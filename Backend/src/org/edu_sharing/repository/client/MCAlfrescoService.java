@@ -162,30 +162,10 @@ public interface MCAlfrescoService extends RemoteService {
 	
 	public void copy(String repositoryId, String nodeId, String toNodeId) throws CCException;
 
-	public void setPermissionsInherit(String nodeId, boolean inheritPermission) throws CCSessionExpiredException, CCException; 
-
-	public void setPermissions(SetPermissions setPermissions) throws CCException;
-
 	public void removePermissions(String nodeId, String _authority, String[] permission)
 			throws CCSessionExpiredException, CCException;
 
 	
-	public void setPermissions(String repositoryid, String nodeId, ACE[] aces) throws CCException;
-
-	/**
-	 * 
-	 * @param nodeId
-	 * @param authPerm
-	 * @param inheritPermission
-	 * @param mailSubject
-	 * @param mailText
-	 * @param authenticationInfo
-	 * @throws CCSessionExpiredException
-	 * @throws CCException
-	 */
-	public void setPermissionsAndMail(SetPermissionsAndMail setPermAndMail) throws CCSessionExpiredException,
-			CCException;
-
 	public RepositoryInfo getRepositoryiesInfo(String metadataSetName) throws CCException;
 
 	public HashMap<String, Object> getNode(String nodeId) throws CCSessionExpiredException, CCException;
@@ -283,8 +263,6 @@ public interface MCAlfrescoService extends RemoteService {
 
 	public ArrayList<EduGroup> getEduGroups() throws CCException;
 	
-	public ArrayList<HashMap<String,Object>> getNewestNodes(String repositoryId,Integer from, Integer to) throws CCException;
-	
 	public GetPreviewResult getPreviewUrl(String nodeId, String repId) throws CCException;
 	
 	public void createShare(String repId, String nodeId, String[] emails, long expiryDate) throws CCException;
@@ -306,8 +284,6 @@ public interface MCAlfrescoService extends RemoteService {
 	public void removeGlobal(String nodeId,String repId) throws CCException;
 	
 	public ArrayList<Group> getGlobalGroups(String repId) throws CCException;
-	
-	public ArrayList<Notify> getNotifyList(String repId, String nodeId) throws CCException;
 	
 	public CacheInfo getCacheInfo(String name) throws CCException;
 	

@@ -16,7 +16,6 @@ import java.util.Map;
 import java.util.Set;
 
 import javax.servlet.ServletContext;
-import javax.transaction.UserTransaction;
 
 import org.alfresco.model.ContentModel;
 import org.alfresco.repo.search.impl.lucene.SolrJSONResultSet;
@@ -44,7 +43,6 @@ import org.apache.log4j.Logger;
 import org.apache.lucene.queryParser.QueryParser;
 import org.edu_sharing.alfresco.service.OrganisationService;
 import org.edu_sharing.alfresco.service.handleservice.HandleService;
-import org.edu_sharing.alfresco.service.handleservice.HandleServiceNotConfiguredException;
 import org.edu_sharing.alfresco.workspace_administration.NodeServiceInterceptor;
 import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
 import org.edu_sharing.repository.client.rpc.ACE;
@@ -66,7 +64,6 @@ import org.edu_sharing.repository.server.tools.I18nServer;
 import org.edu_sharing.repository.server.tools.Mail;
 import org.edu_sharing.repository.server.tools.StringTool;
 import org.edu_sharing.repository.server.tools.URLTool;
-import org.edu_sharing.repository.server.tools.UserEnvironmentTool;
 import org.edu_sharing.repository.server.tools.mailtemplates.MailTemplate;
 import org.edu_sharing.service.Constants;
 import org.edu_sharing.service.InsufficientPermissionException;
@@ -75,6 +72,8 @@ import org.edu_sharing.service.toolpermission.ToolPermissionException;
 import org.edu_sharing.service.toolpermission.ToolPermissionService;
 import org.edu_sharing.service.toolpermission.ToolPermissionServiceFactory;
 import org.springframework.context.ApplicationContext;
+
+import com.google.gson.Gson;
 
 public class PermissionServiceImpl implements org.edu_sharing.service.permission.PermissionService {
 
@@ -221,7 +220,6 @@ public class PermissionServiceImpl implements org.edu_sharing.service.permission
 
 		if (createNotify) {
 			createNotifyObject(nodeId, new AuthenticationToolAPI().getCurrentUser(),
-					CCConstants.CCM_VALUE_NOTIFY_EVENT_PERMISSION,
 					CCConstants.CCM_VALUE_NOTIFY_ACTION_PERMISSION_CHANGE);
 		}
 
@@ -405,8 +403,7 @@ public class PermissionServiceImpl implements org.edu_sharing.service.permission
 		org.edu_sharing.service.permission.PermissionService permissionService = PermissionServiceFactory
 				.getPermissionService(ApplicationInfoList.getHomeRepository().getAppId());
 
-		permissionService.createNotifyObject(_nodeId, user, CCConstants.CCM_VALUE_NOTIFY_EVENT_PERMISSION,
-				CCConstants.CCM_VALUE_NOTIFY_ACTION_PERMISSION_ADD);
+		permissionService.createNotifyObject(_nodeId, user, CCConstants.CCM_VALUE_NOTIFY_ACTION_PERMISSION_ADD);
 	}
 
 	public void createHandle(AuthorityType authorityType, String _nodeId) throws Exception {
@@ -496,86 +493,50 @@ public class PermissionServiceImpl implements org.edu_sharing.service.permission
 		if (!toolPermission.hasToolPermission(CCConstants.CCM_VALUE_TOOLPERMISSION_INVITE_HISTORY)) {
 			throw new ToolPermissionException(CCConstants.CCM_VALUE_TOOLPERMISSION_INVITE_HISTORY);
 		}
-		AuthenticationUtil.RunAsWork<List<Notify>> runsWork = new AuthenticationUtil.RunAsWork<List<Notify>>() {
+		
+		Comparator c = new Comparator<Notify>() {
 			@Override
-			public List<Notify> doWork() throws Exception {
-				List<Notify> notifyList = new ArrayList<Notify>();
+			public int compare(Notify o1, Notify o2) {
 
-				Comparator c = new Comparator<Notify>() {
-					@Override
-					public int compare(Notify o1, Notify o2) {
-
-						if (o1.getCreated().getTime() == o2.getCreated().getTime()) {
-							return 0;
-						} else if (o1.getCreated().getTime() > o2.getCreated().getTime()) {
-							return -1;
-						} else if (o1.getCreated().getTime() < o2.getCreated().getTime()) {
-							return 1;
-						}
-
-						return 0;
-					}
-
-				};
-
-				MCAlfrescoAPIClient repoClient = new MCAlfrescoAPIClient();
-				HashMap<String, HashMap> parents = null;
-				try {
-					parents = repoClient.getParents(nodeId, false);
-				} catch (Throwable e) {
-					logger.error(e.getMessage(), e);
-					return null;
+				if (o1.getCreated().getTime() == o2.getCreated().getTime()) {
+					return 0;
+				} else if (o1.getCreated().getTime() > o2.getCreated().getTime()) {
+					return -1;
+				} else if (o1.getCreated().getTime() < o2.getCreated().getTime()) {
+					return 1;
 				}
 
-				for (Map.Entry<String, HashMap> node : parents.entrySet()) {
-
-					HashMap<String, Object> properties = node.getValue();
-
-					if (CCConstants.CCM_TYPE_NOTIFY.equals(properties.get(CCConstants.NODETYPE))) {
-
-						Notify notify = new Notify();
-						notify.setAcl(
-								repoClient.getPermissions((String) properties.get(CCConstants.SYS_PROP_NODE_UID)));
-
-						String modified = (String) properties.get(CCConstants.CM_PROP_C_CREATED);
-						if (modified != null && !modified.trim().equals("")) {
-							notify.setCreated(new Date(new Long(modified)));
-							notify.setCreatedFormated(
-									new DateTool().formatDate(new Long(modified), DateFormat.LONG, DateFormat.SHORT));
-
-						}
-						notify.setNotifyTarget(nodeId);
-						notify.setNodeId((String) properties.get(CCConstants.SYS_PROP_NODE_UID));
-						notify.setNotifyAction((String) properties.get(CCConstants.CCM_PROP_NOTIFY_ACTION));
-						notify.setNotifyEvent((String) properties.get(CCConstants.CCM_PROP_NOTIFY_EVENT));
-						notify.setNotifyUser((String) properties.get(CCConstants.CCM_PROP_NOTIFY_USER));
-
-						NodeRef personNodeRef = personService
-								.getPerson((String) properties.get(CCConstants.CCM_PROP_NOTIFY_USER));
-						Map<QName, Serializable> personProps = nodeService.getProperties(personNodeRef);
-						User user = new User(Edu_SharingProperties.instance.isFuzzyUserSearch());
-						user.setUsername((String) personProps.get(ContentModel.PROP_USERNAME));
-						user.setAuthorityName((String) personProps.get(ContentModel.PROP_USERNAME));
-						user.setNodeId(personNodeRef.getId());
-						user.setEmail((String) personProps.get(ContentModel.PROP_EMAIL));
-						user.setGivenName((String) personProps.get(ContentModel.PROP_FIRSTNAME));
-						user.setSurname((String) personProps.get(ContentModel.PROP_LASTNAME));
-						notify.setUser(user);
-
-						notifyList.add(notify);
-
-					}
-
-				}
-
-				Collections.sort(notifyList, c);
-
-				System.out.println("NOTIFYLIST:" + notifyList.size());
-				return notifyList;
+				return 0;
 			}
-		};
 
-		return AuthenticationUtil.runAs(runsWork, appInfo.getUsername());
+		};
+		
+		Gson gson = new Gson();
+		List<String> jsonHistory = (List<String>)nodeService.getProperty(new NodeRef(Constants.storeRef,nodeId),QName.createQName(CCConstants.CCM_PROP_PH_HISTORY));
+		
+		List<Notify> notifyList = new ArrayList<Notify>();
+		if(jsonHistory != null) {
+			for(String json : jsonHistory) {
+				Notify notify = gson.fromJson(json, Notify.class);
+				
+				NodeRef personRef = personService.getPerson(notify.getUser().getAuthorityName(),false);
+				Map<QName, Serializable> personProps = nodeService.getProperties(personRef);
+				notify.getUser().setGivenName((String)personProps.get(QName.createQName(CCConstants.CM_PROP_PERSON_FIRSTNAME)));
+				notify.getUser().setSurname((String)personProps.get(QName.createQName(CCConstants.CM_PROP_PERSON_LASTNAME)));
+				notify.getUser().setEmail((String)personProps.get(QName.createQName(CCConstants.CM_PROP_PERSON_EMAIL)));
+				
+				/**
+				 * @todo overwrite acl user firstname, lastname, email
+				 */
+				
+				notifyList.add(notify);
+			}
+			
+			Collections.sort(notifyList, c);
+		}
+
+		System.out.println("NOTIFYLIST:" + notifyList.size());
+		return notifyList;
 	}
 
 	public void setPermissions(String nodeId, List<ACE> aces) throws Exception {
@@ -1479,52 +1440,51 @@ public class PermissionServiceImpl implements org.edu_sharing.service.permission
 		return result;
 	}
 
-	public void createNotifyObject(final String nodeId, final String user, final String event, final String action) {
+	public void createNotifyObject(final String nodeId, final String user, final String action) {
 
-		AuthenticationUtil.RunAsWork<Void> work = new AuthenticationUtil.RunAsWork<Void>() {
-			@Override
-			public Void doWork() throws Exception {
-
-				try {
-					HashMap<String, Object> notifyProps = new HashMap<String, Object>();
-					notifyProps.put(CCConstants.CCM_PROP_NOTIFY_EVENT, event);
-					notifyProps.put(CCConstants.CCM_PROP_NOTIFY_ACTION, action);
-					notifyProps.put(CCConstants.CCM_PROP_NOTIFY_USER, user);
-
-					String notifyFolder = new UserEnvironmentTool(AuthenticationUtil.getRunAsUser())
-							.getEdu_SharingNotifyFolderToSafe();
-
-					// create new repo client so that current admin authinfo from the runAs thread
-					// is used
-					MCAlfrescoAPIClient repoClient = new MCAlfrescoAPIClient();
-
-					String notifyId = repoClient.createNode(notifyFolder, CCConstants.CCM_TYPE_NOTIFY, notifyProps);
-
-					String nameInvitedObj = repoClient.getProperty(Constants.storeRef, nodeId, CCConstants.CM_NAME);
-
-					repoClient.createChildAssociation(notifyId, nodeId, CCConstants.CCM_ASSOC_NOTIFY_NODES,
-							nameInvitedObj);
-
-					ACL aclToCopy = repoClient.getPermissions(nodeId);
-
-					for (ACE ace : aclToCopy.getAces()) {
-						// set inherited to false so that no permissions from the parent systemfolder
-						// are inherited
-						setPermissions(notifyId, ace.getAuthority(),
-								new String[] { ace.getPermission() }, false);
-					}
-
-				} catch (Throwable e) {
-					logger.error(e.getMessage(), e);
+		NodeRef nodeRef = new NodeRef(Constants.storeRef, nodeId);
+		
+		if(!nodeService.hasAspect(nodeRef, QName.createQName(CCConstants.CCM_ASPECT_PERMISSION_HISTORY))) {
+			nodeService.addAspect(nodeRef, QName.createQName(CCConstants.CCM_ASPECT_PERMISSION_HISTORY), null);
+		}
+		
+		nodeService.setProperty(nodeRef, QName.createQName(CCConstants.CCM_PROP_PH_ACTION), action);
+		nodeService.setProperty(nodeRef, QName.createQName(CCConstants.CCM_PROP_PH_USER), user);
+		Date created = new Date();
+		nodeService.setProperty(nodeRef, QName.createQName(CCConstants.CCM_PROP_PH_MODIFIED), created);
+		
+		
+		//ObjectMapper jsonMapper = new ObjectMapper(); 
+		Gson gson = new Gson();
+		Notify n = new Notify();
+		try {
+			ACL acl = repoClient.getPermissions(nodeId);
+			List<ACE> directlySetAces = new ArrayList<ACE>();
+			for(ACE ace : acl.getAces()) {
+				if(!ace.isInherited()) {
+					directlySetAces.add(ace);
 				}
-
-				return null;
 			}
-		};
-
-		// run as admin cause notify objects will be created in system folder auth
-		// problem uncomment when it works
-		AuthenticationUtil.runAs(work, appInfo.getUsername());
+			acl.setAces(directlySetAces.toArray(new ACE[]{}));
+			n.setAcl(acl);
+			n.setCreated(created);
+			n.setNotifyAction(action);
+			n.setNotifyUser(user);
+			User u = new User();
+			u.setAuthorityName(user);
+			u.setUsername(user);
+			n.setUser(u);
+			
+			String jsonStringACL = gson.toJson(n);
+			List<String> history = (List<String>)nodeService.getProperty(nodeRef, QName.createQName(CCConstants.CCM_PROP_PH_HISTORY));
+			history = (history == null)? new ArrayList<String>() : history;
+			history.add(jsonStringACL);
+			nodeService.setProperty(nodeRef, QName.createQName(CCConstants.CCM_PROP_PH_HISTORY), new ArrayList(history));
+		} catch (Exception e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}
+		
 	}
 
 	@Override
