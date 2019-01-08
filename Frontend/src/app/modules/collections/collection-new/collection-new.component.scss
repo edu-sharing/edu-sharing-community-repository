@@ -451,10 +451,14 @@ input[type="radio"] {
     }
   }
 }
-
-@media screen and (max-height: $mobileHeight){
+@media screen and (max-height: $mobileHeight + $mobileStage*1){
   .card, .card-high, .card-low {
     top:$mainnavHeight+15px;
+  }
+}
+@media screen and (max-height: $mobileHeight - $mobileStage*1){
+  .card, .card-high, .card-low {
+    top:0;
   }
 }
 @media screen and (max-width: $mobileWidth+$mobileStage*3) and (max-height: $mobileHeight+$mobileStage*2) {
