@@ -44,6 +44,9 @@ a{
   margin: 2px;
   display: inline-flex;
   align-items: center;
+  &:focus{
+    @include setGlobalInsetFocus();
+  }
   span{
     display:table-cell;
     vertical-align: middle;
@@ -56,6 +59,9 @@ a{
     left: 7px;
     display:table-cell;
     vertical-align: middle;
+    &:focus{
+      @include focusShadow();
+    }
   }
   .badgeIconLeft{
     left:0;

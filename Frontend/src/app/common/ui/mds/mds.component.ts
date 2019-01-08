@@ -947,13 +947,23 @@ export class MdsComponent{
     return html;
   }
   private getSuggestBadge(value:string,caption:string,id:string){
-    return `<div class="badge" data-value="`+value+`"><span>`+caption+`</span>
-            <i class="material-icons clickable" onclick="
-            this.parentNode.parentNode.removeChild(this.parentNode);
+    return `<div tabindex="0" class="badge" data-value="`+value+`" onclick="
+            this.parentNode.removeChild(this);
             var caption='`+caption+`';
             var value='`+value+`';
             document.getElementById('`+id+`').innerHTML+='`+this.getMultivalueBadgeEmbedded('caption','value')+`';
-            ">add_circle</i></div>`;
+            "
+            onkeyup="
+             if (event.keyCode === 13) {
+               this.parentNode.removeChild(this);
+              var caption='`+caption+`';
+              var value='`+value+`';
+              document.getElementById('`+id+`').innerHTML+='`+this.getMultivalueBadgeEmbedded('caption','value')+`';
+             }
+            "
+            ><i class="material-icons clickable">add_circle</i>
+            <span>`+caption+`</span>
+            </div>`;
   }
   private getMultivalueBadge(value:string,caption:string=value){
     return '<div class="badge" data-value="'+value+'"><span>'+caption+`</span><i class="material-icons clickable" tabindex="0" onkeyup="if(event.keyCode==13){this.click()}" onclick="
