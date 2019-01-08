@@ -51,6 +51,7 @@ import org.edu_sharing.service.search.SearchService.ContentType;
 import org.edu_sharing.service.search.model.SearchToken;
 import org.edu_sharing.service.search.model.SortDefinition;
 import org.edu_sharing.service.admin.model.ToolPermission;
+import org.edu_sharing.service.tracking.TrackingService;
 import org.glassfish.jersey.media.multipart.FormDataParam;
 
 import io.swagger.annotations.Api;
@@ -291,13 +292,13 @@ public class AdminApi {
             @ApiResponse(code = 404, message = RestConstants.HTTP_404, response = ErrorResponse.class),
             @ApiResponse(code = 500, message = RestConstants.HTTP_500, response = ErrorResponse.class) })
     public Response getStatisticsNode(@Context HttpServletRequest req,
-    			@ApiParam(value = "date range from", required = false) @QueryParam("dateFrom") Long dateFrom,
-    			@ApiParam(value = "date range to", required = false) @QueryParam("dateTo") Long dateTo
+									  @ApiParam(value = "Grouping type", required = true) @QueryParam("grouping")TrackingService.GroupingType grouping,
+									  @ApiParam(value = "date range from", required = true) @QueryParam("dateFrom") Long dateFrom,
+									  @ApiParam(value = "date range to", required = true) @QueryParam("dateTo") Long dateTo
               ) {
         try {
             // load instance to validate session
-            AdminService service = AdminServiceFactory.getInstance();
-            List<TrackingNode> tracks=TrackingDAO.getNodeStatistics(new Date(dateFrom),new Date(dateTo));
+            List<TrackingNode> tracks=TrackingDAO.getNodeStatistics(grouping,new Date(dateFrom),new Date(dateTo));
             return Response.ok().entity(tracks).build();
         } catch (Throwable t) {
             return ErrorResponse.createResponse(t);
