@@ -38,19 +38,15 @@ $sidenavWidthMobile:66px;
     }
   }
   .main-content{
+    padding:20px;
+    width: 100%;
     margin-left: $sidenavWidth;
     flex-grow: 1;
-    padding:20px 0;
     .btn-flat{
       min-height: 36px;
       height: auto;
     }
   }
-}
-.content{
-  padding:20px;
-  width: 100%;
-  margin: auto;
 }
 .tabs{
   display: flex;

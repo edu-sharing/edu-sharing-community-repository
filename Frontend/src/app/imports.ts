@@ -11,6 +11,7 @@ import {HttpClient, HttpClientModule} from "@angular/common/http";
 import {MatDatepickerModule} from '@angular/material/datepicker';
 import {MatFormFieldModule, MatInputModule, MatNativeDateModule} from "@angular/material";
 import { LazyLoadImageModule } from 'ng-lazyload-image';
+import {CustomModule} from './custom-module/custom.module';
 
 
 export const IMPORTS=[
@@ -23,6 +24,7 @@ export const IMPORTS=[
   MatNativeDateModule,
   MatFormFieldModule,
   MatInputModule,
+  CustomModule,
     TranslateModule.forRoot({
     loader:{
       provide: TranslateLoader,

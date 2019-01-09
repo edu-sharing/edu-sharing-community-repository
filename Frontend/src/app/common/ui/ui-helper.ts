@@ -7,7 +7,7 @@ import {
 } from "../rest/data-object";
 import {ActivatedRoute, NavigationExtras, Router} from "@angular/router";
 import {UIConstants} from "./ui-constants";
-import {ElementRef, EventEmitter, HostListener} from "@angular/core";
+import {ComponentFactoryResolver, ElementRef, EventEmitter, HostListener} from '@angular/core';
 import {RestConstants} from "../rest/rest-constants";
 import {RestHelper} from "../rest/rest-helper";
 import {Toast} from "./toast";
@@ -25,6 +25,7 @@ import {SearchService} from "../../modules/search/search.service";
 import {OptionItem} from "./actionbar/option-item";
 import {RestConnectorService} from "../rest/services/rest-connector.service";
 import {Observable, Observer} from "rxjs";
+import {CUSTOM_COMPONENTS} from '../../custom-module/custom.module';
 export class UIHelper{
 
   public static evaluateMediaQuery(type:string,value:number){
@@ -537,5 +538,18 @@ export class UIHelper{
                 }
             },1000/60);
         });
+    }
+
+    static getCustomComponents(component: any,componentFactoryResolver:ComponentFactoryResolver) {
+        let name=component.constructor.name;
+        console.log(name);
+        let result=[];
+        for(let c of CUSTOM_COMPONENTS){
+            if(c.targetComponent==name) {
+                c.factory = componentFactoryResolver.resolveComponentFactory(c.component);
+                result.push(c);
+            }
+        }
+        return result;
     }
 }

@@ -77,6 +77,8 @@
     </div>
 </div>
 <div class="main-content">
+<!-- for dynamically added components from extensions -->
+<ng-template *ngIf="getModeButton() && getModeButton().factory" #dynamic></ng-template>
 <div *ngIf="mode=='INFO'" class="content info">
   <div class="heading">{{'ADMIN.INFO.REPOSITORY' | translate}}</div>
   <div class="version">{{ repositoryVersion }}</div>

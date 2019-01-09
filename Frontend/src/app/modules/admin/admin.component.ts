@@ -1,5 +1,5 @@
 import {Translation} from '../../common/translation';
-import {UIHelper} from '../../common/ui/ui-helper';
+import {CustomComponent, UIHelper} from '../../common/ui/ui-helper';
 import {ActivatedRoute, Router} from '@angular/router';
 import {Toast} from '../../common/ui/toast';
 import {ConfigurationService} from '../../common/services/configuration.service';
@@ -7,7 +7,7 @@ import {Title} from '@angular/platform-browser';
 import {TranslateService} from '@ngx-translate/core';
 import {SessionStorageService} from '../../common/services/session-storage.service';
 import {RestConnectorService} from '../../common/rest/services/rest-connector.service';
-import {Component, ViewChild, ElementRef} from '@angular/core';
+import {Component, ViewChild, ElementRef, ViewContainerRef, ComponentFactoryResolver} from '@angular/core';
 import {
     LoginResult,
     ServerUpdate,
@@ -30,7 +30,6 @@ import {RestOrganizationService} from '../../common/rest/services/rest-organizat
 import {RestSearchService} from '../../common/rest/services/rest-search.service';
 import {RestHelper} from '../../common/rest/rest-helper';
 import {Observable, Observer} from 'rxjs/index';
-
 
 @Component({
   selector: 'admin-main',
@@ -126,7 +125,9 @@ export class AdminComponent {
   @ViewChild('xmlSelect') xmlSelect : ElementRef;
   @ViewChild('excelSelect') excelSelect : ElementRef;
   @ViewChild('templateSelect') templateSelect : ElementRef;
-  private excelFile: File;
+  @ViewChild('dynamic',{read: ViewContainerRef}) dynamicComponent : any;
+
+    private excelFile: File;
   private collectionsFile: File;
   private uploadTempFile: File;
   private uploadOaiFile: File;
@@ -165,6 +166,9 @@ export class AdminComponent {
   public debugNode(node:Node){
     console.log(node);
     this.nodeInfo=node;
+  }
+  public getModeButton(mode=this.mode) : any{
+      return this.buttons[Helper.indexOfObjectArray(this.buttons,'id',mode)];
   }
     public searchNoderef() {
         this.storage.set('admin_lucene', this.lucene);
@@ -217,11 +221,14 @@ export class AdminComponent {
               private title: Title,
               private translate: TranslateService,
               private storage : SessionStorageService,
+              private componentFactoryResolver : ComponentFactoryResolver,
+              private viewContainerRef : ViewContainerRef,
               private admin : RestAdminService,
               private connector: RestConnectorService,
               private node: RestNodeService,
               private searchApi: RestSearchService,
               private organization: RestOrganizationService) {
+      this.addCustomComponents(UIHelper.getCustomComponents(this,this.componentFactoryResolver));
       this.searchColumns.push(new ListItem('NODE', RestConstants.CM_NAME));
       this.searchColumns.push(new ListItem('NODE', RestConstants.NODE_ID));
       this.searchColumns.push(new ListItem('NODE', RestConstants.CM_MODIFIED_DATE));
@@ -241,8 +248,15 @@ export class AdminComponent {
         }
         this.globalProgress=false;
         this.route.queryParams.subscribe((data:any)=>{
-            if(data['mode'])
-                this.mode=data['mode'];
+            if(data['mode']) {
+                this.mode = data['mode'];
+                if(this.getModeButton().factory){
+                    console.log("init dynamic");
+                    setTimeout(()=> {
+                        let ref = this.dynamicComponent.createComponent(this.getModeButton().factory);
+                    });
+                }
+            }
             else
               this.mode='INFO';
         });
@@ -910,6 +924,17 @@ export class AdminComponent {
         job=new SuggestItem("org.edu_sharing.repository.server.jobs.quartz.RemoveOrphanCollectionReferencesJob",this.translate.instant("ADMIN.JOBS.NAMES.RemoveOrphanCollectionReferencesJob"));
         job.secondaryTitle=job.id;
         this.jobClasses.push(job);
+    }
+
+    private addCustomComponents(customComponents: CustomComponent[]) {
+      console.log(customComponents);
+      for(let c of customComponents){
+          if(c.targetType=="BUTTON"){
+              let item=c.payload;
+              item.factory=c.factory;
+              this.buttons.splice(c.payload.position>=0 ? c.payload.position : this.buttons.length+c.payload.position,0,item);
+          }
+      }
     }
 }
 
