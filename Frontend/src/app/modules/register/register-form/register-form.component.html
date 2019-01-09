@@ -29,5 +29,6 @@
 </div>
 <div class="accept">
     <input id="accept" type="checkbox" class="filled-in" [(ngModel)]="agree" (change)="setAccept(agree)">
-    <label for="accept">{{'REGISTER.ACCEPT' | translate}}<a class="imprint" *ngIf="privacyUrl" (click)="openPrivacy()">{{'REGISTER.PRIVACY-LINK' | translate}}</a></label>
+    <label for="accept">{{'REGISTER.ACCEPT' | translate}}</label>
+    <a class="clickable imprint" *ngIf="privacyUrl" (click)="openPrivacy()">{{'REGISTER.PRIVACY-LINK' | translate}}</a>
 </div>
