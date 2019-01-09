@@ -540,12 +540,11 @@ export class UIHelper{
         });
     }
 
-    static getCustomComponents(component: any,componentFactoryResolver:ComponentFactoryResolver) {
-        let name=component.constructor.name;
-        console.log(name);
+    static getCustomComponents(componentName: string,componentFactoryResolver:ComponentFactoryResolver) {
+        console.log(componentName);
         let result=[];
         for(let c of CUSTOM_COMPONENTS){
-            if(c.targetComponent==name) {
+            if(c.targetComponent==componentName) {
                 c.factory = componentFactoryResolver.resolveComponentFactory(c.component);
                 result.push(c);
             }

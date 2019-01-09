@@ -228,7 +228,7 @@ export class AdminComponent {
               private node: RestNodeService,
               private searchApi: RestSearchService,
               private organization: RestOrganizationService) {
-      this.addCustomComponents(UIHelper.getCustomComponents(this,this.componentFactoryResolver));
+      this.addCustomComponents(UIHelper.getCustomComponents("AdminComponent",this.componentFactoryResolver));
       this.searchColumns.push(new ListItem('NODE', RestConstants.CM_NAME));
       this.searchColumns.push(new ListItem('NODE', RestConstants.NODE_ID));
       this.searchColumns.push(new ListItem('NODE', RestConstants.CM_MODIFIED_DATE));
