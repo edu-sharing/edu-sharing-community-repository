@@ -489,8 +489,6 @@ public interface MCAlfrescoClient {
 	
 	public String getNodeType(String nodeId);
 	
-	public ArrayList<HashMap<String, Object>> getNewestNodes(Integer from, Integer to) throws Throwable;
-	
 	public void setProperty(String nodeId, String property, Serializable value);
 	
 	public String getProperty(String storeProtocol, String storeIdentifier, String nodeId, String property);
@@ -528,8 +526,6 @@ public interface MCAlfrescoClient {
 	public String guessMimetype(String filename);
 	
 	public HashMap<String, HashMap<String, Object>> getChildren(String parentID, String[] permissionsOnChild) throws Throwable;
-
-	public List<Notify> getNotifyList(String nodeId) throws Throwable;
 
 	public void removeGlobalAspectFromGroup(String groupNodeId) throws Exception;
 	

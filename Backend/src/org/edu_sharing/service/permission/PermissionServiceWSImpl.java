@@ -49,7 +49,7 @@ public class PermissionServiceWSImpl implements PermissionService {
 	}
 
 	@Override
-	public void createNotifyObject(String nodeId, String user, String event, String action) {
+	public void createNotifyObject(String nodeId, String user, String action) {
 	}
 
 	@Override

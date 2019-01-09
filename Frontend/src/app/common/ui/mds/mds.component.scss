@@ -10,9 +10,14 @@
   .suggestions {
     padding-top: 40px;
 
-    .badge i {
-      color: $workspaceInheritColor;
+    .badge {
+      cursor: pointer;
+      i {
+        color: $workspaceInheritColor;
+        left: -5px;
+      }
     }
+
   }
 }
 .mdsCardJumpmarks{

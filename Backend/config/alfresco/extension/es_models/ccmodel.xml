@@ -1759,5 +1759,27 @@
 	    	</properties>
 	    </aspect>
 
+		<aspect name="ccm:permission_history">
+			<title>permissionHistory</title>
+			<properties>
+				<property name="ccm:ph_modified">
+					<type>d:datetime</type>
+				</property>
+				<!-- history as json -->
+				<property name="ccm:ph_history">
+	    			<type>d:text</type>
+	    			<multiple>true</multiple>
+	    		</property>
+	    		<!-- user that set permissions -->
+	    		<property name="ccm:ph_user">
+	    			<type>d:text</type>
+	    		</property>
+	    		<!-- add, modify ... -->
+	    		<property name="ccm:ph_action">
+	    			<type>d:text</type>
+	    		</property>			
+			</properties>
+		</aspect>
+		
 	</aspects>
 </model>

@@ -98,20 +98,17 @@ public class SearchServiceImpl implements SearchService {
 	public List<NodeRef> getFilesSharedByMe() throws Exception {
 		String username = AuthenticationUtil.getFullyAuthenticatedUser();
 		SearchParameters parameters = new SearchParameters();
-		String postfix="";
-		if(NodeServiceInterceptor.getEduSharingScope()!=null) {
-			postfix+="_"+NodeServiceInterceptor.getEduSharingScope();
-		}
+		parameters.addSort("@" + CCConstants.CCM_PROP_PH_MODIFIED, false);
 		parameters.addStore(Constants.storeRef);
 		parameters.setLanguage(org.alfresco.service.cmr.search.SearchService.LANGUAGE_LUCENE);
 		parameters.setMaxItems(Integer.MAX_VALUE);
 		parameters.addAllAttribute(CCConstants.CCM_PROP_AUTHORITYCONTAINER_EDUHOMEDIR);
-		parameters.setQuery("TYPE:\"" + CCConstants.CCM_TYPE_NOTIFY
-				+ "\" AND PATH:\"/app\\:company_home/ccm\\:Edu_Sharing_System/ccm\\:Edu_Sharing_Sys_Notify"+postfix+"//.\" AND @cm\\:creator:\"" + QueryParser.escape(username) + "\"");
+		parameters.setQuery("(TYPE:\"" + CCConstants.CCM_TYPE_IO + "\" OR TYPE:\"" + CCConstants.CCM_TYPE_MAP +"\") " +
+				 "AND @cm\\:creator:\"" + QueryParser.escape(username) + "\"");
 		ResultSet resultSet = searchService.query(parameters);
-		List<NodeRef> refs = convertNotifysToObjects(resultSet.getNodeRefs());
+		
 		List<NodeRef> result = new ArrayList<>();
-		for (NodeRef node : refs) {
+		for (NodeRef node : resultSet.getNodeRefs()) {
 			if (result.contains(node))
 				continue;
 			try {
@@ -136,62 +133,28 @@ public class SearchServiceImpl implements SearchService {
 		return result;
 	}
 
-	private List<NodeRef> convertNotifysToObjects(List<NodeRef> nodeRefs) {
-		List<NodeRef> result=new ArrayList<NodeRef>();
-
-		HashSet<QName> types = new HashSet<QName>();
-		types.add(QName.createQName(CCConstants.CCM_TYPE_IO));
-		types.add(QName.createQName(CCConstants.CCM_TYPE_MAP));
-
-		for (NodeRef nodeRef : nodeRefs) {
-
-			if (nodeRef.getId().contains("missing")) {
-				continue;
-			}
-
-			List<ChildAssociationRef> childsOfNotify = null;
-
-			try {
-				childsOfNotify = serviceRegistry.getNodeService().getChildAssocs(nodeRef, types);
-			} catch (org.alfresco.repo.security.permissions.AccessDeniedException e) {
-				logger.error(e.getMessage() + " while calling nodeService.getChildAssocs for " + nodeRef);
-				continue;
-			}
-			if (childsOfNotify != null && childsOfNotify.size() > 0) {
-				NodeRef ref = childsOfNotify.get(0).getChildRef();
-				QName type = serviceRegistry.getNodeService().getType(ref);
-				if(types.contains(type)) {
-					if(!serviceRegistry.getNodeService().hasAspect(ref,QName.createQName(CCConstants.CCM_ASPECT_COLLECTION)) && !result.contains(ref))
-						result.add(ref);
-				}
-			}
-		}
-		return result;
-
-	}
-
+	
 	@Override
 	public List<NodeRef> getFilesSharedToMe() throws Exception {
 		String username = AuthenticationUtil.getFullyAuthenticatedUser();
 		String homeFolder = baseClient.getHomeFolderID(username);
-		String postfix="";
-		if(NodeServiceInterceptor.getEduSharingScope()!=null) {
-			postfix+="_"+NodeServiceInterceptor.getEduSharingScope();
-		}
-
+	
 		SearchParameters parameters = new SearchParameters();
 		parameters.addStore(Constants.storeRef);
 		parameters.setLanguage(org.alfresco.service.cmr.search.SearchService.LANGUAGE_LUCENE);
 		//parameters.setMaxItems(Integer.MAX_VALUE);
-		parameters.setMaxItems(200);
+		parameters.setMaxItems(300);
 		parameters.addAllAttribute(CCConstants.CCM_PROP_AUTHORITYCONTAINER_EDUHOMEDIR);
-		parameters.addSort("@" + CCConstants.CM_PROP_C_MODIFIED, false);
+		parameters.addSort("@" + CCConstants.CCM_PROP_PH_MODIFIED, false);
 
-		// TODO: The amount of files seems to be HUGE, we need a better query for filtering!
-		parameters.setQuery("TYPE:\"" + CCConstants.CCM_TYPE_NOTIFY
-				+ "\" AND PATH:\"/app\\:company_home/ccm\\:Edu_Sharing_System/ccm\\:Edu_Sharing_Sys_Notify"+postfix+"//.\" AND NOT @cm\\:creator:\"" + QueryParser.escape(username) + "\"");
+		parameters.setQuery("(TYPE:\"" + CCConstants.CCM_TYPE_IO +"\" OR TYPE:\"" + CCConstants.CCM_TYPE_MAP +"\") "
+				+ "AND NOT @cm\\:creator:\"" + QueryParser.escape(username) + "\"");
 		ResultSet resultSet = searchService.query(parameters);
-		List<NodeRef> result = convertNotifysToObjects(resultSet.getNodeRefs());
+		List<NodeRef> result = new ArrayList<NodeRef>();
+		for(NodeRef nodeRef : resultSet.getNodeRefs()) {
+			result.add(nodeRef);
+		}
+		
 		Set<String> memberships = new HashSet<>();
 		memberships.addAll(serviceRegistry.getAuthorityService().getAuthorities());
 		memberships.remove(CCConstants.AUTHORITY_GROUP_EVERYONE);
@@ -201,6 +164,7 @@ public class SearchServiceImpl implements SearchService {
 			public List<NodeRef> doWork() throws Exception {
 				List<NodeRef> refs = new ArrayList<>(result.size());
 				for (NodeRef node : result) {
+					System.out.println(baseClient.getProperty(Constants.storeRef, node.getId(), CCConstants.CM_NAME));
 					if (refs.contains(node))
 						continue;
 					if (node.getId().equals(homeFolder))

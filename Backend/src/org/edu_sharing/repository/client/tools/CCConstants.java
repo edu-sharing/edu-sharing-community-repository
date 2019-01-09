@@ -312,6 +312,14 @@ public class CCConstants {
 
 	public final static String CCM_PROP_PERSON_NODE_LISTS = "{http://www.campuscontent.de/model/1.0}userNodeLists";
 
+	public final static String CCM_PROP_PH_MODIFIED = "{http://www.campuscontent.de/model/1.0}ph_modified";
+	
+	public final static String CCM_PROP_PH_HISTORY = "{http://www.campuscontent.de/model/1.0}ph_history";
+	
+	public final static String CCM_PROP_PH_USER = "{http://www.campuscontent.de/model/1.0}ph_user";
+	
+	public final static String CCM_PROP_PH_ACTION = "{http://www.campuscontent.de/model/1.0}ph_action";
+	
 	/**
 	 * custom edu-sharing person attribute
 	 */
@@ -377,7 +385,10 @@ public class CCConstants {
 	public final static String CCM_ASPECT_TOOL_DEFINITION = "{http://www.campuscontent.de/model/1.0}tool_definition";
 
 	public final static String CCM_ASPECT_TOOL_OBJECT = "{http://www.campuscontent.de/model/1.0}tool_object";
-
+	
+	public final static String CCM_ASPECT_PERMISSION_HISTORY = "{http://www.campuscontent.de/model/1.0}permission_history";
+	
+	
 	public final static String CCM_PROP_TOOL_OBJECT_TOOLINSTANCEREF = "{http://www.campuscontent.de/model/1.0}tool_instance_ref";
 
 	public final static String CCM_PROP_IO_REF_TITLE = "{http://www.campuscontent.de/model/1.0}ref_title";
@@ -706,8 +717,6 @@ public class CCConstants {
 
 	public final static String EXIF_PROP_PIXELXDIMENSION = "{http://www.alfresco.org/model/exif/1.0}pixelXDimension";
 	public final static String EXIF_PROP_PIXELYDIMENSION = "{http://www.alfresco.org/model/exif/1.0}pixelYDimension";
-
-	public final static String CCM_VALUE_NOTIFY_EVENT_PERMISSION = "PERMISSION";
 
 	public final static String CCM_VALUE_NOTIFY_ACTION_PERMISSION_ADD = "PERMISSION_ADD";
 

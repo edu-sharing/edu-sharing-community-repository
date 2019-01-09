@@ -19,7 +19,7 @@
                 <app-register-reset-password *ngIf="state=='reset-password'" (onLoading)="isLoading=$event" #resetPassword></app-register-reset-password>
                 <div *ngIf="state != 'register' && state != 'done' && state != 'done-reset'" class="register">
                     {{'LOGIN.REGISTER_TEXT' | translate}}
-                    <a (click)="linkRegister()" (keyup.enter)="linkRegister()" tabindex="0"  class="focus-underline">{{'LOGIN.REGISTER_LINK' | translate}} <i class="material-icons">arrow_forward</i></a>
+                    <a (click)="linkRegister()" (keyup.enter)="linkRegister()" tabindex="0"  class="focus-underline">{{'LOGIN.REGISTER_LINK' | translate}} <i icon iconId="arrow_forward"></i></a>
                 </div>
             </div>
         </div>

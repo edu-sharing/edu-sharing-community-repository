@@ -38,7 +38,7 @@
           </form>
           <div class="register" *ngIf="config.register.local || config.register.registerUrl">
               {{'LOGIN.REGISTER_TEXT' | translate}}
-              <a (click)="register()" (keyup.enter)="register()" class="focus-underline" tabindex="0">{{'LOGIN.REGISTER_LINK' | translate}} <i aria-hidden="true" class="material-icons">arrow_forward</i></a>
+              <a (click)="register()" (keyup.enter)="register()" class="focus-underline" tabindex="0">{{'LOGIN.REGISTER_LINK' | translate}} <i icon iconId="arrow_forward"></i></a>
           </div>
         </div>
       </div>

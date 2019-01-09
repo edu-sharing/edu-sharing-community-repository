@@ -511,8 +511,7 @@ public class NodeDao {
 
 		try {
 			org.alfresco.service.cmr.repository.NodeRef newNode = nodeService.copyNode(sourceId, nodeId, withChildren);
-			permissionService.createNotifyObject(newNode.getId(), new AuthenticationToolAPI().getCurrentUser(), CCConstants.CCM_VALUE_NOTIFY_EVENT_PERMISSION,
-					CCConstants.CCM_VALUE_NOTIFY_ACTION_PERMISSION_ADD);
+			permissionService.createNotifyObject(newNode.getId(), new AuthenticationToolAPI().getCurrentUser(), CCConstants.CCM_VALUE_NOTIFY_ACTION_PERMISSION_ADD);
 			return new NodeDao(repoDao, sourceId);
 			
 		} catch (Throwable t) {
@@ -1615,8 +1614,7 @@ public class NodeDao {
 	public NodeDao createFork(String sourceId) throws DAOException {
 		try {
 			org.alfresco.service.cmr.repository.NodeRef newNode = nodeService.copyNode(sourceId, nodeId, false);
-			permissionService.createNotifyObject(newNode.getId(), new AuthenticationToolAPI().getCurrentUser(), CCConstants.CCM_VALUE_NOTIFY_EVENT_PERMISSION,
-					CCConstants.CCM_VALUE_NOTIFY_ACTION_PERMISSION_ADD);
+			permissionService.createNotifyObject(newNode.getId(), new AuthenticationToolAPI().getCurrentUser(),	CCConstants.CCM_VALUE_NOTIFY_ACTION_PERMISSION_ADD);
 			nodeService.addAspect(newNode.getId(),CCConstants.CCM_ASPECT_FORKED);
 			nodeService.setProperty(newNode.getStoreRef().getProtocol(),newNode.getStoreRef().getIdentifier(),newNode.getId(),CCConstants.CCM_PROP_FORKED_ORIGIN,
 					new org.alfresco.service.cmr.repository.NodeRef(storeProtocol,storeId,sourceId));
