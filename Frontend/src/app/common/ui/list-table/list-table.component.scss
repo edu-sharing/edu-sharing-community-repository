@@ -402,6 +402,15 @@ $badgeWidth:250px;
 }
 .checkbox{
   min-width:70px;
+  >div{
+    position: absolute;
+    z-index: 2;
+    width: 20px;
+    height: 20px;
+    &:focus{
+      @include focusShadow();
+    }
+  }
 }
 .checkboxDummy{
   min-width:10px;
@@ -815,6 +824,9 @@ $orderAnimationTime:$transitionNormal*5;
   top: 10px;
   z-index:1;
   min-width:initial;
+  >div:focus{
+      @include focusShadow(false);
+  }
 }
 .row input[type=checkbox]:checked + label:after{
   @include materialShadow();
