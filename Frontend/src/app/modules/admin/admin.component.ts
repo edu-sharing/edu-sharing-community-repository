@@ -1,5 +1,5 @@
 import {Translation} from '../../common/translation';
-import {CustomComponent, UIHelper} from '../../common/ui/ui-helper';
+import {UIHelper} from '../../common/ui/ui-helper';
 import {ActivatedRoute, Router} from '@angular/router';
 import {Toast} from '../../common/ui/toast';
 import {ConfigurationService} from '../../common/services/configuration.service';
@@ -926,7 +926,7 @@ export class AdminComponent {
         this.jobClasses.push(job);
     }
 
-    private addCustomComponents(customComponents: CustomComponent[]) {
+    private addCustomComponents(customComponents: any[]) {
       console.log(customComponents);
       for(let c of customComponents){
           if(c.targetType=="BUTTON"){
