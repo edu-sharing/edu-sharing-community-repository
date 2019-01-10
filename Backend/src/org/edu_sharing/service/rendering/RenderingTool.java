@@ -25,29 +25,20 @@ public class RenderingTool {
 	public static String COM_INTERNAL = "internal";
 	
 	Logger logger = Logger.getLogger(RenderingTool.class);
-	
-	public String getRenderServiceUrl(ApplicationInfo repInfo, String nodeId, String username,String version,Map<String,String> parameters) throws GeneralSecurityException{
-		return getRenderServiceUrl(repInfo,nodeId,username,version,parameters,false);
-	}
-	
+
 	/**
 	 * this only works for alfresco repositories
 	 * 
 	 * @param repInfo
-	 * @param nodeId
-	 * @param usernameEncrypted
 	 * @return
 	 * @throws GeneralSecurityException
 	 */
-	public String getRenderServiceUrl(ApplicationInfo repInfo, String nodeId, String username,String version,Map<String,String> parameters, boolean backendCall) throws GeneralSecurityException{
-		
-		
-		String usernameEncrypted = getUsernameEncrypted(username);
-		
+	public String getRenderServiceUrl(ApplicationInfo repInfo,Map<String,String> parameters) throws GeneralSecurityException{
+
 		ApplicationInfo homeRepo = ApplicationInfoList.getHomeRepository();
 		
-		String renderingProxy = (backendCall) ? homeRepo.getWebServerUrl() + "/" + homeRepo.getWebappname() +"/renderingproxy" 
-											  : homeRepo.getClientBaseUrl() +"/renderingproxy";
+		String renderingService = homeRepo.getContentUrl();
+
 		//renderServiceUrl = UrlTool.setParam(renderServiceUrl, "proxyRepId", ApplicationInfoList.getHomeRepository().getAppId());
 		
 		long timestamp = System.currentTimeMillis();
@@ -59,60 +50,43 @@ public class RenderingTool {
 		privateKey = homeRepo.getPrivateKey();
 	
 		if(privateKey == null){
-			logger.error("no pkey available");
-			throw new GeneralSecurityException("no pkey available");
-		}		
-		
-		renderingProxy = UrlTool.setParam(renderingProxy, "obj_id", nodeId);
-		renderingProxy = UrlTool.setParam(renderingProxy, "rep_id",repInfo.getAppId());
-		renderingProxy = UrlTool.setParam(renderingProxy, "u",usernameEncrypted);
-		if(version!=null)
-			renderingProxy = UrlTool.setParam(renderingProxy, "version",version);
+			logger.error("no privateKey available");
+			throw new GeneralSecurityException("no privateKey available");
+		}
 		if(parameters!=null){
 			for(Entry<String, String> param : parameters.entrySet()){
-				renderingProxy = UrlTool.setParam(renderingProxy, param.getKey(),param.getValue());
+				renderingService = UrlTool.setParam(renderingService, param.getKey(),param.getValue());
 			}
 		}
-		renderingProxy = UrlTool.setParam(renderingProxy, "ts",""+timestamp);
+		renderingService = UrlTool.setParam(renderingService, "ts",""+timestamp);
 		try{
-			renderingProxy = UrlTool.setParam(renderingProxy, "language",new AuthenticationToolAPI().getCurrentLanguage());
+			renderingService = UrlTool.setParam(renderingService, "language",new AuthenticationToolAPI().getCurrentLanguage());
 		}catch(Throwable t){}
 		
 		String data = repInfo.getAppId()+timestamp;
 		byte[] signature = sig.sign(sig.getPemPrivateKey(privateKey, CCConstants.SECURITY_KEY_ALGORITHM), data, CCConstants.SECURITY_SIGN_ALGORITHM);
 		String urlSig = URLEncoder.encode(new Base64().encodeToString(signature));
-		renderingProxy = UrlTool.setParam(renderingProxy, "sig",urlSig);
-		
-		if(repInfo.ishomeNode()){
-			renderingProxy = UrlTool.setParam(renderingProxy, "app_id",repInfo.getAppId());
-		}else{
-			renderingProxy = UrlTool.setParam(renderingProxy, "proxyRepId",homeRepo.getAppId());
-		}
-		
-		renderingProxy = URLTool.addOAuthAccessToken(renderingProxy);
-			
-		return renderingProxy;
+		renderingService = UrlTool.setParam(renderingService, "sig",urlSig);
+		return renderingService;
 		
 	}
 	
 	/**
 	 * Just an override with few parameters!
 	 */
-	public String getRenderServiceUrl(ApplicationInfo repInfo, String nodeId, String username) throws GeneralSecurityException{
-		return getRenderServiceUrl(repInfo, nodeId, username,null,null);
+	public String getRenderServiceUrl(ApplicationInfo repInfo) throws GeneralSecurityException{
+		return getRenderServiceUrl(repInfo,null,null);
 	}
 
-	public String getRenderServiceUrl(ApplicationInfo repInfo, String nodeId, String username,String version,Map<String,String> parameters,String displayType) throws GeneralSecurityException {
+	public String getRenderServiceUrl(ApplicationInfo repInfo,Map<String,String> parameters,String displayType) throws GeneralSecurityException {
 		
 		boolean backendCall = (displayType != null && displayType.equals(RenderingTool.DISPLAY_DYNAMIC)) ? true : false;
-		String baseUrl = getRenderServiceUrl(repInfo, nodeId, username,version,parameters,backendCall);
+		String baseUrl = getRenderServiceUrl(repInfo,parameters);
 		return UrlTool.setParam(baseUrl,"display",displayType);
 	}
 	
-	public String getRenderServiceUrl(ApplicationInfo repInfo, String nodeId, String username,String version,boolean displayMetadata, boolean backendCall) throws GeneralSecurityException{
-		
-		String usernameEncrypted = getUsernameEncrypted(username);
-		
+	public String getRenderServiceUrl(ApplicationInfo repInfo, String nodeId,String version,boolean displayMetadata, boolean backendCall) throws GeneralSecurityException{
+
 		ApplicationInfo homeRepo = ApplicationInfoList.getHomeRepository();
 		
 		String renderingProxy = (backendCall) ? homeRepo.getWebServerUrl() + "/" + homeRepo.getWebappname() +"/renderingproxy" 
@@ -129,13 +103,12 @@ public class RenderingTool {
 			
 	
 		if(privateKey == null){
-			logger.error("no pkey available");
-			throw new GeneralSecurityException("no pkey available");
+			logger.error("no privateKey available");
+			throw new GeneralSecurityException("no privateKey available");
 		}
 		
 		renderingProxy = UrlTool.setParam(renderingProxy, "obj_id", nodeId);
 		renderingProxy = UrlTool.setParam(renderingProxy, "rep_id",repInfo.getAppId());
-		renderingProxy = UrlTool.setParam(renderingProxy, "u",usernameEncrypted);
 		if(version!=null)
 			renderingProxy = UrlTool.setParam(renderingProxy, "version",version);
 		renderingProxy = UrlTool.setParam(renderingProxy, "metadata",""+displayMetadata);

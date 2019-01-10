@@ -75,7 +75,15 @@ public class NodeDao {
 			org.alfresco.service.cmr.security.PermissionService.WRITE,
 			org.alfresco.service.cmr.security.PermissionService.DELETE,
 			CCConstants.PERMISSION_CC_PUBLISH};
+	private String version;
 
+
+	public static NodeDao getNodeWithVersion(RepositoryDao repoDao, String nodeId,String versionLabel) throws DAOException {
+		NodeDao nodeDao=getNode(repoDao,nodeId,Filter.createShowAllFilter());
+		nodeDao.version=versionLabel;
+		nodeDao.nodeProps=nodeDao.getNodeHistory().get(nodeDao.version);
+		return nodeDao;
+	}
 	public static NodeDao getNode(RepositoryDao repoDao, String nodeId)
 			throws DAOException {
 		return getNode(repoDao, nodeId, new Filter());
@@ -290,7 +298,7 @@ public class NodeDao {
 	private final RepositoryDao repoDao;
 	private final String nodeId;
 
-	private final HashMap<String, Object> nodeProps;
+	private HashMap<String, Object> nodeProps;
 	private HashMap<String, HashMap<String, Object>> nodeHistory;
 
 	private HashMap<String, Boolean> hasPermissions;
@@ -519,6 +527,14 @@ public class NodeDao {
 			throw DAOException.mapping(t);
 		}
 	}
+	public List<NodeRef> getChildrenSubobjects() throws DAOException {
+		SortDefinition sort=new SortDefinition();
+		sort.addSortDefinitionEntry(new SortDefinition.SortDefinitionEntry(CCConstants.getValidLocalName(CCConstants.CCM_PROP_CHILDOBJECT_ORDER),true));
+		sort.addSortDefinitionEntry(new SortDefinition.SortDefinitionEntry(CCConstants.getValidLocalName(CCConstants.CM_NAME),true));
+		List<String> filter=new ArrayList<>();
+		filter.add("files");
+		return getChildren(null,filter,sort);
+	}
 	public List<NodeRef> getChildren() throws DAOException {
 		return getChildren(null,null,new SortDefinition());
 	}
@@ -719,12 +735,23 @@ public class NodeDao {
 		return this.aspects;
 	}
 	public Node asNode() throws DAOException {
-
+		if(this.version!=null){
+			VersionedNode node=new VersionedNode();
+			fillNodeObject(node);
+			VersionedNode.Version version=new VersionedNode.Version();
+			version.setComment((String)nodeProps.get(CCConstants.CCM_PROP_IO_VERSION_COMMENT));
+			node.setVersion(version);
+			return node;
+		}
 		Node data = new Node();
-		
+		fillNodeObject(data);
+		return data;
+	}
+
+	private void fillNodeObject(Node data) throws DAOException {
 		data.setRef(getRef());
 		data.setParent(getParentRef());
-		
+
 		data.setType(getType());
 		data.setIsDirectory(isDirectory());
 		data.setAspects(NameSpaceTool.transFormToShortQName(this.aspects));
@@ -742,7 +769,7 @@ public class NodeDao {
 
 		data.setContentVersion(getContentVersion());
 		data.setContentUrl(getContentUrl());
-		
+
 		data.setDownloadUrl(getDownloadUrl());
 		data.setMetadataset(getMetadataSet());
 
@@ -767,8 +794,6 @@ public class NodeDao {
 			Collection collection=new CollectionDao(repoDao, getRef().getId(),this,data).asCollection();
 			data.setCollection(collection);
 		}
-		
-		return data;
 	}
 
 	public String getType() {
@@ -1135,7 +1160,7 @@ public class NodeDao {
 		return result;
 	}
 
-	private String getVersionLabel(int major, int minor) {
+	private static String getVersionLabel(int major, int minor) {
 		return major + "." + minor;
 	}
 
@@ -1343,6 +1368,7 @@ public class NodeDao {
 		Preview result = new Preview(	getRepositoryType(),
 										getRef().getId(),getStoreProtocol(),
 										getStoreIdentifier(),
+										this.version,
 										nodeProps);
 			return result;
 	}

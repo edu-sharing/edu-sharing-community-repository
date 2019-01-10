@@ -98,30 +98,34 @@ public class HttpQueryTool {
 	public String query(String url) {
 		return this.query(url,null,null);
 	}
-	
+
+	/**
+	 * backward compatbility
+	 */
 	public String query(String url, Map<String,String> header, HttpMethodBase _method) {
-		logger.debug("url:" + url);
-		HttpClient client = new HttpClient();
-	
-		client.getParams().setParameter("http.useragent", "Test Client");
-		
-		HttpMethodBase method = (_method == null) ?  new GetMethod(url) : _method;
+		HttpMethodBase method=_method==null ? new GetMethod(url) : _method;
 		method.setFollowRedirects(true);
-		
-		if(basicAuthUn != null && basicAuthPw != null) {
-			method.addRequestHeader("Authorization", "Basic " + Base64.encodeBase64String((basicAuthUn +":" +basicAuthPw) .getBytes()));  
-		}
-		
 		if(header != null){
 			for(Map.Entry<String, String> entry : header.entrySet()){
 				method.addRequestHeader(entry.getKey(), entry.getValue());
 			}
 		}
+		return query(method);
+	}
+	public String query(HttpMethodBase method) {
+		HttpClient client = new HttpClient();
+	
+		client.getParams().setParameter("http.useragent", "Test Client");
 		
+
+		if(basicAuthUn != null && basicAuthPw != null) {
+			method.addRequestHeader("Authorization", "Basic " + Base64.encodeBase64String((basicAuthUn +":" +basicAuthPw) .getBytes()));  
+		}
+
 		try {
 			
 			//get host of url to check if its an nonproxy host
-			URL urlObj = new URL(url);
+			URL urlObj = new URL(method.getURI().getURI());
 			String urlHost = urlObj.getHost();
 			
 			logger.debug("nonProxyHosts:"+nonProxyHosts+" current Host:"+urlHost);
@@ -167,8 +171,6 @@ public class HttpQueryTool {
 				throw new RuntimeException("Error HTTP Status: "+returnCode+" "+result);
 			}
 
-		}catch(HttpException e){
-			logger.error(e.getMessage(), e);
 		}catch(IOException e){
 			logger.error(e.getMessage(), e);
 		} finally {

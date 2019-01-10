@@ -149,6 +149,7 @@ public class RenderInfoSoapBindingImpl implements org.edu_sharing.webservices.re
 	
 	
 	private RenderInfoResult getBaseData(String userName, String nodeId, String version, MCAlfrescoAPIClient client) throws RemoteException, Throwable{
+		/*
 		NodeService nodeService=NodeServiceFactory.getLocalService();
 		org.edu_sharing.service.permission.PermissionService permissionService=PermissionServiceFactory.getLocalService();
 		if (!nodeService.exists(StoreRef.PROTOCOL_WORKSPACE,StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(),nodeId)) {
@@ -328,14 +329,7 @@ public class RenderInfoSoapBindingImpl implements org.edu_sharing.webservices.re
 		}
 		rir.setChildren(childrenConverted.toArray(new org.edu_sharing.webservices.types.Child[childrenConverted.size()]));
 		//rir.setLabels(labelResult.toArray(new KeyValue[labelResult.size()]));
-		
-		
-		/**
-		 * hasContentLicense: just check readPermissions for the user at the moment
-		 * 
-		 * maybe check mediacenter groupmembership when readContent vs readMetadata is important
-		 */
-		
+
 		//set default
 		//Has the user alf permissions on the node? -> check if he also has read_all permissions
 		if(permissionService.hasPermission(StoreRef.PROTOCOL_WORKSPACE,StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(),nodeId, userName, CCConstants.PERMISSION_READ))
@@ -386,6 +380,8 @@ public class RenderInfoSoapBindingImpl implements org.edu_sharing.webservices.re
 		addMetadataTemplate(rir,locale,nodeType,props,appInfo);
 
 		return rir;
+		*/
+		return null;
 	}
 	private KeyValue[] convertProperties(Map<String,Object> propertiesIn) {
 		List<KeyValue> propsresult = new ArrayList<KeyValue>();

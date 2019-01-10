@@ -203,9 +203,12 @@ public class PreviewServlet extends HttpServlet implements SingleThreadModel {
 								
 								String vNodeId = (String)entry.getValue().get(CCConstants.SYS_PROP_NODE_UID);
 								System.out.println("vNodeId:"+vNodeId+ " entry key:"+entry.getKey());
-								
-								getPrevResult = nodeService.getPreview(VersionService.VERSION_STORE_PROTOCOL, "version2Store", entry.getKey());
-								
+								try {
+									getPrevResult = nodeService.getPreview(VersionService.VERSION_STORE_PROTOCOL, "version2Store", entry.getKey());
+								}catch(InvalidNodeRefException e){
+									// ignoring this error since versioned files don't have a preview
+								}
+
 							}
 							
 						}
