@@ -6,10 +6,13 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 
+import net.cnri.util.StreamUtil;
 import org.alfresco.service.cmr.repository.AssociationRef;
 import org.alfresco.service.cmr.repository.ChildAssociationRef;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.repository.StoreRef;
+import org.apache.commons.codec.digest.DigestUtils;
+import org.apache.log4j.lf5.util.StreamUtils;
 import org.edu_sharing.repository.client.rpc.User;
 import org.edu_sharing.service.nodeservice.model.GetPreviewResult;
 import org.edu_sharing.service.search.model.SortDefinition;
@@ -74,6 +77,16 @@ public interface NodeService {
 	public HashMap<String, Object> getProperties(String storeProtocol, String storeId, String nodeId) throws Throwable;
 
 	public InputStream getContent(String storeProtocol, String storeId, String nodeId, String contentProp) throws Throwable;
+	default String getContentHash(String storeProtocol, String storeId, String nodeId, String contentProp){
+		try {
+			InputStream is = getContent(storeProtocol, storeId, nodeId, contentProp);
+			if(is==null || is.available()==0)
+				return null;
+			return DigestUtils.sha1Hex(StreamUtils.getBytes(is));
+		}catch(Throwable t){
+			return null;
+		}
+	};
 
 	public default boolean hasAspect(String storeProtocol, String storeId, String nodeId, String aspect){
 		return Arrays.asList(getAspects(storeProtocol,storeId,nodeId)).contains(aspect);

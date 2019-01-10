@@ -37,14 +37,13 @@ public class Node {
 	private Date modifiedAt = null;
 	private Person modifiedBy = null;
 	private List<String> access = null;
-	private String contentVersion = null;
-	private String contentUrl = null;
 	private String downloadUrl = null;
 	private HashMap<String,String[]> properties = null;
 	private String mimetype = null;
 	private String mediatype = null;
 	private String size = null;
 	private Preview preview = null;
+	private Content content = null;
 	private String iconURL;
 	private String licenseURL;
 	private boolean isDirectory;
@@ -228,30 +227,15 @@ public class Node {
 		this.modifiedBy = modifiedBy;
 	}
 
-	/**
-   **/
-	@ApiModelProperty(required = true, value = "")
-	@JsonProperty("contentVersion")
-	public String getContentVersion() {
-		return contentVersion;
+	@JsonProperty
+	public Content getContent() {
+		return content;
 	}
 
-	public void setContentVersion(String contentVersion) {
-		this.contentVersion = contentVersion;
+	public void setContent(Content content) {
+		this.content = content;
 	}
 
-	/**
-   **/
-	@ApiModelProperty(required = true, value = "")
-	@JsonProperty("contentUrl")
-	public String getContentUrl() {
-		return contentUrl;
-	}
-
-	public void setContentUrl(String contentUrl) {
-		this.contentUrl = contentUrl;
-	}
-	
 	
 	public void setDownloadUrl(String downloadUrl) {
 		this.downloadUrl = downloadUrl;
@@ -376,8 +360,6 @@ public class Node {
 		sb.append("  modifiedAt: ").append(modifiedAt).append("\n");
 		sb.append("  modifiedBy: ").append(modifiedBy).append("\n");
 		sb.append("  access: ").append(access).append("\n");
-		sb.append("  contentVersion: ").append(contentVersion).append("\n");
-		sb.append("  contentUrl: ").append(contentUrl).append("\n");
 		sb.append("  properties: ").append(properties).append("\n");
 		sb.append("  mimetype: ").append(mimetype).append("\n");
 		sb.append("  size: ").append(size).append("\n");

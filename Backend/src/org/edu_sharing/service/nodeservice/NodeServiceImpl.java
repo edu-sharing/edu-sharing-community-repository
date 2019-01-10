@@ -16,9 +16,12 @@ import org.alfresco.service.cmr.dictionary.DictionaryService;
 import org.alfresco.service.cmr.repository.*;
 import org.alfresco.service.cmr.repository.NodeService;
 import org.alfresco.service.cmr.security.PermissionService;
+import org.alfresco.service.cmr.version.Version;
+import org.alfresco.service.cmr.version.VersionHistory;
 import org.alfresco.service.cmr.version.VersionService;
 import org.alfresco.service.namespace.QName;
 import org.alfresco.service.namespace.RegexQNamePattern;
+import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.lang.ArrayUtils;
 import org.apache.log4j.Logger;
 import org.edu_sharing.alfresco.authentication.HttpContext;
@@ -89,6 +92,7 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
 			CCConstants.CCM_PROP_IO_LICENSE_PROFILE_URL,
 			CCConstants.CCM_PROP_IO_COMMONLICENSE_QUESTIONSALLOWED
 	};
+	private final ContentService contentService;
 	private DictionaryService dictionaryService;
 	String repositoryId = ApplicationInfoList.getHomeRepository().getAppId();
 	MetadataSets metadataSets = RepoFactory.getMetadataSetsForRepository(repositoryId);
@@ -111,6 +115,7 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
 		ApplicationContext applicationContext = AlfAppContextGate.getApplicationContext();
 		serviceRegistry = (ServiceRegistry) applicationContext.getBean(ServiceRegistry.SERVICE_REGISTRY);
 		nodeService = serviceRegistry.getNodeService();
+		contentService = serviceRegistry.getContentService();
 		versionService = serviceRegistry.getVersionService();
 		dictionaryService = serviceRegistry.getDictionaryService();
 		repositoryHelper = (Repository) applicationContext.getBean("repositoryHelper");
@@ -1002,6 +1007,17 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
 	public InputStream getContent(String storeProtocol, String storeId, String nodeId,String contentProp) throws Throwable{
 		return apiClient.getContent(nodeId,contentProp);
 	}
+
+	@Override
+	public String getContentHash(String storeProtocol, String storeId, String nodeId, String contentProp) {
+		try{
+			ContentReader reader = contentService.getReader(new NodeRef(new StoreRef(storeProtocol, storeId), nodeId), ContentModel.PROP_CONTENT).getReader();
+			return DigestUtils.sha1Hex(""+reader.hashCode());
+		}catch(Throwable t){
+			return null;
+		}
+	}
+
 	@Override
 	public void addAspect(String nodeId, String aspect) {
 		apiClient.addAspect(nodeId, aspect);

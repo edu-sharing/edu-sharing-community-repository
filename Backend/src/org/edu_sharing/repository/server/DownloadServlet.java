@@ -10,12 +10,14 @@ import java.util.List;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
+import javax.mail.Store;
 import javax.servlet.ServletException;
 import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import net.cnri.util.StreamUtil;
 import org.alfresco.model.ContentModel;
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.service.ServiceRegistry;
@@ -41,6 +43,7 @@ import org.edu_sharing.service.share.ShareServiceImpl;
 import org.edu_sharing.service.tracking.TrackingService;
 import org.edu_sharing.service.tracking.TrackingServiceFactory;
 import org.springframework.context.ApplicationContext;
+import org.springframework.util.StreamUtils;
 
 
 public class DownloadServlet extends HttpServlet{
@@ -52,10 +55,33 @@ public class DownloadServlet extends HttpServlet{
 	protected void doGet(HttpServletRequest req, HttpServletResponse resp)
 			throws ServletException, IOException {
 
+		String nodeId = req.getParameter("nodeId");
 		String nodeIds = req.getParameter("nodeIds");
-		String zipName = req.getParameter("fileName");
-		downloadZip(resp, nodeIds.split(","), null, null, null, zipName);
+		if(nodeIds!=null) {
+			String zipName = req.getParameter("fileName");
+			downloadZip(resp, nodeIds.split(","), null, null, null, zipName);
+		}
+		downloadNode(nodeId,req,resp);
 
+	}
+
+	private void downloadNode(String nodeId, HttpServletRequest req, HttpServletResponse resp) throws IOException {
+		try {
+			if (!NodeServiceHelper.downloadAllowed(nodeId)) {
+				resp.sendRedirect(URLTool.getNgMessageUrl("security_error"));
+				return;
+			}
+			NodeService nodeService = NodeServiceFactory.getLocalService();
+			ByteArrayOutputStream bufferOut = new ByteArrayOutputStream();
+			StreamUtils.copy(nodeService.getContent(StoreRef.PROTOCOL_WORKSPACE, StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(), nodeId, ContentModel.PROP_CONTENT.toString()),
+					bufferOut);
+			outputData(resp,
+					NodeServiceHelper.getProperty(new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, nodeId), CCConstants.CM_NAME),
+					bufferOut);
+		}catch(Throwable t){
+			logger.error(t);
+			resp.sendRedirect(URLTool.getNgMessageUrl("INVALID"));
+		}
 	}
 
 	public static void downloadZip(HttpServletResponse resp, String[] nodeIds, String parentNodeId, String token, String password, String zipName) throws IOException {
@@ -207,16 +233,20 @@ public class DownloadServlet extends HttpServlet{
 				result=runAll.doWork();
 			}
 			if(result) {
-				resp.setHeader("Content-type","application/octet-stream");
-				resp.setHeader("Content-Transfer-Encoding","binary");
-				resp.setHeader("Content-Disposition","attachment; filename=\""+cleanName(zipName)+"\"");
-				resp.setHeader("Content-Length",""+bufferOut.size());
-				resp.getOutputStream().write(bufferOut.toByteArray());
+				outputData(resp, zipName, bufferOut);
 			}
 		}
 		catch(Throwable t){
 			t.printStackTrace();
 		}
+	}
+
+	private static void outputData(HttpServletResponse resp, String filename, ByteArrayOutputStream bufferOut) throws IOException {
+		resp.setHeader("Content-type","application/octet-stream");
+		resp.setHeader("Content-Transfer-Encoding","binary");
+		resp.setHeader("Content-Disposition","attachment; filename=\""+cleanName(filename)+"\"");
+		resp.setHeader("Content-Length",""+bufferOut.size());
+		resp.getOutputStream().write(bufferOut.toByteArray());
 	}
 
 	public static String cleanName(String name) {

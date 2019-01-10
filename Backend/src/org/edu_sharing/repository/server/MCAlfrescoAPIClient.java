@@ -1156,10 +1156,10 @@ public class MCAlfrescoAPIClient extends MCAlfrescoBaseClient {
 		boolean isSubOfContent = serviceRegistry.getDictionaryService().isSubClass(QName.createQName(nodeType), QName.createQName(CCConstants.CM_TYPE_CONTENT));
 
 		logger.debug("setting external URL");
-		String redirectServletLink = this.getRedirectServletLink(repId, nodeRef.getId());
+		String contentUrl = URLTool.getNgRenderNodeUrl(nodeRef.getId(),null);
 
-		redirectServletLink = URLTool.addOAuthAccessToken(redirectServletLink);
-		propsCopy.put(CCConstants.CONTENTURL, redirectServletLink);
+		contentUrl = URLTool.addOAuthAccessToken(contentUrl);
+		propsCopy.put(CCConstants.CONTENTURL, contentUrl);
 
 		// external URL
 		if (isSubOfContent) {
@@ -1167,10 +1167,8 @@ public class MCAlfrescoAPIClient extends MCAlfrescoBaseClient {
 			String commonLicenseKey = (String)propsCopy.get(CCConstants.CCM_PROP_IO_COMMONLICENSE_KEY);
 			boolean downloadAllowed = downloadAllowed(nodeRef.getId(),commonLicenseKey,(String)propsCopy.get(CCConstants.CCM_PROP_EDITOR_TYPE));
 			
-			if (propsCopy.get(CCConstants.ALFRESCO_MIMETYPE) != null && redirectServletLink != null && downloadAllowed) {
-				String params = URLEncoder.encode("display=download");
-				String downLoadUrl = UrlTool.setParam(redirectServletLink, "params", params);
-				propsCopy.put(CCConstants.DOWNLOADURL, downLoadUrl);
+			if (propsCopy.get(CCConstants.ALFRESCO_MIMETYPE) != null && downloadAllowed) {
+				propsCopy.put(CCConstants.DOWNLOADURL,URLTool.getDownloadServletUrl(nodeRef.getId()));
 			}
 			
 			String commonLicensekey = (String)propsCopy.get(CCConstants.CCM_PROP_IO_COMMONLICENSE_KEY);
@@ -3929,15 +3927,12 @@ public class MCAlfrescoAPIClient extends MCAlfrescoBaseClient {
 				logger.debug(" version NodeID:" + props.get(CCConstants.NODEID));
 
 				// contenturl
-				String redirectServletLink = this.getRedirectServletLink(repId, nodeId);
-				redirectServletLink = UrlTool.setParam(redirectServletLink, "version", version.getVersionLabel());
-				redirectServletLink = URLTool.addOAuthAccessToken(redirectServletLink);
+				String contentUrl = URLTool.getNgRenderNodeUrl(nodeId,version.getVersionLabel());
+				contentUrl = URLTool.addOAuthAccessToken(contentUrl);
 				
-				props.put(CCConstants.CONTENTURL, redirectServletLink);
-				if (props.get(CCConstants.ALFRESCO_MIMETYPE) != null && redirectServletLink != null) {
-					String params = URLEncoder.encode("display=download");
-					String downLoadUrl = UrlTool.setParam(redirectServletLink, "params", params);
-					props.put(CCConstants.DOWNLOADURL, downLoadUrl);
+				props.put(CCConstants.CONTENTURL, contentUrl);
+				if (props.get(CCConstants.ALFRESCO_MIMETYPE) != null && contentUrl != null) {
+					props.put(CCConstants.DOWNLOADURL, URLTool.getDownloadServletUrl(nodeId));
 				}
 
 				// thumbnail take the current thumbnail cause subobjects

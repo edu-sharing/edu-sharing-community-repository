@@ -66,6 +66,8 @@ import org.json.JSONObject;
 
 import io.swagger.util.Json;
 
+import javax.swing.text.html.parser.ContentModel;
+
 public class NodeDao {
 	
 	private static final StoreRef storeRef = new StoreRef(StoreRef.PROTOCOL_WORKSPACE, "SpacesStore");
@@ -74,7 +76,9 @@ public class NodeDao {
 			org.alfresco.service.cmr.security.PermissionService.CHANGE_PERMISSIONS,
 			org.alfresco.service.cmr.security.PermissionService.WRITE,
 			org.alfresco.service.cmr.security.PermissionService.DELETE,
-			CCConstants.PERMISSION_CC_PUBLISH};
+			CCConstants.PERMISSION_CC_PUBLISH,
+			CCConstants.PERMISSION_READ_ALL
+	};
 	private String version;
 
 
@@ -771,8 +775,7 @@ public class NodeDao {
 		data.setModifiedAt(getModifiedAt());
 		data.setModifiedBy(getModifiedBy());
 
-		data.setContentVersion(getContentVersion());
-		data.setContentUrl(getContentUrl());
+		data.setContent(getContent());
 
 		data.setDownloadUrl(getDownloadUrl());
 		data.setMetadataset(getMetadataSet());
@@ -798,6 +801,14 @@ public class NodeDao {
 			Collection collection=new CollectionDao(repoDao, getRef().getId(),this,data).asCollection();
 			data.setCollection(collection);
 		}
+	}
+
+	private Content getContent() {
+		Content content=new Content();
+		content.setVersion(getContentVersion());
+		content.setUrl(getContentUrl());
+		content.setHash(nodeService.getContentHash(storeProtocol,storeId,nodeId, org.alfresco.model.ContentModel.PROP_CONTENT.toString()));
+		return content;
 	}
 
 	public String getType() {
@@ -1104,7 +1115,7 @@ public class NodeDao {
 	}
 
 	private String getContentVersion() {
-		return (String) nodeProps.get(CCConstants.LOM_PROP_LIFECYCLE_VERSION);
+		return (String) nodeProps.get(CCConstants.CM_PROP_VERSIONABLELABEL);
 	}
 
 	private String getContentUrl() {

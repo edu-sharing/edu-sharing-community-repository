@@ -405,4 +405,8 @@ public class URLTool{
     public static String getEduservletUrl() {
         return getBaseUrl()+"/eduservlet/";
     }
+
+	public static String getDownloadServletUrl(String id) {
+		return getEduservletUrl()+"download?nodeId="+URLEncoder.encodeUriComponent(id);
+	}
 }
