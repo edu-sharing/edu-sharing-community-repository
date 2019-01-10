@@ -79,9 +79,13 @@ public class NodeDao {
 
 
 	public static NodeDao getNodeWithVersion(RepositoryDao repoDao, String nodeId,String versionLabel) throws DAOException {
+		if(versionLabel!=null && versionLabel.equals("-1"))
+			versionLabel=null;
 		NodeDao nodeDao=getNode(repoDao,nodeId,Filter.createShowAllFilter());
-		nodeDao.version=versionLabel;
-		nodeDao.nodeProps=nodeDao.getNodeHistory().get(nodeDao.version);
+		if(versionLabel!=null) {
+			nodeDao.version = versionLabel;
+			nodeDao.nodeProps = nodeDao.getNodeHistory().get(nodeDao.version);
+		}
 		return nodeDao;
 	}
 	public static NodeDao getNode(RepositoryDao repoDao, String nodeId)
