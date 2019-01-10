@@ -398,6 +398,9 @@ $imagePath: '../../../../assets/images/collections/';
   right: 10px;
   @include clickable();
   @include materialShadowBottom();
+  &:focus{
+    @include setGlobalInsetFocus();
+  }
 }
 .image-upload-icon i{
   background-color: rgba(255,255,255,0.75);
