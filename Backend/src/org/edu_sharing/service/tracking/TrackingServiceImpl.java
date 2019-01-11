@@ -83,6 +83,7 @@ public class TrackingServiceImpl extends TrackingServiceDefault{
         super.trackActivityOnNode(nodeRef,type);
         return AuthenticationUtil.runAsSystem(()-> {
             return addToDatabase(TRACKING_INSERT_NODE, statement -> {
+                // @Todo: track the node version
                 statement.setLong(1, (Long) nodeService.getProperty(nodeRef, QName.createQName(CCConstants.SYS_PROP_NODE_DBID)));
                 statement.setString(2, nodeRef.getId());
                 statement.setString(3, super.getTrackedUsername(null));
