@@ -331,7 +331,9 @@ export class NodeRenderComponent implements EventListener{
       showDownloadAdvice:!this.isOpenable
     };
     this._node=null;
-    this.nodeApi.getNodeRenderSnippet(this._nodeId,this.version ? this.version : "-1",parameters,this.repository)
+    // we only fetching versions for the primary parent (child objects don't have versions)
+    this.nodeApi.getNodeRenderSnippet(this._nodeId,this.version &&
+        (!this.sequenceParent || this._nodeId==this.sequenceParent.ref.id) ? this.version : "-1",parameters,this.repository)
         .subscribe((data:any)=>{
             if (!data.detailsSnippet) {
                 console.error(data);

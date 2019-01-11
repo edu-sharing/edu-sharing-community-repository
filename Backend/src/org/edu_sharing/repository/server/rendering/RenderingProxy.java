@@ -114,7 +114,7 @@ public class RenderingProxy extends HttpServlet {
 			SignatureVerifier.Result result = new SignatureVerifier().verify(app_id, sig, signed, ts);
 			if(result.getStatuscode() != HttpServletResponse.SC_OK){
 				resp.sendError(result.getStatuscode(),result.getMessage());
-				return true;
+				return false;
 			}
 		}else{
 			if(proxyRepId == null){
@@ -152,17 +152,19 @@ public class RenderingProxy extends HttpServlet {
 	 * returns the encrypted username provided in the request, or fails and returns null
 	 */
 	private String getDecryptedUsername(HttpServletRequest req, HttpServletResponse resp) throws IOException {
-
 		String uEncrypted = req.getParameter("u");
+		if(uEncrypted==null){
+		    resp.sendError(HttpServletResponse.SC_BAD_REQUEST,"Parameter \"u\" (username) is missing");
+		    return null;
+        }
 		Encryption encryptionTool = new Encryption("RSA");
 
 		try {
-
 			return encryptionTool.decrypt(Base64.decodeBase64(uEncrypted.getBytes()),
 					encryptionTool.getPemPrivateKey(ApplicationInfoList.getHomeRepository().getPrivateKey()));
-		}catch(GeneralSecurityException e) {
+		}catch(Exception e) {
 			logger.error(e.getMessage(), e);
-			resp.sendError(HttpServletResponse.SC_FORBIDDEN,e.getMessage());
+            resp.sendError(HttpServletResponse.SC_BAD_REQUEST,"Parameter \"u\" (username) could not be decrypted: "+e.getMessage());
 			return null;
 		}
 	}

@@ -89,6 +89,8 @@ public class NodeDao {
 		if(versionLabel!=null) {
 			nodeDao.version = versionLabel;
 			nodeDao.nodeProps = nodeDao.getNodeHistory().get(nodeDao.version);
+			if(nodeDao.nodeProps==null)
+				throw new IllegalArgumentException("Node "+nodeId+" does not have this version: "+versionLabel);
 		}
 		return nodeDao;
 	}
