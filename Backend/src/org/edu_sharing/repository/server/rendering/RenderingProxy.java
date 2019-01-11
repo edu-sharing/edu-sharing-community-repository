@@ -32,6 +32,9 @@ import org.edu_sharing.repository.server.tools.security.SignatureVerifier;
 import org.edu_sharing.repository.server.tools.security.Signing;
 import org.edu_sharing.service.nodeservice.NodeServiceFactory;
 import org.edu_sharing.service.nodeservice.NodeServiceHelper;
+import org.edu_sharing.service.rendering.RenderingService;
+import org.edu_sharing.service.rendering.RenderingServiceData;
+import org.edu_sharing.service.rendering.RenderingServiceFactory;
 import org.edu_sharing.service.rendering.RenderingTool;
 import org.edu_sharing.service.repoproxy.RepoProxyFactory;
 import org.edu_sharing.service.usage.Usage;
@@ -81,11 +84,6 @@ public class RenderingProxy extends HttpServlet {
 			}
 			nodeId = childobjectId;
 		}
-
-		boolean doRedirect = true;
-		if("inline".equals(display)){
-			doRedirect = false;
-		}
 		
 		if(signed == null || signed.trim().equals("")){
 			signed = rep_id + ts;
@@ -100,6 +98,10 @@ public class RenderingProxy extends HttpServlet {
 		//Signatur validation
 		//current repo knows the app
 		ApplicationInfo appInfoApplication = ApplicationInfoList.getRepositoryInfoById(app_id);
+		String usernameDecrypted = null;
+		ApplicationInfo homeRep = ApplicationInfoList.getHomeRepository();
+		Encryption encryptionTool = new Encryption("RSA");
+
 		if(appInfoApplication != null){
 			
 			SignatureVerifier.Result result = new SignatureVerifier().verify(app_id, sig, signed, ts);
@@ -112,21 +114,16 @@ public class RenderingProxy extends HttpServlet {
 				resp.sendError(HttpServletResponse.SC_BAD_REQUEST,"missing proxyRepId");
 				return;
 			}
-			
+
 			SignatureVerifier.Result result = new SignatureVerifier().verify(proxyRepId, sig, signed, ts);
 			if(result.getStatuscode() != HttpServletResponse.SC_OK){
 				resp.sendError(result.getStatuscode(), result.getMessage());
 				return;
 			}
 		}
-		
-		
-		String uEncrypted = req.getParameter("u");
-		ApplicationInfo homeRep = ApplicationInfoList.getHomeRepository();
 
-		String usernameDecrypted = null;
-		Encryption encryptionTool = new Encryption("RSA");
-		
+		String uEncrypted = req.getParameter("u");
+
 		try {
 			
 			usernameDecrypted = encryptionTool.decrypt(Base64.decodeBase64(uEncrypted.getBytes()), encryptionTool.getPemPrivateKey(homeRep.getPrivateKey()));
@@ -150,33 +147,21 @@ public class RenderingProxy extends HttpServlet {
 			AuthenticationUtil.runAsSystem(runAs);
 		}
 
+
 		if("window".equals(display)) {
 
 			openWindow(req, resp, nodeId, parentId, appInfoApplication,repoInfo, usernameDecrypted);
 			return;
 		}
 		
-		String contentUrl = null;
+		String contentUrl;
 		
 		if(homeRep.getAppId().equals(rep_id)){
 			contentUrl = homeRep.getContentUrl();
-			
-			/**
-			 * use internal url to renderingservice when rendering snippet was requested
-			 */
-			if(RenderingTool.DISPLAY_DYNAMIC.equals(display) && homeRep.getContentUrlBackend() != null){
-				contentUrl = homeRep.getContentUrlBackend();
-				contentUrl = UrlTool.setParam(contentUrl, "com",RenderingTool.COM_INTERNAL);
+			if(contentUrl == null) {
+				logger.warn("no content url configured");
+				resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR,"no content url configured");
 			}
-			
-			String com = req.getParameter("com");
-			if(com != null && com.equals(RenderingTool.COM_INTERNAL) && homeRep.getContentUrlBackend() != null) {
-				contentUrl = homeRep.getContentUrlBackend();
-				contentUrl = UrlTool.setParam(contentUrl, "com",RenderingTool.COM_INTERNAL);
-			}
-			
-			
-			if(contentUrl == null) logger.warn("no content url configured");
 		}else{
 			
 			if(repoInfo == null){
@@ -213,30 +198,25 @@ public class RenderingProxy extends HttpServlet {
 				
 				ApplicationInfo remoteRepo = ApplicationInfoList.getRepositoryInfoById(rep_id);
 				
-				AuthenticationUtil.RunAsWork<String> runAs = new AuthenticationUtil.RunAsWork<String>(){
-					
-					//Logger logger = Logger.getLogger(this.getClass().getClass());
-					@Override
-					public String doWork() throws Exception {
-						
-						String localUsername = new String(usernameDecrypted2).trim();
-						
-						MCAlfrescoAPIClient apiClient = new MCAlfrescoAPIClient();
-						
-						
-						
-						HashMap<String,String> personData = apiClient.getUserInfo(localUsername);
-						
-						/**
-						 *make sure that the remote user exists
-						 */
-						if(RepoProxyFactory.getRepoProxy().myTurn(rep_id)) {
-							RepoProxyFactory.getRepoProxy().remoteAuth(remoteRepo,false);
-						}
-					
-						
-						return personData.get(CCConstants.PROP_USER_ESUID);
+				AuthenticationUtil.RunAsWork<String> runAs = () -> {
+
+					String localUsername = new String(usernameDecrypted2).trim();
+
+					MCAlfrescoAPIClient apiClient = new MCAlfrescoAPIClient();
+
+
+
+					HashMap<String,String> personData = apiClient.getUserInfo(localUsername);
+
+					/**
+					 *make sure that the remote user exists
+					 */
+					if(RepoProxyFactory.getRepoProxy().myTurn(rep_id)) {
+						RepoProxyFactory.getRepoProxy().remoteAuth(remoteRepo,false);
 					}
+
+
+					return personData.get(CCConstants.PROP_USER_ESUID);
 				};
 				
 			    try{
@@ -298,22 +278,20 @@ public class RenderingProxy extends HttpServlet {
 			return;
 		}
 		
-		
-		logger.debug("contentUrl:" + contentUrl);
-		if(doRedirect){
-			if(contentUrl == null){
-				resp.sendError(500, "no contenturl configured");
-				return;
-			}else{
-				resp.sendRedirect(contentUrl);
-				return;
-			}
-		}else{
-			HttpQueryTool httpQuery = new HttpQueryTool();
-			String result = httpQuery.query(contentUrl);
-			resp.getWriter().println(result);
+		RenderingService service=RenderingServiceFactory.getRenderingService(homeRep.getAppId());
+		// @todo 5.1 should version inline be transfered?
+		try {
+			RenderingServiceData renderData = service.getData(nodeId, null);
+			resp.getWriter().print(service.getDetails(contentUrl,renderData));
+		} catch (Exception e) {
+			logger.error(e);
+			resp.sendError(500,e.getMessage());
 		}
-		
+		/*
+		HttpQueryTool httpQuery = new HttpQueryTool();
+		String result = httpQuery.query(contentUrl);
+		resp.getWriter().println(result);
+		*/
 	}
 
 	private boolean openWindow(HttpServletRequest req, HttpServletResponse resp, String nodeId, String parentId, ApplicationInfo appInfoApplication, ApplicationInfo repoInfo, String usernameDecrypted) throws IOException {
@@ -407,19 +385,7 @@ public class RenderingProxy extends HttpServlet {
 			return true;
 		}
 
-		String version=req.getParameter("version");
-
-		if(version==null) {
-			logger.info("parameter version missing, will use latest (-1)");
-		}
-		try {
-			if(Double.parseDouble(version)<1)
-				version=null;
-		}catch(Throwable t) {
-			logger.warn("parameter version is non-numeric ("+version+"), will use latest (-1)");
-			version=null;
-		}
-
+		String version=getVersion(req);
 		String urlWindow = URLTool.getNgRenderNodeUrl(nodeId,version,false,(repoInfo != null) ? repoInfo.getAppId() : null);
 		
 
@@ -443,6 +409,22 @@ public class RenderingProxy extends HttpServlet {
 		
 		resp.sendRedirect(urlWindow);
 		return false;
+	}
+
+	private String getVersion(HttpServletRequest req) {
+		String version=req.getParameter("version");
+		if(version==null) {
+			logger.info("parameter version missing, will use latest (-1)");
+		}
+		try {
+			if(Double.parseDouble(version)<1)
+				version=null;
+		}catch(Throwable t) {
+			logger.warn("parameter version is non-numeric ("+version+"), will use latest (-1)");
+			version=null;
+		}
+		return version;
+
 	}
 
 }

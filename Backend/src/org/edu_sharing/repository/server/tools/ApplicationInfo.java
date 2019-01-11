@@ -91,9 +91,7 @@ public class ApplicationInfo implements Comparable<ApplicationInfo>{
 	public static final String KEY_AUTHENTICATIONTOOLCLASS = "authenticationtoolclass";
 	
 	public static final String KEY_CONTENTURL = "contenturl";
-	
-	public static final String KEY_CONTENTURL_BACKEND = "contenturlBackend";
-	
+
 	public static final String KEY_PREVIEWURL = "previewurl";
 	
 	public static final String KEY_IS_HOME_NODE = "is_home_node";
@@ -227,12 +225,6 @@ public class ApplicationInfo implements Comparable<ApplicationInfo>{
 	 * this is a property used to redirect to content deliverd by repositories renderservice
 	 */
 	private String contentUrl = null;
-	
-	/**
-	 * use this property for a call to the renderservice from an backend service like renderingproxy
-	 * this url contains the internal ip of the renderservice
-	 */
-	private String contentUrlBackend = null;
 
 	/**
 	 * this is a property used redirect to preview deliverd by repositories renderservice
@@ -400,9 +392,7 @@ public class ApplicationInfo implements Comparable<ApplicationInfo>{
 		repositoryType = PropertiesHelper.getProperty(KEY_REPOSITORY_TYPE, appFile, PropertiesHelper.XML);
 		
 		contentUrl = PropertiesHelper.getProperty(KEY_CONTENTURL, appFile, PropertiesHelper.XML);
-		
-		contentUrlBackend = PropertiesHelper.getProperty(KEY_CONTENTURL_BACKEND, appFile, PropertiesHelper.XML);
-		
+
 		previewUrl = PropertiesHelper.getProperty(KEY_PREVIEWURL, appFile, PropertiesHelper.XML);
 		
 		customHtmlHeaders = PropertiesHelper.getProperty(KEY_CUSTOM_HTML_HEADERS, appFile, PropertiesHelper.XML);
@@ -650,14 +640,6 @@ public class ApplicationInfo implements Comparable<ApplicationInfo>{
 		
 		return contentUrl;
 	}
-	
-	public String getContentUrlBackend() {
-		
-		return contentUrlBackend;
-	
-	}
-	
-	
 	
 	/**
 	 * this is a property used redirect to preview deliverd by repositories renderservice

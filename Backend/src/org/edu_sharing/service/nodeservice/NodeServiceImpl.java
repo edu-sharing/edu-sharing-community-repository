@@ -1012,7 +1012,7 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
 	public String getContentHash(String storeProtocol, String storeId, String nodeId, String contentProp) {
 		try{
 			ContentReader reader = contentService.getReader(new NodeRef(new StoreRef(storeProtocol, storeId), nodeId), ContentModel.PROP_CONTENT).getReader();
-			return DigestUtils.sha1Hex(""+reader.hashCode());
+			return ""+reader.getContentData().hashCode();
 		}catch(Throwable t){
 			return null;
 		}

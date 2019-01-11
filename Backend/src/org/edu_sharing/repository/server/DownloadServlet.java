@@ -75,6 +75,7 @@ public class DownloadServlet extends HttpServlet{
 			ByteArrayOutputStream bufferOut = new ByteArrayOutputStream();
 			StreamUtils.copy(nodeService.getContent(StoreRef.PROTOCOL_WORKSPACE, StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(), nodeId, ContentModel.PROP_CONTENT.toString()),
 					bufferOut);
+			TrackingServiceFactory.getTrackingService().trackActivityOnNode(new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE,nodeId),TrackingService.EventType.DOWNLOAD_MATERIAL);
 			outputData(resp,
 					NodeServiceHelper.getProperty(new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, nodeId), CCConstants.CM_NAME),
 					bufferOut);

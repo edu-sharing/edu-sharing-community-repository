@@ -1,9 +1,11 @@
 package org.edu_sharing.service.rendering;
 
+import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.util.HashMap;
 import java.util.Map;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectWriter;
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
@@ -88,12 +90,8 @@ public class RenderingServiceImpl implements RenderingService{
 			// base url for dynamic context routing of domains
 			renderingServiceUrl = UrlTool.setParam(renderingServiceUrl, "baseUrl",URLEncoder.encode(URLTool.getBaseUrl(true)));
 			logger.debug(renderingServiceUrl);
-			PostMethod post = new PostMethod(renderingServiceUrl);
 			RenderingServiceData data = getData(nodeId,nodeVersion);
-			ObjectWriter ow = new ObjectMapper().writer().withDefaultPrettyPrinter();
-			String json = ow.writeValueAsString(data);
-			post.setRequestEntity(new StringRequestEntity(json,"application/json","UTF-8"));
-			return new HttpQueryTool().query(post);
+			return getDetails(renderingServiceUrl, data);
 		}catch(Throwable t) {
 			String repository=VersionService.getVersionNoException(VersionService.Type.REPOSITORY);
 			String rs=VersionService.getVersionNoException(VersionService.Type.RENDERSERVICE);
@@ -112,7 +110,16 @@ public class RenderingServiceImpl implements RenderingService{
 	
 	}
 
-	private RenderingServiceData getData(String nodeId, String nodeVersion) throws Exception {
+	@Override
+	public String getDetails(String renderingServiceUrl, RenderingServiceData data) throws JsonProcessingException, UnsupportedEncodingException {
+		PostMethod post = new PostMethod(renderingServiceUrl);
+		ObjectWriter ow = new ObjectMapper().writer().withDefaultPrettyPrinter();
+		String json = ow.writeValueAsString(data);
+		post.setRequestEntity(new StringRequestEntity(json,"application/json","UTF-8"));
+		return new HttpQueryTool().query(post);
+	}
+	@Override
+	public RenderingServiceData getData(String nodeId, String nodeVersion) throws Exception {
 		long time=System.currentTimeMillis();
 		RenderingServiceData data=new RenderingServiceData();
 		RepositoryDao repoDao = RepositoryDao.getRepository(appInfo.getAppId());

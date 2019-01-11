@@ -39,7 +39,7 @@ public class VersionService {
 	}
 	private static String getRenderserviceVersion() throws Exception{
 		ApplicationInfo rs=ApplicationInfoList.getRenderService();
-		String url=rs.getContentUrlBackend()!=null ? rs.getContentUrlBackend() : rs.getContentUrl();
+		String url=rs.getContentUrl();
 		url=url.replace("index.php", "version.php");
 		InputStream is = new URL(url).openStream();
 		String data=IOUtils.readAllLines(is);
