@@ -86,7 +86,7 @@ public class RenderingServiceImpl implements RenderingService{
 		String renderingServiceUrl = "";
 		try {
 			ApplicationInfo appInfo = ApplicationInfoList.getRepositoryInfoById(this.appInfo.getAppId());
-			renderingServiceUrl = new RenderingTool().getRenderServiceUrl(appInfo,parameters,RenderingTool.DISPLAY_DYNAMIC);
+			renderingServiceUrl = new RenderingTool().getRenderServiceUrl(appInfo,nodeId,parameters,RenderingTool.DISPLAY_DYNAMIC);
 			// base url for dynamic context routing of domains
 			renderingServiceUrl = UrlTool.setParam(renderingServiceUrl, "baseUrl",URLEncoder.encode(URLTool.getBaseUrl(true)));
 			logger.debug(renderingServiceUrl);

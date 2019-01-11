@@ -33,7 +33,7 @@ public class RenderingTool {
 	 * @return
 	 * @throws GeneralSecurityException
 	 */
-	public String getRenderServiceUrl(ApplicationInfo repInfo,Map<String,String> parameters) throws GeneralSecurityException{
+	public String getRenderServiceUrl(ApplicationInfo repInfo,String nodeId,Map<String,String> parameters) throws GeneralSecurityException{
 
 		ApplicationInfo homeRepo = ApplicationInfoList.getHomeRepository();
 		
@@ -63,7 +63,7 @@ public class RenderingTool {
 			renderingService = UrlTool.setParam(renderingService, "language",new AuthenticationToolAPI().getCurrentLanguage());
 		}catch(Throwable t){}
 		
-		String data = repInfo.getAppId()+timestamp;
+		String data = repInfo.getAppId()+nodeId+timestamp;
 		byte[] signature = sig.sign(sig.getPemPrivateKey(privateKey, CCConstants.SECURITY_KEY_ALGORITHM), data, CCConstants.SECURITY_SIGN_ALGORITHM);
 		String urlSig = URLEncoder.encode(new Base64().encodeToString(signature));
 		renderingService = UrlTool.setParam(renderingService, "sig",urlSig);
@@ -74,14 +74,13 @@ public class RenderingTool {
 	/**
 	 * Just an override with few parameters!
 	 */
-	public String getRenderServiceUrl(ApplicationInfo repInfo) throws GeneralSecurityException{
-		return getRenderServiceUrl(repInfo,null,null);
+	public String getRenderServiceUrl(ApplicationInfo repInfo,String nodeId) throws GeneralSecurityException{
+		return getRenderServiceUrl(repInfo,nodeId,null,null);
 	}
 
-	public String getRenderServiceUrl(ApplicationInfo repInfo,Map<String,String> parameters,String displayType) throws GeneralSecurityException {
+	public String getRenderServiceUrl(ApplicationInfo repInfo,String nodeId,Map<String,String> parameters,String displayType) throws GeneralSecurityException {
 		
-		boolean backendCall = (displayType != null && displayType.equals(RenderingTool.DISPLAY_DYNAMIC)) ? true : false;
-		String baseUrl = getRenderServiceUrl(repInfo,parameters);
+		String baseUrl = getRenderServiceUrl(repInfo,nodeId,parameters);
 		return UrlTool.setParam(baseUrl,"display",displayType);
 	}
 	
