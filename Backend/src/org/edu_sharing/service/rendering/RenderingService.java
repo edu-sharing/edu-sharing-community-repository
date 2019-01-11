@@ -16,5 +16,5 @@ public interface RenderingService {
 
     String getDetails(String renderingServiceUrl, RenderingServiceData data) throws JsonProcessingException, UnsupportedEncodingException;
 
-    RenderingServiceData getData(String nodeId, String nodeVersion) throws Exception;
+    RenderingServiceData getData(String nodeId, String nodeVersion, String user) throws Exception;
 }

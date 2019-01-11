@@ -12,12 +12,17 @@ import java.io.Serializable;
 import java.util.List;
 
 public class RenderingServiceData implements Serializable {
+    public enum RenderingError {
+        Unknown,
+        NodeMissing,
+        NodeAccessDenied,
+    }
     private Node node;
     private List<Node> children;
-    private NodeVersion version;
     private UserSimple user;
     private String metadataHTML;
     private Values configValues;
+    private RenderingError error;
 
     public Node getNode() {
         return node;
@@ -43,14 +48,6 @@ public class RenderingServiceData implements Serializable {
         return metadataHTML;
     }
 
-    public void setVersion(NodeVersion version) {
-        this.version = version;
-    }
-
-    public NodeVersion getVersion() {
-        return version;
-    }
-
     public void setConfigValues(Values configValues) {
         this.configValues = configValues;
     }
@@ -65,5 +62,13 @@ public class RenderingServiceData implements Serializable {
 
     public List<Node> getChildren() {
         return children;
+    }
+
+    public RenderingError getError() {
+        return error;
+    }
+
+    public void setError(RenderingError error) {
+        this.error = error;
     }
 }

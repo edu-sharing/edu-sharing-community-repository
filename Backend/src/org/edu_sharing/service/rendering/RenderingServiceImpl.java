@@ -9,6 +9,8 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectWriter;
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
+import org.alfresco.repo.security.permissions.AccessDeniedException;
+import org.alfresco.service.cmr.repository.InvalidNodeRefException;
 import org.alfresco.service.cmr.repository.StoreRef;
 import org.apache.commons.httpclient.methods.PostMethod;
 import org.apache.commons.httpclient.methods.StringRequestEntity;
@@ -31,10 +33,7 @@ import org.edu_sharing.repository.server.tools.ApplicationInfo;
 import org.edu_sharing.repository.server.tools.ApplicationInfoList;
 import org.edu_sharing.repository.server.tools.HttpQueryTool;
 import org.edu_sharing.repository.server.tools.URLTool;
-import org.edu_sharing.restservices.DAOException;
-import org.edu_sharing.restservices.NodeDao;
-import org.edu_sharing.restservices.PersonDao;
-import org.edu_sharing.restservices.RepositoryDao;
+import org.edu_sharing.restservices.*;
 import org.edu_sharing.restservices.shared.Filter;
 import org.edu_sharing.restservices.shared.Node;
 import org.edu_sharing.service.InsufficientPermissionException;
@@ -90,7 +89,7 @@ public class RenderingServiceImpl implements RenderingService{
 			// base url for dynamic context routing of domains
 			renderingServiceUrl = UrlTool.setParam(renderingServiceUrl, "baseUrl",URLEncoder.encode(URLTool.getBaseUrl(true)));
 			logger.debug(renderingServiceUrl);
-			RenderingServiceData data = getData(nodeId,nodeVersion);
+			RenderingServiceData data = getData(nodeId,nodeVersion,AuthenticationUtil.getFullyAuthenticatedUser());
 			return getDetails(renderingServiceUrl, data);
 		}catch(Throwable t) {
 			String repository=VersionService.getVersionNoException(VersionService.Type.REPOSITORY);
@@ -119,31 +118,44 @@ public class RenderingServiceImpl implements RenderingService{
 		return new HttpQueryTool().query(post);
 	}
 	@Override
-	public RenderingServiceData getData(String nodeId, String nodeVersion) throws Exception {
+	public RenderingServiceData getData(String nodeId, String nodeVersion, String user) throws Exception {
 		long time=System.currentTimeMillis();
 		RenderingServiceData data=new RenderingServiceData();
 		RepositoryDao repoDao = RepositoryDao.getRepository(appInfo.getAppId());
-		NodeDao nodeDao = NodeDao.getNodeWithVersion(repoDao, nodeId,nodeVersion);
+		try {
+			NodeDao nodeDao = NodeDao.getNodeWithVersion(repoDao, nodeId, nodeVersion);
+			Node node = nodeDao.asNode();
+			data.setNode(node);
+			data.setChildren(
+					NodeDao.convertToRest(repoDao,Filter.createShowAllFilter(),nodeDao.getChildrenSubobjects(),0,Integer.MAX_VALUE).getNodes()
+			);
+			// template
+			data.setMetadataHTML(new MetadataTemplateRenderer(
+					MetadataHelper.getMetadataset(
+							appInfo,node.getMetadataset()==null ? CCConstants.metadatasetdefault_id : node.getMetadataset()),
+					nodeDao.getAllProperties()).render("io_render"));
 
-		Node node = nodeDao.asNode();
-		data.setNode(node);
-
-		data.setChildren(
-				NodeDao.convertToRest(repoDao,Filter.createShowAllFilter(),nodeDao.getChildrenSubobjects(),0,Integer.MAX_VALUE).getNodes()
-		);
-		// template
-		data.setMetadataHTML(new MetadataTemplateRenderer(
-				MetadataHelper.getMetadataset(
-						appInfo,node.getMetadataset()==null ? CCConstants.metadatasetdefault_id : node.getMetadataset()),
-				nodeDao.getAllProperties()).render("io_render"));
+		}catch(Throwable t){
+			logger.warn(t);
+			data.setError(mapError(t));
+		}
 
 		// user
-		data.setUser(PersonDao.getPerson(repoDao,AuthenticationUtil.getFullyAuthenticatedUser()).asPersonSimple());
+		data.setUser(PersonDao.getPerson(repoDao,user).asPersonSimple());
 
 		// context/config
 		data.setConfigValues(ConfigServiceFactory.getCurrentConfig().values);
 
 		logger.info("Preparing rendering data took "+(System.currentTimeMillis()-time)+" ms");
 		return data;
+	}
+	public RenderingServiceData.RenderingError mapError(Throwable t){
+		if(t instanceof DAOMissingException){
+			return RenderingServiceData.RenderingError.NodeMissing;
+		}
+		if(t instanceof DAOSecurityException){
+			return RenderingServiceData.RenderingError.NodeAccessDenied;
+		}
+		return RenderingServiceData.RenderingError.Unknown;
 	}
 }

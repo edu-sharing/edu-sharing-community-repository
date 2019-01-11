@@ -100,17 +100,17 @@ public class RenderingProxy extends HttpServlet {
 	private boolean validateSignature(HttpServletRequest req,HttpServletResponse resp) throws IOException {
 		String sig = req.getParameter("sig");
 		String ts = req.getParameter("ts");
-		//@todo refactor 5.1 check if this is required?!
-		//String signed = req.getParameter("signed");
+		//some lms may tell an own signed string to validate?
+		String signed = req.getParameter("signed");
 		String app_id = req.getParameter("app_id");
 		String rep_id = req.getParameter("rep_id");
 		String nodeId = req.getParameter("obj_id");
 		//the proxy Repository
 		String proxyRepId = req.getParameter("proxyRepId");
 
-		//if(signed == null || signed.trim().equals("")){
-			String signed = RenderingTool.getSignatureContent(rep_id, nodeId, ts);
-		//}
+		if(signed == null || signed.trim().equals("")){
+			signed = app_id+ts;
+		}
 		ApplicationInfo appInfoApplication = ApplicationInfoList.getRepositoryInfoById(app_id);
 		if(appInfoApplication != null){
 
@@ -287,15 +287,28 @@ public class RenderingProxy extends HttpServlet {
 			return;
 		}
 		*/
-		RenderingService service=RenderingServiceFactory.getRenderingService(homeRep.getAppId());
-		// @todo 5.1 should version inline be transfered?
+		long timestamp=System.currentTimeMillis();
+		contentUrl = UrlTool.setParam(contentUrl, "ts",timestamp+"");
 		try {
-			RenderingServiceData renderData = service.getData(nodeId, null);
-			resp.getWriter().print(service.getDetails(contentUrl,renderData));
-		} catch (Exception e) {
-			logger.error(e);
-			resp.sendError(500,e.getMessage());
+			contentUrl = UrlTool.setParam(contentUrl, "sig", RenderingTool.getSignatureSigned(rep_id, nodeId, timestamp));
+		}catch(GeneralSecurityException e){
+			logger.error("Error building signature "+rep_id+" "+nodeId,e);
+			resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR,e.getMessage());
 		}
+		String finalContentUrl = contentUrl;
+		// it is a trusted app who requested and signature was verified, so we can render the node
+		AuthenticationUtil.runAsSystem(()-> {
+			RenderingService service = RenderingServiceFactory.getRenderingService(homeRep.getAppId());
+			// @todo 5.1 should version inline be transfered?
+			try {
+				RenderingServiceData renderData = service.getData(nodeId, null,usernameDecrypted);
+				resp.getWriter().print(service.getDetails(finalContentUrl, renderData));
+			} catch (Exception e) {
+				logger.error(e);
+				resp.sendError(500, e.getMessage());
+			}
+			return null;
+		});
 		/*
 		HttpQueryTool httpQuery = new HttpQueryTool();
 		String result = httpQuery.query(contentUrl);
