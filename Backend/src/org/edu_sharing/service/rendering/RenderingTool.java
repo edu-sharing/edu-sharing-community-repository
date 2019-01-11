@@ -10,7 +10,6 @@ import org.apache.log4j.Logger;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.client.tools.UrlTool;
 import org.edu_sharing.repository.server.AuthenticationToolAPI;
-import org.edu_sharing.repository.server.MCAlfrescoBaseClient;
 import org.edu_sharing.repository.server.tools.ApplicationInfo;
 import org.edu_sharing.repository.server.tools.ApplicationInfoList;
 import org.edu_sharing.repository.server.tools.URLTool;
@@ -24,7 +23,7 @@ public class RenderingTool {
 	
 	public static String COM_INTERNAL = "internal";
 	
-	Logger logger = Logger.getLogger(RenderingTool.class);
+	static Logger logger = Logger.getLogger(RenderingTool.class);
 
 	/**
 	 * this only works for alfresco repositories
@@ -42,17 +41,7 @@ public class RenderingTool {
 		//renderServiceUrl = UrlTool.setParam(renderServiceUrl, "proxyRepId", ApplicationInfoList.getHomeRepository().getAppId());
 		
 		long timestamp = System.currentTimeMillis();
-		Signing sig = new Signing();
-		
-		String privateKey = repInfo.getPrivateKey();
-		
-		//take the homeRepository keys for signature	
-		privateKey = homeRepo.getPrivateKey();
-	
-		if(privateKey == null){
-			logger.error("no privateKey available");
-			throw new GeneralSecurityException("no privateKey available");
-		}
+
 		if(parameters!=null){
 			for(Entry<String, String> param : parameters.entrySet()){
 				renderingService = UrlTool.setParam(renderingService, param.getKey(),param.getValue());
@@ -62,11 +51,8 @@ public class RenderingTool {
 		try{
 			renderingService = UrlTool.setParam(renderingService, "language",new AuthenticationToolAPI().getCurrentLanguage());
 		}catch(Throwable t){}
-		
-		String data = repInfo.getAppId()+nodeId+timestamp;
-		byte[] signature = sig.sign(sig.getPemPrivateKey(privateKey, CCConstants.SECURITY_KEY_ALGORITHM), data, CCConstants.SECURITY_SIGN_ALGORITHM);
-		String urlSig = URLEncoder.encode(new Base64().encodeToString(signature));
-		renderingService = UrlTool.setParam(renderingService, "sig",urlSig);
+
+		renderingService = UrlTool.setParam(renderingService, "sig", getSignatureSigned(repInfo.getAppId(),nodeId,timestamp));
 		return renderingService;
 		
 	}
@@ -83,8 +69,27 @@ public class RenderingTool {
 		String baseUrl = getRenderServiceUrl(repInfo,nodeId,parameters);
 		return UrlTool.setParam(baseUrl,"display",displayType);
 	}
-	
-	public String getRenderServiceUrl(ApplicationInfo repInfo, String nodeId,String version,boolean displayMetadata, boolean backendCall) throws GeneralSecurityException{
+	public static String getSignatureSigned(String repId, String nodeId, long timestamp) throws GeneralSecurityException {
+		String data = getSignatureContent(repId, nodeId, timestamp);
+		Signing sig = new Signing();
+		//take the homeRepository keys for signature
+		String privateKey = ApplicationInfoList.getHomeRepository().getPrivateKey();
+
+
+		if(privateKey == null){
+			logger.error("no privateKey available");
+			throw new GeneralSecurityException("no privateKey available");
+		}
+		byte[] signature = sig.sign(sig.getPemPrivateKey(privateKey, CCConstants.SECURITY_KEY_ALGORITHM), data, CCConstants.SECURITY_SIGN_ALGORITHM);
+		return URLEncoder.encode(new Base64().encodeToString(signature));
+
+	}
+
+	public static String getSignatureContent(String repId, String nodeId, Object timestamp) {
+		return repId+nodeId+timestamp;
+	}
+
+	public static String getRenderServiceUrl(ApplicationInfo repInfo, String nodeId,String version,boolean displayMetadata, boolean backendCall) throws GeneralSecurityException{
 
 		ApplicationInfo homeRepo = ApplicationInfoList.getHomeRepository();
 		
@@ -93,19 +98,7 @@ public class RenderingTool {
 		//renderServiceUrl = UrlTool.setParam(renderServiceUrl, "proxyRepId", ApplicationInfoList.getHomeRepository().getAppId());
 		
 		long timestamp = System.currentTimeMillis();
-		Signing sig = new Signing();
-		
-		String privateKey = repInfo.getPrivateKey();
-		
-		//take the homeRepository keys for signature	
-		privateKey = homeRepo.getPrivateKey();
-			
-	
-		if(privateKey == null){
-			logger.error("no privateKey available");
-			throw new GeneralSecurityException("no privateKey available");
-		}
-		
+
 		renderingProxy = UrlTool.setParam(renderingProxy, "obj_id", nodeId);
 		renderingProxy = UrlTool.setParam(renderingProxy, "rep_id",repInfo.getAppId());
 		if(version!=null)
@@ -113,10 +106,8 @@ public class RenderingTool {
 		renderingProxy = UrlTool.setParam(renderingProxy, "metadata",""+displayMetadata);
 		renderingProxy = UrlTool.setParam(renderingProxy, "ts",""+timestamp);
 		
-		String data = repInfo.getAppId()+timestamp;
-		byte[] signature = sig.sign(sig.getPemPrivateKey(privateKey, CCConstants.SECURITY_KEY_ALGORITHM), data, CCConstants.SECURITY_SIGN_ALGORITHM);
-		String urlSig = URLEncoder.encode(new Base64().encodeToString(signature));
-		renderingProxy = UrlTool.setParam(renderingProxy, "sig",urlSig);
+
+		renderingProxy = UrlTool.setParam(renderingProxy, "sig", getSignatureSigned(repInfo.getAppId(),nodeId,timestamp));
 		
 		if(repInfo.ishomeNode()){
 			renderingProxy = UrlTool.setParam(renderingProxy, "app_id",repInfo.getAppId());

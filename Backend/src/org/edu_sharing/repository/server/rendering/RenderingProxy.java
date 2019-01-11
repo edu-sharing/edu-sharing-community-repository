@@ -33,6 +33,7 @@ import org.edu_sharing.service.nodeservice.NodeServiceHelper;
 import org.edu_sharing.service.rendering.RenderingService;
 import org.edu_sharing.service.rendering.RenderingServiceData;
 import org.edu_sharing.service.rendering.RenderingServiceFactory;
+import org.edu_sharing.service.rendering.RenderingTool;
 import org.edu_sharing.service.repoproxy.RepoProxyFactory;
 import org.edu_sharing.service.usage.Usage;
 import org.edu_sharing.service.usage.Usage2Service;
@@ -99,15 +100,17 @@ public class RenderingProxy extends HttpServlet {
 	private boolean validateSignature(HttpServletRequest req,HttpServletResponse resp) throws IOException {
 		String sig = req.getParameter("sig");
 		String ts = req.getParameter("ts");
-		String signed = req.getParameter("signed");
+		//@todo refactor 5.1 check if this is required?!
+		//String signed = req.getParameter("signed");
 		String app_id = req.getParameter("app_id");
 		String rep_id = req.getParameter("rep_id");
+		String nodeId = req.getParameter("obj_id");
 		//the proxy Repository
 		String proxyRepId = req.getParameter("proxyRepId");
 
-		if(signed == null || signed.trim().equals("")){
-			signed = rep_id + ts;
-		}
+		//if(signed == null || signed.trim().equals("")){
+			String signed = RenderingTool.getSignatureContent(rep_id, nodeId, ts);
+		//}
 		ApplicationInfo appInfoApplication = ApplicationInfoList.getRepositoryInfoById(app_id);
 		if(appInfoApplication != null){
 
@@ -270,30 +273,20 @@ public class RenderingProxy extends HttpServlet {
 			contentUrl = UrlTool.setParam(contentUrl, key, value);
 		}
 
-
+		//@todo 5.1 refactoring: check if "signed" is relevant -> renderer only uses "sig"
+		/*
 		long timestamp = System.currentTimeMillis();
 		contentUrl = UrlTool.setParam(contentUrl, "ts",""+timestamp);
 
-		Signing sigTool = new Signing();
-
-		String data = rep_id + nodeId + timestamp;
-		contentUrl = UrlTool.setParam(contentUrl, "signed",""+data);
-
-		String privateKey = homeRep.getPrivateKey();
-
 		try{
-			if(privateKey != null){
-				byte[] signature = sigTool.sign(sigTool.getPemPrivateKey(privateKey, CCConstants.SECURITY_KEY_ALGORITHM), data, CCConstants.SECURITY_SIGN_ALGORITHM);
+			contentUrl = UrlTool.setParam(contentUrl, "signed",RenderingTool.getSignatureSigned(repoInfo,nodeId,timestamp));
 
-				String urlSig = URLEncoder.encode(new Base64().encodeToString(signature));
-				contentUrl = UrlTool.setParam(contentUrl, "sig",urlSig);
-			}
 		}catch(GeneralSecurityException e){
 			e.printStackTrace();
 			resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
 			return;
 		}
-
+		*/
 		RenderingService service=RenderingServiceFactory.getRenderingService(homeRep.getAppId());
 		// @todo 5.1 should version inline be transfered?
 		try {
