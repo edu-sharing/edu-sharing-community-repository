@@ -332,7 +332,7 @@ public class MetadataTemplateRenderer {
 	      if(str.charAt(0)=='"'){
 	        search="\"";
 	      }
-	      if(search!=" ")
+	      if(!search.equals(" "))
 	        str=str.substring(1);
 	      int end=str.indexOf(search);
 	      String value=str.substring(0,end);
