@@ -71,11 +71,16 @@ public class DownloadServlet extends HttpServlet{
 				resp.sendRedirect(URLTool.getNgMessageUrl("security_error"));
 				return;
 			}
+			String version=req.getParameter("version");
+			if(version!=null && version.isEmpty())
+			    version=null;
 			NodeService nodeService = NodeServiceFactory.getLocalService();
 			ByteArrayOutputStream bufferOut = new ByteArrayOutputStream();
-			StreamUtils.copy(nodeService.getContent(StoreRef.PROTOCOL_WORKSPACE, StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(), nodeId, ContentModel.PROP_CONTENT.toString()),
-					bufferOut);
 			TrackingServiceFactory.getTrackingService().trackActivityOnNode(new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE,nodeId),TrackingService.EventType.DOWNLOAD_MATERIAL);
+
+
+			StreamUtils.copy(nodeService.getContent(StoreRef.PROTOCOL_WORKSPACE, StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(), nodeId, version, ContentModel.PROP_CONTENT.toString()),
+					bufferOut);
 			outputData(resp,
 					NodeServiceHelper.getProperty(new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, nodeId), CCConstants.CM_NAME),
 					bufferOut);
@@ -181,7 +186,7 @@ public class DownloadServlet extends HttpServlet{
                             }
 							InputStream reader = null;
 							try {
-								reader = nodeService.getContent(StoreRef.PROTOCOL_WORKSPACE,StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(),finalNodeId, ContentModel.PROP_CONTENT.toString());
+								reader = nodeService.getContent(StoreRef.PROTOCOL_WORKSPACE,StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(),finalNodeId,null, ContentModel.PROP_CONTENT.toString());
 							} catch (Throwable t) {
 							}
 							if(reader==null){

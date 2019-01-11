@@ -21,7 +21,6 @@ import org.alfresco.service.cmr.version.VersionHistory;
 import org.alfresco.service.cmr.version.VersionService;
 import org.alfresco.service.namespace.QName;
 import org.alfresco.service.namespace.RegexQNamePattern;
-import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.lang.ArrayUtils;
 import org.apache.log4j.Logger;
 import org.edu_sharing.alfresco.authentication.HttpContext;
@@ -92,7 +91,7 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
 			CCConstants.CCM_PROP_IO_LICENSE_PROFILE_URL,
 			CCConstants.CCM_PROP_IO_COMMONLICENSE_QUESTIONSALLOWED
 	};
-	private final ContentService contentService;
+	private ContentService contentService;
 	private DictionaryService dictionaryService;
 	String repositoryId = ApplicationInfoList.getHomeRepository().getAppId();
 	MetadataSets metadataSets = RepoFactory.getMetadataSetsForRepository(repositoryId);
@@ -1002,17 +1001,27 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
 				enable);
 
 	}
-
+	private ContentReader getContentReader(String storeProtocol, String storeId, String nodeId,String version,String contentProp){
+		NodeRef nodeRef=new NodeRef(new StoreRef(storeProtocol, storeId), nodeId);
+		if(version==null) {
+			return contentService.getReader(nodeRef, QName.createQName(contentProp)).getReader();
+		}
+		else{
+			VersionHistory versionHistory = serviceRegistry.getVersionService().getVersionHistory(nodeRef);
+			Version versionObj = versionHistory.getVersion(version);
+			return contentService.getReader(versionObj.getFrozenStateNodeRef(), QName.createQName(contentProp)).getReader();
+		}
+	}
 	@Override
-	public InputStream getContent(String storeProtocol, String storeId, String nodeId,String contentProp) throws Throwable{
-		return apiClient.getContent(nodeId,contentProp);
+	public InputStream getContent(String storeProtocol, String storeId, String nodeId,String version,String contentProp) throws Throwable{
+		return getContentReader(storeProtocol,storeId,nodeId,version,contentProp).getContentInputStream();
 	}
 
 	@Override
-	public String getContentHash(String storeProtocol, String storeId, String nodeId, String contentProp) {
+	public String getContentHash(String storeProtocol, String storeId, String nodeId, String version, String contentProp) {
 		try{
-			ContentReader reader = contentService.getReader(new NodeRef(new StoreRef(storeProtocol, storeId), nodeId), ContentModel.PROP_CONTENT).getReader();
-			return ""+reader.getContentData().hashCode();
+
+			return ""+getContentReader(storeProtocol,storeId,nodeId,version,contentProp).getContentData().hashCode();
 		}catch(Throwable t){
 			return null;
 		}
@@ -1058,6 +1067,7 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
 	public HashMap<String, HashMap<String, Object>> getVersionHistory(String nodeId) throws Throwable {
 		return apiClient.getVersionHistory(nodeId);
 	}
+
 	@Override
 	public String importNode(String nodeId,String localParent) throws Throwable {
 		throw new Exception("Not supported for local repository");
@@ -1122,7 +1132,7 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
 			/**
 			 * userdefined
 			 */
-			crUserDefinedPreview=this.getContent(storeProtocol,storeIdentifier,nodeId,CCConstants.CCM_PROP_IO_USERDEFINED_PREVIEW);
+			crUserDefinedPreview=this.getContent(storeProtocol,storeIdentifier,nodeId,null,CCConstants.CCM_PROP_IO_USERDEFINED_PREVIEW);
 			if (crUserDefinedPreview != null && crUserDefinedPreview.available() > 0) {
 				String url = URLTool.getPreviewServletUrl(new NodeRef(storeRef, nodeId));
 				return new GetPreviewResult(url, GetPreviewResult.TYPE_USERDEFINED, false);

@@ -1,7 +1,6 @@
 package org.edu_sharing.repository.server.rendering;
 
 import java.io.IOException;
-import java.net.URL;
 import java.net.URLEncoder;
 import java.security.GeneralSecurityException;
 import java.util.ArrayList;
@@ -25,7 +24,6 @@ import org.edu_sharing.repository.server.AuthenticationToolAPI;
 import org.edu_sharing.repository.server.MCAlfrescoAPIClient;
 import org.edu_sharing.repository.server.tools.ApplicationInfo;
 import org.edu_sharing.repository.server.tools.ApplicationInfoList;
-import org.edu_sharing.repository.server.tools.HttpQueryTool;
 import org.edu_sharing.repository.server.tools.URLTool;
 import org.edu_sharing.repository.server.tools.security.Encryption;
 import org.edu_sharing.repository.server.tools.security.SignatureVerifier;
@@ -35,7 +33,6 @@ import org.edu_sharing.service.nodeservice.NodeServiceHelper;
 import org.edu_sharing.service.rendering.RenderingService;
 import org.edu_sharing.service.rendering.RenderingServiceData;
 import org.edu_sharing.service.rendering.RenderingServiceFactory;
-import org.edu_sharing.service.rendering.RenderingTool;
 import org.edu_sharing.service.repoproxy.RepoProxyFactory;
 import org.edu_sharing.service.usage.Usage;
 import org.edu_sharing.service.usage.Usage2Service;
@@ -54,25 +51,10 @@ public class RenderingProxy extends HttpServlet {
 	@Override
 	protected void doGet(HttpServletRequest req, HttpServletResponse resp)
 			throws ServletException, IOException {
-		
-		//the app that requested the content
-		String app_id = req.getParameter("app_id");
-		
 		//the repository the where content is stored
 		String rep_id = req.getParameter("rep_id");
-		
-		//the proxy Repository
-		String proxyRepId = req.getParameter("proxyRepId");
-		String sig = req.getParameter("sig");
-		String ts = req.getParameter("ts");
-		String signed = req.getParameter("signed");
-		
 		String display = req.getParameter("display");
-		
 		String nodeId = req.getParameter("obj_id");
-
-        logger.debug("app_id: " +app_id + " rep_id:" +rep_id+ " proxyRepId: "+proxyRepId+ " signed:" +signed +" display:" + display + " nodeId:" + nodeId);
-
         String childobjectId = req.getParameter("childobject_id");
 
 		String parentId=nodeId;
@@ -84,78 +66,111 @@ public class RenderingProxy extends HttpServlet {
 			}
 			nodeId = childobjectId;
 		}
-		
-		if(signed == null || signed.trim().equals("")){
-			signed = rep_id + ts;
-		}
-		
+
 		if(rep_id == null || rep_id.trim().equals("")){
 			resp.sendError(HttpServletResponse.SC_BAD_REQUEST,"missing rep_id");
 			return;
 		}
-		
-		ApplicationInfo repoInfo = ApplicationInfoList.getRepositoryInfoById(rep_id);
-		//Signatur validation
-		//current repo knows the app
-		ApplicationInfo appInfoApplication = ApplicationInfoList.getRepositoryInfoById(app_id);
-		String usernameDecrypted = null;
-		ApplicationInfo homeRep = ApplicationInfoList.getHomeRepository();
-		Encryption encryptionTool = new Encryption("RSA");
 
+
+		if (!validateSignature(req,resp)) return;
+
+		String usernameDecrypted = getDecryptedUsername(req,resp);
+		if(usernameDecrypted==null) return;
+
+		updateUserRemoteRoles(req, usernameDecrypted);
+
+		ApplicationInfo repoInfo = ApplicationInfoList.getRepositoryInfoById(rep_id);
+		if("window".equals(display)) {
+			openWindow(req, resp, nodeId, parentId, repoInfo, usernameDecrypted);
+		}
+		else{
+			queryRendering(req,resp,nodeId,repoInfo,usernameDecrypted);
+		}
+	}
+
+	/**
+	 * true if the signature is valid, false if not (response error is automatically sent)
+	 * @param req
+	 * @param resp
+	 * @return
+	 * @throws IOException
+	 */
+	private boolean validateSignature(HttpServletRequest req,HttpServletResponse resp) throws IOException {
+		String sig = req.getParameter("sig");
+		String ts = req.getParameter("ts");
+		String signed = req.getParameter("signed");
+		String app_id = req.getParameter("app_id");
+		String rep_id = req.getParameter("rep_id");
+		//the proxy Repository
+		String proxyRepId = req.getParameter("proxyRepId");
+
+		if(signed == null || signed.trim().equals("")){
+			signed = rep_id + ts;
+		}
+		ApplicationInfo appInfoApplication = ApplicationInfoList.getRepositoryInfoById(app_id);
 		if(appInfoApplication != null){
-			
+
 			SignatureVerifier.Result result = new SignatureVerifier().verify(app_id, sig, signed, ts);
 			if(result.getStatuscode() != HttpServletResponse.SC_OK){
 				resp.sendError(result.getStatuscode(),result.getMessage());
-				return;
+				return true;
 			}
 		}else{
 			if(proxyRepId == null){
 				resp.sendError(HttpServletResponse.SC_BAD_REQUEST,"missing proxyRepId");
-				return;
+				return false;
 			}
 
 			SignatureVerifier.Result result = new SignatureVerifier().verify(proxyRepId, sig, signed, ts);
 			if(result.getStatuscode() != HttpServletResponse.SC_OK){
 				resp.sendError(result.getStatuscode(), result.getMessage());
-				return;
+				return false;
 			}
 		}
+		return true;
+	}
 
-		String uEncrypted = req.getParameter("u");
-
-		try {
-			
-			usernameDecrypted = encryptionTool.decrypt(Base64.decodeBase64(uEncrypted.getBytes()), encryptionTool.getPemPrivateKey(homeRep.getPrivateKey()));
-		}catch(GeneralSecurityException e) {
-			logger.error(e.getMessage(), e);
-			resp.sendError(HttpServletResponse.SC_FORBIDDEN,e.getMessage());
-		}
-
+	/**
+	 * set the user ESREMOTEROLES property of the user if provided by the remote system
+	 */
+	private void updateUserRemoteRoles(HttpServletRequest req, String usernameDecrypted) {
 		String[] roles = req.getParameterValues("role");
 		if(roles != null && roles.length > 0) {
 			final String username = usernameDecrypted;
-			RunAsWork<Void> runAs = new RunAsWork<Void>() {
-				@Override
-				public Void doWork() throws Exception {
-					MCAlfrescoAPIClient apiClient = new MCAlfrescoAPIClient();
-					String personId = new MCAlfrescoAPIClient().getUserInfo(username).get(CCConstants.SYS_PROP_NODE_UID);
-					apiClient.setProperty(personId, CCConstants.PROP_USER_ESREMOTEROLES, new ArrayList<String>(Arrays.asList(roles)));
-					return null;
-				}
+			RunAsWork<Void> runAs = () -> {
+				MCAlfrescoAPIClient apiClient = new MCAlfrescoAPIClient();
+				String personId = new MCAlfrescoAPIClient().getUserInfo(username).get(CCConstants.SYS_PROP_NODE_UID);
+				apiClient.setProperty(personId, CCConstants.PROP_USER_ESREMOTEROLES, new ArrayList<String>(Arrays.asList(roles)));
+				return null;
 			};
 			AuthenticationUtil.runAsSystem(runAs);
 		}
+	}
 
+	/**
+	 * returns the encrypted username provided in the request, or fails and returns null
+	 */
+	private String getDecryptedUsername(HttpServletRequest req, HttpServletResponse resp) throws IOException {
 
-		if("window".equals(display)) {
+		String uEncrypted = req.getParameter("u");
+		Encryption encryptionTool = new Encryption("RSA");
 
-			openWindow(req, resp, nodeId, parentId, appInfoApplication,repoInfo, usernameDecrypted);
-			return;
+		try {
+
+			return encryptionTool.decrypt(Base64.decodeBase64(uEncrypted.getBytes()),
+					encryptionTool.getPemPrivateKey(ApplicationInfoList.getHomeRepository().getPrivateKey()));
+		}catch(GeneralSecurityException e) {
+			logger.error(e.getMessage(), e);
+			resp.sendError(HttpServletResponse.SC_FORBIDDEN,e.getMessage());
+			return null;
 		}
-		
+	}
+	private void queryRendering(HttpServletRequest req, HttpServletResponse resp, String nodeId, ApplicationInfo repoInfo, String usernameDecrypted) throws IOException {
+		String rep_id = req.getParameter("rep_id");
+		ApplicationInfo homeRep = ApplicationInfoList.getHomeRepository();
+		Encryption encryptionTool = new Encryption("RSA");
 		String contentUrl;
-		
 		if(homeRep.getAppId().equals(rep_id)){
 			contentUrl = homeRep.getContentUrl();
 			if(contentUrl == null) {
@@ -163,41 +178,40 @@ public class RenderingProxy extends HttpServlet {
 				resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR,"no content url configured");
 			}
 		}else{
-			
+
 			if(repoInfo == null){
 				resp.sendError(HttpServletResponse.SC_BAD_REQUEST,"unknown rep_id "+ rep_id);
 				return;
 			}
-			
+
 			contentUrl = repoInfo.getClientBaseUrl() +"/renderingproxy";
 			contentUrl = UrlTool.setParam(contentUrl, "proxyRepId", ApplicationInfoList.getHomeRepository().getAppId());
 		}
-		
-		//put all Parameters to url but not sig signeddata and ts 
+
+		//put all Parameters to url but not sig signeddata and ts
 		Map parameterMap = req.getParameterMap();
 		for(Object o : parameterMap.entrySet()){
 			Map.Entry entry = (Map.Entry)o;
 			String key = (String)entry.getKey();
 			String value = null;
 			if(entry.getValue() instanceof String[]){
-				
+
 				value = ((String[])entry.getValue())[0];
-				
+
 			}else{
 				value = (String)entry.getValue();
 			}
-			
-			
+
+
 			//leave out the following cause we add our own signature
 			if(key.equals("sig") || key.equals("signed") || key.equals("ts")){
 				continue;
 			}
-			
 			if(key.equals("u") && !homeRep.getAppId().equals(rep_id)){
 				final String usernameDecrypted2 = usernameDecrypted;
-				
+
 				ApplicationInfo remoteRepo = ApplicationInfoList.getRepositoryInfoById(rep_id);
-				
+
 				AuthenticationUtil.RunAsWork<String> runAs = () -> {
 
 					String localUsername = new String(usernameDecrypted2).trim();
@@ -218,21 +232,21 @@ public class RenderingProxy extends HttpServlet {
 
 					return personData.get(CCConstants.PROP_USER_ESUID);
 				};
-				
-			    try{
-			    	String esuid = AuthenticationUtil.runAs(runAs, usernameDecrypted.trim());
-			    	value = esuid + "@" + homeRep.getAppId();
-				    	
+
+				try{
+					String esuid = AuthenticationUtil.runAs(runAs, usernameDecrypted.trim());
+					value = esuid + "@" + homeRep.getAppId();
+
 					byte[] esuidEncrptedBytes = encryptionTool.encrypt(value.getBytes(), encryptionTool.getPemPublicKey(remoteRepo.getPublicKey()));
 					value = Base64.encodeBase64String(esuidEncrptedBytes);
 
-			    }catch(Exception e){
-				    	e.printStackTrace();
-				    	resp.sendError(HttpServletResponse.SC_BAD_REQUEST,"remote user auth failed "+ rep_id);
-				    	return;
-			    }
+				}catch(Exception e){
+					e.printStackTrace();
+					resp.sendError(HttpServletResponse.SC_BAD_REQUEST,"remote user auth failed "+ rep_id);
+					return;
+				}
 			}else {
-			
+
 				//request.getParameter encodes the value, so we have to decode it again
 				if(key.equals("u")){
 					try {
@@ -242,33 +256,33 @@ public class RenderingProxy extends HttpServlet {
 						}
 						byte[] userEncryptedBytes = encryptionTool.encrypt(usernameDecrypted.getBytes(), encryptionTool.getPemPublicKey(targetApplication.getPublicKey()));
 						value = Base64.encodeBase64String(userEncryptedBytes);
-	
+
 					}catch(Exception e) {
 						logger.error(e.getMessage(), e);
 					}
-					
-					
+
+
 				}
 			}
 			value = URLEncoder.encode(value, "UTF-8");
 			contentUrl = UrlTool.setParam(contentUrl, key, value);
 		}
-		
-			
+
+
 		long timestamp = System.currentTimeMillis();
 		contentUrl = UrlTool.setParam(contentUrl, "ts",""+timestamp);
 
 		Signing sigTool = new Signing();
-		
+
 		String data = rep_id + nodeId + timestamp;
 		contentUrl = UrlTool.setParam(contentUrl, "signed",""+data);
-		
+
 		String privateKey = homeRep.getPrivateKey();
-		
+
 		try{
 			if(privateKey != null){
 				byte[] signature = sigTool.sign(sigTool.getPemPrivateKey(privateKey, CCConstants.SECURITY_KEY_ALGORITHM), data, CCConstants.SECURITY_SIGN_ALGORITHM);
-					
+
 				String urlSig = URLEncoder.encode(new Base64().encodeToString(signature));
 				contentUrl = UrlTool.setParam(contentUrl, "sig",urlSig);
 			}
@@ -277,7 +291,7 @@ public class RenderingProxy extends HttpServlet {
 			resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
 			return;
 		}
-		
+
 		RenderingService service=RenderingServiceFactory.getRenderingService(homeRep.getAppId());
 		// @todo 5.1 should version inline be transfered?
 		try {
@@ -294,9 +308,11 @@ public class RenderingProxy extends HttpServlet {
 		*/
 	}
 
-	private boolean openWindow(HttpServletRequest req, HttpServletResponse resp, String nodeId, String parentId, ApplicationInfo appInfoApplication, ApplicationInfo repoInfo, String usernameDecrypted) throws IOException {
+	private boolean openWindow(HttpServletRequest req, HttpServletResponse resp, String nodeId, String parentId, ApplicationInfo repoInfo, String usernameDecrypted) throws IOException {
+		String app_id = req.getParameter("app_id");
 		String ts = req.getParameter("ts");
 		String uEncrypted = req.getParameter("u");
+		ApplicationInfo appInfoApplication = ApplicationInfoList.getRepositoryInfoById(app_id);
 
 		if(uEncrypted == null) {
 			resp.sendError(HttpServletResponse.SC_FORBIDDEN,"no user provided");

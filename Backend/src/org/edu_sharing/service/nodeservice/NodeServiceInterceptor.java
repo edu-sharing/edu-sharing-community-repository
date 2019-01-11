@@ -35,6 +35,7 @@ public class NodeServiceInterceptor implements MethodInterceptor {
                 methodName.equals("getContentMimetype") ||
                 methodName.equals("getPreview") ||
                 methodName.equals("getProperties") ||
+                methodName.equals("getVersion") ||
                 methodName.equals("getAspects") ||
                 methodName.equals("hasAspect") ||
                 methodName.equals("getOwner")) {

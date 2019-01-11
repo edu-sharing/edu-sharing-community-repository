@@ -66,7 +66,7 @@ public class NodeServicePixabayImpl extends NodeServiceAdapter{
 	}
 
 	@Override
-	public InputStream getContent(String storeProtocol, String storeId, String nodeId, String contentProp)
+	public InputStream getContent(String storeProtocol, String storeId, String nodeId, String version, String contentProp)
 			throws Throwable {
 		HashMap<String, Object> props = getProperties(storeProtocol, storeId, nodeId);
 		HttpURLConnection url=SearchServicePixabayImpl.openPixabayUrl(new URL((String) props.get(CCConstants.DOWNLOADURL)));

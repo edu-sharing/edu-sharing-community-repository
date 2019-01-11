@@ -191,13 +191,17 @@ public class NodeServiceAdapter implements NodeService {
 		// TODO Auto-generated method stub
 		return null;
 	}
-	
+
 	@Override
-	public InputStream getContent(String storeProtocol, String storeId, String nodeId, String contentProp)
-			throws Throwable {
+	public InputStream getContent(String storeProtocol, String storeId, String nodeId, String version, String contentProp) throws Throwable {
 		return null;
 	}
-	
+
+	@Override
+	public String getContentHash(String storeProtocol, String storeId, String nodeId, String version, String contentProp) {
+		return null;
+	}
+
 	@Override
 	public void removeNode(String nodeId, String parentId, boolean recycle) {
 	}

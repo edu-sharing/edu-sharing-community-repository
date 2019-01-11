@@ -67,7 +67,7 @@ public class RemoteObjectService {
 							NodeService nodeService = NodeServiceFactory.getNodeService(repInfo.getAppId());
 							InputStream content = nodeService.getContent(StoreRef.PROTOCOL_WORKSPACE,
 									StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(), nodeId,
-									CCConstants.CM_PROP_CONTENT);
+									null,CCConstants.CM_PROP_CONTENT);
 							HashMap<String, Object> properties = nodeService.getProperties(StoreRef.PROTOCOL_WORKSPACE,
 									StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(), nodeId);
 							if (content != null) {

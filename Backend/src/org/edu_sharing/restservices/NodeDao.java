@@ -807,7 +807,8 @@ public class NodeDao {
 		Content content=new Content();
 		content.setVersion(getContentVersion());
 		content.setUrl(getContentUrl());
-		content.setHash(nodeService.getContentHash(storeProtocol,storeId,nodeId, org.alfresco.model.ContentModel.PROP_CONTENT.toString()));
+
+		content.setHash(nodeService.getContentHash(storeProtocol,storeId,nodeId,this.version,org.alfresco.model.ContentModel.PROP_CONTENT.toString()));
 		return content;
 	}
 

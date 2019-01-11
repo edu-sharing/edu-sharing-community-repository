@@ -1168,7 +1168,7 @@ public class MCAlfrescoAPIClient extends MCAlfrescoBaseClient {
 			boolean downloadAllowed = downloadAllowed(nodeRef.getId(),commonLicenseKey,(String)propsCopy.get(CCConstants.CCM_PROP_EDITOR_TYPE));
 			
 			if (propsCopy.get(CCConstants.ALFRESCO_MIMETYPE) != null && downloadAllowed) {
-				propsCopy.put(CCConstants.DOWNLOADURL,URLTool.getDownloadServletUrl(nodeRef.getId()));
+				propsCopy.put(CCConstants.DOWNLOADURL,URLTool.getDownloadServletUrl(nodeRef.getId(),null));
 			}
 			
 			String commonLicensekey = (String)propsCopy.get(CCConstants.CCM_PROP_IO_COMMONLICENSE_KEY);
@@ -3926,13 +3926,14 @@ public class MCAlfrescoAPIClient extends MCAlfrescoBaseClient {
 				logger.debug(" version prop UID:" + props.get(CCConstants.SYS_PROP_NODE_UID));
 				logger.debug(" version NodeID:" + props.get(CCConstants.NODEID));
 
+				props.put(CCConstants.ALFRESCO_MIMETYPE, getAlfrescoMimetype(version.getFrozenStateNodeRef()));
 				// contenturl
 				String contentUrl = URLTool.getNgRenderNodeUrl(nodeId,version.getVersionLabel());
 				contentUrl = URLTool.addOAuthAccessToken(contentUrl);
 				
 				props.put(CCConstants.CONTENTURL, contentUrl);
 				if (props.get(CCConstants.ALFRESCO_MIMETYPE) != null && contentUrl != null) {
-					props.put(CCConstants.DOWNLOADURL, URLTool.getDownloadServletUrl(nodeId));
+					props.put(CCConstants.DOWNLOADURL, URLTool.getDownloadServletUrl(nodeId,version.getVersionLabel()));
 				}
 
 				// thumbnail take the current thumbnail cause subobjects
