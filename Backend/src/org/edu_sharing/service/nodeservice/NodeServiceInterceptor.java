@@ -31,6 +31,7 @@ public class NodeServiceInterceptor implements MethodInterceptor {
         int argumentId=-1;
         if(methodName.equals("getProperty") ||
                 methodName.equals("getContent") ||
+                methodName.equals("getContentHash") ||
                 methodName.equals("getContentMimetype") ||
                 methodName.equals("getPreview") ||
                 methodName.equals("getProperties") ||
