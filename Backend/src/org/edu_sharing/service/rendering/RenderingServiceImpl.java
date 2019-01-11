@@ -104,7 +104,7 @@ public class RenderingServiceImpl implements RenderingService{
 			else {
 				info+=" do not match";
 				logger.warn(info);
-				throw new Exception(info,t);
+				throw new Exception(t.getMessage()+" ("+info+")",t);
 			}
 		}
 	
