@@ -91,19 +91,20 @@
               </div>
 
               <div *ngIf="!imageData && !(currentCollection.preview && !currentCollection.preview.isIcon)" (keyup.enter)="file.click()" (click)="file.click()" class="card-collection-icon-container">
-                  <div style="height: 35px;"></div>
                   <div class="card-image-icon-container" [style.background-color]="currentCollection.color">
-                      <i class="material-icons" style="font-size: 75px; margin-top: 44px;">layers</i>
+                      <i class="material-icons">layers</i>
                   </div>
               </div>
 
               <div *ngIf="!imageData && (currentCollection.preview && !currentCollection.preview.isIcon)" (keyup.enter)="file.click()" (click)="file.click()" class="card-collection-icon-container">
+                  <img class="profile-background" [src]="currentCollection.preview.url+'&crop=true&width=350&height=240'">
                   <img [src]="currentCollection.preview.url+'&crop=true&width=350&height=240'" class="card-image-preview"/>
               </div>
 
               <div *ngIf="imageData" class="card-collection-image-container" (keyup.enter)="file.click()" (click)="file.click()">
                   <div class="card-image-container">
-                      <img [src]="imageData" class="card-image-preview" >
+                      <img [src]="imageData" class="profile-background">
+                      <img [src]="imageData" class="card-image-preview">
                   </div>
               </div>
 

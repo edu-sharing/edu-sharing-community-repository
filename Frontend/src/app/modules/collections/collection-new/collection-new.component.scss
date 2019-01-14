@@ -345,9 +345,13 @@ $imagePath: '../../../../assets/images/collections/';
     width: 160px;
     border-radius: 160px;
     background-color: darkgray;
-    margin: auto;
+    margin: 35px auto auto auto;
     text-align: center;
     vertical-align: middle;
+  i{
+    font-size: 75px;
+    margin-top: 44px;
+  }
 }
 
 .card-collection-image-container {
@@ -394,10 +398,11 @@ $imagePath: '../../../../assets/images/collections/';
   background-color: #fff;
   border-radius:50%;
   position: absolute;
-  bottom: 10px;
-  right: 10px;
+  bottom: 15px;
+  right: 27px;
   @include clickable();
   @include materialShadowBottom();
+  z-index: 2;
   &:focus{
     @include setGlobalInsetFocus();
   }
@@ -461,12 +466,47 @@ input[type="radio"] {
     }
   }
 }
-
+.profile-background{
+  display: none;
+}
 @media screen and (max-height: $mobileHeight){
   .card, .card-high, .card-low {
     top:$mainnavHeight+15px;
   }
+  .collectionImage{
+    height: 120px;
+  }
+  .card-collection-icon-container{
+    height: 120px;
+  }
+  .card-image-icon-container{
+    margin-top: 20px;
+    height: 100px;
+    width: 100px;
+    border-radius: 100px;
+    i{
+      margin-top: 20px;
+      font-size: 60px;
+    }
+  }
+  .profile-background{
+    display: block;
+    width: 100%;
+    height: 140px;
+    filter: blur(12px);
+  }
+  .card-image-preview{
+    height: 120px;
+    width: auto;
+    margin: auto;
+    z-index: 1;
+  }
+  .collection-new-preview-infoline{
+    margin-left: 15px;
+  }
+
 }
+
 @media only screen and (max-width: $mobileTabSwitchWidth) {
   .collections-master-div{
     margin-bottom: $mobileTabNavHeight;
