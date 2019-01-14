@@ -682,8 +682,16 @@
     	<servlet-name>DispatchToIndexServlet</servlet-name>
     	<url-pattern>/search</url-pattern>
     </servlet-mapping>
-    
-    
+
+    <servlet>
+        <servlet-name>RenderingErrorServlet</servlet-name>
+        <servlet-class>org.edu_sharing.repository.server.rendering.RenderingErrorServlet</servlet-class>
+        <!-- <jsp-file>/index.jsp</jsp-file> -->
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>RenderingErrorServlet</servlet-name>
+        <url-pattern>/rendering-error</url-pattern>
+    </servlet-mapping>
     
     <!-- Axis mapping stuff -->
     <servlet-mapping>
@@ -740,4 +748,9 @@
       <servlet-name>ng-index</servlet-name>
       <url-pattern>/components/*</url-pattern>
     </servlet-mapping>
+
+    <error-page>
+        <exception-type>org.edu_sharing.repository.server.rendering.RenderingException</exception-type>
+        <location>/rendering-error</location>
+    </error-page>
 </web-app>

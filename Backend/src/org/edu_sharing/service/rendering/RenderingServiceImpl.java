@@ -29,10 +29,10 @@ import org.edu_sharing.repository.server.MCAlfrescoAPIClient;
 import org.edu_sharing.repository.server.MCAlfrescoBaseClient;
 import org.edu_sharing.repository.server.RepoFactory;
 import org.edu_sharing.repository.server.authentication.Context;
-import org.edu_sharing.repository.server.tools.ApplicationInfo;
-import org.edu_sharing.repository.server.tools.ApplicationInfoList;
-import org.edu_sharing.repository.server.tools.HttpQueryTool;
-import org.edu_sharing.repository.server.tools.URLTool;
+import org.edu_sharing.repository.server.rendering.RenderingErrorServlet;
+import org.edu_sharing.repository.server.rendering.RenderingException;
+import org.edu_sharing.repository.server.tools.*;
+import org.edu_sharing.repository.server.tools.security.Encryption;
 import org.edu_sharing.restservices.*;
 import org.edu_sharing.restservices.shared.Filter;
 import org.edu_sharing.restservices.shared.Node;
@@ -41,6 +41,8 @@ import org.edu_sharing.service.config.ConfigServiceFactory;
 import org.edu_sharing.service.permission.PermissionService;
 import org.edu_sharing.service.permission.PermissionServiceFactory;
 import org.edu_sharing.service.version.VersionService;
+
+import javax.servlet.http.HttpServletResponse;
 
 public class RenderingServiceImpl implements RenderingService{
 
@@ -114,8 +116,22 @@ public class RenderingServiceImpl implements RenderingService{
 		PostMethod post = new PostMethod(renderingServiceUrl);
 		ObjectWriter ow = new ObjectMapper().writer().withDefaultPrettyPrinter();
 		String json = ow.writeValueAsString(data);
+		/*
+		Encryption encryption=new Encryption("RSA");
+		try {
+			json=new String(encryption.encrypt(json, encryption.getPemPublicKey(ApplicationInfoList.getRenderService().getPublicKey())));
+		} catch (Exception e) {
+			logger.warn(e);
+			return "";
+		}
+		*/
 		post.setRequestEntity(new StringRequestEntity(json,"application/json","UTF-8"));
-		return new HttpQueryTool().query(post);
+		try {
+			return new HttpQueryTool().query(post);
+		}catch(HttpException e){
+			return RenderingErrorServlet.errorToHTML(Context.getCurrentInstance().getRequest().getSession().getServletContext(),
+					new RenderingException(e));
+		}
 	}
 	@Override
 	public RenderingServiceData getData(String nodeId, String nodeVersion, String user) throws Exception {

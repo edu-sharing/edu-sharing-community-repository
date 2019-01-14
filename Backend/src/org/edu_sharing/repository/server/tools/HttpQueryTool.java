@@ -35,7 +35,6 @@ import java.util.Map;
 
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.httpclient.HttpClient;
-import org.apache.commons.httpclient.HttpException;
 import org.apache.commons.httpclient.HttpMethodBase;
 import org.apache.commons.httpclient.HttpStatus;
 import org.apache.commons.httpclient.UsernamePasswordCredentials;
@@ -167,8 +166,8 @@ public class HttpQueryTool {
 				result = method.getResponseBodyAsString();
 			}
 			
-			if(returnCode > 400){
-				throw new RuntimeException("Error HTTP Status: "+returnCode+" "+result);
+			if(returnCode >= 400){
+				throw new HttpException(returnCode,result);
 			}
 
 		}catch(IOException e){

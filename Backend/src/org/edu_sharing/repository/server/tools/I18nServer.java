@@ -63,7 +63,13 @@ public class I18nServer {
 		
 		return I18nServer.getTranslationDefaultResourcebundle(key, language+"_"+country);
 	}
-	
+	public static String getTranslationDefaultResourcebundleNoException(String key){
+		try{
+			return getTranslationDefaultResourcebundle(key);
+		}catch(Throwable t){
+			return key;
+		}
+	}
 	public static String getTranslationDefaultResourcebundle(String key, String locale){
 		
 		return getTranslation(key,locale,defaultResourceBundle);
