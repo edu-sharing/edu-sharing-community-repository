@@ -6,10 +6,10 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.TreeMap;
 
 import org.alfresco.model.ContentModel;
 import org.alfresco.service.cmr.repository.ChildAssociationRef;
@@ -45,10 +45,11 @@ public class Release_5_0_NotifyRefactoring extends UpdateAbstract{
 	
 	MCAlfrescoAPIClient apiClient;
 	
-	Logger logger = Logger.getLogger(Release_5_0_NotifyRefactoring.class);
+	
 	
 	public Release_5_0_NotifyRefactoring(PrintWriter out) {
 		this.out = out;
+		this.logger = Logger.getLogger(Release_5_0_NotifyRefactoring.class);
 	}
 	
 	@Override
@@ -70,8 +71,6 @@ public class Release_5_0_NotifyRefactoring extends UpdateAbstract{
 	
 	@Override
 	public void run() {
-		
-		
 		apiClient = new MCAlfrescoAPIClient();
 		
 		SearchParameters sp = new SearchParameters();
@@ -96,9 +95,9 @@ public class Release_5_0_NotifyRefactoring extends UpdateAbstract{
 			
 			logger.info("migrating " + nodeService.getProperty(nodeRef, ContentModel.PROP_NAME));
 			
-			List<ChildAssociationRef> notifyParentAssocs = nodeService.getParentAssocs(nodeRef, QName.createQName(CCConstants.CCM_TYPE_NOTIFY), RegexQNamePattern.MATCH_ALL);
+			List<ChildAssociationRef> notifyParentAssocs = nodeService.getParentAssocs(nodeRef, QName.createQName(CCConstants.CCM_TYPE_NOTIFY + "_nodes"), RegexQNamePattern.MATCH_ALL);
 			
-			Map<NodeRef, Map<QName,Serializable>> notifyProps = new TreeMap<NodeRef,Map<QName,Serializable>>();
+			Map<NodeRef, Map<QName,Serializable>> notifyProps = new HashMap<NodeRef,Map<QName,Serializable>>();
 			
 		
 			for(ChildAssociationRef childRef : notifyParentAssocs) {
@@ -129,6 +128,7 @@ public class Release_5_0_NotifyRefactoring extends UpdateAbstract{
 			int i = 0;
 			for(Map.Entry<NodeRef, Map<QName,Serializable>> entry : toSort) {
 				logger.info(" transforming notify from: " + entry.getValue().get(ContentModel.PROP_CREATED));
+				if(true) continue;
 				Gson gson = new Gson();
 				Notify n = new Notify();
 				try {
@@ -179,7 +179,6 @@ public class Release_5_0_NotifyRefactoring extends UpdateAbstract{
 				
 			}
 			
-			toSort.get(toSort.size() - 1);
 			
 		}
 	}

@@ -534,6 +534,7 @@ public class AdminServiceImpl implements AdminService  {
 				result.add(new ServerUpdateInfo(Release_3_2_DefaultScope.ID,Release_3_2_DefaultScope.description));			
 				result.add(new ServerUpdateInfo(Release_4_1_FixClassificationKeywordPrefix.ID,Release_4_1_FixClassificationKeywordPrefix.description));
 				result.add(new ServerUpdateInfo(Release_4_2_PersonStatusUpdater.ID,Release_4_2_PersonStatusUpdater.description));
+				result.add(new ServerUpdateInfo(Release_5_0_NotifyRefactoring.ID,Release_5_0_NotifyRefactoring.description));
 		return result;
 	}
 	
