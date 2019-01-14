@@ -12,7 +12,7 @@ table, div {
 .tab-group{
   margin-bottom:0;
   position:fixed;
-  top: $mainnavHeight - 1px;
+  top:$mainnavHeight;
   width:100%;
   z-index: 15;
 }
