@@ -207,6 +207,8 @@ public class PreviewServlet extends HttpServlet implements SingleThreadModel {
 									getPrevResult = nodeService.getPreview(VersionService.VERSION_STORE_PROTOCOL, "version2Store", entry.getKey());
 								}catch(InvalidNodeRefException e){
 									// ignoring this error since versioned files don't have a preview
+									// converting it to an other exception so that the mime type handler will take care
+									throw new Exception("Versioned files don't have a preview",e);
 								}
 
 							}
