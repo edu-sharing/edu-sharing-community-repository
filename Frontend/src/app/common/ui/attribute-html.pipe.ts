@@ -19,7 +19,7 @@ export class AttributeHtmlPipe implements PipeTransform {
         return ('<span property="author" title="' + this.translateService.instant('ACCESSIBILITY.AUTHOR') + '">' + text + '</span>');
 
       if (item.name == RestConstants.CCM_PROP_LICENSE) {
-        if (node.licenseURL) {
+        if (node.license && node.license.icon) {
           return this.sanitizer.bypassSecurityTrustHtml('<img src="'+NodeHelper.getLicenseIcon(node)+'" height="20" property="" title="'+NodeHelper.getLicenseName(node,this.translateService)+'">');
         }
         return '';

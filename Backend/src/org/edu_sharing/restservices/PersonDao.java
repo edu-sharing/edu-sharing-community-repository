@@ -352,7 +352,7 @@ public class PersonDao {
 		org.alfresco.service.cmr.repository.NodeRef avatar=getAvatarNode();
 		if(avatar==null)
 			return null;
-		return URLTool.getPreviewServletUrl(avatar);
+		return NodeServiceHelper.getPreview(avatar).getUrl();
 	}
 	public void removeAvatar() throws DAOException {
 		try {

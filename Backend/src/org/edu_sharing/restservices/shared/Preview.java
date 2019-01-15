@@ -8,9 +8,13 @@ import java.util.HashMap;
 
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.server.tools.ApplicationInfo;
+import org.edu_sharing.repository.server.tools.ApplicationInfoList;
 import org.edu_sharing.repository.server.tools.URLTool;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import org.edu_sharing.service.nodeservice.NodeService;
+import org.edu_sharing.service.nodeservice.NodeServiceFactory;
+import org.edu_sharing.service.nodeservice.model.GetPreviewResult;
 
 
 @ApiModel(description = "")
@@ -24,15 +28,19 @@ private boolean isIcon;
   public Preview(){
 	  
   }
-  public Preview(String repositoryType,String node,String storeProtocol,String storeIdentifier,String version,HashMap<String, Object> nodeProps) {
-	  if(repositoryType.equals(ApplicationInfo.REPOSITORY_TYPE_ALFRESCO) || repositoryType.equals(ApplicationInfo.REPOSITORY_TYPE_LOCAL)){
-		  setUrl(URLTool.getPreviewServletUrl(node,storeProtocol,storeIdentifier,version));
+  public Preview(NodeService nodeService,String storeProtocol,String storeIdentifier,String nodeId, String version, HashMap<String, Object> nodeProps) {
+    GetPreviewResult preview = nodeService.getPreview(storeProtocol, storeIdentifier, nodeId, version);
+    setUrl(preview.getUrl());
+    setIsIcon(preview.isIcon());
+
+    //if(repositoryType.equals(ApplicationInfo.REPOSITORY_TYPE_ALFRESCO) || repositoryType.equals(ApplicationInfo.REPOSITORY_TYPE_LOCAL)){
 		  setIsIcon(!(nodeProps.containsKey(CCConstants.CCM_PROP_MAP_ICON) || nodeProps.containsKey(CCConstants.CM_ASSOC_THUMBNAILS)));
-	  }
+	/*  }
 	  else{
 		  setUrl((String)nodeProps.get(CCConstants.CM_ASSOC_THUMBNAILS));
 		  setIsIcon(false);
 	  }
+	  */
   }
 /**
    **/

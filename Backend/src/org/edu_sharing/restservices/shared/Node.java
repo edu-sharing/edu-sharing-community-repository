@@ -45,7 +45,7 @@ public class Node {
 	private Preview preview = null;
 	private Content content = null;
 	private String iconURL;
-	private String licenseURL;
+	private License license;
 	private boolean isDirectory;
 	private Collection collection;
 	private Person owner;
@@ -103,11 +103,6 @@ public class Node {
 	@JsonProperty("iconURL")
 	public String getIconURL() {
 		return iconURL;
-	}
-	@ApiModelProperty(value = "")
-	@JsonProperty("licenseURL")
-	public String getLicenseURL() {
-		return licenseURL;
 	}
 	@ApiModelProperty(value = "")
 	@JsonProperty("isDirectory")
@@ -372,15 +367,20 @@ public class Node {
 		this.iconURL=iconURL;
 		
 	}
-	public void setLicenseURL(String licenseURL) {
-		this.licenseURL=licenseURL;
-		
-	}
+
 	public void setIsDirectory(boolean isDirectory) {
 		this.isDirectory=isDirectory;
 	}
 
 	public void setCollection(Collection collection) {
 		this.collection=collection;
+	}
+
+	public License getLicense() {
+		return license;
+	}
+
+	public void setLicense(License license) {
+		this.license = license;
 	}
 }

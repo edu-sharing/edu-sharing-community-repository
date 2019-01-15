@@ -1,21 +1,18 @@
 package org.edu_sharing.service.nodeservice;
 
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 
 import org.alfresco.service.cmr.repository.ChildAssociationRef;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.repository.StoreRef;
-import org.alfresco.service.namespace.QName;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.server.MCAlfrescoAPIClient;
 import org.edu_sharing.repository.server.RepoFactory;
 import org.edu_sharing.repository.server.tools.NameSpaceTool;
+import org.edu_sharing.service.nodeservice.model.GetPreviewResult;
 import org.edu_sharing.service.search.model.SortDefinition;
 
 public class NodeServiceHelper {
@@ -103,5 +100,12 @@ public class NodeServiceHelper {
 				getProperty(ref,CCConstants.CCM_PROP_IO_COMMONLICENSE_KEY),
 				getProperty(ref,CCConstants.CCM_PROP_EDITOR_TYPE)
 		);
+	}
+
+	public static GetPreviewResult getPreview(NodeRef ref) {
+		return NodeServiceFactory.getLocalService().getPreview(ref.getStoreRef().getProtocol(),ref.getStoreRef().getIdentifier(),ref.getId(),null);
+	}
+	public static GetPreviewResult getPreview(org.edu_sharing.service.model.NodeRef ref) {
+		return NodeServiceFactory.getNodeService(ref.getRepositoryId()).getPreview(ref.getStoreProtocol(),ref.getStoreId(),ref.getNodeId(),null);
 	}
 }

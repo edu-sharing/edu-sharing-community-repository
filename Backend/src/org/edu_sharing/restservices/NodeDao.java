@@ -79,6 +79,8 @@ public class NodeDao {
 			CCConstants.PERMISSION_CC_PUBLISH,
 			CCConstants.PERMISSION_READ_ALL
 	};
+	// id of the object by the remote repository (null if not a remote object)
+	private String remoteId;
 	private String version;
 
 
@@ -90,7 +92,7 @@ public class NodeDao {
 			nodeDao.version = versionLabel;
 			nodeDao.nodeProps = nodeDao.getNodeHistory().get(nodeDao.version);
 			if(nodeDao.nodeProps==null)
-				throw new IllegalArgumentException("Node "+nodeId+" does not have this version: "+versionLabel);
+				throw new DAOMissingException(new Exception("Node "+nodeId+" does not have this version: "+versionLabel));
 		}
 		return nodeDao;
 	}
@@ -394,7 +396,8 @@ public class NodeDao {
 			
 			this.nodeService = NodeServiceFactory.getNodeService(repoDao.getId());
 			this.permissionService = PermissionServiceFactory.getPermissionService(repoDao.getId());
-			
+			this.permissionService = PermissionServiceFactory.getPermissionService(repoDao.getId());
+
 			/**
 			 * call getProperties on demand
 			 */
@@ -404,7 +407,6 @@ public class NodeDao {
 			}else{
 				this.nodeProps = nodeRef.getProperties();
 			}
-	
 			refreshPermissions();
 			
 			if(nodeProps.containsKey(CCConstants.NODETYPE)){
@@ -412,6 +414,12 @@ public class NodeDao {
 			}
 			else{
 				this.type = CCConstants.CCM_TYPE_IO;
+			}
+			if(this.type.equals(CCConstants.CCM_TYPE_REMOTEOBJECT)){
+				this.remoteId=(String)this.nodeProps.get(CCConstants.CCM_PROP_REMOTEOBJECT_NODEID);
+				this.nodeService=NodeServiceFactory
+						.getNodeService((String)this.nodeProps.get(CCConstants.CCM_PROP_REMOTEOBJECT_REPOSITORYID));
+				this.nodeProps = this.nodeService.getProperties(null,null, this.remoteId);
 			}
 			
 			String[] aspects = nodeService.getAspects(this.storeProtocol,this.storeId, nodeId);
@@ -790,7 +798,7 @@ public class NodeDao {
 		data.setMediatype(getMediatype());
 		data.setIconURL(getIconURL());
 		data.setCommentCount(getCommentCount());
-		data.setLicenseURL(getLicenseURL());
+		data.setLicense(getLicense());
 		data.setSize(getSize());
 		try {
 			data.setPreview(getPreview());
@@ -803,6 +811,15 @@ public class NodeDao {
 			Collection collection=new CollectionDao(repoDao, getRef().getId(),this,data).asCollection();
 			data.setCollection(collection);
 		}
+	}
+
+	private License getLicense() {
+		if(isDirectory())
+			return null;
+		License license=new License();
+		license.setIcon(new LicenseService().getIconUrl((String) nodeProps.get(CCConstants.CCM_PROP_IO_COMMONLICENSE_KEY)));
+		license.setUrl(new LicenseService().getLicenseUrl((String) nodeProps.get(CCConstants.CCM_PROP_IO_COMMONLICENSE_KEY),(String) nodeProps.get(CCConstants.CCM_PROP_IO_COMMONLICENSE_CC_LOCALE)));
+		return license;
 	}
 
 	private Content getContent() {
@@ -820,11 +837,6 @@ public class NodeDao {
 
 	private String getMetadataSet() {
 		return (String)nodeProps.get(CCConstants.CM_PROP_METADATASET_EDU_METADATASET);
-	}
-	private String getLicenseURL() {
-		if(isDirectory())
-			return null;
-		return new LicenseService().getIconUrl((String) nodeProps.get(CCConstants.CCM_PROP_IO_COMMONLICENSE_KEY));
 	}
 
 	private String getIconURL() {
@@ -1383,9 +1395,10 @@ public class NodeDao {
 	}
 	
 	private Preview getPreview() {
-		Preview result = new Preview(	getRepositoryType(),
-										getRef().getId(),getStoreProtocol(),
+		Preview result = new Preview(	nodeService,
+										getStoreProtocol(),
 										getStoreIdentifier(),
+										remoteId!=null ? remoteId : getRef().getId(),
 										this.version,
 										nodeProps);
 			return result;
@@ -1567,8 +1580,7 @@ public class NodeDao {
 		
 	}
 	/** store a new search node 
-	 * @return 
-	 * @throws DAO */
+	 * @return */
 	public static NodeDao saveSearch(String repoId, String mdsId, String query, String name,
 			List<MdsQueryCriteria> parameters,boolean replace) throws DAOException {
 		try{

@@ -3,13 +3,7 @@ package org.edu_sharing.repository.server;
 import java.awt.Graphics;
 import java.awt.Image;
 import java.awt.image.BufferedImage;
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.DataInputStream;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStream;
+import java.io.*;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
@@ -32,6 +26,8 @@ import org.alfresco.repo.security.permissions.AccessDeniedException;
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.repo.security.authentication.AuthenticationUtil.RunAsWork;
 import org.alfresco.service.ServiceRegistry;
+import org.alfresco.service.cmr.action.Action;
+import org.alfresco.service.cmr.action.ActionStatus;
 import org.alfresco.service.cmr.repository.ContentReader;
 import org.alfresco.service.cmr.repository.InvalidNodeRefException;
 import org.alfresco.service.cmr.repository.NodeRef;
@@ -41,7 +37,10 @@ import org.alfresco.service.namespace.QName;
 import org.apache.james.mime4j.io.MaxHeaderLengthLimitException;
 import org.apache.log4j.Logger;
 import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
+import org.edu_sharing.repository.server.tools.ActionObserver;
 import org.edu_sharing.repository.server.tools.ApplicationInfoList;
+import org.edu_sharing.repository.server.tools.URLTool;
+import org.edu_sharing.service.nodeservice.NodeServiceHelper;
 import org.edu_sharing.service.nodeservice.model.GetPreviewResult;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.client.tools.MimeTypes;
@@ -192,7 +191,7 @@ public class PreviewServlet extends HttpServlet implements SingleThreadModel {
 				//get previewurl to find out type (generated/userdefined)
 				//Attention the url of GetPreviewResult of generated/userdefined previews points on this servlet so don't use it
 				
-				GetPreviewResult getPrevResult = null;
+				PreviewDetail getPrevResult = null;
 				// check if version is requested and version seems to be NOT the current node version
 				if(version != null && !version.trim().equals("") && !isCollection && !version.equals(props.get(CCConstants.LOM_PROP_LIFECYCLE_VERSION))){
 					HashMap<String, HashMap<String,Object>> versionHistory = nodeService.getVersionHistory(nodeId);
@@ -204,7 +203,7 @@ public class PreviewServlet extends HttpServlet implements SingleThreadModel {
 								String vNodeId = (String)entry.getValue().get(CCConstants.SYS_PROP_NODE_UID);
 								System.out.println("vNodeId:"+vNodeId+ " entry key:"+entry.getKey());
 								try {
-									getPrevResult = nodeService.getPreview(VersionService.VERSION_STORE_PROTOCOL, "version2Store", entry.getKey());
+									getPrevResult = getPreview(nodeService,VersionService.VERSION_STORE_PROTOCOL, "version2Store", entry.getKey());
 								}catch(InvalidNodeRefException e){
 									// ignoring this error since versioned files don't have a preview
 									// converting it to an other exception so that the mime type handler will take care
@@ -221,20 +220,15 @@ public class PreviewServlet extends HttpServlet implements SingleThreadModel {
 				if(getPrevResult == null){
 					if(isCollection){
 						// we need to access the actual object as admin
-						getPrevResult = AuthenticationUtil.runAsSystem(new RunAsWork<GetPreviewResult>() {
-							@Override
-							public GetPreviewResult doWork() throws Exception {
-								return nodeService.getPreview(storeRef.getProtocol(), storeRef.getIdentifier(), nodeIdFinal);
-							}
-						});
+						getPrevResult = AuthenticationUtil.runAsSystem(() -> getPreview(nodeService,storeRef.getProtocol(), storeRef.getIdentifier(), nodeIdFinal));
 					}
 					else{
-						getPrevResult = nodeService.getPreview(storeRef.getProtocol(),storeRef.getIdentifier(), nodeId);
+						getPrevResult = getPreview(nodeService,storeRef.getProtocol(),storeRef.getIdentifier(), nodeId);
 					}
 				}
 				
 				if(isCollection){
-					final GetPreviewResult getPrevResultFinal=getPrevResult;
+					final PreviewDetail getPrevResultFinal=getPrevResult;
 					if(AuthenticationUtil.runAsSystem(new RunAsWork<Boolean>() {
 						@Override
 						public Boolean doWork() throws IOException  {
@@ -253,14 +247,14 @@ public class PreviewServlet extends HttpServlet implements SingleThreadModel {
 				/**
 				 * generated or userdefined
 				 */
-				if (getPrevResult != null && (getPrevResult.getType().equals(GetPreviewResult.TYPE_USERDEFINED) || getPrevResult.getType().equals(GetPreviewResult.TYPE_GENERATED))) {
+				if (getPrevResult != null && (getPrevResult.getType().equals(PreviewDetail.TYPE_USERDEFINED) || getPrevResult.getType().equals(PreviewDetail.TYPE_GENERATED))) {
 					NodeRef prevNodeRef = null;
 					String property = CCConstants.CM_PROP_CONTENT;
-					if (getPrevResult.getType().equals(GetPreviewResult.TYPE_USERDEFINED)) {
+					if (getPrevResult.getType().equals(PreviewDetail.TYPE_USERDEFINED)) {
 						prevNodeRef = new NodeRef(MCAlfrescoAPIClient.storeRef, nodeId);
 						property = CCConstants.CCM_PROP_IO_USERDEFINED_PREVIEW;
 					}
-					if (getPrevResult.getType().equals(GetPreviewResult.TYPE_GENERATED)) {
+					if (getPrevResult.getType().equals(PreviewDetail.TYPE_GENERATED)) {
 						
 						
 						HashMap<String, Object> previewProps = null;
@@ -383,7 +377,7 @@ public class PreviewServlet extends HttpServlet implements SingleThreadModel {
 	 * @throws IOException
 	 */
 	private boolean loadPreview(HttpServletRequest req, HttpServletResponse resp, ServletOutputStream op,StoreRef storeRef, String nodeId,
-			NodeService nodeService, GetPreviewResult getPrevResult) throws IOException {
+			NodeService nodeService, PreviewDetail getPrevResult) throws IOException {
 		
 		if(getPrevResult == null){
 			return false;
@@ -392,7 +386,7 @@ public class PreviewServlet extends HttpServlet implements SingleThreadModel {
 		/**
 		 * external URL
 		 */
-		if (getPrevResult.getType().equals(GetPreviewResult.TYPE_EXTERNAL)) {
+		if (getPrevResult.getType().equals(PreviewDetail.TYPE_EXTERNAL)) {
 			String extThumbUrl = getPrevResult.getUrl();
 			if (extThumbUrl != null && !extThumbUrl.trim().equals("")) {
 				resp.sendRedirect(extThumbUrl);
@@ -403,14 +397,14 @@ public class PreviewServlet extends HttpServlet implements SingleThreadModel {
 		/**
 		 * generated or user defined
 		 */
-		if (getPrevResult.getType().equals(GetPreviewResult.TYPE_USERDEFINED) || getPrevResult.getType().equals(GetPreviewResult.TYPE_GENERATED)) {
+		if (getPrevResult.getType().equals(PreviewDetail.TYPE_USERDEFINED) || getPrevResult.getType().equals(PreviewDetail.TYPE_GENERATED)) {
 			NodeRef prevNodeRef = null;
 			String property = CCConstants.CM_PROP_CONTENT;
-			if (getPrevResult.getType().equals(GetPreviewResult.TYPE_USERDEFINED)) {
+			if (getPrevResult.getType().equals(PreviewDetail.TYPE_USERDEFINED)) {
 				prevNodeRef = new NodeRef(MCAlfrescoAPIClient.storeRef, nodeId);
 				property = CCConstants.CCM_PROP_IO_USERDEFINED_PREVIEW;
 			}
-			if (getPrevResult.getType().equals(GetPreviewResult.TYPE_GENERATED)) {
+			if (getPrevResult.getType().equals(PreviewDetail.TYPE_GENERATED)) {
 				prevNodeRef = nodeService.getChild(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE,nodeId, CCConstants.CM_TYPE_THUMBNAIL, CCConstants.CM_NAME,
 						CCConstants.CM_VALUE_THUMBNAIL_NAME_imgpreview_png);
 			}
@@ -420,7 +414,7 @@ public class PreviewServlet extends HttpServlet implements SingleThreadModel {
 				op.close();
 			}
 		}
-		if (getPrevResult.getType().equals(GetPreviewResult.TYPE_DEFAULT)) {
+		if (getPrevResult.getType().equals(PreviewDetail.TYPE_DEFAULT)) {
 			NodeRef nodeRef = new NodeRef(MCAlfrescoAPIClient.storeRef, nodeId);
 			String mimetype=NodeServiceFactory.getLocalService().getContentMimetype(storeRef.getProtocol(), storeRef.getIdentifier(),nodeId);
 			if(mimetype!=null && mimetype.startsWith("image")) {
@@ -643,5 +637,87 @@ public class PreviewServlet extends HttpServlet implements SingleThreadModel {
 			}
 		});
 		
+	}
+
+
+	public PreviewDetail getPreview(NodeService nodeService,String storeProtocol, String storeIdentifier, String nodeId){
+		StoreRef storeRef = new StoreRef(storeProtocol,storeIdentifier);
+		NodeRef nodeRef = new NodeRef(storeRef,nodeId);
+		if(!nodeService.getType(nodeId).equals(CCConstants.CCM_TYPE_IO)){
+			return null;
+		}
+
+		String extThumbnail = nodeService.getProperty(storeProtocol,storeIdentifier,nodeId,CCConstants.CCM_PROP_IO_THUMBNAILURL);
+		if (extThumbnail != null && !extThumbnail.trim().equals("")) {
+			return new PreviewDetail(extThumbnail, PreviewDetail.TYPE_EXTERNAL, false);
+		}
+
+		String defaultImageUrl = URLTool.getBaseUrl() + "/"
+				+ CCConstants.DEFAULT_PREVIEW_IMG;
+
+		InputStream crUserDefinedPreview = null;
+		try{
+			/**
+			 * userdefined
+			 */
+			crUserDefinedPreview=nodeService.getContent(storeProtocol,storeIdentifier,nodeId,null,CCConstants.CCM_PROP_IO_USERDEFINED_PREVIEW);
+			if (crUserDefinedPreview != null && crUserDefinedPreview.available() > 0) {
+				String url = nodeService.getPreview(storeProtocol,storeIdentifier,nodeId,null).getUrl();
+				return new PreviewDetail(url, PreviewDetail.TYPE_USERDEFINED, false);
+			}
+
+		}catch(Throwable t){
+			// may fails if the user does not has access for content
+		}
+
+
+		/**
+		 * generated and action active
+		 */
+		Action action = ActionObserver.getInstance().getAction(nodeRef, CCConstants.ACTION_NAME_CREATE_THUMBNAIL);
+		if (action != null && action.getExecutionStatus().equals(ActionStatus.Running)) {
+			return new PreviewDetail(defaultImageUrl, PreviewDetail.TYPE_DEFAULT, true);
+		}
+
+		/**
+		 * generated and no action active
+		 */
+		NodeRef previewProps = nodeService.getChild(storeRef, nodeId, CCConstants.CM_TYPE_THUMBNAIL, CCConstants.CM_NAME,
+				CCConstants.CM_VALUE_THUMBNAIL_NAME_imgpreview_png);
+		if (previewProps != null) {
+			String url = NodeServiceHelper.getPreview(new NodeRef(storeRef, nodeId)).getUrl();
+			return new PreviewDetail(url, PreviewDetail.TYPE_GENERATED, false);
+		}
+
+		return new PreviewDetail(defaultImageUrl, PreviewDetail.TYPE_DEFAULT, false);
+	}
+	public static class PreviewDetail{
+		private String url;
+
+		private String type;
+
+		private boolean createActionIsRunning = true;
+
+		public static final String TYPE_EXTERNAL = "TYPE_EXTERNAL";
+		public static final String TYPE_USERDEFINED = "TYPE_USERDEFINED";
+		public static final String TYPE_GENERATED = "TYPE_GENERATED";
+		public static final String TYPE_DEFAULT = "TYPE_DEFAULT";
+		public PreviewDetail(String url, String type, boolean createActionIsRunning) {
+			this.url = url;
+			this.type = type;
+			this.createActionIsRunning = createActionIsRunning;
+		}
+
+		public String getUrl() {
+			return url;
+		}
+
+		public String getType() {
+			return type;
+		}
+
+		public boolean isCreateActionIsRunning() {
+			return createActionIsRunning;
+		}
 	}
 }

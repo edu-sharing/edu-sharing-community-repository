@@ -33,6 +33,7 @@ import org.edu_sharing.service.collection.CollectionServiceFactory;
 import org.edu_sharing.service.collection.CollectionServiceImpl;
 import org.edu_sharing.service.search.SearchServiceFactory;
 import org.edu_sharing.service.search.model.SearchToken;
+import org.edu_sharing.webservices.usage2.Usage2Exception;
 import org.springframework.context.ApplicationContext;
 
 import javax.ws.rs.QueryParam;
@@ -51,7 +52,7 @@ Logger logger = Logger.getLogger(Usage2Service.class);
 		serviceRegistry = (ServiceRegistry) applicationContext.getBean(ServiceRegistry.SERVICE_REGISTRY);
 	}
 	
-	public Usage getUsage(String lmsId, String courseId, String parentNodeId, String resourceId) throws UsageException{
+	public Usage getUsage(String lmsId, String courseId, String parentNodeId, String resourceId) throws Usage2Exception{
 		
 		Usage result = null;
 		
@@ -72,7 +73,7 @@ Logger logger = Logger.getLogger(Usage2Service.class);
 			usage = usageDao.getUsage(lmsId, courseId, parentNodeId, resourceId);
 		}catch(Throwable e){
 			logger.error(e.getMessage(), e);
-			throw new UsageException(e.getMessage());
+			throw new Usage2Exception(e);
 		}finally{
 		    //set authentication back to current user
 			if(adminAuthentication != null){

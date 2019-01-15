@@ -94,6 +94,9 @@ public class RenderingServiceImpl implements RenderingService{
 			RenderingServiceData data = getData(nodeId,nodeVersion,AuthenticationUtil.getFullyAuthenticatedUser());
 			return getDetails(renderingServiceUrl, data);
 		}catch(Throwable t) {
+			return RenderingErrorServlet.errorToHTML(Context.getCurrentInstance().getRequest().getSession().getServletContext(),
+					new RenderingException(HttpServletResponse.SC_INTERNAL_SERVER_ERROR,t.getMessage(),RenderingException.I18N.unknown,t));
+			/*
 			String repository=VersionService.getVersionNoException(VersionService.Type.REPOSITORY);
 			String rs=VersionService.getVersionNoException(VersionService.Type.RENDERSERVICE);
 			String info="Repository version "+repository+", Renderservice version "+rs;
@@ -107,6 +110,7 @@ public class RenderingServiceImpl implements RenderingService{
 				logger.warn(info);
 				throw new Exception(t.getMessage()+" ("+info+")",t);
 			}
+			*/
 		}
 	
 	}
@@ -138,23 +142,17 @@ public class RenderingServiceImpl implements RenderingService{
 		long time=System.currentTimeMillis();
 		RenderingServiceData data=new RenderingServiceData();
 		RepositoryDao repoDao = RepositoryDao.getRepository(appInfo.getAppId());
-		try {
-			NodeDao nodeDao = NodeDao.getNodeWithVersion(repoDao, nodeId, nodeVersion);
-			Node node = nodeDao.asNode();
-			data.setNode(node);
-			data.setChildren(
-					NodeDao.convertToRest(repoDao,Filter.createShowAllFilter(),nodeDao.getChildrenSubobjects(),0,Integer.MAX_VALUE).getNodes()
-			);
-			// template
-			data.setMetadataHTML(new MetadataTemplateRenderer(
-					MetadataHelper.getMetadataset(
-							appInfo,node.getMetadataset()==null ? CCConstants.metadatasetdefault_id : node.getMetadataset()),
-					nodeDao.getAllProperties()).render("io_render"));
-
-		}catch(Throwable t){
-			logger.warn(t);
-			data.setError(mapError(t));
-		}
+		NodeDao nodeDao = NodeDao.getNodeWithVersion(repoDao, nodeId, nodeVersion);
+		Node node = nodeDao.asNode();
+		data.setNode(node);
+		data.setChildren(
+				NodeDao.convertToRest(repoDao,Filter.createShowAllFilter(),nodeDao.getChildrenSubobjects(),0,Integer.MAX_VALUE).getNodes()
+		);
+		// template
+		data.setMetadataHTML(new MetadataTemplateRenderer(
+				MetadataHelper.getMetadataset(
+						appInfo,node.getMetadataset()==null ? CCConstants.metadatasetdefault_id : node.getMetadataset()),
+				nodeDao.getAllProperties()).render("io_render"));
 
 		// user
 		data.setUser(PersonDao.getPerson(repoDao,user).asPersonSimple());
@@ -164,14 +162,5 @@ public class RenderingServiceImpl implements RenderingService{
 
 		logger.info("Preparing rendering data took "+(System.currentTimeMillis()-time)+" ms");
 		return data;
-	}
-	public RenderingServiceData.RenderingError mapError(Throwable t){
-		if(t instanceof DAOMissingException){
-			return RenderingServiceData.RenderingError.NodeMissing;
-		}
-		if(t instanceof DAOSecurityException){
-			return RenderingServiceData.RenderingError.NodeAccessDenied;
-		}
-		return RenderingServiceData.RenderingError.Unknown;
 	}
 }

@@ -19,7 +19,9 @@ public class RenderingException extends ServletException {
         invalid_parameters,
         encryption,
         usage_missing,
+        node_missing,
         usage_missing_permissions,
+        internal,
         unknown,
     }
     private int statusCode;
@@ -41,7 +43,7 @@ public class RenderingException extends ServletException {
             this.technicalDetail=json.getString("technicalDetail");
         }
         catch(Throwable t){
-            this.technicalDetail=t.getMessage();
+            this.technicalDetail=exception.getMessage();
             this.i18nName=I18N.unknown;
         }
     }

@@ -113,7 +113,10 @@ export interface Preview {
   width: number;
   height: number;
 }
-
+export interface License {
+    url: string;
+    icon: string;
+}
 export class Node {
   ref: NodeRef;
   parent: Parent;
@@ -135,7 +138,7 @@ export class Node {
   mediatype: string;
   mimetype: string;
   iconURL: string;
-  licenseURL: string;
+  license: License;
   size: number;
   commentCount: number;
   preview: Preview;

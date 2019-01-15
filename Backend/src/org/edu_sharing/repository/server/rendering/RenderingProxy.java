@@ -17,6 +17,7 @@ import javax.xml.rpc.ServiceException;
 
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.repo.security.authentication.AuthenticationUtil.RunAsWork;
+import org.alfresco.service.cmr.repository.InvalidNodeRefException;
 import org.alfresco.service.cmr.repository.StoreRef;
 import org.alfresco.service.cmr.security.PermissionService;
 import org.apache.commons.codec.binary.Base64;
@@ -192,7 +193,7 @@ public class RenderingProxy extends HttpServlet {
 			contentUrl = homeRep.getContentUrl();
 			if(contentUrl == null) {
 				logger.warn("no content url configured");
-				throw new RenderingException(HttpServletResponse.SC_INTERNAL_SERVER_ERROR,"no content url configured",RenderingException.I18N.unknown);
+				throw new RenderingException(HttpServletResponse.SC_INTERNAL_SERVER_ERROR,"no content url configured",RenderingException.I18N.internal);
 			}
 		}else{
 
@@ -443,7 +444,12 @@ public class RenderingProxy extends HttpServlet {
 				throw e;
 			}
 			catch (Throwable t){
-				throw new RenderingException(HttpServletResponse.SC_UNAUTHORIZED,"Usage fetching failed for node "+nodeId+": "+t.getMessage(),RenderingException.I18N.usage_missing,t);
+				if(t.getCause()!=null && t.getCause() instanceof InvalidNodeRefException){
+					throw new RenderingException(HttpServletResponse.SC_NOT_FOUND, t.getCause().getMessage(), RenderingException.I18N.node_missing, t);
+				}
+				else {
+					throw new RenderingException(HttpServletResponse.SC_UNAUTHORIZED, "Usage fetching failed for node " + nodeId + ": " + t.getMessage(), RenderingException.I18N.usage_missing, t);
+				}
 
 			}
 		}

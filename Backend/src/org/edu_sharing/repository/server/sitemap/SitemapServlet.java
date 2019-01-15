@@ -24,6 +24,7 @@ import org.edu_sharing.repository.server.tools.URLTool;
 import org.edu_sharing.service.mime.MimeTypesV2;
 import org.edu_sharing.service.nodeservice.NodeService;
 import org.edu_sharing.service.nodeservice.NodeServiceFactory;
+import org.edu_sharing.service.nodeservice.NodeServiceHelper;
 import org.edu_sharing.service.search.SearchService;
 import org.edu_sharing.service.search.SearchServiceFactory;
 import org.edu_sharing.service.search.model.SearchToken;
@@ -103,14 +104,14 @@ public class SitemapServlet extends HttpServlet{
             String mimetype=nodeService.getContentMimetype(ref.getStoreProtocol(),ref.getStoreId(),ref.getNodeId());
             if(MimeTypesV2.getTypeFromMimetype(mimetype).equals("file-video")){
                 Urlset.Url.Video video = new Urlset.Url.Video();
-                video.thumbnail_loc = URLTool.getPreviewServletUrl(ref);
+                video.thumbnail_loc = NodeServiceHelper.getPreview(ref).getUrl();
                 video.content_loc = URLTool.getRenderServiceURL(ref.getNodeId(),false);
                 video.title = nodeService.getProperty(ref.getStoreProtocol(),ref.getStoreId(),ref.getNodeId(),CCConstants.CM_NAME);
                 url.video.add(video);
             }
             else {
                 Urlset.Url.Image image = new Urlset.Url.Image();
-                image.loc = URLTool.getPreviewServletUrl(ref);
+                image.loc = NodeServiceHelper.getPreview(ref).getUrl();
                 //url.image.add(image);
             }
             //getPreviewServletUrl

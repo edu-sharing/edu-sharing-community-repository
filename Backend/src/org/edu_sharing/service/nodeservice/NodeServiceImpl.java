@@ -957,8 +957,34 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
 	}
 	
 	@Override
-	public String getProperty(String storeProtocol, String storeId, String nodeId, String property) {
+	public String getProperty(String storeProtocol, String storeId, String nodeId, String property){
 		return apiClient.getProperty(new StoreRef(storeProtocol,storeId), nodeId, property);
+	}
+
+	private String getPreviewUrl(String storeProtocol, String storeId, String nodeId, String version) {
+		if(getType(nodeId).equals(CCConstants.CCM_TYPE_REMOTEOBJECT)) {
+			// @TODO: Basically, when the method getPreviewResult is overriden by the service, we don't need to do that!
+			NodeRef nodeRef=new NodeRef(new StoreRef(storeProtocol,storeId),nodeId);
+			String repoId = (String)nodeService.getProperty(nodeRef, QName.createQName(CCConstants.CCM_PROP_REMOTEOBJECT_REPOSITORYID));
+			String remoteNodeId = (String)nodeService.getProperty(nodeRef, QName.createQName(CCConstants.CCM_PROP_REMOTEOBJECT_NODEID));
+			try {
+				HashMap<String, Object> props = NodeServiceFactory.getNodeService(repoId).getProperties(null,null,remoteNodeId);
+				return  (String)props.get(CCConstants.CM_ASSOC_THUMBNAILS);
+			} catch (Throwable e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+				return null;
+			}
+
+		}else {
+			String previewURL = URLTool.getBaseUrl(true);
+			previewURL += "/preview?nodeId="+nodeId+"&storeProtocol="+storeProtocol+"&storeId="+storeId+"&dontcache="+System.currentTimeMillis();
+			if(version!=null){
+				previewURL +="&version="+version;
+			}
+			previewURL =  URLTool.addOAuthAccessToken(previewURL);
+			return previewURL;
+		}
 	}
 
 	@Override
@@ -1111,57 +1137,10 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
 	}
 
 	@Override
-	public GetPreviewResult getPreview(String storeProtocol, String storeIdentifier, String nodeId){
-
-		StoreRef storeRef = new StoreRef(storeProtocol,storeIdentifier);
-		NodeRef nodeRef = new NodeRef(storeRef,nodeId);
-		if(!getType(nodeId).equals(CCConstants.CCM_TYPE_IO)){
-			return null;
-		}
-
-		String extThumbnail = getProperty(storeProtocol,storeIdentifier,nodeId,CCConstants.CCM_PROP_IO_THUMBNAILURL);
-		if (extThumbnail != null && !extThumbnail.trim().equals("")) {
-			return new GetPreviewResult(extThumbnail, GetPreviewResult.TYPE_EXTERNAL, false);
-		}
-
-		String defaultImageUrl = URLTool.getBaseUrl() + "/"
-				+ CCConstants.DEFAULT_PREVIEW_IMG;
-
-		InputStream crUserDefinedPreview = null;
-		try{
-			/**
-			 * userdefined
-			 */
-			crUserDefinedPreview=this.getContent(storeProtocol,storeIdentifier,nodeId,null,CCConstants.CCM_PROP_IO_USERDEFINED_PREVIEW);
-			if (crUserDefinedPreview != null && crUserDefinedPreview.available() > 0) {
-				String url = URLTool.getPreviewServletUrl(new NodeRef(storeRef, nodeId));
-				return new GetPreviewResult(url, GetPreviewResult.TYPE_USERDEFINED, false);
-			}
-
-		}catch(Throwable t){
-			// may fails if the user does not has access for content
-		}
-
-
-		/**
-		 * generated and action active
-		 */
-		Action action = ActionObserver.getInstance().getAction(nodeRef, CCConstants.ACTION_NAME_CREATE_THUMBNAIL);
-		if (action != null && action.getExecutionStatus().equals(ActionStatus.Running)) {
-			return new GetPreviewResult(defaultImageUrl, GetPreviewResult.TYPE_DEFAULT, true);
-		}
-
-		/**
-		 * generated and no action active
-		 */
-		NodeRef previewProps = getChild(storeRef, nodeId, CCConstants.CM_TYPE_THUMBNAIL, CCConstants.CM_NAME,
-				CCConstants.CM_VALUE_THUMBNAIL_NAME_imgpreview_png);
-		if (previewProps != null) {
-			String url = URLTool.getPreviewServletUrl(new NodeRef(storeRef, nodeId));
-			return new GetPreviewResult(url, GetPreviewResult.TYPE_GENERATED, false);
-		}
-
-		return new GetPreviewResult(defaultImageUrl, GetPreviewResult.TYPE_DEFAULT, false);
+	public GetPreviewResult getPreview(String storeProtocol, String storeIdentifier, String nodeId,String version){
+		NodeRef nodeRef = new NodeRef(new StoreRef(storeProtocol, storeIdentifier), nodeId);
+		boolean isIcon=NodeServiceHelper.getProperty(nodeRef,CCConstants.CCM_PROP_MAP_ICON)!=null && NodeServiceHelper.getProperty(nodeRef,CCConstants.CM_ASSOC_THUMBNAILS)!=null;
+		return new GetPreviewResult(getPreviewUrl(storeProtocol,storeIdentifier,nodeId,version),isIcon);
 	}
 
 	@Override

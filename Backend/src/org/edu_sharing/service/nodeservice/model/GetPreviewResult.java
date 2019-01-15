@@ -6,25 +6,16 @@ public class GetPreviewResult implements Serializable {
 
 	private static final long serialVersionUID = 1L;
 
-	String url;
-	
-	String type;
-	
-	boolean createActionIsRunning = true;
-	
-	public static final String TYPE_EXTERNAL = "TYPE_EXTERNAL";
-	public static final String TYPE_USERDEFINED = "TYPE_USERDEFINED";
-	public static final String TYPE_GENERATED = "TYPE_GENERATED";
-	public static final String TYPE_DEFAULT = "TYPE_DEFAULT";
-	
-	
+	private String url;
+
+	private boolean isIcon;
+
 	public GetPreviewResult() {
 	}
 	
-	public GetPreviewResult(String url, String type, boolean createActionIsRunning) {
+	public GetPreviewResult(String url, boolean isIcon) {
 		this.url = url;
-		this.type = type;
-		this.createActionIsRunning = createActionIsRunning;
+		this.isIcon = isIcon;
 	}
 
 	
@@ -36,21 +27,11 @@ public class GetPreviewResult implements Serializable {
 		this.url = url;
 	}
 
-	public String getType() {
-		return type;
+	public boolean isIcon() {
+		return isIcon;
 	}
 
-	public void setType(String type) {
-		this.type = type;
+	public void setIcon(boolean icon) {
+		isIcon = icon;
 	}
-
-	public boolean isCreateActionRunning() {
-		return createActionIsRunning;
-	}
-
-	public void setCreateActionIsRunning(boolean createActionIsRunning) {
-		this.createActionIsRunning = createActionIsRunning;
-	}
-	
-	
 }

@@ -281,7 +281,7 @@ export class NodeHelper{
    * @returns {string}
    */
   public static getLicenseIcon(node: Node) {
-    return node.licenseURL;
+    return node.license ? node.license.icon : null;
   }
 
   /**
@@ -383,7 +383,7 @@ export class NodeHelper{
         return '<span property="dateModified" title="' + translate.instant('ACCESSIBILITY.LASTMODIFIED') + '">' + NodeHelper.getNodeAttribute(translate,config, data, item) + '</span>';
 
       if (item.name == RestConstants.CCM_PROP_LICENSE) {
-        if (data.licenseURL) {
+        if (data.license && data.license.icon) {
           return NodeHelper.getLicenseHtml(translate,data);
         }
         return '';

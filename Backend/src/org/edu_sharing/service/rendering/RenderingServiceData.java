@@ -12,17 +12,11 @@ import java.io.Serializable;
 import java.util.List;
 
 public class RenderingServiceData implements Serializable {
-    public enum RenderingError {
-        Unknown,
-        NodeMissing,
-        NodeAccessDenied,
-    }
     private Node node;
     private List<Node> children;
     private UserSimple user;
     private String metadataHTML;
     private Values configValues;
-    private RenderingError error;
 
     public Node getNode() {
         return node;
@@ -62,13 +56,5 @@ public class RenderingServiceData implements Serializable {
 
     public List<Node> getChildren() {
         return children;
-    }
-
-    public RenderingError getError() {
-        return error;
-    }
-
-    public void setError(RenderingError error) {
-        this.error = error;
     }
 }

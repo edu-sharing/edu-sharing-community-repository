@@ -11,6 +11,7 @@ import org.alfresco.service.cmr.repository.ChildAssociationRef;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.repository.StoreRef;
 import org.alfresco.service.cmr.version.Version;
+import org.apache.log4j.Logger;
 import org.edu_sharing.repository.client.rpc.User;
 import org.edu_sharing.service.nodeservice.model.GetPreviewResult;
 import org.edu_sharing.service.search.model.SortDefinition;
@@ -116,7 +117,14 @@ public interface NodeService {
 
 	public boolean exists(String protocol, String store, String nodeId);
 
-	String getProperty(String storeProtocol, String storeId, String nodeId, String property);
+	default String getProperty(String storeProtocol, String storeId, String nodeId, String property) {
+	    try {
+            return (String)getProperties(storeProtocol, storeId, nodeId).get(property);
+        }catch(Throwable t){
+			Logger.getLogger(NodeService.class).warn(t);
+	        return null;
+        }
+    };
 
 
 	String getTemplateNode(String nodeId,boolean createIfNotExists) throws Throwable;
@@ -144,5 +152,5 @@ public interface NodeService {
 
 	void setProperty(String protocol, String storeId, String nodeId, String property, Serializable value);
 
-    GetPreviewResult getPreview(String storeProtocol, String storeIdentifier, String nodeId);
+    GetPreviewResult getPreview(String storeProtocol, String storeIdentifier, String nodeId, String version);
 }

@@ -8,7 +8,16 @@
 package org.edu_sharing.webservices.usage2;
 
 public class Usage2Exception  extends org.apache.axis.AxisFault  implements java.io.Serializable {
-    public Usage2Exception() {
+    private final Throwable cause;
+
+    public Usage2Exception(Throwable cause) {
+        this.cause=cause;
+        this.setFaultReason(cause.getMessage());
+    }
+
+    @Override
+    public Throwable getCause() {
+        return cause;
     }
 
     private java.lang.Object __equalsCalc = null;

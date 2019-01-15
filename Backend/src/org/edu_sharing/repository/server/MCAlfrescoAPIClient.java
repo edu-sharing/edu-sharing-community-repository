@@ -184,6 +184,8 @@ import org.edu_sharing.service.comment.CommentServiceFactory;
 import org.edu_sharing.service.connector.ConnectorService;
 import org.edu_sharing.service.license.LicenseService;
 import org.edu_sharing.service.model.NodeRefImpl;
+import org.edu_sharing.service.nodeservice.NodeServiceFactory;
+import org.edu_sharing.service.nodeservice.NodeServiceHelper;
 import org.edu_sharing.service.nodeservice.model.GetPreviewResult;
 import org.edu_sharing.service.share.ShareService;
 import org.edu_sharing.service.share.ShareServiceImpl;
@@ -1200,7 +1202,7 @@ public class MCAlfrescoAPIClient extends MCAlfrescoBaseClient {
 			if (renderServiceUrlPreview != null) {
 				propsCopy.put(CCConstants.CM_ASSOC_THUMBNAILS, renderServiceUrlPreview);
 			} else {
-				propsCopy.put(CCConstants.CM_ASSOC_THUMBNAILS, URLTool.getPreviewServletUrl(nodeRef));
+				propsCopy.put(CCConstants.CM_ASSOC_THUMBNAILS, NodeServiceHelper.getPreview((nodeRef)).getUrl());
 			}
 		}
 		
@@ -1532,7 +1534,8 @@ public class MCAlfrescoAPIClient extends MCAlfrescoBaseClient {
 
 		// Preview
 		if (nodeType.equals(CCConstants.CCM_TYPE_IO)) {
-			
+			//@todo 5.1: check if this is needed since it only is used in the PreviewServlet
+			/*
 			GetPreviewResult prevResult = getPreviewUrl(nodeRef.getStoreRef(), nodeRef.getId());
 
 			if (prevResult.getType().equals(GetPreviewResult.TYPE_USERDEFINED)) {
@@ -1548,6 +1551,7 @@ public class MCAlfrescoAPIClient extends MCAlfrescoBaseClient {
 			} else {
 				properties.remove(CCConstants.KEY_PREVIEW_GENERATION_RUNS);
 			}
+			*/
 
 			List<NodeRef> usages = this.getChildrenByAssociationNodeIds(nodeRef.getStoreRef(),nodeRef.getId(), CCConstants.CCM_ASSOC_USAGEASPECT_USAGES);
 			if (usages != null) {
@@ -4041,7 +4045,9 @@ public class MCAlfrescoAPIClient extends MCAlfrescoBaseClient {
 
 	public void setPreviewUrlWithoutTicket(StoreRef storeRef, String nodeId, HashMap<String, Object> properties) {
 		try {
-
+			properties.put(CCConstants.CM_ASSOC_THUMBNAILS, NodeServiceHelper.getPreview(new NodeRef(storeRef,nodeId)));
+			// @todo 5.1: Check if this is needed in the client
+			/*
 			GetPreviewResult prevResult = getPreviewUrl(storeRef, nodeId);
 
 			if (prevResult.getType().equals(GetPreviewResult.TYPE_USERDEFINED)) {
@@ -4059,7 +4065,7 @@ public class MCAlfrescoAPIClient extends MCAlfrescoBaseClient {
 			} else {
 				properties.remove(CCConstants.KEY_PREVIEW_GENERATION_RUNS);
 			}
-
+			*/
 		} catch (Exception e) {
 			logger.error(e.getMessage(), e);
 		}
@@ -4218,56 +4224,7 @@ public class MCAlfrescoAPIClient extends MCAlfrescoBaseClient {
 	}
 	
 	public GetPreviewResult getPreviewUrl(String storeProtocol, String storeIdentifier, String nodeId){
-		
-		StoreRef storeRef = new StoreRef(storeProtocol,storeIdentifier);
-		NodeRef nodeRef = new NodeRef(storeRef,nodeId);
-		if(!nodeService.getType(nodeRef).equals(QName.createQName(CCConstants.CCM_TYPE_IO))){
-			return null;
-		}
-
-		String extThumbnail = (String) nodeService.getProperty(nodeRef, QName.createQName(CCConstants.CCM_PROP_IO_THUMBNAILURL));
-		if (extThumbnail != null && !extThumbnail.trim().equals("")) {
-			return new GetPreviewResult(extThumbnail, GetPreviewResult.TYPE_EXTERNAL, false);
-		}
-
-		String defaultImageUrl = getUrl() + "/"
-				+ CCConstants.DEFAULT_PREVIEW_IMG;
-
-		ContentReader crUserDefinedPreview = null;
-		try{
-			crUserDefinedPreview=this.contentService.getReader(new NodeRef(storeRef, nodeId),
-				QName.createQName(CCConstants.CCM_PROP_IO_USERDEFINED_PREVIEW));
-		}catch(Throwable t){
-			// may fails if the user does not has access for content
-		}
-
-		/**
-		 * userdefined
-		 */
-		if (crUserDefinedPreview != null && crUserDefinedPreview.getSize() > 0) {
-			String url = URLTool.getPreviewServletUrl(new NodeRef(storeRef, nodeId));
-			return new GetPreviewResult(url, GetPreviewResult.TYPE_USERDEFINED, false);
-		}
-
-		/**
-		 * generated and action active
-		 */
-		Action action = ActionObserver.getInstance().getAction(nodeRef, CCConstants.ACTION_NAME_CREATE_THUMBNAIL);
-		if (action != null && action.getExecutionStatus().equals(ActionStatus.Running)) {
-			return new GetPreviewResult(defaultImageUrl, GetPreviewResult.TYPE_DEFAULT, true);
-		}
-
-		/**
-		 * generated and no action active
-		 */
-		HashMap<String, Object> previewProps = getChild(storeRef, nodeId, CCConstants.CM_TYPE_THUMBNAIL, CCConstants.CM_NAME,
-				CCConstants.CM_VALUE_THUMBNAIL_NAME_imgpreview_png);
-		if (previewProps != null) {
-			String url = URLTool.getPreviewServletUrl(new NodeRef(storeRef, nodeId));
-			return new GetPreviewResult(url, GetPreviewResult.TYPE_GENERATED, false);
-		}
-
-		return new GetPreviewResult(defaultImageUrl, GetPreviewResult.TYPE_DEFAULT, false);
+		return NodeServiceHelper.getPreview(new NodeRef(storeRef, nodeId));
 	}
 
 	@Override

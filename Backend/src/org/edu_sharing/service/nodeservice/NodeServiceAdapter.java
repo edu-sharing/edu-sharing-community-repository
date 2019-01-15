@@ -254,12 +254,6 @@ public class NodeServiceAdapter implements NodeService {
 	}
 
 	@Override
-	public String getProperty(String storeProtocol, String storeId, String nodeId, String property) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
 	public String getTemplateNode(String nodeId,boolean create) throws Throwable {
 		return null;
 	}
@@ -296,7 +290,7 @@ public class NodeServiceAdapter implements NodeService {
 
 	@Override
 	public List<ChildAssociationRef> getChildrenChildAssociationRefAssoc(String parentID, String asoocName, List<String> filter, SortDefinition sortDefinition) {
-		return null;
+		return new ArrayList<>();
 	}
 
 	@Override
@@ -306,8 +300,12 @@ public class NodeServiceAdapter implements NodeService {
 	}
 
 	@Override
-	public GetPreviewResult getPreview(String storeProtocol, String storeIdentifier, String nodeId) {
-		return null;
+	public GetPreviewResult getPreview(String storeProtocol, String storeIdentifier, String nodeId,String version) {
+	    try {
+            return new GetPreviewResult(getProperty(storeProtocol, storeIdentifier, nodeId, CCConstants.CM_ASSOC_THUMBNAILS), false);
+        }catch(Throwable t){
+	        return null;
+        }
 	}
 
 	@Override
