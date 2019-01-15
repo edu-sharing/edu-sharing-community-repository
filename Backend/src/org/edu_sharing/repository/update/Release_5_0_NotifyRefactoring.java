@@ -135,7 +135,10 @@ public class Release_5_0_NotifyRefactoring extends UpdateAbstract {
 					Gson gson = new Gson();
 					Notify n = new Notify();
 
-					// get acl from notify cause its the same as io
+					/**
+					 *  get acl from notify cause its the same as io
+					 *  does not really work for notifys cause there is one notify also with the inherited permissions
+					 */
 					ACL acl = apiClient.getPermissions(entry.getKey().getId());
 					List<ACE> directlySetAces = new ArrayList<ACE>();
 					for (ACE ace : acl.getAces()) {
