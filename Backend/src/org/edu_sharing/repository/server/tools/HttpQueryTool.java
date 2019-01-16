@@ -171,7 +171,7 @@ public class HttpQueryTool {
 			}
 
 		}catch(IOException e){
-			logger.error(e.getMessage(), e);
+			throw new HttpException(0,e.getMessage());
 		} finally {
 			method.releaseConnection();
 		}

@@ -139,9 +139,14 @@ public class RenderingServiceImpl implements RenderingService{
 				NodeDao.convertToRest(repoDao,Filter.createShowAllFilter(),nodeDao.getChildrenSubobjects(),0,Integer.MAX_VALUE).getNodes()
 		);
 		// template
+		// switch to the remote appInfo (for shadow objects) so the mds is the right one
+		ApplicationInfo remoteApp=appInfo;
+		if(nodeDao.isFromRemoteRepository()){
+			remoteApp=ApplicationInfoList.getRepositoryInfoById(nodeDao.getRemoteRef().getRepo());
+		}
 		data.setMetadataHTML(new MetadataTemplateRenderer(
 				MetadataHelper.getMetadataset(
-						appInfo,node.getMetadataset()==null ? CCConstants.metadatasetdefault_id : node.getMetadataset()),
+						remoteApp,node.getMetadataset()==null ? CCConstants.metadatasetdefault_id : node.getMetadataset()),
 				nodeDao.getAllProperties()).render(RenderingTool.DISPLAY_INLINE.equals(displayMode) ? "io_render_inline" : "io_render"));
 
 		// user

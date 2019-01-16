@@ -81,6 +81,8 @@ public class NodeDao {
 	};
 	// id of the object by the remote repository (null if not a remote object)
 	private String remoteId;
+	private String remoteRepositoryId;
+
 	private String version;
 
 
@@ -417,8 +419,9 @@ public class NodeDao {
 			}
 			if(this.type.equals(CCConstants.CCM_TYPE_REMOTEOBJECT)){
 				this.remoteId=(String)this.nodeProps.get(CCConstants.CCM_PROP_REMOTEOBJECT_NODEID);
+				this.remoteRepositoryId=(String)this.nodeProps.get(CCConstants.CCM_PROP_REMOTEOBJECT_REPOSITORYID);
 				this.nodeService=NodeServiceFactory
-						.getNodeService((String)this.nodeProps.get(CCConstants.CCM_PROP_REMOTEOBJECT_REPOSITORYID));
+						.getNodeService(this.remoteRepositoryId);
 				this.nodeProps = this.nodeService.getProperties(null,null, this.remoteId);
 			}
 			
@@ -432,7 +435,9 @@ public class NodeDao {
 			throw DAOException.mapping(t,nodeRef.getNodeId());
 		}
 	}
-
+	public boolean isFromRemoteRepository(){
+		return remoteId!=null || !this.repoDao.isHomeRepo();
+	}
 	public void refreshPermissions() {
         this.hasPermissions = permissionService.hasAllPermissions(storeProtocol, storeId, nodeId,DAO_PERMISSIONS);
 	}
@@ -1035,16 +1040,28 @@ public class NodeDao {
 
 		return nodeRef;
 	}
+	public NodeRef getRemoteRef() throws DAOException {
+		if(!isFromRemoteRepository())
+			return null;
+		if(remoteId!=null){
+			return createNodeRef(remoteRepositoryId,false,remoteId);
+		}
+		// this is the case if NodeDao was already called via a remote ref (and not a shadow object)
+		return getRef();
+	}
 
 	private NodeRef getParentRef() {
 		return createNodeRef(repoDao,getParentId());
 	}
-	public static NodeRef createNodeRef(RepositoryDao repoDao,String nodeId) {
+	private static NodeRef createNodeRef(String repoId,boolean isHomeRepo,String nodeId) {
 		NodeRef parentRef = new NodeRef();
-		parentRef.setRepo(repoDao.getId());
+		parentRef.setRepo(repoId);
 		parentRef.setId(nodeId);
-		parentRef.setHomeRepo(repoDao.isHomeRepo());		
+		parentRef.setHomeRepo(isHomeRepo);
 		return parentRef;
+	}
+	public static NodeRef createNodeRef(RepositoryDao repoDao,String nodeId) {
+		return createNodeRef(repoDao.getId(),repoDao.isHomeRepo(),nodeId);
 	}
 	
 	public String getStoreProtocol(){
