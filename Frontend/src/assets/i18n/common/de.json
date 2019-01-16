@@ -495,7 +495,9 @@
     "list": "Listenansicht",
     "keyboard_arrow_left": "zurück",
     "keyboard_arrow_right": "weiter",
-    "keyboard_arrow_up": "nach oben"
+    "keyboard_arrow_up": "nach oben",
+    "file_upload": "Datei hochladen",
+    "delete": "Löschen"
   },
   "LANGUAGE":{
     "INTERNATIONAL": "International",

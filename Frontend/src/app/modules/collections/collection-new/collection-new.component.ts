@@ -1,4 +1,4 @@
-import {Component, OnInit, NgZone, HostListener, ViewChild, Sanitizer} from '@angular/core';
+import {Component, OnInit, NgZone, HostListener, ViewChild, Sanitizer, ElementRef} from '@angular/core';
 
 
 import {Router, Params, ActivatedRoute} from "@angular/router";
@@ -29,6 +29,7 @@ import {ColorHelper} from '../../../common/ui/color-helper';
 import {DomSanitizer} from "@angular/platform-browser";
 import {TemporaryStorageService} from "../../../common/services/temporary-storage.service";
 import {UIHelper} from "../../../common/ui/ui-helper";
+import {RegisterResetPasswordComponent} from "../../register/register-reset-password/register-reset-password.component";
 
 // component class
 @Component({
@@ -81,7 +82,7 @@ export class CollectionNewComponent {
   private availableSteps: string[];
   private parentCollection: Collection;
   private originalPermissions: LocalPermissions;
-
+  @ViewChild('file') imageFileRef : ElementRef;
 
   @HostListener('document:keydown', ['$event'])
   handleKeyboardEvent(event: KeyboardEvent) {
@@ -535,4 +536,13 @@ export class CollectionNewComponent {
         return;
     });
   }
+
+    deleteImage() {
+      this.imageData = null;
+      this.imageFile = null;
+      this.imageFileRef.nativeElement.value = null;
+      this.currentCollection.preview = null;
+      //TODO @Simon: Delete Picture in Backend
+      return;
+    }
 }

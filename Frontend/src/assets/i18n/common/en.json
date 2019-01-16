@@ -431,7 +431,9 @@
     "list": "List view",
     "keyboard_arrow_left": "previous",
     "keyboard_arrow_right": "next",
-    "keyboard_arrow_up": "up"
+    "keyboard_arrow_up": "up",
+    "file_upload": "file upload",
+    "delete": "delete"
   },
   "LANGUAGE":{
     "INTERNATIONAL":"international",

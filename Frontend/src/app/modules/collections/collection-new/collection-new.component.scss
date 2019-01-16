@@ -339,13 +339,15 @@ $imagePath: '../../../../assets/images/collections/';
     color: white;
     cursor: pointer;
 }
-
+.card-image-distance{
+  height: 35px;
+}
 .card-image-icon-container {
     height: 160px;
     width: 160px;
     border-radius: 160px;
     background-color: darkgray;
-    margin: 35px auto auto auto;
+    margin: auto;
     text-align: center;
     vertical-align: middle;
   i{
@@ -391,25 +393,29 @@ $imagePath: '../../../../assets/images/collections/';
     display: none;
 }
 
-.image-upload-icon {
-  z-index: 1;
-  padding:10px;
-  color: $primary;
-  background-color: #fff;
-  border-radius:50%;
+.button-icon{
   position: absolute;
   bottom: 15px;
   right: 27px;
+  z-index: 2;
+}
+.image-icon {
+  padding: 10px;
+  height: 44px;
+  color: $primary;
+  background-color: #fff;
+  border-radius: 50%;
   @include clickable();
   @include materialShadowBottom();
-  z-index: 2;
+  margin-left: 10px;
+  float: left;
   &:focus{
     @include setGlobalInsetFocus();
   }
-}
-.image-upload-icon i{
-  background-color: rgba(255,255,255,0.75);
-  border-radius:5pt;
+  i{
+    background-color: rgba(255,255,255,0.75);
+    border-radius:5pt;
+  }
 }
 
 
@@ -488,6 +494,9 @@ input[type="radio"] {
       margin-top: 20px;
       font-size: 60px;
     }
+  }
+  .card-image-distance{
+    height: 0;
   }
   .profile-background{
     display: block;

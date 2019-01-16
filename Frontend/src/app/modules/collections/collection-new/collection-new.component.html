@@ -83,14 +83,19 @@
 
               <div class='image-upload-field'>
                   <input #file type='file' accept="image/*" name='userFile' (change)="imageDataChanged($event)"
-                  class="image-upload-field-input" >
+                  class="image-upload-field-input">
               </div>
-
-              <div class="image-upload-icon" tabindex="0" (keyup.enter)="file.click()" (click)="file.click()">
-                  <i class="material-icons icon-bottom">file_upload</i>
+              <div class="button-icon">
+                  <div class="image-icon" tabindex="0" (keyup.enter)="file.click()" (click)="file.click()">
+                      <i icon iconId="file_upload" aria="true"></i>
+                  </div>
+                  <div class="image-icon" tabindex="0" (keyup.enter)="deleteImage()" (click)="deleteImage()">
+                      <i icon iconId="delete" aria="true"></i>
+                  </div>
               </div>
 
               <div *ngIf="!imageData && !(currentCollection.preview && !currentCollection.preview.isIcon)" (keyup.enter)="file.click()" (click)="file.click()" class="card-collection-icon-container">
+                  <div class="card-image-distance"></div>
                   <div class="card-image-icon-container" [style.background-color]="currentCollection.color">
                       <i class="material-icons">layers</i>
                   </div>
