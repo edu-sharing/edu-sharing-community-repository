@@ -607,6 +607,13 @@
 				</views>
 			</group>
 			<group>
+				<id>io_render_inline</id>
+				<views>
+					<view>node_general_render</view>
+					<view>node_contributor_render</view>
+				</views>
+			</group>
+			<group>
 				<id>map</id>
 				<views>
 					<view>node_map</view>

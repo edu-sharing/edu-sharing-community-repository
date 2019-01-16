@@ -292,7 +292,7 @@
   [(addToCollection)]="addNodesToCollection"
   [(addNodesStream)]="addNodesStream"
 ></workspace-management>
-<div *ngIf="showMoreRepositories" class="dialog moreRepositories" (click)="showMoreRepositories=false">
+<div tabindex="0" *ngIf="showMoreRepositories" class="dialog moreRepositories" (click)="showMoreRepositories=false" (keyup.enter)="showMoreRepositories=false">
   <div class="collection" [class.no-mainnav]="!mainnav">
     <a class="collection-item"
        *ngFor="let repo of repositories.slice(3)"

@@ -8,6 +8,9 @@ powered-by{
   left: 0;
   top: calc(15% + 510px);
 }
+.powered-down{
+  top: calc(15% + 530px);
+}
 .card-cancel{
   z-index: 1;
 }
@@ -58,6 +61,9 @@ powered-by{
   powered-by{
     position: fixed;
     top:calc(15% + 410px);
+  }
+  .powered-down{
+    top: calc(15% + 430px);
   }
   .branding{
     position: absolute;

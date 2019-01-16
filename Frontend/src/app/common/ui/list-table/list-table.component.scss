@@ -657,7 +657,7 @@ $orderAnimationTime:$transitionNormal*5;
   height: $listCardSmallHeight;
   @include materialShadow();
   float:left;
-  margin:6px;
+  margin:6px !important;
   border-radius: 2pt;
   border-bottom: 5px solid $primary;
 }
@@ -1091,5 +1091,8 @@ $orderAnimationTime:$transitionNormal*5;
   .cardList .row_9,
   .cardList .row_10{
     width: calc(100% - 180px);
+  }
+  .nodeCollection{
+    margin: 5px 0;
   }
 }
