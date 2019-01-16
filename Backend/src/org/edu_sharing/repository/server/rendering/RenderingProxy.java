@@ -12,14 +12,11 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import javax.servlet.http.HttpSession;
-import javax.xml.rpc.ServiceException;
 
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.repo.security.authentication.AuthenticationUtil.RunAsWork;
 import org.alfresco.service.cmr.repository.InvalidNodeRefException;
 import org.alfresco.service.cmr.repository.StoreRef;
-import org.alfresco.service.cmr.security.PermissionService;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.log4j.Logger;
 import org.edu_sharing.repository.client.tools.CCConstants;
@@ -42,7 +39,6 @@ import org.edu_sharing.service.rendering.RenderingTool;
 import org.edu_sharing.service.repoproxy.RepoProxyFactory;
 import org.edu_sharing.service.usage.Usage;
 import org.edu_sharing.service.usage.Usage2Service;
-import org.edu_sharing.service.usage.UsageException;
 import org.edu_sharing.webservices.usage2.Usage2;
 import org.edu_sharing.webservices.usage2.Usage2Result;
 import org.edu_sharing.webservices.usage2.Usage2ServiceLocator;
@@ -104,6 +100,9 @@ public class RenderingProxy extends HttpServlet {
 				queryRendering(req,resp,nodeId,repoInfo);
 			}
 
+		}
+		catch(RenderingException e){
+			throw e;
 		}catch(Exception e){
 			throw new RenderingException(HttpServletResponse.SC_INTERNAL_SERVER_ERROR,e.getMessage(),RenderingException.I18N.unknown,e);
 		}
@@ -185,6 +184,7 @@ public class RenderingProxy extends HttpServlet {
 	}
 	private void queryRendering(HttpServletRequest req, HttpServletResponse resp, String nodeId, ApplicationInfo repoInfo) throws Exception {
 		String rep_id = req.getParameter("rep_id");
+		String display = req.getParameter("display");
 		ApplicationInfo homeRep = ApplicationInfoList.getHomeRepository();
 		String usernameDecrypted=getDecryptedUsername(req);
 		Encryption encryptionTool = new Encryption("RSA");
@@ -306,21 +306,22 @@ public class RenderingProxy extends HttpServlet {
 		}
 		String finalContentUrl = contentUrl;
 		// it is a trusted app who requested and signature was verified, so we can render the node
-		AuthenticationUtil.runAsSystem(()-> {
+		RenderingException result=AuthenticationUtil.runAsSystem(()-> {
 			RenderingService service = RenderingServiceFactory.getRenderingService(homeRep.getAppId());
 			// @todo 5.1 should version inline be transfered?
 			try {
-				RenderingServiceData renderData = service.getData(nodeId, null,usernameDecrypted);
+				RenderingServiceData renderData = service.getData(nodeId, null,usernameDecrypted, display);
 				resp.getOutputStream().write(
 						service.getDetails(finalContentUrl, renderData).getBytes("UTF-8"));
 			} catch (HttpException e) {
-				throw new RenderingException(e);
+				return new RenderingException(e);
 			} catch (Exception e) {
-				throw new RenderingException(HttpServletResponse.SC_INTERNAL_SERVER_ERROR,e.getMessage(),RenderingException.I18N.unknown,e);
+				return new RenderingException(HttpServletResponse.SC_INTERNAL_SERVER_ERROR,e.getMessage(),RenderingException.I18N.unknown,e);
 			}
-
 			return null;
 		});
+		if(result!=null)
+			throw result;
 		/*
 		HttpQueryTool httpQuery = new HttpQueryTool();
 		String result = httpQuery.query(contentUrl);

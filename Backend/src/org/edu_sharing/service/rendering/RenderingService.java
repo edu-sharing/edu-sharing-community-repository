@@ -4,7 +4,6 @@ import java.io.UnsupportedEncodingException;
 import java.util.Map;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import org.edu_sharing.repository.server.tools.ApplicationInfo;
 import org.edu_sharing.service.InsufficientPermissionException;
 
 public interface RenderingService {
@@ -16,5 +15,5 @@ public interface RenderingService {
 
     String getDetails(String renderingServiceUrl, RenderingServiceData data) throws JsonProcessingException, UnsupportedEncodingException;
 
-    RenderingServiceData getData(String nodeId, String nodeVersion, String user) throws Exception;
+    RenderingServiceData getData(String nodeId, String nodeVersion, String user, String displayMode) throws Exception;
 }

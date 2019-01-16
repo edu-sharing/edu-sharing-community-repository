@@ -20,8 +20,9 @@ public class RenderingErrorServlet extends HttpServlet {
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         RenderingException exception = (RenderingException) req
                 .getAttribute("javax.servlet.error.exception");
+        logger.warn(exception.getMessage(),exception);
         if(exception.getNested()!=null){
-            logger.warn(exception.getNested());
+            logger.warn(exception.getNested().getMessage(),exception.getNested());
         }
         String html = errorToHTML(req.getSession().getServletContext(), exception);
 

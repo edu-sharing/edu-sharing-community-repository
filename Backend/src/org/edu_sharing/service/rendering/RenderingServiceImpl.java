@@ -9,30 +9,20 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectWriter;
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
-import org.alfresco.repo.security.permissions.AccessDeniedException;
-import org.alfresco.service.cmr.repository.InvalidNodeRefException;
 import org.alfresco.service.cmr.repository.StoreRef;
 import org.apache.commons.httpclient.methods.PostMethod;
 import org.apache.commons.httpclient.methods.StringRequestEntity;
-import org.apache.http.HttpEntity;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.entity.StringEntity;
 import org.apache.log4j.Logger;
-import org.edu_sharing.metadataset.v2.MetadataReaderV2;
-import org.edu_sharing.metadataset.v2.MetadataSetV2;
 import org.edu_sharing.metadataset.v2.tools.MetadataHelper;
 import org.edu_sharing.metadataset.v2.tools.MetadataTemplateRenderer;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.client.tools.UrlTool;
 import org.edu_sharing.repository.server.AuthenticationTool;
-import org.edu_sharing.repository.server.MCAlfrescoAPIClient;
-import org.edu_sharing.repository.server.MCAlfrescoBaseClient;
 import org.edu_sharing.repository.server.RepoFactory;
 import org.edu_sharing.repository.server.authentication.Context;
 import org.edu_sharing.repository.server.rendering.RenderingErrorServlet;
 import org.edu_sharing.repository.server.rendering.RenderingException;
 import org.edu_sharing.repository.server.tools.*;
-import org.edu_sharing.repository.server.tools.security.Encryption;
 import org.edu_sharing.restservices.*;
 import org.edu_sharing.restservices.shared.Filter;
 import org.edu_sharing.restservices.shared.Node;
@@ -40,7 +30,6 @@ import org.edu_sharing.service.InsufficientPermissionException;
 import org.edu_sharing.service.config.ConfigServiceFactory;
 import org.edu_sharing.service.permission.PermissionService;
 import org.edu_sharing.service.permission.PermissionServiceFactory;
-import org.edu_sharing.service.version.VersionService;
 
 import javax.servlet.http.HttpServletResponse;
 
@@ -91,7 +80,7 @@ public class RenderingServiceImpl implements RenderingService{
 			// base url for dynamic context routing of domains
 			renderingServiceUrl = UrlTool.setParam(renderingServiceUrl, "baseUrl",URLEncoder.encode(URLTool.getBaseUrl(true)));
 			logger.debug(renderingServiceUrl);
-			RenderingServiceData data = getData(nodeId,nodeVersion,AuthenticationUtil.getFullyAuthenticatedUser());
+			RenderingServiceData data = getData(nodeId,nodeVersion,AuthenticationUtil.getFullyAuthenticatedUser(),RenderingTool.DISPLAY_DYNAMIC);
 			return getDetails(renderingServiceUrl, data);
 		}catch(Throwable t) {
 			logger.warn(t);
@@ -139,7 +128,7 @@ public class RenderingServiceImpl implements RenderingService{
 		}
 	}
 	@Override
-	public RenderingServiceData getData(String nodeId, String nodeVersion, String user) throws Exception {
+	public RenderingServiceData getData(String nodeId, String nodeVersion, String user, String displayMode) throws Exception {
 		long time=System.currentTimeMillis();
 		RenderingServiceData data=new RenderingServiceData();
 		RepositoryDao repoDao = RepositoryDao.getRepository(appInfo.getAppId());
@@ -153,7 +142,7 @@ public class RenderingServiceImpl implements RenderingService{
 		data.setMetadataHTML(new MetadataTemplateRenderer(
 				MetadataHelper.getMetadataset(
 						appInfo,node.getMetadataset()==null ? CCConstants.metadatasetdefault_id : node.getMetadataset()),
-				nodeDao.getAllProperties()).render("io_render"));
+				nodeDao.getAllProperties()).render(RenderingTool.DISPLAY_INLINE.equals(displayMode) ? "io_render_inline" : "io_render"));
 
 		// user
 		data.setUser(PersonDao.getPerson(RepositoryDao.getHomeRepository(),user).asPersonSimple());
