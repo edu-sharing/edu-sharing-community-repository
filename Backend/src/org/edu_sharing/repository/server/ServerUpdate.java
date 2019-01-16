@@ -58,6 +58,7 @@ import org.edu_sharing.repository.update.Release_3_2_DefaultScope;
 import org.edu_sharing.repository.update.Release_3_2_FillOriginalId;
 import org.edu_sharing.repository.update.Release_4_1_FixClassificationKeywordPrefix;
 import org.edu_sharing.repository.update.Release_4_2_PersonStatusUpdater;
+import org.edu_sharing.repository.update.Release_5_0_NotifyRefactoring;
 import org.edu_sharing.repository.update.SystemFolderNameToDisplayName;
 import org.edu_sharing.repository.update.Update;
 import org.springframework.context.ApplicationContext;
@@ -75,7 +76,7 @@ public class ServerUpdate extends HttpServlet implements SingleThreadModel {
 
 		out = resp.getWriter();
 	
-		Update[] avaiableUpdates = new Update[]{new Licenses1(out),new Licenses2(out),new ClassificationKWToGeneralKW(out), new SystemFolderNameToDisplayName(out), new Release_1_6_SystemFolderNameRename(out),new Release_1_7_UnmountGroupFolders(out), new  Edu_SharingAuthoritiesUpdate(out), new Release_1_7_SubObjectsToFlatObjects(out), new RefreshMimetypPreview(out), new KeyGenerator(out), new FixMissingUserstoreNode(out), new FolderToMap(out), new Edu_SharingPersonEsuidUpdate(out), new Release_3_2_FillOriginalId(out), new Release_3_2_DefaultScope(out), new Release_4_1_FixClassificationKeywordPrefix(out), new Release_4_2_PersonStatusUpdater(out)};
+		Update[] avaiableUpdates = new Update[]{new Licenses1(out),new Licenses2(out),new ClassificationKWToGeneralKW(out), new SystemFolderNameToDisplayName(out), new Release_1_6_SystemFolderNameRename(out),new Release_1_7_UnmountGroupFolders(out), new  Edu_SharingAuthoritiesUpdate(out), new Release_1_7_SubObjectsToFlatObjects(out), new RefreshMimetypPreview(out), new KeyGenerator(out), new FixMissingUserstoreNode(out), new FolderToMap(out), new Edu_SharingPersonEsuidUpdate(out), new Release_3_2_FillOriginalId(out), new Release_3_2_DefaultScope(out), new Release_4_1_FixClassificationKeywordPrefix(out), new Release_4_2_PersonStatusUpdater(out), new Release_5_0_NotifyRefactoring(out)};
 
 		ticket = (String)req.getSession().getAttribute(CCConstants.AUTH_TICKET);
 		

@@ -75,6 +75,6 @@ public abstract class UpdateAbstract implements Update {
 	
 	}
 	
-	public abstract void run();
+	public abstract void run() throws Throwable;
 	
 }

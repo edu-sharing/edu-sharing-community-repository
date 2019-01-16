@@ -121,7 +121,7 @@
                  [class.dark-color]="isCollection(node) && getCollection(node).preview.isIcon && isBrightColorCollection(getCollectionColor(node))"
                  [title]="viewType==0 ? '' : getTitle(node)"
                  [draggable]="dragDrop"
-                 (click)="select(node,false)"
+                 (click)="select(node)"
                  (dblclick)="doubleClick(node)"
                  (dragend)="dragHover=null"
                  (dragexit)="dragHover=null"
