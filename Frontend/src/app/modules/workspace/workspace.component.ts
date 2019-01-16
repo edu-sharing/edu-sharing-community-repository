@@ -93,9 +93,8 @@ export class WorkspaceMainComponent implements EventListener{
     private nodeDisplayedVersion : string;
     private createAllowed : boolean;
     private currentFolder : any|Node;
-    private currentFolderRef : any|string;
     private user : IamUser;
-    public searchQuery : string;
+    public searchQuery : any;
     public isSafe = false;
     private isLoggedIn = false;
     public addNodesToCollection : Node[];
@@ -462,6 +461,9 @@ export class WorkspaceMainComponent implements EventListener{
                                 if(params['root'] && WorkspaceMainComponent.VALID_ROOTS.indexOf(params['root'])!=-1) {
                                     this.root = params['root'];
                                 }
+                                else{
+                                    this.root = "MY_FILES";
+                                }
                                 if(params['reurl']) {
                                     this.reurl = params['reurl'];
                                 }
@@ -479,17 +481,7 @@ export class WorkspaceMainComponent implements EventListener{
                                 if(!needsUpdate)
                                     return;
 
-                                this.searchQuery='';
-                                if(params['query']) {
-                                    this.searchQuery=params['query'];
-                                    this.doSearchFromRoute(this.searchQuery);
-                                }
-                                else if(params['id']) {
-                                    this.openDirectoryFromRoute(params['id']);
-                                }
-                                else{
-                                    this.openDirectoryFromRoute("");
-                                }
+                                this.openDirectoryFromRoute(params);
                                 if(params['showAlpha']){
                                     this.showAlpha();
                                 }
@@ -506,26 +498,31 @@ export class WorkspaceMainComponent implements EventListener{
     }
 
     public doSearch(query:any){
-        this.routeTo(this.root,null,query.query);
+        let id=this.currentFolder ? this.currentFolder.ref.id :
+                    this.searchQuery && this.searchQuery.node ? this.searchQuery.node.ref.id : null;
+        this.routeTo(this.root,id,query.query);
         if(!query.cleared){
             this.ui.hideKeyboardIfMobile();
         }
     }
-    private doSearchFromRoute(query:string){
-        this.searchQuery=query;
+    private doSearchFromRoute(params:any,node:Node|any){
+        node=this.isRootFolder ? null : node;
+        this.searchQuery={
+            query:params['query'],
+            node:node
+        };
+        if(node==null){
+            this.root='ALL_FILES';
+        }
         this.createAllowed=false;
         this.path=[];
         this.selection=[];
-        this.currentFolder=null;
         this.actionOptions = this.getOptions(null,false);
 
+        /*
         if(this.root=='MY_SHARED_FILES' || this.root=='SHARED_FILES')
             this.root='MY_FILES';
-        if(!this.searchQuery){
-            this.openDirectory(null);
-            return;
-        }
-
+        */
     }
     private manageContributorsNode(node: Node) {
         let list=this.getNodeList(node);
@@ -642,7 +639,7 @@ export class WorkspaceMainComponent implements EventListener{
 
     private pasteNode(position=0){
         let clip=(this.storage.get("workspace_clipboard") as ClipboardObject);
-        if(this.searchQuery || this.isRootFolder)
+        if(this.searchQuery || (this.isRootFolder && this.root!=RestConstants.USERHOME))
             return;
         if(!clip || !clip.nodes.length)
             return;
@@ -932,14 +929,17 @@ export class WorkspaceMainComponent implements EventListener{
         this.infoToggle.icon='info_outline';
     }
     private openDirectory(id:string){
-        this.routeTo(this.root, id ? id : null);
+        this.routeTo(this.root, id);
     }
-    private openDirectoryFromRoute(id : string,createRoute = true){
+    searchGlobal(query:string){
+        this.routeTo(this.root,null,query);
+    }
+    private openDirectoryFromRoute(params : any){
+        let id=params['id'];
         this.selection=[];
         this.closeMetadata();
         this.createAllowed = false;
         this.actionOptions = this.getOptions(null,false);
-        let hasId=id;
         if(!id){
             this.path=[];
             id=this.getRootFolderId();
@@ -956,15 +956,12 @@ export class WorkspaceMainComponent implements EventListener{
                 this.path=[];
             });
         }
-
-        this.searchQuery=null;
         this.currentFolder=null;
         this.allowBinary=true;
         let root=WorkspaceMainComponent.VALID_ROOTS_NODES.indexOf(id)!=-1;
-        if(!root || id==RestConstants.USERHOME) {
+        if(!root) {
             this.isRootFolder=false;
             console.log("open path: "+id);
-            this.currentFolderRef=id;
             this.node.getNodeMetadata(id).subscribe((data: NodeWrapper) => {
                 this.mds.getSet(data.node.metadataset ? data.node.metadataset : RestConstants.DEFAULT).subscribe((mds:any)=>{
                     if(mds.create) {
@@ -973,14 +970,11 @@ export class WorkspaceMainComponent implements EventListener{
                             console.log("mds does not allow binary files, will switch mode");
                     }
                 });
-                this.currentFolder = data.node;
-                this.event.broadcastEvent(FrameEventsService.EVENT_NODE_FOLDER_OPENED, this.currentFolder);
-                this.createAllowed = NodeHelper.getNodesRight([this.currentFolder], RestConstants.ACCESS_ADD_CHILDREN);
+                this.updateNodeByParams(params,data.node);
+                this.createAllowed = NodeHelper.getNodesRight([data.node], RestConstants.ACCESS_ADD_CHILDREN);
                 this.actionOptions = this.getOptions(this.selection, false);
             }, (error: any) => {
-                this.currentFolder = {ref: {id: id}};
-                this.event.broadcastEvent(FrameEventsService.EVENT_NODE_FOLDER_OPENED, this.currentFolder);
-                this.searchQuery = null;
+                this.updateNodeByParams(params,{ref: {id: id}});
             });
         }
         else{
@@ -989,10 +983,7 @@ export class WorkspaceMainComponent implements EventListener{
             if(id==RestConstants.USERHOME){
                 this.createAllowed = true;
             }
-            this.currentFolder = {ref: {id: id}};
-            this.currentFolderRef = id;
-            this.event.broadcastEvent(FrameEventsService.EVENT_NODE_FOLDER_OPENED, this.currentFolder);
-            this.searchQuery = null;
+            this.updateNodeByParams(params,{ref: {id: id}});
         }
 
     }
@@ -1047,9 +1038,7 @@ export class WorkspaceMainComponent implements EventListener{
     private refresh(refreshPath=true) {
         let search=this.searchQuery;
         let folder=this.currentFolder;
-        let ref=this.currentFolderRef;
         this.currentFolder=null;
-        this.currentFolderRef=null;
         this.searchQuery=null;
         this.selection=[];
         this.actionOptions=this.getOptions(this.selection,false);
@@ -1059,7 +1048,6 @@ export class WorkspaceMainComponent implements EventListener{
         setTimeout(()=>{
             this.path=path;
             this.currentFolder=folder;
-            this.currentFolderRef=ref;
             this.searchQuery=search;
         });
     }
@@ -1078,12 +1066,10 @@ export class WorkspaceMainComponent implements EventListener{
     }
 
     private refreshRoute(){
-        console.log(this.isRootFolder);
-        this.routeTo(this.root,!this.isRootFolder && this.currentFolder ? this.currentFolder.ref.id : null,this.searchQuery);
+        this.routeTo(this.root,!this.isRootFolder && this.currentFolder ? this.currentFolder.ref.id : null,this.searchQuery.query);
     }
     private routeTo(root: string,node : string=null,search="") {
-        console.log("update route "+root+" "+node);
-        let params:any={root:root,id:node?node:"",viewType:this.viewType,query:search,mainnav:this.mainnav};
+        let params:any={root:root,id:node,viewType:this.viewType,query:search,mainnav:this.mainnav};
         if(this.reurl)
             params.reurl=this.reurl;
         this.router.navigate(["./"],{queryParams:params,relativeTo:this.route})
@@ -1186,6 +1172,17 @@ export class WorkspaceMainComponent implements EventListener{
 
     private hasOpenWindows() {
         return this.editNodeLicense || this.editNodeTemplate || this.editNodeMetadata || this.createConnectorName || this.showUploadSelect || this.dialogTitle || this.addFolderName || this.sharedNode || this.workflowNode;
+    }
+
+    private updateNodeByParams(params: any, node: Node|any) {
+        if(params['query']){
+            this.doSearchFromRoute(params,node);
+        }
+        else {
+            this.searchQuery=null;
+            this.currentFolder = node;
+            this.event.broadcastEvent(FrameEventsService.EVENT_NODE_FOLDER_OPENED, this.currentFolder);
+        }
     }
 }
 interface ClipboardObject{

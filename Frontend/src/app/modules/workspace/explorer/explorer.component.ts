@@ -10,6 +10,7 @@ import {SessionStorageService} from "../../../common/services/session-storage.se
 import {RestSearchService} from "../../../common/rest/services/rest-search.service";
 import {ConfigurationService} from "../../../common/services/configuration.service";
 import {ListItem} from "../../../common/ui/list-item";
+import {Helper} from "../../../common/helper";
 
 @Component({
   selector: 'workspace-explorer',
@@ -39,16 +40,16 @@ export class WorkspaceExplorerComponent  {
     }
   }
   public _searchQuery : string = null;
-  private _node : string;
+  private _node : Node;
   public hasMoreToLoad :boolean ;
   private offset : number;
   private lastRequestSearch : boolean;
   @Input() selection : Node[];
-  @Input() set current(current : string){
-   this.setNodeId(current);
+  @Input() set current(current : Node){
+   this.setNode(current);
 
   }
-  @Input() set searchQuery(query : string){
+  @Input() set searchQuery(query : any){
     this.setSearchQuery(query);
   }
   @Output() onOpenNode=new EventEmitter();
@@ -56,6 +57,7 @@ export class WorkspaceExplorerComponent  {
   @Output() onListChange=new EventEmitter();
   @Output() onSelectNode=new EventEmitter();
   @Output() onUpdateOptions=new EventEmitter();
+  @Output() onSearchGlobal=new EventEmitter();
   @Output() onDrop=new EventEmitter();
   @Output() onReset=new EventEmitter();
   private path : Node[];
@@ -64,6 +66,9 @@ export class WorkspaceExplorerComponent  {
   }
   public drop(event : any){
     this.onDrop.emit(event);
+  }
+  searchGlobal(){
+    this.onSearchGlobal.emit(this._searchQuery);
   }
   public load(reset : boolean){
     if(this._node==null && !this._searchQuery)
@@ -106,6 +111,9 @@ export class WorkspaceExplorerComponent  {
       [query,query,query,query,query],[],RestConstants.COMBINE_MODE_OR,RestConstants.CONTENT_TYPE_FILES_AND_FOLDERS, request).subscribe((data : NodeList) => this.addNodes(data,true));*/
     let criterias:any=[];
     criterias.push({'property': RestConstants.PRIMARY_SEARCH_CRITERIA, 'values': [query]});
+    if(this._node){
+        criterias.push({'property': 'parent', 'values': [this._node ? this._node.ref.id : ""]});
+    }
     this.search.search(criterias,[],request,this.connector.getCurrentLogin() && this.connector.getCurrentLogin().isAdmin ? RestConstants.CONTENT_TYPE_ALL : RestConstants.CONTENT_TYPE_FILES_AND_FOLDERS,RestConstants.HOME_REPOSITORY,
       RestConstants.DEFAULT,[],'workspace').subscribe((data:NodeList)=>{
       this.addNodes(data,true);
@@ -118,7 +126,7 @@ export class WorkspaceExplorerComponent  {
 	else{
     this.lastRequestSearch=false;
     console.log(this._node);
-    this.nodeApi.getChildren(this._node,[],request).subscribe((data : NodeList) => this.addNodes(data,false),
+    this.nodeApi.getChildren(this._node.ref.id,[],request).subscribe((data : NodeList) => this.addNodes(data,false),
       (error:any) => {
         this.totalCount=0;
         this.handleError(error);
@@ -128,7 +136,7 @@ export class WorkspaceExplorerComponent  {
 
     private handleError(error: any) {
         if (error.status == 404)
-            this.toast.error(null, "WORKSPACE.TOAST.NOT_FOUND", {id: this._node})
+            this.toast.error(null, "WORKSPACE.TOAST.NOT_FOUND", {id: this._node.ref.id})
         else
             this.toast.error(error);
 
@@ -288,37 +296,37 @@ export class WorkspaceExplorerComponent  {
   }
 
 
-  private setNodeId(current: string) {
+  private setNode(current: Node) {
     setTimeout(()=>{
-      if(this._searchQuery)
-        return;
+      this._searchQuery=null;
       if(!current) {
         this._node=null;
         return;
       }
       if(this.loading){
-        setTimeout(()=>this.setNodeId(current),10);
+        setTimeout(()=>this.setNode(current),10);
         return;
       }
-      if(this._node==current)
-        return;
-
-      this._node=current;
-      this._searchQuery=null;
-      this.load(true);
-    },5);
+      if(Helper.objectEquals(this._node,current))
+          return;
+        this._node=current;
+        this.load(true);
+    });
   }
 
-  private setSearchQuery(query: string) {
+  private setSearchQuery(query: any) {
     setTimeout(()=> {
       if (this.showLoading) {
         setTimeout(() => this.setSearchQuery(query), 10);
         return;
       }
-      this._searchQuery = query;
-      if (this._searchQuery) {
-        this._node = null;
+      if (query && query.query) {
+        this._searchQuery = query.query;
+        this._node=query.node;
         this.load(true);
+      }
+      else{
+        this._searchQuery=null;
       }
     });
   }

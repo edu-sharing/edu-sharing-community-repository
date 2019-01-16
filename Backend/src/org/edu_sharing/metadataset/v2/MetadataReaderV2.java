@@ -165,6 +165,10 @@ public class MetadataReaderV2 {
 					}
 					if(name.equals("ignorable"))
 						parameter.setIgnorable(Integer.parseInt(value));
+					if(name.equals("preprocessor"))
+						parameter.setPreprocessor(value);
+                    if(name.equals("mandatory"))
+                        parameter.setMandatory(value.equalsIgnoreCase("true"));
 					if(name.equals("exactMatching"))
 						parameter.setExactMatching(value.equalsIgnoreCase("true"));
 					if(name.equals("multiple"))
