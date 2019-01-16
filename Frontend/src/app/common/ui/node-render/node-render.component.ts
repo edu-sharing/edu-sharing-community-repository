@@ -445,9 +445,11 @@ export class NodeRenderComponent implements EventListener{
             if(!this.connector.getCurrentLogin().isGuest) {
                 let openFolder = new OptionItem('SHOW_IN_FOLDER', 'folder', () => this.goToWorkspace(login, this._node));
                 openFolder.isEnabled = false;
-                this.nodeApi.getNodeParents(this._node.parent.id, false, [], this._node.parent.repo).subscribe((data: NodeList) => {
-                    openFolder.isEnabled = true;
-                });
+                if(this._node.parent.id) {
+                    this.nodeApi.getNodeParents(this._node.parent.id, false, [], this._node.parent.repo).subscribe((data: NodeList) => {
+                        openFolder.isEnabled = true;
+                    });
+                }
 
                 if (this._node.type != RestConstants.CCM_TYPE_REMOTEOBJECT && ConfigurationHelper.hasMenuButton(this.config, "workspace"))
                     this.options.push(openFolder);
@@ -475,7 +477,7 @@ export class NodeRenderComponent implements EventListener{
         let addCollection = this.actionbar.createOptionIfPossible('ADD_TO_COLLECTION', [this._node], () => this.addToCollection = [this._node]);
         if (addCollection) {
             addCollection.showAsAction = false;
-            addCollection.isEnabled = this._node.type != RestConstants.CCM_TYPE_REMOTEOBJECT;
+            addCollection.isEnabled = addCollection.isEnabled && this._node.type != RestConstants.CCM_TYPE_REMOTEOBJECT;
             this.options.push(addCollection);
         }
         let variant = this.actionbar.createOptionIfPossible('CREATE_VARIANT', [this._node], () => this.nodeVariant = this._node);
