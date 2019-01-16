@@ -103,8 +103,8 @@ public class SearchServiceImpl implements SearchService {
 		parameters.setLanguage(org.alfresco.service.cmr.search.SearchService.LANGUAGE_LUCENE);
 		parameters.setMaxItems(Integer.MAX_VALUE);
 		parameters.addAllAttribute(CCConstants.CCM_PROP_AUTHORITYCONTAINER_EDUHOMEDIR);
-		parameters.setQuery("(TYPE:\"" + CCConstants.CCM_TYPE_IO + "\" OR TYPE:\"" + CCConstants.CCM_TYPE_MAP +"\") " +
-				 "AND @cm\\:creator:\"" + QueryParser.escape(username) + "\"");
+		parameters.setQuery("(TYPE:\"" + CCConstants.CCM_TYPE_IO + "\" OR TYPE:\"" + CCConstants.CCM_TYPE_MAP +"\") "
+				+ 	"AND @ccm\\:ph_user:\"" + QueryParser.escape(username) + "\"");
 		ResultSet resultSet = searchService.query(parameters);
 		
 		List<NodeRef> result = new ArrayList<>();
@@ -148,7 +148,8 @@ public class SearchServiceImpl implements SearchService {
 		parameters.addSort("@" + CCConstants.CCM_PROP_PH_MODIFIED, false);
 
 		parameters.setQuery("(TYPE:\"" + CCConstants.CCM_TYPE_IO +"\" OR TYPE:\"" + CCConstants.CCM_TYPE_MAP +"\") "
-				+ "AND NOT @cm\\:creator:\"" + QueryParser.escape(username) + "\"");
+				+ "AND ISNOTNULL:\"ccm:ph_user\" "
+				+ "AND NOT @ccm\\:ph_user:\"" + QueryParser.escape(username) + "\"");
 		ResultSet resultSet = searchService.query(parameters);
 		List<NodeRef> result = new ArrayList<NodeRef>();
 		for(NodeRef nodeRef : resultSet.getNodeRefs()) {

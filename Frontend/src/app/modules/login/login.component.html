@@ -48,5 +48,5 @@
         <a tabindex="0" class="btn-flat" *ngIf="config.register.local || config.register.recoverUrl" (click)="recoverPassword()" (keyup.enter)="recoverPassword()">{{'LOGIN.RECOVER_PASSWORD' | translate }}</a>
       </div>
   </div>
-  <powered-by mode="white"></powered-by>
+  <powered-by mode="white" [ngClass]="{'powered-down': config.register.local || config.register.registerUrl}"></powered-by>
   </div>
