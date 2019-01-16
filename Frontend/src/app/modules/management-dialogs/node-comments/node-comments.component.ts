@@ -157,7 +157,7 @@ export class NodeCommentsComponent  {
       setTimeout(()=>this.refresh(),100);
       return;
     }
-    this.commentsApi.getComments(this._node.ref.id).subscribe((data:Comments)=>{
+    this.commentsApi.getComments(this._node.ref.id,this._node.ref.repo).subscribe((data:Comments)=>{
       this.comments=data.comments;
       this.options=[];
       for(let comment of this.comments){
