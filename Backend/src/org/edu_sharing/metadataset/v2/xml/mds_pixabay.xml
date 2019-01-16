@@ -69,13 +69,14 @@
 			</template>
 			<template>
 				<id>node_general_render</id>
-				<caption>dialog_upload_tab_basic</caption>
+				<caption>tab_basic</caption>
 				<html><![CDATA[
               <cclom:title>
               <cclom:general_keyword>
               <license>
               <cclom:general_description>
               <sys:node-uuid>
+              <ccm:lifecyclecontributer_author>
 				]]></html>
 			</template>
 		</templates>
@@ -84,6 +85,18 @@
 				<id>ngsearch</id>
 				<views>
 					<view>search</view>
+				</views>
+			</group>
+			<group>
+				<id>io_render</id>
+				<views>
+					<view>node_general_render</view>
+				</views>
+			</group>
+			<group>
+				<id>io_render_inline</id>
+				<views>
+					<view>node_general_render</view>
 				</views>
 			</group>
 		</groups>
