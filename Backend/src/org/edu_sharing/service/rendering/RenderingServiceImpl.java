@@ -94,6 +94,7 @@ public class RenderingServiceImpl implements RenderingService{
 			RenderingServiceData data = getData(nodeId,nodeVersion,AuthenticationUtil.getFullyAuthenticatedUser());
 			return getDetails(renderingServiceUrl, data);
 		}catch(Throwable t) {
+			logger.warn(t);
 			return RenderingErrorServlet.errorToHTML(Context.getCurrentInstance().getRequest().getSession().getServletContext(),
 					new RenderingException(HttpServletResponse.SC_INTERNAL_SERVER_ERROR,t.getMessage(),RenderingException.I18N.unknown,t));
 			/*
@@ -155,7 +156,7 @@ public class RenderingServiceImpl implements RenderingService{
 				nodeDao.getAllProperties()).render("io_render"));
 
 		// user
-		data.setUser(PersonDao.getPerson(repoDao,user).asPersonSimple());
+		data.setUser(PersonDao.getPerson(RepositoryDao.getHomeRepository(),user).asPersonSimple());
 
 		// context/config
 		data.setConfigValues(ConfigServiceFactory.getCurrentConfig().values);

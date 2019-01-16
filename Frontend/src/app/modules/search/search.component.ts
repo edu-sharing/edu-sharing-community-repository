@@ -478,12 +478,14 @@ export class SearchComponent {
       this.switchToCollections(node.ref.id);
       return;
     }
+    /*
     let useRender=RestNetworkService.isFromHomeRepo(node,this.allRepositories) ||
       RestNetworkService.getRepositoryById(node.ref.repo,this.allRepositories) && RestNetworkService.getRepositoryById(node.ref.repo,this.allRepositories).repositoryType==RestConstants.REPOSITORY_TYPE_ALFRESCO;
     if(!useRender){
       UIHelper.openBlankWindow(node.contentUrl,this.connector.getCordovaService());
       return;
     }
+    */
     this.renderedNode = node;
     this.render_options=[];
     let queryParams={
