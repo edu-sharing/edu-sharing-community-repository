@@ -80,11 +80,11 @@ export class ActionbarHelperService{
     if(type=='ADD_TO_COLLECTION') {
       if (NodeHelper.allFiles(nodes) && !this.connector.getCurrentLogin().isGuest) {
         option = new OptionItem("WORKSPACE.OPTION.COLLECTION", "layers", callback);
-        option.isEnabled = NodeHelper.getNodesRight(nodes, RestConstants.ACCESS_CC_PUBLISH,true);
+        option.isEnabled = NodeHelper.getNodesRight(nodes, RestConstants.ACCESS_CC_PUBLISH,true) && RestNetworkService.allFromHomeRepo(nodes,this.repositories);
         option.showAsAction = true;
         option.enabledCallback = (node: Node) => {
           let list = ActionbarHelperService.getNodes(nodes, node);
-          return NodeHelper.getNodesRight(list,RestConstants.ACCESS_CC_PUBLISH,true);
+          return NodeHelper.getNodesRight(list,RestConstants.ACCESS_CC_PUBLISH,true) && RestNetworkService.allFromHomeRepo(list,this.repositories);
         }
         option.disabledCallback = () =>{
           this.connectors.getRestConnector().getToastService().error(null,'WORKSPACE.TOAST.ADD_TO_COLLECTION_DISABLED');
