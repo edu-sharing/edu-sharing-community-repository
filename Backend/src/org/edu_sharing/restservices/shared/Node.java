@@ -25,6 +25,7 @@ public class Node {
 
 	private NodeRef ref = null;
 	private NodeRef parent = null;
+	private Remote remote = null;
 	private String type = null;
 	private List<String> aspects = new ArrayList<String>();
 	private String name = null;
@@ -382,5 +383,13 @@ public class Node {
 
 	public void setLicense(License license) {
 		this.license = license;
+	}
+
+	public Remote getRemote() {
+		return remote;
+	}
+
+	public void setRemote(Remote remote) {
+		this.remote = remote;
 	}
 }

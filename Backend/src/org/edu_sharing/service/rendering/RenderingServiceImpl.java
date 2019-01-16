@@ -140,10 +140,7 @@ public class RenderingServiceImpl implements RenderingService{
 		);
 		// template
 		// switch to the remote appInfo (for shadow objects) so the mds is the right one
-		ApplicationInfo remoteApp=appInfo;
-		if(nodeDao.isFromRemoteRepository()){
-			remoteApp=ApplicationInfoList.getRepositoryInfoById(nodeDao.getRemoteRef().getRepo());
-		}
+		ApplicationInfo remoteApp=ApplicationInfoList.getRepositoryInfoById(nodeDao.getRepositoryDao().getId());
 		data.setMetadataHTML(new MetadataTemplateRenderer(
 				MetadataHelper.getMetadataset(
 						remoteApp,node.getMetadataset()==null ? CCConstants.metadatasetdefault_id : node.getMetadataset()),

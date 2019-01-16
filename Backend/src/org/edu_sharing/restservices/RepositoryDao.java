@@ -14,6 +14,7 @@ import org.edu_sharing.repository.server.authentication.Context;
 import org.edu_sharing.repository.server.tools.ApplicationInfo;
 import org.edu_sharing.repository.server.tools.ApplicationInfoList;
 import org.edu_sharing.repository.server.tools.URLTool;
+import org.edu_sharing.restservices.shared.Repo;
 import org.edu_sharing.service.collection.CollectionService;
 import org.edu_sharing.service.collection.CollectionServiceFactory;
 import org.edu_sharing.service.nodeservice.NodeService;
@@ -50,7 +51,8 @@ public class RepositoryDao {
 			
 			//WSClient is deprecated always use ApiClient, WS Impl of Service Tier is used
 			MCAlfrescoBaseClient baseClient = null;
-			
+
+			/*
 			//prevent when there is a runas user that authenticationService.validate (AuthenticationUtil) overwrites the runas user
 			if((AuthenticationUtil.isRunAsUserTheSystemUser() || "admin".equals(AuthenticationUtil.getRunAsUser())) 
 					&& ApplicationInfoList.getHomeRepository().getAppId().equals(appInfo.getAppId())){
@@ -61,11 +63,11 @@ public class RepositoryDao {
 						//ApplicationInfoList.getHomeRepository().getAppId(),
 						Context.getCurrentInstance().getRequest().getSession());
 			}
-					
-					
-					
+			*/
+			// 5.1: there is no other client anymore
+            baseClient = new MCAlfrescoAPIClient();
 
-			CollectionService collectionClient = CollectionServiceFactory.getCollectionService(appInfo.getAppId());
+            CollectionService collectionClient = CollectionServiceFactory.getCollectionService(appInfo.getAppId());
 			
 			RenderingService renderingClient = RenderingServiceFactory.getRenderingService(appInfo.getAppId());
 			
@@ -177,6 +179,21 @@ public class RepositoryDao {
 
 	public static RepositoryDao getHomeRepository() throws DAOException {
 		return RepositoryDao.getRepository(ApplicationInfoList.getHomeRepository().getAppId());
+	}
+
+	public Repo asRepo(){
+		Repo repo = new Repo();
+
+		repo.setId(getId());
+		//if(repository.isHomeRepo())
+		//	repo.setId(RepositoryDao.HOME);
+		repo.setTitle(getCaption());
+		repo.setIcon(getIcon());
+		repo.setLogo(getLogo());
+		repo.setHomeRepo(isHomeRepo());
+		repo.setRepositoryType(getRepositoryType());
+
+		return repo;
 	}
 	
 	

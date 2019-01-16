@@ -68,27 +68,31 @@ public class DateTool {
 			try{
 				result = ISO8601DateFormat.parse(dateString);
 			}catch(Exception e){
-				logger.info(dateString +" is no ISO String");
+				logger.debug(dateString +" is no ISO String");
 				
 				SimpleDateFormat df = new SimpleDateFormat("EEE MMM dd hh:mm:ss z yyyy",Locale.US);
 				try{
 					result = df.parse(dateString);
 				}catch(ParseException pe){
-					logger.info(dateString+" is no \"EEE MMM dd hh:mm:ss z yyyy\",Locale.US");
+					logger.debug(dateString+" is no \"EEE MMM dd hh:mm:ss z yyyy\",Locale.US");
 					DateFormat cetFormat = new SimpleDateFormat();
 					TimeZone cetTime = TimeZone.getTimeZone("CET");
 					cetFormat.setTimeZone(cetTime);
 					try{
 						result = cetFormat.parse(dateString);
 					}catch(ParseException pe2){
-						logger.info(dateString+" is no CET");
+						logger.debug(dateString+" is no CET");
 						DateFormat gmtFormat = new SimpleDateFormat();
 						TimeZone gmtTime = TimeZone.getTimeZone("GMT");
-						gmtFormat.setTimeZone(gmtTime);  
+						gmtFormat.setTimeZone(gmtTime);
 						try{
-							result = gmtFormat.parse(dateString);
-						}catch(ParseException pe3){
-							logger.info(dateString+" is no GMT. Dont know what to do!");
+							result = new Date(Long.parseLong(dateString));
+						}catch(Throwable pe3){
+							try{
+								result = gmtFormat.parse(dateString);
+							}catch(ParseException pe4){
+								logger.info(dateString+" is no GMT. Dont know what to do!");
+							}
 						}
 					}
 				}

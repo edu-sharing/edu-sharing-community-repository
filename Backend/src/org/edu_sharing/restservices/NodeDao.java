@@ -33,6 +33,8 @@ import org.edu_sharing.repository.client.tools.metadata.ValueTool;
 import org.edu_sharing.repository.server.AuthenticationToolAPI;
 import org.edu_sharing.repository.server.MCAlfrescoAPIClient;
 import org.edu_sharing.repository.server.SearchResultNodeRef;
+import org.edu_sharing.repository.server.tools.ApplicationInfo;
+import org.edu_sharing.repository.server.tools.ApplicationInfoList;
 import org.edu_sharing.repository.server.tools.ImageTool;
 import org.edu_sharing.repository.server.tools.NameSpaceTool;
 import org.edu_sharing.repository.server.tools.cache.PreviewCache;
@@ -81,7 +83,7 @@ public class NodeDao {
 	};
 	// id of the object by the remote repository (null if not a remote object)
 	private String remoteId;
-	private String remoteRepositoryId;
+	private RepositoryDao remoteRepository;
 
 	private String version;
 
@@ -398,7 +400,6 @@ public class NodeDao {
 			
 			this.nodeService = NodeServiceFactory.getNodeService(repoDao.getId());
 			this.permissionService = PermissionServiceFactory.getPermissionService(repoDao.getId());
-			this.permissionService = PermissionServiceFactory.getPermissionService(repoDao.getId());
 
 			/**
 			 * call getProperties on demand
@@ -419,9 +420,9 @@ public class NodeDao {
 			}
 			if(this.type.equals(CCConstants.CCM_TYPE_REMOTEOBJECT)){
 				this.remoteId=(String)this.nodeProps.get(CCConstants.CCM_PROP_REMOTEOBJECT_NODEID);
-				this.remoteRepositoryId=(String)this.nodeProps.get(CCConstants.CCM_PROP_REMOTEOBJECT_REPOSITORYID);
-				this.nodeService=NodeServiceFactory
-						.getNodeService(this.remoteRepositoryId);
+				this.remoteRepository=RepositoryDao.getRepository((String)this.nodeProps.get(CCConstants.CCM_PROP_REMOTEOBJECT_REPOSITORYID));
+				this.nodeService=NodeServiceFactory.getNodeService(this.remoteRepository.getId());
+				this.permissionService=PermissionServiceFactory.getPermissionService(this.remoteRepository.getId());
 				this.nodeProps = this.nodeService.getProperties(null,null, this.remoteId);
 			}
 			
@@ -774,6 +775,7 @@ public class NodeDao {
 	private void fillNodeObject(Node data) throws DAOException {
 		data.setRef(getRef());
 		data.setParent(getParentRef());
+		data.setRemote(getRemote());
 
 		data.setType(getType());
 		data.setIsDirectory(isDirectory());
@@ -816,6 +818,24 @@ public class NodeDao {
 			Collection collection=new CollectionDao(repoDao, getRef().getId(),this,data).asCollection();
 			data.setCollection(collection);
 		}
+	}
+	public RepositoryDao getRepositoryDao(){
+		return remoteRepository!=null ? remoteRepository : repoDao;
+	}
+	private Remote getRemote() throws DAOException {
+		if(!isFromRemoteRepository())
+			return null;
+		Remote remote=new Remote();
+		if(remoteId!=null){
+			remote.setId(remoteId);
+			remote.setRepository(remoteRepository.asRepo());
+		}
+		else {
+			// this is the case if NodeDao was already called via a remote ref (and not a shadow object)
+			remote.setId(getId());
+			remote.setRepository(repoDao.asRepo());
+		}
+		return remote;
 	}
 
 	private License getLicense() {
@@ -1040,16 +1060,6 @@ public class NodeDao {
 
 		return nodeRef;
 	}
-	public NodeRef getRemoteRef() throws DAOException {
-		if(!isFromRemoteRepository())
-			return null;
-		if(remoteId!=null){
-			return createNodeRef(remoteRepositoryId,false,remoteId);
-		}
-		// this is the case if NodeDao was already called via a remote ref (and not a shadow object)
-		return getRef();
-	}
-
 	private NodeRef getParentRef() {
 		return createNodeRef(repoDao,getParentId());
 	}
