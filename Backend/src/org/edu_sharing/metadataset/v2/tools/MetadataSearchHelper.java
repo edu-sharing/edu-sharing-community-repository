@@ -27,11 +27,8 @@ import org.edu_sharing.repository.client.rpc.SearchCriterias;
 import org.edu_sharing.repository.client.rpc.SuggestFacetDTO;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.server.tools.ApplicationInfoList;
-import org.edu_sharing.repository.server.tools.search.QueryValidationFailedException;
 import org.edu_sharing.restservices.shared.MdsQueryCriteria;
 import org.edu_sharing.service.search.SearchServiceFactory;
-import org.edu_sharing.service.search.SearchServiceImpl;
-import org.edu_sharing.service.search.model.SearchToken;
 import org.springframework.context.ApplicationContext;
 
 import com.google.gwt.user.client.ui.SuggestOracle;
