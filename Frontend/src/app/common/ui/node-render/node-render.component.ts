@@ -544,7 +544,7 @@ export class NodeRenderComponent implements EventListener{
     }
     this.checkConnector();
 
-    UIHelper.setTitleNoTranslation(this._node.name,this.title,this.config);
+    UIHelper.setTitleNoTranslation(RestHelper.getName(this._node),this.title,this.config);
   }
   setDownloadUrl(url:string){
       if(this.downloadButton!=null)
