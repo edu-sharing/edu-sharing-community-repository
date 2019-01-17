@@ -52,6 +52,7 @@ import org.edu_sharing.repository.server.AuthenticationToolAPI;
 import org.edu_sharing.repository.server.MCAlfrescoAPIClient;
 import org.edu_sharing.repository.server.SearchResultNodeRef;
 import org.edu_sharing.repository.server.tools.ApplicationInfoList;
+import org.edu_sharing.repository.server.tools.LogTime;
 import org.edu_sharing.restservices.MdsDao;
 import org.edu_sharing.restservices.shared.MdsQueryCriteria;
 import org.edu_sharing.service.Constants;
@@ -713,11 +714,12 @@ public class SearchServiceImpl implements SearchService {
 				}
 			}
 			ResultSet resultSet;
-			if (scoped)
-				resultSet = searchService.query(searchParameters);
-			else
-				resultSet = serviceRegistry.getSearchService().query(searchParameters);
-
+			resultSet=LogTime.log("Searching Solr with query: "+searchParameters.getQuery(),()-> {
+				if (scoped)
+					return searchService.query(searchParameters);
+				else
+					return serviceRegistry.getSearchService().query(searchParameters);
+			});
 			SearchResultNodeRef sr = new SearchResultNodeRef();
 			sr.setData(AlfrescoDaoHelper.unmarshall(resultSet.getNodeRefs(), ApplicationInfoList.getHomeRepository().getAppId()));
 			sr.setStartIDX(searchToken.getFrom());
