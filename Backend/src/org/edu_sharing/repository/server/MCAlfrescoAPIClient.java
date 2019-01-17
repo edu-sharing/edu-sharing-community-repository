@@ -4045,7 +4045,7 @@ public class MCAlfrescoAPIClient extends MCAlfrescoBaseClient {
 
 	public void setPreviewUrlWithoutTicket(StoreRef storeRef, String nodeId, HashMap<String, Object> properties) {
 		try {
-			properties.put(CCConstants.CM_ASSOC_THUMBNAILS, NodeServiceHelper.getPreview(new NodeRef(storeRef,nodeId)));
+			properties.put(CCConstants.CM_ASSOC_THUMBNAILS, NodeServiceHelper.getPreview(new NodeRef(storeRef,nodeId)).getUrl());
 			// @todo 5.1: Check if this is needed in the client
 			/*
 			GetPreviewResult prevResult = getPreviewUrl(storeRef, nodeId);

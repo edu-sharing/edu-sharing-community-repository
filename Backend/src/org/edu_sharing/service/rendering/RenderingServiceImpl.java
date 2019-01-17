@@ -83,7 +83,7 @@ public class RenderingServiceImpl implements RenderingService{
 			RenderingServiceData data = getData(nodeId,nodeVersion,AuthenticationUtil.getFullyAuthenticatedUser(),RenderingTool.DISPLAY_DYNAMIC);
 			return getDetails(renderingServiceUrl, data);
 		}catch(Throwable t) {
-			logger.warn(t);
+			logger.warn(t.getMessage(),t);
 			return RenderingErrorServlet.errorToHTML(Context.getCurrentInstance().getRequest().getSession().getServletContext(),
 					new RenderingException(HttpServletResponse.SC_INTERNAL_SERVER_ERROR,t.getMessage(),RenderingException.I18N.unknown,t));
 			/*

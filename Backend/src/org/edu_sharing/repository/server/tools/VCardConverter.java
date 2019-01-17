@@ -27,8 +27,7 @@
  */
 package org.edu_sharing.repository.server.tools;
 
-import java.io.IOException;
-import java.io.StringReader;
+import java.io.*;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -64,12 +63,17 @@ public class VCardConverter {
 		Document document = new DocumentImpl();
 		
 		if(vcardString == null || vcardString.trim().equals("")) return null;
-	
-		StringReader stringReader = new StringReader(vcardString);
+		Reader reader;
+		try {
+			// Fix library issues for cyrillic chars
+			reader = new InputStreamReader(new ByteArrayInputStream(vcardString.getBytes("UTF-8")));
+		}catch(Throwable t){
+			reader = new StringReader(vcardString);
+		}
 		
 		try{
-			
-			parser.parse(stringReader, document);
+
+			parser.parse(reader, document);
 		    result = new ArrayList<HashMap<String,Object>>();
 		    
 			AddressBook addressBook = new AddressBook(document);
