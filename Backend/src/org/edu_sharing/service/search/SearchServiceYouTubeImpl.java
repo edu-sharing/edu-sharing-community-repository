@@ -182,7 +182,7 @@ public class SearchServiceYouTubeImpl extends SearchServiceAdapter{
 				searchword = "Mathematik";
 			}
 			criterias.put(MetadataSetV2.DEFAULT_CLIENT_QUERY_CRITERIA, new String[] {searchword});
-			query = "ngsearch";
+			query = MetadataSetV2.DEFAULT_CLIENT_QUERY;
 		}
 		
 		List<MdsQueryCriteria> criterasConverted = MdsQueryCriteria.fromMap(criterias);

@@ -1,5 +1,6 @@
 package org.edu_sharing.repository.server;
 
+import java.io.ByteArrayOutputStream;
 import java.io.DataInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -28,6 +29,7 @@ import org.edu_sharing.repository.server.tools.security.SignatureVerifier;
 import org.edu_sharing.repository.server.tools.security.Signing;
 import org.edu_sharing.service.nodeservice.NodeServiceFactory;
 import org.springframework.context.ApplicationContext;
+import org.springframework.util.StreamUtils;
 
 
 public class ContentServlet extends HttpServlet{
@@ -91,8 +93,10 @@ public class ContentServlet extends HttpServlet{
 				String mimetype=NodeServiceFactory.getNodeService(repId).getContentMimetype(null,null,nodeId);
 				InputStream is = NodeServiceFactory.getNodeService(repId).getContent(null, null, nodeId, null, ContentModel.PROP_CONTENT.toString());
 				resp.setContentType((mimetype != null) ? mimetype : "application/octet-stream");
-				resp.setContentLength((int) is.available());
-				IOUtils.copy(is,resp.getOutputStream());
+				ByteArrayOutputStream bos = new ByteArrayOutputStream();
+				StreamUtils.copy(is,bos);
+				resp.setContentLength(bos.size());
+				StreamUtils.copy(bos.toByteArray(),resp.getOutputStream());
 				is.close();
 			}
 			else {
