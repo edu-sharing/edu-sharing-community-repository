@@ -105,11 +105,22 @@ public class MetadataSearchHelper {
 	 * @return
 	 */
 	private static String getStatmentForValue(MetadataQueryParameter parameter, String value) {
-		if(value==null) {
-			throw new java.lang.IllegalArgumentException("null value for "+parameter.getName()+" given, null values are not allowed");
+		if(value==null && parameter.isMandatory()) {
+			throw new java.lang.IllegalArgumentException("null value for mandatory parameter "+parameter.getName()+" given, null values are not allowed if mandatory is set to true");
 		}
+		if(value==null)
+		    return "";
+
+		// invoke any preprocessors for this value
+		try {
+			value = MetadataQueryPreprocessor.run(parameter, value);
+		}catch(Exception e){
+			throw new RuntimeException(e);
+		}
+
 		if(value.startsWith("\"") && value.endsWith("\"") || parameter.isExactMatching())
 			return parameter.getStatement(value).replace("${value}", QueryParser.escape(value));
+
 		String[] words = value.split(" ");
 		String query="";
 		for(String word : words) {
