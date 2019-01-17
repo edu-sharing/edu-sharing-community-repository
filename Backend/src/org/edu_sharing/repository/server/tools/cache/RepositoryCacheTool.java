@@ -76,7 +76,7 @@ public class RepositoryCacheTool {
 		}
 	}
 
-	private static final int THREAD_COUNT = Math.max(1, Math.min(6, Runtime.getRuntime().availableProcessors() - 1));
+	private static final int THREAD_COUNT = Math.max(1, Math.min(4, Runtime.getRuntime().availableProcessors() - 1));
 	private ExecutorService executor = Executors.newFixedThreadPool(THREAD_COUNT, r -> {
 		Thread t = new Thread(r);
 		t.setPriority(Thread.NORM_PRIORITY - 1);
@@ -108,6 +108,7 @@ public class RepositoryCacheTool {
 
 		long time = System.currentTimeMillis();
 
+		logger.info("THREAD_COUNT:" + THREAD_COUNT);
 		int modulo = (childAssocRefs.size() > THREAD_COUNT) ? (int) (childAssocRefs.size() / THREAD_COUNT) : 2;
 
 		List<List<String>> threadNodes = new ArrayList<>();
