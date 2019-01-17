@@ -151,14 +151,14 @@ public class RepositoryCacheTool {
 						for (String cr : childRefPage) {
 							long startMillies = System.currentTimeMillis();
 
-							logger.info("	starting getChildrenRecursive for folder:" + nodeService
+							logger.info("thread nr:" + nr + "	starting getChildrenRecursive for folder:" + nodeService
 									.getProperty(new NodeRef(Constants.storeRef, cr), ContentModel.PROP_NAME));
 
 							try {
 								apiClient.getChildrenRecursive(MCAlfrescoAPIClient.storeRef, cr,
 										CCConstants.CCM_TYPE_IO, null, true);
 							} catch (Throwable e) {
-								logger.error(e.getMessage(), e);
+								logger.error("thread nr:" + nr + e.getMessage(), e);
 							}
 							long endMillies = System.currentTimeMillis();
 							long diff = (endMillies - startMillies) / 1000;
