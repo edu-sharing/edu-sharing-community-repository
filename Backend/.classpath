@@ -17,7 +17,6 @@
 	<classpathentry exported="true" kind="lib" path="lib/org.restlet.ext.servlet.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/org.restlet.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/serializer.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/vcard4j-1_1_3.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/wsdl4j-1.5.1.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/xalan.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/htmlunit-2.13.jar"/>

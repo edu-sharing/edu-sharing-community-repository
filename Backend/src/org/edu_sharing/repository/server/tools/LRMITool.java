@@ -2,7 +2,6 @@ package org.edu_sharing.repository.server.tools;
 
 import com.google.gson.JsonObject;
 import com.google.gwt.json.client.JSONNull;
-import net.sf.vcard4j.java.VCard;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.repository.StoreRef;
 import org.apache.commons.lang.StringUtils;
