@@ -90,8 +90,8 @@ public class VCardConverter {
 				vcardMap.put(propPrefix + CCConstants.VCARD_TEL, (tel != null) ? tel : "");
 				vcardMap.put(propPrefix + CCConstants.VCARD_URL, (url != null) ? url : "");
 
-				if (extendedData.get(CCConstants.VCARD_EXT_LOM_CONTRIBUTE_DATE) != null) {
-					vcardMap.put(propPrefix + CCConstants.VCARD_EXT_LOM_CONTRIBUTE_DATE,extendedData.get(CCConstants.VCARD_EXT_LOM_CONTRIBUTE_DATE));
+				if (extendedData.get(CCConstants.VCARD_T_X_ES_LOM_CONTRIBUTE_DATE) != null) {
+					vcardMap.put(propPrefix + CCConstants.VCARD_EXT_LOM_CONTRIBUTE_DATE,extendedData.get(CCConstants.VCARD_T_X_ES_LOM_CONTRIBUTE_DATE));
 				}
 
 				result.add(vcardMap);
