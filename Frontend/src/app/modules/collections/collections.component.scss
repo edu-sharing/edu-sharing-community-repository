@@ -118,6 +118,10 @@ table, div {
   border-radius: 50%;
   background-color: #fff;
   @include unselectableText();
+  >i{
+    font-size: 75px;
+    margin-top: 38px;
+  }
 }
 .collection-header-image{
   position: relative;
