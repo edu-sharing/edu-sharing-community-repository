@@ -72,8 +72,9 @@ public class NodeDao {
 			org.alfresco.service.cmr.security.PermissionService.CHANGE_PERMISSIONS,
 			org.alfresco.service.cmr.security.PermissionService.WRITE,
 			org.alfresco.service.cmr.security.PermissionService.DELETE,
-			CCConstants.PERMISSION_CC_PUBLISH};
-
+			CCConstants.PERMISSION_CC_PUBLISH,
+			CCConstants.PERMISSION_READ_ALL
+	};
 	public static NodeDao getNode(RepositoryDao repoDao, String nodeId)
 			throws DAOException {
 		return getNode(repoDao, nodeId, new Filter());
