@@ -334,7 +334,13 @@ export class CollectionNewComponent {
            this.collectionService.uploadCollectionImage(collection.ref.id, this.imageFile, "image/png").subscribe(() => {
                this.navigateToCollectionId(collection.ref.id);
            });
-       } else {
+       }
+       else if(collection.preview==null){
+           this.collectionService.deleteCollectionImage(collection.ref.id).subscribe(() => {
+               this.navigateToCollectionId(collection.ref.id);
+           });
+       }
+       else {
           this.navigateToCollectionId(collection.ref.id);
         }
     }
@@ -542,7 +548,5 @@ export class CollectionNewComponent {
       this.imageFile = null;
       this.imageFileRef.nativeElement.value = null;
       this.currentCollection.preview = null;
-      //TODO @Simon: Delete Picture in Backend
-      return;
     }
 }
