@@ -76,7 +76,7 @@ public class RepositoryCacheTool {
 		}
 	}
 
-	private static final int THREAD_COUNT = Math.max(1, Math.min(4, Runtime.getRuntime().availableProcessors() - 1));
+	private static final int THREAD_COUNT = Math.max(1, Math.min(3, Runtime.getRuntime().availableProcessors() - 1));
 	private ExecutorService executor = Executors.newFixedThreadPool(THREAD_COUNT, r -> {
 		Thread t = new Thread(r);
 		t.setPriority(Thread.NORM_PRIORITY - 1);
