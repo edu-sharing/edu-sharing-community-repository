@@ -19,6 +19,7 @@ import org.edu_sharing.repository.server.tools.security.Signing;
 public class RenderingTool {
 	
 	public static String DISPLAY_DYNAMIC = "dynamic";
+	public static String DISPLAY_EMBED = "embed";
 	public static String DISPLAY_INLINE = "inline";
 	
 	public static String COM_INTERNAL = "internal";

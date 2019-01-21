@@ -68,7 +68,7 @@ public class RenderingServiceImpl implements RenderingService{
 	}
 	
 	@Override
-	public String getDetails(String nodeId,String nodeVersion,Map<String,String> parameters) throws InsufficientPermissionException, Exception{		
+	public String getDetails(String nodeId,String nodeVersion,String displayMode,Map<String,String> parameters) throws InsufficientPermissionException, Exception{
 		
 		if(!this.permissionService.hasPermission(StoreRef.PROTOCOL_WORKSPACE,StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(),nodeId,CCConstants.PERMISSION_READ)){
 			throw new InsufficientPermissionException("no read permission");
@@ -76,11 +76,11 @@ public class RenderingServiceImpl implements RenderingService{
 		String renderingServiceUrl = "";
 		try {
 			ApplicationInfo appInfo = ApplicationInfoList.getRepositoryInfoById(this.appInfo.getAppId());
-			renderingServiceUrl = new RenderingTool().getRenderServiceUrl(appInfo,nodeId,parameters,RenderingTool.DISPLAY_DYNAMIC);
+			renderingServiceUrl = new RenderingTool().getRenderServiceUrl(appInfo,nodeId,parameters,displayMode);
 			// base url for dynamic context routing of domains
 			renderingServiceUrl = UrlTool.setParam(renderingServiceUrl, "baseUrl",URLEncoder.encode(URLTool.getBaseUrl(true)));
 			logger.debug(renderingServiceUrl);
-			RenderingServiceData data = getData(nodeId,nodeVersion,AuthenticationUtil.getFullyAuthenticatedUser(),RenderingTool.DISPLAY_DYNAMIC);
+			RenderingServiceData data = getData(nodeId,nodeVersion,AuthenticationUtil.getFullyAuthenticatedUser(),displayMode);
 			return getDetails(renderingServiceUrl, data);
 		}catch(Throwable t) {
 			logger.warn(t.getMessage(),t);

@@ -488,6 +488,11 @@
 		<servlet-name>RenderingProxy</servlet-name>
 		<servlet-class>org.edu_sharing.repository.server.rendering.RenderingProxy</servlet-class>
 	</servlet>
+    <!-- servlet for just outputing rendering data, e.g. for playout or embed links -->
+    <servlet>
+        <servlet-name>RenderingServlet</servlet-name>
+        <servlet-class>org.edu_sharing.repository.server.rendering.RenderingServlet</servlet-class>
+    </servlet>
      <servlet>
     	<servlet-name>ExcelImport</servlet-name>
     	<servlet-class>org.edu_sharing.repository.server.ExcelImportServlet</servlet-class>   
@@ -594,6 +599,10 @@
     <servlet-mapping> 
         <servlet-name>CCSearchService</servlet-name>
         <url-pattern>/eduservlet/service</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>RenderingServlet</servlet-name>
+        <url-pattern>/eduservlet/render</url-pattern>
     </servlet-mapping>
     <servlet-mapping> 
         <servlet-name>SchoolContextService</servlet-name>
