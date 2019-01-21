@@ -22,7 +22,6 @@
   import {RestCollectionTestComponent} from "./common/rest/directives/rest-collection-test/rest-collection-test.component";
   import {RestIamTestComponent} from "./common/rest/directives/rest-iam-test/rest-iam-test.component";
   import {RestMdsTestComponent} from "./common/rest/directives/rest-mds-test/rest-mds-test.component";
-  import {AttributeHtmlPipe} from "./common/ui/attribute-html.pipe";
   import {RestArchiveTestComponent} from "./common/rest/directives/rest-archive-test/rest-archive-test.component";
   import {MdsTestComponent} from "./common/test/mds-test/mds-test.component";
   import {ModalDialogToastComponent} from "./common/ui/modal-dialog-toast/modal-dialog-toast.component";
@@ -55,7 +54,6 @@ export const DECLARATIONS = [
       RestCollectionTestComponent,
       RestIamTestComponent,
       RestMdsTestComponent,
-      AttributeHtmlPipe,
       CustomIconComponent,
       DebugResultPipe,
       FormatSizePipe,
