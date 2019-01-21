@@ -55,17 +55,17 @@ public class VCardConverter {
 				String familyName=vcard.getN().getFamilyName();
 				String givenName=vcard.getN().getGivenName();
 				String mail=null;
-				if(vcard.getEmails().size()>0){
+				if(vcard.getEmails()!=null && vcard.getEmails().size()>0){
 					mail=vcard.getEmails().get(0).getEmail();
 				}
-				String org=vcard.getOrg().getOrgName();
-				String title=vcard.getTitle().getTitle();
+				String org=vcard.getOrg()!=null ? vcard.getOrg().getOrgName() : null;
+				String title=vcard.getTitle()!=null ? vcard.getTitle().getTitle() : null;
 				String tel=null;
-				if(vcard.getTels().size()>0){
+				if(vcard.getTels()!=null && vcard.getTels().size()>0){
 					tel=vcard.getTels().get(0).getTelephone();
 				}
 				String url=null;
-				if(vcard.getUrls().size()>0){
+				if(vcard.getUrls()!=null && vcard.getUrls().size()>0){
 					url=vcard.getUrls().get(0).getRawUrl();
 				}
 				Map<String,String> extendedData=new HashMap<>();
@@ -74,7 +74,7 @@ public class VCardConverter {
 						extendedData.put(extended.getExtendedName(), extended.getExtendedValue());
 					}
 				}
-				AdrType adr = vcard.getAdrs().size()>0 ? vcard.getAdrs().get(0) : null;
+				AdrType adr = vcard.getAdrs()!=null && vcard.getAdrs().size()>0 ? vcard.getAdrs().get(0) : null;
 				vcardMap.put(propPrefix + CCConstants.VCARD_T_FN, (fn != null) ? fn : "");
 				vcardMap.put(propPrefix + CCConstants.VCARD_SURNAME, (familyName != null) ? familyName : "");
 				vcardMap.put(propPrefix + CCConstants.VCARD_GIVENNAME, (givenName != null) ? givenName : "");
