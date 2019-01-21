@@ -5,6 +5,7 @@ import org.apache.log4j.Logger;
 import org.edu_sharing.repository.server.tools.ApplicationInfo;
 import org.edu_sharing.repository.server.tools.ApplicationInfoList;
 import org.edu_sharing.repository.server.tools.LRMITool;
+import org.edu_sharing.repository.server.tools.URLTool;
 import org.json.JSONObject;
 
 import javax.servlet.ServletException;
@@ -31,6 +32,7 @@ public class NgServlet extends HttpServlet {
 			URL url = new URL(req.getRequestURL().toString());
 			if(url.getPath().contains("components/render/")){
 				html = addLRMI(html,url);
+				html = addEmbed(html,url);
 			}
 			if(req.getHeader("User-Agent")!=null){
 				if(req.getHeader("User-Agent").contains("cordova / edu-sharing-app")){
@@ -54,6 +56,12 @@ public class NgServlet extends HttpServlet {
 			t.printStackTrace();
 			resp.sendError(500, "Fatal error preparing index.html: "+t.getMessage());
 		}
+	}
+
+	private String addEmbed(String html, URL url) {
+		String[] path = url.getPath().split("/");
+		String nodeId = path[path.length - 1];
+		return addToHead("<link rel=\"alternate\" type=\"application/json+oembed\" href=\""+URLTool.getEduservletUrl()+"oembed?node_id="+nodeId+"\"/>",html);
 	}
 
 	private String addLRMI(String html, URL url) {

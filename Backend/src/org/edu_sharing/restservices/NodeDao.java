@@ -1167,7 +1167,7 @@ public class NodeDao {
 	private boolean isLink(){
 		return nodeProps.containsKey(CCConstants.CCM_PROP_IO_WWWURL);
 	}
-	private String getDownloadUrl(){
+	public String getDownloadUrl(){
 		if(isLink())
 			return null;
 		// no download url if user can not access the content
@@ -1408,7 +1408,7 @@ public class NodeDao {
 		return MimeTypesV2.getMimeType(nodeProps);
 	}
 	
-	private String getMediatype() {
+	public String getMediatype() {
 		return MimeTypesV2.getNodeType(type,nodeProps,aspects);
 	}
 

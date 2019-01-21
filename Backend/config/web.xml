@@ -261,7 +261,14 @@
        <filter-name>Edu-Sharing Guest Filter</filter-name>
        <url-pattern>/eduservlet/sitemap</url-pattern>
    </filter-mapping>
-   
+    <filter-mapping>
+        <filter-name>Edu-Sharing Guest Filter</filter-name>
+        <url-pattern>/eduservlet/oembed</url-pattern>
+    </filter-mapping>
+    <filter-mapping>
+        <filter-name>Edu-Sharing Guest Filter</filter-name>
+        <url-pattern>/eduservlet/render</url-pattern>
+    </filter-mapping>
    <filter-mapping>
        <filter-name>Edu-Sharing Authentication Filter</filter-name>
        <url-pattern>/search</url-pattern>
@@ -493,6 +500,11 @@
         <servlet-name>RenderingServlet</servlet-name>
         <servlet-class>org.edu_sharing.repository.server.rendering.RenderingServlet</servlet-class>
     </servlet>
+    <!-- servlet for oEmbed standard -->
+    <servlet>
+        <servlet-name>oEmbedServlet</servlet-name>
+        <servlet-class>org.edu_sharing.repository.server.oembed.oEmbedServlet</servlet-class>
+    </servlet>
      <servlet>
     	<servlet-name>ExcelImport</servlet-name>
     	<servlet-class>org.edu_sharing.repository.server.ExcelImportServlet</servlet-class>   
@@ -603,6 +615,10 @@
     <servlet-mapping>
         <servlet-name>RenderingServlet</servlet-name>
         <url-pattern>/eduservlet/render</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>oEmbedServlet</servlet-name>
+        <url-pattern>/eduservlet/oembed</url-pattern>
     </servlet-mapping>
     <servlet-mapping> 
         <servlet-name>SchoolContextService</servlet-name>
