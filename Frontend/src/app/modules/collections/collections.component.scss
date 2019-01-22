@@ -97,7 +97,8 @@ table, div {
 }
 
 .collections-header-textarea {
-    padding: 20px;
+  position: relative;
+  padding: 20px;
 }
 
 .collections-header-texttop {
@@ -125,8 +126,9 @@ table, div {
 }
 .collection-header-image{
   position: relative;
-  top: 50%;
-  transform: translateY(-50%);
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
 }
 .collection-new-preview-headline {
   font-size: 180%;
@@ -221,8 +223,9 @@ table, div {
 }
 .collection-option{
   position: absolute;
-  top: 160px;
+  top: -40px;
   right: 10px;
+  z-index: 1;
 }
 
 .collections-header  {
@@ -363,11 +366,6 @@ table, div {
 
     .collections-master-div-notabs {
         min-width: unset;
-    }
-    .collection-option{
-      position: absolute;
-      top: auto;
-      bottom: 120px;
     }
     .card-collection-image-container {
         height: 200px;

@@ -207,19 +207,18 @@
     </div>
 
     <div *ngIf="!collectionContent.collection.preview.isIcon" class="card-image-icon-container">
-      <img class="collection-header-image" [src]="collectionContent.collection.preview.url+'&crop=true&width=400&height=350'" (error)="collectionContent.collection.previewUrl=null" style="width: 100%; height: auto;" role="presentation"/>
+      <img class="collection-header-image" [src]="collectionContent.collection.preview.url+'&crop=true&width=400&height=350'" (error)="collectionContent.collection.previewUrl=null" role="presentation"/>
     </div>
       <div *ngIf="isAllowedToEditCollection()" (click)="collectionEdit()" class="big-edit-button"></div>
   </div>
-    <actionbar class="collection-option"
-               [options]="optionsCollection"
-               [numberOfAlwaysVisibleOptions]="1"
-               [numberOfAlwaysVisibleOptionsMobile]="1"
-               [appearance]="'round'"
-               [dropdownPosition]="'right'"
-    ></actionbar>
   <div class="collections-header-textarea">
-
+      <actionbar class="collection-option"
+                 [options]="optionsCollection"
+                 [numberOfAlwaysVisibleOptions]="1"
+                 [numberOfAlwaysVisibleOptionsMobile]="1"
+                 [appearance]="'round'"
+                 [dropdownPosition]="'right'"
+      ></actionbar>
     <div class="collection-new-preview-headline collections-header-texttop" style="overflow:hidden;">
       {{collectionContent.collection.title}}
     </div>

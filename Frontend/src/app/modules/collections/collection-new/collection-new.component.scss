@@ -217,6 +217,7 @@ $imagePath: '../../../../assets/images/collections/';
   position: relative;
   height:240px;
   background-color:white;
+  overflow: hidden;
 }
 
 .collection-new-preview-infoarea {
@@ -472,7 +473,7 @@ input[type="radio"] {
     }
   }
 }
-.profile-background{
+.blurred-image{
   display: none;
 }
 @media screen and (max-height: $mobileHeight + $mobileStage*1){
@@ -486,7 +487,7 @@ input[type="radio"] {
     height: 120px;
   }
   .card-image-icon-container{
-    margin-top: 20px;
+    margin-top: 10px;
     height: 100px;
     width: 100px;
     border-radius: 100px;
@@ -498,18 +499,16 @@ input[type="radio"] {
   .card-image-distance{
     height: 0;
   }
-  .profile-background{
+  .blurred-image{
     display: block;
-    width: 100%;
-    height: 140px;
-    filter: blur(12px);
-    left: 0;
+    filter: blur(8px);
   }
   .card-image-preview{
     height: 120px;
     width: auto;
     margin: auto;
     z-index: 1;
+    @include materialShadowLarge();
   }
   .collection-new-preview-infoline{
     margin-left: 15px;
