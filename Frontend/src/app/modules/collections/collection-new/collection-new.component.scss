@@ -395,7 +395,7 @@ $imagePath: '../../../../assets/images/collections/';
 
 .button-icon{
   position: absolute;
-  bottom: 15px;
+  bottom: 8px;
   right: 27px;
   z-index: 2;
 }
@@ -407,7 +407,7 @@ $imagePath: '../../../../assets/images/collections/';
   border-radius: 50%;
   @include clickable();
   @include materialShadowBottom();
-  margin-left: 10px;
+  margin-left: 8px;
   float: left;
   &:focus{
     @include setGlobalInsetFocus();
@@ -503,6 +503,7 @@ input[type="radio"] {
     width: 100%;
     height: 140px;
     filter: blur(12px);
+    left: 0;
   }
   .card-image-preview{
     height: 120px;
