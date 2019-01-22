@@ -77,7 +77,8 @@ public class RedirectServlet extends HttpServlet implements SingleThreadModel {
 		
 		String appId = req.getParameter("APP_ID");
 		String nodeId = req.getParameter("NODE_ID");
-		
+		String version = req.getParameter("version");
+
 		String username = (String)req.getSession().getAttribute(CCConstants.AUTH_USERNAME);
 		String ticket = (String)req.getSession().getAttribute(CCConstants.AUTH_TICKET);
 		
@@ -148,7 +149,7 @@ public class RedirectServlet extends HttpServlet implements SingleThreadModel {
                         for(NameValuePair pair : parsed){
                             if(pair.getName().equals("display") && pair.getValue().equals("download")){
                                 // Track download action for node
-                                TrackingServiceFactory.getTrackingService().trackActivityOnNode(new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE,nodeId),null,TrackingService.EventType.DOWNLOAD_MATERIAL);
+                                TrackingServiceFactory.getTrackingService().trackActivityOnNode(new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE,nodeId),version,TrackingService.EventType.DOWNLOAD_MATERIAL);
                                 break;
                             }
                         }
