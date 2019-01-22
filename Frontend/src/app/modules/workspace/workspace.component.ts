@@ -971,7 +971,7 @@ export class WorkspaceMainComponent implements EventListener{
                     }
                 });
                 this.updateNodeByParams(params,data.node);
-                this.createAllowed = NodeHelper.getNodesRight([data.node], RestConstants.ACCESS_ADD_CHILDREN);
+                this.createAllowed = !this.searchQuery && NodeHelper.getNodesRight([data.node], RestConstants.ACCESS_ADD_CHILDREN);
                 this.actionOptions = this.getOptions(this.selection, false);
             }, (error: any) => {
                 this.updateNodeByParams(params,{ref: {id: id}});
