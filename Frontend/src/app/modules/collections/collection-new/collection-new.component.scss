@@ -475,7 +475,7 @@ input[type="radio"] {
 .profile-background{
   display: none;
 }
-@media screen and (max-height: $mobileHeight){
+@media screen and (max-height: $mobileHeight + $mobileStage*1){
   .card, .card-high, .card-low {
     top:$mainnavHeight+15px;
   }
@@ -516,7 +516,11 @@ input[type="radio"] {
   }
 
 }
-
+@media screen and (max-height: $mobileHeight - $mobileStage*1){
+  .card, .card-high, .card-low {
+    top:0;
+  }
+}
 @media only screen and (max-width: $mobileTabSwitchWidth) {
   .collections-master-div{
     margin-bottom: $mobileTabNavHeight;

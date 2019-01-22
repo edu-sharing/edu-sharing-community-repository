@@ -11,6 +11,8 @@ public class MetadataQueryParameter {
 	private String multiplejoin;
 	private int ignorable;
 	private List<String> facets;
+	private String preprocessor;
+	private boolean mandatory = true;
 
 	public String getName() {
 		return name;
@@ -87,5 +89,21 @@ public class MetadataQueryParameter {
 
     public List<String> getFacets() {
         return facets;
+    }
+
+    public void setPreprocessor(String preprocessor) {
+        this.preprocessor = preprocessor;
+    }
+
+    public String getPreprocessor() {
+        return preprocessor;
+    }
+
+    public void setMandatory(boolean mandatory) {
+        this.mandatory = mandatory;
+    }
+
+    public boolean isMandatory() {
+        return mandatory;
     }
 }

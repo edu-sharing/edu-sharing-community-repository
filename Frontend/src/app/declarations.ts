@@ -16,7 +16,6 @@
   import {MdsComponent} from "./common/ui/mds/mds.component";
   import {ApplyToLmsComponent} from "./common/ui/apply-to-lms/apply-to-lms.component";
   import {ModalLoadingComponent} from "./common/ui/modal-loading/modal-loading.component";
-  import {AttributeHtmlPipe} from "./common/ui/attribute-html.pipe";
   import {MdsTestComponent} from "./common/test/mds-test/mds-test.component";
   import {ModalDialogToastComponent} from "./common/ui/modal-dialog-toast/modal-dialog-toast.component";
   import {ToolListComponent} from "./common/ui/tool-list/tool-list.component";
@@ -51,7 +50,6 @@
 export const DECLARATIONS = [
       MdsTestComponent,
       GlobalProgressComponent,
-      AttributeHtmlPipe,
       IconComponent,
       CalendarComponent,
       DebugResultPipe,

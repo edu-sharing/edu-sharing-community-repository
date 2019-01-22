@@ -150,7 +150,7 @@ export class RestAdminService extends AbstractRestService{
     return this.connector.post(query,null,this.connector.getRequestOptions());
   }
   public getCacheInfo(id : string){
-    let query=this.connector.createUrl("admin/:version/cacheInfo/:id",null,[[":id",id]]);
+    let query=this.connector.createUrl("admin/:version/cache/cacheInfo/:id",null,[[":id",id]]);
     return this.connector.get<CacheInfo>(query,this.connector.getRequestOptions());
   }
   public refreshAppInfo(){

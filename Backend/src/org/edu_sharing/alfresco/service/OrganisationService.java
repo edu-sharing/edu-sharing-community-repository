@@ -42,6 +42,8 @@ public class OrganisationService {
 
 	Logger logger = Logger.getLogger(OrganisationService.class);
 
+	boolean useOrgPrefix = true;
+	
 	public String createOrganization(String orgName, String groupDisplayName) throws Exception {
 		return createOrganization(orgName, groupDisplayName, null, null);
 	}
@@ -235,7 +237,11 @@ public class OrganisationService {
 		organisationName = organisationName.replaceFirst(PermissionService.GROUP_PREFIX, "");
 		organisationName = organisationName.replaceFirst(AuthorityService.ORG_GROUP_PREFIX, "");
 
-		return  PermissionService.GROUP_PREFIX + AuthorityService.ORG_GROUP_PREFIX + organisationName;
+		if(this.isUseOrgPrefix()) {
+			return  PermissionService.GROUP_PREFIX + AuthorityService.ORG_GROUP_PREFIX + organisationName;
+		}else {
+			return  PermissionService.GROUP_PREFIX + organisationName;
+		}
 	}
 
 	public List<String> getMyOrganisations(boolean scoped){
@@ -290,5 +296,13 @@ public class OrganisationService {
 
 	public void setPermissionService(PermissionService permissionService) {
 		this.permissionService = permissionService;
+	}
+	
+	public void setUseOrgPrefix(boolean useOrgPrefix) {
+		this.useOrgPrefix = useOrgPrefix;
+	}
+	
+	public boolean isUseOrgPrefix() {
+		return useOrgPrefix;
 	}
 }
