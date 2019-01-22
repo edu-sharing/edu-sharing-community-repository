@@ -696,8 +696,6 @@ export class ListTableComponent implements EventListener{
       else
         this.selectedNodes=[node];
       this.onSelectionChanged.emit(this.selectedNodes);
-      event.preventDefault();
-      event.stopPropagation();
       return;
     }
     let pos=this.getSelectedPos(node);
