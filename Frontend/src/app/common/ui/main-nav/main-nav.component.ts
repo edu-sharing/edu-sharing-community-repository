@@ -510,9 +510,9 @@ export class MainNavComponent implements AfterViewInit{
     if(button.isDisabled)
       return;
     this.displaySidebar=false;
-    if(button.scope==this._currentScope){
-      return;
-    }
+    // if(button.scope==this._currentScope){
+    //   return;
+    // }
     this.event.broadcastEvent(FrameEventsService.EVENT_VIEW_SWITCHED,button.scope);
     if(button.url){
       UIHelper.openBlankWindow(button.url,this.cordova);
