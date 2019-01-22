@@ -46,11 +46,8 @@
 }
 .breadcrumbMobile{
   display:none;
-  .folder{
-    margin-top: -3px;
-  }
 }
-@media screen and (max-width: $mobileWidth) {
+@media screen and (max-width: $mobileTabSwitchWidth) {
   .breadcrumbMobile{
     display:flex;
     align-items: center;
@@ -59,5 +56,8 @@
   }
   .breadcrumbDesktop{
     display:none;
+  }
+  .home i{
+    float: right;
   }
 }
