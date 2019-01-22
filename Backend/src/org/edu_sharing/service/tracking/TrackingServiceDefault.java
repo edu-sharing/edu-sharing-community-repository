@@ -48,7 +48,7 @@ public abstract class TrackingServiceDefault implements TrackingService{
     }
 
     @Override
-    public boolean trackActivityOnNode(NodeRef nodeRef, EventType type) {
+    public boolean trackActivityOnNode(NodeRef nodeRef,String nodeVersion, EventType type) {
         String value= nodeService.getProperty(nodeRef.getStoreRef().getProtocol(),nodeRef.getStoreRef().getIdentifier(),nodeRef.getId(),EVENT_PROPERTY_MAPPING.get(type));
         if(value==null)
             value="0";
