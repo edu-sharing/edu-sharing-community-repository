@@ -30,6 +30,13 @@ public class RenderingServlet extends HttpServlet {
                 params.put((String)key,req.getParameter((String)key));
             }
 
+            resp.getWriter().write("<html>");
+            resp.getWriter().write("<head>");
+            resp.getWriter().write("<style>");
+            resp.getWriter().write("body,html{margin:0; padding:0;}");
+            resp.getWriter().write("</style>");
+            resp.getWriter().write("</head>");
+            resp.getWriter().write("<body>");
             String response;
             try {
                 response = renderingService.getDetails(node_id, version,DEFAULT_DISPLAY_MODE, params);
@@ -40,5 +47,7 @@ public class RenderingServlet extends HttpServlet {
             }
             resp.setContentType("text/html");
             resp.getWriter().write(response);
+            resp.getWriter().write("</body>");
+            resp.getWriter().write("</html>");
         }
 }

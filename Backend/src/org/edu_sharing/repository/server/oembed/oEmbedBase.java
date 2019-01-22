@@ -2,7 +2,12 @@ package org.edu_sharing.repository.server.oembed;
 
 import javax.xml.bind.annotation.XmlRootElement;
 
-public abstract class oEmbedBase {
+@XmlRootElement
+public class oEmbedBase {
+    // fallback for the size when the content has no obtainable size (e.g. a pdf or document)
+    public static final int DEFAULT_SIZE = 700;
+    // default size for sending thumbnails
+    public static final int DEFAULT_THUMBNAIL_SIZE = 500;
     private String type;
     private String version="1.0";
     private String title;
@@ -14,7 +19,10 @@ public abstract class oEmbedBase {
     private String thumbnail_url;
     private int thumbnail_width;
     private int thumbnail_height;
-
+    private String url;
+    private String html;
+    private int width;
+    private int height;
 
     public String getType() {
         return type;
@@ -102,5 +110,37 @@ public abstract class oEmbedBase {
 
     public void setThumbnail_height(int thumbnail_height) {
         this.thumbnail_height = thumbnail_height;
+    }
+
+    public String getUrl() {
+        return url;
+    }
+
+    public void setUrl(String url) {
+        this.url = url;
+    }
+
+    public String getHtml() {
+        return html;
+    }
+
+    public void setHtml(String html) {
+        this.html = html;
+    }
+
+    public int getWidth() {
+        return width;
+    }
+
+    public void setWidth(int width) {
+        this.width = width;
+    }
+
+    public int getHeight() {
+        return height;
+    }
+
+    public void setHeight(int height) {
+        this.height = height;
     }
 }
