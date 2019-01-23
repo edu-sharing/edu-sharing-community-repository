@@ -1444,7 +1444,9 @@ public class PermissionServiceImpl implements org.edu_sharing.service.permission
 
 		NodeRef nodeRef = new NodeRef(Constants.storeRef, nodeId);
 		
+		boolean firstHistoryEntry = false;
 		if(!nodeService.hasAspect(nodeRef, QName.createQName(CCConstants.CCM_ASPECT_PERMISSION_HISTORY))) {
+			firstHistoryEntry = true;
 			nodeService.addAspect(nodeRef, QName.createQName(CCConstants.CCM_ASPECT_PERMISSION_HISTORY), null);
 		}
 		
@@ -1460,12 +1462,21 @@ public class PermissionServiceImpl implements org.edu_sharing.service.permission
 		try {
 			ACL acl = repoClient.getPermissions(nodeId);
 			List<ACE> directlySetAces = new ArrayList<ACE>();
+			
 			for(ACE ace : acl.getAces()) {
 				if(!ace.isInherited()) {
 					directlySetAces.add(ace);
 				}
 			}
-			acl.setAces(directlySetAces.toArray(new ACE[]{}));
+			
+			//include inherited for the first entry
+			if(firstHistoryEntry) {
+				acl.setAces(acl.getAces());
+			}else {
+				acl.setAces(directlySetAces.toArray(new ACE[]{}));
+			}
+			
+			
 			n.setAcl(acl);
 			n.setCreated(created);
 			n.setNotifyAction(action);
