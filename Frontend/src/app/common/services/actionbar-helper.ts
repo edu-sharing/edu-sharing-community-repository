@@ -65,7 +65,7 @@ export class ActionbarHelperService{
     }
 
     if(type=='ADD_TO_COLLECTION') {
-      if (!this.connector.getCurrentLogin().isGuest) {
+      if (this.connector.getCurrentLogin() && !this.connector.getCurrentLogin().isGuest) {
         option = new OptionItem("WORKSPACE.OPTION.COLLECTION", "layers", callback);
         option.isEnabled = NodeHelper.getNodesRight(nodes, RestConstants.ACCESS_CC_PUBLISH,true);
         option.showAsAction = true;
