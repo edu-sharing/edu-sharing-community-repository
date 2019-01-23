@@ -646,7 +646,7 @@ export class NodeHelper{
       return false;
   }
   public static getActionbarNodes(nodes:Node[],node:Node):Node[] {
-      return node ? [node] : nodes;
+      return node ? [node] : nodes && nodes.length ? nodes  : null;
   }
 }
 

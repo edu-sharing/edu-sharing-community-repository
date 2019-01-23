@@ -244,7 +244,7 @@ export class WorkspaceMainComponent implements EventListener{
         });
         this.connector.setRoute(this.route);
         this.globalProgress=true;
-        this.explorerOptions=this.getOptions([new Node()],true);
+        this.explorerOptions=this.getOptions(null,true);
         //this.nodeOptions.push(new OptionItem("DOWNLOAD", "cloud_download", (node:Node) => this.downloadNode(node)));
     }
     private uploadCamera(event:any){
@@ -756,7 +756,7 @@ export class WorkspaceMainComponent implements EventListener{
         }
     }
     public updateOptions(node : Node) : void{
-        this.explorerOptions=this.getOptions([node ? node : new Node()],true);
+        this.explorerOptions=this.getOptions(node ? [node] : null,true);
     }
 
 
@@ -821,35 +821,29 @@ export class WorkspaceMainComponent implements EventListener{
             if(edit.isEnabled)
                 options.push(edit);
         }
-        if(nodes && nodes.length && allFiles) {
-            let collection = this.actionbar.createOptionIfPossible('ADD_TO_COLLECTION', nodes, (node: Node) => this.addToCollection(node));
-            if (collection && !this.isSafe)
-                options.push(collection);
-        }
-        if(nodes && nodes.length && allFiles) {
-            let variant = this.actionbar.createOptionIfPossible('CREATE_VARIANT',nodes, (node: Node) => this.createVariant(node));
-            if (variant && !this.isSafe)
-                options.push(variant);
-        }
+        let collection = this.actionbar.createOptionIfPossible('ADD_TO_COLLECTION', nodes, (node: Node) => this.addToCollection(node));
+        if (collection && !this.isSafe)
+            options.push(collection);
+        let variant = this.actionbar.createOptionIfPossible('CREATE_VARIANT',nodes, (node: Node) => this.createVariant(node));
+        if (variant && !this.isSafe)
+            options.push(variant);
+
         let share:OptionItem;
-        if (nodes && nodes.length == 1) {
             let template = this.actionbar.createOptionIfPossible('NODE_TEMPLATE', nodes, (node: Node) => this.nodeTemplate(node));
-            if(template)
-                options.push(template);
-            share=this.actionbar.createOptionIfPossible('INVITE', nodes, (node: Node) => this.shareNode(node));
-            if(share) {
-                share.isEnabled = share.isEnabled && (
-                    (this.connector.hasToolPermissionInstant(RestConstants.TOOLPERMISSION_INVITE) && !this.isSafe)
-                    || (this.connector.hasToolPermissionInstant(RestConstants.TOOLPERMISSION_INVITE_SAFE) && this.isSafe)
-                );
-                //if (this.isSafe && this.root != 'SHARED_FILES')
-                //    share.isEnabled = false;
-                options.push(share);
-            }
-            /*let shareLink = ActionbarHelper.createOptionIfPossible('SHARE_LINK',nodes,this.connector,(node: Node) => this.setShareLinkNode(node));
-            if (shareLink && !this.isSafe)
-                options.push(shareLink);*/
+        if(template)
+            options.push(template);
+        share=this.actionbar.createOptionIfPossible('INVITE', nodes, (node: Node) => this.shareNode(node));
+        if(share) {
+            share.isEnabled = share.isEnabled && (
+                (this.connector.hasToolPermissionInstant(RestConstants.TOOLPERMISSION_INVITE) && !this.isSafe)
+                || (this.connector.hasToolPermissionInstant(RestConstants.TOOLPERMISSION_INVITE_SAFE) && this.isSafe)
+            );
+            options.push(share);
         }
+        /*let shareLink = ActionbarHelper.createOptionIfPossible('SHARE_LINK',nodes,this.connector,(node: Node) => this.setShareLinkNode(node));
+        if (shareLink && !this.isSafe)
+            options.push(shareLink);*/
+
         if(nodes) {
             let license = new OptionItem("WORKSPACE.OPTION.LICENSE", "copyright", (node: Node) => this.editLicense(node));
             license.isEnabled = !this.isSafe && allFiles && NodeHelper.getNodesRight(nodes, RestConstants.ACCESS_DELETE) && this.connector.hasToolPermissionInstant(RestConstants.TOOLPERMISSION_LICENSE);
@@ -868,10 +862,7 @@ export class WorkspaceMainComponent implements EventListener{
 
             this.infoToggle=new OptionItem("WORKSPACE.OPTION.METADATA", "info_outline", (node: Node) => this.openMetadata(node));
             this.infoToggle.isToggle=true;
-            //info.onlyMobile=!nodes[0].isDirectory;
             options.push(this.infoToggle);
-            //options[0].showAlways = true;
-
 
         }
         if(fromList || nodes && nodes.length) {
@@ -912,7 +903,8 @@ export class WorkspaceMainComponent implements EventListener{
     }
     private closeMetadata() {
         this.metadataNode=null;
-        this.infoToggle.icon='info_outline';
+        if(this.infoToggle)
+            this.infoToggle.icon='info_outline';
     }
     private openDirectory(id:string){
         this.routeTo(this.root, id);

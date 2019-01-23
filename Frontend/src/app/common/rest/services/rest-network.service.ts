@@ -1,6 +1,6 @@
 import {Injectable} from "@angular/core";
 import {RestConstants} from "../rest-constants";
-import {Observable} from "rxjs";
+import {Observable, Observer} from "rxjs";
 import {RestConnectorService} from "./rest-connector.service";
 import {IamUsers, IamAuthorities, OrganizationOrganizations, NetworkRepositories, Repository, Node, Application} from "../data-object";
 import {Helper} from "../../helper";
@@ -9,6 +9,7 @@ import {Service} from "../data-object";
 
 @Injectable()
 export class RestNetworkService extends AbstractRestService{
+  private static currentRepositories:Repository[];
   public static supportsImport(repository: string, repositories: Repository[]) {
     if(repositories==null)
       return false;
@@ -19,20 +20,20 @@ export class RestNetworkService extends AbstractRestService{
       }
       return false;
   }
-  static allFromHomeRepo(nodes: Node[],repositories:Repository[]) {
+  static allFromHomeRepo(nodes: Node[], repositories=this.currentRepositories) {
     for(let node of nodes) {
       if (!RestNetworkService.isHomeRepo(node.ref.repo, repositories))
         return false;
     }
     return true;
   }
-  static isFromHomeRepo(node: Node,repositories:Repository[]) {
+  static isFromHomeRepo(node: Node, repositories=this.currentRepositories) {
     if(node.ref && node.ref.isHomeRepo)
       return true;
     return RestNetworkService.isHomeRepo(node.ref.repo,repositories);
   }
 
-  static getRepositoryById(id: string, repositories: Repository[]) {
+  static getRepositoryById(id: string,  repositories=this.currentRepositories) {
     let i=Helper.indexOfObjectArray(repositories,'id',id);
     if(id==RestConstants.HOME_REPOSITORY){
       i=Helper.indexOfObjectArray(repositories,'isHomeRepo',true);
@@ -42,7 +43,7 @@ export class RestNetworkService extends AbstractRestService{
     return repositories[i];
   }
 
-  static isHomeRepo(repositoryId: string, repositories: Repository[]) {
+  static isHomeRepo(repositoryId: string, repositories=this.currentRepositories) {
     if(repositoryId==RestConstants.HOME_REPOSITORY)
       return true;
     if(!repositories)
@@ -57,8 +58,17 @@ export class RestNetworkService extends AbstractRestService{
         super(connector);
     }
     public getRepositories = () => {
-        let query = this.connector.createUrl("network/:version/repositories",null);
-        return this.connector.get<NetworkRepositories>(query, this.connector.getRequestOptions());
+        return new Observable<NetworkRepositories>((observer) => {
+            let query = this.connector.createUrl("network/:version/repositories", null);
+            return this.connector.get<NetworkRepositories>(query, this.connector.getRequestOptions()).subscribe((repositories) => {
+                RestNetworkService.currentRepositories = repositories.repositories;
+                observer.next(repositories);
+                observer.complete();
+            }, (error) => {
+                observer.error(error);
+                observer.complete();
+            });
+        });
     }
 
 
