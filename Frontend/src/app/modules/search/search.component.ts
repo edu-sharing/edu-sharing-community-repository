@@ -194,6 +194,9 @@ export class SearchComponent {
     this.currentValues=props;
     this.updateGroupedRepositories();
     this.routeSearchParameters(props);
+    if(UIHelper.evaluateMediaQuery(UIConstants.MEDIA_QUERY_MAX_WIDTH,UIConstants.MOBILE_WIDTH)){
+      this.searchService.sidenavOpened=false;
+    }
     //this.getSearch(null,true,props);
   }
   downloadNode() {
