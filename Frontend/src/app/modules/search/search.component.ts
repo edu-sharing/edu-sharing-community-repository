@@ -661,7 +661,6 @@ export class SearchComponent {
     if(collection) {
         collection.showCallback = (node: Node) => {
             let n=ActionbarHelperService.getNodes(nodes,node);
-            console.log("coll",n);
             if(n==null)
               return false;
             return this.addToCollection == null && !this.isGuest && RestNetworkService.allFromHomeRepo(n,this.allRepositories);

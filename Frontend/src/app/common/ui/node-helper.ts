@@ -501,10 +501,8 @@ export class NodeHelper{
                 return false;
             return true;
         }
-        if(item.showCallback(null))
-            options.splice(position, 0, item);
+        options.splice(position, 0, item);
       }
-
     }
   }
 
