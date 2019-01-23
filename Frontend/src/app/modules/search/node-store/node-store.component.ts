@@ -112,6 +112,7 @@ export class SearchNodeStoreComponent {
     this.iam.getNodeList(SearchNodeStoreComponent.LIST,{sortBy:[this.sortBy],sortAscending:this.sortAscending}).subscribe((data:NodeList)=>{
       this.nodes=data.nodes;
       this.loading=false;
+      this.updateActionOptions();
     });
   }
 }
