@@ -34,6 +34,14 @@ public class OnCopyMapPolicy implements OnCopyCompletePolicy{
 	@Override
 	public void onCopyComplete(QName classRef, NodeRef sourceNodeRef, NodeRef targetNodeRef, boolean copyToNewNode, Map<NodeRef, NodeRef> copyMap) {
 		nodeService.removeProperty(targetNodeRef, QName.createQName(CCConstants.CCM_PROP_MAP_TYPE));
+		
+		//remove old permissionhistory, current entry will be added by edu-sharing NodeDao
+		if(nodeService.hasAspect(targetNodeRef, QName.createQName(CCConstants.CCM_ASPECT_PERMISSION_HISTORY))) {
+			nodeService.removeProperty(targetNodeRef, QName.createQName(CCConstants.CCM_PROP_PH_HISTORY));
+			nodeService.removeProperty(targetNodeRef, QName.createQName(CCConstants.CCM_PROP_PH_ACTION));
+			nodeService.removeProperty(targetNodeRef, QName.createQName(CCConstants.CCM_PROP_PH_MODIFIED));
+			nodeService.removeProperty(targetNodeRef, QName.createQName(CCConstants.CCM_PROP_PH_USERS));
+		}
 	}
 	
 	public void setPolicyComponent(PolicyComponent policyComponent) {
