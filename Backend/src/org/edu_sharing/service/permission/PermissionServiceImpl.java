@@ -1444,14 +1444,16 @@ public class PermissionServiceImpl implements org.edu_sharing.service.permission
 
 		NodeRef nodeRef = new NodeRef(Constants.storeRef, nodeId);
 		
-		boolean firstHistoryEntry = false;
 		if(!nodeService.hasAspect(nodeRef, QName.createQName(CCConstants.CCM_ASPECT_PERMISSION_HISTORY))) {
-			firstHistoryEntry = true;
 			nodeService.addAspect(nodeRef, QName.createQName(CCConstants.CCM_ASPECT_PERMISSION_HISTORY), null);
 		}
 		
 		nodeService.setProperty(nodeRef, QName.createQName(CCConstants.CCM_PROP_PH_ACTION), action);
-		nodeService.setProperty(nodeRef, QName.createQName(CCConstants.CCM_PROP_PH_USER), user);
+		
+		ArrayList<String> phUsers = (ArrayList<String>)nodeService.getProperty(nodeRef, QName.createQName(CCConstants.CCM_PROP_PH_USERS));
+		if(phUsers == null) phUsers = new ArrayList<String>();
+		phUsers.add(user);
+		nodeService.setProperty(nodeRef, QName.createQName(CCConstants.CCM_PROP_PH_USERS), phUsers);
 		Date created = new Date();
 		nodeService.setProperty(nodeRef, QName.createQName(CCConstants.CCM_PROP_PH_MODIFIED), created);
 		

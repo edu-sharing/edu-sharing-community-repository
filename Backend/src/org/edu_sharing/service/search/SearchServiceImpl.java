@@ -105,7 +105,7 @@ public class SearchServiceImpl implements SearchService {
 		parameters.setMaxItems(Integer.MAX_VALUE);
 		parameters.addAllAttribute(CCConstants.CCM_PROP_AUTHORITYCONTAINER_EDUHOMEDIR);
 		parameters.setQuery("(TYPE:\"" + CCConstants.CCM_TYPE_IO + "\" OR TYPE:\"" + CCConstants.CCM_TYPE_MAP +"\") "
-				+ 	"AND @ccm\\:ph_user:\"" + QueryParser.escape(username) + "\"");
+				+ 	"AND @ccm\\:ph_users:\"" + QueryParser.escape(username) + "\"");
 		ResultSet resultSet = searchService.query(parameters);
 
 		List<NodeRef> result = new ArrayList<>();
@@ -149,8 +149,8 @@ public class SearchServiceImpl implements SearchService {
 		parameters.addSort("@" + CCConstants.CCM_PROP_PH_MODIFIED, false);
 
 		parameters.setQuery("(TYPE:\"" + CCConstants.CCM_TYPE_IO +"\" OR TYPE:\"" + CCConstants.CCM_TYPE_MAP +"\") "
-				+ "AND ISNOTNULL:\"ccm:ph_user\" "
-				+ "AND NOT @ccm\\:ph_user:\"" + QueryParser.escape(username) + "\"");
+				+ "AND ISNOTNULL:\"ccm:ph_users\" "
+				+ "AND NOT @ccm\\:ph_users:\"" + QueryParser.escape(username) + "\"");
 		ResultSet resultSet = searchService.query(parameters);
 		List<NodeRef> result = new ArrayList<NodeRef>();
 		for(NodeRef nodeRef : resultSet.getNodeRefs()) {

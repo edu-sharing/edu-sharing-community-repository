@@ -178,7 +178,11 @@ public class Release_5_0_NotifyRefactoring extends UpdateAbstract {
 					 */
 					if (i == (toSort.size() - 1)) {
 						nodeService.setProperty(nodeRef, QName.createQName(CCConstants.CCM_PROP_PH_ACTION), action);
-						nodeService.setProperty(nodeRef, QName.createQName(CCConstants.CCM_PROP_PH_USER), user);
+						
+						ArrayList<String> phUsers = (ArrayList<String>)nodeService.getProperty(nodeRef, QName.createQName(CCConstants.CCM_PROP_PH_USERS));
+						if(phUsers == null) phUsers = new ArrayList<String>();
+						phUsers.add(user);
+						nodeService.setProperty(nodeRef, QName.createQName(CCConstants.CCM_PROP_PH_USERS), phUsers);
 						nodeService.setProperty(nodeRef, QName.createQName(CCConstants.CCM_PROP_PH_MODIFIED), created);
 					}
 					nodeService.addAspect(entry.getKey(), ContentModel.ASPECT_TEMPORARY, null);
