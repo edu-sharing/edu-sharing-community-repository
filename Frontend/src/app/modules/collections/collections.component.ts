@@ -772,4 +772,12 @@ export class CollectionsMainComponent{
     private isAllowedToDeleteNodes(nodes: Node[]) {
         return this.isAllowedToDeleteCollection() || NodeHelper.getNodesRight(nodes,RestConstants.ACCESS_DELETE);
     }
+
+    getCollectionViewType() {
+        // on mobile, we will always show the small collection list
+        if(UIHelper.evaluateMediaQuery(UIConstants.MEDIA_QUERY_MAX_WIDTH,UIConstants.MOBILE_WIDTH)){
+            return ListTableComponent.VIEW_TYPE_GRID_SMALL;
+        }
+        return this.isRootLevelCollection() ? ListTableComponent.VIEW_TYPE_GRID : ListTableComponent.VIEW_TYPE_GRID_SMALL;
+    }
 }

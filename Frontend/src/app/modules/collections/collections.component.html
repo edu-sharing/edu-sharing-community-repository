@@ -78,7 +78,7 @@
                   [addElement]="isAllowedToEditCollection() ? createCollectionElement : null"
                   [hasHeading]="false"
                   [isLoading]="isLoading"
-                  [viewType]="isRootLevelCollection() ? 1 : 2"
+                  [viewType]="getCollectionViewType()"
                   [dragDrop]="true"
                   [canDrop]="canDropOnCollection"
                   (onDrop)="dropOnCollection($event)"
