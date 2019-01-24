@@ -42,7 +42,7 @@ public class RenderingServlet extends HttpServlet {
                 response = renderingService.getDetails(node_id, version,DEFAULT_DISPLAY_MODE, params);
                 response = response.replace("{{{LMS_INLINE_HELPER_SCRIPT}}}",URLTool.getNgRenderNodeUrl(node_id,version)+"?");
             } catch (Throwable t) {
-                response = RenderingErrorServlet.errorToHTML(req.getSession().getServletContext(),
+                response = RenderingErrorServlet.errorToHTML(req,
                         new RenderingException(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, t.getMessage(), RenderingException.I18N.unknown, t));
             }
             resp.setContentType("text/html");
