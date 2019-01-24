@@ -398,6 +398,10 @@ export class CollectionsMainComponent{
         return false;
       if(event.target.ref.id==this.collectionContent.collection.ref.id)
         return false;
+      // do not allow to move anything else than editorial collections into editorial collections
+      if(      event.source.type==RestConstants.COLLECTIONTYPE_EDITORIAL && event.target.type!=RestConstants.COLLECTIONTYPE_EDITORIAL
+            || event.source.type!=RestConstants.COLLECTIONTYPE_EDITORIAL && event.target.type==RestConstants.COLLECTIONTYPE_EDITORIAL)
+          return false;
       if(event.source.reference && event.source[0].access && event.source[0].access.indexOf(RestConstants.ACCESS_CC_PUBLISH)==-1)
         return false;
       if(!event.source.reference && event.source[0].access && event.source[0].access.indexOf(RestConstants.ACCESS_WRITE)==-1)
