@@ -32,10 +32,10 @@
       "EDU_ALL_LONG" : " all collections that are publicly available",
       "TYPE_EDITORIAL":"Editorial",
       "MY" : "My",
-      "EDU_GROUPS" : "Shared",
+      "EDU_GROUPS" : "Invited",
       "EDU_ALL" : "Public",
       "MY_SHORT" : "My",
-      "EDU_GROUPS_SHORT" : "Shared",
+      "EDU_GROUPS_SHORT" : "Invited",
       "EDU_ALL_SHORT" : "Public",
       "TYPE_EDITORIAL_SHORT":"Editorial"
     },
