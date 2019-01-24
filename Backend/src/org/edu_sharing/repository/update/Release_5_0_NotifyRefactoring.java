@@ -181,7 +181,7 @@ public class Release_5_0_NotifyRefactoring extends UpdateAbstract {
 						
 						ArrayList<String> phUsers = (ArrayList<String>)nodeService.getProperty(nodeRef, QName.createQName(CCConstants.CCM_PROP_PH_USERS));
 						if(phUsers == null) phUsers = new ArrayList<String>();
-						phUsers.add(user);
+						if(!phUsers.contains(user)) phUsers.add(user);
 						nodeService.setProperty(nodeRef, QName.createQName(CCConstants.CCM_PROP_PH_USERS), phUsers);
 						nodeService.setProperty(nodeRef, QName.createQName(CCConstants.CCM_PROP_PH_MODIFIED), created);
 					}
