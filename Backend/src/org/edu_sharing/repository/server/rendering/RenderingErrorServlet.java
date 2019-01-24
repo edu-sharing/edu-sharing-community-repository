@@ -20,29 +20,41 @@ public class RenderingErrorServlet extends HttpServlet {
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         RenderingException exception = (RenderingException) req
                 .getAttribute("javax.servlet.error.exception");
-        logger.warn(exception.getMessage(),exception);
-        if(exception.getNested()!=null){
-            logger.warn(exception.getNested().getMessage(),exception.getNested());
+        if(exception!=null) {
+            logger.warn(exception.getMessage(), exception);
+            if (exception.getNested() != null){
+                logger.warn(exception.getNested().getMessage(), exception.getNested());
+            }
         }
-        String html = errorToHTML(req.getSession().getServletContext(), exception);
+        String html = errorToHTML(req, exception);
 
         resp.setHeader("Content-Type","text/html");
-        resp.setStatus(exception.getStatusCode());
+        resp.setStatus(exception!=null ? exception.getStatusCode() : HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
         resp.getOutputStream().write(html.getBytes("UTF-8"));
     }
 
-    public static String errorToHTML(ServletContext context, RenderingException exception) {
+    public static String errorToHTML(HttpServletRequest req, RenderingException exception) {
         try {
-            String exceptionName="";
-            if(exception.getNested()!=null){
-                exceptionName=exception.getNested().getClass().getSimpleName();
-            }
-            File index = new File(context.getRealPath("rendering-error.html"));
+            File index = new File(req.getSession().getServletContext().getRealPath("rendering-error.html"));
             String html = FileUtils.readFileToString(index);
-            html = html.replace("{{statusCode}}", exception.getStatusCode() + "");
-            html = html.replace("{{message}}", I18nServer.getTranslationDefaultResourcebundleNoException("rendering_error_" + exception.getI18nName()));
-            html = html.replace("{{technicalMessage}}", exception.getTechnicalDetail());
-            html = html.replace("{{exception}}", exceptionName);
+            if(exception!=null) {
+                String exceptionName="";
+                if (exception.getNested() != null) {
+                    exceptionName = exception.getNested().getClass().getSimpleName();
+                }
+                html = html.replace("{{statusCode}}", exception.getStatusCode() + "");
+                html = html.replace("{{message}}", I18nServer.getTranslationDefaultResourcebundleNoException("rendering_error_" + exception.getI18nName()));
+                html = html.replace("{{technicalMessage}}", exception.getTechnicalDetail());
+                html = html.replace("{{exception}}", exceptionName);
+            }
+            else{
+                String exceptionName=req.getParameter("exception");
+                String i18n=req.getParameter("i18n");
+                html = html.replace("{{statusCode}}", HttpServletResponse.SC_INTERNAL_SERVER_ERROR+"");
+                html = html.replace("{{message}}", I18nServer.getTranslationDefaultResourcebundleNoException("rendering_error_" + i18n));
+                html = html.replace("{{technicalMessage}}","");
+                html = html.replace("{{exception}}", exceptionName);
+            }
             return html;
         }catch(IOException e){
             throw new RuntimeException(e);
