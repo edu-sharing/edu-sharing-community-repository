@@ -351,7 +351,9 @@ label.notify p{
     }
   }
 }
-
+.share-type-mobile{
+  display: none;
+}
 @media screen and (max-width: $mobileWidth) {
   .typeButton .btn-flat{
     min-width: auto;
@@ -369,7 +371,24 @@ label.notify p{
   .publish .type{
     display: none;
   }
-
+  .groupToInvite {
+    padding-bottom: 60px;
+  }
+  .typeButton{
+    .material-icons{
+      left: 0;
+    }
+  }
+  .groupToInvite {
+    padding-bottom: 60px;
+  }
+  .share-type-mobile{
+    position: absolute;
+    top: 58px;
+    right: 25px;
+    color: $textLight;
+    display: block;
+  }
 }
 @media screen and (max-width: ($mobileWidth - $mobileStage*2)) {
   .groupHeading{
@@ -397,5 +416,8 @@ label.notify p{
     span{
       display: none;
     }
+  }
+  .share-type-mobile {
+    right: 20px;
   }
 }
