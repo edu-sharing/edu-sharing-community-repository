@@ -1,6 +1,9 @@
 package org.edu_sharing.repository.server;
 
+import org.apache.commons.httpclient.URIException;
+import org.apache.commons.httpclient.util.URIUtil;
 import org.apache.commons.io.FileUtils;
+import org.apache.http.client.utils.URLEncodedUtils;
 import org.apache.log4j.Logger;
 import org.edu_sharing.repository.server.tools.ApplicationInfo;
 import org.edu_sharing.repository.server.tools.ApplicationInfoList;
@@ -14,7 +17,9 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.File;
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.net.URL;
+import java.net.URLEncoder;
 
 public class NgServlet extends HttpServlet {
 	private static Logger logger = Logger.getLogger(NgServlet.class);
@@ -58,16 +63,16 @@ public class NgServlet extends HttpServlet {
 		}
 	}
 
-	private String addEmbed(String html, URL url) {
-		String[] path = url.getPath().split("/");
-		String nodeId = path[path.length - 1];
-		return addToHead("<link rel=\"alternate\" type=\"application/json+oembed\" href=\""+URLTool.getEduservletUrl()+"oembed?node_id="+nodeId+"\"/>",html);
+	private String addEmbed(String html, URL url) throws UnsupportedEncodingException {
+		html=addToHead("<link rel=\"alternate\" type=\"application/json+oembed\" href=\""+URLTool.getEduservletUrl()+"oembed?format=json&url="+URLEncoder.encode(url.toString(),"UTF-8")+"\"/>",html);
+		html=addToHead("<link rel=\"alternate\" type=\"text/xml+oembed\" href=\""+URLTool.getEduservletUrl()+"oembed?format=xml&url="+URLEncoder.encode(url.toString(),"UTF-8")+"\"/>",html);
+		return html;
 	}
 
 	private String addLRMI(String html, URL url) {
 		try {
 			String[] path = url.getPath().split("/");
-			String nodeId = path[path.length - 1];
+			String nodeId = path[4];
 			JSONObject lrmi = LRMITool.getLRMIJson(nodeId);
 			String data = "<script type=\"application/ld+json\">";
 			data += lrmi.toString(2);

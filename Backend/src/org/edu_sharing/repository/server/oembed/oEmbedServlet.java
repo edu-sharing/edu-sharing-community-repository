@@ -23,6 +23,8 @@ import javax.xml.bind.JAXBContext;
 import javax.xml.bind.Marshaller;
 import java.io.IOException;
 import java.io.StringWriter;
+import java.net.URL;
+import java.net.URLDecoder;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -31,7 +33,16 @@ public class oEmbedServlet extends HttpServlet {
         protected void doGet(HttpServletRequest req, HttpServletResponse resp)
                 throws ServletException, IOException {
             oEmbedBase base;
-            String node_id = req.getParameter("node_id");
+            String node_id;
+            String version=null;
+            String url = req.getParameter("url");
+            URL decoded = new URL(url);
+            String[] path = decoded.getPath().split("/");
+            node_id=path[4];
+            if(path.length>=6){
+                version=path[5];
+            }
+
             String format = req.getParameter("format");
             int maxWidth=oEmbedBase.DEFAULT_SIZE,maxHeight=oEmbedBase.DEFAULT_SIZE;
             if(format==null)
@@ -43,7 +54,6 @@ public class oEmbedServlet extends HttpServlet {
             if(maxheight!=null)
                 maxHeight=Integer.parseInt(maxheight);
             try {
-                String version = req.getParameter("version");
                 RenderingService renderingService = RenderingServiceFactory.getLocalService();
                 Map<String, String> params = new HashMap<>();
                 for (Object key : req.getParameterMap().keySet()) {
