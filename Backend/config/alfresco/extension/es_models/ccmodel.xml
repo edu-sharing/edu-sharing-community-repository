@@ -1769,6 +1769,7 @@
 				<property name="ccm:ph_history">
 	    			<type>d:text</type>
 	    			<multiple>true</multiple>
+	    			<index enabled="false"></index>
 	    		</property>
 	    		<!-- user that set permissions -->
 	    		<property name="ccm:ph_user">
