@@ -111,8 +111,6 @@ export class WorkspaceMainComponent implements EventListener{
     private nodeOptions: OptionItem[]=[];
     private currentNode: Node;
     public mainnav=true;
-    private timeout: string;
-    private timeIsValid = false;
     private viewToggle: OptionItem;
     private isAdmin=false;
     public isBlocked=false;
@@ -270,35 +268,6 @@ export class WorkspaceMainComponent implements EventListener{
             //this.toast.error(error);
         });
     }
-    private showTimeout(){
-        return !this.cordova.isRunningCordova() && this.timeIsValid && this.dialogTitle!='WORKSPACE.AUTOLOGOUT' &&
-            (this.isSafe || !this.isSafe && this.config.instant('sessionExpiredDialog',{show:true}).show);
-    }
-    private updateTimeout(){
-        let time=this.connector.logoutTimeout - Math.floor((new Date().getTime()-this.connector.lastActionTime)/1000);
-        let min=Math.floor(time/60);
-        let sec=time%60;
-        this.event.broadcastEvent(FrameEventsService.EVENT_SESSION_TIMEOUT,time);
-        if(time>=0) {
-            this.timeout = this.formatTimeout(min, 2) + ":" + this.formatTimeout(sec, 2);
-            this.timeIsValid=true;
-        }
-        else if(this.showTimeout()){
-            this.dialogTitle='WORKSPACE.AUTOLOGOUT';
-            this.dialogMessage='WORKSPACE.AUTOLOGOUT_INFO';
-            this.dialogCancelable=false;
-            this.dialogMessageParameters={minutes:Math.round(this.connector.logoutTimeout/60)};
-            this.dialogButtons=[];
-            this.dialogButtons.push(new DialogButton("WORKSPACE.RELOGIN",DialogButton.TYPE_PRIMARY,()=>this.goToLogin()));
-        }
-        else
-            this.timeout="";
-    }
-    private formatTimeout(num:number, size:number) {
-        let s = num+"";
-        while (s.length < size) s = "0" + s;
-        return s;
-    }
     private createConnector(event : any){
         let name=event.name+"."+event.type.filetype;
         this.createConnectorName=null;
@@ -445,9 +414,6 @@ export class WorkspaceMainComponent implements EventListener{
                         this.globalProgress=false;
                         this.homeDirectory=data.id;
                         this.route.params.forEach((params: Params) => {
-                            //if(this.isSafe)
-                            setInterval(()=>this.updateTimeout(),1000);
-
                             this.route.queryParams.subscribe((params: Params) => {
                                 let needsUpdate=false;
                                 if(this.oldParams){

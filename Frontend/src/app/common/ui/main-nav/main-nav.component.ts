@@ -30,6 +30,7 @@ import {RestNodeService} from "../../rest/services/rest-node.service";
 import {Translation} from "../../translation";
 import {OptionItem} from "../actionbar/option-item";
 import {HttpClient} from '@angular/common/http';
+import {DialogButton} from '../modal-dialog/modal-dialog.component';
 
 @Component({
   selector: 'main-nav',
@@ -79,6 +80,13 @@ export class MainNavComponent implements AfterViewInit{
   @ViewChild('scrolltotop') scrolltotop:ElementRef;
   @ViewChild('userRef') userRef:ElementRef;
   @ViewChild('tabNav') tabNav:ElementRef;
+    private dialogTitle : string;
+    private dialogCancelable = false;
+    private dialogMessage : string;
+    private dialogMessageParameters : any;
+    private dialogButtons : DialogButton[];
+    private timeout: string;
+    private timeIsValid = false;
   public config: any={};
   private editUrl: string;
   public nodeStoreAnimation=0;
@@ -155,6 +163,7 @@ export class MainNavComponent implements AfterViewInit{
     private elementsTopY = 0;
     private elementsBottomY = 0;
     private fixScrollElements = false;
+    private isSafe = false;
   @HostListener('document:keydown', ['$event'])
   handleKeyboardEvent(event: KeyboardEvent) {
       if(event.code=="Escape" && this.canOpen && this.displaySidebar){
@@ -356,6 +365,8 @@ export class MainNavComponent implements AfterViewInit{
         this.checkConfig([]);
         return;
       }
+      this.isSafe=data.currentScope==RestConstants.SAFE_SCOPE;
+      setInterval(()=>this.updateTimeout(),1000);
       this.toolpermissions=data.toolPermissions;
       this.canAccessWorkspace=this.toolpermissions && this.toolpermissions.indexOf(RestConstants.TOOLPERMISSION_WORKSPACE)!=-1;
 
@@ -772,5 +783,37 @@ export class MainNavComponent implements AfterViewInit{
     public setFixMobileElements(fix:boolean){
         this.fixScrollElements=fix;
         this.handleScrollHide();
+    }
+    private showTimeout(){
+        return !this.cordova.isRunningCordova() && !this.isGuest && this.timeIsValid && this.dialogTitle!='WORKSPACE.AUTOLOGOUT' &&
+            (this.isSafe || !this.isSafe && this.configService.instant('sessionExpiredDialog',{show:true}).show);
+    }
+    private updateTimeout(){
+        let time=this.connector.logoutTimeout - Math.floor((new Date().getTime()-this.connector.lastActionTime)/1000);
+        let min=Math.floor(time/60);
+        let sec=time%60;
+        this.event.broadcastEvent(FrameEventsService.EVENT_SESSION_TIMEOUT,time);
+        if(time>=0) {
+            this.timeout = this.formatTimeout(min, 2) + ":" + this.formatTimeout(sec, 2);
+            this.timeIsValid=true;
+        }
+        else if(this.showTimeout()){
+            this.dialogTitle='WORKSPACE.AUTOLOGOUT';
+            this.dialogMessage='WORKSPACE.AUTOLOGOUT_INFO';
+            this.dialogCancelable=false;
+            this.dialogMessageParameters={minutes:Math.round(this.connector.logoutTimeout/60)};
+            this.dialogButtons=[];
+            this.dialogButtons.push(new DialogButton("WORKSPACE.RELOGIN",DialogButton.TYPE_PRIMARY,()=>RestHelper.goToLogin(this.router,this.configService)));
+        }
+        else
+            this.timeout="";
+    }
+    private formatTimeout(num:number, size:number) {
+        let s = num+"";
+        while (s.length < size) s = "0" + s;
+        return s;
+    }
+    private hideDialog() : void{
+        this.dialogTitle=null;
     }
 }
