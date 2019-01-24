@@ -947,6 +947,10 @@ public class CCConstants {
 	public final static String CCM_PROP_REMOTEOBJECT_NODEID = "{http://www.campuscontent.de/model/1.0}remotenodeid";
 	public final static String CCM_PROP_REMOTEOBJECT_REPOSITORY_TYPE = "{http://www.campuscontent.de/model/1.0}remoterepositorytype";
 
+	public final static String CCM_PROP_IMPORTED_OBJECT_NODEID = "{http://www.campuscontent.de/model/1.0}imported_object_nodeid";
+	public final static String CCM_PROP_IMPORTED_OBJECT_APPID = "{http://www.campuscontent.de/model/1.0}imported_object_appid";
+	public final static String CCM_PROP_IMPORTED_OBJECT_APPNAME = "{http://www.campuscontent.de/model/1.0}imported_object_appname";
+
 	public final static String CCM_PROP_EDITOR_TYPE ="{http://www.campuscontent.de/model/1.0}editorType";
 
 	//Additional ressource Information (comes with aspect)
