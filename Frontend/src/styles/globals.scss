@@ -118,10 +118,11 @@ a{
 .general-warning{
   display: flex;
   align-items: center;
-  background-color: lighten($warningMedium,40%);
+  background-color: lighten($warningMedium,50%);
   border: 1px solid $warningMedium;
   border-radius: 2px;
-  padding:10px 15px;
+  padding: 15px 20px;
+  color: #674E04;
   >div:first-child{
     padding-right: 20px;
   }
