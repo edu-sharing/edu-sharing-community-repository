@@ -398,6 +398,10 @@ export class CollectionsMainComponent{
         return false;
       if(event.target.ref.id==this.collectionContent.collection.ref.id)
         return false;
+      // do not allow to move anything else than editorial collections into editorial collections
+      if(      event.source.type==RestConstants.COLLECTIONTYPE_EDITORIAL && event.target.type!=RestConstants.COLLECTIONTYPE_EDITORIAL
+            || event.source.type!=RestConstants.COLLECTIONTYPE_EDITORIAL && event.target.type==RestConstants.COLLECTIONTYPE_EDITORIAL)
+          return false;
       if(event.source.reference && event.source[0].access && event.source[0].access.indexOf(RestConstants.ACCESS_CC_PUBLISH)==-1)
         return false;
       if(!event.source.reference && event.source[0].access && event.source[0].access.indexOf(RestConstants.ACCESS_WRITE)==-1)
@@ -767,5 +771,13 @@ export class CollectionsMainComponent{
 
     private isAllowedToDeleteNodes(nodes: Node[]) {
         return this.isAllowedToDeleteCollection() || NodeHelper.getNodesRight(nodes,RestConstants.ACCESS_DELETE);
+    }
+
+    getCollectionViewType() {
+        // on mobile, we will always show the small collection list
+        if(UIHelper.evaluateMediaQuery(UIConstants.MEDIA_QUERY_MAX_WIDTH,UIConstants.MOBILE_WIDTH)){
+            return ListTableComponent.VIEW_TYPE_GRID_SMALL;
+        }
+        return this.isRootLevelCollection() ? ListTableComponent.VIEW_TYPE_GRID : ListTableComponent.VIEW_TYPE_GRID_SMALL;
     }
 }

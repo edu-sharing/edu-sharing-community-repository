@@ -425,6 +425,20 @@
 			</properties>
 		</aspect>
 
+		<aspect name="ccm:imported_object">
+			<properties>
+				<property name="ccm:imported_object_nodeid">
+					<type>d:text</type>
+				</property>
+				<property name="ccm:imported_object_appid">
+					<type>d:text</type>
+				</property>
+				<property name="ccm:imported_object_appname">
+					<type>d:text</type>
+				</property>
+			</properties>
+		</aspect>
+
 		<aspect name="ccm:ressourceinfo">
 			<title>Aspect for additional resource Information like scorm, qti
 				Version</title>

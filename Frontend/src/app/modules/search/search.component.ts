@@ -698,15 +698,14 @@ export class SearchComponent {
         */
       }
 
-      if(fromList || nodes && nodes.length==1){
-        if(!this.isGuest && (fromList || RestNetworkService.supportsImport(nodes[0].ref.repo,this.allRepositories))) {
-          let save = new OptionItem('SAVE', 'reply', (node: Node) => this.importNode(this.getCurrentNode(node)));
-          save.showCallback=(node:Node)=>{
-            return RestNetworkService.supportsImport(node.ref.repo, this.allRepositories);
-          };
-          options.push(save);
-        }
-      }
+      let save = new OptionItem('SAVE', 'reply', (node: Node) => this.importNode(this.getCurrentNode(node)));
+      save.showCallback=(node:Node)=>{
+          let n=ActionbarHelperService.getNodes(nodes,node);
+          if(n==null)
+              return false;
+        return !this.isGuest && n.length==1 && RestNetworkService.supportsImport(n[0].ref.repo, this.allRepositories);
+      };
+      options.push(save);
 
       let download = this.actionbar.createOptionIfPossible('DOWNLOAD', nodes, (node: Node) => NodeHelper.downloadNodes(this.toast, this.connector, ActionbarHelperService.getNodes(nodes, node)));
       if (download)

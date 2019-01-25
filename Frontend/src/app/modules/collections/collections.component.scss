@@ -269,9 +269,14 @@ table, div {
 .collections-pin-button{
   top: 10px;
 }
+.collections-cards-div{
+  display: flex;
+  flex-direction: column;
+  >* {
+    width: 100%;
+  }
+}
 .section-headline {
-  float:left;
-  width:100%;
   > div {
     float: left;
   }

@@ -158,14 +158,12 @@ public class AuthenticationFilterPreview implements javax.servlet.Filter {
 				Usage usage = u2.getUsage(appId, courseId, nodeId, resourceId);
 
 				if(usage == null ){
-					httpServletResponse.sendError(HttpServletResponse.SC_BAD_REQUEST, "No usage Found!");
+					noPermissions(httpServletResponse);
 					return;
 				}
 
 			} catch(UsageException e) {
-				//httpServletResponse.sendError(HttpServletResponse.SC_BAD_REQUEST, e.getMessage());
-				MimeTypesV2 mime=new MimeTypesV2(ApplicationInfoList.getHomeRepository());
-				httpServletResponse.sendRedirect(mime.getNodeDeletedPreview());
+				nodeDeleted(httpServletResponse);
 				return;
 			}
 
@@ -241,7 +239,16 @@ public class AuthenticationFilterPreview implements javax.servlet.Filter {
 			}
 		}
 	}
-	
+
+	private void noPermissions(HttpServletResponse resp) throws IOException {
+		MimeTypesV2 mime=new MimeTypesV2(ApplicationInfoList.getHomeRepository());
+		resp.sendRedirect(mime.getNoPermissionsPreview());
+	}
+	private void nodeDeleted(HttpServletResponse resp) throws IOException {
+		MimeTypesV2 mime=new MimeTypesV2(ApplicationInfoList.getHomeRepository());
+		resp.sendRedirect(mime.getNodeDeletedPreview());
+	}
+
 	private void remotePreview(ServletRequest req, HttpServletResponse httpServletResponse, String rep_id, String remoteTicket) throws IOException{
 		
 			ApplicationInfo appInfo = ApplicationInfoList.getRepositoryInfoById(rep_id);

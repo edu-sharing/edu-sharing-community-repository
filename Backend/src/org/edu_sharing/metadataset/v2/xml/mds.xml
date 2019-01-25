@@ -321,6 +321,12 @@
 				<valuespace>context.xml</valuespace>
 				<valuespace_i18n>valuespace_context_i18n</valuespace_i18n>
 			</widget>
+			<widget>
+				<id>ccm:imported_object_appname</id>
+				<caption>lom_prop_imported_object_appname</caption>
+				<type>text</type>
+				<hideIfEmpty>true</hideIfEmpty>
+			</widget>
 		</widgets>
 		<templates>
 			<template>
@@ -457,6 +463,7 @@
               <cclom:general_description>
               <cclom:general_keyword>
               <license>
+              <ccm:imported_object_appname>
               <ccm:author_freetext>
               <cclom:size>
               <cm:created>

@@ -2,6 +2,15 @@
   *ngIf="showProfile"
   (onCancel)="showProfile=false"
 ></user-profile>
+<modal-dialog
+        [title]="dialogTitle"
+        [isCancelable]="dialogCancelable"
+        (onCancel)="hideDialog()"
+        [message]="dialogMessage"
+        [messageParameters]="dialogMessageParameters"
+        [buttons]="dialogButtons"
+        [priority]="10"
+></modal-dialog>
 <app-banner [scope]="_currentScope" (onUpdate)="refreshBanner()"></app-banner>
 <global-progress *ngIf="globalProgress"></global-progress>
 <!-- <tutorial [element]="tutorialElement" [heading]="'USER_TUTORIAL_HEADING'" [description]="'USER_TUTORIAL_DESCRIPTION'" [showSkip]="false"></tutorial> -->
