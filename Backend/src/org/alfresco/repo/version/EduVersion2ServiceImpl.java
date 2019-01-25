@@ -185,7 +185,7 @@ public class EduVersion2ServiceImpl extends org.alfresco.repo.version.Version2Se
         	propsToLeaveAlone.add(QName.createQName(CCConstants.CCM_PROP_PH_ACTION));
         	propsToLeaveAlone.add(QName.createQName(CCConstants.CCM_PROP_PH_HISTORY));
         	propsToLeaveAlone.add(QName.createQName(CCConstants.CCM_PROP_PH_MODIFIED));
-        	propsToLeaveAlone.add(QName.createQName(CCConstants.CCM_PROP_PH_USER));
+        	propsToLeaveAlone.add(QName.createQName(CCConstants.CCM_PROP_PH_USERS));
         	
         	
 		    for(QName prop : propsToLeaveAlone)

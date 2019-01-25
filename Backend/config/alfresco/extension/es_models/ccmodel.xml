@@ -1769,10 +1769,12 @@
 				<property name="ccm:ph_history">
 	    			<type>d:text</type>
 	    			<multiple>true</multiple>
+	    			<index enabled="false"></index>
 	    		</property>
-	    		<!-- user that set permissions -->
-	    		<property name="ccm:ph_user">
+	    		<!-- users that set permissions -->
+	    		<property name="ccm:ph_users">
 	    			<type>d:text</type>
+	    			<multiple>true</multiple>
 	    		</property>
 	    		<!-- add, modify ... -->
 	    		<property name="ccm:ph_action">
