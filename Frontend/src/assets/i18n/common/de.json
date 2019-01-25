@@ -97,6 +97,7 @@
     "TOOLPERMISSION_GLOBAL_AUTHORITY_SEARCH":"Suchen und Einladen Nutzer außerhalb der Organisation",
     "TOOLPERMISSION_GLOBAL_AUTHORITY_SEARCH_SAFE":"Suchen und Einladen Nutzer außerhalb der Organisation im Safe",
     "TOOLPERMISSION_GLOBAL_AUTHORITY_SEARCH_SHARE":"Suchen und Einladen Nutzer außerhalb der Organisation in gemeinsamen Ordnern",
+    "TOOLPERMISSION_GLOBAL_AUTHORITY_SEARCH_FUZZY":"Suchen und Finden von Nutzern außerhalb der Organisation ohne Eingabe der gesamten Nutzer-ID",
     "TOOLPERMISSION_GLOBAL_AUTHORITY_SEARCH_SHARE_SAFE":"Suchen und Einladen Nutzer außerhalb der Organisation in gemeinsamen Ordnern im Safe",
     "TOOLPERMISSION_COLLECTION_PINNING":"Sammlungen anpinnen und gepinnte Sammlungen verwalten",
     "TOOLPERMISSION_COLLECTION_CURRICULUM":"Lehrplansammlungen erstellen",

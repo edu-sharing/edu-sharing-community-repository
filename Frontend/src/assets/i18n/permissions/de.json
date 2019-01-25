@@ -87,18 +87,22 @@
       "RESULT":"Status",
       "INHERIT":"Von einer Gruppe oder globalen Berechtigung geerbt",
       "INHERIT_UNKNOWN":"Zustand ist unbekannt. Speichern Sie die Berechtigungen, um den geerbten Zustand zu sehen",
+      "INHERIT_DETAIL":"Die Rechte sind durch folgende Gruppenmitgliedschaften geerbt: {{memberships}}",
       "STATUS_ALLOWED":"Erlaubt",
       "STATUS_DENIED":"Verboten",
       "STATUS_UNDEFINED":"Ungesetzt\n(Verboten)",
       "STATUS_UNKNOWN":"Unbekannt",
       "SAVED":"Berechtigungen wurden aktualisiert",
+      "ADD": "Hinzufügen",
+      "ADDED": "Toolpermission {{name}} hinzugefügt",
       "GROUP":{
         "SHARING":"Freigaben",
         "LICENSING":"Lizenzierung & Veröffentlichung",
         "DATA_MANAGEMENT":"Dateimanagement",
         "SAFE":"Gesicherter Bereich (Safe)",
         "COLLECTIONS":"Sammlungen",
-        "OTHER":"Andere / Nicht kategorisiert"
+        "OTHER":"Andere / Nicht kategorisiert",
+        "ADD": "Eigene Berechtigung anlegen"
       }
     }
   }
