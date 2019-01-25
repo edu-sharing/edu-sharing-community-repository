@@ -813,7 +813,7 @@ export class MainNavComponent implements AfterViewInit{
         while (s.length < size) s = "0" + s;
         return s;
     }
-    private hideDialog() : void{
+    hideDialog() : void{
         this.dialogTitle=null;
     }
 }
