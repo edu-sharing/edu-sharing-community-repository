@@ -179,7 +179,13 @@
     "CREATE":"Create",
     "CREATE_EDIT":"Create & Open",
     "CREATED": "New variant was created and saved in a folder <b>\"{{folder}}\"</b>",
-    "CREATED_LINK": "show"
+    "CREATED_LINK": "show",
+    "WARNING":{
+      "NO_LICENSE":"This material has no license attached.\nMay get in touch with the author of the material in order to prevent license infringements.",
+      "COPYRIGHT":"This material has a coypright-license attached.\nMay get in touch with the author of the material in order to prevent license infringements.",
+      "ND":"This material has a non derivative license attached, which does not allow to change the material.\nMay get in touch with the author of the material in order to prevent license infringements.",
+      "LINK":"Lizenzinformationen anzeigen"
+    }
   },
   "NODE_REPORT":{
     "TITLE":"Report problem",

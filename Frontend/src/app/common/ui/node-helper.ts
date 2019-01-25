@@ -340,7 +340,10 @@ export class NodeHelper{
    * @param licenseVersion
    */
   public static getLicenseUrlByString(licenseProperty: string,licenseVersion:string) {
-    return (RestConstants.LICENSE_URLS as any)[licenseProperty].replace("#version",licenseVersion);
+    let url=(RestConstants.LICENSE_URLS as any)[licenseProperty];
+    if(!url)
+      return null;
+    return url.replace("#version",licenseVersion);
   }
 
   /**

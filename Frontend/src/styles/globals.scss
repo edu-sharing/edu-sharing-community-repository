@@ -115,6 +115,17 @@ a{
 .uppercase {
   text-transform: uppercase;
 }
+.general-warning{
+  display: flex;
+  align-items: center;
+  background-color: lighten($warningMedium,40%);
+  border: 1px solid $warningMedium;
+  border-radius: 2px;
+  padding:10px 15px;
+  >div:first-child{
+    padding-right: 20px;
+  }
+}
 .input-hint-bottom{
   margin: 0 0.75em;
   margin-top:-15px;

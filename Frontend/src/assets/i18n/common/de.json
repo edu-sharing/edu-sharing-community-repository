@@ -247,7 +247,13 @@
     "CREATE":"Anlegen",
     "CREATE_EDIT":"Anlegen & Öffnen",
     "CREATED": "Die Variante wurde angelegt und in <b>\"{{folder}}\"</b> Ordner gespeichert",
-    "CREATED_LINK": "anzeigen"
+    "CREATED_LINK": "anzeigen",
+    "WARNING":{
+      "NO_LICENSE":"Dieses Material besitzt noch keine Lizenz.\nSetzen Sie sich ggf. mit den Autor in Verbindung, um Lizenzverstöße zu vermeiden.",
+      "COPYRIGHT":"Dieses Material besitzt eine Copyright-Lizenz.\nSetzen Sie sich ggf. mit den Autor in Verbindung, um Lizenzverstöße zu vermeiden.",
+      "ND":"Dieses Material besitzt eine Non Derivative Lizenz. Diese Lizenz legt fest, dass das Material nicht verändert werden darf.\nSetzen Sie sich ggf. mit den Autor in Verbindung, um Lizenzverstöße zu vermeiden.",
+      "LINK":"Lizenzinformationen anzeigen"
+    }
   },
   "NODE_REPORT":{
     "TITLE":"Problem melden",
