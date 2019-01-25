@@ -22,6 +22,7 @@ import org.alfresco.service.namespace.RegexQNamePattern;
 import org.apache.commons.lang.ArrayUtils;
 import org.apache.log4j.Logger;
 import org.edu_sharing.alfresco.authentication.HttpContext;
+import org.edu_sharing.alfresco.tools.EduSharingNodeHelper;
 import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
 import org.edu_sharing.metadataset.v2.MetadataSetV2;
 import org.edu_sharing.metadataset.v2.MetadataWidget;
@@ -722,7 +723,7 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
 	    list=new ArrayList<>(list);
 		List<T> filtered = new ArrayList<>();
 		for(T obj : list){
-			if(!shouldFilter(getAsNode(obj),filter)){
+			if(!EduSharingNodeHelper.shouldFilter(getAsNode(obj),filter)){
 				filtered.add(obj);
 			}
 		}
@@ -753,8 +754,8 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
     private int sortNodes(HashMap<String, Object> cache, NodeRef n1, NodeRef n2, SortDefinition sortDefinition) {
         String type1=nodeService.getType(n1).toString();
         String type2=nodeService.getType(n2).toString();
-        if(typeIsDirectory(type1)!=typeIsDirectory(type2)){
-            return typeIsDirectory(type1) ? -1 : 1;
+        if(EduSharingNodeHelper.typeIsDirectory(type1)!=EduSharingNodeHelper.typeIsDirectory(type2)){
+            return EduSharingNodeHelper.typeIsDirectory(type1) ? -1 : 1;
         }
         if(!sortDefinition.hasContent())
             return 0;
@@ -821,53 +822,6 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
         return 0;
     }
 
-    private boolean shouldFilter(NodeRef node, List<String> filter) {
-		// filter nodes for link inivitation and usages
-		if (filter == null)
-			filter = new ArrayList<>();
-
-		if (filter.contains("special")) {
-			// special mode, we do not filter anything
-			return false;
-		}
-		String type = nodeService.getType(node).toString();
-		String mapType = (String) nodeService.getProperty(node, QName.createQName(CCConstants.CCM_PROP_MAP_TYPE));
-		String name = (String) nodeService.getProperty(node, QName.createQName(CCConstants.CM_NAME));
-		if (CCConstants.CCM_TYPE_SHARE.equals(type) ||
-				CCConstants.CCM_TYPE_USAGE.equals(type) ||
-				CCConstants.CM_TYPE_THUMBNAIL.equals(type)) {
-			return true;
-		}
-		// filter the metadata template file
-		if (nodeService.hasAspect(node, QName.createQName(CCConstants.CCM_ASSOC_METADATA_PRESETTING_TEMPLATE))) {
-			return true;
-		}
-		if (CCConstants.CCM_VALUE_MAP_TYPE_FAVORITE.equals(mapType) || CCConstants.CCM_VALUE_MAP_TYPE_EDUGROUP.equals(mapType)) {
-			return true;
-		}
-		if ((".DS_Store".equals(name) || "._.DS_Store".equals(name))) {
-			return true;
-		}
-        if(filter.size()==0)
-        	return false;
-		boolean shouldFilter = true;
-		for(String f : filter) {
-            boolean isDirectory = typeIsDirectory(type);
-            if(f.equals("folders") && isDirectory){
-                shouldFilter=false;
-                break;
-            }
-            if(f.equals("files") && !isDirectory){
-                shouldFilter=false;
-                break;
-            }
-            if(f.startsWith("mime:")){
-                throw new IllegalArgumentException("Filtering by mime: is currently not supported");
-            }
-        }
-        return shouldFilter;
-    }
-
     @Override
 	public List<ChildAssociationRef> getChildrenChildAssociationRefAssoc(String parentID, String assocName, List<String> filter, SortDefinition sortDefinition){
 		NodeRef parentNodeRef = getParentRef(parentID);
@@ -881,10 +835,6 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
         result=sortNodeRefList(result,filter,sortDefinition);
         return result;
 	}
-
-    private boolean typeIsDirectory(String type) {
-        return type.equals(CCConstants.CM_TYPE_FOLDER) || type.equals(CCConstants.CCM_TYPE_MAP);
-    }
 
     private NodeRef getParentRef(String parentID) {
 		if (parentID == null) {
