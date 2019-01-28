@@ -261,6 +261,8 @@ user-profile{
 .sidenav .button{
   padding:20px 30px;
   width:100%;
+  display: flex;
+  align-items: center;
 }
 .userMenu,.helpMenu{
   position: absolute;
