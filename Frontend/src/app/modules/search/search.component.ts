@@ -1069,6 +1069,7 @@ export class SearchComponent {
       (param: any) => {
         this.searchService.init();
         this.mainNavRef.refreshBanner();
+        this.mainNavRef.finishPreloading();
         if(param['addToCollection']){
           this.collectionApi.getCollection(param['addToCollection']).subscribe((data:CollectionWrapper)=>{
             this.addToCollection=data.collection;

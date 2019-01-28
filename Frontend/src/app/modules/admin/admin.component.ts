@@ -30,6 +30,7 @@ import {RestOrganizationService} from '../../common/rest/services/rest-organizat
 import {RestSearchService} from '../../common/rest/services/rest-search.service';
 import {RestHelper} from '../../common/rest/rest-helper';
 import {Observable, Observer} from 'rxjs/index';
+import {MainNavComponent} from '../../common/ui/main-nav/main-nav.component';
 
 
 @Component({
@@ -84,6 +85,7 @@ export class AdminComponent {
   private parentCollectionType = 'root';
   public catalina : string;
   private oaiClasses: string[];
+  @ViewChild('mainNav') mainNavRef: MainNavComponent;
   @ViewChild('catalinaRef') catalinaRef : ElementRef;
   @ViewChild('xmlSelect') xmlSelect : ElementRef;
   @ViewChild('excelSelect') excelSelect : ElementRef;
@@ -191,6 +193,7 @@ export class AdminComponent {
           this.prepareJobClasses();
           this.storage.refresh();
       UIHelper.setTitle('ADMIN.TITLE', this.title, this.translate, this.config);
+      this.mainNavRef.finishPreloading();
       this.warningButtons=[
         new DialogButton('CANCEL',DialogButton.TYPE_CANCEL,()=>{window.history.back()}),
         new DialogButton('ADMIN.UNDERSTAND',DialogButton.TYPE_PRIMARY,()=>{this.showWarning=false})

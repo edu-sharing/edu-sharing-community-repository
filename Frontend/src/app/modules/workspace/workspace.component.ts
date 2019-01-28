@@ -1142,6 +1142,7 @@ export class WorkspaceMainComponent implements EventListener{
     }
 
     private updateNodeByParams(params: any, node: Node|any) {
+        this.mainNavRef.finishPreloading();
         if(params['query']){
             this.doSearchFromRoute(params,node);
         }

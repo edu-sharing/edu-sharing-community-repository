@@ -71,6 +71,7 @@ import {DialogButton} from '../modal-dialog/modal-dialog.component';
  */
 export class MainNavComponent implements AfterViewInit{
   private static bannerPositionInterval: any;
+  private static preloading=true;
   private static ID_ATTRIBUTE_NAME='data-banner-id';
 
   @ViewChild('search') search : ElementRef;
@@ -101,7 +102,7 @@ export class MainNavComponent implements AfterViewInit{
   helpOptions: OptionItem[]=[];
   tutorialElement: ElementRef;
   globalProgress = false;
-  
+
   public showEditProfile: boolean;
   public showProfile: boolean;
 
@@ -813,5 +814,11 @@ export class MainNavComponent implements AfterViewInit{
     }
     hideDialog() : void{
         this.dialogTitle=null;
+    }
+    getPreloading(){
+        return MainNavComponent.preloading;
+    }
+    public finishPreloading(){
+        MainNavComponent.preloading=false;
     }
 }

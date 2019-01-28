@@ -531,6 +531,7 @@ export class CollectionsMainComponent {
         if (!this.isReady) return;
         this.onSelection([]);
         this.isLoading=true;
+        this.mainNavRef.finishPreloading();
 
     // set correct scope
     let request:any=Helper.deepCopy(CollectionsMainComponent.DEFAULT_REQUEST);
@@ -709,6 +710,7 @@ export class CollectionsMainComponent {
           this.toast.error(error);
         }
         this.isLoading=false;
+        this.mainNavRef.finishPreloading();
       });
 
     }

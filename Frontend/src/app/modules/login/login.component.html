@@ -1,12 +1,9 @@
-
+<main-nav *ngIf="mainnav" #mainNav
+          [title]="'SIDEBAR.LOGIN'"
+          [currentScope]="'login'"
+          [searchEnabled]="false"
+></main-nav>
 <div class="dialog darken valign-wrapper">
-
-  <main-nav *ngIf="mainnav"
-            [title]="'SIDEBAR.LOGIN'"
-            [currentScope]="'login'"
-            [searchEnabled]="false"
-  ></main-nav>
-
   <spinner *ngIf="isLoading" class="center"></spinner>
   <div *ngIf="!isLoading">
   <div class="card center-card card-action">

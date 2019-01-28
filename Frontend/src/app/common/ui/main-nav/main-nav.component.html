@@ -1,3 +1,7 @@
+<div class="preload" *ngIf="getPreloading()">
+    <img src="assets/images/edu-sharing-loading.svg" image-config>
+    <spinner class="center"></spinner>
+</div>
 <user-profile
   *ngIf="showProfile"
   (onCancel)="showProfile=false"

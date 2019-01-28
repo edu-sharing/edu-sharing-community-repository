@@ -17,6 +17,7 @@ import {UIAnimation} from "../../common/ui/ui-animation";
 import {UserProfileComponent} from "../../common/ui/user-profile/user-profile.component";
 import {RestConstants} from "../../common/rest/rest-constants";
 import {RestHelper} from "../../common/rest/rest-helper";
+import {MainNavComponent} from '../../common/ui/main-nav/main-nav.component';
 
 @Component({
   selector: 'app-profiles',
@@ -40,6 +41,7 @@ export class ProfilesComponent {
   private editProfile: boolean;
   private editProfileUrl: string;
   private avatarImage: any;
+  @ViewChild('mainNav') mainNavRef: MainNavComponent;
   @ViewChild('avatar') avatarElement : ElementRef;
   constructor(private toast: Toast,
               private route: ActivatedRoute,
@@ -67,6 +69,7 @@ export class ProfilesComponent {
             let name = new AuthorityNamePipe(this.translate).transform(this.user, null);
             UIHelper.setTitle('PROFILES.TITLE', this.title, this.translate, this.config, {name: name});
             this.globalProgress = false;
+            this.mainNavRef.finishPreloading();
             this.iamService.getUser().subscribe((me)=>{
                 this.isMe = profile.person.authorityName == me.person.authorityName;
                 if(this.isMe && login.isGuest){
@@ -75,6 +78,7 @@ export class ProfilesComponent {
             });
         }, (error: any) => {
             this.globalProgress = false;
+            this.mainNavRef.finishPreloading();
             this.toast.error(null, 'PROFILES.LOAD_ERROR');
         });
     });

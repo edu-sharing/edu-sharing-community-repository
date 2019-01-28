@@ -30,6 +30,7 @@ import {DomSanitizer} from "@angular/platform-browser";
 import {TemporaryStorageService} from "../../../common/services/temporary-storage.service";
 import {UIHelper} from "../../../common/ui/ui-helper";
 import {RegisterResetPasswordComponent} from "../../register/register-reset-password/register-reset-password.component";
+import {MainNavComponent} from '../../../common/ui/main-nav/main-nav.component';
 
 // component class
 @Component({
@@ -38,6 +39,7 @@ import {RegisterResetPasswordComponent} from "../../register/register-reset-pass
   styleUrls: ['collection-new.component.scss']
 })
 export class CollectionNewComponent {
+  @ViewChild('mainNav') mainNavRef: MainNavComponent;
   @ViewChild('mds') mds : MdsComponent;
   public hasCustomScope: boolean;
   public COLORS:string[];
@@ -147,6 +149,7 @@ export class CollectionNewComponent {
                       }
                       this.updateAvailableSteps();
                       this.isLoading=false;
+                      this.mainNavRef.finishPreloading();
                     });
                   });
                 });
@@ -527,6 +530,7 @@ export class CollectionNewComponent {
       }
     this.updateAvailableSteps();
     this.isLoading=false;
+    this.mainNavRef.finishPreloading();
   }
 
   private save4(collection:Collection) {
