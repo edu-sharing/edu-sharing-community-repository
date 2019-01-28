@@ -370,7 +370,7 @@ export class MainNavComponent{
           });
         }
         buttons.push({path:'search',scope:'search',icon:"search",name:"SIDEBAR.SEARCH",queryParams:reurl});
-        buttons.push({path:'collections',scope:'collections',icon:"layers",name:"SIDEBAR.COLLECTIONS"});
+        buttons.push({path:'collections',scope:'collections',icon:"layers",name:"SIDEBAR.COLLECTIONS",queryParams:reurl});
         if(data.isGuest){
           buttons.push({path:'login',scope:'login',icon:"person",name:"SIDEBAR.LOGIN"});
         }
