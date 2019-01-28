@@ -40,7 +40,7 @@
 
         <div class="heading">
         <div class="checkbox" *ngIf="hasCheckbox">
-            <input *ngIf="_nodes.length" id="selectAll" (click)="toggleAll()" type="checkbox" class="filled-in" [checked]="selectedNodes.length==_nodes.length"/>
+            <input *ngIf="_nodes && _nodes.length" id="selectAll" (click)="toggleAll()" type="checkbox" class="filled-in" [checked]="selectedNodes.length==_nodes.length"/>
             <label for="selectAll">&nbsp;</label>
         </div>
         <div class="checkboxDummy" *ngIf="!hasCheckbox">&nbsp;</div>

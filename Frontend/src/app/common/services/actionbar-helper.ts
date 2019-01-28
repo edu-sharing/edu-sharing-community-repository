@@ -51,7 +51,10 @@ export class ActionbarHelperService{
     if(type=='ADD_NODE_STORE'){
         option=new OptionItem('SEARCH.ADD_NODE_STORE', 'bookmark_border',callback);
         option.showCallback=(node:Node)=>{
-            return ActionbarHelperService.getNodes(nodes,node).length && RestNetworkService.allFromHomeRepo(ActionbarHelperService.getNodes(nodes,node),this.repositories);
+            let n=ActionbarHelperService.getNodes(nodes,node);
+            if(n==null)
+                return false;
+            return n.length && RestNetworkService.allFromHomeRepo(n,this.repositories);
         };
     }
     if(type=='NODE_TEMPLATE') {

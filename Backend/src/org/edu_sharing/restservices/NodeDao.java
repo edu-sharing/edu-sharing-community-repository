@@ -22,6 +22,7 @@ import org.alfresco.service.cmr.repository.DuplicateChildNodeNameException;
 import org.alfresco.service.cmr.repository.StoreRef;
 import org.alfresco.service.cmr.security.PermissionService;
 import org.alfresco.service.namespace.QName;
+import org.apache.log4j.Logger;
 import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
 import org.edu_sharing.metadataset.v2.MetadataQuery;
 import org.edu_sharing.metadataset.v2.MetadataQueryParameter;
@@ -67,7 +68,7 @@ import org.json.JSONObject;
 import io.swagger.util.Json;
 
 public class NodeDao {
-	
+	private static Logger logger = Logger.getLogger(NodeDao.class);
 	private static final StoreRef storeRef = new StoreRef(StoreRef.PROTOCOL_WORKSPACE, "SpacesStore");
 	private static final String[] DAO_PERMISSIONS = new String[]{
 			org.alfresco.service.cmr.security.PermissionService.ADD_CHILDREN,
@@ -404,6 +405,7 @@ public class NodeDao {
 			this.filter = filter;
 			
 		}catch(Throwable t){
+			logger.warn(t.getMessage(),t);
 			throw DAOException.mapping(t,nodeRef.getNodeId());
 		}
 	}
