@@ -48,4 +48,5 @@ public class Values{
 	@XmlElement	public LicenseAgreement licenseAgreement;
 	@XmlElement	public Services services;
 	@XmlElement	public HelpMenuOptions[] helpMenuOptions;
+	@XmlElement	public Image[] images;
 }
