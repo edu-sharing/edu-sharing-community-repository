@@ -279,6 +279,15 @@ input[type=search]{
     padding:0 1.5rem;
   }
 }
+@media screen and (max-width: ($mobileWidth - $mobileStage*3)) {
+  .card .card-action a {
+    // when screen is small, all buttons should have the same size to prevent long texts to let short text to be too small
+    width: 0;
+    margin: 0;
+    flex-grow: 1;
+    justify-content: center;
+  }
+}
 @media screen and (max-width: ($mobileHeightLandscape)) {
   .center-card .btn,
   .center-card .btn-flat{

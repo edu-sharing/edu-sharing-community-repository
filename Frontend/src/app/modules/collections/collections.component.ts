@@ -429,59 +429,63 @@ export class CollectionsMainComponent {
           }
       }
 
-    return options;
-  }
-  dropOnCollection(event:any){
-    let target=event.target;
-    let source=event.source[0];
-    this.globalProgress=true;
-    console.log(source);
-    if(source.hasOwnProperty('childCollectionsCount')){
-      if(event.type=='copy'){
-        this.toast.error(null,'INVALID_OPERATION');
-        this.globalProgress=false;
-        return;
-      }
-      this.nodeService.moveNode(target.ref.id,source.ref.id).subscribe(()=>{
-        this.globalProgress = false;
-        this.refreshContent();
-      },(error:any)=>{
-        this.toast.error(error);
-        this.globalProgress = false;
-      });
+      return options;
     }
-    else {
-      this.collectionService.addNodeToCollection(target.ref.id, source.ref.id).subscribe(() => {
-        UIHelper.showAddedToCollectionToast(this.toast,this.router, target, 1);
-        if (event.type == 'copy') {
-          this.globalProgress = false;
-          this.refreshContent();
+    dropOnCollection(event:any){
+      let target=event.target;
+      let source=event.source[0];
+      this.globalProgress=true;
+      console.log(source);
+      if(source.hasOwnProperty('childCollectionsCount')){
+        if(event.type=='copy'){
+          this.toast.error(null,'INVALID_OPERATION');
+          this.globalProgress=false;
           return;
         }
-        this.collectionService.removeFromCollection(source.ref.id, this.collectionContent.collection.ref.id).subscribe(() => {
+        this.nodeService.moveNode(target.ref.id,source.ref.id).subscribe(()=>{
           this.globalProgress = false;
           this.refreshContent();
+        },(error:any)=>{
+          this.toast.error(error);
+          this.globalProgress = false;
+        });
+      }
+      else {
+        this.collectionService.addNodeToCollection(target.ref.id, source.ref.id).subscribe(() => {
+          UIHelper.showAddedToCollectionToast(this.toast,this.router, target, 1);
+          if (event.type == 'copy') {
+            this.globalProgress = false;
+            this.refreshContent();
+            return;
+          }
+          this.collectionService.removeFromCollection(source.ref.id, this.collectionContent.collection.ref.id).subscribe(() => {
+            this.globalProgress = false;
+            this.refreshContent();
+          }, (error: any) => {
+            this.toast.error(error);
+            this.globalProgress = false;
+          });
         }, (error: any) => {
           this.toast.error(error);
           this.globalProgress = false;
         });
-      }, (error: any) => {
-        this.toast.error(error);
-        this.globalProgress = false;
-      });
+      }
     }
-  }
-  canDropOnCollection = (event:any)=>{
-    if(event.source[0].ref.id==event.target.ref.id)
-      return false;
-    if(event.target.ref.id==this.collectionContent.collection.ref.id)
-      return false;
-    if(event.source.reference && event.source[0].access && event.source[0].access.indexOf(RestConstants.ACCESS_CC_PUBLISH)==-1)
-      return false;
-    if(!event.source.reference && event.source[0].access && event.source[0].access.indexOf(RestConstants.ACCESS_WRITE)==-1)
-      return false;
-    if(event.target.access && event.target.access.indexOf(RestConstants.ACCESS_WRITE)==-1)
-      return false;
+    canDropOnCollection = (event:any)=>{
+      if(event.source[0].ref.id==event.target.ref.id)
+        return false;
+      if(event.target.ref.id==this.collectionContent.collection.ref.id)
+        return false;
+      // do not allow to move anything else than editorial collections into editorial collections
+      if(      event.source.type==RestConstants.COLLECTIONTYPE_EDITORIAL && event.target.type!=RestConstants.COLLECTIONTYPE_EDITORIAL
+            || event.source.type!=RestConstants.COLLECTIONTYPE_EDITORIAL && event.target.type==RestConstants.COLLECTIONTYPE_EDITORIAL)
+          return false;
+      if(event.source.reference && event.source[0].access && event.source[0].access.indexOf(RestConstants.ACCESS_CC_PUBLISH)==-1)
+        return false;
+      if(!event.source.reference && event.source[0].access && event.source[0].access.indexOf(RestConstants.ACCESS_WRITE)==-1)
+        return false;
+      if(event.target.access && event.target.access.indexOf(RestConstants.ACCESS_WRITE)==-1)
+        return false;
 
     return true;
   }
@@ -868,6 +872,14 @@ export class CollectionsMainComponent {
 
     private isAllowedToDeleteNodes(nodes: Node[]) {
         return this.isAllowedToDeleteCollection() || NodeHelper.getNodesRight(nodes,RestConstants.ACCESS_DELETE);
+    }
+
+    getCollectionViewType() {
+        // on mobile, we will always show the small collection list
+        if(UIHelper.evaluateMediaQuery(UIConstants.MEDIA_QUERY_MAX_WIDTH,UIConstants.MOBILE_WIDTH)){
+            return ListTableComponent.VIEW_TYPE_GRID_SMALL;
+        }
+        return this.isRootLevelCollection() ? ListTableComponent.VIEW_TYPE_GRID : ListTableComponent.VIEW_TYPE_GRID_SMALL;
     }
     private collectionPermissions(){
         this._collectionShare=this.collectionContent.collection;

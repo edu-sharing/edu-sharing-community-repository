@@ -158,7 +158,7 @@ public class RedirectServlet extends HttpServlet implements SingleThreadModel {
                         e.printStackTrace();
                     }
                 }
-				
+
 				if(version != null && !version.trim().equals("")){
 					renderServiceUrl = UrlTool.setParam(renderServiceUrl,"version",version);
 				}
@@ -186,7 +186,7 @@ public class RedirectServlet extends HttpServlet implements SingleThreadModel {
 							MCAlfrescoBaseClient mcAlfrescoBaseClient = (MCAlfrescoBaseClient) RepoFactory.getInstance(repInfo.getAppId(), authInfo);
 							// remoteObjectNodeId wenn remoteRepository
 							renderServiceUrl = mcAlfrescoBaseClient.getAlfrescoContentUrl(renderUrlNodeId);
-							
+
 							if(version != null && !version.trim().equals("")){
 								HashMap<String,HashMap<String,Object>> versHist = mcAlfrescoBaseClient.getVersionHistory(renderUrlNodeId);
 								

@@ -249,7 +249,13 @@ table, div {
 .table-tab-title-short {
     display: none;
 }
-
+.collections-cards-div{
+  display: flex;
+  flex-direction: column;
+  >* {
+    width: 100%;
+  }
+}
 .section-headline {
   float:left;
   width:100%;

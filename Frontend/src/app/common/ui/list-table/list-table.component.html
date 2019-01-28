@@ -220,8 +220,8 @@
                     <i icon iconId="{{option.icon}}"></i>
                 </div>
 
-                <div tabindex="0" (click)="showDropdown(node)" (keyup.enter)="showDropdown(node);$event.stopPropagation();" class="more column" *ngIf="_options && _options.length>1"><a><i icon iconId="more_vert" aria="true"></i></a></div>
-                <div tabindex="0" class="more moreSingle column" *ngIf="_options && _options.length==1 && optionIsShown(_options[0],node)" (click)="callOption(_options[0],node)" (keyup.enter)="callOption(_options[0],node)"><a [class.disabled]="!optionIsValid(_options[0],node)"><i icon iconId="{{_options[0].icon}}"></i> <span class="actionText">{{_options[0].name | translate}}</span></a></div>
+                <div tabindex="0" (click)="showDropdown(node);$event.stopPropagation()" (keyup.enter)="showDropdown(node);$event.stopPropagation();" class="more column" *ngIf="_options && _options.length>1"><a><i icon iconId="more_vert" aria="true"></i></a></div>
+                <div tabindex="0" class="more moreSingle column" *ngIf="_options && _options.length==1 && optionIsShown(_options[0],node)" (click)="callOption(_options[0],node);$event.stopPropagation()" (keyup.enter)="callOption(_options[0],node);$event.stopPropagation()"><a [class.disabled]="!optionIsValid(_options[0],node)"><i icon iconId="{{_options[0].icon}}"></i> <span class="actionText">{{_options[0].name | translate}}</span></a></div>
             </div>
         </div>
         <div *ngIf="_nodes && _nodes.length && hasMore && !isLoading" class="clickable loadMore" (click)="scroll(true)">
