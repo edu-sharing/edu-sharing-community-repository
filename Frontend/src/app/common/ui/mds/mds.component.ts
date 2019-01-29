@@ -1734,11 +1734,23 @@ export class MdsComponent{
 
     preview+=`<input type="file" style="display:none" id="`+this.getDomId('previewSelect')+`" accept="image/*" onchange="`+this.getWindowComponent()+`.changePreview(this)" />
             <label>`+this.translate.instant('WORKSPACE.EDITOR.PREVIEW')+`</label>`;
+    preview+=`<div class="previewImage">`;
+      preview+=`<img id="`+this.getDomId('preview')+`" `+attr+`></div>`;
     if(this.connector.getApiVersion()>=RestConstants.API_VERSION_4_0) {
-      preview += `<div onclick="document.getElementById('`+this.getDomId('previewSelect')+`').click()" class="changePreview clickable">` + this.translate.instant('WORKSPACE.EDITOR.REPLACE_PREVIEW') + `</div>`;
+      preview += `<div class="changePreview">
+                    <a tabindex="0" onclick="document.getElementById('`+this.getDomId('previewSelect')+`').click()" onkeydown="
+                        if(event.keyCode==13){ 
+                    this.click();
+                        }" class="btn-circle"><i class="material-icons" aria-label="`+this.translate.instant('WORKSPACE.EDITOR.REPLACE_PREVIEW')+`">file_upload</i></a>
+                        <a tabindex="0" onclick="
+                        // TODO: @Simon Delete Function
+                        " onkeydown="
+                        if(event.keyCode==13){ 
+                    this.click();
+                        }" class="btn-circle"><i class="material-icons" aria-label="`+this.translate.instant('WORKSPACE.EDITOR.DELETE_PREVIEW')+`">delete</i></a>
+                    </div>`;
     }
-    preview+=`<div class="previewImage"><img id="`+this.getDomId('preview')+`" `+attr+`></div>
-            </div>`;
+    preview+=`</div>`;
     return preview;
   }
   private setEditChildobject(pos:number){

@@ -192,6 +192,7 @@
       "VERSION_COMMENT":"Versionskommentar hinzufügen",
       "REPLACE_MATERIAL":"Material ersetzen",
       "REPLACE_PREVIEW":"Vorschaubild ersetzen",
+      "DELETE_PREVIEW":"Vorschaubild löschen",
       "UPDATED":"Informationen wurden aktualisiert"
     },
     "REVERTED_VERSION":"Version wurde erfolgreich wiederhergestellt",

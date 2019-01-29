@@ -410,9 +410,9 @@ mds .mdsGroup{
       text-align: left;
     }
     .changePreview{
-      float:right;
-      color:$primary;
-      text-transform: uppercase;
+      float: right;
+      clear: both;
+      margin-bottom: 10px;
     }
     img{
       min-width:40%;

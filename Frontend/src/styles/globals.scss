@@ -176,6 +176,24 @@ a:focus,
   }
 }
 
+.btn-circle {
+  padding: 10px;
+  height: 44px;
+  color: $primary;
+  background-color: #fff;
+  border-radius: 50%;
+  @include clickable();
+  @include materialShadowBottom();
+  margin-left: 8px;
+  float: left;
+  &:focus{
+    @include setGlobalInsetFocus();
+  }
+  i{
+    background-color: rgba(255,255,255,0.75);
+    border-radius:5pt;
+  }
+}
 @media screen and (max-width: $mobileWidth) {
   .hidemobile {
     display: none;
