@@ -25,19 +25,19 @@
     <ul class="tabs tabs-fixed-width">
       <li class="clickable tab col s3" tabindex="0" (keyup.enter)="selectTabMyCollections()" (click)="selectTabMyCollections()">
         <a class="table-tab-title-long" [class.active]="(tabSelected==='MY')">{{ 'COLLECTIONS.TAB.MY' | translate }}</a>
-        <a class="table-tab-title-short" [class.active]="(tabSelected==='MY')">{{ 'COLLECTIONS.TAB.MY_SHORT' | translate }}</a>
+          <a class="table-tab-title-short" [class.active]="(tabSelected==='MY')"><i class="material-icons">person</i><span>{{ 'COLLECTIONS.TAB.MY_SHORT' | translate }}</span></a>
       </li>
       <li class="clickable tab col s3" tabindex="0" (keyup.enter)="selectTabMyOrganizations()" (click)="selectTabMyOrganizations()">
         <a class="table-tab-title-long" [class.active]="(tabSelected==='EDU_GROUPS')">{{ 'COLLECTIONS.TAB.EDU_GROUPS' | translate }}</a>
-        <a class="table-tab-title-short" [class.active]="(tabSelected==='EDU_GROUPS')">{{ 'COLLECTIONS.TAB.EDU_GROUPS_SHORT' | translate }}</a>
+          <a class="table-tab-title-short" [class.active]="(tabSelected==='EDU_GROUPS')"><i class="material-icons">group</i><span>{{ 'COLLECTIONS.TAB.EDU_GROUPS_SHORT' | translate }}</span></a>
       </li>
       <li class="clickable tab col s3" tabindex="0" (keyup.enter)="selectTab('TYPE_EDITORIAL')" (click)="selectTab('TYPE_EDITORIAL')" *ngIf="hasEditorial">
         <a class="table-tab-title-long" [class.active]="(tabSelected==='TYPE_EDITORIAL')">{{ 'COLLECTIONS.TAB.TYPE_EDITORIAL' | translate }}</a>
-        <a class="table-tab-title-short" [class.active]="(tabSelected==='TYPE_EDITORIAL')">{{ 'COLLECTIONS.TAB.TYPE_EDITORIAL_SHORT' | translate }}</a>
+          <a class="table-tab-title-short" [class.active]="(tabSelected==='TYPE_EDITORIAL')"><i class="material-icons">star</i><span>{{ 'COLLECTIONS.TAB.TYPE_EDITORIAL_SHORT' | translate }}</span></a>
       </li>
       <li class="clickable tab col s3" tabindex="0" (keyup.enter)="selectTabAllCollections()" (click)="selectTabAllCollections()">
         <a class="table-tab-title-long" [class.active]="(tabSelected==='EDU_ALL')">{{ 'COLLECTIONS.TAB.EDU_ALL' | translate }}</a>
-        <a class="table-tab-title-short" [class.active]="(tabSelected==='EDU_ALL')">{{ 'COLLECTIONS.TAB.EDU_ALL_SHORT' | translate }}</a>
+          <a class="table-tab-title-short" [class.active]="(tabSelected==='EDU_ALL')"><i class="material-icons">language</i><span>{{ 'COLLECTIONS.TAB.EDU_ALL_SHORT' | translate }}</span></a>
       </li>
     </ul>
   </div>
