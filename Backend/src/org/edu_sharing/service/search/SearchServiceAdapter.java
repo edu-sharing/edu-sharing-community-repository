@@ -1,5 +1,6 @@
 package org.edu_sharing.service.search;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -86,7 +87,7 @@ public class SearchServiceAdapter implements SearchService {
 	}
 
 	@Override
-	public SearchToken getLastSearchToken() throws Throwable {
+	public HashMap<ContentType,SearchToken> getLastSearchTokens() throws Throwable {
 		// TODO Auto-generated method stub
 		return null;
 	}
