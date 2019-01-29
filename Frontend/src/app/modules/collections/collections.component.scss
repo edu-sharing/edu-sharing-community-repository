@@ -113,11 +113,15 @@ table, div {
     color: white;
 }
 .card-image-icon-circle{
-  width:150px;
-  height:150px;
+  width: 120px;
+  height: 120px;
   border-radius: 50%;
   background-color: #fff;
   @include unselectableText();
+  i {
+    font-size: 75px;
+    margin-top: 25px;
+  }
 }
 .collection-header-image{
   position: relative;
