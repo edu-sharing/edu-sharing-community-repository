@@ -714,7 +714,8 @@ public class SearchServiceImpl implements SearchService {
 				}
 			}
 			ResultSet resultSet;
-			resultSet=LogTime.log("Searching Solr with query: "+searchParameters.getQuery(),()-> {
+			logger.info(searchParameters.getQuery());
+			resultSet=LogTime.log("Searching Solr",()-> {
 				if (scoped)
 					return searchService.query(searchParameters);
 				else
