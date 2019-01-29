@@ -24,7 +24,13 @@ export class RestAdminService extends AbstractRestService{
         let query=this.connector.createUrl("admin/:version/jobs/:job",null,[[":job",job]]);
         return this.connector.delete<any>(query,this.connector.getRequestOptions());
     }
-
+    public addToolpermission(name:string){
+        let query=this.connector.createUrl("admin/:version/toolpermissions/add/:name",null,[
+            [":name",name]
+        ]);
+        let options=this.connector.getRequestOptions();
+        return this.connector.post<Node>(query,null,options);
+    }
   public getToolpermissions(authority:string){
       let query=this.connector.createUrl("admin/:version/toolpermissions/:authority",null,[
           [":authority",authority]
@@ -150,7 +156,7 @@ export class RestAdminService extends AbstractRestService{
     return this.connector.post(query,null,this.connector.getRequestOptions());
   }
   public getCacheInfo(id : string){
-    let query=this.connector.createUrl("admin/:version/cacheInfo/:id",null,[[":id",id]]);
+    let query=this.connector.createUrl("admin/:version/cache/cacheInfo/:id",null,[[":id",id]]);
     return this.connector.get<CacheInfo>(query,this.connector.getRequestOptions());
   }
   public refreshAppInfo(){

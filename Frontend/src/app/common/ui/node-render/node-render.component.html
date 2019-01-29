@@ -1,5 +1,5 @@
 <!-- dummy for banner-->
-<main-nav #mainnav [currentScope]="'render'"></main-nav>
+<main-nav #mainNav [currentScope]="'render'"></main-nav>
 <div class="topBar fixed scrollWithBanner" *ngIf="showTopBar">
   <div class="displayBar">
     <span class="clickable" title="{{'BACK' | translate}}" (click)="close()" (keypress)="($event.which === 13)?close():0" tabindex="0"><i icon iconId="keyboard_arrow_left"></i> {{'BACK' | translate}}</span>

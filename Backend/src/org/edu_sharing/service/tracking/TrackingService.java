@@ -23,6 +23,6 @@ public interface TrackingService {
         LOGOUT_USER_REGULAR
     }
     boolean trackActivityOnUser(String authorityName,EventType type);
-    boolean trackActivityOnNode(NodeRef nodeRef,EventType type);
+    boolean trackActivityOnNode(NodeRef nodeRef,String nodeVersion,EventType type);
     List<StatisticEntryNode> getNodeStatisics(GroupingType grouping,Date dateFrom, Date dateTo);
 }

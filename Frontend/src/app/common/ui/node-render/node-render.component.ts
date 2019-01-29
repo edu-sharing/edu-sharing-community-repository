@@ -98,7 +98,7 @@ export class NodeRenderComponent implements EventListener{
   public similarNodes: Node[];
 
   @ViewChild('sequencediv') sequencediv : ElementRef;
-  @ViewChild('mainnav') mainnav : MainNavComponent;
+  @ViewChild('mainNav') mainNavRef : MainNavComponent;
   @ViewChild('commentsRef') commentsRef : ElementRef;
 
 
@@ -167,7 +167,7 @@ export class NodeRenderComponent implements EventListener{
             }
             NodeRenderComponent.close(this.location);
             // use a timeout to let the browser try to go back in history first
-            setTimeout(()=>this.mainnav.openSidenav(),250);
+            setTimeout(()=>this.mainNavRef.openSidenav(),250);
           }
         }
       }
@@ -350,10 +350,12 @@ export class NodeRenderComponent implements EventListener{
                 });
             }
             this.isLoading = false;
+            this.mainNavRef.finishPreloading();
         },(error:any)=>{
             console.log(error);
             this.toast.error(error);
             this.isLoading = false;
+            this.mainNavRef.finishPreloading();
         })
   }
     onDelete(event:any){

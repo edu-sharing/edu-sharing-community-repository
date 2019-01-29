@@ -707,7 +707,11 @@ export class Permission {
   group: GroupProfile;
   editable:boolean;
 }
-
+export interface ToolPermission{
+    effective:string;
+    effectiveSource:Group[];
+    explicit:string;
+}
 export class LocalPermissions {
   inherited: boolean;
   permissions: Permission[];

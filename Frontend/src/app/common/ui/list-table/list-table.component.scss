@@ -1004,6 +1004,10 @@ $orderAnimationTime:$transitionNormal*5;
   }
   .cardContainer{
     padding:0;
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: center;
   }
   .cardList{
     margin:0;

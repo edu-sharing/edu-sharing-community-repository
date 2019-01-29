@@ -10,7 +10,7 @@
 }
 .card-scroll{
   top:0;
-  height:calc(100% - 48px);
+  height:calc(100% - 67px);
 }
 .fade{
   position: absolute;
@@ -42,6 +42,20 @@
 .group{
   display:flex;
   flex-direction: column;
+}
+.group-add{
+  display:flex;
+  flex-direction: column;
+  >.add{
+    display: flex;
+    align-items: center;
+    padding:20px 0;
+    >input{
+      flex-grow: 1;
+      width: auto;
+      margin: 0;
+    }
+  }
 }
 .groupName{
   color:$textLight;

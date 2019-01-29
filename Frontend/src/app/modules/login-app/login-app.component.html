@@ -11,10 +11,7 @@
     <div class="card center-card card-action">
       <div class="card-content">
         <div class="card-title"><i class="material-icons card-title-back" (click)="buttonLoginBack()">arrow_back</i>
-          <img class="card-title-image" 
-          [src]="getServerIcon()"
-          onerror="this.src = 'assets/images/app-icon.svg';"
-          > {{'LOGIN_APP.LOGIN_TITLE' | translate}}
+          <img class="card-title-image" src="assets/images/app-icon.svg" image-config> {{'LOGIN_APP.LOGIN_TITLE' | translate}}
           </div>
         <div class="card-scroll">
           <form (ngSubmit)="login()" #loginForm>

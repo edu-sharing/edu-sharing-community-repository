@@ -89,8 +89,10 @@ public interface AdminService {
 
 	Map<String, ToolPermission> getToolpermissions(String authority) throws Throwable;
 
-	void setToolpermissions(String authority,
-			Map<String, ToolPermission.Status> toolpermissions) throws Throwable;
+    String addToolpermission(String name) throws Throwable;
+
+    void setToolpermissions(String authority,
+                            Map<String, ToolPermission.Status> toolpermissions) throws Throwable;
 
 	void refreshEduGroupCache(boolean keepExisting);
 

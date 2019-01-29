@@ -23,6 +23,7 @@ import {trigger} from "@angular/animations";
 import {UIAnimation} from "../../common/ui/ui-animation";
 import {InputPasswordComponent} from "../../common/ui/input-password/input-password.component";
 import {RouterHelper} from '../../common/router.helper';
+import {MainNavComponent} from '../../common/ui/main-nav/main-nav.component';
 
 @Component({
   selector: 'workspace-login',
@@ -34,6 +35,7 @@ import {RouterHelper} from '../../common/router.helper';
 })
 export class LoginComponent  implements OnInit{
     loginUrl: any;
+  @ViewChild('mainNav') mainNavRef : MainNavComponent;
   @ViewChild('passwordInput') passwordInput : InputPasswordComponent;
   @ViewChild('usernameInput') usernameInput : ElementRef;
   @ViewChild('loginForm') loginForm : ElementRef;
@@ -102,6 +104,7 @@ export class LoginComponent  implements OnInit{
 
           this.connector.onAllRequestsReady().subscribe(()=>{
             this.isLoading=false;
+            this.mainNavRef.finishPreloading();
               setTimeout(()=>{
                   if (this.username && this.passwordInput)
                       this.passwordInput.nativeInput.nativeElement.focus();

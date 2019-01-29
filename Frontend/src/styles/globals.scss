@@ -121,6 +121,18 @@ a{
 .uppercase {
   text-transform: uppercase;
 }
+.general-warning{
+  display: flex;
+  align-items: center;
+  background-color: lighten($warningMedium,50%);
+  border: 1px solid $warningMedium;
+  border-radius: 2px;
+  padding: 15px 20px;
+  color: #674E04;
+  >div:first-child{
+    padding-right: 20px;
+  }
+}
 .profile-gradient{
   background: linear-gradient(to bottom, transparent 0,rgba(0,0,0,.5) 100%);
   width: 100%;
@@ -129,7 +141,7 @@ a{
   top: 0;
   position: absolute;
 }
-.profile-background{
+.blurred-image{
   $blurStrength:25px;
   position: absolute;
   left:-$blurStrength;

@@ -32,6 +32,7 @@ import org.edu_sharing.restservices.admin.v1.model.ExcelResult;
 import org.edu_sharing.restservices.admin.v1.model.UpdateResult;
 import org.edu_sharing.restservices.admin.v1.model.UploadResult;
 import org.edu_sharing.restservices.admin.v1.model.XMLResult;
+import org.edu_sharing.restservices.node.v1.model.NodeEntry;
 import org.edu_sharing.restservices.shared.ErrorResponse;
 import org.edu_sharing.restservices.shared.Filter;
 import org.edu_sharing.restservices.shared.Group;
@@ -137,7 +138,6 @@ public class AdminApi {
 			return ErrorResponse.createResponse(t);
 		}
 	}
-
 	@POST
 	@Path("/applyTemplate")
 
@@ -156,6 +156,31 @@ public class AdminApi {
 		try {
 			AdminServiceFactory.getInstance().applyTemplate(template, group, folder);
 			return Response.ok().build();
+		} catch (Throwable t) {
+			return ErrorResponse.createResponse(t);
+		}
+	}
+
+	@POST
+	@Path("/toolpermissions/add/{name}")
+
+	@ApiOperation(value = "add a new toolpermissions")
+
+	@ApiResponses(value = {
+			@ApiResponse(code = 200, message = RestConstants.HTTP_200, response = Node.class),
+			@ApiResponse(code = 400, message = RestConstants.HTTP_400, response = ErrorResponse.class),
+			@ApiResponse(code = 401, message = RestConstants.HTTP_401, response = ErrorResponse.class),
+			@ApiResponse(code = 403, message = RestConstants.HTTP_403, response = ErrorResponse.class),
+			@ApiResponse(code = 404, message = RestConstants.HTTP_404, response = ErrorResponse.class),
+			@ApiResponse(code = 500, message = RestConstants.HTTP_500, response = ErrorResponse.class)
+	})
+	public Response addToolpermission(
+			@ApiParam(value = "Name/ID of toolpermission",required=true) @PathParam("name") String name,
+			@Context HttpServletRequest req){
+		try {
+			String nodeId=AdminServiceFactory.getInstance().addToolpermission(name);
+			NodeDao nodeDao=NodeDao.getNode(RepositoryDao.getHomeRepository(),nodeId);
+			return Response.ok().entity(nodeDao.asNode()).build();
 		} catch (Throwable t) {
 			return ErrorResponse.createResponse(t);
 		}

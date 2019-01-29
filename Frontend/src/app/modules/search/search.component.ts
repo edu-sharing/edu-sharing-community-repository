@@ -195,6 +195,9 @@ export class SearchComponent {
     this.currentValues=props;
     this.updateGroupedRepositories();
     this.routeSearchParameters(props);
+    if(UIHelper.evaluateMediaQuery(UIConstants.MEDIA_QUERY_MAX_WIDTH,UIConstants.MOBILE_WIDTH)){
+      this.searchService.sidenavOpened=false;
+    }
     //this.getSearch(null,true,props);
   }
   downloadNode() {
@@ -655,29 +658,34 @@ export class SearchComponent {
       }
       return options;
     }
+    let collection = this.actionbar.createOptionIfPossible('ADD_TO_COLLECTION', nodes, (node: Node) => {
+        this.addNodesToCollection = ActionbarHelperService.getNodes(nodes, node);
+    });
+    if(collection) {
+        collection.showCallback = (node: Node) => {
+            let n=ActionbarHelperService.getNodes(nodes,node);
+            if(n==null)
+              return false;
+            return this.addToCollection == null && !this.isGuest && RestNetworkService.allFromHomeRepo(n,this.allRepositories);
+        };
+        options.push(collection);
+    }
+    let stream = this.actionbar.createOptionIfPossible('ADD_TO_STREAM', nodes, (node: Node) => this.addToStream(node));
+    options.push(stream);
+    let variant = this.actionbar.createOptionIfPossible('CREATE_VARIANT', nodes, (node: Node) => this.nodeVariant = ActionbarHelperService.getNodes(nodes, node)[0]);
+    if (variant)
+        options.push(variant);
     if(fromList || nodes && nodes.length) {
-      let collection = this.actionbar.createOptionIfPossible('ADD_TO_COLLECTION', nodes, (node: Node) => {
-          this.addNodesToCollection = ActionbarHelperService.getNodes(nodes, node);
-      });
-      if(collection) {
-          collection.showCallback = (node: Node) => {
-              return this.addToCollection == null && !this.isGuest && RestNetworkService.isFromHomeRepo(node, this.allRepositories);
-          };
-          if(fromList || RestNetworkService.allFromHomeRepo(nodes,this.allRepositories))
-              options.push(collection);
-      }
-      if(fromList || RestNetworkService.allFromHomeRepo(nodes,this.allRepositories)) {
-        let stream = this.actionbar.createOptionIfPossible('ADD_TO_STREAM', nodes, (node: Node) => this.addToStream(node));
-        options.push(stream);
-      }
-      let variant = this.actionbar.createOptionIfPossible('CREATE_VARIANT', nodes, (node: Node) => this.nodeVariant = ActionbarHelperService.getNodes(nodes, node)[0]);
-      options.push(variant);
-
-      let nodeStore = this.actionbar.createOptionIfPossible('ADD_NODE_STORE',nodes,(node: Node) => {
+      let nodeStore = new OptionItem('SEARCH.ADD_NODE_STORE', 'bookmark_border', (node: Node) => {
         this.addToStore(ActionbarHelperService.getNodes(nodes,node));
       });
+      nodeStore.showCallback=(node:Node)=>{
+          let n=ActionbarHelperService.getNodes(nodes,node);
+          if(n==null)
+              return false;
+        return RestNetworkService.allFromHomeRepo(n,this.allRepositories);
+      };
       options.push(nodeStore);
-      if(fromList || RestNetworkService.allFromHomeRepo(nodes,this.allRepositories))
 
       if (!this.isGuest && this.isHomeRepository()) {
 
@@ -695,15 +703,14 @@ export class SearchComponent {
         */
       }
 
-      if(fromList || nodes && nodes.length==1){
-        if(!this.isGuest && (fromList || RestNetworkService.supportsImport(nodes[0].ref.repo,this.allRepositories))) {
-          let save = new OptionItem('SAVE', 'reply', (node: Node) => this.importNode(this.getCurrentNode(node)));
-          save.showCallback=(node:Node)=>{
-            return RestNetworkService.supportsImport(node.ref.repo, this.allRepositories);
-          };
-          options.push(save);
-        }
-      }
+      let save = new OptionItem('SAVE', 'reply', (node: Node) => this.importNode(this.getCurrentNode(node)));
+      save.showCallback=(node:Node)=>{
+          let n=ActionbarHelperService.getNodes(nodes,node);
+          if(n==null)
+              return false;
+        return !this.isGuest && n.length==1 && RestNetworkService.supportsImport(n[0].ref.repo, this.allRepositories);
+      };
+      options.push(save);
 
       let download = this.actionbar.createOptionIfPossible('DOWNLOAD', nodes, (node: Node) => NodeHelper.downloadNodes(this.toast, this.connector, ActionbarHelperService.getNodes(nodes, node)));
       options.push(download);
@@ -711,10 +718,12 @@ export class SearchComponent {
       if((fromList || nodes && nodes.length==1) && this.config.instant('nodeReport',false)){
         let report = new OptionItem('NODE_REPORT.OPTION', 'flag', (node: Node) => this.nodeReport=this.getCurrentNode(node));
         report.showCallback=(node:Node)=>{
-          return RestNetworkService.isFromHomeRepo(node,this.allRepositories);
+            let n=ActionbarHelperService.getNodes(nodes,node);
+            if(n==null)
+                return false;
+          return RestNetworkService.allFromHomeRepo(n,this.allRepositories);
         }
-        if(fromList || RestNetworkService.allFromHomeRepo(nodes,this.allRepositories))
-          options.push(report);
+        options.push(report);
       }
     }
     let custom=this.config.instant('searchNodeOptions');
@@ -1060,6 +1069,7 @@ export class SearchComponent {
       (param: any) => {
         this.searchService.init();
         this.mainNavRef.refreshBanner();
+        this.mainNavRef.finishPreloading();
         if(param['addToCollection']){
           this.collectionApi.getCollection(param['addToCollection']).subscribe((data:CollectionWrapper)=>{
             this.addToCollection=data.collection;

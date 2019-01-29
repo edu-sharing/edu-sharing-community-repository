@@ -217,6 +217,7 @@ $imagePath: '../../../../assets/images/collections/';
   position: relative;
   height:240px;
   background-color:white;
+  overflow: hidden;
 }
 
 .collection-new-preview-infoarea {
@@ -339,13 +340,15 @@ $imagePath: '../../../../assets/images/collections/';
     color: white;
     cursor: pointer;
 }
-
+.card-image-distance{
+  height: 35px;
+}
 .card-image-icon-container {
     height: 160px;
     width: 160px;
     border-radius: 160px;
     background-color: darkgray;
-    margin: 35px auto auto auto;
+    margin: auto;
     text-align: center;
     vertical-align: middle;
   i{
@@ -391,25 +394,29 @@ $imagePath: '../../../../assets/images/collections/';
     display: none;
 }
 
-.image-upload-icon {
-  z-index: 1;
-  padding:10px;
+.button-icon{
+  position: absolute;
+  bottom: 8px;
+  right: 27px;
+  z-index: 2;
+}
+.image-icon {
+  padding: 10px;
+  height: 44px;
   color: $primary;
   background-color: #fff;
-  border-radius:50%;
-  position: absolute;
-  bottom: 15px;
-  right: 27px;
+  border-radius: 50%;
   @include clickable();
   @include materialShadowBottom();
-  z-index: 2;
+  margin-left: 8px;
+  float: left;
   &:focus{
     @include setGlobalInsetFocus();
   }
-}
-.image-upload-icon i{
-  background-color: rgba(255,255,255,0.75);
-  border-radius:5pt;
+  i{
+    background-color: rgba(255,255,255,0.75);
+    border-radius:5pt;
+  }
 }
 
 
@@ -466,10 +473,10 @@ input[type="radio"] {
     }
   }
 }
-.profile-background{
+.blurred-image{
   display: none;
 }
-@media screen and (max-height: $mobileHeight){
+@media screen and (max-height: $mobileHeight + $mobileStage*1){
   .card, .card-high, .card-low {
     top:$mainnavHeight+15px;
   }
@@ -480,7 +487,7 @@ input[type="radio"] {
     height: 120px;
   }
   .card-image-icon-container{
-    margin-top: 20px;
+    margin-top: 10px;
     height: 100px;
     width: 100px;
     border-radius: 100px;
@@ -489,24 +496,30 @@ input[type="radio"] {
       font-size: 60px;
     }
   }
-  .profile-background{
+  .card-image-distance{
+    height: 0;
+  }
+  .blurred-image{
     display: block;
-    width: 100%;
-    height: 140px;
-    filter: blur(12px);
+    filter: blur(8px);
   }
   .card-image-preview{
     height: 120px;
     width: auto;
     margin: auto;
     z-index: 1;
+    @include materialShadowLarge();
   }
   .collection-new-preview-infoline{
     margin-left: 15px;
   }
 
 }
-
+@media screen and (max-height: $mobileHeight - $mobileStage*1){
+  .card, .card-high, .card-low {
+    top:0;
+  }
+}
 @media only screen and (max-width: $mobileTabSwitchWidth) {
   .collections-master-div{
     margin-bottom: $mobileTabNavHeight;

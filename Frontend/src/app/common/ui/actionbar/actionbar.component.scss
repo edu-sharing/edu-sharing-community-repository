@@ -80,7 +80,7 @@
     height:45px;
     line-height:45px;
     text-align: center;
-    @include materialShadowBottom();
+    @include materialShadow();
     .edu-icons,.material-icons{
       position: relative;
       font-size: 24px;

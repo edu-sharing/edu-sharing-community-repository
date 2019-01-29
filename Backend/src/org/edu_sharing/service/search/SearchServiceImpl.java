@@ -54,6 +54,7 @@ import org.edu_sharing.repository.server.AuthenticationToolAPI;
 import org.edu_sharing.repository.server.MCAlfrescoAPIClient;
 import org.edu_sharing.repository.server.SearchResultNodeRef;
 import org.edu_sharing.repository.server.tools.ApplicationInfoList;
+import org.edu_sharing.repository.server.tools.LogTime;
 import org.edu_sharing.restservices.MdsDao;
 import org.edu_sharing.restservices.shared.MdsQueryCriteria;
 import org.edu_sharing.service.Constants;
@@ -104,9 +105,9 @@ public class SearchServiceImpl implements SearchService {
 		parameters.setMaxItems(Integer.MAX_VALUE);
 		parameters.addAllAttribute(CCConstants.CCM_PROP_AUTHORITYCONTAINER_EDUHOMEDIR);
 		parameters.setQuery("(TYPE:\"" + CCConstants.CCM_TYPE_IO + "\" OR TYPE:\"" + CCConstants.CCM_TYPE_MAP +"\") "
-				+ 	"AND @ccm\\:ph_user:\"" + QueryParser.escape(username) + "\"");
+				+ 	"AND @ccm\\:ph_users:\"" + QueryParser.escape(username) + "\"");
 		ResultSet resultSet = searchService.query(parameters);
-		
+
 		List<NodeRef> result = new ArrayList<>();
 		for (NodeRef node : resultSet.getNodeRefs()) {
 			if (result.contains(node))
@@ -133,12 +134,12 @@ public class SearchServiceImpl implements SearchService {
 		return result;
 	}
 
-	
+
 	@Override
 	public List<NodeRef> getFilesSharedToMe() throws Exception {
 		String username = AuthenticationUtil.getFullyAuthenticatedUser();
 		String homeFolder = baseClient.getHomeFolderID(username);
-	
+
 		SearchParameters parameters = new SearchParameters();
 		parameters.addStore(Constants.storeRef);
 		parameters.setLanguage(org.alfresco.service.cmr.search.SearchService.LANGUAGE_LUCENE);
@@ -148,14 +149,14 @@ public class SearchServiceImpl implements SearchService {
 		parameters.addSort("@" + CCConstants.CCM_PROP_PH_MODIFIED, false);
 
 		parameters.setQuery("(TYPE:\"" + CCConstants.CCM_TYPE_IO +"\" OR TYPE:\"" + CCConstants.CCM_TYPE_MAP +"\") "
-				+ "AND ISNOTNULL:\"ccm:ph_user\" "
-				+ "AND NOT @ccm\\:ph_user:\"" + QueryParser.escape(username) + "\"");
+				+ "AND ISNOTNULL:\"ccm:ph_users\" "
+				+ "AND NOT @ccm\\:ph_users:\"" + QueryParser.escape(username) + "\"");
 		ResultSet resultSet = searchService.query(parameters);
 		List<NodeRef> result = new ArrayList<NodeRef>();
 		for(NodeRef nodeRef : resultSet.getNodeRefs()) {
 			result.add(nodeRef);
 		}
-		
+
 		Set<String> memberships = new HashSet<>();
 		memberships.addAll(serviceRegistry.getAuthorityService().getAuthorities());
 		memberships.remove(CCConstants.AUTHORITY_GROUP_EVERYONE);
@@ -679,7 +680,7 @@ public class SearchServiceImpl implements SearchService {
 					searchParameters.addFieldFacet(fieldFacet);
 				}
 			}
-			
+
 			List<FieldHighlightParameters> fieldHighlightParameters = new ArrayList<FieldHighlightParameters>();
 			fieldHighlightParameters.add( new FieldHighlightParameters("cm:name",255,100,false,"",""));
 			fieldHighlightParameters.add( new FieldHighlightParameters("cm:title",255,100,false,"",""));
@@ -691,25 +692,14 @@ public class SearchServiceImpl implements SearchService {
 			fieldHighlightParameters.add( new FieldHighlightParameters("lnk:title",255,100,false,"",""));
 			GeneralHighlightParameters ghp = new GeneralHighlightParameters(255,100,false,"","",null,true,fieldHighlightParameters);
 			searchParameters.setHighlight(ghp);
-			
-			ResultSet resultSet;
-			if (scoped)
-				resultSet = searchService.query(searchParameters);
-			else
-				resultSet = serviceRegistry.getSearchService().query(searchParameters);
-			
-/*			Map<NodeRef, List<Pair<String, List<String>>>> hightlightning = resultSet.getHighlighting();
-			for(Map.Entry<NodeRef, List<Pair<String, List<String>>>> entry : hightlightning.entrySet()) {
-				System.out.println("Highlightning NodeRef:" +entry.getKey());
-				for(Pair<String,List<String>> pair :entry.getValue()) {
-					System.out.println("		Pair:" +pair.getFirst());
-					for(String val :  pair.getSecond()) {
-						System.out.println("		val:" + val);
-					}
-				}
-			}
-			*/
 
+			ResultSet resultSet;
+			resultSet=LogTime.log("Searching Solr with query: "+searchParameters.getQuery(),()-> {
+				if (scoped)
+					return searchService.query(searchParameters);
+				else
+					return serviceRegistry.getSearchService().query(searchParameters);
+			});
 			SearchResultNodeRef sr = new SearchResultNodeRef();
 			sr.setData(AlfrescoDaoHelper.unmarshall(resultSet.getNodeRefs(), ApplicationInfoList.getHomeRepository().getAppId()));
 			sr.setStartIDX(searchToken.getFrom());
@@ -762,10 +752,10 @@ public class SearchServiceImpl implements SearchService {
 			throw new RuntimeException(e.getMessage());
 		}
 	}
-	
+
 	@Override
 	public SearchResultNodeRef searchFingerPrint(String nodeId) {
-		
+
 		int skipCount = 0;
 		int maxItems = 100;
 		StoreRef storeRef = new StoreRef(Constants.storeRef.getProtocol(), Constants.storeRef.getIdentifier());
@@ -777,19 +767,19 @@ public class SearchServiceImpl implements SearchService {
 		searchParameters.setQuery("FINGERPRINT:" + nodeId + "_30_90 AND NOT ID:\"workspace://SpacesStore/"+ nodeId + "\"");
 		searchParameters.setSkipCount(skipCount);
 		searchParameters.setMaxItems(maxItems);
-		
+
 		ResultSet resultSet = serviceRegistry.getSearchService().query(searchParameters);
-		
+
 		SearchResultNodeRef sr = new SearchResultNodeRef();
 		sr.setData(AlfrescoDaoHelper.unmarshall(resultSet.getNodeRefs(), ApplicationInfoList.getHomeRepository().getAppId()));
 		sr.setStartIDX(skipCount);
 		sr.setNodeCount(maxItems);
 		sr.setNodeCount((int) resultSet.getNumberFound());
-		
+
 		return sr;
 	}
-	
-	
+
+
 	@Override
 	public List<NodeRef> getWorkflowReceive(String user) {
 		SearchParameters parameters = new SearchParameters();

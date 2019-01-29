@@ -1,9 +1,10 @@
 <div>
 <div class="header">
-  <img src="assets/images/layout/oer_bg.jpg" alt="Header picture">
+  <img src="assets/images/layout/oer_bg.jpg" image-config alt="">
   <div class="headerGradient"></div>
 </div>
   <main-nav
+          #mainNav
           [title]="'SEARCH.TITLE'"
           [currentScope]="'oer'"
           [searchEnabled]="true"
@@ -36,8 +37,8 @@
     [isClickable]="true"
     [viewType]="2"
     [scrollWindow]="true"
-    (clickRow)="click($event.node)"
-    (doubleClickRow)="click($event.node)"
+    (clickRow)="click($event)"
+    (doubleClickRow)="click($event)"
     (loadMore)="loadMore(COLLECTIONS)"
     [isLoading]="loading[COLLECTIONS]"></listTable>
   </div>
@@ -60,7 +61,7 @@
       [isClickable]="true"
       [viewType]="1"
       [scrollWindow]="true"
-      (clickRow)="click($event.node)"
+      (clickRow)="click($event)"
       (onUpdateOptions)="updateOptions(MATERIALS,$event)"
       (doubleClickRow)="click($event)"
       (loadMore)="loadMore(MATERIALS)"
@@ -84,8 +85,8 @@
                [isClickable]="true"
                [viewType]="1"
                [scrollWindow]="true"
-               (clickRow)="click($event.node)"
-               (doubleClickRow)="click($event.node)"
+               (clickRow)="click($event)"
+               (doubleClickRow)="click($event)"
                (loadMore)="loadMore(TOOLS)"
                [isLoading]="loading[TOOLS]"></listTable>
   </div>

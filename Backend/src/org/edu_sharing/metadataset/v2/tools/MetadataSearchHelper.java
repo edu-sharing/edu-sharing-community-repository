@@ -21,23 +21,14 @@ import org.apache.log4j.Logger;
 import org.apache.lucene.queryParser.QueryParser;
 import org.edu_sharing.alfresco.service.ConnectionDBAlfresco;
 import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
-import org.edu_sharing.metadataset.v2.MetadataKey;
-import org.edu_sharing.metadataset.v2.MetadataQueries;
-import org.edu_sharing.metadataset.v2.MetadataQuery;
-import org.edu_sharing.metadataset.v2.MetadataQueryParameter;
-import org.edu_sharing.metadataset.v2.MetadataReaderV2;
-import org.edu_sharing.metadataset.v2.MetadataSetV2;
-import org.edu_sharing.metadataset.v2.MetadataWidget;
+import org.edu_sharing.metadataset.v2.*;
 import org.edu_sharing.repository.client.rpc.SQLKeyword;
 import org.edu_sharing.repository.client.rpc.SearchCriterias;
 import org.edu_sharing.repository.client.rpc.SuggestFacetDTO;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.server.tools.ApplicationInfoList;
-import org.edu_sharing.repository.server.tools.search.QueryValidationFailedException;
 import org.edu_sharing.restservices.shared.MdsQueryCriteria;
 import org.edu_sharing.service.search.SearchServiceFactory;
-import org.edu_sharing.service.search.SearchServiceImpl;
-import org.edu_sharing.service.search.model.SearchToken;
 import org.springframework.context.ApplicationContext;
 
 import com.google.gwt.user.client.ui.SuggestOracle;
@@ -105,11 +96,22 @@ public class MetadataSearchHelper {
 	 * @return
 	 */
 	private static String getStatmentForValue(MetadataQueryParameter parameter, String value) {
-		if(value==null) {
-			throw new java.lang.IllegalArgumentException("null value for "+parameter.getName()+" given, null values are not allowed");
+		if(value==null && parameter.isMandatory()) {
+			throw new java.lang.IllegalArgumentException("null value for mandatory parameter "+parameter.getName()+" given, null values are not allowed if mandatory is set to true");
 		}
+		if(value==null)
+		    return "";
+
+		// invoke any preprocessors for this value
+		try {
+			value = MetadataQueryPreprocessor.run(parameter, value);
+		}catch(Exception e){
+			throw new RuntimeException(e);
+		}
+
 		if(value.startsWith("\"") && value.endsWith("\"") || parameter.isExactMatching())
 			return parameter.getStatement(value).replace("${value}", QueryParser.escape(value));
+
 		String[] words = value.split(" ");
 		String query="";
 		for(String word : words) {

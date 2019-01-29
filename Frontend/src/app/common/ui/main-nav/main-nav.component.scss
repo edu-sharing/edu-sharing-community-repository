@@ -17,6 +17,23 @@
     align-items: center;
   }
 }
+.preload{
+  position: fixed;
+  z-index: 140;
+  width: 100%;
+  height: 100%;
+  left:0;
+  top:0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background-color: #444;
+  >img{
+    width:50%;
+    max-width: 300px;
+  }
+}
 .tab-nav{
   display: none;
 }
@@ -248,10 +265,6 @@ user-profile{
 .topBar .user span{
   font-size:100%;
 }
-.sidenav span{
-  position: relative;
-  top:-4px;
-}
 .topBar .user i{
   font-size:25px;
   vertical-align: top;
@@ -261,6 +274,8 @@ user-profile{
 .sidenav .button{
   padding:20px 30px;
   width:100%;
+  display: flex;
+  align-items: center;
 }
 .userMenu,.helpMenu{
   position: absolute;

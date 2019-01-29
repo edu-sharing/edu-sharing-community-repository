@@ -840,6 +840,11 @@ public class CollectionServiceImpl implements CollectionService{
 		org.alfresco.service.cmr.repository.NodeRef ref=new org.alfresco.service.cmr.repository.NodeRef(MCAlfrescoAPIClient.storeRef,collectionId);
 		PreviewCache.purgeCache(collectionId);
 	}
+	@Override
+	public void removePreviewImage(String collectionId) throws Exception {
+		NodeServiceFactory.getLocalService().removeProperty(StoreRef.PROTOCOL_WORKSPACE,StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(),collectionId,CCConstants.CCM_PROP_MAP_ICON);
+		PreviewCache.purgeCache(collectionId);
+	}
 
 	@Override
 	public void setOrder(String parentId, String[] nodes) {

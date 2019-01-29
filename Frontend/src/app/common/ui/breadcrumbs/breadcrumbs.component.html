@@ -24,7 +24,7 @@
 </div>
 -->
 <div class="breadcrumb breadcrumbMobile" *ngIf="_breadcrumbsAsNodeShort">
-  <div *ngIf="home && _breadcrumbsAsNode.length<1" tabindex="0" class="home" [class.clickable]="clickable" (click)="openBreadcrumb(0)" (keyup.enter)="openBreadcrumb(0)">{{home | translate}}</div>
+  <div *ngIf="home && _breadcrumbsAsNode.length<1" tabindex="0" class="home" [class.clickable]="clickable" (click)="openBreadcrumb(0)" (keyup.enter)="openBreadcrumb(0)">{{home | translate}} <i class="material-icons">keyboard_arrow_down</i></div>
   <div *ngIf="!home && _breadcrumbsAsNode.length<1" tabindex="0" class="home homeIcon" [class.clickable]="clickable" (click)="openBreadcrumb(0)" (keyup.enter)="openBreadcrumb(0)"><i icon iconId="home"></i></div>
   <div *ngIf="_breadcrumbsAsNodeShort.length" tabindex="0" (click)="openBreadcrumb(_breadcrumbsAsNode.length-1)" class="homeIcon" (keyup.enter)="openBreadcrumb(_breadcrumbsAsNode.length-1)" [class.clickable]="clickable"><i icon iconId="keyboard_arrow_left"></i></div>
   <div *ngIf="_breadcrumbsAsNodeShort.length" tabindex="0" class="folder" [class.clickable]="clickable" (click)="openBreadcrumb(_breadcrumbsAsNode.length)" (keyup.enter)="openBreadcrumb(_breadcrumbsAsNode.length)">{{_breadcrumbsAsNodeShort[_breadcrumbsAsNodeShort.length-1] ? _breadcrumbsAsNodeShort[_breadcrumbsAsNodeShort.length-1].name : ''}}</div>
