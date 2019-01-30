@@ -1915,7 +1915,7 @@ public class CCConstants {
 
 	public static final String COLLECTION_COLOR_DEFAULT = "#975B5D";
 
-	public static final String SESSION_LAST_SEARCH_TOKEN = "LAST_SEARCH_TOKEN";
+	public static final String SESSION_LAST_SEARCH_TOKENS = "LAST_SEARCH_TOKENS";
 
 	public static final String COLLECTION_ORDER_MODE_CUSTOM = "custom";
 

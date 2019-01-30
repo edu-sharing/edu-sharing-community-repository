@@ -1,5 +1,6 @@
 package org.edu_sharing.service.search;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -82,7 +83,7 @@ public interface SearchService {
 	SearchResult<String> searchPersonGroups(String authorityName, String pattern, int skipCount, int maxValues,
 			SortDefinition sort);
 
-	SearchToken getLastSearchToken() throws Throwable;
+	HashMap<ContentType,SearchToken> getLastSearchTokens() throws Throwable;
 	
 	public default List<? extends  SuggestOracle.Suggestion> getSuggestions(MetadataSetV2 mds, String queryId, String parameterId, String value, List<MdsQueryCriteria> criterias) {
 		return null;	

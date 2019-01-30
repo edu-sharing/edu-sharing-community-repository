@@ -168,7 +168,7 @@ public class SearchServiceWSImpl implements SearchService {
 	}
 
 	@Override
-	public SearchToken getLastSearchToken() throws Throwable {
+	public HashMap<ContentType,SearchToken> getLastSearchTokens() throws Throwable {
 		// TODO Auto-generated method stub
 		return null;
 	}
