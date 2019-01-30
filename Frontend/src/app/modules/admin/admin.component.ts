@@ -754,16 +754,18 @@ export class AdminComponent {
         return v;
       v.splice(v.length-1,1);
       console.log(v);
-      return v.concat(".");
+      return v.join(".");
     }
     private runChecks() {
         this.systemChecks=[];
 
         // check versions render service
         this.connector.getAbout().subscribe((about)=>{
+            about.version.repository=this.getMajorVersion(about.version.repository);
+            about.version.renderservice=this.getMajorVersion(about.version.renderservice);
             this.systemChecks.push({
               name:"RENDERING",
-              status:this.getMajorVersion(about.version.repository)==this.getMajorVersion(about.version.renderservice) ? 'OK' : 'FAIL',
+              status:about.version.repository=='unknown' ? 'WARN' : about.version.repository==about.version.renderservice ? 'OK' : 'FAIL',
               translate:about.version
             });
         },(error)=>{

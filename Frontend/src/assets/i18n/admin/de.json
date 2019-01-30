@@ -70,6 +70,7 @@
         "RENDERING":{
           "TITLE":"Repository + Renderingservice Version",
           "STATUS_OK":"Version beider Systeme stimmt überein: {{repository}}",
+          "STATUS_WARN":"Die Version des Repositories konnte nicht abgerufen werden (Renderingservice: {{renderservice}}).\nSie befinden sich wahrscheinlich gerade im Development Modus, wodurch die Version nicht abgerufen werden kann",
           "STATUS_FAIL":"Version von Repository ({{repository}}) und Renderingservice ({{renderservice}}) stimmen nicht überein oder Renderingservice wurde nicht gefunden. Inhalte werden möglicherweise falsch oder gar nicht angezeigt",
           "SOLUTION":"Überprüfen Sie, ob ein Renderingservice angebunden ist (Quellen) und ob die korrekte Version installiert ist"
         },
