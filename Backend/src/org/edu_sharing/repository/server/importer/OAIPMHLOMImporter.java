@@ -282,6 +282,7 @@ public class OAIPMHLOMImporter implements Importer{
 			return;
 		}
 		long time=System.currentTimeMillis();
+		int totalResults = 0;
 		for(int i = 0; i < nrOfRs;i++){
 			if(i > MAX_PER_RESUMPTION){
 				logger.error("only " +MAX_PER_RESUMPTION +" for one resumption token are allowed here");
@@ -320,8 +321,10 @@ public class OAIPMHLOMImporter implements Importer{
 		}
 		// wait until all previously started threads have finished
 		executor.invokeAll(threads);
+		totalResults+=threads.size();
 		time=(System.currentTimeMillis()-time);
 		if(threads.size()>0) {
+			logger.info("Import progress: "+totalResults+" entries processed so far");
 			logger.info(THREAD_COUNT + " Threads finished (" + threads.size() + ", " + (time / 1000) + " s -> " + (time / threads.size()) + "ms per entry)");
 		}
 	}
