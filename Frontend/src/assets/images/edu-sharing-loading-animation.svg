@@ -5,22 +5,23 @@
 <style type="text/css">
 	#w1{
   animation: breathe1 1s ease alternate infinite;
-  animation-delay: 0;
+  animation-delay: 0.1;
   }
 
 #w2{
   animation: breathe2 1s ease alternate infinite;
-  animation-delay: 0.1s;
+  animation-delay: 0.2s;
   }
 
 #w3{
   animation: breathe3 1s ease alternate infinite;
-  animation-delay: 0.2s;
+  animation-delay: 0.3s;
   }
 
 .st0{
   fill: white;
   transform-origin: center left;
+  transition: all;
 }
 
 @keyframes breathe1 {
