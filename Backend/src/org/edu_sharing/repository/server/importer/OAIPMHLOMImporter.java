@@ -65,6 +65,7 @@ public class OAIPMHLOMImporter implements Importer{
 	// best thread scaling seems to be at a max at 4-8 threads
 	// check the cpu and choose between a thread count between 1 - 6, leaving 1 core from the cpu at least untouched
 	private static final int THREAD_COUNT = Math.max(1, Math.min(6,Runtime.getRuntime().availableProcessors()-1));
+	private int totalResults = 0;
 	Logger logger = Logger.getLogger(OAIPMHLOMImporter.class);
 	
 	XPathFactory pfactory = XPathFactory.newInstance();
@@ -282,7 +283,6 @@ public class OAIPMHLOMImporter implements Importer{
 			return;
 		}
 		long time=System.currentTimeMillis();
-		int totalResults = 0;
 		for(int i = 0; i < nrOfRs;i++){
 			if(i > MAX_PER_RESUMPTION){
 				logger.error("only " +MAX_PER_RESUMPTION +" for one resumption token are allowed here");
