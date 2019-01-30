@@ -400,10 +400,19 @@ mds .mdsGroup{
     width:100%;
     float:left;
     .previewImage {
-      text-align: center;
+      position: relative;
+      display:flex;
+      justify-content: center;
       width:100%;
-      float:left;
       padding-top: 5px;
+      .preview-deleted{
+        position: absolute;
+        background-color: rgba(255,255,255,0.9);
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+      }
     }
     label{
       float: left;
@@ -414,7 +423,7 @@ mds .mdsGroup{
       clear: both;
       margin-bottom: 10px;
     }
-    img{
+    img,.preview-deleted{
       min-width:40%;
       width:250px;
       height: 175px;

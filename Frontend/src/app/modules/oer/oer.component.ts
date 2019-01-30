@@ -209,7 +209,6 @@ export class OerComponent {
      }
    }
    private click(node:Node){
-    console.log(node);
     this.displayedNode=node;
     if(node.collection){
       this.router.navigate([UIConstants.ROUTER_PREFIX+"collections"],{queryParams:{id:node.ref.id,mainnav:true}});

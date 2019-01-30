@@ -193,6 +193,7 @@
       "REPLACE_MATERIAL":"Material ersetzen",
       "REPLACE_PREVIEW":"Vorschaubild ersetzen",
       "DELETE_PREVIEW":"Vorschaubild löschen",
+      "PREVIEW_DELETED":"Vorschaubild wird gelöscht",
       "UPDATED":"Informationen wurden aktualisiert"
     },
     "REVERTED_VERSION":"Version wurde erfolgreich wiederhergestellt",
