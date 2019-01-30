@@ -636,6 +636,17 @@ public class NodeDao {
 		}
 	}
 
+	public NodeDao deletePreview() throws DAOException {
+
+		try {
+			nodeService.removeProperty(storeProtocol,storeId,nodeId,isDirectory() ? CCConstants.CCM_PROP_MAP_ICON : CCConstants.CCM_PROP_IO_USERDEFINED_PREVIEW);
+			PreviewCache.purgeCache(nodeId);
+			return new NodeDao(repoDao, nodeId);
+		} catch (Throwable t) {
+			throw DAOException.mapping(t);
+		}
+	}
+
 	public NodeDao changeContent(InputStream is, String mimetype,
 			String versionComment) throws DAOException {
 

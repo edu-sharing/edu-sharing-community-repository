@@ -1724,30 +1724,40 @@ export class MdsComponent{
       if(valid){
           document.getElementById(this.getDomId('preview')).setAttribute('data-custom',(true as any));
           (document.getElementById(this.getDomId('preview')) as any).src=window.URL.createObjectURL(element.files[0]);
+          document.getElementById(this.getDomId('preview-deleted')).style.display='none';
+          document.getElementById(this.getDomId('preview-delete')).style.display=null;
       }
   }
-  private renderPreview(widget: any,attr:string) {
+    private deletePreview(){
+        (document.getElementById(this.getDomId('preview-select')) as any).files=null;
+        document.getElementById(this.getDomId('preview-deleted')).style.display=null;
+        document.getElementById(this.getDomId('preview-delete')).style.display='none';
+    }
+
+    private renderPreview(widget: any,attr:string) {
     if(!this.currentNode){
         return "Widget 'preview' is only supported if a node object is available";
     }
     let preview=`<div class="mdsPreview">`;
 
-    preview+=`<input type="file" style="display:none" id="`+this.getDomId('previewSelect')+`" accept="image/*" onchange="`+this.getWindowComponent()+`.changePreview(this)" />
+    preview+=`<input type="file" style="display:none" id="`+this.getDomId('preview-select')+`" accept="image/*" onchange="`+this.getWindowComponent()+`.changePreview(this)" />
             <label>`+this.translate.instant('WORKSPACE.EDITOR.PREVIEW')+`</label>`;
-    preview+=`<div class="previewImage">`;
-      preview+=`<img id="`+this.getDomId('preview')+`" `+attr+`></div>`;
+    preview+=`<div class="previewImage">
+            <div id="`+this.getDomId('preview-deleted')+`" class="preview-deleted" style="display:none">
+                <i class="material-icons">delete</i><div>`+this.translate.instant('WORKSPACE.EDITOR.PREVIEW_DELETED')+`</div>
+            </div>`;
+      preview+=`<img id="`+this.getDomId('preview')+`" `+attr+` alt=""></div>`;
     if(this.connector.getApiVersion()>=RestConstants.API_VERSION_4_0) {
       preview += `<div class="changePreview">
-                    <a tabindex="0" onclick="document.getElementById('`+this.getDomId('previewSelect')+`').click()" onkeydown="
-                        if(event.keyCode==13){ 
-                    this.click();
-                        }" class="btn-circle"><i class="material-icons" aria-label="`+this.translate.instant('WORKSPACE.EDITOR.REPLACE_PREVIEW')+`">file_upload</i></a>
-                        <a tabindex="0" onclick="
-                        // TODO: @Simon Delete Function
-                        " onkeydown="
-                        if(event.keyCode==13){ 
-                    this.click();
-                        }" class="btn-circle"><i class="material-icons" aria-label="`+this.translate.instant('WORKSPACE.EDITOR.DELETE_PREVIEW')+`">delete</i></a>
+                    <a tabindex="0" 
+                    onclick="document.getElementById('`+this.getDomId('preview-select')+`').click()" 
+                    onkeydown="if(event.keyCode==13)this.click();" class="btn-circle"><i class="material-icons" aria-label="`+this.translate.instant('WORKSPACE.EDITOR.REPLACE_PREVIEW')+`">file_upload</i></a>
+                        <a tabindex="0" 
+                        id="`+this.getDomId('preview-delete')+`"
+                        `+(this.currentNode.preview.isGenerated ? 'style="display:none"' : '')+`
+                        onclick="`+this.getWindowComponent()+`.deletePreview()" 
+                        onkeydown="if(event.keyCode==13) this.click();" 
+                        class="btn-circle"><i class="material-icons" aria-label="`+this.translate.instant('WORKSPACE.EDITOR.DELETE_PREVIEW')+`">delete</i></a>
                     </div>`;
     }
     preview+=`</div>`;
@@ -2060,10 +2070,20 @@ export class MdsComponent{
 
   private onUpdatePreview(callback:Function=null) {
     let preview=null;
+    let remove=false;
     try{
-      preview = (document.getElementById(this.getDomId('previewSelect')) as any).files[0];
+      remove=document.getElementById(this.getDomId('preview-deleted')).style.display!='none';
+      preview = (document.getElementById(this.getDomId('preview-select')) as any).files[0];
     }catch(e){}
-    if(preview){
+    if(remove){
+        this.node.deleteNodePreview(this.currentNode.ref.id).subscribe(()=>{
+            this.onAddChildobject(callback);
+        },(error:any)=>{
+            this.toast.error(error);
+            this.globalProgress=false;
+        });
+    }
+    else if(preview){
       this.node.uploadNodePreview(this.currentNode.ref.id,preview).subscribe(()=>{
         this.onAddChildobject(callback);
 

@@ -109,6 +109,7 @@ export interface Service {
 export interface Preview {
   data: Blob; // image, may null, see @NodeHelper.appendImageData
   url: string;
+  isGenerated: boolean;
   isIcon: boolean;
   width: number;
   height: number;
