@@ -37,8 +37,8 @@
     [isClickable]="true"
     [viewType]="2"
     [scrollWindow]="true"
-    (clickRow)="click($event)"
-    (doubleClickRow)="click($event)"
+    (clickRow)="click($event.node)"
+    (doubleClickRow)="click($event.node)"
     (loadMore)="loadMore(COLLECTIONS)"
     [isLoading]="loading[COLLECTIONS]"></listTable>
   </div>
@@ -61,9 +61,9 @@
       [isClickable]="true"
       [viewType]="1"
       [scrollWindow]="true"
-      (clickRow)="click($event)"
+      (clickRow)="click($event.node)"
       (onUpdateOptions)="updateOptions(MATERIALS,$event)"
-      (doubleClickRow)="click($event)"
+      (doubleClickRow)="click($event.node)"
       (loadMore)="loadMore(MATERIALS)"
       [isLoading]="loading[MATERIALS]"></listTable>
   </div>
@@ -85,8 +85,8 @@
                [isClickable]="true"
                [viewType]="1"
                [scrollWindow]="true"
-               (clickRow)="click($event)"
-               (doubleClickRow)="click($event)"
+               (clickRow)="click($event.node)"
+               (doubleClickRow)="click($event.node)"
                (loadMore)="loadMore(TOOLS)"
                [isLoading]="loading[TOOLS]"></listTable>
   </div>
