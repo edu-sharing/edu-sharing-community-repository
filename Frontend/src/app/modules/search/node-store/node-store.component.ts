@@ -37,7 +37,7 @@ export class SearchNodeStoreComponent {
   public options : OptionItem[]=[];
   public loading=true;
   public actionOptions : OptionItem[]=[];
-  public sortBy=RestConstants.CM_NAME;
+  public sortBy=RestConstants.CM_PROP_TITLE;
   public sortAscending=true;
   public nodes: Node[] = [];
 
@@ -52,7 +52,7 @@ export class SearchNodeStoreComponent {
               private translate : TranslateService,
               private iam : RestIamService,
               private service : TemporaryStorageService){
-    this.columns.push(new ListItem("NODE",RestConstants.CM_NAME));
+    this.columns.push(new ListItem("NODE",RestConstants.CM_PROP_TITLE));
     //this.columns.push(new ListItem("NODE",RestConstants.CM_MODIFIED_DATE));
     this.refresh();
 
