@@ -320,11 +320,9 @@ small-collection{
   box-shadow: none;
   -webkit-box-shadow: none;
   -moz-box-shadow: none;
-  padding: 20px;
   overflow-x: hidden;
   overflow-y: auto;
   width: $sidenavWidth;
-  padding-top: 10px;
   top:$mainnavHeight+110px;
   height: calc(100% - #{$mainnavHeight} - 180px);
   transition: $transitionNormal all ease;
@@ -584,6 +582,7 @@ div.dialog.darken {
     .mdsEmbeddedGroup {
       float:left;
       width: 100%;
+      padding:0 20px 20px;
       /* margin-bottom: 40px; */
     }
   }
