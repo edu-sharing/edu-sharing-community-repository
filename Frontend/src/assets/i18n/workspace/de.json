@@ -214,7 +214,7 @@
       "RECEIVERS": "Nutzer/Redaktionsgruppe",
       "RECEIVERS_HINT": "Wer ist verantwortlich?",
       "COMMENT": "Kommentar zum Workflow",
-      "COMMENT_INFO": "Was sollte der Zuständige wissen? Was wurde geändert?",
+      "COMMENT_INFO": "Was sollte der/die Zuständige wissen? Was wurde geändert?",
       "RECEIVERS_NEXT":"übergeben an",
       "OLD_STATUS":"alter Status",
       "NEW_STATUS":"neuer Status",
@@ -259,7 +259,7 @@
         "SCRIPT_WRITER":"Scriptwriter",
         "INSTRUCTIONAL_DESIGNER":"Didaktischer Gestalter",
         "SUBJECT_MATTER_EXPERT":"Wissenschaftliche Beratung",
-        "CREATOR":"Ersteller",
+        "CREATOR":"Ersteller/in",
         "PROVIDER":"Anbieter"
       }
     },
