@@ -1,6 +1,7 @@
 package org.edu_sharing.repository.server;
 
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 import org.edu_sharing.repository.server.tools.ApplicationInfo;
 import org.edu_sharing.repository.server.tools.ApplicationInfoList;
@@ -27,12 +28,12 @@ public class NgServlet extends HttpServlet {
 				html=html.substring(0,pos)+head+html.substring(pos);
 			}
 			if(req.getHeader("User-Agent")!=null) {
+				String platform = "";
+				if (req.getHeader("User-Agent").contains("ios"))
+					platform = "ios";
+				if (req.getHeader("User-Agent").contains("android"))
+					platform = "android";
 				if (req.getHeader("User-Agent").contains("cordova / edu-sharing-app")) {
-					String platform = "";
-					if (req.getHeader("User-Agent").contains("ios"))
-						platform = "ios";
-					if (req.getHeader("User-Agent").contains("android"))
-						platform = "android";
 					html = html.substring(0, pos) +
 							"<script type=\"text/javascript\" src=\"assets/cordova/" + platform + "/cordova.js\"></script>"
 							+ html.substring(pos);
@@ -40,8 +41,13 @@ public class NgServlet extends HttpServlet {
 				}
 				if (req.getHeader("User-Agent").contains("ionic / edu-sharing-app")) {
 					// when using ionic, our app-registry will care for delivering the right plattform data
+					String[] headers=req.getHeader("User-Agent").split("\\/");
+					String version=headers[headers.length-1].trim();
+					if(!version.matches("\\d\\.\\d(\\.\\d)?"))
+						version="";
+
 					html = html.substring(0, pos) +
-							"<script type=\"text/javascript\" src=\"https://app-registry.edu-sharing.com/js/cordova.php\"></script>"
+							"<script type=\"text/javascript\" src=\"https://app-registry.edu-sharing.com/js/"+version+"/"+platform+"/cordova.js\"></script>"
 							+ html.substring(pos);
 					logger.info("ionic app, add cordova.js to header");
 				}
