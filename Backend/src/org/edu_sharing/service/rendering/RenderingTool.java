@@ -15,6 +15,7 @@ import org.edu_sharing.repository.server.tools.ApplicationInfoList;
 import org.edu_sharing.repository.server.tools.URLTool;
 import org.edu_sharing.repository.server.tools.security.Encryption;
 import org.edu_sharing.repository.server.tools.security.Signing;
+import org.edu_sharing.service.mime.MimeTypesV2;
 
 public class RenderingTool {
 	
@@ -136,5 +137,15 @@ public class RenderingTool {
 			return null;
 		}
 	}
-	
+
+	public static void buildRenderingCache(String nodeId) {
+		try {
+			// @TODO: May we need to build up caches just for particular file types?
+			RenderingServiceFactory.getLocalService().getDetails(nodeId,null,null,null);
+		} catch (Exception e) {
+			logger.warn("Error building rendering cache for node "+nodeId+": "+e.getMessage());
+		}
+	}
+
+
 }

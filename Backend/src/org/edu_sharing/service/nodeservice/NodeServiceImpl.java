@@ -43,6 +43,7 @@ import org.edu_sharing.repository.server.tools.cache.RepositoryCache;
 import org.edu_sharing.service.Constants;
 import org.edu_sharing.service.nodeservice.model.GetPreviewResult;
 import org.edu_sharing.service.permission.PermissionServiceFactory;
+import org.edu_sharing.service.rendering.RenderingTool;
 import org.edu_sharing.service.search.model.SortDefinition;
 import org.edu_sharing.service.toolpermission.ToolPermissionServiceFactory;
 import org.springframework.context.ApplicationContext;
@@ -933,6 +934,7 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
 	public void writeContent(StoreRef store, String nodeID, InputStream content, String mimetype, String _encoding,
 			String property) throws Exception {
 		apiClient.writeContent(store, nodeID, content, mimetype, _encoding, property);
+		RenderingTool.buildRenderingCache(nodeID);
 	}
 	
 	@Override
