@@ -59,6 +59,7 @@ import org.edu_sharing.webservices.types.KeyValue;
 import org.edu_sharing.webservices.util.AuthenticationDetails;
 import org.edu_sharing.webservices.util.AuthenticationUtils;
 import org.springframework.context.ApplicationContext;
+import org.w3c.dom.Element;
 
 public class AuthenticatorRemoteRepository {
 	
@@ -98,11 +99,16 @@ public class AuthenticatorRemoteRepository {
 			}else{
 				return null;
 			}
+		}catch(AuthenticationFault e) {
+			logger.info("REMOTE REPOSITORY AUTH FAILED: "+e.getMessage1());
 		}catch(AxisFault e){
 			
-			logger.info("REMOTE REPOSITORY AUTH FAILED"+e.getMessage());
-			exceptionMessage = e.getMessage();
-			
+			logger.info("REMOTE REPOSITORY AUTH FAILED: "+e.getMessage());
+			if(e.getFaultDetails()!=null) {
+				for (Element el : e.getFaultDetails()) {
+					logger.info(el.getTextContent());
+				}
+			}
 			//don't login as guest better throw exception so that we can inform the user that an email was send
 			throw e;
 			
@@ -132,7 +138,7 @@ public class AuthenticatorRemoteRepository {
     
     	String esuid = personData.get(CCConstants.PROP_USER_ESUID);
 	if(esuid == null || esuid.trim().equals("")){
-		throw new Exception("missing esuid for user!!!");
+		throw new Exception("missing esuid for user!!! (Note: Admin doesn't have a esuid!)");
 	}
     	
     	for(Map.Entry<String, String> entry : personMapping.entrySet()){
@@ -215,7 +221,7 @@ public class AuthenticatorRemoteRepository {
 			e.printStackTrace();
 			AuthenticationFault authFault = new AuthenticationFault();
 			authFault.setMessage1(e.getMessage());
-			throw authFault; 
+			throw authFault;
 		}
 		
 	}

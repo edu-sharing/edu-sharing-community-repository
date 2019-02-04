@@ -1350,7 +1350,7 @@ public class MCAlfrescoAPIClient extends MCAlfrescoBaseClient {
 	
 						remoteAuthInfo = arar.getAuthenticationInfo();
 					} catch (Throwable e) {
-						logger.error("It seems that repository id:" + remoteRepInfo.getAppId() + "+ is not reachable:" + e.getMessage());
+						logger.error("It seems that repository id:" + remoteRepInfo.getAppId() + " is not reachable:" + e.getMessage()+". Check the configured value of "+ApplicationInfo.KEY_AUTHENTICATIONWEBSERVICE);
 						return null;
 					}
 				} else {
