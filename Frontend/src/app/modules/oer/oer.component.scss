@@ -35,9 +35,9 @@
   .topbar-search-right{
     width: 300px;
     text-align: right;
-    .user{
-      display: inline-flex !important;
-    }
+    display: flex !important;
+    align-items: center;
+    justify-content: flex-end;
   }
   @media screen and (max-width: ($mobileWidth+$mobileStage*5)) {
     .topBarSearch form, .topBarSearch input {
@@ -178,5 +178,14 @@
   .collections {
     width: calc(100% + 40px);
     margin:10px -20px;
+    padding: 0 20px;
+  }
+}
+
+@media all and (max-width: $mobileWidth) {
+  .materials{
+    .list{
+      width: 100%;
+    }
   }
 }
