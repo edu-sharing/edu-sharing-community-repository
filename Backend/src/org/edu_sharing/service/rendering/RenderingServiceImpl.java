@@ -31,6 +31,7 @@ import org.edu_sharing.service.config.ConfigServiceFactory;
 import org.edu_sharing.service.permission.PermissionService;
 import org.edu_sharing.service.permission.PermissionServiceFactory;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 public class RenderingServiceImpl implements RenderingService{
@@ -84,7 +85,7 @@ public class RenderingServiceImpl implements RenderingService{
 			return getDetails(renderingServiceUrl, data);
 		}catch(Throwable t) {
 			logger.warn(t.getMessage(),t);
-			return RenderingErrorServlet.errorToHTML(Context.getCurrentInstance().getRequest().getSession().getServletContext(),
+			return RenderingErrorServlet.errorToHTML((HttpServletRequest) Context.getCurrentInstance().getRequest().getSession().getServletContext(),
 					new RenderingException(HttpServletResponse.SC_INTERNAL_SERVER_ERROR,t.getMessage(),RenderingException.I18N.unknown,t));
 			/*
 			String repository=VersionService.getVersionNoException(VersionService.Type.REPOSITORY);
@@ -123,7 +124,7 @@ public class RenderingServiceImpl implements RenderingService{
 		try {
 			return new HttpQueryTool().query(post);
 		}catch(HttpException e){
-			return RenderingErrorServlet.errorToHTML(Context.getCurrentInstance().getRequest().getSession().getServletContext(),
+			return RenderingErrorServlet.errorToHTML((HttpServletRequest) Context.getCurrentInstance().getRequest().getSession().getServletContext(),
 					new RenderingException(e));
 		}
 	}
