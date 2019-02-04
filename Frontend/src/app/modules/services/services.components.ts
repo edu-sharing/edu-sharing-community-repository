@@ -17,6 +17,7 @@ import {RestHelper} from "../../common/rest/rest-helper";
 import {UIConstants} from "../../common/ui/ui-constants";
 import {RestConstants} from "../../common/rest/rest-constants";
 import {HttpClient} from '@angular/common/http';
+import {MainNavComponent} from '../../common/ui/main-nav/main-nav.component';
 
 
 @Component({
@@ -25,7 +26,7 @@ import {HttpClient} from '@angular/common/http';
     styleUrls: ['services.component.scss'],
 })
 export class ServicesComponent {
-
+    @ViewChild('mainNav') mainNavRef: MainNavComponent;
     serviceUrl:string;
     registeredServices:Service[] = [];
     stats: any = {};
@@ -49,12 +50,14 @@ export class ServicesComponent {
         private network : RestNetworkService) {
         Translation.initialize(translate, this.config, this.session, this.route).subscribe(() => {
             UIHelper.setTitle('SERVICES.TITLE', title, translate, config);
+            this.configService.getAll().subscribe((data: any) => {
+                this.refreshServiceList();
+                this.mainNavRef.finishPreloading();
+            });
         });
 
 
-        this.configService.getAll().subscribe((data: any) => {
-            this.refreshServiceList();
-        });
+
     }
 
 

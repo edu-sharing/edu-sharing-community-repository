@@ -136,7 +136,7 @@ public class RenderingApi {
 			String mimeType = nodeJson.getMimetype();
 
 			if(repoDao.isHomeRepo())
-				TrackingServiceFactory.getTrackingService().trackActivityOnNode(new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE,node),TrackingService.EventType.VIEW_MATERIAL);
+				TrackingServiceFactory.getTrackingService().trackActivityOnNode(new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE,node),nodeVersion,TrackingService.EventType.VIEW_MATERIAL);
 
 
 			RenderingDetailsEntry response = new RenderingDetailsEntry();

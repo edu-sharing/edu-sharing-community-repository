@@ -22,6 +22,7 @@ import org.alfresco.service.cmr.repository.DuplicateChildNodeNameException;
 import org.alfresco.service.cmr.repository.StoreRef;
 import org.alfresco.service.cmr.security.PermissionService;
 import org.alfresco.service.namespace.QName;
+import org.apache.log4j.Logger;
 import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
 import org.edu_sharing.metadataset.v2.MetadataQuery;
 import org.edu_sharing.metadataset.v2.MetadataQueryParameter;
@@ -67,15 +68,16 @@ import org.json.JSONObject;
 import io.swagger.util.Json;
 
 public class NodeDao {
-	
+	private static Logger logger = Logger.getLogger(NodeDao.class);
 	private static final StoreRef storeRef = new StoreRef(StoreRef.PROTOCOL_WORKSPACE, "SpacesStore");
 	private static final String[] DAO_PERMISSIONS = new String[]{
 			org.alfresco.service.cmr.security.PermissionService.ADD_CHILDREN,
 			org.alfresco.service.cmr.security.PermissionService.CHANGE_PERMISSIONS,
 			org.alfresco.service.cmr.security.PermissionService.WRITE,
 			org.alfresco.service.cmr.security.PermissionService.DELETE,
-			CCConstants.PERMISSION_CC_PUBLISH};
-
+			CCConstants.PERMISSION_CC_PUBLISH,
+			CCConstants.PERMISSION_READ_ALL
+	};
 	public static NodeDao getNode(RepositoryDao repoDao, String nodeId)
 			throws DAOException {
 		return getNode(repoDao, nodeId, new Filter());
@@ -403,6 +405,7 @@ public class NodeDao {
 			this.filter = filter;
 			
 		}catch(Throwable t){
+			logger.warn(t.getMessage(),t);
 			throw DAOException.mapping(t,nodeRef.getNodeId());
 		}
 	}
@@ -629,6 +632,17 @@ public class NodeDao {
 			
 		} catch (Throwable t) {
 			
+			throw DAOException.mapping(t);
+		}
+	}
+
+	public NodeDao deletePreview() throws DAOException {
+
+		try {
+			nodeService.removeProperty(storeProtocol,storeId,nodeId,isDirectory() ? CCConstants.CCM_PROP_MAP_ICON : CCConstants.CCM_PROP_IO_USERDEFINED_PREVIEW);
+			PreviewCache.purgeCache(nodeId);
+			return new NodeDao(repoDao, nodeId);
+		} catch (Throwable t) {
 			throw DAOException.mapping(t);
 		}
 	}

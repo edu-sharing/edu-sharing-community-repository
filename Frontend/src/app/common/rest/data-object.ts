@@ -109,6 +109,7 @@ export interface Service {
 export interface Preview {
   data: Blob; // image, may null, see @NodeHelper.appendImageData
   url: string;
+  isGenerated: boolean;
   isIcon: boolean;
   width: number;
   height: number;
@@ -707,7 +708,11 @@ export class Permission {
   group: GroupProfile;
   editable:boolean;
 }
-
+export interface ToolPermission{
+    effective:string;
+    effectiveSource:Group[];
+    explicit:string;
+}
 export class LocalPermissions {
   inherited: boolean;
   permissions: Permission[];

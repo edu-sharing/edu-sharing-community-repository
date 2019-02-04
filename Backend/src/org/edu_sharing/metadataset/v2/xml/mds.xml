@@ -322,17 +322,23 @@
 				<valuespace_i18n>valuespace_context_i18n</valuespace_i18n>
 			</widget>
 			<widget>
+				<id>ccm:imported_object_appname</id>
+				<caption>lom_prop_imported_object_appname</caption>
+				<type>text</type>
+				<hideIfEmpty>true</hideIfEmpty>
+			</widget>
+			<widget>
 				<id>add_to_stream_title</id>
 				<caption>cb_add_to_stream_title</caption>
 				<placeholder>cb_add_to_stream_title_placeholder</placeholder>
 				<type>text</type>
-				<required>true</required>							
+				<required>true</required>
 			</widget>
 			<widget>
 				<id>add_to_stream_description</id>
 				<caption>cb_add_to_stream_description</caption>
 				<placeholder>cb_add_to_stream_description_placeholder</placeholder>
-				<type>text</type>			
+				<type>text</type>
 			</widget>
 			<widget>
 				<id>add_to_stream_priority</id>
@@ -340,7 +346,7 @@
 				<min>1</min>
 				<max>10</max>
 				<defaultvalue>5</defaultvalue>
-				<type>slider</type>		
+				<type>slider</type>
 			</widget>
 		</widgets>
 		<templates>
@@ -478,6 +484,7 @@
               <cclom:general_description>
               <cclom:general_keyword>
               <license>
+              <ccm:imported_object_appname>
               <ccm:author_freetext>
               <cclom:size>
               <cm:created>
@@ -752,6 +759,11 @@
 				    <multiple>true</multiple>
 				    <multiplejoin>AND</multiplejoin>
 			    </property>
+				<property name="parent">
+					<statement>PATH:"${value}//*"</statement>
+					<preprocessor>node_path</preprocessor>
+                    <mandatory>false</mandatory>
+				</property>
 		   </query>
 		</queries>
 </metadataset>

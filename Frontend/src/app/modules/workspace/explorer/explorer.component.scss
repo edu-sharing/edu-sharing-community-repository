@@ -1,1 +1,9 @@
 @import "../../../../styles/variables.scss";
+
+.noElementsInfo{
+  >div.clickable{
+    color: $primary;
+    text-transform: uppercase;
+    margin-top: 5px;
+  }
+}

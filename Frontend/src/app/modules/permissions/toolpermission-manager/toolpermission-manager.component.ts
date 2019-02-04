@@ -1,9 +1,9 @@
 
 import {Component, Input, Output, EventEmitter, HostListener, ChangeDetectorRef, ApplicationRef} from "@angular/core";
 import {
-  Group, IamGroups, IamUsers, NodeList, IamUser, IamAuthorities,
-  Authority, OrganizationOrganizations, Organization
-} from "../../../common/rest/data-object";
+    Group, IamGroups, IamUsers, NodeList, IamUser, IamAuthorities,
+    Authority, OrganizationOrganizations, Organization, ToolPermission
+} from '../../../common/rest/data-object';
 import {Toast} from "../../../common/ui/toast";
 import {ActivatedRoute} from "@angular/router";
 import {RestIamService} from "../../../common/rest/services/rest-iam.service";
@@ -34,6 +34,8 @@ import {AuthorityNamePipe} from '../../../common/ui/authority-name.pipe';
 })
 export class ToolpermissionManagerComponent {
   isLoading=false;
+  addName="";
+  creatingToolpermission=false;
   static STATUS_ALLOWED="ALLOWED";
   static STATUS_DENIED="DENIED";
   static STATUS_UNDEFINED="UNDEFINED";
@@ -45,6 +47,7 @@ export class ToolpermissionManagerComponent {
         RestConstants.TOOLPERMISSION_INVITE_SHARE,
         RestConstants.TOOLPERMISSION_GLOBAL_AUTHORITY_SEARCH,
         RestConstants.TOOLPERMISSION_GLOBAL_AUTHORITY_SEARCH_SHARE,
+        RestConstants.TOOLPERMISSION_GLOBAL_AUTHORITY_SEARCH_FUZZY,
         RestConstants.TOOLPERMISSION_INVITE_HISTORY,
     ]},
     {name:"LICENSING",icon:"copyright",permissions:[
@@ -101,7 +104,7 @@ export class ToolpermissionManagerComponent {
     this.refresh();
   }
   @Output() onClose = new EventEmitter();
-  permissions: any;
+  permissions: ToolPermission|any;
   allow: any;
   allowInit: any;
   deny: any;
@@ -109,6 +112,7 @@ export class ToolpermissionManagerComponent {
 
   constructor(private toast: Toast,
               private admin : RestAdminService,
+              private node : RestNodeService,
               private translate : TranslateService,
               private iam: RestIamService) {
 
@@ -150,7 +154,7 @@ export class ToolpermissionManagerComponent {
     if(this._authority.authorityType==RestConstants.AUTHORITY_TYPE_EVERYONE){
         return false;
     }
-    if(this.getEffective(key)==ToolpermissionManagerComponent.STATUS_UNKNOWN)
+    if(this.getEffective(key)==ToolpermissionManagerComponent.STATUS_UNDEFINED)
         return false;
     if(this.deny[key]){
         return false;
@@ -159,6 +163,18 @@ export class ToolpermissionManagerComponent {
         return true;
     }
     return !this.allow[key];
+  }
+  getImplicitDetail(key:string){
+      let names=[];
+      for(let group of this.permissions[key].effectiveSource){
+          if(group.authorityType==RestConstants.AUTHORITY_TYPE_EVERYONE){
+              names.push(this.translate.instant("PERMISSIONS.TOOLPERMISSIONS.EVERYONE_ALLOWED"));
+          }
+          else{
+              names.push(new AuthorityNamePipe(this.translate).transform(group, null));
+          }
+      }
+      return this.translate.instant("PERMISSIONS.TOOLPERMISSIONS.INHERIT_DETAIL",{memberships:names.join(", ")});
   }
 
   private getPermissions() {
@@ -192,5 +208,17 @@ export class ToolpermissionManagerComponent {
             this.toast.error(error);
             this.close();
         });
+    }
+    createToolpermission(){
+        this.creatingToolpermission=true;
+        this.admin.addToolpermission(this.addName).subscribe(()=>{
+            this.toast.toast("PERMISSIONS.TOOLPERMISSIONS.ADDED",{name:this.addName});
+            this.addName="";
+            this.creatingToolpermission=false;
+            this.refresh();
+        },(error)=>{
+            this.creatingToolpermission=false;
+            this.toast.error(error);
+        })
     }
 }

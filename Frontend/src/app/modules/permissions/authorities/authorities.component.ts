@@ -207,7 +207,7 @@ export class PermissionsAuthoritiesComponent {
       return;
     let options:OptionItem[]=[];
     let list=this.getList(null);
-    if(!all && this.isAdmin && this._mode=='ORG'){
+    if(!all && this.isAdmin && this._mode=='ORG' && !list.length){
       options.push(new OptionItem("PERMISSIONS.MENU_TOOLPERMISSIONS_GLOBAL","playlist_add_check",(data:any)=>{this.toolpermissionAuthority=RestConstants.getAuthorityEveryone()}));
     }
     if(!all && !list.length){

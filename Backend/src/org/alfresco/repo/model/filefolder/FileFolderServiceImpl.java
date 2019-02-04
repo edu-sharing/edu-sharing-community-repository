@@ -4,21 +4,21 @@
  * %%
  * Copyright (C) 2005 - 2016 Alfresco Software Limited
  * %%
- * This file is part of the Alfresco software. 
- * If the software was purchased under a paid Alfresco license, the terms of 
- * the paid license agreement will prevail.  Otherwise, the software is 
+ * This file is part of the Alfresco software.
+ * If the software was purchased under a paid Alfresco license, the terms of
+ * the paid license agreement will prevail.  Otherwise, the software is
  * provided under the following open source license terms:
- * 
+ *
  * Alfresco is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * Alfresco is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU Lesser General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU Lesser General Public License
  * along with Alfresco. If not, see <http://www.gnu.org/licenses/>.
  * #L%
@@ -39,6 +39,7 @@ import java.util.Map;
 import java.util.ResourceBundle.Control;
 import java.util.Set;
 import java.util.Stack;
+import java.util.stream.Collectors;
 
 import org.alfresco.model.ContentModel;
 import org.alfresco.query.CannedQueryFactory;
@@ -96,7 +97,9 @@ import org.alfresco.util.SearchLanguageConversion;
 import org.alfresco.util.registry.NamedObjectRegistry;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.edu_sharing.alfresco.tools.EduSharingNodeHelper;
 import org.edu_sharing.repository.client.tools.CCConstants;
+import org.edu_sharing.service.nodeservice.NodeServiceFactory;
 import org.springframework.extensions.surf.util.I18NUtil;
 
 /**
@@ -161,14 +164,14 @@ public class FileFolderServiceImpl extends AbstractBaseCopyService implements Fi
     private int defaultListMaxResults = 5000;
 
     private final ExtendedTrait<FileFolderServiceTrait> fileFolderTrait;
-    
+
     /**
      * Default constructor
      */
     public FileFolderServiceImpl()
     {
         super();
-        
+
         fileFolderTrait=new ExtendedTrait<FileFolderServiceTrait>(AJProxyTrait.create(createFileFolderTrait(),FileFolderServiceTrait.class));
     }
 
@@ -397,13 +400,22 @@ public class FileFolderServiceImpl extends AbstractBaseCopyService implements Fi
 					toTransform.add(childRef.getChildRef());
 				}
 				results = toFileInfo(toTransform);
-				
+
 			}
-    	}
+			else{
+                List<ChildAssociationRef> childRefs = nodeService.getChildAssocs(contextNodeRef);
+                // use the helper which is also used by the local node service and filter out special nodes which are also invisible in workspace
+                List<NodeRef> toTransform = childRefs.stream().
+                        map((ChildAssociationRef::getChildRef)).
+                        filter((NodeRef ref)->!EduSharingNodeHelper.shouldFilter(ref,null)).
+                        collect(Collectors.toList());
+                results = toFileInfo(toTransform);
+            }
+        }
     	
     	
     	if(results == null){
-    	
+
     	//default alfresco stuff
         // execute the query
     		results = listSimple(contextNodeRef, true, true);
@@ -535,7 +547,7 @@ public class FileFolderServiceImpl extends AbstractBaseCopyService implements Fi
         CannedQueryResults<NodeRef> results = listImpl(rootNodeRef, null,  assocTypeQNames, searchTypeQNames, ignoreAspectQNames, sortProps, filterProps, pagingRequest);
         return getPagingResults(pagingRequest, results);
     }
-    
+
     private CannedQueryResults<NodeRef> listImpl(NodeRef contextNodeRef, boolean files, boolean folders)
     {
         Set<QName> searchTypeQNames = buildSearchTypesAndIgnoreAspects(files, folders, null).getFirst();
@@ -1750,13 +1762,13 @@ public class FileFolderServiceImpl extends AbstractBaseCopyService implements Fi
     {
         return hiddenAspect.getVisibility(FileFilterMode.getClient(), nodeRef) != Visibility.Visible;
     }
-    
+
     @Override
     public <M extends Trait> ExtendedTrait<M>  getTrait(Class<? extends M> traitAPI)
     {
         return (ExtendedTrait<M>) fileFolderTrait;
     }
-    
+
     private FileFolderServiceTrait createFileFolderTrait()
     {
         return new FileFolderServiceTraitImpl(this);
@@ -1840,16 +1852,16 @@ public class FileFolderServiceImpl extends AbstractBaseCopyService implements Fi
                                       folderSearch,
                                       includeSubFolders);
         }
-       
+
         @Override
         public FileInfo rename(final NodeRef sourceNodeRef, final String newName) throws FileExistsException, FileNotFoundException
         {
-            
+
             return thisService.rename(sourceNodeRef, newName);
-                                       
+
         }
 
-        
+
         public PagingResults<FileInfo> list(NodeRef contextNodeRef,
                     boolean files,
                     boolean folders,

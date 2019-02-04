@@ -9,6 +9,8 @@ import org.edu_sharing.alfresco.service.ConnectionDBAlfresco;
 import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.server.tools.ApplicationInfoList;
+import org.edu_sharing.service.nodeservice.NodeServiceFactory;
+import org.edu_sharing.service.nodeservice.NodeServiceHelper;
 import org.edu_sharing.service.tracking.model.StatisticEntry;
 import org.edu_sharing.service.tracking.model.StatisticEntryNode;
 import org.json.JSONObject;
@@ -23,7 +25,7 @@ import java.util.List;
 public class TrackingServiceImpl extends TrackingServiceDefault{
     public static String TRACKING_NODE_TABLE_ID = "edu_tracking_node";
     public static String TRACKING_USER_TABLE_ID = "edu_tracking_user";
-    public static String TRACKING_INSERT_NODE = "insert into " + TRACKING_NODE_TABLE_ID +" VALUES (?,?,?,?,?,?)";
+    public static String TRACKING_INSERT_NODE = "insert into " + TRACKING_NODE_TABLE_ID +" (node_id,node_uuid,node_version,authority,time,type,data) VALUES (?,?,?,?,?,?,?)";
     public static String TRACKING_INSERT_USER = "insert into " + TRACKING_USER_TABLE_ID +" VALUES (?,?,?,?)";
     public static String TRACKING_STATISTICS_NODE = "SELECT node_uuid as node,type,COUNT(*) from edu_tracking_node as tracking" +
             //" LEFT JOIN alf_node_properties as props ON (tracking.node_id=props.node_id and props.qname_id=28)" +
@@ -79,21 +81,29 @@ public class TrackingServiceImpl extends TrackingServiceDefault{
     }
 
     @Override
-    public boolean trackActivityOnNode(NodeRef nodeRef, EventType type) {
-        super.trackActivityOnNode(nodeRef,type);
+    public boolean trackActivityOnNode(NodeRef nodeRef,String nodeVersion, EventType type) {
+        super.trackActivityOnNode(nodeRef,nodeVersion,type);
         return AuthenticationUtil.runAsSystem(()-> {
+            String version;
+            if(nodeVersion==null || nodeVersion.isEmpty() || nodeVersion.equals("-1")){
+                version=NodeServiceHelper.getProperty(nodeRef,CCConstants.CM_PROP_VERSIONABLELABEL);
+            }
+            else{
+                version=nodeVersion;
+            }
             return addToDatabase(TRACKING_INSERT_NODE, statement -> {
                 statement.setLong(1, (Long) nodeService.getProperty(nodeRef, QName.createQName(CCConstants.SYS_PROP_NODE_DBID)));
                 statement.setString(2, nodeRef.getId());
-                statement.setString(3, super.getTrackedUsername(null));
-                statement.setDate(4, new Date(System.currentTimeMillis()));
-                statement.setString(5, type.name());
+                statement.setString(3, version);
+                statement.setString(4, super.getTrackedUsername(null));
+                statement.setDate(5, new Date(System.currentTimeMillis()));
+                statement.setString(6, type.name());
                 JSONObject json = buildJson(nodeRef, type);
                 PGobject obj = new PGobject();
                 obj.setType("json");
                 if (json != null)
                     obj.setValue(json.toString());
-                statement.setObject(6, obj);
+                statement.setObject(7, obj);
 
                 return true;
             });

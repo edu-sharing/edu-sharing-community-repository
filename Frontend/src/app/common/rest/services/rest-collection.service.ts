@@ -113,12 +113,15 @@ export class RestCollectionService extends AbstractRestService{
     return this.connector.sendDataViaXHR(query,file);
   };
 
+    public deleteCollectionImage = (collectionId:string, repository:string = RestConstants.HOME_REPOSITORY):Observable<XMLHttpRequest> => {
+        let query=this.connector.createUrl("collection/:version/collections/:repository/:collectionid/icon",repository,
+            [
+                [":collectionid",collectionId],
+            ]);
+        let options=this.connector.getRequestOptions();
 
-  // TODO: put into a rest-organization service later
-  public getOrganizations = (repository:string = RestConstants.HOME_REPOSITORY) => {
-    let query=this.connector.createUrl("organization/:version/organizations/:repository",repository,[]);
-    return this.connector.get<EduData.Organizations>(query,this.connector.getRequestOptions());
-  };
+        return this.connector.delete(query,options);
+    };
 
   public updateCollection = (collection:EduData.Collection) => {
 

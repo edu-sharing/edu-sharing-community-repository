@@ -1449,7 +1449,11 @@ public class PermissionServiceImpl implements org.edu_sharing.service.permission
 		}
 		
 		nodeService.setProperty(nodeRef, QName.createQName(CCConstants.CCM_PROP_PH_ACTION), action);
-		nodeService.setProperty(nodeRef, QName.createQName(CCConstants.CCM_PROP_PH_USER), user);
+		
+		ArrayList<String> phUsers = (ArrayList<String>)nodeService.getProperty(nodeRef, QName.createQName(CCConstants.CCM_PROP_PH_USERS));
+		if(phUsers == null) phUsers = new ArrayList<String>();
+		if(!phUsers.contains(user)) phUsers.add(user);
+		nodeService.setProperty(nodeRef, QName.createQName(CCConstants.CCM_PROP_PH_USERS), phUsers);
 		Date created = new Date();
 		nodeService.setProperty(nodeRef, QName.createQName(CCConstants.CCM_PROP_PH_MODIFIED), created);
 		
@@ -1459,13 +1463,9 @@ public class PermissionServiceImpl implements org.edu_sharing.service.permission
 		Notify n = new Notify();
 		try {
 			ACL acl = repoClient.getPermissions(nodeId);
-			List<ACE> directlySetAces = new ArrayList<ACE>();
-			for(ACE ace : acl.getAces()) {
-				if(!ace.isInherited()) {
-					directlySetAces.add(ace);
-				}
-			}
-			acl.setAces(directlySetAces.toArray(new ACE[]{}));
+			acl.setAces(acl.getAces());
+			
+			
 			n.setAcl(acl);
 			n.setCreated(created);
 			n.setNotifyAction(action);
@@ -1474,6 +1474,7 @@ public class PermissionServiceImpl implements org.edu_sharing.service.permission
 			u.setAuthorityName(user);
 			u.setUsername(user);
 			n.setUser(u);
+			
 			
 			String jsonStringACL = gson.toJson(n);
 			List<String> history = (List<String>)nodeService.getProperty(nodeRef, QName.createQName(CCConstants.CCM_PROP_PH_HISTORY));

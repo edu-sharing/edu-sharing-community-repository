@@ -35,10 +35,22 @@ export class NodeVariantComponent  {
   breadcrumbs: Node[];
   variantName : string;
   openViaConnector: Connector;
+  licenseWarning: string;
   @Input() set node(node : Node){
     this._node=node;
     this.variantName=this.translate.instant('NODE_VARIANT.DEFAULT_NAME',{name:this._node.name});
     this.openViaConnector=this.connectors.connectorSupportsEdit(node);
+    let license=node.properties[RestConstants.CCM_PROP_LICENSE] ? node.properties[RestConstants.CCM_PROP_LICENSE][0] : "";
+    console.log(license);
+    if(license.startsWith('CC_BY') && license.indexOf('ND')!=-1){
+      this.licenseWarning='ND';
+    }
+    else if(license.startsWith("COPYRIGHT")){
+      this.licenseWarning='COPYRIGHT';
+    }
+    else if(!license){
+      this.licenseWarning='NO_LICENSE';
+    }
   }
   @Output() onLoading=new EventEmitter();
   @Output() onCancel=new EventEmitter();
@@ -110,4 +122,11 @@ export class NodeVariantComponent  {
             this.breadcrumbs=parents.nodes.reverse();
         })
     }
+    openLicense(){
+      UIHelper.openBlankWindow(this.getLicenseUrl(),this.connector.getCordovaService());
+    }
+
+    getLicenseUrl(): string {
+        return NodeHelper.getLicenseUrlByString(this._node.properties[RestConstants.CCM_PROP_LICENSE],this._node.properties[RestConstants.CCM_PROP_LICENSE_CC_VERSION])
+  }
 }

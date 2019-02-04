@@ -1,5 +1,9 @@
 @mixin clickable() {
   cursor: pointer!important;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
 }
 @mixin imageDisabledBlur(){
   -webkit-filter: blur(3px);

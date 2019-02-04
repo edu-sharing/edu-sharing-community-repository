@@ -632,12 +632,48 @@ public class CollectionApi {
 	    		return ErrorResponse.createResponse(t);
 	    	}
 	}
-	
-	@OPTIONS    
+	@DELETE
 	@Path("/collections/{repository}/{collection}/icon")
-    @ApiOperation(hidden = true, value = "")
-	public Response options04() {
-		
-		return Response.status(Response.Status.OK).header("Allow", "OPTIONS, POST").build();
+
+	@ApiOperation(value = "Deletes Preview Image of a collection.", notes = "Deletes Preview Image of a collection.")
+
+	@ApiResponses(value = {
+			@ApiResponse(code = 200, message = RestConstants.HTTP_200, response = Void.class),
+			@ApiResponse(code = 400, message = RestConstants.HTTP_400, response = ErrorResponse.class),
+			@ApiResponse(code = 401, message = RestConstants.HTTP_401, response = ErrorResponse.class),
+			@ApiResponse(code = 403, message = RestConstants.HTTP_403, response = ErrorResponse.class),
+			@ApiResponse(code = 404, message = RestConstants.HTTP_404, response = ErrorResponse.class),
+			@ApiResponse(code = 500, message = RestConstants.HTTP_500, response = ErrorResponse.class)
+	})
+
+	public Response removeIconOfCollection(
+			@ApiParam(value = RestConstants.MESSAGE_REPOSITORY_ID, required = true, defaultValue = "-home-") @PathParam("repository") String repository,
+			@ApiParam(value = "ID of collection", required = true) @PathParam("collection") String collectionId,
+			@Context HttpServletRequest req) {
+
+		try {
+
+			RepositoryDao repoDao = RepositoryDao.getRepository(repository);
+
+			if (repoDao == null) {
+
+				return Response.status(Response.Status.NOT_FOUND).build();
+			}
+
+			CollectionDao collectionDao = CollectionDao.getCollection(repoDao,
+					collectionId);
+
+			if (collectionDao == null) {
+
+				return Response.status(Response.Status.NOT_FOUND).build();
+			}
+
+			collectionDao.removePreviewImage();
+
+			return Response.status(Response.Status.OK).build();
+
+		} catch (Throwable t) {
+			return ErrorResponse.createResponse(t);
+		}
 	}
 }
