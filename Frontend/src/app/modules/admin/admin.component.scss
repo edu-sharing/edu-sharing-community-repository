@@ -65,6 +65,9 @@
         div:first-child{
           flex-grow: 1;
         }
+        .description{
+          white-space: pre-line;
+        }
         >div{
           display:flex;
           flex-direction: row;
@@ -77,7 +80,9 @@
             margin-right: 5px;
           }
           .solution-link{
+            color: $primaryDark;
             text-transform: uppercase;
+            font-weight: bold;
           }
         }
       }
