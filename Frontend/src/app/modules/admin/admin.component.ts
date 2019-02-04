@@ -16,7 +16,7 @@ import {
     Node,
     Authority,
     NodeList,
-    NodeWrapper
+    NodeWrapper, RestoreResult
 } from '../../common/rest/data-object';
 import {RestAdminService} from '../../common/rest/services/rest-admin.service';
 import {DialogButton} from '../../common/ui/modal-dialog/modal-dialog.component';
@@ -30,6 +30,7 @@ import {RestOrganizationService} from '../../common/rest/services/rest-organizat
 import {RestSearchService} from '../../common/rest/services/rest-search.service';
 import {RestHelper} from '../../common/rest/rest-helper';
 import {Observable, Observer} from 'rxjs/index';
+import {RestNetworkService} from '../../common/rest/services/rest-network.service';
 import {MainNavComponent} from '../../common/ui/main-nav/main-nav.component';
 
 
@@ -181,6 +182,7 @@ export class AdminComponent {
               private title: Title,
               private translate: TranslateService,
               private storage : SessionStorageService,
+              private networkService : RestNetworkService,
               private admin : RestAdminService,
               private connector: RestConnectorService,
               private node: RestNodeService,
@@ -760,17 +762,44 @@ export class AdminComponent {
         return v;
       v.splice(v.length-1,1);
       console.log(v);
-      return v.concat(".");
+      return v.join(".");
     }
     private runChecks() {
         this.systemChecks=[];
 
         // check versions render service
         this.connector.getAbout().subscribe((about)=>{
+            about.version.repository=this.getMajorVersion(about.version.repository);
+            about.version.renderservice=this.getMajorVersion(about.version.renderservice);
             this.systemChecks.push({
               name:"RENDERING",
-              status:this.getMajorVersion(about.version.repository)==this.getMajorVersion(about.version.renderservice) ? 'OK' : 'FAIL',
-              translate:about.version
+                status:about.version.repository=='unknown' ? 'WARN' : about.version.repository==about.version.renderservice ? 'OK' : 'FAIL',
+              translate:about.version,
+              callback:()=>{
+                  this.setTab('APPLICATIONS');
+              }
+            });
+        },(error)=>{
+            this.systemChecks.push({
+                name:"RENDERING",
+                status:"FAIL",
+                error:error,
+                callback:()=>{
+                    this.setTab('APPLICATIONS');
+                }
+            });
+        });
+        // check if appid is changed
+        this.networkService.getRepositories().subscribe((repos)=>{
+            let id=repos.repositories.filter((repo)=>repo.isHomeRepo)[0].id;
+            this.systemChecks.push({
+                name:"APPID",
+                status:id=='local' ? 'WARN' : 'OK',
+                translate:{id:id},
+                callback:()=>{
+                    this.setTab('APPLICATIONS');
+                    this.editApp(this.editableXmls.filter((xml)=>xml.name=='HOMEAPP')[0]);
+                }
             });
         },(error)=>{
             this.systemChecks.push({

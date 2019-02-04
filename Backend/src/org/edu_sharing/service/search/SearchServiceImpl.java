@@ -620,13 +620,20 @@ public class SearchServiceImpl implements SearchService {
 		scParam.setMetadataSetId(mds.getId());
 		scParam.setMetadataSetQuery(query);
 		searchToken.setSearchCriterias(scParam);
-		org.edu_sharing.repository.server.authentication.Context.getCurrentInstance().getRequest().getSession().setAttribute(CCConstants.SESSION_LAST_SEARCH_TOKEN, searchToken);
+
+		HashMap<ContentType, SearchToken> lastTokens = getLastSearchTokens();
+		lastTokens.put(searchToken.getContentType(),searchToken);
+		org.edu_sharing.repository.server.authentication.Context.getCurrentInstance().getRequest().getSession().setAttribute(CCConstants.SESSION_LAST_SEARCH_TOKENS,lastTokens);
+
 		SearchResultNodeRef search = search(searchToken,true);
 		return search;
 	}
 	@Override
-	public SearchToken getLastSearchToken() throws Throwable {
-		return (SearchToken) org.edu_sharing.repository.server.authentication.Context.getCurrentInstance().getRequest().getSession().getAttribute(CCConstants.SESSION_LAST_SEARCH_TOKEN);
+	public HashMap<ContentType,SearchToken> getLastSearchTokens() throws Throwable {
+		if(org.edu_sharing.repository.server.authentication.Context.getCurrentInstance().getRequest().getSession().getAttribute(CCConstants.SESSION_LAST_SEARCH_TOKENS)!=null) {
+			return (HashMap<ContentType, SearchToken>) org.edu_sharing.repository.server.authentication.Context.getCurrentInstance().getRequest().getSession().getAttribute(CCConstants.SESSION_LAST_SEARCH_TOKENS);
+		}
+		return new HashMap<>();
 
 	}
 	public SearchResultNodeRef search(SearchToken searchToken) {
@@ -694,7 +701,8 @@ public class SearchServiceImpl implements SearchService {
 			searchParameters.setHighlight(ghp);
 
 			ResultSet resultSet;
-			resultSet=LogTime.log("Searching Solr with query: "+searchParameters.getQuery(),()-> {
+			logger.info(searchParameters.getQuery());
+			resultSet=LogTime.log("Searching Solr",()-> {
 				if (scoped)
 					return searchService.query(searchParameters);
 				else
