@@ -44,7 +44,7 @@ public class NgServlet extends HttpServlet {
 					String[] headers=req.getHeader("User-Agent").split("\\/");
 					String version=headers[headers.length-1].trim();
 					if(!version.matches("\\d\\.\\d(\\.\\d)?"))
-						version="";
+						version="0.0.0";
 
 					html = html.substring(0, pos) +
 							"<script type=\"text/javascript\" src=\"https://app-registry.edu-sharing.com/js/"+version+"/"+platform+"/cordova.js\"></script>"
