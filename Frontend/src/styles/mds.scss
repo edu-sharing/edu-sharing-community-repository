@@ -412,6 +412,10 @@ mds .mdsGroup{
         flex-direction: column;
         align-items: center;
         justify-content: center;
+        i{
+          margin-top: 18px;
+          font-size: 39px;
+        }
       }
     }
     label{
