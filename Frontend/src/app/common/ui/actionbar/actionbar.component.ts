@@ -78,7 +78,7 @@ export class ActionbarComponent{
     }
     console.log(options);
     this.optionsToggle=UIHelper.filterToggleOptions(options,true);
-
+    options = this.filterCallbacks(options);
     this.optionsAlways=this.getActionOptions(UIHelper.filterToggleOptions(options,false)).slice(0,this.getNumberOptions());
     if(!this.optionsAlways.length){
       this.optionsAlways=UIHelper.filterToggleOptions(options,false).slice(0,this.getNumberOptions());
@@ -162,5 +162,9 @@ export class ActionbarComponent{
             return true;
         }
         return false;
+    }
+
+    private filterCallbacks(options: OptionItem[]) {
+      return options.filter((option)=>!option.showCallback || option.showCallback(null));
     }
 }

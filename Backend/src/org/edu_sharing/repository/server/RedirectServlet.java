@@ -84,7 +84,8 @@ public class RedirectServlet extends HttpServlet implements SingleThreadModel {
 		
 		String appId = req.getParameter("APP_ID");
 		String nodeId = req.getParameter("NODE_ID");
-		
+		String version = req.getParameter("version");
+
 		String username = (String)req.getSession().getAttribute(CCConstants.AUTH_USERNAME);
 		String ticket = (String)req.getSession().getAttribute(CCConstants.AUTH_TICKET);
 		
@@ -156,7 +157,7 @@ public class RedirectServlet extends HttpServlet implements SingleThreadModel {
                         for(NameValuePair pair : parsed){
                             if(pair.getName().equals("display") && pair.getValue().equals("download")){
                                 // Track download action for node
-                                TrackingServiceFactory.getTrackingService().trackActivityOnNode(new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE,nodeId),TrackingService.EventType.DOWNLOAD_MATERIAL);
+                                TrackingServiceFactory.getTrackingService().trackActivityOnNode(new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE,nodeId),version,TrackingService.EventType.DOWNLOAD_MATERIAL);
                                 break;
                             }
                         }
@@ -165,8 +166,7 @@ public class RedirectServlet extends HttpServlet implements SingleThreadModel {
                         e.printStackTrace();
                     }
                 }
-				
-				String version = req.getParameter("version");
+
 				if(version != null && !version.trim().equals("")){
 					renderServiceUrl = UrlTool.setParam(renderServiceUrl,"version",version);
 				}
@@ -194,8 +194,7 @@ public class RedirectServlet extends HttpServlet implements SingleThreadModel {
 							MCAlfrescoBaseClient mcAlfrescoBaseClient = (MCAlfrescoBaseClient) RepoFactory.getInstance(repInfo.getAppId(), authInfo);
 							// remoteObjectNodeId wenn remoteRepository
 							renderServiceUrl = mcAlfrescoBaseClient.getAlfrescoContentUrl(renderUrlNodeId);
-							
-							String version = req.getParameter("version");
+
 							if(version != null && !version.trim().equals("")){
 								HashMap<String,HashMap<String,Object>> versHist = mcAlfrescoBaseClient.getVersionHistory(renderUrlNodeId);
 								

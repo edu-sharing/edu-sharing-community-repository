@@ -30,7 +30,7 @@
     [searchEnabled]="!isBlocked"
     [searchPlaceholder]="isSafe ? 'WORKSPACE.SAFE_SEARCH' : 'WORKSPACE.SEARCH' "
     [canOpen]="mainnav"
-    [searchQuery]="searchQuery"
+    [searchQuery]="searchQuery ? searchQuery.query : null"
     (onSearch)="doSearch($event)"
   >
 
@@ -108,7 +108,7 @@
     <a class="collection-item" [class.rootSelected]="root=='SHARED_FILES'" (click)="showSelectRoot=false;setRoot('SHARED_FILES')"><i icon iconId="group"></i> {{ 'WORKSPACE.SHARED_FILES' | translate}}</a>
     <a class="collection-item" [class.rootSelected]="root=='MY_SHARED_FILES'" (click)="showSelectRoot=false;setRoot('MY_SHARED_FILES')"><i icon iconId="share"></i> {{ 'WORKSPACE.MY_SHARED_FILES' | translate}}</a>
     <a class="collection-item" [class.rootSelected]="root=='TO_ME_SHARED_FILES'" (click)="showSelectRoot=false;setRoot('TO_ME_SHARED_FILES')"><i icon iconId="send"></i> {{ 'WORKSPACE.TO_ME_SHARED_FILES' | translate}}</a>
-    <a class="collection-item" [class.rootSelected]="root=='WORKFLOW_RECEIVE'" (click)="showSelectRoot=false;setRoot('WORKFLOW_RECEIVE')"><i cicon iconId="inbox"></i> {{ 'WORKSPACE.WORKFLOW_RECEIVE' | translate}}</a>
+    <a class="collection-item" [class.rootSelected]="root=='WORKFLOW_RECEIVE'" (click)="showSelectRoot=false;setRoot('WORKFLOW_RECEIVE')"><i icon iconId="inbox"></i> {{ 'WORKSPACE.WORKFLOW_RECEIVE' | translate}}</a>
     <a class="collection-item" [class.rootSelected]="root=='RECYCLE'" (click)="showSelectRoot=false;setRoot('RECYCLE')"><i icon iconId="delete"></i> {{ 'WORKSPACE.RECYCLE' | translate}}</a>
   </div>
 
@@ -128,7 +128,7 @@
 
 
   <workspace-tree class="tree" *ngIf="isLoggedIn"
-  [current]="currentFolderRef"
+  [current]="currentFolder ? currentFolder.ref.id : null"
                   [path]="path"
                   [selectedNode]="selectedNodeTree"
                   [root]="root"
@@ -144,7 +144,7 @@
     <div class="mobile-move-top">
         <breadcrumbs *ngIf="isLoggedIn"
           [breadcrumbsAsNode]="path"
-          [searchQuery]="searchQuery"
+          [searchQuery]="searchQuery ? searchQuery.query : null"
           [home]="'WORKSPACE.'+root"
           [canDrop]="canDropBreadcrumbs"
           (onDrop)="handleDrop($event)"
@@ -154,7 +154,7 @@
     </div>
 </div>
   <recycle *ngIf="root=='RECYCLE'" class="explorer"
-           [searchWorkspace]="searchQuery"
+           [searchWorkspace]="searchQuery ? searchQuery.query : null"
            [isInsideWorkspace]="true"></recycle>
 <div class="actionbarFrame"><div class="mobile-move-top">
   <actionbar class=""
@@ -164,12 +164,13 @@
 ></actionbar>
 </div></div>
   <workspace-explorer class="explorer"  [class.explorerMetadata]="metadataNode" *ngIf="root!='RECYCLE'" (contextmenu)="createContext($event)"
-  [current]="currentFolderRef"
+  [current]="currentFolder"
   [selection]="selection"
   [searchQuery]="searchQuery"
   [options]="explorerOptions"
   [viewType]="viewType"
   [preventKeyevents]="hasOpenWindows()"
+  (onSearchGlobal)="searchGlobal($event)"
   (onDrop)="handleDrop($event)"
   (onSelectNode)="clickNode($event)"
   (onListChange)="updateList($event)"

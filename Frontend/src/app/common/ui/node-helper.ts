@@ -340,7 +340,10 @@ export class NodeHelper{
    * @param licenseVersion
    */
   public static getLicenseUrlByString(licenseProperty: string,licenseVersion:string) {
-    return (RestConstants.LICENSE_URLS as any)[licenseProperty].replace("#version",licenseVersion);
+    let url=(RestConstants.LICENSE_URLS as any)[licenseProperty];
+    if(!url)
+      return null;
+    return url.replace("#version",licenseVersion);
   }
 
   /**
@@ -501,10 +504,8 @@ export class NodeHelper{
                 return false;
             return true;
         }
-        if(item.showCallback(null))
-            options.splice(position, 0, item);
+        options.splice(position, 0, item);
       }
-
     }
   }
 
@@ -661,7 +662,7 @@ export class NodeHelper{
       return prop;
   }
   public static getActionbarNodes(nodes:Node[],node:Node):Node[] {
-      return node ? [node] : nodes;
+      return node ? [node] : nodes && nodes.length ? nodes  : null;
   }
 }
 

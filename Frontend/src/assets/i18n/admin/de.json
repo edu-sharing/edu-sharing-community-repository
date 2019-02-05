@@ -60,7 +60,7 @@
         "appcaption":"Name der Instanz. Wird z.B. in der Suche als Label angezeigt",
         "contenturl":"Index-Datei des Rendering-Service. Sollte die öffentliche Adresse (möglichst https) sein",
         "contenturlBackend":"Optionale URL für Aufruf des Rendering-Services vom Repository aus. Kann interne IP enthalten",
-        "appid":"Id des Repositories. Sollte \"local\" sein"
+        "appid":"ID des Repositories. Sollte eindeutig sein, z.B. die Hauptdomain des Systems"
       }
     },
     "UPDATE":{
@@ -79,8 +79,17 @@
         "RENDERING":{
           "TITLE":"Repository + Renderingservice Version",
           "STATUS_OK":"Version beider Systeme stimmt überein: {{repository}}",
+          "STATUS_WARN":"Die Version des Repositories konnte nicht abgerufen werden (Renderingservice: {{renderservice}}).\nSie befinden sich wahrscheinlich gerade im Development Modus, wodurch die Version nicht abgerufen werden kann",
           "STATUS_FAIL":"Version von Repository ({{repository}}) und Renderingservice ({{renderservice}}) stimmen nicht überein oder Renderingservice wurde nicht gefunden. Inhalte werden möglicherweise falsch oder gar nicht angezeigt",
-          "SOLUTION":"Überprüfen Sie, ob ein Renderingservice angebunden ist (Quellen) und ob die korrekte Version installiert ist"
+          "SOLUTION":"Überprüfen Sie, ob ein Renderingservice angebunden ist (Remote-Systeme) und ob die korrekte Version installiert ist",
+          "SOLUTION_LINK": "Zu Remote-Systeme wechseln"
+        },
+        "APPID":{
+          "TITLE":"Bezeichnung des Home-Repositories",
+          "STATUS_OK":"Dem System wurde ein eigener Identifier zugewiesen ({{id}}).",
+          "STATUS_WARN": "Dem System wurde keine ID zugewiesen, es verwendet den Standardwert ({{id}}).\nDamit dieses Repository fehlerfrei mit anderen Systemen kommunizieren kann, ist ein eindeutiger Identifier wichtig. Es wird empfohlen, einen möglichst eindeutigen Identifier zu benutzen (z.B. die Hauptdomain des Systems)",
+          "SOLUTION":"Wechseln Sie zu \"Grundkonfiguration\" und bearbeiten Sie das Feld \"appid\" in der homeApplication.properties.xml",
+          "SOLUTION_LINK": "homeApplication.properties.xml bearbeiten"
         },
         "COMPANY_HOME":{
           "TITLE":"Freigabe-Zustand des Hauptverzeichnisses",

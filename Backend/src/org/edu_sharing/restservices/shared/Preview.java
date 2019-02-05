@@ -7,6 +7,7 @@ import io.swagger.annotations.ApiModelProperty;
 import java.util.HashMap;
 
 import org.edu_sharing.repository.client.tools.CCConstants;
+import org.edu_sharing.repository.server.PreviewServlet;
 import org.edu_sharing.repository.server.tools.ApplicationInfo;
 import org.edu_sharing.repository.server.tools.ApplicationInfoList;
 import org.edu_sharing.repository.server.tools.URLTool;
@@ -14,6 +15,7 @@ import org.edu_sharing.repository.server.tools.URLTool;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import org.edu_sharing.service.nodeservice.NodeService;
 import org.edu_sharing.service.nodeservice.NodeServiceFactory;
+import org.edu_sharing.service.nodeservice.model.GetPreviewResult;
 import org.edu_sharing.service.nodeservice.model.GetPreviewResult;
 
 
@@ -23,7 +25,8 @@ public class Preview  {
   private String url = null;
   private Integer width = null;
   private Integer height = null;
-private boolean isIcon;
+  private boolean isIcon;
+  private boolean isGenerated;
 
   public Preview(){
 	  
@@ -35,6 +38,7 @@ private boolean isIcon;
 
     //if(repositoryType.equals(ApplicationInfo.REPOSITORY_TYPE_ALFRESCO) || repositoryType.equals(ApplicationInfo.REPOSITORY_TYPE_LOCAL)){
 		  setIsIcon(!(nodeProps.containsKey(CCConstants.CCM_PROP_MAP_ICON) || nodeProps.containsKey(CCConstants.CM_ASSOC_THUMBNAILS)));
+          setIsGenerated(!PreviewServlet.PreviewDetail.TYPE_USERDEFINED.equals(nodeProps.get(CCConstants.KEY_PREVIEWTYPE)));
 	/*  }
 	  else{
 		  setUrl((String)nodeProps.get(CCConstants.CM_ASSOC_THUMBNAILS));
@@ -97,7 +101,16 @@ private boolean isIcon;
   public boolean isIcon() {
     return isIcon;
   }
-public void setIsIcon(boolean isIcon) {
+  public void setIsIcon(boolean isIcon) {
 	this.isIcon=isIcon;
 }
+
+  @JsonProperty("isGenerated")
+  public boolean isGenerated() {
+    return isGenerated;
+  }
+
+  public void setIsGenerated(boolean generated) {
+    isGenerated = generated;
+  }
 }

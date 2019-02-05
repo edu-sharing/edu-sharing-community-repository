@@ -27,3 +27,14 @@ h4{
 .btnVersion{
   margin-top: 10px;
 }
+.license-warning{
+  >div {
+    > .warning {
+      white-space: pre-line;
+    }
+    > .link {
+      color: $primary;
+      text-transform: uppercase;
+    }
+  }
+}

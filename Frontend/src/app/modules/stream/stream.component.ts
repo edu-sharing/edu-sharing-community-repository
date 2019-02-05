@@ -120,9 +120,9 @@ export class StreamComponent {
       Translation.initialize(translate,this.config,this.session,this.route).subscribe(()=>{
         UIHelper.setTitle('STREAM.TITLE',title,translate,config);
         this.connector.isLoggedIn().subscribe(data => {
-            console.log(data);
             this.dateToDisplay = moment().locale(translate.currentLang).format('dddd, DD. MMMM YYYY');
             this.createAllowed=data.statusCode==RestConstants.STATUS_CODE_OK;
+            this.mainNavRef.finishPreloading();
         });
           this.connectors.list().subscribe(list=>{
               this.connectorList=list;

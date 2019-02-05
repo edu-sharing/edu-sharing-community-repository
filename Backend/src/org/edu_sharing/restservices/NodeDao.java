@@ -22,6 +22,7 @@ import org.alfresco.service.cmr.repository.DuplicateChildNodeNameException;
 import org.alfresco.service.cmr.repository.StoreRef;
 import org.alfresco.service.cmr.security.PermissionService;
 import org.alfresco.service.namespace.QName;
+import org.apache.log4j.Logger;
 import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
 import org.edu_sharing.metadataset.v2.MetadataQuery;
 import org.edu_sharing.metadataset.v2.MetadataQueryParameter;
@@ -71,7 +72,7 @@ import io.swagger.util.Json;
 import javax.swing.text.html.parser.ContentModel;
 
 public class NodeDao {
-	
+	private static Logger logger = Logger.getLogger(NodeDao.class);
 	private static final StoreRef storeRef = new StoreRef(StoreRef.PROTOCOL_WORKSPACE, "SpacesStore");
 	private static final String[] DAO_PERMISSIONS = new String[]{
 			org.alfresco.service.cmr.security.PermissionService.ADD_CHILDREN,
@@ -425,7 +426,7 @@ public class NodeDao {
 				this.permissionService=PermissionServiceFactory.getPermissionService(this.remoteRepository.getId());
 				this.nodeProps = this.nodeService.getProperties(null,null, this.remoteId);
 			}
-			
+
 			String[] aspects = nodeService.getAspects(this.storeProtocol,this.storeId, nodeId);
 			
 			this.aspects = (aspects != null) ? Arrays.asList(aspects) : new ArrayList<String>();
@@ -433,6 +434,7 @@ public class NodeDao {
 			this.filter = filter;
 			
 		}catch(Throwable t){
+			logger.warn(t.getMessage(),t);
 			throw DAOException.mapping(t,nodeRef.getNodeId());
 		}
 	}
@@ -668,7 +670,18 @@ public class NodeDao {
 			return new NodeDao(repoDao, nodeId);
 			
 		} catch (Throwable t) {
-			
+
+			throw DAOException.mapping(t);
+		}
+	}
+
+	public NodeDao deletePreview() throws DAOException {
+
+		try {
+			nodeService.removeProperty(storeProtocol,storeId,nodeId,isDirectory() ? CCConstants.CCM_PROP_MAP_ICON : CCConstants.CCM_PROP_IO_USERDEFINED_PREVIEW);
+			PreviewCache.purgeCache(nodeId);
+			return new NodeDao(repoDao, nodeId);
+		} catch (Throwable t) {
 			throw DAOException.mapping(t);
 		}
 	}
@@ -1073,7 +1086,7 @@ public class NodeDao {
 	public static NodeRef createNodeRef(RepositoryDao repoDao,String nodeId) {
 		return createNodeRef(repoDao.getId(),repoDao.isHomeRepo(),nodeId);
 	}
-	
+
 	public String getStoreProtocol(){
 		return (String)nodeProps.get(CCConstants.SYS_PROP_STORE_PROTOCOL);
 	}

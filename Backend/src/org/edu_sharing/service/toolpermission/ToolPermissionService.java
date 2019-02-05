@@ -233,7 +233,7 @@ public class ToolPermissionService {
 	}
 	
 	
-	private String getEdu_SharingToolPermissionsFolder() throws Throwable{
+	public String getEdu_SharingToolPermissionsFolder() throws Throwable{
 		if(toolPermissionFolder!=null)
 			return toolPermissionFolder;
 		logger.info("fully: "+AuthenticationUtil.getFullyAuthenticatedUser() +" runAs:"+AuthenticationUtil.getRunAsUser());

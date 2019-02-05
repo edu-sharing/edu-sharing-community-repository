@@ -1,4 +1,4 @@
-import {Component, OnInit, NgZone, HostListener, ViewChild, Sanitizer} from '@angular/core';
+import {Component, OnInit, NgZone, HostListener, ViewChild, Sanitizer, ElementRef} from '@angular/core';
 
 
 import {Router, Params, ActivatedRoute} from "@angular/router";
@@ -29,6 +29,8 @@ import {ColorHelper} from '../../../common/ui/color-helper';
 import {DomSanitizer} from "@angular/platform-browser";
 import {TemporaryStorageService} from "../../../common/services/temporary-storage.service";
 import {UIHelper} from "../../../common/ui/ui-helper";
+import {RegisterResetPasswordComponent} from "../../register/register-reset-password/register-reset-password.component";
+import {MainNavComponent} from '../../../common/ui/main-nav/main-nav.component';
 
 // component class
 @Component({
@@ -37,6 +39,7 @@ import {UIHelper} from "../../../common/ui/ui-helper";
   styleUrls: ['collection-new.component.scss']
 })
 export class CollectionNewComponent {
+  @ViewChild('mainNav') mainNavRef: MainNavComponent;
   @ViewChild('mds') mds : MdsComponent;
   public hasCustomScope: boolean;
   public COLORS:string[];
@@ -81,7 +84,7 @@ export class CollectionNewComponent {
   private availableSteps: string[];
   private parentCollection: Collection;
   private originalPermissions: LocalPermissions;
-
+  @ViewChild('file') imageFileRef : ElementRef;
 
   @HostListener('document:keydown', ['$event'])
   handleKeyboardEvent(event: KeyboardEvent) {
@@ -146,6 +149,7 @@ export class CollectionNewComponent {
                       }
                       this.updateAvailableSteps();
                       this.isLoading=false;
+                      this.mainNavRef.finishPreloading();
                     });
                   });
                 });
@@ -333,7 +337,13 @@ export class CollectionNewComponent {
            this.collectionService.uploadCollectionImage(collection.ref.id, this.imageFile, "image/png").subscribe(() => {
                this.navigateToCollectionId(collection.ref.id);
            });
-       } else {
+       }
+       else if(collection.preview==null){
+           this.collectionService.deleteCollectionImage(collection.ref.id).subscribe(() => {
+               this.navigateToCollectionId(collection.ref.id);
+           });
+       }
+       else {
           this.navigateToCollectionId(collection.ref.id);
         }
     }
@@ -520,6 +530,7 @@ export class CollectionNewComponent {
       }
     this.updateAvailableSteps();
     this.isLoading=false;
+    this.mainNavRef.finishPreloading();
   }
 
   private save4(collection:Collection) {
@@ -535,4 +546,11 @@ export class CollectionNewComponent {
         return;
     });
   }
+
+    deleteImage() {
+      this.imageData = null;
+      this.imageFile = null;
+      this.imageFileRef.nativeElement.value = null;
+      this.currentCollection.preview = null;
+    }
 }

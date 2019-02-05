@@ -1,19 +1,16 @@
-
+<main-nav *ngIf="mainnav" #mainNav
+          [title]="'SIDEBAR.LOGIN'"
+          [currentScope]="'login'"
+          [searchEnabled]="false"
+></main-nav>
 <div class="dialog darken valign-wrapper">
-
-  <main-nav *ngIf="mainnav"
-            [title]="'SIDEBAR.LOGIN'"
-            [currentScope]="'login'"
-            [searchEnabled]="false"
-  ></main-nav>
-
   <spinner *ngIf="isLoading" class="center"></spinner>
   <div *ngIf="!isLoading">
   <div class="card center-card card-action">
     <div class="card-content">
       <div *ngIf="previousStage" class="card-cancel" (click)="stage=previousStage;previousStage=null" tabindex="0" (keyup.enter)="stage=previousStage;previousStage=null"><i icon iconId="close" aria="true"></i></div>
       <div class="card-title">{{caption | translate}}</div>
-      <div class="branding"><img src="assets/images/logo.svg" alt=""></div>
+      <div class="branding"><img src="assets/images/logo.svg" image-config alt=""></div>
       <div class="card-scroll">
           <div *ngIf="stage=='choose'" [@dialog]="stage=='choose'" class="choose">
               <div>

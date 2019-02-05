@@ -128,20 +128,20 @@ export class BreadcrumbsComponent{
   }
 
   private addSearch() {
-    let add=!(this._breadcrumbsAsNode.length>0 && this._breadcrumbsAsNode[0] && this._breadcrumbsAsNode[0].type=="SEARCH");
+    let add=!(this._breadcrumbsAsNode.length>0 && this._breadcrumbsAsNode[this._breadcrumbsAsNode.length-1] && this._breadcrumbsAsNode[this._breadcrumbsAsNode.length-1].type=="SEARCH");
     if(this._searchQuery){
       let search=new Node();
       search.name="'"+this._searchQuery+"'";
       search.type="SEARCH";
       if(add) {
-        this._breadcrumbsAsNode.splice(1,0,search);
+        this._breadcrumbsAsNode.splice(this._breadcrumbsAsNode.length,0,search);
       }
       else{
-        this._breadcrumbsAsNode[0]=search;
+        this._breadcrumbsAsNode[this._breadcrumbsAsNode.length-1]=search;
       }
     }
     else if(!add){
-      this._breadcrumbsAsNode.splice(1,1);
+      this._breadcrumbsAsNode.splice(this._breadcrumbsAsNode.length,1);
     }
   }
   private parentContains(id:String){

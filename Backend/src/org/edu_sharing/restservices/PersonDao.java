@@ -322,7 +322,7 @@ public class PersonDao {
 				SearchToken token=new SearchToken();
 				token.setMaxResult(0);
 				token.setLuceneString(luceneUser);
-				token.setContentType(SearchService.ContentType.FILES_AND_FOLDERS);
+				token.setContentType(SearchService.ContentType.FILES);
 		    	SearchResultNodeRef result = searchService.search(token);
 		    	stats.setNodeCount(result.getNodeCount());
 

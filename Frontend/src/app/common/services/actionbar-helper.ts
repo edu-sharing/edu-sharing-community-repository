@@ -51,7 +51,10 @@ export class ActionbarHelperService{
     if(type=='ADD_NODE_STORE'){
         option=new OptionItem('SEARCH.ADD_NODE_STORE', 'bookmark_border',callback);
         option.showCallback=(node:Node)=>{
-            return ActionbarHelperService.getNodes(nodes,node).length && RestNetworkService.allFromHomeRepo(ActionbarHelperService.getNodes(nodes,node),this.repositories);
+            let n=ActionbarHelperService.getNodes(nodes,node);
+            if(n==null)
+                return false;
+            return n.length && RestNetworkService.allFromHomeRepo(n,this.repositories);
         };
     }
     if(type=='NODE_TEMPLATE') {
@@ -61,27 +64,30 @@ export class ActionbarHelperService{
       }
     }
     if(type=='CREATE_VARIANT') {
-      if (NodeHelper.allFiles(nodes) && nodes && nodes.length==1 && !this.connector.getCurrentLogin().isGuest) {
-        if(nodes && nodes.length && this.connectors.connectorSupportsEdit(nodes[0])){
-            option = new OptionItem("WORKSPACE.OPTION.VARIANT_OPEN", "call_split", callback);
-        }
-        else {
-            option = new OptionItem("WORKSPACE.OPTION.VARIANT", "call_split", callback);
-
-            option.enabledCallback = (node: Node) => {
-                return node.size > 0 && node.downloadUrl;
-            }
-            if(nodes && nodes.length) {
-                option.isEnabled = option.enabledCallback(nodes[0]);
-            }
-        }
-      }
+        option = new OptionItem("WORKSPACE.OPTION.VARIANT", "call_split", callback);
+        option.showCallback = (node : Node) =>{
+            let n=ActionbarHelperService.getNodes(nodes,node);
+            if(n==null)
+                return false;
+            option.name="WORKSPACE.OPTION.VARIANT" + (this.connectors.connectorSupportsEdit(n[0]) ? "_OPEN" : "");
+            return NodeHelper.allFiles(n) && n && n.length==1 && RestNetworkService.allFromHomeRepo(n) && !this.connector.getCurrentLogin().isGuest;
+        };
+        option.enabledCallback = (node: Node) => {
+            return node.size > 0 && node.downloadUrl;
+        };
     }
+
     if(type=='ADD_TO_COLLECTION') {
-      if (NodeHelper.allFiles(nodes) && !this.connector.getCurrentLogin().isGuest) {
+      if (this.connector.getCurrentLogin() && !this.connector.getCurrentLogin().isGuest) {
         option = new OptionItem("WORKSPACE.OPTION.COLLECTION", "layers", callback);
         option.isEnabled = NodeHelper.getNodesRight(nodes, RestConstants.ACCESS_CC_PUBLISH,true) && RestNetworkService.allFromHomeRepo(nodes,this.repositories);
         option.showAsAction = true;
+        option.showCallback = (node: Node) => {
+            let n=ActionbarHelperService.getNodes(nodes,node);
+            if(n==null)
+                return false;
+            return NodeHelper.allFiles(nodes) && n.length>0;
+        }
         option.enabledCallback = (node: Node) => {
           let list = ActionbarHelperService.getNodes(nodes, node);
           return NodeHelper.getNodesRight(list,RestConstants.ACCESS_CC_PUBLISH,true) && RestNetworkService.allFromHomeRepo(list,this.repositories);
@@ -103,11 +109,19 @@ export class ActionbarHelperService{
       if (NodeHelper.allFiles(nodes)) {
         option = new OptionItem("WORKSPACE.OPTION.STREAM", "event", callback);
         option.enabledCallback = (node: Node) => {
-          let list = ActionbarHelperService.getNodes(nodes, node);
-          return NodeHelper.getNodesRight(list,RestConstants.ACCESS_CC_PUBLISH) &&
+          let n = ActionbarHelperService.getNodes(nodes, node);
+          if(n==null)
+              return false;
+          return NodeHelper.getNodesRight(n,RestConstants.ACCESS_CC_PUBLISH) &&
               this.connectors.getRestConnector().hasToolPermissionInstant(RestConstants.TOOLPERMISSION_INVITE_STREAM) &&
-              RestNetworkService.allFromHomeRepo(list,this.repositories);
-        }
+              RestNetworkService.allFromHomeRepo(n,this.repositories);
+        };
+          option.showCallback = (node: Node) => {
+              let n=ActionbarHelperService.getNodes(nodes,node);
+              if(n==null)
+                  return false;
+              return NodeHelper.allFiles(nodes) && RestNetworkService.allFromHomeRepo(n,this.repositories) && n.length==1;
+          }
         option.isEnabled = option.enabledCallback(null);
       }
     }
@@ -130,6 +144,10 @@ export class ActionbarHelperService{
         option = new OptionItem("WORKSPACE.OPTION.SHARE_LINK", "link", callback);
         option.isEnabled = NodeHelper.getNodesRight(nodes, RestConstants.ACCESS_CHANGE_PERMISSIONS) && this.connectors.getRestConnector().hasToolPermissionInstant(RestConstants.TOOLPERMISSION_INVITE);
       }
+    }
+    // when there are already nodes (action bar), and the option has a show callback, check if it is valid
+    if(option && nodes && nodes.length && option.showCallback && !option.showCallback(null)){
+        return null;
     }
     return option;
   }

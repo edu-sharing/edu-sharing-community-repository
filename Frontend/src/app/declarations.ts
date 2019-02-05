@@ -45,6 +45,7 @@
   import {ReplaceCharsPipe} from "./common/ui/replace-chars.pipe";
   import {CalendarComponent} from "./common/ui/calendar/calendar.component";
   import {SortDropdownComponent} from "./common/ui/sort-dropdown/sort-dropdown.component";
+  import {ImageConfigDirective} from "./common/ui/image-config.directive";
   import {IconComponent} from './common/ui/icon/icon.component';
 
 export const DECLARATIONS = [
@@ -95,5 +96,6 @@ export const DECLARATIONS = [
       InfiniteScrollDirective,
       KeysPipe,
       CookieInfoComponent,
-      TutorialComponent
+      TutorialComponent,
+      ImageConfigDirective
     ];

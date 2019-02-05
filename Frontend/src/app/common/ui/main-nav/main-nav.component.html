@@ -1,7 +1,19 @@
+<div class="preload" *ngIf="getPreloading()">
+    <img src="assets/images/edu-sharing-loading-animation.svg" image-config alt="">
+</div>
 <user-profile
   *ngIf="showProfile"
   (onCancel)="showProfile=false"
 ></user-profile>
+<modal-dialog
+        [title]="dialogTitle"
+        [isCancelable]="dialogCancelable"
+        (onCancel)="hideDialog()"
+        [message]="dialogMessage"
+        [messageParameters]="dialogMessageParameters"
+        [buttons]="dialogButtons"
+        [priority]="10"
+></modal-dialog>
 <app-banner [scope]="_currentScope" (onUpdate)="refreshBanner()"></app-banner>
 <global-progress *ngIf="globalProgress"></global-progress>
 <tutorial tabindex="0" [element]="tutorialElement" [heading]="'USER_TUTORIAL_HEADING'" [description]="'USER_TUTORIAL_DESCRIPTION'" [showSkip]="false"></tutorial>
@@ -28,7 +40,7 @@
   <div class="sidenavClose" tabindex="0" (click)="displaySidebar=false" (keyup.enter)="displaySidebar=false"><i class="material-icons">close</i></div>
   <div class="sidenavImage" style.background-color="{{ (user ? user.person : null) | authorityColor }}">
     <div class="profile-gradient"></div>
-    <img *ngIf="user && user.person.profile.avatar" class="profile-background" [src]="user.person.profile.avatar+'&crop=true&width=200&height=200'">
+    <img *ngIf="user && user.person.profile.avatar" class="blurred-image" [src]="user.person.profile.avatar+'&crop=true&width=200&height=200'">
     <div class="sidenavProfile">
       <user-avatar *ngIf="user" [user]="user.person" [size]="'medium'" class="clickable" (click)="openProfile()"></user-avatar>
       <!-- <i *ngIf="isGuest" class="material-icons">account_circle</i> -->
@@ -49,55 +61,56 @@
 </div>
 <div #topbar class="topBar {{ 'topBar-'+_currentScope}} scrollWithBanner" [class.noUser]="!_showUser">
     <div class="mobile-move-top2">
-  <div class="menuButtonOuter">
-    <div (click)="openSidenav()" (keyup.enter)="openSidenav()" tabindex="0" class="menuButton" [class.clickable]="canOpen" *ngIf="showScope" title="{{'CHOOSEENVIRONMENT' | translate}}">
-      <img class="material-icons eduImage" [src]="getIconSource()" alt=""/>
-      <i aria-hidden="true" class="material-icons scopeIcon">{{getCurrentScopeIcon()}}</i>
-      <span>{{title | translate}}</span>
-      <i aria-hidden="true" class="material-icons barIcon">keyboard_arrow_right</i>
-    </div>
-  </div>
-  <div class="topBarSearch" [class.noScope]="!showScope">
-    <div class="scopeNameMobile" *ngIf="!searchEnabled">{{title | translate}}</div>
-  <form (ngSubmit)="doSearch()" autocomplete="off" *ngIf="searchEnabled" role="search">
-    <div class="searchInputGroup">
-      <input #search name="search" type="search" [(ngModel)]="searchQuery" (change)="searchQueryChange.emit(searchQuery)"
-             title="{{searchPlaceholder | translate}}" placeholder="{{searchPlaceholder | translate}}" />
-      <i class="material-icons searchIcon">search</i>
-      <i class="material-icons searchClearIcon" *ngIf="searchQuery" (click)="clearSearch()">clear</i>
-    </div>
-  </form>
-  </div>
-  <div class="imprint" *ngIf="config.imprintUrl || config.privacyInformationUrl">
-    <a tabindex="0" class="focus-underline" *ngIf="config.imprintUrl" (click)="openImprint()" (keyup.enter)="openImprint()">{{ 'IMPRINT' | translate }}</a>
-    <a tabindex="0" class="focus-underline" *ngIf="config.privacyInformationUrl" (click)="openPrivacy()" (keyup.enter)="openPrivacy()">{{ 'PRIVACY_INFORMATION' | translate }}</a>
-  </div>
-  <div *ngIf="user && (_currentScope=='search' || _currentScope=='stream' || _currentScope=='collections')" #nodeStoreRef class="clickable nodeStore" tabindex="0" (click)="setNodeStore(true)" (keyup.enter)="setNodeStore(true)" title="{{'SEARCH.NODE_STORE.TITLE' | translate}}">
-    <i aria-hidden="true" class="material-icons barIcon">bookmark_border</i>
-    <div class="nodeStoreCount">{{nodeStoreCount}}</div>
-    <div *ngIf="nodeStoreAnimation>0" [@nodeStore]="nodeStoreAnimation>0" class="clickable nodeStoreAnimation" (click)="setNodeStore(true)">
-      <div>+{{nodeStoreAnimation}}</div>
-    </div>
-  </div>
-
-  <div class="user clickable" #userRef *ngIf="user && _showUser" (click)="showUserMenu()" (keyup.enter)="showUserMenu()" tabindex="0" title="{{'USERMENU' | translate}}">
-      <user-avatar [user]="user.person" [size]="'xsmall'"></user-avatar>
-      <div *ngIf="!isGuest">{{userName}}</div>
-      <div *ngIf="isGuest">{{'USER_GUEST' | translate}}</div>
-      <i aria-hidden="true" class="material-icons barIcon iconArrow">keyboard_arrow_down</i>
-      <!-- <i class="material-icons barIcon iconPerson">account_circle</i>-->
-    </div>
-  <dropdown class="userMenu"
-    [(show)]="userOpen"
-    [options]="userMenuOptions"
-  ></dropdown>
-  <div *ngIf="helpOptions.length" class="help clickable" (click)="showHelpMenu()" (keyup.enter)="showHelpMenu()" tabindex="0">
-    <i icon iconId="help_outline" aria="true"></i>
-  </div>
-  <dropdown class="helpMenu"
-            [(show)]="helpOpen"
-            [options]="helpOptions"
-  ></dropdown>
+      <div class="menuButtonOuter">
+        <div (click)="openSidenav()" (keyup.enter)="openSidenav()" tabindex="0" class="menuButton" [class.clickable]="canOpen" *ngIf="showScope" title="{{'CHOOSEENVIRONMENT' | translate}}">
+          <img class="material-icons eduImage" [src]="getIconSource()" alt=""/>
+          <i aria-hidden="true" class="material-icons scopeIcon">{{getCurrentScopeIcon()}}</i>
+          <span>{{title | translate}}</span>
+          <i aria-hidden="true" class="material-icons barIcon">keyboard_arrow_right</i>
+        </div>
+      </div>
+      <div class="topBarSearch" [class.noScope]="!showScope">
+        <div class="scopeNameMobile" *ngIf="!searchEnabled">{{title | translate}}</div>
+      <form (ngSubmit)="doSearch()" autocomplete="off" *ngIf="searchEnabled" role="search">
+        <div class="searchInputGroup">
+          <input #search name="search" type="search" [(ngModel)]="searchQuery" (change)="searchQueryChange.emit(searchQuery)"
+                 title="{{searchPlaceholder | translate}}" placeholder="{{searchPlaceholder | translate}}" />
+          <i class="material-icons searchIcon">search</i>
+          <i class="material-icons searchClearIcon" *ngIf="searchQuery" (click)="clearSearch()">clear</i>
+        </div>
+      </form>
+      </div>
+      <div class="topbar-search-right">
+        <div class="imprint" *ngIf="config.imprintUrl || config.privacyInformationUrl">
+          <a tabindex="0" class="focus-underline" *ngIf="config.imprintUrl" (click)="openImprint()" (keyup.enter)="openImprint()">{{ 'IMPRINT' | translate }}</a>
+          <a tabindex="0" class="focus-underline" *ngIf="config.privacyInformationUrl" (click)="openPrivacy()" (keyup.enter)="openPrivacy()">{{ 'PRIVACY_INFORMATION' | translate }}</a>
+        </div>
+        <div *ngIf="user && (_currentScope=='search' || _currentScope=='stream' || _currentScope=='collections')" #nodeStoreRef class="clickable nodeStore" tabindex="0" (click)="setNodeStore(true)" (keyup.enter)="setNodeStore(true)" title="{{'SEARCH.NODE_STORE.TITLE' | translate}}">
+          <i aria-hidden="true" class="material-icons barIcon">bookmark_border</i>
+          <div class="nodeStoreCount">{{nodeStoreCount}}</div>
+          <div *ngIf="nodeStoreAnimation>0" [@nodeStore]="nodeStoreAnimation>0" class="clickable nodeStoreAnimation" (click)="setNodeStore(true)">
+            <div>+{{nodeStoreAnimation}}</div>
+          </div>
+        </div>
+        <div class="user clickable" #userRef *ngIf="user && _showUser" (click)="showUserMenu()" (keyup.enter)="showUserMenu()" tabindex="0" title="{{'USERMENU' | translate}}">
+            <user-avatar [user]="user.person" [size]="'xsmall'"></user-avatar>
+            <div *ngIf="!isGuest">{{userName}}</div>
+            <div *ngIf="isGuest">{{'USER_GUEST' | translate}}</div>
+            <i aria-hidden="true" class="material-icons barIcon iconArrow">keyboard_arrow_down</i>
+            <!-- <i class="material-icons barIcon iconPerson">account_circle</i>-->
+          </div>
+        <dropdown class="userMenu"
+          [(show)]="userOpen"
+          [options]="userMenuOptions"
+        ></dropdown>
+        <div *ngIf="helpOptions.length" class="help clickable" (click)="showHelpMenu()" (keyup.enter)="showHelpMenu()" tabindex="0">
+          <i icon iconId="help_outline" aria="true"></i>
+        </div>
+        <dropdown class="helpMenu"
+                  [(show)]="helpOpen"
+                  [options]="helpOptions"
+        ></dropdown>
+      </div>
     </div>
 </div>
 <div #scrolltotop class="btn" id="scrollToTop" tabindex="0" (click)="scrollToTop()" (keyup.enter)="scrollToTop()"><i icon iconId="keyboard_arrow_up" aria="true"></i></div>

@@ -447,6 +447,14 @@ public class CollectionDao {
 		}
 	}
 
+	public void removePreviewImage() throws DAOException{
+		try{
+			collectionClient.removePreviewImage(collectionId);
+		}catch(Exception e){
+			throw new DAOException(e,collectionId);
+		}
+	}
+
 	public static void setPinned(RepositoryDao repoDao, String[] collections) {
 		if(!ToolPermissionServiceFactory.getInstance().hasToolPermission(CCConstants.CCM_VALUE_TOOLPERMISSION_COLLECTION_PINNING))
 			throw new ToolPermissionException(CCConstants.CCM_VALUE_TOOLPERMISSION_COLLECTION_PINNING);

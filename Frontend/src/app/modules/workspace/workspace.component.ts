@@ -94,9 +94,8 @@ export class WorkspaceMainComponent implements EventListener{
     private nodeDisplayedVersion : string;
     private createAllowed : boolean;
     private currentFolder : any|Node;
-    private currentFolderRef : any|string;
     private user : IamUser;
-    public searchQuery : string;
+    public searchQuery : any;
     public isSafe = false;
     private isLoggedIn = false;
     public addNodesToCollection : Node[];
@@ -113,8 +112,6 @@ export class WorkspaceMainComponent implements EventListener{
     private nodeOptions: OptionItem[]=[];
     private currentNode: Node;
     public mainnav=true;
-    private timeout: string;
-    private timeIsValid = false;
     private viewToggle: OptionItem;
     private isAdmin=false;
     public isBlocked=false;
@@ -246,7 +243,7 @@ export class WorkspaceMainComponent implements EventListener{
         });
         this.connector.setRoute(this.route);
         this.globalProgress=true;
-        this.explorerOptions=this.getOptions([new Node()],true);
+        this.explorerOptions=this.getOptions(null,true);
         //this.nodeOptions.push(new OptionItem("DOWNLOAD", "cloud_download", (node:Node) => this.downloadNode(node)));
     }
     private uploadCamera(event:any){
@@ -271,35 +268,6 @@ export class WorkspaceMainComponent implements EventListener{
             console.warn(error);
             //this.toast.error(error);
         });
-    }
-    private showTimeout(){
-        return !this.cordova.isRunningCordova() && this.timeIsValid && this.dialogTitle!='WORKSPACE.AUTOLOGOUT' &&
-            (this.isSafe || !this.isSafe && this.config.instant('sessionExpiredDialog',{show:true}).show);
-    }
-    private updateTimeout(){
-        let time=this.connector.logoutTimeout - Math.floor((new Date().getTime()-this.connector.lastActionTime)/1000);
-        let min=Math.floor(time/60);
-        let sec=time%60;
-        this.event.broadcastEvent(FrameEventsService.EVENT_SESSION_TIMEOUT,time);
-        if(time>=0) {
-            this.timeout = this.formatTimeout(min, 2) + ":" + this.formatTimeout(sec, 2);
-            this.timeIsValid=true;
-        }
-        else if(this.showTimeout()){
-            this.dialogTitle='WORKSPACE.AUTOLOGOUT';
-            this.dialogMessage='WORKSPACE.AUTOLOGOUT_INFO';
-            this.dialogCancelable=false;
-            this.dialogMessageParameters={minutes:Math.round(this.connector.logoutTimeout/60)};
-            this.dialogButtons=[];
-            this.dialogButtons.push(new DialogButton("WORKSPACE.RELOGIN",DialogButton.TYPE_PRIMARY,()=>this.goToLogin()));
-        }
-        else
-            this.timeout="";
-    }
-    private formatTimeout(num:number, size:number) {
-        let s = num+"";
-        while (s.length < size) s = "0" + s;
-        return s;
     }
     private createConnector(event : any){
         let name=event.name+"."+event.type.filetype;
@@ -438,9 +406,6 @@ export class WorkspaceMainComponent implements EventListener{
                         this.globalProgress=false;
                         this.homeDirectory=data.id;
                         this.route.params.forEach((params: Params) => {
-                            //if(this.isSafe)
-                            setInterval(()=>this.updateTimeout(),1000);
-
                             this.route.queryParams.subscribe((params: Params) => {
                                 let needsUpdate=false;
                                 if(this.oldParams){
@@ -460,6 +425,9 @@ export class WorkspaceMainComponent implements EventListener{
                                 if(params['root'] && WorkspaceMainComponent.VALID_ROOTS.indexOf(params['root'])!=-1) {
                                     this.root = params['root'];
                                 }
+                                else{
+                                    this.root = "MY_FILES";
+                                }
                                 if(params['reurl']) {
                                     this.reurl = params['reurl'];
                                 }
@@ -478,17 +446,7 @@ export class WorkspaceMainComponent implements EventListener{
                                 if(!needsUpdate)
                                     return;
 
-                                this.searchQuery='';
-                                if(params['query']) {
-                                    this.searchQuery=params['query'];
-                                    this.doSearchFromRoute(this.searchQuery);
-                                }
-                                else if(params['id']) {
-                                    this.openDirectoryFromRoute(params['id']);
-                                }
-                                else{
-                                    this.openDirectoryFromRoute("");
-                                }
+                                this.openDirectoryFromRoute(params);
                                 if(params['showAlpha']){
                                     this.showAlpha();
                                 }
@@ -505,26 +463,31 @@ export class WorkspaceMainComponent implements EventListener{
     }
 
     public doSearch(query:any){
-        this.routeTo(this.root,null,query.query);
+        let id=this.currentFolder ? this.currentFolder.ref.id :
+                    this.searchQuery && this.searchQuery.node ? this.searchQuery.node.ref.id : null;
+        this.routeTo(this.root,id,query.query);
         if(!query.cleared){
             this.ui.hideKeyboardIfMobile();
         }
     }
-    private doSearchFromRoute(query:string){
-        this.searchQuery=query;
+    private doSearchFromRoute(params:any,node:Node|any){
+        node=this.isRootFolder ? null : node;
+        this.searchQuery={
+            query:params['query'],
+            node:node
+        };
+        if(node==null){
+            this.root='ALL_FILES';
+        }
         this.createAllowed=false;
         this.path=[];
         this.selection=[];
-        this.currentFolder=null;
         this.actionOptions = this.getOptions(null,false);
 
+        /*
         if(this.root=='MY_SHARED_FILES' || this.root=='SHARED_FILES')
             this.root='MY_FILES';
-        if(!this.searchQuery){
-            this.openDirectory(null);
-            return;
-        }
-
+        */
     }
     private manageContributorsNode(node: Node) {
         let list=this.getNodeList(node);
@@ -615,7 +578,7 @@ export class WorkspaceMainComponent implements EventListener{
 
     private pasteNode(position=0){
         let clip=(this.storage.get("workspace_clipboard") as ClipboardObject);
-        if(this.searchQuery || this.isRootFolder)
+        if(this.searchQuery || (this.isRootFolder && this.root!=RestConstants.USERHOME))
             return;
         if(!clip || !clip.nodes.length)
             return;
@@ -751,7 +714,7 @@ export class WorkspaceMainComponent implements EventListener{
         }
     }
     public updateOptions(node : Node) : void{
-        this.explorerOptions=this.getOptions([node ? node : new Node()],true);
+        this.explorerOptions=this.getOptions(node ? [node] : null,true);
     }
 
 
@@ -816,38 +779,32 @@ export class WorkspaceMainComponent implements EventListener{
             if(edit.isEnabled)
                 options.push(edit);
         }
-        if(nodes && nodes.length && allFiles) {
-            let collection = this.actionbar.createOptionIfPossible('ADD_TO_COLLECTION', nodes, (node: Node) => this.addToCollection(node));
-            if (collection && !this.isSafe)
-                options.push(collection);
-            let stream = this.actionbar.createOptionIfPossible('ADD_TO_STREAM',nodes,(node:Node)=>this.addToStream(node));
-            if (stream && !this.isSafe)
-                options.push(stream);
-        }
-        if(nodes && nodes.length && allFiles) {
-            let variant = this.actionbar.createOptionIfPossible('CREATE_VARIANT',nodes, (node: Node) => this.createVariant(node));
-            if (variant && !this.isSafe)
-                options.push(variant);
-        }
+        let collection = this.actionbar.createOptionIfPossible('ADD_TO_COLLECTION', nodes, (node: Node) => this.addToCollection(node));
+        if (collection && !this.isSafe)
+            options.push(collection);
+        let stream = this.actionbar.createOptionIfPossible('ADD_TO_STREAM',nodes,(node:Node)=>this.addToStream(node));
+        if (stream && !this.isSafe)
+            options.push(stream);
+        let variant = this.actionbar.createOptionIfPossible('CREATE_VARIANT',nodes, (node: Node) => this.createVariant(node));
+        if (variant && !this.isSafe)
+            options.push(variant);
+
         let share:OptionItem;
-        if (nodes && nodes.length == 1) {
             let template = this.actionbar.createOptionIfPossible('NODE_TEMPLATE', nodes, (node: Node) => this.nodeTemplate(node));
-            if(template)
-                options.push(template);
-            share=this.actionbar.createOptionIfPossible('INVITE', nodes, (node: Node) => this.shareNode(node));
-            if(share) {
-                share.isEnabled = share.isEnabled && (
-                    (this.connector.hasToolPermissionInstant(RestConstants.TOOLPERMISSION_INVITE) && !this.isSafe)
-                    || (this.connector.hasToolPermissionInstant(RestConstants.TOOLPERMISSION_INVITE_SAFE) && this.isSafe)
-                );
-                //if (this.isSafe && this.root != 'SHARED_FILES')
-                //    share.isEnabled = false;
-                options.push(share);
-            }
-            /*let shareLink = ActionbarHelper.createOptionIfPossible('SHARE_LINK',nodes,this.connector,(node: Node) => this.setShareLinkNode(node));
-            if (shareLink && !this.isSafe)
-                options.push(shareLink);*/
+        if(template)
+            options.push(template);
+        share=this.actionbar.createOptionIfPossible('INVITE', nodes, (node: Node) => this.shareNode(node));
+        if(share) {
+            share.isEnabled = share.isEnabled && (
+                (this.connector.hasToolPermissionInstant(RestConstants.TOOLPERMISSION_INVITE) && !this.isSafe)
+                || (this.connector.hasToolPermissionInstant(RestConstants.TOOLPERMISSION_INVITE_SAFE) && this.isSafe)
+            );
+            options.push(share);
         }
+        /*let shareLink = ActionbarHelper.createOptionIfPossible('SHARE_LINK',nodes,this.connector,(node: Node) => this.setShareLinkNode(node));
+        if (shareLink && !this.isSafe)
+            options.push(shareLink);*/
+
         if(nodes) {
             let license = new OptionItem("WORKSPACE.OPTION.LICENSE", "copyright", (node: Node) => this.editLicense(node));
             license.isEnabled = !this.isSafe && allFiles && NodeHelper.getNodesRight(nodes, RestConstants.ACCESS_DELETE) && this.connector.hasToolPermissionInstant(RestConstants.TOOLPERMISSION_LICENSE);
@@ -866,10 +823,7 @@ export class WorkspaceMainComponent implements EventListener{
 
             this.infoToggle=new OptionItem("WORKSPACE.OPTION.METADATA", "info_outline", (node: Node) => this.openMetadata(node));
             this.infoToggle.isToggle=true;
-            //info.onlyMobile=!nodes[0].isDirectory;
             options.push(this.infoToggle);
-            //options[0].showAlways = true;
-
 
         }
         if(fromList || nodes && nodes.length) {
@@ -910,17 +864,21 @@ export class WorkspaceMainComponent implements EventListener{
     }
     private closeMetadata() {
         this.metadataNode=null;
-        this.infoToggle.icon='info_outline';
+        if(this.infoToggle)
+            this.infoToggle.icon='info_outline';
     }
     private openDirectory(id:string){
-        this.routeTo(this.root, id ? id : null);
+        this.routeTo(this.root, id);
     }
-    private openDirectoryFromRoute(id : string,createRoute = true){
+    searchGlobal(query:string){
+        this.routeTo(this.root,null,query);
+    }
+    private openDirectoryFromRoute(params : any){
+        let id=params['id'];
         this.selection=[];
         this.closeMetadata();
         this.createAllowed = false;
         this.actionOptions = this.getOptions(null,false);
-        let hasId=id;
         if(!id){
             this.path=[];
             id=this.getRootFolderId();
@@ -937,15 +895,12 @@ export class WorkspaceMainComponent implements EventListener{
                 this.path=[];
             });
         }
-
-        this.searchQuery=null;
         this.currentFolder=null;
         this.allowBinary=true;
         let root=WorkspaceMainComponent.VALID_ROOTS_NODES.indexOf(id)!=-1;
-        if(!root || id==RestConstants.USERHOME) {
+        if(!root) {
             this.isRootFolder=false;
             console.log("open path: "+id);
-            this.currentFolderRef=id;
             this.node.getNodeMetadata(id).subscribe((data: NodeWrapper) => {
                 this.mds.getSet(data.node.metadataset ? data.node.metadataset : RestConstants.DEFAULT).subscribe((mds:any)=>{
                     if(mds.create) {
@@ -954,15 +909,12 @@ export class WorkspaceMainComponent implements EventListener{
                             console.log("mds does not allow binary files, will switch mode");
                     }
                 });
-                this.currentFolder = data.node;
-                this.event.broadcastEvent(FrameEventsService.EVENT_NODE_FOLDER_OPENED, this.currentFolder);
-                this.createAllowed = NodeHelper.getNodesRight([this.currentFolder], RestConstants.ACCESS_ADD_CHILDREN);
+                this.updateNodeByParams(params,data.node);
+                this.createAllowed = !this.searchQuery && NodeHelper.getNodesRight([data.node], RestConstants.ACCESS_ADD_CHILDREN);
                 this.actionOptions = this.getOptions(this.selection, false);
                 this.recoverScrollposition();
             }, (error: any) => {
-                this.currentFolder = {ref: {id: id}};
-                this.event.broadcastEvent(FrameEventsService.EVENT_NODE_FOLDER_OPENED, this.currentFolder);
-                this.searchQuery = null;
+                this.updateNodeByParams(params,{ref: {id: id}});
             });
         }
         else{
@@ -971,10 +923,7 @@ export class WorkspaceMainComponent implements EventListener{
             if(id==RestConstants.USERHOME){
                 this.createAllowed = true;
             }
-            this.currentFolder = {ref: {id: id}};
-            this.currentFolderRef = id;
-            this.event.broadcastEvent(FrameEventsService.EVENT_NODE_FOLDER_OPENED, this.currentFolder);
-            this.searchQuery = null;
+            this.updateNodeByParams(params,{ref: {id: id}});
         }
 
     }
@@ -1029,9 +978,7 @@ export class WorkspaceMainComponent implements EventListener{
     private refresh(refreshPath=true) {
         let search=this.searchQuery;
         let folder=this.currentFolder;
-        let ref=this.currentFolderRef;
         this.currentFolder=null;
-        this.currentFolderRef=null;
         this.searchQuery=null;
         this.selection=[];
         this.actionOptions=this.getOptions(this.selection,false);
@@ -1041,7 +988,6 @@ export class WorkspaceMainComponent implements EventListener{
         setTimeout(()=>{
             this.path=path;
             this.currentFolder=folder;
-            this.currentFolderRef=ref;
             this.searchQuery=search;
         });
     }
@@ -1060,12 +1006,10 @@ export class WorkspaceMainComponent implements EventListener{
     }
 
     private refreshRoute(){
-        console.log(this.isRootFolder);
-        this.routeTo(this.root,!this.isRootFolder && this.currentFolder ? this.currentFolder.ref.id : null,this.searchQuery);
+        this.routeTo(this.root,!this.isRootFolder && this.currentFolder ? this.currentFolder.ref.id : null,this.searchQuery.query);
     }
-    private routeTo(root: string,node : string=null,search="") {
-        console.log("update route "+root+" "+node);
-        let params:any={root:root,id:node?node:"",viewType:this.viewType,query:search,mainnav:this.mainnav};
+    private routeTo(root: string,node : string=null,search:string=null) {
+        let params:any={root:root,id:node,viewType:this.viewType,query:search,mainnav:this.mainnav};
         if(this.reurl)
             params.reurl=this.reurl;
         this.router.navigate(["./"],{queryParams:params,relativeTo:this.route})
@@ -1195,5 +1139,17 @@ export class WorkspaceMainComponent implements EventListener{
             return;
         }*/
         NodeHelper.addNodeToLms(this.router,this.storage,node,this.reurl)
+    }
+
+    private updateNodeByParams(params: any, node: Node|any) {
+        this.mainNavRef.finishPreloading();
+        if(params['query']){
+            this.doSearchFromRoute(params,node);
+        }
+        else {
+            this.searchQuery=null;
+            this.currentFolder = node;
+            this.event.broadcastEvent(FrameEventsService.EVENT_NODE_FOLDER_OPENED, this.currentFolder);
+        }
     }
 }

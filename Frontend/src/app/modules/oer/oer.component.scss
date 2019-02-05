@@ -23,8 +23,7 @@
     position: absolute !important;
   }
   .topBarSearch form {
-    left: 50%;
-    margin-left: - 250px;
+    margin: auto;
     .searchClearIcon{
       right: 5px;
     }
@@ -33,12 +32,17 @@
     width: 500px;
     box-sizing: border-box;
   }
+  .topbar-search-right{
+    width: 300px;
+    text-align: right;
+    display: flex !important;
+    align-items: center;
+    justify-content: flex-end;
+  }
   @media screen and (max-width: ($mobileWidth+$mobileStage*5)) {
-    .topBarSearch form {
-      margin-left: -200px;
-    }
     .topBarSearch form, .topBarSearch input {
-      width: 400px;
+      width: 100%;
+      box-sizing: content-box;
     }
   }
 
@@ -50,19 +54,17 @@
       display: none;
     }
   }
-  @media screen and (max-width: ($mobileWidth+$mobileStage*1)) {
+  @media screen and (max-width: ($mobileWidth+$mobileStage*2)) {
+    .topbar-search-right{
+      width: auto;
+    }
     .searchInputGroup{
       width: 100%!important;
     }
   }
-
   @media screen and (max-width: ($mobileWidth)) {
-    .topBarSearch form {
-      margin-left: 0;
-      left: 0;
-    }
     .topBarSearch form, .topBarSearch input {
-      width: 100%;
+      box-sizing: border-box;
     }
   }
 }
@@ -176,5 +178,14 @@
   .collections {
     width: calc(100% + 40px);
     margin:10px -20px;
+    padding: 0 20px;
+  }
+}
+
+@media all and (max-width: $mobileWidth) {
+  .materials{
+    .list{
+      width: 100%;
+    }
   }
 }

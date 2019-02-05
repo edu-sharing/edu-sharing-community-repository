@@ -461,6 +461,20 @@
 			</properties>
 		</aspect>
 
+		<aspect name="ccm:imported_object">
+			<properties>
+				<property name="ccm:imported_object_nodeid">
+					<type>d:text</type>
+				</property>
+				<property name="ccm:imported_object_appid">
+					<type>d:text</type>
+				</property>
+				<property name="ccm:imported_object_appname">
+					<type>d:text</type>
+				</property>
+			</properties>
+		</aspect>
+
 		<aspect name="ccm:ressourceinfo">
 			<title>Aspect for additional resource Information like scorm, qti
 				Version</title>
@@ -1769,10 +1783,12 @@
 				<property name="ccm:ph_history">
 	    			<type>d:text</type>
 	    			<multiple>true</multiple>
+	    			<index enabled="false"></index>
 	    		</property>
-	    		<!-- user that set permissions -->
-	    		<property name="ccm:ph_user">
+	    		<!-- users that set permissions -->
+	    		<property name="ccm:ph_users">
 	    			<type>d:text</type>
+	    			<multiple>true</multiple>
 	    		</property>
 	    		<!-- add, modify ... -->
 	    		<property name="ccm:ph_action">

@@ -41,11 +41,7 @@ import org.edu_sharing.repository.client.tools.metadata.ValueTool;
 import org.edu_sharing.repository.server.AuthenticationToolAPI;
 import org.edu_sharing.repository.server.MCAlfrescoAPIClient;
 import org.edu_sharing.repository.server.authentication.Context;
-import org.edu_sharing.repository.server.tools.ApplicationInfo;
-import org.edu_sharing.repository.server.tools.ApplicationInfoList;
-import org.edu_sharing.repository.server.tools.LocaleValidator;
-import org.edu_sharing.repository.server.tools.URLTool;
-import org.edu_sharing.repository.server.tools.VCardConverter;
+import org.edu_sharing.repository.server.tools.*;
 import org.edu_sharing.service.license.LicenseService;
 import org.edu_sharing.service.mime.MimeTypesV2;
 import org.edu_sharing.service.nodeservice.NodeService;
@@ -181,12 +177,14 @@ public class RenderInfoSoapBindingImpl implements org.edu_sharing.webservices.re
 			rir.setRemoteRoles(splitted);
 		}
 
-		HashMap<String, Boolean> perms = permissionService.hasAllPermissions(StoreRef.PROTOCOL_WORKSPACE,StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(),nodeId, userName, new String[]{CCConstants.PERMISSION_READ,CCConstants.PERMISSION_CC_PUBLISH});
+		String finalUserName = userName;
+		LogTime.log("Fetching permissions for node "+nodeId,()-> {
+			HashMap<String, Boolean> perms = permissionService.hasAllPermissions(StoreRef.PROTOCOL_WORKSPACE,StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(),nodeId, finalUserName, new String[]{CCConstants.PERMISSION_READ,CCConstants.PERMISSION_CC_PUBLISH});
+			rir.setPermissions(PermissionServiceHelper.getPermissionsAsString(perms).toArray(new String[0]));
+			rir.setPublishRight(new Boolean(perms.get(CCConstants.PERMISSION_CC_PUBLISH)));
+			rir.setUserReadAllowed(new Boolean(perms.get(PermissionService.READ)));
+		});
 
-		rir.setPermissions(PermissionServiceHelper.getPermissionsAsString(perms).toArray(new String[0]));
-		rir.setPublishRight(new Boolean(perms.get(CCConstants.PERMISSION_CC_PUBLISH)));
-		rir.setUserReadAllowed(new Boolean(perms.get(PermissionService.READ)));
-		
 		//this does not work anymore in alfresco-5.0.d:
 		//HashMap<String, Boolean> permsGuest = client.hasAllPermissions(nodeId, PermissionService.ALL_AUTHORITIES, new String[]{PermissionService.READ});
 		HashMap<String, Boolean> permsGuest = permissionService.hasAllPermissions(StoreRef.PROTOCOL_WORKSPACE,StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(),nodeId, PermissionService.GUEST_AUTHORITY, new String[]{PermissionService.READ});
@@ -247,7 +245,10 @@ public class RenderInfoSoapBindingImpl implements org.edu_sharing.webservices.re
 		
 		//properties without clientinfo cause of admin etc. ticket 
 		NodeRef nodeRef = new NodeRef(MCAlfrescoAPIClient.storeRef,nodeId);
-		Map<String,Object> props = (versionProps == null) ? client.getPropertiesCached(nodeRef, true, true, false) : versionProps;//client.getProperties(nodeId);
+		HashMap finalVersionProps = versionProps;
+		Map<String, Object> props=LogTime.log("Fetching properties for node "+nodeId,()-> {
+					return (finalVersionProps == null) ? client.getPropertiesCached(nodeRef, true, true, false) : finalVersionProps;//client.getProperties(nodeId);
+		});
         // fix axis bug that emoji crash: https://issues.apache.org/jira/browse/AXIS-2908
 		props=removeUTF16Chars(props);
 
@@ -302,32 +303,41 @@ public class RenderInfoSoapBindingImpl implements org.edu_sharing.webservices.re
 		
 		props=VCardConverter.addVCardProperties(nodeType,props);
 		rir.setProperties(convertProperties(props));
-		
-		List<org.edu_sharing.webservices.types.Child> childrenConverted = new ArrayList<>();
-		List<Map<String, Object>> children = getChildNodes(nodeId);
-		String baseUrl=getHeaderValue("baseUrl",MessageContext.getCurrentContext());
 		// when baseUrl is not available from client (e.g. a request from LMS)
-		if(baseUrl==null || baseUrl.isEmpty())
-			baseUrl=URLTool.getBaseUrl(false);
-		for(Map<String, Object> child : children) {
-			org.edu_sharing.webservices.types.Child childConverted=new org.edu_sharing.webservices.types.Child();
-			String childId=(String) child.get(CCConstants.SYS_PROP_NODE_UID);
-			String type=nodeService.getType(childId);
-			String[] childAspects=nodeService.getAspects((String) child.get(CCConstants.SYS_PROP_STORE_PROTOCOL),(String) child.get(CCConstants.SYS_PROP_STORE_IDENTIFIER),childId);
-			child=VCardConverter.addVCardProperties(type,child);
-			childConverted.setProperties(convertProperties(child));
-			childConverted.setAspects(aspects);
-			childConverted.setIconUrl(new MimeTypesV2(appInfo).getIcon(type,child,Arrays.asList(childAspects)));
-			childConverted.setPreviewUrl(
-					URLTool.getPreviewServletUrl(
-							childId,
-							StoreRef.PROTOCOL_WORKSPACE,
-							StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(),
-							baseUrl));
-			childrenConverted.add(childConverted);
+		String baseUrl = getHeaderValue("baseUrl", MessageContext.getCurrentContext());
+		if (baseUrl == null || baseUrl.isEmpty())
+			baseUrl = URLTool.getBaseUrl(false);
 
-		}
-		rir.setChildren(childrenConverted.toArray(new org.edu_sharing.webservices.types.Child[childrenConverted.size()]));
+		ApplicationInfo finalAppInfo = appInfo;
+		String finalBaseUrl = baseUrl;
+		LogTime.log("Fetching child information for node "+nodeId,()-> {
+			try {
+				List<org.edu_sharing.webservices.types.Child> childrenConverted = new ArrayList<>();
+				List<Map<String, Object>> children = getChildNodes(nodeId);
+
+				for (Map<String, Object> child : children) {
+					org.edu_sharing.webservices.types.Child childConverted = new org.edu_sharing.webservices.types.Child();
+					String childId = (String) child.get(CCConstants.SYS_PROP_NODE_UID);
+					String type = nodeService.getType(childId);
+					String[] childAspects = nodeService.getAspects((String) child.get(CCConstants.SYS_PROP_STORE_PROTOCOL), (String) child.get(CCConstants.SYS_PROP_STORE_IDENTIFIER), childId);
+					child = VCardConverter.addVCardProperties(type, child);
+					childConverted.setProperties(convertProperties(child));
+					childConverted.setAspects(aspects);
+					childConverted.setIconUrl(new MimeTypesV2(finalAppInfo).getIcon(type, child, Arrays.asList(childAspects)));
+					childConverted.setPreviewUrl(
+							URLTool.getPreviewServletUrl(
+									childId,
+									StoreRef.PROTOCOL_WORKSPACE,
+									StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(),
+									finalBaseUrl));
+					childrenConverted.add(childConverted);
+
+				}
+				rir.setChildren(childrenConverted.toArray(new org.edu_sharing.webservices.types.Child[childrenConverted.size()]));
+			}catch(Throwable t){
+				throw new RuntimeException(t);
+			}
+		});
 		//rir.setLabels(labelResult.toArray(new KeyValue[labelResult.size()]));
 
 		//set default
