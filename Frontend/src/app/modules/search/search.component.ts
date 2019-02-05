@@ -198,16 +198,6 @@ export class SearchComponent {
      this.connector.setRoute(this.activatedRoute).subscribe(()=> {
          Translation.initialize(this.translate,this.config,this.storage,this.activatedRoute).subscribe(()=>{
            UIHelper.setTitle('SEARCH.TITLE', this.title, this.translate, this.config);
-           if(this.setSidenavSettings()) {
-             // auto, never, always
-             let sidenavMode = this.config.instant("searchSidenavMode","never");
-             if (sidenavMode == "never") {
-               this.searchService.sidenavOpened = false;
-             }
-             if (sidenavMode == "always") {
-               this.searchService.sidenavOpened = true;
-             }
-           }
            this.printListener();
            if(this.searchService.viewType==-1) {
                this.setViewType(this.config.instant('searchViewType', this.config.instant('searchViewType', 1)));
@@ -305,6 +295,10 @@ export class SearchComponent {
 
 
   setSidenavSettings() {
+    if(this.addToCollection){
+        this.searchService.sidenavOpened = false;
+        return false;
+    }
     if(this.searchService.sidenavSet)
       return false;
     console.log("update sidenav");
@@ -746,6 +740,16 @@ export class SearchComponent {
     this.searchService.reinit=true;
   }
   private prepare(param:any) {
+    if(this.setSidenavSettings()) {
+        // auto, never, always
+        let sidenavMode = this.config.instant("searchSidenavMode","never");
+        if (sidenavMode == "never") {
+            this.searchService.sidenavOpened = false;
+        }
+        if (sidenavMode == "always") {
+            this.searchService.sidenavOpened = true;
+        }
+    }
     this.connector.isLoggedIn().subscribe((data:LoginResult)=> {
       if (data.isValidLogin && data.currentScope != null) {
           RestHelper.goToLogin(this.router,this.config);
