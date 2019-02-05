@@ -87,18 +87,7 @@ import org.alfresco.service.cmr.action.ActionStatus;
 import org.alfresco.service.cmr.dictionary.DataTypeDefinition;
 import org.alfresco.service.cmr.dictionary.DictionaryService;
 import org.alfresco.service.cmr.dictionary.PropertyDefinition;
-import org.alfresco.service.cmr.repository.AssociationRef;
-import org.alfresco.service.cmr.repository.ChildAssociationRef;
-import org.alfresco.service.cmr.repository.ContentIOException;
-import org.alfresco.service.cmr.repository.ContentReader;
-import org.alfresco.service.cmr.repository.ContentService;
-import org.alfresco.service.cmr.repository.ContentStreamListener;
-import org.alfresco.service.cmr.repository.ContentWriter;
-import org.alfresco.service.cmr.repository.CopyService;
-import org.alfresco.service.cmr.repository.MLText;
-import org.alfresco.service.cmr.repository.NodeRef;
-import org.alfresco.service.cmr.repository.NodeService;
-import org.alfresco.service.cmr.repository.StoreRef;
+import org.alfresco.service.cmr.repository.*;
 import org.alfresco.service.cmr.repository.datatype.DefaultTypeConverter;
 import org.alfresco.service.cmr.search.ResultSet;
 import org.alfresco.service.cmr.search.ResultSetRow;
@@ -186,6 +175,7 @@ import org.edu_sharing.service.authentication.ScopeUserHomeServiceFactory;
 import org.edu_sharing.service.connector.ConnectorService;
 import org.edu_sharing.service.license.LicenseService;
 import org.edu_sharing.service.model.NodeRefImpl;
+import org.edu_sharing.service.nodeservice.NodeServiceHelper;
 import org.edu_sharing.service.share.ShareService;
 import org.edu_sharing.service.share.ShareServiceImpl;
 import org.edu_sharing.service.util.AlfrescoDaoHelper;
@@ -3874,21 +3864,32 @@ public class MCAlfrescoAPIClient extends MCAlfrescoBaseClient {
 	}
 
 	public void moveNode(String newParentId, String childAssocType, String nodeId) throws Exception {
-		
-		String name = 
+		String originalName =
 				(String) nodeService.getProperty(
-						new NodeRef(storeRef, nodeId), 
-						QName.createQName(CCConstants.CM_NAME)); 
-				
-		nodeService.moveNode(
-				new NodeRef(storeRef, nodeId), 
-				new NodeRef(storeRef, newParentId), 
-				QName.createQName(childAssocType),
-				QName.createQName(CCConstants.NAMESPACE_CCM, name));
+						new NodeRef(storeRef, nodeId),
+						QName.createQName(CCConstants.CM_NAME));
+		for(int i=0;;i++) {
+			String name=originalName;
+			if(i>0) {
+				name = NodeServiceHelper.renameNode(name, i);
+				nodeService.setProperty(new NodeRef(storeRef, nodeId),
+						QName.createQName(CCConstants.CM_NAME),name);
+			}
+			try {
+				nodeService.moveNode(
+						new NodeRef(storeRef, nodeId),
+						new NodeRef(storeRef, newParentId),
+						QName.createQName(childAssocType),
+						QName.createQName(CCConstants.NAMESPACE_CCM, name));
 
-		// remove from cache so that the new primary parent will be refreshed
-		Cache repCache = new RepositoryCache();
-		repCache.remove(nodeId);
+				// remove from cache so that the new primary parent will be refreshed
+				Cache repCache = new RepositoryCache();
+				repCache.remove(nodeId);
+				break;
+			}catch(DuplicateChildNodeNameException e){
+				// let the loop run
+			}
+		}
 	}
 
 	/**

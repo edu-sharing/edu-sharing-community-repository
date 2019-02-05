@@ -52,4 +52,13 @@ public class NodeServiceHelper {
 
 		return result;
 	}
+
+	public static String renameNode(String oldName,int number){
+		String[] split=oldName.split("\\.");
+		int i=split.length-2;
+		i=Math.max(0, i);
+		split[i]+=" - "+number;
+		return String.join(".",split);
+	}
+
 }

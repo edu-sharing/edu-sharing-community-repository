@@ -382,15 +382,7 @@ public class NodeDao {
 			throw DAOException.mapping(t,nodeRef.getNodeId());
 		}
 	}
-	
-	private String renameNode(String oldName,int number){
-		String[] split=oldName.split("\\.");
-		int i=split.length-2;
-		i=Math.max(0, i);
-		split[i]+=" - "+number;
-		return String.join(".",split);
-	}
-	
+
 	public NodeDao createChild(String type, List<String> aspects,
 			HashMap<String, String[]> properties,boolean renameIfExists) throws DAOException {
 		return this.createChild(type, aspects, properties, renameIfExists, null);
@@ -418,7 +410,7 @@ public class NodeDao {
 					break;
 				}catch(DuplicateChildNodeNameException e){
 					if(renameIfExists){
-						props.put(CCConstants.CM_NAME, new String[]{renameNode(originalName,i)});
+						props.put(CCConstants.CM_NAME, new String[]{NodeServiceHelper.renameNode(originalName,i)});
 						i++;
 						continue;
 					}
