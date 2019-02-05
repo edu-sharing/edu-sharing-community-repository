@@ -4034,14 +4034,6 @@ public class MCAlfrescoAPIClient extends MCAlfrescoBaseClient {
 				// versionLabel
 				props.put(CCConstants.CM_PROP_VERSIONABLELABEL, version.getVersionLabel());
 
-				long created = new Long((String) props.get(CCConstants.CM_PROP_C_CREATED));
-				long modified = new Long((String) props.get(CCConstants.CM_PROP_C_MODIFIED));
-				props.put(CCConstants.CM_PROP_C_CREATED, new DateTool().formatDate(created));
-				props.put(CCConstants.CM_PROP_C_MODIFIED, new DateTool().formatDate(modified));
-				
-				props.put(CCConstants.CM_PROP_C_CREATED + CCConstants.LONG_DATE_SUFFIX, new Long(created).toString());
-				props.put(CCConstants.CM_PROP_C_MODIFIED + CCConstants.LONG_DATE_SUFFIX, new Long(modified).toString());
-
 				/* add permalink */
 				String v = version.getVersionLabel();
 				String permaLink = URLTool.getBaseUrl() + "/node/" + nodeId;
