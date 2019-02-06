@@ -477,7 +477,7 @@ export class PermissionsAuthoritiesComponent {
     this.addTo=list;
     this.addToSelection=null;
   }
-  private openEditGroups(data: IamUser) {
+  private openEditGroups(data: User) {
       let list=this.getList(data);
       this.editGroups=list[0];
       this.manageMemberSearch='';
