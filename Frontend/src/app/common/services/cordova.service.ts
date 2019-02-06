@@ -909,12 +909,13 @@ export class CordovaService {
      // set path to store on device
      let targetPath = (window as any).cordova.file.externalRootDirectory + "Download/";
      if (this.isIOS()) targetPath = (window as any).cordova.file.documentsDirectory;
-     let filePath = encodeURI(targetPath + fileName);
-    console.log("target path: "+filePath);
+       let localPath = targetPath + fileName;
+       let filePath = encodeURI(localPath);
+    console.log("target path: "+filePath+" (local "+localPath+")");
      // iOS
      let fileTransfer:any = new (window as any).FileTransfer();
      fileTransfer.download(downloadURL, filePath, (result:any)=>{
-         winCallback(filePath);
+         winCallback(localPath);
      }, (err:any) => {
          console.log("FAIL startContentDownload");
          failCallback("FAIL startContentDownload", err);
