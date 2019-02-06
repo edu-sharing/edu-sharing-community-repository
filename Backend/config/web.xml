@@ -730,7 +730,6 @@
 	<servlet>
       <servlet-name>ng-index</servlet-name>
       <servlet-class>org.edu_sharing.repository.server.NgServlet</servlet-class>
-      <!-- <jsp-file>/index.jsp</jsp-file> -->
     </servlet>
     <servlet-mapping>
       <servlet-name>ng-index</servlet-name>
@@ -740,4 +739,29 @@
       <servlet-name>ng-index</servlet-name>
       <url-pattern>/components/*</url-pattern>
     </servlet-mapping>
+
+    <servlet>
+        <servlet-name>ng-error</servlet-name>
+        <servlet-class>org.edu_sharing.repository.server.NgErrorServlet</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>ng-error</servlet-name>
+        <url-pattern>/error.html</url-pattern>
+    </servlet-mapping>
+    <error-page>
+        <error-code>400</error-code>
+        <location>/error.html</location>
+    </error-page>
+    <error-page>
+        <error-code>403</error-code>
+        <location>/error.html</location>
+    </error-page>
+    <error-page>
+        <error-code>404</error-code>
+        <location>/error.html</location>
+    </error-page>
+    <error-page>
+        <error-code>500</error-code>
+        <location>/error.html</location>
+    </error-page>
 </web-app>
