@@ -1,8 +1,8 @@
 
 import {Component, Input, Output, EventEmitter, HostListener, ChangeDetectorRef, ApplicationRef} from "@angular/core";
 import {
-  Group, IamGroups, IamUsers, NodeList, IamUser, IamAuthorities,
-  Authority, OrganizationOrganizations, Organization
+    Group, IamGroups, IamUsers, NodeList, IamUser, IamAuthorities,
+    Authority, OrganizationOrganizations, Organization, Person, User
 } from "../../../common/rest/data-object";
 import {Toast} from "../../../common/ui/toast";
 import {ActivatedRoute} from "@angular/router";
@@ -42,6 +42,7 @@ export class PermissionsAuthoritiesComponent {
   private offset = 0
   public columns : ListItem[]=[];
   public addMemberColumns : ListItem[]=[];
+  public editGroupColumns : ListItem[]=[];
   public sortBy : string;
   public sortAscending = true;
   public loading = true;
@@ -51,6 +52,7 @@ export class PermissionsAuthoritiesComponent {
   public optionsActionbar:OptionItem[];
   private orgs: OrganizationOrganizations;
   public addMembers: any;
+  public editGroups: User;
   private memberOptions: OptionItem[];
   private addToList: any[];
   private isAdmin = false;
@@ -137,13 +139,21 @@ export class PermissionsAuthoritiesComponent {
      this.sortBy="displayName";
    }
    this.columns=this.getColumns(mode,this.embedded);
-   this.addMemberColumns=this.getColumns('USER',true);
+    this.addMemberColumns=this.getColumns('USER',true);
+    this.editGroupColumns=this.getColumns('GROUP',true);
    this.loadAuthorities();
   }
   private getMemberOptions() : OptionItem[]{
     let options:OptionItem[]=[];
-    if(this.selectedMembers.length){
-      options.push(new OptionItem("PERMISSIONS.MENU_REMOVE_MEMBER","delete",(data:any)=>this.deleteMember()))
+    if(this.editGroups){
+        if (this.selectedMembers.length) {
+            options.push(new OptionItem("PERMISSIONS.MENU_REMOVE_MEMBERSHIP", "delete", (data: any) => this.deleteMembership()))
+        }
+    }
+    else {
+        if (this.selectedMembers.length) {
+            options.push(new OptionItem("PERMISSIONS.MENU_REMOVE_MEMBER", "delete", (data: any) => this.deleteMember()))
+        }
     }
     return options;
   }
@@ -196,7 +206,7 @@ export class PermissionsAuthoritiesComponent {
     this.onSelection.emit(data);
     this.updateOptions(false);
   }
-  private getList(data : any){
+  private getList<T>(data:T) : T[]{
     if(data)
       return [data];
     return this.selected;
@@ -227,7 +237,8 @@ export class PermissionsAuthoritiesComponent {
 
     if(all || list.length){
       if(this._mode=='USER' && !all){
-        options.push(new OptionItem("PERMISSIONS.MENU_ADD_TO_GROUP","group",(data:any)=>this.addToGroup(data)))
+        options.push(new OptionItem("PERMISSIONS.MENU_ADD_TO_GROUP","group_add",(data:any)=>this.addToGroup(data)))
+          options.push(new OptionItem("PERMISSIONS.MENU_EDIT_GROUPS", "group", (data: any) => this.openEditGroups(data)));
       }
       if(list.length==1 || all) {
         if(this._mode=='GROUP') {
@@ -260,6 +271,7 @@ export class PermissionsAuthoritiesComponent {
   private cancelEditMembers(){
     this.editMembers=null;
     this.addMembers=null;
+    this.editGroups=null;
     //this.refresh();
   }
   private addMembersToGroup(){
@@ -465,6 +477,14 @@ export class PermissionsAuthoritiesComponent {
     this.addTo=list;
     this.addToSelection=null;
   }
+  private openEditGroups(data: IamUser) {
+      let list=this.getList(data);
+      this.editGroups=list[0];
+      this.manageMemberSearch='';
+      this.memberList = [];
+      this.memberListOffset = 0;
+      this.searchMembers();
+  }
   private addToSelect(){
     this.addToList=this.selected;
     this.addToSingle();
@@ -639,6 +659,22 @@ export class PermissionsAuthoritiesComponent {
       this.deleteMember(position+1);
     },(error:any)=>this.toast.error(error));
   }
+    private deleteMembership(position=0) {
+        if(this.selectedMembers.length==position){
+            this.toast.toast("PERMISSIONS.MEMBERSHIP_REMOVED");
+            this.selectedMembers=[];
+            this.memberOptions=this.getMemberOptions();
+            this.memberList=[];
+            this.memberListOffset=0;
+            this.searchMembers();
+            this.globalProgress=false;
+            return;
+        }
+        this.globalProgress=true;
+        this.iam.deleteGroupMember(this.selectedMembers[position].authorityName,this.editGroups.authorityName).subscribe(()=>{
+            this.deleteMembership(position+1);
+        },(error:any)=>this.toast.error(error));
+    }
   private searchMembers(){
     this.selectedMembers=[];
     this.memberOptions=this.getMemberOptions();
@@ -656,8 +692,7 @@ export class PermissionsAuthoritiesComponent {
         };
         this.memberListOffset+=this.connector.numberPerRequest;
         this.iam.getGroupMembers(this.org.authorityName,this.manageMemberSearch, RestConstants.AUTHORITY_TYPE_USER, request).subscribe((data: IamAuthorities) => {
-          for (let member of data.authorities)
-            this.memberList.push(member);
+          this.memberList=this.memberList.concat(data.authorities);
           this.memberList=Helper.deepCopy(this.memberList);
         });
       }else {
@@ -666,12 +701,22 @@ export class PermissionsAuthoritiesComponent {
           offset: this.memberListOffset
         };
         this.memberListOffset+=this.connector.numberPerRequest;
-        this.iam.searchUsers(this.manageMemberSearch, true, request).subscribe((data: IamUsers) => {
-          for (let member of data.users)
-            this.memberList.push(member);
-          this.memberList=Helper.deepCopy(this.memberList);
+        this.iam.searchUsers(this.manageMemberSearch, true, request).subscribe((data) => {
+            this.memberList=this.memberList.concat(data.users);
+            this.memberList=Helper.deepCopy(this.memberList);
         });
       }
+    }
+    else if(this.editGroups){
+        let request:any={
+            sortBy: ["authorityName"],
+            offset: this.memberListOffset
+        };
+        this.memberListOffset+=this.connector.numberPerRequest;
+        this.iam.getUserGroups(this.editGroups.authorityName,this.manageMemberSearch, request).subscribe((data) => {
+            this.memberList=this.memberList.concat(data.groups);
+            this.memberList=Helper.deepCopy(this.memberList);
+        });
     }
     else {
       let request:any={
@@ -679,10 +724,9 @@ export class PermissionsAuthoritiesComponent {
         offset: this.memberListOffset
       };
       this.memberListOffset+=this.connector.numberPerRequest;
-      this.iam.getGroupMembers((this.editMembers as Group).authorityName, this.manageMemberSearch, RestConstants.AUTHORITY_TYPE_USER, request).subscribe((data: IamAuthorities) => {
-        for (let member of data.authorities)
-          this.memberList.push(member);
-        this.memberList=Helper.deepCopy(this.memberList);
+      this.iam.getGroupMembers((this.editMembers as Group).authorityName, this.manageMemberSearch, RestConstants.AUTHORITY_TYPE_USER, request).subscribe((data) => {
+          this.memberList=this.memberList.concat(data.authorities);
+          this.memberList=Helper.deepCopy(this.memberList);
       });
     }
   }
