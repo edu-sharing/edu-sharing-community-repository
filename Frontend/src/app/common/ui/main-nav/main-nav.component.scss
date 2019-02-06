@@ -348,6 +348,9 @@ user-profile{
 .scopeNameMobile{
   display:none;
 }
+.topbar-search-right{
+  display: contents;
+}
 @media screen and (max-width: ($mobileWidth+$mobileStage*5)) {
   .searchInputGroup{
     width: calc(100% - 80px);

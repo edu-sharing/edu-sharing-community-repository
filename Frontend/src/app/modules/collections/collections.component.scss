@@ -114,14 +114,14 @@ table, div {
     color: white;
 }
 .card-image-icon-circle{
-  width:140px;
-  height:140px;
+  width: 120px;
+  height: 120px;
   border-radius: 50%;
   background-color: #fff;
   @include unselectableText();
   >i{
     font-size: 75px;
-    margin-top: 38px;
+    margin-top: 25px;
   }
 }
 .collection-header-image{
@@ -287,15 +287,26 @@ table, div {
   @include materialShadow();
 }
 @media only screen and (max-width: $mobileWidth+$mobileStage*3) {
-
     .table-tab-title-long {
         display: none!important;
     }
-
-    .table-tab-title-short {
-        display: block!important;
+    .tabs > li{
+      width:auto;
     }
-
+    .table-tab-title-short {
+      display: flex!important;
+      align-items: center;
+      justify-content: center;
+        >span{
+          display:none;
+        }
+      &.active > span{
+        display:flex;
+      }
+      >i{
+        display: flex;
+      }
+    }
 }
 @media all and (max-width: ($cardWidth*3)) {
   :host /deep/ .cardSmallList{

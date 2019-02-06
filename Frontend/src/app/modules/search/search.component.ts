@@ -1023,6 +1023,7 @@ export class SearchComponent {
       if(this.savedSearchOwn) {
         request.count=RestConstants.COUNT_UNLIMITED;
         this.nodeApi.getChildren(RestConstants.SAVED_SEARCH, [], request).subscribe((data: NodeList) => {
+          data.nodes=data.nodes.filter((node)=>node.type==RestConstants.CCM_TYPE_SAVED_SEARCH);
           this.savedSearch = data.nodes;
           this.savedSearchLoading=false;
         });

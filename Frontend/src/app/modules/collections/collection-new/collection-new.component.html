@@ -87,10 +87,10 @@
                   class="image-upload-field-input">
               </div>
               <div class="button-icon">
-                  <div class="image-icon" tabindex="0" (keyup.enter)="file.click()" (click)="file.click()">
+                  <div class="btn-circle" tabindex="0" (keyup.enter)="file.click()" (click)="file.click()">
                       <i icon iconId="file_upload" aria="true"></i>
                   </div>
-                  <div class="image-icon" tabindex="0" *ngIf="imageData || (currentCollection.preview && !currentCollection.preview.isIcon)" (keyup.enter)="deleteImage()" (click)="deleteImage()">
+                  <div class="btn-circle" tabindex="0" *ngIf="imageData || (currentCollection.preview && !currentCollection.preview.isIcon)" (keyup.enter)="deleteImage()" (click)="deleteImage()">
                       <i icon iconId="delete" aria="true"></i>
                   </div>
               </div>
