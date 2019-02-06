@@ -586,13 +586,8 @@ export class WorkspaceMainComponent implements EventListener{
 
     private pasteNode(position=0){
         let clip=(this.storage.get("workspace_clipboard") as ClipboardObject);
-        if(this.searchQuery || (this.isRootFolder && this.root!=RestConstants.USERHOME))
+        if(!this.canPasteInCurrentLocation())
             return;
-        if(!clip || !clip.nodes.length)
-            return;
-        if(clip.sourceNode && clip.sourceNode.ref.id==this.currentFolder.ref.id && !clip.copy){
-            return;
-        }
         if(position>=clip.nodes.length){
             this.globalProgress=false;
             this.storage.remove("workspace_clipboard");
@@ -744,8 +739,7 @@ export class WorkspaceMainComponent implements EventListener{
 
         let allFiles = NodeHelper.allFiles(nodes);
         let savedSearch = nodes && nodes.length && nodes[0].type==RestConstants.CCM_TYPE_SAVED_SEARCH;
-        let clip=(this.storage.get("workspace_clipboard") as ClipboardObject);
-        if(this.currentFolder && !nodes && !this.searchQuery && clip && ((!clip.sourceNode || clip.sourceNode.ref.id!=this.currentFolder.ref.id) || clip.copy) && this.createAllowed) {
+        if(!nodes && this.canPasteInCurrentLocation()) {
             options.push(new OptionItem("WORKSPACE.OPTION.PASTE", "content_paste", (node: Node) => this.pasteNode()));
         }
         if (nodes && nodes.length == 1) {
@@ -1151,5 +1145,10 @@ export class WorkspaceMainComponent implements EventListener{
             this.currentFolder = node;
             this.event.broadcastEvent(FrameEventsService.EVENT_NODE_FOLDER_OPENED, this.currentFolder);
         }
+    }
+
+    private canPasteInCurrentLocation() {
+        let clip=(this.storage.get("workspace_clipboard") as ClipboardObject);
+        return this.currentFolder  && !this.searchQuery && clip && ((!clip.sourceNode || clip.sourceNode.ref.id!=this.currentFolder.ref.id) || clip.copy) && this.createAllowed;
     }
 }

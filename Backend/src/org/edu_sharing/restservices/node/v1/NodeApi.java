@@ -1269,14 +1269,11 @@ public class NodeApi  {
     	try {
     		
 	    	RepositoryDao repoDao = RepositoryDao.getRepository(repository);
-	    	NodeDao nodeDao = NodeDao.getNode(repoDao, node);
-	    	if("-userhome-".equals(node)){
-    			node = repoDao.getUserHome();
-    		}
-	    	if("-userhome-".equals(source)){
-	    		source = repoDao.getUserHome();
-    		}
-	    	NodeDao child = nodeDao.createChildByMove(source);
+			node=NodeDao.mapNodeConstants(repoDao,node);
+			source=NodeDao.mapNodeConstants(repoDao,source);
+
+			NodeDao nodeDao = NodeDao.getNode(repoDao, node);
+			NodeDao child = nodeDao.createChildByMove(source);
 	    			
 	    	NodeEntry response = new NodeEntry();
 	    	response.setNode(child.asNode());
