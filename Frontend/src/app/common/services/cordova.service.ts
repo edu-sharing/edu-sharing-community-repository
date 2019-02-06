@@ -859,7 +859,7 @@ export class CordovaService {
 
            // iOS: following redirects works automatically - so go direct
            console.log("downloadContent IOS URL: " + downloadURL);
-           this.startContentDownload(downloadURL, fileName, ()=>status=1, ()=>status=-1);
+           this.startContentDownload(downloadURL, fileName, (filePath:string)=>status=1, ()=>status=-1);
 
          } else {
 
@@ -867,7 +867,11 @@ export class CordovaService {
            /*console.log("resolving redirects for downloadContent URL ANDROID: " + downloadURL);
            (window as any).CordovaHttpPlugin.head(downloadURL, {}, {}, (response: any) => {
              console.log("200 NOT A REDIRECT URL - use original: " + downloadURL);*/
-             this.startContentDownload(downloadURL, fileName,()=>status=1, ()=>status=-1);
+             this.startContentDownload(downloadURL, fileName,(filePath:string)=>{
+                 status=1;
+                 // suggest user to open the file
+                 (window as any).plugins.intent.showOpenWith(filePath,()=>{},()=>{});
+             }, ()=>status=-1);
            /*}, (response: any) => {
              if (response.status == 302) {
                let redirectURL = decodeURIComponent(response.headers.Location);
