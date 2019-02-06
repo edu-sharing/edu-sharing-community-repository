@@ -18,6 +18,7 @@ import {UIConstants} from "../../common/ui/ui-constants";
 export class MessagesComponent {
   public message : string;
   public messageDetail : string;
+  public error : string;
   constructor(private toast: Toast,
               private route: ActivatedRoute,
               private router: Router,
@@ -29,6 +30,7 @@ export class MessagesComponent {
       this.route.params.subscribe((data:any)=>{
         this.message="MESSAGES."+data['message'];
         this.messageDetail="MESSAGES.DETAILS."+data['message'];
+        this.error = data['message'];
         if(this.translate.instant(this.message)==this.message){
           this.message="MESSAGES.INVALID";
           this.messageDetail="MESSAGES.DETAILS.INVALID";
