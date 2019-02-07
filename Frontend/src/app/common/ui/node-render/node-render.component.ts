@@ -425,7 +425,7 @@ export class NodeRenderComponent implements EventListener{
       this.toolService.openLtiObject(this._node);
     }
     else {
-      UIHelper.openConnector(this.connectors,this.frame,this.toast, this._node, this.connectors.getCurrentList(),null,null,null,newWindow);
+      UIHelper.openConnector(this.connectors,this.frame,this.toast, this._node,null,null,null,newWindow);
     }
   }
 

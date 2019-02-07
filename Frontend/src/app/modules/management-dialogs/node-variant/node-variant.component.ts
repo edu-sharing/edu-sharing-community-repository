@@ -83,7 +83,7 @@ export class NodeVariantComponent  {
           this.nodeApi.editNodeMetadata(created.node.ref.id,RestHelper.createNameProperty(this.variantName)).subscribe((edited)=>{
               this.onLoading.emit(false);
               if(this.openViaConnector){
-                  UIHelper.openConnector(this.connectors,this.events,this.toast,edited.node,this.connectors.getCurrentList(),null,win);
+                  UIHelper.openConnector(this.connectors,this.events,this.toast,edited.node,null,win);
                   UIHelper.goToWorkspaceFolder(this.nodeApi,this.router,this.connector.getCurrentLogin(),this.breadcrumbs[this.breadcrumbs.length-1].ref.id);
               }
               else {

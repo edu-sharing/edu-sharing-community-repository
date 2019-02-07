@@ -291,7 +291,7 @@ export class WorkspaceMainComponent implements EventListener{
 
     }
     private editConnector(node : Node=null,type : Filetype=null,win : any = null,connectorType : Connector = null){
-        UIHelper.openConnector(this.connectors,this.event,this.toast,this.getNodeList(node)[0],this.connectorList,type,win,connectorType);
+        UIHelper.openConnector(this.connectors,this.event,this.toast,this.getNodeList(node)[0],type,win,connectorType);
     }
     private handleDrop(event:any){
         for(let s of event.source) {
