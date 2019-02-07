@@ -48,6 +48,7 @@ export class ActionbarHelperService{
       if (nodes && nodes.length==1 && NodeHelper.allFolders(nodes)) {
           option = new OptionItem("WORKSPACE.OPTION.TEMPLATE", "assignment_turned_in", callback);
           option.isEnabled = NodeHelper.getNodesRight(nodes, RestConstants.ACCESS_WRITE);
+          option.onlyDesktop = true;
       }
     }
     if(type=='CREATE_VARIANT') {

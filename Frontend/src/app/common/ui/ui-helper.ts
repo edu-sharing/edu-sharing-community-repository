@@ -250,11 +250,10 @@ export class UIHelper{
         UIHelper.addToCollection(collectionService,router,toast,collection,nodes,callback,position+1,true);
       });
   }
-  static openConnector(connector:RestConnectorsService,events:FrameEventsService,toast:Toast,node : Node,connectorList:ConnectorList=connector.getCurrentList(),type : Filetype=null,win : any = null,connectorType : Connector = null,newWindow=true){
+  static openConnector(connector:RestConnectorsService,events:FrameEventsService,toast:Toast,node : Node,type : Filetype=null,win : any = null,connectorType : Connector = null,newWindow=true){
     if(connectorType==null){
-      connectorType=connector.connectorSupportsEdit(node,connectorList);
+      connectorType=connector.connectorSupportsEdit(node);
     }
-    console.log(connectorList);
     let isCordova=connector.getRestConnector().getCordovaService().isRunningCordova();
     if(win==null && newWindow) {
         win = UIHelper.getNewWindow(connector.getRestConnector());
@@ -266,7 +265,7 @@ export class UIHelper{
         win.close();
         return;
       }
-      connector.generateToolUrl(connectorList,connectorType,type,node).subscribe((url:string)=>{
+      connector.generateToolUrl(connectorType,type,node).subscribe((url:string)=>{
           if(win) {
               win.location.href = url;
               console.log(win);

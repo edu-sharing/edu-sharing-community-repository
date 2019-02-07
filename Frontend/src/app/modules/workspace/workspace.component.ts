@@ -758,6 +758,7 @@ export class WorkspaceMainComponent implements EventListener{
             }
             if(this.isAdmin){
                 let debug = new OptionItem("WORKSPACE.OPTION.DEBUG", "build", (node: Node) => this.debugNode(node));
+                debug.onlyDesktop=true;
                 options.push(debug);
             }
             let open = new OptionItem("WORKSPACE.OPTION.SHOW", "remove_red_eye", (node: Node) => this.displayNode(node));
@@ -767,11 +768,11 @@ export class WorkspaceMainComponent implements EventListener{
         let view = new OptionItem("WORKSPACE.OPTION.VIEW", "launch", (node: Node) => this.editConnector(node));
         if(fromList){
             view.showCallback=((node:Node)=>{
-                return this.connectors.connectorSupportsEdit(node,this.connectorList) != null;
+                return this.connectors.connectorSupportsEdit(node) != null;
             });
             options.push(view);
         }
-        else if(nodes && nodes.length==1 && this.connectors.connectorSupportsEdit(nodes[0],this.connectorList)){
+        else if(nodes && nodes.length==1 && this.connectors.connectorSupportsEdit(nodes[0])){
             options.push(view);
         }
         if(nodes && nodes.length==1 && !savedSearch){
@@ -813,6 +814,7 @@ export class WorkspaceMainComponent implements EventListener{
         if (nodes && nodes.length == 1 && !savedSearch) {
             let contributor=new OptionItem("WORKSPACE.OPTION.CONTRIBUTOR","group",(node:Node)=>this.manageContributorsNode(node));
             contributor.isEnabled=NodeHelper.getNodesRight(nodes,RestConstants.ACCESS_WRITE);
+            contributor.onlyDesktop = true;
             if(nodes && !nodes[0].isDirectory && !this.isSafe)
                 options.push(contributor);
             let workflow = this.actionbar.createOptionIfPossible('WORKFLOW', nodes, (node: Node) => this.manageWorkflowNode(node));
@@ -943,7 +945,7 @@ export class WorkspaceMainComponent implements EventListener{
             else if(RestToolService.isLtiObject(node)){
                 this.toolService.openLtiObject(node);
             }
-            else if(useConnector && this.connectors.connectorSupportsEdit(node,this.connectorList)){
+            else if(useConnector && this.connectors.connectorSupportsEdit(node)){
                 this.editConnector(node);
             }
             else {
@@ -973,7 +975,9 @@ export class WorkspaceMainComponent implements EventListener{
 
         this.openDirectory(id);
     }
-
+    getConnectors(){
+        return this.connectors.getConnectors();
+    }
     private refresh(refreshPath=true) {
         let search=this.searchQuery;
         let folder=this.currentFolder;
