@@ -87,19 +87,7 @@ import org.alfresco.service.cmr.action.ActionStatus;
 import org.alfresco.service.cmr.dictionary.DataTypeDefinition;
 import org.alfresco.service.cmr.dictionary.DictionaryService;
 import org.alfresco.service.cmr.dictionary.PropertyDefinition;
-import org.alfresco.service.cmr.repository.AssociationRef;
-import org.alfresco.service.cmr.repository.ChildAssociationRef;
-import org.alfresco.service.cmr.repository.ContentIOException;
-import org.alfresco.service.cmr.repository.ContentReader;
-import org.alfresco.service.cmr.repository.ContentService;
-import org.alfresco.service.cmr.repository.ContentStreamListener;
-import org.alfresco.service.cmr.repository.ContentWriter;
-import org.alfresco.service.cmr.repository.CopyService;
-import org.alfresco.service.cmr.repository.InvalidNodeRefException;
-import org.alfresco.service.cmr.repository.MLText;
-import org.alfresco.service.cmr.repository.NodeRef;
-import org.alfresco.service.cmr.repository.NodeService;
-import org.alfresco.service.cmr.repository.StoreRef;
+import org.alfresco.service.cmr.repository.*;
 import org.alfresco.service.cmr.repository.datatype.DefaultTypeConverter;
 import org.alfresco.service.cmr.search.ResultSet;
 import org.alfresco.service.cmr.search.ResultSetRow;
@@ -185,6 +173,7 @@ import org.edu_sharing.service.connector.ConnectorService;
 import org.edu_sharing.service.license.LicenseService;
 import org.edu_sharing.service.model.NodeRefImpl;
 import org.edu_sharing.service.nodeservice.model.GetPreviewResult;
+import org.edu_sharing.service.nodeservice.NodeServiceHelper;
 import org.edu_sharing.service.share.ShareService;
 import org.edu_sharing.service.share.ShareServiceImpl;
 import org.edu_sharing.service.util.AlfrescoDaoHelper;
@@ -801,7 +790,7 @@ public class MCAlfrescoAPIClient extends MCAlfrescoBaseClient {
 		}
 		return result;
 	}
-	
+
 	public List<NodeRef> searchNodeRefs(SearchParameters token, ContextSearchMode mode){
         Set<String> authorities=null;
         if(mode.equals(ContextSearchMode.UserAndGroups)) {
@@ -3796,21 +3785,32 @@ public class MCAlfrescoAPIClient extends MCAlfrescoBaseClient {
 	}
 
 	public void moveNode(String newParentId, String childAssocType, String nodeId) throws Exception {
-		
-		String name = 
+		String originalName =
 				(String) nodeService.getProperty(
-						new NodeRef(storeRef, nodeId), 
-						QName.createQName(CCConstants.CM_NAME)); 
-				
-		nodeService.moveNode(
-				new NodeRef(storeRef, nodeId), 
-				new NodeRef(storeRef, newParentId), 
-				QName.createQName(childAssocType),
-				QName.createQName(CCConstants.NAMESPACE_CCM, name));
+						new NodeRef(storeRef, nodeId),
+						QName.createQName(CCConstants.CM_NAME));
+		for(int i=0;;i++) {
+			String name=originalName;
+			if(i>0) {
+				name = NodeServiceHelper.renameNode(name, i);
+				nodeService.setProperty(new NodeRef(storeRef, nodeId),
+						QName.createQName(CCConstants.CM_NAME),name);
+			}
+			try {
+				nodeService.moveNode(
+						new NodeRef(storeRef, nodeId),
+						new NodeRef(storeRef, newParentId),
+						QName.createQName(childAssocType),
+						QName.createQName(CCConstants.NAMESPACE_CCM, name));
 
-		// remove from cache so that the new primary parent will be refreshed
-		Cache repCache = new RepositoryCache();
-		repCache.remove(nodeId);
+				// remove from cache so that the new primary parent will be refreshed
+				Cache repCache = new RepositoryCache();
+				repCache.remove(nodeId);
+				break;
+			}catch(DuplicateChildNodeNameException e){
+				// let the loop run
+			}
+		}
 	}
 
 	/**
@@ -3955,14 +3955,6 @@ public class MCAlfrescoAPIClient extends MCAlfrescoBaseClient {
 
 				// versionLabel
 				props.put(CCConstants.CM_PROP_VERSIONABLELABEL, version.getVersionLabel());
-
-				long created = new Long((String) props.get(CCConstants.CM_PROP_C_CREATED));
-				long modified = new Long((String) props.get(CCConstants.CM_PROP_C_MODIFIED));
-				props.put(CCConstants.CM_PROP_C_CREATED, new DateTool().formatDate(created));
-				props.put(CCConstants.CM_PROP_C_MODIFIED, new DateTool().formatDate(modified));
-				
-				props.put(CCConstants.CM_PROP_C_CREATED + CCConstants.LONG_DATE_SUFFIX, new Long(created).toString());
-				props.put(CCConstants.CM_PROP_C_MODIFIED + CCConstants.LONG_DATE_SUFFIX, new Long(modified).toString());
 
 				/* add permalink */
 				String v = version.getVersionLabel();

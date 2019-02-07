@@ -801,12 +801,6 @@ export class AdminComponent {
                     this.editApp(this.editableXmls.filter((xml)=>xml.name=='HOMEAPP')[0]);
                 }
             });
-        },(error)=>{
-            this.systemChecks.push({
-                name:"RENDERING",
-                status:"FAIL",
-                error:error
-            });
         });
         this.node.getNodePermissions(RestConstants.USERHOME).subscribe((data)=>{
           let status='OK';

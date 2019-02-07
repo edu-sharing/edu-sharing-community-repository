@@ -1706,7 +1706,7 @@ export class MdsComponent{
          </div>
          <div id="`+this.getDomId('mdsAuthorFreetext')+`" class="mdsAuthorFreetext">`+this.renderTextareaWidget(freetextWidget,null)+`</div>
           <div id="`+this.getDomId('mdsAuthorPerson')+`" class="mdsAuthorPerson">`+this.renderVCardWidget(authorWidget,null);
-    if(this.currentNode){
+    if(this.currentNode && !this.uiService.isMobile()){
       author+=`<div class="mdsContributors">
             <a class="clickable contributorsLink" onclick="`+this.getWindowComponent()+`.openContributorsDialog();">`+
             this.translate.instant('MDS.CONTRIBUTOR_LINK')+` <i class="material-icons">arrow_forward</i></a>

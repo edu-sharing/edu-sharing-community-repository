@@ -15,9 +15,10 @@
 				<constructor-arg>
 					<list>
 					<bean class="org.edu_sharing.service.connector.Connector">
-							<property name="id" value="TINYMCE"></property>
-							<property name="icon" value="edit"></property>
-							<property name="showNew" value="true"></property>
+							<property name="id" value="TINYMCE"/>
+							<property name="icon" value="edit"/>
+							<property name="showNew" value="true"/>
+							<property name="onlyDesktop" value="true" />
 							<property name="filetypes">
 								<bean class="java.util.ArrayList">
 									<constructor-arg>
@@ -28,7 +29,7 @@
 												<property name="filetype" value="html" />
 												<property name="createable" value="true" />
 												<property name="editable" value="true" />
-												<property name="editorType" value="tinymce"></property>
+												<property name="editorType" value="tinymce"/>
 											</bean>
 										</list>
 									</constructor-arg>

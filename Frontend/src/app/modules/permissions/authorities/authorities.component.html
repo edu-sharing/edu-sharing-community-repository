@@ -97,22 +97,25 @@
       <a class="btn-flat" tabindex="0" (click)="cancelEdit()" (keyup.enter)="cancelEdit()">{{'CANCEL' | translate }}</a>
     </div>
   </div>
-<div *ngIf="editMembers || addMembers" class="dialog darken">
+<div *ngIf="editGroups || editMembers || addMembers" class="dialog darken">
   <div class="card center-card card-action card-high card-xwide">
     <div class="card-content">
       <div class="card-cancel" (click)="cancelEditMembers()" tabindex="0" (keyup.enter)="cancelEditMembers()"><i icon iconId="close" aria="true"></i></div>
       <div class="card-title" *ngIf="addMembers">{{'PERMISSIONS.ADD_MEMBER_TO_GROUP' | translate:{group:addMembers.profile.displayName} }}</div>
       <div class="card-title" *ngIf="editMembers">{{(editMembers=='ALL' ? 'PERMISSIONS.EDIT_ORG_MEMBERS' : 'PERMISSIONS.EDIT_MEMBERS') | translate:{name: editMembers.profile.displayName} }}</div>
+      <div class="card-title" *ngIf="editGroups">{{'PERMISSIONS.EDIT_MEMBER_GROUPS' | translate}}</div>
       <div class="card-scroll"  infinite-scroll [scrollWindow]="false" (scrolled)="refreshMemberList()">
         <div class="memberActions">
-          <form (ngSubmit)="searchMembers()"><input type="search" name="manageMemberSearch" [(ngModel)]="manageMemberSearch"  placeholder="{{(addMembers ? 'PERMISSIONS.SEARCH_USER' : 'PERMISSIONS.SEARCH_MEMBER') | translate}}"></form>
-        <actionbar class="memberItem memberActionBar" *ngIf="editMembers"
-          [options]="memberOptions"
-        ></actionbar>
+          <form (ngSubmit)="searchMembers()">
+            <input type="search" name="manageMemberSearch" [(ngModel)]="manageMemberSearch"  placeholder="{{(addMembers ? 'PERMISSIONS.SEARCH_USER' : editGroups ? 'PERMISSIONS.SEARCH_GROUPS' : 'PERMISSIONS.SEARCH_MEMBER') | translate}}">
+          </form>
+          <actionbar class="memberItem memberActionBar" *ngIf="editMembers || editGroups"
+            [options]="memberOptions"
+          ></actionbar>
         </div>
         <div class="currentMembers" *ngIf="editMembers">{{ 'PERMISSIONS.CURRENT_MEMBERS' |translate:{group:editMembers.profile ? editMembers.profile.displayName : org.profile.displayName} }}</div>
         <listTable
-          [columns]="addMemberColumns"
+          [columns]="editGroups ? editGroupColumns : addMemberColumns"
           [nodes]="memberList"
           [hasCheckbox]="true"
           [icon]="'person'"

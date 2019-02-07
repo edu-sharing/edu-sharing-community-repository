@@ -12,6 +12,7 @@ import {VCard} from "../../../common/VCard";
 import {UIHelper} from "../../../common/ui/ui-helper";
 import {trigger} from "@angular/animations";
 import {UIAnimation} from "../../../common/ui/ui-animation";
+import {UIService} from '../../../common/services/ui.service';
 
 @Component({
   selector: 'workspace-license',
@@ -173,6 +174,7 @@ export class WorkspaceLicenseComponent  {
     private connector : RestConnectorService,
     private translate : TranslateService,
     private config : ConfigurationService,
+    private ui : UIService,
     private toast : Toast,
     private nodeApi : RestNodeService) {
       this.connector.hasToolPermission(RestConstants.TOOLPERMISSION_HANDLESERVICE).subscribe((has:boolean)=>this.doiPermission=has);

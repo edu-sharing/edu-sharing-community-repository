@@ -31,6 +31,7 @@ import {Translation} from "../../translation";
 import {OptionItem} from "../actionbar/option-item";
 import {HttpClient} from '@angular/common/http';
 import {DialogButton} from '../modal-dialog/modal-dialog.component';
+import {UIService} from '../../services/ui.service';
 
 @Component({
   selector: 'main-nav',
@@ -345,6 +346,7 @@ export class MainNavComponent implements AfterViewInit{
   constructor(private iam : RestIamService,
               private connector : RestConnectorService,
               private cordova : CordovaService,
+              private ui : UIService,
               private changeDetector :  ChangeDetectorRef,
               private event : FrameEventsService,
               private nodeService : RestNodeService,
@@ -416,7 +418,7 @@ export class MainNavComponent implements AfterViewInit{
         this.connector.hasAccessToScope(RestConstants.SAFE_SCOPE).subscribe((data:AccessScope)=>{
           // safe needs access and not be app (oauth not supported)
           if(data.hasAccess && !this.cordova.isRunningCordova())
-            buttons.push({path:'workspace/safe',scope:'safe',icon:"lock",name:"SIDEBAR.SECURE"});
+            buttons.push({path:'workspace/safe',scope:'safe',icon:"lock",name:"SIDEBAR.SECURE",onlyDesktop:true});
           this.addMoreButtons(buttons);
         },(error:any)=>this.addMoreButtons(buttons));
       });
@@ -562,10 +564,10 @@ export class MainNavComponent implements AfterViewInit{
         }
       }
       if(add) {
-        buttons.push({path: 'permissions', scope: 'permissions', icon: "group_add", name: "SIDEBAR.PERMISSIONS"});
+        buttons.push({path: 'permissions', scope: 'permissions', icon: "group_add", name: "SIDEBAR.PERMISSIONS",onlyDesktop: true});
       }
       if(this.isAdmin){
-        buttons.push({path:'admin',scope:'admin',icon:"settings",name:"SIDEBAR.ADMIN"});
+        buttons.push({path:'admin',scope:'admin',icon:"settings",name:"SIDEBAR.ADMIN",onlyDesktop: true});
       }
       this.checkConfig(buttons);
     },(error:any)=>this.checkConfig(buttons));
@@ -584,6 +586,7 @@ export class MainNavComponent implements AfterViewInit{
       this.showEditProfile=data["editProfile"];
       this.hideButtons(buttons);
       this.addButtons(buttons);
+      this.filterButtons();
       this.storage.set(TemporaryStorageService.MAIN_NAV_BUTTONS,this.sidebarButtons);
       this.showLicenseAgreement();
     },(error:any)=>this.hideButtons(buttons));
@@ -814,6 +817,16 @@ export class MainNavComponent implements AfterViewInit{
     }
     hideDialog() : void{
         this.dialogTitle=null;
+    }
+
+    private filterButtons() {
+        console.log(this.sidebarButtons);
+        for (let i=0;i<this.sidebarButtons.length;i++) {
+            if (this.sidebarButtons[i].onlyDesktop && this.ui.isMobile()) {
+                this.sidebarButtons.splice(i,1);
+                i--;
+            }
+        }
     }
     getPreloading(){
         return MainNavComponent.preloading;
