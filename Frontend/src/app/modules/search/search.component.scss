@@ -261,6 +261,10 @@ a, a:hover, a:visited, a:active, button {
   top: $mainnavHeight+48px;
   z-index: 12;
   width:100%;
+  actionbar{
+    position: relative;
+    top: -4px;
+  }
   >div {
     height: $secondaryBarHeight;
     background-color: #fff;

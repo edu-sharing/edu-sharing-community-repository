@@ -1,9 +1,9 @@
 @import "./variables";
 
 /*
-  Custom CSS for colors and looks which override the materializecss
+  Custom CSS for colors and looks which override the materialize.css
 */
-.btn,button:focus{
+.btn{
   background-color:$primary!important;
   color:$textOnPrimary!important;
 }

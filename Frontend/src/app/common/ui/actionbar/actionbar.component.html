@@ -1,40 +1,25 @@
-<dropdown [(show)]="dropdown"
+<dropdown #dropdownRef
           [callbackObject]="node"
           [options]="optionsMenu"
           [showDisabled]="showDisabled"
           [position]="dropdownPosition"
 ></dropdown>
-<div [class.actionbar-round]="appearance=='round'">
-  <div *ngIf="optionsToggle.length" class="actionToggle" [class.actionToggleDivider]="optionsAlways.length">
-    <a *ngFor="let option of optionsToggle"
-       tabindex="0"
-       (keyup.enter)="click(option)"
-       (click)="click(option)"
-       [class.light]="backgroundType=='dark' || backgroundType=='primary'"
-       [class.disabled]="!option.isEnabled">
-      <i icon [iconId]="option.icon" aria="true"></i>
-    </a>
-
-  </div>
-<div class="more btn-flat waves-effect"
-       (click)="showDropdown()"
-       tabindex="0"
-       (keyup.enter)="showDropdown()"
-       [class.light]="backgroundType=='dark' || backgroundType=='primary'"
-       *ngIf="canShowDropdown()"><i icon iconId="more_vert" aria="true"></i></div>
-
-  <div *ngFor="let option of optionsAlways.slice().reverse();let i=index;"
-       [class.light]="backgroundType=='dark' || backgroundType=='primary'"
-       [class.primary]="i==optionsAlways.length-1 && backgroundType=='primary'"
-       [class.disabled]="!option.isEnabled"
+<div class="actionbar" [class.actionbar-all-flat]="style=='flat'" [class.actionbar-round]="appearance=='round'">
+  <button mat-flat-button *ngFor="let option of optionsAlways;let i=index;"
+       [color]="i==0 ? 'primary' : null"
+       [disabled]="!option.isEnabled"
        [class.display-none]="!option.isEnabled && !showDisabled"
-       class="actionAlways waves-effect waves-light"
-       [class.btn-flat]="i!=optionsAlways.length-1 || style=='flat'"
-       [class.btn]="i==optionsAlways.length-1 && style!='flat'"
-       tabindex="0"
-       (keyup.enter)="click(option)"
        (click)="click(option)">
     <i icon title="{{option.showName ? null : (option.name | translate)}}" [iconId]="option.icon"></i><span class="actionAlwaysCaption" *ngIf="option.showName"> {{option.name | translate}}</span>
-  </div>
-
+  </button>
+<button mat-flat-button class="more"
+        [matMenuTriggerFor]="dropdownRef.menu"
+        *ngIf="canShowDropdown()"><i icon iconId="more_vert" aria="true"></i></button>
+<div *ngIf="optionsToggle.length" class="actionToggle" [class.actionToggleDivider]="optionsAlways.length">
+    <button mat-flat-button *ngFor="let option of optionsToggle"
+            (click)="click(option)"
+            [class.disabled]="!option.isEnabled">
+        <i icon [iconId]="option.icon" aria="true"></i>
+    </button>
+</div>
 </div>

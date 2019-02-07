@@ -92,22 +92,20 @@
             <div>+{{nodeStoreAnimation}}</div>
           </div>
         </div>
-        <div class="user clickable" #userRef *ngIf="user && _showUser" (click)="showUserMenu()" (keyup.enter)="showUserMenu()" tabindex="0" title="{{'USERMENU' | translate}}">
+        <div class="user clickable" #userRef *ngIf="user && _showUser" tabindex="0" [matMenuTriggerFor]="userDropdown.menu" title="{{'USERMENU' | translate}}">
             <user-avatar [user]="user.person" [size]="'xsmall'"></user-avatar>
             <div *ngIf="!isGuest">{{userName}}</div>
             <div *ngIf="isGuest">{{'USER_GUEST' | translate}}</div>
             <i aria-hidden="true" class="material-icons barIcon iconArrow">keyboard_arrow_down</i>
             <!-- <i class="material-icons barIcon iconPerson">account_circle</i>-->
           </div>
-        <dropdown class="userMenu"
-          [(show)]="userOpen"
+        <dropdown #userDropdown class="userMenu"
           [options]="userMenuOptions"
         ></dropdown>
-        <div *ngIf="helpOptions.length" class="help clickable" (click)="showHelpMenu()" (keyup.enter)="showHelpMenu()" tabindex="0">
+        <div *ngIf="helpOptions.length" class="help clickable" [matMenuTriggerFor]="helpDropdown.menu">
           <i icon iconId="help_outline" aria="true"></i>
         </div>
-        <dropdown class="helpMenu"
-                  [(show)]="helpOpen"
+        <dropdown #helpDropdown class="helpMenu"
                   [options]="helpOptions"
         ></dropdown>
       </div>

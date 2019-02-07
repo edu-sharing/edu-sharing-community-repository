@@ -9,8 +9,41 @@
 // Define the palettes for your theme using the Material Design palettes available in palette.scss
 // (imported above). For each palette, you can optionally specify a default, lighter, and darker
 // hue. Available color palettes: https://material.io/design/color/
-$candy-app-primary: mat-palette($mat-blue-grey);
-$candy-app-accent:  mat-palette($mat-blue-grey);
+$mat-custom: (
+        50: lighten($primary,50%),
+        100: lighten($primary,40%),
+        200: lighten($primary,30%),
+        300: lighten($primary,20%),
+        400: lighten($primary,10%),
+        500: $primary,
+        600: darken($primary,10%),
+        700: darken($primary,20%),
+        800: darken($primary,30%),
+        900: darken($primary,40%),
+        A100: lighten($primary,40%),
+        A200: lighten($primary,30%),
+        A400: $primary,
+        A700: darken($primary,20%),
+        contrast: (
+                50: $textOnPrimaryLight,
+                100: $textOnPrimaryLight,
+                200: $textOnPrimaryLight,
+                300: $textOnPrimaryLight,
+                400: $textOnPrimary,
+                500: $textOnPrimary,
+                600: $textOnPrimary,
+                700: $textOnPrimary,
+                800: $textOnPrimary,
+                900: $textOnPrimary,
+                A100: $textOnPrimaryLight,
+                A200: $textOnPrimaryLight,
+                A400: $textOnPrimary,
+                A700: $textOnPrimary,
+        )
+);
+
+$candy-app-primary: mat-palette($mat-custom);
+$candy-app-accent:  mat-palette($mat-custom);
 
 // The warn palette is optional (defaults to red).
 $candy-app-warn:    mat-palette($mat-red);
@@ -24,6 +57,32 @@ $candy-app-theme: mat-light-theme($candy-app-primary, $candy-app-accent, $candy-
 @include angular-material-theme($candy-app-theme);
 
 
+/** custom project specifics */
+.mat-button-wrapper{
+  text-transform: uppercase;
+  > i {
+    width: 35px;
+  }
+}
+.mat-menu-content{
+  >button{
+    color:$primary;
+    display: flex;
+    align-items: center;
+    > i {
+      width: 35px;
+    }
+  }
+  &:not(:empty){
+    padding: 0!important;
+  }
+}
+.mat-menu-item-seperate {
+  border-top:1px solid #ccc!important;
+}
+.mat-menu-item-seperate-bottom {
+  border-bottom:1px solid #ccc!important;
+}
 .mat-calendar-table-header-divider{
   display: none;
 }

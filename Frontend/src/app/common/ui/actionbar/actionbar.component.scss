@@ -1,80 +1,47 @@
 @import "../../../../styles/variables.scss";
-.actionAlways,.more{
-  float:right;
-  padding:0 15px;
-  @include clickable();
+.actionbar{
+  display:flex;
 }
+.actionToggle > button{
+  color: $textLight;
+}
+.mat-flat-button {
+  min-width: unset;
+  padding:0 5px;
+}
+.actionAlwaysCaption{
+  padding-right:5px;
+}
+
 .light{
   color:#fff;
   background: transparent;
 }
-.primary{
-  color: $primary!important;
-  background: #fff!important;
-}
-.primary.disabled{
-  color: $textVeryLight!important;
-  background: #eee!important;
-}
 .disabled{
   pointer-events: all;
-}
-.btn-flat:not(:hover){
-  background: transparent;
-}
-
-.more{
-  padding:0 10px;
-}
-.more a{
-  color:$primary;
 }
 .light a{
   color:#fff;
 }
-.more{
-  .edu-icons,.material-icons {
-    font-size: 1.5rem;
-  }
-}
-.actionAlways{
-  text-transform: uppercase;
-}
-.actionAlwaysCaption{
-  position: relative;
-  padding-left: 2px;
-}
-.btn,.btn-flat{
-  margin:0 5px;
-  position: relative;
-  top:-5px;
-}
 .actionToggle{
-  margin-top: 1px;
-  height:26px;
   padding-left:10px;
   margin-left:10px;
-  float:right;
 }
 .actionToggleDivider{
   border-left:1px solid #ddd;
 }
-.actionToggle a{
-  padding:0 5px;
-  color: $textLight;
-  display: inline-block;
-  @include clickable();
-}
-.actionToggle a:focus{
-  @include removeDefaultFocus();
-  color: $primary;
-}
 
 .actionbar-round{
+  button{
+    border-radius: 50%;
+  }
+  &.actionbar-all-flat button{
+    background: white !important;
+    color: $primary !important;
+  }
   .more, .actionAlways {
     background: white !important;
     color: $primary !important;
-    border-radius: 50%;
     display:flex;
     width:45px;
     height:45px;

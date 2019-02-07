@@ -7,6 +7,7 @@ import {UIHelper} from "../ui-helper";
 import {Helper} from '../../helper';
 import {UIConstants} from "../ui-constants";
 import {OptionItem} from "../actionbar/option-item";
+import {MatMenu, MatMenuTrigger} from '@angular/material';
 
 @Component({
   selector: 'dropdown',
@@ -20,17 +21,9 @@ import {OptionItem} from "../actionbar/option-item";
  * The dropdown is one base component of the action bar (showing more actions), but can also be used standalone
  */
 export class DropdownComponent{
-  @ViewChild('dropdownRef') dropdownElement : ElementRef;
-  @ViewChild('dropdownContainer') dropdownContainerElement : ElementRef;
-  _show: boolean;
+  @ViewChild('dropdown') menu : MatMenu;
   _options: OptionItem[];
   @Input() position = 'left';
-  @Input() set show(show:boolean){
-    this._show=show;
-    if(show)
-      this.focusDropdown();
-  };
-  @Output() showChange=new EventEmitter();
   @Input() set options(options:OptionItem[]) {
     this._options = UIHelper.filterValidOptions(this.ui,Helper.deepCopyArray(options));
   }
@@ -47,21 +40,11 @@ export class DropdownComponent{
      */
     @Input() showDisabled = true;
 
-  hide(){
-    this._show=false;
-    this.showChange.emit(false);
-  }
+
   click(option : OptionItem){
       if(!option.isEnabled)
           return;
       option.callback(this.callbackObject);
-      this.hide();
-  }
-  focusDropdown(){
-    setTimeout(()=> {
-        UIHelper.setFocusOnDropdown(this.dropdownElement);
-        UIHelper.scrollSmoothElement(this.dropdownContainerElement.nativeElement.scrollHeight,this.dropdownContainerElement.nativeElement);
-    });
   }
   constructor(private ui : UIService){}
 

@@ -54,10 +54,11 @@
 
 
 
-  <div class="addMobile fixed-action-btn"
-       *ngIf="createAllowed"
-       (click)="createMobile()">
-    <div class="mobile-move-bottom"><a class="btn-floating btn-large btn-complementary waves-effect"><i class="material-icons">add</i></a></div>
+  <div class="addMobile"
+       *ngIf="createAllowed">
+    <div class="mobile-move-bottom">
+        <button button mat-fab color="primary" [matMenuTriggerFor]="dropdown"><i class="material-icons">add</i></button>
+    </div>
     <!--
   <ul>
     <li><a class="btn-floating btn-floating-inverted" (click)="showUploadSelect=true"><i class="material-icons">cloud_upload</i></a></li>
@@ -69,39 +70,29 @@
   </ul>
   -->
   </div>
-  <div class="addDesktop btn btn-complementary waves-effect"
-       tabindex="0"
-       [class.disabled]="!createAllowed"
-       (keyup.enter)="createContext()"
-       (click)="createContext()">
+  <button mat-raised-button color="primary" class="addDesktop"
+          [disabled]="!createAllowed"
+          #dropdownTrigger="matMenuTrigger"
+          [matMenuTriggerFor]="dropdown"
+    >
     <i icon iconId="add_circle_outline"></i><span>{{ 'WORKSPACE.ADD' | translate }}</span>
-  </div>
+  </button>
 
-  <div class="dialog dialogAddDesktop" *ngIf="showAddDesktop" (click)="showAddDesktop=false" (contextmenu)="showAddDesktop=false;$event.preventDefault();$event.stopPropagation();"></div>
-  <!-- <input type="file" accept="image/*" capture="camera" #camera (change)="uploadCamera($event)"> -->
-  <div class="addDesktopMenu collection"
-       #dropdown
-       [@overlay]="showAddDesktop"
-       [style.position]="dropdownPosition"
-       [style.left]="dropdownLeft"
-       [style.right]="dropdownRight"
-       [style.top]="dropdownTop"
-       [style.bottom]="dropdownBottom"
-       *ngIf="showAddDesktop">
-    <a *ngIf="allowBinary" class="collection-item" tabindex="0" (keyup.enter)="showAddDesktop=false;showUploadSelect=true" (click)="showAddDesktop=false;showUploadSelect=true"><i icon iconId="cloud_upload"></i> {{ 'WORKSPACE.ADD_OBJECT' | translate}}</a>
-    <a *ngIf="allowBinary && cordova.isRunningCordova()" class="collection-item" tabindex="0" (keyup.enter)="showAddDesktop=false;showUploadSelect=true" (click)="showAddDesktop=false;openCamera()"><i icon iconId="camera_alt"></i> {{ 'WORKSPACE.ADD_CAMERA' | translate}}</a>
-    <a *ngIf="!allowBinary" class="collection-item" tabindex="0" (keyup.enter)="showAddDesktop=false;createEmptyNode()" (click)="showAddDesktop=false;createEmptyNode()"><i icon iconId="description"></i> {{ 'WORKSPACE.ADD_EMPTY_OBJECT' | translate}}</a>
-    <a class="collection-item" tabindex="0" (keyup.enter)="showAddDesktop=false;addFolderName=''" (click)="showAddDesktop=false;addFolderName=''"><i icon iconId="create_new_folder"></i> {{ 'WORKSPACE.ADD_FOLDER' | translate}}</a>
-    <a *ngFor="let connector of (connectorList && allowBinary) ? getConnectors() : null;let i=index"
-       class="collection-item"
-       [class.collection-item-seperate]="!i"
-       tabindex="0"
-       (keyup.enter)="showAddDesktop=false;createConnectorName='';createConnectorType=connector"
-       (click)="showAddDesktop=false;createConnectorName='';createConnectorType=connector">
-      <i icon iconId="{{connector.icon}}"></i> {{ 'CONNECTOR.'+connector.id+'.NAME' | translate}}<img class="connectorBeta" src="assets/images/beta.svg"></a>
-    <!-- <a class="collection-item collection-item-seperate" (click)="listLTI()"><i class="material-icons">extension</i> {{ 'WORKSPACE.ADD_LTI' | translate}}</a> -->
-
-  </div>
+  <mat-menu class="addDesktopMenu" #dropdown="matMenu">
+      <button mat-menu-item *ngIf="allowBinary" (click)="showUploadSelect=true"><i icon iconId="cloud_upload"></i> {{ 'WORKSPACE.ADD_OBJECT' | translate}}</button>
+      <button mat-menu-item *ngIf="allowBinary && cordova.isRunningCordova()" (click)="openCamera()"><i icon iconId="camera_alt"></i> {{ 'WORKSPACE.ADD_CAMERA' | translate}}</button>
+      <button mat-menu-item *ngIf="!allowBinary" (click)="createEmptyNode()"><i icon iconId="description"></i> {{ 'WORKSPACE.ADD_EMPTY_OBJECT' | translate}}</button>
+      <button mat-menu-item (click)="addFolderName=''"><i icon iconId="create_new_folder"></i> {{ 'WORKSPACE.ADD_FOLDER' | translate}}</button>
+      <ng-container>
+      <button mat-menu-item *ngFor="let connector of (connectorList && allowBinary) ? connectorList : null;let i=index"
+       [class.mat-menu-item-seperate]="!i"
+       (click)="createConnectorName='';createConnectorType=connector">
+        <i icon iconId="{{connector.icon}}"></i>
+        {{ 'CONNECTOR.'+connector.id+'.NAME' | translate}}
+        <img style="padding-left:5px" src="assets/images/beta.svg" alt="">
+      </button>
+      </ng-container>
+  </mat-menu>
   <div class="dialog" *ngIf="showSelectRoot" (click)="showSelectRoot=false"></div>
   <div class="selectRootMenu collection" [@overlay]="showSelectRoot" *ngIf="showSelectRoot">
     <a class="collection-item" [class.rootSelected]="root=='MY_FILES'" (click)="showSelectRoot=false;setRoot('MY_FILES')"><i icon iconId="person"></i> {{ 'WORKSPACE.MY_FILES' | translate}}</a>
@@ -163,7 +154,8 @@
              [options]="actionOptions"
 ></actionbar>
 </div></div>
-  <workspace-explorer class="explorer"  [class.explorerMetadata]="metadataNode" *ngIf="root!='RECYCLE'" (contextmenu)="createContext($event)"
+  <workspace-explorer class="explorer"  [class.explorerMetadata]="metadataNode" *ngIf="root!='RECYCLE'"
+  (contextmenu)="createContext($event)"
   [current]="currentFolder"
   [selection]="selection"
   [searchQuery]="searchQuery"

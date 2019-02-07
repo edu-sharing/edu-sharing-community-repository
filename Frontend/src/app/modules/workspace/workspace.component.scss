@@ -79,14 +79,6 @@
 .addDesktopMenu{
   top:42px+$mainnavHeight;
   z-index:105;
-  .connectorBeta{
-    height: auto;
-    float: right;
-    position: absolute;
-    width: 30px;
-    margin-top: 10px;
-    right: 7px;
-  }
 }
 .selectRootMenu{
   position: fixed;
@@ -152,7 +144,7 @@
   >div {
     height:$workspaceBreadcrumbsHeight - 3px;
     margin-right: 10px;
-    padding-top: 19px;
+    padding-top: 15px;
     padding-left: 20px;
     background: linear-gradient(to right, rgba(255, 255, 255, 0.001) 0, #fff 10px, #fff 100%); /* safari fix */
   }
@@ -185,9 +177,10 @@
     @include materialShadow();
   }
 }
-:host /deep/ .breadcrumbFrame div{
-  word-break: break-all;
-  /* word-break-wrap: ; */
+:host /deep/{
+  .breadcrumbFrame div {
+    word-break: break-all;
+  }
 }
 .tree,.metadata{
   @include materialShadow();
