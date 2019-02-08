@@ -1,0 +1,77 @@
+@import "../../../../styles/variables.scss";
+
+$titleHeight:90px;
+$actionMenuHeight:60px;
+$tabHeight:48px;
+
+$height-normal:500px;
+$height-large:600px;
+
+@mixin content{
+  overflow-y: auto;
+  @include iosScrolling();
+  background-color: #fff;
+}
+:host /deep/ .card-dialog{
+  display: flex;
+  z-index: $dialogZIndex+1;
+  align-items: center;
+  justify-content: center;
+  .modal-card{
+    @include materialShadowLarge();
+    .mat-card-header{
+      background-color: $actionDialogBackground;
+      display: flex;
+      align-items: center;
+      height:$titleHeight;
+    }
+    background-color: $backgroundColor;
+    border-radius: 2px;
+    mat-card-actions{
+      $height: $actionMenuHeight;
+      background-color: #fff;
+      display: flex;
+      height: $actionMenuHeight;
+      justify-content: flex-end;
+      margin: 0;
+      padding: 10px 20px;
+      button{
+        margin:0 5px;
+      }
+    }
+    mat-card-content{
+      margin: 0;
+      position: relative;
+    }
+    &.width-normal{
+      width:600px;
+    }
+    &:not(.card-tabbed) {
+      mat-card-content{
+        max-height: calc(100vh - #{$titleHeight} - #{$actionMenuHeight});
+        @include content();
+      }
+      &.height-normal mat-card-content {
+        height: $height-normal - $titleHeight - $actionMenuHeight;
+      }
+      &.height-large mat-card-content {
+        height: $height-large - $titleHeight - $actionMenuHeight;
+      }
+      &.height-auto mat-card-content {
+        height: auto;
+      }
+    }
+    &.card-tabbed{
+      .mat-tab-body-wrapper{
+        max-height: calc(100vh - #{$titleHeight} - #{$actionMenuHeight} - #{$tabHeight});
+        @include content();
+      }
+      &.height-normal .mat-tab-body-wrapper{
+        height: $height-normal - $titleHeight - $actionMenuHeight - $tabHeight;
+      }
+      &.height-large .mat-tab-body-wrapper{
+        height: $height-large - $titleHeight - $actionMenuHeight - $tabHeight;
+      }
+    }
+  }
+}

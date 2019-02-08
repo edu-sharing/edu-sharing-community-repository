@@ -1,0 +1,15 @@
+<div class="card-dialog dialog darken">
+  <mat-card class="modal-card width-{{width}} height-{{height}}" [class.card-tabbed]="tabbed">
+    <mat-card-header>
+      <mat-card-title>{{title}}</mat-card-title>
+      <mat-card-subtitle>{{subtitle}}</mat-card-subtitle>
+    </mat-card-header>
+    <mat-card-content><ng-content></ng-content></mat-card-content>
+    <mat-card-actions>
+      <div *ngFor="let button of _buttons">
+        <button *ngIf="button.type==1" mat-flat-button color="primary" (click)="button.callback()">{{button.name | translate}}</button>
+        <button *ngIf="button.type==2" mat-button color="primary" (click)="button.callback()">{{button.name | translate}}</button>
+      </div>
+    </mat-card-actions>
+  </mat-card>
+</div>

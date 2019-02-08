@@ -50,7 +50,7 @@
   top:30px;
 }
 .invited,.advanced{
-  padding:0 20px;
+  padding:20px;
 }
 :host /deep/{
   .edusharing-autocomplete-wrapper{
@@ -98,13 +98,14 @@ a.active{
 .groupMessage{
   padding:0 20px;
 }
+.invite-group{
+  display: flex;
+  flex-direction: column;
+}
 .publish{
-  margin: 20px -20px;
+  margin-top: 20px;
   padding:20px 20px;
   padding-right:30px;
-  background: white;
-  float: left;
-  width: calc(100% + 40px);
   .publishElements{
     float: left;
     max-width: 495px;
@@ -133,7 +134,6 @@ a.active{
     flex-direction: column;
     span{
       margin-left: 35px;
-      margin-right: -100px;
     }
   }
 }
@@ -244,13 +244,8 @@ img.inherit{
   margin:0 -30px;
   margin-bottom: 0;
 }
-.tabContent{
-  padding-top: 20px;
-  height: calc(100% - 68px);
-  margin:0 -20px;
-  overflow: auto;
-  overflow-x: hidden;
-  @include iosScrolling();
+mat-tab-body-content{
+  padding: $cardPadding;
   .collections{
     background-color:$actionDialogBackground;
     margin: 0 -20px;
@@ -308,8 +303,9 @@ label.notify p{
 
 .share-link{
   position: absolute;
-  top: 14px;
+  top: -65px;
   right: 60px;
+  z-index: $dialogZIndex+2;
   text-transform: uppercase;
   color:$primary;
   cursor: pointer;
@@ -332,6 +328,7 @@ label.notify p{
 .state{
   font-size: 9pt;
   position: absolute;
+  bottom: -48px;
   left: 12px;
   i{
     color: $textLight;

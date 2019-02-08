@@ -5,14 +5,25 @@
           [position]="dropdownPosition"
 ></dropdown>
 <div class="actionbar" [class.actionbar-all-flat]="style=='flat'" [class.actionbar-round]="appearance=='round'">
-  <button mat-flat-button *ngFor="let option of optionsAlways;let i=index;"
-       [color]="i==0 ? 'primary' : null"
+    <button mat-flat-button
+            color="primary"
+            *ngIf="optionsAlways.length>0;"
+            [disabled]="!optionsAlways[0].isEnabled"
+            [class.display-none]="!optionsAlways[0].isEnabled && !showDisabled"
+            (click)="click(optionsAlways[0])">
+        <i icon title="{{optionsAlways[0].showName ? null : (optionsAlways[0].name | translate)}}" [iconId]="optionsAlways[0].icon"></i>
+        <span class="actionAlwaysCaption" *ngIf="optionsAlways[0].showName && appearance!='round'"> {{optionsAlways[0].name | translate}}</span>
+    </button>
+    <button mat-button
+       color="primary"
+       *ngFor="let option of optionsAlways.slice(1);let i=index;"
        [disabled]="!option.isEnabled"
        [class.display-none]="!option.isEnabled && !showDisabled"
        (click)="click(option)">
-    <i icon title="{{option.showName ? null : (option.name | translate)}}" [iconId]="option.icon"></i><span class="actionAlwaysCaption" *ngIf="option.showName && appearance!='round'"> {{option.name | translate}}</span>
-  </button>
-<button mat-flat-button class="more"
+      <i icon title="{{option.showName ? null : (option.name | translate)}}" [iconId]="option.icon"></i>
+      <span class="actionAlwaysCaption" *ngIf="option.showName && appearance!='round'"> {{option.name | translate}}</span>
+    </button>
+<button mat-button class="more" color="primary"
         [matMenuTriggerFor]="dropdownRef.menu"
         *ngIf="canShowDropdown()"><i icon iconId="more_vert" aria="true"></i></button>
 <div *ngIf="optionsToggle.length" class="actionToggle" [class.actionToggleDivider]="optionsAlways.length">

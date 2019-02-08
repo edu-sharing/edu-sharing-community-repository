@@ -58,6 +58,12 @@ $candy-app-theme: mat-light-theme($candy-app-primary, $candy-app-accent, $candy-
 
 
 /** custom project specifics */
+.mat-tab-labels {
+  background-color: $actionDialogBackground;
+  .mat-tab-label {
+    text-transform: uppercase;
+  }
+}
 .mat-button-wrapper{
   text-transform: uppercase;
   > i {

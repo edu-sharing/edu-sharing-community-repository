@@ -9,7 +9,15 @@ import {BrowserAnimationsModule} from '@angular/platform-browser/animations';
 import {RestLocatorService} from './common/rest/services/rest-locator.service';
 import {HttpClient, HttpClientModule} from '@angular/common/http';
 import {MatDatepickerModule} from '@angular/material/datepicker';
-import {MatButtonModule, MatFormFieldModule, MatInputModule, MatMenuModule, MatNativeDateModule, MatToolbarModule} from '@angular/material';
+import {
+    MatButtonModule, MatCardModule,
+    MatDialogModule,
+    MatFormFieldModule,
+    MatInputModule,
+    MatMenuModule,
+    MatNativeDateModule, MatTabsModule,
+    MatToolbarModule
+} from '@angular/material';
 import { LazyLoadImageModule } from 'ng-lazyload-image';
 
 
@@ -20,8 +28,10 @@ export const IMPORTS=[
   HttpClientModule,
   LazyLoadImageModule,
   MatButtonModule,
+  MatTabsModule,
   MatMenuModule,
   MatToolbarModule,
+  MatCardModule,
   MatDatepickerModule,
   MatNativeDateModule,
   MatFormFieldModule,

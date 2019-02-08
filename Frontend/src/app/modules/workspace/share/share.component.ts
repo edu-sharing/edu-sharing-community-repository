@@ -23,6 +23,7 @@ import {RestUsageService} from '../../../common/rest/services/rest-usage.service
 import {UIHelper} from '../../../common/ui/ui-helper';
 import {UIConstants} from '../../../common/ui/ui-constants';
 import {RestCollectionService} from '../../../common/rest/services/rest-collection.service';
+import {DialogButton} from "../../../common/ui/modal-dialog/modal-dialog.component";
 
 @Component({
   selector: 'workspace-share',
@@ -33,7 +34,7 @@ import {RestCollectionService} from '../../../common/rest/services/rest-collecti
     trigger('cardAnimation', UIAnimation.cardAnimation())
   ]
 })
-export class WorkspaceShareComponent implements AfterViewInit{
+export class WorkspaceShareComponent{
   public ALL_PERMISSIONS=["All","Read","ReadPreview","ReadAll","Write","Delete",
     "DeleteChildren","DeleteNode","AddChildren","Consumer","ConsumerMetadata",
     "Editor","Contributor","Collaborator","Coordinator",
@@ -51,11 +52,15 @@ export class WorkspaceShareComponent implements AfterViewInit{
     ["ReadPermissions",["Contributor"]],
     ["Contributor",["Collaborator"]]
   ];
-  public INVITE="INVITE";
-  public INVITED="INVITED";
-  public ADVANCED="ADVANCED";
   initialState: string;
-  public tab=this.INVITE;
+  _tab=0;
+  public set tab(tab:number){
+    this._tab=tab;
+    this.updateButtons();
+  }
+  public get tab(){
+    return this._tab;
+  }
   private currentType=[RestConstants.ACCESS_CONSUMER,RestConstants.ACCESS_CC_PUBLISH];
   private inherited : boolean;
   private notifyUsers = true;
@@ -96,11 +101,9 @@ export class WorkspaceShareComponent implements AfterViewInit{
   public deletedUsages:any[]=[];
   usages: any;
   showCollections = false;
+    buttons: DialogButton[];
 
-    ngAfterViewInit(): void {
-        setTimeout(()=>UIHelper.setFocusOnCard());
-    }
-  public isCollection(){
+    public isCollection(){
     if(this._node==null)
       return true;
     return this._node.aspects.indexOf(RestConstants.CCM_ASPECT_COLLECTION)!=-1;
@@ -223,9 +226,6 @@ export class WorkspaceShareComponent implements AfterViewInit{
       this.cancel();
       return;
     }
-  }
-  public setTab(tab : string){
-    this.tab=tab;
   }
   private chooseType(){
     this.showChooseType=true;
@@ -551,6 +551,13 @@ export class WorkspaceShareComponent implements AfterViewInit{
                 this.updateUsages(permissions,pos+1,true);
             });
         }
+    }
+
+    updateButtons() {
+        this.buttons=[
+            new DialogButton('CANCEL',DialogButton.TYPE_CANCEL,()=>this.cancel()),
+            new DialogButton(this.tab==0 ? 'WORKSPACE.BTN_INVITE' : 'APPLY',DialogButton.TYPE_PRIMARY,()=>this.save()),
+        ];
     }
 }
 /*
