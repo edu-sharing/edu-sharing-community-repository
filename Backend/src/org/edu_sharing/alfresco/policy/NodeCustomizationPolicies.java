@@ -183,73 +183,7 @@ public class NodeCustomizationPolicies implements OnContentUpdatePolicy, OnCreat
 			
 				logger.debug("will do the thumbnail");
 				
-				if(reader.getMimetype().contains("video")){
-					
-					ReadableByteChannel rbc = null;
-					try{
-						
-						rbc = Channels.newChannel(reader.getContentInputStream());
-						IsoFile isoFile = new IsoFile(rbc);
-						MovieBox moov = isoFile.getMovieBox();
-						if(moov != null && moov.getBoxes() != null){
-							for(Box b : moov.getBoxes()) {
-							   
-							    
-							    if(b instanceof TrackBox){
-							    	TrackHeaderBox thb = ((TrackBox)b).getTrackHeaderBox();
-							    	
-							    	if(thb.getWidth() > 0 && thb.getHeight() > 0){
-							    		nodeService.setProperty(nodeRef, QName.createQName(CCConstants.CCM_PROP_IO_WIDTH), thb.getWidth());
-							    		nodeService.setProperty(nodeRef, QName.createQName(CCConstants.CCM_PROP_IO_HEIGHT), thb.getHeight());
-							    	}
-							 
-							    }
-							    
-							}
-						}
-						
-					}catch(Exception e){
-						logger.error(e.getMessage(), e);
-					}finally{
-						
-						if(rbc != null){
-							try{
-							
-								rbc.close();
-							}catch(IOException e){
-								logger.error(e.getMessage(), e);
-							}
-						}
-					}
-				}
-				// alfresco does not read image size for all images, so we try to fix it
-				// trying to load not the whole image but just the bounding rect, see also:
-				// http://stackoverflow.com/questions/1559253/java-imageio-getting-image-dimensions-without-reading-the-entire-file
-				if(reader.getMimetype().contains("image")){
-					try{
-						try(ImageInputStream in = ImageIO.createImageInputStream(reader.getContentInputStream())){
-						    final Iterator<ImageReader> readers = ImageIO.getImageReaders(in);
-						    if (readers.hasNext()) {
-						        ImageReader imageReader = readers.next();
-						        try {
-						        	imageReader.setInput(in);
-						        	nodeService.setProperty(nodeRef, QName.createQName(CCConstants.EXIF_PROP_PIXELXDIMENSION), imageReader.getWidth(0));
-									nodeService.setProperty(nodeRef, QName.createQName(CCConstants.EXIF_PROP_PIXELYDIMENSION), imageReader.getHeight(0));
-						        } finally {
-						        	imageReader.dispose();
-						        }
-						    }
-						} 
-					}catch(Throwable t){}
-				}
-				
-				Action thumbnailAction = actionService.createAction(CCConstants.ACTION_NAME_CREATE_THUMBNAIL);
-				thumbnailAction.setTrackStatus(true);
-				thumbnailAction.setExecuteAsynchronously(true);
-				thumbnailAction.setParameterValue("thumbnail-name", CCConstants.CM_VALUE_THUMBNAIL_NAME_imgpreview_png);
-				thumbnailAction.setParameterValue(ActionObserver.ACTION_OBSERVER_ADD_DATE, new Date());
-			
-				ActionObserver.getInstance().addAction(nodeRef, thumbnailAction);
+				new ThumbnailHandling().thumbnailHandling(nodeRef);
 				
 				SimpleTrigger st = new SimpleTrigger();
 				st.setName("ImmediateTrigger");
@@ -462,13 +396,13 @@ public class NodeCustomizationPolicies implements OnContentUpdatePolicy, OnCreat
 			String linktype = (String)after.get(QName.createQName(CCConstants.CCM_PROP_LINKTYPE));
 			String previewImageBase64 = (linktype != null && linktype.equals(CCConstants.CCM_VALUE_LINK_LINKTYPE_USER_GENERATED)) ? getPreviewFromURL(afterURL) : null;
 			writeBase64Image(nodeRef,previewImageBase64);
-			
+
 		}
-		
+
 	}
-	
-	
-	
+
+
+
 	private void writeBase64Image(NodeRef nodeRef, String previewImageBase64) {
 		if (previewImageBase64!=null) {
 
@@ -495,12 +429,12 @@ public class NodeCustomizationPolicies implements OnContentUpdatePolicy, OnCreat
 				e.printStackTrace();
 			}
 			logger.info("---> OK IMAGE WRITTEN");
-			
+
 		} else {
 			logger.warn("---> NO PREVIEW IMAGE");
 		}
 	}
-	
+
 	public  void generateWebsitePreview(NodeRef nodeRef, String url) {
 		if(nodeRef == null || url == null) {
 			return;
