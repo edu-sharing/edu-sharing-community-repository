@@ -243,21 +243,20 @@ user-profile{
   text-align: right;
   position: relative;
   // space for links like imprint
-  top:5px;
+  top:7px;
   display: flex;
-  margin-right: 7px;
   padding-top: 5px;
   padding-left: 7px;
+  div{
+    overflow: hidden;
+    max-width: 160px;
+    margin-top: 1px;
+    word-break: break-all;
+    display: inline-block;
+    text-transform: none;
+  }
 }
 
-.topBar .user div{
-  overflow: hidden;
-  max-width: 160px;
-  height: 18px;
-  margin-top: 1px;
-  word-break: break-all;
-  display: inline-block;
-}
 .topBar .help{
   margin-top: 15px;
   margin-right: 15px;
@@ -267,7 +266,6 @@ user-profile{
 }
 .topBar .user i{
   font-size:25px;
-  vertical-align: top;
   margin-right: 5px;
   margin-left: 5px;
 }
@@ -342,6 +340,7 @@ user-profile{
   }
   user-avatar{
     position: relative;
+    top: 5px;
     margin-right: 7px;
   }
 }
@@ -441,7 +440,7 @@ user-profile{
     display: none!important;
   }
   .topBar span,
-  .topBar .user div{
+  .topBar .user button{
     display:none;
   }
   .topBar {
