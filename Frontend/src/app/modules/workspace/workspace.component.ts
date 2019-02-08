@@ -994,7 +994,7 @@ export class WorkspaceMainComponent implements EventListener{
     }
 
     private refreshRoute(){
-        this.routeTo(this.root,!this.isRootFolder && this.currentFolder ? this.currentFolder.ref.id : null,this.searchQuery.query);
+        this.routeTo(this.root,!this.isRootFolder && this.currentFolder ? this.currentFolder.ref.id : null,this.searchQuery ? this.searchQuery.query : null);
     }
     private routeTo(root: string,node : string=null,search:string=null) {
         let params:any={root:root,id:node,viewType:this.viewType,query:search,mainnav:this.mainnav};

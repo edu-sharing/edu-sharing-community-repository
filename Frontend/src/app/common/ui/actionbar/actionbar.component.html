@@ -10,7 +10,7 @@
        [disabled]="!option.isEnabled"
        [class.display-none]="!option.isEnabled && !showDisabled"
        (click)="click(option)">
-    <i icon title="{{option.showName ? null : (option.name | translate)}}" [iconId]="option.icon"></i><span class="actionAlwaysCaption" *ngIf="option.showName"> {{option.name | translate}}</span>
+    <i icon title="{{option.showName ? null : (option.name | translate)}}" [iconId]="option.icon"></i><span class="actionAlwaysCaption" *ngIf="option.showName && appearance!='round'"> {{option.name | translate}}</span>
   </button>
 <button mat-flat-button class="more"
         [matMenuTriggerFor]="dropdownRef.menu"
