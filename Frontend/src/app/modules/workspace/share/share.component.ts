@@ -206,27 +206,7 @@ export class WorkspaceShareComponent{
   @Output() onLoading=new EventEmitter();
   private showChooseType = false;
   private showChooseTypeList : Permission;
-  @HostListener('document:keydown', ['$event'])
-  handleKeyboardEvent(event: KeyboardEvent) {
-    if(event.key=="Escape"){
-      event.stopPropagation();
-      event.preventDefault();
-      if(this.history){
-        this.history=null;
-        return;
-      }
-      if(this.showCollections){
-        this.showCollections=false;
-        return;
-      }
-      if(this.linkNode){
-        this.linkNode=null;
-        return;
-      }
-      this.cancel();
-      return;
-    }
-  }
+
   private chooseType(){
     this.showChooseType=true;
   }
@@ -365,6 +345,7 @@ export class WorkspaceShareComponent{
 
     this.connector.isLoggedIn().subscribe((data:LoginResult)=>{
       this.isSafe=data.currentScope!=null;
+      this.updateButtons();
       this.connector.hasToolPermission(this.isSafe ? RestConstants.TOOLPERMISSION_GLOBAL_AUTHORITY_SEARCH_SAFE : RestConstants.TOOLPERMISSION_GLOBAL_AUTHORITY_SEARCH).subscribe((has:boolean)=>this.globalAllowed=has);
       this.connector.hasToolPermission(RestConstants.TOOLPERMISSION_GLOBAL_AUTHORITY_SEARCH_FUZZY).subscribe((has:boolean)=>this.fuzzyAllowed=has);
       this.connector.hasToolPermission(RestConstants.TOOLPERMISSION_INVITE_ALLAUTHORITIES).subscribe((has:boolean)=>this.publishPermission=has);

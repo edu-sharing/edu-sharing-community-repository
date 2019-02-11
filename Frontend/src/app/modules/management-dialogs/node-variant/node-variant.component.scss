@@ -9,7 +9,9 @@ h4{
   font-weight: bold;
   color: $textLight;
 }
-
+.variant-content{
+  padding: $cardPadding;
+}
 
 .breadcrumb-style{
   margin: 20px -20px;

@@ -19,6 +19,7 @@ import {RestConnectorsService} from "../../../common/rest/services/rest-connecto
 import {FrameEventsService} from "../../../common/services/frame-events.service";
 import {WorkspaceMainComponent} from "../../workspace/workspace.component";
 import {NodeHelper} from "../../../common/ui/node-helper";
+import {DialogButton} from "../../../common/ui/modal-dialog/modal-dialog.component";
 
 @Component({
   selector: 'node-variant',
@@ -36,6 +37,7 @@ export class NodeVariantComponent  {
   variantName : string;
   openViaConnector: Connector;
   licenseWarning: string;
+    private buttons: DialogButton[];
   @Input() set node(node : Node){
     this._node=node;
     this.variantName=this.translate.instant('NODE_VARIANT.DEFAULT_NAME',{name:this._node.name});
@@ -51,6 +53,7 @@ export class NodeVariantComponent  {
     else if(!license){
       this.licenseWarning='NO_LICENSE';
     }
+    this.updateButtons();
   }
   @Output() onLoading=new EventEmitter();
   @Output() onCancel=new EventEmitter();
@@ -66,6 +69,7 @@ export class NodeVariantComponent  {
     private router : Router,
     private nodeApi : RestNodeService) {
       this.updateBreadcrumbs(RestConstants.INBOX);
+      this.updateButtons();
   }
   public cancel(){
     this.onCancel.emit();
@@ -129,4 +133,10 @@ export class NodeVariantComponent  {
     getLicenseUrl(): string {
         return NodeHelper.getLicenseUrlByString(this._node.properties[RestConstants.CCM_PROP_LICENSE],this._node.properties[RestConstants.CCM_PROP_LICENSE_CC_VERSION])
   }
+    updateButtons(): any {
+        this.buttons=[
+            new DialogButton('CANCEL',DialogButton.TYPE_CANCEL,()=>this.cancel()),
+            new DialogButton('NODE_VARIANT.CREATE'+(this.openViaConnector ? '_EDIT' : ''),DialogButton.TYPE_PRIMARY,()=>this.create())
+        ]
+    }
 }

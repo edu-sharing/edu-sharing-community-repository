@@ -114,15 +114,17 @@ input[type=number],
 select,
 textarea.materialize-textarea,
 input[type=search]{
-  height:3rem;
-  -webkit-appearance: none;
-  border: 1px solid #ccc;
-  padding: 0 0.75em;
-  width:calc(100% - 1.65em);
-  border-radius: 3px;
-  background-color: #fff;
-  &:disabled{
-    border-style:dashed;
+  &:not(.mat-input-element) {
+    height: 3rem;
+    -webkit-appearance: none;
+    border: 1px solid #ccc;
+    padding: 0 0.75em;
+    width: calc(100% - 1.65em);
+    border-radius: 3px;
+    background-color: #fff;
+    &:disabled {
+      border-style: dashed;
+    }
   }
 }
 select{
@@ -137,12 +139,8 @@ textarea.materialize-textarea{
   TODO: Check if it is possible to combine with the input state
  */
 label,label:active{
-  font-weight: bold;
-  text-transform: uppercase;
   font-size: 90%;
-  margin-bottom: 3px;
   color:$textMain;
-  margin-left: 0.75em;
 }
 input[type=checkbox]+label,
 input[type=radio]+label,

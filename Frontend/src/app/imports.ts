@@ -10,12 +10,12 @@ import {RestLocatorService} from './common/rest/services/rest-locator.service';
 import {HttpClient, HttpClientModule} from '@angular/common/http';
 import {MatDatepickerModule} from '@angular/material/datepicker';
 import {
-    MatButtonModule, MatCardModule,
+    MatButtonModule, MatCardModule, MatCheckboxModule,
     MatDialogModule,
     MatFormFieldModule,
     MatInputModule,
     MatMenuModule,
-    MatNativeDateModule, MatTabsModule,
+    MatNativeDateModule, MatSelectModule, MatTabsModule,
     MatToolbarModule
 } from '@angular/material';
 import { LazyLoadImageModule } from 'ng-lazyload-image';
@@ -29,7 +29,9 @@ export const IMPORTS=[
   LazyLoadImageModule,
   MatButtonModule,
   MatTabsModule,
+  MatCheckboxModule,
   MatMenuModule,
+  MatSelectModule,
   MatToolbarModule,
   MatCardModule,
   MatDatepickerModule,

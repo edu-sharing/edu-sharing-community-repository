@@ -205,8 +205,9 @@
       "STATUS_DISABLED": "Activate the metadata template to automatically apply the metadata specified here to new content in this folder."
     },
     "SHARE_LINK":{
-      "TITLE":"Share link of {{ name }}",
+      "TITLE":"Share link",
       "EXPIRY_TITLE":"Set expiry date",
+      "EXPIRY_LABEL":"Expires at",
       "EXPIRY_INFO":"After this date the link won't be accessible for anyone",
       "DISABLED":"Link sharing is diabled",
       "PASSWORD":"Password Protect",
@@ -215,7 +216,7 @@
       "PASSWORD_PLACEHOLDER_EDIT":"Password is already set",
       "LINK":"Link to object",
       "ACTIVATE":"Activate sharing",
-      "COPY_CLIPBOARD":"Copy link",
+      "COPY_CLIPBOARD":"Copy",
       "LINK_INFO":"Everyone who has access to this link can download the content",
       "LINK_INFO_FOLDER":"Everyone who has access to this link can download all contents in this folder. Sub-Folders can not be accessed.",
       "LINK_DOWNLOADS":"Number downloads: {{ count }}",
@@ -223,7 +224,7 @@
       "COPIED_CLIPBOARD_ERROR":"Failed to copy link. Please mark and copy it manually"
     },
     "WORKFLOW": {
-      "TITLE": "workflow for {{ name }}",
+      "TITLE": "workflow",
       "RECEIVERS": "user/editorial group",
       "RECEIVERS_HINT": "Who is in charge?",
       "COMMENT": "comments",
@@ -239,7 +240,7 @@
       "PROCEED":"Proceed"
     },
     "CONTRIBUTOR":{
-      "TITLE":"Contributors of {{ name }}",
+      "TITLE":"Set Contributors",
       "ADD_TITLE":"Add new contributor",
       "EDIT_TITLE":"Edit contributor",
       "LIFECYCLECONTRIBUTOR":"Contributors of content",

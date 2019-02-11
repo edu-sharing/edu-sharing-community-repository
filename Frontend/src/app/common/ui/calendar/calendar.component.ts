@@ -11,11 +11,16 @@ import {AddElement} from "../list-table/list-table.component";
 import {Router} from "@angular/router";
 import {UIConstants} from "../ui-constants";
 import {DateHelper} from "../DateHelper";
+import {trigger} from "@angular/animations";
+import {UIAnimation} from "../ui-animation";
 
 @Component({
   selector: 'calendar',
   templateUrl: 'calendar.component.html',
   styleUrls: ['calendar.component.scss'],
+    animations: [
+        trigger('overlay', UIAnimation.openOverlay(UIAnimation.ANIMATION_TIME_FAST))
+    ]
 })
 /**
  * An edu-sharing sidebar dialog for adding data to a collection
@@ -23,6 +28,8 @@ import {DateHelper} from "../DateHelper";
 export class CalendarComponent{
     showDatepicker = false;
     @Input() date : Date;
+    @Input() label : string;
+    @Input() isResettable = false;
     @Output() dateChange = new EventEmitter();
     @Input() minDate : Date;
     @Input() maxDate : Date;

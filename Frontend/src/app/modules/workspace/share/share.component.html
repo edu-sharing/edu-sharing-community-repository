@@ -1,5 +1,6 @@
-<card title="{{'WORKSPACE.SHARE.TITLE' | translate }}" [subtitle]="_node ? _node.name : null" tabbed="true" width="normal" height="large"
-    [buttons]="buttons"
+<card title="{{'WORKSPACE.SHARE.TITLE' | translate }}" [avatar]="_node ? _node.iconURL : null" [subtitle]="_node ? _node.name : null" tabbed="true" width="normal" height="xlarge"
+      [buttons]="buttons"
+      (onCancel)="cancel()"
 >
       <div class="share-link" tabindex="0" (click)="openLink()" (keyup.enter)="openLink()" *ngIf="!isCollection()"><i icon iconId="link"></i> <span>{{'WORKSPACE.OPTION.SHARE_LINK' | translate}}</span></div>
   <mat-tab-group mat-stretch-tabs [(selectedIndex)]="tab">

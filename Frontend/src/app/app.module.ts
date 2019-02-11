@@ -24,6 +24,7 @@ import {DECLARATIONS_SHARING} from './modules/sharing/declarations';
 import {DECLARATIONS_REGISTER} from './modules/register/declarations';
 import {DECLARATIONS_SERVICES} from "./modules/services/declarations";
 import {DECLARATIONS_FILE_UPLOAD} from './modules/file-upload/declarations';
+import {MAT_FORM_FIELD_DEFAULT_OPTIONS, MAT_LABEL_GLOBAL_OPTIONS} from "@angular/material";
 
 
 // http://blog.angular-university.io/angular2-ngmodule/
@@ -57,7 +58,8 @@ import {DECLARATIONS_FILE_UPLOAD} from './modules/file-upload/declarations';
   imports: IMPORTS,
   providers: [
     PROVIDERS,
-    PROVIDERS_SEARCH
+    PROVIDERS_SEARCH,
+    {provide: MAT_FORM_FIELD_DEFAULT_OPTIONS, useValue: {appearance: 'outline'}}
   ],
   bootstrap: [RouterComponent]
 })

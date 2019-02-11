@@ -83,7 +83,6 @@
       <button mat-menu-item *ngIf="allowBinary && cordova.isRunningCordova()" (click)="openCamera()"><i icon iconId="camera_alt"></i> {{ 'WORKSPACE.ADD_CAMERA' | translate}}</button>
       <button mat-menu-item *ngIf="!allowBinary" (click)="createEmptyNode()"><i icon iconId="description"></i> {{ 'WORKSPACE.ADD_EMPTY_OBJECT' | translate}}</button>
       <button mat-menu-item (click)="addFolderName=''"><i icon iconId="create_new_folder"></i> {{ 'WORKSPACE.ADD_FOLDER' | translate}}</button>
-      <ng-container>
       <button mat-menu-item *ngFor="let connector of (connectorList && allowBinary) ? connectorList : null;let i=index"
        [class.mat-menu-item-seperate]="!i"
        (click)="createConnectorName='';createConnectorType=connector">
@@ -91,7 +90,6 @@
         {{ 'CONNECTOR.'+connector.id+'.NAME' | translate}}
         <img style="padding-left:5px" src="assets/images/beta.svg" alt="">
       </button>
-      </ng-container>
   </mat-menu>
   <div class="dialog" *ngIf="showSelectRoot" (click)="showSelectRoot=false"></div>
   <div class="selectRootMenu collection" [@overlay]="showSelectRoot" *ngIf="showSelectRoot">

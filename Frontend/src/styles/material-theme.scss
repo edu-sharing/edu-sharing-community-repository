@@ -64,7 +64,25 @@ $candy-app-theme: mat-light-theme($candy-app-primary, $candy-app-accent, $candy-
     text-transform: uppercase;
   }
 }
+// form border on hover
+.mat-form-field-appearance-outline .mat-form-field-outline-thick{
+  color:$primaryMediumLight;
+}
+.mat-checkbox-inner-container{
+  width:18px!important;
+  height:18px!important;
+  .mat-checkbox-frame {
+    border-color: $primary;
+    background-color: #fff;
+  }
+}
+.mat-raised-button{
+  color: $primary;
+}
 .mat-button-wrapper{
+  display: flex;
+  align-items: center;
+  justify-content: center;
   text-transform: uppercase;
   > i {
     width: 35px;

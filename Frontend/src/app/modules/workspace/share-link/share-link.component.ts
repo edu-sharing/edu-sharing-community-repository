@@ -31,6 +31,7 @@ export class WorkspaceShareLinkComponent  {
   public _expiryDate : Date;
   private currentDate: number;
   private edit: boolean;
+  public buttons: DialogButton[];
   public today = new Date();
   public set expiryDate(date:Date){
     this._expiryDate=date;
@@ -139,12 +140,7 @@ export class WorkspaceShareLinkComponent  {
     private translate:TranslateService,
     private toast:Toast,
   ){
-    /*
-    this.dateOptions={};
-    this.dateOptions.minDate=new Date(Date.now() - 1000 * 3600 * 24); // Minimal selectable date
-    this.dateOptions.minYear=new Date().getFullYear();
-    this.dateOptions.maxYear=new Date(new Date().getTime() * 1000 * 3600 * 365).getFullYear();
-    */
+    this.buttons=[new DialogButton('CLOSE',DialogButton.TYPE_PRIMARY,()=>this.cancel())];
   }
 
     private createShare() {

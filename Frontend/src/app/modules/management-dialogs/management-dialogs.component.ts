@@ -114,42 +114,18 @@ export class WorkspaceManagementDialogsComponent  {
         event.stopPropagation();
         return;
       }
-      if(this.addToCollection!=null){
-        this.cancelAddToCollection();
-        event.preventDefault();
-        event.stopPropagation();
-        return;
+      if(this.addToCollection!=null) {
+          this.cancelAddToCollection();
+          event.preventDefault();
+          event.stopPropagation();
+          return;
       }
-        if(this.nodeWorkflow!=null){
-            this.closeWorkflow();
-            event.preventDefault();
-            event.stopPropagation();
-            return;
-        }
-        if(this.nodeShare!=null){
-            this.closeShare();
-            event.preventDefault();
-            event.stopPropagation();
-            return;
-        }
-        if(this.nodeShareLink!=null){
-            this.closeShareLink();
-            event.preventDefault();
-            event.stopPropagation();
-            return;
-        }
         if(this.nodeTemplate!=null){
             this.closeTemplate();
             event.preventDefault();
             event.stopPropagation();
             return;
         }
-      if(this.nodeContributor!=null){
-        this.closeContributor();
-        event.preventDefault();
-        event.stopPropagation();
-        return;
-      }
       if(this.nodeLicense!=null){
         this.closeLicense();
         event.preventDefault();
@@ -168,12 +144,6 @@ export class WorkspaceManagementDialogsComponent  {
         event.stopPropagation();
         return;
       }
-        if(this.nodeVariant!=null){
-            this.closeVariant();
-            event.preventDefault();
-            event.stopPropagation();
-            return;
-        }
       if(this.ltiObject){
         this.ltiObject=null;
         event.preventDefault();

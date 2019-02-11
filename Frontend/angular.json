@@ -19,7 +19,7 @@
               "src/assets"
             ],
             "styles": [
-              "src/styles/materialize.css",
+              "src/styles/materialize.scss",
               "src/assets/fonts/opensans_regular/stylesheet.css",
               "src/assets/fonts/opensans_bold/stylesheet.css",
               "src/assets/fonts/material-design-icons/material-icons.css",
@@ -28,7 +28,6 @@
               "src/styles/custom_materialize.scss",
               "src/styles/material-theme.scss",
               "src/styles/dialogs.scss",
-              "src/styles/file-chooser.scss",
               "src/styles/globals.scss",
               "src/styles/toast.scss",
               "src/styles/mds.scss",

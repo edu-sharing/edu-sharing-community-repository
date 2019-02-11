@@ -1,82 +1,72 @@
-<div class="dialog darken" [style.z-index]="120 + priority" [@fade]="this"></div>
-  <div class="card card-high center-card card-action" [style.z-index]="121 + priority" [@cardAnimation]="this">
-    <div class="card-content">
-      <div tabindex="0" class="card-cancel" (click)="cancel()" (keyup.enter)="cancel()"><i icon iconId="close" aria="true"></i></div>
-      <div class="card-title">{{'WORKSPACE.SHARE_LINK.TITLE' | translate:{name:_node ? _node.name : ''} }}</div>
-      <div class="card-scroll">
-        <spinner *ngIf="loading"></spinner>
-        <div *ngIf="!loading">
-          <div class="info">
-            <div class="configuration-link">
-              <div class="info-left">
-                <div class="heading">{{'WORKSPACE.SHARE_LINK.EXPIRY_TITLE' | translate}}</div>
-                <div>{{'WORKSPACE.SHARE_LINK.EXPIRY_INFO' | translate}}</div>
-                <!--<mat-form-field>
-                  <input matInput [matDatepicker]="picker" readonly placeholder="{{'CHOOSE_DATE' | translate}}">
-                  <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
-                  <mat-datepicker #picker></mat-datepicker>
-                </mat-form-field>-->
-                <calendar *ngIf="expiry" [(date)]="expiryDate" [minDate]="today"></calendar>
-                <!--<ng-datepicker class="datepickerShareLink" *ngIf="expiry" [(ngModel)]="expiryDate"
-                               [options]="dateOptions"></ng-datepicker>-->
-              </div>
-              <div class="info-right">
-                <div class="switch">
-                  <label>
-                    <input type="checkbox" [(ngModel)]="expiry" (change)="setExpiry(expiry)" [disabled]="!enabled">
-                    <span class="lever"></span>
-                  </label>
-                </div>
-              </div>
-            </div>
-            <div class="configuration-link">
-              <div class="info-left">
-                <div class="heading">{{'WORKSPACE.SHARE_LINK.PASSWORD' | translate}}</div>
-                <div>{{'WORKSPACE.SHARE_LINK.PASSWORD_INFO' | translate}}</div>
-              </div>
-
-              <div class="info-right small-switch">
-                <div class="switch">
-                  <label>
-                    <input type="checkbox" [(ngModel)]="password" (change)="setPassword()" [disabled]="!enabled">
-                    <span class="lever"></span>
-                  </label>
-                </div>
-              </div>
-              <input-password *ngIf="password" (change)="setPassword()" [(value)]="passwordString" placeholder="{{(edit ? 'WORKSPACE.SHARE_LINK.PASSWORD_PLACEHOLDER_EDIT' : 'WORKSPACE.SHARE_LINK.PASSWORD_PLACEHOLDER') | translate}}">
-              </input-password>
-            </div>
-          </div>
-
-          <div class="link">
-            <div class="info">
-              <div class="info-left">
-                <div>
-                  <input id="share" type="checkbox" class="filled-in" [(ngModel)]="enabled" (change)="setEnabled(enabled)"> <label for="share" class="link-activate">{{ 'WORKSPACE.SHARE_LINK.ACTIVATE' | translate}}
-                </label></div>
-              </div>
-
-            </div>
-            <label class="heading link-title">{{'WORKSPACE.SHARE_LINK.LINK' | translate}}</label>
-            <div class="info" [class.link-enabled]="enabled">
-              <div class="linkInput info-left">
-                <input type="text" #shareUrl [disabled]="!enabled" (click)="shareUrl.select()" readonly="true" [(ngModel)]="currentShare.url">
-              </div>
-              <div class="info-right copyLink">
-                <div tabindex="0" (click)="copyClipboard()" (keyup.enter)="copyClipboard()" class="btn-flat btn-shadow btn-icon btnVersion link-copy" *ngIf="enabled"> {{'WORKSPACE.SHARE_LINK.COPY_CLIPBOARD' |
-                  translate}}</div>
-              </div>
-            </div>
+<card title="{{'WORKSPACE.SHARE_LINK.TITLE' | translate }}" [priority]="priority" [avatar]="_node ? _node.iconURL : null" [subtitle]="_node ? _node.name : null" width="small" height="xlarge"
+      [buttons]="buttons"
+      (onCancel)="cancel()"
+>
+  <spinner *ngIf="loading"></spinner>
+  <div *ngIf="!loading">
+    <div class="group">
+      <div class="configuration-link">
+        <div class="info-left">
+          <div class="heading">{{'WORKSPACE.SHARE_LINK.EXPIRY_TITLE' | translate}}</div>
+          <div>{{'WORKSPACE.SHARE_LINK.EXPIRY_INFO' | translate}}</div>
+          <!--<mat-form-field>
+            <input matInput [matDatepicker]="picker" readonly placeholder="{{'CHOOSE_DATE' | translate}}">
+            <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
+            <mat-datepicker #picker></mat-datepicker>
+          </mat-form-field>-->
+          <calendar *ngIf="expiry" label="{{'WORKSPACE.SHARE_LINK.EXPIRY_LABEL' | translate}}" [(date)]="expiryDate" [minDate]="today"></calendar>
+          <!--<ng-datepicker class="datepickerShareLink" *ngIf="expiry" [(ngModel)]="expiryDate"
+                         [options]="dateOptions"></ng-datepicker>-->
         </div>
-          <div class="link-info">{{('WORKSPACE.SHARE_LINK.LINK_INFO'+(_node.isDirectory ? '_FOLDER' : '')) | translate}}</div>
-          <div class="link-downloads" *ngIf="enabled">{{ 'WORKSPACE.SHARE_LINK.LINK_DOWNLOADS' |
-            translate:{count:currentShare.downloadCount} }}</div>
+        <div class="info-right">
+          <div class="switch">
+            <label>
+              <input type="checkbox" [(ngModel)]="expiry" (change)="setExpiry(expiry)" [disabled]="!enabled">
+              <span class="lever"></span>
+            </label>
+          </div>
         </div>
       </div>
+      <div class="configuration-link">
+        <div class="info-left">
+          <div class="heading">{{'WORKSPACE.SHARE_LINK.PASSWORD' | translate}}</div>
+          <div>{{'WORKSPACE.SHARE_LINK.PASSWORD_INFO' | translate}}</div>
+        </div>
 
+        <div class="info-right small-switch">
+          <div class="switch">
+            <label>
+              <input type="checkbox" [(ngModel)]="password" (change)="setPassword()" [disabled]="!enabled">
+              <span class="lever"></span>
+            </label>
+          </div>
+        </div>
+        <input-password *ngIf="password" (change)="setPassword()" [(value)]="passwordString" placeholder="{{(edit ? 'WORKSPACE.SHARE_LINK.PASSWORD_PLACEHOLDER_EDIT' : 'WORKSPACE.SHARE_LINK.PASSWORD_PLACEHOLDER') | translate}}">
+        </input-password>
+      </div>
     </div>
-    <div class="card-action">
-      <a tabindex="0" class="waves-effect waves-light btn" (keyup.enter)="cancel()" (click)="cancel()">{{'CLOSE' | translate }}</a>
+
+    <div class="link">
+      <div class="info">
+        <div class="info-checkbox">
+            <mat-checkbox [(ngModel)]="enabled" (change)="setEnabled(enabled)">{{ 'WORKSPACE.SHARE_LINK.ACTIVATE' | translate}}</mat-checkbox>
+        </div>
+      </div>
+      <div class="info link-info" [class.link-disabled]="!enabled">
+        <mat-form-field class="linkInput info-left">
+          <mat-label>{{'WORKSPACE.SHARE_LINK.LINK' | translate}}</mat-label>
+          <input matInput #shareUrl [disabled]="!enabled" (click)="shareUrl.select()" readonly="true" [(ngModel)]="currentShare.url">
+        </mat-form-field>
+        <div class="copyLink">
+          <button mat-raised-button (click)="copyClipboard()" [disabled]="!enabled" (keyup.enter)="copyClipboard()" class="link-copy"> {{'WORKSPACE.SHARE_LINK.COPY_CLIPBOARD' |
+            translate}}</button>
+        </div>
+      </div>
     </div>
+    <div class="group">
+      <div class="link-info">{{('WORKSPACE.SHARE_LINK.LINK_INFO'+(_node.isDirectory ? '_FOLDER' : '')) | translate}}</div>
+      <div class="link-downloads" *ngIf="enabled">{{ 'WORKSPACE.SHARE_LINK.LINK_DOWNLOADS' |
+        translate:{count:currentShare.downloadCount} }}</div>
+      </div>
   </div>
-
+</card>

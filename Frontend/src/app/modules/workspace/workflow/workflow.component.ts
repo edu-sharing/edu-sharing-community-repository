@@ -1,4 +1,4 @@
-import {Component, Input, EventEmitter, Output, ViewChild, ElementRef} from '@angular/core';
+import {Component, Input, EventEmitter, Output, ViewChild, ElementRef, OnChanges} from '@angular/core';
 import {RestNodeService} from "../../../common/rest/services/rest-node.service";
 import {RestConstants} from "../../../common/rest/rest-constants";
 import {
@@ -31,7 +31,7 @@ import {RestHelper} from "../../../common/rest/rest-helper";
     trigger('cardAnimation', UIAnimation.cardAnimation())
   ]
 })
-export class WorkspaceWorkflowComponent  {
+export class WorkspaceWorkflowComponent{
   private _nodeId: string;
   public dialogTitle:string;
   public dialogMessage:string;
@@ -49,6 +49,7 @@ export class WorkspaceWorkflowComponent  {
   public globalAllowed: boolean;
   public globalSearch = false;
   public TYPE_EDITORIAL=RestConstants.GROUP_TYPE_EDITORIAL;
+  private buttons: DialogButton[];
   @Input() set nodeId(nodeId : string){
     this._nodeId=nodeId;
     this.loading=true;
@@ -88,11 +89,13 @@ export class WorkspaceWorkflowComponent  {
     }
     this.status=status;
     this.chooseStatus=false;
+    this.updateButtons();
   }
   private addSuggestion(data: UserSimple) {
     /*if(this.receivers.indexOf(data.item.id)==-1)
       this.receivers.push(data.item.id);*/
     this.receivers=[data];
+    this.updateButtons();
   }
   public getWorkflowForId(id:string){
     return NodeHelper.getWorkflowStatusById(this.config,id);
@@ -102,6 +105,7 @@ export class WorkspaceWorkflowComponent  {
     if(pos!=-1){
       this.receivers.splice(pos,1);
     }
+    this.updateButtons();
   }
   public hasChanges(){
     return this.statusChanged() || this.receiversChanged();
@@ -166,6 +170,7 @@ export class WorkspaceWorkflowComponent  {
     private connector:RestConnectorService,
     private toast:Toast,
   ){
+    this.updateButtons();
     this.connector.hasToolPermission(RestConstants.TOOLPERMISSION_GLOBAL_AUTHORITY_SEARCH).subscribe((has:boolean)=>this.globalAllowed=has);
     this.config.getAll().subscribe(()=> {
       this.validStatus = NodeHelper.getWorkflows(this.config);
@@ -202,4 +207,13 @@ export class WorkspaceWorkflowComponent  {
       },(error:any)=>this.toast.error(error));
     },(error:any)=>this.toast.error(error));
   }
+    private updateButtons() {
+        console.log("update");
+        let save = new DialogButton('SAVE', DialogButton.TYPE_PRIMARY, () => this.saveWorkflow());
+        save.disabled=this.loading || !this.hasChanges();
+        this.buttons = [
+            new DialogButton('CANCEL', DialogButton.TYPE_CANCEL, () => this.cancel()),
+            save
+        ];
+    }
 }

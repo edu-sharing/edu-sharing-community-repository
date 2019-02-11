@@ -30,7 +30,22 @@
 .actionToggleDivider{
   border-left:1px solid #ddd;
 }
-
+.more{
+  color: $primary;
+  background-color: transparent;
+}
+button{
+  margin: 0 5px;
+}
+.actionbar-background-primary{
+  .mat-button{
+    color: $textOnPrimary;
+  }
+  .mat-flat-button{
+    background-color: #fff;
+    color: $primary;
+  }
+}
 .actionbar-round{
   button{
     border-radius: 50%;

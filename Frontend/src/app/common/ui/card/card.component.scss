@@ -1,11 +1,13 @@
 @import "../../../../styles/variables.scss";
 
-$titleHeight:90px;
+$titleHeight:70px;
 $actionMenuHeight:60px;
 $tabHeight:48px;
 
 $height-normal:500px;
 $height-large:600px;
+$height-xlarge:700px;
+$height-xxlarge:800px;
 
 @mixin content{
   overflow-y: auto;
@@ -18,12 +20,33 @@ $height-large:600px;
   align-items: center;
   justify-content: center;
   .modal-card{
+    max-width: 100%;
     @include materialShadowLarge();
     .mat-card-header{
       background-color: $actionDialogBackground;
       display: flex;
       align-items: center;
       height:$titleHeight;
+      padding-top: 15px;
+      position: relative;
+      >button{
+        position: absolute;
+        right:0;
+        top:0;
+        padding:16px;
+      }
+      .avatar{
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-left: 17px;
+        margin-top: -10px;
+        background-color: #fff;
+        >img{
+          width:26px;
+          height:26px;
+        }
+      }
     }
     background-color: $backgroundColor;
     border-radius: 2px;
@@ -43,6 +66,9 @@ $height-large:600px;
       margin: 0;
       position: relative;
     }
+    &.width-small{
+      width:500px;
+    }
     &.width-normal{
       width:600px;
     }
@@ -56,6 +82,12 @@ $height-large:600px;
       }
       &.height-large mat-card-content {
         height: $height-large - $titleHeight - $actionMenuHeight;
+      }
+      &.height-xlarge mat-card-content {
+        height: $height-xlarge - $titleHeight - $actionMenuHeight;
+      }
+      &.height-xxlarge mat-card-content {
+        height: $height-xxlarge - $titleHeight - $actionMenuHeight;
       }
       &.height-auto mat-card-content {
         height: auto;
@@ -71,6 +103,12 @@ $height-large:600px;
       }
       &.height-large .mat-tab-body-wrapper{
         height: $height-large - $titleHeight - $actionMenuHeight - $tabHeight;
+      }
+      &.height-xlarge .mat-tab-body-wrapper{
+        height: $height-xlarge - $titleHeight - $actionMenuHeight - $tabHeight;
+      }
+      &.height-xxlarge .mat-tab-body-wrapper{
+        height: $height-xxlarge - $titleHeight - $actionMenuHeight - $tabHeight;
       }
     }
   }

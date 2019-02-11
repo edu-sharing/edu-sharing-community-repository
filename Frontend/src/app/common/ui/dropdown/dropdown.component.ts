@@ -12,10 +12,7 @@ import {MatMenu, MatMenuTrigger} from '@angular/material';
 @Component({
   selector: 'dropdown',
   templateUrl: 'dropdown.component.html',
-  styleUrls: ['dropdown.component.scss'],
-  animations: [
-    trigger('openOverlay', UIAnimation.openOverlay(UIAnimation.ANIMATION_TIME_FAST))
-  ]
+  styleUrls: ['dropdown.component.scss']
 })
 /**
  * The dropdown is one base component of the action bar (showing more actions), but can also be used standalone
@@ -46,6 +43,7 @@ export class DropdownComponent{
           return;
       option.callback(this.callbackObject);
   }
-  constructor(private ui : UIService){}
+  constructor(private ui : UIService){
 
+  }
 }

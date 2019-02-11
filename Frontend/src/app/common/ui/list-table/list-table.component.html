@@ -1,5 +1,7 @@
 
 <div #drag class="dragBadge" [style.top]="(id*-9999999)+'px'"><div class="badge">{{currentDrag}}</div><div class="count">{{currentDragCount}}</div></div>
+<button #menuTrigger="matMenuTrigger" mat-button class="dropdown-dummy" [style.left]="dropdownLeft" [style.top]="dropdownTop" [matMenuTriggerFor]="dropdown.menu"></button>
+<dropdown #dropdown [options]="_options"></dropdown>
 
 <div class="dialog darken" *ngIf="reorderDialog">
     <div class="card center-card card-action">
@@ -14,7 +16,7 @@
                  (dragover)="allowDragColumn($event,i,item)" (drop)="dropColumn($event,i,item)"
                  (dragstart)="dragStartColumn($event,i,item)"
             >
-                <input type="checkbox" class="filled-in" id="{{item.name}}" disabled="{{i==0}}" [(ngModel)]="item.visible"><label for="{{item.name}}">{{item.type+"."+item.name | translate}}</label>
+                <mat-checkbox [disabled]="i==0" [(ngModel)]="item.visible">{{item.type+"."+item.name | translate}}</mat-checkbox>
             </div>
         </div>
         <div class="card-action">
@@ -31,7 +33,6 @@
         </div>
     </div>
 </div>
-<div class="dialog dialogOptions" *ngIf="dropdown" (click)="dropdown=null" (contextmenu)="dropdown=null;$event.preventDefault();$event.stopPropagation();"></div>
 <div [className]="'list '+listClass" infinite-scroll [scrollWindow]="scrollWindow" (scrolled)="scroll(false)">
     <div class="headingGroup" *ngIf="hasHeading && viewType==0">
         <div class="totalCount" *ngIf="totalCount && hasCheckbox && !isLoading">({{selectedNodes && selectedNodes.length ? selectedNodes.length+'/'+totalCount : totalCount}})</div>
@@ -40,8 +41,7 @@
 
         <div class="heading">
         <div class="checkbox" *ngIf="hasCheckbox">
-            <input *ngIf="_nodes && _nodes.length" id="selectAll" (click)="toggleAll()" type="checkbox" class="filled-in" [checked]="selectedNodes.length==_nodes.length"/>
-            <label for="selectAll">&nbsp;</label>
+            <mat-checkbox *ngIf="_nodes && _nodes.length" (change)="toggleAll()" [ngModel]="selectedNodes.length==_nodes.length"></mat-checkbox>
         </div>
         <div class="checkboxDummy" *ngIf="!hasCheckbox">&nbsp;</div>
         <div class="icon" *ngIf="hasIcon">&nbsp;</div>
@@ -85,33 +85,6 @@
              [class.cardList]="viewType==1"
              [class.cardSmallList]="viewType==2"
              [class.hover]="dragHover==node">
-            <div class="collectionContainer"
-                 #dropdownContainer
-                 *ngIf="dropdown==node && _options && _options.length"
-                 (click)="dropdown=null" (contextmenu)="dropdown=null;$event.preventDefault();$event.stopPropagation();"
-            >
-            <div class="moreOpen collection"
-                     #dropdown
-                     *ngIf="dropdown==node && _options && _options.length"
-                     [@openOverlay]="dropdown==node && dropdownBottom==null"
-                     [style.position]="dropdownPosition"
-                     [style.left]="dropdownLeft"
-                     [style.top]="dropdownTop"
-                     [style.bottom]="dropdownBottom"
-                     [style.right]="dropdownRight"
-                >
-                    <a class="collection-item collection-item-{{option.name | replaceChars:{search:'.',replace:'-'} }}"
-                       [class.collection-item-seperate-bottom]="option.isSeperateBottom && i"
-                       [class.collection-item-seperate]="option.isSeperate && i"
-                       *ngFor="let option of _options;let i=index"
-                       [class.disabled]="!optionIsValid(option,node)"
-                       [style.display]="optionIsShown(option,node) ? '' : 'none'"
-                       (contextmenu)="callOption(option,node);$event.preventDefault();$event.stopPropagation();"
-                       tabindex="0"
-                       (keyup.enter)="callOption(option,node)"
-                       (click)="callOption(option,node)"><i icon iconId="{{option.icon}}"></i> {{option.name | translate}}</a>
-                </div>
-            </div>
             <div class="row waves-effect node-row"
                  [class.noCCPublish]="applyMode && node.access.indexOf('CCPublish')==-1"
                  [class.noPermissions]="noPermissions(node)"
@@ -145,12 +118,7 @@
                 <div *ngIf="isCollection(node) && getCollection(node).type=='EDITORIAL'" class="collectionEditorial"><i class="material-icons">star</i></div>
                 <div *ngIf="isCollection(node) && getCollection(node).pinned" class="collectionPinned"><i icon iconId="edu-pin"></i></div>
                 <div class="checkbox column" *ngIf="hasCheckbox">
-                    <div tabindex="0"
-                     (keydown)="$event.keyCode==32 ? (select(node,'checkbox') || $event.preventDefault()) : null"
-                     (click)="select(node,'checkbox');$event.stopPropagation();"></div>
-                    <input type="checkbox" class="filled-in" [attr.id]="id+'select'+i" tabindex="-1"
-                           checked="{{getSelectedPos(node)!=-1 ? 'checked' : ''}}"/>
-                    <label [attr.for]="id+'select'+i">&nbsp;</label>
+                    <mat-checkbox [ngModel]="getSelectedPos(node)!=-1" (change)="select(node,'checkbox')" (click)="$event.stopPropagation();"></mat-checkbox>
                 </div>
                 <div class="checkboxDummy column" *ngIf="!hasCheckbox"></div>
                 <div class="ccPublishMissing" *ngIf="applyMode && node.access.indexOf('CCPublish')==-1">
@@ -219,9 +187,8 @@
                      (click)="optionIsShown(option,node) ? callOption(option,node) : null">
                     <i icon iconId="{{option.icon}}"></i>
                 </div>
-
-                <div tabindex="0" (click)="showDropdown(node);$event.stopPropagation()" (keyup.enter)="showDropdown(node);$event.stopPropagation();" class="more column" *ngIf="_options && _options.length>1"><a><i icon iconId="more_vert" aria="true"></i></a></div>
-                <div tabindex="0" class="more moreSingle column" *ngIf="_options && _options.length==1 && optionIsShown(_options[0],node)" (click)="callOption(_options[0],node);$event.stopPropagation()" (keyup.enter)="callOption(_options[0],node);$event.stopPropagation()"><a [class.disabled]="!optionIsValid(_options[0],node)"><i icon iconId="{{_options[0].icon}}"></i> <span class="actionText">{{_options[0].name | translate}}</span></a></div>
+                <div class="more column" *ngIf="_options && _options.length>1"><button mat-icon-button [matMenuTriggerFor]="dropdown.menu" (click)="showDropdown(node);$event.stopPropagation();"><i icon iconId="more_vert" aria="true"></i></button></div>
+                <div tabindex="0" class="more moreSingle column" *ngIf="_options && _options.length==1 && optionIsShown(_options[0],node)" (click)="callOption(_options[0],node);$event.stopPropagation();" (keyup.enter)="callOption(_options[0],node);$event.stopPropagation()"><a [class.disabled]="!optionIsValid(_options[0],node)"><i icon iconId="{{_options[0].icon}}"></i> <span class="actionText">{{_options[0].name | translate}}</span></a></div>
             </div>
         </div>
         <div *ngIf="_nodes && _nodes.length && hasMore && !isLoading" class="clickable loadMore" (click)="scroll(true)">

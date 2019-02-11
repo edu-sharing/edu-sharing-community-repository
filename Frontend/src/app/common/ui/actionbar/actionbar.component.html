@@ -4,7 +4,7 @@
           [showDisabled]="showDisabled"
           [position]="dropdownPosition"
 ></dropdown>
-<div class="actionbar" [class.actionbar-all-flat]="style=='flat'" [class.actionbar-round]="appearance=='round'">
+<div class="actionbar" [class.actionbar-all-flat]="style=='flat'" [class.actionbar-background-primary]="backgroundType=='primary'" [class.actionbar-round]="appearance=='round'">
     <button mat-flat-button
             color="primary"
             *ngIf="optionsAlways.length>0;"
@@ -23,7 +23,7 @@
       <i icon title="{{option.showName ? null : (option.name | translate)}}" [iconId]="option.icon"></i>
       <span class="actionAlwaysCaption" *ngIf="option.showName && appearance!='round'"> {{option.name | translate}}</span>
     </button>
-<button mat-button class="more" color="primary"
+<button mat-flat-button class="more"
         [matMenuTriggerFor]="dropdownRef.menu"
         *ngIf="canShowDropdown()"><i icon iconId="more_vert" aria="true"></i></button>
 <div *ngIf="optionsToggle.length" class="actionToggle" [class.actionToggleDivider]="optionsAlways.length">

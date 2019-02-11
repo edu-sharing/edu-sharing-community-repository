@@ -31,7 +31,7 @@ export class WorkspaceContributorComponent  {
   public loading=true;
   public edit: VCard;
   public editMode: string;
-  public editType: string;
+  public editType: number;
   public more = false;
   public editScopeNew: string;
   private editScopeOld: string;
@@ -42,6 +42,10 @@ export class WorkspaceContributorComponent  {
   public dialogParameters: any;
   public node: Node;
   public date : Date;
+  private buttons: DialogButton[];
+  private editButtons: DialogButton[];
+  private static TYPE_PERSON = 0;
+  private static TYPE_ORG = 1;
   @Input() set nodeId(nodeId : string){
     this._nodeId=nodeId;
     this.loading=true;
@@ -88,7 +92,7 @@ export class WorkspaceContributorComponent  {
   }
   public addVCard(mode:string) {
     this.date=null;
-    this.editType='person';
+    this.editType=WorkspaceContributorComponent.TYPE_PERSON;
     this.editMode=mode;
     this.edit=new VCard();
     this.editOriginal=null;
@@ -106,7 +110,7 @@ export class WorkspaceContributorComponent  {
     this.edit=vcard.copy();
     this.editScopeOld=scope;
     this.editScopeNew=scope;
-    this.editType=vcard.givenname||vcard.surname ? 'person' : 'org';
+    this.editType=vcard.givenname||vcard.surname ? WorkspaceContributorComponent.TYPE_PERSON : WorkspaceContributorComponent.TYPE_ORG;
     this.date=null;
     let contributeDate=vcard.contributeDate;
     console.log(contributeDate);
@@ -124,15 +128,15 @@ export class WorkspaceContributorComponent  {
     }
   }
   public saveEdits(){
-    if(this.editType=='person' && (!this.edit.givenname || !this.edit.surname)){
+    if(this.editType==WorkspaceContributorComponent.TYPE_PERSON && (!this.edit.givenname || !this.edit.surname)){
       this.toast.error(null,'WORKSPACE.CONTRIBUTOR.ERROR_PERSON_NAME');
       return;
     }
-    if(this.editType=='org' && (!this.edit.org)){
+    if(this.editType==WorkspaceContributorComponent.TYPE_ORG && (!this.edit.org)){
       this.toast.error(null,'WORKSPACE.CONTRIBUTOR.ERROR_ORG_NAME');
       return;
     }
-    if(this.editType=='org'){
+    if(this.editType==WorkspaceContributorComponent.TYPE_ORG){
       this.edit.givenname='';
       this.edit.surname='';
       this.edit.title='';
@@ -154,9 +158,6 @@ export class WorkspaceContributorComponent  {
     }
     console.log(array);
     this.edit=null;
-  }
-  public setTab(tab:string){
-    this.editType=tab;
   }
   public saveContributor(){
     this.onLoading.emit(true);
@@ -187,6 +188,10 @@ export class WorkspaceContributorComponent  {
     });
   }
   public cancel(){
+    if(this.edit!=null){
+      this.edit=null;
+      return;
+    }
     this.onClose.emit();
   }
   public constructor(
@@ -194,7 +199,14 @@ export class WorkspaceContributorComponent  {
     private translate:TranslateService,
     private toast:Toast,
   ){
-
+    this.buttons=[
+        new DialogButton('CANCEL',DialogButton.TYPE_CANCEL,()=>this.cancel()),
+        new DialogButton('APPLY',DialogButton.TYPE_PRIMARY,()=>this.saveContributor())
+    ];
+    this.editButtons=[
+        new DialogButton('CANCEL',DialogButton.TYPE_CANCEL,()=>this.cancel()),
+        new DialogButton('APPLY',DialogButton.TYPE_PRIMARY,()=>this.saveEdits())
+    ];
   }
 
 }

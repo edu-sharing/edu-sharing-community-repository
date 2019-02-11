@@ -26,6 +26,7 @@ import {RestSharingService} from "./common/rest/services/rest-sharing.service";
 import {ActionbarHelperService} from "./common/services/actionbar-helper";
 import {PermissionNamePipe} from "./common/ui/permission-name.pipe";
 import {RestRegisterService} from './common/rest/services/rest-register.service';
+import {MAT_LABEL_GLOBAL_OPTIONS} from "@angular/material";
 
 
 export const PROVIDERS:any=[
@@ -56,5 +57,5 @@ export const PROVIDERS:any=[
   SessionStorageService,
   ConfigurationService,
   UIService,
-  CordovaService
+  CordovaService,
 ];
