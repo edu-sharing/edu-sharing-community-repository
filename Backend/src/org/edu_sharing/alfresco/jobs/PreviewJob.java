@@ -62,97 +62,14 @@ public class PreviewJob implements Job {
 				logger.info("starting, nodes with actions:" + ActionObserver.getInstance().getNodeActionsMap().size());
 				ActionObserver.getInstance().removeInactiveActions();
 
-				int countRunning = 0;
-				for (Map.Entry<NodeRef, List<Action>> entry : ActionObserver.getInstance().getNodeActionsMap()
-						.entrySet()) {
-					logger.info("node in actions map:" + entry.getKey() + " val:" + entry.getValue());
-					for (Action action : entry.getValue()) {
-						logger.info("action status:" + action.getExecutionStatus() + " created Date:"
-								+ action.getParameterValue(ActionObserver.ACTION_OBSERVER_ADD_DATE));
-						if (action.getExecutionStatus() == ActionStatus.Running
-								|| action.getExecutionStatus() == ActionStatus.Pending) {
-							countRunning++;
-						}
-					}
+
+				Map<NodeRef, List<Action>> m = ActionObserver.getInstance().getNodeActionsMap();
+
+				synchronized (m) {
+					runJob(m);
 				}
 
-				logger.info("found " + countRunning + " running");
 
-				if (countRunning < maxRunning) {
-					int newRunning = 0;
-					for (Map.Entry<NodeRef, List<Action>> entry : ActionObserver.getInstance().getNodeActionsMap()
-							.entrySet()) {
-						synchronized (entry.getValue()) {
-							for (Action action : entry.getValue()) {
-
-								logger.info("check start for id:" + action.getId() + " status "
-										+ action.getExecutionStatus() + " " + action.getActionDefinitionName());
-								if (action.getExecutionStatus() == ActionStatus.New && action.getActionDefinitionName()
-										.equals(CCConstants.ACTION_NAME_CREATE_THUMBNAIL)) {
-
-									RunAsWork<Void> executeActionRunAs = new RunAsWork<Void>() {
-										@Override
-										public Void doWork() throws Exception {
-											actionService.executeAction(action, entry.getKey(), true, false);
-											return null;
-										}
-									};
-
-									String creator = (String) serviceRegistry.getNodeService()
-											.getProperty(entry.getKey(), ContentModel.PROP_CREATOR);
-
-									boolean hasContent = false;
-									ContentReader reader = serviceRegistry.getContentService().getReader(entry.getKey(),
-											ContentModel.PROP_CONTENT);
-									if (reader != null) {
-										if (reader.getSize() > 0) {
-											hasContent = true;
-										}
-									}
-
-									if (hasContent) {
-
-										logger.info("will run as " + creator);
-										logger.info("starting action syncronously. nodeRef:" + entry.getKey());
-
-										String name = (String) serviceRegistry.getNodeService()
-												.getProperty(entry.getKey(), ContentModel.PROP_NAME);
-										logger.info("preview job execute action for :" + name);
-
-										LockState lockState = serviceRegistry.getLockService()
-												.getLockState(entry.getKey());
-										logger.info("preview job lock state: " + lockState.getLockType() + "  "
-												+ lockState.getLifetime() + " " + lockState.getAdditionalInfo() + " "
-												+ lockState);
-
-										Date date = (Date)action.getParameterValue(ActionObserver.ACTION_OBSERVER_ADD_DATE);
-
-										if(System.currentTimeMillis() > (date.getTime() + 15000)) {
-											AuthenticationUtil.runAs(executeActionRunAs, creator);
-											logger.info("finished action syncronously. nodeRef:" + entry.getKey()
-													+ " action status:" + action.getExecutionStatus()
-													+ " ExecutionStartDate:" + action.getExecutionStartDate() +" filename:" + name);
-											newRunning++;
-										}else {
-											logger.info("will wait 15 sek before starting thumnail action for" + name);
-										}
-									} else {
-										/**
-										 * @todo rember the tries and remove from ActionObserver
-										 */
-										logger.info(entry.getKey() + " does not have content yet");
-									}
-								}
-							}
-						}
-
-						if (countRunning + newRunning >= maxRunning) {
-							logger.info("returning cause countRunning + newRunning >= maxRunning");
-							return null;
-						}
-					}
-
-				}
 				logger.info("returning");
 				return null;
 			}
@@ -160,5 +77,106 @@ public class PreviewJob implements Job {
 
 		AuthenticationUtil.runAsSystem(runAsP);
 	}
-	
+
+	/**
+	 * 15 seconds latency before starting
+	 */
+	long latency = 15000;
+
+	public void runJob(Map<NodeRef, List<Action>> m) {
+		int countRunning = 0;
+
+
+
+			for (Map.Entry<NodeRef, List<Action>> entry : m.entrySet()) {
+				logger.info("node in actions map:" + entry.getKey() + " val:" + entry.getValue());
+				for (Action action : entry.getValue()) {
+					logger.info("action status:" + action.getExecutionStatus() + " created Date:"
+							+ action.getParameterValue(ActionObserver.ACTION_OBSERVER_ADD_DATE));
+					if (action.getExecutionStatus() == ActionStatus.Running
+							|| action.getExecutionStatus() == ActionStatus.Pending) {
+						countRunning++;
+					}
+				}
+			}
+
+			logger.info("found " + countRunning + " running");
+
+			if (countRunning < maxRunning) {
+				int newRunning = 0;
+				for (Map.Entry<NodeRef, List<Action>> entry : m.entrySet()) {
+					synchronized (entry.getValue()) {
+						for (Action action : entry.getValue()) {
+
+							logger.info("check start for id:" + action.getId() + " status "
+									+ action.getExecutionStatus() + " " + action.getActionDefinitionName());
+							if (action.getExecutionStatus() == ActionStatus.New
+									&& action.getActionDefinitionName()
+											.equals(CCConstants.ACTION_NAME_CREATE_THUMBNAIL)) {
+
+								RunAsWork<Void> executeActionRunAs = new RunAsWork<Void>() {
+									@Override
+									public Void doWork() throws Exception {
+										actionService.executeAction(action, entry.getKey(), true, false);
+										return null;
+									}
+								};
+
+								String creator = (String) serviceRegistry.getNodeService()
+										.getProperty(entry.getKey(), ContentModel.PROP_CREATOR);
+
+								boolean hasContent = false;
+								ContentReader reader = serviceRegistry.getContentService()
+										.getReader(entry.getKey(), ContentModel.PROP_CONTENT);
+								if (reader != null) {
+									if (reader.getSize() > 0) {
+										hasContent = true;
+									}
+								}
+
+								if (hasContent) {
+
+									logger.info("will run as " + creator);
+
+									String name = (String) serviceRegistry.getNodeService()
+											.getProperty(entry.getKey(), ContentModel.PROP_NAME);
+
+									LockState lockState = serviceRegistry.getLockService()
+											.getLockState(entry.getKey());
+									logger.info("preview job execute action for :" + name +" lock state: " + lockState.getLockType() + "  "
+											+ lockState.getLifetime() + " " + lockState.getAdditionalInfo()
+											+ " " + lockState);
+
+									Date date = (Date) action
+											.getParameterValue(ActionObserver.ACTION_OBSERVER_ADD_DATE);
+
+									if (System.currentTimeMillis() > (date.getTime() + latency)) {
+										AuthenticationUtil.runAs(executeActionRunAs, creator);
+										logger.info("finished action syncronously. nodeRef:" + entry.getKey()
+												+ " action status:" + action.getExecutionStatus()
+												+ " ExecutionStartDate:" + action.getExecutionStartDate()
+												+ " filename:" + name);
+										newRunning++;
+									} else {
+										logger.info(
+												"will wait 15 sek before starting thumnail action for" + name);
+									}
+								} else {
+									/**
+									 * @todo rember the tries and remove from ActionObserver
+									 */
+									logger.info(entry.getKey() + " does not have content yet");
+								}
+							}
+						}
+					}
+
+					if (countRunning + newRunning >= maxRunning) {
+						logger.info("returning cause countRunning + newRunning >= maxRunning");
+					}
+				}
+
+
+		}
+	}
 }
