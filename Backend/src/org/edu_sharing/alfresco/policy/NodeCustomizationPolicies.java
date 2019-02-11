@@ -183,8 +183,7 @@ public class NodeCustomizationPolicies implements OnContentUpdatePolicy, OnCreat
 					&& (LockStatus.NO_LOCK.equals(lockStatus) || LockStatus.LOCK_EXPIRED.equals(lockStatus))
 					&& (reader!=null) && (reader.getContentData()!=null) && reader.getContentData().getSize() > 0){
 			
-				logger.debug("will do the thumbnail");
-				
+				logger.debug("adding noderef for thumbnail handling: " +nodeRef );
 				new ThumbnailHandling().thumbnailHandling(nodeRef);
 				
 				SimpleTrigger st = new SimpleTrigger();

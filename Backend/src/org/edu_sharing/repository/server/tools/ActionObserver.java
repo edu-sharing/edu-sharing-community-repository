@@ -74,7 +74,18 @@ public class ActionObserver {
 				nodeActionsMap.put(nodeRef, actions);
 			}
 		}
-		actions.add(action);
+		
+		/**
+		 * webdav Edu_SharingUnlockMethod is sometimes called twice for the same node 
+		 * so check if actionDef is already there
+		 */
+		boolean alreadyThere = false;
+		for(Action a : actions) {
+			if(action.getActionDefinitionName().equals(a.getActionDefinitionName())){
+				alreadyThere = true;
+			}
+		}
+		if(!alreadyThere) actions.add(action);
 	}
 
 	/**
