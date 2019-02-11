@@ -34,6 +34,11 @@ public class PreviewJob implements Job {
 
 	Logger logger = Logger.getLogger(PreviewJob.class);
 
+	/**
+	 * 5 seconds latency before starting
+	 */
+	long latency = 5000;
+
 	@Override
 	public void execute(JobExecutionContext context) throws JobExecutionException {
 
@@ -77,6 +82,9 @@ public class PreviewJob implements Job {
 
 		AuthenticationUtil.runAsSystem(runAsP);
 	}
+	
+
+	
 
 	/**
 	 * 15 seconds latency before starting
@@ -85,22 +93,25 @@ public class PreviewJob implements Job {
 
 	public void runJob(Map<NodeRef, List<Action>> m) {
 		int countRunning = 0;
-
-
-
+		int countPending = 0;
+		
+		
 			for (Map.Entry<NodeRef, List<Action>> entry : m.entrySet()) {
-				logger.info("node in actions map:" + entry.getKey() + " val:" + entry.getValue());
 				for (Action action : entry.getValue()) {
-					logger.info("action status:" + action.getExecutionStatus() + " created Date:"
+					logger.debug("action status:" + action.getExecutionStatus() + " created Date:"
 							+ action.getParameterValue(ActionObserver.ACTION_OBSERVER_ADD_DATE));
 					if (action.getExecutionStatus() == ActionStatus.Running
 							|| action.getExecutionStatus() == ActionStatus.Pending) {
 						countRunning++;
 					}
+
+					if (action.getExecutionStatus() == ActionStatus.Pending) {
+						countPending++;
+					}
 				}
 			}
 
-			logger.info("found " + countRunning + " running");
+			logger.info("found " + countRunning + " running/pending" + " countPending:" + countPending);
 
 			if (countRunning < maxRunning) {
 				int newRunning = 0;
@@ -108,7 +119,7 @@ public class PreviewJob implements Job {
 					synchronized (entry.getValue()) {
 						for (Action action : entry.getValue()) {
 
-							logger.info("check start for id:" + action.getId() + " status "
+							logger.debug("check start for id:" + action.getId() + " status "
 									+ action.getExecutionStatus() + " " + action.getActionDefinitionName());
 							if (action.getExecutionStatus() == ActionStatus.New
 									&& action.getActionDefinitionName()
@@ -136,14 +147,12 @@ public class PreviewJob implements Job {
 
 								if (hasContent) {
 
-									logger.info("will run as " + creator);
-
 									String name = (String) serviceRegistry.getNodeService()
 											.getProperty(entry.getKey(), ContentModel.PROP_NAME);
-
+									
 									LockState lockState = serviceRegistry.getLockService()
 											.getLockState(entry.getKey());
-									logger.info("preview job execute action for :" + name +" lock state: " + lockState.getLockType() + "  "
+									logger.debug("preview job execute action for :" + name +" lock state: " + lockState.getLockType() + "  "
 											+ lockState.getLifetime() + " " + lockState.getAdditionalInfo()
 											+ " " + lockState);
 
@@ -152,14 +161,14 @@ public class PreviewJob implements Job {
 
 									if (System.currentTimeMillis() > (date.getTime() + latency)) {
 										AuthenticationUtil.runAs(executeActionRunAs, creator);
-										logger.info("finished action syncronously. nodeRef:" + entry.getKey()
+										logger.debug("finished action syncronously. nodeRef:" + entry.getKey()
 												+ " action status:" + action.getExecutionStatus()
 												+ " ExecutionStartDate:" + action.getExecutionStartDate()
 												+ " filename:" + name);
 										newRunning++;
 									} else {
-										logger.info(
-												"will wait 15 sek before starting thumnail action for" + name);
+										logger.debug(
+												"will wait " + latency/1000 + " sek before starting thumnail action for" + name);
 									}
 								} else {
 									/**
