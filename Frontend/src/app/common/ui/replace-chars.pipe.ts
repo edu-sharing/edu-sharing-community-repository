@@ -11,7 +11,6 @@ export class ReplaceCharsPipe implements PipeTransform {
     if(!Array.isArray(args.search)){
         args.search=[args.search];
     }
-    console.log(args);
     if(args.replace && !Array.isArray(args.replace)){
         args.replace=[args.replace];
     }
