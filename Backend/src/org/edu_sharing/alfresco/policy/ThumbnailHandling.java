@@ -44,66 +44,6 @@ public class ThumbnailHandling {
 	
 	
 	public void thumbnailHandling(NodeRef nodeRef) {
-		ContentReader reader = contentService.getReader(nodeRef, ContentModel.PROP_CONTENT);
-		if(reader.getMimetype().contains("video")){
-			
-			ReadableByteChannel rbc = null;
-			try{
-				
-				rbc = Channels.newChannel(reader.getContentInputStream());
-				IsoFile isoFile = new IsoFile(rbc);
-				MovieBox moov = isoFile.getMovieBox();
-				if(moov != null && moov.getBoxes() != null){
-					for(Box b : moov.getBoxes()) {
-					   
-					    
-					    if(b instanceof TrackBox){
-					    	TrackHeaderBox thb = ((TrackBox)b).getTrackHeaderBox();
-					    	
-					    	if(thb.getWidth() > 0 && thb.getHeight() > 0){
-					    		nodeService.setProperty(nodeRef, QName.createQName(CCConstants.CCM_PROP_IO_WIDTH), thb.getWidth());
-					    		nodeService.setProperty(nodeRef, QName.createQName(CCConstants.CCM_PROP_IO_HEIGHT), thb.getHeight());
-					    	}
-					 
-					    }
-					    
-					}
-				}
-				
-			}catch(Exception e){
-				logger.error(e.getMessage(), e);
-			}finally{
-				
-				if(rbc != null){
-					try{
-					
-						rbc.close();
-					}catch(IOException e){
-						logger.error(e.getMessage(), e);
-					}
-				}
-			}
-		}
-		// alfresco does not read image size for all images, so we try to fix it
-		// trying to load not the whole image but just the bounding rect, see also:
-		// http://stackoverflow.com/questions/1559253/java-imageio-getting-image-dimensions-without-reading-the-entire-file
-		if(reader.getMimetype().contains("image")){
-			try{
-				try(ImageInputStream in = ImageIO.createImageInputStream(reader.getContentInputStream())){
-				    final Iterator<ImageReader> readers = ImageIO.getImageReaders(in);
-				    if (readers.hasNext()) {
-				        ImageReader imageReader = readers.next();
-				        try {
-				        	imageReader.setInput(in);
-				        	nodeService.setProperty(nodeRef, QName.createQName(CCConstants.EXIF_PROP_PIXELXDIMENSION), imageReader.getWidth(0));
-							nodeService.setProperty(nodeRef, QName.createQName(CCConstants.EXIF_PROP_PIXELYDIMENSION), imageReader.getHeight(0));
-				        } finally {
-				        	imageReader.dispose();
-				        }
-				    }
-				} 
-			}catch(Throwable t){}
-		}
 		
 		Action thumbnailAction = actionService.createAction(CCConstants.ACTION_NAME_CREATE_THUMBNAIL);
 		thumbnailAction.setTrackStatus(true);
