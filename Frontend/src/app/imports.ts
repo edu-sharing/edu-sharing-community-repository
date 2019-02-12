@@ -15,7 +15,7 @@ import {
     MatFormFieldModule,
     MatInputModule,
     MatMenuModule,
-    MatNativeDateModule, MatSelectModule, MatTabsModule,
+    MatNativeDateModule, MatRadioModule, MatSelectModule, MatSlideToggleModule, MatTabsModule,
     MatToolbarModule
 } from '@angular/material';
 import { LazyLoadImageModule } from 'ng-lazyload-image';
@@ -30,9 +30,11 @@ export const IMPORTS=[
   MatButtonModule,
   MatTabsModule,
   MatCheckboxModule,
+  MatSlideToggleModule,
   MatMenuModule,
   MatSelectModule,
   MatToolbarModule,
+  MatRadioModule,
   MatCardModule,
   MatDatepickerModule,
   MatNativeDateModule,

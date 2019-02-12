@@ -8,6 +8,8 @@ import {UIAnimation} from "../ui-animation";
 import {DialogButton} from "../modal-dialog/modal-dialog.component";
 import {MatDialog, MAT_DIALOG_DATA} from "@angular/material";
 import {UIService} from '../../services/ui.service';
+import {RestHelper} from "../../rest/rest-helper";
+import {Node} from "../../rest/data-object";
 
 @Component({
   selector: 'card',
@@ -31,6 +33,24 @@ export class CardComponent implements OnDestroy{
   @Input() height="normal";
   @Input() tabbed=false;
   @Input() priority=0;
+  @Input() set node(node:Node|Node[]){
+    if(!node)
+      return;
+    let nodes:Node[]=(node as any);
+    if(!Array.isArray(nodes)){
+      nodes=[(node as any)];
+    }
+    if(nodes && nodes.length){
+      if(nodes.length==1 && nodes[0]){
+        this.avatar=nodes[0].iconURL;
+        this.subtitle=RestHelper.getName(nodes[0]);
+      }
+      else{
+        this.avatar=null;
+        this.subtitle=this.translate.instant('CARD_SUBTITLE_MULTIPLE',{count:nodes.length});
+      }
+    }
+  }
   @Output() onCancel = new EventEmitter();
   /** A list of buttons, see @DialogButton
    * Also use the DialogButton.getYesNo() and others if applicable!
@@ -47,7 +67,7 @@ export class CardComponent implements OnDestroy{
               return;
       }
     }
-  constructor(private uiService: UIService){
+  constructor(private uiService: UIService,private translate : TranslateService){
       CardComponent.modalCards.splice(0,0,this);
   }
   ngOnDestroy(){

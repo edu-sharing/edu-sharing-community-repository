@@ -7,7 +7,7 @@
       <button mat-button *ngIf="isCancelable" (click)="cancel()"><i icon iconId="close"></i></button>
     </mat-card-header>
     <mat-card-content><ng-content></ng-content></mat-card-content>
-    <mat-card-actions>
+    <mat-card-actions *ngIf="_buttons && _buttons.length">
       <div *ngFor="let button of _buttons">
         <button *ngIf="button.type==1" mat-flat-button color="primary" [disabled]="button.disabled" (click)="button.callback()">{{button.name | translate}}</button>
         <button *ngIf="button.type==2" mat-button color="primary" [disabled]="button.disabled" (click)="button.callback()">{{button.name | translate}}</button>

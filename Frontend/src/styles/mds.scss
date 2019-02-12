@@ -444,6 +444,7 @@ mds .mdsGroup{
     width: 0;
     flex-grow: 1;
     display: flex;
+    justify-content: center;
     padding: 10px 10px;
     > i {
       color: $textLight;
@@ -495,4 +496,12 @@ mds .mdsGroup{
 }
 mds .mdsEmbedded{
    padding:0;
- }
+}
+@media screen and (max-width: ($mobileWidth - $mobileStage*1)) {
+  .vcard {
+    flex-direction: column;
+    .vcardGroup{
+      width: 100%;
+    }
+  }
+}

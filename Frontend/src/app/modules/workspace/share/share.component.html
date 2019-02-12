@@ -1,4 +1,4 @@
-<card title="{{'WORKSPACE.SHARE.TITLE' | translate }}" [avatar]="_node ? _node.iconURL : null" [subtitle]="_node ? _node.name : null" tabbed="true" width="normal" height="xlarge"
+<card title="{{'WORKSPACE.SHARE.TITLE' | translate }}" [node]="_node" tabbed="true" width="normal" height="xlarge"
       [buttons]="buttons"
       (onCancel)="cancel()"
 >

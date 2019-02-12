@@ -1,51 +1,43 @@
-<div class="dialog darken"></div>
-  <div class="card center-card card-action">
-    <div class="card-content">
-      <div class="card-title">{{'WORKSPACE.UPLOAD_TITLE' | translate }}</div>
-      <div class="scrollable">
-      <div *ngFor="let item of progress" class="group">
-        <div class="icon">
-          <i class="material-icons">file_upload</i>
-        </div>
-        <div class="center">
-        <div class="fileName">{{item.name}}</div>
-          <div class="loading" *ngIf="item.progress.progress>=0 && item.progress.progress<100">
-        </div>
-          <div class="progress" *ngIf="item">
-            <div class="determinate" [class.determinate-finished]="item.progress.progress>=100" [style.width]="item.progress.progress+'%'"></div>
-          </div>
-          <div class="info" [style.visibility]="item.progress.loaded ? '' : 'hidden'">
-            <span *ngIf="item.progress.remaining>1">{{'WORKSPACE.UPLOAD_REMAINING' | translate:{time:formatTime(item.progress.remaining) } }}</span>
-            <span *ngIf="item.progress.remaining<=1">{{'WORKSPACE.UPLOAD_FINISHING' | translate}}</span>
-            <span class="size">({{item.progress.loaded | formatSize}} / {{item.progress.total | formatSize}})</span>
-          </div>
-        </div>
-        <div class="right">
-          <div class="done success" *ngIf="!item.progress.loaded && item.progress.progress>=100">
-            <i class="material-icons">done</i>
-          </div>
-          <div class="done" *ngIf="!item.progress.loaded && item.progress.progress<0">
-            <i class="material-icons">close</i>
-          </div>
-        </div>
-          <!--
-          <div class="preloader-wrapper small active">
-            <div class="spinner-layer spinner-blue-only">
-              <div class="circle-clipper left">
-                <div class="circle"></div>
-              </div><div class="gap-patch">
-              <div class="circle"></div>
-            </div><div class="circle-clipper right">
-              <div class="circle"></div>
-            </div>
-            </div>
-          </div>
-          -->
-        </div>
-
+<card title="{{'WORKSPACE.UPLOAD_TITLE' | translate }}" subtitle="{{'WORKSPACE.UPLOAD_SUBTITLE' | translate:{progress:processed,total:progress.length} }}" width="small" height="normal" [isCancelable]="false">
+  <div class="content">
+  <div *ngFor="let item of progress" class="group">
+    <div class="icon">
+      <i class="material-icons">file_upload</i>
+    </div>
+    <div class="center">
+      <div class="fileName">{{item.name}}</div>
+      <div class="loading" *ngIf="item.progress.progress>=0 && item.progress.progress<100">
       </div>
+      <div class="progress" *ngIf="item">
+        <div class="determinate" [class.determinate-finished]="item.progress.progress>=100" [style.width]="item.progress.progress+'%'"></div>
       </div>
-      <div class="card-action" *ngIf="showClose">
-        <a class="waves-effect waves-light btn" (click)="close()">{{'CLOSE' | translate }}</a>
+      <div class="info" [style.visibility]="item.progress.loaded ? '' : 'hidden'">
+        <span *ngIf="item.progress.remaining>1">{{'WORKSPACE.UPLOAD_REMAINING' | translate:{time:formatTime(item.progress.remaining) } }}</span>
+        <span *ngIf="item.progress.remaining<=1">{{'WORKSPACE.UPLOAD_FINISHING' | translate}}</span>
+        <span class="size">({{item.progress.loaded | formatSize}} / {{item.progress.total | formatSize}})</span>
       </div>
     </div>
+    <div class="right">
+      <div class="done success" *ngIf="!item.progress.loaded && item.progress.progress>=100">
+        <i class="material-icons">done</i>
+      </div>
+      <div class="done" *ngIf="!item.progress.loaded && item.progress.progress<0">
+        <i class="material-icons">close</i>
+      </div>
+    </div>
+    <!--
+    <div class="preloader-wrapper small active">
+      <div class="spinner-layer spinner-blue-only">
+        <div class="circle-clipper left">
+          <div class="circle"></div>
+        </div><div class="gap-patch">
+        <div class="circle"></div>
+      </div><div class="circle-clipper right">
+        <div class="circle"></div>
+      </div>
+      </div>
+    </div>
+    -->
+  </div>
+  </div>
+</card>

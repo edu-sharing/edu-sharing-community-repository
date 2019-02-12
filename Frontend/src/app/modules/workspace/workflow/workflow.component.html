@@ -1,4 +1,4 @@
-<card title="{{'WORKSPACE.WORKFLOW.TITLE' | translate}}" [avatar]="node ? node.iconURL : null" [subtitle]="node ? node.name : null" width="normal" height="large"
+<card title="{{'WORKSPACE.WORKFLOW.TITLE' | translate}}" [node]="node" width="normal" height="large"
       [buttons]="buttons"
       (onCancel)="cancel()"
 >

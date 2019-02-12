@@ -7,6 +7,10 @@
     display:flex;
   }
 }
+
+.content{
+  padding: $cardPadding;
+}
 .group{
   width:100%;
   display: flex;

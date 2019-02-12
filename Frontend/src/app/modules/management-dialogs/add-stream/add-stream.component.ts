@@ -17,6 +17,7 @@ import {trigger} from "@angular/animations";
 import {RestStreamService} from "../../../common/rest/services/rest-stream.service";
 import {RestHelper} from "../../../common/rest/rest-helper";
 import {Helper} from "../../../common/helper";
+import {DialogButton} from "../../../common/ui/modal-dialog/modal-dialog.component";
 
 @Component({
   selector: 'add-stream',
@@ -37,6 +38,7 @@ export class AddStreamComponent  {
   audienceMode=this.AUDIENCE_MODE_EVERYONE;
   private _nodes: any;
   private invite: AuthorityProfile[]=[];
+  private buttons: DialogButton[];
   @Input() set nodes(nodes : Node[]){
     this._nodes=nodes;
   }
@@ -50,6 +52,10 @@ export class AddStreamComponent  {
     private config : ConfigurationService,
     private toast : Toast,
     private nodeApi : RestNodeService) {
+    this.buttons=[
+        new DialogButton("CANCEL",DialogButton.TYPE_CANCEL,()=>this.cancel()),
+        new DialogButton("SAVE",DialogButton.TYPE_PRIMARY,()=>this.save()),
+    ]
     this.connector.isLoggedIn().subscribe((data:LoginResult)=>{
 
     });

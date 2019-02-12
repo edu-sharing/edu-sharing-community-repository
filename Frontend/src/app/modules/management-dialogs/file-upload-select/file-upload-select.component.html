@@ -1,10 +1,9 @@
-<div class="dialog darken" [style.z-index]="120 + priority" [@fade]="this"></div>
 <input #fileSelect type="file" style="display:none" id="fileSelect" [multiple]="multiple" (change)="filesSelected($event)" />
-<div class="card center-card card-action" [style.z-index]="121 + priority" [class.card-high]="ltiAllowed && ltiActivated" [@cardAnimation]="this">
-    <div class="card-content">
-        <div tabindex="0" class="card-cancel" (click)="cancel()" (keyup.enter)="cancel()"><i icon iconId="close" aria="true"></i></div>
-        <div class="card-title">{{'WORKSPACE.ADD_OBJECT_TITLE' | translate }}</div>
-        <div class="card-scroll">
+<card title="{{'WORKSPACE.ADD_OBJECT_TITLE' | translate }}" [priority]="priority" subtitle="{{'WORKSPACE.ADD_OBJECT_SUBTITLE' | translate }}" width="small" height="normal"
+      [buttons]="buttons"
+      (onCancel)="cancel()"
+>
+        <div class="file-upload-content">
             <div class="dropArea" [class.dropActive]="isFileOver" fileDrop
                  (onFileDrop)="onDrop($event)"
                  (fileOver)="isFileOver=$event">
@@ -13,8 +12,14 @@
                 <div class="btn-flat btn-shadow" tabindex="0" (keyup.enter)="selectFile()" (click)="selectFile()">{{'WORKSPACE.SELECT_MATERIAL' | translate}}</div>
             </div>
             <hr>
-            <div class="link"><div class="linkLabel"><i class="material-icons align-icon">link</i> <span class="linkTitle">{{ 'WORKSPACE.SELECT_LINK' | translate}}</span></div>
-                <input type="text" [(ngModel)]="link" (keyup.enter)="setLink()" placeholder="http://">
+            <div class="link">
+                <div class="link-info">
+                    <div class="linkLabel"><i icon iconId="link"></i> <span class="linkTitle">{{ 'WORKSPACE.SELECT_LINK' | translate}}</span></div>
+                    <mat-form-field>
+                        <mat-label>{{ 'WORKSPACE.SELECT_LINK_LABEL' | translate}}</mat-label>
+                        <input matInput [(ngModel)]="link" (keyup.enter)="setLink()" placeholder="http://">
+                    </mat-form-field>
+                </div>
                 <div class="lti" *ngIf="showLti">
                     <div class="switch">
                         <label>
@@ -27,10 +32,14 @@
                         <div class="heading">{{'WORKSPACE.LTI_HEADING' | translate}}</div>
                         <div class="info">{{'WORKSPACE.LTI_INFO' | translate}}</div>
                         <div class="inputs">
-                            <label for="consumerKey">{{'WORKSPACE.LTI_CONSUMER_KEY' | translate}}</label>
-                            <input type="text" id="consumerKey" [(ngModel)]="ltiConsumerKey">
-                            <label for="sharedSecret">{{'WORKSPACE.LTI_SHARED_SECRET' | translate}}</label>
-                            <input type="text" id="sharedSecret" [(ngModel)]="ltiSharedSecret">
+                            <mat-form-field>
+                                <mat-label>{{'WORKSPACE.LTI_CONSUMER_KEY' | translate}}</mat-label>
+                                <input matInput id="consumerKey" [(ngModel)]="ltiConsumerKey">
+                            </mat-form-field>
+                            <mat-form-field>
+                                <mat-label>{{'WORKSPACE.LTI_SHARED_SECRET' | translate}}</mat-label>
+                                <input matInput id="sharedSecret" [(ngModel)]="ltiSharedSecret">
+                            </mat-form-field>
                         </div>
                         <div class="info info-privacy" innerHTML="{{'WORKSPACE.LTI_INFO_PRIVACY' | translate}}"></div>
                     </div>
@@ -54,12 +63,7 @@
             </div>
         </div>
     </div>
-    </div>
-    <div class="card-action">
-        <a tabindex="0" class="waves-effect waves-light btn" [class.disabled]="disabled || !_parent" (click)="setLink()" (keyup.enter)="setLink()">{{'OK' | translate }}</a>
-        <a tabindex="0" class="btn-flat" (click)="cancel()" (keyup.enter)="cancel()">{{'CANCEL' | translate }}</a>
-    </div>
-</div>
+</card>
 <file-chooser *ngIf="chooseParent"
               [isCancelable]="true"
               [pickDirectory]="true"

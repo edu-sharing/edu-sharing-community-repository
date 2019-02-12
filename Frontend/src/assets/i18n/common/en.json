@@ -43,6 +43,7 @@
   "NO_MORE_ELEMENTS" : "no further elements",
   "FIELD_MUST_BE_FILLED" : "This field cannot be empty.",
   "CHOOSE_DATE":"Choose date",
+  "CARD_SUBTITLE_MULTIPLE":"{{count}} elements",
   "SELECT_COLLECTION" : "Add to '{{name}}'",
   "SELECT_ROOT_NAME" : "Home",
   "SELECT_ROOT" : "select home",

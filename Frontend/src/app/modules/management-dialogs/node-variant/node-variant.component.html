@@ -1,4 +1,4 @@
-<card title="{{'NODE_VARIANT.TITLE' | translate}}" [avatar]="_node ? _node.iconURL : null"  [subtitle]="_node ? _node.name : null" width="normal" height="normal"
+<card title="{{'NODE_VARIANT.TITLE' | translate}}" [node]="_node" width="normal" height="normal"
       [buttons]="buttons"
       (onCancel)="cancel()"
 >
@@ -21,7 +21,7 @@
                     [home]="'WORKSPACE.MY_FILES'"
                     [clickable]="false"
             ></breadcrumbs>
-            <div tabindex="0" class="btn-flat btn-shadow btnVersion" (click)="chooseDirectory=true" (keyup.enter)="chooseDirectory=true">{{'NODE_VARIANT.CHOOSE' | translate}}</div>
+            <button mat-raised-button class="btn-choose" (click)="chooseDirectory=true">{{'NODE_VARIANT.CHOOSE' | translate}}</button>
         </div>
     </div>
 </card>

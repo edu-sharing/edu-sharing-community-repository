@@ -1,4 +1,4 @@
-<card title="{{'WORKSPACE.CONTRIBUTOR.TITLE' | translate }}" [avatar]="node ? node.iconURL : null"  [subtitle]="node ? node.name : null" width="small" height="large"
+<card title="{{'WORKSPACE.CONTRIBUTOR.TITLE' | translate }}" [node]="node" width="small" height="large"
       [buttons]="buttons"
       (onCancel)="cancel()"
 >

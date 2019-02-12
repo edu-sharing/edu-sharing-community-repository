@@ -79,6 +79,10 @@ $candy-app-theme: mat-light-theme($candy-app-primary, $candy-app-accent, $candy-
 .mat-raised-button{
   color: $primary;
 }
+.mat-radio-label,.mat-checkbox-layout{
+  // do allow to wrap long labels in material radio groups (e.g. license dialog)
+  white-space: normal!important;
+}
 .mat-button-wrapper{
   display: flex;
   align-items: center;

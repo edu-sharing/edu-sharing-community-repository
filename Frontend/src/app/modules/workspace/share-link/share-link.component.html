@@ -1,4 +1,4 @@
-<card title="{{'WORKSPACE.SHARE_LINK.TITLE' | translate }}" [priority]="priority" [avatar]="_node ? _node.iconURL : null" [subtitle]="_node ? _node.name : null" width="small" height="xlarge"
+<card title="{{'WORKSPACE.SHARE_LINK.TITLE' | translate }}" [priority]="priority" [node]="_node" width="small" height="xlarge"
       [buttons]="buttons"
       (onCancel)="cancel()"
 >

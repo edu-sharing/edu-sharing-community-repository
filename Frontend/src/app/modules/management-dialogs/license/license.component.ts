@@ -13,6 +13,8 @@ import {UIHelper} from "../../../common/ui/ui-helper";
 import {trigger} from "@angular/animations";
 import {UIAnimation} from "../../../common/ui/ui-animation";
 import {UIService} from '../../../common/services/ui.service';
+import {DialogButton} from "../../../common/ui/modal-dialog/modal-dialog.component";
+import {Helper} from "../../../common/helper";
 
 @Component({
   selector: 'workspace-license',
@@ -20,12 +22,11 @@ import {UIService} from '../../../common/services/ui.service';
   styleUrls: ['license.component.scss'],
   animations: [
     trigger('fade', UIAnimation.fade()),
-    trigger('cardAnimation', UIAnimation.cardAnimation())
+    trigger('cardAnimation', UIAnimation.cardAnimation()),
+    trigger('dialog', UIAnimation.switchDialog())
   ]
 })
 export class WorkspaceLicenseComponent  {
-  @ViewChild('contactCheckbox') contactCheckbox : ElementRef;
-  @ViewChild('releaseCheckbox') releaseCheckbox : ElementRef;
   @ViewChild('selectLicense') selectLicense : ElementRef;
 
   /**
@@ -34,18 +35,40 @@ export class WorkspaceLicenseComponent  {
    * Default is 1 for mds
    */
   @Input() priority = 1;
-  _type="";
+  _primaryType="";
+  set primaryType(primaryType:string){
+      this._primaryType=primaryType;
+      this.updateButtons();
+  }
+  get primaryType(){
+      return this._primaryType;
+  }
   _properties: any;
   private doiPermission: boolean;
   private doiActive: boolean;
   private doiDisabled: boolean;
+  private buttons: DialogButton[];
   public set type(type:string){
-    this._type=type;
-    if(this._type=='CC_0' && !this.cc0Type)
-      this.cc0Type='CC_0';
+    if(type=='CC_0' || type=='PDM'){
+        this.cc0Type=type;
+        type='CC_0';
+    }
+      if(type=="CC_BY"){
+          this.ccCommercial="";
+          this.ccShare="";
+      }
+      if(type=="CC_BY_SA"){
+          type="CC_BY";
+          this.ccShare="SA";
+      }
+      if(type.startsWith("COPYRIGHT")){
+          this.copyrightType=type;
+          type="COPYRIGHT";
+      }
+    this.primaryType=type;
   }
   public get type(){
-    return this._type;
+    return this.getLicenseProperty();
   }
   public ccShare="";
   private ccCommercial="";
@@ -53,14 +76,16 @@ export class WorkspaceLicenseComponent  {
   private ccSourceUrl="";
   private ccVersion="4.0";
   private ccLocale="";
-  private cc0Type="";
+  private cc0Type="CC_0";
   private ccProfileUrl="";
   private copyrightType="COPYRIGHT_FREE";
   private eduType="P_NR";
   private rightsDescription="";
   private showCcAuthor=false;
   private contact=true;
+  private contactIndeterminate=false;
   private release=false;
+  private releaseIndeterminate=false;
   private eduDownload=true;
   private _oerMode=true;
   public set oerMode(oerMode:boolean){
@@ -74,7 +99,7 @@ export class WorkspaceLicenseComponent  {
                      "in","it","ca","hr","mt","mk","nl",
                      "no","pl","pt","ro","es","th",
                      "uk","hu"];
-  public ALL_LICENSE_TYPES=["NONE","CC_0","CC_BY","SCHULFUNK","UNTERRICHTS_UND_LEHRMEDIEN","COPYRIGHT","CUSTOM"];
+  public ALL_LICENSEprimaryTypeS=["NONE","CC_0","CC_BY","SCHULFUNK","UNTERRICHTS_UND_LEHRMEDIEN","COPYRIGHT","CUSTOM"];
   public licenseMainTypes:string[];
   _nodes:Node[];
   private permissions: LocalPermissionsResult;
@@ -114,10 +139,12 @@ export class WorkspaceLicenseComponent  {
   @Input() set nodes(nodes : Node[]){
       this._nodes=[];
       this.loadNodes(nodes,()=>{
+          this._nodes=Helper.deepCopyArray(this._nodes);
           this.loadConfig();
           this.checkAllowRelease();
           this.readLicense();
           this.loading=false;
+          this.updateButtons();
           this.releaseMulti=null;
           let i=0;
           for(let node of this._nodes) {
@@ -136,7 +163,7 @@ export class WorkspaceLicenseComponent  {
     private loadConfig() {
         this.config.get("allowedLicenses").subscribe((data: string[]) => {
             if (!data) {
-                this.licenseMainTypes = this.ALL_LICENSE_TYPES;
+                this.licenseMainTypes = this.ALL_LICENSEprimaryTypeS;
                 this.allowedLicenses = null;
             }
             else {
@@ -156,7 +183,7 @@ export class WorkspaceLicenseComponent  {
                         if (data.indexOf(this.copyrightType) == -1)
                             this.copyrightType = entry;
                     }
-                    else if (this.ALL_LICENSE_TYPES.indexOf(entry) != -1) {
+                    else if (this.ALL_LICENSEprimaryTypeS.indexOf(entry) != -1) {
                         this.licenseMainTypes.push(entry);
                     }
                 }
@@ -178,6 +205,7 @@ export class WorkspaceLicenseComponent  {
     private toast : Toast,
     private nodeApi : RestNodeService) {
       this.connector.hasToolPermission(RestConstants.TOOLPERMISSION_HANDLESERVICE).subscribe((has:boolean)=>this.doiPermission=has);
+      this.updateButtons();
   }
   public cancel(){
     this.onCancel.emit();
@@ -293,31 +321,27 @@ export class WorkspaceLicenseComponent  {
     UIHelper.invalidateMaterializeTextarea('licenseRights');
     if(this.authorVCard.isValid())
       this.authorTab=1;
-    setTimeout(()=>{
-      if(contactState=='multi')
-        this.contactCheckbox.nativeElement.indeterminate=true;
-    },10);
+    this.contactIndeterminate=contactState=='multi';
   }
 
   private getLicenseProperty(){
-    let name=this.type;
-    if(this.type=="NONE")
+    let name=this.primaryType;
+    if(this.primaryType=="NONE")
       return "";
-    if(this.type=="CC_BY"){
+    if(this.primaryType=="CC_BY"){
       if(this.ccCommercial)
         name+="_"+this.ccCommercial;
       if(this.ccShare)
         name+="_"+this.ccShare;
-
       return name;
     }
-    if(this.type=="CC_0"){
+    if(this.primaryType=="CC_0"){
       return this.cc0Type;
     }
-    if(this.type=='COPYRIGHT'){
+    if(this.primaryType=='COPYRIGHT'){
       return this.copyrightType;
     }
-    if(this.type=="EDU"){
+    if(this.primaryType=="EDU"){
       name+="_"+this.eduType;
       if(!this.eduDownload)
         name+="_ND";
@@ -338,7 +362,7 @@ export class WorkspaceLicenseComponent  {
     return NodeHelper.getLicenseIconByString(this.getLicenseProperty(),this.connector);
   }
   private savePermissions(node:Node){
-    if(this.releaseCheckbox.nativeElement.indeterminate){
+    if(this.releaseIndeterminate){
       return;
     }
     let add=true;
@@ -406,7 +430,7 @@ export class WorkspaceLicenseComponent  {
       this.release=false;
 
     if(this.releaseMulti=='multi'){
-      this.releaseCheckbox.nativeElement.indeterminate=true;
+      this.releaseIndeterminate=true;
     }
   }
 
@@ -441,7 +465,7 @@ export class WorkspaceLicenseComponent  {
 
     private getProperties(prop: any) {
         prop[RestConstants.CCM_PROP_LICENSE]=[this.getLicenseProperty()];
-        if(!this.contactCheckbox.nativeElement.indeterminate)
+        if(!this.contactIndeterminate)
             prop[RestConstants.CCM_PROP_QUESTIONSALLOWED]=[this.contact];
         if(this.type=='CC_BY'){
             if(this.ccTitleOfWork)
@@ -475,5 +499,20 @@ export class WorkspaceLicenseComponent  {
         if(release){
           this.doiActive=true;
         }
+    }
+
+    private updateButtons() {
+        /*
+            <div class="card-action">
+      <a class="waves-effect waves-light btn" tabindex="0" [class.disabled]="loading || type=='MULTI'" (click)="saveLicense()" (keyup.enter)="saveLicense()">{{'SAVE' | translate }}</a>
+      <a class="btn-flat" tabindex="0" (click)="cancel()" (keyup.enter)="cancel()">{{'CANCEL' | translate }}</a>
+    </div>
+         */
+        let save=new DialogButton('SAVE',DialogButton.TYPE_PRIMARY,()=>this.saveLicense());
+        save.disabled=this.loading || this.type=='MULTI';
+        this.buttons=[
+            new DialogButton('CANCEL',DialogButton.TYPE_CANCEL,()=>this.cancel()),
+            save
+        ];
     }
 }

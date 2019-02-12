@@ -66,11 +66,20 @@ $height-xxlarge:800px;
       margin: 0;
       position: relative;
     }
+    &.width-xsmall{
+      width:400px;
+    }
     &.width-small{
       width:500px;
     }
     &.width-normal{
       width:600px;
+    }
+    &.width-large{
+      width:700px;
+    }
+    &.width-xlarge{
+      width:800px;
     }
     &:not(.card-tabbed) {
       mat-card-content{

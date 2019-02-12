@@ -42,6 +42,7 @@
   "NO_MORE_ELEMENTS" : "Keine weiteren Elemente",
   "FIELD_MUST_BE_FILLED" : "Dieses Feld muss ausgefüllt sein",
   "CHOOSE_DATE":"Datum wählen",
+  "CARD_SUBTITLE_MULTIPLE":"{{count}} Elemente",
   "SELECT_COLLECTION" : "In '{{name}}' einsortieren",
   "SELECT_ROOT_NAME" : "Hauptverzeichnis",
   "SELECT_ROOT" : "Hauptverzeichnis wählen",

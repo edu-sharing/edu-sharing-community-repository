@@ -681,7 +681,6 @@ export class ListTableComponent implements EventListener{
       this.onSelectionChanged.emit(this.selectedNodes);
       return;
     }
-    console.log(JSON.stringify(this.selectedNodes));
     let pos=this.getSelectedPos(node);
     // select from-to range via shift key
     if(from=="checkbox" && pos==-1 && this.ui.isShiftCmd() && this.selectedNodes.length==1){
@@ -701,7 +700,6 @@ export class ListTableComponent implements EventListener{
         this.selectedNodes.push(node);
       }
     }
-    console.log(node,this.selectedNodes,pos);
     this.onSelectionChanged.emit(this.selectedNodes);
     this.changes.detectChanges();
 

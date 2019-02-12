@@ -6,6 +6,7 @@ import {trigger} from "@angular/animations";
 import {UIAnimation} from "../../../common/ui/ui-animation";
 import {RestSearchService} from '../../../common/rest/services/rest-search.service';
 import {Toast} from '../../../common/ui/toast';
+import {DialogButton} from "../../../common/ui/modal-dialog/modal-dialog.component";
 
 @Component({
   selector: 'workspace-file-upload-select',
@@ -54,6 +55,7 @@ export class WorkspaceFileUploadSelectComponent  {
   private ltiTool: Node;
   private _link: string;
   _parent: Node;
+  buttons: DialogButton[];
   @Input() set parent(parent:Node){
     this.breadcrumbs=null;
     this._parent=parent;
@@ -107,6 +109,7 @@ export class WorkspaceFileUploadSelectComponent  {
     link=link.trim();
     this.disabled=!link;
     this.ltiAllowed=true;
+    this.updateButtons();
     /*
     if(this.cleanupUrlForLti(link)) {
         this.searchService.search([{
@@ -138,7 +141,14 @@ export class WorkspaceFileUploadSelectComponent  {
   ){
     this.setState("");
   }
-
+  updateButtons(){
+    let ok=new DialogButton('OK',DialogButton.TYPE_PRIMARY,()=>this.setLink());
+    ok.disabled=this.disabled || !this._parent;
+    this.buttons=[
+        new DialogButton('CANCEL',DialogButton.TYPE_CANCEL,()=>this.cancel()),
+        ok
+    ];
+  }
     private cleanupUrlForLti(link: string) {
         let start=link.indexOf("://");
         if(start==-1)

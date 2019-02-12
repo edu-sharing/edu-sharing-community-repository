@@ -2,12 +2,18 @@
 
 .dropArea{
   border-radius:5px;
-  width: 100%;
   text-align: center;
   border: 2px dashed $primary;
+  margin: $cardPadding;
   padding: 20px;
   margin-bottom:20px;
   color:$textLight;
+}
+mat-form-field{
+  width:100%;
+}
+.link-info{
+  padding:0 $cardPadding;
 }
 .dropActive{
   background:$primaryLight;
@@ -23,8 +29,8 @@ hr{
 }
 .lti-data{
   background-color: $actionDialogBackground;
-  margin: 20px $cardPadding*-1;
   padding:20px $cardPadding;
+  margin: 20px 0;
   .heading{
     font-size: 110%;
     font-weight: bold;
@@ -45,7 +51,12 @@ hr{
 .link{
   width:100%;
   .linkLabel{
-    text-align: center;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    .material-icons{
+      margin-right: 5px;
+    }
   }
   .linkTitle{
     color:$textLight;

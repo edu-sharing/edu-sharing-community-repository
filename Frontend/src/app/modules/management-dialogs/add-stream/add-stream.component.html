@@ -1,9 +1,8 @@
-<div class="dialog darken" [@fade]="this"></div>
-<div class="card center-card card-action card-high" [@cardAnimation]="this">
-  <div class="card-content">
-    <div tabindex="0" class="card-cancel" (click)="cancel()" (keyup.enter)="cancel()"><i icon iconId="close" aria="true"></i></div>
-    <div class="card-title">{{'ADD_TO_STREAM.TITLE' | translate }}</div>
-    <div class="wrapper card-scroll">
+<card title="{{'ADD_TO_STREAM.TITLE' | translate }}" [node]="_nodes" width="normal" height="xlarge"
+      [buttons]="buttons"
+      (onCancel)="cancel()"
+>
+    <div class="wrapper">
     <mds #mds
       [embedded]="true"
       [groupId]="'add_to_stream'"
@@ -32,10 +31,5 @@
       </div>
     </div>
   </div>
-  </div>
+</card>
 
-  <div class="card-action">
-    <a class="waves-effect waves-light btn" (click)="save()" tabindex="0" (keyup.enter)="save()">{{'SAVE' | translate }}</a>
-    <a class="btn-flat" tabindex="0" (click)="cancel()" (keyup.enter)="cancel()">{{'CANCEL' | translate }}</a>
-  </div>
-</div>
