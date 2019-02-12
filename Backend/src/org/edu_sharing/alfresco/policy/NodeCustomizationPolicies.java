@@ -183,26 +183,8 @@ public class NodeCustomizationPolicies implements OnContentUpdatePolicy, OnCreat
 					&& (LockStatus.NO_LOCK.equals(lockStatus) || LockStatus.LOCK_EXPIRED.equals(lockStatus))
 					&& (reader!=null) && (reader.getContentData()!=null) && reader.getContentData().getSize() > 0){
 			
-				logger.debug("adding noderef for thumbnail handling: " +nodeRef );
-				new ThumbnailHandling().thumbnailHandling(nodeRef);
-				
-				SimpleTrigger st = new SimpleTrigger();
-				st.setName("ImmediateTrigger");
-				st.setRepeatCount(0);
-				st.setStartTime(new Date(System.currentTimeMillis() + 500));
-				JobDetail jd = new JobDetail();
-				jd.setJobClass(PreviewJob.class);
-				jd.setName(PreviewJob.class.getName() + " Immediate " + System.currentTimeMillis());
-				
-				try {
-					scheduler.scheduleJob(jd,st);
-				}catch(ObjectAlreadyExistsException e) {
-					//only when debug, the job should only be executed as a singelton, so this exception is fine
-					logger.debug(e.getMessage());
-				}catch(SchedulerException e) {
-					logger.error(e.getMessage(),e);
-				}			
-			}
+	     	    new ThumbnailHandling().thumbnailHandling(nodeRef);
+    		}
 			
 			logger.debug("will do the resourceinfo. noderef:"+nodeRef);
 			Action resourceInfoAction = actionService.createAction(CCConstants.ACTION_NAME_RESOURCEINFO);
@@ -344,7 +326,6 @@ public class NodeCustomizationPolicies implements OnContentUpdatePolicy, OnCreat
 	@Override
 	public void onUpdateProperties(NodeRef nodeRef, Map<QName, Serializable> before, Map<QName, Serializable> after) {
 		
-		//System.out.println("********** onUpdateProperties node("+nodeRef.getId()+")");
 		
 		// make the title like the name(when webdav rename is done), @TODO mybe just show the name in the gui
 		String nameBefore = (String)before.get(ContentModel.PROP_NAME);
@@ -511,7 +492,6 @@ public class NodeCustomizationPolicies implements OnContentUpdatePolicy, OnCreat
 		// --> IF NOT AVAILABLE WILL JUST WARN
 		try {
 			final String localServiceUrl = websitePreviewRenderService+"/?url="+java.net.URLEncoder.encode(httpURL, "ISO-8859-1")+"&scale="+scale+"&base64=1"; 
-			//System.out.println("Calling external Service: "+localServiceUrl);
 		    HttpClient client = new HttpClient();
 		    GetMethod method = new GetMethod(localServiceUrl);
 		    int statusCode = client.executeMethod(method);

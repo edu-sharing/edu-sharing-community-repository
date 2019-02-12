@@ -3,6 +3,7 @@ package org.edu_sharing.alfresco.jobs;
 import java.io.IOException;
 import java.nio.channels.Channels;
 import java.nio.channels.ReadableByteChannel;
+import java.util.ConcurrentModificationException;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
@@ -143,13 +144,21 @@ public class PreviewJob implements Job {
 				try {
 					List<JobExecutionContext> currentlyExecutingJobs = (List<JobExecutionContext>) context
 							.getScheduler().getCurrentlyExecutingJobs();
+					int countPreviewJobs = 0;
 					for (JobExecutionContext jec : currentlyExecutingJobs) {
+						if (jec.getJobInstance().getClass().equals(PreviewJob.class)){
+							countPreviewJobs++;
+						}
+						
 						if (jec.getJobInstance().getClass().equals(PreviewJob.class)
 								&& !context.getJobDetail().equals(jec.getJobDetail())) {
 							logger.info("another instance is running. returning firetime:" + jec.getFireTime());
 							return null;
 						}
 					}
+					
+					logger.info("count preview jobs:" + countPreviewJobs);
+					
 				} catch (SchedulerException e) {
 					logger.error(e.getMessage(), e);
 					return null;
@@ -161,8 +170,15 @@ public class PreviewJob implements Job {
 				
 				Map<NodeRef, List<Action>> m = ActionObserver.getInstance().getNodeActionsMap();
 				
-				synchronized (m) {
+				/**
+				 * syncronized slows process down, catching ConcurrentModificationException, that just skips one job round
+				 */
+				try {
+				//synchronized (m) {
 					runJob(m);
+				//}
+				}catch(ConcurrentModificationException e) {
+					logger.debug("ConcurrentModificationException while runing Preview job");
 				}
 				
 				
@@ -213,7 +229,7 @@ public class PreviewJob implements Job {
 								RunAsWork<Void> executeActionRunAs = new RunAsWork<Void>() {
 									@Override
 									public Void doWork() throws Exception {
-										actionService.executeAction(action, entry.getKey(), true, false);
+										actionService.executeAction(action, entry.getKey(), true, true);
 										return null;
 									}
 								};
@@ -244,15 +260,19 @@ public class PreviewJob implements Job {
 									Date date = (Date) action
 											.getParameterValue(ActionObserver.ACTION_OBSERVER_ADD_DATE);
 
-									if (System.currentTimeMillis() > (date.getTime() + latency)) {
-										
-										extractVideoImageMetadata(entry.getKey(),creator);
-										AuthenticationUtil.runAs(executeActionRunAs, creator);
-										logger.debug("finished action syncronously. nodeRef:" + entry.getKey()
-												+ " action status:" + action.getExecutionStatus()
-												+ " ExecutionStartDate:" + action.getExecutionStartDate()
-												+ " filename:" + name);
-										newRunning++;
+									if ((System.currentTimeMillis() > (date.getTime() + latency)) 
+											) {
+										if(lockState.getLockType() == null) {
+											extractVideoImageMetadata(entry.getKey(),creator);
+											AuthenticationUtil.runAs(executeActionRunAs, creator);
+											logger.debug("finished action syncronously. nodeRef:" + entry.getKey()
+													+ " action status:" + action.getExecutionStatus()
+													+ " ExecutionStartDate:" + action.getExecutionStartDate()
+													+ " filename:" + name);
+											newRunning++;
+										}else {
+											logger.debug("node " + entry.getKey() + " is locked. will try it later.");
+										}
 									} else {
 										logger.debug(
 												"will wait " + latency/1000 + " sek before starting thumnail action for" + name);
