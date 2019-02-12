@@ -60,7 +60,7 @@ public class ActionObserver {
 	 * @param action
 	 */
 	public void addAction(NodeRef nodeRef, Action action) {
-		removeInactiveActions();
+		//removeInactiveActions();
 
 		if (action.getTrackStatus() == false) {
 			logger.error("action.getTrackStatus() = false, will return");
