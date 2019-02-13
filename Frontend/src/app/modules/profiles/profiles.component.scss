@@ -91,7 +91,7 @@ $path:'../../../assets/images/';
     padding:0 25px;
   }
   .changePassword{
-    padding-top: 10px;
+    padding-top: 40px;
     .toggle {
       color: $primary;
       text-transform: uppercase;
@@ -100,18 +100,26 @@ $path:'../../../assets/images/';
       width: 100%;
       div {
         float: left;
+        display: flex;
+        align-items: center;
       }
       i {
-        position: relative;
-        top: 6px;
+        margin-right: 10px;
       }
     }
+  }
+  .change-buttons{
+    width: 100%;
+    text-align: right;
   }
   .about{
     position: relative;
     padding-left: 70px;
     >div{
       padding-top: 20px;
+    }
+    .about-buttons{
+      text-align: right;
     }
     .profiles,.empty{
       white-space: pre-line;
@@ -156,7 +164,7 @@ $path:'../../../assets/images/';
     }
   }
   .authorityName{
-    padding-top: 30px;
+    padding-top: 20px;
   }
 
   .main{
@@ -179,6 +187,7 @@ $path:'../../../assets/images/';
     .stats{
       padding-left: 8px;
       padding-right: 8px;
+      font-size: smaller;
     }
     .top {
       .edit {
