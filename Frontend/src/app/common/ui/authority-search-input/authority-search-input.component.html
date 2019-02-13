@@ -25,7 +25,7 @@
                         </div>
                         <div>
                             <div>{{data.title}}</div>
-                            <div class="small">{{data.secondaryTitle}}</div>
+                            <div class="small" *ngIf="data.secondaryTitle">{{data.secondaryTitle}}</div>
                         </div>
                     </mat-option>
                 </mat-optgroup>

@@ -180,6 +180,7 @@ a:focus,
     display: flex;
     align-items: center;
     .material-icons{
+      color: $textLight;
       margin-right: 10px;
     }
     div {
