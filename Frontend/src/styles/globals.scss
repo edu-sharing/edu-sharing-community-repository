@@ -175,7 +175,24 @@ a:focus,
     border-bottom: 1px solid $focusColor;
   }
 }
-
+.authority-search-input-option{
+  >span {
+    display: flex;
+    align-items: center;
+    .material-icons{
+      margin-right: 10px;
+    }
+    div {
+      line-height: normal;
+      font-size: 90%;
+    }
+    .small {
+      font-size: 80%;
+      color: $textLight;
+      padding-top: 3px;
+    }
+  }
+}
 .btn-circle {
   padding: 10px;
   height: 44px;

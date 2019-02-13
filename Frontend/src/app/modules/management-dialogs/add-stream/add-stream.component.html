@@ -17,7 +17,7 @@
       </div>
       <div class="audienceSearch" *ngIf="audienceMode==AUDIENCE_MODE_CUSTOM">
         <div class="search"><authority-search-input
-          [globalSearch]="false"
+          [globalSearchAllowed]="false"
           [maxSuggestions]="5"
           (onChooseAuthority)="addInvite($event)"
         ></authority-search-input>

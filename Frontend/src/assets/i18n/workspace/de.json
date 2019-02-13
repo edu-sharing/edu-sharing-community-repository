@@ -61,6 +61,8 @@
     "TAB_ADVANCED":"Erweitert",
     "BTN_INVITE":"Einladen",
     "INVITE_FIELD":"Personen oder Gruppen hinzufügen",
+    "INVITE_LOCAL_RESULTS":"In meiner Organisation",
+    "INVITE_GLOBAL_RESULTS":"Globale Ergebnisse",
     "FILE_LOCATION":"Speicherort der Datei",
     "CHANGE__LOCATION":"Ändern",
     "CHOOSE_LOCATION":"Speicherort wählen",

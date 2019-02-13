@@ -7,7 +7,7 @@
         <div class="inputs">
         <authority-search-input
           [disabled]="!status.hasReceiver"
-          [globalSearch]="globalSearch"
+          [globalSearchAllowed]="globalAllowed"
           [groupType]="TYPE_EDITORIAL"
           (onChooseAuthority)="addSuggestion($event)"
           [placeholder]="'WORKSPACE.WORKFLOW.RECEIVERS'"
@@ -30,10 +30,8 @@
           </div>
         </div>
         <div class="global">
-          <input type="checkbox" class="filled-in" [(ngModel)]="globalSearch" [disabled]="!globalAllowed" id="global">
-          <label for="global">{{'WORKSPACE.SHARE.GLOBAL_SEARCH' | translate}}</label>
+          <mat-checkbox [(ngModel)]="globalSearch" [disabled]="!globalAllowed" id="global">{{'WORKSPACE.SHARE.GLOBAL_SEARCH' | translate}}</mat-checkbox>
         </div>
-
         <div class="receivers">
           <div *ngIf="status.hasReceiver">
             <div class="badge" *ngFor="let receiver of receivers">

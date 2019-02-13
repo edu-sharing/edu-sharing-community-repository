@@ -373,8 +373,8 @@ export class WorkspaceShareComponent{
     }
   }
   public setPermission(permission:Permission,name:string,status:any){
-    console.log("set "+name+" "+status);
-    if(status.srcElement.checked){
+    console.log("set "+name+" "+status,status);
+    if(status.checked){
       if(permission.permissions.indexOf(name)==-1)
         permission.permissions.push(name);
     }

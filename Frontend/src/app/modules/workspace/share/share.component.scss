@@ -35,13 +35,10 @@
   position: relative;
 }
 .groupInvite {
-  padding: 10px 30px;
-  padding-top: 20px;
+  padding: 10px 20px;
+  padding-top: 26px;
   background-color: $actionDialogBackground;
   flex-direction: column;
-  .global {
-    margin-left: 8px;
-  }
 }
 .searchIcon{
   position: absolute;
@@ -97,6 +94,9 @@ a.active{
 }
 .groupMessage{
   padding:0 20px;
+  mat-form-field{
+    width: 100%;
+  }
 }
 .invite-group{
   display: flex;
@@ -123,17 +123,18 @@ a.active{
     font-size: 110%;
   }
   .publishInfo{
-    margin-left: 76px;
+    margin-left: 44px;
     color:$textLight;
+    font-size: 90%;
     max-width:400px;
   }
   .doi{
-    margin-left: 77px;
-    margin-top: 15px;
+    margin:10px 0 10px 50px;
     display: flex;
     flex-direction: column;
     span{
       margin-left: 35px;
+      margin-right: 10px;
     }
   }
 }
@@ -145,9 +146,7 @@ a.active{
   width:100%;
   margin-bottom: -25px;
 }
-.global{
-  margin-bottom: 20px;
-}
+
 .groupToInvite{
   display:flex;
   margin-top: 35px;
@@ -294,13 +293,9 @@ mat-tab-body-content{
   width: 310px!important;
   top: -60px;
 }
-label.notify{
-  color:$textPrimary!important;
-}
-label.notify p{
+.notify-info{
   color:$textLight;
 }
-
 .share-link{
   position: absolute;
   top: -60px;

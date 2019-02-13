@@ -2,25 +2,18 @@
       [buttons]="buttons"
       (onCancel)="cancel()"
 >
-      <div class="share-link" tabindex="0" (click)="openLink()" (keyup.enter)="openLink()" *ngIf="!isCollection()"><i icon iconId="link"></i> <span>{{'WORKSPACE.OPTION.SHARE_LINK' | translate}}</span></div>
+  <div class="share-link" tabindex="0" (click)="openLink()" (keyup.enter)="openLink()" *ngIf="!isCollection()"><i icon iconId="link"></i> <span>{{'WORKSPACE.OPTION.SHARE_LINK' | translate}}</span></div>
   <mat-tab-group mat-stretch-tabs [(selectedIndex)]="tab">
       <mat-tab label="{{'WORKSPACE.TAB_INVITE' | translate}}" class="tabContent tabContentInvite">
         <div class="invite-group">
         <div class="group groupInvite">
-            <i class="material-icons searchIcon">search</i>
             <authority-search-input
-            [globalSearch]="globalSearch"
+            [globalSearchAllowed]="globalAllowed"
             (onChooseAuthority)="addSuggestion($event)"
           ></authority-search-input>
           <div class="hintNoFuzzy" *ngIf="globalSearch && !fuzzyAllowed">{{'WORKSPACE.SHARE.NO_FUZZY' | translate}}</div>
           <!-- <ng2-completer [(ngModel)]="searchStr" [clearSelected]="true" (selected)="addAuthority($event)" [dataService]="dataService" [minSearchLength]="2" class="search"></ng2-completer>-->
           <!-- <input type="text" id="inviteName" /> -->
-
-
-          <div class="global">
-            <input type="checkbox" class="filled-in" [(ngModel)]="globalSearch" [disabled]="!globalAllowed" id="global">
-            <label for="global">{{'WORKSPACE.SHARE.GLOBAL_SEARCH' | translate}}</label>
-          </div>
         </div>
 
         <div class="group groupToInvite" *ngIf="filterDisabledPermissions(newPermissions).length">
@@ -62,29 +55,31 @@
         </div>
 
         <div *ngIf="sendMessages && filterDisabledPermissions(newPermissions).length" class="groupMessage">
-          <label for="message">{{'WORKSPACE.SHARE.MESSAGE' | translate}}</label>
-          <input type="text" id="message" name="message" [(ngModel)]="notifyMessage" placeholder="{{'WORKSPACE.SHARE.MESSAGE_PLACEHOLDER' | translate}}"/>
-        <input type="checkbox" class="filled-in" id="notify" [(ngModel)]="notifyUsers"> <label for="notify" class="notify">{{'WORKSPACE.NOTIFY_TITLE' | translate}}<p>{{'WORKSPACE.NOTIFY_INFO' | translate}}</p></label>
+          <mat-form-field>
+            <mat-label>{{'WORKSPACE.SHARE.MESSAGE' | translate}}</mat-label>
+            <input matInput id="message" name="message" [(ngModel)]="notifyMessage" placeholder="{{'WORKSPACE.SHARE.MESSAGE_PLACEHOLDER' | translate}}"/>
+          </mat-form-field>
+          <mat-checkbox id="notify" [(ngModel)]="notifyUsers">
+            <div>{{'WORKSPACE.NOTIFY_TITLE' | translate}}</div>
+            <div class="notify-info">{{'WORKSPACE.NOTIFY_INFO' | translate}}></div>
+          </mat-checkbox>
         </div>
         <div [ngClass]="{'publish-grey': filterDisabledPermissions(newPermissions).length}" class="publish" *ngIf="!isSafe">
           <div class="publishElements">
-          <div class="switch">
-            <label>
-              <input type="checkbox" [disabled]="!publishPermission || publishInherit" [(ngModel)]="publishActive" (change)="setPublish(publishActive)">
-              <span class="lever"></span>
+            <mat-slide-toggle [disabled]="!publishPermission || publishInherit" [(ngModel)]="publishActive" (change)="setPublish(publishActive)">
               {{ ('WORKSPACE.SHARE.PUBLISH_'+(isCollection() ? 'COLLECTION' : _node.isDirectory ? 'DIRECTORY' : 'DOCUMENT')) | translate}}
-            </label>
-          </div>
+            </mat-slide-toggle>
           <div *ngIf="!publishPermission && !publishInherit" class="publishInfo">{{ 'WORKSPACE.SHARE.PUBLISH_NO_PERMISSION' | translate}}</div>
           <div>
             <div *ngIf="publishInherit" class="publishInfo">{{ 'WORKSPACE.SHARE.PUBLISH_INHERIT' | translate}}</div>
             <div *ngIf="publishPermission && !publishInherit" class="publishInfo"
                  innerHTML="{{('WORKSPACE.SHARE.PUBLISH_ACTIVE_'+(isCollection() ? 'COLLECTION' : _node.isDirectory ? 'DIRECTORY' : 'DOCUMENT')) | translate}}">
             </div>
-            <div *ngIf="allowDOI()" class="doi">
-              <input type="checkbox" class="filled-in" [disabled]="doiDisabled" [(ngModel)]="doiActive" id="doi">
-              <label for="doi">{{'WORKSPACE.SHARE.DOI' | translate}}</label>
-              <span>{{'WORKSPACE.SHARE.DOI_INFO' | translate}}</span>
+            <div class="doi" *ngIf="allowDOI()">
+              <mat-checkbox [disabled]="doiDisabled" [(ngModel)]="doiActive" id="doi">
+                <div class="strong">{{'WORKSPACE.SHARE.DOI' | translate}}</div>
+                <div class="label-secondary">{{'WORKSPACE.SHARE.DOI_INFO' | translate}}</div>
+              </mat-checkbox>
             </div>
           </div>
           </div>
@@ -106,8 +101,8 @@
           <div class="groupHeading">
             <div class="groupName">{{'WORKSPACE.SHARE.GROUP_INHERIT' | translate}}</div>
             <div class="inheritCheck">
-              <input type="checkbox" [(ngModel)]="inherited" (change)="updatePublishState()" class="filled-in" id="inherit"> <label for="inherit">{{'WORKSPACE.SHARE.INHERIT' | translate}}
-            </label></div>
+              <mat-checkbox [(ngModel)]="inherited" (change)="updatePublishState()" id="inherit">{{'WORKSPACE.SHARE.INHERIT' | translate}}</mat-checkbox>
+            </div>
           </div>
           <div class="inherit" [class.crossed]="!inherited" *ngIf="inherited && inherit && inherit.length">
             <div *ngFor="let permission of inherit" class="groupEntry">
@@ -214,12 +209,12 @@
         <div *ngFor="let permission of permissionsGroup.concat(permissionsUser)">
           <div class="advancedAuthority"><i class="type material-icons">{{permission.authority.authorityType=='USER' ? "person" : "group"}}</i>{{ permission | permissionName }}</div>
           <div *ngFor="let type of ALL_PERMISSIONS" class="advancedPermission">
-            <input id="{{permission.authority.authorityName+'_'+type}}"
-                   type="checkbox"
+            <mat-checkbox id="{{permission.authority.authorityName+'_'+type}}"
                    [checked]="hasImplicitPermission(permission,type)"
                    [disabled]="isImplicitPermission(permission,type)"
-                   class="filled-in" (change)="setPermission(permission,type,$event)">
-            <label for="{{permission.authority.authorityName+'_'+type}}">{{type}}</label>
+                   (change)="setPermission(permission,type,$event)">
+              {{type}}
+            </mat-checkbox>
           </div>
         </div>
         </div>

@@ -9,6 +9,17 @@
 // Define the palettes for your theme using the Material Design palettes available in palette.scss
 // (imported above). For each palette, you can optionally specify a default, lighter, and darker
 // hue. Available color palettes: https://material.io/design/color/
+$custom-typography: mat-typography-config(
+        $font-family: 'open_sansregular'
+);
+// Override typography CSS classes (e.g., mat-h1, mat-display-1, mat-typography, etc.).
+@include mat-base-typography($custom-typography);
+
+// Override typography for a specific Angular Material components.
+@include mat-checkbox-typography($custom-typography);
+
+// Override typography for all Angular Material, including mat-base-typography and all components.
+@include angular-material-typography($custom-typography);
 $mat-custom: (
         50: lighten($primary,50%),
         100: lighten($primary,40%),
@@ -64,9 +75,22 @@ $candy-app-theme: mat-light-theme($candy-app-primary, $candy-app-accent, $candy-
     text-transform: uppercase;
   }
 }
+// align prefix in input fields
+.mat-form-field-appearance-outline .mat-form-field-prefix {
+  top: 0.4em!important;
+  left: -0.1em;
+}
 // form border on hover
 .mat-form-field-appearance-outline .mat-form-field-outline-thick{
   color:$primaryMediumLight;
+}
+// will fix g and y to cut off with custom font
+input.mat-input-element, mat-label, .mat-select-value{
+  line-height: normal;
+}
+// will better align the border label for the outlined input
+.mat-form-field-appearance-outline .mat-form-field-label{
+  margin-top: -6px;
 }
 .mat-checkbox-inner-container{
   width:18px!important;
@@ -113,4 +137,9 @@ $candy-app-theme: mat-light-theme($candy-app-primary, $candy-app-accent, $candy-
 }
 .mat-calendar-table-header-divider{
   display: none;
+}
+
+label .label-secondary{
+  font-size: 90%;
+  color: $textLight;
 }

@@ -434,7 +434,7 @@
     </div>
     <div class="inputGroupGrow">
       <div class="info">{{'ADMIN.BROWSER.LUCENE_AUTHORITIES' | translate }}</div>
-      <authority-search-input [globalSearch]="true" [placeholder]="'ADMIN.BROWSER.ADD_AUTHORITY'" [allowAny]="true" (onChooseAuthority)="addLuceneAuthority($event)"></authority-search-input>
+      <authority-search-input [globalSearchAllowed]="true" [placeholder]="'ADMIN.BROWSER.ADD_AUTHORITY'" [allowAny]="true" (onChooseAuthority)="addLuceneAuthority($event)"></authority-search-input>
     </div>
     <div class="inputGroupGrow luceneAuthorities" *ngIf="lucene.authorities && lucene.authorities.length">
         <div></div>

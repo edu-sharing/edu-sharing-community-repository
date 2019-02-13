@@ -10,12 +10,13 @@ import {RestLocatorService} from './common/rest/services/rest-locator.service';
 import {HttpClient, HttpClientModule} from '@angular/common/http';
 import {MatDatepickerModule} from '@angular/material/datepicker';
 import {
+    MatAutocompleteModule,
     MatButtonModule, MatCardModule, MatCheckboxModule,
     MatDialogModule,
     MatFormFieldModule,
     MatInputModule,
     MatMenuModule,
-    MatNativeDateModule, MatRadioModule, MatSelectModule, MatSlideToggleModule, MatTabsModule,
+    MatNativeDateModule, MatOptionModule, MatRadioModule, MatSelectModule, MatSlideToggleModule, MatTabsModule,
     MatToolbarModule
 } from '@angular/material';
 import { LazyLoadImageModule } from 'ng-lazyload-image';
@@ -32,7 +33,9 @@ export const IMPORTS=[
   MatCheckboxModule,
   MatSlideToggleModule,
   MatMenuModule,
+  MatOptionModule,
   MatSelectModule,
+  MatAutocompleteModule,
   MatToolbarModule,
   MatRadioModule,
   MatCardModule,

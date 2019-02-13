@@ -1,4 +1,9 @@
-autocomplete{
+@import "../../../../styles/variables.scss";
+
+.authority-search-input{
   width:100%;
+  .material-icons {
+    color: $textLight;
+  }
 }
 

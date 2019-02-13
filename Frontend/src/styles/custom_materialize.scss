@@ -135,13 +135,6 @@ textarea.materialize-textarea{
   width: calc(100% - 1.65em);
 }
 
-/*
-  TODO: Check if it is possible to combine with the input state
- */
-label,label:active{
-  font-size: 90%;
-  color:$textMain;
-}
 input[type=checkbox]+label,
 input[type=radio]+label,
 .switch >label{
