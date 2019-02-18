@@ -3,7 +3,7 @@
 .actionbar{
 
 }
-.actionAlways,.more{
+.action-always,.more{
   float:right;
   padding:0 15px;
   @include clickable();
@@ -39,10 +39,10 @@
 .more i{
   font-size:1.5rem;
 }
-.actionAlways{
+.action-always{
   text-transform: uppercase;
 }
-.actionAlwaysCaption{
+.action-always-caption{
   position: relative;
   padding-left: 2px;
 }
@@ -73,7 +73,7 @@
   color: $primary;
 }
 @media screen and (max-width: ($mobileWidth+$mobileStage*4)){
-  .actionAlwaysCaption{
+  .action-always-caption{
     display: none;
   }
 }

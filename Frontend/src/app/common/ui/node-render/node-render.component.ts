@@ -276,7 +276,7 @@ export class NodeRenderComponent implements EventListener{
       opt.push(o);
     }
     this.options=opt;
-    let download=new OptionItem('DOWNLOAD','cloud_download',()=>this.downloadCurrentNode());
+    let download=new OptionItem('WORKSPACE.OPTION.DOWNLOAD','cloud_download',()=>this.downloadCurrentNode());
     download.isEnabled=this._node.downloadUrl!=null;
     download.showAsAction=true;
     if(this.isCollectionRef()){
