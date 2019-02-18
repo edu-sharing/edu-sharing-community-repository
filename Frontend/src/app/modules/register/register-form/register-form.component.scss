@@ -1,5 +1,10 @@
 @import "../../../../styles/variables.scss";
 
+:host /deep/ {
+  mat-form-field {
+    width: 100%;
+  }
+}
 form{
   div{
     position: relative;
@@ -11,8 +16,11 @@ form{
     font-weight: normal;
   }
 }
+.accept{
+  margin-top: 10px;
+}
 .name-input{
-  div{
+  mat-form-field{
     display: inline-block;
     width: calc(50% - 5px);
   }

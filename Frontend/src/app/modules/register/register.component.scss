@@ -1,11 +1,19 @@
 @import "../../../styles/variables.scss";
 $path:'../../../assets/images/layout/';
-.card-action a{
-  width: 100%;
-  max-width: 100%;
-  justify-content: center;
+:host /deep/ {
+  mat-card-actions > div {
+    width: 100%;
+    max-width: 100%;
+    justify-content: center;
+    > button {
+      width: 100%;
+      margin: 0;
+    }
+  }
 }
-
+.register-content{
+  padding: $cardPadding;
+}
 .register{
   color:$textLight;
   //text-align: center;

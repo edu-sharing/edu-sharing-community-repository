@@ -1,7 +1,12 @@
 @import "../../../styles/variables.scss";
 
-md-input{
-  width:100%;
+.login-content{
+  padding:$cardPadding;
+}
+:host /deep/ .login-content {
+  mat-form-field {
+    width: 100%;
+  }
 }
 powered-by{
   position: fixed;
@@ -38,6 +43,7 @@ powered-by{
   }
 }
 .register{
+  margin-top: 10px;
   color:$textLight;
   a{
     text-transform: uppercase;

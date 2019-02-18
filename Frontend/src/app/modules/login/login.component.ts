@@ -19,11 +19,12 @@ import {RestHelper} from '../../common/rest/rest-helper';
 import {PlatformLocation} from '@angular/common';
 
 import {CordovaService} from '../../common/services/cordova.service';
-import {trigger} from "@angular/animations";
-import {UIAnimation} from "../../common/ui/ui-animation";
-import {InputPasswordComponent} from "../../common/ui/input-password/input-password.component";
+import {trigger} from '@angular/animations';
+import {UIAnimation} from '../../common/ui/ui-animation';
+import {InputPasswordComponent} from '../../common/ui/input-password/input-password.component';
 import {RouterHelper} from '../../common/router.helper';
 import {MainNavComponent} from '../../common/ui/main-nav/main-nav.component';
+import {DialogButton} from '../../common/ui/modal-dialog/modal-dialog.component';
 
 @Component({
   selector: 'workspace-login',
@@ -34,7 +35,7 @@ import {MainNavComponent} from '../../common/ui/main-nav/main-nav.component';
     ]
 })
 export class LoginComponent  implements OnInit{
-    loginUrl: any;
+  loginUrl: any;
   @ViewChild('mainNav') mainNavRef : MainNavComponent;
   @ViewChild('passwordInput') passwordInput : InputPasswordComponent;
   @ViewChild('usernameInput') usernameInput : ElementRef;
@@ -53,12 +54,14 @@ export class LoginComponent  implements OnInit{
   // stage (login or choose)
   private previousStage = '';
   private stage = 'login';
+  private buttons: DialogButton[];
   private checkConditions(){
     this.disabled=!this.username;// || !this.password;
+      this.updateButtons();
   }
   private recoverPassword(){
       if(this.config.register.local){
-          this.router.navigate([UIConstants.ROUTER_PREFIX+"register","request"]);
+          this.router.navigate([UIConstants.ROUTER_PREFIX+'register','request']);
       }
       else {
           window.location.href = this.config.register.recoverUrl;
@@ -66,7 +69,7 @@ export class LoginComponent  implements OnInit{
   }
   private register(){
       if(this.config.register.local){
-          this.router.navigate([UIConstants.ROUTER_PREFIX+"register"]);
+          this.router.navigate([UIConstants.ROUTER_PREFIX+'register']);
       }
       else {
           window.location.href = this.config.register.registerUrl;
@@ -87,15 +90,16 @@ export class LoginComponent  implements OnInit{
               private route : ActivatedRoute,
               private cordova: CordovaService
             ){
-
+    this.updateButtons();
     Translation.initialize(translate,this.configService,this.storage,this.route).subscribe(()=>{
       UIHelper.setTitle('LOGIN.TITLE',title,translate,configService);
       this.configService.getAll().subscribe((data:any)=>{
         this.config=data;
-        if(!this.config.register)
+        if(!this.config.register) {
             // default register mode: allow local registration if not disabled
-            this.config.register={local:true};
-
+            this.config.register = {local: true};
+        }
+        this.updateButtons();
         this.username=this.configService.instant('defaultUsername','');
         this.password=this.configService.instant('defaultPassword','');
         this.route.queryParams.forEach((params: Params) => {
@@ -218,5 +222,32 @@ export class LoginComponent  implements OnInit{
     showLogin() {
         this.previousStage=this.stage;
         this.stage='login';
+        this.updateButtons();
+    }
+
+    updateButtons(): any {
+        /*
+        <div class="card-action" *ngIf="stage=='login'">
+         <a tabindex="0" class="waves-effect waves-light btn" [class.disabled]="disabled" (click)="login()" (keyup.enter)="login()">{{'LOGIN.LOGIN' | translate }}</a>
+         <a tabindex="0" class="btn-flat" *ngIf="config.register.local || config.register.recoverUrl" (click)="recoverPassword()" (keyup.enter)="recoverPassword()">{{'LOGIN.RECOVER_PASSWORD' | translate }}</a>
+       </div>
+         */
+        if(this.stage=='login') {
+            this.buttons = [];
+            if(this.config.register && (this.config.register.local || this.config.register.recoverUrl)) {
+                this.buttons.push(new DialogButton('LOGIN.RECOVER_PASSWORD', DialogButton.TYPE_CANCEL, () => this.recoverPassword()));
+            }
+            let login=new DialogButton('LOGIN.LOGIN',DialogButton.TYPE_PRIMARY,()=>this.login());
+            login.disabled=this.disabled;
+            this.buttons.push(login);
+        }else{
+            this.buttons = null;
+        }
+    }
+
+    goBack() {
+        this.stage=this.previousStage;
+        this.previousStage=null
+        this.updateButtons();
     }
 }

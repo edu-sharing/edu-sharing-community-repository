@@ -1,7 +1,7 @@
 import {RouterModule} from '@angular/router';
 import {ToastyModule} from 'ngx-toasty';
 import {TranslateModule, TranslateLoader} from '@ngx-translate/core';
-import {FormsModule} from '@angular/forms';
+import {FormsModule, ReactiveFormsModule} from '@angular/forms';
 import {BrowserModule} from '@angular/platform-browser';
 import {createTranslateLoader} from './common/translation';
 import {ROUTES} from './router/router.component';
@@ -26,6 +26,7 @@ export const IMPORTS=[
   BrowserModule,
   BrowserAnimationsModule,
   FormsModule,
+  ReactiveFormsModule,
   HttpClientModule,
   LazyLoadImageModule,
   MatButtonModule,

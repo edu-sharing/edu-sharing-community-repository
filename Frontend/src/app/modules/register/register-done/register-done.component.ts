@@ -1,4 +1,4 @@
-import {Component, EventEmitter, Input, Output} from '@angular/core';
+import {ChangeDetectorRef, Component, EventEmitter, Input, Output} from '@angular/core';
 import {RestConnectorService} from "../../../common/rest/services/rest-connector.service";
 import {Toast} from "../../../common/ui/toast";
 import {PlatformLocation} from "@angular/common";
@@ -40,19 +40,24 @@ export class RegisterDoneComponent{
     }
     public sendMail(){
         this.loading=true;
+        this.changes.detectChanges();
         if(this.inputState=='done') {
             this.register.resendMail(this.email).subscribe(() => {
                 this.toast.toast("REGISTER.TOAST");
                 this.loading=false;
+                this.changes.detectChanges();
             },(error)=>{
                 this.loading=false;
+                this.changes.detectChanges();
             });
         }
         else{
             this.register.recoverPassword(this.email).subscribe(()=>{
                 this.loading=false;
+                this.changes.detectChanges();
             },(error)=>{
                 this.loading=false;
+                this.changes.detectChanges();
             });
         }
     }
@@ -61,6 +66,7 @@ export class RegisterDoneComponent{
                 private register: RestRegisterService,
                 private config: ConfigurationService,
                 private cordova: CordovaService,
+                private changes: ChangeDetectorRef,
                 private locator: RestLocatorService,
                 private router: Router
     ) {
@@ -83,8 +89,9 @@ export class RegisterDoneComponent{
             setTimeout(()=>this.checkStatus(),RegisterDoneComponent.STATUS_INTERVAL);
         });
     }
-    private activate(keyUrl: string) {
+    public activate(keyUrl: string) {
         this.loading=true;
+        this.changes.detectChanges();
         if(this.inputState=='done') {
             this.register.activate(keyUrl).subscribe(() => {
                 if(this.cordova.isRunningCordova()){
@@ -105,6 +112,7 @@ export class RegisterDoneComponent{
                     this.toast.error(error);
                 }
                 this.loading = false;
+                this.changes.detectChanges();
             });
         }
         else{

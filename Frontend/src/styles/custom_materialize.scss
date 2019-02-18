@@ -152,15 +152,18 @@ input[type=password],
 input[type=number],
 input[type=text],
 .materialize-textarea{
-  /*box-shadow: 0 1px 0 0 $primary!important;
-  border-bottom: 1px solid $primary!important;*/
-  &:focus:not([readonly]) {
-    border-color:$primaryMediumLight !important;
-    box-shadow: none !important;
-  }
-  &.valid{
-    border-color:$colorStatusPositive !important;
-    box-shadow: none !important;
+  &:not(.mat-input-element) {
+    /*box-shadow: 0 1px 0 0 $primary!important;
+    border-bottom: 1px solid $primary!important;*/
+    &:focus:not([readonly]) {
+      border-color: $primaryMediumLight !important;
+      box-shadow: none !important;
+    }
+
+    &.valid {
+      border-color: $colorStatusPositive !important;
+      box-shadow: none !important;
+    }
   }
 }
 .materialize-textarea{
