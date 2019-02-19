@@ -86,7 +86,7 @@ export class RestConnectorsService extends AbstractRestService{
   }
 
     getConnectors() {
-      if(this.currentList) {
+      if(this.currentList && this.currentList.connectors) {
           // filter connectors which are only available on desktop
           return this.currentList.connectors.filter((connector) => !connector.onlyDesktop || !this.ui.isMobile());
       }

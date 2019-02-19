@@ -1,5 +1,5 @@
 @import "../../../../styles/variables.scss";
-.actionAlways,.more{
+.action-always,.more{
   float:right;
   padding:0 15px;
   @include clickable();
@@ -37,10 +37,10 @@
     font-size: 1.5rem;
   }
 }
-.actionAlways{
+.action-always{
   text-transform: uppercase;
 }
-.actionAlwaysCaption{
+.action-always-caption{
   position: relative;
   padding-left: 2px;
 }
@@ -71,7 +71,7 @@
 }
 
 .actionbar-round{
-  .more, .actionAlways {
+  .more, .action-always {
     background: white !important;
     color: $primary !important;
     border-radius: 50%;
@@ -89,7 +89,7 @@
       display: none;
     }
   }
-  .actionAlways{
+  .action-always{
     .edu-icons,.material-icons {
       right: 4px !important;
     }
@@ -97,7 +97,10 @@
 }
 
 @media screen and (max-width: ($mobileWidth+$mobileStage*4)){
-  .actionAlwaysCaption{
+  .action-always{
+    padding: 0 1rem;
+  }
+  .action-always-caption{
     display: none;
   }
 }

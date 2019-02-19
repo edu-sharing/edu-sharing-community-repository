@@ -1,8 +1,8 @@
 <div class="message-bg">
     <div *ngIf="message" class="message-container">
-        <img *ngIf="error == '404'" src="assets/images/error/404.svg" alt="">
-        <img *ngIf="error == '500'" src="assets/images/error/500.svg" alt="">
-        <img *ngIf="error != '500' && error != '404'" src="assets/images/error/invalid.svg" alt="">
+        <img *ngIf="error == '404'" src="assets/images/message/404.svg" alt="">
+        <img *ngIf="error == '500'" src="assets/images/message/500.svg" alt="">
+        <img *ngIf="error != '500' && error != '404'" src="assets/images/message/invalid.svg" alt="">
         <div>
             <h1>{{message | translate}}</h1>
             <h2>{{messageDetail | translate}}</h2>

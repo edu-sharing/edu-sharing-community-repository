@@ -18,7 +18,7 @@
 							<property name="id" value="TINYMCE"/>
 							<property name="icon" value="edit"/>
 							<property name="showNew" value="true"/>
-							<property name="onlyDesktop" value="true" />
+							<property name="onlyDesktop" value="false" />
 							<property name="filetypes">
 								<bean class="java.util.ArrayList">
 									<constructor-arg>

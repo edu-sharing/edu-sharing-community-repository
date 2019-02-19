@@ -144,6 +144,7 @@ public class NodeCustomizationPolicies implements OnContentUpdatePolicy, OnCreat
 		policyComponent.bindClassBehaviour(OnCreateNodePolicy.QNAME, QName.createQName(CCConstants.CCM_TYPE_IO), new JavaBehaviour(this, "onCreateNode"));
 		policyComponent.bindClassBehaviour(OnCreateNodePolicy.QNAME, QName.createQName(CCConstants.CCM_TYPE_MAP), new JavaBehaviour(this, "onCreateNode"));
 		
+		policyComponent.bindClassBehaviour(OnContentUpdatePolicy.QNAME, ContentModel.TYPE_CONTENT, new JavaBehaviour(this, "onContentUpdate"));
 		policyComponent.bindClassBehaviour(OnContentUpdatePolicy.QNAME, QName.createQName(CCConstants.CCM_TYPE_IO), new JavaBehaviour(this, "onContentUpdate"));
 		
 		//for async changed properties refresh node in cache
@@ -180,108 +181,8 @@ public class NodeCustomizationPolicies implements OnContentUpdatePolicy, OnCreat
 					&& (LockStatus.NO_LOCK.equals(lockStatus) || LockStatus.LOCK_EXPIRED.equals(lockStatus))
 					&& (reader!=null) && (reader.getContentData()!=null) && reader.getContentData().getSize() > 0){
 			
-logger.debug("will do the thumbnail stuff");
-				
-				if(reader.getMimetype().contains("video")){
-					
-					MovieBox moov =null;
-					IsoFile isoFile = null;
-					try{
-						
-						TikaInputStream tstream = TikaInputStream.get(reader.getContentInputStream());
-						isoFile = new IsoFile(new FileDataSourceImpl(tstream.getFile()));
-						moov = isoFile.getMovieBox();
-						
-						if(moov != null && moov.getBoxes() != null){
-							for(Box b : moov.getBoxes()) {
-							   
-							    
-							    if(b instanceof TrackBox){
-							    	TrackHeaderBox thb = ((TrackBox)b).getTrackHeaderBox();
-							    	
-							    	if(thb.getWidth() > 0 && thb.getHeight() > 0){
-							    		nodeService.setProperty(nodeRef, QName.createQName(CCConstants.CCM_PROP_IO_WIDTH), thb.getWidth());
-							    		nodeService.setProperty(nodeRef, QName.createQName(CCConstants.CCM_PROP_IO_HEIGHT), thb.getHeight());
-							    	}
-							 
-							    }
-							    
-							}
-						}
-						
-					}catch(Exception e){
-						logger.error(e.getMessage(), e);
-					}finally{
-						
-						if(isoFile != null){
-							try{
-								isoFile.close();
-							}catch(IOException e){
-								logger.error(e.getMessage(), e);
-							}
-						}
-						
-						if(moov != null){
-							try{
-								moov.close();
-							}catch(IOException e){
-								logger.error(e.getMessage(), e);
-							}
-						}
-					}
-				}
-				// alfresco does not read image size for all images, so we try to fix it
-				// trying to load not the whole image but just the bounding rect, see also:
-				// http://stackoverflow.com/questions/1559253/java-imageio-getting-image-dimensions-without-reading-the-entire-file
-				if(reader.getMimetype().contains("image")){
-					try{
-						try(ImageInputStream in = ImageIO.createImageInputStream(reader.getContentInputStream())){
-						    final Iterator<ImageReader> readers = ImageIO.getImageReaders(in);
-						    if (readers.hasNext()) {
-						        ImageReader imageReader = readers.next();
-						        try {
-						        	imageReader.setInput(in);
-						        	nodeService.setProperty(nodeRef, QName.createQName(CCConstants.EXIF_PROP_PIXELXDIMENSION), imageReader.getWidth(0));
-									nodeService.setProperty(nodeRef, QName.createQName(CCConstants.EXIF_PROP_PIXELYDIMENSION), imageReader.getHeight(0));
-						        } finally {
-						        	imageReader.dispose();
-						        }
-						    }
-						} 
-					}catch(Throwable t){}
-				}
-				ContentReader thumbnail = contentService.getReader(nodeRef, QName.createQName(CCConstants.CCM_PROP_IO_USERDEFINED_PREVIEW));
-				if(thumbnail!=null && thumbnail.getContentData()!=null && thumbnail.getContentData().getSize()>0){
-					// this node has already a custom thumbnail, we do not need to create one
-					// this prevents especially the import from slowing down when using a Binary Handler
-				}
-				else {
-					Action thumbnailAction = actionService.createAction(CCConstants.ACTION_NAME_CREATE_THUMBNAIL);
-					thumbnailAction.setTrackStatus(true);
-					thumbnailAction.setExecuteAsynchronously(true);
-					thumbnailAction.setParameterValue("thumbnail-name", CCConstants.CM_VALUE_THUMBNAIL_NAME_imgpreview_png);
-					thumbnailAction.setParameterValue(ActionObserver.ACTION_OBSERVER_ADD_DATE, new Date());
-
-					ActionObserver.getInstance().addAction(nodeRef, thumbnailAction);
-
-					SimpleTrigger st = new SimpleTrigger();
-					st.setName("ImmediateTrigger");
-					st.setRepeatCount(0);
-					st.setStartTime(new Date(System.currentTimeMillis() + 500));
-					JobDetail jd = new JobDetail();
-					jd.setJobClass(PreviewJob.class);
-					jd.setName(PreviewJob.class.getName() + " Immediate " + System.currentTimeMillis());
-
-					try {
-						scheduler.scheduleJob(jd, st);
-					} catch (ObjectAlreadyExistsException e) {
-						//only when debug, the job should only be executed as a singelton, so this exception is fine
-						logger.debug(e.getMessage());
-					} catch (SchedulerException e) {
-						logger.error(e.getMessage(), e);
-					}
-				}
-			}
+	     	    new ThumbnailHandling().thumbnailHandling(nodeRef);
+    		}
 			
 			logger.debug("will do the resourceinfo. noderef:"+nodeRef);
 			Action resourceInfoAction = actionService.createAction(CCConstants.ACTION_NAME_RESOURCEINFO);
@@ -311,7 +212,7 @@ logger.debug("will do the thumbnail stuff");
 		}
 	
 	}
-	
+
 	@Override
 	public void onCreateNode(ChildAssociationRef childAssocRef) {
 		
@@ -607,8 +508,7 @@ logger.debug("will do the thumbnail stuff");
 		// the following service: https://github.com/rootzoll/web-screenshot
 		// --> IF NOT AVAILABLE WILL JUST WARN
 		try {
-			final String localServiceUrl = websitePreviewRenderService+"/?url="+java.net.URLEncoder.encode(httpURL, "ISO-8859-1")+"&scale="+scale+"&base64=1"; 
-			//System.out.println("Calling external Service: "+localServiceUrl);
+			final String localServiceUrl = websitePreviewRenderService+"/?url="+java.net.URLEncoder.encode(httpURL, "ISO-8859-1")+"&scale="+scale+"&base64=1";
 		    HttpClient client = new HttpClient();
 		    GetMethod method = new GetMethod(localServiceUrl);
 		    int statusCode = client.executeMethod(method);
