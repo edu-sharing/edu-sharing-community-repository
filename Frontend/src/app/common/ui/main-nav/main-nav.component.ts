@@ -542,7 +542,6 @@ export class MainNavComponent{
   }
   private openImprint(){
     UIHelper.openUrl(this.config.imprintUrl,this.cordova);
-    window.document.location.href=this.config.imprintUrl;
   }
   private openPrivacy(){
     UIHelper.openUrl(this.config.privacyInformationUrl,this.cordova);
