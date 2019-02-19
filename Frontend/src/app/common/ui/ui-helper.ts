@@ -358,7 +358,14 @@ export class UIHelper{
   static goToDefaultLocation(router: Router,configService : ConfigurationService,extras:NavigationExtras={}) {
       return router.navigate([UIConstants.ROUTER_PREFIX + configService.instant("loginDefaultLocation","workspace")],extras);
   }
-
+    static openUrl(url:string, cordova: CordovaService) {
+        if(cordova.isRunningCordova()){
+            return cordova.openInAppBrowser(url);
+        }
+        else {
+            window.location.href=url;
+        }
+    }
     static openBlankWindow(url:string, cordova: CordovaService) {
       if(cordova.isRunningCordova()){
         return cordova.openInAppBrowser(url);

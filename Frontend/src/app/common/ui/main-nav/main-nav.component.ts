@@ -541,10 +541,11 @@ export class MainNavComponent{
     },(error:any)=>this.checkConfig(buttons));
   }
   private openImprint(){
+    UIHelper.openUrl(this.config.imprintUrl,this.cordova);
     window.document.location.href=this.config.imprintUrl;
   }
   private openPrivacy(){
-    window.document.location.href=this.config.privacyInformationUrl;
+    UIHelper.openUrl(this.config.privacyInformationUrl,this.cordova);
   }
   private checkConfig(buttons: any[]) {
     this.configService.getAll().subscribe((data:any)=>{
