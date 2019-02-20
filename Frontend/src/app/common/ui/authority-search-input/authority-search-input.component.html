@@ -13,10 +13,10 @@
 ></autocomplete>
 -->
 <form (ngSubmit)="onSubmit()">
-    <mat-form-field class="authority-search-input">
+    <mat-form-field class="authority-search-input" floatLabel="always">
         <i matPrefix icon [iconId]="inputIcon" *ngIf="inputIcon"></i>
         <mat-label>{{placeholder | translate}}</mat-label>
-        <input type="text" matInput [matAutocomplete]="autoGroup" name="authoritySearch" [(ngModel)]="inputValue" (ngModelChange)="updateSuggestions($event)">
+        <input type="text" matInput [matAutocomplete]="autoGroup" placeholder="{{placeholder | translate}}" name="authoritySearch" [(ngModel)]="inputValue" (ngModelChange)="updateSuggestions($event)">
             <mat-autocomplete #autoGroup="matAutocomplete">
                 <mat-optgroup *ngFor="let group of suggestionGroups" label="{{ group.label | translate}}">
                     <mat-option class="authority-search-input-option" *ngFor="let data of group.values" [value]="data">
