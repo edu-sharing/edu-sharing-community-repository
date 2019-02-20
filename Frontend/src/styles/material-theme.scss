@@ -84,7 +84,19 @@ $candy-app-theme: mat-light-theme($candy-app-primary, $candy-app-accent, $candy-
 .mat-form-field-appearance-outline .mat-form-field-outline-thick{
   color:$primaryMediumLight;
 }
-// will fix g and y to cut off with custom font
+.mat-form-field-bright{
+  .mat-form-field-outline,
+  .mat-form-field-label{
+    color: rgba(255,255,255,0.5);
+  }
+  &.mat-focused{
+    .mat-form-field-outline,
+    .mat-form-field-label{
+      color: rgba(255,255,255,0.7);
+    }
+  }
+}
+  // will fix g and y to cut off with custom font
 input.mat-input-element, mat-label, .mat-select-value{
   line-height: normal;
 }
@@ -115,6 +127,9 @@ input.mat-input-element, mat-label, .mat-select-value{
   > i {
     width: 35px;
   }
+}
+.mat-button-no-uppercase .mat-button-wrapper{
+  text-transform: none;
 }
 .mat-menu-content{
   >button{

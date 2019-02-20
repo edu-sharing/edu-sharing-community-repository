@@ -13,8 +13,8 @@
     <img *ngIf="!edit && user.profile.avatar" class="blurred-image" [src]="user.profile.avatar+'&crop=true&width=400&height=400'">
     <img *ngIf="edit && !avatarFile && userEdit.profile.avatar" class="blurred-image" [src]="user.profile.avatar+'&crop=true&width=400&height=400'">
     <img *ngIf="edit && avatarFile" class="blurred-image" [src]="avatarImage">
-    <a class="edit clickable" *ngIf="isMe && !edit && editProfile" (click)="beginEdit()"><i class="material-icons">edit</i><span>{{'PROFILES.EDIT' | translate}}</span></a>
-    <a class="edit clickable" *ngIf="isMe && edit" (click)="edit=false"><i icon iconId="close"></i><span>{{'PROFILES.CANCEL_EDIT' | translate}}</span></a>
+    <button mat-button class="edit clickable" *ngIf="isMe && !edit && editProfile" (click)="beginEdit()"><i class="material-icons">edit</i><span>{{'PROFILES.EDIT' | translate}}</span></button>
+    <button mat-button class="edit clickable" *ngIf="isMe && edit" (click)="edit=false"><i icon iconId="close"></i><span>{{'PROFILES.CANCEL_EDIT' | translate}}</span></button>
     <user-avatar *ngIf="!edit"
      [user]="user"
     ></user-avatar>
@@ -28,7 +28,7 @@
       <div class="new-avatar-button" (click)="avatar.click()">
         <span>{{'PROFILES.IMG_CHANGE' | translate}}</span>
       </div>
-      <i *ngIf="hasAvatar()" class="material-icons clickable" (click)="clearAvatar()">delete</i>
+      <button mat-button *ngIf="hasAvatar()" (click)="clearAvatar()"><i icon iconId="delete"></i></button>
     </div>
 
     <div *ngIf="!edit">
@@ -39,14 +39,23 @@
       <!--</div>-->
     </div>
     <div *ngIf="edit">
-      <input type="text" [(ngModel)]="userEdit.profile.firstName" placeholder="{{'USER.firstName' | translate}}">
-      <input type="text" [(ngModel)]="userEdit.profile.lastName" placeholder="{{'USER.lastName' | translate}}">
-      <div class="email">
-        <input type="email" [(ngModel)]="userEdit.profile.email" placeholder="{{'USER.email' | translate}}">
+      <div>
+        <mat-form-field class="mat-form-field-bright">
+          <mat-label>{{'USER.firstName' | translate}}</mat-label>
+          <input matInput type="text" [(ngModel)]="userEdit.profile.firstName">
+        </mat-form-field>
+        <mat-form-field class="mat-form-field-bright">
+          <mat-label>{{'USER.lastName' | translate}}</mat-label>
+          <input matInput type="text" [(ngModel)]="userEdit.profile.lastName">
+        </mat-form-field>
       </div>
+      <mat-form-field class="mat-form-field-bright email">
+        <mat-label>{{'USER.email' | translate}}</mat-label>
+        <input matInput type="email" [(ngModel)]="userEdit.profile.email">
+      </mat-form-field>
     </div>
     <div class="save">
-      <div *ngIf="edit" class="btn-flat waves-effect waves-light" (click)="saveEdits()">{{'SAVE' | translate}}</div>
+      <button mat-raised-button *ngIf="edit" (click)="saveEdits()">{{'SAVE' | translate}}</button>
     </div>
   </div>
   <div class="statsBackground">

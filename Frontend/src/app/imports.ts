@@ -11,12 +11,20 @@ import {HttpClient, HttpClientModule} from '@angular/common/http';
 import {MatDatepickerModule} from '@angular/material/datepicker';
 import {
     MatAutocompleteModule,
-    MatButtonModule, MatCardModule, MatCheckboxModule,
+    MatButtonModule,
+    MatCardModule,
+    MatCheckboxModule,
     MatDialogModule,
     MatFormFieldModule,
     MatInputModule,
     MatMenuModule,
-    MatNativeDateModule, MatOptionModule, MatRadioModule, MatSelectModule, MatSlideToggleModule, MatTabsModule,
+    MatNativeDateModule,
+    MatOptionModule,
+    MatRadioModule,
+    MatSelectModule,
+    MatSidenavModule,
+    MatSlideToggleModule,
+    MatTabsModule,
     MatToolbarModule
 } from '@angular/material';
 import { LazyLoadImageModule } from 'ng-lazyload-image';
@@ -31,6 +39,7 @@ export const IMPORTS=[
   LazyLoadImageModule,
   MatButtonModule,
   MatTabsModule,
+  MatSidenavModule,
   MatCheckboxModule,
   MatSlideToggleModule,
   MatMenuModule,

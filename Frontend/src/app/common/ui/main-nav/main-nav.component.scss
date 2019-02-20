@@ -101,16 +101,11 @@ user-profile{
 .sidenavClose{
   @include clickable();
   position: absolute;
-  top:10px;
-  right:10px;
+  top:0;
+  right:0;
+  padding: 10px;
   z-index: 2;
   color: #fff;
-  &:focus{
-    @include removeDefaultFocus();
-    i{
-      @include focusShadow();
-    }
-  }
 }
 .sidenavImage > .sidenavProfile{
   position: absolute;
@@ -274,6 +269,15 @@ user-profile{
   width:100%;
   display: flex;
   align-items: center;
+  border-radius: 0;
+  color: $textMain;
+  transition: all $transitionNormal;
+  &:hover{
+    background-color:$workspaceTreeSelectedBackground;
+  }
+}
+:host /deep/ .sidenav .mat-button:hover .mat-button-focus-overlay{
+  opacity:0;
 }
 .userMenu,.helpMenu{
   position: absolute;
@@ -284,10 +288,6 @@ user-profile{
 .userMenu{
   top: $mainnavHeight - 20px;
   right:40px;
-}
-
-.sidenav .button:hover{
-  background:$workspaceTreeSelectedBackground;
 }
 .sidenav .button i{
   padding-right:10px;
