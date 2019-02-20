@@ -12,7 +12,7 @@
             [class.display-none]="!optionsAlways[0].isEnabled && !showDisabled"
             (click)="click(optionsAlways[0])">
         <i icon title="{{optionsAlways[0].showName ? null : (optionsAlways[0].name | translate)}}" [iconId]="optionsAlways[0].icon"></i>
-        <span class="actionAlwaysCaption" *ngIf="optionsAlways[0].showName && appearance!='round'"> {{optionsAlways[0].name | translate}}</span>
+        <span class="action-always-caption" *ngIf="optionsAlways[0].showName && appearance!='round'"> {{optionsAlways[0].name | translate}}</span>
     </button>
     <button mat-button
        color="primary"
@@ -21,7 +21,7 @@
        [class.display-none]="!option.isEnabled && !showDisabled"
        (click)="click(option)">
       <i icon title="{{option.showName ? null : (option.name | translate)}}" [iconId]="option.icon"></i>
-      <span class="actionAlwaysCaption" *ngIf="option.showName && appearance!='round'"> {{option.name | translate}}</span>
+      <span class="action-always-caption" *ngIf="option.showName && appearance!='round'"> {{option.name | translate}}</span>
     </button>
 <button mat-flat-button class="more"
         [matMenuTriggerFor]="dropdownRef.menu"

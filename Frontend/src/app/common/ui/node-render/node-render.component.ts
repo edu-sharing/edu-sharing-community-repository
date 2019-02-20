@@ -298,7 +298,7 @@ export class NodeRenderComponent implements EventListener{
       opt.push(o);
     }
     this.options=opt;
-    let download=new OptionItem('DOWNLOAD','cloud_download',()=>this.downloadCurrentNode());
+    let download=new OptionItem('WORKSPACE.OPTION.DOWNLOAD','cloud_download',()=>this.downloadCurrentNode());
     download.isEnabled=this._node.downloadUrl!=null;
     download.showAsAction=true;
     if(this.isCollectionRef()){
@@ -366,10 +366,10 @@ export class NodeRenderComponent implements EventListener{
     }
   private addComments(){
       jQuery('.edusharing_rendering_metadata_header').append(`
-      <div class="nodeDetails">
-        <div class="item" tabindex="0" onclick="window.nodeRenderComponentRef.component.showComments()" onkeypress="(event.keyCode==13)?window.nodeRenderComponentRef.component.showComments():0">
-          <i class="material-icons">message</i><div>`+this._node.commentCount+` <span>`+this.translate.instant("COMMENTS_"+(this._node.commentCount==1 ? 'SINGLE' : 'MULTIPLE'))+`</span></div>
-        </div>
+      <div class="node-comments">
+          <div class="item" tabindex="0" onclick="window.nodeRenderComponentRef.component.showComments()" onkeypress="(event.keyCode==13)?window.nodeRenderComponentRef.component.showComments():0">
+            <i class="material-icons">message</i><div>`+this._node.commentCount+` <span>`+this.translate.instant("COMMENTS_"+(this._node.commentCount==1 ? 'SINGLE' : 'MULTIPLE'))+`</span></div>
+          </div>
       </div>
     `);
       let commentInterval=setInterval(()=> {

@@ -16,6 +16,7 @@ import org.edu_sharing.repository.server.MCAlfrescoBaseClient;
 import org.edu_sharing.repository.server.SearchResultNodeRef;
 import org.edu_sharing.repository.server.authentication.Context;
 import org.edu_sharing.repository.server.tools.ApplicationInfoList;
+import org.edu_sharing.repository.server.tools.ImageTool;
 import org.edu_sharing.repository.server.tools.URLTool;
 import org.edu_sharing.repository.server.tools.cache.PersonCache;
 import org.edu_sharing.restservices.iam.v1.model.GroupEntries;
@@ -367,6 +368,7 @@ public class PersonDao {
 	public void changeAvatar(InputStream is) throws DAOException {
 		try {
 		org.alfresco.service.cmr.repository.NodeRef currentAvatar = getAvatarNode();
+		is=ImageTool.autoRotateImage(is,ImageTool.MAX_THUMB_SIZE);
 		String nodeId=null;
 		if(currentAvatar==null) {
 			nodeId = this.nodeService.createNode(getNodeId(), CCConstants.CCM_TYPE_IO, new HashMap<>(), CCConstants.ASSOC_USER_PREFERENCEIMAGE);

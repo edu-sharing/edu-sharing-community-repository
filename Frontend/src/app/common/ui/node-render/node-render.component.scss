@@ -193,7 +193,7 @@ a.edusharing_rendering_content{
   .mdsWidget .comment .avatarCircle{
     cursor:default!important;;
   }
-  .nodeDetails {
+  .node-comments{
     margin:15px;
     color: $primary;
     display: flex;
@@ -245,6 +245,15 @@ div.download {
   div.download i {
     font-size: 120%;
   }
-
+  .render-back{
+    display: none;
+  }
+  :host /deep/ .node-comments{
+    min-width: unset;
+    padding-right: 10px;
+    > div > div{
+      display:none;
+    }
+  }
 }
 

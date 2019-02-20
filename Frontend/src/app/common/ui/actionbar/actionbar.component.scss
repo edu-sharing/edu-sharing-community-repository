@@ -9,7 +9,7 @@
   min-width: unset;
   padding:5px;
 }
-.actionAlwaysCaption{
+.action-always-caption{
   line-height: normal;
   padding-right:5px;
 }
@@ -72,7 +72,7 @@ button{
       display: none;
     }
   }
-  .actionAlways{
+  .action-always{
     .edu-icons,.material-icons {
       right: 4px !important;
     }
@@ -80,7 +80,10 @@ button{
 }
 
 @media screen and (max-width: ($mobileWidth+$mobileStage*4)){
-  .actionAlwaysCaption{
+  .action-always{
+    padding: 0 1rem;
+  }
+  .action-always-caption{
     display: none;
   }
 }

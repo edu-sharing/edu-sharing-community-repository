@@ -404,11 +404,6 @@ export class MainNavComponent implements AfterViewInit{
           this.configService.getAll().subscribe(()=>{
             this.userName=ConfigurationHelper.getPersonWithConfigDisplayName(this.user.person,this.configService);
           });
-          if(data.statusCode==RestConstants.STATUS_CODE_OK) {
-              setTimeout(() => {
-                  this.tutorialElement = this.userRef;
-              });
-          }
         });
         this.refreshNodeStore();
         this.connector.hasAccessToScope(RestConstants.SAFE_SCOPE).subscribe((data:AccessScope)=>{
@@ -613,10 +608,20 @@ export class MainNavComponent implements AfterViewInit{
       this.session.set('licenseAgreement',this.licenseAgreementNode.contentVersion);
     else
       this.session.set('licenseAgreement','0.0');
+    this.startTutorial();
+  }
+  startTutorial(){
+      if(this.connector.getCurrentLogin().statusCode=='OK') {
+          UIHelper.waitForComponent(this, 'userRef').subscribe(() => {
+              this.tutorialElement = this.userRef;
+          });
+      }
   }
   private showLicenseAgreement() {
-    if(!this.config.licenseAgreement || this.isGuest || !this.connector.getCurrentLogin().isValidLogin)
-      return;
+    if(!this.config.licenseAgreement || this.isGuest || !this.connector.getCurrentLogin().isValidLogin) {
+        this.startTutorial();
+        return;
+    }
     this.session.get('licenseAgreement',false).subscribe((version:string)=>{
       console.log("user accepted agreement at version "+version);
       this.licenseAgreementHTML=null;
@@ -632,8 +637,10 @@ export class MainNavComponent implements AfterViewInit{
       this.nodeService.getNodeMetadata(nodeId).subscribe((data:NodeWrapper)=>{
         this.licenseAgreementNode=data.node;
         console.log(data.node);
-        if(version==data.node.contentVersion)
-          return;
+        if(version==data.node.contentVersion) {
+            this.startTutorial();
+            return;
+        }
         this.licenseAgreement=true;
         this.nodeService.getNodeTextContent(nodeId).subscribe((data: NodeTextContent) => {
             this.licenseAgreementHTML = data.html ? data.html : data.raw ? data.raw : data.text;

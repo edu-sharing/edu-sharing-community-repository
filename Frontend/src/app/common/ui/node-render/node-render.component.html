@@ -2,7 +2,7 @@
 <main-nav #mainNav [currentScope]="'render'"></main-nav>
 <div class="topBar fixed scrollWithBanner" *ngIf="showTopBar">
   <div class="displayBar">
-    <span class="clickable" title="{{'BACK' | translate}}" (click)="close()" (keypress)="($event.which === 13)?close():0" tabindex="0"><i icon iconId="keyboard_arrow_left"></i> {{'BACK' | translate}}</span>
+    <span class="clickable" title="{{'BACK' | translate}}" (click)="close()" (keypress)="($event.which === 13)?close():0" tabindex="0"><i icon iconId="keyboard_arrow_left"></i> <span class="render-back">{{'BACK' | translate}}</span></span>
     <span *ngIf="_node" class="clickable showDetails" (click)="showDetails()" (keypress)="($event.which === 13)?showDetails():0" tabindex="0" title="{{'GOTO' | translate}} {{'INFO' | translate}}"><i icon iconId="info_outline"></i> <span class="uppercase hidemobile">{{'INFO' | translate}}</span></span>
     <span>
     <actionbar class="actionbarFrame"
