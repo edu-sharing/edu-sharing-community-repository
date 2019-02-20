@@ -345,7 +345,22 @@ export class UIHelper{
             }
         },16);
     }
-  static setFocusOnCard() {
+
+    /**
+     * smoothly scroll to the given child inside an element (The child will be placed around the first 1/3 of the parent's top)
+     * @param child
+     * @param element
+     * @param smoothness
+     */
+    static scrollSmoothElementToChild(child:Element,element:Element,smoothness=1) {
+        // y equals to the top of the child + any scrolling of the parent - the top of the parent
+        let y=child.getBoundingClientRect().top+element.scrollTop-element.getBoundingClientRect().top;
+        // move the focused element to 1/3 at the top of the container
+        y+=child.getBoundingClientRect().height/2 - element.getBoundingClientRect().height/3;
+        this.scrollSmoothElement(y,element,smoothness);
+    }
+
+    static setFocusOnCard() {
     let elements=document.getElementsByClassName("card")[0].getElementsByTagName("*");
     this.focusElements(elements);
   }

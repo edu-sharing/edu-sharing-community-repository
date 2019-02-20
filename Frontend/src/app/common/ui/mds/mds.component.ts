@@ -226,6 +226,13 @@ export class MdsComponent{
       this.onDone.emit(null);
     });
   }
+
+  @HostListener('window:resize')
+  onResize(){
+      if(document.activeElement && this.mdsScrollContainer.nativeElement){
+        UIHelper.scrollSmoothElementToChild(document.activeElement,this.mdsScrollContainer.nativeElement);
+      }
+  }
   constructor(private mdsService : RestMdsService,
               private translate : TranslateService,
               private route : ActivatedRoute,
@@ -1949,8 +1956,10 @@ export class MdsComponent{
     return html;
   }
   private renderTemplateWidget(widget: any){
+      if(this.uiService.isMobile())
+        return '';
       let html=`<div class="mdsTemplate">
-                    <a class="clickable templateLink" onclick="window.mdsComponentRef.component.openTemplateDialog();">` +
+                    <a class="clickable templateLink" onclick="`+this.getWindowComponent()+`.openTemplateDialog();">` +
                     this.translate.instant('MDS.TEMPLATE_LINK') + ` <i class="material-icons">arrow_forward</i></a>
                 </div>`;
       return html;
