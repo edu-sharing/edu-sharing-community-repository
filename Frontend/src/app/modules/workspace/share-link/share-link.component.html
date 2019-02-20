@@ -19,12 +19,7 @@
                          [options]="dateOptions"></ng-datepicker>-->
         </div>
         <div class="info-right">
-          <div class="switch">
-            <label>
-              <input type="checkbox" [(ngModel)]="expiry" (change)="setExpiry(expiry)" [disabled]="!enabled">
-              <span class="lever"></span>
-            </label>
-          </div>
+          <mat-slide-toggle [(ngModel)]="expiry" (change)="setExpiry(expiry)" [disabled]="!enabled"></mat-slide-toggle>
         </div>
       </div>
       <div class="configuration-link">
@@ -33,15 +28,10 @@
           <div>{{'WORKSPACE.SHARE_LINK.PASSWORD_INFO' | translate}}</div>
         </div>
 
-        <div class="info-right small-switch">
-          <div class="switch">
-            <label>
-              <input type="checkbox" [(ngModel)]="password" (change)="setPassword()" [disabled]="!enabled">
-              <span class="lever"></span>
-            </label>
-          </div>
+        <div class="info-right">
+          <mat-slide-toggle [(ngModel)]="password" (change)="setPassword()" [disabled]="!enabled"></mat-slide-toggle>
         </div>
-        <input-password *ngIf="password" (change)="setPassword()" [(value)]="passwordString" placeholder="{{(edit ? 'WORKSPACE.SHARE_LINK.PASSWORD_PLACEHOLDER_EDIT' : 'WORKSPACE.SHARE_LINK.PASSWORD_PLACEHOLDER') | translate}}">
+        <input-password *ngIf="password" (change)="setPassword()" [(value)]="passwordString" label="{{(edit ? 'WORKSPACE.SHARE_LINK.PASSWORD_PLACEHOLDER_EDIT' : 'WORKSPACE.SHARE_LINK.PASSWORD_PLACEHOLDER') | translate}}">
         </input-password>
       </div>
     </div>
