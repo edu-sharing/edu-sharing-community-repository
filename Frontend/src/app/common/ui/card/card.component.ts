@@ -10,6 +10,8 @@ import {MatDialog, MAT_DIALOG_DATA} from "@angular/material";
 import {UIService} from '../../services/ui.service';
 import {RestHelper} from "../../rest/rest-helper";
 import {Node} from "../../rest/data-object";
+import {Helper} from "../../helper";
+import {UIHelper} from "../ui-helper";
 
 @Component({
   selector: 'card',
@@ -24,6 +26,8 @@ import {Node} from "../../rest/data-object";
  * A common edu-sharing modal card
  */
 export class CardComponent implements OnDestroy{
+  @ViewChild('cardContainer') cardContainer: ElementRef;
+  @ViewChild('jumpmarksRef') jumpmarksRef: ElementRef;
   private static modalCards: CardComponent[]=[];
   @Input() title:string;
   @Input() subtitle:string;
@@ -32,7 +36,9 @@ export class CardComponent implements OnDestroy{
   @Input() width="normal";
   @Input() height="normal";
   @Input() tabbed=false;
+  @Input() jumpmarks:CardJumpmark[];
   @Input() priority=0;
+  jumpmarkActive: CardJumpmark;
   @Input() set node(node:Node|Node[]){
     if(!node)
       return;
@@ -67,8 +73,33 @@ export class CardComponent implements OnDestroy{
               return;
       }
     }
+    private scrollSmooth(jumpmark:CardJumpmark){
+        let pos=document.getElementById(jumpmark.id).offsetTop;
+        UIHelper.scrollSmoothElement(pos,this.cardContainer.nativeElement,2);
+    }
   constructor(private uiService: UIService,private translate : TranslateService){
       CardComponent.modalCards.splice(0,0,this);
+      UIHelper.waitForComponent(this,'jumpmarksRef').subscribe(()=> {
+          console.log("jumpmarks ready");
+          setInterval(() => {
+              try {
+                  let jump = this.jumpmarksRef;
+                  let height = this.cardContainer.nativeElement.getBoundingClientRect().bottom - this.cardContainer.nativeElement.getBoundingClientRect().top;
+                  let pos = this.cardContainer.nativeElement.scrollTop - height - 200;
+                  let closest = 999999;
+                  for(let jumpmark of this.jumpmarks) {
+                      let element=document.getElementById(jumpmark.id);
+                      let top = element.getBoundingClientRect().top;
+                      if (Math.abs(top - pos) < closest) {
+                          closest = Math.abs(top - pos);
+                          this.jumpmarkActive = this.jumpmarks[Helper.indexOfObjectArray(this.jumpmarks, 'id', element.id)];
+                      }
+                  }
+              } catch (e) {
+
+              }
+          }, 1000 / 20); // 20 FPS
+      });
   }
   ngOnDestroy(){
       CardComponent.modalCards.splice(CardComponent.modalCards.indexOf(this),1);
@@ -89,4 +120,13 @@ export class CardComponent implements OnDestroy{
   public cancel(){
     this.onCancel.emit();
   }
+}
+export class CardJumpmark{
+    /**
+     *
+     * @param id the id (as in html)
+     * @param label the pre-translated label
+     * @param icon the icon
+     */
+  constructor(public id:string,public label:string,public icon:string){}
 }

@@ -3,7 +3,7 @@
 $titleHeight:70px;
 $actionMenuHeight:60px;
 $tabHeight:48px;
-
+$jumpmarksWidth:200px;
 $height-normal:500px;
 $height-large:600px;
 $height-xlarge:700px;
@@ -19,38 +19,39 @@ $height-xxlarge:800px;
   z-index: $dialogZIndex+1;
   align-items: center;
   justify-content: center;
-  .modal-card{
+  .modal-card {
     max-width: 100%;
+    position: relative;
     @include materialShadowLarge();
-    .mat-card-header{
+    .mat-card-header {
       background-color: $actionDialogBackground;
       display: flex;
       align-items: center;
-      height:$titleHeight;
+      height: $titleHeight;
       padding-top: 15px;
       position: relative;
-      >button{
+      > button {
         position: absolute;
-        right:0;
-        top:0;
-        padding:16px;
+        right: 0;
+        top: 0;
+        padding: 16px;
       }
-      .avatar{
+      .avatar {
         display: flex;
         align-items: center;
         justify-content: center;
         margin-left: 17px;
         margin-top: -10px;
         background-color: #fff;
-        >img{
-          width:24px;
-          height:24px;
+        > img {
+          width: 24px;
+          height: 24px;
         }
       }
     }
     background-color: $backgroundColor;
     border-radius: 2px;
-    mat-card-actions{
+    mat-card-actions {
       $height: $actionMenuHeight;
       background-color: #fff;
       display: flex;
@@ -58,31 +59,31 @@ $height-xxlarge:800px;
       justify-content: flex-end;
       margin: 0;
       padding: 10px 20px;
-      button{
-        margin:0 5px;
+      button {
+        margin: 0 5px;
       }
     }
-    mat-card-content{
+    mat-card-content {
       margin: 0;
       position: relative;
     }
-    &.width-xsmall{
-      width:400px;
+    &.width-xsmall {
+      width: 400px;
     }
-    &.width-small{
-      width:500px;
+    &.width-small {
+      width: 500px;
     }
-    &.width-normal{
-      width:600px;
+    &.width-normal {
+      width: 600px;
     }
-    &.width-large{
-      width:700px;
+    &.width-large {
+      width: 700px;
     }
-    &.width-xlarge{
-      width:800px;
+    &.width-xlarge {
+      width: 800px;
     }
     &:not(.card-tabbed) {
-      mat-card-content{
+      mat-card-content {
         max-height: calc(100vh - #{$titleHeight} - #{$actionMenuHeight});
         @include content();
       }
@@ -102,22 +103,54 @@ $height-xxlarge:800px;
         height: auto;
       }
     }
-    &.card-tabbed{
-      .mat-tab-body-wrapper{
+    &.card-tabbed {
+      .mat-tab-body-wrapper {
         max-height: calc(100vh - #{$titleHeight} - #{$actionMenuHeight} - #{$tabHeight});
         @include content();
       }
-      &.height-normal .mat-tab-body-wrapper{
+      &.height-normal .mat-tab-body-wrapper {
         height: $height-normal - $titleHeight - $actionMenuHeight - $tabHeight;
       }
-      &.height-large .mat-tab-body-wrapper{
+      &.height-large .mat-tab-body-wrapper {
         height: $height-large - $titleHeight - $actionMenuHeight - $tabHeight;
       }
-      &.height-xlarge .mat-tab-body-wrapper{
+      &.height-xlarge .mat-tab-body-wrapper {
         height: $height-xlarge - $titleHeight - $actionMenuHeight - $tabHeight;
       }
-      &.height-xxlarge .mat-tab-body-wrapper{
+      &.height-xxlarge .mat-tab-body-wrapper {
         height: $height-xxlarge - $titleHeight - $actionMenuHeight - $tabHeight;
+      }
+    }
+  }
+  .card-jumpmarks {
+    margin-left: $jumpmarksWidth;
+    .jumpmarks {
+      position: absolute;
+      z-index: $dialogZIndex+2;
+      top: 0;
+      left: -$jumpmarksWidth - 5px;
+      width: $jumpmarksWidth;
+      background-color: $workspaceTreeBackground;
+      border-radius: 3pt;
+      padding: 10px 0;
+      button {
+        border-radius: 0;
+        margin: 0;
+        padding: 5px;
+        width: 100%;
+        transition: all $transitionNormal;
+      }
+      button.active {
+        background: $workspaceTreeSelectedBackgroundEffect;
+        background-color: $workspaceTreeSelectedBackground;
+      }
+    }
+  }
+  @media all and (max-width: 50 + 700 + $jumpmarksWidth){
+    .card-jumpmarks{
+      margin-left: 0;
+      .jumpmarks{
+        display: none;
       }
     }
   }

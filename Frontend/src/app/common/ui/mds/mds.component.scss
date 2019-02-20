@@ -1,10 +1,7 @@
 @import "../../../../styles/variables.scss";
 
 .mdsCard{
-  margin-left: -40px;
-  margin-right: -20px;
-  padding-right: 0;
-  padding-top: 0;
+  padding: 0;
 }
 :host /deep/ {
   .suggestions {
@@ -19,9 +16,6 @@
     }
 
   }
-}
-.mdsCardJumpmarks{
-  margin-left:-220px!important;
 }
 .loading{
   position: relative;
@@ -42,37 +36,5 @@
   @include clickable();
   &:focus{
     @include setGlobalFocus;
-  }
-}
-.card-jumpmarks{
-  position:fixed;
-  z-index: $dialogZIndex+2;
-  top:10%;
-  left:50%;
-  width:200px;
-  margin-left:-425px;
-  background-color: $workspaceTreeBackground;
-  border-radius:3pt;
-  padding:10px 0;
-}
-
-:host /deep/ .card-jumpmarks{
-  a{
-    padding:10px 12px;
-    width:100%;
-    display:flex;
-    align-items: center;
-    >i{
-      margin-right:10px;
-    }
-  }
-  a.active{
-    background: $workspaceTreeSelectedBackgroundEffect;
-    background-color: $workspaceTreeSelectedBackground;
-  }
-}
-@media screen and (max-width: ($mobileWidth + $mobileStage*2)) {
-  .mdsCardJumpmarks{
-    margin-left: 0!important;
   }
 }

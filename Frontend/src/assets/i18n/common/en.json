@@ -366,6 +366,7 @@
   "NO_SIZE":"-",
   "VERSION_COMMENT":"Version comment",
   "MDS":{
+    "TITLE":"Edit Metadata",
     "SHOW_EXTENDED":"Show extended metadata",
     "SHOW_EXTENDED_SEARCH":"Show more filters",
     "AUTHOR_LABEL":"About the Author",

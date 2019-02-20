@@ -416,6 +416,7 @@
   "NO_SIZE":"-",
   "VERSION_COMMENT":"Versionskommentar",
   "MDS":{
+    "TITLE":"Metadaten bearbeiten",
     "SHOW_EXTENDED":"Erweitere Metadaten anzeigen",
     "SHOW_EXTENDED_SEARCH":"Weitere Filter anzeigen",
     "AUTHOR_LABEL":"Urheber-Angaben",
