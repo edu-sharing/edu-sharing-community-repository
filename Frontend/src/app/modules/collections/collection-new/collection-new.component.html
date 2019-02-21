@@ -21,11 +21,14 @@
       <div class="circle"></div><div class="label">{{ 'COLLECTIONS.STEP.DONE' | translate }}</div>
     </div>
   </div>
-  <section *ngIf="(newCollectionStep==STEP_NEW)" class="collection-new-container">
+  <card *ngIf="(newCollectionStep==STEP_NEW)"
+        class="collection-new-container"
+        width="normal"
+        height="auto"
+        [modal]="false"
+        title="{{'COLLECTIONS.CREATE_TYPE' | translate}}"
+        (onCancel)="newCollectionCancel()">
     <div class="createCollection collectionShadow">
-      <div class="headline">{{'COLLECTIONS.CREATE_TYPE' | translate}}
-        <i class="material-icons clickable" (click)="newCollectionCancel()">close</i>
-      </div>
       <div class="collection-item clickable" tabindex="0" (keyup.enter)="setCollectionType('MY')" (click)="setCollectionType('MY')">
         <div class="iconLeft"><i class="material-icons" style="color:#995b5b;">lock</i></div>
         <div class="content">
@@ -71,15 +74,14 @@
         -->
       </div>
     </div>
-  </section>
-  <section *ngIf="newCollectionStep==STEP_GENERAL" class="card center-card card-high card-action collectionShadow collection-new-container collection-basic">
-
-      <div class="card-content">
-          <div class="card-cancel" tabindex="0" (keyup.enter)="goBack()" (click)="goBack()"><i icon iconId="close" aria="true"></i></div>
-        <div class="card-title">
-          {{ 'collectionNew_preview' | translate }}
-        </div>
-        <div class="card-scroll">
+  </card>
+  <card *ngIf="newCollectionStep==STEP_GENERAL"
+        [buttons]="buttons"
+        [isCancelable]="false"
+        title="{{ 'collectionNew_preview' | translate }}"
+        [subtitle]="currentCollection.title"
+        [modal]="false" width="xsmall" height="auto">
+        <div class="collection-general">
           <div class="collectionImage">
 
               <div class='image-upload-field'>
@@ -118,23 +120,29 @@
 
           <div class="collection-new-preview-infoarea" [style.background-color]="currentCollection.color" [class.dark-color]="isBrightColor()">
 
-            <div class="dialog-basic-area" style="padding-top: 0; padding-bottom:0;">
-              <input type="text" id="input1" class="title" [(ngModel)]="currentCollection.title"  placeholder="{{'collectionNew_placeholderTitle' | translate }}" autofocus>
-
-              <textarea id="input2" [(ngModel)]="currentCollection.description" class="materialize-textarea" placeholder="{{'collectionNew_placeholderDescription' | translate }}"></textarea>
+            <div class="dialog-basic-area dialog-input-area">
+                <mat-form-field [class.mat-form-field-bright]="!isBrightColor()">
+                    <mat-label>{{'collectionNew_placeholderTitle' | translate }}</mat-label>
+                    <input matInput class="title" [(ngModel)]="currentCollection.title" autofocus>
+                </mat-form-field>
+                  <mat-form-field [class.mat-form-field-bright]="!isBrightColor()">
+                      <mat-label>{{'collectionNew_placeholderDescription' | translate }}</mat-label>
+                      <textarea matInput
+                                [(ngModel)]="currentCollection.description"
+                                ></textarea>
+                  </mat-form-field>
             </div>
-              <div class="collection-new-preview-infoline">
-                  <i class="material-icons icon-bottom">person</i> {{user | authorityName}}</div>
+              <div class="collection-new-owner">
+                  <i icon iconId="person" class="icon-bottom"></i> {{user | authorityName}}</div>
 
           </div>
 
-          <div style="background-color:#FFFFFF;">
-              <div class="dialog-basic-area">
-                  <div class="collection-new-preview-infoline" style="opacity:0.85;">
+          <div>
+              <div class="dialog-basic-area dialog-color-group">
+                  <div class="collection-new-preview-infoline">
                       {{ 'collectionNew_setColor' | translate }}
                   </div>
-
-                  <div class="color-group" style="text-align: center;margin-top: 8px;">
+                  <div class="color-group">
                       <div *ngFor="let color of COLORS"(click)="setColor(color)"
                            class="color-option"
                            [ngClass]="{'color-selected': (currentCollection.color==color)}"
@@ -143,20 +151,17 @@
               </div>
           </div>
         </div>
-      </div>
-      <div class="card-action">
-          <a class="waves-effect btn" tabindex="0" (keyup.enter)="setCollectionGeneral()" (click)="setCollectionGeneral()">
-            <span>{{(isLastStep() ? 'SAVE' : 'NEXT') | translate }}</span>
-          </a>
-          <a class="waves-effect waves-light btn-flat" tabindex="0" (keyup.enter)="goBack()" (click)="goBack()">{{ 'BACK' | translate }}</a>
-      </div>
-  </section>
-  <section *ngIf="newCollectionStep==STEP_METADATA" class="card center-card card-action card-high collectionShadow collection-new-container collection-metadata">
-    <div class="card-content">
-      <div class="card-title">
-        <span>{{ 'COLLECTIONS.STEP.METADATA' | translate }}</span>
-      </div>
-      <div class="card-scroll">
+  </card>
+  <card *ngIf="newCollectionStep==STEP_METADATA"
+        title="{{ 'COLLECTIONS.STEP.METADATA' | translate }}"
+        [subtitle]="currentCollection.title"
+        [isCancelable]="false"
+        [modal]="false"
+        width="xsmall"
+        height="xlarge"
+        [buttons]="buttons"
+        class="collection-metadata">
+      <div class="card-content">
         <mds #mds
           [groupId]="'collection_'+newCollectionType.toLowerCase()"
           [embedded]="true"
@@ -164,18 +169,17 @@
           [invalidate]="reloadMds"
         ></mds>
       </div>
-    </div>
-    <div class="card-action">
-      <a class="waves-effect waves-light btn" tabindex="0" (keyup.enter)="syncMetadata(true)" (click)="syncMetadata(true)">{{ (isLastStep() ? 'SAVE' : 'NEXT') | translate }}</a>
-      <a class="waves-effect waves-light btn-flat" tabindex="0" (keyup.enter)="syncMetadata(false)" (click)="syncMetadata(false)">{{ 'BACK' | translate }}</a>
-    </div>
-  </section>
-  <section *ngIf="newCollectionStep==STEP_EDITORIAL_GROUPS" class="card center-card card-action card-high collectionShadow collection-new-container collection-metadata">
+  </card>
+  <card *ngIf="newCollectionStep==STEP_EDITORIAL_GROUPS"
+          title="{{ 'COLLECTIONS.STEP.EDITORIAL_GROUPS' | translate }}"
+          [subtitle]="currentCollection.title"
+          [isCancelable]="false"
+          [modal]="false"
+          width="xsmall"
+          height="xlarge"
+          [buttons]="buttons"
+          class="collection-metadata">
     <div class="card-content">
-      <div class="card-title">
-        <span>{{ 'COLLECTIONS.STEP.EDITORIAL_GROUPS' | translate }}</span>
-      </div>
-      <div class="card-scroll">
         <div class="noGroups" *ngIf="editorialGroups.length==0">{{'COLLECTIONS.NO_EDITORIAL_GROUPS' | translate}}</div>
         <listTable
           [nodes]="editorialGroups"
@@ -188,31 +192,24 @@
           [icon]="'star'"
         ></listTable>
       </div>
-    </div>
-    <div class="card-action">
-      <a class="waves-effect waves-light btn" tabindex="0" (keyup.enter)="goToNextStep()" (click)="goToNextStep()">{{ (isLastStep() ? 'SAVE' : 'NEXT') | translate }}</a>
-      <a class="waves-effect waves-light btn-flat" tabindex="0" (keyup.enter)="goBack()" (click)="goBack()">{{ 'BACK' | translate }}</a>
-    </div>
-  </section>
-  <section *ngIf="newCollectionStep==STEP_PERMISSIONS" class="card center-card card-low card-action collectionShadow collection-permission-container">
-    <div class="card-content">
-      <div class="card-title">
-        <span>{{ 'COLLECTIONS.EDIT_PERMISSIONS' | translate }}</span>
-      </div>
-      <div class="card-scroll">
+  </card>
+  <card *ngIf="newCollectionStep==STEP_PERMISSIONS"
+        title="{{ 'COLLECTIONS.EDIT_PERMISSIONS' | translate }}"
+        [modal]="false"
+        [isCancelable]="false"
+        [buttons]="buttons"
+        width="normal"
+        height="large"
+        [subtitle]="currentCollection.title" class="collection-permission-container">
+      <div class="card-content">
           <div class="title">{{'COLLECTIONS.EDIT_PERMISSIONS_SUBTEXT' | translate}}</div>
           <div class="description">{{'COLLECTIONS.EDIT_PERMISSIONS_DESCRIPTION' | translate}}</div>
         <div class="dialog-basic-area permissionsBtn">
           <a class="btn-flat btn-shadow btn-icon" tabindex="0" (keyup.enter)="editPermissions()" (click)="editPermissions()"><i class="material-icons">person_add</i>{{'COLLECTIONS.EXTENDED_PERMISSIONS_BUTTON' | translate}}</a>
         </div>
-          <div class="status">{{('COLLECTIONS.PERMISSIONS_STATUS_'+getShareStatus()) | translate}}</div>
+        <div class="status">{{('COLLECTIONS.PERMISSIONS_STATUS_'+getShareStatus()) | translate}}</div>
       </div>
-    </div>
-      <div class="card-action">
-        <a class="waves-effect waves-light btn" tabindex="0" (keyup.enter)="goToNextStep()" (click)="goToNextStep()">{{ (isLastStep() ? 'SAVE' : 'NEXT') | translate }}</a>
-        <a class="waves-effect waves-light btn-flat" tabindex="0" (keyup.enter)="goBack()" (click)="goBack()">{{ 'BACK' | translate }}</a>
-      </div>
-  </section>
+  </card>
 </div>
 
 </div>

@@ -1,15 +1,25 @@
-.entry{
-  cursor: default;
-  padding:10px 5px;
-  display:flex;
-  div,i,input,label{
-    display:flex;
-  }
-  .name{
-    flex-grow: 1;
-  }
-  .drag{
-    color:#aaa;
-    margin-left:15px;
+@import "../../../../styles/variables.scss";
+
+.pinning-content {
+  padding: $cardPadding;
+  .entry {
+    cursor: default;
+    padding: 10px 5px;
+    display: flex;
+    align-items: center;
+
+    div, i, mat-checkbox, label {
+      display: flex;
+    }
+
+    .name {
+      flex-grow: 1;
+      margin-left: 10px;
+    }
+
+    .drag {
+      color: #aaa;
+      margin-left: 15px;
+    }
   }
 }

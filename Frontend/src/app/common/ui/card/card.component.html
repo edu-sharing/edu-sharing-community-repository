@@ -1,5 +1,9 @@
-<div class="card-dialog dialog darken">
-  <mat-card class="modal-card width-{{width}} height-{{height}}" [class.card-jumpmarks]="jumpmarks && jumpmarks.length>0" [class.card-tabbed]="tabbed" [@cardAnimation]="this">
+<div class="card-dialog dialog" [class.darken]="modal">
+  <mat-card class="modal-card width-{{width}} height-{{height}}"
+            [class.card-no-buttons]="!(_buttons && _buttons.length)"
+            [class.card-jumpmarks]="jumpmarks && jumpmarks.length>0"
+            [class.card-tabbed]="tabbed"
+            [@cardAnimation]="this">
     <mat-card-header>
       <div *ngIf="avatar" class="avatar" mat-card-avatar><img [src]="avatar" alt=""></div>
       <mat-card-title>{{title}}</mat-card-title>

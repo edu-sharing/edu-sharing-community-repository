@@ -31,6 +31,7 @@ import {TemporaryStorageService} from "../../../common/services/temporary-storag
 import {UIHelper} from "../../../common/ui/ui-helper";
 import {RegisterResetPasswordComponent} from "../../register/register-reset-password/register-reset-password.component";
 import {MainNavComponent} from '../../../common/ui/main-nav/main-nav.component';
+import {DialogButton} from '../../../common/ui/modal-dialog/modal-dialog.component';
 
 // component class
 @Component({
@@ -85,6 +86,7 @@ export class CollectionNewComponent {
   private parentCollection: Collection;
   private originalPermissions: LocalPermissions;
   @ViewChild('file') imageFileRef : ElementRef;
+  buttons: DialogButton[];
 
   @HostListener('document:keydown', ['$event'])
   handleKeyboardEvent(event: KeyboardEvent) {
@@ -383,6 +385,17 @@ export class CollectionNewComponent {
       return pos>=this.availableSteps.length-1;
     }
     public goToNextStep(){
+      if(this.newCollectionStep==this.STEP_GENERAL){
+          if(!this.currentCollection.title){
+              this.toast.error(null,'COLLECTIONS.ENTER_NAME');
+              return;
+          }
+      }
+      if(this.newCollectionStep==this.STEP_METADATA){
+          this.properties=this.mds.getValues({},true);
+          if(this.properties==null)
+              return;
+      }
       if(this.isLastStep()){
         this.save();
       }
@@ -391,19 +404,18 @@ export class CollectionNewComponent {
         this.newCollectionStep=this.availableSteps[pos+1];
         this.reloadMds=new Boolean(true);
       }
-
+      this.updateButtons();
     }
     setCollectionGeneral(){
-      if(!this.currentCollection.title){
-        this.toast.error(null,'COLLECTIONS.ENTER_NAME');
-        return;
-      }
-      this.goToNextStep();
+
     }
     currentStepPosition(){
       return this.availableSteps.indexOf(this.newCollectionStep);
     }
     goBack(){
+      if(this.newCollectionStep==this.STEP_METADATA){
+          this.properties=this.mds.getValues({},false);
+      }
        let pos=this.currentStepPosition();
        if(pos==-1){
          this.navigateToCollectionId(this.parentId);
@@ -423,20 +435,12 @@ export class CollectionNewComponent {
          this.newCollectionStep = this.availableSteps[pos - 1];
          this.reloadMds=new Boolean(true);
        }
+       this.updateButtons();
     }
     navigateToCollectionId(id:string) : void {
       this.isLoading = false;
       this.router.navigate([UIConstants.ROUTER_PREFIX+'collections'], {queryParams:{id:id,mainnav:this.mainnav}});
     }
-  private syncMetadata(goToNext:boolean){
-      this.properties=this.mds.getValues({},goToNext);
-      if(goToNext && this.properties!=null){
-        this.goToNextStep();
-      }
-      if(!goToNext){
-        this.goBack();
-      }
-  }
   private save2(collection: Collection) {
     if(this.newCollectionType==RestConstants.GROUP_TYPE_EDITORIAL){
       this.nodeService.AddNodeAspects(collection.ref.id,[RestConstants.CCM_ASPECT_LOMREPLICATION,RestConstants.CCM_ASPECT_CCLOM_GENERAL]).subscribe(()=> {
@@ -489,6 +493,7 @@ export class CollectionNewComponent {
 
   private updateAvailableSteps() {
     this.availableSteps=this.getAvailableSteps();
+    this.updateButtons();
   }
 
   private getEditorialGroupPermissions() {
@@ -552,5 +557,19 @@ export class CollectionNewComponent {
       this.imageFile = null;
       this.imageFileRef.nativeElement.value = null;
       this.currentCollection.preview = null;
+    }
+
+    private updateButtons() {
+        /**
+         *  <a class="waves-effect btn" tabindex="0" (keyup.enter)="setCollectionGeneral()" (click)="setCollectionGeneral()">
+         <span>{{(isLastStep() ? 'SAVE' : 'NEXT') | translate }}</span>
+         </a>
+         <a class="waves-effect waves-light btn-flat" tabindex="0" (keyup.enter)="goBack()" (click)="goBack()">{{ 'BACK' | translate }}</a>
+
+         */
+        this.buttons=[
+            new DialogButton('BACK',DialogButton.TYPE_CANCEL,()=>this.goBack()),
+            new DialogButton(this.isLastStep() ? 'SAVE' : 'NEXT',DialogButton.TYPE_PRIMARY,()=>this.goToNextStep())
+        ]
     }
 }

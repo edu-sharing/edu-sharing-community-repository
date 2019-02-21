@@ -1,9 +1,10 @@
 @import "../../../../styles/variables.scss";
 
 $titleHeight:70px;
-$actionMenuHeight:60px;
+$actionMenuHeight:70px;
 $tabHeight:48px;
 $jumpmarksWidth:200px;
+$height-small:400px;
 $height-normal:500px;
 $height-large:600px;
 $height-xlarge:700px;
@@ -54,11 +55,12 @@ $height-xxlarge:800px;
     mat-card-actions {
       $height: $actionMenuHeight;
       background-color: #fff;
+      border-top:1px solid $cardSeperatorLineColor;
       display: flex;
       height: $actionMenuHeight;
       justify-content: flex-end;
       margin: 0;
-      padding: 10px 20px;
+      padding: 17px 20px;
       button {
         margin: 0 5px;
       }
@@ -87,6 +89,9 @@ $height-xxlarge:800px;
         max-height: calc(100vh - #{$titleHeight} - #{$actionMenuHeight});
         @include content();
       }
+      &.height-small mat-card-content {
+        height: $height-small - $titleHeight - $actionMenuHeight;
+      }
       &.height-normal mat-card-content {
         height: $height-normal - $titleHeight - $actionMenuHeight;
       }
@@ -103,10 +108,37 @@ $height-xxlarge:800px;
         height: auto;
       }
     }
+    &.card-no-buttons {
+      mat-card-content {
+        max-height: calc(100vh - #{$titleHeight});
+        @include content();
+      }
+      &.height-small mat-card-content {
+        height: $height-small - $titleHeight;
+      }
+      &.height-normal mat-card-content {
+        height: $height-normal - $titleHeight;
+      }
+      &.height-large mat-card-content {
+        height: $height-large - $titleHeight;
+      }
+      &.height-xlarge mat-card-content {
+        height: $height-xlarge - $titleHeight;
+      }
+      &.height-xxlarge mat-card-content {
+        height: $height-xxlarge - $titleHeight;
+      }
+      &.height-auto mat-card-content {
+        height: auto;
+      }
+    }
     &.card-tabbed {
       .mat-tab-body-wrapper {
         max-height: calc(100vh - #{$titleHeight} - #{$actionMenuHeight} - #{$tabHeight});
         @include content();
+      }
+      &.height-small .mat-tab-body-wrapper {
+        height: $height-small - $titleHeight - $actionMenuHeight - $tabHeight;
       }
       &.height-normal .mat-tab-body-wrapper {
         height: $height-normal - $titleHeight - $actionMenuHeight - $tabHeight;

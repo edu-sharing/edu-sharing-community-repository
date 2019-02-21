@@ -36,6 +36,7 @@ export class CardComponent implements OnDestroy{
   @Input() width="normal";
   @Input() height="normal";
   @Input() tabbed=false;
+  @Input() modal=true;
   @Input() jumpmarks:CardJumpmark[];
   @Input() priority=0;
   jumpmarkActive: CardJumpmark;

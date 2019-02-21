@@ -70,8 +70,9 @@ export class ActionbarHelperService{
             let n=ActionbarHelperService.getNodes(nodes,node);
             if(n==null)
                 return false;
+            console.log(n);
             option.name="WORKSPACE.OPTION.VARIANT" + (this.connectors.connectorSupportsEdit(n[0]) ? "_OPEN" : "");
-            return NodeHelper.allFiles(n) && n && n.length==1 && RestNetworkService.allFromHomeRepo(n) && !this.connector.getCurrentLogin().isGuest;
+            return n && NodeHelper.allFiles(n) && n.length==1 && RestNetworkService.allFromHomeRepo(n) && !this.connector.getCurrentLogin().isGuest;
         };
         option.enabledCallback = (node: Node) => {
             return node.size > 0 && node.downloadUrl;
