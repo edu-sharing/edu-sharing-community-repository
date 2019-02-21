@@ -1,8 +1,9 @@
 package org.edu_sharing.metadataset.v2;
 
+import java.io.Serializable;
 import java.util.List;
 
-public class MetadataGroup {
+public class MetadataGroup implements Serializable {
 	private String id;
 	public String getId() {
 		return id;
