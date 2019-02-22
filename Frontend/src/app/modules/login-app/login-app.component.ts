@@ -88,7 +88,14 @@ export class LoginAppComponent  implements OnInit {
         });
 
     }
-
+    private recoverPassword(){
+        if(this.config.register.local){
+            this.router.navigate([UIConstants.ROUTER_PREFIX+"register","request"]);
+        }
+        else {
+            window.location.href = this.config.register.recoverUrl;
+        }
+    }
     buttonExitApp() :void {
         this.cordova.exitApp();
     }
