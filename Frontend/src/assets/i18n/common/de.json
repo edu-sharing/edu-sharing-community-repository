@@ -440,7 +440,7 @@
   "LICENSE_AGREEMENT":{
     "TITLE":"Nutzungsbedingungen",
     "CHECKBOX":"Ich habe die oben genannten Bedingungen gelesen und akzeptiere diese",
-    "ACCEPT":"Akzeptieren & Fortfahren",
+    "ACCEPT":"Akzeptieren",
     "DECLINE":"Ablehnen"
   },
   "SHARING":{
