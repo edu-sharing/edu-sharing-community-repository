@@ -28,8 +28,8 @@
        [class.disabled]="!option.isEnabled"
        [class.display-none]="!option.isEnabled && !showDisabled"
        class="action-always waves-effect waves-light action-always-{{option.name | replaceChars:{search:'.',replace:'-'} }}"
-       [class.btn-flat]="i!=optionsAlways.length-1 || style=='flat'"
-       [class.btn]="i==optionsAlways.length-1 && style!='flat'"
+       [class.btn-flat]="i!=optionsAlways.length-1"
+       [class.btn]="i==optionsAlways.length-1"
        tabindex="0"
        (keyup.enter)="click(option)"
        (click)="click(option)">

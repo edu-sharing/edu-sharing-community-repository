@@ -192,10 +192,17 @@ a.edusharing_rendering_content{
 div.download {
   margin-top: -8px;
 }
-
+@media (pointer: coarse) {
+  #sequence {
+    overflow-x: auto;
+    @include iosScrolling();
+  }
+  .scroller{
+    display: none;
+  }
+}
 @media screen and (max-width: $mobileWidth) {
   div.download i {
     font-size: 120%;
   }
-
 }
