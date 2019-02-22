@@ -1,9 +1,10 @@
 package org.edu_sharing.metadataset.v2;
 
+import java.io.Serializable;
 import java.util.List;
 import java.util.Map;
 
-public class MetadataQueryParameter {
+public class MetadataQueryParameter implements Serializable {
 	private String name;
 	private Map<String,String> statements;
 	private boolean multiple;

@@ -169,7 +169,7 @@ public class MetadataSearchHelper {
 			scParam.setMetadataSetId(mds.getId());
 			scParam.setMetadataSetQuery(query);
 			try {
-				luceneQuery = "(" + luceneQuery + ") AND " +  MetadataSearchHelper.getLuceneString(queryObj,scParam, criteriasMap);
+				luceneQuery = "(" + luceneQuery + ") AND " +  MetadataSearchHelper.getLuceneString(queries,queryObj,scParam, criteriasMap);
 				//System.out.println("MetadataSearchHelper lucenequery suggest:" +luceneQuery);
 			} catch (IllegalArgumentException e) {
 				logger.error(e.getMessage(), e);
@@ -315,13 +315,13 @@ public class MetadataSearchHelper {
 		result = result + ")";
 		return result;
 	}
-	public static String getLuceneString(MetadataQuery query, SearchCriterias searchCriterias,Map<String,String[]> parameters) throws IllegalArgumentException {
+	public static String getLuceneString(MetadataQueries queries,MetadataQuery query, SearchCriterias searchCriterias,Map<String,String[]> parameters) throws IllegalArgumentException {
 		String lucene=getLuceneSearchQuery(query, parameters);
 		if(query.isApplyBasequery()){
 			String andQuery="";
 			if(lucene!=null && !lucene.trim().isEmpty())
 				andQuery=" AND (" + lucene + ")";
-			lucene=query.getParent().getBasequery()+andQuery;
+			lucene=queries.getBasequery()+andQuery;
 		}
 		lucene = convertSearchCriteriasToLucene(lucene,searchCriterias);
 		return lucene;

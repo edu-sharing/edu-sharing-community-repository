@@ -1,10 +1,11 @@
 package org.edu_sharing.metadataset.v2;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
-public class MetadataSort {
-	public class MetadataSortDefault{
+public class MetadataSort implements Serializable {
+	public class MetadataSortDefault implements Serializable {
 		private String sortBy;
 		private boolean sortAscending;
 
