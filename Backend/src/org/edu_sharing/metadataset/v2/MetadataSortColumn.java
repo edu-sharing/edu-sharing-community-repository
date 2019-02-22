@@ -1,6 +1,8 @@
 package org.edu_sharing.metadataset.v2;
 
-public class MetadataSortColumn {
+import java.io.Serializable;
+
+public class MetadataSortColumn implements Serializable {
 	private String id;
 	private String mode;
 	public String getId() {

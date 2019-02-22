@@ -14,6 +14,7 @@ import org.alfresco.service.namespace.QName;
 import org.apache.log4j.Logger;
 import org.apache.lucene.queryParser.QueryParser;
 import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
+import org.edu_sharing.metadataset.v2.MetadataQueries;
 import org.edu_sharing.metadataset.v2.MetadataQuery;
 import org.edu_sharing.metadataset.v2.MetadataReaderV2;
 import org.edu_sharing.metadataset.v2.MetadataSetV2;
@@ -123,13 +124,13 @@ public class ArchiveServiceImpl implements ArchiveService  {
 		searchToken.setStoreName(MCAlfrescoAPIClient.archiveStoreRef.getIdentifier());
 		searchToken.setStoreProtocol(MCAlfrescoAPIClient.archiveStoreRef.getProtocol());
 		//searchToken.setQueryString("@cm\\:name:\""+QueryParser.escape(searchWord) + "*\""+" AND ASPECT:\"sys:archived\"");
-		MetadataQuery query = MetadataHelper.getMetadataset(ApplicationInfoList.getHomeRepository(), CCConstants.metadatasetdefault_id).findQuery("archive");
+		MetadataQueries queries = MetadataHelper.getMetadataset(ApplicationInfoList.getHomeRepository(), CCConstants.metadatasetdefault_id).getQueries();
 		Map<String, String[]> params=new HashMap<>();
 		params.put(MetadataSetV2.DEFAULT_CLIENT_QUERY_CRITERIA,new String[]{searchWord});
 		if(user!=null && !user.isEmpty()) {
 			params.put("user", new String[]{user});
 		}
-		searchToken.setMetadataQuery(query,params);
+		searchToken.setMetadataQuery(queries,"archive",params);
 		searchToken.setSortDefinition(sortDefinition);
 		searchToken.setContentType(ContentType.FILES_AND_FOLDERS);
 		return searchToken;
