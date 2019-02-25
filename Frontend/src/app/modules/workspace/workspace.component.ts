@@ -878,8 +878,10 @@ export class WorkspaceMainComponent implements EventListener{
         if(!id){
             this.path=[];
             id=this.getRootFolderId();
-            if(this.root=='RECYCLE')
+            if(this.root=='RECYCLE') {
+                this.mainNavRef.finishPreloading();
                 return;
+            }
         }
         else{
             this.selectedNodeTree=id;
