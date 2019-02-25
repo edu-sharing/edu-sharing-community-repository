@@ -219,12 +219,6 @@ export class MdsComponent{
   private static MAX_SUGGESTIONS = 5;
   private suggestionsViaSearch = false;
 
-  @HostListener('window:resize')
-  onResize(){
-      if(document.activeElement && this.mdsScrollContainer.nativeElement){
-        UIHelper.scrollSmoothElementToChild(document.activeElement,this.mdsScrollContainer.nativeElement);
-      }
-  }
   constructor(private mdsService : RestMdsService,
               private translate : TranslateService,
               private route : ActivatedRoute,

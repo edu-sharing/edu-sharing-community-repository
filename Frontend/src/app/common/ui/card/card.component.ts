@@ -94,7 +94,12 @@ export class CardComponent implements OnDestroy{
   @Input() set buttons (buttons :  DialogButton[]){
    this._buttons=buttons;
   }
-
+    @HostListener('window:resize')
+    onResize(){
+        if(document.activeElement && this.cardContainer.nativeElement){
+            UIHelper.scrollSmoothElementToChild(document.activeElement,this.cardContainer.nativeElement);
+        }
+    }
     @HostListener('document:keydown', ['$event'])
     handleKeyboardEvent(event: KeyboardEvent) {
       for(let card of CardComponent.modalCards){
