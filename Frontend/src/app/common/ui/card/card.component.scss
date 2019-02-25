@@ -184,6 +184,18 @@ $height-xxlarge:800px;
       }
     }
   }
+  @media screen and (max-width: ($mobileWidth - $mobileStage*3)) {
+    mat-card-actions > div{
+      // when screen is small, all buttons should have the same size to prevent long texts to let short text to be too small
+      width: 0;
+      margin: 0;
+      flex-grow: 1;
+      justify-content: center;
+      >button{
+        width: calc(100% - 5px*2); // subtract the margin
+      }
+    }
+  }
   @media all and (max-width: 50 + 700 + $jumpmarksWidth){
     .card-jumpmarks{
       margin-left: 0;
