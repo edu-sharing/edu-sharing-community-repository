@@ -9,6 +9,9 @@
   top:15%;
   @include materialShadowLarge();
 }
+:host /deep/ mat-form-field{
+  width: 100%;
+}
 .infoTop{
   position: absolute;
   top:6%;
