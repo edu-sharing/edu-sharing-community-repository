@@ -1,7 +1,7 @@
 
 <div #drag class="dragBadge" [style.top]="(id*-9999999)+'px'"><div class="badge">{{currentDrag}}</div><div class="count">{{currentDragCount}}</div></div>
 <button #menuTrigger="matMenuTrigger" mat-button class="dropdown-dummy" [style.left]="dropdownLeft" [style.top]="dropdownTop" [matMenuTriggerFor]="dropdown.menu"></button>
-<dropdown #dropdown [options]="_options"></dropdown>
+<dropdown #dropdown [options]="_options" [callbackObject]="selectedNodes ? selectedNodes[0] : null"></dropdown>
 
 <div class="dialog darken" *ngIf="reorderDialog">
     <div class="card center-card card-action">
