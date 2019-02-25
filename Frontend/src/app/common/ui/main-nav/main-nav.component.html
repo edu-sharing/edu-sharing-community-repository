@@ -26,7 +26,7 @@
         <div class="agreement" [innerHTML]="licenseAgreementHTML"></div>
     </div>
     <div *ngIf="licenseAgreementHTML">
-      <input type="checkbox" class="filled-in" id="acceptLicenseAgreement" [(ngModel)]="acceptLicenseAgreement"><label for="acceptLicenseAgreement">{{'LICENSE_AGREEMENT.CHECKBOX' | translate}}</label>
+        <mat-checkbox [(ngModel)]="acceptLicenseAgreement">{{'LICENSE_AGREEMENT.CHECKBOX' | translate}}</mat-checkbox>
     </div>
   </div>
   <div class="card-action">

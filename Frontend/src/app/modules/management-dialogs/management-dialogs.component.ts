@@ -49,7 +49,8 @@ export class WorkspaceManagementDialogsComponent  {
         this.dialogTitle="WORKSPACE.DELETE_TITLE"+(nodeDelete.length==1 ? "_SINGLE" : "");
         this.dialogCancelable=true;
         this.dialogMessage="WORKSPACE.DELETE_MESSAGE"+(nodeDelete.length==1 ? "_SINGLE" : "");
-        this.dialogMessageParameters={name:nodeDelete[0].name};
+        this.dialogMessageParameters={name:RestHelper.getName(nodeDelete[0])};
+        this.dialogNode=nodeDelete;
         this.dialogButtons=DialogButton.getCancel(()=> {this.dialogTitle = null});
         this.dialogButtons.push(new DialogButton('YES_DELETE',DialogButton.TYPE_PRIMARY,()=>{this.deleteConfirmed(nodeDelete)}));
     }
@@ -95,6 +96,7 @@ export class WorkspaceManagementDialogsComponent  {
   public dialogMessage:string;
   public dialogMessageParameters:any;
   public dialogCancelable:boolean;
+  public dialogNode:Node|Node[];
   public dialogButtons:DialogButton[];
   private currentLtiTool: Node;
   private ltiToolRefresh: Boolean;

@@ -1081,7 +1081,7 @@ export class WorkspaceMainComponent implements EventListener{
     }
 
     hasOpenWindows() {
-        return this.editNodeLicense || this.editNodeTemplate || this.editNodeMetadata || this.createConnectorName || this.showUploadSelect || this.dialogTitle || this.addFolderName || this.sharedNode || this.workflowNode || this.filesToUpload;
+        return this.editNodeLicense || this.editNodeTemplate || this.editNodeMetadata || this.createConnectorName || this.showUploadSelect || this.dialogTitle || this.addFolderName || this.sharedNode || this.workflowNode || this.filesToUpload || this.nodeDebug;
     }
     private recoverScrollposition() {
         console.log("recover scroll "+this.storage.get('workspace_scroll',0));

@@ -15,7 +15,7 @@ import {ListItem} from "../../../common/ui/list-item";
 })
 export class RecycleMainComponent {
   @ViewChild('list') list : NodeList;
-  public toDelete:Node[] = [];
+  public toDelete:Node[] = null;
   public restoreResult:ArchiveRestore;
 
   @Input() isInsideWorkspace = false;

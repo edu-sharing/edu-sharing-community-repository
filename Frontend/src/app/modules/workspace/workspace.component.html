@@ -8,16 +8,6 @@
     <p *ngIf="!(!searchQuery  && createAllowed)">{{'WORKSPACE.DROP_FILES_DISABLED' |translate}}</p>
   </div>
 </div>
-<!--<workspace-editor *ngIf="editNodeMetadata"
-                  [node]="editNodeMetadata"
-                  [allowReplacing]="editNodeAllowReplace"
-                  (onWorking)="globalProgress=$event"
-                  (onDone)="closeEditor()"
-                  (onCancel)="editNodeMetadata=null"></workspace-editor>
- -->
-
-
-
 
 <div class="frame" fileDrop
      (onFileDrop)="onFileDrop($event)"

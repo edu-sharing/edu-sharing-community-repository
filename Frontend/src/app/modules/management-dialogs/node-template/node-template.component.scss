@@ -1,9 +1,11 @@
 @import "../../../../styles/variables.scss";
 
+.template-content{
+  padding: $cardPadding;
+}
 .no-scroll{
   overflow: hidden;
 }
-
 .template-disabled {
   background: rgba(255, 255, 255, 1);
   height: calc(100% - 30px);
@@ -19,12 +21,13 @@
   }
 }
 
-.switch{
-  margin:$cardPadding*-1;
+.enable-toggle{
   margin-bottom: 20px;
   padding:20px $cardPadding;
   background: $actionDialogBackground;
   border-bottom: 1px solid $cardSeperatorLineColor;
+  display: flex;
+  flex-direction: row-reverse;
 
   label{
     float: right;

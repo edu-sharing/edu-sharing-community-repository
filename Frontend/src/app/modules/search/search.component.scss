@@ -27,7 +27,7 @@ $sidenavWidth:300px;
 
 }
 .repositoryList{
- padding-top: 15px;
+  padding: 15px $cardPadding 0 $cardPadding;
   >label{
     float:left;
     width:100%;
@@ -518,7 +518,8 @@ listtable {
     position: fixed;
     background-color: $backgroundColor;
     width:$sidenavWidth;
-    text-align: center;
+    display: flex;
+    justify-content: flex-end;
     left:0;
     bottom:0;
     padding:20px 8px;
@@ -558,7 +559,7 @@ listtable {
   listtable{
     width: 100%;
   }
-  .switch{
+  .saved-search-toggle{
     text-align: right;
     margin: 10px 0px;
   }
@@ -578,9 +579,6 @@ div.dialog.darken {
     left: 0px;
     top: -56px;
     width: 220px;
-  }
-  .btn-flat{
-    //background: transparent;
   }
   mds {
     .mdsEmbeddedGroup {

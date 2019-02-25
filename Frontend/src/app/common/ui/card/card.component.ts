@@ -29,17 +29,45 @@ export class CardComponent implements OnDestroy{
   @ViewChild('cardContainer') cardContainer: ElementRef;
   @ViewChild('jumpmarksRef') jumpmarksRef: ElementRef;
   private static modalCards: CardComponent[]=[];
+    /**
+     * the title of the card. Should be pre-translated
+     */
   @Input() title:string;
+    /**
+     * The subtitle of the card (optional)
+     * You may also use the "node" binding to automatically fill this field
+     */
   @Input() subtitle:string;
+    /**
+     * Should a "x" appear in the top right (don't forget to bind onCancel as an event)
+     */
   @Input() isCancelable=true;
+    /**
+     * An optional image href that should be appear in the top left corner
+     */
   @Input() avatar:string;
   @Input() width="normal";
   @Input() height="normal";
+    /**
+     * Hint that the layout contains mat-tab-group (relevant for correct scrolling, tabs will be fixed at top)
+     */
   @Input() tabbed=false;
+    /**
+     * Should the dialog be modal (a dark background)
+     */
   @Input() modal=true;
+    /**
+     * Jumpmarks for the left side (used for the mds dialog)
+     */
   @Input() jumpmarks:CardJumpmark[];
   @Input() priority=0;
   jumpmarkActive: CardJumpmark;
+
+    /**
+     * Optional, bind a Node or Node-Array to this element
+     * If this is used, the subtitle and avatar is automatically set depending on the given data
+     * @param node
+     */
   @Input() set node(node:Node|Node[]){
     if(!node)
       return;

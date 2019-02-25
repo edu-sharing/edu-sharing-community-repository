@@ -53,6 +53,8 @@ export class ModalDialogComponent{
    * And use messageParameters={name:'World'}
    */
   @Input() messageParameters : any;
+
+  @Input() node : Node|Node[];
   /**
    * Will be emitted when the users cancels the dialog
    * @type {EventEmitter}

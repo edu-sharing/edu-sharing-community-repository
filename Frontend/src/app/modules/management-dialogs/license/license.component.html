@@ -104,7 +104,7 @@
                   </mat-radio-button>
                 </div>
               </mat-radio-group>
-              <div *ngIf="primaryType=='EDU'" class="edu">
+              <!--<div *ngIf="primaryType=='EDU'" class="edu">
                 <div class="radio">
                   <input type="radio" [(ngModel)]="eduType" value="P_NR" id="P_NR">
                   <label for="P_NR">
@@ -121,7 +121,7 @@
                 </div>
                 <input type="checkbox" class="filled-in" [(ngModel)]="eduDownload" id="DOWNLOAD"><label for="DOWNLOAD">{{'WORKSPACE.LICENSE.EDU.DOWNLOAD' | translate}}</label>
 
-              </div>
+              </div>-->
               <div *ngIf="primaryType=='CUSTOM'" class="custom">
                  <textarea matInput
                            cdkTextareaAutosize

@@ -1,5 +1,5 @@
 <input #fileSelect type="file" style="display:none" id="fileSelect" [multiple]="multiple" (change)="filesSelected($event)" />
-<card title="{{'WORKSPACE.ADD_OBJECT_TITLE' | translate }}" [priority]="priority" subtitle="{{'WORKSPACE.ADD_OBJECT_SUBTITLE' | translate }}" width="small" height="normal"
+<card title="{{'WORKSPACE.ADD_OBJECT_TITLE' | translate }}" [priority]="priority" subtitle="{{'WORKSPACE.ADD_OBJECT_SUBTITLE' | translate }}" width="small" height="large"
       [buttons]="buttons"
       (onCancel)="cancel()"
 >
@@ -21,13 +21,7 @@
                     </mat-form-field>
                 </div>
                 <div class="lti" *ngIf="showLti">
-                    <div class="switch">
-                        <label>
-                            <input type="checkbox" [disabled]="!ltiAllowed" [(ngModel)]="ltiActivated">
-                            <span class="lever"></span>
-                            {{ 'WORKSPACE.ADD_OBJECT_LTI' | translate}}
-                        </label>
-                    </div>
+                    <mat-slide-toggle [disabled]="!ltiAllowed" [(ngModel)]="ltiActivated">{{ 'WORKSPACE.ADD_OBJECT_LTI' | translate}}</mat-slide-toggle>
                     <div class="lti-data" *ngIf="ltiAllowed && ltiActivated">
                         <div class="heading">{{'WORKSPACE.LTI_HEADING' | translate}}</div>
                         <div class="info">{{'WORKSPACE.LTI_INFO' | translate}}</div>

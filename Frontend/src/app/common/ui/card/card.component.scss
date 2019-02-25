@@ -84,6 +84,9 @@ $height-xxlarge:800px;
     &.width-xlarge {
       width: 800px;
     }
+    &.width-xxlarge {
+      width: 900px;
+    }
     &:not(.card-tabbed) {
       mat-card-content {
         max-height: calc(100vh - #{$titleHeight} - #{$actionMenuHeight});
@@ -152,6 +155,9 @@ $height-xxlarge:800px;
       &.height-xxlarge .mat-tab-body-wrapper {
         height: $height-xxlarge - $titleHeight - $actionMenuHeight - $tabHeight;
       }
+    }
+    .card-content-padding{
+      padding: $cardPadding;
     }
   }
   .card-jumpmarks {

@@ -44,6 +44,7 @@ import {MainNavComponent} from "../../common/ui/main-nav/main-nav.component";
 import {ColorHelper} from '../../common/ui/color-helper';
 import {ActionbarHelperService} from "../../common/services/actionbar-helper";
 import {RestLocatorService} from '../../common/rest/services/rest-locator.service';
+import {MatSlideToggle} from "@angular/material";
 
 // component class
 @Component({
@@ -174,8 +175,8 @@ export class CollectionsMainComponent {
     public isMobileWidth(){
         return window.innerWidth<UIConstants.MOBILE_WIDTH;
     }
-  public setCustomOrder(event:any){
-    let checked=event.target.checked;
+  public setCustomOrder(event:MatSlideToggle){
+    let checked=event.checked;
     this.collectionContent.collection.orderMode=checked ? RestConstants.COLLECTION_ORDER_MODE_CUSTOM : null;
     if(checked){
       this.orderActive=true;
@@ -185,7 +186,6 @@ export class CollectionsMainComponent {
       this.collectionService.setOrder(this.collectionContent.collection.ref.id).subscribe(()=>{
         this.globalProgress = false;
         this.orderActive=false;
-        //this.refreshContent(()=>this.globalProgress=false);
       });
     }
 

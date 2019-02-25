@@ -67,6 +67,9 @@ hr{
   .lti{
     display: flex;
     flex-direction: column;
+    mat-slide-toggle{
+      padding:10px $cardPadding;
+    }
   }
   .toolInfo{
     display:flex;

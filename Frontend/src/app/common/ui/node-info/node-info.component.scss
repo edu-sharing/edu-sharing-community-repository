@@ -1,5 +1,8 @@
 @import "../../../../styles/variables.scss";
 
+.debug-content{
+  padding: $cardPadding;
+}
 :host /deep/{
   .breadcrumb{
     flex-wrap: wrap;

@@ -7,6 +7,9 @@
   width:100%;
   max-width:100%;
   z-index:98;
+  .user div{
+    max-width: 160px;
+  }
   >div{
     width:100%;
     height: $mainnavHeight;
@@ -235,16 +238,15 @@ user-profile{
   @include clickable();
 }
 .topBar .user{
-  text-align: right;
   position: relative;
   // space for links like imprint
   top:3px;
   display: flex;
   padding-top: 5px;
   padding-left: 7px;
+  padding-right: 0;
   div{
     overflow: hidden;
-    max-width: 160px;
     margin-top: 1px;
     word-break: break-all;
     display: inline-block;
@@ -354,9 +356,6 @@ user-profile{
   .searchInputGroup{
     width: calc(100% - 80px);
   }
-  .user{
-    max-width: 160px;
-  }
 }
 @media screen and (max-width: ($mobileWidth+$mobileStage*2)) {
   #scrollToTop {
@@ -435,6 +434,16 @@ user-profile{
     }
   }
 }
+@media screen and (max-width: ($mobileWidth - $mobileStage*1)){
+  .topBar .user{
+    .material-icons{
+      margin-left: 0;
+    }
+    div {
+      display: none;
+    }
+  }
+}
 @media screen and (max-width: ($mobileWidth+$mobileStage*1)){
   #scrollToTop {
     display: none!important;
@@ -446,16 +455,6 @@ user-profile{
   .topBar {
     .user{
       top: 0;
-    }
-    .iconPerson {
-      display: inherit;
-    }
-    user-avatar{
-      top:2px;
-    }
-    .user .iconArrow {
-      margin-right: 0;
-      margin-left: -7px;
     }
     .eduImage{
       display:none;
