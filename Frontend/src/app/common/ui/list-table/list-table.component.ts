@@ -108,6 +108,9 @@ export class ListTableComponent implements EventListener{
    */
   @Input() set options(options : OptionItem[]){
     options=UIHelper.filterValidOptions(this.ui,options);
+    if(this.selectedNodes && this.selectedNodes.length==1)
+      options=this.filterCallbacks(options,this.selectedNodes[0]);
+    console.log(options);
     this._options=[];
     if(!options)
       return;
@@ -349,6 +352,9 @@ export class ListTableComponent implements EventListener{
     this.id=Math.random();
     frame.addListener(this);
     setTimeout(()=>this.loadRepos());
+  }
+  private filterCallbacks(options: OptionItem[],node:Node) {
+      return options.filter((option)=>!option.showCallback || option.showCallback(node));
   }
   loadRepos(){
     if(!this.loadRepositories)

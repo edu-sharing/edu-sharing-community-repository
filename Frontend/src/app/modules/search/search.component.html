@@ -151,6 +151,7 @@
           [isLoading]="savedSearchLoading"
           [selectedNodes]="currentSavedSearch ? [currentSavedSearch] : null"
           [columns]="savedSearchColumns"
+          (onUpdateOptions)="refreshListOptions()"
           (clickRow)="loadSavedSearchNode($event)"
         ></listTable>
          <div class="manageSavedSearch" *ngIf="savedSearch.length && savedSearchOwn">
@@ -205,6 +206,7 @@
                                 [isClickable]="true"
                                 [viewType]="2"
                                 [scrollWindow]="true"
+                                (onUpdateOptions)="refreshListOptions()"
                                 (clickRow)="render($event)"
                                 (doubleClickRow)="render($event)"
                                 [isLoading]="false"></listTable>
@@ -240,6 +242,7 @@
                             [hasMore]="!searchService.complete"
                             [applyMode]="applyMode"
                             [scrollWindow]="true"
+                            (onUpdateOptions)="refreshListOptions()"
                             (clickRow)="render($event)"
                             (doubleClickRow)="render($event)"
                             (loadMore)="getMoreResults()"
@@ -269,6 +272,7 @@
                                    [hasMore]="false"
                                    [applyMode]="applyMode"
                                    [scrollWindow]="true"
+                                   (onUpdateOptions)="refreshListOptions()"
                                    (clickRow)="render($event)"
                                    (doubleClickRow)="render($event)"
                                    (onSelectionChanged)="updateSelection($event)"

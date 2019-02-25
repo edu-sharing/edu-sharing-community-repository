@@ -712,7 +712,8 @@ export class SearchComponent {
           let n=ActionbarHelperService.getNodes(nodes,node);
           if(n==null)
               return false;
-        return !this.isGuest && n.length==1 && RestNetworkService.supportsImport(n[0].ref.repo, this.allRepositories);
+          console.log(n[0],RestNetworkService.supportsImport(n[0].ref.repo, this.allRepositories));
+          return !this.isGuest && n.length==1 && RestNetworkService.supportsImport(n[0].ref.repo, this.allRepositories);
       };
       options.push(save);
 
