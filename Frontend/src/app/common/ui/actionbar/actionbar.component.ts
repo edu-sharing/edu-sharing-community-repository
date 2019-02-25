@@ -75,7 +75,6 @@ export class ActionbarComponent{
       this.optionsMenu=[];
       return;
     }
-    console.log(options);
     this.optionsToggle=UIHelper.filterToggleOptions(options,true);
     options = this.filterCallbacks(options);
     this.optionsAlways=this.getActionOptions(UIHelper.filterToggleOptions(options,false)).slice(0,this.getNumberOptions());
@@ -83,12 +82,10 @@ export class ActionbarComponent{
       this.optionsAlways=UIHelper.filterToggleOptions(options,false).slice(0,this.getNumberOptions());
     }
     this.optionsMenu=this.hideActionOptions(UIHelper.filterToggleOptions(options,false),this.optionsAlways);
-    if(this.optionsMenu.length<1){
+    if(this.optionsMenu.length<2){
       this.optionsAlways=this.optionsAlways.concat(this.optionsMenu);
       this.optionsMenu=[];
     }
-    console.log(this.optionsMenu);
-
   }
 
   public getNumberOptions(){
