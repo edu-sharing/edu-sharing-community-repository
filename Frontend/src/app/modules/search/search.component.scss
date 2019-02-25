@@ -1,6 +1,7 @@
 @import "../../../styles/variables.scss";
 
 $sidenavWidth:300px;
+$sidenavTopBaseOffset:110px;
 .switchToCollections{
   font-weight:bold;
 }
@@ -52,7 +53,6 @@ $sidenavWidth:300px;
 }
 .sidenav .row{
   margin:0 -30px;
-  margin-top: -10px;
 }
 .repositoryActive{
   background: $workspaceTreeSelectedBackgroundEffect;
@@ -327,13 +327,13 @@ small-collection{
   overflow-x: hidden;
   overflow-y: auto;
   width: $sidenavWidth;
-  top:$mainnavHeight+110px;
-  height: calc(100% - #{$mainnavHeight} - 180px);
+  top:$mainnavHeight+$sidenavTopBaseOffset;
+  height: calc(100% - #{$mainnavHeight} - #{$sidenavTopBaseOffset} - 40px);
   transition: $transitionNormal all ease;
   @include iosScrolling();
   &.no-mainnav{
-    top:110px;
-    height: calc(100% - 110px - 70px);
+    top:$sidenavTopBaseOffset;
+    height: calc(100% - #{$sidenavTopBaseOffset} - 70px);
   }
 }
 .sidenavHidden{
@@ -599,6 +599,8 @@ div.dialog.darken {
   .content_wrapper {
     width: 100%;
   }
+}
+@media all and (max-width: $mobileWidth - $mobileStage*3) {
   .extendedSearch{
     span{
       display:none

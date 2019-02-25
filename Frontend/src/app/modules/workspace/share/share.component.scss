@@ -415,3 +415,8 @@ mat-tab-body-content{
     right: 20px;
   }
 }
+@media screen and (max-width: ($mobileWidth - $mobileStage*3)) {
+  .state{
+    display: none;
+  }
+}

@@ -1,19 +1,13 @@
 package org.edu_sharing.metadataset.v2;
 
+import java.io.Serializable;
 import java.util.List;
 
-public class MetadataQuery {
+public class MetadataQuery implements Serializable {
 	private String id,join,basequery;
 	private List<MetadataQueryParameter> parameters;
-	private MetadataQueries parent;
 	private Boolean applyBasequery;
-	public MetadataQuery(MetadataQueries parent){
-		this.parent = parent;
-	}
-	
-	public MetadataQueries getParent() {
-		return parent;
-	}
+	public MetadataQuery(){}
 
 	public boolean isApplyBasequery() {
 		if(applyBasequery==null)
@@ -74,12 +68,7 @@ public class MetadataQuery {
 		return null;
 	}
 
-	public void setParent(MetadataQueries parent) {
-		this.parent = parent;	
-	}
-
 	public void overrideWith(MetadataQuery query) {
-		this.parent=query.parent;
 		if(query.applyBasequery!=null)
 			this.applyBasequery=query.applyBasequery;
 		if(query.basequery!=null)

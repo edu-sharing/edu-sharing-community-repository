@@ -1,9 +1,10 @@
 package org.edu_sharing.metadataset.v2;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
-public class MetadataList {
+public class MetadataList implements Serializable {
 	private String id;
 	private List<MetadataColumn> columns;
 

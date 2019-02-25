@@ -614,7 +614,7 @@ public class SearchServiceImpl implements SearchService {
 	public SearchResultNodeRef searchV2(MetadataSetV2 mds, String query,Map<String,String[]> criterias,
 			SearchToken searchToken) throws Throwable {
 		MetadataQueries queries = mds.getQueries();
-		searchToken.setMetadataQuery(queries.findQuery(query),criterias);
+		searchToken.setMetadataQuery(queries,query,criterias);
 		SearchCriterias scParam = new SearchCriterias();
 		scParam.setRepositoryId(mds.getRepositoryId());
 		scParam.setMetadataSetId(mds.getId());

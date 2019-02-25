@@ -395,7 +395,7 @@
   "LICENSE_AGREEMENT":{
     "TITLE":"License agreement",
     "CHECKBOX":"I read the license agreement and accept it",
-    "ACCEPT":"Accept & Continue",
+    "ACCEPT":"Accept",
     "DECLINE":"Decline"
   },
   "SHARING":{

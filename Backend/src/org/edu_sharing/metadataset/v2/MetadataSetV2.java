@@ -1,13 +1,14 @@
 package org.edu_sharing.metadataset.v2;
 
+import java.io.Serializable;
 import java.util.*;
 
 import org.apache.log4j.Logger;
 import org.edu_sharing.metadataset.v2.MetadataWidget.Subwidget;
 import org.edu_sharing.repository.client.tools.CCConstants;
 
-public class MetadataSetV2 {
-	Logger logger = Logger.getLogger(MetadataSetV2.class);
+public class MetadataSetV2 implements Serializable {
+	static Logger logger = Logger.getLogger(MetadataSetV2.class);
 
 	public static String DEFAULT_CLIENT_QUERY="ngsearch";
 	public static String DEFAULT_CLIENT_QUERY_CRITERIA = "ngsearchword";	
