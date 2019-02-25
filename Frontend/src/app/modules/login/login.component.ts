@@ -52,7 +52,7 @@ export class LoginComponent  implements OnInit{
   private caption='LOGIN.TITLE';
   private config: any={};
   // stage (login or choose)
-  private previousStage = '';
+  private previousStage = null;
   private stage = 'login';
   private buttons: DialogButton[];
   private checkConditions(){

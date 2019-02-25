@@ -72,15 +72,7 @@ powered-by{
     top: calc(15% + 430px);
   }
   .branding{
-    position: absolute;
-    top: -27px;
-    left: 0;
-    display: flex;
-    justify-content: center;
-    img{
-      width:80px;
-      height:auto;
-    }
+    display: none;
   }
 }
 @media screen and (max-height: $mobileHeightWithKeyboard) {

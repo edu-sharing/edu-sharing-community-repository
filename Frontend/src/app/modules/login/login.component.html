@@ -4,7 +4,7 @@
           [searchEnabled]="false"
 ></main-nav>
   <div *ngIf="!isLoading">
-  <card title="{{caption | translate}}" subtitle="{{'LOGIN.SUBTITLE' | translate}}" [isCancelable]="previousStage!=null" (onCancel)="goBack()" [buttons]="buttons" width="normal" height="large">
+  <card title="{{caption | translate}}" avatar="assets/images/app-icon.svg" subtitle="{{'LOGIN.SUBTITLE' | translate}}" [isCancelable]="previousStage!=null" (onCancel)="goBack()" [buttons]="buttons" width="normal" height="auto">
       <spinner *ngIf="isLoading" class="center"></spinner>
       <div class="login-content" *ngIf="!isLoading">
       <div class="branding"><img src="assets/images/logo.svg" image-config alt=""></div>
@@ -32,7 +32,7 @@
           </form>
           <div class="register" *ngIf="config.register.local || config.register.registerUrl">
               {{'LOGIN.REGISTER_TEXT' | translate}}
-              <a (click)="register()" (keyup.enter)="register()" class="focus-underline" tabindex="0">{{'LOGIN.REGISTER_LINK' | translate}} <i icon iconId="arrow_forward"></i></a>
+              <button mat-button color="primary" (click)="register()">{{'LOGIN.REGISTER_LINK' | translate}} <i icon iconId="arrow_forward"></i></button>
           </div>
         </div>
     </div>
