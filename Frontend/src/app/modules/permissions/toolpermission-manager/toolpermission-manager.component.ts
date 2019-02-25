@@ -73,6 +73,8 @@ export class ToolpermissionManagerComponent {
     {name:"OTHER",icon:"help"}
   ];
   changing: string[]=[];
+  buttons: DialogButton[];
+
   getGroups(){
     return ToolpermissionManagerComponent.GROUPS;
   }
@@ -115,7 +117,7 @@ export class ToolpermissionManagerComponent {
               private node : RestNodeService,
               private translate : TranslateService,
               private iam: RestIamService) {
-
+    this.buttons=DialogButton.getSingleButton('CLOSE',()=>this.close(),DialogButton.TYPE_CANCEL);
   }
   close(){
     this.onClose.emit();

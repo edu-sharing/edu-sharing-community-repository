@@ -28,14 +28,14 @@
 
           </div>
           <div class="typeButton" *ngIf="filterDisabledPermissions(newPermissions).length">
-            <div class="btn-flat btn-shadow" *ngIf="currentType.length==0" tabindex="0" (keyup.enter)="chooseType()" (click)="chooseType()"><i class="material-icons align-icon">help_outline</i> <span>{{'WORKSPACE.SHARE.TYPE_UNKNOWN' | translate}}</span>
-              <i aria-hidden="true" class="material-icons align-icon right">keyboard_arrow_down</i></div>
-            <div class="btn-flat btn-shadow" *ngIf="currentType.indexOf('Consumer')>-1" tabindex="0" (keyup.enter)="chooseType()" (click)="chooseType()"><i class="material-icons align-icon">remove_red_eye</i> <span>{{'WORKSPACE.SHARE.TYPE_VIEWER' | translate}}</span>
-              <i aria-hidden="true" class="material-icons align-icon right">keyboard_arrow_down</i></div>
-            <div class="btn-flat btn-shadow" *ngIf="currentType.indexOf('Collaborator')>-1" tabindex="0" (keyup.enter)="chooseType()" (click)="chooseType()"><i class="material-icons align-icon">edit</i> <span>{{'WORKSPACE.SHARE.TYPE_COWORKER' | translate}}</span>
-              <i aria-hidden="true" class="material-icons align-icon right">keyboard_arrow_down</i></div>
-            <div class="btn-flat btn-shadow" *ngIf="currentType.indexOf('Coordinator')>-1" tabindex="0" (keyup.enter)="chooseType()" (click)="chooseType()"><i class="material-icons align-icon">work</i> <span>{{'WORKSPACE.SHARE.TYPE_COORDINATOR' | translate}}</span>
-              <i aria-hidden="true" class="material-icons align-icon right">keyboard_arrow_down</i></div>
+            <button mat-raised-button *ngIf="currentType.length==0" (click)="chooseType()"><i icon iconId="help_outline"></i> <span>{{'WORKSPACE.SHARE.TYPE_UNKNOWN' | translate}}</span>
+              <i aria-hidden="true" icon iconId="keyboard_arrow_down"></i></button>
+            <button mat-raised-button *ngIf="currentType.indexOf('Consumer')>-1" (click)="chooseType()"><i icon iconId="remove_red_eye"></i> <span>{{'WORKSPACE.SHARE.TYPE_VIEWER' | translate}}</span>
+              <i aria-hidden="true" icon iconId="keyboard_arrow_down"></i></button>
+            <button mat-raised-button *ngIf="currentType.indexOf('Collaborator')>-1" (click)="chooseType()"><i icon iconId="edit"></i> <span>{{'WORKSPACE.SHARE.TYPE_COWORKER' | translate}}</span>
+              <i aria-hidden="true" icon iconId="keyboard_arrow_down"></i></button>
+            <button mat-raised-button *ngIf="currentType.indexOf('Coordinator')>-1" (click)="chooseType()"><i icon iconId="work"></i> <span>{{'WORKSPACE.SHARE.TYPE_COORDINATOR' | translate}}</span>
+              <i aria-hidden="true" icon iconId="keyboard_arrow_down"></i></button>
             <!--<div class="share-type-mobile">-->
               <!--<p *ngIf="currentType.length==0">{{'WORKSPACE.SHARE.TYPE_UNKNOWN' | translate}}</p>-->
               <!--<p *ngIf="currentType.indexOf('Consumer')>-1">{{'WORKSPACE.SHARE.TYPE_VIEWER' | translate}}</p>-->

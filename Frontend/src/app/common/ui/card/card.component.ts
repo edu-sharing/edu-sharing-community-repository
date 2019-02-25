@@ -87,6 +87,7 @@ export class CardComponent implements OnDestroy{
     }
   }
   @Output() onCancel = new EventEmitter();
+  @Output() onScrolled = new EventEmitter();
   /** A list of buttons, see @DialogButton
    * Also use the DialogButton.getYesNo() and others if applicable!
    */
@@ -153,6 +154,9 @@ export class CardComponent implements OnDestroy{
   }
   public cancel(){
     this.onCancel.emit();
+  }
+  scrolled(){
+      this.onScrolled.emit();
   }
 }
 export class CardJumpmark{

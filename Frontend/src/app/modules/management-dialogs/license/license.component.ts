@@ -502,12 +502,6 @@ export class WorkspaceLicenseComponent  {
     }
 
     private updateButtons() {
-        /*
-            <div class="card-action">
-      <a class="waves-effect waves-light btn" tabindex="0" [class.disabled]="loading || type=='MULTI'" (click)="saveLicense()" (keyup.enter)="saveLicense()">{{'SAVE' | translate }}</a>
-      <a class="btn-flat" tabindex="0" (click)="cancel()" (keyup.enter)="cancel()">{{'CANCEL' | translate }}</a>
-    </div>
-         */
         let save=new DialogButton('SAVE',DialogButton.TYPE_PRIMARY,()=>this.saveLicense());
         save.disabled=this.loading || this.type=='MULTI';
         this.buttons=[

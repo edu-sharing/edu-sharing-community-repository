@@ -163,12 +163,8 @@ a.active{
     display: flex;
     .material-icons{
     }
-    .btn-flat {
+    button{
       height: 40px;
-    }
-    .right{
-      width:0;
-      left:0;
     }
   }
 }
@@ -282,11 +278,6 @@ mat-tab-body-content{
   position: relative;
   top:14px;
 }
-.group .btn-flat{
-  width:210px;
-  min-width:210px;
-  float:none;
-}
 .typeAdd{
   position:absolute;
   right: 20px;
@@ -298,8 +289,8 @@ mat-tab-body-content{
 }
 .share-link{
   position: absolute;
-  top: -60px;
-  right: 80px;
+  top: -58px;
+  right: 70px;
   z-index: $dialogZIndex+2;
   text-transform: uppercase;
   color:$primary;
@@ -349,7 +340,7 @@ mat-tab-body-content{
   display: none;
 }
 @media screen and (max-width: $mobileWidth) {
-  .typeButton .btn-flat{
+  .typeButton button{
     min-width: auto;
     width: 76px;
     span {
@@ -384,6 +375,14 @@ mat-tab-body-content{
     display: block;
   }
 }
+@media screen and (max-width: ($mobileWidth - $mobileStage*1)) {
+  .share-link{
+    right: 50px;
+    span{
+      display: none;
+    }
+  }
+}
 @media screen and (max-width: ($mobileWidth - $mobileStage*2)) {
   .groupHeading{
     flex-direction:column;
@@ -404,11 +403,6 @@ mat-tab-body-content{
       i{
         color: $workspaceInheritColor;
       }
-    }
-  }
-  .share-link{
-    span{
-      display: none;
     }
   }
   .share-type-mobile {

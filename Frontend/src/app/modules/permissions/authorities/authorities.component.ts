@@ -58,6 +58,8 @@ export class PermissionsAuthoritiesComponent {
   private addToList: any[];
   private isAdmin = false;
   private embeddedQuery:string;
+  editButtons: DialogButton[];
+  memberButtons: DialogButton[];
   @Input() set searchQuery(searchQuery : string){
     this._searchQuery=searchQuery;
     if(this._mode)
@@ -185,6 +187,7 @@ export class PermissionsAuthoritiesComponent {
               private organization : RestOrganizationService,
               private connector : RestConnectorService,
               private iam: RestIamService) {
+    this.updateButtons();
     this.organization.getOrganizations().subscribe((data: OrganizationOrganizations) => {
       this.isAdmin = data.canCreate;
     });
@@ -641,6 +644,7 @@ export class PermissionsAuthoritiesComponent {
     console.log(data);
     this.selectedMembers=data;
     this.memberOptions=this.getMemberOptions();
+    this.updateButtons();
   }
   private manageMembers(data: any) {
     if(data=='ALL')
@@ -810,4 +814,28 @@ export class PermissionsAuthoritiesComponent {
     }
     Helper.downloadContent(this.translate.instant("PERMISSIONS.DOWNLOAD_MEMBER_FILENAME"),data);
   }
+
+    private updateButtons() {
+        this.editButtons=[
+            new DialogButton('CANCEL',DialogButton.TYPE_CANCEL,()=>this.cancelEdit()),
+            new DialogButton('SAVE',DialogButton.TYPE_PRIMARY,()=>this.saveEdits()),
+        ];
+        /**
+         *
+         <div class="card-action" *ngIf="editMembers">
+         <a class="waves-effect waves-light btn" (click)="cancelEditMembers()">{{'CLOSE' | translate }}</a>
+         </div>
+         <div class="card-action" *ngIf="addMembers">
+         <a class="waves-effect waves-light btn" [class.disabled]="selectedMembers.length==0" (click)="addMembersToGroup()">{{'ADD' | translate }}</a>
+         <a class="waves-effect waves-light btn-flat" (click)="cancelEditMembers()">{{'CLOSE' | translate }}</a>
+         </div>
+         </div>
+         */
+        let add=new DialogButton('ADD',DialogButton.TYPE_PRIMARY,()=>this.addMembersToGroup());
+        add.disabled=this.selectedMembers.length==0;
+        this.memberButtons=[
+            new DialogButton('CLOSE',DialogButton.TYPE_CANCEL,()=>this.cancelEditMembers()),
+            add
+        ];
+    }
 }
