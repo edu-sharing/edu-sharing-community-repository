@@ -11,23 +11,23 @@
           <div *ngIf="stage=='choose'" [@dialog]="stage=='choose'" class="choose">
               <div>
                   <div class="choose-label">{{'LOGIN.CHOOSE_URL' | translate}}</div>
-                  <a class="btn waves-effect waves-light" (click)="openLoginUrl()" (keyup.enter)="openLoginUrl()" tabindex="0">{{'LOGIN.CHOOSE_URL_BUTTON' | translate}} <i class="material-icons">arrow_forward</i></a>
+                  <button mat-raised-button color="primary" (click)="openLoginUrl()">{{'LOGIN.CHOOSE_URL_BUTTON' | translate}} <i class="material-icons">arrow_forward</i></button>
               </div>
               <div>
                   <div class="choose-label">{{'LOGIN.CHOOSE_LOCAL' | translate}}</div>
-                  <a class="btn waves-effect waves-light" (click)="showLogin()" (keyup.enter)="showLogin()" tabindex="0">{{'LOGIN.CHOOSE_LOCAL_BUTTON' | translate}}</a>
+                  <button mat-raised-button color="primary" (click)="showLogin()">{{'LOGIN.CHOOSE_LOCAL_BUTTON' | translate}}</button>
               </div>
           </div>
           <div *ngIf="stage=='login'" [@dialog]="stage=='login'">
           <form (ngSubmit)="login()" #loginForm>
             <div *ngIf="showUsername">
-                <mat-form-field>
+                <mat-form-field floatLabel="always">
                   <mat-label>{{'LOGIN.USERNAME' | translate}}</mat-label>
                   <input matInput #usernameInput required name="username" id="username" (keydown.enter)="login()" (keyup)="checkConditions()" [(ngModel)]="username" autofocus/>
                 </mat-form-field>
             </div>
             <div>
-                <input-password #passwordInput id="password" label="{{'LOGIN.PASSWORD' | translate}}" required="true" (keydown.enter)="login()" [(value)]="password"></input-password>
+                <input-password #passwordInput id="password" label="{{'LOGIN.PASSWORD' | translate}}" floatLabel="always" required="true" (keydown.enter)="login()" [(value)]="password"></input-password>
             </div>
           </form>
           <div class="register" *ngIf="config.register.local || config.register.registerUrl">

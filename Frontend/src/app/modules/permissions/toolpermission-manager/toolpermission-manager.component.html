@@ -3,7 +3,7 @@
       [buttons]="buttons"
       width="xlarge"
       [isCancelable]="changing.length==0"
-      (onClose)="close()"
+      (onCancel)="close()"
       height="xlarge">
     <div class="heading-group">
       <div class="heading" *ngIf="!isLoading">
@@ -22,9 +22,8 @@
             <div class="card-title-element"><i icon [iconId]="group.icon"></i>{{'PERMISSIONS.TOOLPERMISSIONS.GROUP.'+group.name | translate}}</div>
             <div class="groupTable" *ngFor="let key of getToolpermissionsForGroup(group)">
               <div class="name">{{'TOOLPERMISSION.'+key | translate}}<div class="technicalName">{{key}}</div></div>
-              <div class="checkboxDiv checkboxInput"><input type="checkbox" class="filled-in" [disabled]="changing.indexOf(key)!=-1" [(ngModel)]="allow[key]" name="allow{{key}}" (change)="deny[key]=false;change(key)" id="allow{{key}}"><label for="allow{{key}}"></label></div>
-              <div class="checkboxDiv checkboxInput" *ngIf="_authority.authorityType!='EVERYONE'"><input type="checkbox" class="filled-in" [disabled]="changing.indexOf(key)!=-1" [(ngModel)]="deny[key]" name="deny{{key}}" (change)="allow[key]=false;change(key)" id="deny{{key}}"><label for="deny{{key}}"></label></div>
-              <div class="result" [class.allowed]="getEffective(key)=='ALLOWED'" [class.denied]="getEffective(key)!='ALLOWED'">
+                <div class="checkboxDiv checkboxInput"><mat-checkbox [disabled]="changing.indexOf(key)!=-1" [(ngModel)]="allow[key]" name="allow{{key}}" (change)="deny[key]=false;change(key)"></mat-checkbox></div>
+                <div class="checkboxDiv checkboxInput" *ngIf="_authority.authorityType!='EVERYONE'"><mat-checkbox [disabled]="changing.indexOf(key)!=-1" [(ngModel)]="deny[key]" name="deny{{key}}" (change)="allow[key]=false;change(key)"></mat-checkbox></div>              <div class="result" [class.allowed]="getEffective(key)=='ALLOWED'" [class.denied]="getEffective(key)!='ALLOWED'">
                 <div *ngIf="changing.indexOf(key)!=-1"><spinner-small></spinner-small></div>
                 <div *ngIf="changing.indexOf(key)==-1"  [title]="isImplicit(key) ? getImplicitDetail(key) : ''">
                     <div class="text">{{'PERMISSIONS.TOOLPERMISSIONS.STATUS_'+getEffective(key) | translate}}</div>
