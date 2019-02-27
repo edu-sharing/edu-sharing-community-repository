@@ -499,7 +499,7 @@ export class PermissionsAuthoritiesComponent {
   }
   private deleteAuthority(data: any,callback:Function) {
     let list=this.getList(data);
-    if(this._mode=='GROUP' && list[0].groupType==RestConstants.GROUP_TYPE_ADMINISTRATORS){
+    if(this._mode=='GROUP' && list.filter((l)=>l.groupType==RestConstants.GROUP_TYPE_ADMINISTRATORS).length){
         this.toast.error(null,'PERMISSIONS.DELETE_ERROR_ADMINISTRATORS');
         return;
     }
