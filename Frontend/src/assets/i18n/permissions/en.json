@@ -53,6 +53,7 @@
     "DELETE_GROUP":"Are you sure you want to delete the selected groups?",
     "DELETE_GROUP_SINGLE":"Are you sure you want to delete the group {{name}}?",
     "DELETE_ORG_SINGLE":"Are you sure you want to remove the organization {{name}}? All users remain and the organization data store will not be deleted",
+    "DELETE_ERROR_ADMINISTRATORS":"Administrators-Groups may not be deleted",
     "DELETED_USER":"User(s) removed successfully",
     "DELETED_GROUP":"Group(s) removed successfully",
     "MEMBER_REMOVED":"User removed from group",
