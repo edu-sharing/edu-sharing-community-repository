@@ -195,4 +195,5 @@ export class RestConstants {
   public static CCMAIL_APPLICATION_XML="ccmail.properties.xml";
   public static NODE_VERSION_CURRENT = "-1";
   public static PRIMARY_SEARCH_CRITERIA='ngsearchword';
+  public static GROUP_TYPE_ADMINISTRATORS="ORG_ADMINISTRATORS";
 }
