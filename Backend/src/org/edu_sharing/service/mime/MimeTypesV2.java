@@ -210,7 +210,7 @@ public class MimeTypesV2 {
 		return "file-pdf";
 	if(mimetype.equals("imsqti"))
 		return "file-qti";
-	if(mimetype.equals("moodle"))
+	if(mimetype.equals("moodle") || mimetype.equals("application/vnd.moodle.backup"))
 		return "file-moodle";
 	if(mimetype.equals("scorm") || mimetype.equals("ADL SCORM"))
 		return "file-scorm";

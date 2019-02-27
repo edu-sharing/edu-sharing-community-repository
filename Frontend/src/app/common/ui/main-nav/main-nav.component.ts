@@ -571,10 +571,10 @@ export class MainNavComponent implements AfterViewInit{
     },(error:any)=>this.checkConfig(buttons));
   }
   private openImprint(){
-    window.document.location.href=this.config.imprintUrl;
+    UIHelper.openUrl(this.config.imprintUrl,this.cordova);
   }
   private openPrivacy(){
-    window.document.location.href=this.config.privacyInformationUrl;
+    UIHelper.openUrl(this.config.privacyInformationUrl,this.cordova);
   }
   private checkConfig(buttons: any[]) {
     this.configService.getAll().subscribe((data:any)=>{
