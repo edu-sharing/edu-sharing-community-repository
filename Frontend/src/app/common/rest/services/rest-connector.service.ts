@@ -88,7 +88,9 @@ export class RestConnectorService {
   }
   public onEvent(event:string,request:any){
     if(event==FrameEventsService.EVENT_UPDATE_SESSION_TIMEOUT) {
-      this._lastActionTime=new Date().getTime();
+        //this._lastActionTime=new Date().getTime();
+        // invoke any client side action to let all server-side filters/sessions for authentication refresh
+        this.isLoggedIn().subscribe(()=>{});
     }
     if(event==FrameEventsService.EVENT_PARENT_REST_REQUEST){
       let method=request.method ? request.method.toLowerCase() : "get";
