@@ -11,19 +11,14 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import org.alfresco.repo.domain.node.NodeEntity;
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.repo.security.authentication.AuthenticationUtil.RunAsWork;
-import org.alfresco.service.ServiceRegistry;
-import org.alfresco.service.cmr.dictionary.DictionaryService;
 import org.alfresco.service.cmr.repository.AssociationRef;
 import org.alfresco.service.cmr.repository.ChildAssociationRef;
 import org.alfresco.service.cmr.repository.DuplicateChildNodeNameException;
 import org.alfresco.service.cmr.repository.StoreRef;
 import org.alfresco.service.cmr.security.PermissionService;
-import org.alfresco.service.namespace.QName;
 import org.apache.log4j.Logger;
-import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
 import org.edu_sharing.metadataset.v2.MetadataQuery;
 import org.edu_sharing.metadataset.v2.MetadataQueryParameter;
 import org.edu_sharing.repository.client.rpc.Notify;
@@ -37,6 +32,7 @@ import org.edu_sharing.repository.server.SearchResultNodeRef;
 import org.edu_sharing.repository.server.tools.ImageTool;
 import org.edu_sharing.repository.server.tools.LogTime;
 import org.edu_sharing.repository.server.tools.NameSpaceTool;
+import org.edu_sharing.repository.server.tools.XApiTool;
 import org.edu_sharing.repository.server.tools.cache.PreviewCache;
 import org.edu_sharing.restservices.collection.v1.model.Collection;
 import org.edu_sharing.restservices.node.v1.model.NodeEntries;
@@ -48,7 +44,6 @@ import org.edu_sharing.restservices.shared.NodeSearch.Facette;
 import org.edu_sharing.restservices.shared.NodeSearch.Facette.Value;
 import org.edu_sharing.service.Constants;
 import org.edu_sharing.service.comment.CommentService;
-import org.edu_sharing.service.comment.CommentServiceFactory;
 import org.edu_sharing.service.license.LicenseService;
 import org.edu_sharing.service.mime.MimeTypesV2;
 import org.edu_sharing.service.nodeservice.*;
@@ -60,7 +55,6 @@ import org.edu_sharing.service.search.SearchService;
 import org.edu_sharing.service.search.SearchServiceFactory;
 import org.edu_sharing.service.search.model.SearchToken;
 import org.edu_sharing.service.search.model.SortDefinition;
-import org.edu_sharing.service.search.model.SortDefinition.SortDefinitionEntry;
 import org.edu_sharing.service.share.ShareService;
 import org.edu_sharing.service.share.ShareServiceImpl;
 import org.json.JSONArray;
@@ -1647,6 +1641,15 @@ public class NodeDao {
 					nodeService.getProperty(storeProtocol,storeId,sourceId,CCConstants.LOM_PROP_LIFECYCLE_VERSION));
 			return new NodeDao(repoDao, newNode.getId());
 		}catch(Throwable t){
+			throw DAOException.mapping(t);
+		}
+	}
+
+	public String storeXApiData(String xApi) throws DAOException {
+		try {
+			JSONObject json = new JSONObject(xApi);
+			return XApiTool.sendToXApi(nodeId,json);
+		} catch (Throwable t) {
 			throw DAOException.mapping(t);
 		}
 	}
