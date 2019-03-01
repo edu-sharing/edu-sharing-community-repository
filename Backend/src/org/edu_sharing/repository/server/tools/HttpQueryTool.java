@@ -102,11 +102,17 @@ public class HttpQueryTool {
 	public String query(String url, Map<String,String> header, HttpMethodBase _method) {
 		logger.debug("url:" + url);
 		HttpClient client = new HttpClient();
-	
+
 		client.getParams().setParameter("http.useragent", "Test Client");
-		
-		HttpMethodBase method = (_method == null) ?  new GetMethod(url) : _method;
-		method.setFollowRedirects(true);
+
+		HttpMethodBase method;
+		if(_method == null) {
+			method = new GetMethod(url);
+			method.setFollowRedirects(true);
+		}
+		else{
+			method = _method;
+		}
 		
 		if(basicAuthUn != null && basicAuthPw != null) {
 			method.addRequestHeader("Authorization", "Basic " + Base64.encodeBase64String((basicAuthUn +":" +basicAuthPw) .getBytes()));  

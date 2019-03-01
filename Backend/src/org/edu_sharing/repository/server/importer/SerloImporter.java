@@ -126,7 +126,8 @@ public class SerloImporter implements Importer{
 		
 		GetMethod method = new GetMethod(url);
 		method.getParams().setContentCharset("utf-8");
-		
+		method.setFollowRedirects(true);
+
 		String result = new HttpQueryTool().query(url, null, method);
 		
 		try{

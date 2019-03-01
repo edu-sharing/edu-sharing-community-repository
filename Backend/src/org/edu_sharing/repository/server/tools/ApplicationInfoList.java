@@ -61,13 +61,27 @@ public class ApplicationInfoList {
 	}
 	
 	public static ApplicationInfo getRenderService() {
-		
+
 		if(appInfos == null || appInfos.size() < 1){
-			
+
 			getApplicationInfos();
 		}
 		for(ApplicationInfo appInfo : appInfos.values()){
 			if(ApplicationInfo.TYPE_RENDERSERVICE.equals(appInfo.getType())){
+				return appInfo;
+			}
+		}
+		return null;
+	}
+
+	public static ApplicationInfo getLearningLocker() {
+
+		if(appInfos == null || appInfos.size() < 1){
+
+			getApplicationInfos();
+		}
+		for(ApplicationInfo appInfo : appInfos.values()){
+			if(ApplicationInfo.TYPE_LEARNING_LOCKER.equals(appInfo.getType())){
 				return appInfo;
 			}
 		}
