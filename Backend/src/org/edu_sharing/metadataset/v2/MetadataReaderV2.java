@@ -1,6 +1,5 @@
 package org.edu_sharing.metadataset.v2;
 
-import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.SerializationUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
@@ -22,6 +21,8 @@ import javax.xml.xpath.XPathFactory;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class MetadataReaderV2 {
 	
@@ -36,7 +37,12 @@ public class MetadataReaderV2 {
 	private DocumentBuilder builder;
 	private String i18nPath;
 	private String locale;
-	
+
+	public static void main(String[] args) throws Exception {
+		MetadataSetV2 mds = MetadataReaderV2.getMetadataset(ApplicationInfoList.getHomeRepository(), CCConstants.metadatasetdefault_id, "de_DE");
+		System.out.print(mds);
+	}
+
 	public static String getPath(){
 		return "/org/edu_sharing/metadataset/v2/";
 	}
@@ -387,6 +393,9 @@ public class MetadataReaderV2 {
 	}
 	
 	private List<MetadataKey> getValuespace(String value,MetadataWidget widget, String valuespaceI18n, String valuespaceI18nPrefix) throws Exception {
+		if(value.startsWith("http://") || value.startsWith("https://")){
+			return getValuespaceExternal(value);
+		}
 		Document docValuespace = builder.parse(getFile(value,Filetype.VALUESPACE));
 		List<MetadataKey> keys=new ArrayList<>();
 		NodeList keysNode=(NodeList)xpath.evaluate("/valuespaces/valuespace[@property='"+widget.getId()+"']/key",docValuespace, XPathConstants.NODESET);
@@ -405,7 +414,23 @@ public class MetadataReaderV2 {
 		}
 		return list;
 	}
-	
+
+	private List<MetadataKey> getValuespaceExternal(String value) throws Exception {
+		// e.g. http://localhost:3000/uri/8a2a94f0-36bd-11e9-bdc4-0242ac1a0003
+		String openSaltRegex="(https?:\\/\\/.*\\/)uri\\/(.*)";
+		Pattern pattern = Pattern.compile(openSaltRegex);
+		Matcher matched = pattern.matcher(value);
+		if(matched.matches()){
+			String baseUrl=matched.group(1);
+			String uuid=matched.group(2);
+			logger.info("matched openSALT at "+baseUrl+" with uuid "+uuid);
+			return new OpenSALTReader(baseUrl).getValuespace(uuid);
+		}
+
+		logger.error("The given valuespace uri "+value+" can not be resolved for a supported provider");
+		return null;
+	}
+
 	private List<MetadataKey> getValues(NodeList keysNode, String valuespaceI18n, String valuespaceI18nPrefix) throws IOException {
 		List<MetadataKey> keys=new ArrayList<>();
 		for(int i=0;i<keysNode.getLength();i++){
