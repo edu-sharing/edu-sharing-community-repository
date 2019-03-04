@@ -24,6 +24,7 @@ import {CordovaService} from "../services/cordova.service";
 import {SearchService} from "../../modules/search/search.service";
 import {OptionItem} from "./actionbar/option-item";
 import {RestConnectorService} from "../rest/services/rest-connector.service";
+import {Observable, Observer} from "rxjs";
 export class UIHelper{
 
   public static evaluateMediaQuery(type:string,value:number){
@@ -326,24 +327,50 @@ export class UIHelper{
      * @param {y} number
      * @param {smoothness} lower numbers indicate less smoothness, higher more smoothness
      */
-    static scrollSmoothElement(y: number=0,element:Element,smoothness=1) {
-        let mode=element.scrollTop>y;
-        let divider=3*smoothness;
-        let minSpeed=7/smoothness;
-        let lastY=y;
-        let interval=setInterval(()=>{
-            let yDiff=element.scrollTop-lastY;
-            lastY=element.scrollTop;
-            if(element.scrollTop>y && mode && yDiff){
-                element.scrollTop-=Math.max((element.scrollTop-y)/divider,minSpeed);
+    static scrollSmoothElement(pos: number=0,element:Element,smoothness=1,axis='y') {
+        return new Promise((resolve)=> {
+            let currentPos = axis == 'x' ? element.scrollLeft : element.scrollTop;
+            console.log(currentPos, pos);
+            if(element.getAttribute('data-is-scrolling')=='true'){
+                return;
             }
-            else if(element.scrollTop<y && !mode && yDiff){
-                element.scrollTop+=Math.max((y-element.scrollTop)/divider,minSpeed);
+            let mode = currentPos > pos;
+            let divider = 3 * smoothness;
+            let minSpeed = 7 / smoothness;
+            let lastPos = pos;
+            let maxPos = axis=='x' ? element.scrollWidth - element.clientWidth : element.scrollHeight - element.clientHeight;
+            let limitReached=false;
+            if(mode && pos<0) {
+                pos = 0;
+                limitReached=true;
             }
-            else {
-                clearInterval(interval);
+            if(!mode && pos>maxPos) {
+                pos = maxPos;
+                limitReached=true;
             }
-        },16);
+            let interval = setInterval(() => {
+                let currentPos = axis == 'x' ? element.scrollLeft : element.scrollTop;
+                let posDiff = currentPos - lastPos;
+                lastPos = currentPos;
+                if (currentPos > pos) {
+                    currentPos -= Math.max((currentPos - pos) / divider, minSpeed);
+                }
+                else if (currentPos < pos && !mode) {
+                    currentPos += Math.max((pos - currentPos) / divider, minSpeed);
+                }
+                else {
+                    clearInterval(interval);
+                    element.removeAttribute('data-is-scrolling');
+                    resolve();
+                }
+                console.log(currentPos, pos, maxPos);
+                if (axis == 'x')
+                    element.scrollLeft = currentPos;
+                else
+                    element.scrollTop = currentPos;
+            }, 16);
+            element.setAttribute('data-is-scrolling','true');
+        });
     }
 
     /**

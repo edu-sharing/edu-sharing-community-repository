@@ -139,7 +139,8 @@ public class MetadataTemplateRenderer {
 						if(link!=null)
 							value="<a href='"+link+"' target='_blank'>";
 						value+="<img src='"+
-								license.getIconUrl(licenseName)+
+								// @TODO 5.1 This can be set to dynamic!
+								license.getIconUrl(licenseName,false)+
 								"'>";
 						if(link!=null)
 							value+="</a>";

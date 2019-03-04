@@ -93,7 +93,7 @@ $sidenavWidth:300px;
 }
 .extendedSearch{
   .mobile{
-    display:none;
+    display:none!important;
   }
 }
 .noResults,.noResultsMatched{

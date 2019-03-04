@@ -26,13 +26,13 @@
 <div class="alignWithBanner">
   <div id="nodeRenderContentWrapper">
     <div *ngIf="sequence" id="sequence" #sequencediv>
-        <div class="wrapperouter clickable" tabindex="0" (click)="node=sequenceParent" (keypress)="($event.which === 13)?node=sequenceParent:''">
+        <div class="wrapperouter clickable" tabindex="0" (click)="node=sequenceParent" (keyup.enter)="node=sequenceParent">
           <span class="itemTitle">{{getNodeName(sequenceParent)}}</span>
           <div class="wrapper" [class.selected]="_nodeId==sequenceParent.ref.id">
             <img src="{{sequenceParent.preview.url}}&crop=true&width=100&height=75">
           </div>
         </div>
-        <div *ngFor="let item of sequence.nodes" tabindex="0" class="wrapperouter clickable" (click)="node=item" (keypress)="($event.which === 13)?node=sequenceParent:''">
+        <div *ngFor="let item of sequence.nodes" tabindex="0" class="wrapperouter clickable" (click)="node=item" (keyup.enter)="node=sequenceParent">
           <span class="itemTitle">{{getNodeName(item)}}</span>
           <div class="wrapper" [class.selected]="_nodeId==item.ref.id">
             <img src="{{item.preview.url}}&crop=true&width=100&height=75">
