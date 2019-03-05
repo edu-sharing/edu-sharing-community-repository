@@ -33,9 +33,10 @@ $height-xxlarge:800px;
       position: relative;
       > button {
         position: absolute;
-        right: 0;
-        top: 0;
-        padding: 16px;
+        right: 2px;
+        top: 2px;
+        border-radius: 50%;
+        height: 66px;
       }
       .avatar {
         display: flex;
@@ -63,6 +64,7 @@ $height-xxlarge:800px;
       padding: 17px 20px;
       button {
         margin: 0 5px;
+        padding: 0 2rem;
       }
     }
     mat-card-content {

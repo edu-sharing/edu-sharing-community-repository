@@ -1,6 +1,8 @@
 <div class="breadcrumb breadcrumbDesktop">
-  <button mat-button color="primary" *ngIf="home" tabindex="0" class="home mat-button-no-uppercase" [class.clickable]="clickable" (click)="openBreadcrumb(0)" (keyup.enter)="openBreadcrumb(0)">{{home | translate}}</button>
-  <button mat-button color="primary" *ngIf="!home" tabindex="0" class="home homeIcon mat-button-no-uppercase" [class.clickable]="clickable" (click)="openBreadcrumb(0)"><i icon iconId="home"></i></button>
+    <div>
+        <button mat-button color="primary" *ngIf="home" tabindex="0" class="home mat-button-no-uppercase" [class.clickable]="clickable" (click)="openBreadcrumb(0)" (keyup.enter)="openBreadcrumb(0)">{{home | translate}}</button>
+        <button mat-button color="primary" *ngIf="!home" tabindex="0" class="home homeIcon mat-button-no-uppercase" [class.clickable]="clickable" (click)="openBreadcrumb(0)"><i icon iconId="home"></i></button>
+    </div>
   <div *ngFor="let node of _breadcrumbsAsNode;let i=index">
       <i aria-hidden="true" icon iconId="keyboard_arrow_right" class="breadcrumb-arrow"></i>
       <button mat-button color="primary"

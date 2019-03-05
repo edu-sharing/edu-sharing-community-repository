@@ -51,8 +51,10 @@
   padding:0 2px!important;
 }
 .breadcrumb div:last-child{
-  font-weight: bold;
-  color:$textMain;
+  button{
+    font-weight: bold;
+    color: $textMain;
+  }
 }
 .breadcrumbMobile{
   display:none;

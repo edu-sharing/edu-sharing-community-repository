@@ -5,16 +5,17 @@
 }
 :host /deep/ .login-content {
   mat-form-field {
-    width: 100%;
+    width: calc(100% - .2rem);
   }
 }
 powered-by{
   position: fixed;
   left: 0;
-  top: calc(15% + 510px);
+  top: calc(15% + 530px);
+  z-index: 1000;
 }
 .powered-down{
-  top: calc(15% + 530px);
+  top: calc(15% + 550px);
 }
 .card-cancel{
   z-index: 1;
@@ -66,10 +67,10 @@ powered-by{
   }
   powered-by{
     position: fixed;
-    top:calc(15% + 410px);
+    top:calc(15% + 480px);
   }
   .powered-down{
-    top: calc(15% + 430px);
+    top: calc(15% + 500px);
   }
   .branding{
     display: none;

@@ -507,7 +507,8 @@
     "keyboard_arrow_right": "weiter",
     "keyboard_arrow_up": "nach oben",
     "file_upload": "Datei hochladen",
-    "delete": "Löschen"
+    "delete": "Löschen",
+    "add": "Neu"
   },
   "LANGUAGE":{
     "INTERNATIONAL": "International",

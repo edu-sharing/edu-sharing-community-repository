@@ -120,7 +120,7 @@ input.mat-input-element, mat-label, .mat-select-value{
   white-space: normal!important;
 }
 .mat-button-wrapper{
-  display: flex;
+  display: flex !important;
   align-items: center;
   justify-content: center;
   text-transform: uppercase;
@@ -132,6 +132,7 @@ input.mat-input-element, mat-label, .mat-select-value{
   text-transform: none;
 }
 .mat-menu-content{
+  width: 240px;
   >button{
     color:$primary;
     display: flex;
@@ -156,5 +157,9 @@ input.mat-input-element, mat-label, .mat-select-value{
 
 label .label-secondary{
   font-size: 90%;
+  color: $textLight;
+}
+// better contrast ratio
+.mat-card-subtitle,.mat-hint{
   color: $textLight;
 }

@@ -8,7 +8,7 @@
       <div *ngIf="avatar" class="avatar" mat-card-avatar><img [src]="avatar" alt=""></div>
       <mat-card-title>{{title}}</mat-card-title>
       <mat-card-subtitle>{{subtitle}}</mat-card-subtitle>
-      <button mat-button *ngIf="isCancelable" (click)="cancel()"><i icon iconId="close"></i></button>
+      <button mat-button *ngIf="isCancelable" (click)="cancel()"><i icon iconId="close" aria="true"></i></button>
     </mat-card-header>
     <div #jumpmarksRef class="jumpmarks" *ngIf="jumpmarks && jumpmarks.length>0">
       <button mat-button color="primary"
