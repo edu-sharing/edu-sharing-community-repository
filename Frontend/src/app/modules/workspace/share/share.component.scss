@@ -60,6 +60,9 @@
       border-radius: 2px;
     }
   }
+  .card-dialog .modal-card .mat-card-header > button{
+    display: none;
+  }
 }
 h2{
   color:$textLight;
@@ -289,8 +292,8 @@ mat-tab-body-content{
 }
 .share-link{
   position: absolute;
-  top: -58px;
-  right: 70px;
+  top: -50px;
+  right: 20px;
   z-index: $dialogZIndex+2;
   text-transform: uppercase;
   color:$primary;
@@ -308,7 +311,7 @@ mat-tab-body-content{
     box-shadow: 0 1px 3px 1px #d0d0d0;
     display: inline-table;
     padding: 3px;
-    margin-right: 8px;
+    margin-left: 8px;
   }
 }
 .state{
@@ -322,11 +325,11 @@ mat-tab-body-content{
     font-size: 14pt;
   }
   .show-state{
+    position: relative;
+    top: 3px;
     border: 2px dashed transparent;
     border-radius: 15px;
-    padding: 6px;
-    padding-right: 12px;
-    padding-left: 8px;
+    padding: 6px 20px 6px 10px;
   }
 
   .state-changed{
@@ -377,7 +380,6 @@ mat-tab-body-content{
 }
 @media screen and (max-width: ($mobileWidth - $mobileStage*1)) {
   .share-link{
-    right: 50px;
     span{
       display: none;
     }

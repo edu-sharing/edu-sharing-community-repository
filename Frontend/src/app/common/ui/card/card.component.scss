@@ -42,13 +42,18 @@ $height-xxlarge:800px;
         display: flex;
         align-items: center;
         justify-content: center;
-        margin-left: 17px;
+        margin-left: 20px;
         margin-top: -10px;
         background-color: #fff;
         > img {
           width: 24px;
           height: 24px;
         }
+      }
+      .mat-card-title, .mat-card-subtitle{
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
       }
     }
     background-color: $backgroundColor;

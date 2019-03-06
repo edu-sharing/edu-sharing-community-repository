@@ -7,7 +7,7 @@
 }
 .mat-flat-button {
   min-width: unset;
-  padding:5px;
+  padding: 5px 10px;
 }
 .action-always-caption{
   line-height: normal;
@@ -85,5 +85,8 @@ button{
   }
   .action-always-caption{
     display: none;
+  }
+  .mat-flat-button {
+    padding:5px;
   }
 }

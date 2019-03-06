@@ -104,11 +104,13 @@ user-profile{
 .sidenavClose{
   @include clickable();
   position: absolute;
-  top:0;
-  right:0;
+  right: 2px;
+  top: 2px;
   padding: 10px;
   z-index: 2;
   color: #fff;
+  border-radius: 50%;
+  height: 66px;
 }
 .sidenavImage > .sidenavProfile{
   position: absolute;
@@ -265,6 +267,7 @@ user-profile{
   font-size:25px;
   margin-right: 5px;
   margin-left: 5px;
+  margin-top: 3px;
 }
 .sidenav .button{
   padding:20px 30px;

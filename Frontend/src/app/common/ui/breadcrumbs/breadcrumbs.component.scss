@@ -25,6 +25,7 @@
     display: flex;
     align-items: center;
     justify-content: center;
+    margin-top: 6px;
   }
   .breadcrumb-arrow {
     font-size: 15pt;
@@ -65,6 +66,7 @@
     align-items: center;
     margin-top: -2px;
     min-height: 25px;
+    margin-left: -30px;
     .folder{
       max-width: calc(100% - 24px);
     }

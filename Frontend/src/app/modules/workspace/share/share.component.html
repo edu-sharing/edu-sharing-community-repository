@@ -2,7 +2,7 @@
       [buttons]="buttons"
       (onCancel)="cancel()"
 >
-  <div class="share-link" tabindex="0" (click)="openLink()" (keyup.enter)="openLink()" *ngIf="!isCollection()"><i icon iconId="link"></i> <span>{{'WORKSPACE.OPTION.SHARE_LINK' | translate}}</span></div>
+  <div class="share-link" tabindex="0" (click)="openLink()" (keyup.enter)="openLink()" *ngIf="!isCollection()"><span>{{'WORKSPACE.OPTION.SHARE_LINK' | translate}}</span> <i icon iconId="link"></i></div>
   <mat-tab-group mat-stretch-tabs [(selectedIndex)]="tab">
       <mat-tab label="{{'WORKSPACE.TAB_INVITE' | translate}}" class="tabContent tabContentInvite">
         <div class="invite-group">

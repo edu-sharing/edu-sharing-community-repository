@@ -37,7 +37,7 @@
 <div class="dialog darken dialog-sidenav" *ngIf="displaySidebar" [@fade]="displaySidebar" (click)="displaySidebar=false"></div>
 
 <div #sidebar tabindex="0" class="sidenav" *ngIf="displaySidebar" [@fromLeft]="displaySidebar">
-  <button mat-button class="sidenavClose" tabindex="0" (click)="displaySidebar=false" ><i icon iconId="close"></i></button>
+  <button mat-button class="sidenavClose" tabindex="0" (click)="displaySidebar=false"><i icon iconId="close" aria="true"></i></button>
   <div class="sidenavImage" style.background-color="{{ (user ? user.person : null) | authorityColor }}">
     <div class="profile-gradient"></div>
     <img *ngIf="user && user.person.profile.avatar" class="blurred-image" [src]="user.person.profile.avatar+'&crop=true&width=200&height=200'">

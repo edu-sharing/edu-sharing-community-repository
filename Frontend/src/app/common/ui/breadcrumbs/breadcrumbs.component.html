@@ -29,7 +29,7 @@
 </div>
 -->
 <div class="breadcrumb breadcrumbMobile" *ngIf="_breadcrumbsAsNodeShort">
-    <button mat-button color="primary" *ngIf="home && _breadcrumbsAsNode.length<1" tabindex="0" class="home mat-button-no-uppercase" [class.clickable]="clickable" (click)="openBreadcrumb(0)" (keyup.enter)="openBreadcrumb(0)">{{home | translate}} <i icon iconId="keyboard_arrow_down" class="dropdown-icon"></i></button>
+    <button style="margin-left: 20px" mat-button color="primary" *ngIf="home && _breadcrumbsAsNode.length<1" tabindex="0" class="home mat-button-no-uppercase" [class.clickable]="clickable" (click)="openBreadcrumb(0)" (keyup.enter)="openBreadcrumb(0)">{{home | translate}} <i icon iconId="keyboard_arrow_down" class="dropdown-icon"></i></button>
     <button mat-button color="primary" *ngIf="!home && _breadcrumbsAsNode.length<1" tabindex="0" class="home homeIcon mat-button-no-uppercase" [class.clickable]="clickable" (click)="openBreadcrumb(0)" (keyup.enter)="openBreadcrumb(0)"><i icon iconId="home"></i></button>
     <button mat-button (click)="openBreadcrumb(_breadcrumbsAsNode.length-1)" *ngIf="_breadcrumbsAsNodeShort.length"><i icon iconId="keyboard_arrow_left" class="breadcrumb-arrow"></i></button>
     <button mat-button color="primary" *ngIf="_breadcrumbsAsNodeShort.length" class="folder mat-button-no-uppercase" [class.clickable]="clickable" (click)="openBreadcrumb(_breadcrumbsAsNode.length)">{{_breadcrumbsAsNodeShort[_breadcrumbsAsNodeShort.length-1] ? _breadcrumbsAsNodeShort[_breadcrumbsAsNodeShort.length-1].name : ''}}</button>
