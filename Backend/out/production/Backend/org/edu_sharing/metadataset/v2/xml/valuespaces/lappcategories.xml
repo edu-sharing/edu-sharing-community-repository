@@ -1,0 +1,538 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<valuespaces>
+ <valuespace property="lappcategorie">
+<key cap="Astronomie">80</key>
+<key parent="80" cap="Mond">80#8288</key>
+<key parent="80" cap="Planeten">80#138</key>
+<key parent="80" cap="Sonnensystem">80#139</key>
+<key cap="Berufliche Bildung">90</key>
+<key parent="90" cap="Allgemeinwissen">90#4156</key>
+<key parent="90" cap="Automobiltechnik">90#2989</key>
+<key parent="90" cap="Bau">90#2757</key>
+<key parent="90" cap="Bewerbung">90#8056</key>
+<key parent="90" cap="Bäcker-Konditoren">90#6022</key>
+<key parent="90" cap="Detaihandelskenntnisse">90#2044</key>
+<key parent="90" cap="Didaktik">90#2643</key>
+<key parent="90" cap="Elektrotechnik">90#4067</key>
+<key parent="90" cap="Erziehung">90#2365</key>
+<key parent="90" cap="Fachperson Betreuung">90#4477</key>
+<key parent="90" cap="Gartenbau">90#8552</key>
+<key parent="90" cap="Gebäudetechnik">90#2581</key>
+<key parent="90" cap="Gesundheit und Pflege">90#1986</key>
+<key parent="90" cap="Hauswirtschaft">90#2086</key>
+<key parent="90" cap="Holztechnik">90#3333</key>
+<key parent="90" cap="Hotelfachfrau/-mann">90#9696</key>
+<key parent="90" cap="Kaufmann">90#2492</key>
+<key parent="90" cap="Koch">90#3945</key>
+<key parent="90" cap="Landwirtschaft">90#3534</key>
+<key parent="90" cap="Lebensmittel">90#4845</key>
+<key parent="90" cap="Lehrer">90#1692</key>
+<key parent="90" cap="Logistik">90#7828</key>
+<key parent="90" cap="Lokomotivführer">90#4708</key>
+<key parent="90" cap="Medienbildung">90#11208</key>
+<key parent="90" cap="Metallberufe">90#3108</key>
+<key parent="90" cap="Pflege / Pflegewissenschaften">90#1521</key>
+<key parent="90" cap="Pharmazie">90#3016</key>
+<key parent="90" cap="Polygrafie">90#4431</key>
+<key parent="90" cap="Post">90#12112</key>
+<key parent="90" cap="Recht">90#2539</key>
+<key parent="90" cap="Verkauf">90#2759</key>
+<key parent="90" cap="Zahnarzt">90#6966</key>
+<key parent="90" cap="Zahnmedizin">90#11901</key>
+<key cap="Biologie">8</key>
+<key parent="8" cap="Amphibien">8#3003</key>
+<key parent="8" cap="Anatomie">8#814</key>
+<key parent="8" cap="Biochemie">8#701</key>
+<key parent="8" cap="Ernährung und Haushalt">8#581</key>
+<key parent="8" cap="Evolution">8#57</key>
+<key parent="8" cap="Fische">8#2282</key>
+<key parent="8" cap="Genetik">8#6</key>
+<key parent="8" cap="Humanbiologie">8#731</key>
+<key parent="8" cap="Immunbiologie">8#2571</key>
+<key parent="8" cap="Insekten">8#2418</key>
+<key parent="8" cap="Lebensräume">8#1376</key>
+<key parent="8" cap="Mensch">8#59</key>
+<key parent="8" cap="Neurologie">8#482</key>
+<key parent="8" cap="Pflanzen">8#58</key>
+<key parent="8" cap="Sexualerziehung">8#1070</key>
+<key parent="8" cap="Sinnesorgane">8#671</key>
+<key parent="8" cap="Stoffwechsel">8#9932</key>
+<key parent="8" cap="Tiere">8#687</key>
+<key parent="8" cap="Tiere und Lebensraum">8#56</key>
+<key parent="8" cap="Verdauung">8#5832</key>
+<key parent="8" cap="Vögel ">8#6111</key>
+<key parent="8" cap="Wasser">8#3454</key>
+<key parent="8" cap="Zellbiologie">8#26</key>
+<key parent="8" cap="Ökologie">8#53</key>
+<key cap="Chemie">12</key>
+<key parent="12" cap="Atommodelle">12#394</key>
+<key parent="12" cap="Basen">12#69</key>
+<key parent="12" cap="Elektrochemie">12#521</key>
+<key parent="12" cap="Grundbegriffe">12#982</key>
+<key parent="12" cap="Grundlagen">12#601</key>
+<key parent="12" cap="Metalle">12#62</key>
+<key parent="12" cap="Organische Chemie">12#1045</key>
+<key parent="12" cap="PSE">12#1274</key>
+<key parent="12" cap="Salze">12#7120</key>
+<key parent="12" cap="Stoffe">12#10091</key>
+<key parent="12" cap="Säuren">12#68</key>
+<key parent="12" cap="Säuren und Basen">12#13764</key>
+<key cap="Deutsch">11</key>
+<key parent="11" cap="Adjektive">11#938</key>
+<key parent="11" cap="Alphabet">11#10277</key>
+<key parent="11" cap="Argumentieren">11#5525</key>
+<key parent="11" cap="Artikel">11#52</key>
+<key parent="11" cap="Aufsatz">11#763</key>
+<key parent="11" cap="Bewerbungsschreiben">11#6526</key>
+<key parent="11" cap="Das/Dass">11#1072</key>
+<key parent="11" cap="Dehnungen und Kürzungen">11#387</key>
+<key parent="11" cap="Erstlesen / Erstschreiben">11#743</key>
+<key parent="11" cap="Fabel">11#1922</key>
+<key parent="11" cap="Fremdwörter">11#2663</key>
+<key parent="11" cap="Fälle">11#70</key>
+<key parent="11" cap="Gedichte und Balladen">11#459</key>
+<key parent="11" cap="Grammatik">11#76</key>
+<key parent="11" cap="Kinder und Jugendliteratur">11#7273</key>
+<key parent="11" cap="Kommunikation">11#6308</key>
+<key parent="11" cap="Konjugation">11#71</key>
+<key parent="11" cap="Kurzgeschichte">11#6270</key>
+<key parent="11" cap="Lektüre">11#686</key>
+<key parent="11" cap="Lesen">11#1077</key>
+<key parent="11" cap="Linguistik">11#9703</key>
+<key parent="11" cap="Literatur">11#410</key>
+<key parent="11" cap="Literaturgeschichte">11#3706</key>
+<key parent="11" cap="Lyrik">11#13868</key>
+<key parent="11" cap="Märchen und Sagen">11#345</key>
+<key parent="11" cap="Nomen">11#327</key>
+<key parent="11" cap="Passiv">11#74</key>
+<key parent="11" cap="Pronomen">11#4728</key>
+<key parent="11" cap="Präposition">11#3408</key>
+<key parent="11" cap="Rechtschreiben">11#551</key>
+<key parent="11" cap="Reimwörter">11#756</key>
+<key parent="11" cap="Satzbau">11#73</key>
+<key parent="11" cap="Satzglieder">11#3355</key>
+<key parent="11" cap="Silbentrennung">11#900</key>
+<key parent="11" cap="Textverständnis">11#3589</key>
+<key parent="11" cap="Verb">11#534</key>
+<key parent="11" cap="Wortarten">11#376</key>
+<key parent="11" cap="Wortbausteine">11#7334</key>
+<key parent="11" cap="Wortschatz">11#453</key>
+<key parent="11" cap="Zeichensetzung">11#874</key>
+<key parent="11" cap="Zeitformen">11#72</key>
+<key parent="11" cap="direkte Rede">11#6805</key>
+<key cap="Deutsch als Fremdsprache">89</key>
+<key parent="89" cap="Adjektivdeklination">89#2270</key>
+<key parent="89" cap="Adjektive">89#8098</key>
+<key parent="89" cap="Adjektive Antonyme">89#4496</key>
+<key parent="89" cap="Artikel">89#183</key>
+<key parent="89" cap="Dialoge">89#7148</key>
+<key parent="89" cap="Grammatik">89#180</key>
+<key parent="89" cap="Haupt- und Nebensatz">89#6389</key>
+<key parent="89" cap="Hoerverstehen">89#492</key>
+<key parent="89" cap="Landeskunde">89#375</key>
+<key parent="89" cap="Landeskunde Europa">89#1471</key>
+<key parent="89" cap="Leseverstehen">89#829</key>
+<key parent="89" cap="Literatur">89#1345</key>
+<key parent="89" cap="Medien">89#1431</key>
+<key parent="89" cap="Modalverben">89#7303</key>
+<key parent="89" cap="Phonetik">89#398</key>
+<key parent="89" cap="Pronomen">89#7302</key>
+<key parent="89" cap="Präpositionen">89#5572</key>
+<key parent="89" cap="Rechtschreibung">89#181</key>
+<key parent="89" cap="Redewendungen">89#2059</key>
+<key parent="89" cap="Schreiben">89#935</key>
+<key parent="89" cap="Substantiv">89#7146</key>
+<key parent="89" cap="Syntax">89#9919</key>
+<key parent="89" cap="Verben">89#8988</key>
+<key parent="89" cap="Verbkonjugation">89#4495</key>
+<key parent="89" cap="Vokabeln">89#141</key>
+<key parent="89" cap="Wortschatz">89#391</key>
+<key parent="89" cap="Zeitformen">89#182</key>
+<key cap="Englisch">3</key>
+<key parent="3" cap=" Verben">3#13063</key>
+<key parent="3" cap="America">3#2920</key>
+<key parent="3" cap="Animals">3#5716</key>
+<key parent="3" cap="Biology">3#2154</key>
+<key parent="3" cap="Business English">3#18</key>
+<key parent="3" cap="Clothes">3#2262</key>
+<key parent="3" cap="Comprehension Exercise">3#483</key>
+<key parent="3" cap="Culture and Films">3#1042</key>
+<key parent="3" cap="Environment">3#3748</key>
+<key parent="3" cap="Food">3#4260</key>
+<key parent="3" cap="Geography">3#926</key>
+<key parent="3" cap="Grammar">3#77</key>
+<key parent="3" cap="Holidays">3#5070</key>
+<key parent="3" cap="Irregular verbs">3#1984</key>
+<key parent="3" cap="Literature">3#2813</key>
+<key parent="3" cap="Songs">3#407</key>
+<key parent="3" cap="Sports">3#969</key>
+<key parent="3" cap="Vocabulary">3#1487</key>
+<key cap="Französisch">4</key>
+<key parent="4" cap="Aussprache">4#1048</key>
+<key parent="4" cap="Dialogue">4#2894</key>
+<key parent="4" cap="Grammatik">4#140</key>
+<key parent="4" cap="Hör-Seh-Verstehen">4#1453</key>
+<key parent="4" cap="Landeskunde ">4#922</key>
+<key parent="4" cap="Leseverstehen">4#4736</key>
+<key parent="4" cap="Satzbau">4#145</key>
+<key parent="4" cap="Spiele">4#2544</key>
+<key parent="4" cap="Verben">4#920</key>
+<key parent="4" cap="Vocabulaire">4#7562</key>
+<key parent="4" cap="Wortschatz">4#386</key>
+<key parent="4" cap="Zahlen">4#328</key>
+<key parent="4" cap="Zeitformen">4#143</key>
+<key cap="Geographie">6</key>
+<key parent="6" cap="Afrika">6#2772</key>
+<key parent="6" cap="Allgemeinwissen">6#1166</key>
+<key parent="6" cap="Amerika ">6#9274</key>
+<key parent="6" cap="Asien">6#1062</key>
+<key parent="6" cap="Australien">6#2246</key>
+<key parent="6" cap="Demographie">6#6714</key>
+<key parent="6" cap="Deutschland">6#2162</key>
+<key parent="6" cap="Europa">6#831</key>
+<key parent="6" cap="Europäische Union">6#1111</key>
+<key parent="6" cap="Flaggen">6#47</key>
+<key parent="6" cap="Flüsse">6#1511</key>
+<key parent="6" cap="Gebirge">6#1510</key>
+<key parent="6" cap="Geologie">6#653</key>
+<key parent="6" cap="Hauptstädte">6#679</key>
+<key parent="6" cap="Klima">6#1828</key>
+<key parent="6" cap="Klimadiagramm">6#81</key>
+<key parent="6" cap="Kontinente">6#1371</key>
+<key parent="6" cap="Landkarte">6#80</key>
+<key parent="6" cap="Landschaftselemente">6#663</key>
+<key parent="6" cap="Landwirtschaft">6#1903</key>
+<key parent="6" cap="Lebensräume">6#2222</key>
+<key parent="6" cap="Länderkunde">6#79</key>
+<key parent="6" cap="Nordamerika">6#1536</key>
+<key parent="6" cap="Planet Erde">6#657</key>
+<key parent="6" cap="Plattentektonik">6#1829</key>
+<key parent="6" cap="Schweiz">6#1690</key>
+<key parent="6" cap="Sehenswürdigkeiten">6#954</key>
+<key parent="6" cap="Städte">6#2333</key>
+<key parent="6" cap="Topografie">6#1852</key>
+<key parent="6" cap="Wirtschaftskunde">6#2523</key>
+<key parent="6" cap="Österreich">6#830</key>
+<key cap="Geschichte">9</key>
+<key parent="9" cap="19. Jahrhundert">9#5687</key>
+<key parent="9" cap="20. Jahrhundert">9#3342</key>
+<key parent="9" cap="Absolutismus">9#85</key>
+<key parent="9" cap="Antike">9#522</key>
+<key parent="9" cap="Aufklärung">9#86</key>
+<key parent="9" cap="Baustile">9#438</key>
+<key parent="9" cap="Deutsche Geschichte nach 1945">9#1702</key>
+<key parent="9" cap="Entdeckungen">9#82</key>
+<key parent="9" cap="Erster Weltkrieg">9#92</key>
+<key parent="9" cap="Französische Revolution">9#4984</key>
+<key parent="9" cap="Griechenland">9#8490</key>
+<key parent="9" cap="Imperialismus">9#89</key>
+<key parent="9" cap="Industrielle Revolution">9#90</key>
+<key parent="9" cap="Kalter Krieg">9#95</key>
+<key parent="9" cap="Methoden">9#10175</key>
+<key parent="9" cap="Mittelalter">9#41</key>
+<key parent="9" cap="Napoleon Bonaparte">9#2349</key>
+<key parent="9" cap="Nationalsozialismus">9#91</key>
+<key parent="9" cap="Neuzeit">9#1859</key>
+<key parent="9" cap="Reformation">9#83</key>
+<key parent="9" cap="Revolutionen">9#692</key>
+<key parent="9" cap="Römisches Reich">9#953</key>
+<key parent="9" cap="Staatskunde">9#96</key>
+<key parent="9" cap="Steinzeit">9#2765</key>
+<key parent="9" cap="USA">9#1165</key>
+<key parent="9" cap="Urzeit">9#1168</key>
+<key parent="9" cap="Weimarer Republik">9#93</key>
+<key parent="9" cap="Wien">9#440</key>
+<key parent="9" cap="Zweiter Weltkrieg">9#94</key>
+<key parent="9" cap="Ägypten">9#1249</key>
+<key parent="9" cap="Österreich">9#893</key>
+<key cap="Informatik">10</key>
+<key parent="10" cap="Algorithmen">10#101</key>
+<key parent="10" cap="Apple">10#1350</key>
+<key parent="10" cap="Betriebssysteme">10#103</key>
+<key parent="10" cap="Bildbearbeitung">10#494</key>
+<key parent="10" cap="Computerspiele">10#843</key>
+<key parent="10" cap="DIN-Regeln">10#697</key>
+<key parent="10" cap="Datenbanken">10#99</key>
+<key parent="10" cap="Datenschutz und Sicherheit">10#9811</key>
+<key parent="10" cap="Datensicherheit">10#100</key>
+<key parent="10" cap="Datenstrukturen">10#102</key>
+<key parent="10" cap="E-Learning">10#1001</key>
+<key parent="10" cap="ECDL">10#7643</key>
+<key parent="10" cap="Excel">10#4240</key>
+<key parent="10" cap="Fachbegriffe">10#2955</key>
+<key parent="10" cap="Geschichte der Informatik">10#5822</key>
+<key parent="10" cap="Grafik und Design">10#1039</key>
+<key parent="10" cap="HTML">10#5698</key>
+<key parent="10" cap="Hardware">10#869</key>
+<key parent="10" cap="Internet allgemein">10#370</key>
+<key parent="10" cap="Kommunikation">10#4177</key>
+<key parent="10" cap="Medien">10#2298</key>
+<key parent="10" cap="Netzwerke">10#7648</key>
+<key parent="10" cap="Onlinespiele">10#564</key>
+<key parent="10" cap="PC-Komponenten">10#374</key>
+<key parent="10" cap="Programmieren">10#98</key>
+<key parent="10" cap="Präsentation">10#2006</key>
+<key parent="10" cap="Rechnernetze">10#1330</key>
+<key parent="10" cap="Sicherheit">10#1556</key>
+<key parent="10" cap="Social Media">10#332</key>
+<key parent="10" cap="Spiele">10#1141</key>
+<key parent="10" cap="Suchmaschine">10#7652</key>
+<key parent="10" cap="Tabellenkalkulation">10#2299</key>
+<key parent="10" cap="Textverarbeitung">10#798</key>
+<key parent="10" cap="Urheberrecht">10#7727</key>
+<key parent="10" cap="Webdesign">10#681</key>
+<key parent="10" cap="Word">10#8294</key>
+<key parent="10" cap="Ö-Norm">10#442</key>
+<key cap="Ingenieurwesen">92</key>
+<key parent="92" cap="Automobil">92#4196</key>
+<key parent="92" cap="Messtechnik">92#6411</key>
+<key cap="Italienisch">86</key>
+<key parent="86" cap="Cultura">86#1401</key>
+<key parent="86" cap="Grammatik">86#146</key>
+<key parent="86" cap="Vocabolario">86#1399</key>
+<key parent="86" cap="Zahlen">86#384</key>
+<key cap="Kunst">77</key>
+<key parent="77" cap="Bild">77#9656</key>
+<key parent="77" cap="Farblehre">77#104</key>
+<key parent="77" cap="Film">77#1065</key>
+<key parent="77" cap="Kunstgeschichte">77#40</key>
+<key parent="77" cap="Künstler">77#1615</key>
+<key parent="77" cap="Theater">77#10162</key>
+<key cap="Latein">5</key>
+<key parent="5" cap="Formenlehre">5#9659</key>
+<key parent="5" cap="Grammatik">5#151</key>
+<key parent="5" cap="Grundwissen">5#418</key>
+<key parent="5" cap="Kasus">5#2327</key>
+<key parent="5" cap="Kulturgeschichte">5#5311</key>
+<key parent="5" cap="Mythologie">5#1953</key>
+<key parent="5" cap="Prima nova - Vokabeln">5#11308</key>
+<key parent="5" cap="Textverständnis">5#13992</key>
+<key parent="5" cap="Verbformen">5#2260</key>
+<key parent="5" cap="Vokabeln">5#3812</key>
+<key parent="5" cap="Wortschatz">5#727</key>
+<key parent="5" cap="Zeitformen">5#152</key>
+<key cap="Mathematik">2</key>
+<key parent="2" cap="Abbildungen">2#2660</key>
+<key parent="2" cap="Algebra">2#2</key>
+<key parent="2" cap="Analysis">2#964</key>
+<key parent="2" cap="Arithmetik">2#4377</key>
+<key parent="2" cap="Bruchrechnung">2#3</key>
+<key parent="2" cap="Brüche">2#10558</key>
+<key parent="2" cap="Dezimalbrüche">2#2245</key>
+<key parent="2" cap="Dezimalzahlen">2#7965</key>
+<key parent="2" cap="Differentialrechnung">2#10593</key>
+<key parent="2" cap="Flächenmasse">2#1689</key>
+<key parent="2" cap="Formeln">2#1437</key>
+<key parent="2" cap="Funktionen">2#3037</key>
+<key parent="2" cap="Ganze Zahlen">2#1344</key>
+<key parent="2" cap="Geld">2#1680</key>
+<key parent="2" cap="Geometrie">2#1</key>
+<key parent="2" cap="Gewichtsmasse">2#2108</key>
+<key parent="2" cap="Gleichungen">2#773</key>
+<key parent="2" cap="Gleichungssysteme">2#5327</key>
+<key parent="2" cap="Grundrechnungsarten">2#810</key>
+<key parent="2" cap="Größen">2#2573</key>
+<key parent="2" cap="Koordinaten">2#3302</key>
+<key parent="2" cap="Kopfrechnen">2#5</key>
+<key parent="2" cap="Körper">2#2717</key>
+<key parent="2" cap="Lineare Funktion">2#868</key>
+<key parent="2" cap="Längenmaße">2#51</key>
+<key parent="2" cap="Maßumwandlungen">2#655</key>
+<key parent="2" cap="Mengen">2#5056</key>
+<key parent="2" cap="Multiplikation">2#11049</key>
+<key parent="2" cap="Parabeln">2#4088</key>
+<key parent="2" cap="Potenzen">2#1927</key>
+<key parent="2" cap="Proportionalität">2#1558</key>
+<key parent="2" cap="Prozentrechnen">2#1253</key>
+<key parent="2" cap="Rationale Zahlen">2#28</key>
+<key parent="2" cap="Reelle Zahlen">2#1366</key>
+<key parent="2" cap="Runden">2#3402</key>
+<key parent="2" cap="Römische Zahlen">2#4344</key>
+<key parent="2" cap="Sachaufgaben">2#360</key>
+<key parent="2" cap="Schätzen">2#2374</key>
+<key parent="2" cap="Spiegeln">2#5159</key>
+<key parent="2" cap="Statistik">2#1475</key>
+<key parent="2" cap="Stochastik">2#4519</key>
+<key parent="2" cap="Termumformungen">2#1157</key>
+<key parent="2" cap="Textaufgaben">2#1473</key>
+<key parent="2" cap="Trigonometrie">2#2318</key>
+<key parent="2" cap="Vektorrechnung">2#9596</key>
+<key parent="2" cap="Wahrscheinlichkeitsrechnung">2#2139</key>
+<key parent="2" cap="Winkel">2#4601</key>
+<key parent="2" cap="Zahlen">2#2223</key>
+<key parent="2" cap="Zahlenraum">2#1676</key>
+<key parent="2" cap="Zahlenstrahl">2#526</key>
+<key parent="2" cap="Zahlensysteme">2#4</key>
+<key parent="2" cap="Zahlentheorie">2#1020</key>
+<key parent="2" cap="Zeit">2#2003</key>
+<key parent="2" cap="Zinsrechnung">2#8086</key>
+<key parent="2" cap="Zuordnung">2#9888</key>
+<key cap="Mensch / Umwelt">82</key>
+<key parent="82" cap="Allgemein">82#1071</key>
+<key parent="82" cap="Anatomie">82#654</key>
+<key parent="82" cap="Bauen">82#112</key>
+<key parent="82" cap="Ernährung">82#113</key>
+<key parent="82" cap="Erste Hilfe">82#2728</key>
+<key parent="82" cap="Film">82#719</key>
+<key parent="82" cap="Freizeit">82#114</key>
+<key parent="82" cap="Gesundheit">82#415</key>
+<key parent="82" cap="Konsum">82#2742</key>
+<key parent="82" cap="Medien">82#116</key>
+<key parent="82" cap="Medizin">82#1457</key>
+<key parent="82" cap="Naturlehre">82#2453</key>
+<key parent="82" cap="Pflanzen">82#119</key>
+<key parent="82" cap="Schule">82#1183</key>
+<key parent="82" cap="Technik">82#805</key>
+<key parent="82" cap="Tiere">82#120</key>
+<key parent="82" cap="Verkehr">82#117</key>
+<key cap="Musik">13</key>
+<key parent="13" cap="Biographie">13#1854</key>
+<key parent="13" cap="Elementare Musiklehre">13#828</key>
+<key parent="13" cap="Gehörbildung">13#4033</key>
+<key parent="13" cap="Harmonielehre">13#835</key>
+<key parent="13" cap="Instrumente">13#123</key>
+<key parent="13" cap="Interpreten">13#3338</key>
+<key parent="13" cap="Komponisten">13#8184</key>
+<key parent="13" cap="Musik der Länder">13#475</key>
+<key parent="13" cap="Musikgeschichte">13#121</key>
+<key parent="13" cap="Notenlehre">13#4026</key>
+<key parent="13" cap="Oper">13#2863</key>
+<key parent="13" cap="Popmusik">13#6987</key>
+<key parent="13" cap="Rap">13#2965</key>
+<key parent="13" cap="Star">13#512</key>
+<key parent="13" cap="Titelmusik">13#1046</key>
+<key parent="13" cap="Tonleiter">13#122</key>
+<key cap="Philosophie">79</key>
+<key parent="79" cap="Anthropologie">79#2138</key>
+<key parent="79" cap="Erkenntnistheorie">79#2137</key>
+<key parent="79" cap="Ethik / Moral">79#6225</key>
+<key parent="79" cap="Weisheit">79#127</key>
+<key cap="Physik">7</key>
+<key parent="7" cap="Atomphysik">7#24</key>
+<key parent="7" cap="Bewegung">7#1280</key>
+<key parent="7" cap="Elektrizitätslehre">7#22</key>
+<key parent="7" cap="Energie">7#485</key>
+<key parent="7" cap="Kernphysik">7#23</key>
+<key parent="7" cap="Kräfte">7#2369</key>
+<key parent="7" cap="Magnetismus">7#4458</key>
+<key parent="7" cap="Mechanik">7#21</key>
+<key parent="7" cap="Naturphänomene">7#1679</key>
+<key parent="7" cap="Optik">7#20</key>
+<key parent="7" cap="Wärmelehre">7#19</key>
+<key cap="Politik">15</key>
+<key parent="15" cap="Berufsbildung">15#1084</key>
+<key parent="15" cap="Bildung">15#10421</key>
+<key parent="15" cap="Bundesräte">15#3353</key>
+<key parent="15" cap="Europäische Union">15#129</key>
+<key parent="15" cap="Internationale Politik">15#130</key>
+<key parent="15" cap="Politische Organe">15#131</key>
+<key parent="15" cap="Recht">15#472</key>
+<key parent="15" cap="Staatsformen">15#128</key>
+<key parent="15" cap="Verwaltungswissenschaften">15#8369</key>
+<key parent="15" cap="Wahlen und Abstimmungen">15#1158</key>
+<key cap="Psychologie">91</key>
+<key parent="91" cap="Entwicklungspsychologie">91#4365</key>
+<key parent="91" cap="Lernen">91#4271</key>
+<key parent="91" cap="Methoden der Psychologie">91#3936</key>
+<key parent="91" cap="Psychologische Theorien">91#4302</key>
+<key parent="91" cap="Pädagogik">91#3122</key>
+<key parent="91" cap="Sozialpsychologie">91#4348</key>
+<key parent="91" cap="Wahrnehmung">91#3962</key>
+<key cap="Religion">87</key>
+<key parent="87" cap="Advent und Weihnachten">87#1730</key>
+<key parent="87" cap="Bibel">87#553</key>
+<key parent="87" cap="Christentum">87#48</key>
+<key parent="87" cap="Ethik">87#1738</key>
+<key parent="87" cap="Evangelische Kirche">87#49</key>
+<key parent="87" cap="Feste">87#1507</key>
+<key parent="87" cap="Islam">87#135</key>
+<key parent="87" cap="Jesus">87#3696</key>
+<key parent="87" cap="Judentum">87#134</key>
+<key parent="87" cap="Katholische Kirche">87#133</key>
+<key parent="87" cap="Kirche">87#786</key>
+<key parent="87" cap="Kirchenjahr">87#2278</key>
+<key parent="87" cap="Sakramente">87#4252</key>
+<key parent="87" cap="Weltreligionen">87#554</key>
+<key cap="Russisch">84</key>
+<key parent="84" cap="Grammatik">84#196</key>
+<key parent="84" cap="Landeskunde">84#918</key>
+<key parent="84" cap="Lexik">84#665</key>
+<key cap="Sachunterricht">76</key>
+<key parent="76" cap="Allgemeinwissen">76#1133</key>
+<key parent="76" cap="Elektrizität">76#32</key>
+<key parent="76" cap="Gesundheit">76#1360</key>
+<key parent="76" cap="Heimatgemeinde">76#976</key>
+<key parent="76" cap="Kalender">76#447</key>
+<key parent="76" cap="Kartenkunde">76#1552</key>
+<key parent="76" cap="Kommunikation">76#1246</key>
+<key parent="76" cap="Lebensmittel">76#202</key>
+<key parent="76" cap="Länder">76#5521</key>
+<key parent="76" cap="Medienerziehung">76#948</key>
+<key parent="76" cap="Menschen">76#2005</key>
+<key parent="76" cap="Natur">76#201</key>
+<key parent="76" cap="Pflanzen">76#12520</key>
+<key parent="76" cap="Pflanzenbau">76#2533</key>
+<key parent="76" cap="Raum">76#460</key>
+<key parent="76" cap="Sinnesorgane">76#827</key>
+<key parent="76" cap="Technik">76#203</key>
+<key parent="76" cap="Tiere">76#200</key>
+<key parent="76" cap="Verkehrserziehung">76#879</key>
+<key parent="76" cap="Wetter">76#1769</key>
+<key parent="76" cap="Zeit">76#557</key>
+<key cap="Spanisch">83</key>
+<key parent="83" cap="Grammatik">83#204</key>
+<key parent="83" cap="Landeskunde">83#348</key>
+<key parent="83" cap="Leseverstehen">83#5480</key>
+<key parent="83" cap="Wortschatz">83#329</key>
+<key parent="83" cap="Zahlen">83#5301</key>
+<key parent="83" cap="Zeitformen">83#206</key>
+<key cap="Sport">78</key>
+<key parent="78" cap="Fussball">78#208</key>
+<key parent="78" cap="Geräteturnen">78#1630</key>
+<key parent="78" cap="Motorsport">78#1033</key>
+<key parent="78" cap="Schach">78#9699</key>
+<key parent="78" cap="Schwimmen">78#2733</key>
+<key parent="78" cap="Sportarten">78#1492</key>
+<key parent="78" cap="Wintersport">78#2577</key>
+<key cap="Unterrichtswerkzeuge">1</key>
+<key cap="Weitere Sprachen">88</key>
+<key parent="88" cap="Altgriechisch">88#5238</key>
+<key parent="88" cap="Arabisch">88#5501</key>
+<key parent="88" cap="Dänisch">88#5114</key>
+<key parent="88" cap="Kroatisch">88#1906</key>
+<key parent="88" cap="Kurdisch">88#9010</key>
+<key parent="88" cap="Niederländisch">88#3309</key>
+<key parent="88" cap="Português">88#10363</key>
+<key parent="88" cap="Rätoromanisch">88#1652</key>
+<key parent="88" cap="Schwedisch">88#5129</key>
+<key parent="88" cap="Slowakisch">88#8661</key>
+<key parent="88" cap="Tschechisch">88#4582</key>
+<key parent="88" cap="Türkisch">88#7218</key>
+<key cap="Werken">85</key>
+<key parent="85" cap="Bau">85#1201</key>
+<key parent="85" cap="Maschinen">85#1456</key>
+<key parent="85" cap="Textil">85#4500</key>
+<key parent="85" cap="Werkzeuge">85#422</key>
+<key cap="Wirtschaft">14</key>
+<key parent="14" cap="Allgemein">14#4173</key>
+<key parent="14" cap="Arbeitsrecht">14#7819</key>
+<key parent="14" cap="Berufsbildung">14#1083</key>
+<key parent="14" cap="Detailhandel">14#7555</key>
+<key parent="14" cap="Finanzierung">14#1384</key>
+<key parent="14" cap="Geld">14#217</key>
+<key parent="14" cap="Geschäftsprozessmanagement">14#593</key>
+<key parent="14" cap="Grundlagen BWL">14#1338</key>
+<key parent="14" cap="Handel">14#995</key>
+<key parent="14" cap="Korrespondenz">14#3689</key>
+<key parent="14" cap="Landwirtschaft">14#746</key>
+<key parent="14" cap="Marketing">14#683</key>
+<key parent="14" cap="Personal">14#1178</key>
+<key parent="14" cap="Rechnungswesen">14#639</key>
+<key parent="14" cap="Recht">14#958</key>
+<key parent="14" cap="Unternehmensformen">14#219</key>
+<key parent="14" cap="Unternehmensführung">14#1169</key>
+<key parent="14" cap="VWL">14#1572</key>
+<key parent="14" cap="Versicherungen">14#1450</key>
+<key parent="14" cap="logistik">14#7829</key>
+</valuespace>
+</valuespaces>

@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE properties SYSTEM "http://java.sun.com/dtd/properties.dtd">
+<properties>
+	<comment>guest properties</comment>
+	<entry key="guestusername">guest@edu-sharing.net</entry>
+</properties>

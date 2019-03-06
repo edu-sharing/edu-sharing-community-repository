@@ -1,0 +1,1 @@
+wird benutzt in MCAlfrescoWSClient.getPermissions

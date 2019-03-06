@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<valuespaces>
+	<valuespace property="{http://www.campuscontent.de/model/1.0}educationalcontext">
+		<key></key>
+		<key cap="pre-school">pre-school</key>
+		<key cap="compulsory education">compulsory education</key>
+		<!-- key cap="special education">special education</key-->
+		<key cap="vocational education">vocational education</key>
+		<!--
+		<key cap="higher education">higher education</key>
+		<key cap="distance education">distance education</key>
+		<key cap="continuing education">continuing education</key>
+		<key cap="professional development">professional development</key>
+		<key cap="library">library</key> 
+		<key cap="educational administration">educational administration</key>
+		<key cap="policy making">policy making</key>
+		<key cap="other">other</key>
+		-->
+		<key cap="primary school">primary school</key>
+		<key cap="lower secondary school">lower secondary school</key>
+		<key cap="upper secondary school">upper secondary school</key>
+	</valuespace>
+</valuespaces>

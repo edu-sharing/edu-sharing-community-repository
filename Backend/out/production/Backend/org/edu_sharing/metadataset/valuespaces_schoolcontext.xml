@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<valuespaces>
+	<valuespace property="{virtualproperty}federal_state">
+		<key>Bayern</key>
+	</valuespace>
+	<valuespace property="{virtualproperty}type_of_school">
+		<key>Gymnasium</key>
+		<key>Realschule</key>
+	</valuespace>
+	<valuespace property="{virtualproperty}school_subject">
+		<key>Deutsch</key>
+		<key>Mathe</key>
+	</valuespace>
+	<valuespace property="{virtualproperty}age_group">
+		<key>1</key>
+		<key>2</key>
+		<key>3</key>
+	</valuespace>
+	<valuespace property="{virtualproperty}topic">
+		<key>Biertrinken ohne Kopfschmerz</key>
+	</valuespace>
+</valuespaces>

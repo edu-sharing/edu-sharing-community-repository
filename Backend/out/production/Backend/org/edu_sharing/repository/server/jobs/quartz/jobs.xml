@@ -1,0 +1,290 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- 
+#
+# Allowed Trigger Types:
+# Cron[cronexpression] i.e.: Cron[0 0/5 * * * ?]
+# Daily[hour,minute] i.e.: Daily[1,0]
+# Immediate   
+#
+#
+ -->
+ 
+<jobs>
+
+<!-- 
+	<job>
+		<class>org.edu_sharing.repository.server.jobs.quartz.ValuespaceImporterJob</class>
+		<trigger>Cron[0 0/2 * * * ?]</trigger>
+		<params>
+			<param>
+				<key>locale</key>
+				<value>de_DE</value>
+			</param>
+		</params>
+	</job>
+-->
+
+
+<!-- <job>
+		<class>org.edu_sharing.repository.server.jobs.quartz.AssignedLicenseManagerJob</class>
+		<trigger>Cron[0 0/2 * * * ?]</trigger>
+		<params>
+			
+		</params>
+	</job>	
+ -->
+<!-- 
+
+<job>
+		<class>org.edu_sharing.repository.server.jobs.quartz.ImporterJob</class>
+		<trigger>Cron[0 0/5 * * * ?]</trigger>
+		<params>
+			<param>
+				<key>sets</key>
+				<value>posts</value>
+			</param>
+			<param>
+				<key>oai_base_url</key>
+				<value>http://stable.demo.edu-sharing.net/wordpress/wp-json/wp/v2/</value>
+			</param>
+		</params>
+	</job>-->
+	
+<!-- 
+	<job>
+		<class>org.edu_sharing.repository.server.jobs.quartz.NodeDistributionJob</class>
+		<trigger>Cron[0 0/2 * * * ?]</trigger>
+		<params>
+			<param>
+				<key>path</key>
+				<value>/app:company_home/documents</value>
+			</param>
+			<param>
+				<key>pattern</key>
+				<value>yyyy/MM/dd/HH</value>
+			</param>
+		</params>
+	</job>	
+ -->	
+ 
+<!--  
+ 	<job>
+		<class>org.edu_sharing.repository.server.jobs.quartz.TrashcanCleanerJob</class>
+		<trigger>Cron[0 0 1 * * ?]</trigger>
+		<params>
+			<param>
+				<key>timeToKeep</key>
+				<value>-1</value>
+			</param>
+			<param>
+				<key>batchSize</key>
+				<value>1000</value>
+			</param>
+		</params>
+	</job>
+ -->
+ 
+	<job>
+		<class>org.edu_sharing.repository.server.jobs.quartz.RefreshCacheJob</class>
+		<!-- Immediate-->
+		<trigger>Immediate</trigger>
+		<params>
+			<param>
+				<key>rootFolderId</key>
+				<value>2becc3a6-001b-4428-938b-0c369e7ee09eTESTST</value>
+			</param>
+			<param>
+				<key>sticky</key>
+				<value>true</value>
+			</param>
+		</params>
+	</job>
+	<job>
+		<class>org.edu_sharing.repository.server.jobs.quartz.RefreshCacheJob</class>
+		<!-- Immediate
+		<trigger>Cron[0 0/5 * * * ?]</trigger>
+		-->
+		<trigger>Immediate</trigger>
+		<params>
+			<param>
+				<key>rootFolderId</key>
+				<value>2becc3a6-001b-4428-938b-0c369e7ee09e</value>
+			</param>
+			<param>
+				<key>sticky</key>
+				<value>true</value>
+			</param>
+		</params>
+	</job>
+<!--	
+	<job>
+		<class>org.edu_sharing.repository.server.jobs.quartz.CourseImporterJob</class>
+		<trigger>Cron[0 0/5 * * * ?]</trigger>
+		<params>
+			<param>
+				<key>type</key>
+				<value>moodle</value>
+			</param>
+			<param>
+				<key>scheme</key>
+				<value>http</value>
+			</param>
+			<param>
+				<key>host</key>
+				<value>stable.demo.edu-sharing.net</value>
+			</param>
+			<param>
+				<key>port</key>
+				<value>80</value>
+			</param>
+			<param>
+				<key>context</key>
+				<value>/moodle</value>
+			</param>
+			<param>
+				<key>wstoken</key>
+				<value>secret</value>
+			</param>
+		</params>
+	</job>
+-->
+<!--  
+	<job>
+		<class>org.edu_sharing.repository.server.jobs.quartz.CourseImporterJob</class>
+		<trigger>Cron[0 0/5 * * * ?]</trigger>
+		<params>
+			<param>
+				<key>type</key>
+				<value>opal</value>
+			</param>
+			<param>
+				<key>scheme</key>
+				<value>http</value>
+			</param>
+			<param>
+				<key>host</key>
+				<value>demo.bps-system.de</value>
+			</param>
+			<param>
+				<key>port</key>
+				<value>80</value>
+			</param>
+			<param>
+				<key>context</key>
+				<value>/opal</value>
+			</param>
+			<param>
+				<key>user</key>
+				<value>demo</value>
+			</param>
+			<param>
+				<key>password</key>
+				<value>secret</value>
+			</param>
+		</params>
+	</job>
+-->
+	<job>
+		<class>org.edu_sharing.repository.server.jobs.quartz.ImporterJob</class>
+		<!-- Fire every 5 minutes
+		<trigger>Cron[0 0/5 * * * ?]</trigger>
+		 -->
+		<trigger>Immediate</trigger>
+		<params>
+			<param>
+				<key>sets</key>
+				<value>lehreronline</value>
+			</param>
+		</params>
+	</job>
+	<job>
+		<class>org.edu_sharing.repository.server.jobs.quartz.OAIXMLValidatorJob</class>
+		<!-- Fire every 5 minutes
+		<trigger>Cron[0 0/5 * * * ?]</trigger>
+		 -->
+		<trigger>Immediate</trigger>
+		<params>
+			<param>
+				<key>sets</key>
+				<value>lehreronline</value>
+			</param>
+		</params>
+	</job>
+	<job>
+		<class>org.edu_sharing.repository.server.jobs.quartz.ImporterJobSAX</class>
+		
+		<trigger>Immediate</trigger>
+		<params>
+			<param>
+				<key>sets</key>
+				<value>lehreronline</value>
+			</param>
+		</params>
+	</job>	
+	
+	
+	<job>
+		<class>org.edu_sharing.repository.server.jobs.quartz.SystemStatisticJob</class>
+		<trigger>Cron[0 0/2 * * * ?]</trigger>
+		<params>
+		</params>
+	</job>
+	
+	
+	<!-- <job>
+		<class>org.edu_sharing.repository.server.importer.ImporterJobDDB</class>
+		
+		<trigger>Cron[0 0/1 * * * ?]</trigger>
+		<params>
+			<param>
+				<key>applicationfile</key>
+				<value>ddb.properties.xml</value>
+			</param>
+			<param>
+				<key>query</key>
+				<value>goethe</value>
+			</param>
+			<param>
+				<key>nrOfResults</key>
+				<value>20</value>
+			</param>
+			
+		</params>
+	</job>	
+	 -->
+
+	<!-- 
+	<job>
+		<class>org.edu_sharing.repository.server.jobs.quartz.TrackingJob</class>
+		<trigger>Cron[0/20 * * * * ?]</trigger>
+		<params>
+			<param>
+				<key>TrackingEventHandler</key>
+				<value>org.edu_sharing.repository.server.tracking.collector.LoggingHandler</value>
+			</param>			
+		</params>
+	</job>
+	 -->
+	<!-- 
+	<job>
+		<class>org.edu_sharing.repository.server.jobs.quartz.TrackingJob</class>
+		<trigger>Cron[0/20 * * * * ?]</trigger>
+		<params>
+			<param>
+				<key>TrackingEventHandler</key>
+				<value>org.edu_sharing.repository.server.tracking.collector.WebServiceTrackingEventHandler</value>
+			</param>			
+			<param>
+				<key>endpoint</key>
+				<value>http://localhost:8081/edu-sharing-analytics/services/tracking</value>
+			</param>			
+		</params>
+	</job>
+	 -->
+	 
+	 <!-- job>
+		<class>org.edu_sharing.repository.server.monitoring.MonitoringJob</class>
+		<trigger>Cron[0/50 * * * * ?]</trigger>
+	</job -->
+	
+</jobs>

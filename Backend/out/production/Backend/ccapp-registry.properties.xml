@@ -1,0 +1,7 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE properties SYSTEM "http://java.sun.com/dtd/properties.dtd">
+<properties>
+	<comment>campuscontent application registry</comment>
+	<entry key="applicationfiles">homeApplication.properties.xml</entry>
+	<!-- <entry key="applicationfiles">homeApplication.properties.xml</entry>-->
+</properties>

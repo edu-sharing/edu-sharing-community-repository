@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<valuespaces>
+	<valuespace property="mimetypes">
+		<key cap="Audio" statement="@cm\:content.mimetype:audio*">filetypes_audio</key>
+		<key cap="Images" statement="@cm\:content.mimetype:image*">filetypes_pics</key>
+		<key cap="Video" statement="@cm\:content.mimetype:video*">filetypes_video</key>
+		<key cap="Doc" statement="(@cm\:content.mimetype:application/pdf OR @cm\:content.mimetype:application/msword OR @cm\:content.mimetype:application/mspowerpoint OR @cm\:content.mimetype:text* OR @cm\:content.mimetype:application/vnd.oasis.opendocument* OR @cm\:content.mimetype:application/vnd.ms-powerpoint OR @cm\:content.mimetype:application/vnd.ms-excel)">filetypes_docs</key>
+		<key cap="moodle" statement="@ccm\:ccressourcetype:moodle">filetype_moodle</key>
+		<key cap="qti" statement="@ccm\:ccressourcetype:imsqti*">filetype_qti</key>
+		<key cap="scorm" statement="@ccm\:ccressourcetype:*scorm*">filetype_scorm</key>
+		<key cap="Edu-Sharing Scenario" statement="@ccm\:ccressourcetype:Edu-Sharing Scenario">filetype_edu_sharing_scenario</key>
+	</valuespace>
+</valuespaces>

@@ -1,0 +1,603 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<valuespaces>
+<valuespace property="ccm:curriculum">
+<key parent="" cap="Erdkunde (DE)">131100</key>
+<key parent="131100" cap="Erdkunde (DE) &gt; EK bis Klasse 6">13110006</key>
+<key parent="13110006" cap="Erdkunde (DE) &gt;  EK bis Klasse 6 &gt; Orientierung in Rheinland-Pfalz &amp; Deutschland">1311000601</key>
+<key parent="1311000601" cap="Erdkunde (DE) &gt; EK bis Klasse 6 &gt; Orientierung in Rheinland-Pfalz &amp; Deutschland &gt; Basis - Inhalte">131100060101</key>
+<key parent="131100060101" cap="Erdkunde (DE) &gt; EK bis Klasse 6 &gt; Orientierung in Rheinland-Pfalz &amp; Deutschland &gt; Basis - Inhalte &gt; Lebensräume und -wege">13110006010101</key>
+<key parent="131100060101" cap="Erdkunde (DE) &gt; EK bis Klasse 6 &gt; Orientierung in Rheinland-Pfalz &amp; Deutschland &gt; Basis - Inhalte &gt; Natur- und Kulturräume">13110006010102</key>
+<key parent="131100060101" cap="Erdkunde (DE) &gt; EK bis Klasse 6 &gt; Orientierung in Rheinland-Pfalz &amp; Deutschland &gt; Basis - Inhalte &gt; Lebenswelten">13110006010103</key>
+<key parent="131100060101" cap="Erdkunde (DE) &gt; EK bis Klasse 6 &gt; Orientierung in Rheinland-Pfalz &amp; Deutschland &gt; Basis - Inhalte &gt; Bundesländer">13110006010104</key>
+<key parent="1311000601" cap="Erdkunde (DE) &gt; EK bis Klasse 6 &gt; Orientierung in Rheinland-Pfalz &amp; Deutschland &gt; Erweiterungs - Inhalte">131100060102</key>
+<key parent="131100060102" cap="Erdkunde (DE) &gt; EK bis Klasse 6 &gt; Orientierung in Rheinland-Pfalz &amp; Deutschland &gt; Erweiterungs - Inhalte &gt; Rheinland - Pfalz &amp; seine Nachbarn">13110006010201</key>
+<key parent="1311000601" cap="Erdkunde (DE) &gt; EK bis Klasse 6 &gt; Orientierung in Rheinland-Pfalz &amp; Deutschland &gt; Vertiefungs - Inhalte">131100060103</key>
+<key parent="131100060103" cap="Erdkunde (DE) &gt; EK bis Klasse 6 &gt; Orientierung in Rheinland-Pfalz &amp; Deutschland &gt; Vertiefungs - Inhalte &gt; Rheinland - Pfalz">13110006010301</key>
+<key parent="13110006" cap="Erdkunde (DE) &gt; EK bis Klasse 6 &gt; Landwirtschaft">1311000602</key>
+<key parent="1311000602" cap="Erdkunde (DE) &gt; EK bis Klasse 6 &gt; Landwirtschaft &gt; Basis - Inhalte">131100060201</key>
+<key parent="131100060201" cap="Erdkunde (DE) &gt; EK bis Klasse 6 &gt; Landwirtschaft &gt; Basis - Inhalte &gt; Ernährungsgewohnheiten">13110006020101</key>
+<key parent="131100060201" cap="Erdkunde (DE) &gt; EK bis Klasse 6 &gt; Landwirtschaft &gt; Basis - Inhalte &gt; Herkunft, Transportrouten der Nahrungsmittel">13110006020102</key>
+<key parent="131100060201" cap="Erdkunde (DE) &gt; EK bis Klasse 6 &gt; Landwirtschaft &gt; Basis - Inhalte &gt; Landwirtschaftlich strukturierte Räume">13110006020103</key>
+<key parent="131100060201" cap="Erdkunde (DE) &gt; EK bis Klasse 6 &gt; Landwirtschaft &gt; Basis - Inhalte &gt; Produktion">13110006020104</key>
+<key parent="1311000602" cap="Erdkunde (DE) &gt; EK bis Klasse 6 &gt; Landwirtschaft &gt; Erweiterungs - Inhalte">131100060202</key>
+<key parent="131100060202" cap="Erdkunde (DE) &gt; EK bis Klasse 6 &gt; Landwirtschaft &gt; Erweiterungs - Inhalte &gt; Großlandschaften">13110006020201</key>
+<key parent="1311000602" cap="Erdkunde (DE) &gt; EK bis Klasse 6 &gt; Landwirtschaft &gt; Vertiefungs - Inhalte">131100060203</key>
+<key parent="131100060203" cap="Erdkunde (DE) &gt; EK bis Klasse 6 &gt; Landwirtschaft &gt; Vertiefungs - Inhalte &gt; Nahrungsmittel">13110006020301</key>
+<key parent="13110006" cap="Erdkunde (DE) &gt; EK bis Klasse 6 &gt; Leben in Extremräumen">1311000603</key>
+<key parent="1311000603" cap="Erdkunde (DE) &gt; EK bis Klasse 6 &gt; Leben in Extremräumen &gt; Basis - Inhalte">131100060301</key>
+<key parent="131100060301" cap="Erdkunde (DE) &gt; EK bis Klasse 6 &gt; Leben in Extremräumen &gt; Basis - Inhalte &gt; Entdecker, Expeditionen">13110006030101</key>
+<key parent="131100060301" cap="Erdkunde (DE) &gt; EK bis Klasse 6 &gt; Leben in Extremräumen &gt; Basis - Inhalte &gt; Tropischer Regenwald, Wüste, Polargebiet">13110006030102</key>
+<key parent="131100060301" cap="Erdkunde (DE) &gt; EK bis Klasse 6 &gt; Leben in Extremräumen &gt; Basis - Inhalte &gt; Lebens- und Wirtschaftsweise">13110006030103</key>
+<key parent="1311000603" cap="Erdkunde (DE) &gt; EK bis Klasse 6 &gt; Leben in Extremräumen &gt; Erweiterungs - Inhalte">131100060302</key>
+<key parent="131100060302" cap="Erdkunde (DE) &gt; EK bis Klasse 6 &gt; Leben in Extremräumen &gt; Erweiterungs - Inhalte &gt; Traditionelle Formen der Landwirtschaft">13110006030201</key>
+<key parent="1311000603" cap="Erdkunde (DE) &gt; EK bis Klasse 6 &gt; Leben in Extremräumen &gt; Vertiefungs - Inhalte">131100060303</key>
+<key parent="131100060303" cap="Erdkunde (DE) &gt; EK bis Klasse 6 &gt; Leben in Extremräumen &gt; Vertiefungs - Inhalte &gt; Polartag - Polarnacht">13110006030301</key>
+<key parent="13110006" cap="Erdkunde (DE) &gt; EK bis Klasse 6 &gt; Tourismus und Erholungsräume">1311000604</key>
+<key parent="1311000604" cap="Erdkunde (DE) &gt; EK bis Klasse 6 &gt; Tourismus und Erholungsräume &gt; Basis - Inhalte">131100060401</key>
+<key parent="131100060401" cap="Erdkunde (DE) &gt; EK bis Klasse 6 &gt; Tourismus und Erholungsräume &gt; Basis - Inhalte &gt; Reiseverhalten">13110006040101</key>
+<key parent="131100060401" cap="Erdkunde (DE) &gt; EK bis Klasse 6 &gt; Tourismus und Erholungsräume &gt; Basis - Inhalte &gt; Infrastruktur">13110006040102</key>
+<key parent="131100060401" cap="Erdkunde (DE) &gt; EK bis Klasse 6 &gt; Tourismus und Erholungsräume &gt; Basis - Inhalte &gt; Tourismusarten">13110006040103</key>
+<key parent="1311000604" cap="Erdkunde (DE) &gt; EK bis Klasse 6 &gt; Tourismus und Erholungsräume &gt; Erweiterungs - Inhalte">131100060402</key>
+<key parent="131100060402" cap="Erdkunde (DE) &gt; EK bis Klasse 6 &gt; Tourismus und Erholungsräume &gt; Erweiterungs - Inhalte &gt; Urlaubsziele">13110006040201</key>
+<key parent="1311000604" cap="Erdkunde (DE) &gt; EK bis Klasse 6 &gt; Tourismus und Erholungsräume &gt; Vertiefungs - Inhalte">131100060403</key>
+<key parent="131100060403" cap="Erdkunde (DE) &gt; EK bis Klasse 6 &gt; Tourismus und Erholungsräume &gt; Vertiefungs - Inhalte &gt; Künstliche Erlebniswelten">13110006040301</key>
+<key parent="13110006" cap="Erdkunde (DE) &gt; EK bis Klasse 6 &gt; Rohstoffe und Produktion">1311000605</key>
+<key parent="1311000605" cap="Erdkunde (DE) &gt; EK bis Klasse 6 &gt; Rohstoffe und Produktion &gt; Basis - Inhalte">131100060501</key>
+<key parent="131100060501" cap="Erdkunde (DE) &gt; EK bis Klasse 6 &gt; Rohstoffe und Produktion &gt; Basis - Inhalte &gt; Rohstoffe im Alltag">13110006050101</key>
+<key parent="131100060501" cap="Erdkunde (DE) &gt; EK bis Klasse 6 &gt; Rohstoffe und Produktion &gt; Basis - Inhalte &gt; Rohstoffabbau">13110006050102</key>
+<key parent="131100060501" cap="Erdkunde (DE) &gt; EK bis Klasse 6 &gt; Rohstoffe und Produktion &gt; Basis - Inhalte &gt; Industrielle Produktion">13110006050103</key>
+<key parent="131100060501" cap="Erdkunde (DE) &gt; EK bis Klasse 6 &gt; Rohstoffe und Produktion &gt; Basis - Inhalte &gt; Recycling">13110006050104</key>
+<key parent="1311000605" cap="Erdkunde (DE) &gt; EK bis Klasse 6 &gt; Rohstoffe und Produktion &gt; Erweiterungs - Inhalte">131100060502</key>
+<key parent="131100060502" cap="Erdkunde (DE) &gt; EK bis Klasse 6 &gt; Rohstoffe und Produktion &gt; Erweiterungs - Inhalte &gt; Strukturwandel">13110006050201</key>
+<key parent="1311000605" cap="Erdkunde (DE) &gt; EK bis Klasse 6 &gt; Rohstoffe und Produktion &gt; Vertiefungs - Inhalte">131100060503</key>
+<key parent="131100060503" cap="Erdkunde (DE) &gt; EK bis Klasse 6 &gt; Rohstoffe und Produktion &gt; Vertiefungs - Inhalte &gt; Rohstoffe, Energiegewinnung">13110006050301</key>
+<key parent="131100060503" cap="Erdkunde (DE) &gt; EK bis Klasse 6 &gt; Rohstoffe und Produktion &gt; Vertiefungs - Inhalte &gt; Alternative Energiequellen">13110006050302</key>
+<key parent="13110006" cap="Erdkunde (DE) &gt; EK bis Klasse 6 &gt; Dienstleistung">1311000606</key>
+<key parent="1311000606" cap="Erdkunde (DE) &gt; EK bis Klasse 6 &gt; Dienstleistung &gt; Basis - Inhalte">131100060601</key>
+<key parent="1311000606" cap="Erdkunde (DE) &gt; EK bis Klasse 6 &gt; Dienstleistung &gt; Erweiterungs - Inhalte">131100060602</key>
+<key parent="131100060602" cap="Erdkunde (DE) &gt; EK bis Klasse 6 &gt; Dienstleistung &gt; Basis - Inhalte &gt; Dienstleistungen im Schulalltag">13110006060201</key>
+<key parent="131100060602" cap="Erdkunde (DE) &gt; EK bis Klasse 6 &gt; Dienstleistung &gt; Erweiterungs - Inhalte &gt; Wege zur Arbeit">13110006060202</key>
+<key parent="131100060602" cap="Erdkunde (DE) &gt; EK bis Klasse 6 &gt; Dienstleistung &gt; Erweiterungs - Inhalte &gt; Wege zur Arbeit &gt; Dienstleistungsvielfalt">13110006060203</key>
+<key parent="1311000606" cap="Erdkunde (DE) &gt; EK bis Klasse 6 &gt; Dienstleistung &gt; Vertiefungs - Inhalte">131100060603</key>
+<key parent="131100060603" cap="Erdkunde (DE) &gt; EK bis Klasse 6 &gt; Dienstleistung &gt; Vertiefungs - Inhalte &gt; Dienstleistungsbereich">13110006060301</key>
+<key parent="131100" cap="Erdkunde (DE) &gt; EK bis Klasse 8">13110008</key>
+<key parent="13110008" cap="Erdkunde (DE) &gt; EK bis Klasse 8 &gt; Geofaktoren als Lebensgrundlage">1311000801</key>
+<key parent="1311000801" cap="Erdkunde (DE) &gt; EK bis Klasse 8 &gt; Geofaktoren als Lebensgrundlage &gt; Basis - Inhalte">131100080101</key>
+<key parent="131100080101" cap="Erdkunde (DE) &gt; EK bis Klasse 8 &gt; Geofaktoren als Lebensgrundlage &gt; Basis - Inhalte &gt; Sonnenenergie, Geozonen">13110008010101</key>
+<key parent="131100080101" cap="Erdkunde (DE) &gt; EK bis Klasse 8 &gt; Geofaktoren als Lebensgrundlage &gt; Basis - Inhalte &gt; Lufthülle, Treibhauseffekt">13110008010102</key>
+<key parent="131100080101" cap="Erdkunde (DE) &gt; EK bis Klasse 8 &gt; Geofaktoren als Lebensgrundlage &gt; Basis - Inhalte &gt; Boden">13110008010103</key>
+<key parent="131100080101" cap="Erdkunde (DE) &gt; EK bis Klasse 8 &gt; Geofaktoren als Lebensgrundlage &gt; Basis - Inhalte &gt; Klima, Boden, Vegetation">13110008010104</key>
+<key parent="131100080101" cap="Erdkunde (DE) &gt; EK bis Klasse 8 &gt; Geofaktoren als Lebensgrundlage &gt; Basis - Inhalte &gt; Treibhauseffekt">13110008010105</key>
+<key parent="1311000801" cap="Erdkunde (DE) &gt; EK bis Klasse 8 &gt; Geofaktoren als Lebensgrundlage &gt; Erweiterungs - Inhalte">131100080102</key>
+<key parent="131100080102" cap="Erdkunde (DE) &gt; EK bis Klasse 8 &gt; Geofaktoren als Lebensgrundlage &gt; Erweiterungs - Inhalte &gt; Geofaktoren ">13110008010201</key>
+<key parent="1311000801" cap="Erdkunde (DE) &gt; EK bis Klasse 8 &gt; Geofaktoren als Lebensgrundlage &gt; Vertiefungs - Inhalte">131100080103</key>
+<key parent="131100080103" cap="Erdkunde (DE) &gt; EK bis Klasse 8 &gt; Geofaktoren als Lebensgrundlage &gt; Vertiefungs - Inhalte &gt; Weltmeere">13110008010301</key>
+<key parent="13110008" cap="Erdkunde (DE) &gt; EK bis Klasse 8 &gt; Endogene Naturkräfte verändern Räume">1311000802</key>
+<key parent="1311000802" cap="Erdkunde (DE) &gt; EK bis Klasse 8 &gt; Endogene Naturkräfte verändern Räume &gt; Basis - Inhalte">131100080201</key>
+<key parent="131100080201" cap="Erdkunde (DE) &gt; EK bis Klasse 8 &gt; Endogene Naturkräfte verändern Räume &gt; Basis - Inhalte &gt; Vulkanismus">13110008020101</key>
+<key parent="131100080201" cap="Erdkunde (DE) &gt; EK bis Klasse 8 &gt; Endogene Naturkräfte verändern Räume &gt; Basis - Inhalte &gt; Vulkanregionen">13110008020102</key>
+<key parent="131100080201" cap="Erdkunde (DE) &gt; EK bis Klasse 8 &gt; Endogene Naturkräfte verändern Räume &gt; Basis - Inhalte &gt; Kontinentalverschiebung, Plattentektonik">13110008020103</key>
+<key parent="131100080201" cap="Erdkunde (DE) &gt; EK bis Klasse 8 &gt; Endogene Naturkräfte verändern Räume &gt; Basis - Inhalte &gt; Erdbeben">13110008020104</key>
+<key parent="131100080201" cap="Erdkunde (DE) &gt; EK bis Klasse 8 &gt; Endogene Naturkräfte verändern Räume &gt; Basis - Inhalte &gt; Erdbebenregionen">13110008020105</key>
+<key parent="1311000802" cap="Erdkunde (DE) &gt; EK bis Klasse 8 &gt; Endogene Naturkräfte verändern Räume &gt; Erweiterungs - Inhalte">131100080202</key>
+<key parent="131100080202" cap="Erdkunde (DE) &gt; EK bis Klasse 8 &gt; Endogene Naturkräfte verändern Räume &gt; Erweiterungs - Inhalte &gt; Tsunami">13110008020201</key>
+<key parent="131100080202" cap="Erdkunde (DE) &gt; EK bis Klasse 8 &gt; Endogene Naturkräfte verändern Räume &gt; Erweiterungs - Inhalte &gt; Hot Spot">13110008020202</key>
+<key parent="1311000802" cap="Erdkunde (DE) &gt; EK bis Klasse 8 &gt; Endogene Naturkräfte verändern Räume &gt; Vertiefungs - Inhalte">131100080203</key>
+<key parent="131100080203" cap="Erdkunde (DE) &gt; EK bis Klasse 8 &gt; Endogene Naturkräfte verändern Räume &gt; Vertiefungs - Inhalte &gt; Geothermie">13110008020301</key>
+<key parent="13110008" cap="Erdkunde (DE) &gt; EK bis Klasse 8 &gt; Exogene Naturkräfte verändern Räume">1311000803</key>
+<key parent="1311000803" cap="Erdkunde (DE) &gt; EK bis Klasse 8 &gt; Exogene Naturkräfte verändern Räume &gt; Basis - Inhalte">131100080301</key>
+<key parent="131100080301" cap="Erdkunde (DE) &gt; EK bis Klasse 8 &gt; Exogene Naturkräfte verändern Räume &gt; Basis - Inhalte &gt; Flussabschnitte und Talformen">13110008030101</key>
+<key parent="131100080301" cap="Erdkunde (DE) &gt; EK bis Klasse 8 &gt; Exogene Naturkräfte verändern Räume &gt; Basis - Inhalte &gt; Flussregionen">13110008030102</key>
+<key parent="131100080301" cap="Erdkunde (DE) &gt; EK bis Klasse 8 &gt; Exogene Naturkräfte verändern Räume &gt; Basis - Inhalte &gt; Hochwasser, Hochwasserregionen">13110008030103</key>
+<key parent="1311000803" cap="Erdkunde (DE) &gt; EK bis Klasse 8 &gt; Exogene Naturkräfte verändern Räume &gt; Erweiterungs - Inhalte">131100080302</key>
+<key parent="131100080302" cap="Erdkunde (DE) &gt; EK bis Klasse 8 &gt; Exogene Naturkräfte verändern Räume &gt; Erweiterungs - Inhalte &gt; Wind">13110008030201</key>
+<key parent="1311000803" cap="Erdkunde (DE) &gt; EK bis Klasse 8 &gt; Exogene Naturkräfte verändern Räume &gt; Vertiefungs - Inhalte">131100080303</key>
+<key parent="131100080303" cap="Erdkunde (DE) &gt; EK bis Klasse 8 &gt; Exogene Naturkräfte verändern Räume &gt; Vertiefungs - Inhalte &gt; Gletscher">13110008030301</key>
+<key parent="131100080303" cap="Erdkunde (DE) &gt; EK bis Klasse 8 &gt; Exogene Naturkräfte verändern Räume &gt; Vertiefungs - Inhalte &gt; Küstenformen, Küstenschutz">13110008030302</key>
+<key parent="131100080303" cap="Erdkunde (DE) &gt; EK bis Klasse 8 &gt; Exogene Naturkräfte verändern Räume &gt; Vertiefungs - Inhalte &gt; Kartsformen">13110008030303</key>
+<key parent="13110008" cap="Erdkunde (DE) &gt; EK bis Klasse 6 &gt; Orientierung in Rheinland-Pfalz &amp; Deutschland &gt; Basis - Inhalte &gt; Lebenswelten">1311000804</key>
+<key parent="1311000804" cap="Erdkunde (DE) &gt; EK bis Klasse 8 &gt; Grenzen der Raumnutzung &gt; Basis - Inhalte">131100080401</key>
+<key parent="131100080401" cap="Erdkunde (DE) &gt; EK bis Klasse 8 &gt; Grenzen der Raumnutzung &gt; Basis - Inhalte &gt; Trockengrenze">13110008040101</key>
+<key parent="131100080401" cap="Erdkunde (DE) &gt; EK bis Klasse 8 &gt; Grenzen der Raumnutzung &gt; Basis - Inhalte &gt; Wasser und Boden">13110008040102</key>
+<key parent="131100080401" cap="Erdkunde (DE) &gt; EK bis Klasse 8 &gt; Grenzen der Raumnutzung &gt; Basis - Inhalte &gt; Bewässerungslandschaft">13110008040103</key>
+<key parent="131100080401" cap="Erdkunde (DE) &gt; EK bis Klasse 8 &gt; Grenzen der Raumnutzung &gt; Basis - Inhalte &gt; Semiarider Raum">13110008040104</key>
+<key parent="1311000804" cap="Erdkunde (DE) &gt; EK bis Klasse 8 &gt; Grenzen der Raumnutzung &gt; Erweiterungs - Inhalte">131100080402</key>
+<key parent="131100080402" cap="Erdkunde (DE) &gt; EK bis Klasse 8 &gt; Grenzen der Raumnutzung &gt; Erweiterungs - Inhalte &gt; Regen- und Trockenzeiten">13110008040201</key>
+<key parent="131100080402" cap="Erdkunde (DE) &gt; EK bis Klasse 8 &gt; Grenzen der Raumnutzung &gt; Erweiterungs - Inhalte &gt; Kältegrenze">13110008040202</key>
+<key parent="1311000804" cap="Erdkunde (DE) &gt; EK bis Klasse 8 &gt; Grenzen der Raumnutzung &gt; Vertiefungs - Inhalte">131100080403</key>
+<key parent="131100080403" cap="Erdkunde (DE) &gt; EK bis Klasse 8 &gt; Grenzen der Raumnutzung &gt; Vertiefungs - Inhalte &gt; Bodenschutzmaßnahmen">13110008040301</key>
+<key parent="131100080403" cap="Erdkunde (DE) &gt; EK bis Klasse 8 &gt; Grenzen der Raumnutzung &gt; Vertiefungs - Inhalte &gt; Wassergewinnung">13110008040302</key>
+<key parent="13110008" cap="Erdkunde (DE) &gt; EK bis Klasse 8 &gt; Nachhaltigkeit">1311000805</key>
+<key parent="1311000805" cap="Erdkunde (DE) &gt; EK bis Klasse 8 &gt; Welternährung &gt; Basis - Inhalte">131100080501</key>
+<key parent="131100080501" cap="Erdkunde (DE) &gt; EK bis Klasse 8 &gt; Welternährung &gt; Basis - Inhalte &gt; Ernährungssituation">13110008050101</key>
+<key parent="131100080501" cap="Erdkunde (DE) &gt; EK bis Klasse 8 &gt; Welternährung &gt; Basis - Inhalte &gt; Ernährungssicherung">13110008050102</key>
+<key parent="131100080501" cap="Erdkunde (DE) &gt; EK bis Klasse 8 &gt; Welternährung &gt; Basis - Inhalte &gt; Ernährungssituation">13110008050103</key>
+<key parent="1311000805" cap="Erdkunde (DE) &gt; EK bis Klasse 8 &gt; Welternährung &gt; Erweiterungs - Inhalte">131100080502</key>
+<key parent="131100080502" cap="Erdkunde (DE) &gt; EK bis Klasse 8 &gt; Welternährung &gt; Erweiterungs - Inhalte &gt; Weltmeere">13110008050201</key>
+<key parent="131100080502" cap="Erdkunde (DE) &gt; EK bis Klasse 8 &gt; Welternährung &gt; Erweiterungs - Inhalte &gt; Fleischkonsum">13110008050202</key>
+<key parent="1311000805" cap="Erdkunde (DE) &gt; EK bis Klasse 8 &gt; Welternährung &gt; Vertiefungs - Inhalte">131100080503</key>
+<key parent="131100080503" cap="Erdkunde (DE) &gt; EK bis Klasse 8 &gt; Welternährung &gt; Vertiefungs - Inhalte &gt; Ernährungssicherheit">13110008050301</key>
+<key parent="131100080503" cap="Erdkunde (DE) &gt; EK bis Klasse 8 &gt; Welternährung &gt; Erweiterungs - Inhalte &gt; Fastfood">13110008050302</key>
+<key parent="13110008" cap="Erdkunde (DE) &gt; EK bis Klasse 8 &gt; Nachhaltigkeit">1311000806</key>
+<key parent="1311000806" cap="Erdkunde (DE) &gt; EK bis Klasse 8 &gt; Nachhaltigkeit &gt; Basis - Inhalte">131100080601</key>
+<key parent="131100080601" cap="Erdkunde (DE) &gt; EK bis Klasse 8 &gt; Nachhaltigkeit &gt; Basis - Inhalte &gt; Eigener Lebensstil">13110008060101</key>
+<key parent="131100080601" cap="Erdkunde (DE) &gt; EK bis Klasse 8 &gt; Nachhaltigkeit &gt; Basis - Inhalte &gt; Nachhaltiges Handeln">13110008060102</key>
+<key parent="1311000806" cap="Erdkunde (DE) &gt; EK bis Klasse 8 &gt; Nachhaltigkeit &gt; Erweiterungs - Inhalte">131100080602</key>
+<key parent="131100080602" cap="Erdkunde (DE) &gt; EK bis Klasse 8 &gt; Nachhaltigkeit &gt; Erweiterungs - Inhalte &gt; Ökologischer Fußabdruck">13110008060201</key>
+<key parent="131100080602" cap="Erdkunde (DE) &gt; EK bis Klasse 8 &gt; Nachhaltigkeit &gt; Erweiterungs - Inhalte &gt; Virtuelles Wasser">13110008060202</key>
+<key parent="1311000806" cap="Erdkunde (DE) &gt; EK bis Klasse 8 &gt; Nachhaltigkeit &gt; Vertiefungs - Inhalte">131100080603</key>
+<key parent="131100080603" cap="Erdkunde (DE) &gt; EK bis Klasse 8 &gt; Nachhaltigkeit &gt; Vertiefungs - Inhalte &gt; Interkulturelle Parnetschaften">13110008060301</key>
+<key parent="131100" cap="Erdkunde (DE) &gt; EK bis Klasse 10">13110010</key>
+<key parent="13110010" cap="Erdkunde (DE) &gt; EK bis Klasse 10 &gt; Europa - Einheit und Vielfalt">1311001001</key>
+<key parent="1311001001" cap="Erdkunde (DE) &gt; EK bis Klasse 10 &gt; Europa - Einheit und Vielfalt &gt; Basis - Inhalte">131100100101</key>
+<key parent="131100100101" cap="Erdkunde (DE) &gt; EK bis Klasse 10 &gt; Europa - Einheit und Vielfalt &gt; Basis - Inhalte &gt; Europa im Alltag junger Menschen">13110010010101</key>
+<key parent="131100100101" cap="Erdkunde (DE) &gt; EK bis Klasse 10 &gt; Europa - Einheit und Vielfalt &gt; Basis - Inhalte &gt; Lebens- und Arbeitswelt">13110010010102</key>
+<key parent="131100100101" cap="Erdkunde (DE) &gt; EK bis Klasse 10 &gt; Europa - Einheit und Vielfalt &gt; Basis - Inhalte &gt; Perspektiven Europas">13110010010103</key>
+<key parent="1311001001" cap="Erdkunde (DE) &gt; EK bis Klasse 10 &gt; Europa - Einheit und Vielfalt &gt; Erweiterungs - Inhalte">131100100102</key>
+<key parent="131100100102" cap="Erdkunde (DE) &gt; EK bis Klasse 10 &gt; Europa - Einheit und Vielfalt &gt; Erweiterungs - Inhalte &gt; Umweltbelastung">13110010010201</key>
+<key parent="1311001001" cap="Erdkunde (DE) &gt; EK bis Klasse 10 &gt; Europa - Einheit und Vielfalt &gt; Vertiefungs - Inhalte">131100100103</key>
+<key parent="131100100103" cap="Erdkunde (DE) &gt; EK bis Klasse 10 &gt; Europa - Einheit und Vielfalt &gt; Vertiefungs - Inhalte &gt; Türkei">13110010010301</key>
+<key parent="131100100103" cap="Erdkunde (DE) &gt; EK bis Klasse 10 &gt; Europa - Einheit und Vielfalt &gt; Vertiefungs - Inhalte &gt; Europa, Afrika">13110010010302</key>
+<key parent="13110010" cap="Erdkunde (DE) &gt; EK bis Klasse 10 &gt; Möglichkeiten der Raumplanung">1311001002</key>
+<key parent="1311001002" cap="Erdkunde (DE) &gt; EK bis Klasse 10 &gt; Möglichkeiten der Raumplanung &gt; Basis - Inhalte">131100100201</key>
+<key parent="131100100201" cap="Erdkunde (DE) &gt; EK bis Klasse 10 &gt; Möglichkeiten der Raumplanung &gt; Basis - Inhalte &gt; Raumentwicklung">13110010020101</key>
+<key parent="131100100201" cap="Erdkunde (DE) &gt; EK bis Klasse 10 &gt; Möglichkeiten der Raumplanung &gt; Basis - Inhalte &gt; Planungsumsetzung">13110010020102</key>
+<key parent="1311001002" cap="Erdkunde (DE) &gt; EK bis Klasse 10 &gt; Möglichkeiten der Raumplanung &gt; Erweiterungs - Inhalte">131100100202</key>
+<key parent="131100100202" cap="Erdkunde (DE) &gt; EK bis Klasse 10 &gt; Möglichkeiten der Raumplanung &gt; Erweiterungs - Inhalte &gt; Landesentwicklung">13110010020201</key>
+<key parent="1311001002" cap="Erdkunde (DE) &gt; EK bis Klasse 10 &gt; Möglichkeiten der Raumplanung &gt; Vertiefungs - Inhalte">131100100203</key>
+<key parent="131100100203" cap="Erdkunde (DE) &gt; EK bis Klasse 10 &gt; Möglichkeiten der Raumplanung &gt; Vertiefungs - Inhalte &gt; Zukunft von Dorf/Stadt">13110010020301</key>
+<key parent="13110010" cap="Erdkunde (DE) &gt; EK bis Klasse 10 &gt; Bevölkerungsentwicklung">1311001004</key>
+<key parent="1311001004" cap="Erdkunde (DE) &gt; EK bis Klasse 10 &gt; Bevölkerungsentwicklung &gt; Basis - Inhalte">131100100401</key>
+<key parent="131100100401" cap="Erdkunde (DE) &gt; EK bis Klasse 10 &gt; Bevölkerungsentwicklung &gt; Basis - Inhalte &gt; Familienstrukturen">13110010040101</key>
+<key parent="131100100401" cap="Erdkunde (DE) &gt; EK bis Klasse 10 &gt; Bevölkerungsentwicklung &gt; Basis - Inhalte &gt; Generatives Verhalten">13110010040102</key>
+<key parent="131100100401" cap="Erdkunde (DE) &gt; EK bis Klasse 10 &gt; Bevölkerungsentwicklung &gt; Basis - Inhalte &gt; Bevölkerungsentwicklung">13110010040103</key>
+<key parent="131100100401" cap="Erdkunde (DE) &gt; EK bis Klasse 10 &gt; Bevölkerungsentwicklung &gt; Basis - Inhalte &gt; Ansätze der Regulierung">13110010040104</key>
+<key parent="1311001004" cap="Erdkunde (DE) &gt; EK bis Klasse 10 &gt; Bevölkerungsentwicklung &gt; Erweiterungs - Inhalte">131100100402</key>
+<key parent="131100100402" cap="Erdkunde (DE) &gt; EK bis Klasse 10 &gt; Bevölkerungsentwicklung &gt; Erweiterungs - Inhalte &gt; Demographische Transformation">13110010040201</key>
+<key parent="131100100402" cap="Erdkunde (DE) &gt; EK bis Klasse 10 &gt; Bevölkerungsentwicklung &gt; Erweiterungs - Inhalte &gt; Bevölkerungsentwicklung">13110010040202</key>
+<key parent="1311001004" cap="Erdkunde (DE) &gt; EK bis Klasse 10 &gt; Bevölkerungsentwicklung &gt; Vertiefungs - Inhalte">131100100403</key>
+<key parent="131100100403" cap="Erdkunde (DE) &gt; EK bis Klasse 10 &gt; Bevölkerungsentwicklung &gt; Vertiefungs - Inhalte &gt; Stellung der Frau">13110010040301</key>
+<key parent="13110010" cap="Erdkunde (DE) &gt; EK bis Klasse 10 &gt; Migration und Verstädterung">1311001005</key>
+<key parent="1311001005" cap="Erdkunde (DE) &gt; EK bis Klasse 10 &gt; Migration und Verstädterung &gt; Basis - Inhalte">131100100501</key>
+<key parent="131100100501" cap="Erdkunde (DE) &gt; EK bis Klasse 10 &gt; Migration und Verstädterung &gt; Basis - Inhalte &gt; Migration    ">13110010050101</key>
+<key parent="131100100501" cap="Erdkunde (DE) &gt; EK bis Klasse 10 &gt; Migration und Verstädterung &gt; Basis - Inhalte &gt; Lebenswelten, Metropolen">13110010050102</key>
+<key parent="131100100501" cap="Erdkunde (DE) &gt; EK bis Klasse 10 &gt; Migration und Verstädterung &gt; Basis - Inhalte &gt; Lebensbedingungen">13110010050103</key>
+<key parent="1311001005" cap="Erdkunde (DE) &gt; EK bis Klasse 10 &gt; Migration und Verstädterung &gt; Erweiterungs - Inhalte">131100100502</key>
+<key parent="131100100502" cap="Erdkunde (DE) &gt; EK bis Klasse 10 &gt; Migration und Verstädterung &gt; Erweiterungs - Inhalte &gt; Ländlicher Raum">13110010050201</key>
+<key parent="131100100502" cap="Erdkunde (DE) &gt; EK bis Klasse 10 &gt; Migration und Verstädterung &gt; Erweiterungs - Inhalte &gt; Transnationale Migration">13110010050202</key>
+<key parent="1311001005" cap="Erdkunde (DE) &gt; EK bis Klasse 10 &gt; Migration und Verstädterung &gt; Vertiefungs - Inhalte">131100100503</key>
+<key parent="131100100503" cap="Erdkunde (DE) &gt; EK bis Klasse 10 &gt; Migration und Verstädterung &gt; Vertiefungs - Inhalte &gt; Informeller Sektor">13110010050301</key>
+<key parent="131100100503" cap="Erdkunde (DE) &gt; EK bis Klasse 10 &gt; Migration und Verstädterung &gt; Vertiefungs - Inhalte &gt; Georisiken">13110010050302</key>
+<key parent="13110010" cap="Erdkunde (DE) &gt; EK bis Klasse 10 &gt; Länder und ihre Entwicklungsmöglichkeiten">1311001006</key>
+<key parent="1311001006" cap="Erdkunde (DE) &gt; EK bis Klasse 10 &gt; Länder und ihre Entwicklungsmöglichkeiten &gt; Basis - Inhalte">131100100601</key>
+<key parent="131100100601" cap="Erdkunde (DE) &gt; EK bis Klasse 10 &gt; Länder und ihre Entwicklungsmöglichkeiten &gt; Basis - Inhalte &gt; Einteilung der Welt">13110010060101</key>
+<key parent="131100100601" cap="Erdkunde (DE) &gt; EK bis Klasse 10 &gt; Länder und ihre Entwicklungsmöglichkeiten &gt; Basis - Inhalte &gt; Strukturen/Potenziale des globalen Südens">13110010060102</key>
+<key parent="131100100601" cap="Erdkunde (DE) &gt; EK bis Klasse 10 &gt; Länder und ihre Entwicklungsmöglichkeiten &gt; Basis - Inhalte &gt; Wechselbeziehungen">13110010060103</key>
+<key parent="131100100601" cap="Erdkunde (DE) &gt; EK bis Klasse 10 &gt; Länder und ihre Entwicklungsmöglichkeiten &gt; Basis - Inhalte &gt; Ruanda">13110010060104</key>
+<key parent="1311001006" cap="Erdkunde (DE) &gt; EK bis Klasse 10 &gt; Länder und ihre Entwicklungsmöglichkeiten &gt; Erweiterungs - Inhalte">131100100602</key>
+<key parent="131100100602" cap="Erdkunde (DE) &gt; EK bis Klasse 10 &gt; Länder und ihre Entwicklungsmöglichkeiten &gt; Erweiterungs - Inhalte &gt; Armut">13110010060201</key>
+<key parent="1311001006" cap="Erdkunde (DE) &gt; EK bis Klasse 10 &gt; Länder und ihre Entwicklungsmöglichkeiten &gt; Vertiefungs - Inhalte">131100100603</key>
+<key parent="131100100603" cap="Erdkunde (DE) &gt; EK bis Klasse 10 &gt; Länder und ihre Entwicklungsmöglichkeiten &gt; Vertiefungs - Inhalte &gt; Bildung, Gesundheit">13110010060301</key>
+<key parent="13110010" cap="Erdkunde (DE) &gt; EK bis Klasse 10 &gt; Globalisierung">1311001007</key>
+<key parent="1311001007" cap="Erdkunde (DE) &gt; EK bis Klasse 10 &gt; Globalisierung &gt; Basis - Inhalte">1311100701</key>
+<key parent="1311100701" cap="Erdkunde (DE) &gt; EK bis Klasse 10 &gt; Globalisierung &gt; Basis - Inhalte &gt; Globalisierte Lebenswelten">131110070101</key>
+<key parent="1311100701" cap="Erdkunde (DE) &gt; EK bis Klasse 10 &gt; Globalisierung &gt; Basis - Inhalte &gt; Grundstrukturen/Akteure der Weltwirtschaft">131110070102</key>
+<key parent="1311100701" cap="Erdkunde (DE) &gt; EK bis Klasse 10 &gt; Globalisierung &gt; Basis - Inhalte &gt; Gewinner/Verlierer der Globalisierung">131110070103</key>
+<key parent="1311001007" cap="Erdkunde (DE) &gt; EK bis Klasse 10 &gt; Globalisierung &gt; Erweiterungs - Inhalte">1311100702</key>
+<key parent="1311100702" cap="Erdkunde (DE) &gt; EK bis Klasse 10 &gt; Globalisierung &gt; Erweiterungs - Inhalte &gt; Global agierende Unternehmen">131110070201</key>
+<key parent="1311001007" cap="Erdkunde (DE) &gt; EK bis Klasse 10 &gt; Globalisierung &gt; Vertiefungs - Inhalte">1311100703</key>
+<key parent="1311100703" cap="Erdkunde (DE) &gt; EK bis Klasse 10 &gt; Globalisierung &gt; Vertiefungs - Inhalte &gt; Containerschifffahrt">131110070301</key>
+<key parent="" cap="Geschichte (DE)">131800</key>
+<key parent="131800" cap="Geschichte (DE) &gt; GE bis Klasse 8">13180008</key>
+<key parent="13180008" cap="Geschichte (DE) &gt; GE bis Klasse 8 &gt; Einführung in das Fach Geschichte">1318000801</key>
+<key parent="1318000801" cap="Geschichte (DE) &gt; GE bis Klasse 8 &gt; Einführung in das Fach Geschichte &gt; Basis - Inhalte">131800080101</key>
+<key parent="131800080101" cap="Geschichte (DE) &gt; GE bis Klasse 8 &gt; Einführung in das Fach Geschichte &gt; Basis - Inhalte &gt; Familiengeschichte">13180008010101</key>
+<key parent="131800080101" cap="Geschichte (DE) &gt; GE bis Klasse 8 &gt; Einführung in das Fach Geschichte &gt; Basis - Inhalte &gt; Lokal-&amp; Regionalgeschichte">13180008010102</key>
+<key parent="131800080101" cap="Geschichte (DE) &gt; GE bis Klasse 8 &gt; Einführung in das Fach Geschichte &gt; Basis - Inhalte &gt; Geschichte der eigenen Schule">13180008010103</key>
+<key parent="1318000801" cap="Geschichte (DE) &gt; GE bis Klasse 8 &gt; Einführung in das Fach Geschichte &gt; Erweiterungs - Inhalte">131800080102</key>
+<key parent="131800080102" cap="Geschichte (DE) &gt; GE bis Klasse 8 &gt; Einführung in das Fach Geschichte &gt; Erweiterungs - Inhalte &gt; Geschichte in medialer Darstellung">13180008010201</key>
+<key parent="13180008" cap="Geschichte (DE) &gt; GE bis Klasse 8 &gt; Vorgeschichte">1318000802</key>
+<key parent="1318000802" cap="Geschichte (DE) &gt; GE bis Klasse 8 &gt; Vorgeschichte &gt; Basis - Inhalte">131800080201</key>
+<key parent="131800080201" cap="Geschichte (DE) &gt; GE bis Klasse 8 &gt; Vorgeschichte &gt; Basis - Inhalte &gt; Entwicklung zum Homo Sapiens">13180008020101</key>
+<key parent="131800080201" cap="Geschichte (DE) &gt; GE bis Klasse 8 &gt; Vorgeschichte &gt; Basis - Inhalte &gt; Siedlungs- und Aclkerbau, Viehzucht">13180008020102</key>
+<key parent="131800080201" cap="Geschichte (DE) &gt; GE bis Klasse 8 &gt; Vorgeschichte &gt; Basis - Inhalte &gt; Darstellungen in der Höhlenmalerei">13180008020103</key>
+<key parent="131800080201" cap="Geschichte (DE) &gt; GE bis Klasse 8 &gt; Vorgeschichte &gt; Basis - Inhalte &gt; Darstellungen in der Höhlenmalerei">13180008020104</key>
+<key parent="1318000802" cap="Geschichte (DE) &gt; GE bis Klasse 8 &gt; Vorgeschichte &gt; Erweiterungs - Inhalte ">131800080202</key>
+<key parent="131800080202" cap="Geschichte (DE) &gt; GE bis Klasse 8 &gt; Vorgeschichte &gt; Erweiterungs - Inhalte  &gt; Jungsteinzeit: Technische Innovationen">13180008020201</key>
+<key parent="131800080202" cap="Geschichte (DE) &gt; GE bis Klasse 8 &gt; Vorgeschichte &gt; Erweiterungs - Inhalte  &gt; Veränderungen in der Metallzeit">13180008020202</key>
+<key parent="131800080202" cap="Geschichte (DE) &gt; GE bis Klasse 8 &gt; Vorgeschichte &gt; Erweiterungs - Inhalte  &gt; Die Kelten">13180008020203</key>
+<key parent="131800080202" cap="Geschichte (DE) &gt; GE bis Klasse 8 &gt; Vorgeschichte &gt; Erweiterungs - Inhalte  &gt; Alt- und Jungsteinzeit: Tiere, Pflanzen">13180008020204</key>
+<key parent="13180008" cap="Geschichte (DE) &gt; GE bis Klasse 8 &gt; Antike Kulturen im Mittelmeerraum - Orientierung">1318000803</key>
+<key parent="1318000803" cap="Geschichte (DE) &gt; GE bis Klasse 8 &gt; Antike Kulturen im Mittelmeerraum - Orientierung &gt; Basis - Inhalte">131800080301</key>
+<key parent="131800080301" cap="Geschichte (DE) &gt; GE bis Klasse 8 &gt; Antike Kulturen im Mittelmeerraum - Orientierung &gt; Basis - Inhalte &gt; Zeitliche/räumliche Ausdehnung im Mittelmeerraum">13180008030101</key>
+<key parent="131800080301" cap="Geschichte (DE) &gt; GE bis Klasse 8 &gt; Antike Kulturen im Mittelmeerraum - Orientierung &gt; Basis - Inhalte &gt; Wasser: Abgrenzung &amp; Transportweg">13180008030102</key>
+<key parent="131800080301" cap="Geschichte (DE) &gt; GE bis Klasse 8 &gt; Antike Kulturen im Mittelmeerraum - Orientierung &gt; Basis - Inhalte &gt; Gemeinschaftsgefühls trotz Disparität">13180008030103</key>
+<key parent="1318000803" cap="Geschichte (DE) &gt; GE bis Klasse 8 &gt; Antike Kulturen im Mittelmeerraum - Orientierung &gt; Vertiefungs - Inhalte">131800080302</key>
+<key parent="131800080302" cap="Geschichte (DE) &gt; GE bis Klasse 8 &gt; Antike Kulturen im Mittelmeerraum - Orientierung &gt; Vertiefungs - Inhalte &gt; Perserreich, Kaiserreich China">13180008030201</key>
+<key parent="13180008" cap="Geschichte (DE) &gt; GE bis Klasse 8 &gt; Antike Kulturen im Mittelmeerraum - Gesellschaft">1318000804</key>
+<key parent="1318000804" cap="Geschichte (DE) &gt; GE bis Klasse 8 &gt; Antike Kulturen im Mittelmeerraum - Gesellschaft &gt; Basis - Inhalte">131800080401</key>
+<key parent="131800080401" cap="Geschichte (DE) &gt; GE bis Klasse 8 &gt; Antike Kulturen im Mittelmeerraum - Gesellschaft &gt; Basis - Inhalte &gt; Aufbau antiker Gesellschaften">13180008040101</key>
+<key parent="131800080401" cap="Geschichte (DE) &gt; GE bis Klasse 8 &gt; Antike Kulturen im Mittelmeerraum - Gesellschaft &gt; Basis - Inhalte &gt; Prägung des antiken Lebens durch Herkunft und Tätigkeit">13180008040102</key>
+<key parent="131800080401" cap="Geschichte (DE) &gt; GE bis Klasse 8 &gt; Antike Kulturen im Mittelmeerraum - Gesellschaft &gt; Basis - Inhalte &gt; Römische familia als kleinste gesellschaftliche Einheit">13180008040103</key>
+<key parent="1318000804" cap="Geschichte (DE) &gt; GE bis Klasse 8 &gt; Antike Kulturen im Mittelmeerraum - Gesellschaft &gt; Erweiterungs - Inhalte">131800080402</key>
+<key parent="131800080402" cap="Geschichte (DE) &gt; GE bis Klasse 8 &gt; Antike Kulturen im Mittelmeerraum - Gesellschaft &gt; Erweiterungs - Inhalte &gt; Leben von Frauen/Kindern in der Antike">13180008040201</key>
+<key parent="131800080402" cap="Geschichte (DE) &gt; GE bis Klasse 8 &gt; Antike Kulturen im Mittelmeerraum - Gesellschaft &gt; Erweiterungs - Inhalte &gt; Zusammenleben verschiedener Kulturen">13180008040202</key>
+<key parent="1318000804" cap="Geschichte (DE) &gt; GE bis Klasse 8 &gt; Antike Kulturen im Mittelmeerraum - Gesellschaft &gt; Vertiefungs - Inhalte">131800080403</key>
+<key parent="131800080403" cap="Geschichte (DE) &gt; GE bis Klasse 8 &gt; Antike Kulturen im Mittelmeerraum - Gesellschaft &gt; Vertiefungs - Inhalte &gt; Eigensicht &amp; Fremdwahrnehmung">13180008040301</key>
+<key parent="13180008" cap="Geschichte (DE) &gt; GE bis Klasse 8 &gt; Antike Kulturen im Mittelmeerraum - Herrschaft">1318000805</key>
+<key parent="1318000805" cap="Geschichte (DE) &gt; GE bis Klasse 8 &gt; Antike Kulturen im Mittelmeerraum - Herrschaft &gt; Basis - Inhalte">131800080501</key>
+<key parent="131800080501" cap="Geschichte (DE) &gt; GE bis Klasse 8 &gt; Antike Kulturen im Mittelmeerraum - Herrschaft &gt; Verschiedene Formen von Herrschaft">13180008050101</key>
+<key parent="131800080501" cap="Geschichte (DE) &gt; GE bis Klasse 8 &gt; Antike Kulturen im Mittelmeerraum - Herrschaft &gt; Unterschiedliche Begründungen von Herrschaft">13180008050102</key>
+<key parent="131800080501" cap="Geschichte (DE) &gt; GE bis Klasse 8 &gt; Antike Kulturen im Mittelmeerraum - Herrschaft &gt; Auswirkungen der römischen Herrschaft ">13180008050103</key>
+<key parent="1318000805" cap="Geschichte (DE) &gt; GE bis Klasse 8 &gt; Antike Kulturen im Mittelmeerraum - Herrschaft &gt; Erweiterungs - Inhalte">131800080502</key>
+<key parent="131800080502" cap="Geschichte (DE) &gt; GE bis Klasse 8 &gt; Antike Kulturen im Mittelmeerraum - Herrschaft &gt; Erweiterungs - Inhalte &gt; Territoriale Expansionen">13180008050201</key>
+<key parent="131800080502" cap="Geschichte (DE) &gt; GE bis Klasse 8 &gt; Antike Kulturen im Mittelmeerraum - Herrschaft &gt; Erweiterungs - Inhalte &gt; Römisches Reich: Grenzen">13180008050202</key>
+<key parent="1318000805" cap="Geschichte (DE) &gt; GE bis Klasse 8 &gt; Antike Kulturen im Mittelmeerraum - Herrschaft &gt; Vertiefungs - Inhalte">131800080503</key>
+<key parent="131800080503" cap="Geschichte (DE) &gt; GE bis Klasse 8 &gt; Antike Kulturen im Mittelmeerraum - Herrschaft &gt; Vertiefungs - Inhalte &gt; Entwicklung des antiken Demokratieverständnisses">13180008050301</key>
+<key parent="131800080503" cap="Geschichte (DE) &gt; GE bis Klasse 8 &gt; Antike Kulturen im Mittelmeerraum - Herrschaft &gt; Vertiefungs - Inhalte &gt; Kritik an Herrschaftsformen">13180008050302</key>
+<key parent="13180008" cap="Geschichte (DE) &gt; GE bis Klasse 8 &gt; Antike Kulturen im Mittelmeerraum - Wirtschaft">1318000806</key>
+<key parent="1318000806" cap="Geschichte (DE) &gt; GE bis Klasse 8 &gt; Antike Kulturen im Mittelmeerraum - Wirtschaft &gt; Basis - Inhalte">131800080601</key>
+<key parent="131800080601" cap="Geschichte (DE) &gt; GE bis Klasse 8 &gt; Antike Kulturen im Mittelmeerraum - Wirtschaft &gt; Basis - Inhalte &gt; Folgen gesellschaftlicherAnforderungen">13180008060101</key>
+<key parent="131800080601" cap="Geschichte (DE) &gt; GE bis Klasse 8 &gt; Antike Kulturen im Mittelmeerraum - Wirtschaft &gt; Basis - Inhalte &gt; Wirtschaftswege &amp; Wirtschaftszentren">13180008060102</key>
+<key parent="131800080601" cap="Geschichte (DE) &gt; GE bis Klasse 8 &gt; Antike Kulturen im Mittelmeerraum - Wirtschaft &gt; Basis - Inhalte &gt; Folgen der territorialen Erweiterung und des Wachstums">13180008060103</key>
+<key parent="1318000806" cap="Geschichte (DE) &gt; GE bis Klasse 8 &gt; Antike Kulturen im Mittelmeerraum - Wirtschaft &gt; Erweiterungs - Inhalte">131800080602</key>
+<key parent="131800080602" cap="Geschichte (DE) &gt; GE bis Klasse 8 &gt; Antike Kulturen im Mittelmeerraum - Wirtschaft &gt; Erweiterungs - Inhalte &gt; Sklaverei als Wirtschaftsfaktor in der Antike">13180008060201</key>
+<key parent="131800080602" cap="Geschichte (DE) &gt; GE bis Klasse 8 &gt; Antike Kulturen im Mittelmeerraum - Wirtschaft &gt; Erweiterungs - Inhalte &gt; Antiker Schiffsbau">13180008060202</key>
+<key parent="13180008" cap="Geschichte (DE) &gt; GE bis Klasse 8 &gt; Antike Kulturen im Mittelmeerraum - Weltdeutungen">1318000807</key>
+<key parent="1318000807" cap="Geschichte (DE) &gt; GE bis Klasse 8 &gt; Antike Kulturen im Mittelmeerraum - Weltdeutungen &gt; Basis - Inhalte">131800080701</key>
+<key parent="131800080701" cap="Geschichte (DE) &gt; GE bis Klasse 8 &gt; Antike Kulturen im Mittelmeerraum - Weltdeutungen &gt; Basis - Inhalte &gt; Polytheismus ">13180008070101</key>
+<key parent="131800080701" cap="Geschichte (DE) &gt; GE bis Klasse 8 &gt; Antike Kulturen im Mittelmeerraum - Weltdeutungen &gt; Basis - Inhalte &gt; Olympische Spiele">13180008070102</key>
+<key parent="131800080701" cap="Geschichte (DE) &gt; GE bis Klasse 8 &gt; Antike Kulturen im Mittelmeerraum - Weltdeutungen &gt; Basis - Inhalte &gt; Aufstieg des Christentums">13180008070103</key>
+<key parent="1318000807" cap="Geschichte (DE) &gt; GE bis Klasse 8 &gt; Antike Kulturen im Mittelmeerraum - Weltdeutungen &gt; Erweiterungs - Inhalte">131800080702</key>
+<key parent="131800080702" cap="Geschichte (DE) &gt; GE bis Klasse 8 &gt; Antike Kulturen im Mittelmeerraum - Weltdeutungen &gt; Erweiterungs - Inhalte &gt; Römer: Götter/Religion">13180008070201</key>
+<key parent="131800080702" cap="Geschichte (DE) &gt; GE bis Klasse 8 &gt; Antike Kulturen im Mittelmeerraum - Weltdeutungen &gt; Erweiterungs - Inhalte &gt; Monumentalbauten">13180008070202</key>
+<key parent="1318000807" cap="Geschichte (DE) &gt; GE bis Klasse 8 &gt; Antike Kulturen im Mittelmeerraum - Weltdeutungen &gt; Vertiefungs - Inhalte">131800080703</key>
+<key parent="131800080703" cap="Geschichte (DE) &gt; GE bis Klasse 8 &gt; Antike Kulturen im Mittelmeerraum - Weltdeutungen &gt; Vertiefungs - Inhalte &gt; Götter, Diesseits, Jenseits">13180008070301</key>
+<key parent="131800080703" cap="Geschichte (DE) &gt; GE bis Klasse 8 &gt; Antike Kulturen im Mittelmeerraum - Weltdeutungen &gt; Vertiefungs - Inhalte &gt; Antike Philosophen">13180008070302</key>
+<key parent="13180008" cap="Geschichte (DE) &gt; GE bis Klasse 8 &gt; Die Grundlegung Europas im Mittelalter - Orientierung">1318000808</key>
+<key parent="1318000808" cap="Geschichte (DE) &gt; GE bis Klasse 8 &gt; Die Grundlegung Europas im Mittelalter - Orientierung &gt; Basis - Inhalte">131800080801</key>
+<key parent="131800080801" cap="Geschichte (DE) &gt; GE bis Klasse 8 &gt; Die Grundlegung Europas im Mittelalter - Orientierung &gt; Basis - Inhalte &gt; Neue Herrschaftsgebiete des Römischen Reiches">13180008080101</key>
+<key parent="131800080801" cap="Geschichte (DE) &gt; GE bis Klasse 8 &gt; Die Grundlegung Europas im Mittelalter - Orientierung &gt; Basis - Inhalte &gt; Bestand und Fortentwicklung der Reichsidee">13180008080102</key>
+<key parent="131800080801" cap="Geschichte (DE) &gt; GE bis Klasse 8 &gt; Die Grundlegung Europas im Mittelalter - Orientierung &gt; Basis - Inhalte &gt; Christentum, Judentum, Islam im Mittelalter">13180008080103</key>
+<key parent="1318000808" cap="Geschichte (DE) &gt; GE bis Klasse 8 &gt; Die Grundlegung Europas im Mittelalter - Orientierung &gt; Erweiterungs - Inhalte">131800080802</key>
+<key parent="131800080802" cap="Geschichte (DE) &gt; GE bis Klasse 8 &gt; Die Grundlegung Europas im Mittelalter - Orientierung &gt; Erweiterungs - Inhalte &gt; Territoriale Entwicklung in mittelalterlichen Karten">13180008080201</key>
+<key parent="1318000808" cap="Geschichte (DE) &gt; GE bis Klasse 8 &gt; Die Grundlegung Europas im Mittelalter - Orientierung &gt; Vertiefungs - Inhalte">131800080803</key>
+<key parent="131800080803" cap="Geschichte (DE) &gt; GE bis Klasse 8 &gt; Die Grundlegung Europas im Mittelalter - Orientierung &gt; Vertiefungs - Inhalte &gt; Rivalisierende Weltbilder">13180008080301</key>
+<key parent="13180008" cap="Geschichte (DE) &gt; GE bis Klasse 8 &gt; Die Grundlegung Europas im Mittelalter - Gesellschaft">1318000809</key>
+<key parent="1318000809" cap="Geschichte (DE) &gt; GE bis Klasse 8 &gt; Die Grundlegung Europas im Mittelalter - Gesellschaft &gt; Basis - Inhalte">131800080901</key>
+<key parent="131800080901" cap="Geschichte (DE) &gt; GE bis Klasse 8 &gt; Die Grundlegung Europas im Mittelalter - Gesellschaft &gt; Basis - Inhalte &gt; Ständeordnung">13180008090101</key>
+<key parent="131800080901" cap="Geschichte (DE) &gt; GE bis Klasse 8 &gt; Die Grundlegung Europas im Mittelalter - Gesellschaft &gt; Basis - Inhalte &gt; Ungleiche Lebensbedingungen">13180008090102</key>
+<key parent="131800080901" cap="Geschichte (DE) &gt; GE bis Klasse 8 &gt; Die Grundlegung Europas im Mittelalter - Gesellschaft &gt; Basis - Inhalte &gt; Lebensräume unterschiedlicher Gesellschaftsgruppen">13180008090103</key>
+<key parent="1318000809" cap="Geschichte (DE) &gt; GE bis Klasse 8 &gt; Die Grundlegung Europas im Mittelalter - Gesellschaft &gt; Erweiterungs - Inhalte">131800080902</key>
+<key parent="131800080902" cap="Geschichte (DE) &gt; GE bis Klasse 8 &gt; Die Grundlegung Europas im Mittelalter - Gesellschaft &gt; Erweiterungs - Inhalte &gt; Städte: Orte gesellschaftlicher Dynamik">13180008090201</key>
+<key parent="131800080902" cap="Geschichte (DE) &gt; GE bis Klasse 8 &gt; Die Grundlegung Europas im Mittelalter - Gesellschaft &gt; Erweiterungs - Inhalte &gt; Klöster: Orte der Kultur und Bildung">13180008090202</key>
+<key parent="1318000809" cap="Geschichte (DE) &gt; GE bis Klasse 8 &gt; Die Grundlegung Europas im Mittelalter - Gesellschaft &gt; Vertiefungs - Inhalte">131800080903</key>
+<key parent="131800080903" cap="Geschichte (DE) &gt; GE bis Klasse 8 &gt; Die Grundlegung Europas im Mittelalter - Gesellschaft &gt; Vertiefungs - Inhalte &gt; Mittelalterliche Geschlechter-/ Rollenvorstellungen">13180008090301</key>
+<key parent="131800080903" cap="Geschichte (DE) &gt; GE bis Klasse 8 &gt; Die Grundlegung Europas im Mittelalter - Gesellschaft &gt; Vertiefungs - Inhalte &gt; Kleiderordnung als Ausdruck sozialer Gliederung">13180008090302</key>
+<key parent="13180008" cap="Geschichte (DE) &gt; GE bis Klasse 8 &gt; Die Grundlegung Europas im Mittelalter - Herrschaft">1318000810</key>
+<key parent="1318000810" cap="Geschichte (DE) &gt; GE bis Klasse 8 &gt; Die Grundlegung Europas im Mittelalter - Herrschaft &gt; Basis - Inhalte">131800081001</key>
+<key parent="131800081001" cap="Geschichte (DE) &gt; GE bis Klasse 8 &gt; Die Grundlegung Europas im Mittelalter - Herrschaft &gt; Basis - Inhalte &gt; Mittelalterliche Herrschaftsgebiete in Europa">13180008100101</key>
+<key parent="131800081001" cap="Geschichte (DE) &gt; GE bis Klasse 8 &gt; Die Grundlegung Europas im Mittelalter - Herrschaft &gt; Basis - Inhalte &gt; Herrschaft auf feudalistischer Grundlage">13180008100102</key>
+<key parent="131800081001" cap="Geschichte (DE) &gt; GE bis Klasse 8 &gt; Die Grundlegung Europas im Mittelalter - Herrschaft &gt; Basis - Inhalte &gt; Weltliche/geistliche Herrschaft">13180008100103</key>
+<key parent="1318000810" cap="Geschichte (DE) &gt; GE bis Klasse 8 &gt; Die Grundlegung Europas im Mittelalter - Herrschaft &gt; Erweiterungs - Inhalte">131800081002</key>
+<key parent="131800081002" cap="Geschichte (DE) &gt; GE bis Klasse 8 &gt; Die Grundlegung Europas im Mittelalter - Herrschaft &gt; Erweiterungs - Inhalte &gt; Legitimationen mittelalterlicher Herrschaft">13180008100201</key>
+<key parent="1318000810" cap="Geschichte (DE) &gt; GE bis Klasse 8 &gt; Die Grundlegung Europas im Mittelalter - Herrschaft &gt; Vertiefungs - Inhalte">131800081003</key>
+<key parent="131800081003" cap="Geschichte (DE) &gt; GE bis Klasse 8 &gt; Die Grundlegung Europas im Mittelalter - Herrschaft &gt; Vertiefungs - Inhalte &gt; Besonderheiten von mittelalterlichen Herrschaftsdynastien">13180008100301</key>
+<key parent="13180008" cap="Geschichte (DE) &gt; GE bis Klasse 8 &gt; Die Grundlegung Europas im Mittelalter - Wirtschaft">1318000811</key>
+<key parent="1318000811" cap="Geschichte (DE) &gt; GE bis Klasse 8 &gt; Die Grundlegung Europas im Mittelalter - Wirtschaft &gt; Basis - Inhalte">131800081101</key>
+<key parent="131800081101" cap="Geschichte (DE) &gt; GE bis Klasse 8 &gt; Die Grundlegung Europas im Mittelalter - Wirtschaft &gt; Basis - Inhalte &gt; Bedeutung der Landwirtschaft im MA">13180008110101</key>
+<key parent="131800081101" cap="Geschichte (DE) &gt; GE bis Klasse 8 &gt; Die Grundlegung Europas im Mittelalter - Wirtschaft &gt; Basis - Inhalte &gt; Verbesserungen in der Landwirtschaft">13180008110102</key>
+<key parent="131800081101" cap="Geschichte (DE) &gt; GE bis Klasse 8 &gt; Die Grundlegung Europas im Mittelalter - Wirtschaft &gt; Basis - Inhalte &gt; Städte &amp; wirtschaftliche Organisationsformen">13180008110103</key>
+<key parent="1318000811" cap="Geschichte (DE) &gt; GE bis Klasse 8 &gt; Die Grundlegung Europas im Mittelalter - Wirtschaft &gt; Erweiterungs - Inhalte">131800081102</key>
+<key parent="131800081102" cap="Geschichte (DE) &gt; GE bis Klasse 8 &gt; Die Grundlegung Europas im Mittelalter - Wirtschaft &gt; Erweiterungs - Inhalte &gt; Handel als Wegbereiter politischer/kultureller Kontakte">13180008110201</key>
+<key parent="131800081102" cap="Geschichte (DE) &gt; GE bis Klasse 8 &gt; Die Grundlegung Europas im Mittelalter - Wirtschaft &gt; Erweiterungs - Inhalte &gt; Landschaftsprägende Wirkung von Siedlungsformen">13180008110202</key>
+<key parent="1318000811" cap="Geschichte (DE) &gt; GE bis Klasse 8 &gt; Die Grundlegung Europas im Mittelalter - Wirtschaft &gt; Vertiefungs - Inhalte">131800081103</key>
+<key parent="131800081103" cap="Geschichte (DE) &gt; GE bis Klasse 8 &gt; Die Grundlegung Europas im Mittelalter - Wirtschaft &gt; Vertiefungs - Inhalte &gt; Abhängigkeit von ökologischen Rahmenbedingungen">13180008110301</key>
+<key parent="131800081103" cap="Geschichte (DE) &gt; GE bis Klasse 8 &gt; Die Grundlegung Europas im Mittelalter - Wirtschaft &gt; Vertiefungs - Inhalte &gt; Römisches Straßensystem">13180008110302</key>
+<key parent="13180008" cap="Geschichte (DE) &gt; GE bis Klasse 8 &gt; Die Grundlegung Europas im Mittelalter - Weltdeutung">1318000812</key>
+<key parent="1318000812" cap="Geschichte (DE) &gt; GE bis Klasse 8 &gt; Die Grundlegung Europas im Mittelalter - Weltdeutung &gt; Basis - Inhalte">131800081201</key>
+<key parent="131800081201" cap="Geschichte (DE) &gt; GE bis Klasse 8 &gt; Die Grundlegung Europas im Mittelalter - Weltdeutung &gt; Basis - Inhalte &gt; Beeinflussung des Lebens durch Religion">13180008120101</key>
+<key parent="131800081201" cap="Geschichte (DE) &gt; GE bis Klasse 8 &gt; Die Grundlegung Europas im Mittelalter - Weltdeutung &gt; Basis - Inhalte &gt; Verhältnis verschiedener Religionen">13180008120102</key>
+<key parent="1318000812" cap="Geschichte (DE) &gt; GE bis Klasse 8 &gt; Die Grundlegung Europas im Mittelalter - Weltdeutung &gt; Erweiterungs - Inhalte">131800081202</key>
+<key parent="131800081202" cap="Geschichte (DE) &gt; GE bis Klasse 8 &gt; Die Grundlegung Europas im Mittelalter - Weltdeutung &gt; Erweiterungs - Inhalte &gt; Gotteshäuser">13180008120201</key>
+<key parent="1318000812" cap="Geschichte (DE) &gt; GE bis Klasse 8 &gt; Die Grundlegung Europas im Mittelalter - Weltdeutung &gt; Vertiefungs - Inhalte">131800081203</key>
+<key parent="131800081203" cap="Geschichte (DE) &gt; GE bis Klasse 8 &gt; Die Grundlegung Europas im Mittelalter - Weltdeutung &gt; Vertiefungs - Inhalte &gt; Spuren mittelalterlicher Religiosität">13180008120301</key>
+<key parent="13180008" cap="Geschichte (DE) &gt; GE bis Klasse 8 &gt; Frühe Neuzeit: Zeit des beschleunigten Wandels-Orientierung">1318000813</key>
+<key parent="1318000813" cap="Geschichte (DE) &gt; GE bis Klasse 8 &gt; Frühe Neuzeit: Zeit des beschleunigten Wandels-Orientierung &gt; Basis - Inhalte">131800081301</key>
+<key parent="131800081301" cap="Geschichte (DE) &gt; GE bis Klasse 8 &gt; Frühe Neuzeit: Zeit des beschleunigten Wandels-Orientierung &gt; Basis - Inhalte &gt; Politische &amp; territoriale Entwicklung 1500 - 1780">13180008130101</key>
+<key parent="131800081301" cap="Geschichte (DE) &gt; GE bis Klasse 8 &gt; Frühe Neuzeit: Zeit des beschleunigten Wandels-Orientierung &gt; Basis - Inhalte &gt; Die Durchsetzung des heliozentrischen Weltbildes">13180008130102</key>
+<key parent="131800081301" cap="Geschichte (DE) &gt; GE bis Klasse 8 &gt; Frühe Neuzeit: Zeit des beschleunigten Wandels-Orientierung &gt; Basis - Inhalte &gt; Erfindungen und deren Auswirkungen">13180008130103</key>
+<key parent="131800081301" cap="Geschichte (DE) &gt; GE bis Klasse 8 &gt; Frühe Neuzeit: Zeit des beschleunigten Wandels-Orientierung &gt; Basis - Inhalte &gt; Motive &amp; Ziele der Erkundungsfahrten">13180008130104</key>
+<key parent="1318000813" cap="Geschichte (DE) &gt; GE bis Klasse 8 &gt; Frühe Neuzeit: Zeit des beschleunigten Wandels-Orientierung &gt; Erweiterungs - Inhalte">131800081302</key>
+<key parent="131800081302" cap="Geschichte (DE) &gt; GE bis Klasse 8 &gt; Frühe Neuzeit: Zeit des beschleunigten Wandels-Orientierung &gt; Erweiterungs - Inhalte &gt; Neues Denken">13180008130201</key>
+<key parent="131800081302" cap="Geschichte (DE) &gt; GE bis Klasse 8 &gt; Frühe Neuzeit: Zeit des beschleunigten Wandels-Orientierung &gt; Erweiterungs - Inhalte &gt; Traditionelle gesellschaftliche Ordnung ">13180008130202</key>
+<key parent="13180008" cap="Geschichte (DE) &gt; GE bis Klasse 8 &gt; Frühe Neuzeit: Zeit des beschleunigten Wandels-Gesellschaft">1318000814</key>
+<key parent="1318000814" cap="Geschichte (DE) &gt; GE bis Klasse 8 &gt; Frühe Neuzeit: Zeit des beschleunigten Wandels-Gesellschaft &gt; Basis - Inhalte">131800081401</key>
+<key parent="131800081401" cap="Geschichte (DE) &gt; GE bis Klasse 8 &gt; Frühe Neuzeit: Zeit des beschleunigten Wandels-Gesellschaft &gt; Basis - Inhalte &gt; Lebensformen Land/Stadt">13180008140101</key>
+<key parent="131800081401" cap="Geschichte (DE) &gt; GE bis Klasse 8 &gt; Frühe Neuzeit: Zeit des beschleunigten Wandels-Gesellschaft &gt; Basis - Inhalte &gt; Durchbrechen des Bildungsmonopols, Vermehrung von Wissen">13180008140102</key>
+<key parent="131800081401" cap="Geschichte (DE) &gt; GE bis Klasse 8 &gt; Frühe Neuzeit: Zeit des beschleunigten Wandels-Gesellschaft &gt; Basis - Inhalte &gt; Bürgertum in den Städten">13180008140103</key>
+<key parent="1318000814" cap="Geschichte (DE) &gt; GE bis Klasse 8 &gt; Frühe Neuzeit: Zeit des beschleunigten Wandels-Gesellschaft &gt; Erweiterungs - Inhalte">131800081402</key>
+<key parent="131800081402" cap="Geschichte (DE) &gt; GE bis Klasse 8 &gt; Frühe Neuzeit: Zeit des beschleunigten Wandels-Gesellschaft &gt; Erweiterungs - Inhalte &gt; Auswirkungen von religiösen/politischen Auseinandersetzungen">13180008140201</key>
+<key parent="1318000814" cap="Geschichte (DE) &gt; GE bis Klasse 8 &gt; Frühe Neuzeit: Zeit des beschleunigten Wandels-Gesellschaft &gt; Vertiefungs - Inhalte">131800081403</key>
+<key parent="131800081403" cap="Geschichte (DE) &gt; GE bis Klasse 8 &gt; Frühe Neuzeit: Zeit des beschleunigten Wandels-Gesellschaft &gt; Vertiefungs - Inhalte &gt; Ausdruck des wachsenden bürgerlichen Bewusstseins">13180008140301</key>
+<key parent="13180008" cap="Geschichte (DE) &gt; GE bis Klasse 8 &gt; Frühe Neuzeit: Zeit des beschleunigten Wandels-Herrschaft">1318000815</key>
+<key parent="1318000815" cap="Geschichte (DE) &gt; GE bis Klasse 8 &gt; Frühe Neuzeit: Zeit des beschleunigten Wandels-Herrschaft &gt; Basis - Inhalte">131800081501</key>
+<key parent="131800081501" cap="Geschichte (DE) &gt; GE bis Klasse 8 &gt; Frühe Neuzeit: Zeit des beschleunigten Wandels-Herrschaft &gt; Basis - Inhalte &gt; Landesherrschaft">13180008150101</key>
+<key parent="131800081501" cap="Geschichte (DE) &gt; GE bis Klasse 8 &gt; Frühe Neuzeit: Zeit des beschleunigten Wandels-Herrschaft &gt; Erweiterungs - Inhalte">13180008150102</key>
+<key parent="131800081501" cap="Geschichte (DE) &gt; GE bis Klasse 8 &gt; Frühe Neuzeit: Zeit des beschleunigten Wandels-Herrschaft &gt; Erweiterungs - Inhalte &gt; Entwicklung neuer europäischer Großmächte">13180008150103</key>
+<key parent="131800081501" cap="Geschichte (DE) &gt; GE bis Klasse 8 &gt; Frühe Neuzeit: Zeit des beschleunigten Wandels-Herrschaft &gt; Erweiterungs - Inhalte &gt; Legitimation &amp; Kritik der absolutistischen Herrschaft">13180008150104</key>
+<key parent="1318000815" cap="Geschichte (DE) &gt; GE bis Klasse 8 &gt; Frühe Neuzeit: Zeit des beschleunigten Wandels-Herrschaft &gt; Vertiefungs - Inhalte">131800081503</key>
+<key parent="131800081503" cap="Geschichte (DE) &gt; GE bis Klasse 8 &gt; Frühe Neuzeit: Zeit des beschleunigten Wandels-Herrschaft &gt; Vertiefungs - Inhalte &gt; Vergleich der Territorialstaaten innerhalb Europas">13180008150301</key>
+<key parent="131800081503" cap="Geschichte (DE) &gt; GE bis Klasse 8 &gt; Frühe Neuzeit: Zeit des beschleunigten Wandels-Herrschaft &gt; Vertiefungs - Inhalte &gt; Residenz: Ausdruck eines neuen Herrschaftsverständnisses">13180008150302</key>
+<key parent="13180008" cap="Geschichte (DE) &gt; GE bis Klasse 8 &gt; Frühe Neuzeit: Zeit des beschleunigten Wandels-Wirtschaft">1318000816</key>
+<key parent="1318000816" cap="Geschichte (DE) &gt; GE bis Klasse 8 &gt; Frühe Neuzeit: Zeit des beschleunigten Wandels-Wirtschaft &gt; Basis - Inhalte">131800081601</key>
+<key parent="131800081601" cap="Geschichte (DE) &gt; GE bis Klasse 8 &gt; Frühe Neuzeit: Zeit des beschleunigten Wandels-Wirtschaft &gt; Basis - Inhalte &gt; Erschließung neuer Handelsräume">13180008160101</key>
+<key parent="131800081601" cap="Geschichte (DE) &gt; GE bis Klasse 8 &gt; Frühe Neuzeit: Zeit des beschleunigten Wandels-Wirtschaft &gt; Basis - Inhalte &gt; Aufbau eines Wirtschaftssystems">13180008160102</key>
+<key parent="1318000816" cap="Geschichte (DE) &gt; GE bis Klasse 8 &gt; Frühe Neuzeit: Zeit des beschleunigten Wandels-Wirtschaft &gt; Erweiterungs - Inhalte">131800081602</key>
+<key parent="131800081602" cap="Geschichte (DE) &gt; GE bis Klasse 8 &gt; Frühe Neuzeit: Zeit des beschleunigten Wandels-Wirtschaft &gt; Erweiterungs - Inhalte &gt; Geld, Geldmenge, Bankhäuser">13180008160201</key>
+<key parent="1318000816" cap="Geschichte (DE) &gt; GE bis Klasse 8 &gt; Frühe Neuzeit: Zeit des beschleunigten Wandels-Wirtschaft &gt; Vertiefungs - Inhalte">131800081603</key>
+<key parent="131800081603" cap="Geschichte (DE) &gt; GE bis Klasse 8 &gt; Frühe Neuzeit: Zeit des beschleunigten Wandels-Wirtschaft &gt; Vertiefungs - Inhalte &gt; Neue Handelswaren schaffen neue Märkte">13180008160301</key>
+<key parent="13180008" cap="Geschichte (DE) &gt; GE bis Klasse 8 &gt; Frühe Neuzeit: Zeit des beschleunigten Wandels-Weltdeutungen">1318000817</key>
+<key parent="1318000817" cap="Geschichte (DE) &gt; GE bis Klasse 8 &gt; Frühe Neuzeit: Zeit des beschleunigten Wandels-Weltdeutungen &gt; Basis - Inhalte">131800081701</key>
+<key parent="131800081701" cap="Geschichte (DE) &gt; GE bis Klasse 8 &gt; Frühe Neuzeit: Zeit des beschleunigten Wandels-Weltdeutungen &gt; Basis - Inhalte &gt; Zerbrechen der religiösen Einheit des Christentums">13180008170101</key>
+<key parent="131800081701" cap="Geschichte (DE) &gt; GE bis Klasse 8 &gt; Frühe Neuzeit: Zeit des beschleunigten Wandels-Weltdeutungen &gt; Basis - Inhalte &gt; Religionskriege: Instrument zur Durchsetzung von Interessen">13180008170102</key>
+<key parent="131800081701" cap="Geschichte (DE) &gt; GE bis Klasse 8 &gt; Frühe Neuzeit: Zeit des beschleunigten Wandels-Weltdeutungen &gt; Basis - Inhalte &gt; Verhältniss religiöse/naturwissenschaftliche Weltdeutung">13180008170103</key>
+<key parent="1318000817" cap="Geschichte (DE) &gt; GE bis Klasse 8 &gt; Frühe Neuzeit: Zeit des beschleunigten Wandels-Weltdeutungen &gt; Erweiterungs - Inhalte">131800081702</key>
+<key parent="131800081702" cap="Geschichte (DE) &gt; GE bis Klasse 8 &gt; Frühe Neuzeit: Zeit des beschleunigten Wandels-Weltdeutungen &gt; Erweiterungs - Inhalte &gt; Die Folgen des aufgeklärten Absolutismus">13180008170201</key>
+<key parent="131800081702" cap="Geschichte (DE) &gt; GE bis Klasse 8 &gt; Frühe Neuzeit: Zeit des beschleunigten Wandels-Weltdeutungen &gt; Erweiterungs - Inhalte &gt; Bibel, Christianisierung">13180008170202</key>
+<key parent="1318000817" cap="Geschichte (DE) &gt; GE bis Klasse 8 &gt; Frühe Neuzeit: Zeit des beschleunigten Wandels-Weltdeutungen &gt; Vertiefungs - Inhalte">131800081703</key>
+<key parent="131800081703" cap="Geschichte (DE) &gt; GE bis Klasse 8 &gt; Frühe Neuzeit: Zeit des beschleunigten Wandels-Weltdeutungen &gt; Vertiefungs - Inhalte &gt; Pilgerreisen, Wallfahrten">13180008170301</key>
+<key parent="131800081703" cap="Geschichte (DE) &gt; GE bis Klasse 8 &gt; Frühe Neuzeit: Zeit des beschleunigten Wandels-Weltdeutungen &gt; Vertiefungs - Inhalte &gt; Konfessionelle Prägung">13180008170302</key>
+<key parent="131800081703" cap="Geschichte (DE) &gt; GE bis Klasse 8 &gt; Frühe Neuzeit: Zeit des beschleunigten Wandels-Weltdeutungen &gt; Vertiefungs - Inhalte &gt; Kirchliche Feste">13180008170303</key>
+<key parent="13180008" cap="Geschichte (DE) &gt; GE bis Klasse 8 &gt; Bürgerlichen Revolutionen &amp; Nationalstaaten: Orientierung">1318000818</key>
+<key parent="1318000818" cap="Geschichte (DE) &gt; GE bis Klasse 8 &gt; Bürgerlichen Revolutionen &amp; Nationalstaaten: Orientierung &gt; Basis - Inhalte">131800081801</key>
+<key parent="131800081801" cap="Geschichte (DE) &gt; GE bis Klasse 8 &gt; Bürgerlichen Revolutionen &amp; Nationalstaaten: Orientierung &gt; Basis - Inhalte &gt; Politische/territoriale Veränderungen in Europa bis 1871">13180008180101</key>
+<key parent="131800081801" cap="Geschichte (DE) &gt; GE bis Klasse 8 &gt; Bürgerlichen Revolutionen &amp; Nationalstaaten: Orientierung &gt; Basis - Inhalte &gt; Geistige Strömungen im 18:/19. Jhd. ">13180008180102</key>
+<key parent="131800081801" cap="Geschichte (DE) &gt; GE bis Klasse 8 &gt; Bürgerlichen Revolutionen &amp; Nationalstaaten: Orientierung &gt; Basis - Inhalte &gt; Deutsches Reich als Nationalstaat">13180008180103</key>
+<key parent="1318000818" cap="Geschichte (DE) &gt; GE bis Klasse 8 &gt; Bürgerlichen Revolutionen &amp; Nationalstaaten: Orientierung &gt; Erweiterungs - Inhalte">131800081802</key>
+<key parent="131800081802" cap="Geschichte (DE) &gt; GE bis Klasse 8 &gt; Bürgerlichen Revolutionen &amp; Nationalstaaten: Orientierung &gt; Erweiterungs - Inhalte &gt; Nationalstaatsbildungen">13180008180201</key>
+<key parent="1318000818" cap="Geschichte (DE) &gt; GE bis Klasse 8 &gt; Bürgerlichen Revolutionen &amp; Nationalstaaten: Orientierung &gt; Vertiefungs - Inhalte">131800081803</key>
+<key parent="131800081803" cap="Geschichte (DE) &gt; GE bis Klasse 8 &gt; Bürgerlichen Revolutionen &amp; Nationalstaaten: Orientierung &gt; Vertiefungs - Inhalte &gt; Freiheit: Zentrale Forderung der Französischen Revolution">13180008180301</key>
+<key parent="13180008" cap="Geschichte (DE) &gt; GE bis Klasse 8 &gt; Bürgerlichen Revolutionen &amp; Nationalstaaten: Gesellschaft">1318000819</key>
+<key parent="1318000819" cap="Geschichte (DE) &gt; GE bis Klasse 8 &gt; Bürgerlichen Revolutionen &amp; Nationalstaaten: Gesellschaft &gt; Basis - Inhalte">131800081901</key>
+<key parent="131800081901" cap="Geschichte (DE) &gt; GE bis Klasse 8 &gt; Bürgerlichen Revolutionen &amp; Nationalstaaten: Gesellschaft &gt; Basis - Inhalte &gt; Bürgertum als wirtschaftliche und politische Kraft">13180008190101</key>
+<key parent="131800081901" cap="Geschichte (DE) &gt; GE bis Klasse 8 &gt; Bürgerlichen Revolutionen &amp; Nationalstaaten: Gesellschaft &gt; Basis - Inhalte &gt; Industriearbeiterschaft">13180008190102</key>
+<key parent="131800081901" cap="Geschichte (DE) &gt; GE bis Klasse 8 &gt; Bürgerlichen Revolutionen &amp; Nationalstaaten: Gesellschaft &gt; Basis - Inhalte &gt; Soziale Frage">13180008190103</key>
+<key parent="1318000819" cap="Geschichte (DE) &gt; GE bis Klasse 8 &gt; Bürgerlichen Revolutionen &amp; Nationalstaaten: Gesellschaft &gt; Erweiterungs - Inhalte">131800081902</key>
+<key parent="131800081902" cap="Geschichte (DE) &gt; GE bis Klasse 8 &gt; Bürgerlichen Revolutionen &amp; Nationalstaaten: Gesellschaft &gt; Erweiterungs - Inhalte &gt; Gewerkschaften, Arbeiterparteien">13180008190201</key>
+<key parent="131800081902" cap="Geschichte (DE) &gt; GE bis Klasse 8 &gt; Bürgerlichen Revolutionen &amp; Nationalstaaten: Gesellschaft &gt; Erweiterungs - Inhalte &gt; Bildung als Filter für gesellschaftliche Aufstiegschancen">13180008190202</key>
+<key parent="1318000819" cap="Geschichte (DE) &gt; GE bis Klasse 8 &gt; Bürgerlichen Revolutionen &amp; Nationalstaaten: Gesellschaft &gt; Vertiefungs - Inhalte">131800081903</key>
+<key parent="131800081903" cap="Geschichte (DE) &gt; GE bis Klasse 8 &gt; Bürgerlichen Revolutionen &amp; Nationalstaaten: Gesellschaft &gt; Vertiefungs - Inhalte &gt; Vereine, Burschenschaften">13180008190301</key>
+<key parent="13180008" cap="Geschichte (DE) &gt; GE bis Klasse 8 &gt; Bürgerlichen Revolutionen &amp; Nationalstaaten: Herrschaft">1318000820</key>
+<key parent="1318000820" cap="Geschichte (DE) &gt; GE bis Klasse 8 &gt; Bürgerlichen Revolutionen &amp; Nationalstaaten: Herrschaft &gt; Basis - Inhalte">131800082001</key>
+<key parent="131800082001" cap="Geschichte (DE) &gt; GE bis Klasse 8 &gt; Bürgerlichen Revolutionen &amp; Nationalstaaten: Herrschaft &gt; Basis - Inhalte &gt; Revolutionen gegen absolutistische Herrschaftsformen">13180008200101</key>
+<key parent="131800082001" cap="Geschichte (DE) &gt; GE bis Klasse 8 &gt; Bürgerlichen Revolutionen &amp; Nationalstaaten: Herrschaft &gt; Basis - Inhalte &gt; Konstitutionelle Monarchie">13180008200102</key>
+<key parent="131800082001" cap="Geschichte (DE) &gt; GE bis Klasse 8 &gt; Bürgerlichen Revolutionen &amp; Nationalstaaten: Herrschaft &gt; Basis - Inhalte &gt; Menschenrechte zum Schutz des Individuums">13180008200103</key>
+<key parent="1318000820" cap="Geschichte (DE) &gt; GE bis Klasse 8 &gt; Bürgerlichen Revolutionen &amp; Nationalstaaten: Herrschaft &gt; Erweiterungs - Inhalte">131800082002</key>
+<key parent="131800082002" cap="Geschichte (DE) &gt; GE bis Klasse 8 &gt; Bürgerlichen Revolutionen &amp; Nationalstaaten: Herrschaft &gt; Erweiterungs - Inhalte &gt; Restauration und Reform als Herrschaftsstrategien">13180008200201</key>
+<key parent="13180008" cap="Geschichte (DE) &gt; GE bis Klasse 8 &gt; Bürgerlichen Revolutionen &amp; Nationalstaaten: Wirtschaft">1318000821</key>
+<key parent="1318000821" cap="Geschichte (DE) &gt; GE bis Klasse 8 &gt; Bürgerlichen Revolutionen &amp; Nationalstaaten: Wirtschaft &gt; Basis - Inhalte">131800082101</key>
+<key parent="131800082101" cap="Geschichte (DE) &gt; GE bis Klasse 8 &gt; Bürgerlichen Revolutionen &amp; Nationalstaaten: Wirtschaft &gt; Basis - Inhalte &gt; Erfindungen/technischer Fortschritt">13180008210101</key>
+<key parent="131800082101" cap="Geschichte (DE) &gt; GE bis Klasse 8 &gt; Bürgerlichen Revolutionen &amp; Nationalstaaten: Wirtschaft &gt; Basis - Inhalte &gt; Revolutionierung der Arbeitswelt">13180008210102</key>
+<key parent="1318000821" cap="Geschichte (DE) &gt; GE bis Klasse 8 &gt; Bürgerlichen Revolutionen &amp; Nationalstaaten: Wirtschaft &gt; Erweiterungs - Inhalte">131800082102</key>
+<key parent="131800082102" cap="Geschichte (DE) &gt; GE bis Klasse 8 &gt; Bürgerlichen Revolutionen &amp; Nationalstaaten: Wirtschaft &gt; Erweiterungs - Inhalte &gt; Unterschiedliche wirtschaftliche Entwicklungen (Land/Stadt)">13180008210201</key>
+<key parent="131800082102" cap="Geschichte (DE) &gt; GE bis Klasse 8 &gt; Bürgerlichen Revolutionen &amp; Nationalstaaten: Wirtschaft &gt; Erweiterungs - Inhalte &gt; Erschließung neuer Absatzmärkte">13180008210202</key>
+<key parent="13180008" cap="Geschichte (DE) &gt; GE bis Klasse 8 &gt; Bürgerlichen Revolutionen &amp; Nationalstaaten: Weltdeutung">1318000822</key>
+<key parent="1318000822" cap="Geschichte (DE) &gt; GE bis Klasse 8 &gt; Bürgerlichen Revolutionen &amp; Nationalstaaten: Weltdeutung &gt; Basis - Inhalte">131800082201</key>
+<key parent="1318000822" cap="Geschichte (DE) &gt; GE bis Klasse 8 &gt; Bürgerlichen Revolutionen &amp; Nationalstaaten: Weltdeutung &gt; Erweiterungs - Inhalte">131800082202</key>
+<key parent="131800082202" cap="Geschichte (DE) &gt; GE bis Klasse 8 &gt; Bürgerlichen Revolutionen &amp; Nationalstaaten: Weltdeutung &gt; Erweiterungs - Inhalte &gt; Volksaufklärung durch Bildungseinrichtungen">13180008220201</key>
+<key parent="1318000822" cap="Geschichte (DE) &gt; GE bis Klasse 8 &gt; Bürgerlichen Revolutionen &amp; Nationalstaaten: Weltdeutung &gt; Vertiefungs - Inhalte">131800082203</key>
+<key parent="131800082203" cap="Geschichte (DE) &gt; GE bis Klasse 8 &gt; Bürgerlichen Revolutionen &amp; Nationalstaaten: Weltdeutung &gt; Vertiefungs - Inhalte &gt; Fabeln: Medium zur Verbreitung aufklärerischer Gedanken">13180008220301</key>
+<key parent="1318000822" cap="Geschichte (DE) &gt; GE bis Klasse 8 &gt; Bürgerlichen Revolutionen &amp; Nationalstaaten: Weltdeutung &gt; Basis - Inhalte &gt; Menschen - und Gesellschaftsbilder moderner Ideologien">131800082204</key>
+<key parent="131800" cap="Geschichte (DE) &gt; GE bis Klasse 10">13180010</key>
+<key parent="13180010" cap="Geschichte (DE) &gt; GE bis Klasse 10 &gt; Weltweite politische Ordnungen: Orientierung">1318001001</key>
+<key parent="1318001001" cap="Geschichte (DE) &gt; GE bis Klasse 10 &gt; Weltweite politische Ordnungen: Orientierung &gt; Basis - Inhalte">131800100101</key>
+<key parent="131800100101" cap="Geschichte (DE) &gt; GE bis Klasse 10 &gt; Weltweite politische Ordnungen: Orientierung &gt; Basis - Inhalte &gt; Politisch - territoriale Entwicklung 1871 - 1945">13180010010101</key>
+<key parent="131800100101" cap="Geschichte (DE) &gt; GE bis Klasse 10 &gt; Weltweite politische Ordnungen: Orientierung &gt; Basis - Inhalte &gt; Ideologien im Überblick">13180010010102</key>
+<key parent="131800100101" cap="Geschichte (DE) &gt; GE bis Klasse 10 &gt; Weltweite politische Ordnungen: Orientierung &gt; Basis - Inhalte &gt; Erweiterungs - Inhalte">13180010010103</key>
+<key parent="1318001001" cap="Geschichte (DE) &gt; GE bis Klasse 10 &gt; Weltweite politische Ordnungen: Orientierung &gt; Erweiterungs - Inhalte">131800100102</key>
+<key parent="1318001001" cap="Geschichte (DE) &gt; GE bis Klasse 10 &gt; Weltweite politische Ordnungen: Orientierung &gt; Vertiefungs - Inhalte">131800100103</key>
+<key parent="131800100103" cap="Geschichte (DE) &gt; GE bis Klasse 10 &gt; Weltweite politische Ordnungen: Orientierung &gt; Vertiefungs - Inhalte &gt; Biographie(n) als Spiegel der Zeit">13180010010301</key>
+<key parent="1318001001" cap="Geschichte (DE) &gt; GE bis Klasse 10 &gt; Weltweite politische Ordnungen: Orientierung &gt; Erweiterungs - Inhalte &gt; Faschismus in Europa">131800100104</key>
+<key parent="13180010" cap="Geschichte (DE) &gt; GE bis Klasse 10 &gt; Weltweite politische Ordnungen: Gesellschaft">1318001002</key>
+<key parent="1318001002" cap="Geschichte (DE) &gt; GE bis Klasse 10 &gt; Weltweite politische Ordnungen: Gesellschaft &gt; Basis - Inhalte">131800100201</key>
+<key parent="131800100201" cap="Geschichte (DE) &gt; GE bis Klasse 10 &gt; Weltweite politische Ordnungen: Gesellschaft &gt; Basis - Inhalte &gt; Weimarer Republik/Nationalsozialismus: Jugendliche">13180010020101</key>
+<key parent="131800100201" cap="Geschichte (DE) &gt; GE bis Klasse 10 &gt; Weltweite politische Ordnungen: Gesellschaft &gt; Basis - Inhalte &gt; Der Nationalsozialismus als Ausgrenzungsgesellschaft">13180010020102</key>
+<key parent="131800100201" cap="Geschichte (DE) &gt; GE bis Klasse 10 &gt; Weltweite politische Ordnungen: Gesellschaft &gt; Basis - Inhalte &gt; Leben in unterschiedlichen Gesellschaftsformen">13180010020103</key>
+<key parent="1318001002" cap="Geschichte (DE) &gt; GE bis Klasse 10 &gt; Weltweite politische Ordnungen: Gesellschaft &gt; Erweiterungs - Inhalte">131800100202</key>
+<key parent="131800100202" cap="Geschichte (DE) &gt; GE bis Klasse 10 &gt; Weltweite politische Ordnungen: Gesellschaft &gt; Erweiterungs - Inhalte &gt; Gesellschaft im Kaiserreich ">13180010020201</key>
+<key parent="131800100202" cap="Geschichte (DE) &gt; GE bis Klasse 10 &gt; Weltweite politische Ordnungen: Gesellschaft &gt; Erweiterungs - Inhalte &gt; Schule im Nationalsozialismus">13180010020202</key>
+<key parent="131800100202" cap="Geschichte (DE) &gt; GE bis Klasse 10 &gt; Weltweite politische Ordnungen: Gesellschaft &gt; Erweiterungs - Inhalte &gt; Bedeutung des Individuums in den verschiedenen Ideologien">13180010020203</key>
+<key parent="1318001002" cap="Geschichte (DE) &gt; GE bis Klasse 10 &gt; Weltweite politische Ordnungen: Gesellschaft &gt; Vertiefungs - Inhalte">131800100203</key>
+<key parent="131800100203" cap="Geschichte (DE) &gt; GE bis Klasse 10 &gt; Weltweite politische Ordnungen: Gesellschaft &gt; Vertiefungs - Inhalte &gt; Biographie(n) in der Ausgrenzungsgesellschaft">13180010020301</key>
+<key parent="131800100203" cap="Geschichte (DE) &gt; GE bis Klasse 10 &gt; Weltweite politische Ordnungen: Gesellschaft &gt; Vertiefungs - Inhalte &gt; Umgang mit Fremdem">13180010020302</key>
+<key parent="13180010" cap="Geschichte (DE) &gt; GE bis Klasse 10 &gt; Weltweite politische Ordnungen: Herrschaft">1318001003</key>
+<key parent="1318001003" cap="Geschichte (DE) &gt; GE bis Klasse 10 &gt; Weltweite politische Ordnungen: Herrschaft &gt; Basis - Inhalte">131800100301</key>
+<key parent="131800100301" cap="Geschichte (DE) &gt; GE bis Klasse 10 &gt; Weltweite politische Ordnungen: Herrschaft &gt; Basis - Inhalte &gt; Übergang von Herrschaftsformen (Oktoberrevolution etc.)">13180010030101</key>
+<key parent="131800100301" cap="Geschichte (DE) &gt; GE bis Klasse 10 &gt; Weltweite politische Ordnungen: Herrschaft &gt; Basis - Inhalte &gt; Auswirkungen der unterschiedlichen Herrschaftsformen ">13180010030102</key>
+<key parent="131800100301" cap="Geschichte (DE) &gt; GE bis Klasse 10 &gt; Weltweite politische Ordnungen: Herrschaft &gt; Basis - Inhalte &gt; Ursachen und Anlässe der Weltkriege">13180010030103</key>
+<key parent="131800100301" cap="Geschichte (DE) &gt; GE bis Klasse 10 &gt; Weltweite politische Ordnungen: Herrschaft &gt; Basis - Inhalte &gt; Der Holocaust als Zivilisationsbruch">13180010030104</key>
+<key parent="1318001003" cap="Geschichte (DE) &gt; GE bis Klasse 10 &gt; Weltweite politische Ordnungen: Herrschaft &gt; Erweiterungs - Inhalte">131800100302</key>
+<key parent="131800100302" cap="Geschichte (DE) &gt; GE bis Klasse 10 &gt; Weltweite politische Ordnungen: Herrschaft &gt; Erweiterungs - Inhalte &gt; Herrschaftskritik in totalitären Systemen">13180010030201</key>
+<key parent="131800100302" cap="Geschichte (DE) &gt; GE bis Klasse 10 &gt; Weltweite politische Ordnungen: Herrschaft &gt; Erweiterungs - Inhalte &gt; Wandel zum modernen Krieg">13180010030202</key>
+<key parent="1318001003" cap="Geschichte (DE) &gt; GE bis Klasse 10 &gt; Weltweite politische Ordnungen: Herrschaft &gt; Vertiefungs - Inhalte">131800100303</key>
+<key parent="131800100303" cap="Geschichte (DE) &gt; GE bis Klasse 10 &gt; Weltweite politische Ordnungen: Herrschaft &gt; Vertiefungs - Inhalte &gt; Herrschaftsinszenierungen (Gemälde, Architektur)">13180010030301</key>
+<key parent="131800100303" cap="Geschichte (DE) &gt; GE bis Klasse 10 &gt; Weltweite politische Ordnungen: Herrschaft &gt; Vertiefungs - Inhalte &gt; Die Pariser Vorort - Verträge - Absichten und Folgen">13180010030302</key>
+<key parent="13180010" cap="Geschichte (DE) &gt; GE bis Klasse 10 &gt; Die weltweite politische Ordnungen: Wirtschaft">1318001004</key>
+<key parent="1318001004" cap="Geschichte (DE) &gt; GE bis Klasse 10 &gt; Die weltweite politische Ordnungen: Wirtschaft &gt; Basis - Inhalte">131800100401</key>
+<key parent="131800100401" cap="Geschichte (DE) &gt; GE bis Klasse 10 &gt; Die weltweite politische Ordnungen: Wirtschaft &gt; Basis - Inhalte &gt; Alltagsleben in verschiedenen Wirtschaftssystemen">13180010040101</key>
+<key parent="131800100401" cap="Geschichte (DE) &gt; GE bis Klasse 10 &gt; Die weltweite politische Ordnungen: Wirtschaft &gt; Basis - Inhalte &gt; Weltweite Erschließung neuer Wirtschaftssysteme">13180010040102</key>
+<key parent="131800100401" cap="Geschichte (DE) &gt; GE bis Klasse 10 &gt; Die weltweite politische Ordnungen: Wirtschaft &gt; Basis - Inhalte &gt; Wirtschaft im Interesse eines Staates">13180010040103</key>
+<key parent="131800100401" cap="Geschichte (DE) &gt; GE bis Klasse 10 &gt; Die weltweite politische Ordnungen: Wirtschaft &gt; Basis - Inhalte &gt; Krieg/e zur Durchsetzung von Interessen">13180010040104</key>
+<key parent="131800100401" cap="Geschichte (DE) &gt; GE bis Klasse 10 &gt; Die weltweite politische Ordnungen: Wirtschaft &gt; Basis - Inhalte &gt; Ursachen, Folgen, Bewältigung wirtschaftlicher Krisen">13180010040105</key>
+<key parent="1318001004" cap="Geschichte (DE) &gt; GE bis Klasse 10 &gt; Die weltweite politische Ordnungen: Wirtschaft &gt; Erweiterungs - Inhalte">131800100402</key>
+<key parent="131800100402" cap="Geschichte (DE) &gt; GE bis Klasse 10 &gt; Die weltweite politische Ordnungen: Wirtschaft &gt; Erweiterungs - Inhalte &gt; USA auf dem Weg zur Weltwirtschaftsmacht">13180010040201</key>
+<key parent="1318001004" cap="Geschichte (DE) &gt; GE bis Klasse 10 &gt; Die weltweite politische Ordnungen: Wirtschaft &gt; Vertiefungs - Inhalte">131800100403</key>
+<key parent="131800100403" cap="Geschichte (DE) &gt; GE bis Klasse 10 &gt; Die weltweite politische Ordnungen: Wirtschaft &gt; Vertiefungs - Inhalte &gt; Unternehmer in wirtschaftlichen/politischen Systemen">13180010040301</key>
+<key parent="131800100403" cap="Geschichte (DE) &gt; GE bis Klasse 10 &gt; Die weltweite politische Ordnungen: Wirtschaft &gt; Vertiefungs - Inhalte &gt; Städte als Brennpunkte wirtschaftlicher Dynamik">13180010040302</key>
+<key parent="13180010" cap="Geschichte (DE) &gt; GE bis Klasse 10 &gt; Die weltweite politische Ordnung: Weltdeutung">1318001005</key>
+<key parent="1318001005" cap="Geschichte (DE) &gt; GE bis Klasse 10 &gt; Die weltweite politische Ordnung: Weltdeutung &gt; Basis - Inhalte">131800100501</key>
+<key parent="131800100501" cap="Geschichte (DE) &gt; GE bis Klasse 10 &gt; Die weltweite politische Ordnung: Weltdeutung &gt; Basis - Inhalte &gt; Kennzeichen einer Ideologie">13180010050101</key>
+<key parent="131800100501" cap="Geschichte (DE) &gt; GE bis Klasse 10 &gt; Die weltweite politische Ordnung: Weltdeutung &gt; Basis - Inhalte &gt; Begründung und Träger von Ideologien">13180010050102</key>
+<key parent="131800100501" cap="Geschichte (DE) &gt; GE bis Klasse 10 &gt; Die weltweite politische Ordnung: Weltdeutung &gt; Basis - Inhalte &gt; Auswirkungen von Ideologien auf das Verhalten Einzelner">13180010050103</key>
+<key parent="131800100501" cap="Geschichte (DE) &gt; GE bis Klasse 10 &gt; Die weltweite politische Ordnung: Weltdeutung &gt; Basis - Inhalte &gt; Auseinandersetzungen zwischen Ideologien (z.B. 2. Weltkrieg)">13180010050104</key>
+<key parent="1318001005" cap="Geschichte (DE) &gt; GE bis Klasse 10 &gt; Die weltweite politische Ordnung: Weltdeutung &gt; Erweiterungs - Inhalte">131800100502</key>
+<key parent="131800100502" cap="Geschichte (DE) &gt; GE bis Klasse 10 &gt; Die weltweite politische Ordnung: Weltdeutung &gt; Erweiterungs - Inhalte &gt; Ideologien und ihre Propaganda">13180010050201</key>
+<key parent="1318001005" cap="Geschichte (DE) &gt; GE bis Klasse 10 &gt; Die weltweite politische Ordnung: Weltdeutung &gt; Vertiefungs - Inhalte">131800100503</key>
+<key parent="131800100503" cap="Geschichte (DE) &gt; GE bis Klasse 10 &gt; Die weltweite politische Ordnung: Weltdeutung &gt; Vertiefungs - Inhalte &gt; Instrumentalisierung von Kunst, Wissenschaft und Medien">13180010050301</key>
+<key parent="131800100503" cap="Geschichte (DE) &gt; GE bis Klasse 10 &gt; Die weltweite politische Ordnung: Weltdeutung &gt; Vertiefungs - Inhalte &gt; Verführung und Widerstand ">13180010050302</key>
+<key parent="131800100503" cap="Geschichte (DE) &gt; GE bis Klasse 10 &gt; Die weltweite politische Ordnung: Weltdeutung &gt; Vertiefungs - Inhalte &gt; Orte und Gelegenheiten der Ideologievermittlung">13180010050303</key>
+<key parent="13180010" cap="Geschichte (DE) &gt; GE bis Klasse 10 &gt; Die Welt nach 1945 - Orientierung">1318001006</key>
+<key parent="1318001006" cap="Geschichte (DE) &gt; GE bis Klasse 10 &gt; Die Welt nach 1945 - Orientierung &gt; Basis - Inhalte">131800100601</key>
+<key parent="131800100601" cap="Geschichte (DE) &gt; GE bis Klasse 10 &gt; Die Welt nach 1945 - Orientierung &gt; Basis - Inhalte &gt; Aufteilung der Welt in ideologisch-politische Blöcke">13180010060101</key>
+<key parent="131800100601" cap="Geschichte (DE) &gt; GE bis Klasse 10 &gt; Die Welt nach 1945 - Orientierung &gt; Basis - Inhalte &gt; Spaltung Europas in der Zeit des Kalten Krieges">13180010060102</key>
+<key parent="131800100601" cap="Geschichte (DE) &gt; GE bis Klasse 10 &gt; Die Welt nach 1945 - Orientierung &gt; Basis - Inhalte &gt; Die Integration der deutschen Teilstaaten">13180010060103</key>
+<key parent="131800100601" cap="Geschichte (DE) &gt; GE bis Klasse 10 &gt; Die Welt nach 1945 - Orientierung &gt; Basis - Inhalte &gt; Historische Entwicklung Deutschlands">13180010060104</key>
+<key parent="1318001006" cap="Geschichte (DE) &gt; GE bis Klasse 10 &gt; Die Welt nach 1945 - Orientierung &gt; Erweiterungs - Inhalte">131800100602</key>
+<key parent="131800100602" cap="Geschichte (DE) &gt; GE bis Klasse 10 &gt; Die Welt nach 1945 - Orientierung &gt; Erweiterungs - Inhalte &gt; Die deutsch - französischen Beziehungen ">13180010060201</key>
+<key parent="131800100602" cap="Geschichte (DE) &gt; GE bis Klasse 10 &gt; Die Welt nach 1945 - Orientierung &gt; Erweiterungs - Inhalte &gt; 1948/49,1968/69,1989/90: Epochenjahre und ihre Auswirkungen">13180010060202</key>
+<key parent="1318001006" cap="Geschichte (DE) &gt; GE bis Klasse 10 &gt; Die Welt nach 1945 - Orientierung &gt; Vertiefungs - Inhalte">131800100603</key>
+<key parent="131800100603" cap="Geschichte (DE) &gt; GE bis Klasse 10 &gt; Die Welt nach 1945 - Orientierung &gt; Vertiefungs - Inhalte &gt;  Schul- und/oder Städtepartnerschaft ">13180010060301</key>
+<key parent="13180010" cap="Geschichte (DE) &gt; GE bis Klasse 10 &gt; Die Welt nach 1945 - Gesellschaft">1318001007</key>
+<key parent="1318001007" cap="Geschichte (DE) &gt; GE bis Klasse 10 &gt; Die Welt nach 1945 - Gesellschaft &gt; Basis - Inhalte">131800100701</key>
+<key parent="131800100701" cap="Geschichte (DE) &gt; GE bis Klasse 10 &gt; Die Welt nach 1945 - Gesellschaft &gt; Basis - Inhalte &gt; Gesellschaftliche Konflikte in Ost und West (1960er)">13180010070101</key>
+<key parent="131800100701" cap="Geschichte (DE) &gt; GE bis Klasse 10 &gt; Die Welt nach 1945 - Gesellschaft &gt; Basis - Inhalte &gt; Alltagsleben im Spannungsfeld von Sicherheit und Freiheit">13180010070102</key>
+<key parent="131800100701" cap="Geschichte (DE) &gt; GE bis Klasse 10 &gt; Die Welt nach 1945 - Gesellschaft &gt; Basis - Inhalte &gt; Aufbrechen historisch bedingter gesellschaftl. Strukturen">13180010070103</key>
+<key parent="131800100701" cap="Geschichte (DE) &gt; GE bis Klasse 10 &gt; Die Welt nach 1945 - Gesellschaft &gt; Basis - Inhalte &gt; Rheinland-Pfalz: Ein Nachkriegsbundesland entwickelt sich">13180010070104</key>
+<key parent="1318001007" cap="Geschichte (DE) &gt; GE bis Klasse 10 &gt; Die Welt nach 1945 - Gesellschaft &gt; Erweiterungs - Inhalte">131800100702</key>
+<key parent="131800100702" cap="Geschichte (DE) &gt; GE bis Klasse 10 &gt; Die Welt nach 1945 - Gesellschaft &gt; Erweiterungs - Inhalte &gt; Unterschiedliche Formen von Migration und Integration">13180010070201</key>
+<key parent="131800100702" cap="Geschichte (DE) &gt; GE bis Klasse 10 &gt; Die Welt nach 1945 - Gesellschaft &gt; Erweiterungs - Inhalte &gt; Unterschiedliche Identitäten von Menschen in Europa">13180010070202</key>
+<key parent="1318001007" cap="Geschichte (DE) &gt; GE bis Klasse 10 &gt; Die Welt nach 1945 - Gesellschaft &gt; Vertiefungs - Inhalte">131800100703</key>
+<key parent="131800100703" cap="Geschichte (DE) &gt; GE bis Klasse 10 &gt; Die Welt nach 1945 - Gesellschaft &gt; Vertiefungs - Inhalte &gt; Identitätsbildung durch sportliche Großereignisse">13180010070301</key>
+<key parent="13180010" cap="Geschichte (DE) &gt; GE bis Klasse 10 &gt; Die Welt nach 1945 - Herrschaft">1318001008</key>
+<key parent="1318001008" cap="Geschichte (DE) &gt; GE bis Klasse 10 &gt; Die Welt nach 1945 - Herrschaft &gt; Basis - Inhalte">131800100801</key>
+<key parent="131800100801" cap="Geschichte (DE) &gt; GE bis Klasse 10 &gt; Die Welt nach 1945 - Herrschaft &gt; Basis - Inhalte &gt; BRD/DDR: Herausbildung unterschiedlicher Herrschaftssysteme">13180010080101</key>
+<key parent="131800100801" cap="Geschichte (DE) &gt; GE bis Klasse 10 &gt; Die Welt nach 1945 - Herrschaft &gt; Basis - Inhalte &gt; Die Vereinigung von BRD und DDR">13180010080102</key>
+<key parent="131800100801" cap="Geschichte (DE) &gt; GE bis Klasse 10 &gt; Die Welt nach 1945 - Herrschaft &gt; Basis - Inhalte &gt; Wirtschaftl. Zusammenarbeit in Europa">13180010080103</key>
+<key parent="131800100801" cap="Geschichte (DE) &gt; GE bis Klasse 10 &gt; Die Welt nach 1945 - Herrschaft &gt; Basis - Inhalte &gt; Historische Entwicklung der Europäischen Integration">13180010080104</key>
+<key parent="1318001008" cap="Geschichte (DE) &gt; GE bis Klasse 10 &gt; Die Welt nach 1945 - Herrschaft &gt; Erweiterungs - Inhalte">131800100802</key>
+<key parent="131800100802" cap="Geschichte (DE) &gt; GE bis Klasse 10 &gt; Die Welt nach 1945 - Herrschaft &gt; Erweiterungs - Inhalte &gt; NATO/Warschauer Pakt: Spiegel der politischen Entwicklung">13180010080201</key>
+<key parent="131800100802" cap="Geschichte (DE) &gt; GE bis Klasse 10 &gt; Die Welt nach 1945 - Herrschaft &gt; Erweiterungs - Inhalte &gt; Neue Machtkonstellationen nach 1990">13180010080202</key>
+<key parent="1318001008" cap="Geschichte (DE) &gt; GE bis Klasse 10 &gt; Die Welt nach 1945 - Herrschaft &gt; Vertiefungs - Inhalte">131800100803</key>
+<key parent="131800100803" cap="Geschichte (DE) &gt; GE bis Klasse 10 &gt; Die Welt nach 1945 - Herrschaft &gt; Vertiefungs - Inhalte &gt; Menschen machen gemeinsam Politik">13180010080301</key>
+<key parent="13180010" cap="Geschichte (DE) &gt; GE bis Klasse 10 &gt; Die Welt nach 1945 - Wirtschaft">1318001009</key>
+<key parent="1318001009" cap="Geschichte (DE) &gt; GE bis Klasse 10 &gt; Die Welt nach 1945 - Wirtschaft &gt; Basis - Inhalte">131800100901</key>
+<key parent="131800100901" cap="Geschichte (DE) &gt; GE bis Klasse 10 &gt; Die Welt nach 1945 - Wirtschaft &gt; Basis - Inhalte &gt; Auswirkungen der Wirtschaftsformen auf die Lebenswelten ">13180010090101</key>
+<key parent="131800100901" cap="Geschichte (DE) &gt; GE bis Klasse 10 &gt; Die Welt nach 1945 - Wirtschaft &gt; Basis - Inhalte &gt; Historische Grundlagen der Globalisierung">13180010090102</key>
+<key parent="1318001009" cap="Geschichte (DE) &gt; GE bis Klasse 10 &gt; Die Welt nach 1945 - Wirtschaft &gt; Erweiterungs - Inhalte">131800100902</key>
+<key parent="131800100902" cap="Geschichte (DE) &gt; GE bis Klasse 10 &gt; Die Welt nach 1945 - Wirtschaft &gt; Erweiterungs - Inhalte &gt; Industriegebiete &amp; industrielle Ballungsräume">13180010090201</key>
+<key parent="131800100902" cap="Geschichte (DE) &gt; GE bis Klasse 10 &gt; Die Welt nach 1945 - Wirtschaft &gt; Erweiterungs - Inhalte &gt; Unterschiedliche wirtschaftl. Entwicklung ehemal. Kolonien">13180010090202</key>
+<key parent="131800100902" cap="Geschichte (DE) &gt; GE bis Klasse 10 &gt; Die Welt nach 1945 - Wirtschaft &gt; Erweiterungs - Inhalte &gt; Ressourcenverteilung/-konflikte als Begleiterscheinung">13180010090203</key>
+<key parent="1318001009" cap="Geschichte (DE) &gt; GE bis Klasse 10 &gt; Die Welt nach 1945 - Wirtschaft &gt; Vertiefungs - Inhalte">131800100903</key>
+<key parent="131800100903" cap="Geschichte (DE) &gt; GE bis Klasse 10 &gt; Die Welt nach 1945 - Wirtschaft &gt; Vertiefungs - Inhalte &gt; Ruanda &amp; RLP: Verwantwortung für ein ehemal. Kolonialgebiet">13180010090301</key>
+<key parent="13180010" cap="Geschichte (DE) &gt; GE bis Klasse 10 &gt; Die Welt nach 1945 - Weltdeutung">1318001010</key>
+<key parent="1318001010" cap="Geschichte (DE) &gt; GE bis Klasse 10 &gt; Die Welt nach 1945 - Weltdeutung &gt; Basis - Inhalte">131800101001</key>
+<key parent="131800101001" cap="Geschichte (DE) &gt; GE bis Klasse 10 &gt; Die Welt nach 1945 - Weltdeutung &gt; Basis - Inhalte &gt; Unterschiedliche Menschenbilder in den Herrschaftssystemen">13180010100101</key>
+<key parent="131800101001" cap="Geschichte (DE) &gt; GE bis Klasse 10 &gt; Die Welt nach 1945 - Weltdeutung &gt; Basis - Inhalte &gt; Kampf um die Universalität der Menschenrechte">13180010100102</key>
+<key parent="131800101001" cap="Geschichte (DE) &gt; GE bis Klasse 10 &gt; Die Welt nach 1945 - Weltdeutung &gt; Basis - Inhalte &gt; Überwindung des Nationalsozialismus">13180010100103</key>
+<key parent="1318001010" cap="Geschichte (DE) &gt; GE bis Klasse 10 &gt; Die Welt nach 1945 - Weltdeutung &gt; Erweiterungs - Inhalte">131800101002</key>
+<key parent="131800101002" cap="Geschichte (DE) &gt; GE bis Klasse 10 &gt; Die Welt nach 1945 - Weltdeutung &gt; Erweiterungs - Inhalte &gt; Historische Säule der sich wandelnden EU">13180010100201</key>
+<key parent="131800101002" cap="Geschichte (DE) &gt; GE bis Klasse 10 &gt; Die Welt nach 1945 - Weltdeutung &gt; Erweiterungs - Inhalte &gt; Terrorismus">13180010100202</key>
+<key parent="1318001010" cap="Geschichte (DE) &gt; GE bis Klasse 10 &gt; Die Welt nach 1945 - Weltdeutung &gt; Vertiefungs - Inhalte">131800101003</key>
+<key parent="131800101003" cap="Geschichte (DE) &gt; GE bis Klasse 10 &gt; Die Welt nach 1945 - Weltdeutung &gt; Vertiefungs - Inhalte &gt; Ideologien und deren Vertreter ">13180010100301</key>
+<key parent="" cap="Sozialkunde (DE)">133600</key>
+<key parent="133600" cap="SK bis Klasse 8">13360008</key>
+<key parent="13360008" cap="SK bis Klasse 8 &gt; Demokratie im Erfahrungsbereich der Jugendlichen">1336000801</key>
+<key parent="1336000801" cap="SK bis Klasse 8 &gt; Demokratie im Erfahrungsbereich der Jugendlichen &gt; Basis - Inhalte">133600080101</key>
+<key parent="133600080101" cap="SK bis Klasse 8 &gt; Demokratie im Erfahrungsbereich der Jugendlichen &gt; Basis - Inhalte &gt; Demokratische Mitwirkungs-&amp; Gestaltungsmöglichkeiten">13360008010101</key>
+<key parent="133600080101" cap="SK bis Klasse 8 &gt; Demokratie im Erfahrungsbereich der Jugendlichen &gt; Basis - Inhalte &gt; Realisierbarkeit politischer Entscheidungen">13360008010102</key>
+<key parent="1336000801" cap="SK bis Klasse 8 &gt; Demokratie im Erfahrungsbereich der Jugendlichen &gt; Erweiterungs - Inhalte">133600080102</key>
+<key parent="133600080102" cap="SK bis Klasse 8 &gt; Demokratie im Erfahrungsbereich der Jugendlichen &gt; Erweiterungs - Inhalte &gt; Beteiligungsmöglichkeiten">13360008010201</key>
+<key parent="133600080102" cap="SK bis Klasse 8 &gt; Demokratie im Erfahrungsbereich der Jugendlichen &gt; Erweiterungs - Inhalte &gt; Demokratische Entscheidungsprozesse">13360008010202</key>
+<key parent="1336000801" cap="SK bis Klasse 8 &gt; Demokratie im Erfahrungsbereich der Jugendlichen &gt; Vertiefungs - Inhalte">133600080103</key>
+<key parent="133600080103" cap="SK bis Klasse 8 &gt; Demokratie im Erfahrungsbereich der Jugendlichen &gt; Vertiefungs - Inhalte &gt; Kommunalwahlrecht">13360008010301</key>
+<key parent="133600080103" cap="SK bis Klasse 8 &gt; Demokratie im Erfahrungsbereich der Jugendlichen &gt; Vertiefungs - Inhalte &gt; Wahlrecht für Jugendliche">13360008010302</key>
+<key parent="13360008" cap="SK bis Klasse 8 &gt; Familie in Gesellschaft und Staat">1336000802</key>
+<key parent="1336000802" cap="SK bis Klasse 8 &gt; Familie in Gesellschaft und Staat &gt; Basis - Inhalte">133600080201</key>
+<key parent="133600080201" cap="SK bis Klasse 8 &gt; Familie in Gesellschaft und Staat &gt; Basis - Inhalte &gt; Familiäre Lebensformen">13360008020101</key>
+<key parent="133600080201" cap="SK bis Klasse 8 &gt; Familie in Gesellschaft und Staat &gt; Basis - Inhalte &gt; Aufgabe der Familie">13360008020102</key>
+<key parent="133600080201" cap="SK bis Klasse 8 &gt; Familie in Gesellschaft und Staat &gt; Basis - Inhalte &gt; Aufgabe des Staates">13360008020103</key>
+<key parent="1336000802" cap="SK bis Klasse 8 &gt; Familie in Gesellschaft und Staat &gt; Erweiterungs - Inhalte">133600080202</key>
+<key parent="133600080202" cap="SK bis Klasse 8 &gt; Familie in Gesellschaft und Staat &gt; Erweiterungs - Inhalte &gt; Vereinbarkeit von Familie &amp; Beruf">13360008020201</key>
+<key parent="1336000802" cap="SK bis Klasse 8 &gt; Familie in Gesellschaft und Staat &gt; Vertiefungs - Inhalte">133600080203</key>
+<key parent="133600080203" cap="SK bis Klasse 8 &gt; Familie in Gesellschaft und Staat &gt; Vertiefungs - Inhalte &gt; Kinderarmut">13360008020301</key>
+<key parent="13360008" cap="SK bis Klasse 8 &gt; Leben in der Mediengesellschaft">1336000803</key>
+<key parent="1336000803" cap="SK bis Klasse 8 &gt; Leben in der Mediengesellschaft &gt; Basis - Inhalte">133600080301</key>
+<key parent="133600080301" cap="SK bis Klasse 8 &gt; Leben in der Mediengesellschaft &gt; Basis - Inhalte &gt; Medien im Alltag Jugendlicher">13360008030101</key>
+<key parent="133600080301" cap="SK bis Klasse 8 &gt; Leben in der Mediengesellschaft &gt; Basis - Inhalte &gt; Verantwortlicher Umgang mit Daten">13360008030102</key>
+<key parent="133600080301" cap="SK bis Klasse 8 &gt; Leben in der Mediengesellschaft &gt; Basis - Inhalte &gt; Massenmedien, Meinungs-&amp; Pressefreiheit">13360008030103</key>
+<key parent="1336000803" cap="SK bis Klasse 8 &gt; Leben in der Mediengesellschaft &gt; Erweiterungs - Inhalte">133600080302</key>
+<key parent="133600080302" cap="SK bis Klasse 8 &gt; Leben in der Mediengesellschaft &gt; Erweiterungs - Inhalte &gt; Relevanz der öffentlich-rechtlichen Sender">13360008030201</key>
+<key parent="133600080302" cap="SK bis Klasse 8 &gt; Leben in der Mediengesellschaft &gt; Erweiterungs - Inhalte &gt; Medien zwischen Information &amp; Sensation">13360008030202</key>
+<key parent="1336000803" cap="SK bis Klasse 8 &gt; Leben in der Mediengesellschaft &gt; Vertiefungs - Inhalte">133600080303</key>
+<key parent="133600080303" cap="SK bis Klasse 8 &gt; Leben in der Mediengesellschaft &gt; Vertiefungs - Inhalte &gt; Politische Beteiligung der Bürger">13360008030301</key>
+<key parent="133600080303" cap="SK bis Klasse 8 &gt; Leben in der Mediengesellschaft &gt; Vertiefungs - Inhalte &gt; Medienkonzentration, Medienmacht">13360008030302</key>
+<key parent="133600" cap="SK bis Klasse 9">13360009</key>
+<key parent="13360009" cap="SK bis Klasse 9 &gt; Wirtschaft">1336000904</key>
+<key parent="1336000904" cap="SK bis Klasse 9 &gt; Wirtschaft &gt; Basis - Inhalte">133600090401</key>
+<key parent="133600090401" cap="SK bis Klasse 9 &gt; Wirtschaft &gt; Basis - Inhalte &gt; Jugendliche als Konsumenten auf globalen Märkten">13360009040101</key>
+<key parent="133600090401" cap="SK bis Klasse 9 &gt; Wirtschaft &gt; Basis - Inhalte &gt; Konsequenzen von Kaufentscheidungen">13360009040102</key>
+<key parent="133600090401" cap="SK bis Klasse 9 &gt; Wirtschaft &gt; Basis - Inhalte &gt; Preisbildung, Markt, Wettbewerb">13360009040103</key>
+<key parent="133600090401" cap="SK bis Klasse 9 &gt; Wirtschaft &gt; Basis - Inhalte &gt; Tarifautonomie, Tarifkonflikt">13360009040104</key>
+<key parent="133600090401" cap="SK bis Klasse 9 &gt; Wirtschaft &gt; Basis - Inhalte &gt; Soziale Marktwirtschaft">13360009040105</key>
+<key parent="133600090401" cap="SK bis Klasse 9 &gt; Wirtschaft &gt; Basis - Inhalte &gt; Ökonomie, Umweltpolitik">13360009040106</key>
+<key parent="1336000904" cap="SK bis Klasse 9 &gt; Wirtschaft &gt; Erweiterungs - Inhalte">133600090402</key>
+<key parent="133600090402" cap="SK bis Klasse 9 &gt; Wirtschaft &gt; Erweiterungs - Inhalte &gt; Verbraucherschutz">13360009040201</key>
+<key parent="133600090402" cap="SK bis Klasse 9 &gt; Wirtschaft &gt; Erweiterungs - Inhalte &gt; Sozialstaat, Soziale Marktwirtschaft">13360009040202</key>
+<key parent="1336000904" cap="SK bis Klasse 9 &gt; Wirtschaft &gt; Vertiefungs - Inhalte">133600090403</key>
+<key parent="133600090403" cap="SK bis Klasse 9 &gt; Wirtschaft &gt; Vertiefungs - Inhalte &gt; Arbeitsmarkt im Wandel">13360009040301</key>
+<key parent="133600090403" cap="SK bis Klasse 9 &gt; Wirtschaft &gt; Vertiefungs - Inhalte &gt; Globalisierung, Standort Deutschland">13360009040302</key>
+<key parent="13360009" cap="SK bis Klasse 9 &gt; Die politische Ordnung der BRD">1336000905</key>
+<key parent="1336000905" cap="SK bis Klasse 9 &gt; Die politische Ordnung der BRD &gt; Basis - Inhalte">133600090501</key>
+<key parent="133600090501" cap="SK bis Klasse 9 &gt; Die politische Ordnung der BRD &gt; Basis - Inhalte &gt; Möglichkeiten politischer Beteiligung">13360009050101</key>
+<key parent="133600090501" cap="SK bis Klasse 9 &gt; Die politische Ordnung der BRD &gt; Basis - Inhalte &gt; Aufgaben von Parteien">13360009050102</key>
+<key parent="133600090501" cap="SK bis Klasse 9 &gt; Die politische Ordnung der BRD &gt; Basis - Inhalte &gt; Wahlkampf, Wahlen, Regierungsbildung">13360009050103</key>
+<key parent="133600090501" cap="SK bis Klasse 9 &gt; Die politische Ordnung der BRD &gt; Basis - Inhalte &gt; Bundestagsabgeordneter">13360009050104</key>
+<key parent="133600090501" cap="SK bis Klasse 9 &gt; Die politische Ordnung der BRD &gt; Basis - Inhalte &gt; Bundeskanzler/Bundeskanzlerin">13360009050105</key>
+<key parent="133600090501" cap="SK bis Klasse 9 &gt; Die politische Ordnung der BRD &gt; Basis - Inhalte &gt; Verfassungsorgane">13360009050106</key>
+<key parent="133600090501" cap="SK bis Klasse 9 &gt; Die politische Ordnung der BRD &gt; Basis - Inhalte &gt; Föderalismus">13360009050107</key>
+<key parent="1336000905" cap="SK bis Klasse 9 &gt; Die politische Ordnung der BRD &gt; Erweiterungs - Inhalte">133600090502</key>
+<key parent="133600090502" cap="SK bis Klasse 9 &gt; Die politische Ordnung der BRD &gt; Erweiterungs - Inhalte &gt; Opposition, parlamentarische Demokratie">13360009050201</key>
+<key parent="133600090502" cap="SK bis Klasse 9 &gt; Die politische Ordnung der BRD &gt; Erweiterungs - Inhalte &gt; Jugendliche &amp; (Partei-)Politik">13360009050202</key>
+<key parent="133600090502" cap="SK bis Klasse 9 &gt; Die politische Ordnung der BRD &gt; Erweiterungs - Inhalte &gt; Politischer Extremismus">13360009050203</key>
+<key parent="1336000905" cap="SK bis Klasse 9 &gt; Die politische Ordnung der BRD &gt; Vertiefungs - Inhalte">133600090503</key>
+<key parent="133600090503" cap="SK bis Klasse 9 &gt; Die politische Ordnung der BRD &gt; Vertiefungs - Inhalte &gt; Direkte Demokratie auf Landes-&amp; Bundesebene">13360009050301</key>
+<key parent="133600090503" cap="SK bis Klasse 9 &gt; Die politische Ordnung der BRD &gt; Vertiefungs - Inhalte &gt; Bundespräsident">13360009050302</key>
+<key parent="133600090503" cap="SK bis Klasse 9 &gt; Die politische Ordnung der BRD &gt; Vertiefungs - Inhalte &gt; Bundesverfassungsgericht">13360009050303</key>
+<key parent="133600" cap="Sk bis Klasse 10">13360010</key>
+<key parent="13360010" cap="Sk bis Klasse 10 &gt; Recht und Rechtsprechung">1336001001</key>
+<key parent="1336001001" cap="Sk bis Klasse 10 &gt; Recht und Rechtsprechung &gt; Basis - Inhalte">133600100101</key>
+<key parent="133600100101" cap="Sk bis Klasse 10 &gt; Recht und Rechtsprechung &gt; Basis - Inhalte &gt; Rechte/Pflichten von Jugendlichen">13360010010101</key>
+<key parent="133600100101" cap="Sk bis Klasse 10 &gt; Recht und Rechtsprechung &gt; Basis - Inhalte &gt; Jugendstrafrecht">13360010010102</key>
+<key parent="133600100101" cap="Sk bis Klasse 10 &gt; Recht und Rechtsprechung &gt; Basis - Inhalte &gt; Gerichtsverhandlungen, Strafvollzug">13360010010103</key>
+<key parent="133600100101" cap="Sk bis Klasse 10 &gt; Recht und Rechtsprechung &gt; Basis - Inhalte &gt; Intervention von Straf-&amp; Zivilprozess">13360010010104</key>
+<key parent="1336001001" cap="Sk bis Klasse 10 &gt; Recht und Rechtsprechung &gt; Erweiterungs - Inhalte">133600100102</key>
+<key parent="133600100102" cap="Sk bis Klasse 10 &gt; Recht und Rechtsprechung &gt; Erweiterungs - Inhalte &gt; Resozialisierung">13360010010201</key>
+<key parent="133600100102" cap="Sk bis Klasse 10 &gt; Recht und Rechtsprechung &gt; Erweiterungs - Inhalte &gt; Jugendstrafrecht: Reformkonzepte, Alternativen ">13360010010202</key>
+<key parent="1336001001" cap="Sk bis Klasse 10 &gt; Recht und Rechtsprechung &gt; Vertiefungs - Inhalte">133600100103</key>
+<key parent="133600100103" cap="Sk bis Klasse 10 &gt; Recht und Rechtsprechung &gt; Vertiefungs - Inhalte &gt; Alltag ohne Menschenrechte">13360010010301</key>
+<key parent="13360010" cap="Sk bis Klasse 10">1336001002</key>
+<key parent="1336001002" cap="Sk bis Klasse 10 &gt; Politik in der Europäischen Union">133600100201</key>
+<key parent="133600100201" cap="Sk bis Klasse 10 &gt; Politik in der Europäischen Union &gt; Basis - Inhalte &gt; Die EU im Alltag von Jugendlichen ">13360010020101</key>
+<key parent="133600100201" cap="Sk bis Klasse 10 &gt; Politik in der Europäischen Union &gt; Basis - Inhalte &gt; Politische Partizipation für EU - Bürger">13360010020102</key>
+<key parent="133600100201" cap="Sk bis Klasse 10 &gt; Politik in der Europäischen Union &gt; Basis - Inhalte &gt; Europäische Institutionen im Entscheidungsprozess">13360010020103</key>
+<key parent="133600100201" cap="Sk bis Klasse 10 &gt; Politik in der Europäischen Union &gt; Basis - Inhalte &gt; Grenzen der europäischen Einigung">13360010020104</key>
+<key parent="1336001002" cap="Sk bis Klasse 10 &gt; Politik in der Europäischen Union &gt; Erweiterungs - Inhalte">133600100202</key>
+<key parent="133600100202" cap="Sk bis Klasse 10 &gt; Politik in der Europäischen Union &gt; Erweiterungs - Inhalte &gt; Aktuelle Herausforderungen der EU">13360010020201</key>
+<key parent="1336001002" cap="Sk bis Klasse 10 &gt; Politik in der Europäischen Union &gt; Vertiefungs - Inhalte">133600100203</key>
+<key parent="133600100203" cap="Sk bis Klasse 10 &gt; Politik in der Europäischen Union &gt; Vertiefungs - Inhalte &gt; Die Außenpolitik der EU">13360010020301</key>
+<key parent="13360010" cap="Sk bis Klasse 10 &gt; Frieden und Sicherheit">1336001003</key>
+<key parent="1336001003" cap="Sk bis Klasse 10 &gt; Frieden und Sicherheit &gt; Basis - Inhalte">133600100301</key>
+<key parent="133600100301" cap="Sk bis Klasse 10 &gt; Frieden und Sicherheit &gt; Basis - Inhalte &gt; Bedrohung von Frieden und Sicherheit">13360010030101</key>
+<key parent="133600100301" cap="Sk bis Klasse 10 &gt; Frieden und Sicherheit &gt; Basis - Inhalte &gt; Analyse eines internationalen Konfliktes">13360010030102</key>
+<key parent="133600100301" cap="Sk bis Klasse 10 &gt; Frieden und Sicherheit &gt; Basis - Inhalte &gt; UNO / NATO; Möglichkeiten &amp; Grenzen">13360010030103</key>
+<key parent="1336001003" cap="Sk bis Klasse 10 &gt; Frieden und Sicherheit &gt; Erweiterungs - Inhalte">133600100302</key>
+<key parent="133600100302" cap="Sk bis Klasse 10 &gt; Frieden und Sicherheit &gt; Erweiterungs - Inhalte &gt; Bundeswehreinsatz">13360010030201</key>
+<key parent="133600100302" cap="Sk bis Klasse 10 &gt; Frieden und Sicherheit &gt; Erweiterungs - Inhalte &gt; NGO's">13360010030202</key>
+<key parent="133600100302" cap="Sk bis Klasse 10 &gt; Frieden und Sicherheit &gt; Erweiterungs - Inhalte &gt; Kinder und Jugendliche im Krieg">13360010030203</key>
+<key parent="1336001003" cap="Sk bis Klasse 10 &gt; Frieden und Sicherheit &gt; Vertiefungs - Inhalte">133600100303</key>
+<key parent="133600100303" cap="Sk bis Klasse 10 &gt; Frieden und Sicherheit &gt; Vertiefungs - Inhalte &gt; Internationaler Strafgerichtshof">13360010030301</key>
+<key parent="133600100303" cap="Sk bis Klasse 10 &gt; Frieden und Sicherheit &gt; Vertiefungs - Inhalte &gt; Friedenssicherung in Europa durch die OSZE">13360010030302</key>
+		
+</valuespace>
+</valuespaces>

@@ -1,9 +1,6 @@
 package org.edu_sharing.repository.server.exporter;
 
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.Serializable;
+import java.io.*;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
@@ -57,8 +54,18 @@ public class OAILOMExporter {
 		// root element record
 		doc = docBuilder.newDocument();
 	}
-
 	public void export(String outputDir) {
+		try {
+			String sourceId = nodeRef.getId();
+
+			File f = new File(outputDir + "/" + sourceId + ".xml");
+			FileOutputStream os=new FileOutputStream(f);
+
+		} catch (IOException e) {
+			logger.error(e.getMessage(), e);
+		}
+	}
+	public void write(OutputStream os) {
 
 		QName type = nodeService.getType(nodeRef);
 
@@ -248,11 +255,6 @@ public class OAILOMExporter {
 		
 		//formatted output
 		try{
-			String sourceId = nodeRef.getId();
-			
-			File f = new File(outputDir + "/" + sourceId +".xml");
-			FileOutputStream os = new FileOutputStream(f);
-			
 			XMLSerializer serializer = new XMLSerializer(os, new OutputFormat(doc,"UTF-8", true));
 			serializer.serialize(doc);
 		}catch(IOException e){

@@ -1,0 +1,353 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<valuespaces>
+	<!-- VCARD RegExp: FN:[a-zA-Z]* N: -->
+	<valuespace property="{http://www.campuscontent.de/model/1.0}lifecyclecontributer_publisher">
+		<key>A Med-World AG</key>
+		<key>ACT Servicestelle für österreichische Übungsfirmen</key>
+		<key>ARAL</key>
+		<key>Abteilung Klinische Sozialmedizin</key>
+		<key>Access-home.de</key>
+		<key>Afrika</key>
+		<key>Allgemeiner Blinden- und Sehbehindertenverein</key>
+		<key>allgemeinbildung.ch</key>
+		<key>Andreas Tillmann Haldenweg 25 89160 Tomerdingen</key>
+		<key>Andriz,Rod</key>
+		<key>Arbeiterkammer Wien</key>
+		<key>Arbeitsgemeinschaft Wirtschaft und Schule (AWS)</key>
+		<key>Archimedes Lab</key>
+		<key>Archäologisches Institut der Uni Göttingen</key>
+		<key>atcaonline.com</key>
+		<key>AuGaLa</key>
+		<key>BBC</key>
+		<key>BBC Germany</key>
+		<key>BMBWK Abt. V/14</key>
+		<key>BR - Bayerischer Rundfunk (München)</key>
+		<key>Babelnet</key>
+		<key>Bauer,H.</key>
+		<key>Baumann,Antje</key>
+		<key>Bayrischer Rundfunk</key>
+		<key>Beethoven-Haus Bonn Bonngasse 18-26 53111 Bonn</key>
+		<key>Berliner Portal zur Anmeldung - Vermittlung - Recherche von E-Mail Partnern</key>
+		<key>bernnet AG</key>
+		<key>Bernheiden,Jens</key>
+		<key>Bildungsverlag EINS</key>
+		<key>Bio Verlag GmbH</key>
+		<key>Biocur</key>
+		<key>Bionetworx</key>
+		<key>Blaschke,Rainer</key>
+		<key>Bockisch,Sven</key>
+		<key>Bohrmann-Linde,Claudia</key>
+		<key>Botanischer Garten der Ruhr-Universität Bochum</key>
+		<key>braingle</key>
+		<key>Bremer,Claudia</key>
+		<key>Bremer,Stefanie</key>
+		<key>Brigitte Wiesinger,Brigitte</key>
+		<key>British Broadcasting Corporation</key>
+		<key>Brown,Pearson</key>
+		<key>Bundesamt für Naturschutz</key>
+		<key>Bundesministerium f. Umwelt, Naturschutz u. Reaktorsicherheit (Berlin)</key>
+		<key>Bundesministerium für Arbeit und Wirtschaft</key>
+		<key>Bundesministerium für Inneres</key>
+		<key>Bundeszentrale für politische Bildung</key>
+		<key>businessgames.com</key>
+		<key>Capital Community Foundation</key>
+		<key>cartecc.com</key>
+		<key>Chefkoch.de</key>
+		<key>Cintron,Karin</key>
+		<key>code-knacker.de</key>
+		<key>College-Radio</key>
+		<key>Contake\TiBS</key>
+		<key>Computerlexikon.com</key>
+		<key>DRK-Blutspendedienst West (Ratingen)</key>
+		<key>Daab,Hans-Ulrich</key>
+		<key>Das Kochrezept.de</key>
+		<key>Dautel,Klaus</key>
+		<key>Davis,Randall</key>
+		<key>Derungs,Lorenz</key>
+		<key>Deutsche Stiftung Organtransplantation (Neu-Isenburg)</key>
+		<key>Deutsche Welle</key>
+		<key>Deutsche Welle (Bonn)</key>
+		<key>Deutscher Taschenbuch Verlag</key>
+		<key>Deutsches Historisches Museum - GmbH</key>
+		<key>deutsches Museum online</key>
+		<key>Deutsches Zentrum für Luft- und Raumfahrt e.V.</key>
+		<key>Deutschlandfunk</key>
+		<key>Didaktik der Physik Universität Bayreuth</key>
+		<key>Dietrich,Walter</key>
+		<key>Discovery Channel</key>
+		<key>Discovery Education</key>
+		<key>Drug Enforcement Administration</key>
+		<key>Dökel,Nicola Jayne</key>
+		<key>ESA/ESTEC (Noordwijk)</key>
+		<key>EUFIC</key>
+		<key>Ebenhofer,Marianne</key>
+		<key>Ebner,Werner</key>
+		<key>EDMOND</key>
+		<key>Education Highway</key>
+		<key>Edufind.com</key>
+		<key>Egle,Gert</key>
+		<key>Egler,Maria</key>
+		<key>ego4u</key>
+		<key>Eickhoff,Axel</key>
+		<key>Embacher,Franz</key>
+		<key>Englisch-hilfen.de</key>
+		<key>English Language Center</key>
+		<key>esl.about.com</key>
+		<key>Essberger,Josef</key>
+		<key>Europa Webteam</key>
+		<key>European Council of Young Farmers</key>
+		<key>European Space Agency</key>
+		<key>faszinationlicht.de</key>
+		<key>FILM + SCHULE NRW (Münster)</key>
+		<key>FLECKENSTEIN,JENS</key>
+		<key>FWU</key>
+		<key>FWU Institut für Film und Bild in Wissenschaft und Unterricht</key>
+		<key>FWU (Melt)</key>
+		<key>Farbe.com</key>
+		<key>Fendt,Walter</key>
+		<key>Field,Simon</key>
+		<key>Finkeldei,Verena</key>
+		<key>Fischer,Elmar</key>
+		<key>Fondation RESTENA ( The RESTENA Foundation )</key>
+		<key>Fonds der Chemischen Industrie (Frankfurt am Main)</key>
+		<key>Frater,Harald</key>
+		<key>Frenzel,Ulrike</key>
+		<key>Freyer,Dieter</key>
+		<key>Funk,Wilfried</key>
+		<key>Gastl,Klaus</key>
+		<key>Geier,Florian</key>
+		<key>Gemüseland</key>
+		<key>Gesundheitsförderung Schweiz</key>
+		<key>Giesecke,Michael</key>
+		<key>Goethe Verlag</key>
+		<key>Goethe-Institut</key>
+		<key>Graf,Christian</key>
+		<key>GrenzGeschichteDG (Eupen)</key>
+		<key>Grochtmann</key>
+		<key>Gugel,Günther</key>
+		<key>Gunkel,Horst</key>
+		<key>HJP-Multimedia-GmbH</key>
+		<key>HS Schwaz</key>
+		<key>Hacke,Ulrike</key>
+		<key>hamiltonap@yahoo.com</key>
+		<key>Handelsakademie.at</key>
+		<key>Hartmann,Werner</key>
+		<key>Heigl,Heinz</key>
+		<key>Heim,Kerstin</key>
+		<key>Heller-Kellenberger,Iris</key>
+		<key>Hessischer Bildungsserver</key>
+		<key>Hessischer Rundfunk</key>
+		<key>Hicke,Florian</key>
+		<key>Hicke,Horst</key>
+		<key>Hicke,Michael</key>
+		<key>Hiebaum,Elisabeth</key>
+		<key>Hocher,Valentin</key>
+		<key>hr - Wissen und mehr (Frankfurt/Main)</key>
+		<key>http://www.languageguide.org/</key>
+		<key>Hueber Verlag</key>
+		<key>Impulsgeneratur und plan-orange</key>
+		<key>in Deutschland,Evangelische Kirche</key>
+		<key>Informationszentrum Mobilfunk e.V. (IZMF)</key>
+		<key>infofarm.de</key>
+		<key>infos24 internet Service</key>
+		<key>Institut für Botanik,Innsbruck</key>
+		<key>Interessengemeinschaft Windkraft Österreich</key>
+		<key>Internet @ided Physics Teaching</key>
+		<key>Internet Tesl Journal</key>
+		<key>JUNGÖSTERREICH</key>
+		<key>Jack F. Higginbotham</key>
+		<key>Jahreis,Manfred</key>
+		<key>Jens Rehländer</key>
+		<key>Kahl,Silvio</key>
+		<key>Kahrer,Johanna</key>
+		<key>Kaiser-Kaplaner,Johannes</key>
+		<key>Kases,Monika</key>
+		<key>Katholisches Filmwerk GmbH (Frankfurt am Main)</key>
+		<key>Kelly,Lawrence</key>
+		<key>Kerzendorfer,Herbert</key>
+		<key>kidsnet</key>
+		<key>kidsweb.at</key>
+		<key>Koopis Online world</key>
+		<key>Koopmann,Jens</key>
+		<key>Krahmer,Peter</key>
+		<key>Kraus,Peter</key>
+		<key>Krieger,Jan</key>
+		<key>Kultur- und Bildungsserver für den Großraum Nürnberg</key>
+		<key>Kynast,Peter</key>
+		<key>LWL-Medienzentrum für Westfalen (Münster) LWL-Medienzentrum für Westfalen (Münster)</key>
+		<key>Labbè</key>
+		<key>Land Oberösterreich</key>
+		<key>Landesmuseum Karlsruhe</key>
+		<key>Landesschulrat für Tirol</key>
+		<key>Landeszentrale für politische Bildung - LpB Nordrhein-Westfalen (Düsseldorf)</key>
+		<key>Landeszentrale für politische Bildung, NRW</key>
+		<key>Language Dynamics</key>
+		<key>Lehrer-Online</key>
+		<key>lehrer online</key>
+		<key>lehrer-online.de</key>
+		<key>Lehrerweb.at</key>
+		<key>Leitl,Kurt</key>
+		<key>Lenntech</key>
+		<key>leo_style</key>
+		<key>lernmodule.net gGmbH</key>
+		<key>Lernmodule.net</key>
+		<key>Lingo4you Mario Müller &amp; Heike Pahlow GbR Kastanienweg 3 • 04827 Machern</key>
+		<key>linguatec Sprachtechnologien GmbH</key>
+		<key>Ludwigs,Kurt</key>
+		<key>Lutz,Eva Maria</key>
+		<key>Lössin,Helmut</key>
+		<key>Lothar Palm</key>
+		<key>Mallig,Hans-Dieter</key>
+		<key>Mantler,Otto</key>
+		<key>Mapsolute GmbH</key>
+		<key>Mauthausen Memorial</key>
+		<key>MedienLB (Gauting)</key>
+		<key>Medienberatung NRW</key>
+		<key>Medienprojekt der Stadt Wuppertal (Wuppertal)</key>
+		<key>Medienvielfalt im Mathematikunterricht</key>
+		<key>medienwerkstatt</key>
+		<key>Meier,Andreas</key>
+		<key>members.aon.at</key>
+		<key>Ministerium für Kultus,Jugend und Sport Baden-Württemberg</key>
+		<key>Ministerium für Schule und Weiterbildung des Landes Nordrhein-Westfalen</key>
+		<key>Mittenhofer,J.</key>
+		<key>Mochmann,Oliver</key>
+		<key>moka@wegener.at</key>
+		<key>Monika Wegerer</key>
+		<key>Museum für Naturkunde Berlin</key>
+		<key>My Own Ressources</key>
+		<key>Möllencamp,Hartwig</key>
+		<key>Müller,Michael</key>
+		<key>mygeo</key>
+		<key>NASA</key>
+		<key>Natur- und Umweltschutz-Akademie NRW</key>
+		<key>Netzwerkgrundlagen.de</key>
+		<key>Nosko,Christian</key>
+		<key>Oesterreich,Jörn</key>
+		<key>Österreichische Gesellschaft für Europapolitik</key>
+		<key>Österreichische Richtervereinigung</key>
+		<key>Österreichischer Steuerverein</key>
+		<key>Österreichisches Schulportal</key>
+		<key>PEMO</key>
+		<key>Paul-Gerhardt Realschule (Münster) Paul-Gerhardt Realschule (Münster)</key>
+		<key>Paul-Kraemer-Schule (Frechen) Paul-Kraemer-Schule (Frechen)</key>
+		<key>Pernstich,Elfriede</key>
+		<key>Petersohn,Frank</key>
+		<key>pixarcon_media</key>
+		<key>planet-wissen.de</key>
+		<key>Podhajsky,Karin</key>
+		<key>Pohland,Jörg</key>
+		<key>Poodwaddle.com</key>
+		<key>Primolo</key>
+		<key>Prock,Anton</key>
+		<key>Pädagogisches Institut des Landes Tirol</key>
+		<key>Quia Corporation</key>
+		<key>rbb - Rundfunk Berlin-Brandenburg (Potsdam)</key>
+		<key>rbb - Wissenszeit</key>
+		<key>Rechnungswesen im Internet leicht gemacht</key>
+		<key>Reimann-Hoehn,Uta</key>
+		<key>Reiß,Philipp</key>
+		<key>Rennenkampf,Maragarita</key>
+		<key>Reuter,Rolf</key>
+		<key>Rezepte Li Team</key>
+		<key>Richter,Margarete</key>
+		<key>Rothländer,Herwig</key>
+		<key>Rubeck,Ben</key>
+		<key>Rude Mechanicals</key>
+		<key>SIL International</key>
+		<key>SWR Schulfernsehen multimedial (Baden-Baden))</key>
+		<key>SWR Südwestrundfunk</key>
+		<key>SXM-Project</key>
+		<key>Sadlon,Peter</key>
+		<key>Schaefer,Suzanne</key>
+		<key>Scherer,Mario</key>
+		<key>Schlecht,Gabriele</key>
+		<key>Schleicher,Stefan</key>
+		<key>Schlichther,Gerda</key>
+		<key>Schmidbauer,Franz</key>
+		<key>Schmitz,Ralf-Peter</key>
+		<key>Scholastic</key>
+		<key>Schreibwerkstatt der Uni Essen</key>
+		<key>Schuldnerberatung</key>
+		<key>Schule und Wirtschaft</key>
+		<key>Schulen ans Netz e.V. - Lehrer-Online</key>
+		<key>Schulmedienstelle des Landes Vorarlberg</key>
+		<key>Schulministerium NRW</key>
+		<key>Schumacher,Friedhelm</key>
+		<key>schumacher</key>
+		<key>Schwazer,Günther</key>
+		<key>Schweizer Fernsehen WISSEN my school</key>
+		<key>Schweizerische Nationalfonds (SNF)</key>
+		<key>Semmel Concerts</key>
+		<key>Servicestelle Politische Bildung</key>
+		<key>sheppardsoftware</key>
+		<key>Siemens Stiftung</key>
+		<key>Silbermann,Uwe</key>
+		<key>Slabihoud,Stephan</key>
+		<key>Sonixmedia Internetservices und Dienstlleistungs GmbH</key>
+		<key>Spitzer,Regina</key>
+		<key>Steffens,Markus</key>
+		<key>Stein,Sebastian</key>
+		<key>Steingrad,Elena</key>
+		<key>Stetten,Beate und Klaus</key>
+		<key>Striewisch,Tom</key>
+		<key>Susanne Kleine</key>
+		<key>TFBS für Handel und Büro Schwaz</key>
+		<key>TMundo</key>
+		<key>Talking Food</key>
+		<key>Teachsam</key>
+		<key>Telepool</key>
+		<key>Terra Musica</key>
+		<key>The USA States Mint</key>
+		<key>The musem of reconstructions</key>
+		<key>Thinkquest.org</key>
+		<key>tibs</key>
+		<key>Thomas Seilnacht</key>
+		<key>Thum,Werner</key>
+		<key>Tintenklex Legasthenie Software</key>
+		<key>Traumprojekt</key>
+		<key>Trauner Verlag</key>
+		<key>University Potsdam</key>
+		<key>Universität Bielefeld</key>
+		<key>Universität Dortmund</key>
+		<key>Uwe Kohnle</key>
+		<key>V.Schneider</key>
+		<key>Verein fontes historiae</key>
+		<key>Verlag für die Deutsche Wirtschaft AG</key>
+		<key>Virtuelle Schule</key>
+		<key>Vocabulix</key>
+		<key>Volkshochschule Floridsdorf</key>
+		<key>Volkswagen AG</key>
+		<key>WDR - Westdeutscher Rundfunk (Köln)</key>
+		<key>WEBGEO</key>
+		<key>Walter Fendt</key>
+		<key>Was ist Was</key>
+		<key>wayahead.com</key>
+		<key>webschool.at</key>
+		<key>Wegerer,Monika</key>
+		<key>welfenburg</key>
+		<key>West Teaxas University</key>
+		<key>Westdeutscher Rundfunk Köln</key>
+		<key>Wetzstein,Klaus</key>
+		<key>Wieser,Reinhard</key>
+		<key>Wirtschaft im Alltag</key>
+		<key>Wirtschaftskammer Gruenderservice</key>
+		<key>Wirtschaftsrecht.de</key>
+		<key>wissen.de GmbH</key>
+		<key>Worldmapper</key>
+		<key>Wuffen,Georg</key>
+		<key>www.biothemen.de</key>
+		<key>www.kaenguru.at</key>
+		<key>www.kico4u.de</key>
+		<key>www.rossipotti.de</key>
+		<key>ZDF Zweites Deutsches Fernsehen</key>
+		<key>ZDFOnline</key>
+		<key>Zentrale für Unterrichtsmedien</key>
+		<key>Zentrale für Unterrichtsmedien im Internet e. V.</key>
+		<key>Zentralschweizer Bildungsserver</key>
+		<key>Zimmermann,Bernd</key>
+		<key>Zimmermann,Matthias</key>
+		<key>Zum</key>
+		<key>Zweites Deutsches Fernsehen</key>
+	</valuespace>
+</valuespaces>

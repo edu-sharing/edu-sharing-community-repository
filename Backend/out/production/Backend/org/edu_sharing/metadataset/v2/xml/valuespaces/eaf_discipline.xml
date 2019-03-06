@@ -1,0 +1,1503 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<valuespaces>
+	<valuespace property="ccm:taxonid">
+		<key cap="Arbeitslehre">020</key>
+		<key cap="Hinführung zur Arbeitswelt" parent="020">02001</key>
+		<key cap="Arbeitsbedingungen, Arbeitsabläufe" parent="02001">0200101</key>
+		<key cap="Arbeitswert" parent="02001">0200102</key>
+		<key cap="Arbeitssicherheit" parent="02001">0200103</key>
+		<key cap="Recht im Betrieb" parent="02001">0200104</key>
+		<key cap="Unternehmensformen, Unternehmensstrukturen" parent="02001">0200105</key>
+		<key cap="Strukturwandel, Rationalisierung, Humanisierung" parent="02001">0200106</key>
+		<key cap="Gesellschaftliche Bedingungen" parent="02001">0200107</key>
+		<key cap="Geschichte von Arbeit und Technik" parent="02001">0200108</key>
+		<key cap="Berufskunde" parent="020">02002</key>
+		<key cap="Berufswahlkriterien" parent="02002">0200201</key>
+		<key cap="Berufsbilder" parent="02002">0200202</key>
+		<key cap="Berufe im naturwissenschaftlich-technischen Bereich" parent="0200202">020020201</key>
+		<key cap="Metallberufe" parent="020020201">02002020101</key>
+		<key cap="Elektroberufe" parent="020020201">02002020102</key>
+		<key cap="Berufsbereiche Bau, Bergbau, Steine" parent="020020201">02002020103</key>
+		<key cap="Berufsbereiche Textil, Bekleidung, Leder" parent="020020201">02002020104</key>
+		<key cap="Berufsbereiche Druck und Papier" parent="020020201">02002020105</key>
+		<key cap="Berufsbereiche Holz und Kunststoff" parent="020020201">02002020106</key>
+		<key cap="Berufsbereiche Chemie, Glas, Keramik" parent="020020201">02002020107</key>
+		<key cap="Berufe im medizinischen Bereich" parent="0200202">020020202</key>
+		<key cap="Berufe im sozialen Bereich" parent="0200202">020020203</key>
+		<key cap="Berufe im hauswirtschaftlichen Bereich" parent="0200202">020020204</key>
+		<key cap="Berufe im pädagogischen Bereich" parent="0200202">020020205</key>
+		<key cap="Berufe im kaufmännischen Bereich" parent="0200202">020020206</key>
+		<key cap="Berufe in der Datenverarbeitung" parent="0200202">020020207</key>
+		<key cap="Berufe im Behördendienst" parent="0200202">020020208</key>
+		<key cap="Berufe im Verkehrswesen" parent="0200202">020020209</key>
+		<key cap="Berufe bei der Bundeswehr" parent="0200202">020020210</key>
+		<key cap="Berufe im künstlerischen und gestalterischen Bereich" parent="0200202">020020211</key>
+		<key cap="Berufe im journalistischen und Medienbereich" parent="0200202">020020212</key>
+		<key cap="Handwerksberufe" parent="0200202">020020213</key>
+		<key cap="Berufe in der Land- und Forstwirtschaft" parent="0200202">020020214</key>
+		<key cap="Berufe im Nahrungs-, Hotel- und Gaststättenbereich" parent="0200202">020020215</key>
+		<key cap="Wandel von Berufen" parent="02002">0200203</key>
+		<key cap="Berufsweg, Fort- und Weiterbildung" parent="02002">0200204</key>
+		<key cap="Berufliche Bildung">040</key>
+		<key cap="Gartenbau und Landwirtschaft, Natur und Umwelt" parent="040">04001</key>
+		<key cap="Pflanzliche Produktion" parent="04001">0400101</key>
+		<key cap="Acker- und Pflanzenbau" parent="0400101">040010101</key>
+		<key cap="Pflanzenzüchtung" parent="0400101">040010102</key>
+		<key cap="Pflanzenernährung" parent="0400101">040010103</key>
+		<key cap="Pflanzenschutz" parent="0400101">040010104</key>
+		<key cap="Grünland" parent="0400101">040010105</key>
+		<key cap="Sonderkulturen" parent="0400101">040010106</key>
+		<key cap="Bodenkunde und Kulturtechnik" parent="04001">0400102</key>
+		<key cap="Tierische Produktion" parent="04001">0400103</key>
+		<key cap="Tierzucht und Tierhaltung, Tierpflege" parent="0400103">040010301</key>
+		<key cap="Geflügel" parent="040010301">04001030101</key>
+		<key cap="Pferde" parent="040010301">04001030102</key>
+		<key cap="Rinder" parent="040010301">04001030103</key>
+		<key cap="Schafe" parent="040010301">04001030104</key>
+		<key cap="Schweine" parent="040010301">04001030105</key>
+		<key cap="Fische" parent="040010301">04001030106</key>
+		<key cap="Allgemein" parent="040010301">04001030107</key>
+		<key cap="Tierernährung" parent="0400103">040010302</key>
+		<key cap="Landtechnik" parent="04001">0400104</key>
+		<key cap="Betriebswirtschaftslehre" parent="04001">0400105</key>
+		<key cap="Agrarpolitik" parent="04001">0400106</key>
+		<key cap="Umweltschutz und Naturschutz" parent="04001">0400108</key>
+		<key cap="Forstwirtschaft" parent="04001">0400109</key>
+		<key cap="Jagd" parent="0400109">040010901</key>
+		<key cap="Gartenbau, Floristik" parent="04001">0400110</key>
+		<key cap="Agrargeschichte" parent="04001">0400112</key>
+		<key cap="Bau, Architektur, Vermessung" parent="040">04002</key>
+		<key cap="Tiefbau" parent="04002">0400201</key>
+		<key cap="Eisenbahnbau" parent="0400201">040020101</key>
+		<key cap="Erdbau" parent="0400201">040020102</key>
+		<key cap="Grundbau" parent="0400201">040020103</key>
+		<key cap="Kanalbau" parent="0400201">040020104</key>
+		<key cap="Straßen- und Wegebau" parent="0400201">040020105</key>
+		<key cap="Tunnelbau" parent="0400201">040020106</key>
+		<key cap="Wasserbau" parent="0400201">040020107</key>
+		<key cap="Hochbau" parent="04002">0400202</key>
+		<key cap="Betonbau" parent="0400202">040020201</key>
+		<key cap="Dachbau" parent="0400202">040020202</key>
+		<key cap="Fassadenbau" parent="0400202">040020203</key>
+		<key cap="Mauerwerksbau" parent="0400202">040020204</key>
+		<key cap="Stahlbau" parent="0400202">040020205</key>
+		<key cap="Stahlbetonbau" parent="0400202">040020206</key>
+		<key cap="Ausbau" parent="04002">0400203</key>
+		<key cap="Bodenbeläge" parent="0400203">040020301</key>
+		<key cap="Dämmung, Isolierung" parent="0400203">040020302</key>
+		<key cap="Elektroinstallationen" parent="0400203">040020303</key>
+		<key cap="Estricharbeiten" parent="0400203">040020304</key>
+		<key cap="Haustechnik/Gebäudetechnik" parent="0400203">040020305</key>
+		<key cap="Holzbau" parent="0400203">040020306</key>
+		<key cap="Metallbau" parent="0400203">040020307</key>
+		<key cap="Putzarbeiten" parent="0400203">040020308</key>
+		<key cap="Baubetrieb" parent="04002">0400204</key>
+		<key cap="Architektur, Bautechnik" parent="04002">0400205</key>
+		<key cap="Vermessung" parent="04002">0400206</key>
+		<key cap="Baugrundlagen" parent="04002">0400207</key>
+		<key cap="Baupraktische Anwendungen" parent="04002">0400208</key>
+		<key cap="Bauschäden" parent="04002">0400209</key>
+		<key cap="Baustoffe" parent="04002">0400210</key>
+		<key cap="Naturwissenschaften" parent="040">04003</key>
+		<key cap="Labor" parent="04003">0400301</key>
+		<key cap="Produktionstechnik" parent="04003">0400302</key>
+		<key cap="Chemie" parent="04003">0400303</key>
+		<key cap="Geowissenschaften" parent="04003">0400304</key>
+		<key cap="Kartographie" parent="0400304">040030401</key>
+		<key cap="Meteorologie" parent="0400304">040030402</key>
+		<key cap="Mathematik und Statistik" parent="04003">0400305</key>
+		<key cap="Pharmazie" parent="04003">0400306</key>
+		<key cap="IT- und Medientechnik" parent="040">04004</key>
+		<key cap="Archiv, Bibliothek, Dokumentation" parent="04004">0400401</key>
+		<key cap="Druck und Medien" parent="04004">0400402</key>
+		<key cap="Medientechnologie" parent="0400402">040040201</key>
+		<key cap="Druck" parent="040040201">04004020101</key>
+		<key cap="Papier" parent="040040201">04004020102</key>
+		<key cap="Schrift" parent="040040201">04004020103</key>
+		<key cap="Mediengestaltung" parent="0400402">040040202</key>
+		<key cap="Film, Funk und Fernsehen" parent="04004">0400403</key>
+		<key cap="Foto" parent="04004">0400404</key>
+		<key cap="Verlagswesen" parent="04004">0400405</key>
+		<key cap="IT, Computer" parent="04004">0400406</key>
+		<key cap="Hard- und Softwareentwicklung" parent="0400406">040040601</key>
+		<key cap="Administration" parent="0400406">040040602</key>
+		<key cap="Kundenbetreuung" parent="0400406">040040603</key>
+		<key cap="Elektrotechnik" parent="040">04005</key>
+		<key cap="Aufgabenbereiche" parent="04005">0400501</key>
+		<key cap="Energietechnik" parent="0400501">040050101</key>
+		<key cap="Antriebstechnik" parent="0400501">040050102</key>
+		<key cap="Nachrichtentechnik" parent="0400501">040050103</key>
+		<key cap="Elektronik" parent="0400501">040050104</key>
+		<key cap="Mechatronik, Automatisierungstechnik" parent="0400501">040050105</key>
+		<key cap="Elektronische Gerätetechnik" parent="0400501">040050106</key>
+		<key cap="Haustechnik/Gebäudetechnik" parent="0400501">040050107</key>
+		<key cap="Theoretische Elektrotechnik" parent="0400501">040050108</key>
+		<key cap="Methoden" parent="04005">0400502</key>
+		<key cap="Grundlagen" parent="0400502">040050201</key>
+		<key cap="Mess- und Regelungstechnik" parent="0400502">040050202</key>
+		<key cap="Praktische Informatik" parent="0400502">040050203</key>
+		<key cap="Schaltungstechnik und Funktionsanalyse" parent="0400502">040050204</key>
+		<key cap="Werkstoffe" parent="0400502">040050205</key>
+		<key cap="Technische Kommunikation" parent="0400502">040050206</key>
+		<key cap="Gastgewerbe" parent="040">04006</key>
+		<key cap="Gastronomie" parent="04006">0400601</key>
+		<key cap="Service" parent="0400601">040060101</key>
+		<key cap="Küche" parent="0400601">040060102</key>
+		<key cap="Housekeeping" parent="0400601">040060103</key>
+		<key cap="Verwaltung" parent="0400601">040060104</key>
+		<key cap="Rezeption" parent="0400601">040060105</key>
+		<key cap="Sonstige Bereiche" parent="0400601">040060106</key>
+		<key cap="Hauswirtschaft" parent="04006">0400602</key>
+		<key cap="Ernährungslehre" parent="0400602">040060201</key>
+		<key cap="Lebensmittellehre" parent="0400602">040060202</key>
+		<key cap="Servierkunde" parent="0400602">040060203</key>
+		<key cap="Verkaufskunde" parent="0400602">040060204</key>
+		<key cap="Sozioökonomie" parent="0400602">040060205</key>
+		<key cap="Haushalttechnik" parent="0400602">040060206</key>
+		<key cap="Wohnökologie" parent="0400602">040060207</key>
+		<key cap="Textilgestaltung" parent="0400602">040060208</key>
+		<key cap="Gesundheitslehre" parent="0400602">040060209</key>
+		<key cap="Erziehungslehre" parent="0400602">040060210</key>
+		<key cap="Hausgarten" parent="0400602">040060211</key>
+		<key cap="Farbtechnik und Raumgestaltung" parent="040">04007</key>
+		<key cap="Farbtechnik" parent="04007">0400701</key>
+		<key cap="Optik, Farbenlehre" parent="0400701">040070101</key>
+		<key cap="Untergründe" parent="0400701">040070102</key>
+		<key cap="Beschichtungstechniken" parent="0400701">040070103</key>
+		<key cap="Mit Farbe gestalten" parent="0400701">040070104</key>
+		<key cap="Raumgestaltung" parent="04007">0400702</key>
+		<key cap="Raumgestaltung" parent="0400702">040070201</key>
+		<key cap="Flächengestaltung" parent="0400702">040070202</key>
+		<key cap="Wandgestaltung" parent="0400702">040070203</key>
+		<key cap="Bodengestaltung" parent="0400702">040070204</key>
+		<key cap="Dekoration" parent="0400702">040070205</key>
+		<key cap="Gesundheit und Pflege" parent="040">04008</key>
+		<key cap="Medizinische Grundlagen" parent="04008">0400801</key>
+		<key cap="Gesunderhaltung" parent="04008">0400802</key>
+		<key cap="Vorbeugung" parent="04008">0400803</key>
+		<key cap="Erste Hilfe" parent="04008">0400804</key>
+		<key cap="Therapie" parent="04008">0400805</key>
+		<key cap="Rehabilitation" parent="04008">0400806</key>
+		<key cap="Ernährung" parent="04008">0400807</key>
+		<key cap="Pflege" parent="04008">0400808</key>
+		<key cap="Altenpflege" parent="0400808">040080801</key>
+		<key cap="Gesundheits- und Krankenpflege" parent="0400808">040080802</key>
+		<key cap="Entbindungspflege" parent="0400808">040080803</key>
+		<key cap="Heilerziehungspflege" parent="0400808">040080804</key>
+		<key cap="Kinderpflege" parent="0400808">040080805</key>
+		<key cap="Holztechnik" parent="040">04009</key>
+		<key cap="Holzbearbeitung" parent="04009">0400901</key>
+		<key cap="Holzverarbeitung" parent="04009">0400902</key>
+		<key cap="Grundlagen der Holztechnik" parent="04009">0400903</key>
+		<key cap="Technische Kommunikation" parent="04009">0400904</key>
+		<key cap="Holzschäden" parent="04009">0400905</key>
+		<key cap="Werkstoffe" parent="04009">0400906</key>
+		<key cap="Fahrzeugtechnik, Mechatronik" parent="040">04010</key>
+		<key cap="Motortechnik" parent="04010">0401001</key>
+		<key cap="Kraft- und Bewegungsübertragung" parent="04010">0401002</key>
+		<key cap="Fahrwerk- und Bremstechnik" parent="04010">0401003</key>
+		<key cap="Steuerungs- und Regelungstechnik" parent="04010">0401004</key>
+		<key cap="Karosserietechnik" parent="04010">0401005</key>
+		<key cap="Installationstechnik" parent="04010">0401006</key>
+		<key cap="Metalltechnik" parent="040">04011</key>
+		<key cap="Technische Mechanik" parent="04011">0401101</key>
+		<key cap="Konstruktionstechnik, Maschinenelemente" parent="04011">0401102</key>
+		<key cap="Maschinenelemente" parent="0401102">040110201</key>
+		<key cap="Kraftmaschinen, Arbeitsmaschinen" parent="0401102">040110202</key>
+		<key cap="Werkstofftechnik" parent="04011">0401103</key>
+		<key cap="Rohstoffe" parent="0401103">040110301</key>
+		<key cap="Werkstoffe" parent="0401103">040110302</key>
+		<key cap="Korrosion" parent="0401103">040110303</key>
+		<key cap="Produktionstechnik" parent="04011">0401104</key>
+		<key cap="Fertigungstechnik" parent="0401104">040110401</key>
+		<key cap="Urformen" parent="040110401">04011040101</key>
+		<key cap="Umformen" parent="040110401">04011040102</key>
+		<key cap="Trennen" parent="040110401">04011040103</key>
+		<key cap="Fügen" parent="040110401">04011040104</key>
+		<key cap="Stoffeigenschaften ändern" parent="040110401">04011040105</key>
+		<key cap="Galvanik und Oberflächenbearbeitung" parent="040110401">04011040106</key>
+		<key cap="Verfahrenstechnik" parent="0401104">040110402</key>
+		<key cap="Prüftechnik" parent="04011">0401105</key>
+		<key cap="Mess- und Prüftechnik" parent="0401105">040110501</key>
+		<key cap="Werkstoffprüfung" parent="0401105">040110502</key>
+		<key cap="Thermodynamik" parent="04011">0401106</key>
+		<key cap="Steuerungs- und Regeltechnik" parent="04011">0401107</key>
+		<key cap="Besondere metallische Gebiete" parent="04011">0401108</key>
+		<key cap="Technische Kommunikation" parent="04011">0401109</key>
+		<key cap="Arbeitswissenschaft" parent="04011">0401110</key>
+		<key cap="Textiltechnik und Bekleidung" parent="040">04012</key>
+		<key cap="Textilrohstoffe" parent="04012">0401201</key>
+		<key cap="Textilherstellung" parent="04012">0401202</key>
+		<key cap="Textilmaschinen" parent="04012">0401203</key>
+		<key cap="Textilveredlung und -verzierung" parent="04012">0401204</key>
+		<key cap="Textilverarbeitung" parent="04012">0401205</key>
+		<key cap="Leder" parent="04012">0401206</key>
+		<key cap="Textilpflege" parent="04012">0401207</key>
+		<key cap="Wirtschaft und Verwaltung" parent="040">04013</key>
+		<key cap="Betriebswirtschaft" parent="04013">0401301</key>
+		<key cap="Beschaffung" parent="0401301">040130101</key>
+		<key cap="Produktion" parent="0401301">040130102</key>
+		<key cap="Absatz" parent="0401301">040130103</key>
+		<key cap="Organisation" parent="0401301">040130104</key>
+		<key cap="Personalwesen" parent="0401301">040130105</key>
+		<key cap="Rechnungswesen" parent="0401301">040130106</key>
+		<key cap="Finanzbereich" parent="0401301">040130107</key>
+		<key cap="EDV" parent="0401301">040130108</key>
+		<key cap="Spezielle Betriebsarten" parent="0401301">040130109</key>
+		<key cap="Volkswirtschaft" parent="04013">0401302</key>
+		<key cap="Grundlagen" parent="0401302">040130201</key>
+		<key cap="Volkswirtschaftliche Gesamtrechnung" parent="0401302">040130202</key>
+		<key cap="Markt und Preis" parent="0401302">040130203</key>
+		<key cap="Geld" parent="0401302">040130204</key>
+		<key cap="Wirtschaftspolitik" parent="0401302">040130205</key>
+		<key cap="Wirtschaftsformen" parent="0401302">040130206</key>
+		<key cap="Wirtschaftsgeographie" parent="0401302">040130207</key>
+		<key cap="Wirtschafts- und Sozialgeschichte" parent="0401302">040130208</key>
+		<key cap="Recht und öffentliche Verwaltung" parent="04013">0401303</key>
+		<key cap="Finanzwesen, Steuerwesen" parent="0401303">040130301</key>
+		<key cap="Öffentliche Ordnung" parent="0401303">040130302</key>
+		<key cap="Verkehrswesen" parent="0401303">040130303</key>
+		<key cap="Bauwesen" parent="0401303">040130304</key>
+		<key cap="Sozialwesen" parent="0401303">040130305</key>
+		<key cap="Informationswirtschaft" parent="04013">0401304</key>
+		<key cap="Wirtschaftsinformation" parent="0401304">040130401</key>
+		<key cap="Textverarbeitung" parent="0401304">040130402</key>
+		<key cap="Bürowirtschaft" parent="0401304">040130403</key>
+		<key cap="Marketing, Werbung" parent="04013">0401305</key>
+		<key cap="Beratung, Verkauf" parent="04013">0401306</key>
+		<key cap="Arbeitssicherheit" parent="040">04014</key>
+		<key cap="Sozialarbeit und Erziehung" parent="040">04015</key>
+		<key cap="Erziehung, Aus- und Weiterbildung" parent="04015">0401501</key>
+		<key cap="Gesundheit- und Sozialmanagement" parent="04015">0401502</key>
+		<key cap="Sozialarbeit, Sozialpflege" parent="04015">0401503</key>
+		<key cap="Verkehr und Logistik" parent="040">04016</key>
+		<key cap="Seefahrt" parent="04016">0401601</key>
+		<key cap="Auto- und Straßenverkehr" parent="04016">0401602</key>
+		<key cap="Bahn- und Schienenverkehr" parent="04016">0401603</key>
+		<key cap="Flugzeug und Luftfahrt" parent="04016">0401604</key>
+		<key cap="Transport und Logistik" parent="04016">0401605</key>
+		<key cap="Klima-, Heizungs- und Sanitärtechnik" parent="040">04017</key>
+		<key cap="Wassertechnik" parent="04017">0401701</key>
+		<key cap="Lüftungstechnik" parent="04017">0401702</key>
+		<key cap="Wärmetechnik" parent="04017">0401703</key>
+		<key cap="Ressourcenschonende Techniken" parent="04017">0401704</key>
+		<key cap="Dienstleistung" parent="040">04018</key>
+		<key cap="Messe- und Veranstaltungsmanagement" parent="04018">0401801</key>
+		<key cap="Veranstaltungstechnik" parent="04018">0401802</key>
+		<key cap="Callcenter" parent="04018">0401803</key>
+		<key cap="Körperpflege" parent="04018">0401804</key>
+		<key cap="Friseurtechnik" parent="0401804">040180401</key>
+		<key cap="Kosmetik" parent="0401804">040180402</key>
+		<key cap="Ver- und Entsorgung" parent="04018">0401805</key>
+		<key cap="Fremdsprachen" parent="04018">0401806</key>
+		<key cap="Bestattungswesen" parent="04018">0401807</key>
+		<key cap="Schutz und Sicherheit" parent="04018">0401808</key>
+		<key cap="Sauberkeit und Hygiene" parent="04018">0401809</key>
+		<key cap="Tourismus und Freizeitwirtschaft" parent="04018">0401810</key>
+		<key cap="Lebensmittel" parent="040">04019</key>
+		<key cap="Lebensmitteltechnik" parent="04019">0401901</key>
+		<key cap="Lebensmittelproduktion" parent="04019">0401902</key>
+		<key cap="Lebensmittellehre" parent="04019">0401903</key>
+		<key cap="Nahrungsmittel" parent="0401903">040190301</key>
+		<key cap="Genussmittel" parent="0401903">040190302</key>
+		<key cap="Lebensmittelzubereitung" parent="0401903">040190303</key>
+		<key cap="Haltbarmachung" parent="0401903">040190304</key>
+		<key cap="Vorratshaltung" parent="0401903">040190305</key>
+		<key cap="Lebensmittelhygiene" parent="0401903">040190306</key>
+		<key cap="Lebensmittelrecht" parent="0401903">040190307</key>
+		<key cap="Kunst, Kultur, Gestaltung" parent="040">04020</key>
+		<key cap="Musik" parent="04020">0402001</key>
+		<key cap="Schmuck" parent="04020">0402002</key>
+		<key cap="Kunsthandwerk" parent="04020">0402003</key>
+		<key cap="Museen, Restaurierung, Denkmalschutz" parent="04020">0402004</key>
+		<key cap="Design, Gestaltung" parent="04020">0402005</key>
+		<key cap="Bühne, Theater" parent="04020">0402006</key>
+		<key cap="Bildende Kunst">060</key>
+		<key cap="Grundlagen künstlerischen Schaffens" parent="060">06001</key>
+		<key cap="Form, Komposition, Perspektive" parent="06001">0600101</key>
+		<key cap="Farblehre, Licht" parent="06001">0600102</key>
+		<key cap="Techniken, Werkstoffe" parent="06001">0600103</key>
+		<key cap="Anwendungsbeispiele" parent="06001">0600104</key>
+		<key cap="Theorien zur Kunst" parent="060">06002</key>
+		<key cap="Kunstgeschichte" parent="060">06003</key>
+		<key cap="Vor- und frühgeschichtliche Kulturen" parent="06003">0600301</key>
+		<key cap="Frühe Hochkulturen" parent="06003">0600302</key>
+		<key cap="Klassisches Altertum" parent="06003">0600303</key>
+		<key cap="Frühchristliche und byzantinische Kunst" parent="06003">0600304</key>
+		<key cap="Kunst des Mittelalters" parent="06003">0600305</key>
+		<key cap="Renaissance" parent="06003">0600306</key>
+		<key cap="Barock, Rokoko" parent="06003">0600307</key>
+		<key cap="Klassizismus" parent="06003">0600308</key>
+		<key cap="19. Jahrhundert" parent="06003">0600309</key>
+		<key cap="Romantik" parent="0600309">060030901</key>
+		<key cap="Realismus" parent="0600309">060030902</key>
+		<key cap="Impressionismus" parent="0600309">060030903</key>
+		<key cap="Weitere Stilrichtungen des 19. Jahrhunderts" parent="0600309">060030909</key>
+		<key cap="Kunst der Jahrhundertwende" parent="06003">0600310</key>
+		<key cap="20./21. Jahrhundert" parent="06003">0600311</key>
+		<key cap="Kunst bis 1945" parent="0600311">060031101</key>
+		<key cap="Kunst bis 1980" parent="0600311">060031102</key>
+		<key cap="Kunst der Gegenwart" parent="0600311">060031103</key>
+		<key cap="Kunstgeschichtliche Überblicksdarstellungen" parent="06003">0600312</key>
+		<key cap="Museen, Galerien" parent="06003">0600313</key>
+		<key cap="Biographien" parent="06003">0600314</key>
+		<key cap="Angewandte Kunst der Gegenwart" parent="060">06004</key>
+		<key cap="Architektur und Landschaftsgestaltung" parent="06004">0600401</key>
+		<key cap="Produktgestaltung, Design" parent="06004">0600402</key>
+		<key cap="Werbung" parent="06004">0600403</key>
+		<key cap="Erhalten und Restaurieren" parent="060">06005</key>
+		<key cap="Bilingualer Unterricht" parent="060">06080</key>
+		<key cap="Biologie">080</key>
+		<key cap="Allgemeine Biologie" parent="080">08001</key>
+		<key cap="Biologische Forschung, biologische Arbeitsmethoden" parent="08001">0800101</key>
+		<key cap="Genetik" parent="08001">0800102</key>
+		<key cap="Evolution" parent="08001">0800103</key>
+		<key cap="Biochemie" parent="08001">0800104</key>
+		<key cap="Biologische Regelkreise, Kybernetik" parent="08001">0800105</key>
+		<key cap="Biophysik, Bionik" parent="08001">0800106</key>
+		<key cap="Zellenlehre" parent="08001">0800107</key>
+		<key cap="Mikroorganismen" parent="080">08002</key>
+		<key cap="Bakterien" parent="08002">0800201</key>
+		<key cap="Viren und Phagen" parent="08002">0800202</key>
+		<key cap="Pflanzliche und tierische Einzeller" parent="08002">0800203</key>
+		<key cap="Pilze" parent="080">08003</key>
+		<key cap="Botanik" parent="080">08004</key>
+		<key cap="Allgemeine Botanik" parent="08004">0800401</key>
+		<key cap="Angewandte Botanik" parent="08004">0800402</key>
+		<key cap="Blütenpflanzen" parent="08004">0800403</key>
+		<key cap="Bäume, Sträucher" parent="0800403">080040301</key>
+		<key cap="Kräuter und Gräser" parent="0800403">080040302</key>
+		<key cap="Blütenlose Pflanzen" parent="08004">0800404</key>
+		<key cap="Zoologie" parent="080">08005</key>
+		<key cap="Allgemeine Zoologie" parent="08005">0800501</key>
+		<key cap="Gestalt und Bau" parent="0800501">080050101</key>
+		<key cap="Fortpflanzung und Entwicklung" parent="0800501">080050102</key>
+		<key cap="Stoffwechsel" parent="0800501">080050103</key>
+		<key cap="Verhalten" parent="0800501">080050104</key>
+		<key cap="Angewandte Zoologie" parent="08005">0800502</key>
+		<key cap="Wirbellose" parent="08005">0800503</key>
+		<key cap="Gliederfüßer" parent="0800503">080050301</key>
+		<key cap="Stachelhäuter" parent="0800503">080050302</key>
+		<key cap="Weichtiere" parent="0800503">080050303</key>
+		<key cap="Platt-, Rund- und Ringelwürmer" parent="0800503">080050304</key>
+		<key cap="Hohltiere, Schwämme" parent="0800503">080050305</key>
+		<key cap="Wirbeltiere" parent="08005">0800504</key>
+		<key cap="Fische" parent="0800504">080050401</key>
+		<key cap="Lurche" parent="0800504">080050402</key>
+		<key cap="Kriechtiere" parent="0800504">080050403</key>
+		<key cap="Vögel" parent="0800504">080050404</key>
+		<key cap="Säugetiere" parent="0800504">080050405</key>
+		<key cap="Haustiere, Nutztiere" parent="080050405">08005040501</key>
+		<key cap="Wildlebende Tiere" parent="080050405">08005040502</key>
+		<key cap="Menschenkunde" parent="080">08006</key>
+		<key cap="Körperbau" parent="08006">0800601</key>
+		<key cap="Stoffwechsel, Innere Organe" parent="08006">0800602</key>
+		<key cap="Sinnesorgane, Nervensystem" parent="08006">0800603</key>
+		<key cap="Fortpflanzung und Entwicklung" parent="08006">0800604</key>
+		<key cap="Genetik, Evolution" parent="08006">0800605</key>
+		<key cap="Krankheiten und Vorbeugung" parent="08006">0800606</key>
+		<key cap="Verhalten" parent="08006">0800607</key>
+		<key cap="Ökologie" parent="080">08007</key>
+		<key cap="Ökologische Grundlagen" parent="08007">0800701</key>
+		<key cap="Stoffkreisläufe" parent="08007">0800702</key>
+		<key cap="Ökosysteme" parent="08007">0800703</key>
+		<key cap="Biodiversität, Artenvielfalt" parent="08007">0800704</key>
+		<key cap="Biographien" parent="080">08008</key>
+		<key cap="Bilingualer Unterricht" parent="080">08080</key>
+		<key cap="Chemie">100</key>
+		<key cap="Geschichte der Chemie" parent="100">10001</key>
+		<key cap="Allgemeine Chemie" parent="100">10002</key>
+		<key cap="Gesetzmäßigkeiten chemischer Reaktionen" parent="10002">1000201</key>
+		<key cap="Chemisches Gleichgewicht und seine Beeinflussung" parent="10002">1000202</key>
+		<key cap="Kernchemie, Radiochemie" parent="10002">1000203</key>
+		<key cap="Arbeitsmethoden, Untersuchungsmethoden" parent="10002">1000204</key>
+		<key cap="Physikalische Chemie" parent="100">10003</key>
+		<key cap="Atombau, Periodensystem" parent="10003">1000301</key>
+		<key cap="Bindung, Struktur, Eigenschaften" parent="10003">1000302</key>
+		<key cap="Chemische Thermodynamik" parent="10003">1000303</key>
+		<key cap="Chemische Kinetik" parent="10003">1000304</key>
+		<key cap="Elektrochemie" parent="10003">1000305</key>
+		<key cap="Anorganische Chemie" parent="100">10004</key>
+		<key cap="Stoffgemische" parent="10004">1000401</key>
+		<key cap="Elemente" parent="10004">1000402</key>
+		<key cap="Verbindungen" parent="10004">1000403</key>
+		<key cap="Redoxreaktionen" parent="10004">1000404</key>
+		<key cap="Säure-Base-Reaktionen" parent="10004">1000405</key>
+		<key cap="Komplexchemie" parent="10004">1000406</key>
+		<key cap="Organische Chemie" parent="100">10005</key>
+		<key cap="Kohlenwasserstoffe" parent="10005">1000501</key>
+		<key cap="Stoffe mit funktionellen Gruppen" parent="10005">1000502</key>
+		<key cap="Polymere Stoffe, Naturstoffe" parent="10005">1000503</key>
+		<key cap="Reaktionsmechanismen" parent="10005">1000504</key>
+		<key cap="Biochemie" parent="100">10006</key>
+		<key cap="Molekulare Grundlagen der Organismen" parent="10006">1000601</key>
+		<key cap="Stoffwechselvorgänge" parent="10006">1000602</key>
+		<key cap="Physiologische Wirkungsweise chemischer Substanzen" parent="10006">1000603</key>
+		<key cap="Angewandte Chemie" parent="100">10007</key>
+		<key cap="Technische Chemie" parent="10007">1000701</key>
+		<key cap="Chemie in Alltag und Umwelt" parent="10007">1000702</key>
+		<key cap="Biographien" parent="100">10008</key>
+		<key cap="Bilingualer Unterricht" parent="100">10080</key>
+		<key cap="Deutsch">120</key>
+		<key cap="Literatur" parent="120">12001</key>
+		<key cap="Epik" parent="12001">1200101</key>
+		<key cap="Lesung" parent="1200101">120010101</key>
+		<key cap="Adaption als Verfilmung" parent="1200101">120010102</key>
+		<key cap="Märchen, Sagen" parent="120010102">12001010201</key>
+		<key cap="Romane, Novellen, Erzählungen" parent="120010102">12001010202</key>
+		<key cap="Adaption als Hörspiel" parent="1200101">120010103</key>
+		<key cap="Adaption in anderer Form" parent="1200101">120010104</key>
+		<key cap="Dramatik" parent="12001">1200102</key>
+		<key cap="Lesung" parent="1200102">120010201</key>
+		<key cap="Adaption als Verfilmung" parent="1200102">120010202</key>
+		<key cap="Aufzeichnung einer Inszenierung" parent="1200102">120010203</key>
+		<key cap="Arbeit an einer Inszenierung" parent="1200102">120010204</key>
+		<key cap="Hörspiel, Hörbild" parent="1200102">120010205</key>
+		<key cap="Lyrik" parent="12001">1200103</key>
+		<key cap="Literaturtheorie" parent="12001">1200104</key>
+		<key cap="Literaturgeschichte" parent="12001">1200105</key>
+		<key cap="Antike" parent="1200105">120010501</key>
+		<key cap="Mittelalter" parent="1200105">120010502</key>
+		<key cap="16. - 18. Jahrhundert" parent="1200105">120010503</key>
+		<key cap="19. Jahrhundert" parent="1200105">120010504</key>
+		<key cap="20. Jahrhundert" parent="1200105">120010505</key>
+		<key cap="21. Jahrhundert" parent="1200105">120010506</key>
+		<key cap="Biographien" parent="1200105">120010507</key>
+		<key cap="Überblicksdarstellungen" parent="1200105">120010508</key>
+		<key cap="Literatursoziologie" parent="12001">1200106</key>
+		<key cap="Kinder- und Jugendliteratur" parent="12001">1200107</key>
+		<key cap="Comics, Cartoons" parent="12001">1200108</key>
+		<key cap="Darstellendes Spiel, Schultheater" parent="120">12002</key>
+		<key cap="Nichtliterarische Texte" parent="120">12003</key>
+		<key cap="Kommunikation" parent="120">12004</key>
+		<key cap="Kommunikationstheorie, Probleme der Kommunikation" parent="12004">1200401</key>
+		<key cap="Sprachgeschichte, Sprachentwicklung" parent="12004">1200402</key>
+		<key cap="Kommunikationsanregung" parent="12004">1200403</key>
+		<key cap="Deutsch als Zweit- und Fremdsprache" parent="120">12005</key>
+		<key cap="Sprachliche Fertigkeiten" parent="12005">1200501</key>
+		<key cap="Szenarien- bzw. dialogbezogene Ordnung" parent="1200501">120050101</key>
+		<key cap="Einwirkende Interaktion" parent="120050101">12005010101</key>
+		<key cap="Informationsaustausch" parent="120050101">12005010102</key>
+		<key cap="Meinungsaustausch" parent="120050101">12005010103</key>
+		<key cap="Soziale Kontakte" parent="120050101">12005010104</key>
+		<key cap="Fertigkeitsbezogene Ordnung" parent="1200501">120050102</key>
+		<key cap="Alphabetisierung" parent="120050102">12005010201</key>
+		<key cap="Seh-/Hörverstehen und Hörverstehen" parent="120050102">12005010202</key>
+		<key cap="Interkulturelles Verstehen" parent="120050102">12005010203</key>
+		<key cap="Leseverstehen" parent="120050102">12005010204</key>
+		<key cap="Schreiben" parent="120050102">12005010205</key>
+		<key cap="Sprechen" parent="120050102">12005010206</key>
+		<key cap="Übersetzen" parent="120050102">12005010207</key>
+		<key cap="Grammatik / Systematisierung" parent="120050102">12005010208</key>
+		<key cap="Fachsprachliche Vertiefungen" parent="1200501">120050103</key>
+		<key cap="Handwerk" parent="120050103">12005010301</key>
+		<key cap="Medizin und Pflege" parent="120050103">12005010302</key>
+		<key cap="Naturwissenschaft und Technik" parent="120050103">12005010303</key>
+		<key cap="Recht" parent="120050103">12005010304</key>
+		<key cap="Wirtschaft" parent="120050103">12005010305</key>
+		<key cap="Landeskunde Deutschland" parent="12005">1200502</key>
+		<key cap="Grammatik, Rechtschreiben" parent="120">12006</key>
+		<key cap="Lesen, Lesetechnik, Umgang mit Texten" parent="120">12007</key>
+		<key cap="Elementarbereich, Vorschulerziehung">140</key>
+		<key cap="Märchen und Geschichten" parent="140">14001</key>
+		<key cap="Lebensbereiche" parent="140">14002</key>
+		<key cap="Familie, Nachbarschaft, Freunde" parent="14002">1400201</key>
+		<key cap="Gesundheit" parent="14002">1400202</key>
+		<key cap="Natur" parent="14002">1400203</key>
+		<key cap="Öffentliche Einrichtungen/Dienstleistungen" parent="14002">1400204</key>
+		<key cap="Berufe" parent="14002">1400205</key>
+		<key cap="Soziales Verhalten" parent="140">14003</key>
+		<key cap="Mathematik, Technik, Naturwissenschaften" parent="140">14004</key>
+		<key cap="Religion, Ethik" parent="140">14005</key>
+		<key cap="Fremdsprachen" parent="140">14006</key>
+		<key cap="Musizieren, Singen, Tanzen" parent="140">14007</key>
+		<key cap="Malen, Basteln" parent="140">14008</key>
+		<key cap="Unsere Erde entdecken" parent="140">14009</key>
+		<key cap="Verkehrserziehung" parent="140">14010</key>
+		<key cap="Sprachförderung" parent="140">14011</key>
+		<key cap="Ethik">160</key>
+		<key cap="Konflikte und Konfliktregelung" parent="160">16001</key>
+		<key cap="Familiäre Konflikte" parent="16001">1600101</key>
+		<key cap="Außerfamiliäre Konflikte" parent="16001">1600102</key>
+		<key cap="Gesellschaftliche Konflikte" parent="16001">1600103</key>
+		<key cap="Soziale Bindungen" parent="160">16002</key>
+		<key cap="Werte und Normen" parent="160">16003</key>
+		<key cap="Anthropologie" parent="160">16005</key>
+		<key cap="Religionen, Weltanschauungen" parent="160">16006</key>
+		<key cap="Bilingualer Unterricht" parent="160">16080</key>
+		<key cap="Freizeit">180</key>
+		<key cap="Freizeitbetätigung, Hobby" parent="180">18001</key>
+		<key cap="Freizeitsport" parent="180">18002</key>
+		<key cap="Reisen" parent="180">18003</key>
+		<key cap="Familie, Gemeinschaft, Verein" parent="180">18004</key>
+		<key cap="Fremdsprachen">200</key>
+		<key cap="Englisch" parent="200">20001</key>
+		<key cap="Sprachliche Fertigkeiten" parent="20001">2000101</key>
+		<key cap="Landeskunde" parent="20001">2000102</key>
+		<key cap="Großbritannien, Irland" parent="2000102">200010201</key>
+		<key cap="Nordamerika (USA, Kanada)" parent="2000102">200010202</key>
+		<key cap="Australien, Neuseeland" parent="2000102">200010203</key>
+		<key cap="Andere englischsprachige Länder" parent="2000102">200010209</key>
+		<key cap="Literatur, Medien" parent="20001">2000103</key>
+		<key cap="Literatur Großbritanniens und Irlands" parent="2000103">200010301</key>
+		<key cap="Literatur Nordamerikas" parent="2000103">200010302</key>
+		<key cap="Literatur anderer englischsprachiger Länder" parent="2000103">200010303</key>
+		<key cap="Spielfilm" parent="20001">2000104</key>
+		<key cap="Bilingualer Unterricht" parent="20001">2000105</key>
+		<key cap="Französisch" parent="200">20002</key>
+		<key cap="Sprachliche Fertigkeiten" parent="20002">2000201</key>
+		<key cap="Landeskunde" parent="20002">2000202</key>
+		<key cap="Literatur, Medien" parent="20002">2000203</key>
+		<key cap="Spielfilm" parent="20002">2000204</key>
+		<key cap="Bilingualer Unterricht" parent="20002">2000205</key>
+		<key cap="Griechisch" parent="200">20003</key>
+		<key cap="Sprachliche Fertigkeiten" parent="20003">2000301</key>
+		<key cap="Landeskunde" parent="20003">2000302</key>
+		<key cap="Literatur, Medien" parent="20003">2000303</key>
+		<key cap="Spielfilm" parent="20003">2000304</key>
+		<key cap="Bilingualer Unterricht" parent="20003">2000305</key>
+		<key cap="Italienisch" parent="200">20004</key>
+		<key cap="Sprachliche Fertigkeiten" parent="20004">2000401</key>
+		<key cap="Landeskunde" parent="20004">2000402</key>
+		<key cap="Literatur, Medien" parent="20004">2000403</key>
+		<key cap="Spielfilm" parent="20004">2000404</key>
+		<key cap="Bilingualer Unterricht" parent="20004">2000405</key>
+		<key cap="Latein" parent="200">20005</key>
+		<key cap="Sprachliche Fertigkeiten" parent="20005">2000501</key>
+		<key cap="Landeskunde" parent="20005">2000502</key>
+		<key cap="Literatur, Medien" parent="20005">2000503</key>
+		<key cap="Spielfilm" parent="20005">2000504</key>
+		<key cap="Bilingualer Unterricht" parent="20005">2000505</key>
+		<key cap="Russisch" parent="200">20006</key>
+		<key cap="Sprachliche Fertigkeiten" parent="20006">2000601</key>
+		<key cap="Landeskunde" parent="20006">2000602</key>
+		<key cap="Literatur, Medien" parent="20006">2000603</key>
+		<key cap="Spielfilm" parent="20006">2000604</key>
+		<key cap="Bilingualer Unterricht" parent="20006">2000605</key>
+		<key cap="Spanisch" parent="200">20007</key>
+		<key cap="Sprachliche Fertigkeiten" parent="20007">2000701</key>
+		<key cap="Landeskunde" parent="20007">2000702</key>
+		<key cap="Literatur, Medien" parent="20007">2000703</key>
+		<key cap="Spielfilm" parent="20007">2000704</key>
+		<key cap="Bilingualer Unterricht" parent="20007">2000705</key>
+		<key cap="Türkisch" parent="200">20008</key>
+		<key cap="Sprachliche Fertigkeiten" parent="20008">2000801</key>
+		<key cap="Landeskunde" parent="20008">2000802</key>
+		<key cap="Literatur, Medien" parent="20008">2000803</key>
+		<key cap="Spielfilm" parent="20008">2000804</key>
+		<key cap="Bilingualer Unterricht" parent="20008">2000805</key>
+		<key cap="Sorbisch" parent="200">20009</key>
+		<key cap="Sprachliche Fertigkeiten" parent="20009">2000901</key>
+		<key cap="Landeskunde" parent="20009">2000902</key>
+		<key cap="Literatur, Medien" parent="20009">2000903</key>
+		<key cap="Spielfilm" parent="20009">2000904</key>
+		<key cap="Bilingualer Unterricht" parent="20009">2000905</key>
+		<key cap="Dänisch" parent="200">20010</key>
+		<key cap="Sprachliche Fertigkeiten" parent="20010">2001001</key>
+		<key cap="Landeskunde" parent="20010">2001002</key>
+		<key cap="Literatur, Medien" parent="20010">2001003</key>
+		<key cap="Spielfilm" parent="20010">2001004</key>
+		<key cap="Bilingualer Unterricht" parent="20010">2001005</key>
+		<key cap="Polnisch" parent="200">20011</key>
+		<key cap="Sprachliche Fertigkeiten" parent="20011">2001101</key>
+		<key cap="Landeskunde" parent="20011">2001102</key>
+		<key cap="Literatur, Medien" parent="20011">2001103</key>
+		<key cap="Spielfilm" parent="20011">2001104</key>
+		<key cap="Bilingualer Unterricht" parent="20011">2001105</key>
+		<key cap="Tschechisch" parent="200">20012</key>
+		<key cap="Sprachliche Fertigkeiten" parent="20012">2001201</key>
+		<key cap="Landeskunde" parent="20012">2001202</key>
+		<key cap="Literatur, Medien" parent="20012">2001203</key>
+		<key cap="Spielfilm" parent="20012">2001204</key>
+		<key cap="Bilingualer Unterricht" parent="20012">2001205</key>
+		<key cap="Niederländisch" parent="200">20013</key>
+		<key cap="Sprachliche Fertigkeiten" parent="20013">2001301</key>
+		<key cap="Landeskunde" parent="20013">2001302</key>
+		<key cap="Literatur, Medien" parent="20013">2001303</key>
+		<key cap="Spielfilm" parent="20013">2001304</key>
+		<key cap="Bilingualer Unterricht" parent="20013">2001305</key>
+		<key cap="Portugiesisch" parent="200">20014</key>
+		<key cap="Sprachliche Fertigkeiten" parent="20014">2001401</key>
+		<key cap="Landeskunde" parent="20014">2001402</key>
+		<key cap="Literatur, Medien" parent="20014">2001403</key>
+		<key cap="Spielfilm" parent="20014">2001404</key>
+		<key cap="Bilingualer Unterricht" parent="20014">2001405</key>
+		<key cap="Weitere europäische Fremdsprachen" parent="200">20040</key>
+		<key cap="Chinesisch" parent="200">20041</key>
+		<key cap="Sprachliche Fertigkeiten" parent="20041">2004101</key>
+		<key cap="Landeskunde" parent="20041">2004102</key>
+		<key cap="Literatur, Medien" parent="20041">2004103</key>
+		<key cap="Spielfilm" parent="20041">2004104</key>
+		<key cap="Bilingualer Unterricht" parent="20041">2004105</key>
+		<key cap="Japanisch" parent="200">20042</key>
+		<key cap="Sprachliche Fertigkeiten" parent="20042">2004201</key>
+		<key cap="Landeskunde" parent="20042">2004202</key>
+		<key cap="Literatur, Medien" parent="20042">2004203</key>
+		<key cap="Spielfilm" parent="20042">2004204</key>
+		<key cap="Bilingualer Unterricht" parent="20042">2004205</key>
+		<key cap="Weitere außereuropäische Fremdsprachen" parent="200">20070</key>
+		<key cap="Esperanto" parent="200">20080</key>
+		<key cap="Geographie">220</key>
+		<key cap="Geographische Arbeitsmethoden und Darstellungen" parent="220">22001</key>
+		<key cap="Erde" parent="220">22002</key>
+		<key cap="Erde als Himmelskörper, Astronomie" parent="22002">2200201</key>
+		<key cap="Orientierung" parent="22002">2200202</key>
+		<key cap="Entdecken und Erforschen" parent="22002">2200203</key>
+		<key cap="Geologie" parent="220">22003</key>
+		<key cap="Erdgeschichte" parent="22003">2200301</key>
+		<key cap="Tektonik, Vulkanismus" parent="22003">2200302</key>
+		<key cap="Geomorphologie" parent="220">22004</key>
+		<key cap="Ergestaltende Kräfte" parent="22004">2200401</key>
+		<key cap="Oberflächenformen" parent="22004">2200402</key>
+		<key cap="Hydrographie" parent="220">22005</key>
+		<key cap="Meer" parent="22005">2200501</key>
+		<key cap="Binnengewässer" parent="22005">2200502</key>
+		<key cap="Klimageographie" parent="220">22006</key>
+		<key cap="Wetter" parent="22006">2200601</key>
+		<key cap="Klima" parent="22006">2200602</key>
+		<key cap="Biogeographie" parent="220">22007</key>
+		<key cap="Tiergeographie" parent="22007">2200701</key>
+		<key cap="Vegetationsgeographie" parent="22007">2200702</key>
+		<key cap="Geoökologie" parent="220">22008</key>
+		<key cap="Ökosystem" parent="22008">2200801</key>
+		<key cap="Umweltprobleme" parent="22008">2200802</key>
+		<key cap="Sozialgeographie" parent="220">22009</key>
+		<key cap="Sozialstrukturen" parent="22009">2200901</key>
+		<key cap="Daseinsgrundfunktionen" parent="22009">2200902</key>
+		<key cap="Bevölkerungsgeographie" parent="220">22010</key>
+		<key cap="Bevölkerungsstruktur" parent="22010">2201001</key>
+		<key cap="Bevölkerungswanderung" parent="22010">2201002</key>
+		<key cap="Siedlungsgeographie" parent="220">22011</key>
+		<key cap="Ländliche Siedlungen und Prozesse" parent="22011">2201101</key>
+		<key cap="Städtische Strukturen und Prozesse" parent="22011">2201102</key>
+		<key cap="Politische Geographie" parent="220">22012</key>
+		<key cap="Staat, Gemeinde" parent="22012">2201201</key>
+		<key cap="Internationale Beziehungen" parent="22012">2201202</key>
+		<key cap="Raumordnung" parent="22012">2201203</key>
+		<key cap="Wirtschaftsgeographie" parent="220">22013</key>
+		<key cap="Wirtschaftsstrukturen,Wirtschaftssysteme, Wirtschaftsformen" parent="22013">2201301</key>
+		<key cap="Wirtschaftsräume" parent="22013">2201302</key>
+		<key cap="Handel, Versorgung" parent="22013">2201303</key>
+		<key cap="Waldwirtschaft" parent="22013">2201304</key>
+		<key cap="Fischwirtschaft, Fischereiwirtschaft" parent="22013">2201305</key>
+		<key cap="Wasserwirtschaft" parent="22013">2201306</key>
+		<key cap="Agrargeographie" parent="220">22014</key>
+		<key cap="Agrarstrukturen" parent="22014">2201401</key>
+		<key cap="Betriebsstrukturen" parent="22014">2201402</key>
+		<key cap="Boden, Melioration" parent="22014">2201403</key>
+		<key cap="Agrarprodukte" parent="22014">2201404</key>
+		<key cap="Agrarräume" parent="22014">2201405</key>
+		<key cap="Industriegeographie" parent="220">22015</key>
+		<key cap="Rohstoffe und Verarbeitung" parent="22015">2201501</key>
+		<key cap="Standorte" parent="22015">2201502</key>
+		<key cap="Energiewirtschaft" parent="22015">2201503</key>
+		<key cap="Verkehrsgeographie" parent="220">22016</key>
+		<key cap="Verkehrswege, Transportmittel" parent="22016">2201601</key>
+		<key cap="Verkehrsknoten, Transportverbund" parent="22016">2201602</key>
+		<key cap="Fremdenverkehrsgeographie" parent="220">22017</key>
+		<key cap="Bundesrepublik Deutschland" parent="220">22018</key>
+		<key cap="Nordsee, Ostsee und Küsten" parent="22018">2201801</key>
+		<key cap="Norddeutsches Tiefland" parent="22018">2201802</key>
+		<key cap="Mittelgebirgsschwelle" parent="22018">2201803</key>
+		<key cap="Süddeutsches Stufen- und Bergland" parent="22018">2201804</key>
+		<key cap="Alpen und Alpenvorland" parent="22018">2201805</key>
+		<key cap="Allgemeines" parent="22018">2201898</key>
+		<key cap="Europa" parent="220">22019</key>
+		<key cap="Nordeuropa" parent="22019">2201901</key>
+		<key cap="Westeuropa" parent="22019">2201902</key>
+		<key cap="Alpenländer" parent="22019">2201903</key>
+		<key cap="Osteuropa und Ostmitteleuropa" parent="22019">2201904</key>
+		<key cap="Südeuropa und Südosteuropa" parent="22019">2201905</key>
+		<key cap="Allgemeines" parent="22019">2201998</key>
+		<key cap="Asien" parent="220">22020</key>
+		<key cap="Vorderasien" parent="22020">2202001</key>
+		<key cap="Nordasien, Mittelasien" parent="22020">2202002</key>
+		<key cap="Südasien" parent="22020">2202003</key>
+		<key cap="Südostasien" parent="22020">2202004</key>
+		<key cap="Ostasien" parent="22020">2202005</key>
+		<key cap="Allgemeines" parent="22020">2202098</key>
+		<key cap="Australien und Ozeanien" parent="220">22021</key>
+		<key cap="Australien" parent="22021">2202101</key>
+		<key cap="Übrige Gebiete" parent="22021">2202102</key>
+		<key cap="Allgemeines" parent="22021">2202198</key>
+		<key cap="Afrika" parent="220">22022</key>
+		<key cap="Nordafrika" parent="22022">2202201</key>
+		<key cap="Westafrika" parent="22022">2202202</key>
+		<key cap="Zentralafrika" parent="22022">2202203</key>
+		<key cap="Ostafrika" parent="22022">2202204</key>
+		<key cap="Südafrika" parent="22022">2202205</key>
+		<key cap="Allgemeines" parent="22022">2202298</key>
+		<key cap="Amerika" parent="220">22023</key>
+		<key cap="Grönland, Kanada" parent="22023">2202301</key>
+		<key cap="USA" parent="22023">2202302</key>
+		<key cap="Mittelamerika" parent="22023">2202303</key>
+		<key cap="Andenländer" parent="22023">2202304</key>
+		<key cap="Östliches Südamerika" parent="22023">2202305</key>
+		<key cap="Allgemeines" parent="22023">2202398</key>
+		<key cap="Pole und Meere" parent="220">22024</key>
+		<key cap="Polargebiete" parent="22024">2202401</key>
+		<key cap="Ozeane, Inseln" parent="22024">2202402</key>
+		<key cap="Bilingualer Unterricht" parent="220">22080</key>
+		<key cap="Geschichte">240</key>
+		<key cap="Quellenkunde" parent="240">24001</key>
+		<key cap="Epochen" parent="240">24002</key>
+		<key cap="Vor- und Frühgeschichte" parent="24002">2400201</key>
+		<key cap="Alte Geschichte" parent="24002">2400202</key>
+		<key cap="Frühe Hochkulturen" parent="2400202">240020201</key>
+		<key cap="Griechische Geschichte" parent="2400202">240020202</key>
+		<key cap="Römische Geschichte, etruskische Geschichte" parent="2400202">240020203</key>
+		<key cap="Völkerwanderung, germanische Geschichte" parent="2400202">240020204</key>
+		<key cap="Mittelalterliche Geschichte" parent="24002">2400203</key>
+		<key cap="Kaiser, Kirche, Reich" parent="2400203">240020301</key>
+		<key cap="Wirtschaft und Gesellschaft" parent="2400203">240020302</key>
+		<key cap="Kultur" parent="2400203">240020303</key>
+		<key cap="Kriege, Kreuzzüge, Normannen" parent="2400203">240020304</key>
+		<key cap="Islam, Judentum" parent="2400203">240020305</key>
+		<key cap="Außereuropäische Geschichte" parent="2400203">240020306</key>
+		<key cap="Neuere Geschichte" parent="24002">2400204</key>
+		<key cap="Zeit der Entdeckungen, Eroberungen und Erfindungen" parent="2400204">240020401</key>
+		<key cap="Humanismus und Renaissance" parent="2400204">240020402</key>
+		<key cap="Reformation, Bauernkriege, Glaubenskämpfe" parent="2400204">240020403</key>
+		<key cap="Absolutismus, Aufklärung, Parlamentarismus" parent="2400204">240020404</key>
+		<key cap="Bürgerliche Revolutionen des 18. Jahrhunderts" parent="2400204">240020405</key>
+		<key cap="Napoleon, Napoleonisches Zeitalter" parent="2400204">240020406</key>
+		<key cap="Restauration, Revolutionen des 19. Jahrhunderts" parent="2400204">240020407</key>
+		<key cap="Industrialisierung und soziale Frage" parent="2400204">240020408</key>
+		<key cap="Nationale Bewegungen und Deutsches Kaiserreich" parent="2400204">240020409</key>
+		<key cap="Imperialismus und Erster Weltkrieg" parent="2400204">240020410</key>
+		<key cap="Weimarer Republik" parent="2400204">240020411</key>
+		<key cap="Faschismus und Nationalsozialismus" parent="2400204">240020412</key>
+		<key cap="Politische und gesellschaftliche Entwicklung" parent="240020412">24002041201</key>
+		<key cap="Verfolgung" parent="240020412">24002041202</key>
+		<key cap="Widerstand" parent="240020412">24002041203</key>
+		<key cap="Zweiter Weltkrieg" parent="2400204">240020413</key>
+		<key cap="Weitere Themen der neueren europäischen Geschichte" parent="2400204">240020414</key>
+		<key cap="Neuere Geschichte außereuropäischer Staaten und Völker" parent="2400204">240020415</key>
+		<key cap="Geschichte von 1945 bis 1990" parent="24002">2400205</key>
+		<key cap="Deutschland" parent="2400205">240020501</key>
+		<key cap="Alliierte Besatzung 1945 - 1949" parent="240020501">24002050101</key>
+		<key cap="Deutsche Demokratische Republik 1949 - 1989" parent="240020501">24002050102</key>
+		<key cap="Bundesrepublik Deutschland 1949 - 1990" parent="240020501">24002050103</key>
+		<key cap="Osteuropäische Länder" parent="2400205">240020502</key>
+		<key cap="Westeuropäische Länder" parent="2400205">240020503</key>
+		<key cap="Außereuropäische Staaten und Völker" parent="2400205">240020504</key>
+		<key cap="Internationale Entwicklungen" parent="2400205">240020505</key>
+		<key cap="Neueste Geschichte seit 1990" parent="24002">2400206</key>
+		<key cap="Bundesrepublik Deutschland" parent="2400206">240020601</key>
+		<key cap="Europa" parent="2400206">240020602</key>
+		<key cap="Außereuropäische Staaten und Völker" parent="2400206">240020603</key>
+		<key cap="Internationale Entwicklungen" parent="2400206">240020604</key>
+		<key cap="Landes- und Regionalgeschichte" parent="240">24003</key>
+		<key cap="Landesgeschichte" parent="24003">2400301</key>
+		<key cap="Regionalgeschichte, Lokalgeschichte" parent="24003">2400302</key>
+		<key cap="Geschichtliche Überblicke und thematische Querschnitte" parent="240">24004</key>
+		<key cap="Alltag" parent="24004">2400401</key>
+		<key cap="Arbeit, Handwerk" parent="24004">2400402</key>
+		<key cap="Bildung und Wissenschaft" parent="24004">2400403</key>
+		<key cap="Formen der Weltauffassung, Religion" parent="24004">2400404</key>
+		<key cap="Gesellschaft" parent="24004">2400405</key>
+		<key cap="Staat, Herrschaftsformen" parent="24004">2400406</key>
+		<key cap="Kriegs- und Wehrwesen" parent="24004">2400407</key>
+		<key cap="Kultur" parent="24004">2400408</key>
+		<key cap="Recht" parent="24004">2400409</key>
+		<key cap="Siedlungsformen" parent="24004">2400410</key>
+		<key cap="Technik, Verkehr" parent="24004">2400411</key>
+		<key cap="Wirtschaft" parent="24004">2400412</key>
+		<key cap="Allgemeine Längs- und Querschnitte" parent="24004">2400413</key>
+		<key cap="Biographien" parent="240">24005</key>
+		<key cap="Bilingualer Unterricht" parent="240">24080</key>
+		<key cap="Gesundheit">260</key>
+		<key cap="Gesunderhaltung" parent="260">26001</key>
+		<key cap="Ernährung" parent="26001">2600101</key>
+		<key cap="Zahnpflege" parent="26001">2600102</key>
+		<key cap="Körperpflege" parent="26001">2600103</key>
+		<key cap="Bewegung" parent="26001">2600104</key>
+		<key cap="Regeneration" parent="26001">2600105</key>
+		<key cap="Krankheitsvorsorge und Früherkennung" parent="26001">2600106</key>
+		<key cap="Krankheit" parent="260">26002</key>
+		<key cap="Behinderung" parent="260">26003</key>
+		<key cap="Psychologie / Psychiatrie" parent="260">26004</key>
+		<key cap="Medizinische Versorgung" parent="260">26005</key>
+		<key cap="Grundschule">280</key>
+		<key cap="Deutsch" parent="280">28001</key>
+		<key cap="Anlässe zum Sprechen, Lesen, Schreiben" parent="28001">2800101</key>
+		<key cap="Literatur" parent="28001">2800102</key>
+		<key cap="Märchen, Sagen" parent="2800102">280010201</key>
+		<key cap="Übrige Kinder- und Jugendliteratur" parent="2800102">280010202</key>
+		<key cap="Sprachlehre, Rechtschreibung" parent="28001">2800103</key>
+		<key cap="Lesen, Lesetechnik" parent="28001">2800104</key>
+		<key cap="Deutsch für Kinder anderer Muttersprache" parent="280">28002</key>
+		<key cap="Szenarien- bzw. dialogbezogene Ordnung" parent="28002">2800201</key>
+		<key cap="Einwirkende Interaktion" parent="2800201">280020101</key>
+		<key cap="Informationsaustausch" parent="2800201">280020102</key>
+		<key cap="Meinungsaustausch" parent="2800201">280020103</key>
+		<key cap="Soziale Kontakte" parent="2800201">280020104</key>
+		<key cap="Fertigkeitsbezogene Ordnung" parent="28002">2800202</key>
+		<key cap="Alphabetisierung" parent="2800202">280020201</key>
+		<key cap="Seh-/Hörverstehen und Hörverstehen" parent="2800202">280020202</key>
+		<key cap="Interkulturelles Verstehen" parent="2800202">280020203</key>
+		<key cap="Leseverstehen" parent="2800202">280020204</key>
+		<key cap="Schreiben" parent="2800202">280020205</key>
+		<key cap="Sprechen" parent="2800202">280020206</key>
+		<key cap="Übersetzen" parent="2800202">280020207</key>
+		<key cap="Grammatik / Systematisierung" parent="2800202">280020208</key>
+		<key cap="Medienerziehung" parent="280">28003</key>
+		<key cap="Ethik" parent="280">28004</key>
+		<key cap="Fremdsprachen" parent="280">28005</key>
+		<key cap="Englisch" parent="28005">2800501</key>
+		<key cap="Französisch" parent="28005">2800502</key>
+		<key cap="Italienisch" parent="28005">2800503</key>
+		<key cap="Türkisch" parent="28005">2800504</key>
+		<key cap="Sorbisch" parent="28005">2800505</key>
+		<key cap="Polnisch" parent="28005">2800506</key>
+		<key cap="Russisch" parent="28005">2800507</key>
+		<key cap="Spanisch" parent="28005">2800508</key>
+		<key cap="Tschechisch" parent="28005">2800509</key>
+		<key cap="Weitere Fremdsprachen" parent="28005">2800520</key>
+		<key cap="Kunst, Werken, Textiles Gestalten" parent="280">28006</key>
+		<key cap="Mathematik" parent="280">28007</key>
+		<key cap="Zahlen, Grundrechenarten" parent="28007">2800701</key>
+		<key cap="Messen und Größen" parent="28007">2800702</key>
+		<key cap="Raum und Ebenen" parent="28007">2800703</key>
+		<key cap="Daten und Zufall" parent="28007">2800704</key>
+		<key cap="Musik" parent="280">28008</key>
+		<key cap="Singen, Musizieren" parent="28008">2800801</key>
+		<key cap="Tanzen" parent="28008">2800802</key>
+		<key cap="Religion" parent="280">28009</key>
+		<key cap="Bibel" parent="28009">2800901</key>
+		<key cap="Kirchenjahr" parent="28009">2800902</key>
+		<key cap="Glaube, Ethik" parent="28009">2800903</key>
+		<key cap="Vorbilder, Heilige" parent="28009">2800904</key>
+		<key cap="Christliche und nichtchristliche Religionen" parent="28009">2800905</key>
+		<key cap="Sachkunde" parent="280">28010</key>
+		<key cap="Soziales Lernen" parent="28010">2801001</key>
+		<key cap="Einstellungsänderung" parent="2801001">280100101</key>
+		<key cap="Erhalten und Verändern" parent="2801001">280100102</key>
+		<key cap="Kommunikatives Handeln, Kreativität" parent="2801001">280100103</key>
+		<key cap="Lernen in Situationen" parent="2801001">280100104</key>
+		<key cap="Rechte und Pflichten" parent="2801001">280100105</key>
+		<key cap="Rollen, Interessen, Konflikte" parent="2801001">280100106</key>
+		<key cap="Sensibilisierung" parent="2801001">280100107</key>
+		<key cap="Ausländische Arbeitnehmer und ihre Familien" parent="28010">2801002</key>
+		<key cap="Behinderte" parent="28010">2801003</key>
+		<key cap="Familie" parent="28010">2801004</key>
+		<key cap="Schule" parent="28010">2801005</key>
+		<key cap="Wohnen" parent="28010">2801006</key>
+		<key cap="Grunderfahrungen aus Naturwissenschaft und Technik" parent="28010">2801007</key>
+		<key cap="Konsum" parent="28010">2801008</key>
+		<key cap="Freizeit" parent="28010">2801009</key>
+		<key cap="Öffentliche Einrichtungen und Aufgaben" parent="28010">2801010</key>
+		<key cap="Arbeit" parent="28010">2801011</key>
+		<key cap="Landwirtschaft" parent="2801011">280101101</key>
+		<key cap="Handwerk" parent="2801011">280101102</key>
+		<key cap="Industrie" parent="2801011">280101103</key>
+		<key cap="Dienstleistungen" parent="2801011">280101104</key>
+		<key cap="Verkehrserziehung" parent="28010">2801012</key>
+		<key cap="Umwelterziehung" parent="28010">2801013</key>
+		<key cap="Wasser und Abwasser" parent="2801013">280101301</key>
+		<key cap="Landschaftsschutz, Landschaftspflege" parent="2801013">280101302</key>
+		<key cap="Luftverschmutzung, Luftreinhaltung" parent="2801013">280101303</key>
+		<key cap="Müllanfall, Müllbeseitigung, Recycling" parent="2801013">280101304</key>
+		<key cap="Lärm" parent="2801013">280101305</key>
+		<key cap="Wetter" parent="28010">2801014</key>
+		<key cap="Pflanzen" parent="28010">2801015</key>
+		<key cap="Anpassung, Bau, Pflege" parent="2801015">280101501</key>
+		<key cap="Entwicklung, Wachstum, Vermehrung" parent="2801015">280101502</key>
+		<key cap="Tiere" parent="28010">2801016</key>
+		<key cap="Haustiere, Nutztiere" parent="2801016">280101601</key>
+		<key cap="Tiermonographie" parent="280101601">28010160101</key>
+		<key cap="Haltung und Pflege" parent="280101601">28010160102</key>
+		<key cap="Wildtiere" parent="2801016">280101602</key>
+		<key cap="Mensch" parent="28010">2801017</key>
+		<key cap="Körperbau, Organe und ihre Aufgaben" parent="2801017">280101701</key>
+		<key cap="Lebensbedürfnisse" parent="2801017">280101702</key>
+		<key cap="Gesundheitserziehung" parent="2801017">280101703</key>
+		<key cap="Sexualerziehung" parent="2801017">280101704</key>
+		<key cap="Sucht und Prävention" parent="28010">2801018</key>
+		<key cap="Heimatkunde" parent="28010">2801019</key>
+		<key cap="Heimatgeschichte" parent="2801019">280101901</key>
+		<key cap="Orientierung im geographischen Raum" parent="2801019">280101902</key>
+		<key cap="Brauchtum" parent="2801019">280101903</key>
+		<key cap="Zeiterfahrungen" parent="28010">2801020</key>
+		<key cap="Bilingualer Unterricht" parent="28010">2801080</key>
+		<key cap="Sport" parent="280">28011</key>
+		<key cap="Heimatraum, Region">300</key>
+		<key cap="Architektur / Denkmalschutz" parent="300">30001</key>
+		<key cap="Brauchtum" parent="300">30002</key>
+		<key cap="Geschichte" parent="300">30003</key>
+		<key cap="Kunst / Kultur" parent="300">30004</key>
+		<key cap="Landschaft" parent="300">30005</key>
+		<key cap="Öffentliche Einrichtungen" parent="300">30006</key>
+		<key cap="Orte (Einzeldarstellungen)" parent="300">30007</key>
+		<key cap="Umwelt" parent="300">30008</key>
+		<key cap="Verkehr" parent="300">30009</key>
+		<key cap="Wirtschaft" parent="300">30010</key>
+		<key cap="Informationstechnische Bildung">320</key>
+		<key cap="Informationstechnische Grundbildung" parent="320">32001</key>
+		<key cap="Geschichte der IuK-Techniken" parent="32001">3200101</key>
+		<key cap="Grundlagen der IuK-Techniken" parent="32001">3200102</key>
+		<key cap="Anwendungen der IuK-Techniken" parent="32001">3200103</key>
+		<key cap="Auswirkungen der IuK-Techniken" parent="32001">3200104</key>
+		<key cap="Informatik" parent="320">32002</key>
+		<key cap="Technische Informatik" parent="32002">3200201</key>
+		<key cap="Angewandte Informatik" parent="32002">3200202</key>
+		<key cap="Theoretische Informatik" parent="32002">3200203</key>
+		<key cap="Berufsbezogene informationstechnische Bildung" parent="320">32003</key>
+		<key cap="Wirtschaftsinformatik" parent="32003">3200301</key>
+		<key cap="Technische Kommunikation" parent="32003">3200302</key>
+		<key cap="Prozessdatenverarbeitung" parent="32003">3200303</key>
+		<key cap="CNC-Fertigung" parent="32003">3200304</key>
+		<key cap="Algorithmische Verfahren" parent="320">32004</key>
+		<key cap="Interkulturelle Bildung">340</key>
+		<key cap="Situation in den Herkunftsländern" parent="340">34001</key>
+		<key cap="Migrationsursachen, Migrationsfolgen" parent="34001">3400101</key>
+		<key cap="Alltagsleben, Alltagskultur" parent="34001">3400102</key>
+		<key cap="Interkulturelles Zusammenleben" parent="340">34002</key>
+		<key cap="Schule" parent="34002">3400201</key>
+		<key cap="Freizeit" parent="34002">3400202</key>
+		<key cap="Familie" parent="34002">3400203</key>
+		<key cap="Arbeitswelt" parent="34002">3400204</key>
+		<key cap="Gesellschaft, Öffentlichkeit" parent="34002">3400205</key>
+		<key cap="Kinder- und Jugendbildung">360</key>
+		<key cap="Lebensbewältigung" parent="360">36001</key>
+		<key cap="Beziehungen und Beziehungskonflikte" parent="36001">3600101</key>
+		<key cap="Lebenskrisen" parent="36001">3600102</key>
+		<key cap="Lebensformen, Lebensvorstellungen" parent="360">36002</key>
+		<key cap="Leben miteinander" parent="360">36003</key>
+		<key cap="Leben anderswo" parent="360">36004</key>
+		<key cap="Beeinflussung durch Subkulturen, Ideologien, Jugendsekten" parent="360">36005</key>
+		<key cap="Kreatives, künstlerisches Lernen" parent="360">36006</key>
+		<key cap="Spiele" parent="360">36007</key>
+		<key cap="Mathematik">380</key>
+		<key cap="Zahlen, Algebra" parent="380">38001</key>
+		<key cap="Analysis, Analytische Geometrie" parent="380">38002</key>
+		<key cap="Geometrie" parent="380">38003</key>
+		<key cap="Endliche Mathematik, Stochastik" parent="380">38004</key>
+		<key cap="Mathematik und Chaos" parent="380">38005</key>
+		<key cap="Mathematische Anwendungen in anderen Gebieten" parent="380">38006</key>
+		<key cap="Medienpädagogik">400</key>
+		<key cap="Grundlagen" parent="400">40001</key>
+		<key cap="Kommunikationslehre" parent="40001">4000101</key>
+		<key cap="Mediennutzung, Medienwirkung" parent="40001">4000102</key>
+		<key cap="Medien im gesellschaftlichen System" parent="40001">4000103</key>
+		<key cap="Medienpädagogische Handlungsfelder" parent="400">40002</key>
+		<key cap="Druckmedien" parent="40002">4000201</key>
+		<key cap="Medienkundlicher Aspekt" parent="4000201">400020101</key>
+		<key cap="Medienpädagogischer Aspekt" parent="4000201">400020102</key>
+		<key cap="Fotografie" parent="40002">4000202</key>
+		<key cap="Medienkundlicher Aspekt" parent="4000202">400020201</key>
+		<key cap="Medienpädagogischer Aspekt" parent="4000202">400020202</key>
+		<key cap="Auditive Medien, Hörfunk" parent="40002">4000203</key>
+		<key cap="Medienkundlicher Aspekt" parent="4000203">400020301</key>
+		<key cap="Medienpädagogischer Aspekt" parent="4000203">400020302</key>
+		<key cap="Film, Video" parent="40002">4000204</key>
+		<key cap="Medienkundlicher Aspekt" parent="4000204">400020401</key>
+		<key cap="Medienpädagogischer Aspekt" parent="4000204">400020402</key>
+		<key cap="Fernsehen" parent="40002">4000205</key>
+		<key cap="Medienkundlicher Aspekt" parent="4000205">400020501</key>
+		<key cap="Medienpädagogischer Aspekt" parent="4000205">400020502</key>
+		<key cap="Computer / Multimedia" parent="40002">4000206</key>
+		<key cap="Medienkundlicher Aspekt" parent="4000206">400020601</key>
+		<key cap="Medienpädagogischer Aspekt" parent="4000206">400020602</key>
+		<key cap="Theater" parent="40002">4000207</key>
+		<key cap="Medienkundlicher Aspekt" parent="4000207">400020701</key>
+		<key cap="Medienpädagogischer Aspekt" parent="4000207">400020702</key>
+		<key cap="Ergebnisse aktiver Medienarbeit" parent="400">40003</key>
+		<key cap="Musik">420</key>
+		<key cap="Außereuropäische Musik" parent="420">42001</key>
+		<key cap="Europäische Zeitstile" parent="420">42002</key>
+		<key cap="Anfänge der abendländischen Musik" parent="42002">4200201</key>
+		<key cap="Mittelalterliche Ein- und Mehrstimmigkeit" parent="42002">4200202</key>
+		<key cap="Renaissance" parent="42002">4200203</key>
+		<key cap="Barock" parent="42002">4200204</key>
+		<key cap="Klassik" parent="42002">4200205</key>
+		<key cap="Romantik" parent="42002">4200206</key>
+		<key cap="Impressionismus" parent="42002">4200207</key>
+		<key cap="Moderne" parent="42002">4200208</key>
+		<key cap="Musikarten" parent="420">42003</key>
+		<key cap="Vokalmusik" parent="42003">4200301</key>
+		<key cap="Chormusik" parent="4200301">420030101</key>
+		<key cap="Volkslied" parent="4200301">420030102</key>
+		<key cap="Kunstlied" parent="4200301">420030103</key>
+		<key cap="Kinderlied" parent="4200301">420030104</key>
+		<key cap="Instrumentalmusik" parent="42003">4200302</key>
+		<key cap="Orchestermusik" parent="4200302">420030201</key>
+		<key cap="Kammermusik" parent="4200302">420030202</key>
+		<key cap="Theater- und Filmmusik" parent="42003">4200303</key>
+		<key cap="Oper" parent="4200303">420030301</key>
+		<key cap="Operette" parent="4200303">420030302</key>
+		<key cap="Musical" parent="4200303">420030303</key>
+		<key cap="Ballett" parent="4200303">420030304</key>
+		<key cap="Filmmusik" parent="4200303">420030305</key>
+		<key cap="Musikvideo" parent="4200303">420030306</key>
+		<key cap="Populäre Musik" parent="42003">4200304</key>
+		<key cap="Unterhaltungsmusik / Schlager" parent="4200304">420030401</key>
+		<key cap="Jazz und Blues" parent="4200304">420030402</key>
+		<key cap="Rock- und Popmusik" parent="4200304">420030403</key>
+		<key cap="Chanson, Liedermacher, Kleinkunst" parent="4200304">420030404</key>
+		<key cap="Neue Stilrichtungen" parent="4200304">420030405</key>
+		<key cap="Religiöse Musik" parent="42003">4200305</key>
+		<key cap="Funktionelle Musik" parent="42003">4200306</key>
+		<key cap="Tanzmusik" parent="42003">4200307</key>
+		<key cap="Interpretation" parent="420">42004</key>
+		<key cap="Musik und Gesellschaft" parent="420">42005</key>
+		<key cap="Musik und Technik" parent="420">42006</key>
+		<key cap="Musiktheorie" parent="420">42007</key>
+		<key cap="Akustik" parent="42007">4200701</key>
+		<key cap="Formenlehre" parent="42007">4200702</key>
+		<key cap="Harmonielehre" parent="42007">4200703</key>
+		<key cap="Instrumentenkunde" parent="42007">4200704</key>
+		<key cap="Notation" parent="42007">4200705</key>
+		<key cap="Arrangement" parent="42007">4200706</key>
+		<key cap="Unterrichtsorientierte Zusammenstellungen" parent="420">42008</key>
+		<key cap="Musikalischer Elementarunterricht" parent="42008">4200801</key>
+		<key cap="Komponistenporträt" parent="42008">4200802</key>
+		<key cap="Musikgeschichte" parent="42008">4200803</key>
+		<key cap="Produktion" parent="42008">4200804</key>
+		<key cap="Werkauswahl" parent="42008">4200805</key>
+		<key cap="Bilingualer Unterricht" parent="420">42080</key>
+		<key cap="Pädagogik">440</key>
+		<key cap="Allgemeine Pädagogik" parent="440">44001</key>
+		<key cap="Grundfragen" parent="44001">4400101</key>
+		<key cap="Forschungsmethoden" parent="44001">4400102</key>
+		<key cap="Geschichte der Pädagogik" parent="44001">4400103</key>
+		<key cap="Vergleichende Pädagogik" parent="44001">4400104</key>
+		<key cap="Kommunikations- und Interaktionsprozesse" parent="44001">4400105</key>
+		<key cap="Bildungsökonomie, Bildungsplanung" parent="44001">4400106</key>
+		<key cap="Pädagogische Psychologie" parent="440">44002</key>
+		<key cap="Grundfragen" parent="44002">4400201</key>
+		<key cap="Methoden" parent="44002">4400202</key>
+		<key cap="Entwicklungspsychologie" parent="44002">4400203</key>
+		<key cap="Lernpsychologie" parent="44002">4400204</key>
+		<key cap="Sozialpsychologie" parent="44002">4400205</key>
+		<key cap="Vorschulpädagogik" parent="440">44003</key>
+		<key cap="Schulpädagogik" parent="440">44004</key>
+		<key cap="Grundfragen" parent="44004">4400401</key>
+		<key cap="Methodik, Didaktik" parent="44004">4400402</key>
+		<key cap="Berufspädagogik" parent="440">44005</key>
+		<key cap="Sonderpädagogik" parent="440">44006</key>
+		<key cap="Sozialpädagogik" parent="440">44007</key>
+		<key cap="Pädagogik der Jugendarbeit" parent="44007">4400701</key>
+		<key cap="Sozialarbeit mit Erwachsenen" parent="44007">4400702</key>
+		<key cap="Seniorenarbeit" parent="44007">4400703</key>
+		<key cap="Erwachsenenpädagogik" parent="440">44008</key>
+		<key cap="Ausländerpädagogik" parent="440">44009</key>
+		<key cap="Eltern und Erziehung" parent="440">44010</key>
+		<key cap="Philosophie">450</key>
+		<key cap="Außereuropäische Philosophie" parent="450">45001</key>
+		<key cap="Indische Philosophie" parent="45001">4500101</key>
+		<key cap="Chinesische Philosophie" parent="45001">4500102</key>
+		<key cap="Japanische Philosophie" parent="45001">4500103</key>
+		<key cap="Philosophie des arabisch-islamischen Kulturraums" parent="45001">4500104</key>
+		<key cap="Epochen" parent="450">45002</key>
+		<key cap="Antike Philosophie" parent="45002">4500201</key>
+		<key cap="Philosophie des Mittelalters" parent="45002">4500202</key>
+		<key cap="Frühneuzeitliche Philosophie" parent="45002">4500203</key>
+		<key cap="Philosophie des 19. Jahrhunderts" parent="45002">4500204</key>
+		<key cap="Philosophie des 20. Jahrhunderts" parent="45002">4500205</key>
+		<key cap="Philosophie der Gegenwart" parent="45002">4500206</key>
+		<key cap="Philosophische Gegenwartsfragen" parent="450">45003</key>
+		<key cap="Wissenschaftstheorie" parent="45003">4500301</key>
+		<key cap="Religionskritik" parent="45003">4500302</key>
+		<key cap="Naturphilosophie" parent="45003">4500303</key>
+		<key cap="Technikphilosophie" parent="45003">4500304</key>
+		<key cap="Medienphilosophie" parent="45003">4500305</key>
+		<key cap="Philosophie des Geistes" parent="45003">4500306</key>
+		<key cap="Ethische Grundfragen" parent="45003">4500307</key>
+		<key cap="Biographien" parent="450">45004</key>
+		<key cap="Praktische Philosophie" parent="450">45005</key>
+		<key cap="Physik">460</key>
+		<key cap="Klassische Mechanik" parent="460">46001</key>
+		<key cap="Statik" parent="46001">4600101</key>
+		<key cap="Kinematik, Dynamik" parent="46001">4600102</key>
+		<key cap="Schwingungen, Wellen, Akustik" parent="46001">4600103</key>
+		<key cap="Technische Anwendungen" parent="46001">4600104</key>
+		<key cap="Wärmelehre" parent="460">46002</key>
+		<key cap="Temperatur, Wärmemenge" parent="46002">4600201</key>
+		<key cap="Aggregatzustände, Lösungen" parent="46002">4600202</key>
+		<key cap="Wärmetheorie" parent="46002">4600203</key>
+		<key cap="Technische Anwendungen" parent="46002">4600204</key>
+		<key cap="Optik" parent="460">46003</key>
+		<key cap="Geometrische Optik" parent="46003">4600301</key>
+		<key cap="Wellenoptik" parent="46003">4600302</key>
+		<key cap="Fotometrie" parent="46003">4600303</key>
+		<key cap="Farbenlehre" parent="46003">4600304</key>
+		<key cap="Technische Anwendungen" parent="46003">4600305</key>
+		<key cap="Magnetismus" parent="460">46004</key>
+		<key cap="Elektrizitätslehre" parent="460">46005</key>
+		<key cap="Elektrostatik" parent="46005">4600501</key>
+		<key cap="Elektrodynamik" parent="46005">4600502</key>
+		<key cap="Elektronik" parent="46005">4600503</key>
+		<key cap="Technische Anwendungen" parent="46005">4600504</key>
+		<key cap="Relativitätstheorie" parent="460">46006</key>
+		<key cap="Quantentheorie" parent="460">46007</key>
+		<key cap="Atomphysik" parent="460">46008</key>
+		<key cap="Atombau, Spektren" parent="46008">4600801</key>
+		<key cap="Nachweismethoden" parent="46008">4600802</key>
+		<key cap="Technische Anwendungen" parent="46008">4600803</key>
+		<key cap="Kernphysik" parent="460">46009</key>
+		<key cap="Aufbau der Kerne" parent="46009">4600901</key>
+		<key cap="Radioaktivität, Kernumwandlung" parent="46009">4600902</key>
+		<key cap="Nachweismethoden" parent="46009">4600903</key>
+		<key cap="Technische Anwendungen" parent="46009">4600904</key>
+		<key cap="Chaostheorie" parent="460">46010</key>
+		<key cap="Elementarteilchenphysik" parent="460">46011</key>
+		<key cap="Festkörperphysik" parent="460">46012</key>
+		<key cap="Biophysik" parent="460">46013</key>
+		<key cap="Astronomie" parent="460">46014</key>
+		<key cap="Himmelsmechanik" parent="46014">4601401</key>
+		<key cap="Astrophysik, Geophysik" parent="46014">4601402</key>
+		<key cap="Weltraumfahrt" parent="46014">4601403</key>
+		<key cap="Technologie" parent="460">46015</key>
+		<key cap="Biographien" parent="460">46016</key>
+		<key cap="Bilingualer Unterricht" parent="460">46080</key>
+		<key cap="Politische Bildung">480</key>
+		<key cap="Politische Theorien" parent="480">48001</key>
+		<key cap="Politisches System der Bundesrepublik Deutschland" parent="480">48002</key>
+		<key cap="Mitwirkung am politischen Prozess" parent="48002">4800201</key>
+		<key cap="Bürgerbeteiligung" parent="4800201">480020101</key>
+		<key cap="Parteien" parent="4800201">480020102</key>
+		<key cap="Organisationen" parent="4800201">480020103</key>
+		<key cap="Massenmedien" parent="4800201">480020104</key>
+		<key cap="Kommunale Ebene" parent="48002">4800202</key>
+		<key cap="Kommunalwahlen" parent="4800202">480020201</key>
+		<key cap="Kommunale Institutionen" parent="4800202">480020202</key>
+		<key cap="Kommunalpolitik" parent="4800202">480020203</key>
+		<key cap="Politische Ordnung des Bundeslandes" parent="48002">4800203</key>
+		<key cap="Landtagswahl" parent="4800203">480020301</key>
+		<key cap="Regierungssystem" parent="4800203">480020302</key>
+		<key cap="Landesgesetzgebung" parent="4800203">480020303</key>
+		<key cap="Politische Ordnung des Bundes" parent="48002">4800204</key>
+		<key cap="Bundestagswahl" parent="4800204">480020401</key>
+		<key cap="Parlamentarisches Regierungssystem" parent="4800204">480020402</key>
+		<key cap="Bundesgesetzgebung" parent="4800204">480020403</key>
+		<key cap="Zusammenwirken von Bund und Ländern" parent="4800204">480020404</key>
+		<key cap="Politische Systeme anderer Länder" parent="480">48003</key>
+		<key cap="Politikfelder" parent="480">48004</key>
+		<key cap="Bildung, Kultur, Forschung" parent="48004">4800401</key>
+		<key cap="Innere Sicherheit" parent="48004">4800402</key>
+		<key cap="Internationale Beziehungen" parent="48004">4800403</key>
+		<key cap="Europäische Union" parent="4800403">480040301</key>
+		<key cap="Sonstige europäische Aspekte" parent="4800403">480040302</key>
+		<key cap="Außereuropäische Beziehungen" parent="4800403">480040303</key>
+		<key cap="Dritte Welt, Entwicklungspolitik" parent="4800403">480040304</key>
+		<key cap="Konflikte" parent="4800403">480040305</key>
+		<key cap="Friedenspolitik, Sicherheitspolitik" parent="4800403">480040306</key>
+		<key cap="Internationale Hilfsorganisationen und Interessenvertretungen" parent="4800403">480040307</key>
+		<key cap="Globalisierung" parent="4800403">480040308</key>
+		<key cap="Raumordnung, Städtebau, Verkehr" parent="48004">4800404</key>
+		<key cap="Recht" parent="48004">4800405</key>
+		<key cap="Menschenrechte" parent="4800405">480040501</key>
+		<key cap="Verfassungen" parent="4800405">480040502</key>
+		<key cap="Arbeitsrecht" parent="4800405">480040503</key>
+		<key cap="Zivilrecht" parent="4800405">480040504</key>
+		<key cap="Strafrecht" parent="4800405">480040505</key>
+		<key cap="Öffentliches Recht" parent="4800405">480040506</key>
+		<key cap="Sozialrecht" parent="4800405">480040507</key>
+		<key cap="Sozialpolitik" parent="48004">4800406</key>
+		<key cap="Verteidigungspolitk" parent="48004">4800407</key>
+		<key cap="Wirtschaftspolitik" parent="48004">4800408</key>
+		<key cap="Gesellschaftspolitische Gegenwartsfragen" parent="480">48005</key>
+		<key cap="Arbeit" parent="48005">4800501</key>
+		<key cap="Armut, soziale Unterschiede" parent="48005">4800502</key>
+		<key cap="Formen des Zusammenlebens" parent="48005">4800503</key>
+		<key cap="Freizeit" parent="48005">4800504</key>
+		<key cap="Gewalt" parent="48005">4800505</key>
+		<key cap="Gleichberechtigung" parent="48005">4800506</key>
+		<key cap="Migration" parent="48005">4800507</key>
+		<key cap="Randgruppen" parent="48005">4800508</key>
+		<key cap="Schule, Ausbildung" parent="48005">4800509</key>
+		<key cap="Verhältnis der Generationen" parent="48005">4800510</key>
+		<key cap="Vorurteile, Rassismus" parent="48005">4800511</key>
+		<key cap="Umwelt, Energie" parent="48005">4800512</key>
+		<key cap="Individuum und Gesellschaft" parent="480">48006</key>
+		<key cap="Sozialisation, Verhalten" parent="48006">4800601</key>
+		<key cap="Kommunikation, Massenkommunikation" parent="48006">4800602</key>
+		<key cap="Politische Persönlichkeiten" parent="480">48007</key>
+		<key cap="Bilingualer Unterricht" parent="480">48080</key>
+		<key cap="Praxisorientierte Fächer">500</key>
+		<key cap="Hauswirtschaft" parent="500">50001</key>
+		<key cap="Ernährungslehre" parent="50001">5000101</key>
+		<key cap="Kochen" parent="50001">5000102</key>
+		<key cap="Wirtschaften im privaten Haushalt" parent="50001">5000103</key>
+		<key cap="Haushalt und Umwelt" parent="50001">5000104</key>
+		<key cap="Wohnung" parent="50001">5000105</key>
+		<key cap="Unfallverhütung" parent="50001">5000106</key>
+		<key cap="Maschinenschreiben, Textverarbeitung, Kurzschrift" parent="500">50002</key>
+		<key cap="Schulgarten" parent="500">50003</key>
+		<key cap="Textiles Gestalten" parent="500">50004</key>
+		<key cap="Materialien" parent="50004">5000401</key>
+		<key cap="Techniken" parent="50004">5000402</key>
+		<key cap="Maschinenkunde" parent="50004">5000403</key>
+		<key cap="Werken" parent="500">50005</key>
+		<key cap="Holz, Kunststoff" parent="50005">5000501</key>
+		<key cap="Metall" parent="50005">5000502</key>
+		<key cap="Ton" parent="50005">5000503</key>
+		<key cap="Papier, Pappe" parent="50005">5000504</key>
+		<key cap="Andere Materialien" parent="50005">5000505</key>
+		<key cap="Elektrotechnik" parent="50005">5000506</key>
+		<key cap="Maschinentechnik" parent="50005">5000507</key>
+		<key cap="Grundlagen des technischen Zeichnens" parent="50005">5000508</key>
+		<key cap="Unfallverhütung" parent="50005">5000509</key>
+		<key cap="Psychologie">510</key>
+		<key cap="Religion">520</key>
+		<key cap="Religionskunde" parent="520">52001</key>
+		<key cap="Riten, Symbole" parent="52001">5200101</key>
+		<key cap="Christliche Konfessionen" parent="52001">5200102</key>
+		<key cap="Nichtchristliche Religionen" parent="52001">5200103</key>
+		<key cap="Sekten, neue religiöse Strömungen" parent="52001">5200104</key>
+		<key cap="Weltanschauungen, Ideologien" parent="52001">5200105</key>
+		<key cap="Magie, Aberglaube" parent="52001">5200106</key>
+		<key cap="Naturreligionen, Animismus, Schamanismus" parent="52001">5200107</key>
+		<key cap="Bibel" parent="520">52002</key>
+		<key cap="Altes Testament" parent="52002">5200201</key>
+		<key cap="Neues Testament" parent="52002">5200202</key>
+		<key cap="Kirche und Gesellschaft" parent="520">52003</key>
+		<key cap="Kirchengeschichte" parent="52003">5200301</key>
+		<key cap="Kirchliche Strukturen" parent="52003">5200302</key>
+		<key cap="Gemeindeleben" parent="52003">5200303</key>
+		<key cap="Kirchliche Gruppen, Verbände" parent="52003">5200304</key>
+		<key cap="Orden, Kommunitäten" parent="52003">5200305</key>
+		<key cap="Kirchliche Berufe" parent="52003">5200306</key>
+		<key cap="Kirchliche Sozialarbeit" parent="52003">5200307</key>
+		<key cap="Kirche und Staat" parent="52003">5200308</key>
+		<key cap="Kirche und säkularisiertes Leben" parent="52003">5200309</key>
+		<key cap="Kirche und Entwicklungsländer" parent="52003">5200310</key>
+		<key cap="Mission" parent="52003">5200311</key>
+		<key cap="Ökumene" parent="52003">5200312</key>
+		<key cap="Kult und Frömmigkeit" parent="520">52004</key>
+		<key cap="Kirchenjahr" parent="52004">5200401</key>
+		<key cap="Gottesdienst" parent="52004">5200402</key>
+		<key cap="Gebet" parent="52004">5200403</key>
+		<key cap="Meditation" parent="52004">5200404</key>
+		<key cap="Sakramente" parent="52004">5200405</key>
+		<key cap="Religiöses Brauchtum" parent="52004">5200406</key>
+		<key cap="Religiöse Lebensgestaltung" parent="520">52005</key>
+		<key cap="Grunderfahrungen" parent="52005">5200501</key>
+		<key cap="Wahrnehmung der Schöpfung" parent="5200501">520050101</key>
+		<key cap="Vertrauen" parent="5200501">520050102</key>
+		<key cap="Gemeinschaft" parent="5200501">520050103</key>
+		<key cap="Verlust" parent="5200501">520050104</key>
+		<key cap="Tod" parent="5200501">520050105</key>
+		<key cap="Glaube" parent="52005">5200502</key>
+		<key cap="Ethik" parent="52005">5200503</key>
+		<key cap="Erziehung und Bildung" parent="52005">5200504</key>
+		<key cap="Persönlichkeitsbilder" parent="52005">5200505</key>
+		<key cap="Religiöse Kunst" parent="520">52006</key>
+		<key cap="Bild und Plastik" parent="52006">5200601</key>
+		<key cap="Musik" parent="52006">5200602</key>
+		<key cap="Theater" parent="52006">5200603</key>
+		<key cap="Film" parent="52006">5200604</key>
+		<key cap="Literatur" parent="52006">5200605</key>
+		<key cap="Architektur" parent="52006">5200606</key>
+		<key cap="Retten, Helfen, Schützen">540</key>
+		<key cap="Unfallverhütung" parent="540">54001</key>
+		<key cap="Brandschutz, Brandbekämpfung" parent="540">54002</key>
+		<key cap="Katastrophenschutz" parent="540">54003</key>
+		<key cap="Hilfsdienste, Rettungsdienste" parent="540">54004</key>
+		<key cap="Erste Hilfe" parent="540">54005</key>
+		<key cap="Sexualerziehung">560</key>
+		<key cap="Sexualität" parent="560">56001</key>
+		<key cap="Pubertät" parent="560">56002</key>
+		<key cap="Partnerschaft, Beziehungen" parent="560">56003</key>
+		<key cap="Schwangerschaft und Geburt" parent="560">56004</key>
+		<key cap="Empfängnisverhütung" parent="560">56005</key>
+		<key cap="Sexueller Missbrauch" parent="560">56006</key>
+		<key cap="Sexuell übertragbare Krankheiten" parent="560">56007</key>
+		<key cap="Spiel- und Dokumentarfilm">580</key>
+		<key cap="Kurzfilm" parent="580">58001</key>
+		<key cap="Kurzspielfilm" parent="58001">5800102</key>
+		<key cap="Literaturverfilmung" parent="5800102">580010205</key>
+		<key cap="Abenteuer" parent="5800102">580010210</key>
+		<key cap="Gewalt, Aggression" parent="5800102">580010220</key>
+		<key cap="Lebenssinn" parent="5800102">580010230</key>
+		<key cap="Liebe, Freundschaft" parent="5800102">580010240</key>
+		<key cap="Macht, Machtmissbrauch" parent="5800102">580010250</key>
+		<key cap="Märchen" parent="5800102">580010260</key>
+		<key cap="Politik, Geschichte" parent="5800102">580010270</key>
+		<key cap="Tod, Sterben" parent="5800102">580010280</key>
+		<key cap="Sonstige" parent="5800102">580010290</key>
+		<key cap="Trickfilm" parent="58001">5800103</key>
+		<key cap="Zeichentrick" parent="5800103">580010301</key>
+		<key cap="Puppentrick" parent="5800103">580010302</key>
+		<key cap="Scherenschnitt" parent="5800103">580010303</key>
+		<key cap="Sonstige Trickarten" parent="5800103">580010304</key>
+		<key cap="Computeranimation" parent="5800103">580010305</key>
+		<key cap="Langfilm" parent="580">58002</key>
+		<key cap="Halbdokumentarischer Spielfilm" parent="58002">5800202</key>
+		<key cap="Spielfilm" parent="58002">5800203</key>
+		<key cap="Abenteuer" parent="5800203">580020301</key>
+		<key cap="Biographie" parent="5800203">580020302</key>
+		<key cap="Experimentalfilm, Avantgarde" parent="5800203">580020303</key>
+		<key cap="Horror" parent="5800203">580020304</key>
+		<key cap="Heimat" parent="5800203">580020305</key>
+		<key cap="Katastrophe" parent="5800203">580020306</key>
+		<key cap="Komödie, Satire, Parodie" parent="5800203">580020307</key>
+		<key cap="Kriegsfilm, Antikriegsfilm" parent="5800203">580020308</key>
+		<key cap="Krimi, Thriller, Justiz" parent="5800203">580020309</key>
+		<key cap="Liebe" parent="5800203">580020310</key>
+		<key cap="Märchen, Sagen, Legenden" parent="5800203">580020311</key>
+		<key cap="Monumentalfilm, Historienfilm" parent="5800203">580020312</key>
+		<key cap="Musik, Tanz" parent="5800203">580020313</key>
+		<key cap="Politik, Geschichte" parent="5800203">580020314</key>
+		<key cap="Sciencefiction, Fantasy" parent="5800203">580020315</key>
+		<key cap="Western" parent="5800203">580020316</key>
+		<key cap="Sonstige Gattungen" parent="5800203">580020317</key>
+		<key cap="Literaturverfilmung" parent="5800203">580020318</key>
+		<key cap="Action" parent="5800203">580020319</key>
+		<key cap="Drama, Schicksal" parent="5800203">580020320</key>
+		<key cap="Tierspielfilm" parent="5800203">580020321</key>
+		<key cap="Trickfilm" parent="58002">5800204</key>
+		<key cap="Zielgruppenfilm" parent="580">58003</key>
+		<key cap="Kinderfilm" parent="58003">5800301</key>
+		<key cap="Jugendfilm" parent="58003">5800302</key>
+		<key cap="Dokumentarfilm" parent="580">58004</key>
+		<key cap="Sport">600</key>
+		<key cap="Sportwissenschaft" parent="600">60001</key>
+		<key cap="Trainings- und Bewegungslehre" parent="60001">6000101</key>
+		<key cap="Sportgeschichte" parent="60001">6000102</key>
+		<key cap="Sportpädagogik" parent="60001">6000103</key>
+		<key cap="Sportpsychologie" parent="60001">6000104</key>
+		<key cap="Sportsoziologie" parent="60001">6000105</key>
+		<key cap="Sportmedizin" parent="60001">6000106</key>
+		<key cap="Sportdidaktik" parent="60001">6000107</key>
+		<key cap="Biomechanik" parent="60001">6000108</key>
+		<key cap="Sportbereiche" parent="600">60002</key>
+		<key cap="Altensport" parent="60002">6000201</key>
+		<key cap="Behindertensport" parent="60002">6000202</key>
+		<key cap="Betriebssport" parent="60002">6000203</key>
+		<key cap="Breitensport" parent="60002">6000204</key>
+		<key cap="Kinder- und Jugendsport" parent="60002">6000205</key>
+		<key cap="Leistungssport" parent="60002">6000206</key>
+		<key cap="Schulsport" parent="60002">6000207</key>
+		<key cap="Gesundheitssport" parent="60002">6000208</key>
+		<key cap="Sonstige Sportbereiche" parent="60002">6000270</key>
+		<key cap="Sportarten" parent="600">60003</key>
+		<key cap="Gerätturnen" parent="60003">6000301</key>
+		<key cap="Gymnastik, Tanz" parent="60003">6000302</key>
+		<key cap="Gymnastik" parent="6000302">600030201</key>
+		<key cap="Entspannung" parent="6000302">600030202</key>
+		<key cap="Tanz" parent="6000302">600030203</key>
+		<key cap="Theatersport" parent="6000302">600030204</key>
+		<key cap="Leichtathletik" parent="60003">6000303</key>
+		<key cap="Spielsportarten" parent="60003">6000304</key>
+		<key cap="Basketball" parent="6000304">600030401</key>
+		<key cap="Fußball" parent="6000304">600030402</key>
+		<key cap="Handball" parent="6000304">600030403</key>
+		<key cap="Tennis" parent="6000304">600030404</key>
+		<key cap="Volleyball" parent="6000304">600030405</key>
+		<key cap="Weitere Spielsportarten und Spiele" parent="6000304">600030406</key>
+		<key cap="Badminton" parent="6000304">600030407</key>
+		<key cap="Tischtennis" parent="6000304">600030408</key>
+		<key cap="Hockey" parent="6000304">600030409</key>
+		<key cap="Integrative Spiele" parent="6000304">600030410</key>
+		<key cap="Kleine Spiele" parent="6000304">600030411</key>
+		<key cap="Wassersport" parent="60003">6000305</key>
+		<key cap="Wintersport, Schneesport" parent="60003">6000306</key>
+		<key cap="Sonstige Sportarten" parent="60003">6000307</key>
+		<key cap="Golf" parent="6000307">600030701</key>
+		<key cap="Wurfscheibe" parent="6000307">600030702</key>
+		<key cap="Akrobatik" parent="6000307">600030703</key>
+		<key cap="Cheerleading" parent="6000307">600030704</key>
+		<key cap="Luftkissenbahn" parent="6000307">600030705</key>
+		<key cap="Kampfsport" parent="6000307">600030706</key>
+		<key cap="Kraftsport" parent="6000307">600030707</key>
+		<key cap="Urbansport" parent="6000307">600030708</key>
+		<key cap="Klettern" parent="6000307">600030709</key>
+		<key cap="Pferdesport" parent="6000307">600030710</key>
+		<key cap="Radsport" parent="6000307">600030711</key>
+		<key cap="Sportorganisation" parent="600">60004</key>
+		<key cap="Olympische Spiele" parent="600">60005</key>
+		<key cap="Sport und Kunst" parent="600">60006</key>
+		<key cap="Sport und Recht" parent="600">60007</key>
+		<key cap="Sport und Umwelt" parent="600">60008</key>
+		<key cap="Sportstätten" parent="600">60009</key>
+		<key cap="Sport und Physik" parent="600">60010</key>
+		<key cap="Sport und Ernährung" parent="600">60011</key>
+		<key cap="Sport und Erziehung" parent="600">60012</key>
+		<key cap="Sport und Biologie" parent="600">60013</key>
+		<key cap="Bilingualer Unterricht" parent="600">60080</key>
+		<key cap="Sucht und Prävention">620</key>
+		<key cap="Suchtursachen" parent="620">62001</key>
+		<key cap="Drogen" parent="620">62002</key>
+		<key cap="Alkohol" parent="62002">6200201</key>
+		<key cap="Nikotin" parent="62002">6200202</key>
+		<key cap="Rauschgifte" parent="62002">6200203</key>
+		<key cap="Sonstige Drogen" parent="62002">6200204</key>
+		<key cap="Medikamente" parent="62002">6200205</key>
+		<key cap="Sonstige Abhängigkeiten" parent="620">62003</key>
+		<key cap="Prävention, Therapie" parent="620">62004</key>
+		<key cap="Gesellschaftliche Aspekte" parent="620">62005</key>
+		<key cap="Bilingualer Unterricht" parent="620">62080</key>
+		<key cap="Umweltgefährdung, Umweltschutz">640</key>
+		<key cap="Wasser" parent="640">64001</key>
+		<key cap="Boden" parent="640">64002</key>
+		<key cap="Luft" parent="640">64003</key>
+		<key cap="Klima" parent="640">64004</key>
+		<key cap="Wald" parent="640">64005</key>
+		<key cap="Arten, Biotope" parent="640">64006</key>
+		<key cap="Landschaft" parent="640">64007</key>
+		<key cap="Landwirtschaft und Nahrungsmittelproduktion" parent="640">64008</key>
+		<key cap="Abfall" parent="640">64009</key>
+		<key cap="Energie" parent="640">64010</key>
+		<key cap="Lärm" parent="640">64011</key>
+		<key cap="Verkehr" parent="640">64012</key>
+		<key cap="Freizeit und Tourismus" parent="640">64013</key>
+		<key cap="Bauen und Wohnen" parent="640">64014</key>
+		<key cap="Umwelt in Politik und Wirtschaft" parent="640">64015</key>
+		<key cap="Umweltbewusstes Handeln" parent="640">64016</key>
+		<key cap="Themenübergreifende Darstellungen" parent="640">64017</key>
+		<key cap="Verkehrserziehung">660</key>
+		<key cap="Verkehrsverhalten" parent="660">66001</key>
+		<key cap="Fußgänger" parent="66001">6600101</key>
+		<key cap="Radfahrer" parent="66001">6600102</key>
+		<key cap="Motorisierter Zweiradfahrer" parent="66001">6600103</key>
+		<key cap="Autofahrer" parent="66001">6600104</key>
+		<key cap="Sonstige" parent="66001">6600105</key>
+		<key cap="Verkehrsmittel" parent="660">66002</key>
+		<key cap="Fahrrad" parent="66002">6600201</key>
+		<key cap="Motorisiertes Zweirad" parent="66002">6600202</key>
+		<key cap="Automobil" parent="66002">6600203</key>
+		<key cap="Bahn" parent="66002">6600204</key>
+		<key cap="Schiff" parent="66002">6600205</key>
+		<key cap="Flugzeug" parent="66002">6600206</key>
+		<key cap="Verkehrswege" parent="660">66003</key>
+		<key cap="Verkehrsrecht" parent="660">66004</key>
+		<key cap="Verkehrspolitik" parent="660">66005</key>
+		<key cap="Sicherheitstechnik, Fahrphysik" parent="660">66006</key>
+		<key cap="Verkehrspsychologie, Verkehrssoziologie" parent="660">66007</key>
+		<key cap="Verkehrsmedizin" parent="660">66008</key>
+		<key cap="Verkehr und Wetter" parent="660">66009</key>
+		<key cap="Verkehr und Umweltschutz" parent="660">66010</key>
+		<key cap="Verkehrsunfall" parent="660">66011</key>
+		<key cap="Weiterbildung">680</key>
+		<key cap="Grundlagen der Weiterbildung" parent="680">68001</key>
+		<key cap="Politische Weiterbildung" parent="680">68002</key>
+		<key cap="Kulturelle Weiterbildung" parent="680">68003</key>
+		<key cap="Kreative Weiterbildung" parent="680">68004</key>
+		<key cap="Elternbildung, Familienbildung" parent="680">68005</key>
+		<key cap="Wirtschaftliche Weiterbildung" parent="680">68006</key>
+		<key cap="Mathematisch-naturwissenschaftliche Weiterbildung" parent="680">68007</key>
+		<key cap="Sprachliche Weiterbildung" parent="680">68008</key>
+		<key cap="Gesundheitliche und sportliche Weiterbildung" parent="680">68009</key>
+		<key cap="Schulische Weiterbildung, Zweiter Bildungsweg" parent="680">68010</key>
+		<key cap="Zielgruppenangebot" parent="680">68011</key>
+		<key cap="Wirtschaftskunde">700</key>
+		<key cap="Privater Haushalt" parent="700">70001</key>
+		<key cap="Umgang mit Geld" parent="70001">7000101</key>
+		<key cap="Verbrauchererziehung, Verbraucherschutz" parent="70001">7000102</key>
+		<key cap="Betriebswirtschaft" parent="700">70002</key>
+		<key cap="Unternehmensformen, Unternehmensstrukturen" parent="70002">7000201</key>
+		<key cap="Bilanzierung, Leistungserstellung" parent="70002">7000202</key>
+		<key cap="Volkswirtschaft" parent="700">70003</key>
+		<key cap="Markt und Preis" parent="70003">7000301</key>
+		<key cap="Geld und Kredit" parent="70003">7000302</key>
+		<key cap="Arbeit und Lohn" parent="70003">7000303</key>
+		<key cap="Sozialpolitik, Wirtschaftspolitik" parent="70003">7000304</key>
+		<key cap="Öffentliche Finanzwirtschaft, Steuern" parent="70003">7000305</key>
+		<key cap="Weltwirtschaft" parent="70003">7000306</key>
+		<key cap="Wirtschaftssysteme" parent="70003">7000307</key>
+		<key cap="Bilingualer Unterricht" parent="700">70080</key>
+		<key cap="Sachgebietsübergreifende Medien">720</key>
+		<key cap="Nicht zuzuordnende Medien">990</key>
+	</valuespace></valuespaces>

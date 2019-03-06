@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<valuespaces>
+	<valuespace property="ccm:educationalcontext">
+		<key>pre-school</key>
+		<key>primary school</key>
+		<key>compulsory education</key>
+		<key>special education</key>
+		<key>vocational education</key>
+		<key>professional development</key>
+		<key>educational administration</key>
+		<key>other</key>
+		<key>lower secondary school</key>
+		<key>upper secondary school</key>
+	</valuespace>
+</valuespaces>

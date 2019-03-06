@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<valuespaces>
+	<valuespace property="{http://www.campuscontent.de/model/1.0}educationalintendedenduserrole">
+		<key cap=""></key>
+		<key>author</key>
+		<key>counsellor</key>
+		<key>learner</key>
+		<key>manager</key>
+		<key>parent</key>
+		<key>teacher</key>
+		<key>other</key>
+	</valuespace>
+</valuespaces>
