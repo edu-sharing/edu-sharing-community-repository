@@ -163,3 +163,28 @@ label .label-secondary{
 .mat-card-subtitle,.mat-hint{
   color: $textLight;
 }
+// Mobile Menus to bottom
+@media screen and (max-width:  ($mobileWidth - $mobileStage*1)) {
+  .cdk-overlay-container {
+    background: rgba(0, 0, 0, 0.8);
+  }
+  .cdk-overlay-connected-position-bounding-box{
+    bottom: 0;
+    top: initial !important;
+    right: initial !important;
+    left: initial !important;
+    height: initial !important;
+    width: 100% !important;
+    display: block;
+  }
+  .mat-menu-content {
+    width: 100%;
+  }
+  .mat-menu-panel {
+    min-width: inherit !important;
+    max-width: inherit !important;
+    width: 100%;
+    border-bottom-right-radius: 0 !important;
+    border-bottom-left-radius: 0 !important;
+  }
+}
