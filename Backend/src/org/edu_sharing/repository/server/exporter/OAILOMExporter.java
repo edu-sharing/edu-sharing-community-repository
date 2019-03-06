@@ -23,6 +23,7 @@ import org.edu_sharing.repository.client.rpc.metadataset.MetadataSetValueKatalog
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.server.MCAlfrescoAPIClient;
 import org.edu_sharing.repository.server.tools.ApplicationInfoList;
+import org.edu_sharing.repository.server.tools.URLTool;
 import org.edu_sharing.repository.server.tools.metadataset.MetadataReader;
 import org.springframework.context.ApplicationContext;
 import org.springframework.extensions.surf.util.ISO8601DateFormat;
@@ -89,7 +90,11 @@ public class OAILOMExporter {
 		createAndAppendElement("entry",identifier, QName.createQName(CCConstants.SYS_PROP_NODE_UID));
 		
 		Element titleEle = createAndAppendElement("title", general);
-		Element titleStrEle = createAndAppendElement("string", titleEle,QName.createQName(CCConstants.LOM_PROP_GENERAL_TITLE));
+		String title= (String) nodeService.getProperty(nodeRef,QName.createQName(CCConstants.LOM_PROP_GENERAL_TITLE));
+		if(title==null || title.isEmpty()){
+			title= (String) nodeService.getProperty(nodeRef,QName.createQName(CCConstants.CM_NAME));
+		}
+		Element titleStrEle = createAndAppendElement("string", titleEle,title);
 		if(titleStrEle != null)titleStrEle.setAttribute("language", "de");
 		createAndAppendElement("language", general,QName.createQName(CCConstants.LOM_PROP_GENERAL_LANGUAGE));
 		Element descriptionEle = createAndAppendElement("description", general);
@@ -140,7 +145,7 @@ public class OAILOMExporter {
 		//technical
 		Element technical = createAndAppendElement("technical", lom);
 		createAndAppendElement("format",technical,QName.createQName(CCConstants.LOM_PROP_TECHNICAL_FORMAT));
-		createAndAppendElement("location",technical,QName.createQName(CCConstants.LOM_PROP_TECHNICAL_LOCATION));
+		createAndAppendElement("location",technical,URLTool.getNgRenderNodeUrl(nodeRef.getId(),null));
 		
 		//educational
 		Element educational = createAndAppendElement("educational", lom);

@@ -263,7 +263,7 @@
    </filter-mapping>
     <filter-mapping>
         <filter-name>Edu-Sharing Guest Filter</filter-name>
-        <url-pattern>/eduservlet/oai</url-pattern>
+        <url-pattern>/eduservlet/oai/*</url-pattern>
     </filter-mapping>
     <filter-mapping>
        <filter-name>Edu-Sharing Authentication Filter</filter-name>

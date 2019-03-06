@@ -88,7 +88,6 @@ public class OaiServlet extends HttpServlet{
         for(Object r : req.getParameterMap().entrySet()){
             Map.Entry<String,String[]> data= (Map.Entry<String, String[]>) r;
             request.put(data.getKey(), Arrays.asList(data.getValue()));
-            logger.info(r);
         }
         return request;
     }
