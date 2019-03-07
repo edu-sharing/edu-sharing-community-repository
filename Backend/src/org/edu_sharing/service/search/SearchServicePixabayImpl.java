@@ -180,7 +180,6 @@ public class SearchServicePixabayImpl extends SearchServiceAdapter{
 			searchWordCriteria = new String[] {"*"};
 		}
 		String searchWord = searchWordCriteria[0];
-		HttpsURLConnection connection=null;
 		if(searchToken.getFrom()%searchToken.getMaxResult()!=0)
 			throw new Exception("Pixabay only supports offsets which are dividable by the maxItems count");
 		try {
@@ -196,17 +195,6 @@ public class SearchServicePixabayImpl extends SearchServiceAdapter{
 			searchToken.setQueryString(uri);
 			return searchPixabay(repositoryId,APIKey,uri);
 			
-		}
-		catch(IOException e){
-			InputStream is=connection.getErrorStream();
-			StringBuilder responseStrBuilder = new StringBuilder();
-			String line;
-			BufferedReader bR = new BufferedReader(  new InputStreamReader(is));
-			while((line =  bR.readLine()) != null){
-			    responseStrBuilder.append(line);
-			}
-			is.close();
-			throw new Exception("Error from Pixabay: "+connection.getResponseCode()+" "+responseStrBuilder.toString());
 		}
 		catch (Throwable t) {
 			t.printStackTrace();
