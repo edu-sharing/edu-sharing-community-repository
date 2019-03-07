@@ -330,21 +330,22 @@ export class UIHelper{
     static scrollSmoothElement(pos: number=0,element:Element,smoothness=1,axis='y') {
         return new Promise((resolve)=> {
             let currentPos = axis == 'x' ? element.scrollLeft : element.scrollTop;
-            console.log(currentPos, pos);
             if(element.getAttribute('data-is-scrolling')=='true'){
+                console.log("is scrolling, skip");
                 return;
             }
+            console.log(currentPos, pos);
             let mode = currentPos > pos;
             let divider = 3 * smoothness;
             let minSpeed = 7 / smoothness;
             let lastPos = pos;
             let maxPos = axis=='x' ? element.scrollWidth - element.clientWidth : element.scrollHeight - element.clientHeight;
             let limitReached=false;
-            if(mode && pos<0) {
+            if(mode && pos<=0) {
                 pos = 0;
                 limitReached=true;
             }
-            if(!mode && pos>maxPos) {
+            if(!mode && pos>=maxPos) {
                 pos = maxPos;
                 limitReached=true;
             }
@@ -352,13 +353,16 @@ export class UIHelper{
                 let currentPos = axis == 'x' ? element.scrollLeft : element.scrollTop;
                 let posDiff = currentPos - lastPos;
                 lastPos = currentPos;
+                let finished=true;
                 if (currentPos > pos) {
                     currentPos -= Math.max((currentPos - pos) / divider, minSpeed);
+                    finished=currentPos<=pos;
                 }
                 else if (currentPos < pos && !mode) {
                     currentPos += Math.max((pos - currentPos) / divider, minSpeed);
+                    finished=currentPos>=pos;
                 }
-                else {
+                if(finished) {
                     clearInterval(interval);
                     element.removeAttribute('data-is-scrolling');
                     resolve();
