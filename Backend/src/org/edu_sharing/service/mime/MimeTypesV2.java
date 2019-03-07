@@ -88,7 +88,8 @@ public class MimeTypesV2 {
 	}
 	private String getBasePath(){
 		if(appInfo.ishomeNode()){
-			return URLTool.getBaseUrl(true);
+			// @TODO 5.1 This can be set to dynamic!
+			return URLTool.getBaseUrl(false);
 		}
 		String basePath=appInfo.getClientBaseUrl();
 		if(basePath.endsWith("/")){
