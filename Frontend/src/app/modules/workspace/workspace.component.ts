@@ -1015,6 +1015,8 @@ export class WorkspaceMainComponent implements EventListener{
         let params:any={root:root,id:node,viewType:this.viewType,query:search,mainnav:this.mainnav};
         if(this.reurl)
             params.reurl=this.reurl;
+        if(this.reurlDirectories)
+            params.applyDirectories=this.reurlDirectories;
         this.router.navigate(["./"],{queryParams:params,relativeTo:this.route})
             .then((result:boolean)=>{
                 if(!result){
