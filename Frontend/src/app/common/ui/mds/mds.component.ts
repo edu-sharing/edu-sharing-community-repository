@@ -223,7 +223,7 @@ export class MdsComponent{
 
   @HostListener('window:resize')
   onResize(){
-      if(document.activeElement && this.mdsScrollContainer.nativeElement){
+      if(document.activeElement && this.mdsScrollContainer && this.mdsScrollContainer.nativeElement){
         UIHelper.scrollSmoothElementToChild(document.activeElement,this.mdsScrollContainer.nativeElement);
       }
   }

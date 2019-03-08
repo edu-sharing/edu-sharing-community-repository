@@ -58,7 +58,10 @@ public class SearchServicePixabayImpl extends SearchServiceAdapter{
 
 	}
 	public static HttpsURLConnection openPixabayUrl(URL url) throws KeyManagementException, IOException, NoSuchAlgorithmException{
-		HttpsURLConnection connection = (HttpsURLConnection) url.openConnection();
+		return (HttpsURLConnection) url.openConnection();
+
+		// not required, the server should have a current java jdk version!
+		/*HttpsURLConnection connection = (HttpsURLConnection) url.openConnection();
 		
 		// TODO!
 		TrustManager[] trustAllCerts = new TrustManager[]{
@@ -83,6 +86,7 @@ public class SearchServicePixabayImpl extends SearchServiceAdapter{
 		    }
 		  });
 		return connection;
+		*/
 	}
 	public static SearchResultNodeRef searchPixabay(String repositoryId,String apiKey,String path) throws Exception{
 		String lang=new AuthenticationToolAPI().getCurrentLocale().split("_")[0];
@@ -180,7 +184,6 @@ public class SearchServicePixabayImpl extends SearchServiceAdapter{
 			searchWordCriteria = new String[] {"*"};
 		}
 		String searchWord = searchWordCriteria[0];
-		HttpsURLConnection connection=null;
 		if(searchToken.getFrom()%searchToken.getMaxResult()!=0)
 			throw new Exception("Pixabay only supports offsets which are dividable by the maxItems count");
 		try {
@@ -201,20 +204,9 @@ public class SearchServicePixabayImpl extends SearchServiceAdapter{
 			return searchPixabay(repositoryId,APIKey,uri);
 			
 		}
-		catch(IOException e){
-			InputStream is=connection.getErrorStream();
-			StringBuilder responseStrBuilder = new StringBuilder();
-			String line;
-			BufferedReader bR = new BufferedReader(  new InputStreamReader(is));
-			while((line =  bR.readLine()) != null){
-			    responseStrBuilder.append(line);
-			}
-			is.close();
-			throw new Exception("Error from Pixabay: "+connection.getResponseCode()+" "+responseStrBuilder.toString());
-		}
 		catch (Throwable t) {
-			t.printStackTrace();
-			throw t;
+			logger.warn(t.getMessage(),t);
+			throw new Exception("Error communicating with the Pixabay API");
 		}
 
 	}
