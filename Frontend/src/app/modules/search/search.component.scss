@@ -91,11 +91,6 @@ $sidenavWidth:300px;
 .extendedSearch a, .switchToCollections a, .switchToSearch a{
   padding: 5px;
 }
-.extendedSearch{
-  .mobile{
-    display:none!important;
-  }
-}
 .noResults,.noResultsMatched{
   color: $noResultsColor;
   text-align: center;

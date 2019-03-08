@@ -310,7 +310,9 @@ export class SearchComponent {
     this.innerWidth = this.winRef.getNativeWindow().innerWidth;
     //this.autocompletesArray = this.autocompletes.toArray();
   }
-
+  public isMobileWidth(){
+      return window.innerWidth<UIConstants.MOBILE_WIDTH;
+  }
   isMdsLoading(){
     return !this.mdsRef || this.mdsRef.isLoading;
   }

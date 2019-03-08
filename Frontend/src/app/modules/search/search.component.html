@@ -54,7 +54,7 @@
             <div class="extendedSearch" #extendedSearch>
                 <a tabindex="0" title="{{'SEARCH.TOGGLE_EXPANDED_SEARCH' | translate}}" (keyup.enter)="toggleSidenav()" (click)="toggleSidenav()" class="pointed filtertoggler">
                     <span>{{'SEARCH.EXPANDED_SEARCH' | translate}}</span>
-                    <span class="mobile">{{'SEARCH.EXPANDED_SEARCH_SHORT' | translate}}</span>
+                    <span class="mobile" *ngIf="(searchService.sidenavOpened && isMobileWidth())">{{'SEARCH.EXPANDED_SEARCH_SHORT' | translate}}</span>
                     <i class="material-icons">{{searchService.sidenavOpened ? 'keyboard_arrow_left' : 'keyboard_arrow_right'}}</i></a>
             </div>
             <div class="switchToCollections" *ngIf="isGuest">
@@ -67,7 +67,7 @@
             ></small-collection>
             <actionbar class="actionbarFrame"
                        [backgroundType]="addToCollection ? 'primary' : 'bright'"
-                       *ngIf="actionOptions && actionOptions.length"
+                       *ngIf="actionOptions && actionOptions.length && !(searchService.sidenavOpened && isMobileWidth())"
                        [options]="actionOptions"></actionbar>
         </div>
     </div>
