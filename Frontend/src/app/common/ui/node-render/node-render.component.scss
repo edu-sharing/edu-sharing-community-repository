@@ -260,7 +260,7 @@ div.download {
   :host /deep/ .node-comments{
     min-width: unset;
     padding-right: 10px;
-    > div > div{
+    > div > div > span{
       display:none;
     }
   }
