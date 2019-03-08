@@ -367,7 +367,6 @@ export class UIHelper{
                     element.removeAttribute('data-is-scrolling');
                     resolve();
                 }
-                console.log(currentPos, pos, maxPos);
                 if (axis == 'x')
                     element.scrollLeft = currentPos;
                 else
