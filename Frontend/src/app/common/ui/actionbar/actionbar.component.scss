@@ -9,6 +9,7 @@
   min-width: unset;
   padding: 5px 10px;
 }
+
 .action-always-caption{
   line-height: normal;
   padding-right:5px;
@@ -48,6 +49,9 @@ button{
   }
 }
 .actionbar-round{
+  .mat-flat-button{
+    padding: 5px;
+  }
   button{
     border-radius: 50%;
   }
