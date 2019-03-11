@@ -67,11 +67,11 @@
             ></small-collection>
             <actionbar class="actionbarFrame"
                        [backgroundType]="addToCollection ? 'primary' : 'bright'"
-                       *ngIf="actionOptions && actionOptions.length && !(searchService.sidenavOpened && isMobileHeight())"
+                       *ngIf="actionOptions && actionOptions.length"
                        [options]="actionOptions"></actionbar>
         </div>
     </div>
-    <div class="card card-action center-card card-high card-wide" *ngIf="(searchService.sidenavOpened && isMobileHeight())">
+    <div class="card card-action center-card card-high card-wide" *ngIf="(searchService.sidenavOpened && isMobileHeight() && isMobileWidth())">
         <div class="card-content">
             <div class="card-cancel" (click)="toggleSidenav()"><i class="material-icons">close</i></div>
             <div class="card-title">{{'SEARCH.EXPANDED_SEARCH' | translate }}</div>

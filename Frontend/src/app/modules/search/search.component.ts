@@ -313,6 +313,9 @@ export class SearchComponent {
   public isMobileHeight(){
     return window.innerHeight<UIConstants.MOBILE_HEIGHT;
   }
+  public isMobileWidth(){
+    return window.innerWidth<UIConstants.MOBILE_WIDTH;
+  }
   isMdsLoading(){
     return !this.mdsRef || this.mdsRef.isLoading;
   }

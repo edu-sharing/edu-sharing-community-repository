@@ -161,12 +161,13 @@ md-sidenav-container,.sidenav,#top {
     margin-bottom: 50px;
 }
 
-i {
-    vertical-align: middle;
-}
+
 
 a, a:hover, a:visited, a:active, button {
     color: $primary;
+  i, span {
+    vertical-align: middle;
+  }
 }
 
 .infobutton {
