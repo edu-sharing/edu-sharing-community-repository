@@ -648,13 +648,19 @@ export class ListTableComponent implements EventListener{
   public isDeleted(node:any){
     return this.isReference(node) && !node.originalId;
   }
-  private showDropdown(node : Node,openMenu = false){
+  private showDropdown(node : Node,openMenu = false,event:any=null){
     //if(this._options==null || this._options.length<1)
     //  return;
     this.select(node,"dropdown",false,false);
     this.onUpdateOptions.emit(node);
     if(openMenu)
-      this.menuTrigger.openMenu();
+        if(event){
+            console.log(event);
+            this.dropdownLeft=event.clientX+"px";
+            this.dropdownTop=event.clientY+"px";
+        }
+      // short delay to let onUpdateOptions handler run and angular menu get the correct data from start
+      setTimeout(()=>this.menuTrigger.openMenu());
       /*
       if(this.dropdown==node)
         this.dropdown=null;

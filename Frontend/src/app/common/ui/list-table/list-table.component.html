@@ -187,7 +187,7 @@
                      (click)="optionIsShown(option,node) ? callOption(option,node) : null">
                     <i icon iconId="{{option.icon}}"></i>
                 </div>
-                <div class="more column" *ngIf="_options && _options.length>1"><button mat-icon-button [matMenuTriggerFor]="dropdown.menu" (click)="showDropdown(node);$event.stopPropagation();"><i icon iconId="more_vert" aria="true"></i></button></div>
+                <div class="more column" *ngIf="_options && _options.length>1"><button mat-icon-button (click)="showDropdown(node,true,$event);$event.stopPropagation();"><i icon iconId="more_vert" aria="true"></i></button></div>
                 <div tabindex="0" class="more moreSingle column" *ngIf="_options && _options.length==1 && optionIsShown(_options[0],node)" (click)="callOption(_options[0],node);$event.stopPropagation();" (keyup.enter)="callOption(_options[0],node);$event.stopPropagation()"><a [class.disabled]="!optionIsValid(_options[0],node)"><i icon iconId="{{_options[0].icon}}"></i> <span class="actionText">{{_options[0].name | translate}}</span></a></div>
             </div>
         </div>
