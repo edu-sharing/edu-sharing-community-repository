@@ -11,11 +11,11 @@
 powered-by{
   position: fixed;
   left: 0;
-  top: calc(15% + 530px);
-  z-index: 1000;
+  top: calc(50% + 220px);
+  z-index: 121;
 }
 .powered-down{
-  top: calc(15% + 550px);
+  top: calc(50% + 260px);
 }
 .card-cancel{
   z-index: 1;
@@ -64,10 +64,6 @@ powered-by{
 @media screen and (max-width: $mobileWidth+$mobileStage*1) {
   .card-title{
     margin-bottom: 15px;
-  }
-  powered-by{
-    position: fixed;
-    top:calc(15% + 480px);
   }
   .powered-down{
     top: calc(15% + 500px);
