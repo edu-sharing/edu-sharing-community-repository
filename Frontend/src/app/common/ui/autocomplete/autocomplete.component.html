@@ -1,7 +1,7 @@
 <div class="dialog" *ngIf="showSuggestions" (click)="showSuggestions=false"></div>
 <div class="form-group edusharing-autocomplete-wrapper">
     <form (ngSubmit)="addValue()">
-        <input name="valueInput" class="searchInput" [(ngModel)]="valueInput" (keyup.enter)="addValue()" [disabled]="disabled" placeholder="{{placeholder | translate}}" title="{{placeholder | translate}}" autocomplete="off">
+        <input name="valueInput" class="searchInput" [(ngModel)]="valueInput" (ngModelChange)="updateValue()" (keyup.enter)="addValue()" [disabled]="disabled" placeholder="{{placeholder | translate}}" title="{{placeholder | translate}}" autocomplete="off">
         <div class="input-hint-bottom" *ngIf="hintBottom">{{hintBottom | translate}}</div>
     </form>
  <ul class="suggestbox" *ngIf="showSuggestions">
