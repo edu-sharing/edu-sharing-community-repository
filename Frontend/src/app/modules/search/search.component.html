@@ -54,7 +54,7 @@
             <div class="extendedSearch" #extendedSearch>
                 <a tabindex="0" title="{{'SEARCH.TOGGLE_EXPANDED_SEARCH' | translate}}" (keyup.enter)="toggleSidenav()" (click)="toggleSidenav()" class="pointed filtertoggler">
                     <span>{{'SEARCH.EXPANDED_SEARCH' | translate}}</span>
-                    <span class="mobile">{{'SEARCH.EXPANDED_SEARCH_SHORT' | translate}}</span>
+                    <span class="mobile" *ngIf="!selection || !selection.length">{{'SEARCH.EXPANDED_SEARCH_SHORT' | translate}}</span>
                     <i class="material-icons">{{searchService.sidenavOpened ? 'keyboard_arrow_left' : 'keyboard_arrow_right'}}</i></a>
             </div>
             <div class="switchToCollections" *ngIf="isGuest">
@@ -67,8 +67,34 @@
             ></small-collection>
             <actionbar class="actionbarFrame"
                        [backgroundType]="addToCollection ? 'primary' : 'bright'"
-                       *ngIf="actionOptions && actionOptions.length"
+                       *ngIf="actionOptions && actionOptions.length && !(searchService.sidenavOpened && isMobileHeight())"
                        [options]="actionOptions"></actionbar>
+        </div>
+    </div>
+    <div class="card card-action center-card card-high card-wide" *ngIf="(searchService.sidenavOpened && isMobileHeight())">
+        <div class="card-content">
+            <div class="card-cancel" (click)="toggleSidenav()"><i class="material-icons">close</i></div>
+            <div class="card-title">{{'SEARCH.EXPANDED_SEARCH' | translate }}</div>
+            <div class="card-scroll">
+                <mds #mds
+                     [class.display-none]="currentRepository=='-all-'"
+                     [groupId]="queryId"
+                     [repository]="currentRepository"
+                     [setId]="mdsId"
+                     [embedded]="true"
+                     [currentValues]="getValuesForMds()"
+                     [suggestions]="mdsSuggestions"
+                     [invalidate]="reloadMds"
+                     [mode]="'search'"
+                     [(extended)]="mdsExtended"
+                     (onMdsLoaded)="onMdsReady($event)"
+                     (onDone)="applyParameters($event)"
+                >
+                </mds>
+            </div>
+        </div>
+        <div class="card-action">
+            <a class="btn waves-effect waves-light" (click)="action.callback()" *ngFor="let action of mdsActions.slice(0,1)">{{action.name | translate}}</a>
         </div>
     </div>
 <div class="sidenavContainer">

@@ -88,7 +88,7 @@ public class AuthorityServiceImpl implements AuthorityService {
                     {
                 		String key =  authorityName;
                 		String groupType = (String) getAuthorityProperty(key,CCConstants.CCM_PROP_GROUPEXTENSION_GROUPTYPE);
-                		if(groupType!=null && groupType.equals(ADMINISTRATORS_GROUP_TYPE))
+                		if(groupType!=null && groupType.equals(ADMINISTRATORS_GROUP_TYPE) && !baseClient.isAdmin(AuthenticationUtil.getFullyAuthenticatedUser()))
                 			throw new AccessDeniedException("An admin group can not be deleted");
                 		authorityService.deleteAuthority(key, true);
 

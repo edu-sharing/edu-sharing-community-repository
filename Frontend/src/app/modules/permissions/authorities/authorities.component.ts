@@ -546,6 +546,10 @@ export class PermissionsAuthoritiesComponent {
   }
   private deleteAuthority(data: any,callback:Function) {
     let list=this.getList(data);
+    if(this._mode=='GROUP' && list.filter((l)=>l.groupType==RestConstants.GROUP_TYPE_ADMINISTRATORS).length){
+        this.toast.error(null,'PERMISSIONS.DELETE_ERROR_ADMINISTRATORS');
+        return;
+    }
     this.dialogTitle="PERMISSIONS.DELETE_TITLE";
     this.dialogMessage="PERMISSIONS.DELETE_"+this._mode;
     this.dialogCancelable=true;

@@ -58,6 +58,7 @@
     "DELETE_GROUP":"Möchten Sie die gewählten Gruppen löschen?",
     "DELETE_GROUP_SINGLE":"Möchten Sie die Gruppe {{name}} löschen?",
     "DELETE_ORG_SINGLE":"Möchten Sie die Organisation {{name}} entfernen? Alle Nutzer bleiben bestehen und der Organisationsordner wird nicht gelöscht",
+    "DELETE_ERROR_ADMINISTRATORS":"Administrations-Gruppen dürfen nicht gelöscht werden",
     "DELETED_USER":"Nutzer erfolgreich entfernt",
     "DELETED_GROUP":"Gruppe(n) erfolgreich gelöscht",
     "MEMBER_REMOVED":"Nutzer aus Gruppe entfernt",
