@@ -1,7 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<valuespaces>
-	<valuespace property="{http://www.campuscontent.de/model/1.0}commonlicense_key">
-		<key cap="Creative Commons">CC</key>
-		<key cap="Edu-Sharing">EDU</key>
-	</valuespace>
-</valuespaces>

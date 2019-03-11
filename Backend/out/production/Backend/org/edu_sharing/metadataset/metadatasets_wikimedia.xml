@@ -1,9 +1,0 @@
-﻿<?xml version="1.0" encoding="UTF-8"?>
-<metadatasets>
- 
-<!--
-	
- -->
- 	<metadataset>/org/edu_sharing/metadataset/metadataset_wikimedia.xml</metadataset>
-	<!-- metadataset>/org/edu_sharing/metadataset/metadataset_test.xml</metadataset -->
-</metadatasets>
