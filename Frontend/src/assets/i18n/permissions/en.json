@@ -83,8 +83,8 @@
       "global":"across repositories (global)"
     },
     "TOOLPERMISSION": {
-      "TOOLPERMISSION_INVITE": "the permission to share objekts",
-      "TOOLPERMISSION_INVITE_STREAM": "the permission to share objekts in the stream",
+      "TOOLPERMISSION_INVITE": "the permission to share objects",
+      "TOOLPERMISSION_INVITE_STREAM": "the permission to share objects in the stream",
       "TOOLPERMISSION_INVITE_LINK": "the permission to share objects via link sharing",
       "TOOLPERMISSION_INVITE_HISTORY": "the permission to use the invitation-history",
       "TOOLPERMISSION_INVITE_SHARE": "the permission to share objects in shared folders",
