@@ -21,6 +21,8 @@ export class RestNetworkService extends AbstractRestService{
       return false;
   }
   static allFromHomeRepo(nodes: Node[], repositories=this.currentRepositories) {
+    if(!nodes)
+      return true;
     for(let node of nodes) {
       if (!RestNetworkService.isHomeRepo(node.ref.repo, repositories))
         return false;
