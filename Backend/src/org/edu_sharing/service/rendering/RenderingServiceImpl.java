@@ -124,7 +124,7 @@ public class RenderingServiceImpl implements RenderingService{
 		try {
 			return new HttpQueryTool().query(post);
 		}catch(HttpException e){
-			return RenderingErrorServlet.errorToHTML((HttpServletRequest) Context.getCurrentInstance().getRequest().getSession().getServletContext(),
+			return RenderingErrorServlet.errorToHTML(Context.getCurrentInstance().getRequest(),
 					new RenderingException(e));
 		}
 	}
