@@ -175,7 +175,10 @@ public class NodeCustomizationPolicies implements OnContentUpdatePolicy, OnCreat
 			if(contentSize > 0 && mimetype != null && !nodeService.hasAspect(nodeRef,QName.createQName(CCConstants.CCM_ASPECT_COLLECTION_IO_REFERENCE))){
 				nodeService.setProperty(nodeRef, QName.createQName(CCConstants.LOM_PROP_TECHNICAL_FORMAT), mimetype);
 			}
-			
+			logger.debug("will do the resourceinfo. noderef:"+nodeRef);
+			Action resourceInfoAction = actionService.createAction(CCConstants.ACTION_NAME_RESOURCEINFO);
+			actionService.executeAction(resourceInfoAction, nodeRef, true, false);
+
 			logger.debug("lockStatus:"+lockStatus);
 			if(newContent 
 					&& (LockStatus.NO_LOCK.equals(lockStatus) || LockStatus.LOCK_EXPIRED.equals(lockStatus))
@@ -183,11 +186,6 @@ public class NodeCustomizationPolicies implements OnContentUpdatePolicy, OnCreat
 			
 	     	    new ThumbnailHandling().thumbnailHandling(nodeRef);
     		}
-			
-			logger.debug("will do the resourceinfo. noderef:"+nodeRef);
-			Action resourceInfoAction = actionService.createAction(CCConstants.ACTION_NAME_RESOURCEINFO);
-			actionService.executeAction(resourceInfoAction, nodeRef, true, false);
-			
 			
 			Action extractMetadataAction = actionService.createAction("extract-metadata");
 			//dont do async cause it conflicts with preview creation when webdav is used
