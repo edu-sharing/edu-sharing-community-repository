@@ -191,7 +191,7 @@
                   </div>
                 </div>
               </div>
-              <div class="contributors" *ngIf="_nodes && _nodes.length==1">
+              <div class="contributors" *ngIf="_nodes && _nodes.length==1 && !ui.isMobile()">
                 <a class="clickable contributorsLink" (click)="openContributorDialog()">{{'MDS.CONTRIBUTOR_LINK' | translate}} <i icon iconId="arrow_forward"></i></a>
               </div>
             </div>

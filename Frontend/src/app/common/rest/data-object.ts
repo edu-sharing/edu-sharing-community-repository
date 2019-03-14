@@ -865,6 +865,7 @@ export class Connector {
   id: string;
   icon: string;
   showNew: boolean;
+  onlyDesktop: boolean;
   parameters: string[];
   filetypes: Filetype[];
 }

@@ -370,6 +370,7 @@ mds .mdsGroup{
           background-color: $workspaceSelectedBackground;
         }
         .icon {
+          min-width: $tableIconSize;
           width: $tableIconSize;
           height: $tableIconSize;
           background: #fff;

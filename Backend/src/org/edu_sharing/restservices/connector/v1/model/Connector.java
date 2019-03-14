@@ -14,6 +14,8 @@ public class Connector {
 	private String url;
 	private String[] parameters;
 	private ConnectorFileType[] filetypes;
+	private boolean onlyDesktop;
+
 	@JsonProperty("icon")
 	public String getIcon() {
 		return icon;
@@ -50,4 +52,13 @@ public class Connector {
 	public void setFiletypes(ConnectorFileType[] filetypes) {
 		this.filetypes = filetypes;
 	}
+
+	@JsonProperty("onlyDesktop")
+	public void setOnlyDesktop(boolean onlyDesktop) {
+        this.onlyDesktop = onlyDesktop;
+    }
+
+    public boolean getOnlyDesktop() {
+        return onlyDesktop;
+    }
 }

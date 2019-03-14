@@ -220,11 +220,12 @@ export class MdsComponent{
   private mds: any;
   private static MAX_SUGGESTIONS = 5;
   private suggestionsViaSearch = false;
-  private resetValues(){
-    this._currentValues=null;
-    this.loadMdsFinal(()=>{
-      this.onDone.emit(null);
-    });
+
+  @HostListener('window:resize')
+  onResize(){
+      if(document.activeElement && this.mdsScrollContainer && this.mdsScrollContainer.nativeElement){
+        UIHelper.scrollSmoothElementToChild(document.activeElement,this.mdsScrollContainer.nativeElement);
+      }
   }
   constructor(private mdsService : RestMdsService,
               private translate : TranslateService,
@@ -652,7 +653,7 @@ export class MdsComponent{
             return;
         }
         // for childobjects
-        if(this._groupId==MdsComponent.TYPE_CHILDOBJECT && !this._currentValues.properties[RestConstants.CCM_PROP_IO_WWWURL] && !this.checkFileExtension(this._currentValues[RestConstants.CM_NAME][0],callback,values)){
+        if(this._groupId==MdsComponent.TYPE_CHILDOBJECT && !this._currentValues[RestConstants.CCM_PROP_IO_WWWURL] && !this.checkFileExtension(this._currentValues[RestConstants.CM_NAME][0],callback,values)){
             return;
         }
     }
@@ -1706,7 +1707,7 @@ export class MdsComponent{
          </div>
          <div id="`+this.getDomId('mdsAuthorFreetext')+`" class="mdsAuthorFreetext">`+this.renderTextareaWidget(freetextWidget,null)+`</div>
           <div id="`+this.getDomId('mdsAuthorPerson')+`" class="mdsAuthorPerson">`+this.renderVCardWidget(authorWidget,null);
-    if(this.currentNode){
+    if(this.currentNode && !this.uiService.isMobile()){
       author+=`<div class="mdsContributors">
             <a class="clickable contributorsLink" onclick="`+this.getWindowComponent()+`.openContributorsDialog();">`+
             this.translate.instant('MDS.CONTRIBUTOR_LINK')+` <i class="material-icons">arrow_forward</i></a>
@@ -1981,8 +1982,10 @@ export class MdsComponent{
     return html;
   }
   private renderTemplateWidget(widget: any){
+      if(this.uiService.isMobile())
+        return '';
       let html=`<div class="mdsTemplate">
-                    <a class="clickable templateLink" onclick="window.mdsComponentRef.component.openTemplateDialog();">` +
+                    <a class="clickable templateLink" onclick="`+this.getWindowComponent()+`.openTemplateDialog();">` +
                     this.translate.instant('MDS.TEMPLATE_LINK') + ` <i class="material-icons">arrow_forward</i></a>
                 </div>`;
       return html;

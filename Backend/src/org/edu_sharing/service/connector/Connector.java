@@ -9,7 +9,9 @@ public class Connector {
 	private String icon;
 	
 	private boolean showNew;
-	
+
+	private boolean onlyDesktop;
+
 	private String url;
 	
 	/**
@@ -76,5 +78,13 @@ public class Connector {
 
 	public void setDefaultCreateElement(String defaultCreateElement) {
 		this.defaultCreateElement = defaultCreateElement;
+	}
+
+	public boolean isOnlyDesktop() {
+		return onlyDesktop;
+	}
+
+	public void setOnlyDesktop(boolean onlyDesktop) {
+		this.onlyDesktop = onlyDesktop;
 	}
 }

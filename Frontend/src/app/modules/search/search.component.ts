@@ -311,7 +311,9 @@ export class SearchComponent {
     this.innerWidth = this.winRef.getNativeWindow().innerWidth;
     //this.autocompletesArray = this.autocompletes.toArray();
   }
-
+  public isMobileHeight(){
+    return window.innerHeight<UIConstants.MOBILE_HEIGHT;
+  }
   isMdsLoading(){
     return !this.mdsRef || this.mdsRef.isLoading;
   }
@@ -332,6 +334,10 @@ export class SearchComponent {
 
 
   setSidenavSettings() {
+    if(this.addToCollection){
+        this.searchService.sidenavOpened = false;
+        return false;
+    }
     if(this.searchService.sidenavSet)
       return false;
     console.log('update sidenav');
@@ -794,6 +800,16 @@ export class SearchComponent {
     this.searchService.reinit=true;
   }
   private prepare(param:any) {
+    if(this.setSidenavSettings()) {
+        // auto, never, always
+        let sidenavMode = this.config.instant("searchSidenavMode","never");
+        if (sidenavMode == "never") {
+            this.searchService.sidenavOpened = false;
+        }
+        if (sidenavMode == "always") {
+            this.searchService.sidenavOpened = true;
+        }
+    }
     this.connector.isLoggedIn().subscribe((data:LoginResult)=> {
       this.toolPermissions=data.toolPermissions;
       if (data.isValidLogin && data.currentScope != null) {

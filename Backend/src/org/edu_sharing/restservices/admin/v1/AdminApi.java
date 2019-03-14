@@ -1,8 +1,15 @@
 package org.edu_sharing.restservices.admin.v1;
 
 import java.io.InputStream;
-import java.util.*;
+import java.lang.reflect.Method;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Set;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.Consumes;
@@ -19,13 +26,23 @@ import javax.ws.rs.core.Response;
 
 import org.alfresco.rest.framework.core.exceptions.InvalidArgumentException;
 import org.alfresco.service.cmr.repository.NodeRef;
+import org.apache.log4j.Level;
+import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
+import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
 import org.edu_sharing.repository.client.rpc.cache.CacheCluster;
 import org.edu_sharing.repository.client.rpc.cache.CacheInfo;
+import org.edu_sharing.repository.server.jobs.quartz.JobInfo;
 import org.edu_sharing.repository.server.tools.ApplicationInfo;
 import org.edu_sharing.repository.server.tools.ApplicationInfoList;
 import org.edu_sharing.repository.server.tools.cache.PreviewCache;
-import org.edu_sharing.restservices.*;
+import org.edu_sharing.restservices.ApiService;
+import org.edu_sharing.restservices.CollectionDao;
+import org.edu_sharing.restservices.DAOException;
+import org.edu_sharing.restservices.NodeDao;
+import org.edu_sharing.restservices.RepositoryDao;
+import org.edu_sharing.restservices.RestConstants;
+import org.edu_sharing.restservices.TrackingDAO;
 import org.edu_sharing.restservices.admin.v1.model.AdminStatistics;
 import org.edu_sharing.restservices.admin.v1.model.CollectionsResult;
 import org.edu_sharing.restservices.admin.v1.model.ExcelResult;
@@ -45,7 +62,6 @@ import org.edu_sharing.service.NotAnAdminException;
 import org.edu_sharing.service.admin.AdminService;
 import org.edu_sharing.service.admin.AdminServiceFactory;
 import org.edu_sharing.service.admin.model.GlobalGroup;
-import org.edu_sharing.repository.server.jobs.quartz.JobInfo;
 import org.edu_sharing.service.admin.model.ServerUpdateInfo;
 import org.edu_sharing.service.lifecycle.PersonLifecycleService;
 import org.edu_sharing.service.search.SearchService.ContentType;
@@ -1152,6 +1168,8 @@ public class AdminApi {
 	@DELETE
 	@Path("/deletePerson")
 
+
+
 	@ApiOperation(value = "delete person", notes = "delete person.")
 
 	@ApiResponses(value = { @ApiResponse(code = 200, message = RestConstants.HTTP_200, response = Void.class),
@@ -1172,4 +1190,89 @@ public class AdminApi {
 		}
 	}
 
+
+    @POST
+    @Path("/log")
+    @ApiOperation(value = "Change the loglevel for classes at runtime.", notes = "Root appenders are used. Check the appender treshold.")
+    @ApiResponses(value = { @ApiResponse(code = 200, message = RestConstants.HTTP_200, response = Void.class),
+            @ApiResponse(code = 400, message = RestConstants.HTTP_400, response = ErrorResponse.class),
+            @ApiResponse(code = 401, message = RestConstants.HTTP_401, response = ErrorResponse.class),
+            @ApiResponse(code = 403, message = RestConstants.HTTP_403, response = ErrorResponse.class),
+            @ApiResponse(code = 404, message = RestConstants.HTTP_404, response = ErrorResponse.class),
+            @ApiResponse(code = 409, message = RestConstants.HTTP_409, response = ErrorResponse.class),
+            @ApiResponse(code = 500, message = RestConstants.HTTP_500, response = ErrorResponse.class) })
+
+    public Response changeLogging(
+            @ApiParam(value = "name", required = true) @QueryParam("name") String name,
+            @ApiParam(value = "loglevel", required = true) @QueryParam("loglevel") String loglevel,
+            @ApiParam(value = "appender", defaultValue = "File") @QueryParam("appender") String appender,
+            @Context HttpServletRequest req) {
+        try {
+
+            //check that there is an admin
+            AdminServiceFactory.getInstance();
+
+            if(name.startsWith("org.alfresco") ||
+                    name.startsWith("org.edu_sharing.alfresco")) {
+                ClassLoader clAlf = AlfAppContextGate.getApplicationContext().getClassLoader();
+
+                Class<?> logManager = clAlf.loadClass("org.apache.log4j.LogManager");
+                Method methodGetLogger = logManager.getMethod("getLogger", String.class);
+                Object logger = methodGetLogger.invoke(null, name);
+
+                Class<?> logLevelClass = clAlf.loadClass("org.apache.log4j.Level");
+                Method methodToLevel = logLevelClass.getMethod("toLevel",String.class);
+                Method methodSetLevel = logger.getClass().getMethod("setLevel",logLevelClass);
+                methodSetLevel.invoke(logger, methodToLevel.invoke(null, loglevel));
+
+				/*Method methodGetRootLogger = logger.getClass().getMethod("getRootLogger", null);
+				Object rootLogger = methodGetRootLogger.invoke(null, null);
+
+				Method methodGetAppender = rootLogger.getClass().getMethod("getAppender", String.class);
+				Object appenderObj = methodGetAppender.invoke(rootLogger, appender);
+
+				Class<?> priorityClass = clAlf.loadClass("org.apache.log4j.Priority");
+				Method methodToPriority = priorityClass.getMethod("toPriority", String.class);
+				Object priorityObj = methodToPriority.invoke(null, loglevel);
+				Method methodSetTreshold = appenderObj.getClass().getMethod("setThreshold", priorityClass);
+				methodSetTreshold.invoke(appenderObj, priorityObj);
+
+				Method methodAddAppender = logger.getClass().getMethod("addAppender", clAlf.loadClass("org.apache.log4j.Appender"));
+				methodAddAppender.invoke(logger, appenderObj);*/
+            }else {
+                Logger logger = LogManager.getLogger(name);
+                logger.setLevel(Level.toLevel(loglevel));
+
+                /**
+                 * logger is auto added to root appender, so we don't need to do this, maybe we can check if the reshhold of the appender is enough for the logger
+                 */
+				/*Logger rootLogger = Logger.getRootLogger();
+				System.out.println("rootLogger:" + rootLogger.getName());
+				Appender appenderObj = rootLogger.getAppender(appender);
+				System.out.println("appenderObj:" + appenderObj.getName() + " " + ((AppenderSkeleton)appenderObj).getThreshold() +" appenders:"+ logger.getAllAppenders().hasMoreElements());
+				*/
+
+
+
+                //	((AppenderSkeleton)appenderObj).setThreshold(Priority.toPriority(loglevel, Priority.INFO));
+                //	logger.addAppender(appenderObj);
+            }
+
+            return Response.status(Response.Status.OK).build();
+        } catch (NotAnAdminException e) {
+            return ErrorResponse.createResponse(e);
+        } catch (Exception e) {
+            return ErrorResponse.createResponse(e);
+        }
+
+    }
+
+    @OPTIONS
+    @Path("/log")
+    @ApiOperation(hidden = true, value = "")
+
+    public Response options15() {
+
+        return Response.status(Response.Status.OK).header("Allow", "OPTIONS, POST").build();
+    }
 }

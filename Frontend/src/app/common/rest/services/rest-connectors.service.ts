@@ -9,6 +9,7 @@ import {Node, Connector, OAuthResult, ConnectorList, Filetype, NodeLock, RestErr
 import {Observer} from "rxjs";
 import {RestNodeService} from "./rest-node.service";
 import {AbstractRestService} from "./abstract-rest-service";
+import {UIService} from '../../services/ui.service';
 
 @Injectable()
 export class RestConnectorsService extends AbstractRestService{
@@ -18,7 +19,8 @@ export class RestConnectorsService extends AbstractRestService{
 
   private currentList: ConnectorList;
   constructor(connector : RestConnectorService,
-              public nodeApi : RestNodeService) {
+              public nodeApi : RestNodeService,
+              public ui : UIService) {
       super(connector);
   }
 
@@ -28,10 +30,14 @@ export class RestConnectorsService extends AbstractRestService{
           return this.connector.get<ConnectorList>(query,this.connector.getRequestOptions())
           .do((data)=>this.currentList=data);
   }
-  public connectorSupportsEdit(node: Node,connectorList:ConnectorList=this.currentList) {
-    if(connectorList==null || connectorList.connectors==null)
+  public connectorSupportsEdit(node: Node) {
+    let connectors=this.getConnectors();
+    if(connectors==null)
       return null;
-    for(let connector of connectorList.connectors){
+    for(let connector of connectors){
+        // do not allow opening on a desktop-only connector on mobile
+        if(connector.onlyDesktop && this.ui.isMobile())
+            continue;
       if(RestConnectorsService.getFiletype(node,connector))
         return connector;
     }
@@ -57,7 +63,7 @@ export class RestConnectorsService extends AbstractRestService{
     }
     return null;
   }
-  public generateToolUrl(connectorList:ConnectorList,connectorType:Connector,type:Filetype,node:Node):Observable<string> {
+  public generateToolUrl(connectorType:Connector,type:Filetype,node:Node):Observable<string> {
     return new Observable<string>((observer: Observer<string>) => {
       let send: any = {};
       send["connectorId"] = connectorType.id;
@@ -79,7 +85,11 @@ export class RestConnectorsService extends AbstractRestService{
     });
   }
 
-    getCurrentList() {
-        return this.currentList;
+    getConnectors() {
+      if(this.currentList && this.currentList.connectors) {
+          // filter connectors which are only available on desktop
+          return this.currentList.connectors.filter((connector) => !connector.onlyDesktop || !this.ui.isMobile());
+      }
+      return null;
     }
 }

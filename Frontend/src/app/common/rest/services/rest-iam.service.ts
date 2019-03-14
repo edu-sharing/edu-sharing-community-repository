@@ -120,6 +120,14 @@ export class RestIamService extends AbstractRestService{
     let query=this.connector.createUrl("iam/:version/people/:repository/:user",repository,[[":user",user]]);
     return this.connector.get<IamUser>(query,this.connector.getRequestOptions());
   }
+  public getUserGroups = (user=RestConstants.ME,pattern="*",request:any=null,repository=RestConstants.HOME_REPOSITORY) => {
+      let query=this.connector.createUrlNoEscape("iam/:version/people/:repository/:user/memberships?pattern=:pattern&:request",repository,[
+          [":user",encodeURIComponent(user)],
+          [":pattern",encodeURIComponent(pattern)],
+          [":request",this.connector.createRequestString(request)]
+      ]);
+      return this.connector.get<IamGroups>(query,this.connector.getRequestOptions());
+  }
   public getUserPreferences = (user=RestConstants.ME,repository=RestConstants.HOME_REPOSITORY) => {
     let query=this.connector.createUrl("iam/:version/people/:repository/:user/preferences",repository,[[":user",user]]);
     return this.connector.get<any>(query,this.connector.getRequestOptions())

@@ -61,7 +61,7 @@ public class RessourceInfoExecuter extends ActionExecuterAbstractBase {
 	public static final String CCM_RESSOURCETYPE_H5P = "h5p";
 	public static final String CCM_RESSOURCETYPE_EDUHTML = "eduhtml";
 
-	private ArchiveInputStream getZipInputStream(ContentReader contentreader) throws IOException {
+	public static ArchiveInputStream getZipInputStream(ContentReader contentreader) throws IOException {
 		InputStream is = contentreader.getContentInputStream();
 
 		Tika tika = new Tika();
@@ -326,27 +326,7 @@ public class RessourceInfoExecuter extends ActionExecuterAbstractBase {
 	private void processH5P(NodeRef nodeRef) {
 		nodeService.setProperty(nodeRef, QName.createQName(CCM_PROP_IO_RESSOURCETYPE),
 				CCM_RESSOURCETYPE_H5P);
-
-		// check if file contains an image to use as thumbnail
-		try {
-			ContentReader contentreader = this.contentService.getReader(nodeRef, ContentModel.PROP_CONTENT);
-			ArchiveInputStream zip = getZipInputStream(contentreader);
-			while (true) {
-				ArchiveEntry entry = zip.getNextEntry();
-				if(entry==null)
-					break;
-				String name=entry.getName().toLowerCase();
-				if(name.startsWith("content/images") && (name.endsWith(".jpg") || name.endsWith(".png"))){
-					OutputStream os = contentService.getWriter(nodeRef, QName.createQName(CCConstants.CCM_PROP_IO_USERDEFINED_PREVIEW),true).getContentOutputStream();
-					StreamUtils.copy(zip,os);
-					os.close();
-					break;
-				}
-			}
-		}
-		catch(Throwable t){
-
-		}
+		// thumbnail is handled @org.edu_sharing.alfresco.transformer.H5PTransformerWorker
 	}
 
 	private void processMoodle2_0(InputStream is, ContentReader contentreader, NodeRef actionedUponNodeRef) {

@@ -126,6 +126,7 @@ public class MetadataTemplateRenderer {
 			else {
 				for(String value : values){
 					if(widget.getId().equals("license")){
+						wasEmpty = false;
 						String licenseName=properties.containsKey(CCConstants.getValidLocalName(CCConstants.CCM_PROP_IO_COMMONLICENSE_KEY)) ?
 								   properties.get(CCConstants.getValidLocalName(CCConstants.CCM_PROP_IO_COMMONLICENSE_KEY))[0] : null;
 						String licenseVersion=properties.containsKey(CCConstants.getValidLocalName(CCConstants.CCM_PROP_IO_COMMONLICENSE_CC_VERSION)) ?
@@ -138,7 +139,8 @@ public class MetadataTemplateRenderer {
 						if(link!=null)
 							value="<a href='"+link+"' target='_blank'>";
 						value+="<img src='"+
-								license.getIconUrl(licenseName)+
+								// @TODO 5.1 This can be set to dynamic!
+								license.getIconUrl(licenseName,false)+
 								"'>";
 						if(link!=null)
 							value+="</a>";

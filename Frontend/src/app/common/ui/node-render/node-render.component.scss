@@ -193,7 +193,7 @@ a.edusharing_rendering_content{
   .mdsWidget .comment .avatarCircle{
     cursor:default!important;;
   }
-  .nodeDetails {
+  .node-comments{
     margin:15px;
     color: $primary;
     display: flex;
@@ -241,10 +241,27 @@ div.download {
   }
 }
 
+@media (pointer: coarse) {
+  #sequence {
+    overflow-x: auto;
+    @include iosScrolling();
+  }
+  .scroller{
+    display: none;
+  }
+}
 @media screen and (max-width: $mobileWidth) {
   div.download i {
     font-size: 120%;
   }
-
+  .render-back{
+    display: none;
+  }
+  :host /deep/ .node-comments{
+    min-width: unset;
+    padding-right: 10px;
+    > div > div > span{
+      display:none;
+    }
+  }
 }
-

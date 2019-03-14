@@ -2,6 +2,8 @@
   "MESSAGES":{
     "GO_TO_SEARCH":"Zur Suche",
     "INVALID":"Unbekannter Fehler",
+    "404":"Ouh sorry,\n wir suchen die Seite auch gerade.",
+    "500":"Hier ging was schief,\n wir arbeiten an einer Lösung.",
     "share_expired":"Dieser Link ist abgelaufen",
     "share_file_deleted":"Die Datei wurde gelöscht",
     "invalid_share":"Ungültiger Link",
@@ -15,7 +17,9 @@
       "security_error":"Der Zugriff auf den gewünschten Bereich bzw. die gewünschte Ressource ist leider nicht möglich",
       "share_empty":"Der Link zeigt auf eine inkompatible Datei oder eine Datei ohne Inhalt",
       "SHARING_ERROR":"edu-sharing kann aktuell leider nur Dateien begrenzter Größe teilen. Bitte versuchen Sie es mit einer anderen Datei",
-      "INVALID":"If this error keeps showing, please contact the operator of this system"
+      "INVALID":"Wenn dieser Fehler weiterhin auftritt, melden Sie sich an den Betreiber des Systems",
+      "404":"Fehler 404",
+      "500":"Fehler 500"
     }
   }
 }
