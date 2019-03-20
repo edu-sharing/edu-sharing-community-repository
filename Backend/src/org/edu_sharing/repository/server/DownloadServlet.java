@@ -60,9 +60,11 @@ public class DownloadServlet extends HttpServlet{
 			resp.sendError(HttpServletResponse.SC_PRECONDITION_FAILED,message);
 			return;
 		}
-		
-		
-		
+
+
+		resp.setHeader("Content-type","application/octet-stream");
+		resp.setHeader("Content-Transfer-Encoding","binary");
+		resp.setHeader("Content-Disposition","attachment; filename=\"Download.zip\"");
 		ServletOutputStream op = resp.getOutputStream();
 		
 		ApplicationContext appContext = AlfAppContextGate.getApplicationContext();
