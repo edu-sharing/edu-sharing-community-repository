@@ -819,7 +819,9 @@ public class NodeDao {
 							if(tmpPerms == null){
 								tmpPerms = new ArrayList<String>();
 							}
-							tmpPerms.add(ace.getPermission());
+							// do not duplicate existing permissions
+							if(!tmpPerms.contains(ace.getPermission()))
+								tmpPerms.add(ace.getPermission());
 							authPermInherited.put(authority, tmpPerms);
 								
 						} else {
@@ -827,7 +829,9 @@ public class NodeDao {
 							if(tmpPerms == null){
 								tmpPerms = new ArrayList<String>();
 							}
-							tmpPerms.add(ace.getPermission());
+							// do not duplicate existing permissions
+							if(!tmpPerms.contains(ace.getPermission()))
+								tmpPerms.add(ace.getPermission());
 							authPerm.put(authority, tmpPerms);
 						}
 					}
