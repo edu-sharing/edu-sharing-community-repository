@@ -600,7 +600,7 @@ export class SearchComponent {
         let sort=this.updateSortMds();
         // do not update state if current state is valid (otherwise sort info is lost when comming back from rendering)
         // exception: if there is no state at all, refresh it with the default
-        if(state==this.searchService.sort.state || sort && !this.searchService.sort.materialsSortBy)
+        if(state==this.searchService.sort.state && !(sort && !this.searchService.sort.materialsSortBy))
             return;
         this.searchService.sort.state = state;
         if(sort) {
