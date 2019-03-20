@@ -157,14 +157,13 @@ export class WorkspaceShareComponent  {
         }
       },(error:any)=>this.toast.error(error));
     }
-    if(node.parent.id) {
+    if(node.parent && node.parent.id) {
       this.nodeApi.getNodePermissions(node.parent.id).subscribe((data: NodePermissions) => {
         if (data.permissions) {
           this.inherit = data.permissions.inheritedPermissions;
           this.removePermissions(this.inherit, 'OWNER');
           this.removePermissions(data.permissions.localPermissions.permissions, 'OWNER');
-          for (let permission of data.permissions.localPermissions.permissions)
-            this.inherit.push(permission);
+          this.inherit = this.mergePermissions(this.inherit,data.permissions.localPermissions.permissions);
           this.updatePublishState();
         }
 
@@ -442,6 +441,17 @@ export class WorkspaceShareComponent  {
     this.setPermissions(this.permissions);
     this.updatePublishState();
   }
+
+    private mergePermissions(source: Permission[], add: Permission[]) {
+        let merge=source;
+        for(let p2 of add){
+            // do only add new, unique permissions
+            if(merge.filter((p1)=> Helper.objectEquals(p1,p2)).length==0){
+                merge.push(p2);
+            }
+        }
+        return merge;
+    }
 }
 /*
 class SearchData extends Subject<CompleterItem[]> implements CompleterData {
