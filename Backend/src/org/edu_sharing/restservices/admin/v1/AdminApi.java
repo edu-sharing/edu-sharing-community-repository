@@ -498,19 +498,19 @@ public class AdminApi {
 
 		return Response.status(Response.Status.OK).header("Allow", "OPTIONS, GET").build();
 	}
-	
+
 	@POST
 	@Path("/cache/removeCacheEntry")
 
 	@ApiOperation(value = "remove cache entry", notes = "remove cache entry")
-	
+
 	@ApiResponses(value = {
 			@ApiResponse(code = 200, message = RestConstants.HTTP_200, response = Void.class),
-	        @ApiResponse(code = 400, message = RestConstants.HTTP_400, response = ErrorResponse.class),        
-	        @ApiResponse(code = 401, message = RestConstants.HTTP_401, response = ErrorResponse.class),        
-	        @ApiResponse(code = 403, message = RestConstants.HTTP_403, response = ErrorResponse.class),        
-	        @ApiResponse(code = 404, message = RestConstants.HTTP_404, response = ErrorResponse.class), 
-	        @ApiResponse(code = 500, message = RestConstants.HTTP_500, response = ErrorResponse.class) 
+	        @ApiResponse(code = 400, message = RestConstants.HTTP_400, response = ErrorResponse.class),
+	        @ApiResponse(code = 401, message = RestConstants.HTTP_401, response = ErrorResponse.class),
+	        @ApiResponse(code = 403, message = RestConstants.HTTP_403, response = ErrorResponse.class),
+	        @ApiResponse(code = 404, message = RestConstants.HTTP_404, response = ErrorResponse.class),
+	        @ApiResponse(code = 500, message = RestConstants.HTTP_500, response = ErrorResponse.class)
 	    })
 	public Response removeCacheEntry(
             @ApiParam(value="cacheIndex", defaultValue="false") @QueryParam("cacheIndex") Integer cacheIndex,
@@ -518,13 +518,13 @@ public class AdminApi {
             @Context HttpServletRequest req){
 		try {
             AdminServiceFactory.getInstance().removeCacheEntry(cacheIndex, bean);
-	    	return Response.ok().build();		
+	    	return Response.ok().build();
 		} catch (Throwable t) {
 			return ErrorResponse.createResponse(t);
 		}
 	}
 
-	
+
 
 	@GET
 	@Path("/cache/cacheInfo/{id}")
@@ -1139,7 +1139,8 @@ public class AdminApi {
             AdminServiceFactory.getInstance();
 
             if(name.startsWith("org.alfresco") ||
-                    name.startsWith("org.edu_sharing.alfresco")) {
+                    name.startsWith("org.edu_sharing.alfresco") ||
+                    name.startsWith("org.edu_sharing.repository.server.tools.cache")) {
                 ClassLoader clAlf = AlfAppContextGate.getApplicationContext().getClassLoader();
 
                 Class<?> logManager = clAlf.loadClass("org.apache.log4j.LogManager");
