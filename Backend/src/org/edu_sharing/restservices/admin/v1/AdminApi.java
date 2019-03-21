@@ -840,7 +840,8 @@ public class AdminApi {
 			AdminServiceFactory.getInstance();
 			
 			if(name.startsWith("org.alfresco") ||
-					name.startsWith("org.edu_sharing.alfresco")) {
+					name.startsWith("org.edu_sharing.alfresco") ||
+					name.startsWith("org.edu_sharing.repository.server.tools.cache")) {
 				ClassLoader clAlf = AlfAppContextGate.getApplicationContext().getClassLoader(); 
 				
 				Class<?> logManager = clAlf.loadClass("org.apache.log4j.LogManager");
