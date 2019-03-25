@@ -53,6 +53,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -102,6 +103,10 @@ public class OaiServlet extends HttpServlet{
         }
         @Override
         public ListItemIdentifiersResult getIdentifiers(int from, int length) {
+            return getIdentifiersSolr(from, length,new HashMap<>());
+        }
+
+        private ListItemIdentifiersResult getIdentifiersSolr(int from, int length,Map<String,String[]> searchCriterias){
             try {
                 SearchToken token=new SearchToken();
                 token.setFrom(from);
@@ -111,8 +116,8 @@ public class OaiServlet extends HttpServlet{
                 token.setSortDefinition(sort);
                 SearchResultNodeRef result = SearchServiceFactory.getLocalService().searchV2(
                         MetadataHelper.getMetadataset(ApplicationInfoList.getHomeRepository(), CCConstants.metadatasetdefault_id),
-                        MetadataSetV2.DEFAULT_CLIENT_QUERY,
-                        new HashMap<>(),
+                        "oai",
+                        searchCriterias,
                         token);
                 List<ItemIdentifier> refs = result.getData().stream().map((ref) -> new EduItemIdentifier(ref.getNodeId(),getDate(ref))).collect(Collectors.toList());
                 logger.info(result.getNodeCount());
@@ -124,6 +129,30 @@ public class OaiServlet extends HttpServlet{
             }
         }
 
+        @Override
+        public ListItemIdentifiersResult getIdentifiersFrom(int from, int length, Date date) {
+            HashMap<String, String[]> criterias = new HashMap<>();
+            criterias.put("from",new String[]{convertDateSolr(date)});
+            return getIdentifiersSolr(from, length,criterias);
+        }
+
+        private String convertDateSolr(Date date) {
+            return DateTimeFormatter.ISO_INSTANT.format(date.toInstant());
+    }
+
+        @Override
+        public ListItemIdentifiersResult getIdentifiersUntil(int from, int length, Date date) {
+            HashMap<String, String[]> criterias = new HashMap<>();
+            criterias.put("until",new String[]{convertDateSolr(date)});
+            return getIdentifiersSolr(from, length,criterias);        }
+
+        @Override
+        public ListItemIdentifiersResult getIdentifiersFromUntil(int from, int length, Date fromDate, Date untilDate) {
+            HashMap<String, String[]> criterias = new HashMap<>();
+            criterias.put("from",new String[]{convertDateSolr(fromDate)});
+            criterias.put("until",new String[]{convertDateSolr(untilDate)});
+            return getIdentifiersSolr(from, length,criterias);
+        }
         private Date getDate(NodeRef ref) {
             return (Date) serviceRegistry.getNodeService().getProperty(new org.alfresco.service.cmr.repository.NodeRef(ref.getStoreProtocol(),ref.getStoreId(),ref.getNodeId()),QName.createQName(CCConstants.CM_PROP_C_MODIFIED));
         }
