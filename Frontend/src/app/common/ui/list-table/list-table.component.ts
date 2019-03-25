@@ -656,8 +656,15 @@ export class ListTableComponent implements EventListener{
     if(openMenu)
         if(event){
             console.log(event);
-            this.dropdownLeft=event.clientX+"px";
-            this.dropdownTop=event.clientY+"px";
+            if(event.clientX+event.clientY) {
+                this.dropdownLeft = event.clientX + "px";
+                this.dropdownTop = event.clientY + "px";
+            }
+            else{
+                let rect=event.srcElement.getBoundingClientRect();
+                this.dropdownLeft = rect.left+rect.width/2 + "px";
+                this.dropdownTop = rect.top+rect.height/2 + "px";
+            }
         }
       // short delay to let onUpdateOptions handler run and angular menu get the correct data from start
       setTimeout(()=>this.menuTrigger.openMenu());
