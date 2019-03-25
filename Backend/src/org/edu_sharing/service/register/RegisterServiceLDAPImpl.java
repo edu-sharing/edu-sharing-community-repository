@@ -58,7 +58,8 @@ public class RegisterServiceLDAPImpl extends RegisterServiceImpl {
         attrs.put("cn",info.getEmail());
         attrs.put("mail",info.getEmail());
         attrs.put("givenName",info.getFirstName());
-        attrs.put("sn",info.getLastName());
+        if(info.getLastName()!=null && !info.getLastName().isEmpty())
+            attrs.put("sn",info.getLastName());
         attrs.put("userPassword",convertPassword(info.getPassword()));
         if(info.getOrganization()!=null && !info.getOrganization().isEmpty())
             attrs.put("o",info.getOrganization());
