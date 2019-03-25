@@ -1128,30 +1128,30 @@ public class AdminApi {
             @ApiResponse(code = 409, message = RestConstants.HTTP_409, response = ErrorResponse.class),
             @ApiResponse(code = 500, message = RestConstants.HTTP_500, response = ErrorResponse.class) })
 
-    public Response changeLogging(
-            @ApiParam(value = "name", required = true) @QueryParam("name") String name,
-            @ApiParam(value = "loglevel", required = true) @QueryParam("loglevel") String loglevel,
-            @ApiParam(value = "appender", defaultValue = "File") @QueryParam("appender") String appender,
-            @Context HttpServletRequest req) {
-        try {
-
-            //check that there is an admin
-            AdminServiceFactory.getInstance();
-
-            if(name.startsWith("org.alfresco") ||
-                    name.startsWith("org.edu_sharing.alfresco") ||
-                    name.startsWith("org.edu_sharing.repository.server.tools.cache")) {
-                ClassLoader clAlf = AlfAppContextGate.getApplicationContext().getClassLoader();
-
-                Class<?> logManager = clAlf.loadClass("org.apache.log4j.LogManager");
-                Method methodGetLogger = logManager.getMethod("getLogger", String.class);
-                Object logger = methodGetLogger.invoke(null, name);
-
-                Class<?> logLevelClass = clAlf.loadClass("org.apache.log4j.Level");
-                Method methodToLevel = logLevelClass.getMethod("toLevel",String.class);
-                Method methodSetLevel = logger.getClass().getMethod("setLevel",logLevelClass);
-                methodSetLevel.invoke(logger, methodToLevel.invoke(null, loglevel));
-
+	public Response changeLogging(
+			@ApiParam(value = "name", required = true) @QueryParam("name") String name,
+			@ApiParam(value = "loglevel", required = true) @QueryParam("loglevel") String loglevel,
+			@ApiParam(value = "appender", defaultValue = "File") @QueryParam("appender") String appender,
+			@Context HttpServletRequest req) {
+		try {
+		
+			//check that there is an admin
+			AdminServiceFactory.getInstance();
+			
+			if(name.startsWith("org.alfresco") ||
+					name.startsWith("org.edu_sharing.alfresco") ||
+					name.startsWith("org.edu_sharing.repository.server.tools.cache")) {
+				ClassLoader clAlf = AlfAppContextGate.getApplicationContext().getClassLoader(); 
+				
+				Class<?> logManager = clAlf.loadClass("org.apache.log4j.LogManager");
+				Method methodGetLogger = logManager.getMethod("getLogger", String.class);
+				Object logger = methodGetLogger.invoke(null, name);
+				
+				Class<?> logLevelClass = clAlf.loadClass("org.apache.log4j.Level");
+				Method methodToLevel = logLevelClass.getMethod("toLevel",String.class);
+				Method methodSetLevel = logger.getClass().getMethod("setLevel",logLevelClass);
+				methodSetLevel.invoke(logger, methodToLevel.invoke(null, loglevel));
+				
 				/*Method methodGetRootLogger = logger.getClass().getMethod("getRootLogger", null);
 				Object rootLogger = methodGetRootLogger.invoke(null, null);
 
@@ -1200,6 +1200,8 @@ public class AdminApi {
 
     public Response options15() {
 
-        return Response.status(Response.Status.OK).header("Allow", "OPTIONS, POST").build();
-    }
+		return Response.status(Response.Status.OK).header("Allow", "OPTIONS, POST").build();
+	}
+
+
 }
