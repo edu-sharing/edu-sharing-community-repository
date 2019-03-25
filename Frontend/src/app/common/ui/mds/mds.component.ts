@@ -37,6 +37,12 @@ export class MdsComponent{
   @ViewChild('mdsScrollContainer') mdsScrollContainer: ElementRef;
   @ViewChild('jumpmarksRef') jumpmarksRef: ElementRef;
 
+  /**
+   * priority, useful if the dialog seems not to be in the foreground
+   * Values greater 0 will raise the z-index
+   * Default is 1 for mds
+   */
+  @Input() priority = 1;
   @Input() addWidget=false;
   @Input() embedded=false;
   private activeAuthorType: number;
@@ -1254,7 +1260,7 @@ export class MdsComponent{
   private renderTreeWidget(widget:any,attr:string){
     let html=this.autoSuggestField(widget,'',false,
                 `window.mdsComponentRef.component.openTree('`+widget.id+`')`,'arrow_forward')
-        +`     <div class="dialog darken" style="display:none;z-index:121;" id="`+widget.id+`_tree">
+        +`     <div class="dialog darken" style="display:none;z-index:`+(122 + this.priority)+`;" id="`+widget.id+`_tree">
                 <div class="card center-card card-wide card-high card-action">
                   <div class="card-content">
                   <div class="card-cancel" onclick="document.getElementById('`+widget.id+`_tree').style.display='none';"><i class="material-icons">close</i></div>

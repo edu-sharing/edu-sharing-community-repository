@@ -1,11 +1,12 @@
 <global-progress *ngIf="globalProgress && !embedded"></global-progress>
-<div class="dialog dialogMdsGlobal darken" *ngIf="!embedded" [@fade]="this"></div>
+<div class="dialog dialogMdsGlobal darken" [style.z-index]="120 + priority" *ngIf="!embedded" [@fade]="this"></div>
 <div *ngIf="!embedded">
   <div #jumpmarksRef class="card-jumpmarks" [innerHTML]="jumpmarks" *ngIf="(currentNode || createType) && jumpmarksCount>1">
 
   </div>
   <div class="card center-card card-action card-wide card-high mdsMainCard"
        [@cardAnimation]="this"
+       [style.z-index]="121 + priority"
        [class.mdsCardJumpmarks]="jumpmarksCount>1">
     <spinner class="loading" *ngIf="isLoading"></spinner>
     <div class="card-content" *ngIf="(currentNode || createType) && !isLoading">
@@ -34,7 +35,7 @@
   </div>
 </div>
 <modal-dialog
-              [priority]="2"
+              [priority]="1 + priority"
               [title]="dialogTitle"
               [message]="dialogMessage"
               [isCancelable]="true"
