@@ -165,16 +165,23 @@ label .label-secondary{
 }
 // Mobile Menus at bottom
 @media screen and (max-width:  ($mobileWidth - $mobileStage*1)) {
-  .cdk-overlay-container {
+  .cdk-overlay-backdrop.dropdown-menu{
     background: rgba(0, 0, 0, 0.8);
   }
-  .cdk-overlay-pane, .cdk-overlay-connected-position-bounding-box {
-    top: auto !important;
-    bottom: 0 !important;
-    right: 0 !important;
-    left: 0 !important;
-    width: 100% !important;
+  .mat-menu-panel{
+    position: fixed;
+    bottom:0;
+    left:0;
   }
+    /*
+    .cdk-overlay-pane, .cdk-overlay-connected-position-bounding-box {
+      top: auto !important;
+      bottom: 0 !important;
+      right: 0 !important;
+      left: 0 !important;
+      width: 100% !important;
+    }
+    */
 
   .mat-menu-panel,.mat-menu-content {
     max-width: 100% !important;
