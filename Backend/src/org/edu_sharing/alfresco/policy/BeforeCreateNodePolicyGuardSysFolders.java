@@ -62,7 +62,7 @@ public class BeforeCreateNodePolicyGuardSysFolders implements NodeServicePolicie
 					throw new NodeCreateDeniedException("In folder of type " + CCConstants.CCM_VALUE_MAP_TYPE_EDU_SHARING_SYSTEM_TOOLPERMISSIONS + " only nodes of type " + CCConstants.CCM_TYPE_TOOLPERMISSION + " are allowed");
 				}
 			}
-			
+
 		}
 
 	}
