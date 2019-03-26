@@ -22,7 +22,7 @@
     <img *ngIf="!edit && user.profile.avatar" class="blurred-image" [src]="user.profile.avatar+'&crop=true&width=400&height=400'" alt="">
     <img *ngIf="edit && !avatarFile && userEdit.profile.avatar" class="blurred-image" [src]="user.profile.avatar+'&crop=true&width=400&height=400'" alt="">
     <img *ngIf="edit && avatarFile" class="blurred-image" [src]="avatarImage" alt="">
-    <a class="edit clickable" *ngIf="isMe && !edit && editProfile" (click)="beginEdit()"><i class="material-icons">edit</i><span>{{'PROFILES.EDIT' | translate}}</span></a>
+    <a class="edit clickable" *ngIf="isMe && !edit && !editAbout && editProfile" (click)="beginEdit()"><i class="material-icons">edit</i><span>{{'PROFILES.EDIT' | translate}}</span></a>
     <a class="edit clickable" *ngIf="isMe && edit" (click)="edit=false"><i icon iconId="close"></i><span>{{'PROFILES.CANCEL_EDIT' | translate}}</span></a>
     <user-avatar *ngIf="!edit"
      [user]="user"
@@ -89,7 +89,7 @@
   <div class="about">
     <i icon iconId="edu-quotes" class="quotes">quotes</i>
     <div class="about-buttons" *ngIf="isMe && editProfile">
-      <a class="edit clickable" *ngIf="!editAbout" (click)="aboutEdit()">{{'PROFILES.EDIT' | translate}}</a>
+      <a class="edit clickable" *ngIf="!editAbout && !edit" (click)="aboutEdit()">{{'PROFILES.EDIT' | translate}}</a>
       <a class="edit clickable" *ngIf="editAbout" (click)="editAbout=false">{{'PROFILES.CANCEL_EDIT' | translate}}</a>
     </div>
     <div *ngIf="editAbout">
