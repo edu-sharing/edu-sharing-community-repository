@@ -20,6 +20,11 @@ export class PermissionNamePipe implements PipeTransform {
               return permission.profile.email || permission.profile.mailbox;
           }
       }
+      if(field=='authorityName'){
+          if(permission.authorityType=='USER') {
+              return permission.authorityName;
+          }
+      }
       return "";
     }
       if(permission.user && (permission.user.firstName || permission.user.lastName))
