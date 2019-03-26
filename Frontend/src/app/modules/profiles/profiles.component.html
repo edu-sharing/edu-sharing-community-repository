@@ -8,9 +8,11 @@
 <global-progress *ngIf="globalProgress"></global-progress>
 <div class="profile-bg" *ngIf="user">
   <div class="avatar-default"></div>
+  <!--
   <img *ngIf="!edit && !avatarFile && user.profile.avatar" [src]="user.profile.avatar+'&crop=true&width=1000&height=1000'" alt="">
   <img *ngIf="edit && !avatarFile && userEdit.profile.avatar" [src]="user.profile.avatar+'&crop=true&width=1000&height=1000'" alt="">
   <img *ngIf="avatarFile" [src]="avatarImage" alt="">
+  -->
   <div class="profile-gradient"></div>
 </div>
 <div class="profiles" *ngIf="user">
