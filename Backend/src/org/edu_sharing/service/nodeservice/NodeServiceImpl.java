@@ -226,15 +226,17 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
 				toSafe.put(id,widget.getDefaultvalue());
 				continue;
 			}
-			if(values==null || values.length==0)
+			// changed: otherwise reset values for multivalue fields is not possible
+			// if(values==null || values.length==0)
+			if(values==null)
 				continue;
 			if(!widget.isMultivalue() && values.length>1)
 				throw new IllegalArgumentException("Multiple values given for a non-multivalue widget: ID "+id+", widget type "+widget.getType());
 			if(widget.isMultivalue()){
-				toSafe.put(id,new ArrayList<String>(Arrays.asList(values)));
+				toSafe.put(id,values.length==0 ? null : new ArrayList<String>(Arrays.asList(values)));
 			}
 			else{
-				toSafe.put(id,values[0]);
+				toSafe.put(id,values.length==0 ? null : values[0]);
 			}
 		}
 		
