@@ -939,7 +939,7 @@ public class AdminApi {
 			token.setLuceneString(query);
 			token.disableSearchCriterias();
 			token.setAuthorityScope(authorityScope);
-			NodeSearch search = NodeDao.search(repoDao, token, false);
+			NodeSearch search = NodeDao.search(repoDao, token);
 
 			List<Node> data = new ArrayList<Node>();
 			for (org.edu_sharing.restservices.shared.NodeRef ref : search.getResult()) {

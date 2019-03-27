@@ -143,12 +143,6 @@ public class NodeDao {
 		return transform(repoDao,searchService.search(searchToken));
 	}
 	
-	public static NodeSearch search(RepositoryDao repoDao,
-			org.edu_sharing.service.search.model.SearchToken searchToken, boolean scoped) throws DAOException {
-		SearchService searchService=SearchServiceFactory.getSearchService(repoDao.getId());
-		return transform(repoDao,searchService.search(searchToken,scoped));
-	}
-	
 	public static NodeSearch searchV2(RepositoryDao repoDao,MdsDaoV2 mdsDao,
 			String query, List<MdsQueryCriteria> criterias,SearchToken token, Filter filter) throws DAOException {
 		SearchService searchService=SearchServiceFactory.getSearchService(repoDao.getId());
