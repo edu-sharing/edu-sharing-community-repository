@@ -162,6 +162,10 @@
 	      <url-pattern>/eduservlet/*</url-pattern>
    </filter-mapping>
    <filter-mapping>
+       <filter-name>Edu Context Management Filter</filter-name>
+       <url-pattern>/share</url-pattern>
+   </filter-mapping>
+   <filter-mapping>
 	      <filter-name>Edu Context Management Filter</filter-name>
 	      <url-pattern>/jsp/*</url-pattern>
    </filter-mapping>
