@@ -84,7 +84,7 @@ public class RemoveOrphanCollectionReferencesJob extends AbstractJob{
 			}
 			logger.info("RemoveOrphanCollectionReferencesJob finished, processed "+result.getData().size()+" references, deleted "+deleted);
 		} catch (Throwable e) {
-			e.printStackTrace();
+			logger.warn(e.getMessage(),e);
 		}
 	}
 	
