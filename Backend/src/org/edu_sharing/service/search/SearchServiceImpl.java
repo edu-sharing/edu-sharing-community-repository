@@ -801,16 +801,16 @@ public class SearchServiceImpl implements SearchService {
 	public SearchResult<String> findAuthorities(AuthorityType type,String searchWord, boolean globalContext, int from, int nrOfResults,SortDefinition sort,Map<String,String> customProperties) throws InsufficientPermissionException {
 		if(globalContext)
 			checkGlobalSearchPermission();
-		HashMap<String, String> toSearch = new HashMap<String, String>();
+		List<String> searchFields = new ArrayList<>();
 
 		// fields to search in - not using username
-		toSearch.put("email", searchWord);
-		toSearch.put("firstName", searchWord);
-		toSearch.put("lastName", searchWord);
+		searchFields.add("email");
+		searchFields.add("firstName");
+		searchFields.add("lastName");
 		
 		PermissionServiceImpl permissionService = (PermissionServiceImpl)PermissionServiceFactory.getPermissionService(null);
 
-		StringBuffer findUsersQuery =  permissionService.getFindUsersSearchString(toSearch, globalContext);
+		StringBuffer findUsersQuery =  permissionService.getFindUsersSearchString(searchWord,searchFields, globalContext);
 		StringBuffer findGroupsQuery = permissionService.getFindGroupsSearchString(searchWord, globalContext);
 		
 

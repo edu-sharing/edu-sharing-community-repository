@@ -108,15 +108,16 @@ public class PermissionServiceWSImpl implements PermissionService {
 	}
 
 	@Override
-	public org.edu_sharing.repository.client.rpc.Result<List<User>> findUsers(HashMap<String, String> propVals,
+	public org.edu_sharing.repository.client.rpc.Result<List<User>> findUsers(String query, List<String> searchFields,
 			boolean globalContext, int from, int nrOfResults) {
 
 		try {
 			NativeAlfrescoWrapper naw = EduWebServiceFactory.getNativeAlfrescoWrapper(appInfo.getWebServiceHotUrl());
 
+			// mapping to new findUsers method signature
 			List<KeyValue> wsParam = new ArrayList<KeyValue>();
-			for (Map.Entry<String, String> entry : propVals.entrySet()) {
-				wsParam.add(new KeyValue(entry.getKey(), entry.getValue()));
+			for (String entry : searchFields) {
+				wsParam.add(new KeyValue(entry, query));
 			}
 			org.edu_sharing.webservices.alfresco.extension.SearchResult wsResult = naw
 					.findUsers(wsParam.toArray(new KeyValue[wsParam.size()]), null, from, nrOfResults);

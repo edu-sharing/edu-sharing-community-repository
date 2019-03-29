@@ -61,7 +61,7 @@ public interface PermissionService {
 	
 	public void removePermissions(String nodeId, String authority, String[] _permissions) throws Exception;
 
-	public Result<List<User>> findUsers(HashMap<String, String> propVals, boolean globalContext, int from, int nrOfResults);
+	public Result<List<User>> findUsers(String query,List<String> searchFields, boolean globalContext, int from, int nrOfResults);
 	
 	public Result<List<Authority>> findAuthorities(String searchWord, boolean globalContext, int from, int nrOfResults);
 

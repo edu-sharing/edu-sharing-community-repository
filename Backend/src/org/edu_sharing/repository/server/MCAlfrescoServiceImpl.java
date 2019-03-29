@@ -1748,10 +1748,10 @@ public class MCAlfrescoServiceImpl extends RemoteServiceServlet implements MCAlf
 		}		
 	}
 	
-	public Result<List<User>> findUsers(HashMap<String, String> propVals, boolean globalContext, int from, int nrOfResults) throws CCException {
+	public Result<List<User>> findUsers(String query, List<String> searchFields, boolean globalContext, int from, int nrOfResults) throws CCException {
 		try{
 			org.edu_sharing.service.permission.PermissionService permissionService = PermissionServiceFactory.getPermissionService(ApplicationInfoList.getHomeRepository().getAppId());
-			return permissionService.findUsers(propVals, globalContext, from, nrOfResults);
+			return permissionService.findUsers(query, searchFields, globalContext, from, nrOfResults);
 		}catch(Throwable e){
 			this.errorHandling(e);
 		}
