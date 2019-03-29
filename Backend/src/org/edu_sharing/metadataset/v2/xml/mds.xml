@@ -600,7 +600,7 @@
 					<column>cm:modified</column>
 					<!-- currently not working (solr error) -->
 					<!-- <column>ccm:commonlicense_key</column> -->
-					<column>cm:title</column>
+					<column>cclom:title</column>
 					<column>ccm:replicationsource</column>
 				</columns>
 			</sort>
@@ -609,7 +609,7 @@
 			<list>
 				<id>search</id>
 				<columns>
-					<column>cm:title</column>
+					<column>cclom:title</column>
 					<column>cm:modified</column>
 					<column>ccm:commonlicense_key</column>
 					<column>ccm:replicationsource</column>
@@ -620,7 +620,7 @@
 			<list>
 				<id>collectionReferences</id>
 				<columns>
-					<column>cm:title</column>
+					<column>cclom:title</column>
 					<column>cm:modified</column>
 					<column>ccm:commonlicense_key</column>
 					<column>ccm:replicationsource</column>

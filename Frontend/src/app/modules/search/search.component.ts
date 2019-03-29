@@ -612,8 +612,9 @@ export class SearchComponent {
       this.searchService.columns=MdsHelper.getColumns(this.currentMdsSet,'search');
   }
   sortMaterials(sort:any){
-      this.searchService.sort.materialsSortBy=sort.name;
-      this.searchService.sort.materialsSortAscending=sort.ascending;
+    console.log(sort);
+      this.searchService.sort.materialsSortBy=sort.name || sort.sortBy;
+      this.searchService.sort.materialsSortAscending=sort.ascending || sort.sortAscending;
       this.routeSearch();
   }
   private importNode(node: Node) {

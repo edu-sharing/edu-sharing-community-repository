@@ -229,6 +229,11 @@ export class ListTableComponent implements EventListener{
    * @type {boolean}
    */
   @Input() sortAscending=true;
+
+    /**
+     * set the allowed list of possible sort by fields
+     */
+  @Input() possibleSortByFields = RestConstants.POSSIBLE_SORT_BY_FIELDS;
   /**
    *  For Infinite Scroll, when false, also does reload when scrolling inside a div
    * @type {boolean}
@@ -556,7 +561,7 @@ export class ListTableComponent implements EventListener{
     this.clickRow.emit(node);
   }
   private canBeSorted(sortBy : any){
-    return RestConstants.POSSIBLE_SORT_BY_FIELDS.indexOf(sortBy.name)!=-1;
+    return this.possibleSortByFields.filter((p)=>p.name==sortBy.name).length;
   }
   private getSortableColumns(){
     let result:ListItem[]=[];
