@@ -657,8 +657,10 @@ export class MainNavComponent implements AfterViewInit{
             this.licenseAgreementHTML = "Error loading content for license agreement node '" + nodeId + "'";
         });
       },(error:any)=>{
-          if(version==='0.0')
-            return;
+          if(version==='0.0') {
+              this.startTutorial();
+              return;
+          }
           this.licenseAgreement=true;
           this.licenseAgreementHTML = "Error loading metadata for license agreement node '" + nodeId + "'";
       })
