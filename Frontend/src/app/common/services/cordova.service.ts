@@ -842,6 +842,7 @@ export class CordovaService {
 
    downloadContent(downloadURL:string, fileName:string, winCallback:Function=null, failCallback:Function=null) : void {
      let status=0;
+     let resultPath="";
      try {
        this.makeSurePermission("WRITE_EXTERNAL_STORAGE", (win: any) => {
 
@@ -860,7 +861,7 @@ export class CordovaService {
 
            // iOS: following redirects works automatically - so go direct
            console.log("downloadContent IOS URL: " + downloadURL);
-           this.startContentDownload(downloadURL, fileName, (filePath:string)=>status=1, ()=>status=-1);
+           this.startContentDownload(downloadURL, fileName, (filePath:string)=>{status=1;resultPath=filePath;}, ()=>status=-1);
 
          } else {
 
@@ -870,8 +871,7 @@ export class CordovaService {
              console.log("200 NOT A REDIRECT URL - use original: " + downloadURL);*/
              this.startContentDownload(downloadURL, fileName,(filePath:string)=>{
                  status=1;
-                 // suggest user to open the file
-                 (window as any).plugins.intent.showOpenWith(filePath,()=>{},()=>{});
+                 resultPath=filePath;
              }, ()=>status=-1);
            /*}, (response: any) => {
              if (response.status == 302) {
@@ -898,8 +898,12 @@ export class CordovaService {
        if(status==0)
          return;
        clearInterval(interval);
-       if(status==1 && winCallback)
-         winCallback();
+       if(status==1 && winCallback) {
+           if(this.isAndroid())
+            // suggest user to open the file
+            (window as any).plugins.intent.showOpenWith(resultPath,()=>{},()=>{});
+           winCallback();
+       }
        if(status==-1 && failCallback)
          failCallback();
      },100);
