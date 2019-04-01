@@ -870,8 +870,8 @@ export class CordovaService {
            (window as any).CordovaHttpPlugin.head(downloadURL, {}, {}, (response: any) => {
              console.log("200 NOT A REDIRECT URL - use original: " + downloadURL);*/
              this.startContentDownload(downloadURL, fileName,(filePath:string)=>{
-                 status=1;
                  resultPath=filePath;
+                 status=1;
              }, ()=>status=-1);
            /*}, (response: any) => {
              if (response.status == 302) {
@@ -899,9 +899,11 @@ export class CordovaService {
          return;
        clearInterval(interval);
        if(status==1 && winCallback) {
-           if(this.isAndroid())
-            // suggest user to open the file
-            (window as any).plugins.intent.showOpenWith(resultPath,()=>{},()=>{});
+           if(this.isAndroid()) {
+               // suggest user to open the file
+               console.log("android, openWith", resultPath);
+               (window as any).plugins.intent.showOpenWith(resultPath, () => {}, () => {});
+           }
            winCallback();
        }
        if(status==-1 && failCallback)
