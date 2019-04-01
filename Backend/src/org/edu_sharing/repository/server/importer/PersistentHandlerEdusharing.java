@@ -359,7 +359,7 @@ public class PersistentHandlerEdusharing implements PersistentHandlerInterface {
 	}
 
 	private String makeUniqueName(String name) {
-		return name+"_"+ DigestUtils.sha1Hex(System.currentTimeMillis()+""+RandomUtils.nextLong());
+		return name+"_"+ DigestUtils.shaHex(System.currentTimeMillis()+""+RandomUtils.nextLong());
 	}
 
 

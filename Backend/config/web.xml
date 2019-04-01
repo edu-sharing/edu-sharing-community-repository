@@ -265,8 +265,11 @@
        <filter-name>Edu-Sharing Guest Filter</filter-name>
        <url-pattern>/eduservlet/sitemap</url-pattern>
    </filter-mapping>
-   
-   <filter-mapping>
+    <filter-mapping>
+        <filter-name>Edu-Sharing Guest Filter</filter-name>
+        <url-pattern>/eduservlet/oai/*</url-pattern>
+    </filter-mapping>
+    <filter-mapping>
        <filter-name>Edu-Sharing Authentication Filter</filter-name>
        <url-pattern>/search</url-pattern>
    </filter-mapping>
@@ -477,6 +480,10 @@
     	<servlet-class>org.edu_sharing.repository.server.DownloadServlet</servlet-class>
     </servlet>
     <servlet>
+        <servlet-name>OaiServlet</servlet-name>
+        <servlet-class>org.edu_sharing.repository.server.oai.OaiServlet</servlet-class>
+    </servlet>
+    <servlet>
         <servlet-name>SitemapServlet</servlet-name>
         <servlet-class>org.edu_sharing.repository.server.sitemap.SitemapServlet</servlet-class>
     </servlet>
@@ -644,6 +651,10 @@
     <servlet-mapping>
         <servlet-name>SitemapServlet</servlet-name>
         <url-pattern>/eduservlet/sitemap</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>OaiServlet</servlet-name>
+        <url-pattern>/eduservlet/oai/provider</url-pattern>
     </servlet-mapping>
     <servlet-mapping>
         <servlet-name>RobotsTXTServlet</servlet-name>
