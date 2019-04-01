@@ -1,7 +1,7 @@
 {
   "name": "angular-edusharing",
   "version": "1.0.0",
-  "license": "GNU GPL v2",
+  "license": "GPL-2.0",
   "angular-cli": {},
   "scripts": {
     "start": "ng serve",
@@ -14,7 +14,7 @@
     "docs": "typedoc --mode file --experimentalDecorators --excludePrivate --ignoreCompilerErrors --target 'ES6' --module 'commonjs' --out docs src",
     "gitlog": "..\\Edu-Sharing-Internal\\Frontend\\gitlog.sh"
   },
-  "private": true,
+  "private": false,
   "dependencies": {
     "@angular/animations": "~7.0.0",
     "@angular/cdk": "~7.0.0",
