@@ -59,7 +59,7 @@ import java.util.stream.Collectors;
 
 
 public class OaiServlet extends HttpServlet{
-    private static final int MAX_ITEMS_PER_PAGE = 100;
+    private static final int MAX_ITEMS_PER_PAGE = 300;
     Logger logger = Logger.getLogger(OaiServlet.class);
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp)
@@ -68,7 +68,7 @@ public class OaiServlet extends HttpServlet{
             //oai/provider?verb=GetRecord&metadataPrefix=lom&identifier=3410648a-465e-47ff-87fe-706b89cecd65
             EduOai oai = new EduOai(MAX_ITEMS_PER_PAGE,
                     URLTool.getBaseUrl(),
-                    "Todo",
+                    ApplicationInfoList.getHomeRepository().getAppCaption(),
                     new Mail().getProperties().getProperty("mail.admin"),
                     new Date(0),
                     new Handler());
