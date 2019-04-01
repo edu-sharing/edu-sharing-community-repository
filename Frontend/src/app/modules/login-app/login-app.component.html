@@ -34,7 +34,7 @@
         </div>
       </div>
       <div class="card-action">
-        <a class="waves-effect waves-light btn" [class.disabled]="disabled" (click)="login()">{{'LOGIN.LOGIN' | translate }}</a>
+        <a class="waves-effect waves-light btn" (click)="login()">{{'LOGIN.LOGIN' | translate }}</a>
         <a class="btn-flat" *ngIf="config.recoverPasswordUrl" (click)="recoverPassword()">{{'LOGIN.RECOVER_PASSWORD' | translate }}</a>
       </div>
     </div>
