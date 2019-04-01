@@ -15,6 +15,7 @@ public class Connector {
 	private String[] parameters;
 	private ConnectorFileType[] filetypes;
 	private boolean onlyDesktop;
+	private boolean hasViewMode;
 
 	@JsonProperty("icon")
 	public String getIcon() {
@@ -61,4 +62,15 @@ public class Connector {
     public boolean getOnlyDesktop() {
         return onlyDesktop;
     }
+
+	@JsonProperty("hasViewMode")
+	public boolean isHasViewMode() {
+		return hasViewMode;
+	}
+
+	public void setHasViewMode(boolean hasViewMode) {
+		this.hasViewMode = hasViewMode;
+	}
+
+
 }

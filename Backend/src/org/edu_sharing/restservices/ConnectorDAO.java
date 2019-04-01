@@ -57,6 +57,7 @@ public class ConnectorDAO {
 			resultConnector.setIcon(connector.getIcon());
 			resultConnector.setId(connector.getId());
 			resultConnector.setOnlyDesktop(connector.isOnlyDesktop());
+			resultConnector.setHasViewMode(connector.isHasViewMode());
 			if(connector.getParameters() != null){
 				resultConnector.setParameters(connector.getParameters().toArray(new String[0]));
 			}

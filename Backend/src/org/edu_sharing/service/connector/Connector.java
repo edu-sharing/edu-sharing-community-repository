@@ -12,6 +12,8 @@ public class Connector {
 
 	private boolean onlyDesktop;
 
+	private boolean hasViewMode;
+
 	private String url;
 	
 	/**
@@ -86,5 +88,13 @@ public class Connector {
 
 	public void setOnlyDesktop(boolean onlyDesktop) {
 		this.onlyDesktop = onlyDesktop;
+	}
+
+	public boolean isHasViewMode() {
+		return hasViewMode;
+	}
+
+	public void setHasViewMode(boolean hasViewMode) {
+		this.hasViewMode = hasViewMode;
 	}
 }
