@@ -19,14 +19,14 @@
 ></infobar>
 
 
-<div class="row tab-group row-dark scrollWithBanner" *ngIf="isRootLevelCollection() && !isGuest">
+<div class="row tab-group row-dark scrollWithBanner" *ngIf="showTabs()">
   <div class="col s12">
     <ul class="tabs tabs-fixed-width">
-      <li class="clickable tab col s3" tabindex="0" (keyup.enter)="selectTabMyCollections()" (click)="selectTabMyCollections()">
+      <li class="clickable tab col s3" tabindex="0" (keyup.enter)="selectTabMyCollections()" (click)="selectTabMyCollections()" *ngIf="!isGuest">
         <a class="table-tab-title-long" [class.active]="(tabSelected==='MY')">{{ 'COLLECTIONS.TAB.MY' | translate }}</a>
         <a class="table-tab-title-short" [class.active]="(tabSelected==='MY')">{{ 'COLLECTIONS.TAB.MY_SHORT' | translate }}</a>
       </li>
-      <li class="clickable tab col s3" tabindex="0" (keyup.enter)="selectTabMyOrganizations()" (click)="selectTabMyOrganizations()">
+      <li class="clickable tab col s3" tabindex="0" (keyup.enter)="selectTabMyOrganizations()" (click)="selectTabMyOrganizations()" *ngIf="!isGuest">
         <a class="table-tab-title-long" [class.active]="(tabSelected==='EDU_GROUPS')">{{ 'COLLECTIONS.TAB.EDU_GROUPS' | translate }}</a>
         <a class="table-tab-title-short" [class.active]="(tabSelected==='EDU_GROUPS')">{{ 'COLLECTIONS.TAB.EDU_GROUPS_SHORT' | translate }}</a>
       </li>
@@ -42,12 +42,12 @@
   </div>
 </div>
 <div class="alignWithBanner">
-<div [class.collectionsContainerTabs]="isRootLevelCollection() && !isGuest" class="collectionsContainer">
+<div [class.collectionsContainerTabs]="showTabs()" class="collectionsContainer">
 
   <section *ngIf="(isLoading || (!isReady))" class="collections-loading-div" style="padding-top: 24px;text-align: center;">
     <spinner></spinner>
   </section>
-  <div class="collections-master-div" [class.collections-master-div-notabs]="!isRootLevelCollection()">
+  <div class="collections-master-div" [class.collections-master-div-notabs]="!showTabs()">
 
     <a *ngIf="!isLoading && isGuest" class="clickable switchToSearch" title="{{'COLLECTIONS.TO_SEARCH' | translate}}" tabindex="0" (click)="navigateToSearch()" (keypress)="($event.which === 13)?navigateToSearch():0">{{'COLLECTIONS.TO_SEARCH' | translate}} <i class="material-icons">arrow_forward</i></a>
 

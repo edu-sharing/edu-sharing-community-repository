@@ -636,10 +636,9 @@ export class CollectionsMainComponent implements GwtEventListener {
         if(params['scope'])
             this.tabSelected=params['scope'];
         else
-            this.tabSelected=RestConstants.COLLECTIONSCOPE_MY;
+            this.tabSelected=this.isGuest ? RestConstants.COLLECTIONSCOPE_ALL : RestConstants.COLLECTIONSCOPE_MY;
         this.reurl=params['reurl'];
-        if(this.isGuest)
-          this.tabSelected=RestConstants.COLLECTIONSCOPE_ALL;
+
         if(params['mainnav'])
           this.mainnav=params['mainnav']!='false';
 
@@ -761,5 +760,9 @@ export class CollectionsMainComponent implements GwtEventListener {
 
     private isAllowedToDeleteNodes(nodes: Node[]) {
         return this.isAllowedToDeleteCollection() || NodeHelper.getNodesRight(nodes,RestConstants.ACCESS_DELETE);
+    }
+
+    showTabs() {
+        return this.isRootLevelCollection() && (!this.isGuest || this.hasEditorial);
     }
 }
