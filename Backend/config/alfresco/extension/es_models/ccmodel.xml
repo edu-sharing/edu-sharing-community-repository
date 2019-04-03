@@ -1639,6 +1639,12 @@
 	         			<tokenised>both</tokenised>
 	         		</index>
 				</property>
+				<property name="ccm:eaf_sequence_title">
+					<type>d:text</type>
+				</property>
+				<property name="ccm:eaf_subtitle">
+					<type>d:text</type>
+				</property>
 			</properties>
 		</aspect>
 		
