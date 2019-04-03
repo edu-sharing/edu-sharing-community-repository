@@ -52,7 +52,7 @@ $sidenavWidth:300px;
 }
 .sidenav .row{
   margin:0 -30px;
-  margin-top: -10px;
+  margin-top: 0;
 }
 .repositoryActive{
   background: $workspaceTreeSelectedBackgroundEffect;
@@ -90,6 +90,25 @@ $sidenavWidth:300px;
 }
 .extendedSearch a, .switchToCollections a, .switchToSearch a{
   padding: 5px;
+}
+.sorting{
+  position: absolute;
+  right: 10px;
+  .sorting-info {
+    padding: 0 10px;
+    display: flex;
+    align-items: center;
+    color: $primary;
+    text-transform: uppercase;
+    .material-icons {
+      padding-left: 5px;
+      font-size: 18px;
+    }
+  }
+}
+sort-dropdown{
+  position: absolute;
+  right: 250px;
 }
 .extendedSearch{
   .mobile{

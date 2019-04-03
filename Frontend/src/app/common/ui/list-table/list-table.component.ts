@@ -129,7 +129,7 @@ export class ListTableComponent implements EventListener{
    */
   @Input() totalCount : number;
   /**
-   * is it possible to load more items? (Otherwise, the icon to laod more is hidden)
+   * is it possible to load more items? (Otherwise, the icon to load more is hidden)
    */
   @Input() hasMore : boolean;
   /**
@@ -234,6 +234,10 @@ export class ListTableComponent implements EventListener{
      * set the allowed list of possible sort by fields
      */
   @Input() possibleSortByFields = RestConstants.POSSIBLE_SORT_BY_FIELDS;
+    /**
+     * Show the sort by dialog when sort is triggered in mobile view
+     */
+    @Input() sortByMobile = true;
   /**
    *  For Infinite Scroll, when false, also does reload when scrolling inside a div
    * @type {boolean}
@@ -561,7 +565,7 @@ export class ListTableComponent implements EventListener{
     this.clickRow.emit(node);
   }
   private canBeSorted(sortBy : any){
-    return this.possibleSortByFields.filter((p)=>p.name==sortBy.name).length;
+    return this.possibleSortByFields && this.possibleSortByFields.filter((p)=>p.name==sortBy.name).length;
   }
   private getSortableColumns(){
     let result:ListItem[]=[];
@@ -573,7 +577,8 @@ export class ListTableComponent implements EventListener{
   }
   private setSortingIntern(sortBy : ListItem,isPrimaryElement : boolean){
     if(isPrimaryElement && window.innerWidth<UIConstants.MOBILE_WIDTH+UIConstants.MOBILE_STAGE*4){
-      this.sortMenu=true;
+      if(this.sortByMobile)
+        this.sortMenu=true;
       return;
     }
     let ascending=this.sortAscending;

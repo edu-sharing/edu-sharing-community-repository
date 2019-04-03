@@ -170,6 +170,10 @@
     "size": "Größe",
     "mediatype":"Dateityp",
     "ccm:commonlicense_key":"Lizenz",
+    "ccm:educationallearningresourcetype":"Materialart",
+    "ccm:replicationsourceid":"Original-ID",
+    "ccm:eaf_sequence_title":"Serientitel",
+    "ccm:eaf_subtitle":"Untertitel",
     "sys:node-uuid":"Node-ID",
     "dimensions": "Bildgröße",
     "exif:dateTimeOriginal":"Aufnahmedatum",
@@ -185,7 +189,7 @@
     "ccm:author_freetext":"Freie Urheber-Angabe",
     "ccm:lifecyclecontributer_authorFN":"Autor",
     "ccm:wf_status":"Status",
-    "ccm:eaf_productionyear":"Produktionsjahr"
+    "ccm:eaf_productionyear":"Prod. Jahr"
   },
   "LICENSE":{
     "NAMES": {
