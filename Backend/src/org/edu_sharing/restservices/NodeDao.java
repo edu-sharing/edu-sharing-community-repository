@@ -1260,12 +1260,10 @@ public class NodeDao {
 			return new HashMap<String, String[]>();
 		}
 
-		ValueTool vt = new ValueTool();
-		
 		HashMap<String,String[]> properties = new HashMap<String,String[]>();
 		for (Entry<String, Object> entry : props.entrySet()) {
 
-			List<String> values = getPropertyValues(vt, entry.getValue());
+			List<String> values = getPropertyValues(entry.getValue());
 
 			String shortPropName = NameSpaceTool.transformToShortQName(entry.getKey());
 			
@@ -1277,7 +1275,7 @@ public class NodeDao {
 					continue;
 				}
 				if(props.containsKey(entry.getKey()+CCConstants.LONG_DATE_SUFFIX)){
-					values = getPropertyValues(vt, props.get(entry.getKey()+CCConstants.LONG_DATE_SUFFIX));
+					values = getPropertyValues(props.get(entry.getKey()+CCConstants.LONG_DATE_SUFFIX));
 					properties.put(shortPropName, values.toArray(new String[values.size()]));
 				}
 				else{
@@ -1290,10 +1288,10 @@ public class NodeDao {
 		return properties;
 	}
 
-	private List<String> getPropertyValues(ValueTool vt,Object value) {
+	private List<String> getPropertyValues(Object value) {
 		List<String> values = new ArrayList<String>();
 		if (value != null ){
-			for (String mv : vt.getMultivalue(value.toString())) {
+			for (String mv : ValueTool.getMultivalue(value.toString())) {
 				values.add(mv);
 			}
 		}
