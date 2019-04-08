@@ -943,7 +943,12 @@ export class WorkspaceMainComponent implements EventListener{
         else{
             this.selectedNodeTree=id;
             this.node.getNodeParents(id).subscribe((data : NodeList)=>{
-                this.path = data.nodes.reverse();
+                if(this.root=='RECYCLE'){
+                    this.path = [];
+                }
+                else {
+                    this.path = data.nodes.reverse();
+                }
                 this.selectedNodeTree=null;
             },(error:any)=>{
                 this.selectedNodeTree=null;
