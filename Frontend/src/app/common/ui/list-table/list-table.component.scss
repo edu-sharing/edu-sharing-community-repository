@@ -265,7 +265,14 @@ $badgeWidth:250px;
 .more a{
   color:$primary;
 }
+.tableList{
+  @for $i from 2 through 10 {
+    .row_#{$i} {
+      word-break: break-all;
+    }
+  }
 
+}
 .tableList .row.selected,
 .cardList .row.selected{
   background: $workspaceSelectedBackgroundEffect;
