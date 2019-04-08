@@ -8,6 +8,7 @@ import {Location} from '@angular/common';
 import {UIConstants} from '../ui/ui-constants';
 import {Router} from '@angular/router';
 import {FrameEventsService} from './frame-events.service';
+import {DateHelper} from "../ui/DateHelper";
 
 declare var cordova : any;
 
@@ -55,7 +56,7 @@ export class CordovaService {
     private http : Http,
     private router : Router,
     private location: Location,
-    private events : FrameEventsService
+    private events : FrameEventsService,
   ) {
 
     this.initialHref = window.location.href;
@@ -105,7 +106,7 @@ export class CordovaService {
   }
 
     /**
-     * get the last android intent
+     * get the last android/ios intent
      */
     public getLastIntent(){
       return this.lastIntent;
@@ -265,6 +266,37 @@ export class CordovaService {
                });
 
            });*/
+       }
+       if(this.isIOS()){
+           // Initialize the plugin
+           cordova.openwith.init(()=>{}, ()=>{
+               console.warn("failed to init openWith ios");
+           });
+
+           // Define your file handler
+           cordova.openwith.addHandler((intent:any)=>{
+               console.log('intent received');
+
+               console.log('  action: ' + intent.action); // type of action requested by the user
+               console.log('  exit: ' + intent.exit); // if true, you should exit the app after processing
+
+               let item = intent.items[0];
+               console.log('  type: ', item.type);   // mime type
+               console.log('  uri:  ', item.uri);     // uri to the file, probably NOT a web uri
+               console.log('  image base64 string length: ', item.base64.length)
+               //console.log('  image base64 string: ', item.base64)
+
+               // some optional additional info
+               console.log('  text: ', item.text);   // text to share alongside the item, iOS only
+               console.log('  name: ', item.name);   // suggested name of the image, iOS 11+ only
+               console.log('  utis: ', item.utis);
+               console.log('  path: ', item.path);   // path on the device, generally undefined
+               item.stream=item.base64; // convert it so it's like on android
+               //alert(item.type+" : "+item.name+" : "+item.path+" : "+item.uri);
+               item.uri=DateHelper.getDateForNewFile()+".jpg";
+               this.lastIntent=item;
+               this.observerShareContent.next({uri:item.uri,mimetype:item.type});
+           });
        }
    }
 
