@@ -1,5 +1,6 @@
 package org.edu_sharing.service.search.model;
 
+import java.io.Serializable;
 import java.util.List;
 import java.util.Map;
 
@@ -16,8 +17,8 @@ import com.sun.star.lang.IllegalArgumentException;
 
 import org.edu_sharing.service.search.SearchService.ContentType;
 
-public class SearchToken {
-	Logger logger = Logger.getLogger(SearchToken.class);
+public class SearchToken implements Serializable {
+	static Logger logger = Logger.getLogger(SearchToken.class);
 
 	SortDefinition sortDefinition;
 	

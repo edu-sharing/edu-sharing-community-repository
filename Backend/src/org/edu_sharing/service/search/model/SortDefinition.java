@@ -1,5 +1,6 @@
 package org.edu_sharing.service.search.model;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -10,11 +11,11 @@ import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.service.search.model.SortDefinition.SortDefinitionEntry;
 
 
-public class SortDefinition {
+public class SortDefinition implements Serializable {
 	
 	List<SortDefinitionEntry> sortDefinitionEntries = new ArrayList<SortDefinitionEntry>();
 	
-	public static class SortDefinitionEntry{
+	public static class SortDefinitionEntry implements Serializable{
 		String property;
 		boolean ascending;
 		
