@@ -155,7 +155,7 @@ public class ConnectorServlet extends HttpServlet  {
 			
 			if(connector != null) {
 				jsonObject.put("endpoint",connector.getUrl());
-				jsonObject.put("tool", connector.getId());
+				jsonObject.put("tool", connector.getConnectorId()!=null ? connector.getConnectorId() : connector.getId());
 				jsonObject.put("defaultCreateElement", connector.getDefaultCreateElement());
 				String mimetype = MimeTypesV2.getMimeType(properties);
 				jsonObject.put("mimetype",mimetype);
