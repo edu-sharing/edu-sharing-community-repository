@@ -123,7 +123,7 @@ public class NetworkServiceImpl implements NetworkService {
         }
     }
     private String generateId(Service service) {
-        return DigestUtils.sha1Hex(service.getUrl());
+        return DigestUtils.shaHex(service.getUrl());
     }
 
     private HashMap<String, String[]> generateProps(String id, Service service) {

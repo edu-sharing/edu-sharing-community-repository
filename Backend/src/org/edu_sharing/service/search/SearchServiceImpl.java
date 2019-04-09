@@ -614,7 +614,7 @@ public class SearchServiceImpl implements SearchService {
 	public SearchResultNodeRef searchV2(MetadataSetV2 mds, String query,Map<String,String[]> criterias,
 			SearchToken searchToken) throws Throwable {
 		MetadataQueries queries = mds.getQueries();
-		searchToken.setMetadataQuery(queries.findQuery(query),criterias);
+		searchToken.setMetadataQuery(queries,query,criterias);
 		SearchCriterias scParam = new SearchCriterias();
 		scParam.setRepositoryId(mds.getRepositoryId());
 		scParam.setMetadataSetId(mds.getId());
@@ -816,16 +816,16 @@ public class SearchServiceImpl implements SearchService {
 	public SearchResult<String> findAuthorities(AuthorityType type,String searchWord, boolean globalContext, int from, int nrOfResults,SortDefinition sort,Map<String,String> customProperties) throws InsufficientPermissionException {
 		if(globalContext)
 			checkGlobalSearchPermission();
-		HashMap<String, String> toSearch = new HashMap<String, String>();
+		List<String> searchFields = new ArrayList<>();
 
 		// fields to search in - not using username
-		toSearch.put("email", searchWord);
-		toSearch.put("firstName", searchWord);
-		toSearch.put("lastName", searchWord);
+		searchFields.add("email");
+		searchFields.add("firstName");
+		searchFields.add("lastName");
 		
 		org.edu_sharing.service.permission.PermissionService permissionService = PermissionServiceFactory.getPermissionService(null);
 
-		StringBuffer findUsersQuery =  permissionService.getFindUsersSearchString(toSearch, globalContext);
+		StringBuffer findUsersQuery =  permissionService.getFindUsersSearchString(searchWord,searchFields, globalContext);
 		StringBuffer findGroupsQuery = permissionService.getFindGroupsSearchString(searchWord, globalContext);
 		
 

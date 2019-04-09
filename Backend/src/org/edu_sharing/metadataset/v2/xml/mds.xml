@@ -652,7 +652,7 @@
 					<column>cm:modified</column>
 					<!-- currently not working (solr error) -->
 					<!-- <column>ccm:commonlicense_key</column> -->
-					<column>cm:title</column>
+					<column>cclom:title</column>
 					<column>ccm:replicationsource</column>
 				</columns>
 			</sort>
@@ -661,7 +661,7 @@
 			<list>
 				<id>search</id>
 				<columns>
-					<column>cm:title</column>
+					<column>cclom:title</column>
 					<column>cm:modified</column>
 					<column>ccm:commonlicense_key</column>
 					<column>ccm:replicationsource</column>
@@ -672,7 +672,7 @@
 			<list>
 				<id>collectionReferences</id>
 				<columns>
-					<column>cm:title</column>
+					<column>cclom:title</column>
 					<column>cm:modified</column>
 					<column>ccm:commonlicense_key</column>
 					<column>ccm:replicationsource</column>
@@ -717,9 +717,18 @@
 					<multiplejoin>OR</multiplejoin>
 				</property>
 			</query>
+			<query join="AND" id="oai">
+				<basequery>ISNULL:@ccm\:tool_category</basequery>
+				<property name="from">
+					<statement>@cm\:modified:[${value} TO MAX]</statement>
+				</property>
+				<property name="until">
+					<statement>@cm\:modified:[MIN TO ${value}]</statement>
+				</property>
+			</query>
 			<query join="AND"  id="collections">
 				<property name="ngsearchword">
-					<statement>(@sys\:node-uuid:"${value}" OR TEXT:"${value}" OR @cm\:name:"*${value}*" OR @cclom\:title:"*${value}*" OR @cclom\:general_description:"*${value}*" OR @cclom\:general_keyword:"*${value}*" OR @ccm\:taxonentry:"*${value}*" OR @ccm\:classification_keyword:"*${value}*" OR @ccm\:educationallearningresourcetype:"*${value}*" OR @ccm\:educationalcontext:"*${value}*" OR @ccm\:learninggoal:"*${value}*" OR @ccm\:guidanceteachers:"*${value}*" OR @ccm\:guidancestudents:"*${value}*")</statement>
+					<statement>(@sys\:node-uuid:"${value}" OR @cm\:name:"*${value}*" OR @cclom\:title:"*${value}*" OR @cclom\:general_description:"*${value}*" OR @cclom\:general_keyword:"*${value}*" OR @ccm\:taxonentry:"*${value}*" OR @ccm\:classification_keyword:"*${value}*" OR @ccm\:educationallearningresourcetype:"*${value}*" OR @ccm\:educationalcontext:"*${value}*" OR @ccm\:learninggoal:"*${value}*" OR @ccm\:guidanceteachers:"*${value}*" OR @ccm\:guidancestudents:"*${value}*")</statement>
 					<exactMatching>false</exactMatching>
 					<multiple>true</multiple>
 					<multiplejoin>AND</multiplejoin>

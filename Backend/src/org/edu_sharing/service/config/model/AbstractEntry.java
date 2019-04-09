@@ -10,4 +10,5 @@ public class AbstractEntry {
 	@XmlElement	public Boolean isDisabled;
 	@XmlElement public Boolean isSeperate;
 	@XmlElement public Boolean isSeperateBottom;
+	@XmlElement public Boolean onlyDesktop;
 }

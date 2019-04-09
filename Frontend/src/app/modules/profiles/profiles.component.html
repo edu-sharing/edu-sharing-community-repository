@@ -6,14 +6,23 @@
 ></main-nav>
 
 <global-progress *ngIf="globalProgress"></global-progress>
+<div class="profile-bg" *ngIf="user">
+  <div class="avatar-default"></div>
+  <!--
+  <img *ngIf="!edit && !avatarFile && user.profile.avatar" [src]="user.profile.avatar+'&crop=true&width=1000&height=1000'" alt="">
+  <img *ngIf="edit && !avatarFile && userEdit.profile.avatar" [src]="user.profile.avatar+'&crop=true&width=1000&height=1000'" alt="">
+  <img *ngIf="avatarFile" [src]="avatarImage" alt="">
+  -->
+  <div class="profile-gradient"></div>
+</div>
 <div class="profiles" *ngIf="user">
   <div class="main">
   <div class="top" style.background-color="{{ (edit ? userEdit : user) | authorityColor }}">
     <div class="profile-gradient"></div>
-    <img *ngIf="!edit && user.profile.avatar" class="blurred-image" [src]="user.profile.avatar+'&crop=true&width=400&height=400'">
-    <img *ngIf="edit && !avatarFile && userEdit.profile.avatar" class="blurred-image" [src]="user.profile.avatar+'&crop=true&width=400&height=400'">
-    <img *ngIf="edit && avatarFile" class="blurred-image" [src]="avatarImage">
-    <a class="edit clickable" *ngIf="isMe && !edit && editProfile" (click)="beginEdit()"><i class="material-icons">edit</i><span>{{'PROFILES.EDIT' | translate}}</span></a>
+    <img *ngIf="!edit && user.profile.avatar" class="blurred-image" [src]="user.profile.avatar+'&crop=true&width=400&height=400'" alt="">
+    <img *ngIf="edit && !avatarFile && userEdit.profile.avatar" class="blurred-image" [src]="user.profile.avatar+'&crop=true&width=400&height=400'" alt="">
+    <img *ngIf="edit && avatarFile" class="blurred-image" [src]="avatarImage" alt="">
+    <a class="edit clickable" *ngIf="isMe && !edit && !editAbout && editProfile" (click)="beginEdit()"><i class="material-icons">edit</i><span>{{'PROFILES.EDIT' | translate}}</span></a>
     <a class="edit clickable" *ngIf="isMe && edit" (click)="edit=false"><i icon iconId="close"></i><span>{{'PROFILES.CANCEL_EDIT' | translate}}</span></a>
     <user-avatar *ngIf="!edit"
      [user]="user"
@@ -34,6 +43,9 @@
     <div *ngIf="!edit">
       <div class="name">{{user | authorityName}}</div>
       <div class="mail"><a href="mailto:{{user.profile.email}}">{{user.profile.email}}</a></div>
+      <!--<div class="authorityName">-->
+        <!--<div>{{'USER.authorityName' | translate}}: {{ user.authorityName }}</div>-->
+      <!--</div>-->
     </div>
     <div *ngIf="edit">
       <input type="text" [(ngModel)]="userEdit.profile.firstName" placeholder="{{'USER.firstName' | translate}}">
@@ -43,7 +55,7 @@
       </div>
     </div>
     <div class="save">
-      <div *ngIf="edit" class="btn-flat waves-effect waves-light" (click)="saveEdits()">{{'SAVE' | translate}}</div>
+      <div tabindex="0" *ngIf="edit" class="btn-flat btn-shadow waves-effect waves-light" (click)="saveEdits()" (keyup.enter)="saveEdits()">{{'SAVE' | translate}}</div>
     </div>
   </div>
   <div class="statsBackground">
@@ -76,22 +88,25 @@
   </div>
   <div class="about">
     <i icon iconId="edu-quotes" class="quotes">quotes</i>
-    <div *ngIf="edit">
+    <div class="about-buttons" *ngIf="isMe && editProfile">
+      <a class="edit clickable" *ngIf="!editAbout && !edit" (click)="aboutEdit()">{{'PROFILES.EDIT' | translate}}</a>
+      <a class="edit clickable" *ngIf="editAbout" (click)="editAbout=false">{{'PROFILES.CANCEL_EDIT' | translate}}</a>
+    </div>
+    <div *ngIf="editAbout">
       <label for="about">{{'PROFILES.ABOUT_LABEL' | translate}}</label>
       <textarea id="about" class="materialize-textarea" [(ngModel)]="userEdit.profile.about"></textarea>
+      <div class="change-buttons">
+        <a tabindex="0" (keyup.enter)="saveEdits()" (click)="saveEdits()" class="waves-effect waves-light btn">{{'SAVE' | translate}}</a>
+      </div>
     </div>
-    <div *ngIf="!edit">
+    <div *ngIf="!editAbout">
       <div *ngIf="user.profile.about" class="profile">{{user.profile.about}}</div>
       <div *ngIf="!user.profile.about" class="empty">{{'PROFILES.NO_ABOUT'+(isMe ? "_ME" : "") | translate}}</div>
     </div>
   </div>
-  <div class="authorityName" *ngIf="!edit">
-    <label>{{'USER.authorityName' | translate}}</label>
-    <div>{{ user.authorityName }}</div>
-  </div>
-  <div class="changePassword" *ngIf="edit">
+  <div *ngIf="isMe && editProfile" class="changePassword">
     <div class="toggle">
-      <div class="clickable" (click)="changePassword=!changePassword">
+      <div tabindex="0" class="clickable" (click)="editPassword()" (keyup.enter)="changePassword=!changePassword">
         <i *ngIf="!changePassword" class="material-icons">lock</i>
         <i *ngIf="changePassword" class="material-icons">lock_open</i>
         {{'CHANGE_PASSWORD' | translate}}
@@ -101,10 +116,14 @@
     </div>
     <div *ngIf="changePassword" class="password" [@overlay]="changePassword">
       <label for="oldPassword">{{'OLD_PASSWORD' | translate }}</label>
-      <input type="password" id="oldPassword" name="oldPassword" [(ngModel)]="oldPassword" required="true">
+      <input-password [hint]="false" [displayStrength]="false" [(value)]="oldPassword" required="true" id="oldPassword"></input-password>
+      <!--<input type="password" id="oldPassword" name="oldPassword" [(ngModel)]="" required="true">-->
       <label for="password">{{'NEW_PASSWORD' | translate }}</label>
-      <input-password [hint]="true" [displayStrength]="true" [(value)]="password" required="true" id="password"></input-password>
-    </div>
+      <input-password #newPassword [hint]="true" [displayStrength]="true" [(value)]="password" required="true" id="password"></input-password>
+      <div class="change-buttons">
+        <a tabindex="0" [class.disabled]="!oldPassword.trim() || newPassword.passwordStrength == 'weak'"  (keyup.enter)="savePassword()" (click)="savePassword()" class="waves-effect waves-light btn">{{'SAVE' | translate}}</a>
+      </div>
+     </div>
   </div>
   </div>
 </div>

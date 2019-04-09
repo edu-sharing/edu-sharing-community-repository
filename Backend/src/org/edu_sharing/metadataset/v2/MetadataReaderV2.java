@@ -1,5 +1,7 @@
 package org.edu_sharing.metadataset.v2;
 
+import org.apache.commons.lang3.ObjectUtils;
+import org.apache.commons.lang3.SerializationUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
 import org.edu_sharing.metadataset.v2.MetadataWidget.Condition.CONDITION_TYPE;
@@ -61,7 +63,7 @@ public class MetadataReaderV2 {
 	    try {
             String id = appId.getAppId() + "_" + mdsName + "_" + locale;
             if (mdsCache.containsKey(id) && !"true".equalsIgnoreCase(ApplicationInfoList.getHomeRepository().getDevmode()))
-                return mdsCache.get(id);
+                return SerializationUtils.clone(mdsCache.get(id));
             reader = new MetadataReaderV2(mdsNameDefault + ".xml", locale);
             mds = reader.getMetadatasetForFile(mdsNameDefault);
             mds.setRepositoryId(appId.getAppId());
@@ -115,7 +117,7 @@ public class MetadataReaderV2 {
 		NodeList queriesNode = (NodeList) xpath.evaluate("/metadataset/queries/query", doc, XPathConstants.NODESET);
 		List<MetadataQuery> queries=new ArrayList<>();
 		for(int i=0;i<queriesNode.getLength();i++){
-			MetadataQuery query=new MetadataQuery(result);
+			MetadataQuery query=new MetadataQuery();
 			Node node=queriesNode.item(i);
 			NamedNodeMap nodeMap = node.getAttributes();
 			query.setId(nodeMap.getNamedItem("id").getTextContent());
@@ -192,7 +194,7 @@ public class MetadataReaderV2 {
 			prefix+="valuespaces/";
 		InputStream is=MetadataReaderV2.class.getResourceAsStream(prefix+name);
 		if(is==null)
-			throw new IOException("file "+name+" not found");
+			throw new IOException("file "+name+" not found: "+prefix+name);
 		return is;
 	}
 	

@@ -335,11 +335,10 @@ export class UIHelper{
         UIHelper.addToCollection(collectionService,router,toast,collection,nodes,callback,position+1,true);
       });
   }
-  static openConnector(connector:RestConnectorsService,events:FrameEventsService,toast:Toast,node : Node,connectorList:ConnectorList=connector.getCurrentList(),type : Filetype=null,win : any = null,connectorType : Connector = null,newWindow=true){
+  static openConnector(connector:RestConnectorsService,events:FrameEventsService,toast:Toast,node : Node,type : Filetype=null,win : any = null,connectorType : Connector = null,newWindow=true){
     if(connectorType==null){
-      connectorType=connector.connectorSupportsEdit(node,connectorList);
+      connectorType=connector.connectorSupportsEdit(node);
     }
-    console.log(connectorList);
     let isCordova=connector.getRestConnector().getCordovaService().isRunningCordova();
     if(win==null && newWindow) {
         win = UIHelper.getNewWindow(connector.getRestConnector());
@@ -351,7 +350,7 @@ export class UIHelper{
         win.close();
         return;
       }
-      connector.generateToolUrl(connectorList,connectorType,type,node).subscribe((url:string)=>{
+      connector.generateToolUrl(connectorType,type,node).subscribe((url:string)=>{
           if(win) {
               win.location.href = url;
               console.log(win);
@@ -412,26 +411,70 @@ export class UIHelper{
      * @param {y} number
      * @param {smoothness} lower numbers indicate less smoothness, higher more smoothness
      */
-    static scrollSmoothElement(y: number=0,element:Element,smoothness=1) {
-        let mode=element.scrollTop>y;
-        let divider=3*smoothness;
-        let minSpeed=7/smoothness;
-        let lastY=y;
-        let interval=setInterval(()=>{
-            let yDiff=element.scrollTop-lastY;
-            lastY=element.scrollTop;
-            if(element.scrollTop>y && mode && yDiff){
-                element.scrollTop-=Math.max((element.scrollTop-y)/divider,minSpeed);
+    static scrollSmoothElement(pos: number=0,element:Element,smoothness=1,axis='y') {
+        return new Promise((resolve)=> {
+            let currentPos = axis == 'x' ? element.scrollLeft : element.scrollTop;
+            if(element.getAttribute('data-is-scrolling')=='true'){
+                console.log("is scrolling, skip");
+                return;
             }
-            else if(element.scrollTop<y && !mode && yDiff){
-                element.scrollTop+=Math.max((y-element.scrollTop)/divider,minSpeed);
+            console.log(currentPos, pos);
+            let mode = currentPos > pos;
+            let divider = 3 * smoothness;
+            let minSpeed = 7 / smoothness;
+            let lastPos = pos;
+            let maxPos = axis=='x' ? element.scrollWidth - element.clientWidth : element.scrollHeight - element.clientHeight;
+            let limitReached=false;
+            if(mode && pos<=0) {
+                pos = 0;
+                limitReached=true;
             }
-            else {
-                clearInterval(interval);
+            if(!mode && pos>=maxPos) {
+                pos = maxPos;
+                limitReached=true;
             }
-        },16);
+            let interval = setInterval(() => {
+                let currentPos = axis == 'x' ? element.scrollLeft : element.scrollTop;
+                let posDiff = currentPos - lastPos;
+                lastPos = currentPos;
+                let finished=true;
+                if (currentPos > pos) {
+                    currentPos -= Math.max((currentPos - pos) / divider, minSpeed);
+                    finished=currentPos<=pos;
+                }
+                else if (currentPos < pos && !mode) {
+                    currentPos += Math.max((pos - currentPos) / divider, minSpeed);
+                    finished=currentPos>=pos;
+                }
+                if(finished) {
+                    clearInterval(interval);
+                    element.removeAttribute('data-is-scrolling');
+                    resolve();
+                }
+                if (axis == 'x')
+                    element.scrollLeft = currentPos;
+                else
+                    element.scrollTop = currentPos;
+            }, 16);
+            element.setAttribute('data-is-scrolling','true');
+        });
     }
-  static setFocusOnCard() {
+
+    /**
+     * smoothly scroll to the given child inside an element (The child will be placed around the first 1/3 of the parent's top)
+     * @param child
+     * @param element
+     * @param smoothness
+     */
+    static scrollSmoothElementToChild(child:Element,element:Element,smoothness=1) {
+        // y equals to the top of the child + any scrolling of the parent - the top of the parent
+        let y=child.getBoundingClientRect().top+element.scrollTop-element.getBoundingClientRect().top;
+        // move the focused element to 1/3 at the top of the container
+        y+=child.getBoundingClientRect().height/2 - element.getBoundingClientRect().height/3;
+        this.scrollSmoothElement(y,element,smoothness);
+    }
+
+    static setFocusOnCard() {
     let elements=document.getElementsByClassName("card")[0].getElementsByTagName("*");
     this.focusElements(elements);
   }
@@ -467,7 +510,14 @@ export class UIHelper{
   static goToDefaultLocation(router: Router,configService : ConfigurationService,extras:NavigationExtras={}) {
       return router.navigate([UIConstants.ROUTER_PREFIX + configService.instant("loginDefaultLocation","workspace")],extras);
   }
-
+    static openUrl(url:string, cordova: CordovaService) {
+        if(cordova.isRunningCordova()){
+            return cordova.openInAppBrowser(url);
+        }
+        else {
+            window.location.href=url;
+        }
+    }
     static openBlankWindow(url:string, cordova: CordovaService) {
       if(cordova.isRunningCordova()){
         return cordova.openInAppBrowser(url);

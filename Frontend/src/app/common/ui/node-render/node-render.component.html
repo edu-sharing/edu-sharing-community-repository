@@ -2,7 +2,7 @@
 <main-nav #mainNav [currentScope]="'render'"></main-nav>
 <div class="topBar fixed scrollWithBanner" *ngIf="showTopBar">
   <div class="displayBar">
-    <span class="clickable" title="{{'BACK' | translate}}" (click)="close()" (keypress)="($event.which === 13)?close():0" tabindex="0"><i icon iconId="keyboard_arrow_left"></i> {{'BACK' | translate}}</span>
+    <span class="clickable" title="{{'BACK' | translate}}" (click)="close()" (keypress)="($event.which === 13)?close():0" tabindex="0"><i icon iconId="keyboard_arrow_left"></i> <span class="render-back">{{'BACK' | translate}}</span></span>
     <span *ngIf="_node" class="clickable showDetails" (click)="showDetails()" (keypress)="($event.which === 13)?showDetails():0" tabindex="0" title="{{'GOTO' | translate}} {{'INFO' | translate}}"><i icon iconId="info_outline"></i> <span class="uppercase hidemobile">{{'INFO' | translate}}</span></span>
     <span>
     <actionbar class="actionbarFrame"
@@ -26,13 +26,13 @@
 <div class="alignWithBanner">
   <div id="nodeRenderContentWrapper">
     <div *ngIf="sequence" id="sequence" #sequencediv>
-        <div class="wrapperouter clickable" tabindex="0" (click)="node=sequenceParent" (keypress)="($event.which === 13)?node=sequenceParent:''">
+        <div class="wrapperouter clickable" tabindex="0" (click)="node=sequenceParent" (keyup.enter)="node=sequenceParent">
           <span class="itemTitle">{{getNodeName(sequenceParent)}}</span>
           <div class="wrapper" [class.selected]="_nodeId==sequenceParent.ref.id">
             <img src="{{sequenceParent.preview.url}}&crop=true&width=100&height=75">
           </div>
         </div>
-        <div *ngFor="let item of sequence.nodes" tabindex="0" class="wrapperouter clickable" (click)="node=item" (keypress)="($event.which === 13)?node=sequenceParent:''">
+        <div *ngFor="let item of sequence.nodes" tabindex="0" class="wrapperouter clickable" (click)="node=item" (keyup.enter)="node=sequenceParent">
           <span class="itemTitle">{{getNodeName(item)}}</span>
           <div class="wrapper" [class.selected]="_nodeId==item.ref.id">
             <img src="{{item.preview.url}}&crop=true&width=100&height=75">

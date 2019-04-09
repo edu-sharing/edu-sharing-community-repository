@@ -104,4 +104,13 @@ public class NodeServiceHelper {
 				getProperty(ref,CCConstants.CCM_PROP_EDITOR_TYPE)
 		);
 	}
+
+	public static String renameNode(String oldName,int number){
+		String[] split=oldName.split("\\.");
+		int i=split.length-2;
+		i=Math.max(0, i);
+		split[i]+=" - "+number;
+		return String.join(".",split);
+	}
+
 }

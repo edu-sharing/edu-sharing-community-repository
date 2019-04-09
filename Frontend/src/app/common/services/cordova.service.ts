@@ -8,6 +8,7 @@ import {Location} from '@angular/common';
 import {UIConstants} from '../ui/ui-constants';
 import {Router} from '@angular/router';
 import {FrameEventsService} from './frame-events.service';
+import {DateHelper} from "../ui/DateHelper";
 import {HttpClient} from '@angular/common/http';
 
 declare var cordova : any;
@@ -56,7 +57,7 @@ export class CordovaService {
     private router : Router,
     private http : HttpClient,
     private location: Location,
-    private events : FrameEventsService
+    private events : FrameEventsService,
   ) {
 
     this.initialHref = window.location.href;
@@ -106,7 +107,7 @@ export class CordovaService {
   }
 
     /**
-     * get the last android intent
+     * get the last android/ios intent
      */
     public getLastIntent(){
       return this.lastIntent;
@@ -274,6 +275,37 @@ export class CordovaService {
                });
 
            });*/
+       }
+       if(this.isIOS()){
+           // Initialize the plugin
+           cordova.openwith.init(()=>{}, ()=>{
+               console.warn("failed to init openWith ios");
+           });
+
+           // Define your file handler
+           cordova.openwith.addHandler((intent:any)=>{
+               console.log('intent received');
+
+               console.log('  action: ' + intent.action); // type of action requested by the user
+               console.log('  exit: ' + intent.exit); // if true, you should exit the app after processing
+
+               let item = intent.items[0];
+               console.log('  type: ', item.type);   // mime type
+               console.log('  uri:  ', item.uri);     // uri to the file, probably NOT a web uri
+               console.log('  image base64 string length: ', item.base64.length)
+               //console.log('  image base64 string: ', item.base64)
+
+               // some optional additional info
+               console.log('  text: ', item.text);   // text to share alongside the item, iOS only
+               console.log('  name: ', item.name);   // suggested name of the image, iOS 11+ only
+               console.log('  utis: ', item.utis);
+               console.log('  path: ', item.path);   // path on the device, generally undefined
+               item.stream=item.base64; // convert it so it's like on android
+               //alert(item.type+" : "+item.name+" : "+item.path+" : "+item.uri);
+               item.uri=DateHelper.getDateForNewFile()+".jpg";
+               this.lastIntent=item;
+               this.observerShareContent.next({uri:item.uri,mimetype:item.type});
+           });
        }
    }
 
@@ -850,6 +882,7 @@ export class CordovaService {
 
    downloadContent(downloadURL:string, fileName:string, winCallback:Function=null, failCallback:Function=null) : void {
      let status=0;
+     let resultPath="";
      try {
        this.makeSurePermission("WRITE_EXTERNAL_STORAGE", (win: any) => {
 
@@ -868,7 +901,7 @@ export class CordovaService {
 
            // iOS: following redirects works automatically - so go direct
            console.log("downloadContent IOS URL: " + downloadURL);
-           this.startContentDownload(downloadURL, fileName, ()=>status=1, ()=>status=-1);
+           this.startContentDownload(downloadURL, fileName, (filePath:string)=>{status=1;resultPath=filePath;}, ()=>status=-1);
 
          } else {
 
@@ -876,7 +909,10 @@ export class CordovaService {
            /*console.log("resolving redirects for downloadContent URL ANDROID: " + downloadURL);
            (window as any).CordovaHttpPlugin.head(downloadURL, {}, {}, (response: any) => {
              console.log("200 NOT A REDIRECT URL - use original: " + downloadURL);*/
-             this.startContentDownload(downloadURL, fileName,()=>status=1, ()=>status=-1);
+             this.startContentDownload(downloadURL, fileName,(filePath:string)=>{
+                 resultPath=filePath;
+                 status=1;
+             }, ()=>status=-1);
            /*}, (response: any) => {
              if (response.status == 302) {
                let redirectURL = decodeURIComponent(response.headers.Location);
@@ -902,8 +938,14 @@ export class CordovaService {
        if(status==0)
          return;
        clearInterval(interval);
-       if(status==1 && winCallback)
-         winCallback();
+       if(status==1 && winCallback) {
+           if(this.isAndroid()) {
+               // suggest user to open the file
+               console.log("android, openWith", resultPath);
+               (window as any).plugins.intent.showOpenWith(resultPath, () => {}, () => {});
+           }
+           winCallback();
+       }
        if(status==-1 && failCallback)
          failCallback();
      },100);
@@ -914,12 +956,13 @@ export class CordovaService {
      // set path to store on device
      let targetPath = (window as any).cordova.file.externalRootDirectory + "Download/";
      if (this.isIOS()) targetPath = (window as any).cordova.file.documentsDirectory;
-     let filePath = encodeURI(targetPath + fileName);
-    console.log("target path: "+filePath);
+       let localPath = targetPath + fileName;
+       let filePath = encodeURI(localPath);
+    console.log("target path: "+filePath+" (local "+localPath+")");
      // iOS
      let fileTransfer:any = new (window as any).FileTransfer();
      fileTransfer.download(downloadURL, filePath, (result:any)=>{
-         winCallback(filePath);
+         winCallback(localPath);
      }, (err:any) => {
          console.log("FAIL startContentDownload");
          failCallback("FAIL startContentDownload", err);
@@ -927,7 +970,7 @@ export class CordovaService {
    }
 
    openInAppBrowser(url:string){
-       let win:any=window.open(url,"_blank","location=no,zoom=no");
+       let win:any=cordova.InAppBrowser.open(url,"_blank","toolbar=yes,hideurlbar=yes,hidenavigationbuttons=yes,zoom=no");
        win.addEventListener( "loadstop", ()=> {
            // register iframe handling
            win.executeScript({code:`

@@ -311,7 +311,12 @@ export class SearchComponent {
     this.innerWidth = this.winRef.getNativeWindow().innerWidth;
     //this.autocompletesArray = this.autocompletes.toArray();
   }
-
+  public isMobileHeight(){
+    return window.innerHeight<UIConstants.MOBILE_HEIGHT;
+  }
+  public isMobileWidth(){
+    return window.innerWidth<UIConstants.MOBILE_WIDTH;
+  }
   isMdsLoading(){
     return !this.mdsRef || this.mdsRef.isLoading;
   }
@@ -332,6 +337,10 @@ export class SearchComponent {
 
 
   setSidenavSettings() {
+    if(this.addToCollection){
+        this.searchService.sidenavOpened = false;
+        return false;
+    }
     if(this.searchService.sidenavSet)
       return false;
     console.log('update sidenav');
@@ -571,9 +580,12 @@ export class SearchComponent {
   private checkFail() {
     this.searchFail=this.searchService.searchResult.length<1 && this.searchService.searchResultCollections.length<1;
   }
-
-    private updateSort() {
+    private updateSortMds(){
+        // when mds is not ready, we can't update just now
+        if(this.currentMdsSet==null)
+            return;
         let sort=MdsHelper.getSortInfo(this.currentMdsSet,'search');
+        console.log(sort);
         if(sort && sort.columns && sort.columns.length) {
             this.searchService.sort.materialsColumns = [];
             for (let column of sort.columns) {
@@ -581,15 +593,19 @@ export class SearchComponent {
                 item.mode = column.mode;
                 this.searchService.sort.materialsColumns.push(item);
             }
+            console.log(this.searchService.sort,sort,sort.columns.length);
         }
+        return sort;
+    }
+    private updateSort() {
         let state=this.currentRepository+":"+this.mdsId;
         console.log(state);
+        let sort=this.updateSortMds();
         // do not update state if current state is valid (otherwise sort info is lost when comming back from rendering)
-        if(state==this.searchService.sort.state)
-          return;
+        // exception: if there is no state at all, refresh it with the default
+        if(state==this.searchService.sort.state && !(sort && !this.searchService.sort.materialsSortBy))
+            return;
         this.searchService.sort.state = state;
-        this.searchService.sort.materialsColumns = null;
-        this.searchService.sort.materialsSortBy = null;
         if(sort) {
             this.searchService.sort.materialsSortBy = sort.default.sortBy;
             this.searchService.sort.materialsSortAscending = sort.default.sortAscending;
@@ -599,8 +615,9 @@ export class SearchComponent {
       this.searchService.columns=MdsHelper.getColumns(this.currentMdsSet,'search');
   }
   sortMaterials(sort:any){
-      this.searchService.sort.materialsSortBy=sort.name;
-      this.searchService.sort.materialsSortAscending=sort.ascending;
+    console.log(sort);
+      this.searchService.sort.materialsSortBy=sort.name || sort.sortBy;
+      this.searchService.sort.materialsSortAscending=sort.ascending || sort.sortAscending;
       this.routeSearch();
   }
   private importNode(node: Node) {
@@ -792,6 +809,16 @@ export class SearchComponent {
     this.searchService.reinit=true;
   }
   private prepare(param:any) {
+    if(this.setSidenavSettings()) {
+        // auto, never, always
+        let sidenavMode = this.config.instant("searchSidenavMode","never");
+        if (sidenavMode == "never") {
+            this.searchService.sidenavOpened = false;
+        }
+        if (sidenavMode == "always") {
+            this.searchService.sidenavOpened = true;
+        }
+    }
     this.connector.isLoggedIn().subscribe((data:LoginResult)=> {
       this.toolPermissions=data.toolPermissions;
       if (data.isValidLogin && data.currentScope != null) {
@@ -877,7 +904,6 @@ export class SearchComponent {
     let sortAscending=[false,false];
 
     // order set by user and order is not of type score (which would be the default mode)
-    console.log(this.searchService.sort);
     if(this.searchService.sort.materialsSortBy && this.searchService.sort.materialsSortBy!=RestConstants.LUCENE_SCORE){
         sortBy=[this.searchService.sort.materialsSortBy];
         sortAscending=[this.searchService.sort.materialsSortAscending];

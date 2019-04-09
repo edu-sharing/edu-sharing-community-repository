@@ -92,7 +92,7 @@
     <a *ngIf="allowBinary && cordova.isRunningCordova()" class="collection-item" tabindex="0" (keyup.enter)="showAddDesktop=false;showUploadSelect=true" (click)="showAddDesktop=false;openCamera()"><i icon iconId="camera_alt"></i> {{ 'WORKSPACE.ADD_CAMERA' | translate}}</a>
     <a *ngIf="!allowBinary" class="collection-item" tabindex="0" (keyup.enter)="showAddDesktop=false;createEmptyNode()" (click)="showAddDesktop=false;createEmptyNode()"><i icon iconId="description"></i> {{ 'WORKSPACE.ADD_EMPTY_OBJECT' | translate}}</a>
     <a class="collection-item" tabindex="0" (keyup.enter)="showAddDesktop=false;addFolderName=''" (click)="showAddDesktop=false;addFolderName=''"><i icon iconId="create_new_folder"></i> {{ 'WORKSPACE.ADD_FOLDER' | translate}}</a>
-    <a *ngFor="let connector of (connectorList && allowBinary) ? connectorList.connectors : null;let i=index"
+    <a *ngFor="let connector of (connectorList && allowBinary) ? getConnectors() : null;let i=index"
        class="collection-item"
        [class.collection-item-seperate]="!i"
        tabindex="0"

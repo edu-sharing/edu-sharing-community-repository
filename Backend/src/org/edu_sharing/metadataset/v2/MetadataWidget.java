@@ -29,7 +29,8 @@ public class MetadataWidget extends MetadataTranslatable{
 			"multivalueFixedBadges",
 			"multivalueSuggestBadges",
 			"multivalueGroup",
-			"multioption"
+			"multioption",
+			"multivalueCombined"
 	};
 
 	public static class Condition implements Serializable{

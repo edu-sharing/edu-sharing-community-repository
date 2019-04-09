@@ -72,8 +72,8 @@ public class MetadataServlet extends HttpServlet {
 			props.put(ApplicationInfo.KEY_WSPATH,appInfo.getWspath());
 			props.put(ApplicationInfo.KEY_WSHOTPATH,appInfo.getWshotpath());
 			props.put(ApplicationInfo.KEY_ALFRESCOCONTEXT,appInfo.getAlfrescocontext());
-			props.put(ApplicationInfo.KEY_SEARCHCLASS,"org.edu_sharing.repository.server.MCAlfrescoWSClient");
-			props.put(ApplicationInfo.KEY_AUTHENTICATIONTOOLCLASS,"org.edu_sharing.repository.server.AuthenticationToolWS");
+			props.put(ApplicationInfo.KEY_SEARCHCLASS,"org.edu_sharing.repository.server.MCAlfrescoAPIClient");
+			props.put(ApplicationInfo.KEY_AUTHENTICATIONTOOLCLASS,"org.edu_sharing.repository.server.AuthenticationToolAPI");
 			props.put(ApplicationInfo.KEY_CONTENTURL,"");
 			props.put(ApplicationInfo.KEY_IS_HOME_NODE,"false");
 			props.put(ApplicationInfo.KEY_APPCAPTION,appInfo.getAppCaption());

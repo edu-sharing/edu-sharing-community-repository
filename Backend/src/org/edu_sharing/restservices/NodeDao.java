@@ -434,14 +434,6 @@ public class NodeDao {
         return NodeDao.convertAlfrescoNodeRef(repoDao,NodeDao.sortAlfrescoRefs(NodeDao.convertApiNodeRef(refList), filter, sortDefinition));
     }
 
-    private String renameNode(String oldName,int number){
-		String[] split=oldName.split("\\.");
-		int i=split.length-2;
-		i=Math.max(0, i);
-		split[i]+=" - "+number;
-		return String.join(".",split);
-	}
-	
 	public NodeDao createChild(String type, List<String> aspects,
 			HashMap<String, String[]> properties,boolean renameIfExists) throws DAOException {
 		return this.createChild(type, aspects, properties, renameIfExists, null);
@@ -470,7 +462,7 @@ public class NodeDao {
 					break;
 				}catch(DuplicateChildNodeNameException e){
 					if(renameIfExists){
-						props.put(CCConstants.CM_NAME, new String[]{renameNode(originalName,i)});
+						props.put(CCConstants.CM_NAME, new String[]{NodeServiceHelper.renameNode(originalName,i)});
 						i++;
 						continue;
 					}
@@ -862,7 +854,9 @@ public class NodeDao {
 							if(tmpPerms == null){
 								tmpPerms = new ArrayList<String>();
 							}
-							tmpPerms.add(ace.getPermission());
+							// do not duplicate existing permissions
+							if(!tmpPerms.contains(ace.getPermission()))
+								tmpPerms.add(ace.getPermission());
 							authPermInherited.put(authority, tmpPerms);
 								
 						} else {
@@ -870,7 +864,9 @@ public class NodeDao {
 							if(tmpPerms == null){
 								tmpPerms = new ArrayList<String>();
 							}
-							tmpPerms.add(ace.getPermission());
+							// do not duplicate existing permissions
+							if(!tmpPerms.contains(ace.getPermission()))
+								tmpPerms.add(ace.getPermission());
 							authPerm.put(authority, tmpPerms);
 						}
 					}
@@ -1296,12 +1292,10 @@ public class NodeDao {
 			return new HashMap<String, String[]>();
 		}
 
-		ValueTool vt = new ValueTool();
-		
 		HashMap<String,String[]> properties = new HashMap<String,String[]>();
 		for (Entry<String, Object> entry : props.entrySet()) {
 
-			List<String> values = getPropertyValues(vt, entry.getValue());
+			List<String> values = getPropertyValues(entry.getValue());
 
 			String shortPropName = NameSpaceTool.transformToShortQName(entry.getKey());
 			
@@ -1313,7 +1307,7 @@ public class NodeDao {
 					continue;
 				}
 				if(props.containsKey(entry.getKey()+CCConstants.LONG_DATE_SUFFIX)){
-					values = getPropertyValues(vt, props.get(entry.getKey()+CCConstants.LONG_DATE_SUFFIX));
+					values = getPropertyValues(props.get(entry.getKey()+CCConstants.LONG_DATE_SUFFIX));
 					properties.put(shortPropName, values.toArray(new String[values.size()]));
 				}
 				else{
@@ -1326,10 +1320,10 @@ public class NodeDao {
 		return properties;
 	}
 
-	private List<String> getPropertyValues(ValueTool vt,Object value) {
+	private List<String> getPropertyValues(Object value) {
 		List<String> values = new ArrayList<String>();
 		if (value != null ){
-			for (String mv : vt.getMultivalue(value.toString())) {
+			for (String mv : ValueTool.getMultivalue(value.toString())) {
 				values.add(mv);
 			}
 		}

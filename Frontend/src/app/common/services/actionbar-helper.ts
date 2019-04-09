@@ -41,11 +41,12 @@ export class ActionbarHelperService{
                 if(item.reference)
                     item = item.reference;
                 // if at least one is allowed -> allow download (download servlet will later filter invalid files)
-                isAllowed=isAllowed || list && item.downloadUrl && item.properties && !item.properties[RestConstants.CCM_PROP_IO_WWWURL];
+                isAllowed=isAllowed || list && item.downloadUrl!=null && item.properties && !item.properties[RestConstants.CCM_PROP_IO_WWWURL];
             }
             return isAllowed;
         }
         option.isEnabled=option.enabledCallback(null);
+        console.log(option,option.enabledCallback(null));
       }
     }
     if(type=='ADD_NODE_STORE'){
@@ -61,6 +62,7 @@ export class ActionbarHelperService{
       if (nodes && nodes.length==1 && NodeHelper.allFolders(nodes)) {
           option = new OptionItem("WORKSPACE.OPTION.TEMPLATE", "assignment_turned_in", callback);
           option.isEnabled = NodeHelper.getNodesRight(nodes, RestConstants.ACCESS_WRITE);
+          option.onlyDesktop = true;
       }
     }
     if(type=='CREATE_VARIANT') {

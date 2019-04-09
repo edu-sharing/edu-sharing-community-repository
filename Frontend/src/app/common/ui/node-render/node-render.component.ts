@@ -54,6 +54,7 @@ export class NodeRenderComponent implements EventListener{
 
 
   public isLoading=true;
+  public isBuildingPage=false;
   /**
    * Show a bar at the top with the node name or not
    * @type {boolean}
@@ -288,8 +289,10 @@ export class NodeRenderComponent implements EventListener{
     this.node=this._nodeId;
   }
   private loadNode() {
-    if(!this._node)
-      return;
+    if(!this._node) {
+        this.isBuildingPage = false;
+        return;
+    }
 
     let input=this.temporaryStorageService.get(TemporaryStorageService.NODE_RENDER_PARAMETER_OPTIONS);
     if(!input) input=[];
@@ -298,7 +301,7 @@ export class NodeRenderComponent implements EventListener{
       opt.push(o);
     }
     this.options=opt;
-    let download=new OptionItem('DOWNLOAD','cloud_download',()=>this.downloadCurrentNode());
+    let download=new OptionItem('WORKSPACE.OPTION.DOWNLOAD','cloud_download',()=>this.downloadCurrentNode());
     download.isEnabled=this._node.downloadUrl!=null;
     download.showAsAction=true;
     if(this.isCollectionRef()){
@@ -315,22 +318,19 @@ export class NodeRenderComponent implements EventListener{
       return;
     }
     this.addDownloadButton(download);
-    this.nodeApi.getNodeChildobjects(this.sequenceParent.ref.id,this.repository).subscribe((data:NodeList)=>{
-        if(data.nodes.length > 0 || this._node.aspects.indexOf(RestConstants.CCM_ASPECT_IO_CHILDOBJECT) != -1) {
-          this.downloadButton.name = 'DOWNLOAD_ALL';
-        }
-    });
-    this.similarNodes=null;
-    this.searchApi.searchFingerprint(this._node.ref.id).subscribe((nodes)=>{
-        this.similarNodes=nodes.nodes;
-    });
   }
   private loadRenderData(){
+      this.isLoading=true;
+    if(this.isBuildingPage){
+        setTimeout(()=>this.loadRenderData(),50);
+        return;
+    }
     let parameters={
       showDownloadButton:false,
       showDownloadAdvice:!this.isOpenable
     };
     this._node=null;
+    this.isBuildingPage=true;
     this.nodeApi.getNodeRenderSnippet(this._nodeId,this.version ? this.version : "-1",parameters,this.repository)
         .subscribe((data:any)=>{
             if (!data.detailsSnippet) {
@@ -366,10 +366,10 @@ export class NodeRenderComponent implements EventListener{
     }
   private addComments(){
       jQuery('.edusharing_rendering_metadata_header').append(`
-      <div class="nodeDetails">
-        <div class="item" tabindex="0" onclick="window.nodeRenderComponentRef.component.showComments()" onkeypress="(event.keyCode==13)?window.nodeRenderComponentRef.component.showComments():0">
-          <i class="material-icons">message</i><div>`+this._node.commentCount+` <span>`+this.translate.instant("COMMENTS_"+(this._node.commentCount==1 ? 'SINGLE' : 'MULTIPLE'))+`</span></div>
-        </div>
+      <div class="node-comments">
+          <div class="item" tabindex="0" onclick="window.nodeRenderComponentRef.component.showComments()" onkeypress="(event.keyCode==13)?window.nodeRenderComponentRef.component.showComments():0">
+            <i class="material-icons">message</i><div>`+this._node.commentCount+` <span>`+this.translate.instant("COMMENTS_"+(this._node.commentCount==1 ? 'SINGLE' : 'MULTIPLE'))+`</span></div>
+          </div>
       </div>
     `);
       let commentInterval=setInterval(()=> {
@@ -425,7 +425,7 @@ export class NodeRenderComponent implements EventListener{
       this.toolService.openLtiObject(this._node);
     }
     else {
-      UIHelper.openConnector(this.connectors,this.frame,this.toast, this._node, this.connectors.getCurrentList(),null,null,null,newWindow);
+      UIHelper.openConnector(this.connectors,this.frame,this.toast, this._node,null,null,null,newWindow);
     }
   }
 
@@ -521,6 +521,7 @@ export class NodeRenderComponent implements EventListener{
         }
         this.options = Helper.deepCopyArray(this.options);
         this.postprocessHtml();
+        this.isBuildingPage=false;
     }
 
     private goToWorkspace(login:LoginResult,node:Node) {
@@ -532,16 +533,21 @@ export class NodeRenderComponent implements EventListener{
   }
 
   private addDownloadButton(download: OptionItem) {
-    this.downloadButton=download;
-    this.options.splice(0,0,download);
+      this.nodeApi.getNodeChildobjects(this.sequenceParent.ref.id,this.repository).subscribe((data:NodeList)=>{
+          this.downloadButton=download;
+          if(data.nodes.length > 0 || this._node.aspects.indexOf(RestConstants.CCM_ASPECT_IO_CHILDOBJECT) != -1) {
+              download.name = 'DOWNLOAD_ALL';
+          }
+          this.options.splice(0,0,download);
 
-    if(this.searchService.reurl) {
-      let apply = new OptionItem("APPLY", "redo", (node: Node) => NodeHelper.addNodeToLms(this.router, this.temporaryStorageService, this._node, this.searchService.reurl));
-      apply.isEnabled = this._node.access.indexOf(RestConstants.ACCESS_CC_PUBLISH) != -1;
-      this.options.splice(0, 0, apply);
-    }
-    this.checkConnector();
+          if(this.searchService.reurl) {
+              let apply = new OptionItem("APPLY", "redo", (node: Node) => NodeHelper.addNodeToLms(this.router, this.temporaryStorageService, this._node, this.searchService.reurl));
+              apply.isEnabled = this._node.access.indexOf(RestConstants.ACCESS_CC_PUBLISH) != -1;
+              this.options.splice(0, 0, apply);
+          }
+          this.checkConnector();
 
+      });
     UIHelper.setTitleNoTranslation(this._node.name,this.title,this.config);
   }
   setDownloadUrl(url:string){
@@ -577,20 +583,11 @@ export class NodeRenderComponent implements EventListener{
     }
 
     private scroll(direction: string) {
-        let scrollAmount = 0;
         let element = this.sequencediv.nativeElement;
-        let slideTimer = setInterval(()=>{
-            if(direction == 'left'){
-                element.scrollLeft -= 20;
-            } else {
-                element.scrollLeft += 20;
-            }
+        let width=window.innerWidth/2;
+        UIHelper.scrollSmoothElement(element.scrollLeft + (direction=='left' ? -width : width),element,2,'x').then((limit)=>{
             this.setScrollparameters();
-            scrollAmount += 10;
-            if(scrollAmount >= 100){
-                clearInterval(slideTimer);
-            }
-        }, 25);
+        });
     }
 
     private setScrollparameters() {

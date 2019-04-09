@@ -355,6 +355,6 @@ export class StreamComponent {
 
     }
     private editConnector(node:Node,type : Filetype=null,win : any = null,connectorType : Connector = null){
-        UIHelper.openConnector(this.connectors,this.event,this.toast,node,this.connectorList,type,win,connectorType);
+        UIHelper.openConnector(this.connectors,this.event,this.toast,node,type,win,connectorType);
     }
 }

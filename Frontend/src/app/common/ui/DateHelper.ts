@@ -146,4 +146,7 @@ export class DateHelper{
     return new Date(date.getTime()-date.getTimezoneOffset()*60*1000);
   }
 
+    static getDateForNewFile() {
+        return DateHelper.formatDate(null,new Date().getTime(),{showAlwaysTime:true,useRelativeLabels:false})
+    }
 }

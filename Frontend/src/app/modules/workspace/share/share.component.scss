@@ -163,6 +163,8 @@ a.active{
   .typeButton{
     display: flex;
     .material-icons{
+      padding:0 4px;
+      display: inline;
     }
     .btn-flat {
       height: 40px;
@@ -421,5 +423,10 @@ label.notify p{
   }
   .share-type-mobile {
     right: 20px;
+  }
+}
+@media screen and (max-width: ($mobileWidth - $mobileStage*3)) {
+  .state{
+    display: none;
   }
 }

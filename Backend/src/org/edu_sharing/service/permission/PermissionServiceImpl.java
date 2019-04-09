@@ -944,24 +944,17 @@ public class PermissionServiceImpl implements org.edu_sharing.service.permission
 	}
 
 	@Override
-	public StringBuffer getFindUsersSearchString(HashMap<String, String> propVals, boolean globalContext) {
+	public StringBuffer getFindUsersSearchString(String query,List<String> searchFields, boolean globalContext) {
 
 		boolean fuzzyUserSearch = !globalContext || ToolPermissionServiceFactory.getInstance()
 				.hasToolPermission(CCConstants.CCM_VALUE_TOOLPERMISSION_GLOBAL_AUTHORITY_SEARCH_FUZZY);
 
 		StringBuffer searchQuery = new StringBuffer("TYPE:cm\\:person");
-
-		StringBuffer subQuery = new StringBuffer();
+		StringBuffer subQuery=new StringBuffer();
 
 		if (fuzzyUserSearch) {
-
-			for (String property : propVals.keySet()) {
-
-				String propValue = propVals.get(property);
-
-				if (propValue != null) {
-
-					for (String token : StringTool.getPhrases(propValue)) {
+				if (query != null) {
+					for (String token : StringTool.getPhrases(query)) {
 
 						boolean isPhrase = token.startsWith("\"") && token.endsWith("\"");
 
@@ -979,23 +972,22 @@ public class PermissionServiceImpl implements org.edu_sharing.service.permission
 								token = token + "*";
 							}
 						}
-
-						if (token.length() > 0) {
-
-							subQuery.append(subQuery.length() > 0 ? " OR " : "").append("@cm\\:").append(property)
-									.append(":").append("\"").append(token).append("\"");
-
+						StringBuffer fieldQuery=new StringBuffer();
+						for(String field : searchFields) {
+							if(fieldQuery.length()>0) {
+								fieldQuery.append(" OR ");
+							}
+							fieldQuery.append("@cm\\:").append(field).append(":").append("\"").append(token).append("\"");
 						}
+						subQuery.append(subQuery.length() > 0 ? " AND " : "").append("(").append(fieldQuery).append(")");
 					}
 				}
-			}
-
 		} else {
 
 			// when no fuzzy search remove "*" from searchstring and remove all params
 			// except email
 
-			String emailValue = propVals.get("email");
+			String emailValue = query;
 
 			// remove wildcards (*,?)
 			if (emailValue != null) {
@@ -1045,7 +1037,7 @@ public class PermissionServiceImpl implements org.edu_sharing.service.permission
 				if (!hasToolPermission) {
 					return null;
 				}
-				return getFindUsersSearchString(propVals, true);
+				return getFindUsersSearchString(query, searchFields, true);
 			}
 
 			StringBuffer groupPathQuery = new StringBuffer();
@@ -1223,11 +1215,10 @@ public class PermissionServiceImpl implements org.edu_sharing.service.permission
 	}
 
 	@Override
-	public Result<List<User>> findUsers(HashMap<String, String> propVals, boolean globalContext, int from,
-			int nrOfResults) {
+	public Result<List<User>> findUsers(String query,List<String> searchFields, boolean globalContext, int from, int nrOfResults) {
 
 		StringBuffer searchQuery = null;
-		searchQuery = getFindUsersSearchString(propVals, globalContext);
+		searchQuery = getFindUsersSearchString(query, searchFields, globalContext);
 
 		if (searchQuery == null) {
 			return new Result<List<User>>();
@@ -1288,14 +1279,13 @@ public class PermissionServiceImpl implements org.edu_sharing.service.permission
 	public Result<List<Authority>> findAuthorities(String searchWord, boolean globalContext, int from,
 			int nrOfResults) {
 
-		HashMap<String, String> toSearch = new HashMap<String, String>();
-
 		// fields to search in - not using username
-		toSearch.put("email", searchWord);
-		toSearch.put("firstName", searchWord);
-		toSearch.put("lastName", searchWord);
+		List<String> searchFields = new ArrayList<>();
+		searchFields.add("email");
+		searchFields.add("firstName");
+		searchFields.add("lastName");
 
-		StringBuffer findUsersQuery = getFindUsersSearchString(toSearch, globalContext);
+		StringBuffer findUsersQuery = getFindUsersSearchString(searchWord,searchFields, globalContext);
 		StringBuffer findGroupsQuery = getFindGroupsSearchString(searchWord, globalContext);
 
 		/**

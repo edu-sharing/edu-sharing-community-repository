@@ -26,15 +26,13 @@
   <div *ngFor="let option of optionsAlways.slice().reverse();let i=index;"
        [class.light]="backgroundType=='dark' || backgroundType=='primary'"
        [class.primary]="i==optionsAlways.length-1 && backgroundType=='primary'"
-       [class.disabled]="!option.isEnabled"
-       [class.display-none]="!option.isEnabled && !showDisabled"
-       class="actionAlways waves-effect waves-light"
+       class="action-always waves-effect waves-light action-always-{{option.name | replaceChars:{search:'.',replace:'-'} }} {{ option.isEnabled ? '' : 'disabled'}} {{ option.isEnabled || showDisabled ? '' : 'display-none'}}"
        [class.btn-flat]="i!=optionsAlways.length-1 || style=='flat'"
        [class.btn]="i==optionsAlways.length-1 && style!='flat'"
        tabindex="0"
        (keyup.enter)="click(option)"
        (click)="click(option)">
-    <i icon title="{{option.showName ? null : (option.name | translate)}}" [iconId]="option.icon"></i><span class="actionAlwaysCaption" *ngIf="option.showName"> {{option.name | translate}}</span>
+    <i icon title="{{option.showName ? null : (option.name | translate)}}" [iconId]="option.icon"></i><span class="action-always-caption" *ngIf="option.showName"> {{option.name | translate}}</span>
   </div>
 
 </div>

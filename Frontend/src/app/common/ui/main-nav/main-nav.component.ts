@@ -31,6 +31,7 @@ import {Translation} from "../../translation";
 import {OptionItem} from "../actionbar/option-item";
 import {HttpClient} from '@angular/common/http';
 import {DialogButton} from '../modal-dialog/modal-dialog.component';
+import {UIService} from '../../services/ui.service';
 
 @Component({
   selector: 'main-nav',
@@ -165,6 +166,8 @@ export class MainNavComponent implements AfterViewInit{
     private elementsBottomY = 0;
     private fixScrollElements = false;
     private isSafe = false;
+    private licenseDialog: boolean;
+    private licenseDetails: string;
   @HostListener('document:keydown', ['$event'])
   handleKeyboardEvent(event: KeyboardEvent) {
       if(event.code=="Escape" && this.canOpen && this.displaySidebar){
@@ -345,6 +348,7 @@ export class MainNavComponent implements AfterViewInit{
   constructor(private iam : RestIamService,
               private connector : RestConnectorService,
               private cordova : CordovaService,
+              private ui : UIService,
               private changeDetector :  ChangeDetectorRef,
               private event : FrameEventsService,
               private nodeService : RestNodeService,
@@ -406,17 +410,12 @@ export class MainNavComponent implements AfterViewInit{
           this.configService.getAll().subscribe(()=>{
             this.userName=ConfigurationHelper.getPersonWithConfigDisplayName(this.user.person,this.configService);
           });
-          if(data.statusCode==RestConstants.STATUS_CODE_OK) {
-              setTimeout(() => {
-                  this.tutorialElement = this.userRef;
-              });
-          }
         });
         this.refreshNodeStore();
         this.connector.hasAccessToScope(RestConstants.SAFE_SCOPE).subscribe((data:AccessScope)=>{
           // safe needs access and not be app (oauth not supported)
           if(data.hasAccess && !this.cordova.isRunningCordova())
-            buttons.push({path:'workspace/safe',scope:'safe',icon:"lock",name:"SIDEBAR.SECURE"});
+            buttons.push({path:'workspace/safe',scope:'safe',icon:"lock",name:"SIDEBAR.SECURE",onlyDesktop:true});
           this.addMoreButtons(buttons);
         },(error:any)=>this.addMoreButtons(buttons));
       });
@@ -562,19 +561,19 @@ export class MainNavComponent implements AfterViewInit{
         }
       }
       if(add) {
-        buttons.push({path: 'permissions', scope: 'permissions', icon: "group_add", name: "SIDEBAR.PERMISSIONS"});
+        buttons.push({path: 'permissions', scope: 'permissions', icon: "group_add", name: "SIDEBAR.PERMISSIONS",onlyDesktop: true});
       }
       if(this.isAdmin){
-        buttons.push({path:'admin',scope:'admin',icon:"settings",name:"SIDEBAR.ADMIN"});
+        buttons.push({path:'admin',scope:'admin',icon:"settings",name:"SIDEBAR.ADMIN",onlyDesktop: true});
       }
       this.checkConfig(buttons);
     },(error:any)=>this.checkConfig(buttons));
   }
   private openImprint(){
-    window.document.location.href=this.config.imprintUrl;
+    UIHelper.openUrl(this.config.imprintUrl,this.cordova);
   }
   private openPrivacy(){
-    window.document.location.href=this.config.privacyInformationUrl;
+    UIHelper.openUrl(this.config.privacyInformationUrl,this.cordova);
   }
   private checkConfig(buttons: any[]) {
     this.configService.getAll().subscribe((data:any)=>{
@@ -584,6 +583,7 @@ export class MainNavComponent implements AfterViewInit{
       this.showEditProfile=data["editProfile"];
       this.hideButtons(buttons);
       this.addButtons(buttons);
+      this.filterButtons();
       this.storage.set(TemporaryStorageService.MAIN_NAV_BUTTONS,this.sidebarButtons);
       this.showLicenseAgreement();
     },(error:any)=>this.hideButtons(buttons));
@@ -619,10 +619,20 @@ export class MainNavComponent implements AfterViewInit{
       this.session.set('licenseAgreement',this.licenseAgreementNode.contentVersion);
     else
       this.session.set('licenseAgreement','0.0');
+    this.startTutorial();
+  }
+  startTutorial(){
+      if(this.connector.getCurrentLogin().statusCode=='OK') {
+          UIHelper.waitForComponent(this, 'userRef').subscribe(() => {
+              this.tutorialElement = this.userRef;
+          });
+      }
   }
   private showLicenseAgreement() {
-    if(!this.config.licenseAgreement || this.isGuest || !this.connector.getCurrentLogin().isValidLogin)
-      return;
+    if(!this.config.licenseAgreement || this.isGuest || !this.connector.getCurrentLogin().isValidLogin) {
+        this.startTutorial();
+        return;
+    }
     this.session.get('licenseAgreement',false).subscribe((version:string)=>{
       console.log("user accepted agreement at version "+version);
       this.licenseAgreementHTML=null;
@@ -638,8 +648,10 @@ export class MainNavComponent implements AfterViewInit{
       this.nodeService.getNodeMetadata(nodeId).subscribe((data:NodeWrapper)=>{
         this.licenseAgreementNode=data.node;
         console.log(data.node);
-        if(version==data.node.contentVersion)
-          return;
+        if(version==data.node.contentVersion) {
+            this.startTutorial();
+            return;
+        }
         this.licenseAgreement=true;
         this.nodeService.getNodeTextContent(nodeId).subscribe((data: NodeTextContent) => {
             this.licenseAgreementHTML = data.html ? data.html : data.raw ? data.raw : data.text;
@@ -647,8 +659,10 @@ export class MainNavComponent implements AfterViewInit{
             this.licenseAgreementHTML = "Error loading content for license agreement node '" + nodeId + "'";
         });
       },(error:any)=>{
-          if(version==='0.0')
-            return;
+          if(version==='0.0') {
+              this.startTutorial();
+              return;
+          }
           this.licenseAgreement=true;
           this.licenseAgreementHTML = "Error loading metadata for license agreement node '" + nodeId + "'";
       })
@@ -677,8 +691,7 @@ export class MainNavComponent implements AfterViewInit{
           option.mediaQueryValue=UIConstants.MOBILE_TAB_SWITCH_WIDTH;
           option.isSeperateBottom=true;
           this.userMenuOptions.push(option);
-      }
-      for(let option of this.getConfigMenuHelpOptions()){
+      }for(let option of this.getConfigMenuHelpOptions()){
           option.mediaQueryType=UIConstants.MEDIA_QUERY_MAX_WIDTH;
           option.mediaQueryValue=UIConstants.MOBILE_TAB_SWITCH_WIDTH;
           this.userMenuOptions.push(option);
@@ -697,6 +710,12 @@ export class MainNavComponent implements AfterViewInit{
             option.isSeperateBottom=true;
             this.userMenuOptions.push(option);
         }
+        let option=new OptionItem('LICENSE_INFORMATION','lightbulb_outline',()=>this.showLicenses());
+        option.mediaQueryType=UIConstants.MEDIA_QUERY_MAX_WIDTH;
+        option.mediaQueryValue=UIConstants.MOBILE_TAB_SWITCH_WIDTH;
+        option.isSeperateBottom=true;
+        this.userMenuOptions.push(option);
+
         if(!this.isGuest){
             this.userMenuOptions.push(new OptionItem('EDIT_ACCOUNT','assignment_ind',()=>this.openProfile()));
         }
@@ -815,10 +834,36 @@ export class MainNavComponent implements AfterViewInit{
     hideDialog() : void{
         this.dialogTitle=null;
     }
+
+    private filterButtons() {
+        console.log(this.sidebarButtons);
+        for (let i=0;i<this.sidebarButtons.length;i++) {
+            if (this.sidebarButtons[i].onlyDesktop && this.ui.isMobile()) {
+                this.sidebarButtons.splice(i,1);
+                i--;
+            }
+        }
+    }
     getPreloading(){
         return MainNavComponent.preloading;
     }
     public finishPreloading(){
         MainNavComponent.preloading=false;
+    }
+
+    showLicenses() {
+        this.licenseDialog=true;
+        this.displaySidebar=false;
+        this.http.get('assets/licenses/'+Translation.getLanguage()+'.html',{responseType:'text'}).subscribe((text)=>{
+            this.licenseDetails=(text as any);
+        },(error)=>{
+            console.info("Could not load license data for "+Translation.getLanguage()+", using default en");
+            this.http.get('assets/licenses/en.html',{responseType:'text'}).subscribe((text)=>{
+                console.log(text);
+                this.licenseDetails=(text as any);
+            },(error)=> {
+                console.error(error);
+            });
+        });
     }
 }

@@ -291,7 +291,7 @@ export class WorkspaceMainComponent implements EventListener{
 
     }
     private editConnector(node : Node=null,type : Filetype=null,win : any = null,connectorType : Connector = null){
-        UIHelper.openConnector(this.connectors,this.event,this.toast,this.getNodeList(node)[0],this.connectorList,type,win,connectorType);
+        UIHelper.openConnector(this.connectors,this.event,this.toast,this.getNodeList(node)[0],type,win,connectorType);
     }
     private handleDrop(event:any){
         for(let s of event.source) {
@@ -578,13 +578,8 @@ export class WorkspaceMainComponent implements EventListener{
 
     private pasteNode(position=0){
         let clip=(this.storage.get("workspace_clipboard") as ClipboardObject);
-        if(this.searchQuery || (this.isRootFolder && this.root!=RestConstants.USERHOME))
+        if(!this.canPasteInCurrentLocation())
             return;
-        if(!clip || !clip.nodes.length)
-            return;
-        if(clip.sourceNode && clip.sourceNode.ref.id==this.currentFolder.ref.id && !clip.copy){
-            return;
-        }
         if(position>=clip.nodes.length){
             this.globalProgress=false;
             this.storage.remove("workspace_clipboard");
@@ -736,8 +731,7 @@ export class WorkspaceMainComponent implements EventListener{
 
         let allFiles = NodeHelper.allFiles(nodes);
         let savedSearch = nodes && nodes.length && nodes[0].type==RestConstants.CCM_TYPE_SAVED_SEARCH;
-        let clip=(this.storage.get("workspace_clipboard") as ClipboardObject);
-        if(this.currentFolder && !nodes && !this.searchQuery && clip && ((!clip.sourceNode || clip.sourceNode.ref.id!=this.currentFolder.ref.id) || clip.copy) && this.createAllowed) {
+        if(!nodes && this.canPasteInCurrentLocation()) {
             options.push(new OptionItem("WORKSPACE.OPTION.PASTE", "content_paste", (node: Node) => this.pasteNode()));
         }
         if (nodes && nodes.length == 1) {
@@ -756,6 +750,7 @@ export class WorkspaceMainComponent implements EventListener{
             }
             if(this.isAdmin){
                 let debug = new OptionItem("WORKSPACE.OPTION.DEBUG", "build", (node: Node) => this.debugNode(node));
+                debug.onlyDesktop=true;
                 options.push(debug);
             }
             let open = new OptionItem("WORKSPACE.OPTION.SHOW", "remove_red_eye", (node: Node) => this.displayNode(node));
@@ -765,11 +760,11 @@ export class WorkspaceMainComponent implements EventListener{
         let view = new OptionItem("WORKSPACE.OPTION.VIEW", "launch", (node: Node) => this.editConnector(node));
         if(fromList){
             view.showCallback=((node:Node)=>{
-                return this.connectors.connectorSupportsEdit(node,this.connectorList) != null;
+                return this.connectors.connectorSupportsEdit(node) != null;
             });
             options.push(view);
         }
-        else if(nodes && nodes.length==1 && this.connectors.connectorSupportsEdit(nodes[0],this.connectorList)){
+        else if(nodes && nodes.length==1 && this.connectors.connectorSupportsEdit(nodes[0])){
             options.push(view);
         }
         if(nodes && nodes.length==1 && !savedSearch){
@@ -814,6 +809,7 @@ export class WorkspaceMainComponent implements EventListener{
         if (nodes && nodes.length == 1 && !savedSearch) {
             let contributor=new OptionItem("WORKSPACE.OPTION.CONTRIBUTOR","group",(node:Node)=>this.manageContributorsNode(node));
             contributor.isEnabled=NodeHelper.getNodesRight(nodes,RestConstants.ACCESS_WRITE);
+            contributor.onlyDesktop = true;
             if(nodes && !nodes[0].isDirectory && !this.isSafe)
                 options.push(contributor);
             let workflow = this.actionbar.createOptionIfPossible('WORKFLOW', nodes, (node: Node) => this.manageWorkflowNode(node));
@@ -882,13 +878,20 @@ export class WorkspaceMainComponent implements EventListener{
         if(!id){
             this.path=[];
             id=this.getRootFolderId();
-            if(this.root=='RECYCLE')
+            if(this.root=='RECYCLE') {
+                this.mainNavRef.finishPreloading();
                 return;
+            }
         }
         else{
             this.selectedNodeTree=id;
             this.node.getNodeParents(id).subscribe((data : NodeList)=>{
-                this.path = data.nodes.reverse();
+                if(this.root=='RECYCLE'){
+                    this.path = [];
+                }
+                else {
+                    this.path = data.nodes.reverse();
+                }
                 this.selectedNodeTree=null;
             },(error:any)=>{
                 this.selectedNodeTree=null;
@@ -923,7 +926,7 @@ export class WorkspaceMainComponent implements EventListener{
             if(id==RestConstants.USERHOME){
                 this.createAllowed = true;
             }
-            this.updateNodeByParams(params,{ref: {id: id}});
+            this.updateNodeByParams(params,{ref: {id: id},name:this.translate.instant('WORKSPACE.'+this.root)});
         }
 
     }
@@ -944,7 +947,7 @@ export class WorkspaceMainComponent implements EventListener{
             else if(RestToolService.isLtiObject(node)){
                 this.toolService.openLtiObject(node);
             }
-            else if(useConnector && this.connectors.connectorSupportsEdit(node,this.connectorList)){
+            else if(useConnector && this.connectors.connectorSupportsEdit(node)){
                 this.editConnector(node);
             }
             else {
@@ -974,7 +977,9 @@ export class WorkspaceMainComponent implements EventListener{
 
         this.openDirectory(id);
     }
-
+    getConnectors(){
+        return this.connectors.getConnectors();
+    }
     private refresh(refreshPath=true) {
         let search=this.searchQuery;
         let folder=this.currentFolder;
@@ -1012,6 +1017,8 @@ export class WorkspaceMainComponent implements EventListener{
         let params:any={root:root,id:node,viewType:this.viewType,query:search,mainnav:this.mainnav};
         if(this.reurl)
             params.reurl=this.reurl;
+        if(this.reurlDirectories)
+            params.applyDirectories=this.reurlDirectories;
         this.router.navigate(["./"],{queryParams:params,relativeTo:this.route})
             .then((result:boolean)=>{
                 if(!result){
@@ -1151,5 +1158,10 @@ export class WorkspaceMainComponent implements EventListener{
             this.currentFolder = node;
             this.event.broadcastEvent(FrameEventsService.EVENT_NODE_FOLDER_OPENED, this.currentFolder);
         }
+    }
+
+    private canPasteInCurrentLocation() {
+        let clip=(this.storage.get("workspace_clipboard") as ClipboardObject);
+        return this.currentFolder  && !this.searchQuery && clip && ((!clip.sourceNode || clip.sourceNode.ref.id!=this.currentFolder.ref.id) || clip.copy) && this.createAllowed;
     }
 }

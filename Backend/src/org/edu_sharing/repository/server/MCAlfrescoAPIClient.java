@@ -57,6 +57,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import java.util.StringTokenizer;
+import java.util.stream.Collectors;
 
 import javax.transaction.UserTransaction;
 
@@ -87,19 +88,7 @@ import org.alfresco.service.cmr.action.ActionStatus;
 import org.alfresco.service.cmr.dictionary.DataTypeDefinition;
 import org.alfresco.service.cmr.dictionary.DictionaryService;
 import org.alfresco.service.cmr.dictionary.PropertyDefinition;
-import org.alfresco.service.cmr.repository.AssociationRef;
-import org.alfresco.service.cmr.repository.ChildAssociationRef;
-import org.alfresco.service.cmr.repository.ContentIOException;
-import org.alfresco.service.cmr.repository.ContentReader;
-import org.alfresco.service.cmr.repository.ContentService;
-import org.alfresco.service.cmr.repository.ContentStreamListener;
-import org.alfresco.service.cmr.repository.ContentWriter;
-import org.alfresco.service.cmr.repository.CopyService;
-import org.alfresco.service.cmr.repository.InvalidNodeRefException;
-import org.alfresco.service.cmr.repository.MLText;
-import org.alfresco.service.cmr.repository.NodeRef;
-import org.alfresco.service.cmr.repository.NodeService;
-import org.alfresco.service.cmr.repository.StoreRef;
+import org.alfresco.service.cmr.repository.*;
 import org.alfresco.service.cmr.repository.datatype.DefaultTypeConverter;
 import org.alfresco.service.cmr.search.ResultSet;
 import org.alfresco.service.cmr.search.ResultSetRow;
@@ -185,6 +174,7 @@ import org.edu_sharing.service.connector.ConnectorService;
 import org.edu_sharing.service.license.LicenseService;
 import org.edu_sharing.service.model.NodeRefImpl;
 import org.edu_sharing.service.nodeservice.model.GetPreviewResult;
+import org.edu_sharing.service.nodeservice.NodeServiceHelper;
 import org.edu_sharing.service.share.ShareService;
 import org.edu_sharing.service.share.ShareServiceImpl;
 import org.edu_sharing.service.util.AlfrescoDaoHelper;
@@ -801,7 +791,7 @@ public class MCAlfrescoAPIClient extends MCAlfrescoBaseClient {
 		}
 		return result;
 	}
-	
+
 	public List<NodeRef> searchNodeRefs(SearchParameters token, ContextSearchMode mode){
         Set<String> authorities=null;
         if(mode.equals(ContextSearchMode.UserAndGroups)) {
@@ -858,17 +848,29 @@ public class MCAlfrescoAPIClient extends MCAlfrescoBaseClient {
 	public String formatData(String type, String key, Object value, String metadataSetId) {
 		String returnValue = null;
 		if (key != null && value != null) {
-
+			boolean processed=false;
 			// value is date than put a String with a long value so that it can
 			// be formated with userInfo later
+			if(value instanceof List){
+				List<Object> list = (List<Object>) value;
+				if(list.size()>0){
+					if(list.get(0) instanceof Date) {
+						returnValue = ValueTool.toMultivalue(
+								list.stream().
+										map((date) -> new Long(((Date)date).getTime()).toString()).
+										collect(Collectors.toList()).toArray(new String[0])
+						);
+						processed=true;
+					}
+				}
+			}
 			if (value instanceof Date) {
 
 				Date date = (Date) value;
-				if (date != null) {
-					returnValue = new Long(date.getTime()).toString();
-				}
-
-			} else {
+				returnValue = new Long(date.getTime()).toString();
+				processed=true;
+			}
+			if(!processed){
 				returnValue = getValue(type, key, value, metadataSetId);
 			}
 			// !(value instanceof MLText || value instanceof List): prevent sth.
@@ -1226,17 +1228,23 @@ public class MCAlfrescoAPIClient extends MCAlfrescoBaseClient {
 					dtd = propDef.getDataType();
 				if (Context.getCurrentInstance() != null && dtd != null
 						&& (dtd.getName().equals(DataTypeDefinition.DATE) || dtd.getName().equals(DataTypeDefinition.DATETIME))) {
-					String timeAsLongString = (String) entry.getValue();
+					String[] values = ValueTool.getMultivalue((String) entry.getValue());
+					String[] formattedValues=new String[values.length];
+					int i=0;
+					for(String value : values){
+						formattedValues[i++]=new DateTool().formatDate(new Long(value));
+					}
 					// put time as long i.e. for sorting or formating in gui
-					addAndOverwriteDateMap.put(entry.getKey() + CCConstants.LONG_DATE_SUFFIX, timeAsLongString);
+					// this is basically just a copy of the real value for backward compatibility
+					addAndOverwriteDateMap.put(entry.getKey() + CCConstants.LONG_DATE_SUFFIX, entry.getValue());
 					// put formated
-					addAndOverwriteDateMap.put(entry.getKey(), new DateTool().formatDate(new Long(timeAsLongString)));
+					addAndOverwriteDateMap.put(entry.getKey(), ValueTool.toMultivalue(formattedValues));
 				}
 				try{
 					MetadataWidget widget = mds.findWidget(CCConstants.getValidLocalName(entry.getKey()));
 					Map<String, MetadataKey> map = widget.getValuesAsMap();
 					if(!map.isEmpty()){
-						String[] keys=new ValueTool().getMultivalue((String) entry.getValue());
+						String[] keys=ValueTool.getMultivalue((String) entry.getValue());
 						String[] values=new String[keys.length];
 						for(int i=0;i<keys.length;i++)
 							values[i]=map.containsKey(keys[i]) ? map.get(keys[i]).getCaption() : keys[i];
@@ -3796,21 +3804,32 @@ public class MCAlfrescoAPIClient extends MCAlfrescoBaseClient {
 	}
 
 	public void moveNode(String newParentId, String childAssocType, String nodeId) throws Exception {
-		
-		String name = 
+		String originalName =
 				(String) nodeService.getProperty(
-						new NodeRef(storeRef, nodeId), 
-						QName.createQName(CCConstants.CM_NAME)); 
-				
-		nodeService.moveNode(
-				new NodeRef(storeRef, nodeId), 
-				new NodeRef(storeRef, newParentId), 
-				QName.createQName(childAssocType),
-				QName.createQName(CCConstants.NAMESPACE_CCM, name));
+						new NodeRef(storeRef, nodeId),
+						QName.createQName(CCConstants.CM_NAME));
+		for(int i=0;;i++) {
+			String name=originalName;
+			if(i>0) {
+				name = NodeServiceHelper.renameNode(name, i);
+				nodeService.setProperty(new NodeRef(storeRef, nodeId),
+						QName.createQName(CCConstants.CM_NAME),name);
+			}
+			try {
+				nodeService.moveNode(
+						new NodeRef(storeRef, nodeId),
+						new NodeRef(storeRef, newParentId),
+						QName.createQName(childAssocType),
+						QName.createQName(CCConstants.NAMESPACE_CCM, name));
 
-		// remove from cache so that the new primary parent will be refreshed
-		Cache repCache = new RepositoryCache();
-		repCache.remove(nodeId);
+				// remove from cache so that the new primary parent will be refreshed
+				Cache repCache = new RepositoryCache();
+				repCache.remove(nodeId);
+				break;
+			}catch(DuplicateChildNodeNameException e){
+				// let the loop run
+			}
+		}
 	}
 
 	/**
@@ -3955,14 +3974,6 @@ public class MCAlfrescoAPIClient extends MCAlfrescoBaseClient {
 
 				// versionLabel
 				props.put(CCConstants.CM_PROP_VERSIONABLELABEL, version.getVersionLabel());
-
-				long created = new Long((String) props.get(CCConstants.CM_PROP_C_CREATED));
-				long modified = new Long((String) props.get(CCConstants.CM_PROP_C_MODIFIED));
-				props.put(CCConstants.CM_PROP_C_CREATED, new DateTool().formatDate(created));
-				props.put(CCConstants.CM_PROP_C_MODIFIED, new DateTool().formatDate(modified));
-				
-				props.put(CCConstants.CM_PROP_C_CREATED + CCConstants.LONG_DATE_SUFFIX, new Long(created).toString());
-				props.put(CCConstants.CM_PROP_C_MODIFIED + CCConstants.LONG_DATE_SUFFIX, new Long(modified).toString());
 
 				/* add permalink */
 				String v = version.getVersionLabel();

@@ -81,7 +81,7 @@ public abstract class TrackingServiceDefault implements TrackingService{
         if(mode==null)
             return null;
         if(mode.equalsIgnoreCase("obfuscate"))
-            return DigestUtils.sha1Hex(username);
+            return DigestUtils.shaHex(username);
         if(mode.equalsIgnoreCase("full"))
             return username;
         return null;

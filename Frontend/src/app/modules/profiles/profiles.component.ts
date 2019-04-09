@@ -18,6 +18,7 @@ import {UserProfileComponent} from "../../common/ui/user-profile/user-profile.co
 import {RestConstants} from "../../common/rest/rest-constants";
 import {RestHelper} from "../../common/rest/rest-helper";
 import {MainNavComponent} from '../../common/ui/main-nav/main-nav.component';
+import {Helper} from "../../common/helper";
 
 @Component({
   selector: 'app-profiles',
@@ -35,6 +36,7 @@ export class ProfilesComponent {
   public edit: boolean;
   public avatarFile: any;
   public changePassword: boolean;
+  public editAbout = false;
   public oldPassword="";
   public password="";
   private static PASSWORD_MIN_LENGTH = 5;
@@ -94,12 +96,9 @@ export class ProfilesComponent {
       window.location.href=this.editProfileUrl;
       return;
     }
-    this.userEdit=JSON.parse(JSON.stringify(this.user));
+    this.userEdit=Helper.deepCopy(this.user);
     this.edit=true;
-    this.changePassword=false;
     this.avatarFile=null;
-    this.password="";
-    this.oldPassword="";
   }
   public clearAvatar(){
     this.avatarFile=null;
@@ -148,7 +147,7 @@ export class ProfilesComponent {
     }
     this.globalProgress=true;
     this.iamService.editUser(this.user.authorityName,this.userEdit.profile).subscribe(()=>{
-      this.savePassword();
+      this.saveAvatar();
     },(error:any)=>{
       this.globalProgress=false;
       this.toast.error(error);
@@ -174,6 +173,17 @@ export class ProfilesComponent {
       this.edit=false;
       this.loadUser(this.userEdit.authorityName);
     }
+  }
+
+  public aboutEdit() {
+    this.userEdit=Helper.deepCopy(this.user);
+    this.editAbout = true;
+  }
+
+  public editPassword() {
+    this.changePassword =! this.changePassword;
+    this.password = "";
+    this.oldPassword = "";
   }
 }
 
