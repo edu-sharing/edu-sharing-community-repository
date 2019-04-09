@@ -163,6 +163,8 @@ a.active{
   .typeButton{
     display: flex;
     .material-icons{
+      padding:0 4px;
+      display: inline;
     }
     .btn-flat {
       height: 40px;

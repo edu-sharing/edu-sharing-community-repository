@@ -260,8 +260,8 @@ public interface MCAlfrescoService extends RemoteService {
 	public HashMap<String, HashMap<String,Object>> getVersionHistory(String nodeId, String repId) throws CCException;
 	
 	public Group getEduGroupContextOfNode(String nodeId) throws CCException;
-	
-	public Result<List<User>> findUsers(HashMap<String, String> propVals, boolean globalContext, int from, int nrOfResults) throws CCException;
+
+	public Result<List<User>> findUsers(String query, List<String> searchFields, boolean globalContext, int from, int nrOfResults) throws CCException;
 	
 	public Result<List<Group>> findGroups(String _toSearch, boolean globalContext, int from, int nrOfResults) throws CCException;
 	

@@ -889,7 +889,12 @@ export class WorkspaceMainComponent implements EventListener{
         else{
             this.selectedNodeTree=id;
             this.node.getNodeParents(id).subscribe((data : NodeList)=>{
-                this.path = data.nodes.reverse();
+                if(this.root=='RECYCLE'){
+                    this.path = [];
+                }
+                else {
+                    this.path = data.nodes.reverse();
+                }
                 this.selectedNodeTree=null;
             },(error:any)=>{
                 this.selectedNodeTree=null;
@@ -924,7 +929,7 @@ export class WorkspaceMainComponent implements EventListener{
             if(id==RestConstants.USERHOME){
                 this.createAllowed = true;
             }
-            this.updateNodeByParams(params,{ref: {id: id}});
+            this.updateNodeByParams(params,{ref: {id: id},name:this.translate.instant('WORKSPACE.'+this.root)});
         }
 
     }
