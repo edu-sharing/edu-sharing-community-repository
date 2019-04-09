@@ -652,7 +652,7 @@
 					<column>cm:modified</column>
 					<!-- currently not working (solr error) -->
 					<!-- <column>ccm:commonlicense_key</column> -->
-					<column>cm:title</column>
+					<column>cclom:title</column>
 					<column>ccm:replicationsource</column>
 				</columns>
 			</sort>
@@ -661,7 +661,7 @@
 			<list>
 				<id>search</id>
 				<columns>
-					<column>cm:title</column>
+					<column>cclom:title</column>
 					<column>cm:modified</column>
 					<column>ccm:commonlicense_key</column>
 					<column>ccm:replicationsource</column>
@@ -672,7 +672,7 @@
 			<list>
 				<id>collectionReferences</id>
 				<columns>
-					<column>cm:title</column>
+					<column>cclom:title</column>
 					<column>cm:modified</column>
 					<column>ccm:commonlicense_key</column>
 					<column>ccm:replicationsource</column>
@@ -715,6 +715,15 @@
 					<statement value="100_unchecked">@ccm\:wf_status:"${value}" or ISNULL:@ccm\:wf_status</statement>
 					<multiple>true</multiple>
 					<multiplejoin>OR</multiplejoin>
+				</property>
+			</query>
+			<query join="AND" id="oai">
+				<basequery>ISNULL:@ccm\:tool_category</basequery>
+				<property name="from">
+					<statement>@cm\:modified:[${value} TO MAX]</statement>
+				</property>
+				<property name="until">
+					<statement>@cm\:modified:[MIN TO ${value}]</statement>
 				</property>
 			</query>
 			<query join="AND"  id="collections">

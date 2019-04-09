@@ -190,10 +190,12 @@ export class LoginComponent  implements OnInit{
           }
           else if(data==RestConstants.STATUS_CODE_PREVIOUS_SESSION_REQUIRED || data==RestConstants.STATUS_CODE_PREVIOUS_USER_WRONG){
             this.toast.error(null,'LOGIN.SAFE_PREVIOUS');
+            this.password="";
             this.isLoading=false;
           }
           else{
             this.toast.error(null,'LOGIN.ERROR');
+            this.password="";
             this.isLoading=false;
           }
         },

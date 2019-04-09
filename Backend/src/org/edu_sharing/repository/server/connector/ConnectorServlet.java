@@ -217,14 +217,14 @@ public class ConnectorServlet extends HttpServlet  {
 		SecretKey aesKey = keygen.generateKey();
 		Encryption eAES = new Encryption("AES");
 		byte[] encrypted = eAES.encrypt(jsonObject.toString(), aesKey);
-		String url = UrlTool.setParam(connectorAppInfo.getContentUrl(), "e", URLEncoder.encode(Base64.encodeBase64String(encrypted)));
+		String url = UrlTool.setParam(connectorAppInfo.getContentUrl(), "e", URLEncoder.encode(java.util.Base64.getEncoder().encodeToString(encrypted)));
 		
 		/**
 		 * encrypt the AES key with RSA public key
 		 */
 		Encryption eRSA = new Encryption("RSA");
 		byte[] aesKeyEncrypted = eRSA.encrypt(aesKey.getEncoded(), eRSA.getPemPublicKey(connectorAppInfo.getPublicKey()));
-		url = UrlTool.setParam(url, "k", URLEncoder.encode(Base64.encodeBase64String(aesKeyEncrypted)));
+		url = UrlTool.setParam(url, "k", URLEncoder.encode(java.util.Base64.getEncoder().encodeToString(aesKeyEncrypted)));
 		logger.info("url:" + url + "  length:" + url.length());
 		resp.sendRedirect(url);
 	}

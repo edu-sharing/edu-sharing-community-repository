@@ -300,7 +300,15 @@
             <ref bean="nodeService" />
         </property> 
    	 </bean>
-   	 
+
+    <bean id="BeforeCreateNodePolicyGuardSysFolders" class="org.edu_sharing.alfresco.policy.BeforeCreateNodePolicyGuardSysFolders" init-method="init">
+        <property name="policyComponent">
+            <ref bean="policyComponent"/>
+        </property>
+        <property name="nodeService">
+            <ref bean="nodeService" />
+        </property>
+    </bean>
    	 
    	 <bean id="onThumbnailContentUpdatePolicy" class="org.edu_sharing.alfresco.policy.OnThumbnailContentUpdatePolicy" init-method="init">
    	 	<property name="policyComponent">
