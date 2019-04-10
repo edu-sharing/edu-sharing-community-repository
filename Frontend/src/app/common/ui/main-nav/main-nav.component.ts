@@ -166,7 +166,7 @@ export class MainNavComponent implements AfterViewInit{
     private elementsBottomY = 0;
     private fixScrollElements = false;
     private isSafe = false;
-    private licenseDialog: boolean;
+    licenseDialog: boolean;
     private licenseDetails: string;
   @HostListener('document:keydown', ['$event'])
   handleKeyboardEvent(event: KeyboardEvent) {
