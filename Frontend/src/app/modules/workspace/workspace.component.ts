@@ -1170,7 +1170,7 @@ export class WorkspaceMainComponent implements EventListener{
     }
 
     private hasOpenWindows() {
-        return this.editNodeLicense || this.editNodeTemplate || this.editNodeMetadata || this.createConnectorName || this.showUploadSelect || this.dialogTitle || this.addFolderName || this.sharedNode || this.workflowNode;
+        return this.editNodeLicense || this.nodeDebug || this.editNodeTemplate || this.editNodeMetadata || this.createConnectorName || this.showUploadSelect || this.dialogTitle || this.addFolderName || this.sharedNode || this.workflowNode;
     }
 
     private updateNodeByParams(params: any, node: Node|any) {
