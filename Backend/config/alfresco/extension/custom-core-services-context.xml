@@ -300,7 +300,15 @@
             <ref bean="nodeService" />
         </property> 
    	 </bean>
-   	 
+
+    <bean id="BeforeCreateNodePolicyGuardSysFolders" class="org.edu_sharing.alfresco.policy.BeforeCreateNodePolicyGuardSysFolders" init-method="init">
+        <property name="policyComponent">
+            <ref bean="policyComponent"/>
+        </property>
+        <property name="nodeService">
+            <ref bean="nodeService" />
+        </property>
+    </bean>
    	 
    	 <bean id="onThumbnailContentUpdatePolicy" class="org.edu_sharing.alfresco.policy.OnThumbnailContentUpdatePolicy" init-method="init">
    	 	<property name="policyComponent">
@@ -496,12 +504,28 @@
     	   <ref bean="TransactionService" />
       </property>
     </bean>
+    <bean id="transformer.worker.ESH5PTransformerWorker" class="org.edu_sharing.alfresco.transformer.H5PTransformerWorker">
+        <property name="mimetypeService" ref="mimetypeService"/>
+        <property name="transformerConfig">
+            <ref bean="transformerConfig" />
+        </property>
+        <property name="nodeService">
+            <ref bean="NodeService" />
+        </property>
+        <property name="transactionService">
+            <ref bean="TransactionService" />
+        </property>
+    </bean>
     <bean id="transformer.ESVideoTransformer" class="org.alfresco.repo.content.transform.ProxyContentTransformer" parent="baseContentTransformer">
       <property name="worker">
          <ref bean="transformer.worker.ESVideoTransformerWorker" />
       </property>
    </bean>
-   
+    <bean id="transformer.ESH5PTransformer" class="org.alfresco.repo.content.transform.ProxyContentTransformer" parent="baseContentTransformer">
+        <property name="worker">
+            <ref bean="transformer.worker.ESH5PTransformerWorker" />
+        </property>
+    </bean>
      <bean id="transformer.worker.ESCollectionRefTransformerWorker" class="org.edu_sharing.alfresco.transformer.CollectionRefTransformerWorker">
     	<property name="mimetypeService" ref="mimetypeService"/>
     	 <property name="transformerConfig">

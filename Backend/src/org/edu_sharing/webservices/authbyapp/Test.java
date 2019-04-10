@@ -45,8 +45,8 @@ public class Test {
 					signed = signed + timestamp;
 					byte[] signature = sigTool.sign(sigTool.getPemPrivateKey(privateKey, CCConstants.SECURITY_KEY_ALGORITHM), signed, CCConstants.SECURITY_SIGN_ALGORITHM);
 						
-					String b64 = new Base64().encodeToString(signature);
-					String urlSig = URLEncoder.encode(new Base64().encodeToString(signature));
+					String b64 = java.util.Base64.getEncoder().encodeToString(signature);
+					String urlSig = URLEncoder.encode(java.util.Base64.getEncoder().encodeToString(signature));
 					//String urlSig = URLEncoder.encode(new Base64().encodeToString(signature));
 					
 					((Stub)stub).setHeader(new SOAPHeaderElement("http://webservices.edu_sharing.org","signature",b64));

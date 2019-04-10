@@ -114,8 +114,6 @@ export class LoginAppComponent  implements OnInit {
     }
 
     private login(){
-
-
         /*
         // test camera
         this.cordova.getPhotoFromCamera(

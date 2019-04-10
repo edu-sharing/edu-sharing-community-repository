@@ -164,6 +164,8 @@ export class MainNavComponent implements AfterViewInit{
     private elementsBottomY = 0;
     private fixScrollElements = false;
     private isSafe = false;
+    licenseDialog: boolean;
+    private licenseDetails: string;
   @HostListener('document:keydown', ['$event'])
   handleKeyboardEvent(event: KeyboardEvent) {
       if(event.code=="Escape" && this.canOpen && this.displaySidebar){
@@ -557,10 +559,10 @@ export class MainNavComponent implements AfterViewInit{
     },(error:any)=>this.checkConfig(buttons));
   }
   private openImprint(){
-    window.document.location.href=this.config.imprintUrl;
+    UIHelper.openUrl(this.config.imprintUrl,this.cordova);
   }
   private openPrivacy(){
-    window.document.location.href=this.config.privacyInformationUrl;
+    UIHelper.openUrl(this.config.privacyInformationUrl,this.cordova);
   }
   private checkConfig(buttons: any[]) {
     this.configService.getAll().subscribe((data:any)=>{
@@ -648,8 +650,10 @@ export class MainNavComponent implements AfterViewInit{
             this.licenseAgreementHTML = "Error loading content for license agreement node '" + nodeId + "'";
         });
       },(error:any)=>{
-          if(version==='0.0')
-            return;
+          if(version==='0.0') {
+              this.startTutorial();
+              return;
+          }
           this.licenseAgreement=true;
           this.licenseAgreementHTML = "Error loading metadata for license agreement node '" + nodeId + "'";
       })
@@ -678,8 +682,7 @@ export class MainNavComponent implements AfterViewInit{
           option.mediaQueryValue=UIConstants.MOBILE_TAB_SWITCH_WIDTH;
           option.isSeperateBottom=true;
           this.userMenuOptions.push(option);
-      }
-      for(let option of this.getConfigMenuHelpOptions()){
+      }for(let option of this.getConfigMenuHelpOptions()){
           option.mediaQueryType=UIConstants.MEDIA_QUERY_MAX_WIDTH;
           option.mediaQueryValue=UIConstants.MOBILE_TAB_SWITCH_WIDTH;
           this.userMenuOptions.push(option);
@@ -698,6 +701,12 @@ export class MainNavComponent implements AfterViewInit{
             option.isSeperateBottom=true;
             this.userMenuOptions.push(option);
         }
+        let option=new OptionItem('LICENSE_INFORMATION','lightbulb_outline',()=>this.showLicenses());
+        option.mediaQueryType=UIConstants.MEDIA_QUERY_MAX_WIDTH;
+        option.mediaQueryValue=UIConstants.MOBILE_TAB_SWITCH_WIDTH;
+        option.isSeperateBottom=true;
+        this.userMenuOptions.push(option);
+
         if(!this.isGuest){
             this.userMenuOptions.push(new OptionItem('EDIT_ACCOUNT','assignment_ind',()=>this.openProfile()));
         }
@@ -831,5 +840,21 @@ export class MainNavComponent implements AfterViewInit{
     }
     public finishPreloading(){
         MainNavComponent.preloading=false;
+    }
+
+    showLicenses() {
+        this.licenseDialog=true;
+        this.displaySidebar=false;
+        this.http.get('assets/licenses/'+Translation.getLanguage()+'.html',{responseType:'text'}).subscribe((text)=>{
+            this.licenseDetails=(text as any);
+        },(error)=>{
+            console.info("Could not load license data for "+Translation.getLanguage()+", using default en");
+            this.http.get('assets/licenses/en.html',{responseType:'text'}).subscribe((text)=>{
+                console.log(text);
+                this.licenseDetails=(text as any);
+            },(error)=> {
+                console.error(error);
+            });
+        });
     }
 }

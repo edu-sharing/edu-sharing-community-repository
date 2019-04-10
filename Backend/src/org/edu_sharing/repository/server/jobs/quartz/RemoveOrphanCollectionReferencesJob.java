@@ -74,17 +74,21 @@ public class RemoveOrphanCollectionReferencesJob extends AbstractJob{
 			SearchResultNodeRef result = searchService.search(token);
 			int deleted=0;
 			for(NodeRef node : result.getData()){
-				String ref=nodeService.getProperty(node.getStoreProtocol(),node.getStoreId(),node.getNodeId(),CCConstants.CCM_PROP_IO_ORIGINAL);
-				if(ref!=null && !nodeService.exists(node.getStoreProtocol(),node.getStoreId(),ref)){
-					logger.info("Found orphan reference "+node.getNodeId()+", removing it");
-					// parent=false == primary
-					nodeService.removeNode(node.getNodeId(),null,false);
-					deleted++;
+				try {
+					String ref = nodeService.getProperty(node.getStoreProtocol(), node.getStoreId(), node.getNodeId(), CCConstants.CCM_PROP_IO_ORIGINAL);
+					if (ref != null && !nodeService.exists(node.getStoreProtocol(), node.getStoreId(), ref)) {
+						logger.info("Found orphan reference " + node.getNodeId() + ", removing it");
+						// parent=false == primary
+						nodeService.removeNode(node.getNodeId(), null, false);
+						deleted++;
+					}
+				}catch(Throwable t){
+					logger.warn(t.getMessage(),t);
 				}
 			}
 			logger.info("RemoveOrphanCollectionReferencesJob finished, processed "+result.getData().size()+" references, deleted "+deleted);
 		} catch (Throwable e) {
-			e.printStackTrace();
+			logger.warn(e.getMessage(),e);
 		}
 	}
 	

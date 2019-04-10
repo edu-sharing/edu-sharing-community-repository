@@ -391,7 +391,7 @@
     "WILL_BE_SAVED_AT":"Will be stored at",
     "ADD_TO_COLLECTION":"Would you like to add the object to a collection?"
   },
-
+  "LICENSE_INFORMATION":"About edu-sharing",
   "LICENSE_AGREEMENT":{
     "TITLE":"License agreement",
     "CHECKBOX":"I read the license agreement and accept it",

@@ -143,7 +143,7 @@ export class WorkspaceFileUploadSelectComponent  {
   }
   updateButtons(){
     let ok=new DialogButton('OK',DialogButton.TYPE_PRIMARY,()=>this.setLink());
-    ok.disabled=this.disabled || !this._parent;
+    ok.disabled=this.disabled || (this.showPicker && !this._parent);
     this.buttons=[
         new DialogButton('CANCEL',DialogButton.TYPE_CANCEL,()=>this.cancel()),
         ok

@@ -132,7 +132,7 @@ input.mat-input-element, mat-label, .mat-select-value{
   text-transform: none;
 }
 .mat-menu-content{
-  width: 240px;
+  min-width: 200px;
   >button{
     color:$primary;
     display: flex;

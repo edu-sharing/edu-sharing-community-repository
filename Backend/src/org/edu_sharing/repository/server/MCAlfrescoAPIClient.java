@@ -57,6 +57,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import java.util.StringTokenizer;
+import java.util.stream.Collectors;
 
 import javax.transaction.UserTransaction;
 
@@ -847,17 +848,29 @@ public class MCAlfrescoAPIClient extends MCAlfrescoBaseClient {
 	public String formatData(String type, String key, Object value, String metadataSetId) {
 		String returnValue = null;
 		if (key != null && value != null) {
-
+			boolean processed=false;
 			// value is date than put a String with a long value so that it can
 			// be formated with userInfo later
+			if(value instanceof List){
+				List<Object> list = (List<Object>) value;
+				if(list.size()>0){
+					if(list.get(0) instanceof Date) {
+						returnValue = ValueTool.toMultivalue(
+								list.stream().
+										map((date) -> new Long(((Date)date).getTime()).toString()).
+										collect(Collectors.toList()).toArray(new String[0])
+						);
+						processed=true;
+					}
+				}
+			}
 			if (value instanceof Date) {
 
 				Date date = (Date) value;
-				if (date != null) {
-					returnValue = new Long(date.getTime()).toString();
-				}
-
-			} else {
+				returnValue = new Long(date.getTime()).toString();
+				processed=true;
+			}
+			if(!processed){
 				returnValue = getValue(type, key, value, metadataSetId);
 			}
 			// !(value instanceof MLText || value instanceof List): prevent sth.
@@ -1215,17 +1228,23 @@ public class MCAlfrescoAPIClient extends MCAlfrescoBaseClient {
 					dtd = propDef.getDataType();
 				if (Context.getCurrentInstance() != null && dtd != null
 						&& (dtd.getName().equals(DataTypeDefinition.DATE) || dtd.getName().equals(DataTypeDefinition.DATETIME))) {
-					String timeAsLongString = (String) entry.getValue();
+					String[] values = ValueTool.getMultivalue((String) entry.getValue());
+					String[] formattedValues=new String[values.length];
+					int i=0;
+					for(String value : values){
+						formattedValues[i++]=new DateTool().formatDate(new Long(value));
+					}
 					// put time as long i.e. for sorting or formating in gui
-					addAndOverwriteDateMap.put(entry.getKey() + CCConstants.LONG_DATE_SUFFIX, timeAsLongString);
+					// this is basically just a copy of the real value for backward compatibility
+					addAndOverwriteDateMap.put(entry.getKey() + CCConstants.LONG_DATE_SUFFIX, entry.getValue());
 					// put formated
-					addAndOverwriteDateMap.put(entry.getKey(), new DateTool().formatDate(new Long(timeAsLongString)));
+					addAndOverwriteDateMap.put(entry.getKey(), ValueTool.toMultivalue(formattedValues));
 				}
 				try{
 					MetadataWidget widget = mds.findWidget(CCConstants.getValidLocalName(entry.getKey()));
 					Map<String, MetadataKey> map = widget.getValuesAsMap();
 					if(!map.isEmpty()){
-						String[] keys=new ValueTool().getMultivalue((String) entry.getValue());
+						String[] keys=ValueTool.getMultivalue((String) entry.getValue());
 						String[] values=new String[keys.length];
 						for(int i=0;i<keys.length;i++)
 							values[i]=map.containsKey(keys[i]) ? map.get(keys[i]).getCaption() : keys[i];

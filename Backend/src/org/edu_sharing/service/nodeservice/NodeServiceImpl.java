@@ -266,15 +266,17 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
 				toSafe.put(id,widget.getDefaultvalue());
 				continue;
 			}
-			if(values==null || values.length==0)
+			// changed: otherwise reset values for multivalue fields is not possible
+			// if(values==null || values.length==0)
+			if(values==null)
 				continue;
 			if(!widget.isMultivalue() && values.length>1)
 				throw new IllegalArgumentException("Multiple values given for a non-multivalue widget: ID "+id+", widget type "+widget.getType());
 			if(widget.isMultivalue()){
-				toSafe.put(id,new ArrayList<String>(Arrays.asList(values)));
+				toSafe.put(id,values.length==0 ? null : new ArrayList<String>(Arrays.asList(values)));
 			}
 			else{
-				toSafe.put(id,values[0]);
+				toSafe.put(id,values.length==0 ? null : values[0]);
 			}
 		}
 
@@ -913,10 +915,12 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
 			throw new IllegalArgumentException("Setting templates for nodes is only supported for type "+CCConstants.CCM_TYPE_MAP);
 		}
 
-		QName qname=QName.createQName(CCConstants.CCM_ASSOC_METADATA_PRESETTING_TEMPLATE);
-		List<AssociationRef> result = nodeService.getTargetAssocs(new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, nodeId),qname);
-		if(result!=null && result.size()>0)
-			return result.get(0).getTargetRef().getId();
+		QName assocQName=QName.createQName(CCConstants.CCM_ASSOC_METADATA_PRESETTING_TEMPLATE);
+		//List<AssociationRef> result = nodeService.getTargetAssocs(new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, nodeId),qname);
+		NodeRef result = nodeService.getChildByName(new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, nodeId),ContentModel.ASSOC_CONTAINS,CCConstants.TEMPLATE_NODE_NAME);
+
+		if(result!=null)
+			return result.getId();
 		if(!create)
 			return null;
 
@@ -926,7 +930,7 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
 		String id=createNode(nodeId,CCConstants.CCM_TYPE_IO,props);
 		nodeService.createAssociation(new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE,nodeId),
 				new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE,id),
-				qname);
+				assocQName);
 		addAspect(id,CCConstants.CCM_ASPECT_METADATA_PRESETTING_TEMPLATE);
 		return id;
 	}

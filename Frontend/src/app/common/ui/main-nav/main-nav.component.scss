@@ -43,7 +43,7 @@
 .dialog{
   z-index:$dialogZIndex+5;
 }
-.card{
+.card-agreement{
   z-index:$dialogZIndex+6;
   .card-content{
     display:flex;
@@ -268,6 +268,23 @@ user-profile{
   margin-right: 5px;
   margin-left: 5px;
   margin-top: 3px;
+}
+$licenseInfoHeight:40px;
+.sidenav{
+  .sidenav-main{
+    min-height:calc(100% - #{$licenseInfoHeight});
+  }
+  .license-info{
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    padding:0 20px;
+    width: 100%;
+    height: $licenseInfoHeight;
+    color: $textLight;
+    font-size: 90%;
+    @include clickable();
+  }
 }
 .sidenav .button{
   padding:20px 30px;

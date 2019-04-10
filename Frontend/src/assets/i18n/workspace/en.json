@@ -53,6 +53,7 @@
     "FOLDER_PLACEHOLDER": "Foldername",
     "DELETE_TITLE_SINGLE":"Delete element?",
     "DELETE_MESSAGE_SINGLE":"Are you sure you want to delete '{{name}}'?",
+    "DELETE_MESSAGE_SINGLE_USAGES":"Are you sure you want to delete '{{name}}'?\n\nThe element is currently used {{usages}} times in collections or connected systems.\n\nBy deleting the element it will not longer be usable there.",
     "DELETE_TITLE":"Delete elements?",
     "DELETE_MESSAGE":"Do you want to remove all selected elements?",
     "TAB_INVITE":"Add",

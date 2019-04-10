@@ -247,6 +247,15 @@ div.download {
   }
 }
 
+@media (pointer: coarse) {
+  #sequence {
+    overflow-x: auto;
+    @include iosScrolling();
+  }
+  .scroller{
+    display: none;
+  }
+}
 @media screen and (max-width: $mobileWidth) {
   div.download i {
     font-size: 120%;
@@ -257,9 +266,8 @@ div.download {
   :host /deep/ .node-comments{
     min-width: unset;
     padding-right: 10px;
-    > div > div{
+    > div > div > span{
       display:none;
     }
   }
 }
-

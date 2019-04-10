@@ -75,6 +75,11 @@ h2{
 .btnAdd{
   margin-top: 10px;
   float:none!important;
+  display: inline-flex;
+  align-items: center;
+  .material-icons{
+    top: 0;
+  }
 }
 .moreOpen{
   margin-top: 20px;

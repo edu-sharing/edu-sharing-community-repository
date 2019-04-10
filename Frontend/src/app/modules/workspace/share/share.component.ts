@@ -162,8 +162,7 @@ export class WorkspaceShareComponent{
           this.inherit = data.permissions.inheritedPermissions;
           this.removePermissions(this.inherit, 'OWNER');
           this.removePermissions(data.permissions.localPermissions.permissions, 'OWNER');
-          for (let permission of data.permissions.localPermissions.permissions)
-            this.inherit.push(permission);
+          this.inherit = this.mergePermissions(this.inherit,data.permissions.localPermissions.permissions);
           this.updatePublishState();
           this.initialState=this.getState();
         }
@@ -532,6 +531,17 @@ export class WorkspaceShareComponent{
                 this.updateUsages(permissions,pos+1,true);
             });
         }
+    }
+
+    private mergePermissions(source: Permission[], add: Permission[]) {
+      let merge=source;
+      for(let p2 of add){
+        // do only add new, unique permissions
+        if(merge.filter((p1)=> Helper.objectEquals(p1,p2)).length==0){
+            merge.push(p2);
+        }
+      }
+      return merge;
     }
 
     updateButtons() {

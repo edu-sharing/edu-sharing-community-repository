@@ -34,9 +34,31 @@ $cardActionHeight:77px;
   margin-left:-250px!important;
 }
 
-.card .card-content{
-  height: calc(100% - #{$cardActionHeight});
-  margin-bottom: 0;
+.modal-card mat-card-content{
+  pre{
+    white-space: pre-line;
+  }
+  h1,h2,h3,h4,h5,h6{
+    margin: 1.5rem 0;
+  }
+  h1{
+    font-size:170%;
+  }
+  h2{
+    font-size: 150%;
+  }
+  h3{
+    font-size: 140%;
+  }
+  h4{
+    font-size: 130%;
+  }
+  h5{
+    font-size: 120%;
+  }
+  h6{
+    font-size: 110%;
+  }
 }
 .card.card-no-action{
   .card-content {
@@ -282,7 +304,7 @@ input[type=search]{
 @media screen and (max-width: ($mobileHeightLandscape)) {
   .center-card .btn,
   .center-card .btn-flat{
-    padding:0 1.2rem;
+    padding:0 .2rem;
   }
 }
 @media screen and (max-height: ($mobileHeight)) {
