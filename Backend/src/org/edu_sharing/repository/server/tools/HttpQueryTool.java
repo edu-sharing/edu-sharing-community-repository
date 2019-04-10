@@ -104,6 +104,11 @@ public class HttpQueryTool {
 	public String query(String url, Map<String,String> header, HttpMethodBase _method) {
 		HttpMethodBase method=_method==null ? new GetMethod(url) : _method;
 		method.setFollowRedirects(true);
+		
+		if(basicAuthUn != null && basicAuthPw != null) {
+			method.addRequestHeader("Authorization", "Basic " +java.util.Base64.getEncoder().encodeToString((basicAuthUn +":" +basicAuthPw) .getBytes()));
+		}
+		
 		if(header != null){
 			for(Map.Entry<String, String> entry : header.entrySet()){
 				method.addRequestHeader(entry.getKey(), entry.getValue());
@@ -113,12 +118,12 @@ public class HttpQueryTool {
 	}
 	public String query(HttpMethodBase method) {
 		HttpClient client = new HttpClient();
-	
+
 		client.getParams().setParameter("http.useragent", "Test Client");
-		
+
 
 		if(basicAuthUn != null && basicAuthPw != null) {
-			method.addRequestHeader("Authorization", "Basic " + Base64.encodeBase64String((basicAuthUn +":" +basicAuthPw) .getBytes()));  
+			method.addRequestHeader("Authorization", "Basic " + Base64.encodeBase64String((basicAuthUn +":" +basicAuthPw) .getBytes()));
 		}
 
 		try {

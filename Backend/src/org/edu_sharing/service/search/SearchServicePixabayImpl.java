@@ -21,6 +21,7 @@ import javax.net.ssl.SSLSession;
 import javax.net.ssl.TrustManager;
 import javax.net.ssl.X509TrustManager;
 
+import org.apache.commons.collections.map.LRUMap;
 import org.apache.log4j.Logger;
 import org.edu_sharing.metadataset.v2.MetadataSetV2;
 import org.edu_sharing.repository.client.tools.CCConstants;
@@ -50,7 +51,7 @@ public class SearchServicePixabayImpl extends SearchServiceAdapter{
 
 	String APIKey = null;
 			
-	private static ConcurrentMap<String,String> searchCache=new MapMaker().expiration(30, TimeUnit.MINUTES).makeMap();
+	private static LRUMap searchCache=new LRUMap(1000);
 	public SearchServicePixabayImpl(String appId) {
 		ApplicationInfo appInfo = ApplicationInfoList.getRepositoryInfoById(appId);
 		this.repositoryId = appInfo.getAppId();		
@@ -93,7 +94,7 @@ public class SearchServicePixabayImpl extends SearchServiceAdapter{
 		String url=PIXABAY_API+"?key="+URLEncoder.encodeUriComponent(apiKey)+"&lang="+lang+path;
 		String jsonString;
 		if(searchCache.containsKey(url)){
-			jsonString=searchCache.get(url);
+			jsonString= (String) searchCache.get(url);
 		}
 		else{
 			URL urlURL=new URL(url);

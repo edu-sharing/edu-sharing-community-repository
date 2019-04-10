@@ -255,7 +255,7 @@ public class RenderingProxy extends HttpServlet {
 					value = esuid + "@" + homeRep.getAppId();
 
 					byte[] esuidEncrptedBytes = encryptionTool.encrypt(value.getBytes(), encryptionTool.getPemPublicKey(remoteRepo.getPublicKey()));
-					value = Base64.encodeBase64String(esuidEncrptedBytes);
+					value = java.util.Base64.getEncoder().encodeToString(esuidEncrptedBytes);
 
 				}catch(Exception e){
 					throw new RenderingException(HttpServletResponse.SC_BAD_REQUEST,"remote user auth failed "+ rep_id,RenderingException.I18N.invalid_parameters,e);
@@ -270,8 +270,8 @@ public class RenderingProxy extends HttpServlet {
 							targetApplication = ApplicationInfoList.getRepositoryInfoById(rep_id);
 						}
 						byte[] userEncryptedBytes = encryptionTool.encrypt(usernameDecrypted.getBytes(), encryptionTool.getPemPublicKey(targetApplication.getPublicKey()));
-						value = Base64.encodeBase64String(userEncryptedBytes);
-
+						value = java.util.Base64.getEncoder().encodeToString(userEncryptedBytes);
+	
 					}catch(Exception e) {
 						logger.error(e.getMessage(), e);
 					}
@@ -347,7 +347,7 @@ public class RenderingProxy extends HttpServlet {
 		String ticket = null;
 		Encryption enc = new Encryption("RSA");
 		try {
-			ticket = enc.decrypt(Base64.decodeBase64(encTicket.getBytes()), enc.getPemPrivateKey(ApplicationInfoList.getHomeRepository().getPrivateKey().trim()));
+			ticket = enc.decrypt(java.util.Base64.getDecoder().decode(encTicket.getBytes()), enc.getPemPrivateKey(ApplicationInfoList.getHomeRepository().getPrivateKey().trim()));
 		}catch(GeneralSecurityException e) {
 			throw new RenderingException(HttpServletResponse.SC_BAD_REQUEST,e.getMessage(),RenderingException.I18N.encryption,e);
 		}
@@ -376,7 +376,7 @@ public class RenderingProxy extends HttpServlet {
 
 		String version=getVersion(req);
 		String urlWindow = URLTool.getNgRenderNodeUrl(nodeId,version,false,(repoInfo != null) ? repoInfo.getAppId() : null);
-		
+
 
 		Map parameterMap = req.getParameterMap();
 		for(Object o : parameterMap.entrySet()) {
@@ -393,9 +393,9 @@ public class RenderingProxy extends HttpServlet {
 			}
 			urlWindow = UrlTool.setParam(urlWindow,key,value);
 		}
-		
+
 		logger.debug("urlWindow:" + urlWindow);
-		
+
 		resp.sendRedirect(urlWindow);
 	}
 

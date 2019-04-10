@@ -293,7 +293,7 @@ public class AuthenticationFilterPreview implements javax.servlet.Filter {
 					if(privateKey != null){
 						byte[] signature = sigTool.sign(sigTool.getPemPrivateKey(privateKey, CCConstants.SECURITY_KEY_ALGORITHM), data, CCConstants.SECURITY_SIGN_ALGORITHM);
 							
-						String urlSig = URLEncoder.encode(new Base64().encodeToString(signature));
+						String urlSig = URLEncoder.encode(java.util.Base64.getEncoder().encodeToString(signature));
 						url = UrlTool.setParam(url, "sig",urlSig);
 					}
 				} catch (GeneralSecurityException e) {

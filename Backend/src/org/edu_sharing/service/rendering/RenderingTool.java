@@ -56,7 +56,7 @@ public class RenderingTool {
 
 		renderingService = UrlTool.setParam(renderingService, "sig", getSignatureSigned(repInfo.getAppId(),nodeId,timestamp));
 		return renderingService;
-		
+
 	}
 	
 	/**
@@ -83,7 +83,7 @@ public class RenderingTool {
 			throw new GeneralSecurityException("no privateKey available");
 		}
 		byte[] signature = sig.sign(sig.getPemPrivateKey(privateKey, CCConstants.SECURITY_KEY_ALGORITHM), data, CCConstants.SECURITY_SIGN_ALGORITHM);
-		return URLEncoder.encode(new Base64().encodeToString(signature));
+		return URLEncoder.encode(java.util.Base64.getEncoder().encodeToString(signature));
 
 	}
 
@@ -129,7 +129,7 @@ public class RenderingTool {
 		try {
 			Encryption encryptionTool = new Encryption("RSA");
 			byte[] userEncryptedBytes = encryptionTool.encrypt(username.getBytes(), encryptionTool.getPemPublicKey(appInfoRender.getPublicKey()));
-			usernameEncrypted = Base64.encodeBase64String(userEncryptedBytes);
+			usernameEncrypted = java.util.Base64.getEncoder().encodeToString(userEncryptedBytes);
 			usernameEncrypted = URLEncoder.encode(usernameEncrypted, "UTF-8");
 			return usernameEncrypted;
 		}catch(Exception e) {

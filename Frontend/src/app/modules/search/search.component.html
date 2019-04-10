@@ -66,11 +66,11 @@
             ></small-collection>
             <actionbar class="actionbarFrame"
                        [backgroundType]="addToCollection ? 'primary' : 'bright'"
-                       *ngIf="actionOptions && actionOptions.length && !(searchService.sidenavOpened && isMobileHeight())"
+                       *ngIf="actionOptions && actionOptions.length"
                        [options]="actionOptions"></actionbar>
         </div>
     </div>
-    <div class="card card-action center-card card-high card-wide" *ngIf="(searchService.sidenavOpened && isMobileHeight())">
+    <div class="card card-action center-card card-high card-wide" *ngIf="(searchService.sidenavOpened && isMobileHeight() && isMobileWidth())">
         <div class="card-content">
             <div class="card-cancel" (click)="toggleSidenav()"><i class="material-icons">close</i></div>
             <div class="card-title">{{'SEARCH.EXPANDED_SEARCH' | translate }}</div>
@@ -247,13 +247,18 @@
                         {{'SEARCH.QUERY_NO_RESULT' | translate}}
                     </div>
                     <div class="heading" *ngIf="searchService.searchResult.length">
-                        <div [class.clickable]="searchService.sort.materialsColumns" (click)="searchService.sort.materialsColumns ? searchService.sort.materials=true : null">
+                        <div>
                             {{ 'SEARCH.MATERIALS' | translate}}
                             <span *ngIf="searchService.resultCount.materials && currentRepository!='-all-'">({{searchService.resultCount.materials}})</span>
-                            <i *ngIf="searchService.sort.materialsColumns" class="material-icons">arrow_{{searchService.sort.materialsSortAscending ? 'upward' : 'downward'}}</i>
+                            <div class="sorting" [class.clickable]="searchService.sort.materialsColumns" (click)="searchService.sort.materialsColumns ? searchService.sort.materials=true : null">
+                                <div class="sorting-info">
+                                    <div>{{'NODE.'+searchService.sort.materialsSortBy | translate}}</div>
+                                    <i *ngIf="searchService.sort.materialsColumns" class="material-icons">arrow_{{searchService.sort.materialsSortAscending ? 'upward' : 'downward'}}</i>
+                                </div>
+                            </div>
+                            <sort-dropdown [(open)]="searchService.sort.materials" [columns]="searchService.sort.materialsColumns" [sortAscending]="searchService.sort.materialsSortAscending" [sortBy]="searchService.sort.materialsSortBy" (onSort)="sortMaterials($event)"></sort-dropdown>
                         </div>
                     </div>
-                    <sort-dropdown [(open)]="searchService.sort.materials" [columns]="searchService.sort.materialsColumns" [sortAscending]="searchService.sort.materialsSortAscending" [sortBy]="searchService.sort.materialsSortBy" (onSort)="sortMaterials($event)"></sort-dropdown>
                     <div class="heading" *ngIf="searchService.searchResult.length && searchService.ignored && searchService.ignored.length">{{ 'SEARCH.IGNORED_PARAMETERS' | translate}}</div>
                     <listTable
                             [nodes]="searchService.searchResult"
@@ -263,8 +268,13 @@
                             [options]="options"
                             [dragDrop]="false"
                             [canDrop]="canDrop"
+                            [sortByMobile]="false"
+                            [sortBy]="searchService.sort.materialsSortBy"
+                            [sortAscending]="searchService.sort.materialsSortAscending"
+                            [possibleSortByFields]="searchService.sort.materialsColumns"
+                            (sortListener)="sortMaterials($event)"
                             [hasCheckbox]="hasCheckbox"
-                            [hasHeading]="false"
+                            [hasHeading]="true"
                             [isClickable]="true"
                             [viewType]="searchService.viewType"
                             [validatePermissions]="addToCollection ? permissionAddToCollection : null"

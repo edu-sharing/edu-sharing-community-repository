@@ -24,7 +24,7 @@
       </div>
 
     <div class="card-action">
-      <a class="waves-effect waves-light btn" [class.disabled]="!_name.trim()" (click)="create()" tabindex="0" (keyup.enter)="create()">{{'CREATE' | translate }}</a>
+      <a class="waves-effect waves-light btn" (click)="create()" tabindex="0" (keyup.enter)="create()">{{'CREATE' | translate }}</a>
       <a class="btn-flat" tabindex="0" (click)="cancel()" (keyup.enter)="cancel()">{{'CANCEL' | translate }}</a>
     </div>
     </div>

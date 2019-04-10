@@ -11,6 +11,7 @@ import java.util.concurrent.TimeUnit;
 import javax.net.ssl.HttpsURLConnection;
 
 import org.apache.camel.util.LRUCache;
+import org.apache.commons.collections.map.LRUMap;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.server.SearchResultNodeRef;
 import org.edu_sharing.repository.server.tools.ApplicationInfo;
@@ -23,7 +24,7 @@ public class NodeServicePixabayImpl extends NodeServiceAdapter{
 
 	private String repositoryId;
 	private String APIKey;
-	private static ConcurrentMap<String,HashMap<String, Object>> propertyCache=new MapMaker().expiration(60, TimeUnit.MINUTES).makeMap();
+	private static LRUMap propertyCache=new LRUMap(1000);
 	public NodeServicePixabayImpl(String appId) {
 		super(appId);
 		ApplicationInfo appInfo = ApplicationInfoList.getRepositoryInfoById(appId);
@@ -46,7 +47,7 @@ public class NodeServicePixabayImpl extends NodeServiceAdapter{
 	@Override
 	public HashMap<String, Object> getProperties(String storeProtocol, String storeId, String nodeId) throws Throwable {
 		if(propertyCache.containsKey(nodeId))
-			return propertyCache.get(nodeId);
+			return (HashMap<String, Object>) propertyCache.get(nodeId);
 		
 		// Querying by "id" is no longer supported.
 		// some api keys still have it, we can still try it

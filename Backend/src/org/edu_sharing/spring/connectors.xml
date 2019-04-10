@@ -19,6 +19,7 @@
 							<property name="icon" value="edit"/>
 							<property name="showNew" value="true"/>
 							<property name="onlyDesktop" value="false" />
+							<property name="hasViewMode" value="true" />
 							<property name="filetypes">
 								<bean class="java.util.ArrayList">
 									<constructor-arg>

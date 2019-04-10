@@ -8,6 +8,8 @@ import java.util.Map;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectWriter;
+import com.fasterxml.jackson.databind.SerializationFeature;
+import com.google.gson.Gson;
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.service.cmr.repository.StoreRef;
 import org.apache.commons.httpclient.methods.PostMethod;
@@ -85,7 +87,7 @@ public class RenderingServiceImpl implements RenderingService{
 			return getDetails(renderingServiceUrl, data);
 		}catch(Throwable t) {
 			logger.warn(t.getMessage(),t);
-			return RenderingErrorServlet.errorToHTML((HttpServletRequest) Context.getCurrentInstance().getRequest().getSession().getServletContext(),
+			return RenderingErrorServlet.errorToHTML(Context.getCurrentInstance().getRequest(),
 					new RenderingException(HttpServletResponse.SC_INTERNAL_SERVER_ERROR,t.getMessage(),RenderingException.I18N.unknown,t));
 			/*
 			String repository=VersionService.getVersionNoException(VersionService.Type.REPOSITORY);
@@ -109,8 +111,12 @@ public class RenderingServiceImpl implements RenderingService{
 	@Override
 	public String getDetails(String renderingServiceUrl, RenderingServiceData data) throws JsonProcessingException, UnsupportedEncodingException {
 		PostMethod post = new PostMethod(renderingServiceUrl);
-		ObjectWriter ow = new ObjectMapper().writer().withDefaultPrettyPrinter();
+		/*
+		ObjectMapper mapper = new ObjectMapper();
+		ObjectWriter ow = mapper.writer().withDefaultPrettyPrinter();
 		String json = ow.writeValueAsString(data);
+		*/
+		String json=new Gson().toJson(data);
 		/*
 		Encryption encryption=new Encryption("RSA");
 		try {

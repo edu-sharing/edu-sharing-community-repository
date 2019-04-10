@@ -162,6 +162,10 @@
 	      <url-pattern>/eduservlet/*</url-pattern>
    </filter-mapping>
    <filter-mapping>
+       <filter-name>Edu Context Management Filter</filter-name>
+       <url-pattern>/share</url-pattern>
+   </filter-mapping>
+   <filter-mapping>
 	      <filter-name>Edu Context Management Filter</filter-name>
 	      <url-pattern>/jsp/*</url-pattern>
    </filter-mapping>
@@ -261,6 +265,10 @@
        <filter-name>Edu-Sharing Guest Filter</filter-name>
        <url-pattern>/eduservlet/sitemap</url-pattern>
    </filter-mapping>
+    <filter-mapping>
+        <filter-name>Edu-Sharing Guest Filter</filter-name>
+        <url-pattern>/eduservlet/oai/*</url-pattern>
+    </filter-mapping>
     <filter-mapping>
         <filter-name>Edu-Sharing Guest Filter</filter-name>
         <url-pattern>/eduservlet/oembed</url-pattern>
@@ -480,6 +488,10 @@
     	<servlet-class>org.edu_sharing.repository.server.DownloadServlet</servlet-class>
     </servlet>
     <servlet>
+        <servlet-name>OaiServlet</servlet-name>
+        <servlet-class>org.edu_sharing.repository.server.oai.OaiServlet</servlet-class>
+    </servlet>
+    <servlet>
         <servlet-name>SitemapServlet</servlet-name>
         <servlet-class>org.edu_sharing.repository.server.sitemap.SitemapServlet</servlet-class>
     </servlet>
@@ -667,6 +679,10 @@
         <url-pattern>/eduservlet/sitemap</url-pattern>
     </servlet-mapping>
     <servlet-mapping>
+        <servlet-name>OaiServlet</servlet-name>
+        <url-pattern>/eduservlet/oai/provider</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
         <servlet-name>RobotsTXTServlet</servlet-name>
         <url-pattern>/robots.txt</url-pattern>
     </servlet-mapping>
@@ -717,7 +733,7 @@
         <servlet-name>RenderingErrorServlet</servlet-name>
         <url-pattern>/rendering-error</url-pattern>
     </servlet-mapping>
-    
+
     <!-- Axis mapping stuff -->
     <servlet-mapping>
 		<servlet-name>AxisServlet</servlet-name>
