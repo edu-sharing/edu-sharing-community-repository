@@ -35,9 +35,20 @@ public class EduSharingNodeHelper {
         if (nodeService.hasAspect(node, QName.createQName(CCConstants.CCM_ASSOC_METADATA_PRESETTING_TEMPLATE))) {
             return true;
         }
-        if (CCConstants.CCM_VALUE_MAP_TYPE_FAVORITE.equals(mapType) || CCConstants.CCM_VALUE_MAP_TYPE_EDUGROUP.equals(mapType)) {
+        
+        if (CCConstants.CCM_VALUE_MAP_TYPE_FAVORITE.equals(mapType)) {
             return true;
         }
+        
+        if(CCConstants.CCM_VALUE_MAP_TYPE_EDUGROUP.equals(mapType)) {
+        	if(!filter.contains("edugroup")) {
+        		return true;
+        	}
+        }
+        //prevent later code filters only cause of filter is set
+		filter.remove("edugroup");
+        
+        
         if ((".DS_Store".equals(name) || "._.DS_Store".equals(name))) {
             return true;
         }
