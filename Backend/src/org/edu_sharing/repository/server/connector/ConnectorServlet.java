@@ -2,6 +2,7 @@ package org.edu_sharing.repository.server.connector;
 
 import java.io.IOException;
 import java.net.URLEncoder;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -14,6 +15,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.service.cmr.repository.NodeRef;
+import org.alfresco.service.cmr.repository.StoreRef;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.log4j.Logger;
 import org.apache.oltu.oauth2.as.issuer.MD5Generator;
@@ -77,9 +79,18 @@ public class ConnectorServlet extends HttpServlet  {
 		boolean readOnly=true;
 		try{
 			MCAlfrescoBaseClient repoClient = null;
+			NodeService nodeService = NodeServiceFactory.getLocalService();
 			repoClient = (MCAlfrescoBaseClient)RepoFactory.getInstance(homeRepo.getAppId(), req.getSession());
+			// if collection ref, use original node
+			String realNodeId=nodeId;
+			if(Arrays.asList(nodeService.getAspects(StoreRef.PROTOCOL_WORKSPACE,StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(),nodeId)).contains(CCConstants.CCM_ASPECT_COLLECTION_IO_REFERENCE)){
+				logger.info("ConnectorServlet detected io reference "+nodeId+", will sent original io node ref to service");
+				nodeId = (String) nodeService.getProperties(StoreRef.PROTOCOL_WORKSPACE,StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(),nodeId).get(CCConstants.CCM_PROP_IO_ORIGINAL);
+			}
+			// for writing, access to the original is required
 			readOnly=!repoClient.hasPermissions(nodeId, new String[]{CCConstants.PERMISSION_WRITE});
-			if(!repoClient.hasPermissions(nodeId, new String[]{CCConstants.PERMISSION_READ})){
+			// check if user has permissions on the real node (i.e. the reference io)
+			if(!repoClient.hasPermissions(realNodeId, new String[]{CCConstants.PERMISSION_READ})){
 				resp.sendError(HttpServletResponse.SC_FORBIDDEN);
 				return;
 			}
