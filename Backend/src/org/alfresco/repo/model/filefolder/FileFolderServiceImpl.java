@@ -20,7 +20,6 @@ package org.alfresco.repo.model.filefolder;
 
 import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
@@ -388,7 +387,7 @@ public class FileFolderServiceImpl extends AbstractBaseCopyService implements Fi
                 // use the helper which is also used by the local node service and filter out special nodes which are also invisible in workspace
                 List<NodeRef> toTransform = childRefs.stream().
                         map((ChildAssociationRef::getChildRef)).
-                        filter((NodeRef ref)->!EduSharingNodeHelper.shouldFilter(ref,Arrays.asList(new String[] {"allowEduGroup"}))).
+                        filter((NodeRef ref)->!EduSharingNodeHelper.shouldFilter(ref,null)).
                         collect(Collectors.toList());
                 results = toFileInfo(toTransform);
             }
