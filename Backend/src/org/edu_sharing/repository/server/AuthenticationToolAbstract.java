@@ -14,7 +14,7 @@ import org.edu_sharing.service.tracking.TrackingServiceFactory;
 
 public abstract class AuthenticationToolAbstract implements AuthenticationTool {
 
-	Logger log = Logger.getLogger(AuthenticationToolAbstract.class);
+	static Logger log = Logger.getLogger(AuthenticationToolAbstract.class);
 	
 	@Override
 	public void storeAuthInfoInSession(String username, String ticket, String authType, HttpSession session) {
@@ -63,10 +63,16 @@ public abstract class AuthenticationToolAbstract implements AuthenticationTool {
 	}
 	
 	public String getCurrentLocale(){
-		HttpSession session = Context.getCurrentInstance().getRequest().getSession();
-		String currentLocale = (String)session.getAttribute(CCConstants.AUTH_LOCALE);
-		if(currentLocale == null || currentLocale.trim().equals("")) currentLocale = "en_EN";
-		return currentLocale;
+		try {
+			HttpSession session = Context.getCurrentInstance().getRequest().getSession();
+			String currentLocale = (String) session.getAttribute(CCConstants.AUTH_LOCALE);
+			if (currentLocale == null || currentLocale.trim().equals("")) currentLocale = getPrimaryLocale();
+			return currentLocale;
+		}catch(Throwable t){
+			String primary=getPrimaryLocale();
+			log.info("error fetching current locale from session, will use primary "+primary);
+			return primary;
+		}
 	}
 	public String getCurrentLanguage(){
 		return getCurrentLocale().substring(0,2);

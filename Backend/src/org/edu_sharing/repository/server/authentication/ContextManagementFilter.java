@@ -2,11 +2,7 @@ package org.edu_sharing.repository.server.authentication;
 
 import java.io.IOException;
 
-import javax.servlet.FilterChain;
-import javax.servlet.FilterConfig;
-import javax.servlet.ServletException;
-import javax.servlet.ServletRequest;
-import javax.servlet.ServletResponse;
+import javax.servlet.*;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -30,13 +26,16 @@ import net.sf.acegisecurity.AuthenticationCredentialsNotFoundException;
 public class ContextManagementFilter implements javax.servlet.Filter {
 	
 	Logger log = Logger.getLogger(ContextManagementFilter.class);
-	
+
+	ServletContext context;
+
 	@Override
 	public void destroy() {
 	}
 	
 	@Override
 	public void init(FilterConfig config) throws ServletException {
+		this.context=config.getServletContext();
 	}
 	
 	@Override
@@ -46,8 +45,7 @@ public class ContextManagementFilter implements javax.servlet.Filter {
 				
 		try {
 			
-			Context.newInstance((HttpServletRequest)req , (HttpServletResponse)res);
-			
+			Context.newInstance((HttpServletRequest)req , (HttpServletResponse)res, context);
 			ScopeAuthenticationServiceFactory.getScopeAuthenticationService().setScopeForCurrentThread();
 			((HttpServletResponse)res).setHeader("Access-Control-Expose-Headers","X-Edu-Scope");
 			((HttpServletResponse)res).setHeader("X-Edu-Scope", NodeServiceInterceptor.getEduSharingScope());

@@ -2,6 +2,7 @@ package org.edu_sharing.repository.server.rendering;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.log4j.Logger;
+import org.edu_sharing.repository.server.authentication.Context;
 import org.edu_sharing.repository.server.tools.I18nServer;
 import org.springframework.extensions.webscripts.Runtime;
 
@@ -35,7 +36,10 @@ public class RenderingErrorServlet extends HttpServlet {
 
     public static String errorToHTML(HttpServletRequest req, RenderingException exception) {
         try {
-            File index = new File(req.getSession().getServletContext().getRealPath("rendering-error.html"));
+            if(req==null && Context.getCurrentInstance()!=null){
+                req=Context.getCurrentInstance().getRequest();
+            }
+            File index = new File(Context.getGlobalContext().getRealPath("rendering-error.html"));
             String html = FileUtils.readFileToString(index);
             if(exception!=null) {
                 String exceptionName="";

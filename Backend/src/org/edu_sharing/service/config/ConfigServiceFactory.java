@@ -16,7 +16,9 @@ public class ConfigServiceFactory {
 		return new ConfigServiceImpl();
 	}
 	public static Config getCurrentConfig() throws Exception {
-		return getCurrentConfig(Context.getCurrentInstance().getRequest());
+		if(Context.getCurrentInstance()!=null)
+			return getCurrentConfig(Context.getCurrentInstance().getRequest());
+		return getConfigService().getConfig();
 	}
 	public static Config getCurrentConfig(ServletRequest req) throws Exception {
 		try {

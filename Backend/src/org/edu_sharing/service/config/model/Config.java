@@ -33,6 +33,8 @@ public class Config {
 			for (String p : path) {
 				data = data.getClass().getDeclaredField(p).get(data);
 			}
+			if(data==null)
+				return defaultValue;
 			return (T) data;
 		}catch(Exception e){
 			logger.debug(name+" not found: "+e.getMessage()+". Using default: "+defaultValue);

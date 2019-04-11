@@ -4,7 +4,11 @@ import java.net.URLEncoder;
 import java.security.GeneralSecurityException;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ThreadPoolExecutor;
 
+import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.log4j.Logger;
 import org.edu_sharing.repository.client.tools.CCConstants;
@@ -18,7 +22,8 @@ import org.edu_sharing.repository.server.tools.security.Signing;
 import org.edu_sharing.service.mime.MimeTypesV2;
 
 public class RenderingTool {
-	
+
+	public static String DISPLAY_PRERENDER = "prerender";
 	public static String DISPLAY_DYNAMIC = "dynamic";
 	public static String DISPLAY_EMBED = "embed";
 	public static String DISPLAY_INLINE = "inline";
@@ -27,6 +32,8 @@ public class RenderingTool {
 	
 	static Logger logger = Logger.getLogger(RenderingTool.class);
 
+	// thread tasks for processing requests of pre-rendering objects
+	static ExecutorService prepareExecutor = Executors.newFixedThreadPool(1);
 	/**
 	 * this only works for alfresco repositories
 	 * 
@@ -139,12 +146,18 @@ public class RenderingTool {
 	}
 
 	public static void buildRenderingCache(String nodeId) {
-		try {
-			// @TODO: May we need to build up caches just for particular file types?
-			RenderingServiceFactory.getLocalService().getDetails(nodeId,null,null,null);
-		} catch (Exception e) {
-			logger.warn("Error building rendering cache for node "+nodeId+": "+e.getMessage());
-		}
+		prepareExecutor.execute(()->{
+			AuthenticationUtil.runAsSystem(()-> {
+				try {
+					// @TODO: May we need to build up caches just for particular file types?
+					//logger.info("Building rendering cache for node " + nodeId);
+					return RenderingServiceFactory.getLocalService().getDetails(nodeId, null, DISPLAY_PRERENDER, null);
+				} catch (Exception e) {
+					logger.warn("Error building rendering cache for node " + nodeId + ": " + e.getMessage(), e);
+					return e;
+				}
+			});
+		});
 	}
 
 

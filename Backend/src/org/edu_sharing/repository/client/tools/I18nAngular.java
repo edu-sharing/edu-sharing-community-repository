@@ -48,12 +48,13 @@ public class I18nAngular {
      * @return
      */
     public static String getTranslationAngular(String scope,String key,String language){
-        ServletContext context = Context.getCurrentInstance().getRequest().getSession().getServletContext();
         try {
             String override=getTranslationFromOverride(key,language);
             if(override!=null)
                 return override;
-            String json=FileUtils.readFileToString(new File(context.getRealPath("/assets/i18n/"+scope+"/"+language+".json")),"UTF-8");
+            // Using global instance singe it only is used for file reading
+            ServletContext servletContext = Context.getGlobalContext();
+            String json=FileUtils.readFileToString(new File(servletContext.getRealPath("/assets/i18n/"+scope+"/"+language+".json")),"UTF-8");
             JSONObject object=new JSONObject(json);
             String[] list=key.split("\\.");
             for(int i=0;i<list.length-1;i++){

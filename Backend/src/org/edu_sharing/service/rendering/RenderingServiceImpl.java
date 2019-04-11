@@ -87,7 +87,7 @@ public class RenderingServiceImpl implements RenderingService{
 			return getDetails(renderingServiceUrl, data);
 		}catch(Throwable t) {
 			logger.warn(t.getMessage(),t);
-			return RenderingErrorServlet.errorToHTML(Context.getCurrentInstance().getRequest(),
+			return RenderingErrorServlet.errorToHTML(null,
 					new RenderingException(HttpServletResponse.SC_INTERNAL_SERVER_ERROR,t.getMessage(),RenderingException.I18N.unknown,t));
 			/*
 			String repository=VersionService.getVersionNoException(VersionService.Type.REPOSITORY);
@@ -130,8 +130,7 @@ public class RenderingServiceImpl implements RenderingService{
 		try {
 			return new HttpQueryTool().query(post);
 		}catch(HttpException e){
-			return RenderingErrorServlet.errorToHTML(Context.getCurrentInstance().getRequest(),
-					new RenderingException(e));
+			return RenderingErrorServlet.errorToHTML(null,new RenderingException(e));
 		}
 	}
 	@Override
@@ -154,7 +153,9 @@ public class RenderingServiceImpl implements RenderingService{
 				nodeDao.getAllProperties()).render(RenderingTool.DISPLAY_INLINE.equals(displayMode) ? "io_render_inline" : "io_render"));
 
 		// user
-		data.setUser(PersonDao.getPerson(RepositoryDao.getHomeRepository(),user).asPersonSimple());
+		if(!AuthenticationUtil.isRunAsUserTheSystemUser()) {
+			data.setUser(PersonDao.getPerson(RepositoryDao.getHomeRepository(), user).asPersonSimple());
+		}
 
 		// context/config
 		data.setConfigValues(ConfigServiceFactory.getCurrentConfig().values);
