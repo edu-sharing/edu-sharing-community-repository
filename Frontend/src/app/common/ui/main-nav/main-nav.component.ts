@@ -854,16 +854,17 @@ export class MainNavComponent implements AfterViewInit{
     showLicenses() {
         this.licenseDialog=true;
         this.displaySidebar=false;
-        this.http.get('assets/licenses/'+Translation.getLanguage()+'.html',{responseType:'text'}).subscribe((text)=>{
+        /*this.http.get('assets/licenses/'+Translation.getLanguage()+'.html',{responseType:'text'}).subscribe((text)=>{
             this.licenseDetails=(text as any);
         },(error)=>{
             console.info("Could not load license data for "+Translation.getLanguage()+", using default en");
+            */
             this.http.get('assets/licenses/en.html',{responseType:'text'}).subscribe((text)=>{
                 console.log(text);
                 this.licenseDetails=(text as any);
             },(error)=> {
                 console.error(error);
             });
-        });
+        //});
     }
 }
