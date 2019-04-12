@@ -112,6 +112,8 @@ export var ROUTES=[
 
     // messages
     { path: UIConstants.ROUTER_PREFIX+'messages/:message', component: MessagesComponent },
+    // error (same as message)
+    { path: UIConstants.ROUTER_PREFIX+'error/:message', component: MessagesComponent },
 
     // link-share
     { path: UIConstants.ROUTER_PREFIX+'sharing', component: SharingComponent },
