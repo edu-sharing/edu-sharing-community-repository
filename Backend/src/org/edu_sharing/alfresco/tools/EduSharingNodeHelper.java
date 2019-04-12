@@ -47,6 +47,15 @@ public class EduSharingNodeHelper {
         }
         //prevent later code filters only cause of filter is set
 		filter.remove("edugroup");
+		
+		//@TODO change this in 4.2
+		if(CCConstants.CCM_VALUE_MAP_TYPE_USERSAVEDSEARCH.equals(mapType)) {
+        	if(!filter.contains("savedsearch")) {
+        		return true;
+        	}
+        }
+        //prevent later code filters only cause of filter is set
+		filter.remove("savedsearch");
         
         
         if ((".DS_Store".equals(name) || "._.DS_Store".equals(name))) {
