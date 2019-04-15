@@ -72,6 +72,8 @@ public class AuthenticationFilter implements javax.servlet.Filter {
 	    
 	    //set the locale
 	    String locale = httpReq.getParameter("locale");
+	    if(locale==null && httpReq.getLocale()!=null)
+	    	locale=httpReq.getLocale().toString();
 	    if(LocaleValidator.validate(locale)){
 	    	log.info("current locale:"+locale);
 	    	httpReq.getSession().setAttribute(CCConstants.AUTH_LOCALE,locale);

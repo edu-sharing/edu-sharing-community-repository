@@ -67,6 +67,8 @@ public class ApiAuthenticationFilter implements javax.servlet.Filter {
 		HashMap<String, String> validatedAuth = authTool.validateAuthentication(session);
 		
 		String locale = httpReq.getHeader("locale");
+		if(locale==null && httpReq.getLocale()!=null)
+			locale=httpReq.getLocale().toString();
 		String authHdr = httpReq.getHeader("Authorization");
 
 		// always take the header so we can auth when a guest is activated
