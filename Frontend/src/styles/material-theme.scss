@@ -105,8 +105,9 @@ input.mat-input-element, mat-label, .mat-select-value{
   margin-top: -6px;
 }
 .mat-checkbox-inner-container{
-  width:18px!important;
-  height:18px!important;
+  width:18px !important;
+  height:18px !important;
+  margin-right: 18px !important;
   .mat-checkbox-frame {
     border-color: $primary;
     background-color: #fff;
@@ -159,8 +160,8 @@ label .label-secondary{
   font-size: 90%;
   color: $textLight;
 }
-// better contrast ratio
-.mat-card-subtitle,.mat-hint{
+
+.mat-card-subtitle,.mat-hint, .mat-slide-toggle-content{
   color: $textLight;
 }
 // Mobile Menus at bottom

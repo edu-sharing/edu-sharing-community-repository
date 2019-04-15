@@ -37,7 +37,7 @@
 .groupInvite {
   padding: 10px 20px;
   padding-top: 26px;
-  background-color: $actionDialogBackground;
+  //background-color: $actionDialogBackground;
   flex-direction: column;
 }
 .searchIcon{
@@ -105,7 +105,8 @@ a.active{
 .publish{
   margin-top: 20px;
   padding:20px 20px;
-  padding-right:30px;
+  padding-right: 30px;
+  background-color: $actionDialogBackground;
   .publishElements{
     float: left;
     max-width: 495px;
