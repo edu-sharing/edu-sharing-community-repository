@@ -388,7 +388,7 @@ public class FileFolderServiceImpl extends AbstractBaseCopyService implements Fi
                 // use the helper which is also used by the local node service and filter out special nodes which are also invisible in workspace
                 List<NodeRef> toTransform = childRefs.stream().
                         map((ChildAssociationRef::getChildRef)).
-                        filter((NodeRef ref)->!EduSharingNodeHelper.shouldFilter(ref,new ArrayList<String>(Arrays.asList(new String[] {EduSharingNodeHelper.KEEP_EDUGROUP_FOLDER, EduSharingNodeHelper.KEEP_MACOS_HIDDENFILES})))).
+                        filter((NodeRef ref)->!EduSharingNodeHelper.shouldFilter(ref,new ArrayList<String>(Arrays.asList(new String[] {"edugroup"})))).
                         collect(Collectors.toList());
                 results = toFileInfo(toTransform);
             }

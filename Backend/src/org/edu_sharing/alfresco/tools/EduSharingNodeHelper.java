@@ -13,13 +13,6 @@ import java.util.List;
 
 public class EduSharingNodeHelper {
     public static ServiceRegistry serviceRegistry = (ServiceRegistry)AlfAppContextGate.getApplicationContext().getBean(ServiceRegistry.SERVICE_REGISTRY);
-    
-    public static final String KEEP_MACOS_HIDDENFILES = "macos_hiddenfiles";
-    
-    public static final String KEEP_EDUGROUP_FOLDER = "edugroup";
-    
-    public static final String KEEP_SAVED_SEARCH = "savedsearch";
-    
     public static boolean shouldFilter(NodeRef node, List<String> filter) {
         NodeService nodeService = serviceRegistry.getNodeService();
         // filter nodes for link inivitation and usages
@@ -48,35 +41,26 @@ public class EduSharingNodeHelper {
         }
         
         if(CCConstants.CCM_VALUE_MAP_TYPE_EDUGROUP.equals(mapType)) {
-        	if(!filter.contains(KEEP_EDUGROUP_FOLDER)) {
+        	if(!filter.contains("edugroup")) {
         		return true;
         	}
         }
         //prevent later code filters only cause of filter is set
-		filter.remove(KEEP_EDUGROUP_FOLDER);
+		filter.remove("edugroup");
 		
 		//@TODO change this in 4.2
 		if(CCConstants.CCM_VALUE_MAP_TYPE_USERSAVEDSEARCH.equals(mapType)) {
-        	if(!filter.contains(KEEP_SAVED_SEARCH)) {
+        	if(!filter.contains("savedsearch")) {
         		return true;
         	}
         }
         //prevent later code filters only cause of filter is set
-		filter.remove(KEEP_SAVED_SEARCH);
+		filter.remove("savedsearch");
         
         
         if ((".DS_Store".equals(name) || "._.DS_Store".equals(name))) {
             return true;
         }
-        
-        if(name != null && name.startsWith("._")) {
-        	if(!filter.contains(KEEP_MACOS_HIDDENFILES)) {
-        		return true;
-        	}
-        }
-        filter.remove(KEEP_MACOS_HIDDENFILES);
-        
-        
         if(filter.size()==0)
             return false;
         boolean shouldFilter = true;
