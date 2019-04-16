@@ -107,11 +107,16 @@ input.mat-input-element, mat-label, .mat-select-value{
 .mat-checkbox-inner-container{
   width:18px !important;
   height:18px !important;
-  margin-right: 18px !important;
+  margin: 2px 18px auto 0 !important;
   .mat-checkbox-frame {
     border-color: $primary;
     background-color: #fff;
   }
+}
+.mat-checkbox-label {
+  line-height: 17pt !important;
+  font-size: 1rem;
+  color: $textMain;
 }
 .mat-raised-button{
   color: $primary;
@@ -163,6 +168,17 @@ label .label-secondary{
 
 .mat-card-subtitle,.mat-hint, .mat-slide-toggle-content{
   color: $textLight;
+}
+
+// Show toggle on the right place
+.toggle-reverse{
+  .mat-slide-toggle-label {
+    flex-direction: row-reverse;
+    margin: 10px 4px;
+  }
+  .mat-slide-toggle-content {
+    margin-right: 18px;
+  }
 }
 // Mobile Menus at bottom
 @media screen and (max-width:  ($mobileWidth - $mobileStage*1)) {

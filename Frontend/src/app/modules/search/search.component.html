@@ -154,7 +154,7 @@
      </div>
      <div *ngIf="sidenavTab==1">
        <div class="saved-search-toggle">
-           <mat-slide-toggle [(ngModel)]="savedSearchOwn" (change)="loadSavedSearch()">{{ 'SEARCH.SAVED_SEARCH_ONLY_OWN' | translate}}</mat-slide-toggle>
+           <mat-slide-toggle class="toggle-reverse" [(ngModel)]="savedSearchOwn" (change)="loadSavedSearch()">{{ 'SEARCH.SAVED_SEARCH_ONLY_OWN' | translate}}</mat-slide-toggle>
        </div>
        <form *ngIf="!savedSearchOwn" (ngSubmit)="setSavedSearchQuery(savedSearchQueryModel)">
          <input type="search" name="savedSearchQuery" [(ngModel)]="savedSearchQueryModel" placeholder="{{'SEARCH.SAVED_SEARCH_QUERY' | translate}}">

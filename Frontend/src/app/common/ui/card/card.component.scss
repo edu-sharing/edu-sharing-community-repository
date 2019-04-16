@@ -55,6 +55,9 @@ $height-xxlarge:800px;
         overflow: hidden;
         text-overflow: ellipsis;
       }
+      .mat-card-title{
+        color: $textMain;
+      }
     }
     background-color: $backgroundColor;
     border-radius: 2px;
