@@ -195,6 +195,10 @@ public class AuthenticationFilter implements javax.servlet.Filter {
 		boolean allowSSO = true;
 		try {
 			Config config=ConfigServiceFactory.getCurrentConfig(req);
+			// local login requested -> do not redirect on server-side
+			if(req.getParameter("local")!=null && Boolean.parseBoolean(req.getParameter("local"))){
+				allowSSO = false;
+			}
 			if(!(config.values.loginUrl != null && 
 					config.values.loginUrl.contains("edu-sharing/shibboleth"))){
 				// client based redirect, disable server-side redirect (guest support)
