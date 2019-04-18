@@ -124,6 +124,7 @@ input.mat-input-element, mat-label, .mat-select-value{
 .mat-radio-label,.mat-checkbox-layout{
   // do allow to wrap long labels in material radio groups (e.g. license dialog)
   white-space: normal!important;
+  align-items: baseline !important;
 }
 .mat-button-wrapper{
   display: flex !important;
@@ -174,7 +175,6 @@ label .label-secondary{
 .toggle-reverse{
   .mat-slide-toggle-label {
     flex-direction: row-reverse;
-    margin: 10px 4px;
   }
   .mat-slide-toggle-content {
     margin-right: 18px;
