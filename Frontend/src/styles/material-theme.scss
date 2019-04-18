@@ -113,6 +113,11 @@ input.mat-input-element, mat-label, .mat-select-value{
     background-color: #fff;
   }
 }
+.mat-radio-container {
+  .mat-radio-outer-circle {
+    border-color: $primary;
+  }
+}
 .mat-checkbox-label {
   line-height: 17pt !important;
   font-size: 1rem;
