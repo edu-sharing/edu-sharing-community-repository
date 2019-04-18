@@ -291,27 +291,21 @@ mat-tab-body-content{
   color:$textLight;
 }
 .share-link{
-  position: absolute;
-  top: -50px;
-  right: 20px;
-  z-index: $dialogZIndex+2;
-  text-transform: uppercase;
-  color:$primary;
-  cursor: pointer;
-  &:focus{
-    @include setGlobalFocus();
-  }
-  span{
-    vertical-align: middle;
-  }
-  i{
-    vertical-align: middle;
-    border-radius: 50%;
-    background: rgba(255, 255, 255, 0.5);
-    box-shadow: 0 1px 3px 1px #d0d0d0;
-    display: inline-table;
-    padding: 3px;
-    margin-left: 8px;
+  position: relative;
+  width: 100%;
+  background: $actionDialogBackground;
+  text-align: right;
+  padding: 0 3px;
+  button{
+    i{
+      vertical-align: middle;
+      border-radius: 50%;
+      background: white;
+      box-shadow: 0 1px 3px 1px #d0d0d0;
+      display: inline-table;
+      padding: 5px;
+      margin-left: 8px;
+    }
   }
 }
 .state{
@@ -376,13 +370,6 @@ mat-tab-body-content{
     right: 25px;
     color: $textLight;
     display: block;
-  }
-}
-@media screen and (max-width: ($mobileWidth - $mobileStage*1)) {
-  .share-link{
-    span{
-      display: none;
-    }
   }
 }
 @media screen and (max-width: ($mobileWidth - $mobileStage*2)) {
