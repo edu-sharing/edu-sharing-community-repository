@@ -675,6 +675,9 @@ export class MainNavComponent implements AfterViewInit{
       this.userMenuOptions=[];
         //<a *ngIf="isGuest && !config.loginOptions" class="collection-item" (click)="showAddDesktop=false;login(true)" (keyup.enter)="showAddDesktop=false;login(true)" tabindex="0" title="{{ 'SIDEBAR.LOGIN' | translate}}"><i class="material-icons">person</i> {{ 'SIDEBAR.LOGIN' | translate}}</a>
         //<a *ngFor="let loginOption of isGuest?config.loginOptions:null" class="collection-item" tabindex="0" title="{{loginOption.name}}" href="{{loginOption.url}}">{{loginOption.name}}</a>
+        if(!this.isGuest){
+            this.userMenuOptions.push(new OptionItem('EDIT_ACCOUNT','assignment_ind',()=>this.openProfile()));
+        }
         if(this.isGuest){
           if(this.config.loginOptions){
             for(let login of this.config.loginOptions){
@@ -716,9 +719,7 @@ export class MainNavComponent implements AfterViewInit{
         option.isSeperateBottom=true;
         this.userMenuOptions.push(option);
 
-        if(!this.isGuest){
-            this.userMenuOptions.push(new OptionItem('EDIT_ACCOUNT','assignment_ind',()=>this.openProfile()));
-        }
+
       if(!this.isGuest){
         this.userMenuOptions.push(new OptionItem('LOGOUT','undo',()=>this.logout()));
       }
