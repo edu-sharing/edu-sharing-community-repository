@@ -15,7 +15,7 @@
         <input matInput required [formControl]="emailFormControl" type="email" name="email" id="email" placeholder="{{'REGISTER.PL_MAIL' | translate}}"/>
     </mat-form-field>
     <input-password label="{{'USER.password' | translate}}" [hint]="true" [displayStrength]="true" autocomplete="new-password" id="password" required="true" (keydown.enter)="register()" [(value)]="info.password" placeholder="{{'REGISTER.PL_PASSWORD' | translate}}"></input-password>
-    <mat-form-field>
+    <mat-form-field class="organization">
         <mat-label>{{'REGISTER.ORGANIZATION' | translate}}</mat-label>
         <input matInput type="text" name="organization" id="organization" placeholder="{{'REGISTER.PL_ORG' | translate}} {{'REGISTER.ORGANIZATION_TITLE' | translate}} ..." [(ngModel)]="info.organization"/>
     </mat-form-field>

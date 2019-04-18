@@ -17,11 +17,11 @@
 powered-by{
   position: fixed;
   left: 0;
-  top: calc(50% + 220px);
+  top: calc(50% + 240px);
   z-index: 121;
 }
 .powered-down{
-  top: calc(50% + 260px);
+  top: calc(50% + 280px);
 }
 .card-cancel{
   z-index: 1;
@@ -50,7 +50,6 @@ powered-by{
   }
 }
 .register{
-  margin-top: 10px;
   color:$textLight;
   a{
     text-transform: uppercase;
