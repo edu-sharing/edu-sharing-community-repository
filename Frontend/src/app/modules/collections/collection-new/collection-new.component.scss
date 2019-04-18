@@ -446,7 +446,7 @@ input[type="radio"] {
 .blurred-image{
   display: none;
 }
-@media screen and (max-height: $mobileHeight + $mobileStage*1){
+@media screen and (max-height: $mobileHeight + $mobileStage*2){
   .card, .card-high, .card-low {
     top:$mainnavHeight+15px;
   }

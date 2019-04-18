@@ -7,5 +7,7 @@ export class UIConstants{
   public static MOBILE_TAB_SWITCH_WIDTH = UIConstants.MOBILE_WIDTH + UIConstants.MOBILE_STAGE*2;
   public static MEDIA_QUERY_MIN_WIDTH="min-width";
   public static MEDIA_QUERY_MAX_WIDTH="max-width";
+  public static MEDIA_QUERY_MIN_HEIGHT="min-height";
+  public static MEDIA_QUERY_MAX_HEIGHT="max-height";
 
 }
