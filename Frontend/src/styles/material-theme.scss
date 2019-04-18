@@ -185,29 +185,12 @@ label .label-secondary{
   .cdk-overlay-backdrop.dropdown-menu{
     background: rgba(0, 0, 0, 0.8);
   }
-  .mat-menu-panel{
+  .mat-menu-panel.dropdown-menu{
     position: fixed;
     bottom:0;
     left:0;
-  }
-    /*
-    .cdk-overlay-pane, .cdk-overlay-connected-position-bounding-box {
-      top: auto !important;
-      bottom: 0 !important;
-      right: 0 !important;
-      left: 0 !important;
-      width: 100% !important;
-    }
-    */
-
-  .mat-menu-panel,.mat-menu-content {
-    max-width: 100% !important;
-    width: 100% !important;
-    border-bottom-right-radius: 0 !important;
-    border-bottom-left-radius: 0 !important;
-  }
-  .mat-menu-panel {
-    position: absolute;
-    bottom: 0;
+    max-width: 100%;
+    width: 100%;
+    border-radius: 0;
   }
 }
