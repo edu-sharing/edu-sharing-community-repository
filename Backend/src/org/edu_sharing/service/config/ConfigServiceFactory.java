@@ -19,6 +19,14 @@ public class ConfigServiceFactory {
 	public static Config getCurrentConfig() throws Exception {
 		return getCurrentConfig(Context.getCurrentInstance().getRequest());
 	}
+	public static String getCurrentContextId(){
+		try {
+			return getConfigService().getContextId(getCurrentDomain());
+		} catch (Exception e) {
+			logger.info(e.getMessage(),e);
+			return null;
+		}
+	}
 	public static Config getCurrentConfig(ServletRequest req) throws Exception {
 		try {
 			return getConfigService().getConfigByDomain(req==null ? getCurrentDomain() : getCurrentDomain(req));
