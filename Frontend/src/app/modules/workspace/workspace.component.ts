@@ -511,7 +511,7 @@ export class WorkspaceMainComponent implements EventListener{
             query:params['query'],
             node:node
         };
-        if(node==null){
+        if(node==null && this.root!='RECYCLE'){
             this.root='ALL_FILES';
         }
         this.createAllowed=false;
@@ -937,8 +937,8 @@ export class WorkspaceMainComponent implements EventListener{
         if(!id){
             this.path=[];
             id=this.getRootFolderId();
-            if(this.root=='RECYCLE')
-                return;
+            //if(this.root=='RECYCLE')
+            //    return;
         }
         else{
             this.selectedNodeTree=id;

@@ -617,8 +617,18 @@
         </property>
         <property name="repositoryHelper" ref="repositoryHelper"/>
     </bean>
-    
-    
+
+    <bean id="onRestoreCollectionPolicy" class="org.edu_sharing.alfresco.policy.OnRestoreCollectionPolicy" init-method="init">
+        <property name="policyComponent">
+            <ref bean="policyComponent"/>
+        </property>
+        <property name="nodeService">
+            <ref bean="nodeService" />
+        </property>
+        <property name="versionService">
+            <ref bean="versionService" />
+        </property>
+    </bean>
      <bean id="beforeDeleteIOPolicy" class="org.edu_sharing.alfresco.policy.BeforeDeleteIOPolicy" init-method="init">
    	  <property name="policyComponent">
             <ref bean="policyComponent"/>
