@@ -428,16 +428,8 @@ public class CollectionServiceImpl implements CollectionService{
 			/**
 			 * first remove the children so that the usages from the original are also removed
 			 */
-			List<NodeRef> refObjects = this.getChildren(collectionId, null);
-			for(NodeRef entry : refObjects){
-				String type=nodeService.getType(entry.getId());
-				if(type.equals(CCConstants.CCM_TYPE_MAP) ){
-					remove(entry.getId());
-				}
-				if(type.equals(CCConstants.CCM_TYPE_IO) ){
-					removeFromCollection(collectionId, entry.getId());
-				}
-			}
+			// Moved to @BeforeDeleteIOPolicy
+
 			/**
 			 * remove the collection
 			 */
@@ -461,30 +453,16 @@ public class CollectionServiceImpl implements CollectionService{
 	@Override
 	public void removeFromCollection(String collectionId, String nodeId) {
 		try{
-						
-			List<String> assocNodes = client.getAssociationNodeIds(nodeId, CCConstants.CM_ASSOC_ORIGINAL);
-			
-			String originalNodeId = null;
-			if(assocNodes != null && assocNodes.size() > 0){
-				originalNodeId = (String)assocNodes.get(0);
-			}
-							
+			String originalNodeId=nodeService.getProperty(StoreRef.PROTOCOL_WORKSPACE,StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(),nodeId,CCConstants.CCM_PROP_IO_ORIGINAL);
 			client.removeNode(nodeId, collectionId);
-			
+
 			if(originalNodeId == null){
 				logger.warn("reference object "+nodeId + " has no originId, can not remove usage");
 				return;
 			}
 
+			// Usage handling is now handled in @BeforeDeleteIOPolicy
 
-			Usage2Service usageService = new Usage2Service();
-			
-			usageService.deleteUsage(appInfo.getAppId(), 
-					authInfo.get(CCConstants.AUTH_USERNAME), 
-					this.appInfo.getAppId(), 
-					collectionId, 
-					originalNodeId, 
-					nodeId);
 			try{
 				new RepositoryCache().remove(originalNodeId);
 			}catch(Throwable t){
