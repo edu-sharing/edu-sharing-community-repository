@@ -772,7 +772,7 @@ public class SearchServiceImpl implements SearchService {
 				sr.setCountedProps(newCountPropsMap);
 
 			}
-
+			SearchLogger.logSearch(searchToken,sr);
 			return sr;
 
 		} catch (Throwable e) {
