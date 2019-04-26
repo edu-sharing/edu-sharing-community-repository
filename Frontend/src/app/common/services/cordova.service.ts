@@ -9,6 +9,7 @@ import {UIConstants} from '../ui/ui-constants';
 import {Router} from '@angular/router';
 import {FrameEventsService} from './frame-events.service';
 import {DateHelper} from "../ui/DateHelper";
+import {TranslateService} from "@ngx-translate/core";
 
 declare var cordova : any;
 
@@ -56,6 +57,7 @@ export class CordovaService {
     private http : Http,
     private router : Router,
     private location: Location,
+    private translate: TranslateService,
     private events : FrameEventsService,
   ) {
 
@@ -975,7 +977,14 @@ export class CordovaService {
    }
 
    openInAppBrowser(url:string){
-       let win:any=cordova.InAppBrowser.open(url,"_blank","toolbar=yes,hideurlbar=yes,hidenavigationbuttons=yes,zoom=no");
+       let params:string;
+       if(this.isAndroid()){
+           params="location=no,zoom=no";
+       }
+       else if(this.isIOS()){
+           params="toolbar=yes,hideurlbar=yes,hidenavigationbuttons=yes,closebuttoncaption="+this.translate.instant("CLOSE");
+       }
+       let win:any=cordova.InAppBrowser.open(url,"_blank",params);
        win.addEventListener( "loadstop", ()=> {
            // register iframe handling
            win.executeScript({code:`
