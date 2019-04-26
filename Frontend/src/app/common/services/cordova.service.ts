@@ -982,7 +982,7 @@ export class CordovaService {
            params="location=no,zoom=no";
        }
        else if(this.isIOS()){
-           params="toolbar=yes,hideurlbar=yes,hidenavigationbuttons=yes,closebuttoncaption="+this.injector.get(TranslateService).instant("CANCEL");
+           params="toolbar=yes,hideurlbar=yes,hidenavigationbuttons=yes,closebuttoncolor=#ffffff,closebuttoncaption="+this.injector.get(TranslateService).instant("CANCEL");
        }
        let win:any=cordova.InAppBrowser.open(url,"_blank",params);
        win.addEventListener( "loadstop", ()=> {
