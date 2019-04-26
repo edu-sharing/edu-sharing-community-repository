@@ -1,4 +1,4 @@
-import {Injectable} from '@angular/core';
+import {Injectable, Injector} from '@angular/core';
 import {setTimeout} from 'core-js/library/web/timers';
 import {Observable, Observer} from 'rxjs';
 import {Headers, Http, Response} from '@angular/http';
@@ -57,7 +57,7 @@ export class CordovaService {
     private http : Http,
     private router : Router,
     private location: Location,
-    private translate: TranslateService,
+    private injector:Injector,
     private events : FrameEventsService,
   ) {
 
@@ -982,7 +982,7 @@ export class CordovaService {
            params="location=no,zoom=no";
        }
        else if(this.isIOS()){
-           params="toolbar=yes,hideurlbar=yes,hidenavigationbuttons=yes,closebuttoncaption="+this.translate.instant("CLOSE");
+           params="toolbar=yes,hideurlbar=yes,hidenavigationbuttons=yes,closebuttoncaption="+this.injector.get(TranslateService).instant("CLOSE");
        }
        let win:any=cordova.InAppBrowser.open(url,"_blank",params);
        win.addEventListener( "loadstop", ()=> {
