@@ -204,7 +204,13 @@ public class MimeTypesV2 {
 	}
 	if(SCRIPT.contains(mimetype))
 		return "file-script";
-	
+
+	if(mimetype.equals("application/vnd.oasis.opendocument.text"))
+		return "file-odt";
+	if(mimetype.equals("application/vnd.oasis.opendocument.spreadsheet"))
+		return "file-ods";
+	if(mimetype.equals("application/vnd.oasis.opendocument.presentation"))
+		return "file-odp";
 	if(mimetype.equals("text/xml"))
 		return "file-xml";
 	if(mimetype.equals("application/pdf"))

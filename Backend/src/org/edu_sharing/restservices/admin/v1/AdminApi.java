@@ -1056,7 +1056,7 @@ public class AdminApi {
 			token.setLuceneString(query);
 			token.disableSearchCriterias();
 			token.setAuthorityScope(authorityScope);
-			NodeSearch search = NodeDao.search(repoDao, token);
+			NodeSearch search = NodeDao.search(repoDao, token, false);
 
 			List<Node> data = new ArrayList<Node>();
 			for (org.edu_sharing.restservices.shared.NodeRef ref : search.getResult()) {

@@ -374,11 +374,39 @@ public class SearchServiceImpl implements SearchService {
 		List<String> list = new ArrayList<>();
 		if (pattern != null && !pattern.isEmpty()) {
 			for (String authority : list2) {
+				
+				NodeRef authorityNodeRef = serviceRegistry.getAuthorityService().getAuthorityNodeRef(authority);
+				
 				String name = authority;
 
-				if (name.startsWith(PermissionService.GROUP_PREFIX))
+				String toCompare = "" + name;
+				
+				if (name.startsWith(PermissionService.GROUP_PREFIX)) {
 					name = name.substring(PermissionService.GROUP_PREFIX.length());
-				if (name.toLowerCase().contains(pattern.toLowerCase()))
+					
+					if(authorityNodeRef != null) {
+						String displayName = (String)serviceRegistry.getNodeService().getProperty(authorityNodeRef, ContentModel.PROP_AUTHORITY_DISPLAY_NAME);
+						if(displayName != null) {
+							toCompare += displayName;
+						}
+					}
+						
+					
+				}else {
+					if(authorityNodeRef != null) {
+						String firstName = (String)serviceRegistry.getNodeService().getProperty(authorityNodeRef, ContentModel.PROP_FIRSTNAME);
+						String lastName = (String)serviceRegistry.getNodeService().getProperty(authorityNodeRef, ContentModel.PROP_LASTNAME);
+						if(firstName != null) {
+							toCompare+=firstName;
+						}
+						if(lastName != null) {
+							toCompare+=lastName;
+						}
+					}
+				}
+				
+				
+				if (toCompare.toLowerCase().contains(pattern.toLowerCase()))
 					list.add(authority);
 			}
 		} else {

@@ -14,9 +14,12 @@ import org.alfresco.service.namespace.QName;
 import org.apache.log4j.Logger;
 import org.edu_sharing.alfresco.service.handleservice.HandleService;
 import org.edu_sharing.alfresco.service.handleservice.HandleServiceNotConfiguredException;
+import org.edu_sharing.alfresco.tools.UsageTool;
 import org.edu_sharing.repository.client.tools.CCConstants;
 
 import net.handle.hdllib.HandleException;
+import org.edu_sharing.repository.server.tools.ApplicationInfo;
+import org.edu_sharing.repository.server.tools.ApplicationInfoList;
 
 public class BeforeDeleteIOPolicy implements BeforeDeleteNodePolicy {
 	
@@ -42,7 +45,9 @@ public class BeforeDeleteIOPolicy implements BeforeDeleteNodePolicy {
 	
 	@Override
 	public void beforeDeleteNode(NodeRef nodeRef) {
-		
+		if(nodeService.hasAspect(nodeRef,QName.createQName(CCConstants.CCM_ASPECT_COLLECTION_IO_REFERENCE))){
+			removeCollectionRefUsage(nodeRef);
+		}
 		if(handleService != null) {
 			String handleId = (String)nodeService.getProperty(nodeRef, QName.createQName(CCConstants.CCM_PROP_PUBLISHED_HANDLE_ID));
 			if(handleId != null && handleId.trim().length() > 0) {
@@ -77,8 +82,22 @@ public class BeforeDeleteIOPolicy implements BeforeDeleteNodePolicy {
 			}
 		}
 	}
-	
-	
+
+	private void removeCollectionRefUsage(NodeRef nodeRef) {
+		logger.info("removing usage of collection ref: "+nodeRef.getId());
+		try {
+			new UsageTool().removeUsage(ApplicationInfoList.getHomeRepository().getAppId(),
+					nodeService.getPrimaryParent(nodeRef).getParentRef().getId(),
+					(String)nodeService.getProperty(nodeRef,QName.createQName(CCConstants.CCM_PROP_IO_ORIGINAL)),
+					nodeRef.getId()
+					);
+		} catch (Exception e) {
+			logger.warn("failed to delete ref usage",e);
+		}
+
+	}
+
+
 	public void setPolicyComponent(PolicyComponent policyComponent) {
 		this.policyComponent = policyComponent;
 	}

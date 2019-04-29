@@ -574,8 +574,17 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
 	public void updateNodeNative(StoreRef store, String nodeId, HashMap<String, Object> _props) {
 
 		try {
-			Map<QName, Serializable> props = transformPropMap(_props);
 			NodeRef nodeRef = new NodeRef(store, nodeId);
+			Map<QName, Serializable> props = transformPropMap(_props);
+			Map<QName, Serializable> propsNotNull = new HashMap<>();
+
+			for(Map.Entry<QName, Serializable> prop : props.entrySet()){
+				// instead of storing props as null (which can cause solr erros), remove them completely from the node!
+				if(prop.getValue()==null)
+					nodeService.removeProperty(nodeRef,prop.getKey());
+				else
+					propsNotNull.put(prop.getKey(),prop.getValue());
+			}
 
 			// don't do this cause it's slow:
 			/*
@@ -585,15 +594,15 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
 			 */
 
 			// prevent overwriting of properties that don't come with param _props
-			Set<QName> changedProps = props.keySet();
+			Set<QName> changedProps = propsNotNull.keySet();
 			Map<QName, Serializable> currentProps = nodeService.getProperties(nodeRef);
 			for (Map.Entry<QName, Serializable> entry : currentProps.entrySet()) {
 				if (!changedProps.contains(entry.getKey())) {
-					props.put(entry.getKey(), entry.getValue());
+					propsNotNull.put(entry.getKey(), entry.getValue());
 				}
 			}
 
-			nodeService.setProperties(nodeRef, props);
+			nodeService.setProperties(nodeRef, propsNotNull);
 
 		} catch (org.hibernate.StaleObjectStateException e) {
 			// this occurs sometimes in workspace

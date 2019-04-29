@@ -2,12 +2,19 @@ import {TranslateService} from "@ngx-translate/core";
 import {Title} from "@angular/platform-browser";
 import {ConfigurationService} from "../services/configuration.service";
 import {
-    Collection, Connector, ConnectorList, Filetype, LoginResult, MdsInfo, Node,
-    NodeLock, ParentList
+    Collection,
+    Connector,
+    ConnectorList,
+    Filetype,
+    LoginResult,
+    MdsInfo,
+    Node,
+    NodeLock,
+    ParentList
 } from "../rest/data-object";
 import {ActivatedRoute, NavigationExtras, Router} from "@angular/router";
-import {UIConstants} from "./ui-constants";
-import {ElementRef, EventEmitter, HostListener} from "@angular/core";
+import {OPEN_URL_MODE, UIConstants} from "./ui-constants";
+import {ElementRef, EventEmitter} from "@angular/core";
 import {RestConstants} from "../rest/rest-constants";
 import {RestHelper} from "../rest/rest-helper";
 import {Toast} from "./toast";
@@ -25,6 +32,7 @@ import {SearchService} from "../../modules/search/search.service";
 import {OptionItem} from "./actionbar/option-item";
 import {RestConnectorService} from "../rest/services/rest-connector.service";
 import {Observable, Observer} from "rxjs";
+
 export class UIHelper{
 
   public static evaluateMediaQuery(type:string,value:number){
@@ -272,7 +280,7 @@ export class UIHelper{
               console.log(win);
           }
           else if(isCordova){
-            UIHelper.openBlankWindow(url,connector.getRestConnector().getCordovaService());
+            UIHelper.openUrl(url,connector.getRestConnector().getCordovaService(),OPEN_URL_MODE.Blank);
           }
           else {
               window.location.replace(url);
@@ -426,21 +434,24 @@ export class UIHelper{
   static goToDefaultLocation(router: Router,configService : ConfigurationService,extras:NavigationExtras={}) {
       return router.navigate([UIConstants.ROUTER_PREFIX + configService.instant("loginDefaultLocation","workspace")],extras);
   }
-    static openUrl(url:string, cordova: CordovaService) {
+    static openUrl(url:string, cordova: CordovaService,mode=OPEN_URL_MODE.Current) {
         if(cordova.isRunningCordova()){
-            return cordova.openInAppBrowser(url);
+          if(mode==OPEN_URL_MODE.BlankSystemBrowser) {
+              return cordova.openBrowser(url);
+          }
+          else {
+              return cordova.openInAppBrowser(url);
+          }
         }
         else {
-            window.location.href=url;
+          if(mode==OPEN_URL_MODE.Current) {
+              window.location.href = url;
+              return;
+          }
+          else {
+              return window.open(url, '_blank',);
+          }
         }
-    }
-    static openBlankWindow(url:string, cordova: CordovaService) {
-      if(cordova.isRunningCordova()){
-        return cordova.openInAppBrowser(url);
-      }
-      else {
-        return window.open(url, '_blank',);
-      }
     }
 
     static filterValidOptions(ui: UIService, options: OptionItem[]) {
