@@ -324,11 +324,7 @@ export class WorkspaceShareComponent implements AfterViewInit{
     if(this.permissions!=null) {
       this.onLoading.emit(true);
       let permissions=Helper.deepCopy(this.permissions);
-      for(let permission of permissions){
-          if(this.isDeleted(permission)){
-              permissions.splice(permissions.indexOf(permission),1);
-          }
-      }
+      permissions=permissions.filter((p:Permission)=>!this.isDeleted(p));
       permissions=RestHelper.copyAndCleanPermissions(permissions,this.inherited && this.inheritAllowed && !this.disableInherition);
       if(!this.sendToApi) {
         this.onClose.emit(permissions);
