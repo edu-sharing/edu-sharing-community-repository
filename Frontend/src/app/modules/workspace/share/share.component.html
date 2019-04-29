@@ -81,7 +81,7 @@
         <div *ngIf="sendMessages && filterDisabledPermissions(newPermissions).length" class="groupMessage">
           <label for="message">{{'WORKSPACE.SHARE.MESSAGE' | translate}}</label>
           <input type="text" id="message" name="message" [(ngModel)]="notifyMessage" placeholder="{{'WORKSPACE.SHARE.MESSAGE_PLACEHOLDER' | translate}}"/>
-        <input type="checkbox" class="filled-in" id="notify" [(ngModel)]="notifyUsers"> <label for="notify" class="notify">{{'WORKSPACE.NOTIFY_TITLE' | translate}}<p>{{'WORKSPACE.NOTIFY_INFO' | translate}}</p></label>
+        <input type="checkbox" class="filled-in" id="notify" [(ngModel)]="notifyUsers"> <label for="notify" class="notify">{{'WORKSPACE.NOTIFY_TITLE' | translate}}</label>
         </div>
         <div [ngClass]="{'publish-grey': filterDisabledPermissions(newPermissions).length}" class="publish" *ngIf="!isSafe">
           <div class="publishElements">

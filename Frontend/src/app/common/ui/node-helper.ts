@@ -411,6 +411,8 @@ export class NodeHelper{
     if(item.type=='GROUP' || item.type=='ORG'){
       if(item.name=="displayName")
         return data.profile.displayName;
+      if(item.name=="groupType")
+        return data.profile.groupType;
     }
     if(item.type=='USER'){
       if(item.name=='firstName')

@@ -331,11 +331,13 @@
   },
   "GROUP" : {
     "displayName" : "Gruppenname",
+    "groupEmail" : "E-Mail",
     "groupType" : "Typ",
     "scopeType" : "Sichtbarkeit"
   },
   "ORG" : {
     "displayName" : "Organisations-Name",
+    "groupEmail" : "E-Mail",
     "groupType" : "Typ"
   },
   "USER":{

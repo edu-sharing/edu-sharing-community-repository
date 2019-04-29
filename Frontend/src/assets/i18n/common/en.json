@@ -258,10 +258,12 @@
   },
   "GROUP" : {
     "displayName" : "group name",
+    "groupEmail" : "e-mail",
     "groupType" : "type"
   },
   "ORG" : {
     "displayName" : "organisation name",
+    "groupEmail" : "e-mail",
     "groupType" : "type"
   },
   "USER":{

@@ -130,8 +130,7 @@
     "PERMISSION_AUTHORITY_EXISTS":"The chosen user/group already has access. Check the current permissions at \"Invited\"",
     "PERMISSIONS_UPDATED":"Permissions updated",
 
-    "NOTIFY_TITLE":"Notify invitees",
-    "NOTIFY_INFO":"At the moment, no messages will be send to groups",
+    "NOTIFY_TITLE":"Send e-mail notification",
     "METADATA":{
       "INVITED_USERS":"invited users",
       "INVITED_GROUPS":"invited groups",
