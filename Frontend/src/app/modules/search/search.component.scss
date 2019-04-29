@@ -311,11 +311,10 @@ small-collection{
 }
 .mdsSelect{
   float:left;
-  width:calc(100% + 40px);
+  width:100%;
   >div {
     width: 100%;
     padding: 10px 15px;
-    margin: 0 -20px;
     margin-top: 20px;
     background-color: #fff;
     > div {

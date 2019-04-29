@@ -24,7 +24,7 @@ public class NgErrorServlet extends HttpServlet {
 	protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
 		try {
 			Object errorCode=req.getAttribute("javax.servlet.error.status_code");
-			resp.sendRedirect(URLTool.getNgMessageUrl(errorCode.toString()));
+			resp.sendRedirect(URLTool.getNgErrorUrl(errorCode.toString()));
 		}catch(Throwable t) {
 			t.printStackTrace();
 			resp.sendError(500, "Fatal error preparing error.html: "+t.getMessage());

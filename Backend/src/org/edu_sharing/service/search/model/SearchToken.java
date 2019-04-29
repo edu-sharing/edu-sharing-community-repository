@@ -115,6 +115,11 @@ public class SearchToken implements Serializable {
 		this.query = queries.findQuery(queryId);
 		this.parameters = parameters;
 	}
+
+	public Map<String, String[]> getParameters() {
+		return parameters;
+	}
+
 	public String getStoreProtocol() {
 		return storeProtocol;
 	}
@@ -162,6 +167,11 @@ public class SearchToken implements Serializable {
 		this.searchCriterias=searchCriterias;
 		updateSearchCriterias(false);
 	}
+
+	public SearchCriterias getSearchCriterias() {
+		return searchCriterias;
+	}
+
 	private void updateSearchCriterias(boolean rebuild) {
 		if(searchCriterias==null || rebuild)
 			searchCriterias=new SearchCriterias();

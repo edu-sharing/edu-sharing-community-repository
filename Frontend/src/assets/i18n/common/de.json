@@ -179,7 +179,7 @@
     "size": "Größe",
     "mediatype":"Dateityp",
     "ccm:commonlicense_key":"Lizenz",
-    "ccm:educationallearningresourcetype":"Materialart",
+    "ccm:educationallearningresourcetype":"Medienart",
     "ccm:replicationsourceid":"Original-ID",
     "ccm:eaf_sequence_title":"Serientitel",
     "ccm:eaf_subtitle":"Untertitel",

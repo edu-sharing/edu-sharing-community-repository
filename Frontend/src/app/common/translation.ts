@@ -160,11 +160,10 @@ export class TranslationLoader implements TranslateLoader {
             console.log("initalized without translation");
         });
     }
-    const hasEndpoint=!this.locator.getCordova().isRunningCordova() || this.locator.getCordova().hasValidConfig();
     let translations : any =[];
     let results=0;
     let maxCount=TRANSLATION_LIST.length;
-    if(hasEndpoint && environment.production){
+    if(environment.production){
       maxCount=1;
       console.log(Translation.LANGUAGES[lang]);
       this.locator.getLanguageDefaults(Translation.LANGUAGES[lang]).subscribe((data: any) =>{
@@ -173,18 +172,16 @@ export class TranslationLoader implements TranslateLoader {
       });
     }
     else {
-      console.log("dev/app mode, loading translations locally");
+      console.log("dev mode, loading translations locally");
         for (let translation of TRANSLATION_LIST) {
             this.http.get(`${this.prefix}/${translation}/${lang}${this.suffix}`)
                 .subscribe((data: any) => translations.push(data));
         }
     }
-    if(hasEndpoint) {
-      maxCount++;
-      this.locator.getConfigLanguage(Translation.LANGUAGES[lang]).subscribe((data: any) => {
-          translations.push(data);
-      });
-    }
+    maxCount++;
+    this.locator.getConfigLanguage(Translation.LANGUAGES[lang]).subscribe((data: any) => {
+        translations.push(data);
+    });
 
     return new Observable<any>((observer : Observer<any>) => {
       let callback = ()=> {
