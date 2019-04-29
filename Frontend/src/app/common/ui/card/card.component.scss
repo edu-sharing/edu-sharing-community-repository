@@ -31,12 +31,16 @@ $height-xxlarge:800px;
       height: $titleHeight;
       padding-top: 15px;
       position: relative;
-      > button {
+      .cancel {
         position: absolute;
-        right: 2px;
-        top: 2px;
-        border-radius: 50%;
-        height: 66px;
+        right: 0;
+        top: 0;
+        padding:2px;
+        background: linear-gradient(to right,rgba(red($actionDialogBackground),green($actionDialogBackground),blue($actionDialogBackground),0.0001) 0,$actionDialogBackground 15px);
+        >button {
+          border-radius: 50%;
+          height: 66px;
+        }
       }
       .avatar {
         display: flex;
