@@ -808,7 +808,7 @@ export class WorkspaceMainComponent implements EventListener{
                 });
                 options.push(apply);
             }
-            if(this.isAdmin){
+            if(this.isAdmin || (window as any).esDebug===true){
                 let debug = new OptionItem("WORKSPACE.OPTION.DEBUG", "build", (node: Node) => this.debugNode(node));
                 options.push(debug);
             }
