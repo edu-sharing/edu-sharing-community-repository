@@ -476,7 +476,7 @@ export class WorkspaceMainComponent implements EventListener{
             query:params['query'],
             node:node
         };
-        if(node==null){
+        if(node==null && this.root!='RECYCLE'){
             this.root='ALL_FILES';
         }
         this.createAllowed=false;
@@ -879,8 +879,8 @@ export class WorkspaceMainComponent implements EventListener{
             this.path=[];
             id=this.getRootFolderId();
             if(this.root=='RECYCLE') {
-                this.mainNavRef.finishPreloading();
-                return;
+                //this.mainNavRef.finishPreloading();
+                //return;
             }
         }
         else{
@@ -1124,7 +1124,7 @@ export class WorkspaceMainComponent implements EventListener{
     }
 
     hasOpenWindows() {
-        return this.editNodeLicense || this.editNodeTemplate || this.editNodeMetadata || this.createConnectorName || this.showUploadSelect || this.dialogTitle || this.addFolderName || this.sharedNode || this.workflowNode || this.filesToUpload;
+        return this.editNodeLicense || this.nodeDebug || this.editNodeTemplate || this.editNodeMetadata || this.createConnectorName || this.showUploadSelect || this.dialogTitle || this.addFolderName || this.sharedNode || this.workflowNode || this.filesToUpload;
     }
     private recoverScrollposition() {
         console.log("recover scroll "+this.storage.get('workspace_scroll',0));

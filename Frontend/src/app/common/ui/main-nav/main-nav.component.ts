@@ -19,7 +19,7 @@ import {ConfigurationService} from "../../services/configuration.service";
 import {style, transition, trigger, animate, keyframes} from "@angular/animations";
 import {SearchNodeStoreComponent} from "../../../modules/search/node-store/node-store.component";
 import {UIHelper} from "../ui-helper";
-import {UIConstants} from "../ui-constants";
+import {OPEN_URL_MODE, UIConstants} from "../ui-constants";
 import {RestHelper} from "../../rest/rest-helper";
 import {Toast} from "../toast";
 import {TemporaryStorageService} from "../../services/temporary-storage.service";
@@ -458,7 +458,7 @@ export class MainNavComponent implements AfterViewInit{
   }
   public showHelp(url:string){
     this.helpOpen=false;
-    UIHelper.openBlankWindow(url,this.cordova);
+    UIHelper.openUrl(url,this.cordova,OPEN_URL_MODE.BlankSystemBrowser);
   }
   private logout(){
     this.globalProgress=true;
@@ -527,7 +527,7 @@ export class MainNavComponent implements AfterViewInit{
     // }
     this.event.broadcastEvent(FrameEventsService.EVENT_VIEW_SWITCHED,button.scope);
     if(button.url){
-      UIHelper.openBlankWindow(button.url,this.cordova);
+      UIHelper.openUrl(button.url,this.cordova,OPEN_URL_MODE.BlankSystemBrowser);
     }
     else {
       let queryParams=button.queryParams?button.queryParams:{};
@@ -570,10 +570,10 @@ export class MainNavComponent implements AfterViewInit{
     },(error:any)=>this.checkConfig(buttons));
   }
   private openImprint(){
-    UIHelper.openUrl(this.config.imprintUrl,this.cordova);
+    UIHelper.openUrl(this.config.imprintUrl,this.cordova,OPEN_URL_MODE.BlankSystemBrowser);
   }
   private openPrivacy(){
-    UIHelper.openUrl(this.config.privacyInformationUrl,this.cordova);
+    UIHelper.openUrl(this.config.privacyInformationUrl,this.cordova,OPEN_URL_MODE.BlankSystemBrowser);
   }
   private checkConfig(buttons: any[]) {
     this.configService.getAll().subscribe((data:any)=>{

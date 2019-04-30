@@ -56,7 +56,7 @@ public class LoginServlet extends HttpServlet {
 				try {Thread.sleep(1000);} catch(Exception ex) {}
 				resp.getWriter().print("FAIL");
 			} else {
-				RequestDispatcher rp = req.getRequestDispatcher(AuthenticationFilter.PATH_LOGIN_JSP);  
+				RequestDispatcher rp = req.getRequestDispatcher(AuthenticationFilter.PATH_LOGIN_ANGULAR);
 			    rp.forward(req,resp); 
 			}
 		}
@@ -92,7 +92,7 @@ public class LoginServlet extends HttpServlet {
 		// forward to login page if any of the parameters above is missing
 		if ((username==null) || (password==null) || (redirectSuccessUrl==null)) {
 			log.warn("missing parameters on GET login-servlet ... forwarding to login page");
-			RequestDispatcher rp = req.getRequestDispatcher(AuthenticationFilter.PATH_LOGIN_JSP);  
+			RequestDispatcher rp = req.getRequestDispatcher(AuthenticationFilter.PATH_LOGIN_ANGULAR);
 		    rp.forward(req,resp); 
 		    return;
 		}

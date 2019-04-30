@@ -131,8 +131,7 @@
     "PERMISSION_AUTHORITY_EXISTS":"Der gewählte Nutzer/Gruppe hat bereits Zugriff. Überprüfen Sie die Berechtigungen unter \"Schon Eingeladen\"",
     "PERMISSIONS_UPDATED":"Freigaben wurden aktualisiert",
 
-    "NOTIFY_TITLE":"Personen benachrichtigen",
-    "NOTIFY_INFO":"Derzeit werden keine Nachrichten an Gruppen versendet",
+    "NOTIFY_TITLE":"E-Mail Benachrichtigung senden",
     "METADATA":{
       "INVITED_USERS":"eingeladene Benutzer",
       "INVITED_GROUPS":"eingeladene Gruppen",

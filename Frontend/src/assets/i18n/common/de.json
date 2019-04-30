@@ -177,7 +177,7 @@
     "size": "Größe",
     "mediatype":"Dateityp",
     "ccm:commonlicense_key":"Lizenz",
-    "ccm:educationallearningresourcetype":"Materialart",
+    "ccm:educationallearningresourcetype":"Medienart",
     "ccm:replicationsourceid":"Original-ID",
     "ccm:eaf_sequence_title":"Serientitel",
     "ccm:eaf_subtitle":"Untertitel",
@@ -320,6 +320,9 @@
     "file-word":"Word-Dokument",
     "file-excel":"Tabelle",
     "file-powerpoint":"Präsentation",
+    "file-odt":"OpenOffice Dokument",
+    "file-ods":"OpenOffice Tabelle",
+    "file-odp":"OpenOffice Präsentation",
     "file-zip":"Zip-Datei",
     "file-script":"Skript",
     "file-xml":"XML-Datei",
@@ -349,11 +352,13 @@
   },
   "GROUP" : {
     "displayName" : "Gruppenname",
+    "groupEmail" : "E-Mail",
     "groupType" : "Typ",
     "scopeType" : "Sichtbarkeit"
   },
   "ORG" : {
     "displayName" : "Organisations-Name",
+    "groupEmail" : "E-Mail",
     "groupType" : "Typ"
   },
   "USER":{

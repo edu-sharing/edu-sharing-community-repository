@@ -247,6 +247,9 @@
     "file-word":"word document",
     "file-excel":"spreadsheet",
     "file-powerpoint":"presentation",
+    "file-odt":"OpenOffice document",
+    "file-ods":"OpenOffice spreadsheet",
+    "file-odp":"OpenOffice presentation",
     "file-zip":"zip file",
     "file-script":"script",
     "file-xml":"XML file",
@@ -275,10 +278,12 @@
   },
   "GROUP" : {
     "displayName" : "group name",
+    "groupEmail" : "e-mail",
     "groupType" : "type"
   },
   "ORG" : {
     "displayName" : "organisation name",
+    "groupEmail" : "e-mail",
     "groupType" : "type"
   },
   "USER":{

@@ -1465,6 +1465,15 @@
 		<aspect name="ccm:groupExtension">
 			<title>extension of metadata of alfresco groups</title>
 			<properties>
+				<!-- edu-sharing: for sending invitation mails to groups -->
+				<property name="cm:groupEmail">
+					<type>d:text</type>
+					<index enabled="true">
+						<atomic>true</atomic>
+						<stored>false</stored>
+						<tokenised>both</tokenised>
+					</index>
+				</property>
 				<property name="ccm:groupType">
 					<title>type of a group in edu-sharing context</title>
 					<type>d:text</type>

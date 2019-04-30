@@ -205,6 +205,9 @@ export interface RestError {
 
 export interface GroupProfile {
   displayName: string;
+  groupEmail: string;
+  groupType: string;
+  scopeType: string;
 }
 
 export interface Group {
