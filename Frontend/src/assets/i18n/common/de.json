@@ -135,6 +135,12 @@
     "NODE_PROPERTIES":"Properties",
     "NODE_TYPE":"Objekttyp",
     "JSON":"Gesamtes Objekt",
+    "PERMISSIONS":"Berechtigungen",
+    "PERMISSIONS_INHERITED":"Geerbte Berechtigungen",
+    "PERMISSIONS_INHERIT_DISABLED":"Vereerbung dektiviert",
+    "PERMISSIONS_INHERIT_EMPTY":"Keine Berechtigungen vom Parent geerbt",
+    "PERMISSIONS_LOCAL":"Explizite Berechtigungen",
+    "PERMISSIONS_LOCAL_EMPTY":"Keine Berechtigungen am Objekt festgelegt",
     "CHILDREN":"Children",
     "CHILDREN_NONE":"Dieses Element besitzt keine Child Objekte"
   },
