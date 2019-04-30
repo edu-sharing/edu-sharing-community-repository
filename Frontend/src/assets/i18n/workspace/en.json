@@ -45,6 +45,10 @@
     "UPLOAD_TITLE": "Upload",
     "UPLOAD_REMAINING": "{{time}} left",
     "UPLOAD_FINISHING": "Almost done...",
+    "UPLOAD_ERROR":{
+      "UNKNOWN":"Error while transfering data",
+      "FORMAT":"Unknown file format"
+    },
     "ADD_FOLDER_TITLE":"Add new folder",
     "ADD_FOLDER_METADATASET":"Metadataset of folder",
     "FOLDER_PLACEHOLDER": "Foldername",
