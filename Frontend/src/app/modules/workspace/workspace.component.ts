@@ -729,7 +729,8 @@ export class WorkspaceMainComponent implements EventListener{
     }
     private setRoot(root : string){
         this.root=root;
-        this.routeTo(root);
+        this.searchQuery=null;
+        this.routeTo(root,null,null);
     }
     private updateList(nodes : Node[]){
         this.currentNodes=nodes;
