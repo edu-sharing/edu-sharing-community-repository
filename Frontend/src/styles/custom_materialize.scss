@@ -216,6 +216,9 @@ option {
 }
 .progress{
   background-color: $primaryLight;
+  &.determinate-failed{
+    background-color: $colorStatusNegative;
+  }
   .indeterminate,
   .determinate{
     background-color: $primary;

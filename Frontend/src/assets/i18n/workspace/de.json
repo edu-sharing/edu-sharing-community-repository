@@ -46,6 +46,10 @@
     "UPLOAD_TITLE": "Hochladen",
     "UPLOAD_REMAINING": "Noch {{time}}",
     "UPLOAD_FINISHING": "Fertigstellen...",
+    "UPLOAD_ERROR":{
+      "UNKNOWN":"Fehler bei der Datenübertragung",
+      "FORMAT":"Nicht identifizierbares Dateiformat"
+    },
     "ADD_FOLDER_TITLE":"Neuen Ordner erstellen",
     "ADD_FOLDER_METADATASET":"Metadatenset für Ordner",
     "FOLDER_PLACEHOLDER": "Ordnername",

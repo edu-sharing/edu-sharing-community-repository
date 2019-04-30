@@ -45,6 +45,7 @@ export class WorkspaceFileUploadComponent  {
     if(!this._files.item(number).type && !this._files.item(number).size){
       setTimeout(()=>{
         this.progress[number].progress.progress=-1;
+        this.progress[number].error='FORMAT';
         this.error=true;
         this.upload(number+1);
       },50);
@@ -60,10 +61,14 @@ export class WorkspaceFileUploadComponent  {
           () => {
             this.progress[number].progress.progress=100;
             this.upload(number+1);
-          }
-        );
+          });
       }
-    )
+      ,(error:any) => {
+          this.error=true;
+          this.progress[number].error='UNKNOWN';
+          this.progress[number].progress.progress=-1;
+          this.upload(number+1);
+      });
   }
   formatTime(time:number){
     return new TimePipe(this.translate).transform(time,null);
