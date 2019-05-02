@@ -12,6 +12,7 @@ import java.util.Map;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
+import org.alfresco.repo.search.impl.solr.ESSearchParameters;
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.repo.security.authentication.AuthenticationUtil.RunAsWork;
 import org.alfresco.service.ServiceRegistry;
@@ -538,16 +539,30 @@ public class CollectionServiceImpl implements CollectionService{
 		
 		return collection;
 	}
-	
+    private void addCollectionCountProperties(NodeRef nodeRef, Collection collection) {
+        String path=serviceRegistry.getNodeService().getPath(nodeRef).toPrefixString(serviceRegistry.getNamespaceService());
+        SearchParameters params=new ESSearchParameters();
+        params.addStore(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE);
+        params.setLanguage(org.alfresco.service.cmr.search.SearchService.LANGUAGE_LUCENE);
+        params.setMaxItems(0);
+
+        params.setQuery("TYPE:"+QueryParser.escape("ccm:io")+" AND PATH:\""+QueryParser.escape(path)+"//*\"");
+        collection.setChildReferencesCount((int) serviceRegistry.getSearchService().query(params).getNumberFound());
+        params.setQuery("TYPE:"+QueryParser.escape("ccm:map")+" AND PATH:\""+QueryParser.escape(path)+"//*\"");
+        collection.setChildCollectionsCount((int) serviceRegistry.getSearchService().query(params).getNumberFound());
+    }
 	@Override
 	public Collection get(String storeId,String storeProtocol,String collectionId) {
 		try{
 			HashMap<String,Object> props = client.getProperties(storeProtocol,storeId,collectionId);
 			throwIfNotACollection(storeProtocol,storeId,collectionId);
 			
-			Collection collection = asCollection(props);			
-			collection.setChildReferencesCount(client.getChildAssociationByType(storeProtocol,storeId,collectionId, CCConstants.CCM_TYPE_IO).size());
-			collection.setChildCollectionsCount(client.getChildAssociationByType(storeProtocol,storeId,collectionId, CCConstants.CCM_TYPE_MAP).size());
+			Collection collection = asCollection(props);
+
+			// using solr to count all underlying refs recursive
+            addCollectionCountProperties(new NodeRef(new StoreRef(storeProtocol,storeId),collectionId),collection);
+			//collection.setChildReferencesCount(client.getChildAssociationByType(storeProtocol,storeId,collectionId, CCConstants.CCM_TYPE_IO).size());
+			//collection.setChildCollectionsCount(client.getChildAssociationByType(storeProtocol,storeId,collectionId, CCConstants.CCM_TYPE_MAP).size());
 						
 			User owner = client.getOwner(storeId,storeProtocol,collectionId);
 			
