@@ -12,7 +12,7 @@
           <div class="loading" *ngIf="item.progress.progress>=0 && item.progress.progress<100">
         </div>
           <div class="progress" [class.determinate-failed]="item.progress.progress==-1" *ngIf="item">
-            <div class="determinate" [class.determinate-finished]="item.progress.progress>=100" [style.width]="item.progress.progress+'%'"></div>
+            <div class="determinate" [class.determinate-failed]="item.progress.progress==-1" [class.determinate-finished]="item.progress.progress>=100" [style.width]="item.progress.progress+'%'"></div>
           </div>
           <div class="info" [style.visibility]="item.progress.loaded || item.error ? '' : 'hidden'">
             <span class="info-error" *ngIf="item.error">{{'WORKSPACE.UPLOAD_ERROR.'+item.error | translate}}</span>

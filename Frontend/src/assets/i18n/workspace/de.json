@@ -48,7 +48,8 @@
     "UPLOAD_FINISHING": "Fertigstellen...",
     "UPLOAD_ERROR":{
       "UNKNOWN":"Fehler bei der Datenübertragung",
-      "FORMAT":"Nicht identifizierbares Dateiformat"
+      "FORMAT":"Nicht identifizierbares Dateiformat",
+      "QUOTA":"Speicherplatz-Quota wurde überschritten"
     },
     "ADD_FOLDER_TITLE":"Neuen Ordner erstellen",
     "ADD_FOLDER_METADATASET":"Metadatenset für Ordner",

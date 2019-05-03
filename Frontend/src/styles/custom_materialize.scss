@@ -214,11 +214,11 @@ option {
 .btn-shadow{
   box-shadow: 0px 1px 3px #aaa!important;
 }
+.determinate-failed{
+  background-color: $colorStatusNegative!important;
+}
 .progress{
   background-color: $primaryLight;
-  &.determinate-failed{
-    background-color: $colorStatusNegative;
-  }
   .indeterminate,
   .determinate{
     background-color: $primary;

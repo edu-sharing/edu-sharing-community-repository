@@ -1,11 +1,12 @@
 import {Component, Input, EventEmitter, Output, ViewChild, ElementRef} from '@angular/core';
 import {RestConstants} from "../../../common/rest/rest-constants";
-import {Node, NodeList, NodeWrapper} from '../../../common/rest/data-object';
+import {IamUser, Node, NodeList, NodeWrapper} from '../../../common/rest/data-object';
 import {RestNodeService} from "../../../common/rest/services/rest-node.service";
 import {trigger} from "@angular/animations";
 import {UIAnimation} from "../../../common/ui/ui-animation";
 import {RestSearchService} from '../../../common/rest/services/rest-search.service';
 import {Toast} from '../../../common/ui/toast';
+import {RestIamService} from "../../../common/rest/services/rest-iam.service";
 
 @Component({
   selector: 'workspace-file-upload-select',
@@ -54,6 +55,7 @@ export class WorkspaceFileUploadSelectComponent  {
   private ltiTool: Node;
   private _link: string;
   _parent: Node;
+  user: IamUser;
   @Input() set parent(parent:Node){
     this.breadcrumbs=null;
     this._parent=parent;
@@ -133,10 +135,14 @@ export class WorkspaceFileUploadSelectComponent  {
   }
   public constructor(
     private nodeService:RestNodeService,
+    private iamService:RestIamService,
     private searchService:RestSearchService,
     private toast:Toast,
   ){
     this.setState("");
+    this.iamService.getUser().subscribe((user)=>{
+      this.user=user;
+    })
   }
 
     private cleanupUrlForLti(link: string) {

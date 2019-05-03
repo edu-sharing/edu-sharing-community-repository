@@ -47,7 +47,8 @@
     "UPLOAD_FINISHING": "Almost done...",
     "UPLOAD_ERROR":{
       "UNKNOWN":"Error while transfering data",
-      "FORMAT":"Unknown file format"
+      "FORMAT":"Unknown file format",
+      "QUOTA":"Upload quota reached"
     },
     "ADD_FOLDER_TITLE":"Add new folder",
     "ADD_FOLDER_METADATASET":"Metadataset of folder",

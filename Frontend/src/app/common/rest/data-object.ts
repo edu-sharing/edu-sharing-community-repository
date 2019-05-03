@@ -247,12 +247,18 @@ export interface User {
   profile: UserProfile;
   homeFolder: NodeRef;
   sharedFolders: NodeRef[];
+  quota: UserQuota;
 }
 export interface UserSimple {
   authorityName: string;
   authorityType: string;
   userName: string;
   profile: UserProfile;
+}
+export interface UserQuota{
+    enabled:boolean;
+    sizeCurrent:number;
+    sizeQuota:number;
 }
 export interface IamUser {
   person : User;
