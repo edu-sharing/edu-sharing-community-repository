@@ -32,6 +32,7 @@ import {EventListener} from "../../../common/services/frame-events.service";
 import {ActionbarHelperService} from "../../services/actionbar-helper";
 import {SuggestItem} from "../autocomplete/autocomplete.component";
 import {MainNavComponent} from "../main-nav/main-nav.component";
+import {HttpClient} from "@angular/common/http";
 
 declare var jQuery:any;
 declare var window: any;
@@ -193,6 +194,7 @@ export class NodeRenderComponent implements EventListener{
       private location: Location,
       private searchService : SearchService,
       private connector : RestConnectorService,
+      private http : HttpClient,
       private connectors : RestConnectorsService,
       private nodeApi : RestNodeService,
       private searchStorage : SearchService,
@@ -464,6 +466,9 @@ export class NodeRenderComponent implements EventListener{
                 this.openConnector(false);
             }
         }
+        let custom=this.config.instant('renderNodeOptions');
+        NodeHelper.applyCustomNodeOptions(this.toast,this.http,this.connector,custom,this.searchService.searchResult, this._node ? [this._node] : null, this.options,(load:boolean)=>this.isLoading=load);
+
         this.options = Helper.deepCopyArray(this.options);
         this.postprocessHtml();
         this.isBuildingPage=false;

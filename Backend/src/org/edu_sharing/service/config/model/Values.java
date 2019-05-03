@@ -20,6 +20,7 @@ public class Values{
 	@XmlElement	public MenuEntry[] menuEntries;
 	@XmlElement	public ContextMenuEntry[] nodeOptions;
 	@XmlElement	public ContextMenuEntry[] searchNodeOptions;
+	@XmlElement	public ContextMenuEntry[] renderNodeOptions;
 	@XmlElement	public ContextMenuEntry[] nodeStoreOptions;
 	@XmlElement	public String[] allowedLicenses;
 	@XmlElement	public License[] customLicenses;
