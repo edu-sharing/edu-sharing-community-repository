@@ -333,11 +333,13 @@ export class PermissionsAuthoritiesComponent {
         (error : any)=>this.toast.error(error));
     }
     else{
+      let editStore=Helper.deepCopy(this.edit);
+      editStore.profile.sizeQuota*=1024*1024;
+      this.globalProgress=true;
       if(this.editId==null){
         let name=this.editDetails.authorityName;
         let password=this.editDetails.password;
-        this.globalProgress=true;
-        this.iam.createUser(name,password,this.edit.profile).subscribe(() => {
+        this.iam.createUser(name,password,editStore.profile).subscribe(() => {
             this.edit=null;
             this.globalProgress=false;
             if(this.org){
@@ -358,12 +360,16 @@ export class PermissionsAuthoritiesComponent {
           });
       }
       else {
-        this.iam.editUser(this.editId, this.edit.profile).subscribe(() => {
+        this.iam.editUser(this.editId, editStore.profile).subscribe(() => {
             this.edit = null;
             this.toast.toast("PERMISSIONS.USER_EDITED");
             this.refresh();
+            this.globalProgress=false;
           },
-          (error: any) => this.toast.error(error));
+          (error: any) => {
+            this.toast.error(error);
+            this.globalProgress=false;
+          });
       }
     }
   }
@@ -462,6 +468,13 @@ export class PermissionsAuthoritiesComponent {
         }
         this.editId = this.edit.authorityName;
       },(error:any)=>this.toast.error(error));
+    }
+    else if(this._mode=='USER'){
+      this.iam.getUser(list[0].authorityName).subscribe((user)=>{
+          this.edit = Helper.deepCopy(user.person);
+          this.edit.profile.sizeQuota=user.person.quota.sizeQuota/1024/1024;
+          this.editId = this.edit.authorityName;
+      });
     }
     else {
       this.edit = Helper.deepCopy(list[0]);

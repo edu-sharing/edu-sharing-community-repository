@@ -676,7 +676,8 @@ export class WorkspaceMainComponent implements EventListener{
     }
     private setRoot(root : string){
         this.root=root;
-        this.routeTo(root);
+        this.searchQuery=null;
+        this.routeTo(root,null,null);
     }
     private updateList(nodes : Node[]){
         this.currentNodes=nodes;
@@ -756,7 +757,7 @@ export class WorkspaceMainComponent implements EventListener{
                 if(apply.showCallback(nodes[0]))
                     options.push(apply);
             }
-            if(this.isAdmin){
+            if(this.isAdmin || (window as any).esDebug===true){
                 let debug = new OptionItem("WORKSPACE.OPTION.DEBUG", "build", (node: Node) => this.debugNode(node));
                 debug.onlyDesktop=true;
                 options.push(debug);
