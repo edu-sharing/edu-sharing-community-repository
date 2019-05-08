@@ -29,7 +29,7 @@ public class TrashcanCleanerSolr {
 	Date to = null;
 	int batchCount;
 	
-	private static final int PAGE_SIZE = 10;
+	private static final int PAGE_SIZE = 100;
 	
 	public TrashcanCleanerSolr(long timeToKeep, int batchCount) {
 		this.to = new Date(System.currentTimeMillis() - timeToKeep);
