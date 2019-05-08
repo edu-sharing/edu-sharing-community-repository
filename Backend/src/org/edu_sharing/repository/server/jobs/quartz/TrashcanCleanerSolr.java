@@ -29,19 +29,24 @@ public class TrashcanCleanerSolr {
 	Date to = null;
 	int batchCount;
 	
+	private static final int PAGE_SIZE = 10;
+	
 	public TrashcanCleanerSolr(long timeToKeep, int batchCount) {
 		this.to = new Date(System.currentTimeMillis() - timeToKeep);
 		this.batchCount = batchCount;
 	}
 	
 	public void exeute() {
-		
+		execute(0);
+	}
+	
+	private void execute(int page) {
+		logger.info("page:" + page);
 		SearchParameters sp = new SearchParameters();
 		sp.setLanguage(SearchService.LANGUAGE_LUCENE);
 		sp.addStore(StoreRef.STORE_REF_ARCHIVE_SPACESSTORE);
-		sp.setMaxItems(batchCount);
-		//(TYPE:"ccm:io" OR TYPE:"ccm:map") AND @sys\:archivedDate:[MIN TO "2018-09-10"]
-		//sp.setQuery("TYPE:\"cm:cmobject\"");
+		sp.setSkipCount(page);
+		sp.setMaxItems(PAGE_SIZE);
 		
 		SimpleDateFormat dateFormater = new SimpleDateFormat("yyyy-MM-dd");
 		sp.setQuery("(TYPE:\"ccm:io\" OR TYPE:\"ccm:map\") AND @sys\\:archivedDate:[MIN TO \"" + dateFormater.format(this.to)+ "\"]");
@@ -49,13 +54,18 @@ public class TrashcanCleanerSolr {
 		logger.info("query:" + sp.getQuery());
 		ResultSet resultSet = searchService.query(sp);
 		
-		logger.info("found " + resultSet.length());
+		
+		logger.info("page " + page + " from " + resultSet.getNumberFound());
 		
 		for(NodeRef nodeRef : resultSet.getNodeRefs()) {
 			if(StoreRef.STORE_REF_ARCHIVE_SPACESSTORE.equals(nodeRef.getStoreRef())) {
 				logger.info("deleteing from archive:" + nodeRef +"  " + nodeService.getProperty(nodeRef, ContentModel.PROP_NAME));
 				nodeService.deleteNode(nodeRef);
 			}
+		}
+		
+		if(resultSet.hasMore() && (page < (this.batchCount))) {
+			execute(page + PAGE_SIZE);
 		}
 	}
 	
