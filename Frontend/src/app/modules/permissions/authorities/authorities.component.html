@@ -71,7 +71,8 @@
             <select id="orgType" name="orgType" [(ngModel)]="edit.profile.groupType">
               <option *ngFor="let type of ORG_TYPES" [value]="type">{{('PERMISSIONS.GROUP_TYPE.'+type) | translate}}</option>
             </select>
-            <div class="infoText">{{edit.folder}}</div>
+            <label>{{'ORG.folderLocation' | translate}}</label>
+            <div class="infoText folderLocation clickable" (click)="openFolder(edit.sharedFolder)">{{edit.folder}}</div>
           </div>
           <div *ngIf="_mode=='USER'">
             <div *ngIf="!editId">

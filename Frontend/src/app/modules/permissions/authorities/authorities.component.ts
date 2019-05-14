@@ -1,11 +1,11 @@
 
 import {Component, Input, Output, EventEmitter, HostListener, ChangeDetectorRef, ApplicationRef} from "@angular/core";
 import {
-    Group, IamGroups, IamUsers, NodeList, IamUser, IamAuthorities,
-    Authority, OrganizationOrganizations, Organization, Person, User
+    Node, Group, IamGroups, IamUsers, NodeList, IamUser, IamAuthorities,
+    Authority, OrganizationOrganizations, Organization, Person, User, HomeFolder, SharedFolder
 } from "../../../common/rest/data-object";
 import {Toast} from "../../../common/ui/toast";
-import {ActivatedRoute} from "@angular/router";
+import {ActivatedRoute, Router} from "@angular/router";
 import {RestIamService} from "../../../common/rest/services/rest-iam.service";
 import {TranslateService} from "@ngx-translate/core";
 import {RestConnectorService} from "../../../common/rest/services/rest-connector.service";
@@ -21,6 +21,7 @@ import {ConfigurationService} from "../../../common/services/configuration.servi
 import {Helper} from "../../../common/helper";
 import {trigger} from "@angular/animations";
 import {ListItem} from "../../../common/ui/list-item";
+import {UIHelper} from "../../../common/ui/ui-helper";
 @Component({
   selector: 'permissions-authorities',
   templateUrl: 'authorities.component.html',
@@ -180,6 +181,7 @@ export class PermissionsAuthoritiesComponent {
   constructor(private toast: Toast,
               private node : RestNodeService,
               private config : ConfigurationService,
+              private router : Router,
               private translate : TranslateService,
               private organization : RestOrganizationService,
               private connector : RestConnectorService,
@@ -816,5 +818,8 @@ export class PermissionsAuthoritiesComponent {
       }
     }
     Helper.downloadContent(this.translate.instant("PERMISSIONS.DOWNLOAD_MEMBER_FILENAME"),data);
+  }
+  openFolder(folder:SharedFolder){
+      UIHelper.goToWorkspaceFolder(this.node,this.router,this.connector.getCurrentLogin(),folder.id);
   }
 }

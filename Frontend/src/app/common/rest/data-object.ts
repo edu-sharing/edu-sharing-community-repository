@@ -128,8 +128,8 @@ export class Node {
   isDirectory: boolean;
   version : string;
   collection : Collection;
-  public Node(){
-
+  public constructor(id:string=null){
+    this.ref=new NodeRef(id);
   }
 }
 export class SortItem extends ListItem{
@@ -946,6 +946,9 @@ export class NodeRef {
   id:string;
   archived:boolean;
   isHomeRepo:boolean;
+  public constructor(id:string=null){
+    this.id=id;
+  }
 }
 
 export class CollectionContent {

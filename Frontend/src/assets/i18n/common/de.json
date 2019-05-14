@@ -352,7 +352,8 @@
   "ORG" : {
     "displayName" : "Organisations-Name",
     "groupEmail" : "E-Mail",
-    "groupType" : "Typ"
+    "groupType" : "Typ",
+    "folderLocation":" Speicherort des gemeinsamen Ordners"
   },
   "USER":{
     "authorityName" : "Nutzername",

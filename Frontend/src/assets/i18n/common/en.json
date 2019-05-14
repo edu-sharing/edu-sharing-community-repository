@@ -169,6 +169,11 @@
     "DIALOG_TITLE":"Cookies",
     "DIALOG_MESSAGE":"Our website uses so-called cookies. Cookies do not cause any damage to your computer and do not contain any viruses.\nCookies are used to make our website more user-friendly, effective and secure. Cookies are small text files that are stored on your computer and saved by your browser. Most of the cookies we use are so-called \"session cookies\". They are automatically deleted at the end of your visit. Other cookies remain stored on your device until you delete them. These cookies enable us to recognize your browser the next time you visit our website.\nYou can set your browser so that you are informed about the usage of cookies and only allow cookies in individual cases, exclude the acceptance of cookies for certain cases or generally and activate the automatic deletion of cookies when closing the browser.\nWhen cookies are deactivated, the functionality of this website may be limited. "
   },
+  "QUOTA":{
+    "TITLE":"QUOTA",
+    "FREE_SPACE":"unused storage space of",
+    "OVERALL":""
+  },
   "NODE_VARIANT":{
     "TITLE": "Create new variant for {{name}}",
     "NEW_VARIANT":"New Title:",
@@ -267,14 +272,16 @@
   "ORG" : {
     "displayName" : "organisation name",
     "groupEmail" : "e-mail",
-    "groupType" : "type"
+    "groupType" : "type",
+    "folderLocation":" Location of the shared folder"
   },
   "USER":{
     "authorityName" : "user name",
     "firstName" : "first name",
     "lastName" : "family name",
     "email" : "e-mail",
-    "password" : "password"
+    "password" : "password",
+    "sizeQuota" : "Quota size in MB"
   },
   "CONNECTOR":{
     "ONLY_OFFICE": {
