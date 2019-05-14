@@ -221,6 +221,13 @@ export class MdsComponent{
   private static MAX_SUGGESTIONS = 5;
   private suggestionsViaSearch = false;
 
+  private resetValues(){
+      this._currentValues=null;
+      this.loadMdsFinal(()=>{
+          this.onDone.emit(null);
+      });
+  }
+
   @HostListener('window:resize')
   onResize(){
       if(document.activeElement && this.mdsScrollContainer && this.mdsScrollContainer.nativeElement){
