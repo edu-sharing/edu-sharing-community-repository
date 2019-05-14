@@ -103,9 +103,14 @@ public class MetadataTemplateRenderer {
 					if(key==null)
 						continue;
 					List<String> path=new ArrayList<String>();
+					int preventInfiniteLoop = 0;
 					while(key!=null) {
 						path.add(key.getCaption());
 						key=valuesMap.get(key.getParent());
+						if(preventInfiniteLoop++ > 100) {
+							logger.error("check valuespace for widget:" + widget.getId() + " key:" + key.getKey());
+							break;
+						}
 					}
 					path=Lists.reverse(path);
 					int i=0;
