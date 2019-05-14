@@ -7,10 +7,10 @@
     <div class="quota-details">
         <div class="quota-title">{{'QUOTA.TITLE' | translate}}</div>
         <div class="quota-progress">
-            <div class="quota-used" [style.width]="(quota.sizeCurrent/quota.sizeQuota)*100+'%'"></div>
+            <div class="quota-used" [style.width]="getPercentUsed()*100+'%'"></div>
         </div>
         <div class="quota-info">
-            <span class="quota-free">{{(quota.sizeQuota-quota.sizeCurrent) | formatSize}}</span>
+            <span class="quota-free">{{getFree() | formatSize}}</span>
             <span class="quota-free-label">&nbsp;{{'QUOTA.FREE_SPACE' | translate}}&nbsp;</span>
             <span class="quota-size">{{quota.sizeQuota | formatSize}}</span>
             <span class="quota-free-label">{{'QUOTA.OVERALL' | translate}}</span>

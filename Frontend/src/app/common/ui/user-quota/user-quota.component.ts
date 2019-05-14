@@ -28,11 +28,18 @@ export class UserQuotaComponent{
      * 2 = bad
      */
   getHealth(){
-    const fac=this.quota.sizeCurrent / this.quota.sizeQuota;
+    const fac=this.getPercentUsed();
     if(fac<0.75)
       return 0;
     if(fac<0.9)
       return 1;
     return 2;
+  }
+
+  getFree() {
+    return Math.max((this.quota.sizeQuota-this.quota.sizeCurrent),0)
+  }
+  getPercentUsed() {
+      return Math.min(this.quota.sizeCurrent / this.quota.sizeQuota,1);
   }
 }
