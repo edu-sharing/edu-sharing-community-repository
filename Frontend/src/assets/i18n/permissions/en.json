@@ -76,6 +76,10 @@
       "null":"none / regular group",
       "EDITORIAL":"editorial group",
       "ORG_ADMINISTRATORS":"administrators"
+    },
+    "SCOPE_TYPE":{
+      "null":"Local / Default visibility",
+      "global":"Global / Across repositories"
     }
   }
 }
