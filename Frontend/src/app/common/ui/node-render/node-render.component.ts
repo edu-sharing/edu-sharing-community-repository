@@ -306,7 +306,7 @@ export class NodeRenderComponent implements EventListener{
         return;
     }
     let parameters={
-      showDownloadButton:false,
+      showDownloadButton:this.config.instant("rendering.showDownloadButton",false),
       showDownloadAdvice:!this.isOpenable
     };
     this.isBuildingPage=true;
