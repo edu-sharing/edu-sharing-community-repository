@@ -74,7 +74,7 @@ public class SQLUpdater extends UpdateAbstract {
             logger.info("no scripts to execute defined in property "+property);
         }
         }catch(Throwable e) {
-            logger.error(e.getMessage(), e);
+            logger.error("Error running one or more sql scripts defined in "+property, e);
         }
     }
 
