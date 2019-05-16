@@ -4,6 +4,22 @@
           [showDisabled]="showDisabled"
 ></dropdown>
 <div class="actionbar">
+  <div *ngFor="let option of optionsAlways;let i=index;"
+       [class.light]="backgroundType=='dark' || backgroundType=='primary'"
+       [class.primary]="i==optionsAlways.length-1 && backgroundType=='primary'"
+       class="action-always waves-effect waves-light action-always-{{option.name | replaceChars:{search:'.',replace:'-'} }} {{ option.isEnabled ? '' : 'disabled'}} {{ option.isEnabled || showDisabled ? '' : 'display-none'}} {{ i==0 ? 'btn' : 'btn-flat'}}"
+       tabindex="0"
+       (keyup.enter)="click(option)"
+       (click)="click(option)">
+    <i class="material-icons" title="{{option.showName ? null : (option.name | translate)}}">{{option.icon}}</i><span class="action-always-caption" *ngIf="option.showName"> {{option.name | translate}}</span>
+  </div>
+  <div class="more btn-flat waves-effect"
+       (click)="showDropdown()"
+       tabindex="0"
+       (keyup.enter)="showDropdown()"
+       [class.light]="backgroundType=='dark' || backgroundType=='primary'"
+       *ngIf="canShowDropdown()"><a><i class="material-icons">more_vert</i></a>
+  </div>
   <div *ngIf="optionsToggle.length" class="actionToggle" [class.actionToggleDivider]="optionsAlways.length">
     <a *ngFor="let option of optionsToggle"
        tabindex="0"
@@ -13,25 +29,5 @@
        [class.disabled]="!option.isEnabled">
       <i class="material-icons">{{option.icon}}</i>
     </a>
-
   </div>
-<div class="more btn-flat waves-effect"
-       (click)="showDropdown()"
-       tabindex="0"
-       (keyup.enter)="showDropdown()"
-       [class.light]="backgroundType=='dark' || backgroundType=='primary'"
-       *ngIf="canShowDropdown()"><a><i class="material-icons">more_vert</i></a></div>
-
-  <div *ngFor="let option of optionsAlways.slice().reverse();let i=index;"
-       [class.light]="backgroundType=='dark' || backgroundType=='primary'"
-       [class.primary]="i==optionsAlways.length-1 && backgroundType=='primary'"
-       class="action-always waves-effect waves-light action-always-{{option.name | replaceChars:{search:'.',replace:'-'} }} {{ option.isEnabled ? '' : 'disabled'}} {{ option.isEnabled || showDisabled ? '' : 'display-none'}}"
-       [class.btn-flat]="i!=optionsAlways.length-1 || style=='flat'"
-       [class.btn]="i==optionsAlways.length-1 && style!='flat'"
-       tabindex="0"
-       (keyup.enter)="click(option)"
-       (click)="click(option)">
-    <i class="material-icons" title="{{option.showName ? null : (option.name | translate)}}">{{option.icon}}</i><span class="action-always-caption" *ngIf="option.showName"> {{option.name | translate}}</span>
-  </div>
-
 </div>
