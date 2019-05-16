@@ -374,7 +374,8 @@
     "LICENSE_NO_PERMISSIONS":"You have insufficient permissions to license materials",
     "LICENSE_NO_PERMISSIONS_SAFE":"You may not change licenses in safe environment",
     "ADD_CHILD_OBJECT":"Add further materials",
-    "ADD_CHILD_OBJECT_DESCRIPTION":"Create a series by attaching more materials to this object"
+    "ADD_CHILD_OBJECT_DESCRIPTION":"Create a series by attaching more materials to this object",
+    "ADD_CHILD_OBJECT_QUOTA_REACHED":"Error while uploading \"{{ name }}\": Upload quota reached"
   },
   
   "SHARE_APP":{
