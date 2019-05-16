@@ -82,7 +82,7 @@ export class WorkspaceFileUploadComponent  {
               private translate:TranslateService){}
 
     private mapError(error: any, node: Node = null) {
-      if(RestHelper.errorMatchesAny(error,'org.alfresco.service.cmr.usage.ContentQuotaException')) {
+      if(RestHelper.errorMatchesAny(error,RestConstants.CONTENT_QUOTA_EXCEPTION)) {
           // delete the now orphan node since it's empty
           if(node)
             this.node.deleteNode(node.ref.id,false).subscribe(()=>{});

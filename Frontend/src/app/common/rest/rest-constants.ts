@@ -119,6 +119,7 @@ export class RestConstants {
     "editor","graphical_designer","technical_implementer","content_provider",
     "educational_validator","script_writer","instructional_designer","subject_matter_expert"];
   public static CONTRIBUTOR_ROLES_METADATA=["creator","validator","provider"];
+  public static CONTENT_QUOTA_EXCEPTION="org.alfresco.service.cmr.usage.ContentQuotaException";
   public static getAllVCardFields(){
       let list=[];
       for(let role of RestConstants.CONTRIBUTOR_ROLES_LIFECYCLE){
