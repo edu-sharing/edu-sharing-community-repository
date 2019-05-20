@@ -348,7 +348,7 @@ public class RenderingProxy extends HttpServlet {
 		 */
 		if(appInfoApplication != null &&
 					   (ApplicationInfo.TYPE_LMS.equals(appInfoApplication.getType()) ||
-						ApplicationInfo.TYPE_LMS.equals(appInfoApplication.getType()))) {
+						ApplicationInfo.TYPE_CMS.equals(appInfoApplication.getType()))) {
 			req.getSession().removeAttribute(CCConstants.AUTH_SINGLE_USE_NODEID);
 			HttpSession session = req.getSession(true);
 			if(		Long.parseLong(ts) > (System.currentTimeMillis() - appInfoApplication.getMessageOffsetMs())
