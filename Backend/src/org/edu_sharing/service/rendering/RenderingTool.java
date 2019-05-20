@@ -19,6 +19,7 @@ import org.edu_sharing.repository.server.tools.ApplicationInfoList;
 import org.edu_sharing.repository.server.tools.URLTool;
 import org.edu_sharing.repository.server.tools.security.Encryption;
 import org.edu_sharing.repository.server.tools.security.Signing;
+import org.edu_sharing.service.config.ConfigServiceFactory;
 import org.edu_sharing.service.mime.MimeTypesV2;
 
 public class RenderingTool {
@@ -149,8 +150,10 @@ public class RenderingTool {
 		prepareExecutor.execute(()->{
 			AuthenticationUtil.runAsSystem(()-> {
 				try {
+					if(!ConfigServiceFactory.getCurrentConfig().getValue("rendering.prerender",true)) {
+						return null;
+					}
 					// @TODO: May we need to build up caches just for particular file types?
-					//logger.info("Building rendering cache for node " + nodeId);
 					return RenderingServiceFactory.getLocalService().getDetails(nodeId, null, DISPLAY_PRERENDER, null);
 				} catch (Exception e) {
 					logger.warn("Error building rendering cache for node " + nodeId + ": " + e.getMessage(), e);

@@ -441,7 +441,6 @@ public class PersonDao {
 			public String[] doWork() throws Exception {
 				 PersonCache.get(getAuthorityName(),PersonCache.TYPE);
 				if(PersonCache.contains(getAuthorityName(),PersonCache.TYPE)) {
-					logger.info("using person cache for "+getAuthorityName());
 					return (String[]) PersonCache.get(getAuthorityName(),PersonCache.TYPE);
 				}
 				Set<String> types=new HashSet<>();
