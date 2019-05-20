@@ -53,6 +53,10 @@
               <mat-label>{{'GROUP.displayName' | translate}}</mat-label>
               <input matInput name="displayName" [(ngModel)]="edit.profile.displayName" required>
             </mat-form-field>
+            <mat-form-field>
+              <mat-label>{{'GROUP.groupEmail' | translate}}</mat-label>
+              <input matInput name="groupEmail" [(ngModel)]="edit.profile.groupEmail">
+              </mat-form-field>
             <mat-form-field floatLabel="always">
               <mat-label>{{'GROUP.groupType' | translate}}</mat-label>
               <mat-select name="orgType" [(ngModel)]="edit.profile.groupType" placeholder="{{'PERMISSIONS.GROUP_TYPE.null' | translate}}">
@@ -70,6 +74,10 @@
             <mat-form-field>
               <mat-label>{{'ORG.displayName' | translate}}</mat-label>
               <input matInput name="displayName" [(ngModel)]="edit.profile.displayName" required>
+            </mat-form-field>
+            <mat-form-field>
+                <mat-label>{{'ORG.groupEmail' | translate}}</mat-label>
+                <input matInput name="groupEmail" [(ngModel)]="edit.profile.groupEmail">
             </mat-form-field>
             <mat-form-field floatLabel="always">
               <mat-label>{{'ORG.groupType' | translate}}</mat-label>
@@ -98,6 +106,13 @@
             </mat-form-field>
             <div *ngIf="!editId">
               <input-password label="{{'USER.password' | translate}}" [(value)]="editDetails.password"></input-password>
+            </div>
+            <div class="quota">
+                <mat-form-field>
+                    <mat-label>{{'USER.sizeQuota' | translate}}</mat-label>
+                    <input matInput name="sizeQuota" [(ngModel)]="edit.profile.sizeQuota" required>
+                </mat-form-field>
+                <user-quota *ngIf="editId && edit.quota.enabled" [quota]="edit.quota"></user-quota>
             </div>
           </div>
           </form>

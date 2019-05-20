@@ -219,6 +219,13 @@ export class MdsComponent{
   private static MAX_SUGGESTIONS = 5;
   private suggestionsViaSearch = false;
 
+  private resetValues(){
+      this._currentValues=null;
+      this.loadMdsFinal(()=>{
+          this.onDone.emit(null);
+      });
+  }
+
   constructor(private mdsService : RestMdsService,
               private translate : TranslateService,
               private route : ActivatedRoute,
@@ -1276,7 +1283,7 @@ export class MdsComponent{
     let domId=this.getWidgetDomId(widget);
     let html=this.autoSuggestField(widget,'',false,
                 this.getWindowComponent()+`.openTree('`+widget.id+`')`,'arrow_forward')
-        +`     <div class="dialog darken" style="display:none;z-index:121;" id="`+domId+`_tree">
+        +`     <div class="dialog darken" style="display:none;z-index:`+(122 + this.priority)+`;" id="`+domId+`_tree">
                 <div class="card center-card card-wide card-high card-action">
                   <div class="card-content">
                   <div class="card-cancel" onclick="document.getElementById('`+domId+`_tree').style.display='none';"><i class="material-icons">close</i></div>
@@ -2284,11 +2291,18 @@ export class MdsComponent{
       let child=this.childobjects[pos];
       console.log('add new child',child);
       if(child.file){
-          this.node.createNode(this.currentNode.ref.id,RestConstants.CCM_TYPE_IO,[RestConstants.CCM_ASPECT_IO_CHILDOBJECT],this.getChildobjectProperties(child,pos),true,'',RestConstants.CCM_ASSOC_CHILDIO).subscribe((data:NodeWrapper)=>{
-            this.node.uploadNodeContent(data.node.ref.id,child.file,RestConstants.COMMENT_MAIN_FILE_UPLOAD).subscribe(()=>{
-              this.onAddChildobject(callback,pos+1);
-            });
-        });
+          this.node.createNode(this.currentNode.ref.id,RestConstants.CCM_TYPE_IO,[RestConstants.CCM_ASPECT_IO_CHILDOBJECT],this.getChildobjectProperties(child,pos),true,'',RestConstants.CCM_ASSOC_CHILDIO).subscribe((data:NodeWrapper)=> {
+              this.node.uploadNodeContent(data.node.ref.id, child.file, RestConstants.COMMENT_MAIN_FILE_UPLOAD).subscribe(() => {
+                  this.onAddChildobject(callback, pos + 1);
+              }, (error) => {
+                  if (RestHelper.errorMatchesAny(error, RestConstants.CONTENT_QUOTA_EXCEPTION)) {
+                      this.node.deleteNode(data.node.ref.id, false).subscribe(() => {});
+                      this.toast.error(null,"MDS.ADD_CHILD_OBJECT_QUOTA_REACHED",{name:child.name});
+                      this.globalProgress=false;
+                      return;
+                  }
+              });
+          });
       }
       else if(child.link){
         let properties:any={};

@@ -1,11 +1,8 @@
-import {Component, Input, EventEmitter, Output, ViewChild, ElementRef} from '@angular/core';
+import {Component, EventEmitter, Input, Output} from '@angular/core';
 import {RestConnectorService} from "../../../common/rest/services/rest-connector.service";
 import {Toast} from "../../../common/ui/toast";
 import {RestNodeService} from "../../../common/rest/services/rest-node.service";
-import {
-    NodeWrapper, Node, NodePermissions, LocalPermissionsResult, Permission,
-    LoginResult, Connector
-} from "../../../common/rest/data-object";
+import {Connector, Node} from "../../../common/rest/data-object";
 import {ConfigurationService} from "../../../common/services/configuration.service";
 import {UIHelper} from "../../../common/ui/ui-helper";
 import {RestIamService} from "../../../common/rest/services/rest-iam.service";
@@ -17,8 +14,8 @@ import {Router} from '@angular/router';
 import {RestHelper} from '../../../common/rest/rest-helper';
 import {RestConnectorsService} from "../../../common/rest/services/rest-connectors.service";
 import {FrameEventsService} from "../../../common/services/frame-events.service";
-import {WorkspaceMainComponent} from "../../workspace/workspace.component";
 import {NodeHelper} from "../../../common/ui/node-helper";
+import {OPEN_URL_MODE} from "../../../common/ui/ui-constants";
 import {DialogButton} from "../../../common/ui/modal-dialog/modal-dialog.component";
 
 @Component({
@@ -127,7 +124,7 @@ export class NodeVariantComponent  {
         })
     }
     openLicense(){
-      UIHelper.openBlankWindow(this.getLicenseUrl(),this.connector.getCordovaService());
+      UIHelper.openUrl(this.getLicenseUrl(),this.connector.getCordovaService(),OPEN_URL_MODE.BlankSystemBrowser);
     }
 
     getLicenseUrl(): string {

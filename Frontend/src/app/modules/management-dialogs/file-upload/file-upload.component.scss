@@ -22,7 +22,6 @@
   .center{
     flex-direction: column;
     flex-grow: 1;
-    align-items: left;
     .fileName{
       word-break: break-all;
       padding-bottom: 4px;
@@ -36,6 +35,7 @@
       font-size:8pt;
       font-weight: bold;
       padding-top: 2px;
+      min-height: 1.3rem;
       .size{
         font-weight: normal;
         padding-left: 0.5em;
@@ -56,6 +56,9 @@
   }
   .success{
     color:$colorStatusPositive;
+  }
+  .failed{
+    color:$colorStatusNegative;
   }
   .progress{
     margin:0 10px;

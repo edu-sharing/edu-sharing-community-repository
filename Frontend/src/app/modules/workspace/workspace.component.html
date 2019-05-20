@@ -105,9 +105,10 @@
                         (onCreate)="createConnector($event)"
   ></workspace-create-connector>
 
-
-  <workspace-tree class="tree" *ngIf="isLoggedIn"
-  [current]="currentFolder ? currentFolder.ref.id : null"
+  <div class="tree" *ngIf="isLoggedIn">
+  <workspace-tree
+                  [class.tree-quota]="user.person.quota.enabled"
+                  [current]="currentFolder ? currentFolder.ref.id : null"
                   [path]="path"
                   [selectedNode]="selectedNodeTree"
                   [root]="root"
@@ -119,6 +120,8 @@
                   (onDeleteNodes)="deleteNode=$event"
                   (onUpdateOptions)="updateOptions($event)"
   ></workspace-tree>
+  <user-quota *ngIf="user.person.quota.enabled" [quota]="user.person.quota"></user-quota>
+  </div>
 <div class="breadcrumbFrame">
     <div class="mobile-move-top">
         <breadcrumbs *ngIf="isLoggedIn"

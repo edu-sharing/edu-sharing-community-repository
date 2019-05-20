@@ -640,6 +640,11 @@
 				</property>
 				<property name="ccm:replicationsourceid">
 					<type>d:text</type>
+					<index enabled="true">
+						<atomic>true</atomic>
+						<stored>false</stored>
+						<tokenised>both</tokenised>
+					</index>
 				</property>
 				<property name="ccm:replicationsourcetimestamp">
 					<type>d:text</type>
@@ -1460,6 +1465,15 @@
 		<aspect name="ccm:groupExtension">
 			<title>extension of metadata of alfresco groups</title>
 			<properties>
+				<!-- edu-sharing: for sending invitation mails to groups -->
+				<property name="cm:groupEmail">
+					<type>d:text</type>
+					<index enabled="true">
+						<atomic>true</atomic>
+						<stored>false</stored>
+						<tokenised>both</tokenised>
+					</index>
+				</property>
 				<property name="ccm:groupType">
 					<title>type of a group in edu-sharing context</title>
 					<type>d:text</type>
@@ -1606,74 +1620,6 @@
 			<properties>
 				<property name="ccm:collection_ordered_position">
 					<type>d:int</type>
-				</property>
-			</properties>
-		</aspect>
-		<aspect name="ccm:eaf">
-			<title>aspect for extending an io with eaf specific fields</title>
-			<properties>
-				<property name="ccm:eaf_productionyear">
-					<type>d:date</type>
-				</property>
-				<property name="ccm:eaf_grade">
-					<type>d:text</type>
-				</property>
-				<property name="ccm:eaf_productioncountry">
-					<type>d:text</type>
-				</property>
-				<property name="ccm:eaf_available">
-					<type>d:date</type>
-				</property>
-				<property name="ccm:eaf_fixed_keywords">
-					<type>d:text</type>
-					<multiple>true</multiple>
-					<index enabled="true">
-	         			<atomic>true</atomic>
-	         			<tokenised>both</tokenised>
-	         		</index>
-				</property>
-				<property name="ccm:eaf_custom_keywords">
-					<type>d:text</type>
-					<multiple>true</multiple>
-					<index enabled="true">
-	         			<atomic>true</atomic>
-	         			<tokenised>both</tokenised>
-	         		</index>
-				</property>
-				<property name="ccm:eaf_fsk">
-					<type>d:text</type>
-				</property>
-				<property name="ccm:eaf_previous_knowledge">
-					<type>d:text</type>
-				</property>
-				<property name="ccm:eaf_description_long">
-					<type>d:text</type>
-				</property>
-				<property name="ccm:eaf_public_screening">
-					<type>d:text</type>
-				</property>
-				<property name="ccm:eaf_learninggoal">
-					<type>d:text</type>
-				</property>
-				<property name="ccm:eaf_learningtime">
-					<type>d:text</type>
-				</property>
-				<property name="ccm:eaf_distribution">
-					<type>d:text</type>
-				</property>
-				<property name="ccm:eaf_publisher">
-					<type>d:text</type>
-					<index enabled="true">
-	         			<atomic>true</atomic>
-	         			<tokenised>both</tokenised>
-	         		</index>
-				</property>
-				<property name="ccm:eaf_content_provider">
-					<type>d:text</type>
-					<index enabled="true">
-	         			<atomic>true</atomic>
-	         			<tokenised>both</tokenised>
-	         		</index>
 				</property>
 			</properties>
 		</aspect>

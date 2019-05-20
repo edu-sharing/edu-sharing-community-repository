@@ -85,7 +85,7 @@ public class Edu_SharingAuthenticationFilter implements Filter {
 				logger.info("auth is BASIC");
 				// Basic authentication details present
 
-				String basicAuth = new String(Base64.decodeBase64(authHdr.substring(5).getBytes()));
+				String basicAuth = new String(java.util.Base64.getDecoder().decode(authHdr.substring(5).getBytes()));
 
 				// Split the username and password
 

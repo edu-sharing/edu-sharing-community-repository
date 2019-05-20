@@ -21,7 +21,7 @@
       <div class="done success" *ngIf="!item.progress.loaded && item.progress.progress>=100">
         <i class="material-icons">done</i>
       </div>
-      <div class="done" *ngIf="!item.progress.loaded && item.progress.progress<0">
+      <div class="done failed" *ngIf="!item.progress.loaded && item.progress.progress<0">
         <i class="material-icons">close</i>
       </div>
     </div>

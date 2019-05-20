@@ -20,6 +20,7 @@ public class Values{
 	@XmlElement	public MenuEntry[] menuEntries;
 	@XmlElement	public ContextMenuEntry[] nodeOptions;
 	@XmlElement	public ContextMenuEntry[] searchNodeOptions;
+	@XmlElement	public ContextMenuEntry[] renderNodeOptions;
 	@XmlElement	public ContextMenuEntry[] nodeStoreOptions;
 	@XmlElement	public String[] allowedLicenses;
 	@XmlElement	public License[] customLicenses;
@@ -27,6 +28,7 @@ public class Values{
 	@XmlElement	public Boolean licenseDialogOnUpload;
 	@XmlElement	public Boolean nodeReport;
 	@XmlElement	public Boolean branding;
+	@XmlElement	public Boolean publishingNotice;
 	@XmlElement	public String siteTitle;
 	@XmlElement	public String userDisplayName;
 	@XmlElement	public String userSecondaryDisplayName;

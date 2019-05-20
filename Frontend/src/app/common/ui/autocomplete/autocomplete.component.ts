@@ -5,8 +5,7 @@ import {TranslateService} from "@ngx-translate/core";
   selector: 'autocomplete',
   templateUrl: 'autocomplete.component.html',
   styleUrls: ['autocomplete.component.scss'],
-  host: {'(keydown)': 'handleKeyDown($event)',
-  '(keyup)': 'handleKeyUp($event)'}
+  host: {'(keydown)': 'handleKeyDown($event)'}
 })
 
 
@@ -98,7 +97,7 @@ itemChosen(item:SuggestItem) {
     this.showSuggestions=false;
   }
 
-  handleKeyUp(event: any) {
+  updateValue() {
     if(this.valueInput.length >= this.inputMinLength) {
       this.updateInput.emit({input: this.valueInput, id: this.id});
       this.showSuggestions = true;

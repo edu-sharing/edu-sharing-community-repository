@@ -142,6 +142,12 @@
     "NODE_PROPERTIES":"Properties",
     "NODE_TYPE":"Objekttyp",
     "JSON":"Gesamtes Objekt",
+    "PERMISSIONS":"Berechtigungen",
+    "PERMISSIONS_INHERITED":"Geerbte Berechtigungen",
+    "PERMISSIONS_INHERIT_DISABLED":"Vereerbung dektiviert",
+    "PERMISSIONS_INHERIT_EMPTY":"Keine Berechtigungen vom Parent geerbt",
+    "PERMISSIONS_LOCAL":"Explizite Berechtigungen",
+    "PERMISSIONS_LOCAL_EMPTY":"Keine Berechtigungen am Objekt festgelegt",
     "CHILDREN":"Children",
     "CHILDREN_NONE":"Dieses Element besitzt keine Child Objekte"
   },
@@ -179,6 +185,10 @@
     "size": "Größe",
     "mediatype":"Dateityp",
     "ccm:commonlicense_key":"Lizenz",
+    "ccm:educationallearningresourcetype":"Medienart",
+    "ccm:replicationsourceid":"Original-ID",
+    "ccm:eaf_sequence_title":"Serientitel",
+    "ccm:eaf_subtitle":"Untertitel",
     "sys:node-uuid":"Node-ID",
     "dimensions": "Bildgröße",
     "exif:dateTimeOriginal":"Aufnahmedatum",
@@ -194,7 +204,7 @@
     "ccm:author_freetext":"Freie Urheber-Angabe",
     "ccm:lifecyclecontributer_authorFN":"Autor",
     "ccm:wf_status":"Status",
-    "ccm:eaf_productionyear":"Produktionsjahr"
+    "ccm:eaf_productionyear":"Prod. Jahr"
   },
   "LICENSE":{
     "NAMES": {
@@ -245,6 +255,11 @@
     "MORE_LINK":"Weitere Informationen",
     "DIALOG_TITLE":"Cookies",
     "DIALOG_MESSAGE":"Die Internetseiten verwenden teilweise so genannte Cookies. Cookies richten auf Ihrem Rechner keinen Schaden an und enthalten keine Viren.\nCookies dienen dazu, unser Angebot nutzerfreundlicher, effektiver und sicherer zu machen.\nCookies sind kleine Textdateien, die auf Ihrem Rechner abgelegt werden und die Ihr Browser speichert. Die meisten der von uns verwendeten Cookies sind so genannte \"Session-Cookies\". Sie werden nach Ende Ihres Besuchs automatisch gelöscht. Andere Cookies bleiben auf Ihrem Endgerät gespeichert, bis Sie diese löschen.\nDiese Cookies ermöglichen es uns, Ihren Browser beim nächsten Besuch wiederzuerkennen.\nSie können Ihren Browser so einstellen, dass Sie über das Setzen von Cookies informiert werden und Cookies nur im Einzelfall erlauben, die Annahme von Cookies für bestimmte Fälle oder generell ausschließen sowie das automatische Löschen der Cookies beim Schließen des Browser aktivieren.\nBei der Deaktivierung von Cookies kann die Funktionalität dieser Website eingeschränkt sein."
+  },
+  "QUOTA":{
+    "TITLE":"Speicherplatz",
+    "FREE_SPACE":"frei von",
+    "OVERALL":""
   },
   "NODE_VARIANT":{
     "TITLE": "Neue Variante anlegen",
@@ -318,6 +333,9 @@
     "file-word":"Word-Dokument",
     "file-excel":"Tabelle",
     "file-powerpoint":"Präsentation",
+    "file-odt":"OpenOffice Dokument",
+    "file-ods":"OpenOffice Tabelle",
+    "file-odp":"OpenOffice Präsentation",
     "file-zip":"Zip-Datei",
     "file-script":"Skript",
     "file-xml":"XML-Datei",
@@ -347,19 +365,23 @@
   },
   "GROUP" : {
     "displayName" : "Gruppenname",
+    "groupEmail" : "E-Mail",
     "groupType" : "Typ",
     "scopeType" : "Sichtbarkeit"
   },
   "ORG" : {
     "displayName" : "Organisations-Name",
-    "groupType" : "Typ"
+    "groupEmail" : "E-Mail",
+    "groupType" : "Typ",
+    "folderLocation":" Speicherort des gemeinsamen Ordners"
   },
   "USER":{
     "authorityName" : "Nutzername",
     "firstName" : "Vorname",
     "lastName" : "Nachname",
     "email" : "E-Mail",
-    "password" : "Passwort"
+    "password" : "Passwort",
+    "sizeQuota" : "Speicherkontingent in MB"
   },
   "CONNECTOR":{
     "ONLY_OFFICE": {
@@ -432,7 +454,8 @@
     "LICENSE_NO_PERMISSIONS":"Sie besitzen keine Berechtigungen, um Materialien zu lizenzieren",
     "LICENSE_NO_PERMISSIONS_SAFE":"Sie können im gesicherten Bereich die Lizenz des Materials nicht ändern",
     "ADD_CHILD_OBJECT":"Weitere Materialien hinzufügen",
-    "ADD_CHILD_OBJECT_DESCRIPTION":"Erzeugen Sie eine neue Serie, indem Sie dazugehörige Materialien ergänzen"
+    "ADD_CHILD_OBJECT_DESCRIPTION":"Erzeugen Sie eine neue Serie, indem Sie dazugehörige Materialien ergänzen",
+    "ADD_CHILD_OBJECT_QUOTA_REACHED":"Fehler beim Hochladen des Objekts \"{{ name }}\": Speicherplatz-Quota überschritten"
   },
   "SHARE_APP":{
     "TEXT_SNIPPET":"Notiz",
@@ -440,6 +463,7 @@
     "WILL_BE_SAVED_AT":"Wird gespeichert unter",
     "ADD_TO_COLLECTION":"In welche Sammlung einsortieren?"
   },
+  "LICENSE_INFORMATION":"Über edu-sharing",
   "LICENSE_AGREEMENT":{
     "TITLE":"Nutzungsbedingungen",
     "CHECKBOX":"Ich habe die oben genannten Bedingungen gelesen und akzeptiere diese",

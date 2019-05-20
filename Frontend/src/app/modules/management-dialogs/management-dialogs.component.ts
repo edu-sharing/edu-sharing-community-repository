@@ -17,6 +17,7 @@ import {DialogButton} from "../../common/ui/modal-dialog/modal-dialog.component"
 import {Router} from '@angular/router';
 import {UIConstants} from "../../common/ui/ui-constants";
 import {ClipboardObject, TemporaryStorageService} from '../../common/services/temporary-storage.service';
+import {RestUsageService} from "../../common/rest/services/rest-usage.service";
 
 @Component({
   selector: 'workspace-management',
@@ -53,6 +54,16 @@ export class WorkspaceManagementDialogsComponent  {
         this.dialogNode=nodeDelete;
         this.dialogButtons=DialogButton.getCancel(()=> {this.dialogTitle = null});
         this.dialogButtons.push(new DialogButton('YES_DELETE',DialogButton.TYPE_PRIMARY,()=>{this.deleteConfirmed(nodeDelete)}));
+
+        // check for usages and warn user
+        if(nodeDelete.length==1 && !nodeDelete[0].isDirectory){
+            this.usageService.getNodeUsages(nodeDelete[0].ref.id,nodeDelete[0].ref.repo).subscribe((usages)=>{
+                if(usages.usages.length>0){
+                    this.dialogMessage="WORKSPACE.DELETE_MESSAGE_SINGLE_USAGES";
+                    this.dialogMessageParameters={name:nodeDelete[0].name,usages:usages.usages.length};
+                }
+            });
+        }
     }
     @Output() nodeDeleteChange = new EventEmitter();
     @Output() onDelete = new EventEmitter();
@@ -156,6 +167,7 @@ export class WorkspaceManagementDialogsComponent  {
   }
   public constructor(
     private nodeService:RestNodeService,
+    private usageService:RestUsageService,
     private toolService:RestToolService,
     private temporaryStorage:TemporaryStorageService,
     private collectionService:RestCollectionService,

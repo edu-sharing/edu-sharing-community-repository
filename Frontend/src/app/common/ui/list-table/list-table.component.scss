@@ -169,7 +169,13 @@ $badgeWidth:250px;
   min-width:150px;
 }
 .node_ccm_eaf_productionyear{
-  min-width:70px;
+  min-width:115px;
+}
+.node_ccm_eaf_sequence_title{
+  min-width:130px;
+}
+.node_ccm_eaf_subtitle{
+  min-width:130px;
 }
 .node_dimensions{
   min-width:110px;
@@ -199,7 +205,7 @@ $badgeWidth:250px;
   word-break: break-all;
 }
 .node_ccm_replicationsource{
-  min-width:50px;
+  min-width:80px;
 }
 .user_firstName,
 .user_lastName{
@@ -262,7 +268,14 @@ $badgeWidth:250px;
 .more{
   color:$primary!important;
 }
+.tableList{
+  @for $i from 2 through 10 {
+    .row_#{$i} {
+      word-break: break-all;
+    }
+  }
 
+}
 .tableList .row.selected,
 .cardList .row.selected{
   background: $workspaceSelectedBackgroundEffect;
@@ -596,6 +609,7 @@ $orderAnimationTime:$transitionNormal*5;
     height: 100%;
     background-color:rgba(255,255,255,0.85);
     position: absolute;
+    z-index: 1;
     border-radius: $borderRadius;
     left:0;
     top:0;
@@ -746,6 +760,7 @@ $orderAnimationTime:$transitionNormal*5;
   background-color: #eee;
   border-radius:15px;
   width:45px;
+  min-width:45px;
   display: inline-flex;
   align-items: center;
   justify-content: center;

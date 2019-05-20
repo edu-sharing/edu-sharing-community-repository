@@ -44,15 +44,37 @@
   z-index: 122;
 }
 
+$treeWidth:300px;
+$quotaHeight:60px;
 .tree{
-  min-width:300px;
-  max-width:300px;
+  min-width:$treeWidth;
+  max-width:$treeWidth;
   top:$workspaceBreadcrumbsHeight+$mainnavHeight;
   position:fixed;
   height:calc(100% - #{$workspaceBreadcrumbsHeight} - #{$mainnavHeight});
   z-index: 2;
-  overflow-y:auto;
   background: $workspaceTreeBackground;
+  workspace-tree{
+    min-width:$treeWidth;
+    max-width:$treeWidth;
+    top:$workspaceBreadcrumbsHeight+$mainnavHeight;
+    position:fixed;
+    height:calc(100% - #{$workspaceBreadcrumbsHeight} - #{$mainnavHeight});
+    overflow-y:auto;
+  }
+  .tree-quota{
+    height:calc(100% - #{$workspaceBreadcrumbsHeight} - #{$mainnavHeight} - #{$quotaHeight});
+  }
+}
+
+user-quota{
+  position: absolute;
+  width: $treeWidth;
+  height: $quotaHeight;
+  background: $workspaceTreeBackground;
+  bottom: 0;
+  z-index: 3;
+  padding: 10px 20px;
 }
 .nodeRender{
   padding:20px;

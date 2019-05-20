@@ -219,18 +219,15 @@ public class PreviewServlet extends HttpServlet implements SingleThreadModel {
 				final String nodeIdFinal=nodeId;
 
 				if(getPrevResult == null){
-					if(isCollection){
-						// we need to access the actual object as admin
-						getPrevResult = AuthenticationUtil.runAsSystem(new RunAsWork<GetPreviewResult>() {
-							@Override
-							public GetPreviewResult doWork() throws Exception {
-								return nodeService.getPreview(storeRef.getProtocol(), storeRef.getIdentifier(), nodeIdFinal);
-							}
-						});
-					}
-					else{
-						getPrevResult = nodeService.getPreview(storeRef.getProtocol(),storeRef.getIdentifier(), nodeId);
-					}
+					// we need to access the actual object as admin
+					// for collections, this is required
+					// and since may there is no right to access binary content (but READ_PREVIEW is present and validated before)
+					getPrevResult = AuthenticationUtil.runAsSystem(new RunAsWork<GetPreviewResult>() {
+						@Override
+						public GetPreviewResult doWork() throws Exception {
+							return nodeService.getPreview(storeRef.getProtocol(), storeRef.getIdentifier(), nodeIdFinal);
+						}
+					});
 				}
 				
 				if(isCollection){

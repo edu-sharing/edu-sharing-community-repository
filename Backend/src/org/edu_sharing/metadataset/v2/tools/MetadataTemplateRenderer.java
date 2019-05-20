@@ -69,7 +69,6 @@ public class MetadataTemplateRenderer {
 		html+="<div class='mdsGroup'><div class='mdsCaption "+template.getId()+"'>"+template.getCaption()+"</div>"
 				+ "<div class='mdsContent'>";
 		String content=template.getHtml();
-		
 		for(MetadataWidget srcWidget : mds.getWidgets()){
 			MetadataWidget widget=mds.findWidgetForTemplateAndCondition(srcWidget.getId(),template.getId(),properties);
 			int start=content.indexOf("<"+widget.getId());
@@ -104,9 +103,14 @@ public class MetadataTemplateRenderer {
 					if(key==null)
 						continue;
 					List<String> path=new ArrayList<String>();
+					int preventInfiniteLoop = 0;
 					while(key!=null) {
 						path.add(key.getCaption());
 						key=valuesMap.get(key.getParent());
+						if(preventInfiniteLoop++ > 100) {
+							logger.error("check valuespace for widget:" + widget.getId() + " key:" + key.getKey());
+							break;
+						}
 					}
 					path=Lists.reverse(path);
 					int i=0;
@@ -121,6 +125,25 @@ public class MetadataTemplateRenderer {
 					}
 					widgetHtml+="</div>";
 
+				}
+			}
+			else if("multivalueCombined".equals(widget.getType())){
+				String[] firstValues=properties.get(widget.getSubwidgets().get(0).getId());
+				if(firstValues!=null && firstValues.length>0) {
+					wasEmpty=false;
+					empty=false;
+					for(int i=0;i<firstValues.length;i++) {
+						widgetHtml+="<div class='mdsValue'>";
+						for (MetadataWidget.Subwidget subWidget : widget.getSubwidgets()) {
+							try {
+								widgetHtml += renderWidgetValue(mds.findWidget(subWidget.getId()),properties.get(subWidget.getId())[i]) + " ";
+							}
+							catch(IndexOutOfBoundsException e){
+								logger.warn("Sub widget "+subWidget.getId()+" can not be rendered (main widget "+widget.getId()+"): The array values of the sub widgets do not match up",e);
+							}
+						}
+						widgetHtml+="</div>";
+					}
 				}
 			}
 			else {
@@ -139,7 +162,8 @@ public class MetadataTemplateRenderer {
 						if(link!=null)
 							value="<a href='"+link+"' target='_blank'>";
 						value+="<img src='"+
-								license.getIconUrl(licenseName)+
+								// @TODO 5.1 This can be set to dynamic!
+								license.getIconUrl(licenseName,false)+
 								"'>";
 						if(link!=null)
 							value+="</a>";
@@ -156,44 +180,7 @@ public class MetadataTemplateRenderer {
 					}
 					if(value==null || value.trim().isEmpty())
 						continue;
-					if(widget.getType()!=null){
-						if(widget.getType().equals("date")){
-							try{
-								if(widget.getFormat()!=null && !widget.getFormat().isEmpty()){
-									value=new SimpleDateFormat(widget.getFormat()).format(Long.parseLong(value));
-								}
-								else{
-									value=new DateTool().formatDate(Long.parseLong(value));
-								}
-							}catch(Throwable t){
-								// wrong data or text
-							}
-						}
-						if(widget.getType().equals("filesize")){
-							try{
-								value=formatFileSize(Long.parseLong(value));
-							}catch(Throwable t){
-							}
-						}
-						if(widget.getType().equals("multivalueGroup")) {
-                            value=formatGroupValue(value,widget);
-                        }
-						if(widget.getType().equals("checkbox")) {
-							try{
-								value = MetadataHelper.getTranslation(new Boolean(value) ? "boolean_yes" : "boolean_no");
-							}catch(Throwable t){
-								logger.info("Error parsing value "+value+" for checkbox widget "+widget.getId(),t);
-							}
-						}
-					}
-					if(valuesMap.containsKey(value))
-						value=valuesMap.get(value).getCaption();
-
-					if(widget.getFormat()!=null && !widget.getFormat().isEmpty()){
-						if(widget.getFormat().contains("${value}")) {
-							value = widget.getFormat().replace("${value}", value);
-						}
-					}
+					value=renderWidgetValue(widget,value);
 					boolean isLink=false;
 					if(widget.getLink()!=null && !widget.getLink().isEmpty()){
 						widgetHtml+="<a href=\""+value+"\" target=\""+widget.getLink()+"\">";
@@ -239,6 +226,48 @@ public class MetadataTemplateRenderer {
 		html+=content;
 		html+="</div></div>";
 		return html;
+	}
+	private String renderWidgetValue(MetadataWidget widget,String value){
+		if(widget.getType()!=null){
+			if(widget.getType().equals("date")){
+				try{
+					if(widget.getFormat()!=null && !widget.getFormat().isEmpty()){
+						value=new SimpleDateFormat(widget.getFormat()).format(Long.parseLong(value));
+					}
+					else{
+						value=new DateTool().formatDate(Long.parseLong(value));
+					}
+				}catch(Throwable t){
+					// wrong data or text
+				}
+			}
+			if(widget.getType().equals("filesize")){
+				try{
+					value=formatFileSize(Long.parseLong(value));
+				}catch(Throwable t){
+				}
+			}
+			if(widget.getType().equals("multivalueGroup")) {
+				value=formatGroupValue(value,widget);
+			}
+			if(widget.getType().equals("checkbox")) {
+				try{
+					value = MetadataHelper.getTranslation(new Boolean(value) ? "boolean_yes" : "boolean_no");
+				}catch(Throwable t){
+					logger.info("Error parsing value "+value+" for checkbox widget "+widget.getId(),t);
+				}
+			}
+		}
+		Map<String, MetadataKey> valuesMap = widget.getValuesAsMap();
+		if(valuesMap.containsKey(value))
+			value=valuesMap.get(value).getCaption();
+
+		if(widget.getFormat()!=null && !widget.getFormat().isEmpty()){
+			if(widget.getFormat().contains("${value}")) {
+				value = widget.getFormat().replace("${value}", value);
+			}
+		}
+		return value;
 	}
 	private String getLicenseName(String licenseName, Map<String, String[]> properties) {
 		if(licenseName==null || licenseName.isEmpty())

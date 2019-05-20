@@ -88,7 +88,8 @@ public class MimeTypesV2 {
 	}
 	private String getBasePath(){
 		if(appInfo.ishomeNode()){
-			return URLTool.getBaseUrl(true);
+			// @TODO 5.1 This can be set to dynamic!
+			return URLTool.getBaseUrl(false);
 		}
 		String basePath=appInfo.getClientBaseUrl();
 		if(basePath.endsWith("/")){
@@ -203,14 +204,20 @@ public class MimeTypesV2 {
 	}
 	if(SCRIPT.contains(mimetype))
 		return "file-script";
-	
+
+	if(mimetype.equals("application/vnd.oasis.opendocument.text"))
+		return "file-odt";
+	if(mimetype.equals("application/vnd.oasis.opendocument.spreadsheet"))
+		return "file-ods";
+	if(mimetype.equals("application/vnd.oasis.opendocument.presentation"))
+		return "file-odp";
 	if(mimetype.equals("text/xml"))
 		return "file-xml";
 	if(mimetype.equals("application/pdf"))
 		return "file-pdf";
 	if(mimetype.equals("imsqti"))
 		return "file-qti";
-	if(mimetype.equals("moodle"))
+	if(mimetype.equals("moodle") || mimetype.equals("application/vnd.moodle.backup"))
 		return "file-moodle";
 	if(mimetype.equals("scorm") || mimetype.equals("ADL SCORM"))
 		return "file-scorm";

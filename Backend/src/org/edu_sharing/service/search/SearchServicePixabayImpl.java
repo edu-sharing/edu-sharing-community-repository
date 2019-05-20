@@ -21,6 +21,7 @@ import javax.net.ssl.SSLSession;
 import javax.net.ssl.TrustManager;
 import javax.net.ssl.X509TrustManager;
 
+import org.apache.commons.collections.map.LRUMap;
 import org.apache.log4j.Logger;
 import org.edu_sharing.metadataset.v2.MetadataSetV2;
 import org.edu_sharing.repository.client.tools.CCConstants;
@@ -50,7 +51,7 @@ public class SearchServicePixabayImpl extends SearchServiceAdapter{
 
 	String APIKey = null;
 			
-	private static ConcurrentMap<String,String> searchCache=new MapMaker().expiration(30, TimeUnit.MINUTES).makeMap();
+	private static LRUMap searchCache=new LRUMap(1000);
 	public SearchServicePixabayImpl(String appId) {
 		ApplicationInfo appInfo = ApplicationInfoList.getRepositoryInfoById(appId);
 		this.repositoryId = appInfo.getAppId();		
@@ -58,7 +59,10 @@ public class SearchServicePixabayImpl extends SearchServiceAdapter{
 
 	}
 	public static HttpsURLConnection openPixabayUrl(URL url) throws KeyManagementException, IOException, NoSuchAlgorithmException{
-		HttpsURLConnection connection = (HttpsURLConnection) url.openConnection();
+		return (HttpsURLConnection) url.openConnection();
+
+		// not required, the server should have a current java jdk version!
+		/*HttpsURLConnection connection = (HttpsURLConnection) url.openConnection();
 		
 		// TODO!
 		TrustManager[] trustAllCerts = new TrustManager[]{
@@ -83,13 +87,14 @@ public class SearchServicePixabayImpl extends SearchServiceAdapter{
 		    }
 		  });
 		return connection;
+		*/
 	}
 	public static SearchResultNodeRef searchPixabay(String repositoryId,String apiKey,String path) throws Exception{
 		String lang=new AuthenticationToolAPI().getCurrentLocale().split("_")[0];
 		String url=PIXABAY_API+"?key="+URLEncoder.encodeUriComponent(apiKey)+"&lang="+lang+path;
 		String jsonString;
 		if(searchCache.containsKey(url)){
-			jsonString=searchCache.get(url);
+			jsonString= (String) searchCache.get(url);
 		}
 		else{
 			URL urlURL=new URL(url);
@@ -180,7 +185,6 @@ public class SearchServicePixabayImpl extends SearchServiceAdapter{
 			searchWordCriteria = new String[] {"*"};
 		}
 		String searchWord = searchWordCriteria[0];
-		HttpsURLConnection connection=null;
 		if(searchToken.getFrom()%searchToken.getMaxResult()!=0)
 			throw new Exception("Pixabay only supports offsets which are dividable by the maxItems count");
 		try {
@@ -201,20 +205,9 @@ public class SearchServicePixabayImpl extends SearchServiceAdapter{
 			return searchPixabay(repositoryId,APIKey,uri);
 			
 		}
-		catch(IOException e){
-			InputStream is=connection.getErrorStream();
-			StringBuilder responseStrBuilder = new StringBuilder();
-			String line;
-			BufferedReader bR = new BufferedReader(  new InputStreamReader(is));
-			while((line =  bR.readLine()) != null){
-			    responseStrBuilder.append(line);
-			}
-			is.close();
-			throw new Exception("Error from Pixabay: "+connection.getResponseCode()+" "+responseStrBuilder.toString());
-		}
 		catch (Throwable t) {
-			t.printStackTrace();
-			throw t;
+			logger.warn(t.getMessage(),t);
+			throw new Exception("Error communicating with the Pixabay API");
 		}
 
 	}

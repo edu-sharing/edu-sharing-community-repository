@@ -11,7 +11,6 @@ import javax.xml.bind.Unmarshaller;
 import javax.xml.transform.TransformerException;
 
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
-import org.alfresco.service.cmr.repository.InvalidNodeRefException;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.repository.StoreRef;
 import org.edu_sharing.repository.client.rpc.ACE;
@@ -20,12 +19,7 @@ import org.edu_sharing.repository.server.tools.UserEnvironmentTool;
 import org.edu_sharing.restservices.shared.Authority;
 import org.edu_sharing.service.NotAnAdminException;
 import org.edu_sharing.service.authority.AuthorityServiceFactory;
-import org.edu_sharing.service.config.model.Config;
-import org.edu_sharing.service.config.model.Context;
-import org.edu_sharing.service.config.model.KeyValuePair;
-import org.edu_sharing.service.config.model.Language;
-import org.edu_sharing.service.config.model.Values;
-import org.edu_sharing.service.config.model.Variables;
+import org.edu_sharing.service.config.model.*;
 import org.edu_sharing.service.nodeservice.NodeService;
 import org.edu_sharing.service.nodeservice.NodeServiceFactory;
 import org.edu_sharing.service.nodeservice.NodeServiceHelper;
@@ -102,27 +96,41 @@ public class ConfigServiceImpl implements ConfigService{
 				.getContextClassLoader();
 		return classLoader.getResourceAsStream("/org/edu_sharing/service/config/client.config.xml");	
 	}
-	@Override
-	public Config getConfigByDomain(String domain) throws Exception {
+	private Context getContext(String domain) throws Exception {
 		Config config=getConfig();
 		if(config.contexts!=null && config.contexts.context!=null) {
-			for(Context context : config.contexts.context) {
-				if(context.domain==null)
+			for (Context context : config.contexts.context) {
+				if (context.domain == null)
 					continue;
-				for(String cd : context.domain) {
-					if(cd.equals(domain)) {
-						overrideValues(config.values,context.values);
-						if(context.language!=null)
-							config.language=overrideLanguage(config.language,context.language);
-						if(context.variables!=null)
-							config.variables=overrideVariables(config.variables,context.variables);
-						return config;
+				for (String cd : context.domain) {
+					if (cd.equals(domain)) {
+						return context;
 					}
 				}
 			}
 		}
+		return null;
+	}
+	@Override
+	public String getContextId(String domain) throws Exception {
+		Context context = getContext(domain);
+		if(context!=null)
+			return context.id;
+		return null;
+	}
+	@Override
+	public Config getConfigByDomain(String domain) throws Exception {
+		Config config=getConfig();
+		Context context=getContext(domain);
+		if(context!=null){
+			overrideValues(config.values,context.values);
+			if(context.language!=null)
+				config.language=overrideLanguage(config.language,context.language);
+			if(context.variables!=null)
+				config.variables=overrideVariables(config.variables,context.variables);
+			return config;
+		}
 		throw new IllegalArgumentException("Context with domain "+domain+" does not exists");
-		
 	}
 
 	@Override

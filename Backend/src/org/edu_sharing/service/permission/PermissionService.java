@@ -63,12 +63,12 @@ public interface PermissionService {
 	
 	public void removePermissions(String nodeId, String authority, String[] _permissions) throws Exception;
 
-    StringBuffer getFindUsersSearchString(HashMap<String, String> propVals, boolean globalContext);
+	public Result<List<User>> findUsers(String query,List<String> searchFields, boolean globalContext, int from, int nrOfResults);
 
-	StringBuffer getFindGroupsSearchString(String searchWord, boolean globalContext);
+    StringBuffer getFindUsersSearchString(String query, List<String> searchFields, boolean globalContext);
 
-	public Result<List<User>> findUsers(HashMap<String, String> propVals, boolean globalContext, int from, int nrOfResults);
-	
+    StringBuffer getFindGroupsSearchString(String searchWord, boolean globalContext);
+
 	public Result<List<Authority>> findAuthorities(String searchWord, boolean globalContext, int from, int nrOfResults);
 
 	public Result<List<Group>> findGroups(String searchWord, boolean globalContext, int from, int nrOfResults);

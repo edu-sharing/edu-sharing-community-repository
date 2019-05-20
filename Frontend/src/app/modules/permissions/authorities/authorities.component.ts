@@ -1,11 +1,11 @@
 
 import {Component, Input, Output, EventEmitter, HostListener, ChangeDetectorRef, ApplicationRef} from "@angular/core";
 import {
-    Group, IamGroups, IamUsers, NodeList, IamUser, IamAuthorities,
-    Authority, OrganizationOrganizations, Organization, Person, User
+    Node, Group, IamGroups, IamUsers, NodeList, IamUser, IamAuthorities,
+    Authority, OrganizationOrganizations, Organization, Person, User, HomeFolder, SharedFolder
 } from "../../../common/rest/data-object";
 import {Toast} from "../../../common/ui/toast";
-import {ActivatedRoute} from "@angular/router";
+import {ActivatedRoute, Router} from "@angular/router";
 import {RestIamService} from "../../../common/rest/services/rest-iam.service";
 import {TranslateService} from "@ngx-translate/core";
 import {RestConnectorService} from "../../../common/rest/services/rest-connector.service";
@@ -21,6 +21,7 @@ import {ConfigurationService} from "../../../common/services/configuration.servi
 import {Helper} from "../../../common/helper";
 import {trigger} from "@angular/animations";
 import {ListItem} from "../../../common/ui/list-item";
+import {UIHelper} from "../../../common/ui/ui-helper";
 @Component({
   selector: 'permissions-authorities',
   templateUrl: 'authorities.component.html',
@@ -183,6 +184,7 @@ export class PermissionsAuthoritiesComponent {
   constructor(private toast: Toast,
               private node : RestNodeService,
               private config : ConfigurationService,
+              private router : Router,
               private translate : TranslateService,
               private organization : RestOrganizationService,
               private connector : RestConnectorService,
@@ -346,11 +348,13 @@ export class PermissionsAuthoritiesComponent {
         (error : any)=>this.toast.error(error));
     }
     else{
+      let editStore=Helper.deepCopy(this.edit);
+      editStore.profile.sizeQuota*=1024*1024;
+      this.globalProgress=true;
       if(this.editId==null){
         let name=this.editDetails.authorityName;
         let password=this.editDetails.password;
-        this.globalProgress=true;
-        this.iam.createUser(name,password,this.edit.profile).subscribe(() => {
+        this.iam.createUser(name,password,editStore.profile).subscribe(() => {
             this.edit=null;
             this.globalProgress=false;
             if(this.org){
@@ -371,12 +375,16 @@ export class PermissionsAuthoritiesComponent {
           });
       }
       else {
-        this.iam.editUser(this.editId, this.edit.profile).subscribe(() => {
+        this.iam.editUser(this.editId, editStore.profile).subscribe(() => {
             this.edit = null;
             this.toast.toast("PERMISSIONS.USER_EDITED");
             this.refresh();
+            this.globalProgress=false;
           },
-          (error: any) => this.toast.error(error));
+          (error: any) => {
+            this.toast.error(error);
+            this.globalProgress=false;
+          });
       }
     }
   }
@@ -476,6 +484,13 @@ export class PermissionsAuthoritiesComponent {
         this.editId = this.edit.authorityName;
       },(error:any)=>this.toast.error(error));
     }
+    else if(this._mode=='USER'){
+      this.iam.getUser(list[0].authorityName).subscribe((user)=>{
+          this.edit = Helper.deepCopy(user.person);
+          this.edit.profile.sizeQuota=user.person.quota.sizeQuota/1024/1024;
+          this.editId = this.edit.authorityName;
+      });
+    }
     else {
       this.edit = Helper.deepCopy(list[0]);
       this.editId = this.edit.authorityName;
@@ -559,6 +574,10 @@ export class PermissionsAuthoritiesComponent {
   }
   private deleteAuthority(data: any,callback:Function) {
     let list=this.getList(data);
+    if(this._mode=='GROUP' && list.filter((l)=>l.groupType==RestConstants.GROUP_TYPE_ADMINISTRATORS).length){
+        this.toast.error(null,'PERMISSIONS.DELETE_ERROR_ADMINISTRATORS');
+        return;
+    }
     this.dialogTitle="PERMISSIONS.DELETE_TITLE";
     this.dialogMessage="PERMISSIONS.DELETE_"+this._mode;
     this.dialogCancelable=true;
@@ -813,6 +832,9 @@ export class PermissionsAuthoritiesComponent {
       }
     }
     Helper.downloadContent(this.translate.instant("PERMISSIONS.DOWNLOAD_MEMBER_FILENAME"),data);
+  }
+  openFolder(folder:SharedFolder){
+      UIHelper.goToWorkspaceFolder(this.node,this.router,this.connector.getCurrentLogin(),folder.id);
   }
 
     private updateButtons() {

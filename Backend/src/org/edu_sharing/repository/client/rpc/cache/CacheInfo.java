@@ -31,6 +31,16 @@ public class CacheInfo implements Serializable{
 	 */
 	long sizeInMemory;
 	
+	String member;
+	
+	public String getMember() {
+		return member;
+	}
+
+	public void setMember(String member) {
+		this.member = member;
+	}
+
 	public int getSize() {
 		return size;
 	}

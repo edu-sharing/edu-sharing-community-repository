@@ -12,6 +12,7 @@ import java.util.Map;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
+import org.alfresco.repo.search.impl.solr.ESSearchParameters;
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.repo.security.authentication.AuthenticationUtil.RunAsWork;
 import org.alfresco.service.ServiceRegistry;
@@ -432,16 +433,8 @@ public class CollectionServiceImpl implements CollectionService{
 			/**
 			 * first remove the children so that the usages from the original are also removed
 			 */
-			List<NodeRef> refObjects = this.getChildren(collectionId, null);
-			for(NodeRef entry : refObjects){
-				String type=nodeService.getType(entry.getId());
-				if(type.equals(CCConstants.CCM_TYPE_MAP) ){
-					remove(entry.getId());
-				}
-				if(type.equals(CCConstants.CCM_TYPE_IO) ){
-					removeFromCollection(collectionId, entry.getId());
-				}
-			}
+			// Moved to @BeforeDeleteIOPolicy
+
 			/**
 			 * remove the collection
 			 */
@@ -465,30 +458,16 @@ public class CollectionServiceImpl implements CollectionService{
 	@Override
 	public void removeFromCollection(String collectionId, String nodeId) {
 		try{
-						
-			List<String> assocNodes = client.getAssociationNodeIds(nodeId, CCConstants.CM_ASSOC_ORIGINAL);
-			
-			String originalNodeId = null;
-			if(assocNodes != null && assocNodes.size() > 0){
-				originalNodeId = (String)assocNodes.get(0);
-			}
-							
+			String originalNodeId=nodeService.getProperty(StoreRef.PROTOCOL_WORKSPACE,StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(),nodeId,CCConstants.CCM_PROP_IO_ORIGINAL);
 			client.removeNode(nodeId, collectionId);
-			
+
 			if(originalNodeId == null){
 				logger.warn("reference object "+nodeId + " has no originId, can not remove usage");
 				return;
 			}
 
+			// Usage handling is now handled in @BeforeDeleteIOPolicy
 
-			Usage2Service usageService = new Usage2Service();
-			
-			usageService.deleteUsage(appInfo.getAppId(), 
-					authInfo.get(CCConstants.AUTH_USERNAME), 
-					this.appInfo.getAppId(), 
-					collectionId, 
-					originalNodeId, 
-					nodeId);
 			try{
 				new RepositoryCache().remove(originalNodeId);
 			}catch(Throwable t){
@@ -560,16 +539,30 @@ public class CollectionServiceImpl implements CollectionService{
 		
 		return collection;
 	}
-	
+    private void addCollectionCountProperties(NodeRef nodeRef, Collection collection) {
+        String path=serviceRegistry.getNodeService().getPath(nodeRef).toPrefixString(serviceRegistry.getNamespaceService());
+        SearchParameters params=new ESSearchParameters();
+        params.addStore(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE);
+        params.setLanguage(org.alfresco.service.cmr.search.SearchService.LANGUAGE_LUCENE);
+        params.setMaxItems(0);
+
+        params.setQuery("TYPE:"+QueryParser.escape("ccm:io")+" AND PATH:\""+QueryParser.escape(path)+"//*\"");
+        collection.setChildReferencesCount((int) serviceRegistry.getSearchService().query(params).getNumberFound());
+        params.setQuery("TYPE:"+QueryParser.escape("ccm:map")+" AND PATH:\""+QueryParser.escape(path)+"//*\"");
+        collection.setChildCollectionsCount((int) serviceRegistry.getSearchService().query(params).getNumberFound());
+    }
 	@Override
 	public Collection get(String storeId,String storeProtocol,String collectionId) {
 		try{
 			HashMap<String,Object> props = client.getProperties(storeProtocol,storeId,collectionId);
 			throwIfNotACollection(storeProtocol,storeId,collectionId);
 			
-			Collection collection = asCollection(props);			
-			collection.setChildReferencesCount(client.getChildAssociationByType(storeProtocol,storeId,collectionId, CCConstants.CCM_TYPE_IO).size());
-			collection.setChildCollectionsCount(client.getChildAssociationByType(storeProtocol,storeId,collectionId, CCConstants.CCM_TYPE_MAP).size());
+			Collection collection = asCollection(props);
+
+			// using solr to count all underlying refs recursive
+            addCollectionCountProperties(new NodeRef(new StoreRef(storeProtocol,storeId),collectionId),collection);
+			//collection.setChildReferencesCount(client.getChildAssociationByType(storeProtocol,storeId,collectionId, CCConstants.CCM_TYPE_IO).size());
+			//collection.setChildCollectionsCount(client.getChildAssociationByType(storeProtocol,storeId,collectionId, CCConstants.CCM_TYPE_MAP).size());
 						
 			User owner = client.getOwner(storeId,storeProtocol,collectionId);
 			

@@ -19,7 +19,7 @@ import {ConfigurationService} from "../../services/configuration.service";
 import {style, transition, trigger, animate, keyframes} from "@angular/animations";
 import {SearchNodeStoreComponent} from "../../../modules/search/node-store/node-store.component";
 import {UIHelper} from "../ui-helper";
-import {UIConstants} from "../ui-constants";
+import {OPEN_URL_MODE, UIConstants} from "../ui-constants";
 import {RestHelper} from "../../rest/rest-helper";
 import {Toast} from "../toast";
 import {TemporaryStorageService} from "../../services/temporary-storage.service";
@@ -164,6 +164,8 @@ export class MainNavComponent implements AfterViewInit{
     private elementsBottomY = 0;
     private fixScrollElements = false;
     private isSafe = false;
+    licenseDialog: boolean;
+    private licenseDetails: string;
   @HostListener('document:keydown', ['$event'])
   handleKeyboardEvent(event: KeyboardEvent) {
       if(event.code=="Escape" && this.canOpen && this.displaySidebar){
@@ -445,7 +447,7 @@ export class MainNavComponent implements AfterViewInit{
       return;
   }
   public showHelp(url:string){
-    UIHelper.openBlankWindow(url,this.cordova);
+    UIHelper.openUrl(url,this.cordova,OPEN_URL_MODE.BlankSystemBrowser);
   }
   private logout(){
     this.globalProgress=true;
@@ -459,7 +461,7 @@ export class MainNavComponent implements AfterViewInit{
       let sessionData=this.connector.getCurrentLogin();
       if(this.config.logout.ajax){
         this.http.get(this.config.logout.url).subscribe(()=>{
-            if(this.config.logut.destroySession){
+            if(this.config.logout.destroySession){
                 this.connector.logout().subscribe((response) => {
                     this.finishLogout();
                 });
@@ -514,7 +516,7 @@ export class MainNavComponent implements AfterViewInit{
     // }
     this.event.broadcastEvent(FrameEventsService.EVENT_VIEW_SWITCHED,button.scope);
     if(button.url){
-      UIHelper.openBlankWindow(button.url,this.cordova);
+      UIHelper.openUrl(button.url,this.cordova,OPEN_URL_MODE.BlankSystemBrowser);
     }
     else {
       let queryParams=button.queryParams?button.queryParams:{};
@@ -557,10 +559,10 @@ export class MainNavComponent implements AfterViewInit{
     },(error:any)=>this.checkConfig(buttons));
   }
   private openImprint(){
-    window.document.location.href=this.config.imprintUrl;
+    UIHelper.openUrl(this.config.imprintUrl,this.cordova,OPEN_URL_MODE.BlankSystemBrowser);
   }
   private openPrivacy(){
-    window.document.location.href=this.config.privacyInformationUrl;
+    UIHelper.openUrl(this.config.privacyInformationUrl,this.cordova,OPEN_URL_MODE.BlankSystemBrowser);
   }
   private checkConfig(buttons: any[]) {
     this.configService.getAll().subscribe((data:any)=>{
@@ -648,8 +650,10 @@ export class MainNavComponent implements AfterViewInit{
             this.licenseAgreementHTML = "Error loading content for license agreement node '" + nodeId + "'";
         });
       },(error:any)=>{
-          if(version==='0.0')
-            return;
+          if(version==='0.0') {
+              this.startTutorial();
+              return;
+          }
           this.licenseAgreement=true;
           this.licenseAgreementHTML = "Error loading metadata for license agreement node '" + nodeId + "'";
       })
@@ -662,6 +666,9 @@ export class MainNavComponent implements AfterViewInit{
       this.userMenuOptions=[];
         //<a *ngIf="isGuest && !config.loginOptions" class="collection-item" (click)="showAddDesktop=false;login(true)" (keyup.enter)="showAddDesktop=false;login(true)" tabindex="0" title="{{ 'SIDEBAR.LOGIN' | translate}}"><i class="material-icons">person</i> {{ 'SIDEBAR.LOGIN' | translate}}</a>
         //<a *ngFor="let loginOption of isGuest?config.loginOptions:null" class="collection-item" tabindex="0" title="{{loginOption.name}}" href="{{loginOption.url}}">{{loginOption.name}}</a>
+        if(!this.isGuest){
+            this.userMenuOptions.push(new OptionItem('EDIT_ACCOUNT','assignment_ind',()=>this.openProfile()));
+        }
         if(this.isGuest){
           if(this.config.loginOptions){
             for(let login of this.config.loginOptions){
@@ -678,8 +685,7 @@ export class MainNavComponent implements AfterViewInit{
           option.mediaQueryValue=UIConstants.MOBILE_TAB_SWITCH_WIDTH;
           option.isSeperateBottom=true;
           this.userMenuOptions.push(option);
-      }
-      for(let option of this.getConfigMenuHelpOptions()){
+      }for(let option of this.getConfigMenuHelpOptions()){
           option.mediaQueryType=UIConstants.MEDIA_QUERY_MAX_WIDTH;
           option.mediaQueryValue=UIConstants.MOBILE_TAB_SWITCH_WIDTH;
           this.userMenuOptions.push(option);
@@ -698,9 +704,13 @@ export class MainNavComponent implements AfterViewInit{
             option.isSeperateBottom=true;
             this.userMenuOptions.push(option);
         }
-        if(!this.isGuest){
-            this.userMenuOptions.push(new OptionItem('EDIT_ACCOUNT','assignment_ind',()=>this.openProfile()));
-        }
+        let option=new OptionItem('LICENSE_INFORMATION','lightbulb_outline',()=>this.showLicenses());
+        option.mediaQueryType=UIConstants.MEDIA_QUERY_MAX_WIDTH;
+        option.mediaQueryValue=UIConstants.MOBILE_TAB_SWITCH_WIDTH;
+        option.isSeperateBottom=true;
+        this.userMenuOptions.push(option);
+
+
       if(!this.isGuest){
         this.userMenuOptions.push(new OptionItem('LOGOUT','undo',()=>this.logout()));
       }
@@ -831,5 +841,22 @@ export class MainNavComponent implements AfterViewInit{
     }
     public finishPreloading(){
         MainNavComponent.preloading=false;
+    }
+
+    showLicenses() {
+        this.licenseDialog=true;
+        this.displaySidebar=false;
+        /*this.http.get('assets/licenses/'+Translation.getLanguage()+'.html',{responseType:'text'}).subscribe((text)=>{
+            this.licenseDetails=(text as any);
+        },(error)=>{
+            console.info("Could not load license data for "+Translation.getLanguage()+", using default en");
+            */
+            this.http.get('assets/licenses/en.html',{responseType:'text'}).subscribe((text)=>{
+                console.log(text);
+                this.licenseDetails=(text as any);
+            },(error)=> {
+                console.error(error);
+            });
+        //});
     }
 }

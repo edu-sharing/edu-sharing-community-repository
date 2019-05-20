@@ -341,11 +341,39 @@ public class SearchServiceImpl implements SearchService {
 		List<String> list = new ArrayList<>();
 		if (pattern != null && !pattern.isEmpty()) {
 			for (String authority : list2) {
+				
+				NodeRef authorityNodeRef = serviceRegistry.getAuthorityService().getAuthorityNodeRef(authority);
+				
 				String name = authority;
 
-				if (name.startsWith(PermissionService.GROUP_PREFIX))
+				String toCompare = "" + name;
+				
+				if (name.startsWith(PermissionService.GROUP_PREFIX)) {
 					name = name.substring(PermissionService.GROUP_PREFIX.length());
-				if (name.toLowerCase().contains(pattern.toLowerCase()))
+					
+					if(authorityNodeRef != null) {
+						String displayName = (String)serviceRegistry.getNodeService().getProperty(authorityNodeRef, ContentModel.PROP_AUTHORITY_DISPLAY_NAME);
+						if(displayName != null) {
+							toCompare += displayName;
+						}
+					}
+						
+					
+				}else {
+					if(authorityNodeRef != null) {
+						String firstName = (String)serviceRegistry.getNodeService().getProperty(authorityNodeRef, ContentModel.PROP_FIRSTNAME);
+						String lastName = (String)serviceRegistry.getNodeService().getProperty(authorityNodeRef, ContentModel.PROP_LASTNAME);
+						if(firstName != null) {
+							toCompare+=firstName;
+						}
+						if(lastName != null) {
+							toCompare+=lastName;
+						}
+					}
+				}
+				
+				
+				if (toCompare.toLowerCase().contains(pattern.toLowerCase()))
 					list.add(authority);
 			}
 		} else {
@@ -752,7 +780,7 @@ public class SearchServiceImpl implements SearchService {
 				sr.setCountedProps(newCountPropsMap);
 
 			}
-
+			SearchLogger.logSearch(searchToken,sr);
 			return sr;
 
 		} catch (Throwable e) {
@@ -816,16 +844,16 @@ public class SearchServiceImpl implements SearchService {
 	public SearchResult<String> findAuthorities(AuthorityType type,String searchWord, boolean globalContext, int from, int nrOfResults,SortDefinition sort,Map<String,String> customProperties) throws InsufficientPermissionException {
 		if(globalContext)
 			checkGlobalSearchPermission();
-		HashMap<String, String> toSearch = new HashMap<String, String>();
+		List<String> searchFields = new ArrayList<>();
 
 		// fields to search in - not using username
-		toSearch.put("email", searchWord);
-		toSearch.put("firstName", searchWord);
-		toSearch.put("lastName", searchWord);
+		searchFields.add("email");
+		searchFields.add("firstName");
+		searchFields.add("lastName");
 		
 		org.edu_sharing.service.permission.PermissionService permissionService = PermissionServiceFactory.getPermissionService(null);
 
-		StringBuffer findUsersQuery =  permissionService.getFindUsersSearchString(toSearch, globalContext);
+		StringBuffer findUsersQuery =  permissionService.getFindUsersSearchString(searchWord,searchFields, globalContext);
 		StringBuffer findGroupsQuery = permissionService.getFindGroupsSearchString(searchWord, globalContext);
 		
 

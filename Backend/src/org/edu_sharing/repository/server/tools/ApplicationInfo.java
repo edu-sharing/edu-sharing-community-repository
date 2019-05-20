@@ -121,7 +121,8 @@ public class ApplicationInfo implements Comparable<ApplicationInfo>{
 	 */
 	public static final String TYPE_REPOSITORY = "REPOSITORY";
 	public static final String TYPE_LMS = "LMS";
-	
+	public static final String TYPE_CMS = "CMS";
+
 	/**
 	 * SERVICE = renderservice -> reserved, no other system can use this
 	 */

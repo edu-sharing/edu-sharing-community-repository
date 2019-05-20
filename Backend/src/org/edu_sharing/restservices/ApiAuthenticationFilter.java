@@ -67,6 +67,8 @@ public class ApiAuthenticationFilter implements javax.servlet.Filter {
 		HashMap<String, String> validatedAuth = authTool.validateAuthentication(session);
 		
 		String locale = httpReq.getHeader("locale");
+		if(locale==null && httpReq.getLocale()!=null)
+			locale=httpReq.getLocale().toString();
 		String authHdr = httpReq.getHeader("Authorization");
 
 		// always take the header so we can auth when a guest is activated
@@ -77,7 +79,7 @@ public class ApiAuthenticationFilter implements javax.servlet.Filter {
 					logger.info("auth is BASIC");
 					// Basic authentication details present
 	
-					String basicAuth = new String(Base64.decodeBase64(authHdr.substring(5).getBytes()));
+					String basicAuth = new String(java.util.Base64.getDecoder().decode(authHdr.substring(6).getBytes()));
 	
 					// Split the username and password
 	

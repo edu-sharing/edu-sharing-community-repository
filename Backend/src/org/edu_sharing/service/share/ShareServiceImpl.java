@@ -171,7 +171,7 @@ public class ShareServiceImpl implements ShareService {
 	public static String encryptPassword(String password) {
 		if(password==null || password.isEmpty())
 			return null;
-		return DigestUtils.sha1Hex(password);
+		return DigestUtils.shaHex(password);
 	}
 
 	private void throwIfScopedNode(NodeRef io) {

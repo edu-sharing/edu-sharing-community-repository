@@ -10,6 +10,30 @@
       <div><span>{{'NODE.cm:creator' | translate}}</span><span>{{_creator}}</span></div>
       <div><span>{{'DOWNLOAD' | translate}}</span><span><a *ngIf="_node.downloadUrl" [href]="_node.downloadUrl" target="_blank">{{_node.downloadUrl}}</a><div *ngIf="!_node.downloadUrl">-</div></span></div>
       <div><span>{{'WORKSPACE.EDITOR.PREVIEW' | translate}}</span><span><a [href]="_node.preview.url" target="_blank">{{_node.preview.url}}</a></span><span>isIcon: {{_node.preview.isIcon}}</span> <img [src]="_node.preview.url"></div>
+      <div><span>{{'NODE_INFO.PERMISSIONS' | translate}}</span>
+        <spinner-small *ngIf="!_permissions"></spinner-small>
+        <div *ngIf="_permissions">
+          <div class="inherited">
+            <span>{{'NODE_INFO.PERMISSIONS_INHERITED' | translate}}</span>
+            <div *ngIf="!_permissions.localPermissions.inherited">{{'NODE_INFO.PERMISSIONS_INHERIT_DISABLED' | translate}}</div>
+            <div *ngIf="_permissions.localPermissions.inherited">
+              <div *ngIf="!_permissions.inheritedPermissions.length">{{'NODE_INFO.PERMISSIONS_INHERIT_EMPTY' | translate}}</div>
+              <div *ngFor="let permission of _permissions.inheritedPermissions">
+                <div class="authority">{{permission.authority.authorityName}} ({{permission.authority.authorityType}})</div>
+                <div class="permissions">{{permission.permissions.join(", ")}}</div>
+              </div>
+            </div>
+          </div>
+          <div class="local">
+            <span>{{'NODE_INFO.PERMISSIONS_LOCAL' | translate}}</span>
+            <div *ngIf="!_permissions.localPermissions.permissions.length">{{'NODE_INFO.PERMISSIONS_LOCAL_EMPTY' | translate}}</div>
+            <div *ngFor="let permission of _permissions.localPermissions.permissions">
+              <div class="authority">{{permission.authority.authorityName}} ({{permission.authority.authorityType}})</div>
+              <div class="permissions">{{permission.permissions.join(", ")}}</div>
+            </div>
+          </div>
+        </div>
+      </div>
       <div><span>{{'NODE_INFO.CHILDREN' | translate}} ({{_children ? _children.length : 0}})</span>
         <span class="children">
           <div *ngFor="let child of _children">{{child.type}} (<a class="clickable" (click)="openNode(child)">{{child.ref.id}}</a>)</div>

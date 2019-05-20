@@ -14,6 +14,7 @@ import {trigger} from "@angular/animations";
 import {UIAnimation} from "../../../common/ui/ui-animation";
 import {UIService} from '../../../common/services/ui.service';
 import {DialogButton} from "../../../common/ui/modal-dialog/modal-dialog.component";
+import {DialogButton} from "../../../common/ui/modal-dialog/modal-dialog.component";
 import {Helper} from "../../../common/helper";
 
 @Component({
@@ -87,6 +88,11 @@ export class WorkspaceLicenseComponent  {
   private release=false;
   private releaseIndeterminate=false;
   private eduDownload=true;
+  dialogTitle : string;
+  dialogMessage : string;
+  dialogCancel : Function;
+  dialogButtons : DialogButton[];
+
   private _oerMode=true;
   public set oerMode(oerMode:boolean){
     this._oerMode=oerMode;
@@ -497,6 +503,22 @@ export class WorkspaceLicenseComponent  {
 
     changeRelease(release:boolean) {
         if(release){
+            if(this.config.instant('publishingNotice',false)){
+                this.dialogTitle='WORKSPACE.SHARE.PUBLISHING_WARNING_TITLE';
+                this.dialogMessage='WORKSPACE.SHARE.PUBLISHING_WARNING_MESSAGE';
+                this.dialogCancel=()=>{
+                    this.dialogTitle=null;
+                    this.release=false;
+                };
+                this.dialogButtons=DialogButton.getYesNo(()=>{
+                    this.dialogCancel();
+                }, ()=>{
+                    this.release=true;
+                    this.doiActive=true;
+                    this.dialogTitle=null;
+                });
+                return;
+            }
           this.doiActive=true;
         }
     }

@@ -469,7 +469,7 @@ export class WorkspaceMainComponent implements EventListener{
             query:params['query'],
             node:node
         };
-        if(node==null){
+        if(node==null && this.root!='RECYCLE'){
             this.root='ALL_FILES';
         }
         this.createAllowed=false;
@@ -661,7 +661,8 @@ export class WorkspaceMainComponent implements EventListener{
     }
     private setRoot(root : string){
         this.root=root;
-        this.routeTo(root);
+        this.searchQuery=null;
+        this.routeTo(root,null,null);
     }
     private updateList(nodes : Node[]){
         this.currentNodes=nodes;
@@ -741,7 +742,7 @@ export class WorkspaceMainComponent implements EventListener{
                 if(apply.showCallback(nodes[0]))
                     options.push(apply);
             }
-            if(this.isAdmin){
+            if(this.isAdmin || (window as any).esDebug===true){
                 let debug = new OptionItem("WORKSPACE.OPTION.DEBUG", "build", (node: Node) => this.debugNode(node));
                 debug.onlyDesktop=true;
                 options.push(debug);
@@ -871,13 +872,20 @@ export class WorkspaceMainComponent implements EventListener{
         if(!id){
             this.path=[];
             id=this.getRootFolderId();
-            if(this.root=='RECYCLE')
-                return;
+            if(this.root=='RECYCLE') {
+                //this.mainNavRef.finishPreloading();
+                //return;
+            }
         }
         else{
             this.selectedNodeTree=id;
             this.node.getNodeParents(id).subscribe((data : NodeList)=>{
-                this.path = data.nodes.reverse();
+                if(this.root=='RECYCLE'){
+                    this.path = [];
+                }
+                else {
+                    this.path = data.nodes.reverse();
+                }
                 this.selectedNodeTree=null;
             },(error:any)=>{
                 this.selectedNodeTree=null;
@@ -912,7 +920,7 @@ export class WorkspaceMainComponent implements EventListener{
             if(id==RestConstants.USERHOME){
                 this.createAllowed = true;
             }
-            this.updateNodeByParams(params,{ref: {id: id}});
+            this.updateNodeByParams(params,{ref: {id: id},name:this.translate.instant('WORKSPACE.'+this.root)});
         }
 
     }
@@ -1000,6 +1008,8 @@ export class WorkspaceMainComponent implements EventListener{
         let params:any={root:root,id:node,viewType:this.viewType,query:search,mainnav:this.mainnav};
         if(this.reurl)
             params.reurl=this.reurl;
+        if(this.reurlDirectories)
+            params.applyDirectories=this.reurlDirectories;
         this.router.navigate(["./"],{queryParams:params,relativeTo:this.route})
             .then((result:boolean)=>{
                 if(!result){
@@ -1081,7 +1091,7 @@ export class WorkspaceMainComponent implements EventListener{
     }
 
     hasOpenWindows() {
-        return this.editNodeLicense || this.editNodeTemplate || this.editNodeMetadata || this.createConnectorName || this.showUploadSelect || this.dialogTitle || this.addFolderName || this.sharedNode || this.workflowNode || this.filesToUpload || this.nodeDebug;
+        return this.editNodeLicense || this.nodeDebug || this.editNodeTemplate || this.editNodeMetadata || this.createConnectorName || this.showUploadSelect || this.dialogTitle || this.addFolderName || this.sharedNode || this.workflowNode || this.filesToUpload;
     }
     private recoverScrollposition() {
         console.log("recover scroll "+this.storage.get('workspace_scroll',0));

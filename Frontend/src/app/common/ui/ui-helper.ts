@@ -6,8 +6,8 @@ import {
     NodeLock, OAuthResult, ParentList
 } from "../rest/data-object";
 import {ActivatedRoute, NavigationExtras, Router} from "@angular/router";
-import {UIConstants} from "./ui-constants";
-import {ElementRef, EventEmitter, HostListener} from "@angular/core";
+import {OPEN_URL_MODE, UIConstants} from "./ui-constants";
+import {ElementRef, EventEmitter} from "@angular/core";
 import {RestConstants} from "../rest/rest-constants";
 import {RestHelper} from "../rest/rest-helper";
 import {Toast} from "./toast";
@@ -25,6 +25,7 @@ import {SearchService} from "../../modules/search/search.service";
 import {OptionItem} from "./actionbar/option-item";
 import {RestConnectorService} from "../rest/services/rest-connector.service";
 import {Observable, Observer} from "rxjs";
+
 export class UIHelper{
 
   public static evaluateMediaQuery(type:string,value:number){
@@ -355,7 +356,7 @@ export class UIHelper{
               console.log(win);
           }
           else if(isCordova){
-            UIHelper.openBlankWindow(url,connector.getRestConnector().getCordovaService());
+            UIHelper.openUrl(url,connector.getRestConnector().getCordovaService(),OPEN_URL_MODE.Blank);
           }
           else {
               window.location.replace(url);
@@ -410,24 +411,53 @@ export class UIHelper{
      * @param {y} number
      * @param {smoothness} lower numbers indicate less smoothness, higher more smoothness
      */
-    static scrollSmoothElement(y: number=0,element:Element,smoothness=1) {
-        let mode=element.scrollTop>y;
-        let divider=3*smoothness;
-        let minSpeed=7/smoothness;
-        let lastY=y;
-        let interval=setInterval(()=>{
-            let yDiff=element.scrollTop-lastY;
-            lastY=element.scrollTop;
-            if(element.scrollTop>y && mode && yDiff){
-                element.scrollTop-=Math.max((element.scrollTop-y)/divider,minSpeed);
+    static scrollSmoothElement(pos: number=0,element:Element,smoothness=1,axis='y') {
+        return new Promise((resolve)=> {
+            let currentPos = axis == 'x' ? element.scrollLeft : element.scrollTop;
+            if(element.getAttribute('data-is-scrolling')=='true'){
+                console.log("is scrolling, skip");
+                return;
             }
-            else if(element.scrollTop<y && !mode && yDiff){
-                element.scrollTop+=Math.max((y-element.scrollTop)/divider,minSpeed);
+            console.log(currentPos, pos);
+            let mode = currentPos > pos;
+            let divider = 3 * smoothness;
+            let minSpeed = 7 / smoothness;
+            let lastPos = pos;
+            let maxPos = axis=='x' ? element.scrollWidth - element.clientWidth : element.scrollHeight - element.clientHeight;
+            let limitReached=false;
+            if(mode && pos<=0) {
+                pos = 0;
+                limitReached=true;
             }
-            else {
-                clearInterval(interval);
+            if(!mode && pos>=maxPos) {
+                pos = maxPos;
+                limitReached=true;
             }
-        },16);
+            let interval = setInterval(() => {
+                let currentPos = axis == 'x' ? element.scrollLeft : element.scrollTop;
+                let posDiff = currentPos - lastPos;
+                lastPos = currentPos;
+                let finished=true;
+                if (currentPos > pos) {
+                    currentPos -= Math.max((currentPos - pos) / divider, minSpeed);
+                    finished=currentPos<=pos;
+                }
+                else if (currentPos < pos && !mode) {
+                    currentPos += Math.max((pos - currentPos) / divider, minSpeed);
+                    finished=currentPos>=pos;
+                }
+                if(finished) {
+                    clearInterval(interval);
+                    element.removeAttribute('data-is-scrolling');
+                    resolve();
+                }
+                if (axis == 'x')
+                    element.scrollLeft = currentPos;
+                else
+                    element.scrollTop = currentPos;
+            }, 16);
+            element.setAttribute('data-is-scrolling','true');
+        });
     }
 
     /**
@@ -480,14 +510,24 @@ export class UIHelper{
   static goToDefaultLocation(router: Router,configService : ConfigurationService,extras:NavigationExtras={}) {
       return router.navigate([UIConstants.ROUTER_PREFIX + configService.instant("loginDefaultLocation","workspace")],extras);
   }
-
-    static openBlankWindow(url:string, cordova: CordovaService) {
-      if(cordova.isRunningCordova()){
-        return cordova.openInAppBrowser(url);
-      }
-      else {
-        return window.open(url, '_blank',);
-      }
+    static openUrl(url:string, cordova: CordovaService,mode=OPEN_URL_MODE.Current) {
+        if(cordova.isRunningCordova()){
+          if(mode==OPEN_URL_MODE.BlankSystemBrowser) {
+              return cordova.openBrowser(url);
+          }
+          else {
+              return cordova.openInAppBrowser(url);
+          }
+        }
+        else {
+          if(mode==OPEN_URL_MODE.Current) {
+              window.location.href = url;
+              return;
+          }
+          else {
+              return window.open(url, '_blank',);
+          }
+        }
     }
 
     static filterValidOptions(ui: UIService, options: OptionItem[]) {

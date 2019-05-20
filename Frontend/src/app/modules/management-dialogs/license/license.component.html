@@ -228,7 +228,7 @@
         </div>
         <div class="licenseCheckbox">
           <div class="switch-release" *ngIf="_nodes">
-            <mat-checkbox class="strong" [disabled]="!allowRelease" [(ngModel)]="release" [(indeterminate)]="releaseIndeterminate" (change)="changeRelease($event)">
+            <mat-checkbox class="strong" [disabled]="!allowRelease" [(ngModel)]="release" [(indeterminate)]="releaseIndeterminate" (ngModelChange)="changeRelease($event)">
               {{'WORKSPACE.LICENSE.RELEASE'+(_nodes.length>1 ? '_MULTI' : '') | translate:{count:_nodes.length} }}
             </mat-checkbox>
             <div class="doi" *ngIf="allowDOI()">

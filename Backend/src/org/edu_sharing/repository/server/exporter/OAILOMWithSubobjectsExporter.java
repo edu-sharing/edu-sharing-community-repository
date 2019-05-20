@@ -1,9 +1,6 @@
 package org.edu_sharing.repository.server.exporter;
 
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.Serializable;
+import java.io.*;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -26,11 +23,8 @@ import org.apache.log4j.Logger;
 import org.apache.xml.serialize.OutputFormat;
 import org.apache.xml.serialize.XMLSerializer;
 import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
-import org.edu_sharing.repository.client.rpc.metadataset.MetadataSetValueKatalog;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.server.MCAlfrescoAPIClient;
-import org.edu_sharing.repository.server.tools.ApplicationInfoList;
-import org.edu_sharing.repository.server.tools.metadataset.MetadataReader;
 import org.springframework.context.ApplicationContext;
 import org.springframework.extensions.surf.util.ISO8601DateFormat;
 import org.w3c.dom.Document;
@@ -46,7 +40,7 @@ import org.w3c.dom.Element;
  *
  */
 public class OAILOMWithSubobjectsExporter {
-	
+
 	class TagDef{
 		
 		String tag;
@@ -469,29 +463,16 @@ public class OAILOMWithSubobjectsExporter {
 		}
 		
 	}
-
+	private void serializeResult(OutputStream os) throws IOException {
+		XMLSerializer serializer = new XMLSerializer(os, new OutputFormat(doc,"UTF-8", true));
+		serializer.serialize(doc);
+	}
 	public void export(String outputDir) {
 
-		QName type = nodeService.getType(nodeRef);
-
-		if (!type.equals(QName.createQName(CCConstants.CCM_TYPE_IO))) {
-			logger.error("this was not an io");
+		Document doc=toXML();
+		if(doc==null)
 			return;
-		}
-		
-		Element lom = doc.createElement("lom");
-		doc.appendChild(lom);
-		
-		
-		lom.setAttribute("xmlns", "http://ltsc.ieee.org/xsd/LOM");
-		lom.setAttribute("xmlns:xsi", "http://www.w3.org/2001/XMLSchema-instance");
-		lom.setAttribute("xsi:schemaLocation", "http://www.w3.org/2001/XMLSchema-instance");
-		lom.setAttribute("xsi:schemaLocation", "http://ltsc.ieee.org/xsd/LOM  http://ltsc.ieee.org/xsd/lomv1.0/lom.xsd");
-		
-		for(TagDef tagDef : this.lom.getSubTags()){
-			processTag(tagDef, lom, nodeRef, type.toString());
-		}
-		
+
 		//formatted output:
 		try{
 			String sourceId = nodeRef.getId();//(String)nodeService.getProperty(nodeRef, QName.createQName(CCConstants.CM_NAME));
@@ -499,17 +480,36 @@ public class OAILOMWithSubobjectsExporter {
 			
 			File f = new File(outputDir + "/" + sourceId +".xml");
 			FileOutputStream os = new FileOutputStream(f);
-			
-			XMLSerializer serializer = new XMLSerializer(os, new OutputFormat(doc,"UTF-8", true));
-			serializer.serialize(doc);
+			serializeResult(os);
 		}catch(IOException e){
 			logger.error(e.getMessage(),e);
 		}
 
 	}
-	
-	
-	
+
+	public Document toXML() {
+		QName type = nodeService.getType(nodeRef);
+
+		if (!type.equals(QName.createQName(CCConstants.CCM_TYPE_IO))) {
+			logger.error("this was not an io");
+			return null;
+		}
+
+		Element lom = doc.createElement("lom");
+		doc.appendChild(lom);
+
+
+		lom.setAttribute("xmlns", "http://ltsc.ieee.org/xsd/LOM");
+		lom.setAttribute("xmlns:xsi", "http://www.w3.org/2001/XMLSchema-instance");
+		lom.setAttribute("xsi:schemaLocation", "http://www.w3.org/2001/XMLSchema-instance");
+		lom.setAttribute("xsi:schemaLocation", "http://ltsc.ieee.org/xsd/LOM  http://ltsc.ieee.org/xsd/lomv1.0/lom.xsd");
+
+		for(TagDef tagDef : this.lom.getSubTags()){
+			processTag(tagDef, lom, nodeRef, type.toString());
+		}
+		return doc;
+	}
+
 
 	public Element createAndAppendElement(String elementName, Element parent) {
 		return this.createAndAppendElement(elementName, parent, (String) null);

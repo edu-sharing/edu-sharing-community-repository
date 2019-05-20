@@ -5,12 +5,16 @@ import java.util.List;
 public class Connector {
 	
 	private String id;
+
+	private String connectorId;
 	
 	private String icon;
 	
 	private boolean showNew;
 
 	private boolean onlyDesktop;
+
+	private boolean hasViewMode;
 
 	private String url;
 	
@@ -30,6 +34,14 @@ public class Connector {
 
 	public void setId(String id) {
 		this.id = id;
+	}
+
+	public String getConnectorId() {
+		return connectorId;
+	}
+
+	public void setConnectorId(String connectorId) {
+		this.connectorId = connectorId;
 	}
 
 	public String getIcon() {
@@ -86,5 +98,13 @@ public class Connector {
 
 	public void setOnlyDesktop(boolean onlyDesktop) {
 		this.onlyDesktop = onlyDesktop;
+	}
+
+	public boolean isHasViewMode() {
+		return hasViewMode;
+	}
+
+	public void setHasViewMode(boolean hasViewMode) {
+		this.hasViewMode = hasViewMode;
 	}
 }
