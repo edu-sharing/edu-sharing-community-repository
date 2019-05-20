@@ -28,6 +28,7 @@ public class Values{
 	@XmlElement	public Boolean licenseDialogOnUpload;
 	@XmlElement	public Boolean nodeReport;
 	@XmlElement	public Boolean branding;
+	@XmlElement	public Boolean publishingNotice;
 	@XmlElement	public String siteTitle;
 	@XmlElement	public String userDisplayName;
 	@XmlElement	public String userSecondaryDisplayName;
