@@ -1,10 +1,7 @@
 package org.edu_sharing.service.rendering;
 
 import org.edu_sharing.restservices.node.v1.model.NodeEntries;
-import org.edu_sharing.restservices.shared.Node;
-import org.edu_sharing.restservices.shared.NodeVersion;
-import org.edu_sharing.restservices.shared.User;
-import org.edu_sharing.restservices.shared.UserSimple;
+import org.edu_sharing.restservices.shared.*;
 import org.edu_sharing.service.config.model.Config;
 import org.edu_sharing.service.config.model.Values;
 
@@ -14,7 +11,7 @@ import java.util.List;
 public class RenderingServiceData implements Serializable {
     private Node node;
     private List<Node> children;
-    private UserSimple user;
+    private UserRender user;
     private String metadataHTML;
     private Values configValues;
 
@@ -26,11 +23,11 @@ public class RenderingServiceData implements Serializable {
         this.node = node;
     }
 
-    public void setUser(UserSimple user) {
+    public void setUser(UserRender user) {
         this.user = user;
     }
 
-    public UserSimple getUser() {
+    public UserRender getUser() {
         return user;
     }
 

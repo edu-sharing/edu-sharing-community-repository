@@ -416,6 +416,16 @@ public class PersonDao {
     	}
     	return data;
 	}
+	public UserRender asPersonRender() {
+		UserRender data = new UserRender();
+		data.setAuthorityName(getAuthorityName());
+		data.setAuthorityType(Authority.Type.USER);
+		data.setUserName(getUserName());
+		data.setProfile(getProfile());
+		data.setPrimaryAffiliation((String) userInfo.get(CCConstants.CM_PROP_PERSON_EDU_SCHOOL_PRIMARY_AFFILIATION));
+		data.setRemoteRoles((List<String>) userInfo.get(CCConstants.PROP_USER_ESREMOTEROLES));
+		return data;
+	}
 	public String getId() {
 		return getNodeId();
 	}
