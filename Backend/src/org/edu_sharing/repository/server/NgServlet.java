@@ -23,6 +23,8 @@ import java.net.URL;
 import java.net.URLEncoder;
 
 public class NgServlet extends HttpServlet {
+	public static final String COMPONENTS_RENDER = "components/render/";
+	public static final String COMPONENTS_ERROR = "components/error/";
 	private static Logger logger = Logger.getLogger(NgServlet.class);
 
 	@Override
@@ -36,7 +38,7 @@ public class NgServlet extends HttpServlet {
 				html = addToHead(head, html);
 			}
 			URL url = new URL(req.getRequestURL().toString());
-			if(url.getPath().contains("components/render/")){
+			if(url.getPath().contains(COMPONENTS_RENDER)){
 				html = addLRMI(html,url);
 				html = addEmbed(html,url);
 			}

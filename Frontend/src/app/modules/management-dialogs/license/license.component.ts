@@ -13,6 +13,7 @@ import {UIHelper} from "../../../common/ui/ui-helper";
 import {trigger} from "@angular/animations";
 import {UIAnimation} from "../../../common/ui/ui-animation";
 import {UIService} from '../../../common/services/ui.service';
+import {DialogButton} from "../../../common/ui/modal-dialog/modal-dialog.component";
 
 @Component({
   selector: 'workspace-license',
@@ -62,6 +63,11 @@ export class WorkspaceLicenseComponent  {
   private contact=true;
   private release=false;
   private eduDownload=true;
+  dialogTitle : string;
+  dialogMessage : string;
+  dialogCancel : Function;
+  dialogButtons : DialogButton[];
+
   private _oerMode=true;
   public set oerMode(oerMode:boolean){
     this._oerMode=oerMode;
@@ -473,6 +479,22 @@ export class WorkspaceLicenseComponent  {
 
     changeRelease(release:boolean) {
         if(release){
+            if(this.config.instant('publishingNotice',false)){
+                this.dialogTitle='WORKSPACE.SHARE.PUBLISHING_WARNING_TITLE';
+                this.dialogMessage='WORKSPACE.SHARE.PUBLISHING_WARNING_MESSAGE';
+                this.dialogCancel=()=>{
+                    this.dialogTitle=null;
+                    this.release=false;
+                };
+                this.dialogButtons=DialogButton.getYesNo(()=>{
+                    this.dialogCancel();
+                }, ()=>{
+                    this.release=true;
+                    this.doiActive=true;
+                    this.dialogTitle=null;
+                });
+                return;
+            }
           this.doiActive=true;
         }
     }

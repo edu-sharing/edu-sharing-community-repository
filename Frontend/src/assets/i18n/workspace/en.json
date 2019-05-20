@@ -45,6 +45,11 @@
     "UPLOAD_TITLE": "Upload",
     "UPLOAD_REMAINING": "{{time}} left",
     "UPLOAD_FINISHING": "Almost done...",
+    "UPLOAD_ERROR":{
+      "UNKNOWN":"Error while transfering data",
+      "FORMAT":"Unknown file format",
+      "QUOTA":"Upload quota reached"
+    },
     "ADD_FOLDER_TITLE":"Add new folder",
     "ADD_FOLDER_METADATASET":"Metadataset of folder",
     "FOLDER_PLACEHOLDER": "Foldername",
@@ -103,6 +108,8 @@
       "NO_FUZZY":"Enter the full e-mail address to add users",
       "DOI":"Provide with DOI",
       "DOI_INFO":"DOI (Digital Object Identifier) is a standardized ID for unique global identification and retrieved material",
+      "PUBLISHING_WARNING_TITLE":"Publish element?",
+      "PUBLISHING_WARNING_MESSAGE":"If you continue, the current element will be shared to every user on the system and can be accessed by everyone.\n\nAre you sure you want to publish this element?",
       "STATE": {
         "PRIVATE": "Private",
         "SHARED": "Shared",
@@ -130,8 +137,7 @@
     "PERMISSION_AUTHORITY_EXISTS":"The chosen user/group already has access. Check the current permissions at \"Invited\"",
     "PERMISSIONS_UPDATED":"Permissions updated",
 
-    "NOTIFY_TITLE":"Notify invitees",
-    "NOTIFY_INFO":"At the moment, no messages will be send to groups",
+    "NOTIFY_TITLE":"Send e-mail notification",
     "METADATA":{
       "INVITED_USERS":"invited users",
       "INVITED_GROUPS":"invited groups",

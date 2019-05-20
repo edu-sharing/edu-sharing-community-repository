@@ -152,10 +152,12 @@ public class OrganizationDao {
     	data.setAuthorityType(Authority.Type.GROUP);
     	data.setGroupName(groupName);
     	data.setAdministrationAccess(hasAdministrationAccess());
-    	
-    	GroupProfile profile = new GroupProfile();
-    	profile.setDisplayName(eduGroup.getGroupDisplayName());
-    	data.setProfile(profile);
+
+    	try {
+			data.setProfile(GroupDao.getGroup(repoDao, authorityName).asGroup().getProfile());
+		}catch(Throwable t){
+    		throw new RuntimeException("Error getting profile for organization "+authorityName,t);
+		}
     	
     	NodeRef ref = new NodeRef();
     	ref.setRepo(repoDao.getId());

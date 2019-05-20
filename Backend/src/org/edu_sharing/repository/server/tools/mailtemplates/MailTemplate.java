@@ -1,9 +1,17 @@
 package org.edu_sharing.repository.server.tools.mailtemplates;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.List;
+import org.alfresco.service.cmr.repository.StoreRef;
+import org.apache.log4j.Logger;
+import org.edu_sharing.repository.server.tools.ApplicationInfo;
+import org.edu_sharing.repository.server.tools.URLTool;
+import org.edu_sharing.service.config.ConfigServiceFactory;
+import org.edu_sharing.service.mime.MimeTypesV2;
+import org.edu_sharing.service.nodeservice.NodeService;
+import org.edu_sharing.service.nodeservice.NodeServiceFactory;
+import org.w3c.dom.Document;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
+import org.xml.sax.SAXException;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -12,19 +20,10 @@ import javax.xml.xpath.XPath;
 import javax.xml.xpath.XPathConstants;
 import javax.xml.xpath.XPathExpressionException;
 import javax.xml.xpath.XPathFactory;
-
-import org.alfresco.service.cmr.repository.StoreRef;
-import org.apache.log4j.Logger;
-import org.edu_sharing.repository.server.tools.ApplicationInfo;
-import org.edu_sharing.repository.server.tools.URLTool;
-import org.edu_sharing.service.mime.MimeTypesV2;
-import org.edu_sharing.service.nodeservice.NodeService;
-import org.edu_sharing.service.nodeservice.NodeServiceFactory;
-import org.w3c.dom.Document;
-import org.w3c.dom.NamedNodeMap;
-import org.w3c.dom.Node;
-import org.w3c.dom.NodeList;
-import org.xml.sax.SAXException;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.HashMap;
+import java.util.Map;
 
 public class MailTemplate {
 	static XPathFactory pfactory = XPathFactory.newInstance();
@@ -51,12 +50,14 @@ public class MailTemplate {
 		}
 		return 	URLTool.getNgComponentsUrl()+"render/"+nodeId+"?closeOnBack=true";
 	}
-	private static List<Node> getTemplates(String locale) throws Exception {
+	private static Map<TemplateDescription, Node> getTemplates(String locale) throws Exception {
 		Document base=getXML(locale,false);
 		NodeList templatesBase = (NodeList) xpath.evaluate("/templates/template", base, XPathConstants.NODESET);
-		List<Node> result = new ArrayList<>();
+		Map<TemplateDescription,Node> result = new HashMap<>();
 		for(int i=0;i<templatesBase.getLength();i++){
-			result.add(templatesBase.item(i));
+			TemplateDescription desc = TemplateDescription.fromNode(templatesBase.item(i));
+			if(desc!=null)
+				result.put(desc,templatesBase.item(i));
 		}
 		try{
 			Document override=getXML(locale,true);
@@ -64,25 +65,9 @@ public class MailTemplate {
 				NodeList templatesOverride = (NodeList) xpath.evaluate("/templates/template", override, XPathConstants.NODESET);
 
 				for(int i=0;i<templatesOverride.getLength();i++) {
-					NamedNodeMap attributes = templatesOverride.item(i).getAttributes();
-					String search = null;
-					if (attributes != null) {
-						search = attributes.getNamedItem("name").getTextContent();
-					} else {
-						continue;
-					}
-					boolean replaced = false;
-					for (int j = 0; j < result.size(); j++) {
-						NamedNodeMap attributes2 = result.get(j).getAttributes();
-						if (attributes2 != null && attributes2.getNamedItem("name").getTextContent().equals(search)) {
-							result.remove(j);
-							result.add(j, templatesOverride.item(i));
-							replaced = true;
-							break;
-						}
-					}
-					if (!replaced)
-						throw new IllegalArgumentException("Error while override: The name " + search + " is not known by the main template and can not be override");
+					TemplateDescription desc = TemplateDescription.fromNode(templatesOverride.item(i));
+					if(desc!=null)
+						result.put(desc,templatesOverride.item(i));
 				}
 			}
 		}catch(Throwable t){
@@ -92,23 +77,23 @@ public class MailTemplate {
 
 	}
 	private static String getChildContent(String locale,String template, String name) throws Exception {
-	    List<Node> nodes = getTemplates(locale);
+	    Map<TemplateDescription, Node> nodes = getTemplates(locale);
 		String content=getChildContent(nodes,template,name);
 		if(content!=null)
 			return content;
 		nodes = getTemplates(null);
 		return getChildContent(nodes,template,name);
 	}
-	private static String getChildContent(List<Node> nodes, String template, String name) throws XPathExpressionException {
-		for(Node node : nodes){
-			NamedNodeMap attributes = node.getAttributes();
-			if(attributes!=null && attributes.getNamedItem("name").getTextContent().equals(template)){
-				NodeList childs = node.getChildNodes();
-				for(int j=0;j<childs.getLength();j++){
-			    	if(childs.item(j).getNodeName().equals(name))
-			    		return childs.item(j).getTextContent();
-			    }
-			}
+	private static String getChildContent(Map<TemplateDescription, Node> nodes, String template, String name) throws XPathExpressionException {
+		Node node = nodes.get(new TemplateDescription(template, ConfigServiceFactory.getCurrentContextId()));
+		// no context specific template found, fallback to default
+		if(node==null)
+			node=nodes.get(new TemplateDescription(template,null));
+
+		NodeList childs = node.getChildNodes();
+		for(int j=0;j<childs.getLength();j++){
+			if(childs.item(j).getNodeName().equals(name))
+				return childs.item(j).getTextContent();
 		}
 	    return null;
 	}

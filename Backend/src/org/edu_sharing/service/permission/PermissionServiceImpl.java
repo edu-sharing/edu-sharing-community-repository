@@ -308,7 +308,6 @@ public class PermissionServiceImpl implements org.edu_sharing.service.permission
 			setPermissions(_nodeId, authority, permissions, _inheritPermissions);
 
 			String emailaddress = null;
-			String receiverName = null;
 			String receiverFirstName = null, receiverLastName = null;
 
 			AuthorityType authorityType = AuthorityType.getAuthorityType(authority);
@@ -320,9 +319,14 @@ public class PermissionServiceImpl implements org.edu_sharing.service.permission
 				if (personInfo != null) {
 					receiverFirstName = personInfo.get(CCConstants.CM_PROP_PERSON_FIRSTNAME);
 					receiverLastName = personInfo.get(CCConstants.CM_PROP_PERSON_LASTNAME);
-					receiverName = receiverFirstName + " " + receiverLastName;
 					emailaddress = personInfo.get(CCConstants.CM_PROP_PERSON_EMAIL);
 				}
+			}
+			// send group email notifications
+			if(AuthorityType.GROUP.equals(authorityType)){
+				receiverLastName="";
+				receiverFirstName= (String) nodeService.getProperty(authorityService.getAuthorityNodeRef(authority),QName.createQName(CCConstants.CM_PROP_AUTHORITY_AUTHORITYDISPLAYNAME));
+				emailaddress= (String) nodeService.getProperty(authorityService.getAuthorityNodeRef(authority),QName.createQName(CCConstants.CCM_PROP_GROUPEXTENSION_GROUPEMAIL));
 			}
 
 			if (mailValidator.isValid(emailaddress) && _sendMail) {

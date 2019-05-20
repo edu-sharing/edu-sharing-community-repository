@@ -602,6 +602,7 @@ $orderAnimationTime:$transitionNormal*5;
     height: 100%;
     background-color:rgba(255,255,255,0.85);
     position: absolute;
+    z-index: 1;
     border-radius: $borderRadius;
     left:0;
     top:0;

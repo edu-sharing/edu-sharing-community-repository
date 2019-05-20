@@ -81,7 +81,7 @@ public class I18nAngular {
                     return pair.value;
             }
         }catch(Exception e){
-            logger.warn(e);
+            logger.debug(e);
         }
         return null;
     }

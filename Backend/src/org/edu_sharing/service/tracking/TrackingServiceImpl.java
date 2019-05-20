@@ -5,6 +5,7 @@ import org.alfresco.service.ServiceRegistry;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.repository.NodeService;
 import org.alfresco.service.namespace.QName;
+import org.apache.log4j.Logger;
 import org.edu_sharing.alfresco.service.ConnectionDBAlfresco;
 import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
 import org.edu_sharing.repository.client.tools.CCConstants;
@@ -23,6 +24,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class TrackingServiceImpl extends TrackingServiceDefault{
+    public static Logger logger = Logger.getLogger(TrackingServiceImpl.class);
+
     public static String TRACKING_NODE_TABLE_ID = "edu_tracking_node";
     public static String TRACKING_USER_TABLE_ID = "edu_tracking_user";
     public static String TRACKING_INSERT_NODE = "insert into " + TRACKING_NODE_TABLE_ID +" (node_id,node_uuid,node_version,authority,time,type,data) VALUES (?,?,?,?,?,?,?)";
@@ -158,7 +161,7 @@ public class TrackingServiceImpl extends TrackingServiceDefault{
             }
             return result;
         }catch(Throwable t){
-            t.printStackTrace();
+            logger.error("Error tracking to database",t);
         }finally {
             dbAlf.cleanUp(con, statement);
         }
@@ -178,7 +181,7 @@ public class TrackingServiceImpl extends TrackingServiceDefault{
             con.commit();
 
         }catch(Throwable t){
-            t.printStackTrace();
+            logger.error("Error tracking to database",t);
         }finally {
             dbAlf.cleanUp(con, statement);
         }

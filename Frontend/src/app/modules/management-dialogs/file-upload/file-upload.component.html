@@ -11,20 +11,23 @@
         <div class="fileName">{{item.name}}</div>
           <div class="loading" *ngIf="item.progress.progress>=0 && item.progress.progress<100">
         </div>
-          <div class="progress" *ngIf="item">
-            <div class="determinate" [class.determinate-finished]="item.progress.progress>=100" [style.width]="item.progress.progress+'%'"></div>
+          <div class="progress" [class.determinate-failed]="item.progress.progress==-1" *ngIf="item">
+            <div class="determinate" [class.determinate-failed]="item.progress.progress==-1" [class.determinate-finished]="item.progress.progress>=100" [style.width]="item.progress.progress+'%'"></div>
           </div>
-          <div class="info" [style.visibility]="item.progress.loaded ? '' : 'hidden'">
-            <span *ngIf="item.progress.remaining>1">{{'WORKSPACE.UPLOAD_REMAINING' | translate:{time:formatTime(item.progress.remaining) } }}</span>
-            <span *ngIf="item.progress.remaining<=1">{{'WORKSPACE.UPLOAD_FINISHING' | translate}}</span>
-            <span class="size">({{item.progress.loaded | formatSize}} / {{item.progress.total | formatSize}})</span>
+          <div class="info" [style.visibility]="item.progress.loaded || item.error ? '' : 'hidden'">
+            <span class="info-error" *ngIf="item.error">{{'WORKSPACE.UPLOAD_ERROR.'+item.error | translate}}</span>
+            <div *ngIf="item.progress.loaded">
+              <span *ngIf="item.progress.remaining>1">{{'WORKSPACE.UPLOAD_REMAINING' | translate:{time:formatTime(item.progress.remaining) } }}</span>
+              <span *ngIf="item.progress.remaining<=1">{{'WORKSPACE.UPLOAD_FINISHING' | translate}}</span>
+              <span class="size">({{item.progress.loaded | formatSize}} / {{item.progress.total | formatSize}})</span>
+            </div>
           </div>
         </div>
         <div class="right">
           <div class="done success" *ngIf="!item.progress.loaded && item.progress.progress>=100">
             <i class="material-icons">done</i>
           </div>
-          <div class="done" *ngIf="!item.progress.loaded && item.progress.progress<0">
+          <div class="done failed" *ngIf="!item.progress.loaded && item.progress.progress<0">
             <i class="material-icons">close</i>
           </div>
         </div>

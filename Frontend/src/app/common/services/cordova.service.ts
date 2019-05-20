@@ -1,4 +1,4 @@
-import {Injectable} from '@angular/core';
+import {Injectable, Injector} from '@angular/core';
 import {setTimeout} from 'core-js/library/web/timers';
 import {Observable, Observer} from 'rxjs';
 import {Headers, Http, Response} from '@angular/http';
@@ -9,6 +9,7 @@ import {UIConstants} from '../ui/ui-constants';
 import {Router} from '@angular/router';
 import {FrameEventsService} from './frame-events.service';
 import {DateHelper} from "../ui/DateHelper";
+import {TranslateService} from "@ngx-translate/core";
 import {HttpClient} from '@angular/common/http';
 
 declare var cordova : any;
@@ -57,6 +58,7 @@ export class CordovaService {
     private router : Router,
     private http : HttpClient,
     private location: Location,
+    private injector:Injector,
     private events : FrameEventsService,
   ) {
 
@@ -970,7 +972,14 @@ export class CordovaService {
    }
 
    openInAppBrowser(url:string){
-       let win:any=cordova.InAppBrowser.open(url,"_blank","toolbar=yes,hideurlbar=yes,hidenavigationbuttons=yes,zoom=no");
+       let params:string;
+       if(this.isAndroid()){
+           params="location=no,zoom=no";
+       }
+       else if(this.isIOS()){
+           params="toolbar=yes,hideurlbar=yes,hidenavigationbuttons=yes,closebuttoncolor=#ffffff,closebuttoncaption="+this.injector.get(TranslateService).instant("CANCEL");
+       }
+       let win:any=cordova.InAppBrowser.open(url,"_blank",params);
        win.addEventListener( "loadstop", ()=> {
            // register iframe handling
            win.executeScript({code:`

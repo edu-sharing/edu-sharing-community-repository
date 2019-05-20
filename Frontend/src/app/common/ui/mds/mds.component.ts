@@ -221,6 +221,13 @@ export class MdsComponent{
   private static MAX_SUGGESTIONS = 5;
   private suggestionsViaSearch = false;
 
+  private resetValues(){
+      this._currentValues=null;
+      this.loadMdsFinal(()=>{
+          this.onDone.emit(null);
+      });
+  }
+
   @HostListener('window:resize')
   onResize(){
       if(document.activeElement && this.mdsScrollContainer && this.mdsScrollContainer.nativeElement){
@@ -2321,11 +2328,18 @@ export class MdsComponent{
       let child=this.childobjects[pos];
       console.log('add new child',child);
       if(child.file){
-          this.node.createNode(this.currentNode.ref.id,RestConstants.CCM_TYPE_IO,[RestConstants.CCM_ASPECT_IO_CHILDOBJECT],this.getChildobjectProperties(child,pos),true,'',RestConstants.CCM_ASSOC_CHILDIO).subscribe((data:NodeWrapper)=>{
-            this.node.uploadNodeContent(data.node.ref.id,child.file,RestConstants.COMMENT_MAIN_FILE_UPLOAD).subscribe(()=>{
-              this.onAddChildobject(callback,pos+1);
-            });
-        });
+          this.node.createNode(this.currentNode.ref.id,RestConstants.CCM_TYPE_IO,[RestConstants.CCM_ASPECT_IO_CHILDOBJECT],this.getChildobjectProperties(child,pos),true,'',RestConstants.CCM_ASSOC_CHILDIO).subscribe((data:NodeWrapper)=> {
+              this.node.uploadNodeContent(data.node.ref.id, child.file, RestConstants.COMMENT_MAIN_FILE_UPLOAD).subscribe(() => {
+                  this.onAddChildobject(callback, pos + 1);
+              }, (error) => {
+                  if (RestHelper.errorMatchesAny(error, RestConstants.CONTENT_QUOTA_EXCEPTION)) {
+                      this.node.deleteNode(data.node.ref.id, false).subscribe(() => {});
+                      this.toast.error(null,"MDS.ADD_CHILD_OBJECT_QUOTA_REACHED",{name:child.name});
+                      this.globalProgress=false;
+                      return;
+                  }
+              });
+          });
       }
       else if(child.link){
         let properties:any={};

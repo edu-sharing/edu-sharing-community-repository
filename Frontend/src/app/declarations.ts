@@ -47,6 +47,7 @@
   import {SortDropdownComponent} from "./common/ui/sort-dropdown/sort-dropdown.component";
   import {ImageConfigDirective} from "./common/ui/image-config.directive";
   import {IconComponent} from './common/ui/icon/icon.component';
+  import {UserQuotaComponent} from "./common/ui/user-quota/user-quota.component";
 
 export const DECLARATIONS = [
       MdsTestComponent,
@@ -89,6 +90,7 @@ export const DECLARATIONS = [
       ApplyToLmsComponent,
       ModalDialogToastComponent,
       ToolListComponent,
+      UserQuotaComponent,
       ToucheventDirective,
       PoweredByComponent,
       BannerComponent,

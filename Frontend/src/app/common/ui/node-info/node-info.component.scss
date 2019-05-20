@@ -9,15 +9,24 @@
 img{
   max-width: 140px;
 }
-div{
+.node-info div{
+  margin:0 5px;
+  padding-bottom: 5px;
   >span{
-    margin:0 5px;
     display:flex;
   }
   >span:first-child{
     font-weight: bold;
   }
-  padding-bottom: 5px;
+  .inherited,.local{
+    padding:10px 20px 0 20px;
+    .authority{
+      font-weight: bold;
+    }
+    .permissions{
+      padding:0 10px;
+    }
+  }
 }
 .aspects{
   white-space: pre-line;

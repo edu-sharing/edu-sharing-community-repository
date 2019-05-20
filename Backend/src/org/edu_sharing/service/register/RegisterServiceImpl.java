@@ -238,8 +238,7 @@ public class RegisterServiceImpl implements RegisterService {
     private String addToCacheNoDuplicate(RegisterInformation info,SimpleCache cache,boolean override) {
         String existing=getKeyForMail(info.getEmail(),cache);
         if(existing!=null) {
-            if(existing!=null)
-                cache.put(existing,cache);
+            cache.put(existing,info);
             return existing;
         }
         return addToCache(info, cache);

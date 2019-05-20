@@ -189,6 +189,9 @@ public class URLTool{
 	public static String getNgMessageUrl(String messageId){
 		return getNgComponentsUrl()+"messages/"+messageId;
 	}
+	public static String getNgErrorUrl(String errorId){
+		return getNgComponentsUrl()+"error/"+errorId;
+	}
 	public static String getNgComponentsUrl(){
 		return getBaseUrl(true)+"/components/";
 	}

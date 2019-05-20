@@ -80,8 +80,8 @@
       "ORG_ADMINISTRATORS":"Administrationsgruppe"
     },
     "SCOPE_TYPE":{
-      "null":"Kein / Normale Sichtbarkeit",
-      "global":"Repository übergreifend"
+      "null":"Lokal / Normale Sichtbarkeit",
+      "global":"Global / Repository übergreifend"
     },
     "TOOLPERMISSIONS":{
       "TITLE":"Berechtigungen festlegen für {{name}}",

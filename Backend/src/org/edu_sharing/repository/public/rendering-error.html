@@ -43,14 +43,15 @@
     </head>
 <body>
 <div class="error">
-    <div class="message_wrapper">
+    <div class="message_wrapper"
+         data-error-statusCode="{{statusCode}}"
+         data-error-message="{{technicalMessage}}"
+         data-error-exception="{{exception}}">
         <div class="message">
             <svg class="warning">
                 <path id="warning" d="M1,21l22,0l-11,-19l-11,19Zm3.47,-2l7.53,-13.01l7.53,13.01l-15.06,0Zm6.53,-3l2,0l0,2l-2,0l0,-2Zm0,-6l2,0l0,4l-2,0l0,-4Z" style="fill-rule:nonzero;"/>
             </svg>
             <span>{{message}}</span></div>
-        <div class="technicalMessage">{{statusCode}} - {{technicalMessage}}</div>
-        <div class="technicalMessage">{{exception}}</div>
     </div>
 </div>
 </body>

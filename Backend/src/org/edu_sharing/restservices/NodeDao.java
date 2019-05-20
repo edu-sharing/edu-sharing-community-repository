@@ -79,6 +79,7 @@ public class NodeDao {
 			org.alfresco.service.cmr.security.PermissionService.CHANGE_PERMISSIONS,
 			org.alfresco.service.cmr.security.PermissionService.WRITE,
 			org.alfresco.service.cmr.security.PermissionService.DELETE,
+			CCConstants.PERMISSION_COMMENT,
 			CCConstants.PERMISSION_CC_PUBLISH,
 			CCConstants.PERMISSION_READ_ALL
 	};
@@ -157,6 +158,12 @@ public class NodeDao {
 			org.edu_sharing.service.search.model.SearchToken searchToken) throws DAOException {
 		SearchService searchService=SearchServiceFactory.getSearchService(repoDao.getId());
 		return transform(repoDao,searchService.search(searchToken));
+	}
+	
+	public static NodeSearch search(RepositoryDao repoDao,
+			org.edu_sharing.service.search.model.SearchToken searchToken, boolean scoped) throws DAOException {
+		SearchService searchService=SearchServiceFactory.getSearchService(repoDao.getId());
+		return transform(repoDao,searchService.search(searchToken,scoped));
 	}
 	
 	public static NodeSearch searchV2(RepositoryDao repoDao,MdsDaoV2 mdsDao,

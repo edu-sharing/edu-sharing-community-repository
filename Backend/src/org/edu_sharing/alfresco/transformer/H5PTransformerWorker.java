@@ -19,6 +19,7 @@ import org.apache.commons.compress.archivers.ArchiveInputStream;
 import org.apache.log4j.Logger;
 import org.edu_sharing.alfresco.action.RessourceInfoExecuter;
 import org.edu_sharing.repository.client.tools.CCConstants;
+import org.edu_sharing.repository.server.tools.ImageTool;
 import org.springframework.util.StreamUtils;
 
 import java.io.File;
@@ -55,7 +56,8 @@ public class H5PTransformerWorker extends ContentTransformerHelper implements Co
 				String name=entry.getName().toLowerCase();
 				if(name.startsWith("content/images") && (name.endsWith(".jpg") || name.endsWith(".png"))){
 					OutputStream os = writer.getContentOutputStream();
-					StreamUtils.copy(zip,os);
+					InputStream is = ImageTool.autoRotateImage(zip, ImageTool.MAX_THUMB_SIZE);
+					StreamUtils.copy(is,os);
 					os.close();
 					break;
 				}

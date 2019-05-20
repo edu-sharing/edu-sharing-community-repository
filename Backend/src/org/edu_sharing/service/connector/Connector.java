@@ -5,6 +5,8 @@ import java.util.List;
 public class Connector {
 	
 	private String id;
+
+	private String connectorId;
 	
 	private String icon;
 	
@@ -32,6 +34,14 @@ public class Connector {
 
 	public void setId(String id) {
 		this.id = id;
+	}
+
+	public String getConnectorId() {
+		return connectorId;
+	}
+
+	public void setConnectorId(String connectorId) {
+		this.connectorId = connectorId;
 	}
 
 	public String getIcon() {

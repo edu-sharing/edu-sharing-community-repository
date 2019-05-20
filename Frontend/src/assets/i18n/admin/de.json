@@ -214,7 +214,8 @@
       "LOG_LEVEL_0":"Fatal",
       "NAMES":{
         "RemoveImportedObjectsJob":"Alle importierten Nodes löschen",
-        "RemoveOrphanCollectionReferencesJob":"Alle Sammlungsreferenzen mit fehlenden Originalobjekt löschen"
+        "RemoveOrphanCollectionReferencesJob":"Alle Sammlungsreferenzen mit fehlenden Originalobjekt löschen",
+        "RemoveNodeJob":"Einen Node/Ordner vollständig löschen (Parameter \"id\" angeben)"
       }
     },
     "FOLDERTEMPLATES":{

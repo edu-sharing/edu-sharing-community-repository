@@ -35,7 +35,7 @@ import {RestMdsService} from '../../common/rest/services/rest-mds.service';
 import {RestHelper} from '../../common/rest/rest-helper';
 import {RestIamService} from '../../common/rest/services/rest-iam.service';
 import {SearchNodeStoreComponent} from './node-store/node-store.component';
-import {UIConstants} from '../../common/ui/ui-constants';
+import {OPEN_URL_MODE, UIConstants} from '../../common/ui/ui-constants';
 import {ListItem} from '../../common/ui/list-item';
 import {MdsComponent} from '../../common/ui/mds/mds.component';
 import {RequestObject} from '../../common/rest/request-object';
@@ -494,7 +494,7 @@ export class SearchComponent {
     let useRender=RestNetworkService.isFromHomeRepo(node,this.allRepositories) ||
       RestNetworkService.getRepositoryById(node.ref.repo,this.allRepositories) && RestNetworkService.getRepositoryById(node.ref.repo,this.allRepositories).repositoryType==RestConstants.REPOSITORY_TYPE_ALFRESCO;
     if(!useRender){
-      UIHelper.openBlankWindow(node.contentUrl,this.connector.getCordovaService());
+      UIHelper.openUrl(node.contentUrl,this.connector.getCordovaService(),OPEN_URL_MODE.Blank);
       return;
     }
     */
