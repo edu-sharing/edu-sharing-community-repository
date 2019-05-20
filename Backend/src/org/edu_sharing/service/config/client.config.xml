@@ -7,9 +7,6 @@
 		<branding>true</branding>
 		<editProfile>true</editProfile>
 		<nodeReport>true</nodeReport>
-		<rendering>
-			<prerender>false</prerender>
-		</rendering>
 		<services>
 			<visualization>https://appserver7.metaventis.com/stat/</visualization>
 		</services>
