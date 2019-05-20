@@ -36,6 +36,7 @@ import {RestSearchService} from '../../rest/services/rest-search.service';
 import {ListItem} from '../list-item';
 import {RestMdsService} from '../../rest/services/rest-mds.service';
 import {MdsHelper} from '../../rest/mds-helper';
+import {HttpClient} from "@angular/common/http";
 
 declare var jQuery:any;
 declare var window: any;
@@ -204,6 +205,7 @@ export class NodeRenderComponent implements EventListener{
       private location: Location,
       private searchService : SearchService,
       private connector : RestConnectorService,
+      private http : HttpClient,
       private connectors : RestConnectorsService,
       private mdsApi : RestMdsService,
       private nodeApi : RestNodeService,
@@ -296,37 +298,37 @@ export class NodeRenderComponent implements EventListener{
 
     let input=this.temporaryStorageService.get(TemporaryStorageService.NODE_RENDER_PARAMETER_OPTIONS);
     if(!input) input=[];
-    let opt=[];
+    let opt:OptionItem[]=[];
     for(let o of input){
       opt.push(o);
     }
-    this.options=opt;
     let download=new OptionItem('WORKSPACE.OPTION.DOWNLOAD','cloud_download',()=>this.downloadCurrentNode());
     download.isEnabled=this._node.downloadUrl!=null;
     download.showAsAction=true;
     if(this.isCollectionRef()){
       console.log("is ref");
       this.nodeApi.getNodeMetadata(this._node.properties[RestConstants.CCM_PROP_IO_ORIGINAL]).subscribe((node:NodeWrapper)=>{
-        this.addDownloadButton(download);
+        this.addDownloadButton(opt,download);
       },(error:any)=>{
         if(error.status==RestConstants.HTTP_NOT_FOUND) {
           console.log("original missing");
           download.isEnabled = false;
         }
-        this.addDownloadButton(download);
+        this.addDownloadButton(opt,download);
       });
       return;
     }
-    this.addDownloadButton(download);
+    this.addDownloadButton(opt,download);
   }
   private loadRenderData(){
       this.isLoading=true;
+      this.options=[];
     if(this.isBuildingPage){
         setTimeout(()=>this.loadRenderData(),50);
         return;
     }
     let parameters={
-      showDownloadButton:false,
+      showDownloadButton:this.config.instant("rendering.showDownloadButton",false),
       showDownloadAdvice:!this.isOpenable
     };
     this._node=null;
@@ -429,18 +431,17 @@ export class NodeRenderComponent implements EventListener{
     }
   }
 
-  private checkConnector() {
+  private checkConnector(options:OptionItem[]) {
     this.connector.isLoggedIn().subscribe((login:LoginResult)=>{
         this.connectors.list().subscribe((data:ConnectorList)=>{
-            this.initAfterConnector(login);
+            this.initAfterConnector(options,login);
         },(error:any)=>{
-            this.initAfterConnector(login);
+            this.initAfterConnector(options,login);
         });
-      this.options=Helper.deepCopyArray(this.options);
     });
   }
 
-    private initAfterConnector(login: LoginResult) {
+    private initAfterConnector(options:OptionItem[],login: LoginResult) {
         if (!this.isCollectionRef()) {
             if(!this.connector.getCurrentLogin().isGuest) {
                 let openFolder = new OptionItem('SHOW_IN_FOLDER', 'folder', () => this.goToWorkspace(login, this._node));
@@ -450,12 +451,12 @@ export class NodeRenderComponent implements EventListener{
                 });
 
                 if (this._node.type != RestConstants.CCM_TYPE_REMOTEOBJECT && ConfigurationHelper.hasMenuButton(this.config, "workspace"))
-                    this.options.push(openFolder);
+                    options.push(openFolder);
             }
             let edit = new OptionItem('WORKSPACE.OPTION.EDIT', 'info_outline', () => this.nodeMetadata = this._node);
             edit.isEnabled = this._node.access.indexOf(RestConstants.ACCESS_WRITE) != -1 && this._node.type != RestConstants.CCM_TYPE_REMOTEOBJECT;
             if (this.version == RestConstants.NODE_VERSION_CURRENT)
-                this.options.push(edit);
+                options.push(edit);
             this.isOpenable = false;
         }
         else {
@@ -470,56 +471,58 @@ export class NodeRenderComponent implements EventListener{
                 });
             }, (error: any) => {
             });
-            this.options.push(openFolder);
+            options.push(openFolder);
         }
         let addCollection = this.actionbar.createOptionIfPossible('ADD_TO_COLLECTION', [this._node], () => this.addToCollection = [this._node]);
         if (addCollection) {
             addCollection.showAsAction = false;
             addCollection.isEnabled = this._node.type != RestConstants.CCM_TYPE_REMOTEOBJECT;
-            this.options.push(addCollection);
+            options.push(addCollection);
         }
         let variant = this.actionbar.createOptionIfPossible('CREATE_VARIANT', [this._node], () => this.nodeVariant = this._node);
         if (variant) {
-            this.options.push(variant);
+            options.push(variant);
         }
 
         let share = this.actionbar.createOptionIfPossible('INVITE', [this._node], (node: Node) => this.nodeShare = this._node);
         if (share) {
             share.showAsAction = false;
             share.isSeperate = true;
-            this.options.push(share);
+            options.push(share);
         }
         let shareLink = this.actionbar.createOptionIfPossible('SHARE_LINK',[this._node],(node: Node) => this.nodeShareLink=this._node);
         if (shareLink && !this.isSafe)
-            this.options.push(shareLink);
-        let workflow = this.actionbar.createOptionIfPossible('WORKFLOW',[this._node],(node:Node)=>this.nodeWorkflow=this._node);
-        if(workflow) {
-            this.options.push(workflow);
+            options.push(shareLink);
+        let workflow = this.actionbar.createOptionIfPossible('WORKFLOW', [this._node], (node: Node) => this.nodeWorkflow = this._node);
+        if (workflow) {
+            options.push(workflow);
         }
         let stream = this.actionbar.createOptionIfPossible('ADD_TO_STREAM',[this._node],(node:Node)=>this.addNodesStream=[this._node]);
         if(stream){
-            this.options.push(stream);
+            options.push(stream);
         }
-
-      if (this.config.instant("nodeReport", false)) {
-        let nodeReport = new OptionItem('NODE_REPORT.OPTION', 'flag', () => this.nodeReport = this._node);
-        this.options.push(nodeReport);
-      }
-        let del=this.actionbar.createOptionIfPossible('DELETE',[this._node],(node : Node) => this.nodeDelete=[this._node]);
-        if(del){
-            this.options.push(del);
+        if (this.config.instant("nodeReport", false)) {
+            let nodeReport = new OptionItem('NODE_REPORT.OPTION', 'flag', () => this.nodeReport = this._node);
+            options.push(nodeReport);
+        }
+        let del = this.actionbar.createOptionIfPossible('DELETE', [this._node], (node: Node) => this.nodeDelete = [this._node]);
+        if (del) {
+            options.push(del);
         }
         this.isOpenable = false;
         if (this.version == RestConstants.NODE_VERSION_CURRENT && this.connectors.connectorSupportsEdit(this._node) || RestToolService.isLtiObject(this._node)) {
             let view = new OptionItem("WORKSPACE.OPTION.VIEW", "launch", () => this.openConnector( true));
             //view.isEnabled = this._node.access.indexOf(RestConstants.ACCESS_WRITE)!=-1;
-            this.options.splice(0, 0, view);
+            options.splice(0, 0, view);
             this.isOpenable = true;
             if (this.editor && this.connectors.connectorSupportsEdit(this._node).id == this.editor) {
                 this.openConnector(false);
             }
         }
-        this.options = Helper.deepCopyArray(this.options);
+        let custom=this.config.instant('renderNodeOptions');
+        NodeHelper.applyCustomNodeOptions(this.toast,this.http,this.connector,custom,this.searchService.searchResult, this._node ? [this._node] : null, options,(load:boolean)=>this.isLoading=load);
+
+        this.options = Helper.deepCopyArray(options);
         this.postprocessHtml();
         this.isBuildingPage=false;
     }
@@ -532,20 +535,20 @@ export class NodeRenderComponent implements EventListener{
     return this._node.aspects.indexOf(RestConstants.CCM_ASPECT_IO_REFERENCE)!=-1;
   }
 
-  private addDownloadButton(download: OptionItem) {
+  private addDownloadButton(options:OptionItem[],download: OptionItem) {
       this.nodeApi.getNodeChildobjects(this.sequenceParent.ref.id,this.repository).subscribe((data:NodeList)=>{
           this.downloadButton=download;
           if(data.nodes.length > 0 || this._node.aspects.indexOf(RestConstants.CCM_ASPECT_IO_CHILDOBJECT) != -1) {
               download.name = 'DOWNLOAD_ALL';
           }
-          this.options.splice(0,0,download);
+          options.splice(0,0,download);
 
           if(this.searchService.reurl) {
               let apply = new OptionItem("APPLY", "redo", (node: Node) => NodeHelper.addNodeToLms(this.router, this.temporaryStorageService, this._node, this.searchService.reurl));
               apply.isEnabled = this._node.access.indexOf(RestConstants.ACCESS_CC_PUBLISH) != -1;
-              this.options.splice(0, 0, apply);
+              options.splice(0, 0, apply);
           }
-          this.checkConnector();
+          this.checkConnector(options);
 
       });
     UIHelper.setTitleNoTranslation(this._node.name,this.title,this.config);

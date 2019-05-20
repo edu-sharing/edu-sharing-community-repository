@@ -472,7 +472,7 @@ export class MainNavComponent implements AfterViewInit{
       let sessionData=this.connector.getCurrentLogin();
       if(this.config.logout.ajax){
         this.http.get(this.config.logout.url).subscribe(()=>{
-            if(this.config.logut.destroySession){
+            if(this.config.logout.destroySession){
                 this.connector.logout().subscribe((response) => {
                     this.finishLogout();
                 });

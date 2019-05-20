@@ -79,8 +79,8 @@
       "ORG_ADMINISTRATORS":"administrators"
     },
     "SCOPE_TYPE":{
-      "null":"none / regular visibility",
-      "global":"across repositories (global)"
+      "null":"Local / Default visibility",
+      "global":"Global / Across repositories"
     },
     "TOOLPERMISSION": {
       "TOOLPERMISSION_INVITE": "the permission to share objects",

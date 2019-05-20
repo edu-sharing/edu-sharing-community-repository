@@ -52,10 +52,17 @@ export class RestHelper{
     return type;
   }
 
-  public static errorClassContains(error:any,needle:string){
+    /**
+     * checks a rest error message and returns true if the string was found in the error or message text
+     * @param error
+     * @param needle
+     */
+  public static errorMatchesAny(error:any,needle:string){
     try{
-      let json=JSON.parse(error._body);
-      return json.error.indexOf(needle)!=-1;
+      console.log(error);
+      let json=JSON.parse(error.response);
+      console.log(json);
+      return json.error.indexOf(needle)!=-1 || json.message.indexOf(needle)!=-1;
     }catch(e){}
     return false;
   }

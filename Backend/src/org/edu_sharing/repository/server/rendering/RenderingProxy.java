@@ -327,6 +327,7 @@ public class RenderingProxy extends HttpServlet {
 
 		String encTicket = req.getParameter("ticket");
 		if(encTicket == null) {
+			logger.error("no ticket provided");
 			resp.sendError(HttpServletResponse.SC_FORBIDDEN,"no ticket provided");
 			return true;
 		}
@@ -343,11 +344,13 @@ public class RenderingProxy extends HttpServlet {
 
 
 		/**
-		 * when it's an lms the user who is in a course where the node is used (Angular path can not handle signatures)
+		 * when it's an lms/cms the user who is in a course where the node is used (Angular path can not handle signatures)
 		 *
 		 * doing edu ticket auth
 		 */
-		if(appInfoApplication != null && ApplicationInfo.TYPE_LMS.equals(appInfoApplication.getType())) {
+		if(appInfoApplication != null &&
+					   (ApplicationInfo.TYPE_LMS.equals(appInfoApplication.getType()) ||
+						ApplicationInfo.TYPE_CMS.equals(appInfoApplication.getType()))) {
 			req.getSession().removeAttribute(CCConstants.AUTH_SINGLE_USE_NODEID);
 			HttpSession session = req.getSession(true);
 			if(		Long.parseLong(ts) > (System.currentTimeMillis() - appInfoApplication.getMessageOffsetMs())
@@ -403,7 +406,8 @@ public class RenderingProxy extends HttpServlet {
 				return true;
 			}
 		}else {
-			resp.sendError(HttpServletResponse.SC_BAD_REQUEST,"only LMS apps allowed for display=\"window\"");
+			logger.warn("only LMS / CMS apps allowed for display=\"window\"");
+			resp.sendError(HttpServletResponse.SC_BAD_REQUEST,"only LMS / CMS apps allowed for display=\"window\"");
 			return true;
 		}
 

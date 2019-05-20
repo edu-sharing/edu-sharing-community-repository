@@ -261,7 +261,14 @@
   [node]="linkNode"
   (onClose)="updateNodeLink();linkNode=null"
 ></workspace-share-link>
-
+<modal-dialog
+        [title]="dialogTitle"
+        [isCancelable]="true"
+        (onCancel)="dialogCancel()"
+        [message]="dialogMessage"
+        [buttons]="dialogButtons"
+        [priority]="1"
+></modal-dialog>
 <div class="dialog darken dialog-collections" [@fade]="showCollections" *ngIf="showCollections"></div>
 <div class="card center-card card-action card-high card-collections" [@cardAnimation]="showCollections" *ngIf="showCollections">
   <div class="card-content">

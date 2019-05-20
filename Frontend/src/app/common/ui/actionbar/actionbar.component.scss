@@ -1,4 +1,10 @@
 @import "../../../../styles/variables.scss";
+
+.actionbar{
+  display: flex;
+  flex-direction: row;
+  justify-content: flex-end;
+}
 .action-always,.more{
   float:right;
   padding:0 15px;

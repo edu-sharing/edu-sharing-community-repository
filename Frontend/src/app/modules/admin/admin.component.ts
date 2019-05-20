@@ -898,6 +898,9 @@ export class AdminComponent {
         job=new SuggestItem("org.edu_sharing.repository.server.jobs.quartz.RemoveOrphanCollectionReferencesJob",this.translate.instant("ADMIN.JOBS.NAMES.RemoveOrphanCollectionReferencesJob"));
         job.secondaryTitle=job.id;
         this.jobClasses.push(job);
+        job=new SuggestItem("org.edu_sharing.repository.server.jobs.quartz.RemoveNodeJob",this.translate.instant("ADMIN.JOBS.NAMES.RemoveNodeJob"));
+        job.secondaryTitle=job.id;
+        this.jobClasses.push(job);
     }
 }
 

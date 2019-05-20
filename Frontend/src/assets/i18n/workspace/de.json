@@ -46,6 +46,11 @@
     "UPLOAD_TITLE": "Hochladen",
     "UPLOAD_REMAINING": "Noch {{time}}",
     "UPLOAD_FINISHING": "Fertigstellen...",
+    "UPLOAD_ERROR":{
+      "UNKNOWN":"Fehler bei der Datenübertragung",
+      "FORMAT":"Nicht identifizierbares Dateiformat",
+      "QUOTA":"Speicherplatz-Quota wurde überschritten"
+    },
     "ADD_FOLDER_TITLE":"Neuen Ordner erstellen",
     "ADD_FOLDER_METADATASET":"Metadatenset für Ordner",
     "FOLDER_PLACEHOLDER": "Ordnername",
@@ -104,6 +109,8 @@
       "NO_FUZZY":"Geben Sie die vollständige E-Mail-Adresse ein, um Personen hinzuzufügen",
       "DOI":"Mit Handle versehen",
       "DOI_INFO":"Ein Handle ist eine standardisierte ID, mit der dieses Material global eindeutig identifiziert und wiedergefunden werden kann",
+      "PUBLISHING_WARNING_TITLE":"Element wirklich veröffentlichen?",
+      "PUBLISHING_WARNING_MESSAGE":"Wenn Sie fortfahren, wird das aktuelle Element für alle Nutzer des Systems freigegeben und kann von jedem aufgerufen werden.\n\nSind Sie sicher, dass Sie das Element öffentlich freigeben möchten?",
       "STATE": {
         "PRIVATE": "Privat",
         "SHARED": "Geteilt",
