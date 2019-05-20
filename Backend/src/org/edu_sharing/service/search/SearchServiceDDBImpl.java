@@ -31,8 +31,6 @@ import org.edu_sharing.repository.server.SearchResultNodeRef;
 import org.edu_sharing.repository.server.tools.ApplicationInfo;
 import org.edu_sharing.repository.server.tools.ApplicationInfoList;
 import org.edu_sharing.repository.server.tools.URLTool;
-import org.edu_sharing.restservices.search.v1.model.SearchParameters;
-import org.edu_sharing.restservices.shared.MdsQueryCriteria;
 import org.edu_sharing.service.Constants;
 import org.edu_sharing.service.mime.MimeTypesV2;
 import org.edu_sharing.service.model.NodeRef;
@@ -108,7 +106,6 @@ public class SearchServiceDDBImpl extends SearchServiceAdapter{
 
 		
 		SearchResultNodeRef searchResultNodeRef = new SearchResultNodeRef();
-		searchResultNodeRef.setNodeCount(nrOfResult);
 		List<NodeRef> data=new ArrayList<>();
 		
 		HashMap<String,HashMap<String,Object>> result = new HashMap<String, HashMap<String,Object>>();
@@ -231,7 +228,6 @@ public class SearchServiceDDBImpl extends SearchServiceAdapter{
 			// fetch binary info
 			String all = httpGet(DDB_API+"/items/"+nodeId+"/aip?oauth_consumer_key=" + URLEncoder.encode(this.APIKey, "UTF-8"), null);
 			JSONObject allJson = new JSONObject(all);
-			
 			try {
 				JSONArray binaries = (JSONArray)allJson.getJSONObject("binaries").getJSONArray("binary");			
 				JSONObject binary = null;
@@ -282,77 +278,51 @@ public class SearchServiceDDBImpl extends SearchServiceAdapter{
 			}catch(Throwable t) {}
 			
 			
-			try {
-				JSONObject webresource = allJson.getJSONObject("edm").getJSONObject("RDF").getJSONObject("WebResource");
-				String licenseUrl = webresource.getJSONObject("rights").getString("@resource");
-				
-				for(Map.Entry<String, String> entry : CCConstants.getLicenseMap().entrySet()) {
-					String matching = entry.getKey().replace("/1.0/deed.", "");
-					matching = matching.replaceFirst("https://", "");
-					matching = matching.replaceFirst("http://", "");
-					
-					if(licenseUrl != null) {
-						String tempLicenseurl = licenseUrl.replaceFirst("https://", "");
-						tempLicenseurl = tempLicenseurl.replaceFirst("http://", "");
-						if(tempLicenseurl.startsWith(matching)) {
-							properties.put(CCConstants.CCM_PROP_IO_COMMONLICENSE_KEY,entry.getValue());
-						}
-					}
-					
-				}
-				
-				
-				
-			}catch(Throwable e) {
-				
-			}
-			
-			
 			String imageUrl = null;
-			
+
 			try {
-				
+
 				JSONObject joPreview = (JSONObject)allJson.get("preview");
 				if(joPreview.has("thumbnail") && joPreview.get("thumbnail") != null && joPreview.get("thumbnail") instanceof JSONObject) {
 					JSONObject joThumbnail = (JSONObject)joPreview.getJSONObject("thumbnail");
-					
+
 					String previewId = (String)joThumbnail.get("@href");
-					
-					
+
+
 					String thumbUrl = "https://iiif.deutsche-digitale-bibliothek.de/image/2/" + previewId + "/info.json";
 					String thumbResult = httpGet(thumbUrl, null);
-					
+
 					JSONObject jo = new JSONObject(thumbResult);
 					JSONArray ja = (JSONArray)jo.get("sizes");
-					
-					
-					
+
+
+
 					JSONObject joSize = (JSONObject)ja.get(0);
-					
+
 					if(ja.length() > 3) {
 						joSize = (JSONObject)ja.get(1);
 					}
-					
-					Integer width = (Integer)joSize.get("width"); 
-					Integer height = (Integer)joSize.get("height"); 
-					
+
+					Integer width = (Integer)joSize.get("width");
+					Integer height = (Integer)joSize.get("height");
+
 					imageUrl = "https://iiif.deutsche-digitale-bibliothek.de/image/2/" + previewId + "/full/!" + width + "," + height + "/0/default.jpg";
 				}
 			} catch (IOException e1) {
 				// TODO Auto-generated catch block
 				e1.printStackTrace();
-			} 
-			
+			}
+
 			/*String previewUrl;
 			try {
-				previewUrl=DDB_API+ "/binary/" + allJson.getJSONObject("preview").getJSONObject("thumbnail").getString("@href")+"?oauth_consumer_key=" + URLEncoder.encode(this.APIKey, "UTF-8");
+				previewUrl=DDB_API+allJson.getJSONObject("preview").getJSONObject("thumbnail").getString("@href")+"?oauth_consumer_key=" + URLEncoder.encode(this.APIKey, "UTF-8");
 			}
 			catch(Throwable t) {
 				previewUrl=new MimeTypesV2(appInfo).getPreview(CCConstants.CCM_TYPE_IO, properties, null);
 			}*/
-			
+
 			if(imageUrl != null) {
-				properties.put(CCConstants.CCM_PROP_IO_THUMBNAILURL, imageUrl);	
+				properties.put(CCConstants.CCM_PROP_IO_THUMBNAILURL, imageUrl);
 				//for the gwt gui no persistent
 				properties.put(CCConstants.CM_ASSOC_THUMBNAILS, imageUrl);
 			}
@@ -453,29 +423,19 @@ public class SearchServiceDDBImpl extends SearchServiceAdapter{
 			
 		return properties;
 	}
-	@Override
-	public List<? extends  SuggestOracle.Suggestion> getSuggestions(MetadataSetV2 mds, String queryId, 
-			String parameterId, String value, List<MdsQueryCriteria> criterias) {
+
+	public List<? extends  SuggestOracle.Suggestion> getSuggestions(MetadataSetV2 mds, String queryId, String parameterId, String value) {
 		
 		List<SuggestOracle.Suggestion> result = new ArrayList<SuggestOracle.Suggestion>();
 		
 		List<String> facets = mds.getQueries().findQuery(queryId).findParameterByName(parameterId).getFacets();
 		//String url = getUrl("/search",parameterId +":("+value+")",facets, 0, 0);
-		
-		Map<String,String[]> criteriasAsMap = new HashMap<String,String[]>();
-		for(MdsQueryCriteria crit : criterias) {
-			criteriasAsMap.put(crit.getProperty(), crit.getValues().toArray(new String[crit.getValues().size()]));
-		}
-		criteriasAsMap.put(parameterId, new String[] {value});
-		
-		
+		String url = getUrl("/search","*",facets, 0, 0);
+		System.out.println("url:" + url);
 		
 		try {
-			String url = DDB_API + getPath(criteriasAsMap, 0, 0, facets);
-			logger.debug("url:" + url);
-			
 			String json = this.query(url);
-			//System.out.println(json);
+			System.out.println(json);
 			JSONObject jo = new JSONObject(json);
 	    	
 			JSONArray resultsArr = (JSONArray)jo.get("facets");
@@ -491,12 +451,12 @@ public class SearchServiceDDBImpl extends SearchServiceAdapter{
 						JSONObject facetteVal = (JSONObject)facetValues.get(j);
 						//int count = facetteVal.getInt("count");
 						String val = facetteVal.getString("value");
-						//check for cleaner results
-						if(val.toLowerCase().contains(value.toLowerCase())) {					
+
+						if(val.contains(value)) {
 							SuggestFacetDTO dto = new SuggestFacetDTO();
 							dto.setFacet(val);
 							dto.setDisplayString(val);
-							
+
 							result.add(dto);
 						}
 					}
@@ -511,11 +471,16 @@ public class SearchServiceDDBImpl extends SearchServiceAdapter{
 		return result;
 	}
 	
-	public String getPath(Map<String, String[]> criterias, int from, int maxResults, List<String> facets) throws UnsupportedEncodingException{
+	public String getUrl(String basePath, String query, List<String> facets, int offset, int rows){
+		String url = DDB_API + basePath;
 		
-		String url = "";
-		
-		url += getPath(criterias, from, maxResults,true);
+		try {
+			url += "?oauth_consumer_key=" + URLEncoder.encode(APIKey, "UTF-8");
+		} catch (UnsupportedEncodingException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		url += "&query=" + org.springframework.extensions.surf.util.URLEncoder.encodeUriComponent(query);
 		if(facets != null && facets.size() > 0) {
 			url += "&facet=";
 			int i = 0;
@@ -527,8 +492,9 @@ public class SearchServiceDDBImpl extends SearchServiceAdapter{
 				}
 				
 			}
-		}		
-		
+		}
+		url += "&offset="+offset;
+		url += "&rows="+rows;
 		
 		return url;
 	}
@@ -551,40 +517,6 @@ public class SearchServiceDDBImpl extends SearchServiceAdapter{
          * 		
          */
 
-		
-		HttpsURLConnection connection=null;
-		
-		try {
-
-
-			String uri = getPath(criterias,searchToken.getFrom(),searchToken.getMaxResult(),false);
-			searchToken.setQueryString(uri);
-			
-			
-			logger.debug("ddb url:" + uri);
-			return searchDDB(repositoryId,APIKey,uri);
-			
-		}
-		catch(IOException e){
-			InputStream is=connection.getErrorStream();
-			StringBuilder responseStrBuilder = new StringBuilder();
-			String line;
-			BufferedReader bR = new BufferedReader(  new InputStreamReader(is));
-			while((line =  bR.readLine()) != null){
-			    responseStrBuilder.append(line);
-			}
-			is.close();
-			throw new Exception("Error from DDB: "+connection.getResponseCode()+" "+responseStrBuilder.toString());
-		}
-		catch (Throwable t) {
-			t.printStackTrace();
-			throw t;
-		}
-
-	}	
-	
-	private String getPath(Map<String, String[]> criterias, int from, int maxResults, boolean fuzzy) throws UnsupportedEncodingException {
-		
 		String[] searchWordCriteria=criterias.get(MetadataSetV2.DEFAULT_CLIENT_QUERY_CRITERIA);
 
 		List<String> extSearch = new ArrayList<String>();
@@ -597,21 +529,9 @@ public class SearchServiceDDBImpl extends SearchServiceAdapter{
 			searchWord="";
 		}
 
-		
-		for(Map.Entry<String, String[]> entry : criterias.entrySet()) {
-			if(!entry.getKey().startsWith("ngsearch")) {
-				String[] values = criterias.get(entry.getKey());
-				if(values != null && values.length > 0) {
-					String value = values[0];
-					if(!value.trim().equals("")) {
-						if(fuzzy) value += "*";
-						extSearch.add(entry.getKey() +":("+value+")");
-					}
-				}
-			}
-		}
+		boolean retval;
 
- 		/*if(criterias.containsKey("title")) {
+ 		if(criterias.containsKey("title")) {
  			String ddbTitle =criterias.get("title")[0];
  			if (!ddbTitle.equals("") ){
  				extSearch.add("title:("+ddbTitle+")");
@@ -630,11 +550,14 @@ public class SearchServiceDDBImpl extends SearchServiceAdapter{
  			if (!ddbPerson.equals("") ){
  				extSearch.add("affiliate:("+ddbPerson+")");
  			}
- 		}*/
+ 		}
 		
-		
+		HttpsURLConnection connection=null;
 
- 		String ext = "";
+/*		if(searchToken.getFrom()%searchToken.getMaxResult()!=0)
+			throw new Exception("Pixabay only supports offsets which are dividable by the maxItems count");
+	*/
+		String ext = "";
 		for (String s : extSearch) {
 		    if (!s.equals("") && !extSearch.get(extSearch.size() - 1).equals(s)){
 		     ext = ext+s +" AND ";	
@@ -643,14 +566,37 @@ public class SearchServiceDDBImpl extends SearchServiceAdapter{
 		    }
 		}
 		
-		String oauth  = "/search?oauth_consumer_key=" + URLEncoder.encode(this.APIKey, "UTF-8");
-		String offset = "&offset=" + from;
-		String rows = "&rows=" + maxResults;
-		
-		String queryStr = searchWord+" "+ext;
-		String uri=oauth+"&query="+org.springframework.extensions.surf.util.URLEncoder.encodeUriComponent(queryStr)+offset+rows;
 
-		return uri;
+		try {
+
+
+			String oauth  = "/search?oauth_consumer_key=" + URLEncoder.encode(this.APIKey, "UTF-8");
+			String offset = "&offset="+searchToken.getFrom();
+			String rows = "&rows="+searchToken.getMaxResult();
+
+			String uri=oauth+"&query="+org.springframework.extensions.surf.util.URLEncoder.encodeUriComponent(searchWord+" "+ext)+offset+rows;
+
+			searchToken.setQueryString(uri);
+
+			return searchDDB(repositoryId,APIKey,uri);
+
+		}
+		catch(IOException e){
+			InputStream is=connection.getErrorStream();
+			StringBuilder responseStrBuilder = new StringBuilder();
+			String line;
+			BufferedReader bR = new BufferedReader(  new InputStreamReader(is));
+			while((line =  bR.readLine()) != null){
+			    responseStrBuilder.append(line);
+			}
+			is.close();
+			throw new Exception("Error from DDB: "+connection.getResponseCode()+" "+responseStrBuilder.toString());
+		}
+		catch (Throwable t) {
+			t.printStackTrace();
+			throw t;
+		}
+
 	}
 	
 	public static void main(String[] args) {
@@ -681,7 +627,7 @@ public class SearchServiceDDBImpl extends SearchServiceAdapter{
 	        isr.close();
 	        connection.disconnect();
 	        String jsonString = sb.toString();
-	      
+	        System.out.println(jsonString);
 			JSONObject jo = new JSONObject(jsonString);
 	    	
 			Integer nrOfResult = (Integer)jo.get("numberOfResults");

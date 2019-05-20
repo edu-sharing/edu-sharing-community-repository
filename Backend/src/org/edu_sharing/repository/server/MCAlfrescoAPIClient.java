@@ -3011,7 +3011,7 @@ public class MCAlfrescoAPIClient extends MCAlfrescoBaseClient {
                 		
                 		for (String containedAuthority : authorityService.getContainedAuthorities(null, key, true)) {
                 			
-                			authorityService.removeAuthority(groupName, containedAuthority);
+                			authorityService.removeAuthority(key, containedAuthority);
                 		}
 
                 		return null;
