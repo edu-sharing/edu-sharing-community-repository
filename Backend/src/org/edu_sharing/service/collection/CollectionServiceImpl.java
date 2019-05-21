@@ -546,9 +546,9 @@ public class CollectionServiceImpl implements CollectionService{
         params.setLanguage(org.alfresco.service.cmr.search.SearchService.LANGUAGE_LUCENE);
         params.setMaxItems(0);
 
-        params.setQuery("TYPE:"+QueryParser.escape("ccm:io")+" AND PATH:\""+QueryParser.escape(path)+"//*\"");
+        params.setQuery("TYPE:"+QueryParser.escape(CCConstants.CCM_TYPE_IO)+" AND NOT ASPECT:"+QueryParser.escape(CCConstants.CCM_ASPECT_IO_CHILDOBJECT)+" AND PATH:\""+QueryParser.escape(path)+"//*\"");
         collection.setChildReferencesCount((int) serviceRegistry.getSearchService().query(params).getNumberFound());
-        params.setQuery("TYPE:"+QueryParser.escape("ccm:map")+" AND PATH:\""+QueryParser.escape(path)+"//*\"");
+        params.setQuery("TYPE:"+QueryParser.escape(CCConstants.CCM_TYPE_MAP)+" AND PATH:\""+QueryParser.escape(path)+"//*\"");
         collection.setChildCollectionsCount((int) serviceRegistry.getSearchService().query(params).getNumberFound());
     }
 	@Override
