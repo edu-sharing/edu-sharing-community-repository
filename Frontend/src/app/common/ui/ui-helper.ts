@@ -33,6 +33,10 @@ export class UIHelper{
       return value>window.innerWidth;
     if(type==UIConstants.MEDIA_QUERY_MIN_WIDTH)
         return value<window.innerWidth;
+      if(type==UIConstants.MEDIA_QUERY_MAX_HEIGHT)
+          return value>window.innerHeight;
+      if(type==UIConstants.MEDIA_QUERY_MIN_HEIGHT)
+          return value<window.innerHeight;
     console.warn("Unsupported media query "+type);
     return true;
   }

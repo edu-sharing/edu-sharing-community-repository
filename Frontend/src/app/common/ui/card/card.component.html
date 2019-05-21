@@ -5,10 +5,12 @@
             [class.card-tabbed]="tabbed"
             [@cardAnimation]="this">
     <mat-card-header>
-      <div *ngIf="avatar" class="avatar" mat-card-avatar><img [src]="avatar" alt=""></div>
+      <div *ngIf="avatar" class="avatar" mat-card-avatar><img [src]="avatar" alt="" image-config></div>
       <mat-card-title>{{title}}</mat-card-title>
       <mat-card-subtitle>{{subtitle}}</mat-card-subtitle>
-      <button mat-button *ngIf="isCancelable" (click)="cancel()"><i icon iconId="close" aria="true"></i></button>
+      <div class="cancel">
+        <button mat-button *ngIf="isCancelable" (click)="cancel()"><i icon iconId="close" aria="true"></i></button>
+      </div>
     </mat-card-header>
     <div #jumpmarksRef class="jumpmarks" *ngIf="jumpmarks && jumpmarks.length>1">
       <button mat-button color="primary"

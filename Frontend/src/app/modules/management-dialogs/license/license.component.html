@@ -4,7 +4,7 @@
 >
       <spinner *ngIf="loading"></spinner>
       <div *ngIf="(_nodes || _properties) && !loading" class="license-content">
-        <mat-slide-toggle class="oerSelect switch" [(ngModel)]="oerMode">{{ 'WORKSPACE.LICENSE.ONLY_OER' | translate }}</mat-slide-toggle>
+        <mat-slide-toggle class="oerSelect switch toggle-reverse" [(ngModel)]="oerMode">{{ 'WORKSPACE.LICENSE.ONLY_OER' | translate }}</mat-slide-toggle>
         <mat-radio-group class="oerLicenses" [(ngModel)]="type" name="oerLicenses" *ngIf="oerMode">
           <div class="oerCC0">
             <h4>{{'LICENSE.GROUPS.CC_0' | translate}}</h4>

@@ -10,22 +10,31 @@
   width: 100%;
   margin:10px 0;
 }
-:host /deep/ .license-content {
-  .mat-tab-labels {
-    background-color: #fff;
+:host /deep/ {
+  .license-content {
+    .mat-tab-labels {
+      background-color: #fff;
+    }
   }
-}
-h4{
-  font-weight: bold;
-  font-size: 11pt;
-  margin: 2rem 0 1rem 0;
-}
-h5{
-  font-weight:normal;
-  font-size:9pt;
-  color: $textLight;
-  margin: 0;
-  line-height: 1.5;
+  .modal-card mat-card-content {
+    h4 {
+      font-weight: bold;
+      font-size: 11pt;
+      margin: 1.6rem 0 1rem 0;
+    }
+
+    h5 {
+      font-weight: normal;
+      font-size: 9pt;
+      color: $textLight;
+      margin: 0;
+      line-height: 1.5;
+    }
+    .mat-radio-container{
+      position: relative;
+      top:6px;
+    }
+  }
 }
 .ccAuthor {
   font-weight: bold;
@@ -172,6 +181,8 @@ h4{
 }
 .release, .strong{
   font-weight: bold;
+  display: block;
+  margin-bottom: 5px;
 }
 
 .doi{

@@ -97,7 +97,7 @@ export class CardComponent implements OnDestroy{
   }
     @HostListener('window:resize')
     onResize(){
-        if(document.activeElement && this.cardContainer.nativeElement){
+        if(document.activeElement && this.cardContainer && this.cardContainer.nativeElement){
             UIHelper.scrollSmoothElementToChild(document.activeElement,this.cardContainer.nativeElement);
         }
     }

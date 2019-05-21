@@ -8,6 +8,10 @@
   padding: 20px;
   margin-bottom:20px;
   color:$textLight;
+
+  .object-message{
+    margin-bottom: 10px;
+  }
 }
 mat-form-field{
   width:100%;
@@ -25,7 +29,8 @@ mat-form-field{
   color:$primary;
 }
 hr{
-  margin-bottom:20px;
+  margin-bottom: 20px;
+  width: calc(100% - 40px);
 }
 .dropArea i{
   font-size:60px;
@@ -71,7 +76,7 @@ hr{
     display: flex;
     flex-direction: column;
     mat-slide-toggle{
-      padding:10px $cardPadding;
+      padding:0 30px;
     }
   }
   .toolInfo{

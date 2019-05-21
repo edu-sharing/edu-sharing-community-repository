@@ -16,18 +16,17 @@
 ></modal-dialog>
 
 <div class="dialog darken" [style.z-index]="120" *ngIf="licenseDialog" [@fade]="licenseDialog"></div>
-<div class="card center-card card-action card-high card-xwide" [style.z-index]="121" *ngIf="licenseDialog" [@cardAnimation]="licenseDialog">
-  <div class="card-content">
-    <div tabindex="0" class="card-cancel" (click)="licenseDialog=false" (keyup.enter)="licenseDialog=false"><i icon iconId="close" aria="true"></i></div>
-    <div class="card-title ">{{'LICENSE_INFORMATION' | translate }}</div>
+<card *ngIf="licenseDialog"
+      title="{{'LICENSE_INFORMATION' | translate }}"
+      width="xxlarge"
+      height="xxlarge"
+      [isCancelable]="true"
+      (onCancel)="licenseDialog=false">
+  <div class="card-content-padding">
     <spinner *ngIf="!licenseDetails"></spinner>
-    <div class="card-scroll" [innerHTML]="licenseDetails"></div>
+    <div [innerHTML]="licenseDetails"></div>
   </div>
-  <div class="card-action">
-    <a class="btn-flat waves-effect waves-light" tabindex="0" (click)="licenseDialog=false" (keyup.enter)="licenseDialog=false">{{'CLOSE' | translate}}</a>
-  </div>
-</div>
-
+</card>
 
 <app-banner [scope]="_currentScope" (onUpdate)="refreshBanner()"></app-banner>
 <global-progress *ngIf="globalProgress"></global-progress>
@@ -73,7 +72,7 @@
         <i *ngIf="button.icon" class="material-icons align-icon">{{button.icon}}</i><img *ngIf="button.alticon" class="align-icon" src="{{button.alticon}}"> <span>{{button.name | translate}}</span>
       </button>
   </div>
-  <div class="license-info"><span tabindex="0" (click)="showLicenses()" (keyup.enter)="showLicenses()">{{'LICENSE_INFORMATION' | translate}}</span></div>
+  <div class="license-info"><button mat-button class="mat-button-no-uppercase" (click)="showLicenses()">{{'LICENSE_INFORMATION' | translate}}</button></div>
 </div>
 <div #topbar class="topBar {{ 'topBar-'+_currentScope}} scrollWithBanner" [class.noUser]="!_showUser">
     <div class="mobile-move-top2">

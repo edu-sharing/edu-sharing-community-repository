@@ -105,12 +105,23 @@ input.mat-input-element, mat-label, .mat-select-value{
   margin-top: -6px;
 }
 .mat-checkbox-inner-container{
-  width:18px!important;
-  height:18px!important;
+  width:18px !important;
+  height:18px !important;
+  margin: 2px 18px auto 0 !important;
   .mat-checkbox-frame {
     border-color: $primary;
     background-color: #fff;
   }
+}
+.mat-radio-container {
+  .mat-radio-outer-circle {
+    border-color: $primary;
+  }
+}
+.mat-checkbox-label {
+  line-height: 17pt !important;
+  font-size: 1rem;
+  color: $textMain;
 }
 .mat-raised-button{
   color: $primary;
@@ -118,6 +129,7 @@ input.mat-input-element, mat-label, .mat-select-value{
 .mat-radio-label,.mat-checkbox-layout{
   // do allow to wrap long labels in material radio groups (e.g. license dialog)
   white-space: normal!important;
+  align-items: baseline !important;
 }
 .mat-button-wrapper{
   display: flex !important;
@@ -132,7 +144,7 @@ input.mat-input-element, mat-label, .mat-select-value{
   text-transform: none;
 }
 .mat-menu-content{
-  width: 240px;
+  min-width: 200px;
   >button{
     color:$primary;
     display: flex;
@@ -159,38 +171,31 @@ label .label-secondary{
   font-size: 90%;
   color: $textLight;
 }
-// better contrast ratio
-.mat-card-subtitle,.mat-hint{
+
+.mat-card-subtitle,.mat-hint, .mat-slide-toggle-content{
   color: $textLight;
+}
+
+// Show toggle on the right place
+.toggle-reverse{
+  .mat-slide-toggle-label {
+    flex-direction: row-reverse;
+  }
+  .mat-slide-toggle-content {
+    margin-right: 18px;
+  }
 }
 // Mobile Menus at bottom
 @media screen and (max-width:  ($mobileWidth - $mobileStage*1)) {
   .cdk-overlay-backdrop.dropdown-menu{
     background: rgba(0, 0, 0, 0.8);
   }
-  .mat-menu-panel{
+  .mat-menu-panel.dropdown-menu{
     position: fixed;
     bottom:0;
     left:0;
-  }
-    /*
-    .cdk-overlay-pane, .cdk-overlay-connected-position-bounding-box {
-      top: auto !important;
-      bottom: 0 !important;
-      right: 0 !important;
-      left: 0 !important;
-      width: 100% !important;
-    }
-    */
-
-  .mat-menu-panel,.mat-menu-content {
-    max-width: 100% !important;
-    width: 100% !important;
-    border-bottom-right-radius: 0 !important;
-    border-bottom-left-radius: 0 !important;
-  }
-  .mat-menu-panel {
-    position: absolute;
-    bottom: 0;
+    max-width: 100%;
+    width: 100%;
+    border-radius: 0;
   }
 }

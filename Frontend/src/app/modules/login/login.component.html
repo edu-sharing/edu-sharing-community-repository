@@ -4,14 +4,14 @@
           [searchEnabled]="false"
 ></main-nav>
   <div *ngIf="!isLoading">
-  <card title="{{caption | translate}}" avatar="assets/images/app-icon.svg" subtitle="{{'LOGIN.SUBTITLE' | translate}}" [isCancelable]="previousStage!=null" (onCancel)="goBack()" [buttons]="buttons" width="normal" height="auto">
+  <card title="{{caption | translate}}" avatar="assets/images/app-icon.svg" subtitle="{{'LOGIN.SUBTITLE' | translate}}" [isCancelable]="true" (onCancel)="goBack()" [buttons]="buttons" width="small" height="auto">
       <spinner *ngIf="isLoading" class="center"></spinner>
       <div class="login-content" *ngIf="!isLoading">
       <div class="branding"><img src="assets/images/logo.svg" image-config alt=""></div>
           <div *ngIf="stage=='choose'" [@dialog]="stage=='choose'" class="choose">
               <div>
                   <div class="choose-label">{{'LOGIN.CHOOSE_URL' | translate}}</div>
-                  <button mat-raised-button color="primary" (click)="openLoginUrl()">{{'LOGIN.CHOOSE_URL_BUTTON' | translate}} <i class="material-icons">arrow_forward</i></button>
+                  <button mat-raised-button color="primary" (click)="openLoginUrl()">{{'LOGIN.CHOOSE_URL_BUTTON' | translate}} <i icon iconId="arrow_forward"></i></button>
               </div>
               <div>
                   <div class="choose-label">{{'LOGIN.CHOOSE_LOCAL' | translate}}</div>

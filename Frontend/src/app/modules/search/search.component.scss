@@ -570,8 +570,8 @@ listtable {
     }
   }
   input[type=search]{
-    width: calc(100% - 20px);
-    margin-bottom: 10px;
+    width: calc(100% - 40px);
+    margin: 10px;
   }
   .manageSavedSearch{
     text-transform: uppercase;
@@ -581,7 +581,7 @@ listtable {
   }
   .saved-search-toggle{
     text-align: right;
-    margin: 10px 0px;
+    margin: 10px 4px;
   }
 }
 div.dialog.darken {

@@ -200,8 +200,12 @@ user-quota{
   }
 }
 :host /deep/{
-  .breadcrumbFrame div {
-    word-break: break-all;
+  .breadcrumbFrame .breadcrumb {
+    position: relative;
+    top: -5px;
+    div {
+      word-break: break-all;
+    }
   }
 }
 .tree,.metadata{
