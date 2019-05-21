@@ -76,6 +76,7 @@
   "COMMON_API_ERROR_TITLE": "Fehlerdetails",
   "RENDERSERVICE_API_ERROR":"Fehler beim Verbinden mit dem Renderingservice. Bitte melden Sie diesen Fehler einen Administrator",
   "SYSTEM_FOLDER_DELETE_ERROR":"Dieser Ordner wurde vom System erstellt und kann nicht gelöscht werden",
+  "GENERIC_QUOTA_ERROR_TITLE":"Der Vorgang konnte nicht ausgeführt werden, da das Speicherplatz-Quota überschritten wurde",
   "TOOLPERMISSION_ERROR":"Ihnen fehlt für diesen Vorgang die notwendige Berechtigung",
   "TOOLPERMISSION_ERROR_TITLE":"Fehlende Berechtigung",
   "TOOLPERMISSION_ERROR_HEADER":"Folgende Berechtigung ist für Ihren aktuellen Nutzer nicht freigegeben:",
