@@ -14,7 +14,6 @@ import {trigger} from "@angular/animations";
 import {UIAnimation} from "../../../common/ui/ui-animation";
 import {UIService} from '../../../common/services/ui.service';
 import {DialogButton} from "../../../common/ui/modal-dialog/modal-dialog.component";
-import {DialogButton} from "../../../common/ui/modal-dialog/modal-dialog.component";
 import {Helper} from "../../../common/helper";
 
 @Component({
@@ -88,10 +87,6 @@ export class WorkspaceLicenseComponent  {
   private release=false;
   private releaseIndeterminate=false;
   private eduDownload=true;
-  dialogTitle : string;
-  dialogMessage : string;
-  dialogCancel : Function;
-  dialogButtons : DialogButton[];
 
   private _oerMode=true;
   public set oerMode(oerMode:boolean){
@@ -504,19 +499,19 @@ export class WorkspaceLicenseComponent  {
     changeRelease(release:boolean) {
         if(release){
             if(this.config.instant('publishingNotice',false)){
-                this.dialogTitle='WORKSPACE.SHARE.PUBLISHING_WARNING_TITLE';
-                this.dialogMessage='WORKSPACE.SHARE.PUBLISHING_WARNING_MESSAGE';
-                this.dialogCancel=()=>{
-                    this.dialogTitle=null;
+                let cancel=()=>{
                     this.release=false;
+                    this.toast.closeModalDialog();
                 };
-                this.dialogButtons=DialogButton.getYesNo(()=>{
-                    this.dialogCancel();
-                }, ()=>{
-                    this.release=true;
-                    this.doiActive=true;
-                    this.dialogTitle=null;
-                });
+                this.toast.showModalDialog('WORKSPACE.SHARE.PUBLISHING_WARNING_TITLE',
+                    'WORKSPACE.SHARE.PUBLISHING_WARNING_MESSAGE',
+                    DialogButton.getYesNo(cancel, ()=>{
+                        this.release=true;
+                        this.doiActive=true;
+                        this.toast.closeModalDialog();
+                    }),true,cancel);
+
+
                 return;
             }
           this.doiActive=true;

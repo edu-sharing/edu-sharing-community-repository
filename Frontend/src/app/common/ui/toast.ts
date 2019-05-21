@@ -207,7 +207,9 @@ export class Toast{
       }
       return text;
   }
-
+    closeModalDialog() {
+      this.onShowModal({title:null});
+    }
     showModalDialog(title: string,message: string,buttons : DialogButton[],isCancelable=true,onCancel:Function=null,messageParamters:any=null) {
         this.onShowModal({title:title,message:message,isCancelable:isCancelable,translation:messageParamters,onCancel:onCancel,buttons:buttons});
     }

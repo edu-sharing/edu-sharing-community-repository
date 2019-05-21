@@ -38,7 +38,7 @@ export class ModalDialogToastComponent{
       this.isCancelable=data.isCancelable;
       this.buttons=data.buttons;
       this.onCancel=data.onCancel;
-      this.visible=true
+      this.visible=this.title!=null;
     });
   }
 

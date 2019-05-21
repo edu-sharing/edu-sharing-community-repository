@@ -41,6 +41,7 @@
       title="{{'PERMISSIONS.'+(editId==null ? 'CREATE' : 'EDIT') + '_' +_mode | translate }}"
       [subtitle]="editId ? edit.authorityName : editDetails.authorityName ? editDetails.authorityName : edit.profile.displayName"
       [buttons]="editButtons"
+      height="xlarge"
       (onCancel)="cancelEdit()">
         <div class="card-content-padding card-edit">
           <form (submit)="saveEdits()">

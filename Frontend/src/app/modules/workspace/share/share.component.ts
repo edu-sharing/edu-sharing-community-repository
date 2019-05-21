@@ -25,7 +25,6 @@ import {UIConstants} from '../../../common/ui/ui-constants';
 import {RestCollectionService} from '../../../common/rest/services/rest-collection.service';
 import {DialogButton} from "../../../common/ui/modal-dialog/modal-dialog.component";
 import {ConfigurationService} from "../../../common/services/configuration.service";
-import {DialogButton} from "../../../common/ui/modal-dialog/modal-dialog.component";
 
 @Component({
   selector: 'workspace-share',
@@ -78,11 +77,6 @@ export class WorkspaceShareComponent{
   public linkDisabled : Permission;
   public link = false;
   private _node : Node;
-  dialogTitle : string;
-  dialogMessage : string;
-  dialogCancel : Function;
-  dialogButtons : DialogButton[];
-
   private searchStr: string;
   private inheritAllowed=false;
   private globalSearch=false;
@@ -457,21 +451,19 @@ export class WorkspaceShareComponent{
     return -1;
   }
   public setPublish(status:boolean,force=false){
-    if(status && !force){
-      if(this.config.instant('publishingNotice',false)){
-        this.dialogTitle='WORKSPACE.SHARE.PUBLISHING_WARNING_TITLE';
-        this.dialogMessage='WORKSPACE.SHARE.PUBLISHING_WARNING_MESSAGE';
-        this.dialogCancel=()=>{
-            this.dialogTitle=null;
-            this.publishActive=false;
-        };
-        this.dialogButtons=DialogButton.getYesNo(()=>{
-            this.dialogCancel();
-        }, ()=>{
-            this.publishActive=true;
-            this.dialogTitle=null;
-            this.setPublish(status,true);
-        });
+    if(status){
+      if(!force && this.config.instant('publishingNotice',false)){
+          let cancel=()=>{
+              this.publishActive=false;
+              this.toast.closeModalDialog();
+          };
+          this.toast.showModalDialog('WORKSPACE.SHARE.PUBLISHING_WARNING_TITLE',
+              'WORKSPACE.SHARE.PUBLISHING_WARNING_MESSAGE',
+              DialogButton.getYesNo(cancel, ()=>{
+                  this.publishActive=true;
+                  this.setPublish(status,true);
+                  this.toast.closeModalDialog();
+              }),true,cancel);
         return;
       }
       if(this.deletedPermissions.indexOf(RestConstants.AUTHORITY_EVERYONE)!=-1){
