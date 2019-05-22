@@ -1,6 +1,6 @@
 import {
     Component, Input, Output, EventEmitter, OnInit, ElementRef, ViewChild,
-    HostListener, Renderer, ChangeDetectorRef, AfterViewInit
+    HostListener, ChangeDetectorRef, AfterViewInit
 } from '@angular/core';
 import {TranslateService} from "@ngx-translate/core";
 import {UIAnimation} from "../ui-animation";
@@ -356,9 +356,7 @@ export class MainNavComponent implements AfterViewInit{
               private org : RestOrganizationService,
               private router : Router,
               private route : ActivatedRoute,
-              private toast : Toast,
-              private renderer: Renderer
-  ){
+              private toast : Toast){
     // get last buttons from cache for faster app navigation
     this.sidebarButtons=this.storage.get(TemporaryStorageService.MAIN_NAV_BUTTONS,[]);
     this.connector.isLoggedIn().subscribe((data:LoginResult)=>{
@@ -442,7 +440,11 @@ export class MainNavComponent implements AfterViewInit{
     if(this.canOpen) {
       this.displaySidebar=!this.displaySidebar;
       setTimeout(() => {
-        this.renderer.invokeElementMethod(this.sidebar.nativeElement,'focus');
+          try {
+              this.sidebar.nativeElement.focus();
+          }catch(e){
+              // ignore error, may open was canceled
+          }
       }, 100);
     }
   }
