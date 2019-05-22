@@ -53,6 +53,7 @@ import org.edu_sharing.service.Constants;
 import org.edu_sharing.service.nodeservice.NodeService;
 import org.edu_sharing.service.nodeservice.NodeServiceFactory;
 import org.edu_sharing.service.nodeservice.NodeServiceHelper;
+import org.edu_sharing.service.nodeservice.NodeServiceInterceptor;
 import org.edu_sharing.service.permission.PermissionServiceFactory;
 import org.edu_sharing.service.search.SearchService;
 import org.edu_sharing.service.search.SearchServiceFactory;
@@ -220,19 +221,17 @@ public class CollectionServiceImpl implements CollectionService{
 				client.addAspect(refId, CCConstants.CCM_ASPECT_POSITIONABLE);
 
 
-				/**
+				/*
 				 * write content, so that the index tracking will be triggered
 				 * the overwritten NodeContentGet class checks if it' s an collection ref object
 				 * and switches the nodeId to original node, which is used for indexing
 				 * Do a transaction and disable all policy filters to prevent quota exceptions to kick in
 				 */
-				RetryingTransactionHelper rth = transactionService.getRetryingTransactionHelper();
-				rth.doInTransaction((RetryingTransactionHelper.RetryingTransactionCallback<Void>) () -> {
-					policyBehaviourFilter.disableBehaviour(new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, refId));
+				NodeServiceInterceptor.ignoreQuota(()-> {
 					client.writeContent(refId, new String("1").getBytes(), (String) props.get(CCConstants.ALFRESCO_MIMETYPE), "utf-8", CCConstants.CM_PROP_CONTENT);
-					policyBehaviourFilter.enableBehaviour(new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, refId));
 					return null;
 				});
+
 				//set to original size
 				client.setProperty(refId, CCConstants.LOM_PROP_TECHNICAL_SIZE, (String)props.get(CCConstants.LOM_PROP_TECHNICAL_SIZE));
 
