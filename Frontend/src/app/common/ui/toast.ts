@@ -10,7 +10,6 @@ import {UIConstants} from "./ui-constants";
 import {TranslateService} from "@ngx-translate/core";
 import {UIAnimation} from "./ui-animation";
 import {CordovaService} from "../services/cordova.service";
-import {RestHelper} from "../rest/rest-helper";
 
 @Injectable()
 export class Toast{
@@ -212,8 +211,10 @@ export class Toast{
       }
       return text;
   }
-
-    showModalDialog(title: string,message: string,buttons : DialogButton[],isCancelable=true,onCancel:Function=null,messageParamters:any=null) {
-        this.onShowModal({title:title,message:message,isCancelable:isCancelable,translation:messageParamters,onCancel:onCancel,buttons:buttons});
+    closeModalDialog() {
+      this.onShowModal({title:null});
+    }
+    showModalDialog(title: string,message: string,buttons : DialogButton[],isCancelable=true,isHigh=true,onCancel:Function=null,messageParamters:any=null) {
+        this.onShowModal({title:title,message:message,isCancelable:isCancelable,isHigh:isHigh,translation:messageParamters,onCancel:onCancel,buttons:buttons});
     }
 }

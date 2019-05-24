@@ -33,6 +33,7 @@ import {ActionbarHelperService} from "../../services/actionbar-helper";
 import {SuggestItem} from "../autocomplete/autocomplete.component";
 import {MainNavComponent} from "../main-nav/main-nav.component";
 import {HttpClient} from "@angular/common/http";
+import {RestIamService} from "../../rest/services/rest-iam.service";
 
 declare var jQuery:any;
 declare var window: any;
@@ -196,6 +197,7 @@ export class NodeRenderComponent implements EventListener{
       private connector : RestConnectorService,
       private http : HttpClient,
       private connectors : RestConnectorsService,
+      private iam : RestIamService,
       private nodeApi : RestNodeService,
       private searchStorage : SearchService,
       private toolService: RestToolService,
@@ -379,7 +381,7 @@ export class NodeRenderComponent implements EventListener{
       this.toolService.openLtiObject(this._node);
     }
     else {
-      UIHelper.openConnector(this.connectors,this.frame,this.toast, this._node,null,null,null,newWindow);
+      UIHelper.openConnector(this.connectors,this.iam,this.frame,this.toast, this._node,null,null,null,newWindow);
     }
   }
 

@@ -32,6 +32,8 @@ import {SearchService} from "../../modules/search/search.service";
 import {OptionItem} from "./actionbar/option-item";
 import {RestConnectorService} from "../rest/services/rest-connector.service";
 import {Observable, Observer} from "rxjs";
+import {RestIamService} from "../rest/services/rest-iam.service";
+import {DialogButton} from "./modal-dialog/modal-dialog.component";
 
 export class UIHelper{
 
@@ -259,7 +261,7 @@ export class UIHelper{
         UIHelper.addToCollection(collectionService,router,toast,collection,nodes,callback,position+1,true);
       });
   }
-  static openConnector(connector:RestConnectorsService,events:FrameEventsService,toast:Toast,node : Node,type : Filetype=null,win : any = null,connectorType : Connector = null,newWindow=true){
+  static openConnector(connector:RestConnectorsService,iam:RestIamService,events:FrameEventsService,toast:Toast,node : Node,type : Filetype=null,win : any = null,connectorType : Connector = null,newWindow=true){
     if(connectorType==null){
       connectorType=connector.connectorSupportsEdit(node);
     }
@@ -271,32 +273,45 @@ export class UIHelper{
       connector.nodeApi.isLocked(node.ref.id).subscribe((result:NodeLock)=>{
       if(result.isLocked) {
         toast.error(null, "TOAST.NODE_LOCKED");
-        win.close();
+        if(win)
+            win.close();
         return;
       }
-      connector.generateToolUrl(connectorType,type,node).subscribe((url:string)=>{
-          if(win) {
-              win.location.href = url;
-              console.log(win);
+      iam.getUser().subscribe((user)=> {
+          if(user.person.quota.enabled && user.person.quota.sizeCurrent>=user.person.quota.sizeQuota){
+              toast.showModalDialog('CONNECTOR_QUOTA_REACHED_TITLE','CONNECTOR_QUOTA_REACHED_MESSAGE',DialogButton.getOk(()=>{
+                  toast.closeModalDialog();
+              }),true,false);
+              if(win)
+                  win.close();
+              return;
           }
-          else if(isCordova){
-            UIHelper.openUrl(url,connector.getRestConnector().getCordovaService(),OPEN_URL_MODE.Blank);
-          }
-          else {
-              window.location.replace(url);
-          }
-          if(win) {
-              events.addWindow(win);
-          }
-        },
-        (error)=>{
-          console.warn(error);
-          toast.error(null,error);
-          if(win)
-            win.close();
-        });
+          connector.generateToolUrl(connectorType, type, node).subscribe((url: string) => {
+                  if (win) {
+                      win.location.href = url;
+                      console.log(win);
+                  }
+                  else if (isCordova) {
+                      UIHelper.openUrl(url, connector.getRestConnector().getCordovaService(), OPEN_URL_MODE.Blank);
+                  }
+                  else {
+                      window.location.replace(url);
+                  }
+                  if (win) {
+                      events.addWindow(win);
+                  }
+              },
+              (error) => {
+                  toast.error(null, error);
+                  if (win)
+                      win.close();
+              });
+      },(error)=>{
+          toast.error(null, error);
+          if (win)
+              win.close();
+      });
     },(error:any)=> {
-      console.warn(error);
       toast.error(error);
       if(win)
         win.close();
