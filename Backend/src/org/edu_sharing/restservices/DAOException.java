@@ -7,6 +7,7 @@ import org.alfresco.service.cmr.repository.DuplicateChildNodeNameException;
 import org.alfresco.service.cmr.repository.InvalidNodeRefException;
 import org.alfresco.service.cmr.repository.InvalidStoreRefException;
 import org.alfresco.service.cmr.security.NoSuchPersonException;
+import org.alfresco.service.cmr.usage.ContentQuotaException;
 import org.edu_sharing.service.InsufficientPermissionException;
 import org.edu_sharing.service.collection.DuplicateNodeException;
 import org.edu_sharing.service.toolpermission.ToolPermissionException;
@@ -46,7 +47,9 @@ public class DAOException extends Exception {
 			
 			return new DAOSecurityException(t,nodeId); 
 		}
-
+		if (t instanceof ContentQuotaException){
+			return new DAOQuotaException(t,nodeId);
+		}
 		if (t instanceof NodeExistsException) {
 			
 			return new DAOValidationException(t,nodeId); 

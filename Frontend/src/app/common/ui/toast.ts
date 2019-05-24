@@ -104,7 +104,7 @@ export class Toast{
         if (error.stacktraceArray) {
           errorInfo = json.stacktraceArray.join('\n');
         }
-        if(json.message.indexOf(RestConstants.CONTENT_QUOTA_EXCEPTION)!=-1){
+        if(json.error.indexOf(RestConstants.CONTENT_QUOTA_EXCEPTION)!=-1){
           message = 'GENERIC_QUOTA_ERROR_TITLE';
           this.dialogTitle = '';
         }
