@@ -442,6 +442,8 @@ public class CCConstants {
 
 	public static final String CCM_PROP_TRACKING_VIEWS = "{http://www.campuscontent.de/model/1.0}tracking_views";
 
+	public static final int HTTP_INSUFFICIENT_STORAGE = 503;
+
 
     public static String CCM_WF_STATUS_VALUE_UNCHECKED="100_unchecked";
 	public static String CCM_WF_STATUS_VALUE_TO_CHECK="200_tocheck";

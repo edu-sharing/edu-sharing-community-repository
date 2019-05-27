@@ -75,7 +75,7 @@
       <button mat-menu-item (click)="addFolderName=''"><i icon iconId="create_new_folder"></i> {{ 'WORKSPACE.ADD_FOLDER' | translate}}</button>
       <button mat-menu-item *ngFor="let connector of (connectorList && allowBinary) ? connectorList : null;let i=index"
        [class.mat-menu-item-seperate]="!i"
-       (click)="createConnectorName='';createConnectorType=connector">
+       (click)="showCreateConnector(connector)">
         <i icon iconId="{{connector.icon}}"></i>
         {{ 'CONNECTOR.'+connector.id+'.NAME' | translate}}
         <img style="padding-left:5px" src="assets/images/beta.svg" alt="">

@@ -83,8 +83,8 @@
     },
     "ACTIONBAR":{
       "EDIT":"Edit",
-      "PIN":"Collection pin",
-      "DELETE":"Collection delete"
+      "PIN":"Pin collection",
+      "DELETE":"Delete collection"
     }
   },
 

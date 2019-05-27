@@ -37,6 +37,7 @@ import {ListItem} from '../list-item';
 import {RestMdsService} from '../../rest/services/rest-mds.service';
 import {MdsHelper} from '../../rest/mds-helper';
 import {HttpClient} from "@angular/common/http";
+import {RestIamService} from "../../rest/services/rest-iam.service";
 
 declare var jQuery:any;
 declare var window: any;
@@ -207,6 +208,7 @@ export class NodeRenderComponent implements EventListener{
       private connector : RestConnectorService,
       private http : HttpClient,
       private connectors : RestConnectorsService,
+      private iam : RestIamService,
       private mdsApi : RestMdsService,
       private nodeApi : RestNodeService,
       private searchApi : RestSearchService,
@@ -427,7 +429,7 @@ export class NodeRenderComponent implements EventListener{
       this.toolService.openLtiObject(this._node);
     }
     else {
-      UIHelper.openConnector(this.connectors,this.frame,this.toast, this._node,null,null,null,newWindow);
+      UIHelper.openConnector(this.connectors,this.iam,this.frame,this.toast, this._node,null,null,null,newWindow);
     }
   }
 
