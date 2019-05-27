@@ -317,8 +317,11 @@ mat-tab-body-content{
     color: $textLight;
     vertical-align: bottom;
     font-size: 14pt;
+    margin-right: 3px;
   }
   .show-state{
+    display: flex;
+    align-items: center;
     position: relative;
     top: 3px;
     border: 2px dashed transparent;

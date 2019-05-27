@@ -5,14 +5,12 @@
 .actionToggle > button{
   color: $textLight;
 }
-.mat-flat-button {
+button{
   min-width: unset;
-  padding: 5px 10px;
-}
-
-.action-always-caption{
-  line-height: normal;
-  padding-right:5px;
+  &.button-icon{
+    padding-left:0;
+    padding-right:0;
+  }
 }
 
 .light{

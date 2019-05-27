@@ -420,7 +420,7 @@ export class RestConnectorService {
               this.cordova.exitApp();
           }));
       }
-      this.toast.showModalDialog('LOGIN_APP.NOTINTERNET','LOGIN_APP.NOTINTERNET_TEXT',buttons,true,true,()=>{
+      this.toast.showModalDialog('LOGIN_APP.NOTINTERNET','LOGIN_APP.NOTINTERNET_TEXT',buttons,true,()=>{
           this.cordova.exitApp();
       });
     }

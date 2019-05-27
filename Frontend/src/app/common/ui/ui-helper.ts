@@ -361,7 +361,7 @@ export class UIHelper{
           if(user.person.quota.enabled && user.person.quota.sizeCurrent>=user.person.quota.sizeQuota){
               toast.showModalDialog('CONNECTOR_QUOTA_REACHED_TITLE','CONNECTOR_QUOTA_REACHED_MESSAGE',DialogButton.getOk(()=>{
                   toast.closeModalDialog();
-              }),true,false);
+              }),true);
               if(win)
                   win.close();
               return;

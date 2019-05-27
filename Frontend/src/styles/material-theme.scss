@@ -10,7 +10,8 @@
 // (imported above). For each palette, you can optionally specify a default, lighter, and darker
 // hue. Available color palettes: https://material.io/design/color/
 $custom-typography: mat-typography-config(
-        $font-family: 'open_sansregular'
+        $font-family: 'open_sansregular',
+        $button: mat-typography-level(10pt, normal, 500)
 );
 // Override typography CSS classes (e.g., mat-h1, mat-display-1, mat-typography, etc.).
 @include mat-base-typography($custom-typography);
@@ -122,6 +123,9 @@ input.mat-input-element, mat-label, .mat-select-value{
   line-height: 17pt !important;
   font-size: 1rem;
   color: $textMain;
+}
+.mat-flat-button,.mat-raised-button{
+  min-height: 36px;
 }
 .mat-raised-button{
   color: $primary;

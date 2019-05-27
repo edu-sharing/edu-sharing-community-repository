@@ -206,9 +206,9 @@
       </mat-tab>
       <mat-tab label="{{'WORKSPACE.TAB_ADVANCED' | translate}}" *ngIf="isAdmin && permissionsUser && permissionsGroup" class="tabContent">
         <div class="advanced">
-        <h2 *ngIf="permissionsUser.length+permissionsGroup.length==0">
+        <h4 *ngIf="permissionsUser.length+permissionsGroup.length==0">
           {{'WORKSPACE.SHARE.NO_PERMISSIONS' | translate}}
-        </h2>
+        </h4>
         <div *ngFor="let permission of permissionsGroup.concat(permissionsUser)">
           <div class="advancedAuthority"><i class="type material-icons">{{permission.authority.authorityType=='USER' ? "person" : "group"}}</i>{{ permission | permissionName }}</div>
           <div *ngFor="let type of ALL_PERMISSIONS" class="advancedPermission">

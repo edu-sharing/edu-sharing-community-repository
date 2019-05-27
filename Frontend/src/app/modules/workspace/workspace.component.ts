@@ -269,7 +269,7 @@ export class WorkspaceMainComponent implements EventListener{
             if(user.person.quota.enabled && user.person.quota.sizeCurrent>=user.person.quota.sizeQuota){
                 this.toast.showModalDialog('CONNECTOR_QUOTA_REACHED_TITLE','CONNECTOR_QUOTA_REACHED_MESSAGE',DialogButton.getOk(()=>{
                     this.toast.closeModalDialog();
-                }),true,false);
+                }),true);
                 this.createConnectorName=null;
             }
 

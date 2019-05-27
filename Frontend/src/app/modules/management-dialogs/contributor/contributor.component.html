@@ -4,7 +4,7 @@
 >
       <spinner *ngIf="loading"></spinner>
       <div class="contributor-content" *ngIf="!loading">
-        <h2 class="lifecycleHeading">{{'WORKSPACE.CONTRIBUTOR.LIFECYCLECONTRIBUTOR' | translate}}</h2>
+        <h4 class="lifecycleHeading">{{'WORKSPACE.CONTRIBUTOR.LIFECYCLECONTRIBUTOR' | translate}}</h4>
         <div *ngFor="let role of rolesLifecycle">
           <div *ngIf="contributorLifecycle[role] && contributorLifecycle[role].length"  class="group">
             <div class="role">{{'WORKSPACE.CONTRIBUTOR.TYPE.'+role.toUpperCase() | translate}}</div>
@@ -14,7 +14,7 @@
           </div>
         </div>
         <button mat-raised-button class="btnAdd" (click)="addVCard('lifecycle')"><i icon iconId="add"></i> {{'ADD' | translate}}</button>
-        <h2 class="metadataHeading">{{'WORKSPACE.CONTRIBUTOR.METADATACONTRIBUTOR' | translate}}</h2>
+        <h4 class="metadataHeading">{{'WORKSPACE.CONTRIBUTOR.METADATACONTRIBUTOR' | translate}}</h4>
         <div *ngFor="let role of rolesMetadata">
           <div *ngIf="contributorMetadata[role] && contributorMetadata[role].length"  class="group">
             <div class="role">{{'WORKSPACE.CONTRIBUTOR.TYPE.'+role.toUpperCase() | translate}}</div>

@@ -23,11 +23,12 @@
       <i icon title="{{option.showName ? null : (option.name | translate)}}" [iconId]="option.icon"></i>
       <span class="action-always-caption" *ngIf="option.showName && appearance!='round'"> {{option.name | translate}}</span>
     </button>
-<button mat-flat-button class="more"
+<button mat-flat-button class="more button-icon"
         [matMenuTriggerFor]="dropdownRef.menu"
         *ngIf="canShowDropdown()"><i icon iconId="more_vert" aria="true"></i></button>
 <div *ngIf="optionsToggle.length" class="actionToggle" [class.actionToggleDivider]="optionsAlways.length">
     <button mat-flat-button *ngFor="let option of optionsToggle"
+            class="button-icon"
             (click)="click(option)"
             [class.disabled]="!option.isEnabled">
         <i icon [iconId]="option.icon" aria="true"></i>
