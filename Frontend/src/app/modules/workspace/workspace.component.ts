@@ -78,8 +78,8 @@ export class WorkspaceMainComponent implements EventListener{
 
     private showSelectRoot = false;
     public showUploadSelect = false;
-    private createConnectorName : string;
-    private createConnectorType : Connector;
+    createConnectorName : string;
+    createConnectorType : Connector;
     private addFolderName : string;
 
     public allowBinary = true;
@@ -269,6 +269,19 @@ export class WorkspaceMainComponent implements EventListener{
             //this.toast.error(error);
         });
     }
+    showCreateConnector(connector:Connector){
+        this.createConnectorName='';
+        this.createConnectorType=connector;
+        this.iam.getUser().subscribe((user)=>{
+            if(user.person.quota.enabled && user.person.quota.sizeCurrent>=user.person.quota.sizeQuota){
+                this.toast.showModalDialog('CONNECTOR_QUOTA_REACHED_TITLE','CONNECTOR_QUOTA_REACHED_MESSAGE',DialogButton.getOk(()=>{
+                    this.toast.closeModalDialog();
+                }),true,false);
+                this.createConnectorName=null;
+            }
+
+        });
+    }
     private createConnector(event : any){
         let name=event.name+"."+event.type.filetype;
         this.createConnectorName=null;
@@ -291,7 +304,7 @@ export class WorkspaceMainComponent implements EventListener{
 
     }
     private editConnector(node : Node=null,type : Filetype=null,win : any = null,connectorType : Connector = null){
-        UIHelper.openConnector(this.connectors,this.event,this.toast,this.getNodeList(node)[0],type,win,connectorType);
+        UIHelper.openConnector(this.connectors,this.iam,this.event,this.toast,this.getNodeList(node)[0],type,win,connectorType);
     }
     private handleDrop(event:any){
         for(let s of event.source) {

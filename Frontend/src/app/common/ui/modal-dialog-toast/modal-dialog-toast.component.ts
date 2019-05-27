@@ -36,13 +36,19 @@ export class ModalDialogToastComponent{
       this.message=data.message;
       this.messageParameters=data.translation;
       this.isCancelable=data.isCancelable;
+      this.isHigh=data.isHigh;
       this.buttons=data.buttons;
       this.onCancel=data.onCancel;
-      this.visible=true
+      this.visible=this.title!=null;
     });
   }
 
   public visible=false;
+
+  /**
+   * use the "high" card layout (for longer messages)
+   */
+  private isHigh = true;
   private isCancelable = true;
   /**
    * The title, will be translated automatically

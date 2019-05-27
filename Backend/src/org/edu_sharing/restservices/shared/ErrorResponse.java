@@ -12,12 +12,8 @@ import org.apache.commons.logging.impl.Log4JLogger;
 import org.apache.log4j.Level;
 import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
-import org.edu_sharing.restservices.DAODuplicateNodeNameException;
-import org.edu_sharing.restservices.DAOException;
-import org.edu_sharing.restservices.DAOMissingException;
-import org.edu_sharing.restservices.DAOSecurityException;
-import org.edu_sharing.restservices.DAOToolPermissionException;
-import org.edu_sharing.restservices.DAOValidationException;
+import org.edu_sharing.repository.client.tools.CCConstants;
+import org.edu_sharing.restservices.*;
 import org.edu_sharing.restservices.node.v1.NodeApi;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -50,15 +46,20 @@ public class ErrorResponse {
     		
     		logger.warn(t.getMessage(), t);
     		return Response.status(Response.Status.NOT_FOUND).entity(new ErrorResponse(t)).build();
-    		
     	}
+    	if(t instanceof DAOQuotaException){
+
+			logger.info(t.getMessage(), t);
+			return Response.status(CCConstants.HTTP_INSUFFICIENT_STORAGE).entity(new ErrorResponse(t)).build();
+		}
         if(t instanceof DAODuplicateNodeNameException){
+
         	logger.info(t.getMessage(), t);
         	return Response.status(Response.Status.CONFLICT).entity(new ErrorResponse(t)).build();
         }
     		
-    		logger.error(t.getMessage(), t);
-    		return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(new ErrorResponse(t)).build();
+		logger.error(t.getMessage(), t);
+		return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(new ErrorResponse(t)).build();
     	
 	}
 	public ErrorResponse(Throwable t) {

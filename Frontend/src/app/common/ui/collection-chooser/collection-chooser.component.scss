@@ -1,7 +1,9 @@
 @import "../../../../styles/variables.scss";
 
 .noElements{
-  text-align: center;
+  display: flex;
+  justify-content: center;
+  width: 100%;
   color:$textLight;
   font-size: 110%;
 }
