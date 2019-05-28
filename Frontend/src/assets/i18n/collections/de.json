@@ -86,7 +86,7 @@
 
 
     "collections_description" : "Beschreibung",
-    "collections_noOrgaCollections" : "Ihre Gruppen haben noch keine Sammlungen freigegeben.",
+    "collections_noOrgaCollections" : "Sie wurden bisher zu keiner Sammlung eingeladen.",
     "collections_noCollections" : "Es sind keine öffentlichen Sammlungen verfügbar.",
 
     "collections_content" : "Materialien",
