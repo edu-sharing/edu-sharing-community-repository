@@ -48,7 +48,7 @@
   "SELECT_ROOT_DISABLED" : "select element",
   "CLOSE" : "close",
   "DOWNLOAD": "download",
-  "DOWNLOAD_ALL": "download all",
+  "DOWNLOAD_ALL": "download zip",
   "LOAD_MORE":"Load more",
   "LOADING": "loading...",
   "INFORMATION": "information",

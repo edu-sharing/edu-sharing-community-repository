@@ -362,17 +362,16 @@ export class NodeRenderComponent implements EventListener{
   private openLink(href:string){
 
   }
+  private downloadSequence() {
+      let nodes = [this.sequenceParent].concat(this.sequence.nodes);
+      NodeHelper.downloadNodes(this.toast,this.connector,nodes, this.sequenceParent.name+".zip");
+  }
 
   private downloadCurrentNode() {
       if(this.downloadUrl) {
           NodeHelper.downloadUrl(this.toast, this.connector.getCordovaService(), this.downloadUrl);
       } else {
-          if(this.sequence && this.sequence.nodes.length > 0 || this._node.aspects.indexOf(RestConstants.CCM_ASPECT_IO_CHILDOBJECT) != -1) {
-              let nodes = [this.sequenceParent].concat(this.sequence.nodes);
-              NodeHelper.downloadNodes(this.toast,this.connector,nodes, this.sequenceParent.name+".zip");
-          } else {
-              NodeHelper.downloadNode(this.toast, this.connector.getCordovaService(), this._node, this.version);
-          }
+          NodeHelper.downloadNode(this.toast, this.connector.getCordovaService(), this._node, this.version);
       }
   }
 
@@ -486,11 +485,13 @@ export class NodeRenderComponent implements EventListener{
   private addDownloadButton(options:OptionItem[],download: OptionItem) {
       this.nodeApi.getNodeChildobjects(this.sequenceParent.ref.id,this.repository).subscribe((data:NodeList)=>{
           this.downloadButton=download;
-          if(data.nodes.length > 0 || this._node.aspects.indexOf(RestConstants.CCM_ASPECT_IO_CHILDOBJECT) != -1) {
-              download.name = 'DOWNLOAD_ALL';
-          }
           options.splice(0,0,download);
-
+          if(data.nodes.length > 0 || this._node.aspects.indexOf(RestConstants.CCM_ASPECT_IO_CHILDOBJECT) != -1) {
+              let downloadAll = new OptionItem('DOWNLOAD_ALL','archive',()=>{
+                  this.downloadSequence();
+              });
+              options.splice(1,0,downloadAll);
+          }
           if(this.searchService.reurl) {
               let apply = new OptionItem("APPLY", "redo", (node: Node) => NodeHelper.addNodeToLms(this.router, this.temporaryStorageService, this._node, this.searchService.reurl));
               apply.isEnabled = this._node.access.indexOf(RestConstants.ACCESS_CC_PUBLISH) != -1;
