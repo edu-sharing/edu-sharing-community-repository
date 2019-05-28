@@ -92,7 +92,7 @@
       <li *ngFor="let point of stats.points;let i=index" class="point"><i class="material-icons">{{ stats.pointsIcons[i] }}</i> {{point}}</li>
 
     </ul>
-    <div class="description usage-count">{{'WORKSPACE.METADATA.USAGE_COUNT' | translate}} <span class="usage-counter">{{usages ? usages.length : 0}}</span></div>
+    <div class="description usage-count">{{'WORKSPACE.METADATA.USAGE_COUNT' | translate}} <span class="usage-counter">{{ statsTotalPoints }}</span></div>
     <div class="description collections" *ngIf="usagesCollection && usagesCollection.length">{{'WORKSPACE.METADATA.COLLECTIONS' | translate:{count:usagesCollection.length} }}</div>
     <listTable *ngIf="usagesCollection && usagesCollection.length"
                [nodes]="usagesCollection"
