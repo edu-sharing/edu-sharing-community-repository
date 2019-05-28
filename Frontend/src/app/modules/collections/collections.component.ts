@@ -367,8 +367,8 @@ export class CollectionsMainComponent{
         this.nodeService.moveNode(target.ref.id,source.ref.id).subscribe(()=>{
           this.globalProgress = false;
           this.refreshContent();
-        },(error:any)=>{
-          this.toast.error(error);
+        },(error)=>{
+          this.handleError(error);
           this.globalProgress = false;
         });
       }
@@ -384,12 +384,12 @@ export class CollectionsMainComponent{
             this.globalProgress = false;
             this.refreshContent();
           }, (error: any) => {
-            this.toast.error(error);
+            this.handleError(error);
             this.globalProgress = false;
           });
         }, (error: any) => {
-          this.toast.error(error);
-          this.globalProgress = false;
+            this.handleError(error);
+            this.globalProgress = false;
         });
       }
     }
