@@ -1,0 +1,29 @@
+{
+  "extends": "../tsconfig.json",
+  "exclude": [
+    "../src/test.ts",
+    "../src/**/*.spec.ts",
+    "../projects/**/*.spec.ts"
+  ],
+  "include": [
+    "../src/**/*",
+    "../projects/**/*"
+  ],
+  "compilerOptions": {
+    "noImplicitAny": true,
+    "noImplicitReturns": true,
+    "declaration": false,
+    "emitDecoratorMetadata": true,
+    "experimentalDecorators": true,
+    "lib": ["es6", "dom"],
+    "mapRoot": "./",
+    "module": "es6",
+    "moduleResolution": "node",
+    "outDir": "../dist/out-tsc",
+    "sourceMap": true,
+    "target": "es5",
+    "typeRoots": [
+      "../node_modules/@types"
+    ]
+  }
+}

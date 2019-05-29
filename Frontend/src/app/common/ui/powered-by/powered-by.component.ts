@@ -14,7 +14,7 @@ import {ConfigurationHelper} from "../../rest/configuration-helper";
 export class PoweredByComponent {
   /**
    * The mode do display
-   * Either 'white' (like on login') or 'colored'
+   * Either 'white' (like on login') or 'color'
    * @type {string}
    */
   @Input() mode='white';

@@ -124,6 +124,21 @@ export class Translation  {
 export function createTranslateLoader(http: HttpClient,locator:RestLocatorService) {
   return new TranslationLoader(http,locator);
 }
+export function createTranslateLoaderDummy() {
+    return new TranslationLoaderDummy();
+}
+export class TranslationLoaderDummy implements TranslateLoader {
+    constructor(){
+    }
+
+    getTranslation(lang: string): Observable<any> {
+        return new Observable<any>((observer : Observer<any>) => {
+            observer.next(null);
+            observer.complete();
+        });
+    }
+}
+
 export class TranslationLoader implements TranslateLoader {
   private initializing:string = null;
   private initializedLanguage: any;
