@@ -186,7 +186,7 @@ public class DownloadServlet extends HttpServlet{
                         else
                             work.doWork();
 					}catch(Throwable t){
-						t.printStackTrace();
+                        logger.warn(t.getMessage(),t);
 						resp.sendRedirect(URLTool.getNgMessageUrl("INVALID"));
 						return false;
 					}
