@@ -46,7 +46,7 @@ import org.springframework.context.ApplicationContext;
 public class DownloadServlet extends HttpServlet{
 
 	
-	Logger logger = Logger.getLogger(DownloadServlet.class);
+	static Logger logger = Logger.getLogger(DownloadServlet.class);
 	
 	@Override
 	protected void doGet(HttpServletRequest req, HttpServletResponse resp)
