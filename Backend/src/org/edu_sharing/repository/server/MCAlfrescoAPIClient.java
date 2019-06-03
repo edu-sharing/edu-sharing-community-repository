@@ -1105,14 +1105,20 @@ public class MCAlfrescoAPIClient extends MCAlfrescoBaseClient {
 	public boolean downloadAllowed(String nodeId){
 		NodeRef ref=new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE,nodeId);
 		return downloadAllowed(nodeId,
-				(String)nodeService.getProperty(ref,QName.createQName(CCConstants.CCM_PROP_IO_COMMONLICENSE_KEY)),
+				nodeService.getProperty(ref,QName.createQName(CCConstants.CCM_PROP_IO_COMMONLICENSE_KEY)),
 				(String)nodeService.getProperty(ref,QName.createQName(CCConstants.CCM_PROP_EDITOR_TYPE))
 				);
 	}
-	public boolean downloadAllowed(String nodeId,String commonLicenseKey,String editorType){
-		boolean downloadAllowed = (CCConstants.COMMON_LICENSE_EDU_P_NR_ND.equals(commonLicenseKey)) ? false : true;
+	public boolean downloadAllowed(String nodeId,Serializable commonLicenseKey,String editorType){
+        boolean downloadAllowed;
+        // Array value
+	    if(commonLicenseKey instanceof ArrayList)
+		    downloadAllowed = (CCConstants.COMMON_LICENSE_EDU_P_NR_ND.equals(((ArrayList)commonLicenseKey).get(0))) ? false : true;
+	    else
+	        // string value
+            downloadAllowed = (CCConstants.COMMON_LICENSE_EDU_P_NR_ND.equals(commonLicenseKey)) ? false : true;
 
-		//allow download for owner, performance only check owner if download not allowed
+        //allow download for owner, performance only check owner if download not allowed
 		if(!downloadAllowed && isOwner(nodeId, authenticationInfo.get(CCConstants.AUTH_USERNAME))){
 			downloadAllowed = true;
 		}
