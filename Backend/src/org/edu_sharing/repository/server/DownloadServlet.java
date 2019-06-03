@@ -137,7 +137,7 @@ public class DownloadServlet extends HttpServlet{
 						work.doWork();
 
 				}catch(Throwable t){
-					t.printStackTrace();
+					logger.warn(t.getMessage(),t);
 					resp.sendError(HttpServletResponse.SC_PRECONDITION_FAILED,"Node does not exists or no permissions: "+nodeId);
 				}
 			}
