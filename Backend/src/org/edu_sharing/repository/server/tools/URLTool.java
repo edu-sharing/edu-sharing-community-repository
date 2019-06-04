@@ -156,7 +156,7 @@ public class URLTool{
 	public static String getBaseUrlFromRequest(HttpServletRequest req) {
 		ApplicationInfo homeRepository = ApplicationInfoList.getHomeRepository();
 		String path = req.getScheme() + "://" + req.getServerName();
-		int port = req.getLocalPort();
+		int port = req.getServerPort();
 		if (port != 80 && port != 443) {
 			path += ":" + port;
 		}
