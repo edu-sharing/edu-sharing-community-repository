@@ -4,7 +4,6 @@ import {
 } from '@angular/core';
 import {BrowserModule, DomSanitizer} from '@angular/platform-browser';
 import {TranslateService} from "@ngx-translate/core";
-import {Node} from "../../rest/data-object";
 import {UIAnimation} from "../ui-animation";
 import {trigger} from "@angular/animations";
 

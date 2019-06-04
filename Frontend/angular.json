@@ -15,6 +15,7 @@
             "index": "src/index.html",
             "main": "src/main.ts",
             "tsConfig": "src/tsconfig.json",
+            "showCircularDependencies": true,
             "assets": [
               "src/assets"
             ],

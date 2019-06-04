@@ -1,28 +1,28 @@
 import {Component, Input, EventEmitter, Output, ElementRef, ViewChild, OnInit} from '@angular/core';
 import {Toast} from '../../common/ui/toast';
 import {Router, Route, Params, ActivatedRoute, UrlSerializer} from '@angular/router';
-import {OAuthResult, LoginResult, AccessScope, Node} from '../../common/rest/data-object';
+import {OAuthResult, LoginResult, AccessScope, Node} from '../../core-module/core.module';
 import {RouterComponent} from '../../router/router.component';
 import {TranslateService} from '@ngx-translate/core';
 import {Translation} from '../../common/translation';
-import {RestConnectorService} from '../../common/rest/services/rest-connector.service';
-import {RestConstants} from '../../common/rest/rest-constants';
-import {ConfigurationService} from '../../common/services/configuration.service';
-import {FrameEventsService} from '../../common/services/frame-events.service';
+import {RestConnectorService} from '../../core-module/core.module';
+import {RestConstants} from '../../core-module/core.module';
+import {ConfigurationService} from '../../core-module/core.module';
+import {FrameEventsService} from '../../core-module/core.module';
 import {Title} from '@angular/platform-browser';
 import {UIHelper} from '../../common/ui/ui-helper';
-import {SessionStorageService} from '../../common/services/session-storage.service';
+import {SessionStorageService} from '../../core-module/core.module';
 import {Scope} from '@angular/core/src/profile/wtf_impl';
-import {UIConstants} from '../../common/ui/ui-constants';
-import {Helper} from '../../common/helper';
-import {RestHelper} from '../../common/rest/rest-helper';
+import {UIConstants} from '../../core-module/ui/ui-constants';
+import {Helper} from '../../core-module/rest/helper';
+import {RestHelper} from '../../core-module/core.module';
 import {PlatformLocation} from '@angular/common';
 
 import {CordovaService} from "../../common/services/cordova.service";
 import {InputPasswordComponent} from "../../common/ui/input-password/input-password.component";
-import {RestNodeService} from '../../common/rest/services/rest-node.service';
+import {RestNodeService} from '../../core-module/core.module';
 import {NodeHelper} from '../../common/ui/node-helper';
-import {TemporaryStorageService} from '../../common/services/temporary-storage.service';
+import {TemporaryStorageService} from '../../core-module/core.module';
 
 @Component({
   selector: 'app-file-upload',

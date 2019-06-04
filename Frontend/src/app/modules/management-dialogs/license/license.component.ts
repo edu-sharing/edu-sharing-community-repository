@@ -1,19 +1,18 @@
 import {Component, Input, EventEmitter, Output, ViewChild, ElementRef} from '@angular/core';
-import {RestConnectorService} from "../../../common/rest/services/rest-connector.service";
+import {DialogButton, RestConnectorService} from "../../../core-module/core.module";
 import {Toast} from "../../../common/ui/toast";
-import {RestNodeService} from "../../../common/rest/services/rest-node.service";
-import {RestConstants} from "../../../common/rest/rest-constants";
-import {NodeWrapper, Node, NodePermissions, LocalPermissionsResult, Permission} from "../../../common/rest/data-object";
+import {RestNodeService} from "../../../core-module/core.module";
+import {RestConstants} from "../../../core-module/core.module";
+import {NodeWrapper, Node, NodePermissions, LocalPermissionsResult, Permission} from "../../../core-module/core.module";
 import {TranslateService} from "@ngx-translate/core";
 import {NodeHelper} from "../../../common/ui/node-helper";
-import {ConfigurationService} from "../../../common/services/configuration.service";
-import {RestHelper} from "../../../common/rest/rest-helper";
+import {ConfigurationService} from "../../../core-module/core.module";
+import {RestHelper} from "../../../core-module/core.module";
 import {VCard} from "../../../common/VCard";
 import {UIHelper} from "../../../common/ui/ui-helper";
 import {trigger} from "@angular/animations";
 import {UIAnimation} from "../../../common/ui/ui-animation";
-import {UIService} from '../../../common/services/ui.service';
-import {DialogButton} from "../../../common/ui/modal-dialog/modal-dialog.component";
+import {UIService} from '../../../core-module/core.module';
 
 @Component({
   selector: 'workspace-license',

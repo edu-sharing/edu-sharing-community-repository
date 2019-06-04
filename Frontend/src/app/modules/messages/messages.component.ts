@@ -2,14 +2,14 @@ import {Translation} from "../../common/translation";
 import {UIHelper} from "../../common/ui/ui-helper";
 import {ActivatedRoute, Router} from "@angular/router";
 import {Toast} from "../../common/ui/toast";
-import {ConfigurationService} from "../../common/services/configuration.service";
+import {ConfigurationService} from "../../core-module/core.module";
 import {Title} from "@angular/platform-browser";
 import {TranslateService} from "@ngx-translate/core";
-import {SessionStorageService} from "../../common/services/session-storage.service";
-import {RestConnectorService} from "../../common/rest/services/rest-connector.service";
+import {SessionStorageService} from "../../core-module/core.module";
+import {RestConnectorService} from "../../core-module/core.module";
 import {Component, ViewChild, ElementRef} from "@angular/core";
 import {RouterComponent} from "../../router/router.component";
-import {UIConstants} from "../../common/ui/ui-constants";
+import {UIConstants} from "../../core-module/ui/ui-constants";
 @Component({
   selector: 'messages-main',
   templateUrl: 'messages.component.html',

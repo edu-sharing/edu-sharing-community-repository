@@ -1,15 +1,15 @@
 import {Component, Input, EventEmitter, Output} from '@angular/core';
-import {RestNodeService} from '../../../common/rest/services/rest-node.service';
+import {RestNodeService} from '../../../core-module/core.module';
 import {TranslateService} from '@ngx-translate/core';
 import {Translation} from '../../../common/translation';
-import {RestConstants} from '../../../common/rest/rest-constants';
-import {Node,NodeList} from '../../../common/rest/data-object';
-import {TemporaryStorageService} from '../../../common/services/temporary-storage.service';
+import {RestConstants} from '../../../core-module/core.module';
+import {Node,NodeList} from '../../../core-module/core.module';
+import {TemporaryStorageService} from '../../../core-module/core.module';
 import {OptionItem} from '../../../common/ui/actionbar/option-item';
-import {UIService} from '../../../common/services/ui.service';
+import {UIService} from '../../../core-module/core.module';
 import {UIAnimation} from '../../../common/ui/ui-animation';
 import {trigger} from '@angular/animations';
-import {Helper} from '../../../common/helper';
+import {Helper} from '../../../core-module/rest/helper';
 import {UIHelper} from "../../../common/ui/ui-helper";
 
 @Component({

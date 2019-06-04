@@ -3,14 +3,16 @@ import {setTimeout} from 'core-js/library/web/timers';
 import {Observable, Observer} from 'rxjs';
 import {Headers, Http, Response} from '@angular/http';
 
-import {OAuthResult} from '../rest/data-object';
 import {Location} from '@angular/common';
-import {UIConstants} from '../ui/ui-constants';
 import {Router} from '@angular/router';
-import {FrameEventsService} from './frame-events.service';
-import {DateHelper} from "../ui/DateHelper";
 import {TranslateService} from "@ngx-translate/core";
 import {HttpClient} from '@angular/common/http';
+import {UIConstants} from "../../core-module/ui/ui-constants";
+import {FrameEventsService} from "../../core-module/rest/services/frame-events.service"
+
+import {DateHelper} from "../ui/DateHelper";
+import {OAuthResult} from "../../core-module/rest/data-object";
+import {RestConstants} from "../../core-module/rest/rest-constants";
 
 declare var cordova : any;
 
@@ -44,7 +46,7 @@ export class CordovaService {
     this._oauth=oauth;
     if(oauth) {
         this._oauth.expires_ts = Date.now() + (oauth.expires_in * 1000);
-        this.setPermanentStorage(CordovaService.STORAGE_OAUTHTOKENS,JSON.stringify(this._oauth));
+        this.setPermanentStorage(RestConstants.CORDOVA_STORAGE_OAUTHTOKENS,JSON.stringify(this._oauth));
     }
 
   }
@@ -466,7 +468,7 @@ export class CordovaService {
   }
 
   restartCordova(parameters=""):void {
-    this.setPermanentStorage(CordovaService.STORAGE_OAUTHTOKENS,null);
+    this.setPermanentStorage(RestConstants.CORDOVA_STORAGE_OAUTHTOKENS,null);
     if(parameters)
         parameters="&"+parameters;
     if(navigator.userAgent.indexOf("ionic / edu-sharing-app")!=-1) {
@@ -495,12 +497,6 @@ export class CordovaService {
    * Dont use plugin on Android to avoid starting the app with a permission request.
    */
 
-  /*
-   * KEYS FOR STORAGE
-   */
-  public static STORAGE_OAUTHTOKENS:string = "oauth";
-  public static STORAGE_SERVER_ENDPOINT:string = "server_endpoint";
-  public static STORAGE_SERVER_OWN:string = "server_own";
 
   /**
    * load permanent key/value 
@@ -613,7 +609,7 @@ export class CordovaService {
     }
 
     // if a oauth relevant key - sync with sharescreen
-    if (key==CordovaService.STORAGE_OAUTHTOKENS) {
+    if (key==RestConstants.CORDOVA_STORAGE_OAUTHTOKENS) {
       try {
         let oauthData:any = JSON.parse(value);
         this.iosShareScreenStoreValue(CordovaService.IOSSHARE_ACCESS,oauthData.access_token);
@@ -625,7 +621,7 @@ export class CordovaService {
     }
 
     // if server address - sync with sharescreen
-    if (key==CordovaService.STORAGE_SERVER_OWN && this.isIOS()) {
+    if (key==RestConstants.CORDOVA_STORAGE_SERVER_OWN && this.isIOS()) {
       try {
         this.iosShareScreenStoreValue(CordovaService.IOSSHARE_SERVER,value);
       } catch (e) {
@@ -671,7 +667,7 @@ export class CordovaService {
    * after init, load the stored info from the cordova storage and save it as class members for access of other services
    */
   loadStorage(){
-    this.getPermanentStorage(CordovaService.STORAGE_OAUTHTOKENS,(data:string)=>{
+    this.getPermanentStorage(RestConstants.CORDOVA_STORAGE_OAUTHTOKENS,(data:string)=>{
         this._oauth = (data!=null) ? JSON.parse(data) : null;
         this.serviceIsReady=true;
     });
@@ -1189,7 +1185,7 @@ export class CordovaService {
   }
 
     private resetAndGoToServerlist(parameters="") {
-        this.setPermanentStorage(CordovaService.STORAGE_OAUTHTOKENS, null);
+        this.setPermanentStorage(RestConstants.CORDOVA_STORAGE_OAUTHTOKENS, null);
         this.clearAllCookies();
         this.restartCordova(parameters);
     }

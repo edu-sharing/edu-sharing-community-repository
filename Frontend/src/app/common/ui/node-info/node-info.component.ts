@@ -1,14 +1,17 @@
 import {UIAnimation} from "../ui-animation";
 import {Component, EventEmitter, Input, Output} from "@angular/core";
 import {trigger} from "@angular/animations";
-import {Node, NodeList, NodePermissions, Permissions} from "../../rest/data-object";
-import {RestNodeService} from "../../rest/services/rest-node.service";
-import {ConfigurationService} from "../../services/configuration.service";
-import {RestHelper} from "../../rest/rest-helper";
-import {ConfigurationHelper} from "../../rest/configuration-helper";
 import {Router} from "@angular/router";
-import {UIConstants} from "../ui-constants";
-import {RestConstants} from "../../rest/rest-constants";
+import {UIConstants} from "../../../core-module/ui/ui-constants";
+import {
+    ConfigurationHelper,
+    ConfigurationService,
+    Node,
+    Permissions,
+    NodeList,
+    RestConstants,
+    RestNodeService
+} from "../../../core-module/core.module";
 
 
 @Component({

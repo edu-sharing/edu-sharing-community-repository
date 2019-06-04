@@ -1,10 +1,9 @@
 import {Component, Input, EventEmitter, Output, ViewChild, ElementRef} from '@angular/core';
-import {RestNodeService} from "../../../common/rest/services/rest-node.service";
-import {RestConstants} from "../../../common/rest/rest-constants";
-import {NodeWrapper,Node} from "../../../common/rest/data-object";
+import {DialogButton, RestNodeService} from "../../../core-module/core.module";
+import {RestConstants} from "../../../core-module/core.module";
+import {NodeWrapper,Node} from "../../../core-module/core.module";
 import {VCard} from "../../../common/VCard";
 import {Toast} from "../../../common/ui/toast";
-import {ModalDialogComponent, DialogButton} from "../../../common/ui/modal-dialog/modal-dialog.component";
 import {Translation} from "../../../common/translation";
 import {TranslateService} from "@ngx-translate/core";
 import {DateHelper} from "../../../common/ui/DateHelper";

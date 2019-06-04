@@ -1,7 +1,7 @@
 import {Component, Input, EventEmitter, Output, ViewChild, ElementRef} from '@angular/core';
-import {RestConstants} from "../../../common/rest/rest-constants";
-import {Node, NodeWrapper} from "../../../common/rest/data-object";
-import {RestNodeService} from "../../../common/rest/services/rest-node.service";
+import {RestConstants} from "../../../core-module/core.module";
+import {Node, NodeWrapper} from "../../../core-module/core.module";
+import {RestNodeService} from "../../../core-module/core.module";
 import {Toast} from "../../../common/ui/toast";
 
 @Component({

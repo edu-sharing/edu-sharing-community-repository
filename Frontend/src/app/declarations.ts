@@ -1,4 +1,3 @@
-  import {DebugResultPipe} from "./common/rest/pipes/debug-result.pipe";
   import {SpinnerComponent} from "./common/ui/spinner/spinner.component";
   import {ListTableComponent} from "./common/ui/list-table/list-table.component";
   import {FileChooserComponent} from "./common/ui/file-chooser/file-chooser.component";
@@ -54,7 +53,6 @@ export const DECLARATIONS = [
       GlobalProgressComponent,
       IconComponent,
       CalendarComponent,
-      DebugResultPipe,
       FormatSizePipe,
       NodeDatePipe,
       TimePipe,

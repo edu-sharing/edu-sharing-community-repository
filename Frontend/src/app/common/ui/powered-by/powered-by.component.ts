@@ -3,8 +3,6 @@
  */
 
 import {Component, EventEmitter, Input, Output} from '@angular/core';
-import {ConfigurationService} from "../../services/configuration.service";
-import {ConfigurationHelper} from "../../rest/configuration-helper";
 
 @Component({
   selector: 'powered-by',
@@ -19,7 +17,7 @@ export class PoweredByComponent {
    */
   @Input() mode='white';
 
-  constructor(private config:ConfigurationService) {
+  constructor() {
     /*
     this.config.getAll().subscribe(()=>{
       this.config = ConfigurationHelper.getBanner(this.config);

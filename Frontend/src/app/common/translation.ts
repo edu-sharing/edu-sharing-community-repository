@@ -5,15 +5,13 @@ import 'rxjs/Rx';
 import 'rxjs/add/observable/forkJoin';
 import 'rxjs/add/observable/concat';
 import {Observer} from "rxjs";
-import {ConfigurationService} from "./services/configuration.service";
 import {ActivatedRoute} from "@angular/router";
-import {SessionStorageService} from "./services/session-storage.service";
 import 'rxjs/add/operator/first'
-import {RestLocatorService} from "./rest/services/rest-locator.service";
 import {HttpClient, HttpClientModule} from "@angular/common/http";
 import {CordovaService} from './services/cordova.service';
 import * as moment from 'moment';
 import {environment} from "../../environments/environment";
+import {ConfigurationService, RestLocatorService, SessionStorageService} from "../core-module/core.module";
 
 export let TRANSLATION_LIST=['common','admin','recycle','workspace', 'search','collections','login','permissions','oer','messages','register','profiles','services','stream','override'];
 
@@ -34,8 +32,8 @@ export class Translation  {
     public static initialize(translate : TranslateService,config : ConfigurationService,storage:SessionStorageService,route:ActivatedRoute) : Observable<string> {
     return new Observable<string>((observer: Observer<string>) => {
       config.get("supportedLanguages",Translation.DEFAULT_SUPPORTED_LANGUAGES).subscribe((data: string[]) => {
-        if(config.getLocator().getCordova().isRunningCordova()){
-          Translation.initializeCordova(translate,config.getLocator().getCordova(),data).subscribe((language:string)=>{
+        if(config.getLocator().getBridge().isRunningCordova()){
+          Translation.initializeCordova(translate,config.getLocator().getBridge().getCordova(),data).subscribe((language:string)=>{
             observer.next(language);
             observer.complete();
           });

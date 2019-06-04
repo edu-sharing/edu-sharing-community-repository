@@ -1,10 +1,10 @@
 import {Component, Input, EventEmitter, Output, ViewChild, ElementRef} from '@angular/core';
-import {RestMdsService} from "../../../common/rest/services/rest-mds.service";
-import {MdsMetadatasets, Node, MdsInfo} from "../../../common/rest/data-object";
+import {RestMdsService} from "../../../core-module/core.module";
+import {MdsMetadatasets, Node, MdsInfo} from "../../../core-module/core.module";
 import {TranslateService} from "@ngx-translate/core";
-import {ConfigurationService} from "../../../common/services/configuration.service";
-import {RestConstants} from "../../../common/rest/rest-constants";
-import {ConfigurationHelper} from "../../../common/rest/configuration-helper";
+import {ConfigurationService} from "../../../core-module/core.module";
+import {RestConstants} from "../../../core-module/core.module";
+import {ConfigurationHelper} from "../../../core-module/core.module";
 import {UIHelper} from "../../../common/ui/ui-helper";
 import {trigger} from "@angular/animations";
 import {UIAnimation} from "../../../common/ui/ui-animation";

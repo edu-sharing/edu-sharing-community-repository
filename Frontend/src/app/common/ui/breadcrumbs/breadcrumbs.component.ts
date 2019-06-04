@@ -1,9 +1,7 @@
 import {Component, Input, Output, EventEmitter, OnInit} from '@angular/core';
-import {RestNodeService} from "../../rest/services/rest-node.service";
-import {Node, NodeList, IamUsers, IamUser, NodeWrapper} from "../../rest/data-object";
-import {TemporaryStorageService} from "../../services/temporary-storage.service";
 import {UIHelper} from "../ui-helper";
-import {UIService} from "../../services/ui.service";
+import {NodeList, Node, RestNodeService, TemporaryStorageService, UIService} from "../../../core-module/core.module";
+
 
 @Component({
   selector: 'breadcrumbs',

@@ -1,41 +1,49 @@
-import {AfterViewInit, Component, ElementRef, HostListener, OnDestroy, ViewChild} from '@angular/core';
+import {Component, ElementRef, HostListener, ViewChild} from '@angular/core';
 import {TranslateService} from "@ngx-translate/core";
 import {Translation} from "../../common/translation";
-import {RestNodeService} from "../../common/rest/services/rest-node.service";
 import {
-    NodeRef, IamUser, NodeWrapper, Node, Version, NodeVersions, LoginResult, NodeList,
-    OAuthResult, Collection, Connector, ConnectorList, Type, Filetype
-} from "../../common/rest/data-object";
-import {RestIamService} from "../../common/rest/services/rest-iam.service";
-import {Router, Params, ActivatedRoute, Routes} from "@angular/router";
+    ClipboardObject,
+    ConfigurationService,
+    Connector,
+    ConnectorList, DialogButton,
+    EventListener,
+    Filetype,
+    FrameEventsService,
+    IamUser,
+    LoginResult,
+    Node,
+    NodeList,
+    NodeRef,
+    NodeVersions,
+    NodeWrapper,
+    RestCollectionService,
+    RestConnectorService,
+    RestConnectorsService,
+    RestConstants,
+    RestHelper,
+    RestIamService,
+    RestMdsService,
+    RestNodeService,
+    RestToolService,
+    SessionStorageService,
+    TemporaryStorageService,
+    UIService,
+    Version
+} from "../../core-module/core.module";
+import {ActivatedRoute, Params, Router} from "@angular/router";
 import {OptionItem} from "../../common/ui/actionbar/option-item";
-import {DialogButton, ModalDialogComponent} from "../../common/ui/modal-dialog/modal-dialog.component";
-import {RestConstants} from "../../common/rest/rest-constants";
-import {RestHelper} from "../../common/rest/rest-helper";
 import {Toast} from "../../common/ui/toast";
-import {ClipboardObject, TemporaryStorageService} from '../../common/services/temporary-storage.service';
 import {UIAnimation} from "../../common/ui/ui-animation";
-import {RestConnectorService} from "../../common/rest/services/rest-connector.service";
-import {SessionStorageService} from "../../common/services/session-storage.service";
 import {NodeHelper} from "../../common/ui/node-helper";
-import {UIService} from "../../common/services/ui.service";
-import {RestCollectionService} from "../../common/rest/services/rest-collection.service";
-import {RestConnectorsService} from "../../common/rest/services/rest-connectors.service";
 import {KeyEvents} from "../../common/ui/key-events";
-import {ConfigurationService} from "../../common/services/configuration.service";
-import {FrameEventsService} from "../../common/services/frame-events.service";
 import {Title} from "@angular/platform-browser";
 import {UIHelper} from "../../common/ui/ui-helper";
 import {trigger} from "@angular/animations";
-import {RestToolService} from "../../common/rest/services/rest-tool.service";
-import {UIConstants} from "../../common/ui/ui-constants";
-import {RestSearchService} from "../../common/rest/services/rest-search.service";
+import {UIConstants} from "../../core-module/ui/ui-constants";
 import {ActionbarHelperService} from "../../common/services/actionbar-helper";
-import {Helper} from "../../common/helper";
-import {RestMdsService} from '../../common/rest/services/rest-mds.service';
+import {Helper} from "../../core-module/rest/helper";
 import {DateHelper} from '../../common/ui/DateHelper';
 import {CordovaService} from "../../common/services/cordova.service";
-import {EventListener} from "../../common/services/frame-events.service";
 import {HttpClient} from '@angular/common/http';
 import {MainNavComponent} from '../../common/ui/main-nav/main-nav.component';
 

@@ -4,13 +4,12 @@ import { Observable } from 'rxjs/Observable';
 import { BrowserModule } from '@angular/platform-browser';
 import {Translation} from "../../common/translation";
 import {Toast} from "../../common/ui/toast";
-import {ArchiveRestore, RestoreResult, ArchiveSearch,Node} from "../../common/rest/data-object";
-import {RestConnectorService} from "../../common/rest/services/rest-connector.service";
+import {ArchiveRestore, RestoreResult, ArchiveSearch, Node, ListItem} from "../../core-module/core.module";
+import {RestConnectorService} from "../../core-module/core.module";
 import {OptionItem} from "../../common/ui/actionbar/option-item";
-import {ConfigurationService} from "../../common/services/configuration.service";
-import {SessionStorageService} from "../../common/services/session-storage.service";
+import {ConfigurationService} from "../../core-module/core.module";
+import {SessionStorageService} from "../../core-module/core.module";
 import {ActivatedRoute} from "@angular/router";
-import {ListItem} from "../../common/ui/list-item";
 import {TranslateService} from "@ngx-translate/core";
 
 @Component({

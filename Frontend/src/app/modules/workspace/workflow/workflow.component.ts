@@ -1,26 +1,25 @@
 import {Component, Input, EventEmitter, Output, ViewChild, ElementRef} from '@angular/core';
-import {RestNodeService} from "../../../common/rest/services/rest-node.service";
-import {RestConstants} from "../../../common/rest/rest-constants";
+import {DialogButton, RestNodeService} from "../../../core-module/core.module";
+import {RestConstants} from "../../../core-module/core.module";
 import {
   NodeWrapper, Node, IamUsers, WorkflowEntry, NodePermissions,
   Permission, UserSimple, WorkflowDefinition
-} from "../../../common/rest/data-object";
+} from "../../../core-module/core.module";
 import {VCard} from "../../../common/VCard";
 import {Toast} from "../../../common/ui/toast";
-import {ModalDialogComponent, DialogButton} from "../../../common/ui/modal-dialog/modal-dialog.component";
 import {Translation} from "../../../common/translation";
 import {TranslateService} from "@ngx-translate/core";
 import any = jasmine.any;
 import {SuggestItem} from "../../../common/ui/autocomplete/autocomplete.component";
-import {RestIamService} from "../../../common/rest/services/rest-iam.service";
+import {RestIamService} from "../../../core-module/core.module";
 import {NodeHelper} from "../../../common/ui/node-helper";
 import {AuthorityNamePipe} from "../../../common/ui/authority-name.pipe";
-import {RestConnectorService} from "../../../common/rest/services/rest-connector.service";
+import {RestConnectorService} from "../../../core-module/core.module";
 import {UIHelper} from "../../../common/ui/ui-helper";
-import {ConfigurationService} from "../../../common/services/configuration.service";
+import {ConfigurationService} from "../../../core-module/core.module";
 import {trigger} from "@angular/animations";
 import {UIAnimation} from "../../../common/ui/ui-animation";
-import {RestHelper} from "../../../common/rest/rest-helper";
+import {RestHelper} from "../../../core-module/core.module";
 
 @Component({
   selector: 'workspace-workflow',

@@ -1,5 +1,5 @@
 import {Pipe, PipeTransform} from "@angular/core";
-import {RestConstants} from '../rest/rest-constants';
+import {RestConstants} from '../../core-module/core.module';
 import {TranslateService} from '@ngx-translate/core';
 @Pipe({name: 'authorityName'})
 export class AuthorityNamePipe implements PipeTransform {

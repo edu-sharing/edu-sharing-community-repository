@@ -4,34 +4,38 @@ import {
 } from '@angular/core';
 import {TranslateService} from "@ngx-translate/core";
 import {UIAnimation} from "../ui-animation";
-import {RestIamService} from "../../rest/services/rest-iam.service";
-import {
-    IamUser, AccessScope, LoginResult, Organizations, OrganizationOrganizations, NodeList,
-    NodeTextContent, NodeWrapper, Node
-} from '../../rest/data-object';
 import {Router, Params, ActivatedRoute} from "@angular/router";
-import {RouterComponent} from "../../../router/router.component";
-import {RestConnectorService} from "../../rest/services/rest-connector.service";
-import {RestConstants} from "../../rest/rest-constants";
-import {RestOrganizationService} from "../../rest/services/rest-organization.service";
-import {FrameEventsService} from "../../services/frame-events.service";
-import {ConfigurationService} from "../../services/configuration.service";
 import {style, transition, trigger, animate, keyframes} from "@angular/animations";
-import {SearchNodeStoreComponent} from "../../../modules/search/node-store/node-store.component";
 import {UIHelper} from "../ui-helper";
-import {OPEN_URL_MODE, UIConstants} from "../ui-constants";
-import {RestHelper} from "../../rest/rest-helper";
+import {OPEN_URL_MODE, UIConstants} from "../../../core-module/ui/ui-constants";
 import {Toast} from "../toast";
-import {TemporaryStorageService} from "../../services/temporary-storage.service";
-import {ConfigurationHelper} from "../../rest/configuration-helper";
-import {CordovaService} from '../../services/cordova.service';
-import {SessionStorageService} from "../../services/session-storage.service";
-import {RestNodeService} from "../../rest/services/rest-node.service";
 import {Translation} from "../../translation";
 import {OptionItem} from "../actionbar/option-item";
 import {HttpClient} from '@angular/common/http';
-import {DialogButton} from '../modal-dialog/modal-dialog.component';
-import {UIService} from '../../services/ui.service';
+import {
+    AccessScope,
+    ConfigurationHelper,
+    ConfigurationService,
+    DialogButton,
+    FrameEventsService,
+    IamUser,
+    LoginResult,
+    Node,
+    NodeList,
+    NodeTextContent,
+    NodeWrapper,
+    OrganizationOrganizations,
+    RestConnectorService,
+    RestConstants, RestHelper,
+    RestIamService,
+    RestNodeService,
+    RestOrganizationService,
+    SessionStorageService,
+    TemporaryStorageService,
+    UIService
+} from '../../../core-module/core.module';
+import {CordovaService} from "../../services/cordova.service";
+import {BridgeService} from "../../../core-bridge-module/bridge.service";
 
 @Component({
   selector: 'main-nav',
@@ -347,7 +351,7 @@ export class MainNavComponent implements AfterViewInit{
   }
   constructor(private iam : RestIamService,
               private connector : RestConnectorService,
-              private cordova : CordovaService,
+              private bridge : BridgeService,
               private ui : UIService,
               private changeDetector :  ChangeDetectorRef,
               private event : FrameEventsService,
@@ -414,7 +418,7 @@ export class MainNavComponent implements AfterViewInit{
         this.refreshNodeStore();
         this.connector.hasAccessToScope(RestConstants.SAFE_SCOPE).subscribe((data:AccessScope)=>{
           // safe needs access and not be app (oauth not supported)
-          if(data.hasAccess && !this.cordova.isRunningCordova())
+          if(data.hasAccess && !this.bridge.isRunningCordova())
             buttons.push({path:'workspace/safe',scope:'safe',icon:"lock",name:"SIDEBAR.SECURE",onlyDesktop:true});
           this.addMoreButtons(buttons);
         },(error:any)=>this.addMoreButtons(buttons));
@@ -430,7 +434,7 @@ export class MainNavComponent implements AfterViewInit{
     //window.scrollTo(0,0);
   }
   editProfile(){
-    if(this.cordova.isRunningCordova()){
+    if(this.bridge.isRunningCordova()){
       window.open(this.editUrl,'_system');
     }
     else {
@@ -458,13 +462,13 @@ export class MainNavComponent implements AfterViewInit{
   }
   public showHelp(url:string){
     this.helpOpen=false;
-    UIHelper.openUrl(url,this.cordova,OPEN_URL_MODE.BlankSystemBrowser);
+    UIHelper.openUrl(url,this.bridge,OPEN_URL_MODE.BlankSystemBrowser);
   }
   private logout(){
     this.globalProgress=true;
-    if(this.cordova.isRunningCordova()){
+    if(this.bridge.isRunningCordova()){
       this.connector.logout().subscribe(()=> {
-          this.cordova.restartCordova();
+          this.bridge.getCordova().restartCordova();
       });
       return;
     }
@@ -527,7 +531,7 @@ export class MainNavComponent implements AfterViewInit{
     // }
     this.event.broadcastEvent(FrameEventsService.EVENT_VIEW_SWITCHED,button.scope);
     if(button.url){
-      UIHelper.openUrl(button.url,this.cordova,OPEN_URL_MODE.BlankSystemBrowser);
+      UIHelper.openUrl(button.url,this.bridge,OPEN_URL_MODE.BlankSystemBrowser);
     }
     else {
       let queryParams=button.queryParams?button.queryParams:{};
@@ -570,10 +574,10 @@ export class MainNavComponent implements AfterViewInit{
     },(error:any)=>this.checkConfig(buttons));
   }
   private openImprint(){
-    UIHelper.openUrl(this.config.imprintUrl,this.cordova,OPEN_URL_MODE.BlankSystemBrowser);
+    UIHelper.openUrl(this.config.imprintUrl,this.bridge,OPEN_URL_MODE.BlankSystemBrowser);
   }
   private openPrivacy(){
-    UIHelper.openUrl(this.config.privacyInformationUrl,this.cordova,OPEN_URL_MODE.BlankSystemBrowser);
+    UIHelper.openUrl(this.config.privacyInformationUrl,this.bridge,OPEN_URL_MODE.BlankSystemBrowser);
   }
   private checkConfig(buttons: any[]) {
     this.configService.getAll().subscribe((data:any)=>{
@@ -804,7 +808,7 @@ export class MainNavComponent implements AfterViewInit{
         this.handleScrollHide();
     }
     private showTimeout(){
-        return !this.cordova.isRunningCordova() && !this.isGuest && this.timeIsValid && this.dialogTitle!='WORKSPACE.AUTOLOGOUT' &&
+        return !this.bridge.isRunningCordova() && !this.isGuest && this.timeIsValid && this.dialogTitle!='WORKSPACE.AUTOLOGOUT' &&
             (this.isSafe || !this.isSafe && this.configService.instant('sessionExpiredDialog',{show:true}).show);
     }
     private updateTimeout(){

@@ -1,31 +1,24 @@
 import {TranslateService} from "@ngx-translate/core";
 import {Title} from "@angular/platform-browser";
-import {ConfigurationService} from "../services/configuration.service";
 import {
     Collection, Connector, ConnectorList, Filetype, LoginResult, MdsInfo, Node,
-    NodeLock, OAuthResult, ParentList
-} from "../rest/data-object";
+    NodeLock, OAuthResult, ParentList, RestConstants, RestHelper,
+    TemporaryStorageService, UIService, RestCollectionService,
+    RestConnectorsService, FrameEventsService, RestNodeService,
+    ListItem, RestConnectorService, ConfigurationService
+} from "../../core-module/core.module";
 import {ActivatedRoute, NavigationExtras, Router} from "@angular/router";
-import {OPEN_URL_MODE, UIConstants} from "./ui-constants";
+import {OPEN_URL_MODE, UIConstants} from "../../core-module/ui/ui-constants";
 import {ComponentFactoryResolver, ElementRef, EventEmitter, HostListener} from "@angular/core";
-import {RestConstants} from "../rest/rest-constants";
-import {RestHelper} from "../rest/rest-helper";
 import {Toast} from "./toast";
-import {TemporaryStorageService} from "../services/temporary-storage.service";
-import {UIService} from "../services/ui.service";
-import {RestCollectionService} from "../rest/services/rest-collection.service";
 import {NodeHelper} from "./node-helper";
-import {RestConnectorsService} from "../rest/services/rest-connectors.service";
-import {FrameEventsService} from "../services/frame-events.service";
-import {RestNodeService} from "../rest/services/rest-node.service";
 import {PlatformLocation} from "@angular/common";
-import {ListItem} from './list-item';
 import {CordovaService} from "../services/cordova.service";
 import {SearchService} from "../../modules/search/search.service";
 import {OptionItem} from "./actionbar/option-item";
-import {RestConnectorService} from "../rest/services/rest-connector.service";
 import {Observable, Observer} from "rxjs";
 import {CUSTOM_COMPONENTS} from '../../custom-module/custom.module';
+import {BridgeService} from "../../core-bridge-module/core.bridge.module";
 export class UIHelper{
 
   public static evaluateMediaQuery(type:string,value:number){
@@ -339,7 +332,7 @@ export class UIHelper{
     if(connectorType==null){
       connectorType=connector.connectorSupportsEdit(node);
     }
-    let isCordova=connector.getRestConnector().getCordovaService().isRunningCordova();
+    let isCordova=connector.getRestConnector().getBridgeService().isRunningCordova();
     if(win==null && newWindow) {
         win = UIHelper.getNewWindow(connector.getRestConnector());
     }
@@ -356,7 +349,7 @@ export class UIHelper{
               console.log(win);
           }
           else if(isCordova){
-            UIHelper.openUrl(url,connector.getRestConnector().getCordovaService(),OPEN_URL_MODE.Blank);
+            UIHelper.openUrl(url,connector.getRestConnector().getBridgeService(),OPEN_URL_MODE.Blank);
           }
           else {
               window.location.replace(url);
@@ -510,13 +503,13 @@ export class UIHelper{
   static goToDefaultLocation(router: Router,configService : ConfigurationService,extras:NavigationExtras={}) {
       return router.navigate([UIConstants.ROUTER_PREFIX + configService.instant("loginDefaultLocation","workspace")],extras);
   }
-    static openUrl(url:string, cordova: CordovaService,mode=OPEN_URL_MODE.Current) {
-        if(cordova.isRunningCordova()){
+    static openUrl(url:string, bridge: BridgeService,mode=OPEN_URL_MODE.Current) {
+        if(bridge.isRunningCordova()){
           if(mode==OPEN_URL_MODE.BlankSystemBrowser) {
-              return cordova.openBrowser(url);
+              return bridge.getCordova().openBrowser(url);
           }
           else {
-              return cordova.openInAppBrowser(url);
+              return bridge.getCordova().openInAppBrowser(url);
           }
         }
         else {
@@ -558,7 +551,7 @@ export class UIHelper{
      * @returns {any}
      */
     public static getNewWindow(connector:RestConnectorService) {
-        if(connector.getCordovaService().isRunningCordova())
+        if(connector.getBridgeService().isRunningCordova())
             return null;
         return window.open("");
     }

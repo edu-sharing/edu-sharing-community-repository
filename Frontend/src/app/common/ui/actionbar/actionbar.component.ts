@@ -1,12 +1,12 @@
 import {Component, Input, Output, EventEmitter, OnInit, ViewChild, ElementRef, HostListener} from '@angular/core';
 import {TranslateService} from "@ngx-translate/core";
 import {UIAnimation} from "../ui-animation";
-import {UIService} from "../../services/ui.service";
 import {trigger} from "@angular/animations";
 import {UIHelper} from "../ui-helper";
 import {OptionItem} from "./option-item";
-import {Helper} from '../../helper';
-import {UIConstants} from "../ui-constants";
+import {Helper} from '../../../core-module/rest/helper';
+import {UIConstants} from "../../../core-module/ui/ui-constants";
+import {UIService} from "../../../core-module/core.module";
 
 @Component({
   selector: 'actionbar',

@@ -3,9 +3,9 @@ import {
   QueryList
 } from '@angular/core';
 import {TranslateService} from "@ngx-translate/core";
-import {DialogButton} from "../modal-dialog/modal-dialog.component";
 import {UIAnimation} from "../ui-animation";
 import {trigger} from "@angular/animations";
+import {DialogButton} from "../../../core-module/core.module";
 
 @Component({
   selector: 'infobar',

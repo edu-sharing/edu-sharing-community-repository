@@ -2,10 +2,8 @@ import {Component, Input, Output, EventEmitter, OnInit, SimpleChanges} from '@an
 import {TranslateService} from "@ngx-translate/core";
 import {SuggestItem} from "../autocomplete/autocomplete.component";
 import {NodeHelper} from "../node-helper";
-import {Authority, IamAuthorities} from "../../rest/data-object";
-import {RestIamService} from "../../rest/services/rest-iam.service";
-import {RestConstants} from "../../rest/rest-constants";
 import {PermissionNamePipe} from '../permission-name.pipe';
+import {Authority, IamAuthorities, RestConstants, RestIamService} from '../../../core-module/core.module';
 
 @Component({
   selector: 'authority-search-input',

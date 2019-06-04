@@ -1,12 +1,12 @@
 import {Component, Input, EventEmitter, Output, ViewChild, ElementRef} from '@angular/core';
-import {RestConstants} from "../../../common/rest/rest-constants";
-import {IamUser, Node, NodeList, NodeWrapper} from '../../../common/rest/data-object';
-import {RestNodeService} from "../../../common/rest/services/rest-node.service";
+import {RestConstants} from "../../../core-module/core.module";
+import {IamUser, Node, NodeList, NodeWrapper} from '../../../core-module/core.module';
+import {RestNodeService} from "../../../core-module/core.module";
 import {trigger} from "@angular/animations";
 import {UIAnimation} from "../../../common/ui/ui-animation";
-import {RestSearchService} from '../../../common/rest/services/rest-search.service';
+import {RestSearchService} from '../../../core-module/core.module';
 import {Toast} from '../../../common/ui/toast';
-import {RestIamService} from "../../../common/rest/services/rest-iam.service";
+import {RestIamService} from "../../../core-module/core.module";
 
 @Component({
   selector: 'workspace-file-upload-select',

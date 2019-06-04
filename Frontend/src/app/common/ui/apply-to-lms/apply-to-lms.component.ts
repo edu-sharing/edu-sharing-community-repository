@@ -1,20 +1,20 @@
 import {Component} from '@angular/core';
 import {ActivatedRoute, Params, Router} from "@angular/router";
-import {RestConnectorService} from "../../rest/services/rest-connector.service";
-import {RestNodeService} from "../../rest/services/rest-node.service";
+import {
+    ConfigurationService,
+    FrameEventsService, NodeRemoteWrapper, NodeWrapper,
+    Node,
+    RestConnectorService, RestConstants,
+    RestNodeService, SessionStorageService,
+    TemporaryStorageService
+} from "../../../core-module/core.module";
 import {Toast} from "../toast";
-import {Node, NodeRemoteWrapper, NodeWrapper} from "../../rest/data-object";
-import {RestConstants} from "../../rest/rest-constants";
 import {SearchService} from "../../../modules/search/search.service";
-import {FrameEventsService} from "../../services/frame-events.service";
 import {NodeHelper} from "../node-helper";
-import {UIConstants} from "../ui-constants";
+import {UIConstants} from "../../../core-module/ui/ui-constants";
 import {Translation} from "../../translation";
 import {TranslateService} from "@ngx-translate/core";
-import {ConfigurationService} from "../../services/configuration.service";
-import {SessionStorageService} from "../../services/session-storage.service";
-import {TemporaryStorageService} from "../../services/temporary-storage.service";
-import {RestLocatorService} from "../../rest/services/rest-locator.service";
+import {RestLocatorService} from "../../../core-module/core.module";
 
 @Component({
   selector: 'add-node-to-lms',

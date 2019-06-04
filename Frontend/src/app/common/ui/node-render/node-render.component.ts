@@ -2,41 +2,34 @@ import {
   Component, OnInit, OnDestroy, Input, EventEmitter, Output, ViewChild, ElementRef,
   HostListener, ChangeDetectorRef, ApplicationRef, NgZone
 } from '@angular/core';
-import {RestConnectorService} from "../../rest/services/rest-connector.service";
-import {RestConstants} from "../../rest/rest-constants";
-import {NodeList, Node, NodeWrapper, LoginResult, ConnectorList} from "../../rest/data-object";
 import {Toast} from "../toast";
-import {RestNodeService} from "../../rest/services/rest-node.service";
 import {ActivatedRoute, Params, Router} from "@angular/router";
 import {TranslateService} from "@ngx-translate/core";
 import {Translation} from "../../translation";
-import {TemporaryStorageService} from "../../services/temporary-storage.service";
 import {OptionItem} from "../actionbar/option-item";
 import {UIAnimation} from "../ui-animation";
-import {FrameEventsService} from "../../services/frame-events.service";
 import {UIHelper} from "../ui-helper";
-import {ConfigurationService} from "../../services/configuration.service";
 import {Title} from "@angular/platform-browser";
-import {SessionStorageService} from "../../services/session-storage.service";
-import {RestConnectorsService} from "../../rest/services/rest-connectors.service";
 import {trigger} from "@angular/animations";
 import {Location} from "@angular/common";
 import {NodeHelper} from "../node-helper";
-import {RestToolService} from "../../rest/services/rest-tool.service";
-import {UIConstants} from "../ui-constants";
-import {ConfigurationHelper} from "../../rest/configuration-helper";
+import {UIConstants} from "../../../core-module/ui/ui-constants";
 import {SearchService} from "../../../modules/search/search.service";
-import {Helper} from "../../helper";
-import {RestHelper} from "../../rest/rest-helper";
-import {EventListener} from "../../../common/services/frame-events.service";
+import {Helper} from "../../../core-module/rest/helper";
 import {ActionbarHelperService} from "../../services/actionbar-helper";
-import {SuggestItem} from "../autocomplete/autocomplete.component";
 import {MainNavComponent} from "../main-nav/main-nav.component";
-import {RestSearchService} from '../../rest/services/rest-search.service';
-import {ListItem} from '../list-item';
-import {RestMdsService} from '../../rest/services/rest-mds.service';
-import {MdsHelper} from '../../rest/mds-helper';
 import {HttpClient} from "@angular/common/http";
+import {
+    ConfigurationHelper, ConfigurationService,
+    EventListener,
+    ConnectorList, FrameEventsService, ListItem,
+    LoginResult, NodeWrapper, RestConnectorService,
+    RestConnectorsService, Node, NodeList,
+    RestConstants, RestHelper, RestMdsService, RestNodeService, RestSearchService,
+    RestToolService, SessionStorageService,
+    TemporaryStorageService
+} from "../../../core-module/core.module";
+import {MdsHelper} from "../../../core-module/rest/mds-helper";
 
 declare var jQuery:any;
 declare var window: any;
@@ -397,10 +390,10 @@ export class NodeRenderComponent implements EventListener{
       let element=jQuery('#edusharing_rendering_content_href');
       console.log(element);
       element.click((event:any)=>{
-          if(this.connector.getCordovaService().isRunningCordova()){
+          if(this.connector.getBridgeService().isRunningCordova()){
               let href=element.attr('href');
               console.log(href);
-              this.connector.getCordovaService().openBrowser(href);
+              this.connector.getBridgeService().getCordova().openBrowser(href);
               event.preventDefault();
           }
       });
@@ -413,13 +406,13 @@ export class NodeRenderComponent implements EventListener{
   }
   private downloadCurrentNode() {
       if(this.downloadUrl) {
-          NodeHelper.downloadUrl(this.toast, this.connector.getCordovaService(), this.downloadUrl);
+          NodeHelper.downloadUrl(this.toast, this.connector.getBridgeService(), this.downloadUrl);
       } else {
           if(this.sequence && this.sequence.nodes.length > 0 || this._node.aspects.indexOf(RestConstants.CCM_ASPECT_IO_CHILDOBJECT) != -1) {
               let nodes = [this.sequenceParent].concat(this.sequence.nodes);
               NodeHelper.downloadNodes(this.toast,this.connector,nodes, this.sequenceParent.name+".zip");
           } else {
-              NodeHelper.downloadNode(this.toast, this.connector.getCordovaService(), this._node, this.version);
+              NodeHelper.downloadNode(this.toast, this.connector.getBridgeService(), this._node, this.version);
           }
       }
   }

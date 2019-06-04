@@ -1,15 +1,5 @@
 import {Component, Input, Output, EventEmitter, OnInit, HostListener} from '@angular/core';
 import {TranslateService} from "@ngx-translate/core";
-import {RestIamService} from "../../rest/services/rest-iam.service";
-import {RestNodeService} from "../../rest/services/rest-node.service";
-import {RestConnectorService} from "../../rest/services/rest-connector.service";
-import {RestConstants} from "../../rest/rest-constants";
-import {RestCollectionService} from "../../rest/services/rest-collection.service";
-import {Toast} from "../toast";
-import {ListItem} from "../list-item";
-import {AddElement} from "../list-table/list-table.component";
-import {Router} from "@angular/router";
-import {UIConstants} from "../ui-constants";
 import {DateHelper} from "../DateHelper";
 
 @Component({

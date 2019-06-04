@@ -1,30 +1,24 @@
-import {Component, Input, Output, EventEmitter, OnInit, NgZone, HostListener, ViewChild, ElementRef} from '@angular/core';
+import {Component, ElementRef, EventEmitter, HostListener, Input, NgZone, Output, ViewChild} from '@angular/core';
 import {TranslateService} from '@ngx-translate/core';
-import {RestMdsService} from '../../rest/services/rest-mds.service';
-import {MdsMetadataset, View, Type, Node, NodeList, NodeWrapper, MdsValueList} from '../../rest/data-object';
 import {DomSanitizer, SafeHtml} from '@angular/platform-browser';
-import {RestNodeService} from '../../rest/services/rest-node.service';
-import {RestConstants} from '../../rest/rest-constants';
 import {Translation} from '../../translation';
-import {HtmlParser} from '@angular/compiler';
 import {ActivatedRoute} from '@angular/router';
 import {Toast} from '../toast';
 import {VCard} from '../../VCard';
-import {Helper} from '../../helper';
-import {ConfigurationService} from '../../services/configuration.service';
-import {SessionStorageService} from '../../services/session-storage.service';
-import {RestConnectorService} from '../../rest/services/rest-connector.service';
-import {RestToolService} from '../../rest/services/rest-tool.service';
+import {Helper} from '../../../core-module/rest/helper';
 import {UIHelper} from '../ui-helper';
-import {RestHelper} from '../../rest/rest-helper';
 import {NodeHelper} from '../node-helper';
-import {RestLocatorService} from '../../rest/services/rest-locator.service';
 import {trigger} from '@angular/animations';
 import {UIAnimation} from '../ui-animation';
-import {DialogButton} from '../modal-dialog/modal-dialog.component';
-import {UIService} from '../../services/ui.service';
-import {ConfigurationHelper} from "../../rest/configuration-helper";
-import {RestSearchService} from '../../rest/services/rest-search.service';
+import {
+    ConfigurationService,
+    Node, NodeList,
+    DialogButton, MdsValueList, NodeWrapper, RestConnectorService,
+    RestConstants, RestHelper, RestLocatorService, RestMdsService,
+    RestNodeService, RestSearchService,
+    RestToolService, SessionStorageService,
+    UIService
+} from '../../../core-module/core.module';
 
 @Component({
   selector: 'mds',

@@ -1,21 +1,21 @@
 import {Component, EventEmitter, Input, Output} from '@angular/core';
-import {RestConnectorService} from "../../../common/rest/services/rest-connector.service";
+import {RestConnectorService} from "../../../core-module/core.module";
 import {Toast} from "../../../common/ui/toast";
-import {RestNodeService} from "../../../common/rest/services/rest-node.service";
-import {Connector, Node} from "../../../common/rest/data-object";
-import {ConfigurationService} from "../../../common/services/configuration.service";
+import {RestNodeService} from "../../../core-module/core.module";
+import {Connector, Node} from "../../../core-module/core.module";
+import {ConfigurationService} from "../../../core-module/core.module";
 import {UIHelper} from "../../../common/ui/ui-helper";
-import {RestIamService} from "../../../common/rest/services/rest-iam.service";
+import {RestIamService} from "../../../core-module/core.module";
 import {TranslateService} from "@ngx-translate/core";
 import {trigger} from "@angular/animations";
 import {UIAnimation} from "../../../common/ui/ui-animation";
-import {RestConstants} from '../../../common/rest/rest-constants';
+import {RestConstants} from '../../../core-module/core.module';
 import {Router} from '@angular/router';
-import {RestHelper} from '../../../common/rest/rest-helper';
-import {RestConnectorsService} from "../../../common/rest/services/rest-connectors.service";
-import {FrameEventsService} from "../../../common/services/frame-events.service";
+import {RestHelper} from '../../../core-module/core.module';
+import {RestConnectorsService} from "../../../core-module/core.module";
+import {FrameEventsService} from "../../../core-module/core.module";
 import {NodeHelper} from "../../../common/ui/node-helper";
-import {OPEN_URL_MODE} from "../../../common/ui/ui-constants";
+import {OPEN_URL_MODE} from "../../../core-module/ui/ui-constants";
 
 @Component({
   selector: 'node-variant',
@@ -120,7 +120,7 @@ export class NodeVariantComponent  {
         })
     }
     openLicense(){
-      UIHelper.openUrl(this.getLicenseUrl(),this.connector.getCordovaService(),OPEN_URL_MODE.BlankSystemBrowser);
+      UIHelper.openUrl(this.getLicenseUrl(),this.connector.getBridgeService(),OPEN_URL_MODE.BlankSystemBrowser);
     }
 
     getLicenseUrl(): string {

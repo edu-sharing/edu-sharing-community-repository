@@ -1,5 +1,5 @@
 import {Pipe, PipeTransform} from "@angular/core";
-import {Helper} from "../helper";
+import {Helper} from "../../core-module/rest/helper";
 import {ColorHelper} from "./color-helper";
 @Pipe({name: 'authorityColor'})
 export class AuthorityColorPipe implements PipeTransform {

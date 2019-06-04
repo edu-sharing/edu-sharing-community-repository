@@ -1,5 +1,5 @@
 import {AfterViewInit, OnDestroy} from '@angular/core';
-import {TemporaryStorageService} from '../services/temporary-storage.service';
+import {TemporaryStorageService} from "../../core-module/core.module";
 
 /**
  * Helper class for components that may store and revert state after navigating

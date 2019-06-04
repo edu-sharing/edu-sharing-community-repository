@@ -4,26 +4,24 @@ import {
 } from '@angular/core';
 import {BrowserModule, DomSanitizer, SafeHtml} from '@angular/platform-browser';
 import {TranslateService} from "@ngx-translate/core";
-import {NetworkRepositories, Node, Repository} from "../../rest/data-object";
-import {RestConstants} from "../../rest/rest-constants";
 import {NodeHelper} from "../../ui/node-helper";
 import {UIAnimation} from "../ui-animation";
 import {OptionItem} from "../actionbar/option-item";
-import {TemporaryStorageService} from "../../services/temporary-storage.service";
 import {Toast} from "../toast";
-import {UIService} from "../../services/ui.service";
 import {KeyEvents} from "../key-events";
-import {FrameEventsService,EventListener} from "../../services/frame-events.service";
-import {ConfigurationService} from "../../services/configuration.service";
-import {RestHelper} from "../../rest/rest-helper";
 import {animate, sequence, style, transition, trigger} from "@angular/animations";
-import {ListItem} from "../list-item";
 import {UIHelper} from "../ui-helper";
-import {Helper} from "../../helper";
-import {RestNetworkService} from "../../rest/services/rest-network.service";
+import {Helper} from "../../../core-module/rest/helper";
 import {ColorHelper} from '../color-helper';
-import {RestLocatorService} from '../../rest/services/rest-locator.service';
-import {UIConstants} from "../ui-constants";
+import {UIConstants} from "../../../core-module/ui/ui-constants";
+import {
+    ConfigurationService,
+    FrameEventsService, EventListener,
+    ListItem, NetworkRepositories,
+    Repository, Node,
+    RestConstants, RestHelper, RestLocatorService, RestNetworkService,
+    TemporaryStorageService, UIService
+} from '../../../core-module/core.module';
 
 @Component({
   selector: 'listTable',

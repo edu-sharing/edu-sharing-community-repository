@@ -1,7 +1,6 @@
 import {PipeTransform, Pipe} from '@angular/core';
-import {RestHelper} from "../rest/rest-helper";
-import {Node} from "../rest/data-object";
 import {TranslateService} from "@ngx-translate/core";
+import {RestHelper} from '../../core-module/core.module';
 
 @Pipe({name: 'nodeTitle'})
 export class NodeTitlePipe implements PipeTransform {

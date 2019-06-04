@@ -1,14 +1,8 @@
 import {Component, Input, Output, EventEmitter, OnInit, HostListener} from '@angular/core';
 import {TranslateService} from "@ngx-translate/core";
-import {RestIamService} from "../../rest/services/rest-iam.service";
-import {RestNodeService} from "../../rest/services/rest-node.service";
-import {RestConnectorService} from "../../rest/services/rest-connector.service";
-import {Node, NodeList, IamUsers, IamUser, UserQuota} from "../../rest/data-object";
-import {RestConstants} from "../../rest/rest-constants";
-import {RestCollectionService} from "../../rest/services/rest-collection.service";
 import {Toast} from "../toast";
-import {ListItem} from "../list-item";
 import {UIHelper} from '../ui-helper';
+import {UserQuota} from '../../../core-module/core.module';
 
 @Component({
   selector: 'user-quota',

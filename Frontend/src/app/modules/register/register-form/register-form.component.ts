@@ -1,16 +1,16 @@
 import {Component, EventEmitter, Output} from '@angular/core';
 import {Toast} from '../../../common/ui/toast';
 import {Router, ActivatedRoute, UrlSerializer} from '@angular/router';
-import {RegisterInformation} from '../../../common/rest/data-object';
+import {RegisterInformation} from '../../../core-module/core.module';
 import {TranslateService} from '@ngx-translate/core';
 import {Translation} from '../../../common/translation';
-import {RestConnectorService} from '../../../common/rest/services/rest-connector.service';
-import {ConfigurationService} from '../../../common/services/configuration.service';
+import {RestConnectorService} from '../../../core-module/core.module';
+import {ConfigurationService} from '../../../core-module/core.module';
 import {Title} from '@angular/platform-browser';
 import {UIHelper} from '../../../common/ui/ui-helper';
-import {SessionStorageService} from '../../../common/services/session-storage.service';
+import {SessionStorageService} from '../../../core-module/core.module';
 import {PlatformLocation} from '@angular/common';
-import {RestRegisterService} from '../../../common/rest/services/rest-register.service';
+import {RestRegisterService} from '../../../core-module/core.module';
 
 @Component({
   selector: 'app-register-form',

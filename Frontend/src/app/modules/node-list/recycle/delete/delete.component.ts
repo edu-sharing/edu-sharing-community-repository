@@ -1,7 +1,7 @@
 import {Component, Input, EventEmitter, Output} from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
-import {RestArchiveService} from "../../../../common/rest/services/rest-archive.service";
-import {TemporaryStorageService} from "../../../../common/services/temporary-storage.service";
+import {RestArchiveService} from "../../../../core-module/core.module";
+import {TemporaryStorageService} from "../../../../core-module/core.module";
 
 @Component({
   selector: 'recycle-delete-confirmation',

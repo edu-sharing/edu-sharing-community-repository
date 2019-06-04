@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
-import { Node } from "../../common/rest/data-object";
-import {ListItem} from "../../common/ui/list-item";
+import { Node } from "../../core-module/core.module";
+import {ListItem} from "../../core-module/core.module";
 
 @Injectable()
 export class SearchService {

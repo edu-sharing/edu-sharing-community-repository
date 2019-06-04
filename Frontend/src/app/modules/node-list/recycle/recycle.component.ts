@@ -1,13 +1,12 @@
 import {Component, Input, ViewChild} from "@angular/core";
-import {RestArchiveService} from "../../../common/rest/services/rest-archive.service";
-import {RestConstants} from "../../../common/rest/rest-constants";
+import {ListItem, RestArchiveService} from "../../../core-module/core.module";
+import {RestConstants} from "../../../core-module/core.module";
 import {OptionItem} from "../../../common/ui/actionbar/option-item";
 import {RecycleRestoreComponent} from "./restore/restore.component";
 import {TranslateService} from "@ngx-translate/core";
 import {Toast} from "../../../common/ui/toast";
-import {ArchiveRestore,Node} from "../../../common/rest/data-object";
-import {TemporaryStorageService} from "../../../common/services/temporary-storage.service";
-import {ListItem} from "../../../common/ui/list-item";
+import {ArchiveRestore,Node} from "../../../core-module/core.module";
+import {TemporaryStorageService} from "../../../core-module/core.module";
 
 @Component({
   selector: 'recycle',

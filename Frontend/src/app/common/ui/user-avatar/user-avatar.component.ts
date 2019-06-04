@@ -3,12 +3,11 @@
  */
 
 import {Component, Input} from '@angular/core';
-import {ConfigurationService} from "../../services/configuration.service";
-import {Comment, Person, UserProfile, UserSimple} from '../../rest/data-object';
-import {RestConstants} from '../../rest/rest-constants';
 import {Router} from '@angular/router';
-import {UIConstants} from '../ui-constants';
+import {UIConstants} from '../../../core-module/ui/ui-constants';
 import {DomSanitizer} from "@angular/platform-browser";
+import {RestConstants} from "../../../core-module/rest/rest-constants";
+import {UserSimple} from "../../../core-module/core.module";
 
 @Component({
     selector: 'user-avatar',

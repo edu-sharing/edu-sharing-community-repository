@@ -3,7 +3,7 @@ import {
   OnInit
 } from '@angular/core';
 import { CordovaService } from "../../common/services/cordova.service";
-import {UIConstants} from '../../common/ui/ui-constants';
+import {UIConstants} from '../../core-module/ui/ui-constants';
 import {Router} from '@angular/router';
 
 @Component({

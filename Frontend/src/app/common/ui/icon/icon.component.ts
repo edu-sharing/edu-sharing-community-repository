@@ -3,7 +3,6 @@
  */
 
 import {AfterViewInit, Component, ContentChildren, Directive, ElementRef, Input, Type, ViewChild} from '@angular/core';
-import {ConfigurationService} from "../../services/configuration.service";
 import {TranslateService} from "@ngx-translate/core";
 
 @Directive({

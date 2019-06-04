@@ -1,7 +1,6 @@
 import {PipeTransform, Pipe} from '@angular/core';
 import {NodeHelper} from "./node-helper";
 import {TranslateService} from "@ngx-translate/core";
-import {ConfigurationService} from "../services/configuration.service";
 
 @Pipe({name: 'replaceChars'})
 export class ReplaceCharsPipe implements PipeTransform {
@@ -20,5 +19,5 @@ export class ReplaceCharsPipe implements PipeTransform {
     }
     return value;
   }
-  constructor(private translate : TranslateService,private config:ConfigurationService){}
+  constructor(private translate : TranslateService){}
 }

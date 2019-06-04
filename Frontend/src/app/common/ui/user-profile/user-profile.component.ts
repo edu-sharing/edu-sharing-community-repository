@@ -3,13 +3,10 @@ import {
   QueryList
 } from '@angular/core';
 import {TranslateService} from "@ngx-translate/core";
-import {RestIamService} from "../../rest/services/rest-iam.service";
-import {IamUser, User} from "../../rest/data-object";
 import {UIAnimation} from "../ui-animation";
 import {trigger} from "@angular/animations";
 import {Toast} from "../toast";
-import {RestConstants} from "../../rest/rest-constants";
-import {RestHelper} from "../../rest/rest-helper";
+import {IamUser, RestConstants, RestHelper, RestIamService, User} from "../../../core-module/core.module";
 
 @Component({
   selector: 'user-profile',

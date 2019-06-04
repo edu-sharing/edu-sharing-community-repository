@@ -1,16 +1,19 @@
-import {Component, Input, Output, EventEmitter} from "@angular/core";
-import {RestConstants} from "../../../common/rest/rest-constants";
+import {Component, EventEmitter, Output} from "@angular/core";
+import {
+    ConfigurationService,
+    ListItem,
+    Node,
+    NodeList,
+    RestConnectorService,
+    RestConstants,
+    RestIamService,
+    RestSearchService,
+    TemporaryStorageService
+} from "../../../core-module/core.module";
 import {Toast} from "../../../common/ui/toast";
-import {ArchiveRestore,Node,NodeList} from "../../../common/rest/data-object";
-import {TemporaryStorageService} from "../../../common/services/temporary-storage.service";
-import {RestSearchService} from "../../../common/rest/services/rest-search.service";
-import {RestIamService} from "../../../common/rest/services/rest-iam.service";
-import {ConfigurationService} from "../../../common/services/configuration.service";
 import {NodeHelper} from "../../../common/ui/node-helper";
-import {RestConnectorService} from "../../../common/rest/services/rest-connector.service";
 import {Router} from "@angular/router";
-import {UIConstants} from "../../../common/ui/ui-constants";
-import {ListItem} from "../../../common/ui/list-item";
+import {UIConstants} from "../../../core-module/ui/ui-constants";
 import {TranslateService} from "@ngx-translate/core";
 import {OptionItem} from "../../../common/ui/actionbar/option-item";
 import {trigger} from "@angular/animations";

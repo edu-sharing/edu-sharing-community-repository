@@ -2,25 +2,23 @@
 import {Component, Input, Output, EventEmitter, HostListener, ChangeDetectorRef, ApplicationRef} from "@angular/core";
 import {
     Node, Group, IamGroups, IamUsers, NodeList, IamUser, IamAuthorities,
-    Authority, OrganizationOrganizations, Organization, Person, User, HomeFolder, SharedFolder
-} from "../../../common/rest/data-object";
+    Authority, OrganizationOrganizations, Organization, Person, User, HomeFolder, SharedFolder, ListItem, DialogButton
+} from "../../../core-module/core.module";
 import {Toast} from "../../../common/ui/toast";
 import {ActivatedRoute, Router} from "@angular/router";
-import {RestIamService} from "../../../common/rest/services/rest-iam.service";
+import {RestIamService} from "../../../core-module/core.module";
 import {TranslateService} from "@ngx-translate/core";
-import {RestConnectorService} from "../../../common/rest/services/rest-connector.service";
+import {RestConnectorService} from "../../../core-module/core.module";
 import {OptionItem} from "../../../common/ui/actionbar/option-item";
-import {DialogButton} from "../../../common/ui/modal-dialog/modal-dialog.component";
 import {UIAnimation} from "../../../common/ui/ui-animation";
 import {SuggestItem} from "../../../common/ui/autocomplete/autocomplete.component";
 import {NodeHelper} from "../../../common/ui/node-helper";
-import {RestConstants} from "../../../common/rest/rest-constants";
-import {RestOrganizationService} from "../../../common/rest/services/rest-organization.service";
-import {RestNodeService} from "../../../common/rest/services/rest-node.service";
-import {ConfigurationService} from "../../../common/services/configuration.service";
-import {Helper} from "../../../common/helper";
+import {RestConstants} from "../../../core-module/core.module";
+import {RestOrganizationService} from "../../../core-module/core.module";
+import {RestNodeService} from "../../../core-module/core.module";
+import {ConfigurationService} from "../../../core-module/core.module";
+import {Helper} from "../../../core-module/rest/helper";
 import {trigger} from "@angular/animations";
-import {ListItem} from "../../../common/ui/list-item";
 import {UIHelper} from "../../../common/ui/ui-helper";
 @Component({
   selector: 'permissions-authorities',

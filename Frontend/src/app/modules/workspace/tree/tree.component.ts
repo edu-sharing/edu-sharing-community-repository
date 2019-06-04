@@ -1,11 +1,11 @@
 import {Component, Input, Output, EventEmitter} from '@angular/core';
-import {NodeList,Node} from "../../../common/rest/data-object";
-import {RestNodeService} from "../../../common/rest/services/rest-node.service";
+import {NodeList,Node} from "../../../core-module/core.module";
+import {RestNodeService} from "../../../core-module/core.module";
 import {OptionItem} from "../../../common/ui/actionbar/option-item";
-import {TemporaryStorageService} from "../../../common/services/temporary-storage.service";
-import {RestConnectorService} from "../../../common/rest/services/rest-connector.service";
-import {RestConstants} from "../../../common/rest/rest-constants";
-import {Helper} from "../../../common/helper";
+import {TemporaryStorageService} from "../../../core-module/core.module";
+import {RestConnectorService} from "../../../core-module/core.module";
+import {RestConstants} from "../../../core-module/core.module";
+import {Helper} from "../../../core-module/rest/helper";
 
 @Component({
   selector: 'workspace-tree',

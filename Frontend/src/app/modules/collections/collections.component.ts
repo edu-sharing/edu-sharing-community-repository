@@ -1,49 +1,48 @@
-import {Component, ElementRef, OnInit, ViewChild} from '@angular/core';
+import {Component, ElementRef, ViewChild} from '@angular/core';
 
-import {Router, Params, ActivatedRoute} from "@angular/router";
-import {RouterComponent} from "../../router/router.component";
+import {ActivatedRoute, Router} from "@angular/router";
 
 import {Translation} from "../../common/translation";
 
-import * as EduData from "../../common/rest/data-object";
-
-import {RestCollectionService} from "../../common/rest/services/rest-collection.service";
-import {RestNodeService} from "../../common/rest/services/rest-node.service";
-import {RestIamService} from "../../common/rest/services/rest-iam.service";
-import {RestHelper} from "../../common/rest/rest-helper";
-import {RestConstants} from "../../common/rest/rest-constants";
+import * as EduData from "../../core-module/core.module";
+import {
+    Collection,
+    ConfigurationService, DialogButton,
+    FrameEventsService, ListItem,
+    LoginResult,
+    MdsMetadataset,
+    Node,
+    NodeRef,
+    NodeWrapper,
+    RestCollectionService,
+    RestConnectorService,
+    RestConstants,
+    RestHelper,
+    RestIamService,
+    RestMdsService,
+    RestNodeService,
+    RestOrganizationService,
+    SessionStorageService,
+    TemporaryStorageService,
+    UIService
+} from "../../core-module/core.module";
 
 import {Toast} from "../../common/ui/toast";
-import {RestConnectorService} from "../../common/rest/services/rest-connector.service";
-import {Collection, LoginResult, MdsMetadataset, NodeRef} from '../../common/rest/data-object';
-import {RestOrganizationService} from "../../common/rest/services/rest-organization.service";
-import {OrganizationOrganizations} from "../../common/rest/data-object";
 import {OptionItem} from "../../common/ui/actionbar/option-item";
-import {TemporaryStorageService} from "../../common/services/temporary-storage.service";
 import {NodeRenderComponent} from "../../common/ui/node-render/node-render.component";
-import {DialogButton} from "../../common/ui/modal-dialog/modal-dialog.component";
-import {NodeWrapper,Node} from "../../common/rest/data-object";
-import {FrameEventsService} from "../../common/services/frame-events.service";
 import {UIHelper} from "../../common/ui/ui-helper";
 import {Title} from "@angular/platform-browser";
-import {ConfigurationService} from "../../common/services/configuration.service";
-import {SessionStorageService} from "../../common/services/session-storage.service";
-import {UIConstants} from "../../common/ui/ui-constants";
-import {ListItem} from "../../common/ui/list-item";
+import {UIConstants} from "../../core-module/ui/ui-constants";
 import {AddElement, ListTableComponent} from "../../common/ui/list-table/list-table.component";
-import {RestMdsService} from "../../common/rest/services/rest-mds.service";
 import {NodeHelper} from "../../common/ui/node-helper";
 import {TranslateService} from "@ngx-translate/core";
-import {MdsHelper} from "../../common/rest/mds-helper";
-import {UIAnimation} from "../../common/ui/ui-animation";
-import {trigger} from "@angular/animations";
 import {Location} from "@angular/common";
-import {Helper} from "../../common/helper";
-import {UIService} from "../../common/services/ui.service";
+import {Helper} from "../../core-module/rest/helper";
 import {MainNavComponent} from "../../common/ui/main-nav/main-nav.component";
 import {ColorHelper} from '../../common/ui/color-helper';
 import {ActionbarHelperService} from "../../common/services/actionbar-helper";
-import {RestLocatorService} from '../../common/rest/services/rest-locator.service';
+import {MdsHelper} from "../../core-module/rest/mds-helper";
+import {BridgeService} from "../../core-bridge-module/bridge.service";
 
 // component class
 @Component({
@@ -141,6 +140,7 @@ export class CollectionsMainComponent {
         private router : Router,
         private tempStorage :TemporaryStorageService,
         private toast : Toast,
+        private bridge : BridgeService,
       private title:Title,
       private config:ConfigurationService,
         private translationService: TranslateService) {
@@ -934,7 +934,7 @@ export class CollectionsMainComponent {
 
     private addToStore(nodes:Node[]) {
         this.globalProgress=true;
-        RestHelper.addToStore(nodes,this.toast,this.iamService,()=>{
+        RestHelper.addToStore(nodes,this.bridge,this.iamService,()=>{
             this.globalProgress=false;
             this.mainNavRef.refreshNodeStore();
         });

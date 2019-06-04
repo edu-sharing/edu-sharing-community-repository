@@ -1,26 +1,24 @@
 import {Component, Input, EventEmitter, Output, AfterViewInit} from '@angular/core';
-import {RestNodeService} from "../../../common/rest/services/rest-node.service";
+import {ListItem, RestNodeService} from "../../../core-module/core.module";
 import {
     Node, NodeList, NodeWrapper, NodePermissions, NodeVersions, UsageList,
     Version, LoginResult, IamUser, Permission, Usage, Collection, CollectionUsage
-} from '../../../common/rest/data-object';
-import {RestConstants} from "../../../common/rest/rest-constants";
+} from '../../../core-module/core.module';
+import {RestConstants} from "../../../core-module/core.module";
 import {TranslateService} from "@ngx-translate/core";
 import {NodeHelper} from "../../../common/ui/node-helper";
-import {RestUsageService} from "../../../common/rest/services/rest-usage.service";
-import {DialogButton} from "../../../common/ui/modal-dialog/modal-dialog.component";
+import {RestUsageService} from "../../../core-module/core.module";
 import {Toast} from "../../../common/ui/toast";
-import {RestConnectorService} from "../../../common/rest/services/rest-connector.service";
-import {RestIamService} from "../../../common/rest/services/rest-iam.service";
-import {ConfigurationService} from "../../../common/services/configuration.service";
+import {RestConnectorService} from "../../../core-module/core.module";
+import {RestIamService} from "../../../core-module/core.module";
+import {ConfigurationService} from "../../../core-module/core.module";
 import {VCard} from "../../../common/VCard";
-import {RestHelper} from "../../../common/rest/rest-helper";
+import {RestHelper} from "../../../core-module/core.module";
 import {Router} from "@angular/router";
 import {UIHelper} from "../../../common/ui/ui-helper";
-import {UIConstants} from "../../../common/ui/ui-constants";
-import {ListItem} from "../../../common/ui/list-item";
-import {ConfigurationHelper} from "../../../common/rest/configuration-helper";
-import {RestSearchService} from "../../../common/rest/services/rest-search.service";
+import {UIConstants} from "../../../core-module/ui/ui-constants";
+import {ConfigurationHelper} from "../../../core-module/core.module";
+import {RestSearchService} from "../../../core-module/core.module";
 
 // Charts.js
 declare var Chart:any;

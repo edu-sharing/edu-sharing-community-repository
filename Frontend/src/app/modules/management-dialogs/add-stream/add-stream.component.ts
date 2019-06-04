@@ -1,22 +1,22 @@
 import {Component, Input, EventEmitter, Output, ViewChild, ElementRef} from '@angular/core';
-import {RestConnectorService} from "../../../common/rest/services/rest-connector.service";
+import {RestConnectorService} from "../../../core-module/core.module";
 import {Toast} from "../../../common/ui/toast";
-import {RestNodeService} from "../../../common/rest/services/rest-node.service";
+import {RestNodeService} from "../../../core-module/core.module";
 import {
   NodeWrapper, Node, NodePermissions, LocalPermissionsResult, Permission,
   LoginResult, View, STREAM_STATUS, IamUser, AuthorityProfile
-} from "../../../common/rest/data-object";
-import {ConfigurationService} from "../../../common/services/configuration.service";
+} from "../../../core-module/core.module";
+import {ConfigurationService} from "../../../core-module/core.module";
 import {UIHelper} from "../../../common/ui/ui-helper";
-import {RestIamService} from "../../../common/rest/services/rest-iam.service";
+import {RestIamService} from "../../../core-module/core.module";
 import {TranslateService} from "@ngx-translate/core";
 import {MdsComponent} from "../../../common/ui/mds/mds.component";
-import {RestConstants} from "../../../common/rest/rest-constants";
+import {RestConstants} from "../../../core-module/core.module";
 import {UIAnimation} from "../../../common/ui/ui-animation";
 import {trigger} from "@angular/animations";
-import {RestStreamService} from "../../../common/rest/services/rest-stream.service";
-import {RestHelper} from "../../../common/rest/rest-helper";
-import {Helper} from "../../../common/helper";
+import {RestStreamService} from "../../../core-module/core.module";
+import {RestHelper} from "../../../core-module/core.module";
+import {Helper} from "../../../core-module/rest/helper";
 
 @Component({
   selector: 'add-stream',

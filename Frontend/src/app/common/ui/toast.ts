@@ -1,15 +1,13 @@
-import {Injectable} from "@angular/core";
+import {Injectable, Injector} from "@angular/core";
 import {ToastyService, ToastData} from "ngx-toasty";
-import {RestConstants} from "../rest/rest-constants";
-import {RouterComponent} from "../../router/router.component";
-import {ConfigurationService} from "../services/configuration.service";
 import {Router} from "@angular/router";
-import {TemporaryStorageService} from "../services/temporary-storage.service";
-import {DialogButton} from "./modal-dialog/modal-dialog.component";
-import {UIConstants} from "./ui-constants";
+import {UIConstants} from "../../core-module/ui/ui-constants";
 import {TranslateService} from "@ngx-translate/core";
 import {UIAnimation} from "./ui-animation";
 import {CordovaService} from "../services/cordova.service";
+import {TemporaryStorageService} from "../../core-module/rest/services/temporary-storage.service";
+import {DialogButton} from "../../core-module/ui/dialog-button";
+import {RestConstants} from "../../core-module/rest/rest-constants";
 
 @Injectable()
 export class Toast{
@@ -26,8 +24,8 @@ export class Toast{
   constructor(private toasty : ToastyService,
               private router : Router,
               private storage : TemporaryStorageService,
-              private cordova : CordovaService,
-              private translate : TranslateService){
+              private injector:Injector,
+              private cordova : CordovaService){
     (window as any)['toastComponent']=this;
   }
   /**
@@ -41,9 +39,9 @@ export class Toast{
       return;
     this.lastToastMessage=message;
     this.lastToastMessageTime=Date.now();
-    this.translate.get(message, parameters).subscribe((text: any) => {
+    this.injector.get(TranslateService).get(message, parameters).subscribe((text: any) => {
       if(dialogTitle){
-        text+='<br /><a onclick="window[\'toastComponent\'].openDetails()">'+this.translate.instant("DETAILS")+'</a>';
+        text+='<br /><a onclick="window[\'toastComponent\'].openDetails()">'+this.injector.get(TranslateService).instant("DETAILS")+'</a>';
       }
       text=this.handleAdditional(text,additional);
       this.dialogParameters=parameters;
@@ -108,9 +106,9 @@ export class Toast{
           this.dialogTitle = 'TOOLPERMISSION_ERROR_TITLE';
           message = 'TOOLPERMISSION_ERROR';
           let permission = (json ? json.message : error).split(' ')[0];
-          this.dialogMessage = this.translate.instant('TOOLPERMISSION_ERROR_HEADER') + "\n- " +
-            this.translate.instant('TOOLPERMISSION.' + permission) + "\n\n" +
-            this.translate.instant('TOOLPERMISSION_ERROR_FOOTER', {permission: permission});
+          this.dialogMessage = this.injector.get(TranslateService).instant('TOOLPERMISSION_ERROR_HEADER') + "\n- " +
+            this.injector.get(TranslateService).instant('TOOLPERMISSION.' + permission) + "\n\n" +
+            this.injector.get(TranslateService).instant('TOOLPERMISSION_ERROR_FOOTER', {permission: permission});
         }
         else if (json.error.indexOf("SystemFolderDeleteDeniedException") != -1) {
           message = 'SYSTEM_FOLDER_DELETE_ERROR';
@@ -129,9 +127,9 @@ export class Toast{
               this.dialogTitle = 'TOOLPERMISSION_ERROR_TITLE';
               message = 'TOOLPERMISSION_ERROR';
               let permission = error.split(' ')[0];
-              this.dialogMessage = this.translate.instant('TOOLPERMISSION_ERROR_HEADER') + "\n- " +
-                this.translate.instant('TOOLPERMISSION.' + permission) + "\n\n" +
-                this.translate.instant('TOOLPERMISSION_ERROR_FOOTER', {permission: permission});
+              this.dialogMessage = this.injector.get(TranslateService).instant('TOOLPERMISSION_ERROR_HEADER') + "\n- " +
+                this.injector.get(TranslateService).instant('TOOLPERMISSION.' + permission) + "\n\n" +
+                this.injector.get(TranslateService).instant('TOOLPERMISSION_ERROR_FOOTER', {permission: permission});
             }
             else if (json.error.indexOf("SystemFolderDeleteDeniedException") != -1) {
               message = 'SYSTEM_FOLDER_DELETE_ERROR';
@@ -184,9 +182,9 @@ export class Toast{
     this.lastToastError=message+JSON.stringify(parameters);
     this.lastToastErrorTime=Date.now();
     console.log(message);
-    this.translate.get(message, parameters).subscribe((text: any) => {
+    this.injector.get(TranslateService).get(message, parameters).subscribe((text: any) => {
       if (this.dialogTitle) {
-        text += '<br /><a onclick="window[\'toastComponent\'].openDetails()">' + this.translate.instant("DETAILS") + '</a>';
+        text += '<br /><a onclick="window[\'toastComponent\'].openDetails()">' + this.injector.get(TranslateService).instant("DETAILS") + '</a>';
       }
       text=this.handleAdditional(text,additional);
       this.toasty.error(this.getToastOptions(text));
@@ -202,7 +200,7 @@ export class Toast{
 
   private handleAdditional(text:string,additional: any) {
       if(additional && additional.link){
-          text+='<br /><a onclick="window[\'toastComponent\'].linkCallback()">'+this.translate.instant(additional.link.caption)+'</a>';
+          text+='<br /><a onclick="window[\'toastComponent\'].linkCallback()">'+this.injector.get(TranslateService).instant(additional.link.caption)+'</a>';
           this.linkCallback=additional.link.callback;
       }
       return text;

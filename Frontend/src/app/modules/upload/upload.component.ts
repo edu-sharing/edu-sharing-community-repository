@@ -2,13 +2,13 @@
 import {Component} from "@angular/core";
 import {Translation} from "../../common/translation";
 import {UIHelper} from "../../common/ui/ui-helper";
-import {SessionStorageService} from "../../common/services/session-storage.service";
+import {SessionStorageService} from "../../core-module/core.module";
 import {TranslateService} from "@ngx-translate/core";
 import {Title} from "@angular/platform-browser";
 import {ActivatedRoute} from "@angular/router";
 import {Toast} from "../../common/ui/toast";
-import {RestConnectorService} from "../../common/rest/services/rest-connector.service";
-import {ConfigurationService} from "../../common/services/configuration.service";
+import {RestConnectorService} from "../../core-module/core.module";
+import {ConfigurationService} from "../../core-module/core.module";
 
 @Component({
   selector: 'upload-main',

@@ -1,23 +1,22 @@
 import {Component, Input, EventEmitter, Output, ViewChild, ElementRef, HostListener} from '@angular/core';
-import {RestNodeService} from "../../common/rest/services/rest-node.service";
+import {DialogButton, RestNodeService} from "../../core-module/core.module";
 import {TranslateService} from "@ngx-translate/core";
-import {RestSearchService} from "../../common/rest/services/rest-search.service";
+import {RestSearchService} from "../../core-module/core.module";
 import {Toast} from "../../common/ui/toast";
-import {RestConstants} from "../../common/rest/rest-constants";
-import {NodeWrapper, Node, Collection} from "../../common/rest/data-object";
-import {RestHelper} from "../../common/rest/rest-helper";
-import {RestToolService} from "../../common/rest/services/rest-tool.service";
-import {ConfigurationService} from "../../common/services/configuration.service";
+import {RestConstants} from "../../core-module/core.module";
+import {NodeWrapper, Node, Collection} from "../../core-module/core.module";
+import {RestHelper} from "../../core-module/core.module";
+import {RestToolService} from "../../core-module/core.module";
+import {ConfigurationService} from "../../core-module/core.module";
 import {MdsComponent} from "../../common/ui/mds/mds.component";
-import {RestCollectionService} from "../../common/rest/services/rest-collection.service";
+import {RestCollectionService} from "../../core-module/core.module";
 import {trigger} from "@angular/animations";
 import {UIAnimation} from "../../common/ui/ui-animation";
 import {UIHelper} from "../../common/ui/ui-helper";
-import {DialogButton} from "../../common/ui/modal-dialog/modal-dialog.component";
 import {Router} from '@angular/router';
-import {UIConstants} from "../../common/ui/ui-constants";
-import {ClipboardObject, TemporaryStorageService} from '../../common/services/temporary-storage.service';
-import {RestUsageService} from "../../common/rest/services/rest-usage.service";
+import {UIConstants} from "../../core-module/ui/ui-constants";
+import {ClipboardObject, TemporaryStorageService} from '../../core-module/core.module';
+import {RestUsageService} from "../../core-module/core.module";
 
 @Component({
   selector: 'workspace-management',

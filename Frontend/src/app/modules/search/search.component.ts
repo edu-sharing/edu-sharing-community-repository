@@ -1,52 +1,58 @@
-
-import {Component, ViewChild, HostListener, ElementRef} from '@angular/core';
+import {Component, ElementRef, HostListener, ViewChild} from '@angular/core';
 import 'rxjs/add/operator/map';
-import { SearchService } from './search.service';
-import { WindowRefService } from './window-ref.service';
-import { Subscription } from 'rxjs/Subscription';
-import { SuggestItem} from '../../common/ui/autocomplete/autocomplete.component';
-import {Router, ActivatedRoute} from '@angular/router';
+import {SearchService} from './search.service';
+import {WindowRefService} from './window-ref.service';
+import {Subscription} from 'rxjs/Subscription';
+import {ActivatedRoute, Router} from '@angular/router';
 import {TranslateService} from '@ngx-translate/core';
 import {Translation} from '../../common/translation';
-import {RestSearchService} from '../../common/rest/services/rest-search.service';
-import {RestNodeService} from '../../common/rest/services/rest-node.service';
-import {RestConstants} from '../../common/rest/rest-constants';
-import {RestConnectorService} from '../../common/rest/services/rest-connector.service';
 import {
-    Node, NodeList, LoginResult, NetworkRepositories, Repository, NodeWrapper,
-    MdsMetadatasets, MdsInfo, Collection, CollectionWrapper, SearchList, SortItem
-} from '../../common/rest/data-object';
+    Collection,
+    CollectionWrapper,
+    ConfigurationHelper,
+    ConfigurationService,
+    DialogButton,
+    ListItem,
+    LoginResult,
+    MdsInfo,
+    MdsMetadatasets,
+    NetworkRepositories,
+    Node,
+    NodeList,
+    NodeWrapper,
+    Repository,
+    RestCollectionService,
+    RestConnectorService,
+    RestConstants,
+    RestHelper,
+    RestIamService,
+    RestMdsService,
+    RestNetworkService,
+    RestNodeService,
+    RestSearchService,
+    SearchList,
+    SessionStorageService,
+    SortItem,
+    TemporaryStorageService,
+    UIService
+} from '../../core-module/core.module';
 import {ListTableComponent} from '../../common/ui/list-table/list-table.component';
 import {OptionItem} from '../../common/ui/actionbar/option-item';
-import {TemporaryStorageService} from '../../common/services/temporary-storage.service';
-import {Helper} from '../../common/helper';
+import {Helper} from '../../core-module/rest/helper';
 import {UIHelper} from '../../common/ui/ui-helper';
 import {Title} from '@angular/platform-browser';
-import {ConfigurationService} from '../../common/services/configuration.service';
 import {Toast} from '../../common/ui/toast';
-import {SessionStorageService} from '../../common/services/session-storage.service';
-import {RestNetworkService} from '../../common/rest/services/rest-network.service';
-import {WorkspaceMainComponent} from '../workspace/workspace.component';
 import {UIAnimation} from '../../common/ui/ui-animation';
 import {trigger} from '@angular/animations';
 import {NodeHelper} from '../../common/ui/node-helper';
-import {RestCollectionService} from '../../common/rest/services/rest-collection.service';
-import {RestMdsService} from '../../common/rest/services/rest-mds.service';
-import {RestHelper} from '../../common/rest/rest-helper';
-import {RestIamService} from '../../common/rest/services/rest-iam.service';
-import {SearchNodeStoreComponent} from './node-store/node-store.component';
-import {OPEN_URL_MODE, UIConstants} from '../../common/ui/ui-constants';
-import {ListItem} from '../../common/ui/list-item';
+import {UIConstants} from '../../core-module/ui/ui-constants';
 import {MdsComponent} from '../../common/ui/mds/mds.component';
-import {RequestObject} from '../../common/rest/request-object';
-import {DialogButton} from '../../common/ui/modal-dialog/modal-dialog.component';
 import {WorkspaceManagementDialogsComponent} from '../management-dialogs/management-dialogs.component';
-import {ConfigurationHelper} from '../../common/rest/configuration-helper';
-import {MdsHelper} from '../../common/rest/mds-helper';
 import {MainNavComponent} from '../../common/ui/main-nav/main-nav.component';
-import {UIService} from '../../common/services/ui.service';
 import {ActionbarHelperService} from "../../common/services/actionbar-helper";
 import {HttpClient} from '@angular/common/http';
+import {MdsHelper} from "../../core-module/rest/mds-helper";
+import {BridgeService} from "../../core-bridge-module/bridge.service";
 
 
 @Component({
@@ -155,6 +161,7 @@ export class SearchComponent {
     private connector:RestConnectorService,
     private RestNodeService: RestNodeService,
     private mdsService:RestMdsService,
+    private bridge:BridgeService,
     private iam:RestIamService,
     private search: RestSearchService,
     private collectionApi : RestCollectionService,
@@ -785,7 +792,7 @@ export class SearchComponent {
 
   private addToStore(selection: Node[]) {
     this.globalProgress=true;
-    RestHelper.addToStore(selection,this.toast,this.iam,()=>{
+    RestHelper.addToStore(selection,this.bridge,this.iam,()=>{
         this.globalProgress=false;
         this.updateSelection([]);
         this.mainNavRef.refreshNodeStore();

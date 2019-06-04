@@ -2,11 +2,11 @@ import {Translation} from '../../common/translation';
 import {UIHelper} from '../../common/ui/ui-helper';
 import {ActivatedRoute, Router} from '@angular/router';
 import {Toast} from '../../common/ui/toast';
-import {ConfigurationService} from '../../common/services/configuration.service';
+import {ConfigurationService, DialogButton, ListItem} from '../../core-module/core.module';
 import {Title} from '@angular/platform-browser';
 import {TranslateService} from '@ngx-translate/core';
-import {SessionStorageService} from '../../common/services/session-storage.service';
-import {RestConnectorService} from '../../common/rest/services/rest-connector.service';
+import {SessionStorageService} from '../../core-module/core.module';
+import {RestConnectorService} from '../../core-module/core.module';
 import {Component, ViewChild, ElementRef, ViewContainerRef, ComponentFactoryResolver} from '@angular/core';
 import {
     LoginResult,
@@ -17,20 +17,18 @@ import {
     Authority,
     NodeList,
     NodeWrapper, RestoreResult
-} from '../../common/rest/data-object';
-import {RestAdminService} from '../../common/rest/services/rest-admin.service';
-import {DialogButton} from '../../common/ui/modal-dialog/modal-dialog.component';
-import {Helper} from '../../common/helper';
-import {RestConstants} from '../../common/rest/rest-constants';
-import {UIConstants} from '../../common/ui/ui-constants';
-import {ListItem} from '../../common/ui/list-item';
-import {RestNodeService} from '../../common/rest/services/rest-node.service';
+} from '../../core-module/core.module';
+import {RestAdminService} from '../../core-module/core.module';
+import {Helper} from '../../core-module/rest/helper';
+import {RestConstants} from '../../core-module/core.module';
+import {UIConstants} from '../../core-module/ui/ui-constants';
+import {RestNodeService} from '../../core-module/core.module';
 import {SuggestItem} from '../../common/ui/autocomplete/autocomplete.component';
-import {RestOrganizationService} from '../../common/rest/services/rest-organization.service';
-import {RestSearchService} from '../../common/rest/services/rest-search.service';
-import {RestHelper} from '../../common/rest/rest-helper';
+import {RestOrganizationService} from '../../core-module/core.module';
+import {RestSearchService} from '../../core-module/core.module';
+import {RestHelper} from '../../core-module/core.module';
 import {Observable, Observer} from 'rxjs/index';
-import {RestNetworkService} from '../../common/rest/services/rest-network.service';
+import {RestNetworkService} from '../../core-module/core.module';
 import {MainNavComponent} from '../../common/ui/main-nav/main-nav.component';
 
 @Component({

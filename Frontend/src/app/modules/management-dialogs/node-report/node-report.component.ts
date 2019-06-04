@@ -1,14 +1,14 @@
 import {Component, Input, EventEmitter, Output, ViewChild, ElementRef} from '@angular/core';
-import {RestConnectorService} from "../../../common/rest/services/rest-connector.service";
+import {RestConnectorService} from "../../../core-module/core.module";
 import {Toast} from "../../../common/ui/toast";
-import {RestNodeService} from "../../../common/rest/services/rest-node.service";
+import {RestNodeService} from "../../../core-module/core.module";
 import {
   NodeWrapper, Node, NodePermissions, LocalPermissionsResult, Permission,
   LoginResult
-} from "../../../common/rest/data-object";
-import {ConfigurationService} from "../../../common/services/configuration.service";
+} from "../../../core-module/core.module";
+import {ConfigurationService} from "../../../core-module/core.module";
 import {UIHelper} from "../../../common/ui/ui-helper";
-import {RestIamService} from "../../../common/rest/services/rest-iam.service";
+import {RestIamService} from "../../../core-module/core.module";
 import {TranslateService} from "@ngx-translate/core";
 import {trigger} from "@angular/animations";
 import {UIAnimation} from "../../../common/ui/ui-animation";

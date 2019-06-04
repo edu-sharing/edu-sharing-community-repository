@@ -1,16 +1,17 @@
 import {Component, Input, Output, EventEmitter, OnInit, HostListener} from '@angular/core';
 import {TranslateService} from "@ngx-translate/core";
-import {RestIamService} from "../../rest/services/rest-iam.service";
-import {RestNodeService} from "../../rest/services/rest-node.service";
-import {RestConnectorService} from "../../rest/services/rest-connector.service";
-import {Node, NodeList, IamUsers, IamUser, Collection} from "../../rest/data-object";
-import {RestConstants} from "../../rest/rest-constants";
-import {RestCollectionService} from "../../rest/services/rest-collection.service";
 import {Toast} from "../toast";
-import {ListItem} from "../list-item";
 import {AddElement} from "../list-table/list-table.component";
 import {Router} from "@angular/router";
-import {UIConstants} from "../ui-constants";
+import {UIConstants} from "../../../core-module/ui/ui-constants";
+import {
+    Collection,
+    ListItem,
+    RestCollectionService, RestConnectorService,
+    RestConstants,
+    RestIamService,
+    RestNodeService
+} from "../../../core-module/core.module";
 
 @Component({
   selector: 'collection-chooser',

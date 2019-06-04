@@ -1,17 +1,17 @@
 import {Component, EventEmitter, Input, Output} from '@angular/core';
-import {RestConnectorService} from "../../../common/rest/services/rest-connector.service";
+import {RestConnectorService} from "../../../core-module/core.module";
 import {Toast} from "../../../common/ui/toast";
 import {PlatformLocation} from "@angular/common";
 import {ActivatedRoute, Router, UrlSerializer} from "@angular/router";
 import {TranslateService} from "@ngx-translate/core";
-import {ConfigurationService} from "../../../common/services/configuration.service";
+import {ConfigurationService} from "../../../core-module/core.module";
 import {Title} from "@angular/platform-browser";
-import {SessionStorageService} from "../../../common/services/session-storage.service";
-import {UIConstants} from "../../../common/ui/ui-constants";
-import {RestRegisterService} from '../../../common/rest/services/rest-register.service';
+import {SessionStorageService} from "../../../core-module/core.module";
+import {UIConstants} from "../../../core-module/ui/ui-constants";
+import {RestRegisterService} from '../../../core-module/core.module';
 import {UIHelper} from "../../../common/ui/ui-helper";
 import {CordovaService} from "../../../common/services/cordova.service";
-import {RestLocatorService} from "../../../common/rest/services/rest-locator.service";
+import {RestLocatorService} from "../../../core-module/core.module";
 
 @Component({
   selector: 'app-register-done',

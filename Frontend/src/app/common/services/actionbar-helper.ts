@@ -1,11 +1,16 @@
 import {NodeHelper} from "../ui/node-helper";
-import {Node, Repository} from '../rest/data-object';
-import {RestConstants} from "../rest/rest-constants";
-import {OptionItem} from "../ui/actionbar/option-item";
-import {RestConnectorService} from "../rest/services/rest-connector.service";
-import {RestConnectorsService} from "../rest/services/rest-connectors.service";
 import {Injectable} from "@angular/core";
-import {RestNetworkService} from '../rest/services/rest-network.service';
+import {MessageType} from "../../core-bridge-module/bridge.service";
+import {
+    Node,
+    Repository,
+    RestConnectorService,
+    RestConnectorsService,
+    RestConstants,
+    RestNetworkService
+} from "../../core-module/core.module";
+import {OptionItem} from "../ui/actionbar/option-item";
+
 @Injectable()
 export class ActionbarHelperService{
   private repositories: Repository[];
@@ -95,7 +100,7 @@ export class ActionbarHelperService{
           return NodeHelper.getNodesRight(list,RestConstants.ACCESS_CC_PUBLISH,true) && RestNetworkService.allFromHomeRepo(list,this.repositories);
         }
         option.disabledCallback = () =>{
-          this.connectors.getRestConnector().getToastService().error(null,'WORKSPACE.TOAST.ADD_TO_COLLECTION_DISABLED');
+          this.connectors.getRestConnector().getBridgeService().showTemporaryMessage(MessageType.error, null,'WORKSPACE.TOAST.ADD_TO_COLLECTION_DISABLED');
         };
       }
     }

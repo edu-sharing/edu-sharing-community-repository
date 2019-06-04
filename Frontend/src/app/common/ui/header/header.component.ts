@@ -3,7 +3,6 @@
  */
 
 import {Component, Input} from '@angular/core';
-import {ConfigurationService} from "../../services/configuration.service";
 
 @Component({
   selector: 'app-header',

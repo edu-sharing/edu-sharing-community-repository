@@ -1,30 +1,32 @@
-import {
-  Component, Input, EventEmitter, Output, ViewChild, ElementRef, HostListener,
-  ApplicationRef, AfterViewInit
-} from '@angular/core';
-import {RestNodeService} from "../../../common/rest/services/rest-node.service";
-import {
-    Node, NodeList, NodePermissions, Permission, Permissions, LocalPermissions,
-    NodeWrapper, IamUsers, IamGroups, NodeShare, IamAuthorities, LoginResult, Authority, Collection, UsageList, CollectionUsage
-} from '../../../common/rest/data-object';
+import {AfterViewInit, ApplicationRef, Component, EventEmitter, HostListener, Input, Output} from '@angular/core';
+
 import {Toast} from "../../../common/ui/toast";
-import {RestConstants} from "../../../common/rest/rest-constants";
-import {Subject} from "rxjs";
-import {RestIamService} from "../../../common/rest/services/rest-iam.service";
-import {SuggestItem} from "../../../common/ui/autocomplete/autocomplete.component";
-import {RestConnectorService} from "../../../common/rest/services/rest-connector.service";
 import {TranslateService} from "@ngx-translate/core";
 import {NodeHelper} from "../../../common/ui/node-helper";
-import {RestHelper} from "../../../common/rest/rest-helper";
-import {Helper} from "../../../common/helper";
+import {Helper} from "../../../core-module/rest/helper";
 import {trigger} from "@angular/animations";
 import {UIAnimation} from "../../../common/ui/ui-animation";
-import {RestUsageService} from '../../../common/rest/services/rest-usage.service';
 import {UIHelper} from '../../../common/ui/ui-helper';
-import {UIConstants} from '../../../common/ui/ui-constants';
-import {RestCollectionService} from '../../../common/rest/services/rest-collection.service';
-import {ConfigurationService} from "../../../common/services/configuration.service";
-import {DialogButton} from "../../../common/ui/modal-dialog/modal-dialog.component";
+import {UIConstants} from '../../../core-module/ui/ui-constants';
+import {ConfigurationService} from "../../../core-module/core.module";
+import {
+    Collection,
+    CollectionUsage,
+    DialogButton,
+    LocalPermissions,
+    LoginResult,
+    Node,
+    NodeList,
+    NodePermissions, NodeShare,
+    NodeWrapper,
+    Permission, RestCollectionService,
+    RestConnectorService,
+    RestConstants,
+    RestHelper,
+    RestIamService,
+    RestNodeService,
+    RestUsageService, UsageList
+} from "../../../core-module/core.module";
 
 @Component({
   selector: 'workspace-share',

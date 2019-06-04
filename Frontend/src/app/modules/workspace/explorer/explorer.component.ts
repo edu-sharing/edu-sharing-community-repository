@@ -1,18 +1,17 @@
 import {Component, Input, EventEmitter, Output, OnDestroy, AfterViewInit} from '@angular/core';
-import {RestNodeService} from "../../../common/rest/services/rest-node.service";
-import {Node, NodeList, NodeWrapper} from "../../../common/rest/data-object";
-import {RestConstants} from "../../../common/rest/rest-constants";
+import {ListItem, RestNodeService} from "../../../core-module/core.module";
+import {Node, NodeList, NodeWrapper} from "../../../core-module/core.module";
+import {RestConstants} from "../../../core-module/core.module";
 import {TranslateService} from "@ngx-translate/core";
-import {RestConnectorService} from "../../../common/rest/services/rest-connector.service";
+import {RestConnectorService} from "../../../core-module/core.module";
 import {OptionItem} from "../../../common/ui/actionbar/option-item";
 import {Toast} from "../../../common/ui/toast";
-import {SessionStorageService} from "../../../common/services/session-storage.service";
-import {RestSearchService} from "../../../common/rest/services/rest-search.service";
-import {ConfigurationService} from "../../../common/services/configuration.service";
-import {ListItem} from "../../../common/ui/list-item";
-import {TemporaryStorageService} from '../../../common/services/temporary-storage.service';
+import {SessionStorageService} from "../../../core-module/core.module";
+import {RestSearchService} from "../../../core-module/core.module";
+import {ConfigurationService} from "../../../core-module/core.module";
+import {TemporaryStorageService} from '../../../core-module/core.module';
 import {StateAwareComponent} from '../../../common/directives/StateAwareComponent';
-import {Helper} from "../../../common/helper";
+import {Helper} from "../../../core-module/rest/helper";
 
 @Component({
   selector: 'workspace-explorer',

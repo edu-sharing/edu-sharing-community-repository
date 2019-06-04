@@ -1,31 +1,34 @@
-import {RestConstants} from "../rest/rest-constants";
 import {TranslateService} from "@ngx-translate/core";
 import {
-    Node, Permission, Collection, User, LoginResult, AuthorityProfile, ParentList,
-    Repository, WorkflowDefinition, Permissions, CollectionReference
-} from "../rest/data-object";
+    Node,
+    Permission,
+    Collection,
+    User,
+    LoginResult,
+    AuthorityProfile,
+    ParentList,
+    Repository,
+    WorkflowDefinition,
+    Permissions,
+    CollectionReference,
+    RestConstants,
+    RestHelper,
+    ConfigurationService,
+    TemporaryStorageService, RestConnectorService, ListItem
+} from "../../core-module/core.module";
 import {FormatSizePipe} from "./file-size.pipe";
-import {RestConnectorService} from "../rest/services/rest-connector.service";
 import {Observable, Observer} from "rxjs";
-import {ConfigurationService} from "../services/configuration.service";
-import {RestHelper} from "../rest/rest-helper";
 import {Toast} from "./toast";
 import {Router} from "@angular/router";
 import {OptionItem} from "./actionbar/option-item";
 import {DateHelper} from "./DateHelper";
-import {RestNodeService} from "../rest/services/rest-node.service";
-import {UIConstants} from "./ui-constants";
-import {Translation} from "../translation";
-import {TemporaryStorageService} from "../services/temporary-storage.service";
-import {ApplyToLmsComponent} from "./apply-to-lms/apply-to-lms.component";
-import {ListItem} from "./list-item";
-import {Helper} from "../helper";
-import {ConfigurationHelper} from "../rest/configuration-helper";
-import {CordovaService} from "../services/cordova.service";
+import {UIConstants} from "../../core-module/ui/ui-constants";
+import {Helper} from "../../core-module/rest/helper";
 import {VCard} from "../VCard";
 import {HttpClient} from '@angular/common/http';
 import {HttpResponse} from '@angular/common/http/src/response';
-
+import {ConfigurationHelper} from "../../core-module/rest/configuration-helper";
+import {BridgeService} from "../../core-bridge-module/bridge.service";
 export class NodeHelper{
   /**
    * Gets and formats an attribute from the node
@@ -220,11 +223,11 @@ export class NodeHelper{
     return collection[item];
   }
 
-  public static downloadUrl(toast:Toast,cordova:CordovaService,url:string,fileName="download"){
-    if(cordova.isRunningCordova()){
+  public static downloadUrl(toast:Toast,bridge:BridgeService,url:string,fileName="download"){
+    if(bridge.isRunningCordova()){
         toast.toast('TOAST.DOWNLOAD_STARTED',{name:fileName});
-        cordova.downloadContent(url,fileName,(deviceFileName:string)=>{
-            if(cordova.isAndroid()) {
+        bridge.getCordova().downloadContent(url,fileName,(deviceFileName:string)=>{
+            if(bridge.getCordova().isAndroid()) {
                 toast.toast('TOAST.DOWNLOAD_FINISHED_ANDROID', {name: fileName});
             }
             else{
@@ -234,7 +237,7 @@ export class NodeHelper{
             toast.error(null,'TOAST.DOWNLOAD_FAILED',{name:fileName},null,null,{
               link:{
                 caption:'TOAST.DOWNLOAD_TRY_AGAIN',
-                callback:()=>{this.downloadUrl(toast,cordova,url,fileName)}
+                callback:()=>{this.downloadUrl(toast,bridge,url,fileName)}
               }
             });
         });
@@ -247,10 +250,10 @@ export class NodeHelper{
    * Download (a single) node
    * @param node
    */
-  public static downloadNode(toast:Toast,cordova:CordovaService,node:any,version=RestConstants.NODE_VERSION_CURRENT) {
+  public static downloadNode(toast:Toast,bridge:BridgeService,node:any,version=RestConstants.NODE_VERSION_CURRENT) {
     if(node.reference)
       node=node.reference;
-    this.downloadUrl(toast,cordova,node.downloadUrl+(version && version!=RestConstants.NODE_VERSION_CURRENT ? "&version="+version : ""),node.name);
+    this.downloadUrl(toast,bridge,node.downloadUrl+(version && version!=RestConstants.NODE_VERSION_CURRENT ? "&version="+version : ""),node.name);
   }
 
 
@@ -526,14 +529,14 @@ export class NodeHelper{
    */
   static downloadNodes(toast:Toast,connector:RestConnectorService,nodes: Node[], fileName="download.zip") {
     if(nodes.length==1)
-      return this.downloadNode(toast,connector.getCordovaService(),nodes[0]);
+      return this.downloadNode(toast,connector.getBridgeService(),nodes[0]);
 
     let nodesString=RestHelper.getNodeIds(nodes).join(",");
     let url=connector.getAbsoluteEndpointUrl()+
         "../eduservlet/download?appId="+
         encodeURIComponent(nodes[0].ref.repo)+
         "&nodeIds="+encodeURIComponent(nodesString)+"&fileName="+encodeURIComponent(fileName);
-    this.downloadUrl(toast,connector.getCordovaService(),url,fileName);
+    this.downloadUrl(toast,connector.getBridgeService(),url,fileName);
   }
 
   static getLRMIProperty(data: any, item: ListItem) {

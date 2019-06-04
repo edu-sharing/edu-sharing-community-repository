@@ -6,17 +6,18 @@ import {
 
 import { Toast } from "../../common/ui/toast";
 import {Router, Route, ActivatedRoute} from "@angular/router";
-import { OAuthResult, LoginResult, AccessScope } from "../../common/rest/data-object";
-import {OPEN_URL_MODE, UIConstants} from "../../common/ui/ui-constants";
+import {OAuthResult, LoginResult, AccessScope, RestConstants} from "../../core-module/core.module";
+import {OPEN_URL_MODE, UIConstants} from "../../core-module/ui/ui-constants";
 import { CordovaService } from "../../common/services/cordova.service";
-import { ConfigurationService } from '../../common/services/configuration.service';
+import { ConfigurationService } from '../../core-module/core.module';
 import { UIHelper } from '../../common/ui/ui-helper';
 import { Translation } from '../../common/translation';
 import { TranslateService } from '@ngx-translate/core';
-import { RestHelper } from '../../common/rest/rest-helper';
+import { RestHelper } from '../../core-module/core.module';
 import { STATUS_CODES } from 'http';
-import {RestLocatorService} from "../../common/rest/services/rest-locator.service";
-import {SessionStorageService} from "../../common/services/session-storage.service";
+import {RestLocatorService} from "../../core-module/core.module";
+import {SessionStorageService} from "../../core-module/core.module";
+import {BridgeService} from "../../core-bridge-module/bridge.service";
 
 // possible states this UI component can be in
 enum StateUI { SERVERLIST = 0, LOGIN = 1, SERVERURL = 2, NOINTERNET = 3};
@@ -50,6 +51,7 @@ export class LoginAppComponent  implements OnInit {
         private translation: TranslateService,
         private storage: SessionStorageService,
         private cordova: CordovaService,
+        private bridge: BridgeService,
         private configService: ConfigurationService,
         private locator: RestLocatorService,
     ){
@@ -152,7 +154,7 @@ export class LoginAppComponent  implements OnInit {
         this.isLoading=true;
         // APP: oAuth Login
         this.cordova.loginOAuth(this.locator.endpointUrl,this.username, this.password).subscribe((oauthTokens: OAuthResult) => {
-                this.cordova.setPermanentStorage(CordovaService.STORAGE_OAUTHTOKENS, JSON.stringify(oauthTokens));
+                this.cordova.setPermanentStorage(RestConstants.CORDOVA_STORAGE_OAUTHTOKENS, JSON.stringify(oauthTokens));
                 // continue to within the app
                 this.goToDefaultLocation();
             },
@@ -210,7 +212,7 @@ export class LoginAppComponent  implements OnInit {
             this.router.navigate([UIConstants.ROUTER_PREFIX+"register"]);
         }
         else {
-            UIHelper.openUrl(this.config.register.registerUrl,this.cordova,OPEN_URL_MODE.BlankSystemBrowser);
+            UIHelper.openUrl(this.config.register.registerUrl,this.bridge,OPEN_URL_MODE.BlankSystemBrowser);
         }
     }
 }

@@ -1,5 +1,5 @@
 import {Component, Input, EventEmitter, Output, ViewChild, ElementRef} from '@angular/core';
-import {Connector} from "../../../common/rest/data-object";
+import {Connector} from "../../../core-module/core.module";
 
 @Component({
   selector: 'workspace-create-connector',

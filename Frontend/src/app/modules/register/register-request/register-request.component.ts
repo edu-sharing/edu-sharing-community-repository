@@ -1,16 +1,16 @@
 import {Component, EventEmitter, Output} from '@angular/core';
 import {UIHelper} from "../../../common/ui/ui-helper";
 import {Router, Route, Params, ActivatedRoute, UrlSerializer} from "@angular/router";
-import {RestConnectorService} from "../../../common/rest/services/rest-connector.service";
+import {RestConnectorService} from "../../../core-module/core.module";
 import {Toast} from "../../../common/ui/toast";
 import {PlatformLocation} from "@angular/common";
 import {TranslateService} from "@ngx-translate/core";
-import {ConfigurationService} from "../../../common/services/configuration.service";
+import {ConfigurationService} from "../../../core-module/core.module";
 import {Title} from "@angular/platform-browser";
-import {SessionStorageService} from "../../../common/services/session-storage.service";
+import {SessionStorageService} from "../../../core-module/core.module";
 import {CordovaService} from "../../../common/services/cordova.service";
-import {UIConstants} from "../../../common/ui/ui-constants";
-import {RestRegisterService} from "../../../common/rest/services/rest-register.service";
+import {UIConstants} from "../../../core-module/ui/ui-constants";
+import {RestRegisterService} from "../../../core-module/core.module";
 
 @Component({
   selector: 'app-register-request',

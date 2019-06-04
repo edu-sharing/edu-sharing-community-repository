@@ -4,7 +4,7 @@ import {
 } from '@angular/core';
 import {TranslateService} from "@ngx-translate/core";
 import {Toast} from "../toast";
-import {DialogButton} from "../modal-dialog/modal-dialog.component";
+import {DialogButton} from "../../../core-module/core.module";
 import {UIAnimation} from "../ui-animation";
 import {trigger} from "@angular/animations";
 

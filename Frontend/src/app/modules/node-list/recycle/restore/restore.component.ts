@@ -1,6 +1,6 @@
 import {Component, Input, Output, EventEmitter} from '@angular/core';
 import {TranslateService} from "@ngx-translate/core";
-import {ArchiveRestore,Node} from "../../../../common/rest/data-object";
+import {ArchiveRestore,Node} from "../../../../core-module/core.module";
 
 @Component({
   selector: 'recycle-restore-info',

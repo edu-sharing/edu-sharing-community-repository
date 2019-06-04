@@ -1,19 +1,18 @@
 import {Component, Input, EventEmitter, Output, ViewChild, ElementRef, HostListener} from '@angular/core';
-import {RestConnectorService} from "../../../common/rest/services/rest-connector.service";
+import {DialogButton, RestConnectorService} from "../../../core-module/core.module";
 import {Toast} from "../../../common/ui/toast";
-import {RestNodeService} from "../../../common/rest/services/rest-node.service";
+import {RestNodeService} from "../../../core-module/core.module";
 import {
   NodeWrapper, Node, NodePermissions, LocalPermissionsResult, Permission,
   LoginResult, UserProfile, Comments, Comment, User
-} from "../../../common/rest/data-object";
-import {ConfigurationService} from "../../../common/services/configuration.service";
+} from "../../../core-module/core.module";
+import {ConfigurationService} from "../../../core-module/core.module";
 import {UIHelper} from "../../../common/ui/ui-helper";
-import {RestIamService} from "../../../common/rest/services/rest-iam.service";
+import {RestIamService} from "../../../core-module/core.module";
 import {TranslateService} from "@ngx-translate/core";
-import {RestCommentsService} from "../../../common/rest/services/rest-comments.service";
+import {RestCommentsService} from "../../../core-module/core.module";
 import {OptionItem} from "../../../common/ui/actionbar/option-item";
-import {RestConstants} from "../../../common/rest/rest-constants";
-import {DialogButton} from "../../../common/ui/modal-dialog/modal-dialog.component";
+import {RestConstants} from "../../../core-module/core.module";
 import {trigger} from "@angular/animations";
 import {UIAnimation} from "../../../common/ui/ui-animation";
 

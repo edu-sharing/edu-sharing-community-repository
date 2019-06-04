@@ -1,10 +1,8 @@
 import {Component, Input, Output, EventEmitter, OnInit, SimpleChanges} from '@angular/core';
-import {TranslateService} from "@ngx-translate/core";
-import {SessionStorageService} from '../../services/session-storage.service';
-import {DialogButton} from '../modal-dialog/modal-dialog.component';
 import {UIAnimation} from '../ui-animation';
 import {trigger} from '@angular/animations';
 import {CordovaService} from "../../services/cordova.service";
+import {DialogButton, SessionStorageService} from "../../../core-module/core.module";
 
 @Component({
   selector: 'cookie-info',

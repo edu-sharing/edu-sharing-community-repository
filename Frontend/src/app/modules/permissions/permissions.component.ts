@@ -4,16 +4,16 @@ import {Translation} from "../../common/translation";
 import {
   NodeRef, IamUser, NodeWrapper, Node, Version, NodeVersions, LoginResult,
   IamGroups, Group, OrganizationOrganizations
-} from "../../common/rest/data-object";
+} from "../../core-module/core.module";
 import {Router, Params, ActivatedRoute, Routes} from "@angular/router";
 import {Toast} from "../../common/ui/toast";
-import {RestConnectorService} from "../../common/rest/services/rest-connector.service";
-import {RestOrganizationService} from "../../common/rest/services/rest-organization.service";
-import {ConfigurationService} from "../../common/services/configuration.service";
+import {RestConnectorService} from "../../core-module/core.module";
+import {RestOrganizationService} from "../../core-module/core.module";
+import {ConfigurationService} from "../../core-module/core.module";
 import {Title} from "@angular/platform-browser";
 import {UIHelper} from "../../common/ui/ui-helper";
-import {SessionStorageService} from "../../common/services/session-storage.service";
-import {RestHelper} from "../../common/rest/rest-helper";
+import {SessionStorageService} from "../../core-module/core.module";
+import {RestHelper} from "../../core-module/core.module";
 import {MainNavComponent} from '../../common/ui/main-nav/main-nav.component';
 
 @Component({
