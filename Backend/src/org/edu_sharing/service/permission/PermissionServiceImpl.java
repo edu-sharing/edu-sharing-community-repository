@@ -1,7 +1,6 @@
 package org.edu_sharing.service.permission;
 
 import java.io.Serializable;
-import java.math.BigDecimal;
 import java.sql.SQLException;
 import java.text.DateFormat;
 import java.util.ArrayList;
@@ -16,7 +15,6 @@ import java.util.Map;
 import java.util.Set;
 
 import javax.servlet.ServletContext;
-import javax.transaction.UserTransaction;
 
 import org.alfresco.model.ContentModel;
 import org.alfresco.repo.search.impl.lucene.SolrJSONResultSet;
@@ -44,7 +42,6 @@ import org.apache.log4j.Logger;
 import org.apache.lucene.queryParser.QueryParser;
 import org.edu_sharing.alfresco.service.OrganisationService;
 import org.edu_sharing.alfresco.service.handleservice.HandleService;
-import org.edu_sharing.alfresco.service.handleservice.HandleServiceNotConfiguredException;
 import org.edu_sharing.alfresco.workspace_administration.NodeServiceInterceptor;
 import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
 import org.edu_sharing.repository.client.rpc.ACE;
@@ -74,6 +71,7 @@ import org.edu_sharing.service.oai.OAIExporterService;
 import org.edu_sharing.service.toolpermission.ToolPermissionException;
 import org.edu_sharing.service.toolpermission.ToolPermissionService;
 import org.edu_sharing.service.toolpermission.ToolPermissionServiceFactory;
+import org.edu_sharing.service.version.VersionTool;
 import org.springframework.context.ApplicationContext;
 
 public class PermissionServiceImpl implements org.edu_sharing.service.permission.PermissionService {
@@ -108,6 +106,10 @@ public class PermissionServiceImpl implements org.edu_sharing.service.permission
 
 	public PermissionServiceImpl() {
 		this(ApplicationInfoList.getHomeRepository().getAppId());
+	}
+	
+	public PermissionServiceImpl(boolean test) {
+		
 	}
 
 	/**
@@ -431,10 +433,7 @@ public class PermissionServiceImpl implements org.edu_sharing.service.permission
 				return;
 			}
 
-			//get new version label
-			//use BigDecimal cause of rounding Problem with double
-			BigDecimal bd = BigDecimal.valueOf(Double.valueOf(version)).add(BigDecimal.valueOf(0.1));
-			String newVersion = bd.toString();
+			String newVersion = new VersionTool().incrementVersion(version);
 
 			HandleService handleService = null;
 			String handle = null;
@@ -494,6 +493,8 @@ public class PermissionServiceImpl implements org.edu_sharing.service.permission
 			}
 		}
 	}
+	
+	
 
 	@Override
 	public List<Notify> getNotifyList(final String nodeId) throws Throwable {
@@ -1604,4 +1605,5 @@ public class PermissionServiceImpl implements org.edu_sharing.service.permission
 	public void setToolPermission(ToolPermissionService toolPermission) {
 		this.toolPermission = toolPermission;
 	}
+	
 }
