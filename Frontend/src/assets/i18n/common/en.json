@@ -83,7 +83,7 @@
   "TOOLPERMISSION_ERROR":"You have insufficient permissions for this task",
   "TOOLPERMISSION_ERROR_TITLE":"Insufficient permissions",
   "TOOLPERMISSION_ERROR_HEADER":"The following permission is missing for your account:",
-  "TOOLPERMISSION_ERROR_FOOTER":"If you think that's an error, contact your administrator and and ask for permission {{permission}}",
+  "TOOLPERMISSION_ERROR_FOOTER":"If you think that's an error, contact your administrator and ask for permission {{permission}}",
   "TOOLPERMISSION":{
     "TOOLPERMISSION_INVITE":"The permission to share content",
     "TOOLPERMISSION_INVITE_LINK":"The permission to create content links",
