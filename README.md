@@ -11,6 +11,7 @@ This module also has dependencies to the RouterModule and HttpClientModule from 
 
 Include this module by importing it:
 
+```
   imports: [
     BrowserModule,
     CoreModule,
@@ -18,6 +19,8 @@ Include this module by importing it:
     RouterModule.forRoot([]),
     HttpClientModule
   ],
+```
+
   
 Some callbacks of this module make use of the "BridgeModule". Your application has to implement this module and the service.
 
