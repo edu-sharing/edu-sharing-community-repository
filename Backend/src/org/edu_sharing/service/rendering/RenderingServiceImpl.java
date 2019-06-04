@@ -10,6 +10,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectWriter;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.service.cmr.repository.StoreRef;
 import org.apache.commons.httpclient.methods.PostMethod;
@@ -116,7 +117,7 @@ public class RenderingServiceImpl implements RenderingService{
 		ObjectWriter ow = mapper.writer().withDefaultPrettyPrinter();
 		String json = ow.writeValueAsString(data);
 		*/
-		String json=new Gson().toJson(data);
+		String json=new GsonBuilder().serializeNulls().create().toJson(data);
 		/*
 		Encryption encryption=new Encryption("RSA");
 		try {
@@ -154,7 +155,7 @@ public class RenderingServiceImpl implements RenderingService{
 
 		// user
 		if(!AuthenticationUtil.isRunAsUserTheSystemUser()) {
-			data.setUser(PersonDao.getPerson(RepositoryDao.getHomeRepository(), user).asPersonSimple());
+			data.setUser(PersonDao.getPerson(RepositoryDao.getHomeRepository(), user).asPersonRender());
 		}
 
 		// context/config
