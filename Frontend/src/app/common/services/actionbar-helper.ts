@@ -1,5 +1,5 @@
 import {NodeHelper} from "../ui/node-helper";
-import { Node} from "../rest/data-object";
+import {CollectionReference, Node} from "../rest/data-object";
 import {RestConstants} from "../rest/rest-constants";
 import {OptionItem} from "../ui/actionbar/option-item";
 import {RestConnectorService} from "../rest/services/rest-connector.service";
@@ -41,6 +41,9 @@ export class ActionbarHelperService{
             }
             return isAllowed;
         }
+        option.showCallback=(node: Node) => {
+            return NodeHelper.referenceOriginalExists(node);
+        }
         option.isEnabled=option.enabledCallback(null);
         console.log(option,option.enabledCallback(null));
       }
@@ -75,7 +78,7 @@ export class ActionbarHelperService{
             let n=ActionbarHelperService.getNodes(nodes,node);
             if(n==null)
                 return false;
-            return NodeHelper.allFiles(nodes) && n.length>0;
+            return NodeHelper.referenceOriginalExists(node) && NodeHelper.allFiles(nodes) && n.length>0;
         }
         option.enabledCallback = (node: Node) => {
           let list = ActionbarHelperService.getNodes(nodes, node);
