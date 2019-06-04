@@ -426,6 +426,9 @@ public class CCConstants {
 
 	public static final int HTTP_INSUFFICIENT_STORAGE = 503;
 
+    public static final List<String> CHILDOBJECT_IGNORED_PARENT_PROPERTIES = Arrays.asList(
+    		CCConstants.CM_NAME,CCConstants.ALFRESCO_MIMETYPE,CCConstants.LOM_PROP_TECHNICAL_FORMAT,CCConstants.LOM_PROP_TECHNICAL_SIZE
+	);
 
     public static String CCM_WF_STATUS_VALUE_UNCHECKED="100_unchecked";
 	public static String CCM_WF_STATUS_VALUE_TO_CHECK="200_tocheck";
