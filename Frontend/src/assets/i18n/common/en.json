@@ -187,7 +187,7 @@
   },
   "QUOTA":{
     "TITLE":"QUOTA",
-    "FREE_SPACE":"unused storage space of",
+    "FREE_SPACE":"unused space of",
     "OVERALL":""
   },
   "NODE_VARIANT":{
