@@ -832,13 +832,8 @@ export class WorkspaceMainComponent implements EventListener{
             if(nodes && !nodes[0].isDirectory && !this.isSafe)
                 options.push(contributor);
             let workflow = this.actionbar.createOptionIfPossible('WORKFLOW', nodes, (node: Node) => this.manageWorkflowNode(node));
-            if(workflow) {
-                workflow.isEnabled=workflow.isEnabled && (
-                    (this.connector.hasToolPermissionInstant(RestConstants.TOOLPERMISSION_INVITE) && !this.isSafe)
-                    || (this.connector.hasToolPermissionInstant(RestConstants.TOOLPERMISSION_INVITE_SAFE) && this.isSafe)
-                );
+            if(workflow)
                 options.push(workflow);
-            }
 
 
             this.infoToggle=new OptionItem("WORKSPACE.OPTION.METADATA", "info_outline", (node: Node) => this.openMetadata(node));
