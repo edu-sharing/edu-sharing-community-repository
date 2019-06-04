@@ -94,6 +94,7 @@ export class NodeRenderComponent implements EventListener{
 
   @ViewChild('sequencediv') sequencediv : ElementRef;
   @ViewChild('mainnav') mainnav : MainNavComponent;
+  isChildobject = false;
 
     public static close(location:Location) {
         location.back();
@@ -222,6 +223,7 @@ export class NodeRenderComponent implements EventListener{
           this.fromLogin=params['fromLogin']=='true';
           this.repository=params['repository'] ? params['repository'] : RestConstants.HOME_REPOSITORY;
           let childobject = params['childobject_id'] ? params['childobject_id'] : null;
+          this.isChildobject=childobject!=null;
           this.route.params.subscribe((params: Params) => {
             if(params['node']) {
               this.isRoute=true;
@@ -270,6 +272,10 @@ export class NodeRenderComponent implements EventListener{
     this.isLoading=true;
     this.node=this._nodeId;
   }
+  viewChildobject(node:Node,pos:number){
+        this.isChildobject=pos!=0;
+        this.node=node;
+  }
   private loadNode() {
     if(!this._node) {
         this.isBuildingPage = false;
@@ -312,7 +318,7 @@ export class NodeRenderComponent implements EventListener{
       showDownloadAdvice:!this.isOpenable
     };
     this.isBuildingPage=true;
-    this.nodeApi.getNodeRenderSnippet(this._nodeId,this.version ? this.version : "-1",parameters,this.repository)
+    this.nodeApi.getNodeRenderSnippet(this._nodeId,this.version && !this.isChildobject ? this.version : "-1",parameters,this.repository)
         .subscribe((data:any)=>{
             if (!data.detailsSnippet) {
                 console.error(data);
