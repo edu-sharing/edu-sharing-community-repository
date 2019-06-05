@@ -1,9 +1,8 @@
 package org.edu_sharing.repository.client.tools;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import org.edu_sharing.restservices.RestConstants;
+
+import java.util.*;
 
 public class CCConstants {
 
