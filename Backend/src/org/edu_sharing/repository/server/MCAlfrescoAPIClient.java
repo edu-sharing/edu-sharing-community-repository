@@ -1119,23 +1119,35 @@ public class MCAlfrescoAPIClient extends MCAlfrescoBaseClient {
 	public HashMap<String, Object> getProperties(String storeProtocol, String storeId, String nodeId) throws Throwable {
 		return getProperties(new NodeRef(new StoreRef(storeProtocol,storeId),nodeId));
 	}
-	public String getDownloadUrl(String nodeId) throws Throwable {
-		HashMap<String, Object> props = getProperties(nodeId);
-		boolean downloadAllowed = downloadAllowed(nodeId, (Serializable)props.get(CCConstants.CCM_PROP_IO_COMMONLICENSE_KEY), (String)props.get(CCConstants.CCM_PROP_EDITOR_TYPE));
+    public String getDownloadUrl(String nodeId) throws Throwable {
+        HashMap<String, Object> props = getProperties(nodeId);
+        boolean downloadAllowed = downloadAllowed(nodeId, (Serializable)props.get(CCConstants.CCM_PROP_IO_COMMONLICENSE_KEY), (String)props.get(CCConstants.CCM_PROP_EDITOR_TYPE));
 
-		String redirectServletLink = this.getRedirectServletLink(repId, nodeId);
-		if (props.get(CCConstants.ALFRESCO_MIMETYPE) != null && redirectServletLink != null && downloadAllowed) {
-			String params = URLEncoder.encode("display=download");
-			String downloadUrl = UrlTool.setParam(redirectServletLink, "params", params);
-			return downloadUrl;
-		}
-		return null;
+        String redirectServletLink = this.getRedirectServletLink(repId, nodeId);
+        if (props.get(CCConstants.ALFRESCO_MIMETYPE) != null && redirectServletLink != null && downloadAllowed) {
+            String params = URLEncoder.encode("display=download");
+            String downloadUrl = UrlTool.setParam(redirectServletLink, "params", params);
+            return downloadUrl;
+        }
+        return null;
+    }
+	public boolean downloadAllowed(String nodeId){
+		NodeRef ref=new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE,nodeId);
+		return downloadAllowed(nodeId,
+				nodeService.getProperty(ref,QName.createQName(CCConstants.CCM_PROP_IO_COMMONLICENSE_KEY)),
+				(String)nodeService.getProperty(ref,QName.createQName(CCConstants.CCM_PROP_EDITOR_TYPE))
+				);
 	}
-
 	public boolean downloadAllowed(String nodeId,Serializable commonLicenseKey,String editorType){
-		boolean downloadAllowed = (CCConstants.COMMON_LICENSE_EDU_P_NR_ND.equals(commonLicenseKey)) ? false : true;
+        boolean downloadAllowed;
+        // Array value
+	    if(commonLicenseKey instanceof ArrayList)
+		    downloadAllowed = (CCConstants.COMMON_LICENSE_EDU_P_NR_ND.equals(((ArrayList)commonLicenseKey).get(0))) ? false : true;
+	    else
+	        // string value
+            downloadAllowed = (CCConstants.COMMON_LICENSE_EDU_P_NR_ND.equals(commonLicenseKey)) ? false : true;
 
-		//allow download for owner, performance only check owner if download not allowed
+        //allow download for owner, performance only check owner if download not allowed
 		if(!downloadAllowed && isOwner(nodeId, authenticationInfo.get(CCConstants.AUTH_USERNAME))){
 			downloadAllowed = true;
 		}
