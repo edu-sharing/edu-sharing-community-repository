@@ -302,16 +302,7 @@ public interface MCAlfrescoClient {
 	public void removeNodeAndRelations(String nodeID, String fromID) throws Throwable;
 	
 	public void removeNodeAndRelations(String nodeID, String fromID, boolean recycle) throws Throwable;
-	
-	/**
-	 * 
-	 * link the public folder to the node with targetFolderId if it's not already done
-	 * 
-	 * @param targetFolderId
-	 * @throws Exception
-	 */
-	public void checkAndLinkPublicFolder(String targetFolderId) throws Exception;
-	
+
 	/**
 	 * get the root folder of the current user. if admin then it's null else its the user home
 	 * @return root nodeId

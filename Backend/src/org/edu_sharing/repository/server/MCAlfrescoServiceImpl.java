@@ -72,7 +72,6 @@ import org.edu_sharing.repository.client.rpc.AssignedLicense;
 import org.edu_sharing.repository.client.rpc.Authority;
 import org.edu_sharing.repository.client.rpc.CheckForDuplicatesResult;
 import org.edu_sharing.repository.client.rpc.EduGroup;
-import org.edu_sharing.repository.client.rpc.EnvInfo;
 import org.edu_sharing.repository.client.rpc.Everyone;
 import org.edu_sharing.repository.client.rpc.GetPermissions;
 import org.edu_sharing.service.nodeservice.model.GetPreviewResult;
@@ -141,7 +140,6 @@ import org.edu_sharing.repository.update.Release_3_2_DefaultScope;
 import org.edu_sharing.repository.update.Release_3_2_FillOriginalId;
 import org.edu_sharing.repository.update.SystemFolderNameToDisplayName;
 import org.edu_sharing.service.admin.AdminServiceFactory;
-import org.edu_sharing.service.environment.EnvironmentService;
 import org.edu_sharing.service.license.AssignedLicenseService;
 import org.edu_sharing.service.permission.PermissionServiceFactory;
 import org.edu_sharing.service.share.EMailSendFailedException;
@@ -1146,29 +1144,6 @@ public class MCAlfrescoServiceImpl extends RemoteServiceServlet implements MCAlf
 		}
 		return null;
 	}
-	
-	/***
-	 * this method should only be called once (Performance) cause it also checks
-	 * and creates the linked public folder
-	 */
-	public String getRootNodeId() throws CCException {
-		String result = null;
-		try {
-
-			MCAlfrescoBaseClient mcAlfrescoBaseClient = getMCAlfrescoBaseClient(null);
-			// get Root Node Id
-			result = mcAlfrescoBaseClient.getRootNodeId();
-			// check if public folder is linked
-			if (result != null && !result.trim().equals("")) {
-				//link public folder
-				mcAlfrescoBaseClient.checkAndLinkPublicFolder(result);
-			}
-
-		} catch (Throwable e) {
-			errorHandling(e);
-		}
-		return result;
-	}
 
 	/**
 	 * @param foldername
@@ -1196,18 +1171,6 @@ public class MCAlfrescoServiceImpl extends RemoteServiceServlet implements MCAlf
 			}
 		}
 		return null;
-	}
-
-	public EnvInfo getEnvInfo() throws CCException {
-		try{	
-			//authenticate
-			this.getValidatedAuthInfo(null);
-			EnvironmentService envService = (EnvironmentService)ApplicationContextFactory.getApplicationContext().getBean("environmentService");
-			return envService.getEntInfo(null);
-		} catch(Throwable e) {
-			this.errorHandling(e);
-			return null;
-		}
 	}
 
 	public GetPermissions getPermissions(String nodeId) throws CCSessionExpiredException, CCException {

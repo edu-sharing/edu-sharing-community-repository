@@ -1744,7 +1744,6 @@ public class CCConstants {
 
 
 	//AppInfo
-	public final static String APPLICATIONINFO_AVAILABLESEARCHCRITERIA = "availablesearchcriterias";
 	public final static String APPLICATIONINFO_APPID = "appid";
 	public final static String APPLICATIONINFO_APPCAPTION = "appcaption";
 	public final static String APPLICATIONINFO_ISHOMENODE = "is_home_node";
