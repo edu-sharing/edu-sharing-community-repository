@@ -1121,8 +1121,7 @@ public class MCAlfrescoAPIClient extends MCAlfrescoBaseClient {
 	}
     public String getDownloadUrl(String nodeId) throws Throwable {
         HashMap<String, Object> props = getProperties(nodeId);
-        boolean downloadAllowed = downloadAllowed(nodeId, (Serializable)props.get(CCConstants.CCM_PROP_IO_COMMONLICENSE_KEY), (String)props.get(CCConstants.CCM_PROP_EDITOR_TYPE));
-
+        boolean downloadAllowed = downloadAllowed(nodeId);
         String redirectServletLink = this.getRedirectServletLink(repId, nodeId);
         if (props.get(CCConstants.ALFRESCO_MIMETYPE) != null && redirectServletLink != null && downloadAllowed) {
             String params = URLEncoder.encode("display=download");
