@@ -1,0 +1,37 @@
+  <div class="title">{{ title | translate}}
+   <i tabindex="0" icon iconId="close" class="close" (click)="cancel()" (keyup.enter)="cancel()" aria="true"></i>
+  </div>
+  <div class="content" infinite-scroll [scrollWindow]="false" (scrolled)="loadData()">
+    <listTable
+      [viewType]="2"
+      [hasHeading]="false"
+      [addElement]="createCollectionElement"
+      (onAddElement)="createCollection()"
+    ></listTable>
+    <div class="search">
+      <label>{{ 'ADD_TO_RECENT_COLLECTION' | translate}}</label>
+      <form (ngSubmit)="loadData(true)" autocomplete="off">
+          <input name="search" type="search" [(ngModel)]="searchQuery"
+                 title="{{'SEARCH_COLLECTIONS' | translate}}" placeholder="{{'SEARCH_COLLECTIONS' | translate}}" />
+          <i icon iconId="search" class="searchIcon">search</i>
+      </form>
+    </div>
+      <listTable *ngIf="isLoading || list.length"
+        [nodes]="list"
+        [columns]="columns"
+        [hasIcon]="true"
+        [hasCheckbox]="false"
+        [hasHeading]="false"
+        [isClickable]="true"
+        [viewType]="2"
+        [isLoading]="isLoading"
+        [validatePermissions]="hasWritePermissions"
+        [sortBy]="sortBy"
+        [sortAscending]="sortAscending"
+        [listClass]=""
+        (onDrop)="drop($event)"
+        (clickRow)="clickCollection($event.node)"></listTable>
+    <h5 class="noElements" *ngIf="!isLoading && !list.length && searchQuery==''">{{'NO_MORE_ELEMENTS' | translate }}</h5>
+    <h5 class="noElements" *ngIf="!isLoading && !list.length && searchQuery!=''">{{'NO_MATCHES' | translate }}</h5>
+  </div>
+
