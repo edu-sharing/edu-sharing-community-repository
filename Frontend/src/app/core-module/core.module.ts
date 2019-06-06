@@ -60,8 +60,7 @@ import {UIConstants} from "./ui/ui-constants";
         ConfigurationService,
         TemporaryStorageService,
         UIService
-    ],
-    entryComponents:[],
+    ]
 })
 export class CoreModule {}
 
