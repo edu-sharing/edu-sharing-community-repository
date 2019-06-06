@@ -15,7 +15,7 @@ import {RestConstants} from "../../common/rest/rest-constants";
 
 import {Toast} from "../../common/ui/toast";
 import {RestConnectorService} from "../../common/rest/services/rest-connector.service";
-import {Collection, NodeRef, CollectionContent, CollectionReference, LoginResult, MdsMetadataset} from "../../common/rest/data-object";
+import {Collection, NodeRef, CollectionReference, LoginResult, MdsMetadataset} from "../../common/rest/data-object";
 import {RestOrganizationService} from "../../common/rest/services/rest-organization.service";
 import {OrganizationOrganizations} from "../../common/rest/data-object";
 import {OptionItem} from "../../common/ui/actionbar/option-item";
