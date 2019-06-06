@@ -2,17 +2,17 @@ import {
   Component, OnInit, OnDestroy, Input, EventEmitter, Output, ViewChild, ElementRef,
   HostListener, ChangeDetectorRef, ApplicationRef, NgZone
 } from '@angular/core';
-import {Toast} from "../toast";
+import {Toast} from "../../../core-ui-module/toast";
 import {ActivatedRoute, Params, Router} from "@angular/router";
 import {TranslateService} from "@ngx-translate/core";
-import {Translation} from "../../translation";
-import {OptionItem} from "../actionbar/option-item";
-import {UIAnimation} from "../ui-animation";
-import {UIHelper} from "../ui-helper";
+import {Translation} from "../../../core-ui-module/translation";
+import {OptionItem} from "../../../core-ui-module/option-item";
+import {UIAnimation} from "../../../core-module/ui/ui-animation";
+import {UIHelper} from "../../../core-ui-module/ui-helper";
 import {Title} from "@angular/platform-browser";
 import {trigger} from "@angular/animations";
 import {Location} from "@angular/common";
-import {NodeHelper} from "../node-helper";
+import {NodeHelper} from "../../../core-ui-module/node-helper";
 import {UIConstants} from "../../../core-module/ui/ui-constants";
 import {SearchService} from "../../../modules/search/search.service";
 import {Helper} from "../../../core-module/rest/helper";

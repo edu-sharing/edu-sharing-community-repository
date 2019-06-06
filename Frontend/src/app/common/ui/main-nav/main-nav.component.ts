@@ -3,14 +3,14 @@ import {
     HostListener, Renderer, ChangeDetectorRef, AfterViewInit
 } from '@angular/core';
 import {TranslateService} from "@ngx-translate/core";
-import {UIAnimation} from "../ui-animation";
+import {UIAnimation} from "../../../core-module/ui/ui-animation";
 import {Router, Params, ActivatedRoute} from "@angular/router";
 import {style, transition, trigger, animate, keyframes} from "@angular/animations";
-import {UIHelper} from "../ui-helper";
+import {UIHelper} from "../../../core-ui-module/ui-helper";
 import {OPEN_URL_MODE, UIConstants} from "../../../core-module/ui/ui-constants";
-import {Toast} from "../toast";
-import {Translation} from "../../translation";
-import {OptionItem} from "../actionbar/option-item";
+import {Toast} from "../../../core-ui-module/toast";
+import {Translation} from "../../../core-ui-module/translation";
+import {OptionItem} from "../../../core-ui-module/option-item";
 import {HttpClient} from '@angular/common/http';
 import {
     AccessScope,

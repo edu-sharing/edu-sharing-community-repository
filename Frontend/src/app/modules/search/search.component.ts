@@ -5,7 +5,7 @@ import {WindowRefService} from './window-ref.service';
 import {Subscription} from 'rxjs/Subscription';
 import {ActivatedRoute, Router} from '@angular/router';
 import {TranslateService} from '@ngx-translate/core';
-import {Translation} from '../../common/translation';
+import {Translation} from '../../core-ui-module/translation';
 import {
     Collection,
     CollectionWrapper,
@@ -36,15 +36,15 @@ import {
     TemporaryStorageService,
     UIService
 } from '../../core-module/core.module';
-import {ListTableComponent} from '../../common/ui/list-table/list-table.component';
-import {OptionItem} from '../../common/ui/actionbar/option-item';
+import {ListTableComponent} from '../../core-ui-module/components/list-table/list-table.component';
+import {OptionItem} from '../../core-ui-module/option-item';
 import {Helper} from '../../core-module/rest/helper';
-import {UIHelper} from '../../common/ui/ui-helper';
+import {UIHelper} from '../../core-ui-module/ui-helper';
 import {Title} from '@angular/platform-browser';
-import {Toast} from '../../common/ui/toast';
-import {UIAnimation} from '../../common/ui/ui-animation';
+import {Toast} from '../../core-ui-module/toast';
+import {UIAnimation} from '../../core-module/ui/ui-animation';
 import {trigger} from '@angular/animations';
-import {NodeHelper} from '../../common/ui/node-helper';
+import {NodeHelper} from '../../core-ui-module/node-helper';
 import {UIConstants} from '../../core-module/ui/ui-constants';
 import {MdsComponent} from '../../common/ui/mds/mds.component';
 import {WorkspaceManagementDialogsComponent} from '../management-dialogs/management-dialogs.component';
@@ -1042,7 +1042,7 @@ export class SearchComponent {
   }
   private loadSavedSearchNode(node:Node){
     this.sidenavTab=0;
-    UIHelper.routeToSearchNode(this.router,this.searchService,node);
+    UIHelper.routeToSearchNode(this.router,this.searchService.reurl,node);
     this.currentSavedSearch=node;
   }
   private goToSaveSearchWorkspace() {

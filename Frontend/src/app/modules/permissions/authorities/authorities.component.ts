@@ -4,22 +4,22 @@ import {
     Node, Group, IamGroups, IamUsers, NodeList, IamUser, IamAuthorities,
     Authority, OrganizationOrganizations, Organization, Person, User, HomeFolder, SharedFolder, ListItem, DialogButton
 } from "../../../core-module/core.module";
-import {Toast} from "../../../common/ui/toast";
+import {Toast} from "../../../core-ui-module/toast";
 import {ActivatedRoute, Router} from "@angular/router";
 import {RestIamService} from "../../../core-module/core.module";
 import {TranslateService} from "@ngx-translate/core";
 import {RestConnectorService} from "../../../core-module/core.module";
-import {OptionItem} from "../../../common/ui/actionbar/option-item";
-import {UIAnimation} from "../../../common/ui/ui-animation";
+import {OptionItem} from "../../../core-ui-module/option-item";
+import {UIAnimation} from "../../../core-module/ui/ui-animation";
 import {SuggestItem} from "../../../common/ui/autocomplete/autocomplete.component";
-import {NodeHelper} from "../../../common/ui/node-helper";
+import {NodeHelper} from "../../../core-ui-module/node-helper";
 import {RestConstants} from "../../../core-module/core.module";
 import {RestOrganizationService} from "../../../core-module/core.module";
 import {RestNodeService} from "../../../core-module/core.module";
 import {ConfigurationService} from "../../../core-module/core.module";
 import {Helper} from "../../../core-module/rest/helper";
 import {trigger} from "@angular/animations";
-import {UIHelper} from "../../../common/ui/ui-helper";
+import {UIHelper} from "../../../core-ui-module/ui-helper";
 @Component({
   selector: 'permissions-authorities',
   templateUrl: 'authorities.component.html',

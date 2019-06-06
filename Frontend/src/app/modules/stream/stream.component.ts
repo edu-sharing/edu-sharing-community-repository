@@ -2,29 +2,29 @@ import {Component, ViewChild, HostListener, ElementRef} from '@angular/core';
 import 'rxjs/add/operator/map';
 import {Router, ActivatedRoute, Params} from '@angular/router';
 import {TranslateService} from "@ngx-translate/core";
-import {Translation} from "../../common/translation";
+import {Translation} from "../../core-ui-module/translation";
 import * as EduData from "../../core-module/core.module"; //
 import {RestCollectionService} from "../../core-module/core.module"; //
-import {Toast} from "../../common/ui/toast"; //
+import {Toast} from "../../core-ui-module/toast"; //
 import {RestSearchService} from '../../core-module/core.module';
 import {RestNodeService} from '../../core-module/core.module';
 import {RestConstants} from '../../core-module/core.module';
 import {RestConnectorService} from "../../core-module/core.module";
 import {Node, NodeList, LoginResult, STREAM_STATUS, ConnectorList} from '../../core-module/core.module';
-import {OptionItem} from "../../common/ui/actionbar/option-item";
+import {OptionItem} from "../../core-ui-module/option-item";
 import {TemporaryStorageService} from "../../core-module/core.module";
-import {UIHelper} from "../../common/ui/ui-helper";
+import {UIHelper} from "../../core-ui-module/ui-helper";
 import {Title} from "@angular/platform-browser";
 import {ConfigurationService} from "../../core-module/core.module";
 import {SessionStorageService} from "../../core-module/core.module";
 import {UIConstants} from "../../core-module/ui/ui-constants";
 import {RestMdsService} from "../../core-module/core.module";
 import {RestHelper} from "../../core-module/core.module";
-import {NodeHelper} from "../../common/ui/node-helper"; //
+import {NodeHelper} from "../../core-ui-module/node-helper"; //
 import {Observable} from 'rxjs/Rx';
 import {RestStreamService} from "../../core-module/core.module";
 import {RestConnectorsService} from '../../core-module/core.module';
-import {UIAnimation} from '../../common/ui/ui-animation';
+import {UIAnimation} from '../../core-module/ui/ui-animation';
 import {trigger} from '@angular/animations';
 import {Connector} from '../../core-module/core.module';
 import {NodeWrapper} from '../../core-module/core.module';

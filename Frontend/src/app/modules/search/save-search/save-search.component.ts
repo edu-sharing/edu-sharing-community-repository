@@ -1,8 +1,8 @@
 import {Component, Input, Output, EventEmitter} from "@angular/core";
 import {RestConstants} from "../../../core-module/core.module";
-import {Toast} from "../../../common/ui/toast";
+import {Toast} from "../../../core-ui-module/toast";
 import {RestSearchService} from "../../../core-module/core.module";
-import {DateHelper} from "../../../common/ui/DateHelper";
+import {DateHelper} from "../../../core-ui-module/DateHelper";
 import {TranslateService} from "@ngx-translate/core";
 
 @Component({

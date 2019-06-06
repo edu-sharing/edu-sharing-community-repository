@@ -1,6 +1,6 @@
 import {Component, Input, Output, EventEmitter, OnInit, HostListener} from '@angular/core';
 import {TranslateService} from "@ngx-translate/core";
-import {DateHelper} from "../DateHelper";
+import {DateHelper} from "../../../core-ui-module/DateHelper";
 
 @Component({
   selector: 'calendar',

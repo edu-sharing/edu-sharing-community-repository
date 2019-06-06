@@ -2,7 +2,7 @@ import {Component, ElementRef, ViewChild} from '@angular/core';
 
 import {ActivatedRoute, Router} from "@angular/router";
 
-import {Translation} from "../../common/translation";
+import {Translation} from "../../core-ui-module/translation";
 
 import * as EduData from "../../core-module/core.module";
 import {
@@ -27,22 +27,23 @@ import {
     UIService
 } from "../../core-module/core.module";
 
-import {Toast} from "../../common/ui/toast";
-import {OptionItem} from "../../common/ui/actionbar/option-item";
+import {Toast} from "../../core-ui-module/toast";
+import {OptionItem} from "../../core-ui-module/option-item";
 import {NodeRenderComponent} from "../../common/ui/node-render/node-render.component";
-import {UIHelper} from "../../common/ui/ui-helper";
+import {UIHelper} from "../../core-ui-module/ui-helper";
 import {Title} from "@angular/platform-browser";
 import {UIConstants} from "../../core-module/ui/ui-constants";
-import {AddElement, ListTableComponent} from "../../common/ui/list-table/list-table.component";
-import {NodeHelper} from "../../common/ui/node-helper";
+import {ListTableComponent} from "../../core-ui-module/components/list-table/list-table.component";
+import {NodeHelper} from "../../core-ui-module/node-helper";
 import {TranslateService} from "@ngx-translate/core";
 import {Location} from "@angular/common";
 import {Helper} from "../../core-module/rest/helper";
 import {MainNavComponent} from "../../common/ui/main-nav/main-nav.component";
-import {ColorHelper} from '../../common/ui/color-helper';
+import {ColorHelper} from '../../core-module/ui/color-helper';
 import {ActionbarHelperService} from "../../common/services/actionbar-helper";
 import {MdsHelper} from "../../core-module/rest/mds-helper";
 import {BridgeService} from "../../core-bridge-module/bridge.service";
+import {AddElement} from "../../core-ui-module/add-element";
 
 // component class
 @Component({

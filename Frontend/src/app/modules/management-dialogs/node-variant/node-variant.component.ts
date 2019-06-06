@@ -1,20 +1,20 @@
 import {Component, EventEmitter, Input, Output} from '@angular/core';
 import {RestConnectorService} from "../../../core-module/core.module";
-import {Toast} from "../../../common/ui/toast";
+import {Toast} from "../../../core-ui-module/toast";
 import {RestNodeService} from "../../../core-module/core.module";
 import {Connector, Node} from "../../../core-module/core.module";
 import {ConfigurationService} from "../../../core-module/core.module";
-import {UIHelper} from "../../../common/ui/ui-helper";
+import {UIHelper} from "../../../core-ui-module/ui-helper";
 import {RestIamService} from "../../../core-module/core.module";
 import {TranslateService} from "@ngx-translate/core";
 import {trigger} from "@angular/animations";
-import {UIAnimation} from "../../../common/ui/ui-animation";
+import {UIAnimation} from "../../../core-module/ui/ui-animation";
 import {RestConstants} from '../../../core-module/core.module';
 import {Router} from '@angular/router';
 import {RestHelper} from '../../../core-module/core.module';
 import {RestConnectorsService} from "../../../core-module/core.module";
 import {FrameEventsService} from "../../../core-module/core.module";
-import {NodeHelper} from "../../../common/ui/node-helper";
+import {NodeHelper} from "../../../core-ui-module/node-helper";
 import {OPEN_URL_MODE} from "../../../core-module/ui/ui-constants";
 
 @Component({

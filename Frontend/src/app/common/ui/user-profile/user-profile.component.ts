@@ -3,9 +3,9 @@ import {
   QueryList
 } from '@angular/core';
 import {TranslateService} from "@ngx-translate/core";
-import {UIAnimation} from "../ui-animation";
+import {UIAnimation} from "../../../core-module/ui/ui-animation";
 import {trigger} from "@angular/animations";
-import {Toast} from "../toast";
+import {Toast} from "../../../core-ui-module/toast";
 import {IamUser, RestConstants, RestHelper, RestIamService, User} from "../../../core-module/core.module";
 
 @Component({

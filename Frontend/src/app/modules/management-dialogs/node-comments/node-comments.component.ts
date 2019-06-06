@@ -1,20 +1,20 @@
 import {Component, Input, EventEmitter, Output, ViewChild, ElementRef, HostListener} from '@angular/core';
 import {DialogButton, RestConnectorService} from "../../../core-module/core.module";
-import {Toast} from "../../../common/ui/toast";
+import {Toast} from "../../../core-ui-module/toast";
 import {RestNodeService} from "../../../core-module/core.module";
 import {
   NodeWrapper, Node, NodePermissions, LocalPermissionsResult, Permission,
   LoginResult, UserProfile, Comments, Comment, User
 } from "../../../core-module/core.module";
 import {ConfigurationService} from "../../../core-module/core.module";
-import {UIHelper} from "../../../common/ui/ui-helper";
+import {UIHelper} from "../../../core-ui-module/ui-helper";
 import {RestIamService} from "../../../core-module/core.module";
 import {TranslateService} from "@ngx-translate/core";
 import {RestCommentsService} from "../../../core-module/core.module";
-import {OptionItem} from "../../../common/ui/actionbar/option-item";
+import {OptionItem} from "../../../core-ui-module/option-item";
 import {RestConstants} from "../../../core-module/core.module";
 import {trigger} from "@angular/animations";
-import {UIAnimation} from "../../../common/ui/ui-animation";
+import {UIAnimation} from "../../../core-module/ui/ui-animation";
 
 @Component({
   selector: 'node-comments',

@@ -5,7 +5,6 @@ import {BridgeService} from "./bridge.service";
     providers:[
         BridgeService
     ],
-    entryComponents:[],
 })
 export class CoreBridgeModule { }
 

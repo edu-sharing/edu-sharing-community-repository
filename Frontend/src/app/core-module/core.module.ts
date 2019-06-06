@@ -26,6 +26,7 @@ import {UIService} from "./rest/services/ui.service";
 import {CoreBridgeModule} from "../core-bridge-module/core.bridge.module";
 import {ConfigurationService} from "./rest/services/configuration.service";
 import {DialogButton} from "./ui/dialog-button";
+import {UIConstants} from "./ui/ui-constants";
 
 @NgModule({
     imports: [
@@ -70,6 +71,7 @@ export * from "./rest/request-object";
 export * from "./rest/rest-helper";
 export {DialogButton} from "./ui/dialog-button";
 export {ListItem} from "./ui/list-item";
+export {UIConstants} from "./ui/ui-constants";
 export * from "./rest/configuration-helper";
 export * from "./rest/services/configuration.service";
 export * from "./rest/services/rest-locator.service";

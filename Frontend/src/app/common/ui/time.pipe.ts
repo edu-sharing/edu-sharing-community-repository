@@ -1,6 +1,6 @@
 import {PipeTransform, Pipe} from '@angular/core';
 import {TranslateService} from "@ngx-translate/core";
-import {DateHelper} from "./DateHelper";
+import {DateHelper} from "../../core-ui-module/DateHelper";
 import {isNumeric} from "rxjs/util/isNumeric";
 
 /**

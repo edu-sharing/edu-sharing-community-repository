@@ -1,4 +1,4 @@
-@import "./variables";
+@import "../app/core-ui-module/styles/variables";
 .clickable{
   @include clickable();
 }

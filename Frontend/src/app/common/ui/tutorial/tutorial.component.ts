@@ -1,8 +1,8 @@
 import {Component, ElementRef, EventEmitter, HostListener, Input, OnInit, Output, ViewChild} from '@angular/core';
 import {DomSanitizer, SafeStyle} from "@angular/platform-browser";
 import {trigger} from "@angular/animations";
-import {UIAnimation} from "../ui-animation";
-import {KeyEvents} from '../key-events';
+import {UIAnimation} from "../../../core-module/ui/ui-animation";
+import {KeyEvents} from '../../../core-module/ui/key-events';
 
 @Component({
   selector: 'tutorial',

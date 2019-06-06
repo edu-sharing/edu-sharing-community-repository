@@ -3,9 +3,9 @@ import {RestConstants} from "../../../core-module/core.module";
 import {IamUser, Node, NodeList, NodeWrapper} from '../../../core-module/core.module';
 import {RestNodeService} from "../../../core-module/core.module";
 import {trigger} from "@angular/animations";
-import {UIAnimation} from "../../../common/ui/ui-animation";
+import {UIAnimation} from "../../../core-module/ui/ui-animation";
 import {RestSearchService} from '../../../core-module/core.module';
-import {Toast} from '../../../common/ui/toast';
+import {Toast} from '../../../core-ui-module/toast';
 import {RestIamService} from "../../../core-module/core.module";
 
 @Component({

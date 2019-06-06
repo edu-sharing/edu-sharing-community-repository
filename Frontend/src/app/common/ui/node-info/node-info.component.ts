@@ -1,4 +1,4 @@
-import {UIAnimation} from "../ui-animation";
+import {UIAnimation} from "../../../core-module/ui/ui-animation";
 import {Component, EventEmitter, Input, Output} from "@angular/core";
 import {trigger} from "@angular/animations";
 import {Router} from "@angular/router";

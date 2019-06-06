@@ -3,9 +3,9 @@ import {
   QueryList
 } from '@angular/core';
 import {TranslateService} from "@ngx-translate/core";
-import {Toast} from "../toast";
+import {Toast} from "../../../core-ui-module/toast";
 import {DialogButton} from "../../../core-module/core.module";
-import {UIAnimation} from "../ui-animation";
+import {UIAnimation} from "../../../core-module/ui/ui-animation";
 import {trigger} from "@angular/animations";
 
 @Component({

@@ -1,13 +1,13 @@
 import {Component, EventEmitter, Output} from '@angular/core';
-import {Toast} from '../../../common/ui/toast';
+import {Toast} from '../../../core-ui-module/toast';
 import {Router, ActivatedRoute, UrlSerializer} from '@angular/router';
 import {RegisterInformation} from '../../../core-module/core.module';
 import {TranslateService} from '@ngx-translate/core';
-import {Translation} from '../../../common/translation';
+import {Translation} from '../../../core-ui-module/translation';
 import {RestConnectorService} from '../../../core-module/core.module';
 import {ConfigurationService} from '../../../core-module/core.module';
 import {Title} from '@angular/platform-browser';
-import {UIHelper} from '../../../common/ui/ui-helper';
+import {UIHelper} from '../../../core-ui-module/ui-helper';
 import {SessionStorageService} from '../../../core-module/core.module';
 import {PlatformLocation} from '@angular/common';
 import {RestRegisterService} from '../../../core-module/core.module';

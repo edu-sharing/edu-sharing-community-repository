@@ -3,7 +3,7 @@ import {Component, OnInit, NgZone, HostListener, ViewChild, Sanitizer, ElementRe
 
 import {Router, Params, ActivatedRoute} from "@angular/router";
 
-import {Translation} from './../../../common/translation';
+import {Translation} from '../../../core-ui-module/translation';
 
 import * as EduData from "../../../core-module/core.module";
 
@@ -11,7 +11,7 @@ import {RestCollectionService, ListItem} from "../../../core-module/core.module"
 import {RestNodeService} from "../../../core-module/core.module";
 import {RestConstants} from "../../../core-module/core.module";
 import {RestHelper} from "../../../core-module/core.module";
-import {Toast} from "../../../common/ui/toast";
+import {Toast} from "../../../core-ui-module/toast";
 import {RestIamService} from "../../../core-module/core.module";
 import {Group, IamGroups, IamUser, LoginResult, NodeRef, Permission} from '../../../core-module/core.module';
 import {User} from "../../../core-module/core.module";
@@ -23,13 +23,13 @@ import {SessionStorageService} from "../../../core-module/core.module";
 import {UIConstants} from "../../../core-module/ui/ui-constants";
 import {MdsComponent} from "../../../common/ui/mds/mds.component";
 import {TranslateService} from "@ngx-translate/core";
-import {NodeHelper} from "../../../common/ui/node-helper";
-import {ColorHelper} from '../../../common/ui/color-helper';
+import {NodeHelper} from "../../../core-ui-module/node-helper";
+import {ColorHelper} from '../../../core-module/ui/color-helper';
 import {DomSanitizer} from "@angular/platform-browser";
 import {TemporaryStorageService} from "../../../core-module/core.module";
-import {UIHelper} from "../../../common/ui/ui-helper";
 import {RegisterResetPasswordComponent} from "../../register/register-reset-password/register-reset-password.component";
 import {MainNavComponent} from '../../../common/ui/main-nav/main-nav.component';
+import {UIHelper} from "../../../core-ui-module/ui-helper";
 
 // component class
 @Component({

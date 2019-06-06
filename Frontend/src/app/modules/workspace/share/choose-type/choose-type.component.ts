@@ -1,5 +1,5 @@
 import {Component, Input, EventEmitter, Output, ViewChild, ElementRef, AfterViewInit} from '@angular/core';
-import {UIHelper} from "../../../../common/ui/ui-helper";
+import {UIHelper} from "../../../../core-ui-module/ui-helper";
 
 @Component({
   selector: 'workspace-share-choose-type',

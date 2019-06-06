@@ -6,9 +6,9 @@ import {
     RestNodeService,
     ToolPermission
 } from '../../../core-module/core.module';
-import {Toast} from "../../../common/ui/toast";
+import {Toast} from "../../../core-ui-module/toast";
 import {TranslateService} from "@ngx-translate/core";
-import {UIAnimation} from "../../../common/ui/ui-animation";
+import {UIAnimation} from "../../../core-module/ui/ui-animation";
 import {Helper} from "../../../core-module/rest/helper";
 import {trigger} from "@angular/animations";
 import {AuthorityNamePipe} from '../../../common/ui/authority-name.pipe';

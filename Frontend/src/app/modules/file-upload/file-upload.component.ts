@@ -1,16 +1,16 @@
 import {Component, Input, EventEmitter, Output, ElementRef, ViewChild, OnInit} from '@angular/core';
-import {Toast} from '../../common/ui/toast';
+import {Toast} from '../../core-ui-module/toast';
 import {Router, Route, Params, ActivatedRoute, UrlSerializer} from '@angular/router';
 import {OAuthResult, LoginResult, AccessScope, Node} from '../../core-module/core.module';
 import {RouterComponent} from '../../router/router.component';
 import {TranslateService} from '@ngx-translate/core';
-import {Translation} from '../../common/translation';
+import {Translation} from '../../core-ui-module/translation';
 import {RestConnectorService} from '../../core-module/core.module';
 import {RestConstants} from '../../core-module/core.module';
 import {ConfigurationService} from '../../core-module/core.module';
 import {FrameEventsService} from '../../core-module/core.module';
 import {Title} from '@angular/platform-browser';
-import {UIHelper} from '../../common/ui/ui-helper';
+import {UIHelper} from '../../core-ui-module/ui-helper';
 import {SessionStorageService} from '../../core-module/core.module';
 import {Scope} from '@angular/core/src/profile/wtf_impl';
 import {UIConstants} from '../../core-module/ui/ui-constants';
@@ -21,7 +21,7 @@ import {PlatformLocation} from '@angular/common';
 import {CordovaService} from "../../common/services/cordova.service";
 import {InputPasswordComponent} from "../../common/ui/input-password/input-password.component";
 import {RestNodeService} from '../../core-module/core.module';
-import {NodeHelper} from '../../common/ui/node-helper';
+import {NodeHelper} from '../../core-ui-module/node-helper';
 import {TemporaryStorageService} from '../../core-module/core.module';
 
 @Component({

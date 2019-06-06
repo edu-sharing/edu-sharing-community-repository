@@ -1,12 +1,12 @@
 import {AfterViewInit, ApplicationRef, Component, EventEmitter, HostListener, Input, Output} from '@angular/core';
 
-import {Toast} from "../../../common/ui/toast";
+import {Toast} from "../../../core-ui-module/toast";
 import {TranslateService} from "@ngx-translate/core";
-import {NodeHelper} from "../../../common/ui/node-helper";
+import {NodeHelper} from "../../../core-ui-module/node-helper";
 import {Helper} from "../../../core-module/rest/helper";
 import {trigger} from "@angular/animations";
-import {UIAnimation} from "../../../common/ui/ui-animation";
-import {UIHelper} from '../../../common/ui/ui-helper';
+import {UIAnimation} from "../../../core-module/ui/ui-animation";
+import {UIHelper} from '../../../core-ui-module/ui-helper';
 import {UIConstants} from '../../../core-module/ui/ui-constants';
 import {ConfigurationService} from "../../../core-module/core.module";
 import {

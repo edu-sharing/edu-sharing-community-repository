@@ -1,4 +1,4 @@
-import {NodeHelper} from "../ui/node-helper";
+import {NodeHelper} from "../../core-ui-module/node-helper";
 import {Injectable} from "@angular/core";
 import {MessageType} from "../../core-bridge-module/bridge.service";
 import {
@@ -9,7 +9,7 @@ import {
     RestConstants,
     RestNetworkService
 } from "../../core-module/core.module";
-import {OptionItem} from "../ui/actionbar/option-item";
+import {OptionItem} from "../../core-ui-module/option-item";
 
 @Injectable()
 export class ActionbarHelperService{

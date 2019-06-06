@@ -1,8 +1,8 @@
 import {Injectable} from "@angular/core";
-import {Toast} from "../common/ui/toast";
+import {Toast} from "../core-ui-module/toast";
 import {CordovaService} from "../common/services/cordova.service";
 import {DialogButton} from "../core-module/core.module";
-import {Translation} from "../common/translation";
+import {Translation} from "../core-ui-module/translation";
 
 @Injectable()
 export class BridgeService{

@@ -1,6 +1,6 @@
 import {Component, Input, Output, EventEmitter, OnInit, HostListener} from '@angular/core';
 import {TranslateService} from "@ngx-translate/core";
-import {UIHelper} from '../ui-helper';
+import {UIHelper} from '../../../core-ui-module/ui-helper';
 import {
     Node, NodeList,
     ListItem,
@@ -9,7 +9,7 @@ import {
     RestIamService,
     RestNodeService
 } from "../../../core-module/core.module";
-import {Toast} from "../toast";
+import {Toast} from "../../../core-ui-module/toast";
 
 @Component({
   selector: 'file-chooser',

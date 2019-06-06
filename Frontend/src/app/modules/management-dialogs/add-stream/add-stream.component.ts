@@ -1,18 +1,18 @@
 import {Component, Input, EventEmitter, Output, ViewChild, ElementRef} from '@angular/core';
 import {RestConnectorService} from "../../../core-module/core.module";
-import {Toast} from "../../../common/ui/toast";
+import {Toast} from "../../../core-ui-module/toast";
 import {RestNodeService} from "../../../core-module/core.module";
 import {
   NodeWrapper, Node, NodePermissions, LocalPermissionsResult, Permission,
   LoginResult, View, STREAM_STATUS, IamUser, AuthorityProfile
 } from "../../../core-module/core.module";
 import {ConfigurationService} from "../../../core-module/core.module";
-import {UIHelper} from "../../../common/ui/ui-helper";
+import {UIHelper} from "../../../core-ui-module/ui-helper";
 import {RestIamService} from "../../../core-module/core.module";
 import {TranslateService} from "@ngx-translate/core";
 import {MdsComponent} from "../../../common/ui/mds/mds.component";
 import {RestConstants} from "../../../core-module/core.module";
-import {UIAnimation} from "../../../common/ui/ui-animation";
+import {UIAnimation} from "../../../core-module/ui/ui-animation";
 import {trigger} from "@angular/animations";
 import {RestStreamService} from "../../../core-module/core.module";
 import {RestHelper} from "../../../core-module/core.module";

@@ -1,5 +1,5 @@
 import {Component, Input, Output, EventEmitter, OnInit} from '@angular/core';
-import {UIHelper} from "../ui-helper";
+import {UIHelper} from "../../../core-ui-module/ui-helper"
 import {NodeList, Node, RestNodeService, TemporaryStorageService, UIService} from "../../../core-module/core.module";
 
 

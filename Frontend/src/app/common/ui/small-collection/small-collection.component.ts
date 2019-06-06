@@ -1,5 +1,5 @@
 import {Component, Input, OnInit} from '@angular/core';
-import {NodeHelper} from "../node-helper";
+import {NodeHelper} from "../../../core-ui-module/node-helper";
 import {TranslateService} from "@ngx-translate/core";
 import {
     Collection,

@@ -1,6 +1,6 @@
 import {Component, ElementRef, HostListener, ViewChild} from '@angular/core';
 import {TranslateService} from "@ngx-translate/core";
-import {Translation} from "../../common/translation";
+import {Translation} from "../../core-ui-module/translation";
 import {
     ClipboardObject,
     ConfigurationService,
@@ -31,18 +31,18 @@ import {
     Version
 } from "../../core-module/core.module";
 import {ActivatedRoute, Params, Router} from "@angular/router";
-import {OptionItem} from "../../common/ui/actionbar/option-item";
-import {Toast} from "../../common/ui/toast";
-import {UIAnimation} from "../../common/ui/ui-animation";
-import {NodeHelper} from "../../common/ui/node-helper";
-import {KeyEvents} from "../../common/ui/key-events";
+import {OptionItem} from "../../core-ui-module/option-item";
+import {Toast} from "../../core-ui-module/toast";
+import {UIAnimation} from "../../core-module/ui/ui-animation";
+import {NodeHelper} from "../../core-ui-module/node-helper";
+import {KeyEvents} from "../../core-module/ui/key-events";
 import {Title} from "@angular/platform-browser";
-import {UIHelper} from "../../common/ui/ui-helper";
+import {UIHelper} from "../../core-ui-module/ui-helper";
 import {trigger} from "@angular/animations";
 import {UIConstants} from "../../core-module/ui/ui-constants";
 import {ActionbarHelperService} from "../../common/services/actionbar-helper";
 import {Helper} from "../../core-module/rest/helper";
-import {DateHelper} from '../../common/ui/DateHelper';
+import {DateHelper} from '../../core-ui-module/DateHelper';
 import {CordovaService} from "../../common/services/cordova.service";
 import {HttpClient} from '@angular/common/http';
 import {MainNavComponent} from '../../common/ui/main-nav/main-nav.component';

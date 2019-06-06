@@ -1,12 +1,12 @@
 
 import {Component} from "@angular/core";
-import {Translation} from "../../common/translation";
-import {UIHelper} from "../../common/ui/ui-helper";
+import {Translation} from "../../core-ui-module/translation";
+import {UIHelper} from "../../core-ui-module/ui-helper";
 import {SessionStorageService} from "../../core-module/core.module";
 import {TranslateService} from "@ngx-translate/core";
 import {Title} from "@angular/platform-browser";
 import {ActivatedRoute} from "@angular/router";
-import {Toast} from "../../common/ui/toast";
+import {Toast} from "../../core-ui-module/toast";
 import {RestConnectorService} from "../../core-module/core.module";
 import {ConfigurationService} from "../../core-module/core.module";
 

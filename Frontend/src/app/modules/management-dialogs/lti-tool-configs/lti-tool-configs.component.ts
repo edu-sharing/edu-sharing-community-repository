@@ -2,11 +2,11 @@ import {Component, Input, EventEmitter, Output, ViewChild, ElementRef} from '@an
 import {DialogButton, ListItem, RestNodeService} from "../../../core-module/core.module";
 import {RestConstants} from "../../../core-module/core.module";
 import {NodeWrapper,NodeList, Node, IamUsers, WorkflowEntry} from "../../../core-module/core.module";
-import {Toast} from "../../../common/ui/toast";
+import {Toast} from "../../../core-ui-module/toast";
 import {TranslateService} from "@ngx-translate/core";
 import {MdsComponent} from "../../../common/ui/mds/mds.component";
 import {RestToolService} from "../../../core-module/core.module";
-import {OptionItem} from "../../../common/ui/actionbar/option-item";
+import {OptionItem} from "../../../core-ui-module/option-item";
 
 @Component({
   selector: 'workspace-lti-tool-configs',

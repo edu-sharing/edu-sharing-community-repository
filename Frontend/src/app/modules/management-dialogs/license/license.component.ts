@@ -1,17 +1,17 @@
 import {Component, Input, EventEmitter, Output, ViewChild, ElementRef} from '@angular/core';
 import {DialogButton, RestConnectorService} from "../../../core-module/core.module";
-import {Toast} from "../../../common/ui/toast";
+import {Toast} from "../../../core-ui-module/toast";
 import {RestNodeService} from "../../../core-module/core.module";
 import {RestConstants} from "../../../core-module/core.module";
 import {NodeWrapper, Node, NodePermissions, LocalPermissionsResult, Permission} from "../../../core-module/core.module";
 import {TranslateService} from "@ngx-translate/core";
-import {NodeHelper} from "../../../common/ui/node-helper";
+import {NodeHelper} from "../../../core-ui-module/node-helper";
 import {ConfigurationService} from "../../../core-module/core.module";
 import {RestHelper} from "../../../core-module/core.module";
-import {VCard} from "../../../common/VCard";
-import {UIHelper} from "../../../common/ui/ui-helper";
+import {VCard} from "../../../core-module/ui/VCard";
+import {UIHelper} from "../../../core-ui-module/ui-helper";
 import {trigger} from "@angular/animations";
-import {UIAnimation} from "../../../common/ui/ui-animation";
+import {UIAnimation} from "../../../core-module/ui/ui-animation";
 import {UIService} from '../../../core-module/core.module';
 
 @Component({

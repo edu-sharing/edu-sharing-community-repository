@@ -1,7 +1,7 @@
-import {Translation} from '../../common/translation';
-import {UIHelper} from '../../common/ui/ui-helper';
+import {Translation} from '../../core-ui-module/translation';
+import {UIHelper} from '../../core-ui-module/ui-helper';
 import {ActivatedRoute, Router} from '@angular/router';
-import {Toast} from '../../common/ui/toast';
+import {Toast} from '../../core-ui-module/toast';
 import {ConfigurationService, DialogButton, ListItem} from '../../core-module/core.module';
 import {Title} from '@angular/platform-browser';
 import {TranslateService} from '@ngx-translate/core';
@@ -30,6 +30,7 @@ import {RestHelper} from '../../core-module/core.module';
 import {Observable, Observer} from 'rxjs/index';
 import {RestNetworkService} from '../../core-module/core.module';
 import {MainNavComponent} from '../../common/ui/main-nav/main-nav.component';
+import {CustomHelper} from "../../common/custom-helper";
 
 @Component({
   selector: 'admin-main',
@@ -230,7 +231,7 @@ export class AdminComponent {
               private node: RestNodeService,
               private searchApi: RestSearchService,
               private organization: RestOrganizationService) {
-      this.addCustomComponents(UIHelper.getCustomComponents("AdminComponent",this.componentFactoryResolver));
+      this.addCustomComponents(CustomHelper.getCustomComponents("AdminComponent",this.componentFactoryResolver));
       this.searchColumns.push(new ListItem('NODE', RestConstants.CM_NAME));
       this.searchColumns.push(new ListItem('NODE', RestConstants.NODE_ID));
       this.searchColumns.push(new ListItem('NODE', RestConstants.CM_MODIFIED_DATE));

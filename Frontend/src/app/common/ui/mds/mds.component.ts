@@ -1,15 +1,15 @@
 import {Component, ElementRef, EventEmitter, HostListener, Input, NgZone, Output, ViewChild} from '@angular/core';
 import {TranslateService} from '@ngx-translate/core';
 import {DomSanitizer, SafeHtml} from '@angular/platform-browser';
-import {Translation} from '../../translation';
+import {Translation} from '../../../core-ui-module/translation';
 import {ActivatedRoute} from '@angular/router';
-import {Toast} from '../toast';
-import {VCard} from '../../VCard';
+import {Toast} from '../../../core-ui-module/toast';
+import {VCard} from '../../../core-module/ui/VCard';
 import {Helper} from '../../../core-module/rest/helper';
-import {UIHelper} from '../ui-helper';
-import {NodeHelper} from '../node-helper';
+import {UIHelper} from "../../../core-ui-module/ui-helper"
+import {NodeHelper} from '../../../core-ui-module/node-helper';
 import {trigger} from '@angular/animations';
-import {UIAnimation} from '../ui-animation';
+import {UIAnimation} from '../../../core-module/ui/ui-animation';
 import {
     ConfigurationService,
     Node, NodeList,

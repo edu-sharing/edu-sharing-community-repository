@@ -1,8 +1,8 @@
 import {Component, EventEmitter, Output} from '@angular/core';
-import {UIHelper} from "../../../common/ui/ui-helper";
+import {UIHelper} from "../../../core-ui-module/ui-helper";
 import {Router, Route, Params, ActivatedRoute, UrlSerializer} from "@angular/router";
 import {RestConnectorService} from "../../../core-module/core.module";
-import {Toast} from "../../../common/ui/toast";
+import {Toast} from "../../../core-ui-module/toast";
 import {PlatformLocation} from "@angular/common";
 import {TranslateService} from "@ngx-translate/core";
 import {ConfigurationService} from "../../../core-module/core.module";

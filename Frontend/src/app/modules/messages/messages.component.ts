@@ -1,7 +1,7 @@
-import {Translation} from "../../common/translation";
-import {UIHelper} from "../../common/ui/ui-helper";
+import {Translation} from "../../core-ui-module/translation";
+import {UIHelper} from "../../core-ui-module/ui-helper";
 import {ActivatedRoute, Router} from "@angular/router";
-import {Toast} from "../../common/ui/toast";
+import {Toast} from "../../core-ui-module/toast";
 import {ConfigurationService} from "../../core-module/core.module";
 import {Title} from "@angular/platform-browser";
 import {TranslateService} from "@ngx-translate/core";

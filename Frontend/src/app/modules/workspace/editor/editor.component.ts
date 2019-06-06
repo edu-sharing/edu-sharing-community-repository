@@ -2,7 +2,7 @@ import {Component, Input, EventEmitter, Output, ViewChild, ElementRef} from '@an
 import {RestConstants} from "../../../core-module/core.module";
 import {Node, NodeWrapper} from "../../../core-module/core.module";
 import {RestNodeService} from "../../../core-module/core.module";
-import {Toast} from "../../../common/ui/toast";
+import {Toast} from "../../../core-ui-module/toast";
 
 @Component({
   selector: 'workspace-editor',

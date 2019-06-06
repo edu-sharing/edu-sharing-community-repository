@@ -10,7 +10,7 @@ import {HttpClient} from '@angular/common/http';
 import {UIConstants} from "../../core-module/ui/ui-constants";
 import {FrameEventsService} from "../../core-module/rest/services/frame-events.service"
 
-import {DateHelper} from "../ui/DateHelper";
+import {DateHelper} from "../../core-ui-module/DateHelper";
 import {OAuthResult} from "../../core-module/rest/data-object";
 import {RestConstants} from "../../core-module/rest/rest-constants";
 

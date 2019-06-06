@@ -1,6 +1,6 @@
 import {Pipe, PipeTransform} from "@angular/core";
 import {Helper} from "../../core-module/rest/helper";
-import {ColorHelper} from "./color-helper";
+import {ColorHelper} from "../../core-module/ui/color-helper";
 @Pipe({name: 'authorityColor'})
 export class AuthorityColorPipe implements PipeTransform {
   public static COLORS=['#48708e','#975B5D','#6A9663','#62998F','#769CB6','#968758'];

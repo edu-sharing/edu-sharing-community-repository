@@ -4,14 +4,14 @@ import {
     //ApplicationRef 
 } from '@angular/core';
 
-import { Toast } from "../../common/ui/toast";
+import { Toast } from "../../core-ui-module/toast";
 import {Router, Route, ActivatedRoute} from "@angular/router";
 import {OAuthResult, LoginResult, AccessScope, RestConstants} from "../../core-module/core.module";
 import {OPEN_URL_MODE, UIConstants} from "../../core-module/ui/ui-constants";
 import { CordovaService } from "../../common/services/cordova.service";
 import { ConfigurationService } from '../../core-module/core.module';
-import { UIHelper } from '../../common/ui/ui-helper';
-import { Translation } from '../../common/translation';
+import { UIHelper } from '../../core-ui-module/ui-helper';
+import { Translation } from '../../core-ui-module/translation';
 import { TranslateService } from '@ngx-translate/core';
 import { RestHelper } from '../../core-module/core.module';
 import { STATUS_CODES } from 'http';

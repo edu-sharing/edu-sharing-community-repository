@@ -1,7 +1,7 @@
 import {Component, Input, Output, EventEmitter} from "@angular/core";
 import {RestConstants} from "../../../core-module/core.module";
 import {Node,NodeList,NodeWrapper} from "../../../core-module/core.module";
-import {Toast} from "../../../common/ui/toast";
+import {Toast} from "../../../core-ui-module/toast";
 import {RestSearchService} from "../../../core-module/core.module";
 import {RestHelper} from "../../../core-module/core.module";
 import {RestNodeService} from "../../../core-module/core.module";

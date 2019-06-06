@@ -8,11 +8,11 @@ import {
     RestNodeService, SessionStorageService,
     TemporaryStorageService
 } from "../../../core-module/core.module";
-import {Toast} from "../toast";
+import {Toast} from "../../../core-ui-module/toast";
 import {SearchService} from "../../../modules/search/search.service";
-import {NodeHelper} from "../node-helper";
+import {NodeHelper} from "../../../core-ui-module/node-helper";
 import {UIConstants} from "../../../core-module/ui/ui-constants";
-import {Translation} from "../../translation";
+import {Translation} from "../../../core-ui-module/translation";
 import {TranslateService} from "@ngx-translate/core";
 import {RestLocatorService} from "../../../core-module/core.module";
 

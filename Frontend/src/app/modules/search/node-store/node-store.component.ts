@@ -10,14 +10,14 @@ import {
     RestSearchService,
     TemporaryStorageService
 } from "../../../core-module/core.module";
-import {Toast} from "../../../common/ui/toast";
-import {NodeHelper} from "../../../common/ui/node-helper";
+import {Toast} from "../../../core-ui-module/toast";
+import {NodeHelper} from "../../../core-ui-module/node-helper";
 import {Router} from "@angular/router";
 import {UIConstants} from "../../../core-module/ui/ui-constants";
 import {TranslateService} from "@ngx-translate/core";
-import {OptionItem} from "../../../common/ui/actionbar/option-item";
+import {OptionItem} from "../../../core-ui-module/option-item";
 import {trigger} from "@angular/animations";
-import {UIAnimation} from "../../../common/ui/ui-animation";
+import {UIAnimation} from "../../../core-module/ui/ui-animation";
 import {ActionbarHelperService} from "../../../common/services/actionbar-helper";
 import {HttpClient} from '@angular/common/http';
 

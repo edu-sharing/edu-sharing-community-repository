@@ -1,9 +1,9 @@
 import {Component, Input, Output, EventEmitter, OnInit, ViewChild, ElementRef, HostListener} from '@angular/core';
-import {UIAnimation} from "../ui-animation";
+import {UIAnimation} from "../../../core-module/ui/ui-animation";
 import {trigger} from "@angular/animations";
-import {UIHelper} from "../ui-helper";
+import {UIHelper} from "../../../core-ui-module/ui-helper"
 import {Helper} from '../../../core-module/rest/helper';
-import {OptionItem} from "../actionbar/option-item";
+import {OptionItem} from "../../../core-ui-module/option-item";
 import {UIService} from "../../../core-module/core.module";
 
 @Component({

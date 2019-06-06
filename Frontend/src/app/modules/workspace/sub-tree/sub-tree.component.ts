@@ -1,16 +1,16 @@
 import {Component, Input, EventEmitter, Output} from '@angular/core';
 import {RestNodeService} from '../../../core-module/core.module';
 import {TranslateService} from '@ngx-translate/core';
-import {Translation} from '../../../common/translation';
+import {Translation} from '../../../core-ui-module/translation';
 import {RestConstants} from '../../../core-module/core.module';
 import {Node,NodeList} from '../../../core-module/core.module';
 import {TemporaryStorageService} from '../../../core-module/core.module';
-import {OptionItem} from '../../../common/ui/actionbar/option-item';
+import {OptionItem} from '../../../core-ui-module/option-item';
 import {UIService} from '../../../core-module/core.module';
-import {UIAnimation} from '../../../common/ui/ui-animation';
+import {UIAnimation} from '../../../core-module/ui/ui-animation';
 import {trigger} from '@angular/animations';
 import {Helper} from '../../../core-module/rest/helper';
-import {UIHelper} from "../../../common/ui/ui-helper";
+import {UIHelper} from "../../../core-ui-module/ui-helper";
 
 @Component({
   selector: 'workspace-sub-tree',

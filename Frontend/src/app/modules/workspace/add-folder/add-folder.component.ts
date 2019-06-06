@@ -5,9 +5,9 @@ import {TranslateService} from "@ngx-translate/core";
 import {ConfigurationService} from "../../../core-module/core.module";
 import {RestConstants} from "../../../core-module/core.module";
 import {ConfigurationHelper} from "../../../core-module/core.module";
-import {UIHelper} from "../../../common/ui/ui-helper";
+import {UIHelper} from "../../../core-ui-module/ui-helper";
 import {trigger} from "@angular/animations";
-import {UIAnimation} from "../../../common/ui/ui-animation";
+import {UIAnimation} from "../../../core-module/ui/ui-animation";
 
 @Component({
   selector: 'workspace-add-folder',

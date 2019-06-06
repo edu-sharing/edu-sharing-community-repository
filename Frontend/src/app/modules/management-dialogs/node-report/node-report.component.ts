@@ -1,17 +1,17 @@
 import {Component, Input, EventEmitter, Output, ViewChild, ElementRef} from '@angular/core';
 import {RestConnectorService} from "../../../core-module/core.module";
-import {Toast} from "../../../common/ui/toast";
+import {Toast} from "../../../core-ui-module/toast";
 import {RestNodeService} from "../../../core-module/core.module";
 import {
   NodeWrapper, Node, NodePermissions, LocalPermissionsResult, Permission,
   LoginResult
 } from "../../../core-module/core.module";
 import {ConfigurationService} from "../../../core-module/core.module";
-import {UIHelper} from "../../../common/ui/ui-helper";
+import {UIHelper} from "../../../core-ui-module/ui-helper";
 import {RestIamService} from "../../../core-module/core.module";
 import {TranslateService} from "@ngx-translate/core";
 import {trigger} from "@angular/animations";
-import {UIAnimation} from "../../../common/ui/ui-animation";
+import {UIAnimation} from "../../../core-module/ui/ui-animation";
 
 @Component({
   selector: 'node-report',

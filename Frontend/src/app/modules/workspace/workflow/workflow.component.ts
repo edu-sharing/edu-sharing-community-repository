@@ -5,20 +5,20 @@ import {
   NodeWrapper, Node, IamUsers, WorkflowEntry, NodePermissions,
   Permission, UserSimple, WorkflowDefinition
 } from "../../../core-module/core.module";
-import {VCard} from "../../../common/VCard";
-import {Toast} from "../../../common/ui/toast";
-import {Translation} from "../../../common/translation";
+import {VCard} from "../../../core-module/ui/VCard";
+import {Toast} from "../../../core-ui-module/toast";
+import {Translation} from "../../../core-ui-module/translation";
 import {TranslateService} from "@ngx-translate/core";
 import any = jasmine.any;
 import {SuggestItem} from "../../../common/ui/autocomplete/autocomplete.component";
 import {RestIamService} from "../../../core-module/core.module";
-import {NodeHelper} from "../../../common/ui/node-helper";
+import {NodeHelper} from "../../../core-ui-module/node-helper";
 import {AuthorityNamePipe} from "../../../common/ui/authority-name.pipe";
 import {RestConnectorService} from "../../../core-module/core.module";
-import {UIHelper} from "../../../common/ui/ui-helper";
+import {UIHelper} from "../../../core-ui-module/ui-helper";
 import {ConfigurationService} from "../../../core-module/core.module";
 import {trigger} from "@angular/animations";
-import {UIAnimation} from "../../../common/ui/ui-animation";
+import {UIAnimation} from "../../../core-module/ui/ui-animation";
 import {RestHelper} from "../../../core-module/core.module";
 
 @Component({

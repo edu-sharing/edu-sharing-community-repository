@@ -1,15 +1,15 @@
 import {Component, Input, EventEmitter, Output, ElementRef, ViewChild, OnInit} from '@angular/core';
-import {Toast} from "../../../common/ui/toast";
+import {Toast} from "../../../core-ui-module/toast";
 import {Router, Route, Params, ActivatedRoute, UrlSerializer} from "@angular/router";
 import {OAuthResult, LoginResult, AccessScope} from "../../../core-module/core.module";
 import {TranslateService} from "@ngx-translate/core";
-import {Translation} from "../../../common/translation";
+import {Translation} from "../../../core-ui-module/translation";
 import {RestConnectorService} from "../../../core-module/core.module";
 import {RestConstants} from "../../../core-module/core.module";
 import {ConfigurationService} from "../../../core-module/core.module";
 import {FrameEventsService} from "../../../core-module/core.module";
 import {Title} from "@angular/platform-browser";
-import {UIHelper} from "../../../common/ui/ui-helper";
+import {UIHelper} from "../../../core-ui-module/ui-helper";
 import {SessionStorageService} from "../../../core-module/core.module";
 import {UIConstants} from "../../../core-module/ui/ui-constants";
 import {Helper} from "../../../core-module/rest/helper";

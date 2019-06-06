@@ -1,5 +1,5 @@
 import {Component, Input, Output, EventEmitter, OnInit, SimpleChanges} from '@angular/core';
-import {UIAnimation} from '../ui-animation';
+import {UIAnimation} from '../../../core-module/ui/ui-animation';
 import {trigger} from '@angular/animations';
 import {CordovaService} from "../../services/cordova.service";
 import {DialogButton, SessionStorageService} from "../../../core-module/core.module";

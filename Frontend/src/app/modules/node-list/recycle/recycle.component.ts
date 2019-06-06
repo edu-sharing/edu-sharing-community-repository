@@ -1,10 +1,10 @@
 import {Component, Input, ViewChild} from "@angular/core";
 import {ListItem, RestArchiveService} from "../../../core-module/core.module";
 import {RestConstants} from "../../../core-module/core.module";
-import {OptionItem} from "../../../common/ui/actionbar/option-item";
+import {OptionItem} from "../../../core-ui-module/option-item";
 import {RecycleRestoreComponent} from "./restore/restore.component";
 import {TranslateService} from "@ngx-translate/core";
-import {Toast} from "../../../common/ui/toast";
+import {Toast} from "../../../core-ui-module/toast";
 import {ArchiveRestore,Node} from "../../../core-module/core.module";
 import {TemporaryStorageService} from "../../../core-module/core.module";
 

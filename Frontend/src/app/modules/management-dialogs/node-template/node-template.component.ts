@@ -2,13 +2,13 @@ import {Component, Input, EventEmitter, Output, ViewChild, ElementRef} from '@an
 import {RestNodeService} from "../../../core-module/core.module";
 import {RestConstants} from "../../../core-module/core.module";
 import {NodeWrapper,Node} from "../../../core-module/core.module";
-import {VCard} from "../../../common/VCard";
-import {Toast} from "../../../common/ui/toast";
-import {Translation} from "../../../common/translation";
+import {VCard} from "../../../core-module/ui/VCard";
+import {Toast} from "../../../core-ui-module/toast";
+import {Translation} from "../../../core-ui-module/translation";
 import {TranslateService} from "@ngx-translate/core";
-import {DateHelper} from "../../../common/ui/DateHelper";
+import {DateHelper} from "../../../core-ui-module/DateHelper";
 import {trigger} from "@angular/animations";
-import {UIAnimation} from "../../../common/ui/ui-animation";
+import {UIAnimation} from "../../../core-module/ui/ui-animation";
 import {MdsComponent} from "../../../common/ui/mds/mds.component";
 
 @Component({

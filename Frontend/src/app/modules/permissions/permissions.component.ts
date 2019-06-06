@@ -1,17 +1,17 @@
 import {Component, ViewChild, ElementRef} from '@angular/core';
 import {TranslateService} from "@ngx-translate/core";
-import {Translation} from "../../common/translation";
+import {Translation} from "../../core-ui-module/translation";
 import {
   NodeRef, IamUser, NodeWrapper, Node, Version, NodeVersions, LoginResult,
   IamGroups, Group, OrganizationOrganizations
 } from "../../core-module/core.module";
 import {Router, Params, ActivatedRoute, Routes} from "@angular/router";
-import {Toast} from "../../common/ui/toast";
+import {Toast} from "../../core-ui-module/toast";
 import {RestConnectorService} from "../../core-module/core.module";
 import {RestOrganizationService} from "../../core-module/core.module";
 import {ConfigurationService} from "../../core-module/core.module";
 import {Title} from "@angular/platform-browser";
-import {UIHelper} from "../../common/ui/ui-helper";
+import {UIHelper} from "../../core-ui-module/ui-helper";
 import {SessionStorageService} from "../../core-module/core.module";
 import {RestHelper} from "../../core-module/core.module";
 import {MainNavComponent} from '../../common/ui/main-nav/main-nav.component';

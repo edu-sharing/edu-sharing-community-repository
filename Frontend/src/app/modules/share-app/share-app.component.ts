@@ -1,7 +1,7 @@
-import {Translation} from "../../common/translation";
-import {UIHelper} from "../../common/ui/ui-helper";
+import {Translation} from "../../core-ui-module/translation";
+import {UIHelper} from "../../core-ui-module/ui-helper";
 import {ActivatedRoute, Router} from "@angular/router";
-import {Toast} from "../../common/ui/toast";
+import {Toast} from "../../core-ui-module/toast";
 import {ConfigurationService, ListItem} from "../../core-module/core.module";
 import {DomSanitizer, Title} from "@angular/platform-browser";
 import {TranslateService} from "@ngx-translate/core";
@@ -21,7 +21,7 @@ import {RestNodeService} from "../../core-module/core.module";
 import {RestCollectionService} from "../../core-module/core.module";
 import {RestHelper} from "../../core-module/core.module";
 import {CordovaService} from "../../common/services/cordova.service";
-import {DateHelper} from "../../common/ui/DateHelper";
+import {DateHelper} from "../../core-ui-module/DateHelper";
 import {RestConnectorsService} from "../../core-module/core.module";
 import {FrameEventsService} from "../../core-module/core.module";
 @Component({

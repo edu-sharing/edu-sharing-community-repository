@@ -1,7 +1,7 @@
 import {Component, Input, Output, EventEmitter} from '@angular/core';
 import {NodeList,Node} from "../../../core-module/core.module";
 import {RestNodeService} from "../../../core-module/core.module";
-import {OptionItem} from "../../../common/ui/actionbar/option-item";
+import {OptionItem} from "../../../core-ui-module/option-item";
 import {TemporaryStorageService} from "../../../core-module/core.module";
 import {RestConnectorService} from "../../../core-module/core.module";
 import {RestConstants} from "../../../core-module/core.module";
