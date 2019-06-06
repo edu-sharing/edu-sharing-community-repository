@@ -1,0 +1,24 @@
+@import "../../styles/variables";
+
+.noElements{
+  text-align: center;
+  color:$textLight;
+  font-size: 110%;
+}
+.close{
+  &:focus{
+    @include focusShadow();
+  }
+}
+
+:host /deep/{
+  .cardSmallList{
+    width:$dialogRightWidth - 60px!important;
+  }
+  .cardContainer{
+    padding:0 20px !important;
+  }
+  .preview img{
+    width:$dialogRightWidth - 29px!important;
+  }
+}

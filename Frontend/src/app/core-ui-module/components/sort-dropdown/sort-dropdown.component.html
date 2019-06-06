@@ -1,0 +1,11 @@
+<div class="dialog" *ngIf="open" (click)="setOpen(false);$event.stopPropagation();" (contextmenu)="setOpen(false);$event.preventDefault();$event.stopPropagation();"></div>
+<div class="group">
+    <div class="sortMenu collection" *ngIf="open" [@openOverlay]="open">
+        <div class="collection-item-title">{{'SORT_BY' | translate}}</div>
+        <a *ngFor="let item of columns" (click)="setSort(item)" class="collection-item" [class.active]="sortBy==item.name">
+            <div class="title">{{item.type+"."+item.name | translate}}</div>
+            <a *ngIf="sortBy==item.name"><i class="material-icons" *ngIf="sortAscending">arrow_upward</i><i class="material-icons" *ngIf="!sortAscending">arrow_downward</i></a>
+            <a *ngIf="sortBy!=item.name"></a>
+        </a>
+    </div>
+</div>
