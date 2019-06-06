@@ -1,0 +1,6 @@
+[submodule "Frontend/src/app/core-ui-module"]
+	path = Frontend/src/app/core-ui-module
+	url = https://scm.edu-sharing.com/Angular/core-ui-module.git
+[submodule "Frontend/src/app/core-module"]
+	path = Frontend/src/app/core-module
+	url = https://scm.edu-sharing.com/Angular/core-module.git
