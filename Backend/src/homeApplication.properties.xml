@@ -27,7 +27,11 @@
 	<entry key="clientprotocol">http</entry>
 	<entry key="domain">localhost</entry>
 	<entry key="clientport">8080</entry>
-	 
+
+	<!--
+	Shall the client url dynamically generated depending on the request domain of the client
+	-->
+	<entry key="url_dynamic">false</entry>
 
 	<entry key="webappname">edu-sharing</entry>
 	<entry key="wspath">/alfresco/api</entry>
@@ -38,16 +42,12 @@
 		<entry key="contenturl">http://127.0.0.1/esrender/application/esmain/index.php</entry>
 	 	<entry key="previewurl">http://127.0.0.1/esrender/application/esmain/index.php?type=preview</entry>
 	 -->
-	<entry key="nodeid_key">obj_id</entry>
 	<entry key="is_home_node">true</entry>
 	<entry key="appcaption">local</entry>
 	<entry key="appid">local</entry>
 	<!-- credentials of default User -->
 	<entry key="username">admin</entry>
 	<entry key="password">admin</entry>
-	<entry key="publicfolderid"></entry>
-	<entry key="availablesearchcriterias">contenttypes,learningtime,learningresourcetype,groupsize,filetypes,period,user,keywords</entry>
-	<entry key="metadatasets">/org/edu_sharing/metadataset/metadatasets_default.xml</entry>
 	<entry key="devmode">false</entry>
 	<entry key="recommend_objects_query">@cm\:modified:[2011\-03\-24T00:00:00 TO NOW]</entry>
 	<entry key="logo">/edu-sharing/images/logos/edu_sharing_com_login.svg</entry>

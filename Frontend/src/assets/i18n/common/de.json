@@ -48,7 +48,7 @@
   "CLOSE" : "Schließen",
   "INFORMATION": "Informationen",
   "DOWNLOAD": "Herunterladen",
-  "DOWNLOAD_ALL": "Alle herunterladen",
+  "DOWNLOAD_ALL": "Zip herunterladen",
   "LOAD_MORE":"Weitere laden",
   "LOADING": "Lädt...",
   "TODAY" : "Heute",
@@ -274,8 +274,8 @@
     "CREATED": "Die Variante wurde angelegt und in <b>\"{{folder}}\"</b> Ordner gespeichert",
     "CREATED_LINK": "anzeigen",
     "WARNING":{
-      "NO_LICENSE":"Dieses Material besitzt noch keine Lizenz.\nSetzen Sie sich ggf. mit den Autor in Verbindung, um Lizenzverstöße zu vermeiden.",
-      "COPYRIGHT":"Dieses Material besitzt eine Copyright-Lizenz.\nSetzen Sie sich ggf. mit den Autor in Verbindung, um Lizenzverstöße zu vermeiden.",
+      "NO_LICENSE":"Dieses Material besitzt noch keine Lizenz.\nSetzen Sie sich ggf. mit dem Autor in Verbindung, um Lizenzverstöße zu vermeiden.",
+      "COPYRIGHT":"Dieses Material besitzt eine Copyright-Lizenz.\nSetzen Sie sich ggf. mit dem Autor in Verbindung, um Lizenzverstöße zu vermeiden.",
       "ND":"Dieses Material besitzt eine Non Derivative Lizenz. Diese Lizenz legt fest, dass das Material nicht verändert werden darf.\nSetzen Sie sich ggf. mit den Autor in Verbindung, um Lizenzverstöße zu vermeiden.",
       "LINK":"Lizenzinformationen anzeigen"
     }

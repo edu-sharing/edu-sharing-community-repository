@@ -48,7 +48,7 @@
   "SELECT_ROOT_DISABLED" : "select element",
   "CLOSE" : "close",
   "DOWNLOAD": "download",
-  "DOWNLOAD_ALL": "download all",
+  "DOWNLOAD_ALL": "download zip",
   "LOAD_MORE":"Load more",
   "LOADING": "loading...",
   "INFORMATION": "information",
@@ -86,7 +86,7 @@
   "TOOLPERMISSION_ERROR":"You have insufficient permissions for this task",
   "TOOLPERMISSION_ERROR_TITLE":"Insufficient permissions",
   "TOOLPERMISSION_ERROR_HEADER":"The following permission is missing for your account:",
-  "TOOLPERMISSION_ERROR_FOOTER":"If you think that's an error, contact your administrator and and ask for permission {{permission}}",
+  "TOOLPERMISSION_ERROR_FOOTER":"If you think that's an error, contact your administrator and ask for permission {{permission}}",
   "TOOLPERMISSION":{
     "TOOLPERMISSION_INVITE":"The permission to share content",
     "TOOLPERMISSION_INVITE_STREAM":"The permission to add content to the stream",
@@ -94,7 +94,20 @@
     "TOOLPERMISSION_INVITE_HISTORY":"The permission to view the sharing history",
     "TOOLPERMISSION_INVITED":"The permission to see the list of invited users",
     "TOOLPERMISSION_INVITE_SHARE":"The permission to share content in shared folders",
-    "TOOLPERMISSION_INVITE_ALLAUTHORITIES":"The permission to share content to all users"
+    "TOOLPERMISSION_INVITE_ALLAUTHORITIES":"The permission to share content to all users",
+    "TOOLPERMISSION_COLLECTION_EDITORIAL":"Creating editorial collections",
+    "TOOLPERMISSION_LICENSE":"Using the license dialog",
+    "TOOLPERMISSION_INVITE_SAFE":"The permission to release materials in the safe",
+    "TOOLPERMISSION_INVITE_SHARE_SAFE":"The permission to share materials in shared folders of the safe",
+    "TOOLPERMISSION_GLOBAL_AUTHORITY_SEARCH":"Searching and inviting Users Outside the Organization",
+    "TOOLPERMISSION_GLOBAL_AUTHORITY_SEARCH_SAFE":"Searching and inviting users outside the organization in the safe",
+    "TOOLPERMISSION_GLOBAL_AUTHORITY_SEARCH_SHARE":"Searching and inviting users outside the organization in shared folders",
+    "TOOLPERMISSION_GLOBAL_AUTHORITY_SEARCH_SHARE_SAFE":"Searching and inviting users outside the organization in shared folders in the safe",
+    "TOOLPERMISSION_COLLECTION_PINNING":"Pinning collections and managing pinned collections",
+    "TOOLPERMISSION_COLLECTION_CURRICULUM":"Creating curriculum collections",
+    "TOOLPERMISSION_CONFIDENTAL":"Access to the secure area (safe)",
+    "TOOLPERMISSION_UNCHECKEDCONTENT":"Show sources like YouTube in your search",
+    "TOOLPERMISSION_WORKSPACE":"Access to the workspace"
   },
   "NO_WRITE_PERMISSIONS":"No permissions",
   "NODE_SEARCH":"Search elements...",
@@ -180,7 +193,7 @@
   },
   "QUOTA":{
     "TITLE":"QUOTA",
-    "FREE_SPACE":"unused storage space of",
+    "FREE_SPACE":"unused space of",
     "OVERALL":""
   },
   "NODE_VARIANT":{

@@ -15,7 +15,7 @@ import {RestConstants} from "../../common/rest/rest-constants";
 
 import {Toast} from "../../common/ui/toast";
 import {RestConnectorService} from "../../common/rest/services/rest-connector.service";
-import {Collection, LoginResult, MdsMetadataset, NodeRef} from '../../common/rest/data-object';
+import {Collection, NodeRef, CollectionContent, CollectionReference, LoginResult, MdsMetadataset} from "../../common/rest/data-object";
 import {RestOrganizationService} from "../../common/rest/services/rest-organization.service";
 import {OrganizationOrganizations} from "../../common/rest/data-object";
 import {OptionItem} from "../../common/ui/actionbar/option-item";
@@ -371,14 +371,15 @@ export class CollectionsMainComponent {
     }
 
     getOptions(nodes:Node[]=null,fromList:boolean) {
+        let originalDeleted=nodes && nodes.filter((node:any)=>node.originalId==null).length>0;
         if(this.reurl){
             // no action bar in apply mode
             if(!fromList){
                 return [];
             }
             let apply=new OptionItem("APPLY", "redo", (node: Node) => NodeHelper.addNodeToLms(this.router,this.tempStorage,ActionbarHelperService.getNodes(nodes,node)[0],this.reurl));
-            apply.enabledCallback=((node:Node)=> {
-                return NodeHelper.getNodesRight(ActionbarHelperService.getNodes(nodes,node),RestConstants.ACCESS_CC_PUBLISH);
+            apply.enabledCallback=((node:CollectionReference)=> {
+                return node.originalId!=null && NodeHelper.getNodesRight(ActionbarHelperService.getNodes(nodes,node as any),RestConstants.ACCESS_CC_PUBLISH);
             });
             return [apply];
         }
@@ -386,7 +387,7 @@ export class CollectionsMainComponent {
         let options: OptionItem[] = [];
         if (!fromList) {
             if (nodes && nodes.length) {
-                if (NodeHelper.getNodesRight(nodes, RestConstants.ACCESS_CC_PUBLISH)) {
+                if (!originalDeleted && NodeHelper.getNodesRight(nodes, RestConstants.ACCESS_CC_PUBLISH)) {
                     let collection = this.actionbar.createOptionIfPossible('ADD_TO_COLLECTION', nodes, (node: Node) => this.addToOther = ActionbarHelperService.getNodes(nodes, node));
                     if (collection)
                         options.push(collection);
@@ -407,7 +408,7 @@ export class CollectionsMainComponent {
                 options.push(collection);
             }
         }
-      if (fromList || nodes && nodes.length) {
+      if (!originalDeleted && fromList || nodes && nodes.length) {
           let download = this.actionbar.createOptionIfPossible('DOWNLOAD', nodes, (node: Node) => NodeHelper.downloadNodes(this.toast, this.connector, ActionbarHelperService.getNodes(nodes, node)));
           options.push(download);
           let nodeStore = this.actionbar.createOptionIfPossible('ADD_NODE_STORE',nodes,(node: Node) => {
@@ -445,8 +446,8 @@ export class CollectionsMainComponent {
         this.nodeService.moveNode(target.ref.id,source.ref.id).subscribe(()=>{
           this.globalProgress = false;
           this.refreshContent();
-        },(error:any)=>{
-          this.toast.error(error);
+        },(error)=>{
+          this.handleError(error);
           this.globalProgress = false;
         });
       }
@@ -462,12 +463,12 @@ export class CollectionsMainComponent {
             this.globalProgress = false;
             this.refreshContent();
           }, (error: any) => {
-            this.toast.error(error);
+            this.handleError(error);
             this.globalProgress = false;
           });
         }, (error: any) => {
-          this.toast.error(error);
-          this.globalProgress = false;
+            this.handleError(error);
+            this.globalProgress = false;
         });
       }
     }
