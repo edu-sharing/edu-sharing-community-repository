@@ -80,6 +80,11 @@
       "DUPLICATE_NAME":"Eine Sammlung mit diesen Namen existiert bereits",
       "CREATED":"Sammlung wurde erstellt",
       "INVALID_NAME":"Der Name ist unzulässig. Bitte keine Sonderzeichen verwenden"
+    },
+    "ACTIONBAR":{
+      "EDIT":"Bearbeiten",
+      "PIN":"Sammlung pinnen",
+      "DELETE":"Sammlung löschen"
     }
   },
 

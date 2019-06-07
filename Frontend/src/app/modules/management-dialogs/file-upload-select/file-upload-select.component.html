@@ -2,7 +2,7 @@
 <input #fileSelect type="file" style="display:none" id="fileSelect" [multiple]="multiple" (change)="filesSelected($event)" />
 <div class="card center-card card-action" [style.z-index]="121 + priority" [class.card-high]="ltiAllowed && ltiActivated" [@cardAnimation]="this">
     <div class="card-content">
-        <div class="card-cancel" (click)="cancel()"><i class="material-icons">close</i></div>
+        <div tabindex="0" class="card-cancel" (click)="cancel()" (keyup.enter)="cancel()"><i icon iconId="close" aria="true"></i></div>
         <div class="card-title">{{'WORKSPACE.ADD_OBJECT_TITLE' | translate }}</div>
         <div class="card-scroll">
             <div class="dropArea" [class.dropActive]="isFileOver" fileDrop
@@ -59,8 +59,8 @@
     </div>
     </div>
     <div class="card-action">
-        <a class="waves-effect waves-light btn" [class.disabled]="disabled || (showPicker && !_parent)" (click)="setLink()">{{'OK' | translate }}</a>
-        <a class="btn-flat" (click)="cancel()">{{'CANCEL' | translate }}</a>
+        <a tabindex="0" class="waves-effect waves-light btn" [class.disabled]="disabled || (showPicker && !_parent)" (click)="setLink()" (keyup.enter)="setLink()">{{'OK' | translate }}</a>
+        <a tabindex="0" class="btn-flat" (click)="cancel()" (keyup.enter)="cancel()">{{'CANCEL' | translate }}</a>
     </div>
 </div>
 <file-chooser *ngIf="chooseParent"

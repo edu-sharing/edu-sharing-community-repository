@@ -177,6 +177,7 @@ public class LDAPAuthenticationFilter implements Filter {
 		try {
 			properties.load(getClass().getClassLoader().getResourceAsStream("ldap.properties"));
 		} catch (IOException e1) {
+			// TODO Auto-generated catch block
 			e1.printStackTrace();
 		}
 		this.ldapBase = properties.getProperty(LDAPAuthenticationFilter.INIT_LDAP_BASE);

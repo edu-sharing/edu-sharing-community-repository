@@ -117,7 +117,7 @@ export class WorkspaceWorkflowComponent  {
         if(data.indexOf(RestConstants.PERMISSION_COORDINATOR)==-1){
           this.dialogTitle='WORKSPACE.WORKFLOW.USER_NO_PERMISSION';
           this.dialogMessage='WORKSPACE.WORKFLOW.USER_NO_PERMISSION_INFO';
-          this.dialogMessageParameters={user:new AuthorityNamePipe().transform(receivers[0],null)};
+          this.dialogMessageParameters={user:new AuthorityNamePipe(this.translate).transform(receivers[0],null)};
           this.dialogButtons=[
             new DialogButton('CANCEL',DialogButton.TYPE_CANCEL,()=>{this.dialogTitle=null;}),
             new DialogButton('WORKSPACE.WORKFLOW.PROCEED',DialogButton.TYPE_PRIMARY,()=>{

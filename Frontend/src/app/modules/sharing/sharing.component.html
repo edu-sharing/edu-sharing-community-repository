@@ -2,7 +2,7 @@
 <div *ngIf="!loading && sharingInfo" class="container">
 
     <div class="container-inside">
-        <div class="branding"><img src="assets/images/logo.svg" alt="logo"></div>
+        <div class="branding"><img src="assets/images/logo.svg" image-config alt="logo"></div>
         <div class="details" [ngClass]="{'details-opacity' : !(!sharingInfo.password || sharingInfo.passwordMatches)}">
             <div class="details-type">
                 <img class="icon" [src]="sharingInfo.node.iconURL" />

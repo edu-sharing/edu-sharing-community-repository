@@ -217,6 +217,7 @@ $imagePath: '../../../../assets/images/collections/';
   position: relative;
   height:240px;
   background-color:white;
+  overflow: hidden;
 }
 
 .collection-new-preview-infoarea {
@@ -339,7 +340,9 @@ $imagePath: '../../../../assets/images/collections/';
     color: white;
     cursor: pointer;
 }
-
+.card-image-distance{
+  height: 35px;
+}
 .card-image-icon-container {
     height: 160px;
     width: 160px;
@@ -348,6 +351,10 @@ $imagePath: '../../../../assets/images/collections/';
     margin: auto;
     text-align: center;
     vertical-align: middle;
+  i{
+    font-size: 75px;
+    margin-top: 44px;
+  }
 }
 
 .card-collection-image-container {
@@ -387,24 +394,12 @@ $imagePath: '../../../../assets/images/collections/';
     display: none;
 }
 
-.image-upload-icon {
-  z-index: 1;
-  padding:10px;
-  color: $primary;
-  background-color: #fff;
-  border-radius:50%;
+.button-icon{
   position: absolute;
-  bottom: 10px;
-  right: 10px;
-  @include clickable();
-  @include materialShadowBottom();
+  bottom: 8px;
+  right: 27px;
+  z-index: 2;
 }
-.image-upload-icon i{
-  background-color: rgba(255,255,255,0.75);
-  border-radius:5pt;
-}
-
-
 label{
 }
 
@@ -458,10 +453,47 @@ input[type="radio"] {
     }
   }
 }
+.blurred-image{
+  display: none;
+}
 @media screen and (max-height: $mobileHeight + $mobileStage*1){
   .card, .card-high, .card-low {
     top:$mainnavHeight+15px;
   }
+  .collectionImage{
+    height: 120px;
+  }
+  .card-collection-icon-container{
+    height: 120px;
+  }
+  .card-image-icon-container{
+    margin-top: 10px;
+    height: 100px;
+    width: 100px;
+    border-radius: 100px;
+    i{
+      margin-top: 20px;
+      font-size: 60px;
+    }
+  }
+  .card-image-distance{
+    height: 0;
+  }
+  .blurred-image{
+    display: block;
+    filter: blur(8px);
+  }
+  .card-image-preview{
+    height: 120px;
+    width: auto;
+    margin: auto;
+    z-index: 1;
+    @include materialShadowLarge();
+  }
+  .collection-new-preview-infoline{
+    margin-left: 15px;
+  }
+
 }
 @media screen and (max-height: $mobileHeight - $mobileStage*1){
   .card, .card-high, .card-low {

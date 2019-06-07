@@ -33,6 +33,8 @@ import org.edu_sharing.service.connector.ConnectorServiceFactory;
 import org.edu_sharing.service.nodeservice.NodeServiceFactory;
 import org.springframework.context.ApplicationContext;
 
+import com.sun.java.accessibility.util.TopLevelWindowListener;
+
 import net.sf.acegisecurity.AuthenticationCredentialsNotFoundException;
 
 public class ToolPermissionService {
@@ -151,7 +153,11 @@ public class ToolPermissionService {
 
 		String toolNodeId = AuthenticationUtil.runAsSystem(workTP);
 		AccessStatus accessStatus = permissionService.hasPermission(new NodeRef(Constants.storeRef, toolNodeId), PermissionService.READ);
-		return (0 == accessStatus.compareTo(AccessStatus.ALLOWED));
+		AccessStatus accessStatusDenied = permissionService.hasPermission(new NodeRef(Constants.storeRef, toolNodeId), CCConstants.PERMISSION_DENY);
+		if(accessStatusDenied.equals(AccessStatus.ALLOWED)) {
+			logger.info("Toolpermission "+toolPermission+" has explicit Deny permission");;
+		}
+		return accessStatus.equals(AccessStatus.ALLOWED) && !accessStatusDenied.equals(AccessStatus.ALLOWED);
 	}
 	static Map<String,String> toolPermissionNodeCache = new HashMap<>();
 	public String getToolPermissionNodeId(String toolPermission) throws Throwable{
@@ -227,7 +233,7 @@ public class ToolPermissionService {
 	}
 	
 	
-	private String getEdu_SharingToolPermissionsFolder() throws Throwable{
+	public String getEdu_SharingToolPermissionsFolder() throws Throwable{
 		if(toolPermissionFolder!=null)
 			return toolPermissionFolder;
 		logger.info("fully: "+AuthenticationUtil.getFullyAuthenticatedUser() +" runAs:"+AuthenticationUtil.getRunAsUser());
@@ -324,6 +330,7 @@ public class ToolPermissionService {
 		toInit.add(CCConstants.CCM_VALUE_TOOLPERMISSION_GLOBAL_AUTHORITY_SEARCH_SHARE_SAFE);
 
 		toInit.add(CCConstants.CCM_VALUE_TOOLPERMISSION_INVITE);
+		toInit.add(CCConstants.CCM_VALUE_TOOLPERMISSION_INVITE_STREAM);
 		toInit.add(CCConstants.CCM_VALUE_TOOLPERMISSION_INVITE_LINK);
 		toInit.add(CCConstants.CCM_VALUE_TOOLPERMISSION_INVITE_SHARE);
 		toInit.add(CCConstants.CCM_VALUE_TOOLPERMISSION_INVITE_SAFE);

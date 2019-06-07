@@ -9,9 +9,9 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 import io.swagger.annotations.ApiModelProperty;
 
-public class SearchResult {
+public class SearchResult<T> {
 
-	private List<Node> nodes = new ArrayList<Node>();
+	private List<T> nodes = new ArrayList<T>();
 	private Pagination pagination = null;
 	private List<Facette> facettes = null;
 	private List<String> ignored;
@@ -20,11 +20,11 @@ public class SearchResult {
 	   **/
 	@ApiModelProperty(required = true, value = "")
 	@JsonProperty("nodes")
-	public List<Node> getNodes() {
+	public List<T> getNodes() {
 		return nodes;
 	}
 
-	public void setNodes(List<Node> nodes) {
+	public void setNodes(List<T> nodes) {
 		this.nodes = nodes;
 	}
 	

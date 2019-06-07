@@ -8,10 +8,9 @@
     [searchPlaceholder]="'SEARCH.SEARCH_STUFF'"
     [canOpen]="true"
     [(searchQuery)]="searchService.searchTerm"
-    [onInvalidNodeStore]="invalidateNodeStore"
     (onSearch)="routeAndClearSearch($event)"
   ></main-nav>
-  <tutorial [element]="tutorialElement" [heading]="'SEARCH.TUTORIAL_HEADING'" [description]="'SEARCH.TUTORIAL_DESCRIPTION'" [showSkip]="false"
+  <tutorial tabindex="0" [element]="tutorialElement" [heading]="'SEARCH.TUTORIAL_HEADING'" [description]="'SEARCH.TUTORIAL_DESCRIPTION'" [showSkip]="false"
   ></tutorial>
 
   <div class="rowRepositories scrollWithBanner" [class.no-mainnav]="!mainnav" *ngIf="repositories && repositories.length>2">
@@ -27,7 +26,7 @@
             <span>
               <img [src]="getSourceIconPath('more')"><span class="repositoryTitle">{{ 'SEARCH.REPOSITORY_MORE' | translate }}</span>
             </span>
-                          <i class="material-icons" >keyboard_arrow_down</i>
+                          <i aria-hidden="true" class="material-icons" >keyboard_arrow_down</i>
                       </a>
                   </li>
                   <li class="clickable tab col s3" *ngIf="repositories.length>4 && extendedRepositorySelected"
@@ -36,7 +35,7 @@
                       (click)="currentRepository==repositories[3].id ? showMoreRepositories=true : setRepository(repositories[3].id)">
                       <a [class.active]="currentRepository==repositories[3].id">
                           <img [src]="getSourceIcon(repositories[3])"><span class="repositoryTitle">{{ repositories[3].title }}</span>
-                          <i class="material-icons" (click)="$event.stopPropagation();showMoreRepositories=true">keyboard_arrow_down</i>
+                          <i aria-hidden="true" class="material-icons" (click)="$event.stopPropagation();showMoreRepositories=true">keyboard_arrow_down</i>
                       </a>
                   </li>
                   <!--
@@ -55,7 +54,7 @@
                 <a tabindex="0" title="{{'SEARCH.TOGGLE_EXPANDED_SEARCH' | translate}}" (keyup.enter)="toggleSidenav()" (click)="toggleSidenav()" class="pointed filtertoggler">
                     <span>{{'SEARCH.EXPANDED_SEARCH' | translate}}</span>
                     <span class="mobile" *ngIf="!selection || !selection.length">{{'SEARCH.EXPANDED_SEARCH_SHORT' | translate}}</span>
-                    <i class="material-icons">{{searchService.sidenavOpened ? 'keyboard_arrow_left' : 'keyboard_arrow_right'}}</i></a>
+                    <i aria-hidden="true" class="material-icons">{{searchService.sidenavOpened ? 'keyboard_arrow_left' : 'keyboard_arrow_right'}}</i></a>
             </div>
             <div class="switchToCollections" *ngIf="isGuest">
                 <a tabindex="0" title="{{'SEARCH.TO_COLLECTIONS' | translate}}" class="clickable" (click)="switchToCollections()" (keyup.enter)="switchToCollections()">{{'SEARCH.TO_COLLECTIONS' | translate}} <i class="material-icons">arrow_forward</i></a>
@@ -327,8 +326,9 @@
   [(nodeReport)]="nodeReport"
   [(nodeVariant)]="nodeVariant"
   [(addToCollection)]="addNodesToCollection"
+  [(addNodesStream)]="addNodesStream"
 ></workspace-management>
-<div *ngIf="showMoreRepositories" class="dialog moreRepositories" (click)="showMoreRepositories=false">
+<div tabindex="0" *ngIf="showMoreRepositories" class="dialog moreRepositories" (click)="showMoreRepositories=false" (keyup.enter)="showMoreRepositories=false">
   <div class="collection" [class.no-mainnav]="!mainnav">
     <a class="collection-item"
        *ngFor="let repo of repositories.slice(3)"

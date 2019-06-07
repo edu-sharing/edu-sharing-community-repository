@@ -20,6 +20,7 @@ public class ApiApplication extends ResourceConfig {
 		org.edu_sharing.restservices.about.v1.AboutApi.class,
 		org.edu_sharing.restservices.admin.v1.AdminApi.class,
 		org.edu_sharing.restservices.collection.v1.CollectionApi.class,
+		org.edu_sharing.restservices.comment.v1.CommentApi.class,
 		org.edu_sharing.restservices.config.v1.ConfigApi.class,
 		org.edu_sharing.restservices.iam.v1.IamApi.class,
 //		org.edu_sharing.restservices.knowledge.v1.KnowledgeApi.class,
@@ -35,6 +36,7 @@ public class ApiApplication extends ResourceConfig {
 		org.edu_sharing.restservices.archive.v1.ArchiveApi.class,
 		org.edu_sharing.restservices.clientutils.v1.ClientUtilsApi.class,
 		org.edu_sharing.restservices.tool.v1.ToolApi.class,
+		org.edu_sharing.restservices.register.v1.RegisterApi.class,
 		org.edu_sharing.restservices.sharing.v1.SharingApi.class
 	};
 	

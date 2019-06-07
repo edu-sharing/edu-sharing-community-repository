@@ -197,7 +197,11 @@ public class CCConstants {
 
 	public final static String CCM_TYPE_IO = "{http://www.campuscontent.de/model/1.0}io";
 
+	public final static String CCM_TYPE_CONFIGOBJECT = "{http://www.campuscontent.de/model/1.0}configobject";
+
 	public final static String CCM_TYPE_SAVED_SEARCH = "{http://www.campuscontent.de/model/1.0}saved_search";
+
+	public final static String CCM_TYPE_COMMENT = "{http://www.campuscontent.de/model/1.0}comment";
 
 	public final static String CCM_TYPE_LO = "{http://www.campuscontent.de/model/1.0}lo";
 
@@ -311,6 +315,14 @@ public class CCConstants {
 
 	public final static String CCM_PROP_PERSON_NODE_LISTS = "{http://www.campuscontent.de/model/1.0}userNodeLists";
 
+	public final static String CCM_PROP_PH_MODIFIED = "{http://www.campuscontent.de/model/1.0}ph_modified";
+	
+	public final static String CCM_PROP_PH_HISTORY = "{http://www.campuscontent.de/model/1.0}ph_history";
+	
+	public final static String CCM_PROP_PH_USERS = "{http://www.campuscontent.de/model/1.0}ph_users";
+	
+	public final static String CCM_PROP_PH_ACTION = "{http://www.campuscontent.de/model/1.0}ph_action";
+	
 	/**
 	 * custom edu-sharing person attribute
 	 */
@@ -352,6 +364,9 @@ public class CCConstants {
 	public final static String CCM_PROP_SAVED_SEARCH_QUERY = "{http://www.campuscontent.de/model/1.0}saved_search_query";
 	public final static String CCM_PROP_SAVED_SEARCH_PARAMETERS = "{http://www.campuscontent.de/model/1.0}saved_search_parameters";
 
+	public final static String CCM_PROP_COMMENT_REPLY = "{http://www.campuscontent.de/model/1.0}comment_reply";
+	public final static String CCM_PROP_COMMENT_CONTENT = "{http://www.campuscontent.de/model/1.0}comment_content";
+
 	public final static String CCM_PROP_FORKED_ORIGIN = "{http://www.campuscontent.de/model/1.0}forked_origin";
 	public final static String CCM_PROP_FORKED_ORIGIN_VERSION = "{http://www.campuscontent.de/model/1.0}forked_origin_version";
 
@@ -373,7 +388,10 @@ public class CCConstants {
 	public final static String CCM_ASPECT_TOOL_DEFINITION = "{http://www.campuscontent.de/model/1.0}tool_definition";
 
 	public final static String CCM_ASPECT_TOOL_OBJECT = "{http://www.campuscontent.de/model/1.0}tool_object";
-
+	
+	public final static String CCM_ASPECT_PERMISSION_HISTORY = "{http://www.campuscontent.de/model/1.0}permission_history";
+	
+	
 	public final static String CCM_PROP_TOOL_OBJECT_TOOLINSTANCEREF = "{http://www.campuscontent.de/model/1.0}tool_instance_ref";
 
 	public final static String CCM_PROP_IO_REF_TITLE = "{http://www.campuscontent.de/model/1.0}ref_title";
@@ -485,6 +503,7 @@ public class CCConstants {
 
 	public final static String CCM_ASSOC_ASSIGNED_SHARES = "{http://www.campuscontent.de/model/1.0}assignedshares";
 
+	public final static String CCM_ASSOC_COMMENT = "{http://www.campuscontent.de/model/1.0}childcomment";
 	/**
 	 * update alfresco3stable auf alfresco34e
 	 *
@@ -709,8 +728,6 @@ public class CCConstants {
 	public final static String EXIF_PROP_PIXELXDIMENSION = "{http://www.alfresco.org/model/exif/1.0}pixelXDimension";
 	public final static String EXIF_PROP_PIXELYDIMENSION = "{http://www.alfresco.org/model/exif/1.0}pixelYDimension";
 
-	public final static String CCM_VALUE_NOTIFY_EVENT_PERMISSION = "PERMISSION";
-
 	public final static String CCM_VALUE_NOTIFY_ACTION_PERMISSION_ADD = "PERMISSION_ADD";
 
 	public final static String CCM_VALUE_NOTIFY_ACTION_PERMISSION_CHANGE = "PERMISSION_CHANGE";
@@ -718,6 +735,8 @@ public class CCConstants {
 	public final static String CCM_VALUE_NOTIFY_ACTION_PERMISSION_CHANGE_INHERIT  = "PERMISSION_CHANGE_INHERIT";
 
 	public final static String CCM_VALUE_TOOLPERMISSION_INVITE = "TOOLPERMISSION_INVITE";
+
+	public final static String CCM_VALUE_TOOLPERMISSION_INVITE_STREAM = "TOOLPERMISSION_INVITE_STREAM";
 
 	public final static String CCM_VALUE_TOOLPERMISSION_INVITE_LINK = "TOOLPERMISSION_INVITE_LINK";
 
@@ -765,6 +784,8 @@ public class CCConstants {
 	 * dynamic generated properties
 	 */
 	public final static String VIRT_PROP_USAGECOUNT = "{virtualproperty}usagecount";
+
+	public final static String VIRT_PROP_COMMENTCOUNT = "{virtualproperty}commentcount";
 
 	public final static String VIRT_PROP_CHILDOBJECTCOUNT = "{virtualproperty}childobjectcount";
 
@@ -952,6 +973,8 @@ public class CCConstants {
 	public static final String CCM_PROP_IO_SCHOOLTOPIC = "{http://www.campuscontent.de/model/1.0}schooltopic";
 
 	public static final String SCHOOLCONTEXT_PATH_SEPARATOR = "#";
+
+	public final static String CCM_PROP_CONFIGOBJECT_VALUE = "{http://www.campuscontent.de/model/1.0}configvalue";
 
 	public final static String CCM_PROP_REMOTEOBJECT_REPOSITORYID = "{http://www.campuscontent.de/model/1.0}remoterepositoryid";
 	public final static String CCM_PROP_REMOTEOBJECT_NODEID = "{http://www.campuscontent.de/model/1.0}remotenodeid";
@@ -1142,6 +1165,13 @@ public class CCConstants {
 
 	public static final String CCM_ASSOC_CHILDIO = "{http://www.campuscontent.de/model/1.0}childio";
 
+	public static final String CCM_ASSOC_FORKIO = "{http://www.campuscontent.de/model/1.0}forkio";
+
+
+	public static final String CM_PROP_PERSON_ALLOW_NOTIFICATIONS = "{http://www.alfresco.org/model/content/1.0}personallownotifications";
+	public static final String CM_PROP_PERSON_ABOUT = "{http://www.alfresco.org/model/content/1.0}personabout";
+	public static final String CM_PROP_PERSON_SKILLS = "{http://www.alfresco.org/model/content/1.0}personskills";
+
 	/**
 	 * tempory, non persistent properties
 	 */
@@ -1310,6 +1340,8 @@ public class CCConstants {
 
 	public final static String I18n_SYSTEMFOLDER_UPDATE = "systemfolder_update";
 
+	public final static String I18n_SYSTEMFOLDER_CONFIG = "systemfolder_config";
+
 	public final static String I18n_SYSTEMFOLDER_NOTIFY = "systemfolder_notify";
 
 	public final static String I18n_SYSTEMFOLDER_TOOLPERMISSIONS = "systemfolder_toolpermissions";
@@ -1403,6 +1435,10 @@ public class CCConstants {
 	public final static String PERMISSION_READ = "Read";
 
 	/**
+	 * Deny Permission (if set, will revoke all other permissions)
+	 */
+	public final static String PERMISSION_DENY = "Deny";
+	/**
 	 * Write Permission
 	 */
 	public final static String PERMISSION_WRITE = "Write";
@@ -1452,6 +1488,8 @@ public class CCConstants {
 	public final static String PERMISSION_CC_PUBLISH = "CCPublish";
 	public final static String PERMISSION_READ_ALL = "ReadAll";
 	public final static String PERMISSION_READ_PREVIEW = "ReadPreview";
+
+	public final static String PERMISSION_COMMENT = "Comment";
 
 	public final static String PERMISSION_ES_CHILD_MANAGER = "ESChildManager";
 
@@ -1644,15 +1682,19 @@ public class CCConstants {
 
 	public static ArrayList<String> getPermissionList(){
 		if(permission == null){
-			permission = new ArrayList();
+			permission = new ArrayList<>();
 			permission.add(PERMISSION_ALL);
 			permission.add(PERMISSION_READ);
+			permission.add(PERMISSION_READ_PREVIEW);
+			permission.add(PERMISSION_READ_ALL);
+			permission.add(PERMISSION_COMMENT);
 			permission.add(PERMISSION_WRITE);
 			permission.add(PERMISSION_DELETE);
 			permission.add(PERMISSION_DELETE_CHILDREN);
 			permission.add(PERMISSION_DELETE_NODE);
 			permission.add(PERMISSION_ADD_CHILDREN);
 			permission.add(PERMISSION_CONSUMER);
+			permission.add(PERMISSION_CONSUMER_METADATA);
 			permission.add(PERMISSION_EDITOR);
 			permission.add(PERMISSION_CONTRIBUTER);
 			permission.add(PERMISSION_COLLABORATOR);
@@ -1660,6 +1702,7 @@ public class CCConstants {
 			permission.add(PERMISSION_CC_PUBLISH);
 			permission.add(PERMISSION_READPERMISSIONS);
 			permission.add(PERMISSION_CHANGEPERMISSIONS);
+			permission.add(PERMISSION_DENY);
 		}
 		return permission;
 	}
@@ -1667,7 +1710,7 @@ public class CCConstants {
 	private static ArrayList minimalPermissions = null;
 	public static ArrayList getMinimalPermissions(){
 		if(minimalPermissions == null){
-			minimalPermissions = new ArrayList();
+			minimalPermissions = new ArrayList<>();
 			minimalPermissions.add(PERMISSION_CONSUMER);
 			minimalPermissions.add(PERMISSION_COLLABORATOR);
 			minimalPermissions.add(PERMISSION_COORDINATOR);

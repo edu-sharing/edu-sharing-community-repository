@@ -1,0 +1,28 @@
+<div class="avatarOuter size_{{size}}">
+  <div class="avatarCircle" [class.clickable]="link" (click)="link ? openProfile() : null">
+    <div *ngIf="_customImage">
+      <img [src]="_customImage" class="userImage" alt="user image">
+    </div>
+    <div *ngIf="!_customImage">
+      <img *ngIf="user.profile && user.profile.avatar" [src]="user.profile.avatar+'&crop=true&width=200&height=200'" class="userImage" alt="">
+      <!-- <img *ngIf="!(profile && profile.avatar)" src="assets/images/user-profile.svg">-->
+      <svg alt="" style.background="linear-gradient(to bottom,#F3F3F3,{{ user | authorityColor}})"
+           *ngIf="!(user.profile && user.profile.avatar)" viewBox="0 0 200 200" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+        <defs>
+          <linearGradient x1="50%" y1="0%" x2="50%" y2="100%" id="linearGradient-{{id}}">
+            <stop stop-color="#F3F3F3" offset="0%"></stop>
+            <!--<stop stop-color="#999999" offset="100%"></stop>-->
+            <stop attr.stop-color="{{ user | authorityColor}}" offset="100%"></stop>
+          </linearGradient>
+        </defs>
+        <g id="Symbols" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+          <g id="ic_person_black_24px">
+            <rect id="Rectangle-12" attr.fill="url(#linearGradient-{{id}})" x="0" y="0" width="200" height="200"></rect>
+            <path d="M100,122 C115.47,122 128,109.69375 128,94.5 C128,79.30625 115.47,67 100,67 C84.53,67 72,79.30625 72,94.5 C72,109.69375 84.53,122 100,122 Z M99.5,136 C80.976875,136 44,145.38 44,164 L44,200 L155,200 L155,164 C155,145.38 118.023125,136 99.5,136 Z" id="Shape" fill="#FFFFFF" fill-rule="nonzero"></path>
+          </g>
+        </g>
+      </svg>
+    </div>
+  </div>
+  <img *ngIf="isEditorialUser()" class="editorial-badge" src="assets/images/editorial-badge.svg" alt="">
+</div>

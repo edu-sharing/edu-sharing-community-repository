@@ -3,8 +3,6 @@ package org.edu_sharing.alfresco.policy;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.Serializable;
-import java.nio.channels.Channels;
-import java.nio.channels.ReadableByteChannel;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
@@ -48,13 +46,13 @@ import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.HttpStatus;
 import org.apache.commons.httpclient.methods.GetMethod;
 import org.apache.log4j.Logger;
+import org.apache.tika.io.TikaInputStream;
 import org.edu_sharing.alfresco.jobs.PreviewJob;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.client.tools.forms.VCardTool;
 import org.edu_sharing.repository.server.tools.ActionObserver;
 import org.edu_sharing.repository.server.tools.ApplicationInfo;
 import org.edu_sharing.repository.server.tools.ApplicationInfoList;
-import org.edu_sharing.repository.server.tools.PropertiesHelper;
 import org.edu_sharing.repository.server.tools.cache.RepositoryCache;
 import org.quartz.JobDetail;
 import org.quartz.ObjectAlreadyExistsException;
@@ -68,6 +66,7 @@ import com.coremedia.iso.boxes.Box;
 import com.coremedia.iso.boxes.MovieBox;
 import com.coremedia.iso.boxes.TrackBox;
 import com.coremedia.iso.boxes.TrackHeaderBox;
+import com.googlecode.mp4parser.FileDataSourceImpl;
 
 /**
  * 
@@ -176,7 +175,10 @@ public class NodeCustomizationPolicies implements OnContentUpdatePolicy, OnCreat
 			if(contentSize > 0 && mimetype != null && !nodeService.hasAspect(nodeRef,QName.createQName(CCConstants.CCM_ASPECT_COLLECTION_IO_REFERENCE))){
 				nodeService.setProperty(nodeRef, QName.createQName(CCConstants.LOM_PROP_TECHNICAL_FORMAT), mimetype);
 			}
-			
+			logger.debug("will do the resourceinfo. noderef:"+nodeRef);
+			Action resourceInfoAction = actionService.createAction(CCConstants.ACTION_NAME_RESOURCEINFO);
+			actionService.executeAction(resourceInfoAction, nodeRef, true, false);
+
 			logger.debug("lockStatus:"+lockStatus);
 			if(newContent 
 					&& (LockStatus.NO_LOCK.equals(lockStatus) || LockStatus.LOCK_EXPIRED.equals(lockStatus))
@@ -184,12 +186,7 @@ public class NodeCustomizationPolicies implements OnContentUpdatePolicy, OnCreat
 			
 	     	    new ThumbnailHandling().thumbnailHandling(nodeRef);
     		}
-			
-			logger.debug("will do the resourceinfo. noderef:"+nodeRef);
-			Action resourceInfoAction = actionService.createAction(CCConstants.ACTION_NAME_RESOURCEINFO);
-			actionService.executeAction(resourceInfoAction, nodeRef, true, false);
-			
-			
+
 			Action extractMetadataAction = actionService.createAction("extract-metadata");
 			//dont do async cause it conflicts with preview creation when webdav is used
 			actionService.executeAction(extractMetadataAction, nodeRef, true, false);

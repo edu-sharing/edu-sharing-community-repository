@@ -37,7 +37,42 @@ $cardActionHeight:77px;
 .card .card-content{
   height: calc(100% - #{$cardActionHeight});
   margin-bottom: 0;
+
+  pre{
+    white-space: pre-line;
+  }
+  h1,h2,h3,h4,h5,h6{
+    margin: 1.5rem 0;
+  }
+  h1{
+    font-size:170%;
+  }
+  h2{
+    font-size: 150%;
+  }
+  h3{
+    font-size: 140%;
+  }
+  h4{
+    font-size: 130%;
+  }
+  h5{
+    font-size: 120%;
+  }
+  h6{
+    font-size: 110%;
+  }
 }
+.card.card-no-action{
+  .card-content {
+    height: 100%;
+  }
+  .card-action{
+    display: none!important;
+  }
+  //padding-bottom: 40px;
+}
+
 .card .card-action {
   display: flex;
   align-items: end;
@@ -69,13 +104,18 @@ $cardActionHeight:77px;
     font-size: 12pt;
     position: relative;
     top: -25px;
+    &:focus{
+      @include removeDefaultFocus();
+      i{
+        @include focusShadow();
+      }
+    }
   }
 }
 
 .card-title{
   word-break: break-all;
   max-height: 48px;
-  align-items: start;
   overflow: hidden;
   display:flex;
   align-items:center;
@@ -89,22 +129,26 @@ $cardActionHeight:77px;
     width:auto;
     height:25px;
     margin-right:15px;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
   }
 }
 .center-card .card-scroll{
   overflow-y: auto;
   overflow-x: hidden;
   @include iosScrolling();
-  padding-right: 20px;
-  margin-right: -20px;
-  padding-left: 20px;
-  margin-left: -20px;
+  padding-right: $cardPadding;
+  margin-right: $cardPadding*-1;
+  padding-left: $cardPadding;
+  margin-left: $cardPadding*-1;
   height: calc(100% - 8px);
 
-  top: -20px;
+  top: $cardPadding*-1;
   position: relative;
-  padding-top: 20px;
-  padding-bottom: 20px;
+  padding-top: $cardPadding;
+  padding-bottom: $cardPadding;
 }
 .card-actionbar .card-scroll{
   height: calc(100% - 68px);
@@ -118,6 +162,30 @@ input[type=search]{
   top:10%;
   bottom:10%;
 }
+
+.header-high{
+  background: linear-gradient(to bottom, $actionDialogBackground 0%,$actionDialogBackground 80px,transparent 80px,transparent 100%);
+
+  .card-title-info{
+    margin-top: -28px;
+    font-size: 9pt;
+    color: $textLight;
+    display: flex;
+    align-items: center;
+
+    img{
+      height: 20px;
+      width: auto;
+      margin-right: 14px;
+    }
+  }
+
+  .card-scroll{
+    top: 8px;
+    height:calc(100% - 28px);
+  }
+}
+
 .card-wide{
   width:650px;
   margin-left:-325px!important;
@@ -167,8 +235,8 @@ input[type=search]{
   @include materialShadow();
   .title{
     padding-top:16px;
-    padding-left:20px;
-    padding-right:20px;
+    padding-left:$cardPadding;
+    padding-right:$cardPadding;
     font-size:110%;
     background-color: $workspaceMetadataBackground;
     word-break: break-all;

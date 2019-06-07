@@ -12,6 +12,9 @@ import org.apache.log4j.Logger;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.server.tools.ApplicationInfo;
 import org.edu_sharing.repository.server.tools.ApplicationInfoList;
+import org.edu_sharing.service.stream.StreamService;
+import org.edu_sharing.service.stream.StreamServiceFactory;
+import org.edu_sharing.service.stream.StreamServiceHelper;
 import org.edu_sharing.service.permission.PermissionService;
 
 public class SignatureVerifier {

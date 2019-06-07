@@ -76,6 +76,8 @@ public class SolrJSONResultSet implements ResultSet, JSONResult
     
     private Map<String, Integer> facetQueries = new HashMap<String, Integer>();
     
+    private Map<NodeRef, List<Pair<String, List<String>>>> highlighting = new HashMap<>();
+    
     private NodeDAO nodeDao;
     
     private long lastIndexedTxId;
@@ -90,7 +92,11 @@ public class SolrJSONResultSet implements ResultSet, JSONResult
     * 
     * http://stackoverflow.com/questions/20775656/solr-grouping-results-with-group-limit-return-wrong-numfound
     * 
-    * TODO: problem is the sharding http://wiki.apache.org/solr/FieldCollapsing
+    * problem is the sharding stuff 
+    *	 http://wiki.apache.org/solr/FieldCollapsing
+    * 
+    * 
+    * 
     * 
     * @param json
     * @param searchParameters
@@ -109,18 +115,19 @@ public class SolrJSONResultSet implements ResultSet, JSONResult
         this.nodeDao = nodeDao;
         try
         {
+        	/**
+        	 * edu-sharing customization: learn to handle GroupBy stuff
+        	 */
         	
-        		/**
-        		 * edu-sharing customization: learn to handle GroupBy
-        		 */
-        		if(json.has("response")){
-        			initDefault(json, searchParameters, nodeService, nodeDao, limitBy, maxResults);
-        		}else if(json.has("grouped")){
-        			initGroupBy(json, searchParameters, nodeService, nodeDao, limitBy, maxResults);
-        		}else{
-        			logger.error("no response or grouped part found");
-        		}
+        	if(json.has("response")){
+        		initDefault(json, searchParameters, nodeService, nodeDao, limitBy, maxResults);
+        	}else if(json.has("grouped")){
+        		initGroupBy(json, searchParameters, nodeService, nodeDao, limitBy, maxResults);
+        	}else{
+        		logger.error("no response or grouped part found");
+        	}
         	
+           
         }
         catch (JSONException e)
         {
@@ -133,143 +140,182 @@ public class SolrJSONResultSet implements ResultSet, JSONResult
     }
     
     private void initDefault(JSONObject json, SearchParameters searchParameters, NodeService nodeService, NodeDAO nodeDao, LimitBy limitBy, int maxResults) throws JSONException{
-    	 JSONObject responseHeader = json.getJSONObject("responseHeader");
-         status = responseHeader.getLong("status");
-         queryTime = responseHeader.getLong("QTime");
-         
-         JSONObject response = json.getJSONObject("response");
-         numberFound = response.getLong("numFound");
-         start = response.getLong("start");
-         maxScore = Float.valueOf(response.getString("maxScore"));
-         if (json.has("lastIndexedTx"))
-         {
-             lastIndexedTxId = json.getLong("lastIndexedTx");
-         }
-         if (json.has("processedDenies"))
-         {
-             processedDenies = json.getBoolean("processedDenies");
-         }
-         JSONArray docs = response.getJSONArray("docs");
-         
-         int numDocs = docs.length();
-         
-         ArrayList<Long> rawDbids = new ArrayList<Long>(numDocs);
-         ArrayList<Float> rawScores = new ArrayList<Float>(numDocs); 
-         for(int i = 0; i < numDocs; i++)
-         {
-             JSONObject doc = docs.getJSONObject(i);
-             JSONArray dbids = doc.optJSONArray("DBID");
-             if(dbids != null)
-             {
-                 Long dbid = dbids.getLong(0);
-                 Float score = Float.valueOf(doc.getString("score"));
-                 rawDbids.add(dbid);
-                 rawScores.add(score);
-             }
-             else
-             {
-                 Long dbid = doc.optLong("DBID");
-                 if(dbid != null)
-                 {
-                     Float score = Float.valueOf(doc.getString("score"));
-                     rawDbids.add(dbid);
-                     rawScores.add(score);
-                 }
-                 else
-                 {
-                     // No DBID found 
-                     throw new LuceneQueryParserException("No DBID found for doc ...");
-                 }
-             }
-             
-         }
-         
-         // bulk load
-         if (searchParameters.isBulkFetchEnabled())
-         {
-             nodeDao.cacheNodesById(rawDbids);
-         }
-         
-         // filter out rubbish
-         
-         page = new ArrayList<Pair<Long, Float>>(numDocs);
-         refs = new ArrayList<NodeRef>(numDocs);
-         for(int i = 0; i < numDocs; i++)
-         {
-             Long dbid = rawDbids.get(i);
-             NodeRef nodeRef = nodeService.getNodeRef(dbid);
+    	JSONObject responseHeader = json.getJSONObject("responseHeader");
+        status = responseHeader.getLong("status");
+        queryTime = responseHeader.getLong("QTime");
+        
+        JSONObject response = json.getJSONObject("response");
+        numberFound = response.getLong("numFound");
+        start = response.getLong("start");
+        maxScore = Float.valueOf(response.getString("maxScore"));
+        if (json.has("lastIndexedTx"))
+        {
+            lastIndexedTxId = json.getLong("lastIndexedTx");
+        }
+        if (json.has("processedDenies"))
+        {
+            processedDenies = json.getBoolean("processedDenies");
+        }
+        JSONArray docs = response.getJSONArray("docs");
+        
+        int numDocs = docs.length();
+        
+        ArrayList<Long> rawDbids = new ArrayList<Long>(numDocs);
+        ArrayList<Float> rawScores = new ArrayList<Float>(numDocs); 
+        for(int i = 0; i < numDocs; i++)
+        {
+            JSONObject doc = docs.getJSONObject(i);
+            JSONArray dbids = doc.optJSONArray("DBID");
+            if(dbids != null)
+            {
+                Long dbid = dbids.getLong(0);
+                Float score = Float.valueOf(doc.getString("score"));
+                rawDbids.add(dbid);
+                rawScores.add(score);
+            }
+            else
+            {
+                Long dbid = doc.optLong("DBID");
+                if(dbid != null)
+                {
+                    Float score = Float.valueOf(doc.getString("score"));
+                    rawDbids.add(dbid);
+                    rawScores.add(score);
+                }
+                else
+                {
+                    // No DBID found 
+                    throw new LuceneQueryParserException("No DBID found for doc ...");
+                }
+            }
+            
+        }
+        
+        // bulk load
+        if (searchParameters.isBulkFetchEnabled())
+        {
+            nodeDao.cacheNodesById(rawDbids);
+        }
 
-             if(nodeRef != null)
-             {
-                 page.add(new Pair<Long, Float>(dbid, rawScores.get(i)));
-                 refs.add(nodeRef);
-             }
-         }
-         
-         if(json.has("facet_counts"))
-         {
-             JSONObject facet_counts = json.getJSONObject("facet_counts");
-             if(facet_counts.has("facet_queries"))
-             {
-                 JSONObject facet_queries = facet_counts.getJSONObject("facet_queries");
-                 for(Iterator it = facet_queries.keys(); it.hasNext(); /**/)
-                 {
-                     String fq = (String) it.next();
-                     Integer count =Integer.parseInt(facet_queries.getString(fq));
-                     facetQueries.put(fq, count);
-                 }
-             }
-             if(facet_counts.has("facet_fields"))
-             {
-                 JSONObject facet_fields = facet_counts.getJSONObject("facet_fields");
-                 for(Iterator it = facet_fields.keys(); it.hasNext(); /**/)
-                 {
-                     String fieldName = (String)it.next();
-                     JSONArray facets = facet_fields.getJSONArray(fieldName);
-                     int facetArraySize = facets.length();
-                     ArrayList<Pair<String, Integer>> facetValues = new ArrayList<Pair<String, Integer>>(facetArraySize/2);
-                     for(int i = 0; i < facetArraySize; i+=2)
-                     {
-                         String facetEntryName = facets.getString(i);
-                         Integer facetEntryCount = Integer.parseInt(facets.getString(i+1));
-                         Pair<String, Integer> pair = new Pair<String, Integer>(facetEntryName, facetEntryCount);
-                         facetValues.add(pair);
-                     }
-                     fieldFacets.put(fieldName, facetValues);
-                 }
-             }
-         }
-         // process Spell check 
-         JSONObject spellCheckJson = (JSONObject) json.opt("spellcheck");
-         if (spellCheckJson != null)
-         {
-             List<String> list = new ArrayList<>(3);
-             String flag = "";
-             boolean searchedFor = false;
-             if (spellCheckJson.has("searchInsteadFor"))
-             {
-                 flag = "searchInsteadFor";
-                 searchedFor = true;
-                 list.add(spellCheckJson.getString(flag));
+        // filter out rubbish
+        
+        page = new ArrayList<Pair<Long, Float>>(numDocs);
+        refs = new ArrayList<NodeRef>(numDocs);
+        Map<Long,NodeRef> dbIdNodeRefs = new HashMap<>(numDocs);
 
-             }
-             else if (spellCheckJson.has("didYouMean"))
-             {
-                 flag = "didYouMean";
-                 JSONArray suggestions = spellCheckJson.getJSONArray(flag);
-                 for (int i = 0, lenght = suggestions.length(); i < lenght; i++)
-                 {
-                     list.add(suggestions.getString(i));
-                 }
-             }
+        for(int i = 0; i < numDocs; i++)
+        {
+            Long dbid = rawDbids.get(i);
+            NodeRef nodeRef = nodeService.getNodeRef(dbid);
 
-             spellCheckResult = new SpellCheckResult(flag, list, searchedFor);
+            if(nodeRef != null)
+            {
+                page.add(new Pair<Long, Float>(dbid, rawScores.get(i)));
+                refs.add(nodeRef);
+                dbIdNodeRefs.put(dbid, nodeRef);
+            }
+        }
 
-         }
-         else
-         {
-             spellCheckResult = new SpellCheckResult(null, null, false);
-         }
+        //Process hightlight response
+        if(json.has("highlighting"))
+        {
+            JSONObject highObj = (JSONObject) json.getJSONObject("highlighting");
+            for(Iterator it = highObj.keys(); it.hasNext(); /**/)
+            {
+                Long nodeKey = null;
+                String aKey = (String) it.next();
+                JSONObject high = highObj.getJSONObject(aKey);
+                List< Pair<String, List<String>> > highFields = new ArrayList<>(high.length());
+                for(Iterator hit = high.keys(); hit.hasNext(); /**/)
+                {
+                    String highKey = (String) hit.next();
+                    if ("DBID".equals(highKey))
+                    {
+                        nodeKey = high.getLong("DBID");
+                    }
+                    else
+                    {
+                        JSONArray highVal = high.getJSONArray(highKey);
+                        List<String> highValues = new ArrayList<>(highVal.length());
+                        for (int i = 0, length = highVal.length(); i < length; i++)
+                        {
+                            highValues.add(highVal.getString(i));
+                        }
+                        Pair<String, List<String>> highPair = new Pair<String, List<String>>(highKey, highValues);
+                        highFields.add(highPair);
+                    }
+                }
+                NodeRef nodefRef = dbIdNodeRefs.get(nodeKey);
+                if (nodefRef != null && !highFields.isEmpty())
+                {
+                    highlighting.put(nodefRef, highFields);
+                }
+            }
+        }
+        if(json.has("facet_counts"))
+        {
+            JSONObject facet_counts = json.getJSONObject("facet_counts");
+            if(facet_counts.has("facet_queries"))
+            {
+                JSONObject facet_queries = facet_counts.getJSONObject("facet_queries");
+                for(Iterator it = facet_queries.keys(); it.hasNext(); /**/)
+                {
+                    String fq = (String) it.next();
+                    Integer count =Integer.parseInt(facet_queries.getString(fq));
+                    facetQueries.put(fq, count);
+                }
+            }
+            if(facet_counts.has("facet_fields"))
+            {
+                JSONObject facet_fields = facet_counts.getJSONObject("facet_fields");
+                for(Iterator it = facet_fields.keys(); it.hasNext(); /**/)
+                {
+                    String fieldName = (String)it.next();
+                    JSONArray facets = facet_fields.getJSONArray(fieldName);
+                    int facetArraySize = facets.length();
+                    ArrayList<Pair<String, Integer>> facetValues = new ArrayList<Pair<String, Integer>>(facetArraySize/2);
+                    for(int i = 0; i < facetArraySize; i+=2)
+                    {
+                        String facetEntryName = facets.getString(i);
+                        Integer facetEntryCount = Integer.parseInt(facets.getString(i+1));
+                        Pair<String, Integer> pair = new Pair<String, Integer>(facetEntryName, facetEntryCount);
+                        facetValues.add(pair);
+                    }
+                    fieldFacets.put(fieldName, facetValues);
+                }
+            }
+        }
+        // process Spell check 
+        JSONObject spellCheckJson = (JSONObject) json.opt("spellcheck");
+        if (spellCheckJson != null)
+        {
+            List<String> list = new ArrayList<>(3);
+            String flag = "";
+            boolean searchedFor = false;
+            if (spellCheckJson.has("searchInsteadFor"))
+            {
+                flag = "searchInsteadFor";
+                searchedFor = true;
+                list.add(spellCheckJson.getString(flag));
+
+            }
+            else if (spellCheckJson.has("didYouMean"))
+            {
+                flag = "didYouMean";
+                JSONArray suggestions = spellCheckJson.getJSONArray(flag);
+                for (int i = 0, lenght = suggestions.length(); i < lenght; i++)
+                {
+                    list.add(suggestions.getString(i));
+                }
+            }
+
+            spellCheckResult = new SpellCheckResult(flag, list, searchedFor);
+
+        }
+        else
+        {
+            spellCheckResult = new SpellCheckResult(null, null, false);
+        }
     }
     
     private void initGroupBy(JSONObject json, SearchParameters searchParameters, NodeService nodeService, NodeDAO nodeDao, LimitBy limitBy, int maxResults) throws JSONException{
@@ -353,7 +399,9 @@ public class SolrJSONResultSet implements ResultSet, JSONResult
              /*there is always the same maxScore for every group*/
              maxScore = Float.valueOf(doclist.getString("maxScore"));
          }
+         
         
+         
          // bulk load
          if (searchParameters.isBulkFetchEnabled())
          {
@@ -375,6 +423,8 @@ public class SolrJSONResultSet implements ResultSet, JSONResult
                  refs.add(nodeRef);
              }
          }
+         
+         
          
          if(json.has("facet_counts"))
          {
@@ -663,6 +713,12 @@ public class SolrJSONResultSet implements ResultSet, JSONResult
     public Map<String, Integer> getFacetQueries()
     {
         return Collections.unmodifiableMap(facetQueries);
+    }
+
+    @Override
+    public Map<NodeRef, List<Pair<String, List<String>>>> getHighlighting()
+    {
+        return Collections.unmodifiableMap(highlighting);
     }
 
     @Override

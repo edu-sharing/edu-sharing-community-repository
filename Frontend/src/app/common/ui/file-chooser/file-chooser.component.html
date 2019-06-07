@@ -1,7 +1,7 @@
 <div class="dialog darken" [style.z-index]="120 + priority"></div>
 <div class="card center-card card-high card-action" [style.z-index]="121 + priority" [class.card-xwide]="_collections">
     <div class="card-content">
-        <div *ngIf="isCancelable" class="card-cancel" (click)="cancel()"><i class="material-icons">close</i></div>
+        <div *ngIf="isCancelable" class="card-cancel" (click)="cancel()" tabindex="0" (keyup.enter)="cancel()"><i icon iconId="close" aria="true"></i></div>
         <span class="card-title">{{title | translate }}</span>
         <div class="fileChooser">
             <breadcrumbs class="breadcrumbFrame" *ngIf="!searchMode"
@@ -30,7 +30,7 @@
                        (onSelectionChanged)="onSelection($event)"
                        [listClass]="'fileChooserList'"
                        (sortListener)="setSorting($event)"
-                       (clickRow)="selectItem($event)"
+                       (clickRow)="selectItem($event.node)"
                        (loadMore)="loadMore()"></listTable>
             <h5 class="noElements" *ngIf="!isLoading && !list.length && !searchMode">{{'NO_MORE_ELEMENTS' | translate }}</h5>
             <h5 class="noElements" *ngIf="!isLoading && !list.length && searchMode">{{'NO_MATCHES' | translate }}</h5>

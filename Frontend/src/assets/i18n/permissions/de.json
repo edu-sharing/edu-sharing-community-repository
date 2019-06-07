@@ -11,6 +11,8 @@
     "MENU_CREATE_GROUP":"Gruppe erstellen",
     "MENU_EDIT":"Bearbeiten",
     "MENU_DELETE":"Löschen",
+    "MENU_TOOLPERMISSIONS":"Berechtigungen",
+    "MENU_TOOLPERMISSIONS_GLOBAL":"Globale Berecht.",
     "MANAGE_GROUP":"Gruppe {{group}} verwalten",
     "ADD_MEMBER_TO_GROUP":"Nutzer zu {{group}} hinzufügen",
     "EDIT_MEMBER_GROUPS":"Nutzer ist Mitglied von",
@@ -80,6 +82,34 @@
     "SCOPE_TYPE":{
       "null":"Lokal / Normale Sichtbarkeit",
       "global":"Global / Repository übergreifend"
+    },
+    "TOOLPERMISSIONS":{
+      "TITLE":"Berechtigungen festlegen für {{name}}",
+      "EVERYONE_ALLOWED":"Ausgangswert für alle Gruppen & Nutzer",
+      "MEMBERS_ALLOWED":"Gilt für alle Mitglieder",
+      "USER_ALLOWED":"Gilt für gewählten Benutzer",
+      "ALLOW":"Erlauben",
+      "DENY":"Verbieten",
+      "RESULT":"Status",
+      "INHERIT":"Von einer Gruppe oder globalen Berechtigung geerbt",
+      "INHERIT_UNKNOWN":"Zustand ist unbekannt. Speichern Sie die Berechtigungen, um den geerbten Zustand zu sehen",
+      "INHERIT_DETAIL":"Die Rechte sind durch folgende Gruppenmitgliedschaften geerbt: {{memberships}}",
+      "STATUS_ALLOWED":"Erlaubt",
+      "STATUS_DENIED":"Verboten",
+      "STATUS_UNDEFINED":"Ungesetzt\n(Verboten)",
+      "STATUS_UNKNOWN":"Unbekannt",
+      "SAVED":"Berechtigungen wurden aktualisiert",
+      "ADD": "Hinzufügen",
+      "ADDED": "Toolpermission {{name}} hinzugefügt",
+      "GROUP":{
+        "SHARING":"Freigaben",
+        "LICENSING":"Lizenzierung & Veröffentlichung",
+        "DATA_MANAGEMENT":"Dateimanagement",
+        "SAFE":"Gesicherter Bereich (Safe)",
+        "COLLECTIONS":"Sammlungen",
+        "OTHER":"Andere / Nicht kategorisiert",
+        "ADD": "Eigene Berechtigung anlegen"
+      }
     }
   }
 }

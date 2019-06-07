@@ -1,7 +1,7 @@
 <div class="dialog darken">
   <div class="card center-card card-high card-actionbar card-wide">
     <div class="card-content" *ngIf="_tool">
-      <div class="card-cancel" (click)="cancel()"><i class="material-icons">close</i></div>
+      <div tabindex="0" class="card-cancel" (click)="cancel()" (keyup.enter)="cancel()"><i icon iconId="close" aria="true"></i></div>
       <div class="card-title">{{'WORKSPACE.LTI_TOOLS.TITLE_CONFIG' | translate:{tool:_tool.name} }}</div>
       <div class="card-title-actionbar">
         <div class="actionbar">

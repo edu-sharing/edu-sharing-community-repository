@@ -27,6 +27,9 @@ public interface NodeService {
 	
 	public String createNodeBasic(String parentID, String nodeTypeString, HashMap<String, Object> _props);
 
+	public String createNodeBasic(StoreRef store, String parentID, String nodeTypeString, String childAssociation,
+			HashMap<String, Object> _props);
+
 	public String findNodeByName(String parentId, String name );
 
 	public NodeRef copyNode(String sourceId, String nodeId, boolean withChildren) throws Throwable;
@@ -47,13 +50,17 @@ public interface NodeService {
 	
 	public String getOrCreateUserSavedSearch();
 
+	public String getPrimaryParent(String nodeId);
+
 	default List<ChildAssociationRef> getChildrenChildAssociationRef(String parentID){
 		return getChildrenChildAssociationRefAssoc(parentID,null, null, new SortDefinition());
 	}
 
-	<T>List<T> sortNodeRefList(List<T> list, List<String> filter, SortDefinition sortDefinition);
+    <T>List<T> sortNodeRefList(List<T> list, List<String> filter, SortDefinition sortDefinition);
 
-	public List<ChildAssociationRef> getChildrenChildAssociationRefAssoc(String parentID, String asoocName, List<String> filter, SortDefinition sortDefinition);
+    public List<ChildAssociationRef> getChildrenChildAssociationRefType(String parentID, String childType);
+
+    public List<ChildAssociationRef> getChildrenChildAssociationRefAssoc(String parentID, String asoocName, List<String> filter, SortDefinition sortDefinition);
 
 	public void createVersion(String nodeId, HashMap _properties) throws Exception;
 

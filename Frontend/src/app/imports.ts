@@ -10,6 +10,7 @@ import {RestLocatorService} from "./common/rest/services/rest-locator.service";
 import {HttpClient, HttpClientModule} from "@angular/common/http";
 import {MatDatepickerModule} from '@angular/material/datepicker';
 import {MatFormFieldModule, MatInputModule, MatNativeDateModule} from "@angular/material";
+import { LazyLoadImageModule } from 'ng-lazyload-image';
 
 
 export const IMPORTS=[
@@ -17,6 +18,7 @@ export const IMPORTS=[
   BrowserAnimationsModule,
   FormsModule,
   HttpClientModule,
+  LazyLoadImageModule,
   MatDatepickerModule,
   MatNativeDateModule,
   MatFormFieldModule,

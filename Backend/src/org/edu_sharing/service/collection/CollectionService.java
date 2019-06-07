@@ -50,10 +50,12 @@ public interface CollectionService {
 	
 	public List<NodeRef> getChildren(String parentId, String scope);
 	
-	public List<NodeRef> getChildReferences(String parentId, String scope, SortDefinition sortDefinition);
+	public List<NodeRef> getChildren(String parentId, String scope, SortDefinition sortDefinition,List<String> filter);
 
 	public Collection get(String storeId, String storeProtocol, String collectionId);
-	
+
+	void removePreviewImage(String collectionId) throws Exception;
+
 	/**
 	 * 
 	 * @param parentId collection to set the order of the children

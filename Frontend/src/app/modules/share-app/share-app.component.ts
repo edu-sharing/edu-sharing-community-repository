@@ -10,7 +10,7 @@ import {RestConnectorService} from "../../common/rest/services/rest-connector.se
 import {Component, ViewChild, ElementRef} from "@angular/core";
 import {
     LoginResult, ServerUpdate, CacheInfo, Application, Node, ParentList,
-    CollectionContent, Collection, NodeWrapper, ConnectorList, Connector
+    Collection, NodeWrapper, ConnectorList, Connector
 } from "../../common/rest/data-object";
 import {RestAdminService} from "../../common/rest/services/rest-admin.service";
 import {DialogButton} from "../../common/ui/modal-dialog/modal-dialog.component";
@@ -165,7 +165,7 @@ export class ShareAppComponent {
                     offset:0,
                     count:50,
                     sortAscending:false,
-                }).subscribe((data:CollectionContent)=>{
+                }).subscribe((data)=>{
                     this.collections=data.collections;
                     this.loading=false;
                 },(error)=>{

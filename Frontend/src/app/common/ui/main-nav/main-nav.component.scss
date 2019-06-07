@@ -17,20 +17,37 @@
     align-items: center;
   }
 }
+.preload{
+  position: fixed;
+  z-index: 140;
+  width: 100%;
+  height: 100%;
+  left:0;
+  top:0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background-color: #444;
+  >img{
+    width:50%;
+    max-width: 300px;
+  }
+}
 .tab-nav{
   display: none;
 }
 .dialog{
   z-index:$dialogZIndex+5;
 }
-.card{
+.card-agreement{
   z-index:$dialogZIndex+6;
   .card-content{
     display:flex;
     flex-direction: column;
   }
   .card-scroll{
-    height:calc(100% - 68px)
+    height:calc(100% - 68px);
   }
 }
 user-profile{
@@ -54,12 +71,15 @@ user-profile{
 
 .menuButton {
   width: 300px;
-  display: table-cell;
-  vertical-align: middle;
+  display: flex;
+  align-items: center;
+  .barIcon{
+    margin-top: 2px;
+  }
 }
 .menuButtonOuter{
   height:100%;
-  display: table;
+  display: flex;
 }
 
 .topBarSearch {
@@ -68,51 +88,53 @@ user-profile{
 }
 
 .menuButton .barIcon, .menuButton img {
-  vertical-align: bottom;
 }
 .menuButton img{
   /*
   margin-left: 16px;
   width: 24px;
   */
-  margin-left: 0px;
+  margin-left: 0;
   width: 35px;
 }
 
 .sidenavClose{
+  @include clickable();
   position: absolute;
   top:10px;
   right:10px;
-  z-index: 1;
+  z-index: 2;
   color: #fff;
+  &:focus{
+    @include removeDefaultFocus();
+    i{
+      @include focusShadow();
+    }
+  }
 }
-.sidenavImage img{
-  width:100%;
-  height:auto;
+.sidenavImage > .sidenavProfile{
   position: absolute;
-  left:0;
-  top:0;
-}
-.sidenavImage > div{
-  position: absolute;
+  z-index: 2;
   left:0;
   top:60px;
   width:100%;
   text-align: center;
   color:#fff;
 }
-.sidenavImage > div i{
+.sidenavImage .sidenavProfile i{
   font-size:50pt;
 }
-.sidenavImage > div > div{
+.sidenavImage .sidenavProfile > div{
   font-size: 120%;
   overflow: hidden;
 }
-.sidenavImage > div > div,.sidenavClose{
+.sidenavImage .sidenavProfile > div,.sidenavClose{
   text-shadow: 0 0 30px rgba(0,0,0,.5);
 }
 .sidenavImage{
+  position: relative;
   height:200px;
+  overflow: hidden;
   @include unselectableText();
 }
 
@@ -123,11 +145,11 @@ user-profile{
     margin-left: 6px;
   }
   .nodeStore{
-    margin-right:10px;
+    margin-right: 4px;
     position: relative;
-    top:5px;
+    top: 8px;
     >i{
-      color:$primary;
+      color:$primaryMediumLight;
     }
   }
   .nodeStoreCount{
@@ -203,6 +225,7 @@ user-profile{
 .barIcon{
   font-size: 24px;
   z-index:115;
+
 }
 .searchIcon,.searchClearIcon{
   font-size: 22px !important;
@@ -221,13 +244,17 @@ user-profile{
   position: relative;
   // space for links like imprint
   top:5px;
-  display: table;
+  display: flex;
+  margin-right: 7px;
+  padding-top: 5px;
+  padding-left: 7px;
 }
 
 .topBar .user div{
   overflow: hidden;
   max-width: 160px;
-  height: 20px;
+  height: 18px;
+  margin-top: 1px;
   word-break: break-all;
   display: inline-block;
 }
@@ -238,19 +265,34 @@ user-profile{
 .topBar .user span{
   font-size:100%;
 }
-.sidenav span{
-  position: relative;
-  top:-4px;
-}
 .topBar .user i{
   font-size:25px;
   vertical-align: top;
-  margin-right: 10px;
+  margin-right: 5px;
   margin-left: 5px;
+}
+$licenseInfoHeight:40px;
+.sidenav{
+  .sidenav-main{
+    min-height:calc(100% - #{$licenseInfoHeight});
+  }
+  .license-info{
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    padding:0 20px;
+    width: 100%;
+    height: $licenseInfoHeight;
+    color: $textLight;
+    font-size: 90%;
+    @include clickable();
+  }
 }
 .sidenav .button{
   padding:20px 30px;
   width:100%;
+  display: flex;
+  align-items: center;
 }
 .userMenu,.helpMenu{
   position: absolute;
@@ -288,6 +330,9 @@ user-profile{
   background: $workspaceTreeBackground;
   width:$workspaceSidebarWidth;
   @include materialShadow();
+  &:focus{
+    @include removeDefaultFocus();
+  }
 }
 
 #scrollToTop {
@@ -302,21 +347,33 @@ user-profile{
     margin-right: 0;
   }
 }
-.topBar .scopeIcon{
-  margin-left: 13px;
-  position: relative;
-  top: 4px;
-  display:none;
-}
-.topBar .iconPerson{
-  display:none;
+.topBar{
+  .scopeIcon{
+    margin-left: 13px;
+    position: relative;
+    top: 1px;
+    display:none;
+  }
+  .iconPerson{
+    display:none;
+  }
+  user-avatar{
+    position: relative;
+    margin-right: 7px;
+  }
 }
 .scopeNameMobile{
   display:none;
 }
+.topbar-search-right{
+  display: contents;
+}
 @media screen and (max-width: ($mobileWidth+$mobileStage*5)) {
   .searchInputGroup{
     width: calc(100% - 80px);
+  }
+  .user{
+    max-width: 160px;
   }
 }
 @media screen and (max-width: ($mobileWidth+$mobileStage*2)) {
@@ -411,14 +468,18 @@ user-profile{
     .iconPerson {
       display: inherit;
     }
-    .iconArrow {
-      display: none;
+    user-avatar{
+      top:2px;
+    }
+    .user .iconArrow {
+      margin-right: 0;
+      margin-left: -7px;
     }
     .eduImage{
       display:none;
     }
     .scopeIcon{
-      display: inline-block;
+      display: flex;
     }
   }
 }

@@ -38,7 +38,7 @@ import org.edu_sharing.alfresco.policy.ThumbnailHandling;
  */
 public class Edu_SharingUnlockMethod extends WebDAVMethod
 {
-    private String m_strLockToken = null;
+	private String m_strLockToken = null;
 
     /**
      * Default constructor
@@ -223,8 +223,8 @@ public class Edu_SharingUnlockMethod extends WebDAVMethod
                if(lockNodeInfo != null 
             		&& lockNodeInfo.getContentData() != null && lockNodeInfo.getContentData().getSize() > 0 
             		&& lockNodeInfo.getName() != null && !lockNodeInfo.getName().startsWith("._") ){
-            	   
-            	  
+
+
             	   /**
             	    * for windows also add thumbnail action here
             	    */

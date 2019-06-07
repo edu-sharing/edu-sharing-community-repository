@@ -72,6 +72,7 @@ import {UIService} from '../../services/ui.service';
  */
 export class MainNavComponent implements AfterViewInit{
   private static bannerPositionInterval: any;
+  private static preloading=true;
   private static ID_ATTRIBUTE_NAME='data-banner-id';
 
   @ViewChild('search') search : ElementRef;
@@ -102,7 +103,7 @@ export class MainNavComponent implements AfterViewInit{
   helpOptions: OptionItem[]=[];
   tutorialElement: ElementRef;
   globalProgress = false;
-  
+
   public showEditProfile: boolean;
   public showProfile: boolean;
 
@@ -165,6 +166,8 @@ export class MainNavComponent implements AfterViewInit{
     private elementsBottomY = 0;
     private fixScrollElements = false;
     private isSafe = false;
+    licenseDialog: boolean;
+    private licenseDetails: string;
   @HostListener('document:keydown', ['$event'])
   handleKeyboardEvent(event: KeyboardEvent) {
       if(event.code=="Escape" && this.canOpen && this.displaySidebar){
@@ -282,21 +285,16 @@ export class MainNavComponent implements AfterViewInit{
     this._currentScope=currentScope;
     this.event.broadcastEvent(FrameEventsService.EVENT_VIEW_OPENED,currentScope);
   }
-  /**
-   * The current search query, will be inserted in the search field
-   */
-
-  @Input() set onInvalidNodeStore(data:Boolean){
-    this.iam.getNodeList(SearchNodeStoreComponent.LIST).subscribe((data:NodeList)=>{
-      if(data.nodes.length-this.nodeStoreCount>0 && this.nodeStoreAnimation==-1)
-        this.nodeStoreAnimation=data.nodes.length-this.nodeStoreCount;
-      this.nodeStoreCount=data.nodes.length;
-      setTimeout(()=>{
-        this.nodeStoreAnimation=-1;
-      },1500);
-    });
-  };
-
+  public refreshNodeStore(){
+      this.iam.getNodeList(RestConstants.NODE_STORE_LIST).subscribe((data:NodeList)=>{
+          if(data.nodes.length-this.nodeStoreCount>0 && this.nodeStoreAnimation==-1)
+              this.nodeStoreAnimation=data.nodes.length-this.nodeStoreCount;
+          this.nodeStoreCount=data.nodes.length;
+          setTimeout(()=>{
+              this.nodeStoreAnimation=-1;
+          },1500);
+      });
+  }
 
   onEvent(event:string,data:any){
     if(event==FrameEventsService.EVENT_PARENT_SEARCH){
@@ -307,8 +305,13 @@ export class MainNavComponent implements AfterViewInit{
     this.userOpen=false;
     this.showProfile=true;
   }
+  public openProfile(){
+    this.router.navigate([UIConstants.ROUTER_PREFIX+"profiles",RestConstants.ME]);
+    this.displaySidebar=false;
+    this.userOpen=false;
+  }
   public getCurrentScopeIcon(){
-    if(this._currentScope=='login')
+    if(this._currentScope=='login' || this._currentScope=='profiles')
       return 'person';
     if(this._currentScope=='oer')
         return 'public'
@@ -392,7 +395,8 @@ export class MainNavComponent implements AfterViewInit{
         }
         buttons.push({path:'search',scope:'search',icon:"search",name:"SIDEBAR.SEARCH",queryParams:reurl});
         buttons.push({path:'collections',scope:'collections',icon:"layers",name:"SIDEBAR.COLLECTIONS",queryParams:reurl});
-        if(data.isGuest){
+        buttons.push({path:'stream',scope:'stream',icon:"event",name:"SIDEBAR.STREAM"});
+          if(data.isGuest){
           buttons.push({path:'login',scope:'login',icon:"person",name:"SIDEBAR.LOGIN"});
         }
         this.isGuest=data.isGuest;
@@ -404,13 +408,8 @@ export class MainNavComponent implements AfterViewInit{
           this.configService.getAll().subscribe(()=>{
             this.userName=ConfigurationHelper.getPersonWithConfigDisplayName(this.user.person,this.configService);
           });
-          if(data.statusCode==RestConstants.STATUS_CODE_OK) {
-              setTimeout(() => {
-                  this.tutorialElement = this.userRef;
-              });
-          }
         });
-        this.onInvalidNodeStore=new Boolean(true);
+        this.refreshNodeStore();
         this.connector.hasAccessToScope(RestConstants.SAFE_SCOPE).subscribe((data:AccessScope)=>{
           // safe needs access and not be app (oauth not supported)
           if(data.hasAccess && !this.cordova.isRunningCordova())
@@ -622,10 +621,20 @@ export class MainNavComponent implements AfterViewInit{
       this.session.set('licenseAgreement',this.licenseAgreementNode.contentVersion);
     else
       this.session.set('licenseAgreement','0.0');
+    this.startTutorial();
+  }
+  startTutorial(){
+      if(this.connector.getCurrentLogin().statusCode=='OK') {
+          UIHelper.waitForComponent(this, 'userRef').subscribe(() => {
+              this.tutorialElement = this.userRef;
+          });
+      }
   }
   private showLicenseAgreement() {
-    if(!this.config.licenseAgreement || this.isGuest || !this.connector.getCurrentLogin().isValidLogin)
-      return;
+    if(!this.config.licenseAgreement || this.isGuest || !this.connector.getCurrentLogin().isValidLogin) {
+        this.startTutorial();
+        return;
+    }
     this.session.get('licenseAgreement',false).subscribe((version:string)=>{
       console.log("user accepted agreement at version "+version);
       this.licenseAgreementHTML=null;
@@ -641,8 +650,10 @@ export class MainNavComponent implements AfterViewInit{
       this.nodeService.getNodeMetadata(nodeId).subscribe((data:NodeWrapper)=>{
         this.licenseAgreementNode=data.node;
         console.log(data.node);
-        if(version==data.node.contentVersion)
-          return;
+        if(version==data.node.contentVersion) {
+            this.startTutorial();
+            return;
+        }
         this.licenseAgreement=true;
         this.nodeService.getNodeTextContent(nodeId).subscribe((data: NodeTextContent) => {
             this.licenseAgreementHTML = data.html ? data.html : data.raw ? data.raw : data.text;
@@ -650,8 +661,10 @@ export class MainNavComponent implements AfterViewInit{
             this.licenseAgreementHTML = "Error loading content for license agreement node '" + nodeId + "'";
         });
       },(error:any)=>{
-          if(version==='0.0')
-            return;
+          if(version==='0.0') {
+              this.startTutorial();
+              return;
+          }
           this.licenseAgreement=true;
           this.licenseAgreementHTML = "Error loading metadata for license agreement node '" + nodeId + "'";
       })
@@ -664,6 +677,9 @@ export class MainNavComponent implements AfterViewInit{
       this.userMenuOptions=[];
         //<a *ngIf="isGuest && !config.loginOptions" class="collection-item" (click)="showAddDesktop=false;login(true)" (keyup.enter)="showAddDesktop=false;login(true)" tabindex="0" title="{{ 'SIDEBAR.LOGIN' | translate}}"><i class="material-icons">person</i> {{ 'SIDEBAR.LOGIN' | translate}}</a>
         //<a *ngFor="let loginOption of isGuest?config.loginOptions:null" class="collection-item" tabindex="0" title="{{loginOption.name}}" href="{{loginOption.url}}">{{loginOption.name}}</a>
+        if(!this.isGuest){
+            this.userMenuOptions.push(new OptionItem('EDIT_ACCOUNT','assignment_ind',()=>this.openProfile()));
+        }
         if(this.isGuest){
           if(this.config.loginOptions){
             for(let login of this.config.loginOptions){
@@ -680,8 +696,7 @@ export class MainNavComponent implements AfterViewInit{
           option.mediaQueryValue=UIConstants.MOBILE_TAB_SWITCH_WIDTH;
           option.isSeperateBottom=true;
           this.userMenuOptions.push(option);
-      }
-      for(let option of this.getConfigMenuHelpOptions()){
+      }for(let option of this.getConfigMenuHelpOptions()){
           option.mediaQueryType=UIConstants.MEDIA_QUERY_MAX_WIDTH;
           option.mediaQueryValue=UIConstants.MOBILE_TAB_SWITCH_WIDTH;
           this.userMenuOptions.push(option);
@@ -700,12 +715,13 @@ export class MainNavComponent implements AfterViewInit{
             option.isSeperateBottom=true;
             this.userMenuOptions.push(option);
         }
-      if(this.editUrl && !this.isGuest){
-        this.userMenuOptions.push(new OptionItem('EDIT_ACCOUNT','assignment_ind',()=>this.editProfile()));
-      }
-      if(this.showEditProfile && this.canEditProfile && !this.editUrl && !this.isGuest){
-        this.userMenuOptions.push(new OptionItem('EDIT_ACCOUNT','assignment_ind',()=>this.openProfileDialog()));
-      }
+        let option=new OptionItem('LICENSE_INFORMATION','lightbulb_outline',()=>this.showLicenses());
+        option.mediaQueryType=UIConstants.MEDIA_QUERY_MAX_WIDTH;
+        option.mediaQueryValue=UIConstants.MOBILE_TAB_SWITCH_WIDTH;
+        option.isSeperateBottom=true;
+        this.userMenuOptions.push(option);
+
+
       if(!this.isGuest){
         this.userMenuOptions.push(new OptionItem('LOGOUT','undo',()=>this.logout()));
       }
@@ -830,5 +846,28 @@ export class MainNavComponent implements AfterViewInit{
                 i--;
             }
         }
+    }
+    getPreloading(){
+        return MainNavComponent.preloading;
+    }
+    public finishPreloading(){
+        MainNavComponent.preloading=false;
+    }
+
+    showLicenses() {
+        this.licenseDialog=true;
+        this.displaySidebar=false;
+        /*this.http.get('assets/licenses/'+Translation.getLanguage()+'.html',{responseType:'text'}).subscribe((text)=>{
+            this.licenseDetails=(text as any);
+        },(error)=>{
+            console.info("Could not load license data for "+Translation.getLanguage()+", using default en");
+            */
+            this.http.get('assets/licenses/en.html',{responseType:'text'}).subscribe((text)=>{
+                console.log(text);
+                this.licenseDetails=(text as any);
+            },(error)=> {
+                console.error(error);
+            });
+        //});
     }
 }

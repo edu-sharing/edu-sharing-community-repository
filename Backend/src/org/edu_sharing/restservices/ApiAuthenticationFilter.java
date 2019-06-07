@@ -35,6 +35,8 @@ import org.edu_sharing.service.authentication.oauth2.TokenService;
 import org.edu_sharing.service.authentication.oauth2.TokenService.Token;
 import org.edu_sharing.service.authority.AuthorityServiceFactory;
 import org.edu_sharing.service.authority.AuthorityServiceImpl;
+import org.edu_sharing.service.config.ConfigServiceFactory;
+import org.glassfish.jersey.client.ClientConfig;
 import org.springframework.context.ApplicationContext;
 
 import com.sun.xml.bind.v2.runtime.unmarshaller.XsiNilLoader.Array;
@@ -161,8 +163,16 @@ public class ApiAuthenticationFilter implements javax.servlet.Filter {
 	    	httpReq.getSession().setAttribute(CCConstants.AUTH_LOCALE,locale);
 	    }
 		
-		List<String> AUTHLESS_ENDPOINTS=Arrays.asList(new String[]{"/authentication","/_about","/config","/sharing"});
+		List<String> AUTHLESS_ENDPOINTS=Arrays.asList(new String[]{"/authentication","/_about","/config","/register","/sharing"});
 		List<String> ADMIN_ENDPOINTS=Arrays.asList(new String[]{"/admin"});
+		List<String> DISABLED_ENDPOINTS=new ArrayList<>();
+
+		try {
+			if(!ConfigServiceFactory.getCurrentConfig(req).getValue("register.local",true)){
+				DISABLED_ENDPOINTS.add("/register");
+			}
+		} catch (Exception e) {}
+
 		boolean noAuthenticationNeeded=false;
 		for(String endpoint : AUTHLESS_ENDPOINTS){
 			if(httpReq.getPathInfo().startsWith(endpoint)){
@@ -175,6 +185,15 @@ public class ApiAuthenticationFilter implements javax.servlet.Filter {
 			if(httpReq.getPathInfo().startsWith(endpoint)){
 				adminRequired=true;
 				break;
+			}
+		}
+
+		for(String endpoint : DISABLED_ENDPOINTS){
+			if(httpReq.getPathInfo().startsWith(endpoint)){
+				httpResp.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+				httpResp.flushBuffer();
+				httpResp.getWriter().print("This endpoint is disabled via config");
+				return;
 			}
 		}
 		

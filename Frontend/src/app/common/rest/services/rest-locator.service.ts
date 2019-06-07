@@ -8,6 +8,7 @@ import {subscribeOn} from "rxjs/operator/subscribeOn";
 import {CordovaService} from '../../services/cordova.service';
 import {environment} from "../../../../environments/environment";
 import {HttpClient, HttpHeaders, HttpResponse} from '@angular/common/http';
+import {OAuthResult} from "../data-object";
 
 @Injectable()
 export class RestLocatorService {
@@ -34,9 +35,37 @@ export class RestLocatorService {
 
   constructor(private http : HttpClient,private cordova:CordovaService) {
   }
+  public createOAuthFromSession(){
+      return new Observable((observer : Observer<OAuthResult>) => {
+          this.cordova.loginOAuth(this.endpointUrl,null,null,"client_credentials").subscribe((oauthTokens) => {
+              this.cordova.setPermanentStorage(CordovaService.STORAGE_OAUTHTOKENS, JSON.stringify(oauthTokens));
+              observer.next(oauthTokens);
+              observer.complete();
+          },(error)=>{
+              observer.error(error);
+              observer.complete();
+          });
+    });
+  }
   public getCordova(){
     return this.cordova;
   }
+    public getConfigDynamic(key:string) : Observable<any>{
+        return new Observable<any>((observer : Observer<any>) => {
+            this.locateApi().subscribe(data => {
+                let query = RestLocatorService.createUrl("config/:version/dynamic/:key", null,[[":key",key]]);
+                this.http.get<any>(this.endpointUrl + query, this.getRequestOptions())
+                    .subscribe(response => {
+                        // unmarshall encapuslated json response
+                        observer.next(JSON.parse(response.body.value));
+                        observer.complete();
+                    },(error:any)=>{
+                        observer.error(error);
+                        observer.complete();
+                    });
+            });
+        });
+    }
   public getConfig() : Observable<any>{
     return new Observable<any>((observer : Observer<any>) => {
       this.locateApi().subscribe(data => {

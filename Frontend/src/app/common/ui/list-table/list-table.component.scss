@@ -1,5 +1,6 @@
 @import "../../../../styles/variables.scss";
 $borderRadius:2px;
+$previewHeight:160px;
 
 .heading div{
   padding:0px 0px;
@@ -224,6 +225,10 @@ $badgeWidth:250px;
   min-width:60px;
   transition: $transitionNormal all;
   @include clickable();
+  &:focus{
+    @include focusShadow();
+    border-radius: 0;
+  }
 }
 .moreOpen{
   position:absolute;
@@ -330,7 +335,7 @@ $badgeWidth:250px;
 .list .nodeCollection .row {
   background-color: transparent;
   &:focus{
-    outline: 2px dashed $primary;
+    @include setGlobalDashedFocus();
   }
 }
 
@@ -397,10 +402,8 @@ $badgeWidth:250px;
     background-color: #444;
     color:#fff;
     z-index: 1;
-    custom-icon{
-      width:12px;
-      height:12px;
-      position:initial;
+    >i{
+      font-size: 12px;
     }
   }
 }
@@ -410,13 +413,17 @@ $badgeWidth:250px;
     color: #000 !important;
   }
 }
-:host /deep/{
-  .collectionPinned custom-icon g{
-    fill:#fff;
-  }
-}
 .checkbox{
   min-width:70px;
+  >div{
+    position: absolute;
+    z-index: 2;
+    width: 20px;
+    height: 20px;
+    &:focus{
+      @include focusShadow();
+    }
+  }
 }
 .checkboxDummy{
   min-width:10px;
@@ -499,6 +506,35 @@ $orderAnimationTime:$transitionNormal*5;
   padding: 3px !important;
   z-index: 1;
 }
+.nodeRatingComments {
+  position: absolute;
+  z-index: 1;
+  top: $previewHeight - 60px;
+  width: 100%;
+  height: 50px;
+  display: flex;
+  align-items: flex-end;
+  padding-bottom: 10px;
+  background: linear-gradient(to bottom,rgba(0,0,0,0.001) 0,rgba(0,0,0,0.75) 100%);
+  .nodeRating{
+    flex-grow: 1;
+  }
+  .nodeComments {
+    right: 0;
+    border-radius: 0;
+    border-top-left-radius: 3px;
+    color: #fff;
+    width: 60px;
+    text-align: center;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    > i {
+      margin-right: 4px;
+      font-size: 16pt;
+    }
+  }
+}
 
 .typeicon > img {
   width: 60%;
@@ -566,6 +602,7 @@ $orderAnimationTime:$transitionNormal*5;
     height: 100%;
     background-color:rgba(255,255,255,0.85);
     position: absolute;
+    z-index: 1;
     border-radius: $borderRadius;
     left:0;
     top:0;
@@ -634,7 +671,7 @@ $orderAnimationTime:$transitionNormal*5;
   height: $listCardSmallHeight;
   @include materialShadow();
   float:left;
-  margin:6px;
+  margin:6px !important;
   border-radius: 2pt;
   border-bottom: 5px solid $primary;
 }
@@ -736,7 +773,7 @@ $orderAnimationTime:$transitionNormal*5;
   right:45px;
 }
 .cardList .preview{
-  height:160px;
+  height:$previewHeight;
   padding:0!important;
   margin-top:-10px;
   margin-bottom:15px;
@@ -802,6 +839,9 @@ $orderAnimationTime:$transitionNormal*5;
   top: 10px;
   z-index:1;
   min-width:initial;
+  >div:focus{
+      @include focusShadow(false);
+  }
 }
 .row input[type=checkbox]:checked + label:after{
   @include materialShadow();
@@ -929,6 +969,13 @@ $orderAnimationTime:$transitionNormal*5;
   .cardList .row_4{
     display:block!important;
   }
+  .cardList{
+    .collection_info,.collection_scope {
+      float:initial;
+      display:flex!important;
+      margin:5px 0;
+    }
+  }
 }
 @media all and (max-width: ($mobileWidth)) {
     .cardList.nodeCollection .collectionEditorial {
@@ -996,6 +1043,10 @@ $orderAnimationTime:$transitionNormal*5;
     left:15px;
     top:23px;
   }
+  .cardList .nodeRatingComments{
+    width:160px;
+    height:40px;
+  }
   .cardList .previewCollection{
     left: 46px;
     top: 28px;
@@ -1059,5 +1110,8 @@ $orderAnimationTime:$transitionNormal*5;
   .cardList .row_9,
   .cardList .row_10{
     width: calc(100% - 180px);
+  }
+  .nodeCollection{
+    margin: 5px 0;
   }
 }

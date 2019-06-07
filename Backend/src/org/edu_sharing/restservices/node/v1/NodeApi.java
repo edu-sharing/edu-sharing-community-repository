@@ -937,13 +937,10 @@ public class NodeApi  {
 	    	}
 	    	
 	    	RepositoryDao repoDaoHome = RepositoryDao.getRepository(RepositoryDao.HOME);
-	    	if("-userhome-".equals(parent)){
-	    		parent = repoDaoHome.getUserHome();
-    		}
-	    	if("-inbox-".equals(parent)){
-	    		parent = repoDaoHome.getUserInbox();
-    		}
-	    	NodeDao nodeDao=NodeDao.getNode(repoDao, node).importNode(parent);
+			node=NodeDao.mapNodeConstants(repoDaoHome,node);
+			parent=NodeDao.mapNodeConstants(repoDaoHome,parent);
+
+			NodeDao nodeDao=NodeDao.getNode(repoDao, node).importNode(parent);
 	    	NodeEntry response=new NodeEntry();
 	    	response.setNode(nodeDao.asNode());
 	    	return Response.status(Response.Status.OK).entity(response).build();
@@ -1082,13 +1079,9 @@ public class NodeApi  {
     	try {
     		
 	    	RepositoryDao repoDao = RepositoryDao.getRepository(repository);
-	    	if("-userhome-".equals(node)){
-    			node = repoDao.getUserHome();
-    		}
-	    	if("-inbox-".equals(node)){
-    			node = repoDao.getUserInbox();
-    		}
-	    	NodeDao nodeDao = NodeDao.getNode(repoDao, node);
+			node=NodeDao.mapNodeConstants(repoDao,node);
+
+			NodeDao nodeDao = NodeDao.getNode(repoDao, node);
 	    	resolveURLTitle(properties);
 	    	NodeDao child = nodeDao.createChild(type, aspects, properties,
 	    			renameIfExists==null ? false : renameIfExists.booleanValue(),
@@ -1353,7 +1346,43 @@ public class NodeApi  {
     	}
 
     }
-    
+	@DELETE
+	@Path("/nodes/{repository}/{node}/preview")
+
+	@ApiOperation(
+			value = "Delete preview of node.")
+
+	@ApiResponses(
+			value = {
+					@ApiResponse(code = 200, message = RestConstants.HTTP_200, response = NodeEntry.class),
+					@ApiResponse(code = 400, message = RestConstants.HTTP_400, response = ErrorResponse.class),
+					@ApiResponse(code = 401, message = RestConstants.HTTP_401, response = ErrorResponse.class),
+					@ApiResponse(code = 403, message = RestConstants.HTTP_403, response = ErrorResponse.class),
+					@ApiResponse(code = 404, message = RestConstants.HTTP_404, response = ErrorResponse.class),
+					@ApiResponse(code = 500, message = RestConstants.HTTP_500, response = ErrorResponse.class)
+			})
+
+	public Response deletePreview(
+			@ApiParam(value = RestConstants.MESSAGE_REPOSITORY_ID,required=true, defaultValue="-home-" ) @PathParam("repository") String repository,
+			@ApiParam(value = RestConstants.MESSAGE_NODE_ID,required=true ) @PathParam("node") String node,
+			@Context HttpServletRequest req) {
+
+		try {
+
+			RepositoryDao repoDao = RepositoryDao.getRepository(repository);
+			NodeDao nodeDao = NodeDao.getNode(repoDao, node);
+
+			NodeDao newNode = nodeDao.deletePreview();
+
+			NodeEntry response = new NodeEntry();
+			response.setNode(newNode.asNode());
+
+			return Response.status(Response.Status.OK).entity(response).build();
+
+		} catch (Throwable t) {
+			return ErrorResponse.createResponse(t);
+		}
+	}
     @POST
     @Path("/nodes/{repository}/{node}/content")
     @Consumes({ "multipart/form-data" })

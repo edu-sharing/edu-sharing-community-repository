@@ -1,0 +1,75 @@
+@import "../../../../styles/variables.scss";
+
+.done-info{
+  text-align: center;
+  h4{
+    margin-bottom: 20px;
+  }
+  p{
+    white-space: pre-line;
+  }
+  img{
+    width: 160px;
+    height: auto;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+  }
+
+  i{
+    font-size: 14pt;
+    margin-left: 2pt;
+    display: table-caption;
+    margin-bottom: -3px;
+    padding-right: 23px;
+  }
+  .mail-info{
+    margin-bottom:20px;
+
+    span{
+      cursor: pointer;
+      font-weight: bold;
+      white-space: nowrap;
+    }
+  }
+
+  strong{
+    display: block;
+    margin-top: 20px;
+  }
+  small{
+    font-size: 100%;
+    color: $textLight;
+  }
+  .input-hint-bottom{
+    margin-bottom: 15px;
+  }
+  .keyForm{
+    display: flex;
+    width: 100%;
+    padding:20px 20px;
+    form{
+      width: 100%;
+      input{
+        text-align: center;
+      }
+    }
+  }
+
+  .send-mail{
+    float:initial;
+    margin-top: 5px;
+    margin-bottom: 10px;
+    display: block;
+    padding: 0 2rem;
+    text-transform: uppercase;
+    cursor: pointer;
+  }
+}
+
+@media screen and (max-width: $mobileWidth) {
+  .done-info .keyForm{
+    padding: 10px 0;
+  }
+}

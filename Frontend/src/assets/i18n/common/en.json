@@ -55,6 +55,9 @@
   "TODAY" : "today",
   "YESTERDAY" : "yesterday",
   "DAYS_AGO" : "{{ days }} days ago",
+  "HOURS_AGO" : "{{ hours }} hours ago",
+  "MINUTES_AGO" : "{{ minutes }} minutes ago",
+  "JUST_NOW" : "Just now",
   "CREATE" : "create",
   "LOGOUT" : "Log out",
   "INVALID_OPERATION":"This feature is currently not supported",
@@ -86,6 +89,7 @@
   "TOOLPERMISSION_ERROR_FOOTER":"If you think that's an error, contact your administrator and ask for permission {{permission}}",
   "TOOLPERMISSION":{
     "TOOLPERMISSION_INVITE":"The permission to share content",
+    "TOOLPERMISSION_INVITE_STREAM":"The permission to add content to the stream",
     "TOOLPERMISSION_INVITE_LINK":"The permission to create content links",
     "TOOLPERMISSION_INVITE_HISTORY":"The permission to view the sharing history",
     "TOOLPERMISSION_INVITED":"The permission to see the list of invited users",
@@ -137,6 +141,7 @@
     "WORKSPACE":"Workspace",
     "SEARCH":"Search",
     "COLLECTIONS":"Collections",
+    "STREAM":"Activity stream",
     "SECURE":"Safe",
     "PERMISSIONS":"User management",
     "LOGIN":"Login",
@@ -144,6 +149,7 @@
     "WORKSPACE_SHORT":"Workspace",
     "SEARCH_SHORT":"Search",
     "COLLECTIONS_SHORT":"Collections",
+    "STREAM_SHORT":"Stream",
     "SECURE_SHORT":"Safe",
     "PERMISSIONS_SHORT":"Users",
     "LOGIN_SHORT":"Login",
@@ -226,6 +232,17 @@
       "INVALID_METADATA":"incorrect description",
       "OTHER":"none of the above"
     }
+  },
+  "COMMENTS_SINGLE":"Comment",
+  "COMMENTS_MULTIPLE":"Comments",
+  "NODE_COMMENTS":{
+    "TITLE":"Comments",
+    "NEW_COMMENT_PLACEHOLDER":"New comment...",
+    "NO_COMMENTS":"No comments yet",
+    "OPTION_EDIT":"edit",
+    "OPTION_DELETE":"delete",
+    "DELETE_COMMENT":"Delete comment?",
+    "DELETE_COMMENT_MESSAGE":"Are you sure you want to remove the selected comment?"
   },
   "COLLECTION":{
     "INFO_REFERENCES":"collection",
@@ -393,14 +410,14 @@
     "ADD_CHILD_OBJECT_DESCRIPTION":"Create a series by attaching more materials to this object",
     "ADD_CHILD_OBJECT_QUOTA_REACHED":"Error while uploading \"{{ name }}\": Upload quota reached"
   },
-  
+
   "SHARE_APP":{
     "TEXT_SNIPPET":"Note",
     "IMAGE":"Image",
     "WILL_BE_SAVED_AT":"Will be stored at",
     "ADD_TO_COLLECTION":"Would you like to add the object to a collection?"
   },
-  
+  "LICENSE_INFORMATION":"About edu-sharing",
   "LICENSE_AGREEMENT":{
     "TITLE":"License agreement",
     "CHECKBOX":"I read the license agreement and accept it",
@@ -439,6 +456,19 @@
     "City":"City",
     "Region":"State/Region",
     "Country":"Country"
+  },
+  "ICON_LABELS":{
+    "more_vert": "Option",
+    "close": "close",
+    "help_outline": "Help",
+    "info_outline": "Information",
+    "view_module": "Box view",
+    "list": "List view",
+    "keyboard_arrow_left": "previous",
+    "keyboard_arrow_right": "next",
+    "keyboard_arrow_up": "up",
+    "file_upload": "file upload",
+    "delete": "delete"
   },
   "LANGUAGE":{
     "INTERNATIONAL":"international",

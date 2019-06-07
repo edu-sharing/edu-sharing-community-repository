@@ -7,7 +7,7 @@ import {
 import { Toast } from "../../common/ui/toast";
 import {Router, Route, ActivatedRoute} from "@angular/router";
 import { OAuthResult, LoginResult, AccessScope } from "../../common/rest/data-object";
-import { UIConstants } from "../../common/ui/ui-constants";
+import {OPEN_URL_MODE, UIConstants} from "../../common/ui/ui-constants";
 import { CordovaService } from "../../common/services/cordova.service";
 import { ConfigurationService } from '../../common/services/configuration.service';
 import { UIHelper } from '../../common/ui/ui-helper';
@@ -30,8 +30,6 @@ export class LoginAppComponent  implements OnInit {
 
     private state:StateUI = StateUI.NOINTERNET;
 
-    private instanceTS:number = null;
-
     public isLoading=true;
     public disabled=true;
     private username="";
@@ -43,20 +41,18 @@ export class LoginAppComponent  implements OnInit {
     servers: any;
     currentServer: any;
     private locationNext: string;
+    config: any;
 
     constructor(
         private toast:Toast,
         private router:Router,
         private route:ActivatedRoute,
         private translation: TranslateService,
+        private storage: SessionStorageService,
         private cordova: CordovaService,
-        private config: ConfigurationService,
+        private configService: ConfigurationService,
         private locator: RestLocatorService,
-        //private applicationRef: ApplicationRef
     ){
-
-        this.instanceTS = Date.now();
-        console.log("CONSTRUCTOR LoginAppComponent",this.instanceTS);
 
         this.isLoading=true;
 
@@ -92,7 +88,14 @@ export class LoginAppComponent  implements OnInit {
         });
 
     }
-
+    private recoverPassword(){
+        if(this.config.register.local){
+            this.router.navigate([UIConstants.ROUTER_PREFIX+"register","request"]);
+        }
+        else {
+            window.location.href = this.config.register.recoverUrl;
+        }
+    }
     buttonExitApp() :void {
         this.cordova.exitApp();
     }
@@ -176,8 +179,8 @@ export class LoginAppComponent  implements OnInit {
             window.location.replace(this.locationNext);
         }
         else {
-            this.config.getAll().subscribe(() => {
-                UIHelper.goToDefaultLocation(this.router, this.config, {replaceUrl: true});
+            this.configService.getAll().subscribe(() => {
+                UIHelper.goToDefaultLocation(this.router, this.configService, {replaceUrl: true});
             });
         }
     }
@@ -185,14 +188,29 @@ export class LoginAppComponent  implements OnInit {
         return 'assets/images/app-icon.svg';
     }
     private init() {
-        Translation.initializeCordova(this.translation,this.cordova).subscribe(()=>{
+        Translation.initialize(this.translation,this.configService,this.storage,this.route).subscribe(()=>{
             console.log("INIT TranslationService .. OK");
             this.locator.locateApi().subscribe(()=>{
                 this.serverurl=this.locator.endpointUrl;
                 this.state=StateUI.LOGIN;
-                this.isLoading=false;
+                this.configService.getAll().subscribe((config)=>{
+                    this.config=config;
+                    if(!this.config.register)
+                    // default register mode: allow local registration if not disabled
+                        this.config.register={local:true};
+
+                    this.isLoading=false;
+                });
             });
 
         });
+    }
+    private register(){
+        if(this.config.register.local){
+            this.router.navigate([UIConstants.ROUTER_PREFIX+"register"]);
+        }
+        else {
+            UIHelper.openUrl(this.config.register.registerUrl,this.cordova,OPEN_URL_MODE.BlankSystemBrowser);
+        }
     }
 }

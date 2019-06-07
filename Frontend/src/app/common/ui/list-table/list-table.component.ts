@@ -282,7 +282,10 @@ export class ListTableComponent implements EventListener{
    */
   @Output() sortListener = new EventEmitter();
   /**
-   * Called when the user clicks on a row, emits an object from the list (usually a node, but depends how you filled it)
+   * Called when the user clicks on a row, emits the following: {
+   *        node: <clicked object from list, depends on what you filled in>,
+   *        source: <source click information, may null, e.g. 'preview', 'comments', 'dropdown'>
+   *     }
    * @type {EventEmitter}
    */
   @Output() clickRow = new EventEmitter();
@@ -561,8 +564,8 @@ export class ListTableComponent implements EventListener{
     this.currentDragColumn=column;
   }
 
-  private clickRowSender(node : Node){
-    this.clickRow.emit(node);
+  private clickRowSender(node : Node,source:string){
+    this.clickRow.emit({node:node,source:source});
   }
   private canBeSorted(sortBy : any){
     return this.possibleSortByFields && this.possibleSortByFields.filter((p)=>p.name==sortBy.name).length;
@@ -659,6 +662,11 @@ export class ListTableComponent implements EventListener{
         return true;
     return RestNetworkService.isFromHomeRepo(node,this.repositories);
   }
+  public getOriginalNode(node : any){
+    if(node.reference)
+      return node.reference;
+    return node;
+  }
   public getIconUrl(node : any){
     return this.getReference(node).iconURL;
   }
@@ -674,7 +682,7 @@ export class ListTableComponent implements EventListener{
   private showDropdown(node : Node){
     //if(this._options==null || this._options.length<1)
     //  return;
-    this.select(node,false,false,false);
+    this.select(node,"dropdown",false,false);
     this.dropdownPosition="";
     this.dropdownLeft=null;
     this.dropdownTop=null;
@@ -711,15 +719,15 @@ export class ListTableComponent implements EventListener{
   private doubleClick(node : Node){
     this.doubleClickRow.emit(node);
   }
-  private select(node : Node,fromCheckbox : boolean,fireEvent=true,unselect=true){
-    if(!fromCheckbox && !this.isClickable)
+  private select(node : Node,from : string=null,fireEvent=true,unselect=true){
+    if(from!="checkbox" && !this.isClickable)
       return;
-    if(!fromCheckbox && !this.selectOnClick && fireEvent){
-      this.clickRowSender(node);
+    if(from!="checkbox" && !this.selectOnClick && fireEvent){
+      this.clickRowSender(node,from);
       return;
     }
 
-    if(!this.hasCheckbox || !fromCheckbox){ // Single value select
+    if(!this.hasCheckbox || from!="checkbox"){ // Single value select
       if(this.selectedNodes.length && this.selectedNodes[0]==node && unselect)
         this.selectedNodes=[];
       else
@@ -729,7 +737,7 @@ export class ListTableComponent implements EventListener{
     }
     let pos=this.getSelectedPos(node);
     // select from-to range via shift key
-    if(fromCheckbox && pos==-1 && this.ui.isShiftCmd() && this.selectedNodes.length==1){
+    if(from=="checkbox" && pos==-1 && this.ui.isShiftCmd() && this.selectedNodes.length==1){
       let pos1=RestHelper.getRestObjectPositionInArray(node,this._nodes);
       let pos2=RestHelper.getRestObjectPositionInArray(this.selectedNodes[0],this._nodes);
       let start=pos1<pos2 ? pos1 : pos2;

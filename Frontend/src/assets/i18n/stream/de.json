@@ -1,0 +1,23 @@
+{
+  "STREAM": {
+    "TITLE":"Stream",
+    "MENU": {
+      "OPTION1":"Was gibt's Neues?",
+      "OPTION2":"Schon gesehen",
+      "OPTION3":"Einstellungen"
+    },
+    "OBJECT":{
+      "NOTITLE":"Keine Titel",
+      "NOMATERIALS":"Noch Keine Materialien vorhanden.",
+      "NONODES":"Es wurden keine Knoten gefunden",
+      "OPTION": {
+        "MOVEUP":"Ganz oben anzeigen",
+        "REMOVE":"Aus Stream entfernen"
+      }  
+    },
+    "TOAST":{
+      "MOVEUP":"wird jetzt ganz oben angezeigt",
+      "SEEN":"Das eben benutzte Material ist jetzt in \"Schon gesehen\" zu finden."
+    }
+  }
+}

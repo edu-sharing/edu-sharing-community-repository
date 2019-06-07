@@ -1,20 +1,27 @@
 /*
- * Copyright (C) 2005-2010 Alfresco Software Limited.
- *
- * This file is part of Alfresco
- *
+ * #%L
+ * Alfresco Remote API
+ * %%
+ * Copyright (C) 2005 - 2016 Alfresco Software Limited
+ * %%
+ * This file is part of the Alfresco software. 
+ * If the software was purchased under a paid Alfresco license, the terms of 
+ * the paid license agreement will prevail.  Otherwise, the software is 
+ * provided under the following open source license terms:
+ * 
  * Alfresco is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- *
+ * 
  * Alfresco is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU Lesser General Public License for more details.
- *
+ * 
  * You should have received a copy of the GNU Lesser General Public License
  * along with Alfresco. If not, see <http://www.gnu.org/licenses/>.
+ * #L%
  */
 package org.alfresco.repo.webdav;
 
@@ -388,7 +395,7 @@ public class PropFindMethod extends WebDAVMethod
      * Generates the required response XML for the current node
      * 
      * @param xml XMLWriter
-     * @param node NodeRef
+     * @param nodeInfo FileInfo
      * @param path String
      */
     protected void generateResponseForNode(XMLWriter xml, FileInfo nodeInfo, String path) throws Exception
@@ -431,7 +438,7 @@ public class PropFindMethod extends WebDAVMethod
      * specific set of properties
      * 
      * @param xml XMLWriter
-     * @param node NodeRef
+     * @param nodeInfo FileInfo
      * @param isDir boolean
      */
     private void generateNamedPropertiesResponse(XMLWriter xml, FileInfo nodeInfo, boolean isDir) throws Exception
@@ -538,9 +545,13 @@ public class PropFindMethod extends WebDAVMethod
                 }
                 else if (propName.equals(WebDAV.XML_GET_CONTENT_LANGUAGE) && !isDir)
                 {
+                    // Get the content language
+                    // TODO:
+                    // Output the content language
                     xml.startElement(
                             WebDAV.DAV_NS, WebDAV.XML_GET_CONTENT_LANGUAGE,
                             WebDAV.XML_NS_GET_CONTENT_LANGUAGE, nullAttr);
+                    // TODO:
                     xml.endElement(WebDAV.DAV_NS, WebDAV.XML_GET_CONTENT_LANGUAGE, WebDAV.XML_NS_GET_CONTENT_LANGUAGE);
                 }
                 else if (propName.equals(WebDAV.XML_GET_CONTENT_TYPE) && !isDir)
@@ -702,7 +713,7 @@ public class PropFindMethod extends WebDAVMethod
      * properties
      * 
      * @param xml XMLWriter
-     * @param node NodeRef
+     * @param nodeInfo FileInfo
      * @param isDir boolean
      */
     protected void generateAllPropertiesResponse(XMLWriter xml, FileInfo nodeInfo, boolean isDir) throws Exception
@@ -785,9 +796,14 @@ public class PropFindMethod extends WebDAVMethod
 
         if (isDir == false)
         {
+            // Get the content language
+
+            // TODO:
+            // Output the content language
 
             xml.startElement(WebDAV.DAV_NS, WebDAV.XML_GET_CONTENT_LANGUAGE, WebDAV.XML_NS_GET_CONTENT_LANGUAGE,
                     nullAttr);
+            // TODO:
             xml.endElement(WebDAV.DAV_NS, WebDAV.XML_GET_CONTENT_LANGUAGE, WebDAV.XML_NS_GET_CONTENT_LANGUAGE);
 
             // Get the content type
@@ -848,7 +864,7 @@ public class PropFindMethod extends WebDAVMethod
      * all known properties
      * 
      * @param xml XMLWriter
-     * @param node NodeRef
+     * @param nodeInfo FileInfo
      * @param isDir boolean
      */
     protected void generateFindPropertiesResponse(XMLWriter xml, FileInfo nodeInfo, boolean isDir)
@@ -906,7 +922,7 @@ public class PropFindMethod extends WebDAVMethod
      * given path
      * 
      * @param xml XMLWriter
-     * @param node NodeRef
+     * @param nodeInfo FileInfo
      * @param isDir boolean
      */
     protected void generateLockDiscoveryResponse(XMLWriter xml, FileInfo nodeInfo, boolean isDir) throws Exception
@@ -947,7 +963,7 @@ public class PropFindMethod extends WebDAVMethod
     /**
      * Loads all dead properties persisted on the node
      * 
-     * @param nodeRef
+     * @param nodeRef NodeRef
      * @return the map of all dead properties
      */
     @SuppressWarnings("unchecked")
@@ -1013,8 +1029,7 @@ public class PropFindMethod extends WebDAVMethod
     /**
      * Output the lockentry element of the specified type
      * @param xml XMLWriter
-     * @param lockType lock type. Can be WebDAV.XML_NS_EXCLUSIVE or WebDAV.XML_NS_SHARED
-     * @param lockType lock type containing namespace
+     * @param lockType lock type containing namespace. Can be WebDAV.XML_NS_EXCLUSIVE or WebDAV.XML_NS_SHARED
      * @throws SAXException
      * @throws IOException
      */

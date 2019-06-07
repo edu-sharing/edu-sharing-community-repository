@@ -3,10 +3,19 @@
 md-input{
   width:100%;
 }
+.dialog{
+  z-index: 90;
+}
+.card{
+  z-index: 91;
+}
 powered-by{
   position: fixed;
   left: 0;
   top: calc(15% + 510px);
+}
+.powered-down{
+  top: calc(15% + 530px);
 }
 .card-cancel{
   z-index: 1;
@@ -36,6 +45,14 @@ powered-by{
 }
 .register{
   color:$textLight;
+  a{
+    text-transform: uppercase;
+    i{
+      font-size: 11pt;
+      position: relative;
+      top: 3px;
+    }
+  }
 }
 @media screen and (max-height: ($mobileHeight)) {
   .card{
@@ -51,7 +68,9 @@ powered-by{
     position: fixed;
     top:calc(15% + 410px);
   }
-
+  .powered-down{
+    top: calc(15% + 430px);
+  }
   .branding{
     position: absolute;
     top: -27px;

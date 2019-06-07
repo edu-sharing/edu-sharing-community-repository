@@ -80,6 +80,11 @@
       "DUPLICATE_NAME":"A collection with the same name already exists",
       "CREATED":"Collection has been created",
       "INVALID_NAME":"The given name is invalid. Please don't use special characters"
+    },
+    "ACTIONBAR":{
+      "EDIT":"Edit",
+      "PIN":"Pin collection",
+      "DELETE":"Delete collection"
     }
   },
 

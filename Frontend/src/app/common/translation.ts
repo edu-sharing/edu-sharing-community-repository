@@ -15,7 +15,7 @@ import {CordovaService} from './services/cordova.service';
 import * as moment from 'moment';
 import {environment} from "../../environments/environment";
 
-export var TRANSLATION_LIST=['common','admin','recycle','workspace', 'search','collections','login','permissions','oer','messages','services','override'];
+export let TRANSLATION_LIST=['common','admin','recycle','workspace', 'search','collections','login','permissions','oer','messages','register','profiles','services','stream','override'];
 
 export class Translation  {
   private static language : string;
@@ -30,7 +30,8 @@ export class Translation  {
   };
   // none means that only labels should be shown (for dev)
   private static DEFAULT_SUPPORTED_LANGUAGES = ["de","en","none"];
-  public static initialize(translate : TranslateService,config : ConfigurationService,storage:SessionStorageService,route:ActivatedRoute) : Observable<string> {
+
+    public static initialize(translate : TranslateService,config : ConfigurationService,storage:SessionStorageService,route:ActivatedRoute) : Observable<string> {
     return new Observable<string>((observer: Observer<string>) => {
       config.get("supportedLanguages",Translation.DEFAULT_SUPPORTED_LANGUAGES).subscribe((data: string[]) => {
         if(config.getLocator().getCordova().isRunningCordova()){
@@ -203,6 +204,12 @@ export class TranslationLoader implements TranslateLoader {
           for (const key in obj) {
               try {
                   let path = key.split(".");
+
+                  // init non-existing objects first
+                  if(path.length>=2 && !final[path[0]]) final[path[0]]={};
+                  if(path.length>=3 && !final[path[0]][path[1]]) final[path[0]][path[1]]={};
+                  if(path.length>=4 && !final[path[0]][path[1]][path[2]]) final[path[0]][path[1]][path[2]]={};
+
                   if (path.length == 1) {
                       continue;
                   }

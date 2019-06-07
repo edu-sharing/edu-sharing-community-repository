@@ -38,6 +38,7 @@ import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.repository.StoreRef;
 import org.alfresco.service.cmr.version.VersionService;
 import org.alfresco.service.namespace.QName;
+import org.apache.james.mime4j.io.MaxHeaderLengthLimitException;
 import org.apache.log4j.Logger;
 import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
 import org.edu_sharing.repository.server.tools.ApplicationInfoList;

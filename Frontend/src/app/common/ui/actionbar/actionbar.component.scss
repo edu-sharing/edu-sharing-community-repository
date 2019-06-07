@@ -38,8 +38,10 @@
 .light a{
   color:#fff;
 }
-.more i{
-  font-size:1.5rem;
+.more{
+  .edu-icons,.material-icons {
+    font-size: 1.5rem;
+  }
 }
 .action-always{
   text-transform: uppercase;
@@ -63,7 +65,6 @@
 .actionToggleDivider{
   border-left:1px solid #ddd;
 }
-
 .actionToggle a{
   padding:0 5px;
   color: $textLight;
@@ -74,7 +75,37 @@
   @include removeDefaultFocus();
   color: $primary;
 }
+
+.actionbar-round{
+  .more, .action-always {
+    background: white !important;
+    color: $primary !important;
+    border-radius: 50%;
+    display:flex;
+    width:45px;
+    height:45px;
+    line-height:45px;
+    text-align: center;
+    @include materialShadow();
+    .edu-icons,.material-icons{
+      position: relative;
+      font-size: 24px;
+    }
+    span{
+      display: none;
+    }
+  }
+  .action-always{
+    .edu-icons,.material-icons {
+      right: 4px !important;
+    }
+  }
+}
+
 @media screen and (max-width: ($mobileWidth+$mobileStage*4)){
+  .action-always{
+    padding: 0 1rem;
+  }
   .action-always-caption{
     display: none;
   }

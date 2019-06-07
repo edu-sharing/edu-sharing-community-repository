@@ -14,6 +14,7 @@ import {Title} from "@angular/platform-browser";
 import {UIHelper} from "../../common/ui/ui-helper";
 import {SessionStorageService} from "../../common/services/session-storage.service";
 import {RestHelper} from "../../common/rest/rest-helper";
+import {MainNavComponent} from '../../common/ui/main-nav/main-nav.component';
 
 @Component({
   selector: 'permissions-main',
@@ -24,6 +25,7 @@ import {RestHelper} from "../../common/rest/rest-helper";
   ]
 })
 export class PermissionsMainComponent {
+  @ViewChild('mainNav') mainNavRef: MainNavComponent;
   public tab : string;
   public searchQuery: string;
   private selectedOrg: Group;
@@ -40,24 +42,26 @@ export class PermissionsMainComponent {
               private connector: RestConnectorService) {
     Translation.initialize(translate,this.config,this.storage,this.route).subscribe(()=>{
       UIHelper.setTitle('PERMISSIONS.TITLE',this.title,this.translate,this.config);
-    });
-    this.connector.isLoggedIn().subscribe((data: LoginResult) => {
-      if(data.isValidLogin && !data.isGuest && !data.currentScope){
-        this.organization.getOrganizations().subscribe((data: OrganizationOrganizations) => {
-          this.isAdmin = data.canCreate;
+        this.connector.isLoggedIn().subscribe((data: LoginResult) => {
+            if(data.isValidLogin && !data.isGuest && !data.currentScope){
+                this.organization.getOrganizations().subscribe((data: OrganizationOrganizations) => {
+                    this.isAdmin = data.canCreate;
+                });
+                this.tab='ORG';
+            }
+            else{
+                this.goToLogin();
+            }
+            this.mainNavRef.finishPreloading();
+        }, (error: any) => this.goToLogin());
+        this.config.get("hideMainMenu").subscribe((data:string[])=>{
+            if(data && data.indexOf("permissions")!=-1){
+                //this.router.navigate([UIConstants.ROUTER_PREFIX+"workspace"]);
+                this.disabled=true;
+            }
         });
-        this.tab='ORG';
-      }
-      else{
-        this.goToLogin();
-      }
-    }, (error: any) => this.goToLogin());
-    this.config.get("hideMainMenu").subscribe((data:string[])=>{
-      if(data && data.indexOf("permissions")!=-1){
-        //this.router.navigate([UIConstants.ROUTER_PREFIX+"workspace"]);
-        this.disabled=true;
-      }
     });
+
   }
 
   public doSearch(event: string) {

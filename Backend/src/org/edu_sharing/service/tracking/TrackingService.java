@@ -7,6 +7,12 @@ import java.util.Date;
 import java.util.List;
 
 public interface TrackingService {
+    enum GroupingType {
+        None,
+        Daily,
+        Monthly,
+        Yearly
+    }
     enum EventType {
         DOWNLOAD_MATERIAL,
         VIEW_MATERIAL,
@@ -18,5 +24,5 @@ public interface TrackingService {
     }
     boolean trackActivityOnUser(String authorityName,EventType type);
     boolean trackActivityOnNode(NodeRef nodeRef,String nodeVersion,EventType type);
-    List<StatisticEntryNode> getNodeStatisics(Date dateFrom, Date dateTo);
+    List<StatisticEntryNode> getNodeStatisics(GroupingType grouping,Date dateFrom, Date dateTo);
 }

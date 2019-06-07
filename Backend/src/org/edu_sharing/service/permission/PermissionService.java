@@ -44,6 +44,8 @@ public interface PermissionService {
 			String mailText, Boolean sendMail, Boolean sendCopy, Boolean createHandle) throws Throwable;
 
 
+	public void createNotifyObject(final String nodeId, final String user, final String action);
+	
 	List<Notify> getNotifyList(String nodeId) throws Throwable;
 		
 	
@@ -71,9 +73,6 @@ public interface PermissionService {
 
 	public Result<List<Group>> findGroups(String searchWord, boolean globalContext, int from, int nrOfResults);
 	
-	
-	public void createNotifyObject(final String nodeId, final String user, final String event, final String action);
-
 	public boolean hasPermission(String storeProtocol, String storeId, String nodeId, String permission);
 
 	public boolean hasPermission(String storeProtocol, String storeId, String nodeId, String authority, String permission);
@@ -87,4 +86,7 @@ public interface PermissionService {
 	public List<String> getPermissionsForAuthority(String nodeId,String authorityId) throws Exception;
 
 	void setPermission(String nodeId, String authority, String permission);
+
+
+	List<String> getExplicitPermissionsForAuthority(String nodeId, String authorityId) throws Exception;
 }

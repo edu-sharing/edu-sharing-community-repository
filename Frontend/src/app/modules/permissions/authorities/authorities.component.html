@@ -33,12 +33,15 @@
           [options]="optionsActionbar"
   ></actionbar>
 </div>
-
+<toolpermission-manager *ngIf="toolpermissionAuthority"
+                        [authority]="toolpermissionAuthority"
+                        (onClose)="toolpermissionAuthority=null"
+></toolpermission-manager>
 
 <div *ngIf="edit" [@fade]="edit" class="dialog darken"></div>
   <div *ngIf="edit" [@cardAnimation]="edit" class="card center-card card-action">
     <div class="card-content">
-      <div class="card-cancel" (click)="cancelEdit()"><i class="material-icons">close</i></div>
+      <div class="card-cancel" (click)="cancelEdit()" tabindex="0" (keyup.enter)="cancelEdit()"><i icon iconId="close" aria="true"></i></div>
       <div class="card-title">{{'PERMISSIONS.'+(editId==null ? 'CREATE' : 'EDIT') + '_' +_mode | translate }}</div>
         <div class="card-scroll">
           <form (submit)="saveEdits()">
@@ -100,14 +103,14 @@
     </div>
 
     <div class="card-action">
-      <a class="waves-effect waves-light btn" [class.disabled]="disabled" (click)="saveEdits()">{{'SAVE' | translate }}</a>
-      <a class="btn-flat" (click)="cancelEdit()">{{'CANCEL' | translate }}</a>
+      <a class="waves-effect waves-light btn" tabindex="0" [class.disabled]="disabled" (click)="saveEdits()" (keyup.enter)="saveEdits()">{{'SAVE' | translate }}</a>
+      <a class="btn-flat" tabindex="0" (click)="cancelEdit()" (keyup.enter)="cancelEdit()">{{'CANCEL' | translate }}</a>
     </div>
   </div>
 <div *ngIf="editGroups || editMembers || addMembers" class="dialog darken">
   <div class="card center-card card-action card-high card-xwide">
     <div class="card-content">
-      <div class="card-cancel" (click)="cancelEditMembers()"><i class="material-icons">close</i></div>
+      <div class="card-cancel" (click)="cancelEditMembers()" tabindex="0" (keyup.enter)="cancelEditMembers()"><i icon iconId="close" aria="true"></i></div>
       <div class="card-title" *ngIf="addMembers">{{'PERMISSIONS.ADD_MEMBER_TO_GROUP' | translate:{group:addMembers.profile.displayName} }}</div>
       <div class="card-title" *ngIf="editMembers">{{(editMembers=='ALL' ? 'PERMISSIONS.EDIT_ORG_MEMBERS' : 'PERMISSIONS.EDIT_MEMBERS') | translate:{name: editMembers.profile.displayName} }}</div>
       <div class="card-title" *ngIf="editGroups">{{'PERMISSIONS.EDIT_MEMBER_GROUPS' | translate}}</div>
@@ -129,7 +132,7 @@
           [hasIcon]="true"
           [selectedNodes]="selectedMembers"
           [hasHeading]="true"
-          [selectOnClick]="addMembers ? true : false"
+          [selectOnClick]="true"
           [isClickable]="true"
           (onSelectionChanged)="updateSelectedMembers($event)"
        ></listTable>
@@ -156,8 +159,8 @@
     ></permissions-authorities>
   </div>
   <div class="btns">
-      <a class="waves-effect waves-light btn" [class.disabled]="addToSelection==null" (click)="addToSelect()">{{'PERMISSIONS.ADD_TO' | translate }}</a>
-      <a class="btn-flat" (click)="cancelAddTo()">{{'CANCEL' | translate }}</a>
+      <a class="waves-effect waves-light btn" [class.disabled]="addToSelection==null" tabindex="0" (click)="addToSelect()" (keyup.enter)="addToSelect()">{{'PERMISSIONS.ADD_TO' | translate }}</a>
+      <a class="btn-flat" tabindex="0" (click)="cancelAddTo()" (keyup.enter)="cancelAddTo()">{{'CANCEL' | translate }}</a>
   </div>
 </div>
 <div *ngIf="embedded" class="searchEmbedded">

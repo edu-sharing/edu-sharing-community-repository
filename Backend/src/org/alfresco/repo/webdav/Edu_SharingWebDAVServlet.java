@@ -26,6 +26,7 @@ import java.util.regex.Pattern;
 
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
+import javax.servlet.UnavailableException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -54,6 +55,8 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
 import org.springframework.context.ApplicationContext;
+import org.springframework.web.context.WebApplicationContext;
+import org.springframework.web.context.support.WebApplicationContextUtils;
 
 /**
  * Servlet that accepts WebDAV requests for the hub. The request is served by the hub's content
@@ -96,9 +99,11 @@ public class Edu_SharingWebDAVServlet extends HttpServlet
     
     private static NodeRef defaultRootNode; // for default domain
     
+    
     // WebDAV helper class
     private WebDAVHelper m_davHelper;
     private WebDAVActivityPoster activityPoster;
+    
     
     /**
      * edu-sharing customization
@@ -260,14 +265,13 @@ public class Edu_SharingWebDAVServlet extends HttpServlet
         }
         
         /**
-         * edu-sharing custom no init params WebApplicationContext
+         * edu-sharing custom no init params WebApplicationContext stuff
          */
         
          /*
         
         // Get global configuration properties
-      	/*
-      	WebApplicationContext wc = WebApplicationContextUtils.getRequiredWebApplicationContext(getServletContext());
+      /**  WebApplicationContext wc = WebApplicationContextUtils.getRequiredWebApplicationContext(getServletContext());
         WebDAVInitParameters initParams = (WebDAVInitParameters) wc.getBean(BEAN_INIT_PARAMS);
         
         // Render this servlet permanently unavailable if its enablement property is not set
@@ -308,9 +312,17 @@ public class Edu_SharingWebDAVServlet extends HttpServlet
         namespaceService = (NamespaceService) context.getBean("NamespaceService");
         ActivityPoster poster = (ActivityPoster) context.getBean("activitiesPoster");
         singletonCache = (SimpleCache<String, NodeRef>)context.getBean("immutableSingletonCache");
+        
+        
        
+        
+        
+        
         // Collaborator used by WebDAV methods to create activity posts.
         activityPoster = new ActivityPosterImpl("WebDAV", poster);
+        
+        
+        
         
         // Create the WebDAV helper
         
@@ -364,7 +376,10 @@ public class Edu_SharingWebDAVServlet extends HttpServlet
         m_davMethods.put(WebDAV.METHOD_MOVE, MoveMethod.class);
         m_davMethods.put(WebDAV.METHOD_OPTIONS, OptionsMethod.class);
         m_davMethods.put(WebDAV.METHOD_POST, PostMethod.class);
-        m_davMethods.put(WebDAV.METHOD_PUT, Edu_SharingPutMethod.class);
+        
+        //it seems that Edu_SharingPutMethod fix is no longer needed
+       // m_davMethods.put(WebDAV.METHOD_PUT, Edu_SharingPutMethod.class);
+        m_davMethods.put(WebDAV.METHOD_PUT, PutMethod.class);
         m_davMethods.put(WebDAV.METHOD_UNLOCK, Edu_SharingUnlockMethod.class);
     }
 
@@ -437,6 +452,7 @@ public class Edu_SharingWebDAVServlet extends HttpServlet
         finally
         {
             // Clear the current system user
+
             authComponent.clearCurrentSecurityContext();
         }
     }

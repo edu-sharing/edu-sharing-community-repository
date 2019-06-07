@@ -189,9 +189,58 @@ a.edusharing_rendering_content{
   height: calc(100% - #{$mainnavHeight} - 130px) !important;
 }
 
+:host /deep/ {
+  .mdsWidget .comment .avatarCircle{
+    cursor:default!important;;
+  }
+  .node-comments{
+    margin:15px;
+    color: $primary;
+    display: flex;
+    align-items:center;
+    min-width: 160px;
+    justify-content: flex-end;
+    .item {
+      display: flex;
+      @include clickable();
+      &:focus{
+        @include setGlobalFocus();
+      }
+      >i{
+        padding-left: 5px;
+      }
+      >div{
+        margin:0 10px;
+        span{
+          text-transform: uppercase;
+        }
+      }
+    }
+
+  }
+}
 div.download {
   margin-top: -8px;
 }
+
+
+.similarNodes{
+  display: flex;
+  flex-direction:column;
+  padding:20px;
+  width:100%;
+  background-color:#FFF;
+  listTable{
+    /*margin:auto;*/
+  }
+  .caption{
+    padding-bottom: 10px;
+    color:$textLight;
+    font-weight: bold;
+    display:block;
+  }
+}
+
 @media (pointer: coarse) {
   #sequence {
     overflow-x: auto;
@@ -204,5 +253,15 @@ div.download {
 @media screen and (max-width: $mobileWidth) {
   div.download i {
     font-size: 120%;
+  }
+  .render-back{
+    display: none;
+  }
+  :host /deep/ .node-comments{
+    min-width: unset;
+    padding-right: 10px;
+    > div > div > span{
+      display:none;
+    }
   }
 }

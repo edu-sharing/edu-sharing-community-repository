@@ -4,6 +4,13 @@ import {ListItem} from "../ui/list-item";
  * All Object types returned by the rest service
  */
 
+export enum STREAM_STATUS {
+  OPEN = "OPEN",
+  READ = "READ",
+  PROGRESS = "PROGRESS",
+  DONE = "DONE"
+}
+
 export interface RestoreResult {
   archiveNodeId: string;
   nodeId: string;
@@ -16,7 +23,15 @@ export interface RestoreResult {
 export class ArchiveRestore {
   public results: RestoreResult[];
 }
-
+export interface Comments {
+  comments: Comment[];
+}
+export interface Comment {
+  ref: Ref;
+  creator: UserSimple;
+  created: number;
+  comment: string;
+}
 export interface Parent {
   repo: string;
   id: string;
@@ -94,6 +109,7 @@ export interface Service {
 export interface Preview {
   data: Blob; // image, may null, see @NodeHelper.appendImageData
   url: string;
+  isGenerated: boolean;
   isIcon: boolean;
   width: number;
   height: number;
@@ -122,6 +138,7 @@ export class Node {
   iconURL: string;
   licenseURL: string;
   size: number;
+  commentCount: number;
   preview: Preview;
   owner: Person;
   metadataset: string;
@@ -229,6 +246,15 @@ export interface UserProfile {
   firstName: string;
   lastName: string;
   email: string;
+  avatar: string;
+  about: string;
+  skills: string[];
+  types: string[];
+}
+export interface UserStats {
+  nodeCount: number;
+  nodeCountCC: number;
+  collectionCount: number;
 }
 export interface UserCredentials {
   oldPassword: string;
@@ -245,6 +271,7 @@ export interface User {
   authorityType: string;
   userName: string;
   profile: UserProfile;
+  stats: UserStats;
   homeFolder: NodeRef;
   sharedFolders: NodeRef[];
   quota: UserQuota;
@@ -620,6 +647,7 @@ export interface Person {
   firstName: string;
   lastName: string;
   mailbox: string;
+  avatar: string;
 }
 
 export interface Access {
@@ -689,7 +717,11 @@ export class Permission {
   group: GroupProfile;
   editable:boolean;
 }
-
+export interface ToolPermission{
+    effective:string;
+    effectiveSource:Group[];
+    explicit:string;
+}
 export class LocalPermissions {
   inherited: boolean;
   permissions: Permission[];
@@ -708,7 +740,17 @@ export interface  OAuthResult{
   // for local use
   expires_ts?:number;
 }
-
+export interface RegisterExists{
+    exists:boolean;
+}
+export interface RegisterInformation{
+    firstName: string;
+    lastName: string;
+    email: string;
+    password: string;
+    organization: string;
+    allowNotifications: boolean;
+}
 export interface Permissions {
   localPermissions: LocalPermissionsResult;
   inheritedPermissions: Permission[];
@@ -950,32 +992,13 @@ export class NodeRef {
     this.id=id;
   }
 }
-
-export class CollectionContent {
-
-  collection:Collection; // meta data of collection
-  collections:Array<Collection>; // array of sub collections
-  references:Array<CollectionReference>; // array of content nodes references
-
-  constructor() {
-    this.collection = new Collection();
-    this.collection.ref = new NodeRef();
-    this.collections = new Array<Collection>();
-    this.references = new Array<CollectionReference>();
-  }
-
-  getCollectionID() :string {
-    if (this.collection==null) return null;
-    if (this.collection.ref==null) return null;
-    return this.collection.ref.id;
-  }
-
-  setCollectionID(id:string):void {
-    if (this.collection==null) this.collection = new Collection();
-    if (this.collection.ref==null) this.collection.ref = new NodeRef();
-    this.collection.ref.id = id;
-  }
-
+export interface CollectionReferences {
+    references: Array<CollectionReference>;
+    pagination: Pagination;
+}
+export interface CollectionSubcollections {
+    collections:Array<Collection>;
+    pagination: Pagination;
 }
 
 export class Permissions {

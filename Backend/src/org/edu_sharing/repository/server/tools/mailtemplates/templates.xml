@@ -12,13 +12,18 @@
 			body{
 				padding:20px;
 				background:#f6f6f6;
+				font-size: 12px;
+				min-width: 300px;
 			}
 			.content{
-				max-width:600px;
+				max-width:500px;
 				margin:auto;
 				background:#fff;
 				box-shadow:0 2px 6px rgba(0,0,0,.5);
 				padding:20px;
+			}
+			.content img{
+				max-width: 100%;
 			}
 			.footer{
 				max-width:500px;
@@ -32,8 +37,8 @@
 				text-align:center;
 			}
 			.logo img{
-				min-width:100px;
 				width:30%;
+				min-width:100px;
 				max-width:250px;
 				height:auto;
 				padding-bottom:20px;
@@ -48,6 +53,9 @@
 				font-size:14px;
 				font-weight:bold;
 				padding-bottom:5px;
+			}
+			p{
+				line-height: 20px;
 			}
 			.rights{
 				padding:10px 5px;
@@ -66,6 +74,15 @@
 				text-transform:uppercase;
 				padding:10px 25px;
 				box-shadow:0 2px 5px rgba(0,0,0,.5);
+				display: inline-block;
+				width: 60%;
+			}
+			.input-field{
+				display:inline-block;
+				background:#fff;
+				border-radius:3px;
+				padding:5px 10px;
+				border:1px solid #ccc;
 			}
 			a{
 				color:#48708e;
@@ -73,6 +90,15 @@
 			}
 			.center{
 				text-align:center;
+			}
+			@media only screen and (max-width: 400px)  {
+				body{
+					padding: 20px 0;
+				}
+				content{
+					width: 100%;
+				}
+
 			}
 		]]>
 		</style>
@@ -93,6 +119,80 @@
 		]]>
 		</message>
 	</template>
+	<template name="userRegister">
+		<subject>Account confirmation</subject>
+		<message><![CDATA[
+			<div class="center">
+				<h1>Hello {{firstName}} {{lastName}},</h1>
+				<p>Thank you for your registration!</p>
+				</p>
+					Copy the link below in the registration form to complete the registration:
+				<p>
+				</p>
+				<div class="center"><div class="input-field">{{key}}</div></div>
+				<br><br>
+				<p>Or click on the link below:</p>
+				<a class="btn" href="{{link}}">Finish registration</a>
+			</div>
+		]]>
+		</message>
+	</template>
+	<template name="userRecoverPassword">
+		<subject>Recover password</subject>
+		<message><![CDATA[
+			<div class="center">
+				<img src="{{image:/assets/images/register/register-mail.png}}">
+				<h1>Hello {{firstName}} {{lastName}},</h1>
+				<p>Did you forgot your password?
+				</p>
+				</p>
+					Click on the button below to recover your password
+				</p>
+				<a class="btn" href="{{link}}">Reset password</a>
+				<p>You can also copy the activation code below in the form:</p>
+				<div class="center"><div class="input-field">{{key}}</div></div>
+				<br>
+
+			</div>
+		]]>
+		</message>
+	</template>
+	<template name="userRegisterInformation">
+		<subject>New user registered</subject>
+		<message><![CDATA[
+			<div class="center">
+				<img src="{{image:/assets/images/register/new_user.png}}">
+				<h1>A new user has registered!</h1>
+				<p>
+				Name: {{firstName}} {{lastName}}
+				<br>E-Mail: <a href="mailto:{{email}}">{{email}}</a>
+				</p>
+				{{if organization}}
+					<p>Organization: {{organization}}</p>
+				{{endif}}
+				<a class="btn" href="{{link}}">Go to user management</a>
+			</div>
+		]]>
+		</message>
+	</template>
+	<template name="passwordRequest">
+		<subject>Password reset</subject>
+		<message><![CDATA[
+			<div class="center">
+				<h1>Hello {{firstName}} {{lastName}},</h1>
+				<p>If you forgot your password for logging into<a href="{{url}}"> {{url}} </a>.</p>
+				<p>Click on this link to assign a new password.</p>
+				<a class="btn" href="{{link}}">new password</a>
+				<p>
+					In case this email is not displayed correctly, please click » <a href="{{link}}">here</a> 
+				</p>
+				<div class="input-field"><a href="{{link}}">{{link}}</a></div>
+				<br><br><br>
+				<p>Best regards, you {{LaSiDig Team}}</p>
+			</div>
+		]]>
+		</message>
+	</template>
 	<template name="nodeIssue">
 		<subject>{{reporterEmail}} reported a problem</subject>
 		<message><![CDATA[
@@ -110,7 +210,7 @@
 	</template>
 	<template name="footer">
 		<message><![CDATA[
-			<a href="http://edu-sharing.net" style="float:left;">www.edu-sharing.net</a>
+			<a href="http://edu-sharing.com" style="float:left;">www.edu-sharing.com</a>
 			<a href="https://twitter.com/edusharing" style="float:right;">@edusharing</a>
 		]]>
 		</message>

@@ -7,6 +7,11 @@
   color:$textLight;
   font-size: 110%;
 }
+.close{
+  &:focus{
+    @include focusShadow();
+  }
+}
 
 :host /deep/{
   .cardSmallList{

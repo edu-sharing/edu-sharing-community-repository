@@ -199,6 +199,8 @@
       "VERSION_COMMENT":"Versionskommentar hinzufügen",
       "REPLACE_MATERIAL":"Material ersetzen",
       "REPLACE_PREVIEW":"Vorschaubild ersetzen",
+      "DELETE_PREVIEW":"Vorschaubild löschen",
+      "PREVIEW_DELETED":"Vorschaubild wird gelöscht",
       "UPDATED":"Informationen wurden aktualisiert"
     },
     "REVERTED_VERSION":"Version wurde erfolgreich wiederhergestellt",
@@ -215,6 +217,7 @@
       "PASTE":"Einfügen",
       "METADATA":"Details",
       "COLLECTION":"In Sammlung",
+      "STREAM":"Auf Stream",
       "LICENSE":"Lizenz (& Veröffentlichung)",
       "CONTRIBUTOR":"Beteiligte",
       "SHARE_LINK":"Download-Link freigeben",

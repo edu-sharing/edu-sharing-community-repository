@@ -39,12 +39,13 @@ export class WorkspaceShareComponent implements AfterViewInit{
   public ALL_PERMISSIONS=["All","Read","ReadPreview","ReadAll","Write","Delete",
     "DeleteChildren","DeleteNode","AddChildren","Consumer","ConsumerMetadata",
     "Editor","Contributor","Collaborator","Coordinator",
-    "Publisher","ReadPermissions","ChangePermissions","CCPublish"];
+    "Publisher","ReadPermissions","ChangePermissions","CCPublish","Deny"];
   public PERMISSIONS_FORCES:any= [
     ["Read",["ConsumerMetadata"]],
     ["Read",["Consumer"]],
     ["ReadPreview",["Consumer"]],
     ["ReadAll",["Consumer"]],
+    ["Comment",["Consumer"]],
     ["Write",["Editor"]],
     ["DeleteChildren",["Delete"]],
     ["DeleteNode",["Delete"]],

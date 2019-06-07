@@ -1,6 +1,6 @@
 import {
-    Component, OnInit, OnDestroy, Input, EventEmitter, Output, ViewChild, ElementRef,
-    HostListener, ChangeDetectorRef, ApplicationRef, NgZone
+  Component, OnInit, OnDestroy, Input, EventEmitter, Output, ViewChild, ElementRef,
+  HostListener, ChangeDetectorRef, ApplicationRef, NgZone
 } from '@angular/core';
 import {RestConnectorService} from "../../rest/services/rest-connector.service";
 import {RestConstants} from "../../rest/rest-constants";
@@ -32,6 +32,10 @@ import {EventListener} from "../../../common/services/frame-events.service";
 import {ActionbarHelperService} from "../../services/actionbar-helper";
 import {SuggestItem} from "../autocomplete/autocomplete.component";
 import {MainNavComponent} from "../main-nav/main-nav.component";
+import {RestSearchService} from '../../rest/services/rest-search.service';
+import {ListItem} from '../list-item';
+import {RestMdsService} from '../../rest/services/rest-mds.service';
+import {MdsHelper} from '../../rest/mds-helper';
 import {HttpClient} from "@angular/common/http";
 import {RestIamService} from "../../rest/services/rest-iam.service";
 
@@ -77,6 +81,7 @@ export class NodeRenderComponent implements EventListener{
   public nodeShare: Node;
   public nodeShareLink: Node;
   public nodeWorkflow: Node;
+  public addNodesStream: Node[];
   public nodeDelete: Node[];
   public nodeVariant: Node;
   public addToCollection: Node[];
@@ -87,14 +92,19 @@ export class NodeRenderComponent implements EventListener{
   private repository: string;
   private downloadButton: OptionItem;
   private downloadUrl: string;
+  nodeComments: Node;
   sequence: NodeList;
   sequenceParent: Node;
   canScrollLeft: boolean = false;
   canScrollRight: boolean = false;
+  private queryParams: Params;
+  public similarNodes: Node[];
 
   @ViewChild('sequencediv') sequencediv : ElementRef;
-  @ViewChild('mainnav') mainnav : MainNavComponent;
+  @ViewChild('mainNav') mainNavRef : MainNavComponent;
+  @ViewChild('commentsRef') commentsRef : ElementRef;
   isChildobject = false;
+
 
     public static close(location:Location) {
         location.back();
@@ -116,7 +126,7 @@ export class NodeRenderComponent implements EventListener{
     if(this.nodeMetadata!=null) {
       return;
     }
-    if(event.code=="Escape"){
+    if(event.code=="Escape" && this.nodeComments==null){
       event.preventDefault();
       event.stopPropagation();
       this.close();
@@ -136,7 +146,7 @@ export class NodeRenderComponent implements EventListener{
     }
 
   }
-    private _node : Node;
+    _node : Node;
     private _nodeId : string;
     @Input() set node(node: Node|string){
       let id=(node as Node).ref ? (node as Node).ref.id : (node as string);
@@ -145,6 +155,7 @@ export class NodeRenderComponent implements EventListener{
       this.loadRenderData();
     }
     @Output() onClose=new EventEmitter();
+    similarNodeColumns: ListItem[]=[];
     private close(){
       if(this.isRoute) {
         if(this.closeOnBack){
@@ -160,7 +171,7 @@ export class NodeRenderComponent implements EventListener{
             }
             NodeRenderComponent.close(this.location);
             // use a timeout to let the browser try to go back in history first
-            setTimeout(()=>this.mainnav.openSidenav(),250);
+            setTimeout(()=>this.mainNavRef.openSidenav(),250);
           }
         }
       }
@@ -199,7 +210,9 @@ export class NodeRenderComponent implements EventListener{
       private http : HttpClient,
       private connectors : RestConnectorsService,
       private iam : RestIamService,
+      private mdsApi : RestMdsService,
       private nodeApi : RestNodeService,
+      private searchApi : RestSearchService,
       private searchStorage : SearchService,
       private toolService: RestToolService,
       private frame : FrameEventsService,
@@ -210,11 +223,17 @@ export class NodeRenderComponent implements EventListener{
       private config : ConfigurationService,
       private storage : SessionStorageService,
       private route : ActivatedRoute,
+      private _ngZone: NgZone,
       private router : Router,
       private temporaryStorageService: TemporaryStorageService) {
+      (window as any)['nodeRenderComponentRef'] = {component: this, zone: _ngZone};
       (window as any).ngRender = {setDownloadUrl:(url:string)=>{this.setDownloadUrl(url)}};
       this.frame.addListener(this);
+
         Translation.initialize(translate,config,storage,route).subscribe(()=>{
+            this.mdsApi.getSet().subscribe((set)=>{
+                this.similarNodeColumns = MdsHelper.getColumns(set,'search');
+            });
         this.banner = ConfigurationHelper.getBanner(this.config);
         this.connector.setRoute(this.route);
         this.route.queryParams.subscribe((params:Params)=>{
@@ -222,6 +241,7 @@ export class NodeRenderComponent implements EventListener{
           this.editor=params['editor'];
           this.fromLogin=params['fromLogin']=='true';
           this.repository=params['repository'] ? params['repository'] : RestConstants.HOME_REPOSITORY;
+          this.queryParams=params;
           let childobject = params['childobject_id'] ? params['childobject_id'] : null;
           this.isChildobject=childobject!=null;
           this.route.params.subscribe((params: Params) => {
@@ -268,6 +288,8 @@ export class NodeRenderComponent implements EventListener{
     this.nodeMetadata=null;
   }
   public refresh(){
+    if(this.isLoading)
+      return;
     this.options=[];
     this.isLoading=true;
     this.node=this._nodeId;
@@ -317,6 +339,7 @@ export class NodeRenderComponent implements EventListener{
       showDownloadButton:this.config.instant("rendering.showDownloadButton",false),
       showDownloadAdvice:!this.isOpenable
     };
+    this._node=null;
     this.isBuildingPage=true;
     this.nodeApi.getNodeRenderSnippet(this._nodeId,this.version && !this.isChildobject ? this.version : "-1",parameters,this.repository)
         .subscribe((data:any)=>{
@@ -326,18 +349,23 @@ export class NodeRenderComponent implements EventListener{
             }
             else {
                 this._node=data.node;
+                if(this.queryParams['comments'])
+                    this.showComments();
                 this.getSequence(()=>{
                     jQuery('#nodeRenderContent').html(data.detailsSnippet);
                     this.postprocessHtml();
+                    this.addComments();
                     this.loadNode();
                     this.isLoading = false;
                 });
             }
             this.isLoading = false;
+            this.mainNavRef.finishPreloading();
         },(error:any)=>{
             console.log(error);
             this.toast.error(error);
             this.isLoading = false;
+            this.mainNavRef.finishPreloading();
         })
   }
     onDelete(event:any){
@@ -346,6 +374,24 @@ export class NodeRenderComponent implements EventListener{
             return;
         this.close();
     }
+  private addComments(){
+      jQuery('.edusharing_rendering_metadata_header').append(`
+      <div class="node-comments">
+          <div class="item" tabindex="0" onclick="window.nodeRenderComponentRef.component.showComments()" onkeypress="(event.keyCode==13)?window.nodeRenderComponentRef.component.showComments():0">
+            <i class="material-icons">message</i><div>`+this._node.commentCount+` <span>`+this.translate.instant("COMMENTS_"+(this._node.commentCount==1 ? 'SINGLE' : 'MULTIPLE'))+`</span></div>
+          </div>
+      </div>
+    `);
+      let commentInterval=setInterval(()=> {
+          let html=this.getCommentWidgetHtml();
+          if(html) {
+              try {
+                  jQuery('#edusharing_rendering_metadata').html(jQuery('#edusharing_rendering_metadata').html().replace('<comments>', html));
+                  clearInterval(commentInterval);
+              }catch(e){}
+          }
+      },100);
+  }
   private postprocessHtml() {
     if(!this.config.instant("rendering.showPreview",true)){
       jQuery('.edusharing_rendering_content_wrapper').hide();
@@ -367,6 +413,9 @@ export class NodeRenderComponent implements EventListener{
   }
   private openLink(href:string){
 
+  }
+  private showComments(){
+      this.nodeComments=this._node;
   }
   private downloadSequence() {
       let nodes = [this.sequenceParent].concat(this.sequence.nodes);
@@ -449,10 +498,16 @@ export class NodeRenderComponent implements EventListener{
             share.isSeperate = true;
             options.push(share);
         }
-
+        let shareLink = this.actionbar.createOptionIfPossible('SHARE_LINK',[this._node],(node: Node) => this.nodeShareLink=this._node);
+        if (shareLink && !this.isSafe)
+            options.push(shareLink);
         let workflow = this.actionbar.createOptionIfPossible('WORKFLOW', [this._node], (node: Node) => this.nodeWorkflow = this._node);
         if (workflow) {
             options.push(workflow);
+        }
+        let stream = this.actionbar.createOptionIfPossible('ADD_TO_STREAM',[this._node],(node:Node)=>this.addNodesStream=[this._node]);
+        if(stream){
+            options.push(stream);
         }
         if (this.config.instant("nodeReport", false)) {
             let nodeReport = new OptionItem('NODE_REPORT.OPTION', 'flag', () => this.nodeReport = this._node);
@@ -565,5 +620,20 @@ export class NodeRenderComponent implements EventListener{
     }
     private getNodeName(node:Node) {
       return RestHelper.getName(node);
+    }
+
+    private getCommentWidgetHtml() {
+        let container = this.commentsRef.nativeElement.getElementsByClassName("comments");
+        if (container.length) {
+
+            return '<div class="mdsWidget">' + container[0].outerHTML + '</div>';
+        }
+        return null;
+
+    }
+
+    public switchNode(node:Node){
+        UIHelper.scrollSmooth();
+        this.node=node;
     }
 }

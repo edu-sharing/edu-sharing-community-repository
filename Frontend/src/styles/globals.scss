@@ -44,6 +44,9 @@ a{
   margin: 2px;
   display: inline-flex;
   align-items: center;
+  &:focus{
+    @include setGlobalInsetFocus();
+  }
   span{
     display:table-cell;
     vertical-align: middle;
@@ -56,6 +59,9 @@ a{
     left: 7px;
     display:table-cell;
     vertical-align: middle;
+    &:focus{
+      @include focusShadow();
+    }
   }
   .badgeIconLeft{
     left:0;
@@ -127,6 +133,27 @@ a{
     padding-right: 20px;
   }
 }
+.profile-gradient{
+  background: linear-gradient(to bottom, transparent 0,rgba(0,0,0,.5) 100%);
+  width: 100%;
+  height: 100%;
+  left: 0;
+  top: 0;
+  position: absolute;
+}
+.blurred-image{
+  $blurStrength:25px;
+  position: absolute;
+  left:-$blurStrength;
+  top:-$blurStrength;
+  width:calc(100% + #{$blurStrength*2});
+  height:calc(100% + #{$blurStrength*2});
+  z-index: 1;
+  overflow: hidden;
+  filter: blur($blurStrength);
+  object-fit: cover;
+  opacity: 0.7;
+}
 .input-hint-bottom{
   margin: 0 0.75em;
   margin-top:-15px;
@@ -139,7 +166,34 @@ a:focus,
 .clickable:focus {
   @include setGlobalInsetFocus();
 }
+.focus-underline{
+  cursor: pointer;
+  &:focus{
+    box-shadow: none !important;
+    @include removeDefaultFocus();
+    padding-bottom: 2px;
+    border-bottom: 1px solid $focusColor;
+  }
+}
 
+.btn-circle {
+  padding: 10px;
+  height: 44px;
+  color: $primary;
+  background-color: #fff;
+  border-radius: 50%;
+  @include clickable();
+  @include materialShadowBottom();
+  margin-left: 8px;
+  float: left;
+  &:focus{
+    @include setGlobalInsetFocus();
+  }
+  i{
+    background-color: rgba(255,255,255,0.75);
+    border-radius:5pt;
+  }
+}
 @media screen and (max-width: $mobileWidth) {
   .hidemobile {
     display: none;

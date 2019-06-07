@@ -1,7 +1,7 @@
 <div class="dialog darken" [@fade]="this"></div>
   <div class="card center-card card-high card-action" [@cardAnimation]="this">
     <div class="card-content">
-      <div class="card-cancel" (click)="cancel()"><i class="material-icons">close</i></div>
+      <div tabindex="0" class="card-cancel" (click)="cancel()" (keyup.enter)="cancel()"><i icon iconId="close" aria="true"></i></div>
       <div class="card-title">{{'WORKSPACE.CONTRIBUTOR.TITLE' | translate:{name:node ? node.name : ''} }}</div>
       <spinner *ngIf="loading"></spinner>
       <div class="card-scroll" *ngIf="!loading">
@@ -28,14 +28,14 @@
     </div>
     </div>
     <div class="card-action">
-      <a class="waves-effect waves-light btn" [class.disabled]="loading" (click)="saveContributor()">{{'SAVE' | translate }}</a>
-      <a class="btn-flat" (click)="cancel()">{{'CANCEL' | translate }}</a>
+      <a class="waves-effect waves-light btn" [class.disabled]="loading" (click)="saveContributor()" tabindex="0" (keyup.enter)="saveContributor()">{{'SAVE' | translate }}</a>
+      <a class="btn-flat" tabindex="0" (click)="cancel()" (keyup.enter)="cancel()">{{'CANCEL' | translate }}</a>
     </div>
     </div>
 
   <div class="card center-card card-high card-action" *ngIf="edit">
     <div class="card-content">
-      <div class="card-cancel" (click)="edit=null"><i class="material-icons">close</i></div>
+      <div class="card-cancel" (click)="edit=null" tabindex="0" (keyup.enter)="edit=null"><i icon iconId="close" aria="true"></i></div>
       <div class="card-title">{{'WORKSPACE.CONTRIBUTOR.'+(editOriginal ? 'EDIT' : 'ADD')+'_TITLE' | translate }}</div>
       <div class="card-scroll">
         <div class="row">
@@ -95,8 +95,8 @@
         </div>
       </div>
       <a class="more clickable" (click)="more=!more">
-        <i class="material-icons" *ngIf="more">keyboard_arrow_down</i>
-        <i class="material-icons" *ngIf="!more">keyboard_arrow_right</i>
+        <i aria-hidden="true" class="material-icons" *ngIf="more">keyboard_arrow_down</i>
+        <i aria-hidden="true" class="material-icons" *ngIf="!more">keyboard_arrow_right</i>
         <span>{{'WORKSPACE.CONTRIBUTOR.MORE' | translate}}</span>
       </a>
       <div *ngIf="more" [@overlay]="more" class="moreOpen">
@@ -150,8 +150,8 @@
     </div>
   </div>
     <div class="card-action">
-      <a class="waves-effect waves-light btn" (click)="saveEdits()">{{'APPLY' | translate }}</a>
-      <a class="btn-flat" (click)="edit=null">{{'CANCEL' | translate }}</a>
+      <a class="waves-effect waves-light btn" (click)="saveEdits()" tabindex="0" (keyup.enter)="saveEdits()">{{'APPLY' | translate }}</a>
+      <a class="btn-flat" (click)="edit=null" tabindex="0" (keyup.enter)="edit=null">{{'CANCEL' | translate }}</a>
     </div>
   </div>
   <modal-dialog

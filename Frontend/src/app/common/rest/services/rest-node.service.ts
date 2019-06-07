@@ -538,6 +538,15 @@ export class RestNodeService extends AbstractRestService{
      .map((response: Response) => response.json());
      */
   }
+    public deleteNodePreview = (node : string,
+                                repository=RestConstants.HOME_REPOSITORY) : Observable<XMLHttpRequest> => {
+        let query=this.connector.createUrl("node/:version/nodes/:repository/:node/preview",repository,
+            [
+                [":node",node],
+            ]);
+        let options=this.connector.getRequestOptions();
+        return this.connector.delete(query,options);
+    }
   private createNodeUrl(data: any) {
     let prop=RestHelper.createNameProperty(data.name);
     prop[RestConstants.CCM_PROP_IO_WWWURL]=[data.url];

@@ -104,7 +104,6 @@ export class TutorialComponent implements OnInit {
             space.push((y-size)*window.innerWidth);
 
             let maxIndex=space.indexOf(Math.max(...space));
-            console.log(space);
             // we prefer a centered region if we are on a big screen
             if(space[1]*2>space[0] && y<window.innerHeight/3)
                 maxIndex=1;

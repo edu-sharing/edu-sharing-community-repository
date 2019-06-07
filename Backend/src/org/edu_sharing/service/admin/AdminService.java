@@ -16,6 +16,7 @@ import org.edu_sharing.repository.server.tools.ApplicationInfo;
 import org.edu_sharing.service.admin.model.GlobalGroup;
 import org.edu_sharing.repository.server.jobs.quartz.JobInfo;
 import org.edu_sharing.service.admin.model.ServerUpdateInfo;
+import org.edu_sharing.service.admin.model.ToolPermission;
 
 public interface AdminService {
 
@@ -36,11 +37,11 @@ public interface AdminService {
 	CacheInfo getCacheInfo(String name);
 	
 	public void removeCacheEntry(Integer index, String beanName);
-	
+
 	public CacheCluster getCacheCluster();
 
 	public List<CacheCluster> getCacheClusters();
-	
+
 
 	List<GlobalGroup> getGlobalGroups() throws Throwable;
 
@@ -86,6 +87,12 @@ public interface AdminService {
 
 	void startJob(String jobClass, HashMap<String, Object> params) throws Exception;
 
+	Map<String, ToolPermission> getToolpermissions(String authority) throws Throwable;
+
+    String addToolpermission(String name) throws Throwable;
+
+    void setToolpermissions(String authority,
+                            Map<String, ToolPermission.Status> toolpermissions) throws Throwable;
 
 	void refreshEduGroupCache(boolean keepExisting);
 

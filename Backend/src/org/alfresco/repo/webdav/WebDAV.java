@@ -1,20 +1,27 @@
 /*
- * Copyright (C) 2005-2011 Alfresco Software Limited.
- *
- * This file is part of Alfresco
- *
+ * #%L
+ * Alfresco Remote API
+ * %%
+ * Copyright (C) 2005 - 2016 Alfresco Software Limited
+ * %%
+ * This file is part of the Alfresco software. 
+ * If the software was purchased under a paid Alfresco license, the terms of 
+ * the paid license agreement will prevail.  Otherwise, the software is 
+ * provided under the following open source license terms:
+ * 
  * Alfresco is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- *
+ * 
  * Alfresco is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU Lesser General Public License for more details.
- *
+ * 
  * You should have received a copy of the GNU Lesser General Public License
  * along with Alfresco. If not, see <http://www.gnu.org/licenses/>.
+ * #L%
  */
 package org.alfresco.repo.webdav;
 
@@ -261,7 +268,7 @@ public class WebDAV
     /**
      * Formats the given date so that it conforms with the Last-Modified HTTP header
      * 
-     * @param date long
+     * @param ldate long
      * @return The formatted date string
      */
     public static String formatModifiedDate(long ldate)
@@ -283,7 +290,7 @@ public class WebDAV
     /**
      * Formats the given date so that it conforms with the WebDAV creation date/time format
      * 
-     * @param date long
+     * @param ldate long
      * @return The formatted date string
      */
     public static String formatCreationDate(long ldate)
@@ -308,7 +315,7 @@ public class WebDAV
     /**
      * Formats the given date for use in the HTTP header
      * 
-     * @param date long
+     * @param ldate long
      * @return String
      */
     public static String formatHeaderDate(long ldate)
@@ -322,7 +329,6 @@ public class WebDAV
     /**
      * Return the Alfresco property value for the specified WebDAV property
      * 
-     * @param props Map<QName, Serializable>
      * @param davPropName String
      * @return Object
      */
@@ -483,7 +489,7 @@ public class WebDAV
     /**
      * Returns string representation of the depth
      * 
-     * @param depth
+     * @param depth int
      * @return String
      */
     public static final String getDepthName(int depth)

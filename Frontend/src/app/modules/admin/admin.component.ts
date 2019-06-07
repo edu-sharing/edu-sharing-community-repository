@@ -31,6 +31,7 @@ import {RestSearchService} from '../../common/rest/services/rest-search.service'
 import {RestHelper} from '../../common/rest/rest-helper';
 import {Observable, Observer} from 'rxjs/index';
 import {RestNetworkService} from '../../common/rest/services/rest-network.service';
+import {MainNavComponent} from '../../common/ui/main-nav/main-nav.component';
 
 
 @Component({
@@ -44,7 +45,10 @@ import {RestNetworkService} from '../../common/rest/services/rest-network.servic
 export class AdminComponent {
   mailTemplates=[
       "invited",
-      "nodeIssue"
+      "nodeIssue",
+      "userRegister",
+      "passwordRequest",
+      "userRegisterInformation"
   ];
   public tab : string;
   public globalProgress=true;
@@ -82,6 +86,7 @@ export class AdminComponent {
   private parentCollectionType = 'root';
   public catalina : string;
   private oaiClasses: string[];
+  @ViewChild('mainNav') mainNavRef: MainNavComponent;
   @ViewChild('catalinaRef') catalinaRef : ElementRef;
   @ViewChild('xmlSelect') xmlSelect : ElementRef;
   @ViewChild('excelSelect') excelSelect : ElementRef;
@@ -190,6 +195,7 @@ export class AdminComponent {
           this.prepareJobClasses();
           this.storage.refresh();
       UIHelper.setTitle('ADMIN.TITLE', this.title, this.translate, this.config);
+      this.mainNavRef.finishPreloading();
       this.warningButtons=[
         new DialogButton('CANCEL',DialogButton.TYPE_CANCEL,()=>{window.history.back()}),
         new DialogButton('ADMIN.UNDERSTAND',DialogButton.TYPE_PRIMARY,()=>{this.showWarning=false})

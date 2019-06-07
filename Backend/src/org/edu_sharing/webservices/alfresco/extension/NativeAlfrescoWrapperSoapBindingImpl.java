@@ -1117,8 +1117,8 @@ public class NativeAlfrescoWrapperSoapBindingImpl implements org.edu_sharing.web
 	public Notify[] getNotifyList(String nodeId) throws RemoteException {
 		try {
 			
-			MCAlfrescoAPIClient mcAlfrescoAPIClient = new MCAlfrescoAPIClient();
-			List<Notify> result = mcAlfrescoAPIClient.getNotifyList(nodeId);
+			org.edu_sharing.service.permission.PermissionService permissionService = PermissionServiceFactory.getPermissionService(ApplicationInfoList.getHomeRepository().getAppId());
+			List<Notify> result = permissionService.getNotifyList(nodeId);
 			return result.toArray(new Notify[result.size()]);
 			
 		} catch(Throwable e) {

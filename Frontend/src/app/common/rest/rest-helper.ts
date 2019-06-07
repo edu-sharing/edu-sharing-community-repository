@@ -318,11 +318,25 @@ export class RestHelper{
     perm.authority={authorityName:RestConstants.AUTHORITY_EVERYONE,authorityType:RestConstants.AUTHORITY_TYPE_EVERYONE};
     return perm;
   }
-
+    static addToStore(selection: Node[],toast:Toast,iam:RestIamService,callback:Function,position=0,errors=0) {
+        if(position==selection.length){
+            if(errors==0)
+                toast.toast('SEARCH.ADDED_TO_NODE_STORE',{count:position,errors:errors});
+            callback();
+            return;
+        }
+        iam.addNodeList(RestConstants.NODE_STORE_LIST,selection[position].ref.id).subscribe(()=>{
+            RestHelper.addToStore(selection,toast,iam,callback,position+1,errors);
+        },(error)=>{
+            console.log(error);
+            if(RestHelper.errorMessageContains(error,'Node is already in list'))
+                toast.error(null,'SEARCH.ADDED_TO_NODE_STORE_EXISTS',{name:RestHelper.getTitle(selection[position])});
+            RestHelper.addToStore(selection,toast,iam,callback,position+1,errors+1)
+        });
+    }
   public static goToLogin(router : Router,config:ConfigurationService,scope:string=null,next=window.location.href) {
-
     if(config.getLocator().getCordova().isRunningCordova()){
-          config.getLocator().getCordova().reinitStatus(config.getLocator().endpointUrl);
+          config.getLocator().getCordova().reinitStatus(config.getLocator().endpointUrl,true,next).subscribe(()=>{});
           return;
     }
 

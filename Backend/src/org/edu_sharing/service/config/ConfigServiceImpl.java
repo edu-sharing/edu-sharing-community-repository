@@ -1,51 +1,39 @@
 package org.edu_sharing.service.config;
-import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.StringWriter;
 import java.lang.reflect.Field;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 import javax.xml.bind.JAXBContext;
-import javax.xml.bind.JAXBException;
 import javax.xml.bind.Unmarshaller;
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.transform.OutputKeys;
-import javax.xml.transform.Transformer;
 import javax.xml.transform.TransformerException;
-import javax.xml.transform.TransformerFactory;
-import javax.xml.transform.dom.DOMSource;
-import javax.xml.transform.stream.StreamResult;
-import javax.xml.xpath.XPath;
-import javax.xml.xpath.XPathConstants;
-import javax.xml.xpath.XPathFactory;
 
-import org.apache.camel.util.FileUtil;
-import org.apache.commons.io.FileUtils;
-import org.edu_sharing.metadataset.v2.MetadataReaderV2;
-import org.edu_sharing.service.config.model.Config;
-import org.edu_sharing.service.config.model.Context;
-import org.edu_sharing.service.config.model.KeyValuePair;
-import org.edu_sharing.service.config.model.Language;
-import org.edu_sharing.service.config.model.Values;
-import org.edu_sharing.service.config.model.Variables;
+import org.alfresco.repo.security.authentication.AuthenticationUtil;
+import org.alfresco.service.cmr.repository.NodeRef;
+import org.alfresco.service.cmr.repository.StoreRef;
+import org.edu_sharing.repository.client.rpc.ACE;
+import org.edu_sharing.repository.client.tools.CCConstants;
+import org.edu_sharing.repository.server.tools.UserEnvironmentTool;
+import org.edu_sharing.restservices.shared.Authority;
+import org.edu_sharing.service.NotAnAdminException;
+import org.edu_sharing.service.authority.AuthorityServiceFactory;
+import org.edu_sharing.service.config.model.*;
+import org.edu_sharing.service.nodeservice.NodeService;
+import org.edu_sharing.service.nodeservice.NodeServiceFactory;
+import org.edu_sharing.service.nodeservice.NodeServiceHelper;
+import org.edu_sharing.service.permission.PermissionService;
+import org.edu_sharing.service.permission.PermissionServiceFactory;
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.json.XML;
-import org.w3c.dom.Document;
-import org.w3c.dom.Node;
-import org.w3c.dom.NodeList;
-
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-
 
 
 public class ConfigServiceImpl implements ConfigService{
+	private final NodeService nodeService;
+	private final PermissionService permissionService;
 
-	
+
 	/*
 	XPathFactory pfactory = XPathFactory.newInstance();
 	XPath xpath = pfactory.newXPath();
@@ -55,6 +43,8 @@ public class ConfigServiceImpl implements ConfigService{
 	*/
 	
 	public ConfigServiceImpl(){
+		nodeService=NodeServiceFactory.getLocalService();
+		permissionService=PermissionServiceFactory.getLocalService();
 		/*
 		json = XML.toJSONObject(FileUtils.readFileToString(CONFIG_XML,"UTF-8"));
 		builder = DocumentBuilderFactory.newInstance().newDocumentBuilder();
@@ -106,28 +96,97 @@ public class ConfigServiceImpl implements ConfigService{
 				.getContextClassLoader();
 		return classLoader.getResourceAsStream("/org/edu_sharing/service/config/client.config.xml");	
 	}
-	@Override
-	public Config getConfigByDomain(String domain) throws Exception {
+	private Context getContext(String domain) throws Exception {
 		Config config=getConfig();
 		if(config.contexts!=null && config.contexts.context!=null) {
-			for(Context context : config.contexts.context) {
-				if(context.domain==null)
+			for (Context context : config.contexts.context) {
+				if (context.domain == null)
 					continue;
-				for(String cd : context.domain) {
-					if(cd.equals(domain)) {
-						overrideValues(config.values,context.values);
-						if(context.language!=null)
-							config.language=overrideLanguage(config.language,context.language);
-						if(context.variables!=null)
-							config.variables=overrideVariables(config.variables,context.variables);
-						return config;
+				for (String cd : context.domain) {
+					if (cd.equals(domain)) {
+						return context;
 					}
 				}
 			}
 		}
-		throw new IllegalArgumentException("Context with domain "+domain+" does not exists");
-		
+		return null;
 	}
+	@Override
+	public String getContextId(String domain) throws Exception {
+		Context context = getContext(domain);
+		if(context!=null)
+			return context.id;
+		return null;
+	}
+	@Override
+	public Config getConfigByDomain(String domain) throws Exception {
+		Config config=getConfig();
+		Context context=getContext(domain);
+		if(context!=null){
+			overrideValues(config.values,context.values);
+			if(context.language!=null)
+				config.language=overrideLanguage(config.language,context.language);
+			if(context.variables!=null)
+				config.variables=overrideVariables(config.variables,context.variables);
+			return config;
+		}
+		throw new IllegalArgumentException("Context with domain "+domain+" does not exists");
+	}
+
+	@Override
+	public DynamicConfig setDynamicValue(String key, boolean readPublic, JSONObject object) throws Throwable {
+		if(!AuthorityServiceFactory.getLocalService().isGlobalAdmin()){
+			throw new NotAnAdminException();
+		}
+		String folder = new UserEnvironmentTool().getEdu_SharingConfigFolder();
+		String nodeId;
+		try {
+			NodeRef child = nodeService.getChild(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE,folder,CCConstants.CCM_TYPE_CONFIGOBJECT, CCConstants.CM_NAME, key);
+			nodeId = child.getId();
+		}catch(Throwable t){
+			// does not exists -> we will create a new node
+			HashMap<String, String[]> props=new HashMap<>();
+			props.put(CCConstants.CM_NAME,new String[]{key});
+			nodeId=nodeService.createNode(folder,CCConstants.CCM_TYPE_CONFIGOBJECT,props);
+		}
+
+		HashMap<String, Object> props=new HashMap<>();
+		props.put(CCConstants.CCM_PROP_CONFIGOBJECT_VALUE,object.toString());
+		nodeService.updateNodeNative(nodeId,props);
+		DynamicConfig result=new DynamicConfig();
+		result.setNodeId(nodeId);
+		result.setValue(object.toString());
+		List<ACE> aces = new ArrayList<>();
+		if(readPublic){
+			ACE ace=new ACE();
+			ace.setAuthority(CCConstants.AUTHORITY_GROUP_EVERYONE);
+			ace.setAuthorityType(Authority.Type.EVERYONE.name());
+			ace.setPermission(CCConstants.PERMISSION_CONSUMER);
+			aces.add(ace);
+		}
+		permissionService.setPermissions(nodeId,aces,false);
+		return result;
+	}
+
+	@Override
+	public DynamicConfig getDynamicValue(String key) throws Throwable {
+		String folder = AuthenticationUtil.runAsSystem(()-> {
+			try {
+				return new UserEnvironmentTool().getEdu_SharingConfigFolder();
+			} catch (Throwable throwable) {
+				return null;
+			}
+		});
+		NodeRef child = nodeService.getChild(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE,folder,CCConstants.CCM_TYPE_CONFIGOBJECT, CCConstants.CM_NAME, key);
+		if(child==null)
+			throw new IllegalArgumentException(key);
+		String value=NodeServiceHelper.getProperty(child,CCConstants.CCM_PROP_CONFIGOBJECT_VALUE);
+		DynamicConfig result=new DynamicConfig();
+		result.setNodeId(child.getId());
+		result.setValue(value);
+		return result;
+	}
+
 	private Variables overrideVariables(Variables values, Variables override) {
 		if(values==null)
 			return override;

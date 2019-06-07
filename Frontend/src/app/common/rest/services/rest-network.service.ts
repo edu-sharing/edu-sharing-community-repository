@@ -74,7 +74,7 @@ export class RestNetworkService extends AbstractRestService{
 
     public addService = (jsondata:string): Observable<any> => {
         let query=this.connector.createUrl("network/:version/services",null);
-        return this.connector.post<any>(query,jsondata,this.connector.getRequestOptions())
+        return this.connector.post<any>(query,jsondata,this.connector.getRequestOptions());
     }
 
     public getServices = () => {

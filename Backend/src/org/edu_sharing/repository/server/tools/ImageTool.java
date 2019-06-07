@@ -22,7 +22,6 @@ import com.drew.metadata.Directory;
 import com.drew.metadata.Metadata;
 import com.drew.metadata.MetadataException;
 import com.drew.metadata.exif.ExifIFD0Directory;
-import com.google.api.client.util.IOUtils;
 import com.sun.star.uno.Exception;
 
 /** 
@@ -34,7 +33,7 @@ public class ImageTool {
 	public static final int MAX_THUMB_SIZE = 900;
 
 	private static int readImageOrientation(InputStream imageFile)  throws IOException, MetadataException, ImageProcessingException {
-	    Metadata metadata = ImageMetadataReader.readMetadata(new BufferedInputStream(imageFile),true);
+	    Metadata metadata = ImageMetadataReader.readMetadata(new BufferedInputStream(imageFile));
 	    Directory directory = metadata.getDirectory(ExifIFD0Directory.class);
 	    int orientation = 1;
 	    try {

@@ -16,7 +16,7 @@
   </div>
   <div *ngIf="invalidPermission" title="{{'WORKSPACE.SHARE.TYPE_UNKNOWN_DESCRIPTION'|translate:{permissions:_permission.permissions.join(', ')} }}">
     <div>
-      <i class="material-icons align">help_outline</i> <span>{{'WORKSPACE.SHARE.TYPE_UNKNOWN' | translate}}</span>
+      <i aria-hidden="true" class="material-icons align">help_outline</i> <span>{{'WORKSPACE.SHARE.TYPE_UNKNOWN' | translate}}</span>
       <div class="select"></div>
     </div>
   </div>
@@ -43,7 +43,7 @@
 <div class="remove" tabindex="0" (keyup.enter)="remove()" (click)="remove()" *ngIf="showDelete" [class.clickable]="!readOnly">
   <i *ngIf="!inherit && !isDeleted" class="material-icons">cancel</i>
   <i *ngIf="!inherit && isDeleted" class="material-icons">undo</i>
-  <img *ngIf="inherit" class="inherit" src="assets/images/inherit.svg" title="{{ 'WORKSPACE.SHARE.INHERIT_HINT' | translate}}"/>
+  <i *ngIf="inherit" class="inherit" icon iconId="edu-inherit" title="{{ 'WORKSPACE.SHARE.INHERIT_HINT' | translate}}"></i>
 </div>
 </div>
 </div>

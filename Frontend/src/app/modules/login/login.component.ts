@@ -23,6 +23,7 @@ import {trigger} from "@angular/animations";
 import {UIAnimation} from "../../common/ui/ui-animation";
 import {InputPasswordComponent} from "../../common/ui/input-password/input-password.component";
 import {RouterHelper} from '../../common/router.helper';
+import {MainNavComponent} from '../../common/ui/main-nav/main-nav.component';
 
 @Component({
   selector: 'workspace-login',
@@ -34,6 +35,7 @@ import {RouterHelper} from '../../common/router.helper';
 })
 export class LoginComponent  implements OnInit{
     loginUrl: any;
+  @ViewChild('mainNav') mainNavRef : MainNavComponent;
   @ViewChild('passwordInput') passwordInput : InputPasswordComponent;
   @ViewChild('usernameInput') usernameInput : ElementRef;
   @ViewChild('loginForm') loginForm : ElementRef;
@@ -55,10 +57,20 @@ export class LoginComponent  implements OnInit{
     this.disabled=!this.username;// || !this.password;
   }
   private recoverPassword(){
-    window.location.href=this.config.recoverPasswordUrl;
+      if(this.config.register.local){
+          this.router.navigate([UIConstants.ROUTER_PREFIX+"register","request"]);
+      }
+      else {
+          window.location.href = this.config.register.recoverUrl;
+      }
   }
   private register(){
-    window.location.href=this.config.registerUrl;
+      if(this.config.register.local){
+          this.router.navigate([UIConstants.ROUTER_PREFIX+"register"]);
+      }
+      else {
+          window.location.href = this.config.register.registerUrl;
+      }
   }
   openLoginUrl(){
       window.location.href=this.loginUrl;
@@ -80,12 +92,19 @@ export class LoginComponent  implements OnInit{
       UIHelper.setTitle('LOGIN.TITLE',title,translate,configService);
       this.configService.getAll().subscribe((data:any)=>{
         this.config=data;
+        if(!this.config.register)
+            // default register mode: allow local registration if not disabled
+            this.config.register={local:true};
 
         this.username=this.configService.instant('defaultUsername','');
         this.password=this.configService.instant('defaultPassword','');
         this.route.queryParams.forEach((params: Params) => {
+          if(params['username'])
+              this.username=params['username'];
+
           this.connector.onAllRequestsReady().subscribe(()=>{
             this.isLoading=false;
+            this.mainNavRef.finishPreloading();
               setTimeout(()=>{
                   if (this.username && this.passwordInput)
                       this.passwordInput.nativeInput.nativeElement.focus();

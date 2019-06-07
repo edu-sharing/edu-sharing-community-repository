@@ -1,4 +1,5 @@
 <main-nav *ngIf="mainnav"
+          #mainNav
           [title]="'COLLECTIONS.TITLE'"
           [currentScope]="'collections'"
           [searchEnabled]="false"
@@ -74,6 +75,7 @@
   <section *ngIf="newCollectionStep==STEP_GENERAL" class="card center-card card-high card-action collectionShadow collection-new-container collection-basic">
 
       <div class="card-content">
+          <div class="card-cancel" tabindex="0" (keyup.enter)="goBack()" (click)="goBack()"><i icon iconId="close" aria="true"></i></div>
         <div class="card-title">
           {{ 'collectionNew_preview' | translate }}
         </div>
@@ -82,27 +84,33 @@
 
               <div class='image-upload-field'>
                   <input #file type='file' accept="image/*" name='userFile' (change)="imageDataChanged($event)"
-                  class="image-upload-field-input" >
+                  class="image-upload-field-input">
               </div>
-
-              <div class="image-upload-icon" tabindex="0" (keyup.enter)="file.click()" (click)="file.click()">
-                  <i class="material-icons icon-bottom">file_upload</i>
+              <div class="button-icon">
+                  <div class="btn-circle" tabindex="0" (keyup.enter)="file.click()" (click)="file.click()">
+                      <i icon iconId="file_upload" aria="true"></i>
+                  </div>
+                  <div class="btn-circle" tabindex="0" *ngIf="imageData || (currentCollection.preview && !currentCollection.preview.isIcon)" (keyup.enter)="deleteImage()" (click)="deleteImage()">
+                      <i icon iconId="delete" aria="true"></i>
+                  </div>
               </div>
 
               <div *ngIf="!imageData && !(currentCollection.preview && !currentCollection.preview.isIcon)" (keyup.enter)="file.click()" (click)="file.click()" class="card-collection-icon-container">
-                  <div style="height: 35px;"></div>
+                  <div class="card-image-distance"></div>
                   <div class="card-image-icon-container" [style.background-color]="currentCollection.color">
-                      <i class="material-icons" style="font-size: 75px; margin-top: 44px;">layers</i>
+                      <i class="material-icons">layers</i>
                   </div>
               </div>
 
               <div *ngIf="!imageData && (currentCollection.preview && !currentCollection.preview.isIcon)" (keyup.enter)="file.click()" (click)="file.click()" class="card-collection-icon-container">
+                  <img class="blurred-image" [src]="currentCollection.preview.url+'&crop=true&width=350&height=240'">
                   <img [src]="currentCollection.preview.url+'&crop=true&width=350&height=240'" class="card-image-preview"/>
               </div>
 
-              <div *ngIf="imageData" class="card-collection-image-container">
+              <div *ngIf="imageData" class="card-collection-image-container" (keyup.enter)="file.click()" (click)="file.click()">
                   <div class="card-image-container">
-                      <img [src]="imageData" class="card-image-preview" >
+                      <img [src]="imageData" class="blurred-image">
+                      <img [src]="imageData" class="card-image-preview">
                   </div>
               </div>
 

@@ -250,10 +250,6 @@ public class MCAlfrescoClientAdapter extends MCAlfrescoBaseClient {
 		return null;
 	}
 
-	@Override
-	public ArrayList<HashMap<String, Object>> getNewestNodes(Integer from, Integer to) throws Throwable {
-		return null;
-	}
 
 	@Override
 	public void setProperty(String nodeId, String property, Serializable value) {
@@ -319,11 +315,6 @@ public class MCAlfrescoClientAdapter extends MCAlfrescoBaseClient {
 	@Override
 	public HashMap<String, HashMap<String, Object>> getChildren(String parentID, String[] permissionsOnChild)
 			throws Throwable {
-		return null;
-	}
-
-	@Override
-	public List<Notify> getNotifyList(String nodeId) throws Throwable {
 		return null;
 	}
 

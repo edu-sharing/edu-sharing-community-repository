@@ -1,20 +1,27 @@
 /*
- * Copyright (C) 2005-2013 Alfresco Software Limited.
- *
- * This file is part of Alfresco
- *
+ * #%L
+ * Alfresco Remote API
+ * %%
+ * Copyright (C) 2005 - 2016 Alfresco Software Limited
+ * %%
+ * This file is part of the Alfresco software. 
+ * If the software was purchased under a paid Alfresco license, the terms of 
+ * the paid license agreement will prevail.  Otherwise, the software is 
+ * provided under the following open source license terms:
+ * 
  * Alfresco is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- *
+ * 
  * Alfresco is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU Lesser General Public License for more details.
- *
+ * 
  * You should have received a copy of the GNU Lesser General Public License
  * along with Alfresco. If not, see <http://www.gnu.org/licenses/>.
+ * #L%
  */
 package org.alfresco.repo.webdav;
 
@@ -115,7 +122,7 @@ public class WebDAVHelper
     private ActivityPoster poster;
     
     // pattern is tested against full path after it has been lower cased.
-    private Pattern m_renameShufflePattern = Pattern.compile("(.*/\\..*)|(.*[a-f0-9]{8}+$)|(.*\\.tmp$)|(.*\\.wbk$)|(.*\\.bak$)|(.*\\~$)|(.*backup.*\\.do[ct]{1}[x]?[m]?$)|(.*\\.sb\\-\\w{8}\\-\\w{6}$)");
+    private Pattern m_renameShufflePattern = Pattern.compile("(.*/\\..*)|(.*[a-f0-9]{8}+$)|(.*\\.tmp$)|(.*atmp[0-9]+$)|(.*\\.wbk$)|(.*\\.bak$)|(.*\\~$)|(.*backup.*\\.do[ct]{1}[x]?[m]?$)|(.*\\.sb\\-\\w{8}\\-\\w{6}$)");
     
     //  Empty XML attribute list
     
@@ -153,7 +160,7 @@ public class WebDAVHelper
      * to detect whether clients are performing a renaming shuffle - common during
      * file saving on various clients.
      * <p/>
-     * <bALF-3856, ALF-7079, MNT-181</b>
+     * <b>ALF-3856, ALF-7079, MNT-181</b>
      * 
      * @param renameShufflePattern      a regular expression filename match
      */
@@ -338,7 +345,7 @@ public class WebDAVHelper
     
 
     /**
-     * @param poster
+     * @param poster ActivityPoster
      */
     public void setPoster(ActivityPoster poster)
     {
@@ -780,7 +787,7 @@ public class WebDAVHelper
      * ALF-5333: Microsoft clients use ISO-8859-1 to decode WebDAV responses
      * so this method should only be used for Microsoft user agents.
      * 
-     * @param string
+     * @param string String
      * @return The encoded string for Microsoft clients
      * @throws UnsupportedEncodingException
      */
@@ -1092,11 +1099,11 @@ public class WebDAVHelper
     
     /**
      * Notifies listeners that a read has taken place
-     * @param nodeRef
-     * @param propertyQName
-     * @param attach
-     * @param mimetype
-     * @param size
+     * @param realNodeInfo FileInfo
+     * @param mimetype String
+     * @param size Long
+     * @param contentEncoding String
+     * @param range String
      */
     protected void publishReadEvent(final FileInfo realNodeInfo, final String mimetype, final Long size, final String contentEncoding, final String range)
     {
@@ -1182,12 +1189,12 @@ public class WebDAVHelper
     /**
      * Indicates if the node is unlocked or the current user has a WRITE_LOCK<p>
      * 
-     * @see LockService#isLockedAndReadOnly(NodeRef)
+     * @see LockService#isLockedAndReadOnly(org.alfresco.service.cmr.repository.NodeRef)
      * 
      * @param nodeRef    the node reference
      */
     public boolean isLockedAndReadOnly(final NodeRef nodeRef)
     {
-        return LockUtils.isLockedAndReadOnly(nodeRef, m_serviceRegistry.getLockService());
+        return m_serviceRegistry.getLockService().isLockedAndReadOnly(nodeRef);
     }
 }

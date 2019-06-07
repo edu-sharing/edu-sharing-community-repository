@@ -315,7 +315,9 @@ label.notify p{
   text-transform: uppercase;
   color:$primary;
   cursor: pointer;
-
+  &:focus{
+    @include setGlobalFocus();
+  }
   span{
     vertical-align: middle;
   }

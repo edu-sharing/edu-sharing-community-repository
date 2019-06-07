@@ -49,6 +49,7 @@ import org.edu_sharing.restservices.admin.v1.model.ExcelResult;
 import org.edu_sharing.restservices.admin.v1.model.UpdateResult;
 import org.edu_sharing.restservices.admin.v1.model.UploadResult;
 import org.edu_sharing.restservices.admin.v1.model.XMLResult;
+import org.edu_sharing.restservices.node.v1.model.NodeEntry;
 import org.edu_sharing.restservices.shared.ErrorResponse;
 import org.edu_sharing.restservices.shared.Filter;
 import org.edu_sharing.restservices.shared.Group;
@@ -66,6 +67,8 @@ import org.edu_sharing.service.lifecycle.PersonLifecycleService;
 import org.edu_sharing.service.search.SearchService.ContentType;
 import org.edu_sharing.service.search.model.SearchToken;
 import org.edu_sharing.service.search.model.SortDefinition;
+import org.edu_sharing.service.admin.model.ToolPermission;
+import org.edu_sharing.service.tracking.TrackingService;
 import org.glassfish.jersey.media.multipart.FormDataParam;
 
 import io.swagger.annotations.Api;
@@ -104,7 +107,53 @@ public class AdminApi {
 			return ErrorResponse.createResponse(t);
 		}
 	}
+	@GET
+	@Path("/toolpermissions/{authority}")
 
+	@ApiOperation(value = "get all toolpermissions for an authority", notes="Returns explicit (rights set for this authority) + effective (resulting rights for this authority) toolpermission")
+
+	@ApiResponses(value = {
+			@ApiResponse(code = 200, message = RestConstants.HTTP_200, response = Map.class),
+	        @ApiResponse(code = 400, message = RestConstants.HTTP_400, response = ErrorResponse.class),
+	        @ApiResponse(code = 401, message = RestConstants.HTTP_401, response = ErrorResponse.class),
+	        @ApiResponse(code = 403, message = RestConstants.HTTP_403, response = ErrorResponse.class),
+	        @ApiResponse(code = 404, message = RestConstants.HTTP_404, response = ErrorResponse.class),
+	        @ApiResponse(code = 500, message = RestConstants.HTTP_500, response = ErrorResponse.class)
+	    })
+	public Response getAllToolpermissions(
+			@ApiParam(value = "Authority to load (user or group)",required=true) @PathParam("authority") String authority,
+			@Context HttpServletRequest req){
+		try {
+			Map<String, ToolPermission> result = AdminServiceFactory.getInstance().getToolpermissions(authority);
+	    	return Response.ok().entity(result).build();
+		} catch (Throwable t) {
+			return ErrorResponse.createResponse(t);
+		}
+	}
+	@PUT
+	@Path("/toolpermissions/{authority}")
+
+	@ApiOperation(value = "set toolpermissions for an authority", notes="If a toolpermission has status UNDEFINED, it will remove explicit permissions for the authority")
+
+	@ApiResponses(value = {
+			@ApiResponse(code = 200, message = RestConstants.HTTP_200, response = Map.class),
+	        @ApiResponse(code = 400, message = RestConstants.HTTP_400, response = ErrorResponse.class),
+	        @ApiResponse(code = 401, message = RestConstants.HTTP_401, response = ErrorResponse.class),
+	        @ApiResponse(code = 403, message = RestConstants.HTTP_403, response = ErrorResponse.class),
+	        @ApiResponse(code = 404, message = RestConstants.HTTP_404, response = ErrorResponse.class),
+	        @ApiResponse(code = 500, message = RestConstants.HTTP_500, response = ErrorResponse.class)
+	    })
+	public Response setToolpermissions(
+			@ApiParam(value = "Authority to set (user or group)",required=true) @PathParam("authority") String authority,
+			Map<String,ToolPermission.Status> permissions,
+			@Context HttpServletRequest req){
+		try {
+			AdminServiceFactory.getInstance().setToolpermissions(authority,permissions);
+	    	return Response.ok().build();
+		} catch (Throwable t) {
+			return ErrorResponse.createResponse(t);
+		}
+	}
 	@POST
 	@Path("/applyTemplate")
 
@@ -123,6 +172,31 @@ public class AdminApi {
 		try {
 			AdminServiceFactory.getInstance().applyTemplate(template, group, folder);
 			return Response.ok().build();
+		} catch (Throwable t) {
+			return ErrorResponse.createResponse(t);
+		}
+	}
+
+	@POST
+	@Path("/toolpermissions/add/{name}")
+
+	@ApiOperation(value = "add a new toolpermissions")
+
+	@ApiResponses(value = {
+			@ApiResponse(code = 200, message = RestConstants.HTTP_200, response = Node.class),
+			@ApiResponse(code = 400, message = RestConstants.HTTP_400, response = ErrorResponse.class),
+			@ApiResponse(code = 401, message = RestConstants.HTTP_401, response = ErrorResponse.class),
+			@ApiResponse(code = 403, message = RestConstants.HTTP_403, response = ErrorResponse.class),
+			@ApiResponse(code = 404, message = RestConstants.HTTP_404, response = ErrorResponse.class),
+			@ApiResponse(code = 500, message = RestConstants.HTTP_500, response = ErrorResponse.class)
+	})
+	public Response addToolpermission(
+			@ApiParam(value = "Name/ID of toolpermission",required=true) @PathParam("name") String name,
+			@Context HttpServletRequest req){
+		try {
+			String nodeId=AdminServiceFactory.getInstance().addToolpermission(name);
+			NodeDao nodeDao=NodeDao.getNode(RepositoryDao.getHomeRepository(),nodeId);
+			return Response.ok().entity(nodeDao.asNode()).build();
 		} catch (Throwable t) {
 			return ErrorResponse.createResponse(t);
 		}
@@ -259,13 +333,13 @@ public class AdminApi {
             @ApiResponse(code = 404, message = RestConstants.HTTP_404, response = ErrorResponse.class),
             @ApiResponse(code = 500, message = RestConstants.HTTP_500, response = ErrorResponse.class) })
     public Response getStatisticsNode(@Context HttpServletRequest req,
-    			@ApiParam(value = "date range from", required = false) @QueryParam("dateFrom") Long dateFrom,
-    			@ApiParam(value = "date range to", required = false) @QueryParam("dateTo") Long dateTo
+									  @ApiParam(value = "Grouping type", required = true) @QueryParam("grouping")TrackingService.GroupingType grouping,
+									  @ApiParam(value = "date range from", required = true) @QueryParam("dateFrom") Long dateFrom,
+									  @ApiParam(value = "date range to", required = true) @QueryParam("dateTo") Long dateTo
               ) {
         try {
             // load instance to validate session
-            AdminService service = AdminServiceFactory.getInstance();
-            List<TrackingNode> tracks=TrackingDAO.getNodeStatistics(new Date(dateFrom),new Date(dateTo));
+            List<TrackingNode> tracks=TrackingDAO.getNodeStatistics(grouping,new Date(dateFrom),new Date(dateTo));
             return Response.ok().entity(tracks).build();
         } catch (Throwable t) {
             return ErrorResponse.createResponse(t);
@@ -470,21 +544,21 @@ public class AdminApi {
 	@Path("/cache/refreshEduGroupCache")
 
 	@ApiOperation(value = "Refresh the Edu Group Cache", notes = "Refresh the Edu Group Cache.")
-	
+
 	@ApiResponses(value = {
 			@ApiResponse(code = 200, message = RestConstants.HTTP_200, response = Void.class),
-	        @ApiResponse(code = 400, message = RestConstants.HTTP_400, response = ErrorResponse.class),        
-	        @ApiResponse(code = 401, message = RestConstants.HTTP_401, response = ErrorResponse.class),        
-	        @ApiResponse(code = 403, message = RestConstants.HTTP_403, response = ErrorResponse.class),        
-	        @ApiResponse(code = 404, message = RestConstants.HTTP_404, response = ErrorResponse.class), 
-	        @ApiResponse(code = 500, message = RestConstants.HTTP_500, response = ErrorResponse.class) 
+	        @ApiResponse(code = 400, message = RestConstants.HTTP_400, response = ErrorResponse.class),
+	        @ApiResponse(code = 401, message = RestConstants.HTTP_401, response = ErrorResponse.class),
+	        @ApiResponse(code = 403, message = RestConstants.HTTP_403, response = ErrorResponse.class),
+	        @ApiResponse(code = 404, message = RestConstants.HTTP_404, response = ErrorResponse.class),
+	        @ApiResponse(code = 500, message = RestConstants.HTTP_500, response = ErrorResponse.class)
 	    })
 	public Response refreshEduGroupCache(
             @ApiParam(value="keep existing", defaultValue="false") @QueryParam("keepExisting") Boolean keepExisting,
             @Context HttpServletRequest req){
 		try {
             AdminServiceFactory.getInstance().refreshEduGroupCache(keepExisting);
-	    	return Response.ok().build();		
+	    	return Response.ok().build();
 		} catch (Throwable t) {
 			return ErrorResponse.createResponse(t);
 		}
@@ -1134,24 +1208,24 @@ public class AdminApi {
 			@ApiParam(value = "appender", defaultValue = "File") @QueryParam("appender") String appender,
 			@Context HttpServletRequest req) {
 		try {
-		
+
 			//check that there is an admin
 			AdminServiceFactory.getInstance();
-			
+
 			if(name.startsWith("org.alfresco") ||
 					name.startsWith("org.edu_sharing.alfresco") ||
 					name.startsWith("org.edu_sharing.repository.server.tools.cache")) {
-				ClassLoader clAlf = AlfAppContextGate.getApplicationContext().getClassLoader(); 
-				
+				ClassLoader clAlf = AlfAppContextGate.getApplicationContext().getClassLoader();
+
 				Class<?> logManager = clAlf.loadClass("org.apache.log4j.LogManager");
 				Method methodGetLogger = logManager.getMethod("getLogger", String.class);
 				Object logger = methodGetLogger.invoke(null, name);
-				
+
 				Class<?> logLevelClass = clAlf.loadClass("org.apache.log4j.Level");
 				Method methodToLevel = logLevelClass.getMethod("toLevel",String.class);
 				Method methodSetLevel = logger.getClass().getMethod("setLevel",logLevelClass);
 				methodSetLevel.invoke(logger, methodToLevel.invoke(null, loglevel));
-				
+
 				/*Method methodGetRootLogger = logger.getClass().getMethod("getRootLogger", null);
 				Object rootLogger = methodGetRootLogger.invoke(null, null);
 

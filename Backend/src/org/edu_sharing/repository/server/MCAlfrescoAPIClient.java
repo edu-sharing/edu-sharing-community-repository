@@ -169,6 +169,7 @@ import org.edu_sharing.repository.server.tools.metadataset.MetadataReader;
 import org.edu_sharing.repository.server.tools.search.QueryBuilder;
 import org.edu_sharing.repository.server.tools.search.QueryValidationFailedException;
 import org.edu_sharing.service.authentication.ScopeUserHomeServiceFactory;
+import org.edu_sharing.service.comment.CommentServiceFactory;
 import org.edu_sharing.service.connector.ConnectorService;
 import org.edu_sharing.service.license.LicenseService;
 import org.edu_sharing.service.model.NodeRefImpl;
@@ -1235,7 +1236,7 @@ public class MCAlfrescoAPIClient extends MCAlfrescoBaseClient {
 		 * run over all properties and format the date props with with current
 		 * user locale
 		 */
-		if (nodeType.equals(CCConstants.CCM_TYPE_IO) || nodeType.equals(CCConstants.CCM_TYPE_MAP) || nodeType.equals(CCConstants.CM_TYPE_FOLDER)) {
+		if (nodeType.equals(CCConstants.CCM_TYPE_IO) || nodeType.equals(CCConstants.CCM_TYPE_COMMENT) || nodeType.equals(CCConstants.CCM_TYPE_MAP) || nodeType.equals(CCConstants.CM_TYPE_FOLDER)) {
 			String mdsId=CCConstants.metadatasetdefault_id;
 			if(propsCopy.containsKey(CCConstants.CM_PROP_METADATASET_EDU_METADATASET)){
 				mdsId=(String)propsCopy.get(CCConstants.CM_PROP_METADATASET_EDU_METADATASET);
@@ -1589,6 +1590,10 @@ public class MCAlfrescoAPIClient extends MCAlfrescoBaseClient {
 			List<NodeRef> childs = this.getChildrenByAssociationNodeIds(nodeRef.getStoreRef(),nodeRef.getId(), CCConstants.CCM_ASSOC_CHILDIO);
 			if (childs != null) {
 				properties.put(CCConstants.VIRT_PROP_CHILDOBJECTCOUNT, "" + childs.size());
+			}
+			List<NodeRef> comments = this.getChildrenByAssociationNodeIds(nodeRef.getStoreRef(),nodeRef.getId(), CCConstants.CCM_ASSOC_COMMENT);
+			if (comments != null) {
+				properties.put(CCConstants.VIRT_PROP_COMMENTCOUNT,comments.size());
 			}
 
 			// add permalink
@@ -3730,91 +3735,6 @@ public class MCAlfrescoAPIClient extends MCAlfrescoBaseClient {
 		return authorityAdministrator;
 	}
 	
-	@Override
-	public ArrayList<HashMap<String, Object>> getNewestNodes(Integer from, Integer to) throws Throwable {
-
-		SearchParameters searchParameters = new SearchParameters();
-		searchParameters.addStore(storeRef);
-
-		searchParameters.setLanguage(SearchService.LANGUAGE_LUCENE);
-
-		searchParameters.setQuery("TYPE:\"{http://www.campuscontent.de/model/1.0}notify\" AND @ccm\\:notify_event:"
-				+ CCConstants.CCM_VALUE_NOTIFY_EVENT_PERMISSION);
-
-		if (from != null) searchParameters.setSkipCount(from);
-		if (to != null) searchParameters.setMaxItems(to);
-
-		searchParameters.addSort("@" + CCConstants.CM_PROP_C_CREATED, false);
-
-		ResultSet resultSet = searchService.query(searchParameters);
-		List<NodeRef> nodeRefs = resultSet.getNodeRefs();
-
-		// linked hashmap to get insertion order and override duplicates
-		LinkedHashMap<String, HashMap<String, Object>> toFilterDuplicates = new LinkedHashMap<String, HashMap<String, Object>>();
-
-		int missingCounter = 0;
-		for (NodeRef nodeRef : nodeRefs) {
-
-			if (nodeRef.getId().contains("missing")) {
-				missingCounter++;
-				continue;
-			}
-
-			NodeRef nodeRefIo = null;
-
-			HashSet<QName> types = new HashSet<QName>();
-			types.add(QName.createQName(CCConstants.CCM_TYPE_IO));
-			types.add(QName.createQName(CCConstants.CCM_TYPE_MAP));
-			List<ChildAssociationRef> childsOfNotify = null;
-
-			/**
-			 * try catch here when you find the node with solr but don't got the
-			 * read permission anymore
-			 */
-			try {
-				childsOfNotify = nodeService.getChildAssocs(nodeRef, types);
-			} catch (org.alfresco.repo.security.permissions.AccessDeniedException e) {
-				logger.error(e.getMessage() + " while calling nodeService.getChildAssocs for " + nodeRef);
-				continue;
-			}
-			if (childsOfNotify != null && childsOfNotify.size() > 0) {
-				// get the first
-				nodeRefIo = childsOfNotify.get(0).getChildRef();
-			}
-
-			Date notifyDate = (Date) nodeService.getProperty(nodeRef, QName.createQName(CCConstants.CM_PROP_C_CREATED));
-
-			OwnableService ownableService = serviceRegistry.getOwnableService();
-			
-			if((nodeRefIo != null) && (nodeService.hasAspect(nodeRefIo, QName.createQName(CCConstants.CCM_ASPECT_COLLECTION) ) 
-					|| nodeService.hasAspect(nodeRefIo, QName.createQName(CCConstants.CCM_ASPECT_COLLECTION_IO_REFERENCE)) )){
-				continue;
-			}
-
-			// ask also if it's the spaces store cause if deleted and archiving
-			// is on nodeRefIo points to archive store and exists delivers true
-			if (nodeRefIo != null && nodeService.exists(nodeRefIo) && MCAlfrescoAPIClient.storeRef.equals(nodeRefIo.getStoreRef())
-					&& this.hasPermissions(nodeRefIo.getId(), new String[] { PermissionService.READ })
-					&& !ownableService.getOwner(nodeRefIo).equals(authenticationInfo.get(CCConstants.AUTH_USERNAME))) {
-
-				// put duplicates on the end of the list
-				if (toFilterDuplicates.containsKey(nodeRefIo.getId())) {
-					toFilterDuplicates.remove(nodeRefIo.getId());
-				}
-
-				HashMap<String, Object> props = getProperties(nodeRefIo);
-				props.put(CCConstants.VIRT_PROP_NOTIFY_CREATEDATE, new DateTool().formatDate(notifyDate.getTime()));
-				props.put(CCConstants.VIRT_PROP_NOTIFY_CREATEDATE + CCConstants.LONG_DATE_SUFFIX, new Long(notifyDate.getTime()).toString());
-				toFilterDuplicates.put(nodeRefIo.getId(), props);
-
-			}
-
-		}
-		logger.warn("found " + missingCounter + " missing noderRefs in invited objects " + nodeRefs.size());
-
-		return new ArrayList<HashMap<String, Object>>(toFilterDuplicates.values());
-	}
-
 	public void removeRelations(String parentID) throws Exception {
 		NodeRef parentNodeRef = new NodeRef(storeRef, parentID);
 		List<ChildAssociationRef> childAssocList = nodeService.getChildAssocs(parentNodeRef);
@@ -4448,86 +4368,6 @@ public class MCAlfrescoAPIClient extends MCAlfrescoBaseClient {
 		}
 	}
 
-	public List<Notify> getNotifyList(final String nodeId) throws Throwable {
-
-		AuthenticationUtil.RunAsWork<List<Notify>> runsWork = new AuthenticationUtil.RunAsWork<List<Notify>>() {
-			@Override
-			public List<Notify> doWork() throws Exception {
-				List<Notify> notifyList = new ArrayList<Notify>();
-
-				Comparator c = new Comparator<Notify>() {
-					@Override
-					public int compare(Notify o1, Notify o2) {
-						
-						if (o1.getCreated().getTime() == o2.getCreated().getTime()) {
-							return 0;
-						} else if (o1.getCreated().getTime() > o2.getCreated().getTime()) {
-							return -1;
-						} else if (o1.getCreated().getTime() < o2.getCreated().getTime()) {
-							return 1;
-						}
-
-						return 0;
-					}
-
-				};
-
-				MCAlfrescoAPIClient repoClient = new MCAlfrescoAPIClient();
-				HashMap<String, HashMap> parents = null;
-				try {
-					parents = repoClient.getParents(nodeId, false);
-				} catch (Throwable e) {
-					logger.error(e.getMessage(), e);
-					return null;
-				}
-
-				for (Map.Entry<String, HashMap> node : parents.entrySet()) {
-
-					HashMap<String, Object> properties = node.getValue();
-
-					if (CCConstants.CCM_TYPE_NOTIFY.equals(properties.get(CCConstants.NODETYPE))) {
-
-						Notify notify = new Notify();
-						notify.setAcl(repoClient.getPermissions((String) properties.get(CCConstants.SYS_PROP_NODE_UID)));
-
-						String modified = (String) properties.get(CCConstants.CM_PROP_C_CREATED);
-						if (modified != null && !modified.trim().equals("")) {
-							notify.setCreated(new Date(new Long(modified)));
-							notify.setCreatedFormated(new DateTool().formatDate(new Long(modified), DateFormat.LONG, DateFormat.SHORT));
-
-						}
-						notify.setNotifyTarget(nodeId);
-						notify.setNodeId((String) properties.get(CCConstants.SYS_PROP_NODE_UID));
-						notify.setNotifyAction((String) properties.get(CCConstants.CCM_PROP_NOTIFY_ACTION));
-						notify.setNotifyEvent((String) properties.get(CCConstants.CCM_PROP_NOTIFY_EVENT));
-						notify.setNotifyUser((String) properties.get(CCConstants.CCM_PROP_NOTIFY_USER));
-						
-						NodeRef personNodeRef = personService.getPerson((String) properties.get(CCConstants.CCM_PROP_NOTIFY_USER));
-						Map<QName, Serializable> personProps = nodeService.getProperties(personNodeRef);
-						User user = new User(Edu_SharingProperties.instance.isFuzzyUserSearch());
-						user.setNodeId(personNodeRef.getId());
-						user.setEmail((String) personProps.get(ContentModel.PROP_EMAIL));
-						user.setGivenName((String) personProps.get(ContentModel.PROP_FIRSTNAME));
-						user.setSurname((String) personProps.get(ContentModel.PROP_LASTNAME));
-						notify.setUser(user);
-						
-						notifyList.add(notify);
-
-					}
-
-				}
-
-				Collections.sort(notifyList, c);
-				
-				System.out.println("NOTIFYLIST:"+notifyList.size());
-				return notifyList;
-			}
-		};
-
-		return AuthenticationUtil.runAs(runsWork, appInfo.getUsername());
-
-	}
-	
 	
 	public String[] getAspects(String nodeId){
 		return getAspects(new NodeRef(storeRef,nodeId));

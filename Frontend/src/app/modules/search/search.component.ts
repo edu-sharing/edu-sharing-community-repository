@@ -84,7 +84,6 @@ export class SearchComponent {
   public showMoreRepositories=false;
   innerWidth: number = 0;
   breakpoint: number = 800;
-  invalidateNodeStore: Boolean;
 
   @ViewChild('toolbar') toolbar: any;
 
@@ -105,7 +104,9 @@ export class SearchComponent {
   // Max items to fetch at all (afterwards no more infinite scroll)
   private static MAX_ITEMS_COUNT = 300;
   private repositoryIds: any[]=[];
+
   public addNodesToCollection: Node[];
+  public addNodesStream : Node[];
   private mdsSets: MdsInfo[];
   private _mdsId: string;
   private isSearching = false;
@@ -384,7 +385,6 @@ export class SearchComponent {
       reurl:this.searchService.reurl}});
   }
   getSearch(searchString:string = null, init = false,properties:any=this.currentValues) {
-    console.log(properties);
     if(this.isSearching && init || this.repositoryIds.length==0){
       setTimeout(()=>this.getSearch(searchString,init,properties),100);
       return;
@@ -483,7 +483,9 @@ export class SearchComponent {
       }
       this.groupedRepositories=list;
   }
-  render(node: Node) {
+  render(event: any) {
+    console.log(event);
+    let node=event.node;
     if(node.collection){
       this.switchToCollections(node.ref.id);
       return;
@@ -497,7 +499,8 @@ export class SearchComponent {
     this.renderedNode = node;
     this.render_options=[];
     let queryParams={
-      'repository' : RestNetworkService.isFromHomeRepo(node,this.allRepositories) ? null : node.ref.repo
+      "repository" : RestNetworkService.isFromHomeRepo(node,this.allRepositories) ? null : node.ref.repo,
+      "comments" : event.source=="comments" ? true : null
     };
     this.temporaryStorageService.set(TemporaryStorageService.NODE_RENDER_PARAMETER_OPTIONS, this.render_options);
     this.temporaryStorageService.set(TemporaryStorageService.NODE_RENDER_PARAMETER_LIST, this.searchService.searchResult);
@@ -684,6 +687,8 @@ export class SearchComponent {
         };
         options.push(collection);
     }
+    let stream = this.actionbar.createOptionIfPossible('ADD_TO_STREAM', nodes, (node: Node) => this.addToStream(node));
+    options.push(stream);
     let variant = this.actionbar.createOptionIfPossible('CREATE_VARIANT', nodes, (node: Node) => this.nodeVariant = ActionbarHelperService.getNodes(nodes, node)[0]);
     if (variant)
         options.push(variant);
@@ -725,8 +730,7 @@ export class SearchComponent {
       options.push(save);
 
       let download = this.actionbar.createOptionIfPossible('DOWNLOAD', nodes, (node: Node) => NodeHelper.downloadNodes(this.toast, this.connector, ActionbarHelperService.getNodes(nodes, node)));
-      if (download)
-        options.push(download);
+      options.push(download);
 
       if((fromList || nodes && nodes.length==1) && this.config.instant('nodeReport',false)){
         let report = new OptionItem('NODE_REPORT.OPTION', 'flag', (node: Node) => this.nodeReport=this.getCurrentNode(node));
@@ -747,6 +751,10 @@ export class SearchComponent {
     this.setViewType(this.searchService.viewType);
 
     return options;
+  }
+  private addToStream(node: Node) {
+      let nodes=ActionbarHelperService.getNodes(this.selection,node);
+      this.addNodesStream=nodes;
   }
 
   private addToCollectionList(collection:Collection,nodes=this.addNodesToCollection,callback:Function=null,position=0,error=false){
@@ -773,22 +781,12 @@ export class SearchComponent {
     */
   }
 
-  private addToStore(selection: Node[],position=0,errors=0) {
-    if(position==selection.length){
-      if(errors==0)
-        this.toast.toast('SEARCH.ADDED_TO_NODE_STORE',{count:position,errors:errors});
-      this.globalProgress=false;
-      this.updateSelection([]);
-      this.invalidateNodeStore=new Boolean(true);
-      return;
-    }
+  private addToStore(selection: Node[]) {
     this.globalProgress=true;
-    this.iam.addNodeList(SearchNodeStoreComponent.LIST,selection[position].ref.id).subscribe(()=>{
-      this.addToStore(selection,position+1,errors);
-    },(error:any)=>{
-      if(RestHelper.errorMessageContains(error,'Node is already in list'))
-        this.toast.error(null,'SEARCH.ADDED_TO_NODE_STORE_EXISTS',{name:RestHelper.getTitle(selection[position])});
-      this.addToStore(selection,position+1,errors+1)
+    RestHelper.addToStore(selection,this.toast,this.iam,()=>{
+        this.globalProgress=false;
+        this.updateSelection([]);
+        this.mainNavRef.refreshNodeStore();
     });
   }
   private onMdsReady(mds:any=null){
@@ -1098,6 +1096,7 @@ export class SearchComponent {
       (param: any) => {
         this.searchService.init();
         this.mainNavRef.refreshBanner();
+        this.mainNavRef.finishPreloading();
         if(param['addToCollection']){
           this.collectionApi.getCollection(param['addToCollection']).subscribe((data:CollectionWrapper)=>{
             this.addToCollection=data.collection;

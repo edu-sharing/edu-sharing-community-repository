@@ -13,6 +13,7 @@ import javax.imageio.ImageIO;
 import javax.imageio.ImageReader;
 import javax.imageio.stream.ImageInputStream;
 
+import com.googlecode.mp4parser.FileDataSourceImpl;
 import org.alfresco.model.ContentModel;
 import org.alfresco.repo.lock.mem.LockState;
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
@@ -27,6 +28,7 @@ import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.repository.NodeService;
 import org.alfresco.service.namespace.QName;
 import org.apache.log4j.Logger;
+import org.apache.tika.io.TikaInputStream;
 import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.server.tools.ActionObserver;
@@ -65,39 +67,47 @@ public class PreviewJob implements Job {
 			public Void doWork() throws Exception {
 				ContentReader reader = contentService.getReader(nodeRef, ContentModel.PROP_CONTENT);
 				if(reader.getMimetype().contains("video")){
-					
-					ReadableByteChannel rbc = null;
+
+					MovieBox moov =null;
+					IsoFile isoFile = null;
 					try{
-						
-						rbc = Channels.newChannel(reader.getContentInputStream());
-						IsoFile isoFile = new IsoFile(rbc);
-						MovieBox moov = isoFile.getMovieBox();
+
+						TikaInputStream tstream = TikaInputStream.get(reader.getContentInputStream());
+						isoFile = new IsoFile(new FileDataSourceImpl(tstream.getFile()));
+						moov = isoFile.getMovieBox();
+
 						if(moov != null && moov.getBoxes() != null){
 							for(Box b : moov.getBoxes()) {
-							   
-							    
-							    if(b instanceof TrackBox){
-							    	TrackHeaderBox thb = ((TrackBox)b).getTrackHeaderBox();
-							    	
-							    	if(thb.getWidth() > 0 && thb.getHeight() > 0){
-							    		nodeService.setProperty(nodeRef, QName.createQName(CCConstants.CCM_PROP_IO_WIDTH), thb.getWidth());
-							    		nodeService.setProperty(nodeRef, QName.createQName(CCConstants.CCM_PROP_IO_HEIGHT), thb.getHeight());
-							    	}
-							 
-							    }
-							    
+
+
+								if(b instanceof TrackBox){
+									TrackHeaderBox thb = ((TrackBox)b).getTrackHeaderBox();
+
+									if(thb.getWidth() > 0 && thb.getHeight() > 0){
+										nodeService.setProperty(nodeRef, QName.createQName(CCConstants.CCM_PROP_IO_WIDTH), thb.getWidth());
+										nodeService.setProperty(nodeRef, QName.createQName(CCConstants.CCM_PROP_IO_HEIGHT), thb.getHeight());
+									}
+
+								}
+
 							}
 						}
-						
+
 					}catch(Exception e){
 						logger.error(e.getMessage(), e);
-					}finally{
-						
-						if(rbc != null){
-							try{
-							
-								rbc.close();
-							}catch(IOException e){
+					}finally {
+						if (isoFile != null) {
+							try {
+								isoFile.close();
+							} catch (IOException e) {
+								logger.error(e.getMessage(), e);
+							}
+						}
+
+						if (moov != null) {
+							try {
+								moov.close();
+							} catch (IOException e) {
 								logger.error(e.getMessage(), e);
 							}
 						}

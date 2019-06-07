@@ -179,17 +179,6 @@ public class MCAlfrescoServiceImpl extends RemoteServiceServlet implements MCAlf
 		super.service(req, resp);
 	}
 	
-	public ArrayList<HashMap<String,Object>> getNewestNodes(String repositoryId,Integer from, Integer to) throws CCException{
-		try{
-			MCAlfrescoBaseClient repoClient = getMCAlfrescoBaseClient(repositoryId);
-			return repoClient.getNewestNodes(from,to);
-		}catch(Throwable e){
-			this.errorHandling(e);
-			return null;
-		}
-	}
-	
-
 	public SearchResult search(SearchToken searchToken) throws CCException {
 		logger.info("start searching Repository:" + searchToken.getRepositoryId() + " cap:"
 				+ ApplicationInfoList.getRepositoryInfoById(searchToken.getRepositoryId()).getAppCaption());
@@ -1358,135 +1347,7 @@ public class MCAlfrescoServiceImpl extends RemoteServiceServlet implements MCAlf
 			errorEle(node.getChildNodes().item(i), space);
 		}
 	}
-
-	/**
-	 * this method is used to set and remove Permissions for a set of
-	 * authorities
-	 * 
-	 * @param ioNodeId
-	 * @param ArrayList <PermissionContainer> permissionContainers
-	 * @param authenticationInfo
-	 */
-	public void setPermissions(SetPermissions setPermissions) throws CCException {
-
-		HashMap<String,String> authenticationInfo = null;
-		try {
-			authenticationInfo = getValidatedAuthInfo(null);
-			
-		} catch (Throwable e) {
-			this.errorHandling(e);
-			return;
-		}
-		
-		// for all users
-		logger.debug("permContainer:" + setPermissions.getPermissionContainers());
-		for (PermissionContainer permCont : setPermissions.getPermissionContainers()) {
-			logger.debug("permCont.getAuthorityType():" + permCont.getAuthorityType());
-			if (permCont.getAuthorityType().equals(CCConstants.PERM_AUTHORITY_TYPE_USER)) {
-				
-				//cause the search only delivers local users(even shadow ones) we don't need to check and create remote users here
-				//HashMap<String, String> userProps = checkAndCreateShadowUser(permCont.getAuthorityProps(), authenticationInfo);
-				HashMap<String, String> userProps  = null;
-				try{
-					MCAlfrescoBaseClient baseClient = (MCAlfrescoBaseClient) RepoFactory.getInstance(null, authenticationInfo);
-					userProps = baseClient.getUserInfo((String)permCont.getAuthorityProps().get(CCConstants.PROP_USERNAME));
-				}catch(Throwable e){
-					this.errorHandling(e);
-					return;
-				}
-				
-				logger.debug("userProps:" + userProps);
-				if (userProps != null && userProps.get(CCConstants.PROP_USERNAME) != null
-						&& userProps.get(CCConstants.PROP_USERNAME).equals(permCont.getAuthorityName())) {
-					logger.info("AUTHORITY:" + permCont.getAuthorityName());
-					logger.info("   SET Permissions:");
-
-					// first remove than set this is necessary for Permissionpanel that 
-					// removes all old permissions and add's the new one
-					logger.info("   REMOVE Permissions:" + permCont.getPermissionsToRemove());
-					for (String perm : permCont.getPermissionsToRemove()) {
-						logger.info("     " + perm);
-					}
-					removePermissions(setPermissions.getNodeId(), permCont.getAuthorityName(), permCont.getPermissionsToRemove());
-					for (String perm : permCont.getPermissionsToSet()) {
-						logger.info("     " + perm);
-					}
-					setPermissions(setPermissions.getNodeId(), permCont.getAuthorityName(), permCont.getPermissionsToSet(), setPermissions.getInherit());
-
-				} else {
-					removePermissions(setPermissions.getNodeId(), permCont.getAuthorityName(), permCont.getPermissionsToRemove());
-				}
-			} else {
-				// first remove than set the new
-				removePermissions(setPermissions.getNodeId(), permCont.getAuthorityName(), permCont.getPermissionsToRemove());
-				setPermissions(setPermissions.getNodeId(), permCont.getAuthorityName(), permCont.getPermissionsToSet(), setPermissions.getInherit());
-			}
-		}
-
-		// set licenses
-		setLicenses(setPermissions.getNodeId(), setPermissions.getAssignedLicenses(), authenticationInfo);
-		/**
-		 * @TODO make this hole permission stuff run inside an transaction
-		 */
-		try{
-			org.edu_sharing.service.permission.PermissionService permissionService = PermissionServiceFactory.getPermissionService(ApplicationInfoList.getHomeRepository().getAppId());
-			permissionService.createNotifyObject(setPermissions.getNodeId(), authenticationInfo.get(CCConstants.AUTH_USERNAME), CCConstants.CCM_VALUE_NOTIFY_EVENT_PERMISSION, CCConstants.CCM_VALUE_NOTIFY_ACTION_PERMISSION_CHANGE);
-		}catch(Throwable e){
-			this.errorHandling(e);
-		}
-	}
 	
-	public void setPermissions(String repositoryid, String nodeId, ACE[] aces) throws CCException {
-		try{
-			org.edu_sharing.service.permission.PermissionService permissionService = PermissionServiceFactory.getPermissionService(repositoryid);
-			permissionService.setPermissions(nodeId, Arrays.asList(aces));
-			
-			HashMap<String,String> authenticationInfo = null;
-			try{
-				authenticationInfo = getValidatedAuthInfo(null);
-			}catch(Throwable e){
-				this.errorHandling(e);
-				return;
-			}
-
-			HashMap<String,AssignedLicense> alicenses = new HashMap<String,AssignedLicense>();
-			for(ACE ace : aces){
-				AssignedLicense licenses = alicenses.get(ace.getAuthority());
-				if (licenses == null) {
-					String[] license =  CCConstants.PERMISSION_CC_PUBLISH.equals(ace.getPermission()) ? new String[]{CCConstants.COMMON_LICENSE_EDU_NC} : new String[]{CCConstants.COMMON_LICENSE_EDU_P_NR};
-					licenses = new AssignedLicense(nodeId, ace.getAuthority(), license);
-				} else {
-					licenses.setLicenses(CCConstants.PERMISSION_CC_PUBLISH.equals(ace.getPermission()) ? new String[]{CCConstants.COMMON_LICENSE_EDU_NC} : new String[]{CCConstants.COMMON_LICENSE_EDU_P_NR});
-				}
-				alicenses.put(ace.getAuthority(), licenses);
-			}
-			
-			// set licenses
-			setLicenses(nodeId, alicenses.values().toArray(new AssignedLicense[alicenses.values().size()]), authenticationInfo);
-			/**
-			 * @TODO make this hole permission stuff run inside an transaction
-			 */
-			permissionService.createNotifyObject(nodeId, authenticationInfo.get(CCConstants.AUTH_USERNAME), CCConstants.CCM_VALUE_NOTIFY_EVENT_PERMISSION, CCConstants.CCM_VALUE_NOTIFY_ACTION_PERMISSION_CHANGE);
-			
-		} catch(Throwable e){
-			this.errorHandling(e);
-		}
-		
-	}
-	
-	public void setPermissionsInherit(String nodeId, boolean inheritPermission) throws CCSessionExpiredException, CCException {
-		this.setPermissions(nodeId, null, null, inheritPermission);
-		/**
-		 * @TODO make this hole permission stuff run inside an transaction
-		 */
-		try {
-			org.edu_sharing.service.permission.PermissionService permissionService = PermissionServiceFactory.getPermissionService(ApplicationInfoList.getHomeRepository().getAppId());
-			permissionService.createNotifyObject(nodeId, getValidatedAuthInfo(null).get(CCConstants.AUTH_USERNAME), CCConstants.CCM_VALUE_NOTIFY_EVENT_PERMISSION, CCConstants.CCM_VALUE_NOTIFY_ACTION_PERMISSION_CHANGE_INHERIT);
-		} catch (Throwable e) {
-			this.errorHandling(e);
-		}
-	}
-
 	private void setPermissions(String nodeId, String _authority, String[] permissions, boolean inheritPermission) throws CCSessionExpiredException, CCException {
 		try {
 			org.edu_sharing.service.permission.PermissionService permissionService = PermissionServiceFactory.getPermissionService(ApplicationInfoList.getHomeRepository().getAppId());
@@ -2721,16 +2582,7 @@ public class MCAlfrescoServiceImpl extends RemoteServiceServlet implements MCAlf
 		}
 		return result;
 	}
-	
-	public ArrayList<Notify> getNotifyList(String repId, String nodeId) throws CCException {
-		try {
-			MCAlfrescoBaseClient mcAlfrescoBaseClient = getMCAlfrescoBaseClient(repId);
-			return new ArrayList<Notify>(mcAlfrescoBaseClient.getNotifyList(nodeId));	
-		} catch (Throwable e) {
-			this.errorHandling(e);
-			return null;
-		}	
-	}
+
 	
 	public CacheInfo getCacheInfo(String name) throws CCException {
 		if (!isAdmin(null)) {
@@ -2751,10 +2603,5 @@ public class MCAlfrescoServiceImpl extends RemoteServiceServlet implements MCAlf
 		EduGroupCache.refresh();
 	}
 	
-	@Override
-	public void setPermissionsAndMail(SetPermissionsAndMail setPermAndMail) throws CCSessionExpiredException, CCException {
-		// TODO Auto-generated method stub
-		
-	}
 	
 }

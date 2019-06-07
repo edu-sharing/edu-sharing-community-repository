@@ -1,7 +1,7 @@
 <div class="dialog darken" [@fade]="this"></div>
 <div class="card center-card card-high card-wide card-action" [@cardAnimation]="this">
   <div class="card-content">
-    <div class="card-cancel" (click)="close()"><i class="material-icons">close</i></div>
+    <div tabindex="0" class="card-cancel" (click)="close()" (keyup.enter)="close()"><i icon iconId="close" aria="true"></i></div>
     <div class="card-title">{{'NODE_INFO.TITLE' | translate:{name:_node.name} }}</div>
     <div class="card-scroll node-info">
       <div><span>{{'NODE.cm:name' | translate}}</span><span>{{_node.name}}</span></div>
@@ -65,6 +65,6 @@
     </div>
   </div>
   <div class="card-action">
-    <a class="btn waves-effect waves-light" tabindex="0" focus (keyup.enter)="close()" (click)="close()">{{'CLOSE' | translate}}</a>
+    <a class="btn waves-effect waves-light" tabindex="0" (keyup.enter)="close()" (click)="close()">{{'CLOSE' | translate}}</a>
   </div>
 </div>

@@ -1,5 +1,6 @@
 package org.edu_sharing.restservices.shared;
 
+import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.service.admin.model.GlobalGroup;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -21,8 +22,14 @@ public class Group extends Authority {
 	 * @TODO is an prop for the ACE Object, remove when not longer needed
 	 */
 	private boolean editable = true;
-	
-	public Group(){}
+	public Group(){
+	}
+	public static Group getEveryone(){
+		Group group=new Group();
+		group.setAuthorityName(CCConstants.AUTHORITY_GROUP_EVERYONE);
+		group.setAuthorityType(Authority.Type.EVERYONE);
+		return group;
+	}
 	public Group(GlobalGroup group) {
 		groupName=group.getName();
 		setAuthorityType(Authority.Type.GROUP);

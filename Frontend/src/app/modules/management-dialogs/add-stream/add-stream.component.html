@@ -1,0 +1,41 @@
+<div class="dialog darken" [@fade]="this"></div>
+<div class="card center-card card-action card-high" [@cardAnimation]="this">
+  <div class="card-content">
+    <div tabindex="0" class="card-cancel" (click)="cancel()" (keyup.enter)="cancel()"><i icon iconId="close" aria="true"></i></div>
+    <div class="card-title">{{'ADD_TO_STREAM.TITLE' | translate }}</div>
+    <div class="wrapper card-scroll">
+    <mds #mds
+      [embedded]="true"
+      [groupId]="'add_to_stream'"
+      [invalidate]="reloadMds"
+    ></mds>
+    <div class="audience">
+      <h4>{{'ADD_TO_STREAM.AUDIENCE_TYPE' | translate}}</h4>
+      <input type="radio" name="audienceType" id="audienceTypeEveryone" [(ngModel)]="audienceMode" value="0"><label for="audienceTypeEveryone">{{'ADD_TO_STREAM.AUDIENCE_EVERYONE' | translate}}</label>
+      <input type="radio" name="audienceType" id="audienceTypeCustom" [(ngModel)]="audienceMode" value="1"><label for="audienceTypeCustom">{{'ADD_TO_STREAM.AUDIENCE_CUSTOM' | translate}}</label>
+      <div class="audienceEveryone" *ngIf="audienceMode==AUDIENCE_MODE_EVERYONE">
+        {{'ADD_TO_STREAM.AUDIENCE_EVERYONE_INFO' | translate}}
+      </div>
+      <div class="audienceSearch" *ngIf="audienceMode==AUDIENCE_MODE_CUSTOM">
+        <div class="search"><authority-search-input
+          [globalSearch]="false"
+          [maxSuggestions]="5"
+          (onChooseAuthority)="addInvite($event)"
+        ></authority-search-input>
+        </div>
+        <div class="toInvite">
+          <div class="badge" *ngFor="let auth of invite">
+            <span>{{auth | authorityName}}</span>
+            <i class="material-icons clickable" (click)="removeInvite(auth)">cancel</i>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  </div>
+
+  <div class="card-action">
+    <a class="waves-effect waves-light btn" (click)="save()" tabindex="0" (keyup.enter)="save()">{{'SAVE' | translate }}</a>
+    <a class="btn-flat" tabindex="0" (click)="cancel()" (keyup.enter)="cancel()">{{'CANCEL' | translate }}</a>
+  </div>
+</div>

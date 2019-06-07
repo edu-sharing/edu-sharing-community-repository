@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="UTF-8"?>
+<?xml version="1.0" encoding="UTF-8"?>
 <!-- xsi:schemaLocation="http://www.alfresco.org/model/dictionary/1.0 modelSchema.xsd" -->
 <model name="cm:contentmodel" 
        xmlns="http://www.alfresco.org/model/dictionary/1.0" 
@@ -195,7 +195,7 @@
             </property>
             <property name="cm:email">
                <type>d:text</type>
-                <!-- edu-sharing customization: to make it impossible to search for a part of an email also create an untokenized version -->
+                <!-- edu-sharing customization: to make it unpossible to search for a part of an email also create an untokenized version -->
                <index enabled="true">
 		           <atomic>true</atomic>
 		           <stored>false</stored>
@@ -322,7 +322,7 @@
                 <protected>true</protected>
             </property>
             
-             <!-- CampusContent Customization: holds information if it's an shadowuser -->
+               <!-- CampusContent Customization: holds information if it's an shadowuser -->
             <property name="cm:isShadowUser">
                <type>d:boolean</type>
                <default>false</default>
@@ -375,6 +375,24 @@
             	<type>d:datetime</type>
             </property>
 
+            <!-- edu-sharing customization whether the user is interested in receiving mail updates / notifications -->
+            <property name="cm:personallownotifications">
+               <type>d:boolean</type>
+            </property>
+            <!-- edu-sharing customization description/about the user -->
+            <property name="cm:personabout">
+               <type>d:text</type>
+            </property>
+            <!-- edu-sharing customization skills of the user -->
+            <property name="cm:personskills">
+               <type>d:text</type>
+               <multiple>true</multiple>
+			   <index enabled="true">
+                 	<atomic>true</atomic>
+                 	<stored>false</stored>
+                	<tokenised>both</tokenised>
+               </index>
+         	 </property>
          </properties>
          
          <associations>
@@ -392,7 +410,7 @@
                </target>
             </association>
             
-             <!-- CampusContent Customization: AccessList-->
+               <!-- CampusContent Customization: AccessList-->
             <child-association name="cm:accesslist">
             	 <title>Application accesslist for user</title>
                <source>
@@ -467,6 +485,7 @@
        	   </property>
        	 </properties>
       </type>
+
 
       <type name="cm:authorityContainer">
          <title>Alfresco Authority Type</title>

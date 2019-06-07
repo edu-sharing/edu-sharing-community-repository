@@ -47,281 +47,11 @@
 	<classpathentry exported="true" kind="lib" path="gwt/validation-api-1.0.0.GA.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/org.apache.oltu.oauth2.authzserver-1.0.2.jar" sourcepath="/org.apache.oltu.oauth2.authzserver"/>
 	<classpathentry exported="true" kind="lib" path="lib/org.apache.oltu.oauth2.common-1.0.2.jar" sourcepath="/org.apache.oltu.oauth2.common"/>
-	<classpathentry exported="true" kind="var" path="ALFRESCO_50d_WEBAPP_LIB/javax.inject-1.jar"/>
-	<classpathentry exported="true" kind="var" path="ALFRESCO_50d_WEBAPP_LIB/acegi-security-0.8.2_patched.jar"/>
-	<classpathentry exported="true" kind="var" path="ALFRESCO_50d_WEBAPP_LIB/activation-1.1.jar"/>
-	<classpathentry exported="true" kind="var" path="ALFRESCO_50d_WEBAPP_LIB/activemq-amqp-5.10.0.jar"/>
-	<classpathentry exported="true" kind="var" path="ALFRESCO_50d_WEBAPP_LIB/activemq-broker-5.10.0.jar"/>
-	<classpathentry exported="true" kind="var" path="ALFRESCO_50d_WEBAPP_LIB/activemq-camel-5.10.0.jar"/>
-	<classpathentry exported="true" kind="var" path="ALFRESCO_50d_WEBAPP_LIB/activemq-client-5.10.0.jar"/>
-	<classpathentry exported="true" kind="var" path="ALFRESCO_50d_WEBAPP_LIB/activemq-jms-pool-5.10.0.jar"/>
-	<classpathentry exported="true" kind="var" path="ALFRESCO_50d_WEBAPP_LIB/activemq-kahadb-store-5.10.0.jar"/>
-	<classpathentry exported="true" kind="var" path="ALFRESCO_50d_WEBAPP_LIB/activemq-openwire-legacy-5.10.0.jar"/>
-	<classpathentry exported="true" kind="var" path="ALFRESCO_50d_WEBAPP_LIB/activemq-pool-5.10.0.jar"/>
-	<classpathentry exported="true" kind="var" path="ALFRESCO_50d_WEBAPP_LIB/activemq-protobuf-1.1.jar"/>
-	<classpathentry exported="true" kind="var" path="ALFRESCO_50d_WEBAPP_LIB/activemq-spring-5.10.0.jar"/>
-	<classpathentry exported="true" kind="var" path="ALFRESCO_50d_WEBAPP_LIB/activiti-bpmn-converter-5.16.4.jar"/>
-	<classpathentry exported="true" kind="var" path="ALFRESCO_50d_WEBAPP_LIB/activiti-bpmn-model-5.16.4.jar"/>
-	<classpathentry exported="true" kind="var" path="ALFRESCO_50d_WEBAPP_LIB/activiti-engine-5.16.4.jar"/>
-	<classpathentry exported="true" kind="var" path="ALFRESCO_50d_WEBAPP_LIB/activiti-image-generator-5.16.4.jar"/>
-	<classpathentry exported="true" kind="var" path="ALFRESCO_50d_WEBAPP_LIB/activiti-process-validation-5.16.4.jar"/>
-	<classpathentry exported="true" kind="var" path="ALFRESCO_50d_WEBAPP_LIB/activiti-spring-5.16.4.jar"/>
-	<classpathentry exported="true" kind="var" path="ALFRESCO_50d_WEBAPP_LIB/alfresco-core-5.0.d.jar"/>
-	<classpathentry exported="true" kind="var" path="ALFRESCO_50d_WEBAPP_LIB/alfresco-data-model-5.0.d.jar"/>
-	<classpathentry exported="true" kind="var" path="ALFRESCO_50d_WEBAPP_LIB/alfresco-events-1.2.4.jar"/>
-	<classpathentry exported="true" kind="var" path="ALFRESCO_50d_WEBAPP_LIB/alfresco-greenmail-5.0.d.jar"/>
-	<classpathentry exported="true" kind="var" path="ALFRESCO_50d_WEBAPP_LIB/alfresco-jlan-embed-5.0.d.jar"/>
-	<classpathentry exported="true" kind="var" path="ALFRESCO_50d_WEBAPP_LIB/alfresco-legacy-lucene-5.0.d.jar"/>
-	<classpathentry exported="true" kind="var" path="ALFRESCO_50d_WEBAPP_LIB/alfresco-mbeans-5.0.d.jar"/>
-	<classpathentry exported="true" kind="var" path="ALFRESCO_50d_WEBAPP_LIB/alfresco-messaging-repo-1.2.4.jar"/>
-	<classpathentry exported="true" kind="var" path="ALFRESCO_50d_WEBAPP_LIB/alfresco-opencmis-extension-1.0.jar"/>
-	<classpathentry exported="true" kind="var" path="ALFRESCO_50d_WEBAPP_LIB/alfresco-remote-api-5.0.d.jar"/>
-	<classpathentry exported="true" kind="var" path="ALFRESCO_50d_WEBAPP_LIB/alfresco-repository-5.0.d.jar" sourcepath="/alf5 src"/>
-	<classpathentry exported="true" kind="var" path="ALFRESCO_50d_WEBAPP_LIB/alfresco-text-gen-1.1.jar"/>
-	<classpathentry exported="true" kind="var" path="ALFRESCO_50d_WEBAPP_LIB/alfresco-web-framework-commons-5.0.d-classes.jar"/>
-	<classpathentry exported="true" kind="var" path="ALFRESCO_50d_WEBAPP_LIB/alfresco-xmlfactory-1.0.2.jar"/>
-	<classpathentry exported="true" kind="var" path="ALFRESCO_50d_WEBAPP_LIB/antlr-2.7.7.jar"/>
-	<classpathentry exported="true" kind="var" path="ALFRESCO_50d_WEBAPP_LIB/antlr-3.5.2.jar"/>
-	<classpathentry exported="true" kind="var" path="ALFRESCO_50d_WEBAPP_LIB/antlr-runtime-3.5.2.jar"/>
-	<classpathentry exported="true" kind="var" path="ALFRESCO_50d_WEBAPP_LIB/apache-mime4j-core-0.7.2.jar"/>
-	<classpathentry exported="true" kind="var" path="ALFRESCO_50d_WEBAPP_LIB/apache-mime4j-dom-0.7.2.jar"/>
-	<classpathentry exported="true" kind="var" path="ALFRESCO_50d_WEBAPP_LIB/asm-3.1.jar"/>
-	<classpathentry exported="true" kind="var" path="ALFRESCO_50d_WEBAPP_LIB/aspectjrt-1.6.11.jar"/>
-	<classpathentry exported="true" kind="var" path="ALFRESCO_50d_WEBAPP_LIB/avalon-framework-api-4.3.1.jar"/>
-	<classpathentry exported="true" kind="var" path="ALFRESCO_50d_WEBAPP_LIB/avalon-framework-impl-4.3.1.jar"/>
-	<classpathentry exported="true" kind="var" path="ALFRESCO_50d_WEBAPP_LIB/batik-awt-util-1.6-1.jar"/>
-	<classpathentry exported="true" kind="var" path="ALFRESCO_50d_WEBAPP_LIB/batik-bridge-1.6-1.jar"/>
-	<classpathentry exported="true" kind="var" path="ALFRESCO_50d_WEBAPP_LIB/batik-css-1.6-1.jar"/>
-	<classpathentry exported="true" kind="var" path="ALFRESCO_50d_WEBAPP_LIB/batik-dom-1.6-1.jar"/>
-	<classpathentry exported="true" kind="var" path="ALFRESCO_50d_WEBAPP_LIB/batik-ext-1.6-1.jar"/>
-	<classpathentry exported="true" kind="var" path="ALFRESCO_50d_WEBAPP_LIB/batik-extension-1.6-1.jar"/>
-	<classpathentry exported="true" kind="var" path="ALFRESCO_50d_WEBAPP_LIB/batik-gui-util-1.6-1.jar"/>
-	<classpathentry exported="true" kind="var" path="ALFRESCO_50d_WEBAPP_LIB/batik-gvt-1.6-1.jar"/>
-	<classpathentry exported="true" kind="var" path="ALFRESCO_50d_WEBAPP_LIB/batik-parser-1.6-1.jar"/>
-	<classpathentry exported="true" kind="var" path="ALFRESCO_50d_WEBAPP_LIB/batik-script-1.6-1.jar"/>
-	<classpathentry exported="true" kind="var" path="ALFRESCO_50d_WEBAPP_LIB/batik-svg-dom-1.6-1.jar"/>
-	<classpathentry exported="true" kind="var" path="ALFRESCO_50d_WEBAPP_LIB/batik-transcoder-1.6-1.jar"/>
-	<classpathentry exported="true" kind="var" path="ALFRESCO_50d_WEBAPP_LIB/batik-util-1.6-1.jar"/>
-	<classpathentry exported="true" kind="var" path="ALFRESCO_50d_WEBAPP_LIB/batik-xml-1.6-1.jar"/>
-	<classpathentry exported="true" kind="var" path="ALFRESCO_50d_WEBAPP_LIB/bcel-6.0-RC3.jar"/>
-	<classpathentry exported="true" kind="var" path="ALFRESCO_50d_WEBAPP_LIB/bcmail-jdk15-1.45.jar"/>
-	<classpathentry exported="true" kind="var" path="ALFRESCO_50d_WEBAPP_LIB/bcprov-jdk15-1.45.jar"/>
-	<classpathentry exported="true" kind="var" path="ALFRESCO_50d_WEBAPP_LIB/bliki-3.0.2.jar"/>
-	<classpathentry exported="true" kind="var" path="ALFRESCO_50d_WEBAPP_LIB/boilerpipe-1.1.0.jar"/>
-	<classpathentry exported="true" kind="var" path="ALFRESCO_50d_WEBAPP_LIB/bsf-2.4.0.jar"/>
-	<classpathentry exported="true" kind="var" path="ALFRESCO_50d_WEBAPP_LIB/bsh-1.3.0.jar"/>
-	<classpathentry exported="true" kind="var" path="ALFRESCO_50d_WEBAPP_LIB/camel-amqp-2.13.2.jar"/>
-	<classpathentry exported="true" kind="var" path="ALFRESCO_50d_WEBAPP_LIB/camel-core-2.13.2.jar"/>
-	<classpathentry exported="true" kind="var" path="ALFRESCO_50d_WEBAPP_LIB/camel-jackson-2.13.2.jar"/>
-	<classpathentry exported="true" kind="var" path="ALFRESCO_50d_WEBAPP_LIB/camel-jms-2.13.2.jar"/>
-	<classpathentry exported="true" kind="var" path="ALFRESCO_50d_WEBAPP_LIB/camel-spring-2.13.2.jar"/>
-	<classpathentry exported="true" kind="var" path="ALFRESCO_50d_WEBAPP_LIB/cglib-2.2.jar"/>
-	<classpathentry exported="true" kind="var" path="ALFRESCO_50d_WEBAPP_LIB/chemistry-opencmis-client-api-0.11.0.jar"/>
-	<classpathentry exported="true" kind="var" path="ALFRESCO_50d_WEBAPP_LIB/chemistry-opencmis-client-bindings-0.11.0.jar"/>
-	<classpathentry exported="true" kind="var" path="ALFRESCO_50d_WEBAPP_LIB/chemistry-opencmis-client-impl-0.11.0.jar"/>
-	<classpathentry exported="true" kind="var" path="ALFRESCO_50d_WEBAPP_LIB/chemistry-opencmis-commons-api-0.11.0.jar"/>
-	<classpathentry exported="true" kind="var" path="ALFRESCO_50d_WEBAPP_LIB/chemistry-opencmis-commons-impl-0.11.0.jar"/>
-	<classpathentry exported="true" kind="var" path="ALFRESCO_50d_WEBAPP_LIB/chemistry-opencmis-server-bindings-0.11.0.jar"/>
-	<classpathentry exported="true" kind="var" path="ALFRESCO_50d_WEBAPP_LIB/chemistry-opencmis-server-support-0.11.0.jar"/>
-	<classpathentry exported="true" kind="var" path="ALFRESCO_50d_WEBAPP_LIB/chemistry-opencmis-test-browser-0.11.0.jar"/>
-	<classpathentry exported="true" kind="var" path="ALFRESCO_50d_WEBAPP_LIB/chemistry-opencmis-test-tck-0.11.0.jar"/>
-	<classpathentry exported="true" kind="var" path="ALFRESCO_50d_WEBAPP_LIB/commons-beanutils-1.9.2.jar"/>
-	<classpathentry exported="true" kind="var" path="ALFRESCO_50d_WEBAPP_LIB/commons-codec-1.10.jar"/>
-	<classpathentry exported="true" kind="var" path="ALFRESCO_50d_WEBAPP_LIB/commons-collections-3.2.1.jar"/>
-	<classpathentry exported="true" kind="var" path="ALFRESCO_50d_WEBAPP_LIB/commons-compress-1.9.jar"/>
-	<classpathentry exported="true" kind="var" path="ALFRESCO_50d_WEBAPP_LIB/commons-csv-20110211.jar"/>
-	<classpathentry exported="true" kind="var" path="ALFRESCO_50d_WEBAPP_LIB/commons-dbcp-1.4-DBCP330.jar"/>
-	<classpathentry exported="true" kind="var" path="ALFRESCO_50d_WEBAPP_LIB/commons-digester-2.1.jar"/>
-	<classpathentry exported="true" kind="var" path="ALFRESCO_50d_WEBAPP_LIB/commons-discovery-0.5.jar"/>
-	<classpathentry exported="true" kind="var" path="ALFRESCO_50d_WEBAPP_LIB/commons-el-1.0.jar"/>
-	<classpathentry exported="true" kind="var" path="ALFRESCO_50d_WEBAPP_LIB/commons-email-1.2.jar"/>
-	<classpathentry exported="true" kind="var" path="ALFRESCO_50d_WEBAPP_LIB/commons-fileupload-1.3.1.jar"/>
-	<classpathentry exported="true" kind="var" path="ALFRESCO_50d_WEBAPP_LIB/commons-httpclient-3.1-HTTPCLIENT-1265.jar"/>
-	<classpathentry exported="true" kind="var" path="ALFRESCO_50d_WEBAPP_LIB/commons-io-2.4.jar"/>
-	<classpathentry exported="true" kind="var" path="ALFRESCO_50d_WEBAPP_LIB/commons-jxpath-1.3.jar"/>
-	<classpathentry exported="true" kind="var" path="ALFRESCO_50d_WEBAPP_LIB/commons-lang-2.6.jar"/>
-	<classpathentry exported="true" kind="var" path="ALFRESCO_50d_WEBAPP_LIB/commons-lang3-3.3.2.jar"/>
-	<classpathentry exported="true" kind="var" path="ALFRESCO_50d_WEBAPP_LIB/commons-logging-1.2.jar"/>
-	<classpathentry exported="true" kind="var" path="ALFRESCO_50d_WEBAPP_LIB/commons-math3-3.3.jar"/>
-	<classpathentry exported="true" kind="var" path="ALFRESCO_50d_WEBAPP_LIB/commons-modeler-2.0.1.jar"/>
-	<classpathentry exported="true" kind="var" path="ALFRESCO_50d_WEBAPP_LIB/commons-net-3.3.jar"/>
-	<classpathentry exported="true" kind="var" path="ALFRESCO_50d_WEBAPP_LIB/commons-pool-1.6.jar"/>
-	<classpathentry exported="true" kind="var" path="ALFRESCO_50d_WEBAPP_LIB/concurrentlinkedhashmap-lru-1.2.jar"/>
-	<classpathentry exported="true" kind="var" path="ALFRESCO_50d_WEBAPP_LIB/cors-filter-1.9.3.jar"/>
-	<classpathentry exported="true" kind="var" path="ALFRESCO_50d_WEBAPP_LIB/dom4j-1.6.1.jar"/>
-	<classpathentry exported="true" kind="var" path="ALFRESCO_50d_WEBAPP_LIB/FastInfoset-1.2.2.jar"/>
-	<classpathentry exported="true" kind="var" path="ALFRESCO_50d_WEBAPP_LIB/fop-0.94.jar"/>
-	<classpathentry exported="true" kind="var" path="ALFRESCO_50d_WEBAPP_LIB/freemarker-2.3.20-alfresco-patched.jar"/>
-	<classpathentry exported="true" kind="var" path="ALFRESCO_50d_WEBAPP_LIB/gdata-client-1.0-1.47.1.jar"/>
-	<classpathentry exported="true" kind="var" path="ALFRESCO_50d_WEBAPP_LIB/gdata-client-meta-1.0-1.47.1.jar"/>
-	<classpathentry exported="true" kind="var" path="ALFRESCO_50d_WEBAPP_LIB/gdata-core-1.0-1.47.1.jar"/>
-	<classpathentry exported="true" kind="var" path="ALFRESCO_50d_WEBAPP_LIB/gdata-docs-3.0-1.47.1.jar"/>
-	<classpathentry exported="true" kind="var" path="ALFRESCO_50d_WEBAPP_LIB/gdata-docs-meta-3.0-1.47.1.jar"/>
-	<classpathentry exported="true" kind="var" path="ALFRESCO_50d_WEBAPP_LIB/gdata-media-1.0-1.47.1.jar"/>
-	<classpathentry exported="true" kind="var" path="ALFRESCO_50d_WEBAPP_LIB/gdata-youtube-2.0-1.47.1.jar"/>
-	<classpathentry exported="true" kind="var" path="ALFRESCO_50d_WEBAPP_LIB/geronimo-activation_1.1_spec-1.0.2.jar"/>
-	<classpathentry exported="true" kind="var" path="ALFRESCO_50d_WEBAPP_LIB/geronimo-annotation_1.0_spec-1.1.1.jar"/>
-	<classpathentry exported="true" kind="var" path="ALFRESCO_50d_WEBAPP_LIB/geronimo-j2ee-management_1.1_spec-1.0.1.jar"/>
-	<classpathentry exported="true" kind="var" path="ALFRESCO_50d_WEBAPP_LIB/geronimo-jaxws_2.1_spec-1.0.jar"/>
-	<classpathentry exported="true" kind="var" path="ALFRESCO_50d_WEBAPP_LIB/geronimo-jms_1.1_spec-1.1.1.jar"/>
-	<classpathentry exported="true" kind="var" path="ALFRESCO_50d_WEBAPP_LIB/geronimo-jta_1.0.1B_spec-1.0.1.jar"/>
-	<classpathentry exported="true" kind="var" path="ALFRESCO_50d_WEBAPP_LIB/geronimo-stax-api_1.0_spec-1.0.1.jar"/>
-	<classpathentry exported="true" kind="var" path="ALFRESCO_50d_WEBAPP_LIB/geronimo-ws-metadata_2.0_spec-1.1.2.jar"/>
-	<classpathentry exported="true" kind="var" path="ALFRESCO_50d_WEBAPP_LIB/groovy-all-2.1.7-indy.jar"/>
-	<classpathentry exported="true" kind="var" path="ALFRESCO_50d_WEBAPP_LIB/guava-11.0.2.jar"/>
-	<classpathentry exported="true" kind="var" path="ALFRESCO_50d_WEBAPP_LIB/guessencoding-1.0.jar"/>
-	<classpathentry exported="true" kind="var" path="ALFRESCO_50d_WEBAPP_LIB/gytheio-commons-0.2.jar"/>
-	<classpathentry exported="true" kind="var" path="ALFRESCO_50d_WEBAPP_LIB/gytheio-health-commons-0.2.jar"/>
-	<classpathentry exported="true" kind="var" path="ALFRESCO_50d_WEBAPP_LIB/gytheio-messaging-camel-0.2.jar"/>
-	<classpathentry exported="true" kind="var" path="ALFRESCO_50d_WEBAPP_LIB/gytheio-messaging-commons-0.2.jar"/>
-	<classpathentry exported="true" kind="var" path="ALFRESCO_50d_WEBAPP_LIB/hawtbuf-1.10.jar"/>
-	<classpathentry exported="true" kind="var" path="ALFRESCO_50d_WEBAPP_LIB/hibernate-3.2.6-alf-20131023.jar"/>
-	<classpathentry exported="true" kind="var" path="ALFRESCO_50d_WEBAPP_LIB/htmllexer-2.1.jar"/>
-	<classpathentry exported="true" kind="var" path="ALFRESCO_50d_WEBAPP_LIB/htmlparser-2.1.jar"/>
-	<classpathentry exported="true" kind="var" path="ALFRESCO_50d_WEBAPP_LIB/httpclient-4.3.3.jar"/>
-	<classpathentry exported="true" kind="var" path="ALFRESCO_50d_WEBAPP_LIB/httpclient-cache-4.3.3.jar"/>
-	<classpathentry exported="true" kind="var" path="ALFRESCO_50d_WEBAPP_LIB/httpcore-4.3.2.jar"/>
-	<classpathentry exported="true" kind="var" path="ALFRESCO_50d_WEBAPP_LIB/icu4j-3.6.1.jar"/>
-	<classpathentry exported="true" kind="var" path="ALFRESCO_50d_WEBAPP_LIB/isoparser-1.0-RC-1.jar"/>
-	<classpathentry exported="true" kind="var" path="ALFRESCO_50d_WEBAPP_LIB/java-libpst-0.7.jar"/>
-	<classpathentry exported="true" kind="var" path="ALFRESCO_50d_WEBAPP_LIB/java-property-utils-1.9.1.jar"/>
-	<classpathentry exported="true" kind="var" path="ALFRESCO_50d_WEBAPP_LIB/jaxb-api-2.1.jar"/>
-	<classpathentry exported="true" kind="var" path="ALFRESCO_50d_WEBAPP_LIB/jaxb-impl-2.2.6.jar"/>
-	<classpathentry exported="true" kind="var" path="ALFRESCO_50d_WEBAPP_LIB/jaxb-xjc-2.2.6.jar"/>
-	<classpathentry exported="true" kind="var" path="ALFRESCO_50d_WEBAPP_LIB/jaxen-1.1.6.jar"/>
-	<classpathentry exported="true" kind="var" path="ALFRESCO_50d_WEBAPP_LIB/jaxrpc-api-1.1.jar"/>
-	<classpathentry exported="true" kind="var" path="ALFRESCO_50d_WEBAPP_LIB/jaxws-api-2.1.jar"/>
-	<classpathentry exported="true" kind="var" path="ALFRESCO_50d_WEBAPP_LIB/jaxws-rt-2.1.7.jar"/>
-	<classpathentry exported="true" kind="var" path="ALFRESCO_50d_WEBAPP_LIB/jbpm-identity-3.3.1.jar"/>
-	<classpathentry exported="true" kind="var" path="ALFRESCO_50d_WEBAPP_LIB/jbpm-jpdl-3.3.1-patched.jar"/>
-	<classpathentry exported="true" kind="var" path="ALFRESCO_50d_WEBAPP_LIB/jdom-1.0.jar"/>
-	<classpathentry exported="true" kind="var" path="ALFRESCO_50d_WEBAPP_LIB/jhighlight-1.0.jar"/>
-	<classpathentry exported="true" kind="var" path="ALFRESCO_50d_WEBAPP_LIB/jibx-run-1.2.6.jar"/>
-	<classpathentry exported="true" kind="var" path="ALFRESCO_50d_WEBAPP_LIB/jid3lib-0.5.4.jar"/>
-	<classpathentry exported="true" kind="var" path="ALFRESCO_50d_WEBAPP_LIB/jmagick-6.2.4.jar"/>
-	<classpathentry exported="true" kind="var" path="ALFRESCO_50d_WEBAPP_LIB/joda-time-2.5.jar"/>
-	<classpathentry exported="true" kind="var" path="ALFRESCO_50d_WEBAPP_LIB/jodconverter-2.1.0-alfresco-patched.jar"/>
-	<classpathentry exported="true" kind="var" path="ALFRESCO_50d_WEBAPP_LIB/JSlideShare-0.6.jar"/>
-	<classpathentry exported="true" kind="var" path="ALFRESCO_50d_WEBAPP_LIB/json-20090211.jar"/>
-	<classpathentry exported="true" kind="var" path="ALFRESCO_50d_WEBAPP_LIB/json-simple-1.1.1.jar"/>
-	<classpathentry exported="true" kind="var" path="ALFRESCO_50d_WEBAPP_LIB/jsr107cache-1.0.jar"/>
-	<classpathentry exported="true" kind="var" path="ALFRESCO_50d_WEBAPP_LIB/jsr181-api-1.0-MR1.jar"/>
-	<classpathentry exported="true" kind="var" path="ALFRESCO_50d_WEBAPP_LIB/jsr250-api-1.0.jar"/>
-	<classpathentry exported="true" kind="var" path="ALFRESCO_50d_WEBAPP_LIB/jsr305-1.3.9.jar"/>
-	<classpathentry exported="true" kind="var" path="ALFRESCO_50d_WEBAPP_LIB/jstl-1.2.jar"/>
-	<classpathentry exported="true" kind="var" path="ALFRESCO_50d_WEBAPP_LIB/jta-1.0.1b.jar"/>
-	<classpathentry exported="true" kind="var" path="ALFRESCO_50d_WEBAPP_LIB/jug-2.0.0-asl.jar"/>
-	<classpathentry exported="true" kind="var" path="ALFRESCO_50d_WEBAPP_LIB/juh-3.1.0.jar"/>
-	<classpathentry exported="true" kind="var" path="ALFRESCO_50d_WEBAPP_LIB/juniversalchardet-1.0.3.jar"/>
-	<classpathentry exported="true" kind="var" path="ALFRESCO_50d_WEBAPP_LIB/jurt-3.1.0.jar"/>
-	<classpathentry exported="true" kind="var" path="ALFRESCO_50d_WEBAPP_LIB/jut-1.0-alfresco.jar"/>
-	<classpathentry exported="true" kind="var" path="ALFRESCO_50d_WEBAPP_LIB/jutf7-1.0.0.jar"/>
-	<classpathentry exported="true" kind="var" path="ALFRESCO_50d_WEBAPP_LIB/lesscss-engine-1.5.0.jar"/>
-	<classpathentry exported="true" kind="var" path="ALFRESCO_50d_WEBAPP_LIB/livetribe-jsr223-2.0.6.jar"/>
-	<classpathentry exported="true" kind="var" path="ALFRESCO_50d_WEBAPP_LIB/log4j-1.2.17.jar"/>
-	<classpathentry exported="true" kind="var" path="ALFRESCO_50d_WEBAPP_LIB/lucene-analyzers-2.4.1.jar"/>
-	<classpathentry exported="true" kind="var" path="ALFRESCO_50d_WEBAPP_LIB/lucene-core-2.4.1.jar"/>
-	<classpathentry exported="true" kind="var" path="ALFRESCO_50d_WEBAPP_LIB/lucene-regex-2.4.1.jar"/>
-	<classpathentry exported="true" kind="var" path="ALFRESCO_50d_WEBAPP_LIB/lucene-snowball-2.4.1.jar"/>
-	<classpathentry exported="true" kind="var" path="ALFRESCO_50d_WEBAPP_LIB/maven-artifact-3.2.1.jar"/>
-	<classpathentry exported="true" kind="var" path="ALFRESCO_50d_WEBAPP_LIB/metadata-extractor-2.6.2.jar"/>
-	<classpathentry exported="true" kind="var" path="ALFRESCO_50d_WEBAPP_LIB/mimepull-1.9.4.jar"/>
-	<classpathentry exported="true" kind="var" path="ALFRESCO_50d_WEBAPP_LIB/mybatis-3.2.7.jar"/>
-	<classpathentry exported="true" kind="var" path="ALFRESCO_50d_WEBAPP_LIB/mybatis-spring-1.2.2.jar"/>
-	<classpathentry exported="true" kind="var" path="ALFRESCO_50d_WEBAPP_LIB/myfaces-api-1.1.8.jar"/>
-	<classpathentry exported="true" kind="var" path="ALFRESCO_50d_WEBAPP_LIB/myfaces-impl-1.1.8.jar"/>
-	<classpathentry exported="true" kind="var" path="ALFRESCO_50d_WEBAPP_LIB/netcdf-4.2-min.jar"/>
-	<classpathentry exported="true" kind="var" path="ALFRESCO_50d_WEBAPP_LIB/ooxml-schemas-1.1.jar"/>
-	<classpathentry exported="true" kind="var" path="ALFRESCO_50d_WEBAPP_LIB/oro-2.0.8.jar"/>
-	<classpathentry exported="true" kind="var" path="ALFRESCO_50d_WEBAPP_LIB/pdfrenderer-0.9.1-patched.jar"/>
-	<classpathentry exported="true" kind="var" path="ALFRESCO_50d_WEBAPP_LIB/plexus-utils-3.0.17.jar"/>
-	<classpathentry exported="true" kind="var" path="ALFRESCO_50d_WEBAPP_LIB/poi-3.10.1.jar"/>
-	<classpathentry exported="true" kind="var" path="ALFRESCO_50d_WEBAPP_LIB/poi-ooxml-3.10.1-20140922-alfresco-patched.jar"/>
-	<classpathentry exported="true" kind="var" path="ALFRESCO_50d_WEBAPP_LIB/poi-scratchpad-3.10.1.jar"/>
-	<classpathentry exported="true" kind="var" path="ALFRESCO_50d_WEBAPP_LIB/proton-j-0.7.jar"/>
-	<classpathentry exported="true" kind="var" path="ALFRESCO_50d_WEBAPP_LIB/proton-jms-0.7.jar"/>
-	<classpathentry exported="true" kind="var" path="ALFRESCO_50d_WEBAPP_LIB/quartz-1.8.3-alfresco-patched.jar"/>
-	<classpathentry exported="true" kind="var" path="ALFRESCO_50d_WEBAPP_LIB/resolver-20050927.jar"/>
-	<classpathentry exported="true" kind="var" path="ALFRESCO_50d_WEBAPP_LIB/rhino-1.7R4-alfresco-patched.jar"/>
-	<classpathentry exported="true" kind="var" path="ALFRESCO_50d_WEBAPP_LIB/ridl-3.1.0.jar"/>
-	<classpathentry exported="true" kind="var" path="ALFRESCO_50d_WEBAPP_LIB/rome-1.0.jar"/>
-	<classpathentry exported="true" kind="var" path="ALFRESCO_50d_WEBAPP_LIB/saaj-api-1.3.jar"/>
-	<classpathentry exported="true" kind="var" path="ALFRESCO_50d_WEBAPP_LIB/saaj-impl-1.3.3.jar"/>
-	<classpathentry exported="true" kind="var" path="ALFRESCO_50d_WEBAPP_LIB/serializer-2.7.2.jar"/>
-	<classpathentry exported="true" kind="var" path="ALFRESCO_50d_WEBAPP_LIB/slf4j-api-1.7.7.jar"/>
-	<classpathentry exported="true" kind="var" path="ALFRESCO_50d_WEBAPP_LIB/slf4j-log4j12-1.7.7.jar"/>
-	<classpathentry exported="true" kind="var" path="ALFRESCO_50d_WEBAPP_LIB/solr-solrj-1.4.1.jar"/>
-	<classpathentry exported="true" kind="var" path="ALFRESCO_50d_WEBAPP_LIB/spring-aop-3.2.10.RELEASE.jar"/>
-	<classpathentry exported="true" kind="var" path="ALFRESCO_50d_WEBAPP_LIB/spring-beans-3.2.10.RELEASE.jar"/>
-	<classpathentry exported="true" kind="var" path="ALFRESCO_50d_WEBAPP_LIB/spring-cmis-framework-5.0.d.jar"/>
-	<classpathentry exported="true" kind="var" path="ALFRESCO_50d_WEBAPP_LIB/spring-context-3.2.10.RELEASE.jar"/>
-	<classpathentry exported="true" kind="var" path="ALFRESCO_50d_WEBAPP_LIB/spring-context-support-3.2.10.RELEASE.jar"/>
-	<classpathentry exported="true" kind="var" path="ALFRESCO_50d_WEBAPP_LIB/spring-core-3.2.10.RELEASE.jar"/>
-	<classpathentry exported="true" kind="var" path="ALFRESCO_50d_WEBAPP_LIB/spring-expression-3.2.10.RELEASE.jar"/>
-	<classpathentry exported="true" kind="var" path="ALFRESCO_50d_WEBAPP_LIB/spring-jdbc-3.2.10.RELEASE.jar"/>
-	<classpathentry exported="true" kind="var" path="ALFRESCO_50d_WEBAPP_LIB/spring-jms-3.2.8.RELEASE.jar"/>
-	<classpathentry exported="true" kind="var" path="ALFRESCO_50d_WEBAPP_LIB/spring-modules-jbpm31-0.5.jar"/>
-	<classpathentry exported="true" kind="var" path="ALFRESCO_50d_WEBAPP_LIB/spring-orm-3.2.10.RELEASE.jar"/>
-	<classpathentry exported="true" kind="var" path="ALFRESCO_50d_WEBAPP_LIB/spring-security-core-3.1.3.RELEASE.jar"/>
-	<classpathentry exported="true" kind="var" path="ALFRESCO_50d_WEBAPP_LIB/spring-security-crypto-3.1.3.RELEASE.jar"/>
-	<classpathentry exported="true" kind="var" path="ALFRESCO_50d_WEBAPP_LIB/spring-social-core-1.0.3.RELEASE.jar"/>
-	<classpathentry exported="true" kind="var" path="ALFRESCO_50d_WEBAPP_LIB/spring-social-facebook-1.0.0.RC1.jar"/>
-	<classpathentry exported="true" kind="var" path="ALFRESCO_50d_WEBAPP_LIB/spring-social-facebook-web-1.0.0.RELEASE.jar"/>
-	<classpathentry exported="true" kind="var" path="ALFRESCO_50d_WEBAPP_LIB/spring-social-linkedin-1.0.0-20110711.jar"/>
-	<classpathentry exported="true" kind="var" path="ALFRESCO_50d_WEBAPP_LIB/spring-social-twitter-1.0.5.RELEASE.jar"/>
-	<classpathentry exported="true" kind="var" path="ALFRESCO_50d_WEBAPP_LIB/spring-social-web-1.0.3.RELEASE.jar"/>
-	<classpathentry exported="true" kind="var" path="ALFRESCO_50d_WEBAPP_LIB/spring-surf-5.0.d.jar"/>
-	<classpathentry exported="true" kind="var" path="ALFRESCO_50d_WEBAPP_LIB/spring-surf-core-5.0.d.jar"/>
-	<classpathentry exported="true" kind="var" path="ALFRESCO_50d_WEBAPP_LIB/spring-surf-core-configservice-5.0.d.jar"/>
-	<classpathentry exported="true" kind="var" path="ALFRESCO_50d_WEBAPP_LIB/spring-tx-3.2.10.RELEASE.jar"/>
-	<classpathentry exported="true" kind="var" path="ALFRESCO_50d_WEBAPP_LIB/spring-web-3.2.10.RELEASE.jar"/>
-	<classpathentry exported="true" kind="var" path="ALFRESCO_50d_WEBAPP_LIB/spring-webmvc-3.2.10.RELEASE.jar"/>
-	<classpathentry exported="true" kind="var" path="ALFRESCO_50d_WEBAPP_LIB/spring-webscripts-5.0.d.jar"/>
-	<classpathentry exported="true" kind="var" path="ALFRESCO_50d_WEBAPP_LIB/spring-webscripts-api-5.0.d.jar"/>
-	<classpathentry exported="true" kind="var" path="ALFRESCO_50d_WEBAPP_LIB/ST4-4.0.8.jar"/>
-	<classpathentry exported="true" kind="var" path="ALFRESCO_50d_WEBAPP_LIB/standard-1.1.2.jar"/>
-	<classpathentry exported="true" kind="var" path="ALFRESCO_50d_WEBAPP_LIB/stax-api-1.0-2.jar"/>
-	<classpathentry exported="true" kind="var" path="ALFRESCO_50d_WEBAPP_LIB/stax-api-1.0.1.jar"/>
-	<classpathentry exported="true" kind="var" path="ALFRESCO_50d_WEBAPP_LIB/stax-ex-1.2.jar"/>
-	<classpathentry exported="true" kind="var" path="ALFRESCO_50d_WEBAPP_LIB/stax-utils-20060502.jar"/>
-	<classpathentry exported="true" kind="var" path="ALFRESCO_50d_WEBAPP_LIB/stax2-api-3.1.1.jar"/>
-	<classpathentry exported="true" kind="var" path="ALFRESCO_50d_WEBAPP_LIB/streambuffer-0.9.jar"/>
-	<classpathentry exported="true" kind="var" path="ALFRESCO_50d_WEBAPP_LIB/subethasmtp-3.1.7.jar"/>
-	<classpathentry exported="true" kind="var" path="ALFRESCO_50d_WEBAPP_LIB/tagsoup-1.2.1.jar"/>
-	<classpathentry exported="true" kind="var" path="ALFRESCO_50d_WEBAPP_LIB/tika-core-1.6-20140428-alfresco-patched.jar"/>
-	<classpathentry exported="true" kind="var" path="ALFRESCO_50d_WEBAPP_LIB/tika-parsers-1.6-20140428-alfresco-patched.jar"/>
-	<classpathentry exported="true" kind="var" path="ALFRESCO_50d_WEBAPP_LIB/unoil-3.1.0.jar"/>
-	<classpathentry exported="true" kind="var" path="ALFRESCO_50d_WEBAPP_LIB/vorbis-java-core-0.4.jar"/>
-	<classpathentry exported="true" kind="var" path="ALFRESCO_50d_WEBAPP_LIB/vorbis-java-tika-0.4.jar"/>
-	<classpathentry exported="true" kind="var" path="ALFRESCO_50d_WEBAPP_LIB/woodstox-core-asl-4.2.0.jar"/>
-	<classpathentry exported="true" kind="var" path="ALFRESCO_50d_WEBAPP_LIB/ws-commons-util-1.0.2.jar"/>
-	<classpathentry exported="true" kind="var" path="ALFRESCO_50d_WEBAPP_LIB/wsdl4j-1.6.2.jar"/>
-	<classpathentry exported="true" kind="var" path="ALFRESCO_50d_WEBAPP_LIB/wss4j-1.5.12.jar"/>
-	<classpathentry exported="true" kind="var" path="ALFRESCO_50d_WEBAPP_LIB/xalan-2.7.2.jar"/>
-	<classpathentry exported="true" kind="var" path="ALFRESCO_50d_WEBAPP_LIB/xbean-spring-3.16.jar"/>
-	<classpathentry exported="true" kind="var" path="ALFRESCO_50d_WEBAPP_LIB/xercesImpl-2.10.0-alfresco-patched.jar"/>
-	<classpathentry exported="true" kind="var" path="ALFRESCO_50d_WEBAPP_LIB/xml-apis-1.4.01.jar"/>
-	<classpathentry exported="true" kind="var" path="ALFRESCO_50d_WEBAPP_LIB/xmlbeans-2.6.0.jar"/>
-	<classpathentry exported="true" kind="var" path="ALFRESCO_50d_WEBAPP_LIB/xmlgraphics-commons-1.2.jar"/>
-	<classpathentry exported="true" kind="var" path="ALFRESCO_50d_WEBAPP_LIB/xmlParserAPIs-2.0.2.jar"/>
-	<classpathentry exported="true" kind="var" path="ALFRESCO_50d_WEBAPP_LIB/xmlrpc-client-3.1.3.jar"/>
-	<classpathentry exported="true" kind="var" path="ALFRESCO_50d_WEBAPP_LIB/xmlrpc-common-3.1.3.jar"/>
-	<classpathentry exported="true" kind="var" path="ALFRESCO_50d_WEBAPP_LIB/XmlSchema-1.4.5.jar"/>
-	<classpathentry exported="true" kind="var" path="ALFRESCO_50d_WEBAPP_LIB/xmlsec-1.4.5.jar"/>
-	<classpathentry exported="true" kind="var" path="ALFRESCO_50d_WEBAPP_LIB/xmpcore-5.1.2.jar"/>
-	<classpathentry exported="true" kind="var" path="ALFRESCO_50d_WEBAPP_LIB/xpp3_min-1.1.3.4.O.jar"/>
-	<classpathentry exported="true" kind="var" path="ALFRESCO_50d_WEBAPP_LIB/xpp3-1.1.3_8.jar"/>
-	<classpathentry exported="true" kind="var" path="ALFRESCO_50d_WEBAPP_LIB/xstream-1.2.2.jar"/>
-	<classpathentry exported="true" kind="var" path="ALFRESCO_50d_WEBAPP_LIB/yuicompressor-2.4.8-alfresco-patched.jar"/>
-	<classpathentry exported="true" kind="var" path="ALFRESCO_50d_TOMCAT_LIB/catalina.jar"/>
-	<classpathentry exported="true" kind="var" path="ALFRESCO_50d_TOMCAT_LIB/servlet-api.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/axis-1.4.jar"/>
-	<classpathentry exported="true" kind="var" path="ALFRESCO_50d_WEBAPP_LIB/aopalliance-1.0.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/jackson-core-2.4.5.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/jackson-mapper-asl-1.9.13.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/jackson-databind-2.4.5.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/jackson-core-asl-1.9.13.jar"/>
-	<classpathentry exported="true" kind="var" path="ALFRESCO_50d_WEBAPP_LIB/javax.mail-1.5.2.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/axis2-adb-1.7.3.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/axis2-kernel-1.7.3.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/axis2-transport-http-1.7.3.jar"/>
@@ -348,17 +78,11 @@
 	<classpathentry exported="true" kind="lib" path="lib/swagger-jersey2-jaxrs-1.5.3.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/validation-api-1.1.0.Final.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/wss4j-1.5.12.jar"/>
-	<classpathentry kind="var" path="ALFRESCO_50d_TOMCAT_LIB/catalina-ha.jar"/>
-	<classpathentry kind="var" path="ALFRESCO_50d_TOMCAT_LIB/tomcat-coyote.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/woden-core-1.0M10.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/neethi-3.0.3.jar"/>
-	<classpathentry exported="true" kind="var" path="ALFRESCO_50d_WEBAPP_LIB/javax.annotation-api-1.2.jar"/>
-	<classpathentry exported="true" kind="var" path="ALFRESCO_50d_WEBAPP_LIB/javax.ws.rs-api-2.0.1.jar"/>
 	<classpathentry kind="lib" path="lib/de.axelfaust.alfresco.simplecontentstores.repo-0.0.1.0-SNAPSHOT.jar"/>
-	<classpathentry exported="true" kind="var" path="ALFRESCO_50d_WEBAPP_LIB/commons-validator-1.6.jar"/>
-	<classpathentry kind="var" path="ALFRESCO_50d_TOMCAT_LIB"/>
-	<classpathentry kind="var" path="ALFRESCO_50d_WEBAPP_LIB"/>
 	<classpathentry kind="lib" path="lib/pdfbox-1.8.10-alfresco-patched.jar"/>
+	<classpathentry kind="lib" path="lib/elasticsearch-all-6.2.1.jar"/>
 	<classpathentry kind="lib" path="lib/handle-client.jar"/>
 	<classpathentry kind="lib" path="/Applications/alfresco-5.0.d/tomcat/lib/postgresql-9.3-1102-jdbc41.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/swagger-java-client-1.0.0.jar"/>
@@ -368,5 +92,324 @@
 	<classpathentry kind="lib" path="lib/logging-interceptor-2.7.5.jar"/>
 	<classpathentry kind="lib" path="lib/okhttp-2.7.5.jar"/>
 	<classpathentry kind="lib" path="lib/okio-1.6.0.jar"/>
+	<classpathentry kind="var" path="ALFRESCO_52_WEBAPPS_LIB/acegi-security-0.8.2_patched.jar"/>
+	<classpathentry kind="var" path="ALFRESCO_52_WEBAPPS_LIB/activation-1.1.jar"/>
+	<classpathentry kind="var" path="ALFRESCO_52_WEBAPPS_LIB/activemq-amqp-5.13.0.jar"/>
+	<classpathentry kind="var" path="ALFRESCO_52_WEBAPPS_LIB/activemq-broker-5.13.0.jar"/>
+	<classpathentry kind="var" path="ALFRESCO_52_WEBAPPS_LIB/activemq-camel-5.13.0.jar"/>
+	<classpathentry kind="var" path="ALFRESCO_52_WEBAPPS_LIB/activemq-client-5.13.0.jar"/>
+	<classpathentry kind="var" path="ALFRESCO_52_WEBAPPS_LIB/activemq-jms-pool-5.13.0.jar"/>
+	<classpathentry kind="var" path="ALFRESCO_52_WEBAPPS_LIB/activemq-openwire-legacy-5.13.0.jar"/>
+	<classpathentry kind="var" path="ALFRESCO_52_WEBAPPS_LIB/activemq-pool-5.13.0.jar"/>
+	<classpathentry kind="var" path="ALFRESCO_52_WEBAPPS_LIB/activemq-spring-5.13.0.jar"/>
+	<classpathentry kind="var" path="ALFRESCO_52_WEBAPPS_LIB/activiti-bpmn-converter-5.19.0.3.jar"/>
+	<classpathentry kind="var" path="ALFRESCO_52_WEBAPPS_LIB/activiti-bpmn-model-5.19.0.3.jar"/>
+	<classpathentry kind="var" path="ALFRESCO_52_WEBAPPS_LIB/activiti-engine-5.19.0.3.jar"/>
+	<classpathentry kind="var" path="ALFRESCO_52_WEBAPPS_LIB/activiti-image-generator-5.19.0.3.jar"/>
+	<classpathentry kind="var" path="ALFRESCO_52_WEBAPPS_LIB/activiti-process-validation-5.19.0.3.jar"/>
+	<classpathentry kind="var" path="ALFRESCO_52_WEBAPPS_LIB/activiti-spring-5.19.0.3.jar"/>
+	<classpathentry kind="var" path="ALFRESCO_52_WEBAPPS_LIB/alfresco-core-6.13.jar"/>
+	<classpathentry kind="var" path="ALFRESCO_52_WEBAPPS_LIB/alfresco-data-model-6.16.jar"/>
+	<classpathentry kind="var" path="ALFRESCO_52_WEBAPPS_LIB/alfresco-events-1.2.5.jar"/>
+	<classpathentry kind="var" path="ALFRESCO_52_WEBAPPS_LIB/alfresco-greenmail-5.2.g.jar"/>
+	<classpathentry kind="var" path="ALFRESCO_52_WEBAPPS_LIB/alfresco-jlan-embed-6.3.jar"/>
+	<classpathentry kind="var" path="ALFRESCO_52_WEBAPPS_LIB/alfresco-legacy-lucene-5.2.g.jar"/>
+	<classpathentry kind="var" path="ALFRESCO_52_WEBAPPS_LIB/alfresco-mbeans-5.2.g.jar"/>
+	<classpathentry kind="var" path="ALFRESCO_52_WEBAPPS_LIB/alfresco-messaging-repo-1.2.8.jar"/>
+	<classpathentry kind="var" path="ALFRESCO_52_WEBAPPS_LIB/alfresco-opencmis-extension-1.1.jar"/>
+	<classpathentry kind="var" path="ALFRESCO_52_WEBAPPS_LIB/alfresco-remote-api-5.2.g.jar"/>
+	<classpathentry kind="var" path="ALFRESCO_52_WEBAPPS_LIB/alfresco-repository-5.2.g.jar"/>
+	<classpathentry kind="var" path="ALFRESCO_52_WEBAPPS_LIB/alfresco-share-services-5.2.f.jar"/>
+	<classpathentry kind="var" path="ALFRESCO_52_WEBAPPS_LIB/alfresco-text-gen-1.3.jar"/>
+	<classpathentry kind="var" path="ALFRESCO_52_WEBAPPS_LIB/alfresco-trashcan-cleaner-2.2.jar"/>
+	<classpathentry kind="var" path="ALFRESCO_52_WEBAPPS_LIB/alfresco-xmlfactory-1.2.2.jar"/>
+	<classpathentry kind="var" path="ALFRESCO_52_WEBAPPS_LIB/antlr-2.7.7.jar"/>
+	<classpathentry kind="var" path="ALFRESCO_52_WEBAPPS_LIB/antlr-3.5.2.jar"/>
+	<classpathentry kind="var" path="ALFRESCO_52_WEBAPPS_LIB/antlr-runtime-3.5.2.jar"/>
+	<classpathentry kind="var" path="ALFRESCO_52_WEBAPPS_LIB/aopalliance-1.0.jar"/>
+	<classpathentry kind="var" path="ALFRESCO_52_WEBAPPS_LIB/apache-mime4j-core-0.7.2.jar"/>
+	<classpathentry kind="var" path="ALFRESCO_52_WEBAPPS_LIB/apache-mime4j-dom-0.7.2.jar"/>
+	<classpathentry kind="var" path="ALFRESCO_52_WEBAPPS_LIB/asm-3.1.jar"/>
+	<classpathentry kind="var" path="ALFRESCO_52_WEBAPPS_LIB/aspectjrt-1.8.7.jar"/>
+	<classpathentry kind="var" path="ALFRESCO_52_WEBAPPS_LIB/avalon-framework-api-4.3.1.jar"/>
+	<classpathentry kind="var" path="ALFRESCO_52_WEBAPPS_LIB/avalon-framework-impl-4.3.1.jar"/>
+	<classpathentry kind="var" path="ALFRESCO_52_WEBAPPS_LIB/axiom-api-1.2.19.jar"/>
+	<classpathentry kind="var" path="ALFRESCO_52_WEBAPPS_LIB/axiom-impl-1.2.19.jar"/>
+	<classpathentry kind="var" path="ALFRESCO_52_WEBAPPS_LIB/axis2-adb-1.7.3.jar"/>
+	<classpathentry kind="var" path="ALFRESCO_52_WEBAPPS_LIB/axis2-kernel-1.7.3.jar"/>
+	<classpathentry kind="var" path="ALFRESCO_52_WEBAPPS_LIB/axis2-transport-http-1.7.3.jar"/>
+	<classpathentry kind="var" path="ALFRESCO_52_WEBAPPS_LIB/axis2-transport-local-1.7.3.jar"/>
+	<classpathentry kind="var" path="ALFRESCO_52_WEBAPPS_LIB/batik-awt-util-1.6-1.jar"/>
+	<classpathentry kind="var" path="ALFRESCO_52_WEBAPPS_LIB/batik-bridge-1.6-1.jar"/>
+	<classpathentry kind="var" path="ALFRESCO_52_WEBAPPS_LIB/batik-css-1.6-1.jar"/>
+	<classpathentry kind="var" path="ALFRESCO_52_WEBAPPS_LIB/batik-dom-1.6-1.jar"/>
+	<classpathentry kind="var" path="ALFRESCO_52_WEBAPPS_LIB/batik-ext-1.6-1.jar"/>
+	<classpathentry kind="var" path="ALFRESCO_52_WEBAPPS_LIB/batik-extension-1.6-1.jar"/>
+	<classpathentry kind="var" path="ALFRESCO_52_WEBAPPS_LIB/batik-gui-util-1.6-1.jar"/>
+	<classpathentry kind="var" path="ALFRESCO_52_WEBAPPS_LIB/batik-gvt-1.6-1.jar"/>
+	<classpathentry kind="var" path="ALFRESCO_52_WEBAPPS_LIB/batik-parser-1.6-1.jar"/>
+	<classpathentry kind="var" path="ALFRESCO_52_WEBAPPS_LIB/batik-script-1.6-1.jar"/>
+	<classpathentry kind="var" path="ALFRESCO_52_WEBAPPS_LIB/batik-svg-dom-1.6-1.jar"/>
+	<classpathentry kind="var" path="ALFRESCO_52_WEBAPPS_LIB/batik-transcoder-1.6-1.jar"/>
+	<classpathentry kind="var" path="ALFRESCO_52_WEBAPPS_LIB/batik-util-1.6-1.jar"/>
+	<classpathentry kind="var" path="ALFRESCO_52_WEBAPPS_LIB/batik-xml-1.6-1.jar"/>
+	<classpathentry kind="var" path="ALFRESCO_52_WEBAPPS_LIB/bcel-6.0-RC3.jar"/>
+	<classpathentry kind="var" path="ALFRESCO_52_WEBAPPS_LIB/bcmail-jdk15-1.46.jar"/>
+	<classpathentry kind="var" path="ALFRESCO_52_WEBAPPS_LIB/bcprov-jdk15-1.46.jar"/>
+	<classpathentry kind="var" path="ALFRESCO_52_WEBAPPS_LIB/bliki-3.0.2.jar"/>
+	<classpathentry kind="var" path="ALFRESCO_52_WEBAPPS_LIB/boilerpipe-1.1.0.jar"/>
+	<classpathentry kind="var" path="ALFRESCO_52_WEBAPPS_LIB/bsf-2.4.0.jar"/>
+	<classpathentry kind="var" path="ALFRESCO_52_WEBAPPS_LIB/bsh-1.3.0.jar"/>
+	<classpathentry kind="var" path="ALFRESCO_52_WEBAPPS_LIB/camel-amqp-2.13.2.jar"/>
+	<classpathentry kind="var" path="ALFRESCO_52_WEBAPPS_LIB/camel-core-2.13.2.jar"/>
+	<classpathentry kind="var" path="ALFRESCO_52_WEBAPPS_LIB/camel-jackson-2.13.2.jar"/>
+	<classpathentry kind="var" path="ALFRESCO_52_WEBAPPS_LIB/camel-jms-2.13.2.jar"/>
+	<classpathentry kind="var" path="ALFRESCO_52_WEBAPPS_LIB/camel-spring-2.13.2.jar"/>
+	<classpathentry kind="var" path="ALFRESCO_52_WEBAPPS_LIB/cglib-2.2.jar"/>
+	<classpathentry kind="var" path="ALFRESCO_52_WEBAPPS_LIB/chemistry-opencmis-client-api-1.0.0.jar"/>
+	<classpathentry kind="var" path="ALFRESCO_52_WEBAPPS_LIB/chemistry-opencmis-client-bindings-1.0.0.jar"/>
+	<classpathentry kind="var" path="ALFRESCO_52_WEBAPPS_LIB/chemistry-opencmis-client-impl-1.0.0.jar"/>
+	<classpathentry kind="var" path="ALFRESCO_52_WEBAPPS_LIB/chemistry-opencmis-commons-api-1.0.0.jar"/>
+	<classpathentry kind="var" path="ALFRESCO_52_WEBAPPS_LIB/chemistry-opencmis-commons-impl-1.0.0.jar"/>
+	<classpathentry kind="var" path="ALFRESCO_52_WEBAPPS_LIB/chemistry-opencmis-server-bindings-1.0.0.jar"/>
+	<classpathentry kind="var" path="ALFRESCO_52_WEBAPPS_LIB/chemistry-opencmis-server-support-1.0.0.jar"/>
+	<classpathentry kind="var" path="ALFRESCO_52_WEBAPPS_LIB/chemistry-opencmis-test-tck-1.0.0.jar"/>
+	<classpathentry kind="var" path="ALFRESCO_52_WEBAPPS_LIB/commons-beanutils-1.9.3.jar"/>
+	<classpathentry kind="var" path="ALFRESCO_52_WEBAPPS_LIB/commons-codec-1.10.jar"/>
+	<classpathentry kind="var" path="ALFRESCO_52_WEBAPPS_LIB/commons-collections-3.2.2.jar"/>
+	<classpathentry kind="var" path="ALFRESCO_52_WEBAPPS_LIB/commons-compress-1.12.jar"/>
+	<classpathentry kind="var" path="ALFRESCO_52_WEBAPPS_LIB/commons-csv-20110211.jar"/>
+	<classpathentry kind="var" path="ALFRESCO_52_WEBAPPS_LIB/commons-dbcp-1.4-DBCP330.jar"/>
+	<classpathentry kind="var" path="ALFRESCO_52_WEBAPPS_LIB/commons-digester-2.1.jar"/>
+	<classpathentry kind="var" path="ALFRESCO_52_WEBAPPS_LIB/commons-discovery-0.5.jar"/>
+	<classpathentry kind="var" path="ALFRESCO_52_WEBAPPS_LIB/commons-el-1.0.jar"/>
+	<classpathentry kind="var" path="ALFRESCO_52_WEBAPPS_LIB/commons-email-1.4.jar"/>
+	<classpathentry kind="var" path="ALFRESCO_52_WEBAPPS_LIB/commons-fileupload-1.3.2.jar"/>
+	<classpathentry kind="var" path="ALFRESCO_52_WEBAPPS_LIB/commons-httpclient-3.1-HTTPCLIENT-1265.jar"/>
+	<classpathentry kind="var" path="ALFRESCO_52_WEBAPPS_LIB/commons-io-2.4.jar"/>
+	<classpathentry kind="var" path="ALFRESCO_52_WEBAPPS_LIB/commons-jxpath-1.3.jar"/>
+	<classpathentry kind="var" path="ALFRESCO_52_WEBAPPS_LIB/commons-lang-2.6.jar"/>
+	<classpathentry kind="var" path="ALFRESCO_52_WEBAPPS_LIB/commons-lang3-3.3.2.jar"/>
+	<classpathentry kind="var" path="ALFRESCO_52_WEBAPPS_LIB/commons-logging-1.2.jar"/>
+	<classpathentry kind="var" path="ALFRESCO_52_WEBAPPS_LIB/commons-math3-3.6.1.jar"/>
+	<classpathentry kind="var" path="ALFRESCO_52_WEBAPPS_LIB/commons-modeler-2.0.1.jar"/>
+	<classpathentry kind="var" path="ALFRESCO_52_WEBAPPS_LIB/commons-net-3.5.jar"/>
+	<classpathentry kind="var" path="ALFRESCO_52_WEBAPPS_LIB/commons-pool-1.6.jar"/>
+	<classpathentry kind="var" path="ALFRESCO_52_WEBAPPS_LIB/commons-pool2-2.4.2.jar"/>
+	<classpathentry kind="var" path="ALFRESCO_52_WEBAPPS_LIB/commons-validator-1.5.1.jar"/>
+	<classpathentry kind="var" path="ALFRESCO_52_WEBAPPS_LIB/commons-validator-1.6.jar"/>
+	<classpathentry kind="var" path="ALFRESCO_52_WEBAPPS_LIB/concurrentlinkedhashmap-lru-1.4.2.jar"/>
+	<classpathentry kind="var" path="ALFRESCO_52_WEBAPPS_LIB/cors-filter-2.5.jar"/>
+	<classpathentry kind="var" path="ALFRESCO_52_WEBAPPS_LIB/cxf-core-3.0.10.jar"/>
+	<classpathentry kind="var" path="ALFRESCO_52_WEBAPPS_LIB/cxf-rt-bindings-soap-3.0.10.jar"/>
+	<classpathentry kind="var" path="ALFRESCO_52_WEBAPPS_LIB/cxf-rt-bindings-xml-3.0.10.jar"/>
+	<classpathentry kind="var" path="ALFRESCO_52_WEBAPPS_LIB/cxf-rt-databinding-jaxb-3.0.10.jar"/>
+	<classpathentry kind="var" path="ALFRESCO_52_WEBAPPS_LIB/cxf-rt-frontend-jaxws-3.0.10.jar"/>
+	<classpathentry kind="var" path="ALFRESCO_52_WEBAPPS_LIB/cxf-rt-frontend-simple-3.0.10.jar"/>
+	<classpathentry kind="var" path="ALFRESCO_52_WEBAPPS_LIB/cxf-rt-transports-http-3.0.10.jar"/>
+	<classpathentry kind="var" path="ALFRESCO_52_WEBAPPS_LIB/cxf-rt-ws-addr-3.0.10.jar"/>
+	<classpathentry kind="var" path="ALFRESCO_52_WEBAPPS_LIB/cxf-rt-ws-policy-3.0.10.jar"/>
+	<classpathentry kind="var" path="ALFRESCO_52_WEBAPPS_LIB/cxf-rt-wsdl-3.0.10.jar"/>
+	<classpathentry kind="var" path="ALFRESCO_52_WEBAPPS_LIB/de.axelfaust.alfresco.simplecontentstores.repo-0.0.1.0-SNAPSHOT.jar"/>
+	<classpathentry kind="var" path="ALFRESCO_52_WEBAPPS_LIB/dom4j-1.6.1.jar"/>
+	<classpathentry kind="var" path="ALFRESCO_52_WEBAPPS_LIB/edu-sharing_cifs.jar"/>
+	<classpathentry kind="var" path="ALFRESCO_52_WEBAPPS_LIB/edu-sharing_cmis.jar"/>
+	<classpathentry kind="var" path="ALFRESCO_52_WEBAPPS_LIB/edu-sharing_security.jar"/>
+	<classpathentry kind="var" path="ALFRESCO_52_WEBAPPS_LIB/edu-sharing-cluster.jar"/>
+	<classpathentry kind="var" path="ALFRESCO_52_WEBAPPS_LIB/FastInfoset-1.2.13.jar"/>
+	<classpathentry kind="var" path="ALFRESCO_52_WEBAPPS_LIB/fontbox-1.8.10.jar"/>
+	<classpathentry kind="var" path="ALFRESCO_52_WEBAPPS_LIB/fop-0.94.jar"/>
+	<classpathentry kind="var" path="ALFRESCO_52_WEBAPPS_LIB/freemarker-2.3.20-alfresco-patched.jar"/>
+	<classpathentry kind="var" path="ALFRESCO_52_WEBAPPS_LIB/gdata-client-1.0-1.47.1.jar"/>
+	<classpathentry kind="var" path="ALFRESCO_52_WEBAPPS_LIB/gdata-client-meta-1.0-1.47.1.jar"/>
+	<classpathentry kind="var" path="ALFRESCO_52_WEBAPPS_LIB/gdata-core-1.0-1.47.1.jar"/>
+	<classpathentry kind="var" path="ALFRESCO_52_WEBAPPS_LIB/gdata-docs-3.0-1.47.1.jar"/>
+	<classpathentry kind="var" path="ALFRESCO_52_WEBAPPS_LIB/gdata-docs-meta-3.0-1.47.1.jar"/>
+	<classpathentry kind="var" path="ALFRESCO_52_WEBAPPS_LIB/gdata-media-1.0-1.47.1.jar"/>
+	<classpathentry kind="var" path="ALFRESCO_52_WEBAPPS_LIB/gdata-youtube-2.0-1.47.1.jar"/>
+	<classpathentry kind="var" path="ALFRESCO_52_WEBAPPS_LIB/geronimo-activation_1.1_spec-1.0.2.jar"/>
+	<classpathentry kind="var" path="ALFRESCO_52_WEBAPPS_LIB/geronimo-annotation_1.0_spec-1.1.1.jar"/>
+	<classpathentry kind="var" path="ALFRESCO_52_WEBAPPS_LIB/geronimo-j2ee-management_1.1_spec-1.0.1.jar"/>
+	<classpathentry kind="var" path="ALFRESCO_52_WEBAPPS_LIB/geronimo-jaxws_2.1_spec-1.0.jar"/>
+	<classpathentry kind="var" path="ALFRESCO_52_WEBAPPS_LIB/geronimo-jms_1.1_spec-1.1.1.jar"/>
+	<classpathentry kind="var" path="ALFRESCO_52_WEBAPPS_LIB/geronimo-jta_1.0.1B_spec-1.0.1.jar"/>
+	<classpathentry kind="var" path="ALFRESCO_52_WEBAPPS_LIB/geronimo-stax-api_1.0_spec-1.0.1.jar"/>
+	<classpathentry kind="var" path="ALFRESCO_52_WEBAPPS_LIB/geronimo-ws-metadata_2.0_spec-1.1.3.jar"/>
+	<classpathentry kind="var" path="ALFRESCO_52_WEBAPPS_LIB/groovy-all-2.4.7-indy.jar"/>
+	<classpathentry kind="var" path="ALFRESCO_52_WEBAPPS_LIB/gson-2.6.2.jar"/>
+	<classpathentry kind="var" path="ALFRESCO_52_WEBAPPS_LIB/gson-2.8.1.jar"/>
+	<classpathentry kind="var" path="ALFRESCO_52_WEBAPPS_LIB/gson-fire-1.8.0.jar"/>
+	<classpathentry kind="var" path="ALFRESCO_52_WEBAPPS_LIB/guava-11.0.2.jar"/>
+	<classpathentry kind="var" path="ALFRESCO_52_WEBAPPS_LIB/guessencoding-1.4.jar"/>
+	<classpathentry kind="var" path="ALFRESCO_52_WEBAPPS_LIB/gytheio-commons-0.2.jar"/>
+	<classpathentry kind="var" path="ALFRESCO_52_WEBAPPS_LIB/gytheio-health-commons-0.2.jar"/>
+	<classpathentry kind="var" path="ALFRESCO_52_WEBAPPS_LIB/gytheio-messaging-camel-0.2.jar"/>
+	<classpathentry kind="var" path="ALFRESCO_52_WEBAPPS_LIB/gytheio-messaging-commons-0.2.jar"/>
+	<classpathentry kind="var" path="ALFRESCO_52_WEBAPPS_LIB/handle-client.jar"/>
+	<classpathentry kind="var" path="ALFRESCO_52_WEBAPPS_LIB/hawtbuf-1.11.jar"/>
+	<classpathentry kind="var" path="ALFRESCO_52_WEBAPPS_LIB/hazelcast-all-3.9.jar"/>
+	<classpathentry kind="var" path="ALFRESCO_52_WEBAPPS_LIB/hazelcast-client-3.9.jar"/>
+	<classpathentry kind="var" path="ALFRESCO_52_WEBAPPS_LIB/hibernate-3.2.6-alf-20131023.jar"/>
+	<classpathentry kind="var" path="ALFRESCO_52_WEBAPPS_LIB/hk2-api-2.4.0-b31.jar"/>
+	<classpathentry kind="var" path="ALFRESCO_52_WEBAPPS_LIB/hk2-locator-2.4.0-b31.jar"/>
+	<classpathentry kind="var" path="ALFRESCO_52_WEBAPPS_LIB/hk2-utils-2.4.0-b31.jar"/>
+	<classpathentry kind="var" path="ALFRESCO_52_WEBAPPS_LIB/htmllexer-2.1.jar"/>
+	<classpathentry kind="var" path="ALFRESCO_52_WEBAPPS_LIB/htmlparser-2.1.jar"/>
+	<classpathentry kind="var" path="ALFRESCO_52_WEBAPPS_LIB/httpclient-4.5.2.jar"/>
+	<classpathentry kind="var" path="ALFRESCO_52_WEBAPPS_LIB/httpclient-cache-4.5.2.jar"/>
+	<classpathentry kind="var" path="ALFRESCO_52_WEBAPPS_LIB/httpcore-4.4.5.jar"/>
+	<classpathentry kind="var" path="ALFRESCO_52_WEBAPPS_LIB/icu4j-3.6.1.jar"/>
+	<classpathentry kind="var" path="ALFRESCO_52_WEBAPPS_LIB/isoparser-1.1.21.jar"/>
+	<classpathentry kind="var" path="ALFRESCO_52_WEBAPPS_LIB/jackson-annotations-2.4.5.jar"/>
+	<classpathentry kind="var" path="ALFRESCO_52_WEBAPPS_LIB/jackson-annotations-2.8.3.jar"/>
+	<classpathentry kind="var" path="ALFRESCO_52_WEBAPPS_LIB/jackson-core-2.4.5.jar"/>
+	<classpathentry kind="var" path="ALFRESCO_52_WEBAPPS_LIB/jackson-core-2.8.3.jar"/>
+	<classpathentry kind="var" path="ALFRESCO_52_WEBAPPS_LIB/jackson-core-asl-1.9.13.jar"/>
+	<classpathentry kind="var" path="ALFRESCO_52_WEBAPPS_LIB/jackson-databind-2.4.5.jar"/>
+	<classpathentry kind="var" path="ALFRESCO_52_WEBAPPS_LIB/jackson-databind-2.8.3.jar"/>
+	<classpathentry kind="var" path="ALFRESCO_52_WEBAPPS_LIB/jackson-dataformat-xml-2.4.5.jar"/>
+	<classpathentry kind="var" path="ALFRESCO_52_WEBAPPS_LIB/jackson-dataformat-yaml-2.4.5.jar"/>
+	<classpathentry kind="var" path="ALFRESCO_52_WEBAPPS_LIB/jackson-datatype-joda-2.4.5.jar"/>
+	<classpathentry kind="var" path="ALFRESCO_52_WEBAPPS_LIB/jackson-jaxrs-base-2.4.5.jar"/>
+	<classpathentry kind="var" path="ALFRESCO_52_WEBAPPS_LIB/jackson-jaxrs-json-provider-2.4.5.jar"/>
+	<classpathentry kind="var" path="ALFRESCO_52_WEBAPPS_LIB/jackson-mapper-asl-1.9.13.jar"/>
+	<classpathentry kind="var" path="ALFRESCO_52_WEBAPPS_LIB/jackson-module-jaxb-annotations-2.4.5.jar"/>
+	<classpathentry kind="var" path="ALFRESCO_52_WEBAPPS_LIB/java-libpst-0.7.jar"/>
+	<classpathentry kind="var" path="ALFRESCO_52_WEBAPPS_LIB/java-property-utils-1.9.1.jar"/>
+	<classpathentry kind="var" path="ALFRESCO_52_WEBAPPS_LIB/javax.annotation-api-1.2.jar"/>
+	<classpathentry kind="var" path="ALFRESCO_52_WEBAPPS_LIB/javax.inject-1.jar"/>
+	<classpathentry kind="var" path="ALFRESCO_52_WEBAPPS_LIB/javax.mail-1.5.5.jar"/>
+	<classpathentry kind="var" path="ALFRESCO_52_WEBAPPS_LIB/javax.ws.rs-api-2.0.1.jar"/>
+	<classpathentry kind="var" path="ALFRESCO_52_WEBAPPS_LIB/jaxb-core-2.2.11.jar"/>
+	<classpathentry kind="var" path="ALFRESCO_52_WEBAPPS_LIB/jaxb-impl-2.2.11.jar"/>
+	<classpathentry kind="var" path="ALFRESCO_52_WEBAPPS_LIB/jaxb-xjc-2.2.11.jar"/>
+	<classpathentry kind="var" path="ALFRESCO_52_WEBAPPS_LIB/jaxen-1.1.6.jar"/>
+	<classpathentry kind="var" path="ALFRESCO_52_WEBAPPS_LIB/jaxrpc-api-1.1.jar"/>
+	<classpathentry kind="var" path="ALFRESCO_52_WEBAPPS_LIB/jcip-annotations-1.0.jar"/>
+	<classpathentry kind="var" path="ALFRESCO_52_WEBAPPS_LIB/jdom-1.0.jar"/>
+	<classpathentry kind="var" path="ALFRESCO_52_WEBAPPS_LIB/jempbox-1.8.10.jar"/>
+	<classpathentry kind="var" path="ALFRESCO_52_WEBAPPS_LIB/jersey-client-2.22.jar"/>
+	<classpathentry kind="var" path="ALFRESCO_52_WEBAPPS_LIB/jersey-common-2.22.jar"/>
+	<classpathentry kind="var" path="ALFRESCO_52_WEBAPPS_LIB/jersey-container-servlet-core-2.22.jar"/>
+	<classpathentry kind="var" path="ALFRESCO_52_WEBAPPS_LIB/jersey-entity-filtering-2.22.jar"/>
+	<classpathentry kind="var" path="ALFRESCO_52_WEBAPPS_LIB/jersey-guava-2.22.jar"/>
+	<classpathentry kind="var" path="ALFRESCO_52_WEBAPPS_LIB/jersey-media-jaxb-2.22.jar"/>
+	<classpathentry kind="var" path="ALFRESCO_52_WEBAPPS_LIB/jersey-media-json-jackson-2.22.jar"/>
+	<classpathentry kind="var" path="ALFRESCO_52_WEBAPPS_LIB/jersey-media-multipart-2.22.jar"/>
+	<classpathentry kind="var" path="ALFRESCO_52_WEBAPPS_LIB/jersey-server-2.22.jar"/>
+	<classpathentry kind="var" path="ALFRESCO_52_WEBAPPS_LIB/jhighlight-1.0.jar"/>
+	<classpathentry kind="var" path="ALFRESCO_52_WEBAPPS_LIB/jibx-run-1.2.6.jar"/>
+	<classpathentry kind="var" path="ALFRESCO_52_WEBAPPS_LIB/jid3lib-0.5.4.jar"/>
+	<classpathentry kind="var" path="ALFRESCO_52_WEBAPPS_LIB/jmagick-6.6.9.jar"/>
+	<classpathentry kind="var" path="ALFRESCO_52_WEBAPPS_LIB/joda-time-2.9.4.jar"/>
+	<classpathentry kind="var" path="ALFRESCO_52_WEBAPPS_LIB/jodconverter-2.1.0-alfresco-patched.jar"/>
+	<classpathentry kind="var" path="ALFRESCO_52_WEBAPPS_LIB/JSlideShare-0.6.jar"/>
+	<classpathentry kind="var" path="ALFRESCO_52_WEBAPPS_LIB/json-20090211.jar"/>
+	<classpathentry kind="var" path="ALFRESCO_52_WEBAPPS_LIB/json-simple-1.1.1.jar"/>
+	<classpathentry kind="var" path="ALFRESCO_52_WEBAPPS_LIB/jsr107cache-1.1.jar"/>
+	<classpathentry kind="var" path="ALFRESCO_52_WEBAPPS_LIB/jsr181-api-1.0-MR1.jar"/>
+	<classpathentry kind="var" path="ALFRESCO_52_WEBAPPS_LIB/jsr250-api-1.0.jar"/>
+	<classpathentry kind="var" path="ALFRESCO_52_WEBAPPS_LIB/jsr305-1.3.9.jar"/>
+	<classpathentry kind="var" path="ALFRESCO_52_WEBAPPS_LIB/jstl-1.2.jar"/>
+	<classpathentry kind="var" path="ALFRESCO_52_WEBAPPS_LIB/jta-1.0.1b.jar"/>
+	<classpathentry kind="var" path="ALFRESCO_52_WEBAPPS_LIB/jug-2.0.0-asl.jar"/>
+	<classpathentry kind="var" path="ALFRESCO_52_WEBAPPS_LIB/juh-3.1.0.jar"/>
+	<classpathentry kind="var" path="ALFRESCO_52_WEBAPPS_LIB/juniversalchardet-1.0.3.jar"/>
+	<classpathentry kind="var" path="ALFRESCO_52_WEBAPPS_LIB/jurt-3.1.0.jar"/>
+	<classpathentry kind="var" path="ALFRESCO_52_WEBAPPS_LIB/jut-1.0-alfresco.jar"/>
+	<classpathentry kind="var" path="ALFRESCO_52_WEBAPPS_LIB/jutf7-1.0.0.jar"/>
+	<classpathentry kind="var" path="ALFRESCO_52_WEBAPPS_LIB/livetribe-jsr223-2.0.7.jar"/>
+	<classpathentry kind="var" path="ALFRESCO_52_WEBAPPS_LIB/log4j-1.2.17.jar"/>
+	<classpathentry kind="var" path="ALFRESCO_52_WEBAPPS_LIB/lucene-analyzers-2.4.1.jar"/>
+	<classpathentry kind="var" path="ALFRESCO_52_WEBAPPS_LIB/lucene-core-2.4.1.jar"/>
+	<classpathentry kind="var" path="ALFRESCO_52_WEBAPPS_LIB/lucene-regex-2.4.1.jar"/>
+	<classpathentry kind="var" path="ALFRESCO_52_WEBAPPS_LIB/lucene-snowball-2.4.1.jar"/>
+	<classpathentry kind="var" path="ALFRESCO_52_WEBAPPS_LIB/maven-artifact-3.2.1.jar"/>
+	<classpathentry kind="var" path="ALFRESCO_52_WEBAPPS_LIB/metadata-extractor-2.7.2.jar"/>
+	<classpathentry kind="var" path="ALFRESCO_52_WEBAPPS_LIB/mybatis-3.3.0.jar"/>
+	<classpathentry kind="var" path="ALFRESCO_52_WEBAPPS_LIB/mybatis-spring-1.2.5.jar"/>
+	<classpathentry kind="var" path="ALFRESCO_52_WEBAPPS_LIB/myfaces-api-1.1.10.jar"/>
+	<classpathentry kind="var" path="ALFRESCO_52_WEBAPPS_LIB/myfaces-impl-1.1.10.jar"/>
+	<classpathentry kind="var" path="ALFRESCO_52_WEBAPPS_LIB/neethi-3.0.3.jar"/>
+	<classpathentry kind="var" path="ALFRESCO_52_WEBAPPS_LIB/netcdf-4.2.20.jar"/>
+	<classpathentry kind="var" path="ALFRESCO_52_WEBAPPS_LIB/ooxml-schemas-1.1.jar"/>
+	<classpathentry kind="var" path="ALFRESCO_52_WEBAPPS_LIB/oro-2.0.8.jar"/>
+	<classpathentry kind="var" path="ALFRESCO_52_WEBAPPS_LIB/pdfbox-1.8.10-alfresco-patched.jar"/>
+	<classpathentry kind="var" path="ALFRESCO_52_WEBAPPS_LIB/pdfrenderer-0.9.1-patched.jar"/>
+	<classpathentry kind="var" path="ALFRESCO_52_WEBAPPS_LIB/plexus-utils-3.0.17.jar"/>
+	<classpathentry kind="var" path="ALFRESCO_52_WEBAPPS_LIB/poi-3.10.1-20151016-alfresco-patched.jar"/>
+	<classpathentry kind="var" path="ALFRESCO_52_WEBAPPS_LIB/poi-ooxml-3.10.1-20151016-alfresco-patched.jar"/>
+	<classpathentry kind="var" path="ALFRESCO_52_WEBAPPS_LIB/poi-scratchpad-3.10.1-20151016-alfresco-patched.jar"/>
+	<classpathentry kind="var" path="ALFRESCO_52_WEBAPPS_LIB/proton-j-0.11.0.jar"/>
+	<classpathentry kind="var" path="ALFRESCO_52_WEBAPPS_LIB/quartz-1.8.3-alfresco-patched.jar"/>
+	<classpathentry kind="var" path="ALFRESCO_52_WEBAPPS_LIB/rhino-1.7R4-alfresco-patched.jar"/>
+	<classpathentry kind="var" path="ALFRESCO_52_WEBAPPS_LIB/ridl-3.1.0.jar"/>
+	<classpathentry kind="var" path="ALFRESCO_52_WEBAPPS_LIB/rome-1.0.jar"/>
+	<classpathentry kind="var" path="ALFRESCO_52_WEBAPPS_LIB/serializer-2.7.2.jar"/>
+	<classpathentry kind="var" path="ALFRESCO_52_WEBAPPS_LIB/slf4j-api-1.7.21.jar"/>
+	<classpathentry kind="var" path="ALFRESCO_52_WEBAPPS_LIB/slf4j-log4j12-1.7.21.jar"/>
+	<classpathentry kind="var" path="ALFRESCO_52_WEBAPPS_LIB/solr-solrj-1.4.1.jar"/>
+	<classpathentry kind="var" path="ALFRESCO_52_WEBAPPS_LIB/spring-aop-3.2.17.RELEASE.jar"/>
+	<classpathentry kind="var" path="ALFRESCO_52_WEBAPPS_LIB/spring-beans-3.2.17.RELEASE.jar"/>
+	<classpathentry kind="var" path="ALFRESCO_52_WEBAPPS_LIB/spring-context-3.2.17.RELEASE.jar"/>
+	<classpathentry kind="var" path="ALFRESCO_52_WEBAPPS_LIB/spring-context-support-3.2.17.RELEASE.jar"/>
+	<classpathentry kind="var" path="ALFRESCO_52_WEBAPPS_LIB/spring-core-3.2.17.RELEASE.jar"/>
+	<classpathentry kind="var" path="ALFRESCO_52_WEBAPPS_LIB/spring-expression-3.2.17.RELEASE.jar"/>
+	<classpathentry kind="var" path="ALFRESCO_52_WEBAPPS_LIB/spring-jdbc-3.2.17.RELEASE.jar"/>
+	<classpathentry kind="var" path="ALFRESCO_52_WEBAPPS_LIB/spring-jms-3.2.17.RELEASE.jar"/>
+	<classpathentry kind="var" path="ALFRESCO_52_WEBAPPS_LIB/spring-orm-3.2.17.RELEASE.jar"/>
+	<classpathentry kind="var" path="ALFRESCO_52_WEBAPPS_LIB/spring-security-core-3.1.7.RELEASE.jar"/>
+	<classpathentry kind="var" path="ALFRESCO_52_WEBAPPS_LIB/spring-security-crypto-3.2.8.RELEASE.jar"/>
+	<classpathentry kind="var" path="ALFRESCO_52_WEBAPPS_LIB/spring-social-config-1.1.0.RELEASE.jar"/>
+	<classpathentry kind="var" path="ALFRESCO_52_WEBAPPS_LIB/spring-social-core-1.0.3.RELEASE.jar"/>
+	<classpathentry kind="var" path="ALFRESCO_52_WEBAPPS_LIB/spring-social-facebook-1.1.1.RELEASE.jar"/>
+	<classpathentry kind="var" path="ALFRESCO_52_WEBAPPS_LIB/spring-social-facebook-web-1.1.1.RELEASE.jar"/>
+	<classpathentry kind="var" path="ALFRESCO_52_WEBAPPS_LIB/spring-social-linkedin-1.0.0-20110711.jar"/>
+	<classpathentry kind="var" path="ALFRESCO_52_WEBAPPS_LIB/spring-social-twitter-1.1.2.RELEASE.jar"/>
+	<classpathentry kind="var" path="ALFRESCO_52_WEBAPPS_LIB/spring-social-web-1.1.4.RELEASE.jar"/>
+	<classpathentry kind="var" path="ALFRESCO_52_WEBAPPS_LIB/spring-surf-core-6.13.jar"/>
+	<classpathentry kind="var" path="ALFRESCO_52_WEBAPPS_LIB/spring-surf-core-configservice-6.13.jar"/>
+	<classpathentry kind="var" path="ALFRESCO_52_WEBAPPS_LIB/spring-tx-3.2.17.RELEASE.jar"/>
+	<classpathentry kind="var" path="ALFRESCO_52_WEBAPPS_LIB/spring-web-3.2.17.RELEASE.jar"/>
+	<classpathentry kind="var" path="ALFRESCO_52_WEBAPPS_LIB/spring-webmvc-3.2.17.RELEASE.jar"/>
+	<classpathentry kind="var" path="ALFRESCO_52_WEBAPPS_LIB/spring-webscripts-6.13.jar"/>
+	<classpathentry kind="var" path="ALFRESCO_52_WEBAPPS_LIB/spring-webscripts-api-6.13.jar"/>
+	<classpathentry kind="var" path="ALFRESCO_52_WEBAPPS_LIB/ST4-4.0.8.jar"/>
+	<classpathentry kind="var" path="ALFRESCO_52_WEBAPPS_LIB/standard-1.1.2.jar"/>
+	<classpathentry kind="var" path="ALFRESCO_52_WEBAPPS_LIB/stax-api-1.0.1.jar"/>
+	<classpathentry kind="var" path="ALFRESCO_52_WEBAPPS_LIB/stax-utils-20070216.jar"/>
+	<classpathentry kind="var" path="ALFRESCO_52_WEBAPPS_LIB/stax2-api-3.1.4.jar"/>
+	<classpathentry kind="var" path="ALFRESCO_52_WEBAPPS_LIB/subethasmtp-3.1.7.jar"/>
+	<classpathentry kind="var" path="ALFRESCO_52_WEBAPPS_LIB/tagsoup-1.2.1.jar"/>
+	<classpathentry kind="var" path="ALFRESCO_52_WEBAPPS_LIB/tika-core-1.6-20160727-alfresco-patched.jar"/>
+	<classpathentry kind="var" path="ALFRESCO_52_WEBAPPS_LIB/tika-parsers-1.6-20160727-alfresco-patched.jar"/>
+	<classpathentry kind="var" path="ALFRESCO_52_WEBAPPS_LIB/unidataCommon-4.2.20.jar"/>
+	<classpathentry kind="var" path="ALFRESCO_52_WEBAPPS_LIB/unoil-3.1.0.jar"/>
+	<classpathentry kind="var" path="ALFRESCO_52_WEBAPPS_LIB/validation-api-1.1.0.Final.jar"/>
+	<classpathentry kind="var" path="ALFRESCO_52_WEBAPPS_LIB/vorbis-java-core-0.4.jar"/>
+	<classpathentry kind="var" path="ALFRESCO_52_WEBAPPS_LIB/vorbis-java-tika-0.4.jar"/>
+	<classpathentry kind="var" path="ALFRESCO_52_WEBAPPS_LIB/woden-core-1.0M10.jar"/>
+	<classpathentry kind="var" path="ALFRESCO_52_WEBAPPS_LIB/woodstox-core-asl-4.4.1.jar"/>
+	<classpathentry kind="var" path="ALFRESCO_52_WEBAPPS_LIB/ws-commons-util-1.0.2.jar"/>
+	<classpathentry kind="var" path="ALFRESCO_52_WEBAPPS_LIB/wsdl4j-1.6.3.jar"/>
+	<classpathentry kind="var" path="ALFRESCO_52_WEBAPPS_LIB/wss4j-1.6.19.jar"/>
+	<classpathentry kind="var" path="ALFRESCO_52_WEBAPPS_LIB/xalan-2.7.2-alfresco.jar"/>
+	<classpathentry kind="var" path="ALFRESCO_52_WEBAPPS_LIB/xbean-spring-3.18.jar"/>
+	<classpathentry kind="var" path="ALFRESCO_52_WEBAPPS_LIB/xercesImpl-2.10.0-alfresco-patched.jar"/>
+	<classpathentry kind="var" path="ALFRESCO_52_WEBAPPS_LIB/xml-apis-1.4.01.jar"/>
+	<classpathentry kind="var" path="ALFRESCO_52_WEBAPPS_LIB/xml-resolver-1.2.jar"/>
+	<classpathentry kind="var" path="ALFRESCO_52_WEBAPPS_LIB/xmlbeans-2.6.0.jar"/>
+	<classpathentry kind="var" path="ALFRESCO_52_WEBAPPS_LIB/xmlgraphics-commons-1.2.jar"/>
+	<classpathentry kind="var" path="ALFRESCO_52_WEBAPPS_LIB/xmlParserAPIs-2.0.2.jar"/>
+	<classpathentry kind="var" path="ALFRESCO_52_WEBAPPS_LIB/xmlrpc-client-3.1.3.jar"/>
+	<classpathentry kind="var" path="ALFRESCO_52_WEBAPPS_LIB/xmlrpc-common-3.1.3.jar"/>
+	<classpathentry kind="var" path="ALFRESCO_52_WEBAPPS_LIB/xmlschema-core-2.2.1.jar"/>
+	<classpathentry kind="var" path="ALFRESCO_52_WEBAPPS_LIB/xmlsec-1.5.8.jar"/>
+	<classpathentry kind="var" path="ALFRESCO_52_WEBAPPS_LIB/xmpcore-5.1.2.jar"/>
+	<classpathentry kind="var" path="ALFRESCO_52_WEBAPPS_LIB/xpp3_min-1.1.4c.jar"/>
+	<classpathentry kind="var" path="ALFRESCO_52_WEBAPPS_LIB/xpp3-1.1.3_8.jar"/>
+	<classpathentry kind="var" path="ALFRESCO_52_WEBAPPS_LIB/xstream-1.3.1.jar"/>
+	<classpathentry kind="var" path="ALFRESCO_52_TOMCAT_LIB"/>
+	<classpathentry kind="var" path="ALFRESCO_52_TOMCAT_LIB/servlet-api.jar"/>
 	<classpathentry kind="output" path="war/WEB-INF/classes"/>
 </classpath>

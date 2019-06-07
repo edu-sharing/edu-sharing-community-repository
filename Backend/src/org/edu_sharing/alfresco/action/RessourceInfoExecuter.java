@@ -1,11 +1,6 @@
 package org.edu_sharing.alfresco.action;
 
-import java.io.BufferedInputStream;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.InputStream;
+import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -33,6 +28,8 @@ import org.apache.commons.compress.compressors.CompressorStreamFactory;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.tika.Tika;
+import org.edu_sharing.repository.client.tools.CCConstants;
+import org.springframework.util.StreamUtils;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
@@ -64,7 +61,7 @@ public class RessourceInfoExecuter extends ActionExecuterAbstractBase {
 	public static final String CCM_RESSOURCETYPE_H5P = "h5p";
 	public static final String CCM_RESSOURCETYPE_EDUHTML = "eduhtml";
 
-	private ArchiveInputStream getZipInputStream(ContentReader contentreader) throws IOException {
+	public static ArchiveInputStream getZipInputStream(ContentReader contentreader) throws IOException {
 		InputStream is = contentreader.getContentInputStream();
 
 		Tika tika = new Tika();
@@ -133,8 +130,8 @@ public class RessourceInfoExecuter extends ActionExecuterAbstractBase {
 							return;
 						}
 						if (current.getName().equals("h5p.json")) {
-							processH5P(zip, contentreader, actionedUponNodeRef);
 							zip.close();
+							processH5P(actionedUponNodeRef);
 							return;
 						}
 					}
@@ -326,9 +323,10 @@ public class RessourceInfoExecuter extends ActionExecuterAbstractBase {
 		}
 	}
 
-	private void processH5P(InputStream is, ContentReader contentreader, NodeRef actionedUponNodeRef) {
-		nodeService.setProperty(actionedUponNodeRef, QName.createQName(CCM_PROP_IO_RESSOURCETYPE),
+	private void processH5P(NodeRef nodeRef) {
+		nodeService.setProperty(nodeRef, QName.createQName(CCM_PROP_IO_RESSOURCETYPE),
 				CCM_RESSOURCETYPE_H5P);
+		// thumbnail is handled @org.edu_sharing.alfresco.transformer.H5PTransformerWorker
 	}
 
 	private void processMoodle2_0(InputStream is, ContentReader contentreader, NodeRef actionedUponNodeRef) {

@@ -198,12 +198,6 @@
 			<copy todir="${app.server.tomcat.webapps.alfresco.lib}">
 				<fileset dir="${lib.dir}" includes="${alfrescojars}"></fileset>
 			</copy>
-			<delete failonerror="false">
-		    		<fileset dir="${app.server.deploy.dir}/solr4/WEB-INF/lib" includes="${solr4jars_clean}"/>
-		    </delete>       
-			<copy failonerror="false" todir="${app.server.deploy.dir}/solr4/WEB-INF/lib">
-				<fileset dir="${lib.dir}" includes="${solr4jars}"></fileset>
-			</copy>
 			<delete>
 				<fileset dir="${app.server.tomcat.webapps.ccsearch.lib}" includes="${ccsearchjars_clean}"/>
 			</delete>		
@@ -267,7 +261,10 @@
 	</target>	
 	
 	<target name="undeploy" depends="undeploy-classes, undeploy-alfresco-config">
-			<delete dir="${webserver.home}/webapps/${webapp.name}">
+			
+			<delete file="${webserver.home}/lib/edu-sharing_classloaderstuff.jar">
+			</delete>
+		    <delete dir="${webserver.home}/webapps/${webapp.name}">
 			</delete>
 		
 			<delete file="${webserver.home}/shared/classes/alfresco/extension/cc-context.xml">
@@ -281,6 +278,9 @@
 			<!--delete dir="${webserver.home}/shared/classes" includes="${api_not_hotdeployable}"/-->
 		<delete dir="${webserver.home}/shared/classes/org/edu_sharing" />
 			<delete dir="${webserver.home}/webapps/alfresco/WEB-INF/classes/org/edu_sharing" />
+			<delete dir="${webserver.home}/webapps/alfresco/WEB-INF/classes/org/alfresco/repo/model" />
+			<delete dir="${webserver.home}/webapps/alfresco/WEB-INF/classes/org/alfresco/repo/search" />
+			<delete dir="${webserver.home}/webapps/alfresco/WEB-INF/classes/org/alfresco/repo/version" />
 			<delete dir="${webserver.home}/webapps/${webapp.name}/WEB-INF/classes/" />
 	</target>
 	
@@ -293,14 +293,27 @@
 		</delete>
 		<delete file="${webserver.home}/shared/classes/alfresco/extension/ccauthentication-services-context.xml"></delete>
 		<delete file="${webserver.home}/shared/classes/alfresco/extension/custom-permissionDefinitions.xml"></delete>
-		<delete file="${webserver.home}/shared/classes/alfresco/extension/model/ccContentModel.xml"></delete>
+		<delete>
+			<fileset dir="${webserver.home}/shared/classes/alfresco/extension/model">
+			</fileset>
+		</delete>
+		<delete>
+			<fileset dir="${webserver.home}/shared/classes/alfresco/extension/" includes="mimetype*.xml">
+			</fileset>
+		</delete>
+		
 		<delete file="${webserver.home}/shared/classes/alfresco/extension/custom-core-services-context.xml"></delete>	
 		<delete file="${webserver.home}/shared/classes/alfresco/extension/es-caches.properties"></delete>
 		<delete file="${webserver.home}/shared/classes/alfresco/extension/custom-cache-context.xml"></delete>
 		<delete dir="${webserver.home}/shared/classes/alfresco/extension/subsystems"></delete>
 		<delete file="${webserver.home}/shared/classes/alfresco/extension/custom-opencmis-context.xml"></delete>
-		<delete file="${webserver.home}/shared/classes/alfresco/extension/edu-sharing-sso-context.xml"></delete>
-		
+		<delete>
+			<fileset dir="${webserver.home}/shared/classes/alfresco/extension/" includes="edu-sharing*.xml">
+			</fileset>
+		</delete>
+		<delete file="${webserver.home}/shared/classes/alfresco/extension/cc-ressourceinfo-action-context.xml"></delete>
+		<delete file="${webserver.home}/shared/classes/alfresco/extension/cc-pdf-action-context.xml"></delete>
+		<delete file="${webserver.home}/shared/classes/alfresco/extension/custom-web-context.xml"></delete>
 		<!-- 
 			contentmodel stuff 
 		-->

@@ -1,0 +1,23 @@
+{
+  "STREAM": {
+    "TITLE":"Activity-Stream",
+    "MENU": {
+      "OPTION1":"What's New?",
+      "OPTION2":"Already seen",
+      "OPTION3":"settings"
+    },
+    "OBJECT":{
+      "NOTITLE":"No title",
+      "NOMATERIALS":"No materials are available yet.",
+      "NONODES":"No nodes were found",
+      "OPTION": {
+        "MOVEUP":"Show at the top",
+        "REMOVE":"Remove from stream"
+      }  
+    },
+    "TOAST":{
+      "MOVEUP":"is now displayed at the top",
+      "SEEN":"The material just used can now be found in \"Seen\""
+    }
+  }
+}

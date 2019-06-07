@@ -1,0 +1,88 @@
+@import "../../../../styles/variables.scss";
+
+.avatarCircle{
+  border-radius: 50%;
+  border:3px solid #fff;
+  overflow: hidden;
+  display:inline-block;
+  .userImage, svg {
+    overflow: hidden;
+    border-radius: 50%;
+    object-fit: cover;
+    position: relative;
+    top: -3px;
+    left: -3px;
+  }
+}
+.avatarOuter{
+  display: inline;
+  position: relative;
+  .editorial-badge{
+    position: absolute;
+    bottom:0;
+    right:0;
+    width:30px;
+    height:auto;
+  }
+}
+
+.size_large {
+  .avatarCircle{
+    @include materialShadow();
+  }
+  .avatarCircle,.userImage, svg {
+    width: 120px;
+    height: 120px;
+  }
+}
+.size_medium {
+  .avatarCircle {
+    @include materialShadow();
+  }
+  .avatarCircle, .userImage, svg {
+    width: 70px;
+    height: 70px;
+
+    border-width: 2px;
+  }
+  .userImage, svg {
+    left: -2px;
+    top: -2px;
+  }
+  .editorial-badge {
+    width: 25px;
+  }
+}
+.size_small {
+  .avatarCircle {
+    @include materialShadow();
+  }
+  .avatarCircle,.userImage, svg {
+    width: 40px;
+    height: 40px;
+
+    border-width: 2px;
+  }
+  .userImage, svg {
+    left: -2px;
+    top: -2px;
+  }
+  .editorial-badge {
+    width: 16px;
+  }
+}
+
+.size_xsmall{
+  .avatarCircle,.userImage,svg{
+      width:20px;
+      height:20px;
+      border-width: 1px;
+  }
+  .userImage, svg {
+    left: -1px;
+    top: -1px;
+  }
+  .editorial-badge {
+    width: 8px;
+  }
+}

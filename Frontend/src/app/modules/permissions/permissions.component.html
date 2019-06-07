@@ -37,6 +37,7 @@
   ></permissions-authorities>
 </div>
 <main-nav *ngIf="!disabled"
+          #mainNav
           [title]="'PERMISSIONS.TITLE'"
           [currentScope]="'permissions'"
           [searchEnabled]="tab"

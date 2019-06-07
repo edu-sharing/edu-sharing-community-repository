@@ -180,6 +180,7 @@
       "VERSION_COMMENT":"Add version comment",
       "REPLACE_MATERIAL":"Replace material",
       "REPLACE_PREVIEW":"Replace preview",
+      "DELETE_PREVIEW":"Delete preview",
       "UPDATED":"Information updated"
     },
     "REVERTED_VERSION":"Version has been reverted successfully",
@@ -196,6 +197,7 @@
       "PASTE":"Paste",
       "METADATA":"Details",
       "COLLECTION":"Add to collection",
+      "STREAM":"Add to stream",
       "LICENSE":"Assign a license",
       "CONTRIBUTOR":"Contributors",
       "SHARE_LINK":"Share download-link",

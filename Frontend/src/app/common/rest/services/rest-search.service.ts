@@ -65,4 +65,12 @@ export class RestSearchService extends AbstractRestService{
       ]);
       return this.connector.post<NodeList>(q,body,this.connector.getRequestOptions());
     }
+
+    searchFingerprint(nodeid:string,request: any=null,repository = RestConstants.HOME_REPOSITORY) {
+        let q=this.connector.createUrlNoEscape('search/:version/queries/:repository/fingerprint/:nodeid/?:request',repository,[
+            [":nodeid",encodeURIComponent(nodeid)],
+            [":request",this.connector.createRequestString(request)]
+        ]);
+        return this.connector.post<NodeList>(q,null,this.connector.getRequestOptions());
+    }
 }

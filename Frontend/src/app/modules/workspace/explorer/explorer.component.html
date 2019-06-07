@@ -22,7 +22,7 @@
   (onSelectionChanged)="onSelection($event)"
   (onUpdateOptions)="updateOptions($event)"
   (sortListener)="setSorting($event)"
-  (clickRow)="selectItem($event)"
+  (clickRow)="selectItem($event.node)"
   (doubleClickRow)="doubleClick($event)"
   (columnsChanged)="columnsChanged($event)"
   (loadMore)="load(false)"></listTable>

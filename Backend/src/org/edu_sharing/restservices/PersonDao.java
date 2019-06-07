@@ -1,38 +1,48 @@
 package org.edu_sharing.restservices;
 
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
+import org.alfresco.repo.security.authentication.AuthenticationUtil.RunAsWork;
 import org.alfresco.repo.security.permissions.AccessDeniedException;
 import org.alfresco.service.cmr.repository.ChildAssociationRef;
 import org.alfresco.service.cmr.repository.InvalidNodeRefException;
 import org.alfresco.service.cmr.repository.StoreRef;
 import org.alfresco.service.cmr.security.NoSuchPersonException;
 import org.alfresco.service.namespace.QName;
+import org.apache.log4j.Logger;
+import org.apache.lucene.queryParser.QueryParser;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.server.MCAlfrescoAPIClient;
 import org.edu_sharing.repository.server.MCAlfrescoBaseClient;
+import org.edu_sharing.repository.server.SearchResultNodeRef;
 import org.edu_sharing.repository.server.authentication.Context;
 import org.edu_sharing.repository.server.tools.ApplicationInfoList;
+import org.edu_sharing.repository.server.tools.ImageTool;
 import org.edu_sharing.repository.server.tools.URLTool;
+import org.edu_sharing.repository.server.tools.cache.PersonCache;
 import org.edu_sharing.restservices.iam.v1.model.GroupEntries;
 import org.edu_sharing.restservices.shared.*;
 import org.edu_sharing.service.NotAnAdminException;
+import org.edu_sharing.service.authority.AuthorityService;
 import org.edu_sharing.service.authority.AuthorityServiceFactory;
 import org.edu_sharing.service.nodeservice.NodeService;
 import org.edu_sharing.service.nodeservice.NodeServiceFactory;
 import org.edu_sharing.service.nodeservice.NodeServiceHelper;
+import org.edu_sharing.service.search.SearchService;
 import org.edu_sharing.service.search.SearchServiceFactory;
 import org.edu_sharing.service.search.model.SearchResult;
+import org.edu_sharing.service.search.model.SearchToken;
 import org.edu_sharing.service.search.model.SortDefinition;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
 import javax.servlet.http.HttpSession;
 import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
+import java.io.Serializable;
+import java.util.*;
 
 public class PersonDao {
+
+	Logger logger = Logger.getLogger(PersonDao.class);
 
 	public static final String ME = "-me-";
 	
@@ -46,14 +56,16 @@ public class PersonDao {
 				userName = currentUser;
 			}
 	
-			if (   !currentUser.equals(userName) 
+			/*
+			if (   !currentUser.equals(userName)
 				&& !repoDao.getBaseClient().isAdmin(currentUser)
 				&& !AuthenticationUtil.isRunAsUserTheSystemUser()
 					) {
 								
 				throw new AccessDeniedException(currentUser);
 			}
-				
+			*/
+
 			return new PersonDao(repoDao, userName);
 			
 		} catch (Exception e) {
@@ -61,7 +73,21 @@ public class PersonDao {
 			throw DAOException.mapping(e);
 		}
 	}
+	private boolean isCurrentUserOrAdmin() {
+		try {
+		String currentUser = AuthenticationUtil.getFullyAuthenticatedUser();
+		if (   !currentUser.equals(getUserName())
+				&& !repoDao.getBaseClient().isAdmin(currentUser)
+				&& !AuthenticationUtil.isRunAsUserTheSystemUser()
+					) {
 
+				return false;
+			}
+		}catch(Exception e) {
+			return false;
+		}
+		return true;
+	}
 	public static PersonDao createPerson(RepositoryDao repoDao, String userName,String password, UserProfileEdit profile) throws DAOException {
 		
 		try {
@@ -75,10 +101,10 @@ public class PersonDao {
 				
 			} catch (NoSuchPersonException e) {
 				
-				HashMap<String, String> userInfo = profileToMap(profile);
+				HashMap<String, Serializable> userInfo = profileToMap(profile);
 				userInfo.put(CCConstants.PROP_USERNAME, userName);
 
-				((MCAlfrescoAPIClient)repoDao.getBaseClient()).createOrUpdateUser(userInfo);
+				AuthorityServiceFactory.getAuthorityService(repoDao.getId()).createOrUpdateUser(userInfo);
 				PersonDao result=new PersonDao(repoDao, userName);
 				if(password!=null)
 					result.changePassword(null,password);
@@ -95,11 +121,15 @@ public class PersonDao {
 
 	private final RepositoryDao repoDao;
 	
-	private final HashMap<String, String> userInfo;
+	private final Map<String, Serializable> userInfo;
 	private final String homeFolderId;
 	private final List<String> sharedFolderIds = new ArrayList<String>();
 
 	private NodeService nodeService;
+	private SearchService searchService;
+
+	private AuthorityService authorityService;
+
 
 	public PersonDao(RepositoryDao repoDao, String userName) throws DAOException  {
 
@@ -107,10 +137,12 @@ public class PersonDao {
 			
 			this.baseClient = repoDao.getBaseClient();
 			this.nodeService = NodeServiceFactory.getNodeService(repoDao.getId());
+			this.searchService = SearchServiceFactory.getSearchService(repoDao.getId());
+			this.authorityService = AuthorityServiceFactory.getAuthorityService(repoDao.getId());
 
 			this.repoDao = repoDao;
 
-			this.userInfo = baseClient.getUserInfo(userName);
+			this.userInfo = authorityService.getUserInfo(userName);
 			this.homeFolderId = baseClient.getHomeFolderID(userName);
 			try{
 				
@@ -150,11 +182,9 @@ public class PersonDao {
 		
 		try {
 
-			HashMap<String, String> newUserInfo = profileToMap(profile);
+			HashMap<String, Serializable> newUserInfo = profileToMap(profile);
 			newUserInfo.put(CCConstants.PROP_USERNAME, getUserName());
-
-			((MCAlfrescoAPIClient)this.baseClient).createOrUpdateUser(newUserInfo);
-			
+			authorityService.createOrUpdateUser(newUserInfo);
 		} catch (Throwable t) {
 			
 			throw DAOException.mapping(t);
@@ -162,12 +192,14 @@ public class PersonDao {
 
 	}
 
-	private static HashMap<String, String> profileToMap(UserProfileEdit profile) {
-		HashMap<String, String> newUserInfo = new HashMap<>();
+	private static HashMap<String, Serializable> profileToMap(UserProfileEdit profile) {
+		HashMap<String, Serializable> newUserInfo = new HashMap<>();
 		newUserInfo.put(CCConstants.PROP_USER_FIRSTNAME, profile.getFirstName());
 		newUserInfo.put(CCConstants.PROP_USER_LASTNAME, profile.getLastName());
 		newUserInfo.put(CCConstants.PROP_USER_EMAIL, profile.getEmail());
-		if(profile.getSizeQuota()>0)
+        newUserInfo.put(CCConstants.CM_PROP_PERSON_ABOUT, profile.getAbout());
+        newUserInfo.put(CCConstants.CM_PROP_PERSON_SKILLS, profile.getSkills());
+        if(profile.getSizeQuota()>0)
 			newUserInfo.put(CCConstants.CM_PROP_PERSON_SIZE_QUOTA, ""+profile.getSizeQuota());
 		else
 			newUserInfo.put(CCConstants.CM_PROP_PERSON_SIZE_QUOTA, null);
@@ -238,7 +270,7 @@ public class PersonDao {
 	}
 
 	private String getNodeId() {
-		return this.userInfo.get(CCConstants.SYS_PROP_NODE_UID);
+		return (String) this.userInfo.get(CCConstants.SYS_PROP_NODE_UID);
 	}
 	public User asPerson() {
 		
@@ -251,38 +283,40 @@ public class PersonDao {
     	
 
     	data.setProfile(getProfile());
-    	
-    	NodeRef homeDir = new NodeRef();
-    	homeDir.setRepo(repoDao.getId());
-    	homeDir.setId(getHomeFolder());
-    	data.setHomeFolder(homeDir);
-    	data.setQuota(getQuota());
+    	data.setStats(getStats());
 
-    	List<NodeRef> sharedFolderRefs = new ArrayList<NodeRef>();
-    	for (String sharedFolderId : sharedFolderIds) {
-    		
-        	NodeRef sharedFolderRef = new NodeRef();
-        	sharedFolderRef.setRepo(repoDao.getId());
-        	sharedFolderRef.setId(sharedFolderId);
-        	
-        	sharedFolderRefs.add(sharedFolderRef);	
+    	if(isCurrentUserOrAdmin()) {
+	    	NodeRef homeDir = new NodeRef();
+	    	homeDir.setRepo(repoDao.getId());
+	    	homeDir.setId(getHomeFolder());
+	    	data.setHomeFolder(homeDir);
+            data.setQuota(getQuota());
+
+	    	List<NodeRef> sharedFolderRefs = new ArrayList<NodeRef>();
+	    	for (String sharedFolderId : sharedFolderIds) {
+
+	        	NodeRef sharedFolderRef = new NodeRef();
+	        	sharedFolderRef.setRepo(repoDao.getId());
+	        	sharedFolderRef.setId(sharedFolderId);
+
+	        	sharedFolderRefs.add(sharedFolderRef);
+	    	}
+	    	data.setSharedFolders(sharedFolderRefs);
     	}
-    	data.setSharedFolders(sharedFolderRefs);
-
     	return data;
 	}
 
 	private UserQuota getQuota() {
 		UserQuota quota=new UserQuota();
-		String sizeQuota = userInfo.get(CCConstants.CM_PROP_PERSON_SIZE_QUOTA);
+		Long sizeQuota = (Long) userInfo.get(CCConstants.CM_PROP_PERSON_SIZE_QUOTA);
 		if(sizeQuota==null || sizeQuota.equals("-1")){
 			quota.setEnabled(false);
 			return quota;
 		}
-		String sizeCurrent = userInfo.get(CCConstants.CM_PROP_PERSON_SIZE_CURRENT);
+		Long sizeCurrent = (Long) userInfo.get(CCConstants.CM_PROP_PERSON_SIZE_CURRENT);
 		quota.setEnabled(true);
-		quota.setSizeQuota(Long.parseLong(sizeQuota));
-		quota.setSizeCurrent(Long.parseLong(sizeCurrent));
+		quota.setSizeQuota(sizeQuota);
+		quota.setSizeCurrent(sizeCurrent);
 		return quota;
 	}
 
@@ -292,7 +326,37 @@ public class PersonDao {
     	profile.setLastName(getLastName());
     	profile.setEmail(getEmail());
     	profile.setAvatar(getAvatar());
+    	profile.setAbout(getAbout());
+    	profile.setSkills(getSkills());
+    	profile.setType(getType());
     	return profile;
+	}
+	private UserStats getStats() {
+		UserStats stats = new UserStats();
+		// run as admin so solr counts all materials and collections
+		return AuthenticationUtil.runAsSystem(new RunAsWork<UserStats>() {
+
+			@Override
+			public UserStats doWork() throws Exception {
+				String luceneUser = "@cm\\:creator:\""+QueryParser.escape(getAuthorityName())+"\"";
+				SearchToken token=new SearchToken();
+				token.setMaxResult(0);
+				token.setLuceneString(luceneUser);
+				token.setContentType(SearchService.ContentType.FILES);
+		    	SearchResultNodeRef result = searchService.search(token);
+		    	stats.setNodeCount(result.getNodeCount());
+
+		    	token.setLuceneString(luceneUser+" AND @ccm\\:commonlicense_key:\"CC_*\"");
+		    	result = searchService.search(token);
+		    	stats.setNodeCountCC(result.getNodeCount());
+
+		    	token.setLuceneString(luceneUser);
+		    	token.setContentType(SearchService.ContentType.COLLECTIONS);
+		    	result = searchService.search(token);
+		    	stats.setCollectionCount(result.getNodeCount());
+				return stats;
+			}
+		});
 	}
 
 	private org.alfresco.service.cmr.repository.NodeRef getAvatarNode() {
@@ -323,6 +387,7 @@ public class PersonDao {
 	public void changeAvatar(InputStream is) throws DAOException {
 		try {
 		org.alfresco.service.cmr.repository.NodeRef currentAvatar = getAvatarNode();
+		is=ImageTool.autoRotateImage(is,ImageTool.MAX_THUMB_SIZE);
 		String nodeId=null;
 		if(currentAvatar==null) {
 			nodeId = this.nodeService.createNode(getNodeId(), CCConstants.CCM_TYPE_IO, new HashMap<>(), CCConstants.ASSOC_USER_PREFERENCEIMAGE);
@@ -333,6 +398,7 @@ public class PersonDao {
 		}
 		NodeServiceHelper.setCreateVersion(nodeId,false);
 		nodeService.writeContent(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, nodeId, is, "image", null, CCConstants.CM_PROP_CONTENT);
+		this.nodeService.setPermissions(nodeId, CCConstants.AUTHORITY_GROUP_EVERYONE,new String[]{CCConstants.PERMISSION_CONSUMER},true);
 		}catch(Throwable t) {
 			throw DAOException.mapping(t);
 		}
@@ -343,15 +409,15 @@ public class PersonDao {
     	data.setAuthorityType(Authority.Type.USER);    	
     	data.setUserName(getUserName());    	
     	data.setProfile(getProfile());
-    	
-    	NodeRef homeDir = new NodeRef();
-    	homeDir.setRepo(repoDao.getId());
-    	homeDir.setId(getHomeFolder());
+    	if(isCurrentUserOrAdmin()) {
+	    	NodeRef homeDir = new NodeRef();
+	    	homeDir.setRepo(repoDao.getId());
+	    	homeDir.setId(getHomeFolder());
+    	}
     	return data;
 	}
 	public String getId() {
-		
-		return this.userInfo.get(CCConstants.SYS_PROP_NODE_UID);
+		return getNodeId();
 	}
 	
 	public String getAuthorityName() {
@@ -361,31 +427,62 @@ public class PersonDao {
 	
 	public String getUserName() {
 		
-		return this.userInfo.get(CCConstants.CM_PROP_PERSON_USERNAME);
+		return (String)this.userInfo.get(CCConstants.CM_PROP_PERSON_USERNAME);
 	}
 	
 	public String getFirstName() {
 		
-		return this.userInfo.get(CCConstants.CM_PROP_PERSON_FIRSTNAME);
+		return (String)this.userInfo.get(CCConstants.CM_PROP_PERSON_FIRSTNAME);
+	}
+
+	public String[] getType() {
+		return AuthenticationUtil.runAsSystem(new RunAsWork<String[]>() {
+			@Override
+			public String[] doWork() throws Exception {
+				 PersonCache.get(getAuthorityName(),PersonCache.TYPE);
+				if(PersonCache.contains(getAuthorityName(),PersonCache.TYPE)) {
+					logger.info("using person cache for "+getAuthorityName());
+					return (String[]) PersonCache.get(getAuthorityName(),PersonCache.TYPE);
+				}
+				Set<String> types=new HashSet<>();
+				Set<String> groups = authorityService.getMemberships(getAuthorityName());
+				for(String group : groups) {
+					try {
+						String type=GroupDao.getGroup(repoDao, group).getGroupType();
+						if(type!=null)
+							types.add(type);
+
+					}catch(Throwable t) {}
+				}
+				String[] typesArray = types.toArray(new String[0]);
+				PersonCache.put(getAuthorityName(),PersonCache.TYPE, typesArray);
+				return typesArray;
+			}
+		});
 	}
 	
 	public String getLastName() {
 		
-		return this.userInfo.get(CCConstants.CM_PROP_PERSON_LASTNAME);
+		return (String)this.userInfo.get(CCConstants.CM_PROP_PERSON_LASTNAME);
 	}
 	
 	public String getEmail() {
 		
-		return this.userInfo.get(CCConstants.CM_PROP_PERSON_EMAIL);
+		return (String)this.userInfo.get(CCConstants.CM_PROP_PERSON_EMAIL);
 	}
-	
+	public String getAbout() {
+		return (String)this.userInfo.get(CCConstants.CM_PROP_PERSON_ABOUT);
+	}
+	public String[] getSkills() {
+		return (String[])this.userInfo.get(CCConstants.CM_PROP_PERSON_SKILLS);
+	}
 	public String getHomeFolder() {
 		
 		return this.homeFolderId;
 	}
 
 	public String getPreferences() {
-		return this.userInfo.get(CCConstants.CCM_PROP_PERSON_PREFERENCES);
+		return (String)this.userInfo.get(CCConstants.CCM_PROP_PERSON_PREFERENCES);
 	}
 	public void setPreferences(String preferences) throws Exception{
 		// validate json
@@ -431,7 +528,7 @@ public class PersonDao {
 			data=(String) session.getAttribute(CCConstants.CCM_PROP_PERSON_NODE_LISTS);
 		}
 		else{
-			data=this.userInfo.get(CCConstants.CCM_PROP_PERSON_NODE_LISTS);
+			data=(String) this.userInfo.get(CCConstants.CCM_PROP_PERSON_NODE_LISTS);
 		}
 		return data;
 	}

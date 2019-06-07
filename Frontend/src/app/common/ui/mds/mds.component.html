@@ -10,7 +10,7 @@
        [class.mdsCardJumpmarks]="jumpmarksCount>1">
     <spinner class="loading" *ngIf="isLoading"></spinner>
     <div class="card-content" *ngIf="(currentNode || createType || _currentValues) && !isLoading">
-      <div class="card-cancel" (click)="cancel()"><i class="material-icons">close</i></div>
+      <div tabindex="0" class="card-cancel" (click)="cancel()" (keyup.enter)="cancel()"><i icon iconId="close" aria="true"></i></div>
       <div class="card-title" *ngIf="currentNode || _groupId">{{currentNode ? currentNode.name : _currentValues['cm:name']}}</div>
       <div class="card-title" *ngIf="!(currentNode || _groupId)">{{"CREATE_NODE."+createType | translate:{parent:parentNode ? parentNode.name : ""} }}</div>
       <div class="card-scroll mdsCard" id="mdsScrollContainer" #mdsScrollContainer>
@@ -19,8 +19,8 @@
       </div>
     </div>
     <div class="card-action" *ngIf="(currentNode || createType || _currentValues) && !isLoading">
-      <a class="btn" (click)="saveValues()">{{'SAVE' | translate}}</a>
-      <a class="btn-flat" (click)="cancel()">{{'CANCEL' | translate}}</a>
+      <a class="btn" (click)="saveValues()" tabindex="0" (keyup.enter)="saveValues()">{{'SAVE' | translate}}</a>
+      <a class="btn-flat" tabindex="0" (click)="cancel()" (keyup.enter)="cancel()">{{'CANCEL' | translate }}</a>
     </div>
   </div>
 </div>
@@ -28,7 +28,7 @@
   <div class="mdsEmbeddedGroup">
     <div class="dialogMds" *ngIf="currentWidgetSuggestion" (click)="closeDialog()"></div>
     <div [innerHTML]="rendered" *ngIf="rendered"></div>
-    <div tabindex="0" class="reset" *ngIf="mode=='search' && rendered" (click)="resetValues()" (keyup.enter)="resetValues()">{{'CLEAR_FILTERS' | translate}}</div>
+    <div class="reset" *ngIf="mode=='search' && rendered"><a class="btn-flat" tabindex="0" (click)="resetValues()" (keyup.enter)="resetValues()">{{'CLEAR_FILTERS' | translate}}</a></div>
     <div *ngIf="renderedSuggestions" [innerHTML]="renderedSuggestions" class="suggestions"></div>
   </div>
 </div>
