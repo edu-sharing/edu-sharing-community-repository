@@ -163,6 +163,9 @@ export class VCard{
     return false;
   }
   public set(key:string,value:string,splitIndex=-1){
+    // no value and empty vcard -> do nothing
+    if(!this.isDirty && !value)
+      return;
     if(key=="Surname"){
       splitIndex=0;
       key="N";
