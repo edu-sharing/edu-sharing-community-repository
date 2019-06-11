@@ -759,9 +759,13 @@ export class ListTableComponent implements EventListener{
 
   }
   private getAttribute(data : any,item : ListItem) : SafeHtml{
-    return this.sanitizer.bypassSecurityTrustHtml(NodeHelper.getAttribute(this.translate,this.config,data,item));
-    // faster, but will break background-color styles on workflows
-    //return NodeHelper.getAttribute(this.translate,this.config,data,item);
+
+    let attribute=NodeHelper.getAttribute(this.translate,this.config,data,item);
+    // sanitizer is much slower but required when attributes inject styles, so keep it in these cases
+    if(attribute!=null && attribute.indexOf("style=")!=-1){
+        return this.sanitizer.bypassSecurityTrustHtml(attribute);
+    }
+    return attribute;
   }
   private getAttributeText(data : any,item : ListItem) : string{
       return NodeHelper.getAttribute(this.translate,this.config,data,item);

@@ -100,7 +100,11 @@ export class Toast{
         if (error.stacktraceArray) {
           errorInfo = json.stacktraceArray.join('\n');
         }
-        if (json.error.indexOf("DAOToolPermissionException") != -1) {
+        if(json.error.indexOf(RestConstants.CONTENT_QUOTA_EXCEPTION)!=-1){
+          message = 'GENERIC_QUOTA_ERROR_TITLE';
+          this.dialogTitle = '';
+        }
+        else if (json.error.indexOf("DAOToolPermissionException") != -1) {
           this.dialogTitle = 'TOOLPERMISSION_ERROR_TITLE';
           message = 'TOOLPERMISSION_ERROR';
           let permission = (json ? json.message : error).split(' ')[0];
@@ -203,8 +207,10 @@ export class Toast{
       }
       return text;
   }
-
-    showModalDialog(title: string,message: string,buttons : DialogButton[],isCancelable=true,onCancel:Function=null,messageParamters:any=null) {
-        this.onShowModal({title:title,message:message,isCancelable:isCancelable,translation:messageParamters,onCancel:onCancel,buttons:buttons});
+    closeModalDialog() {
+      this.onShowModal({title:null});
+    }
+    showModalDialog(title: string,message: string,buttons : DialogButton[],isCancelable=true,isHigh=true,onCancel:Function=null,messageParamters:any=null) {
+        this.onShowModal({title:title,message:message,isCancelable:isCancelable,isHigh:isHigh,translation:messageParamters,onCancel:onCancel,buttons:buttons});
     }
 }

@@ -68,9 +68,12 @@ export class Translation  {
             translate.use(language);
             Translation.setLanguage(language);
             translate.getTranslation(language).subscribe(()=>{
+                // strangley, the translation service seems to need some time to fully init
+                setTimeout(()=> {
               Translation.languageLoaded=true;
               observer.next(language);
               observer.complete();
+                },100);
             });
           });
         });

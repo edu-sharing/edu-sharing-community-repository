@@ -29,6 +29,7 @@ import {BridgeService} from "../core-bridge-module/bridge.service";
 import {OptionItem} from "./option-item";
 import {RestConnectorService} from "../core-module/rest/services/rest-connector.service";
 import {Observable, Observer} from "rxjs";
+import {DialogButton, RestIamService} from "../core-module/core.module";
 
 export class UIHelper {
 
@@ -55,17 +56,14 @@ export class UIHelper {
             }
         });
     }
-
     public static setTitle(name: string, title: Title, translate: TranslateService, config: ConfigurationService, languageParams: any = null) {
         translate.get(name, languageParams).subscribe((name: string) => {
             this.setTitleNoTranslation(name, title, config);
         });
     }
-
     public static getBlackWhiteContrast(color: string) {
 
     }
-
     static changeQueryParameter(router: Router, route: ActivatedRoute, name: string, value: any) {
         route.queryParams.subscribe((data: any) => {
             let queryParams: any = {};
@@ -149,7 +147,6 @@ export class UIHelper {
         // console.log('Strengt: '+strength);
         return strength;
     }
-
     /**
      * returns an factor indicating the repeat of signd in a password
      * Higher values mean better password strength
@@ -276,10 +273,7 @@ export class UIHelper {
         else if (type == RestConstants.COLLECTIONTYPE_EDITORIAL) {
             scope = 'PUBLIC';
         }
-        toast.toast("WORKSPACE.TOAST.ADDED_TO_COLLECTION_" + scope, {
-            count: count,
-            collection: RestHelper.getTitle(node)
-        }, null, null, {
+        toast.toast("WORKSPACE.TOAST.ADDED_TO_COLLECTION_"+scope, {count: count, collection: RestHelper.getTitle(node)},null,null,{
             link: {
                 caption: 'WORKSPACE.TOAST.VIEW_COLLECTION',
                 callback: () => UIHelper.goToCollection(router, node)
@@ -354,8 +348,7 @@ export class UIHelper {
                 UIHelper.addToCollection(collectionService, router, toast, collection, nodes, callback, position + 1, true);
             });
     }
-
-    static openConnector(connector: RestConnectorsService, events: FrameEventsService, toast: Toast, node: Node, type: Filetype = null, win: any = null, connectorType: Connector = null, newWindow = true) {
+  static openConnector(connector:RestConnectorsService,iam:RestIamService,events:FrameEventsService,toast:Toast,node : Node,type : Filetype=null,win : any = null,connectorType : Connector = null,newWindow=true){
         if (connectorType == null) {
             connectorType = connector.connectorSupportsEdit(node);
         }
@@ -367,32 +360,45 @@ export class UIHelper {
         connector.nodeApi.isLocked(node.ref.id).subscribe((result: NodeLock) => {
             if (result.isLocked) {
                 toast.error(null, "TOAST.NODE_LOCKED");
-                win.close();
+                if(win)
+                    win.close();
                 return;
             }
-            connector.generateToolUrl(connectorType, type, node).subscribe((url: string) => {
-                    if (win) {
-                        win.location.href = url;
-                        console.log(win);
-                    }
-                    else if (isCordova) {
-                        UIHelper.openUrl(url, connector.getRestConnector().getBridgeService(), OPEN_URL_MODE.Blank);
-                    }
-                    else {
-                        window.location.replace(url);
-                    }
-                    if (win) {
-                        events.addWindow(win);
-                    }
-                },
-                (error) => {
-                    console.warn(error);
-                    toast.error(null, error);
-                    if (win)
+            iam.getUser().subscribe((user)=> {
+                if(user.person.quota.enabled && user.person.quota.sizeCurrent>=user.person.quota.sizeQuota){
+                    toast.showModalDialog('CONNECTOR_QUOTA_REACHED_TITLE','CONNECTOR_QUOTA_REACHED_MESSAGE',DialogButton.getOk(()=>{
+                        toast.closeModalDialog();
+                    }),true,false);
+                    if(win)
                         win.close();
-                });
+                    return;
+                }
+                connector.generateToolUrl(connectorType, type, node).subscribe((url: string) => {
+                        if (win) {
+                            win.location.href = url;
+                            console.log(win);
+                        }
+                        else if (isCordova) {
+                            UIHelper.openUrl(url, connector.getRestConnector().getBridgeService(), OPEN_URL_MODE.Blank);
+                        }
+                        else {
+                            window.location.replace(url);
+                        }
+                        if (win) {
+                            events.addWindow(win);
+                        }
+                    },
+                    (error) => {
+                        toast.error(null, error);
+                        if (win)
+                            win.close();
+                    });
+            },(error)=>{
+                toast.error(null, error);
+                if (win)
+                    win.close();
+            });
         }, (error: any) => {
-            console.warn(error);
             toast.error(error);
             if (win)
                 win.close();
@@ -426,7 +432,6 @@ export class UIHelper {
             }
         }, 16);
     }
-
     /**
      * smoothly scroll to the given y offset inside an element (use offsetTop on the child to determine this position)
      * @param {y} number
@@ -499,7 +504,6 @@ export class UIHelper {
         let elements = document.getElementsByClassName("card")[0].getElementsByTagName("*");
         this.focusElements(elements);
     }
-
     static setFocusOnDropdown(ref: ElementRef) {
         // the first element(s) might be currently invisible, so try to focus from bottom to top
         if (ref && ref.nativeElement) {
@@ -566,7 +570,6 @@ export class UIHelper {
         }
         return optionsFiltered;
     }
-
     static filterToggleOptions(options: OptionItem[], toggle: boolean) {
         let result: OptionItem[] = [];
         for (let option of options) {
@@ -596,8 +599,7 @@ export class UIHelper {
     static errorContains(error: any, data: string) {
         try {
             return error.error.message.indexOf(data) != -1;
-        } catch (e) {
-        }
+        }catch(e){}
         return false;
     }
 
