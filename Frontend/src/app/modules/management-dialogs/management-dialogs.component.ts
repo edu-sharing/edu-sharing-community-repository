@@ -93,6 +93,7 @@ export class WorkspaceManagementDialogsComponent  {
   @Output() onUploadFileSelected=new EventEmitter();
   @Output() onUpdateLicense=new EventEmitter();
   @Output() onCloseAddToCollection=new EventEmitter();
+  @Output() onStoredAddToCollection=new EventEmitter();
   public createMetadata: string;
   public editorPending = false;
   public metadataParent: Node;
@@ -441,6 +442,7 @@ export class WorkspaceManagementDialogsComponent  {
     this.globalProgress=true;
     UIHelper.addToCollection(this.collectionService,this.router,this.toast,collection,list,()=>{
       this.globalProgress=false;
+       this.onStoredAddToCollection.emit(collection);
       if(callback)
         callback();
     });

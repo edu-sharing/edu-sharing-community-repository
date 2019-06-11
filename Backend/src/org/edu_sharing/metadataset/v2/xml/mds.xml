@@ -462,9 +462,6 @@
               <cm:name>
               <cclom:general_description>
               <cclom:general_keyword>
-              <license>
-              <ccm:imported_object_appname>
-              <ccm:author_freetext>
               <cclom:size>
               <cm:created>
               <cm:modified>
@@ -475,6 +472,9 @@
 				<id>node_contributor_render</id>
 				<caption>dialog_upload_tab_contributers</caption>
 				<html><![CDATA[
+				<license>
+                <ccm:imported_object_appname>
+                <ccm:author_freetext>
 				<div class="mdsContributorGroup mdsWidgetCaption">
 					<div id="mdsLifecyclecontributorsTitle" class="mdsContributorTitle">{{ cb_contr_material }}</div>
 					<div id="mdsLifecyclecontributors">
@@ -509,6 +509,13 @@
                		hideIfEmpty(document.getElementById("mdsLifecyclecontributorsTitle"),document.getElementById("mdsLifecyclecontributors"));
                		hideIfEmpty(document.getElementById("mdsMetadatcontributorsTitle"),document.getElementById("mdsMetadatcontributors"));
                	</script>
+				]]></html>
+			</template>
+			<template>
+				<id>node_collections_render</id>
+				<caption>dialog_upload_tab_collections</caption>
+				<html><![CDATA[
+					<collections>
 				]]></html>
 			</template>
 			<template>
@@ -572,6 +579,7 @@
 				<views>
 					<view>node_general_render</view>
 					<view>node_contributor_render</view>
+					<view>node_collections_render</view>
 				</views>
 			</group>
 			<group>

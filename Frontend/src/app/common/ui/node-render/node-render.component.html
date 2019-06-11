@@ -62,7 +62,11 @@
   [(nodeWorkflow)]="nodeWorkflow"
   [(nodeDelete)]="nodeDelete"
   (onRefresh)="refresh()"
+  (onStoredAddToCollection)="refresh()"
   (onCloseMetadata)="closeMetadata()"
   (onDelete)="onDelete($event)"
 >
 </workspace-management>
+<div #collectionsRef style="display:none">
+  TEST
+</div>

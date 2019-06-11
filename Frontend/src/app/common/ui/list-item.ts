@@ -17,4 +17,12 @@ export class ListItem{
   public format:string;
   constructor(public type : string,public name : string) {
   }
+
+    static getCollectionDefaults() {
+      let columns=[];
+      columns.push(new ListItem("COLLECTION", 'title'));
+      columns.push(new ListItem("COLLECTION", 'info'));
+      columns.push(new ListItem("COLLECTION",'scope'));
+      return columns;
+    }
 }
