@@ -67,12 +67,16 @@ export class Translation  {
             else{
                 translate.setDefaultLang(data[0]);
             }
+            console.log("translate "+route+" "+language);
             translate.use(language);
             Translation.setLanguage(language);
             translate.getTranslation(language).subscribe(()=>{
-              Translation.languageLoaded=true;
-              observer.next(language);
-              observer.complete();
+                // strangley, the translation service seems to need some time to fully init
+                setTimeout(()=> {
+                    Translation.languageLoaded = true;
+                    observer.next(language);
+                    observer.complete();
+                },100);
             });
           });
         });
@@ -223,6 +227,7 @@ export class TranslationLoader implements TranslateLoader {
         }
         this.initializedLanguage=final;
         this.initializing=null;
+        console.log("initialized language ",final);
         observer.next(final);
         observer.complete();
       };
