@@ -241,7 +241,7 @@ export class MdsComponent{
               private sanitizer: DomSanitizer,
               private config : ConfigurationService,
               private _ngZone: NgZone) {
-      Translation.initialize(this.translate,this.config,this.storage,this.route);
+      //Translation.initialize(this.translate,this.config,this.storage,this.route);
       (window as any)['mdsComponentRef_'+this.mdsId] = {component: this, zone: _ngZone};
     }
 
@@ -2159,8 +2159,9 @@ export class MdsComponent{
   }
 
   private isContentEditable() {
-    let value=this.currentNode && this.currentNode.properties[RestConstants.CCM_PROP_EDITOR_TYPE];
-    return value!='tinymce';
+    let editor=this.currentNode && this.currentNode.properties[RestConstants.CCM_PROP_EDITOR_TYPE];
+    let wwwurl=this.currentNode && this.currentNode.properties[RestConstants.CCM_PROP_IO_WWWURL];
+    return editor!='tinymce' && !wwwurl;
   }
 
   private isExtendedWidget(widget: any) {

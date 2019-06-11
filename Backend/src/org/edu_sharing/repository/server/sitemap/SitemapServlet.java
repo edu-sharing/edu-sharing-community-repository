@@ -16,6 +16,7 @@ import org.edu_sharing.metadataset.v2.MetadataReaderV2;
 import org.edu_sharing.metadataset.v2.MetadataSetV2;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.client.tools.MimeTypes;
+import org.edu_sharing.repository.server.MCAlfrescoAPIClient;
 import org.edu_sharing.repository.server.SearchResultNodeRef;
 import org.edu_sharing.repository.server.sitemap.xml.Sitemapindex;
 import org.edu_sharing.repository.server.sitemap.xml.Urlset;
@@ -105,8 +106,11 @@ public class SitemapServlet extends HttpServlet{
             if(MimeTypesV2.getTypeFromMimetype(mimetype).equals("file-video")){
                 Urlset.Url.Video video = new Urlset.Url.Video();
                 video.thumbnail_loc = NodeServiceHelper.getPreview(ref).getUrl();
-                video.content_loc = URLTool.getRenderServiceURL(ref.getNodeId(),false);
-                video.title = nodeService.getProperty(ref.getStoreProtocol(),ref.getStoreId(),ref.getNodeId(),CCConstants.CM_NAME);
+                try {
+                    video.content_loc = new MCAlfrescoAPIClient().getDownloadUrl(ref.getNodeId());
+                }catch(Throwable t){
+                    logger.warn("Can not read download url: "+t.getMessage());
+                }                video.title = nodeService.getProperty(ref.getStoreProtocol(),ref.getStoreId(),ref.getNodeId(),CCConstants.CM_NAME);
                 url.video.add(video);
             }
             else {

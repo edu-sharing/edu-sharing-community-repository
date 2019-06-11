@@ -184,7 +184,7 @@
           [columns]="savedSearchColumns"
           (clickRow)="loadSavedSearchNode($event)"
         ></listTable>
-         <div class="manageSavedSearch" *ngIf="savedSearch.length && savedSearchOwn">
+         <div class="manageSavedSearch" *ngIf="savedSearch.length && savedSearchOwn && isWorkspaceEnabled()">
            <a (click)="goToSaveSearchWorkspace()" class="clickable">{{'SEARCH.MANAGE_SAVED_SEARCH' | translate}}</a>
          </div>
        </div>

@@ -1,7 +1,6 @@
 package org.edu_sharing.service.permission;
 
 import java.io.Serializable;
-import java.math.BigDecimal;
 import java.sql.SQLException;
 import java.text.DateFormat;
 import java.util.ArrayList;
@@ -71,6 +70,7 @@ import org.edu_sharing.service.oai.OAIExporterService;
 import org.edu_sharing.service.toolpermission.ToolPermissionException;
 import org.edu_sharing.service.toolpermission.ToolPermissionService;
 import org.edu_sharing.service.toolpermission.ToolPermissionServiceFactory;
+import org.edu_sharing.service.version.VersionTool;
 import org.springframework.context.ApplicationContext;
 
 import com.google.gson.Gson;
@@ -107,6 +107,10 @@ public class PermissionServiceImpl implements org.edu_sharing.service.permission
 
 	public PermissionServiceImpl() {
 		this(ApplicationInfoList.getHomeRepository().getAppId());
+	}
+	
+	public PermissionServiceImpl(boolean test) {
+		
 	}
 
 	/**
@@ -428,10 +432,7 @@ public class PermissionServiceImpl implements org.edu_sharing.service.permission
 				return;
 			}
 
-			//get new version label
-			//use BigDecimal cause of rounding Problem with double
-			BigDecimal bd = BigDecimal.valueOf(Double.valueOf(version)).add(BigDecimal.valueOf(0.1));
-			String newVersion = bd.toString();
+			String newVersion = new VersionTool().incrementVersion(version);
 
 			HandleService handleService = null;
 			String handle = null;
@@ -491,6 +492,8 @@ public class PermissionServiceImpl implements org.edu_sharing.service.permission
 			}
 		}
 	}
+	
+	
 
 	@Override
 	public List<Notify> getNotifyList(final String nodeId) throws Throwable {
@@ -1593,4 +1596,5 @@ public class PermissionServiceImpl implements org.edu_sharing.service.permission
 	public void setToolPermission(ToolPermissionService toolPermission) {
 		this.toolPermission = toolPermission;
 	}
+	
 }

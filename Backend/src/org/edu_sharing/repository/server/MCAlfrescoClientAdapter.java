@@ -152,10 +152,6 @@ public class MCAlfrescoClientAdapter extends MCAlfrescoBaseClient {
 	}
 
 	@Override
-	public void checkAndLinkPublicFolder(String targetFolderId) throws Exception {
-	}
-
-	@Override
 	public String getRootNodeId() throws Exception {
 		return null;
 	}

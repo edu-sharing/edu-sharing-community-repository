@@ -1,8 +1,10 @@
 package org.edu_sharing.service.nodeservice;
 
 import net.sf.acegisecurity.AuthenticationCredentialsNotFoundException;
+import org.alfresco.repo.policy.BehaviourFilter;
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.repo.security.permissions.AccessDeniedException;
+import org.alfresco.repo.transaction.RetryingTransactionHelper;
 import org.alfresco.service.ServiceRegistry;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.repository.NodeService;
@@ -13,11 +15,16 @@ import org.apache.log4j.Logger;
 import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.server.authentication.Context;
-import org.edu_sharing.repository.server.tools.security.SignatureVerifier;
+import org.edu_sharing.repository.server.tools.ApplicationInfo;
+import org.edu_sharing.restservices.ApiAuthenticationFilter;
 import org.edu_sharing.service.InsufficientPermissionException;
 import org.edu_sharing.service.stream.StreamServiceFactory;
 import org.edu_sharing.service.stream.StreamServiceHelper;
+import org.edu_sharing.service.authority.AuthorityServiceFactory;
 import org.springframework.context.ApplicationContext;
+
+import java.io.Serializable;
+import java.util.concurrent.Callable;
 
 public class NodeServiceInterceptor implements MethodInterceptor {
     static Logger logger = Logger.getLogger(NodeServiceInterceptor.class);
@@ -49,6 +56,9 @@ public class NodeServiceInterceptor implements MethodInterceptor {
                 methodName.equals("getType") ||
                 methodName.equals("getVersionHistory")){
             argumentId=0;
+        }
+        if(methodName.equals("writeContent")){
+            return checkIgnoreQuota(invocation);
         }
         if(argumentId==-1)
             return invocation.proceed();
@@ -82,7 +92,52 @@ public class NodeServiceInterceptor implements MethodInterceptor {
 
 
     }
-    private static Object runAsSystem(String nodeId,MethodInvocation invocation) throws Throwable {
+
+    /**
+     * checks if the quota must be ignored (basically if the request was initiated by a connector)
+     * and run the task accordingly
+     */
+    private static Object checkIgnoreQuota(MethodInvocation invocation) throws Throwable {
+        if(ApplicationInfo.TYPE_CONNECTOR.equals(ApiAuthenticationFilter.accessToolType.get())){
+            return ignoreQuota(() -> {
+                try {
+                    return invocation.proceed();
+                } catch (Throwable t) {
+                    logger.error(t.getMessage(),t);
+                    return null;
+                }
+            });
+        }
+        return invocation.proceed();
+    }
+
+    /**
+     * Ignores any user quotas for the given callback context
+     * Basically, this temporarily disables the quota for the user
+     */
+    public static <T> T ignoreQuota(Callable<T> callable) throws Exception {
+        ApplicationContext applicationContext = AlfAppContextGate.getApplicationContext();
+        ServiceRegistry serviceRegistry = (ServiceRegistry) applicationContext.getBean(ServiceRegistry.SERVICE_REGISTRY);
+        RetryingTransactionHelper rth = serviceRegistry.getTransactionService().getRetryingTransactionHelper();
+
+        return rth.doInTransaction(() -> {
+            Serializable quota= (Serializable) AuthorityServiceFactory.getLocalService().getAuthorityProperty(AuthenticationUtil.getFullyAuthenticatedUser(),CCConstants.CM_PROP_PERSON_SIZE_QUOTA);
+            AuthenticationUtil.runAsSystem(()-> {
+                AuthorityServiceFactory.getLocalService().setAuthorityProperty(AuthenticationUtil.getFullyAuthenticatedUser(), CCConstants.CM_PROP_PERSON_SIZE_QUOTA, null);
+                return null;
+            });
+
+            T result=callable.call();
+
+            AuthenticationUtil.runAsSystem(()-> {
+                AuthorityServiceFactory.getLocalService().setAuthorityProperty(AuthenticationUtil.getFullyAuthenticatedUser(), CCConstants.CM_PROP_PERSON_SIZE_QUOTA, quota);
+                return null;
+            });
+            return result;
+        });
+    }
+
+        private static Object runAsSystem(String nodeId,MethodInvocation invocation) throws Throwable {
         ApplicationContext applicationContext = AlfAppContextGate.getApplicationContext();
         ServiceRegistry serviceRegistry = (ServiceRegistry) applicationContext.getBean(ServiceRegistry.SERVICE_REGISTRY);
         NodeService nodeService = serviceRegistry.getNodeService();

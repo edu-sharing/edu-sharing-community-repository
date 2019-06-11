@@ -45,12 +45,15 @@ public class LRMITool {
                 (String)props.get(CCConstants.CCM_PROP_IO_COMMONLICENSE_CC_VERSION)
         ));
         for(String prop : lrmiProps.stringPropertyNames()){
-            List<String> propsList = new ArrayList<>(
-                    Arrays.asList(lrmiProps.getProperty(prop).split(",")));
-            propsList=propsList.stream().map(CCConstants::getValidGlobalName)
-                .collect(Collectors.toList());
-
-            lrmi.put(prop,getProperty(props,propsList));
+            // split by "," (or) first, than combine all the "+" concats (and)
+            // finally, convert them to global names
+            List<List<String>> propsListAnd = Arrays.stream(lrmiProps.getProperty(prop).split(",")).map((f) ->
+                    Arrays.stream(f.split("\\+")).
+                            map(CCConstants::getValidGlobalName).
+                            collect(Collectors.toList())).
+                    collect(Collectors.toList()
+            );
+            lrmi.put(prop,getPropertyCombined(props,propsListAnd));
         }
         /*
         lrmi.put("name",getProperty(props,CCConstants.LOM_PROP_GENERAL_TITLE,CCConstants.CM_NAME));
@@ -101,21 +104,42 @@ public class LRMITool {
             return result.getJSONObject(0);
     }
 
-    private static Object getProperty(HashMap<String, Object> props, List<String> keys) {
-        for(String key : keys){
-            if(!props.containsKey(key) || props.get(key)==null)
-                continue;
-            if(props.get(key) instanceof String){
-                if(((String)props.get(key)).isEmpty()){
+    /**
+     * The outer list defines the first hit
+     * The first outer list hit will be returned (basically "or" combined)
+     * All inner list properties are concated
+     * @param props
+     * @param keys
+     * @return
+     */
+    private static Object getPropertyCombined(HashMap<String, Object> props, List<List<String>> keys) {
+        for(List<String> keyArray : keys){
+            List<Object> result=new ArrayList<>();
+            for(String key : keyArray) {
+                if (!props.containsKey(key) || props.get(key) == null)
                     continue;
+                if (props.get(key) instanceof String) {
+                    if (((String) props.get(key)).isEmpty()) {
+                        continue;
+                    }
+                    String[] data = StringUtils.splitByWholeSeparator((String) props.get(key), CCConstants.MULTIVALUE_SEPARATOR);
+                    if (data.length > 1)
+                        result.addAll(Arrays.asList(data));
+                    else
+                        result.add(data[0]);
                 }
-                String[] data=StringUtils.splitByWholeSeparator((String) props.get(key),CCConstants.MULTIVALUE_SEPARATOR);
-                if(data.length>1)
-                    return data;
-                return data[0];
+                else
+                    result.add(props.get(key));
             }
-                return props.get(key);
+            if(result.size()==1)
+                return result.get(0);
+            else if(result.size()>1)
+                return result;
+            // else continue until a filled field is found
         }
         return null;
+    }
+    private static Object getProperty(HashMap<String, Object> props, List<String> keys) {
+        return getPropertyCombined(props,Collections.singletonList(keys));
     }
 }

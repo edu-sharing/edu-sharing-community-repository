@@ -1,9 +1,8 @@
 package org.edu_sharing.repository.client.tools;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import org.edu_sharing.restservices.RestConstants;
+
+import java.util.*;
 
 public class CCConstants {
 
@@ -442,6 +441,11 @@ public class CCConstants {
 
 	public static final String CCM_PROP_TRACKING_VIEWS = "{http://www.campuscontent.de/model/1.0}tracking_views";
 
+	public static final int HTTP_INSUFFICIENT_STORAGE = 503;
+
+    public static final List<String> CHILDOBJECT_IGNORED_PARENT_PROPERTIES = Arrays.asList(
+    		CCConstants.CM_NAME,CCConstants.ALFRESCO_MIMETYPE,CCConstants.LOM_PROP_TECHNICAL_FORMAT,CCConstants.LOM_PROP_TECHNICAL_SIZE
+	);
 
     public static String CCM_WF_STATUS_VALUE_UNCHECKED="100_unchecked";
 	public static String CCM_WF_STATUS_VALUE_TO_CHECK="200_tocheck";
@@ -567,7 +571,7 @@ public class CCConstants {
 	public final static String CCM_PROP_IO_HEIGHT = "{http://www.campuscontent.de/model/1.0}height";
 
 	//LOM Replication:
-	public final static String CCM_PROP_IO_REPL_EDUCATIONAL_LEARNINGRESSOURCETYPE  = "{http://www.campuscontent.de/model/1.0}educationallearningresourcetype";
+	public final static String CCM_PROP_IO_REPL_EDUCATIONAL_LEARNINGRESSOURCETYPE  = "{http://www.campuscontent.de/model/1.0}unknown license description";
 	public final static String CCM_PROP_IO_REPL_EDUCATIONAL_LEARNINGRESSOURCETYPE_AGG  = "{http://www.campuscontent.de/model/1.0}educationallearningresourcetype_agg";
 	public final static String CCM_PROP_IO_REPL_EDUCATIONAL_CONTEXT  = "{http://www.campuscontent.de/model/1.0}educationalcontext";
 	public final static String CCM_PROP_IO_REPL_EDUCATIONAL_TYPICALLEARNINGTIME  = "{http://www.campuscontent.de/model/1.0}educationaltypicallearningtime";
@@ -1783,7 +1787,6 @@ public class CCConstants {
 
 
 	//AppInfo
-	public final static String APPLICATIONINFO_AVAILABLESEARCHCRITERIA = "availablesearchcriterias";
 	public final static String APPLICATIONINFO_APPID = "appid";
 	public final static String APPLICATIONINFO_APPCAPTION = "appcaption";
 	public final static String APPLICATIONINFO_ISHOMENODE = "is_home_node";

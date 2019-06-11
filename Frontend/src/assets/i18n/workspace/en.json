@@ -15,6 +15,7 @@
     "ALL_FILES": "Alle Dateien",
     "ADD": "Add",
     "ADD_OBJECT": "Add Material",
+    "ADD_OBJECT_LTI":"Use as lti ressource",
     "ADD_CAMERA": "Take a picture",
     "ADD_EMPTY_OBJECT": "Add object",
     "ADD_OBJECT_TITLE": "Add new material",
@@ -109,8 +110,7 @@
       "DOI":"Provide with DOI",
       "DOI_INFO":"DOI (Digital Object Identifier) is a standardized ID for unique global identification and retrieved material",
       "PUBLISHING_WARNING_TITLE":"Publish element?",
-      "PUBLISHING_WARNING_MESSAGE":"If you continue, the current element will be shared to every user on the system and can be accessed by everyone.\n\nAre you sure you want to publish this element?",
-      "STATE": {
+      "PUBLISHING_WARNING_MESSAGE":"If you continue, the current element will be shared with all users of the system and can be accessed by everyone.\n\nAre you sure you want to publish this element?",      "STATE": {
         "PRIVATE": "Private",
         "SHARED": "Shared",
         "PUBLIC": "Public"

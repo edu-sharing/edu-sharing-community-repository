@@ -38,7 +38,6 @@ import org.edu_sharing.repository.client.rpc.ACE;
 import org.edu_sharing.repository.client.rpc.Authority;
 import org.edu_sharing.repository.client.rpc.CheckForDuplicatesResult;
 import org.edu_sharing.repository.client.rpc.EduGroup;
-import org.edu_sharing.repository.client.rpc.EnvInfo;
 import org.edu_sharing.repository.client.rpc.GetPermissions;
 import org.edu_sharing.service.nodeservice.model.GetPreviewResult;
 import org.edu_sharing.repository.client.rpc.Group;
@@ -148,10 +147,6 @@ public interface MCAlfrescoService extends RemoteService {
 	public HashMap getISO8601DateFormat(HashMap dates);
 	
 	public Date getDateFromISOString(String isoDate);
-
-	public String getRootNodeId() throws CCException;
-
-	public EnvInfo getEnvInfo() throws CCException;
 
 	public GetPermissions getPermissions(String nodeId) throws CCSessionExpiredException, CCException;
 

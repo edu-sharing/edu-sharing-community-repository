@@ -25,7 +25,7 @@ import {
     ConnectorList, FrameEventsService, ListItem,
     LoginResult, NodeWrapper, RestConnectorService,
     RestConnectorsService, Node, NodeList,
-    RestConstants, RestHelper, RestMdsService, RestNodeService, RestSearchService,
+    RestConstants, RestHelper, RestMdsService, RestIamService, RestNodeService, RestSearchService,
     RestToolService, SessionStorageService,
     TemporaryStorageService
 } from "../../../core-module/core.module";
@@ -95,6 +95,7 @@ export class NodeRenderComponent implements EventListener{
   @ViewChild('sequencediv') sequencediv : ElementRef;
   @ViewChild('mainNav') mainNavRef : MainNavComponent;
   @ViewChild('commentsRef') commentsRef : ElementRef;
+  isChildobject = false;
 
 
     public static close(location:Location) {
@@ -200,6 +201,7 @@ export class NodeRenderComponent implements EventListener{
       private connector : RestConnectorService,
       private http : HttpClient,
       private connectors : RestConnectorsService,
+      private iam : RestIamService,
       private mdsApi : RestMdsService,
       private nodeApi : RestNodeService,
       private searchApi : RestSearchService,
@@ -233,6 +235,7 @@ export class NodeRenderComponent implements EventListener{
           this.repository=params['repository'] ? params['repository'] : RestConstants.HOME_REPOSITORY;
           this.queryParams=params;
           let childobject = params['childobject_id'] ? params['childobject_id'] : null;
+          this.isChildobject=childobject!=null;
           this.route.params.subscribe((params: Params) => {
             if(params['node']) {
               this.isRoute=true;
@@ -283,6 +286,10 @@ export class NodeRenderComponent implements EventListener{
     this.isLoading=true;
     this.node=this._nodeId;
   }
+  viewChildobject(node:Node,pos:number){
+        this.isChildobject=pos!=0;
+        this.node=node;
+  }
   private loadNode() {
     if(!this._node) {
         this.isBuildingPage = false;
@@ -327,8 +334,7 @@ export class NodeRenderComponent implements EventListener{
     this._node=null;
     this.isBuildingPage=true;
       // we only fetching versions for the primary parent (child objects don't have versions)
-    this.nodeApi.getNodeRenderSnippet(this._nodeId,this.version &&
-        (!this.sequenceParent || this._nodeId==this.sequenceParent.ref.id) ? this.version : "-1",parameters,this.repository)
+      this.nodeApi.getNodeRenderSnippet(this._nodeId,this.version && !this.isChildobject ? this.version : "-1",parameters,this.repository)
         .subscribe((data:any)=>{
             if (!data.detailsSnippet) {
                 console.error(data);
@@ -404,16 +410,16 @@ export class NodeRenderComponent implements EventListener{
   private showComments(){
       this.nodeComments=this._node;
   }
+  private downloadSequence() {
+      let nodes = [this.sequenceParent].concat(this.sequence.nodes);
+      NodeHelper.downloadNodes(this.toast,this.connector,nodes, this.sequenceParent.name+".zip");
+  }
+
   private downloadCurrentNode() {
       if(this.downloadUrl) {
           NodeHelper.downloadUrl(this.toast, this.connector.getBridgeService(), this.downloadUrl);
       } else {
-          if(this.sequence && this.sequence.nodes.length > 0 || this._node.aspects.indexOf(RestConstants.CCM_ASPECT_IO_CHILDOBJECT) != -1) {
-              let nodes = [this.sequenceParent].concat(this.sequence.nodes);
-              NodeHelper.downloadNodes(this.toast,this.connector,nodes, this.sequenceParent.name+".zip");
-          } else {
-              NodeHelper.downloadNode(this.toast, this.connector.getBridgeService(), this._node, this.version);
-          }
+          NodeHelper.downloadNode(this.toast, this.connector.getBridgeService(), this._node, this.version);
       }
   }
 
@@ -422,7 +428,7 @@ export class NodeRenderComponent implements EventListener{
       this.toolService.openLtiObject(this._node);
     }
     else {
-      UIHelper.openConnector(this.connectors,this.frame,this.toast, this._node,null,null,null,newWindow);
+      UIHelper.openConnector(this.connectors,this.iam,this.frame,this.toast, this._node,null,null,null,newWindow);
     }
   }
 
@@ -535,11 +541,13 @@ export class NodeRenderComponent implements EventListener{
   private addDownloadButton(options:OptionItem[],download: OptionItem) {
       this.nodeApi.getNodeChildobjects(this.sequenceParent.ref.id,this.repository).subscribe((data:NodeList)=>{
           this.downloadButton=download;
-          if(data.nodes.length > 0 || this._node.aspects.indexOf(RestConstants.CCM_ASPECT_IO_CHILDOBJECT) != -1) {
-              download.name = 'DOWNLOAD_ALL';
-          }
           options.splice(0,0,download);
-
+          if(data.nodes.length > 0 || this._node.aspects.indexOf(RestConstants.CCM_ASPECT_IO_CHILDOBJECT) != -1) {
+              let downloadAll = new OptionItem('DOWNLOAD_ALL','archive',()=>{
+                  this.downloadSequence();
+              });
+              options.splice(1,0,downloadAll);
+          }
           if(this.searchService.reurl) {
               let apply = new OptionItem("APPLY", "redo", (node: Node) => NodeHelper.addNodeToLms(this.router, this.temporaryStorageService, this._node, this.searchService.reurl));
               apply.isEnabled = this._node.access.indexOf(RestConstants.ACCESS_CC_PUBLISH) != -1;

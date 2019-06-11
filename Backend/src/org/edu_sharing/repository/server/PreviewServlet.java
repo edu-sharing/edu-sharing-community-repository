@@ -75,8 +75,12 @@ public class PreviewServlet extends HttpServlet implements SingleThreadModel {
 	private boolean isCacheable(int width,int height, int maxWidth, int maxHeight){
 		if(width==-1)
 			return true;
-		if(maxWidth>0 || maxHeight>0)
-			return false;
+		if(maxWidth>0 && maxHeight>0) {
+			for(int i=0;i<PreviewCache.CACHE_SIZES_MAX_WIDTH.length;i++){
+				if(PreviewCache.CACHE_SIZES_MAX_WIDTH[i]==maxWidth && PreviewCache.CACHE_SIZES_MAX_HEIGHT[i]==maxHeight)
+					return true;
+			}
+		}
 		for(int i=0;i<PreviewCache.CACHE_SIZES_WIDTH.length;i++){
 			if(PreviewCache.CACHE_SIZES_WIDTH[i]==width && PreviewCache.CACHE_SIZES_HEIGHT[i]==height)
 				return true;
@@ -460,7 +464,7 @@ public class PreviewServlet extends HttpServlet implements SingleThreadModel {
 		
 		boolean fromCache=false;
 		if(fullsize || isCacheable(width, height,maxWidth,maxHeight)){
-			File file=PreviewCache.getFileForNode(nodeId,fullsize ? -1 : width,height,false);
+			File file=PreviewCache.getFileForNode(nodeId,fullsize ? -1 : width,height,maxWidth,maxHeight,false);
 			if(file!=null && file.exists()){
 				try{
 					in.close();
@@ -545,7 +549,7 @@ public class PreviewServlet extends HttpServlet implements SingleThreadModel {
 		
 			if(!fromCache && (isCacheable(width, height,maxWidth,maxHeight) || fullsize)){
 				// Drop alpha (weird colors in jpg otherwise)
-				ImageIO.write(imgOut, "JPG",PreviewCache.getFileForNode(nodeId,fullsize ? -1 : width, height,true));
+				ImageIO.write(imgOut, "JPG",PreviewCache.getFileForNode(nodeId,fullsize ? -1 : width, height,maxWidth,maxHeight,true));
 			}
 
 			JPEGImageWriteParam jpegParams = new JPEGImageWriteParam(null);

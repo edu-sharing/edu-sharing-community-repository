@@ -114,6 +114,7 @@ public class OaiServlet extends HttpServlet{
                 SortDefinition sort=new SortDefinition();
                 sort.addSortDefinitionEntry(new SortDefinition.SortDefinitionEntry(CCConstants.CM_PROP_C_CREATED,true));
                 token.setSortDefinition(sort);
+                token.setContentType(SearchService.ContentType.FILES);
                 SearchResultNodeRef result = SearchServiceFactory.getLocalService().searchV2(
                         MetadataHelper.getMetadataset(ApplicationInfoList.getHomeRepository(), CCConstants.metadatasetdefault_id),
                         "oai",

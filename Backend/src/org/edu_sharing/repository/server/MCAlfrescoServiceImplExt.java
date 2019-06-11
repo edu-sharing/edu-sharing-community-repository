@@ -76,7 +76,6 @@ public class MCAlfrescoServiceImplExt {
 				HashMap<String,String> repProps = new HashMap<String,String>();
 				repProps.put(CCConstants.APPLICATIONINFO_APPCAPTION, appInfo.getAppCaption());
 				repProps.put(CCConstants.APPLICATIONINFO_APPID, appInfo.getAppId());
-				repProps.put(CCConstants.APPLICATIONINFO_AVAILABLESEARCHCRITERIA, appInfo.getAvailableSearchCriterias());
 				repProps.put(CCConstants.APPLICATIONINFO_ISHOMENODE, new Boolean(appInfo.ishomeNode()).toString());
 				repProps.put(CCConstants.APPLICATIONINFO_REPOSITORYTYPE, appInfo.getRepositoryType());
 				repProps.put(CCConstants.APPLICATIONINFO_RECOMMENDOBJECTS_QUERY, appInfo.getRecommend_objects_query());

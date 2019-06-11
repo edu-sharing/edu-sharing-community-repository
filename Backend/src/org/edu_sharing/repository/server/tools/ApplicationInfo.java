@@ -33,6 +33,7 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Properties;
 
 import org.apache.log4j.Logger;
 
@@ -92,13 +93,14 @@ public class ApplicationInfo implements Comparable<ApplicationInfo>{
 	
 	public static final String KEY_CONTENTURL = "contenturl";
 
+	public static final String KEY_URL_DYNAMIC = "url_dynamic";
+
 	public static final String KEY_PREVIEWURL = "previewurl";
 	
 	public static final String KEY_IS_HOME_NODE = "is_home_node";
 	
 	public static final String KEY_CUSTOM_HTML_HEADERS = "custom_html_headers";
-	
-	public static final String KEY_METADATASETS = "metadatasets";
+
 	public static final String KEY_METADATASETS_V2 = "metadatasetsV2";
 	
 	public static final String KEY_PUBLIC_KEY = "public_key";
@@ -147,6 +149,7 @@ public class ApplicationInfo implements Comparable<ApplicationInfo>{
 	public static final String WEBSITEPREVIEWRENDERSERVICE = "websitepreviewrenderservice";
 
 	public static final String REPOSITORY_TYPE_MEMUCHO = "MEMUCHO";
+	private final Properties properties;
 
 	private String host = null;
 	
@@ -207,8 +210,6 @@ public class ApplicationInfo implements Comparable<ApplicationInfo>{
 	private String permissionwebservice = null;
 	
 	private String subtype = null;
-	
-	private String publicfolderid = null;
 
 	private String searchclass = null;
 	
@@ -236,16 +237,11 @@ public class ApplicationInfo implements Comparable<ApplicationInfo>{
 
 	private String logoutUrl = null;
 
-	private String nodeIdKey = null;
-	
-	private String availableSearchCriterias = null;
-	
 	private String websitepreviewrenderservice;
 	
 	private String searchable = "true";
 	
 	//file that contains metadatasets for the repository
-	private String metadatsets = null;
 	private String metadatsetsV2 = null;
 	
 	//devmode metadatasets will be parsed every time and not cached in RepoFactory
@@ -316,144 +312,137 @@ public class ApplicationInfo implements Comparable<ApplicationInfo>{
 		xml = new String(Files.readAllBytes(Paths.get(url.toURI())));
 		
 		//test if file exists if not exception is thrown
-		//PropertiesHelper.getProperty("is_home_node", appFile, PropertiesHelper.XML);
+		//properties.getProperty("is_home_node");
+		properties = PropertiesHelper.getProperties(appFile,PropertiesHelper.XML);
 		
-		host = PropertiesHelper.getProperty(KEY_HOST, appFile, PropertiesHelper.XML);
+		host = properties.getProperty(KEY_HOST);
 				
-		hostAliases = PropertiesHelper.getProperty("host_aliases", appFile, PropertiesHelper.XML);	
+		hostAliases = properties.getProperty("host_aliases");
 		
-		domain = PropertiesHelper.getProperty(KEY_DOMAIN, appFile, PropertiesHelper.XML);	
+		domain = properties.getProperty(KEY_DOMAIN);
 		
-		port = PropertiesHelper.getProperty(KEY_PORT, appFile, PropertiesHelper.XML);
+		port = properties.getProperty(KEY_PORT);
 		if(port == null || port.trim().equals("")){
 			port="80";
 		}
 		
-		protocol = PropertiesHelper.getProperty(KEY_PROTOCOL, appFile, PropertiesHelper.XML);
+		protocol = properties.getProperty(KEY_PROTOCOL);
 		if(protocol == null || protocol.trim().equals("")){
 			protocol = "http";
 		}
 		
-		clientport =  PropertiesHelper.getProperty(KEY_CLIENTPORT, appFile, PropertiesHelper.XML);
-		clientprotocol =  PropertiesHelper.getProperty(KEY_CLIENTPROTOCOL, appFile, PropertiesHelper.XML);
+		clientport =  properties.getProperty(KEY_CLIENTPORT);
+		clientprotocol =  properties.getProperty(KEY_CLIENTPROTOCOL);
 		
-		wspath = PropertiesHelper.getProperty(KEY_WSPATH, appFile, PropertiesHelper.XML);
-		ishomeNode = PropertiesHelper.getProperty(KEY_IS_HOME_NODE, appFile, PropertiesHelper.XML);
+		wspath = properties.getProperty(KEY_WSPATH);
+		ishomeNode = properties.getProperty(KEY_IS_HOME_NODE);
 		if(ishomeNode == null){
 			ishomeNode = "false";
 		}
-		wshotpath = PropertiesHelper.getProperty(KEY_WSHOTPATH, appFile, PropertiesHelper.XML);
+		wshotpath = properties.getProperty(KEY_WSHOTPATH);
 		
-		webappname = PropertiesHelper.getProperty(KEY_WEBAPPNAME, appFile, PropertiesHelper.XML);
+		webappname = properties.getProperty(KEY_WEBAPPNAME);
 		if(webappname == null) webappname = "edu-sharing";
 		
-		username = PropertiesHelper.getProperty(KEY_USERNAME, appFile, PropertiesHelper.XML);
+		username = properties.getProperty(KEY_USERNAME);
 		
-		password = PropertiesHelper.getProperty(KEY_PASSWORD, appFile, PropertiesHelper.XML);
+		password = properties.getProperty(KEY_PASSWORD);
 		
 		
 		
-		guest_username = PropertiesHelper.getProperty("guest_username", appFile, PropertiesHelper.XML);
+		guest_username = properties.getProperty("guest_username");
 		
-		guest_password = PropertiesHelper.getProperty("guest_password", appFile, PropertiesHelper.XML);
+		guest_password = properties.getProperty("guest_password");
 		
-		logo = PropertiesHelper.getProperty(KEY_LOGO, appFile, PropertiesHelper.XML);
+		logo = properties.getProperty(KEY_LOGO);
 		
-		icon = PropertiesHelper.getProperty(KEY_ICON, appFile, PropertiesHelper.XML);
+		icon = properties.getProperty(KEY_ICON);
 
-		appCaption = PropertiesHelper.getProperty(KEY_APPCAPTION, appFile, PropertiesHelper.XML);
+		appCaption = properties.getProperty(KEY_APPCAPTION);
 		
-		appId = PropertiesHelper.getProperty(KEY_APPID, appFile, PropertiesHelper.XML);
+		appId = properties.getProperty(KEY_APPID);
 		if(appId == null || appId.trim().equals("")){
 			logger.error("missing appid in file:"+appFile);
 		}
 		
-		trustedclient = PropertiesHelper.getProperty(KEY_TRUSTEDCLIENT, appFile, PropertiesHelper.XML);
+		trustedclient = properties.getProperty(KEY_TRUSTEDCLIENT);
 		
-		type = PropertiesHelper.getProperty(KEY_TYPE, appFile, PropertiesHelper.XML); 
+		type = properties.getProperty(KEY_TYPE);
 		
-		authenticationwebservice = PropertiesHelper.getProperty("authenticationwebservice", appFile, PropertiesHelper.XML); 
+		authenticationwebservice = properties.getProperty("authenticationwebservice");
 		
-		permissionwebservice = PropertiesHelper.getProperty("permissionwebservice", appFile, PropertiesHelper.XML);
-		
-		subtype  = PropertiesHelper.getProperty("subtype", appFile, PropertiesHelper.XML);
-	
-		publicfolderid = PropertiesHelper.getProperty("publicfolderid", appFile, PropertiesHelper.XML);
+		permissionwebservice = properties.getProperty("permissionwebservice");
 
-		searchclass = PropertiesHelper.getProperty(KEY_SEARCHCLASS, appFile, PropertiesHelper.XML);	
-		
-		searchService = PropertiesHelper.getProperty("searchService", appFile, PropertiesHelper.XML);	
-		
-		permissionService = PropertiesHelper.getProperty("permissionService", appFile, PropertiesHelper.XML);	
-		
-		nodeService = PropertiesHelper.getProperty("nodeService", appFile, PropertiesHelper.XML);	
-		
-		authenticationtoolclass = PropertiesHelper.getProperty("authenticationtoolclass", appFile, PropertiesHelper.XML);
-		
-		repositoryType = PropertiesHelper.getProperty(KEY_REPOSITORY_TYPE, appFile, PropertiesHelper.XML);
-		
-		contentUrl = PropertiesHelper.getProperty(KEY_CONTENTURL, appFile, PropertiesHelper.XML);
+		subtype  = properties.getProperty("subtype");
 
-		previewUrl = PropertiesHelper.getProperty(KEY_PREVIEWURL, appFile, PropertiesHelper.XML);
+		searchclass = properties.getProperty(KEY_SEARCHCLASS);
 		
-		customHtmlHeaders = PropertiesHelper.getProperty(KEY_CUSTOM_HTML_HEADERS, appFile, PropertiesHelper.XML);
+		searchService = properties.getProperty("searchService");
+		
+		permissionService = properties.getProperty("permissionService");
+		
+		nodeService = properties.getProperty("nodeService");
+		
+		authenticationtoolclass = properties.getProperty("authenticationtoolclass");
+		
+		repositoryType = properties.getProperty(KEY_REPOSITORY_TYPE);
+		
+		contentUrl = properties.getProperty(KEY_CONTENTURL);
 
-		logoutUrl = PropertiesHelper.getProperty(KEY_LOGOUT_URL, appFile, PropertiesHelper.XML);
+		previewUrl = properties.getProperty(KEY_PREVIEWURL);
 		
-		nodeIdKey = PropertiesHelper.getProperty("nodeid_key", appFile, PropertiesHelper.XML);
-		
-		availableSearchCriterias = PropertiesHelper.getProperty("availablesearchcriterias", appFile, PropertiesHelper.XML);
-		
-		searchable = PropertiesHelper.getProperty(KEY_SEARCHABLE, appFile, PropertiesHelper.XML);
-		
+		customHtmlHeaders = properties.getProperty(KEY_CUSTOM_HTML_HEADERS);
+
+		logoutUrl = properties.getProperty(KEY_LOGOUT_URL);
+
+		searchable = properties.getProperty(KEY_SEARCHABLE);
+
 		if(searchable == null) searchable = "true";
 		
-		path = PropertiesHelper.getProperty("path", appFile, PropertiesHelper.XML);
+		path = properties.getProperty("path");
+
+		metadatsetsV2 = properties.getProperty(KEY_METADATASETS_V2);
 		
-		metadatsets = PropertiesHelper.getProperty(KEY_METADATASETS, appFile, PropertiesHelper.XML);
-		
-		metadatsetsV2 = PropertiesHelper.getProperty(KEY_METADATASETS_V2, appFile, PropertiesHelper.XML);
-		
-		devmode = PropertiesHelper.getProperty("devmode", appFile, PropertiesHelper.XML);
-		
+		devmode = properties.getProperty("devmode");
+
 		devmode = (devmode == null)? "false": devmode;
 		
-		alfrescocontext = PropertiesHelper.getProperty(KEY_ALFRESCOCONTEXT, appFile, PropertiesHelper.XML);
+		alfrescocontext = properties.getProperty(KEY_ALFRESCOCONTEXT);
 		
-		recommend_objects_query = PropertiesHelper.getProperty("recommend_objects_query", appFile, PropertiesHelper.XML);
+		recommend_objects_query = properties.getProperty("recommend_objects_query");
 		
-		trustedEmailAddress = PropertiesHelper.getProperty("trusted_emailaddress", appFile, PropertiesHelper.XML);
+		trustedEmailAddress = properties.getProperty("trusted_emailaddress");
 		
-		authByAppUsernameProp = PropertiesHelper.getProperty("auth_by_app_username_prop", appFile, PropertiesHelper.XML);
+		authByAppUsernameProp = properties.getProperty("auth_by_app_username_prop");
 		authByAppUsernameProp = (authByAppUsernameProp == null)? authByAppUsernameProp = ApplicationInfo.AUTHBYAPP_USERNAME_PROP_USERNAME : authByAppUsernameProp;
 		
-		String tmpAuthByAppSendmail = PropertiesHelper.getProperty("auth_by_app_sendmail", appFile, PropertiesHelper.XML);
+		String tmpAuthByAppSendmail = properties.getProperty("auth_by_app_sendmail");
 		authByAppSendMail = (tmpAuthByAppSendmail == null)? true : new Boolean(tmpAuthByAppSendmail);
 		
-		authByAppUsernameMappingDirectoryUsername = PropertiesHelper.getProperty("auth_by_app_usernamemapping_dir_username", appFile, PropertiesHelper.XML);
+		authByAppUsernameMappingDirectoryUsername = properties.getProperty("auth_by_app_usernamemapping_dir_username");
 		
-		authByAppUsernameMappingRepositoryUsername = PropertiesHelper.getProperty("auth_by_app_usernamemapping_rep_username", appFile, PropertiesHelper.XML);
+		authByAppUsernameMappingRepositoryUsername = properties.getProperty("auth_by_app_usernamemapping_rep_username");
 		
-		allowedAuthenticationTypes = PropertiesHelper.getProperty("allowed_authentication_types", appFile, PropertiesHelper.XML);
+		allowedAuthenticationTypes = properties.getProperty("allowed_authentication_types");
 		
-		customCss = PropertiesHelper.getProperty("custom_css", appFile, PropertiesHelper.XML);
+		customCss = properties.getProperty("custom_css");
 		
-		String tmpTrackingBufferSize = PropertiesHelper.getProperty("trackingBufferSize", appFile, PropertiesHelper.XML);
+		String tmpTrackingBufferSize = properties.getProperty("trackingBufferSize");
 		trackingBufferSize = (tmpTrackingBufferSize != null ? Integer.parseInt(tmpTrackingBufferSize) : 0);
 		
-		publicKey = PropertiesHelper.getProperty(KEY_PUBLIC_KEY, appFile, PropertiesHelper.XML);
+		publicKey = properties.getProperty(KEY_PUBLIC_KEY);
 		
-		privateKey = PropertiesHelper.getProperty(KEY_PRIVATE_KEY, appFile, PropertiesHelper.XML);
+		privateKey = properties.getProperty(KEY_PRIVATE_KEY);
 		
-		messageOffsetMs = PropertiesHelper.getProperty(KEY_MESSAGE_OFFSET_MILLISECONDS, appFile, PropertiesHelper.XML);
+		messageOffsetMs = properties.getProperty(KEY_MESSAGE_OFFSET_MILLISECONDS);
 		
-		messageSendOffsetMs = PropertiesHelper.getProperty(KEY_MESSAGE_SEND_OFFSET_MILLISECONDS, appFile, PropertiesHelper.XML);
+		messageSendOffsetMs = properties.getProperty(KEY_MESSAGE_SEND_OFFSET_MILLISECONDS);
 		
-		apiKey = PropertiesHelper.getProperty(KEY_API_KEY, appFile, PropertiesHelper.XML);
+		apiKey = properties.getProperty(KEY_API_KEY);
 
-		websitepreviewrenderservice = PropertiesHelper.getProperty(WEBSITEPREVIEWRENDERSERVICE, appFile, PropertiesHelper.XML);
+		websitepreviewrenderservice = properties.getProperty(WEBSITEPREVIEWRENDERSERVICE);
 
-		String orderString = PropertiesHelper.getProperty(KEY_ORDER, appFile, PropertiesHelper.XML);
+		String orderString = properties.getProperty(KEY_ORDER);
 		order = orderString==null ? (ishomeNode() ? 0 : 1) : Integer.parseInt(orderString);
 
 		getWebServiceUrl();
@@ -521,8 +510,17 @@ public class ApplicationInfo implements Comparable<ApplicationInfo>{
 			return this.getProtocol()+"://" + this.getHost() + port + this.getWshotpath();
 		}
 	}
-	
-		
+
+	public String getString(String key,String defaultValue){
+		return properties.getProperty(key,defaultValue);
+	}
+
+	public boolean getBoolean(String key,boolean defaultValue){
+		String property = properties.getProperty(key);
+		if(property==null || property.isEmpty())
+			return defaultValue;
+		return property.equalsIgnoreCase("true");
+	}
 	public String getWebServerUrl(){
 		String port = ""; 
 		if(!this.getPort().equals("80") && !this.getPort().equals("443")){
@@ -596,10 +594,6 @@ public class ApplicationInfo implements Comparable<ApplicationInfo>{
 		return subtype;
 	}
 
-	public String getPublicfolderid() {
-		return publicfolderid;
-	}
-
 	/**
 	 * @return the searchclass
 	 */
@@ -641,7 +635,7 @@ public class ApplicationInfo implements Comparable<ApplicationInfo>{
 		
 		return contentUrl;
 	}
-	
+
 	/**
 	 * this is a property used redirect to preview deliverd by repositories renderservice
 	 * 
@@ -664,26 +658,7 @@ public class ApplicationInfo implements Comparable<ApplicationInfo>{
 		
 		return logoutUrl;
 	}
-	
-	/**
-	 * @return the nodeIdKey
-	 */
-	public String getNodeIdKey() {
-		
-		return nodeIdKey;
-	}
-	
-	
-	
-	/**
-	 * @return the availableSearchCriterias
-	 */
-	public String getAvailableSearchCriterias() {
-		
-		
-		return availableSearchCriterias;
-	}
-	
+
 	/**
 	 * @return the searchable
 	 */
@@ -707,13 +682,6 @@ public class ApplicationInfo implements Comparable<ApplicationInfo>{
 		return path;
 	}
 
-	/**
-	 * @return the metadatsets
-	 */
-	public String getMetadatsets() {
-		
-		return metadatsets;
-	}
 	/**
 	 * @return the metadatsetsV2
 	 */
