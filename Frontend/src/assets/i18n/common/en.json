@@ -157,7 +157,7 @@
   },
   "NODE" : {
     "cm:name": "filename",
-    "score": "Relevance",
+    "score": "relevance",
     "description": "description",
     "mimetype": "file type",
     "size": "size",
