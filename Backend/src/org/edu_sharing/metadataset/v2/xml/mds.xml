@@ -68,6 +68,15 @@
 				<hideIfEmpty>true</hideIfEmpty>
 			</widget>
 			<widget>
+				<id>ccm:educationallearningresourcetype</id>
+				<type>multivalueFixedBadges</type>
+				<caption>lom_prop_educationallearningresourcetype</caption>
+				<hideIfEmpty>true</hideIfEmpty>
+				<valuespace>valuespaces.xml</valuespace>
+				<valuespace_i18n>valuespaces_i18n</valuespace_i18n>
+			</widget>
+
+			<widget>
 				<id>ccm:tool_category</id>
 				<type>singleoption</type>
 				<caption>cb_tool_category</caption>
@@ -338,6 +347,7 @@
               <ccm:wwwurl>		 
               <cm:name>
               <cclom:title>
+              <ccm:educationallearningresourcetype>
               <cclom:general_keyword>
               <cclom:general_description>
               <author>
@@ -362,6 +372,7 @@
 				<caption>dialog_upload_tab_basic</caption>
 				<icon>description</icon>
 				<html><![CDATA[
+			  <ccm:educationallearningresourcetype>
               <cclom:general_keyword>
               <cclom:general_description>
 				]]></html>
@@ -443,6 +454,7 @@
 			<template>
 				<id>search</id>
 				<html><![CDATA[
+			  <ccm:educationallearningresourcetype>
               <cclom:general_keyword>
               <license>
 				]]></html>
@@ -460,6 +472,7 @@
 				<html><![CDATA[
               <cclom:title>
               <cm:name>
+			  <ccm:educationallearningresourcetype>
               <cclom:general_description>
               <cclom:general_keyword>
               <cclom:size>
