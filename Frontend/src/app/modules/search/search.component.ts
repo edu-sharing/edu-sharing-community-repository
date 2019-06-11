@@ -1041,6 +1041,9 @@ export class SearchComponent {
       UIHelper.goToWorkspaceFolder(this.nodeApi,this.router,this.login,data.node.ref.id);
     });
   }
+  isWorkspaceEnabled(){
+     return ConfigurationHelper.hasMenuButton(this.config, "workspace");
+  }
   private loadSavedSearch() {
     if(!this.isGuest){
       this.savedSearch=[];
