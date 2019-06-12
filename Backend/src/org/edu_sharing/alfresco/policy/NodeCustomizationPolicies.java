@@ -93,7 +93,11 @@ import com.coremedia.iso.boxes.TrackHeaderBox;
  * * - only if create_version value is true (default = true)
  */
 public class NodeCustomizationPolicies implements OnContentUpdatePolicy, OnCreateNodePolicy, OnUpdatePropertiesPolicy{
-	
+
+	/**
+	 * These are the properties that will be copied to all io_reference nodes inside collections
+	 * if the original node gets changed
+	 */
 	private static final String[] IO_REFERENCE_COPY_PROPERTIES = new String[]{
 			CCConstants.CCM_PROP_IO_COMMONLICENSE_KEY,
 			CCConstants.CCM_PROP_IO_COMMONLICENSE_CC_LOCALE,
@@ -108,6 +112,12 @@ public class NodeCustomizationPolicies implements OnContentUpdatePolicy, OnCreat
 			CCConstants.CCM_PROP_IO_LICENSE_TO,
 			CCConstants.CCM_PROP_IO_LICENSE_VALID,
 
+
+			// fix for 4.2, override all relevant metadata when changed on original
+			CCConstants.LOM_PROP_GENERAL_TITLE,
+			CCConstants.LOM_PROP_GENERAL_KEYWORD,
+			CCConstants.LOM_PROP_GENERAL_DESCRIPTION,
+			CCConstants.LOM_PROP_EDUCATIONAL_LEARNINGRESOURCETYPE,
 	};
 
 	static Logger logger = Logger.getLogger(NodeCustomizationPolicies.class);
