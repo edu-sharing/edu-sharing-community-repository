@@ -362,8 +362,15 @@ export class NodeRenderComponent implements EventListener{
         this.close();
     }
     addCollections(){
-        UIHelper.injectAngularComponent(this.componentFactoryResolver,this.viewContainerRef,SpinnerComponent,document.getElementsByTagName("collections")[0]);
+        let domContainer=document.getElementsByClassName("node_collections_render")[0].parentElement;
+        let domCollections=document.getElementsByTagName("collections")[0];
+        UIHelper.injectAngularComponent(this.componentFactoryResolver,this.viewContainerRef,SpinnerComponent,domCollections);
         this.usageApi.getNodeUsagesCollection(this._node.ref.id,this._node.ref.repo).subscribe((usages)=>{
+            //@TODO: This does currently ignore the "hideIfEmpty" flag of the mds template
+            if(usages.length==0){
+                domContainer.parentElement.removeChild(domContainer);
+                return;
+            }
             let data={
                 nodes:usages.map((u)=>u.collection),
                 columns:ListItem.getCollectionDefaults(),

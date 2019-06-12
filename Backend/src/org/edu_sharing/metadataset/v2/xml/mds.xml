@@ -526,6 +526,7 @@
 			<template>
 				<id>node_collections_render</id>
 				<caption>dialog_upload_tab_collections</caption>
+				<hideIfEmpty>true</hideIfEmpty>
 				<html><![CDATA[
 					<collections>
 				]]></html>
