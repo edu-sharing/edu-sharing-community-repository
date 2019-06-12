@@ -24,6 +24,8 @@ import {DECLARATIONS_SHARING} from './modules/sharing/declarations';
 import {DECLARATIONS_REGISTER} from './modules/register/declarations';
 import {DECLARATIONS_SERVICES} from "./modules/services/declarations";
 import {DECLARATIONS_FILE_UPLOAD} from './modules/file-upload/declarations';
+import {SpinnerComponent} from "./common/ui/spinner/spinner.component";
+import {ListTableComponent} from "./common/ui/list-table/list-table.component";
 
 
 // http://blog.angular-university.io/angular2-ngmodule/
@@ -53,6 +55,10 @@ import {DECLARATIONS_FILE_UPLOAD} from './modules/file-upload/declarations';
     DECLARATIONS_SHARING,
     DECLARATIONS_SHARE_APP,
     DECLARATIONS_SERVICES
+  ],
+  entryComponents: [
+      SpinnerComponent,
+      ListTableComponent
   ],
   imports: IMPORTS,
   providers: [

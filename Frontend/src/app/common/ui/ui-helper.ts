@@ -7,7 +7,14 @@ import {
 } from "../rest/data-object";
 import {ActivatedRoute, NavigationExtras, Router} from "@angular/router";
 import {OPEN_URL_MODE, UIConstants} from "./ui-constants";
-import {ElementRef, EventEmitter} from "@angular/core";
+import {
+    ComponentFactoryResolver,
+    ElementRef,
+    EmbeddedViewRef,
+    EventEmitter,
+    Type,
+    ViewContainerRef
+} from "@angular/core";
 import {RestConstants} from "../rest/rest-constants";
 import {RestHelper} from "../rest/rest-helper";
 import {Toast} from "./toast";
@@ -27,6 +34,7 @@ import {RestConnectorService} from "../rest/services/rest-connector.service";
 import {Observable, Observer} from "rxjs";
 import {RestIamService} from "../rest/services/rest-iam.service";
 import {DialogButton} from "./modal-dialog/modal-dialog.component";
+import {SpinnerComponent} from "./spinner/spinner.component";
 
 export class UIHelper{
 
@@ -576,6 +584,43 @@ export class UIHelper{
         if(connector.getCordovaService().isRunningCordova())
             return null;
         return window.open("");
+    }
+
+    /**
+     * dynamically inject an angular component into a regular html dom element
+     * @param componentFactoryResolver The resolver service
+     * @param viewContainerRef The viewContainerRef service
+     * @param componentName The name of the angular component (e.g. SpinnerComponent)
+     * @param targetElement The target element of the dom
+     * @param bindings Optional bindings (inputs & outputs) to the given component
+     * @param delay Optional inflating delay in ms(some components may need some time to "init" the layout)
+     */
+    public static injectAngularComponent<T>(componentFactoryResolver:ComponentFactoryResolver,viewContainerRef:ViewContainerRef,
+                                         componentName:  Type<T>,targetElement: Element,bindings:any=null,delay=0){
+        let factory = componentFactoryResolver.resolveComponentFactory(componentName);
+        let component = viewContainerRef.createComponent(factory);
+        if(bindings){
+            for(let key in bindings){
+                if(bindings[key] instanceof Function){
+                    // subscribe so callback can properly invoked
+                    (component.instance as any)[key].subscribe((o:any)=>bindings[key](o));
+                }
+                else {
+                    (component.instance as any)[key] = bindings[key];
+                }
+            }
+        }
+        //component.changeDetectorRef.detectChanges();
+
+        // 3. Get DOM element from component
+        const domElem = (component.hostView as EmbeddedViewRef<any>)
+            .rootNodes[0] as HTMLElement;
+        domElem.style.display='none';
+        targetElement.innerHTML=null;
+        targetElement.appendChild(domElem);
+        setTimeout(()=>{
+            domElem.style.display=null;
+        },delay);
     }
 
     /**

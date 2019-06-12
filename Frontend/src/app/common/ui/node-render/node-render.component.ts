@@ -1,10 +1,18 @@
 import {
-  Component, OnInit, OnDestroy, Input, EventEmitter, Output, ViewChild, ElementRef,
-  HostListener, ChangeDetectorRef, ApplicationRef, NgZone
+    Component, OnInit, OnDestroy, Input, EventEmitter, Output, ViewChild, ElementRef,
+    HostListener, ChangeDetectorRef, ApplicationRef, NgZone, ComponentFactoryResolver, ViewContainerRef, EmbeddedViewRef
 } from '@angular/core';
 import {RestConnectorService} from "../../rest/services/rest-connector.service";
 import {RestConstants} from "../../rest/rest-constants";
-import {NodeList, Node, NodeWrapper, LoginResult, ConnectorList} from "../../rest/data-object";
+import {
+    NodeList,
+    Node,
+    NodeWrapper,
+    LoginResult,
+    ConnectorList,
+    CollectionUsage,
+    Collection
+} from "../../rest/data-object";
 import {Toast} from "../toast";
 import {RestNodeService} from "../../rest/services/rest-node.service";
 import {ActivatedRoute, Params, Router} from "@angular/router";
@@ -33,11 +41,14 @@ import {ActionbarHelperService} from "../../services/actionbar-helper";
 import {SuggestItem} from "../autocomplete/autocomplete.component";
 import {MainNavComponent} from "../main-nav/main-nav.component";
 import {RestSearchService} from '../../rest/services/rest-search.service';
-import {ListItem} from '../list-item';
 import {RestMdsService} from '../../rest/services/rest-mds.service';
 import {MdsHelper} from '../../rest/mds-helper';
 import {HttpClient} from "@angular/common/http";
 import {RestIamService} from "../../rest/services/rest-iam.service";
+import {SpinnerComponent} from "../spinner/spinner.component";
+import {ListTableComponent} from "../list-table/list-table.component";
+import {RestUsageService} from "../../rest/services/rest-usage.service";
+import {ListItem} from "../list-item";
 
 declare var jQuery:any;
 declare var window: any;
@@ -102,6 +113,7 @@ export class NodeRenderComponent implements EventListener{
 
   @ViewChild('sequencediv') sequencediv : ElementRef;
   @ViewChild('mainNav') mainNavRef : MainNavComponent;
+  @ViewChild('collectionsRef') collectionsRef : ElementRef;
   @ViewChild('commentsRef') commentsRef : ElementRef;
   isChildobject = false;
 
@@ -213,8 +225,11 @@ export class NodeRenderComponent implements EventListener{
       private mdsApi : RestMdsService,
       private nodeApi : RestNodeService,
       private searchApi : RestSearchService,
+      private usageApi : RestUsageService,
       private searchStorage : SearchService,
       private toolService: RestToolService,
+      private componentFactoryResolver: ComponentFactoryResolver,
+      private viewContainerRef: ViewContainerRef,
       private frame : FrameEventsService,
       private actionbar : ActionbarHelperService,
       private toast : Toast,
@@ -354,6 +369,7 @@ export class NodeRenderComponent implements EventListener{
                 this.getSequence(()=>{
                     jQuery('#nodeRenderContent').html(data.detailsSnippet);
                     this.postprocessHtml();
+                    this.addCollections();
                     this.addComments();
                     this.loadNode();
                     this.isLoading = false;
@@ -369,10 +385,26 @@ export class NodeRenderComponent implements EventListener{
         })
   }
     onDelete(event:any){
-        console.log(event);
         if(event.error)
             return;
         this.close();
+    }
+    addCollections(){
+        UIHelper.injectAngularComponent(this.componentFactoryResolver,this.viewContainerRef,SpinnerComponent,document.getElementsByTagName("collections")[0]);
+        this.usageApi.getNodeUsagesCollection(this._node.ref.id,this._node.ref.repo).subscribe((usages)=>{
+            let data={
+                nodes:usages.map((u)=>u.collection),
+                columns:ListItem.getCollectionDefaults(),
+                isClickable:true,
+                clickRow:(collection:Node)=>{
+                    UIHelper.goToCollection(this.router,collection);
+                },
+                viewType:ListTableComponent.VIEW_TYPE_GRID_SMALL,
+            };
+            UIHelper.injectAngularComponent(this.componentFactoryResolver,this.viewContainerRef,ListTableComponent,document.getElementsByTagName("collections")[0],data,250);
+        },(error)=>{
+
+        });
     }
   private addComments(){
       jQuery('.edusharing_rendering_metadata_header').append(`
@@ -621,6 +653,17 @@ export class NodeRenderComponent implements EventListener{
     private getNodeName(node:Node) {
       return RestHelper.getName(node);
     }
+
+    private getCollectionsWidgetHtml() {
+        let container = this.collectionsRef.nativeElement;
+        console.log(container);
+        if (container) {
+            return '<div class="mdsWidget">' + container.outerHTML + '</div>';
+        }
+        return null;
+
+    }
+
 
     private getCommentWidgetHtml() {
         let container = this.commentsRef.nativeElement.getElementsByClassName("comments");
