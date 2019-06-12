@@ -25,7 +25,7 @@
 				<caption>cm_title_wwwurl</caption>
 				<placeholder>cm_title_placeholder</placeholder>
 				<type>text</type>
-				<condition type="PROPERTY">ccm:wwwurl</condition>			
+				<condition type="PROPERTY">ccm:wwwurl</condition>
 			</widget>
 			<widget>
 				<id>ccm:wwwurl</id>
@@ -33,7 +33,7 @@
 				<placeholder>cm_wwwurl_placeholder</placeholder>
 				<type>text</type>
 				<required>true</required>
-				<condition type="PROPERTY">ccm:wwwurl</condition>			
+				<condition type="PROPERTY">ccm:wwwurl</condition>
 			</widget>
 			<widget>
 				<id>cclom:general_description</id>
@@ -592,6 +592,13 @@
 					<view>node_general_render</view>
 					<view>node_contributor_render</view>
 					<view>node_collections_render</view>
+				</views>
+			</group>
+			<group>
+				<id>io_render_inline</id>
+				<views>
+					<view>node_general_render</view>
+					<view>node_contributor_render</view>
 				</views>
 			</group>
 			<group>
