@@ -374,7 +374,7 @@ export class NodeRenderComponent implements EventListener{
                 },
                 viewType:ListTableComponent.VIEW_TYPE_GRID_SMALL,
             };
-            UIHelper.injectAngularComponent(this.componentFactoryResolver,this.viewContainerRef,ListTableComponent,document.getElementsByTagName("collections")[0],data,1000);
+            UIHelper.injectAngularComponent(this.componentFactoryResolver,this.viewContainerRef,ListTableComponent,document.getElementsByTagName("collections")[0],data,250);
         },(error)=>{
 
         });
