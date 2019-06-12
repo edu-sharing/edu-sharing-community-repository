@@ -105,8 +105,7 @@ export class NodeRenderComponent implements EventListener{
   canScrollRight: boolean = false;
 
   @ViewChild('sequencediv') sequencediv : ElementRef;
-  @ViewChild('mainnav') mainNavRef : MainNavComponent;
-  @ViewChild('collectionsRef') collectionsRef : ElementRef;
+  @ViewChild('mainNav') mainNavRef : MainNavComponent;
   isChildobject = false;
 
     public static close(location:Location) {
@@ -598,16 +597,6 @@ export class NodeRenderComponent implements EventListener{
     }
     private getNodeName(node:Node) {
       return RestHelper.getName(node);
-    }
-
-    private getCollectionsWidgetHtml() {
-        let container = this.collectionsRef.nativeElement;
-        console.log(container);
-        if (container) {
-            return '<div class="mdsWidget">' + container.outerHTML + '</div>';
-        }
-        return null;
-
     }
 
 }
