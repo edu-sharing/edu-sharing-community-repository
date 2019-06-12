@@ -7,10 +7,10 @@ import {WorkspaceFileUploadComponent} from "./file-upload/file-upload.component"
 import {WorkspaceFileUploadSelectComponent} from "./file-upload-select/file-upload-select.component";
 import {WorkspaceContributorComponent} from "./contributor/contributor.component";
 import {NodeReportComponent} from "./node-report/node-report.component";
-import {NodeCommentsComponent} from "./node-comments/node-comments.component";
 import {AddStreamComponent} from "./add-stream/add-stream.component";
 import {NodeTemplateComponent} from "./node-template/node-template.component";
 import {NodeVariantComponent} from './node-variant/node-variant.component';
+import {CommentsListComponent} from "./node-comments/comments-list/comments-list.component";
 
 export const DECLARATIONS_MANAGEMENT_DIALOGS = [
   WorkspaceLicenseComponent,
@@ -22,7 +22,7 @@ export const DECLARATIONS_MANAGEMENT_DIALOGS = [
   WorkspaceFileUploadSelectComponent,
   WorkspaceContributorComponent,
   NodeReportComponent,
-  NodeCommentsComponent,
+  CommentsListComponent,
   AddStreamComponent,
   NodeVariantComponent,
   NodeTemplateComponent

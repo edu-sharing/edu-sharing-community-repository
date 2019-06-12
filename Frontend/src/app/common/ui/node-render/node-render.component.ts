@@ -49,6 +49,7 @@ import {SpinnerComponent} from "../spinner/spinner.component";
 import {ListTableComponent} from "../list-table/list-table.component";
 import {RestUsageService} from "../../rest/services/rest-usage.service";
 import {ListItem} from "../list-item";
+import {CommentsListComponent} from "../../../modules/management-dialogs/node-comments/comments-list/comments-list.component";
 
 declare var jQuery:any;
 declare var window: any;
@@ -103,7 +104,6 @@ export class NodeRenderComponent implements EventListener{
   private repository: string;
   private downloadButton: OptionItem;
   private downloadUrl: string;
-  nodeComments: Node;
   sequence: NodeList;
   sequenceParent: Node;
   canScrollLeft: boolean = false;
@@ -113,8 +113,6 @@ export class NodeRenderComponent implements EventListener{
 
   @ViewChild('sequencediv') sequencediv : ElementRef;
   @ViewChild('mainNav') mainNavRef : MainNavComponent;
-  @ViewChild('collectionsRef') collectionsRef : ElementRef;
-  @ViewChild('commentsRef') commentsRef : ElementRef;
   isChildobject = false;
 
 
@@ -138,12 +136,6 @@ export class NodeRenderComponent implements EventListener{
     if(this.nodeMetadata!=null) {
       return;
     }
-    if(event.code=="Escape" && this.nodeComments==null){
-      event.preventDefault();
-      event.stopPropagation();
-      this.close();
-      return;
-     }
     if (event.code == "ArrowLeft" && this.canSwitchBack()) {
       this.switchPosition(this.getPosition() - 1);
       event.preventDefault();
@@ -364,8 +356,6 @@ export class NodeRenderComponent implements EventListener{
             }
             else {
                 this._node=data.node;
-                if(this.queryParams['comments'])
-                    this.showComments();
                 this.getSequence(()=>{
                     jQuery('#nodeRenderContent').html(data.detailsSnippet);
                     this.postprocessHtml();
@@ -407,22 +397,11 @@ export class NodeRenderComponent implements EventListener{
         });
     }
   private addComments(){
-      jQuery('.edusharing_rendering_metadata_header').append(`
-      <div class="node-comments">
-          <div class="item" tabindex="0" onclick="window.nodeRenderComponentRef.component.showComments()" onkeypress="(event.keyCode==13)?window.nodeRenderComponentRef.component.showComments():0">
-            <i class="material-icons">message</i><div>`+this._node.commentCount+` <span>`+this.translate.instant("COMMENTS_"+(this._node.commentCount==1 ? 'SINGLE' : 'MULTIPLE'))+`</span></div>
-          </div>
-      </div>
-    `);
-      let commentInterval=setInterval(()=> {
-          let html=this.getCommentWidgetHtml();
-          if(html) {
-              try {
-                  jQuery('#edusharing_rendering_metadata').html(jQuery('#edusharing_rendering_metadata').html().replace('<comments>', html));
-                  clearInterval(commentInterval);
-              }catch(e){}
-          }
-      },100);
+      let data={
+          node:this._node,
+          readOnly:false
+      };
+      UIHelper.injectAngularComponent(this.componentFactoryResolver,this.viewContainerRef,CommentsListComponent,document.getElementsByTagName("comments")[0],data);
   }
   private postprocessHtml() {
     if(!this.config.instant("rendering.showPreview",true)){
@@ -445,9 +424,6 @@ export class NodeRenderComponent implements EventListener{
   }
   private openLink(href:string){
 
-  }
-  private showComments(){
-      this.nodeComments=this._node;
   }
   private downloadSequence() {
       let nodes = [this.sequenceParent].concat(this.sequence.nodes);
@@ -652,27 +628,6 @@ export class NodeRenderComponent implements EventListener{
     }
     private getNodeName(node:Node) {
       return RestHelper.getName(node);
-    }
-
-    private getCollectionsWidgetHtml() {
-        let container = this.collectionsRef.nativeElement;
-        console.log(container);
-        if (container) {
-            return '<div class="mdsWidget">' + container.outerHTML + '</div>';
-        }
-        return null;
-
-    }
-
-
-    private getCommentWidgetHtml() {
-        let container = this.commentsRef.nativeElement.getElementsByClassName("comments");
-        if (container.length) {
-
-            return '<div class="mdsWidget">' + container[0].outerHTML + '</div>';
-        }
-        return null;
-
     }
 
     public switchNode(node:Node){

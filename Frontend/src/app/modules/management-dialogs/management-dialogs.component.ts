@@ -72,8 +72,6 @@ export class WorkspaceManagementDialogsComponent  {
     @Output() nodeShareLinkChange = new EventEmitter();
     @Input() nodeWorkflow : Node;
     @Output() nodeWorkflowChange = new EventEmitter();
-  @Input() nodeComment : Node;
-  @Output() nodeCommentChange = new EventEmitter();
   @Input() nodeReport : Node;
   @Output() nodeReportChange = new EventEmitter();
   @Input() addNodesStream : Node[];
@@ -420,10 +418,6 @@ export class WorkspaceManagementDialogsComponent  {
         this.nodeVariant=null;
         this.nodeVariantChange.emit(null);
     }
-  public closeComments() {
-    this.nodeComment=null;
-    this.nodeCommentChange.emit(null);
-  }
   private cancelAddToCollection(){
     this.dialogTitle=null;
     this.addToCollection=null;

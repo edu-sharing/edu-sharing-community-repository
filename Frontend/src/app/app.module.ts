@@ -26,6 +26,7 @@ import {DECLARATIONS_SERVICES} from "./modules/services/declarations";
 import {DECLARATIONS_FILE_UPLOAD} from './modules/file-upload/declarations';
 import {SpinnerComponent} from "./common/ui/spinner/spinner.component";
 import {ListTableComponent} from "./common/ui/list-table/list-table.component";
+import {CommentsListComponent} from "./modules/management-dialogs/node-comments/comments-list/comments-list.component";
 
 
 // http://blog.angular-university.io/angular2-ngmodule/
@@ -58,7 +59,8 @@ import {ListTableComponent} from "./common/ui/list-table/list-table.component";
   ],
   entryComponents: [
       SpinnerComponent,
-      ListTableComponent
+      ListTableComponent,
+      CommentsListComponent,
   ],
   imports: IMPORTS,
   providers: [
