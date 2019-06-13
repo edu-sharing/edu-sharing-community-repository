@@ -1,34 +1,30 @@
 package org.edu_sharing.repository.server.tools;
 
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
+import org.alfresco.service.cmr.repository.NodeRef;
+import org.alfresco.service.cmr.repository.StoreRef;
 import org.apache.commons.httpclient.methods.ByteArrayRequestEntity;
 import org.apache.commons.httpclient.methods.PostMethod;
 import org.apache.log4j.Logger;
+import org.edu_sharing.metadataset.v2.MetadataSetV2;
+import org.edu_sharing.metadataset.v2.MetadataWidget;
+import org.edu_sharing.metadataset.v2.tools.MetadataHelper;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.restservices.NodeDao;
 import org.edu_sharing.restservices.RepositoryDao;
 import org.edu_sharing.service.authority.AuthorityServiceFactory;
+import org.edu_sharing.service.nodeservice.NodeServiceHelper;
 import org.edu_sharing.service.tracking.TrackingService;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.net.URLEncoder;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
+import java.util.stream.Collectors;
 
 public class XApiTool {
     private static Logger logger = Logger.getLogger(XApiTool.class);
 
-    private static final String[] STORED_PROPERTIES = new String[]{
-            CCConstants.CM_NAME,
-            CCConstants.LOM_PROP_GENERAL_TITLE,
-            CCConstants.LOM_PROP_GENERAL_KEYWORD,
-            CCConstants.LOM_PROP_CLASSIFICATION_KEYWORD,
-            CCConstants.LOM_PROP_GENERAL_LANGUAGE,
-            CCConstants.LOM_PROP_EDUCATIONAL_LEARNINGRESOURCETYPE,
-    };
     public static String VERB_OPEN="http://adlnet.gov/expapi/verbs/open";
     public static String VERB_DOWNLOADED="http://adlnet.gov/expapi/verbs/downloaded";
 
@@ -80,12 +76,16 @@ public class XApiTool {
     }
 
     private static JSONObject addData(String nodeId, JSONObject xApiData) throws Throwable {
-        HashMap<String, String[]> props = NodeDao.getNode(RepositoryDao.getHomeRepository(), nodeId).getAllProperties();
+        NodeRef nodeRef = new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, nodeId);
+        HashMap<String, String[]> props = NodeServiceHelper.getPropertiesMultivalue(nodeRef);
         if(!xApiData.getJSONObject("object").getJSONObject("definition").has("extensions"))
             xApiData.getJSONObject("object").getJSONObject("definition").put("extensions",new JSONObject());
         JSONObject propsData = new JSONObject();
+        List<MetadataWidget> widgets = MetadataHelper.getWidgetsByNode(nodeRef);
+        // widgets objects to unique id set
+        Set<String> storedProperties = widgets.stream().map((w) -> CCConstants.getValidGlobalName(w.getId())).collect(Collectors.toSet());
         props.entrySet().stream().
-                filter((entry)->Arrays.asList(STORED_PROPERTIES).contains(CCConstants.getValidGlobalName(entry.getKey()))).
+                filter((entry)->storedProperties.contains(entry.getKey())).
                 forEach((entry)->{
                     try {
                         propsData.put(entry.getKey(),entry.getValue());
