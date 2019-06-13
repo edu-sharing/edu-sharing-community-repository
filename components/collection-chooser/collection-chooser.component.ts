@@ -25,7 +25,7 @@ export class CollectionChooserComponent implements OnInit{
   public createCollectionElement = new AddElement("COLLECTIONS.CREATE_COLLECTION");
   private hasMoreToLoad : boolean;
   public searchQuery = "";
-  private columns:ListItem[]=[];
+  private columns:ListItem[]=ListItem.getCollectionDefaults();
   private sortBy: string[];
   public isLoading=true;
   ngOnInit(): void {
@@ -90,9 +90,6 @@ export class CollectionChooserComponent implements OnInit{
               private toast : Toast,
               private translate : TranslateService) {
     // http://plnkr.co/edit/btpW3l0jr5beJVjohy1Q?p=preview
-    this.columns.push(new ListItem("COLLECTION", 'title'));
-    this.columns.push(new ListItem("COLLECTION", 'info'));
-    this.columns.push(new ListItem("COLLECTION",'scope'));
     this.sortBy=[RestConstants.CM_MODIFIED_DATE];
   }
   @HostListener('document:keydown', ['$event'])

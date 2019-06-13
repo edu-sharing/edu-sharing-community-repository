@@ -44,6 +44,10 @@ import {ToastyModule} from "ngx-toasty";
     providers: [
         Toast
     ],
+    entryComponents: [
+        SpinnerComponent,
+        ListTableComponent,
+    ],
     exports: [
         TranslateModule,
         ListTableComponent,

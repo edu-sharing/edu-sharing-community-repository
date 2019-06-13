@@ -19,7 +19,14 @@ import {Toast} from "./toast";
 import {RestHelper} from "../core-module/rest/rest-helper";
 import {TemporaryStorageService} from "../core-module/rest/services/temporary-storage.service";
 import {UIService} from "../core-module/rest/services/ui.service";
-import {ComponentFactoryResolver, ElementRef, EventEmitter} from "@angular/core";
+import {
+    ComponentFactoryResolver,
+    ElementRef,
+    EmbeddedViewRef,
+    EventEmitter,
+    Type,
+    ViewContainerRef
+} from "@angular/core";
 import {RestCollectionService} from "../core-module/rest/services/rest-collection.service";
 import {NodeHelper} from "./node-helper";
 import {RestConnectorsService} from "../core-module/rest/services/rest-connectors.service";
@@ -204,12 +211,10 @@ export class UIHelper {
             }
         });
     }
-
     public static goToCollection(router: Router, node: Node, extras: NavigationExtras = {}) {
         extras.queryParams = {id: node.ref.id};
         router.navigate([UIConstants.ROUTER_PREFIX + "collections"], extras);
     }
-
     /**
      * Navigate to the workspace
      * @param nodeService instance of NodeService
@@ -224,7 +229,6 @@ export class UIHelper {
                 extras);
         });
     }
-
     /**
      * Navigate to the workspace
      * @param nodeService instance of NodeService
@@ -237,7 +241,6 @@ export class UIHelper {
         router.navigate([UIConstants.ROUTER_PREFIX + "workspace/" + (login && login.currentScope ? login.currentScope : "files")],
             extras);
     }
-
     static convertSearchParameters(node: Node) {
         let parameters = JSON.parse(node.properties[RestConstants.CCM_PROP_SAVED_SEARCH_PARAMETERS]);
         let result: any = {parameters: {}, query: null};
@@ -588,6 +591,43 @@ export class UIHelper {
         if (connector.getBridgeService().isRunningCordova())
             return null;
         return window.open("");
+    }
+
+    /**
+     * dynamically inject an angular component into a regular html dom element
+     * @param componentFactoryResolver The resolver service
+     * @param viewContainerRef The viewContainerRef service
+     * @param componentName The name of the angular component (e.g. SpinnerComponent)
+     * @param targetElement The target element of the dom
+     * @param bindings Optional bindings (inputs & outputs) to the given component
+     * @param delay Optional inflating delay in ms(some components may need some time to "init" the layout)
+     */
+    public static injectAngularComponent<T>(componentFactoryResolver:ComponentFactoryResolver,viewContainerRef:ViewContainerRef,
+                                         componentName:  Type<T>,targetElement: Element,bindings:any=null,delay=0){
+        let factory = componentFactoryResolver.resolveComponentFactory(componentName);
+        let component = viewContainerRef.createComponent(factory);
+        if(bindings){
+            for(let key in bindings){
+                if(bindings[key] instanceof Function){
+                    // subscribe so callback can properly invoked
+                    (component.instance as any)[key].subscribe((o:any)=>bindings[key](o));
+                }
+                else {
+                    (component.instance as any)[key] = bindings[key];
+                }
+            }
+        }
+        //component.changeDetectorRef.detectChanges();
+
+        // 3. Get DOM element from component
+        const domElem = (component.hostView as EmbeddedViewRef<any>)
+            .rootNodes[0] as HTMLElement;
+        domElem.style.display='none';
+        targetElement.innerHTML=null;
+        targetElement.appendChild(domElem);
+        setTimeout(()=>{
+            domElem.style.display=null;
+        },delay);
     }
 
     /**
