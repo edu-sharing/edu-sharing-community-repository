@@ -147,7 +147,7 @@ export class ProfilesComponent {
     }
     this.globalProgress=true;
     this.iamService.editUser(this.user.authorityName,this.userEdit.profile).subscribe(()=>{
-      this.savePassword();
+      this.saveAvatar();
     },(error:any)=>{
       this.globalProgress=false;
       this.toast.error(error);

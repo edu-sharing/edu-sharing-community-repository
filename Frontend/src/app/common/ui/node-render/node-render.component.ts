@@ -1,10 +1,18 @@
 import {
-  Component, OnInit, OnDestroy, Input, EventEmitter, Output, ViewChild, ElementRef,
-  HostListener, ChangeDetectorRef, ApplicationRef, NgZone
+    Component, OnInit, OnDestroy, Input, EventEmitter, Output, ViewChild, ElementRef,
+    HostListener, ChangeDetectorRef, ApplicationRef, NgZone, ComponentFactoryResolver, ViewContainerRef, EmbeddedViewRef
 } from '@angular/core';
 import {RestConnectorService} from "../../rest/services/rest-connector.service";
 import {RestConstants} from "../../rest/rest-constants";
-import {NodeList, Node, NodeWrapper, LoginResult, ConnectorList} from "../../rest/data-object";
+import {
+    NodeList,
+    Node,
+    NodeWrapper,
+    LoginResult,
+    ConnectorList,
+    CollectionUsage,
+    Collection
+} from "../../rest/data-object";
 import {Toast} from "../toast";
 import {RestNodeService} from "../../rest/services/rest-node.service";
 import {ActivatedRoute, Params, Router} from "@angular/router";
@@ -33,9 +41,15 @@ import {ActionbarHelperService} from "../../services/actionbar-helper";
 import {SuggestItem} from "../autocomplete/autocomplete.component";
 import {MainNavComponent} from "../main-nav/main-nav.component";
 import {RestSearchService} from '../../rest/services/rest-search.service';
-import {ListItem} from '../list-item';
 import {RestMdsService} from '../../rest/services/rest-mds.service';
 import {MdsHelper} from '../../rest/mds-helper';
+import {HttpClient} from "@angular/common/http";
+import {RestIamService} from "../../rest/services/rest-iam.service";
+import {SpinnerComponent} from "../spinner/spinner.component";
+import {ListTableComponent} from "../list-table/list-table.component";
+import {RestUsageService} from "../../rest/services/rest-usage.service";
+import {ListItem} from "../list-item";
+import {CommentsListComponent} from "../../../modules/management-dialogs/node-comments/comments-list/comments-list.component";
 
 declare var jQuery:any;
 declare var window: any;
@@ -54,6 +68,7 @@ export class NodeRenderComponent implements EventListener{
 
 
   public isLoading=true;
+  public isBuildingPage=false;
   /**
    * Show a bar at the top with the node name or not
    * @type {boolean}
@@ -89,7 +104,6 @@ export class NodeRenderComponent implements EventListener{
   private repository: string;
   private downloadButton: OptionItem;
   private downloadUrl: string;
-  nodeComments: Node;
   sequence: NodeList;
   sequenceParent: Node;
   canScrollLeft: boolean = false;
@@ -99,7 +113,7 @@ export class NodeRenderComponent implements EventListener{
 
   @ViewChild('sequencediv') sequencediv : ElementRef;
   @ViewChild('mainNav') mainNavRef : MainNavComponent;
-  @ViewChild('commentsRef') commentsRef : ElementRef;
+  isChildobject = false;
 
 
     public static close(location:Location) {
@@ -122,12 +136,6 @@ export class NodeRenderComponent implements EventListener{
     if(this.nodeMetadata!=null) {
       return;
     }
-    if(event.code=="Escape" && this.nodeComments==null){
-      event.preventDefault();
-      event.stopPropagation();
-      this.close();
-      return;
-     }
     if (event.code == "ArrowLeft" && this.canSwitchBack()) {
       this.switchPosition(this.getPosition() - 1);
       event.preventDefault();
@@ -203,12 +211,17 @@ export class NodeRenderComponent implements EventListener{
       private location: Location,
       private searchService : SearchService,
       private connector : RestConnectorService,
+      private http : HttpClient,
       private connectors : RestConnectorsService,
+      private iam : RestIamService,
       private mdsApi : RestMdsService,
       private nodeApi : RestNodeService,
       private searchApi : RestSearchService,
+      private usageApi : RestUsageService,
       private searchStorage : SearchService,
       private toolService: RestToolService,
+      private componentFactoryResolver: ComponentFactoryResolver,
+      private viewContainerRef: ViewContainerRef,
       private frame : FrameEventsService,
       private actionbar : ActionbarHelperService,
       private toast : Toast,
@@ -237,6 +250,7 @@ export class NodeRenderComponent implements EventListener{
           this.repository=params['repository'] ? params['repository'] : RestConstants.HOME_REPOSITORY;
           this.queryParams=params;
           let childobject = params['childobject_id'] ? params['childobject_id'] : null;
+          this.isChildobject=childobject!=null;
           this.route.params.subscribe((params: Params) => {
             if(params['node']) {
               this.isRoute=true;
@@ -287,51 +301,54 @@ export class NodeRenderComponent implements EventListener{
     this.isLoading=true;
     this.node=this._nodeId;
   }
+  viewChildobject(node:Node,pos:number){
+        this.isChildobject=pos!=0;
+        this.node=node;
+  }
   private loadNode() {
-    if(!this._node)
-      return;
+    if(!this._node) {
+        this.isBuildingPage = false;
+        return;
+    }
 
     let input=this.temporaryStorageService.get(TemporaryStorageService.NODE_RENDER_PARAMETER_OPTIONS);
     if(!input) input=[];
-    let opt=[];
+    let opt:OptionItem[]=[];
     for(let o of input){
       opt.push(o);
     }
-    this.options=opt;
     let download=new OptionItem('WORKSPACE.OPTION.DOWNLOAD','cloud_download',()=>this.downloadCurrentNode());
     download.isEnabled=this._node.downloadUrl!=null;
     download.showAsAction=true;
     if(this.isCollectionRef()){
       console.log("is ref");
       this.nodeApi.getNodeMetadata(this._node.properties[RestConstants.CCM_PROP_IO_ORIGINAL]).subscribe((node:NodeWrapper)=>{
-        this.addDownloadButton(download);
+        this.addDownloadButton(opt,download);
       },(error:any)=>{
         if(error.status==RestConstants.HTTP_NOT_FOUND) {
           console.log("original missing");
           download.isEnabled = false;
         }
-        this.addDownloadButton(download);
+        this.addDownloadButton(opt,download);
       });
       return;
     }
-    this.addDownloadButton(download);
-    this.nodeApi.getNodeChildobjects(this.sequenceParent.ref.id,this.repository).subscribe((data:NodeList)=>{
-        if(data.nodes.length > 0 || this._node.aspects.indexOf(RestConstants.CCM_ASPECT_IO_CHILDOBJECT) != -1) {
-          this.downloadButton.name = 'DOWNLOAD_ALL';
-        }
-    });
-    this.similarNodes=null;
-    this.searchApi.searchFingerprint(this._node.ref.id).subscribe((nodes)=>{
-        this.similarNodes=nodes.nodes;
-    });
+    this.addDownloadButton(opt,download);
   }
   private loadRenderData(){
+      this.isLoading=true;
+      this.options=[];
+    if(this.isBuildingPage){
+        setTimeout(()=>this.loadRenderData(),50);
+        return;
+    }
     let parameters={
-      showDownloadButton:false,
+      showDownloadButton:this.config.instant("rendering.showDownloadButton",false),
       showDownloadAdvice:!this.isOpenable
     };
     this._node=null;
-    this.nodeApi.getNodeRenderSnippet(this._nodeId,this.version ? this.version : "-1",parameters,this.repository)
+    this.isBuildingPage=true;
+    this.nodeApi.getNodeRenderSnippet(this._nodeId,this.version && !this.isChildobject ? this.version : "-1",parameters,this.repository)
         .subscribe((data:any)=>{
             if (!data.detailsSnippet) {
                 console.error(data);
@@ -339,11 +356,10 @@ export class NodeRenderComponent implements EventListener{
             }
             else {
                 this._node=data.node;
-                if(this.queryParams['comments'])
-                    this.showComments();
                 this.getSequence(()=>{
                     jQuery('#nodeRenderContent').html(data.detailsSnippet);
                     this.postprocessHtml();
+                    this.addCollections();
                     this.addComments();
                     this.loadNode();
                     this.isLoading = false;
@@ -359,28 +375,33 @@ export class NodeRenderComponent implements EventListener{
         })
   }
     onDelete(event:any){
-        console.log(event);
         if(event.error)
             return;
         this.close();
     }
+    addCollections(){
+        UIHelper.injectAngularComponent(this.componentFactoryResolver,this.viewContainerRef,SpinnerComponent,document.getElementsByTagName("collections")[0]);
+        this.usageApi.getNodeUsagesCollection(this._node.ref.id,this._node.ref.repo).subscribe((usages)=>{
+            let data={
+                nodes:usages.map((u)=>u.collection),
+                columns:ListItem.getCollectionDefaults(),
+                isClickable:true,
+                clickRow:(collection:Node)=>{
+                    UIHelper.goToCollection(this.router,collection);
+                },
+                viewType:ListTableComponent.VIEW_TYPE_GRID_SMALL,
+            };
+            UIHelper.injectAngularComponent(this.componentFactoryResolver,this.viewContainerRef,ListTableComponent,document.getElementsByTagName("collections")[0],data,250);
+        },(error)=>{
+
+        });
+    }
   private addComments(){
-      jQuery('.edusharing_rendering_metadata_header').append(`
-      <div class="node-comments">
-          <div class="item" tabindex="0" onclick="window.nodeRenderComponentRef.component.showComments()" onkeypress="(event.keyCode==13)?window.nodeRenderComponentRef.component.showComments():0">
-            <i class="material-icons">message</i><div>`+this._node.commentCount+` <span>`+this.translate.instant("COMMENTS_"+(this._node.commentCount==1 ? 'SINGLE' : 'MULTIPLE'))+`</span></div>
-          </div>
-      </div>
-    `);
-      let commentInterval=setInterval(()=> {
-          let html=this.getCommentWidgetHtml();
-          if(html) {
-              try {
-                  jQuery('#edusharing_rendering_metadata').html(jQuery('#edusharing_rendering_metadata').html().replace('<comments>', html));
-                  clearInterval(commentInterval);
-              }catch(e){}
-          }
-      },100);
+      let data={
+          node:this._node,
+          readOnly:false
+      };
+      UIHelper.injectAngularComponent(this.componentFactoryResolver,this.viewContainerRef,CommentsListComponent,document.getElementsByTagName("comments")[0],data);
   }
   private postprocessHtml() {
     if(!this.config.instant("rendering.showPreview",true)){
@@ -404,19 +425,16 @@ export class NodeRenderComponent implements EventListener{
   private openLink(href:string){
 
   }
-  private showComments(){
-      this.nodeComments=this._node;
+  private downloadSequence() {
+      let nodes = [this.sequenceParent].concat(this.sequence.nodes);
+      NodeHelper.downloadNodes(this.toast,this.connector,nodes, this.sequenceParent.name+".zip");
   }
+
   private downloadCurrentNode() {
       if(this.downloadUrl) {
           NodeHelper.downloadUrl(this.toast, this.connector.getCordovaService(), this.downloadUrl);
       } else {
-          if(this.sequence && this.sequence.nodes.length > 0 || this._node.aspects.indexOf(RestConstants.CCM_ASPECT_IO_CHILDOBJECT) != -1) {
-              let nodes = [this.sequenceParent].concat(this.sequence.nodes);
-              NodeHelper.downloadNodes(this.toast,this.connector,nodes, this.sequenceParent.name+".zip");
-          } else {
-              NodeHelper.downloadNode(this.toast, this.connector.getCordovaService(), this._node, this.version);
-          }
+          NodeHelper.downloadNode(this.toast, this.connector.getCordovaService(), this._node, this.version);
       }
   }
 
@@ -425,22 +443,21 @@ export class NodeRenderComponent implements EventListener{
       this.toolService.openLtiObject(this._node);
     }
     else {
-      UIHelper.openConnector(this.connectors,this.frame,this.toast, this._node,null,null,null,newWindow);
+      UIHelper.openConnector(this.connectors,this.iam,this.frame,this.toast, this._node,null,null,null,newWindow);
     }
   }
 
-  private checkConnector() {
+  private checkConnector(options:OptionItem[]) {
     this.connector.isLoggedIn().subscribe((login:LoginResult)=>{
         this.connectors.list().subscribe((data:ConnectorList)=>{
-            this.initAfterConnector(login);
+            this.initAfterConnector(options,login);
         },(error:any)=>{
-            this.initAfterConnector(login);
+            this.initAfterConnector(options,login);
         });
-      this.options=Helper.deepCopyArray(this.options);
     });
   }
 
-    private initAfterConnector(login: LoginResult) {
+    private initAfterConnector(options:OptionItem[],login: LoginResult) {
         if (!this.isCollectionRef()) {
             if(!this.connector.getCurrentLogin().isGuest) {
                 let openFolder = new OptionItem('SHOW_IN_FOLDER', 'folder', () => this.goToWorkspace(login, this._node));
@@ -450,12 +467,12 @@ export class NodeRenderComponent implements EventListener{
                 });
 
                 if (this._node.type != RestConstants.CCM_TYPE_REMOTEOBJECT && ConfigurationHelper.hasMenuButton(this.config, "workspace"))
-                    this.options.push(openFolder);
+                    options.push(openFolder);
             }
             let edit = new OptionItem('WORKSPACE.OPTION.EDIT', 'info_outline', () => this.nodeMetadata = this._node);
             edit.isEnabled = this._node.access.indexOf(RestConstants.ACCESS_WRITE) != -1 && this._node.type != RestConstants.CCM_TYPE_REMOTEOBJECT;
             if (this.version == RestConstants.NODE_VERSION_CURRENT)
-                this.options.push(edit);
+                options.push(edit);
             this.isOpenable = false;
         }
         else {
@@ -470,57 +487,60 @@ export class NodeRenderComponent implements EventListener{
                 });
             }, (error: any) => {
             });
-            this.options.push(openFolder);
+            options.push(openFolder);
         }
         let addCollection = this.actionbar.createOptionIfPossible('ADD_TO_COLLECTION', [this._node], () => this.addToCollection = [this._node]);
         if (addCollection) {
             addCollection.showAsAction = false;
             addCollection.isEnabled = this._node.type != RestConstants.CCM_TYPE_REMOTEOBJECT;
-            this.options.push(addCollection);
+            options.push(addCollection);
         }
         let variant = this.actionbar.createOptionIfPossible('CREATE_VARIANT', [this._node], () => this.nodeVariant = this._node);
         if (variant) {
-            this.options.push(variant);
+            options.push(variant);
         }
 
         let share = this.actionbar.createOptionIfPossible('INVITE', [this._node], (node: Node) => this.nodeShare = this._node);
         if (share) {
             share.showAsAction = false;
             share.isSeperate = true;
-            this.options.push(share);
+            options.push(share);
         }
         let shareLink = this.actionbar.createOptionIfPossible('SHARE_LINK',[this._node],(node: Node) => this.nodeShareLink=this._node);
         if (shareLink && !this.isSafe)
-            this.options.push(shareLink);
-        let workflow = this.actionbar.createOptionIfPossible('WORKFLOW',[this._node],(node:Node)=>this.nodeWorkflow=this._node);
-        if(workflow) {
-            this.options.push(workflow);
+            options.push(shareLink);
+        let workflow = this.actionbar.createOptionIfPossible('WORKFLOW', [this._node], (node: Node) => this.nodeWorkflow = this._node);
+        if (workflow) {
+            options.push(workflow);
         }
         let stream = this.actionbar.createOptionIfPossible('ADD_TO_STREAM',[this._node],(node:Node)=>this.addNodesStream=[this._node]);
         if(stream){
-            this.options.push(stream);
+            options.push(stream);
         }
-
-      if (this.config.instant("nodeReport", false)) {
-        let nodeReport = new OptionItem('NODE_REPORT.OPTION', 'flag', () => this.nodeReport = this._node);
-        this.options.push(nodeReport);
-      }
-        let del=this.actionbar.createOptionIfPossible('DELETE',[this._node],(node : Node) => this.nodeDelete=[this._node]);
-        if(del){
-            this.options.push(del);
+        if (this.config.instant("nodeReport", false)) {
+            let nodeReport = new OptionItem('NODE_REPORT.OPTION', 'flag', () => this.nodeReport = this._node);
+            options.push(nodeReport);
+        }
+        let del = this.actionbar.createOptionIfPossible('DELETE', [this._node], (node: Node) => this.nodeDelete = [this._node]);
+        if (del) {
+            options.push(del);
         }
         this.isOpenable = false;
         if (this.version == RestConstants.NODE_VERSION_CURRENT && this.connectors.connectorSupportsEdit(this._node) || RestToolService.isLtiObject(this._node)) {
             let view = new OptionItem("WORKSPACE.OPTION.VIEW", "launch", () => this.openConnector( true));
             //view.isEnabled = this._node.access.indexOf(RestConstants.ACCESS_WRITE)!=-1;
-            this.options.splice(0, 0, view);
+            options.splice(0, 0, view);
             this.isOpenable = true;
             if (this.editor && this.connectors.connectorSupportsEdit(this._node).id == this.editor) {
                 this.openConnector(false);
             }
         }
-        this.options = Helper.deepCopyArray(this.options);
+        let custom=this.config.instant('renderNodeOptions');
+        NodeHelper.applyCustomNodeOptions(this.toast,this.http,this.connector,custom,this.searchService.searchResult, this._node ? [this._node] : null, options,(load:boolean)=>this.isLoading=load);
+
+        this.options = Helper.deepCopyArray(options);
         this.postprocessHtml();
+        this.isBuildingPage=false;
     }
 
     private goToWorkspace(login:LoginResult,node:Node) {
@@ -531,17 +551,24 @@ export class NodeRenderComponent implements EventListener{
     return this._node.aspects.indexOf(RestConstants.CCM_ASPECT_IO_REFERENCE)!=-1;
   }
 
-  private addDownloadButton(download: OptionItem) {
-    this.downloadButton=download;
-    this.options.splice(0,0,download);
+  private addDownloadButton(options:OptionItem[],download: OptionItem) {
+      this.nodeApi.getNodeChildobjects(this.sequenceParent.ref.id,this.repository).subscribe((data:NodeList)=>{
+          this.downloadButton=download;
+          options.splice(0,0,download);
+          if(data.nodes.length > 0 || this._node.aspects.indexOf(RestConstants.CCM_ASPECT_IO_CHILDOBJECT) != -1) {
+              let downloadAll = new OptionItem('DOWNLOAD_ALL','archive',()=>{
+                  this.downloadSequence();
+              });
+              options.splice(1,0,downloadAll);
+          }
+          if(this.searchService.reurl) {
+              let apply = new OptionItem("APPLY", "redo", (node: Node) => NodeHelper.addNodeToLms(this.router, this.temporaryStorageService, this._node, this.searchService.reurl));
+              apply.isEnabled = this._node.access.indexOf(RestConstants.ACCESS_CC_PUBLISH) != -1;
+              options.splice(0, 0, apply);
+          }
+          this.checkConnector(options);
 
-    if(this.searchService.reurl) {
-      let apply = new OptionItem("APPLY", "redo", (node: Node) => NodeHelper.addNodeToLms(this.router, this.temporaryStorageService, this._node, this.searchService.reurl));
-      apply.isEnabled = this._node.access.indexOf(RestConstants.ACCESS_CC_PUBLISH) != -1;
-      this.options.splice(0, 0, apply);
-    }
-    this.checkConnector();
-
+      });
     UIHelper.setTitleNoTranslation(this._node.name,this.title,this.config);
   }
   setDownloadUrl(url:string){
@@ -577,20 +604,11 @@ export class NodeRenderComponent implements EventListener{
     }
 
     private scroll(direction: string) {
-        let scrollAmount = 0;
         let element = this.sequencediv.nativeElement;
-        let slideTimer = setInterval(()=>{
-            if(direction == 'left'){
-                element.scrollLeft -= 20;
-            } else {
-                element.scrollLeft += 20;
-            }
+        let width=window.innerWidth/2;
+        UIHelper.scrollSmoothElement(element.scrollLeft + (direction=='left' ? -width : width),element,2,'x').then((limit)=>{
             this.setScrollparameters();
-            scrollAmount += 10;
-            if(scrollAmount >= 100){
-                clearInterval(slideTimer);
-            }
-        }, 25);
+        });
     }
 
     private setScrollparameters() {
@@ -610,16 +628,6 @@ export class NodeRenderComponent implements EventListener{
     }
     private getNodeName(node:Node) {
       return RestHelper.getName(node);
-    }
-
-    private getCommentWidgetHtml() {
-        let container = this.commentsRef.nativeElement.getElementsByClassName("comments");
-        if (container.length) {
-
-            return '<div class="mdsWidget">' + container[0].outerHTML + '</div>';
-        }
-        return null;
-
     }
 
     public switchNode(node:Node){

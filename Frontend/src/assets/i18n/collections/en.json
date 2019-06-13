@@ -83,13 +83,13 @@
     },
     "ACTIONBAR":{
       "EDIT":"Edit",
-      "PIN":"Collection pin",
-      "DELETE":"Collection delete"
+      "PIN":"Pin collection",
+      "DELETE":"Delete collection"
     }
   },
 
   "collections_description" : "Description",
-  "collections_noOrgaCollections" : "Your groups have not shared any collections yet.",
+  "collections_noOrgaCollections" : "You have not been invited to any collections yet.",
   "collections_noCollections" : "There are no public collections available yet.",
 
   "collections_content" : "Content",

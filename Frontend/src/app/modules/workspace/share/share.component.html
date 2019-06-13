@@ -80,7 +80,7 @@
         <div *ngIf="sendMessages && filterDisabledPermissions(newPermissions).length" class="groupMessage">
           <label for="message">{{'WORKSPACE.SHARE.MESSAGE' | translate}}</label>
           <input type="text" id="message" name="message" [(ngModel)]="notifyMessage" placeholder="{{'WORKSPACE.SHARE.MESSAGE_PLACEHOLDER' | translate}}"/>
-        <input type="checkbox" class="filled-in" id="notify" [(ngModel)]="notifyUsers"> <label for="notify" class="notify">{{'WORKSPACE.NOTIFY_TITLE' | translate}}<p>{{'WORKSPACE.NOTIFY_INFO' | translate}}</p></label>
+        <input type="checkbox" class="filled-in" id="notify" [(ngModel)]="notifyUsers"> <label for="notify" class="notify">{{'WORKSPACE.NOTIFY_TITLE' | translate}}</label>
         </div>
         <div [ngClass]="{'publish-grey': filterDisabledPermissions(newPermissions).length}" class="publish" *ngIf="!isSafe">
           <div class="publishElements">
@@ -261,7 +261,14 @@
   [node]="linkNode"
   (onClose)="updateNodeLink();linkNode=null"
 ></workspace-share-link>
-
+<modal-dialog
+        [title]="dialogTitle"
+        [isCancelable]="true"
+        (onCancel)="dialogCancel()"
+        [message]="dialogMessage"
+        [buttons]="dialogButtons"
+        [priority]="1"
+></modal-dialog>
 <div class="dialog darken dialog-collections" [@fade]="showCollections" *ngIf="showCollections"></div>
 <div class="card center-card card-action card-high card-collections" [@cardAnimation]="showCollections" *ngIf="showCollections">
   <div class="card-content">

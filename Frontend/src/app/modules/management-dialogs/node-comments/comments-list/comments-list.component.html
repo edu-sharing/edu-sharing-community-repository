@@ -1,0 +1,53 @@
+<div *ngIf="_node" class="group">
+  <div class="new" *ngIf="canComment()">
+    <div class="left">
+      <user-avatar
+              [size]="'small'"
+              [user]="user"
+      ></user-avatar>
+    </div>
+    <div class="right">
+      <form (ngSubmit)="addComment()">
+        <textarea name="addComment" class="materialize-textarea" placeholder="{{'NODE_COMMENTS.NEW_COMMENT_PLACEHOLDER' | translate}}" [(ngModel)]="newComment"></textarea>
+        <i tabindex="0" class="material-icons send-icon" (click)="addComment()" (keyup.enter)="addComment()">send</i>
+      </form>
+    </div>
+  </div>
+  <div class="comments" [class.commentsLong]="!canComment()" *ngIf="comments">
+    <div *ngIf="comments && !comments.length" class="noComments">{{'NODE_COMMENTS.NO_COMMENTS' | translate}}</div>
+    <div *ngFor="let comment of comments;let i=index" class="comment">
+      <div class="top">
+        <div class="left">
+          <user-avatar
+                  [link]="true"
+                  [size]="'small'"
+                  [user]="comment.creator"
+          ></user-avatar>
+        </div>
+        <div class="right">
+          <div class="creator">
+            <div class="name">{{comment.creator | authorityName}}</div>
+            <div class="date">{{comment.created | formatDate}}</div>
+          </div>
+          <div class="commentText" *ngIf="comment!=editComment">{{comment.comment}}</div>
+          <div class="commentTextEdit" *ngIf="comment==editComment">
+            <form (ngSubmit)="saveEditComment()">
+              <textarea name="comment" class="materialize-textarea" placeholder="{{'NODE_COMMENTS.NEW_COMMENT_PLACEHOLDER' | translate}}" [(ngModel)]="editCommentText"></textarea>
+              <div class="icons">
+                <i tabindex="0" class="material-icons clickable" (click)="editComment=null" (keyup.enter)="editComment=null">close</i>
+                <i tabindex="0" class="material-icons clickable" (click)="saveEditComment()" (keyup.enter)="saveEditComment()">save</i>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+      <div *ngIf="!readOnly" class="actions" [class.actionsAvailable]="(options[i] && options[i].length)">
+        <actionbar
+                [numberOfAlwaysVisibleOptions]="1"
+                [options]="options[i]"
+                [style]="'flat'"
+        ></actionbar>
+      </div>
+    </div>
+  </div>
+</div>

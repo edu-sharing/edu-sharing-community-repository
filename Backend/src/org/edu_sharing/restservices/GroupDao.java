@@ -40,9 +40,8 @@ public class GroupDao {
 			String result=authorityService.createGroup(groupName, profile.getDisplayName(), parentGroup);
 			GroupDao groupDao=GroupDao.getGroup(repoDao, result);
 			if(result!=null) {
+				groupDao.setGroupEmail(profile);
 				groupDao.setGroupType(profile);
-			}
-			if(result != null) {
 				groupDao.setScopeType(profile);
 			}
 			return groupDao;
@@ -81,6 +80,8 @@ public class GroupDao {
 
 	private String groupType;
 
+	private String groupEmail;
+
 	private NodeRef ref;
 
 	public GroupDao(RepositoryDao repoDao, String groupName) throws DAOException  {
@@ -109,6 +110,8 @@ public class GroupDao {
 				
 			}
 			this.groupType= authorityService.getProperty(this.authorityName,CCConstants.CCM_PROP_GROUPEXTENSION_GROUPTYPE);
+
+			this.groupEmail= authorityService.getProperty(this.authorityName,CCConstants.CCM_PROP_GROUPEXTENSION_GROUPEMAIL);
 			this.ref = authorityService.getAuthorityNodeRef(this.authorityName);
 			
 		} catch (Throwable t) {
@@ -127,6 +130,7 @@ public class GroupDao {
 				public Void doWork() throws Exception {
 					((MCAlfrescoAPIClient)repoDao.getBaseClient()).createOrUpdateGroup(groupName, profile.getDisplayName());
 					setGroupType(profile);
+					setGroupEmail(profile);
 					setScopeType(profile);
 					return null;
 				}
@@ -146,7 +150,10 @@ public class GroupDao {
 		}
 
 	}
-	
+	protected void setGroupEmail(GroupProfile profile) {
+		authorityService.setAuthorityProperty(PermissionService.GROUP_PREFIX+groupName,CCConstants.CCM_PROP_GROUPEXTENSION_GROUPEMAIL,profile.getGroupEmail());
+
+	}
 	protected void setScopeType(GroupProfile profile) {
 		if(profile.getScopeType()!=null){
 			authorityService.addAuthorityAspect(PermissionService.GROUP_PREFIX+groupName, CCConstants.CCM_ASPECT_SCOPE);
@@ -258,11 +265,11 @@ public class GroupDao {
     	data.setAuthorityType(Authority.Type.GROUP);
     	
     	data.setGroupName(getGroupName());
-    	data.setGroupType(getGroupType());
-    	
+
     	GroupProfile profile = new GroupProfile();
     	profile.setDisplayName(getDisplayName());
     	profile.setGroupType(getGroupType());
+    	profile.setGroupEmail(getGoupEmail());
     	data.setProfile(profile);
     	
     	return data;
@@ -270,6 +277,9 @@ public class GroupDao {
 	
 	public String getGroupType() {
 		return this.groupType;
+	}
+	private String getGoupEmail() {
+		return this.groupEmail;
 	}
 	public org.edu_sharing.restservices.shared.NodeRef getRef() {
 

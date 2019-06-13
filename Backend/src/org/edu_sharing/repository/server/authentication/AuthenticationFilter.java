@@ -1,6 +1,7 @@
 package org.edu_sharing.repository.server.authentication;
 
 import java.io.IOException;
+import java.net.URL;
 import java.util.HashMap;
 
 import javax.servlet.FilterChain;
@@ -17,6 +18,7 @@ import org.apache.log4j.Logger;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.client.tools.UrlTool;
 import org.edu_sharing.repository.server.AuthenticationTool;
+import org.edu_sharing.repository.server.NgServlet;
 import org.edu_sharing.repository.server.RepoFactory;
 import org.edu_sharing.repository.server.tools.ApplicationInfo;
 import org.edu_sharing.repository.server.tools.ApplicationInfoList;
@@ -26,14 +28,13 @@ import org.edu_sharing.service.authentication.oauth2.TokenService;
 import org.edu_sharing.service.authentication.oauth2.TokenService.Token;
 import org.edu_sharing.service.config.ConfigServiceFactory;
 import org.edu_sharing.service.config.model.Config;
-import org.edu_sharing.service.config.model.Context;
 import org.springframework.context.ApplicationContext;
 
 public class AuthenticationFilter implements javax.servlet.Filter {
 	
 	public static final String LOGIN_SUCCESS_REDIRECT_URL = "LOGIN_SUCCESS_REDIRECT_URL";
 	
-	public static final String PATH_LOGIN_JSP = "/components/login";
+	public static final String PATH_LOGIN_ANGULAR = "/components/login";
 	
 	public static final String PATH_INDEX_JSP = "/index.html";
 	
@@ -72,6 +73,8 @@ public class AuthenticationFilter implements javax.servlet.Filter {
 	    
 	    //set the locale
 	    String locale = httpReq.getParameter("locale");
+	    if(locale==null && httpReq.getLocale()!=null)
+	    	locale=httpReq.getLocale().toString();
 	    if(LocaleValidator.validate(locale)){
 	    	log.info("current locale:"+locale);
 	    	httpReq.getSession().setAttribute(CCConstants.AUTH_LOCALE,locale);
@@ -167,10 +170,10 @@ public class AuthenticationFilter implements javax.servlet.Filter {
 		}
 		
 		//redirect to login page
-		this.redirectToLoginpage(httpReq, httpRes);
+		this.redirectToLoginpage(httpReq, httpRes, chain);
 	}
 	
-	private void redirectToLoginpage(HttpServletRequest req, HttpServletResponse resp) throws IOException,ServletException{
+	private void redirectToLoginpage(HttpServletRequest req, HttpServletResponse resp, FilterChain chain) throws IOException,ServletException{
 		
 		//remember the URL the user wants to get
 		String loginSuccessRedirectUrl = req.getRequestURI() +( req.getQueryString() != null ? "?"+req.getQueryString() : "");
@@ -195,6 +198,10 @@ public class AuthenticationFilter implements javax.servlet.Filter {
 		boolean allowSSO = true;
 		try {
 			Config config=ConfigServiceFactory.getCurrentConfig(req);
+			// local login requested -> do not redirect on server-side
+			if(req.getParameter("local")!=null && Boolean.parseBoolean(req.getParameter("local"))){
+				allowSSO = false;
+			}
 			if(!(config.values.loginUrl != null && 
 					config.values.loginUrl.contains("edu-sharing/shibboleth"))){
 				// client based redirect, disable server-side redirect (guest support)
@@ -214,12 +221,33 @@ public class AuthenticationFilter implements javax.servlet.Filter {
 			String shibbUrl = URLTool.addSSOPathWhenConfigured(URLTool.getBaseUrl()) + ( req.getQueryString() != null ? "?"+req.getQueryString() : "");
 			resp.sendRedirect(shibbUrl);
 		}else{
-			RequestDispatcher rp = req.getRequestDispatcher(AuthenticationFilter.PATH_LOGIN_JSP);
-			rp.forward(req,resp);
+			// detect if the error component was requested -> then go ahead
+			// otherwise, go to the angular login page
+			URL url = new URL(req.getRequestURL().toString());
+			if(url.getPath().contains(NgServlet.COMPONENTS_ERROR)){
+				addErrorCode(resp, url);
+				// go to the error component
+				chain.doFilter(req, resp);
+			}
+			else {
+				// go to angular login
+				RequestDispatcher rp = req.getRequestDispatcher(AuthenticationFilter.PATH_LOGIN_ANGULAR);
+				rp.forward(req, resp);
+			}
 		}
 	  
 	}
-	
+
+	private void addErrorCode(HttpServletResponse resp, URL url) {
+		String error=url.getPath().substring(url.getPath().indexOf(NgServlet.COMPONENTS_ERROR)+ NgServlet.COMPONENTS_ERROR.length());
+		try {
+			resp.setStatus(Integer.parseInt(error));
+		}catch(Throwable t){
+			log.info("Can not parse the reported error code "+error);
+			resp.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+		}
+	}
+
 	private boolean authenticateByGuest(HttpServletRequest req) {
 		ApplicationInfo repHomeInfo = ApplicationInfoList.getRepositoryInfo(CCConstants.REPOSITORY_FILE_HOME);
 		String guestUn = repHomeInfo.getGuest_username();

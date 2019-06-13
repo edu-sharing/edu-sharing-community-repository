@@ -4,7 +4,23 @@
           [showDisabled]="showDisabled"
           [position]="dropdownPosition"
 ></dropdown>
-<div [class.actionbar-round]="appearance=='round'">
+<div class="actionbar" [class.actionbar-round]="appearance=='round'">
+  <div *ngFor="let option of optionsAlways;let i=index;"
+       [class.light]="backgroundType=='dark' || backgroundType=='primary'"
+       [class.primary]="i==optionsAlways.length-1 && backgroundType=='primary'"
+       class="action-always waves-effect waves-light action-always-{{option.name | replaceChars:{search:'.',replace:'-'} }} {{ option.isEnabled ? '' : 'disabled'}} {{ option.isEnabled || showDisabled ? '' : 'display-none'}} {{ i==0 ? 'btn' : 'btn-flat'}}"
+       tabindex="0"
+       (keyup.enter)="click(option)"
+       (click)="click(option)">
+    <i icon [iconId]="option.icon" title="{{option.showName ? null : (option.name | translate)}}"></i><span class="action-always-caption" *ngIf="option.showName"> {{option.name | translate}}</span>
+  </div>
+  <div class="more btn-flat waves-effect"
+       (click)="showDropdown()"
+       tabindex="0"
+       (keyup.enter)="showDropdown()"
+       [class.light]="backgroundType=='dark' || backgroundType=='primary'"
+       *ngIf="canShowDropdown()"><a><i class="material-icons">more_vert</i></a>
+  </div>
   <div *ngIf="optionsToggle.length" class="actionToggle" [class.actionToggleDivider]="optionsAlways.length">
     <a *ngFor="let option of optionsToggle"
        tabindex="0"
@@ -12,29 +28,7 @@
        (click)="click(option)"
        [class.light]="backgroundType=='dark' || backgroundType=='primary'"
        [class.disabled]="!option.isEnabled">
-      <i icon [iconId]="option.icon" aria="true"></i>
+      <i icon [iconId]="option.icon"></i>
     </a>
-
   </div>
-<div class="more btn-flat waves-effect"
-       (click)="showDropdown()"
-       tabindex="0"
-       (keyup.enter)="showDropdown()"
-       [class.light]="backgroundType=='dark' || backgroundType=='primary'"
-       *ngIf="canShowDropdown()"><i icon iconId="more_vert" aria="true"></i></div>
-
-  <div *ngFor="let option of optionsAlways.slice().reverse();let i=index;"
-       [class.light]="backgroundType=='dark' || backgroundType=='primary'"
-       [class.primary]="i==optionsAlways.length-1 && backgroundType=='primary'"
-       [class.disabled]="!option.isEnabled"
-       [class.display-none]="!option.isEnabled && !showDisabled"
-       class="action-always waves-effect waves-light action-always-{{option.name | replaceChars:{search:'.',replace:'-'} }}"
-       [class.btn-flat]="i!=optionsAlways.length-1 || style=='flat'"
-       [class.btn]="i==optionsAlways.length-1 && style!='flat'"
-       tabindex="0"
-       (keyup.enter)="click(option)"
-       (click)="click(option)">
-    <i icon title="{{option.showName ? null : (option.name | translate)}}" [iconId]="option.icon"></i><span class="action-always-caption" *ngIf="option.showName"> {{option.name | translate}}</span>
-  </div>
-
 </div>

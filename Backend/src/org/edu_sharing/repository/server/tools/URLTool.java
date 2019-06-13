@@ -140,7 +140,7 @@ public class URLTool{
 	}
 	public static String getBaseUrl(boolean dynamic){
 		ApplicationInfo homeRepository = ApplicationInfoList.getHomeRepository();
-		if(dynamic) {
+		if(dynamic && homeRepository.getBoolean(ApplicationInfo.KEY_URL_DYNAMIC,false)) {
 			try {
 				HttpServletRequest req = Context.getCurrentInstance().getRequest();
 				return getBaseUrlFromRequest(req);
@@ -156,7 +156,7 @@ public class URLTool{
 	public static String getBaseUrlFromRequest(HttpServletRequest req) {
 		ApplicationInfo homeRepository = ApplicationInfoList.getHomeRepository();
 		String path = req.getScheme() + "://" + req.getServerName();
-		int port = req.getLocalPort();
+		int port = req.getServerPort();
 		if (port != 80 && port != 443) {
 			path += ":" + port;
 		}
@@ -188,6 +188,9 @@ public class URLTool{
 	}
 	public static String getNgMessageUrl(String messageId){
 		return getNgComponentsUrl()+"messages/"+messageId;
+	}
+	public static String getNgErrorUrl(String errorId){
+		return getNgComponentsUrl()+"error/"+errorId;
 	}
 	public static String getNgComponentsUrl(){
 		return getBaseUrl(true)+"/components/";
@@ -262,14 +265,12 @@ public class URLTool{
 		
 		String CONTENTURLKEY = "contenturl";
 		String PREVIEWURLKEY = "previewurl";
-		String NOIDKEY_KEY = "nodeid_key";
-		
+
 		String url = null;
 		
-		String nodeIdKey = null;
+		String nodeIdKey = "obj_id";
 		ApplicationInfo appInfo = ApplicationInfoList.getHomeRepository();
 		try{
-			nodeIdKey = appInfo.getNodeIdKey();
 			if(preview){
 				url = appInfo.getPreviewUrl();
 			}else{

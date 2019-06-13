@@ -221,9 +221,16 @@ export class MdsComponent{
   private static MAX_SUGGESTIONS = 5;
   private suggestionsViaSearch = false;
 
+  private resetValues(){
+      this._currentValues=null;
+      this.loadMdsFinal(()=>{
+          this.onDone.emit(null);
+      });
+  }
+
   @HostListener('window:resize')
   onResize(){
-      if(document.activeElement && this.mdsScrollContainer.nativeElement){
+      if(document.activeElement && this.mdsScrollContainer && this.mdsScrollContainer.nativeElement){
         UIHelper.scrollSmoothElementToChild(document.activeElement,this.mdsScrollContainer.nativeElement);
       }
   }
@@ -240,7 +247,7 @@ export class MdsComponent{
               private sanitizer: DomSanitizer,
               private config : ConfigurationService,
               private _ngZone: NgZone) {
-      Translation.initialize(this.translate,this.config,this.storage,this.route);
+      //Translation.initialize(this.translate,this.config,this.storage,this.route);
       (window as any)['mdsComponentRef_'+this.mdsId] = {component: this, zone: _ngZone};
     }
 
@@ -1313,7 +1320,7 @@ export class MdsComponent{
     let domId=this.getWidgetDomId(widget);
     let html=this.autoSuggestField(widget,'',false,
                 this.getWindowComponent()+`.openTree('`+widget.id+`')`,'arrow_forward')
-        +`     <div class="dialog darken" style="display:none;z-index:121;" id="`+domId+`_tree">
+        +`     <div class="dialog darken" style="display:none;z-index:`+(122 + this.priority)+`;" id="`+domId+`_tree">
                 <div class="card center-card card-wide card-high card-action">
                   <div class="card-content">
                   <div class="card-cancel" onclick="document.getElementById('`+domId+`_tree').style.display='none';"><i class="material-icons">close</i></div>
@@ -2158,8 +2165,9 @@ export class MdsComponent{
   }
 
   private isContentEditable() {
-    let value=this.currentNode && this.currentNode.properties[RestConstants.CCM_PROP_EDITOR_TYPE];
-    return value!='tinymce';
+    let editor=this.currentNode && this.currentNode.properties[RestConstants.CCM_PROP_EDITOR_TYPE];
+    let wwwurl=this.currentNode && this.currentNode.properties[RestConstants.CCM_PROP_IO_WWWURL];
+    return editor!='tinymce' && !wwwurl;
   }
 
   private isExtendedWidget(widget: any) {
@@ -2321,11 +2329,18 @@ export class MdsComponent{
       let child=this.childobjects[pos];
       console.log('add new child',child);
       if(child.file){
-          this.node.createNode(this.currentNode.ref.id,RestConstants.CCM_TYPE_IO,[RestConstants.CCM_ASPECT_IO_CHILDOBJECT],this.getChildobjectProperties(child,pos),true,'',RestConstants.CCM_ASSOC_CHILDIO).subscribe((data:NodeWrapper)=>{
-            this.node.uploadNodeContent(data.node.ref.id,child.file,RestConstants.COMMENT_MAIN_FILE_UPLOAD).subscribe(()=>{
-              this.onAddChildobject(callback,pos+1);
-            });
-        });
+          this.node.createNode(this.currentNode.ref.id,RestConstants.CCM_TYPE_IO,[RestConstants.CCM_ASPECT_IO_CHILDOBJECT],this.getChildobjectProperties(child,pos),true,'',RestConstants.CCM_ASSOC_CHILDIO).subscribe((data:NodeWrapper)=> {
+              this.node.uploadNodeContent(data.node.ref.id, child.file, RestConstants.COMMENT_MAIN_FILE_UPLOAD).subscribe(() => {
+                  this.onAddChildobject(callback, pos + 1);
+              }, (error) => {
+                  if (RestHelper.errorMatchesAny(error, RestConstants.CONTENT_QUOTA_EXCEPTION)) {
+                      this.node.deleteNode(data.node.ref.id, false).subscribe(() => {});
+                      this.toast.error(null,"MDS.ADD_CHILD_OBJECT_QUOTA_REACHED",{name:child.name});
+                      this.globalProgress=false;
+                      return;
+                  }
+              });
+          });
       }
       else if(child.link){
         let properties:any={};

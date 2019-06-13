@@ -80,7 +80,7 @@ public class MetadataServlet extends HttpServlet {
 			props.put(ApplicationInfo.KEY_APPID,appInfo.getAppId());
 			props.put(ApplicationInfo.KEY_USERNAME,"");
 			props.put(ApplicationInfo.KEY_PASSWORD,"");
-			props.put(ApplicationInfo.KEY_METADATASETS,"/org/edu_sharing/metadataset/metadatasets_default.xml");
+			props.put(ApplicationInfo.KEY_METADATASETS_V2,"mds");
 			props.put(ApplicationInfo.KEY_PUBLIC_KEY,appInfo.getPublicKey());
 			
 		}

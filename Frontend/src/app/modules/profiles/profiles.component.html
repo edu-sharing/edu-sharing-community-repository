@@ -6,14 +6,23 @@
 ></main-nav>
 
 <global-progress *ngIf="globalProgress"></global-progress>
+<div class="profile-bg" *ngIf="user">
+  <div class="avatar-default"></div>
+  <!--
+  <img *ngIf="!edit && !avatarFile && user.profile.avatar" [src]="user.profile.avatar+'&crop=true&width=1000&height=1000'" alt="">
+  <img *ngIf="edit && !avatarFile && userEdit.profile.avatar" [src]="user.profile.avatar+'&crop=true&width=1000&height=1000'" alt="">
+  <img *ngIf="avatarFile" [src]="avatarImage" alt="">
+  -->
+  <div class="profile-gradient"></div>
+</div>
 <div class="profiles" *ngIf="user">
   <div class="main">
   <div class="top" style.background-color="{{ (edit ? userEdit : user) | authorityColor }}">
     <div class="profile-gradient"></div>
-    <img *ngIf="!edit && user.profile.avatar" class="blurred-image" [src]="user.profile.avatar+'&crop=true&width=400&height=400'">
-    <img *ngIf="edit && !avatarFile && userEdit.profile.avatar" class="blurred-image" [src]="user.profile.avatar+'&crop=true&width=400&height=400'">
-    <img *ngIf="edit && avatarFile" class="blurred-image" [src]="avatarImage">
-    <a class="edit clickable" *ngIf="isMe && !edit && editProfile" (click)="beginEdit()"><i class="material-icons">edit</i><span>{{'PROFILES.EDIT' | translate}}</span></a>
+    <img *ngIf="!edit && user.profile.avatar" class="blurred-image" [src]="user.profile.avatar+'&crop=true&width=400&height=400'" alt="">
+    <img *ngIf="edit && !avatarFile && userEdit.profile.avatar" class="blurred-image" [src]="user.profile.avatar+'&crop=true&width=400&height=400'" alt="">
+    <img *ngIf="edit && avatarFile" class="blurred-image" [src]="avatarImage" alt="">
+    <a class="edit clickable" *ngIf="isMe && !edit && !editAbout && editProfile" (click)="beginEdit()"><i class="material-icons">edit</i><span>{{'PROFILES.EDIT' | translate}}</span></a>
     <a class="edit clickable" *ngIf="isMe && edit" (click)="edit=false"><i icon iconId="close"></i><span>{{'PROFILES.CANCEL_EDIT' | translate}}</span></a>
     <user-avatar *ngIf="!edit"
      [user]="user"
@@ -46,7 +55,7 @@
       </div>
     </div>
     <div class="save">
-      <div *ngIf="edit" class="btn-flat waves-effect waves-light" (click)="saveEdits()">{{'SAVE' | translate}}</div>
+      <div tabindex="0" *ngIf="edit" class="btn-flat btn-shadow waves-effect waves-light" (click)="saveEdits()" (keyup.enter)="saveEdits()">{{'SAVE' | translate}}</div>
     </div>
   </div>
   <div class="statsBackground">
@@ -80,7 +89,7 @@
   <div class="about">
     <i icon iconId="edu-quotes" class="quotes">quotes</i>
     <div class="about-buttons" *ngIf="isMe && editProfile">
-      <a class="edit clickable" *ngIf="!editAbout" (click)="aboutEdit()">{{'PROFILES.EDIT' | translate}}</a>
+      <a class="edit clickable" *ngIf="!editAbout && !edit" (click)="aboutEdit()">{{'PROFILES.EDIT' | translate}}</a>
       <a class="edit clickable" *ngIf="editAbout" (click)="editAbout=false">{{'PROFILES.CANCEL_EDIT' | translate}}</a>
     </div>
     <div *ngIf="editAbout">

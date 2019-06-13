@@ -46,11 +46,17 @@
     "UPLOAD_TITLE": "Hochladen",
     "UPLOAD_REMAINING": "Noch {{time}}",
     "UPLOAD_FINISHING": "Fertigstellen...",
+    "UPLOAD_ERROR":{
+      "UNKNOWN":"Fehler bei der Datenübertragung",
+      "FORMAT":"Nicht identifizierbares Dateiformat",
+      "QUOTA":"Speicherplatz-Quota wurde überschritten"
+    },
     "ADD_FOLDER_TITLE":"Neuen Ordner erstellen",
     "ADD_FOLDER_METADATASET":"Metadatenset für Ordner",
     "FOLDER_PLACEHOLDER": "Ordnername",
     "DELETE_TITLE_SINGLE":"Element löschen?",
-    "DELETE_MESSAGE_SINGLE":"Möchten Sie das Element '{{name}}' löschen?",
+    "DELETE_MESSAGE_SINGLE":"Möchten Sie das Element '{{name}}' wirklich löschen?",
+    "DELETE_MESSAGE_SINGLE_USAGES":"Möchten Sie das Element '{{name}}' wirklich löschen?\n\nDas Element wird insgesamt {{usages}} mal in Sammlungen bzw. angeschlossenen Systemen verwendet.\n\nDurch das Löschen ist das Element dort nicht mehr nutzbar.",
     "DELETE_TITLE":"Elemente löschen?",
     "DELETE_MESSAGE":"Möchten Sie alle ausgewählten Elemente löschen?",
     "TAB_INVITE":"Hinzufügen",
@@ -103,6 +109,8 @@
       "NO_FUZZY":"Geben Sie die vollständige E-Mail-Adresse ein, um Personen hinzuzufügen",
       "DOI":"Mit Handle versehen",
       "DOI_INFO":"Ein Handle ist eine standardisierte ID, mit der dieses Material global eindeutig identifiziert und wiedergefunden werden kann",
+      "PUBLISHING_WARNING_TITLE":"Element wirklich veröffentlichen?",
+      "PUBLISHING_WARNING_MESSAGE":"Wenn Sie fortfahren, wird das aktuelle Element für alle Nutzer des Systems freigegeben und kann von jedem aufgerufen werden.\n\nSind Sie sicher, dass Sie das Element öffentlich freigeben möchten?",
       "STATE": {
         "PRIVATE": "Privat",
         "SHARED": "Geteilt",
@@ -130,8 +138,7 @@
     "PERMISSION_AUTHORITY_EXISTS":"Der gewählte Nutzer/Gruppe hat bereits Zugriff. Überprüfen Sie die Berechtigungen unter \"Schon Eingeladen\"",
     "PERMISSIONS_UPDATED":"Freigaben wurden aktualisiert",
 
-    "NOTIFY_TITLE":"Personen benachrichtigen",
-    "NOTIFY_INFO":"Derzeit werden keine Nachrichten an Gruppen versendet",
+    "NOTIFY_TITLE":"E-Mail Benachrichtigung senden",
     "METADATA":{
       "INVITED_USERS":"eingeladene Benutzer",
       "INVITED_GROUPS":"eingeladene Gruppen",

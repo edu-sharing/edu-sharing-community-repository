@@ -266,15 +266,17 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
 				toSafe.put(id,widget.getDefaultvalue());
 				continue;
 			}
-			if(values==null || values.length==0)
+			// changed: otherwise reset values for multivalue fields is not possible
+			// if(values==null || values.length==0)
+			if(values==null)
 				continue;
 			if(!widget.isMultivalue() && values.length>1)
 				throw new IllegalArgumentException("Multiple values given for a non-multivalue widget: ID "+id+", widget type "+widget.getType());
 			if(widget.isMultivalue()){
-				toSafe.put(id,new ArrayList<String>(Arrays.asList(values)));
+				toSafe.put(id,values.length==0 ? null : new ArrayList<String>(Arrays.asList(values)));
 			}
 			else{
-				toSafe.put(id,values[0]);
+				toSafe.put(id,values.length==0 ? null : values[0]);
 			}
 		}
 
@@ -576,8 +578,17 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
 	public void updateNodeNative(StoreRef store, String nodeId, HashMap<String, Object> _props) {
 
 		try {
-			Map<QName, Serializable> props = transformPropMap(_props);
 			NodeRef nodeRef = new NodeRef(store, nodeId);
+			Map<QName, Serializable> props = transformPropMap(_props);
+			Map<QName, Serializable> propsNotNull = new HashMap<>();
+
+			for(Map.Entry<QName, Serializable> prop : props.entrySet()){
+				// instead of storing props as null (which can cause solr erros), remove them completely from the node!
+				if(prop.getValue()==null)
+					nodeService.removeProperty(nodeRef,prop.getKey());
+				else
+					propsNotNull.put(prop.getKey(),prop.getValue());
+			}
 
 			// don't do this cause it's slow:
 			/*
@@ -587,15 +598,15 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
 			 */
 
 			// prevent overwriting of properties that don't come with param _props
-			Set<QName> changedProps = props.keySet();
+			Set<QName> changedProps = propsNotNull.keySet();
 			Map<QName, Serializable> currentProps = nodeService.getProperties(nodeRef);
 			for (Map.Entry<QName, Serializable> entry : currentProps.entrySet()) {
 				if (!changedProps.contains(entry.getKey())) {
-					props.put(entry.getKey(), entry.getValue());
+					propsNotNull.put(entry.getKey(), entry.getValue());
 				}
 			}
 
-			nodeService.setProperties(nodeRef, props);
+			nodeService.setProperties(nodeRef, propsNotNull);
 
 		} catch (org.hibernate.StaleObjectStateException e) {
 			// this occurs sometimes in workspace
@@ -913,10 +924,12 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
 			throw new IllegalArgumentException("Setting templates for nodes is only supported for type "+CCConstants.CCM_TYPE_MAP);
 		}
 
-		QName qname=QName.createQName(CCConstants.CCM_ASSOC_METADATA_PRESETTING_TEMPLATE);
-		List<AssociationRef> result = nodeService.getTargetAssocs(new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, nodeId),qname);
-		if(result!=null && result.size()>0)
-			return result.get(0).getTargetRef().getId();
+		QName assocQName=QName.createQName(CCConstants.CCM_ASSOC_METADATA_PRESETTING_TEMPLATE);
+		//List<AssociationRef> result = nodeService.getTargetAssocs(new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, nodeId),qname);
+		NodeRef result = nodeService.getChildByName(new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, nodeId),ContentModel.ASSOC_CONTAINS,CCConstants.TEMPLATE_NODE_NAME);
+
+		if(result!=null)
+			return result.getId();
 		if(!create)
 			return null;
 
@@ -926,7 +939,7 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
 		String id=createNode(nodeId,CCConstants.CCM_TYPE_IO,props);
 		nodeService.createAssociation(new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE,nodeId),
 				new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE,id),
-				qname);
+				assocQName);
 		addAspect(id,CCConstants.CCM_ASPECT_METADATA_PRESETTING_TEMPLATE);
 		return id;
 	}

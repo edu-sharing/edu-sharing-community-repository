@@ -1,11 +1,15 @@
 package org.edu_sharing.repository.server;
 
+import org.alfresco.service.cmr.repository.NodeRef;
+import org.alfresco.service.cmr.repository.StoreRef;
 import org.apache.commons.io.FileUtils;
-import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
+import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.server.tools.ApplicationInfo;
 import org.edu_sharing.repository.server.tools.ApplicationInfoList;
 import org.edu_sharing.repository.server.tools.LRMITool;
+import org.edu_sharing.service.license.LicenseService;
+import org.edu_sharing.service.nodeservice.NodeServiceHelper;
 import org.json.JSONObject;
 
 import javax.servlet.ServletException;
@@ -17,6 +21,8 @@ import java.io.IOException;
 import java.net.URL;
 
 public class NgServlet extends HttpServlet {
+	public static final String COMPONENTS_RENDER = "components/render/";
+	public static final String COMPONENTS_ERROR = "components/error/";
 	private static Logger logger = Logger.getLogger(NgServlet.class);
 
 	@Override
@@ -30,7 +36,8 @@ public class NgServlet extends HttpServlet {
 				html = addToHead(head, html);
 			}
 			URL url = new URL(req.getRequestURL().toString());
-			if(url.getPath().contains("components/render/")){
+			if(url.getPath().contains(COMPONENTS_RENDER)){
+				html = addLicenseMetadata(html,url);
 				html = addLRMI(html,url);
 			}
 			if(req.getHeader("User-Agent")!=null){
@@ -61,20 +68,41 @@ public class NgServlet extends HttpServlet {
 		}
 	}
 
+	private String addLicenseMetadata(String html, URL url) {
+		try {
+			String nodeId = getNodeFromURL(url);
+			NodeRef ref = new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, nodeId);
+			String licenseUrl=new LicenseService().getLicenseUrl(
+					NodeServiceHelper.getProperty(ref,CCConstants.CCM_PROP_IO_COMMONLICENSE_KEY),
+					NodeServiceHelper.getProperty(ref,CCConstants.CCM_PROP_IO_COMMONLICENSE_CC_LOCALE),
+					NodeServiceHelper.getProperty(ref,CCConstants.CCM_PROP_IO_COMMONLICENSE_CC_VERSION)
+			);
+			if(licenseUrl!=null) {
+				String data = "<link rel=\"license\" href=\"" + licenseUrl + "\">";
+				return addToHead(data, html);
+			}
+		}catch(Throwable t){
+			logger.error("Failed to load node license for attaching to head:",t);
+		}
+		return html;	}
+
 	private String addLRMI(String html, URL url) {
 		try {
-			String[] path = url.getPath().split("/");
-			String nodeId = path[path.length - 1];
+			String nodeId = getNodeFromURL(url);
 			JSONObject lrmi = LRMITool.getLRMIJson(nodeId);
 			String data = "<script type=\"application/ld+json\">";
 			data += lrmi.toString(2);
 			data += "</script>";
 			return addToHead(data, html);
 		}catch(Throwable t){
-			logger.error("Failed to load node properties for attaching LRMI data:");
-			t.printStackTrace();
+			logger.error("Failed to load node properties for attaching LRMI data:",t);
 		}
 		return html;
+	}
+
+	private String getNodeFromURL(URL url) {
+		String[] path = url.getPath().split("/");
+		return path[path.length - 1];
 	}
 
 	private String addToHead(String head, String html) {

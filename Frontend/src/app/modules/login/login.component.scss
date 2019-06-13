@@ -3,6 +3,12 @@
 md-input{
   width:100%;
 }
+.dialog{
+  z-index: 90;
+}
+.card{
+  z-index: 91;
+}
 powered-by{
   position: fixed;
   left: 0;

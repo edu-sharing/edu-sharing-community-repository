@@ -7,7 +7,7 @@ import {
 import { Toast } from "../../common/ui/toast";
 import {Router, Route, ActivatedRoute} from "@angular/router";
 import { OAuthResult, LoginResult, AccessScope } from "../../common/rest/data-object";
-import { UIConstants } from "../../common/ui/ui-constants";
+import {OPEN_URL_MODE, UIConstants} from "../../common/ui/ui-constants";
 import { CordovaService } from "../../common/services/cordova.service";
 import { ConfigurationService } from '../../common/services/configuration.service';
 import { UIHelper } from '../../common/ui/ui-helper';
@@ -120,8 +120,6 @@ export class LoginAppComponent  implements OnInit {
     }
 
     private login(){
-
-
         /*
         // test camera
         this.cordova.getPhotoFromCamera(
@@ -212,7 +210,7 @@ export class LoginAppComponent  implements OnInit {
             this.router.navigate([UIConstants.ROUTER_PREFIX+"register"]);
         }
         else {
-            UIHelper.openBlankWindow(this.config.register.registerUrl,this.cordova);
+            UIHelper.openUrl(this.config.register.registerUrl,this.cordova,OPEN_URL_MODE.BlankSystemBrowser);
         }
     }
 }

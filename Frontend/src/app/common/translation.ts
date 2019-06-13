@@ -68,12 +68,16 @@ export class Translation  {
             else{
                 translate.setDefaultLang(data[0]);
             }
+            console.log("translate "+route+" "+language);
             translate.use(language);
             Translation.setLanguage(language);
             translate.getTranslation(language).subscribe(()=>{
-              Translation.languageLoaded=true;
-              observer.next(language);
-              observer.complete();
+                // strangley, the translation service seems to need some time to fully init
+                setTimeout(()=> {
+                    Translation.languageLoaded = true;
+                    observer.next(language);
+                    observer.complete();
+                },100);
             });
           });
         });
@@ -160,11 +164,10 @@ export class TranslationLoader implements TranslateLoader {
             console.log("initalized without translation");
         });
     }
-    const hasEndpoint=!this.locator.getCordova().isRunningCordova() || this.locator.getCordova().hasValidConfig();
     let translations : any =[];
     let results=0;
     let maxCount=TRANSLATION_LIST.length;
-    if(hasEndpoint && environment.production){
+    if(environment.production){
       maxCount=1;
       console.log(Translation.LANGUAGES[lang]);
       this.locator.getLanguageDefaults(Translation.LANGUAGES[lang]).subscribe((data: any) =>{
@@ -173,18 +176,16 @@ export class TranslationLoader implements TranslateLoader {
       });
     }
     else {
-      console.log("dev/app mode, loading translations locally");
+      console.log("dev mode, loading translations locally");
         for (let translation of TRANSLATION_LIST) {
             this.http.get(`${this.prefix}/${translation}/${lang}${this.suffix}`)
                 .subscribe((data: any) => translations.push(data));
         }
     }
-    if(hasEndpoint) {
-      maxCount++;
-      this.locator.getConfigLanguage(Translation.LANGUAGES[lang]).subscribe((data: any) => {
-          translations.push(data);
-      });
-    }
+    maxCount++;
+    this.locator.getConfigLanguage(Translation.LANGUAGES[lang]).subscribe((data: any) => {
+        translations.push(data);
+    });
 
     return new Observable<any>((observer : Observer<any>) => {
       let callback = ()=> {
@@ -207,6 +208,12 @@ export class TranslationLoader implements TranslateLoader {
           for (const key in obj) {
               try {
                   let path = key.split(".");
+
+                  // init non-existing objects first
+                  if(path.length>=2 && !final[path[0]]) final[path[0]]={};
+                  if(path.length>=3 && !final[path[0]][path[1]]) final[path[0]][path[1]]={};
+                  if(path.length>=4 && !final[path[0]][path[1]][path[2]]) final[path[0]][path[1]][path[2]]={};
+
                   if (path.length == 1) {
                       continue;
                   }
@@ -227,6 +234,7 @@ export class TranslationLoader implements TranslateLoader {
         }
         this.initializedLanguage=final;
         this.initializing=null;
+        console.log("initialized language ",final);
         observer.next(final);
         observer.complete();
       };

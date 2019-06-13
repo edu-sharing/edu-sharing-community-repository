@@ -1,7 +1,6 @@
 package org.edu_sharing.service.permission;
 
 import java.io.Serializable;
-import java.math.BigDecimal;
 import java.sql.SQLException;
 import java.text.DateFormat;
 import java.util.ArrayList;
@@ -71,6 +70,7 @@ import org.edu_sharing.service.oai.OAIExporterService;
 import org.edu_sharing.service.toolpermission.ToolPermissionException;
 import org.edu_sharing.service.toolpermission.ToolPermissionService;
 import org.edu_sharing.service.toolpermission.ToolPermissionServiceFactory;
+import org.edu_sharing.service.version.VersionTool;
 import org.springframework.context.ApplicationContext;
 
 import com.google.gson.Gson;
@@ -107,6 +107,10 @@ public class PermissionServiceImpl implements org.edu_sharing.service.permission
 
 	public PermissionServiceImpl() {
 		this(ApplicationInfoList.getHomeRepository().getAppId());
+	}
+	
+	public PermissionServiceImpl(boolean test) {
+		
 	}
 
 	/**
@@ -308,7 +312,6 @@ public class PermissionServiceImpl implements org.edu_sharing.service.permission
 			setPermissions(_nodeId, authority, permissions, _inheritPermissions);
 
 			String emailaddress = null;
-			String receiverName = null;
 			String receiverFirstName = null, receiverLastName = null;
 
 			AuthorityType authorityType = AuthorityType.getAuthorityType(authority);
@@ -320,9 +323,14 @@ public class PermissionServiceImpl implements org.edu_sharing.service.permission
 				if (personInfo != null) {
 					receiverFirstName = personInfo.get(CCConstants.CM_PROP_PERSON_FIRSTNAME);
 					receiverLastName = personInfo.get(CCConstants.CM_PROP_PERSON_LASTNAME);
-					receiverName = receiverFirstName + " " + receiverLastName;
 					emailaddress = personInfo.get(CCConstants.CM_PROP_PERSON_EMAIL);
 				}
+			}
+			// send group email notifications
+			if(AuthorityType.GROUP.equals(authorityType)){
+				receiverLastName="";
+				receiverFirstName= (String) nodeService.getProperty(authorityService.getAuthorityNodeRef(authority),QName.createQName(CCConstants.CM_PROP_AUTHORITY_AUTHORITYDISPLAYNAME));
+				emailaddress= (String) nodeService.getProperty(authorityService.getAuthorityNodeRef(authority),QName.createQName(CCConstants.CCM_PROP_GROUPEXTENSION_GROUPEMAIL));
 			}
 
 			if (mailValidator.isValid(emailaddress) && _sendMail) {
@@ -424,10 +432,7 @@ public class PermissionServiceImpl implements org.edu_sharing.service.permission
 				return;
 			}
 
-			//get new version label
-			//use BigDecimal cause of rounding Problem with double
-			BigDecimal bd = BigDecimal.valueOf(Double.valueOf(version)).add(BigDecimal.valueOf(0.1));
-			String newVersion = bd.toString();
+			String newVersion = new VersionTool().incrementVersion(version);
 
 			HandleService handleService = null;
 			String handle = null;
@@ -487,6 +492,8 @@ public class PermissionServiceImpl implements org.edu_sharing.service.permission
 			}
 		}
 	}
+	
+	
 
 	@Override
 	public List<Notify> getNotifyList(final String nodeId) throws Throwable {
@@ -944,24 +951,17 @@ public class PermissionServiceImpl implements org.edu_sharing.service.permission
 	}
 
 	@Override
-	public StringBuffer getFindUsersSearchString(HashMap<String, String> propVals, boolean globalContext) {
+	public StringBuffer getFindUsersSearchString(String query,List<String> searchFields, boolean globalContext) {
 
 		boolean fuzzyUserSearch = !globalContext || ToolPermissionServiceFactory.getInstance()
 				.hasToolPermission(CCConstants.CCM_VALUE_TOOLPERMISSION_GLOBAL_AUTHORITY_SEARCH_FUZZY);
 
 		StringBuffer searchQuery = new StringBuffer("TYPE:cm\\:person");
-
-		StringBuffer subQuery = new StringBuffer();
+		StringBuffer subQuery=new StringBuffer();
 
 		if (fuzzyUserSearch) {
-
-			for (String property : propVals.keySet()) {
-
-				String propValue = propVals.get(property);
-
-				if (propValue != null) {
-
-					for (String token : StringTool.getPhrases(propValue)) {
+				if (query != null) {
+					for (String token : StringTool.getPhrases(query)) {
 
 						boolean isPhrase = token.startsWith("\"") && token.endsWith("\"");
 
@@ -979,23 +979,22 @@ public class PermissionServiceImpl implements org.edu_sharing.service.permission
 								token = token + "*";
 							}
 						}
-
-						if (token.length() > 0) {
-
-							subQuery.append(subQuery.length() > 0 ? " OR " : "").append("@cm\\:").append(property)
-									.append(":").append("\"").append(token).append("\"");
-
+						StringBuffer fieldQuery=new StringBuffer();
+						for(String field : searchFields) {
+							if(fieldQuery.length()>0) {
+								fieldQuery.append(" OR ");
+							}
+							fieldQuery.append("@cm\\:").append(field).append(":").append("\"").append(token).append("\"");
 						}
+						subQuery.append(subQuery.length() > 0 ? " AND " : "").append("(").append(fieldQuery).append(")");
 					}
 				}
-			}
-
 		} else {
 
 			// when no fuzzy search remove "*" from searchstring and remove all params
 			// except email
 
-			String emailValue = propVals.get("email");
+			String emailValue = query;
 
 			// remove wildcards (*,?)
 			if (emailValue != null) {
@@ -1045,7 +1044,7 @@ public class PermissionServiceImpl implements org.edu_sharing.service.permission
 				if (!hasToolPermission) {
 					return null;
 				}
-				return getFindUsersSearchString(propVals, true);
+				return getFindUsersSearchString(query, searchFields, true);
 			}
 
 			StringBuffer groupPathQuery = new StringBuffer();
@@ -1223,11 +1222,10 @@ public class PermissionServiceImpl implements org.edu_sharing.service.permission
 	}
 
 	@Override
-	public Result<List<User>> findUsers(HashMap<String, String> propVals, boolean globalContext, int from,
-			int nrOfResults) {
+	public Result<List<User>> findUsers(String query,List<String> searchFields, boolean globalContext, int from, int nrOfResults) {
 
 		StringBuffer searchQuery = null;
-		searchQuery = getFindUsersSearchString(propVals, globalContext);
+		searchQuery = getFindUsersSearchString(query, searchFields, globalContext);
 
 		if (searchQuery == null) {
 			return new Result<List<User>>();
@@ -1288,14 +1286,13 @@ public class PermissionServiceImpl implements org.edu_sharing.service.permission
 	public Result<List<Authority>> findAuthorities(String searchWord, boolean globalContext, int from,
 			int nrOfResults) {
 
-		HashMap<String, String> toSearch = new HashMap<String, String>();
-
 		// fields to search in - not using username
-		toSearch.put("email", searchWord);
-		toSearch.put("firstName", searchWord);
-		toSearch.put("lastName", searchWord);
+		List<String> searchFields = new ArrayList<>();
+		searchFields.add("email");
+		searchFields.add("firstName");
+		searchFields.add("lastName");
 
-		StringBuffer findUsersQuery = getFindUsersSearchString(toSearch, globalContext);
+		StringBuffer findUsersQuery = getFindUsersSearchString(searchWord,searchFields, globalContext);
 		StringBuffer findGroupsQuery = getFindGroupsSearchString(searchWord, globalContext);
 
 		/**
@@ -1599,4 +1596,5 @@ public class PermissionServiceImpl implements org.edu_sharing.service.permission
 	public void setToolPermission(ToolPermissionService toolPermission) {
 		this.toolPermission = toolPermission;
 	}
+	
 }

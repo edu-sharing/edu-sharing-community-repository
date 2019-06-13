@@ -6,8 +6,15 @@ import {
     NodeLock, OAuthResult, ParentList
 } from "../rest/data-object";
 import {ActivatedRoute, NavigationExtras, Router} from "@angular/router";
-import {UIConstants} from "./ui-constants";
-import {ElementRef, EventEmitter, HostListener} from "@angular/core";
+import {OPEN_URL_MODE, UIConstants} from "./ui-constants";
+import {
+    ComponentFactoryResolver,
+    ElementRef,
+    EmbeddedViewRef,
+    EventEmitter,
+    Type,
+    ViewContainerRef
+} from "@angular/core";
 import {RestConstants} from "../rest/rest-constants";
 import {RestHelper} from "../rest/rest-helper";
 import {Toast} from "./toast";
@@ -25,6 +32,10 @@ import {SearchService} from "../../modules/search/search.service";
 import {OptionItem} from "./actionbar/option-item";
 import {RestConnectorService} from "../rest/services/rest-connector.service";
 import {Observable, Observer} from "rxjs";
+import {RestIamService} from "../rest/services/rest-iam.service";
+import {DialogButton} from "./modal-dialog/modal-dialog.component";
+import {SpinnerComponent} from "./spinner/spinner.component";
+
 export class UIHelper{
 
   public static evaluateMediaQuery(type:string,value:number){
@@ -334,7 +345,7 @@ export class UIHelper{
         UIHelper.addToCollection(collectionService,router,toast,collection,nodes,callback,position+1,true);
       });
   }
-  static openConnector(connector:RestConnectorsService,events:FrameEventsService,toast:Toast,node : Node,type : Filetype=null,win : any = null,connectorType : Connector = null,newWindow=true){
+  static openConnector(connector:RestConnectorsService,iam:RestIamService,events:FrameEventsService,toast:Toast,node : Node,type : Filetype=null,win : any = null,connectorType : Connector = null,newWindow=true){
     if(connectorType==null){
       connectorType=connector.connectorSupportsEdit(node);
     }
@@ -346,32 +357,45 @@ export class UIHelper{
       connector.nodeApi.isLocked(node.ref.id).subscribe((result:NodeLock)=>{
       if(result.isLocked) {
         toast.error(null, "TOAST.NODE_LOCKED");
-        win.close();
+        if(win)
+            win.close();
         return;
       }
-      connector.generateToolUrl(connectorType,type,node).subscribe((url:string)=>{
-          if(win) {
-              win.location.href = url;
-              console.log(win);
+      iam.getUser().subscribe((user)=> {
+          if(user.person.quota.enabled && user.person.quota.sizeCurrent>=user.person.quota.sizeQuota){
+              toast.showModalDialog('CONNECTOR_QUOTA_REACHED_TITLE','CONNECTOR_QUOTA_REACHED_MESSAGE',DialogButton.getOk(()=>{
+                  toast.closeModalDialog();
+              }),true,false);
+              if(win)
+                  win.close();
+              return;
           }
-          else if(isCordova){
-            UIHelper.openBlankWindow(url,connector.getRestConnector().getCordovaService());
-          }
-          else {
-              window.location.replace(url);
-          }
-          if(win) {
-              events.addWindow(win);
-          }
-        },
-        (error)=>{
-          console.warn(error);
-          toast.error(null,error);
-          if(win)
-            win.close();
-        });
+          connector.generateToolUrl(connectorType, type, node).subscribe((url: string) => {
+                  if (win) {
+                      win.location.href = url;
+                      console.log(win);
+                  }
+                  else if (isCordova) {
+                      UIHelper.openUrl(url, connector.getRestConnector().getCordovaService(), OPEN_URL_MODE.Blank);
+                  }
+                  else {
+                      window.location.replace(url);
+                  }
+                  if (win) {
+                      events.addWindow(win);
+                  }
+              },
+              (error) => {
+                  toast.error(null, error);
+                  if (win)
+                      win.close();
+              });
+      },(error)=>{
+          toast.error(null, error);
+          if (win)
+              win.close();
+      });
     },(error:any)=> {
-      console.warn(error);
       toast.error(error);
       if(win)
         win.close();
@@ -410,24 +434,53 @@ export class UIHelper{
      * @param {y} number
      * @param {smoothness} lower numbers indicate less smoothness, higher more smoothness
      */
-    static scrollSmoothElement(y: number=0,element:Element,smoothness=1) {
-        let mode=element.scrollTop>y;
-        let divider=3*smoothness;
-        let minSpeed=7/smoothness;
-        let lastY=y;
-        let interval=setInterval(()=>{
-            let yDiff=element.scrollTop-lastY;
-            lastY=element.scrollTop;
-            if(element.scrollTop>y && mode && yDiff){
-                element.scrollTop-=Math.max((element.scrollTop-y)/divider,minSpeed);
+    static scrollSmoothElement(pos: number=0,element:Element,smoothness=1,axis='y') {
+        return new Promise((resolve)=> {
+            let currentPos = axis == 'x' ? element.scrollLeft : element.scrollTop;
+            if(element.getAttribute('data-is-scrolling')=='true'){
+                console.log("is scrolling, skip");
+                return;
             }
-            else if(element.scrollTop<y && !mode && yDiff){
-                element.scrollTop+=Math.max((y-element.scrollTop)/divider,minSpeed);
+            console.log(currentPos, pos);
+            let mode = currentPos > pos;
+            let divider = 3 * smoothness;
+            let minSpeed = 7 / smoothness;
+            let lastPos = pos;
+            let maxPos = axis=='x' ? element.scrollWidth - element.clientWidth : element.scrollHeight - element.clientHeight;
+            let limitReached=false;
+            if(mode && pos<=0) {
+                pos = 0;
+                limitReached=true;
             }
-            else {
-                clearInterval(interval);
+            if(!mode && pos>=maxPos) {
+                pos = maxPos;
+                limitReached=true;
             }
-        },16);
+            let interval = setInterval(() => {
+                let currentPos = axis == 'x' ? element.scrollLeft : element.scrollTop;
+                let posDiff = currentPos - lastPos;
+                lastPos = currentPos;
+                let finished=true;
+                if (currentPos > pos) {
+                    currentPos -= Math.max((currentPos - pos) / divider, minSpeed);
+                    finished=currentPos<=pos;
+                }
+                else if (currentPos < pos && !mode) {
+                    currentPos += Math.max((pos - currentPos) / divider, minSpeed);
+                    finished=currentPos>=pos;
+                }
+                if(finished) {
+                    clearInterval(interval);
+                    element.removeAttribute('data-is-scrolling');
+                    resolve();
+                }
+                if (axis == 'x')
+                    element.scrollLeft = currentPos;
+                else
+                    element.scrollTop = currentPos;
+            }, 16);
+            element.setAttribute('data-is-scrolling','true');
+        });
     }
 
     /**
@@ -480,14 +533,24 @@ export class UIHelper{
   static goToDefaultLocation(router: Router,configService : ConfigurationService,extras:NavigationExtras={}) {
       return router.navigate([UIConstants.ROUTER_PREFIX + configService.instant("loginDefaultLocation","workspace")],extras);
   }
-
-    static openBlankWindow(url:string, cordova: CordovaService) {
-      if(cordova.isRunningCordova()){
-        return cordova.openInAppBrowser(url);
-      }
-      else {
-        return window.open(url, '_blank',);
-      }
+    static openUrl(url:string, cordova: CordovaService,mode=OPEN_URL_MODE.Current) {
+        if(cordova.isRunningCordova()){
+          if(mode==OPEN_URL_MODE.BlankSystemBrowser) {
+              return cordova.openBrowser(url);
+          }
+          else {
+              return cordova.openInAppBrowser(url);
+          }
+        }
+        else {
+          if(mode==OPEN_URL_MODE.Current) {
+              window.location.href = url;
+              return;
+          }
+          else {
+              return window.open(url, '_blank',);
+          }
+        }
     }
 
     static filterValidOptions(ui: UIService, options: OptionItem[]) {
@@ -521,6 +584,43 @@ export class UIHelper{
         if(connector.getCordovaService().isRunningCordova())
             return null;
         return window.open("");
+    }
+
+    /**
+     * dynamically inject an angular component into a regular html dom element
+     * @param componentFactoryResolver The resolver service
+     * @param viewContainerRef The viewContainerRef service
+     * @param componentName The name of the angular component (e.g. SpinnerComponent)
+     * @param targetElement The target element of the dom
+     * @param bindings Optional bindings (inputs & outputs) to the given component
+     * @param delay Optional inflating delay in ms(some components may need some time to "init" the layout)
+     */
+    public static injectAngularComponent<T>(componentFactoryResolver:ComponentFactoryResolver,viewContainerRef:ViewContainerRef,
+                                         componentName:  Type<T>,targetElement: Element,bindings:any=null,delay=0){
+        let factory = componentFactoryResolver.resolveComponentFactory(componentName);
+        let component = viewContainerRef.createComponent(factory);
+        if(bindings){
+            for(let key in bindings){
+                if(bindings[key] instanceof Function){
+                    // subscribe so callback can properly invoked
+                    (component.instance as any)[key].subscribe((o:any)=>bindings[key](o));
+                }
+                else {
+                    (component.instance as any)[key] = bindings[key];
+                }
+            }
+        }
+        //component.changeDetectorRef.detectChanges();
+
+        // 3. Get DOM element from component
+        const domElem = (component.hostView as EmbeddedViewRef<any>)
+            .rootNodes[0] as HTMLElement;
+        domElem.style.display='none';
+        targetElement.innerHTML=null;
+        targetElement.appendChild(domElem);
+        setTimeout(()=>{
+            domElem.style.display=null;
+        },delay);
     }
 
     /**

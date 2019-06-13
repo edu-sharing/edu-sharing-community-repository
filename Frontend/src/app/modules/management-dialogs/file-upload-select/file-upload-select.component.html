@@ -12,6 +12,9 @@
                 <div *ngIf="supportsDrop">{{ 'WORKSPACE.ADD_OBJECT_MESSAGE' | translate}}</div>
                 <div class="btn-flat btn-shadow" tabindex="0" (keyup.enter)="selectFile()" (click)="selectFile()">{{'WORKSPACE.SELECT_MATERIAL' | translate}}</div>
             </div>
+            <div class="quota" *ngIf="user && user.person.quota.enabled">
+                <user-quota [quota]="user.person.quota"></user-quota>
+            </div>
             <hr>
             <div class="link"><div class="linkLabel"><i class="material-icons align-icon">link</i> <span class="linkTitle">{{ 'WORKSPACE.SELECT_LINK' | translate}}</span></div>
                 <input type="text" [(ngModel)]="link" (keyup.enter)="setLink()" placeholder="http://">
@@ -56,7 +59,7 @@
     </div>
     </div>
     <div class="card-action">
-        <a tabindex="0" class="waves-effect waves-light btn" [class.disabled]="disabled || !_parent" (click)="setLink()" (keyup.enter)="setLink()">{{'OK' | translate }}</a>
+        <a tabindex="0" class="waves-effect waves-light btn" [class.disabled]="disabled || (showPicker && !_parent)" (click)="setLink()" (keyup.enter)="setLink()">{{'OK' | translate }}</a>
         <a tabindex="0" class="btn-flat" (click)="cancel()" (keyup.enter)="cancel()">{{'CANCEL' | translate }}</a>
     </div>
 </div>

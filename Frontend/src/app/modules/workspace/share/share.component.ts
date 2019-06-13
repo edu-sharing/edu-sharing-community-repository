@@ -23,6 +23,8 @@ import {RestUsageService} from '../../../common/rest/services/rest-usage.service
 import {UIHelper} from '../../../common/ui/ui-helper';
 import {UIConstants} from '../../../common/ui/ui-constants';
 import {RestCollectionService} from '../../../common/rest/services/rest-collection.service';
+import {ConfigurationService} from "../../../common/services/configuration.service";
+import {DialogButton} from "../../../common/ui/modal-dialog/modal-dialog.component";
 
 @Component({
   selector: 'workspace-share',
@@ -71,6 +73,10 @@ export class WorkspaceShareComponent implements AfterViewInit{
   public linkDisabled : Permission;
   public link = false;
   private _node : Node;
+  dialogTitle : string;
+  dialogMessage : string;
+  dialogCancel : Function;
+  dialogButtons : DialogButton[];
 
   private searchStr: string;
   private inheritAllowed=false;
@@ -159,8 +165,7 @@ export class WorkspaceShareComponent implements AfterViewInit{
           this.inherit = data.permissions.inheritedPermissions;
           this.removePermissions(this.inherit, 'OWNER');
           this.removePermissions(data.permissions.localPermissions.permissions, 'OWNER');
-          for (let permission of data.permissions.localPermissions.permissions)
-            this.inherit.push(permission);
+          this.inherit = this.mergePermissions(this.inherit,data.permissions.localPermissions.permissions);
           this.updatePublishState();
           this.initialState=this.getState();
         }
@@ -326,11 +331,7 @@ export class WorkspaceShareComponent implements AfterViewInit{
     if(this.permissions!=null) {
       this.onLoading.emit(true);
       let permissions=Helper.deepCopy(this.permissions);
-      for(let permission of permissions){
-          if(this.isDeleted(permission)){
-              permissions.splice(permissions.indexOf(permission),1);
-          }
-      }
+      permissions=permissions.filter((p:Permission)=>!this.isDeleted(p));
       permissions=RestHelper.copyAndCleanPermissions(permissions,this.inherited && this.inheritAllowed && !this.disableInherition);
       if(!this.sendToApi) {
         this.onClose.emit(permissions);
@@ -350,6 +351,7 @@ export class WorkspaceShareComponent implements AfterViewInit{
               private translate : TranslateService,
               private collectionService : RestCollectionService,
               private applicationRef : ApplicationRef,
+              private config : ConfigurationService,
               private toast : Toast,
               private usageApi : RestUsageService,
               private iam : RestIamService,
@@ -473,8 +475,24 @@ export class WorkspaceShareComponent implements AfterViewInit{
     }
     return -1;
   }
-  public setPublish(status:boolean){
-    if(status){
+  public setPublish(status:boolean,force=false){
+    if(status && !force){
+      if(this.config.instant('publishingNotice',false)){
+        this.dialogTitle='WORKSPACE.SHARE.PUBLISHING_WARNING_TITLE';
+        this.dialogMessage='WORKSPACE.SHARE.PUBLISHING_WARNING_MESSAGE';
+        this.dialogCancel=()=>{
+            this.dialogTitle=null;
+            this.publishActive=false;
+        };
+        this.dialogButtons=DialogButton.getYesNo(()=>{
+            this.dialogCancel();
+        }, ()=>{
+            this.publishActive=true;
+            this.dialogTitle=null;
+            this.setPublish(status,true);
+        });
+        return;
+      }
       if(this.deletedPermissions.indexOf(RestConstants.AUTHORITY_EVERYONE)!=-1){
           this.deletedPermissions.splice(this.deletedPermissions.indexOf(RestConstants.AUTHORITY_EVERYONE),1);
           return;
@@ -551,6 +569,17 @@ export class WorkspaceShareComponent implements AfterViewInit{
                 this.updateUsages(permissions,pos+1,true);
             });
         }
+    }
+
+    private mergePermissions(source: Permission[], add: Permission[]) {
+      let merge=source;
+      for(let p2 of add){
+        // do only add new, unique permissions
+        if(merge.filter((p1)=> Helper.objectEquals(p1,p2)).length==0){
+            merge.push(p2);
+        }
+      }
+      return merge;
     }
 }
 /*

@@ -52,6 +52,8 @@
           <div *ngIf="_mode=='GROUP'">
             <label for="groupName">{{'GROUP.displayName' | translate}}</label>
             <input type="text" id="groupName" name="groupName" [(ngModel)]="edit.profile.displayName" autofocus required>
+            <label for="groupEmail">{{'GROUP.groupEmail' | translate}}</label>
+            <input type="email" id="groupEmail" name="groupEmail" [(ngModel)]="edit.profile.groupEmail">
             <label for="groupType">{{'GROUP.groupType' | translate}}</label>
             <select id="groupType" name="groupType" [(ngModel)]="edit.profile.groupType">
               <option *ngFor="let type of GROUP_TYPES" [value]="type">{{('PERMISSIONS.GROUP_TYPE.'+type) | translate}}</option>
@@ -65,12 +67,15 @@
           </div>
           <div *ngIf="_mode=='ORG'">
             <label for="orgName">{{'ORG.displayName' | translate}}</label>
-            <input type="text" id="orgName" name="orgName" [(ngModel)]="edit.profile.displayName" autofocus required>
-            <label for="orgName">{{'ORG.groupType' | translate}}</label>
+            <input type="email" id="orgName" name="orgName" [(ngModel)]="edit.profile.displayName" autofocus required>
+            <label for="orgEmail">{{'ORG.groupEmail' | translate}}</label>
+            <input type="text" id="orgEmail" name="orgEmail" [(ngModel)]="edit.profile.groupEmail">
+            <label for="orgType">{{'ORG.groupType' | translate}}</label>
             <select id="orgType" name="orgType" [(ngModel)]="edit.profile.groupType">
               <option *ngFor="let type of ORG_TYPES" [value]="type">{{('PERMISSIONS.GROUP_TYPE.'+type) | translate}}</option>
             </select>
-            <div class="infoText">{{edit.folder}}</div>
+            <label>{{'ORG.folderLocation' | translate}}</label>
+            <div class="infoText folderLocation clickable" (click)="openFolder(edit.sharedFolder)">{{edit.folder}}</div>
           </div>
           <div *ngIf="_mode=='USER'">
             <div *ngIf="!editId">
@@ -86,6 +91,11 @@
             <div *ngIf="!editId">
               <label for="password">{{'USER.password' | translate}}</label>
               <input type="password" id="password" name="password" [(ngModel)]="editDetails.password">
+            </div>
+            <div class="quota">
+              <label for="lastName">{{'USER.sizeQuota' | translate}}</label>
+              <input type="text" id="sizeQuota" name="sizeQuota" [(ngModel)]="edit.profile.sizeQuota">
+              <user-quota *ngIf="editId && edit.quota.enabled" [quota]="edit.quota"></user-quota>
             </div>
           </div>
           </form>

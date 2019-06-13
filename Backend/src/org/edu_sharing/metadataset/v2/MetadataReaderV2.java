@@ -200,7 +200,7 @@ public class MetadataReaderV2 {
 			prefix+="valuespaces/";
 		InputStream is=MetadataReaderV2.class.getResourceAsStream(prefix+name);
 		if(is==null)
-			throw new IOException("file "+name+" not found");
+			throw new IOException("file "+name+" not found: "+prefix+name);
 		return is;
 	}
 	

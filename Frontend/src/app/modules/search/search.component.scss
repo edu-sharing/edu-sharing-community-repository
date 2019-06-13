@@ -53,6 +53,7 @@ $sidenavTopBaseOffset:110px;
 }
 .sidenav .row{
   margin:0 -30px;
+  margin-top: 0;
 }
 .repositoryActive{
   background: $workspaceTreeSelectedBackgroundEffect;
@@ -90,6 +91,25 @@ $sidenavTopBaseOffset:110px;
 }
 .extendedSearch a, .switchToCollections a, .switchToSearch a{
   padding: 5px;
+}
+.sorting{
+  position: absolute;
+  right: 10px;
+  .sorting-info {
+    padding: 0 10px;
+    display: flex;
+    align-items: center;
+    color: $primary;
+    text-transform: uppercase;
+    .material-icons {
+      padding-left: 5px;
+      font-size: 18px;
+    }
+  }
+}
+sort-dropdown{
+  position: absolute;
+  right: 250px;
 }
 .extendedSearch{
   .mobile{
@@ -161,12 +181,13 @@ md-sidenav-container,.sidenav,#top {
     margin-bottom: 50px;
 }
 
-i {
-    vertical-align: middle;
-}
+
 
 a, a:hover, a:visited, a:active, button {
     color: $primary;
+  i, span {
+    vertical-align: middle;
+  }
 }
 
 .infobutton {
@@ -286,11 +307,10 @@ small-collection{
 }
 .mdsSelect{
   float:left;
-  width:calc(100% + 40px);
+  width:100%;
   >div {
     width: 100%;
     padding: 10px 15px;
-    margin: 0 -20px;
     margin-top: 20px;
     background-color: #fff;
     > div {

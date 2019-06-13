@@ -115,7 +115,7 @@ public class HttpQueryTool {
 		}
 		
 		if(basicAuthUn != null && basicAuthPw != null) {
-			method.addRequestHeader("Authorization", "Basic " + Base64.encodeBase64String((basicAuthUn +":" +basicAuthPw) .getBytes()));  
+			method.addRequestHeader("Authorization", "Basic " +java.util.Base64.getEncoder().encodeToString((basicAuthUn +":" +basicAuthPw) .getBytes()));
 		}
 		
 		if(header != null){

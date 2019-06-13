@@ -129,7 +129,7 @@ public class RenderingProxy extends HttpServlet {
 		
 		try {
 			
-			usernameDecrypted = encryptionTool.decrypt(Base64.decodeBase64(uEncrypted.getBytes()), encryptionTool.getPemPrivateKey(homeRep.getPrivateKey()));
+			usernameDecrypted = encryptionTool.decrypt(java.util.Base64.getDecoder().decode(uEncrypted.getBytes()), encryptionTool.getPemPrivateKey(homeRep.getPrivateKey()));
 		}catch(GeneralSecurityException e) {
 			logger.error(e.getMessage(), e);
 			resp.sendError(HttpServletResponse.SC_FORBIDDEN,e.getMessage());
@@ -244,7 +244,7 @@ public class RenderingProxy extends HttpServlet {
 			    	value = esuid + "@" + homeRep.getAppId();
 				    	
 					byte[] esuidEncrptedBytes = encryptionTool.encrypt(value.getBytes(), encryptionTool.getPemPublicKey(remoteRepo.getPublicKey()));
-					value = Base64.encodeBase64String(esuidEncrptedBytes);
+					value = java.util.Base64.getEncoder().encodeToString(esuidEncrptedBytes);
 
 			    }catch(Exception e){
 				    	e.printStackTrace();
@@ -261,7 +261,7 @@ public class RenderingProxy extends HttpServlet {
 							targetApplication = ApplicationInfoList.getRepositoryInfoById(rep_id);
 						}
 						byte[] userEncryptedBytes = encryptionTool.encrypt(usernameDecrypted.getBytes(), encryptionTool.getPemPublicKey(targetApplication.getPublicKey()));
-						value = Base64.encodeBase64String(userEncryptedBytes);
+						value = java.util.Base64.getEncoder().encodeToString(userEncryptedBytes);
 	
 					}catch(Exception e) {
 						logger.error(e.getMessage(), e);
@@ -289,7 +289,7 @@ public class RenderingProxy extends HttpServlet {
 			if(privateKey != null){
 				byte[] signature = sigTool.sign(sigTool.getPemPrivateKey(privateKey, CCConstants.SECURITY_KEY_ALGORITHM), data, CCConstants.SECURITY_SIGN_ALGORITHM);
 					
-				String urlSig = URLEncoder.encode(new Base64().encodeToString(signature));
+				String urlSig = URLEncoder.encode(java.util.Base64.getEncoder().encodeToString(signature));
 				contentUrl = UrlTool.setParam(contentUrl, "sig",urlSig);
 			}
 		}catch(GeneralSecurityException e){
@@ -327,6 +327,7 @@ public class RenderingProxy extends HttpServlet {
 
 		String encTicket = req.getParameter("ticket");
 		if(encTicket == null) {
+			logger.error("no ticket provided");
 			resp.sendError(HttpServletResponse.SC_FORBIDDEN,"no ticket provided");
 			return true;
 		}
@@ -334,7 +335,7 @@ public class RenderingProxy extends HttpServlet {
 		String ticket = null;
 		Encryption enc = new Encryption("RSA");
 		try {
-			ticket = enc.decrypt(Base64.decodeBase64(encTicket.getBytes()), enc.getPemPrivateKey(ApplicationInfoList.getHomeRepository().getPrivateKey().trim()));
+			ticket = enc.decrypt(java.util.Base64.getDecoder().decode(encTicket.getBytes()), enc.getPemPrivateKey(ApplicationInfoList.getHomeRepository().getPrivateKey().trim()));
 		}catch(GeneralSecurityException e) {
 			logger.error(e.getMessage(), e);
 			resp.sendError(HttpServletResponse.SC_FORBIDDEN,e.getMessage());
@@ -343,11 +344,13 @@ public class RenderingProxy extends HttpServlet {
 
 
 		/**
-		 * when it's an lms the user who is in a course where the node is used (Angular path can not handle signatures)
+		 * when it's an lms/cms the user who is in a course where the node is used (Angular path can not handle signatures)
 		 *
 		 * doing edu ticket auth
 		 */
-		if(appInfoApplication != null && ApplicationInfo.TYPE_LMS.equals(appInfoApplication.getType())) {
+		if(appInfoApplication != null &&
+					   (ApplicationInfo.TYPE_LMS.equals(appInfoApplication.getType()) ||
+						ApplicationInfo.TYPE_CMS.equals(appInfoApplication.getType()))) {
 			req.getSession().removeAttribute(CCConstants.AUTH_SINGLE_USE_NODEID);
 			HttpSession session = req.getSession(true);
 			if(		Long.parseLong(ts) > (System.currentTimeMillis() - appInfoApplication.getMessageOffsetMs())
@@ -403,7 +406,8 @@ public class RenderingProxy extends HttpServlet {
 				return true;
 			}
 		}else {
-			resp.sendError(HttpServletResponse.SC_BAD_REQUEST,"only LMS apps allowed for display=\"window\"");
+			logger.warn("only LMS / CMS apps allowed for display=\"window\"");
+			resp.sendError(HttpServletResponse.SC_BAD_REQUEST,"only LMS / CMS apps allowed for display=\"window\"");
 			return true;
 		}
 

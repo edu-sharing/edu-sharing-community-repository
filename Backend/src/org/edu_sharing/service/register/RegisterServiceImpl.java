@@ -106,7 +106,7 @@ public class RegisterServiceImpl implements RegisterService {
                 RegisterInformation info = getPersonById(id);
                 if(info==null)
                     return false;
-                String key = addToCacheNoDuplicate(info,recoverPasswordCache);
+                String key = addToCacheNoDuplicate(info,recoverPasswordCache,false);
 
                 String currentLocale = new AuthenticationToolAPI().getCurrentLocale();
                 String subject = MailTemplate.getSubject("userRecoverPassword", currentLocale);
@@ -206,7 +206,7 @@ public class RegisterServiceImpl implements RegisterService {
             AuthenticationUtil.runAsSystem(() -> {
                 if (userExists(info))
                     throw new DuplicateAuthorityException();
-                String value = addToCacheNoDuplicate(info, registerUserCache);
+                String value = addToCacheNoDuplicate(info, registerUserCache,true);
                 sendRegisterMail(info, value);
                 return null;
             });
@@ -235,10 +235,12 @@ public class RegisterServiceImpl implements RegisterService {
         }
         return null;
     }
-    private String addToCacheNoDuplicate(RegisterInformation info,SimpleCache cache) {
+    private String addToCacheNoDuplicate(RegisterInformation info,SimpleCache cache,boolean override) {
         String existing=getKeyForMail(info.getEmail(),cache);
-        if(existing!=null)
+        if(existing!=null) {
+            cache.put(existing,info);
             return existing;
+        }
         return addToCache(info, cache);
     }
 

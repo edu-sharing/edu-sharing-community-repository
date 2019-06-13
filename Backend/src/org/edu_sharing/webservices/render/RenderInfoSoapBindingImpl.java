@@ -7,8 +7,8 @@
 
 package org.edu_sharing.webservices.render;
 
+import java.awt.*;
 import java.io.Serializable;
-import java.io.UnsupportedEncodingException;
 import java.rmi.RemoteException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -16,11 +16,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import javax.mail.Store;
 import javax.servlet.http.HttpSession;
 import javax.xml.soap.SOAPException;
 
-import org.alfresco.repo.search.impl.querymodel.impl.functions.Child;
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.repo.security.authentication.AuthenticationUtil.RunAsWork;
 import org.alfresco.service.cmr.repository.ChildAssociationRef;
@@ -49,6 +47,7 @@ import org.edu_sharing.service.nodeservice.NodeServiceFactory;
 import org.edu_sharing.service.nodeservice.NodeServiceHelper;
 import org.edu_sharing.service.permission.PermissionServiceFactory;
 import org.edu_sharing.service.permission.PermissionServiceHelper;
+import org.edu_sharing.service.rendering.RenderingTool;
 import org.edu_sharing.service.usage.AlfServicesWrapper;
 import org.edu_sharing.service.usage.UsageDAO;
 import org.edu_sharing.service.usage.UsageService;
@@ -77,7 +76,7 @@ public class RenderInfoSoapBindingImpl implements org.edu_sharing.webservices.re
 			
 			ticket = authTool.createNewSession(homeAppInfo.getUsername(), homeAppInfo.getPassword()).get(CCConstants.AUTH_TICKET);
 			MCAlfrescoAPIClient client = new MCAlfrescoAPIClient();
-			RenderInfoResult result = getBaseData(userName, nodeId, version, client);
+			RenderInfoResult result = getBaseData(userName, nodeId, version, client,homeAppInfo.getAppId().equals(lmsId) ? RenderingTool.DISPLAY_DYNAMIC : RenderingTool.DISPLAY_INLINE);
 			UsageDAO usageDao = new AlfServicesWrapper();
 			if(lmsId!=null && courseId!=null) {
 				HashMap<String, Object> usageMap = usageDao.getUsageOnNodeOrParents(lmsId, courseId, nodeId, resourceId);
@@ -110,7 +109,7 @@ public class RenderInfoSoapBindingImpl implements org.edu_sharing.webservices.re
 			
 			ticket = authTool.createNewSession(homeAppInfo.getUsername(), homeAppInfo.getPassword()).get(CCConstants.AUTH_TICKET);
 			MCAlfrescoAPIClient client = new MCAlfrescoAPIClient();
-			return getBaseData(userName, nodeId, version, client);
+			return getBaseData(userName, nodeId, version, client,RenderingTool.DISPLAY_DYNAMIC);
 			
 		} catch (RemoteException e) {
 			throw e;
@@ -144,7 +143,7 @@ public class RenderInfoSoapBindingImpl implements org.edu_sharing.webservices.re
 	}
 	
 	
-	private RenderInfoResult getBaseData(String userName, String nodeId, String version, MCAlfrescoAPIClient client) throws RemoteException, Throwable{
+	private RenderInfoResult getBaseData(String userName, String nodeId, String version, MCAlfrescoAPIClient client, String displayMode) throws RemoteException, Throwable{
 		NodeService nodeService=NodeServiceFactory.getLocalService();
 		org.edu_sharing.service.permission.PermissionService permissionService=PermissionServiceFactory.getLocalService();
 		if (!nodeService.exists(StoreRef.PROTOCOL_WORKSPACE,StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(),nodeId)) {
@@ -254,7 +253,10 @@ public class RenderInfoSoapBindingImpl implements org.edu_sharing.webservices.re
 		// child object: inherit all props from parent
 		if(Arrays.asList(aspects).contains(CCConstants.CCM_ASPECT_IO_CHILDOBJECT)){
 			ChildAssociationRef parentRef = client.getParent(nodeRef);
-			Map<String,Object> propsParent = new HashMap<String, Object>(client.getPropertiesCached(parentRef.getParentRef(), true, true, false));
+			Map<String,Object> propsParent = new HashMap<>(client.getPropertiesCached(parentRef.getParentRef(), true, true, false));
+			// ignore some technical properties, like mimetypes etc.
+			for(String prop : CCConstants.CHILDOBJECT_IGNORED_PARENT_PROPERTIES)
+				propsParent.remove(prop);
 			// override it with the props from the child
 			for(Map.Entry<String,Object> entry : props.entrySet()){
 				propsParent.put(entry.getKey(),entry.getValue());
@@ -393,7 +395,7 @@ public class RenderInfoSoapBindingImpl implements org.edu_sharing.webservices.re
 		rir.setMimeTypeUrl(new MimeTypes(clientBaseUrl).getIconUrl(props, Theme.getThemeId()));
 		rir.setAspects(client.getAspects(nodeId));
 		rir.setDirectory(MimeTypesV2.isDirectory(props));
-		addMetadataTemplate(rir,locale,nodeType,props,appInfo);
+		addMetadataTemplate(rir,locale,nodeType,props,appInfo,displayMode);
 
 		return rir;
 	}
@@ -438,7 +440,7 @@ public class RenderInfoSoapBindingImpl implements org.edu_sharing.webservices.re
 		}
 		return propsClean;
 	}
-	private void addMetadataTemplate(RenderInfoResult rir,String locale,String type, Map<String, Object> props,ApplicationInfo appInfo) throws Exception {
+	private void addMetadataTemplate(RenderInfoResult rir, String locale, String type, Map<String, Object> props, ApplicationInfo appInfo, String displayMode) throws Exception {
 		String mdsId = (String)props.get(CCConstants.CM_PROP_METADATASET_EDU_METADATASET);
 		if(mdsId==null)
 			mdsId = CCConstants.metadatasetdefault_id;
@@ -453,7 +455,7 @@ public class RenderInfoSoapBindingImpl implements org.edu_sharing.webservices.re
 			String[] values=new ValueTool().getMultivalue(props.get(key).toString());
 			propsConverted.put(keyLocal, values);
 		}
-		rir.setMdsTemplate(new MetadataTemplateRenderer(mds,propsConverted).render("io_render"));
+		rir.setMdsTemplate(new MetadataTemplateRenderer(mds,propsConverted).render(displayMode.equals(RenderingTool.DISPLAY_INLINE) ? "io_render_inline" : "io_render"));
 	}
 
 	String getHeaderValue(String key, MessageContext msgContext) throws SOAPException, AxisFault{

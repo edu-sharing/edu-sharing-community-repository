@@ -1,5 +1,5 @@
 import {NodeHelper} from "../ui/node-helper";
-import {Node, Repository} from '../rest/data-object';
+import {CollectionReference, Node, Repository} from '../rest/data-object';
 import {RestConstants} from "../rest/rest-constants";
 import {OptionItem} from "../ui/actionbar/option-item";
 import {RestConnectorService} from "../rest/services/rest-connector.service";
@@ -41,11 +41,15 @@ export class ActionbarHelperService{
                 if(item.reference)
                     item = item.reference;
                 // if at least one is allowed -> allow download (download servlet will later filter invalid files)
-                isAllowed=isAllowed || list && item.downloadUrl && item.properties && !item.properties[RestConstants.CCM_PROP_IO_WWWURL];
+                isAllowed=isAllowed || list && item.downloadUrl!=null && item.properties && !item.properties[RestConstants.CCM_PROP_IO_WWWURL];
             }
             return isAllowed;
         }
+        option.showCallback=(node: Node) => {
+            return NodeHelper.referenceOriginalExists(node);
+        }
         option.isEnabled=option.enabledCallback(null);
+        console.log(option,option.enabledCallback(null));
       }
     }
     if(type=='ADD_NODE_STORE'){
@@ -87,7 +91,7 @@ export class ActionbarHelperService{
             let n=ActionbarHelperService.getNodes(nodes,node);
             if(n==null)
                 return false;
-            return NodeHelper.allFiles(nodes) && n.length>0;
+            return NodeHelper.referenceOriginalExists(node) && NodeHelper.allFiles(nodes) && n.length>0;
         }
         option.enabledCallback = (node: Node) => {
           let list = ActionbarHelperService.getNodes(nodes, node);

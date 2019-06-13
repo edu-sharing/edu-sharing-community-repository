@@ -175,7 +175,10 @@ public class NodeCustomizationPolicies implements OnContentUpdatePolicy, OnCreat
 			if(contentSize > 0 && mimetype != null && !nodeService.hasAspect(nodeRef,QName.createQName(CCConstants.CCM_ASPECT_COLLECTION_IO_REFERENCE))){
 				nodeService.setProperty(nodeRef, QName.createQName(CCConstants.LOM_PROP_TECHNICAL_FORMAT), mimetype);
 			}
-			
+			logger.debug("will do the resourceinfo. noderef:"+nodeRef);
+			Action resourceInfoAction = actionService.createAction(CCConstants.ACTION_NAME_RESOURCEINFO);
+			actionService.executeAction(resourceInfoAction, nodeRef, true, false);
+
 			logger.debug("lockStatus:"+lockStatus);
 			if(newContent 
 					&& (LockStatus.NO_LOCK.equals(lockStatus) || LockStatus.LOCK_EXPIRED.equals(lockStatus))
@@ -183,12 +186,7 @@ public class NodeCustomizationPolicies implements OnContentUpdatePolicy, OnCreat
 			
 	     	    new ThumbnailHandling().thumbnailHandling(nodeRef);
     		}
-			
-			logger.debug("will do the resourceinfo. noderef:"+nodeRef);
-			Action resourceInfoAction = actionService.createAction(CCConstants.ACTION_NAME_RESOURCEINFO);
-			actionService.executeAction(resourceInfoAction, nodeRef, true, false);
-			
-			
+
 			Action extractMetadataAction = actionService.createAction("extract-metadata");
 			//dont do async cause it conflicts with preview creation when webdav is used
 			actionService.executeAction(extractMetadataAction, nodeRef, true, false);
@@ -326,7 +324,7 @@ public class NodeCustomizationPolicies implements OnContentUpdatePolicy, OnCreat
 	public void onUpdateProperties(NodeRef nodeRef, Map<QName, Serializable> before, Map<QName, Serializable> after) {
 		
 		//System.out.println("********** onUpdateProperties node("+nodeRef.getId()+")");
-		
+
 		// make the title like the name(when webdav rename is done), @TODO mybe just show the name in the gui
 		String nameBefore = (String)before.get(ContentModel.PROP_NAME);
 		String nameAfter =  (String)after.get(ContentModel.PROP_NAME);
@@ -379,13 +377,13 @@ public class NodeCustomizationPolicies implements OnContentUpdatePolicy, OnCreat
 			String linktype = (String)after.get(QName.createQName(CCConstants.CCM_PROP_LINKTYPE));
 			String previewImageBase64 = (linktype != null && linktype.equals(CCConstants.CCM_VALUE_LINK_LINKTYPE_USER_GENERATED)) ? getPreviewFromURL(afterURL) : null;
 			writeBase64Image(nodeRef,previewImageBase64);
-			
+
 		}
-		
+
 	}
-	
-	
-	
+
+
+
 	private void writeBase64Image(NodeRef nodeRef, String previewImageBase64) {
 		if (previewImageBase64!=null) {
 
@@ -412,12 +410,12 @@ public class NodeCustomizationPolicies implements OnContentUpdatePolicy, OnCreat
 				e.printStackTrace();
 			}
 			logger.info("---> OK IMAGE WRITTEN");
-			
+
 		} else {
 			logger.warn("---> NO PREVIEW IMAGE");
 		}
 	}
-	
+
 	public  void generateWebsitePreview(NodeRef nodeRef, String url) {
 		if(nodeRef == null || url == null) {
 			return;

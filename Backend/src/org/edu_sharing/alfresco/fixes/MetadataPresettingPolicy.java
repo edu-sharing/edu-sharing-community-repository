@@ -13,10 +13,7 @@ import org.alfresco.repo.node.NodeServicePolicies.OnCreateNodePolicy;
 import org.alfresco.repo.policy.JavaBehaviour;
 import org.alfresco.repo.policy.PolicyComponent;
 import org.alfresco.service.cmr.lock.NodeLockedException;
-import org.alfresco.service.cmr.repository.AssociationRef;
-import org.alfresco.service.cmr.repository.ChildAssociationRef;
-import org.alfresco.service.cmr.repository.NodeRef;
-import org.alfresco.service.cmr.repository.NodeService;
+import org.alfresco.service.cmr.repository.*;
 import org.alfresco.service.namespace.QName;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -142,22 +139,20 @@ public class MetadataPresettingPolicy implements
 		}
 		Boolean status = (Boolean) nodeService.getProperty(parentRef, QName.createQName(CCConstants.CCM_PROP_METADATA_PRESETTING_STATUS));
 		if (nodeService.hasAspect(parentRef, ASPECT_TYPE) && status!=null && status) {
+			// assoc is a good idea but will always get lost when a node is moved to recycle
+			//List<AssociationRef> templates = nodeService.getTargetAssocs(parentRef, ASPECT_ASSOC);
+			NodeRef template = nodeService.getChildByName(parentRef,ContentModel.ASSOC_CONTAINS,CCConstants.TEMPLATE_NODE_NAME);
 
-			List<AssociationRef> templates = nodeService.getTargetAssocs(
-					parentRef, ASPECT_ASSOC);
-
-			if (templates.size() < 1) {
+			if (template==null) {
 
 				logger.error("metadataPresettingPolicy for folder(" + parentRef
 						+ ") failed: there's no template specified .");
 				return;
 			}
 
-			NodeRef templateRef = templates.get(0).getTargetRef();
-
-			if (!nodeService.exists(templateRef)) {
+			if (!nodeService.exists(template)) {
 				logger.error("metadataPresettingPolicy for folder(" + parentRef
-						+ ") failed: template (" + templateRef
+						+ ") failed: template (" + template
 						+ ") doesn't exist.");
 				return;
 			}
@@ -180,7 +175,7 @@ public class MetadataPresettingPolicy implements
 
 			}
 			*/
-			inheritMetadata(parentRef,templateRef,targetRef);
+			inheritMetadata(parentRef,template,targetRef);
 		}
 	}
 

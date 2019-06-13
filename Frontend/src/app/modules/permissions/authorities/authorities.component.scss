@@ -63,7 +63,13 @@ input[type=search]{
   top: $mainnavHeight+100px;
 }
 .infoText{
-  padding:5px 0;
+  padding:5px 15px;
+}
+#orgType{
+  margin-bottom: 1.5em;
+}
+.folderLocation{
+  color: $primary;
 }
 
 $addToWidth:350px;

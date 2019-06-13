@@ -17,12 +17,12 @@
           <form (ngSubmit)="login()" #loginForm>
             <div>
               <label for="username">{{'LOGIN.USERNAME' | translate}}</label>
-              <input type="text" required name="username" id="username" (keyup)="checkConditions()" [(ngModel)]="username"/>
+              <input type="text" required name="username" id="username" (ngModelChange)="checkConditions()" [(ngModel)]="username"/>
             </div>
             <div>
               <label for="password">{{'LOGIN.PASSWORD' | translate}}</label>
               <!-- input requried type="password" name="password" id="password" (keydown.enter)="login()" (keyup)="checkConditions()" [(ngModel)]="password"/> -->
-              <input-password id="password" required (keyup)="checkConditions()" (keydown.enter)="login()" [(value)]="password"></input-password>
+              <input-password id="password" required (valueChange)="checkConditions()" (keydown.enter)="login()" [(value)]="password"></input-password>
             </div>
           </form>
           <div class="register" *ngIf="config.register.local || config.register.registerUrl">
@@ -32,7 +32,7 @@
         </div>
       </div>
       <div class="card-action">
-        <a class="waves-effect waves-light btn" [class.disabled]="disabled" (click)="login()">{{'LOGIN.LOGIN' | translate }}</a>
+        <a class="waves-effect waves-light btn" (click)="login()">{{'LOGIN.LOGIN' | translate }}</a>
         <a class="btn-flat" *ngIf="config.register.local || config.register.recoverUrl" (click)="recoverPassword()">{{'LOGIN.RECOVER_PASSWORD' | translate }}</a>
       </div>
     </div>

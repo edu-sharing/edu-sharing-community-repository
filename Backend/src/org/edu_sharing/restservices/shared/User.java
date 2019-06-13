@@ -14,6 +14,7 @@ public class User extends UserSimple {
 	
 	private NodeRef homeFolder = null;
 	private List<NodeRef> sharedFolders = new ArrayList<NodeRef>();
+	private UserQuota quota;
 	public User(){super();}
 	public User(org.edu_sharing.repository.client.rpc.User user) {
 		super(user);
@@ -45,4 +46,12 @@ public class User extends UserSimple {
 		this.sharedFolders = sharedFolders;
 	}
 
+	@JsonProperty
+	public UserQuota getQuota() {
+		return quota;
+	}
+
+	public void setQuota(UserQuota quota) {
+		this.quota = quota;
+	}
 }

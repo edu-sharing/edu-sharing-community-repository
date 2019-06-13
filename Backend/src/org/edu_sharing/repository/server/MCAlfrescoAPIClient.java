@@ -57,6 +57,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import java.util.StringTokenizer;
+import java.util.stream.Collectors;
 
 import javax.transaction.UserTransaction;
 
@@ -847,17 +848,29 @@ public class MCAlfrescoAPIClient extends MCAlfrescoBaseClient {
 	public String formatData(String type, String key, Object value, String metadataSetId) {
 		String returnValue = null;
 		if (key != null && value != null) {
-
+			boolean processed=false;
 			// value is date than put a String with a long value so that it can
 			// be formated with userInfo later
+			if(value instanceof List){
+				List<Object> list = (List<Object>) value;
+				if(list.size()>0){
+					if(list.get(0) instanceof Date) {
+						returnValue = ValueTool.toMultivalue(
+								list.stream().
+										map((date) -> new Long(((Date)date).getTime()).toString()).
+										collect(Collectors.toList()).toArray(new String[0])
+						);
+						processed=true;
+					}
+				}
+			}
 			if (value instanceof Date) {
 
 				Date date = (Date) value;
-				if (date != null) {
-					returnValue = new Long(date.getTime()).toString();
-				}
-
-			} else {
+				returnValue = new Long(date.getTime()).toString();
+				processed=true;
+			}
+			if(!processed){
 				returnValue = getValue(type, key, value, metadataSetId);
 			}
 			// !(value instanceof MLText || value instanceof List): prevent sth.
@@ -1107,10 +1120,34 @@ public class MCAlfrescoAPIClient extends MCAlfrescoBaseClient {
 	public HashMap<String, Object> getProperties(String storeProtocol, String storeId, String nodeId) throws Throwable {
 		return getProperties(new NodeRef(new StoreRef(storeProtocol,storeId),nodeId));
 	}
-	public boolean downloadAllowed(String nodeId,String commonLicenseKey,String editorType){
-		boolean downloadAllowed = (CCConstants.COMMON_LICENSE_EDU_P_NR_ND.equals(commonLicenseKey)) ? false : true;
+    public String getDownloadUrl(String nodeId) throws Throwable {
+        HashMap<String, Object> props = getProperties(nodeId);
+        boolean downloadAllowed = downloadAllowed(nodeId);
+        String redirectServletLink = this.getRedirectServletLink(repId, nodeId);
+        if (props.get(CCConstants.ALFRESCO_MIMETYPE) != null && redirectServletLink != null && downloadAllowed) {
+            String params = URLEncoder.encode("display=download");
+            String downloadUrl = UrlTool.setParam(redirectServletLink, "params", params);
+            return downloadUrl;
+        }
+        return null;
+    }
+	public boolean downloadAllowed(String nodeId){
+		NodeRef ref=new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE,nodeId);
+		return downloadAllowed(nodeId,
+				nodeService.getProperty(ref,QName.createQName(CCConstants.CCM_PROP_IO_COMMONLICENSE_KEY)),
+				(String)nodeService.getProperty(ref,QName.createQName(CCConstants.CCM_PROP_EDITOR_TYPE))
+				);
+	}
+	public boolean downloadAllowed(String nodeId,Serializable commonLicenseKey,String editorType){
+        boolean downloadAllowed;
+        // Array value
+	    if(commonLicenseKey instanceof ArrayList)
+		    downloadAllowed = (CCConstants.COMMON_LICENSE_EDU_P_NR_ND.equals(((ArrayList)commonLicenseKey).get(0))) ? false : true;
+	    else
+	        // string value
+            downloadAllowed = (CCConstants.COMMON_LICENSE_EDU_P_NR_ND.equals(commonLicenseKey)) ? false : true;
 
-		//allow download for owner, performance only check owner if download not allowed
+        //allow download for owner, performance only check owner if download not allowed
 		if(!downloadAllowed && isOwner(nodeId, authenticationInfo.get(CCConstants.AUTH_USERNAME))){
 			downloadAllowed = true;
 		}
@@ -1153,7 +1190,7 @@ public class MCAlfrescoAPIClient extends MCAlfrescoBaseClient {
 		// external URL
 		if (isSubOfContent) {
 
-			String commonLicenseKey = (String)propsCopy.get(CCConstants.CCM_PROP_IO_COMMONLICENSE_KEY);
+			Serializable commonLicenseKey = (String)propsCopy.get(CCConstants.CCM_PROP_IO_COMMONLICENSE_KEY);
 			boolean downloadAllowed = downloadAllowed(nodeRef.getId(),commonLicenseKey,(String)propsCopy.get(CCConstants.CCM_PROP_EDITOR_TYPE));
 			
 			if (propsCopy.get(CCConstants.ALFRESCO_MIMETYPE) != null && redirectServletLink != null && downloadAllowed) {
@@ -1215,17 +1252,23 @@ public class MCAlfrescoAPIClient extends MCAlfrescoBaseClient {
 					dtd = propDef.getDataType();
 				if (Context.getCurrentInstance() != null && dtd != null
 						&& (dtd.getName().equals(DataTypeDefinition.DATE) || dtd.getName().equals(DataTypeDefinition.DATETIME))) {
-					String timeAsLongString = (String) entry.getValue();
+					String[] values = ValueTool.getMultivalue((String) entry.getValue());
+					String[] formattedValues=new String[values.length];
+					int i=0;
+					for(String value : values){
+						formattedValues[i++]=new DateTool().formatDate(new Long(value));
+					}
 					// put time as long i.e. for sorting or formating in gui
-					addAndOverwriteDateMap.put(entry.getKey() + CCConstants.LONG_DATE_SUFFIX, timeAsLongString);
+					// this is basically just a copy of the real value for backward compatibility
+					addAndOverwriteDateMap.put(entry.getKey() + CCConstants.LONG_DATE_SUFFIX, entry.getValue());
 					// put formated
-					addAndOverwriteDateMap.put(entry.getKey(), new DateTool().formatDate(new Long(timeAsLongString)));
+					addAndOverwriteDateMap.put(entry.getKey(), ValueTool.toMultivalue(formattedValues));
 				}
 				try{
 					MetadataWidget widget = mds.findWidget(CCConstants.getValidLocalName(entry.getKey()));
 					Map<String, MetadataKey> map = widget.getValuesAsMap();
 					if(!map.isEmpty()){
-						String[] keys=new ValueTool().getMultivalue((String) entry.getValue());
+						String[] keys=ValueTool.getMultivalue((String) entry.getValue());
 						String[] values=new String[keys.length];
 						for(int i=0;i<keys.length;i++)
 							values[i]=map.containsKey(keys[i]) ? map.get(keys[i]).getCaption() : keys[i];
@@ -2997,7 +3040,7 @@ public class MCAlfrescoAPIClient extends MCAlfrescoBaseClient {
                 		
                 		for (String containedAuthority : authorityService.getContainedAuthorities(null, key, true)) {
                 			
-                			authorityService.removeAuthority(groupName, containedAuthority);
+                			authorityService.removeAuthority(key, containedAuthority);
                 		}
 
                 		return null;
@@ -3762,26 +3805,6 @@ public class MCAlfrescoAPIClient extends MCAlfrescoBaseClient {
 			logger.error("missing remote NodeId or remoteRepository");
 		}
 		return result;
-	}
-
-	public void checkAndLinkPublicFolder(String targetFolderId) {
-
-		String publicfolderId = ApplicationInfoList.getHomeRepository().getPublicfolderid();
-		logger.info("publicfolderId:" + publicfolderId);
-		if (publicfolderId != null && !publicfolderId.trim().equals("")) {
-
-			if (this.hasPermissions(publicfolderId, new String[] { "Read" })) {
-				String statement = "@sys\\:node-uuid:" + publicfolderId + " AND PARENT:\"" + storeRef.getProtocol() + "://" + storeRef.getIdentifier() + "/"
-						+ targetFolderId + "\"";
-
-				ResultSet resultSet = searchService.query(storeRef, SearchService.LANGUAGE_LUCENE, statement);
-				if (resultSet == null || resultSet.length() < 1) {
-					logger.info("linking public folder for:" + this.authenticationInfo.get(CCConstants.AUTH_USERNAME));
-					createChildAssociation(targetFolderId, publicfolderId);
-				}
-			}
-		}
-
 	}
 
 	public void moveNode(String newParentId, String childAssocType, String nodeId) throws Exception {

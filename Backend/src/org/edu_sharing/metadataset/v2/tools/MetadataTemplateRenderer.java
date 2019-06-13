@@ -14,10 +14,7 @@ import org.edu_sharing.service.license.LicenseService;
 
 import java.lang.reflect.Field;
 import java.text.NumberFormat;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 
 /**
@@ -69,7 +66,6 @@ public class MetadataTemplateRenderer {
 		html+="<div class='mdsGroup'><div class='mdsCaption "+template.getId()+"'>"+template.getCaption()+"</div>"
 				+ "<div class='mdsContent'>";
 		String content=template.getHtml();
-		
 		for(MetadataWidget srcWidget : mds.getWidgets()){
 			MetadataWidget widget=mds.findWidgetForTemplateAndCondition(srcWidget.getId(),template.getId(),properties);
 			int start=content.indexOf("<"+widget.getId());
@@ -104,9 +100,14 @@ public class MetadataTemplateRenderer {
 					if(key==null)
 						continue;
 					List<String> path=new ArrayList<String>();
+					int preventInfiniteLoop = 0;
 					while(key!=null) {
 						path.add(key.getCaption());
 						key=valuesMap.get(key.getParent());
+						if(preventInfiniteLoop++ > 100) {
+							logger.error("check valuespace for widget:" + widget.getId() + " key:" + key.getKey());
+							break;
+						}
 					}
 					path=Lists.reverse(path);
 					int i=0;
@@ -121,6 +122,25 @@ public class MetadataTemplateRenderer {
 					}
 					widgetHtml+="</div>";
 
+				}
+			}
+			else if("multivalueCombined".equals(widget.getType())){
+				String[] firstValues=properties.get(widget.getSubwidgets().get(0).getId());
+				if(firstValues!=null && firstValues.length>0) {
+					wasEmpty=false;
+					empty=false;
+					for(int i=0;i<firstValues.length;i++) {
+						widgetHtml+="<div class='mdsValue'>";
+						for (MetadataWidget.Subwidget subWidget : widget.getSubwidgets()) {
+							try {
+								widgetHtml += renderWidgetValue(mds.findWidget(subWidget.getId()),properties.get(subWidget.getId())[i]) + " ";
+							}
+							catch(IndexOutOfBoundsException e){
+								logger.warn("Sub widget "+subWidget.getId()+" can not be rendered (main widget "+widget.getId()+"): The array values of the sub widgets do not match up",e);
+							}
+						}
+						widgetHtml+="</div>";
+					}
 				}
 			}
 			else {
@@ -139,11 +159,17 @@ public class MetadataTemplateRenderer {
 						if(link!=null)
 							value="<a href='"+link+"' target='_blank'>";
 						value+="<img src='"+
-								license.getIconUrl(licenseName)+
+								// @TODO 5.1 This can be set to dynamic!
+								license.getIconUrl(licenseName,false)+
 								"'>";
 						if(link!=null)
 							value+="</a>";
-						value+="<div class='licenseName'>" +getLicenseName(licenseName,properties) +"</div>";
+						String name = getLicenseName(licenseName, properties);
+						String group = getLicenseGroup(licenseName, properties);
+						if(name!=null)
+							value+="<div class='licenseName'>"+name+"</div>";
+						if(!group.equals(name))
+							value+="<div class='licenseGroup'>"+group+"</div>";
 
 						if(CCConstants.COMMON_LICENSE_CUSTOM.equals(licenseName) && properties.containsKey(CCConstants.getValidLocalName(CCConstants.LOM_PROP_RIGHTS_RIGHTS_DESCRIPTION))) {
 							String licenseDescription=properties.get(CCConstants.getValidLocalName(CCConstants.LOM_PROP_RIGHTS_RIGHTS_DESCRIPTION))[0];
@@ -156,44 +182,7 @@ public class MetadataTemplateRenderer {
 					}
 					if(value==null || value.trim().isEmpty())
 						continue;
-					if(widget.getType()!=null){
-						if(widget.getType().equals("date")){
-							try{
-								if(widget.getFormat()!=null && !widget.getFormat().isEmpty()){
-									value=new SimpleDateFormat(widget.getFormat()).format(Long.parseLong(value));
-								}
-								else{
-									value=new DateTool().formatDate(Long.parseLong(value));
-								}
-							}catch(Throwable t){
-								// wrong data or text
-							}
-						}
-						if(widget.getType().equals("filesize")){
-							try{
-								value=formatFileSize(Long.parseLong(value));
-							}catch(Throwable t){
-							}
-						}
-						if(widget.getType().equals("multivalueGroup")) {
-                            value=formatGroupValue(value,widget);
-                        }
-						if(widget.getType().equals("checkbox")) {
-							try{
-								value = MetadataHelper.getTranslation(new Boolean(value) ? "boolean_yes" : "boolean_no");
-							}catch(Throwable t){
-								logger.info("Error parsing value "+value+" for checkbox widget "+widget.getId(),t);
-							}
-						}
-					}
-					if(valuesMap.containsKey(value))
-						value=valuesMap.get(value).getCaption();
-
-					if(widget.getFormat()!=null && !widget.getFormat().isEmpty()){
-						if(widget.getFormat().contains("${value}")) {
-							value = widget.getFormat().replace("${value}", value);
-						}
-					}
+					value=renderWidgetValue(widget,value);
 					boolean isLink=false;
 					if(widget.getLink()!=null && !widget.getLink().isEmpty()){
 						widgetHtml+="<a href=\""+value+"\" target=\""+widget.getLink()+"\">";
@@ -240,7 +229,74 @@ public class MetadataTemplateRenderer {
 		html+="</div></div>";
 		return html;
 	}
+	private String renderWidgetValue(MetadataWidget widget,String value){
+		if(widget.getType()!=null){
+			if(widget.getType().equals("date")){
+				try{
+					if(widget.getFormat()!=null && !widget.getFormat().isEmpty()){
+						value=new SimpleDateFormat(widget.getFormat()).format(Long.parseLong(value));
+					}
+					else{
+						value=new DateTool().formatDate(Long.parseLong(value));
+					}
+				}catch(Throwable t){
+					// wrong data or text
+				}
+			}
+			if(widget.getType().equals("filesize")){
+				try{
+					value=formatFileSize(Long.parseLong(value));
+				}catch(Throwable t){
+				}
+			}
+			if(widget.getType().equals("multivalueGroup")) {
+				value=formatGroupValue(value,widget);
+			}
+			if(widget.getType().equals("checkbox")) {
+				try{
+					value = MetadataHelper.getTranslation(new Boolean(value) ? "boolean_yes" : "boolean_no");
+				}catch(Throwable t){
+					logger.info("Error parsing value "+value+" for checkbox widget "+widget.getId(),t);
+				}
+			}
+		}
+		Map<String, MetadataKey> valuesMap = widget.getValuesAsMap();
+		if(valuesMap.containsKey(value))
+			value=valuesMap.get(value).getCaption();
+
+		if(widget.getFormat()!=null && !widget.getFormat().isEmpty()){
+			if(widget.getFormat().contains("${value}")) {
+				value = widget.getFormat().replace("${value}", value);
+			}
+		}
+		return value;
+	}
 	private String getLicenseName(String licenseName, Map<String, String[]> properties) {
+		if(licenseName==null || licenseName.isEmpty())
+			return null;
+		List<String> supported=Arrays.asList(CCConstants.COMMON_LICENSE_CC_ZERO,CCConstants.COMMON_LICENSE_PDM);
+		if(licenseName.startsWith(CCConstants.COMMON_LICENSE_CC_BY) || supported.contains(licenseName)) {
+			String name=I18nAngular.getTranslationAngular("common","LICENSE.NAMES."+licenseName);
+			if(licenseName.startsWith(CCConstants.COMMON_LICENSE_CC_BY)){
+				String[] version=properties.get(CCConstants.getValidLocalName(CCConstants.CCM_PROP_IO_COMMONLICENSE_CC_VERSION));
+				if(version!=null && version.length>0 && version[0]!=null && !version[0].isEmpty()){
+					name+=" ("+version[0];
+					try{
+						if(Double.parseDouble(version[0])<4.0){
+							String[] locale=properties.get(CCConstants.getValidLocalName(CCConstants.CCM_PROP_IO_COMMONLICENSE_CC_LOCALE));
+							if(locale!=null && locale.length>0 && locale[0]!=null && !locale[0].isEmpty()) {
+								name += " - " + I18nAngular.getTranslationAngular("common","LANGUAGE."+locale[0]);
+							}
+						}
+					}catch(Throwable t){}
+					name+=")";
+				}
+			}
+			return name;
+		}
+		return null;
+	}
+	private String getLicenseGroup(String licenseName, Map<String, String[]> properties) {
 		if(licenseName==null || licenseName.isEmpty())
 			licenseName="NONE";
 
@@ -250,24 +306,7 @@ public class MetadataTemplateRenderer {
 		if(licenseName.equals(CCConstants.COMMON_LICENSE_PDM)){
 			licenseName=CCConstants.COMMON_LICENSE_CC_ZERO;
 		}
-		String name=I18nAngular.getTranslationAngular("common","LICENSE.GROUPS."+licenseName);
-		if(licenseName.startsWith(CCConstants.COMMON_LICENSE_CC_BY)){
-			String[] version=properties.get(CCConstants.getValidLocalName(CCConstants.CCM_PROP_IO_COMMONLICENSE_CC_VERSION));
-			String data="";
-			if(version!=null && version.length>0 && version[0]!=null && !version[0].isEmpty()){
-				name+=" ("+version[0];
-				try{
-					if(Double.parseDouble(version[0])<4.0){
-						String[] locale=properties.get(CCConstants.getValidLocalName(CCConstants.CCM_PROP_IO_COMMONLICENSE_CC_LOCALE));
-						if(locale!=null && locale.length>0 && locale[0]!=null && !locale[0].isEmpty()) {
-							name += " - " + I18nAngular.getTranslationAngular("common","LANGUAGE."+locale[0]);
-						}
-					}
-				}catch(Throwable t){}
-				name+=")";
-			}
-		}
-		return name;
+		return I18nAngular.getTranslationAngular("common","LICENSE.GROUPS."+licenseName);
 	}
 	private String getLicenseDescription(String licenseName) {
 		if(licenseName==null || licenseName.isEmpty())

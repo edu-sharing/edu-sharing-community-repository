@@ -11,7 +11,9 @@ import org.alfresco.service.transaction.TransactionService;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
 import org.edu_sharing.repository.client.tools.CCConstants;
+import org.edu_sharing.repository.server.MCAlfrescoAPIClient;
 import org.edu_sharing.repository.server.RepoFactory;
+import org.edu_sharing.repository.server.tools.cache.RepositoryCache;
 import org.edu_sharing.service.nodeservice.NodeServiceFactory;
 import org.edu_sharing.service.tracking.model.StatisticEntryNode;
 import org.springframework.context.ApplicationContext;
@@ -62,6 +64,11 @@ public abstract class TrackingServiceDefault implements TrackingService{
                 policyBehaviourFilter.disableBehaviour(nodeRef);
                 nodeService.setProperty(nodeRef.getStoreRef().getProtocol(),nodeRef.getStoreRef().getIdentifier(),nodeRef.getId(),EVENT_PROPERTY_MAPPING.get(type), finalValue);
                 policyBehaviourFilter.enableBehaviour(nodeRef);
+                // change the value in cache
+                Map<String, Object> cache = new RepositoryCache().get(nodeRef.getId());
+                if(cache!=null)
+                    cache.put(EVENT_PROPERTY_MAPPING.get(type),finalValue);
+
                 return null;
             });
             return null;
@@ -81,7 +88,7 @@ public abstract class TrackingServiceDefault implements TrackingService{
         if(mode==null)
             return null;
         if(mode.equalsIgnoreCase("obfuscate"))
-            return DigestUtils.sha1Hex(username);
+            return DigestUtils.shaHex(username);
         if(mode.equalsIgnoreCase("full"))
             return username;
         return null;

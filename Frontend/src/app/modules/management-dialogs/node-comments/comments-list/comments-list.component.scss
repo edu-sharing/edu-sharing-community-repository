@@ -1,0 +1,132 @@
+@import "../../../../../styles/variables.scss";
+.send-icon{
+  cursor: pointer;
+  &:focus{
+    @include focusShadow();
+  }
+}
+:host /deep/{
+  actionbar{
+    .action-always-caption{
+      display: none;
+    }
+  }
+}
+.group{
+  display:flex;
+  height:100%;
+  flex-direction: column;
+}
+.noComments{
+  font-size: 120%;
+  text-align: center;
+  color: $textLight;
+  padding-top: 30px;
+}
+.new{
+  display:flex;
+  background-color: #fff;
+  flex-direction: row;
+  margin-top: 20px;
+  padding:10px 20px;
+  @include materialShadow();
+  .left,.right{
+    display:flex;
+  }
+  .left{
+    padding-right: 15px;
+    padding-top: 10px;
+  }
+  .right{
+    flex-grow: 1;
+  }
+}
+.new .right,.comments .right{
+  form{
+    textarea{
+      flex-grow: 1;
+      margin-right: 10px;
+      max-height: 2em;
+    }
+    display: flex;
+    flex-grow: 1;
+    align-items: center;
+    textarea,i,div{
+      display: flex;
+    }
+    .icons{
+      align-self: start;
+      flex-direction: column;
+    }
+    i{
+      color:$primary;
+      margin:7px 0;
+    }
+  }
+}
+.card{
+  background-color: $actionDialogBackground!important;
+}
+.comments {
+  flex-grow: 1;
+  max-height: calc(100% - 95px);
+  overflow-y: auto;
+  margin:-$cardPadding;
+  padding:$cardPadding;
+  .comment {
+    padding:10px;
+    background-color: #fff;
+    @include materialShadow();
+    margin:20px 0;
+    display: flex;
+    flex-direction: column;
+    .top {
+      display: flex;
+      flex-direction: row;
+      .left, .right {
+        display: flex;
+      }
+      .left {
+        padding-right: 15px;
+        padding-top: 10px;
+      }
+      .right {
+        flex-grow: 1;
+        flex-direction: column;
+        input {
+          flex-grow: 1;
+        }
+        flex-grow: 1;
+        flex-direction: column;
+        .creator {
+          display: flex;
+          flex-direction: row;
+          padding-bottom: 2px;
+          .name {
+            font-weight: bold;
+            flex-grow: 1;
+          }
+          .date {
+            color: $textLight;
+          }
+        }
+        .commentText {
+          white-space: pre-wrap;
+        }
+      }
+    }
+    .actions{
+      margin:0 $cardPadding/-2;
+      padding-right: 10px;
+    }
+    .actionsAvailable{
+      margin-top: 10px;
+      padding-top: 15px;
+      margin-bottom: -5px;
+      border-top:1px solid $commentsActionsSeperatorLineColor;
+    }
+  }
+}
+.commentsLong{
+  max-height: 100%;
+}

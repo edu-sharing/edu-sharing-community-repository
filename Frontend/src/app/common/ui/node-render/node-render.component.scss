@@ -36,6 +36,17 @@ a, a:hover, a:visited, a:active {
   a.edusharing_rendering_content{
     background-color: $primary;
   }
+  .edusharing_rendering_metadata_body comments .group{
+    padding: 0 10px;
+  }
+  .edusharing_rendering_metadata_body collections .list{
+    padding-top:15px;
+    .cardContainer{
+      display: flex;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+  }
 }
 .topBar{
   background:#383838;
@@ -241,6 +252,15 @@ div.download {
   }
 }
 
+@media (pointer: coarse) {
+  #sequence {
+    overflow-x: auto;
+    @include iosScrolling();
+  }
+  .scroller{
+    display: none;
+  }
+}
 @media screen and (max-width: $mobileWidth) {
   div.download i {
     font-size: 120%;
@@ -251,9 +271,8 @@ div.download {
   :host /deep/ .node-comments{
     min-width: unset;
     padding-right: 10px;
-    > div > div{
+    > div > div > span{
       display:none;
     }
   }
 }
-

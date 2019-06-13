@@ -11,12 +11,21 @@ import javax.servlet.ServletRequest;
 import java.util.List;
 
 public class ConfigServiceFactory {
+	private static final String[] DEFAULT_LANGUAGES = new String[]{"de", "en"};
 	static Logger logger = Logger.getLogger(ConfigServiceFactory.class);
 	public static ConfigService getConfigService(){
 		return new ConfigServiceImpl();
 	}
 	public static Config getCurrentConfig() throws Exception {
 		return getCurrentConfig(Context.getCurrentInstance().getRequest());
+	}
+	public static String getCurrentContextId(){
+		try {
+			return getConfigService().getContextId(getCurrentDomain());
+		} catch (Exception e) {
+			logger.info(e.getMessage(),e);
+			return null;
+		}
 	}
 	public static Config getCurrentConfig(ServletRequest req) throws Exception {
 		try {
@@ -53,6 +62,19 @@ public class ConfigServiceFactory {
 	public static List<KeyValuePair> getLanguageData() throws Exception {
 		String language=new AuthenticationToolAPI().getCurrentLanguage();
 		return getLanguageData(language);
+	}
+
+
+	/**
+	 * get supported languages for the current config or returns @DEFAULT_LANGUAGES
+	 * @return
+	 */
+	public static String[] getSupportedLanguages() {
+		try {
+			return ConfigServiceFactory.getCurrentConfig().getValue("language", DEFAULT_LANGUAGES);
+		}catch(Throwable t){
+			return DEFAULT_LANGUAGES;
+		}
 	}
 
 }

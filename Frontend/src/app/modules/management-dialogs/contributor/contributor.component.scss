@@ -50,9 +50,9 @@ h2{
     >div{
       display:flex;
       align-items: center;
-      padding-top:6px;
+      padding-top:8px;
       margin-bottom: 24px;
-      justify-content: center;
+      justify-content: right;
       >i{
         margin: 0 5px;
       }
@@ -65,6 +65,11 @@ h2{
 .btnAdd{
   margin-top: 10px;
   float:none!important;
+  display: inline-flex;
+  align-items: center;
+  .material-icons{
+    top: 0;
+  }
 }
 .moreOpen{
   margin-top: 20px;
@@ -77,7 +82,12 @@ h2{
   }
 }
 :host /deep/{
-  calendar .picker{
-    left: -40px;
+  calendar{
+    input{
+      width:100px;
+    }
+    .picker {
+      left: -40px;
+    }
   }
 }

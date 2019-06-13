@@ -38,7 +38,6 @@ import org.edu_sharing.repository.client.rpc.ACE;
 import org.edu_sharing.repository.client.rpc.Authority;
 import org.edu_sharing.repository.client.rpc.CheckForDuplicatesResult;
 import org.edu_sharing.repository.client.rpc.EduGroup;
-import org.edu_sharing.repository.client.rpc.EnvInfo;
 import org.edu_sharing.repository.client.rpc.GetPermissions;
 import org.edu_sharing.service.nodeservice.model.GetPreviewResult;
 import org.edu_sharing.repository.client.rpc.Group;
@@ -149,10 +148,6 @@ public interface MCAlfrescoService extends RemoteService {
 	
 	public Date getDateFromISOString(String isoDate);
 
-	public String getRootNodeId() throws CCException;
-
-	public EnvInfo getEnvInfo() throws CCException;
-
 	public GetPermissions getPermissions(String nodeId) throws CCSessionExpiredException, CCException;
 
 	public GetPermissions getPermissions(String nodeId, String repositoryId) throws CCException;
@@ -240,8 +235,8 @@ public interface MCAlfrescoService extends RemoteService {
 	public HashMap<String, HashMap<String,Object>> getVersionHistory(String nodeId, String repId) throws CCException;
 	
 	public Group getEduGroupContextOfNode(String nodeId) throws CCException;
-	
-	public Result<List<User>> findUsers(HashMap<String, String> propVals, boolean globalContext, int from, int nrOfResults) throws CCException;
+
+	public Result<List<User>> findUsers(String query, List<String> searchFields, boolean globalContext, int from, int nrOfResults) throws CCException;
 	
 	public Result<List<Group>> findGroups(String _toSearch, boolean globalContext, int from, int nrOfResults) throws CCException;
 	

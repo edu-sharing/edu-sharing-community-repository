@@ -68,6 +68,15 @@
 				<hideIfEmpty>true</hideIfEmpty>
 			</widget>
 			<widget>
+				<id>ccm:educationallearningresourcetype</id>
+				<type>multivalueFixedBadges</type>
+				<caption>lom_prop_educationallearningresourcetype</caption>
+				<hideIfEmpty>true</hideIfEmpty>
+				<valuespace>valuespaces.xml</valuespace>
+				<valuespace_i18n>valuespaces_i18n</valuespace_i18n>
+			</widget>
+
+			<widget>
 				<id>ccm:tool_category</id>
 				<type>singleoption</type>
 				<caption>cb_tool_category</caption>
@@ -359,6 +368,7 @@
               <ccm:wwwurl>
               <cm:name>
               <cclom:title>
+              <ccm:educationallearningresourcetype>
               <cclom:general_keyword>
               <cclom:general_description>
               <author>
@@ -383,6 +393,7 @@
 				<caption>dialog_upload_tab_basic</caption>
 				<icon>description</icon>
 				<html><![CDATA[
+			  <ccm:educationallearningresourcetype>
               <cclom:general_keyword>
               <cclom:general_description>
 				]]></html>
@@ -464,6 +475,7 @@
 			<template>
 				<id>search</id>
 				<html><![CDATA[
+			  <ccm:educationallearningresourcetype>
               <cclom:general_keyword>
               <license>
 				]]></html>
@@ -481,21 +493,21 @@
 				<html><![CDATA[
               <cclom:title>
               <cm:name>
+			  <ccm:educationallearningresourcetype>
               <cclom:general_description>
               <cclom:general_keyword>
-              <license>
-              <ccm:imported_object_appname>
-              <ccm:author_freetext>
               <cclom:size>
               <cm:created>
               <cm:modified>
-              <sys:node-uuid>
 				]]></html>
 			</template>
 			<template>
 				<id>node_contributor_render</id>
 				<caption>dialog_upload_tab_contributers</caption>
 				<html><![CDATA[
+				<license>
+                <ccm:imported_object_appname>
+                <ccm:author_freetext>
 				<div class="mdsContributorGroup mdsWidgetCaption">
 					<div id="mdsLifecyclecontributorsTitle" class="mdsContributorTitle">{{ cb_contr_material }}</div>
 					<div id="mdsLifecyclecontributors">
@@ -530,6 +542,13 @@
                		hideIfEmpty(document.getElementById("mdsLifecyclecontributorsTitle"),document.getElementById("mdsLifecyclecontributors"));
                		hideIfEmpty(document.getElementById("mdsMetadatcontributorsTitle"),document.getElementById("mdsMetadatcontributors"));
                	</script>
+				]]></html>
+			</template>
+			<template>
+				<id>node_collections_render</id>
+				<caption>dialog_upload_tab_collections</caption>
+				<html><![CDATA[
+					<collections>
 				]]></html>
 			</template>
 			<template>
@@ -608,10 +627,11 @@
 			<group>
 				<id>io_render</id>
 				<views>
-					<view>node_comments_render</view>
 					<view>node_general_render</view>
 					<view>node_contributor_render</view>
-				</views>
+					<view>node_collections_render</view>
+                    <view>node_comments_render</view>
+                </views>
 			</group>
 			<group>
 				<id>io_render_inline</id>
@@ -652,8 +672,8 @@
 					<column>cm:modified</column>
 					<!-- currently not working (solr error) -->
 					<!-- <column>ccm:commonlicense_key</column> -->
-					<column>cm:title</column>
-					<column>ccm:replicationsource</column>
+					<column>cclom:title</column>
+					<!-- <column>ccm:replicationsource</column> -->
 				</columns>
 			</sort>
 		</sorts>
@@ -661,7 +681,7 @@
 			<list>
 				<id>search</id>
 				<columns>
-					<column>cm:title</column>
+					<column>cclom:title</column>
 					<column>cm:modified</column>
 					<column>ccm:commonlicense_key</column>
 					<column>ccm:replicationsource</column>
@@ -672,7 +692,7 @@
 			<list>
 				<id>collectionReferences</id>
 				<columns>
-					<column>cm:title</column>
+					<column>cclom:title</column>
 					<column>cm:modified</column>
 					<column>ccm:commonlicense_key</column>
 					<column>ccm:replicationsource</column>
@@ -717,9 +737,18 @@
 					<multiplejoin>OR</multiplejoin>
 				</property>
 			</query>
+			<query join="AND" id="oai">
+				<basequery>ISNULL:@ccm\:tool_category</basequery>
+				<property name="from">
+					<statement>@cm\:modified:[${value} TO MAX]</statement>
+				</property>
+				<property name="until">
+					<statement>@cm\:modified:[MIN TO ${value}]</statement>
+				</property>
+			</query>
 			<query join="AND"  id="collections">
 				<property name="ngsearchword">
-					<statement>(@sys\:node-uuid:"${value}" OR TEXT:"${value}" OR @cm\:name:"*${value}*" OR @cclom\:title:"*${value}*" OR @cclom\:general_description:"*${value}*" OR @cclom\:general_keyword:"*${value}*" OR @ccm\:taxonentry:"*${value}*" OR @ccm\:classification_keyword:"*${value}*" OR @ccm\:educationallearningresourcetype:"*${value}*" OR @ccm\:educationalcontext:"*${value}*" OR @ccm\:learninggoal:"*${value}*" OR @ccm\:guidanceteachers:"*${value}*" OR @ccm\:guidancestudents:"*${value}*")</statement>
+					<statement>(@sys\:node-uuid:"${value}" OR @cm\:name:"*${value}*" OR @cclom\:title:"*${value}*" OR @cclom\:general_description:"*${value}*" OR @cclom\:general_keyword:"*${value}*" OR @ccm\:taxonentry:"*${value}*" OR @ccm\:classification_keyword:"*${value}*" OR @ccm\:educationallearningresourcetype:"*${value}*" OR @ccm\:educationalcontext:"*${value}*" OR @ccm\:learninggoal:"*${value}*" OR @ccm\:guidanceteachers:"*${value}*" OR @ccm\:guidancestudents:"*${value}*")</statement>
 					<exactMatching>false</exactMatching>
 					<multiple>true</multiple>
 					<multiplejoin>AND</multiplejoin>

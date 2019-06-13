@@ -38,7 +38,7 @@ export class NodeHelper{
     let name=item.name;
     if(name==RestConstants.CM_NAME)
       return node["name"];
-    if(name==RestConstants.CM_PROP_TITLE){
+    if(name==RestConstants.CM_PROP_TITLE || name==RestConstants.LOM_PROP_TITLE){
       return RestHelper.getTitle(node);
     }
     if(name==RestConstants.SIZE) {
@@ -411,6 +411,8 @@ export class NodeHelper{
     if(item.type=='GROUP' || item.type=='ORG'){
       if(item.name=="displayName")
         return data.profile.displayName;
+      if(item.name=="groupType")
+        return data.profile.groupType;
     }
     if(item.type=='USER'){
       if(item.name=='firstName')
@@ -664,5 +666,11 @@ export class NodeHelper{
   public static getActionbarNodes(nodes:Node[],node:Node):Node[] {
       return node ? [node] : nodes && nodes.length ? nodes  : null;
   }
+
+    static referenceOriginalExists(node: Node|CollectionReference) {
+      if(node==null)
+        return true;
+      return (node.hasOwnProperty('originalId') ? (node as any).originalId!=null : true)
+    }
 }
 

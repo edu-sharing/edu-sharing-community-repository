@@ -145,8 +145,8 @@ export class Node {
   isDirectory: boolean;
   version : string;
   collection : Collection;
-  public Node(){
-
+  public constructor(id:string=null){
+    this.ref=new NodeRef(id);
   }
 }
 export class SortItem extends ListItem{
@@ -205,6 +205,9 @@ export interface RestError {
 
 export interface GroupProfile {
   displayName: string;
+  groupEmail: string;
+  groupType: string;
+  scopeType: string;
 }
 
 export interface Group {
@@ -271,12 +274,18 @@ export interface User {
   stats: UserStats;
   homeFolder: NodeRef;
   sharedFolders: NodeRef[];
+  quota: UserQuota;
 }
 export interface UserSimple {
   authorityName: string;
   authorityType: string;
   userName: string;
   profile: UserProfile;
+}
+export interface UserQuota{
+    enabled:boolean;
+    sizeCurrent:number;
+    sizeQuota:number;
 }
 export interface IamUser {
   person : User;
@@ -863,6 +872,7 @@ export class Connector {
   icon: string;
   showNew: boolean;
   onlyDesktop: boolean;
+  hasViewMode: boolean;
   parameters: string[];
   filetypes: Filetype[];
 }
@@ -978,6 +988,9 @@ export class NodeRef {
   id:string;
   archived:boolean;
   isHomeRepo:boolean;
+  public constructor(id:string=null){
+    this.id=id;
+  }
 }
 export interface CollectionReferences {
     references: Array<CollectionReference>;

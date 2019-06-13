@@ -24,7 +24,12 @@ import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.server.AuthenticationToolAPI;
 import org.edu_sharing.repository.server.AuthenticationToolAbstract;
+import org.edu_sharing.repository.server.authentication.Context;
+import org.edu_sharing.repository.server.tools.ApplicationInfo;
+import org.edu_sharing.repository.server.tools.ApplicationInfoList;
 import org.edu_sharing.repository.server.tools.LocaleValidator;
+import org.edu_sharing.repository.server.tools.security.SignatureVerifier;
+import org.edu_sharing.restservices.admin.v1.Application;
 import org.edu_sharing.service.authentication.EduAuthentication;
 import org.edu_sharing.service.authentication.oauth2.TokenService;
 import org.edu_sharing.service.authentication.oauth2.TokenService.Token;
@@ -37,7 +42,10 @@ import org.springframework.context.ApplicationContext;
 import com.sun.xml.bind.v2.runtime.unmarshaller.XsiNilLoader.Array;
 
 public class ApiAuthenticationFilter implements javax.servlet.Filter {
-	
+
+	// stores the currently accessing tool type, e.g. CONNECTOR
+	public static ThreadLocal<String> accessToolType = new ThreadLocal<>();
+
 	Logger logger = Logger.getLogger(ApiAuthenticationFilter.class);
 	
 	private TokenService tokenService;
@@ -54,7 +62,7 @@ public class ApiAuthenticationFilter implements javax.servlet.Filter {
 			FilterChain chain) throws IOException, ServletException {
 		
 		HttpServletRequest httpReq = (HttpServletRequest) req;
-		HttpServletResponse httpResp = (HttpServletResponse)resp;	
+		HttpServletResponse httpResp = (HttpServletResponse)resp;
 
 		if("OPTIONS".equals(httpReq.getMethod())){
 			chain.doFilter(req, resp);
@@ -67,8 +75,11 @@ public class ApiAuthenticationFilter implements javax.servlet.Filter {
 		HashMap<String, String> validatedAuth = authTool.validateAuthentication(session);
 		
 		String locale = httpReq.getHeader("locale");
+		if(locale==null && httpReq.getLocale()!=null)
+			locale=httpReq.getLocale().toString();
 		String authHdr = httpReq.getHeader("Authorization");
 
+		handleAppSignature(httpReq);
 		// always take the header so we can auth when a guest is activated
 		if (authHdr != null) {			
 				
@@ -77,7 +88,7 @@ public class ApiAuthenticationFilter implements javax.servlet.Filter {
 					logger.info("auth is BASIC");
 					// Basic authentication details present
 	
-					String basicAuth = new String(Base64.decodeBase64(authHdr.substring(5).getBytes()));
+					String basicAuth = new String(java.util.Base64.getDecoder().decode(authHdr.substring(6).getBytes()));
 	
 					// Split the username and password
 	
@@ -204,8 +215,36 @@ public class ApiAuthenticationFilter implements javax.servlet.Filter {
 		// Chain other filters
 		chain.doFilter(req, resp);
 	}
-	
-	
+
+	/**
+	 * Checks if app headers and signature are present and sets the header accordingly
+	 * @param httpReq
+	 */
+	private void handleAppSignature(HttpServletRequest httpReq) {
+		if(httpReq.getHeader("X-Edu-App-Id")!=null){
+			String appId=httpReq.getHeader("X-Edu-App-Id");
+			String sig=httpReq.getHeader("X-Edu-App-Sig");
+			String signed=httpReq.getHeader("X-Edu-App-Signed");
+			String ts=httpReq.getHeader("X-Edu-App-Ts");
+			ApplicationInfo app = ApplicationInfoList.getRepositoryInfoById(appId);
+			if(app==null){
+				logger.warn("X-Edu-App-Id header was sent but the tool "+appId+" was not found in the list of registered apps");
+			}
+			else{
+				SignatureVerifier.Result result = new SignatureVerifier().verify(appId, sig, signed, ts);
+				if(result.getStatuscode() == HttpServletResponse.SC_OK){
+					accessToolType.set(app.getType());
+					logger.debug("Connector request verified, setting accessToolType to "+accessToolType.get());
+				}
+				else{
+					logger.warn("X-Edu-App-Id header was sent but signature check failed: "+result.getMessage());
+				}
+			}
+
+		}
+	}
+
+
 	@Override
 	public void init(FilterConfig arg0) throws ServletException {
 		

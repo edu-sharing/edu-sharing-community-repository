@@ -74,6 +74,7 @@ export class WorkspaceMetadataComponent{
     this.loading=true;
     this.versionsLoading=true;
     this.data=null;
+    this.resetStats();
     let currentNode=this._node;
     this.nodeApi.getNodeMetadata(this._node,[RestConstants.ALL]).subscribe((data : NodeWrapper) => {
       if(currentNode!=this._node)
@@ -289,19 +290,24 @@ export class WorkspaceMetadataComponent{
     }
     return false;
   }
+  resetStats(){
+      this.stats.labels=[];
+      this.stats.points=[];
+      this.statsTotalPoints=null;
+  }
   getStats() {
-        this.stats.labels=[];
+        this.resetStats();
         this.stats.labels.push(this.translate.instant("WORKSPACE.METADATA.USAGE_TYPE.LMS"));
         this.stats.labels.push(this.translate.instant("WORKSPACE.METADATA.USAGE_TYPE.COLLECTION"));
-        //this.stats.labels.push(this.translate.instant("WORKSPACE.METADATA.USAGE_TYPE.DOWNLOAD"));
-        //this.stats.labels.push(this.translate.instant("WORKSPACE.METADATA.USAGE_TYPE.VIEW"));
+        this.stats.labels.push(this.translate.instant("WORKSPACE.METADATA.USAGE_TYPE.DOWNLOAD"));
+        this.stats.labels.push(this.translate.instant("WORKSPACE.METADATA.USAGE_TYPE.VIEW"));
 
-        this.stats.points=[];
         this.stats.points.push(this.usages.length-this.usagesCollection.length);
         this.stats.points.push(this.usagesCollection.length);
-        //this.stats.points.push(this.nodeObject.properties[RestConstants.CCM_PROP_TRACKING_DOWNLOADS] ? this.nodeObject.properties[RestConstants.CCM_PROP_TRACKING_DOWNLOADS] : 0);
-        //this.stats.points.push(this.nodeObject.properties[RestConstants.CCM_PROP_TRACKING_VIEWS] ? this.nodeObject.properties[RestConstants.CCM_PROP_TRACKING_VIEWS] : 0);
-        this.statsTotalPoints=this.stats.points.reduce((a:any,b:any)=>parseInt(a,10)+parseInt(b,10), 0);
+        this.stats.points.push(this.nodeObject.properties[RestConstants.CCM_PROP_TRACKING_DOWNLOADS] ? this.nodeObject.properties[RestConstants.CCM_PROP_TRACKING_DOWNLOADS] : 0);
+        this.stats.points.push(this.nodeObject.properties[RestConstants.CCM_PROP_TRACKING_VIEWS] ? this.nodeObject.properties[RestConstants.CCM_PROP_TRACKING_VIEWS] : 0);
+        this.statsTotalPoints=this.stats.points.reduce((a:any,b:any)=>parseInt(a)+parseInt(b));
+        let statsMax=this.stats.points.reduce((a:any,b:any)=>Math.max(parseInt(a),parseInt(b)));
         this.canvas = document.getElementById('myChart');
         this.ctx = this.canvas.getContext('2d');
         // FontFamily
@@ -339,7 +345,7 @@ export class WorkspaceMetadataComponent{
                     yAxes: [{
                         ticks: {
                             beginAtZero:true,
-                            max:this.usages.length>6 ? this.usages.length : 6
+                            max:Math.max(Math.round(statsMax*1.25),6)
                         }
                     }]
                 }

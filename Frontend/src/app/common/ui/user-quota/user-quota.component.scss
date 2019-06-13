@@ -1,0 +1,52 @@
+@import "../../../../styles/variables.scss";
+
+.quota{
+  display: flex;
+  width: 100%;
+}
+.quota-title{
+  font-weight: bold;
+}
+.quota-details{
+  display: flex;
+  flex-direction: column;
+  flex-grow: 1;
+}
+.quota-icon{
+  display: flex;
+  align-items: center;
+  color:$textLight;
+  padding-right: 10px;
+}
+.quota-info{
+  font-size: 90%;
+  color:$textLight;
+}
+.quota-progress{
+  height:8px;
+  background-color: $primaryLight;
+}
+.quota-used{
+  height:8px;
+  background-color: $primary;
+}
+.quota-free{
+  font-weight: bold;
+  color:$primary;
+}
+.quota-health-medium{
+  .quota-free{
+    color:$colorStatusWarning;
+  }
+  .quota-used {
+    background-color: $colorStatusWarning;
+  }
+}
+.quota-health-bad{
+  .quota-free,.quota-icon{
+    color:$colorStatusNegative;
+  }
+  .quota-used {
+    background-color: $colorStatusNegative;
+  }
+}

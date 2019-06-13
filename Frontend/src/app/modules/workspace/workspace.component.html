@@ -96,8 +96,8 @@
        class="collection-item"
        [class.collection-item-seperate]="!i"
        tabindex="0"
-       (keyup.enter)="showAddDesktop=false;createConnectorName='';createConnectorType=connector"
-       (click)="showAddDesktop=false;createConnectorName='';createConnectorType=connector">
+       (keyup.enter)="showAddDesktop=false;showCreateConnector(connector)"
+       (click)="showAddDesktop=false;showCreateConnector(connector)">
       <i icon iconId="{{connector.icon}}"></i> {{ 'CONNECTOR.'+connector.id+'.NAME' | translate}}<img class="connectorBeta" src="assets/images/beta.svg"></a>
     <!-- <a class="collection-item collection-item-seperate" (click)="listLTI()"><i class="material-icons">extension</i> {{ 'WORKSPACE.ADD_LTI' | translate}}</a> -->
 
@@ -126,9 +126,10 @@
                         (onCreate)="createConnector($event)"
   ></workspace-create-connector>
 
-
-  <workspace-tree class="tree" *ngIf="isLoggedIn"
-  [current]="currentFolder ? currentFolder.ref.id : null"
+  <div class="tree" *ngIf="isLoggedIn">
+  <workspace-tree
+                  [class.tree-quota]="user.person.quota.enabled"
+                  [current]="currentFolder ? currentFolder.ref.id : null"
                   [path]="path"
                   [selectedNode]="selectedNodeTree"
                   [root]="root"
@@ -140,6 +141,8 @@
                   (onDeleteNodes)="deleteNode=$event"
                   (onUpdateOptions)="updateOptions($event)"
   ></workspace-tree>
+  <user-quota *ngIf="user.person.quota.enabled" [quota]="user.person.quota"></user-quota>
+  </div>
 <div class="breadcrumbFrame">
     <div class="mobile-move-top">
         <breadcrumbs *ngIf="isLoggedIn"

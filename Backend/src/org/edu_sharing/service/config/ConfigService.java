@@ -7,7 +7,15 @@ public interface ConfigService {
 
 	Config getConfig() throws Exception;
 
-	Config getConfigByDomain(String domain) throws Exception;
+    /**
+     * Gets the id for the context that matches the domain or null if there is no context for that domain
+     * @param domain
+     * @return
+     * @throws Exception
+     */
+    String getContextId(String domain) throws Exception;
+
+    Config getConfigByDomain(String domain) throws Exception;
 
 
     DynamicConfig setDynamicValue(String key, boolean readPublic, JSONObject object) throws Throwable;
