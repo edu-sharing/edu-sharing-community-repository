@@ -27,9 +27,12 @@ import {
     RestConnectorsService, Node, NodeList,
     RestConstants, RestHelper, RestMdsService, RestIamService, RestNodeService, RestSearchService,
     RestToolService, SessionStorageService,
-    TemporaryStorageService
+    TemporaryStorageService, RestUsageService
 } from "../../../core-module/core.module";
 import {MdsHelper} from "../../../core-module/rest/mds-helper";
+import {ListTableComponent} from "../../../core-ui-module/components/list-table/list-table.component";
+import {SpinnerComponent} from "../../../core-ui-module/components/spinner/spinner.component";
+import {CommentsListComponent} from "../../../modules/management-dialogs/node-comments/comments-list/comments-list.component";
 
 declare var jQuery:any;
 declare var window: any;

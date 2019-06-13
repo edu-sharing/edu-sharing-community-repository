@@ -24,8 +24,6 @@ import {DECLARATIONS_SHARING} from './modules/sharing/declarations';
 import {DECLARATIONS_REGISTER} from './modules/register/declarations';
 import {DECLARATIONS_SERVICES} from "./modules/services/declarations";
 import {DECLARATIONS_FILE_UPLOAD} from './modules/file-upload/declarations';
-import {SpinnerComponent} from "./common/ui/spinner/spinner.component";
-import {ListTableComponent} from "./common/ui/list-table/list-table.component";
 import {CommentsListComponent} from "./modules/management-dialogs/node-comments/comments-list/comments-list.component";
 
 
@@ -58,8 +56,6 @@ import {CommentsListComponent} from "./modules/management-dialogs/node-comments/
     DECLARATIONS_SERVICES
   ],
   entryComponents: [
-      SpinnerComponent,
-      ListTableComponent,
       CommentsListComponent,
   ],
   imports: IMPORTS,
