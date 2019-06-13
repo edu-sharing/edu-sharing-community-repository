@@ -164,8 +164,8 @@ export class WorkspaceMetadataComponent{
   private displayNode(node:Node){
       this.router.navigate([UIConstants.ROUTER_PREFIX+"render",node.ref.id]);
   }
-  private displayCollection(collection:Node){
-      UIHelper.goToCollection(this.router,collection);
+  private displayCollection(collection:CollectionUsage){
+      UIHelper.goToCollection(this.router,(collection.collection as any));
   }
   private openPermalink(){
       this.displayNode(this.nodeObject);

@@ -225,6 +225,10 @@ public class MetadataTemplateRenderer {
 				widgetHtml="";
 			content=first+widgetHtml+second;
 		}
+		// when hideIfEmpty for template is true, and no content was rendered -> hide
+		if(content.trim().isEmpty() && template.getHideIfEmpty()){
+			return "";
+		}
 		html+=content;
 		html+="</div></div>";
 		return html;
