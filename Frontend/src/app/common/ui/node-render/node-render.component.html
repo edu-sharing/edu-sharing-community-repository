@@ -74,15 +74,9 @@
   [(nodeWorkflow)]="nodeWorkflow"
   [(addNodesStream)]="addNodesStream"
   [(nodeDelete)]="nodeDelete"
-  [(nodeComment)]="nodeComments"
   (onRefresh)="refresh()"
+  (onStoredAddToCollection)="refresh()"
   (onCloseMetadata)="closeMetadata()"
   (onDelete)="onDelete($event)"
 >
 </workspace-management>
-<div #commentsRef style="display:none">
-  <node-comments
-    [node]="_node"
-    [readOnly]="true"
-  ></node-comments>
-</div>

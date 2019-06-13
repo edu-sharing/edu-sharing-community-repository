@@ -3,6 +3,7 @@ package org.edu_sharing.metadataset.v2;
 
 public class MetadataTemplate extends MetadataTranslatable {
 	private String id,caption,icon,html,rel;
+	private boolean hideIfEmpty=false;
 
 	public String getId() {
 		return id;
@@ -52,4 +53,12 @@ public class MetadataTemplate extends MetadataTranslatable {
 		}
 		return super.equals(obj);
 	}
+
+    public void setHideIfEmpty(boolean hideIfEmpty) {
+        this.hideIfEmpty = hideIfEmpty;
+    }
+
+    public boolean getHideIfEmpty() {
+        return hideIfEmpty;
+    }
 }

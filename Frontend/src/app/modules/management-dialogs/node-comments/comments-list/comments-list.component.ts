@@ -17,19 +17,16 @@ import {trigger} from "@angular/animations";
 import {UIAnimation} from "../../../core-module/ui/ui-animation";
 
 @Component({
-  selector: 'node-comments',
-  templateUrl: 'node-comments.component.html',
-  styleUrls: ['node-comments.component.scss'],
+  selector: 'comments-list',
+  templateUrl: 'comments-list.component.html',
+  styleUrls: ['comments-list.component.scss'],
   animations: [
     trigger('fade', UIAnimation.fade()),
     trigger('cardAnimation', UIAnimation.cardAnimation())
   ]
 })
-export class NodeCommentsComponent  {
+export class CommentsListComponent  {
   public _node: Node;
-  public dialogTitle:string;
-  public dialogMessage:string;
-  public dialogButtons:DialogButton[];
   private isGuest: boolean;
   private loading: boolean;
   private user: User;
@@ -53,15 +50,7 @@ export class NodeCommentsComponent  {
      */
   @Output() onChange=new EventEmitter();
 
-  @HostListener('document:keydown', ['$event'])
-  handleKeyboardEvent(event: KeyboardEvent) {
-      if(event.code=="Escape"){
-          event.preventDefault();
-          event.stopPropagation();
-          this.cancel();
-          return;
-      }
-  }
+
   constructor(
     private connector : RestConnectorService,
     private iam : RestIamService,
@@ -102,13 +91,11 @@ export class NodeCommentsComponent  {
     }
     if(isAuthor || this._node.access.indexOf(RestConstants.ACCESS_WRITE)!=-1){
       options.push(new OptionItem('NODE_COMMENTS.OPTION_DELETE','delete',()=>{
-        this.dialogTitle='NODE_COMMENTS.DELETE_COMMENT';
-        this.dialogMessage='NODE_COMMENTS.DELETE_COMMENT_MESSAGE';
-        this.dialogButtons=DialogButton.getYesNo(()=>{
-            this.dialogTitle=null;
+        this.toast.showModalDialog('NODE_COMMENTS.DELETE_COMMENT','NODE_COMMENTS.DELETE_COMMENT_MESSAGE',DialogButton.getYesNo(()=>{
+            this.toast.closeModalDialog()
           },()=>{
             this.onLoading.emit(true);
-            this.dialogTitle=null;
+            this.toast.closeModalDialog()
             this.commentsApi.deleteComment(comment.ref.id).subscribe(()=>{
               this.refresh();
               this.onChange.emit();
@@ -118,7 +105,7 @@ export class NodeCommentsComponent  {
               this.onLoading.emit(false);
             });
           }
-        );
+        ),true,false);
       }));
     }
     return options;
@@ -157,7 +144,7 @@ export class NodeCommentsComponent  {
       return;
     }
     this.commentsApi.getComments(this._node.ref.id,this._node.ref.repo).subscribe((data:Comments)=>{
-      this.comments=data.comments;
+      this.comments=data.comments.reverse();
       this.options=[];
       for(let comment of this.comments){
         this.options.push(this.getOptions(comment));

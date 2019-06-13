@@ -71,8 +71,6 @@ export class WorkspaceManagementDialogsComponent  {
     @Output() nodeShareLinkChange = new EventEmitter();
     @Input() nodeWorkflow : Node;
     @Output() nodeWorkflowChange = new EventEmitter();
-  @Input() nodeComment : Node;
-  @Output() nodeCommentChange = new EventEmitter();
   @Input() nodeReport : Node;
   @Output() nodeReportChange = new EventEmitter();
   @Input() addNodesStream : Node[];
@@ -96,6 +94,7 @@ export class WorkspaceManagementDialogsComponent  {
   @Output() onUploadFileSelected=new EventEmitter();
   @Output() onUpdateLicense=new EventEmitter();
   @Output() onCloseAddToCollection=new EventEmitter();
+  @Output() onStoredAddToCollection=new EventEmitter();
   public createMetadata: string;
   public editorPending = false;
   public metadataParent: Node;
@@ -418,10 +417,6 @@ export class WorkspaceManagementDialogsComponent  {
         this.nodeVariant=null;
         this.nodeVariantChange.emit(null);
     }
-  public closeComments() {
-    this.nodeComment=null;
-    this.nodeCommentChange.emit(null);
-  }
   private cancelAddToCollection(){
     this.dialogTitle=null;
     this.addToCollection=null;
@@ -454,6 +449,7 @@ export class WorkspaceManagementDialogsComponent  {
     this.globalProgress=true;
     UIHelper.addToCollection(this.collectionService,this.router,this.toast,collection,list,()=>{
       this.globalProgress=false;
+       this.onStoredAddToCollection.emit(collection);
       if(callback)
         callback();
     });

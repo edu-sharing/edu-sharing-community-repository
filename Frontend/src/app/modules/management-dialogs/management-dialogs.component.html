@@ -37,13 +37,6 @@
   (onCancel)="closeReport()"
   (onDone)="closeReport()"
 ></node-report>
-<node-comments
-  *ngIf="nodeComment"
-  [node]="nodeComment"
-  (onChange)="refresh()"
-  (onLoading)="globalProgress=$event"
-  (onCancel)="closeComments()"
-></node-comments>
 <node-variant
         *ngIf="nodeVariant"
         [node]="nodeVariant"

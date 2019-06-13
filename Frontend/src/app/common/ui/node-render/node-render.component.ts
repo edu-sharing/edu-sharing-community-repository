@@ -1,6 +1,6 @@
 import {
-  Component, OnInit, OnDestroy, Input, EventEmitter, Output, ViewChild, ElementRef,
-  HostListener, ChangeDetectorRef, ApplicationRef, NgZone
+    Component, OnInit, OnDestroy, Input, EventEmitter, Output, ViewChild, ElementRef,
+    HostListener, ChangeDetectorRef, ApplicationRef, NgZone, ComponentFactoryResolver, ViewContainerRef, EmbeddedViewRef
 } from '@angular/core';
 import {Toast} from "../../../core-ui-module/toast";
 import {ActivatedRoute, Params, Router} from "@angular/router";
@@ -84,7 +84,6 @@ export class NodeRenderComponent implements EventListener{
   private repository: string;
   private downloadButton: OptionItem;
   private downloadUrl: string;
-  nodeComments: Node;
   sequence: NodeList;
   sequenceParent: Node;
   canScrollLeft: boolean = false;
@@ -94,7 +93,6 @@ export class NodeRenderComponent implements EventListener{
 
   @ViewChild('sequencediv') sequencediv : ElementRef;
   @ViewChild('mainNav') mainNavRef : MainNavComponent;
-  @ViewChild('commentsRef') commentsRef : ElementRef;
   isChildobject = false;
 
 
@@ -118,12 +116,6 @@ export class NodeRenderComponent implements EventListener{
     if(this.nodeMetadata!=null) {
       return;
     }
-    if(event.code=="Escape" && this.nodeComments==null){
-      event.preventDefault();
-      event.stopPropagation();
-      this.close();
-      return;
-     }
     if (event.code == "ArrowLeft" && this.canSwitchBack()) {
       this.switchPosition(this.getPosition() - 1);
       event.preventDefault();
@@ -205,8 +197,11 @@ export class NodeRenderComponent implements EventListener{
       private mdsApi : RestMdsService,
       private nodeApi : RestNodeService,
       private searchApi : RestSearchService,
+      private usageApi : RestUsageService,
       private searchStorage : SearchService,
       private toolService: RestToolService,
+      private componentFactoryResolver: ComponentFactoryResolver,
+      private viewContainerRef: ViewContainerRef,
       private frame : FrameEventsService,
       private actionbar : ActionbarHelperService,
       private toast : Toast,
@@ -342,11 +337,10 @@ export class NodeRenderComponent implements EventListener{
             }
             else {
                 this._node=data.node;
-                if(this.queryParams['comments'])
-                    this.showComments();
                 this.getSequence(()=>{
                     jQuery('#nodeRenderContent').html(data.detailsSnippet);
                     this.postprocessHtml();
+                    this.addCollections();
                     this.addComments();
                     this.loadNode();
                     this.isLoading = false;
@@ -362,28 +356,40 @@ export class NodeRenderComponent implements EventListener{
         })
   }
     onDelete(event:any){
-        console.log(event);
         if(event.error)
             return;
         this.close();
     }
+    addCollections(){
+        let domContainer=document.getElementsByClassName("node_collections_render")[0].parentElement;
+        let domCollections=document.getElementsByTagName("collections")[0];
+        UIHelper.injectAngularComponent(this.componentFactoryResolver,this.viewContainerRef,SpinnerComponent,domCollections);
+        this.usageApi.getNodeUsagesCollection(this._node.ref.id,this._node.ref.repo).subscribe((usages)=>{
+            //@TODO: This does currently ignore the "hideIfEmpty" flag of the mds template
+            if(usages.length==0){
+                domContainer.parentElement.removeChild(domContainer);
+                return;
+            }
+            let data={
+                nodes:usages.map((u)=>u.collection),
+                columns:ListItem.getCollectionDefaults(),
+                isClickable:true,
+                clickRow:(collection:Node)=>{
+                    UIHelper.goToCollection(this.router,collection);
+                },
+                viewType:ListTableComponent.VIEW_TYPE_GRID_SMALL,
+            };
+            UIHelper.injectAngularComponent(this.componentFactoryResolver,this.viewContainerRef,ListTableComponent,document.getElementsByTagName("collections")[0],data,250);
+        },(error)=>{
+
+        });
+    }
   private addComments(){
-      jQuery('.edusharing_rendering_metadata_header').append(`
-      <div class="node-comments">
-          <div class="item" tabindex="0" onclick="window.nodeRenderComponentRef.component.showComments()" onkeypress="(event.keyCode==13)?window.nodeRenderComponentRef.component.showComments():0">
-            <i class="material-icons">message</i><div>`+this._node.commentCount+` <span>`+this.translate.instant("COMMENTS_"+(this._node.commentCount==1 ? 'SINGLE' : 'MULTIPLE'))+`</span></div>
-          </div>
-      </div>
-    `);
-      let commentInterval=setInterval(()=> {
-          let html=this.getCommentWidgetHtml();
-          if(html) {
-              try {
-                  jQuery('#edusharing_rendering_metadata').html(jQuery('#edusharing_rendering_metadata').html().replace('<comments>', html));
-                  clearInterval(commentInterval);
-              }catch(e){}
-          }
-      },100);
+      let data={
+          node:this._node,
+          readOnly:false
+      };
+      UIHelper.injectAngularComponent(this.componentFactoryResolver,this.viewContainerRef,CommentsListComponent,document.getElementsByTagName("comments")[0],data);
   }
   private postprocessHtml() {
     if(!this.config.instant("rendering.showPreview",true)){
@@ -406,9 +412,6 @@ export class NodeRenderComponent implements EventListener{
   }
   private openLink(href:string){
 
-  }
-  private showComments(){
-      this.nodeComments=this._node;
   }
   private downloadSequence() {
       let nodes = [this.sequenceParent].concat(this.sequence.nodes);
@@ -614,16 +617,6 @@ export class NodeRenderComponent implements EventListener{
     }
     private getNodeName(node:Node) {
       return RestHelper.getName(node);
-    }
-
-    private getCommentWidgetHtml() {
-        let container = this.commentsRef.nativeElement.getElementsByClassName("comments");
-        if (container.length) {
-
-            return '<div class="mdsWidget">' + container[0].outerHTML + '</div>';
-        }
-        return null;
-
     }
 
     public switchNode(node:Node){
