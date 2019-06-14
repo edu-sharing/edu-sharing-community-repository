@@ -44,6 +44,7 @@ powered-by{
   }
 }
 .register{
+  padding-bottom: 10px;
   color:$textLight;
   a{
     text-transform: uppercase;
@@ -102,7 +103,6 @@ powered-by{
   }
 }
 .useUrl{
-  padding-bottom: 10px;
   .goto{
     display: inline-flex;
     align-items: center;
