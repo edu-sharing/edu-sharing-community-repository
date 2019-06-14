@@ -9,23 +9,37 @@
 
   <spinner *ngIf="isLoading" class="center"></spinner>
   <div *ngIf="!isLoading">
-  <div class="card center-card card-action">
+  <div class="card center-card card-action" [class.card-xwide]="showProviders">
     <div class="card-content">
-      <div *ngIf="previousStage" class="card-cancel" (click)="stage=previousStage;previousStage=null"><i class="material-icons">close</i></div>
       <div class="card-title">{{caption | translate}}</div>
       <div class="branding"><img src="assets/images/logo.svg" image-config alt=""></div>
       <div class="card-scroll">
-          <div *ngIf="stage=='choose'" [@dialog]="stage=='choose'" class="choose">
-              <div>
-                  <div class="choose-label">{{'LOGIN.CHOOSE_URL' | translate}}</div>
-                  <a class="btn waves-effect waves-light" (click)="openLoginUrl()" (keyup.enter)="openLoginUrl()" tabindex="0">{{'LOGIN.CHOOSE_URL_BUTTON' | translate}} <i class="material-icons">arrow_forward</i></a>
-              </div>
-              <div>
-                  <div class="choose-label">{{'LOGIN.CHOOSE_LOCAL' | translate}}</div>
-                  <a class="btn waves-effect waves-light" (click)="showLogin()" (keyup.enter)="showLogin()" tabindex="0">{{'LOGIN.CHOOSE_LOCAL_BUTTON' | translate}}</a>
-              </div>
+        <div class="groups">
+        <div class="providers-select" *ngIf="showProviders">
+          <div class="group-heading">{{'LOGIN.PROVIDER_SELECT_GROUP' | translate}}</div>
+          <div class="group-description">{{'LOGIN.PROVIDER_SELECT_GROUP_DESCRIPTION' | translate}}</div>
+          <label>{{'LOGIN.PROVIDER_LABEL' | translate}}</label>
+          <mat-form-field>
+            <input type="text" matInput placeholder="{{'LOGIN.PROVIDER_PLACEHOLDER' | translate}}" [formControl]="providerControl" [matAutocomplete]="autoProvider">
+            <mat-autocomplete #autoProvider="matAutocomplete" [displayWith]="currentProviderDisplay">
+              <mat-optgroup *ngFor="let group of filteredProviders | async" [label]="group.group.name">
+                <mat-option *ngFor="let option of group.providers" [value]="option" (onSelectionChange)="currentProvider=option">
+                  <div class="mat-option-primary">{{option.name}}</div>
+                  <div class="mat-option-secondary">{{option.url | url:{mode:'domain'} }}</div>
+                </mat-option>
+              </mat-optgroup>
+            </mat-autocomplete>
+          </mat-form-field>
+          <div class="sso-group">
+            <img class="sso-logo" src="assets/images/sso_logo.svg">
+            <div class="group-actions">
+              <a class="waves-effect waves-light btn" (click)="goToProvider()">{{'LOGIN.GO_TO_PROVIDER' | translate }}</a>
+            </div>
           </div>
-          <div *ngIf="stage=='login'" [@dialog]="stage=='login'">
+        </div>
+        <div class="login-form">
+          <div class="group-heading" *ngIf="showProviders">{{'LOGIN.LOGIN_GROUP' | translate}}</div>
+          <div class="group-description" *ngIf="showProviders">{{'LOGIN.LOGIN_GROUP_DESCRIPTION' | translate}}</div>
           <form (ngSubmit)="login()" #loginForm>
             <div *ngIf="showUsername">
               <label for="username">{{'LOGIN.USERNAME' | translate}}</label>
@@ -36,18 +50,30 @@
                 <input-password #passwordInput id="password" required="true" (keydown.enter)="login()" [(value)]="password"></input-password>
             </div>
           </form>
+      <div class="useUrl" *ngIf="config.loginUrl && !showProviders">
+          <div>{{'LOGIN.USE_URL_TEXT' | translate}}</div>
+          <a (click)="openLoginUrl()" class="clickable goto"><span>{{'LOGIN.USE_URL_LINK' | translate}}</span> <i class="material-icons">arrow_forward</i></a>
+      </div>
           <div class="register" *ngIf="config.registerUrl">
             {{'LOGIN.REGISTER_TEXT' | translate}}
             <a tabindex="0" (click)="register()" (keyup.enter)="register()" class="clickable">{{'LOGIN.REGISTER_LINK' | translate}}</a>
           </div>
+          <div class="group-actions" *ngIf="showProviders">
+            <a class="waves-effect waves-light btn" [class.disabled]="disabled" (click)="login()">{{'LOGIN.LOGIN' | translate }}</a>
+            <a class="btn-flat" *ngIf="config.recoverPasswordUrl" (click)="recoverPassword()">{{'LOGIN.RECOVER_PASSWORD' | translate }}</a>
+          </div>
         </div>
       </div>
-    </div>
-      <div class="card-action" *ngIf="stage=='login'">
+      </div>
+      </div>
+      <div class="card-action" *ngIf="!showProviders">
         <a class="waves-effect waves-light btn" [class.disabled]="disabled" (click)="login()">{{'LOGIN.LOGIN' | translate }}</a>
         <a class="btn-flat" *ngIf="config.recoverPasswordUrl" (click)="recoverPassword()">{{'LOGIN.RECOVER_PASSWORD' | translate }}</a>
       </div>
-  </div>
+    <div class="card-action card-action-info" *ngIf="showProviders">
+      {{'LOGIN.ACTION_HELP' | translate}}
+    </div>
   <powered-by mode="white"></powered-by>
   </div>
-  </div>
+</div>
+</div>

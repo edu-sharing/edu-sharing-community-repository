@@ -6,6 +6,8 @@ public class Values{
 	@XmlElement public String extension;
 	@XmlElement public String loginUrl;
 	@XmlElement public Boolean loginAllowLocal;
+	@XmlElement public String loginProvidersUrl;
+	@XmlElement public String loginProviderTargetUrl;
 	@XmlElement public String registerUrl;
 	@XmlElement public String recoverPasswordUrl;
 	@XmlElement	public String imprintUrl;

@@ -50,6 +50,10 @@ $cardActionHeight:77px;
     word-break: break-all;
   }
 }
+.card .card-action-info{
+  align-items: center;
+  justify-content: center;
+}
 .card-action .card-content{
   padding-top:32px;
   background: linear-gradient(to bottom, $actionDialogBackground 0%,$actionDialogBackground 60px,transparent 60px,transparent 100%);
@@ -246,8 +250,8 @@ input[type=search]{
   }
 }
 @media screen and (max-width: ($mobileHeightLandscape)) {
-  .center-card .btn,
-  .center-card .btn-flat{
+  .center-card .card-action .btn,
+  .center-card .card-action .btn-flat{
     padding:0 .2rem;
   }
 }
