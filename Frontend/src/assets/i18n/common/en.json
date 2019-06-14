@@ -239,7 +239,7 @@
   "NODE_COMMENTS":{
     "TITLE":"Comments",
     "NEW_COMMENT_PLACEHOLDER":"New comment...",
-    "COMMENTS_EMPTY":"Please enter a comment",
+    "COMMENT_EMPTY":"Please enter a comment",
     "NO_COMMENTS":"No comments yet",
     "OPTION_EDIT":"edit",
     "OPTION_DELETE":"delete",

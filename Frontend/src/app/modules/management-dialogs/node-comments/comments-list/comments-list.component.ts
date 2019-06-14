@@ -23,7 +23,6 @@ import {Toast} from "../../../../common/ui/toast";
 export class CommentsListComponent  {
   public _node: Node;
   private isGuest: boolean;
-  private loading: boolean;
   private user: User;
   private comments: Comment[];
   private edit: Comment[];
@@ -31,6 +30,8 @@ export class CommentsListComponent  {
   public newComment="";
   public editComment:Comment=null;
   public editCommentText:string;
+  loading: boolean;
+  sending: boolean;
 
   @Input() set node(node : Node){
     this._node=node;
@@ -52,9 +53,7 @@ export class CommentsListComponent  {
     private commentsApi : RestCommentsService,
     private toast : Toast,
     private nodeApi : RestNodeService) {
-    this.loading=true;
     this.connector.isLoggedIn().subscribe((data:LoginResult)=>{
-      this.loading=false;
       this.isGuest=data.isGuest;
       if(!data.isGuest){
         this.iam.getUser().subscribe((data)=>{
@@ -112,16 +111,19 @@ export class CommentsListComponent  {
   }
   public addComment(){
     if(!this.newComment.trim()){
-      this.toast.error(null,'NODE_COMMENTS.COMMENT_EMTPY');
+      this.toast.error(null,'NODE_COMMENTS.COMMENT_EMPTY');
       return;
     }
+    this.sending=true;
     this.onLoading.emit(true);
     this.commentsApi.addComment(this._node.ref.id,this.newComment.trim()).subscribe(()=>{
+      this.sending=false;
       this.onLoading.emit(false);
       this.onChange.emit();
       this.newComment="";
       this.refresh();
     },(error:any)=>{
+      this.sending=false;
       this.toast.error(error);
       this.onLoading.emit(false);
     })
@@ -138,13 +140,16 @@ export class CommentsListComponent  {
       setTimeout(()=>this.refresh(),100);
       return;
     }
+    this.loading=true;
     this.commentsApi.getComments(this._node.ref.id).subscribe((data:Comments)=>{
+      this.loading=false;
       this.comments=data.comments.reverse();
       this.options=[];
       for(let comment of this.comments){
         this.options.push(this.getOptions(comment));
       }
     },(error:any)=>{
+      this.loading=false;
       this.toast.error(error);
     });
   }

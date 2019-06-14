@@ -305,7 +305,7 @@
     "TITLE":"Kommentare",
     "NEW_COMMENT_PLACEHOLDER":"Neuer Kommentar...",
     "NO_COMMENTS":"Noch keine Kommentare vorhanden",
-    "COMMENTS_EMPTY":"Bitte einen Kommentar eingeben",
+    "COMMENT_EMPTY":"Bitte einen Kommentar eingeben",
     "OPTION_EDIT":"Bearbeiten",
     "OPTION_DELETE":"Löschen",
     "DELETE_COMMENT":"Kommentar löschen?",
