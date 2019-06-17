@@ -20,8 +20,8 @@
               "src/assets"
             ],
             "styles": [
-              "src/styles/main.scss",
-              "src/app/core-ui-module/styles/core-base.scss"
+              "src/app/core-ui-module/styles/core-base.scss",
+              "src/styles/main.scss"
             ],
             "scripts": [
               "src/assets/js/jquery.1.12.4.min.js",
