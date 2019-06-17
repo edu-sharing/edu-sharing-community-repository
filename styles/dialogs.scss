@@ -154,11 +154,6 @@ $cardActionHeight:77px;
 .card-actionbar .card-scroll{
   height: calc(100% - 68px);
 }
-input[type=search]{
-  background: #fff;
-  border:1px solid $searchInputBorderColor;
-  padding:0 10px;
-}
 .card-high{
   top:10%;
   bottom:10%;
@@ -248,25 +243,6 @@ input[type=search]{
     padding-bottom: 15px;
     .close{
       float:right;
-    }
-  }
-  .search{
-    padding:10px 30px;
-    float:left;
-    form {
-      position: relative;
-      padding-top: 10px;
-      input {
-        padding-left: 40px;
-        width: $dialogRightWidth - 120px;
-        margin-bottom: 0;
-      }
-      .searchIcon {
-        position: absolute;
-        color: $textLight;
-        left: 10px;
-        top: 17px;
-      }
     }
   }
   .content{

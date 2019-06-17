@@ -17,6 +17,10 @@ $previewHeight:160px;
 .sorting a i{
   width:12px;
 }
+.list{
+  display: flex;
+  flex-direction: column;
+}
 .loadMore{
   width:100%;
   float:left;
@@ -248,6 +252,7 @@ $badgeWidth:250px;
 .headingGroup {
   position: relative;
   padding-top: 12px;
+  display: flex;
   .totalCount {
     position: absolute;
     left: 56px;
@@ -424,18 +429,6 @@ $badgeWidth:250px;
 .list .cardList.dark-color{
   .row_1,.row_2,.row_3,.row_4,.row_5,.row_6 {
     color: #000 !important;
-  }
-}
-.checkbox{
-  min-width:70px;
-  >div{
-    position: absolute;
-    z-index: 2;
-    width: 20px;
-    height: 20px;
-    &:focus{
-      @include focusShadow();
-    }
   }
 }
 .checkboxDummy{
@@ -703,7 +696,7 @@ $orderAnimationTime:$transitionNormal*5;
   text-align: center;
 }
 .cardSmallList .row_1{
-  top: 5px;
+  top: 25px;
   font-size: 110%;
   overflow: hidden;
 }
@@ -801,12 +794,6 @@ $orderAnimationTime:$transitionNormal*5;
   object-fit: cover;
   object-position: center;
 }
-.cardList .row .checkbox input:not(:checked) + label:after{
-  background-color: #fff;
-}
-.cardList .row .checkbox input+label {
-  padding-left:22px;
-}
 .cardList{
   .more{
     position:absolute;
@@ -845,7 +832,7 @@ $orderAnimationTime:$transitionNormal*5;
 }
 .cardList .row .checkbox{
   position: absolute;
-  right: 0px;
+  right: -15px;
   top: 10px;
   z-index:1;
   min-width:initial;

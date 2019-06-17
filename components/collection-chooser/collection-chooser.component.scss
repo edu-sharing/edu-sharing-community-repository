@@ -12,7 +12,15 @@
     @include focusShadow();
   }
 }
-
+.search{
+  padding:20px 30px;
+  .mat-form-field{
+    width: 100%;
+    .mat-form-field-appearance-outline .mat-form-field-wrapper{
+      margin: 0;
+    }
+  }
+}
 :host /deep/{
   .cardSmallList{
     width:$dialogRightWidth - 60px!important;

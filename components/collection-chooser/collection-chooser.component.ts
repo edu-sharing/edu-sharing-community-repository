@@ -25,8 +25,10 @@ export class CollectionChooserComponent implements OnInit{
   public createCollectionElement = new AddElement("COLLECTIONS.CREATE_COLLECTION");
   private hasMoreToLoad : boolean;
   public searchQuery = "";
+  public lastSearchQuery = "";
   private columns:ListItem[]=ListItem.getCollectionDefaults();
   private sortBy: string[];
+  private sortAscending = false;
   public isLoading=true;
   ngOnInit(): void {
     this.loadData(true);
@@ -104,12 +106,13 @@ export class CollectionChooserComponent implements OnInit{
   public loadData(reset=false) {
     if(reset){
       this.list=[];
+      this.lastSearchQuery=this.searchQuery;
     }
     else if(!this.hasMoreToLoad){
       return;
     }
     this.isLoading=true;
-    this.collectionApi.search(this.searchQuery,{
+    this.collectionApi.search(this.lastSearchQuery,{
       sortBy:this.sortBy,
       offset:this.list.length,
       sortAscending:false,

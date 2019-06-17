@@ -9,11 +9,13 @@
       (onAddElement)="createCollection()"
     ></listTable>
     <div class="search">
-      <label>{{ 'ADD_TO_RECENT_COLLECTION' | translate}}</label>
       <form (ngSubmit)="loadData(true)" autocomplete="off">
-          <input name="search" type="search" [(ngModel)]="searchQuery"
-                 title="{{'SEARCH_COLLECTIONS' | translate}}" placeholder="{{'SEARCH_COLLECTIONS' | translate}}" />
-          <i icon iconId="search" class="searchIcon">search</i>
+        <mat-form-field floatLabel="always">
+          <mat-label>{{ 'ADD_TO_RECENT_COLLECTION' | translate}}</mat-label>
+            <i icon iconId="search" matPrefix>search</i>
+            <input matInput type="search" name="search" [(ngModel)]="searchQuery"
+                   title="{{'SEARCH_COLLECTIONS' | translate}}" placeholder="{{'SEARCH_COLLECTIONS' | translate}}" />
+        </mat-form-field>
       </form>
     </div>
       <listTable *ngIf="isLoading || list.length"
