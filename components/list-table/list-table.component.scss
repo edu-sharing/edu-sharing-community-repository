@@ -230,11 +230,13 @@ $badgeWidth:250px;
   width:0;
   height:0;
 }
+.clickable{
+  @include clickable();
+}
 .more{
   min-width:60px;
   transition: $transitionNormal all;
   padding-top: 0!important;
-  @include clickable();
 }
 .moreOpen{
   position:absolute;
