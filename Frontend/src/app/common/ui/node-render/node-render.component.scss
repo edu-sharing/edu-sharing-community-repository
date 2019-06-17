@@ -36,6 +36,17 @@ a, a:hover, a:visited, a:active {
   a.edusharing_rendering_content{
     background-color: $primary;
   }
+  .edusharing_rendering_metadata_body comments .group{
+    padding: 0 10px;
+  }
+  .edusharing_rendering_metadata_body collections .list{
+    padding-top:15px;
+    .cardContainer{
+      display: flex;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+  }
   .more{
     color: white !important;
   }

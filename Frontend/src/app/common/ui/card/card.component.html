@@ -1,5 +1,5 @@
-<div class="card-dialog dialog" [class.darken]="modal">
-  <mat-card class="modal-card width-{{width}} height-{{height}}"
+<div class="card-dialog dialog" [style.z-index]="120+priority" [class.darken]="modal">
+  <mat-card class="modal-card width-{{width}} height-{{height}}" [style.z-index]="121+priority"
             [class.card-no-buttons]="!(_buttons && _buttons.length)"
             [class.card-jumpmarks]="jumpmarks && jumpmarks.length>1"
             [class.card-tabbed]="tabbed"

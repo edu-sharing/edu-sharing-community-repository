@@ -3,10 +3,9 @@ package org.edu_sharing.alfresco.policy;
 import org.alfresco.repo.node.NodeServicePolicies.BeforeDeleteNodePolicy;
 import org.alfresco.repo.policy.JavaBehaviour;
 import org.alfresco.repo.policy.PolicyComponent;
-import org.alfresco.service.cmr.dictionary.InvalidAspectException;
-import org.alfresco.service.cmr.repository.InvalidNodeRefException;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.repository.NodeService;
+import org.alfresco.service.cmr.repository.StoreRef;
 import org.alfresco.service.cmr.version.Version;
 import org.alfresco.service.cmr.version.VersionHistory;
 import org.alfresco.service.cmr.version.VersionService;
@@ -16,10 +15,9 @@ import org.edu_sharing.alfresco.service.handleservice.HandleService;
 import org.edu_sharing.alfresco.service.handleservice.HandleServiceNotConfiguredException;
 import org.edu_sharing.alfresco.tools.UsageTool;
 import org.edu_sharing.repository.client.tools.CCConstants;
+import org.edu_sharing.repository.server.tools.ApplicationInfoList;
 
 import net.handle.hdllib.HandleException;
-import org.edu_sharing.repository.server.tools.ApplicationInfo;
-import org.edu_sharing.repository.server.tools.ApplicationInfoList;
 
 public class BeforeDeleteIOPolicy implements BeforeDeleteNodePolicy {
 	
@@ -86,11 +84,15 @@ public class BeforeDeleteIOPolicy implements BeforeDeleteNodePolicy {
 	private void removeCollectionRefUsage(NodeRef nodeRef) {
 		logger.info("removing usage of collection ref: "+nodeRef.getId());
 		try {
-			new UsageTool().removeUsage(ApplicationInfoList.getHomeRepository().getAppId(),
-					nodeService.getPrimaryParent(nodeRef).getParentRef().getId(),
-					(String)nodeService.getProperty(nodeRef,QName.createQName(CCConstants.CCM_PROP_IO_ORIGINAL)),
-					nodeRef.getId()
-					);
+			
+			String originalId = (String)nodeService.getProperty(nodeRef,QName.createQName(CCConstants.CCM_PROP_IO_ORIGINAL));
+			if(nodeService.exists(new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, originalId))) {
+				new UsageTool().removeUsage(ApplicationInfoList.getHomeRepository().getAppId(),
+						nodeService.getPrimaryParent(nodeRef).getParentRef().getId(),
+						originalId,
+						nodeRef.getId()
+						);
+			}
 		} catch (Exception e) {
 			logger.warn("failed to delete ref usage",e);
 		}

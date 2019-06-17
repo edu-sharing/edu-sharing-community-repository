@@ -470,7 +470,9 @@ public class MetadataReaderV2 {
 				if(name.equals("icon"))
 					template.setIcon(value);
 				if(name.equals("html"))
-					template.setHtml(translateHtml(i18nPath,value));				
+					template.setHtml(translateHtml(i18nPath,value));
+				if(name.equals("hideIfEmpty"))
+					template.setHideIfEmpty(value.equalsIgnoreCase("true"));
 			}
 			templates.add(template);
 

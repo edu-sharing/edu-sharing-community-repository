@@ -14,10 +14,7 @@ import org.edu_sharing.service.license.LicenseService;
 
 import java.lang.reflect.Field;
 import java.text.NumberFormat;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 
 /**
@@ -167,7 +164,12 @@ public class MetadataTemplateRenderer {
 								"'>";
 						if(link!=null)
 							value+="</a>";
-						value+="<div class='licenseName'>" +getLicenseName(licenseName,properties) +"</div>";
+						String name = getLicenseName(licenseName, properties);
+						String group = getLicenseGroup(licenseName, properties);
+						if(name!=null)
+							value+="<div class='licenseName'>"+name+"</div>";
+						if(!group.equals(name))
+							value+="<div class='licenseGroup'>"+group+"</div>";
 
 						if(CCConstants.COMMON_LICENSE_CUSTOM.equals(licenseName) && properties.containsKey(CCConstants.getValidLocalName(CCConstants.LOM_PROP_RIGHTS_RIGHTS_DESCRIPTION))) {
 							String licenseDescription=properties.get(CCConstants.getValidLocalName(CCConstants.LOM_PROP_RIGHTS_RIGHTS_DESCRIPTION))[0];
@@ -223,6 +225,10 @@ public class MetadataTemplateRenderer {
 				widgetHtml="";
 			content=first+widgetHtml+second;
 		}
+		// when hideIfEmpty for template is true, and no content was rendered -> hide
+		if(content.trim().isEmpty() && template.getHideIfEmpty()){
+			return "";
+		}
 		html+=content;
 		html+="</div></div>";
 		return html;
@@ -271,6 +277,31 @@ public class MetadataTemplateRenderer {
 	}
 	private String getLicenseName(String licenseName, Map<String, String[]> properties) {
 		if(licenseName==null || licenseName.isEmpty())
+			return null;
+		List<String> supported=Arrays.asList(CCConstants.COMMON_LICENSE_CC_ZERO,CCConstants.COMMON_LICENSE_PDM);
+		if(licenseName.startsWith(CCConstants.COMMON_LICENSE_CC_BY) || supported.contains(licenseName)) {
+			String name=I18nAngular.getTranslationAngular("common","LICENSE.NAMES."+licenseName);
+			if(licenseName.startsWith(CCConstants.COMMON_LICENSE_CC_BY)){
+				String[] version=properties.get(CCConstants.getValidLocalName(CCConstants.CCM_PROP_IO_COMMONLICENSE_CC_VERSION));
+				if(version!=null && version.length>0 && version[0]!=null && !version[0].isEmpty()){
+					name+=" ("+version[0];
+					try{
+						if(Double.parseDouble(version[0])<4.0){
+							String[] locale=properties.get(CCConstants.getValidLocalName(CCConstants.CCM_PROP_IO_COMMONLICENSE_CC_LOCALE));
+							if(locale!=null && locale.length>0 && locale[0]!=null && !locale[0].isEmpty()) {
+								name += " - " + I18nAngular.getTranslationAngular("common","LANGUAGE."+locale[0]);
+							}
+						}
+					}catch(Throwable t){}
+					name+=")";
+				}
+			}
+			return name;
+		}
+		return null;
+	}
+	private String getLicenseGroup(String licenseName, Map<String, String[]> properties) {
+		if(licenseName==null || licenseName.isEmpty())
 			licenseName="NONE";
 
 		if(licenseName.startsWith(CCConstants.COMMON_LICENSE_CC_BY)) {
@@ -279,24 +310,7 @@ public class MetadataTemplateRenderer {
 		if(licenseName.equals(CCConstants.COMMON_LICENSE_PDM)){
 			licenseName=CCConstants.COMMON_LICENSE_CC_ZERO;
 		}
-		String name=I18nAngular.getTranslationAngular("common","LICENSE.GROUPS."+licenseName);
-		if(licenseName.startsWith(CCConstants.COMMON_LICENSE_CC_BY)){
-			String[] version=properties.get(CCConstants.getValidLocalName(CCConstants.CCM_PROP_IO_COMMONLICENSE_CC_VERSION));
-			String data="";
-			if(version!=null && version.length>0 && version[0]!=null && !version[0].isEmpty()){
-				name+=" ("+version[0];
-				try{
-					if(Double.parseDouble(version[0])<4.0){
-						String[] locale=properties.get(CCConstants.getValidLocalName(CCConstants.CCM_PROP_IO_COMMONLICENSE_CC_LOCALE));
-						if(locale!=null && locale.length>0 && locale[0]!=null && !locale[0].isEmpty()) {
-							name += " - " + I18nAngular.getTranslationAngular("common","LANGUAGE."+locale[0]);
-						}
-					}
-				}catch(Throwable t){}
-				name+=")";
-			}
-		}
-		return name;
+		return I18nAngular.getTranslationAngular("common","LICENSE.GROUPS."+licenseName);
 	}
 	private String getLicenseDescription(String licenseName) {
 		if(licenseName==null || licenseName.isEmpty())

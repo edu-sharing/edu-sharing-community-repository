@@ -1,38 +1,28 @@
-import {Component, Input, EventEmitter, Output, ViewChild, ElementRef, HostListener} from '@angular/core';
-import {RestConnectorService} from "../../../common/rest/services/rest-connector.service";
-import {Toast} from "../../../common/ui/toast";
-import {RestNodeService} from "../../../common/rest/services/rest-node.service";
-import {
-  NodeWrapper, Node, NodePermissions, LocalPermissionsResult, Permission,
-  LoginResult, UserProfile, Comments, Comment, User
-} from "../../../common/rest/data-object";
-import {ConfigurationService} from "../../../common/services/configuration.service";
-import {UIHelper} from "../../../common/ui/ui-helper";
-import {RestIamService} from "../../../common/rest/services/rest-iam.service";
-import {TranslateService} from "@ngx-translate/core";
-import {RestCommentsService} from "../../../common/rest/services/rest-comments.service";
-import {OptionItem} from "../../../common/ui/actionbar/option-item";
-import {RestConstants} from "../../../common/rest/rest-constants";
-import {DialogButton} from "../../../common/ui/modal-dialog/modal-dialog.component";
+import {DialogButton} from "../../../../common/ui/modal-dialog/modal-dialog.component";
+import {Comments, Comment, LoginResult, Node, User} from "../../../../common/rest/data-object";
+import {RestConstants} from "../../../../common/rest/rest-constants";
+import {OptionItem} from "../../../../common/ui/actionbar/option-item";
+import {RestNodeService} from "../../../../common/rest/services/rest-node.service";
 import {trigger} from "@angular/animations";
-import {UIAnimation} from "../../../common/ui/ui-animation";
+import {Component, EventEmitter, HostListener, Input, Output} from "@angular/core";
+import {RestConnectorService} from "../../../../common/rest/services/rest-connector.service";
+import {UIAnimation} from "../../../../common/ui/ui-animation";
+import {RestCommentsService} from "../../../../common/rest/services/rest-comments.service";
+import {RestIamService} from "../../../../common/rest/services/rest-iam.service";
+import {Toast} from "../../../../common/ui/toast";
 
 @Component({
-  selector: 'node-comments',
-  templateUrl: 'node-comments.component.html',
-  styleUrls: ['node-comments.component.scss'],
+  selector: 'comments-list',
+  templateUrl: 'comments-list.component.html',
+  styleUrls: ['comments-list.component.scss'],
   animations: [
     trigger('fade', UIAnimation.fade()),
     trigger('cardAnimation', UIAnimation.cardAnimation())
   ]
 })
-export class NodeCommentsComponent  {
+export class CommentsListComponent  {
   public _node: Node;
-  public dialogTitle:string;
-  public dialogMessage:string;
-  public dialogButtons:DialogButton[];
   private isGuest: boolean;
-  private loading: boolean;
   private user: User;
   private comments: Comment[];
   private edit: Comment[];
@@ -40,6 +30,8 @@ export class NodeCommentsComponent  {
   public newComment="";
   public editComment:Comment=null;
   public editCommentText:string;
+  loading: boolean;
+  sending: boolean;
 
   @Input() set node(node : Node){
     this._node=node;
@@ -54,24 +46,14 @@ export class NodeCommentsComponent  {
      */
   @Output() onChange=new EventEmitter();
 
-  @HostListener('document:keydown', ['$event'])
-  handleKeyboardEvent(event: KeyboardEvent) {
-      if(event.code=="Escape"){
-          event.preventDefault();
-          event.stopPropagation();
-          this.cancel();
-          return;
-      }
-  }
+
   constructor(
     private connector : RestConnectorService,
     private iam : RestIamService,
     private commentsApi : RestCommentsService,
     private toast : Toast,
     private nodeApi : RestNodeService) {
-    this.loading=true;
     this.connector.isLoggedIn().subscribe((data:LoginResult)=>{
-      this.loading=false;
       this.isGuest=data.isGuest;
       if(!data.isGuest){
         this.iam.getUser().subscribe((data)=>{
@@ -103,13 +85,11 @@ export class NodeCommentsComponent  {
     }
     if(isAuthor || this._node.access.indexOf(RestConstants.ACCESS_WRITE)!=-1){
       options.push(new OptionItem('NODE_COMMENTS.OPTION_DELETE','delete',()=>{
-        this.dialogTitle='NODE_COMMENTS.DELETE_COMMENT';
-        this.dialogMessage='NODE_COMMENTS.DELETE_COMMENT_MESSAGE';
-        this.dialogButtons=DialogButton.getYesNo(()=>{
-            this.dialogTitle=null;
+        this.toast.showModalDialog('NODE_COMMENTS.DELETE_COMMENT','NODE_COMMENTS.DELETE_COMMENT_MESSAGE',DialogButton.getYesNo(()=>{
+            this.toast.closeModalDialog()
           },()=>{
             this.onLoading.emit(true);
-            this.dialogTitle=null;
+            this.toast.closeModalDialog()
             this.commentsApi.deleteComment(comment.ref.id).subscribe(()=>{
               this.refresh();
               this.onChange.emit();
@@ -119,7 +99,7 @@ export class NodeCommentsComponent  {
               this.onLoading.emit(false);
             });
           }
-        );
+        ),true);
       }));
     }
     return options;
@@ -131,16 +111,19 @@ export class NodeCommentsComponent  {
   }
   public addComment(){
     if(!this.newComment.trim()){
-      this.toast.error(null,'NODE_COMMENTS.COMMENT_EMTPY');
+      this.toast.error(null,'NODE_COMMENTS.COMMENT_EMPTY');
       return;
     }
+    this.sending=true;
     this.onLoading.emit(true);
     this.commentsApi.addComment(this._node.ref.id,this.newComment.trim()).subscribe(()=>{
+      this.sending=false;
       this.onLoading.emit(false);
       this.onChange.emit();
       this.newComment="";
       this.refresh();
     },(error:any)=>{
+      this.sending=false;
       this.toast.error(error);
       this.onLoading.emit(false);
     })
@@ -157,13 +140,16 @@ export class NodeCommentsComponent  {
       setTimeout(()=>this.refresh(),100);
       return;
     }
+    this.loading=true;
     this.commentsApi.getComments(this._node.ref.id).subscribe((data:Comments)=>{
-      this.comments=data.comments;
+      this.loading=false;
+      this.comments=data.comments.reverse();
       this.options=[];
       for(let comment of this.comments){
         this.options.push(this.getOptions(comment));
       }
     },(error:any)=>{
+      this.loading=false;
       this.toast.error(error);
     });
   }

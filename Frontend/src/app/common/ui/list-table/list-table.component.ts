@@ -737,7 +737,7 @@ export class ListTableComponent implements EventListener{
 
     let attribute=NodeHelper.getAttribute(this.translate,this.config,data,item);
     // sanitizer is much slower but required when attributes inject styles, so keep it in these cases
-    if(attribute.indexOf("style=")!=-1){
+    if(attribute!=null && attribute.indexOf("style=")!=-1){
         return this.sanitizer.bypassSecurityTrustHtml(attribute);
     }
     return attribute;

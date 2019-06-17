@@ -1,4 +1,4 @@
-@import "../../../../styles/variables.scss";
+@import "../../../../../styles/variables.scss";
 .send-icon{
   cursor: pointer;
   &:focus{
@@ -6,14 +6,11 @@
   }
 }
 :host /deep/{
-  .comments actionbar{
-    .actionAlwaysCaption{
+  actionbar{
+    .action-always-caption{
       display: none;
     }
   }
-}
-.card-content{
-  height: 100%;
 }
 .group{
   display:flex;
@@ -30,9 +27,8 @@
   display:flex;
   background-color: #fff;
   flex-direction: row;
-  margin:0 $cardPadding*-1;
-  margin-top: $cardPadding;
-  padding:10px $cardPadding;
+  margin-top: 20px;
+  padding:10px 20px;
   @include materialShadow();
   .left,.right{
     display:flex;

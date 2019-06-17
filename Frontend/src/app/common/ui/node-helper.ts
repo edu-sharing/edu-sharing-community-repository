@@ -666,5 +666,11 @@ export class NodeHelper{
   public static getActionbarNodes(nodes:Node[],node:Node):Node[] {
       return node ? [node] : nodes && nodes.length ? nodes  : null;
   }
+
+    static referenceOriginalExists(node: Node|CollectionReference) {
+      if(node==null)
+        return true;
+      return (node.hasOwnProperty('originalId') ? (node as any).originalId!=null : true)
+    }
 }
 

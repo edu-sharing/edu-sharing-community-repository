@@ -51,7 +51,10 @@ export const IMPORTS=[
   MatCardModule,
   MatDatepickerModule,
   MatNativeDateModule,
+  MatAutocompleteModule,
+  MatOptionModule,
   MatFormFieldModule,
+  ReactiveFormsModule,
   MatInputModule,
     TranslateModule.forRoot({
     loader:{

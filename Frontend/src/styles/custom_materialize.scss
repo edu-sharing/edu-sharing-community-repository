@@ -10,17 +10,17 @@
 .btn,.btn-flat{
   display:inline-flex;
   align-items: center;
-    >span{
-      margin-left: 5px;
-      flex-grow:1;
-    }
+  >span{
+    margin-left: 5px;
+    flex-grow:1;
+  }
   >.material-icons{
     display: inline-flex;
     align-items: center;
   }
 }
 .btn:focus:not(.disabled){
-    background-color:$primaryDark!important;
+  background-color:$primaryDark!important;
 }
 .btn-complementary:focus:not(.disabled){
   background-color:darken($primaryComplementary,20%)!important;
@@ -208,8 +208,8 @@ option {
 }
 .collection{
   .disabled{
-      color:$textLight!important;
-      cursor:default;
+    color:$textLight!important;
+    cursor:default;
   }
   a.collection-item {
     color: $primary;
@@ -348,8 +348,8 @@ img.align-icon {
 }
 .collection i{
   position: relative;
-    top: 7px;
-    left: -5px;
+  top: 7px;
+  left: -5px;
 }
 span.thumb{
   display:none; /* preview thumb for range does not work */
@@ -482,7 +482,7 @@ span.thumb{
   }
   /* ng2-datepicker */
   .ngx-datepicker-input {
-      width: auto !important;
+    width: auto !important;
   }
   .ngx-datepicker-container .ngx-datepicker-calendar-container {
     left: -2% !important;

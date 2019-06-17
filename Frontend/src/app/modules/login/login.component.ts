@@ -1,19 +1,16 @@
-import {Component, Input, EventEmitter, Output, ElementRef, ViewChild, OnInit} from '@angular/core';
+import {Component, ElementRef, OnInit, ViewChild} from '@angular/core';
 import {Toast} from '../../common/ui/toast';
-import {Router, Route, Params, ActivatedRoute, UrlSerializer} from '@angular/router';
-import {OAuthResult, LoginResult, AccessScope} from '../../common/rest/data-object';
-import {RouterComponent} from '../../router/router.component';
+import {ActivatedRoute, Params, Router, UrlSerializer} from '@angular/router';
+import {AccessScope, LoginResult} from '../../common/rest/data-object';
 import {TranslateService} from '@ngx-translate/core';
 import {Translation} from '../../common/translation';
 import {RestConnectorService} from '../../common/rest/services/rest-connector.service';
 import {RestConstants} from '../../common/rest/rest-constants';
 import {ConfigurationService} from '../../common/services/configuration.service';
-import {FrameEventsService} from '../../common/services/frame-events.service';
 import {Title} from '@angular/platform-browser';
 import {UIHelper} from '../../common/ui/ui-helper';
 import {SessionStorageService} from '../../common/services/session-storage.service';
-import {Scope} from '@angular/core/src/profile/wtf_impl';
-import {UIConstants} from '../../common/ui/ui-constants';
+import {OPEN_URL_MODE, UIConstants} from '../../common/ui/ui-constants';
 import {Helper} from '../../common/helper';
 import {RestHelper} from '../../common/rest/rest-helper';
 import {PlatformLocation} from '@angular/common';
@@ -23,6 +20,9 @@ import {trigger} from '@angular/animations';
 import {UIAnimation} from '../../common/ui/ui-animation';
 import {InputPasswordComponent} from '../../common/ui/input-password/input-password.component';
 import {RouterHelper} from '../../common/router.helper';
+import {HttpClient} from "@angular/common/http";
+import {FormControl} from '@angular/forms';
+import {map, startWith} from "rxjs/operators";
 import {MainNavComponent} from '../../common/ui/main-nav/main-nav.component';
 import {DialogButton} from '../../common/ui/modal-dialog/modal-dialog.component';
 
@@ -49,12 +49,18 @@ export class LoginComponent  implements OnInit{
   private scope='';
   private next='';
   public mainnav=true;
+  public showProviders=false;
   private caption='LOGIN.TITLE';
   private config: any={};
-  // stage (login or choose)
-  private previousStage:string = null;
-  private stage = 'login';
+  private providers: any;
+  providerControl = new FormControl();
+  currentProvider:any;
   private buttons: DialogButton[];
+
+  currentProviderDisplay(provider:any){
+    return provider ? provider.name : null;
+  }
+  private filteredProviders: any;
   private checkConditions(){
     this.disabled=!this.username;// || !this.password;
       this.updateButtons();
@@ -83,6 +89,7 @@ export class LoginComponent  implements OnInit{
               private platformLocation: PlatformLocation,
               private urlSerializer:UrlSerializer,
               private router:Router,
+              private http:HttpClient,
               private translate:TranslateService,
               private configService:ConfigurationService,
               private title:Title,
@@ -130,19 +137,23 @@ export class LoginComponent  implements OnInit{
                 this.goToNext();
               }
             }
+            if(configService.instant('loginProvidersUrl')){
+              this.showProviders=true;
+              this.updateButtons();
+              this.http.get(configService.instant('loginProvidersUrl')).subscribe((providers)=>{
+                  this.processProviders(providers);
+              });
+            }
               this.loginUrl=configService.instant('loginUrl');
               const allowLocal=configService.instant('loginAllowLocal',false);
               if(params['local']!='true' && !allowLocal && this.loginUrl && data.statusCode!=RestConstants.STATUS_CODE_OK){
                 this.openLoginUrl();
                 return;
             }
-            if(this.loginUrl && allowLocal){
-              this.stage='choose';
-            }
           });
           this.showUsername=this.scope!=RestConstants.SAFE_SCOPE;
           this.next=params['next'];
-          this.mainnav=params['mainnav']=='false' ? false : true;
+          this.mainnav=params['mainnav'] != 'false';
           if(this.scope==RestConstants.SAFE_SCOPE){
             this.connector.isLoggedIn().subscribe((data:LoginResult)=>{
               if(data.statusCode!=RestConstants.STATUS_CODE_OK){
@@ -181,6 +192,12 @@ export class LoginComponent  implements OnInit{
   }
   ngOnInit() {
 
+    this.filteredProviders = this.providerControl.valueChanges
+        .pipe(
+            startWith(''),
+            map((value:string) => this.filterProviders(value))
+        );
+    console.log(this.filteredProviders);
 
   }
   private login(){
@@ -221,35 +238,69 @@ export class LoginComponent  implements OnInit{
     }
   }
 
-    showLogin() {
-        this.previousStage=this.stage;
-        this.stage='login';
-        this.updateButtons();
-    }
-
     updateButtons(): any {
-        /*
-        <div class="card-action" *ngIf="stage=='login'">
-         <a tabindex="0" class="waves-effect waves-light btn" [class.disabled]="disabled" (click)="login()" (keyup.enter)="login()">{{'LOGIN.LOGIN' | translate }}</a>
-         <a tabindex="0" class="btn-flat" *ngIf="config.register.local || config.register.recoverUrl" (click)="recoverPassword()" (keyup.enter)="recoverPassword()">{{'LOGIN.RECOVER_PASSWORD' | translate }}</a>
-       </div>
-         */
-        if(this.stage=='login') {
-            this.buttons = [];
-            if(this.config.register && (this.config.register.local || this.config.register.recoverUrl)) {
-                this.buttons.push(new DialogButton('LOGIN.RECOVER_PASSWORD', DialogButton.TYPE_CANCEL, () => this.recoverPassword()));
-            }
-            let login=new DialogButton('LOGIN.LOGIN',DialogButton.TYPE_PRIMARY,()=>this.login());
-            login.disabled=this.disabled;
-            this.buttons.push(login);
-        }else{
-            this.buttons = null;
-        }
+      this.buttons = [];
+      if(this.showProviders){
+        return;
+      }
+      if(this.config.register && (this.config.register.local || this.config.register.recoverUrl)) {
+          this.buttons.push(new DialogButton('LOGIN.RECOVER_PASSWORD', DialogButton.TYPE_CANCEL, () => this.recoverPassword()));
+      }
+      let login=new DialogButton('LOGIN.LOGIN',DialogButton.TYPE_PRIMARY,()=>this.login());
+      login.disabled=this.disabled;
+      this.buttons.push(login);
     }
+  private processProviders(providers: any) {
+    let data:any={};
+    for(let provider in providers.wayf_idps){
+      let object=providers.wayf_idps[provider];
+      object.url=provider;
+      let type=object.type;
+      if(!data[type]) {
+        data[type] = {
+          group: providers.wayf_categories[type],
+          providers: []
+        };
+      }
+      data[type].providers.push(object);
+    }
+    this.providers = [];
+    for(let key in data){
+      this.providers.push(data[key]);
+    }
+    console.log(this.providers);
+  }
 
-    goBack() {
-        this.stage=this.previousStage;
-        this.previousStage=null
-        this.updateButtons();
+  private filterProviders(filter:any="") {
+    console.log(filter);
+    let filtered=[];
+    // an object was detected, abort
+    if(filter.name){
+      return this.providers;
     }
+    this.currentProvider=null;
+    for(let p of Helper.deepCopy(this.providers)){
+      p.providers=p.providers.filter((p:any) => p.name.toLowerCase().includes(filter.toLowerCase()));
+      if(p.providers.length)
+        filtered.push(p);
+    }
+    return filtered;
+  }
+  goToProvider(){
+    console.log(this.currentProvider);
+    if(!this.currentProvider){
+      this.toast.error(null,'LOGIN.NO_PROVIDER_SELECTED');
+    }
+    let url=this.configService.instant('loginProviderTargetUrl');
+    if(!url){
+      this.toast.error(null,'No configuration for loginProviderTargetUrl found.');
+      return;
+    }
+    let target=this.connector.getAbsoluteServerUrl()+this.configService.instant('loginUrl');
+    url=url.
+      replace(':target',encodeURIComponent(target)).
+      replace(':entity',encodeURIComponent(this.currentProvider.url));
+    //@TODO: Redirect to shibboleth provider
+    UIHelper.openUrl(url,this.cordova,OPEN_URL_MODE.Current);
+  }
 }

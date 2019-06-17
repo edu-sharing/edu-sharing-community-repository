@@ -49,8 +49,9 @@
   import {IconComponent} from './common/ui/icon/icon.component';
   import {CardComponent} from "./common/ui/card/card.component";
   import {UserQuotaComponent} from "./common/ui/user-quota/user-quota.component";
+  import {UrlPipe} from "./common/url.pipe";
 
-export const DECLARATIONS = [
+  export const DECLARATIONS = [
       MdsTestComponent,
       GlobalProgressComponent,
       IconComponent,
@@ -99,6 +100,7 @@ export const DECLARATIONS = [
       FooterComponent,
       InfiniteScrollDirective,
       KeysPipe,
+      UrlPipe,
       CookieInfoComponent,
       TutorialComponent,
       ImageConfigDirective

@@ -171,6 +171,16 @@ input.mat-input-element, mat-label, .mat-select-value{
   display: none;
 }
 
+.mat-option-primary{
+  line-height: initial;
+  font-size: 90%;
+}
+.mat-option-secondary{
+  font-size: 75%;
+  line-height: initial;
+  color: $textLight;
+}
+
 label .label-secondary{
   font-size: 90%;
   color: $textLight;

@@ -1,5 +1,11 @@
 @import "../../../../styles/variables.scss";
 
+.dialog{
+  z-index: $dialogZIndex + 10;
+}
+.modal-dialog-toast{
+  z-index: $dialogZIndex + 11;
+}
 :host /deep/ .modal-dialog-toast{
   padding: $cardPadding;
   white-space: pre-line;

@@ -19,7 +19,7 @@ import {Helper} from "../../../common/helper";
   templateUrl: 'explorer.component.html',
   styleUrls: ['explorer.component.scss']
 })
-export class WorkspaceExplorerComponent extends StateAwareComponent{
+export class WorkspaceExplorerComponent{
   public _nodes : Node[]=[];
   public sortBy : string=RestConstants.CM_NAME;
   public sortAscending=RestConstants.DEFAULT_SORT_ASCENDING;
@@ -171,7 +171,7 @@ export class WorkspaceExplorerComponent extends StateAwareComponent{
     private search : RestSearchService,
     private toast : Toast,
     private nodeApi : RestNodeService) {
-    super(temporaryStorage,['_node','_nodes','sortBy','sortAscending','columns','totalCount','hasMoreToLoad']);
+    //super(temporaryStorage,['_node','_nodes','sortBy','sortAscending','columns','totalCount','hasMoreToLoad']);
     this.config.get("workspaceColumns").subscribe((data:string[])=> {
       this.storage.get("workspaceColumns").subscribe((columns:any[])=>{
         this.columns = this.getColumns(columns, data);

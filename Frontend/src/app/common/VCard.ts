@@ -3,6 +3,8 @@
  */
 
 export class VCard{
+  // was the vcard altered
+  private isDirty=false;
   private lines:string[];
   constructor(vcard:string=null){
     if(vcard){
@@ -17,12 +19,14 @@ export class VCard{
       if(!this.get("END")){
         this.lines.splice(this.lines.length,0,"END:VCARD");
       }
+      this.isDirty=true;
     }
     else {
       this.lines = [];
       this.lines.push("BEGIN:VCARD");
       this.lines.push("VERSION:3.0");
       this.lines.push("END:VCARD");
+      this.isDirty=false;
     }
   }
 
@@ -116,7 +120,11 @@ export class VCard{
     return this.get("ADR;TYPE=intl,postal,parcel,work",6);
   }
   public toVCardString(){
-    this.set("FN",this.get("Givenname")+" "+this.get("Surname"));
+    // unaltered -> so return a null value
+    if(!this.isDirty)
+      return null;
+    if(this.get("Givenname") || this.get("Surname"))
+      this.set("FN",this.get("Givenname",-1,"")+" "+this.get("Surname",-1,""));
     return this.lines.join("\n");
   }
   public getDisplayName(){
@@ -125,7 +133,7 @@ export class VCard{
       return this.org;
     return string;
   }
-  public get(key:string,splitIndex=-1){
+  public get(key:string,splitIndex=-1,fallback:string=null){
     if(key=="Surname"){
       splitIndex=0;
       key="N";
@@ -143,7 +151,7 @@ export class VCard{
         return this.deEscape(value);
       }
     }
-    return null;
+    return fallback;
   }
   public remove(key:string){
     for(let i=0;i<this.lines.length;i++){
@@ -155,6 +163,9 @@ export class VCard{
     return false;
   }
   public set(key:string,value:string,splitIndex=-1){
+    // no value and empty vcard -> do nothing
+    if(!this.isDirty && !value)
+      return;
     if(key=="Surname"){
       splitIndex=0;
       key="N";
@@ -189,6 +200,7 @@ export class VCard{
       lineValue+=this.escape(value);
     }
     this.lines.splice(this.getNextLine(),0,key+":"+lineValue);
+    this.isDirty=true;
   }
 
   private getNextLine() {

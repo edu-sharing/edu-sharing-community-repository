@@ -46,7 +46,7 @@ import org.springframework.context.ApplicationContext;
 public class DownloadServlet extends HttpServlet{
 
 	
-	Logger logger = Logger.getLogger(DownloadServlet.class);
+	static Logger logger = Logger.getLogger(DownloadServlet.class);
 	
 	@Override
 	protected void doGet(HttpServletRequest req, HttpServletResponse resp)
@@ -186,7 +186,7 @@ public class DownloadServlet extends HttpServlet{
                         else
                             work.doWork();
 					}catch(Throwable t){
-						t.printStackTrace();
+                        logger.warn(t.getMessage(),t);
 						resp.sendRedirect(URLTool.getNgMessageUrl("INVALID"));
 						return false;
 					}

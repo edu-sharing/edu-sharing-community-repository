@@ -9,9 +9,6 @@
 
 
 <beans>
-	<bean id="environmentService" class="org.edu_sharing.service.environment.EnvironmentServiceImpl">
-	</bean>
-
 	<bean id="nodeService" class="org.springframework.aop.framework.ProxyFactoryBean" >
 		<property name="targetName">
 			<value>nodeServiceImpl</value>

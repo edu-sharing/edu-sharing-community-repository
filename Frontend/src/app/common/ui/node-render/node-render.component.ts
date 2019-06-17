@@ -1,10 +1,18 @@
 import {
-  Component, OnInit, OnDestroy, Input, EventEmitter, Output, ViewChild, ElementRef,
-  HostListener, ChangeDetectorRef, ApplicationRef, NgZone
+    Component, OnInit, OnDestroy, Input, EventEmitter, Output, ViewChild, ElementRef,
+    HostListener, ChangeDetectorRef, ApplicationRef, NgZone, ComponentFactoryResolver, ViewContainerRef, EmbeddedViewRef
 } from '@angular/core';
 import {RestConnectorService} from "../../rest/services/rest-connector.service";
 import {RestConstants} from "../../rest/rest-constants";
-import {NodeList, Node, NodeWrapper, LoginResult, ConnectorList} from "../../rest/data-object";
+import {
+    NodeList,
+    Node,
+    NodeWrapper,
+    LoginResult,
+    ConnectorList,
+    CollectionUsage,
+    Collection
+} from "../../rest/data-object";
 import {Toast} from "../toast";
 import {RestNodeService} from "../../rest/services/rest-node.service";
 import {ActivatedRoute, Params, Router} from "@angular/router";
@@ -33,11 +41,15 @@ import {ActionbarHelperService} from "../../services/actionbar-helper";
 import {SuggestItem} from "../autocomplete/autocomplete.component";
 import {MainNavComponent} from "../main-nav/main-nav.component";
 import {RestSearchService} from '../../rest/services/rest-search.service';
-import {ListItem} from '../list-item';
 import {RestMdsService} from '../../rest/services/rest-mds.service';
 import {MdsHelper} from '../../rest/mds-helper';
 import {HttpClient} from "@angular/common/http";
 import {RestIamService} from "../../rest/services/rest-iam.service";
+import {SpinnerComponent} from "../spinner/spinner.component";
+import {ListTableComponent} from "../list-table/list-table.component";
+import {RestUsageService} from "../../rest/services/rest-usage.service";
+import {ListItem} from "../list-item";
+import {CommentsListComponent} from "../../../modules/management-dialogs/node-comments/comments-list/comments-list.component";
 
 declare var jQuery:any;
 declare var window: any;
@@ -92,7 +104,6 @@ export class NodeRenderComponent implements EventListener{
   private repository: string;
   private downloadButton: OptionItem;
   private downloadUrl: string;
-  nodeComments: Node;
   sequence: NodeList;
   sequenceParent: Node;
   canScrollLeft: boolean = false;
@@ -102,7 +113,7 @@ export class NodeRenderComponent implements EventListener{
 
   @ViewChild('sequencediv') sequencediv : ElementRef;
   @ViewChild('mainNav') mainNavRef : MainNavComponent;
-  @ViewChild('commentsRef') commentsRef : ElementRef;
+  isChildobject = false;
 
 
     public static close(location:Location) {
@@ -125,12 +136,6 @@ export class NodeRenderComponent implements EventListener{
     if(this.nodeMetadata!=null) {
       return;
     }
-    if(event.code=="Escape" && this.nodeComments==null){
-      event.preventDefault();
-      event.stopPropagation();
-      this.close();
-      return;
-     }
     if (event.code == "ArrowLeft" && this.canSwitchBack()) {
       this.switchPosition(this.getPosition() - 1);
       event.preventDefault();
@@ -212,8 +217,11 @@ export class NodeRenderComponent implements EventListener{
       private mdsApi : RestMdsService,
       private nodeApi : RestNodeService,
       private searchApi : RestSearchService,
+      private usageApi : RestUsageService,
       private searchStorage : SearchService,
       private toolService: RestToolService,
+      private componentFactoryResolver: ComponentFactoryResolver,
+      private viewContainerRef: ViewContainerRef,
       private frame : FrameEventsService,
       private actionbar : ActionbarHelperService,
       private toast : Toast,
@@ -242,6 +250,7 @@ export class NodeRenderComponent implements EventListener{
           this.repository=params['repository'] ? params['repository'] : RestConstants.HOME_REPOSITORY;
           this.queryParams=params;
           let childobject = params['childobject_id'] ? params['childobject_id'] : null;
+          this.isChildobject=childobject!=null;
           this.route.params.subscribe((params: Params) => {
             if(params['node']) {
               this.isRoute=true;
@@ -292,6 +301,10 @@ export class NodeRenderComponent implements EventListener{
     this.isLoading=true;
     this.node=this._nodeId;
   }
+  viewChildobject(node:Node,pos:number){
+        this.isChildobject=pos!=0;
+        this.node=node;
+  }
   private loadNode() {
     if(!this._node) {
         this.isBuildingPage = false;
@@ -335,7 +348,7 @@ export class NodeRenderComponent implements EventListener{
     };
     this._node=null;
     this.isBuildingPage=true;
-    this.nodeApi.getNodeRenderSnippet(this._nodeId,this.version ? this.version : "-1",parameters,this.repository)
+    this.nodeApi.getNodeRenderSnippet(this._nodeId,this.version && !this.isChildobject ? this.version : "-1",parameters,this.repository)
         .subscribe((data:any)=>{
             if (!data.detailsSnippet) {
                 console.error(data);
@@ -343,11 +356,10 @@ export class NodeRenderComponent implements EventListener{
             }
             else {
                 this._node=data.node;
-                if(this.queryParams['comments'])
-                    this.showComments();
                 this.getSequence(()=>{
                     jQuery('#nodeRenderContent').html(data.detailsSnippet);
                     this.postprocessHtml();
+                    this.addCollections();
                     this.addComments();
                     this.loadNode();
                     this.isLoading = false;
@@ -363,28 +375,40 @@ export class NodeRenderComponent implements EventListener{
         })
   }
     onDelete(event:any){
-        console.log(event);
         if(event.error)
             return;
         this.close();
     }
+    addCollections(){
+        let domContainer=document.getElementsByClassName("node_collections_render")[0].parentElement;
+        let domCollections=document.getElementsByTagName("collections")[0];
+        UIHelper.injectAngularComponent(this.componentFactoryResolver,this.viewContainerRef,SpinnerComponent,domCollections);
+        this.usageApi.getNodeUsagesCollection(this._node.ref.id,this._node.ref.repo).subscribe((usages)=>{
+            //@TODO: This does currently ignore the "hideIfEmpty" flag of the mds template
+            if(usages.length==0){
+                domContainer.parentElement.removeChild(domContainer);
+                return;
+            }
+            let data={
+                nodes:usages.map((u)=>u.collection),
+                columns:ListItem.getCollectionDefaults(),
+                isClickable:true,
+                clickRow:(collection:Node)=>{
+                    UIHelper.goToCollection(this.router,collection);
+                },
+                viewType:ListTableComponent.VIEW_TYPE_GRID_SMALL,
+            };
+            UIHelper.injectAngularComponent(this.componentFactoryResolver,this.viewContainerRef,ListTableComponent,document.getElementsByTagName("collections")[0],data,250);
+        },(error)=>{
+
+        });
+    }
   private addComments(){
-      jQuery('.edusharing_rendering_metadata_header').append(`
-      <div class="node-comments">
-          <div class="item" tabindex="0" onclick="window.nodeRenderComponentRef.component.showComments()" onkeypress="(event.keyCode==13)?window.nodeRenderComponentRef.component.showComments():0">
-            <i class="material-icons">message</i><div>`+this._node.commentCount+` <span>`+this.translate.instant("COMMENTS_"+(this._node.commentCount==1 ? 'SINGLE' : 'MULTIPLE'))+`</span></div>
-          </div>
-      </div>
-    `);
-      let commentInterval=setInterval(()=> {
-          let html=this.getCommentWidgetHtml();
-          if(html) {
-              try {
-                  jQuery('#edusharing_rendering_metadata').html(jQuery('#edusharing_rendering_metadata').html().replace('<comments>', html));
-                  clearInterval(commentInterval);
-              }catch(e){}
-          }
-      },100);
+      let data={
+          node:this._node,
+          readOnly:false
+      };
+      UIHelper.injectAngularComponent(this.componentFactoryResolver,this.viewContainerRef,CommentsListComponent,document.getElementsByTagName("comments")[0],data);
   }
   private postprocessHtml() {
     if(!this.config.instant("rendering.showPreview",true)){
@@ -408,19 +432,16 @@ export class NodeRenderComponent implements EventListener{
   private openLink(href:string){
 
   }
-  private showComments(){
-      this.nodeComments=this._node;
+  private downloadSequence() {
+      let nodes = [this.sequenceParent].concat(this.sequence.nodes);
+      NodeHelper.downloadNodes(this.toast,this.connector,nodes, this.sequenceParent.name+".zip");
   }
+
   private downloadCurrentNode() {
       if(this.downloadUrl) {
           NodeHelper.downloadUrl(this.toast, this.connector.getCordovaService(), this.downloadUrl);
       } else {
-          if(this.sequence && this.sequence.nodes.length > 0 || this._node.aspects.indexOf(RestConstants.CCM_ASPECT_IO_CHILDOBJECT) != -1) {
-              let nodes = [this.sequenceParent].concat(this.sequence.nodes);
-              NodeHelper.downloadNodes(this.toast,this.connector,nodes, this.sequenceParent.name+".zip");
-          } else {
-              NodeHelper.downloadNode(this.toast, this.connector.getCordovaService(), this._node, this.version);
-          }
+          NodeHelper.downloadNode(this.toast, this.connector.getCordovaService(), this._node, this.version);
       }
   }
 
@@ -540,11 +561,13 @@ export class NodeRenderComponent implements EventListener{
   private addDownloadButton(options:OptionItem[],download: OptionItem) {
       this.nodeApi.getNodeChildobjects(this.sequenceParent.ref.id,this.repository).subscribe((data:NodeList)=>{
           this.downloadButton=download;
-          if(data.nodes.length > 0 || this._node.aspects.indexOf(RestConstants.CCM_ASPECT_IO_CHILDOBJECT) != -1) {
-              download.name = 'DOWNLOAD_ALL';
-          }
           options.splice(0,0,download);
-
+          if(data.nodes.length > 0 || this._node.aspects.indexOf(RestConstants.CCM_ASPECT_IO_CHILDOBJECT) != -1) {
+              let downloadAll = new OptionItem('DOWNLOAD_ALL','archive',()=>{
+                  this.downloadSequence();
+              });
+              options.splice(1,0,downloadAll);
+          }
           if(this.searchService.reurl) {
               let apply = new OptionItem("APPLY", "redo", (node: Node) => NodeHelper.addNodeToLms(this.router, this.temporaryStorageService, this._node, this.searchService.reurl));
               apply.isEnabled = this._node.access.indexOf(RestConstants.ACCESS_CC_PUBLISH) != -1;
@@ -612,16 +635,6 @@ export class NodeRenderComponent implements EventListener{
     }
     private getNodeName(node:Node) {
       return RestHelper.getName(node);
-    }
-
-    private getCommentWidgetHtml() {
-        let container = this.commentsRef.nativeElement.getElementsByClassName("comments");
-        if (container.length) {
-
-            return '<div class="mdsWidget">' + container[0].outerHTML + '</div>';
-        }
-        return null;
-
     }
 
     public switchNode(node:Node){
