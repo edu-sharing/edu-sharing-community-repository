@@ -1,6 +1,6 @@
 import {PipeTransform, Pipe} from '@angular/core';
 import {TranslateService} from "@ngx-translate/core";
-import {DateHelper, FormatOptions} from './DateHelper';
+import {DateHelper, FormatOptions} from '../DateHelper';
 
 @Pipe({name: 'formatDate'})
 export class NodeDatePipe implements PipeTransform {

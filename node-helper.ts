@@ -16,7 +16,7 @@ import {
     ConfigurationService,
     TemporaryStorageService, RestConnectorService, ListItem
 } from "../core-module/core.module";
-import {FormatSizePipe} from "./file-size.pipe";
+import {FormatSizePipe} from "./pipes/file-size.pipe";
 import {Observable, Observer} from "rxjs";
 import {Toast} from "./toast";
 import {Router} from "@angular/router";

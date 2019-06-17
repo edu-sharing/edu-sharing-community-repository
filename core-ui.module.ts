@@ -10,14 +10,22 @@ import {FormsModule} from "@angular/forms";
 import {BrowserModule} from "@angular/platform-browser";
 import {SortDropdownComponent} from "./components/sort-dropdown/sort-dropdown.component";
 import {IconComponent} from "./components/icon/icon.component";
-import {ReplaceCharsPipe} from "./replace-chars.pipe";
+import {ReplaceCharsPipe} from "./pipes/replace-chars.pipe";
 import {SpinnerComponent} from "./components/spinner/spinner.component";
 import {SpinnerSmallComponent} from "./components/spinner-small/spinner-small.component";
 import {GlobalProgressComponent} from "./components/global-progress/global-progress.component";
 import {Toast} from "./toast";
 import {ToastyModule} from "ngx-toasty";
 import {DropdownComponent} from "./components/dropdown/dropdown.component";
-import {MatButtonModule, MatCheckboxModule, MatInputModule, MatMenuModule} from "@angular/material";
+import {MatButtonModule, MatCardModule, MatCheckboxModule, MatInputModule, MatMenuModule, MatRadioModule, MatTabsModule} from "@angular/material";
+import {AuthorityNamePipe} from "./pipes/authority-name.pipe";
+import {AuthorityColorPipe} from "./pipes/authority-color.pipe";
+import {FormatSizePipe} from "./pipes/file-size.pipe";
+import {KeysPipe} from "./pipes/keys.pipe";
+import {UrlPipe} from "./pipes/url.pipe";
+import {NodeDatePipe} from "./pipes/date.pipe";
+import {CardComponent} from "./components/card/card.component";
+import {PermissionNamePipe} from "./pipes/permission-name.pipe";
 
 @NgModule({
     declarations: [
@@ -26,16 +34,27 @@ import {MatButtonModule, MatCheckboxModule, MatInputModule, MatMenuModule} from 
         DropdownComponent,
         SortDropdownComponent,
         IconComponent,
+        CardComponent,
         SpinnerComponent,
         SpinnerSmallComponent,
         GlobalProgressComponent,
-        ReplaceCharsPipe,
         InfiniteScrollDirective,
+        AuthorityNamePipe,
+        AuthorityColorPipe,
+        NodeDatePipe,
+        FormatSizePipe,
+        KeysPipe,
+        ReplaceCharsPipe,
+        PermissionNamePipe,
+        UrlPipe
     ],
     imports: [
         BrowserModule,
         FormsModule,
+        MatCardModule,
         MatButtonModule,
+        MatTabsModule,
+        MatRadioModule,
         MatMenuModule,
         MatInputModule,
         MatCheckboxModule,
@@ -62,12 +81,20 @@ import {MatButtonModule, MatCheckboxModule, MatInputModule, MatMenuModule} from 
         SpinnerSmallComponent,
         GlobalProgressComponent,
         IconComponent,
+        CardComponent,
         CollectionChooserComponent,
-        ReplaceCharsPipe,
         DropdownComponent,
         SortDropdownComponent,
         InfiniteScrollDirective,
         ToastyModule,
+        AuthorityNamePipe,
+        AuthorityColorPipe,
+        NodeDatePipe,
+        FormatSizePipe,
+        KeysPipe,
+        ReplaceCharsPipe,
+        PermissionNamePipe,
+        UrlPipe
     ]
 })
 export class CoreUiModule { }

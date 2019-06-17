@@ -1,5 +1,5 @@
 import {PipeTransform, Pipe} from '@angular/core';
-import {Translation} from "./translation";
+import {Translation} from "../translation";
 
 @Pipe({name: 'formatSize'})
 export class FormatSizePipe implements PipeTransform {

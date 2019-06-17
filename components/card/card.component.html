@@ -1,0 +1,30 @@
+<div class="card-dialog dialog" [style.z-index]="120+priority" [class.darken]="modal">
+  <mat-card class="modal-card width-{{width}} height-{{height}}" [style.z-index]="121+priority"
+            [class.card-no-buttons]="!(_buttons && _buttons.length)"
+            [class.card-jumpmarks]="jumpmarks && jumpmarks.length>1"
+            [class.card-tabbed]="tabbed"
+            [@cardAnimation]="this">
+    <mat-card-header>
+      <div *ngIf="avatar" class="avatar" mat-card-avatar><img [src]="avatar" alt="" image-config></div>
+      <mat-card-title>{{title}}</mat-card-title>
+      <mat-card-subtitle>{{subtitle}}</mat-card-subtitle>
+      <div class="cancel">
+        <button mat-button *ngIf="isCancelable" (click)="cancel()"><i icon iconId="close" aria="true"></i></button>
+      </div>
+    </mat-card-header>
+    <div #jumpmarksRef class="jumpmarks" *ngIf="jumpmarks && jumpmarks.length>1">
+      <button mat-button color="primary"
+              *ngFor="let jumpmark of jumpmarks"
+              [class.active]="jumpmark==jumpmarkActive"
+              (click)="scrollSmooth(jumpmark)"
+      ><i icon [iconId]="jumpmark.icon"></i> {{jumpmark.label}}</button>
+    </div>
+    <mat-card-content #cardContainer infinite-scroll [scrollWindow]="false" (scrolled)="scrolled()"><ng-content></ng-content></mat-card-content>
+    <mat-card-actions *ngIf="_buttons && _buttons.length">
+      <div *ngFor="let button of _buttons">
+        <button *ngIf="button.type==1" mat-flat-button color="primary" [disabled]="button.disabled" (click)="button.callback()">{{button.name | translate}}</button>
+        <button *ngIf="button.type==2" mat-button color="primary" [disabled]="button.disabled" (click)="button.callback()">{{button.name | translate}}</button>
+      </div>
+    </mat-card-actions>
+  </mat-card>
+</div>
