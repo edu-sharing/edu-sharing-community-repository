@@ -1,0 +1,12 @@
+/*
+  globally usable classes
+  carefully choose what to place here since this will be included in all projects
+  use non-common class names to prevent conflicts with other included files
+*/
+
+.display-none{
+  display: none!important;
+}
+.opacity-invisible{
+  opacity:0;
+}
