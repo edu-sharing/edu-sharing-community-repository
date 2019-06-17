@@ -2,75 +2,63 @@
           [title]="'SIDEBAR.LOGIN'"
           [currentScope]="'login'"
           [searchEnabled]="false"
-></main-nav>
-<div class="dialog darken valign-wrapper">
-  <spinner *ngIf="isLoading" class="center"></spinner>
+          xmlns="http://www.w3.org/1999/html"></main-nav>
+  <global-progress *ngIf="isLoading"></global-progress>
   <div *ngIf="!isLoading">
-  <div class="card center-card card-action" [class.card-xxwide]="showProviders">
-    <div class="card-content">
-      <div class="card-title">{{caption | translate}}</div>
-      <div class="branding"><img src="assets/images/logo.svg" image-config alt=""></div>
-      <div class="card-scroll">
-        <div class="groups">
-        <div class="providers-select" *ngIf="showProviders">
-          <div class="group-heading">{{'LOGIN.PROVIDER_SELECT_GROUP' | translate}}</div>
-          <div class="group-description">{{'LOGIN.PROVIDER_SELECT_GROUP_DESCRIPTION' | translate}}</div>
-          <label>{{'LOGIN.PROVIDER_LABEL' | translate}}</label>
-          <mat-form-field>
-            <input type="text" matInput placeholder="{{'LOGIN.PROVIDER_PLACEHOLDER' | translate}}" [formControl]="providerControl" [matAutocomplete]="autoProvider">
-            <mat-autocomplete #autoProvider="matAutocomplete" [displayWith]="currentProviderDisplay">
-              <mat-optgroup *ngFor="let group of filteredProviders | async" [label]="group.group.name">
-                <mat-option *ngFor="let option of group.providers" [value]="option" (onSelectionChange)="currentProvider=option">
-                  <div class="mat-option-primary">{{option.name}}</div>
-                  <div class="mat-option-secondary">{{option.url | url:{mode:'domain'} }}</div>
-                </mat-option>
-              </mat-optgroup>
-            </mat-autocomplete>
-          </mat-form-field>
-          <div class="sso-group">
-            <img class="sso-logo" src="assets/images/sso_logo.svg">
-            <div class="group-actions">
-              <a class="waves-effect waves-light btn" (click)="goToProvider()">{{'LOGIN.GO_TO_PROVIDER' | translate }}</a>
-            </div>
+      <card title="{{caption | translate}}" avatar="assets/images/app-icon.svg" subtitle="{{'LOGIN.SUBTITLE' | translate}}" [isCancelable]="false" [priority]="-110" [buttons]="buttons" [width]="showProviders ? 'xlarge' : 'small'" height="auto">
+          <spinner *ngIf="isLoading" class="center"></spinner>
+          <div class="login-content" *ngIf="!isLoading">
+          <div class="branding"><img src="assets/images/logo.svg" image-config alt=""></div>
+              <div class="groups">
+                  <div class="providers-select" *ngIf="showProviders">
+                      <div class="group-heading">{{'LOGIN.PROVIDER_SELECT_GROUP' | translate}}</div>
+                      <div class="group-description">{{'LOGIN.PROVIDER_SELECT_GROUP_DESCRIPTION' | translate}}</div>
+                      <mat-form-field floatLabel="always">
+                          <mat-label>{{'LOGIN.PROVIDER_LABEL' | translate}}</mat-label>
+                          <input type="text" matInput placeholder="{{'LOGIN.PROVIDER_PLACEHOLDER' | translate}}" [formControl]="providerControl" [matAutocomplete]="autoProvider">
+                          <mat-autocomplete #autoProvider="matAutocomplete" [displayWith]="currentProviderDisplay">
+                              <mat-optgroup *ngFor="let group of filteredProviders | async" [label]="group.group.name">
+                                  <mat-option *ngFor="let option of group.providers" [value]="option" (onSelectionChange)="currentProvider=option">
+                                      <div class="mat-option-primary">{{option.name}}</div>
+                                      <div class="mat-option-secondary">{{option.url | url:{mode:'domain'} }}</div>
+                                  </mat-option>
+                              </mat-optgroup>
+                          </mat-autocomplete>
+                      </mat-form-field>
+                      <div class="sso-group">
+                          <img class="sso-logo" src="assets/images/sso_logo.svg">
+                          <div class="group-actions">
+                              <button mat-raised-button color="primary" (click)="goToProvider()">{{'LOGIN.GO_TO_PROVIDER' | translate }}</button>
+                          </div>
+                      </div>
+                  </div>
+                  <div class="login-form">
+                      <div class="group-heading" *ngIf="showProviders">{{'LOGIN.LOGIN_GROUP' | translate}}</div>
+                      <div class="group-description" *ngIf="showProviders">{{'LOGIN.LOGIN_GROUP_DESCRIPTION' | translate}}</div>
+                      <form (ngSubmit)="login()" #loginForm>
+                          <mat-form-field floatLabel="always">
+                              <mat-label>{{'LOGIN.USERNAME' | translate}}</mat-label>
+                              <input matInput #usernameInput required name="username" id="username" (keydown.enter)="login()" (keyup)="checkConditions()" [(ngModel)]="username" autofocus/>
+                          </mat-form-field>
+                          <div>
+                              <input-password #passwordInput id="password" label="{{'LOGIN.PASSWORD' | translate}}" floatLabel="always" required="true" (keydown.enter)="login()" [(value)]="password"></input-password>
+                          </div>
+                      </form>
+                      <div class="useUrl" *ngIf="config.loginUrl && !showProviders">
+                          <div>{{'LOGIN.USE_URL_TEXT' | translate}}</div>
+                          <a (click)="openLoginUrl()" (keyup.enter)="register()" class="clickable goto" tabindex="0"><span>{{'LOGIN.USE_URL_LINK' | translate}}</span> <i class="material-icons">arrow_forward</i></a>
+                      </div>
+                      <div class="register" *ngIf="config.register.local || config.register.registerUrl">
+                          {{'LOGIN.REGISTER_TEXT' | translate}}
+                          <a (click)="register()" (keyup.enter)="register()" class="focus-underline" tabindex="0">{{'LOGIN.REGISTER_LINK' | translate}} <i icon iconId="arrow_forward"></i></a>
+                      </div>
+                      <div class="group-actions" *ngIf="showProviders">
+                          <button mat-button color="primary" *ngIf="config.register.local || config.register.recoverUrl" (click)="recoverPassword()">{{'LOGIN.RECOVER_PASSWORD' | translate }}</button>
+                          <button mat-raised-button color="primary" [class.disabled]="disabled" (click)="login()">{{'LOGIN.LOGIN' | translate }}</button>
+                      </div>
+                  </div>
+              </div>
           </div>
-        </div>
-        <div class="login-form">
-          <div class="group-heading" *ngIf="showProviders">{{'LOGIN.LOGIN_GROUP' | translate}}</div>
-          <div class="group-description" *ngIf="showProviders">{{'LOGIN.LOGIN_GROUP_DESCRIPTION' | translate}}</div>
-          <form (ngSubmit)="login()" #loginForm>
-            <div *ngIf="showUsername">
-              <label for="username">{{'LOGIN.USERNAME' | translate}}</label>
-              <input #usernameInput type="text" required name="username" id="username" (keydown.enter)="login()" (keyup)="checkConditions()" [(ngModel)]="username" autofocus/>
-            </div>
-            <div>
-              <label for="password">{{'LOGIN.PASSWORD' | translate}}</label>
-                <input-password #passwordInput id="password" required="true" (keydown.enter)="login()" [(value)]="password"></input-password>
-            </div>
-          </form>
-          <div class="useUrl" *ngIf="config.loginUrl && !showProviders">
-              <div>{{'LOGIN.USE_URL_TEXT' | translate}}</div>
-              <a (click)="openLoginUrl()" (keyup.enter)="register()" class="clickable goto" tabindex="0"><span>{{'LOGIN.USE_URL_LINK' | translate}}</span> <i class="material-icons">arrow_forward</i></a>
-          </div>
-            <div class="register" *ngIf="config.register.local || config.register.registerUrl">
-                {{'LOGIN.REGISTER_TEXT' | translate}}
-                <a (click)="register()" (keyup.enter)="register()" class="focus-underline" tabindex="0">{{'LOGIN.REGISTER_LINK' | translate}} <i icon iconId="arrow_forward"></i></a>
-            </div>
-          <div class="group-actions" *ngIf="showProviders">
-            <a tabindex="0" class="waves-effect waves-light btn" [class.disabled]="disabled" (click)="login()" (keyup.enter)="login()">{{'LOGIN.LOGIN' | translate }}</a>
-            <a tabindex="0" class="btn-flat" *ngIf="config.register.local || config.register.recoverUrl" (click)="recoverPassword()" (keyup.enter)="recoverPassword()">{{'LOGIN.RECOVER_PASSWORD' | translate }}</a>
-          </div>
-        </div>
-      </div>
-      </div>
-      </div>
-      <div class="card-action" *ngIf="!showProviders">
-        <a class="waves-effect waves-light btn" [class.disabled]="disabled" (click)="login()">{{'LOGIN.LOGIN' | translate }}</a>
-        <a class="btn-flat" *ngIf="config.recoverPasswordUrl" (click)="recoverPassword()">{{'LOGIN.RECOVER_PASSWORD' | translate }}</a>
-      </div>
-    <div class="card-action card-action-info" *ngIf="showProviders">
-      {{'LOGIN.ACTION_HELP' | translate}}
-    </div>
-  <powered-by mode="white"></powered-by>
+       </card>
+  <powered-by mode="white" [ngClass]="{'powered-down': config.register.local || config.register.registerUrl}"></powered-by>
   </div>
-</div>
-</div>

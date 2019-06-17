@@ -1,4 +1,12 @@
-autocomplete{
+@import "../../../../app/core-ui-module/styles/variables";
+
+form{
+  width: 100%;
+}
+.authority-search-input{
   width:100%;
+  .material-icons {
+    color: $textLight;
+  }
 }
 

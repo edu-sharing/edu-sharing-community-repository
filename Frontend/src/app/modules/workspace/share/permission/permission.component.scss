@@ -28,6 +28,9 @@
       min-height: 3px;
     }
   }
+  .permission-type{
+    position: relative;
+  }
 }
 .deleted-info{
   // the outer boundary in share dialog has 15px + 5px padding
@@ -89,7 +92,7 @@
   position:absolute;
   right: 20px;
   width: 310px!important;
-  top: 160px;
+  top: -60px;
 }
 .select{
   width:25px;

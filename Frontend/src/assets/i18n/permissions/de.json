@@ -13,8 +13,8 @@
     "MENU_DELETE":"Löschen",
     "MENU_TOOLPERMISSIONS":"Berechtigungen",
     "MENU_TOOLPERMISSIONS_GLOBAL":"Globale Berecht.",
-    "MANAGE_GROUP":"Gruppe {{group}} verwalten",
-    "ADD_MEMBER_TO_GROUP":"Nutzer zu {{group}} hinzufügen",
+    "MANAGE_GROUP":"Gruppe verwalten",
+    "ADD_MEMBER_TO_GROUP":"Nutzer hinzufügen",
     "EDIT_MEMBER_GROUPS":"Nutzer ist Mitglied von",
     "EXPORT_MEMBER":"Nutzer exportieren",
     "ADD_ORG":"Organisation erstellen",
@@ -84,7 +84,7 @@
       "global":"Global / Repository übergreifend"
     },
     "TOOLPERMISSIONS":{
-      "TITLE":"Berechtigungen festlegen für {{name}}",
+      "TITLE":"Berechtigungen festlegen",
       "EVERYONE_ALLOWED":"Ausgangswert für alle Gruppen & Nutzer",
       "MEMBERS_ALLOWED":"Gilt für alle Mitglieder",
       "USER_ALLOWED":"Gilt für gewählten Benutzer",

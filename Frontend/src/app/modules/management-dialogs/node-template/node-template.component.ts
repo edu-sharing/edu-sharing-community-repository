@@ -1,5 +1,5 @@
 import {Component, Input, EventEmitter, Output, ViewChild, ElementRef} from '@angular/core';
-import {RestNodeService} from "../../../core-module/core.module";
+import {DialogButton, RestNodeService} from "../../../core-module/core.module";
 import {RestConstants} from "../../../core-module/core.module";
 import {NodeWrapper,Node} from "../../../core-module/core.module";
 import {VCard} from "../../../core-module/ui/VCard";
@@ -26,12 +26,14 @@ export class NodeTemplateComponent  {
     _nodeId: string;
     node: Node;
     enabled: boolean;
+    buttons: DialogButton[];
   @Input() set nodeId(nodeId : string){
     this._nodeId=nodeId;
     this.loading=true;
+    this.updateButtons();
     this.nodeService.getNodeMetadata(nodeId).subscribe((parent)=>{
         this.nodeService.getNodeTemplate(nodeId).subscribe((data)=>{
-            this.node=data.node;
+            this.node=parent.node;
             this.enabled=data.enabled;
             if(!data.enabled){
               // check if this is the first time opening -> activate it
@@ -39,9 +41,8 @@ export class NodeTemplateComponent  {
                 this.enabled=true;
             }
             this.loading=false;
-            console.log(data);
+            this.updateButtons();
         });
-
     });
 
   }
@@ -52,11 +53,12 @@ export class NodeTemplateComponent  {
       private nodeService : RestNodeService,
       private toast : Toast
   ){
-
+    this.updateButtons();
   }
   save(){
     let data = this.enabled ? this.mdsRef.getValues() : {};
     this.loading=true;
+    this.updateButtons();
     this.nodeService.setNodeTemplate(this._nodeId,this.enabled,data).subscribe(()=>{
       this.cancel();
       this.toast.toast('WORKSPACE.TOAST.METADATA_TEMPLATE_UPDATED');
@@ -67,4 +69,13 @@ export class NodeTemplateComponent  {
   cancel(){
     this.onClose.emit();
   }
+
+    private updateButtons() {
+        let save=new DialogButton('SAVE',DialogButton.TYPE_PRIMARY,()=>this.save());
+        save.disabled=this.loading;
+        this.buttons=[
+            new DialogButton('CANCEL',DialogButton.TYPE_CANCEL,()=>this.cancel()),
+            save
+        ]
+    }
 }

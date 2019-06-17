@@ -10,7 +10,7 @@ import {
     Permissions,
     NodeList,
     RestConstants,
-    RestNodeService
+    RestNodeService, DialogButton
 } from "../../../core-module/core.module";
 
 
@@ -34,6 +34,7 @@ export class NodeInfoComponent{
     _properties : any[];
     _creator: string;
     _json: string;
+    buttons: DialogButton[];
   @Input() set node(node : Node){
     this._node=node;
     this._creator=ConfigurationHelper.getPersonWithConfigDisplayName(this._node.createdBy,this.config);
@@ -56,7 +57,11 @@ export class NodeInfoComponent{
   @Output() onClose = new EventEmitter();
   constructor(private nodeApi : RestNodeService,
               private config : ConfigurationService,
-              private router : Router){}
+              private router : Router){
+    this.buttons=[
+        new DialogButton('CLOSE',DialogButton.TYPE_CANCEL,()=>this.close())
+    ];
+  }
 
   close(){
     this.onClose.emit();

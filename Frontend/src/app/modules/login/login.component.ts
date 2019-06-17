@@ -1,7 +1,7 @@
 import {Component, Input, EventEmitter, Output, ElementRef, ViewChild, OnInit} from '@angular/core';
 import {Toast} from '../../core-ui-module/toast';
 import {Router, Route, Params, ActivatedRoute, UrlSerializer} from '@angular/router';
-import {OAuthResult, LoginResult, AccessScope} from '../../core-module/core.module';
+import {OAuthResult, LoginResult, AccessScope, DialogButton} from '../../core-module/core.module';
 import {RouterComponent} from '../../router/router.component';
 import {TranslateService} from '@ngx-translate/core';
 import {Translation} from '../../core-ui-module/translation';
@@ -38,7 +38,7 @@ import {BridgeService} from "../../core-bridge-module/bridge.service";
     ]
 })
 export class LoginComponent  implements OnInit{
-    loginUrl: any;
+  loginUrl: any;
   @ViewChild('mainNav') mainNavRef : MainNavComponent;
   @ViewChild('passwordInput') passwordInput : InputPasswordComponent;
   @ViewChild('usernameInput') usernameInput : ElementRef;
@@ -58,6 +58,7 @@ export class LoginComponent  implements OnInit{
   private providers: any;
   providerControl = new FormControl();
   currentProvider:any;
+  private buttons: DialogButton[];
 
   currentProviderDisplay(provider:any){
     return provider ? provider.name : null;
@@ -65,10 +66,11 @@ export class LoginComponent  implements OnInit{
   private filteredProviders: any;
   private checkConditions(){
     this.disabled=!this.username;// || !this.password;
+      this.updateButtons();
   }
   private recoverPassword(){
       if(this.config.register.local){
-          this.router.navigate([UIConstants.ROUTER_PREFIX+"register","request"]);
+          this.router.navigate([UIConstants.ROUTER_PREFIX+'register','request']);
       }
       else {
           window.location.href = this.config.register.recoverUrl;
@@ -76,7 +78,7 @@ export class LoginComponent  implements OnInit{
   }
   private register(){
       if(this.config.register.local){
-          this.router.navigate([UIConstants.ROUTER_PREFIX+"register"]);
+          this.router.navigate([UIConstants.ROUTER_PREFIX+'register']);
       }
       else {
           window.location.href = this.config.register.registerUrl;
@@ -98,15 +100,16 @@ export class LoginComponent  implements OnInit{
               private route : ActivatedRoute,
               private bridge: BridgeService
             ){
-
+    this.updateButtons();
     Translation.initialize(translate,this.configService,this.storage,this.route).subscribe(()=>{
       UIHelper.setTitle('LOGIN.TITLE',title,translate,configService);
       this.configService.getAll().subscribe((data:any)=>{
         this.config=data;
-        if(!this.config.register)
+        if(!this.config.register) {
             // default register mode: allow local registration if not disabled
-            this.config.register={local:true};
-
+            this.config.register = {local: true};
+        }
+        this.updateButtons();
         this.username=this.configService.instant('defaultUsername','');
         this.password=this.configService.instant('defaultPassword','');
         this.route.queryParams.forEach((params: Params) => {
@@ -139,6 +142,7 @@ export class LoginComponent  implements OnInit{
             }
             if(configService.instant('loginProvidersUrl')){
               this.showProviders=true;
+              this.updateButtons();
               this.http.get(configService.instant('loginProvidersUrl')).subscribe((providers)=>{
                   this.processProviders(providers);
               });
@@ -237,6 +241,18 @@ export class LoginComponent  implements OnInit{
     }
   }
 
+    updateButtons(): any {
+      this.buttons = [];
+      if(this.showProviders){
+        return;
+      }
+      if(this.config.register && (this.config.register.local || this.config.register.recoverUrl)) {
+          this.buttons.push(new DialogButton('LOGIN.RECOVER_PASSWORD', DialogButton.TYPE_CANCEL, () => this.recoverPassword()));
+      }
+      let login=new DialogButton('LOGIN.LOGIN',DialogButton.TYPE_PRIMARY,()=>this.login());
+      login.disabled=this.disabled;
+      this.buttons.push(login);
+    }
   private processProviders(providers: any) {
     let data:any={};
     for(let provider in providers.wayf_idps){

@@ -19,10 +19,12 @@
     "ADD_CAMERA": "Bild aufnehmen",
     "ADD_EMPTY_OBJECT": "Neues Objekt",
     "ADD_OBJECT_TITLE": "Neues Material erstellen",
+    "ADD_OBJECT_SUBTITLE": "Neue Datei oder Link anlegen",
     "ADD_OBJECT_MESSAGE": "Materialien hier ablegen",
     "SELECT_COLLECTION": "Sammlung wählen",
     "SELECT_MATERIAL": "Material wählen",
     "SELECT_LINK": "oder Link angeben",
+    "SELECT_LINK_LABEL": "URL eingeben",
 
     "RELOGIN":"Neu Anmelden",
     "AUTOLOGOUT":"Sie wurden abgemeldet",
@@ -44,6 +46,7 @@
     "NO_SUB_NODES": "Keine weiteren Elemente",
     "NO_NODES_IN_FOLDER": "Der Ordner enthält noch keine Elemente.",
     "UPLOAD_TITLE": "Hochladen",
+    "UPLOAD_SUBTITLE": "{{progress}}/{{total}} abgeschlossen",
     "UPLOAD_REMAINING": "Noch {{time}}",
     "UPLOAD_FINISHING": "Fertigstellen...",
     "UPLOAD_ERROR":{
@@ -64,6 +67,8 @@
     "TAB_ADVANCED":"Erweitert",
     "BTN_INVITE":"Einladen",
     "INVITE_FIELD":"Personen oder Gruppen hinzufügen",
+    "INVITE_LOCAL_RESULTS":"In meiner Organisation",
+    "INVITE_GLOBAL_RESULTS":"Globale Ergebnisse",
     "FILE_LOCATION":"Speicherort der Datei",
     "CHANGE__LOCATION":"Ändern",
     "CHOOSE_LOCATION":"Speicherort wählen",
@@ -232,18 +237,18 @@
       "STATUS_DISABLED": "Metadaten-Vorlage aktivieren, um die hier angegebenen Metadaten automatisch auf neue Inhalte in diesem Ordner anzuwenden"
     },
     "SHARE_LINK":{
-      "TITLE":"Link für {{ name }} freigeben",
+      "TITLE":"Link freigeben",
       "EXPIRY_TITLE":"Ablaufdatum für den Link angeben",
+      "EXPIRY_LABEL":"Läuft ab am",
       "EXPIRY_INFO":"Nach diesem Zeitpunkt ist das Objekt unter diesem Link für Eingeladene nicht mehr verfügbar",
       "PASSWORD":"Passwortschutz",
       "PASSWORD_INFO":"Dieser Link wird mit einem Passwort geschützt",
       "PASSWORD_PLACEHOLDER":"Passwort angeben...",
       "PASSWORD_PLACEHOLDER_EDIT":"Passwort ist schon gesetzt",
       "DISABLED":"Linkfreigabe ist deaktiviert",
-      "EXPIRY_INFO":"Nach diesem Zeitpunkt ist das Objekt unter diesem Link für Eingeladene nicht mehr verfügbar",
       "LINK":"Link zum Objekt",
       "ACTIVATE":"Linkfreigabe aktivieren",
-      "COPY_CLIPBOARD":"Link kopieren",
+      "COPY_CLIPBOARD":"Kopieren",
       "LINK_INFO":"Jeder, der Zugriff auf den Link hat, darf das Objekt herunterladen.",
       "LINK_INFO_FOLDER":"Jeder, der Zugriff auf den Link hat, darf alle Dateien des Ordners herunterladen. Auf Unterordner kann nicht zugegriffen werden.",
       "LINK_DOWNLOADS":"Bisherige Downloads: {{ count }}",
@@ -251,7 +256,7 @@
       "COPIED_CLIPBOARD_ERROR":"Link konnte nicht kopiert werden. Bitte markieren und kopieren Sie den Link manuell"
     },
     "WORKFLOW": {
-      "TITLE": "Workflow für {{ name }}",
+      "TITLE": "Workflow",
       "RECEIVERS": "Nutzer/Redaktionsgruppe",
       "RECEIVERS_HINT": "Wer ist verantwortlich?",
       "COMMENT": "Kommentar zum Workflow",
@@ -267,7 +272,7 @@
       "PROCEED":"Ja, Zulassen"
     },
     "CONTRIBUTOR":{
-      "TITLE":"Beteiligte von {{ name }}",
+      "TITLE":"Beteiligte angeben",
       "ADD_TITLE":"Neuen Beteiligten angeben",
       "EDIT_TITLE":"Beteiligten Bearbeiten",
       "LIFECYCLECONTRIBUTOR":"Beteiligte am Objekt",
@@ -314,8 +319,7 @@
     "DRAG_DROP_MOVE":"Verschieben",
     "FEATURE_NOT_IMPLEMENTED":"Die Funktion ist derzeit leider noch nicht verfügbar",
     "LICENSE":{
-      "TITLE":"Lizenz von {{ name }}",
-      "TITLE_MULTI":"Lizenzen von {{ count }} Elementen",
+      "TITLE":"Lizenz festlegen",
       "TYPE":"Lizenz wählen",
       "ONLY_OER":"Nur OER-Lizenzen",
       "OER":"OER",

@@ -1,5 +1,5 @@
 import {Component, Input, Output, EventEmitter} from "@angular/core";
-import {RestConstants} from "../../../core-module/core.module";
+import {DialogButton, RestConstants} from "../../../core-module/core.module";
 import {Node,NodeList,NodeWrapper} from "../../../core-module/core.module";
 import {Toast} from "../../../core-ui-module/toast";
 import {RestSearchService} from "../../../core-module/core.module";
@@ -21,6 +21,7 @@ export class CollectionManagePinningComponent {
   public isMobile: boolean;
   public globalProgress: boolean;
   public checked:string[]=[];
+  buttons: DialogButton[];
   @Input() set addCollection (addCollection : string){
     this.globalProgress=true;
     this.search.searchByProperties([RestConstants.CCM_PROP_COLLECTION_PINNED_STATUS],["true"],["="],
@@ -51,6 +52,10 @@ export class CollectionManagePinningComponent {
               private translate : TranslateService
              ){
     this.isMobile=ui.isMobile();
+    this.buttons=[
+        new DialogButton('CANCEL',DialogButton.TYPE_CANCEL,()=>this.cancel()),
+        new DialogButton('APPLY',DialogButton.TYPE_PRIMARY,()=>this.apply())
+    ]
   }
   public isChecked(collection:Node){
     return this.checked.indexOf(collection.ref.id)!=-1;

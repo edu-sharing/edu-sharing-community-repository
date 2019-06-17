@@ -28,7 +28,7 @@ $sidenavTopBaseOffset:110px;
 
 }
 .repositoryList{
- padding-top: 15px;
+  padding: 15px $cardPadding 0 $cardPadding;
   >label{
     float:left;
     width:100%;
@@ -282,6 +282,10 @@ a, a:hover, a:visited, a:active, button {
   top: $mainnavHeight+48px;
   z-index: 12;
   width:100%;
+  actionbar{
+    position: relative;
+    top: -4px;
+  }
   >div {
     height: $secondaryBarHeight;
     background-color: #fff;
@@ -534,7 +538,8 @@ listtable {
     position: fixed;
     background-color: $backgroundColor;
     width:$sidenavWidth;
-    text-align: center;
+    display: flex;
+    justify-content: flex-end;
     left:0;
     bottom:0;
     padding:20px 8px;
@@ -565,8 +570,8 @@ listtable {
     }
   }
   input[type=search]{
-    width: calc(100% - 20px);
-    margin-bottom: 10px;
+    width: calc(100% - 40px);
+    margin: 10px;
   }
   .manageSavedSearch{
     text-transform: uppercase;
@@ -574,9 +579,9 @@ listtable {
   listtable{
     width: 100%;
   }
-  .switch{
+  .saved-search-toggle{
     text-align: right;
-    margin: 10px 0px;
+    margin: 10px 4px;
   }
 }
 div.dialog.darken {
@@ -594,9 +599,6 @@ div.dialog.darken {
     left: 0px;
     top: -56px;
     width: 220px;
-  }
-  .btn-flat{
-    //background: transparent;
   }
   mds {
     .mdsEmbeddedGroup {

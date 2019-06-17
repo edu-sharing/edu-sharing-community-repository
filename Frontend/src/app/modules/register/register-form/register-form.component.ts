@@ -11,6 +11,7 @@ import {UIHelper} from '../../../core-ui-module/ui-helper';
 import {SessionStorageService} from '../../../core-module/core.module';
 import {PlatformLocation} from '@angular/common';
 import {RestRegisterService} from '../../../core-module/core.module';
+import {FormControl, ValidationErrors, Validators} from '@angular/forms';
 
 @Component({
   selector: 'app-register-form',
@@ -28,15 +29,17 @@ export class RegisterFormComponent{
         password: '',
         allowNotifications: false
     };
+    emailFormControl = new FormControl('', [
+        Validators.required,
+        Validators.email,
+    ]);
     public news = true;
     public agree = false;
     public privacyUrl: string;
-    public mailValid: boolean;
 
-    public checkMail(mail:string) {
-        this.mailValid = UIHelper.isEmail(mail);
-    }
     public register(){
+        this.info.email=this.emailFormControl.value;
+        console.log(this.info,this.emailFormControl);
         this.onLoading.emit(true);
         this.registerService.register(this.info).subscribe(()=>{
             this.onRegisterDone.emit();
@@ -44,7 +47,7 @@ export class RegisterFormComponent{
             this.toast.toast("REGISTER.TOAST");
         },(error)=>{
             if(UIHelper.errorContains(error,"DuplicateAuthorityException")){
-                this.mailValid = false;
+                this.emailFormControl.setErrors({'incorrect': true});
                 this.toast.error(null,"REGISTER.TOAST_DUPLICATE");
             }else {
                 this.toast.error(error);
@@ -65,7 +68,7 @@ export class RegisterFormComponent{
   }
 
     public canRegister(){
-        return this.info.firstName.trim() && this.mailValid && this.info.password && UIHelper.getPasswordStrengthString(this.info.password) != 'weak'
+        return this.info.firstName.trim() && this.emailFormControl.valid && this.info.password && UIHelper.getPasswordStrengthString(this.info.password) != 'weak'
             && this.agree;
     }
 

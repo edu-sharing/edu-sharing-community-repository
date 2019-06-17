@@ -25,7 +25,7 @@ import {DECLARATIONS_REGISTER} from './modules/register/declarations';
 import {DECLARATIONS_SERVICES} from "./modules/services/declarations";
 import {DECLARATIONS_FILE_UPLOAD} from './modules/file-upload/declarations';
 import {CommentsListComponent} from "./modules/management-dialogs/node-comments/comments-list/comments-list.component";
-import {MAT_FORM_FIELD_DEFAULT_OPTIONS} from "@angular/material";
+import {MAT_FORM_FIELD_DEFAULT_OPTIONS, MAT_LABEL_GLOBAL_OPTIONS} from "@angular/material";
 
 
 // http://blog.angular-university.io/angular2-ngmodule/

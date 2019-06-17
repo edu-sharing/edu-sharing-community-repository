@@ -50,8 +50,6 @@
 [message]="dialogMessage"
 [buttons]="dialogButtons"
 [messageParameters]="dialogParameters"
-[isScrollable]="true"
-[isHigh]="true"
 [isCancelable]="true"
 (onCancel)="dialogTitle=null"
 ></modal-dialog>
@@ -258,11 +256,10 @@
     <input type="text" id="OAI_BINARY_HANDLER_CLASS_NAME" [(ngModel)]="oai.binaryHandlerClassName">
     <div class="input-hint-bottom">{{'ADMIN.IMPORT.OAI_BINARY_HANDLER_CLASS_NAME_EXAMPLE' | translate}}</div>
     <div class="oaiForce" *ngIf="!uploadOaiFile">
-      <input type="checkbox" id="OAI_FORCE_UPDATE" class="filled-in" [(ngModel)]="oai.forceUpdate">
-      <label for="OAI_FORCE_UPDATE">{{'ADMIN.IMPORT.OAI_FORCE_UPDATE' | translate}}</label>
+        <mat-checkbox [(ngModel)]="oai.forceUpdate">{{'ADMIN.IMPORT.OAI_FORCE_UPDATE' | translate}}</mat-checkbox>
     </div>
     <div class="oaiSave">
-        <input type="checkbox" id="oaiSave" class="filled-in" [(ngModel)]="oaiSave"><label for="oaiSave">{{'ADMIN.IMPORT.OAI_SAVE' | translate}}</label>
+        <mat-checkbox [(ngModel)]="oaiSave">{{'ADMIN.IMPORT.OAI_SAVE' | translate}}</mat-checkbox>
     </div>
     <a class="btn-flat btn-shadow" (click)="removeImports()">{{'ADMIN.IMPORT.REMOVE_IMPORTS' | translate}}</a>
     <a class="btn waves-effect waves-light" (click)="oaiImport()">{{'ADMIN.IMPORT.OAI_START' | translate}}</a>
@@ -429,7 +426,7 @@
     </div>
     <div class="inputGroupGrow">
       <div class="info">{{'ADMIN.BROWSER.LUCENE_AUTHORITIES' | translate }}</div>
-      <authority-search-input [globalSearch]="true" [placeholder]="'ADMIN.BROWSER.ADD_AUTHORITY'" [allowAny]="true" (onChooseAuthority)="addLuceneAuthority($event)"></authority-search-input>
+      <authority-search-input [globalSearchAllowed]="true" [placeholder]="'ADMIN.BROWSER.ADD_AUTHORITY'" [allowAny]="true" (onChooseAuthority)="addLuceneAuthority($event)"></authority-search-input>
     </div>
     <div class="inputGroupGrow luceneAuthorities" *ngIf="lucene.authorities && lucene.authorities.length">
         <div></div>

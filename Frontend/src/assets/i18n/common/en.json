@@ -43,7 +43,9 @@
   "NO_MORE_ELEMENTS" : "no further elements",
   "FIELD_MUST_BE_FILLED" : "This field cannot be empty.",
   "CHOOSE_DATE":"Choose date",
+  "CARD_SUBTITLE_MULTIPLE":"{{count}} elements",
   "SELECT_COLLECTION" : "Add to '{{name}}'",
+  "SELECT_ROOT_NAME" : "Home",
   "SELECT_ROOT" : "select home",
   "SELECT_ROOT_DISABLED" : "select element",
   "CLOSE" : "close",
@@ -198,7 +200,7 @@
     "OVERALL":""
   },
   "NODE_VARIANT":{
-    "TITLE": "Create new variant for {{name}}",
+    "TITLE": "Create new variant",
     "NEW_VARIANT":"New Title:",
     "DEFAULT_NAME":"Variant of {{name}}",
     "BREADCRUMB_INFO": "Save variant in:",
@@ -403,6 +405,7 @@
   "NO_SIZE":"-",
   "VERSION_COMMENT":"Version comment",
   "MDS":{
+    "TITLE":"Edit Metadata",
     "SHOW_EXTENDED":"Show extended metadata",
     "SHOW_EXTENDED_SEARCH":"Show more filters",
     "AUTHOR_LABEL":"About the Author",
@@ -479,7 +482,8 @@
     "keyboard_arrow_right": "next",
     "keyboard_arrow_up": "up",
     "file_upload": "file upload",
-    "delete": "delete"
+    "delete": "delete",
+    "add": "New"
   },
   "LANGUAGE":{
     "INTERNATIONAL":"international",

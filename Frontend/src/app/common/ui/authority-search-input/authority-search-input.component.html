@@ -1,4 +1,4 @@
-<autocomplete
+<!--<autocomplete
   [id]="'searchAuthority'"
   [inputMinLength]="2"
   (addItem)="addSuggestion($event)"
@@ -11,3 +11,24 @@
   [suggestions]="authoritySuggestions"
   (updateInput)="updateSuggestions($event)"
 ></autocomplete>
+-->
+<form (ngSubmit)="onSubmit()">
+    <mat-form-field class="authority-search-input" floatLabel="always">
+        <i matPrefix icon [iconId]="inputIcon" *ngIf="inputIcon"></i>
+        <mat-label>{{placeholder | translate}}</mat-label>
+        <input type="text" matInput [matAutocomplete]="autoGroup" placeholder="{{placeholder | translate}}" name="authoritySearch" [(ngModel)]="inputValue" (ngModelChange)="updateSuggestions($event)">
+            <mat-autocomplete #autoGroup="matAutocomplete">
+                <mat-optgroup *ngFor="let group of suggestionGroups" label="{{ group.label | translate}}">
+                    <mat-option class="authority-search-input-option" *ngFor="let data of group.values" [value]="data">
+                        <div>
+                            <i *ngIf="data.materialIcon" icon [iconId]="data.materialIcon"></i>
+                        </div>
+                        <div>
+                            <div>{{data.title}}</div>
+                            <div class="small" *ngIf="data.secondaryTitle">{{data.secondaryTitle}}</div>
+                        </div>
+                    </mat-option>
+                </mat-optgroup>
+            </mat-autocomplete>
+    </mat-form-field>
+</form>

@@ -41,7 +41,6 @@ export class ActionbarComponent{
   public optionsAlways : OptionItem[] = [];
   public optionsMenu : OptionItem[] = [];
   public optionsToggle : OptionItem[] = [];
-  public dropdown = false;
 
   /**
    * backgroundType for color matching, either bright, dark or primary
@@ -89,14 +88,6 @@ export class ActionbarComponent{
     }
   }
 
-  @HostListener('document:keydown', ['$event'])
-  handleKeyboardEvent(event: KeyboardEvent) {
-    if(this.dropdown && event.key=="Escape"){
-      this.dropdown=false;
-      event.preventDefault();
-      event.stopPropagation();
-    }
-  }
   public getNumberOptions(){
     if(window.innerWidth<UIConstants.MOBILE_WIDTH){
       return this.numberOfAlwaysVisibleOptionsMobile;
@@ -114,14 +105,7 @@ export class ActionbarComponent{
       return;
     }
     option.callback(this.node);
-    this.dropdown=false;
   }
-  private showDropdown(){
-    this.dropdown=true;
-  }
-
-
-
   private getActionOptions(options: OptionItem[]) {
     let result:OptionItem[]=[];
     for(let option of options){

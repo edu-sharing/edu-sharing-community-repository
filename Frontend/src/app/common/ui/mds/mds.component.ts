@@ -19,6 +19,7 @@ import {
     RestToolService, SessionStorageService,
     UIService
 } from '../../../core-module/core.module';
+import {CardJumpmark} from "../card/card.component";
 
 @Component({
   selector: 'mds',
@@ -30,9 +31,6 @@ import {
   ]
 })
 export class MdsComponent{
-  @ViewChild('mdsScrollContainer') mdsScrollContainer: ElementRef;
-  @ViewChild('jumpmarksRef') jumpmarksRef: ElementRef;
-
   /**
    * priority, useful if the dialog seems not to be in the foreground
    * Values greater 0 will raise the z-index
@@ -42,7 +40,6 @@ export class MdsComponent{
   @Input() addWidget=false;
   @Input() embedded=false;
   private activeAuthorType: number;
-  private jumpmarksCount: number;
   public static TYPE_CHILDOBJECT = 'io_childobject';
   public static TYPE_TOOLDEFINITION = 'tool_definition';
   public static TYPE_TOOLINSTANCE = 'tool_instance';
@@ -82,6 +79,7 @@ export class MdsComponent{
   private static GROUP_MULTIVALUE_DELIMITER='[+]';
   private mdsId = new Date().getTime();
   private childobjectDrag: number;
+  buttons: DialogButton[];
   @Input() set suggestions(suggestions:any){
     this._suggestions=suggestions;
     this.applySuggestions();
@@ -197,7 +195,7 @@ export class MdsComponent{
   @Output() onMdsLoaded=new EventEmitter();
   private rendered : SafeHtml;
   private renderedSuggestions : SafeHtml;
-  private jumpmarks: SafeHtml;
+  private jumpmarks: CardJumpmark[];
   isLoading = false;
 
   private widgetName='cclom:general_keyword';
@@ -222,12 +220,6 @@ export class MdsComponent{
       });
   }
 
-  @HostListener('window:resize')
-  onResize(){
-      if(document.activeElement && this.mdsScrollContainer && this.mdsScrollContainer.nativeElement){
-        UIHelper.scrollSmoothElementToChild(document.activeElement,this.mdsScrollContainer.nativeElement);
-      }
-  }
   constructor(private mdsService : RestMdsService,
               private translate : TranslateService,
               private route : ActivatedRoute,
@@ -415,48 +407,18 @@ export class MdsComponent{
     }
   }
 
-  private scrollSmooth(id:string){
-    let pos=document.getElementById(id+'_header').offsetTop;
-    UIHelper.scrollSmoothElement(pos,this.mdsScrollContainer.nativeElement,2);
-  }
-  private renderJumpmarks(group:any,data:any) : string{
-    let html='';
-    let i=0;
+  private renderJumpmarks(group:any,data:any){
+    this.jumpmarks=[];
     for(let viewId of group.views){
       for(let view of data.views){
         if(view.id==viewId){
-          html+=`<a class="clickable" onclick="`+this.getWindowComponent()+`.scrollSmooth('`+view.id+`')"><i class="material-icons">`+view.icon+`</i><span>`+view.caption+`</span></a>`;
-          i++;
+          this.jumpmarks.push(new CardJumpmark(view.id+'_header',view.caption,view.icon));
+          //html+=`<a class="clickable" onclick="`+this.getWindowComponent()+`.scrollSmooth('`+view.id+`')"><i class="material-icons">`+view.icon+`</i><span>`+view.caption+`</span></a>`;
           break;
         }
       }
     }
-    this.jumpmarksCount=i;
-    setInterval(()=>{
-      try {
-          let jump = this.jumpmarksRef;
-          let elements = jump.nativeElement.getElementsByTagName("a");
-          let scroll = document.getElementsByClassName("card-title-element");
-          let height = document.getElementById("mdsScrollContainer").getBoundingClientRect().bottom - document.getElementById("mdsScrollContainer").getBoundingClientRect().top;
-          let pos = document.getElementById("mdsScrollContainer").scrollTop - height - 200;
-          let closest = 999999;
-          let active = elements[0];
-          for (let i = 0; i < elements.length; i++) {
-              elements[i].className = elements[i].className.replace("active", "").trim();
-              if (!scroll[i])
-                  continue;
-              let top = scroll[i].getBoundingClientRect().top;
-              if (Math.abs(top - pos) < closest) {
-                  closest = Math.abs(top - pos);
-                  active = elements[i];
-              }
-          }
-          active.className += " active";
-      }catch(e){
-
-      }
-    },200);
-    return html;
+    console.log(this.jumpmarks);
   }
 
   private renderGroup(id:string,data:any){
@@ -479,10 +441,10 @@ export class MdsComponent{
       if(group.id==id){
         let result=this.renderList(group,data);
         this.setRenderedHtml(result.main);
+        this.updateButtons();
         if(result.suggestions)
           this.renderedSuggestions=this.sanitizer.bypassSecurityTrustHtml(result.suggestions);
-        let jumpHtml=this.renderJumpmarks(group,data);
-        this.jumpmarks=this.sanitizer.bypassSecurityTrustHtml(jumpHtml);
+        this.renderJumpmarks(group,data);
         this.readValues(data);
         //setTimeout(()=>UIHelper.materializeSelect(),15);
         return;
@@ -490,6 +452,7 @@ export class MdsComponent{
     }
     let html='Group \''+id+'\' was not found in the mds';
     this.setRenderedHtml(html);
+    this.updateButtons();
   }
   public getValues(propertiesIn:any={},showError=true,widgets=this.currentWidgets){
     let properties:any={};
@@ -2381,5 +2344,12 @@ export class MdsComponent{
             this.renderGroup(nodeGroup, this.mds);
             this.isLoading = false;
         });
+    }
+
+    private updateButtons() {
+        this.buttons=[
+            new DialogButton('CANCEL',DialogButton.TYPE_CANCEL,()=>this.cancel()),
+            new DialogButton('SAVE',DialogButton.TYPE_PRIMARY,()=>this.saveValues())
+        ];
     }
 }

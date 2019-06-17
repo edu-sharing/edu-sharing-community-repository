@@ -1,136 +1,110 @@
-<div class="dialog darken" [style.z-index]="120 + priority" [@fade]="this"></div>
-  <div class="card center-card card-action card-high card-wide" [style.z-index]="121 + priority" [@cardAnimation]="this">
-    <div class="card-content">
-      <div tabindex="0" class="card-cancel" (click)="cancel()" (keyup.enter)="cancel()"><i icon iconId="close" aria="true"></i></div>
-      <div *ngIf="_nodes && _nodes.length==1" class="card-title">{{'WORKSPACE.LICENSE.TITLE' | translate:{name:_nodes[0].name} }}</div>
-      <div *ngIf="_nodes && _nodes.length!=1" class="card-title">{{'WORKSPACE.LICENSE.TITLE_MULTI' | translate:{count:_nodes.length} }}</div>
-      <div *ngIf="_properties && !_nodes" class="card-title">{{'WORKSPACE.LICENSE.TITLE' | translate:{name:_properties['cm:name']} }}</div>
+<card title="{{'WORKSPACE.LICENSE.TITLE' | translate }}" [priority]="priority" [node]="_nodes" width="large" height="xlarge"
+      [buttons]="buttons"
+      (onCancel)="cancel()"
+>
       <spinner *ngIf="loading"></spinner>
-      <div *ngIf="(_nodes || _properties) && !loading" class="card-scroll">
-        <div class="oerSelect switch">
-          <label>
-            {{ 'WORKSPACE.LICENSE.ONLY_OER' | translate }}
-            <input type="checkbox" [(ngModel)]="oerMode">
-            <span class="lever"></span>
-          </label>
-        </div>
-        <div class="oerLicenses" *ngIf="oerMode">
+      <div *ngIf="(_nodes || _properties) && !loading" class="license-content">
+        <mat-slide-toggle class="oerSelect switch toggle-reverse" [(ngModel)]="oerMode">{{ 'WORKSPACE.LICENSE.ONLY_OER' | translate }}</mat-slide-toggle>
+        <mat-radio-group class="oerLicenses" [(ngModel)]="type" name="oerLicenses" *ngIf="oerMode">
           <div class="oerCC0">
             <h4>{{'LICENSE.GROUPS.CC_0' | translate}}</h4>
             <div *ngIf="isAllowedLicense('CC_0')">
-              <div class="radio">
-                <input type="radio" (ngModel)="type" [ngModel]="cc0Type" (change)="setCC0()" value="CC_0" id="CC_02">
-                <label for="CC_02">
-                  <h4>{{'WORKSPACE.LICENSE.CC0.CC0' | translate}}</h4>
-                  <h5 innerHTML="{{'WORKSPACE.LICENSE.CC0.CC0_INFO' | translate}}"></h5>
-                  <h5><a class="focus-underline" [href]="getLicenseUrlVersion('CC_0')" target="_blank">{{'WORKSPACE.LICENSE.MORE' | translate}}</a></h5>
-                </label>
-              </div>
+              <mat-radio-button value="CC_0">
+                <h4>{{'WORKSPACE.LICENSE.CC0.CC0' | translate}}</h4>
+                <h5 innerHTML="{{'WORKSPACE.LICENSE.CC0.CC0_INFO' | translate}}"></h5>
+                <h5><a class="focus-underline" [href]="getLicenseUrlVersion('CC_0')" target="_blank">{{'WORKSPACE.LICENSE.MORE' | translate}}</a></h5>
+              </mat-radio-button>
             </div>
             <div *ngIf="isAllowedLicense('PDM')">
-              <div class="radio">
-                <input type="radio" [(ngModel)]="cc0Type" (change)="$event.target.checked ? type='CC_0' : null" value="PDM" id="PDM2">
-                <label for="PDM2">
-                  <h4>{{'WORKSPACE.LICENSE.CC0.PDM' | translate}}</h4>
-                  <h5>{{'WORKSPACE.LICENSE.CC0.PDM_INFO' | translate}}</h5>
-                  <h5><a class="focus-underline" [href]="getLicenseUrlVersion('PDM')" target="_blank">{{'WORKSPACE.LICENSE.MORE' | translate}}</a></h5>
-                </label>
-              </div>
+              <mat-radio-button value="PDM">
+                <h4>{{'WORKSPACE.LICENSE.CC0.PDM' | translate}}</h4>
+                <h5>{{'WORKSPACE.LICENSE.CC0.PDM_INFO' | translate}}</h5>
+                <h5><a class="focus-underline" [href]="getLicenseUrlVersion('PDM')" target="_blank">{{'WORKSPACE.LICENSE.MORE' | translate}}</a></h5>
+              </mat-radio-button>
             </div>
           </div>
           <div class="oerCCBY">
             <h4>{{'LICENSE.GROUPS.CC_BY' | translate}}</h4>
             <div *ngIf="isAllowedLicense('CC_BY')">
-              <div class="radio">
-                <input type="radio" [ngModel]="type+(ccShare ? '_'+ccShare : '')" value="CC_BY" (change)="$event.target.checked ? setCCBy() : null" id="CC_BY">
-                <label for="CC_BY">
-                  <h4>{{'WORKSPACE.LICENSE.CC.CC_BY_RADIO' | translate}}</h4>
-                  <h5>{{'WORKSPACE.LICENSE.CC.CC_BY_INFO' | translate}}</h5>
-                  <h5><a class="focus-underline" [href]="getLicenseUrlVersion('CC_BY')" target="_blank">{{'WORKSPACE.LICENSE.MORE' | translate}}</a></h5>
-                </label>
-              </div>
+              <mat-radio-button value="CC_BY" id="CC_BY">
+                <h4>{{'WORKSPACE.LICENSE.CC.CC_BY_RADIO' | translate}}</h4>
+                <h5>{{'WORKSPACE.LICENSE.CC.CC_BY_INFO' | translate}}</h5>
+                <h5><a class="focus-underline" [href]="getLicenseUrlVersion('CC_BY')" target="_blank">{{'WORKSPACE.LICENSE.MORE' | translate}}</a></h5>
+              </mat-radio-button>
             </div>
             <div *ngIf="isAllowedLicense('CC_BY_SA')">
-              <div class="radio">
-                <input type="radio" [(ngModel)]="ccShare" (change)="$event.target.checked ? type='CC_BY' : null"  value="SA" id="CC_BY_SA">
-                <label for="CC_BY_SA">
+                <mat-radio-button value="CC_BY_SA" id="CC_BY_SA">
                   <h4>{{'WORKSPACE.LICENSE.CC.CC_BY_SA_RADIO' | translate}}</h4>
                   <h5>{{'WORKSPACE.LICENSE.CC.CC_BY_SA_INFO' | translate}}</h5>
                   <h5><a class="focus-underline" [href]="getLicenseUrlVersion('CC_BY_SA')" target="_blank">{{'WORKSPACE.LICENSE.MORE' | translate}}</a></h5>
-                </label>
-              </div>
+                </mat-radio-button>
             </div>
-            <div class="ccAuthor clickable" (click)="showCcAuthor=!showCcAuthor;"><i icon iconId="{{ showCcAuthor ? 'keyboard_arrow_down' : 'keyboard_arrow_right' }}"></i> {{ 'WORKSPACE.LICENSE.CC.NAME_AUTHOR' | translate}}</div>
+            <button mat-button color="primary" class="ccAuthor clickable" (click)="showCcAuthor=!showCcAuthor;">
+              <i icon iconId="{{ showCcAuthor ? 'keyboard_arrow_down' : 'keyboard_arrow_right' }}"></i>
+              {{ 'WORKSPACE.LICENSE.CC.NAME_AUTHOR' | translate}}
+            </button>
           </div>
-        </div>
+        </mat-radio-group>
         <div class="allLicenses" *ngIf="!oerMode">
-          <label for="type" class="licenseTypeLabel">{{'WORKSPACE.LICENSE.TYPE' | translate}}</label>
-          <select #selectLicense class="licenseType" id="type" type="text" [(ngModel)]="type">
-            <option *ngFor="let license of licenseMainTypes" [value]="license">{{ ('LICENSE.GROUPS.'+license) | translate}}</option>
-          </select>
-            <div>
-          <div *ngIf="type=='CC_BY'" class="cc">
+          <mat-form-field class="licenseType" >
+            <mat-label>{{'WORKSPACE.LICENSE.TYPE' | translate}}</mat-label>
+            <mat-select #selectLicense id="type" type="text" [(ngModel)]="primaryType">
+              <mat-option *ngFor="let license of licenseMainTypes" [value]="license">{{ ('LICENSE.GROUPS.'+license) | translate}}</mat-option>
+            </mat-select>
+          </mat-form-field>
+          <div *ngIf="primaryType=='CC_BY'" class="cc">
             <h5 class="ccAbout"><a class="focus-underline" [href]="getLicenseUrlVersion('CC_BY_ABOUT')" target="_blank">{{ 'WORKSPACE.LICENSE.CC.ABOUT' | translate}}</a></h5>
             <div *ngIf="isAllowedLicense('CC_BY_SA') || isAllowedLicense('CC_BY_ND')">
               <h4>{{'WORKSPACE.LICENSE.CC.SHARE' | translate}}</h4>
               <h5>{{'WORKSPACE.LICENSE.CC.SHARE_INFO' | translate}}</h5>
-              <input type="radio" name="CC_SHARE" [(ngModel)]="ccShare" value="" id="CC_ALL"><label for="CC_ALL">{{'YES' | translate}}</label>
-              <div *ngIf="isAllowedLicense('CC_BY_SA')"><input type="radio" name="CC_SHARE" [(ngModel)]="ccShare" value="SA" id="CC_SA"><label for="CC_SA">{{'WORKSPACE.LICENSE.CC.YES_ALIKE' | translate}}</label></div>
-              <div *ngIf="isAllowedLicense('CC_BY_ND')"><input type="radio" name="CC_SHARE" [(ngModel)]="ccShare" value="ND" id="CC_ND"><label for="CC_ND">{{'NO' | translate}}</label></div>
+              <mat-radio-group [(ngModel)]="ccShare">
+                <mat-radio-button value="">{{'YES' | translate}}</mat-radio-button>
+                <mat-radio-button *ngIf="isAllowedLicense('CC_BY_SA')" value="SA">{{'WORKSPACE.LICENSE.CC.YES_ALIKE' | translate}}</mat-radio-button>
+                <mat-radio-button *ngIf="isAllowedLicense('CC_BY_ND')" value="ND">{{'NO' | translate}}</mat-radio-button>
+              </mat-radio-group>
             </div>
             <div *ngIf="isAllowedLicense('CC_BY_NC')">
               <h4>{{'WORKSPACE.LICENSE.CC.COMMERCIAL' | translate}}</h4>
               <h5>{{'WORKSPACE.LICENSE.CC.COMMERCIAL_INFO' | translate}}</h5>
-              <input type="radio" name="CC_COMMERCIAL" [(ngModel)]="ccCommercial" value="" id="CC_C"><label for="CC_C">{{'YES' | translate}}</label>
-              <input type="radio" name="CC_COMMERCIAL" [(ngModel)]="ccCommercial" value="NC" id="CC_NC"><label for="CC_NC">{{'NO' | translate}}</label>
+              <mat-radio-group [(ngModel)]="ccCommercial">
+                <mat-radio-button value="">{{'YES' | translate}}</mat-radio-button>
+                <mat-radio-button value="NC">{{'NO' | translate}}</mat-radio-button>
+              </mat-radio-group>
             </div>
             <div class="ccAuthor clickable" (click)="showCcAuthor=!showCcAuthor;"><i icon iconId="{{ showCcAuthor ? 'keyboard_arrow_down' : 'keyboard_arrow_right' }}"></i> {{ 'WORKSPACE.LICENSE.CC.NAME_AUTHOR' | translate}}</div>
           </div>
-              <div *ngIf="type=='COPYRIGHT'" class="copyright">
+              <mat-radio-group [(ngModel)]="type" *ngIf="primaryType=='COPYRIGHT'" class="copyright">
                 <div *ngIf="isAllowedLicense('COPYRIGHT_FREE')">
-                  <div class="radio">
-                    <input type="radio" [(ngModel)]="copyrightType" value="COPYRIGHT_FREE" id="COPYRIGHT_FREE">
-                    <label for="COPYRIGHT_FREE">
+                  <mat-radio-button value="COPYRIGHT_FREE">
                       <h4>{{'WORKSPACE.LICENSE.COPYRIGHT.FREE' | translate}}</h4>
                       <h5 innerHTML="{{'WORKSPACE.LICENSE.COPYRIGHT.FREE_INFO' | translate}}"></h5>
-                    </label>
-                  </div>
+                  </mat-radio-button>
                 </div>
                 <div *ngIf="isAllowedLicense('COPYRIGHT_LICENSE')">
-                  <div class="radio">
-                    <input type="radio" [(ngModel)]="copyrightType" value="COPYRIGHT_LICENSE" id="COPYRIGHT_LICENSE">
-                    <label for="COPYRIGHT_LICENSE">
-                      <h4>{{'WORKSPACE.LICENSE.COPYRIGHT.LICENSE' | translate}}</h4>
-                      <h5>{{'WORKSPACE.LICENSE.COPYRIGHT.LICENSE_INFO' | translate}}</h5>
-                    </label>
-                  </div>
+                  <mat-radio-button value="COPYRIGHT_LICENSE">
+                    <h4>{{'WORKSPACE.LICENSE.COPYRIGHT.LICENSE' | translate}}</h4>
+                    <h5>{{'WORKSPACE.LICENSE.COPYRIGHT.LICENSE_INFO' | translate}}</h5>
+                  </mat-radio-button>
                 </div>
 
-              </div>
-              <div *ngIf="type=='CC_0'" class="cc">
+              </mat-radio-group>
+              <mat-radio-group [(ngModel)]="type" *ngIf="primaryType=='CC_0'" class="cc">
                 <div *ngIf="isAllowedLicense('CC_0')">
-                  <div class="radio">
-                    <input type="radio" [(ngModel)]="cc0Type" value="CC_0" id="CC_0">
-                    <label for="CC_0">
-                      <h4>{{'WORKSPACE.LICENSE.CC0.CC0' | translate}}</h4>
-                      <h5 innerHTML="{{'WORKSPACE.LICENSE.CC0.CC0_INFO' | translate}}"></h5>
-                      <h5><a [href]="getLicenseUrlVersion('CC_0')" target="_blank">{{'WORKSPACE.LICENSE.MORE' | translate}}</a></h5>
-                    </label>
-                  </div>
+                  <mat-radio-button value="CC_0">
+                    <h4>{{'WORKSPACE.LICENSE.CC0.CC0' | translate}}</h4>
+                    <h5 innerHTML="{{'WORKSPACE.LICENSE.CC0.CC0_INFO' | translate}}"></h5>
+                    <h5><a class="focus-underline" [href]="getLicenseUrlVersion('CC_0')" target="_blank">{{'WORKSPACE.LICENSE.MORE' | translate}}</a></h5>
+                  </mat-radio-button>
                 </div>
                 <div *ngIf="isAllowedLicense('PDM')">
-                  <div class="radio">
-                    <input type="radio" [(ngModel)]="cc0Type" value="PDM" id="PDM">
-                    <label for="PDM">
-                      <h4>{{'WORKSPACE.LICENSE.CC0.PDM' | translate}}</h4>
-                      <h5>{{'WORKSPACE.LICENSE.CC0.PDM_INFO' | translate}}</h5>
-                      <h5><a [href]="getLicenseUrlVersion('PDM')" target="_blank">{{'WORKSPACE.LICENSE.MORE' | translate}}</a></h5>
-                    </label>
-                  </div>
+                  <mat-radio-button value="PDM">
+                    <h4>{{'WORKSPACE.LICENSE.CC0.PDM' | translate}}</h4>
+                    <h5>{{'WORKSPACE.LICENSE.CC0.PDM_INFO' | translate}}</h5>
+                    <h5><a class="focus-underline" [href]="getLicenseUrlVersion('PDM')" target="_blank">{{'WORKSPACE.LICENSE.MORE' | translate}}</a></h5>
+                  </mat-radio-button>
                 </div>
-
-              </div>
-              <div *ngIf="type=='EDU'" class="edu">
+              </mat-radio-group>
+              <!--<div *ngIf="primaryType=='EDU'" class="edu">
                 <div class="radio">
                   <input type="radio" [(ngModel)]="eduType" value="P_NR" id="P_NR">
                   <label for="P_NR">
@@ -147,55 +121,63 @@
                 </div>
                 <input type="checkbox" class="filled-in" [(ngModel)]="eduDownload" id="DOWNLOAD"><label for="DOWNLOAD">{{'WORKSPACE.LICENSE.EDU.DOWNLOAD' | translate}}</label>
 
-              </div>
-              <div *ngIf="type=='CUSTOM'" class="custom">
-                <textarea #rights id="licenseRights" class="materialize-textarea" [(ngModel)]="rightsDescription" placeholder="{{'WORKSPACE.LICENSE.CUSTOM_RIGHTS' | translate}}"></textarea>
+              </div>-->
+              <div *ngIf="primaryType=='CUSTOM'" class="custom">
+                 <textarea matInput
+                           cdkTextareaAutosize
+                           [(ngModel)]="rightsDescription"
+                           cdkAutosizeMinRows="2"
+                           cdkAutosizeMaxRows="5"></textarea>
               </div>
           </div>
-        </div>
         <div *ngIf="showCcAuthor">
           <div class="ccAuthorGroup" [class.ccAuthorGroupOer]="oerMode">
-            <label for="CC_TITLE">{{'WORKSPACE.LICENSE.CC.TITLE_OF_WORK' | translate}}</label>
-            <input type="text" id="CC_TITLE" [(ngModel)]="ccTitleOfWork">
-            <label for="CC_URL">{{'WORKSPACE.LICENSE.CC.SOURCE_URL' | translate}}</label>
-            <input type="text" id="CC_URL" [(ngModel)]="ccSourceUrl">
-            <label for="CC_PROFILE">{{'WORKSPACE.LICENSE.CC.PROFILE_URL' | translate}}</label>
-            <input type="text" id="CC_PROFILE" [(ngModel)]="ccProfileUrl">
+            <mat-form-field>
+              <mat-label>{{'WORKSPACE.LICENSE.CC.TITLE_OF_WORK' | translate}}</mat-label>
+              <input matInput id="CC_TITLE" [(ngModel)]="ccTitleOfWork">
+            </mat-form-field>
+            <mat-form-field>
+              <mat-label>{{'WORKSPACE.LICENSE.CC.SOURCE_URL' | translate}}</mat-label>
+              <input matInput id="CC_URL" [(ngModel)]="ccSourceUrl">
+            </mat-form-field>
+            <mat-form-field>
+              <mat-label>{{'WORKSPACE.LICENSE.CC.PROFILE_URL' | translate}}</mat-label>
+              <input matInput id="CC_PROFILE" [(ngModel)]="ccProfileUrl">
+            </mat-form-field>
           </div>
         </div>
-        <div class="row">
-            <div class="col s12">
-              <ul class="tabs" id="mdsAuthorTabs">
-                <li class="clickable tab col s6" (click)="authorTab=0">
-                  <a [class.active]="authorTab==0">{{'MDS.AUTHOR_FREETEXT' | translate}}</a>
-                </li>
-                <li class="clickable tab col s6" (click)="authorTab=1">
-                  <a [class.active]="authorTab==1">{{'MDS.AUTHOR_PERSON' | translate}}</a>
-                </li>
-              </ul>
-            </div>
-            <div class="authorFreetext" *ngIf="authorTab==0"><textarea class="materialize-textarea" id="authorFreetext" #freetext [(ngModel)]="authorFreetext" placeholder="{{'MDS.AUTHOR_FREETEXT_PLACEHOLDER' | translate}}"></textarea></div>
-            <div class="authorPerson" *ngIf="authorTab==1">
-              <div class="vcard">
-                <div class="vcardGroup">
-                  <i icon iconID="person"></i>
-                  <div>
-                    <label for="firstName">{{'VCARD.Givenname' | translate}}</label>
-                    <input type="text" class="vcard_Givenname vcardFirstInput" id="firstName" [(ngModel)]="authorVCard.givenname">
-                  </div>
-                </div>
-                <div class="vcardGroup">
-                  <div>
-                    <label for="lastName">{{'VCARD.Surname' | translate}}</label>
-                    <input type="text" class="vcard_Surname" id="lastName" [(ngModel)]="authorVCard.surname">
-                  </div>
-                </div>
+        <mat-tab-group mat-stretch-tabs [(selectedIndex)]="authorTab">
+          <mat-tab label="{{'MDS.AUTHOR_FREETEXT' | translate}}">
+            <mat-form-field class="authorFreetext">
+              <mat-label>{{'MDS.AUTHOR_FREETEXT_PLACEHOLDER' | translate}}</mat-label>
+              <textarea matInput
+              cdkTextareaAutosize
+              id="authorFreetext" [(ngModel)]="authorFreetext"
+              cdkAutosizeMinRows="2"
+              cdkAutosizeMaxRows="5"></textarea>
+            </mat-form-field>
+          </mat-tab>
+          <mat-tab label="{{'MDS.AUTHOR_PERSON' | translate}}">
+            <div class="vcard authorPerson">
+              <div class="vcardGroup">
+                <!-- <i icon iconId="person"></i> -->
+                <mat-form-field>
+                  <mat-label>{{'VCARD.Givenname' | translate}}</mat-label>
+                  <input matInput class="vcard_Givenname vcardFirstInput" id="firstName" [(ngModel)]="authorVCard.givenname">
+                </mat-form-field>
               </div>
-              <div class="contributors" *ngIf="_nodes && _nodes.length==1 && !ui.isMobile()">
-                <a class="clickable contributorsLink" (click)="openContributorDialog()">{{'MDS.CONTRIBUTOR_LINK' | translate}} <i icon iconId="arrow_forward"></i></a>
+              <div class="vcardGroup">
+                <mat-form-field>
+                  <mat-label>{{'VCARD.Surname' | translate}}</mat-label>
+                  <input matInput class="vcard_Surname" id="lastName" [(ngModel)]="authorVCard.surname">
+                </mat-form-field>
               </div>
             </div>
-          </div>
+            <button class="contributors" mat-button color="primary" (click)="openContributorDialog()" class="contributors" *ngIf="_nodes && _nodes.length==1 && !ui.isMobile()">
+              {{'MDS.CONTRIBUTOR_LINK' | translate}} <i icon iconId="arrow_forward"></i>
+            </button>
+          </mat-tab>
+        </mat-tab-group>
           <div class="currentLicense">
           <h4  *ngIf="type!='MULTI'">{{'WORKSPACE.LICENSE.CURRENT' | translate}}</h4>
           <img *ngIf="type!='MULTI'" class="currentLicenseIcon" src="{{getLicenseIcon()}}">
@@ -223,12 +205,12 @@
             </div>
           <div class="currentLicenseDescription">
             <div class="customLicenseDescription" *ngIf="type=='CUSTOM'">{{rightsDescription}}</div>
-            <div *ngIf="type!='CUSTOM' && type!='COPYRIGHT'" innerHTML="{{ 'LICENSE.DESCRIPTION.'+type | translate }}">
+            <div *ngIf="primaryType!='CUSTOM' && primaryType!='COPYRIGHT'" innerHTML="{{ 'LICENSE.DESCRIPTION.'+primaryType | translate }}">
             </div>
-            <div *ngIf="type=='COPYRIGHT'">
+            <div *ngIf="primaryType=='COPYRIGHT'">
               <div innerHTML="{{ 'LICENSE.DESCRIPTION.'+copyrightType | translate}}"></div>
             </div>
-            <div *ngIf="type=='CC_BY'">
+            <div *ngIf="primaryType=='CC_BY'">
               <div *ngIf="ccShare">
                 {{ 'LICENSE.DESCRIPTION.CC_SHARE_'+ccShare | translate}}
               </div>
@@ -239,45 +221,24 @@
                 {{ 'WORKSPACE.LICENSE.LOCALE' | translate:{locale:ccLocale} }} {{'LANGUAGE.'+(ccLocale ? ccLocale : 'INTERNATIONAL') | translate}}.
               </div>
             </div>
-            <div *ngIf="type=='CC_BY' || type=='CC_0'" class="licenseUrl">
+            <div *ngIf="primaryType=='CC_BY' || primaryType=='CC_0'" class="licenseUrl">
               <a [href]="getLicenseUrl()" target="_blank">{{'WORKSPACE.LICENSE.MORE' | translate}}</a>
             </div>
           </div>
         </div>
         <div class="licenseCheckbox">
-         <!-- <input #releaseCheckbox type="checkbox" class="filled-in release" [(ngModel)]="release" id="releaseCb" [disabled]="!allowRelease">
-          <label *ngIf="_nodes.length==1" class="release" for="releaseCb">{{'WORKSPACE.LICENSE.RELEASE' | translate}}</label>
-          <label *ngIf="_nodes.length!=1" class="release" for="releaseCb">{{'WORKSPACE.LICENSE.RELEASE_MULTI' | translate:{count:_nodes.length} }}</label>-->
           <div class="switch-release" *ngIf="_nodes">
-            <div class="switch">
-                <label class="strong" class="release"><input #releaseCheckbox type="checkbox" [disabled]="!allowRelease" [(ngModel)]="release" (ngModelChange)="changeRelease($event)">
-                    <span class="lever"></span>
-                    {{'WORKSPACE.LICENSE.RELEASE'+(_nodes.length>1 ? '_MULTI' : '') | translate:{count:_nodes.length} }}
-                 </label>
-            </div>
+            <mat-checkbox class="strong" [disabled]="!allowRelease" [(ngModel)]="release" [(indeterminate)]="releaseIndeterminate" (ngModelChange)="changeRelease($event)">
+              {{'WORKSPACE.LICENSE.RELEASE'+(_nodes.length>1 ? '_MULTI' : '') | translate:{count:_nodes.length} }}
+            </mat-checkbox>
             <div class="doi" *ngIf="allowDOI()">
-              <input type="checkbox" [disabled]="doiDisabled" [(ngModel)]="doiActive" class="filled-in" id="doi">
-                <label for="doi" class="strong">{{'WORKSPACE.SHARE.DOI' | translate}}</label>
-                <span>{{'WORKSPACE.SHARE.DOI_INFO' | translate}}</span>
+              <mat-checkbox [disabled]="doiDisabled" [(ngModel)]="doiActive" id="doi">
+                <div class="strong">{{'WORKSPACE.SHARE.DOI' | translate}}</div>
+                <div class="label-secondary">{{'WORKSPACE.SHARE.DOI_INFO' | translate}}</div>
+              </mat-checkbox>
             </div>
           </div>
-
-          <input #contactCheckbox type="checkbox" class="filled-in" [(ngModel)]="contact" id="contactCb"><label for="contactCb">{{'WORKSPACE.LICENSE.CONTACT' | translate}}</label>
+          <mat-checkbox [(ngModel)]="contact" [(indeterminate)]="contactIndeterminate">{{'WORKSPACE.LICENSE.CONTACT' | translate}}</mat-checkbox>
         </div>
-    </div>
-    </div>
-
-    <div class="card-action">
-      <a class="waves-effect waves-light btn" tabindex="0" [class.disabled]="loading || type=='MULTI'" (click)="saveLicense()" (keyup.enter)="saveLicense()">{{'SAVE' | translate }}</a>
-      <a class="btn-flat" tabindex="0" (click)="cancel()" (keyup.enter)="cancel()">{{'CANCEL' | translate }}</a>
-    </div>
-  </div>
-
-<modal-dialog
-        [title]="dialogTitle"
-        [isCancelable]="true"
-        (onCancel)="dialogCancel()"
-        [message]="dialogMessage"
-        [buttons]="dialogButtons"
-        [priority]="2"
-></modal-dialog>
+      </div>
+</card>

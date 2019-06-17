@@ -1,10 +1,12 @@
 @import "../../../core-ui-module/styles/variables";
 
-.info{
-  display:table;
+.group{
+  display:flex;
+  flex-direction: column;
   width: 100%;
-  .info-left,.info-right{
-    display: table-cell;
+  padding: $cardPadding;
+  .info-checkbox{
+    padding-bottom: 10px;
   }
   .configuration-link{
     position: relative;
@@ -24,24 +26,14 @@
 }
 .copyLink{
   padding-left: 10px;
+  margin-top: 10px;
 }
 .heading{
   font-weight: bold;
 }
 .link{
   background-color: $backgroundColor;
-  padding: 30px 30px 10px;
-  margin-left: -20px;
-  margin-right: -20px;
-
-  .link-copy{
-    margin: 0;
-    padding: 0 1rem;
-    position: relative;
-    top: 10px;
-    height: 40px;
-    line-height: 41px;
-  }
+  padding: $cardPadding;
 }
 
 .link-info,.link-downloads{
@@ -69,12 +61,12 @@ input-password{
 .link-title{
   margin-top: 10px;
 }
-.link-enabled{
-  margin-top: -10px;
+.link-info{
+  display: flex;
+  .linkInput{
+    flex-grow: 1;
+  }
 }
-
-.copyLink{
-  min-width: 135px;
-  top: 5px;
-  text-transform: uppercase;
+.link-disabled{
+  filter:blur(2px);
 }

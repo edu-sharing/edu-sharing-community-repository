@@ -1,9 +1,5 @@
-<div class="dialog darken" [@fade]="this"></div>
-<div class="card center-card card-high card-wide card-action" [@cardAnimation]="this">
-  <div class="card-content">
-    <div tabindex="0" class="card-cancel" (click)="close()" (keyup.enter)="close()"><i icon iconId="close" aria="true"></i></div>
-    <div class="card-title">{{'NODE_INFO.TITLE' | translate:{name:_node.name} }}</div>
-    <div class="card-scroll node-info">
+<card title="{{'NODE_INFO.TITLE' | translate:{name:_node.name} }}" [node]="_node" (onCancel)="close()" [buttons]="buttons" height="xxlarge" width="xxlarge">
+    <div class="debug-content">
       <div><span>{{'NODE.cm:name' | translate}}</span><span>{{_node.name}}</span></div>
       <div><span>{{'NODE.sys:node-uuid' | translate}}</span><span><a class="clickable" (click)="openNodeWorkspace(_node)">{{_node.ref.id}}</a></span></div>
       <div><span>{{'NODE_INFO.NODE_TYPE' | translate}}</span><span>{{_node.type}}</span></div>
@@ -63,8 +59,4 @@
         <div><span>{{'NODE_INFO.JSON' | translate}}</span><span class="json">{{_json}}</span></div>
       </div>
     </div>
-  </div>
-  <div class="card-action">
-    <a class="btn waves-effect waves-light" tabindex="0" (keyup.enter)="close()" (click)="close()">{{'CLOSE' | translate}}</a>
-  </div>
-</div>
+</card>

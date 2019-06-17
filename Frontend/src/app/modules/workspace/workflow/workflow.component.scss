@@ -3,12 +3,18 @@
 h2{
   text-align: center;
   padding-top: 5%;
-  font-size: 120%;
+  font-size: 120% !important;
   color:$textLight;
+}
+.workflow-content{
+  padding: $cardPadding;
 }
 .global{
   margin-top: 15px;
   margin-bottom: 20px;
+}
+.comment{
+  width: 100%;
 }
 .receivers{
   margin-bottom: 20px;
@@ -73,18 +79,20 @@ h2{
 
 
 }
+:host /deep/ authority-search-input .mat-form-field-wrapper{
+  padding-bottom: 0;
+}
 .inputs{
   display:flex;
+  align-items: center;
   width:100%;
-  margin-bottom: -25px;
+  margin-bottom: 10px;
   authority-search-input{
     display: flex;
     width:0;
     flex-grow: 1;
   }
   .btn-flat {
-    position: relative;
-    left: 10px;
     min-width: 150px;
     display: flex;
     align-items: center;

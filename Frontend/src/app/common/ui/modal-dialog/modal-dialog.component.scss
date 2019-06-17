@@ -1,5 +1,6 @@
 @import "../../../core-ui-module/styles/variables";
 
-.card-content p{
+.modal-card-content{
   white-space: pre-line;
+  padding: $cardPadding;
 }

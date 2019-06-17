@@ -11,17 +11,15 @@
   color: $textLight;
   display: inline-block;
   width: 100%;
+  padding-top: 20px;
 }
 .breadcrumbFrame{
   float:left;
   padding:11px;
   /* padding-top:20px; */
-  position: relative;
-  top:-25px;
   height: 50px;
-  z-index: 1;
-  width: calc(100% + 40px);
-  margin-left: -20px;
+  z-index: 2;
+  width: 100%;
   background-color: #fff;
   @include materialShadowBottom();
   input{
@@ -35,12 +33,17 @@
 .fileChooser{
   margin:0 auto;
   width:100%;
-  height: calc(100% - 45px);
-  margin-bottom:-55px;
+  display: flex;
+  flex-direction: column;
 }
-.listFrame{
-  position: relative;
-  top:-10px;
+:host /deep/{
+  .fileChooserList{
+    overflow: visible;
+    width:100%;
+    background:none;
+    position: relative;
+    top: 10px;
+  }
 }
 
 /*

@@ -29,7 +29,6 @@
   import {AuthoritySearchInputComponent} from "./common/ui/authority-search-input/authority-search-input.component";
   import {KeysPipe} from './common/keys.pipe';
   import {NodeInfoComponent} from "./common/ui/node-info/node-info.component";
-  import {DropdownComponent} from "./common/ui/dropdown/dropdown.component";
   import {TutorialComponent} from "./common/ui/tutorial/tutorial.component";
   import {CookieInfoComponent} from './common/ui/cookie-info/cookie-info.component';
   import {InputPasswordComponent} from "./common/ui/input-password/input-password.component";
@@ -37,6 +36,7 @@
   import {FooterComponent} from "./common/ui/footer/footer.component";
   import {CalendarComponent} from "./common/ui/calendar/calendar.component";
   import {ImageConfigDirective} from "./common/ui/image-config.directive";
+  import {CardComponent} from "./common/ui/card/card.component";
   import {UserQuotaComponent} from "./common/ui/user-quota/user-quota.component";
   import {UrlPipe} from "./common/url.pipe";
 
@@ -56,7 +56,6 @@
       BreadcrumbsComponent,
       ActionbarComponent,
       InputPasswordComponent,
-      DropdownComponent,
       NodeInfoComponent,
       SmallCollectionComponent,
       MainNavComponent,
@@ -65,6 +64,7 @@
       MdsComponent,
       RouterComponent,
       FileDropDirective,
+      CardComponent,
       ModalDialogComponent,
       InfobarComponent,
       ModalLoadingComponent,

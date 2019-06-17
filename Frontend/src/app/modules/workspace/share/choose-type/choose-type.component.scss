@@ -4,10 +4,6 @@
 .collection-item{
   color:$textPrimary!important;
 }
-.switch{
-  background-color: #eee;
-  cursor:auto;
-}
 .switch label{
   color:$textPrimary;
 }
@@ -19,16 +15,24 @@
 .collection-item p{
   color:$textLight;
   padding: 0 28px;
+  margin:5px 0;
 }
-.switch i{
-  padding-right:10px;
+.publish-toggle {
+  width: 100%;
+  background-color: $actionDialogBackground;
+  padding: 20px 10px;
+  display: flex;
+  justify-content: flex-end;
+  mat-slide-toggle {
+    background-color: transparent;
+    .toggle {
+      display: flex;
+      align-items: center;
+      .material-icons {
+        top: 0;
+        left: 0;
+        margin-right: 5px;
+      }
+    }
+  }
 }
-.lever{
-  top: 8px!important;
-  left: 10px!important;
-}
-.lever,
-.selected{
-  float:right;
-}
-

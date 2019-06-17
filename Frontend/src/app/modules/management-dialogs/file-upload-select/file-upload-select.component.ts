@@ -1,5 +1,5 @@
 import {Component, Input, EventEmitter, Output, ViewChild, ElementRef} from '@angular/core';
-import {RestConstants} from "../../../core-module/core.module";
+import {DialogButton, RestConstants} from "../../../core-module/core.module";
 import {IamUser, Node, NodeList, NodeWrapper} from '../../../core-module/core.module';
 import {RestNodeService} from "../../../core-module/core.module";
 import {trigger} from "@angular/animations";
@@ -55,6 +55,7 @@ export class WorkspaceFileUploadSelectComponent  {
   private ltiTool: Node;
   private _link: string;
   _parent: Node;
+  buttons: DialogButton[];
   user: IamUser;
   @Input() set parent(parent:Node){
     this.breadcrumbs=null;
@@ -109,6 +110,7 @@ export class WorkspaceFileUploadSelectComponent  {
     link=link.trim();
     this.disabled=!link;
     this.ltiAllowed=true;
+    this.updateButtons();
     /*
     if(this.cleanupUrlForLti(link)) {
         this.searchService.search([{
@@ -144,7 +146,14 @@ export class WorkspaceFileUploadSelectComponent  {
       this.user=user;
     })
   }
-
+  updateButtons(){
+    let ok=new DialogButton('OK',DialogButton.TYPE_PRIMARY,()=>this.setLink());
+    ok.disabled=this.disabled || (this.showPicker && !this._parent);
+    this.buttons=[
+        new DialogButton('CANCEL',DialogButton.TYPE_CANCEL,()=>this.cancel()),
+        ok
+    ];
+  }
     private cleanupUrlForLti(link: string) {
         let start=link.indexOf("://");
         if(start==-1)

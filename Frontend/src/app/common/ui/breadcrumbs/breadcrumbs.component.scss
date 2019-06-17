@@ -11,28 +11,39 @@
   width:100%;
   max-height:1.5em;
   display:flex;
+  align-items: center;
   overflow:hidden;
   cursor: default;
-  div{
-    float:left;
-    color:$primary;
-    padding:2px 4px;
+  button {
+    color: $primary;
+    padding: 2px 4px;
     font-size: 9pt;
-    max-height: 20px;
-    overflow: hidden;
     word-break: break-all;
+    min-width: unset;
   }
-  .homeIsIcon{
-    margin-top: 3px;
+  .dropdown-icon{
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-top: 6px;
   }
-  .homeIcon{
-    margin-top: 0;
-    max-height: none;
-    min-width: 30px;
-  }
-  .breadcrumb-arrow{
+  .breadcrumb-arrow {
     font-size: 15pt;
-    margin-left: -10px;
+    color: $textLight;
+  }
+  >div {
+    display: flex;
+    align-items: center;
+
+    .homeIsIcon {
+      margin-top: 3px;
+    }
+
+    .homeIcon {
+      margin-top: 0;
+      max-height: none;
+      min-width: 30px;
+    }
   }
 }
 .selected{
@@ -41,8 +52,10 @@
   padding:0 2px!important;
 }
 .breadcrumb div:last-child{
-  font-weight: bold;
-  color:$textMain;
+  button{
+    font-weight: bold;
+    color: $textMain;
+  }
 }
 .breadcrumbMobile{
   display:none;
@@ -53,14 +66,12 @@
     align-items: center;
     margin-top: -2px;
     min-height: 25px;
+    margin-left: -30px;
     .folder{
       max-width: calc(100% - 24px);
     }
   }
   .breadcrumbDesktop{
     display:none;
-  }
-  .home i{
-    float: right;
   }
 }

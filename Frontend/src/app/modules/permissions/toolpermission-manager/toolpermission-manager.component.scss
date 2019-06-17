@@ -12,18 +12,25 @@
   top:0;
   height:calc(100% - 67px);
 }
-.fade{
-  position: absolute;
-  z-index: 100;
-  left:0;
-  top:108px;
+$headingHeight:60px;
+.heading-group {
   width: 100%;
-  height:20px;
-  background: linear-gradient(to bottom,#fff 15%,rgba(255,255,255,0.0001));
+  background-color: #fff;
+  height: $headingHeight;
+  .fade {
+    position: absolute;
+    z-index: 100;
+    left: 0;
+    top: 108px;
+    width: 100%;
+    height: 20px;
+    background: linear-gradient(to bottom, #fff 15%, rgba(255, 255, 255, 0.0001));
+  }
 }
-.card-title-element{
-  margin-left:$cardPadding*-1;
-  width:calc(100% + #{$cardPadding*2});
+.toolpermissions{
+  .groupTable{
+    padding: 0 $cardPadding;
+  }
 }
 .heading,.groupTable{
   display:flex;

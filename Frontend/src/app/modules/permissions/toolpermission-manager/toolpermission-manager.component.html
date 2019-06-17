@@ -1,26 +1,29 @@
-<div class="dialog darken" [@fade]="this"></div>
-<div class="card center-card card-action card-xwide card-high" [@cardAnimation]="this">
-  <div class="card-content">
-      <div class="card-cancel" (click)="close()" *ngIf="changing.length==0" tabindex="0" (keyup.enter)="close()"><i icon iconId="close" aria="true"></i></div>
-      <span class="card-title">{{'PERMISSIONS.TOOLPERMISSIONS.TITLE' | translate:{name:name} }}</span>
+<card title="{{'PERMISSIONS.TOOLPERMISSIONS.TITLE' | translate }}"
+      [subtitle]="name"
+      [buttons]="buttons"
+      width="xlarge"
+      [isCancelable]="changing.length==0"
+      (onCancel)="close()"
+      height="xlarge">
+    <div class="heading-group">
       <div class="heading" *ngIf="!isLoading">
         <div class="name">{{(_authority.authorityType=='GROUP' ? 'PERMISSIONS.TOOLPERMISSIONS.MEMBERS_ALLOWED' : _authority.authorityType=='EVERYONE' ? 'PERMISSIONS.TOOLPERMISSIONS.EVERYONE_ALLOWED' : 'PERMISSIONS.TOOLPERMISSIONS.USER_ALLOWED') | translate}}:</div>
         <div class="checkboxDiv">{{'PERMISSIONS.TOOLPERMISSIONS.ALLOW' | translate}}</div>
         <div class="checkboxDiv" *ngIf="_authority.authorityType!='EVERYONE'">{{'PERMISSIONS.TOOLPERMISSIONS.DENY' | translate}}</div>
         <div class="result">{{'PERMISSIONS.TOOLPERMISSIONS.RESULT' | translate}}</div>
       </div>
-    <div class="fade"></div>
-    <div class="card-scroll">
+      <!--<div class="fade"></div>-->
+    </div>
+    <div class="toolpermissions">
         <form>
         <spinner *ngIf="isLoading"></spinner>
         <div class="table" *ngIf="!isLoading">
           <div *ngFor="let group of getGroups()" class="group">
-            <div class="card-title-element"><i class="material-icons">{{group.icon}}</i>{{'PERMISSIONS.TOOLPERMISSIONS.GROUP.'+group.name | translate}}</div>
+            <div class="card-title-element"><i icon [iconId]="group.icon"></i>{{'PERMISSIONS.TOOLPERMISSIONS.GROUP.'+group.name | translate}}</div>
             <div class="groupTable" *ngFor="let key of getToolpermissionsForGroup(group)">
               <div class="name">{{'TOOLPERMISSION.'+key | translate}}<div class="technicalName">{{key}}</div></div>
-              <div class="checkboxDiv checkboxInput"><input type="checkbox" class="filled-in" [disabled]="changing.indexOf(key)!=-1" [(ngModel)]="allow[key]" name="allow{{key}}" (change)="deny[key]=false;change(key)" id="allow{{key}}"><label for="allow{{key}}"></label></div>
-              <div class="checkboxDiv checkboxInput" *ngIf="_authority.authorityType!='EVERYONE'"><input type="checkbox" class="filled-in" [disabled]="changing.indexOf(key)!=-1" [(ngModel)]="deny[key]" name="deny{{key}}" (change)="allow[key]=false;change(key)" id="deny{{key}}"><label for="deny{{key}}"></label></div>
-              <div class="result" [class.allowed]="getEffective(key)=='ALLOWED'" [class.denied]="getEffective(key)!='ALLOWED'">
+                <div class="checkboxDiv checkboxInput"><mat-checkbox [disabled]="changing.indexOf(key)!=-1" [(ngModel)]="allow[key]" name="allow{{key}}" (change)="deny[key]=false;change(key)"></mat-checkbox></div>
+                <div class="checkboxDiv checkboxInput" *ngIf="_authority.authorityType!='EVERYONE'"><mat-checkbox [disabled]="changing.indexOf(key)!=-1" [(ngModel)]="deny[key]" name="deny{{key}}" (change)="allow[key]=false;change(key)"></mat-checkbox></div>              <div class="result" [class.allowed]="getEffective(key)=='ALLOWED'" [class.denied]="getEffective(key)!='ALLOWED'">
                 <div *ngIf="changing.indexOf(key)!=-1"><spinner-small></spinner-small></div>
                 <div *ngIf="changing.indexOf(key)==-1"  [title]="isImplicit(key) ? getImplicitDetail(key) : ''">
                     <div class="text">{{'PERMISSIONS.TOOLPERMISSIONS.STATUS_'+getEffective(key) | translate}}</div>
@@ -33,17 +36,15 @@
             <div class="group-add" *ngIf="_authority.authorityType=='EVERYONE'">
                 <div class="card-title-element"><i class="material-icons">add</i>{{'PERMISSIONS.TOOLPERMISSIONS.GROUP.ADD' | translate}}</div>
                 <div class="add">
-                    <input type="text" name="addName" [(ngModel)]="addName">
+                    <mat-form-field>
+                      <mat-label></mat-label>
+                      <input matInput name="addName" [(ngModel)]="addName">
+                    </mat-form-field>
                     <spinner-small *ngIf="creatingToolpermission"></spinner-small>
                     <div class="btn waves-effect waves-light" *ngIf="!creatingToolpermission" (click)="createToolpermission()" [class.disabled]="!addName.trim()">{{'PERMISSIONS.TOOLPERMISSIONS.ADD' | translate}}</div>
                 </div>
             </div>
         </div>
         </form>
-      </div>
   </div>
-
-  <div class="card-action">
-    <a class="btn waves-effect waves-light" [class.disabled]="changing.length" (click)="close()">{{'CLOSE' | translate }}</a>
-  </div>
-</div>
+</card>

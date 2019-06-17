@@ -35,13 +35,10 @@
   position: relative;
 }
 .groupInvite {
-  padding: 10px 30px;
-  padding-top: 20px;
-  background-color: $actionDialogBackground;
+  padding: 10px 20px;
+  padding-top: 26px;
+  //background-color: $actionDialogBackground;
   flex-direction: column;
-  .global {
-    margin-left: 8px;
-  }
 }
 .searchIcon{
   position: absolute;
@@ -50,7 +47,7 @@
   top:30px;
 }
 .invited,.advanced{
-  padding:0 20px;
+  padding:20px;
 }
 :host /deep/{
   .edusharing-autocomplete-wrapper{
@@ -97,14 +94,19 @@ a.active{
 }
 .groupMessage{
   padding:0 20px;
+  mat-form-field{
+    width: 100%;
+  }
+}
+.invite-group{
+  display: flex;
+  flex-direction: column;
 }
 .publish{
-  margin: 20px -20px;
+  margin-top: 20px;
   padding:20px 20px;
-  padding-right:30px;
-  background: white;
-  float: left;
-  width: calc(100% + 40px);
+  padding-right: 30px;
+  background-color: $actionDialogBackground;
   .publishElements{
     float: left;
     max-width: 495px;
@@ -122,18 +124,18 @@ a.active{
     font-size: 110%;
   }
   .publishInfo{
-    margin-left: 76px;
+    margin-left: 44px;
     color:$textLight;
+    font-size: 90%;
     max-width:400px;
   }
   .doi{
-    margin-left: 77px;
-    margin-top: 15px;
+    margin:10px 0 10px 50px;
     display: flex;
     flex-direction: column;
     span{
       margin-left: 35px;
-      margin-right: -100px;
+      margin-right: 10px;
     }
   }
 }
@@ -145,9 +147,7 @@ a.active{
   width:100%;
   margin-bottom: -25px;
 }
-.global{
-  margin-bottom: 20px;
-}
+
 .groupToInvite{
   display:flex;
   margin-top: 35px;
@@ -166,12 +166,8 @@ a.active{
       padding:0 4px;
       display: inline;
     }
-    .btn-flat {
+    button{
       height: 40px;
-    }
-    .right{
-      width:0;
-      left:0;
     }
   }
 }
@@ -246,13 +242,8 @@ img.inherit{
   margin:0 -30px;
   margin-bottom: 0;
 }
-.tabContent{
-  padding-top: 20px;
-  height: calc(100% - 68px);
-  margin:0 -20px;
-  overflow: auto;
-  overflow-x: hidden;
-  @include iosScrolling();
+mat-tab-body-content{
+  padding: $cardPadding;
   .collections{
     background-color:$actionDialogBackground;
     margin: 0 -20px;
@@ -290,62 +281,52 @@ img.inherit{
   position: relative;
   top:14px;
 }
-.group .btn-flat{
-  width:210px;
-  min-width:210px;
-  float:none;
-}
 .typeAdd{
   position:absolute;
   right: 20px;
   width: 310px!important;
   top: -60px;
 }
-label.notify{
-  color:$textPrimary!important;
-}
-label.notify p{
+.notify-info{
   color:$textLight;
 }
-
 .share-link{
-  position: absolute;
-  top: 14px;
-  right: 60px;
-  text-transform: uppercase;
-  color:$primary;
-  cursor: pointer;
-  &:focus{
-    @include setGlobalFocus();
-  }
-  span{
-    vertical-align: middle;
-  }
-  i{
-    vertical-align: middle;
-    border-radius: 50%;
-    background: rgba(255, 255, 255, 0.5);
-    box-shadow: 0 1px 3px 1px #d0d0d0;
-    display: inline-table;
-    padding: 3px;
-    margin-right: 8px;
+  position: relative;
+  width: 100%;
+  background: $actionDialogBackground;
+  text-align: right;
+  padding: 0 3px 5px 3px;
+  button{
+    i{
+      vertical-align: middle;
+      border-radius: 50%;
+      background: white;
+      box-shadow: 0 1px 3px 1px #d0d0d0;
+      display: inline-table;
+      padding: 5px;
+      margin-left: 8px;
+    }
   }
 }
 .state{
   font-size: 9pt;
   position: absolute;
+  bottom: -48px;
   left: 12px;
   i{
     color: $textLight;
     vertical-align: bottom;
     font-size: 14pt;
+    margin-right: 3px;
   }
   .show-state{
+    display: flex;
+    align-items: center;
+    position: relative;
+    top: 3px;
     border: 2px dashed transparent;
     border-radius: 15px;
-    padding: 6px;
-    padding-right: 12px;
-    padding-left: 8px;
+    padding: 6px 20px 6px 10px;
   }
 
   .state-changed{
@@ -359,7 +340,7 @@ label.notify p{
   display: none;
 }
 @media screen and (max-width: $mobileWidth) {
-  .typeButton .btn-flat{
+  .typeButton button{
     min-width: auto;
     width: 76px;
     span {
@@ -414,11 +395,6 @@ label.notify p{
       i{
         color: $workspaceInheritColor;
       }
-    }
-  }
-  .share-link{
-    span{
-      display: none;
     }
   }
   .share-type-mobile {

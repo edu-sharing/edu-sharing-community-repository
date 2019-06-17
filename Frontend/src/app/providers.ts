@@ -7,7 +7,6 @@ import {FrameEventsService} from "./core-module/core.module";
 import {ActionbarHelperService} from "./common/services/actionbar-helper";
 import {PermissionNamePipe} from "./common/ui/permission-name.pipe";
 
-
 export const PROVIDERS:any=[
   FrameEventsService,
   TemporaryStorageService,
@@ -16,5 +15,5 @@ export const PROVIDERS:any=[
   SessionStorageService,
   ConfigurationService,
   UIService,
-  CordovaService
+  CordovaService,
 ];

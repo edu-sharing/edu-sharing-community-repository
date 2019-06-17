@@ -6,7 +6,7 @@ import {
 
 import { Toast } from "../../core-ui-module/toast";
 import {Router, Route, ActivatedRoute} from "@angular/router";
-import {OAuthResult, LoginResult, AccessScope, RestConstants} from "../../core-module/core.module";
+import {OAuthResult, LoginResult, AccessScope, RestConstants, DialogButton} from "../../core-module/core.module";
 import {OPEN_URL_MODE, UIConstants} from "../../core-module/ui/ui-constants";
 import { CordovaService } from "../../common/services/cordova.service";
 import { ConfigurationService } from '../../core-module/core.module';
@@ -29,8 +29,6 @@ enum StateUI { SERVERLIST = 0, LOGIN = 1, SERVERURL = 2, NOINTERNET = 3};
 })
 export class LoginAppComponent  implements OnInit {
 
-    private state:StateUI = StateUI.NOINTERNET;
-
     public isLoading=true;
     public disabled=true;
     private username="";
@@ -43,6 +41,7 @@ export class LoginAppComponent  implements OnInit {
     currentServer: any;
     private locationNext: string;
     config: any;
+    buttons: DialogButton[];
 
     constructor(
         private toast:Toast,
@@ -108,6 +107,7 @@ export class LoginAppComponent  implements OnInit {
 
     private checkConditions() :void  {
         this.disabled=!this.username;// || !this.password;
+        this.updateButtons();
     }
 
     private buttonLoginBack() : void {
@@ -115,10 +115,6 @@ export class LoginAppComponent  implements OnInit {
         //window.location.replace(this.cordova.getIndexPath()+"?reset=true");
         this.cordova.restartCordova();
         //(navigator as any).app.loadUrl(this.cordova.getIndexPath()+"?reset=true");
-    }
-
-    private buttonEnterServer() : void {
-        this.state = StateUI.SERVERURL;
     }
 
     private login(){
@@ -194,7 +190,6 @@ export class LoginAppComponent  implements OnInit {
             console.log("INIT TranslationService .. OK");
             this.locator.locateApi().subscribe(()=>{
                 this.serverurl=this.locator.endpointUrl;
-                this.state=StateUI.LOGIN;
                 this.configService.getAll().subscribe((config)=>{
                     this.config=config;
                     if(!this.config.register)
@@ -213,6 +208,17 @@ export class LoginAppComponent  implements OnInit {
         }
         else {
             UIHelper.openUrl(this.config.register.registerUrl,this.bridge,OPEN_URL_MODE.BlankSystemBrowser);
+        }
+    }
+    updateButtons(){
+        let login=new DialogButton('LOGIN.LOGIN',DialogButton.TYPE_PRIMARY,()=>this.login());
+        login.disabled=this.disabled;
+        if(this.config && (this.config.register.local || this.config.register.recoverUrl)){
+            let recover=new DialogButton('LOGIN.RECOVER_PASSWORD',DialogButton.TYPE_CANCEL,()=>this.recoverPassword());
+            this.buttons=[recover,login];
+        }
+        else{
+            this.buttons=[login];
         }
     }
 }

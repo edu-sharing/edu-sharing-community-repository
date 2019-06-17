@@ -122,8 +122,6 @@ export class MainNavComponent implements AfterViewInit{
   public displaySidebar=false;
   public user : IamUser;
   public userName : string;
-  public userOpen = false;
-  public helpOpen = false;
   public _currentScope:string;
 
   /**
@@ -306,13 +304,11 @@ export class MainNavComponent implements AfterViewInit{
     }
   }
   public openProfileDialog(){
-    this.userOpen=false;
     this.showProfile=true;
   }
   public openProfile(){
     this.router.navigate([UIConstants.ROUTER_PREFIX+"profiles",RestConstants.ME]);
     this.displaySidebar=false;
-    this.userOpen=false;
   }
   public getCurrentScopeIcon(){
     if(this._currentScope=='login' || this._currentScope=='profiles')
@@ -455,15 +451,8 @@ export class MainNavComponent implements AfterViewInit{
   private showUserMenu(){
     if(this._currentScope=='login')
       return;
-    this.updateUserOptions();
-    this.userOpen=true;
-  }
-  public showHelpMenu(){
-    this.updateHelpOptions();
-    this.helpOpen=true;
   }
   public showHelp(url:string){
-    this.helpOpen=false;
     UIHelper.openUrl(url,this.bridge,OPEN_URL_MODE.BlankSystemBrowser);
   }
   private logout(){
@@ -592,6 +581,8 @@ export class MainNavComponent implements AfterViewInit{
       this.filterButtons();
       this.storage.set(TemporaryStorageService.MAIN_NAV_BUTTONS,this.sidebarButtons);
       this.showLicenseAgreement();
+      this.updateUserOptions();
+      this.updateHelpOptions();
     },(error:any)=>this.hideButtons(buttons));
   }
 

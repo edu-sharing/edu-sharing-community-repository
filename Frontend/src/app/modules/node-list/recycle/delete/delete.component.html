@@ -1,18 +1,11 @@
-<div class="dialog darken" *ngIf="node.length">
-<div class="card center-card">
-    <div class="card-content">
-        <span class="card-title">{{'RECYCLE.DELETE.CONFIRM_TITLE' | translate }}</span>
-              <p>{{'RECYCLE.DELETE.CONFIRM_MESSAGE' | translate }}</p>
-              <form>
-              <div class="checkbox"><input name="skipDeleteConfirmation" id="skipDeleteConfirmation" class="filled-in" type="checkbox" [(ngModel)]="skipDeleteConfirmation" >
-              <label for="skipDeleteConfirmation">{{'RECYCLE.DELETE.NOT_ASK_AGAIN' | translate }}</label>
-                </div>
-              </form>
-
+<card title="{{'RECYCLE.DELETE.CONFIRM_TITLE' | translate }}" [node]="node" width="normal" height="auto" (onCancel)="cancel()" [buttons]="buttons">
+    <div class="card-content-padding">
+        <span class="card-title"></span>
+          <p>{{'RECYCLE.DELETE.CONFIRM_MESSAGE' | translate }}</p>
+          <form>
+              <div class="checkbox">
+                  <mat-checkbox name="skipDeleteConfirmation"[(ngModel)]="skipDeleteConfirmation">{{'RECYCLE.DELETE.NOT_ASK_AGAIN' | translate }}</mat-checkbox>
+              </div>
+          </form>
     </div>
-         <div class="card-action">
-          <a class="waves-effect waves-light btn" (click)="confirm()" tabindex="0" (keyup.enter)="confirm()">{{'RECYCLE.DELETE.YES' | translate }}</a>
-          <a class="btn-flat" (click)="cancel()"  tabindex="0" (keyup.enter)="cancel()">{{'RECYCLE.DELETE.CANCEL' | translate }}</a>
-         </div>
-</div>
-</div>
+</card>

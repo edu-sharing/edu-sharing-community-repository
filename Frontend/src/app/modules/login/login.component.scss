@@ -1,7 +1,12 @@
 @import "../../core-ui-module/styles/variables";
 
-md-input{
-  width:100%;
+.login-content{
+  padding:$cardPadding;
+}
+:host /deep/ .login-content {
+  mat-form-field {
+    width: calc(100% - .2rem);
+  }
 }
 .dialog{
   z-index: 10;
@@ -15,7 +20,7 @@ powered-by{
   bottom: 5%;
 }
 .powered-down{
-  top: calc(15% + 530px);
+  top: calc(50% + 280px);
 }
 .card-cancel{
   z-index: 1;
@@ -44,7 +49,7 @@ powered-by{
   }
 }
 .register{
-  padding-bottom: 10px;
+  padding-bottom: 20px;
   color:$textLight;
   a{
     text-transform: uppercase;
@@ -77,6 +82,9 @@ powered-by{
       padding: 0 10px 20px 10px;
       text-align: center;
     }
+    .group-actions{
+      text-align: right;
+    }
     .sso-group{
       display: flex;
       .group-actions{
@@ -85,21 +93,12 @@ powered-by{
       }
       .sso-logo{
         padding-left: 10px;
-        height: 114px;
+        height: 155px;
       }
     }
     mat-form-field{
       width: 100%;
     }
-  }
-}
-// @todo: remove this when switching to full angular material
-:host /deep/ {
-  .mat-form-field-appearance-outline .mat-form-field-outline{
-    top: 0;
-  }
-  .mat-form-field-appearance-outline .mat-form-field-infix {
-    padding-top: 0.15em;
   }
 }
 .useUrl{
@@ -127,28 +126,13 @@ powered-by{
   powered-by{
     display: none;
   }
-  .card{
-    top: 0;
-    bottom:$mobileTabNavHeight;
-  }
-  .center-card .card-scroll{
-    height:calc(100% + 69px);
-  }
   .card-action-info{
     display: none;
   }
 }
 @media screen and (max-width: $mobileWidth+$mobileStage*1) {
   .branding{
-    position: absolute;
-    top: -27px;
-    left: 0;
-    display: flex;
-    justify-content: center;
-    img{
-      width:80px;
-      height:auto;
-    }
+    display: none;
   }
 }
 @media screen and (max-height: $mobileHeightWithKeyboard) {

@@ -29,6 +29,8 @@ input[type=search]{
   }
   actionbar{
     min-width: 170px;
+    display: flex;
+    justify-content: flex-end;
   }
 }
 .memberActions{
@@ -50,6 +52,11 @@ input[type=search]{
 }
 .memberInput{
   width:280px;
+}
+:host /deep/{
+  .card-edit mat-form-field{
+    width: 100%;
+  }
 }
 .editSystemName{
   margin-bottom: 10px;

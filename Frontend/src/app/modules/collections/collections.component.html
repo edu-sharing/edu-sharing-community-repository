@@ -110,13 +110,7 @@
 
     <div class="section-headline"><div>{{ 'collections_content' | translate }}</div>
                   <div class="custom-order" *ngIf="!isMobile() && collectionContent.references && collectionContent.references.length>1 && isUserAllowedToEdit(collectionContent.collection)">
-                    <div class="switch">
-                      <label>
-                        <input type="checkbox" [ngModel]="collectionContent.collection.orderMode=='custom'" (change)="setCustomOrder($event)">
-                        <span class="lever"></span>
-                        {{ 'COLLECTIONS.CUSTOM_ORDER' | translate}}
-                      </label>
-                    </div>
+                    <mat-slide-toggle [ngModel]="collectionContent.collection.orderMode=='custom'" (change)="setCustomOrder($event)">{{ 'COLLECTIONS.CUSTOM_ORDER' | translate}}</mat-slide-toggle>
                   </div>
         <actionbar class="actionbarMaterials"
             [options]="optionsMaterials"
@@ -217,7 +211,8 @@
                  [options]="optionsCollection"
                  [numberOfAlwaysVisibleOptions]="1"
                  [numberOfAlwaysVisibleOptionsMobile]="1"
-                 [appearance]="'round'"
+                 appearance="round"
+                 [style]="'flat'"
                  [dropdownPosition]="'right'"
       ></actionbar>
     <div class="collection-new-preview-headline collections-header-texttop" style="overflow:hidden;">

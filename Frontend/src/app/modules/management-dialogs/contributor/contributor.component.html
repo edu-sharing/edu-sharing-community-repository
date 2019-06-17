@@ -1,11 +1,10 @@
-<div class="dialog darken" [@fade]="this"></div>
-  <div class="card center-card card-high card-action" [@cardAnimation]="this">
-    <div class="card-content">
-      <div tabindex="0" class="card-cancel" (click)="cancel()" (keyup.enter)="cancel()"><i icon iconId="close" aria="true"></i></div>
-      <div class="card-title">{{'WORKSPACE.CONTRIBUTOR.TITLE' | translate:{name:node ? node.name : ''} }}</div>
+<card title="{{'WORKSPACE.CONTRIBUTOR.TITLE' | translate }}" [node]="node" width="small" height="large"
+      [buttons]="buttons"
+      (onCancel)="cancel()"
+>
       <spinner *ngIf="loading"></spinner>
-      <div class="card-scroll" *ngIf="!loading">
-        <h2 class="lifecycleHeading">{{'WORKSPACE.CONTRIBUTOR.LIFECYCLECONTRIBUTOR' | translate}}</h2>
+      <div class="contributor-content" *ngIf="!loading">
+        <h4 class="lifecycleHeading">{{'WORKSPACE.CONTRIBUTOR.LIFECYCLECONTRIBUTOR' | translate}}</h4>
         <div *ngFor="let role of rolesLifecycle">
           <div *ngIf="contributorLifecycle[role] && contributorLifecycle[role].length"  class="group">
             <div class="role">{{'WORKSPACE.CONTRIBUTOR.TYPE.'+role.toUpperCase() | translate}}</div>
@@ -14,8 +13,8 @@
             </div>
           </div>
         </div>
-        <a class="btnAdd btn-flat btn-shadow waves-light waves-effect btn-icon" (click)="addVCard('lifecycle')"><i class="material-icons">add</i> {{'ADD' | translate}}</a>
-        <h2 class="metadataHeading">{{'WORKSPACE.CONTRIBUTOR.METADATACONTRIBUTOR' | translate}}</h2>
+        <button mat-raised-button class="btnAdd" (click)="addVCard('lifecycle')"><i icon iconId="add"></i> {{'ADD' | translate}}</button>
+        <h4 class="metadataHeading">{{'WORKSPACE.CONTRIBUTOR.METADATACONTRIBUTOR' | translate}}</h4>
         <div *ngFor="let role of rolesMetadata">
           <div *ngIf="contributorMetadata[role] && contributorMetadata[role].length"  class="group">
             <div class="role">{{'WORKSPACE.CONTRIBUTOR.TYPE.'+role.toUpperCase() | translate}}</div>
@@ -24,142 +23,139 @@
             </div>
           </div>
         </div>
-        <a class="btnAdd btn-flat btn-shadow waves-light waves-effect btn-icon" (click)="addVCard('metadata')"><i class="material-icons">add</i> {{'ADD' | translate}}</a>
+        <button mat-raised-button class="btnAdd" (click)="addVCard('metadata')"><i icon iconId="add"></i> {{'ADD' | translate}}</button>
     </div>
-    </div>
-    <div class="card-action">
-      <a class="waves-effect waves-light btn" [class.disabled]="loading" (click)="saveContributor()" tabindex="0" (keyup.enter)="saveContributor()">{{'SAVE' | translate }}</a>
-      <a class="btn-flat" tabindex="0" (click)="cancel()" (keyup.enter)="cancel()">{{'CANCEL' | translate }}</a>
-    </div>
-    </div>
-
-  <div class="card center-card card-high card-action" *ngIf="edit">
-    <div class="card-content">
-      <div class="card-cancel" (click)="edit=null" tabindex="0" (keyup.enter)="edit=null"><i icon iconId="close" aria="true"></i></div>
-      <div class="card-title">{{'WORKSPACE.CONTRIBUTOR.'+(editOriginal ? 'EDIT' : 'ADD')+'_TITLE' | translate }}</div>
-      <div class="card-scroll">
-        <div class="row">
-          <div class="col s12">
-            <ul class="tabs">
-              <li class="clickable tab col s6" (click)="setTab('person')">
-                <a [class.active]="editType=='person'" >{{'WORKSPACE.CONTRIBUTOR.MODE_PERSON' | translate}}</a>
-              </li>
-              <li class="clickable tab col s6" (click)="setTab('org')">
-                <a [class.active]="editType=='org'" >{{'WORKSPACE.CONTRIBUTOR.MODE_ORG' | translate}}</a>
-              </li>
-            </ul>
-          </div>
-        </div>
-          <div class="table" *ngIf="editType=='person'">
+</card>
+<modal-dialog
+        [priority]="1"
+        [title]="dialogTitle"
+        [message]="dialogMessage"
+        [messageParameters]="dialogParameters"
+        [buttons]="dialogButtons"
+        [isCancelable]="true"
+        (onCancel)="dialogTitle=null"
+></modal-dialog>
+<card title="{{'WORKSPACE.CONTRIBUTOR.'+(editOriginal ? 'EDIT' : 'ADD')+'_TITLE' | translate }}"
+      subtitle="{{'WORKSPACE.CONTRIBUTOR.TYPE.'+editScopeNew.toUpperCase() | translate}}"
+      (onCancel)="cancel()"
+      [buttons]="editButtons"
+      *ngIf="edit"
+      width="small" height="xlarge">
+  <mat-tab-group mat-stretch-tabs [(selectedIndex)]="editType">
+    <mat-tab label="{{'WORKSPACE.CONTRIBUTOR.MODE_PERSON' | translate}}">
+      <div class="table">
         <div class="title">
-          <label for="title">{{'VCARD.Title' | translate}}</label>
-          <input type="text" id="title" [(ngModel)]="edit.title">
+          <mat-form-field>
+            <mat-label>{{'VCARD.Title' | translate}}</mat-label>
+            <input matInput id="title" [(ngModel)]="edit.title">
+          </mat-form-field>
         </div>
         <div class="givenname">
-      <label for="givenname">{{'VCARD.Givenname' | translate}}</label>
-      <input type="text" id="givenname" [(ngModel)]="edit.givenname">
+          <mat-form-field>
+            <mat-label>{{'VCARD.Givenname' | translate}}</mat-label>
+            <input matInput id="givenname" [(ngModel)]="edit.givenname">
+          </mat-form-field>
         </div>
         <div class="surname">
-      <label for="surname">{{'VCARD.Surname' | translate}}</label>
-      <input type="text" id="surname" [(ngModel)]="edit.surname">
+          <mat-form-field>
+            <mat-label>{{'VCARD.Surname' | translate}}</mat-label>
+            <input matInput id="surname" [(ngModel)]="edit.surname">
+          </mat-form-field>
         </div>
       </div>
-        <div class="table" *ngIf="editType=='org'">
-          <div>
-            <label for="orgName2">{{'VCARD.Org' | translate}}</label>
-            <input type="text" id="orgName2" [(ngModel)]="edit.org">
-          </div>
-        </div>
+    </mat-tab>
+
+    <mat-tab label="{{'WORKSPACE.CONTRIBUTOR.MODE_ORG' | translate}}">
       <div class="table">
-        <div>
-          <label for="email">{{'VCARD.Email' | translate}}</label>
-          <input type="text" id="email" [(ngModel)]="edit.email">
-        </div>
+        <mat-form-field>
+          <mat-label>{{'VCARD.Org' | translate}}</mat-label>
+          <input matInput id="org" [(ngModel)]="edit.org">
+        </mat-form-field>
       </div>
-      <div class="table">
-        <div>
-          <label for="scope">{{'WORKSPACE.CONTRIBUTOR.SCOPE' | translate}}</label>
-          <select id="scope" [(ngModel)]="editScopeNew">
-            <option *ngFor="let role of editMode=='lifecycle' ? rolesLifecycle : rolesMetadata" value="{{role}}">{{'WORKSPACE.CONTRIBUTOR.TYPE.'+role.toUpperCase() | translate}}</option>
-          </select>
-        </div>
-        <div>
-          <label for="date">{{'WORKSPACE.CONTRIBUTOR.DATE' | translate}}</label>
-          <div class="datePicker">
-            <div *ngIf="!date" class="clickable" (click)="openDatepicker()"><i class="material-icons">date_range</i><div>{{'CHOOSE_DATE' | translate}}</div></div>
-            <calendar *ngIf="date" id="date" [(date)]="date"></calendar>
-            <!-- <ng-datepicker #datepicker *ngIf="date" id="date" [options]="dateOptions" [(ngModel)]="date"></ng-datepicker> -->
-            <div *ngIf="date"><i class="material-icons clickable" (click)="date=null">clear</i></div>
-          </div>
-          <!-- <input type="date" id="date" [(ngModel)]="edit.contributeDate"> -->
-        </div>
+    </mat-tab>
+  </mat-tab-group>
+  <div class="contributor-content">
+    <div class="table">
+      <div>
+        <mat-form-field>
+          <mat-label>{{'VCARD.Email' | translate}}</mat-label>
+          <input matInput id="email" [(ngModel)]="edit.email">
+        </mat-form-field>
       </div>
-      <a class="more clickable" (click)="more=!more">
-        <i aria-hidden="true" class="material-icons" *ngIf="more">keyboard_arrow_down</i>
-        <i aria-hidden="true" class="material-icons" *ngIf="!more">keyboard_arrow_right</i>
-        <span>{{'WORKSPACE.CONTRIBUTOR.MORE' | translate}}</span>
-      </a>
-      <div *ngIf="more" [@overlay]="more" class="moreOpen">
-        <h2>{{'WORKSPACE.CONTRIBUTOR.ORG_INFO' | translate}}</h2>
-        <div class="table">
-          <div>
-            <label for="orgName">{{'VCARD.Org' | translate}}</label>
-            <input type="text" [disabled]="editType=='org'" id="orgName" [(ngModel)]="edit.org">
-          </div>
-        </div>
-        <div class="table">
-          <div>
-            <label for="orgUrl">{{'VCARD.OrgUrl' | translate}}</label>
-            <input type="text" id="orgUrl" [(ngModel)]="edit.url">
-          </div>
-        </div>
-        <div class="table">
-          <div>
-            <label for="orgPhone">{{'VCARD.OrgPhone' | translate}}</label>
-            <input type="text" id="orgPhone" [(ngModel)]="edit.orgPhone">
-          </div>
-        </div>
-        <h2>{{'WORKSPACE.CONTRIBUTOR.ADDRESS_INFO' | translate}}</h2>
-        <div class="table">
-          <div>
-            <label for="street">{{'VCARD.Street' | translate}}</label>
-            <input type="text" id="street" [(ngModel)]="edit.street">
-          </div>
-        </div>
-        <div class="table">
-          <div>
-            <label for="zip">{{'VCARD.Zip' | translate}}</label>
-            <input type="text" id="zip" [(ngModel)]="edit.zip">
-          </div>
-          <div>
-            <label for="city">{{'VCARD.City' | translate}}</label>
-            <input type="text" id="city" [(ngModel)]="edit.city">
-          </div>
-        </div>
-        <div class="table">
-          <div>
-            <label for="region">{{'VCARD.Region' | translate}}</label>
-            <input type="text" id="region" [(ngModel)]="edit.region">
-          </div>
-          <div>
-            <label for="country">{{'VCARD.Country' | translate}}</label>
-            <input type="text" id="country" [(ngModel)]="edit.country">
-          </div>
-        </div>
+    </div>
+    <div class="table">
+      <div>
+        <mat-form-field>
+          <mat-label>{{'WORKSPACE.CONTRIBUTOR.SCOPE' | translate}}</mat-label>
+          <mat-select id="scope" [(ngModel)]="editScopeNew">
+            <mat-option *ngFor="let role of editMode=='lifecycle' ? rolesLifecycle : rolesMetadata" value="{{role}}">{{'WORKSPACE.CONTRIBUTOR.TYPE.'+role.toUpperCase() | translate}}</mat-option>
+          </mat-select>
+        </mat-form-field>
+      </div>
+      <div class="calendar">
+        <calendar label="{{'WORKSPACE.CONTRIBUTOR.DATE' | translate}}" isResettable="true" [(date)]="date"></calendar>
+      </div>
+    </div>
+    <button mat-button color="primary" class="more clickable" (click)="more=!more">
+      <i icon iconId="keyboard_arrow_down" *ngIf="more"></i>
+      <i icon iconId="keyboard_arrow_right" *ngIf="!more"></i>
+      <span>{{'WORKSPACE.CONTRIBUTOR.MORE' | translate}}</span>
+    </button>
+    <div *ngIf="more" [@overlay]="more" class="moreOpen">
+    <h2>{{'WORKSPACE.CONTRIBUTOR.ORG_INFO' | translate}}</h2>
+    <div class="table">
+      <mat-form-field>
+        <mat-label>{{'VCARD.Org' | translate}}</mat-label>
+        <input matInput [disabled]="editType=='org'" id="orgName" [(ngModel)]="edit.org">
+      </mat-form-field>
+    </div>
+    <div class="table">
+      <mat-form-field>
+        <mat-label>{{'VCARD.OrgUrl' | translate}}</mat-label>
+        <input matInput id="orgUrl" [(ngModel)]="edit.url">
+      </mat-form-field>
+    </div>
+    <div class="table">
+      <mat-form-field>
+        <mat-label>{{'VCARD.OrgPhone' | translate}}</mat-label>
+        <input matInput id="orgPhone" [(ngModel)]="edit.orgPhone">
+      </mat-form-field>
+    </div>
+    <h2>{{'WORKSPACE.CONTRIBUTOR.ADDRESS_INFO' | translate}}</h2>
+    <div class="table">
+      <mat-form-field>
+        <mat-label>{{'VCARD.Street' | translate}}</mat-label>
+        <input matInput id="street" [(ngModel)]="edit.street">
+      </mat-form-field>
+    </div>
+    <div class="table">
+      <div>
+        <mat-form-field>
+          <mat-label>{{'VCARD.Zip' | translate}}</mat-label>
+          <input matInput id="zip" [(ngModel)]="edit.zip">
+        </mat-form-field>
+      </div>
+      <div>
+        <mat-form-field>
+          <mat-label>{{'VCARD.City' | translate}}</mat-label>
+          <input matInput id="city" [(ngModel)]="edit.city">
+        </mat-form-field>
+      </div>
+    </div>
+    <div class="table">
+      <div>
+        <mat-form-field>
+          <mat-label>{{'VCARD.Region' | translate}}</mat-label>
+          <input matInput id="region" [(ngModel)]="edit.region">
+        </mat-form-field>
+      </div>
+      <div>
+        <mat-form-field>
+          <mat-label>{{'VCARD.Country' | translate}}</mat-label>
+          <input matInput id="country" [(ngModel)]="edit.country">
+        </mat-form-field>
       </div>
     </div>
   </div>
-    <div class="card-action">
-      <a class="waves-effect waves-light btn" (click)="saveEdits()" tabindex="0" (keyup.enter)="saveEdits()">{{'APPLY' | translate }}</a>
-      <a class="btn-flat" (click)="edit=null" tabindex="0" (keyup.enter)="edit=null">{{'CANCEL' | translate }}</a>
-    </div>
-  </div>
-  <modal-dialog
-    [priority]="1"
-    [title]="dialogTitle"
-    [message]="dialogMessage"
-    [messageParameters]="dialogParameters"
-    [buttons]="dialogButtons"
-    [isCancelable]="true"
-    (onCancel)="dialogTitle=null"
-  ></modal-dialog>
+</div>
+</card>

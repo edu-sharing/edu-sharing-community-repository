@@ -46,6 +46,7 @@ import {DateHelper} from '../../core-ui-module/DateHelper';
 import {CordovaService} from "../../common/services/cordova.service";
 import {HttpClient} from '@angular/common/http';
 import {MainNavComponent} from '../../common/ui/main-nav/main-nav.component';
+import {MatMenuTrigger} from '@angular/material';
 
 @Component({
     selector: 'workspace-main',
@@ -60,6 +61,7 @@ import {MainNavComponent} from '../../common/ui/main-nav/main-nav.component';
     ]
 })
 export class WorkspaceMainComponent implements EventListener{
+    @ViewChild('dropdownTrigger') dropdownTrigger: MatMenuTrigger;
     private static VALID_ROOTS=['MY_FILES','SHARED_FILES','MY_SHARED_FILES','TO_ME_SHARED_FILES','WORKFLOW_RECEIVE','RECYCLE'];
     private static VALID_ROOTS_NODES=[RestConstants.USERHOME,'-shared_files-','-my_shared_files-','-to_me_shared_files-'];
     private isRootFolder : boolean;
@@ -80,9 +82,6 @@ export class WorkspaceMainComponent implements EventListener{
     private dialogMessage : string;
     private dialogMessageParameters : any;
     private dialogButtons : DialogButton[];
-
-    private showAddDesktop = false;
-    private showAddMobile = false;
 
     private showSelectRoot = false;
     public showUploadSelect = false;
@@ -109,14 +108,8 @@ export class WorkspaceMainComponent implements EventListener{
     public addNodesToCollection : Node[];
     public addNodesStream : Node[];
     public variantNode : Node;
-    @ViewChild('dropdown') dropdownElement : ElementRef;
     @ViewChild('mainNav') mainNavRef : MainNavComponent;
-    private dropdownPosition: string;
-    private dropdownLeft: string;
-    private dropdownRight: string;
-    private dropdownTop: string;
-    private dropdownBottom: string;
-    private connectorList: ConnectorList;
+    private connectorList: Connector[];
     private nodeOptions: OptionItem[]=[];
     private currentNode: Node;
     public mainnav=true;
@@ -315,7 +308,7 @@ export class WorkspaceMainComponent implements EventListener{
             if(user.person.quota.enabled && user.person.quota.sizeCurrent>=user.person.quota.sizeQuota){
                 this.toast.showModalDialog('CONNECTOR_QUOTA_REACHED_TITLE','CONNECTOR_QUOTA_REACHED_MESSAGE',DialogButton.getOk(()=>{
                     this.toast.closeModalDialog();
-                }),true,false);
+                }),true);
                 this.createConnectorName=null;
             }
 
@@ -451,7 +444,7 @@ export class WorkspaceMainComponent implements EventListener{
                     }
                     this.connector.scope=this.isSafe ? RestConstants.SAFE_SCOPE : null;
                     this.connectors.list().subscribe((data:ConnectorList)=>{
-                        this.connectorList=data;
+                        this.connectorList=this.connectors.getConnectors();
                     });
                     this.isLoggedIn=true;
                     this.node.getHomeDirectory().subscribe((data : NodeRef) => {
@@ -1033,9 +1026,6 @@ export class WorkspaceMainComponent implements EventListener{
 
         this.openDirectory(id);
     }
-    getConnectors(){
-        return this.connectors.getConnectors();
-    }
     private refresh(refreshPath=true) {
         let search=this.searchQuery;
         let folder=this.currentFolder;
@@ -1067,7 +1057,7 @@ export class WorkspaceMainComponent implements EventListener{
     }
 
     private refreshRoute(){
-        this.routeTo(this.root,!this.isRootFolder && this.currentFolder ? this.currentFolder.ref.id : null,this.searchQuery.query);
+        this.routeTo(this.root,!this.isRootFolder && this.currentFolder ? this.currentFolder.ref.id : null,this.searchQuery ? this.searchQuery.query : null);
     }
     private routeTo(root: string,node : string=null,search:string=null) {
         let params:any={root:root,id:node,viewType:this.viewType,query:search,mainnav:this.mainnav};
@@ -1109,34 +1099,12 @@ export class WorkspaceMainComponent implements EventListener{
     private createContext(event:any=null){
         if(!this.createAllowed)
             return;
-        this.showAddDesktop = true;
-        this.dropdownPosition = null;
-        this.dropdownTop = null;
-        this.dropdownBottom = null;
-        this.dropdownLeft = null;
-        this.dropdownRight = null;
+        console.log(this.dropdownTrigger);
+        this.dropdownTrigger.openMenu();
         if(event) {
             event.preventDefault();
             event.stopPropagation();
-            this.dropdownPosition = "fixed";
-            this.dropdownLeft = event.clientX + "px";
-            if (event.clientY > window.innerHeight / 2) {
-                this.dropdownBottom = window.innerHeight - event.clientY + "px";
-                this.dropdownTop = "auto";
-            }
-            else {
-                this.dropdownTop = event.clientY + "px";
-            }
         }
-        setTimeout(()=>UIHelper.setFocusOnDropdown(this.dropdownElement));
-    }
-    private createMobile(){
-        if(!this.createAllowed)
-            return;
-        this.showAddDesktop = true;
-        this.dropdownPosition = "fixed";
-        this.dropdownTop = "auto";
-        this.dropdownLeft = "auto";
     }
 
     private goToLogin() {
@@ -1175,8 +1143,6 @@ export class WorkspaceMainComponent implements EventListener{
 
     public listLTI() {
         this.showLtiTools=true;
-        this.showAddDesktop=false;
-        this.showAddMobile=false;
     }
 
     hasOpenWindows() {

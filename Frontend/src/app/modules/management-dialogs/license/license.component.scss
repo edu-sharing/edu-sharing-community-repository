@@ -1,38 +1,57 @@
 @import "../../../core-ui-module/styles/variables";
 
+.license-content{
+  padding: $cardPadding;
+}
 .card-content .cc label{
   width:100%;
 }
 .licenseType{
-  margin-bottom:30px;
+  width: 100%;
+  margin:10px 0;
 }
+:host /deep/ {
+  .license-content {
+    .mat-tab-labels {
+      background-color: #fff;
+    }
+  }
+  .modal-card mat-card-content {
+    h4 {
+      font-weight: bold;
+      font-size: 11pt;
+      margin: 1.6rem 0 1rem 0;
+    }
 
-h4{
-  font-weight: bold;
-  font-size: 11pt;
-  margin: 2rem 0 0.912rem 0;
+    h5 {
+      font-weight: normal;
+      font-size: 9pt;
+      color: $textLight;
+      margin: 0;
+      line-height: 1.5;
+    }
+    .mat-radio-container{
+      position: relative;
+      top:6px;
+    }
+  }
 }
-h5{
-  font-weight:normal;
-  font-size:9pt;
-  color: $textLight;
-  margin: 0;
-  line-height: 1.5;
-}
-.ccAuthor{
-  color:$primary;
-  text-transform: uppercase;
+.ccAuthor {
   font-weight: bold;
   margin-bottom: 10px;
+  i {
+    color: $textLight;
+  }
 }
-.ccAuthor i{
-  position: relative;
-  top: 7px;
-  color: $textLight;
+.contributors{
+  margin-bottom: 30px;
 }
 .ccAuthorGroup{
   padding:10px;
   margin:0 20px;
+  mat-form-field{
+    width: 100%;
+  }
 }
 .ccAuthorGroupOer{
   margin:0 40px;
@@ -48,7 +67,6 @@ h5{
   h4{
     margin: 10px 0px 20px 0px;
   }
-  float:left;
   width: calc(100% + 40px);
 }
 .licenseName{
@@ -77,36 +95,36 @@ h5{
   }
 }
 .oerLicenses{
-  float:left;
   width:100%;
   .ccAuthor{
-    margin-left: 20px;
+    margin:5px 20px;
   }
 }
 .authorFreetext,.authorPerson{
   padding: 0 10px;
 }
 .authorFreetext{
+  width: 100%;
+  margin-top: 5px;
   textarea{
-    min-height: 2.5rem;
-    margin-top: 10px;
+    overflow: hidden;
   }
 }
-.oerCC0,.oerCCBY{
-  >h4{
-    color:$textLight;
-    font-weight: bold;
+mat-radio-button{
+  padding-left:20px;
+  padding-right:20px;
+  h4{
+    margin: 2rem 0 0.2rem 0;
   }
-  .radio{
-    padding-left:20px;
-    padding-right:20px;
-  }
+}
+h4{
+  color:$textLight;
+  font-weight: bold;
 }
 .oerSelect{
   float:right;
 }
 .licenseTypeLabel{
-  float:left;
   width:100%;
 }
 .currentLicenseIcon{
@@ -121,6 +139,15 @@ h5{
 }
 .currentLicenseDescription div{
   margin:0 10px;
+}
+.cc{
+  mat-radio-group{
+    display: flex;
+    flex-direction: column;
+    mat-radio-button{
+      margin: 3px 0;
+    }
+  }
 }
 .cc .ccAbout{
   text-transform: uppercase;
@@ -148,29 +175,18 @@ h5{
 }
 .licenseCheckbox{
   padding-top:20px;
-  float:left;
 }
 .licenseCheckbox label{
   width:100%;
 }
 .release, .strong{
   font-weight: bold;
-}
-.radio{
-  padding-bottom:15px;
-}
-.radio h4{
-  margin-top: 4px;
-}
-
-.switch-release{
-  padding-bottom: 25px;
-  margin-left: -10px;
+  display: block;
+  margin-bottom: 5px;
 }
 
 .doi{
-  margin-left: 77px;
-  margin-top: 15px;
+  margin:10px 0 10px 50px;
   display: flex;
   flex-direction: column;
   span{

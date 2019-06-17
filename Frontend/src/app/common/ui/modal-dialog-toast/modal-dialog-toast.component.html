@@ -1,25 +1,3 @@
-<div class="dialog darken" [@fade]="visible" *ngIf="visible"></div>
-  <div class="card center-card card-wide card-high modal-dialog-toast" [class.card-high]="isHigh" [class.card-action]="isCancelable" [@cardAnimation]="visible" *ngIf="visible">
-    <div class="card-content">
-      <div *ngIf="isCancelable" class="card-cancel" (click)="cancel()" tabindex="0" (keyup.enter)="cancel()"><i icon iconId="close" aria="true"></i></div>
-      <div class="card-title ">{{title | translate }}</div>
-      <div class="card-scroll">
-        <p>{{message | translate:messageParameters }}</p>
-      </div>
-    </div>
-    <div class="card-action">
-      <a *ngFor="let button of buttons;let i=index"
-         [class.btn-flat]="button.type==2"
-         [class.waves-effect]="button.type==1"
-         [class.waves-light]="button.type==1"
-         [class.btn]="button.type==1"
-         tabindex="0"
-         (focus)="i==0"
-         (keyup.enter)="click(button)"
-         (click)="click(button)"
-      >{{button.name | translate}}</a>
-      <a *ngIf="!buttons" class ="waves-effect waves-light btn" tabindex="0" (focus)="true" (keyup.enter)="cancel()"
-         (click)="cancel()"
-      >{{'CLOSE' | translate}}</a>
-    </div>
-  </div>
+<card *ngIf="visible" title="{{title | translate}}" (onCancel)="cancel()" [isCancelable]="isCancelable" [buttons]="buttons" [priority]="priority" height="auto">
+  <div class="modal-dialog-toast">{{message | translate:messageParameters }}</div>
+</card>

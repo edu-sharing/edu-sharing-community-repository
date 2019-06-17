@@ -1,34 +1,37 @@
-<dropdown [(show)]="dropdown"
+<dropdown #dropdownRef
           [callbackObject]="node"
           [options]="optionsMenu"
           [showDisabled]="showDisabled"
           [position]="dropdownPosition"
 ></dropdown>
-<div class="actionbar" [class.actionbar-round]="appearance=='round'">
-  <div *ngFor="let option of optionsAlways;let i=index;"
-       [class.light]="backgroundType=='dark' || backgroundType=='primary'"
-       [class.primary]="i==optionsAlways.length-1 && backgroundType=='primary'"
-       class="action-always waves-effect waves-light action-always-{{option.name | replaceChars:{search:'.',replace:'-'} }} {{ option.isEnabled ? '' : 'disabled'}} {{ option.isEnabled || showDisabled ? '' : 'display-none'}} {{ i==0 ? 'btn' : 'btn-flat'}}"
-       tabindex="0"
-       (keyup.enter)="click(option)"
+<div class="actionbar" [class.actionbar-all-flat]="style=='flat'" [class.actionbar-background-primary]="backgroundType=='primary'" [class.actionbar-round]="appearance=='round'">
+    <button mat-flat-button
+            color="primary"
+            *ngIf="optionsAlways.length>0;"
+            [disabled]="!optionsAlways[0].isEnabled"
+            [class.display-none]="!optionsAlways[0].isEnabled && !showDisabled"
+            (click)="click(optionsAlways[0])">
+        <i icon title="{{optionsAlways[0].showName ? null : (optionsAlways[0].name | translate)}}" [iconId]="optionsAlways[0].icon"></i>
+        <span class="action-always-caption" *ngIf="optionsAlways[0].showName && appearance!='round'"> {{optionsAlways[0].name | translate}}</span>
+    </button>
+    <button mat-button
+       color="primary"
+       *ngFor="let option of optionsAlways.slice(1);let i=index;"
+       [disabled]="!option.isEnabled"
+       [class.display-none]="!option.isEnabled && !showDisabled"
        (click)="click(option)">
-    <i icon [iconId]="option.icon" title="{{option.showName ? null : (option.name | translate)}}"></i><span class="action-always-caption" *ngIf="option.showName"> {{option.name | translate}}</span>
-  </div>
-  <div class="more btn-flat waves-effect"
-       (click)="showDropdown()"
-       tabindex="0"
-       (keyup.enter)="showDropdown()"
-       [class.light]="backgroundType=='dark' || backgroundType=='primary'"
-       *ngIf="canShowDropdown()"><a><i class="material-icons">more_vert</i></a>
-  </div>
-  <div *ngIf="optionsToggle.length" class="actionToggle" [class.actionToggleDivider]="optionsAlways.length">
-    <a *ngFor="let option of optionsToggle"
-       tabindex="0"
-       (keyup.enter)="click(option)"
-       (click)="click(option)"
-       [class.light]="backgroundType=='dark' || backgroundType=='primary'"
-       [class.disabled]="!option.isEnabled">
-      <i icon [iconId]="option.icon"></i>
-    </a>
-  </div>
+      <i icon title="{{option.showName ? null : (option.name | translate)}}" [iconId]="option.icon"></i>
+      <span class="action-always-caption" *ngIf="option.showName && appearance!='round'"> {{option.name | translate}}</span>
+    </button>
+<button mat-flat-button class="more button-icon"
+        [matMenuTriggerFor]="dropdownRef.menu"
+        *ngIf="canShowDropdown()"><i icon iconId="more_vert" aria="true"></i></button>
+<div *ngIf="optionsToggle.length" class="actionToggle" [class.actionToggleDivider]="optionsAlways.length">
+    <button mat-flat-button *ngFor="let option of optionsToggle"
+            class="button-icon"
+            (click)="click(option)"
+            [class.disabled]="!option.isEnabled">
+        <i icon [iconId]="option.icon" aria="true"></i>
+    </button>
+</div>
 </div>

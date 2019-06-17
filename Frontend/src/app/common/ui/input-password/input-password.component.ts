@@ -13,6 +13,8 @@ export class InputPasswordComponent{
     @Input() autocomplete:string;
     @Input() inputClass="";
     @Input() hint=false;
+    @Input() label="";
+    @Input() floatLabel="auto";
     @Input() displayStrength=false;
     @Output() valueChange = new EventEmitter();
     @Input() placeholder="";

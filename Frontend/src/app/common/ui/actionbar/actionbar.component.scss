@@ -1,86 +1,66 @@
 @import "../../../core-ui-module/styles/variables";
 
 .actionbar{
-  display: flex;
-  flex-direction: row;
-  justify-content: flex-end;
+  display:flex;
 }
-.action-always,.more{
-  float:right;
-  padding:0 15px;
-  @include clickable();
+.actionToggle > button{
+  color: $textLight;
 }
+button{
+  min-width: unset;
+  &.button-icon{
+    padding-left:0;
+    padding-right:0;
+  }
+}
+
 .light{
   color:#fff;
   background: transparent;
 }
-.primary{
-  color: $primary!important;
-  background: #fff!important;
-}
-.primary.disabled{
-  color: $textVeryLight!important;
-  background: #eee!important;
-}
 .disabled{
   pointer-events: all;
-}
-.btn-flat:not(:hover){
-  background: transparent;
-}
-
-.more{
-  padding:0 10px;
-}
-.more a{
-  color:$primary;
 }
 .light a{
   color:#fff;
 }
-.more{
-  .edu-icons,.material-icons {
-    font-size: 1.5rem;
-  }
-}
-.action-always{
-  text-transform: uppercase;
-}
-.action-always-caption{
-  position: relative;
-  padding-left: 2px;
-}
-.btn,.btn-flat{
-  margin:0 5px;
-  position: relative;
-  top:-5px;
-}
 .actionToggle{
-  margin-top: 1px;
-  height:26px;
   padding-left:10px;
   margin-left:10px;
-  float:right;
 }
 .actionToggleDivider{
   border-left:1px solid #ddd;
 }
-.actionToggle a{
-  padding:0 5px;
-  color: $textLight;
-  display: inline-block;
-  @include clickable();
-}
-.actionToggle a:focus{
-  @include removeDefaultFocus();
+.more{
   color: $primary;
+  background-color: transparent;
 }
-
+button{
+  margin: 0 5px;
+}
+.actionbar-background-primary{
+  .mat-button{
+    color: $textOnPrimary;
+  }
+  .mat-flat-button{
+    background-color: #fff;
+    color: $primary;
+  }
+}
 .actionbar-round{
-  .more, .action-always {
+  .mat-flat-button{
+    padding: 5px;
+  }
+  button{
+    border-radius: 50%;
+  }
+  &.actionbar-all-flat button{
     background: white !important;
     color: $primary !important;
-    border-radius: 50%;
+  }
+  .more, .actionAlways {
+    background: white !important;
+    color: $primary !important;
     display:flex;
     width:45px;
     height:45px;
@@ -108,5 +88,8 @@
   }
   .action-always-caption{
     display: none;
+  }
+  .mat-flat-button {
+    padding:5px;
   }
 }

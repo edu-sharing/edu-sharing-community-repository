@@ -1,14 +1,13 @@
-<div class="dialog darken" [@fade]="this"></div>
-  <div class="card center-card card-high card-action" [@cardAnimation]="this">
-    <div class="card-content">
-      <div tabindex="0" class="card-cancel" (click)="cancel()" (keyup.enter)="cancel()"><i icon iconId="close" aria="true"></i></div>
-      <div class="card-title">{{'WORKSPACE.WORKFLOW.TITLE' | translate:{name:node ? node.name : ''} }}</div>
+<card title="{{'WORKSPACE.WORKFLOW.TITLE' | translate}}" [node]="node" width="normal" height="large"
+      [buttons]="buttons"
+      (onCancel)="cancel()"
+>
       <spinner *ngIf="loading"></spinner>
-      <div class="card-scroll" *ngIf="!loading">
+      <div class="workflow-content" *ngIf="!loading">
         <div class="inputs">
         <authority-search-input
           [disabled]="!status.hasReceiver"
-          [globalSearch]="globalSearch"
+          [globalSearchAllowed]="globalAllowed"
           [groupType]="TYPE_EDITORIAL"
           (onChooseAuthority)="addSuggestion($event)"
           [placeholder]="'WORKSPACE.WORKFLOW.RECEIVERS'"
@@ -30,11 +29,9 @@
           </div>
           </div>
         </div>
-        <div class="global">
-          <input type="checkbox" class="filled-in" [(ngModel)]="globalSearch" [disabled]="!globalAllowed" id="global">
-          <label for="global">{{'WORKSPACE.SHARE.GLOBAL_SEARCH' | translate}}</label>
-        </div>
-
+        <!--<div class="global">
+          <mat-checkbox [(ngModel)]="globalSearch" [disabled]="!globalAllowed" id="global">{{'WORKSPACE.SHARE.GLOBAL_SEARCH' | translate}}</mat-checkbox>
+        </div>-->
         <div class="receivers">
           <div *ngIf="status.hasReceiver">
             <div class="badge" *ngFor="let receiver of receivers">
@@ -46,8 +43,11 @@
             </div>
             </div>
         </div>
-        <input type="text" [(ngModel)]="comment" placeholder="{{'WORKSPACE.WORKFLOW.COMMENT' | translate}}">
-        <div class="input-hint-bottom">{{'WORKSPACE.WORKFLOW.COMMENT_INFO' | translate}}</div>
+        <mat-form-field class="comment">
+          <mat-label>{{'WORKSPACE.WORKFLOW.COMMENT' | translate}}</mat-label>
+          <input matInput [(ngModel)]="comment">
+          <mat-hint>{{'WORKSPACE.WORKFLOW.COMMENT_INFO' | translate}}</mat-hint>
+        </mat-form-field>
         <div class="historyLabel">
           {{'WORKSPACE.WORKFLOW.HISTORY' | translate}}
         </div>
@@ -116,12 +116,7 @@
           </div>
         </div>
     </div>
-  </div>
-  <div class="card-action">
-    <a class="waves-effect waves-light btn" [class.disabled]="loading || !hasChanges()" (click)="saveWorkflow()" (keyup.enter)="saveWorkflow()" tabindex="0">{{'SAVE' | translate }}</a>
-    <a class="btn-flat" (click)="cancel()" (keyup.enter)="cancel()" tabindex="0">{{'CANCEL' | translate }}</a>
-  </div>
-  </div>
+</card>
 <modal-dialog
               [isCancelable]="true"
               [title]="dialogTitle"

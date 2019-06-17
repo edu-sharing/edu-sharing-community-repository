@@ -119,7 +119,7 @@
      <div *ngIf="currentRepository=='-all-'" class="repositoryList">
        <label>{{'SEARCH.REPOSITORY_FILTER' | translate}}</label>
        <div *ngFor="let repo of repositoryIds">
-         <input type="checkbox" class="filled-in" [(ngModel)]="repo.enabled" [id]="repo.id"><label [for]="repo.id">{{repo.title}}</label>
+           <mat-checkbox [(ngModel)]="repo.enabled">{{repo.title}}</mat-checkbox>
        </div>
      </div>
 
@@ -153,13 +153,8 @@
        </div>
      </div>
      <div *ngIf="sidenavTab==1">
-       <div class="switch">
-         <label>
-           <input type="checkbox" [(ngModel)]="savedSearchOwn" (change)="loadSavedSearch()">
-           {{ 'SEARCH.SAVED_SEARCH_ONLY_OWN' | translate}}
-           <span class="lever"></span>
-
-         </label>
+       <div class="saved-search-toggle">
+           <mat-slide-toggle class="toggle-reverse" [(ngModel)]="savedSearchOwn" (change)="loadSavedSearch()">{{ 'SEARCH.SAVED_SEARCH_ONLY_OWN' | translate}}</mat-slide-toggle>
        </div>
        <form *ngIf="!savedSearchOwn" (ngSubmit)="setSavedSearchQuery(savedSearchQueryModel)">
          <input type="search" name="savedSearchQuery" [(ngModel)]="savedSearchQueryModel" placeholder="{{'SEARCH.SAVED_SEARCH_QUERY' | translate}}">
@@ -182,6 +177,7 @@
           [isLoading]="savedSearchLoading"
           [selectedNodes]="currentSavedSearch ? [currentSavedSearch] : null"
           [columns]="savedSearchColumns"
+          (onUpdateOptions)="refreshListOptions()"
           (clickRow)="loadSavedSearchNode($event)"
         ></listTable>
          <div class="manageSavedSearch" *ngIf="savedSearch.length && savedSearchOwn && isWorkspaceEnabled()">
@@ -236,6 +232,7 @@
                                 [isClickable]="true"
                                 [viewType]="2"
                                 [scrollWindow]="true"
+                                (onUpdateOptions)="refreshListOptions()"
                                 (clickRow)="render($event)"
                                 (doubleClickRow)="render($event)"
                                 [isLoading]="false"></listTable>
@@ -281,6 +278,7 @@
                             [hasMore]="!searchService.complete"
                             [applyMode]="applyMode"
                             [scrollWindow]="true"
+                            (onUpdateOptions)="refreshListOptions()"
                             (clickRow)="render($event)"
                             (doubleClickRow)="render($event)"
                             (loadMore)="getMoreResults()"
@@ -310,6 +308,7 @@
                                    [hasMore]="false"
                                    [applyMode]="applyMode"
                                    [scrollWindow]="true"
+                                   (onUpdateOptions)="refreshListOptions()"
                                    (clickRow)="render($event)"
                                    (doubleClickRow)="render($event)"
                                    (onSelectionChanged)="updateSelection($event)"

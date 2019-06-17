@@ -2,12 +2,12 @@ import {Component, Input, Output, EventEmitter, OnInit, HostListener} from '@ang
 import {TranslateService} from "@ngx-translate/core";
 import {UIHelper} from '../../../core-ui-module/ui-helper';
 import {
-    Node, NodeList,
-    ListItem,
-    RestCollectionService, RestConnectorService,
-    RestConstants,
-    RestIamService,
-    RestNodeService
+  Node, NodeList,
+  ListItem,
+  RestCollectionService, RestConnectorService,
+  RestConstants,
+  RestIamService,
+  RestNodeService, DialogButton
 } from "../../../core-module/core.module";
 import {Toast} from "../../../core-ui-module/toast";
 
@@ -26,7 +26,10 @@ export class FileChooserComponent implements OnInit{
   private viewType = 0;
   public searchMode: boolean;
   private searchQuery : string;
-  ngOnInit(): void {
+  buttons: DialogButton[];
+  private subtitle: string;
+
+    ngOnInit(): void {
     this.initialize();
   }
   public list : Node[];
@@ -75,7 +78,8 @@ export class FileChooserComponent implements OnInit{
     this.columns=UIHelper.getDefaultCollectionColumns();
     this.sortBy=RestConstants.CM_MODIFIED_DATE;
     this.sortAscending=false;
-  }
+    this.updateButtons();
+    }
 
   /**
    * Set to true if the user should pick a directory
@@ -85,6 +89,7 @@ export class FileChooserComponent implements OnInit{
       if(pickDirectory)
         this.filter.push(RestConstants.FILTER_FOLDERS);
       this._pickDirectory=pickDirectory;
+      this.updateButtons();
   }
 
   /**
@@ -118,6 +123,7 @@ export class FileChooserComponent implements OnInit{
     // http://plnkr.co/edit/btpW3l0jr5beJVjohy1Q?p=preview
     this.columns.push(new ListItem("NODE",RestConstants.CM_NAME));
     this.sortBy=this.columns[0].name;
+    this.updateButtons();
   }
   private onSelection(node : Node[]){
     this.selectedFiles=node;
@@ -150,7 +156,10 @@ export class FileChooserComponent implements OnInit{
         return;
       }
       this.selectedFiles=[];
-      this.node.getNodeParents(event.ref.id).subscribe((data:NodeList)=> this.path=data.nodes.reverse());
+      this.node.getNodeParents(event.ref.id).subscribe((data:NodeList)=> {
+        this.path=data.nodes.reverse();
+        this.updateButtons();
+      });
       this.viewDirectory(event.ref.id);
     }
     else{
@@ -220,6 +229,7 @@ export class FileChooserComponent implements OnInit{
   }
   private showList(list : any) {
     this.addToList(list);
+    this.updateButtons();
     this.isLoading=false;
   }
   private cancel(){
@@ -273,5 +283,34 @@ export class FileChooserComponent implements OnInit{
       this.cancel();
       return;
     }
+  }
+  updateButtons(){
+    /*
+     <div class="card-action">
+        <a *ngIf="_pickDirectory && path.length" class="waves-effect waves-light btn" tabindex="0" (keyup.enter)="chooseDirectory()" (click)="chooseDirectory()">{{() |translate:{name:path[path.length-1].name} }}</a>
+        <a *ngIf="_pickDirectory && !path.length" class="waves-effect waves-light btn"
+           [class.disabled]="_collections || !allowRoot" tabindex="0" (keyup.enter)="chooseDirectory()"
+           (click)="chooseDirectory()">{{('SELECT_ROOT'+(_collections || !allowRoot ? '_DISABLED' : '')) | translate}}</a>
+        <a *ngIf="selectedFiles.length" class="waves-effect waves-light btn"  [class.disabled]="writeRequired && hasWritePermissions(selectedFiles[0]).status==false" tabindex="0" (keyup.enter)="chooseFile()" (click)="chooseFile()">
+            {{(_collections ? 'SELECT_COLLECTION' : 'SELECT_FILE') | translate:{name:selectedFiles[0].name ? selectedFiles[0].name : selectedFiles[0].title} }}</a>
+        <a *ngIf="isCancelable && false" class="waves-effect waves-light btn-flat" tabindex="0" (keyup.enter)="cancel()" (click)="cancel()">{{ 'CANCEL' | translate}}</a>
+    </div>
+     */
+    let btn;
+    if(this._pickDirectory && this.path.length){
+      this.subtitle=this.path[this.path.length-1].name;
+      btn=new DialogButton(this.translate.instant(this._collections ? 'SELECT_COLLECTION' : 'SELECT_DIRECTORY',{name:this.subtitle}),DialogButton.TYPE_PRIMARY,()=>this.chooseDirectory());
+    }
+    if(this._pickDirectory && !this.path.length){
+      this.subtitle=this.translate.instant('SELECT_ROOT_NAME');
+      btn=new DialogButton('SELECT_ROOT'+(this._collections || !this.allowRoot ? '_DISABLED' : ''),DialogButton.TYPE_PRIMARY,()=>this.chooseDirectory());
+      btn.disabled=this._collections;
+    }
+    if(this.selectedFiles.length){
+      this.subtitle=this.selectedFiles[0].name;
+      btn=new DialogButton(this.translate.instant(this._collections ? 'SELECT_COLLECTION' : 'SELECT_FILE',{name:this.subtitle}),DialogButton.TYPE_PRIMARY,()=>this.chooseFile());
+      btn.disabled=this.writeRequired && this.hasWritePermissions(this.selectedFiles[0]).status==false;
+    }
+    this.buttons=[btn];
   }
 }

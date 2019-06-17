@@ -113,7 +113,7 @@ export class CommentsListComponent  {
               this.onLoading.emit(false);
             });
           }
-        ),true,false);
+        ),true);
       }));
     }
     return options;

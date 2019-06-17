@@ -14,7 +14,7 @@ import {TemporaryStorageService} from "../../../core-module/core.module";
 })
 export class RecycleMainComponent {
   @ViewChild('list') list : NodeList;
-  public toDelete:Node[] = [];
+  public toDelete:Node[] = null;
   public restoreResult:ArchiveRestore;
 
   @Input() isInsideWorkspace = false;

@@ -1,5 +1,5 @@
 import {Component, Input, EventEmitter, Output, ViewChild, ElementRef} from '@angular/core';
-import {RestConnectorService} from "../../../core-module/core.module";
+import {DialogButton, RestConnectorService} from "../../../core-module/core.module";
 import {Toast} from "../../../core-ui-module/toast";
 import {RestNodeService} from "../../../core-module/core.module";
 import {
@@ -37,6 +37,7 @@ export class AddStreamComponent  {
   audienceMode=this.AUDIENCE_MODE_EVERYONE;
   private _nodes: any;
   private invite: AuthorityProfile[]=[];
+  private buttons: DialogButton[];
   @Input() set nodes(nodes : Node[]){
     this._nodes=nodes;
   }
@@ -50,6 +51,10 @@ export class AddStreamComponent  {
     private config : ConfigurationService,
     private toast : Toast,
     private nodeApi : RestNodeService) {
+    this.buttons=[
+        new DialogButton("CANCEL",DialogButton.TYPE_CANCEL,()=>this.cancel()),
+        new DialogButton("SAVE",DialogButton.TYPE_PRIMARY,()=>this.save()),
+    ]
     this.connector.isLoggedIn().subscribe((data:LoginResult)=>{
 
     });

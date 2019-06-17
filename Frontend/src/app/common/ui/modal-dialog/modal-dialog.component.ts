@@ -40,16 +40,6 @@ export class ModalDialogComponent{
    */
   @Input() isCancelable = false;
   /**
-   * Allow the dialog to scroll it contents
-   * @type {boolean}
-   */
-  @Input() isScrollable = false;
-  /**
-   * Should the dialog be fill the whole height? (use with isScrollable=true)
-   * @type {boolean}
-   */
-  @Input() isHigh = false;
-  /**
    * The title, will be translated automatically
    * The dialog will only be visible if the title is not null
    */
@@ -64,6 +54,8 @@ export class ModalDialogComponent{
    * And use messageParameters={name:'World'}
    */
   @Input() messageParameters : any;
+
+  @Input() node : Node|Node[];
   /**
    * Will be emitted when the users cancels the dialog
    * @type {EventEmitter}
@@ -72,18 +64,7 @@ export class ModalDialogComponent{
   /** A list of buttons, see @DialogButton
    * Also use the DialogButton.getYesNo() and others if applicable!
    */
-  public _buttons : DialogButton[];
-  @Input() set buttons (buttons :  DialogButton[]){
-    if(!buttons){
-      this._buttons=null;
-      return;
-    }
-   this._buttons=buttons.reverse();
-   setTimeout(()=> {
-     if(this.buttonElements)
-      this.buttonElements.nativeElement.focus();
-   },10);
-  }
+  @Input() public buttons : DialogButton[];
 
   @ViewChild('buttonElements') buttonElements : ElementRef;
 

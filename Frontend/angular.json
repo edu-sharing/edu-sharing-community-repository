@@ -29,7 +29,6 @@
               "src/styles/custom_materialize.scss",
               "src/styles/material-theme.scss",
               "src/styles/dialogs.scss",
-              "src/styles/file-chooser.scss",
               "src/styles/globals.scss",
               "src/styles/toast.scss",
               "src/styles/mds.scss",

@@ -37,84 +37,97 @@
                         [authority]="toolpermissionAuthority"
                         (onClose)="toolpermissionAuthority=null"
 ></toolpermission-manager>
-
-<div *ngIf="edit" [@fade]="edit" class="dialog darken"></div>
-  <div *ngIf="edit" [@cardAnimation]="edit" class="card center-card card-action">
-    <div class="card-content">
-      <div class="card-cancel" (click)="cancelEdit()" tabindex="0" (keyup.enter)="cancelEdit()"><i icon iconId="close" aria="true"></i></div>
-      <div class="card-title">{{'PERMISSIONS.'+(editId==null ? 'CREATE' : 'EDIT') + '_' +_mode | translate }}</div>
-        <div class="card-scroll">
+<card *ngIf="edit"
+      title="{{'PERMISSIONS.'+(editId==null ? 'CREATE' : 'EDIT') + '_' +_mode | translate }}"
+      [subtitle]="editId ? edit.authorityName : editDetails.authorityName ? editDetails.authorityName : edit.profile.displayName"
+      [buttons]="editButtons"
+      height="xlarge"
+      (onCancel)="cancelEdit()">
+        <div class="card-content-padding card-edit">
           <form (submit)="saveEdits()">
           <div *ngIf="editId" class="editSystemName">
             <label>{{'PERMISSIONS.INTERNAL_NAME' | translate}}</label>
             <div class="infoText">{{edit.authorityName}}</div>
           </div>
           <div *ngIf="_mode=='GROUP'">
-            <label for="groupName">{{'GROUP.displayName' | translate}}</label>
-            <input type="text" id="groupName" name="groupName" [(ngModel)]="edit.profile.displayName" autofocus required>
-            <label for="groupEmail">{{'GROUP.groupEmail' | translate}}</label>
-            <input type="email" id="groupEmail" name="groupEmail" [(ngModel)]="edit.profile.groupEmail">
-            <label for="groupType">{{'GROUP.groupType' | translate}}</label>
-            <select id="groupType" name="groupType" [(ngModel)]="edit.profile.groupType">
-              <option *ngFor="let type of GROUP_TYPES" [value]="type">{{('PERMISSIONS.GROUP_TYPE.'+type) | translate}}</option>
-            </select>
-            <div *ngIf="isAdmin">
-              <label for="scopeType">{{'GROUP.scopeType' | translate}}</label>
-              <select id="scopeType" name="scopeType" [(ngModel)]="edit.profile.scopeType">
-                <option *ngFor="let scope of SCOPE_TYPES" [value]="scope">{{('PERMISSIONS.SCOPE_TYPE.'+scope) | translate}}</option>
-              </select>
-            </div>
+            <mat-form-field>
+              <mat-label>{{'GROUP.displayName' | translate}}</mat-label>
+              <input matInput name="displayName" [(ngModel)]="edit.profile.displayName" required>
+            </mat-form-field>
+            <mat-form-field>
+              <mat-label>{{'GROUP.groupEmail' | translate}}</mat-label>
+              <input matInput name="groupEmail" [(ngModel)]="edit.profile.groupEmail">
+              </mat-form-field>
+            <mat-form-field floatLabel="always">
+              <mat-label>{{'GROUP.groupType' | translate}}</mat-label>
+              <mat-select name="orgType" [(ngModel)]="edit.profile.groupType" placeholder="{{'PERMISSIONS.GROUP_TYPE.null' | translate}}">
+                <mat-option *ngFor="let type of GROUP_TYPES" [value]="type">{{('PERMISSIONS.GROUP_TYPE.'+type) | translate}}</mat-option>
+              </mat-select>
+            </mat-form-field>
+            <mat-form-field floatLabel="always" *ngIf="isAdmin">
+              <mat-label>{{'GROUP.scopeType' | translate}}</mat-label>
+              <mat-select name="scopeType" [(ngModel)]="edit.profile.scopeType" placeholder="{{'PERMISSIONS.SCOPE_TYPE.null' | translate}}">
+                <mat-option *ngFor="let type of SCOPE_TYPES" [value]="type">{{('PERMISSIONS.SCOPE_TYPE.'+type) | translate}}</mat-option>
+              </mat-select>
+            </mat-form-field>
           </div>
           <div *ngIf="_mode=='ORG'">
-            <label for="orgName">{{'ORG.displayName' | translate}}</label>
-            <input type="email" id="orgName" name="orgName" [(ngModel)]="edit.profile.displayName" autofocus required>
-            <label for="orgEmail">{{'ORG.groupEmail' | translate}}</label>
-            <input type="text" id="orgEmail" name="orgEmail" [(ngModel)]="edit.profile.groupEmail">
-            <label for="orgType">{{'ORG.groupType' | translate}}</label>
-            <select id="orgType" name="orgType" [(ngModel)]="edit.profile.groupType">
-              <option *ngFor="let type of ORG_TYPES" [value]="type">{{('PERMISSIONS.GROUP_TYPE.'+type) | translate}}</option>
-            </select>
-            <label>{{'ORG.folderLocation' | translate}}</label>
-            <div class="infoText folderLocation clickable" (click)="openFolder(edit.sharedFolder)">{{edit.folder}}</div>
+            <mat-form-field>
+              <mat-label>{{'ORG.displayName' | translate}}</mat-label>
+              <input matInput name="displayName" [(ngModel)]="edit.profile.displayName" required>
+            </mat-form-field>
+            <mat-form-field>
+                <mat-label>{{'ORG.groupEmail' | translate}}</mat-label>
+                <input matInput name="groupEmail" [(ngModel)]="edit.profile.groupEmail">
+            </mat-form-field>
+            <mat-form-field floatLabel="always">
+              <mat-label>{{'ORG.groupType' | translate}}</mat-label>
+              <mat-select name="orgType" [(ngModel)]="edit.profile.groupType" placeholder="{{'PERMISSIONS.GROUP_TYPE.null' | translate}}">
+                <mat-option *ngFor="let type of ORG_TYPES" [value]="type">{{('PERMISSIONS.GROUP_TYPE.'+type) | translate}}</mat-option>
+              </mat-select>
+            </mat-form-field>
+            <div class="infoText">{{edit.folder}}</div>
           </div>
           <div *ngIf="_mode=='USER'">
+            <mat-form-field *ngIf="!editId">
+              <mat-label>{{'USER.authorityName' | translate}}</mat-label>
+              <input matInput name="authorityName" [(ngModel)]="editDetails.authorityName" autofocus required>
+            </mat-form-field >
+            <mat-form-field>
+              <mat-label>{{'USER.firstName' | translate}}</mat-label>
+              <input matInput name="firstName" [(ngModel)]="edit.profile.firstName" required>
+            </mat-form-field>
+            <mat-form-field>
+              <mat-label>{{'USER.lastName' | translate}}</mat-label>
+              <input matInput name="lastName" [(ngModel)]="edit.profile.lastName" required>
+            </mat-form-field>
+            <mat-form-field>
+              <mat-label>{{'USER.email' | translate}}</mat-label>
+              <input matInput name="email" [(ngModel)]="edit.profile.email" required>
+            </mat-form-field>
             <div *ngIf="!editId">
-              <label for="authorityName">{{'USER.authorityName' | translate}}</label>
-              <input type="text" id="authorityName" name="authorityName" [(ngModel)]="editDetails.authorityName" autofocus required>
-            </div>
-            <label for="firstName">{{'USER.firstName' | translate}}</label>
-            <input type="text" id="firstName" name="firstName" [(ngModel)]="edit.profile.firstName" required>
-            <label for="lastName">{{'USER.lastName' | translate}}</label>
-            <input type="text" id="lastName" name="lastName" [(ngModel)]="edit.profile.lastName" required>
-            <label for="email">{{'USER.email' | translate}}</label>
-            <input type="text" id="email" name="email" [(ngModel)]="edit.profile.email" required>
-            <div *ngIf="!editId">
-              <label for="password">{{'USER.password' | translate}}</label>
-              <input type="password" id="password" name="password" [(ngModel)]="editDetails.password">
+              <input-password label="{{'USER.password' | translate}}" [(value)]="editDetails.password"></input-password>
             </div>
             <div class="quota">
-              <label for="lastName">{{'USER.sizeQuota' | translate}}</label>
-              <input type="text" id="sizeQuota" name="sizeQuota" [(ngModel)]="edit.profile.sizeQuota">
-              <user-quota *ngIf="editId && edit.quota.enabled" [quota]="edit.quota"></user-quota>
+                <mat-form-field>
+                    <mat-label>{{'USER.sizeQuota' | translate}}</mat-label>
+                    <input matInput name="sizeQuota" [(ngModel)]="edit.profile.sizeQuota" required>
+                </mat-form-field>
+                <user-quota *ngIf="editId && edit.quota.enabled" [quota]="edit.quota"></user-quota>
             </div>
           </div>
           </form>
         </div>
-    </div>
-
-    <div class="card-action">
-      <a class="waves-effect waves-light btn" tabindex="0" [class.disabled]="disabled" (click)="saveEdits()" (keyup.enter)="saveEdits()">{{'SAVE' | translate }}</a>
-      <a class="btn-flat" tabindex="0" (click)="cancelEdit()" (keyup.enter)="cancelEdit()">{{'CANCEL' | translate }}</a>
-    </div>
-  </div>
-<div *ngIf="editGroups || editMembers || addMembers" class="dialog darken">
-  <div class="card center-card card-action card-high card-xwide">
-    <div class="card-content">
-      <div class="card-cancel" (click)="cancelEditMembers()" tabindex="0" (keyup.enter)="cancelEditMembers()"><i icon iconId="close" aria="true"></i></div>
-      <div class="card-title" *ngIf="addMembers">{{'PERMISSIONS.ADD_MEMBER_TO_GROUP' | translate:{group:addMembers.profile.displayName} }}</div>
-      <div class="card-title" *ngIf="editMembers">{{(editMembers=='ALL' ? 'PERMISSIONS.EDIT_ORG_MEMBERS' : 'PERMISSIONS.EDIT_MEMBERS') | translate:{name: editMembers.profile.displayName} }}</div>
-      <div class="card-title" *ngIf="editGroups">{{'PERMISSIONS.EDIT_MEMBER_GROUPS' | translate}}</div>
-      <div class="card-scroll"  infinite-scroll [scrollWindow]="false" (scrolled)="refreshMemberList()">
+</card>
+<card *ngIf="editGroups || editMembers || addMembers"
+      title="{{(addMembers ? 'PERMISSIONS.ADD_MEMBER_TO_GROUP' : editMembers=='ALL' ? 'PERMISSIONS.EDIT_ORG_MEMBERS' : editMembers ? 'PERMISSIONS.EDIT_MEMBERS' : 'PERMISSIONS.EDIT_MEMBER_GROUPS') | translate }}"
+      [subtitle]="addMembers ? addMembers.profile.displayName : editMembers ? editMembers.profile.displayName : editGroups.authorityName"
+      width="xlarge"
+      height="xlarge"
+      [buttons]="memberButtons"
+      (onScrolled)="refreshMemberList()"
+      (onCancel)="cancelEditMembers()">
+    <div class="card-content-padding">
         <div class="memberActions">
           <form (ngSubmit)="searchMembers()">
             <input type="search" name="manageMemberSearch" [(ngModel)]="manageMemberSearch"  placeholder="{{(addMembers ? 'PERMISSIONS.SEARCH_USER' : editGroups ? 'PERMISSIONS.SEARCH_GROUPS' : 'PERMISSIONS.SEARCH_MEMBER') | translate}}">
@@ -136,18 +149,8 @@
           [isClickable]="true"
           (onSelectionChanged)="updateSelectedMembers($event)"
        ></listTable>
-      </div>
     </div>
-
-    <div class="card-action" *ngIf="editMembers">
-      <a class="waves-effect waves-light btn" (click)="cancelEditMembers()">{{'CLOSE' | translate }}</a>
-    </div>
-    <div class="card-action" *ngIf="addMembers">
-      <a class="waves-effect waves-light btn" [class.disabled]="selectedMembers.length==0" (click)="addMembersToGroup()">{{'ADD' | translate }}</a>
-      <a class="waves-effect waves-light btn-flat" (click)="cancelEditMembers()">{{'CLOSE' | translate }}</a>
-    </div>
-  </div>
-</div>
+</card>
 <!-- <div *ngIf="addTo" [@fade]="addTo" class="dialog darken"></div> -->
 <div *ngIf="addTo" [@fromRight]="addTo" class="addTo">
   <div class="addToList">

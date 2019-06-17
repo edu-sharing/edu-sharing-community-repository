@@ -16,18 +16,17 @@
 ></modal-dialog>
 
 <div class="dialog darken" [style.z-index]="120" *ngIf="licenseDialog" [@fade]="licenseDialog"></div>
-<div class="card center-card card-action card-high card-xwide" [style.z-index]="121" *ngIf="licenseDialog" [@cardAnimation]="licenseDialog">
-  <div class="card-content">
-    <div tabindex="0" class="card-cancel" (click)="licenseDialog=false" (keyup.enter)="licenseDialog=false"><i icon iconId="close" aria="true"></i></div>
-    <div class="card-title ">{{'LICENSE_INFORMATION' | translate }}</div>
+<card *ngIf="licenseDialog"
+      title="{{'LICENSE_INFORMATION' | translate }}"
+      width="xxlarge"
+      height="xxlarge"
+      [isCancelable]="true"
+      (onCancel)="licenseDialog=false">
+  <div class="card-content-padding">
     <spinner *ngIf="!licenseDetails"></spinner>
-    <div class="card-scroll" [innerHTML]="licenseDetails"></div>
+    <div [innerHTML]="licenseDetails"></div>
   </div>
-  <div class="card-action">
-    <a class="btn-flat waves-effect waves-light" tabindex="0" (click)="licenseDialog=false" (keyup.enter)="licenseDialog=false">{{'CLOSE' | translate}}</a>
-  </div>
-</div>
-
+</card>
 
 <app-banner [scope]="_currentScope" (onUpdate)="refreshBanner()"></app-banner>
 <global-progress *ngIf="globalProgress"></global-progress>
@@ -41,7 +40,7 @@
         <div class="agreement" [innerHTML]="licenseAgreementHTML"></div>
     </div>
     <div *ngIf="licenseAgreementHTML">
-      <input type="checkbox" class="filled-in" id="acceptLicenseAgreement" [(ngModel)]="acceptLicenseAgreement"><label for="acceptLicenseAgreement">{{'LICENSE_AGREEMENT.CHECKBOX' | translate}}</label>
+        <mat-checkbox [(ngModel)]="acceptLicenseAgreement">{{'LICENSE_AGREEMENT.CHECKBOX' | translate}}</mat-checkbox>
     </div>
   </div>
   <div class="card-action">
@@ -49,43 +48,41 @@
     <a tabindex="0" class="waves-effect waves-light btn-flat" (keyup.enter)="logout()" (click)="logout()">{{'LICENSE_AGREEMENT.DECLINE' | translate }}</a>
   </div>
 </div>
-<div class="dialog darken dialog-sidenav" *ngIf="displaySidebar" [@fade]="displaySidebar" (click)="displaySidebar=false" (keyup.enter)="displaySidebar=false" tabindex="0"></div>
+<div class="dialog darken dialog-sidenav" *ngIf="displaySidebar" [@fade]="displaySidebar" (click)="displaySidebar=false"></div>
 
 <div #sidebar tabindex="0" class="sidenav" *ngIf="displaySidebar" [@fromLeft]="displaySidebar">
   <div class="sidenav-main">
-    <div class="sidenavClose" tabindex="0" (click)="displaySidebar=false" (keyup.enter)="displaySidebar=false"><i class="material-icons">close</i></div>
-    <div class="sidenavImage" style.background-color="{{ (user ? user.person : null) | authorityColor }}">
-      <div class="profile-gradient"></div>
-      <img *ngIf="user && user.person.profile.avatar" class="blurred-image" [src]="user.person.profile.avatar+'&crop=true&width=200&height=200'">
-      <div class="sidenavProfile">
-        <user-avatar *ngIf="user" [user]="user.person" [size]="'medium'" class="clickable" (click)="openProfile()"></user-avatar>
-        <!-- <i *ngIf="isGuest" class="material-icons">account_circle</i> -->
-        <div *ngIf="user && !isGuest">{{userName}}</div>
-        <div *ngIf="isGuest">{{'USER_GUEST' | translate}}</div>
+      <button mat-button class="sidenavClose" tabindex="0" (click)="displaySidebar=false"><i icon iconId="close" aria="true"></i></button>
+      <div class="sidenavImage" style.background-color="{{ (user ? user.person : null) | authorityColor }}">
+        <div class="profile-gradient"></div>
+        <img *ngIf="user && user.person.profile.avatar" class="blurred-image" [src]="user.person.profile.avatar+'&crop=true&width=200&height=200'">
+        <div class="sidenavProfile">
+          <user-avatar *ngIf="user" [user]="user.person" [size]="'medium'" class="clickable" (click)="openProfile()"></user-avatar>
+          <!-- <i *ngIf="isGuest" class="material-icons">account_circle</i> -->
+          <div *ngIf="user && !isGuest">{{userName}}</div>
+          <div *ngIf="isGuest">{{'USER_GUEST' | translate}}</div>
+        </div>
       </div>
-    </div>
-    <div *ngFor="let button of sidebarButtons" class="button" [class.selected]="_currentScope==button.scope"
-         (click)="openButton(button)"
-         (keyup.enter)="openButton(button)"
-         [class.collection-item-seperate]="button.isSeperate"
-         [class.clickable]="!button.isDisabled"
-         [class.disabled]="button.isDisabled"
-         tabindex="0"
-         title="{{'GOTO' | translate}} {{button.name | translate}}">
-      <i *ngIf="button.icon" class="material-icons align-icon">{{button.icon}}</i><img *ngIf="button.alticon" class="align-icon" src="{{button.alticon}}"> <span>{{button.name | translate}}</span>
-    </div>
+      <button mat-button color="primary" *ngFor="let button of sidebarButtons" class="button mat-button-no-uppercase" [class.selected]="_currentScope==button.scope"
+           (click)="openButton(button)"
+           [class.collection-item-seperate]="button.isSeperate"
+           [class.clickable]="!button.isDisabled"
+           [class.disabled]="button.isDisabled"
+           title="{{'GOTO' | translate}} {{button.name | translate}}">
+        <i *ngIf="button.icon" class="material-icons align-icon">{{button.icon}}</i><img *ngIf="button.alticon" class="align-icon" src="{{button.alticon}}"> <span>{{button.name | translate}}</span>
+      </button>
   </div>
-  <div class="license-info"><span tabindex="0" (click)="showLicenses()" (keyup.enter)="showLicenses()">{{'LICENSE_INFORMATION' | translate}}</span></div>
+  <div class="license-info"><button mat-button class="mat-button-no-uppercase" (click)="showLicenses()">{{'LICENSE_INFORMATION' | translate}}</button></div>
 </div>
 <div #topbar class="topBar {{ 'topBar-'+_currentScope}} scrollWithBanner" [class.noUser]="!_showUser">
     <div class="mobile-move-top2">
       <div class="menuButtonOuter">
-        <div (click)="openSidenav()" (keyup.enter)="openSidenav()" tabindex="0" class="menuButton" [class.clickable]="canOpen" *ngIf="showScope" title="{{'CHOOSEENVIRONMENT' | translate}}">
+        <button mat-button (click)="openSidenav()" class="menuButton mat-button-no-uppercase" [class.clickable]="canOpen" *ngIf="showScope" title="{{'CHOOSEENVIRONMENT' | translate}}">
           <img class="material-icons eduImage" [src]="getIconSource()" alt=""/>
           <i aria-hidden="true" class="material-icons scopeIcon">{{getCurrentScopeIcon()}}</i>
           <span>{{title | translate}}</span>
           <i aria-hidden="true" class="material-icons barIcon">keyboard_arrow_right</i>
-        </div>
+        </button>
       </div>
       <div class="topBarSearch" [class.noScope]="!showScope">
         <div class="scopeNameMobile" *ngIf="!searchEnabled">{{title | translate}}</div>
@@ -110,22 +107,20 @@
             <div>+{{nodeStoreAnimation}}</div>
           </div>
         </div>
-        <div class="user clickable" #userRef *ngIf="user && _showUser" (click)="showUserMenu()" (keyup.enter)="showUserMenu()" tabindex="0" title="{{'USERMENU' | translate}}">
+        <button mat-button class="user clickable" #userRef *ngIf="user && _showUser" [matMenuTriggerFor]="userDropdown.menu" title="{{'USERMENU' | translate}}">
             <user-avatar [user]="user.person" [size]="'xsmall'"></user-avatar>
             <div *ngIf="!isGuest">{{userName}}</div>
             <div *ngIf="isGuest">{{'USER_GUEST' | translate}}</div>
             <i aria-hidden="true" class="material-icons barIcon iconArrow">keyboard_arrow_down</i>
             <!-- <i class="material-icons barIcon iconPerson">account_circle</i>-->
-          </div>
-        <dropdown class="userMenu"
-          [(show)]="userOpen"
+          </button>
+        <dropdown #userDropdown class="userMenu"
           [options]="userMenuOptions"
         ></dropdown>
-        <div *ngIf="helpOptions.length" class="help clickable" (click)="showHelpMenu()" (keyup.enter)="showHelpMenu()" tabindex="0">
+        <button mat-icon-button *ngIf="helpOptions.length" class="help clickable" [matMenuTriggerFor]="helpDropdown.menu">
           <i icon iconId="help_outline" aria="true"></i>
-        </div>
-        <dropdown class="helpMenu"
-                  [(show)]="helpOpen"
+        </button>
+        <dropdown #helpDropdown class="helpMenu"
                   [options]="helpOptions"
         ></dropdown>
       </div>

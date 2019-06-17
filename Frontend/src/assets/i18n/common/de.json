@@ -42,7 +42,9 @@
   "NO_MORE_ELEMENTS" : "Keine weiteren Elemente",
   "FIELD_MUST_BE_FILLED" : "Dieses Feld muss ausgefüllt sein",
   "CHOOSE_DATE":"Datum wählen",
+  "CARD_SUBTITLE_MULTIPLE":"{{count}} Elemente",
   "SELECT_COLLECTION" : "In '{{name}}' einsortieren",
+  "SELECT_ROOT_NAME" : "Hauptverzeichnis",
   "SELECT_ROOT" : "Hauptverzeichnis wählen",
   "SELECT_ROOT_DISABLED" : "Element wählen",
   "CLOSE" : "Schließen",
@@ -263,7 +265,7 @@
     "OVERALL":""
   },
   "NODE_VARIANT":{
-    "TITLE": "Neue Variante anlegen für {{name}}",
+    "TITLE": "Neue Variante anlegen",
     "NEW_VARIANT":"Name der Variante:",
     "DEFAULT_NAME":"Variante von {{name}}",
     "BREADCRUMB_INFO": "Variante speichern in:",
@@ -440,6 +442,7 @@
   "NO_SIZE":"-",
   "VERSION_COMMENT":"Versionskommentar",
   "MDS":{
+    "TITLE":"Metadaten bearbeiten",
     "SHOW_EXTENDED":"Erweitere Metadaten anzeigen",
     "SHOW_EXTENDED_SEARCH":"Weitere Filter anzeigen",
     "AUTHOR_LABEL":"Urheber-Angaben",
@@ -532,7 +535,8 @@
     "keyboard_arrow_right": "weiter",
     "keyboard_arrow_up": "nach oben",
     "file_upload": "Datei hochladen",
-    "delete": "Löschen"
+    "delete": "Löschen",
+    "add": "Neu"
   },
   "LANGUAGE":{
     "INTERNATIONAL": "International",

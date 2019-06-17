@@ -47,6 +47,9 @@ a, a:hover, a:visited, a:active {
       flex-wrap: wrap;
     }
   }
+  .more{
+    color: white !important;
+  }
 }
 .topBar{
   background:#383838;
@@ -83,9 +86,12 @@ a, a:hover, a:visited, a:active {
 }
 
 .displayBar > span:last-child {
+  position: relative;
+  top: -5px;
   text-align: right;
   align-items: center;
-  padding-top: 12px;
+  justify-content: right;
+  display: grid;
 }
 
 #nodeRenderContentWrapper {

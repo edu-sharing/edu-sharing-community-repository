@@ -11,6 +11,7 @@ import {SessionStorageService} from "../../../core-module/core.module";
 import {CordovaService} from "../../../common/services/cordova.service";
 import {UIConstants} from "../../../core-module/ui/ui-constants";
 import {RestRegisterService} from "../../../core-module/core.module";
+import {FormControl, Validators} from '@angular/forms';
 
 @Component({
   selector: 'app-register-request',
@@ -20,12 +21,10 @@ import {RestRegisterService} from "../../../core-module/core.module";
 export class RegisterRequestComponent {
     @Output() onLoading=new EventEmitter();
     @Output() onDone=new EventEmitter();
-    email = "";
-
-    public checkMail() {
-        return UIHelper.isEmail(this.email);
-    }
-
+    emailFormControl = new FormControl('', [
+        Validators.required,
+        Validators.email,
+    ]);
     constructor(private connector: RestConnectorService,
                 private toast: Toast,
                 private router: Router,
@@ -34,10 +33,10 @@ export class RegisterRequestComponent {
     }
 
     submit() {
-        if(!this.checkMail())
+        if(!this.emailFormControl.valid)
             return;
         this.onLoading.emit(true);
-        this.register.recoverPassword(this.email).subscribe(()=>{
+        this.register.recoverPassword(this.emailFormControl.value).subscribe(()=>{
             this.onLoading.emit(false);
             this.toast.toast("REGISTER.TOAST");
             this.onDone.emit();

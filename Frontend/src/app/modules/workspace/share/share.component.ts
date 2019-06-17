@@ -37,7 +37,7 @@ import {
     trigger('cardAnimation', UIAnimation.cardAnimation())
   ]
 })
-export class WorkspaceShareComponent implements AfterViewInit{
+export class WorkspaceShareComponent{
   public ALL_PERMISSIONS=["All","Read","ReadPreview","ReadAll","Write","Delete",
     "DeleteChildren","DeleteNode","AddChildren","Consumer","ConsumerMetadata",
     "Editor","Contributor","Collaborator","Coordinator",
@@ -55,11 +55,15 @@ export class WorkspaceShareComponent implements AfterViewInit{
     ["ReadPermissions",["Contributor"]],
     ["Contributor",["Collaborator"]]
   ];
-  public INVITE="INVITE";
-  public INVITED="INVITED";
-  public ADVANCED="ADVANCED";
   initialState: string;
-  public tab=this.INVITE;
+  _tab=0;
+  public set tab(tab:number){
+    this._tab=tab;
+    this.updateButtons();
+  }
+  public get tab(){
+    return this._tab;
+  }
   private currentType=[RestConstants.ACCESS_CONSUMER,RestConstants.ACCESS_CC_PUBLISH];
   private inherited : boolean;
   private notifyUsers = true;
@@ -75,11 +79,6 @@ export class WorkspaceShareComponent implements AfterViewInit{
   public linkDisabled : Permission;
   public link = false;
   private _node : Node;
-  dialogTitle : string;
-  dialogMessage : string;
-  dialogCancel : Function;
-  dialogButtons : DialogButton[];
-
   private searchStr: string;
   private inheritAllowed=false;
   private globalSearch=false;
@@ -104,11 +103,9 @@ export class WorkspaceShareComponent implements AfterViewInit{
   public deletedUsages:any[]=[];
   usages: any;
   showCollections = false;
+    buttons: DialogButton[];
 
-    ngAfterViewInit(): void {
-        setTimeout(()=>UIHelper.setFocusOnCard());
-    }
-  public isCollection(){
+    public isCollection(){
     if(this._node==null)
       return true;
     return this._node.aspects.indexOf(RestConstants.CCM_ASPECT_COLLECTION)!=-1;
@@ -210,30 +207,7 @@ export class WorkspaceShareComponent implements AfterViewInit{
   @Output() onLoading=new EventEmitter();
   private showChooseType = false;
   private showChooseTypeList : Permission;
-  @HostListener('document:keydown', ['$event'])
-  handleKeyboardEvent(event: KeyboardEvent) {
-    if(event.key=="Escape"){
-      event.stopPropagation();
-      event.preventDefault();
-      if(this.history){
-        this.history=null;
-        return;
-      }
-      if(this.showCollections){
-        this.showCollections=false;
-        return;
-      }
-      if(this.linkNode){
-        this.linkNode=null;
-        return;
-      }
-      this.cancel();
-      return;
-    }
-  }
-  public setTab(tab : string){
-    this.tab=tab;
-  }
+
   private chooseType(){
     this.showChooseType=true;
   }
@@ -369,6 +343,7 @@ export class WorkspaceShareComponent implements AfterViewInit{
 
     this.connector.isLoggedIn().subscribe((data:LoginResult)=>{
       this.isSafe=data.currentScope!=null;
+      this.updateButtons();
       this.connector.hasToolPermission(this.isSafe ? RestConstants.TOOLPERMISSION_GLOBAL_AUTHORITY_SEARCH_SAFE : RestConstants.TOOLPERMISSION_GLOBAL_AUTHORITY_SEARCH).subscribe((has:boolean)=>this.globalAllowed=has);
       this.connector.hasToolPermission(RestConstants.TOOLPERMISSION_GLOBAL_AUTHORITY_SEARCH_FUZZY).subscribe((has:boolean)=>this.fuzzyAllowed=has);
       this.connector.hasToolPermission(RestConstants.TOOLPERMISSION_INVITE_ALLAUTHORITIES).subscribe((has:boolean)=>this.publishPermission=has);
@@ -396,8 +371,8 @@ export class WorkspaceShareComponent implements AfterViewInit{
     }
   }
   public setPermission(permission:Permission,name:string,status:any){
-    console.log("set "+name+" "+status);
-    if(status.srcElement.checked){
+    console.log("set "+name+" "+status,status);
+    if(status.checked){
       if(permission.permissions.indexOf(name)==-1)
         permission.permissions.push(name);
     }
@@ -478,21 +453,19 @@ export class WorkspaceShareComponent implements AfterViewInit{
     return -1;
   }
   public setPublish(status:boolean,force=false){
-    if(status && !force){
-      if(this.config.instant('publishingNotice',false)){
-        this.dialogTitle='WORKSPACE.SHARE.PUBLISHING_WARNING_TITLE';
-        this.dialogMessage='WORKSPACE.SHARE.PUBLISHING_WARNING_MESSAGE';
-        this.dialogCancel=()=>{
-            this.dialogTitle=null;
-            this.publishActive=false;
-        };
-        this.dialogButtons=DialogButton.getYesNo(()=>{
-            this.dialogCancel();
-        }, ()=>{
-            this.publishActive=true;
-            this.dialogTitle=null;
-            this.setPublish(status,true);
-        });
+    if(status){
+      if(!force && this.config.instant('publishingNotice',false)){
+          let cancel=()=>{
+              this.publishActive=false;
+              this.toast.closeModalDialog();
+          };
+          this.toast.showModalDialog('WORKSPACE.SHARE.PUBLISHING_WARNING_TITLE',
+              'WORKSPACE.SHARE.PUBLISHING_WARNING_MESSAGE',
+              DialogButton.getYesNo(cancel, ()=>{
+                  this.publishActive=true;
+                  this.setPublish(status,true);
+                  this.toast.closeModalDialog();
+              }),true,cancel);
         return;
       }
       if(this.deletedPermissions.indexOf(RestConstants.AUTHORITY_EVERYONE)!=-1){
@@ -582,6 +555,13 @@ export class WorkspaceShareComponent implements AfterViewInit{
         }
       }
       return merge;
+    }
+
+    updateButtons() {
+        this.buttons=[
+            new DialogButton('CANCEL',DialogButton.TYPE_CANCEL,()=>this.cancel()),
+            new DialogButton(this.tab==0 ? 'WORKSPACE.BTN_INVITE' : 'APPLY',DialogButton.TYPE_PRIMARY,()=>this.save()),
+        ];
     }
 }
 /*

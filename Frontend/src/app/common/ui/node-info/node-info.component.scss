@@ -1,5 +1,8 @@
 @import "../../../core-ui-module/styles/variables";
 
+.debug-content{
+  padding: $cardPadding;
+}
 :host /deep/{
   .breadcrumb{
     flex-wrap: wrap;

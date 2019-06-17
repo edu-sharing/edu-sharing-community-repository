@@ -9,12 +9,23 @@ import {BrowserAnimationsModule} from "@angular/platform-browser/animations";
 import {HttpClient, HttpClientModule} from "@angular/common/http";
 import {MatDatepickerModule} from '@angular/material/datepicker';
 import {
-  MatAutocompleteModule,
-  MatFormFieldModule,
-  MatInputModule,
-  MatNativeDateModule,
-  MatOptionModule
-} from "@angular/material";
+    MatAutocompleteModule,
+    MatButtonModule,
+    MatCardModule,
+    MatCheckboxModule,
+    MatDialogModule,
+    MatFormFieldModule,
+    MatInputModule,
+    MatMenuModule,
+    MatNativeDateModule,
+    MatOptionModule,
+    MatRadioModule,
+    MatSelectModule,
+    MatSidenavModule,
+    MatSlideToggleModule,
+    MatTabsModule,
+    MatToolbarModule
+} from '@angular/material';
 import { LazyLoadImageModule } from 'ng-lazyload-image';
 import {CustomModule} from './custom-module/custom.module';
 import {RestLocatorService, CoreModule} from "./core-module/core.module";
@@ -26,8 +37,21 @@ export const IMPORTS=[
   BrowserModule,
   BrowserAnimationsModule,
   FormsModule,
+  ReactiveFormsModule,
   HttpClientModule,
   LazyLoadImageModule,
+  MatButtonModule,
+  MatTabsModule,
+  MatSidenavModule,
+  MatCheckboxModule,
+  MatSlideToggleModule,
+  MatMenuModule,
+  MatOptionModule,
+  MatSelectModule,
+  MatAutocompleteModule,
+  MatToolbarModule,
+  MatRadioModule,
+  MatCardModule,
   MatDatepickerModule,
   MatNativeDateModule,
   MatAutocompleteModule,

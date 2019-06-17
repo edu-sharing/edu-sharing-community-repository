@@ -2,12 +2,22 @@
 
 .dropArea{
   border-radius:5px;
-  width: 100%;
   text-align: center;
   border: 2px dashed $primary;
+  margin: $cardPadding;
   padding: 20px;
   margin-bottom:20px;
   color:$textLight;
+
+  .object-message{
+    margin-bottom: 10px;
+  }
+}
+mat-form-field{
+  width:100%;
+}
+.link-info{
+  padding:0 $cardPadding;
 }
 .quota{
   padding-bottom: 5px;
@@ -19,15 +29,16 @@
   color:$primary;
 }
 hr{
-  margin-bottom:20px;
+  margin-bottom: 20px;
+  width: calc(100% - 40px);
 }
 .dropArea i{
   font-size:60px;
 }
 .lti-data{
   background-color: $actionDialogBackground;
-  margin: 20px $cardPadding*-1;
   padding:20px $cardPadding;
+  margin: 20px 0;
   .heading{
     font-size: 110%;
     font-weight: bold;
@@ -48,7 +59,12 @@ hr{
 .link{
   width:100%;
   .linkLabel{
-    text-align: center;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    .material-icons{
+      margin-right: 5px;
+    }
   }
   .linkTitle{
     color:$textLight;
@@ -59,6 +75,9 @@ hr{
   .lti{
     display: flex;
     flex-direction: column;
+    mat-slide-toggle{
+      padding:0 30px;
+    }
   }
   .toolInfo{
     display:flex;

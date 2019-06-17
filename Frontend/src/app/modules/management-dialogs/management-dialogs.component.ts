@@ -49,7 +49,8 @@ export class WorkspaceManagementDialogsComponent  {
         this.dialogTitle="WORKSPACE.DELETE_TITLE"+(nodeDelete.length==1 ? "_SINGLE" : "");
         this.dialogCancelable=true;
         this.dialogMessage="WORKSPACE.DELETE_MESSAGE"+(nodeDelete.length==1 ? "_SINGLE" : "");
-        this.dialogMessageParameters={name:nodeDelete[0].name};
+        this.dialogMessageParameters={name:RestHelper.getName(nodeDelete[0])};
+        this.dialogNode=nodeDelete;
         this.dialogButtons=DialogButton.getCancel(()=> {this.dialogTitle = null});
         this.dialogButtons.push(new DialogButton('YES_DELETE',DialogButton.TYPE_PRIMARY,()=>{this.deleteConfirmed(nodeDelete)}));
 
@@ -104,6 +105,7 @@ export class WorkspaceManagementDialogsComponent  {
   public dialogMessage:string;
   public dialogMessageParameters:any;
   public dialogCancelable:boolean;
+  public dialogNode:Node|Node[];
   public dialogButtons:DialogButton[];
   private currentLtiTool: Node;
   private ltiToolRefresh: Boolean;
@@ -123,42 +125,18 @@ export class WorkspaceManagementDialogsComponent  {
         event.stopPropagation();
         return;
       }
-      if(this.addToCollection!=null){
-        this.cancelAddToCollection();
-        event.preventDefault();
-        event.stopPropagation();
-        return;
+      if(this.addToCollection!=null) {
+          this.cancelAddToCollection();
+          event.preventDefault();
+          event.stopPropagation();
+          return;
       }
-        if(this.nodeWorkflow!=null){
-            this.closeWorkflow();
-            event.preventDefault();
-            event.stopPropagation();
-            return;
-        }
-        if(this.nodeShare!=null){
-            this.closeShare();
-            event.preventDefault();
-            event.stopPropagation();
-            return;
-        }
-        if(this.nodeShareLink!=null){
-            this.closeShareLink();
-            event.preventDefault();
-            event.stopPropagation();
-            return;
-        }
         if(this.nodeTemplate!=null){
             this.closeTemplate();
             event.preventDefault();
             event.stopPropagation();
             return;
         }
-      if(this.nodeContributor!=null){
-        this.closeContributor();
-        event.preventDefault();
-        event.stopPropagation();
-        return;
-      }
       if(this.nodeLicense!=null){
         this.closeLicense();
         event.preventDefault();
@@ -177,12 +155,6 @@ export class WorkspaceManagementDialogsComponent  {
         event.stopPropagation();
         return;
       }
-        if(this.nodeVariant!=null){
-            this.closeVariant();
-            event.preventDefault();
-            event.stopPropagation();
-            return;
-        }
       if(this.ltiObject){
         this.ltiObject=null;
         event.preventDefault();

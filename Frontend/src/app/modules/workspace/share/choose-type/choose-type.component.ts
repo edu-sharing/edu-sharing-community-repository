@@ -1,5 +1,6 @@
 import {Component, Input, EventEmitter, Output, ViewChild, ElementRef, AfterViewInit} from '@angular/core';
 import {UIHelper} from "../../../../core-ui-module/ui-helper";
+import {MatSlideToggle} from "@angular/material";
 
 @Component({
   selector: 'workspace-share-choose-type',
@@ -7,11 +8,12 @@ import {UIHelper} from "../../../../core-ui-module/ui-helper";
   styleUrls: ['choose-type.component.scss']
 })
 export class WorkspaceShareChooseTypeComponent implements AfterViewInit {
+  private publish: boolean;
+  private publishDisabled: boolean;
   ngAfterViewInit(): void {
     setTimeout(()=>UIHelper.setFocusOnDropdown(this.dropdownElement));
   }
   private _selected : string[];
-  @ViewChild('publish') publish : ElementRef;
   @ViewChild('dropdown') dropdownElement : ElementRef;
   @Input() set selected (selected : string[]){
     this._selected=selected;
@@ -39,15 +41,13 @@ export class WorkspaceShareChooseTypeComponent implements AfterViewInit {
     return this._selected.indexOf(type)!=-1;
   }
   public checkPublish() {
-    if(!this.publish)
-      return;
-    this.publish.nativeElement.checked=this.contains('CCPublish');
-    this.publish.nativeElement.disabled=this.contains('Coordinator');
+    this.publish=this.contains('CCPublish');
+    this.publishDisabled=this.contains('Coordinator');
     if(this.contains('Coordinator'))
-      this.publish.nativeElement.checked=true;
+      this.publish=true;
   }
-  public setPublish(event : any){
-    if(this.publish.nativeElement.checked){
+  public setPublish(event : MatSlideToggle){
+    if(event.checked){
       if(this.contains('CCPublish'))
         return;
       this._selected.push('CCPublish');

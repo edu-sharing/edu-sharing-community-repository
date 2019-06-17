@@ -1,34 +1,27 @@
 <form (ngSubmit)="register()" #loginForm>
     <div class="name-input">
-        <div>
-            <label for="username">{{'USER.firstName' | translate}} *</label>
-            <input [ngClass]="{'valid': info.firstName.trim()}" type="text" required name="username" id="username"  placeholder="{{'REGISTER.PL_USER' | translate}}" [(ngModel)]="info.firstName"/>
-        </div>
-        <div class="last-name">
-            <label for="lastname">{{'USER.lastName' | translate}}</label>
-            <input [ngClass]="{'valid': info.lastName.trim()}" type="text" name="lastname" id="lastname" placeholder="{{'REGISTER.PL_NAME' | translate}}" [(ngModel)]="info.lastName"/>
-        </div>
+        <mat-form-field>
+            <mat-label>{{'USER.firstName' | translate}}</mat-label>
+            <input matInput type="text" required name="username" id="username"  placeholder="{{'REGISTER.PL_USER' | translate}}" [(ngModel)]="info.firstName"/>
+        </mat-form-field>
+        <mat-form-field class="last-name">
+            <mat-label>{{'USER.lastName' | translate}}</mat-label>
+            <input matInput type="text" name="lastname" id="lastname" placeholder="{{'REGISTER.PL_NAME' | translate}}" [(ngModel)]="info.lastName"/>
+        </mat-form-field>
     </div>
 
-    <div>
-        <label for="email">{{'USER.email' | translate}} *</label>
-        <input required [ngClass]="{'valid': mailValid, 'invalid': !mailValid && info.email.trim()}" type="email" name="email" id="email" placeholder="{{'REGISTER.PL_MAIL' | translate}}" (ngModelChange)="checkMail($event)" [(ngModel)]="info.email"/>
-    </div>
-    <div>
-        <label for="password">{{'USER.password' | translate}} *</label>
-        <input-password [hint]="true" [displayStrength]="true" autocomplete="new-password" id="password" required="true" (keydown.enter)="register()" [(value)]="info.password" placeholder="{{'REGISTER.PL_PASSWORD' | translate}}"></input-password>
-    </div>
-    <div>
-        <label for="organization">{{'REGISTER.ORGANIZATION' | translate}}</label>
-        <input [ngClass]="{'valid': info.organization.trim()}" type="text" name="organization" id="organization" placeholder="{{'REGISTER.PL_ORG' | translate}} {{'REGISTER.ORGANIZATION_TITLE' | translate}} ..." [(ngModel)]="info.organization"/>
-    </div>
+    <mat-form-field>
+        <mat-label>{{'USER.email' | translate}}</mat-label>
+        <input matInput required [formControl]="emailFormControl" type="email" name="email" id="email" placeholder="{{'REGISTER.PL_MAIL' | translate}}"/>
+    </mat-form-field>
+    <input-password label="{{'USER.password' | translate}}" [hint]="true" [displayStrength]="true" autocomplete="new-password" id="password" required="true" (keydown.enter)="register()" [(value)]="info.password" placeholder="{{'REGISTER.PL_PASSWORD' | translate}}"></input-password>
+    <mat-form-field class="organization">
+        <mat-label>{{'REGISTER.ORGANIZATION' | translate}}</mat-label>
+        <input matInput type="text" name="organization" id="organization" placeholder="{{'REGISTER.PL_ORG' | translate}} {{'REGISTER.ORGANIZATION_TITLE' | translate}} ..." [(ngModel)]="info.organization"/>
+    </mat-form-field>
 </form>
-<div>
-    <input id="newsletter" type="checkbox" [(ngModel)]="info.allowNotifications" class="filled-in">
-    <label for="newsletter">{{'REGISTER.NEWSLETTER' | translate}}</label>
-</div>
+<mat-checkbox [(ngModel)]="info.allowNotifications">{{'REGISTER.NEWSLETTER' | translate}}</mat-checkbox>
 <div class="accept">
-    <input id="accept" type="checkbox" class="filled-in" [(ngModel)]="agree" (change)="setAccept(agree)">
-    <label for="accept">{{'REGISTER.ACCEPT' | translate}}</label>
+    <mat-checkbox [(ngModel)]="agree" (change)="setAccept(agree)">{{'REGISTER.ACCEPT' | translate}}</mat-checkbox>
     <a class="clickable imprint" *ngIf="privacyUrl" (click)="openPrivacy()">{{'REGISTER.PRIVACY-LINK' | translate}}</a>
 </div>
