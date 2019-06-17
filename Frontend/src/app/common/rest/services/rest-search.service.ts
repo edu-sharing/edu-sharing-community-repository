@@ -7,16 +7,50 @@ import {RestConstants} from "../rest-constants";
 import { NodeRef, Node, NodeWrapper, NodePermissions, LocalPermissions, NodeVersions, NodeVersion, NodeList} from "../data-object";
 import {RequestObject} from "../request-object";
 import {AbstractRestService} from "./abstract-rest-service";
+import {MdsComponent} from "../../ui/mds/mds.component";
+import {Helper} from "../../helper";
 
 @Injectable()
 export class RestSearchService extends AbstractRestService{
-    static convertCritierias(properties:any[]){
+    static convertCritierias(properties:any[],mdsRef:MdsComponent){
         let criterias=[];
+        properties=Helper.deepCopy(properties);
         for (let property in properties) {
+            let widget=mdsRef.getWidget(property);
+            if(widget && widget.type=='multivalueTree'){
+                let attach=RestSearchService.unfoldTreeChilds(properties[property],widget);
+                if(attach)
+                    properties[property]=properties[property].concat(attach);
+            }
+            console.log(properties[property]);
             if(properties[property] && properties[property].length)
                 criterias.push({'property':property,'values':properties[property]});
         }
         return criterias;
+    }
+    static unfoldTreeChilds(props:string[], widget:any) {
+        let attach:string[] = [];
+        if(props) {
+            for (let prop of props) {
+                for (let child of widget.values) {
+                    let copy = child;
+                    for(let i=0;i<=100 && copy.parent;i++) {
+                        if (copy.parent == prop && attach.indexOf(child.id) == -1) {
+                            attach.push(child.id);
+                        }
+                        if (copy.parent) {
+                            copy = widget.values.find((v: any) => v.id == copy.parent);
+                        } else
+                            break;
+                        if(i==100){
+                            console.warn("possible tree recursion detected in valuespace for widget "+widget.id);
+                        }
+                    }
+                }
+            }
+            return attach;
+        }
+        return null;
     }
   constructor(connector : RestConnectorService) {
       super(connector);

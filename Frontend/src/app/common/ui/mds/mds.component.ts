@@ -216,7 +216,7 @@ export class MdsComponent{
   private childobjects:any=[];
   public globalProgress=false;
   private properties: string[]=[];
-  private currentWidgets: any[];
+  currentWidgets: any[];
   private mds: any;
   private static MAX_SUGGESTIONS = 5;
   private suggestionsViaSearch = false;
@@ -1131,7 +1131,7 @@ export class MdsComponent{
             property: id,
             pattern: element.value,
         },
-        criterias:RestSearchService.convertCritierias(Helper.arrayJoin(this._currentValues,this.getValues()))
+        criterias:RestSearchService.convertCritierias(Helper.arrayJoin(this._currentValues,this.getValues()),this)
     },this._setId,this._repository).subscribe((data:MdsValueList)=>{
       if(this.lastMdsQuery!=element.value)
         return;
@@ -2100,7 +2100,7 @@ export class MdsComponent{
       );
   }
 
-  private getWidget(id: string,template:string=null,widgets=this.mds.widgets) {
+  getWidget(id: string,template:string=null,widgets=this.mds.widgets) {
     for(let w of widgets){
       if(w.id==id){
         if((template==null || w.template==template) && this.isWidgetConditionTrue(w)){

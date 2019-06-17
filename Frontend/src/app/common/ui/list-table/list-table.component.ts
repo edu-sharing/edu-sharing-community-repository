@@ -49,7 +49,7 @@ import {UIConstants} from "../ui-constants";
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 /**
- * A provider to render multiple Nodes as a list
+ * A provider to render multiple Nodes as a lists
  */
 export class ListTableComponent implements EventListener{
   public static VIEW_TYPE_LIST = 0;

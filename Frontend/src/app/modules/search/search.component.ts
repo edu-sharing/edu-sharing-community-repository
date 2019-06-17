@@ -408,39 +408,6 @@ export class SearchComponent {
       return;
     }
 
-    /*
-    if(typeof this.searchService.autocompleteData['keyword'] != 'undefined') {
-        let values:string[]=[];
-        for(let i = 0; i<this.searchService.autocompleteData['keyword'].length; i++) {
-            values.push(this.searchService.autocompleteData['keyword'][i].title);
-        }
-        criterias.push({'property': '{http://www.campuscontent.de/model/lom/1.0}general_keyword', 'values': values});
-    }
-
-    if(typeof this.searchService.autocompleteData['educationallearningresourcetype'] != 'undefined') {
-        let values:string[]=[];
-        for(let i = 0; i<this.searchService.autocompleteData['educationallearningresourcetype'].length; i++) {
-            values.push(this.searchService.autocompleteData['educationallearningresourcetype'][i].title);
-        }
-        criterias.push({'property': '{http://www.campuscontent.de/model/1.0}educationallearningresourcetype', 'values': values});
-    }
-
-    if(typeof this.searchService.autocompleteData['taxonid'] != 'undefined') {
-      let values:string[]=[];
-      for(let i = 0; i<this.searchService.autocompleteData['taxonid'].length; i++) {
-        values.push(this.searchService.autocompleteData['taxonid'][i].key);
-      }
-      criterias.push({'property': '{http://www.campuscontent.de/model/1.0}taxonid', 'values': values});
-    }
-
-    if(typeof this.searchService.autocompleteData['educationalcontext'] != 'undefined') {
-      let values:string[]=[];
-      for(let i = 0; i<this.searchService.autocompleteData['educationalcontext'].length; i++) {
-        values.push(this.searchService.autocompleteData['educationalcontext'][i].title);
-      }
-      criterias.push({'property': '{http://www.campuscontent.de/model/1.0}educationalcontext', 'values': values});
-    }
-    */
     let criterias:any[] = this.getCriterias(properties,searchString);
 
 
@@ -1029,7 +996,7 @@ export class SearchComponent {
     if(!addAll)
       return criterias;
     if(properties) {
-        criterias=criterias.concat(RestSearchService.convertCritierias(properties));
+        criterias=criterias.concat(RestSearchService.convertCritierias(properties,this.mdsRef));
     }
     return criterias;
   }
