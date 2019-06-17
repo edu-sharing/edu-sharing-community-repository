@@ -844,6 +844,12 @@ $orderAnimationTime:$transitionNormal*5;
   @include materialShadow();
 }
 :host /deep/ {
+  .material-icons.collectionScope {
+    font-size: 130%;
+    left: -1px;
+    position: relative;
+    top: 2px;
+  }
   .nodeCollection {
     .collection_info {
       i {

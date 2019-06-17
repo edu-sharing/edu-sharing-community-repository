@@ -228,7 +228,6 @@ $cardActionHeight:77px;
   position: fixed;
   z-index: 100;
   right:0;
-  top:$mainnavHeight;
   height: calc( 100% - #{$mainnavHeight});
   width:$dialogRightWidth;
   background-color: #fff;
