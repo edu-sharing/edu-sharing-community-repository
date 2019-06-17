@@ -234,13 +234,12 @@ $cardActionHeight:77px;
   background-color: #fff;
   @include materialShadow();
   .title{
-    padding-top:16px;
+    display: flex;
     padding-left:$cardPadding;
-    padding-right:$cardPadding;
-    font-size:110%;
-    background-color: $workspaceMetadataBackground;
-    word-break: break-all;
-    padding-bottom: 15px;
+    .label{
+      flex-grow: 1;
+      padding:16px 0;
+    }
     .close{
       float:right;
     }

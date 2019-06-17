@@ -1,5 +1,6 @@
-  <div class="title">{{ title | translate}}
-   <i tabindex="0" icon iconId="close" class="close" (click)="cancel()" (keyup.enter)="cancel()" aria="true"></i>
+  <div class="title">
+    <div class="label">{{ title | translate}}</div>
+    <button mat-button class="close" (click)="cancel()"><i icon iconId="close"></i></button>
   </div>
   <div class="content" infinite-scroll [scrollWindow]="false" (scrolled)="loadData()">
     <listTable
