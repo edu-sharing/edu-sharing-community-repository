@@ -1,0 +1,16 @@
+@import "../../styles/variables";
+.moreOpen{
+  position:absolute;
+  right:20px;
+  width:$contextMenuWidth;
+  padding:0!important;
+}
+.moreOpen a{
+  text-align: left;
+}
+
+.dropdown-right{
+  right: -180px;
+  top: 20px;
+  width: 200px;
+}

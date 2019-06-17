@@ -16,11 +16,14 @@ import {SpinnerSmallComponent} from "./components/spinner-small/spinner-small.co
 import {GlobalProgressComponent} from "./components/global-progress/global-progress.component";
 import {Toast} from "./toast";
 import {ToastyModule} from "ngx-toasty";
+import {DropdownComponent} from "./components/dropdown/dropdown.component";
+import {MatButtonModule, MatCheckboxModule, MatInputModule, MatMenuModule} from "@angular/material";
 
 @NgModule({
     declarations: [
         CollectionChooserComponent,
         ListTableComponent,
+        DropdownComponent,
         SortDropdownComponent,
         IconComponent,
         SpinnerComponent,
@@ -32,6 +35,10 @@ import {ToastyModule} from "ngx-toasty";
     imports: [
         BrowserModule,
         FormsModule,
+        MatButtonModule,
+        MatMenuModule,
+        MatInputModule,
+        MatCheckboxModule,
         ToastyModule.forRoot(),
         TranslateModule.forRoot({
             loader:{
@@ -57,6 +64,7 @@ import {ToastyModule} from "ngx-toasty";
         IconComponent,
         CollectionChooserComponent,
         ReplaceCharsPipe,
+        DropdownComponent,
         SortDropdownComponent,
         InfiniteScrollDirective,
         ToastyModule,

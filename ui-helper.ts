@@ -45,6 +45,10 @@ export class UIHelper {
             return value > window.innerWidth;
         if (type == UIConstants.MEDIA_QUERY_MIN_WIDTH)
             return value < window.innerWidth;
+      if(type==UIConstants.MEDIA_QUERY_MAX_HEIGHT)
+          return value>window.innerHeight;
+      if(type==UIConstants.MEDIA_QUERY_MIN_HEIGHT)
+          return value<window.innerHeight;
         console.warn("Unsupported media query " + type);
         return true;
     }
@@ -184,7 +188,7 @@ export class UIHelper {
     public static getPasswordStrengthString(password: string) {
         let min_length = 5;
         // console.log("strength: "+this.getPasswordStrength(password));
-        if (password.length >= min_length) {
+        if (password && password.length >= min_length){
             if (this.getPasswordStrength(password) > 10) {
                 if (this.getPasswordStrength(password) > 15) {
                     return 'strong';
@@ -369,7 +373,7 @@ export class UIHelper {
                 if(user.person.quota.enabled && user.person.quota.sizeCurrent>=user.person.quota.sizeQuota){
                     toast.showModalDialog('CONNECTOR_QUOTA_REACHED_TITLE','CONNECTOR_QUOTA_REACHED_MESSAGE',DialogButton.getOk(()=>{
                         toast.closeModalDialog();
-                    }),true,false);
+                    }),true);
                     if(win)
                         win.close();
                     return;
@@ -596,7 +600,7 @@ export class UIHelper {
      * @param componentFactoryResolver The resolver service
      * @param viewContainerRef The viewContainerRef service
      * @param componentName The name of the angular component (e.g. SpinnerComponent)
-     * @param targetElement The target element of the dom
+     * @param targetElement The target element of the dom. If the element is null (not found), nothing is done
      * @param bindings Optional bindings (inputs & outputs) to the given component
      * @param delay Optional inflating delay in ms(some components may need some time to "init" the layout)
      */

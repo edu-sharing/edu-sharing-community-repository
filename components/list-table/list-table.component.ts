@@ -23,6 +23,7 @@ import {
     TemporaryStorageService, UIService
 } from '../../../core-module/core.module';
 import {AddElement} from "../../add-element";
+import {MatMenuTrigger} from "@angular/material";
 
 @Component({
   selector: 'listTable',
@@ -55,6 +56,7 @@ export class ListTableComponent implements EventListener{
   public static VIEW_TYPE_GRID = 1;
   public static VIEW_TYPE_GRID_SMALL = 2;
   @ViewChild('drag') drag : ElementRef;
+  @ViewChild('menuTrigger') menuTrigger : MatMenuTrigger;
   @ViewChild('addElementRef') addElementRef : ElementRef;
 
 
@@ -104,6 +106,9 @@ export class ListTableComponent implements EventListener{
    */
   @Input() set options(options : OptionItem[]){
     options=UIHelper.filterValidOptions(this.ui,options);
+    if(this.selectedNodes && this.selectedNodes.length==1)
+      options=this.filterCallbacks(options,this.selectedNodes[0]);
+    console.log(options);
     this._options=[];
     if(!options)
       return;
@@ -116,7 +121,6 @@ export class ListTableComponent implements EventListener{
       if(option.showAlways)
         this.optionsAlways.push(option);
     }
-    console.log(this._options);
   }
 
   /**
@@ -330,15 +334,11 @@ export class ListTableComponent implements EventListener{
   @Output() onOrderElements=new EventEmitter();
 
   private dragHover : Node;
-  private dropdownPosition = "";
   private dropdownLeft : string;
   private dropdownTop : string;
-  private dropdownBottom : string;
-  private dropdownRight : string;
   @ViewChild('dropdown') dropdownElement : ElementRef;
   @ViewChild('dropdownContainer') dropdownContainerElement : ElementRef;
 
-  public dropdown : Node;
   public id : number;
 
   public currentDrag : string;
@@ -360,6 +360,9 @@ export class ListTableComponent implements EventListener{
     frame.addListener(this);
     setTimeout(()=>this.loadRepos());
   }
+  private filterCallbacks(options: OptionItem[],node:Node) {
+      return options.filter((option)=>!option.showCallback || option.showCallback(node));
+  }
   loadRepos(){
     if(!this.loadRepositories)
       return;
@@ -375,7 +378,7 @@ export class ListTableComponent implements EventListener{
       this.scroll(false);
     }
   }
-  @HostListener('document:keydown', ['$event'])
+  //@HostListener('document:keydown', ['$event'])
   handleKeyboardEvent(event: KeyboardEvent) {
     if(event.code=="KeyA" && (event.ctrlKey || this.ui.isAppleCmd()) && !KeyEvents.eventFromInputField(event) && !this.preventKeyevents){
       this.toggleAll();
@@ -383,11 +386,6 @@ export class ListTableComponent implements EventListener{
       event.stopPropagation();
     }
     if(event.key=="Escape"){
-      if(this.dropdown){
-        this.dropdown=null;
-        event.preventDefault();
-        event.stopPropagation();
-      }
       if(this.reorderDialog) {
         this.closeReorder(false);
         event.preventDefault();
@@ -605,7 +603,6 @@ export class ListTableComponent implements EventListener{
         return;
     }
     option.callback(node);
-    this.dropdown=null;
   }
   public scroll(fromUser:boolean){
     if(!fromUser){
@@ -623,28 +620,9 @@ export class ListTableComponent implements EventListener{
 
     if(!this._options || this._options.length<2)
       return;
-    this.showDropdown(node);
-    this.dropdownPosition="fixed";
     this.dropdownLeft=event.clientX+"px";
     this.dropdownTop=event.clientY+"px";
-    //if(event.clientY>window.innerHeight/2){
-    let interval=setInterval(()=>{
-      if(!this.dropdownElement || !this.dropdownElement.nativeElement)
-        return;
-      let y=this.dropdownElement.nativeElement.getBoundingClientRect().bottom;
-      let right=this.dropdownElement.nativeElement.getBoundingClientRect().right;
-      if(right>window.innerWidth){
-        this.dropdownRight="0";
-        this.dropdownLeft="auto";
-      }
-      if(y>window.innerHeight){
-        this.dropdownBottom="0";
-        this.dropdownTop="auto";
-      }
-      this.cd.detectChanges();
-    },16);
-    setTimeout(()=>clearInterval(interval),500);
-
+      this.showDropdown(node,true);
   }
   public getCollectionColor(node : any){
     return node.collection ? node.collection.color : node.color;
@@ -678,15 +656,27 @@ export class ListTableComponent implements EventListener{
   public isDeleted(node:any){
     return this.isReference(node) && !node.originalId;
   }
-  private showDropdown(node : Node){
+  private showDropdown(node : Node,openMenu = false,event:any=null){
     //if(this._options==null || this._options.length<1)
     //  return;
     this.select(node,"dropdown",false,false);
-    this.dropdownPosition="";
-    this.dropdownLeft=null;
-    this.dropdownTop=null;
-    this.dropdownBottom=null;
-    this.dropdownRight=null;
+    this.onUpdateOptions.emit(node);
+    if(openMenu)
+        if(event){
+            console.log(event);
+            if(event.clientX+event.clientY) {
+                this.dropdownLeft = event.clientX + "px";
+                this.dropdownTop = event.clientY + "px";
+            }
+            else{
+                let rect=event.srcElement.getBoundingClientRect();
+                this.dropdownLeft = rect.left+rect.width/2 + "px";
+                this.dropdownTop = rect.top+rect.height/2 + "px";
+            }
+        }
+      // short delay to let onUpdateOptions handler run and angular menu get the correct data from start
+      setTimeout(()=>this.menuTrigger.openMenu());
+      /*
     if(this.dropdown==node)
       this.dropdown=null;
     else {
@@ -697,22 +687,6 @@ export class ListTableComponent implements EventListener{
         UIHelper.scrollSmoothElement(this.dropdownContainerElement.nativeElement.scrollHeight,this.dropdownContainerElement.nativeElement);
       });
     }
-
-    /*
-    // causes issue when detail metadata panel is open
-    let interval=setInterval(()=>{
-      if(!this.dropdownElement || !this.dropdownElement.nativeElement)
-        return;
-      let y=this.dropdownElement.nativeElement.getBoundingClientRect().bottom;
-      console.log(y+" "+window.innerHeight);
-      if(y>window.innerHeight){
-        this.dropdownPosition="fixed";
-        this.dropdownBottom="0";
-        this.dropdownTop="auto";
-      }
-      this.cd.detectChanges();
-    },16);
-    setTimeout(()=>clearInterval(interval),500);
     */
   }
   private doubleClick(node : Node){
@@ -741,7 +715,6 @@ export class ListTableComponent implements EventListener{
       let pos2=RestHelper.getRestObjectPositionInArray(this.selectedNodes[0],this._nodes);
       let start=pos1<pos2 ? pos1 : pos2;
       let end=pos1<pos2 ? pos2 : pos1;
-      console.log("from "+start+" to "+end);
       for(let i=start;i<=end;i++){
         if(this.getSelectedPos(this._nodes[i])==-1)
           this.selectedNodes.push(this._nodes[i]);
@@ -777,7 +750,7 @@ export class ListTableComponent implements EventListener{
     return NodeHelper.getLRMIProperty(data,item);
   }
   private getSelectedPos(selected : Node) : number{
-    if(!this.selectedNodes)
+    if(!this.selectedNodes || !this.selectedNodes.length)
       return -1;
     return RestHelper.getRestObjectPositionInArray(selected,this.selectedNodes);
   }
@@ -805,6 +778,8 @@ export class ListTableComponent implements EventListener{
   }
 
     handleKeyboard(event:any) {
+        //will break ng menu. May add a check whether menu is open
+        /*
         if(this.viewType==ListTableComponent.VIEW_TYPE_LIST && (event.key=="ArrowUp" || event.key=="ArrowDown")){
             let next=event.key=="ArrowDown";
             let elements:any=document.getElementsByClassName("node-row");
@@ -821,5 +796,7 @@ export class ListTableComponent implements EventListener{
             event.preventDefault();
             event.stopPropagation();
         }
+        */
     }
+
 }
