@@ -85,7 +85,7 @@
               "src/assets/fonts/edu-icons/edu-icons.css",
               "src/assets/css/nouislider.min.css",
               "src/styles/custom_materialize.scss",
-              "src/styles/dialogs.scss",
+              "src/app/core-ui-module/styles/dialogs.scss",
               "src/styles/file-chooser.scss",
               "src/styles/globals.scss",
               "src/styles/toast.scss",
