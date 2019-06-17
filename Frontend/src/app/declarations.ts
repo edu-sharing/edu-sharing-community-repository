@@ -38,8 +38,9 @@
   import {CalendarComponent} from "./common/ui/calendar/calendar.component";
   import {ImageConfigDirective} from "./common/ui/image-config.directive";
   import {UserQuotaComponent} from "./common/ui/user-quota/user-quota.component";
+  import {UrlPipe} from "./common/url.pipe";
 
-export const DECLARATIONS = [
+  export const DECLARATIONS = [
       MdsTestComponent,
       CalendarComponent,
       FormatSizePipe,
@@ -77,6 +78,7 @@ export const DECLARATIONS = [
       BannerComponent,
       FooterComponent,
       KeysPipe,
+      UrlPipe,
       CookieInfoComponent,
       TutorialComponent,
       ImageConfigDirective

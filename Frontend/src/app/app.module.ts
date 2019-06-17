@@ -25,6 +25,7 @@ import {DECLARATIONS_REGISTER} from './modules/register/declarations';
 import {DECLARATIONS_SERVICES} from "./modules/services/declarations";
 import {DECLARATIONS_FILE_UPLOAD} from './modules/file-upload/declarations';
 import {CommentsListComponent} from "./modules/management-dialogs/node-comments/comments-list/comments-list.component";
+import {MAT_FORM_FIELD_DEFAULT_OPTIONS} from "@angular/material";
 
 
 // http://blog.angular-university.io/angular2-ngmodule/
@@ -61,7 +62,8 @@ import {CommentsListComponent} from "./modules/management-dialogs/node-comments/
   imports: IMPORTS,
   providers: [
     PROVIDERS,
-    PROVIDERS_SEARCH
+    PROVIDERS_SEARCH,
+    {provide: MAT_FORM_FIELD_DEFAULT_OPTIONS, useValue: {appearance: 'outline'}}
   ],
   bootstrap: [RouterComponent]
 })

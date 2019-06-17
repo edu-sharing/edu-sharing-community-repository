@@ -1,26 +1,26 @@
 @import "../app/core-ui-module/styles/variables";
 
 /*
-  Custom CSS for colors and looks which override the materializecss
+  Custom CSS for colors and looks which override the materialize.css
 */
-.btn,button:focus{
+.btn{
   background-color:$primary!important;
   color:$textOnPrimary!important;
 }
 .btn,.btn-flat{
   display:inline-flex;
   align-items: center;
-    >span{
-      margin-left: 5px;
-      flex-grow:1;
-    }
+  >span{
+    margin-left: 5px;
+    flex-grow:1;
+  }
   >.material-icons{
     display: inline-flex;
     align-items: center;
   }
 }
 .btn:focus:not(.disabled){
-    background-color:$primaryDark!important;
+  background-color:$primaryDark!important;
 }
 .btn-complementary:focus:not(.disabled){
   background-color:darken($primaryComplementary,20%)!important;
@@ -114,15 +114,17 @@ input[type=number],
 select,
 textarea.materialize-textarea,
 input[type=search]{
-  height:3rem;
-  -webkit-appearance: none;
-  border: 1px solid #ccc;
-  padding: 0 0.75em;
-  width:calc(100% - 1.65em);
-  border-radius: 3px;
-  background-color: #fff;
-  &:disabled{
-    border-style:dashed;
+  &:not(.mat-input-element) {
+    height: 3rem;
+    -webkit-appearance: none;
+    border: 1px solid #ccc;
+    padding: 0 0.75em;
+    width: calc(100% - 1.65em);
+    border-radius: 3px;
+    background-color: #fff;
+    &:disabled {
+      border-style: dashed;
+    }
   }
 }
 select{
@@ -133,17 +135,6 @@ textarea.materialize-textarea{
   width: calc(100% - 1.65em);
 }
 
-/*
-  TODO: Check if it is possible to combine with the input state
- */
-label,label:active{
-  font-weight: bold;
-  text-transform: uppercase;
-  font-size: 90%;
-  margin-bottom: 3px;
-  color:$textMain;
-  margin-left: 0.75em;
-}
 input[type=checkbox]+label,
 input[type=radio]+label,
 .switch >label{
@@ -161,15 +152,18 @@ input[type=password],
 input[type=number],
 input[type=text],
 .materialize-textarea{
-  /*box-shadow: 0 1px 0 0 $primary!important;
-  border-bottom: 1px solid $primary!important;*/
-  &:focus:not([readonly]) {
-    border-color:$primaryMediumLight !important;
-    box-shadow: none !important;
-  }
-  &.valid{
-    border-color:$colorStatusPositive !important;
-    box-shadow: none !important;
+  &:not(.mat-input-element) {
+    /*box-shadow: 0 1px 0 0 $primary!important;
+    border-bottom: 1px solid $primary!important;*/
+    &:focus:not([readonly]) {
+      border-color: $primaryMediumLight !important;
+      box-shadow: none !important;
+    }
+
+    &.valid {
+      border-color: $colorStatusPositive !important;
+      box-shadow: none !important;
+    }
   }
 }
 .materialize-textarea{
@@ -214,8 +208,8 @@ option {
 }
 .collection{
   .disabled{
-      color:$textLight!important;
-      cursor:default;
+    color:$textLight!important;
+    cursor:default;
   }
   a.collection-item {
     color: $primary;
@@ -354,8 +348,8 @@ img.align-icon {
 }
 .collection i{
   position: relative;
-    top: 7px;
-    left: -5px;
+  top: 7px;
+  left: -5px;
 }
 span.thumb{
   display:none; /* preview thumb for range does not work */
@@ -488,7 +482,7 @@ span.thumb{
   }
   /* ng2-datepicker */
   .ngx-datepicker-input {
-      width: auto !important;
+    width: auto !important;
   }
   .ngx-datepicker-container .ngx-datepicker-calendar-container {
     left: -2% !important;

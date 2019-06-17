@@ -9,8 +9,53 @@
 // Define the palettes for your theme using the Material Design palettes available in palette.scss
 // (imported above). For each palette, you can optionally specify a default, lighter, and darker
 // hue. Available color palettes: https://material.io/design/color/
-$candy-app-primary: mat-palette($mat-blue-grey);
-$candy-app-accent:  mat-palette($mat-blue-grey);
+$custom-typography: mat-typography-config(
+        $font-family: 'open_sansregular',
+        $button: mat-typography-level(10pt, normal, 500)
+);
+// Override typography CSS classes (e.g., mat-h1, mat-display-1, mat-typography, etc.).
+@include mat-base-typography($custom-typography);
+
+// Override typography for a specific Angular Material components.
+@include mat-checkbox-typography($custom-typography);
+
+// Override typography for all Angular Material, including mat-base-typography and all components.
+@include angular-material-typography($custom-typography);
+$mat-custom: (
+        50: lighten($primary,50%),
+        100: lighten($primary,40%),
+        200: lighten($primary,30%),
+        300: lighten($primary,20%),
+        400: lighten($primary,10%),
+        500: $primary,
+        600: darken($primary,10%),
+        700: darken($primary,20%),
+        800: darken($primary,30%),
+        900: darken($primary,40%),
+        A100: lighten($primary,40%),
+        A200: lighten($primary,30%),
+        A400: $primary,
+        A700: darken($primary,20%),
+        contrast: (
+                50: $textOnPrimaryLight,
+                100: $textOnPrimaryLight,
+                200: $textOnPrimaryLight,
+                300: $textOnPrimaryLight,
+                400: $textOnPrimary,
+                500: $textOnPrimary,
+                600: $textOnPrimary,
+                700: $textOnPrimary,
+                800: $textOnPrimary,
+                900: $textOnPrimary,
+                A100: $textOnPrimaryLight,
+                A200: $textOnPrimaryLight,
+                A400: $textOnPrimary,
+                A700: $textOnPrimary,
+        )
+);
+
+$candy-app-primary: mat-palette($mat-custom);
+$candy-app-accent:  mat-palette($mat-custom);
 
 // The warn palette is optional (defaults to red).
 $candy-app-warn:    mat-palette($mat-red);
@@ -24,6 +69,147 @@ $candy-app-theme: mat-light-theme($candy-app-primary, $candy-app-accent, $candy-
 @include angular-material-theme($candy-app-theme);
 
 
+/** custom project specifics */
+.mat-tab-labels {
+  background-color: $actionDialogBackground;
+  .mat-tab-label {
+    text-transform: uppercase;
+  }
+}
+// align prefix in input fields
+.mat-form-field-appearance-outline .mat-form-field-prefix {
+  top: 0.4em!important;
+  left: -0.1em;
+}
+// form border on hover
+.mat-form-field-appearance-outline .mat-form-field-outline-thick{
+  color:$primaryMediumLight;
+}
+.mat-form-field-bright{
+  .mat-form-field-outline,
+  .mat-form-field-label{
+    color: rgba(255,255,255,0.5);
+  }
+  &.mat-focused{
+    .mat-form-field-outline,
+    .mat-form-field-label{
+      color: rgba(255,255,255,0.7);
+    }
+  }
+}
+  // will fix g and y to cut off with custom font
+input.mat-input-element, mat-label, .mat-select-value{
+  line-height: normal;
+}
+// will better align the border label for the outlined input
+.mat-form-field-appearance-outline .mat-form-field-label{
+  margin-top: -6px;
+}
+.mat-checkbox-inner-container{
+  width:18px !important;
+  height:18px !important;
+  margin: 2px 18px auto 0 !important;
+  .mat-checkbox-frame {
+    border-color: $primary;
+    background-color: #fff;
+  }
+}
+.mat-radio-container {
+  .mat-radio-outer-circle {
+    border-color: $primary;
+  }
+}
+.mat-checkbox-label {
+  line-height: 17pt !important;
+  font-size: 1rem;
+  color: $textMain;
+}
+.mat-flat-button,.mat-raised-button{
+  min-height: 36px;
+}
+.mat-raised-button{
+  color: $primary;
+}
+.mat-radio-label,.mat-checkbox-layout{
+  // do allow to wrap long labels in material radio groups (e.g. license dialog)
+  white-space: normal!important;
+  align-items: baseline !important;
+}
+.mat-button-wrapper{
+  display: flex !important;
+  align-items: center;
+  justify-content: center;
+  text-transform: uppercase;
+  > i {
+    width: 35px;
+  }
+}
+.mat-button-no-uppercase .mat-button-wrapper{
+  text-transform: none;
+}
+.mat-menu-content{
+  min-width: 200px;
+  >button{
+    color:$primary;
+    display: flex;
+    align-items: center;
+    > i {
+      width: 35px;
+    }
+  }
+  &:not(:empty){
+    padding: 0!important;
+  }
+}
+.mat-menu-item-seperate {
+  border-top:1px solid #ccc!important;
+}
+.mat-menu-item-seperate-bottom {
+  border-bottom:1px solid #ccc!important;
+}
 .mat-calendar-table-header-divider{
   display: none;
+}
+
+.mat-option-primary{
+  line-height: initial;
+  font-size: 90%;
+}
+.mat-option-secondary{
+  font-size: 75%;
+  line-height: initial;
+  color: $textLight;
+}
+
+label .label-secondary{
+  font-size: 90%;
+  color: $textLight;
+}
+
+.mat-card-subtitle,.mat-hint, .mat-slide-toggle-content{
+  color: $textLight;
+}
+
+// Show toggle on the right place
+.toggle-reverse{
+  .mat-slide-toggle-label {
+    flex-direction: row-reverse;
+  }
+  .mat-slide-toggle-content {
+    margin-right: 18px;
+  }
+}
+// Mobile Menus at bottom
+@media screen and (max-width:  ($mobileWidth - $mobileStage*1)) {
+  .cdk-overlay-backdrop.dropdown-menu{
+    background: rgba(0, 0, 0, 0.8);
+  }
+  .mat-menu-panel.dropdown-menu{
+    position: fixed;
+    bottom:0;
+    left:0;
+    max-width: 100%;
+    width: 100%;
+    border-radius: 0;
+  }
 }

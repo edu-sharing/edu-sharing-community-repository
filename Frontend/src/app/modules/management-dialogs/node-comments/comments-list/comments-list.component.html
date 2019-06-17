@@ -8,11 +8,13 @@
     </div>
     <div class="right">
       <form (ngSubmit)="addComment()">
-        <textarea name="addComment" class="materialize-textarea" placeholder="{{'NODE_COMMENTS.NEW_COMMENT_PLACEHOLDER' | translate}}" [(ngModel)]="newComment"></textarea>
-        <i tabindex="0" class="material-icons send-icon" (click)="addComment()" (keyup.enter)="addComment()">send</i>
+        <textarea name="addComment" class="materialize-textarea" [disabled]="sending" placeholder="{{'NODE_COMMENTS.NEW_COMMENT_PLACEHOLDER' | translate}}" [(ngModel)]="newComment"></textarea>
+        <i *ngIf="!sending" tabindex="0" class="material-icons send-icon" (click)="addComment()" (keyup.enter)="addComment()">send</i>
+        <spinner-small *ngIf="sending" ></spinner-small>
       </form>
     </div>
   </div>
+  <div class="comments comments-loading" *ngIf="loading"><spinner></spinner></div>
   <div class="comments" [class.commentsLong]="!canComment()" *ngIf="comments">
     <div *ngIf="comments && !comments.length" class="noComments">{{'NODE_COMMENTS.NO_COMMENTS' | translate}}</div>
     <div *ngFor="let comment of comments;let i=index" class="comment">

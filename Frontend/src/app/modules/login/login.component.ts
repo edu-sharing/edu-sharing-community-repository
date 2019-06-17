@@ -13,7 +13,7 @@ import {Title} from '@angular/platform-browser';
 import {UIHelper} from '../../core-ui-module/ui-helper';
 import {SessionStorageService} from '../../core-module/core.module';
 import {Scope} from '@angular/core/src/profile/wtf_impl';
-import {UIConstants} from '../../core-module/ui/ui-constants';
+import {OPEN_URL_MODE, UIConstants} from '../../core-module/ui/ui-constants';
 import {Helper} from '../../core-module/rest/helper';
 import {RestHelper} from '../../core-module/core.module';
 import {PlatformLocation} from '@angular/common';
@@ -23,7 +23,11 @@ import {trigger} from "@angular/animations";
 import {UIAnimation} from "../../core-module/ui/ui-animation";
 import {InputPasswordComponent} from "../../common/ui/input-password/input-password.component";
 import {RouterHelper} from '../../common/router.helper';
+import {HttpClient} from "@angular/common/http";
+import {FormControl} from '@angular/forms';
+import {map, startWith} from "rxjs/operators";
 import {MainNavComponent} from '../../common/ui/main-nav/main-nav.component';
+import {BridgeService} from "../../core-bridge-module/bridge.service";
 
 @Component({
   selector: 'workspace-login',
@@ -48,11 +52,17 @@ export class LoginComponent  implements OnInit{
   private scope='';
   private next='';
   public mainnav=true;
+  public showProviders=false;
   private caption='LOGIN.TITLE';
   private config: any={};
-  // stage (login or choose)
-  private previousStage = '';
-  private stage = 'login';
+  private providers: any;
+  providerControl = new FormControl();
+  currentProvider:any;
+
+  currentProviderDisplay(provider:any){
+    return provider ? provider.name : null;
+  }
+  private filteredProviders: any;
   private checkConditions(){
     this.disabled=!this.username;// || !this.password;
   }
@@ -80,12 +90,13 @@ export class LoginComponent  implements OnInit{
               private platformLocation: PlatformLocation,
               private urlSerializer:UrlSerializer,
               private router:Router,
+              private http:HttpClient,
               private translate:TranslateService,
               private configService:ConfigurationService,
               private title:Title,
               private storage : SessionStorageService,
               private route : ActivatedRoute,
-              private cordova: CordovaService
+              private bridge: BridgeService
             ){
 
     Translation.initialize(translate,this.configService,this.storage,this.route).subscribe(()=>{
@@ -126,19 +137,22 @@ export class LoginComponent  implements OnInit{
                 this.goToNext();
               }
             }
+            if(configService.instant('loginProvidersUrl')){
+              this.showProviders=true;
+              this.http.get(configService.instant('loginProvidersUrl')).subscribe((providers)=>{
+                  this.processProviders(providers);
+              });
+            }
               this.loginUrl=configService.instant('loginUrl');
               const allowLocal=configService.instant('loginAllowLocal',false);
               if(params['local']!='true' && !allowLocal && this.loginUrl && data.statusCode!=RestConstants.STATUS_CODE_OK){
                 this.openLoginUrl();
                 return;
             }
-            if(this.loginUrl && allowLocal){
-              this.stage='choose';
-            }
           });
           this.showUsername=this.scope!=RestConstants.SAFE_SCOPE;
           this.next=params['next'];
-          this.mainnav=params['mainnav']=='false' ? false : true;
+          this.mainnav=params['mainnav'] != 'false';
           if(this.scope==RestConstants.SAFE_SCOPE){
             this.connector.isLoggedIn().subscribe((data:LoginResult)=>{
               if(data.statusCode!=RestConstants.STATUS_CODE_OK){
@@ -177,6 +191,12 @@ export class LoginComponent  implements OnInit{
   }
   ngOnInit() {
 
+    this.filteredProviders = this.providerControl.valueChanges
+        .pipe(
+            startWith(''),
+            map((value:string) => this.filterProviders(value))
+        );
+    console.log(this.filteredProviders);
 
   }
   private login(){
@@ -217,8 +237,57 @@ export class LoginComponent  implements OnInit{
     }
   }
 
-    showLogin() {
-        this.previousStage=this.stage;
-        this.stage='login';
+  private processProviders(providers: any) {
+    let data:any={};
+    for(let provider in providers.wayf_idps){
+      let object=providers.wayf_idps[provider];
+      object.url=provider;
+      let type=object.type;
+      if(!data[type]) {
+        data[type] = {
+          group: providers.wayf_categories[type],
+          providers: []
+        };
+      }
+      data[type].providers.push(object);
     }
+    this.providers = [];
+    for(let key in data){
+      this.providers.push(data[key]);
+    }
+    console.log(this.providers);
+  }
+
+  private filterProviders(filter:any="") {
+    console.log(filter);
+    let filtered=[];
+    // an object was detected, abort
+    if(filter.name){
+      return this.providers;
+    }
+    this.currentProvider=null;
+    for(let p of Helper.deepCopy(this.providers)){
+      p.providers=p.providers.filter((p:any) => p.name.toLowerCase().includes(filter.toLowerCase()));
+      if(p.providers.length)
+        filtered.push(p);
+    }
+    return filtered;
+  }
+  goToProvider(){
+    console.log(this.currentProvider);
+    if(!this.currentProvider){
+      this.toast.error(null,'LOGIN.NO_PROVIDER_SELECTED');
+    }
+    let url=this.configService.instant('loginProviderTargetUrl');
+    if(!url){
+      this.toast.error(null,'No configuration for loginProviderTargetUrl found.');
+      return;
+    }
+    let target=this.connector.getAbsoluteServerUrl()+this.configService.instant('loginUrl');
+    url=url.
+      replace(':target',encodeURIComponent(target)).
+      replace(':entity',encodeURIComponent(this.currentProvider.url));
+    //@TODO: Redirect to shibboleth provider
+    UIHelper.openUrl(url,this.bridge,OPEN_URL_MODE.Current);
+  }
 }

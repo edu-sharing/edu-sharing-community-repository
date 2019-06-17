@@ -20,7 +20,7 @@
               "src/assets"
             ],
             "styles": [
-              "node_modules/materialize-css/dist/css/materialize.min.css",
+              "src/styles/materialize.scss",
               "src/assets/fonts/opensans_regular/stylesheet.css",
               "src/assets/fonts/opensans_bold/stylesheet.css",
               "src/assets/fonts/material-design-icons/material-icons.css",

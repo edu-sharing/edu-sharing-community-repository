@@ -85,6 +85,10 @@ $cardActionHeight:77px;
     word-break: break-all;
   }
 }
+.card .card-action-info{
+  align-items: center;
+  justify-content: center;
+}
 .card-action .card-content{
   padding-top:32px;
   background: linear-gradient(to bottom, $actionDialogBackground 0%,$actionDialogBackground 60px,transparent 60px,transparent 100%);
@@ -194,6 +198,10 @@ input[type=search]{
   width:700px;
   margin-left:-350px!important;
 }
+.card-xxwide{
+  width:800px;
+  margin-left:-400px!important;
+}
 .center-card .checkbox{
   padding-top:10px;
 }
@@ -282,6 +290,16 @@ input[type=search]{
     @include fullsizeCard();
   }
 }
+@media screen and (max-width: ($mobileWidth + $mobileStage*3)) {
+  .card-xwide{
+    @include fullsizeCard();
+  }
+}
+@media screen and (max-width: ($mobileWidth + $mobileStage*4)) {
+  .card-xxwide{
+    @include fullsizeCard();
+  }
+}
 @media screen and (max-width: ($mobileWidth)) {
   .dialogOptions{
     overflow: auto;
@@ -314,8 +332,8 @@ input[type=search]{
   }
 }
 @media screen and (max-width: ($mobileHeightLandscape)) {
-  .center-card .btn,
-  .center-card .btn-flat{
+  .center-card .card-action .btn,
+  .center-card .card-action .btn-flat{
     padding:0 .2rem;
   }
 }
