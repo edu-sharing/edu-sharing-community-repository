@@ -2,7 +2,7 @@ import {Component, Input, Output, EventEmitter, OnInit, SimpleChanges} from '@an
 import {TranslateService} from "@ngx-translate/core";
 import {SuggestItem} from "../autocomplete/autocomplete.component";
 import {NodeHelper} from "../../../core-ui-module/node-helper";
-import {PermissionNamePipe} from '../permission-name.pipe';
+import {PermissionNamePipe} from '../../../core-ui-module/pipes/permission-name.pipe';
 import {Authority, AuthorityProfile, IamAuthorities, RestConnectorService, RestConstants, RestIamService} from '../../../core-module/core.module';
 import {Helper} from "../../../core-module/rest/helper";
 

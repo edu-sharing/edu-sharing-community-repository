@@ -12,7 +12,7 @@ import {TranslateService} from "@ngx-translate/core";
 import {UIAnimation} from "../../../core-module/ui/ui-animation";
 import {Helper} from "../../../core-module/rest/helper";
 import {trigger} from "@angular/animations";
-import {AuthorityNamePipe} from '../../../common/ui/authority-name.pipe';
+import {AuthorityNamePipe} from '../../../core-ui-module/pipes/authority-name.pipe';
 
 @Component({
   selector: 'toolpermission-manager',

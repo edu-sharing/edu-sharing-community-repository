@@ -20,20 +20,7 @@
               "src/assets"
             ],
             "styles": [
-              "src/styles/materialize.scss",
-              "src/assets/fonts/opensans_regular/stylesheet.css",
-              "src/assets/fonts/opensans_bold/stylesheet.css",
-              "src/assets/fonts/material-design-icons/material-icons.css",
-              "src/assets/fonts/edu-icons/edu-icons.css",
-              "src/assets/css/nouislider.min.css",
-              "src/styles/custom_materialize.scss",
-              "src/styles/material-theme.scss",
-              "src/styles/dialogs.scss",
-              "src/styles/globals.scss",
-              "src/styles/toast.scss",
-              "src/styles/mds.scss",
-              "src/styles/ng2-calendar.scss",
-              "src/styles/override.scss"
+              "src/styles/main.scss"
             ],
             "scripts": [
               "src/assets/js/jquery.1.12.4.min.js",

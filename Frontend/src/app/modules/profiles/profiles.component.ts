@@ -11,7 +11,7 @@ import {RestConnectorService} from "../../core-module/core.module";
 import {ConfigurationService} from "../../core-module/core.module";
 import {RestIamService} from "../../core-module/core.module";
 import {IamUser, User} from "../../core-module/core.module";
-import {AuthorityNamePipe} from "../../common/ui/authority-name.pipe";
+import {AuthorityNamePipe} from "../../core-ui-module/pipes/authority-name.pipe";
 import {trigger} from "@angular/animations";
 import {UIAnimation} from "../../core-module/ui/ui-animation";
 import {UserProfileComponent} from "../../common/ui/user-profile/user-profile.component";

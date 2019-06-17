@@ -19,7 +19,7 @@ import {
     RestToolService, SessionStorageService,
     UIService
 } from '../../../core-module/core.module';
-import {CardJumpmark} from "../card/card.component";
+import {CardJumpmark} from "../../../core-ui-module/components/card/card.component";
 
 @Component({
   selector: 'mds',

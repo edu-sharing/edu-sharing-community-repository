@@ -13,7 +13,7 @@ import any = jasmine.any;
 import {SuggestItem} from "../../../common/ui/autocomplete/autocomplete.component";
 import {RestIamService} from "../../../core-module/core.module";
 import {NodeHelper} from "../../../core-ui-module/node-helper";
-import {AuthorityNamePipe} from "../../../common/ui/authority-name.pipe";
+import {AuthorityNamePipe} from "../../../core-ui-module/pipes/authority-name.pipe";
 import {RestConnectorService} from "../../../core-module/core.module";
 import {UIHelper} from "../../../core-ui-module/ui-helper";
 import {ConfigurationService} from "../../../core-module/core.module";
