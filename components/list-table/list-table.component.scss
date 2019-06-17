@@ -260,6 +260,8 @@ $badgeWidth:250px;
   }
 }
 .row{
+  position: relative;
+  overflow: hidden;
   transition: none;
 }
 .list .row{
@@ -647,6 +649,7 @@ $orderAnimationTime:$transitionNormal*5;
   border:2px dashed $primary;
   display:table;
   background-color: #fff;
+  @include clickable();
   >div{
     color:$primary;
     display:table-cell;

@@ -271,6 +271,7 @@ input[type=search]{
   }
   .content{
     padding:10px 0;
+    width: 100%;
     height: calc( 100% - #{$mainnavHeight});
     overflow-x: hidden;
     overflow-y: auto;
