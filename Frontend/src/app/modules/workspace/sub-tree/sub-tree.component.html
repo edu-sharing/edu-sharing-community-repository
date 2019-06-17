@@ -33,7 +33,7 @@
   <i *ngIf="!isOpen(node)" class="arrow material-icons" (click)="openOrCloseTree(node)">
     keyboard_arrow_right
   </i>
-  <i *ngIf="isOpen(node)" [class.invisible]="!_hasChilds[getPathOpen(node)]" class="arrow material-icons arrow" (click)="_hasChilds[getPathOpen(node)] ? openOrCloseTree(node) : null">
+  <i *ngIf="isOpen(node)" [class.opacity-invisible]="!_hasChilds[getPathOpen(node)]" class="arrow material-icons arrow" (click)="_hasChilds[getPathOpen(node)] ? openOrCloseTree(node) : null">
     keyboard_arrow_down
   </i>
     <!--
