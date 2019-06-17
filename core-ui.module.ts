@@ -26,6 +26,7 @@ import {UrlPipe} from "./pipes/url.pipe";
 import {NodeDatePipe} from "./pipes/date.pipe";
 import {CardComponent} from "./components/card/card.component";
 import {PermissionNamePipe} from "./pipes/permission-name.pipe";
+import {BrowserAnimationsModule} from '@angular/platform-browser/animations';
 
 @NgModule({
     declarations: [
@@ -50,6 +51,7 @@ import {PermissionNamePipe} from "./pipes/permission-name.pipe";
     ],
     imports: [
         BrowserModule,
+        BrowserAnimationsModule,
         FormsModule,
         MatCardModule,
         MatButtonModule,
