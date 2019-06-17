@@ -10,7 +10,7 @@
 @import "material-theme.scss";
 @import "../app/core-ui-module/styles/dialogs";
 @import "globals.scss";
-@import "toast.scss";
-@import "mds.scss";
-@import "ng2-calendar.scss";
+@import "../app/core-ui-module/styles/toast";
+@import "../app/core-ui-module/styles/mds";
+@import "../app/core-ui-module/styles/ng2-calendar";
 @import "override.scss";
