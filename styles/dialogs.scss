@@ -232,6 +232,8 @@ $cardActionHeight:77px;
   height:100%;
   width:$dialogRightWidth;
   background-color: #fff;
+  display: flex;
+  flex-direction: column;
   @include materialShadow();
   .title{
     display: flex;
@@ -250,7 +252,7 @@ $cardActionHeight:77px;
   .content{
     padding:10px 0;
     width: 100%;
-    height: calc( 100% - #{$mainnavHeight});
+    flex-grow: 1;
     overflow-x: hidden;
     overflow-y: auto;
   }
