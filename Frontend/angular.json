@@ -81,8 +81,6 @@
               "node_modules/materialize-css/dist/css/materialize.min.css",
               "src/assets/fonts/opensans_regular/stylesheet.css",
               "src/assets/fonts/opensans_bold/stylesheet.css",
-              "src/assets/fonts/material-design-icons/material-icons.css",
-              "src/assets/fonts/edu-icons/edu-icons.css",
               "src/assets/css/nouislider.min.css",
               "src/styles/custom_materialize.scss",
               "src/app/core-ui-module/styles/core-base.scss",
