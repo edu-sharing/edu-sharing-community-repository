@@ -227,14 +227,18 @@ $cardActionHeight:77px;
 .dialog-right{
   position: fixed;
   z-index: 100;
+  top:0;
   right:0;
-  height: calc( 100% - #{$mainnavHeight});
+  height:100%;
   width:$dialogRightWidth;
   background-color: #fff;
   @include materialShadow();
   .title{
     display: flex;
     padding-left:$cardPadding;
+    font-size:110%;
+    background-color: $workspaceMetadataBackground;
+    word-break: break-all;
     .label{
       flex-grow: 1;
       padding:16px 0;
