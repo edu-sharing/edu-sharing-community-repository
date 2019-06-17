@@ -322,14 +322,12 @@ export class UIHelper {
             type = 'copy';
         onDrop.emit({target: target, source: data, event: event, type: type});
     }
-
     static prepareMetadatasets(translate: TranslateService, mdsSets: MdsInfo[]) {
         for (let i = 0; i < mdsSets.length; i++) {
             if (mdsSets[i].id == "mds")
                 mdsSets[i].name = translate.instant('DEFAULT_METADATASET', {name: mdsSets[i].name});
         }
     }
-
     static addToCollection(collectionService: RestCollectionService, router: Router, toast: Toast, collection: Node | Collection, nodes: Node[], callback: Function = null, position = 0, error = false) {
         if (position >= nodes.length) {
             if (!error)
@@ -604,6 +602,8 @@ export class UIHelper {
      */
     public static injectAngularComponent<T>(componentFactoryResolver:ComponentFactoryResolver,viewContainerRef:ViewContainerRef,
                                          componentName:  Type<T>,targetElement: Element,bindings:any=null,delay=0){
+        if(targetElement==null)
+            return;
         let factory = componentFactoryResolver.resolveComponentFactory(componentName);
         let component = viewContainerRef.createComponent(factory);
         if(bindings){
