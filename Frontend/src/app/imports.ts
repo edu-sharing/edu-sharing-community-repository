@@ -35,7 +35,6 @@ import {CoreUiModule} from "./core-ui-module/core-ui.module";
 
 export const IMPORTS=[
   BrowserModule,
-  BrowserAnimationsModule,
   FormsModule,
   ReactiveFormsModule,
   HttpClientModule,
