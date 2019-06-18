@@ -547,4 +547,25 @@ export class UIHelper{
             domElem.style.display=null;
         },delay);
     }
+
+    /**
+     * returns common active route parameters that should be keeped
+     * currently including: mainnav,
+     * @param route
+     */
+    static getCommonParameters(route: ActivatedRoute) {
+        const COPY_PARAMS=['mainnav','reurl','applyDirectories']
+        return new Observable<any>((observer: Observer<any>) => {
+            route.queryParams.pipe().first().subscribe((queryParams)=>{
+                let result:any={};
+                COPY_PARAMS.forEach((params)=>{
+                    if(queryParams[params]) {
+                        result[params] = queryParams[params];
+                    }
+                });
+                observer.next(result);
+                observer.complete();
+            });
+        });
+    }
 }

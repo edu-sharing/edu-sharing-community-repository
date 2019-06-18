@@ -504,7 +504,9 @@ export class CollectionsMainComponent{
 
     }
     onCreateCollection(){
-      this.router.navigate([UIConstants.ROUTER_PREFIX+"collections/collection", "new", this.collectionContent.collection.ref.id],{queryParams:{mainnav:this.mainnav}});
+      UIHelper.getCommonParameters(this.route).subscribe((params)=>{
+          this.router.navigate([UIConstants.ROUTER_PREFIX+"collections/collection", "new", this.collectionContent.collection.ref.id],{queryParams:params});
+      });
     }
     onCollectionsClick(collection:EduData.Collection) : void {
 
