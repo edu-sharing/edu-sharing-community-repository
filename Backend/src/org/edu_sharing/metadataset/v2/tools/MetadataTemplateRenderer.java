@@ -15,6 +15,8 @@ import org.edu_sharing.service.license.LicenseService;
 import java.lang.reflect.Field;
 import java.text.NumberFormat;
 import java.util.*;
+import java.util.stream.Collector;
+import java.util.stream.Collectors;
 
 
 /**
@@ -129,14 +131,21 @@ public class MetadataTemplateRenderer {
 				if(firstValues!=null && firstValues.length>0) {
 					wasEmpty=false;
 					empty=false;
-					for(int i=0;i<firstValues.length;i++) {
+					// use the property with the longest value list for render
+					long max=Collections.max(widget.getSubwidgets().stream().map((subwidget)->{
+						try{
+							return (long)properties.get(subwidget.getId()).length;
+						}catch(NullPointerException e){}
+						return 0L;
+					}).collect(Collectors.toSet()));
+					for(int i=0;i<max;i++) {
 						widgetHtml+="<div class='mdsValue'>";
-						for (MetadataWidget.Subwidget subWidget : widget.getSubwidgets()) {
+						for (MetadataWidget.Subwidget subwidget : widget.getSubwidgets()) {
 							try {
-								widgetHtml += renderWidgetValue(mds.findWidget(subWidget.getId()),properties.get(subWidget.getId())[i]) + " ";
+								widgetHtml += renderWidgetValue(mds.findWidget(subwidget.getId()),properties.get(subwidget.getId())[i]) + " ";
 							}
-							catch(IndexOutOfBoundsException e){
-								logger.warn("Sub widget "+subWidget.getId()+" can not be rendered (main widget "+widget.getId()+"): The array values of the sub widgets do not match up",e);
+							catch(IndexOutOfBoundsException|NullPointerException e){
+								logger.warn("Sub widget "+subwidget.getId()+" can not be rendered (main widget "+widget.getId()+"): The array values of the sub widgets do not match up",e);
 							}
 						}
 						widgetHtml+="</div>";
