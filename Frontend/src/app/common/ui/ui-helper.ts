@@ -514,12 +514,14 @@ export class UIHelper{
      * @param componentFactoryResolver The resolver service
      * @param viewContainerRef The viewContainerRef service
      * @param componentName The name of the angular component (e.g. SpinnerComponent)
-     * @param targetElement The target element of the dom
+     * @param targetElement The target element of the dom. If the element is null (not found), nothing is done
      * @param bindings Optional bindings (inputs & outputs) to the given component
      * @param delay Optional inflating delay in ms(some components may need some time to "init" the layout)
      */
     public static injectAngularComponent<T>(componentFactoryResolver:ComponentFactoryResolver,viewContainerRef:ViewContainerRef,
                                          componentName:  Type<T>,targetElement: Element,bindings:any=null,delay=0){
+        if(targetElement==null)
+            return;
         let factory = componentFactoryResolver.resolveComponentFactory(componentName);
         let component = viewContainerRef.createComponent(factory);
         if(bindings){
