@@ -18,7 +18,7 @@
     "PROVIDER_LABEL": "Anbieter",
     "PROVIDER_PLACEHOLDER": "Liste der Anbieter durchsuchen...",
     "GO_TO_PROVIDER": "Zum Anbieter",
-    "ACTION_HELP": "Bei Problemen mit der Anmeldung wenden Sie sich bitte an den Betreiber",
+    "ACTION_HELP": "Bei Problemen mit der Anmeldung wenden Sie sich bitte an den Betreiber.",
     "USE_URL_TEXT":"Login via externen Anbieter (z.B. Shibboleth)",
     "USE_URL_LINK":"Zum Anbieter",
     "SAFE_PREVIOUS":"Um sich im geschützten Bereich anzumelden, melden Sie sich bitte zuerst im Workspace an",
