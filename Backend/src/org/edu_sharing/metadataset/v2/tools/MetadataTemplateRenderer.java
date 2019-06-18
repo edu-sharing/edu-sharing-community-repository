@@ -127,28 +127,26 @@ public class MetadataTemplateRenderer {
 				}
 			}
 			else if("multivalueCombined".equals(widget.getType())){
-				String[] firstValues=properties.get(widget.getSubwidgets().get(0).getId());
-				if(firstValues!=null && firstValues.length>0) {
-					wasEmpty=false;
-					empty=false;
-					// use the property with the longest value list for render
-					long max=Collections.max(widget.getSubwidgets().stream().map((subwidget)->{
-						try{
-							return (long)properties.get(subwidget.getId()).length;
-						}catch(NullPointerException e){}
-						return 0L;
-					}).collect(Collectors.toSet()));
-					for(int i=0;i<max;i++) {
-						widgetHtml+="<div class='mdsValue'>";
+				// use the property with the longest value list for render
+				long max=Collections.max(widget.getSubwidgets().stream().map((subwidget)->{
+					try{
+						return (long)properties.get(subwidget.getId()).length;
+					}catch(NullPointerException e){}
+					return 0L;
+				}).collect(Collectors.toSet()));
+				if(max>0) {
+					wasEmpty = false;
+					empty = false;
+					for (int i = 0; i < max; i++) {
+						widgetHtml += "<div class='mdsValue'>";
 						for (MetadataWidget.Subwidget subwidget : widget.getSubwidgets()) {
 							try {
-								widgetHtml += renderWidgetValue(mds.findWidget(subwidget.getId()),properties.get(subwidget.getId())[i]) + " ";
-							}
-							catch(IndexOutOfBoundsException|NullPointerException e){
-								logger.warn("Sub widget "+subwidget.getId()+" can not be rendered (main widget "+widget.getId()+"): The array values of the sub widgets do not match up",e);
+								widgetHtml += renderWidgetValue(mds.findWidget(subwidget.getId()), properties.get(subwidget.getId())[i]) + " ";
+							} catch (IndexOutOfBoundsException | NullPointerException e) {
+								logger.warn("Sub widget " + subwidget.getId() + " can not be rendered (main widget " + widget.getId() + "): The array values of the sub widgets do not match up", e);
 							}
 						}
-						widgetHtml+="</div>";
+						widgetHtml += "</div>";
 					}
 				}
 			}
