@@ -372,7 +372,7 @@ export class NodeRenderComponent implements EventListener{
             return;
         }
         UIHelper.injectAngularComponent(this.componentFactoryResolver,this.viewContainerRef,SpinnerComponent,domCollections);
-        this.usageApi.getNodeUsagesCollection(this._node.ref.id,this._node.ref.repo).subscribe((usages)=>{
+        this.usageApi.getNodeUsagesCollection(this.isCollectionRef() ? this._node.properties[RestConstants.CCM_PROP_IO_ORIGINAL] : this._node.ref.id,this._node.ref.repo).subscribe((usages)=>{
             //@TODO: This does currently ignore the "hideIfEmpty" flag of the mds template
             if(usages.length==0){
                 domContainer.parentElement.removeChild(domContainer);
