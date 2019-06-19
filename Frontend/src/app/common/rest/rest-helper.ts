@@ -15,6 +15,7 @@ import NumberFormatOptions = Intl.NumberFormatOptions;
 import {RestConnectorService} from './services/rest-connector.service';
 import {Toast} from '../ui/toast';
 import {RestIamService} from './services/rest-iam.service';
+import {Helper} from "../helper";
 
 export class RestHelper{
     private static SPACES_STORE_REF = "workspace://SpacesStore/";
@@ -25,6 +26,13 @@ export class RestHelper{
     }
     return data;
   }
+  static copyPermissions(permissionsIn: Permission[],inherited=true) {
+      let permissions: LocalPermissions = new LocalPermissions();
+      permissions.inherited=inherited;
+      permissions.permissions=Helper.deepCopy(permissionsIn);
+      return permissions;
+  }
+
   static copyAndCleanPermissions(permissionsIn: Permission[],inherited=true) {
     let permissions: LocalPermissions = new LocalPermissions();
     permissions.inherited=inherited;

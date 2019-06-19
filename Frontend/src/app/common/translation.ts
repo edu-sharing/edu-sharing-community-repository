@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import {Component, Injectable} from '@angular/core';
 import {TranslateService, TranslateLoader} from "@ngx-translate/core";
 import { Observable } from 'rxjs/Observable';
 import 'rxjs/Rx';
