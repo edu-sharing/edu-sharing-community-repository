@@ -275,14 +275,15 @@ export class CollectionsMainComponent{
     }
 
     navigateToSearch(){
-      this.router.navigate([UIConstants.ROUTER_PREFIX+"search"],{queryParams:{mainnav:this.mainnav}});
+        UIHelper.getCommonParameters(this.route).subscribe((params)=> {
+            this.router.navigate([UIConstants.ROUTER_PREFIX + "search"], {queryParams: params});
+        });
     }
     switchToSearch() : void {
-      if(this.frame.isRunningInFrame()) {
-      }
-      else{
-        this.router.navigate([UIConstants.ROUTER_PREFIX+"search"],{queryParams:{addToCollection:this.collectionContent.collection.ref.id}});
-      }
+       UIHelper.getCommonParameters(this.route).subscribe((params)=>{
+          params.addToCollection=this.collectionContent.collection.ref.id;
+          this.router.navigate([UIConstants.ROUTER_PREFIX+"search"],{queryParams:params});
+       });
     }
     public isBrightColor(){
         return ColorHelper.getColorBrightness(this.collectionContent.collection.color)>ColorHelper.BRIGHTNESS_THRESHOLD_COLLECTIONS;

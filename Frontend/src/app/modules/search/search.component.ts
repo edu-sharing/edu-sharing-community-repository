@@ -472,7 +472,10 @@ export class SearchComponent {
     this.router.navigate([UIConstants.ROUTER_PREFIX+'render', node.ref.id],{queryParams:queryParams});
   }
   switchToCollections(id=''){
-    this.router.navigate([UIConstants.ROUTER_PREFIX+'collections'],{queryParams:{mainnav:this.mainnav,id:id}});
+    UIHelper.getCommonParameters(this.activatedRoute).subscribe((params)=>{
+        params.id=id;
+        this.router.navigate([UIConstants.ROUTER_PREFIX + 'collections'], {queryParams: params});
+    });
   }
   setViewType(type:number){
     this.searchService.viewType = type;
@@ -797,7 +800,6 @@ export class SearchComponent {
       this.login=data;
       this.isGuest = data.isGuest;
       this.updateMdsActions();
-      this.hasCheckbox=true;
       this.options=[];
       this.mdsExtended=false;
       this.loadSavedSearch();
@@ -814,9 +816,6 @@ export class SearchComponent {
       }
       else if(this.currentValues){
         this.currentValues=null;
-      }
-      if(param['reurl']) {
-        this.hasCheckbox=false;
       }
         if(param['savedQuery']){
             this.nodeApi.getNodeMetadata(param['savedQuery'],[RestConstants.ALL]).subscribe((data:NodeWrapper)=>{
@@ -1068,6 +1067,7 @@ export class SearchComponent {
       (param: any) => {
         this.searchService.init();
         this.mainNavRef.refreshBanner();
+        this.hasCheckbox=true;
         if(param['addToCollection']){
           this.collectionApi.getCollection(param['addToCollection']).subscribe((data:CollectionWrapper)=>{
             this.addToCollection=data.collection;
@@ -1075,13 +1075,18 @@ export class SearchComponent {
             this.setViewType(ListTableComponent.VIEW_TYPE_GRID);
             this.refreshListOptions();
             this.updateActionbar(null);
+          },(error)=>{
+            this.toast.error(error);
           });
-        }this.mainnav=param['mainnav']=='false' ? false : true;
-        this.searchService.reurl=null;
-        if(param['reurl']) {
+        }
+        else if(param['reurl']) {
           this.searchService.reurl = param['reurl'];
           this.applyMode=true;
+          this.hasCheckbox=false;
         }
+        this.mainnav=param['mainnav']=='false' ? false : true;
+        this.searchService.reurl=null;
+
 
         if(param['query'])
           this.searchService.searchTerm=param['query'];
