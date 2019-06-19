@@ -114,7 +114,9 @@ export class CollectionNewComponent {
           this.connector.isLoggedIn().subscribe((data:LoginResult)=>{
             this.COLORS=this.config.instant('collections.colors',this.DEFAULT_COLORS);
             if(data.statusCode!=RestConstants.STATUS_CODE_OK){
-              this.router.navigate([UIConstants.ROUTER_PREFIX+"collections"]);
+              UIHelper.getCommonParameters(this.route).subscribe((params)=> {
+                this.router.navigate([UIConstants.ROUTER_PREFIX + "collections",{queryParams:params}]);
+              });
               return;
             }
             this.connector.hasToolPermission(RestConstants.TOOLPERMISSION_INVITE).subscribe((has:boolean)=>this.canInvite=has);
@@ -426,7 +428,12 @@ export class CollectionNewComponent {
     }
     navigateToCollectionId(id:string) : void {
       this.isLoading = false;
-      this.router.navigate([UIConstants.ROUTER_PREFIX+'collections'], {queryParams:{id:id,mainnav:this.mainnav}});
+      UIHelper.getCommonParameters(this.route).subscribe((params)=> {
+        params.id=id;
+        this.router.navigate([UIConstants.ROUTER_PREFIX + 'collections'], {
+          queryParams:params
+        });
+      });
     }
   private syncMetadata(goToNext:boolean){
       this.properties=this.mds.getValues({},goToNext);

@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import {Component, Injectable} from '@angular/core';
 import {TranslateService, TranslateLoader} from "@ngx-translate/core";
 import { Observable } from 'rxjs/Observable';
 import 'rxjs/Rx';
@@ -53,6 +53,9 @@ export class Translation  {
             if (data.indexOf(params.locale) != -1) {
               language = params.locale;
             }
+            else if(params.locale != -1){
+                console.warn("Url requested language "+params.locale+", but it was not found or is not configured in the allowed languages: "+data);
+            }
             else if (data.indexOf(storageLanguage) != -1) {
               language = storageLanguage;
               useStored=true;
@@ -68,7 +71,7 @@ export class Translation  {
             else{
                 translate.setDefaultLang(data[0]);
             }
-            console.log("translate "+route+" "+language);
+            console.log("language used: "+language);
             translate.use(language);
             Translation.setLanguage(language);
             translate.getTranslation(language).subscribe(()=>{
@@ -234,7 +237,6 @@ export class TranslationLoader implements TranslateLoader {
         }
         this.initializedLanguage=final;
         this.initializing=null;
-        console.log("initialized language ",final);
         observer.next(final);
         observer.complete();
       };

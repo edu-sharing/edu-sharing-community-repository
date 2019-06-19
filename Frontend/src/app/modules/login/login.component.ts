@@ -257,6 +257,8 @@ export class LoginComponent  implements OnInit{
   private filterProviders(filter:any="") {
     console.log(filter);
     let filtered=[];
+    if(!this.providers)
+      return null;
     // an object was detected, abort
     if(filter.name){
       return this.providers;

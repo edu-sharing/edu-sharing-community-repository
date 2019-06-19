@@ -380,10 +380,17 @@ export class NodeRenderComponent implements EventListener{
         this.close();
     }
     addCollections(){
-        let domContainer=document.getElementsByClassName("node_collections_render")[0].parentElement;
-        let domCollections=document.getElementsByTagName("collections")[0];
+        let domContainer:Element;
+        let domCollections:Element;
+        try {
+            domContainer = document.getElementsByClassName("node_collections_render")[0].parentElement;
+            domCollections = document.getElementsByTagName("collections")[0];
+        }catch(e){
+            console.log("did not find collections rendering template, will not display in collections widget",e);
+            return;
+        }
         UIHelper.injectAngularComponent(this.componentFactoryResolver,this.viewContainerRef,SpinnerComponent,domCollections);
-        this.usageApi.getNodeUsagesCollection(this._node.ref.id,this._node.ref.repo).subscribe((usages)=>{
+        this.usageApi.getNodeUsagesCollection(this.isCollectionRef() ? this._node.properties[RestConstants.CCM_PROP_IO_ORIGINAL] : this._node.ref.id,this._node.ref.repo).subscribe((usages)=>{
             //@TODO: This does currently ignore the "hideIfEmpty" flag of the mds template
             if(usages.length==0){
                 domContainer.parentElement.removeChild(domContainer);

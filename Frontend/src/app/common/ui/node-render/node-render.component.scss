@@ -93,7 +93,6 @@ a, a:hover, a:visited, a:active {
   position: absolute;
   top:$mainnavHeight;
   width:100%;
-  height: calc(100% - #{$mainnavHeight});
 }
 
 #nodeRenderContent,.nodeRenderLoading {

@@ -6,9 +6,14 @@
 ></dropdown>
 <div class="actionbar" [class.actionbar-round]="appearance=='round'">
   <div *ngFor="let option of optionsAlways;let i=index;"
-       [class.light]="backgroundType=='dark' || backgroundType=='primary'"
-       [class.primary]="i==optionsAlways.length-1 && backgroundType=='primary'"
-       class="action-always waves-effect waves-light action-always-{{option.name | replaceChars:{search:'.',replace:'-'} }} {{ option.isEnabled ? '' : 'disabled'}} {{ option.isEnabled || showDisabled ? '' : 'display-none'}} {{ i==0 ? 'btn' : 'btn-flat'}}"
+       class="
+       action-always waves-effect waves-light
+       action-always-{{option.name | replaceChars:{search:'.',replace:'-'} }}
+      {{ option.isEnabled ? '' : 'disabled'}} {{ option.isEnabled || showDisabled ? '' : 'display-none'}}
+      {{ i==0 ? 'btn' : 'btn-flat'}}
+      {{ (i==0 && backgroundType=='primary') ? 'primary' : ''}}
+      {{ (backgroundType=='dark' || backgroundType=='primary') ? 'light' : ''}}
+      "
        tabindex="0"
        (keyup.enter)="click(option)"
        (click)="click(option)">

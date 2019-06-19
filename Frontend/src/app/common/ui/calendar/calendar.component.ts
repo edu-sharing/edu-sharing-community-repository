@@ -11,6 +11,8 @@ import {AddElement} from "../list-table/list-table.component";
 import {Router} from "@angular/router";
 import {UIConstants} from "../ui-constants";
 import {DateHelper} from "../DateHelper";
+import {DateAdapter} from "@angular/material";
+import {Translation} from "../../translation";
 
 @Component({
   selector: 'calendar',
@@ -34,8 +36,11 @@ export class CalendarComponent{
       this.showDatepicker=false;
     }
     constructor(
-      private translate : TranslateService
-    ){}
+      private translate : TranslateService,
+      private _adapter: DateAdapter<any>
+    ){
+        this._adapter.setLocale(Translation.getLanguage());
+    }
     getFormatted() {
         if(this.date){
           return DateHelper.formatDate(this.translate,this.date.getTime(),{useRelativeLabels:false,showAlwaysTime:false});

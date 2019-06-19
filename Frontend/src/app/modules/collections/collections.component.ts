@@ -351,14 +351,15 @@ export class CollectionsMainComponent {
   }
 
     navigateToSearch(){
-      this.router.navigate([UIConstants.ROUTER_PREFIX+"search"],{queryParams:{mainnav:this.mainnav}});
+        UIHelper.getCommonParameters(this.route).subscribe((params)=> {
+            this.router.navigate([UIConstants.ROUTER_PREFIX + "search"], {queryParams: params});
+        });
     }
     switchToSearch() : void {
-      if(this.frame.isRunningInFrame()) {
-      }
-      else{
-        this.router.navigate([UIConstants.ROUTER_PREFIX+"search"],{queryParams:{addToCollection:this.collectionContent.collection.ref.id}});
-      }
+       UIHelper.getCommonParameters(this.route).subscribe((params)=>{
+          params.addToCollection=this.collectionContent.collection.ref.id;
+          this.router.navigate([UIConstants.ROUTER_PREFIX+"search"],{queryParams:params});
+       });
     }
     public isBrightColor(){
         return ColorHelper.getColorBrightness(this.collectionContent.collection.color)>ColorHelper.BRIGHTNESS_THRESHOLD_COLLECTIONS;
@@ -605,10 +606,12 @@ export class CollectionsMainComponent {
     getScope(){
         return this.tabSelected ? this.tabSelected : RestConstants.COLLECTIONSCOPE_ALL;
     }
-  onCreateCollection(){
-    this.router.navigate([UIConstants.ROUTER_PREFIX+"collections/collection", "new", this.collectionContent.collection.ref.id],{queryParams:{mainnav:this.mainnav}});
-  }
-  onCollectionsClick(collection:EduData.Collection) : void {
+    onCreateCollection(){
+      UIHelper.getCommonParameters(this.route).subscribe((params)=>{
+          this.router.navigate([UIConstants.ROUTER_PREFIX+"collections/collection", "new", this.collectionContent.collection.ref.id],{queryParams:params});
+      });
+    }
+    onCollectionsClick(collection:EduData.Collection) : void {
 
         // remember actual collection as breadcrumb
         if (!this.isRootLevelCollection()) {
