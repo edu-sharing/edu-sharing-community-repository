@@ -13,7 +13,7 @@
 	</bean>
 	<bean id="collectionServiceConfig" class="org.edu_sharing.service.collection.CollectionServiceConfig">
 		<property name="pattern">
-			<value>yyyy/MM/dd/HH</value>
+			<value>yyyy/MM/dd/HH/mm/ss/SS</value>
 		</property>
 		<property name="path">
 			<value>/app:company_home/ccm:collections</value>
