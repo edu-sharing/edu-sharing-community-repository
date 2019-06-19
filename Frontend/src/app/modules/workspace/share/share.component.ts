@@ -541,7 +541,7 @@ export class WorkspaceShareComponent implements AfterViewInit{
         return 'PRIVATE';
   }
 
-    private updateUsages(permissions:Permission[],pos=0,error=false) {
+    private updateUsages(permissions:LocalPermissions,pos=0,error=false) {
       if(pos==this.deletedUsages.length){
           this.onLoading.emit(false);
           this.onClose.emit(permissions);
