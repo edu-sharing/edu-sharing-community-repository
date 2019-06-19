@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import {Component, Injectable} from '@angular/core';
 import {TranslateService, TranslateLoader} from "@ngx-translate/core";
 import { Observable } from 'rxjs/Observable';
 import 'rxjs/Rx';
@@ -13,8 +13,10 @@ import 'rxjs/add/operator/first'
 import {RestLocatorService} from "./rest/services/rest-locator.service";
 import {HttpClient, HttpClientModule} from "@angular/common/http";
 import {CordovaService} from './services/cordova.service';
-import * as moment from 'moment';
+import * as deLocale from 'date-fns/locale/de';
+import * as enLocale from 'date-fns/locale/en';
 
+import 'moment/locale/de';
 export var TRANSLATION_LIST=['common','admin','recycle','workspace', 'search','collections','login','permissions','oer','messages','override'];
 
 export class Translation  {
@@ -116,7 +118,7 @@ export class Translation  {
     //dateOptions.locale=moment.localeData(this.getLanguage());
     dateOptions.displayFormat=Translation.getDateFormat();
     dateOptions.firstCalendarDay=1;
-    dateOptions.locale=(moment.locale(this.getLanguage()) as any);
+    dateOptions.locale=this.getLanguage()=='de' ? deLocale : enLocale;
     /*
     dateOptions.todayText=translate.instant("TODAY");
     dateOptions.clearText=translate.instant("DATE_CLEAR");
