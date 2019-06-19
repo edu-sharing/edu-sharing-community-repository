@@ -13,6 +13,7 @@ import {UIConstants} from "../ui/ui-constants";
 import NumberFormat = Intl.NumberFormat;
 import NumberFormatOptions = Intl.NumberFormatOptions;
 import {CordovaService} from '../services/cordova.service';
+import {Helper} from "../helper";
 
 export class RestHelper{
   public static getNodeIds(nodes : Node[]|Collection[]|CollectionReference[]): Array<string>{
@@ -22,6 +23,13 @@ export class RestHelper{
     }
     return data;
   }
+  static copyPermissions(permissionsIn: Permission[],inherited=true) {
+      let permissions: LocalPermissions = new LocalPermissions();
+      permissions.inherited=inherited;
+      permissions.permissions=Helper.deepCopy(permissionsIn);
+      return permissions;
+  }
+
   static copyAndCleanPermissions(permissionsIn: Permission[],inherited=true) {
     let permissions: LocalPermissions = new LocalPermissions();
     permissions.inherited=inherited;

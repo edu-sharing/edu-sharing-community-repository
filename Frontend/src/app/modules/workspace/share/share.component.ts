@@ -282,14 +282,15 @@ export class WorkspaceShareComponent implements AfterViewInit{
   private save(){
     if(this.permissions!=null) {
       this.onLoading.emit(true);
-      let permissions=RestHelper.copyAndCleanPermissions(this.permissions,this.inherited && this.inheritAllowed && !this.disableInherition);
+      let inherit=this.inherited && this.inheritAllowed && !this.disableInherition;
+      let permissions=RestHelper.copyAndCleanPermissions(this.permissions,inherit);
       if(!this.sendToApi) {
-        this.onClose.emit(permissions);
+        this.onClose.emit(RestHelper.copyPermissions(this.permissions,inherit));
         return;
       }
       this.nodeApi.setNodePermissions(this._node.ref.id,permissions,this.notifyUsers && this.sendMessages,this.notifyMessage,false,this.doiPermission && this.allowDOI() && this.doiActive && this.publishActive).subscribe(() => {
           this.onLoading.emit(false);
-          this.onClose.emit(permissions);
+          this.onClose.emit(RestHelper.copyPermissions(this.permissions,inherit));
           this.toast.toast('WORKSPACE.PERMISSIONS_UPDATED');
         },
         (error : any)=> {
