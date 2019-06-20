@@ -58,7 +58,6 @@ import org.edu_sharing.restservices.shared.MdsQueryCriteria;
 import org.edu_sharing.service.Constants;
 import org.edu_sharing.service.InsufficientPermissionException;
 import org.edu_sharing.service.permission.PermissionServiceFactory;
-import org.edu_sharing.service.permission.PermissionServiceImpl;
 import org.edu_sharing.service.search.model.SearchResult;
 import org.edu_sharing.service.search.model.SearchToken;
 import org.edu_sharing.service.search.model.SortDefinition;
@@ -103,12 +102,11 @@ public class SearchServiceImpl implements SearchService {
 		}
 		parameters.addStore(Constants.storeRef);
 		parameters.setLanguage(org.alfresco.service.cmr.search.SearchService.LANGUAGE_LUCENE);
-		parameters.setMaxItems(Integer.MAX_VALUE);
 		parameters.addAllAttribute(CCConstants.CCM_PROP_AUTHORITYCONTAINER_EDUHOMEDIR);
 		parameters.setQuery("TYPE:\"" + CCConstants.CCM_TYPE_NOTIFY
 				+ "\" AND PATH:\"/app\\:company_home/ccm\\:Edu_Sharing_System/ccm\\:Edu_Sharing_Sys_Notify"+postfix+"//.\" AND @cm\\:creator:\"" + QueryParser.escape(username) + "\"");
-		ResultSet resultSet = searchService.query(parameters);
-		List<NodeRef> refs = convertNotifysToObjects(resultSet.getNodeRefs());
+		List<NodeRef> resultSet = queryAll(parameters);
+		Set<NodeRef> refs = convertNotifysToObjects(resultSet);
 		List<NodeRef> result = new ArrayList<>();
 		for (NodeRef node : refs) {
 			if (result.contains(node))
@@ -135,8 +133,8 @@ public class SearchServiceImpl implements SearchService {
 		return result;
 	}
 
-	private List<NodeRef> convertNotifysToObjects(List<NodeRef> nodeRefs) {
-		List<NodeRef> result=new ArrayList<NodeRef>();
+	private Set<NodeRef> convertNotifysToObjects(List<NodeRef> nodeRefs) {
+		Set<NodeRef> result=new HashSet<>();
 
 		HashSet<QName> types = new HashSet<QName>();
 		types.add(QName.createQName(CCConstants.CCM_TYPE_IO));
@@ -158,11 +156,12 @@ public class SearchServiceImpl implements SearchService {
 			}
 			if (childsOfNotify != null && childsOfNotify.size() > 0) {
 				NodeRef ref = childsOfNotify.get(0).getChildRef();
-				QName type = serviceRegistry.getNodeService().getType(ref);
-				if(types.contains(type)) {
-					if(!serviceRegistry.getNodeService().hasAspect(ref,QName.createQName(CCConstants.CCM_ASPECT_COLLECTION)) && !result.contains(ref))
-						result.add(ref);
-				}
+				// unnecessary, already handled by getChildAssocs
+				//QName type = serviceRegistry.getNodeService().getType(ref);
+				//if(types.contains(type)) {
+				if(!serviceRegistry.getNodeService().hasAspect(ref,QName.createQName(CCConstants.CCM_ASPECT_COLLECTION)) && !result.contains(ref))
+					result.add(ref);
+				//}
 			}
 		}
 		return result;
@@ -173,35 +172,29 @@ public class SearchServiceImpl implements SearchService {
 	public List<NodeRef> getFilesSharedToMe() throws Exception {
 		String username = AuthenticationUtil.getFullyAuthenticatedUser();
 		String homeFolder = baseClient.getHomeFolderID(username);
-		String postfix="";
-		if(NodeServiceInterceptor.getEduSharingScope()!=null) {
-			postfix+="_"+NodeServiceInterceptor.getEduSharingScope();
-		}
-
-		SearchParameters parameters = new SearchParameters();
-		parameters.addStore(Constants.storeRef);
-		parameters.setLanguage(org.alfresco.service.cmr.search.SearchService.LANGUAGE_LUCENE);
-		//parameters.setMaxItems(Integer.MAX_VALUE);
-		parameters.setMaxItems(200);
-		parameters.addAllAttribute(CCConstants.CCM_PROP_AUTHORITYCONTAINER_EDUHOMEDIR);
-		parameters.addSort("@" + CCConstants.CM_PROP_C_MODIFIED, false);
-
-		// TODO: The amount of files seems to be HUGE, we need a better query for filtering!
-		parameters.setQuery("TYPE:\"" + CCConstants.CCM_TYPE_NOTIFY
-				+ "\" AND PATH:\"/app\\:company_home/ccm\\:Edu_Sharing_System/ccm\\:Edu_Sharing_Sys_Notify"+postfix+"//.\" AND NOT @cm\\:creator:\"" + QueryParser.escape(username) + "\"");
-		ResultSet resultSet = searchService.query(parameters);
-		List<NodeRef> result = convertNotifysToObjects(resultSet.getNodeRefs());
 		Set<String> memberships = new HashSet<>();
 		memberships.addAll(serviceRegistry.getAuthorityService().getAuthorities());
 		memberships.remove(CCConstants.AUTHORITY_GROUP_EVERYONE);
+		List<NodeRef> notifyResults=LogTime.log("Fetching notify objects",()-> {
+			String postfix="";
+			if(NodeServiceInterceptor.getEduSharingScope()!=null) {
+				postfix+="_"+NodeServiceInterceptor.getEduSharingScope();
+			}
+			SearchParameters parameters = new SearchParameters();
+			parameters.addStore(Constants.storeRef);
+			parameters.setLanguage(org.alfresco.service.cmr.search.SearchService.LANGUAGE_LUCENE);
+			parameters.addAllAttribute(CCConstants.CCM_PROP_AUTHORITYCONTAINER_EDUHOMEDIR);
+			parameters.addSort("@" + CCConstants.CM_PROP_C_MODIFIED, false);
 
-		return AuthenticationUtil.runAsSystem(new RunAsWork<List<NodeRef>>() {
-			@Override
-			public List<NodeRef> doWork() throws Exception {
+			parameters.setQuery("TYPE:\"" + CCConstants.CCM_TYPE_NOTIFY
+					+ "\" AND PATH:\"/app\\:company_home/ccm\\:Edu_Sharing_System/ccm\\:Edu_Sharing_Sys_Notify" + postfix + "//.\" AND NOT @cm\\:creator:\"" + QueryParser.escape(username) + "\"");
+			return queryAll(parameters);
+		});
+		Set<NodeRef> result=LogTime.log("Converting notify objects to real nodes ("+notifyResults.size()+")",()->convertNotifysToObjects(notifyResults));
+
+		return LogTime.log("Validating node permissions ("+result.size()+")",()-> AuthenticationUtil.runAsSystem(()->{
 				List<NodeRef> refs = new ArrayList<>(result.size());
 				for (NodeRef node : result) {
-					if (refs.contains(node))
-						continue;
 					if (node.getId().equals(homeFolder))
 						continue;
 					try {
@@ -224,8 +217,21 @@ public class SearchServiceImpl implements SearchService {
 				}
 				return refs;
 			}
-		});
+		));
+	}
 
+	private List<NodeRef> queryAll(SearchParameters parameters) {
+		List<NodeRef> result=new ArrayList<>();
+		int MAX_PER_PAGE=1000;
+		for(int offset=0;;offset+=MAX_PER_PAGE) {
+			parameters.setSkipCount(offset);
+			parameters.setMaxItems(MAX_PER_PAGE);
+			ResultSet data = searchService.query(parameters);
+			result.addAll(data.getNodeRefs());
+			if(data.getNodeRefs().size()<MAX_PER_PAGE)
+				break;
+		}
+		return result;
 	}
 
 	@Override
