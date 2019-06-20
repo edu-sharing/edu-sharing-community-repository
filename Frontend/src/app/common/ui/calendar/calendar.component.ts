@@ -4,7 +4,7 @@ import {DateHelper} from "../../../core-ui-module/DateHelper";
 import {trigger} from "@angular/animations";
 import {UIAnimation} from "../../../core-module/ui/ui-animation";
 import {DateAdapter} from "@angular/material";
-import {Translation} from "../../translation";
+import {Translation} from "../../../core-ui-module/translation";
 
 @Component({
   selector: 'calendar',

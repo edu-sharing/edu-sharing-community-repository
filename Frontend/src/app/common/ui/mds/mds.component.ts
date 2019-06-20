@@ -20,6 +20,7 @@ import {
     UIService
 } from '../../../core-module/core.module';
 import {CardJumpmark} from "../../../core-ui-module/components/card/card.component";
+import {MdsHelper} from "../../../core-module/rest/mds-helper";
 
 @Component({
   selector: 'mds',
@@ -1475,25 +1476,7 @@ export class MdsComponent{
     return html;
   }
   private isWidgetConditionTrue(widget:any){
-    if(!widget.condition)
-      return true;
-    let condition=widget.condition;
-    console.log('condition:');
-    console.log(condition);
-    let properties=this.currentNode ? this.currentNode : this._currentValues;
-    if(condition.type=='PROPERTY' && properties) {
-        if (!properties[condition.value] && !condition.negate || properties[condition.value] && condition.negate) {
-            return false;
-        }
-    }
-    if(condition.type=='TOOLPERMISSION'){
-        let tp=this.connector.hasToolPermissionInstant(condition.value);
-        if(tp==condition.negate){
-            return false;
-        }
-    }
-    console.log('condition is true, will display widget');
-    return true;
+    return MdsHelper.isWidgetConditionTrue(this.connector,widget,this.getCurrentProperties());
   }
   private renderWidget(widget: any,attr:string,template:any) : string{
     let id=widget.id;
@@ -2100,14 +2083,7 @@ export class MdsComponent{
   }
 
   getWidget(id: string,template:string=null,widgets=this.mds.widgets) {
-    for(let w of widgets){
-      if(w.id==id){
-        if((template==null || w.template==template) && this.isWidgetConditionTrue(w)){
-          return w;
-        }
-      }
-    }
-    return null;
+    return MdsHelper.getWidgetWithCondition(this.connector,this.getCurrentProperties(),id,template,widgets);
   }
 
   private getKeyCaption(key: string, values:any[]) {
@@ -2352,4 +2328,8 @@ export class MdsComponent{
             new DialogButton('SAVE',DialogButton.TYPE_PRIMARY,()=>this.saveValues())
         ];
     }
+
+  getCurrentProperties() {
+    return this.currentNode ? this.currentNode : this._currentValues;
+  }
 }

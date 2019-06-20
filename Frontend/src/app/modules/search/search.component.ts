@@ -1003,7 +1003,7 @@ export class SearchComponent {
     if(!addAll)
       return criterias;
     if(properties) {
-        criterias=criterias.concat(RestSearchService.convertCritierias(properties,this.mdsRef));
+        criterias=criterias.concat(RestSearchService.convertCritierias(properties,this.mdsRef.getCurrentProperties()));
     }
     return criterias;
   }
