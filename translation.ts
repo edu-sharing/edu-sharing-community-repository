@@ -50,6 +50,9 @@ export class Translation  {
             if (data.indexOf(params.locale) != -1) {
               language = params.locale;
             }
+            else if(params.locale != -1){
+                console.warn("Url requested language "+params.locale+", but it was not found or is not configured in the allowed languages: "+data);
+            }
             else if (data.indexOf(storageLanguage) != -1) {
               language = storageLanguage;
               useStored=true;
@@ -65,6 +68,7 @@ export class Translation  {
             else{
                 translate.setDefaultLang(data[0]);
             }
+            console.log("language used: "+language);
             translate.use(language);
             Translation.setLanguage(language);
             translate.getTranslation(language).subscribe(()=>{
