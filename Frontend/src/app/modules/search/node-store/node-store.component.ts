@@ -1,14 +1,14 @@
 import {Component, EventEmitter, Output} from "@angular/core";
 import {
-    ConfigurationService,
-    ListItem,
-    Node,
-    NodeList,
-    RestConnectorService,
-    RestConstants,
-    RestIamService,
-    RestSearchService,
-    TemporaryStorageService
+  ConfigurationService, DialogButton,
+  ListItem,
+  Node,
+  NodeList,
+  RestConnectorService,
+  RestConstants,
+  RestIamService,
+  RestSearchService,
+  TemporaryStorageService
 } from "../../../core-module/core.module";
 import {Toast} from "../../../core-ui-module/toast";
 import {NodeHelper} from "../../../core-ui-module/node-helper";
@@ -37,6 +37,7 @@ export class SearchNodeStoreComponent {
 
   public columns : ListItem[]=[];
   public options : OptionItem[]=[];
+  public buttons = DialogButton.getCancel(()=>this.cancel());
   public loading=true;
   public actionOptions : OptionItem[]=[];
   public sortBy=RestConstants.CM_PROP_TITLE;
