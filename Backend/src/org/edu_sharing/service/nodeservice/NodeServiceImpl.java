@@ -763,8 +763,24 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
     }
 
     private int sortNodes(HashMap<String, Object> cache, NodeRef n1, NodeRef n2, SortDefinition sortDefinition) {
-        String type1=nodeService.getType(n1).toString();
-        String type2=nodeService.getType(n2).toString();
+		String keyType1=n1.toString()+"_TYPE";
+		String keyType2=n2.toString()+"_TYPE";
+
+		String type1,type2;
+		if(cache.containsKey(keyType1)){
+			type1= (String) cache.get(keyType1);
+		}
+		else{
+			type1=nodeService.getType(n1).toString();
+			cache.put(keyType1,type1);
+		}
+		if(cache.containsKey(keyType2)){
+			type2= (String) cache.get(keyType2);
+		}
+		else{
+			type2=nodeService.getType(n2).toString();
+			cache.put(keyType2,type2);
+		}
         if(EduSharingNodeHelper.typeIsDirectory(type1)!=EduSharingNodeHelper.typeIsDirectory(type2)){
             return EduSharingNodeHelper.typeIsDirectory(type1) ? -1 : 1;
         }
