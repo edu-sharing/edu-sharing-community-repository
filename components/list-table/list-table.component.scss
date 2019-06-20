@@ -376,11 +376,10 @@ $badgeWidth:250px;
 }
 .tableList {
 .row{
-    display: flex;
-    flex-direction: row;
+    display: table-row;
     .column {
-  display: flex;
-  flex-direction: column;
+      display: table-cell;
+      flex-direction: column;
       justify-content: center;
     }
   }
