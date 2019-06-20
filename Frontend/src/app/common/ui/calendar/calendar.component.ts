@@ -3,6 +3,8 @@ import {TranslateService} from "@ngx-translate/core";
 import {DateHelper} from "../../../core-ui-module/DateHelper";
 import {trigger} from "@angular/animations";
 import {UIAnimation} from "../../../core-module/ui/ui-animation";
+import {DateAdapter} from "@angular/material";
+import {Translation} from "../../translation";
 
 @Component({
   selector: 'calendar',
@@ -31,8 +33,11 @@ export class CalendarComponent{
       this.showDatepicker=false;
     }
     constructor(
-      private translate : TranslateService
-    ){}
+      private translate : TranslateService,
+      private _adapter: DateAdapter<any>
+    ){
+        this._adapter.setLocale(Translation.getLanguage());
+    }
     getFormatted() {
         if(this.date){
           return DateHelper.formatDate(this.translate,this.date.getTime(),{useRelativeLabels:false,showAlwaysTime:false});

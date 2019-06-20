@@ -237,6 +237,9 @@ $imagePath: '../../../../assets/images/collections/';
   @include placeholder {
     color: #ccc;
   }
+  input,textarea{
+    background-color: transparent;
+  }
 }
 .dark-color{
   color:#000;
@@ -393,9 +396,6 @@ $imagePath: '../../../../assets/images/collections/';
 label{
 }
 
-input,textarea{
-  background-color: transparent;
-}
 input[type="radio"] {
     margin: 0px 4px 8px 13px;
     cursor: pointer;

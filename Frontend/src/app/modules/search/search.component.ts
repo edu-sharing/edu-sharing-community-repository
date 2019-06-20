@@ -415,39 +415,6 @@ export class SearchComponent {
       return;
     }
 
-    /*
-    if(typeof this.searchService.autocompleteData['keyword'] != 'undefined') {
-        let values:string[]=[];
-        for(let i = 0; i<this.searchService.autocompleteData['keyword'].length; i++) {
-            values.push(this.searchService.autocompleteData['keyword'][i].title);
-        }
-        criterias.push({'property': '{http://www.campuscontent.de/model/lom/1.0}general_keyword', 'values': values});
-    }
-
-    if(typeof this.searchService.autocompleteData['educationallearningresourcetype'] != 'undefined') {
-        let values:string[]=[];
-        for(let i = 0; i<this.searchService.autocompleteData['educationallearningresourcetype'].length; i++) {
-            values.push(this.searchService.autocompleteData['educationallearningresourcetype'][i].title);
-        }
-        criterias.push({'property': '{http://www.campuscontent.de/model/1.0}educationallearningresourcetype', 'values': values});
-    }
-
-    if(typeof this.searchService.autocompleteData['taxonid'] != 'undefined') {
-      let values:string[]=[];
-      for(let i = 0; i<this.searchService.autocompleteData['taxonid'].length; i++) {
-        values.push(this.searchService.autocompleteData['taxonid'][i].key);
-      }
-      criterias.push({'property': '{http://www.campuscontent.de/model/1.0}taxonid', 'values': values});
-    }
-
-    if(typeof this.searchService.autocompleteData['educationalcontext'] != 'undefined') {
-      let values:string[]=[];
-      for(let i = 0; i<this.searchService.autocompleteData['educationalcontext'].length; i++) {
-        values.push(this.searchService.autocompleteData['educationalcontext'][i].title);
-      }
-      criterias.push({'property': '{http://www.campuscontent.de/model/1.0}educationalcontext', 'values': values});
-    }
-    */
     let criterias:any[] = this.getCriterias(properties,searchString);
 
 
@@ -517,7 +484,10 @@ export class SearchComponent {
     this.router.navigate([UIConstants.ROUTER_PREFIX+'render', node.ref.id],{queryParams:queryParams});
   }
   switchToCollections(id=''){
-    this.router.navigate([UIConstants.ROUTER_PREFIX+'collections'],{queryParams:{mainnav:this.mainnav,id:id}});
+    UIHelper.getCommonParameters(this.activatedRoute).subscribe((params)=>{
+        params.id=id;
+        this.router.navigate([UIConstants.ROUTER_PREFIX + 'collections'], {queryParams: params});
+    });
   }
   setViewType(type:number){
     this.searchService.viewType = type;
@@ -838,7 +808,6 @@ export class SearchComponent {
       this.login=data;
       this.isGuest = data.isGuest;
       this.updateMdsActions();
-      this.hasCheckbox=true;
       this.options=[];
       this.mdsExtended=false;
       this.loadSavedSearch();
@@ -855,9 +824,6 @@ export class SearchComponent {
       }
       else if(this.currentValues){
         this.currentValues=null;
-      }
-      if(param['reurl']) {
-        this.hasCheckbox=false;
       }
         if(param['savedQuery']){
             this.nodeApi.getNodeMetadata(param['savedQuery'],[RestConstants.ALL]).subscribe((data:NodeWrapper)=>{
@@ -1037,7 +1003,7 @@ export class SearchComponent {
     if(!addAll)
       return criterias;
     if(properties) {
-        criterias=criterias.concat(RestSearchService.convertCritierias(properties));
+        criterias=criterias.concat(RestSearchService.convertCritierias(properties,this.mdsRef));
     }
     return criterias;
   }
@@ -1110,6 +1076,7 @@ export class SearchComponent {
         this.searchService.init();
         this.mainNavRef.refreshBanner();
         this.mainNavRef.finishPreloading();
+        this.hasCheckbox=true;
         if(param['addToCollection']){
           this.collectionApi.getCollection(param['addToCollection']).subscribe((data:CollectionWrapper)=>{
             this.addToCollection=data.collection;
@@ -1117,13 +1084,18 @@ export class SearchComponent {
             this.setViewType(ListTableComponent.VIEW_TYPE_GRID);
             this.refreshListOptions();
             this.updateActionbar(null);
+          },(error)=>{
+            this.toast.error(error);
           });
-        }this.mainnav=param['mainnav']=='false' ? false : true;
-        this.searchService.reurl=null;
-        if(param['reurl']) {
+        }
+        else if(param['reurl']) {
           this.searchService.reurl = param['reurl'];
           this.applyMode=true;
+          this.hasCheckbox=false;
         }
+        this.mainnav=param['mainnav']=='false' ? false : true;
+        this.searchService.reurl=null;
+
 
         if(param['query'])
           this.searchService.searchTerm=param['query'];

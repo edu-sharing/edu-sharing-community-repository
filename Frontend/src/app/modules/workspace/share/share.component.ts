@@ -306,15 +306,16 @@ export class WorkspaceShareComponent{
     private save(){
     if(this.permissions!=null) {
       this.onLoading.emit(true);
+      let inherit=this.inherited && this.inheritAllowed && !this.disableInherition;
       let permissions=Helper.deepCopy(this.permissions);
       permissions=permissions.filter((p:Permission)=>!this.isDeleted(p));
-      permissions=RestHelper.copyAndCleanPermissions(permissions,this.inherited && this.inheritAllowed && !this.disableInherition);
-      if(!this.sendToApi) {
-        this.onClose.emit(permissions);
+      let permissionsCopy=RestHelper.copyAndCleanPermissions(permissions,inherit);
+        if(!this.sendToApi) {
+        this.onClose.emit(RestHelper.copyPermissions(permissions,inherit));
         return;
       }
-      this.nodeApi.setNodePermissions(this._node.ref.id,permissions,this.notifyUsers && this.sendMessages,this.notifyMessage,false,this.doiPermission && this.allowDOI() && this.doiActive && this.publishActive).subscribe(() => {
-          this.updateUsages(permissions);
+      this.nodeApi.setNodePermissions(this._node.ref.id,permissionsCopy,this.notifyUsers && this.sendMessages,this.notifyMessage,false,this.doiPermission && this.allowDOI() && this.doiActive && this.publishActive).subscribe(() => {
+          this.updateUsages(RestHelper.copyPermissions(permissions,inherit));
         },
         (error : any)=> {
           this.toast.error(error);
@@ -516,7 +517,7 @@ export class WorkspaceShareComponent{
         return 'PRIVATE';
   }
 
-    private updateUsages(permissions:Permission[],pos=0,error=false) {
+    private updateUsages(permissions:LocalPermissions,pos=0,error=false) {
       if(pos==this.deletedUsages.length){
           this.onLoading.emit(false);
           this.onClose.emit(permissions);

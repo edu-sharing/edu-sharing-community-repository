@@ -19,7 +19,7 @@
     "PROVIDER_LABEL": "Provider",
     "PROVIDER_PLACEHOLDER": "Search the list of providers...",
     "GO_TO_PROVIDER": "Go to provider",
-    "ACTION_HELP": "In case of login issues please get in touch with your provider",
+    "ACTION_HELP": "In case of login issues please get in touch with your provider.",
     "USE_URL_TEXT":"Login via external provider (e.g. Shibboleth)",
     "USE_URL_LINK":"Go to provider",
     "SAFE_PREVIOUS":"In order to login to the safe space, please login to the regular workspace first",

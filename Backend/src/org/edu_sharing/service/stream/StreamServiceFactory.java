@@ -16,7 +16,11 @@ public class StreamServiceFactory {
 		}
 	}
 	public static Properties getConfig() throws Exception {
-		return PropertiesHelper.getProperties("/org/edu_sharing/service/stream/stream.properties", PropertiesHelper.TEXT);
+		return PropertiesHelper.getProperties(getConfigFile(), PropertiesHelper.TEXT);
+	}
+
+	public static String getConfigFile() {
+		return "/org/edu_sharing/service/stream/stream.properties";
 	}
 
 }
