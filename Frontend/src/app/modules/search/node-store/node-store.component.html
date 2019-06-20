@@ -1,10 +1,11 @@
-<div class="dialog darken" [@fade]="this"></div>
-  <div class="card center-card card-high card-action" [@cardAnimation]="this">
-    <div class="card-content">
-      <div tabindex="0" class="card-cancel" (click)="cancel()" (keyup.enter)="cancel()"><i icon iconId="close" aria="true"></i></div>
-      <span class="card-title ">{{'SEARCH.NODE_STORE.TITLE' | translate }}</span>
+<card
+  title="{{'SEARCH.NODE_STORE.TITLE' | translate }}"
+  height="large" width="normal"
+  [buttons]="buttons"
+  [node]="nodes"
+  [isCancelable]="true" (onCancel)="cancel()">
       <spinner *ngIf="loading"></spinner>
-      <div class="card-scroll" *ngIf="!loading">
+      <div *ngIf="!loading">
         <actionbar class="actions"
                    [options]="actionOptions"
         ></actionbar>
@@ -26,12 +27,4 @@
           (doubleClickRow)="onDoubleClick($event)"
           ></listTable>
       </div>
-    </div>
-    <div class="card-action">
-      <a class="btn-flat"
-         tabindex="0"
-         (keyup.enter)="cancel()"
-         (click)="cancel()"
-      >{{'CLOSE' | translate}}</a>
-    </div>
-  </div>
+</card>>
