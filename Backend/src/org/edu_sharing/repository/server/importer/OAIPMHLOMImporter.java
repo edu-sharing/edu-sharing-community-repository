@@ -48,6 +48,7 @@ import javax.xml.xpath.XPathExpressionException;
 import javax.xml.xpath.XPathFactory;
 
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
+import org.apache.commons.httpclient.util.URIUtil;
 import org.apache.log4j.Logger;
 import org.edu_sharing.repository.server.MCAlfrescoAPIClient;
 import org.edu_sharing.repository.server.jobs.quartz.ImporterJob;
@@ -229,7 +230,7 @@ public class OAIPMHLOMImporter implements Importer{
 			String completeListSize = (String)xpath.evaluate("/OAI-PMH/ListRecords/resumptionToken/@completeListSize", doc, XPathConstants.STRING);
 			String token = (String)xpath.evaluate("/OAI-PMH/ListIdentifiers/resumptionToken", doc, XPathConstants.STRING);
 			
-			token = URLEncoder.encode(token);
+			token = URIUtil.encodeQuery(token);
 			
 			handleIdentifierList(doc,cursor,set);
 			//&& completeListSize != null && cursor != null &&  (new Integer(completeListSize) > new Integer(cursor))
