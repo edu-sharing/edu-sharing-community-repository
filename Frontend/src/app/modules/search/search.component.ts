@@ -1068,6 +1068,7 @@ export class SearchComponent {
         this.searchService.init();
         this.mainNavRef.refreshBanner();
         this.hasCheckbox=true;
+        this.searchService.reurl=null;
         if(param['addToCollection']){
           this.collectionApi.getCollection(param['addToCollection']).subscribe((data:CollectionWrapper)=>{
             this.addToCollection=data.collection;
@@ -1085,7 +1086,6 @@ export class SearchComponent {
           this.hasCheckbox=false;
         }
         this.mainnav=param['mainnav']=='false' ? false : true;
-        this.searchService.reurl=null;
 
 
         if(param['query'])
