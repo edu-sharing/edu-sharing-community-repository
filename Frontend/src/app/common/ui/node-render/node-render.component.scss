@@ -163,7 +163,7 @@ a, a:hover, a:visited, a:active {
 }
 
 .nodeRenderLoading{
-  height: calc(100% - #{$mainnavHeight});
+  height: calc(100vh - #{$mainnavHeight});
   overflow: hidden;
   spinner{
     position: relative;
