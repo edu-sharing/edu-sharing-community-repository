@@ -36,7 +36,9 @@ import java.util.Map;
 
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.repo.security.authentication.AuthenticationUtil.RunAsWork;
+import org.alfresco.service.ServiceRegistry;
 import org.apache.log4j.Logger;
+import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
 import org.edu_sharing.repository.server.importer.BinaryHandler;
 import org.edu_sharing.repository.server.importer.Importer;
 import org.edu_sharing.repository.server.importer.OAIPMHLOMImporter;
@@ -46,6 +48,7 @@ import org.edu_sharing.repository.server.importer.RecordHandlerLOM;
 import org.quartz.JobDataMap;
 import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
+import org.springframework.context.ApplicationContext;
 
 public class ImporterJob extends AbstractJob {
 
@@ -158,7 +161,9 @@ public class ImporterJob extends AbstractJob {
 			importer.setRecordHandler(recordHandler);
 			importer.setJob(this);
 			importer.setSet("xml-import");
-			return importer.startImport(xmlData);
+			ApplicationContext applicationContext = AlfAppContextGate.getApplicationContext();
+			ServiceRegistry serviceRegistry = (ServiceRegistry) applicationContext.getBean(ServiceRegistry.SERVICE_REGISTRY);
+			return serviceRegistry.getTransactionService().getRetryingTransactionHelper().doInTransaction(()-> importer.startImport(xmlData));
 		}catch(Throwable t){
 			logger.error(t.getMessage(),t);
 			return null;
