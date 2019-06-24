@@ -628,7 +628,8 @@
 					<column>cm:modified</column>
 					<!-- currently not working (solr error) -->
 					<!-- <column>ccm:commonlicense_key</column> -->
-					<column>cclom:title</column>
+					<!-- currently not working (cm:name vs cclom:title) -->
+					<!-- <column>cclom:title</column> -->
 					<!-- <column>ccm:replicationsource</column> -->
 				</columns>
 			</sort>
