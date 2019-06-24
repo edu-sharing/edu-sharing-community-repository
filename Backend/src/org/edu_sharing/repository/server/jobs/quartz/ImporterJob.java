@@ -36,7 +36,9 @@ import java.util.Map;
 
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.repo.security.authentication.AuthenticationUtil.RunAsWork;
+import org.alfresco.service.ServiceRegistry;
 import org.apache.log4j.Logger;
+import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
 import org.edu_sharing.repository.server.importer.BinaryHandler;
 import org.edu_sharing.repository.server.importer.Importer;
 import org.edu_sharing.repository.server.importer.OAIPMHLOMImporter;
@@ -46,6 +48,7 @@ import org.edu_sharing.repository.server.importer.RecordHandlerLOM;
 import org.quartz.JobDataMap;
 import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
+import org.springframework.context.ApplicationContext;
 
 public class ImporterJob extends AbstractJob {
 
@@ -124,12 +127,19 @@ public class ImporterJob extends AbstractJob {
 
 
 		this.context = context;
+		ApplicationContext applicationContext = AlfAppContextGate.getApplicationContext();
+		ServiceRegistry serviceRegistry = (ServiceRegistry) applicationContext.getBean(ServiceRegistry.SERVICE_REGISTRY);
 
-		if(xmlData!=null){
-			return start(xmlData,recordHandlerClass,binaryHandlerClass);
-		}
-		start(urlImport, oaiBaseUrl, metadataSetId, metadataPrefix, sets, recordHandlerClass,binaryHandlerClass, importerClass,idArr);
-		return null;
+		String finalUrlImport = urlImport;
+		String finalMetadataPrefix = metadataPrefix;
+		String[] finalSets = sets;
+		return serviceRegistry.getTransactionService().getRetryingTransactionHelper().doInTransaction(()-> {
+			if (xmlData != null) {
+				return start(xmlData, recordHandlerClass, binaryHandlerClass);
+			}
+			start(finalUrlImport, oaiBaseUrl, metadataSetId, finalMetadataPrefix, finalSets, recordHandlerClass, binaryHandlerClass, importerClass, idArr);
+			return null;
+		});
 	}
 
 	private String start(byte[] xmlData, String recordHandlerClass, String binaryHandlerClass){
