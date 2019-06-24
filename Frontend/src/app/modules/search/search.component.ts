@@ -102,7 +102,7 @@ export class SearchComponent {
   public repositories: Repository[];
   public globalProgress = false;
   // Max items to fetch at all (afterwards no more infinite scroll)
-  private static MAX_ITEMS_COUNT = 300;
+  private static MAX_ITEMS_COUNT = 500;
   private repositoryIds: any[]=[];
 
   public addNodesToCollection: Node[];
