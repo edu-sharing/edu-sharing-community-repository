@@ -90,14 +90,14 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
 			CCConstants.CCM_PROP_IO_LICENSE_PROFILE_URL,
 			CCConstants.CCM_PROP_IO_COMMONLICENSE_QUESTIONSALLOWED
 	};
+	private String appId;
 	private DictionaryService dictionaryService;
 	String repositoryId = ApplicationInfoList.getHomeRepository().getAppId();
 	MetadataSets metadataSets = RepoFactory.getMetadataSetsForRepository(repositoryId);
 	private ServiceRegistry serviceRegistry = null;
 	private NodeService nodeService = null;
 	private VersionService versionService;
-	private ApplicationInfo application;
-	
+
 	Logger logger = Logger.getLogger(NodeServiceImpl.class);
 
 	Repository repositoryHelper = null;
@@ -108,6 +108,9 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
 		this(ApplicationInfoList.getHomeRepository().getAppId());
 	}
 
+	public ApplicationInfo getApplication(){
+		return ApplicationInfoList.getRepositoryInfoById(appId);
+	}
 	public NodeServiceImpl(String appId) {
 		ApplicationContext applicationContext = AlfAppContextGate.getApplicationContext();
 		serviceRegistry = (ServiceRegistry) applicationContext.getBean(ServiceRegistry.SERVICE_REGISTRY);
@@ -115,7 +118,7 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
 		versionService = serviceRegistry.getVersionService();
 		dictionaryService = serviceRegistry.getDictionaryService();
 		repositoryHelper = (Repository) applicationContext.getBean("repositoryHelper");
-		application=ApplicationInfoList.getRepositoryInfoById(appId);
+		this.appId=appId;
 		HashMap homeAuthInfo = null;
 		if(!ApplicationInfoList.getRepositoryInfoById(repositoryId).ishomeNode()){
 			homeAuthInfo = new AuthenticationToolAPI().getAuthentication(Context.getCurrentInstance().getRequest().getSession());
@@ -240,7 +243,7 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
 			}
 		}
 		
-		MetadataSetV2 mds = MetadataHelper.getMetadataset(application, metadataSetId);
+		MetadataSetV2 mds = MetadataHelper.getMetadataset(getApplication(), metadataSetId);
 		HashMap<String,Object> toSafe = new HashMap<String,Object>();
 		for (MetadataWidget widget : (templateName==null ?
 				mds.getWidgetsByNode(nodeType,Arrays.asList(ArrayUtils.nullToEmpty(aspects))) :
@@ -1042,7 +1045,7 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
 
 	@Override
 	public String getContentMimetype(String protocol, String storeId, String nodeId) {
-		if(PermissionServiceFactory.getPermissionService(application.getAppId()).hasPermission(protocol,storeId,nodeId,CCConstants.PERMISSION_READ))
+		if(PermissionServiceFactory.getPermissionService(appId).hasPermission(protocol,storeId,nodeId,CCConstants.PERMISSION_READ))
 			return new MCAlfrescoAPIClient().getAlfrescoMimetype(new NodeRef(protocol,storeId,nodeId));
 		else
 			throw new AccessDeniedException("No "+CCConstants.PERMISSION_READ+" permission on node "+nodeId);
