@@ -62,7 +62,6 @@ public class StreamServiceNone implements StreamService {
 
     @Override
     public boolean canAccessNode(List<String> authorities, String nodeId) throws Exception {
-        notImplemented();
         return false;
     }
 

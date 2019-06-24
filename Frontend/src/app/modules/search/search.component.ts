@@ -108,7 +108,7 @@ export class SearchComponent {
   public repositories: Repository[];
   public globalProgress = false;
   // Max items to fetch at all (afterwards no more infinite scroll)
-  private static MAX_ITEMS_COUNT = 300;
+  private static MAX_ITEMS_COUNT = 500;
   private repositoryIds: any[]=[];
 
   public addNodesToCollection: Node[];
@@ -1077,6 +1077,7 @@ export class SearchComponent {
         this.mainNavRef.refreshBanner();
         this.mainNavRef.finishPreloading();
         this.hasCheckbox=true;
+        this.searchService.reurl=null;
         if(param['addToCollection']){
           this.collectionApi.getCollection(param['addToCollection']).subscribe((data:CollectionWrapper)=>{
             this.addToCollection=data.collection;
@@ -1094,7 +1095,6 @@ export class SearchComponent {
           this.hasCheckbox=false;
         }
         this.mainnav=param['mainnav']=='false' ? false : true;
-        this.searchService.reurl=null;
 
 
         if(param['query'])

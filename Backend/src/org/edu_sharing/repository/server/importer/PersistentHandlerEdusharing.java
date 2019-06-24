@@ -88,8 +88,13 @@ public class PersistentHandlerEdusharing implements PersistentHandlerInterface {
 		this.importFolderId=prepareImportFolder();
 		this.importer=importer;
 		// prepare cache
-		getAllNodesInImportfolder();
-		getReplicationIdTimestampMap();
+		ApplicationContext applicationContext = AlfAppContextGate.getApplicationContext();
+		ServiceRegistry serviceRegistry = (ServiceRegistry) applicationContext.getBean(ServiceRegistry.SERVICE_REGISTRY);
+		serviceRegistry.getTransactionService().getRetryingTransactionHelper().doInTransaction(()-> {
+			getAllNodesInImportfolder();
+			getReplicationIdTimestampMap();
+			return null;
+		});
 	}
 	public Logger getLogger(){
 	    return Logger.getLogger(job.getClass());

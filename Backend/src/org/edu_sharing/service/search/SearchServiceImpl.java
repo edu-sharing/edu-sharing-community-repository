@@ -60,7 +60,6 @@ import org.edu_sharing.restservices.shared.MdsQueryCriteria;
 import org.edu_sharing.service.Constants;
 import org.edu_sharing.service.InsufficientPermissionException;
 import org.edu_sharing.service.permission.PermissionServiceFactory;
-import org.edu_sharing.service.permission.PermissionServiceImpl;
 import org.edu_sharing.service.search.model.SearchResult;
 import org.edu_sharing.service.search.model.SearchToken;
 import org.edu_sharing.service.search.model.SortDefinition;
@@ -102,14 +101,13 @@ public class SearchServiceImpl implements SearchService {
 		parameters.addSort("@" + CCConstants.CCM_PROP_PH_MODIFIED, false);
 		parameters.addStore(Constants.storeRef);
 		parameters.setLanguage(org.alfresco.service.cmr.search.SearchService.LANGUAGE_LUCENE);
-		parameters.setMaxItems(Integer.MAX_VALUE);
 		parameters.addAllAttribute(CCConstants.CCM_PROP_AUTHORITYCONTAINER_EDUHOMEDIR);
 		parameters.setQuery("(TYPE:\"" + CCConstants.CCM_TYPE_IO + "\" OR TYPE:\"" + CCConstants.CCM_TYPE_MAP +"\") "
 				+ 	"AND @ccm\\:ph_users:\"" + QueryParser.escape(username) + "\"");
-		ResultSet resultSet = searchService.query(parameters);
+        List<NodeRef> resultSet = queryAll(parameters);
 
 		List<NodeRef> result = new ArrayList<>();
-		for (NodeRef node : resultSet.getNodeRefs()) {
+		for (NodeRef node : resultSet) {
 			if (result.contains(node))
 				continue;
 			try {
@@ -151,22 +149,15 @@ public class SearchServiceImpl implements SearchService {
 		parameters.setQuery("(TYPE:\"" + CCConstants.CCM_TYPE_IO +"\" OR TYPE:\"" + CCConstants.CCM_TYPE_MAP +"\") "
 				+ "AND ISNOTNULL:\"ccm:ph_users\" "
 				+ "AND NOT @ccm\\:ph_users:\"" + QueryParser.escape(username) + "\"");
-		ResultSet resultSet = searchService.query(parameters);
-		List<NodeRef> result = new ArrayList<NodeRef>();
-		for(NodeRef nodeRef : resultSet.getNodeRefs()) {
-			result.add(nodeRef);
-		}
+		List<NodeRef> result =  queryAll(parameters);
 
 		Set<String> memberships = new HashSet<>();
 		memberships.addAll(serviceRegistry.getAuthorityService().getAuthorities());
 		memberships.remove(CCConstants.AUTHORITY_GROUP_EVERYONE);
 
-		return AuthenticationUtil.runAsSystem(new RunAsWork<List<NodeRef>>() {
-			@Override
-			public List<NodeRef> doWork() throws Exception {
+		return LogTime.log("Validating node permissions ("+result.size()+")",()-> AuthenticationUtil.runAsSystem(()->{
 				List<NodeRef> refs = new ArrayList<>(result.size());
 				for (NodeRef node : result) {
-					System.out.println(baseClient.getProperty(Constants.storeRef, node.getId(), CCConstants.CM_NAME));
 					if (refs.contains(node))
 						continue;
 					if (node.getId().equals(homeFolder))
@@ -191,8 +182,21 @@ public class SearchServiceImpl implements SearchService {
 				}
 				return refs;
 			}
-		});
+		));
+	}
 
+	private List<NodeRef> queryAll(SearchParameters parameters) {
+		List<NodeRef> result=new ArrayList<>();
+		int MAX_PER_PAGE=1000;
+		for(int offset=0;;offset+=MAX_PER_PAGE) {
+			parameters.setSkipCount(offset);
+			parameters.setMaxItems(MAX_PER_PAGE);
+			ResultSet data = searchService.query(parameters);
+			result.addAll(data.getNodeRefs());
+			if(data.getNodeRefs().size()<MAX_PER_PAGE)
+				break;
+		}
+		return result;
 	}
 
 	@Override

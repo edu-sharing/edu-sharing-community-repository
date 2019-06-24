@@ -915,8 +915,11 @@ public class RecordHandlerLOM implements RecordHandlerInterface {
 		return result;
 	}
 
-
 	public List getMultivalue(Node parent, String nodeName) throws XPathExpressionException {
+		return getMultivalue(parent,nodeName,true);
+	}
+
+	public List getMultivalue(Node parent, String nodeName,boolean ignoreEmpty) throws XPathExpressionException {
 		if (parent == null){
 			logger.debug("returning null cause parent == null");
 			return null;
@@ -939,7 +942,7 @@ public class RecordHandlerLOM implements RecordHandlerInterface {
 
 			}else {
 				String value = (String) xpath.evaluate(".", node, XPathConstants.STRING);
-				if (value != null && !value.trim().equals("")) {
+				if (!ignoreEmpty || (value != null && !value.trim().isEmpty())) {
 					value = adaptValue(value);
 					result.add(value);
 				}

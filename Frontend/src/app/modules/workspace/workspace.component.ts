@@ -792,7 +792,10 @@ export class WorkspaceMainComponent implements EventListener{
                     return node.access.indexOf(RestConstants.ACCESS_CC_PUBLISH) != -1;
                 });
                 apply.showCallback=((node:Node)=> {
-                    return this.reurlDirectories || !node.isDirectory;
+                    let result=NodeHelper.getActionbarNodes(nodes,node);
+                    if(result==null || !result.length)
+                        return false;
+                    return (this.reurlDirectories || !result[0].isDirectory);
                 });
                 if(apply.showCallback(nodes[0]))
                     options.push(apply);

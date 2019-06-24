@@ -3663,7 +3663,7 @@ public class MCAlfrescoAPIClient extends MCAlfrescoBaseClient {
 							aceResult.setGroup(group);
 						}
 			
-						logger.info("authority" + authority + " Permission:" + permission + " ACCESSSTATUS:" + aceResult.getAccessStatus() + "isInherited:"
+						logger.debug("authority" + authority + " Permission:" + permission + " ACCESSSTATUS:" + aceResult.getAccessStatus() + "isInherited:"
 								+ ace.isInherited() + " getInheritParentPermissions(nodeRef):" + permissionsService.getInheritParentPermissions(nodeRef));
 			
 						aces.add(aceResult);
@@ -3671,7 +3671,7 @@ public class MCAlfrescoAPIClient extends MCAlfrescoBaseClient {
 					
 					result.setAces(aces.toArray(new ACE[aces.size()]));
 			
-					logger.info("permissionsService.getInheritParentPermissions(nodeRef):" + permissionsService.getInheritParentPermissions(nodeRef));
+					logger.debug("permissionsService.getInheritParentPermissions(nodeRef):" + permissionsService.getInheritParentPermissions(nodeRef));
 					isInherited = permissionsService.getInheritParentPermissions(nodeRef);
 			
 					result.setInherited(isInherited);
