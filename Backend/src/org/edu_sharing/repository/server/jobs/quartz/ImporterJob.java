@@ -127,12 +127,19 @@ public class ImporterJob extends AbstractJob {
 
 
 		this.context = context;
+		ApplicationContext applicationContext = AlfAppContextGate.getApplicationContext();
+		ServiceRegistry serviceRegistry = (ServiceRegistry) applicationContext.getBean(ServiceRegistry.SERVICE_REGISTRY);
 
-		if(xmlData!=null){
-			return start(xmlData,recordHandlerClass,binaryHandlerClass);
-		}
-		start(urlImport, oaiBaseUrl, metadataSetId, metadataPrefix, sets, recordHandlerClass,binaryHandlerClass, importerClass,idArr);
-		return null;
+		String finalUrlImport = urlImport;
+		String finalMetadataPrefix = metadataPrefix;
+		String[] finalSets = sets;
+		return serviceRegistry.getTransactionService().getRetryingTransactionHelper().doInTransaction(()-> {
+			if (xmlData != null) {
+				return start(xmlData, recordHandlerClass, binaryHandlerClass);
+			}
+			start(finalUrlImport, oaiBaseUrl, metadataSetId, finalMetadataPrefix, finalSets, recordHandlerClass, binaryHandlerClass, importerClass, idArr);
+			return null;
+		});
 	}
 
 	private String start(byte[] xmlData, String recordHandlerClass, String binaryHandlerClass){
@@ -161,9 +168,7 @@ public class ImporterJob extends AbstractJob {
 			importer.setRecordHandler(recordHandler);
 			importer.setJob(this);
 			importer.setSet("xml-import");
-			ApplicationContext applicationContext = AlfAppContextGate.getApplicationContext();
-			ServiceRegistry serviceRegistry = (ServiceRegistry) applicationContext.getBean(ServiceRegistry.SERVICE_REGISTRY);
-			return serviceRegistry.getTransactionService().getRetryingTransactionHelper().doInTransaction(()-> importer.startImport(xmlData));
+			return importer.startImport(xmlData);
 		}catch(Throwable t){
 			logger.error(t.getMessage(),t);
 			return null;
