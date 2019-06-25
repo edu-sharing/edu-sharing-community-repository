@@ -17,11 +17,12 @@ export class IconComponent{
         this.updateAria();
     }
     @Input() set iconId(id: string){
-        this._id=id;
-        let css:string;
-        this.updateAria();
+      this.element.nativeElement.classList.add('edu-icon-base');
+      this._id=id;
+      let css:string;
+      this.updateAria();
         if(id.startsWith("edu-")){
-            css="edu-icons";
+            css+="edu-icons";
             id=id.substr(4);
         }
         else{

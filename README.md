@@ -8,7 +8,7 @@ This module also depends on some dependencies, including:
 
 ```
 @angular/material
-@ngx/toasty
+ngx-toasty
 @ngx-translate/core
 ```
 
