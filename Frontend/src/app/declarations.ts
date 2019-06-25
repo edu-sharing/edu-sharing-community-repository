@@ -30,7 +30,6 @@
   import {CalendarComponent} from "./common/ui/calendar/calendar.component";
   import {ImageConfigDirective} from "./common/ui/image-config.directive";
   import {UserQuotaComponent} from "./common/ui/user-quota/user-quota.component";
-  import {MdsEmbedComponent} from "./common/ui/embed/mds-embed.component";
   import {EmbedComponent} from "./common/ui/embed/embed.component";
 
   export const DECLARATIONS = [
