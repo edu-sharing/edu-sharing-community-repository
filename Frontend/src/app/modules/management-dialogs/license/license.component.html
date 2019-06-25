@@ -1,5 +1,7 @@
 <card title="{{'WORKSPACE.LICENSE.TITLE' | translate }}" [priority]="priority" [node]="_nodes" width="large" height="xlarge"
-      [buttons]="buttons"
+      [buttons]="embedded ? null : buttons"
+      [header]="!embedded"
+      [isCancelable]="!embedded"
       (onCancel)="cancel()"
 >
       <spinner *ngIf="loading"></spinner>

@@ -26,6 +26,7 @@ import {SharingComponent} from "../modules/sharing/sharing.component";
 import {RegisterComponent} from '../modules/register/register.component';
 import {ServicesComponent} from "../modules/services/services.components";
 import {FileUploadComponent} from '../modules/file-upload/file-upload.component';
+import {EmbedComponent} from "../common/ui/embed/embed.component";
 
 
 
@@ -130,6 +131,10 @@ export var ROUTES=[
     { path: UIConstants.ROUTER_PREFIX+'sharing', component: SharingComponent },
     // services
     { path: UIConstants.ROUTER_PREFIX+'services', component: ServicesComponent },
-  ]
+
+    // embed
+    { path: UIConstants.ROUTER_PREFIX+'embed/:component', component: EmbedComponent },
+
+    ]
 ;
 

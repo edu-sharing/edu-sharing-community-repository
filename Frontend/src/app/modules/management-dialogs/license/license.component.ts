@@ -34,6 +34,7 @@ export class WorkspaceLicenseComponent  {
    * Default is 1 for mds
    */
   @Input() priority = 1;
+  @Input() embedded = false;
   _primaryType="";
   set primaryType(primaryType:string){
       this._primaryType=primaryType;
@@ -463,7 +464,7 @@ export class WorkspaceLicenseComponent  {
     this.cc0Type='CC_0';
   }
 
-    private getProperties(prop: any) {
+  getProperties(prop = this._properties) {
         prop[RestConstants.CCM_PROP_LICENSE]=[this.getLicenseProperty()];
         if(!this.contactIndeterminate)
             prop[RestConstants.CCM_PROP_QUESTIONSALLOWED]=[this.contact];
