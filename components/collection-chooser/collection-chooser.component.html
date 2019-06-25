@@ -1,6 +1,6 @@
   <div class="title">
     <div class="label">{{ title | translate}}</div>
-    <button mat-button class="close" (click)="cancel()"><i icon iconId="close"></i></button>
+    <button mat-button (click)="cancel()"><i icon iconId="close"></i></button>
   </div>
   <div class="content" infinite-scroll [scrollWindow]="false" (scrolled)="loadData()">
     <listTable

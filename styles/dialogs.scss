@@ -244,13 +244,14 @@ $cardActionHeight:77px;
     display: flex;
     padding-left:$cardPadding;
     font-size:110%;
+    color: $textMain;
     background-color: $workspaceMetadataBackground;
     word-break: break-all;
     .label{
       flex-grow: 1;
       padding:16px 0;
     }
-    .close{
+    button{
       float:right;
     }
   }
