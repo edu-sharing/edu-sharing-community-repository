@@ -54,6 +54,10 @@ export class CardComponent implements OnDestroy{
      */
   @Input() modal=true;
     /**
+     * Should the heading be shown
+     */
+  @Input() header=true;
+    /**
      * Jumpmarks for the left side (used for the mds dialog)
      */
   @Input() jumpmarks:CardJumpmark[];

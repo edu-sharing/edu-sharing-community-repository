@@ -4,7 +4,7 @@
             [class.card-jumpmarks]="jumpmarks && jumpmarks.length>1"
             [class.card-tabbed]="tabbed"
             [@cardAnimation]="this">
-    <mat-card-header>
+    <mat-card-header *ngIf="header">
       <div *ngIf="avatar" class="avatar" mat-card-avatar><img [src]="avatar" alt="" image-config></div>
       <mat-card-title>{{title}}</mat-card-title>
       <mat-card-subtitle>{{subtitle}}</mat-card-subtitle>
@@ -19,7 +19,7 @@
               (click)="scrollSmooth(jumpmark)"
       ><i icon [iconId]="jumpmark.icon"></i> {{jumpmark.label}}</button>
     </div>
-    <mat-card-content #cardContainer infinite-scroll [scrollWindow]="false" (scrolled)="scrolled()"><ng-content></ng-content></mat-card-content>
+    <mat-card-content #cardContainer infinite-scroll [class.card-content-header]="header" [scrollWindow]="false" (scrolled)="scrolled()"><ng-content></ng-content></mat-card-content>
     <mat-card-actions *ngIf="_buttons && _buttons.length">
       <div *ngFor="let button of _buttons">
         <button *ngIf="button.type==1" mat-flat-button color="primary" [disabled]="button.disabled" (click)="button.callback()">{{button.name | translate}}</button>
