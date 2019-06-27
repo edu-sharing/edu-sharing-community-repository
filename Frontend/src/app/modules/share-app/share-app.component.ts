@@ -115,7 +115,7 @@ export class ShareAppComponent {
     }
     private saveToCollection(collection:Node){
       this.saveInternal((node:Node)=>{
-          this.collectionApi.addNodeToCollection(collection.ref.id,node.ref.id).subscribe(()=>{
+          this.collectionApi.addNodeToCollection(collection.ref.id,node.ref.id,node.ref.repo).subscribe(()=>{
               UIHelper.goToCollection(this.router,collection,{replaceUrl:true});
               this.events.broadcastEvent(FrameEventsService.EVENT_SHARED,node);
           });

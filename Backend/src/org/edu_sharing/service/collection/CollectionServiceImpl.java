@@ -266,7 +266,7 @@ public class CollectionServiceImpl implements CollectionService{
 		}
 		HashMap<String, Object> props = nsSourceRepo.getProperties(null, null, originalNodeId);
 		if(props == null || props.size() == 0) {
-			logger.error("no properties found for originalNodeId:" + originalNodeId);
+			logger.error("no properties found for source nodeId:" + originalNodeId);
 		}
 		
 		HashMap<String, Object> toSafe = new HashMap<String, Object>();
