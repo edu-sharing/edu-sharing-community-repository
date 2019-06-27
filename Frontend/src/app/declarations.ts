@@ -31,6 +31,7 @@
   import {ImageConfigDirective} from "./common/ui/image-config.directive";
   import {UserQuotaComponent} from "./common/ui/user-quota/user-quota.component";
   import {EmbedComponent} from "./common/ui/embed/embed.component";
+  import {TimePipe} from "./common/ui/time.pipe";
 
   export const DECLARATIONS = [
       MdsTestComponent,
@@ -38,6 +39,7 @@
       AutocompleteComponent,
       AuthoritySearchInputComponent,
       NodeTitlePipe,
+      TimePipe,
       FileChooserComponent,
       BreadcrumbsComponent,
       ActionbarComponent,
