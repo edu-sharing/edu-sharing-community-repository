@@ -252,6 +252,43 @@ public class CollectionServiceImpl implements CollectionService{
 	}
 	
 	@Override
+	public String addToCollection(String collectionId, String originalNodeId, String sourceRepositoryId)
+			throws DuplicateNodeException, Throwable {
+		//@TODO: create folder remote_ios and make it customizable
+		String containerId = getContainerId(client, "/app:company_home/ccm:remote_ios");
+		
+		ApplicationInfo appInfo = ApplicationInfoList.getRepositoryInfoById(sourceRepositoryId);
+		appInfo.getNodeService();
+		
+		NodeService nsSourceRepo = NodeServiceFactory.getNodeService(sourceRepositoryId);
+		if(nsSourceRepo == null) {
+			logger.error("no nodeservice found for sourceRepositoryId:" + sourceRepositoryId);
+		}
+		HashMap<String, Object> props = nsSourceRepo.getProperties(null, null, originalNodeId);
+		if(props == null || props.size() == 0) {
+			logger.error("no properties found for originalNodeId:" + originalNodeId);
+		}
+		
+		HashMap<String, Object> toSafe = new HashMap<String, Object>();
+		toSafe.put(CCConstants.CM_NAME, props.get(CCConstants.CM_NAME));
+		toSafe.put(CCConstants.LOM_PROP_GENERAL_TITLE, props.get(CCConstants.LOM_PROP_GENERAL_TITLE));
+		toSafe.put(CCConstants.CCM_PROP_IO_REPL_LIFECYCLECONTRIBUTER_AUTOR, props.get(CCConstants.CCM_PROP_IO_REPL_LIFECYCLECONTRIBUTER_AUTOR));
+		toSafe.put(CCConstants.LOM_PROP_TECHNICAL_FORMAT, props.get(CCConstants.LOM_PROP_TECHNICAL_FORMAT));
+		toSafe.put(CCConstants.LOM_PROP_GENERAL_KEYWORD, props.get(CCConstants.LOM_PROP_GENERAL_KEYWORD));
+		toSafe.put(CCConstants.LOM_PROP_TECHNICAL_LOCATION, props.get(CCConstants.LOM_PROP_TECHNICAL_LOCATION));
+		toSafe.put(CCConstants.CCM_PROP_IO_REPLICATIONSOURCE, props.get(CCConstants.CCM_PROP_IO_REPLICATIONSOURCE));
+		toSafe.put(CCConstants.CCM_PROP_IO_REPLICATIONSOURCEID, props.get(CCConstants.CCM_PROP_IO_REPLICATIONSOURCEID));
+		toSafe.put(CCConstants.LOM_PROP_GENERAL_DESCRIPTION, props.get(CCConstants.LOM_PROP_GENERAL_DESCRIPTION));
+		toSafe.put(CCConstants.CCM_PROP_IO_COMMONLICENSE_KEY, props.get(CCConstants.CCM_PROP_IO_COMMONLICENSE_KEY));
+		toSafe.put(CCConstants.CCM_PROP_IO_THUMBNAILURL, props.get(CCConstants.CM_ASSOC_THUMBNAILS));
+		
+		//
+		String nodeId = client.createNode(containerId, CCConstants.CCM_TYPE_IO,toSafe);
+		this.addToCollection(collectionId, nodeId);
+		return null;
+	}
+	
+	@Override
 	public String[] addToCollection(String collectionId, String[] originalNodeIds) throws Throwable {
 		List<String> refIds = new ArrayList<String>();
 		for(String orgId : originalNodeIds){
@@ -285,7 +322,7 @@ public class CollectionServiceImpl implements CollectionService{
 						
 						collection.setLevel0(true);
 						
-						parentIdLocal = getContainerId(client);
+						parentIdLocal = getContainerId(client,path);
 					}
 					
 					HashMap<String,Object> props = asProps(collection);
@@ -317,19 +354,19 @@ public class CollectionServiceImpl implements CollectionService{
 		return col;
 	}
 	
-	private String getContainerId(MCAlfrescoBaseClient client){
+	private String getContainerId(MCAlfrescoBaseClient client, String rootPath){
 		String result = null;
 		try{
 			
 			// request node	
-			HashMap<String, HashMap<String, Object>> search = client.search("PATH:\"" + path + "\"", CCConstants.CM_TYPE_FOLDER);
+			HashMap<String, HashMap<String, Object>> search = client.search("PATH:\"" + rootPath + "\"", CCConstants.CM_TYPE_FOLDER);
 			String rootId = null;
 			if (search.size() != 1) {
 				if(search.size() > 1) throw new IllegalArgumentException("The path must reference a unique node.");
 				
 				
 				String startAt = client.getCompanyHomeNodeId();
-				String collectionPath = new String(path);
+				String collectionPath = new String(rootPath);
 				String pathCompanyHome = "/app:company_home/";
 				
 				if(collectionPath.startsWith(pathCompanyHome)){

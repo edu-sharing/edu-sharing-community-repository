@@ -33,6 +33,8 @@ public interface CollectionService {
 	 */
 	public String addToCollection(String collectionId, String originalNodeId) throws DuplicateNodeException, Throwable;
 	
+	public String addToCollection(String collectionId, String originalNodeId, String sourceRepositoryId) throws DuplicateNodeException, Throwable;
+	
 	
 	public String[] addToCollection(String collectionId, String[] originalNodeIds) throws DuplicateNodeException, Throwable;
 	
