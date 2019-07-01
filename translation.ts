@@ -11,6 +11,7 @@ import {HttpClient, HttpClientModule} from "@angular/common/http";
 import {environment} from "../../environments/environment";
 import {ConfigurationService, RestLocatorService, SessionStorageService} from "../core-module/core.module";
 import {BridgeService} from "../core-bridge-module/bridge.service";
+import {TranslationSource} from "./translation-source";
 
 export let TRANSLATION_LIST=['common','admin','recycle','workspace', 'search','collections','login','permissions','oer','messages','register','profiles','services','stream','override'];
 
@@ -27,6 +28,7 @@ export class Translation  {
   };
   // none means that only labels should be shown (for dev)
   private static DEFAULT_SUPPORTED_LANGUAGES = ["de","en","none"];
+  private static source=TranslationSource.Auto;
 
     public static initialize(translate : TranslateService,config : ConfigurationService,storage:SessionStorageService,route:ActivatedRoute) : Observable<string> {
     return new Observable<string>((observer: Observer<string>) => {
@@ -124,6 +126,19 @@ export class Translation  {
     }
     return "YYYY/MM/DD";
   }
+
+  /**
+   * Set the preferred source for language files
+   * Auto: In dev mode, local files are used and in production, repository files are used (default)
+   * Repository: Repository files are used
+   * Local: Local files (assets/i18n) are used
+   */
+  static setSource(source:TranslationSource){
+      this.source=source;
+  }
+  static getSource() {
+    return this.source;
+  }
 }
 export function createTranslateLoader(http: HttpClient,locator:RestLocatorService) {
   return new TranslationLoader(http,locator);
@@ -146,7 +161,8 @@ export class TranslationLoaderDummy implements TranslateLoader {
 export class TranslationLoader implements TranslateLoader {
   private initializing:string = null;
   private initializedLanguage: any;
-  constructor(private http: HttpClient,private locator : RestLocatorService, private prefix: string = "assets/i18n", private suffix: string = ".json") { }
+  constructor(private http: HttpClient,private locator : RestLocatorService, private prefix: string = "assets/i18n", private suffix: string = ".json") {
+  }
   /**
    * Gets the translations from the server
    * @param lang
@@ -182,7 +198,7 @@ export class TranslationLoader implements TranslateLoader {
     let translations : any =[];
     let results=0;
     let maxCount=TRANSLATION_LIST.length;
-    if(environment.production){
+    if(environment.production && Translation.getSource()==TranslationSource.Auto || Translation.getSource()==TranslationSource.Repository){
       maxCount=1;
       console.log(Translation.LANGUAGES[lang]);
       this.locator.getLanguageDefaults(Translation.LANGUAGES[lang]).subscribe((data: any) =>{
@@ -191,7 +207,7 @@ export class TranslationLoader implements TranslateLoader {
       });
     }
     else {
-      console.log("dev mode, loading translations locally");
+      console.log("loading translations locally");
         for (let translation of TRANSLATION_LIST) {
             this.http.get(`${this.prefix}/${translation}/${lang}${this.suffix}`)
                 .subscribe((data: any) => translations.push(data));
