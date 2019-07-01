@@ -52,7 +52,7 @@ export class Translation  {
             if (data.indexOf(params.locale) != -1) {
               language = params.locale;
             }
-            else if(params.locale != -1){
+            else if(params.locale){
                 console.warn("Url requested language "+params.locale+", but it was not found or is not configured in the allowed languages: "+data);
             }
             else if (data.indexOf(storageLanguage) != -1) {
