@@ -1,4 +1,4 @@
-#This is the angular core-ui-module for edu-sharing.
+# This is the angular core-ui-module for edu-sharing.
 
 The core ui module provides basic ui modules (e.g. list objects, toast messages) for reuse in other projects
 
@@ -16,7 +16,7 @@ Make sure to install the dependencies. Take a look at the edu-sharing repository
 
 As some components rely on global styles, make sure to include the "styles/core-base.scss" into your angular-project by adding it to the angular.json style section.
 
-##Translation:
+## Translation:
 
 You have to choose whether you want to provide the i18n files yourself (place them in assets/i18n/<language>.json) or if you want to use the once provided by the repository (recommended).
 
