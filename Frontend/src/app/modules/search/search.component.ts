@@ -662,7 +662,7 @@ export class SearchComponent {
             let n=ActionbarHelperService.getNodes(nodes,node);
             if(n==null)
               return false;
-            return this.addToCollection == null && !this.isGuest && RestNetworkService.allFromHomeRepo(n,this.allRepositories);
+            return this.addToCollection == null && !this.isGuest;// && RestNetworkService.allFromHomeRepo(n,this.allRepositories);
         };
         options.push(collection);
     }

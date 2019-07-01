@@ -298,6 +298,19 @@ public class CollectionDao {
 			throw DAOException.mapping(t);
 		}
 	}
+	
+	public static void addToCollection(RepositoryDao repoDao,String collectionId,String nodeId, String sourceRepositoryId) throws DAOException {
+		try {
+
+			CollectionServiceFactory.getCollectionService(repoDao.getApplicationInfo().getAppId()).
+					addToCollection(collectionId,nodeId,sourceRepositoryId);
+
+		} catch (Throwable t) {
+
+			throw DAOException.mapping(t);
+		}
+	}
+	
 	public void addToCollection(NodeDao node) throws DAOException {
 		
 		try {

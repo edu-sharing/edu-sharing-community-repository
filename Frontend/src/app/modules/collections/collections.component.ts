@@ -455,7 +455,7 @@ export class CollectionsMainComponent {
         });
       }
       else {
-        this.collectionService.addNodeToCollection(target.ref.id, source.ref.id).subscribe(() => {
+        this.collectionService.addNodeToCollection(target.ref.id, source.ref.id, source.ref.repo).subscribe(() => {
           UIHelper.showAddedToCollectionToast(this.toast,this.router, target, 1);
           if (event.type == 'copy') {
             this.globalProgress = false;
@@ -778,7 +778,7 @@ export class CollectionsMainComponent {
           let node=params['nodeId'].split("/");
           node=node[node.length-1];
           console.log("node: "+node);
-          this.collectionService.addNodeToCollection(id,node).subscribe(()=> this.navigate(id),(error:any)=>{
+          this.collectionService.addNodeToCollection(id,node,null).subscribe(()=> this.navigate(id),(error:any)=>{
             this.handleError(error);
             this.navigate(id);
             //this.displayCollectionById(id)

@@ -91,17 +91,20 @@ export class ActionbarHelperService{
     if(type=='ADD_TO_COLLECTION') {
       if (this.connector.getCurrentLogin() && !this.connector.getCurrentLogin().isGuest) {
         option = new OptionItem("WORKSPACE.OPTION.COLLECTION", "layers", callback);
-        option.isEnabled = NodeHelper.getNodesRight(nodes, RestConstants.ACCESS_CC_PUBLISH,true) && RestNetworkService.allFromHomeRepo(nodes,this.repositories);
+        option.isEnabled = NodeHelper.getNodesRight(nodes, RestConstants.ACCESS_CC_PUBLISH,true);// && RestNetworkService.allFromHomeRepo(nodes,this.repositories);
         option.showAsAction = true;
         option.showCallback = (node: Node) => {
             let n=ActionbarHelperService.getNodes(nodes,node);
             if(n==null)
                 return false;
+
+            console.log(n);
+
             return NodeHelper.referenceOriginalExists(node) && NodeHelper.allFiles(nodes) && n.length>0;
         }
         option.enabledCallback = (node: Node) => {
           let list = ActionbarHelperService.getNodes(nodes, node);
-          return NodeHelper.getNodesRight(list,RestConstants.ACCESS_CC_PUBLISH,true) && RestNetworkService.allFromHomeRepo(list,this.repositories);
+          return NodeHelper.getNodesRight(list,RestConstants.ACCESS_CC_PUBLISH,true);//&& RestNetworkService.allFromHomeRepo(list,this.repositories);
         }
         option.disabledCallback = () =>{
           this.connectors.getRestConnector().getBridgeService().showTemporaryMessage(MessageType.error, null,'WORKSPACE.TOAST.ADD_TO_COLLECTION_DISABLED');

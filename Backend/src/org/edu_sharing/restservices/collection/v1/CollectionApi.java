@@ -491,10 +491,13 @@ public class CollectionApi {
 			@ApiParam(value = "ID of repository (or \"-home-\" for home repository)", required = true, defaultValue = "-home-") @PathParam("repository") String repository,
 			@ApiParam(value = "ID of collection", required = true) @PathParam("collection") String collectionId,
 			@ApiParam(value = "ID of node", required = true) @PathParam("node") String nodeId,
+			@ApiParam(value = "ID of source repository", required=true ) @QueryParam("sourceRepo")  String sourceRepo,
 			@Context HttpServletRequest req) {
 
 		try {
 
+			
+			
 			RepositoryDao repoDao = RepositoryDao.getRepository(repository);
 			
 			if (repoDao == null) {
@@ -502,7 +505,13 @@ public class CollectionApi {
 				return Response.status(Response.Status.NOT_FOUND).build();
 			}
 
-			CollectionDao.addToCollection(repoDao,collectionId,nodeId);
+			if(sourceRepo != null && !sourceRepo.equals(RepositoryDao.getHomeRepository().getId())){
+				CollectionDao.addToCollection(repoDao,collectionId,nodeId,sourceRepo);
+			}else {
+				CollectionDao.addToCollection(repoDao,collectionId,nodeId);
+			}
+			
+			
 			return Response.status(Response.Status.OK).build();
 
     	} catch (Throwable t) {
