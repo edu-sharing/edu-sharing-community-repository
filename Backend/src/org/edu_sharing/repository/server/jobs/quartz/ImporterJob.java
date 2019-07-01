@@ -133,13 +133,11 @@ public class ImporterJob extends AbstractJob {
 		String finalUrlImport = urlImport;
 		String finalMetadataPrefix = metadataPrefix;
 		String[] finalSets = sets;
-		return serviceRegistry.getTransactionService().getRetryingTransactionHelper().doInTransaction(()-> {
-			if (xmlData != null) {
-				return start(xmlData, recordHandlerClass, binaryHandlerClass);
-			}
-			start(finalUrlImport, oaiBaseUrl, metadataSetId, finalMetadataPrefix, finalSets, recordHandlerClass, binaryHandlerClass, importerClass, idArr);
-			return null;
-		});
+		if (xmlData != null) {
+			return start(xmlData, recordHandlerClass, binaryHandlerClass);
+		}
+		start(finalUrlImport, oaiBaseUrl, metadataSetId, finalMetadataPrefix, finalSets, recordHandlerClass, binaryHandlerClass, importerClass, idArr);
+		return null;
 	}
 
 	private String start(byte[] xmlData, String recordHandlerClass, String binaryHandlerClass){
@@ -164,7 +162,8 @@ public class ImporterJob extends AbstractJob {
 			logger.info("importer:" + importer.getClass().getName());
 
 			importer.setBinaryHandler(binaryHandler);
-			importer.setPersistentHandler(new PersistentHandlerEdusharing(this,importer));
+			// quick import: do not build up cache, always import xml file
+			importer.setPersistentHandler(new PersistentHandlerEdusharing(this,importer,false));
 			importer.setRecordHandler(recordHandler);
 			importer.setJob(this);
 			importer.setSet("xml-import");
@@ -215,7 +214,7 @@ public class ImporterJob extends AbstractJob {
 				importer.setMetadataPrefix(metadataPrefix);
 				importer.setNrOfRecords(-1);
 				importer.setNrOfResumptions(-1);
-				importer.setPersistentHandler(new PersistentHandlerEdusharing(this,importer));
+				importer.setPersistentHandler(new PersistentHandlerEdusharing(this,importer,true));
 				importer.setSet(set);
 				importer.setMetadataSetId(metadataSetId);
 				importer.setRecordHandler(recordHandler);
