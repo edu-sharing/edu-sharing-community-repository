@@ -127,8 +127,11 @@ $height-xxlarge:800px;
     }
     &.card-no-buttons {
       mat-card-content {
-        max-height: calc(100vh - #{$titleHeight});
+        max-height: 100vh;
         @include content();
+      }
+      .card-content-header{
+        max-height: calc(100vh - #{$titleHeight} - #{$actionMenuHeight});
       }
       &.height-small mat-card-content {
         height: $height-small - $titleHeight;

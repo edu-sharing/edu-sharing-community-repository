@@ -341,7 +341,7 @@ export class UIHelper {
             return;
         }
 
-        collectionService.addNodeToCollection(collection.ref.id, nodes[position].ref.id).subscribe(() => {
+        collectionService.addNodeToCollection(collection.ref.id, nodes[position].ref.id,nodes[position].ref.repo).subscribe(() => {
                 UIHelper.addToCollection(collectionService, router, toast, collection, nodes, callback, position + 1, error);
             },
             (error: any) => {
