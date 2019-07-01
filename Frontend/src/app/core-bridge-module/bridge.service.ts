@@ -3,6 +3,7 @@ import {Toast} from "../core-ui-module/toast";
 import {CordovaService} from "../common/services/cordova.service";
 import {DialogButton} from "../core-module/core.module";
 import {Translation} from "../core-ui-module/translation";
+import {MessageType} from "../core-module/ui/message-type";
 
 @Injectable()
 export class BridgeService{
@@ -30,8 +31,4 @@ export class BridgeService{
     getISOLanguage() {
         return Translation.getISOLanguage();
     }
-}
-export enum MessageType {
-    info,
-    error
 }
