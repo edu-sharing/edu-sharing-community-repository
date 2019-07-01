@@ -1,6 +1,5 @@
 import {NodeHelper} from "../../core-ui-module/node-helper";
 import {Injectable} from "@angular/core";
-import {MessageType} from "../../core-bridge-module/bridge.service";
 import {
     Node,
     Repository,
@@ -10,6 +9,7 @@ import {
     RestNetworkService
 } from "../../core-module/core.module";
 import {OptionItem} from "../../core-ui-module/option-item";
+import {MessageType} from "../../core-module/ui/message-type";
 
 @Injectable()
 export class ActionbarHelperService{
