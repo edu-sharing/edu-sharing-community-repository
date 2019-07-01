@@ -9,7 +9,6 @@ import {VCard} from "../../../core-module/ui/VCard";
 import {Toast} from "../../../core-ui-module/toast";
 import {Translation} from "../../../core-ui-module/translation";
 import {TranslateService} from "@ngx-translate/core";
-import any = jasmine.any;
 import {SuggestItem} from "../../../common/ui/autocomplete/autocomplete.component";
 import {RestIamService} from "../../../core-module/core.module";
 import {NodeHelper} from "../../../core-ui-module/node-helper";

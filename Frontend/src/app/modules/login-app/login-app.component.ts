@@ -14,7 +14,6 @@ import { UIHelper } from '../../core-ui-module/ui-helper';
 import { Translation } from '../../core-ui-module/translation';
 import { TranslateService } from '@ngx-translate/core';
 import { RestHelper } from '../../core-module/core.module';
-import { STATUS_CODES } from 'http';
 import {RestLocatorService} from "../../core-module/core.module";
 import {SessionStorageService} from "../../core-module/core.module";
 import {BridgeService} from "../../core-bridge-module/bridge.service";
