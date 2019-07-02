@@ -22,7 +22,7 @@ export class IconComponent{
       let css:string;
       this.updateAria();
         if(id.startsWith("edu-")){
-            css+="edu-icons";
+            css="edu-icons";
             id=id.substr(4);
         }
         else{
