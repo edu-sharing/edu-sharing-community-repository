@@ -1,4 +1,7 @@
 @import "../../../core-ui-module/styles/variables";
+@import "../../../core-ui-module/components/card/variables";
+
+$shareLinkHeight:40px;
 
 .tab{
   background-color: transparent;
@@ -59,6 +62,9 @@
       background-color: #fff;
       border-radius: 2px;
     }
+  }
+  .mat-tab-body-wrapper {
+    max-height: calc(100vh - #{$titleHeight} - #{$actionMenuHeight} - #{$tabHeight} - #{$shareLinkHeight} )!important;
   }
 }
 h2{
@@ -296,6 +302,7 @@ mat-tab-body-content{
   background: $actionDialogBackground;
   text-align: right;
   padding: 0 3px 5px 3px;
+  height:$shareLinkHeight;
   button{
     i{
       vertical-align: middle;
