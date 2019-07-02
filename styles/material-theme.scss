@@ -76,6 +76,10 @@ $candy-app-theme: mat-light-theme($candy-app-primary, $candy-app-accent, $candy-
     text-transform: uppercase;
   }
 }
+.mat-fab.mat-white{
+  // white background, primary as content color
+  color: $primary;
+}
 // align prefix in input fields
 .mat-form-field-appearance-outline .mat-form-field-prefix {
   top: 0.4em!important;
