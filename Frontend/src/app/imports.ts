@@ -24,7 +24,7 @@ import {
     MatSidenavModule,
     MatSlideToggleModule,
     MatTabsModule,
-    MatToolbarModule
+    MatToolbarModule, MatTooltipModule
 } from '@angular/material';
 import { LazyLoadImageModule } from 'ng-lazyload-image';
 import {CustomModule} from './custom-module/custom.module';
@@ -53,6 +53,7 @@ export const IMPORTS=[
   MatCardModule,
   MatDatepickerModule,
   MatNativeDateModule,
+  MatTooltipModule,
   MatAutocompleteModule,
   MatOptionModule,
   MatFormFieldModule,
