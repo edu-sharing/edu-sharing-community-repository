@@ -84,7 +84,7 @@ public class TrackingServiceImpl extends TrackingServiceDefault{
                 statement.setString(2, nodeRef.getId());
                 statement.setString(3, version);
                 statement.setString(4, super.getTrackedUsername(null));
-                statement.setDate(5, new Date(System.currentTimeMillis()));
+                statement.setTimestamp(5, new Timestamp(System.currentTimeMillis()));
                 statement.setString(6, type.name());
                 JSONObject json = buildJson(nodeRef, type);
                 PGobject obj = new PGobject();
