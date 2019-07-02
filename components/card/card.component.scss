@@ -1,14 +1,6 @@
 @import "../../styles/variables";
+@import "variables";
 
-$titleHeight:70px;
-$actionMenuHeight:70px;
-$tabHeight:48px;
-$jumpmarksWidth:200px;
-$height-small:400px;
-$height-normal:500px;
-$height-large:600px;
-$height-xlarge:700px;
-$height-xxlarge:800px;
 
 @mixin content{
   overflow-y: auto;
