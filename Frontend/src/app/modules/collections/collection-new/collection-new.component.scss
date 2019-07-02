@@ -156,7 +156,7 @@ $imagePath: '../../../../assets/images/collections/';
     padding-bottom: 20px;
   }
   .status{
-    margin: -20px;
+    margin: $cardPadding*-1;
     margin-top: 20px;
     padding: 6px 20px;
     background: $actionDialogBackground;
@@ -389,9 +389,12 @@ $imagePath: '../../../../assets/images/collections/';
 
 .button-icon{
   position: absolute;
-  bottom: 8px;
-  right: 27px;
+  bottom: 10px;
+  right: 5px;
   z-index: 2;
+  .mat-fab{
+    margin: 0 5px;
+  }
 }
 label{
 }

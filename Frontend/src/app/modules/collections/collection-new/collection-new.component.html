@@ -90,12 +90,12 @@
                   class="image-upload-field-input">
               </div>
               <div class="button-icon">
-                  <div class="btn-circle" tabindex="0" (keyup.enter)="file.click()" (click)="file.click()">
+                  <button mat-fab color="white" (click)="file.click()">
                       <i icon iconId="file_upload" aria="true"></i>
-                  </div>
-                  <div class="btn-circle" tabindex="0" *ngIf="imageData || (currentCollection.preview && !currentCollection.preview.isIcon)" (keyup.enter)="deleteImage()" (click)="deleteImage()">
+                  </button>
+                  <button mat-fab color="white" *ngIf="imageData || (currentCollection.preview && !currentCollection.preview.isIcon)" (click)="deleteImage()">
                       <i icon iconId="delete" aria="true"></i>
-                  </div>
+                  </button>
               </div>
 
               <div *ngIf="!imageData && !(currentCollection.preview && !currentCollection.preview.isIcon)" (keyup.enter)="file.click()" (click)="file.click()" class="card-collection-icon-container">
@@ -206,7 +206,7 @@
           <div class="title">{{'COLLECTIONS.EDIT_PERMISSIONS_SUBTEXT' | translate}}</div>
           <div class="description">{{'COLLECTIONS.EDIT_PERMISSIONS_DESCRIPTION' | translate}}</div>
         <div class="dialog-basic-area permissionsBtn">
-          <a class="btn-flat btn-shadow btn-icon" tabindex="0" (keyup.enter)="editPermissions()" (click)="editPermissions()"><i class="material-icons">person_add</i>{{'COLLECTIONS.EXTENDED_PERMISSIONS_BUTTON' | translate}}</a>
+          <button mat-raised-button (click)="editPermissions()"><i class="material-icons">person_add</i>{{'COLLECTIONS.EXTENDED_PERMISSIONS_BUTTON' | translate}}</button>
         </div>
         <div class="status">{{('COLLECTIONS.PERMISSIONS_STATUS_'+getShareStatus()) | translate}}</div>
       </div>

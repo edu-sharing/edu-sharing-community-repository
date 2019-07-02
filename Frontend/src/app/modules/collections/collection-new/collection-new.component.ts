@@ -579,7 +579,6 @@ export class CollectionNewComponent {
     }
 
     showAsModal() {
-      console.log(UIHelper.evaluateMediaQuery(UIConstants.MEDIA_QUERY_MAX_HEIGHT,UIConstants.MOBILE_HEIGHT));
-        return UIHelper.evaluateMediaQuery(UIConstants.MEDIA_QUERY_MAX_HEIGHT,UIConstants.MOBILE_HEIGHT + UIConstants.MOBILE_STAGE);
+      return UIHelper.evaluateMediaQuery(UIConstants.MEDIA_QUERY_MAX_HEIGHT,UIConstants.MOBILE_HEIGHT + UIConstants.MOBILE_STAGE);
     }
 }
