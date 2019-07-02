@@ -666,9 +666,10 @@ export class ListTableComponent implements EventListener{
     return node.collection || node.hasOwnProperty('childCollectionsCount');
   }
   public isReference(node : any){
-    return node.reference!=null;
+    return node.reference!=null || node.aspects && node.aspects.indexOf(RestConstants.CCM_ASPECT_IO_REFERENCE)!=-1;
   }
   public isDeleted(node:any){
+    console.log(node.name+" "+this.isReference(node)+" "+node.originalId);
     return this.isReference(node) && !node.originalId;
   }
   private showDropdown(node : Node){

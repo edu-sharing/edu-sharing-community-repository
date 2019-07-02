@@ -388,7 +388,7 @@ export class NodeRenderComponent implements EventListener{
             };
             UIHelper.injectAngularComponent(this.componentFactoryResolver,this.viewContainerRef,ListTableComponent,document.getElementsByTagName("collections")[0],data,250);
         },(error)=>{
-
+            domContainer.parentElement.removeChild(domContainer);
         });
     }
   private postprocessHtml() {
