@@ -71,6 +71,7 @@
 				<id>ccm:educationallearningresourcetype</id>
 				<type>multivalueFixedBadges</type>
 				<caption>lom_prop_educationallearningresourcetype</caption>
+				<placeholder>lom_prop_educationallearningresourcetype_placeholder</placeholder>
 				<hideIfEmpty>true</hideIfEmpty>
 				<valuespace>valuespaces.xml</valuespace>
 				<valuespace_i18n>valuespaces_i18n</valuespace_i18n>
