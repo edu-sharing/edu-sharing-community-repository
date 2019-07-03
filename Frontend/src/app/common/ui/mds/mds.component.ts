@@ -1515,7 +1515,7 @@ export class MdsComponent{
     let condition=widget.condition;
     console.log('condition:');
     console.log(condition);
-    let properties=this.currentNode ? this.currentNode : this._currentValues;
+    let properties=this.currentNode ? this.currentNode.properties : this._currentValues;
     if(condition.type=='PROPERTY' && properties) {
         if (!properties[condition.value] && !condition.negate || properties[condition.value] && condition.negate) {
             return false;
