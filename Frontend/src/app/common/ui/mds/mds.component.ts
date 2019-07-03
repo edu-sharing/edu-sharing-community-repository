@@ -25,6 +25,7 @@ import {DialogButton} from '../modal-dialog/modal-dialog.component';
 import {UIService} from '../../services/ui.service';
 import {ConfigurationHelper} from "../../rest/configuration-helper";
 import {RestSearchService} from '../../rest/services/rest-search.service';
+import {RestUtilitiesService} from "../../rest/services/rest-utilities.service";
 
 @Component({
   selector: 'mds',
@@ -240,6 +241,7 @@ export class MdsComponent{
               private uiService : UIService,
               private node : RestNodeService,
               private tools : RestToolService,
+              private utilities : RestUtilitiesService,
               private toast : Toast,
               private locator : RestLocatorService,
               private storage : SessionStorageService,
@@ -1740,10 +1742,16 @@ export class MdsComponent{
     return preview;
   }
   private setEditChildobject(pos:number){
-      this.editChildobject=this.childobjects[pos];
+    this.editChildobject={
+      child:this.childobjects[pos],
+      properties:this.getChildobjectProperties(this.childobjects[pos],pos)
+    };
   }
   private setEditChildobjectLicense(pos:number){
-      this.editChildobjectLicense=this.childobjects[pos];
+    this.editChildobjectLicense= {
+      child: this.childobjects[pos],
+      properties: this.getChildobjectProperties(this.childobjects[pos], pos)
+    };
   }
   private removeChildobject(pos:number){
       let element=document.getElementById(this.getDomId('mdsChildobjects')).getElementsByClassName('childobject').item(pos);
@@ -1800,14 +1808,29 @@ export class MdsComponent{
   private addChildobjectLink(event:any){
       let link=UIHelper.addHttpIfRequired(event.link);
       this.addChildobject=false;
-      console.log(event);
-      let data={
-          icon:this.connector.getThemeMimeIconSvg('link.svg'),
-          name:link,
-          link:link
+      let properties=RestHelper.createNameProperty(link);
+      properties[RestConstants.CCM_PROP_IO_WWWURL] = [link];
+      properties[RestConstants.LOM_PROP_TITLE] = [link];
+      let process=()=>{
+        console.log(properties);
+        let data:any= {
+          icon: this.connector.getThemeMimeIconSvg('link.svg'),
+          name: RestHelper.getTitleFromProperties(properties),
+          link: link,
+          properties:properties
+        };
+        this.childobjects.push(data);
+        this.refreshChildobjects();
       }
-      this.childobjects.push(data);
-      this.refreshChildobjects();
+      this.utilities.getWebsiteInformation(link).subscribe((info)=>{
+        if(info.title)
+            properties[RestConstants.LOM_PROP_TITLE] = [info.title+" - "+info.page];
+        process();
+      },(error)=>{
+        console.warn(error);
+        process();
+      })
+
   }
   private addChildobjectFile(event:any){
     this.addChildobject=false;
@@ -2251,25 +2274,21 @@ export class MdsComponent{
   }
   private setChildobjectProperties(props:any){
     console.log(props);
-    let child=this.editChildobject || this.editChildobjectLicense;
-    child.properties=props;
-    child.name=props[RestConstants.LOM_PROP_TITLE] ? props[RestConstants.LOM_PROP_TITLE] : props[RestConstants.CM_NAME];
+    let edit=this.editChildobject || this.editChildobjectLicense;
+    edit.child.properties=props;
+    edit.child.name=props[RestConstants.LOM_PROP_TITLE] ? props[RestConstants.LOM_PROP_TITLE] : props[RestConstants.CM_NAME];
     this.editChildobject=null;
     this.editChildobjectLicense=null;
     this.refreshChildobjects();
   }
 
-  private getChildobjectProperties(child:any,pos:number){
+  private getChildobjectProperties(child:any,pos:number=null){
     let props:any;
     if(child.properties){
         props=child.properties;
     }
     else if(child.file){
-        props=RestHelper.createNameProperty(child.name);
-    }
-    else if(child.link){
-        props={};
-        props[RestConstants.CCM_PROP_IO_WWWURL]=[child.link];
+      props=RestHelper.createNameProperty(child.name);
     }
     else{
       console.error('Invalid object state for childobject',child);
@@ -2285,7 +2304,6 @@ export class MdsComponent{
     }
 
       let child=this.childobjects[pos];
-      console.log('add new child',child);
       if(child.file){
           this.node.createNode(this.currentNode.ref.id,RestConstants.CCM_TYPE_IO,[RestConstants.CCM_ASPECT_IO_CHILDOBJECT],this.getChildobjectProperties(child,pos),true,'',RestConstants.CCM_ASSOC_CHILDIO).subscribe((data:NodeWrapper)=> {
               this.node.uploadNodeContent(data.node.ref.id, child.file, RestConstants.COMMENT_MAIN_FILE_UPLOAD).subscribe(() => {
@@ -2303,7 +2321,7 @@ export class MdsComponent{
       else if(child.link){
         let properties:any={};
         properties[RestConstants.CCM_PROP_IO_WWWURL]=[child.link];
-        this.node.createNode(this.currentNode.ref.id,RestConstants.CCM_TYPE_IO,[RestConstants.CCM_ASPECT_IO_CHILDOBJECT],this.getChildobjectProperties(child,pos),true,'',RestConstants.CCM_ASSOC_CHILDIO).subscribe((data:NodeWrapper)=>{
+        this.node.createNode(this.currentNode.ref.id,RestConstants.CCM_TYPE_IO,[RestConstants.CCM_ASPECT_IO_CHILDOBJECT],this.getChildobjectProperties(child,pos),true,RestConstants.COMMENT_MAIN_FILE_UPLOAD,RestConstants.CCM_ASSOC_CHILDIO).subscribe((data:NodeWrapper)=>{
             this.onAddChildobject(callback,pos+1);
         });
       }

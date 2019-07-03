@@ -607,5 +607,8 @@ export class NodeRenderComponent implements EventListener{
     private getNodeName(node:Node) {
       return RestHelper.getName(node);
     }
+    private getNodeTitle(node:Node) {
+        return RestHelper.getTitle(node);
+    }
 
 }
