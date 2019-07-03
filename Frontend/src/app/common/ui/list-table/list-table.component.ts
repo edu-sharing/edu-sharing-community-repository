@@ -666,10 +666,12 @@ export class ListTableComponent implements EventListener{
     return node.collection || node.hasOwnProperty('childCollectionsCount');
   }
   public isReference(node : any){
-    return node.reference!=null || node.aspects && node.aspects.indexOf(RestConstants.CCM_ASPECT_IO_REFERENCE)!=-1;
+    // when checking for aspects, we always detect a reference
+    // BUT these references are regular nodes and DO NOT have the "originalId"
+    // resulting that all references are detected as "deleted"
+    return node.reference!=null/* || node.aspects && node.aspects.indexOf(RestConstants.CCM_ASPECT_IO_REFERENCE)!=-1*/;
   }
   public isDeleted(node:any){
-    console.log(node.name+" "+this.isReference(node)+" "+node.originalId);
     return this.isReference(node) && !node.originalId;
   }
   private showDropdown(node : Node){
