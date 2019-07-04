@@ -183,6 +183,8 @@ export class MainNavComponent implements AfterViewInit{
     @HostListener('window:scroll', ['$event'])
     @HostListener('window:touchmove', ['$event'])
     handleScroll(event: any) {
+        if(this.storage.get(TemporaryStorageService.OPTION_DISABLE_SCROLL_LAYOUT,false))
+            return;
         let elementsScroll=document.getElementsByClassName('scrollWithBanner');
         let elementsAlign=document.getElementsByClassName('alignWithBanner');
         let elements:any=[];
@@ -253,10 +255,12 @@ export class MainNavComponent implements AfterViewInit{
                 element.style.top = Number.parseInt(this.scrollInitialPositions[element.getAttribute(MainNavComponent.ID_ATTRIBUTE_NAME)])+y + 'px';
             }
         }
-        if((window.pageYOffset || document.documentElement.scrollTop) > 400) {
-            this.scrolltotop.nativeElement.style.display = 'flex';
-        } else {
-            this.scrolltotop.nativeElement.style.display = 'none';
+        if(this.scrolltotop && this.scrolltotop.nativeElement) {
+            if ((window.pageYOffset || document.documentElement.scrollTop) > 400) {
+                this.scrolltotop.nativeElement.style.display = 'flex';
+            } else {
+                this.scrolltotop.nativeElement.style.display = 'none';
+            }
         }
     }
     @HostListener('document:touchstart',['$event']) onTouchStart(event:any) {

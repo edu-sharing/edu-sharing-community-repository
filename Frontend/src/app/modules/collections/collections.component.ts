@@ -62,8 +62,29 @@ export class CollectionsMainComponent {
   public dialogCancelable = false;
   public dialogMessage : string;
   public dialogButtons : DialogButton[];
-
+  static INDEX_MAPPING=[
+        RestConstants.COLLECTIONSCOPE_MY,
+        RestConstants.COLLECTIONSCOPE_ORGA,
+        RestConstants.COLLECTIONSCOPE_TYPE_EDITORIAL,
+        RestConstants.COLLECTIONSCOPE_ALL,
+    ]
     public tabSelected:string = RestConstants.COLLECTIONSCOPE_MY;
+
+    set tabSelectedIndex(pos:number){
+        if(this.isGuest)
+            pos+=2; // skip first 2 tabs
+        if(!this.hasEditorial && pos>1)
+            pos++; // skip editorial
+        this.selectTab(CollectionsMainComponent.INDEX_MAPPING[pos]);
+    }
+    get tabSelectedIndex(){
+        let pos=CollectionsMainComponent.INDEX_MAPPING.indexOf(this.tabSelected);
+        if(this.isGuest)
+            pos-=2;
+        if(!this.hasEditorial && pos>1)
+            pos--;
+        return pos;
+    }
     public isLoading:boolean = true;
     public isReady:boolean = false;
 
