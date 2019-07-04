@@ -74,6 +74,17 @@ $candy-app-theme: mat-light-theme($candy-app-primary, $candy-app-accent, $candy-
     text-transform: uppercase;
   }
 }
+.mat-tab-group.mat-dark{
+  .mat-tab-labels {
+    background-color: $workspaceTopBarBackground;
+    .mat-tab-label {
+      color: $textOnPrimary;
+    }
+  }
+  .mat-ink-bar{
+    background-color: $primaryLight;
+  }
+}
 .mat-fab.mat-white{
   // white background, primary as content color
   color: $primary;
