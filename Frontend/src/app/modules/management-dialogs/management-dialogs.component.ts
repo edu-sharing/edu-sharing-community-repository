@@ -395,9 +395,9 @@ export class WorkspaceManagementDialogsComponent  {
     this.addToCollectionChange.emit(null);
     this.onCloseAddToCollection.emit();
   }
-  public addToCollectionCreate(){
+  public addToCollectionCreate(parent:Node|Collection=null){
       this.temporaryStorage.set(TemporaryStorageService.COLLECTION_ADD_NODES,this.addToCollection);
-      this.router.navigate([UIConstants.ROUTER_PREFIX,"collections","collection","new",RestConstants.ROOT]);
+      this.router.navigate([UIConstants.ROUTER_PREFIX,"collections","collection","new",parent ? parent.ref.id : RestConstants.ROOT]);
       this.addToCollection=null;
       this.addToCollectionChange.emit(null);
   }

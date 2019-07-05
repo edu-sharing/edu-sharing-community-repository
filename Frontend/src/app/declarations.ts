@@ -1,6 +1,5 @@
   import {FileChooserComponent} from "./common/ui/file-chooser/file-chooser.component";
   import {RouterComponent} from "./router/router.component";
-  import {BreadcrumbsComponent} from "./common/ui/breadcrumbs/breadcrumbs.component";
   import {ActionbarComponent} from "./common/ui/actionbar/actionbar.component";
   import {FileDropDirective} from "./common/ui/file-drop";
   import {ModalDialogComponent} from "./common/ui/modal-dialog/modal-dialog.component";
@@ -41,7 +40,6 @@
       NodeTitlePipe,
       TimePipe,
       FileChooserComponent,
-      BreadcrumbsComponent,
       ActionbarComponent,
       InputPasswordComponent,
       NodeInfoComponent,

@@ -26,6 +26,7 @@ import {DECLARATIONS_SERVICES} from "./modules/services/declarations";
 import {DECLARATIONS_FILE_UPLOAD} from './modules/file-upload/declarations';
 import {CommentsListComponent} from "./modules/management-dialogs/node-comments/comments-list/comments-list.component";
 import {MAT_FORM_FIELD_DEFAULT_OPTIONS, MAT_LABEL_GLOBAL_OPTIONS, MAT_TOOLTIP_DEFAULT_OPTIONS} from "@angular/material";
+import {BreadcrumbsComponent} from "./core-ui-module/components/breadcrumbs/breadcrumbs.component";
 
 
 // http://blog.angular-university.io/angular2-ngmodule/
@@ -33,39 +34,42 @@ import {MAT_FORM_FIELD_DEFAULT_OPTIONS, MAT_LABEL_GLOBAL_OPTIONS, MAT_TOOLTIP_DE
 
 
 @NgModule({
-  declarations: [
-    DECLARATIONS,
-    DECLARATIONS_RECYCLE,
-    DECLARATIONS_WORKSPACE,
-    DECLARATIONS_SEARCH,
-    DECLARATIONS_COLLECTIONS,
-    DECLARATIONS_LOGIN,
-    DECLARATIONS_REGISTER,
-    DECLARATIONS_LOGINAPP,
-    DECLARATIONS_FILE_UPLOAD,
-    DECLARATIONS_STARTUP,
-    DECLARATIONS_PERMISSIONS,
-    DECLARATIONS_OER,
-    DECLARATIONS_STREAM,
-    DECLARATIONS_MANAGEMENT_DIALOGS,
-    DECLARATIONS_ADMIN,
-    DECLARATIONS_UPLOAD,
-    DECLARATIONS_PROFILES,
-    DECLARATIONS_MESSAGES,
-    DECLARATIONS_SHARING,
-    DECLARATIONS_SHARE_APP,
-    DECLARATIONS_SERVICES
-  ],
-  entryComponents: [
-      CommentsListComponent,
-  ],
-  imports: IMPORTS,
-  providers: [
-    PROVIDERS,
-    PROVIDERS_SEARCH,
-    {provide: MAT_FORM_FIELD_DEFAULT_OPTIONS, useValue: {appearance: 'outline'}},
-    {provide: MAT_TOOLTIP_DEFAULT_OPTIONS, useValue: {showDelay: 500}}
-  ],
-  bootstrap: [RouterComponent]
+    declarations: [
+        DECLARATIONS,
+        DECLARATIONS_RECYCLE,
+        DECLARATIONS_WORKSPACE,
+        DECLARATIONS_SEARCH,
+        DECLARATIONS_COLLECTIONS,
+        DECLARATIONS_LOGIN,
+        DECLARATIONS_REGISTER,
+        DECLARATIONS_LOGINAPP,
+        DECLARATIONS_FILE_UPLOAD,
+        DECLARATIONS_STARTUP,
+        DECLARATIONS_PERMISSIONS,
+        DECLARATIONS_OER,
+        DECLARATIONS_STREAM,
+        DECLARATIONS_MANAGEMENT_DIALOGS,
+        DECLARATIONS_ADMIN,
+        DECLARATIONS_UPLOAD,
+        DECLARATIONS_PROFILES,
+        DECLARATIONS_MESSAGES,
+        DECLARATIONS_SHARING,
+        DECLARATIONS_SHARE_APP,
+        DECLARATIONS_SERVICES
+    ],
+    entryComponents: [
+        CommentsListComponent,
+    ],
+    imports: IMPORTS,
+    providers: [
+        PROVIDERS,
+        PROVIDERS_SEARCH,
+        {provide: MAT_FORM_FIELD_DEFAULT_OPTIONS, useValue: {appearance: 'outline'}},
+        {provide: MAT_TOOLTIP_DEFAULT_OPTIONS, useValue: {showDelay: 500}}
+    ],
+    exports: [
+        BreadcrumbsComponent
+    ],
+    bootstrap: [RouterComponent]
 })
 export class AppModule { }

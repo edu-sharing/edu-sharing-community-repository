@@ -28,7 +28,7 @@ import {SpinnerSmallComponent} from "../src/app/core-ui-module/components/spinne
 import {InfobarComponent} from "../src/app/common/ui/infobar/infobar.component";
 import {CardComponent} from "../src/app/core-ui-module/components/card/card.component";
 import {UserAvatarComponent} from "../src/app/common/ui/user-avatar/user-avatar.component";
-import {BreadcrumbsComponent} from "../src/app/common/ui/breadcrumbs/breadcrumbs.component";
+import {BreadcrumbsComponent} from "../src/app/core-ui-module/components/breadcrumbs/breadcrumbs.component";
 import {PoweredByComponent} from "../src/app/common/ui/powered-by/powered-by.component";
 import {DialogButton} from "../src/app/core-module/ui/dialog-button";
 import {Router} from "@angular/router";
