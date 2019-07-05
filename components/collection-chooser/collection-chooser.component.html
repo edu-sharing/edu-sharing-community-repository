@@ -5,7 +5,7 @@
 <div class="content" infinite-scroll [scrollWindow]="false" (scrolled)="loadLatest()">
   <h5 class="mat-heading-5">{{'COLLECTION_CHOOSER.ADD_TO_MY_COLLECTION' | translate}}</h5>
   <div class="breadcrumbs" *ngIf="currentRoot">
-    <button mat-raised-button (click)="navigateBack()"><i icon iconId="arrow_back"></i></button>
+    <button mat-button color="primary" (click)="navigateBack()"><i icon iconId="arrow_back"></i></button>
     <h5 class="mat-heading-5">{{currentRoot.title ? currentRoot.title : currentRoot.name}}</h5>
   </div>
   <listTable
@@ -31,7 +31,7 @@
                (onDrop)="drop($event)"
                (clickRow)="goIntoCollection($event.node)">
       <ng-template #itemContent>
-        <div class="go-into"><button mat-raised-button><i icon iconId="arrow_forward"></i></button></div>
+        <div class="go-into"><button mat-mini-fab color="white"><i icon iconId="arrow_forward"></i></button></div>
       </ng-template>
     </listTable>
     <h5 class="noElements" *ngIf="!isLoadingMy && !listMy.length && !currentRoot">{{'COLLECTION_CHOOSER.NO_PERSONAL_COLLECTIONS' | translate }}</h5>

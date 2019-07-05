@@ -85,7 +85,8 @@ $candy-app-theme: mat-light-theme($candy-app-primary, $candy-app-accent, $candy-
     background-color: $primaryLight;
   }
 }
-.mat-fab.mat-white{
+.mat-fab.mat-white,
+.mat-mini-fab.mat-white{
   // white background, primary as content color
   color: $primary;
 }
