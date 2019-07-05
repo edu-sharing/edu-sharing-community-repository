@@ -1,6 +1,6 @@
 import {
   Component, Input, Output, EventEmitter, ChangeDetectionStrategy, ApplicationRef,
-  ChangeDetectorRef, ViewChild, ElementRef, HostListener, ViewEncapsulation
+  ChangeDetectorRef, ViewChild, ElementRef, HostListener, ViewEncapsulation, ContentChild, TemplateRef
 } from '@angular/core';
 import {BrowserModule, DomSanitizer, SafeHtml} from '@angular/platform-browser';
 import {TranslateService} from "@ngx-translate/core";
@@ -58,6 +58,8 @@ export class ListTableComponent implements EventListener{
   @ViewChild('drag') drag : ElementRef;
   @ViewChild('menuTrigger') menuTrigger : MatMenuTrigger;
   @ViewChild('addElementRef') addElementRef : ElementRef;
+
+  @ContentChild('itemContent') itemContentRef: TemplateRef<any>;
 
 
   private optionsAlways:OptionItem[]=[];

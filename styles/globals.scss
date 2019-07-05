@@ -11,7 +11,33 @@
 .opacity-invisible{
   opacity:0;
 }
-
+.mat-heading-1{
+  color:$textLight;
+  font-size: 2.2rem;
+}
+.mat-heading-2{
+  color:$textLight;
+  font-size: 1.8rem;
+}
+.mat-heading-3{
+  color:$textLight;
+  font-size: 1.5rem;
+}
+.mat-heading-4{
+  color:$textLight;
+  font-size: 1.2rem;
+  font-weight: bold;
+}
+.mat-heading-5{
+  color:$textLight;
+  font-size: 1rem;
+  font-weight: bold;
+}
+.mat-heading-6{
+  color:$textLight;
+  font-weight: bold;
+  font-size: 0.9rem;
+}
 .authority-search-input-option{
   >span {
     display: flex;

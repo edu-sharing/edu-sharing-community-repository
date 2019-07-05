@@ -1,40 +1,71 @@
-  <div class="title">
-    <div class="label">{{ title | translate}}</div>
-    <button mat-button (click)="cancel()"><i icon iconId="close"></i></button>
+<div class="title">
+  <div class="label">{{ title | translate}}</div>
+  <button mat-button (click)="cancel()"><i icon iconId="close"></i></button>
+</div>
+<div class="content" infinite-scroll [scrollWindow]="false" (scrolled)="loadLatest()">
+  <h5 class="mat-heading-5">{{'COLLECTION_CHOOSER.ADD_TO_MY_COLLECTION' | translate}}</h5>
+  <div class="breadcrumbs" *ngIf="currentRoot">
+    <button mat-raised-button (click)="navigateBack()"><i icon iconId="arrow_back"></i></button>
+    <h5 class="mat-heading-5">{{currentRoot.title ? currentRoot.title : currentRoot.name}}</h5>
   </div>
-  <div class="content" infinite-scroll [scrollWindow]="false" (scrolled)="loadData()">
-    <listTable
-      [viewType]="2"
-      [hasHeading]="false"
-      [addElement]="createCollectionElement"
-      (onAddElement)="createCollection()"
-    ></listTable>
+  <listTable
+          [viewType]="2"
+          [hasHeading]="false"
+          [addElement]="createCollectionElement"
+          (onAddElement)="createCollection()"
+  ></listTable>
+  <div class="list-my">
+    <listTable *ngIf="isLoadingMy || listMy.length"
+               [nodes]="listMy"
+               [columns]="columns"
+               [hasIcon]="true"
+               [hasCheckbox]="false"
+               [hasHeading]="false"
+               [isClickable]="true"
+               [viewType]="2"
+               [isLoading]="isLoadingMy"
+               [validatePermissions]="hasWritePermissions"
+               [sortBy]="sortBy"
+               [sortAscending]="sortAscending"
+               [listClass]=""
+               (onDrop)="drop($event)"
+               (clickRow)="goIntoCollection($event.node)">
+      <ng-template #itemContent>
+        <div class="go-into"><button mat-raised-button><i icon iconId="arrow_forward"></i></button></div>
+      </ng-template>
+    </listTable>
+    <h5 class="noElements" *ngIf="!isLoadingMy && !listMy.length && !currentRoot">{{'COLLECTION_CHOOSER.NO_PERSONAL_COLLECTIONS' | translate }}</h5>
+    <h5 class="noElements" *ngIf="!isLoadingMy && !listMy.length && currentRoot">{{'COLLECTION_CHOOSER.NO_SUB_COLLECTIONS' | translate }}</h5>
+  </div>
+  <button *ngIf="currentRoot" class="add-to-personal" mat-raised-button color="primary" (click)="clickCollection(currentRoot)">{{'COLLECTION_CHOOSER.ADD_TO_SELECTED_COLLECTION' | translate}}</button>
+  <div *ngIf="!currentRoot">
+    <h5 class="mat-heading-5">{{'COLLECTION_CHOOSER.ADD_TO_RECENT_COLLECTION' | translate}}</h5>
     <div class="search">
-      <form (ngSubmit)="loadData(true)" autocomplete="off">
+      <form (ngSubmit)="loadLatest(true)" autocomplete="off">
         <mat-form-field floatLabel="always">
-          <mat-label>{{ 'ADD_TO_RECENT_COLLECTION' | translate}}</mat-label>
-            <i icon iconId="search" matPrefix>search</i>
-            <input matInput type="search" name="search" [(ngModel)]="searchQuery"
-                   title="{{'SEARCH_COLLECTIONS' | translate}}" placeholder="{{'SEARCH_COLLECTIONS' | translate}}" />
+          <mat-label>{{ 'COLLECTION_CHOOSER.SEARCH_COLLECTIONS' | translate}}</mat-label>
+          <i icon iconId="search" matPrefix>search</i>
+          <input matInput type="search" name="search" [(ngModel)]="searchQuery"
+                 placeholder="{{'COLLECTION_CHOOSER.SEARCH_COLLECTIONS' | translate}}" />
         </mat-form-field>
       </form>
     </div>
-      <listTable *ngIf="isLoading || list.length"
-        [nodes]="list"
-        [columns]="columns"
-        [hasIcon]="true"
-        [hasCheckbox]="false"
-        [hasHeading]="false"
-        [isClickable]="true"
-        [viewType]="2"
-        [isLoading]="isLoading"
-        [validatePermissions]="hasWritePermissions"
-        [sortBy]="sortBy"
-        [sortAscending]="sortAscending"
-        [listClass]=""
-        (onDrop)="drop($event)"
-        (clickRow)="clickCollection($event.node)"></listTable>
-    <h5 class="noElements" *ngIf="!isLoading && !list.length && searchQuery==''">{{'NO_MORE_ELEMENTS' | translate }}</h5>
-    <h5 class="noElements" *ngIf="!isLoading && !list.length && searchQuery!=''">{{'NO_MATCHES' | translate }}</h5>
+    <listTable *ngIf="isLoadingLatest || listLatest.length"
+               [nodes]="listLatest"
+               [columns]="columns"
+               [hasIcon]="true"
+               [hasCheckbox]="false"
+               [hasHeading]="false"
+               [isClickable]="true"
+               [viewType]="2"
+               [isLoading]="isLoadingLatest"
+               [validatePermissions]="hasWritePermissions"
+               [sortBy]="sortBy"
+               [sortAscending]="sortAscending"
+               [listClass]=""
+               (onDrop)="drop($event)"
+               (clickRow)="clickCollection($event.node)"></listTable>
+    <h5 class="noElements" *ngIf="!isLoadingLatest && !listLatest.length && searchQuery==''">{{'COLLECTION_CHOOSER.NO_MORE_ELEMENTS' | translate }}</h5>
+    <h5 class="noElements" *ngIf="!isLoadingLatest && !listLatest.length && searchQuery!=''">{{'COLLECTION_CHOOSER.NO_MATCHES' | translate }}</h5>
   </div>
-
+</div>

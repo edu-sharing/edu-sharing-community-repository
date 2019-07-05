@@ -1,5 +1,27 @@
 @import "../../styles/variables";
-
+.content{
+  display: flex;
+  flex-direction: column;
+}
+.breadcrumbs{
+  display: flex;
+  padding: 10px 20px;
+  button{
+    margin-left: 10px;
+  }
+}
+.go-into{
+  position: absolute;
+  right: -6px;
+  display: flex;
+  height: 100%;
+  align-items: center;
+  z-index: 101;
+  >button{
+    min-width: unset;
+    width: 36px;
+  }
+}
 .noElements{
   display: flex;
   justify-content: center;
@@ -7,13 +29,22 @@
   color:$textLight;
   font-size: 110%;
 }
+.mat-heading-5{
+  padding:0 20px;
+}
+.list-my{
+  padding-bottom: 15px;
+}
+.add-to-personal{
+  margin: 0 20px 20px 20px;
+}
 .close{
   &:focus{
     @include focusShadow();
   }
 }
 .search{
-  padding:20px 30px;
+  padding:20px 30px 0 20px;
   .mat-form-field{
     width: 100%;
     .mat-form-field-appearance-outline .mat-form-field-wrapper{
@@ -26,9 +57,6 @@
     width:$dialogRightWidth - 60px!important;
   }
   .cardContainer{
-    padding:0 20px !important;
-  }
-  .preview img{
-    width:$dialogRightWidth - 29px!important;
+    padding:0 15px !important;
   }
 }

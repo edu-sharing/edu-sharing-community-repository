@@ -104,7 +104,8 @@
                  (dragenter)="allowDrag($event,node)"
                  (keydown)="handleKeyboard($event)"
                  (drop)="drop($event,node)" (dragstart)="dragStart($event,node)" tabindex="0" (keyup.enter)="doubleClick(node)">
-
+                <!-- custom data binding from outside -->
+                <ng-container *ngTemplateOutlet="itemContentRef; context: { $implicit: node }"></ng-container>
                 <div *ngIf="viewType==1 && getReference(node).properties && getReference(node).properties['virtual:childobjectcount']>0" class="childobjectCount">
                     <span>{{getReference(node).properties['virtual:childobjectcount']*1+1}}</span><i icon iconId="filter_none"></i>
                 </div>

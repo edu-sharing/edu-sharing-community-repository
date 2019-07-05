@@ -27,6 +27,7 @@ import {NodeDatePipe} from "./pipes/date.pipe";
 import {CardComponent} from "./components/card/card.component";
 import {PermissionNamePipe} from "./pipes/permission-name.pipe";
 import {BrowserAnimationsModule} from '@angular/platform-browser/animations';
+import {BreadcrumbsComponent} from "./components/breadcrumbs/breadcrumbs.component";
 
 @NgModule({
     declarations: [
@@ -37,6 +38,7 @@ import {BrowserAnimationsModule} from '@angular/platform-browser/animations';
         IconComponent,
         CardComponent,
         SpinnerComponent,
+        BreadcrumbsComponent,
         SpinnerSmallComponent,
         GlobalProgressComponent,
         InfiniteScrollDirective,
@@ -80,6 +82,7 @@ import {BrowserAnimationsModule} from '@angular/platform-browser/animations';
         TranslateModule,
         ListTableComponent,
         SpinnerComponent,
+        BreadcrumbsComponent,
         SpinnerSmallComponent,
         GlobalProgressComponent,
         IconComponent,

@@ -4,6 +4,7 @@ import {Toast} from "../../toast";
 import {Router} from "@angular/router";
 import {
     Collection,
+    Node,
     ListItem,
     RestCollectionService, RestConnectorService,
     RestConstants,
@@ -29,11 +30,17 @@ export class CollectionChooserComponent implements OnInit{
   private columns:ListItem[]=ListItem.getCollectionDefaults();
   private sortBy: string[];
   private sortAscending = false;
-  public isLoading=true;
+  isLoadingLatest=true;
+  isLoadingMy=true;
+  currentRoot: Collection;
+  breadcrumbs: Node[];
+
   ngOnInit(): void {
-    this.loadData(true);
+    this.loadLatest(true);
+    this.loadMy();
   }
-  public list : Collection[];
+  public listLatest : Collection[];
+  public listMy : Collection[];
   /**
    * The caption of the dialog, will be translated automatically
    */
@@ -70,13 +77,18 @@ export class CollectionChooserComponent implements OnInit{
     return true;
   }
   public createCollection(){
-    this.onCreateCollection.emit();
+    this.onCreateCollection.emit(this.currentRoot ? this.currentRoot : null);
   }
   private hasWritePermissions(node:any){
       if(node.access.indexOf(RestConstants.ACCESS_WRITE)==-1){
           return {status:false,message:'NO_WRITE_PERMISSIONS'};
       }
       return {status:true};
+  }
+  private goIntoCollection(node:Collection){
+    this.currentRoot=node;
+    this.loadMy();
+
   }
   private clickCollection(node:Collection){
     if(!this.checkPermissions(node)){
@@ -103,27 +115,53 @@ export class CollectionChooserComponent implements OnInit{
       return;
     }
   }
-  public loadData(reset=false) {
+  public loadLatest(reset=false) {
     if(reset){
-      this.list=[];
+      this.listLatest=[];
       this.lastSearchQuery=this.searchQuery;
     }
     else if(!this.hasMoreToLoad){
       return;
     }
-    this.isLoading=true;
+    this.isLoadingLatest=true;
     this.collectionApi.search(this.lastSearchQuery,{
       sortBy:this.sortBy,
-      offset:this.list.length,
+      offset:this.listLatest.length,
       sortAscending:false,
     }).subscribe((data)=>{
-      this.isLoading=false;
+      this.isLoadingLatest=false;
       this.hasMoreToLoad=data.collections.length>0;
-      this.list=this.list.concat(data.collections);
+      this.listLatest=this.listLatest.concat(data.collections);
     });
   }
 
   public cancel() {
     this.onCancel.emit();
+  }
+
+  private loadMy() {
+    this.listMy=[];
+    this.breadcrumbs=null;
+    this.isLoadingMy=true;
+    this.collectionApi.getCollectionSubcollections(this.currentRoot ? this.currentRoot.ref.id : RestConstants.ROOT,RestConstants.COLLECTIONSCOPE_MY,[RestConstants.ALL],{
+      sortBy:this.sortBy,
+      sortAscending:false,
+      count: RestConstants.COUNT_UNLIMITED,
+    }).subscribe((data)=>{
+      this.isLoadingMy=false;
+      this.listMy=this.listMy.concat(data.collections);
+    });
+    if(this.currentRoot) {
+      this.node.getNodeParents(this.currentRoot.ref.id,false).subscribe((list)=>this.breadcrumbs=list.nodes.reverse());
+    }
+  }
+
+  navigateBack() {
+    if(this.breadcrumbs.length>1)
+      this.currentRoot=(this.breadcrumbs[this.breadcrumbs.length-2] as any);
+    else
+      this.currentRoot=null;
+    console.log(this.currentRoot);
+    this.loadMy();
   }
 }

@@ -1,0 +1,80 @@
+@import "../../styles/variables";
+
+.breadcrumb::before{
+  content:''!important;
+}
+.breadcrumbMobile .homeIsIcon{
+  word-break: break-all;
+}
+
+.breadcrumb{
+  width:100%;
+  max-height:1.5em;
+  align-items: center;
+  overflow:hidden;
+  cursor: default;
+  display: none;
+  button {
+    color: $primary;
+    padding: 2px 4px;
+    font-size: 0.75em;
+    word-break: break-all;
+    min-width: unset;
+  }
+  .dropdown-icon{
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-top: 6px;
+  }
+  .breadcrumb-arrow {
+    font-size: 15pt;
+    color: $textLight;
+  }
+  >div {
+    display: flex;
+    align-items: center;
+
+    .homeIsIcon {
+      margin-top: 3px;
+    }
+
+    .homeIcon {
+      margin-top: 0;
+      max-height: none;
+      min-width: 30px;
+    }
+  }
+}
+.breadrumbVisible{
+  display: flex;
+}
+.selected{
+  background-color: #fff;
+  border:2px dashed $primary;
+  padding:0 2px!important;
+}
+.breadcrumb div:last-child{
+  button{
+    font-weight: bold;
+    color: $textMain;
+  }
+}
+.breadcrumbDesktop {
+  display: flex;
+}
+@media screen and (max-width: $mobileTabSwitchWidth) {
+  .breadcrumbMobile{
+    display:flex;
+    align-items: center;
+    margin-top: -2px;
+    min-height: 25px;
+    margin-left: -30px;
+    .folder{
+      max-width: calc(100% - 24px);
+    }
+  }
+  .breadcrumbDesktop{
+    display:none;
+  }
+}
