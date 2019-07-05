@@ -3,10 +3,31 @@
   carefully choose what to place here since this will be included in all projects
   use non-common class names to prevent conflicts with other included files
 */
+@import "variables";
 
 .display-none{
   display: none!important;
 }
 .opacity-invisible{
   opacity:0;
+}
+
+.authority-search-input-option{
+  >span {
+    display: flex;
+    align-items: center;
+    .material-icons{
+      color: $textLight;
+      margin-right: 10px;
+    }
+    div {
+      line-height: 100%;
+      font-size: 100%;
+    }
+    .small {
+      font-size: 90%;
+      color: $textLight;
+      padding-top: 3px;
+    }
+  }
 }

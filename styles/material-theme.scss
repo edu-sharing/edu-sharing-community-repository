@@ -183,15 +183,23 @@ input.mat-input-element, mat-label, .mat-select-value{
 .mat-calendar-table-header-divider{
   display: none;
 }
-
-.mat-option-primary{
-  line-height: initial;
-  font-size: 90%;
+.mat-chip{
+  .edu-icon-base{
+    font-size: 1.45rem;
+  }
 }
-.mat-option-secondary{
-  font-size: 75%;
-  line-height: initial;
-  color: $textLight;
+.mat-option {
+  font-size: 100%;
+  .mat-option-primary {
+    line-height: initial;
+    font-size: 90%;
+  }
+
+  .mat-option-secondary {
+    font-size: 75%;
+    line-height: initial;
+    color: $textLight;
+  }
 }
 
 label .label-secondary{
