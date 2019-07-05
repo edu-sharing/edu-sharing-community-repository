@@ -214,10 +214,10 @@ label .label-secondary{
 }
 // Mobile Menus at bottom
 @media screen and (max-width:  ($mobileWidth - $mobileStage*1)) {
-  .cdk-overlay-backdrop.dropdown-menu{
+  .cdk-overlay-backdrop.mat-dropdown-menu{
     background: rgba(0, 0, 0, 0.8);
   }
-  .mat-menu-panel.dropdown-menu{
+  .mat-menu-panel.mat-dropdown-menu{
     position: fixed;
     bottom:0;
     left:0;
