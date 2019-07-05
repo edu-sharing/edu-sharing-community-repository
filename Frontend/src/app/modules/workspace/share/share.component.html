@@ -20,16 +20,15 @@
         </div>
 
         <div class="group groupToInvite" *ngIf="filterDisabledPermissions(newPermissions).length">
-          <div class="toInvite">
-            <div class="badge" *ngFor="let permission of filterDisabledPermissions(newPermissions)">
-                <div class="badge-group">
+          <mat-chip-list class="toInvite">
+            <mat-chip *ngFor="let permission of filterDisabledPermissions(newPermissions)" (removed)="removePermission(permission)">
+                <div class="mat-chip-group">
                     <span class="primary">{{permission | permissionName}}</span>
                     <span class="secondary">{{permission | permissionName:{field:'secondary'} }}</span>
                 </div>
-                <i class="material-icons clickable" tabindex="0" (keyup.enter)="removePermission(permission)" (click)="removePermission(permission)">cancel</i>
-              </div>
-
-          </div>
+                <i matChipRemove icon iconId="cancel"></i>
+            </mat-chip>
+          </mat-chip-list>
           <div class="typeButton" *ngIf="filterDisabledPermissions(newPermissions).length">
             <button mat-raised-button *ngIf="currentType.length==0" (click)="chooseType()"><i icon iconId="help_outline"></i> <span>{{'WORKSPACE.SHARE.TYPE_UNKNOWN' | translate}}</span>
               <i aria-hidden="true" icon iconId="keyboard_arrow_down"></i></button>

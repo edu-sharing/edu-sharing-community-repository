@@ -22,12 +22,12 @@
           (onChooseAuthority)="addInvite($event)"
         ></authority-search-input>
         </div>
-        <div class="toInvite">
-          <div class="badge" *ngFor="let auth of invite">
+        <mat-chip-list class="toInvite">
+          <mat-chip *ngFor="let auth of invite" (removed)="removeInvite(auth)">
             <span>{{auth | authorityName}}</span>
-            <i class="material-icons clickable" (click)="removeInvite(auth)">cancel</i>
-          </div>
-        </div>
+            <i matChipRemove icon iconId="cancel"></i>
+          </mat-chip>
+        </mat-chip-list>
       </div>
     </div>
   </div>

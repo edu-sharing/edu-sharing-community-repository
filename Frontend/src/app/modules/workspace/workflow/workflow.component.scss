@@ -19,7 +19,7 @@ h2{
 .receivers{
   margin-bottom: 20px;
   width: 100%;
-  >div{
+  >mat-chip-list{
     float: left;
     margin-bottom: 10px;
   }

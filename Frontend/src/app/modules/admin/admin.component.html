@@ -430,12 +430,12 @@
     </div>
     <div class="inputGroupGrow luceneAuthorities" *ngIf="lucene.authorities && lucene.authorities.length">
         <div></div>
-        <div>
-          <div class="badge" *ngFor="let authority of lucene.authorities">
+        <mat-chip-list>
+          <mat-chip *ngFor="let authority of lucene.authorities" (removed)="removeLuceneAuthority(authority)">
             <span>{{authority | authorityName}}</span>
-            <i class="material-icons clickable" tabindex="0" (keyup.enter)="authority(permission)" (click)="removeLuceneAuthority(authority)">cancel</i>
-          </div>
-        </div>
+            <i matChipRemove icon iconId="cancel"></i>
+          </mat-chip>
+        </mat-chip-list>
     </div>
   <div class="inputGroupGrow lucenePaging">
       <div class="info">{{'ADMIN.BROWSER.LUCENE_OFFSET' | translate }}</div>

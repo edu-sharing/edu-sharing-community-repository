@@ -60,7 +60,7 @@ a{
   .badgeIconLeft{
     left:0;
   }
-  .badge-group{
+  .mat-chip-group{
     display: flex;
     flex-direction: column;
     >.secondary{
@@ -161,25 +161,6 @@ a:focus,
     @include removeDefaultFocus();
     padding-bottom: 2px;
     border-bottom: 1px solid $focusColor;
-  }
-}
-.authority-search-input-option{
-  >span {
-    display: flex;
-    align-items: center;
-    .material-icons{
-      color: $textLight;
-      margin-right: 10px;
-    }
-    div {
-      line-height: normal;
-      font-size: 90%;
-    }
-    .small {
-      font-size: 80%;
-      color: $textLight;
-      padding-top: 3px;
-    }
   }
 }
 .btn-circle {

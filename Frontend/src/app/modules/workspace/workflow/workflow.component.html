@@ -33,15 +33,15 @@
           <mat-checkbox [(ngModel)]="globalSearch" [disabled]="!globalAllowed" id="global">{{'WORKSPACE.SHARE.GLOBAL_SEARCH' | translate}}</mat-checkbox>
         </div>-->
         <div class="receivers">
-          <div *ngIf="status.hasReceiver">
-            <div class="badge" *ngFor="let receiver of receivers">
-                <div class="badge-group">
+          <mat-chip-list *ngIf="status.hasReceiver">
+            <mat-chip *ngFor="let receiver of receivers" (removed)="removeReceiver(receiver)">
+                <div class="mat-chip-group">
                     <span class="primary">{{receiver | authorityName}}</span>
                     <span class="secondary">{{receiver | permissionName:{field:'secondary'} }}</span>
                 </div>
-                <i class="material-icons clickable" (click)="removeReceiver(receiver)">cancel</i>
-            </div>
-            </div>
+                <i matChipRemove icon iconId="cancel"></i>
+            </mat-chip>
+          </mat-chip-list>
         </div>
         <mat-form-field class="comment">
           <mat-label>{{'WORKSPACE.WORKFLOW.COMMENT' | translate}}</mat-label>
@@ -60,34 +60,40 @@
                 <div class="row">
                 <div class="receivers" *ngIf="i<history.length-1">
                 <label>{{'WORKSPACE.WORKFLOW.RECEIVERS' | translate}}</label>
-                  <div class="badge" *ngFor="let receiver of history[i+1].receiver"><i class="material-icons badgeIconLeft">{{receiver.authorityType=='USER' ? "person" : "group"}}</i>
+                  <mat-chip-list *ngIf="status.hasReceiver">
+                    <mat-chip *ngFor="let receiver of history[i+1].receiver"><i class="material-icons badgeIconLeft">{{receiver.authorityType=='USER' ? "person" : "group"}}</i>
                       <div class="badge-group">
                           <span class="primary">{{receiver | authorityName}}</span>
                           <span class="secondary">{{receiver | permissionName:{field:'secondary'} }}</span>
                       </div>
-                  </div>
+                    </mat-chip>
+                  </mat-chip-list>
                 </div>
                 <div class="receivers" *ngIf="i>=history.length-1">
                   <label>{{'WORKSPACE.WORKFLOW.RECEIVERS_NEXT' | translate}}</label>
-                  <div class="badge" *ngFor="let receiver of entry.receiver">
-                    <i class="material-icons badgeIconLeft">{{receiver.authorityType=='USER' ? "person" : "group"}}</i>
-                      <div class="badge-group">
-                          <span class="primary">{{receiver | authorityName}}</span>
-                          <span class="secondary">{{receiver | permissionName:{field:'secondary'} }}</span>
-                      </div>
-                  </div>
+                  <mat-chip-list>
+                    <mat-chip *ngFor="let receiver of entry.receiver">
+                      <i class="badgeIconLeft" icon [iconId]="receiver.authorityType=='USER' ? 'person' : 'group'"></i>
+                        <div class="mat-chip-group">
+                            <span class="primary">{{receiver | authorityName}}</span>
+                            <span class="secondary">{{receiver | permissionName:{field:'secondary'} }}</span>
+                        </div>
+                    </mat-chip>
+                  </mat-chip-list>
                 </div>
                 <div *ngIf="i<history.length-1">
                   <i class="material-icons">keyboard_arrow_right</i>
                 </div>
                 <div class="receivers" *ngIf="i<history.length-1">
                   <label>{{'WORKSPACE.WORKFLOW.RECEIVERS_NEXT' | translate}}</label>
-                  <div class="badge" *ngFor="let receiver of entry.receiver"><i class="material-icons badgeIconLeft">{{receiver.authorityType=='USER' ? "person" : "group"}}</i>
-                      <div class="badge-group">
-                          <span class="primary">{{receiver | authorityName}}</span>
-                          <span class="secondary">{{receiver | permissionName:{field:'secondary'} }}</span>
+                  <mat-chip-list>
+                    <mat-chip *ngFor="let receiver of entry.receiver"><i class="badgeIconLeft" icon [iconId]="receiver.authorityType=='USER' ? 'person' : 'group'"></i>
+                      <div class="mat-chip-group">
+                            <span class="primary">{{receiver | authorityName}}</span>
+                            <span class="secondary">{{receiver | permissionName:{field:'secondary'} }}</span>
                       </div>
-                  </div>
+                    </mat-chip>
+                  </mat-chip-list>
                 </div>
               </div>
               <div class="row">
