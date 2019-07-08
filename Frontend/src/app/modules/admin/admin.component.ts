@@ -54,6 +54,10 @@ export class AdminComponent {
           icon:"info_outline"
       },
       {
+          id:"STATISTICS",
+          icon:"assessment"
+      },
+      {
           id:"CONFIG",
           icon:"build"
       },

@@ -118,6 +118,11 @@
         </form>
     </div>
 </div>
+<div *ngIf="mode=='STATISTICS'" class="content statistics">
+    <app-admin-statistics
+        (onOpenNode)="debugNode($event)"
+    ></app-admin-statistics>
+</div>
 <div *ngIf="mode=='APPLICATIONS'" class="content applications">
   <input #xmlSelect type="file" style="display:none" id="xmlSelect" accept="application/xml" (change)="registerAppXml($event)" />
   <form (ngSubmit)="registerApp()">

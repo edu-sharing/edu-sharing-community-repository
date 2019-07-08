@@ -404,6 +404,14 @@ $sidenavWidthMobile:66px;
     }
   }
 }
+.statistics{
+  display: flex;
+  justify-content: center;
+  app-admin-statistics{
+    width: 100%;
+    max-width: 900px;
+  }
+}
 .jobs{
   max-width: 1200px;
   display: flex;

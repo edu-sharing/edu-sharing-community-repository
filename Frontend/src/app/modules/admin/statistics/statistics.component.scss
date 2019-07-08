@@ -1,0 +1,34 @@
+@import "../../../core-ui-module/styles/variables";
+.modes{
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  >mat-form-field{
+    width: 100%;
+    max-width: 500px;
+  }
+  .calendars{
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    >div{
+      padding:10px;
+      margin:15px;
+      background-color: #fff;
+      @include materialShadow();
+      text-align: center;
+      mat-calendar{
+        width: 250px;
+      }
+    }
+  }
+}
+listTable{
+  width: 100%;
+}
+.stats-grouped,.stats-nodes{
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}

@@ -3,8 +3,10 @@ package org.edu_sharing.service.tracking;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.edu_sharing.service.tracking.model.StatisticEntryNode;
 
+import java.sql.SQLException;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 
 public interface TrackingService {
     enum GroupingType {
@@ -24,5 +26,5 @@ public interface TrackingService {
     }
     boolean trackActivityOnUser(String authorityName,EventType type);
     boolean trackActivityOnNode(NodeRef nodeRef,String nodeVersion,EventType type);
-    List<StatisticEntryNode> getNodeStatisics(GroupingType grouping,Date dateFrom, Date dateTo);
+    List<StatisticEntryNode> getNodeStatisics(GroupingType type, java.util.Date dateFrom, java.util.Date dateTo, List<String> additionalFields, List<String> groupFields, Map<String, String> filters) throws SQLException;
 }

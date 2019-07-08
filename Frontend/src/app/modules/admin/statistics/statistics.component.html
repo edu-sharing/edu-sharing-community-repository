@@ -1,0 +1,52 @@
+<div class="stats-grouped">
+    <h4 class="mat-heading-4 mat-heading-underline"><i icon iconId="history"></i> {{'ADMIN.STATISTICS.GROUPED' | translate}}</h4>
+    <div class="modes">
+        <mat-form-field>
+            <mat-label>{{'ADMIN.STATISTICS.GROUP_BY' | translate}}</mat-label>
+            <mat-select [(ngModel)]="groupedMode">
+                <mat-option value="Daily">{{'ADMIN.STATISTICS.GROUP_DAILY' | translate}}</mat-option>
+                <mat-option value="Monthly">{{'ADMIN.STATISTICS.GROUP_MONTHLY' | translate}}</mat-option>
+                <mat-option value="Yearly">{{'ADMIN.STATISTICS.GROUP_YEARLY' | translate}}</mat-option>
+            </mat-select>
+        </mat-form-field>
+        <div class="calendars">
+            <div>
+                <mat-label>{{'ADMIN.STATISTICS.FROM' | translate}}</mat-label>
+                <mat-calendar [(selected)]="groupedStart" [maxDate]="groupedEnd"></mat-calendar>
+            </div>
+            <div>
+                <mat-label>{{'ADMIN.STATISTICS.TO' | translate}}</mat-label>
+                <mat-calendar [(selected)]="groupedEnd" [minDate]="groupedStart" [maxDate]="today"></mat-calendar>
+            </div>
+        </div>
+    </div>
+    <spinner *ngIf="groupedLoading"></spinner>
+    <h5 class="mat-heading-5" *ngIf="groupedNoData">{{'ADMIN.STATISTICS.NO_DATA' | translate}}</h5>
+    <canvas id="groupedChart" [class.display-none]="groupedLoading || groupedNoData"></canvas>
+</div>
+<div class="stats-nodes">
+    <h4 class="mat-heading-4 mat-heading-underline"><i icon iconId="assessment"></i> {{'ADMIN.STATISTICS.NODES' | translate}}</h4>
+    <div class="modes">
+        <div class="calendars">
+            <div>
+                <mat-label>{{'ADMIN.STATISTICS.FROM' | translate}}</mat-label>
+                <mat-calendar [(selected)]="nodesStart" [maxDate]="nodesEnd"></mat-calendar>
+            </div>
+            <div>
+                <mat-label>{{'ADMIN.STATISTICS.TO' | translate}}</mat-label>
+                <mat-calendar [(selected)]="nodesEnd" [minDate]="nodesStart" [maxDate]="today"></mat-calendar>
+            </div>
+        </div>
+    </div>
+    <h5 class="mat-heading-5" *ngIf="nodesNoData">{{'ADMIN.STATISTICS.NO_DATA' | translate}}</h5>
+    <listTable *ngIf="!nodesNoData"
+        [hasIcon]="true"
+        [hasHeading]="true"
+        [isClickable]="true"
+        (clickRow)="openNode($event)"
+        [viewType]="0"
+        [columns]="columns"
+        [isLoading]="nodesLoading"
+        [nodes]="nodes"
+    ></listTable>
+</div>

@@ -40,9 +40,11 @@ export class NodeInfoComponent{
     this._creator=ConfigurationHelper.getPersonWithConfigDisplayName(this._node.createdBy,this.config);
     this._json=JSON.stringify(this._node,null,4);
     this._properties=[];
-    for(let k of Object.keys(node.properties).sort()) {
-      if(node.properties[k].join(""))
-        this._properties.push([k, node.properties[k].join(", ")]);
+    if(node.properties) {
+        for (let k of Object.keys(node.properties).sort()) {
+            if (node.properties[k].join(""))
+                this._properties.push([k, node.properties[k].join(", ")]);
+        }
     }
     this.nodeApi.getNodeParents(this._node.ref.id,true).subscribe((data:NodeList)=>{
       this._path=data.nodes.reverse();

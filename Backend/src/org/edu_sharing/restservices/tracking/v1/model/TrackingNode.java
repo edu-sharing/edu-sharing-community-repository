@@ -10,11 +10,13 @@ public class TrackingNode {
     private final Node node;
     private final Map<TrackingService.EventType, Integer> counts;
     private final String date;
+    private final Map<String, String> data;
 
-    public TrackingNode(Node node, String date, Map<TrackingService.EventType,Integer> counts){
+    public TrackingNode(Node node, String date, Map<TrackingService.EventType,Integer> counts,Map<String,String> data){
         this.node=node;
         this.date=date;
         this.counts=counts;
+        this.data=data;
     }
 
     public Node getNode() {
@@ -27,5 +29,9 @@ public class TrackingNode {
 
     public String getDate() {
         return date;
+    }
+
+    public Map<String, String> getData() {
+        return data;
     }
 }

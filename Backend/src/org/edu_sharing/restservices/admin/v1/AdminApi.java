@@ -320,7 +320,7 @@ public class AdminApi {
 			return ErrorResponse.createResponse(t);
 		}
 	}
-    @GET
+    @POST
     @Path("/statistics/nodes")
 
     @ApiOperation(value = "get statistics for node actions")
@@ -335,11 +335,14 @@ public class AdminApi {
     public Response getStatisticsNode(@Context HttpServletRequest req,
 									  @ApiParam(value = "Grouping type", required = true) @QueryParam("grouping")TrackingService.GroupingType grouping,
 									  @ApiParam(value = "date range from", required = true) @QueryParam("dateFrom") Long dateFrom,
-									  @ApiParam(value = "date range to", required = true) @QueryParam("dateTo") Long dateTo
+									  @ApiParam(value = "date range to", required = true) @QueryParam("dateTo") Long dateTo,
+									  @ApiParam(value = "additionals fields of the custom json object stored in each query that should be returned", required = false) @QueryParam("additionalFields") List<String> additionalFields,
+									  @ApiParam(value = "grouping fields of the custom json object stored in each query", required = false) @QueryParam("groupField") List<String> groupField,
+									  @ApiParam(value = "filters for the custom json object stored in each entry", required = false) Map<String,String> filters
               ) {
         try {
             // load instance to validate session
-            List<TrackingNode> tracks=TrackingDAO.getNodeStatistics(grouping,new Date(dateFrom),new Date(dateTo));
+            List<TrackingNode> tracks=TrackingDAO.getNodeStatistics(grouping,new Date(dateFrom),new Date(dateTo),additionalFields,groupField,filters);
             return Response.ok().entity(tracks).build();
         } catch (Throwable t) {
             return ErrorResponse.createResponse(t);
