@@ -39,17 +39,17 @@ public class TrackingServiceImpl extends TrackingServiceDefault{
             //" LEFT JOIN alf_node_properties as props ON (tracking.node_id=props.node_id and props.qname_id=28)" +
             " WHERE time BETWEEN ? AND ?" +
             " GROUP BY type,date" +
-            " ORDER BY count DESC";
+            " ORDER BY date DESC";
     public static String TRACKING_STATISTICS_NODE_MONTHLY = "SELECT type,COUNT(*),TO_CHAR(time,'yyyy-mm') as date from edu_tracking_node as tracking" +
             //" LEFT JOIN alf_node_properties as props ON (tracking.node_id=props.node_id and props.qname_id=28)" +
             " WHERE time BETWEEN ? AND ?" +
             " GROUP BY type,date" +
-            " ORDER BY count DESC";
+            " ORDER BY date DESC";
     public static String TRACKING_STATISTICS_NODE_YEARLY = "SELECT type,COUNT(*),TO_CHAR(time,'yyyy') as date from edu_tracking_node as tracking" +
             //" LEFT JOIN alf_node_properties as props ON (tracking.node_id=props.node_id and props.qname_id=28)" +
             " WHERE time BETWEEN ? AND ?" +
             " GROUP BY type,date" +
-            " ORDER BY count DESC";
+            " ORDER BY date DESC";
     private final NodeService nodeService;
 
     public TrackingServiceImpl() {
