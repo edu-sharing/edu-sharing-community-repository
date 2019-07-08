@@ -157,7 +157,9 @@ public class TrackingServiceImpl extends TrackingServiceDefault{
                     entry=result.get(result.indexOf(entry));
                 }
                 entry.getCounts().put(EventType.valueOf(resultSet.getString("type")),resultSet.getInt("count"));
-                result.add(entry);
+                if(!result.contains(entry)) {
+                    result.add(entry);
+                }
             }
             return result;
         }catch(Throwable t){
