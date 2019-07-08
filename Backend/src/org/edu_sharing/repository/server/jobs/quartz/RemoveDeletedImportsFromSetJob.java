@@ -8,6 +8,14 @@ import org.edu_sharing.repository.server.importer.ImportCleanerIdentifiersList;
 import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
 
+/**
+ * 
+ * @author mv
+ *
+ * example:
+ *	{"URL":"http://sodis.de/cp/oai_pmh/oai.php","SET":"oer_mebis_activated","METADATA_PREFIX":"oai_lom-de","TESTMODE":"true"}
+ *
+ */
 public class RemoveDeletedImportsFromSetJob extends AbstractJob {
 
 	
