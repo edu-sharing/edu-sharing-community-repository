@@ -114,6 +114,7 @@ export class AdminComponent {
   public dialogButtons:DialogButton[]=[];
   public dialogParameters:any;
   public warningButtons:DialogButton[]=[];
+  public xmlCardButtons:DialogButton[]=[];
   public xmlAppProperties:any;
   public xmlAppAdditionalPropertyName:string;
   public xmlAppAdditionalPropertyValue:string;
@@ -243,6 +244,10 @@ export class AdminComponent {
       this.warningButtons=[
         new DialogButton('CANCEL',DialogButton.TYPE_CANCEL,()=>{window.history.back()}),
         new DialogButton('ADMIN.UNDERSTAND',DialogButton.TYPE_PRIMARY,()=>{this.showWarning=false})
+      ];
+      this.xmlCardButtons=[
+          new DialogButton('CANCEL',DialogButton.TYPE_CANCEL,()=>{this.xmlAppProperties=null}),
+          new DialogButton('APPLY',DialogButton.TYPE_PRIMARY,()=>{this.saveApp()})
       ];
       this.getTemplates();
       this.connector.isLoggedIn().subscribe((data: LoginResult) => {
