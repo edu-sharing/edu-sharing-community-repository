@@ -338,7 +338,7 @@ public class URLTool{
 	 * @return
 	 */
 	public static String getNgRenderNodeUrl(String nodeId,String version,boolean dynamic, String repository) {
-		String ngComponentsUrl =  getNgComponentsUrl()+"render/"+nodeId+(version!=null && !version.trim().isEmpty() ? "/"+version : "");
+		String ngComponentsUrl =  getNgComponentsUrl()+"render/"+nodeId+(version!=null && !version.equals("-1") && !version.trim().isEmpty() ? "/"+version : "");
 		if(repository != null) {
 			ngComponentsUrl+="?repository="+repository;
 		}

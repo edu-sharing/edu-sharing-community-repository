@@ -102,8 +102,17 @@ public class HttpQueryTool {
 	 * backward compatbility
 	 */
 	public String query(String url, Map<String,String> header, HttpMethodBase _method) {
-		HttpMethodBase method=_method==null ? new GetMethod(url) : _method;
-		method.setFollowRedirects(true);
+		logger.debug("url:" + url);
+		HttpClient client = new HttpClient();
+
+		HttpMethodBase method;
+		if(_method == null) {
+			method = new GetMethod(url);
+			method.setFollowRedirects(true);
+		}
+		else{
+			method = _method;
+		}
 		
 		if(basicAuthUn != null && basicAuthPw != null) {
 			method.addRequestHeader("Authorization", "Basic " +java.util.Base64.getEncoder().encodeToString((basicAuthUn +":" +basicAuthPw) .getBytes()));

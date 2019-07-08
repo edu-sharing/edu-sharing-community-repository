@@ -62,6 +62,7 @@ import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
+import org.json.JSONObject;
 
 @Path("/node/v1")
 @Api(tags = {"NODE v1"})
@@ -1102,8 +1103,45 @@ public class NodeApi  {
     	}
 
     }
-    
-    public void resolveURLTitle(HashMap<String, String[]> properties) {
+
+	@POST
+	@Path("/nodes/{repository}/{node}/xapi")
+
+	@ApiOperation(
+			value = "Store xApi-Conform data for a given node")
+
+	@ApiResponses(
+			value = {
+					@ApiResponse(code = 200, message = RestConstants.HTTP_200, response = Object.class),
+					@ApiResponse(code = 400, message = RestConstants.HTTP_400, response = ErrorResponse.class),
+					@ApiResponse(code = 401, message = RestConstants.HTTP_401, response = ErrorResponse.class),
+					@ApiResponse(code = 403, message = RestConstants.HTTP_403, response = ErrorResponse.class),
+					@ApiResponse(code = 404, message = RestConstants.HTTP_404, response = ErrorResponse.class),
+					@ApiResponse(code = 409, message = RestConstants.HTTP_409, response = ErrorResponse.class),
+					@ApiResponse(code = 500, message = RestConstants.HTTP_500, response = ErrorResponse.class)
+			})
+
+	public Response storeXApiData(
+			@ApiParam(value = RestConstants.MESSAGE_REPOSITORY_ID,required=true, defaultValue="-home-" ) @PathParam("repository") String repository,
+			@ApiParam(value = RestConstants.MESSAGE_NODE_ID,required=true ) @PathParam("node") String node,
+			@ApiParam(value = "xApi conform json data",required=true ) String xApi,
+			@Context HttpServletRequest req) {
+
+		try {
+
+			RepositoryDao repoDao = RepositoryDao.getRepository(repository);
+			node=NodeDao.mapNodeConstants(repoDao,node);
+
+			NodeDao nodeDao = NodeDao.getNode(repoDao, node);
+			String result = nodeDao.storeXApiData(xApi);
+			return Response.status(Response.Status.OK).entity(result).build();
+		} catch (Throwable t) {
+			return ErrorResponse.createResponse(t);
+		}
+
+	}
+
+	public void resolveURLTitle(HashMap<String, String[]> properties) {
 		String[] url=(String[])properties.get(CCConstants.getValidLocalName(CCConstants.CCM_PROP_IO_WWWURL));
 		if(url==null)
 			return;

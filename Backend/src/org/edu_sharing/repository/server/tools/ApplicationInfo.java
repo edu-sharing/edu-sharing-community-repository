@@ -127,7 +127,12 @@ public class ApplicationInfo implements Comparable<ApplicationInfo>{
 	 * SERVICE = renderservice -> reserved, no other system can use this
 	 */
 	public static final String TYPE_RENDERSERVICE = "SERVICE";
-	
+
+	/**
+	 * LEARNING_LOCKER = reserved for a learning locker system
+	 */
+	public static final String TYPE_LEARNING_LOCKER = "LEARNING_LOCKER";
+
 	public static final String TYPE_CONNECTOR = "CONNECTOR";
 	
 	public static final String REPOSITORY_TYPE_ALFRESCO = "ALFRESCO"; // a remote alfresco repository
@@ -482,14 +487,16 @@ public class ApplicationInfo implements Comparable<ApplicationInfo>{
 	public String getWspath() {
 		return wspath;
 	}
-	public String getWebServiceUrl(){
-		
-		String port = ""; 
+	public String getBaseUrl(){
+		String port = "";
 		if(!this.getPort().equals("80") && !this.getPort().equals("443")){
 			port = ":" + this.getPort();
 		}
-		
-		return this.getProtocol()+"://" + this.getHost() + port + this.getWspath();
+
+		return this.getProtocol()+"://" + this.getHost() + port;
+	}
+	public String getWebServiceUrl(){
+		return this.getBaseUrl() + this.getWspath();
 	}
 	
 	public String getWebServiceHotUrl(){

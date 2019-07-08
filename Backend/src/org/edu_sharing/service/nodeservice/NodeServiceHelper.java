@@ -4,11 +4,13 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import org.alfresco.service.cmr.repository.ChildAssociationRef;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.repository.StoreRef;
 import org.edu_sharing.repository.client.tools.CCConstants;
+import org.edu_sharing.repository.client.tools.metadata.ValueTool;
 import org.edu_sharing.repository.server.MCAlfrescoAPIClient;
 import org.edu_sharing.repository.server.RepoFactory;
 import org.edu_sharing.repository.server.tools.NameSpaceTool;
@@ -93,6 +95,26 @@ public class NodeServiceHelper {
     public static String getProperty(NodeRef nodeRef,String key){
 		return NodeServiceFactory.getLocalService().getProperty(nodeRef.getStoreRef().getProtocol(),nodeRef.getStoreRef().getIdentifier(),nodeRef.getId(),key);
 	}
+	public static String[] getAspects(NodeRef nodeRef){
+		return NodeServiceFactory.getLocalService().getAspects(nodeRef.getStoreRef().getProtocol(),nodeRef.getStoreRef().getIdentifier(),nodeRef.getId());
+	}
+    public static HashMap<String, Object> getProperties(NodeRef nodeRef) throws Throwable {
+        return NodeServiceFactory.getLocalService().getProperties(nodeRef.getStoreRef().getProtocol(),nodeRef.getStoreRef().getIdentifier(),nodeRef.getId());
+    }
+
+    /**
+     * Get all properties automatically splitted by multivalue
+     * Each property is always returned as an array
+     * @param nodeRef
+     * @return
+     * @throws Throwable
+     */
+    public static HashMap<String, String[]> getPropertiesMultivalue(NodeRef nodeRef) throws Throwable {
+        HashMap<String, Object> properties = getProperties(nodeRef);
+        HashMap<String, String[]> propertiesMultivalue = new HashMap<>();
+        properties.entrySet().forEach((e)->propertiesMultivalue.put(e.getKey(),ValueTool.getMultivalue(e.getValue().toString())));
+        return propertiesMultivalue;
+    }
     public static boolean downloadAllowed(String nodeId){
 		NodeRef ref=new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE,nodeId);
 		return new MCAlfrescoAPIClient().downloadAllowed(
