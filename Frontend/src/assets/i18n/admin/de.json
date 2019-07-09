@@ -252,6 +252,7 @@
       "NODES": "Statistiken nach Objekt",
       "VIEWS": "Objekt-Aufrufe",
       "DOWNLOADS": "Objekt-Downloads",
+      "USER_LOGINS": "Benutzer-Logins",
       "GROUP_BY": "Gruppieren nach",
       "FROM": "Start-Zeit",
       "TO": "End-Zeit",

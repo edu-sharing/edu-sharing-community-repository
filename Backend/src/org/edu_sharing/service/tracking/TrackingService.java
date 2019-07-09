@@ -1,6 +1,7 @@
 package org.edu_sharing.service.tracking;
 
 import org.alfresco.service.cmr.repository.NodeRef;
+import org.edu_sharing.service.tracking.model.StatisticEntry;
 import org.edu_sharing.service.tracking.model.StatisticEntryNode;
 
 import java.sql.SQLException;
@@ -26,5 +27,8 @@ public interface TrackingService {
     }
     boolean trackActivityOnUser(String authorityName,EventType type);
     boolean trackActivityOnNode(NodeRef nodeRef,String nodeVersion,EventType type);
-    List<StatisticEntryNode> getNodeStatisics(GroupingType type, java.util.Date dateFrom, java.util.Date dateTo, List<String> additionalFields, List<String> groupFields, Map<String, String> filters) throws SQLException;
+
+    List<StatisticEntryNode> getNodeStatisics(GroupingType type, java.util.Date dateFrom, java.util.Date dateTo, List<String> additionalFields, List<String> groupFields, Map<String, String> filters) throws Throwable;
+    List<StatisticEntry> getUserStatistics(GroupingType type, java.util.Date dateFrom, java.util.Date dateTo, List<String> additionalFields, List<String> groupFields, Map<String, String> filters) throws Throwable;
+
 }

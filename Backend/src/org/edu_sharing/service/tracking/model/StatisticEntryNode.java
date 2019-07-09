@@ -6,8 +6,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class StatisticEntryNode extends StatisticEntry{
-    private String node,date;
-    private Map<String,String> data=new HashMap<>();
+    private String node;
 
     public String getNode() {
         return node;
@@ -17,17 +16,6 @@ public class StatisticEntryNode extends StatisticEntry{
         this.node = node;
     }
 
-    public String getDate() {
-        return date;
-    }
-
-    public void setDate(String date) {
-        this.date = date;
-    }
-
-    public Map<String, String> getData() {
-        return data;
-    }
 
     @Override
     public boolean equals(Object obj) {
