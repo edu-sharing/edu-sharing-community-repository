@@ -963,6 +963,8 @@ public class CCConstants {
 
 	public final static String CCM_PROP_EDITOR_TYPE ="{http://www.campuscontent.de/model/1.0}editorType";
 
+	public final static String CCM_PROP_LEARNUNIT_ID ="{http://www.campuscontent.de/model/1.0}learnunit_id";
+
 	//Additional ressource Information (comes with aspect)
 
 	public final static String CCM_PROP_CCRESSOURCETYPE ="{http://www.campuscontent.de/model/1.0}ccressourcetype";

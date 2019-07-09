@@ -10,9 +10,7 @@ import org.edu_sharing.alfresco.service.ConnectionDBAlfresco;
 import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.server.tools.ApplicationInfoList;
-import org.edu_sharing.service.nodeservice.NodeServiceFactory;
 import org.edu_sharing.service.nodeservice.NodeServiceHelper;
-import org.edu_sharing.service.tracking.model.StatisticEntry;
 import org.edu_sharing.service.tracking.model.StatisticEntryNode;
 import org.json.JSONObject;
 import org.postgresql.util.PGobject;
@@ -69,10 +67,11 @@ public class TrackingServiceImpl extends TrackingServiceDefault{
     }
 
     @Override
-    public boolean trackActivityOnNode(NodeRef nodeRef,String nodeVersion, EventType type) {
-        super.trackActivityOnNode(nodeRef,nodeVersion,type);
+    public boolean trackActivityOnNode(NodeRef nodeRef,NodeTrackingDetails details, EventType type) {
+        super.trackActivityOnNode(nodeRef,details,type);
         return AuthenticationUtil.runAsSystem(()-> {
             String version;
+            String nodeVersion = details==null ? null : details.getNodeVersion();
             if(nodeVersion==null || nodeVersion.isEmpty() || nodeVersion.equals("-1")){
                 version=NodeServiceHelper.getProperty(nodeRef,CCConstants.CM_PROP_VERSIONABLELABEL);
             }
@@ -86,7 +85,7 @@ public class TrackingServiceImpl extends TrackingServiceDefault{
                 statement.setString(4, super.getTrackedUsername(null));
                 statement.setTimestamp(5, new Timestamp(System.currentTimeMillis()));
                 statement.setString(6, type.name());
-                JSONObject json = buildJson(nodeRef, type);
+                JSONObject json = buildJson(nodeRef, details, type);
                 PGobject obj = new PGobject();
                 obj.setType("json");
                 if (json != null)
@@ -101,7 +100,7 @@ public class TrackingServiceImpl extends TrackingServiceDefault{
     /**
      * overwrite this in a custom method to track additional data
      */
-    protected JSONObject buildJson(NodeRef nodeRef, EventType type) {
+    protected JSONObject buildJson(NodeRef nodeRef, NodeTrackingDetails details, EventType type) {
         return null;
     }
     /**

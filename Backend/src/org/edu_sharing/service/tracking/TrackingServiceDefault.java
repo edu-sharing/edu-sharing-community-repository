@@ -33,6 +33,7 @@ public abstract class TrackingServiceDefault implements TrackingService{
     static{
         EVENT_PROPERTY_MAPPING.put(EventType.DOWNLOAD_MATERIAL,CCConstants.CCM_PROP_TRACKING_DOWNLOADS);
         EVENT_PROPERTY_MAPPING.put(EventType.VIEW_MATERIAL,CCConstants.CCM_PROP_TRACKING_VIEWS);
+        EVENT_PROPERTY_MAPPING.put(EventType.VIEW_MATERIAL_EMBEDDED,CCConstants.CCM_PROP_TRACKING_VIEWS);
     }
 
     public TrackingServiceDefault() {
@@ -50,7 +51,7 @@ public abstract class TrackingServiceDefault implements TrackingService{
     }
 
     @Override
-    public boolean trackActivityOnNode(NodeRef nodeRef,String nodeVersion, EventType type) {
+    public boolean trackActivityOnNode(NodeRef nodeRef,NodeTrackingDetails details, EventType type) {
         String value= nodeService.getProperty(nodeRef.getStoreRef().getProtocol(),nodeRef.getStoreRef().getIdentifier(),nodeRef.getId(),EVENT_PROPERTY_MAPPING.get(type));
         if(value==null)
             value="0";
