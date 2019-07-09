@@ -93,6 +93,22 @@
 		]]>
 		</message>
 	</template>
+	<template name="invited_collection">
+		<subject>{{inviterFirstName}} {{inviterLastName}} invited you to a collection.</subject>
+		<message><![CDATA[
+			<h1>Hello {{firstName}} {{lastName}}</h1>
+			<h2>{{inviterFirstName}} {{inviterLastName}} invited you to collection "{{name}}".</h2>
+			Your access rights are:<br>
+			<div class="rights">{{permissions}}</div>
+			<br>
+			<div class="center"><a class="btn" href="{{link}}">Link to collection</a></div>
+			<br><br>
+			{{if message}}Message from {{inviterFirstName}} {{inviterLastName}}:<br>
+				{{message}}
+			{{endif}}
+		]]>
+		</message>
+	</template>
 	<template name="nodeIssue">
 		<subject>{{reporterEmail}} reported a problem</subject>
 		<message><![CDATA[

@@ -334,7 +334,7 @@ export class WorkspaceShareComponent implements AfterViewInit{
       permissions=permissions.filter((p:Permission)=>!this.isDeleted(p));
       let permissionsCopy=RestHelper.copyAndCleanPermissions(permissions,inherit);
         if(!this.sendToApi) {
-        this.onClose.emit(RestHelper.copyPermissions(permissions,inherit));
+        this.onClose.emit(this.getEmitObject(RestHelper.copyPermissions(permissions,inherit)));
         return;
       }
       this.nodeApi.setNodePermissions(this._node.ref.id,permissionsCopy,this.notifyUsers && this.sendMessages,this.notifyMessage,false,this.doiPermission && this.allowDOI() && this.doiActive && this.publishActive).subscribe(() => {
@@ -544,7 +544,7 @@ export class WorkspaceShareComponent implements AfterViewInit{
     private updateUsages(permissions:LocalPermissions,pos=0,error=false) {
       if(pos==this.deletedUsages.length){
           this.onLoading.emit(false);
-          this.onClose.emit(permissions);
+          this.onClose.emit(this.getEmitObject(permissions));
           if(!error) {
               this.toast.toast('WORKSPACE.PERMISSIONS_UPDATED');
           }
@@ -581,6 +581,14 @@ export class WorkspaceShareComponent implements AfterViewInit{
       }
       return merge;
     }
+
+  private getEmitObject(localPermissions: LocalPermissions) {
+    return {
+      permissions: localPermissions,
+      notify: this.notifyUsers,
+      notifyMessage: this.notifyMessage
+    };
+  }
 }
 /*
 class SearchData extends Subject<CompleterItem[]> implements CompleterData {

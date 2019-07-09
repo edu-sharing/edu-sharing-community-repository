@@ -23,6 +23,22 @@
 		]]>
 		</message>
 	</template>
+	<template name="invited_collection">
+		<subject>{{inviterFirstName}} {{inviterLastName}} hat Sie zur Mitarbeit an einer Sammlung eingeladen.</subject>
+		<message><![CDATA[
+			<h1>Hallo {{firstName}} {{lastName}}</h1>
+			<h2>{{inviterFirstName}} {{inviterLastName}} hat die Sammlung "{{name}}" für Sie freigegeben.</h2>
+			Ihnen wurden die folgenden Rechte zugeteilt:<br>
+			<div class="rights">{{permissions}}</div>
+			<br>
+			<div class="center"><a class="btn" href="{{link}}">Link zur Sammlung</a></div>
+			<br><br>
+			{{if message}}Nachricht vom Nutzer:<br>
+				{{message}}
+			{{endif}}
+		]]>
+		</message>
+	</template>
 	<template name="nodeIssue">
 		<subject>{{reporterEmail}} hat ein Problem gemeldet</subject>
 		<message><![CDATA[
