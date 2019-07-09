@@ -40,7 +40,7 @@ public class ImporterJobSAX extends ImporterJob {
 					recordHandler = new RecordHandlerLOM(metadataSetId);
 				}
 				
-				new ListIdentifiersHandler(recordHandler, new PersistentHandlerEdusharing(this,null), null, oaiBaseUrl, set, metadataPrefix, metadataSetId);
+				new ListIdentifiersHandler(recordHandler, new PersistentHandlerEdusharing(this,null,true), null, oaiBaseUrl, set, metadataPrefix, metadataSetId);
 				logger.info("finished import in "+(System.currentTimeMillis() - millisec)/1000+" secs");
 			}
 		}catch(Throwable e){

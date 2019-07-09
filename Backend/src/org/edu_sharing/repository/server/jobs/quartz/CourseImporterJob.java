@@ -43,7 +43,7 @@ public class CourseImporterJob extends AbstractJob {
 
 						new MoodleImporter(jobDataMap.getString(KEY_SCHEME), jobDataMap.getString(KEY_HOST),
 								Integer.parseInt(jobDataMap.getString(KEY_PORT)), jobDataMap.getString(KEY_CONTEXT),
-								jobDataMap.getString(KEY_WSTOKEN), new PersistentHandlerEdusharing(CourseImporterJob.this,null));
+								jobDataMap.getString(KEY_WSTOKEN), new PersistentHandlerEdusharing(CourseImporterJob.this,null,true));
 						break;
 
 					case opal:
@@ -51,7 +51,7 @@ public class CourseImporterJob extends AbstractJob {
 						new OPALImporter(jobDataMap.getString(KEY_SCHEME), jobDataMap.getString(KEY_HOST),
 								Integer.parseInt(jobDataMap.getString(KEY_PORT)), jobDataMap.getString(KEY_CONTEXT),
 								jobDataMap.getString(KEY_USER), jobDataMap.getString(KEY_PASSWORD),
-						        new PersistentHandlerEdusharing(CourseImporterJob.this,null));
+						        new PersistentHandlerEdusharing(CourseImporterJob.this,null,true));
 						break;
 					}
 				} catch (Throwable t) {

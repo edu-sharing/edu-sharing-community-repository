@@ -84,7 +84,6 @@ export class CollectionsMainComponent {
     public mainnav = true;
     private path : EduData.Node[];
     private hasEditorial = false;
-    private nodeOptions: OptionItem[]=[];
     public isGuest = true;
     public addToOther:EduData.Node[];
     private showCollection=true;
@@ -647,16 +646,17 @@ export class CollectionsMainComponent {
 
         // remember the scroll Y before displaying content
         this.lastScrollY = window.scrollY;
+        let nodeOptions=[];
         /*if(data.node.downloadUrl)
-          this.nodeOptions.push(new OptionItem("DOWNLOAD", "cloud_download", () => this.downloadMaterial()));
+          nodeOptions.push(new OptionItem("DOWNLOAD", "cloud_download", () => this.downloadMaterial()));
          */
         if(this.isAllowedToDeleteNodes([content])) {
-          this.nodeOptions.push(new OptionItem("COLLECTIONS.DETAIL.REMOVE", "remove_circle_outline", () => this.deleteFromCollection(() => {
+          nodeOptions.push(new OptionItem("COLLECTIONS.DETAIL.REMOVE", "remove_circle_outline", () => this.deleteFromCollection(() => {
             NodeRenderComponent.close(this.location);
           })));
         }
         // set content for being displayed in detail
-        this.temporaryStorageService.set(TemporaryStorageService.NODE_RENDER_PARAMETER_OPTIONS,this.nodeOptions);
+        this.temporaryStorageService.set(TemporaryStorageService.NODE_RENDER_PARAMETER_OPTIONS,nodeOptions);
         this.temporaryStorageService.set(TemporaryStorageService.NODE_RENDER_PARAMETER_LIST,this.collectionContent.references);
         this.temporaryStorageService.set(TemporaryStorageService.NODE_RENDER_PARAMETER_ORIGIN,"collections");
           this.router.navigate([UIConstants.ROUTER_PREFIX+"render",  content.ref.id]);

@@ -48,6 +48,9 @@ import org.edu_sharing.service.nodeservice.NodeServiceHelper;
 import org.edu_sharing.service.permission.PermissionServiceFactory;
 import org.edu_sharing.service.permission.PermissionServiceHelper;
 import org.edu_sharing.service.rendering.RenderingTool;
+import org.edu_sharing.service.tracking.NodeTrackingDetails;
+import org.edu_sharing.service.tracking.TrackingService;
+import org.edu_sharing.service.tracking.TrackingServiceFactory;
 import org.edu_sharing.service.usage.AlfServicesWrapper;
 import org.edu_sharing.service.usage.UsageDAO;
 import org.edu_sharing.service.usage.UsageService;
@@ -77,6 +80,16 @@ public class RenderInfoSoapBindingImpl implements org.edu_sharing.webservices.re
 			ticket = authTool.createNewSession(homeAppInfo.getUsername(), homeAppInfo.getPassword()).get(CCConstants.AUTH_TICKET);
 			MCAlfrescoAPIClient client = new MCAlfrescoAPIClient();
 			RenderInfoResult result = getBaseData(userName, nodeId, version, client,homeAppInfo.getAppId().equals(lmsId) ? RenderingTool.DISPLAY_DYNAMIC : RenderingTool.DISPLAY_INLINE);
+			// track inline rendering requests
+			if(!homeAppInfo.getAppId().equals(lmsId)){
+				NodeTrackingDetails details=new NodeTrackingDetails(version);
+				NodeTrackingDetails.NodeTrackingLms lms = new NodeTrackingDetails.NodeTrackingLms();
+				lms.setAppId(lmsId);
+				lms.setCourseId(courseId);
+				lms.setResourceId(resourceId);
+				details.setLms(lms);
+				TrackingServiceFactory.getTrackingService().trackActivityOnNode(new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE,nodeId),details,TrackingService.EventType.VIEW_MATERIAL_EMBEDDED);
+			}
 			UsageDAO usageDao = new AlfServicesWrapper();
 			if(lmsId!=null && courseId!=null) {
 				HashMap<String, Object> usageMap = usageDao.getUsageOnNodeOrParents(lmsId, courseId, nodeId, resourceId);

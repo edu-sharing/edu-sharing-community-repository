@@ -285,6 +285,9 @@ export class RestHelper{
       if (node.title) return node.title;
       return node.name;
     }
+    public static getTitleFromProperties(properties:any):string {
+        return properties[RestConstants.LOM_PROP_TITLE] ? properties[RestConstants.LOM_PROP_TITLE] : properties[RestConstants.CM_NAME];
+    }
     public static getCreatorName(node:Node):string {
         let result:string = "";
         if (node.createdBy!=null) {

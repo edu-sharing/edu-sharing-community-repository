@@ -16,6 +16,7 @@ public interface TrackingService {
     enum EventType {
         DOWNLOAD_MATERIAL,
         VIEW_MATERIAL,
+        VIEW_MATERIAL_EMBEDDED,
         LOGIN_USER_SESSION,
         LOGIN_USER_OAUTH_PASSWORD,
         LOGIN_USER_OAUTH_REFRESH_TOKEN,
@@ -23,6 +24,6 @@ public interface TrackingService {
         LOGOUT_USER_REGULAR
     }
     boolean trackActivityOnUser(String authorityName,EventType type);
-    boolean trackActivityOnNode(NodeRef nodeRef,String nodeVersion,EventType type);
+    boolean trackActivityOnNode(NodeRef nodeRef,NodeTrackingDetails details,EventType type);
     List<StatisticEntryNode> getNodeStatisics(GroupingType grouping,Date dateFrom, Date dateTo);
 }

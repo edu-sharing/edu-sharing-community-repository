@@ -5,8 +5,20 @@ import {RestConnectorService} from "./rest-connector.service";
 import {RestHelper} from "../rest-helper";
 import {RestConstants} from "../rest-constants";
 import {
-  NodeRef, NodeWrapper,Node, NodePermissions, LocalPermissions, NodeVersions, NodeVersion, NodeList, NodePermissionsHistory,
-  NodeLock, NodeShare, WorkflowEntry, ParentList
+  NodeRef,
+  NodeWrapper,
+  Node,
+  NodePermissions,
+  LocalPermissions,
+  NodeVersions,
+  NodeVersion,
+  NodeList,
+  NodePermissionsHistory,
+  NodeLock,
+  NodeShare,
+  WorkflowEntry,
+  ParentList,
+  WebsiteInformation
 } from "../data-object";
 import {RestIamService} from "./rest-iam.service";
 import {RequestObject} from "../request-object";
@@ -25,6 +37,6 @@ export class RestUtilitiesService extends AbstractRestService{
       [
         [":url",url],
       ]);
-    return this.connector.get<any>(query,this.connector.getRequestOptions());
+    return this.connector.get<WebsiteInformation>(query,this.connector.getRequestOptions());
   }
 }

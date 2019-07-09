@@ -64,6 +64,7 @@ import org.springframework.context.ApplicationContext;
 public class PersistentHandlerEdusharing implements PersistentHandlerInterface {
 
 	private final AbstractJob job;
+	private final boolean hasTimestampMap;
 
 	MCAlfrescoBaseClient mcAlfrescoBaseClient = null;
 
@@ -82,15 +83,16 @@ public class PersistentHandlerEdusharing implements PersistentHandlerInterface {
 	private String importFolderId;
 	private Importer importer;
 
-	public PersistentHandlerEdusharing(AbstractJob job,Importer importer) throws Throwable {
+	public PersistentHandlerEdusharing(AbstractJob job,Importer importer,boolean buildCaches) throws Throwable {
 		mcAlfrescoBaseClient = new MCAlfrescoAPIClient();
 		this.job = job;
 		this.importFolderId=prepareImportFolder();
 		this.importer=importer;
+		this.hasTimestampMap=buildCaches;
 		// prepare cache
 		ApplicationContext applicationContext = AlfAppContextGate.getApplicationContext();
 		ServiceRegistry serviceRegistry = (ServiceRegistry) applicationContext.getBean(ServiceRegistry.SERVICE_REGISTRY);
-		serviceRegistry.getTransactionService().getRetryingTransactionHelper().doInTransaction(()-> {
+		serviceRegistry.getTransactionService().getRetryingTransactionHelper().doInTransaction(() -> {
 			getAllNodesInImportfolder();
 			getReplicationIdTimestampMap();
 			return null;
@@ -318,6 +320,9 @@ public class PersistentHandlerEdusharing implements PersistentHandlerInterface {
 		}
 	}
 	public List<NodeRef> getAllNodesInImportfolder(String importFolderId) throws Throwable {
+		if(!hasTimestampMap){
+			allNodesInImportfolder=new ArrayList<>();
+		}
 		if (allNodesInImportfolder == null) {
 			getLogger().info("allNodesInImportfolder is null starting to initialize it");
 			allNodesInImportfolder = NodeServiceFactory.getLocalService().getChildrenRecursive(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE,importFolderId, Collections.singletonList(CCConstants.CCM_TYPE_IO));
@@ -429,6 +434,10 @@ public class PersistentHandlerEdusharing implements PersistentHandlerInterface {
 	}
 
 	public HashMap<String, String> getReplicationIdTimestampMap() {
+		if(!hasTimestampMap) {
+			replIdMap = new HashMap<>();
+			replIdTimestampMap=new HashMap<>();
+		}
 		if (replIdTimestampMap == null) {
 			try {
 				String user=AuthenticationUtil.getFullyAuthenticatedUser();
