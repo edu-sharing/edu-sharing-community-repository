@@ -11,6 +11,18 @@
 .opacity-invisible{
   opacity:0;
 }
+.mat-heading-1,
+.mat-heading-2,
+.mat-heading-3,
+.mat-heading-4,
+.mat-heading-5,
+.mat-heading-6 {
+  display: flex;
+  align-items: center;
+  .edu-icon-base{
+    margin: 0 5px;
+  }
+}
 .mat-heading-1{
   color:$textLight;
   font-size: 2.2rem;
@@ -37,6 +49,10 @@
   color:$textLight;
   font-weight: bold;
   font-size: 0.9rem;
+}
+.mat-heading-underline{
+  width: 100%;
+  border-bottom: 1px solid $textVeryLight;
 }
 .authority-search-input-option{
   >span {

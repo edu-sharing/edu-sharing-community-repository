@@ -40,7 +40,7 @@ export class NodeHelper{
   {
     let name=item.name;
     if(name==RestConstants.CM_NAME)
-      return node["name"];
+      return node.name==null ? node.ref.id : node.name;
     if(name==RestConstants.CM_PROP_TITLE || name==RestConstants.LOM_PROP_TITLE){
       return RestHelper.getTitle(node);
     }
@@ -94,6 +94,13 @@ export class NodeHelper{
         }
         return Math.round(width) + "x" + Math.round(height);
       }
+    }
+    if(name.startsWith("counts.")){
+      let count=(node as any).counts[name.split(".")[1]];
+      if(count)
+        return ""+count;
+      else
+        return fallbackValue;
     }
     let value : string;
     if(node.properties[name])

@@ -776,7 +776,7 @@ export class ListTableComponent implements EventListener{
     event.stopPropagation();
   }
   public getItemCssClass(item:ListItem){
-    return item.type.toLowerCase()+"_"+item.name.replace(":","_");
+    return item.type.toLowerCase()+"_"+item.name.toLowerCase().replace(":","_").replace(".","_");
   }
 
     handleKeyboard(event:any) {
