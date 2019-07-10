@@ -177,7 +177,12 @@ export class ShareAppComponent {
                 this.previewUrl=this.connector.getThemeMimePreview(this.getType()+'.svg');
                 if(this.isLink()) {
                     this.utilities.getWebsiteInformation(this.uri).subscribe((data: any) => {
-                        this.title = data.title + " - " + data.page;
+                        if(data.title) {
+                            this.title = data.title + " - " + data.page;
+                        }
+                        else{
+                            this.title = this.uri;
+                        }
                         this.description = data.description;
                         this.globalProgress = false;
                     });

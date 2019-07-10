@@ -16,6 +16,7 @@ import javax.servlet.http.HttpServletResponse;
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.repo.security.authentication.AuthenticationUtil.RunAsWork;
 import org.alfresco.service.cmr.repository.InvalidNodeRefException;
+import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.repository.StoreRef;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.log4j.Logger;
@@ -23,6 +24,7 @@ import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.client.tools.UrlTool;
 import org.edu_sharing.repository.server.AuthenticationToolAPI;
 import org.edu_sharing.repository.server.MCAlfrescoAPIClient;
+import org.edu_sharing.repository.server.authentication.Context;
 import org.edu_sharing.repository.server.tools.ApplicationInfo;
 import org.edu_sharing.repository.server.tools.ApplicationInfoList;
 import org.edu_sharing.repository.server.tools.HttpException;
@@ -37,6 +39,9 @@ import org.edu_sharing.service.rendering.RenderingServiceData;
 import org.edu_sharing.service.rendering.RenderingServiceFactory;
 import org.edu_sharing.service.rendering.RenderingTool;
 import org.edu_sharing.service.repoproxy.RepoProxyFactory;
+import org.edu_sharing.service.tracking.NodeTrackingDetails;
+import org.edu_sharing.service.tracking.TrackingService;
+import org.edu_sharing.service.tracking.TrackingServiceFactory;
 import org.edu_sharing.service.usage.Usage;
 import org.edu_sharing.service.usage.Usage2Service;
 import org.edu_sharing.webservices.usage2.Usage2;
@@ -87,7 +92,7 @@ public class RenderingProxy extends HttpServlet {
 		req.getSession().removeAttribute(CCConstants.AUTH_SINGLE_USE_NODEID);
 
 		// will throw if the usage is invalid
-		validateUsage(req, nodeId, parentId);
+		Usage usage = validateUsage(req, nodeId, parentId);
 
 		try {
 			updateUserRemoteRoles(req);
@@ -97,7 +102,7 @@ public class RenderingProxy extends HttpServlet {
 				openWindow(req, resp, nodeId, parentId, repoInfo);
 			}
 			else{
-				queryRendering(req,resp,nodeId,repoInfo);
+				queryRendering(req,resp,nodeId,usage,repoInfo);
 			}
 
 		}
@@ -182,7 +187,7 @@ public class RenderingProxy extends HttpServlet {
 			throw new SecurityException("Parameter \"u\" (username) could not be decrypted: "+e.getMessage(),e);
 		}
 	}
-	private void queryRendering(HttpServletRequest req, HttpServletResponse resp, String nodeId, ApplicationInfo repoInfo) throws Exception {
+	private void queryRendering(HttpServletRequest req, HttpServletResponse resp, String nodeId, Usage usage, ApplicationInfo repoInfo) throws Exception {
 		String rep_id = req.getParameter("rep_id");
 		String display = req.getParameter("display");
 		ApplicationInfo homeRep = ApplicationInfoList.getHomeRepository();
@@ -313,6 +318,13 @@ public class RenderingProxy extends HttpServlet {
 				RenderingServiceData renderData = service.getData(nodeId, null,usernameDecrypted, display);
 				resp.getOutputStream().write(
 						service.getDetails(finalContentUrl, renderData).getBytes("UTF-8"));
+				// track inline / lms
+				if(display.equals(RenderingTool.DISPLAY_INLINE)) {
+					NodeTrackingDetails details = new NodeTrackingDetails(getVersion(req));
+					details.setLms(new NodeTrackingDetails.NodeTrackingLms(usage));
+					TrackingServiceFactory.getTrackingService().trackActivityOnNode(new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, nodeId), details, TrackingService.EventType.VIEW_MATERIAL_EMBEDDED);
+				}
+
 			} catch (HttpException e) {
 				return new RenderingException(e);
 			} catch (Exception e) {
@@ -403,7 +415,7 @@ public class RenderingProxy extends HttpServlet {
 		resp.sendRedirect(urlWindow);
 	}
 
-	private void validateUsage(HttpServletRequest req, String nodeId, String parentId) throws RenderingException {
+	private Usage validateUsage(HttpServletRequest req, String nodeId, String parentId) throws RenderingException {
 		String ts=req.getParameter("ts");
 		ApplicationInfo appInfoApplication = ApplicationInfoList.getRepositoryInfoById(req.getParameter("app_id"));
 		ApplicationInfo repoInfo = ApplicationInfoList.getRepositoryInfoById(req.getParameter("rep_id"));
@@ -444,6 +456,7 @@ public class RenderingProxy extends HttpServlet {
 					}
 					throw new RenderingException(HttpServletResponse.SC_UNAUTHORIZED,"Usage fetching failed for node "+nodeId,RenderingException.I18N.usage_missing);
 				}
+				return usage;
 			}
 			catch(RenderingException e){
 				throw e;

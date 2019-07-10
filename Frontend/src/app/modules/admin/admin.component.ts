@@ -820,7 +820,7 @@ export class AdminComponent {
       let v=version.split(".");
       if(v.length<3)
         return v;
-      v.splice(v.length-1,1);
+      v.splice(2,v.length-2);
       console.log(v);
       return v.join(".");
     }

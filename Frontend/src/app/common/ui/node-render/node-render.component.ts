@@ -304,7 +304,6 @@ export class NodeRenderComponent implements EventListener{
     download.isEnabled=this._node.downloadUrl!=null;
     download.showAsAction=true;
     if(this.isCollectionRef()){
-      console.log("is ref");
       this.nodeApi.getNodeMetadata(this._node.properties[RestConstants.CCM_PROP_IO_ORIGINAL]).subscribe((node:NodeWrapper)=>{
         this.addDownloadButton(opt,download);
       },(error:any)=>{
@@ -391,7 +390,7 @@ export class NodeRenderComponent implements EventListener{
             };
             UIHelper.injectAngularComponent(this.componentFactoryResolver,this.viewContainerRef,ListTableComponent,document.getElementsByTagName("collections")[0],data,250);
         },(error)=>{
-
+            domContainer.parentElement.removeChild(domContainer);
         });
     }
   private addComments(){
@@ -577,10 +576,6 @@ export class NodeRenderComponent implements EventListener{
   }
 
     private getSequence(onFinish:Function) {
-        if(this.sequence){
-            onFinish();
-            return;
-        }
         if(this._node.aspects.indexOf(RestConstants.CCM_ASPECT_IO_CHILDOBJECT) != -1) {
            this.nodeApi.getNodeMetadata(this._node.parent.id).subscribe(data =>{
              this.sequenceParent = data.node;
@@ -627,6 +622,9 @@ export class NodeRenderComponent implements EventListener{
     }
     private getNodeName(node:Node) {
       return RestHelper.getName(node);
+    }
+    private getNodeTitle(node:Node) {
+        return RestHelper.getTitle(node);
     }
 
     public switchNode(node:Node){

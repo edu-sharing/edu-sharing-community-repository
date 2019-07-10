@@ -34,6 +34,7 @@ import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
 
 import org.edu_sharing.service.repoproxy.RepoProxyFactory;
+import org.edu_sharing.service.tracking.NodeTrackingDetails;
 import org.edu_sharing.service.tracking.TrackingService;
 import org.edu_sharing.service.tracking.TrackingServiceFactory;
 
@@ -137,7 +138,7 @@ public class RenderingApi {
 			String mimeType = nodeJson.getMimetype();
 
 			if(repoDao.isHomeRepo())
-				TrackingTool.trackActivityOnNode(node,nodeVersion,TrackingService.EventType.VIEW_MATERIAL);
+				TrackingTool.trackActivityOnNode(node,new NodeTrackingDetails(nodeVersion),TrackingService.EventType.VIEW_MATERIAL);
 
 
 			RenderingDetailsEntry response = new RenderingDetailsEntry();

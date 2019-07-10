@@ -444,7 +444,7 @@ public class CCConstants {
 	public static final int HTTP_INSUFFICIENT_STORAGE = 503;
 
     public static final List<String> CHILDOBJECT_IGNORED_PARENT_PROPERTIES = Arrays.asList(
-    		CCConstants.CM_NAME,CCConstants.ALFRESCO_MIMETYPE,CCConstants.LOM_PROP_TECHNICAL_FORMAT,CCConstants.LOM_PROP_TECHNICAL_SIZE
+    		CCConstants.CM_NAME,CCConstants.LOM_PROP_GENERAL_TITLE,CCConstants.CCM_PROP_IO_WWWURL,CCConstants.ALFRESCO_MIMETYPE,CCConstants.LOM_PROP_TECHNICAL_FORMAT,CCConstants.LOM_PROP_TECHNICAL_SIZE
 	);
 
     public static String CCM_WF_STATUS_VALUE_UNCHECKED="100_unchecked";
@@ -985,6 +985,8 @@ public class CCConstants {
 	public final static String CCM_PROP_IMPORTED_OBJECT_APPNAME = "{http://www.campuscontent.de/model/1.0}imported_object_appname";
 
 	public final static String CCM_PROP_EDITOR_TYPE ="{http://www.campuscontent.de/model/1.0}editorType";
+
+	public final static String CCM_PROP_LEARNUNIT_ID ="{http://www.campuscontent.de/model/1.0}learnunit_id";
 
 	//Additional ressource Information (comes with aspect)
 

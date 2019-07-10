@@ -129,9 +129,10 @@ public class PreviewServlet extends HttpServlet implements SingleThreadModel {
 			if (nodeId != null) {
 				try {
 					props = nodeService.getProperties(storeRef.getProtocol(),storeRef.getIdentifier(),nodeId);
-					
-					// For collections: Fetch the original object for preview
-					if(props.containsKey(CCConstants.CCM_PROP_IO_ORIGINAL)){
+                    String[] aspects = nodeService.getAspects(storeRef.getProtocol(), storeRef.getIdentifier(), nodeId);
+
+                    // For collections: Fetch the original object for preview
+					if(Arrays.asList(aspects).contains(CCConstants.CCM_ASPECT_COLLECTION_IO_REFERENCE) && props.containsKey(CCConstants.CCM_PROP_IO_ORIGINAL)){
 						
 						String original = (String) props.get(CCConstants.CCM_PROP_IO_ORIGINAL);
 						

@@ -61,6 +61,7 @@ import org.edu_sharing.service.nodeservice.NodeService;
 import org.edu_sharing.service.nodeservice.NodeServiceFactory;
 import org.edu_sharing.service.remote.RemoteObjectService;
 import org.edu_sharing.service.rendering.RenderingTool;
+import org.edu_sharing.service.tracking.NodeTrackingDetails;
 import org.edu_sharing.service.tracking.TrackingService;
 import org.edu_sharing.service.tracking.TrackingServiceFactory;
 
@@ -158,7 +159,7 @@ public class RedirectServlet extends HttpServlet implements SingleThreadModel {
                         for(NameValuePair pair : parsed){
                             if(pair.getName().equals("display") && pair.getValue().equals("download")){
                                 // Track download action for node
-                                TrackingTool.trackActivityOnNode(nodeId,version,TrackingService.EventType.DOWNLOAD_MATERIAL);
+                                TrackingServiceFactory.getTrackingService().trackActivityOnNode(new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE,nodeId),new NodeTrackingDetails(version),TrackingService.EventType.DOWNLOAD_MATERIAL);
                                 break;
                             }
                         }

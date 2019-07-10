@@ -60,23 +60,25 @@ public class BeforeDeleteIOPolicy implements BeforeDeleteNodePolicy {
 			}
 			
 			VersionHistory vh = versionService.getVersionHistory(nodeRef);
-			for(Version v : vh.getAllVersions()) {
-				String vhandleId = (String)nodeService.getProperty( v.getFrozenStateNodeRef(), QName.createQName(CCConstants.CCM_PROP_PUBLISHED_HANDLE_ID));
-				if(vhandleId != null && vhandleId.trim().length() > 0) {
-					
-					try {
-						handleService.deleteHandle(vhandleId);
-					} catch (HandleException e) {
-						logger.error(e.getMessage());
-					} catch (Exception e) {
-						// TODO Auto-generated catch block
-						logger.error(e.getMessage(), e);
+			if(vh != null) {
+				for(Version v : vh.getAllVersions()) {
+					String vhandleId = (String)nodeService.getProperty( v.getFrozenStateNodeRef(), QName.createQName(CCConstants.CCM_PROP_PUBLISHED_HANDLE_ID));
+					if(vhandleId != null && vhandleId.trim().length() > 0) {
+						
+						try {
+							handleService.deleteHandle(vhandleId);
+						} catch (HandleException e) {
+							logger.error(e.getMessage());
+						} catch (Exception e) {
+							// TODO Auto-generated catch block
+							logger.error(e.getMessage(), e);
+						}
 					}
+					
+					/**
+					 * not able to remove aspect published here cause version can not be manipulated
+					 */
 				}
-				
-				/**
-				 * not able to remove aspect published here cause version can not be manipulated
-				 */
 			}
 		}
 	}

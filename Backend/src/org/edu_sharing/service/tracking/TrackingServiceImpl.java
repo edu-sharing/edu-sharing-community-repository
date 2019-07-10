@@ -85,10 +85,11 @@ public class TrackingServiceImpl extends TrackingServiceDefault{
     }
 
     @Override
-    public boolean trackActivityOnNode(NodeRef nodeRef,String nodeVersion, EventType type) {
-        super.trackActivityOnNode(nodeRef,nodeVersion,type);
+    public boolean trackActivityOnNode(NodeRef nodeRef,NodeTrackingDetails details, EventType type) {
+        super.trackActivityOnNode(nodeRef,details,type);
         return AuthenticationUtil.runAsSystem(()-> {
             String version;
+            String nodeVersion = details==null ? null : details.getNodeVersion();
             if(nodeVersion==null || nodeVersion.isEmpty() || nodeVersion.equals("-1")){
                 version=NodeServiceHelper.getProperty(nodeRef,CCConstants.CM_PROP_VERSIONABLELABEL);
             }
@@ -101,9 +102,9 @@ public class TrackingServiceImpl extends TrackingServiceDefault{
                 statement.setString(2, nodeRef.getId());
                 statement.setString(3, version);
                 statement.setString(4, super.getTrackedUsername(null));
-                statement.setDate(5, new Date(System.currentTimeMillis()));
+                statement.setTimestamp(5, new Timestamp(System.currentTimeMillis()));
                 statement.setString(6, type.name());
-                JSONObject json = buildJson(nodeRef, type);
+                JSONObject json = buildJson(nodeRef, details, type);
                 PGobject obj = new PGobject();
                 obj.setType("json");
                 if (json != null)
@@ -118,7 +119,7 @@ public class TrackingServiceImpl extends TrackingServiceDefault{
     /**
      * overwrite this in a custom method to track additional data
      */
-    protected JSONObject buildJson(NodeRef nodeRef, EventType type) {
+    protected JSONObject buildJson(NodeRef nodeRef, NodeTrackingDetails details, EventType type) {
         /*
         try {
             // sample object for testing purposes
@@ -225,7 +226,7 @@ public class TrackingServiceImpl extends TrackingServiceDefault{
         }
     }
 
-    private <T extends StatisticEntry> List<T> initList(Class<T> clz,GroupingType type, java.util.Date dateFrom, java.util.Date dateTo) throws IllegalAccessException, InstantiationException {
+    private <T extends StatisticEntry> List<T> initList(Class<T> clz, GroupingType type, java.util.Date dateFrom, java.util.Date dateTo) throws IllegalAccessException, InstantiationException {
         long DAY_DURATION=1000*60*60*24;
 
         List<T> list = new ArrayList<>();

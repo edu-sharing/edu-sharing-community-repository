@@ -98,6 +98,9 @@ public class NodeServiceHelper {
 	public static String[] getAspects(NodeRef nodeRef){
 		return NodeServiceFactory.getLocalService().getAspects(nodeRef.getStoreRef().getProtocol(),nodeRef.getStoreRef().getIdentifier(),nodeRef.getId());
 	}
+	public static boolean hasAspect(NodeRef nodeRef,String aspect){
+		return NodeServiceFactory.getLocalService().hasAspect(nodeRef.getStoreRef().getProtocol(),nodeRef.getStoreRef().getIdentifier(),nodeRef.getId(),aspect);
+	}
     public static HashMap<String, Object> getProperties(NodeRef nodeRef) throws Throwable {
         return NodeServiceFactory.getLocalService().getProperties(nodeRef.getStoreRef().getProtocol(),nodeRef.getStoreRef().getIdentifier(),nodeRef.getId());
     }
