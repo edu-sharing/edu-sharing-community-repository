@@ -680,7 +680,7 @@
 				</property>
 				<property name="ccm:university">
 					<type>d:text</type>
-					<multiple>true</multiple>
+					<multiple>false</multiple>
 					<index enabled="true">
 	                  <atomic>true</atomic>
 	                  <stored>false</stored>
