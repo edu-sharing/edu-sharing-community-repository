@@ -370,7 +370,7 @@ public class PermissionServiceImpl implements org.edu_sharing.service.permission
 				ServletContext context = Context.getCurrentInstance().getRequest().getSession().getServletContext();
 				Map<String, String> replace = new HashMap<>();
 				replace.put("inviterFirstName", senderFirstName.trim());
-				replace.put("inviterLastName", senderFirstName.trim());
+				replace.put("inviterLastName", senderLastName.trim());
 				replace.put("firstName", receiverFirstName.trim());
 				replace.put("lastName", receiverLastName.trim());
 				replace.put("name", name.trim());
