@@ -378,12 +378,20 @@ public class PermissionServiceImpl implements org.edu_sharing.service.permission
 				replace.put("permissions", permText.trim());
 				replace.put("link", MailTemplate.generateContentLink(appInfo, _nodeId));
 				String template="invited";
+				boolean send=true;
+				org.edu_sharing.service.nodeservice.NodeService nodeServiceApp = NodeServiceFactory.getNodeService(appInfo.getAppId());
 				if(nodeType.equals(CCConstants.CCM_TYPE_MAP) &&
-						NodeServiceFactory.getNodeService(appInfo.getAppId()).hasAspect(StoreRef.PROTOCOL_WORKSPACE,StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(),_nodeId,CCConstants.CCM_ASPECT_COLLECTION)){
+						nodeServiceApp.hasAspect(StoreRef.PROTOCOL_WORKSPACE,StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(),_nodeId,CCConstants.CCM_ASPECT_COLLECTION)){
 					template="invited_collection";
+					// if the receiver is the creator itself, skip it (because it is automatically added)
+					if(authority.equals(nodeServiceApp.getProperty(StoreRef.PROTOCOL_WORKSPACE,StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(),_nodeId,CCConstants.CM_PROP_C_CREATOR))){
+						send=false;
+					}
 				}
-				mail.sendMailHtml(context, senderName, emailaddress, MailTemplate.getSubject(template, currentLocale),
-						MailTemplate.getContent(template, currentLocale, true), replace);
+				if(send) {
+					mail.sendMailHtml(context, senderName, emailaddress, MailTemplate.getSubject(template, currentLocale),
+							MailTemplate.getContent(template, currentLocale, true), replace);
+				}
 
 			} else {
 				logger.info("username/authority: " + authority + " has no valid emailaddress:" + emailaddress);
