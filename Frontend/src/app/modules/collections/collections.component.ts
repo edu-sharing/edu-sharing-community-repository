@@ -44,6 +44,7 @@ import {UIService} from "../../common/services/ui.service";
 import {MainNavComponent} from "../../common/ui/main-nav/main-nav.component";
 import {ColorHelper} from '../../common/ui/color-helper';
 import {ActionbarHelperService} from "../../common/services/actionbar-helper";
+import {HttpClient} from "@angular/common/http";
 
 // component class
 @Component({
@@ -108,6 +109,7 @@ export class CollectionsMainComponent{
     // inject services
     constructor(
       private frame : FrameEventsService,
+      private http : HttpClient,
       private temporaryStorageService : TemporaryStorageService,
         private location : Location,
         private collectionService : RestCollectionService,
@@ -352,7 +354,10 @@ export class CollectionsMainComponent{
           }
       }
 
-      return options;
+      let custom=this.config.instant('collectionNodeOptions');
+      NodeHelper.applyCustomNodeOptions(this.toast,this.http,this.connector,custom,(this.collectionContent.references as any), nodes, options,(load:boolean)=>this.isLoading=load);
+
+        return options;
     }
     dropOnCollection(event:any){
       let target=event.target;
