@@ -380,8 +380,14 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
 	}
 	@Override
 	public List<NodeRef> getChildrenRecursive(StoreRef store, String nodeId,List<String> types) {
-		Set<QName> typesConverted = types.stream().map(QName::createQName).collect(Collectors.toSet());
-		List<ChildAssociationRef> assocs = nodeService.getChildAssocs(new NodeRef(store, nodeId),typesConverted);
+		List<ChildAssociationRef> assocs;
+		if(types==null){
+			assocs = nodeService.getChildAssocs(new NodeRef(store, nodeId));
+		}
+		else {
+			Set<QName> typesConverted = types.stream().map(QName::createQName).collect(Collectors.toSet());
+			assocs = nodeService.getChildAssocs(new NodeRef(store, nodeId), typesConverted);
+		}
 		List<NodeRef> result=new ArrayList<>();
 		for(ChildAssociationRef assoc : assocs){
 			result.add(assoc.getChildRef());
