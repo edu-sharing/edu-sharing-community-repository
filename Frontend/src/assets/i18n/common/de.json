@@ -216,6 +216,7 @@
     "ccm:eaf_productionyear":"Prod. Jahr",
     "counts": {
       "VIEW_MATERIAL": "Aufrufe",
+      "VIEW_MATERIAL_EMBEDDED": "Aufrufe (Remote)",
       "DOWNLOAD_MATERIAL": "Downloads"
     }
   },

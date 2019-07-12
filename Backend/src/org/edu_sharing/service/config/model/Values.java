@@ -53,4 +53,5 @@ public class Values{
 	@XmlElement	public Services services;
 	@XmlElement	public HelpMenuOptions[] helpMenuOptions;
 	@XmlElement	public Image[] images;
+	@XmlElement	public Admin admin;
 }

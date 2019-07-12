@@ -8,8 +8,8 @@ import java.util.Map;
 
 public class TrackingNode extends Tracking {
     private final Node node;
-    public TrackingNode(Node node, String date, Map<TrackingService.EventType,Integer> counts,Map<String,String> data){
-        super(date,counts,data);
+    public TrackingNode(Node node,String authority, String date, Map<TrackingService.EventType,Integer> counts,Map<String,String> data){
+        super(date,authority,counts,data);
         this.node=node;
     }
 

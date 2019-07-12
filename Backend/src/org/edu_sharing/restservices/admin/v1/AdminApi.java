@@ -334,11 +334,11 @@ public class AdminApi {
             @ApiResponse(code = 404, message = RestConstants.HTTP_404, response = ErrorResponse.class),
             @ApiResponse(code = 500, message = RestConstants.HTTP_500, response = ErrorResponse.class) })
     public Response getStatisticsNode(@Context HttpServletRequest req,
-									  @ApiParam(value = "Grouping type", required = true) @QueryParam("grouping")TrackingService.GroupingType grouping,
+									  @ApiParam(value = "Grouping type (by date)", required = true) @QueryParam("grouping")TrackingService.GroupingType grouping,
 									  @ApiParam(value = "date range from", required = true) @QueryParam("dateFrom") Long dateFrom,
 									  @ApiParam(value = "date range to", required = true) @QueryParam("dateTo") Long dateTo,
 									  @ApiParam(value = "additionals fields of the custom json object stored in each query that should be returned", required = false) @QueryParam("additionalFields") List<String> additionalFields,
-									  @ApiParam(value = "grouping fields of the custom json object stored in each query", required = false) @QueryParam("groupField") List<String> groupField,
+									  @ApiParam(value = "grouping fields of the custom json object stored in each query (currently only meant to be combined with no grouping by date)", required = false) @QueryParam("groupField") List<String> groupField,
 									  @ApiParam(value = "filters for the custom json object stored in each entry", required = false) Map<String,String> filters
               ) {
         try {
@@ -363,11 +363,11 @@ public class AdminApi {
 			@ApiResponse(code = 404, message = RestConstants.HTTP_404, response = ErrorResponse.class),
 			@ApiResponse(code = 500, message = RestConstants.HTTP_500, response = ErrorResponse.class) })
 	public Response getStatisticsUser(@Context HttpServletRequest req,
-									  @ApiParam(value = "Grouping type", required = true) @QueryParam("grouping")TrackingService.GroupingType grouping,
+									  @ApiParam(value = "Grouping type (by date)", required = true) @QueryParam("grouping")TrackingService.GroupingType grouping,
 									  @ApiParam(value = "date range from", required = true) @QueryParam("dateFrom") Long dateFrom,
 									  @ApiParam(value = "date range to", required = true) @QueryParam("dateTo") Long dateTo,
 									  @ApiParam(value = "additionals fields of the custom json object stored in each query that should be returned", required = false) @QueryParam("additionalFields") List<String> additionalFields,
-									  @ApiParam(value = "grouping fields of the custom json object stored in each query", required = false) @QueryParam("groupField") List<String> groupField,
+									  @ApiParam(value = "grouping fields of the custom json object stored in each query (currently only meant to be combined with no grouping by date)", required = false) @QueryParam("groupField") List<String> groupField,
 									  @ApiParam(value = "filters for the custom json object stored in each entry", required = false) Map<String,String> filters
 	) {
 		try {

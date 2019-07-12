@@ -194,3 +194,8 @@ h4{
     margin-right: 10px;
   }
 }
+
+.mat-radio-label,.mat-checkbox-layout{
+  white-space: normal!important;
+  align-items: baseline !important;
+}

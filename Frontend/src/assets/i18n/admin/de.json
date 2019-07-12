@@ -248,9 +248,12 @@
     },
     "STATISTICS": {
       "NO_DATA": "Keine Daten für den gewählten Zeitraum",
-      "GROUPED": "Statistiken nach Zeitraum",
-      "NODES": "Statistiken nach Objekt",
+      "GROUPED": "Nach Zeitraum",
+      "SINGLE": "Einzelauswertung",
+      "NODES": "Nach Objekt",
+      "CUSTOM_GROUPS": "Nach Kriterium",
       "VIEWS": "Objekt-Aufrufe",
+      "VIEWS_EMBEDDED": "Objekt-Ansichten (Remote)",
       "DOWNLOADS": "Objekt-Downloads",
       "USER_LOGINS": "Benutzer-Logins",
       "GROUP_BY": "Gruppieren nach",
@@ -258,7 +261,28 @@
       "TO": "End-Zeit",
       "GROUP_DAILY": "Tagen",
       "GROUP_MONTHLY": "Monaten",
-      "GROUP_YEARLY": "Jahren"
+      "GROUP_YEARLY": "Jahren",
+      "CUSTOM_GROUP_MODE": "Gruppier-Kriterium",
+      "SINGLE_MODE": "Aktions-Typ",
+      "MODE_NODES": "Material-Interaktionen (Ansichten, Downloads)",
+      "MODE_USERS": "Nutzer-Interaktionen (Logins & Logouts)",
+      "HEADERS": {
+        "action": "Aktion",
+        "count": "Anzahl",
+        "node": "Element",
+        "authority": "Nutzer/Session",
+        "date": "Datum"
+      },
+      "ACTIONS": {
+        "LOGIN_USER_SESSION": "Login",
+        "LOGIN_USER_OAUTH_PASSWORD": "Login (OAuth)",
+        "LOGIN_USER_OAUTH_REFRESH_TOKEN": "Login (OAuth)",
+        "LOGOUT_USER_REGULAR": "Logout",
+        "LOGOUT_USER_TIMEOUT": "Logout (Timeout)",
+        "VIEW_MATERIAL": "Material angesehen",
+        "VIEW_MATERIAL_EMBEDDED": "Material angesehen (Remote)",
+        "DOWNLOAD_MATERIAL": "Material heruntergeladen"
+      }
     }
   }
 }

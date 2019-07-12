@@ -47,6 +47,10 @@ $sidenavWidthMobile:66px;
       height: auto;
     }
   }
+  // has own padding cause of tabs
+  .main-content-statistics{
+    padding:0;
+  }
 }
 .tabs{
   display: flex;
@@ -134,7 +138,7 @@ $sidenavWidthMobile:66px;
         margin-bottom: 5px;
       }
       &.check-fail {
-        background-color: lighten($warning, 60%);
+        background-color: lighten($warning, 35%);
       }
       &.check-warn {
         background-color: lighten($warningMedium, 50%);
@@ -409,7 +413,6 @@ $sidenavWidthMobile:66px;
   justify-content: center;
   app-admin-statistics{
     width: 100%;
-    max-width: 900px;
   }
 }
 .jobs{

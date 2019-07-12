@@ -64,7 +64,7 @@
         </div>
     </div>
 </div>
-<div class="main-content">
+<div class="main-content main-content-{{mode ? mode.toLowerCase() : 'default'}}">
 <!-- for dynamically added components from extensions -->
 <ng-template *ngIf="getModeButton() && getModeButton().factory" #dynamic></ng-template>
 <div *ngIf="mode=='INFO'" class="content info">

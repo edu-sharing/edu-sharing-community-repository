@@ -34,7 +34,7 @@ public class TrackingDAO {
                             node.setRef(new NodeRef(RepositoryDao.getHomeRepository(),track.getNode()));
                         }
                     }
-                    TrackingNode tracking = new TrackingNode(node, track.getDate(), track.getCounts(),track.getData());
+                    TrackingNode tracking = new TrackingNode(node, track.getAuthority(), track.getDate(), track.getCounts(),track.getData());
                     result.add(tracking);
                 }
             }
@@ -50,7 +50,7 @@ public class TrackingDAO {
             List<Tracking> result = new ArrayList<>();
             if(tracks!=null) {
                 for (StatisticEntry track : tracks) {
-                    Tracking tracking = new Tracking(track.getDate(), track.getCounts(),track.getData());
+                    Tracking tracking = new Tracking(track.getDate(),track.getAuthority(), track.getCounts(),track.getData());
                     result.add(tracking);
                 }
             }

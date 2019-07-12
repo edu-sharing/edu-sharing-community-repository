@@ -13,16 +13,16 @@ import org.edu_sharing.repository.server.tools.ApplicationInfoList;
 import org.edu_sharing.service.nodeservice.NodeServiceHelper;
 import org.edu_sharing.service.tracking.model.StatisticEntry;
 import org.edu_sharing.service.tracking.model.StatisticEntryNode;
+import org.json.JSONException;
 import org.json.JSONObject;
 import org.postgresql.util.PGobject;
 import org.springframework.context.ApplicationContext;
 
 import java.sql.*;
+import java.sql.Date;
 import java.text.SimpleDateFormat;
 import java.time.ZoneId;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class TrackingServiceImpl extends TrackingServiceDefault{
     public static Logger logger = Logger.getLogger(TrackingServiceImpl.class);
@@ -31,23 +31,28 @@ public class TrackingServiceImpl extends TrackingServiceDefault{
     public static String TRACKING_USER_TABLE_ID = "edu_tracking_user";
     public static String TRACKING_INSERT_NODE = "insert into " + TRACKING_NODE_TABLE_ID +" (node_id,node_uuid,node_version,authority,time,type,data) VALUES (?,?,?,?,?,?,?)";
     public static String TRACKING_INSERT_USER = "insert into " + TRACKING_USER_TABLE_ID +" VALUES (?,?,?,?)";
-    public static String TRACKING_STATISTICS_NODE = "SELECT node_uuid as node,type,COUNT(*) :additional from edu_tracking_node as tracking" +
+    public static String TRACKING_STATISTICS_CUSTOM_GROUPING = "SELECT type,COUNT(*) :additional from :table as tracking" +
+            " WHERE time BETWEEN ? AND ? AND (:filter)" +
+            " GROUP BY type :grouping" +
+            " ORDER BY count DESC";
+    public static String TRACKING_STATISTICS_USER = "SELECT authority,time as date,type,COUNT(*) :additional from edu_tracking_user as tracking" +
+            " WHERE time BETWEEN ? AND ? AND (:filter)" +
+            " GROUP BY authority,time,type :grouping" +
+            " ORDER BY count DESC";
+    public static String TRACKING_STATISTICS_NODE = "SELECT node_uuid as node,authority,time as date,type,COUNT(*) :additional from edu_tracking_node as tracking" +
             //" LEFT JOIN alf_node_properties as props ON (tracking.node_id=props.node_id and props.qname_id=28)" +
             " WHERE time BETWEEN ? AND ? AND (:filter)" +
-            " GROUP BY node,type :grouping" +
+            " GROUP BY node,authority,time,type :grouping" +
             " ORDER BY count DESC";
     public static String TRACKING_STATISTICS_DAILY = "SELECT type,COUNT(*),TO_CHAR(time,'yyyy-mm-dd') as date :additional from :table as tracking" +
-            //" LEFT JOIN alf_node_properties as props ON (tracking.node_id=props.node_id and props.qname_id=28)" +
             " WHERE time BETWEEN ? AND ? AND (:filter)" +
             " GROUP BY type,date :grouping" +
             " ORDER BY date";
     public static String TRACKING_STATISTICS_MONTHLY = "SELECT type,COUNT(*),TO_CHAR(time,'yyyy-mm') as date :additional from :table as tracking" +
-            //" LEFT JOIN alf_node_properties as props ON (tracking.node_id=props.node_id and props.qname_id=28)" +
             " WHERE time BETWEEN ? AND ? AND (:filter)" +
             " GROUP BY type,date :grouping" +
             " ORDER BY date";
     public static String TRACKING_STATISTICS_YEARLY = "SELECT type,COUNT(*),TO_CHAR(time,'yyyy') as date :additional from :table as tracking" +
-            //" LEFT JOIN alf_node_properties as props ON (tracking.node_id=props.node_id and props.qname_id=28)" +
             " WHERE time BETWEEN ? AND ? AND (:filter)" +
             " GROUP BY type,date :grouping" +
             " ORDER BY date";
@@ -63,7 +68,7 @@ public class TrackingServiceImpl extends TrackingServiceDefault{
     @Override
     public boolean trackActivityOnUser(String authorityName, EventType type) {
         super.trackActivityOnUser(authorityName,type);
-        if(authorityName==null ||authorityName.equals(ApplicationInfoList.getHomeRepository().getGuest_username())){
+        if(authorityName==null || authorityName.equals(ApplicationInfoList.getHomeRepository().getGuest_username()) || authorityName.equals(AuthenticationUtil.getSystemUserName())){
             return false;
         }
         return AuthenticationUtil.runAsSystem(()-> {
@@ -132,6 +137,12 @@ public class TrackingServiceImpl extends TrackingServiceDefault{
      * overwrite this in a custom method to track additional data
      */
     protected JSONObject buildJson(String authorityName, EventType type) {
+        /*
+        try {
+            // sample object for testing purposes
+            return new JSONObject().put("school",AuthenticationUtil.getFullyAuthenticatedUser().substring(0,2));
+        } catch (JSONException e) {}
+        */
         return null;
     }
     @Override
@@ -142,7 +153,7 @@ public class TrackingServiceImpl extends TrackingServiceDefault{
         try {
             con = dbAlf.getConnection();
             List<StatisticEntry> result = initList(StatisticEntry.class,type,dateFrom,dateTo);
-            String query = getQuery(type, "edu_Tracking_user", additionalFields, groupFields, filters);
+            String query = getQuery(type, "edu_tracking_user", additionalFields, groupFields, filters);
             statement = con.prepareStatement(query);
             statement.setTimestamp(1, Timestamp.valueOf(dateFrom.toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime()));
             statement.setTimestamp(2, Timestamp.valueOf(dateTo.toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime()));
@@ -156,20 +167,26 @@ public class TrackingServiceImpl extends TrackingServiceDefault{
             ResultSet resultSet = statement.executeQuery();
             while (resultSet.next()) {
                 StatisticEntry entry = new StatisticEntry();
-                entry.setDate(resultSet.getString("date"));
+                boolean grouping=!type.equals(GroupingType.None) || groupFields!=null && !groupFields.isEmpty();
+                if (!grouping) {
+                    entry.setAuthority(resultSet.getString("authority"));
+                }
+                if(groupFields==null || groupFields.isEmpty())
+                    entry.setDate(resultSet.getString("date"));
                 if (additionalFields != null && additionalFields.size() > 0) {
                     for (String field : additionalFields) {
                         entry.getData().put(field, resultSet.getString(field));
                     }
                 }
-                if (result.contains(entry)) {
+                if (result.contains(entry) && grouping) {
                     entry = result.get(result.indexOf(entry));
                 }
                 entry.getCounts().put(EventType.valueOf(resultSet.getString("type")), resultSet.getInt("count"));
-                if (!result.contains(entry)) {
+                if (!result.contains(entry) || !grouping) {
                     result.add(entry);
                 }
             }
+            Collections.sort(result);
             return result;
         }catch(Throwable t){
             throw t;
@@ -201,23 +218,27 @@ public class TrackingServiceImpl extends TrackingServiceDefault{
             ResultSet resultSet = statement.executeQuery();
             while (resultSet.next()) {
                 StatisticEntryNode entry = new StatisticEntryNode();
-                if (type.equals(GroupingType.None)) {
+                boolean grouping=!type.equals(GroupingType.None) || groupFields!=null && !groupFields.isEmpty();
+                if (!grouping) {
                     entry.setNode(resultSet.getString("node"));
-                } else
+                    entry.setAuthority(resultSet.getString("authority"));
+                }
+                if(groupFields==null || groupFields.isEmpty())
                     entry.setDate(resultSet.getString("date"));
                 if (additionalFields != null && additionalFields.size() > 0) {
                     for (String field : additionalFields) {
                         entry.getData().put(field, resultSet.getString(field));
                     }
                 }
-                if (result.contains(entry)) {
+                if (result.contains(entry) && grouping) {
                     entry = result.get(result.indexOf(entry));
                 }
                 entry.getCounts().put(EventType.valueOf(resultSet.getString("type")), resultSet.getInt("count"));
-                if (!result.contains(entry)) {
+                if (!result.contains(entry) || !grouping) {
                     result.add(entry);
                 }
             }
+            Collections.sort(result);
             return result;
         }catch(Throwable t){
             throw t;
@@ -257,18 +278,26 @@ public class TrackingServiceImpl extends TrackingServiceDefault{
 
     private String getQuery(GroupingType type, String table, List<String> additionalFields, List<String> groupFields, Map<String, String> filters) throws SQLException {
         try {
-            String prepared;
+            String prepared=null;
             if (type.equals(GroupingType.Daily))
                 prepared = TRACKING_STATISTICS_DAILY;
             else if (type.equals(GroupingType.Monthly))
                 prepared = TRACKING_STATISTICS_MONTHLY;
             else if (type.equals(GroupingType.Yearly))
                 prepared = TRACKING_STATISTICS_YEARLY;
-            else if (type.equals(GroupingType.None) && table.equals("edu_tracking_node")) {
-                prepared = TRACKING_STATISTICS_NODE;
-            } else {
-                throw new IllegalArgumentException("No statement found for tracking table " + table + " and mode " + type);
+            else if (type.equals(GroupingType.None)) {
+                if(groupFields!=null && !groupFields.isEmpty()){
+                    prepared = TRACKING_STATISTICS_CUSTOM_GROUPING;
+                }
+                else if (table.equals("edu_tracking_node")) {
+                    prepared = TRACKING_STATISTICS_NODE;
+                } else if (table.equals("edu_tracking_user")) {
+                    prepared = TRACKING_STATISTICS_USER;
+                }
             }
+            if(prepared==null)
+                throw new IllegalArgumentException("No statement found for tracking table " + table + " and mode " + type);
+
             prepared = prepared.replace(":table", table);
 
             StringBuilder filter = new StringBuilder("true");
@@ -282,7 +311,7 @@ public class TrackingServiceImpl extends TrackingServiceDefault{
                     filter.append(makeDbField(entry.getKey())).append(" = ?");
                 }
             }
-            if (groupFields != null && groupFields.size() > 0) {
+            if (groupFields != null && !groupFields.isEmpty()) {
                 for (String field : groupFields) {
                     grouping.append(",").append(makeDbField(field));
                 }
@@ -290,6 +319,10 @@ public class TrackingServiceImpl extends TrackingServiceDefault{
             if (additionalFields != null && additionalFields.size() > 0) {
                 for (String field : additionalFields) {
                     additional.append(",").append(makeDbField(field) + " as " + field);
+                    // if additional fields and no grouping is provided, add them to grouping otherwise there will be a postgres exception when fetching
+                    if(groupFields==null || groupFields.isEmpty()){
+                        grouping.append(",").append(makeDbField(field));
+                    }
                 }
             }
             prepared = prepared.replace(":additional", additional).replace(":filter", filter).replace(":grouping", grouping);
