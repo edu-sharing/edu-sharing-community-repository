@@ -143,8 +143,6 @@ export class CordovaService {
               clearInterval(shareInterval);
               this.onNewShareContent().subscribe(
                   (data: any) => {
-                      // TODO: take URI and processes on share screen
-                      // this.router.navigate(['share', URI]);
                       this.router.navigate([UIConstants.ROUTER_PREFIX,'app', 'share'], {queryParams: data});
                   }, (error) => {
                       console.log("ERROR on new share event", error);
@@ -291,14 +289,14 @@ export class CordovaService {
 
                // some optional additional info
                console.log('  text: ', item.text);   // text to share alongside the item, iOS only
-               console.log('  name: ', item.name);   // suggested name of the image, iOS 11+ only
+               console.log('  file: ', item.file);   // suggested name of the image, iOS 11+ only
                console.log('  utis: ', item.utis);
                console.log('  path: ', item.path);   // path on the device, generally undefined
                item.stream=item.base64; // convert it so it's like on android
                //alert(item.type+" : "+item.name+" : "+item.path+" : "+item.uri);
                item.uri=DateHelper.getDateForNewFile()+".jpg";
                this.lastIntent=item;
-               this.observerShareContent.next({uri:item.uri,mimetype:item.type});
+               this.observerShareContent.next({uri:item.uri,mimetype:item.type,file:item.file,text:item.text});
            });
        }
    }

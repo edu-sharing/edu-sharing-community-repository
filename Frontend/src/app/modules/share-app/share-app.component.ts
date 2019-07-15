@@ -159,6 +159,7 @@ export class ShareAppComponent {
         Translation.initialize(this.translate, this.config, this.storage, this.route).subscribe(() => {
             console.log("translate");
             this.route.queryParams.subscribe((params:any)=>{
+                console.log("share app query params",params);
                 this.uri=params['uri'];
                 this.mimetype=params['mimetype'];
                 this.fileName=params['file'];
