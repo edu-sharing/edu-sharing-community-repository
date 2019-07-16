@@ -762,7 +762,7 @@ export class AdminComponent {
         this.systemChecks=[];
 
         // check versions render service
-        this.connector.getAbout().subscribe((about)=>{
+        this.connector.getAbout().subscribe((about:any)=>{
             about.version.repository=this.getMajorVersion(about.version.repository);
             about.version.renderservice=this.getMajorVersion(about.version.renderservice);
             this.systemChecks.push({
