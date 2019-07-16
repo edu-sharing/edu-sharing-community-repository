@@ -954,7 +954,7 @@ export class WorkspaceMainComponent implements EventListener{
         }
         this.currentFolder=null;
         this.allowBinary=true;
-        let root=WorkspaceMainComponent.VALID_ROOTS_NODES.indexOf(id)!=-1;
+        let root=!id || WorkspaceMainComponent.VALID_ROOTS_NODES.indexOf(id)!=-1;
         if(!root) {
             this.isRootFolder=false;
             console.log("open path: "+id);
