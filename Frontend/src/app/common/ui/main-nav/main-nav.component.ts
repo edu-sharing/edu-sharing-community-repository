@@ -225,6 +225,8 @@ export class MainNavComponent implements AfterViewInit{
         try {
             let rect=document.getElementsByTagName("header")[0].getBoundingClientRect();
             y = rect.bottom-rect.top;
+            // set min height + a small increase of height to prevent flickering in chrome
+            document.documentElement.style.minHeight="calc(100% + "+(y+10)+"px)";
         }catch(e){
         }
         for(let i=0;i<elements.length;i++) {
