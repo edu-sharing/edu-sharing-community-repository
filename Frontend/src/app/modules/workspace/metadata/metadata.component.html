@@ -8,14 +8,14 @@
       <div class="col s12">
         <ul class="tabs">
           <li class="clickable tab col s4" (click)="setTab(INFO)" title="Info">
-            <a [class.active]="tab==INFO" alt="Info"><i class="material-icons">info_outline</i></a>
+            <a [class.active]="tab==INFO"><i class="material-icons">info_outline</i></a>
           </li>
           <!--Icon for Usages-->
           <li class="clickable tab col s4" (click)="setTab(PROPERTIES)" title="Statistik">
-            <a [class.active]="tab==PROPERTIES" alt="Statistik"><i class="material-icons">equalizer</i><div class="value-properties">{{statsTotalPoints}}</div></a>
+            <a [class.active]="tab==PROPERTIES"><i class="material-icons">equalizer</i><div class="value-properties">{{statsTotalPoints}}</div></a>
           </li>
           <li class="clickable tab col s4" (click)="setTab(VERSIONS)" title="Version">
-            <a [class.active]="tab==VERSIONS" alt="Version"><i class="material-icons">restore</i></a>
+            <a [class.active]="tab==VERSIONS"><i class="material-icons">restore</i></a>
           </li>
         </ul>
     </div>
