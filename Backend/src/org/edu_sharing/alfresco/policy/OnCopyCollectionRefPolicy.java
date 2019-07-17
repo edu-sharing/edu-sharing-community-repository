@@ -41,6 +41,8 @@ public class OnCopyCollectionRefPolicy implements OnCopyNodePolicy,CopyServicePo
 	public void onCopyComplete(QName classRef, NodeRef sourceNodeRef, NodeRef targetNodeRef, boolean copyToNewNode, Map<NodeRef,NodeRef> copyMap){
 		if(isCollectionReference(targetNodeRef,nodeService.getPrimaryParent(targetNodeRef).getParentRef())){
 			nodeService.addAspect(targetNodeRef,QName.createQName(CCConstants.CCM_ASPECT_COLLECTION_IO_REFERENCE),null);
+			logger.info("will add property link to original io");
+			nodeService.setProperty(targetNodeRef,QName.createQName(CCConstants.CCM_PROP_IO_ORIGINAL),sourceNodeRef.getId());
 		}
 	}
 
@@ -54,14 +56,10 @@ public class OnCopyCollectionRefPolicy implements OnCopyNodePolicy,CopyServicePo
 				@Override
 				public Map<QName, Serializable> getCopyProperties(QName classQName, CopyDetails copyDetails,
 						Map<QName, Serializable> properties) {
-	
+					properties=super.getCopyProperties(classQName, copyDetails, properties);
 					logger.info("will remove content from properties");
-					if(properties.containsKey(ContentModel.PROP_CONTENT)){
-						properties.remove(ContentModel.PROP_CONTENT);
-					}
-					logger.info("will add property link to original io");
-					properties.put(QName.createQName(CCConstants.CCM_PROP_IO_ORIGINAL),copyDetails.getSourceNodeRef().getId());
-					return super.getCopyProperties(classQName, copyDetails, properties);
+					properties.remove(ContentModel.PROP_CONTENT);
+					return properties;
 				}
 				
 				
