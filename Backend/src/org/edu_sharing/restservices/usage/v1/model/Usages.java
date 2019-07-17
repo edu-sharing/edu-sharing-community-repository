@@ -3,6 +3,7 @@ package org.edu_sharing.restservices.usage.v1.model;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
+import java.util.Objects;
 
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
@@ -284,6 +285,22 @@ public class Usages {
 
 		public void setCollection(Collection collection) {
 			this.collection = collection;
+		}
+
+		@Override
+		public boolean equals(Object obj) {
+			if(obj instanceof CollectionUsage){
+				CollectionUsage that= (CollectionUsage) obj;
+				return that.collection.getRef().equals(collection.getRef());
+			}
+			return super.equals(obj);
+		}
+
+		@Override
+		public int hashCode() {
+			if(collection!=null)
+				return Objects.hash(collection.getRef());
+			return super.hashCode();
 		}
 	}
 	

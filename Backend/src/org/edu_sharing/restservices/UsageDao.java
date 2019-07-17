@@ -2,9 +2,7 @@ package org.edu_sharing.restservices;
 
 import java.io.ByteArrayInputStream;
 import java.io.StringReader;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.repo.security.authentication.AuthenticationUtil.RunAsWork;
@@ -172,9 +170,9 @@ public class UsageDao {
 		}
 	}
 
-	public List<Usages.CollectionUsage> getUsagesByNodeCollection(String nodeId) throws DAOException {
+	public Set<Usages.CollectionUsage> getUsagesByNodeCollection(String nodeId) throws DAOException {
 		try {
-			List<Usages.CollectionUsage> collections = new ArrayList<>();
+			Set<Usages.CollectionUsage> collections = new HashSet<>();
 			for (org.edu_sharing.service.usage.Usage usage : new Usage2Service().getUsageByParentNodeId(null, null,
 					nodeId)) {
 				if (usage.getCourseId() == null)

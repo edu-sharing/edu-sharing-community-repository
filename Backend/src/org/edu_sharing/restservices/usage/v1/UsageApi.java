@@ -1,6 +1,7 @@
 package org.edu_sharing.restservices.usage.v1;
 
 import java.util.List;
+import java.util.Set;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.DELETE;
@@ -159,7 +160,7 @@ public class UsageApi {
 			@ApiParam(value = "ID of node", required = true) @PathParam("nodeId") String nodeId,
 			@Context HttpServletRequest req) {
 		try {
-			List<Usages.CollectionUsage> collections = new UsageDao(RepositoryDao.getRepository(RepositoryDao.HOME)).getUsagesByNodeCollection(nodeId);
+			Set<Usages.CollectionUsage> collections = new UsageDao(RepositoryDao.getRepository(RepositoryDao.HOME)).getUsagesByNodeCollection(nodeId);
 			return Response.status(Response.Status.OK).entity(collections).build();
 		} catch (Throwable t) {
 			return ErrorResponse.createResponse(t);
