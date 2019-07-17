@@ -19,12 +19,12 @@
               <ul class="tabs tabsRepositories tabs-fixed-width">
                   <li class="clickable tab col s3" *ngFor="let repo of repositories.length<=4 ? repositories : repositories.slice(0,3)" tabindex="0" (keyup.enter)="setRepository(repo.id)" (click)="setRepository(repo.id)">
                       <a [class.active]="currentRepository==repo.id">
-                          <img [src]="getSourceIcon(repo)"><span class="repositoryTitle">{{ repo.title }}</span></a>
+                          <img [src]="getSourceIcon(repo)" alt=""><span class="repositoryTitle">{{ repo.title }}</span></a>
                   </li>
                   <li class="clickable tab col s3" *ngIf="repositories.length>4 && !extendedRepositorySelected" tabindex="0" (keyup.enter)="showMoreRepositories=true" (click)="showMoreRepositories=true">
                       <a>
             <span>
-              <img [src]="getSourceIconPath('more')"><span class="repositoryTitle">{{ 'SEARCH.REPOSITORY_MORE' | translate }}</span>
+              <img [src]="getSourceIconPath('more')" alt=""><span class="repositoryTitle">{{ 'SEARCH.REPOSITORY_MORE' | translate }}</span>
             </span>
                           <i aria-hidden="true" class="material-icons" >keyboard_arrow_down</i>
                       </a>
@@ -34,7 +34,7 @@
                       (keyup.enter)="currentRepository==repositories[3].id ? showMoreRepositories=true : setRepository(repositories[3].id)"
                       (click)="currentRepository==repositories[3].id ? showMoreRepositories=true : setRepository(repositories[3].id)">
                       <a [class.active]="currentRepository==repositories[3].id">
-                          <img [src]="getSourceIcon(repositories[3])"><span class="repositoryTitle">{{ repositories[3].title }}</span>
+                          <img [src]="getSourceIcon(repositories[3])" alt=""><span class="repositoryTitle">{{ repositories[3].title }}</span>
                           <i aria-hidden="true" class="material-icons" (click)="$event.stopPropagation();showMoreRepositories=true">keyboard_arrow_down</i>
                       </a>
                   </li>

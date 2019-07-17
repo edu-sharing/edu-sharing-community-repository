@@ -23,6 +23,22 @@
 		]]>
 		</message>
 	</template>
+	<template name="invited_collection">
+		<subject>{{inviterFirstName}} {{inviterLastName}} hat Sie zur Mitarbeit an einer Sammlung eingeladen.</subject>
+		<message><![CDATA[
+			<h1>Hallo {{firstName}} {{lastName}}</h1>
+			<h2>{{inviterFirstName}} {{inviterLastName}} hat die Sammlung "{{name}}" für Sie freigegeben.</h2>
+			Ihnen wurden die folgenden Rechte zugeteilt:<br>
+			<div class="rights">{{permissions}}</div>
+			<br>
+			<div class="center"><a class="btn" href="{{link}}">Link zur Sammlung</a></div>
+			<br><br>
+			{{if message}}Nachricht vom Nutzer:<br>
+				{{message}}
+			{{endif}}
+		]]>
+		</message>
+	</template>
 	<template name="userRegister">
 		<subject>Bitte bestätigen Sie Ihren Account</subject>
 		<message><![CDATA[
@@ -58,7 +74,7 @@
 				<p>Alternativ können Sie auch den Aktivierungscode kopieren und ihn in das Formular einfügen:</p>
 				<div class="center"><div class="input-field">{{key}}</div></div>
 				<br>
-				
+
 			</div>
 		]]>
 		</message>
@@ -70,7 +86,7 @@
 				<img src="{{image:/assets/images/register/new_user.png}}">
 				<h1>Ein neuer Nutzer hat sich im System registriert!</h1>
 				<p>
-				Name: {{firstName}} {{lastName}} 
+				Name: {{firstName}} {{lastName}}
 				<br>E-Mail: <a href="mailto:{{email}}">{{email}}</a>
 				</p>
 				{{if organization}}

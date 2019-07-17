@@ -84,6 +84,8 @@ export class CollectionNewComponent {
   private availableSteps: string[];
   private parentCollection: Collection;
   private originalPermissions: LocalPermissions;
+  private permissionsInfo: any;
+
   @ViewChild('file') imageFileRef : ElementRef;
 
   @HostListener('document:keydown', ['$event'])
@@ -203,9 +205,11 @@ export class CollectionNewComponent {
          //this.toast.error(error)
        });
     }
-    private setPermissions(permissions : LocalPermissions){
+    private setPermissions(permissions : any){
+      console.log(permissions);
       if(permissions) {
-        this.permissions = permissions;
+        this.permissionsInfo = permissions;
+        this.permissions = permissions.permissions;
         this.permissions.inherited=false;
         if(this.permissions.permissions && this.permissions.permissions.length){
           this.currentCollection.scope=RestConstants.COLLECTIONSCOPE_CUSTOM;
@@ -468,12 +472,12 @@ export class CollectionNewComponent {
         }
         this.permissions=this.getEditorialGroupPermissions();
     }
-    if((this.newCollectionType==RestConstants.COLLECTIONSCOPE_CUSTOM || this.newCollectionType==RestConstants.GROUP_TYPE_EDITORIAL) && this.permissions && this.permissions.permissions && this.permissions.permissions.length){
+    if((this.newCollectionType==RestConstants.COLLECTIONSCOPE_CUSTOM || this.newCollectionType==RestConstants.GROUP_TYPE_EDITORIAL) && this.permissions && this.permissions.permissions){
       if(this.originalPermissions && this.originalPermissions.inherited){
         console.log("current collection had inherited permissions set. Will keep these setting");
       }
       let permissions=RestHelper.copyAndCleanPermissions(this.permissions.permissions,this.originalPermissions ? this.originalPermissions.inherited : false);
-      this.nodeService.setNodePermissions(collection.ref.id,permissions).subscribe(()=>{
+      this.nodeService.setNodePermissions(collection.ref.id,permissions,this.permissionsInfo.notify,this.permissionsInfo.notifyMessage).subscribe(()=>{
         this.save4(collection);
       });
     }

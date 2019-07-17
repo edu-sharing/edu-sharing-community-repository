@@ -53,7 +53,7 @@ import {MainNavComponent} from '../../common/ui/main-nav/main-nav.component';
 })
 export class WorkspaceMainComponent implements EventListener{
     private static VALID_ROOTS=['MY_FILES','SHARED_FILES','MY_SHARED_FILES','TO_ME_SHARED_FILES','WORKFLOW_RECEIVE','RECYCLE'];
-    private static VALID_ROOTS_NODES=[RestConstants.USERHOME,'-shared_files-','-my_shared_files-','-to_me_shared_files-'];
+    private static VALID_ROOTS_NODES=[RestConstants.USERHOME,'-shared_files-','-my_shared_files-','-to_me_shared_files-','-workflow_receive-'];
     private isRootFolder : boolean;
     private homeDirectory : string;
     private sharedFolders : Node[]=[];
@@ -951,7 +951,7 @@ export class WorkspaceMainComponent implements EventListener{
         }
         this.currentFolder=null;
         this.allowBinary=true;
-        let root=WorkspaceMainComponent.VALID_ROOTS_NODES.indexOf(id)!=-1;
+        let root=!id || WorkspaceMainComponent.VALID_ROOTS_NODES.indexOf(id)!=-1;
         if(!root) {
             this.isRootFolder=false;
             console.log("open path: "+id);

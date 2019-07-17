@@ -2,6 +2,7 @@ package org.edu_sharing.repository.server.tools.mailtemplates;
 
 import org.alfresco.service.cmr.repository.StoreRef;
 import org.apache.log4j.Logger;
+import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.server.tools.ApplicationInfo;
 import org.edu_sharing.repository.server.tools.URLTool;
 import org.edu_sharing.service.config.ConfigServiceFactory;
@@ -46,6 +47,9 @@ public class MailTemplate {
 		NodeService nodeService=NodeServiceFactory.getNodeService(appInfo.getAppId());
 		String mime=MimeTypesV2.getMimeType(nodeService.getProperties(StoreRef.PROTOCOL_WORKSPACE, StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(), nodeId));
 		if(mime.equals(MimeTypesV2.MIME_DIRECTORY)){
+			if(nodeService.hasAspect(StoreRef.PROTOCOL_WORKSPACE, StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(), nodeId,CCConstants.CCM_ASPECT_COLLECTION)){
+				return URLTool.getNgComponentsUrl()+"collections/?id="+nodeId;
+			}
 			return URLTool.getNgComponentsUrl()+"workspace/?id="+nodeId;
 		}
 		return 	URLTool.getNgComponentsUrl()+"render/"+nodeId+"?closeOnBack=true";

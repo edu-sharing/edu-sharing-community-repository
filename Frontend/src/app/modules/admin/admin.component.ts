@@ -768,7 +768,7 @@ export class AdminComponent {
         this.systemChecks=[];
 
         // check versions render service
-        this.connector.getAbout().subscribe((about)=>{
+        this.connector.getAbout().subscribe((about:any)=>{
             about.version.repository=this.getMajorVersion(about.version.repository);
             about.version.renderservice=this.getMajorVersion(about.version.renderservice);
             this.systemChecks.push({
@@ -901,6 +901,17 @@ export class AdminComponent {
         job=new SuggestItem("org.edu_sharing.repository.server.jobs.quartz.RemoveNodeJob",this.translate.instant("ADMIN.JOBS.NAMES.RemoveNodeJob"));
         job.secondaryTitle=job.id;
         this.jobClasses.push(job);
+      job=new SuggestItem("org.edu_sharing.repository.server.jobs.quartz.ConvertMultivalueToSinglevalueJob",this.translate.instant("ADMIN.JOBS.NAMES.ConvertMultivalueToSinglevalueJob"));
+      job.secondaryTitle=job.id;
+      this.jobClasses.push(job);
+    }
+    getJobName(job:any){
+      if(job && job.class) {
+        let name = job.class.split(".");
+        name = name[name.length - 1];
+        return name;
+      }
+      return null;
     }
 }
 

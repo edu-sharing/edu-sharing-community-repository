@@ -49,6 +49,7 @@ export class ShareAppComponent {
     private editorType: string;
     private file: File;
     private fileName: string;
+    private text: string;
     private loading=true;
   constructor(private toast: Toast,
               private route: ActivatedRoute,
@@ -101,6 +102,9 @@ export class ShareAppComponent {
             let prop: any = RestHelper.createNameProperty(this.title);
             if(this.editorType){
                 prop[RestConstants.CCM_PROP_EDITOR_TYPE]=[this.editorType];
+            }
+            if(this.text){
+                prop[RestConstants.LOM_PROP_GENERAL_DESCRIPTION]=[this.text];
             }
             this.node.createNode(this.inbox.ref.id, RestConstants.CCM_TYPE_IO, [], prop, true).subscribe((data: NodeWrapper) => {
                 this.node.uploadNodeContent(data.node.ref.id, this.file, RestConstants.COMMENT_MAIN_FILE_UPLOAD,this.mimetype).subscribe(() => {
@@ -155,9 +159,11 @@ export class ShareAppComponent {
         Translation.initialize(this.translate, this.config, this.storage, this.route).subscribe(() => {
             console.log("translate");
             this.route.queryParams.subscribe((params:any)=>{
+                console.log("share app query params",params);
                 this.uri=params['uri'];
                 this.mimetype=params['mimetype'];
                 this.fileName=params['file'];
+                this.text=params['text']; // ios only: custom description
                 this.description=null;
                 console.log(this.uri);
                 this.collectionApi.search("",{

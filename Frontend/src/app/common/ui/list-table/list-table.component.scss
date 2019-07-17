@@ -142,84 +142,116 @@ $badgeWidth:250px;
   font-weight:normal;
   word-break: break-all;
 }
-.node_mediatype{
-  min-width:100px;
-}
-.node_cm_modified,
-.node_sys_archivedDate,
-.node_cm_created{
-   min-width:160px;
-}
-.node_ccm_educationaltypicalagerange{
-  min-width:50px;
-}
-.node_ccm_wf_status{
-  min-width: 100px;
-}
-.node_cm_name{
-  min-width: 80px;
-}
-.node_size{
-  min-width:110px;
-}
-.node_ccm_educationallearningresourcetype{
-  min-width:150px;
-}
-.node_ccm_replicationsourceid{
-  min-width:150px;
-}
-.node_ccm_eaf_productionyear{
-  min-width:115px;
-}
-.node_ccm_eaf_sequence_title{
-  min-width:130px;
-}
-.node_ccm_eaf_subtitle{
-  min-width:130px;
-}
-.node_dimensions{
-  min-width:110px;
-}
-.node_cclom_title{
-  min-width: 160px;
-  word-break: break-all;
-}
-.node_cclom_general_keyword{
-  min-width: 160px;
-  word-break: break-all;
-}
-.node_cclom_version{
-  min-width: 60px;
-}
-.node_sys_node-uuid{
-  min-width: 150px;
-}
-.node_virtual_usagecount{
-  min-width: 150px;
-}
-.node_ccm_commonlicense_key{
-  min-width: 130px;
-}
-.node_cm_creator,.node_ccm_lifecyclecontributer_authorFN,.node_ccm_metadatacontributer_creatorFN{
-  min-width:130px;
-  word-break: break-all;
-}
-.node_ccm_replicationsource{
-  min-width:80px;
-}
-.user_firstName,
-.user_lastName{
-  min-width:130px;
-  word-break: break-all;
-}
-.group_groupType{
-  min-width: 160px;
-  word-break: break-all;
-}
+.headingGroup .heading,
+.tableList .node-row{
+  /* fallback for unset/unknown fields */
+  >div{
+    min-width: 120px;
+  }
+  .editColumns{
+    min-width: initial;
+  }
+  .icon {
+    min-width: 50px;
+  }
+  .checkbox{
+    min-width:70px;
+  }
+  .checkboxDummy{
+    min-width:10px;
+  }
+  .node_mediatype{
+    min-width:100px;
+  }
+  .node_cm_modified,
+  .node_sys_archivedDate,
+  .node_cm_created{
+    min-width:160px;
+  }
+  .node_ccm_educationaltypicalagerange{
+    min-width:50px;
+  }
+  .node_ccm_wf_status{
+    min-width: 100px;
+  }
+  .node_cm_name{
+    min-width: 80px;
+  }
+  .node_size{
+    min-width:110px;
+  }
+  .node_ccm_educationallearningresourcetype{
+    min-width:150px;
+  }
+  .node_ccm_replicationsourceid{
+    min-width:150px;
+  }
+  .node_ccm_eaf_productionyear{
+    min-width:115px;
+  }
+  .node_ccm_eaf_sequence_title{
+    min-width:130px;
+  }
+  .node_ccm_eaf_subtitle{
+    min-width:130px;
+  }
+  .node_dimensions{
+    min-width:110px;
+  }
+  .node_cclom_title{
+    min-width: 160px;
+    word-break: break-all;
+  }
+  .node_ccm_educationalcontext{
+    min-width: 180px;
+    word-break: break-all;
+  }
+  .node_cclom_general_keyword{
+    min-width: 160px;
+    word-break: break-all;
+  }
+  .node_cclom_version{
+    min-width: 60px;
+  }
+  .node_sys_node-uuid{
+    min-width: 150px;
+  }
+  .node_virtual_usagecount{
+    min-width: 150px;
+  }
+  .node_ccm_commonlicense_key{
+    min-width: 130px;
+  }
+  .node_cm_creator,.node_ccm_lifecyclecontributer_authorFN,.node_ccm_metadatacontributer_creatorFN{
+    min-width:130px;
+    word-break: break-all;
+  }
+  .node_ccm_replicationsource{
+    min-width:80px;
+  }
+  .node_ccm_lifecyclecontributer_publisherFN{
+    min-width:50px;
+    text-align: center;
+  }
+  .user_firstName,
+  .user_lastName{
+    min-width:130px;
+    word-break: break-all;
+  }
+  .group_groupType{
+    min-width: 160px;
+    word-break: break-all;
+  }
 
-.user_email{
-  min-width:180px;
-  word-break: break-all;
+  .user_email{
+    min-width:180px;
+    word-break: break-all;
+  }
+  .more{
+    min-width:60px;
+    transition: $transitionNormal all;
+    @include clickable();
+  }
 }
 .more{
   min-width:60px;
@@ -411,6 +443,11 @@ $badgeWidth:250px;
 .list .cardList.dark-color{
   .row_1,.row_2,.row_3,.row_4,.row_5,.row_6 {
     color: #000 !important;
+  }
+}
+:host /deep/{
+  .collectionPinned custom-icon g{
+    fill:#fff;
   }
 }
 .checkbox{

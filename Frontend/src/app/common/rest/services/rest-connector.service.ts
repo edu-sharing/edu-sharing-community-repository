@@ -3,7 +3,7 @@ import {RestConstants} from '../rest-constants';
 import {RestHelper} from '../rest-helper';
 import {Observable, Observer} from 'rxjs';
 import {RequestObject} from '../request-object';
-import {OAuthResult, LoginResult, AccessScope} from '../data-object';
+import {OAuthResult, LoginResult, AccessScope, About} from '../data-object';
 import {FrameEventsService} from '../../services/frame-events.service';
 import {Router, ActivatedRoute} from '@angular/router';
 import {TemporaryStorageService} from '../../services/temporary-storage.service';
@@ -145,7 +145,7 @@ export class RestConnectorService {
   }
   public getAbout(){
       let url=this.createUrl("_about",null);
-      return this.get<any>(url,this.getRequestOptions());
+      return this.get<About>(url,this.getRequestOptions());
   }
   public isLoggedIn(){
     let url=this.createUrl("authentication/:version/validateSession",null);
