@@ -80,7 +80,11 @@ public class NodeRunner {
         this.runAsSystem = runAsSystem;
     }
 
-    public void run(){
+    /**
+     * runs the job for each node
+     * @return the number of nodes that have been processed
+     */
+    public int run(){
         if(task==null)
             throw new IllegalArgumentException("No task has been set yet");
 
@@ -105,6 +109,7 @@ public class NodeRunner {
             nodes.parallelStream().forEach(callTask);
         else
             nodes.forEach(task);
+        return nodes.size();
 
     }
 }

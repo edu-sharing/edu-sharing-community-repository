@@ -86,6 +86,7 @@ public class ConvertMultivalueToSinglevalueJob extends AbstractJob{
 		runner.setTask((ref)->{
 			org.alfresco.service.cmr.repository.NodeRef nodeRef = new org.alfresco.service.cmr.repository.NodeRef(ref.getStoreRef(), ref.getId());
 			Serializable value = nodeService.getProperty(nodeRef, QName.createQName(property));
+			//logger.info("ref: "+ref.getId()+ " value: "+value);
 			if(value!=null) {
 				if(value instanceof List){
 					List list = (List) value;
@@ -105,7 +106,8 @@ public class ConvertMultivalueToSinglevalueJob extends AbstractJob{
 		runner.setTypes(Collections.singletonList(CCConstants.CCM_TYPE_IO));
 		runner.setRunAsSystem(true);
 		runner.setThreaded(true);
-		runner.run();
+		int count=runner.run();
+		logger.info("Processed "+count+" nodes");
 	}
 	
 	public void run() {
