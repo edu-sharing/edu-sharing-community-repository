@@ -101,6 +101,14 @@ public class ConvertMultivalueToSinglevalueJob extends AbstractJob{
 				else if(value instanceof String){
 					logger.info("Value for ref " + ref.getId() + " is already singlevalue/string: "+value);
 				}
+				else{
+					logger.info("Value for ref " + ref.getId() + " is of type "+value.getClass().getSimpleName()+", use toString(): " + value);
+					try {
+						nodeService.setProperty(nodeRef, QName.createQName(property), value.toString());
+					}catch(Throwable t){
+						logger.error("can't set value "+value+" for ref: "+ref.getId(),t);
+					}
+				}
 			}
 		});
 		runner.setTypes(Collections.singletonList(CCConstants.CCM_TYPE_IO));
