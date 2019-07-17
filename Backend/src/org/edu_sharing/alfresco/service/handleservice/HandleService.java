@@ -213,6 +213,8 @@ public class HandleService {
 	
 	public static synchronized String generateUniqueHandleId() throws SQLException{
 		String handleId = RandomStringUtils.randomAlphabetic(HANDLE_ID_LENGTH);
+		//handle server does not differentiate upper/lowercase
+		handleId = handleId.toUpperCase();
 		while(handleIdExists(handleId)) {
 			handleId = RandomStringUtils.randomAlphabetic(HANDLE_ID_LENGTH);
 		}
