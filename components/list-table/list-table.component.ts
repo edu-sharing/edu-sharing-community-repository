@@ -101,7 +101,7 @@ export class ListTableComponent implements EventListener{
     this.changes.detectChanges();
   }
 
-  private _options : OptionItem[];
+  _options : OptionItem[];
   /**
    * Set the options which are valid for each node, similar to the action bar options, see @OptionItem
    * @param options
@@ -336,8 +336,8 @@ export class ListTableComponent implements EventListener{
   @Output() onOrderElements=new EventEmitter();
 
   private dragHover : Node;
-  private dropdownLeft : string;
-  private dropdownTop : string;
+  dropdownLeft : string;
+  dropdownTop : string;
   @ViewChild('dropdown') dropdownElement : ElementRef;
   @ViewChild('dropdownContainer') dropdownContainerElement : ElementRef;
 
