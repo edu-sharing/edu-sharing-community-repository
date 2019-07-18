@@ -2,6 +2,9 @@
 $borderRadius:2px;
 $previewHeight:160px;
 
+.dropdown-dummy{
+  position: absolute;
+}
 .heading div{
   padding:0px 0px;
 }
@@ -251,21 +254,22 @@ $badgeWidth:250px;
     min-width: 160px;
     word-break: break-all;
   }
-
   .user_email{
     min-width:180px;
     word-break: break-all;
   }
   .more{
-    min-width:60px;
-    transition: $transitionNormal all;
-    @include clickable();
+    display: flex!important;
+    align-items: center;
+    position: relative;
+    top: 10px;
+    right: 10px;
   }
 }
 .more{
-  min-width:60px;
-  transition: $transitionNormal all;
-  padding-top: 0!important;
+  width: 50px;
+  height: 50px;
+  padding:0!important;
 }
 .moreOpen{
   position:absolute;
@@ -282,7 +286,6 @@ $badgeWidth:250px;
 }
 .headingGroup {
   position: relative;
-  padding-top: 12px;
   display: flex;
   .totalCount {
     position: absolute;
@@ -318,18 +321,12 @@ $badgeWidth:250px;
 .cardList .row.selected{
   background: $workspaceSelectedBackgroundEffect;
   background-color:$workspaceSelectedBackground;
-  .more{
-    @include fadeRight($workspaceSelectedBackground,20px)
-  }
 }
 
 .cardList .row.selected{
   background: $backgroundColor;
   background-color:$backgroundColor;
   outline:2px solid $primary;
-  .more{
-    @include fadeRight($backgroundColor,20px)
-  }
 }
 .row:focus{
   @include setGlobalInsetFocus();
@@ -348,9 +345,6 @@ $badgeWidth:250px;
 }
 .list .row:hover{
   background-color:$workspaceSelectedBackground;
-  .more{
-    @include fadeRight($workspaceSelectedBackground,20px);
-  }
 }
 
 .list .filled-in:checked+label:after{
@@ -600,13 +594,6 @@ $orderAnimationTime:$transitionNormal*5;
 .cardList .rowInner{
   max-height: none;
 }
-.checkbox,
-.more{
-  padding-left:15px!important;
-}
-.more{
-  padding-right:20px!important;
-}
 .checkbox{
   padding-left:25px!important;
 }
@@ -827,16 +814,8 @@ $orderAnimationTime:$transitionNormal*5;
 .cardList{
   .more{
     position:absolute;
-    right: -5px;
-    top:$cardHeight - 55px;
-    padding:10px!important;
-    @include fadeRight(#fff,20px);
-    padding-bottom: 5px;
-    a{
-      padding-left: 5px;
-      position: relative;
-      left:10px;
-    }
+    right: 0;
+    top:$cardHeight - 50px;
   }
   .moreAlways{
     right: 30px;

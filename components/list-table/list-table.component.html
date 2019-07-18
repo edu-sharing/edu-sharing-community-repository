@@ -54,7 +54,7 @@
             </div>
         </div>
         <div *ngFor="let option of optionsAlways"  class="more moreAlways" > </div>
-        <div class="more" *ngIf="_options && _options.length">&nbsp;</div>
+        <div class="more-header" *ngIf="_options && _options.length">&nbsp;</div>
         <div class="removeColumn" *ngIf="currentDragColumn && reorderColumns"
              (dragover)="allowDeleteColumn($event)" (drop)="deleteColumn($event)"
         ><i icon iconId="delete"></i></div>
@@ -182,14 +182,14 @@
                         </div>
                     </div>
                 </div>
-                <div *ngFor="let option of optionsAlways"
+                <button mat-icon-button *ngFor="let option of optionsAlways"
                      class="more moreAlways column"
                      [style.opacity]="optionIsShown(option,node) ? 1 : 0"
                      (click)="optionIsShown(option,node) ? callOption(option,node) : null">
                     <i icon iconId="{{option.icon}}"></i>
-                </div>
-                <div class="more column" *ngIf="_options && _options.length>1"><button mat-icon-button (click)="showDropdown(node,true,$event);$event.stopPropagation();"><i icon iconId="more_vert" aria="true"></i></button></div>
-                <div tabindex="0" class="more moreSingle column" *ngIf="_options && _options.length==1 && optionIsShown(_options[0],node)" (click)="callOption(_options[0],node);$event.stopPropagation();" (keyup.enter)="callOption(_options[0],node);$event.stopPropagation()"><a [class.disabled]="!optionIsValid(_options[0],node)"><i icon iconId="{{_options[0].icon}}"></i> <span class="actionText">{{_options[0].name | translate}}</span></a></div>
+                </button>
+                <button mat-icon-button class="more column" *ngIf="_options && _options.length>1" (click)="showDropdown(node,true,$event);$event.stopPropagation();"><i icon iconId="more_vert" aria="true"></i></button>
+                <button mat-icon-button class="more moreSingle column" *ngIf="_options && _options.length==1 && optionIsShown(_options[0],node)" (click)="callOption(_options[0],node);$event.stopPropagation();"><a [class.disabled]="!optionIsValid(_options[0],node)"><i icon iconId="{{_options[0].icon}}"></i> <span class="actionText">{{_options[0].name | translate}}</span></a></button>
             </div>
         </div>
         <div *ngIf="_nodes && _nodes.length && hasMore && !isLoading" class="clickable loadMore" (click)="scroll(true)">
@@ -198,4 +198,3 @@
         </div>
         <spinner *ngIf="isLoading"></spinner>
     </div>
-</div>
