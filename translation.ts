@@ -51,6 +51,7 @@ export class Translation  {
             let useStored=false;
             if (data.indexOf(params.locale) != -1) {
               language = params.locale;
+              console.log("language: locale parameter is used");
             }
             else if(params.locale){
                 console.warn("Url requested language "+params.locale+", but it was not found or is not configured in the allowed languages: "+data);
@@ -58,9 +59,11 @@ export class Translation  {
             else if (data.indexOf(storageLanguage) != -1) {
               language = storageLanguage;
               useStored=true;
+                console.log("language: stored user profile parameter is used");
             }
             else if (data.indexOf(browserLang) != -1) {
               language = browserLang;
+              console.log("language: browser setting is used");
             }
             if(!useStored)
               storage.set("language", language);
@@ -76,9 +79,9 @@ export class Translation  {
             translate.getTranslation(language).subscribe(()=>{
                 // strangley, the translation service seems to need some time to fully init
                 setTimeout(()=> {
-              Translation.languageLoaded=true;
-              observer.next(language);
-              observer.complete();
+                    Translation.languageLoaded = true;
+                    observer.next(language);
+                    observer.complete();
                 },100);
             });
           });

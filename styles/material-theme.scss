@@ -85,6 +85,16 @@ $candy-app-theme: mat-light-theme($candy-app-primary, $candy-app-accent, $candy-
     background-color: $primaryLight;
   }
 }
+// a mat table with clickable columsn
+.mat-table-clickable{
+  .mat-row{
+    @include clickable();
+    transition: all $transitionNormal;
+    &:hover{
+      background-color: $workspaceSelectedBackground;
+    }
+  }
+}
 .mat-fab.mat-white,
 .mat-mini-fab.mat-white{
   // white background, primary as content color
@@ -143,11 +153,6 @@ input.mat-input-element, mat-label, .mat-select-value{
 }
 .mat-raised-button{
   color: $primary;
-}
-.mat-radio-label,.mat-checkbox-layout{
-  // do allow to wrap long labels in material radio groups (e.g. license dialog)
-  white-space: normal!important;
-  align-items: baseline !important;
 }
 .mat-button-wrapper{
   display: flex !important;

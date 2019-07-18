@@ -59,7 +59,7 @@ export class DateHelper{
   public static formatDate(translation : TranslateService,date: number|any,options:FormatOptions = new FormatOptions()) : string{
     try {
       if(!isNumeric(date)) {
-        return date;
+        date=Date.parse(date)
       }
       let dateObject = new Date((date as number) * 1);
       let dateToday = new Date();

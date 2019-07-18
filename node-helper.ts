@@ -577,10 +577,10 @@ export class NodeHelper{
     return '<span title="'+NodeHelper.getLicenseName(data,translate)+'"><img alt="'+NodeHelper.getLicenseName(data,translate)+'" src="'+NodeHelper.getLicenseIcon(data)+'"></span>';
   }
   public static getSourceIconRepoPath(repo:Repository) {
-    if(repo.isHomeRepo)
-      return NodeHelper.getSourceIconPath('home');
     if(repo.icon)
       return repo.icon;
+    if(repo.isHomeRepo)
+      return NodeHelper.getSourceIconPath('home');
     return NodeHelper.getSourceIconPath(repo.repositoryType.toLowerCase());
   }
   public static getSourceIconPath(src: string) {
