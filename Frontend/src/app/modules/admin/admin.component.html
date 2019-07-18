@@ -59,7 +59,7 @@
 <div class="main">
 <div class="main-nav">
     <div>
-        <div *ngFor="let button of buttons" class="button clickable" [class.active]="mode==button.id" tabindex="0" (click)="setMode(button.id)" (keyup.enter)="setMode(button.id)">
+        <div matRipple *ngFor="let button of buttons" class="button clickable" [class.active]="mode==button.id" tabindex="0" (click)="setMode(button.id)" (keyup.enter)="setMode(button.id)">
             <i icon [iconId]="button.icon"></i><span>{{('ADMIN.MODE.'+button.id) | translate }}</span>
         </div>
     </div>
@@ -97,8 +97,8 @@
     <div class="heading"><i class="material-icons">build</i><span>{{'ADMIN.CONFIG.XML_CONFIG' | translate}}</span></div>
     <div class="group xml">
         <div *ngFor="let xml of editableXmls">
-            <a class="btn waves-effect waves-light"
-             (click)="editApp(xml)">{{'ADMIN.APPLICATIONS.EDIT_APP' | translate:{xml:xml.file} }}</a>
+            <button mat-raised-button color="primary"
+             (click)="editApp(xml)">{{'ADMIN.APPLICATIONS.EDIT_APP' | translate:{xml:xml.file} }}</button>
         </div>
     </div>
     <div class="heading"><i class="material-icons">mail</i><span>{{'ADMIN.CONFIG.TEST_MAIL' | translate}}</span></div>
@@ -114,7 +114,7 @@
                     <option *ngFor="let template of mailTemplates">{{template}}</option>
                 </select>
             </div>
-            <a class="btn btn-shadow" [class.disabled]="!mailReceiver || !mailTemplate" (click)="testMail()">{{'ADMIN.CONFIG.TEST_MAIL_SEND' | translate }}</a>
+            <button mat-raised-button color="primary" [class.disabled]="!mailReceiver || !mailTemplate" (click)="testMail()">{{'ADMIN.CONFIG.TEST_MAIL_SEND' | translate }}</button>
         </form>
     </div>
 </div>
