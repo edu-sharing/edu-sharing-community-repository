@@ -46,7 +46,6 @@ import {MdsHelper} from "../../core-module/rest/mds-helper";
 import {BridgeService} from "../../core-bridge-module/bridge.service";
 import {AddElement} from "../../core-ui-module/add-element";
 import {MatSlideToggle} from "@angular/material";
-import {RestLocatorService} from '../../common/rest/services/rest-locator.service';
 import {HttpClient} from "@angular/common/http";
 
 // component class

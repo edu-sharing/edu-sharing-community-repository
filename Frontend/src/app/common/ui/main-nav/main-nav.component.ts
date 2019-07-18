@@ -32,9 +32,9 @@ import {
     RestOrganizationService,
     SessionStorageService,
     TemporaryStorageService,
-    UIService
+    UIService,
+    About
 } from '../../../core-module/core.module';
-import {CordovaService} from "../../services/cordova.service";
 import {BridgeService} from "../../../core-bridge-module/bridge.service";
 
 @Component({
@@ -423,7 +423,7 @@ export class MainNavComponent implements AfterViewInit{
                     this.refreshNodeStore();
                     this.connector.hasAccessToScope(RestConstants.SAFE_SCOPE).subscribe((data: AccessScope) => {
                         // safe needs access and not be app (oauth not supported)
-                        if (data.hasAccess && !this.cordova.isRunningCordova())
+                        if (data.hasAccess && !this.bridge.isRunningCordova())
                             buttons.push({path: 'workspace/safe', scope: 'safe', icon: "lock", name: "SIDEBAR.SECURE", onlyDesktop: true});
                         this.addMoreButtons(buttons);
                     }, (error: any) => this.addMoreButtons(buttons));
