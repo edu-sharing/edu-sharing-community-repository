@@ -41,7 +41,7 @@ export class WorkspaceContributorComponent  {
   public dialogParameters: any;
   public node: Node;
   public date : Date;
-  private buttons: DialogButton[];
+  buttons: DialogButton[];
   private editButtons: DialogButton[];
   private static TYPE_PERSON = 0;
   private static TYPE_ORG = 1;

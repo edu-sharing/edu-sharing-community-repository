@@ -47,7 +47,7 @@ export class WorkspaceWorkflowComponent{
   public globalAllowed: boolean;
   public globalSearch = false;
   public TYPE_EDITORIAL=RestConstants.GROUP_TYPE_EDITORIAL;
-  private buttons: DialogButton[];
+  buttons: DialogButton[];
   @Input() set nodeId(nodeId : string){
     this._nodeId=nodeId;
     this.loading=true;

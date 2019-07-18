@@ -72,18 +72,18 @@ export class WorkspaceShareComponent{
   private permissions : Permission[]=[];
   public permissionsUser : Permission[];
   public permissionsGroup : Permission[];
-  private newPermissions : Permission[]=[];
+  newPermissions : Permission[]=[];
   inheritAccessDenied = false;
   public owner : Permission;
   public linkEnabled : Permission;
   public linkDisabled : Permission;
   public link = false;
-  private _node : Node;
-  private searchStr: string;
-  private inheritAllowed=false;
-  private globalSearch=false;
-  private globalAllowed=false;
-  private fuzzyAllowed=false;
+  _node : Node;
+  searchStr: string;
+  inheritAllowed=false;
+  globalSearch=false;
+  globalAllowed=false;
+  fuzzyAllowed=false;
   public history: Node;
   public linkNode: Node;
   public showLink: boolean;
@@ -95,7 +95,7 @@ export class WorkspaceShareComponent{
   public doiActive: boolean;
   public doiDisabled: boolean;
   private originalPermissions: LocalPermissions;
-  private isSafe = false;
+  isSafe = false;
   collectionColumns=UIHelper.getDefaultCollectionColumns();
   collections: CollectionUsage[];
   // store authorities marked for deletion
@@ -113,7 +113,7 @@ export class WorkspaceShareComponent{
   public openLink(){
     this.linkNode=this._node;
   }
-  private addSuggestion(data: any) {
+  addSuggestion(data: any) {
     this.addAuthority(data);
   }
   @Input() sendMessages=true;

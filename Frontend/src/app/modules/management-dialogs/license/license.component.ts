@@ -47,7 +47,7 @@ export class WorkspaceLicenseComponent  {
   private doiPermission: boolean;
   private doiActive: boolean;
   private doiDisabled: boolean;
-  private buttons: DialogButton[];
+  buttons: DialogButton[];
   public set type(type:string){
     if(type=='CC_0' || type=='PDM'){
         this.cc0Type=type;

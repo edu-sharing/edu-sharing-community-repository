@@ -27,7 +27,7 @@ export class FileChooserComponent implements OnInit{
   public searchMode: boolean;
   private searchQuery : string;
   buttons: DialogButton[];
-  private subtitle: string;
+  subtitle: string;
 
     ngOnInit(): void {
     this.initialize();
@@ -232,7 +232,7 @@ export class FileChooserComponent implements OnInit{
     this.updateButtons();
     this.isLoading=false;
   }
-  private cancel(){
+  cancel(){
     this.onCancel.emit();
   }
 

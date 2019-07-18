@@ -77,7 +77,7 @@ import {BridgeService} from "../../../core-bridge-module/bridge.service";
 export class MainNavComponent implements AfterViewInit{
     private static bannerPositionInterval: any;
     private static preloading=true;
-    private visible=false;
+    visible=false;
     private static ID_ATTRIBUTE_NAME='data-banner-id';
 
     @ViewChild('search') search : ElementRef;

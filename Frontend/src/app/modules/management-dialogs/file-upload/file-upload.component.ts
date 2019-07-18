@@ -18,7 +18,7 @@ export class WorkspaceFileUploadComponent  {
   private _files : FileList;
   private error = false;
   public showClose = false;
-  private processed = 0;
+  processed = 0;
   @Input() set files(files : FileList){
     console.log(files);
     this._files=files;

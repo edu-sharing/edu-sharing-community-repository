@@ -35,9 +35,9 @@ export class AddStreamComponent  {
   AUDIENCE_MODE_EVERYONE="0";
   AUDIENCE_MODE_CUSTOM="1";
   audienceMode=this.AUDIENCE_MODE_EVERYONE;
-  private _nodes: any;
+  _nodes: any;
   private invite: AuthorityProfile[]=[];
-  private buttons: DialogButton[];
+  buttons: DialogButton[];
   @Input() set nodes(nodes : Node[]){
     this._nodes=nodes;
   }

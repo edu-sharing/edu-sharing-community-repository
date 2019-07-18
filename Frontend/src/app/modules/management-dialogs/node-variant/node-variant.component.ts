@@ -33,7 +33,7 @@ export class NodeVariantComponent  {
   variantName : string;
   openViaConnector: Connector;
   licenseWarning: string;
-    private buttons: DialogButton[];
+  buttons: DialogButton[];
   @Input() set node(node : Node){
     this._node=node;
     this.variantName=this.translate.instant('NODE_VARIANT.DEFAULT_NAME',{name:this._node.name});
