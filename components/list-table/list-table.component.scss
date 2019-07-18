@@ -155,6 +155,9 @@ $badgeWidth:250px;
   >div{
     min-width: 120px;
   }
+  .more-header{
+    min-width: 50px;
+  }
   .editColumns{
     min-width: initial;
   }
@@ -290,7 +293,7 @@ $badgeWidth:250px;
   .totalCount {
     position: absolute;
     left: 56px;
-    top: 14px;
+    top: 0;
     color:$textLight;
   }
   .sortMenu{

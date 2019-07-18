@@ -77,7 +77,7 @@
                 <div class="label">{{addElement.label | translate}}</div>
             </div>
         </div>
-        <div *ngFor="let node of _nodes; let i = index" class="collection-item rowFrame"
+        <div matRipple *ngFor="let node of _nodes; let i = index" class="rowFrame"
              [class.order-animation]="orderElementsActive"
              [class.nodeCollection]="isCollection(node)"
              [style.border-color]="isCollection(node) ? getCollectionColor(node) : null"
@@ -85,7 +85,7 @@
              [class.cardList]="viewType==1"
              [class.cardSmallList]="viewType==2"
              [class.hover]="dragHover==node">
-            <div class="row waves-effect node-row"
+            <div class="row node-row"
                  [class.noCCPublish]="applyMode && node.access.indexOf('CCPublish')==-1"
                  [class.noPermissions]="noPermissions(node)"
                  [class.selected]="getSelectedPos(node)!=-1"
