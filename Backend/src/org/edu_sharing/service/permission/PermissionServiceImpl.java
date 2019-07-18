@@ -66,6 +66,7 @@ import org.edu_sharing.repository.server.tools.URLTool;
 import org.edu_sharing.repository.server.tools.mailtemplates.MailTemplate;
 import org.edu_sharing.service.Constants;
 import org.edu_sharing.service.InsufficientPermissionException;
+import org.edu_sharing.service.nodeservice.NodeServiceFactory;
 import org.edu_sharing.service.oai.OAIExporterService;
 import org.edu_sharing.service.toolpermission.ToolPermissionException;
 import org.edu_sharing.service.toolpermission.ToolPermissionService;
@@ -303,10 +304,6 @@ public class PermissionServiceImpl implements org.edu_sharing.service.permission
 			}
 		}
 
-		String subject = I18nServer.getTranslationDefaultResourcebundle("dialog_inviteusers_mailtext_subject_default",
-				currentLocale);
-		subject = subject.replace("{user}", senderName);
-
 		for (String authority : _authPerm.keySet()) {
 			String[] permissions = _authPerm.get(authority);
 			setPermissions(_nodeId, authority, permissions, _inheritPermissions);
@@ -373,39 +370,33 @@ public class PermissionServiceImpl implements org.edu_sharing.service.permission
 				ServletContext context = Context.getCurrentInstance().getRequest().getSession().getServletContext();
 				Map<String, String> replace = new HashMap<>();
 				replace.put("inviterFirstName", senderFirstName.trim());
-				replace.put("inviterLastName", senderFirstName.trim());
+				replace.put("inviterLastName", senderLastName.trim());
 				replace.put("firstName", receiverFirstName.trim());
 				replace.put("lastName", receiverLastName.trim());
 				replace.put("name", name.trim());
 				replace.put("message", _mailText.trim());
 				replace.put("permissions", permText.trim());
 				replace.put("link", MailTemplate.generateContentLink(appInfo, _nodeId));
-				mail.sendMailHtml(context, senderName, emailaddress, MailTemplate.getSubject("invited", currentLocale),
-						MailTemplate.getContent("invited", currentLocale, true), replace);
+				String template="invited";
+				boolean send=true;
+				org.edu_sharing.service.nodeservice.NodeService nodeServiceApp = NodeServiceFactory.getNodeService(appInfo.getAppId());
+				if(nodeType.equals(CCConstants.CCM_TYPE_MAP) &&
+						nodeServiceApp.hasAspect(StoreRef.PROTOCOL_WORKSPACE,StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(),_nodeId,CCConstants.CCM_ASPECT_COLLECTION)){
+					template="invited_collection";
+					// if the receiver is the creator itself, skip it (because it is automatically added)
+					if(authority.equals(nodeServiceApp.getProperty(StoreRef.PROTOCOL_WORKSPACE,StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(),_nodeId,CCConstants.CM_PROP_C_CREATOR))){
+						send=false;
+					}
+				}
+				if(send) {
+					mail.sendMailHtml(context, senderName, emailaddress, MailTemplate.getSubject(template, currentLocale),
+							MailTemplate.getContent(template, currentLocale, true), replace);
+				}
 
 			} else {
 				logger.info("username/authority: " + authority + " has no valid emailaddress:" + emailaddress);
 			}
 
-		}
-
-		if (_sendMail && _sendCopy) {
-			Mail mail = new Mail();
-			String emailaddress = null;
-			try {
-				HashMap<String, String> personInfo = repoClient.getUserInfo(user);
-				if (personInfo != null) {
-					emailaddress = personInfo.get(CCConstants.CM_PROP_PERSON_EMAIL);
-				}
-			} catch (Exception e) {
-				// do nothing: user has no valid email
-			}
-
-			if (mailValidator.isValid(emailaddress)) {
-				mail.sendMail(senderName, emailaddress, subject, copyMailText);
-			} else {
-				logger.info("username: " + _sendMail + " has no valid emailaddress:" + emailaddress);
-			}
 		}
 
 		org.edu_sharing.service.permission.PermissionService permissionService = PermissionServiceFactory

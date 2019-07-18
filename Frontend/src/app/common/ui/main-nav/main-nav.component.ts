@@ -169,6 +169,7 @@ export class MainNavComponent implements AfterViewInit{
     private elementsBottomY = 0;
     private fixScrollElements = false;
     private isSafe = false;
+    private about: About;
     licenseDialog: boolean;
     private licenseDetails: string;
     @HostListener('document:keydown', ['$event'])
@@ -232,6 +233,8 @@ export class MainNavComponent implements AfterViewInit{
         try {
             let rect=document.getElementsByTagName("header")[0].getBoundingClientRect();
             y = rect.bottom-rect.top;
+            // set min height + a small increase of height to prevent flickering in chrome
+            document.documentElement.style.minHeight="calc(100% + "+(y+10)+"px)";
         }catch(e){
         }
         for(let i=0;i<elements.length;i++) {
@@ -368,66 +371,69 @@ export class MainNavComponent implements AfterViewInit{
         // get last buttons from cache for faster app navigation
         this.sidebarButtons=this.storage.get(TemporaryStorageService.MAIN_NAV_BUTTONS,[]);
         this.visible=!this.storage.get(TemporaryStorageService.OPTION_HIDE_MAINNAV,false);
-        this.connector.isLoggedIn().subscribe((data:LoginResult)=>{
-            if(!data.isValidLogin) {
-                this.canOpen=data.isGuest;
-                this.checkConfig([]);
-                return;
-            }
-            this.isSafe=data.currentScope==RestConstants.SAFE_SCOPE;
-            setInterval(()=>this.updateTimeout(),1000);
-            this.toolpermissions=data.toolPermissions;
-            this.canAccessWorkspace=this.toolpermissions && this.toolpermissions.indexOf(RestConstants.TOOLPERMISSION_WORKSPACE)!=-1;
-
-            this.route.queryParams.subscribe((params: Params) => {
-                let buttons:any=[];
-                if(params["noNavigation"]=="true")
-                    this.canOpen=false;
-
-                let reurl=null;
-                if(params["reurl"])
-                    reurl={reurl:params["reurl"],applyDirectories:params["applyDirectories"]};
-                this.showNodeStore=params['nodeStore']=="true";
-                if(!data.isGuest && this.canAccessWorkspace) {
-                    //buttons.push({url:this.connector.getAbsoluteEndpointUrl()+"../classic.html",scope:'workspace_old',icon:"cloud",name:"SIDEBAR.WORKSPACE_OLD"});
-                    buttons.push({
-                        //isSeperate:true,
-                        path: 'workspace/files',
-                        scope: 'workspace',
-                        icon: "cloud",
-                        name: "SIDEBAR.WORKSPACE",
-                        queryParams:reurl
-                    });
+        this.connector.getAbout().subscribe((about)=> {
+            this.about = about;
+            this.connector.isLoggedIn().subscribe((data: LoginResult) => {
+                if (!data.isValidLogin) {
+                    this.canOpen = data.isGuest;
+                    this.checkConfig([]);
+                    return;
                 }
-                buttons.push({path:'search',scope:'search',icon:"search",name:"SIDEBAR.SEARCH",queryParams:reurl});
-                buttons.push({path:'collections',scope:'collections',icon:"layers",name:"SIDEBAR.COLLECTIONS",queryParams:reurl});
-                buttons.push({path:'stream',scope:'stream',icon:"event",name:"SIDEBAR.STREAM"});
-                if(data.isGuest){
-                    buttons.push({path:'login',scope:'login',icon:"person",name:"SIDEBAR.LOGIN"});
-                }
-                this.isGuest=data.isGuest;
-                this.isAdmin=data.isAdmin;
-                this._showUser=this.currentScope!='login' && this.showUser;
-                this.iam.getUser().subscribe((user : IamUser) => {
-                    this.user=user;
-                    this.canEditProfile=user.editProfile;
-                    this.configService.getAll().subscribe(()=>{
-                        this.userName=ConfigurationHelper.getPersonWithConfigDisplayName(this.user.person,this.configService);
+                this.isSafe = data.currentScope == RestConstants.SAFE_SCOPE;
+                setInterval(() => this.updateTimeout(), 1000);
+                this.toolpermissions = data.toolPermissions;
+                this.canAccessWorkspace = this.toolpermissions && this.toolpermissions.indexOf(RestConstants.TOOLPERMISSION_WORKSPACE) != -1;
+
+                this.route.queryParams.subscribe((params: Params) => {
+                    let buttons: any = [];
+                    if (params["noNavigation"] == "true")
+                        this.canOpen = false;
+
+                    let reurl = null;
+                    if (params["reurl"])
+                        reurl = {reurl: params["reurl"], applyDirectories: params["applyDirectories"]};
+                    this.showNodeStore = params['nodeStore'] == "true";
+                    if (!data.isGuest && this.canAccessWorkspace) {
+                        //buttons.push({url:this.connector.getAbsoluteEndpointUrl()+"../classic.html",scope:'workspace_old',icon:"cloud",name:"SIDEBAR.WORKSPACE_OLD"});
+                        buttons.push({
+                            //isSeperate:true,
+                            path: 'workspace/files',
+                            scope: 'workspace',
+                            icon: "cloud",
+                            name: "SIDEBAR.WORKSPACE",
+                            queryParams: reurl
+                        });
+                    }
+                    buttons.push({path: 'search', scope: 'search', icon: "search", name: "SIDEBAR.SEARCH", queryParams: reurl});
+                    buttons.push({path: 'collections', scope: 'collections', icon: "layers", name: "SIDEBAR.COLLECTIONS", queryParams: reurl});
+                    buttons.push({path: 'stream', scope: 'stream', icon: "event", name: "SIDEBAR.STREAM"});
+                    if (data.isGuest) {
+                        buttons.push({path: 'login', scope: 'login', icon: "person", name: "SIDEBAR.LOGIN"});
+                    }
+                    this.isGuest = data.isGuest;
+                    this.isAdmin = data.isAdmin;
+                    this._showUser = this.currentScope != 'login' && this.showUser;
+                    this.iam.getUser().subscribe((user: IamUser) => {
+                        this.user = user;
+                        this.canEditProfile = user.editProfile;
+                        this.configService.getAll().subscribe(() => {
+                            this.userName = ConfigurationHelper.getPersonWithConfigDisplayName(this.user.person, this.configService);
+                        });
                     });
+                    this.refreshNodeStore();
+                    this.connector.hasAccessToScope(RestConstants.SAFE_SCOPE).subscribe((data: AccessScope) => {
+                        // safe needs access and not be app (oauth not supported)
+                        if (data.hasAccess && !this.cordova.isRunningCordova())
+                            buttons.push({path: 'workspace/safe', scope: 'safe', icon: "lock", name: "SIDEBAR.SECURE", onlyDesktop: true});
+                        this.addMoreButtons(buttons);
+                    }, (error: any) => this.addMoreButtons(buttons));
                 });
-                this.refreshNodeStore();
-                this.connector.hasAccessToScope(RestConstants.SAFE_SCOPE).subscribe((data:AccessScope)=>{
-                    // safe needs access and not be app (oauth not supported)
-                    if(data.hasAccess && !this.bridge.isRunningCordova())
-                        buttons.push({path:'workspace/safe',scope:'safe',icon:"lock",name:"SIDEBAR.SECURE",onlyDesktop:true});
-                    this.addMoreButtons(buttons);
-                },(error:any)=>this.addMoreButtons(buttons));
-            });
 
+            });
         });
 
-        event.addListener(this);
-    }
+    event.addListener(this);
+  }
 
     scrollToTop() {
         UIHelper.scrollSmooth(0);
@@ -738,8 +744,10 @@ export class MainNavComponent implements AfterViewInit{
             return [];
         }
         let options:OptionItem[]=[];
+        let version:string[]|string=this.about.version.repository.split(".");
+        version=version[0]+version[1];
         for(let entry of this.config.helpMenuOptions){
-            options.push(new OptionItem(entry.key,entry.icon,()=>window.open(entry.url)));
+            options.push(new OptionItem(entry.key,entry.icon,()=>window.open(entry.url.replace(":version",version))));
         }
         return options;
     }

@@ -272,7 +272,8 @@
                             [allowAny]="true"
                             (addItem)="job.class=$event.item.id"
                             (addAny)="job.class=$event"></autocomplete>
-                    <div>{{job.class}}</div>
+                    <div class="job-title" *ngIf="job && job.class">{{'ADMIN.JOBS.NAMES.'+getJobName(job) | translate}}</div>
+                    <div class="job-class" *ngIf="job && job.class">{{job.class}}</div>
                 </div>
             </div>
             <textarea name="jobParams" class="jobParams materialize-textarea" [(ngModel)]="job.params" placeholder='{"param1":"value1","param2":"value2"}'></textarea>

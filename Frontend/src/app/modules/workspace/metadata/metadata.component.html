@@ -11,11 +11,11 @@
             <a [class.active]="tab==INFO"><i icon iconId="info_outline" aria="true"></i></a>
           </li>
           <!--Icon for Usages-->
-          <li class="clickable tab col s4" (click)="setTab(PROPERTIES)" title="Statistik">
-            <a [class.active]="tab==PROPERTIES" alt="Statistik"><i class="material-icons">equalizer</i><div class="value-properties">{{statsTotalPoints}}</div></a>
+          <li class="clickable tab col s4" (click)="setTab(PROPERTIES)">
+            <a [class.active]="tab==PROPERTIES"><i icon iconId="equalizer"></i><div class="value-properties">{{statsTotalPoints}}</div></a>
           </li>
-          <li class="clickable tab col s4" (click)="setTab(VERSIONS)" title="Version">
-            <a [class.active]="tab==VERSIONS" alt="Version"><i class="material-icons">restore</i></a>
+          <li class="clickable tab col s4" (click)="setTab(VERSIONS)">
+            <a [class.active]="tab==VERSIONS"><i icon iconId="restore"></i></a>
           </li>
         </ul>
     </div>

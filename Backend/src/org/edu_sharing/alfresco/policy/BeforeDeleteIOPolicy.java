@@ -45,6 +45,8 @@ public class BeforeDeleteIOPolicy implements BeforeDeleteNodePolicy {
 	public void beforeDeleteNode(NodeRef nodeRef) {
 		if(nodeService.hasAspect(nodeRef,QName.createQName(CCConstants.CCM_ASPECT_COLLECTION_IO_REFERENCE))){
 			removeCollectionRefUsage(nodeRef);
+			//don't delete handle when it's an collection ref
+			return;
 		}
 		if(handleService != null) {
 			String handleId = (String)nodeService.getProperty(nodeRef, QName.createQName(CCConstants.CCM_PROP_PUBLISHED_HANDLE_ID));
