@@ -180,6 +180,10 @@ input.mat-input-element, mat-label, .mat-select-value{
     padding: 0!important;
   }
 }
+.mat-menu-item{
+  height: 40px;
+  line-height: 40px;
+}
 .mat-menu-item-seperate {
   border-top:1px solid #ccc!important;
 }

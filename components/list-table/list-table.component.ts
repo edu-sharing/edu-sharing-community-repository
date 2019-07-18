@@ -669,9 +669,9 @@ export class ListTableComponent implements EventListener{
     if(openMenu)
         if(event){
             console.log(event);
-            if(event.pageX+event.pageY) {
-                this.dropdownLeft = event.pageX + "px";
-                this.dropdownTop = event.pageY + "px";
+            if(event.clientX+event.clientY) {
+                this.dropdownLeft = event.clientX + "px";
+                this.dropdownTop = event.clientY + "px";
             }
             else{
                 let rect=event.srcElement.getBoundingClientRect();
