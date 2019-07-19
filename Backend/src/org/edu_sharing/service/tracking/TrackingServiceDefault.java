@@ -23,6 +23,7 @@ import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
 public abstract class TrackingServiceDefault implements TrackingService{
     private final org.edu_sharing.service.nodeservice.NodeService nodeService;
@@ -89,7 +90,8 @@ public abstract class TrackingServiceDefault implements TrackingService{
 
         String mode=RepoFactory.getEdusharingProperty(CCConstants.EDU_SHARING_PROPERTIES_PROPERTY_TRACKING_USER);
         if(mode==null)
-            return null;
+            // we need any kind of stable id for tracking, so we'll generate a random, hopefully unique UUID
+            return UUID.randomUUID().toString();
         if(mode.equalsIgnoreCase("obfuscate"))
             return DigestUtils.shaHex(username);
         if(mode.equalsIgnoreCase("full"))

@@ -191,17 +191,17 @@ public class AuthorityServiceImpl implements AuthorityService {
 	}
 
 	@Override
-	public ArrayList<EduGroup> getAllEduGroups() {
+	public ArrayList<EduGroup> getAllEduGroups(String authority) {
 		org.alfresco.service.cmr.security.AuthorityService alfAuthorityService = serviceRegistry.getAuthorityService();
 		Set<String> authoritiesForUser = alfAuthorityService
-				.getAuthoritiesForUser(AuthenticationUtil.getFullyAuthenticatedUser());
+				.getAuthoritiesForUser(authority);
 
 		
 		
 		ArrayList<EduGroup> result = new ArrayList<EduGroup>();
 
-		for (String authority : authoritiesForUser) {
-			EduGroup eg = getEduGroup(authority);
+		for (String a : authoritiesForUser) {
+			EduGroup eg = getEduGroup(a);
 			if(eg != null)result.add(eg);
 		}
 
@@ -248,10 +248,10 @@ public EduGroup getEduGroup(String authority){
 	}
 
 	@Override
-	public ArrayList<EduGroup> getEduGroups(String scope) {
+	public ArrayList<EduGroup> getEduGroups(String authority,String scope) {
 		ArrayList<EduGroup> result = new ArrayList<EduGroup>();
 
-		for (EduGroup eduGroup : getAllEduGroups()) {
+		for (EduGroup eduGroup : getAllEduGroups(authority)) {
 			if ((eduGroup.getScope() == null && scope == null)
 					|| (eduGroup.getScope() != null && eduGroup.getScope().equals(scope))) {
 				result.add(eduGroup);

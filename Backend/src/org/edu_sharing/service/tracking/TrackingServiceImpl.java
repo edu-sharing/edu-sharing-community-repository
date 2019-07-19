@@ -8,29 +8,34 @@ import org.alfresco.service.namespace.QName;
 import org.apache.log4j.Logger;
 import org.edu_sharing.alfresco.service.ConnectionDBAlfresco;
 import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
+import org.edu_sharing.repository.client.rpc.EduGroup;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.server.tools.ApplicationInfoList;
+import org.edu_sharing.service.authority.AuthorityService;
+import org.edu_sharing.service.authority.AuthorityServiceFactory;
 import org.edu_sharing.service.nodeservice.NodeServiceHelper;
 import org.edu_sharing.service.tracking.model.StatisticEntry;
 import org.edu_sharing.service.tracking.model.StatisticEntryNode;
-import org.json.JSONException;
 import org.json.JSONObject;
 import org.postgresql.util.PGobject;
 import org.springframework.context.ApplicationContext;
 
+import javax.sql.rowset.serial.SerialArray;
 import java.sql.*;
 import java.sql.Date;
 import java.text.SimpleDateFormat;
 import java.time.ZoneId;
 import java.util.*;
+import java.util.stream.Collector;
+import java.util.stream.Collectors;
 
 public class TrackingServiceImpl extends TrackingServiceDefault{
     public static Logger logger = Logger.getLogger(TrackingServiceImpl.class);
 
     public static String TRACKING_NODE_TABLE_ID = "edu_tracking_node";
     public static String TRACKING_USER_TABLE_ID = "edu_tracking_user";
-    public static String TRACKING_INSERT_NODE = "insert into " + TRACKING_NODE_TABLE_ID +" (node_id,node_uuid,node_version,authority,time,type,data) VALUES (?,?,?,?,?,?,?)";
-    public static String TRACKING_INSERT_USER = "insert into " + TRACKING_USER_TABLE_ID +" VALUES (?,?,?,?)";
+    public static String TRACKING_INSERT_NODE = "insert into " + TRACKING_NODE_TABLE_ID +" (node_id,node_uuid,node_version,authority,authority_organization,authority_mediacenter,time,type,data) VALUES (?,?,?,?,?,?,?,?,?)";
+    public static String TRACKING_INSERT_USER = "insert into " + TRACKING_USER_TABLE_ID +" (authority,authority_organization,authority_mediacenter,time,type,data) VALUES (?,?,?,?,?,?)";
     public static String TRACKING_STATISTICS_CUSTOM_GROUPING = "SELECT type,COUNT(*) :additional from :table as tracking" +
             " WHERE time BETWEEN ? AND ? AND (:filter)" +
             " GROUP BY type :grouping" +
@@ -72,16 +77,19 @@ public class TrackingServiceImpl extends TrackingServiceDefault{
             return false;
         }
         return AuthenticationUtil.runAsSystem(()-> {
-            return addToDatabase(TRACKING_INSERT_USER, statement -> {
+            return execDatabaseQuery(TRACKING_INSERT_USER, statement -> {
                 statement.setString(1, super.getTrackedUsername(authorityName));
-                statement.setTimestamp(2, new Timestamp(System.currentTimeMillis()));
-                statement.setString(3, type.name());
+                statement.setArray(2,statement.getConnection().createArrayOf("VARCHAR",AuthorityServiceFactory.getLocalService().getEduGroups(authorityName,null).stream().map(EduGroup::getGroupname).toArray()));
+                //@TODO: Get all media centers for the user
+                statement.setArray(3,null);
+                statement.setTimestamp(4, new Timestamp(System.currentTimeMillis()));
+                statement.setString(5, type.name());
                 JSONObject json = buildJson(authorityName, type);
                 PGobject obj = new PGobject();
                 obj.setType("json");
                 if (json != null)
                     obj.setValue(json.toString());
-                statement.setObject(4, obj);
+                statement.setObject(6, obj);
 
                 return true;
             });
@@ -101,20 +109,23 @@ public class TrackingServiceImpl extends TrackingServiceDefault{
             else{
                 version=nodeVersion;
             }
-            return addToDatabase(TRACKING_INSERT_NODE, statement -> {
+            return execDatabaseQuery(TRACKING_INSERT_NODE, statement -> {
                 // @Todo: track the node version
                 statement.setLong(1, (Long) nodeService.getProperty(nodeRef, QName.createQName(CCConstants.SYS_PROP_NODE_DBID)));
                 statement.setString(2, nodeRef.getId());
                 statement.setString(3, version);
                 statement.setString(4, super.getTrackedUsername(null));
-                statement.setTimestamp(5, new Timestamp(System.currentTimeMillis()));
-                statement.setString(6, type.name());
+                statement.setArray(5,statement.getConnection().createArrayOf("VARCHAR",AuthorityServiceFactory.getLocalService().getEduGroups(null).stream().map(EduGroup::getGroupname).toArray()));
+                //@TODO: Get all media centers for the user
+                statement.setArray(6,null);
+                statement.setTimestamp(7, new Timestamp(System.currentTimeMillis()));
+                statement.setString(8, type.name());
                 JSONObject json = buildJson(nodeRef, details, type);
                 PGobject obj = new PGobject();
                 obj.setType("json");
                 if (json != null)
                     obj.setValue(json.toString());
-                statement.setObject(7, obj);
+                statement.setObject(9, obj);
 
                 return true;
             });
@@ -342,7 +353,7 @@ public class TrackingServiceImpl extends TrackingServiceDefault{
             throw new IllegalArgumentException("Fields for filter and grouping should only contain numbers and letters");
     }
 
-    private static boolean addToDatabase(String statementContent,FillStatement fillStatement){
+    private static boolean execDatabaseQuery(String statementContent, FillStatement fillStatement){
         ConnectionDBAlfresco dbAlf = new ConnectionDBAlfresco();
         Connection con = null;
         PreparedStatement statement = null;
