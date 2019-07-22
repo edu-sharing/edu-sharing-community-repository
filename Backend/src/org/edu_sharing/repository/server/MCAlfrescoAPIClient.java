@@ -2674,7 +2674,7 @@ public class MCAlfrescoAPIClient extends MCAlfrescoBaseClient {
                 {
                     public String execute() throws Throwable
                     {
-                		String key = PermissionService.GROUP_PREFIX + groupName;
+                		String key = groupName.startsWith(PermissionService.GROUP_PREFIX) ? groupName : PermissionService.GROUP_PREFIX + groupName;
                 		
                 		return 	  authorityService.authorityExists(key)
                 				? authorityService.getAuthorityNodeRef(key).getId()
@@ -2692,7 +2692,7 @@ public class MCAlfrescoAPIClient extends MCAlfrescoBaseClient {
                 {
                     public String execute() throws Throwable
                     {
-                		String key = PermissionService.GROUP_PREFIX + groupName;
+						String key = groupName.startsWith(PermissionService.GROUP_PREFIX) ? groupName : PermissionService.GROUP_PREFIX + groupName;
                 		
                     	NodeRef nodeRef = serviceRegistry.getAuthorityService().getAuthorityNodeRef(key);
                     	
@@ -3049,66 +3049,6 @@ public class MCAlfrescoAPIClient extends MCAlfrescoBaseClient {
                     }
                 }, false); 
 		
-		
-	}
-
-	public String[] getMemberships(String groupName) {
-		
-		AuthorityService authorityService = serviceRegistry.getAuthorityService();
-		
-		return serviceRegistry.getTransactionService().getRetryingTransactionHelper().doInTransaction(
-				
-                new RetryingTransactionCallback<String[]>()
-                {
-                    public String[] execute() throws Throwable
-                    {
-                		String key = PermissionService.GROUP_PREFIX + groupName;
-                		
-                		return authorityService.getContainedAuthorities(null, key, true).toArray(new String[0]);		
-                    }
-                }, true); 
-		
-	}
-	
-	public void addMemberships(String groupName, String[] members) {
-		
-		serviceRegistry.getTransactionService().getRetryingTransactionHelper().doInTransaction(
-				
-                new RetryingTransactionCallback<Void>()
-                {
-                    public Void execute() throws Throwable
-                    {
-                			eduAuthorityService.addMemberships(groupName, members);
-                			return null;
-                    }
-                }, false); 
-		
-	}
-
-	public void removeMemberships(String groupName, String[] members) {
-		
-		AuthorityService authorityService = serviceRegistry.getAuthorityService();
-		
-		serviceRegistry.getTransactionService().getRetryingTransactionHelper().doInTransaction(
-				
-                new RetryingTransactionCallback<Void>()
-                {
-                    public Void execute() throws Throwable
-                    {
-                		String key = PermissionService.GROUP_PREFIX + groupName;
-                		
-                		for (String member : members) {
-                			
-                			if (member == null) {
-                				continue;
-                			}
-                			
-                			authorityService.removeAuthority(key, member);
-                		}
-
-                		return null;
-                    }
-                }, false); 
 		
 	}
 

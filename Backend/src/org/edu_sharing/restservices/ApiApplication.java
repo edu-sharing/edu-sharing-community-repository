@@ -26,6 +26,7 @@ public class ApiApplication extends ResourceConfig {
 //		org.edu_sharing.restservices.knowledge.v1.KnowledgeApi.class,
 		org.edu_sharing.restservices.login.v1.LoginApi.class,
 		org.edu_sharing.restservices.mds.v1.MdsApi.class,
+		org.edu_sharing.restservices.mediacenter.v1.MediacenterApi.class,
 		org.edu_sharing.restservices.network.v1.NetworkApi.class,
 		org.edu_sharing.restservices.node.v1.NodeApi.class,
 		org.edu_sharing.restservices.organization.v1.OrganizationApi.class,

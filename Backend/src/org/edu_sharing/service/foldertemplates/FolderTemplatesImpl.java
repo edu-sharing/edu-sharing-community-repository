@@ -75,7 +75,7 @@ public class FolderTemplatesImpl implements FolderTemplates {
 		}
 		mappedGroup = mappedGroup.replace("GROUP_", "");
 
-		String[] member = ((MCAlfrescoAPIClient) this.repoClient).getMemberships(mappedGroup);
+		String[] member = AuthorityServiceFactory.getLocalService().getMembershipsOfGroup(mappedGroup);
 
 		String user = (String) Context.getCurrentInstance().getRequest().getSession()
 				.getAttribute(CCConstants.AUTH_USERNAME);

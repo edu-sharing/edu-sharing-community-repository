@@ -17,8 +17,14 @@ public class GroupProfile  {
   private String scopeType = null;
 
   public GroupProfile(){}
+  public GroupProfile(GroupProfile GroupProfile) {
+    displayName=GroupProfile.getDisplayName();
+    groupType=GroupProfile.getGroupType();
+    groupEmail=GroupProfile.getGroupEmail();
+    scopeType=GroupProfile.getScopeType();
+  }
   public GroupProfile(Group group) {
-	displayName=group.getAuthorityDisplayName();
+    displayName=group.getAuthorityDisplayName();
   }
 /**
    **/
@@ -30,7 +36,7 @@ public class GroupProfile  {
   public void setDisplayName(String displayName) {
     this.displayName = displayName;
   }
-  
+
   @JsonProperty("groupType")
   public String getGroupType() {
 	return groupType;
@@ -38,12 +44,12 @@ public class GroupProfile  {
   public void setGroupType(String groupType) {
 	this.groupType = groupType;
   }
-  
+
   @JsonProperty("scopeType")
   public void setScopeType(String scopeType) {
 	this.scopeType = scopeType;
 }
-  
+
   public String getScopeType() {
 	return scopeType;
 }

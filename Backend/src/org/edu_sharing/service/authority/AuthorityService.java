@@ -12,13 +12,6 @@ import org.edu_sharing.repository.client.rpc.EduGroup;
 import org.edu_sharing.restservices.DAOException;
 
 public interface AuthorityService {
-	public static String ORGANIZATION_GROUP_FOLDER="EDU_SHARED";
-	public static String ADMINISTRATORS_GROUP="ORG_ADMINISTRATORS";
-	public static String ADMINISTRATORS_GROUP_TYPE="ORG_ADMINISTRATORS";
-	public static String MEDIA_CENTER_GROUP_TYPE = "MEDIA_CENTER";
-	public static String ORG_GROUP_PREFIX = "ORG_";
-	public static String ADMINISTRATORS_GROUP_DISPLAY_POSTFIX = "_Admins";
-
 	Set<String> getMemberships(String username) throws Exception;
 	boolean isGlobalAdmin();
 	boolean hasAdminAccessToOrganization(String orgName);
@@ -72,8 +65,7 @@ public interface AuthorityService {
 	boolean isGuest();
 	public String getProperty(String authorityName, String ccmPropGroupextensionGrouptype);
 	EduGroup getEduGroup(String authority);
-	String createGroup(String groupName, String displayName, String parentGroup) throws DAOException;
-	
+	String createGroup(String groupName, String displayName, String parentGroup) throws Exception;
 	static String getGroupName(String groupName,String parentGroup){
 		return org.edu_sharing.alfresco.service.AuthorityService.getGroupName(groupName, parentGroup);
 	}
@@ -83,4 +75,11 @@ public interface AuthorityService {
 
 	NodeRef getAuthorityNodeRef(String authority);
 
+    void addMemberships(String groupName, String[] members);
+
+	void removeMemberships(String groupName, String[] members);
+
+	String[] getMembershipsOfGroup(String groupName);
+
+	void createGroupWithType(String groupName, String displayName, String parentGroup, String groupType) throws Exception;
 }

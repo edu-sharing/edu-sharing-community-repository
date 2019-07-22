@@ -15,12 +15,16 @@ import org.edu_sharing.repository.server.tools.ApplicationInfo;
 import org.edu_sharing.repository.server.tools.ApplicationInfoList;
 import org.edu_sharing.repository.server.tools.URLTool;
 import org.edu_sharing.restservices.shared.Repo;
+import org.edu_sharing.service.authority.AuthorityService;
+import org.edu_sharing.service.authority.AuthorityServiceFactory;
 import org.edu_sharing.service.collection.CollectionService;
 import org.edu_sharing.service.collection.CollectionServiceFactory;
 import org.edu_sharing.service.nodeservice.NodeService;
 import org.edu_sharing.service.nodeservice.NodeServiceFactory;
 import org.edu_sharing.service.rendering.RenderingService;
 import org.edu_sharing.service.rendering.RenderingServiceFactory;
+import org.edu_sharing.service.search.SearchService;
+import org.edu_sharing.service.search.SearchServiceFactory;
 
 public class RepositoryDao {
 
@@ -195,6 +199,14 @@ public class RepositoryDao {
 
 		return repo;
 	}
-	
-	
+
+	AuthorityService getAuthorityService(){
+		return AuthorityServiceFactory.getAuthorityService(getId());
+	}
+	NodeService getNodeService(){
+		return NodeServiceFactory.getNodeService(getId());
+	}
+	SearchService getSearchService() {
+		return SearchServiceFactory.getSearchService(getId());
+	}
 }

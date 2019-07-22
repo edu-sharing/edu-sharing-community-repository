@@ -70,6 +70,7 @@ import org.edu_sharing.alfresco.HasPermissionsWork;
 import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
 import org.edu_sharing.repository.client.rpc.ACE;
 import org.edu_sharing.repository.client.rpc.ACL;
+import org.edu_sharing.service.authority.AuthorityServiceFactory;
 import org.edu_sharing.service.nodeservice.model.GetPreviewResult;
 import org.edu_sharing.repository.client.rpc.Group;
 import org.edu_sharing.repository.client.rpc.Notify;
@@ -1786,9 +1787,7 @@ public class NativeAlfrescoWrapperSoapBindingImpl implements org.edu_sharing.web
 	public String[] getMemberships(String groupName) throws RemoteException {
 
 		try {
-			
-			MCAlfrescoAPIClient mcAlfrescoAPIClient = new MCAlfrescoAPIClient();
-			return mcAlfrescoAPIClient.getMemberships(groupName);
+			return AuthorityServiceFactory.getLocalService().getMembershipsOfGroup(groupName);
 			
 		} catch (Throwable e) {
 			logger.error(e.getMessage(), e);
@@ -1801,10 +1800,7 @@ public class NativeAlfrescoWrapperSoapBindingImpl implements org.edu_sharing.web
 			throws RemoteException {
 
 		try {
-			
-			MCAlfrescoAPIClient mcAlfrescoAPIClient = new MCAlfrescoAPIClient();
-			mcAlfrescoAPIClient.addMemberships(groupName, members);
-			
+			AuthorityServiceFactory.getLocalService().addMemberships(groupName, members);
 		} catch (Throwable e) {
 			logger.error(e.getMessage(), e);
 			throw new RemoteException(e.getMessage(), e);
@@ -1817,10 +1813,7 @@ public class NativeAlfrescoWrapperSoapBindingImpl implements org.edu_sharing.web
 			throws RemoteException {
 
 		try {
-			
-			MCAlfrescoAPIClient mcAlfrescoAPIClient = new MCAlfrescoAPIClient();
-			mcAlfrescoAPIClient.removeMemberships(groupName, members);
-			
+			AuthorityServiceFactory.getLocalService().removeMemberships(groupName, members);
 		} catch (Throwable e) {
 			logger.error(e.getMessage(), e);
 			throw new RemoteException(e.getMessage(), e);

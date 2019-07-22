@@ -929,7 +929,8 @@ public class NodeDao {
 						Authority authority = (Authority.Type.valueOf(ace.getAuthorityType()) == Authority.Type.GROUP )? new Group() : new Authority();
 						if(authority instanceof Group) {
 							Group g = (Group)authority;
-							g.setGroupType(ace.getGroup().getGroupType());
+							g.setProfile(new GroupProfile());
+							g.getProfile().setGroupType(ace.getGroup().getGroupType());
 							g.setEditable(ace.getGroup().isEditable());
 						}
 						

@@ -133,7 +133,6 @@ public class OrganizationDao {
 		this.authorityName = generateAuthorityName(eduGroup);		
 		this.groupName = generateGroupName(eduGroup);
 		this.ref = AuthorityServiceFactory.getAuthorityService(repoDao.getId()).getAuthorityNodeRef(this.authorityName);
-		
 	}
 	/**
 	 * returns true if the user is allowed to administer this org
@@ -225,15 +224,18 @@ public class OrganizationDao {
 		});		
 	}
 	private void removeMember(String groupName,String authorityName) throws DAOException {
-		String[] members=((MCAlfrescoAPIClient)repoDao.getBaseClient()).getMemberships(groupName);
-		for(String auth : members){
-			if(auth.startsWith(PermissionService.GROUP_PREFIX)){
-				removeMember(auth.substring(PermissionService.GROUP_PREFIX.length()),authorityName);
+		try {
+			String[] members = repoDao.getAuthorityService().getMembershipsOfGroup(groupName);
+			for (String auth : members) {
+				if (auth.startsWith(PermissionService.GROUP_PREFIX)) {
+					removeMember(auth.substring(PermissionService.GROUP_PREFIX.length()), authorityName);
+				} else if (auth.equals(authorityName)) {
+					repoDao.getAuthorityService().removeMemberships(groupName, new String[]{authorityName});
+				}
 			}
-			else if(auth.equals(authorityName)){
-				((MCAlfrescoAPIClient)repoDao.getBaseClient()).removeMemberships(groupName, new String[]{authorityName});
-			}
-		}		
+		}catch(Exception e){
+			throw DAOException.mapping(e);
+		}
 	}
 
 }

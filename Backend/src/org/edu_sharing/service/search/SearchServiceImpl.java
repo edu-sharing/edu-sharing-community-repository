@@ -10,6 +10,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.alfresco.model.ContentModel;
 import org.alfresco.repo.search.impl.solr.ESSearchParameters;
@@ -59,6 +60,7 @@ import org.edu_sharing.restservices.MdsDao;
 import org.edu_sharing.restservices.shared.MdsQueryCriteria;
 import org.edu_sharing.service.Constants;
 import org.edu_sharing.service.InsufficientPermissionException;
+import org.edu_sharing.service.nodeservice.NodeServiceFactory;
 import org.edu_sharing.service.permission.PermissionServiceFactory;
 import org.edu_sharing.service.search.model.SearchResult;
 import org.edu_sharing.service.search.model.SearchToken;
@@ -203,7 +205,18 @@ public class SearchServiceImpl implements SearchService {
 	public SearchResult<EduGroup> getAllOrganizations(boolean scoped) throws Exception {
 		return searchOrganizations("", 0, Integer.MAX_VALUE, null,scoped);
 	}
-
+	@Override
+	public List<String> getAllMediacenters() throws Exception {
+		SearchParameters parameters = new SearchParameters();
+		parameters.addStore(Constants.storeRef);
+		parameters.setLanguage(org.alfresco.service.cmr.search.SearchService.LANGUAGE_LUCENE);
+		parameters.addAllAttribute(CCConstants.MEDIA_CENTER_GROUP_TYPE);
+		parameters.addSort(CCConstants.CM_PROP_AUTHORITY_AUTHORITYDISPLAYNAME,true);
+		parameters.setQuery("@ccm\\:groupType:\"" + CCConstants.MEDIA_CENTER_GROUP_TYPE + "\"");
+		return queryAll(parameters).stream().map((ref)->
+				NodeServiceFactory.getNodeService(applicationId).getProperty(ref.getStoreRef().getProtocol(),ref.getStoreRef().getIdentifier(),ref.getId(),CCConstants.CM_PROP_AUTHORITY_AUTHORITYNAME)
+		).collect(Collectors.toList());
+	}
 	@Override
 	public SearchResult<EduGroup> searchOrganizations(String pattern, int skipCount, int maxValues, SortDefinition sort,boolean scoped)
 			throws Exception {

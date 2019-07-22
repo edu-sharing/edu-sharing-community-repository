@@ -1742,6 +1742,29 @@
 	    		</property>			
 			</properties>
 		</aspect>
-		
+		<aspect name="ccm:mediacenter">
+			<title>extend group to become a mediacenter</title>
+			<properties>
+				<property name="ccm:mediacenterId">
+					<type>d:text</type>
+				</property>
+				<property name="ccm:mediacenterCatalogStatus">
+					<type>d:text</type>
+				</property>
+				<property name="ccm:mediacenterLocation">
+					<type>d:text</type>
+				</property>
+				<property name="ccm:mediacenterMainUrl">
+					<type>d:text</type>
+				</property>
+				<property name="ccm:mediacenterDistrictAbbreviation">
+					<type>d:text</type>
+				</property>
+				<!-- internally stored as a json array of type @Mediacenter.Catalog -->
+				<property name="ccm:mediacenterCatalogs">
+					<type>d:text</type>
+				</property>
+			</properties>
+		</aspect>
 	</aspects>
 </model>

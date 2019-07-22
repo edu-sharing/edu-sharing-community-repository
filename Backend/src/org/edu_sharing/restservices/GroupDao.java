@@ -188,7 +188,7 @@ public class GroupDao {
 
 				@Override
 				public Void doWork() throws Exception {
-					((MCAlfrescoAPIClient)baseClient).addMemberships(groupName, new String[]{member});
+					authorityService.addMemberships(groupName, new String[]{member});
 					PersonCache.reset(member);
 					return null;
 				}
@@ -218,7 +218,7 @@ public class GroupDao {
 
 				@Override
 				public Void doWork() throws Exception {
-					((MCAlfrescoAPIClient)baseClient).removeMemberships(groupName, new String[]{member});
+					authorityService.removeMemberships(groupName, new String[]{member});
 					PersonCache.reset(member);
 					return null;
 				}
@@ -238,7 +238,7 @@ public class GroupDao {
 
 			checkAdminAccess();
 						
-			for (String member : ((MCAlfrescoAPIClient)this.baseClient).getMemberships(groupName)) {
+			for (String member : authorityService.getMemberships(groupName)) {
 				
 				result.add(   member.startsWith(PermissionService.GROUP_PREFIX) 
 							? GroupDao.getGroup(repoDao, member).asGroup()
