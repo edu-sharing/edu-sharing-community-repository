@@ -1,4 +1,23 @@
 {
   "PROFILES": {
+    "TITLE": "Profile of {{ name }}",
+    "TITLE_NAV": "Profile",
+    "LOAD_ERROR": "Profile could not be found.",
+    "EDIT":"bearbeiten",
+    "CANCEL_EDIT":"cancel",
+    "ABOUT_LABEL":"about me",
+    "NO_ABOUT":"This user has not created a description yet.",
+    "NO_ABOUT_ME":"Your profile description is empty\nEdit your profile to create a description.",
+    "STATS":{
+      "MATERIALS":"Materials",
+      "COLLECTIONS":"Collections",
+      "MATERIALS_CC":"CC-Materials"
+    },
+    "ERROR":{
+      "FIRST_NAME":"Please enter first name",
+      "LAST_NAME":"Please enter last name",
+      "EMAIL":"Please enter e-mail"
+    },
+    "IMG_CHANGE":"change"
   }
 }
