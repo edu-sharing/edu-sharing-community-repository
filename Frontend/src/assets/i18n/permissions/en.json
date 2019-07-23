@@ -12,6 +12,7 @@
     "MENU_EDIT":"Edit",
     "MENU_DELETE":"Delete",
     "MENU_TOOLPERMISSIONS":"Permissions",
+    "MENU_TOOLPERMISSIONS_GLOBAL":"Global PErmissions",
     "MANAGE_GROUP":"Manage group {{group}}",
     "ADD_MEMBER_TO_GROUP":"Add user to group {{group}}",
     "EDIT_MEMBER_GROUPS":"User is member of",
@@ -82,6 +83,35 @@
       "null":"Local / Default visibility",
       "global":"Global / Across repositories"
     },
+    "TOOLPERMISSIONS":{
+      "TITLE":"Set permissions for {{name}}",
+      "EVERYONE_ALLOWED":"Initial value for all groups & users",
+      "MEMBERS_ALLOWED":"Applies to all members",
+      "USER_ALLOWED":"Applies to all selected users",
+      "ALLOW":"allow",
+      "DENY":"deny",
+      "RESULT":"status",
+      "INHERIT":"Inherited from a group or global authorization",
+      "INHERIT_UNKNOWN":"Condition is unknown. Save the permissions to see the inherited state.",
+      "INHERIT_DETAIL":"The rights are inherited via the following group memberships: {{memberships}}",
+      "STATUS_ALLOWED":"allowed",
+      "STATUS_DENIED":"prohibited",
+      "STATUS_UNDEFINED":"not set\n(prohibited)",
+      "STATUS_UNKNOWN":"unknown",
+      "SAVED":"Permissions have been updated.",
+      "ADD": "add",
+      "ADDED": "Toolpermission {{name}} added",
+      "GROUP":{
+        "SHARING":"Sharing",
+        "LICENSING":"Licensing & Publishing",
+        "DATA_MANAGEMENT":"File Management",
+        "SAFE":"Secure Area (Safe)",
+        "COLLECTIONS":"Collections",
+        "OTHER":"Other  / Not categorized",
+        "ADD": "Creating custom  Authorizations"
+      }
+    }
+
     "TOOLPERMISSION": {
       "TOOLPERMISSION_INVITE": "the permission to share objects",
       "TOOLPERMISSION_INVITE_STREAM": "the permission to share objects in the stream",
