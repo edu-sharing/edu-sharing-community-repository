@@ -5,7 +5,14 @@
           xmlns="http://www.w3.org/1999/html"></main-nav>
   <global-progress *ngIf="isLoading"></global-progress>
   <div *ngIf="!isLoading">
-      <card title="{{caption | translate}}" avatar="assets/images/app-icon.svg" subtitle="{{'LOGIN.SUBTITLE' | translate}}" [isCancelable]="false" [priority]="-110" [buttons]="buttons" [width]="showProviders ? 'xlarge' : 'small'" height="auto">
+      <card title="{{caption | translate}}"
+            avatar="assets/images/app-icon.svg"
+            subtitle="{{'LOGIN.SUBTITLE' | translate}}"
+            [isCancelable]="false"
+            modal="auto"
+            [buttons]="buttons"
+            [width]="showProviders ? 'xlarge' : 'small'"
+            height="auto">
           <spinner *ngIf="isLoading" class="center"></spinner>
           <div class="login-content" *ngIf="!isLoading">
           <div class="branding"><img src="assets/images/logo.svg" image-config alt=""></div>
@@ -60,5 +67,5 @@
               </div>
           </div>
        </card>
-  <powered-by mode="white" [ngClass]="{'powered-down': config.register.local || config.register.registerUrl}"></powered-by>
+  <powered-by mode="color" [ngClass]="{'powered-down': config.register.local || config.register.registerUrl}"></powered-by>
   </div>

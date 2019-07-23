@@ -6,7 +6,7 @@
   left:0;
   width:100%;
   max-width:100%;
-  z-index:98;
+  z-index:$topBarZIndex;
   .user div{
     max-width: 160px;
   }
@@ -418,7 +418,7 @@ $licenseInfoHeight:40px;
 
   .tab-nav{
     position:fixed;
-    z-index: 20;
+    z-index: $mobileTabsZIndex;
     width:100%;
     bottom:0;
     display:flex;

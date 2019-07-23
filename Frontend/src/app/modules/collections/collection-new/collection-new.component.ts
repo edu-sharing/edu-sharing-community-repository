@@ -581,8 +581,4 @@ export class CollectionNewComponent {
             new DialogButton(this.isLastStep() ? 'SAVE' : 'NEXT',DialogButton.TYPE_PRIMARY,()=>this.goToNextStep())
         ]
     }
-
-    showAsModal() {
-      return UIHelper.evaluateMediaQuery(UIConstants.MEDIA_QUERY_MAX_HEIGHT,UIConstants.MOBILE_HEIGHT + UIConstants.MOBILE_STAGE);
-    }
 }

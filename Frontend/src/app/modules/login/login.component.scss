@@ -1,4 +1,5 @@
 @import "../../core-ui-module/styles/variables";
+@import "../../core-ui-module/components/card/variables";
 
 .login-content{
   padding:$cardPadding;
@@ -12,7 +13,7 @@
   z-index: 10;
 }
 .card{
-  z-index: 90;
+  z-index: 11;
 }
 powered-by{
   position: fixed;
@@ -62,7 +63,7 @@ powered-by{
 }
 .groups{
   display: flex;
-  padding:$cardPadding 0;
+  padding:15px 0;
   >div{
     width: 0;
     flex-grow: 1;
@@ -138,6 +139,5 @@ powered-by{
 @media screen and (max-height: $mobileHeightWithKeyboard) {
   .card{
     top: 0;
-    bottom: 0;
   }
 }

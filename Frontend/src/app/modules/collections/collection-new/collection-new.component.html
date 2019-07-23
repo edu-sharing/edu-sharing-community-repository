@@ -25,7 +25,7 @@
         class="collection-new-container"
         width="normal"
         height="auto"
-        [modal]="showAsModal()"
+        modal="auto"
         title="{{'COLLECTIONS.CREATE_TYPE' | translate}}"
         (onCancel)="newCollectionCancel()">
     <div class="createCollection collectionShadow">
@@ -80,7 +80,7 @@
         [isCancelable]="false"
         title="{{ 'collectionNew_preview' | translate }}"
         [subtitle]="currentCollection.title"
-        [modal]="showAsModal()"
+        modal="auto"
         width="xsmall" height="auto">
         <div class="collection-general">
           <div class="collectionImage">
@@ -157,7 +157,7 @@
         title="{{ 'COLLECTIONS.STEP.METADATA' | translate }}"
         [subtitle]="currentCollection.title"
         [isCancelable]="false"
-        [modal]="showAsModal()"
+        modal="auto"
         width="xsmall"
         height="xlarge"
         [buttons]="buttons"
@@ -175,7 +175,7 @@
           title="{{ 'COLLECTIONS.STEP.EDITORIAL_GROUPS' | translate }}"
           [subtitle]="currentCollection.title"
           [isCancelable]="false"
-          [modal]="showAsModal()"
+          modal="auto"
           width="xsmall"
           height="xlarge"
           [buttons]="buttons"
@@ -196,7 +196,7 @@
   </card>
   <card *ngIf="newCollectionStep==STEP_PERMISSIONS"
         title="{{ 'COLLECTIONS.EDIT_PERMISSIONS' | translate }}"
-        [modal]="showAsModal()"
+        modal="auto"
         [isCancelable]="false"
         [buttons]="buttons"
         width="normal"

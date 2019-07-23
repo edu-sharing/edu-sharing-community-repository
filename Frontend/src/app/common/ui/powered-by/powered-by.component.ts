@@ -12,7 +12,7 @@ import {Component, EventEmitter, Input, Output} from '@angular/core';
 export class PoweredByComponent {
   /**
    * The mode do display
-   * Either 'white' (like on login') or 'color'
+   * Either 'white' or 'color'
    * @type {string}
    */
   @Input() mode='white';
