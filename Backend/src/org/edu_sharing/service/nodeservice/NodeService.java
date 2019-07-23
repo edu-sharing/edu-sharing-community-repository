@@ -43,8 +43,14 @@ public interface NodeService {
     List<NodeRef> getChildrenRecursive(StoreRef store, String nodeId, List<String> types);
 
     public NodeRef getChild(StoreRef store, String parentId, String type, String property, Serializable value);
-	
-	public void setOwner(String nodeId, String username);
+
+    String getType(String storeProtocol, String storeId, String nodeId);
+
+    default String getType(String nodeId){
+    	return getType(StoreRef.PROTOCOL_WORKSPACE,StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(),nodeId);
+	}
+
+    public void setOwner(String nodeId, String username);
 	
 	public void setPermissions(String nodeId, String authority, String[] permissions, Boolean inheritPermission) throws Exception;
 
@@ -112,8 +118,6 @@ public interface NodeService {
     public void updateNodeNative(String nodeId, HashMap<String, Object> _props);
 
 	public void removeProperty(String storeProtocol, String storeId, String nodeId, String property);
-
-	public String getType(String nodeId);
 
 	public boolean exists(String protocol, String store, String nodeId);
 

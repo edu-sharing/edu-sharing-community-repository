@@ -250,7 +250,7 @@ public class NodeServiceAdapter implements NodeService {
 	}
 
 	@Override
-	public String getType(String nodeId) {
+	public String getType(String storeProtocol,String storeId,String nodeId) {
 		// TODO Auto-generated method stub
 		return null;
 	}

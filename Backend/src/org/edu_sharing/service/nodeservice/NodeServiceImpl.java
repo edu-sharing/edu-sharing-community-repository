@@ -674,8 +674,8 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
 	}
 	
 	@Override
-	public String getType(String nodeId) {
-		return nodeService.getType(new NodeRef(Constants.storeRef, nodeId)).toString();
+	public String getType(String storeProtocol,String storeId,String nodeId) {
+		return nodeService.getType(new NodeRef(new StoreRef(storeProtocol,storeId), nodeId)).toString();
 	}
 	
 	public ChildAssociationRef getParent(NodeRef nodeRef){
@@ -950,7 +950,7 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
 	}
 
 	private String getPreviewUrl(String storeProtocol, String storeId, String nodeId, String version) {
-		if(getType(nodeId).equals(CCConstants.CCM_TYPE_REMOTEOBJECT)) {
+		if(getType(storeProtocol,storeId,nodeId).equals(CCConstants.CCM_TYPE_REMOTEOBJECT)) {
 			// @TODO: Basically, when the method getPreviewResult is overriden by the service, we don't need to do that!
 			NodeRef nodeRef=new NodeRef(new StoreRef(storeProtocol,storeId),nodeId);
 			String repoId = (String)nodeService.getProperty(nodeRef, QName.createQName(CCConstants.CCM_PROP_REMOTEOBJECT_REPOSITORYID));
