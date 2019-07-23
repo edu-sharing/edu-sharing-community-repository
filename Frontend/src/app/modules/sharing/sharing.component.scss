@@ -17,9 +17,9 @@
   margin: 0 auto;
   width: 400px;
 
-  .btn{
-    width: 100%;
-    margin-top: -5px;
+  form{
+    display: flex;
+    flex-direction: column;
   }
 }
 
@@ -109,6 +109,11 @@ powered-by{
 :host /deep/ {
   .heading {
     background: $actionDialogBackground;
+  }
+  .password-required{
+    mat-form-field{
+      width: 100%;
+    }
   }
 }
 @media screen and (max-width:($mobileWidth)), screen and (max-height:($mobileHeightLandscape)) {
