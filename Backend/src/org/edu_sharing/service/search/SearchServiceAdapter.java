@@ -4,6 +4,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.google.gwt.user.client.ui.SuggestOracle;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.security.AuthorityType;
 import org.edu_sharing.metadataset.v2.MetadataSetV2;
@@ -21,6 +22,11 @@ public class SearchServiceAdapter implements SearchService {
 	@Override
 	public SearchResultNodeRef search(MdsDao mdsDao, String query, List<MdsQueryCriteria> criterias, SearchToken token)
 			throws Throwable {
+		return null;
+	}
+
+	@Override
+	public List<String> getAllMediacenters() throws Exception {
 		return null;
 	}
 
@@ -89,6 +95,11 @@ public class SearchServiceAdapter implements SearchService {
 	@Override
 	public HashMap<ContentType,SearchToken> getLastSearchTokens() throws Throwable {
 		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public List<? extends SuggestOracle.Suggestion> getSuggestions(MetadataSetV2 mds, String queryId, String parameterId, String value, List<MdsQueryCriteria> criterias) {
 		return null;
 	}
 
