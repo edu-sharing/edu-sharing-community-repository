@@ -6,7 +6,7 @@ import {TranslateService} from "@ngx-translate/core";
 import {trigger} from "@angular/animations";
 import {MatDialog, MAT_DIALOG_DATA} from "@angular/material";
 import {UIAnimation} from '../../../core-module/ui/ui-animation';
-import {DialogButton, RestHelper, UIService, Node} from "../../../core-module/core.module";
+import {DialogButton, RestHelper, UIService, Node, UIConstants} from "../../../core-module/core.module";
 import {Helper} from "../../../core-module/rest/helper";
 import {UIHelper} from "../../ui-helper";
 
@@ -51,8 +51,10 @@ export class CardComponent implements OnDestroy{
   @Input() tabbed=false;
     /**
      * Should the dialog be modal (a dark background)
+     * allowed values: always (default), auto, never
+     * auto: Automatically make the dialog modal when viewed on very tiny screens (e.g. mobile), otherwise use non-modal view
      */
-  @Input() modal=true;
+  @Input() modal="always";
     /**
      * Should the heading be shown
      */
@@ -158,6 +160,12 @@ export class CardComponent implements OnDestroy{
   }
   scrolled(){
       this.onScrolled.emit();
+  }
+
+  showAsModal() {
+      return this.modal=='always' ? true : this.modal=='never' ? false :
+          // also configured in the css media query
+          UIHelper.evaluateMediaQuery(UIConstants.MEDIA_QUERY_MAX_HEIGHT,UIConstants.MOBILE_HEIGHT_WITH_KEYBOARD);
   }
 }
 export class CardJumpmark{

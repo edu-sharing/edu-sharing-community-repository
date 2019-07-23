@@ -1,5 +1,7 @@
-<div class="card-dialog dialog" [style.z-index]="modal ? 120+priority : 1+priority" [class.darken]="modal">
-  <mat-card class="modal-card width-{{width}} height-{{height}}" [style.z-index]="121+priority"
+<div class="card-dialog dialog" [style.z-index]="showAsModal() ? 120+priority : 105+priority" [class.darken]="showAsModal()">
+  <mat-card class="mat-card width-{{width}} height-{{height}}"
+            [style.z-index]="showAsModal() ? 121+priority : 106+priority"
+            [class.card-modal]="showAsModal()"
             [class.card-no-buttons]="!(_buttons && _buttons.length)"
             [class.card-jumpmarks]="jumpmarks && jumpmarks.length>1"
             [class.card-tabbed]="tabbed"

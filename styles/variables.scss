@@ -54,6 +54,9 @@ $mobileWidthPortrait: 400px;
 // this factor should be multiplied by a natural number, e.g. *3 means stage 3 (relatively early)
 $mobileStage:   100px;
 $dialogZIndex: 120;
+$dialogNonModalZIndex: 105; // before the top bar, but behind the mobile tabs
+$topBarZIndex: 98;
+$mobileTabsZIndex: 110;
 $mobileTabSwitchWidth:   $mobileWidth+$mobileStage*2;
 $mobileTabNavHeight:62px;
 

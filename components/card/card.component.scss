@@ -12,9 +12,10 @@
   z-index: $dialogZIndex+1;
   align-items: center;
   justify-content: center;
-  .modal-card {
+  .mat-card {
     max-width: 100%;
     position: relative;
+    padding: 0;
     @include materialShadowLarge();
     .mat-card-header {
       background-color: $actionDialogBackground;
@@ -193,6 +194,23 @@
       }
     }
   }
+  // @TODO: using position fixed is may not the best way since it can fail for different combinations
+  // however, it's currently just used for non-modal dialogs which are relatively rare
+
+  @media screen and (max-width: $mobileTabSwitchWidth){
+    .mat-card:not(.card-modal){
+      /*position: fixed;
+      top: $mainnavHeight;
+      bottom: $mainnavHeight + $mobileTabNavHeight;
+      */
+      &:not(.card-tabbed) {
+        mat-card-content {
+          max-height: calc(100vh - #{$titleHeight} - #{$actionMenuHeight} - #{$mobileTabNavHeight * 2});
+        }
+      }
+    }
+  }
+
   @media screen and (max-width: ($mobileWidth - $mobileStage*3)) {
     mat-card-actions > div{
       // when screen is small, all buttons should have the same size to prevent long texts to let short text to be too small
