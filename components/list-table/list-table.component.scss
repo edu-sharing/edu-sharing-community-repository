@@ -265,8 +265,12 @@ $badgeWidth:250px;
     display: flex!important;
     align-items: center;
     position: relative;
-    top: 10px;
+    top: 9px;
     right: 10px;
+    /* align single option icons */
+    a >i{
+      vertical-align: middle;
+    }
   }
 }
 .more{

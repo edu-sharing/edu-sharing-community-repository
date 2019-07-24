@@ -7,6 +7,7 @@ import {UIAnimation} from "../core-module/ui/ui-animation";
 import {TemporaryStorageService} from "../core-module/rest/services/temporary-storage.service";
 import {DialogButton} from "../core-module/ui/dialog-button";
 import {RestConstants} from "../core-module/rest/rest-constants";
+import {ProgressType} from "../common/ui/modal-dialog/modal-dialog.component";
 
 @Injectable()
 export class Toast{
@@ -14,6 +15,7 @@ export class Toast{
   private dialogTitle: string;
   private dialogMessage: string;
   private dialogParameters: any;
+  dialogInputValue: string;
   private lastToastMessage: string;
   private lastToastMessageTime: number;
   private lastToastError: string;
@@ -212,5 +214,11 @@ export class Toast{
     }
     showModalDialog(title: string,message: string,buttons : DialogButton[],isCancelable=true,onCancel:Function=null,messageParamters:any=null) {
         this.onShowModal({title:title,message:message,isCancelable:isCancelable,translation:messageParamters,onCancel:onCancel,buttons:buttons});
+    }
+    showInputDialog(title: string,message: string,label: string,buttons : DialogButton[],isCancelable=true,onCancel:Function=null,messageParamters:any=null) {
+      this.onShowModal({title:title,message:message,input:label,isCancelable:isCancelable,translation:messageParamters,onCancel:onCancel,buttons:buttons});
+    }
+    showProgressDialog(title='PROGRESS_DIALOG_DEFAULT_TITLE',message='PROGRESS_DIALOG_DEFAULT_MESSAGE',type = ProgressType.Indeterminate) {
+      this.onShowModal({title:title,message:message,progressType:type});
     }
 }

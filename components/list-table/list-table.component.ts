@@ -571,6 +571,8 @@ export class ListTableComponent implements EventListener{
   }
   private getSortableColumns(){
     let result:ListItem[]=[];
+    if(!this.columnsAll)
+      return result;
     for(let col of this.columnsAll){
       if(this.canBeSorted(col))
         result.push(col);
