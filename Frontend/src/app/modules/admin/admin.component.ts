@@ -58,6 +58,10 @@ export class AdminComponent {
           icon:"assessment"
       },
       {
+          id:"MEDIACENTER",
+          icon:"business"
+      },
+      {
           id:"CONFIG",
           icon:"build"
       },

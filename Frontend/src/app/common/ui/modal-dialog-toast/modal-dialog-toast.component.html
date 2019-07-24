@@ -1,3 +1,10 @@
-<card *ngIf="visible" title="{{title | translate}}" (onCancel)="cancel()" [isCancelable]="isCancelable" [buttons]="buttons" [priority]="priority" height="auto">
-  <div class="modal-dialog-toast">{{message | translate:messageParameters }}</div>
+<card *ngIf="visible" title="{{title | translate}}" (onCancel)="cancel()" [isCancelable]="isCancelable" [buttons]="buttons" height="auto">
+  <div class="modal-dialog-toast">
+    <span class="modal-dialog-toast-message">{{message | translate:messageParameters }}</span>
+    <mat-form-field *ngIf="input">
+      <mat-label>{{input | translate}}</mat-label>
+      <input matInput autofocus [(ngModel)]="toast.dialogInputValue">
+    </mat-form-field>
+  </div>
+  <mat-progress-bar *ngIf="progressType" [mode]="progressType"></mat-progress-bar>
 </card>

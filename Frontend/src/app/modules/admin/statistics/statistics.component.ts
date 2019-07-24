@@ -1,5 +1,5 @@
 import {RestAdminService} from "../../../core-module/rest/services/rest-admin.service";
-import {Component, EventEmitter, Output} from "@angular/core";
+import {Component, ElementRef, EventEmitter, Output, ViewChild} from "@angular/core";
 import {TranslateService} from "@ngx-translate/core";
 import {NodeStatistics, Node, Statistics} from "../../../core-module/rest/data-object";
 import {ListItem} from "../../../core-module/ui/list-item";
@@ -7,6 +7,7 @@ import {RestConstants} from "../../../core-module/rest/rest-constants";
 import {RestHelper} from "../../../core-module/rest/rest-helper";
 import {NodeHelper} from "../../../core-ui-module/node-helper";
 import {ConfigurationService} from "../../../core-module/rest/services/configuration.service";
+import {UIHelper} from "../../../core-ui-module/ui-helper";
 
 // Charts.js
 declare var Chart:any;
@@ -17,6 +18,7 @@ declare var Chart:any;
   styleUrls: ['statistics.component.scss']
 })
 export class AdminStatisticsComponent {
+  @ViewChild('groupedChart') groupedChartRef : ElementRef;
   @Output() onOpenNode = new EventEmitter();
   static DAY_OFFSET=1000*60*60*24;
   static DEFAULT_OFFSET=AdminStatisticsComponent.DAY_OFFSET*7; // 7 days
@@ -48,6 +50,7 @@ export class AdminStatisticsComponent {
   nodesLoading: boolean;
   nodes: Node[];
   columns: ListItem[];
+  currentTab=0;
 
   set groupedStart(groupedStart:Date){
     this._groupedStart=groupedStart;
@@ -140,14 +143,15 @@ export class AdminStatisticsComponent {
       ) {
       this.columns=[
           new ListItem('NODE',RestConstants.CM_NAME),
-        new ListItem('NODE','counts.VIEW_MATERIAL'),
-        new ListItem('NODE','counts.VIEW_MATERIAL_EMBEDDED'),
+          new ListItem('NODE','counts.VIEW_MATERIAL'),
+          new ListItem('NODE','counts.VIEW_MATERIAL_EMBEDDED'),
           new ListItem('NODE','counts.DOWNLOAD_MATERIAL'),
       ]
       // e.g. ['school']
       this.config.get('admin.statistics.groups',null).subscribe((v)=>{
         this.customGroups=v;
-        this.customGroup=v[0];
+        if(v.length)
+          this.customGroup=v[0];
       });
       this.refreshGroups();
       this.refreshNodes();
@@ -173,12 +177,14 @@ export class AdminStatisticsComponent {
       return;
     }
     this.groupedNoData=false;
-    let canvas:any = document.getElementById('groupedChart');
-    let ctx = canvas.getContext('2d');
-    if(this.groupedChart)
-      this.groupedChart.destroy();
-    this.groupedChart=this.initGroupedChart(dataNode,dataUser, ctx);
-    console.log(this.groupedChart);
+    UIHelper.waitForComponent(this,'groupedChartRef').subscribe(()=> {
+      let canvas: any = this.groupedChartRef.nativeElement;
+      let ctx = canvas.getContext('2d');
+      if (this.groupedChart)
+        this.groupedChart.destroy();
+      this.groupedChart = this.initGroupedChart(dataNode, dataUser, ctx);
+      console.log(this.groupedChart);
+    });
   }
 
   private initGroupedChart(dataNode: NodeStatistics[],dataUser: Statistics[], ctx:any) {

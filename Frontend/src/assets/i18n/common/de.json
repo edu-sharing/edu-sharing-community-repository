@@ -144,6 +144,8 @@
   "PASSWORD_MIN_LENGTH":"Das Passwort muss mindestens {{length}} Zeichen lang sein",
   "PASSWORD_NOT_MATCH":"Die Passwörter stimmen nicht überein",
   "LEARNINGAGE_YEAR":"Jahre",
+  "PROGRESS_DIALOG_DEFAULT_TITLE": "Vorgang wird ausgeführt...",
+  "PROGRESS_DIALOG_DEFAULT_MESSAGE": "Bitte warten, der Vorgang wird ausgeführt...",
   "NODE_INFO":{
     "TITLE":"Node \"{{name}}\"",
     "LOCATION":"Pfad zum Element",

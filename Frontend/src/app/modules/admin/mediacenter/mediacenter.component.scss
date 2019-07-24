@@ -1,0 +1,63 @@
+@import "../../../core-ui-module/styles/variables";
+:host /deep/{
+  .mat-tab-body-wrapper{
+    padding: 20px;
+  }
+}
+.select-mediacenter{
+  display: flex;
+  flex-direction: column;
+  padding: 20px;
+  align-items: center;
+  >mat-form-field{
+    width: 100%;
+    max-width: 500px;
+  }
+}
+.base-data{
+  display: flex;
+  flex-direction: column;
+  mat-checkbox{
+    padding: 20px 0;
+  }
+  .base-fields{
+    display:flex;
+    flex-wrap: wrap;
+    >mat-form-field{
+      width: calc(50% - 20px);
+      margin:0 10px;
+    }
+  }
+  .data-catalogs{
+    padding:30px 20px;
+    mat-form-field{
+      width: 100%;
+    }
+    h5{
+      display: flex;
+      >span{
+        flex-grow: 1;
+      }
+    }
+    .catalog-fields{
+      display: flex;
+      >mat-form-field{
+        margin:0 10px;
+      }
+    }
+  }
+  .actions{
+    display: flex;
+    >button{
+      margin: 0 10px;
+    }
+  }
+}
+.groups{
+  >h6{
+    padding:10px 0;
+  }
+  >button{
+    margin-bottom: 20px;
+  }
+}

@@ -25,7 +25,7 @@ import {
     MatSidenavModule,
     MatSlideToggleModule,
     MatTabsModule,
-    MatToolbarModule, MatTooltipModule, MatRippleModule
+    MatToolbarModule, MatTooltipModule, MatRippleModule, MatProgressBarModule
 } from '@angular/material';
 import { LazyLoadImageModule } from 'ng-lazyload-image';
 import {CustomModule} from './custom-module/custom.module';
@@ -52,6 +52,7 @@ export const IMPORTS=[
   MatTableModule,
   MatToolbarModule,
   MatRippleModule,
+  MatProgressBarModule,
   MatRadioModule,
   MatCardModule,
   MatDatepickerModule,

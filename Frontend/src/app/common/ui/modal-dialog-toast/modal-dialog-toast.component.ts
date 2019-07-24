@@ -7,6 +7,7 @@ import {Toast} from "../../../core-ui-module/toast";
 import {DialogButton} from "../../../core-module/core.module";
 import {UIAnimation} from "../../../core-module/ui/ui-animation";
 import {trigger} from "@angular/animations";
+import {ProgressType} from "../modal-dialog/modal-dialog.component";
 
 @Component({
   selector: 'modal-dialog-toast',
@@ -31,9 +32,12 @@ export class ModalDialogToastComponent{
   }
 
   constructor(private toast : Toast){
-    toast.onShowModalDialog((data:any)=>{
+    this.toast.onShowModalDialog((data:any)=>{
       this.title=data.title;
       this.message=data.message;
+      this.input=data.input;
+      this.toast.dialogInputValue='';
+      this.progressType=data.progressType;
       this.messageParameters=data.translation;
       this.isCancelable=data.isCancelable;
       this.buttons=data.buttons;
@@ -45,6 +49,10 @@ export class ModalDialogToastComponent{
   public visible=false;
 
   private isCancelable = true;
+  /**
+   * Name/Label of the input that should be displayed
+   */
+  private input: string;
   /**
    * The title, will be translated automatically
    */
@@ -59,20 +67,19 @@ export class ModalDialogToastComponent{
    * And use messageParameters={name:'World'}
    */
   private messageParameters : any;
+  /**
+   * type of the progress to display. Null if this is not an progress dialog
+   */
+  private progressType:ProgressType;
+  /* value stored in the input, if enabled */
+  inputValue: string;
 
-
-  public click(btn : DialogButton){
-    btn.callback();
-    this.visible=false;
-    this.reset();
-  }
   private cancel(){
     this.visible=false;
     if(this.onCancel!=null) this.onCancel();
     this.reset();
   }
-
-    private reset() {
-        this.onCancel=null;
-    }
+  private reset() {
+      this.onCancel=null;
+  }
 }

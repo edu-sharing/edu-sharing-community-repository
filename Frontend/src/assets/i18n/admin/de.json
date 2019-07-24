@@ -7,6 +7,7 @@
     "MODE": {
       "INFO": "Info",
       "STATISTICS": "Statistiken",
+      "MEDIACENTER": "Medienzentren",
       "CONFIG": "Grundkonfiguration",
       "APPLICATIONS": "Remote-Systeme (Rendering, LMS, Suchen)",
       "UPDATE": "Server Updates",
@@ -283,6 +284,47 @@
         "VIEW_MATERIAL": "Material angesehen",
         "VIEW_MATERIAL_EMBEDDED": "Material angesehen (Remote)",
         "DOWNLOAD_MATERIAL": "Material heruntergeladen"
+      }
+    },
+    "MEDIACENTER": {
+      "MANAGE": "Medienzentren verwalten",
+      "SELECT": "Medienzentrum auswählen",
+      "UPDATED": "Medienzentrum \"{{name}}\" wurde aktualisiert",
+      "ADD_MEDIACENTER": "Medienzentrum hinzufügen",
+      "ADD_MEDIACENTER_TITLE": "Medienzentrum hinzufügen",
+      "ADD_MEDIACENTER_MESSAGE": "Geben Sie den Namen für das Medienzentrum ein. Alle weiteren Parameter können nach dem Erstellen konfiguriert werden",
+      "ADD_MEDIACENTER_LABEL": "Name des Medienzentrums",
+      "SAVE": "Daten aktualisieren",
+      "DELETE": "Medienzentrum löschen",
+      "DELETE_TITLE": "Medienzentrum löschen",
+      "DELETE_MESSAGE": "Soll das Medienzentrum \"{{name}}\" wirklich gelöscht werden?",
+      "CREATED": "Medienzentrum \"{{name}}\" wurde erstellt",
+      "DELETED": "Medienzentrum \"{{name}}\" wurde gelöscht",
+      "DATA": {
+        "TITLE": "Basidaten",
+        "contentStatus": "Medienzentrum ist angebunden",
+        "id": "Interne ID",
+        "location": "Standort",
+        "districtAbbreviation": "Kreiskürzel",
+        "shortName": "Kurzbezeichnung",
+        "mainUrl": "URL/Link zur Seite",
+        "CATALOGS":"Katalog {{id}}",
+        "ADD_CATALOG":"Katalog hinzufügen",
+        "CATALOG": {
+          "name": "Bezeichnung",
+          "url": "URL/Link"
+        }
+      },
+      "GROUPS":{
+        "TITLE": "Verwaltete Gruppen",
+        "REMOVE": "Löschen",
+        "REMOVED": "Gruppe \"{{name}}\" ist jetzt nicht mehr dem Medienzentrum zugeordnet",
+        "ADDED": "Gruppe \"{{name}}\" ist jetzt dem Medienzentrum zugeordnet",
+        "REMOVE_TITLE": "Gruppe entfernen",
+        "REMOVE_MESSAGE": "Soll die gewählte Gruppe \"{{name}}\" aus der Zuordnung für das aktuelle Medienzentrum entfernt werden? (Die Gruppe selbst wird nicht gelöscht)",
+        "ADD": "Gruppe \"{{name}}\" hinzufügen",
+        "ADD_LABEL": "Gruppe suchen",
+        "DESCRIPTION": "Alle Mitglieder der folgenden Gruppen können auf die Medien dieses Medienzentrums zugreifen"
       }
     }
   }

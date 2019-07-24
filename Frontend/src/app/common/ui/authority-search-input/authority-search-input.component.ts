@@ -3,7 +3,7 @@ import {TranslateService} from "@ngx-translate/core";
 import {SuggestItem} from "../autocomplete/autocomplete.component";
 import {NodeHelper} from "../../../core-ui-module/node-helper";
 import {PermissionNamePipe} from '../../../core-ui-module/pipes/permission-name.pipe';
-import {Authority, AuthorityProfile, IamAuthorities, RestConnectorService, RestConstants, RestIamService} from '../../../core-module/core.module';
+import {Authority, AuthorityProfile, Group, IamAuthorities, Organization, RestConnectorService, RestConstants, RestIamService, RestOrganizationService} from '../../../core-module/core.module';
 import {Helper} from "../../../core-module/rest/helper";
 
 @Component({
@@ -24,6 +24,7 @@ export class AuthoritySearchInputComponent{
    * Group type to filter the groups searched for
    */
   @Input() groupType = "";
+  @Input() mode = AuthoritySearchMode.UsersAndGroups;
   @Input() disabled = false;
   @Input() maxSuggestions = 10;
   @Input() inputIcon='search';
@@ -47,13 +48,16 @@ export class AuthoritySearchInputComponent{
         this.addAny(this.inputValue);
     }
   }
-  constructor(private iam : RestIamService,private namePipe : PermissionNamePipe,private connector : RestConnectorService){
+  constructor(private iam : RestIamService,
+              private organization : RestOrganizationService,
+              private namePipe : PermissionNamePipe,
+              private connector : RestConnectorService){
   }
 
-    private convertData(suggestionGroup: any, authorities: AuthorityProfile[]) {
+    private convertData(suggestionGroup: any, authorities: AuthorityProfile[]|Group[]) {
         for (let user of authorities) {
             let group = user.profile.displayName != null;
-            let item = new SuggestItem(user.authorityName, group ? user.profile.displayName : NodeHelper.getUserDisplayName(user), group ? 'group' : 'person', '');
+            let item = new SuggestItem(user.authorityName, group ? user.profile.displayName : NodeHelper.getUserDisplayName((user as AuthorityProfile)), group ? 'group' : 'person', '');
             item.originalObject = user;
             item.secondaryTitle = this.namePipe.transform(user,{field:'secondary'});
             suggestionGroup.push(item);
@@ -71,31 +75,44 @@ export class AuthoritySearchInputComponent{
     this.suggestionGroups=[
         {label:'WORKSPACE.INVITE_LOCAL_RESULTS',values:[]}
     ];
-    if(this.globalSearchAllowed) {
-        this.suggestionGroups.push({label: 'WORKSPACE.INVITE_GLOBAL_RESULTS', values: []});
-    }
     if(event.length<2)
         return;
-    this.iam.searchAuthorities(event,false,this.groupType).subscribe(
-      (authorities:IamAuthorities)=>{
-        if(this.inputValue!=event)
-          return;
-        this.convertData(this.suggestionGroups[0].values,authorities.authorities);
-        if(authorities.authorities.length==0)
-            this.suggestionGroups.splice(0,1);
-          if(this.globalSearchAllowed){
-              this.iam.searchAuthorities(event,true,this.groupType).subscribe(
-                  (authorities2:IamAuthorities)=>{
-                      if(this.inputValue!=event)
-                          return;
-                      // leave out all local existing persons
-                      authorities2.authorities=authorities2.authorities.filter((authority)=>Helper.indexOfObjectArray(authorities.authorities,'authorityName',authority.authorityName)==-1);
-                      this.convertData(this.suggestionGroups[this.suggestionGroups.length-1].values,authorities2.authorities);
-                      if(authorities2.authorities.length==0)
-                        this.suggestionGroups.splice(1,1);
+    if(this.mode==AuthoritySearchMode.UsersAndGroups) {
+        if(this.globalSearchAllowed) {
+            this.suggestionGroups.push({label: 'WORKSPACE.INVITE_GLOBAL_RESULTS', values: []});
+        }
+        this.iam.searchAuthorities(event, false, this.groupType).subscribe(
+            (authorities: IamAuthorities) => {
+                if (this.inputValue != event)
+                    return;
+                this.convertData(this.suggestionGroups[0].values, authorities.authorities);
+                if (authorities.authorities.length == 0)
+                    this.suggestionGroups.splice(0, 1);
+                if (this.globalSearchAllowed) {
+                    this.iam.searchAuthorities(event, true, this.groupType).subscribe(
+                        (authorities2: IamAuthorities) => {
+                            if (this.inputValue != event)
+                                return;
+                            // leave out all local existing persons
+                            authorities2.authorities = authorities2.authorities.filter((authority) => Helper.indexOfObjectArray(authorities.authorities, 'authorityName', authority.authorityName) == -1);
+                            this.convertData(this.suggestionGroups[this.suggestionGroups.length - 1].values, authorities2.authorities);
+                            if (authorities2.authorities.length == 0)
+                                this.suggestionGroups.splice(1, 1);
 
-                  });
-          }
-      });
+                        });
+                }
+            });
+    }
+    if(this.mode==AuthoritySearchMode.Organizations) {
+        this.organization.getOrganizations(event).subscribe((orgs) => {
+            if (this.inputValue != event)
+                return;
+            this.convertData(this.suggestionGroups[0].values,orgs.organizations);
+        });
+    }
   }
+}
+export enum AuthoritySearchMode{
+    UsersAndGroups="UsersAndGroups",
+    Organizations="Organizations"
 }

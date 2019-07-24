@@ -8,20 +8,26 @@
 }
 :host /deep/ .modal-dialog-toast{
   padding: $cardPadding;
-  white-space: pre-line;
-  h1 {
-    font-size: 1.5rem;
+  >mat-form-field{
+    width: 100%;
+    padding-top: 20px;
   }
-  h2 {
-    font-size: 1.4rem;
-  }
-  h3 {
-    font-size: 1.3rem;
-  }
-  h4 {
-    font-size: 1.2rem;
-  }
-  h5 {
-    font-size: 1.1rem;
+  .modal-dialog-toast-message {
+    white-space: pre-line;
+    h1 {
+      font-size: 1.5rem;
+    }
+    h2 {
+      font-size: 1.4rem;
+    }
+    h3 {
+      font-size: 1.3rem;
+    }
+    h4 {
+      font-size: 1.2rem;
+    }
+    h5 {
+      font-size: 1.1rem;
+    }
   }
 }

@@ -123,6 +123,10 @@
         (onOpenNode)="debugNode($event)"
     ></app-admin-statistics>
 </div>
+<div *ngIf="mode=='MEDIACENTER'" class="content mediacenter">
+    <app-admin-mediacenter
+    ></app-admin-mediacenter>
+</div>
 <div *ngIf="mode=='APPLICATIONS'" class="content applications">
   <input #xmlSelect type="file" style="display:none" id="xmlSelect" accept="application/xml" (change)="registerAppXml($event)" />
   <form (ngSubmit)="registerApp()">

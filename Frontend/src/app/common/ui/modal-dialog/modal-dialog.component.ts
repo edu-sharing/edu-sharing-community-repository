@@ -75,3 +75,6 @@ export class ModalDialogComponent{
     this.onCancel.emit();
   }
 }
+export enum ProgressType {
+  Indeterminate="indeterminate"
+}
