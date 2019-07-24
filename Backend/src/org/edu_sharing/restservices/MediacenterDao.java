@@ -128,7 +128,9 @@ public class MediacenterDao extends AbstractDao{
 		authorityService.addAuthorityAspect(authorityName,CCConstants.CCM_ASPECT_MEDIACENTER);
 		if(profile.getMediacenter()!=null) {
 			authorityService.setAuthorityProperty(authorityName, CCConstants.CCM_PROP_MEDIACENTER_ID, profile.getMediacenter().getId());
-			authorityService.setAuthorityProperty(authorityName, CCConstants.CCM_PROP_MEDIACENTER_CONTENT_STATUS, profile.getMediacenter().getContentStatus().toString());
+			authorityService.setAuthorityProperty(authorityName, CCConstants.CCM_PROP_MEDIACENTER_CONTENT_STATUS,
+					profile.getMediacenter().getContentStatus()==null ? Mediacenter.MediacenterProfileExtension.ContentStatus.Deactivated.toString() : profile.getMediacenter().getContentStatus().toString()
+			);
 			authorityService.setAuthorityProperty(authorityName, CCConstants.CCM_PROP_MEDIACENTER_LOCATION, profile.getMediacenter().getLocation());
 			authorityService.setAuthorityProperty(authorityName, CCConstants.CCM_PROP_MEDIACENTER_DISTRICT_ABBREVIATION, profile.getMediacenter().getDistrictAbbreviation());
 			authorityService.setAuthorityProperty(authorityName, CCConstants.CCM_PROP_MEDIACENTER_MAIN_URL, profile.getMediacenter().getMainUrl());
