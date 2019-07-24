@@ -32,7 +32,8 @@ public class MediacenterApi {
 	@Path("/mediacenter/{repository}")
 
 	@ApiOperation(
-			value = "get all mediacenters in the repository."
+			value = "get mediacenters in the repository.",
+			notes = "Only shows the one available/managing the current user (only admin can access all)"
 	)
 
 	@ApiResponses(
@@ -63,20 +64,21 @@ public class MediacenterApi {
 	}
     @POST
     @Path("/mediacenter/{repository}/{mediacenter}")
-        
+
     @ApiOperation(
-    	value = "create new mediacenter in repository."
+    	value = "create new mediacenter in repository.",
+		notes = "admin rights are required."
 	)
-    
+
     @ApiResponses(
-    	value = { 
+    	value = {
     		@ApiResponse(code = 200, message = RestConstants.HTTP_200, response = Mediacenter.class),
-	        @ApiResponse(code = 400, message = RestConstants.HTTP_400, response = ErrorResponse.class),        
-	        @ApiResponse(code = 401, message = RestConstants.HTTP_401, response = ErrorResponse.class),        
-	        @ApiResponse(code = 403, message = RestConstants.HTTP_403, response = ErrorResponse.class),        
-	        @ApiResponse(code = 404, message = RestConstants.HTTP_404, response = ErrorResponse.class), 
-	        @ApiResponse(code = 409, message = RestConstants.HTTP_409, response = ErrorResponse.class), 
-	        @ApiResponse(code = 500, message = RestConstants.HTTP_500, response = ErrorResponse.class) 
+	        @ApiResponse(code = 400, message = RestConstants.HTTP_400, response = ErrorResponse.class),
+	        @ApiResponse(code = 401, message = RestConstants.HTTP_401, response = ErrorResponse.class),
+	        @ApiResponse(code = 403, message = RestConstants.HTTP_403, response = ErrorResponse.class),
+	        @ApiResponse(code = 404, message = RestConstants.HTTP_404, response = ErrorResponse.class),
+	        @ApiResponse(code = 409, message = RestConstants.HTTP_409, response = ErrorResponse.class),
+	        @ApiResponse(code = 500, message = RestConstants.HTTP_500, response = ErrorResponse.class)
     	})
 
     public Response createMediacenter(
@@ -84,13 +86,13 @@ public class MediacenterApi {
     		@ApiParam(value = "mediacenter name",required=true) @PathParam("mediacenter") String mediacenter,
     		Mediacenter.Profile profile,
     		@Context HttpServletRequest req) {
-    	
+
     	try {
 
 	    	RepositoryDao repoDao = RepositoryDao.getRepository(repository);
 	    	Mediacenter group = MediacenterDao.create(repoDao,mediacenter,profile).asMediacenter();
 	    	return Response.status(Response.Status.OK).entity(group).build();
-	
+
     	} catch (Throwable t) {
     		return ErrorResponse.createResponse(t);
     	}
@@ -171,7 +173,7 @@ public class MediacenterApi {
 
 	@ApiOperation(
 			value = "add a group that is managed by the given mediacenter",
-			notes = "although not restricted, it is recommended that the group is an edu-sharing organization")
+			notes = "although not restricted, it is recommended that the group is an edu-sharing organization (admin rights are required)")
 
 	@ApiResponses(
 			value = {
@@ -207,7 +209,8 @@ public class MediacenterApi {
 	@Path("/mediacenter/{repository}/{mediacenter}/manages/{group}")
 
 	@ApiOperation(
-			value = "delete a group that is managed by the given mediacenter"
+			value = "delete a group that is managed by the given mediacenter",
+			notes = "admin rights are required."
 	)
 
 	@ApiResponses(
@@ -224,7 +227,7 @@ public class MediacenterApi {
 	public Response removeMediacenterGroup(
 			@ApiParam(value = RestConstants.MESSAGE_REPOSITORY_ID,required=true, defaultValue="-home-" ) @PathParam("repository") String repository,
 			@ApiParam(value = "authorityName of the mediacenter that should manage the group",required=true) @PathParam("mediacenter") String mediacenter,
-			@ApiParam(value = "authorityName of the group that should be managed by that mediacenter",required=true) @PathParam("group") String group,
+			@ApiParam(value = "authorityName of the group that should not longer be managed by that mediacenter",required=true) @PathParam("group") String group,
 			@Context HttpServletRequest req) {
 
 		try {

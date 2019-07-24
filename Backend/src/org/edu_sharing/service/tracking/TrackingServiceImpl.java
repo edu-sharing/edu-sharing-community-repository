@@ -14,6 +14,7 @@ import org.edu_sharing.repository.server.tools.ApplicationInfoList;
 import org.edu_sharing.service.authority.AuthorityService;
 import org.edu_sharing.service.authority.AuthorityServiceFactory;
 import org.edu_sharing.service.nodeservice.NodeServiceHelper;
+import org.edu_sharing.service.search.SearchServiceFactory;
 import org.edu_sharing.service.tracking.model.StatisticEntry;
 import org.edu_sharing.service.tracking.model.StatisticEntryNode;
 import org.json.JSONObject;
@@ -76,24 +77,29 @@ public class TrackingServiceImpl extends TrackingServiceDefault{
         if(authorityName==null || authorityName.equals(ApplicationInfoList.getHomeRepository().getGuest_username()) || authorityName.equals(AuthenticationUtil.getSystemUserName())){
             return false;
         }
-        return AuthenticationUtil.runAsSystem(()-> {
-            return execDatabaseQuery(TRACKING_INSERT_USER, statement -> {
-                statement.setString(1, super.getTrackedUsername(authorityName));
-                statement.setArray(2,statement.getConnection().createArrayOf("VARCHAR",AuthorityServiceFactory.getLocalService().getEduGroups(authorityName,null).stream().map(EduGroup::getGroupname).toArray()));
-                //@TODO: Get all media centers for the user
-                statement.setArray(3,null);
-                statement.setTimestamp(4, new Timestamp(System.currentTimeMillis()));
-                statement.setString(5, type.name());
-                JSONObject json = buildJson(authorityName, type);
-                PGobject obj = new PGobject();
-                obj.setType("json");
-                if (json != null)
-                    obj.setValue(json.toString());
-                statement.setObject(6, obj);
+        return AuthenticationUtil.runAsSystem(()-> execDatabaseQuery(TRACKING_INSERT_USER, statement -> {
+            statement.setString(1, super.getTrackedUsername(authorityName));
+            try {
+                statement.setArray(2,statement.getConnection().createArrayOf("VARCHAR",SearchServiceFactory.getLocalService().getAllOrganizations(true).getData().stream().map(EduGroup::getGroupname).toArray()));
+            } catch (Exception e) {
+                logger.info("Failed to track organizations of user",e);
+            }
+            try {
+                statement.setArray(3,statement.getConnection().createArrayOf("VARCHAR",SearchServiceFactory.getLocalService().getAllMediacenters().toArray()));
+            } catch (Exception e) {
+                logger.info("Failed to track mediacenter of user",e);
+            }
+            statement.setTimestamp(4, new Timestamp(System.currentTimeMillis()));
+            statement.setString(5, type.name());
+            JSONObject json = buildJson(authorityName, type);
+            PGobject obj = new PGobject();
+            obj.setType("json");
+            if (json != null)
+                obj.setValue(json.toString());
+            statement.setObject(6, obj);
 
-                return true;
-            });
-        });
+            return true;
+        }));
 
     }
 
@@ -115,9 +121,16 @@ public class TrackingServiceImpl extends TrackingServiceDefault{
                 statement.setString(2, nodeRef.getId());
                 statement.setString(3, version);
                 statement.setString(4, super.getTrackedUsername(null));
-                statement.setArray(5,statement.getConnection().createArrayOf("VARCHAR",AuthorityServiceFactory.getLocalService().getEduGroups(null).stream().map(EduGroup::getGroupname).toArray()));
-                //@TODO: Get all media centers for the user
-                statement.setArray(6,null);
+                try {
+                    statement.setArray(5,statement.getConnection().createArrayOf("VARCHAR",SearchServiceFactory.getLocalService().getAllOrganizations(true).getData().stream().map(EduGroup::getGroupname).toArray()));
+                } catch (Exception e) {
+                    logger.info("Failed to track organizations of user",e);
+                }
+                try {
+                    statement.setArray(6,statement.getConnection().createArrayOf("VARCHAR",SearchServiceFactory.getLocalService().getAllMediacenters().toArray()));
+                } catch (Exception e) {
+                    logger.info("Failed to track mediacenter of user",e);
+                }
                 statement.setTimestamp(7, new Timestamp(System.currentTimeMillis()));
                 statement.setString(8, type.name());
                 JSONObject json = buildJson(nodeRef, details, type);

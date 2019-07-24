@@ -60,6 +60,8 @@ import org.edu_sharing.restservices.MdsDao;
 import org.edu_sharing.restservices.shared.MdsQueryCriteria;
 import org.edu_sharing.service.Constants;
 import org.edu_sharing.service.InsufficientPermissionException;
+import org.edu_sharing.service.authority.AuthorityServiceFactory;
+import org.edu_sharing.service.authority.AuthorityServiceHelper;
 import org.edu_sharing.service.nodeservice.NodeServiceFactory;
 import org.edu_sharing.service.permission.PermissionServiceFactory;
 import org.edu_sharing.service.search.model.SearchResult;
@@ -73,6 +75,7 @@ import org.springframework.extensions.surf.util.URLEncoder;
 
 public class SearchServiceImpl implements SearchService {
 
+	private final org.edu_sharing.service.authority.AuthorityService authorityService;
 	MCAlfrescoAPIClient apiClient = new MCAlfrescoAPIClient();
 
 	ApplicationContext alfApplicationContext = AlfAppContextGate.getApplicationContext();
@@ -94,6 +97,7 @@ public class SearchServiceImpl implements SearchService {
 		this.applicationId = applicationId;
 		this.baseClient = new MCAlfrescoAPIClient();
 		this.toolPermissionService = ToolPermissionServiceFactory.getInstance();
+		this.authorityService = AuthorityServiceFactory.getAuthorityService(applicationId);
 	}
 
 	@Override
@@ -207,15 +211,27 @@ public class SearchServiceImpl implements SearchService {
 	}
 	@Override
 	public List<String> getAllMediacenters() throws Exception {
+		List<EduGroup> userOrgs = getAllOrganizations(true).getData();
 		SearchParameters parameters = new SearchParameters();
 		parameters.addStore(Constants.storeRef);
 		parameters.setLanguage(org.alfresco.service.cmr.search.SearchService.LANGUAGE_LUCENE);
 		parameters.addAllAttribute(CCConstants.MEDIA_CENTER_GROUP_TYPE);
 		parameters.addSort(CCConstants.CM_PROP_AUTHORITY_AUTHORITYDISPLAYNAME,true);
 		parameters.setQuery("@ccm\\:groupType:\"" + CCConstants.MEDIA_CENTER_GROUP_TYPE + "\"");
-		return queryAll(parameters).stream().map((ref)->
-				NodeServiceFactory.getNodeService(applicationId).getProperty(ref.getStoreRef().getProtocol(),ref.getStoreRef().getIdentifier(),ref.getId(),CCConstants.CM_PROP_AUTHORITY_AUTHORITYNAME)
-		).collect(Collectors.toList());
+		return queryAll(parameters).stream().map((ref) ->
+				NodeServiceFactory.getNodeService(applicationId).getProperty(ref.getStoreRef().getProtocol(), ref.getStoreRef().getIdentifier(), ref.getId(), CCConstants.CM_PROP_AUTHORITY_AUTHORITYNAME)
+		).filter((authority)->{
+			if(AuthorityServiceHelper.isAdmin())
+				return true;
+
+			String[] memberships = authorityService.getMembershipsOfGroup(authority);
+			if(memberships!=null && memberships.length>0) {
+				// returns true if any of the organizations matches any of the managed groups of this mediacenter
+				return userOrgs.stream().anyMatch((eduGroup)->Arrays.stream(memberships).anyMatch((membership)->membership.equals(eduGroup.getGroupname())));
+
+			}
+			return false;
+		}).collect(Collectors.toList());
 	}
 	@Override
 	public SearchResult<EduGroup> searchOrganizations(String pattern, int skipCount, int maxValues, SortDefinition sort,boolean scoped)
