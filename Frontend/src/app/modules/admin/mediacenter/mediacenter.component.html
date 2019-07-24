@@ -1,0 +1,86 @@
+<div class="mediacenters">
+    <h4 class="mat-heading-4 mat-heading-underline">{{'ADMIN.MEDIACENTER.MANAGE' | translate}}</h4>
+    <spinner *ngIf="!mediacenters"></spinner>
+    <div class="select-mediacenter" *ngIf="mediacenters">
+        <mat-form-field class="mediacenter">
+            <mat-label>{{'ADMIN.MEDIACENTER.SELECT' | translate}}</mat-label>
+            <mat-select id="type" type="text" [ngModel]="currentMediacenter" (ngModelChange)="setMediacenter($event)">
+                <mat-option *ngFor="let mediacenter of mediacenters" [value]="mediacenter">{{mediacenter.profile.displayName}}</mat-option>
+            </mat-select>
+        </mat-form-field>
+        <button mat-raised-button color="primary" (click)="addMediacenter()"><i icon iconId="add"></i>{{'ADMIN.MEDIACENTER.ADD_MEDIACENTER' | translate}}</button>
+    </div>
+    <div class="mediacenter-actions" *ngIf="mediacenters && currentMediacenterCopy">
+        <h4 class="mat-heading-4 mat-heading-underline">{{currentMediacenterCopy.profile.displayName | translate}}</h4>
+        <mat-tab-group mat-stretch-tabs [(selectedIndex)]="currentTab">
+            <mat-tab label="{{'ADMIN.MEDIACENTER.DATA.TITLE' | translate}}">
+                <div class="base-data">
+                    <mat-checkbox [ngModel]="currentMediacenterCopy.profile.mediacenter.contentStatus=='Activated'" (ngModelChange)="currentMediacenterCopy.profile.mediacenter.contentStatus=$event ? 'Activated' : 'Deactivated'">{{'ADMIN.MEDIACENTER.DATA.contentStatus' | translate}}</mat-checkbox>
+                    <div class="base-fields">
+                        <mat-form-field>
+                            <mat-label>{{'ADMIN.MEDIACENTER.DATA.id' | translate}}</mat-label>
+                            <input matInput [(ngModel)]="currentMediacenterCopy.profile.mediacenter.id">
+                        </mat-form-field>
+                        <mat-form-field>
+                            <mat-label>{{'ADMIN.MEDIACENTER.DATA.location' | translate}}</mat-label>
+                            <input matInput [(ngModel)]="currentMediacenterCopy.profile.mediacenter.location">
+                        </mat-form-field>
+                        <mat-form-field>
+                            <mat-label>{{'ADMIN.MEDIACENTER.DATA.districtAbbreviation' | translate}}</mat-label>
+                            <input matInput [(ngModel)]="currentMediacenterCopy.profile.mediacenter.districtAbbreviation">
+                        </mat-form-field>
+                        <mat-form-field>
+                            <mat-label>{{'ADMIN.MEDIACENTER.DATA.shortName' | translate}}</mat-label>
+                            <input matInput [(ngModel)]="currentMediacenterCopy.profile.displayName">
+                        </mat-form-field>
+                        <mat-form-field>
+                            <mat-label>{{'ADMIN.MEDIACENTER.DATA.mainUrl' | translate}}</mat-label>
+                            <input matInput [(ngModel)]="currentMediacenterCopy.profile.mediacenter.mainUrl">
+                        </mat-form-field>
+                    </div>
+                    <div class="data-catalogs">
+                        <div *ngFor="let catalog of currentMediacenterCopy.profile.mediacenter.catalogs;let i=index;">
+                            <h5 class="mat-heading-5 mat-heading-underline">
+                                <span>{{'ADMIN.MEDIACENTER.DATA.CATALOGS' | translate:{id:(i+1)} }}</span>
+                                <button mat-icon-button color="primary" (click)="removeCatalog(catalog)"><i icon iconId="delete"></i></button>
+                            </h5>
+                            <div class="catalog-fields">
+                                <mat-form-field>
+                                    <mat-label>{{'ADMIN.MEDIACENTER.DATA.CATALOG.name' | translate}}</mat-label>
+                                    <input matInput [(ngModel)]="catalog.name">
+                                </mat-form-field>
+                                <mat-form-field>
+                                    <mat-label>{{'ADMIN.MEDIACENTER.DATA.CATALOG.url' | translate}}</mat-label>
+                                    <input matInput [(ngModel)]="catalog.url">
+                                </mat-form-field>
+                            </div>
+                        </div>
+                        <button mat-button color="primary" (click)="addCatalog()"><i icon iconId="add"></i>{{'ADMIN.MEDIACENTER.DATA.ADD_CATALOG' | translate}}</button>
+                    </div>
+                    <div class="actions">
+                        <button mat-raised-button color="primary" (click)="saveChanges()">{{'ADMIN.MEDIACENTER.SAVE' | translate}}</button>
+                        <button mat-raised-button color="warn" (click)="deleteMediacenter()">{{'ADMIN.MEDIACENTER.DELETE' | translate}}</button>
+                    </div>
+                </div>
+            </mat-tab>
+            <mat-tab label="{{'ADMIN.MEDIACENTER.GROUPS.TITLE' | translate}}">
+                <div class="groups">
+                    <h6 class="mat-heading-6">{{'ADMIN.MEDIACENTER.GROUPS.DESCRIPTION' | translate}}</h6>
+                    <authority-search-input placeholder="ADMIN.MEDIACENTER.GROUPS.ADD_LABEL" mode="Organizations" (onChooseAuthority)="addGroup=$event"></authority-search-input>
+                    <button *ngIf="addGroup" mat-raised-button color="primary" (click)="addCurrentGroup()"><i icon iconId="add"></i>{{'ADMIN.MEDIACENTER.GROUPS.ADD' | translate:{name:addGroup.profile.displayName} }}</button>
+                    <listTable *ngIf="mediacenterGroups"
+                        [nodes]="mediacenterGroups"
+                        [hasIcon]="true"
+                        [options]="groupActions"
+                        icon="group"
+                        [columns]="groupColumns"
+                ></listTable>
+                </div>
+            </mat-tab>
+            <mat-tab label="{{'ADMIN.MEDIACENTER.STATISTICS.TITLE' | translate}}">
+                <!-- workaround for https://github.com/angular/components/issues/7274 -->
+                <app-admin-statistics *ngIf="currentTab==2"></app-admin-statistics>
+            </mat-tab>
+        </mat-tab-group>
+    </div>
+</div>
