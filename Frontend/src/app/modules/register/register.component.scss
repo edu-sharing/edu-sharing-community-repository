@@ -37,3 +37,9 @@ $path:'../../../assets/images/layout/';
   background: url($path + 'register.jpg') no-repeat center bottom;
   background-size: cover;
 }
+:host /deep/ {
+  .mat-checkbox-layout {
+    white-space: normal !important;
+    align-items: baseline !important;
+  }
+}
