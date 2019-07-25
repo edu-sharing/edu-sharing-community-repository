@@ -174,9 +174,16 @@ public class NodeServiceAdapter implements NodeService {
 		InputStream content=getContent(nodeId);
 		NodeService service=NodeServiceFactory.getLocalService();
 		
+		//fix name
 		String name = (String) props.get(CCConstants.CM_NAME);
 		name = NodeServiceHelper.cleanupCmName(name);
 		props.put(CCConstants.CM_NAME, name);
+		
+		//preview
+		String thumbnail = (String)props.get(CCConstants.CM_ASSOC_THUMBNAILS);
+		if(thumbnail != null) {
+			props.put(CCConstants.CCM_PROP_IO_THUMBNAILURL, thumbnail);
+		}
 
 		// Aspect ccm:imported_object properties
 		props.put(CCConstants.CCM_PROP_IMPORTED_OBJECT_NODEID,props.get(CCConstants.SYS_PROP_NODE_UID));
