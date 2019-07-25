@@ -11,22 +11,31 @@
               [isCancelable]="false"
 ></modal-dialog>
 <card width="normal" height="xxlarge" [buttons]="xmlCardButtons" [isCancelable]="true" (onCancel)="xmlAppProperties=null" title="{{'ADMIN.APPLICATIONS.EDIT_APP' | translate:{xml:currentAppXml} }}" *ngIf="xmlAppProperties">
-    <div class="card-content-padding">
+    <div class="card-content-padding card-xml">
         <div class="warning">{{'ADMIN.APPLICATIONS.APP_XML_WARNING' | translate}}</div>
         <div *ngFor="let value of xmlAppKeys;let i=index;" class="appEditor">
-            <div class="property">{{value}}</div>
-            <div class="inputGroup">
-                <textarea *ngIf="isMultilineProperty(value)" class="materialize-textarea" [(ngModel)]="xmlAppProperties[value]"></textarea>
-                <input    *ngIf="!isMultilineProperty(value)" type="text" [(ngModel)]="xmlAppProperties[value]">
+            <mat-form-field class="mat-input-group">
+                <mat-label>{{value}}</mat-label>
+                <textarea matInput
+                          cdkTextareaAutosize
+                          cdkAutosizeMinRows="2"
+                          cdkAutosizeMaxRows="5"*ngIf="isMultilineProperty(value)" class="materialize-textarea" [(ngModel)]="xmlAppProperties[value]"></textarea>
+                <input matInput *ngIf="!isMultilineProperty(value)" type="text" [(ngModel)]="xmlAppProperties[value]">
                 <!-- Api does currently not support deleting -->
                 <i class="material-icons clickable" (click)="removeAppProperty(i)" *ngIf="false">delete</i>
-            </div>
-            <div class="input-hint-bottom" *ngIf="currentApp">{{'ADMIN.APPLICATIONS.'+currentApp+"."+value | translate}}</div>
+                <mat-hint *ngIf="currentApp">{{'ADMIN.APPLICATIONS.'+currentApp+"."+value | translate}}</mat-hint>
+            </mat-form-field>
         </div>
-        <div class="addProperty">
+        <div class="add-property">
             <div class="property">{{'ADMIN.APPLICATIONS.ADD_PROPERTY' | translate}}</div>
-            <input type="text" id="additionalProperty" placeholder="{{'ADMIN.APPLICATIONS.PROPERTY_NAME_PLACEHOLDER' | translate}}" [(ngModel)]="xmlAppAdditionalPropertyName">
-            <input type="text" placeholder="{{'ADMIN.APPLICATIONS.PROPERTY_VALUE_PLACEHOLDER' | translate}}" [(ngModel)]="xmlAppAdditionalPropertyValue">
+            <mat-form-field>
+                <mat-label>{{'ADMIN.APPLICATIONS.PROPERTY_NAME_PLACEHOLDER' | translate}}</mat-label>
+                <input matInput type="text" id="additionalProperty" [(ngModel)]="xmlAppAdditionalPropertyName">
+            </mat-form-field>
+            <mat-form-field>
+                <mat-label>{{'ADMIN.APPLICATIONS.PROPERTY_VALUE_PLACEHOLDER' | translate}}</mat-label>
+                <input matInput type="text" [(ngModel)]="xmlAppAdditionalPropertyValue">
+            </mat-form-field>
         </div>
     </div>
 </card>
@@ -106,13 +115,19 @@
         <form (ngSubmit)="testMail()">
             <div class="inputGroupGrow">
                 <div class="info">{{'ADMIN.CONFIG.TEST_MAIL_RECEIVER' | translate }}</div>
-                <input type="email" name="receiver" [(ngModel)]="mailReceiver">
+                <mat-form-field>
+                    <mat-label>{{'ADMIN.CONFIG.TEST_MAIL_RECEIVER_LABEL' | translate}}</mat-label>
+                    <input matInput type="email" name="receiver" [(ngModel)]="mailReceiver">
+                </mat-form-field>
             </div>
             <div class="inputGroupGrow">
                 <div class="info">{{'ADMIN.CONFIG.TEST_MAIL_TEMPLATE' | translate }}</div>
-                <select name="template" [(ngModel)]="mailTemplate">
-                    <option *ngFor="let template of mailTemplates">{{template}}</option>
-                </select>
+                <mat-form-field>
+                    <mat-label>{{'ADMIN.CONFIG.TEST_MAIL_TEMPLATE_LABEL' | translate}}</mat-label>
+                    <mat-select name="template" [(ngModel)]="mailTemplate">
+                        <mat-option *ngFor="let template of mailTemplates" [value]="template">{{template}}</mat-option>
+                    </mat-select>
+                </mat-form-field>
             </div>
             <button mat-raised-button color="primary" [class.disabled]="!mailReceiver || !mailTemplate" (click)="testMail()">{{'ADMIN.CONFIG.TEST_MAIL_SEND' | translate }}</button>
         </form>

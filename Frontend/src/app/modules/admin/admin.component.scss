@@ -206,21 +206,6 @@ $sidenavWidthMobile:66px;
     float: left;
     width:100%;
   }
-  .appEditor{
-    .addProperty{
-      width:100%;
-      float:left;
-    }
-    .inputGroup{
-      textarea,input{
-        /*width:calc(100% - 40px);*/
-      }
-      .material-icons{
-        color:$textLight;
-        float:right;
-      }
-    }
-  }
   max-width: 1000px;
   margin: auto;
 }
@@ -551,13 +536,30 @@ $sidenavWidthMobile:66px;
       background-color: #ffdcd8;
     }
   }
-
-
+}
+.card-xml {
+  .warning{
+    padding:10px 0;
+  }
+  .mat-input-group {
+    width: 100%;
+    margin:15px 0;
+  }
+  .add-property{
+    display: flex;
+    flex-direction: column;
+  }
 }
 :host /deep/{
   .preloader-wrapper.small{
     width:16px;
     height:16px;
+  }
+  .inputGroupGrow{
+    .mat-form-field-wrapper{
+      width: 100%;
+      margin-bottom: 0;
+    }
   }
 }
 .reload{
