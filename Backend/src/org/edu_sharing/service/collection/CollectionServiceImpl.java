@@ -270,7 +270,10 @@ public class CollectionServiceImpl implements CollectionService{
 		}
 		
 		HashMap<String, Object> toSafe = new HashMap<String, Object>();
-		toSafe.put(CCConstants.CM_NAME, props.get(CCConstants.CM_NAME));
+		
+		String name = (String)props.get(CCConstants.CM_NAME);
+		name = NodeServiceHelper.cleanupCmName(name);
+		toSafe.put(CCConstants.CM_NAME, name);
 		toSafe.put(CCConstants.LOM_PROP_GENERAL_TITLE, props.get(CCConstants.LOM_PROP_GENERAL_TITLE));
 		toSafe.put(CCConstants.CCM_PROP_IO_REPL_LIFECYCLECONTRIBUTER_AUTOR, props.get(CCConstants.CCM_PROP_IO_REPL_LIFECYCLECONTRIBUTER_AUTOR));
 		toSafe.put(CCConstants.LOM_PROP_TECHNICAL_FORMAT, props.get(CCConstants.LOM_PROP_TECHNICAL_FORMAT));

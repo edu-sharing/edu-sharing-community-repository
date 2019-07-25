@@ -173,6 +173,17 @@ public class NodeServiceAdapter implements NodeService {
 			mimetype= (String) props.get(CCConstants.LOM_PROP_TECHNICAL_FORMAT);
 		InputStream content=getContent(nodeId);
 		NodeService service=NodeServiceFactory.getLocalService();
+		
+		//fix name
+		String name = (String) props.get(CCConstants.CM_NAME);
+		name = NodeServiceHelper.cleanupCmName(name);
+		props.put(CCConstants.CM_NAME, name);
+		
+		//preview
+		String thumbnail = (String)props.get(CCConstants.CM_ASSOC_THUMBNAILS);
+		if(thumbnail != null) {
+			props.put(CCConstants.CCM_PROP_IO_THUMBNAILURL, thumbnail);
+		}
 
 		// Aspect ccm:imported_object properties
 		props.put(CCConstants.CCM_PROP_IMPORTED_OBJECT_NODEID,props.get(CCConstants.SYS_PROP_NODE_UID));
@@ -184,7 +195,9 @@ public class NodeServiceAdapter implements NodeService {
 		props.remove(CCConstants.CM_PROP_C_MODIFIED);
 
 		String localNode=service.createNodeBasic(localParent, CCConstants.CCM_TYPE_IO,props);
-		service.writeContent(new StoreRef(StoreRef.PROTOCOL_WORKSPACE, "SpacesStore"), localNode, content,mimetype, null, CCConstants.CM_PROP_CONTENT);
+		if(content != null) {
+			service.writeContent(new StoreRef(StoreRef.PROTOCOL_WORKSPACE, "SpacesStore"), localNode, content,mimetype, null, CCConstants.CM_PROP_CONTENT);
+		}
 		return localNode;
 	}
 	
