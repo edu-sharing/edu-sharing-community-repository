@@ -599,20 +599,29 @@ export class SearchComponent {
       this.searchService.sort.materialsSortAscending=sort.ascending || sort.sortAscending;
       this.routeSearch();
   }
-  private importNode(node: Node) {
+  private importNode(nodes: Node[],pos=0,errors=false,lastData:Node=null) {
+    if(pos>=nodes.length){
+        this.globalProgress=false;
+        let additional;
+        if(nodes.length==1 && lastData){
+            additional={link:
+                {caption:'SEARCH.NODE_IMPORTED_VIEW',
+                callback:()=>{
+                        UIHelper.goToWorkspace(this.nodeApi,this.router,this.login,lastData);
+                    }
+                }
+            };
+        }
+        if(!errors)
+            this.toast.toast('SEARCH.NODE_IMPORTED',null,null,null,additional);
+        return;
+    }
     this.globalProgress=true;
-    this.nodeApi.importNode(node.ref.repo,node.ref.id,RestConstants.INBOX).subscribe((data:NodeWrapper)=>{
-      this.globalProgress=false;
-      this.toast.toast('SEARCH.NODE_IMPORTED',null,null,null,
-          {link:
-                        {caption:'SEARCH.NODE_IMPORTED_VIEW',
-                         callback:()=>{
-                            UIHelper.goToWorkspace(this.nodeApi,this.router,this.login,data.node);
-                        }}
-      });
+    this.nodeApi.importNode(nodes[pos].ref.repo,nodes[pos].ref.id,RestConstants.INBOX).subscribe((data:NodeWrapper)=>{
+        this.importNode(nodes,pos+1,errors,data.node);
     },(error:any)=>{
-      this.toast.error(error);
-      this.globalProgress=false;
+        this.toast.error(error);
+        this.importNode(nodes,pos+1,true,null);
     });
   }
 
@@ -699,13 +708,13 @@ export class SearchComponent {
         */
       }
 
-      let save = new OptionItem('SAVE', 'reply', (node: Node) => this.importNode(this.getCurrentNode(node)));
+      let save = new OptionItem('SAVE', 'reply', (node: Node) => this.importNode(ActionbarHelperService.getNodes(nodes, node)));
       save.showCallback=(node:Node)=>{
           let n=ActionbarHelperService.getNodes(nodes,node);
           if(n==null)
               return false;
-          console.log(n[0],RestNetworkService.supportsImport(n[0].ref.repo, this.allRepositories));
-          return !this.isGuest && n.length==1 && RestNetworkService.supportsImport(n[0].ref.repo, this.allRepositories);
+          // only for logged in users when all nods are supported for import
+          return !this.isGuest && n.length && n.filter((node)=>RestNetworkService.supportsImport(node.ref.repo, this.allRepositories)).length==n.length;
       };
       options.push(save);
 
