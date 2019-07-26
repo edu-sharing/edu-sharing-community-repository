@@ -8,6 +8,7 @@ import {RestHelper} from "../../../core-module/rest/rest-helper";
 import {NodeHelper} from "../../../core-ui-module/node-helper";
 import {ConfigurationService} from "../../../core-module/rest/services/configuration.service";
 import {UIHelper} from "../../../core-ui-module/ui-helper";
+import {RestStatisticsService} from "../../../core-module/rest/services/rest-statistics.service";
 
 // Charts.js
 declare var Chart:any;
@@ -138,6 +139,7 @@ export class AdminStatisticsComponent {
   }
     constructor(
         private admin : RestAdminService,
+        private statistics : RestStatisticsService,
         private translate : TranslateService,
         private config : ConfigurationService,
       ) {
@@ -160,9 +162,9 @@ export class AdminStatisticsComponent {
 
   private refreshGroups() {
     this.groupedLoading=true;
-    this.admin.getStatisticsNode(this._groupedStart,new Date(this._groupedEnd.getTime()+AdminStatisticsComponent.DAY_OFFSET),this._groupedMode).subscribe((dataNode)=> {
+    this.statistics.getStatisticsNode(this._groupedStart,new Date(this._groupedEnd.getTime()+AdminStatisticsComponent.DAY_OFFSET),this._groupedMode).subscribe((dataNode)=> {
       if (this._groupedMode != 'None') {
-        this.admin.getStatisticsUser(this._groupedStart,new Date(this._groupedEnd.getTime()+AdminStatisticsComponent.DAY_OFFSET), this._groupedMode).subscribe((dataUser) => {
+        this.statistics.getStatisticsUser(this._groupedStart,new Date(this._groupedEnd.getTime()+AdminStatisticsComponent.DAY_OFFSET), this._groupedMode).subscribe((dataUser) => {
           this.processGroupData(dataNode,dataUser);
         });
       } else {
@@ -280,7 +282,7 @@ export class AdminStatisticsComponent {
   private refreshNodes() {
     this.nodes=[];
     this.nodesLoading = true;
-    this.admin.getStatisticsNode(this._nodesStart, new Date(this._nodesEnd.getTime()+AdminStatisticsComponent.DAY_OFFSET)).subscribe((data) => {
+    this.statistics.getStatisticsNode(this._nodesStart, new Date(this._nodesEnd.getTime()+AdminStatisticsComponent.DAY_OFFSET)).subscribe((data) => {
       this.nodesLoading = false;
       this.nodesNoData = data.length==0;
       this.nodes = data.map((stat)=>{
@@ -298,7 +300,7 @@ export class AdminStatisticsComponent {
     this.singleLoading=true;
     if(this._singleMode=='NODES'){
       this.singleDataRows=["date","action","node","authority"].concat(this.customGroups || []);
-      this.admin.getStatisticsNode(this._singleStart,new Date(this._singleEnd.getTime()+AdminStatisticsComponent.DAY_OFFSET),'None',this.customGroups).subscribe((result)=>{
+      this.statistics.getStatisticsNode(this._singleStart,new Date(this._singleEnd.getTime()+AdminStatisticsComponent.DAY_OFFSET),'None',this.customGroups).subscribe((result)=>{
         this.singleData=result.map((entry)=> {
           return {"action": Object.keys(entry.counts)[0], "date": entry.date, "node": RestHelper.getName(entry.node), "authority":entry.authority, "entry": entry}
         });
@@ -307,7 +309,7 @@ export class AdminStatisticsComponent {
     }
     if(this._singleMode=='USERS'){
       this.singleDataRows=["date","action","authority"].concat(this.customGroups || []);
-      this.admin.getStatisticsUser(this._singleStart,new Date(this._singleEnd.getTime()+AdminStatisticsComponent.DAY_OFFSET),'None',this.customGroups).subscribe((result)=>{
+      this.statistics.getStatisticsUser(this._singleStart,new Date(this._singleEnd.getTime()+AdminStatisticsComponent.DAY_OFFSET),'None',this.customGroups).subscribe((result)=>{
         this.singleData=result.map((entry)=> {
           return {"action": Object.keys(entry.counts)[0], "date": entry.date, "authority":entry.authority, "entry": entry}
         });
@@ -334,12 +336,12 @@ export class AdminStatisticsComponent {
       this.customGroupLoading=false;
     };
     if(this._customGroupMode=='NODES'){
-      this.admin.getStatisticsNode(this._singleStart,new Date(this._singleEnd.getTime()+AdminStatisticsComponent.DAY_OFFSET),'None',this.customGroups,this.customGroups).subscribe((result)=>{
+      this.statistics.getStatisticsNode(this._singleStart,new Date(this._singleEnd.getTime()+AdminStatisticsComponent.DAY_OFFSET),'None',this.customGroups,this.customGroups).subscribe((result)=>{
         handleResult(result);
       });
     }
     if(this._customGroupMode=='USERS'){
-      this.admin.getStatisticsUser(this._singleStart,new Date(this._singleEnd.getTime()+AdminStatisticsComponent.DAY_OFFSET),'None',this.customGroups,this.customGroups).subscribe((result)=>{
+      this.statistics.getStatisticsUser(this._singleStart,new Date(this._singleEnd.getTime()+AdminStatisticsComponent.DAY_OFFSET),'None',this.customGroups,this.customGroups).subscribe((result)=>{
         handleResult(result);
       });
     }
