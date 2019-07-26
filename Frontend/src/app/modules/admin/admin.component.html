@@ -282,12 +282,13 @@
                 <div class="info">{{'ADMIN.TOOLKIT.JOB_CLASS' | translate }}</div>
                 <div class="autocomplete">
                     <autocomplete
-                            [suggestions]="jobClasses"
-                            [fixed]="true"
+                            [suggestions]="jobClassesSuggested"
                             [allowAny]="true"
-                            (addItem)="job.class=$event.item.id"
-                            (addAny)="job.class=$event"></autocomplete>
-                    <div class="job-title" *ngIf="job && job.class">{{'ADMIN.JOBS.NAMES.'+getJobName(job) | translate}}</div>
+                            [inputMinLength]="1"
+                            (updateInput)="updateJobSuggestions($event)"
+                            (addItem)="job.name=$event.item.title;job.class=$event.item.id"
+                            (addAny)="job.name='';job.class=$event"></autocomplete>
+                    <div class="job-title" *ngIf="job && job.name">{{job.name | translate}}</div>
                     <div class="job-class" *ngIf="job && job.class">{{job.class}}</div>
                 </div>
             </div>
