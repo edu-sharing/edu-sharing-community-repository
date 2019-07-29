@@ -14,38 +14,39 @@ import java.util.List;
 public class CollectionReference extends CollectionBase {
 
 	private String originalId;
-	
+
 	private Node reference;
-	
+
 
 	private Preview preview;
 	private List<String> accessOriginal;
+	private List<String> aspects;
 
 	@ApiModelProperty(required = false, value = "")
 	@JsonProperty("originalId")
 	public String getOriginalId() {
 		return originalId;
 	}
-	
+
 	public void setOriginalId(String originalId) {
 		this.originalId = originalId;
 	}
-	
+
 	public void setReference(Node reference) {
 		this.reference = reference;
 	}
-	
+
 	@ApiModelProperty(required = true, value = "")
 	@JsonProperty("reference")
 	public Node getReference() {
 		return reference;
 	}
-	
-	
+
+
 	public void setPreview(Preview preview) {
 		this.preview = preview;
 	}
-	
+
 	@ApiModelProperty(required = true, value = "")
 	@JsonProperty("preview")
 	public Preview getPreview() {
@@ -53,11 +54,20 @@ public class CollectionReference extends CollectionBase {
 	}
 
 	@JsonProperty
-    public void setAccessOriginal(List<String> accessOriginal) {
-        this.accessOriginal = accessOriginal;
-    }
+	public void setAccessOriginal(List<String> accessOriginal) {
+		this.accessOriginal = accessOriginal;
+	}
 
-    public List<String> getAccessOriginal() {
-        return accessOriginal;
-    }
+	public List<String> getAccessOriginal() {
+		return accessOriginal;
+	}
+
+	@JsonProperty
+	public List<String> getAspects() {
+		return aspects;
+	}
+
+	public void setAspects(List<String> aspects) {
+		this.aspects = aspects;
+	}
 }

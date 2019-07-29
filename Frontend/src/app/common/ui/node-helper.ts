@@ -122,17 +122,33 @@ export class NodeHelper{
 
   /**
    * returns true if all nodes have the requested right
-   * If originalRights is true, check the rights of the original object as well (either ref or original must match the right)
-   * (only works for collection refs)
+   * mode (only works for collection refs):
+   *   Local: check only rights of the node itself
+       Original: check only rights of the original node this refers to (collection ref). If it is not a collection ref, fallback to local
+       Both: check both rights of node + original combined via or
+   *
+   *
    * @param nodes
    * @param right
    * @returns {boolean}
    */
-  public static getNodesRight(nodes :any[],right : string,originalRights=false){
+  public static getNodesRight(nodes :any[],right : string,mode=NodesRightMode.Local){
     if(nodes==null)
       return true;
     for(let node of nodes){
-      if(originalRights && node.accessOriginal && node.accessOriginal.indexOf(right)!=-1)
+      let currentMode=mode;
+      // if this is not a collection ref -> force local mode
+      if(node.aspects.indexOf(RestConstants.CCM_ASPECT_IO_REFERENCE)==-1){
+        currentMode=NodesRightMode.Local;
+      }
+      if(currentMode==NodesRightMode.Original || currentMode==NodesRightMode.Both){
+        if(node.accessOriginal && node.accessOriginal.indexOf(right)!=-1)
+          continue;
+        // only original, but not found -> return false
+        if(currentMode==NodesRightMode.Original)
+          return false;
+      }
+      if(node.accessOriginal && node.accessOriginal.indexOf(right)!=-1)
           continue;
       if(!node.access)
         return false;
@@ -659,3 +675,8 @@ export class NodeHelper{
     }
 }
 
+export enum NodesRightMode{
+  Local,
+  Original,
+  Both
+}

@@ -1,11 +1,12 @@
-import {NodeHelper} from "../ui/node-helper";
-import {CollectionReference, Node} from "../rest/data-object";
+import {NodeHelper, NodesRightMode} from "../ui/node-helper";
+import {Node} from "../rest/data-object";
 import {RestConstants} from "../rest/rest-constants";
 import {OptionItem} from "../ui/actionbar/option-item";
 import {RestConnectorService} from "../rest/services/rest-connector.service";
 import {RestConnectorsService} from "../rest/services/rest-connectors.service";
 import {Injectable} from "@angular/core";
 import {RestNetworkService} from "../rest/services/rest-network.service";
+
 @Injectable()
 export class ActionbarHelperService{
   public static getNodes(nodes:Node[],node:Node):Node[] {
@@ -72,7 +73,7 @@ export class ActionbarHelperService{
     if(type=='ADD_TO_COLLECTION') {
       if (this.connector.getCurrentLogin() && !this.connector.getCurrentLogin().isGuest) {
         option = new OptionItem("WORKSPACE.OPTION.COLLECTION", "layers", callback);
-        option.isEnabled = NodeHelper.getNodesRight(nodes, RestConstants.ACCESS_CC_PUBLISH,true);
+        option.isEnabled = NodeHelper.getNodesRight(nodes, RestConstants.ACCESS_CC_PUBLISH,NodesRightMode.Original);
         option.showAsAction = true;
         option.showCallback = (node: Node) => {
             let n=ActionbarHelperService.getNodes(nodes,node);
@@ -82,7 +83,7 @@ export class ActionbarHelperService{
         }
         option.enabledCallback = (node: Node) => {
           let list = ActionbarHelperService.getNodes(nodes, node);
-          return NodeHelper.getNodesRight(list,RestConstants.ACCESS_CC_PUBLISH,true);
+          return NodeHelper.getNodesRight(list,RestConstants.ACCESS_CC_PUBLISH,NodesRightMode.Original);
         }
         option.disabledCallback = () =>{
           this.connectors.getRestConnector().getToastService().error(null,'WORKSPACE.TOAST.ADD_TO_COLLECTION_DISABLED');
