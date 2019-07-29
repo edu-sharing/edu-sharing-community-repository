@@ -205,7 +205,7 @@ public class HandleService {
 	
 	public static String HANDLE_TABLE_ATT_ID = "ID";
 	
-	public static String HANDLE_QUERY_EXISTS = "select " + HANDLE_TABLE_ATT_ID + " from " + HANDLE_TABLE + " where " + HANDLE_TABLE_ATT_ID +"=?";
+	public static String HANDLE_QUERY_EXISTS = "select " + HANDLE_TABLE_ATT_ID + " from " + HANDLE_TABLE + " where lower(" + HANDLE_TABLE_ATT_ID +") = lower(?)";
 	
 	public static String HANDLE_INSERT = "insert into " + HANDLE_TABLE +" (" + HANDLE_TABLE_ATT_ID + ") VALUES (?)";
 	
@@ -213,9 +213,14 @@ public class HandleService {
 	
 	public static synchronized String generateUniqueHandleId() throws SQLException{
 		String handleId = RandomStringUtils.randomAlphabetic(HANDLE_ID_LENGTH);
+		
 		while(handleIdExists(handleId)) {
 			handleId = RandomStringUtils.randomAlphabetic(HANDLE_ID_LENGTH);
 		}
+		
+		//handle server does not differentiate upper/lowercase
+		handleId = handleId.toUpperCase();
+		
 		insertHandleId(handleId);
 		return handleId;
 	}
