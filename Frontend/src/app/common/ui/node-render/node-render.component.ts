@@ -287,8 +287,12 @@ export class NodeRenderComponent implements EventListener{
     this.isLoading=true;
     this.node=this._nodeId;
   }
+  viewParent(){
+      this.isChildobject=false;
+      this.node=this.sequenceParent;
+  }
   viewChildobject(node:Node,pos:number){
-        this.isChildobject=pos!=0;
+        this.isChildobject=true;
         this.node=node;
   }
   private loadNode() {
