@@ -66,6 +66,7 @@ export class AdminComponent {
   public jobsLogLevel:any = [];
   public jobsLogData:any = [];
   public jobClasses:SuggestItem[]=[];
+  public jobClassesSuggested:SuggestItem[]=[];
   public lucene:any={mode:'NODEREF',offset:0,count:100};
   public oaiSave=true;
   public repositoryVersion:string;
@@ -913,5 +914,10 @@ export class AdminComponent {
       }
       return null;
     }
+
+  updateJobSuggestions(event: any) {
+    let name=event.input.toString();
+    this.jobClassesSuggested=this.jobClasses.filter((j)=>j.title.toLowerCase().indexOf(name)!=-1 || j.secondaryTitle.toLowerCase().indexOf(name)!=-1);
+  }
 }
 

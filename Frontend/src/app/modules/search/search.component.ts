@@ -29,7 +29,7 @@ import {RestNetworkService} from '../../common/rest/services/rest-network.servic
 import {WorkspaceMainComponent} from '../workspace/workspace.component';
 import {UIAnimation} from '../../common/ui/ui-animation';
 import {trigger} from '@angular/animations';
-import {NodeHelper} from '../../common/ui/node-helper';
+import {NodeHelper, NodesRightMode} from '../../common/ui/node-helper';
 import {RestCollectionService} from '../../common/rest/services/rest-collection.service';
 import {RestMdsService} from '../../common/rest/services/rest-mds.service';
 import {RestHelper} from '../../common/rest/rest-helper';
@@ -619,7 +619,7 @@ export class SearchComponent {
     if(this.searchService.reurl) {
       let apply=new OptionItem('APPLY', 'redo', (node: Node) => NodeHelper.addNodeToLms(this.router,this.temporaryStorageService,ActionbarHelperService.getNodes(this.selection,node)[0],this.searchService.reurl));
       apply.enabledCallback=((node:Node)=> {
-        return node.access.indexOf(RestConstants.ACCESS_CC_PUBLISH) != -1;
+        return node.access.indexOf(RestConstants.ACCESS_CC_PUBLISH,NodesRightMode.Original) != -1;
       });
       if(fromList || (nodes && nodes.length==1))
         options.push(apply);
@@ -632,8 +632,8 @@ export class SearchComponent {
             this.switchToCollections(this.addToCollection.ref.id);
           });
         });
-        addTo.isEnabled = NodeHelper.getNodesRight(nodes, RestConstants.ACCESS_CC_PUBLISH) && RestNetworkService.allFromHomeRepo(nodes, this.repositories);
-        addTo.enabledCallback = (node:Node)=>{return NodeHelper.getNodesRight([node], RestConstants.ACCESS_CC_PUBLISH) && RestNetworkService.isFromHomeRepo(node,this.repositories)};
+        addTo.isEnabled = NodeHelper.getNodesRight(nodes, RestConstants.ACCESS_CC_PUBLISH,NodesRightMode.Original) && RestNetworkService.allFromHomeRepo(nodes, this.repositories);
+        addTo.enabledCallback = (node:Node)=>{return NodeHelper.getNodesRight([node], RestConstants.ACCESS_CC_PUBLISH,NodesRightMode.Original) && RestNetworkService.isFromHomeRepo(node,this.repositories)};
 
         options.push(addTo);
       }

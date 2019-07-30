@@ -1,6 +1,7 @@
 package org.edu_sharing.service.authentication.oauth2;
 
 import java.io.File;
+import java.io.Serializable;
 import java.util.Map;
 
 import org.alfresco.repo.cache.SimpleCache;
@@ -170,9 +171,13 @@ public class TokenService {
     	}
     }
     
-    public static class Token {
+    public static class Token implements Serializable {
     	
-    	private String accessToken;
+    	/**
+		 * 
+		 */
+		private static final long serialVersionUID = -3853091262670597487L;
+		private String accessToken;
     	private String refreshToken;
     	private String username;
     	private String clientId;

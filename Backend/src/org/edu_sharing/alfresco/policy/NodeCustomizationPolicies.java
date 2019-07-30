@@ -355,6 +355,11 @@ public class NodeCustomizationPolicies implements OnContentUpdatePolicy, OnCreat
 			Map<QName, Serializable> properties = nodeService.getProperties(nodeRef);
 			for(NodeRef ref : result.getNodeRefs()){
 				Map<QName, Serializable> originalProperties = nodeService.getProperties(ref);
+				// security check: make sure we have an object which really matches the solr query
+				if(nodeService.hasAspect(ref,QName.createQName(CCConstants.CCM_ASPECT_COLLECTION_IO_REFERENCE)) || !originalProperties.get(QName.createQName(CCConstants.CCM_PROP_IO_ORIGINAL)).equals(nodeRef.getId())){
+					logger.warn("Solr query for node "+nodeRef.getId()+" returned node "+ref.getId()+", but it's metadata do not match");
+					continue;
+				}
 				for(QName prop : properties.keySet()){
 					if(Arrays.asList(IO_REFERENCE_COPY_PROPERTIES).contains(prop.toString())){
 						originalProperties.put(prop, properties.get(prop));

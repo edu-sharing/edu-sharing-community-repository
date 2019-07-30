@@ -32,7 +32,7 @@ import {UIConstants} from "../../common/ui/ui-constants";
 import {ListItem} from "../../common/ui/list-item";
 import {AddElement, ListTableComponent} from "../../common/ui/list-table/list-table.component";
 import {RestMdsService} from "../../common/rest/services/rest-mds.service";
-import {NodeHelper} from "../../common/ui/node-helper";
+import {NodeHelper, NodesRightMode} from "../../common/ui/node-helper";
 import {TranslateService} from "@ngx-translate/core";
 import {MdsHelper} from "../../common/rest/mds-helper";
 import {UIAnimation} from "../../common/ui/ui-animation";
@@ -381,7 +381,7 @@ export class CollectionsMainComponent {
             }
             let apply=new OptionItem("APPLY", "redo", (node: Node) => NodeHelper.addNodeToLms(this.router,this.tempStorage,ActionbarHelperService.getNodes(nodes,node)[0],this.reurl));
             apply.enabledCallback=((node:CollectionReference)=> {
-                return node.originalId!=null && NodeHelper.getNodesRight(ActionbarHelperService.getNodes(nodes,node as any),RestConstants.ACCESS_CC_PUBLISH);
+                return node.originalId!=null && NodeHelper.getNodesRight(ActionbarHelperService.getNodes(nodes,node as any),RestConstants.ACCESS_CC_PUBLISH,NodesRightMode.Original);
             });
             return [apply];
         }
@@ -389,7 +389,7 @@ export class CollectionsMainComponent {
         let options: OptionItem[] = [];
         if (!fromList) {
             if (nodes && nodes.length) {
-                if (!originalDeleted && NodeHelper.getNodesRight(nodes, RestConstants.ACCESS_CC_PUBLISH)) {
+                if (!originalDeleted && NodeHelper.getNodesRight(nodes, RestConstants.ACCESS_CC_PUBLISH,NodesRightMode.Original)) {
                     let collection = this.actionbar.createOptionIfPossible('ADD_TO_COLLECTION', nodes, (node: Node) => this.addToOther = ActionbarHelperService.getNodes(nodes, node));
                     if (collection)
                         options.push(collection);

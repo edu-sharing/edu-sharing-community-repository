@@ -304,7 +304,7 @@ export class CordovaService {
                //alert(item.type+" : "+item.name+" : "+item.path+" : "+item.uri);
                item.uri=DateHelper.getDateForNewFile()+".jpg";
                this.lastIntent=item;
-               this.observerShareContent.next({uri:item.uri,mimetype:item.type,file:item.file,text:item.text});
+               this.observerShareContent.next({uri:item.uri,mimetype:item.type,file:item.name,text:item.text});
            });
        }
    }

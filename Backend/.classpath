@@ -84,6 +84,7 @@
 	<classpathentry kind="lib" path="lib/pdfbox-1.8.10-alfresco-patched.jar"/>
 	<classpathentry kind="lib" path="lib/elasticsearch-all-6.2.1.jar"/>
 	<classpathentry kind="lib" path="lib/handle-client.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/handle-client.jar"/>
 	<classpathentry kind="lib" path="/Applications/alfresco-5.0.d/tomcat/lib/postgresql-9.3-1102-jdbc41.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/swagger-java-client-1.0.0.jar"/>
 	<classpathentry kind="lib" path="lib/gson-2.8.1.jar"/>
