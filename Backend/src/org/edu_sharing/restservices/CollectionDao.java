@@ -147,7 +147,8 @@ public class CollectionDao {
 
 				final Node node=child;
 				collRef.setReference(node);
-				collRef.setAccess(node.getAccess());
+                collRef.setAccess(node.getAccess());
+                collRef.setAspects(node.getAspects());
 				HashMap<String,String[]> props = collRef.getReference().getProperties();
 				String[] prop=props.get(shortproporiginal);
 				final String originalId=prop!=null && prop.length>0 ? prop[0] : null;

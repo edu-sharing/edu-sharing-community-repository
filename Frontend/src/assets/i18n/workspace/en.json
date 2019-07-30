@@ -221,7 +221,7 @@
       "EXPIRY_INFO":"After this date the link won't be accessible for anyone",
       "DISABLED":"Link sharing is diabled",
       "PASSWORD":"Password Protect",
-      "PASSWORD_INFO":"Then this link will be password protected",
+      "PASSWORD_INFO":"Activate to enter password for link.",
       "PASSWORD_PLACEHOLDER":"Set password...",
       "PASSWORD_PLACEHOLDER_EDIT":"Password is already set",
       "LINK":"Link to object",

@@ -1,4 +1,4 @@
-import {NodeHelper} from "../../core-ui-module/node-helper";
+import {NodeHelper, NodesRightMode} from "../../core-ui-module/node-helper";
 import {Injectable} from "@angular/core";
 import {
     Node,
@@ -81,7 +81,7 @@ export class ActionbarHelperService{
                 return false;
             console.log(n);
             option.name="WORKSPACE.OPTION.VARIANT" + (this.connectors.connectorSupportsEdit(n[0]) ? "_OPEN" : "");
-            return n && NodeHelper.allFiles(n) && n.length==1 && RestNetworkService.allFromHomeRepo(n) && !this.connector.getCurrentLogin().isGuest;
+            return NodeHelper.allFiles(n) && n && n.length==1  && n[0].aspects.indexOf(RestConstants.CCM_ASPECT_IO_REFERENCE)==-1 && RestNetworkService.allFromHomeRepo(n) && !this.connector.getCurrentLogin().isGuest;
         };
         option.enabledCallback = (node: Node) => {
             return node.size > 0 && node.downloadUrl;
@@ -91,7 +91,7 @@ export class ActionbarHelperService{
     if(type=='ADD_TO_COLLECTION') {
       if (this.connector.getCurrentLogin() && !this.connector.getCurrentLogin().isGuest) {
         option = new OptionItem("WORKSPACE.OPTION.COLLECTION", "layers", callback);
-        option.isEnabled = NodeHelper.getNodesRight(nodes, RestConstants.ACCESS_CC_PUBLISH,true);// && RestNetworkService.allFromHomeRepo(nodes,this.repositories);
+        option.isEnabled = NodeHelper.getNodesRight(nodes, RestConstants.ACCESS_CC_PUBLISH,NodesRightMode.Original);
         option.showAsAction = true;
         option.showCallback = (node: Node) => {
             let n=ActionbarHelperService.getNodes(nodes,node);
@@ -104,7 +104,7 @@ export class ActionbarHelperService{
         }
         option.enabledCallback = (node: Node) => {
           let list = ActionbarHelperService.getNodes(nodes, node);
-          return NodeHelper.getNodesRight(list,RestConstants.ACCESS_CC_PUBLISH,true);//&& RestNetworkService.allFromHomeRepo(list,this.repositories);
+          return NodeHelper.getNodesRight(list,RestConstants.ACCESS_CC_PUBLISH,NodesRightMode.Original);
         }
         option.disabledCallback = () =>{
           this.connectors.getRestConnector().getBridgeService().showTemporaryMessage(MessageType.error, null,'WORKSPACE.TOAST.ADD_TO_COLLECTION_DISABLED');
@@ -140,7 +140,7 @@ export class ActionbarHelperService{
       }
     }
     if(type=='INVITE'){
-      if(nodes && nodes.length==1) {
+      if(nodes && nodes.length==1 && nodes[0].aspects.indexOf(RestConstants.CCM_ASPECT_IO_REFERENCE)==-1) {
         option = new OptionItem("WORKSPACE.OPTION.INVITE", "group_add", callback);
         option.isSeperate = NodeHelper.allFiles(nodes);
         option.showAsAction = true;
@@ -148,7 +148,7 @@ export class ActionbarHelperService{
       }
     }
     if(type=='WORKFLOW'){
-        if (nodes && nodes.length==1 && !nodes[0].isDirectory  && nodes[0].type!=RestConstants.CCM_TYPE_SAVED_SEARCH) {
+        if (nodes && nodes.length==1 && !nodes[0].isDirectory  && nodes[0].type!=RestConstants.CCM_TYPE_SAVED_SEARCH && nodes[0].aspects.indexOf(RestConstants.CCM_ASPECT_IO_REFERENCE)==-1) {
             option = new OptionItem("WORKSPACE.OPTION.WORKFLOW", "swap_calls", callback);
             option.isEnabled = NodeHelper.getNodesRight(nodes, RestConstants.ACCESS_CHANGE_PERMISSIONS);
         }

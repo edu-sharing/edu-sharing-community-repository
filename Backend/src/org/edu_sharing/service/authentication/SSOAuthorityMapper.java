@@ -131,6 +131,14 @@ public class SSOAuthorityMapper {
 		this.nodeService = serviceRegistry.getNodeService();
 	}
 
+	public static String mapAdminAuthority(String authority,String appid){
+
+		if(authority.trim().equals(ApplicationInfoList.getHomeRepository().getUsername())){
+			return authority + "@" + appid;
+		}
+		return authority;
+	}
+
 	/**
 	 * @param ssoAttributes
 	 * @return username: means the user exists(before or was created) null when
@@ -149,16 +157,13 @@ public class SSOAuthorityMapper {
 			logErrorParams("userName", ssoAttributes);
 			throw new AuthenticationException(AuthenticationExceptionMessages.MISSING_PARAM);
 		}
-		
-		//guest does not exsist in user store but exsist as a person, so user will not be found and trying to create person -> user already exsists 
+
+		//guest does not exsist in user store but exsist as a person, so user will not be found and trying to create person -> user already exsists
 		if(tmpUserName.equals("guest")){
 			return tmpUserName;
 		}
-		
-		if(tmpUserName.trim().equals(ApplicationInfoList.getHomeRepository().getUsername())){
-			String tmpAppId = ssoAttributes.get(PARAM_APP_ID);
-			tmpUserName += "@" + tmpAppId;
-		}
+
+		tmpUserName=mapAdminAuthority(tmpUserName,ssoAttributes.get(PARAM_APP_ID));
 		
 		String ssoType = ssoAttributes.get(PARAM_SSO_TYPE);
 		if (ssoType == null) {
