@@ -33,7 +33,7 @@ import {
     SessionStorageService,
     TemporaryStorageService,
     UIService,
-    About
+    About, RestMediacenterService
 } from '../../../core-module/core.module';
 import {BridgeService} from "../../../core-bridge-module/bridge.service";
 
@@ -172,6 +172,7 @@ export class MainNavComponent implements AfterViewInit{
     private about: About;
     licenseDialog: boolean;
     private licenseDetails: string;
+    private manageMediacenters = false;
     @HostListener('document:keydown', ['$event'])
     handleKeyboardEvent(event: KeyboardEvent) {
         if(event.code=="Escape" && this.canOpen && this.displaySidebar){
@@ -365,6 +366,7 @@ export class MainNavComponent implements AfterViewInit{
                 private session : SessionStorageService,
                 private http : HttpClient,
                 private org : RestOrganizationService,
+                private mediacenterService : RestMediacenterService,
                 private router : Router,
                 private route : ActivatedRoute,
                 private toast : Toast){
@@ -560,20 +562,16 @@ export class MainNavComponent implements AfterViewInit{
 
     private addMoreButtons(buttons:any[]) {
         this.org.getOrganizations().subscribe((data:OrganizationOrganizations)=>{
-            let add=data.canCreate;
-            for(let orga of data.organizations){
-                if(orga.administrationAccess){
-                    add=true;
-                    break;
-                }
-            }
-            if(add) {
+            if(data.canCreate || data.organizations.filter((org)=>org.administrationAccess).length) {
                 buttons.push({path: 'permissions', scope: 'permissions', icon: "group_add", name: "SIDEBAR.PERMISSIONS",onlyDesktop: true});
             }
-            if(this.isAdmin){
-                buttons.push({path:'admin',scope:'admin',icon:"settings",name:"SIDEBAR.ADMIN",onlyDesktop: true});
-            }
-            this.checkConfig(buttons);
+            this.mediacenterService.getMediacenters().subscribe((data)=>{
+                this.manageMediacenters=data.filter((mc)=>mc.administrationAccess).length!=0;
+                if(this.showAdminButton()){
+                    buttons.push({path:'admin',scope:'admin',icon:"settings",name:"SIDEBAR.ADMIN",onlyDesktop: true});
+                }
+                this.checkConfig(buttons);
+            });
         },(error:any)=>this.checkConfig(buttons));
     }
     private openImprint(){
@@ -878,5 +876,9 @@ export class MainNavComponent implements AfterViewInit{
             console.error(error);
         });
         //});
+    }
+
+    showAdminButton() {
+        return this.isAdmin || this.toolpermissions.indexOf(RestConstants.TOOLPERMISSION_GLOBAL_STATISTICS) || this.manageMediacenters;
     }
 }

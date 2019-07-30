@@ -309,7 +309,7 @@
   "GROUP" : {
     "displayName" : "group name",
     "groupEmail" : "e-mail",
-    "groupType" : "type"
+    "groupType" : "type",
     "scopeType" : "Sichtbarkeit"
   },
   "ORG" : {

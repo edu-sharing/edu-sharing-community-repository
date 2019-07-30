@@ -7,7 +7,7 @@ import {RestConstants} from "../../../core-module/rest/rest-constants";
 import {RestHelper} from "../../../core-module/rest/rest-helper";
 import {NodeHelper} from "../../../core-ui-module/node-helper";
 import {ConfigurationService} from "../../../core-module/rest/services/configuration.service";
-import {DialogButton, RestIamService, RestMediacenterService} from "../../../core-module/core.module";
+import {DialogButton, RestConnectorService, RestIamService, RestMediacenterService} from "../../../core-module/core.module";
 import {Helper} from "../../../core-module/rest/helper";
 import {Toast} from "../../../core-ui-module/toast";
 import {OptionItem} from "../../../core-ui-module/option-item";
@@ -33,11 +33,14 @@ export class AdminMediacenterComponent {
   groupColumns:ListItem[];
   groupActions:OptionItem[];
   currentTab=0;
+  private isAdmin: boolean;
   constructor(
       private mediacenterService: RestMediacenterService,
+      private connector: RestConnectorService,
       private iamService: RestIamService,
       private toast: Toast,
   ){
+    this.isAdmin=this.connector.getCurrentLogin().isAdmin;
     this.refresh();
     this.groupColumns=[
       new ListItem('GROUP', RestConstants.AUTHORITY_DISPLAYNAME),
@@ -103,13 +106,14 @@ export class AdminMediacenterComponent {
       this.refresh();
     },(error:any)=>{
       this.toast.error(error);
+      this.toast.closeModalDialog();
       this.refresh();
     })
   }
   refresh() {
     this.mediacenters=null;
     this.mediacenterService.getMediacenters().subscribe((m)=>{
-      this.mediacenters=m;
+      this.mediacenters=m.filter((m)=>m.administrationAccess);
     });
   }
   addCurrentGroup() {

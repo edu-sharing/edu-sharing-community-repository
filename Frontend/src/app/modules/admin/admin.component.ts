@@ -2,7 +2,7 @@ import {Translation} from '../../core-ui-module/translation';
 import {UIHelper} from '../../core-ui-module/ui-helper';
 import {ActivatedRoute, Router} from '@angular/router';
 import {Toast} from '../../core-ui-module/toast';
-import {ConfigurationService, DialogButton, ListItem} from '../../core-module/core.module';
+import {ConfigurationService, DialogButton, ListItem, RestMediacenterService} from '../../core-module/core.module';
 import {Title} from '@angular/platform-browser';
 import {TranslateService} from '@ngx-translate/core';
 import {SessionStorageService} from '../../core-module/core.module';
@@ -48,52 +48,6 @@ export class AdminComponent {
       "passwordRequest",
       "userRegisterInformation"
   ];
-  buttons=[
-      {
-          id:"INFO",
-          icon:"info_outline"
-      },
-      {
-          id:"STATISTICS",
-          icon:"assessment"
-      },
-      {
-          id:"MEDIACENTER",
-          icon:"business"
-      },
-      {
-          id:"CONFIG",
-          icon:"build"
-      },
-      {
-          id:"APPLICATIONS",
-          icon:"apps"
-      },
-      {
-          id:"UPDATE",
-          icon:"update"
-      },
-      {
-          id:"IMPORT",
-          icon:"cloud_download"
-      },
-      {
-          id:"JOBS",
-          icon:"check"
-      },
-      {
-          id:"TOOLKIT",
-          icon:"settings"
-      },
-      {
-          id:"BROWSER",
-          icon:"search"
-      },
-      {
-          id:"FOLDERTEMPLATES",
-          icon:"create_new_folder"
-      },
-  ]
   public mode : string;
   public globalProgress=true;
   public appUrl:string;
@@ -139,7 +93,8 @@ export class AdminComponent {
   @ViewChild('templateSelect') templateSelect : ElementRef;
   @ViewChild('dynamic',{read: ViewContainerRef}) dynamicComponent : any;
 
-    private excelFile: File;
+  buttons:any[]=[];
+  private excelFile: File;
   private collectionsFile: File;
   private uploadTempFile: File;
   private uploadOaiFile: File;
@@ -164,6 +119,8 @@ export class AdminComponent {
   systemChecks : any = [];
   mailReceiver: string;
   mailTemplate: string;
+  private loginResult: LoginResult;
+  private mediacenters: any[];
   public startJob(){
     this.storage.set('admin_job',this.job);
     this.globalProgress=true;
@@ -206,7 +163,7 @@ export class AdminComponent {
       offset:this.lucene.offset ? this.lucene.offset : 0,
       count:this.lucene.count,
       propertyFilter:[RestConstants.ALL]
-    }
+    };
     this.globalProgress=true;
     this.admin.searchLucene(this.lucene.query,authorities,request).subscribe((data:NodeList)=>{
       this.globalProgress=false;
@@ -234,6 +191,7 @@ export class AdminComponent {
               private translate: TranslateService,
               private storage : SessionStorageService,
               private networkService : RestNetworkService,
+              private mediacenterService : RestMediacenterService,
               private componentFactoryResolver : ComponentFactoryResolver,
               private viewContainerRef : ViewContainerRef,
               private admin : RestAdminService,
@@ -260,70 +218,11 @@ export class AdminComponent {
       ];
       this.getTemplates();
       this.connector.isLoggedIn().subscribe((data: LoginResult) => {
-        if (!data.isAdmin) {
-          this.router.navigate([UIConstants.ROUTER_PREFIX+'workspace']);
-          return;
-        }
-        this.globalProgress=false;
-        this.route.queryParams.subscribe((data:any)=>{
-            if(data['mode']) {
-                this.mode = data['mode'];
-                if(this.getModeButton().factory){
-                    console.log("init dynamic");
-                    setTimeout(()=> {
-                        let ref = this.dynamicComponent.createComponent(this.getModeButton().factory);
-                    });
-                }
-            }
-            else
-              this.mode='INFO';
-        });
-        this.showWarning=true;
-        this.admin.getServerUpdates().subscribe((data:ServerUpdate[])=>{
-          this.updates=data;
-        });
-        this.refreshCatalina();
-        this.refreshAppList();
-        this.storage.get('admin_job',this.job).subscribe((data:any)=>{
-          this.job=data;
-        });
-        this.storage.get('admin_lucene',this.lucene).subscribe((data:any)=>{
-            this.lucene=data;
-        });
-        this.reloadJobStatus();
-        this.runChecks();
-          setInterval(()=>{
-            if(this.mode=='JOBS')
-                this.reloadJobStatus();
-        },10000);
-        this.admin.getOAIClasses().subscribe((classes:string[])=>{
-          this.oaiClasses=classes;
-          this.storage.get('admin_oai').subscribe((data:any)=>{
-            if(data)
-              this.oai=data;
-            else{
-              this.oai={
-                className:classes[0],
-                importerClassName:'org.edu_sharing.repository.server.importer.OAIPMHLOMImporter',
-                recordHandlerClassName:'org.edu_sharing.repository.server.importer.RecordHandlerLOM'
-              };
-            }
-            if(!this.oai.binaryHandlerClassName)
-              this.oai.binaryHandlerClassName='';
+          this.loginResult=data;
+          this.mediacenterService.getMediacenters().subscribe((mediacenters)=>{
+              this.mediacenters=mediacenters;
+              this.init();
           });
-        });
-        this.admin.getRepositoryVersion().subscribe((data:string)=>{
-          this.repositoryVersion=data;
-        },(error:any)=>{
-            console.info(error);
-            this.repositoryVersion="Error accessing version information. Are you in dev mode?";
-        });
-        this.admin.getNgVersion().subscribe((data:string)=>{
-          this.ngVersion=data;
-        },(error:any)=>{
-            console.info(error);
-            this.ngVersion="Error accessing version information. Are you in dev mode?";
-        });
       });
     });
   }
@@ -993,6 +892,127 @@ export class AdminComponent {
               this.buttons.splice(c.payload.position>=0 ? c.payload.position : this.buttons.length+c.payload.position,0,item);
           }
       }
+    }
+
+    private initButtons() {
+        if(this.loginResult.isAdmin) {
+            this.buttons = [
+                {
+                    id: "INFO",
+                    icon: "info_outline"
+                },
+                {
+                    id: "CONFIG",
+                    icon: "build"
+                },
+                {
+                    id: "APPLICATIONS",
+                    icon: "apps"
+                },
+                {
+                    id: "UPDATE",
+                    icon: "update"
+                },
+                {
+                    id: "IMPORT",
+                    icon: "cloud_download"
+                },
+                {
+                    id: "JOBS",
+                    icon: "check"
+                },
+                {
+                    id: "TOOLKIT",
+                    icon: "settings"
+                },
+                {
+                    id: "BROWSER",
+                    icon: "search"
+                },
+                {
+                    id: "FOLDERTEMPLATES",
+                    icon: "create_new_folder"
+                }];
+        }
+        if(this.loginResult.isAdmin || this.loginResult.toolPermissions.indexOf(RestConstants.TOOLPERMISSION_GLOBAL_STATISTICS)){
+            this.buttons.splice(1,0,{
+                id: "STATISTICS",
+                icon: "assessment"
+            });
+        }
+        if(this.loginResult.isAdmin || this.mediacenters.filter((mc)=>mc.administrationAccess).length){
+            this.buttons.splice(2,0,{
+                id: "MEDIACENTER",
+                icon: "business"
+            });
+        }
+        this.setMode(this.buttons[0].id);
+    }
+
+    private init() {
+        this.initButtons();
+        this.globalProgress=false;
+        this.route.queryParams.subscribe((data:any)=>{
+            if(data['mode']) {
+                this.mode = data['mode'];
+                if(this.getModeButton().factory){
+                    console.log("init dynamic");
+                    setTimeout(()=> {
+                        let ref = this.dynamicComponent.createComponent(this.getModeButton().factory);
+                    });
+                }
+            }
+            else
+                this.mode='INFO';
+        });
+        if(this.loginResult.isAdmin) {
+            this.showWarning = true;
+            this.admin.getServerUpdates().subscribe((data: ServerUpdate[]) => {
+                this.updates = data;
+            });
+            this.refreshCatalina();
+            this.refreshAppList();
+            this.storage.get('admin_job', this.job).subscribe((data: any) => {
+                this.job = data;
+            });
+            this.storage.get('admin_lucene', this.lucene).subscribe((data: any) => {
+                this.lucene = data;
+            });
+            this.reloadJobStatus();
+            this.runChecks();
+            setInterval(() => {
+                if (this.mode == 'JOBS')
+                    this.reloadJobStatus();
+            }, 10000);
+            this.admin.getOAIClasses().subscribe((classes: string[]) => {
+                this.oaiClasses = classes;
+                this.storage.get('admin_oai').subscribe((data: any) => {
+                    if (data)
+                        this.oai = data;
+                    else {
+                        this.oai = {
+                            className: classes[0],
+                            importerClassName: 'org.edu_sharing.repository.server.importer.OAIPMHLOMImporter',
+                            recordHandlerClassName: 'org.edu_sharing.repository.server.importer.RecordHandlerLOM'
+                        };
+                    }
+                    if (!this.oai.binaryHandlerClassName)
+                        this.oai.binaryHandlerClassName = '';
+                });
+            });
+            this.admin.getRepositoryVersion().subscribe((data: string) => {
+                this.repositoryVersion = data;
+            }, (error: any) => {
+                console.info(error);
+                this.repositoryVersion = "Error accessing version information. Are you in dev mode?";
+            });
+            this.admin.getNgVersion().subscribe((data: string) => {
+                this.ngVersion = data;
+            }, (error: any) => {
+                console.info(error);
+                this.ngVersion = "Error accessing version information. Are you in dev mode?";
+            });
+        }
     }
 }
 
