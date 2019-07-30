@@ -319,6 +319,7 @@ public class ToolPermissionService {
 		toInit.remove(CCConstants.CCM_VALUE_TOOLPERMISSION_COLLECTION_CURRICULUM); // curriculum collections
 		toInit.remove(CCConstants.CCM_VALUE_TOOLPERMISSION_COLLECTION_PINNING); // pin collections
 		toInit.remove(CCConstants.CCM_VALUE_TOOLPERMISSION_HANDLESERVICE); // use handle id
+		toInit.remove(CCConstants.CCM_VALUE_TOOLPERMISSION_GLOBAL_STATISTICS);
 		return toInit;
 	}
 	public List<String> getAllPredefinedToolPermissions(){
@@ -347,7 +348,7 @@ public class ToolPermissionService {
 		toInit.add(CCConstants.CCM_VALUE_TOOLPERMISSION_COLLECTION_CURRICULUM);
 		toInit.add(CCConstants.CCM_VALUE_TOOLPERMISSION_COLLECTION_PINNING);
 		toInit.add(CCConstants.CCM_VALUE_TOOLPERMISSION_HANDLESERVICE);
-		toInit.add(CCConstants.CCM_VALUE_TOOLPERMISSION_USAGE_STATISTIC);
+		toInit.add(CCConstants.CCM_VALUE_TOOLPERMISSION_GLOBAL_STATISTICS);
 
 		addConnectorToolpermissions(toInit);
 		return toInit;

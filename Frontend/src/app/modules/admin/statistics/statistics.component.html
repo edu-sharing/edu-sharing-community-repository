@@ -125,7 +125,17 @@
                     <mat-cell *matCellDef="let element" (click)="openNode(element.entry ? element.entry : null)">
                         <span *ngIf="key=='action'">{{'ADMIN.STATISTICS.ACTIONS.'+element[key] | translate}}</span>
                         <span *ngIf="key=='date'">{{element[key] | formatDate:{time:true,relative:false} }}</span>
-                        <span *ngIf="key=='authority'">{{element[key] | slice:0:8 }}</span>
+                        <span *ngIf="key=='authority'">{{element.authority.hash | slice:0:8 }}</span>
+                        <span *ngIf="key=='organizations'">
+                            <div *ngFor="let org of element.authority.organization">
+                                {{org | authorityName}}
+                            </div>
+                        </span>
+                        <span *ngIf="key=='mediacenters'">
+                            <div *ngFor="let med of element.authority.mediacenter">
+                                {{med | authorityName}}
+                            </div>
+                        </span>
                         <span *ngIf="key=='node'">{{element[key]}}</span>
                         <span *ngIf="!(key=='action' || key=='date' || key=='authority' || key=='nod')">{{element.entry.data[key]}}</span>
                     </mat-cell>

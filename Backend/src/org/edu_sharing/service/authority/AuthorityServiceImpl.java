@@ -113,11 +113,16 @@ public class AuthorityServiceImpl implements AuthorityService {
     		return false;
     	String adminGroup=PermissionService.GROUP_PREFIX+split[0]+"_"+org.edu_sharing.alfresco.service.AuthorityService.ADMINISTRATORS_GROUP;
     	if(memberships.contains(adminGroup)) {
-			return groupIsOfType(adminGroup, org.edu_sharing.alfresco.service.AuthorityService.ADMINISTRATORS_GROUP_TYPE) ||
-					groupIsOfType(adminGroup, org.edu_sharing.alfresco.service.AuthorityService.MEDIACENTER_ADMINISTRATORS_GROUP_TYPE);
+			return isAdminGroup(adminGroup);
 		}
     	return false;
 	}
+
+	private boolean isAdminGroup(String group) {
+		return groupIsOfType(group, org.edu_sharing.alfresco.service.AuthorityService.ADMINISTRATORS_GROUP_TYPE) ||
+				groupIsOfType(group, org.edu_sharing.alfresco.service.AuthorityService.MEDIACENTER_ADMINISTRATORS_GROUP_TYPE);
+	}
+
 	private boolean groupIsOfType(String adminGroup, String type) {
 		String typeProp=(String) serviceRegistry.getNodeService().getProperty(serviceRegistry.getAuthorityService().getAuthorityNodeRef(adminGroup),QName.createQName(CCConstants.CCM_PROP_GROUPEXTENSION_GROUPTYPE));
     	return typeProp.equals(type);
@@ -134,28 +139,35 @@ public class AuthorityServiceImpl implements AuthorityService {
 		}
 		return false;
 	}
-	@Override
-	public boolean hasAdminAccessToGroup(String groupName){
+	private boolean hasAdminAccessToGroup(String groupName,String postfix){
 		try {
-	    	Set<String> memberships=serviceRegistry.getAuthorityService().getAuthorities();
+			Set<String> memberships=serviceRegistry.getAuthorityService().getAuthorities();
 			if(memberships.contains(CCConstants.AUTHORITY_GROUP_ALFRESCO_ADMINISTRATORS))
 				return true;
-			String group=PermissionService.GROUP_PREFIX+AuthorityService.getGroupName(org.edu_sharing.alfresco.service.AuthorityService.ADMINISTRATORS_GROUP,groupName);
+			String group=PermissionService.GROUP_PREFIX+AuthorityService.getGroupName(postfix,groupName);
 			if(memberships.contains(group))
-				return groupIsOfType(group, CCConstants.ADMINISTRATORS_GROUP_TYPE);
-			
+				return isAdminGroup(group);
+
 			// Detect the group prefix and decide
 			String[] split=groupName.split("_");
 			if(split.length<2)
 				return false;
-			group=PermissionService.GROUP_PREFIX+split[0]+"_"+org.edu_sharing.alfresco.service.AuthorityService.ADMINISTRATORS_GROUP;
+			group=PermissionService.GROUP_PREFIX+split[0]+"_"+postfix;
 			if(memberships.contains(group))
-				return groupIsOfType(group, CCConstants.ADMINISTRATORS_GROUP_TYPE);
-			
+				return isAdminGroup(group);
+
 		} catch (Throwable t) {
 			t.printStackTrace();
 		}
 		return false;
+	}
+	@Override
+	public boolean hasAdminAccessToGroup(String groupName){
+		return hasAdminAccessToGroup(groupName,org.edu_sharing.alfresco.service.AuthorityService.ADMINISTRATORS_GROUP);
+	}
+	@Override
+	public boolean hasAdminAccessToMediacenter(String groupName){
+		return hasAdminAccessToGroup(groupName,org.edu_sharing.alfresco.service.AuthorityService.MEDIACENTER_ADMINISTRATORS_GROUP);
 	}
 	public String getProperty(String authorityName, String property){
 		return (String)nodeService.getProperty(authorityService.getAuthorityNodeRef(authorityName),QName.createQName(property));

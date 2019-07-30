@@ -4,7 +4,6 @@ import org.alfresco.service.cmr.repository.NodeRef;
 import org.edu_sharing.service.tracking.model.StatisticEntry;
 import org.edu_sharing.service.tracking.model.StatisticEntryNode;
 
-import java.sql.SQLException;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -14,7 +13,8 @@ public interface TrackingService {
         None,
         Daily,
         Monthly,
-        Yearly
+        Yearly,
+        Node,
     }
     enum EventType {
         DOWNLOAD_MATERIAL,
@@ -28,6 +28,6 @@ public interface TrackingService {
     }
     boolean trackActivityOnUser(String authorityName,EventType type);
     boolean trackActivityOnNode(NodeRef nodeRef,NodeTrackingDetails details,EventType type);
-    List<StatisticEntryNode> getNodeStatisics(GroupingType type, java.util.Date dateFrom, java.util.Date dateTo, List<String> additionalFields, List<String> groupFields, Map<String, String> filters) throws Throwable;
-    List<StatisticEntry> getUserStatistics(GroupingType type, java.util.Date dateFrom, java.util.Date dateTo, List<String> additionalFields, List<String> groupFields, Map<String, String> filters) throws Throwable;
+    List<StatisticEntryNode> getNodeStatisics(GroupingType type, Date dateFrom, Date dateTo, String mediacenter, List<String> additionalFields, List<String> groupFields, Map<String, String> filters) throws Throwable;
+    List<StatisticEntry> getUserStatistics(GroupingType type, java.util.Date dateFrom, java.util.Date dateTo, String mediacenter, List<String> additionalFields, List<String> groupFields, Map<String, String> filters) throws Throwable;
 }

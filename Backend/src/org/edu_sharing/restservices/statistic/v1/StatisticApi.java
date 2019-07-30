@@ -91,7 +91,7 @@ public class StatisticApi {
 	@Path("/statistics/nodes")
 
 	@ApiOperation(value = "get statistics for node actions",
-			      notes = "requires toolpermission "+CCConstants.CCM_VALUE_TOOLPERMISSION_GLOBAL_STATISTICS
+			      notes = "requires either toolpermission "+CCConstants.CCM_VALUE_TOOLPERMISSION_GLOBAL_STATISTICS+" for global stats or to be admin of the requested mediacenter"
 	)
 
 	@ApiResponses(value = {
@@ -105,6 +105,7 @@ public class StatisticApi {
 									  @ApiParam(value = "Grouping type (by date)", required = true) @QueryParam("grouping")TrackingService.GroupingType grouping,
 									  @ApiParam(value = "date range from", required = true) @QueryParam("dateFrom") Long dateFrom,
 									  @ApiParam(value = "date range to", required = true) @QueryParam("dateTo") Long dateTo,
+									  @ApiParam(value = "the mediacenter to filter for statistics", required = false) @QueryParam("mediacenter") String mediacenter,
 									  @ApiParam(value = "additionals fields of the custom json object stored in each query that should be returned", required = false) @QueryParam("additionalFields") List<String> additionalFields,
 									  @ApiParam(value = "grouping fields of the custom json object stored in each query (currently only meant to be combined with no grouping by date)", required = false) @QueryParam("groupField") List<String> groupField,
 									  @ApiParam(value = "filters for the custom json object stored in each entry", required = false) Map<String,String> filters
@@ -113,7 +114,7 @@ public class StatisticApi {
 			// load instance to validate session
 			ToolPermissionHelper.throwIfToolpermissionMissing(CCConstants.CCM_VALUE_TOOLPERMISSION_GLOBAL_STATISTICS);
 			List<TrackingNode> tracks=AuthenticationUtil.runAsSystem(()->
-					TrackingDAO.getNodeStatistics(grouping,new Date(dateFrom),new Date(dateTo),additionalFields,groupField,filters)
+					TrackingDAO.getNodeStatistics(grouping,new Date(dateFrom),new Date(dateTo),mediacenter,additionalFields,groupField,filters)
 			);
 			return Response.ok().entity(tracks).build();
 		} catch (Throwable t) {
@@ -125,7 +126,7 @@ public class StatisticApi {
 	@Path("/statistics/users")
 
 	@ApiOperation(value = "get statistics for user actions (login, logout)",
-			      notes = "requires toolpermission "+CCConstants.CCM_VALUE_TOOLPERMISSION_GLOBAL_STATISTICS
+				  notes = "requires either toolpermission "+CCConstants.CCM_VALUE_TOOLPERMISSION_GLOBAL_STATISTICS+" for global stats or to be admin of the requested mediacenter"
 	)
 			@ApiResponses(value = {
 			@ApiResponse(code = 200, message = RestConstants.HTTP_200, response = Tracking[].class),
@@ -138,6 +139,7 @@ public class StatisticApi {
 									  @ApiParam(value = "Grouping type (by date)", required = true) @QueryParam("grouping")TrackingService.GroupingType grouping,
 									  @ApiParam(value = "date range from", required = true) @QueryParam("dateFrom") Long dateFrom,
 									  @ApiParam(value = "date range to", required = true) @QueryParam("dateTo") Long dateTo,
+									  @ApiParam(value = "the mediacenter to filter for statistics", required = false) @QueryParam("mediacenter") String mediacenter,
 									  @ApiParam(value = "additionals fields of the custom json object stored in each query that should be returned", required = false) @QueryParam("additionalFields") List<String> additionalFields,
 									  @ApiParam(value = "grouping fields of the custom json object stored in each query (currently only meant to be combined with no grouping by date)", required = false) @QueryParam("groupField") List<String> groupField,
 									  @ApiParam(value = "filters for the custom json object stored in each entry", required = false) Map<String,String> filters
@@ -146,7 +148,7 @@ public class StatisticApi {
 			// load instance to validate session
 			ToolPermissionHelper.throwIfToolpermissionMissing(CCConstants.CCM_VALUE_TOOLPERMISSION_GLOBAL_STATISTICS);
 			List<Tracking> tracks=AuthenticationUtil.runAsSystem(()->
-					TrackingDAO.getUserStatistics(grouping,new Date(dateFrom),new Date(dateTo),additionalFields,groupField,filters)
+					TrackingDAO.getUserStatistics(grouping,new Date(dateFrom),new Date(dateTo),mediacenter,additionalFields,groupField,filters)
 			);
 			return Response.ok().entity(tracks).build();
 		} catch (Throwable t) {

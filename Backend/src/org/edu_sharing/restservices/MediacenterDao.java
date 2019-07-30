@@ -85,8 +85,7 @@ public class MediacenterDao extends AbstractDao{
 			}catch(NullPointerException e){}
 			profile.setMediacenter(mProfile);
 			mediacenter.setProfile(profile);
-			//@TODO: change to check for mediacenter admins
-			mediacenter.setAdministrationAccess(authorityService.hasAdminAccessToGroup(authorityName));
+			mediacenter.setAdministrationAccess(authorityService.hasAdminAccessToMediacenter(authorityName));
 			return mediacenter;
 		}catch(DAOException e){
 			throw new RuntimeException(e);
@@ -109,7 +108,7 @@ public class MediacenterDao extends AbstractDao{
 		}
 	}
 	public List<GroupDao> getManagedGroups(){
-		return Arrays.stream(authorityService.getMembershipsOfGroup(this.authorityName)).map((group)-> {
+		return Arrays.stream(authorityService.getMembershipsOfGroup(this.authorityName)).filter((group)->group.startsWith(PermissionService.GROUP_PREFIX)).map((group)-> {
 			try {
 				return GroupDao.getGroup(repoDao,group);
 			} catch (DAOException e) {

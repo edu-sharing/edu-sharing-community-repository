@@ -63,7 +63,10 @@ public interface AuthorityService {
 	 */
 	public EduGroup getOrCreateEduGroup(EduGroup eduGroup, EduGroup unscopedEduGroup, String folderParentId);
 	boolean isGuest();
-	public String getProperty(String authorityName, String ccmPropGroupextensionGrouptype);
+
+    boolean hasAdminAccessToMediacenter(String groupName);
+
+    public String getProperty(String authorityName, String ccmPropGroupextensionGrouptype);
 	EduGroup getEduGroup(String authority);
 	String createGroup(String groupName, String displayName, String parentGroup) throws Exception;
 	static String getGroupName(String groupName,String parentGroup){

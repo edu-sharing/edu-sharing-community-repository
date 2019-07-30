@@ -1,5 +1,5 @@
 import {RestAdminService} from "../../../core-module/rest/services/rest-admin.service";
-import {Component, ElementRef, EventEmitter, Output, ViewChild} from "@angular/core";
+import {Component, ElementRef, EventEmitter, Input, Output, ViewChild} from "@angular/core";
 import {TranslateService} from "@ngx-translate/core";
 import {NodeStatistics, Node, Statistics} from "../../../core-module/rest/data-object";
 import {ListItem} from "../../../core-module/ui/list-item";
@@ -20,6 +20,11 @@ declare var Chart:any;
 })
 export class AdminStatisticsComponent {
   @ViewChild('groupedChart') groupedChartRef : ElementRef;
+  private _mediacenter:any;
+  @Input() set mediacenter(mediacenter: any){
+    this._mediacenter=mediacenter;
+    this.refresh();
+  }
   @Output() onOpenNode = new EventEmitter();
   static DAY_OFFSET=1000*60*60*24;
   static DEFAULT_OFFSET=AdminStatisticsComponent.DAY_OFFSET*7; // 7 days
@@ -155,16 +160,19 @@ export class AdminStatisticsComponent {
         if(v.length)
           this.customGroup=v[0];
       });
-      this.refreshGroups();
-      this.refreshNodes();
-      this.refreshSingle();
+     this.refresh();
     }
+  refresh(){
+    this.refreshGroups();
+    this.refreshNodes();
+    this.refreshSingle();
+  }
 
   private refreshGroups() {
     this.groupedLoading=true;
-    this.statistics.getStatisticsNode(this._groupedStart,new Date(this._groupedEnd.getTime()+AdminStatisticsComponent.DAY_OFFSET),this._groupedMode).subscribe((dataNode)=> {
+    this.statistics.getStatisticsNode(this._groupedStart,new Date(this._groupedEnd.getTime()+AdminStatisticsComponent.DAY_OFFSET),this._groupedMode,this.getMediacenter()).subscribe((dataNode)=> {
       if (this._groupedMode != 'None') {
-        this.statistics.getStatisticsUser(this._groupedStart,new Date(this._groupedEnd.getTime()+AdminStatisticsComponent.DAY_OFFSET), this._groupedMode).subscribe((dataUser) => {
+        this.statistics.getStatisticsUser(this._groupedStart,new Date(this._groupedEnd.getTime()+AdminStatisticsComponent.DAY_OFFSET), this._groupedMode,this.getMediacenter()).subscribe((dataUser) => {
           this.processGroupData(dataNode,dataUser);
         });
       } else {
@@ -172,6 +180,11 @@ export class AdminStatisticsComponent {
       }
     });
   }
+
+  getMediacenter(): string {
+    return this._mediacenter ? this._mediacenter.authorityName : '';
+  }
+
   processGroupData(dataNode : NodeStatistics[],dataUser : Statistics[]){
     this.groupedLoading=false;
     if(!dataNode.length){
@@ -224,7 +237,8 @@ export class AdminStatisticsComponent {
       id: 'y-axis-view',
       ticks: {
         beginAtZero: true,
-        max: max
+        max: max,
+        min: 0
       }
     }, {
         type: 'linear',
@@ -232,7 +246,8 @@ export class AdminStatisticsComponent {
         id: 'y-axis-view-embedded',
         ticks: {
           beginAtZero: true,
-          max: max
+          max: max,
+          min: 0
         }
       }, {
       type: 'linear',
@@ -240,7 +255,8 @@ export class AdminStatisticsComponent {
       id: 'y-axis-download',
       ticks: {
         beginAtZero: true,
-        max: max
+        max: max,
+        min: 0
       }
     }];
     if(dataUser){
@@ -256,7 +272,8 @@ export class AdminStatisticsComponent {
         id: 'y-axis-user',
         ticks: {
           beginAtZero: true,
-          max: max
+          max: max,
+          min: 0
         }
       });
     }
@@ -282,7 +299,7 @@ export class AdminStatisticsComponent {
   private refreshNodes() {
     this.nodes=[];
     this.nodesLoading = true;
-    this.statistics.getStatisticsNode(this._nodesStart, new Date(this._nodesEnd.getTime()+AdminStatisticsComponent.DAY_OFFSET)).subscribe((data) => {
+    this.statistics.getStatisticsNode(this._nodesStart, new Date(this._nodesEnd.getTime()+AdminStatisticsComponent.DAY_OFFSET),'Node',this.getMediacenter()).subscribe((data) => {
       this.nodesLoading = false;
       this.nodesNoData = data.length==0;
       this.nodes = data.map((stat)=>{
@@ -299,8 +316,8 @@ export class AdminStatisticsComponent {
     this.singleDataRows=null;
     this.singleLoading=true;
     if(this._singleMode=='NODES'){
-      this.singleDataRows=["date","action","node","authority"].concat(this.customGroups || []);
-      this.statistics.getStatisticsNode(this._singleStart,new Date(this._singleEnd.getTime()+AdminStatisticsComponent.DAY_OFFSET),'None',this.customGroups).subscribe((result)=>{
+      this.singleDataRows=["date","action","node","authority","organizations","mediacenters"].concat(this.customGroups || []);
+      this.statistics.getStatisticsNode(this._singleStart,new Date(this._singleEnd.getTime()+AdminStatisticsComponent.DAY_OFFSET),'None',this.getMediacenter(),this.customGroups).subscribe((result)=>{
         this.singleData=result.map((entry)=> {
           return {"action": Object.keys(entry.counts)[0], "date": entry.date, "node": RestHelper.getName(entry.node), "authority":entry.authority, "entry": entry}
         });
@@ -308,8 +325,8 @@ export class AdminStatisticsComponent {
       });
     }
     if(this._singleMode=='USERS'){
-      this.singleDataRows=["date","action","authority"].concat(this.customGroups || []);
-      this.statistics.getStatisticsUser(this._singleStart,new Date(this._singleEnd.getTime()+AdminStatisticsComponent.DAY_OFFSET),'None',this.customGroups).subscribe((result)=>{
+      this.singleDataRows=["date","action","authority","organizations","mediacenters"].concat(this.customGroups || []);
+      this.statistics.getStatisticsUser(this._singleStart,new Date(this._singleEnd.getTime()+AdminStatisticsComponent.DAY_OFFSET),'None',this.getMediacenter(),this.customGroups).subscribe((result)=>{
         this.singleData=result.map((entry)=> {
           return {"action": Object.keys(entry.counts)[0], "date": entry.date, "authority":entry.authority, "entry": entry}
         });
@@ -336,12 +353,12 @@ export class AdminStatisticsComponent {
       this.customGroupLoading=false;
     };
     if(this._customGroupMode=='NODES'){
-      this.statistics.getStatisticsNode(this._singleStart,new Date(this._singleEnd.getTime()+AdminStatisticsComponent.DAY_OFFSET),'None',this.customGroups,this.customGroups).subscribe((result)=>{
+      this.statistics.getStatisticsNode(this._singleStart,new Date(this._singleEnd.getTime()+AdminStatisticsComponent.DAY_OFFSET),'None',this.getMediacenter(),this.customGroups,this.customGroups).subscribe((result)=>{
         handleResult(result);
       });
     }
     if(this._customGroupMode=='USERS'){
-      this.statistics.getStatisticsUser(this._singleStart,new Date(this._singleEnd.getTime()+AdminStatisticsComponent.DAY_OFFSET),'None',this.customGroups,this.customGroups).subscribe((result)=>{
+      this.statistics.getStatisticsUser(this._singleStart,new Date(this._singleEnd.getTime()+AdminStatisticsComponent.DAY_OFFSET),'None',this.getMediacenter(),this.customGroups,this.customGroups).subscribe((result)=>{
         handleResult(result);
       });
     }

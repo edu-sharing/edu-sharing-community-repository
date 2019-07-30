@@ -275,6 +275,8 @@
         "count": "Anzahl",
         "node": "Element",
         "authority": "Nutzer/Session",
+        "organizations": "Organisation",
+        "mediacenters": "Medienzentrum",
         "date": "Datum"
       },
       "ACTIONS": {
@@ -289,7 +291,7 @@
       }
     },
     "MEDIACENTER": {
-      "MANAGE": "Medienzentren verwalten",
+      "MANAGE": "Medienzentren",
       "SELECT": "Medienzentrum auswählen",
       "UPDATED": "Medienzentrum \"{{name}}\" wurde aktualisiert",
       "ADD_MEDIACENTER": "Medienzentrum hinzufügen",
@@ -303,7 +305,8 @@
       "CREATED": "Medienzentrum \"{{name}}\" wurde erstellt",
       "DELETED": "Medienzentrum \"{{name}}\" wurde gelöscht",
       "DATA": {
-        "TITLE": "Basidaten",
+        "TITLE": "Basisdaten",
+        "EDIT_NOT_ALLOWED": "Um weitere Änderungen an den Daten durchzuführen, kontaktieren Sie bitte den zuständigen Administrator des Systems",
         "contentStatus": "Medienzentrum ist angebunden",
         "id": "Interne ID",
         "location": "Standort",
@@ -327,6 +330,9 @@
         "ADD": "Gruppe \"{{name}}\" hinzufügen",
         "ADD_LABEL": "Gruppe suchen",
         "DESCRIPTION": "Alle Mitglieder der folgenden Gruppen können auf die Medien dieses Medienzentrums zugreifen"
+      },
+      "STATISTICS": {
+        "TITLE": "Statistiken"
       }
     }
   }

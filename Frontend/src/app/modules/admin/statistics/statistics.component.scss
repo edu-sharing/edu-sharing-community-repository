@@ -59,6 +59,8 @@ listTable{
     padding:0 10px;
     >span{
       @include limitLineCount(2,1.5);
+      display:flex;
+      flex-direction: column;
     }
   }
 }
