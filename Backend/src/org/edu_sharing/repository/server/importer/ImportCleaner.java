@@ -149,8 +149,8 @@ public class ImportCleaner {
 					countDeletedObjects++;
 				}
 			}
+			logger.info("returns (deleted objects counter:" + countDeletedObjects + ", processed nodes: "+allNodes.size()+")");
 		}
-		logger.info("returns (deleted objects counter:" + countDeletedObjects + ")");
 	}
 	
 }
