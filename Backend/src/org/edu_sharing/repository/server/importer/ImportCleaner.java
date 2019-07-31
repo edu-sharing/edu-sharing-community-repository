@@ -69,6 +69,9 @@ public class ImportCleaner {
 	String metadataPrefix = null;
 	
 	public ImportCleaner(String oaiBaseUrl, List<String> allowedCataloges, String metadataPrefix){
+        if(allowedCataloges.size()!=1){
+            throw new IllegalArgumentException("Import cleaner can currently only be used with a single set");
+        }
 		this.oaiBaseUrl = oaiBaseUrl;
 		this.allowedCataloges = allowedCataloges;
 		this.metadataPrefix = metadataPrefix;
@@ -138,7 +141,11 @@ public class ImportCleaner {
 				String importedKatalog = (String)entry.getValue().get(CCConstants.CCM_PROP_IO_REPLICATIONSOURCE);
 				String importedId = (String)entry.getValue().get(CCConstants.CCM_PROP_IO_REPLICATIONSOURCEID);
 				
-				boolean nodeExists = nodeExists(importedId, importedKatalog);
+				//boolean nodeExists = nodeExists(importedId, importedKatalog);
+                // changed! the property CCM_PROP_IO_REPLICATIONSOURCE does not always match the set name imported
+                // the import cleaner only has the nodes inside the given set to work with, so we rely that the nodes
+                // to check are already correct
+				boolean nodeExists = nodeExists(importedId, allowedCataloges.get(0));
 				if(!nodeExists){
 					logger.info("Node with REPLICATIONSOURCEID:"+importedId+" REPLICATIONSOURCE:"+importedKatalog+" seems deleted. Delete the imported Object nodeId:"+alfNodeId);
 					HashMap<String, HashMap> primaryParents = mcAlfrescoBaseClient.getParents(alfNodeId, true);
@@ -147,8 +154,8 @@ public class ImportCleaner {
 					countDeletedObjects++;
 				}
 			}
+			logger.info("deleted objects counter:" + countDeletedObjects + ", processed nodes: "+allNodes.size());
 		}
-		logger.info("returns (deleted objects counter:" + countDeletedObjects + ")");
 	}
 	
 }

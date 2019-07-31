@@ -111,7 +111,7 @@ public class PersistentHandlerEdusharing implements PersistentHandlerInterface {
 		}
 	}
 
-	private HashMap<String, Object> getImportFolderProps() throws Throwable {
+	public HashMap<String, Object> getImportFolderProps() throws Throwable {
 		String repositoryRoot = null;
 		try {
 			repositoryRoot = mcAlfrescoBaseClient.getRepositoryRoot();
@@ -306,7 +306,22 @@ public class PersistentHandlerEdusharing implements PersistentHandlerInterface {
 		}
 		return null;
 	}
+	public HashMap<String, HashMap<String, Object>> getAllNodesInSetFolder(String setName) throws Throwable {
+		HashMap<String, Object> importFolderProps = getImportFolderProps();
+		if (importFolderProps != null) {
+			String importFolderNodeId = (String) importFolderProps.get(CCConstants.SYS_PROP_NODE_UID);
+			HashMap<String, Object> setProps=mcAlfrescoBaseClient.getChild(importFolderNodeId,CCConstants.CCM_TYPE_MAP,CCConstants.CM_NAME,setName);
+			if(setProps==null){
+				logger.info("set folder "+setName+" not found");
+				return null;
+			}
+			return this.getAllNodesInImportfolder((String) setProps.get(CCConstants.SYS_PROP_NODE_UID));
+		} else {
+			logger.info("returns importFolderProps == null");
+			return null;
+		}
 
+	}
 	public HashMap<String, HashMap<String, Object>> getAllNodesInImportfolder() throws Throwable {
 		HashMap<String, Object> importFolderProps = getImportFolderProps();
 		if (importFolderProps != null) {
