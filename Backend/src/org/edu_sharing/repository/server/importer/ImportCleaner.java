@@ -87,7 +87,7 @@ public class ImportCleaner {
 			return true;
 		} else {
 			String urlGetRecord = (oaiBaseUrl.contains("?")) ? oaiBaseUrl + "&verb=GetRecord" : oaiBaseUrl + "?verb=GetRecord";
-			String url = urlGetRecord + "&identifier=" + replicationSourceId + "&metadataPrefix=" + this.metadataPrefix;
+			String url = urlGetRecord + "&identifier=" + replicationSourceId + "&metadataPrefix=" + this.metadataPrefix +	"&set="+replicationCatalog;
 			logger.debug("url:"+url);
 			String result = new HttpQueryTool().query(url);
 			if (result != null && !result.trim().equals("")) {
