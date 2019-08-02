@@ -50,6 +50,7 @@ import org.apache.tika.io.TikaInputStream;
 import org.edu_sharing.alfresco.jobs.PreviewJob;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.client.tools.forms.VCardTool;
+import org.edu_sharing.repository.server.authentication.Context;
 import org.edu_sharing.repository.server.tools.ActionObserver;
 import org.edu_sharing.repository.server.tools.ApplicationInfo;
 import org.edu_sharing.repository.server.tools.ApplicationInfoList;
@@ -92,6 +93,10 @@ import com.googlecode.mp4parser.FileDataSourceImpl;
  * * - only if create_version value is true (default = true)
  */
 public class NodeCustomizationPolicies implements OnContentUpdatePolicy, OnCreateNodePolicy, OnUpdatePropertiesPolicy{
+	/**
+	 * Thread local holding the current context id as defined in the client.config.xml
+	 */
+	static ThreadLocal<String> eduSharingContext = new ThreadLocal<String>();
 
 	/**
 	 * These are the properties that will be copied to all io_reference nodes inside collections
@@ -146,7 +151,11 @@ public class NodeCustomizationPolicies implements OnContentUpdatePolicy, OnCreat
 	private ResultSet result;
 	
 	Scheduler scheduler;
-	
+
+	public static void setEduSharingContext(String context) {
+		eduSharingContext.set(context);
+	}
+
 	public void init() {
 		
 		policyComponent.bindClassBehaviour(OnCreateNodePolicy.QNAME, ContentModel.TYPE_CONTENT, new JavaBehaviour(this, "onCreateNode"));
@@ -317,9 +326,11 @@ public class NodeCustomizationPolicies implements OnContentUpdatePolicy, OnCreat
 					String mdsName=(String)nodeService.getProperty(childAssocRef.getParentRef(), QName.createQName(CCConstants.CM_PROP_METADATASET_EDU_METADATASET));
 					nodeService.setProperty(eduNodeRef, QName.createQName(CCConstants.CM_PROP_METADATASET_EDU_METADATASET),mdsName);
 				}
-	            
+
 			}
-			
+
+			addCurrentContext(eduNodeRef,type);
+
 			if(ContentModel.TYPE_FOLDER.equals(type)){
 				// type
 				logger.debug("its a folder node will transform to map");
@@ -329,7 +340,20 @@ public class NodeCustomizationPolicies implements OnContentUpdatePolicy, OnCreat
 			policyBehaviourFilter.enableBehaviour(eduNodeRef);
 		}
 	}
-	
+
+	private void addCurrentContext(NodeRef eduNodeRef, QName type) {
+		if(Arrays.asList(CCConstants.CCM_TYPE_IO,CCConstants.CCM_TYPE_MAP,CCConstants.CCM_TYPE_TOOL_INSTANCE).contains(type.toString())){
+			String context = eduSharingContext.get();
+			if(context==null) {
+				context = CCConstants.EDUCONTEXT_DEFAULT;
+			}
+			nodeService.setProperty(
+					eduNodeRef,
+					QName.createQName(CCConstants.CCM_PROP_EDUCONTEXT_NAME),
+					context);
+		}
+	}
+
 	@Override
 	public void onUpdateProperties(NodeRef nodeRef, Map<QName, Serializable> before, Map<QName, Serializable> after) {
 		

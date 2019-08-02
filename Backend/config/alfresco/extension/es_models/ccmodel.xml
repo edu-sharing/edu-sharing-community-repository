@@ -24,7 +24,7 @@
 			<parent>cm:folder</parent>
 		</type>
 		<type name="ccm:comment">
-			<title>Campus Content stored search queries</title>
+			<title>Campus Content comments on ccm:ios</title>
 			<parent>cm:cmobject</parent>
 			<properties>
 				<property name="ccm:comment_reply">
@@ -153,6 +153,7 @@
 				<aspect>ccm:licenses</aspect>
 				<aspect>ccm:commonlicenses</aspect>
 				<aspect>cm:metadataset</aspect>
+				<aspect>ccm:educontext</aspect>
 				<aspect>ccm:eduscope</aspect>
 			</mandatory-aspects>
 		</type>
@@ -257,6 +258,7 @@
 				<aspect>ccm:mapdata</aspect>
 				<aspect>ccm:licenses</aspect>
 				<aspect>cm:metadataset</aspect>
+				<aspect>ccm:educontext</aspect>
 				<aspect>ccm:eduscope</aspect>
 			</mandatory-aspects>
 		</type>
@@ -441,6 +443,7 @@
          		</property>
          	</properties>
          	<mandatory-aspects>
+    			<aspect>ccm:educontext</aspect>
     			<aspect>ccm:eduscope</aspect>
    			</mandatory-aspects>
        </type>
@@ -1672,6 +1675,16 @@
 		            	</property>
 	      		</properties>
 	    </aspect>
+
+		<aspect name="ccm:educontext">
+			<title>context id when creating the node as defined in the client.config.xml</title>
+			<properties>
+				<property name="ccm:educontextname">
+					<type>d:text</type>
+					<multiple>true</multiple>
+				</property>
+			</properties>
+		</aspect>
 	    
 	    <aspect name="ccm:tool_definition">
 	    		<title>extend io's to become a tooldefinition object</title>

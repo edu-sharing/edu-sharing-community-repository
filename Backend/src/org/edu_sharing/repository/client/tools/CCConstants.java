@@ -480,6 +480,9 @@ public class CCConstants {
 	 */
 	public final static String CCM_ASPECT_EDUSCOPE = "{http://www.campuscontent.de/model/1.0}eduscope";
 	public final static String CCM_PROP_EDUSCOPE_NAME = "{http://www.campuscontent.de/model/1.0}eduscopename";
+
+	public final static String CCM_PROP_EDUCONTEXT_NAME = "{http://www.campuscontent.de/model/1.0}educontext";
+	public final static String EDUCONTEXT_DEFAULT = "default";
 	//public final static String CCM_VALUE_SCOPE_DEFAULT = "default";
 	public final static String CCM_VALUE_SCOPE_SAFE = "safe";
 
