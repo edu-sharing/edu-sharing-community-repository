@@ -466,7 +466,7 @@ export class CollectionNewComponent {
         console.log("current collection had inherited permissions set. Will keep these setting");
       }
       let permissions=RestHelper.copyAndCleanPermissions(this.permissions.permissions,this.originalPermissions ? this.originalPermissions.inherited : false);
-      this.nodeService.setNodePermissions(collection.ref.id,permissions,this.permissionsInfo.notify,this.permissionsInfo.notifyMessage).subscribe(()=>{
+      this.nodeService.setNodePermissions(collection.ref.id,permissions,this.permissionsInfo ? this.permissionsInfo.notify : false,this.permissionsInfo ? this.permissionsInfo.notifyMessage : null).subscribe(()=>{
         this.save4(collection);
       });
     }
