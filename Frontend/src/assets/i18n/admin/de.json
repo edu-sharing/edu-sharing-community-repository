@@ -229,7 +229,8 @@
         "RemoveImportedObjectsJob":"Alle importierten Nodes löschen",
         "RemoveOrphanCollectionReferencesJob":"Alle Sammlungsreferenzen mit fehlenden Originalobjekt löschen",
         "RemoveNodeJob":"Einen Node/Ordner vollständig löschen (Parameter \"id\" angeben)",
-        "ConvertMultivalueToSinglevalueJob":"Eine Property von Multivalue in Singlevalue konvertieren"
+        "ConvertMultivalueToSinglevalueJob":"Eine Property von Multivalue in Singlevalue konvertieren",
+        "BulkEditNodesJob":"Bulk-Bearbeitung von einer Property für mehrere Nodes"
       }
     },
     "FOLDERTEMPLATES":{

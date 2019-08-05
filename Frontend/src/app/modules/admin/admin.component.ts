@@ -891,18 +891,19 @@ export class AdminComponent {
     }
 
     private prepareJobClasses() {
-        let job=new SuggestItem("org.edu_sharing.repository.server.jobs.quartz.RemoveImportedObjectsJob",this.translate.instant("ADMIN.JOBS.NAMES.RemoveImportedObjectsJob"));
-        job.secondaryTitle=job.id;
-        this.jobClasses.push(job);
-        job=new SuggestItem("org.edu_sharing.repository.server.jobs.quartz.RemoveOrphanCollectionReferencesJob",this.translate.instant("ADMIN.JOBS.NAMES.RemoveOrphanCollectionReferencesJob"));
-        job.secondaryTitle=job.id;
-        this.jobClasses.push(job);
-        job=new SuggestItem("org.edu_sharing.repository.server.jobs.quartz.RemoveNodeJob",this.translate.instant("ADMIN.JOBS.NAMES.RemoveNodeJob"));
-        job.secondaryTitle=job.id;
-        this.jobClasses.push(job);
-      job=new SuggestItem("org.edu_sharing.repository.server.jobs.quartz.ConvertMultivalueToSinglevalueJob",this.translate.instant("ADMIN.JOBS.NAMES.ConvertMultivalueToSinglevalueJob"));
-      job.secondaryTitle=job.id;
-      this.jobClasses.push(job);
+        let jobs=[
+            new SuggestItem("org.edu_sharing.repository.server.jobs.quartz.RemoveImportedObjectsJob",null),
+            new SuggestItem("org.edu_sharing.repository.server.jobs.quartz.RemoveOrphanCollectionReferencesJob",null),
+            new SuggestItem("org.edu_sharing.repository.server.jobs.quartz.RemoveNodeJob",null),
+            new SuggestItem("org.edu_sharing.repository.server.jobs.quartz.ConvertMultivalueToSinglevalueJob",null),
+            new SuggestItem("org.edu_sharing.repository.server.jobs.quartz.BulkEditNodesJob",null)
+        ];
+        this.jobClasses=jobs.map((job)=>{
+          let id=job.id.split(".");
+          job.secondaryTitle=id[id.length-1];
+          job.title=this.translate.instant('ADMIN.JOBS.NAMES.'+id[id.length-1]);
+          return job;
+        });
     }
     getJobName(job:any){
       if(job && job.class) {
