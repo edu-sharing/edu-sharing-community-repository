@@ -63,10 +63,9 @@ public class Release_5_0_Educontext_Default extends UpdateAbstract {
 			return prop==null || prop.isEmpty();
 		});
 		runner.setTask((ref)->{
-			logInfo("add educontext to "+ref.getId());
+			logDebug("add educontext to "+ref.getId());
 			if(!test){
 				nodeService.setProperty(ref,QName.createQName(CCConstants.CCM_PROP_EDUCONTEXT_NAME),CCConstants.EDUCONTEXT_DEFAULT);
-				logInfo("added educontext to "+ref.getId());
 			}
 			processed[0]++;
 		});
