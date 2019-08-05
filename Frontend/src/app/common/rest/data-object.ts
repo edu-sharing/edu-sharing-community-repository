@@ -45,6 +45,7 @@ export interface NodeTextContent{
 export interface ServerUpdate {
   id:string;
   description:string;
+  executedAt:number;
 }
 export interface CacheInfo{
   size:number;

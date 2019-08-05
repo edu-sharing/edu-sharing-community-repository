@@ -73,6 +73,8 @@
       "HINT":"Vergessen Sie vor Anpassungen an dieser Stelle nicht Ihr Backup der Datenbank und Dokumente des Repositoriums zu erneuern.",
       "ID":"ID",
       "DESCRIPTION":"Beschreibung",
+      "DATE":"Ausgeführt am",
+      "NOT_EXECUTED":"Unbekannt",
       "TEST":"Testen",
       "RUN":"Ausführen",
       "RESULT":"Update-Ausgabe"

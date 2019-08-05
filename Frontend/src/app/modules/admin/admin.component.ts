@@ -215,9 +215,7 @@ export class AdminComponent {
               this.tab='INFO';
         });
         this.showWarning=true;
-        this.admin.getServerUpdates().subscribe((data:ServerUpdate[])=>{
-          this.updates=data;
-        });
+        this.refreshUpdateList();
         this.refreshCatalina();
         this.refreshAppList();
         this.storage.get('admin_job',this.job).subscribe((data:any)=>{
@@ -570,7 +568,7 @@ export class AdminComponent {
       this.dialogTitle='ADMIN.UPDATE.RESULT';
       this.dialogMessage=data.result;
       this.dialogButtons=DialogButton.getOk(()=>{this.dialogTitle=null;});
-      this.appUrl='';
+      this.refreshUpdateList();
     },(error:any)=>{
       this.globalProgress=false;
       this.toast.error(error);
@@ -918,6 +916,12 @@ export class AdminComponent {
   updateJobSuggestions(event: any) {
     let name=event.input.toString();
     this.jobClassesSuggested=this.jobClasses.filter((j)=>j.title.toLowerCase().indexOf(name)!=-1 || j.secondaryTitle.toLowerCase().indexOf(name)!=-1);
+  }
+
+  refreshUpdateList() {
+    this.admin.getServerUpdates().subscribe((data:ServerUpdate[])=>{
+      this.updates=data;
+    });
   }
 }
 
