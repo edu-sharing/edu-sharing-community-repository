@@ -110,8 +110,7 @@
         "OTHER":"Other  / Not categorized",
         "ADD": "Creating custom  Authorizations"
       }
-    }
-
+    },
     "TOOLPERMISSION": {
       "TOOLPERMISSION_INVITE": "the permission to share objects",
       "TOOLPERMISSION_INVITE_STREAM": "the permission to share objects in the stream",
