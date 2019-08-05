@@ -27,6 +27,9 @@ import org.alfresco.service.transaction.TransactionService;
 import org.apache.log4j.Logger;
 import org.apache.lucene.queryParser.QueryParser;
 import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
+import org.edu_sharing.metadataset.v2.MetadataReaderV2;
+import org.edu_sharing.metadataset.v2.MetadataSetV2;
+import org.edu_sharing.metadataset.v2.tools.MetadataHelper;
 import org.edu_sharing.repository.client.rpc.ACE;
 import org.edu_sharing.repository.client.rpc.ACL;
 import org.edu_sharing.repository.client.rpc.EduGroup;
@@ -65,6 +68,7 @@ import org.edu_sharing.service.toolpermission.ToolPermissionService;
 import org.edu_sharing.service.toolpermission.ToolPermissionServiceFactory;
 import org.edu_sharing.service.usage.Usage;
 import org.edu_sharing.service.usage.Usage2Service;
+import org.edu_sharing.webservices.alfresco.extension.Search;
 import org.springframework.context.ApplicationContext;
 
 
@@ -675,28 +679,30 @@ public class CollectionServiceImpl implements CollectionService{
 			if(parentId == null){
                 SearchParameters searchParams=new SearchParameters();
                 sortDefinition.applyToSearchParameters(searchParams);
+
+				MetadataSetV2 mds = MetadataHelper.getMetadataset(appInfo, CCConstants.metadatasetdefault_id);
+
+				String queryId=null;
+				switch(SearchScope.valueOf(scope)){
+					case MY:
+						queryId="collections_scope_my";
+						break;
+					case EDU_ALL:
+						queryId="collections_scope_public";
+						break;
+					case EDU_GROUPS:
+						queryId="collections_scope_shared";
+						break;
+					case TYPE_EDITORIAL:
+						queryId="collections_scope_editorial";
+						break;
+				}
+				String queryString=mds.findQuery(queryId).getBasequery();
 				/**
 				 * @TODO owner + inherit off -> node will be found even if search is done in edu-group context 
-				 * level 0 nodes -> maybe cache level 0 with an node property
 				 */
-				String queryString = "ASPECT:\"" + CCConstants.CCM_ASPECT_COLLECTION + "\"" + " AND @ccm\\:collectionlevel0:true";
 				MCAlfrescoAPIClient.ContextSearchMode mode = getContextModeForScope(scope);
-				
-				if(SearchScope.MY.name().equals(scope)){
-					queryString += " AND OWNER:\"" + authInfo.get(CCConstants.AUTH_USERNAME)+"\"";
-				}
-				else if(SearchScope.EDU_GROUPS.name().equals(scope)){
-					// hide my collections in "shared" tab
-					queryString += " AND NOT OWNER:\"" + authInfo.get(CCConstants.AUTH_USERNAME)+"\"";
-				}
-				else if(SearchScope.TYPE_EDITORIAL.name().equals(scope)){
-					queryString += " AND @ccm\\:collectiontype:\"" + CCConstants.COLLECTIONTYPE_EDITORIAL + "\"";
-				}
 
-				if(SearchScope.EDU_GROUPS.name().equals(scope) || SearchScope.EDU_ALL.name().equals(scope) ){
-					// do hide the editorial collections when not in editorial scope mode
-					queryString += " AND NOT @ccm\\:collectiontype:\"" + CCConstants.COLLECTIONTYPE_EDITORIAL + "\"";
-				}
 				List<NodeRef> returnVal = new ArrayList<>();
                 searchParams.setQuery(queryString);
 				List<NodeRef> nodeRefs = client.searchNodeRefs(searchParams,mode);
