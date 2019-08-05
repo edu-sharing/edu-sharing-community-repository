@@ -23,6 +23,7 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
 import java.util.TreeSet;
+import java.util.stream.Collectors;
 
 import javax.management.MBeanServer;
 import javax.management.ObjectName;
@@ -53,10 +54,7 @@ import org.edu_sharing.repository.client.rpc.cache.CacheCluster;
 import org.edu_sharing.repository.client.rpc.cache.CacheInfo;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.client.tools.StringTool;
-import org.edu_sharing.repository.server.AuthenticationToolAPI;
-import org.edu_sharing.repository.server.MCAlfrescoAPIClient;
-import org.edu_sharing.repository.server.MCAlfrescoBaseClient;
-import org.edu_sharing.repository.server.RepoFactory;
+import org.edu_sharing.repository.server.*;
 import org.edu_sharing.repository.server.authentication.Context;
 import org.edu_sharing.repository.server.importer.ExcelLOMImporter;
 import org.edu_sharing.repository.server.importer.OAIPMHLOMImporter;
@@ -67,25 +65,7 @@ import org.edu_sharing.repository.server.tools.*;
 import org.edu_sharing.repository.server.tools.cache.CacheManagerFactory;
 import org.edu_sharing.repository.server.tools.cache.EduGroupCache;
 import org.edu_sharing.repository.server.tools.mailtemplates.MailTemplate;
-import org.edu_sharing.repository.update.ClassificationKWToGeneralKW;
-import org.edu_sharing.repository.update.Edu_SharingAuthoritiesUpdate;
-import org.edu_sharing.repository.update.Edu_SharingPersonEsuidUpdate;
-import org.edu_sharing.repository.update.FixMissingUserstoreNode;
-import org.edu_sharing.repository.update.FolderToMap;
-import org.edu_sharing.repository.update.KeyGenerator;
-import org.edu_sharing.repository.update.Licenses1;
-import org.edu_sharing.repository.update.Licenses2;
-import org.edu_sharing.repository.update.RefreshMimetypPreview;
-import org.edu_sharing.repository.update.Release_1_6_SystemFolderNameRename;
-import org.edu_sharing.repository.update.Release_1_7_SubObjectsToFlatObjects;
-import org.edu_sharing.repository.update.Release_1_7_UnmountGroupFolders;
-import org.edu_sharing.repository.update.Release_3_2_DefaultScope;
-import org.edu_sharing.repository.update.Release_3_2_FillOriginalId;
-import org.edu_sharing.repository.update.Release_4_1_FixClassificationKeywordPrefix;
-import org.edu_sharing.repository.update.Release_4_2_PersonStatusUpdater;
-import org.edu_sharing.repository.update.Release_5_0_NotifyRefactoring;
-import org.edu_sharing.repository.update.SystemFolderNameToDisplayName;
-import org.edu_sharing.repository.update.Update;
+import org.edu_sharing.repository.update.*;
 import org.edu_sharing.restservices.GroupDao;
 import org.edu_sharing.restservices.RepositoryDao;
 import org.edu_sharing.restservices.shared.Group;
@@ -547,8 +527,8 @@ public class AdminServiceImpl implements AdminService  {
 	}
 	
 	@Override
-	public ArrayList<ServerUpdateInfo> getServerUpdateInfos(){
-		ArrayList<ServerUpdateInfo> result = new ArrayList<ServerUpdateInfo>();			
+	public List<ServerUpdateInfo> getServerUpdateInfos(){
+		List<ServerUpdateInfo> result = new ArrayList<ServerUpdateInfo>();
 				result.add(new ServerUpdateInfo(Licenses1.ID,Licenses1.description));
 				result.add(new ServerUpdateInfo(Licenses2.ID,Licenses2.description));
 				result.add(new ServerUpdateInfo(ClassificationKWToGeneralKW.ID,ClassificationKWToGeneralKW.description));
@@ -567,6 +547,18 @@ public class AdminServiceImpl implements AdminService  {
 				result.add(new ServerUpdateInfo(Release_4_1_FixClassificationKeywordPrefix.ID,Release_4_1_FixClassificationKeywordPrefix.description));
 				result.add(new ServerUpdateInfo(Release_4_2_PersonStatusUpdater.ID,Release_4_2_PersonStatusUpdater.description));
 				result.add(new ServerUpdateInfo(Release_5_0_NotifyRefactoring.ID,Release_5_0_NotifyRefactoring.description));
+				result.add(new ServerUpdateInfo(Release_5_0_Educontext_Default.ID,Release_5_0_Educontext_Default.description));
+
+		result=result.stream().map((r)->{
+			try {
+				HashMap<String, Object> entry = new Protocol().getSysUpdateEntry(r.getId());
+				String date=(String)entry.get(CCConstants.CCM_PROP_SYSUPDATE_DATE);
+				r.setExecutedAt(Long.parseLong(date));
+			}catch(Throwable t){
+
+			}
+			return r;
+		}).collect(Collectors.toList());
 		return result;
 	}
 	
@@ -574,8 +566,7 @@ public class AdminServiceImpl implements AdminService  {
 	public String runUpdate(String updateId,boolean execute) throws Exception{
 		StringWriter result=new StringWriter();
 		PrintWriter out=new PrintWriter(result);
-		Update[] avaiableUpdates = new Update[]{new Licenses1(out),new Licenses2(out),new ClassificationKWToGeneralKW(out), new SystemFolderNameToDisplayName(out), new Release_1_6_SystemFolderNameRename(out),new Release_1_7_UnmountGroupFolders(out), new  Edu_SharingAuthoritiesUpdate(out), new Release_1_7_SubObjectsToFlatObjects(out), new RefreshMimetypPreview(out), new KeyGenerator(out), new FixMissingUserstoreNode(out), new FolderToMap(out), new Edu_SharingPersonEsuidUpdate(out), new Release_3_2_FillOriginalId(out), new Release_3_2_DefaultScope(out), new Release_4_1_FixClassificationKeywordPrefix(out),new Release_4_2_PersonStatusUpdater(out),new Release_5_0_NotifyRefactoring(out)};
-
+		Update[] avaiableUpdates = ServerUpdate.getAvailableUpdates(out);
 		ApplicationContext applicationContext = AlfAppContextGate.getApplicationContext();
 		ServiceRegistry serviceRegistry = (ServiceRegistry) applicationContext.getBean(ServiceRegistry.SERVICE_REGISTRY);
 		boolean run=false;

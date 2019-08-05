@@ -342,7 +342,7 @@ public class NodeCustomizationPolicies implements OnContentUpdatePolicy, OnCreat
 	}
 
 	private void addCurrentContext(NodeRef eduNodeRef, QName type) {
-		if(Arrays.asList(CCConstants.CCM_TYPE_IO,CCConstants.CCM_TYPE_MAP,CCConstants.CCM_TYPE_TOOL_INSTANCE).contains(type.toString())){
+		if(CCConstants.EDUCONTEXT_TYPES.contains(type.toString())){
 			String context = eduSharingContext.get();
 			if(context==null) {
 				context = CCConstants.EDUCONTEXT_DEFAULT;

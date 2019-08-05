@@ -28,7 +28,7 @@ public interface AdminService {
 
 	HashMap<String, String> addApplication(String appMetadataUrl) throws Exception;
 
-	ArrayList<ServerUpdateInfo> getServerUpdateInfos();
+	List<ServerUpdateInfo> getServerUpdateInfos();
 
 	String runUpdate(String updateId, boolean execute) throws Exception;
 

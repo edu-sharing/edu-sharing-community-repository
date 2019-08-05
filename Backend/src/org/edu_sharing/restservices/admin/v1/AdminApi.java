@@ -490,7 +490,7 @@ public class AdminApi {
 			@ApiResponse(code = 500, message = RestConstants.HTTP_500, response = ErrorResponse.class) })
 	public Response serverUpdateList(@Context HttpServletRequest req) {
 		try {
-			ArrayList<ServerUpdateInfo> result = AdminServiceFactory.getInstance().getServerUpdateInfos();
+			List<ServerUpdateInfo> result = AdminServiceFactory.getInstance().getServerUpdateInfos();
 			return Response.ok().entity(result).build();
 		} catch (Throwable t) {
 			return ErrorResponse.createResponse(t);
