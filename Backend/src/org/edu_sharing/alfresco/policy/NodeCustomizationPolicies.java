@@ -15,6 +15,7 @@ import javax.imageio.stream.ImageInputStream;
 
 import org.alfresco.model.ContentModel;
 import org.alfresco.repo.content.ContentServicePolicies.OnContentUpdatePolicy;
+import org.alfresco.repo.copy.CopyServicePolicies;
 import org.alfresco.repo.node.NodeServicePolicies.OnCreateNodePolicy;
 import org.alfresco.repo.node.NodeServicePolicies.OnUpdatePropertiesPolicy;
 import org.alfresco.repo.policy.BehaviourFilter;
@@ -41,6 +42,7 @@ import org.alfresco.service.cmr.security.PersonService;
 import org.alfresco.service.cmr.thumbnail.ThumbnailService;
 import org.alfresco.service.cmr.version.VersionService;
 import org.alfresco.service.cmr.version.VersionType;
+import org.alfresco.service.namespace.NamespaceService;
 import org.alfresco.service.namespace.QName;
 import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.HttpStatus;
@@ -92,7 +94,7 @@ import com.googlecode.mp4parser.FileDataSourceImpl;
  * - Create version history and version
  * * - only if create_version value is true (default = true)
  */
-public class NodeCustomizationPolicies implements OnContentUpdatePolicy, OnCreateNodePolicy, OnUpdatePropertiesPolicy{
+public class NodeCustomizationPolicies implements OnContentUpdatePolicy, OnCreateNodePolicy, OnUpdatePropertiesPolicy, CopyServicePolicies.OnCopyCompletePolicy {
 	/**
 	 * Thread local holding the current context id as defined in the client.config.xml
 	 */
@@ -169,8 +171,26 @@ public class NodeCustomizationPolicies implements OnContentUpdatePolicy, OnCreat
 		//for async changed properties refresh node in cache
 		policyComponent.bindClassBehaviour(OnUpdatePropertiesPolicy.QNAME, QName.createQName(CCConstants.CCM_TYPE_IO), new JavaBehaviour(this, "onUpdateProperties"));
 		policyComponent.bindClassBehaviour(OnUpdatePropertiesPolicy.QNAME, QName.createQName(CCConstants.CCM_TYPE_MAP), new JavaBehaviour(this, "onUpdateProperties"));
+
+		// for educontext copy complete
+		for(String type : CCConstants.EDUCONTEXT_TYPES) {
+			this.policyComponent.bindClassBehaviour(QName.createQName(NamespaceService.ALFRESCO_URI, "onCopyComplete"),
+					QName.createQName(type), new JavaBehaviour(this, "onCopyComplete"));
+		}
 	}
-	
+
+	@Override
+	public void onCopyComplete(QName classRef,
+							   NodeRef sourceNodeRef,
+							   NodeRef targetNodeRef,
+							   boolean copyToNewNode,
+							   Map<NodeRef,NodeRef> copyMap) {
+		// add/override the previous node context
+		copyMap.forEach((source,dest)-> {
+			addCurrentContext(dest);
+		});
+	}
+
 	@Override
 	public void onContentUpdate(NodeRef nodeRef, boolean newContent) {
 		
@@ -329,7 +349,7 @@ public class NodeCustomizationPolicies implements OnContentUpdatePolicy, OnCreat
 
 			}
 
-			addCurrentContext(eduNodeRef,type);
+			addCurrentContext(eduNodeRef);
 
 			if(ContentModel.TYPE_FOLDER.equals(type)){
 				// type
@@ -341,7 +361,8 @@ public class NodeCustomizationPolicies implements OnContentUpdatePolicy, OnCreat
 		}
 	}
 
-	private void addCurrentContext(NodeRef eduNodeRef, QName type) {
+	void addCurrentContext(NodeRef eduNodeRef) {
+		QName type = nodeService.getType(eduNodeRef);
 		if(CCConstants.EDUCONTEXT_TYPES.contains(type.toString())){
 			String context = eduSharingContext.get();
 			if(context==null) {
