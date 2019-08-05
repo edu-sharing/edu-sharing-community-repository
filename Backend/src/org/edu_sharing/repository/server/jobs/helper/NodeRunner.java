@@ -1,11 +1,18 @@
 package org.edu_sharing.repository.server.jobs.helper;
 
+import org.alfresco.repo.policy.BehaviourFilter;
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
+import org.alfresco.service.ServiceRegistry;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.repository.StoreRef;
+import org.apache.log4j.Logger;
+import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
+import org.edu_sharing.repository.server.tools.cache.RepositoryCache;
 import org.edu_sharing.service.nodeservice.NodeService;
 import org.edu_sharing.service.nodeservice.NodeServiceFactory;
+import org.springframework.context.ApplicationContext;
 
+import javax.transaction.*;
 import java.util.List;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
@@ -14,6 +21,9 @@ import java.util.function.Predicate;
  * This is a class that will do a task for all nodes with a given type (or all) in a given folder
  */
 public class NodeRunner {
+
+    Logger logger = Logger.getLogger(NodeRunner.class);
+
     private NodeService nodeService = NodeServiceFactory.getLocalService();
 
     /**
@@ -45,6 +55,24 @@ public class NodeRunner {
      * Threading enabled
      */
     private boolean threaded = true;
+
+    /**
+     * Shall the modified date of the edited nodes stay the same
+     * (Enabling this will disable the behaviour filters while running)
+     * Required transaction to be set to true
+     */
+    private boolean keepModifiedDate;
+
+    /**
+     * Shall a transaction be spawned for the task
+     * This WILL NOT WORK in conjunction with threaded=true
+     */
+    private boolean transaction;
+
+
+    private ApplicationContext applicationContext = AlfAppContextGate.getApplicationContext();
+    ServiceRegistry serviceRegistry = (ServiceRegistry) applicationContext.getBean(ServiceRegistry.SERVICE_REGISTRY);
+    private BehaviourFilter policyBehaviourFilter = (BehaviourFilter) applicationContext.getBean("policyBehaviourFilter");
 
     public Consumer<NodeRef> getTask() {
         return task;
@@ -102,38 +130,84 @@ public class NodeRunner {
         if(task==null)
             throw new IllegalArgumentException("No task has been set yet");
 
-        List<NodeRef> nodes;
-        if(runAsSystem)
-            nodes = AuthenticationUtil.runAsSystem(()->nodeService.getChildrenRecursive(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE,startFolder,types));
-        else
-            nodes = nodeService.getChildrenRecursive(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE,startFolder,types);
+        UserTransaction userTransaction = null;
+        if(transaction){
+            userTransaction = serviceRegistry.getTransactionService().getNonPropagatingUserTransaction();
+            try {
+                userTransaction.begin();
+            } catch (NotSupportedException|SystemException e) {
+                logger.error(e.getMessage(), e);
+            }
+            policyBehaviourFilter.disableBehaviour();
+        }
+        try {
+            List<NodeRef> nodes;
+            if (runAsSystem)
+                nodes = AuthenticationUtil.runAsSystem(() -> nodeService.getChildrenRecursive(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, startFolder, types));
+            else
+                nodes = nodeService.getChildrenRecursive(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, startFolder, types);
 
-        Predicate<? super NodeRef> callFilter=(ref)->{
-            if(filter==null)
-                return true;
-            if(runAsSystem){
-                return AuthenticationUtil.runAsSystem(()->filter.test(ref));
-            }
-            else{
-                return filter.test(ref);
-            }
-        };
-        Consumer<? super NodeRef> callTask=(ref)->{
-            if(runAsSystem){
-                AuthenticationUtil.runAsSystem(()->{
+            Predicate<? super NodeRef> callFilter = (ref) -> {
+                if (filter == null)
+                    return true;
+                if (runAsSystem) {
+                    return AuthenticationUtil.runAsSystem(() -> filter.test(ref));
+                } else {
+                    return filter.test(ref);
+                }
+            };
+            Consumer<? super NodeRef> callTask = (ref) -> {
+                if(keepModifiedDate)
+                    policyBehaviourFilter.disableBehaviour(ref);
+                if (runAsSystem) {
+                    AuthenticationUtil.runAsSystem(() -> {
+                        task.accept(ref);
+                        new RepositoryCache().remove(ref.getId());
+                        return null;
+                    });
+                } else {
                     task.accept(ref);
-                    return null;
-                });
+                    new RepositoryCache().remove(ref.getId());
+                }
+                policyBehaviourFilter.enableBehaviour(ref);
+            };
+            if (threaded)
+                nodes.parallelStream().filter(callFilter).forEach(callTask);
+            else
+                nodes.stream().filter(callFilter).forEach(callTask);
+            return nodes.size();
+        }
+        finally{
+            if(transaction){
+                policyBehaviourFilter.enableBehaviour();
+                try {
+                    userTransaction.commit();
+                } catch (Exception e) {
+                    logger.error(e.getMessage(),e);
+                    try {
+                        userTransaction.rollback();
+                    } catch (SystemException e1) {
+                        logger.error(e1.getMessage(),e1);
+                    }
+                }
             }
-            else{
-                task.accept(ref);
-            }
-        };
-        if(threaded)
-            nodes.parallelStream().filter(callFilter).forEach(callTask);
-        else
-            nodes.stream().filter(callFilter).forEach(callTask);
-        return nodes.size();
 
+        }
+    }
+
+    public void setKeepModifiedDate(boolean keepModifiedDate) {
+        this.keepModifiedDate = keepModifiedDate;
+    }
+
+    public boolean isKeepModifiedDate() {
+        return keepModifiedDate;
+    }
+
+    public boolean isTransaction() {
+        return transaction;
+    }
+
+    public void setTransaction(boolean transaction) {
+        this.transaction = transaction;
     }
 }

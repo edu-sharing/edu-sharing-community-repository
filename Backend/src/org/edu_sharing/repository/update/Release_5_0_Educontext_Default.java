@@ -23,8 +23,6 @@ public class Release_5_0_Educontext_Default extends UpdateAbstract {
 
 	NodeService nodeService = serviceRegistry.getNodeService();
 
-	BehaviourFilter policyBehaviourFilter = (BehaviourFilter) applicationContext.getBean("policyBehaviourFilter");
-
 	MCAlfrescoAPIClient apiClient;
 
 	public Release_5_0_Educontext_Default(PrintWriter out) {
@@ -57,6 +55,7 @@ public class Release_5_0_Educontext_Default extends UpdateAbstract {
 		runner.setRunAsSystem(true);
 		runner.setTypes(CCConstants.EDUCONTEXT_TYPES);
 		runner.setThreaded(false);
+		runner.setKeepModifiedDate(true);
 		int[] processed=new int[]{0};
 		runner.setFilter((ref)->{
 			Serializable prop = nodeService.getProperty(ref, QName.createQName(CCConstants.CCM_PROP_EDUCONTEXT_NAME));
@@ -79,7 +78,7 @@ public class Release_5_0_Educontext_Default extends UpdateAbstract {
 			}
 			processed[0]++;
 		});
-		runner.run();
+        runner.run();
 		logInfo("Added educontext default value to a total of "+processed[0]+" nodes");
 	}
 
