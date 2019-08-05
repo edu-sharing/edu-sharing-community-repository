@@ -128,16 +128,21 @@ public class ExcelLOMImporter {
 							}else{
 								PropertyDefinition propDef = dictionaryService.getProperty(QName.createQName(alfrescoProperty));
 								
-								if(propDef.isMultiValued() && !alfrescoProperty.contains("contributer")){
-									ArrayList<String> multival = new ArrayList<String>();
-									
-									//String[] vals = value.split(",");   StringTool.escape(CCConstants.MULTIVALUE_SEPARATOR)
-									String[] vals = value.split(StringTool.escape(CCConstants.MULTIVALUE_SEPARATOR));
-									multival.addAll(Arrays.asList(vals));
-									
-									toSafe.put(QName.createQName(alfrescoProperty), multival);
-								}else{
-									toSafe.put(QName.createQName(alfrescoProperty), value);
+								if(propDef != null) {
+									if(propDef.isMultiValued() && !alfrescoProperty.contains("contributer")){
+										ArrayList<String> multival = new ArrayList<String>();
+										
+										//String[] vals = value.split(",");   StringTool.escape(CCConstants.MULTIVALUE_SEPARATOR)
+										String[] vals = value.split(StringTool.escape(CCConstants.MULTIVALUE_SEPARATOR));
+										multival.addAll(Arrays.asList(vals));
+										
+										toSafe.put(QName.createQName(alfrescoProperty), multival);
+									}else{
+										toSafe.put(QName.createQName(alfrescoProperty), value);
+									}
+								}else {
+									logger.error("unkown property: " + alfrescoProperty);
+									continue;
 								}
 								
 								if(alfrescoProperty.equals(CCConstants.LOM_PROP_GENERAL_TITLE)){
@@ -210,12 +215,16 @@ public class ExcelLOMImporter {
 		if(excelAlfMap == null){
 			excelAlfMap = new HashMap<String, String>();
 			excelAlfMap.put("catalog", CCConstants.CCM_PROP_IO_REPLICATIONSOURCE);
-			excelAlfMap.put("identifier", CCConstants.CCM_PROP_IO_REPLICATIONSOURCE);
+			excelAlfMap.put("identifier", CCConstants.CCM_PROP_IO_REPLICATIONSOURCEID);
 			excelAlfMap.put("datestamp", CCConstants.CCM_PROP_IO_REPLICATIONSOURCETIMESTAMP);
 			excelAlfMap.put("title", CCConstants.LOM_PROP_GENERAL_TITLE);
 			excelAlfMap.put("language", CCConstants.LOM_PROP_GENERAL_LANGUAGE);
 			excelAlfMap.put("description", CCConstants.LOM_PROP_GENERAL_DESCRIPTION);
 			excelAlfMap.put("keyword", CCConstants.LOM_PROP_GENERAL_KEYWORD);
+			excelAlfMap.put("context", CCConstants.CCM_PROP_IO_REPL_EDUCATIONAL_CONTEXT);
+			excelAlfMap.put("educationalIntendedenduserrole", CCConstants.CCM_PROP_IO_REPL_EDUCATIONAL_INTENDEDENDUSERROLE);
+			excelAlfMap.put("educationalTypicalAgeRangeFrom", CCConstants.CCM_PROP_IO_REPL_EDUCATIONAL_TYPICALAGERANGEFROM);
+			excelAlfMap.put("educationalTypicalAgeRangeTo", CCConstants.CCM_PROP_IO_REPL_EDUCATIONAL_TYPICALAGERANGETO);
 			excelAlfMap.put("lifeCycleContributerAuthor", CCConstants.CCM_PROP_IO_REPL_LIFECYCLECONTRIBUTER_AUTHOR);
 			excelAlfMap.put("lifeCycleContributerPublisher", CCConstants.CCM_PROP_IO_REPL_LIFECYCLECONTRIBUTER_PUBLISHER);
 			excelAlfMap.put("metadataContributerProvider", CCConstants.CCM_PROP_IO_REPL_METADATACONTRIBUTER_PROVIDER);
@@ -238,6 +247,7 @@ public class ExcelLOMImporter {
 		}
 		return excelAlfMap;
 	}
+	
 	
 	
 }
