@@ -53,11 +53,21 @@
           ></breadcrumbs>
         </span>
         </div>
+        <div *ngIf="canEdit()" class="edit"><i icon iconId="edit" (click)="editMode=true"></i></div>
         <div><span>{{'NODE_INFO.NODE_PROPERTIES' | translate}}</span>
           <div class="property" *ngFor="let property of _properties">
             <span>{{property[0]}}</span>
-            <span>{{property[1]}}</span>
+            <span *ngIf="!editMode">{{property[1]}}</span>
+            <input type="text" *ngIf="editMode" [(ngModel)]="property[1]">
           </div>
+          <div class="property" *ngIf="editMode">
+            <input type="text" placeholder="{{'NODE_INFO.CUSTOM_PROPERTY_NAME' | translate}}" [(ngModel)]="customProperty[0]">
+            <input type="text" placeholder="{{'NODE_INFO.CUSTOM_PROPERTY_VALUE' | translate}}" [(ngModel)]="customProperty[1]">
+          </div>
+        </div>
+        <div *ngIf="editMode" class="edit-save">
+          <spinner-small *ngIf="saving"></spinner-small>
+          <a class="btn waves-effect waves-light" [class.disabled]="saving" (click)="saveEdits()">{{'SAVE' | translate}}</a>
         </div>
 
         <div><span>{{'NODE_INFO.JSON' | translate}}</span><span class="json">{{_json}}</span></div>
