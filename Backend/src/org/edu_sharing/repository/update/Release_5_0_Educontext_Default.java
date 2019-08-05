@@ -11,6 +11,7 @@ import org.edu_sharing.repository.server.jobs.helper.NodeRunner;
 
 import java.io.PrintWriter;
 import java.io.Serializable;
+import java.util.List;
 import java.util.function.Consumer;
 
 public class Release_5_0_Educontext_Default extends UpdateAbstract {
@@ -58,9 +59,18 @@ public class Release_5_0_Educontext_Default extends UpdateAbstract {
 		runner.setThreaded(false);
 		int[] processed=new int[]{0};
 		runner.setFilter((ref)->{
-			String prop = (String)nodeService.getProperty(ref, QName.createQName(CCConstants.CCM_PROP_EDUCONTEXT_NAME));
+			Serializable prop = nodeService.getProperty(ref, QName.createQName(CCConstants.CCM_PROP_EDUCONTEXT_NAME));
 			// we want to return true for all nodes which don't have the property set yet
-			return prop==null || prop.isEmpty();
+			if(prop==null)
+				return true;
+			if(prop instanceof String) {
+				 return ((String)prop).isEmpty();
+			}
+			else if(prop instanceof List){
+				return ((List)prop).isEmpty();
+			}
+			else
+				return true;
 		});
 		runner.setTask((ref)->{
 			logDebug("add educontext to "+ref.getId());

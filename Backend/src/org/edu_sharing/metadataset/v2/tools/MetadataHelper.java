@@ -3,6 +3,7 @@ package org.edu_sharing.metadataset.v2.tools;
 import io.swagger.config.ConfigFactory;
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.apache.lucene.queryParser.QueryParser;
+import org.edu_sharing.alfresco.policy.NodeCustomizationPolicies;
 import org.edu_sharing.metadataset.v2.MetadataReaderV2;
 import org.edu_sharing.metadataset.v2.MetadataSetV2;
 import org.edu_sharing.repository.client.tools.CCConstants;
@@ -30,11 +31,5 @@ public class MetadataHelper {
 	}
 	public static String getTranslation(ApplicationInfo appId,String key,String fallback) throws Exception {
 		return MetadataReaderV2.getTranslation(getMetadataset(appId,CCConstants.metadatasetdefault_id).getI18n(),key,fallback,getLocale());
-	}
-
-	public static String replaceCommonQueryParams(String query) {
-		return query
-				.replace("${educontext}",QueryParser.escape(ConfigServiceFactory.getCurrentContextId()))
-				.replace("${authority}",QueryParser.escape(AuthenticationUtil.getFullyAuthenticatedUser()));
 	}
 }

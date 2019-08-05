@@ -154,6 +154,16 @@ public class NodeCustomizationPolicies implements OnContentUpdatePolicy, OnCreat
 	
 	Scheduler scheduler;
 
+	/**
+	 * The current context, or the default value @EDUCONTEXT_DEFAULT
+	 * @return
+	 */
+	public static String getEduSharingContext(){
+		if(eduSharingContext.get()==null){
+			return CCConstants.EDUCONTEXT_DEFAULT;
+		}
+		return eduSharingContext.get();
+	}
 	public static void setEduSharingContext(String context) {
 		eduSharingContext.set(context);
 	}
@@ -364,10 +374,7 @@ public class NodeCustomizationPolicies implements OnContentUpdatePolicy, OnCreat
 	void addCurrentContext(NodeRef eduNodeRef) {
 		QName type = nodeService.getType(eduNodeRef);
 		if(CCConstants.EDUCONTEXT_TYPES.contains(type.toString())){
-			String context = eduSharingContext.get();
-			if(context==null) {
-				context = CCConstants.EDUCONTEXT_DEFAULT;
-			}
+			String context = getEduSharingContext();
 			nodeService.setProperty(
 					eduNodeRef,
 					QName.createQName(CCConstants.CCM_PROP_EDUCONTEXT_NAME),

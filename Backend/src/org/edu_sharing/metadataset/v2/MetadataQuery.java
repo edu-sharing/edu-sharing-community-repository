@@ -1,7 +1,5 @@
 package org.edu_sharing.metadataset.v2;
 
-import org.edu_sharing.metadataset.v2.tools.MetadataHelper;
-
 import java.io.Serializable;
 import java.util.List;
 
@@ -39,7 +37,7 @@ public class MetadataQuery implements Serializable {
 	}
 	
 	public String getBasequery() {
-		return MetadataHelper.replaceCommonQueryParams(basequery);
+		return MetadataQueries.replaceCommonQueryParams(basequery);
 	}
 
 	public void setBasequery(String basequery) {

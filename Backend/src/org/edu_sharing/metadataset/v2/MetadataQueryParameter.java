@@ -1,7 +1,5 @@
 package org.edu_sharing.metadataset.v2;
 
-import org.edu_sharing.metadataset.v2.tools.MetadataHelper;
-
 import java.io.Serializable;
 import java.util.List;
 import java.util.Map;
@@ -39,7 +37,7 @@ public class MetadataQueryParameter implements Serializable {
 		if(statement==null) {
 			statement = getDefaultStatement();
 		}
-		return MetadataHelper.replaceCommonQueryParams(statement);
+		return MetadataQueries.replaceCommonQueryParams(statement);
 	}
 	private String getDefaultStatement() {
 		return "@"+name.replace(":", "\\:")+":\"*${value}*\"";
