@@ -170,6 +170,14 @@ public class ExcelLOMImporter {
 					}
 					
 					if(toSafe.size() > 0 && nodeName != null && !nodeName.trim().equals("")){
+						
+						//check for valid thumbnail url
+						String thumbUrl = (String)toSafe.get(QName.createQName(CCConstants.CCM_PROP_IO_THUMBNAILURL));
+						if(thumbUrl == null || !thumbUrl.startsWith("http")) {
+							logger.error("invalid thumbnail url:" + thumbUrl +" for:" +toSafe.get(QName.createQName(CCConstants.CM_NAME))+" will not safe object");
+							continue;
+						}
+						
 						ChildAssociationRef newNode = nodeService.createNode(new NodeRef(MCAlfrescoAPIClient.storeRef,parentFolder),QName.createQName(CCConstants.CM_ASSOC_FOLDER_CONTAINS), QName.createQName(nodeName),  QName.createQName(CCConstants.CCM_TYPE_IO),toSafe);
 						
 						HashMap<String,Object> versProps = new HashMap<String,Object> ();
