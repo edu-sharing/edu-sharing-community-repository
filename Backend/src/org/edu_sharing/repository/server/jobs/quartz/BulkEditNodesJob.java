@@ -49,6 +49,7 @@ import java.util.stream.Collectors;
  * Required parameters:
  * property: The property name to replace
  * value: the target value to set
+ * OR copy: the source property to copy the value of
  * startFolder: The id of the folder to start (recursively processing all children)
  * mode: The mode, see enum
  * types: the types of nodes to process, e.g. ccm:io (comma seperated string)
@@ -59,7 +60,8 @@ public class BulkEditNodesJob extends AbstractJob{
 	protected Logger logger = Logger.getLogger(BulkEditNodesJob.class);
 	private org.alfresco.service.cmr.repository.NodeService nodeService;
 	private String property;
-	private String value;
+	private Serializable value;
+	private String copy;
 	private Mode mode;
 	private List<String> types;
 
@@ -84,9 +86,16 @@ public class BulkEditNodesJob extends AbstractJob{
 		}
 		property = CCConstants.getValidGlobalName(property);
 
+		copy = (String) context.getJobDetail().getJobDataMap().get("copy");
+		if(copy!=null){
+			copy=CCConstants.getValidGlobalName(copy);
+		}
 		value = (String) context.getJobDetail().getJobDataMap().get("value");
-		if(value==null){
-			throw new IllegalArgumentException("Missing required parameter 'value'");
+		if(copy==null && value==null){
+			throw new IllegalArgumentException("Missing one of the required parameters 'value' or 'copy'");
+		}
+		if(copy!=null && value!=null){
+			throw new IllegalArgumentException("Only one of parameters 'value' and 'copy' may be set");
 		}
 
 		String startFolder = (String) context.getJobDetail().getJobDataMap().get("startFolder");
@@ -111,6 +120,9 @@ public class BulkEditNodesJob extends AbstractJob{
 		runner.setTask((ref)->{
 			org.alfresco.service.cmr.repository.NodeRef nodeRef = new org.alfresco.service.cmr.repository.NodeRef(ref.getStoreRef(), ref.getId());
 			logger.info("Bulk edit metadata for node "+ref.getId());
+			if(copy!=null){
+				value=nodeService.getProperty(nodeRef,QName.createQName(copy));
+			}
 			if(mode.equals(Mode.Replace)){
 				nodeService.setProperty(nodeRef,QName.createQName(property),value);
 			}
