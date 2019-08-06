@@ -900,8 +900,8 @@ export class AdminComponent {
         ];
         this.jobClasses=jobs.map((job)=>{
           let id=job.id.split(".");
-          job.secondaryTitle=id[id.length-1];
           job.title=this.translate.instant('ADMIN.JOBS.NAMES.'+id[id.length-1]);
+          job.secondaryTitle=id[id.length-1];
           return job;
         });
     }
@@ -915,8 +915,10 @@ export class AdminComponent {
     }
 
   updateJobSuggestions(event: any) {
-    let name=event.input.toString();
+    let name=event.input.toString().toLowerCase();
     this.jobClassesSuggested=this.jobClasses.filter((j)=>j.title.toLowerCase().indexOf(name)!=-1 || j.secondaryTitle.toLowerCase().indexOf(name)!=-1);
+    console.log(name);
+    console.log(this.jobClassesSuggested);
   }
 
   refreshUpdateList() {
