@@ -113,7 +113,9 @@ public class ConvertMultivalueToSinglevalueJob extends AbstractJob{
 		});
 		runner.setTypes(Collections.singletonList(CCConstants.CCM_TYPE_IO));
 		runner.setRunAsSystem(true);
-		runner.setThreaded(true);
+		runner.setThreaded(false);
+		runner.setKeepModifiedDate(true);
+		runner.setTransaction(true);
 		int count=runner.run();
 		logger.info("Processed "+count+" nodes");
 	}
