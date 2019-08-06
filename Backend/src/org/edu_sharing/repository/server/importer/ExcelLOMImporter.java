@@ -104,11 +104,15 @@ public class ExcelLOMImporter {
 					
 					String contentUrl = null;
 					for(Cell cell : row){
+						
+						int colIdxIdx = cell.getColumnIndex();
+						
 						if(Cell.CELL_TYPE_STRING != cell.getCellType()){
 							continue;
 						}
-						int colIdxIdx = cell.getColumnIndex();
+						
 						String columnName = IdxColumnMap.get(colIdxIdx);
+						//System.out.println(columnName + " " + toSafe.get(QName.createQName(CCConstants.CM_NAME)) + " " + cell.getStringCellValue() + " colIdx:" + colIdxIdx);
 						String alfrescoProperty = null;
 						String value = cell.getStringCellValue();
 						if(value == null) continue;
@@ -155,10 +159,8 @@ public class ExcelLOMImporter {
 									eduProps.put(CCConstants.LOM_PROP_GENERAL_TITLE, nodeName);
 									
 									
-									System.out.println("folder size:"+currentLevelObjects.size());
 									new DuplicateFinder().transformToSafeName(currentLevelObjects, eduProps);
 									
-									System.out.println((String)eduProps.get(CCConstants.CM_NAME));
 									
 									toSafe.put(QName.createQName(CCConstants.CM_NAME), (String)eduProps.get(CCConstants.CM_NAME));
 								}
@@ -225,18 +227,20 @@ public class ExcelLOMImporter {
 			excelAlfMap.put("educationalIntendedenduserrole", CCConstants.CCM_PROP_IO_REPL_EDUCATIONAL_INTENDEDENDUSERROLE);
 			excelAlfMap.put("educationalTypicalAgeRangeFrom", CCConstants.CCM_PROP_IO_REPL_EDUCATIONAL_TYPICALAGERANGEFROM);
 			excelAlfMap.put("educationalTypicalAgeRangeTo", CCConstants.CCM_PROP_IO_REPL_EDUCATIONAL_TYPICALAGERANGETO);
+			excelAlfMap.put("educationalTypicalAgeRange", CCConstants.CCM_PROP_IO_REPL_EDUCATIONAL_TYPICALAGERANGE);
 			excelAlfMap.put("lifeCycleContributerAuthor", CCConstants.CCM_PROP_IO_REPL_LIFECYCLECONTRIBUTER_AUTHOR);
 			excelAlfMap.put("lifeCycleContributerPublisher", CCConstants.CCM_PROP_IO_REPL_LIFECYCLECONTRIBUTER_PUBLISHER);
 			excelAlfMap.put("metadataContributerProvider", CCConstants.CCM_PROP_IO_REPL_METADATACONTRIBUTER_PROVIDER);
 			excelAlfMap.put("metadataContributerCreator", CCConstants.CCM_PROP_IO_REPL_METADATACONTRIBUTER_CREATOR);
 			excelAlfMap.put("technicalFormat", CCConstants.LOM_PROP_TECHNICAL_FORMAT);
-			//excelAlfMap.put("technicalLocation", CCConstants.LOM_PROP_TECHNICAL_LOCATION);
+			excelAlfMap.put("technicalLocation", CCConstants.LOM_PROP_TECHNICAL_LOCATION);
 			excelAlfMap.put("wwwurl", CCConstants.CM_PROP_CONTENT);
 			excelAlfMap.put("educationalLearningResourceType", CCConstants.CCM_PROP_IO_REPL_EDUCATIONAL_LEARNINGRESSOURCETYPE);
 			excelAlfMap.put("RightsCopyrightAndOtherRestrictions", CCConstants.LOM_PROP_RIGHTS_COPY_RIGHT);
 			excelAlfMap.put("RightsDescription", CCConstants.LOM_PROP_RIGHTS_RIGHTS_DESCRIPTION);
 			excelAlfMap.put("thumbnailUrl", CCConstants.CCM_PROP_IO_THUMBNAILURL);
 			excelAlfMap.put("taxonId",CCConstants.CCM_PROP_IO_REPL_TAXON_ID);
+			excelAlfMap.put("taxonEntry",CCConstants.CCM_PROP_IO_REPL_TAXON_ENTRY);
 			excelAlfMap.put("licenseKey",CCConstants.CCM_PROP_IO_COMMONLICENSE_KEY);
 			excelAlfMap.put("licenseVersion",CCConstants.CCM_PROP_IO_COMMONLICENSE_CC_VERSION);
 			excelAlfMap.put("licenseLocale",CCConstants.CCM_PROP_IO_COMMONLICENSE_CC_LOCALE);
