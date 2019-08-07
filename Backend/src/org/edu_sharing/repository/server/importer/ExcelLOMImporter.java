@@ -172,32 +172,33 @@ public class ExcelLOMImporter {
 					if(toSafe.size() > 0 && nodeName != null && !nodeName.trim().equals("")){
 						
 						//check for valid thumbnail url
+						boolean createNode = true;
 						String thumbUrl = (String)toSafe.get(QName.createQName(CCConstants.CCM_PROP_IO_THUMBNAILURL));
 						if(thumbUrl == null || !thumbUrl.startsWith("http")) {
 							logger.error("invalid thumbnail url:" + thumbUrl +" for:" +toSafe.get(QName.createQName(CCConstants.CM_NAME))+" will not safe object");
-							continue;
+							createNode = false;
 						}
+						if(createNode) {
+							ChildAssociationRef newNode = nodeService.createNode(new NodeRef(MCAlfrescoAPIClient.storeRef,parentFolder),QName.createQName(CCConstants.CM_ASSOC_FOLDER_CONTAINS), QName.createQName(nodeName),  QName.createQName(CCConstants.CCM_TYPE_IO),toSafe);
+							
+							HashMap<String,Object> versProps = new HashMap<String,Object> ();
+							for(Map.Entry<QName, Serializable> entry : toSafe.entrySet()){
+								versProps.put(entry.getKey().toString(), entry.getValue());
+							}
+							
+							if(contentUrl != null && !contentUrl.trim().equals("")){
+								String mimetype = MimeTypes.guessMimetype(contentUrl);
+								InputStream inputStream = new URL(contentUrl).openConnection().getInputStream();
+								apiClient.writeContent(MCAlfrescoAPIClient.storeRef, 
+										newNode.getChildRef().getId(), 
+										inputStream, 
+										mimetype, 
+										null, 
+										CCConstants.CM_PROP_CONTENT);
+							}
 						
-						ChildAssociationRef newNode = nodeService.createNode(new NodeRef(MCAlfrescoAPIClient.storeRef,parentFolder),QName.createQName(CCConstants.CM_ASSOC_FOLDER_CONTAINS), QName.createQName(nodeName),  QName.createQName(CCConstants.CCM_TYPE_IO),toSafe);
-						
-						HashMap<String,Object> versProps = new HashMap<String,Object> ();
-						for(Map.Entry<QName, Serializable> entry : toSafe.entrySet()){
-							versProps.put(entry.getKey().toString(), entry.getValue());
+							apiClient.createVersion(newNode.getChildRef().getId(), versProps);
 						}
-						
-						if(contentUrl != null && !contentUrl.trim().equals("")){
-							String mimetype = MimeTypes.guessMimetype(contentUrl);
-							InputStream inputStream = new URL(contentUrl).openConnection().getInputStream();
-							apiClient.writeContent(MCAlfrescoAPIClient.storeRef, 
-									newNode.getChildRef().getId(), 
-									inputStream, 
-									mimetype, 
-									null, 
-									CCConstants.CM_PROP_CONTENT);
-						}
-						
-						apiClient.createVersion(newNode.getChildRef().getId(), versProps);
-					//serviceRegistry.getVersionService().createVersion(newNode.getChildRef(), versProps,);
 					}
 					
 				}else{
@@ -242,7 +243,7 @@ public class ExcelLOMImporter {
 			excelAlfMap.put("metadataContributerCreator", CCConstants.CCM_PROP_IO_REPL_METADATACONTRIBUTER_CREATOR);
 			excelAlfMap.put("technicalFormat", CCConstants.LOM_PROP_TECHNICAL_FORMAT);
 			excelAlfMap.put("technicalLocation", CCConstants.LOM_PROP_TECHNICAL_LOCATION);
-			excelAlfMap.put("wwwurl", CCConstants.CM_PROP_CONTENT);
+			excelAlfMap.put("wwwurl", CCConstants.CCM_PROP_IO_WWWURL);
 			excelAlfMap.put("educationalLearningResourceType", CCConstants.CCM_PROP_IO_REPL_EDUCATIONAL_LEARNINGRESSOURCETYPE);
 			excelAlfMap.put("RightsCopyrightAndOtherRestrictions", CCConstants.LOM_PROP_RIGHTS_COPY_RIGHT);
 			excelAlfMap.put("RightsDescription", CCConstants.LOM_PROP_RIGHTS_RIGHTS_DESCRIPTION);
