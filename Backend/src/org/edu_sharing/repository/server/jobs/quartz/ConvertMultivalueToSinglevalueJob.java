@@ -75,7 +75,7 @@ public class ConvertMultivalueToSinglevalueJob extends AbstractJob{
 		property = (String) context.getJobDetail().getJobDataMap().get("property");
 		seperator = (String) context.getJobDetail().getJobDataMap().get("seperator");
 		if(property==null){
-			throw new IllegalArgumentException("Missing requied parameter 'property'");
+			throw new IllegalArgumentException("Missing required parameter 'property'");
 		}
 		property = CCConstants.getValidGlobalName(property);
 		if(seperator==null){
@@ -113,7 +113,9 @@ public class ConvertMultivalueToSinglevalueJob extends AbstractJob{
 		});
 		runner.setTypes(Collections.singletonList(CCConstants.CCM_TYPE_IO));
 		runner.setRunAsSystem(true);
-		runner.setThreaded(true);
+		runner.setThreaded(false);
+		runner.setKeepModifiedDate(true);
+		runner.setTransaction(true);
 		int count=runner.run();
 		logger.info("Processed "+count+" nodes");
 	}

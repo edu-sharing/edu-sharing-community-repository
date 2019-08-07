@@ -37,7 +37,7 @@ public class MetadataQuery implements Serializable {
 	}
 	
 	public String getBasequery() {
-		return basequery;
+		return MetadataQueries.replaceCommonQueryParams(basequery);
 	}
 
 	public void setBasequery(String basequery) {

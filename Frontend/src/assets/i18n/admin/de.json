@@ -82,13 +82,15 @@
         "url_dynamic": "Wenn true, werden alle generierten Links (z.B. zu Previews) immer auf die anfragende Domain des Clients gemappt. Wenn false, wird der Wert immer fest anhand clientprotocol, clientport und domain generiert"
       }
     },
-    "UPDATE": {
-      "HINT": "Vergessen Sie vor Anpassungen an dieser Stelle nicht Ihr Backup der Datenbank und Dokumente des Repositoriums zu erneuern.",
-      "ID": "ID",
-      "DESCRIPTION": "Beschreibung",
-      "TEST": "Testen",
-      "RUN": "Ausführen",
-      "RESULT": "Update-Ausgabe"
+    "UPDATE":{
+      "HINT":"Vergessen Sie vor Anpassungen an dieser Stelle nicht Ihr Backup der Datenbank und Dokumente des Repositoriums zu erneuern.",
+      "ID":"ID",
+      "DESCRIPTION":"Beschreibung",
+      "DATE":"Ausgeführt am",
+      "NOT_EXECUTED":"Unbekannt",
+      "TEST":"Testen",
+      "RUN":"Ausführen",
+      "RESULT":"Update-Ausgabe"
     },
     "INFO": {
       "REPOSITORY": "Repository-Version (Server-Side)",
@@ -212,30 +214,31 @@
       "LUCENE_START": "Suchen",
       "ADD_AUTHORITY": "Authority suchen..."
     },
-    "JOBS": {
-      "LOG": "Log-Einträge",
-      "LOG_FILTER": "Filtern nach Inhalt:",
-      "LOG_LEVEL": "Filtern nach Schweregrad:",
-      "LIST": "Bisherige Aufgaben",
-      "NO_JOBS": "Es wurden noch keine Aufgaben ausgeführt. Aufgaben werden z.B. durch einen Importvorgang angelegt",
-      "TOAST_CANCELED": "Die Aufgabe wurde abgebrochen. Es kann jedoch einen Moment dauern, bis der Status aktualisiert wird.",
-      "CANCEL_TITLE": "Aufgabe abbrechen?",
-      "CANCEL_MESSAGE": "Das Abbrechen einer Aufgabe kann zu einem inkonsistenten Datenzustand oder sogar Datenverlust führen.\n\nSind Sie wirklich sicher, dass Sie die Aufgabe abbrechen möchten?",
-      "WITH_WARNINGS": "(hat Warnungen)",
-      "WITH_ERRORS": "(hat Fehler)",
-      "Aborted": "Abgebrochen",
-      "Finished": "Abgeschlossen",
-      "Running": "Wird ausgeführt...",
-      "LOG_LEVEL_7": "Debug",
-      "LOG_LEVEL_6": "Info",
-      "LOG_LEVEL_4": "Warning",
-      "LOG_LEVEL_3": "Error",
-      "LOG_LEVEL_0": "Fatal",
-      "NAMES": {
-        "RemoveImportedObjectsJob": "Alle importierten Nodes löschen",
-        "RemoveOrphanCollectionReferencesJob": "Alle Sammlungsreferenzen mit fehlenden Originalobjekt löschen",
-        "RemoveNodeJob": "Einen Node/Ordner vollständig löschen (Parameter \"id\" angeben)",
-        "ConvertMultivalueToSinglevalueJob":"Eine Property von Multivalue in Singlevalue konvertieren"
+    "JOBS":{
+      "LOG":"Log-Einträge",
+      "LOG_FILTER":"Filtern nach Inhalt:",
+      "LOG_LEVEL":"Filtern nach Schweregrad:",
+      "LIST":"Bisherige Aufgaben",
+      "NO_JOBS":"Es wurden noch keine Aufgaben ausgeführt. Aufgaben werden z.B. durch einen Importvorgang angelegt",
+      "TOAST_CANCELED":"Die Aufgabe wurde abgebrochen. Es kann jedoch einen Moment dauern, bis der Status aktualisiert wird.",
+      "CANCEL_TITLE":"Aufgabe abbrechen?",
+      "CANCEL_MESSAGE":"Das Abbrechen einer Aufgabe kann zu einem inkonsistenten Datenzustand oder sogar Datenverlust führen.\n\nSind Sie wirklich sicher, dass Sie die Aufgabe abbrechen möchten?",
+      "WITH_WARNINGS":"(hat Warnungen)",
+      "WITH_ERRORS":"(hat Fehler)",
+      "Aborted":"Abgebrochen",
+      "Finished":"Abgeschlossen",
+      "Running":"Wird ausgeführt...",
+      "LOG_LEVEL_7":"Debug",
+      "LOG_LEVEL_6":"Info",
+      "LOG_LEVEL_4":"Warning",
+      "LOG_LEVEL_3":"Error",
+      "LOG_LEVEL_0":"Fatal",
+      "NAMES":{
+        "RemoveImportedObjectsJob":"Alle importierten Nodes löschen",
+        "RemoveOrphanCollectionReferencesJob":"Alle Sammlungsreferenzen mit fehlenden Originalobjekt löschen",
+        "RemoveNodeJob":"Einen Node/Ordner vollständig löschen (Parameter \"id\" angeben)",
+        "ConvertMultivalueToSinglevalueJob":"Eine Property von Multivalue in Singlevalue konvertieren",
+        "BulkEditNodesJob":"Bulk-Bearbeitung von einer Property für mehrere Nodes"
       }
     },
     "FOLDERTEMPLATES": {

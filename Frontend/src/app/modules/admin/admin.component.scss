@@ -259,7 +259,7 @@ $sidenavWidthMobile:66px;
 }
 .tableRow{
   display:table-row;
-  background-color: #fff;
+  background-color: lighten($colorStatusPositive,50%);
   div{
     display:table-cell;
     padding:5px 10px;
@@ -269,6 +269,9 @@ $sidenavWidthMobile:66px;
     .material-icons{
       color:$textLight;
     }
+  }
+  &.table-not-executed{
+    background-color: lighten($warningMedium,50%);
   }
 }
 .header{

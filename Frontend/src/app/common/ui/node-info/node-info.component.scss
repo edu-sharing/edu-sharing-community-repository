@@ -31,6 +31,13 @@ img{
     }
   }
 }
+.edit{
+  display: flex;
+  justify-content: flex-end;
+  i {
+    @include clickable();
+  }
+}
 .aspects{
   white-space: pre-line;
 }

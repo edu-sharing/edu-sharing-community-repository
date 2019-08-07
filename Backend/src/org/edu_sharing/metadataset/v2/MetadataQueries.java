@@ -1,5 +1,10 @@
 package org.edu_sharing.metadataset.v2;
 
+import org.alfresco.repo.security.authentication.AuthenticationUtil;
+import org.apache.lucene.queryParser.QueryParser;
+import org.edu_sharing.alfresco.policy.NodeCustomizationPolicies;
+import org.edu_sharing.repository.client.tools.CCConstants;
+
 import java.io.Serializable;
 import java.util.List;
 
@@ -7,8 +12,17 @@ public class MetadataQueries implements Serializable {
 	private String basequery;
 	private boolean allowSearchWithoutCriteria;
 	private List<MetadataQuery> queries;
+
+	public static String replaceCommonQueryParams(String query) {
+		if(query==null)
+			return query;
+		return query
+				.replace("${educontext}",QueryParser.escape(NodeCustomizationPolicies.getEduSharingContext()))
+				.replace("${authority}",QueryParser.escape(AuthenticationUtil.getFullyAuthenticatedUser()));
+	}
+
 	public String getBasequery() {
-		return basequery;
+		return replaceCommonQueryParams(basequery);
 	}
 	public void setBasequery(String basequery) {
 		this.basequery = basequery;

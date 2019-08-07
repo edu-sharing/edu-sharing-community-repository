@@ -188,14 +188,17 @@
     <div class="tableRow header">
       <div class="id">{{'ADMIN.UPDATE.ID' | translate}}</div>
       <div class="description">{{'ADMIN.UPDATE.DESCRIPTION' | translate}}</div>
+      <div class="date">{{'ADMIN.UPDATE.DATE' | translate}}</div>
       <div class="test">{{'ADMIN.UPDATE.TEST' | translate}}</div>
       <div class="run">{{'ADMIN.UPDATE.RUN' | translate}}</div>
     </div>
-    <div *ngFor="let update of updates" class="tableRow">
+    <div *ngFor="let update of updates" class="tableRow" [class.table-not-executed]="!update.executedAt">
       <div class="id">{{update.id}}</div>
       <div class="description">{{update.description}}</div>
+      <div class="date" *ngIf="!update.executedAt">{{'ADMIN.UPDATE.NOT_EXECUTED' | translate}}</div>
+      <div class="date" *ngIf="update.executedAt">{{update.executedAt | formatDate}}</div>
       <div class="test"><a class="clickable" (click)="runUpdate(update,false)">{{'ADMIN.UPDATE.TEST' | translate}}</a></div>
-      <div class="run"><a class="btn-flat btn-shadow" (click)="runUpdate(update,true)">{{'ADMIN.UPDATE.RUN' | translate}}</a></div>
+      <div class="run"><a class="btn-flat btn-shadow" [class.disabled]="update.executedAt" (click)="runUpdate(update,true)">{{'ADMIN.UPDATE.RUN' | translate}}</a></div>
     </div>
   </div>
 </div>

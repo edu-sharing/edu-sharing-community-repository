@@ -5,7 +5,9 @@ public class ServerUpdateInfo {
 	String id;
 	
 	String description;
-	
+
+	long executedAt;
+
 	public ServerUpdateInfo() {
 	}
 	
@@ -29,5 +31,12 @@ public class ServerUpdateInfo {
 	public void setDescription(String description) {
 		this.description = description;
 	}
-	
+
+	public long getExecutedAt() {
+		return executedAt;
+	}
+
+	public void setExecutedAt(long executedAt) {
+		this.executedAt = executedAt;
+	}
 }

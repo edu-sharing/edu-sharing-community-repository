@@ -8,6 +8,7 @@ import org.edu_sharing.service.config.model.KeyValuePair;
 import org.edu_sharing.service.config.model.Language;
 
 import javax.servlet.ServletRequest;
+import javax.servlet.http.HttpServletRequest;
 import java.util.List;
 
 public class ConfigServiceFactory {
@@ -22,8 +23,11 @@ public class ConfigServiceFactory {
 		return getConfigService().getConfig();
 	}
 	public static String getCurrentContextId(){
+		return getCurrentContextId(Context.getCurrentInstance().getRequest());
+	}
+	public static String getCurrentContextId(HttpServletRequest req){
 		try {
-			return getConfigService().getContextId(getCurrentDomain());
+			return getConfigService().getContextId(getCurrentDomain(req));
 		} catch (Exception e) {
 			logger.info(e.getMessage(),e);
 			return null;

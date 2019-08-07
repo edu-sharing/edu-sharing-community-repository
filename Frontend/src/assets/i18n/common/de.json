@@ -160,7 +160,9 @@
     "PERMISSIONS_LOCAL":"Explizite Berechtigungen",
     "PERMISSIONS_LOCAL_EMPTY":"Keine Berechtigungen am Objekt festgelegt",
     "CHILDREN":"Children",
-    "CHILDREN_NONE":"Dieses Element besitzt keine Child Objekte"
+    "CHILDREN_NONE":"Dieses Element besitzt keine Child Objekte",
+    "CUSTOM_PROPERTY_NAME": "Eigene Property eingeben",
+    "CUSTOM_PROPERTY_VALUE": "Wert für Property eingeben"
   },
   "SIDEBAR":{
     "WORKSPACE":"Workspace",

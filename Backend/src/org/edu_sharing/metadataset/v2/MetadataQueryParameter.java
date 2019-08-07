@@ -27,13 +27,17 @@ public class MetadataQueryParameter implements Serializable {
 		return statements;
 	}
 	public String getStatement(String value) {
+		String statement=null;
 		if(statements!=null) {
 			if(statements.containsKey(value))
-				return statements.get(value);
+				statement=statements.get(value);
 			if(statements.get(null)!=null)
-				return statements.get(null);
+				statement=statements.get(null);
 		}
-		return getDefaultStatement();
+		if(statement==null) {
+			statement = getDefaultStatement();
+		}
+		return MetadataQueries.replaceCommonQueryParams(statement);
 	}
 	private String getDefaultStatement() {
 		return "@"+name.replace(":", "\\:")+":\"*${value}*\"";

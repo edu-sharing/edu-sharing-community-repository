@@ -36,13 +36,14 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.edu_sharing.alfresco.workspace_administration.NodeServiceInterceptor;
 import org.edu_sharing.repository.client.tools.CCConstants;
+import org.edu_sharing.repository.server.MCAlfrescoAPIClient;
 import org.edu_sharing.repository.server.MCAlfrescoBaseClient;
 import org.edu_sharing.repository.server.RepoFactory;
 
 public class UserEnvironmentTool {
 	
 	private static Log logger = LogFactory.getLog(UserEnvironmentTool.class);
-	MCAlfrescoBaseClient mcBaseClient = null;
+	MCAlfrescoAPIClient mcBaseClient = new MCAlfrescoAPIClient();
 	String username = null;
 
     public UserEnvironmentTool() throws Throwable {
@@ -54,13 +55,10 @@ public class UserEnvironmentTool {
          */
 	public UserEnvironmentTool(String runAsUser) throws Throwable{
 		username = runAsUser;
-		mcBaseClient = (MCAlfrescoBaseClient)RepoFactory.getInstanceForRepo(ApplicationInfoList.getHomeRepository(), null);
 	}
 	
 	public UserEnvironmentTool(String repositoryId, HashMap<String,String> authInfo) throws Throwable{
 		username = authInfo.get(CCConstants.AUTH_USERNAME);
-		ApplicationInfo appInfo = (repositoryId != null)? ApplicationInfoList.getRepositoryInfoById(repositoryId) : ApplicationInfoList.getHomeRepository();
-		mcBaseClient = (MCAlfrescoBaseClient)RepoFactory.getInstanceForRepo(appInfo, authInfo);
 	}
 	
 	public String getDefaultUserDataFolder() throws Throwable{

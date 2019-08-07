@@ -42,25 +42,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
 import org.edu_sharing.repository.client.tools.CCConstants;
-import org.edu_sharing.repository.update.ClassificationKWToGeneralKW;
-import org.edu_sharing.repository.update.Edu_SharingAuthoritiesUpdate;
-import org.edu_sharing.repository.update.Edu_SharingPersonEsuidUpdate;
-import org.edu_sharing.repository.update.FixMissingUserstoreNode;
-import org.edu_sharing.repository.update.FolderToMap;
-import org.edu_sharing.repository.update.KeyGenerator;
-import org.edu_sharing.repository.update.Licenses1;
-import org.edu_sharing.repository.update.Licenses2;
-import org.edu_sharing.repository.update.RefreshMimetypPreview;
-import org.edu_sharing.repository.update.Release_1_6_SystemFolderNameRename;
-import org.edu_sharing.repository.update.Release_1_7_SubObjectsToFlatObjects;
-import org.edu_sharing.repository.update.Release_1_7_UnmountGroupFolders;
-import org.edu_sharing.repository.update.Release_3_2_DefaultScope;
-import org.edu_sharing.repository.update.Release_3_2_FillOriginalId;
-import org.edu_sharing.repository.update.Release_4_1_FixClassificationKeywordPrefix;
-import org.edu_sharing.repository.update.Release_4_2_PersonStatusUpdater;
-import org.edu_sharing.repository.update.Release_5_0_NotifyRefactoring;
-import org.edu_sharing.repository.update.SystemFolderNameToDisplayName;
-import org.edu_sharing.repository.update.Update;
+import org.edu_sharing.repository.update.*;
 import org.springframework.context.ApplicationContext;
 
 public class ServerUpdate extends HttpServlet implements SingleThreadModel {
@@ -75,8 +57,8 @@ public class ServerUpdate extends HttpServlet implements SingleThreadModel {
 	protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
 
 		out = resp.getWriter();
-	
-		Update[] avaiableUpdates = new Update[]{new Licenses1(out),new Licenses2(out),new ClassificationKWToGeneralKW(out), new SystemFolderNameToDisplayName(out), new Release_1_6_SystemFolderNameRename(out),new Release_1_7_UnmountGroupFolders(out), new  Edu_SharingAuthoritiesUpdate(out), new Release_1_7_SubObjectsToFlatObjects(out), new RefreshMimetypPreview(out), new KeyGenerator(out), new FixMissingUserstoreNode(out), new FolderToMap(out), new Edu_SharingPersonEsuidUpdate(out), new Release_3_2_FillOriginalId(out), new Release_3_2_DefaultScope(out), new Release_4_1_FixClassificationKeywordPrefix(out), new Release_4_2_PersonStatusUpdater(out), new Release_5_0_NotifyRefactoring(out)};
+
+		Update[] avaiableUpdates = getAvailableUpdates(out);
 
 		ticket = (String)req.getSession().getAttribute(CCConstants.AUTH_TICKET);
 		
@@ -121,5 +103,29 @@ public class ServerUpdate extends HttpServlet implements SingleThreadModel {
 			out.print("Authentication failed!!!");
 		}
 
+	}
+
+	public static Update[] getAvailableUpdates(PrintWriter out) {
+		return new Update[]{
+					new Licenses1(out),
+					new Licenses2(out),
+					new ClassificationKWToGeneralKW(out),
+					new SystemFolderNameToDisplayName(out),
+					new Release_1_6_SystemFolderNameRename(out),
+					new Release_1_7_UnmountGroupFolders(out),
+					new Edu_SharingAuthoritiesUpdate(out),
+					new Release_1_7_SubObjectsToFlatObjects(out),
+					new RefreshMimetypPreview(out),
+					new KeyGenerator(out),
+					new FixMissingUserstoreNode(out),
+					new FolderToMap(out),
+					new Edu_SharingPersonEsuidUpdate(out),
+					new Release_3_2_FillOriginalId(out),
+					new Release_3_2_DefaultScope(out),
+					new Release_4_1_FixClassificationKeywordPrefix(out),
+					new Release_4_2_PersonStatusUpdater(out),
+					new Release_5_0_NotifyRefactoring(out),
+					new Release_5_0_Educontext_Default(out)
+			};
 	}
 }

@@ -42,7 +42,12 @@ public abstract class UpdateAbstract implements Update {
 			}
 		}
 	}
-	
+
+	@Override
+	public void execute() {
+		executeWithProtocolEntry();
+	}
+
 	protected void executeWithProtocolEntry() {
 			Protocol protocol = new Protocol();
 			HashMap<String,Object> updateInfo = null;
@@ -58,8 +63,10 @@ public abstract class UpdateAbstract implements Update {
 				try{
 				    transaction.begin();
 				    run();
-				    protocol.writeSysUpdateEntry(getId());
+				    // this may cause a currently unknown rollback of the whole transaction
+				    //protocol.writeSysUpdateEntry(getId());
 				    transaction.commit();
+					protocol.writeSysUpdateEntry(getId());
 				}catch(Throwable e){
 					this.logError(e.getMessage(), e);
 					try{

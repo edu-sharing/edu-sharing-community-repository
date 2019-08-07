@@ -12,6 +12,7 @@ import {
     RestConstants,
     RestNodeService, DialogButton
 } from "../../../core-module/core.module";
+import {Toast} from "../../../core-ui-module/toast";
 
 
 @Component({
@@ -35,6 +36,8 @@ export class NodeInfoComponent{
     _creator: string;
     _json: string;
     buttons: DialogButton[];
+    saving: boolean;
+    customProperty:string[]=[];
   @Input() set node(node : Node){
     this._node=node;
     this._creator=ConfigurationHelper.getPersonWithConfigDisplayName(this._node.createdBy,this.config);
@@ -57,7 +60,9 @@ export class NodeInfoComponent{
     });
   }
   @Output() onClose = new EventEmitter();
+  editMode: boolean;
   constructor(private nodeApi : RestNodeService,
+              private toast : Toast,
               private config : ConfigurationService,
               private router : Router){
     this.buttons=[
@@ -84,5 +89,31 @@ export class NodeInfoComponent{
     this.node=node;
     //this.router.navigate([UIConstants.ROUTER_PREFIX,"workspace"],{queryParams:{id:node.ref.id}});
     //this.close();
+  }
+
+  canEdit() {
+    return this._node && this._node.access.indexOf(RestConstants.ACCESS_WRITE)!=-1;
+  }
+
+  saveEdits() {
+    let props:any={};
+    for(let prop of this._properties){
+      props[prop[0]]=prop[1].split(", ");
+    }
+    if(this.customProperty[0]){
+      props[this.customProperty[0]]=this.customProperty[1] ? this.customProperty[1].split(", ") : '';
+    }
+    this.saving=true;
+    this.nodeApi.editNodeMetadata(this._node.ref.id,props,this._node.ref.repo).subscribe(()=>{
+      this.nodeApi.getNodeMetadata(this._node.ref.id,[RestConstants.ALL],this._node.ref.repo).subscribe((node)=>{
+        this.saving=false;
+        this.customProperty=[];
+        this.editMode=false;
+        this.openNode(node.node);
+      });
+    },(error)=>{
+      this.toast.error(error);
+      this.saving=false;
+    })
   }
 }

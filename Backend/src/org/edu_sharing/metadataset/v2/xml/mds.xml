@@ -706,7 +706,7 @@
 			<basequery>-TYPE:"ccm:toolpermission" AND NOT ASPECT:"ccm:metadataPresettingTemplate" AND NOT @cm\:name:"._*" AND NOT @cm\:name:".DS_Store*" AND NOT PATH:"/sys\:system/sys\:people//*" AND -ASPECT:"ccm:io_childobject"</basequery>
 			<allowSearchWithoutCriteria>true</allowSearchWithoutCriteria>
 
-			<query join="AND"  id="ngsearch">
+			<query join="AND" id="ngsearch">
 				<basequery>ISNULL:@ccm\:tool_category</basequery>
 				<property name="ngsearchword">
 					<statement>(@sys\:node-uuid:"${value}" OR TEXT:"${value}" OR @cm\:name:"*${value}*" OR @cclom\:title:"*${value}*" OR @cclom\:general_description:"*${value}*" OR @cclom\:general_keyword:"*${value}*" OR @ccm\:taxonentry:"*${value}*" OR @ccm\:classification_keyword:"*${value}*" OR @ccm\:educationallearningresourcetype:"*${value}*" OR @ccm\:educationalcontext:"*${value}*" OR @ccm\:learninggoal:"*${value}*" OR @ccm\:guidanceteachers:"*${value}*" OR @ccm\:guidancestudents:"*${value}*")</statement>
@@ -756,6 +756,18 @@
 					<multiple>true</multiple>
 					<multiplejoin>AND</multiplejoin>
 				</property>
+			</query>
+			<query join="AND"  id="collections_scope_my">
+				<basequery>ASPECT:"ccm:collection" AND @ccm\:collectionlevel0:true AND OWNER:"${authority}"</basequery>
+			</query>
+			<query join="AND"  id="collections_scope_shared">
+				<basequery>ASPECT:"ccm:collection" AND @ccm\:collectionlevel0:true AND NOT OWNER:"${authority}" AND NOT @ccm\:collectiontype:"EDITORIAL"</basequery>
+			</query>
+			<query join="AND"  id="collections_scope_editorial">
+				<basequery>ASPECT:"ccm:collection" AND @ccm\:collectionlevel0:true AND @ccm\:collectiontype:"EDITORIAL"</basequery>
+			</query>
+			<query join="AND"  id="collections_scope_public">
+				<basequery>ASPECT:"ccm:collection" AND @ccm\:collectionlevel0:true AND NOT @ccm\:collectiontype:"EDITORIAL"</basequery>
 			</query>
 			<query join="AND" id="archive" applyBasequery="false">
 				<property name="ngsearchword">
