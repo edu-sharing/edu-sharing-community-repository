@@ -955,7 +955,6 @@ export class AdminComponent {
                 icon: "business"
             });
         }
-        this.setMode(this.buttons[0].id);
     }
 
     private init() {
@@ -972,7 +971,7 @@ export class AdminComponent {
                 }
             }
             else
-                this.mode='INFO';
+                this.setMode(this.buttons[0].id);
         });
         if(this.loginResult.isAdmin) {
             this.showWarning = true;
