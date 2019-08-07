@@ -301,6 +301,12 @@ export class WorkspaceMainComponent implements EventListener{
         while (s.length < size) s = "0" + s;
         return s;
     }
+    routeToConnector(connector:Connector){
+        UIHelper.getCommonParameters(this.route).subscribe((params)=> {
+            params['connector']=connector.id;
+            this.router.navigate(['./'], {queryParams: params, relativeTo: this.route});
+        });
+    }
     showCreateConnector(connector:Connector){
         this.createConnectorName='';
         this.createConnectorType=connector;
@@ -443,18 +449,26 @@ export class WorkspaceMainComponent implements EventListener{
                         return;
                     }
                     this.connector.scope=this.isSafe ? RestConstants.SAFE_SCOPE : null;
-                    this.connectors.list().subscribe((data:ConnectorList)=>{
-                        this.connectorList=this.connectors.getConnectors();
-                    });
                     this.isLoggedIn=true;
                     this.node.getHomeDirectory().subscribe((data : NodeRef) => {
                         this.globalProgress=false;
                         this.homeDirectory=data.id;
                         this.route.params.forEach((params: Params) => {
                             //if(this.isSafe)
+
+
                             setInterval(()=>this.updateTimeout(),1000);
 
                             this.route.queryParams.subscribe((params: Params) => {
+
+                                this.connectors.list().subscribe(()=>{
+                                    this.connectorList=this.connectors.getConnectors();
+                                    console.log(params);
+                                    if(params['connector']){
+                                        this.showCreateConnector(this.connectorList.filter((c)=>c.id==params['connector'])[0]);
+                                    }
+                                });
+
                                 let needsUpdate=false;
                                 if(this.oldParams){
                                     for(let key of Object.keys(this.oldParams).concat(Object.keys(params))){
