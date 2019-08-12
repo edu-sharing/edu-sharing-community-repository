@@ -28,11 +28,20 @@
     <mat-tab *ngIf="customGroups" label="{{'ADMIN.STATISTICS.CUSTOM_GROUPS' | translate}}" class="stats-custom-groups">
         <h4 class="mat-heading-4 mat-heading-underline"><i icon iconId="view_list"></i> {{'ADMIN.STATISTICS.CUSTOM_GROUPS' | translate}}</h4>
         <div class="modes">
-            <div class="group">
-                <mat-label>{{'ADMIN.STATISTICS.CUSTOM_GROUP_MODE' | translate}}</mat-label>
-                <mat-radio-group [(ngModel)]="customGroup">
-                    <mat-radio-button *ngFor="let group of customGroups" value="{{group}}">{{group}}</mat-radio-button>
-                </mat-radio-group>
+            <div class="group-multi">
+                <div class="group">
+                    <mat-label>{{'ADMIN.STATISTICS.CUSTOM_GROUP_MODE' | translate}}</mat-label>
+                    <mat-radio-group [(ngModel)]="customGroup">
+                        <mat-radio-button *ngFor="let group of customGroups" value="{{group}}">{{group}}</mat-radio-button>
+                    </mat-radio-group>
+                </div>
+                <div class="group">
+                    <mat-label>{{'ADMIN.STATISTICS.CUSTOM_UNFOLD_MODE' | translate}}</mat-label>
+                    <mat-radio-group [(ngModel)]="customUnfold">
+                        <mat-radio-button value="">{{'ADMIN.STATISTICS.UNFOLD_NONE' | translate}}</mat-radio-button>
+                        <mat-radio-button *ngFor="let group of customGroups" value="{{group}}" [disabled]="group==customGroup">{{group}}</mat-radio-button>
+                    </mat-radio-group>
+                </div>
             </div>
             <div class="group">
                 <mat-label>{{'ADMIN.STATISTICS.SINGLE_MODE' | translate}}</mat-label>
@@ -57,11 +66,15 @@
             <mat-table [dataSource]="customGroupData" [class.mat-table-clickable]="singleMode=='NODES'" *ngIf="customGroupData && !customGroupLoading">
 
                 <ng-container *ngFor="let key of customGroupRows" [matColumnDef]="key">
-                    <mat-header-cell *matHeaderCellDef> {{'ADMIN.STATISTICS.HEADERS.'+key | translate}} </mat-header-cell>
+                    <mat-header-cell *matHeaderCellDef>
+                        <span *ngIf="(key=='action' || key=='count' || key==customGroup)">{{'ADMIN.STATISTICS.HEADERS.'+key | translate}}</span>
+                        <span *ngIf="!(key=='action' || key=='count' || key==customGroup)">{{key}}</span>
+                    </mat-header-cell>
                     <mat-cell *matCellDef="let element" (click)="openNode(element.entry ? element.entry : null)">
                         <span *ngIf="key=='action'">{{'ADMIN.STATISTICS.ACTIONS.'+element[key] | translate}}</span>
                         <span *ngIf="key=='count'">{{element[key]}}</span>
-                        <span *ngIf="!(key=='action' || key=='count')">{{element.entry.data[key]}}</span>
+                        <span *ngIf="key==customGroup">{{element.entry.fields[key]}}</span>
+                        <span *ngIf="!(key=='action' || key=='count' || key==customGroup)">{{element.entry.groups[customUnfold][key]}}</span>
                     </mat-cell>
                 </ng-container>
                 <mat-header-row *matHeaderRowDef="customGroupRows; sticky: true"></mat-header-row>
@@ -137,7 +150,7 @@
                             </div>
                         </span>
                         <span *ngIf="key=='node'">{{element[key]}}</span>
-                        <span *ngIf="!(key=='action' || key=='date' || key=='authority' || key=='nod')">{{element.entry.data[key]}}</span>
+                        <span *ngIf="!(key=='action' || key=='date' || key=='authority' || key=='nod')">{{getGroupKey(element,key)}}</span>
                     </mat-cell>
                 </ng-container>
                 <mat-header-row *matHeaderRowDef="singleDataRows; sticky: true"></mat-header-row>

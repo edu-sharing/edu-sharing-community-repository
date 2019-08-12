@@ -37,6 +37,7 @@ export class AdminStatisticsComponent {
   _customGroupStart = new Date(new Date().getTime()-AdminStatisticsComponent.DEFAULT_OFFSET);
   _customGroupEnd = new Date();
   _customGroup : string;
+  _customUnfold = '';
   customGroupRows:string[];
   customGroups:string[];
   customGroupData:any;
@@ -80,7 +81,7 @@ export class AdminStatisticsComponent {
     return this._groupedMode;
   }
   set customGroupStart(customGroupStart:Date){
-    this._singleStart=customGroupStart;
+    this._customGroupStart=customGroupStart;
     this.refreshCustomGroups();
   }
   get customGroupStart(){
@@ -106,6 +107,13 @@ export class AdminStatisticsComponent {
   }
   get customGroupMode(){
     return this._customGroupMode;
+  }
+  set customUnfold(customUnfold:string){
+    this._customUnfold=customUnfold;
+    this.refreshCustomGroups();
+  }
+  get customUnfold(){
+    return this._customUnfold;
   }
   set singleStart(singleStart:Date){
     this._singleStart=singleStart;
@@ -155,10 +163,11 @@ export class AdminStatisticsComponent {
           new ListItem('NODE','counts.DOWNLOAD_MATERIAL'),
       ]
       // e.g. ['school']
-      this.config.get('admin.statistics.groups',null).subscribe((v)=>{
-        this.customGroups=v;
-        if(v.length)
-          this.customGroup=v[0];
+      this.config.get('admin.statistics.groups',[]).subscribe((v)=>{
+        //this.customGroups=['authority_organization','authority_mediacenter'].concat(v);
+        this.customGroups=[].concat(v);
+        if(this.customGroups.length)
+          this.customGroup=this.customGroups[0];
       });
      this.refresh();
     }
@@ -340,8 +349,18 @@ export class AdminStatisticsComponent {
       return;
     this.customGroupData=null;
     this.customGroupLoading=true;
-    this.customGroupRows=["action"].concat(this.customGroups).concat("count");
+    this.customGroupRows=[];
     let handleResult=(result:Statistics[])=>{
+      this.customGroupRows=["action"].concat(this.customGroup).concat("count");
+      if(this.customUnfold){
+        // add all found values as a matrix
+        let set=Array.from(new Set( result.map((entry)=>Object.keys(entry.groups[this.customUnfold])).
+            reduce((a,b)=>a.concat(b)).
+            filter((a)=>a!="")
+        ));
+        console.log(set);
+        this.customGroupRows=this.customGroupRows.concat(set);
+      }
       this.customGroupData=result.map((entry)=> {
         let result=[];
         for(let key in entry.counts) {
@@ -353,14 +372,18 @@ export class AdminStatisticsComponent {
       this.customGroupLoading=false;
     };
     if(this._customGroupMode=='NODES'){
-      this.statistics.getStatisticsNode(this._singleStart,new Date(this._singleEnd.getTime()+AdminStatisticsComponent.DAY_OFFSET),'None',this.getMediacenter(),this.customGroups,this.customGroups).subscribe((result)=>{
+      this.statistics.getStatisticsNode(this._customGroupStart,new Date(this._customGroupEnd.getTime()+AdminStatisticsComponent.DAY_OFFSET),'None',this.getMediacenter(),this.customUnfold ? [this.customUnfold] : null,[this.customGroup]).subscribe((result)=>{
         handleResult(result);
       });
     }
     if(this._customGroupMode=='USERS'){
-      this.statistics.getStatisticsUser(this._singleStart,new Date(this._singleEnd.getTime()+AdminStatisticsComponent.DAY_OFFSET),'None',this.getMediacenter(),this.customGroups,this.customGroups).subscribe((result)=>{
+      this.statistics.getStatisticsUser(this._customGroupStart,new Date(this._customGroupEnd.getTime()+AdminStatisticsComponent.DAY_OFFSET),'None',this.getMediacenter(),this.customUnfold ? [this.customUnfold] : null,[this.customGroup]).subscribe((result)=>{
         handleResult(result);
       });
     }
+  }
+
+  getGroupKey(element: any, key: string) {
+    return element.entry.groups[key] ? Object.keys(element.entry.groups[key])[0] : null
   }
 }

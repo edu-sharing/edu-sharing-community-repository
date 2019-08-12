@@ -9,7 +9,8 @@ import java.util.Objects;
 
 public class StatisticEntry implements Comparable<StatisticEntry>{
     protected String date;
-    protected Map<String,Serializable> data=new HashMap<>();
+    protected Map<String,Serializable> fields=new HashMap<>();
+    protected Map<String,Map<String,Long>> groups=new HashMap<>();
 
     protected Map<TrackingService.EventType,Integer> counts=new HashMap<>();
     private final AuthorityInfo authorityInfo = new AuthorityInfo();
@@ -29,8 +30,12 @@ public class StatisticEntry implements Comparable<StatisticEntry>{
         this.date = date;
     }
 
-    public Map<String, Serializable> getData() {
-        return data;
+    public Map<String, Serializable> getFields() {
+        return fields;
+    }
+
+    public Map<String, Map<String, Long>> getGroups() {
+        return groups;
     }
 
     @Override
@@ -38,13 +43,13 @@ public class StatisticEntry implements Comparable<StatisticEntry>{
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         StatisticEntry that = (StatisticEntry) o;
-        return Objects.equals(date, that.date) && Objects.equals(data, that.data);
+        return Objects.equals(date, that.date) && Objects.equals(fields, that.fields);
     }
 
     @Override
     public int hashCode() {
 
-        return Objects.hash(date);
+        return Objects.hash(date,fields);
     }
 
     public AuthorityInfo getAuthorityInfo() {
