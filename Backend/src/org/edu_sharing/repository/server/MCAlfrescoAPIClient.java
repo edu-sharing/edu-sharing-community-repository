@@ -147,6 +147,7 @@ import org.edu_sharing.repository.client.tools.UrlTool;
 import org.edu_sharing.repository.client.tools.metadata.ValueTool;
 import org.edu_sharing.repository.client.tools.metadata.search.SearchMetadataHelper;
 import org.edu_sharing.repository.server.authentication.Context;
+import org.edu_sharing.repository.server.authentication.ContextManagementFilter;
 import org.edu_sharing.repository.server.tools.ActionObserver;
 import org.edu_sharing.repository.server.tools.ApplicationInfo;
 import org.edu_sharing.repository.server.tools.ApplicationInfoList;
@@ -1141,7 +1142,11 @@ public class MCAlfrescoAPIClient extends MCAlfrescoBaseClient {
 				);
 	}
 	public boolean downloadAllowed(String nodeId,Serializable commonLicenseKey,String editorType){
-        boolean downloadAllowed;
+		// when there is a signed request from the connector, the download (binary content delivery) is allowed
+		if(ApplicationInfo.TYPE_CONNECTOR.equals(ContextManagementFilter.accessToolType.get())) {
+			return true;
+		}
+		boolean downloadAllowed;
         // Array value
 	    if(commonLicenseKey instanceof ArrayList)
 		    downloadAllowed = (CCConstants.COMMON_LICENSE_EDU_P_NR_ND.equals(((ArrayList)commonLicenseKey).get(0))) ? false : true;

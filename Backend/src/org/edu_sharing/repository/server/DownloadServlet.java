@@ -13,6 +13,7 @@ import java.util.zip.ZipOutputStream;
 import javax.mail.Store;
 import javax.servlet.ServletException;
 import javax.servlet.ServletOutputStream;
+import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -69,7 +70,7 @@ public class DownloadServlet extends HttpServlet{
 	private void downloadNode(String nodeId, HttpServletRequest req, HttpServletResponse resp) throws IOException {
 		try {
 			if (!NodeServiceHelper.downloadAllowed(nodeId)) {
-				resp.sendRedirect(URLTool.getNgMessageUrl("security_error"));
+				resp.sendRedirect(URLTool.getNgErrorUrl(""+HttpServletResponse.SC_FORBIDDEN));
 				return;
 			}
 			String version=req.getParameter("version");
@@ -87,7 +88,7 @@ public class DownloadServlet extends HttpServlet{
 					bufferOut);
 		}catch(Throwable t){
 			logger.error(t);
-			resp.sendRedirect(URLTool.getNgMessageUrl("INVALID"));
+			resp.sendRedirect(URLTool.getNgErrorUrl(""+HttpServletResponse.SC_INTERNAL_SERVER_ERROR));
 		}
 	}
 
@@ -124,7 +125,7 @@ public class DownloadServlet extends HttpServlet{
 			}
 			for(String node : nodeIds){
 				if(!shareService.isNodeAccessibleViaShare(new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE,parentNodeId),node)){
-					resp.sendRedirect(URLTool.getNgMessageUrl("security_error"));
+					resp.sendRedirect(URLTool.getNgErrorUrl(""+HttpServletResponse.SC_FORBIDDEN));
 					return;
 				}
 
@@ -220,7 +221,7 @@ public class DownloadServlet extends HttpServlet{
                             work.doWork();
 					}catch(Throwable t){
                         logger.warn(t.getMessage(),t);
-						resp.sendRedirect(URLTool.getNgMessageUrl("INVALID"));
+						resp.sendRedirect(URLTool.getNgErrorUrl(""+HttpServletResponse.SC_INTERNAL_SERVER_ERROR));
 						return false;
 					}
 				}

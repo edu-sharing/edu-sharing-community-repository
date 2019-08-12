@@ -14,7 +14,9 @@ import org.edu_sharing.alfresco.authentication.subsystems.SubsystemChainingAuthe
 import org.edu_sharing.alfresco.policy.NodeCustomizationPolicies;
 import org.edu_sharing.alfresco.workspace_administration.NodeServiceInterceptor;
 import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
+import org.edu_sharing.repository.server.tools.ApplicationInfo;
 import org.edu_sharing.repository.server.tools.ApplicationInfoList;
+import org.edu_sharing.repository.server.tools.security.SignatureVerifier;
 import org.edu_sharing.restservices.RepositoryDao;
 import org.edu_sharing.service.authentication.ScopeAuthenticationServiceFactory;
 import org.edu_sharing.service.config.ConfigServiceFactory;
@@ -25,8 +27,12 @@ import net.sf.acegisecurity.AuthenticationCredentialsNotFoundException;
 
 
 public class ContextManagementFilter implements javax.servlet.Filter {
-	
-	Logger log = Logger.getLogger(ContextManagementFilter.class);
+
+	// stores the currently accessing tool type, e.g. CONNECTOR
+	public static ThreadLocal<String> accessToolType = new ThreadLocal<>();
+
+
+	Logger logger = Logger.getLogger(ContextManagementFilter.class);
 
 	ServletContext context;
 
@@ -41,8 +47,8 @@ public class ContextManagementFilter implements javax.servlet.Filter {
 	
 	@Override
 	public void doFilter(ServletRequest req, ServletResponse res, FilterChain chain) throws IOException, ServletException {
-		
-		log.debug("thread:"+Thread.currentThread().getId() +" "+((HttpServletRequest)req).getServletPath()+" starting");
+
+		logger.debug("thread:"+Thread.currentThread().getId() +" "+((HttpServletRequest)req).getServletPath()+" starting");
 				
 		try {
 			
@@ -64,13 +70,16 @@ public class ContextManagementFilter implements javax.servlet.Filter {
 				}
 				
 			}catch(Throwable e) {
-				log.debug(e.getMessage());
+				logger.debug(e.getMessage());
 			}
+
+			handleAppSignature((HttpServletRequest)req);
+
 			chain.doFilter(req,res);
 
 		} finally {
-			
-			log.debug("thread:"+Thread.currentThread().getId() +" "+((HttpServletRequest)req).getServletPath()+" cleaning up");
+
+			logger.debug("thread:"+Thread.currentThread().getId() +" "+((HttpServletRequest)req).getServletPath()+" cleaning up");
 
 			NodeServiceInterceptor.setEduSharingScope((String)null);
 			NodeCustomizationPolicies.setEduSharingContext(null);
@@ -96,7 +105,7 @@ public class ContextManagementFilter implements javax.servlet.Filter {
 				//also calls clearCurrentSecurityContext()
 				authservice.clearCurrentSecurityContext();
 			}catch(AuthenticationCredentialsNotFoundException e){
-				log.debug("thread:"+Thread.currentThread().getId() +" "+((HttpServletRequest)req).getServletPath()+ " there was nothing to clean up in native api");
+				logger.debug("thread:"+Thread.currentThread().getId() +" "+((HttpServletRequest)req).getServletPath()+ " there was nothing to clean up in native api");
 			}
 			
 			//for soap api
@@ -105,5 +114,34 @@ public class ContextManagementFilter implements javax.servlet.Filter {
 		}
 		
 	}
-	
+
+	/**
+	 * Checks if app headers and signature are present and sets the header accordingly
+	 * @param httpReq
+	 */
+	private void handleAppSignature(HttpServletRequest httpReq) {
+        accessToolType.set(null);
+		if(httpReq.getHeader("X-Edu-App-Id")!=null){
+			String appId=httpReq.getHeader("X-Edu-App-Id");
+			String sig=httpReq.getHeader("X-Edu-App-Sig");
+			String signed=httpReq.getHeader("X-Edu-App-Signed");
+			String ts=httpReq.getHeader("X-Edu-App-Ts");
+			ApplicationInfo app = ApplicationInfoList.getRepositoryInfoById(appId);
+			if(app==null){
+				logger.warn("X-Edu-App-Id header was sent but the tool "+appId+" was not found in the list of registered apps");
+			}
+			else{
+				SignatureVerifier.Result result = new SignatureVerifier().verify(appId, sig, signed, ts);
+				if(result.getStatuscode() == HttpServletResponse.SC_OK){
+					accessToolType.set(app.getType());
+					logger.debug("Connector request verified, setting accessToolType to "+accessToolType.get());
+				}
+				else{
+					logger.warn("X-Edu-App-Id header was sent but signature check failed: "+result.getMessage());
+				}
+			}
+
+		}
+	}
+
 }

@@ -43,9 +43,6 @@ import com.sun.xml.bind.v2.runtime.unmarshaller.XsiNilLoader.Array;
 
 public class ApiAuthenticationFilter implements javax.servlet.Filter {
 
-	// stores the currently accessing tool type, e.g. CONNECTOR
-	public static ThreadLocal<String> accessToolType = new ThreadLocal<>();
-
 	Logger logger = Logger.getLogger(ApiAuthenticationFilter.class);
 	
 	private TokenService tokenService;
@@ -79,7 +76,6 @@ public class ApiAuthenticationFilter implements javax.servlet.Filter {
 			locale=httpReq.getLocale().toString();
 		String authHdr = httpReq.getHeader("Authorization");
 
-		handleAppSignature(httpReq);
 		// always take the header so we can auth when a guest is activated
 		if (authHdr != null) {			
 				
@@ -215,35 +211,6 @@ public class ApiAuthenticationFilter implements javax.servlet.Filter {
 		// Chain other filters
 		chain.doFilter(req, resp);
 	}
-
-	/**
-	 * Checks if app headers and signature are present and sets the header accordingly
-	 * @param httpReq
-	 */
-	private void handleAppSignature(HttpServletRequest httpReq) {
-		if(httpReq.getHeader("X-Edu-App-Id")!=null){
-			String appId=httpReq.getHeader("X-Edu-App-Id");
-			String sig=httpReq.getHeader("X-Edu-App-Sig");
-			String signed=httpReq.getHeader("X-Edu-App-Signed");
-			String ts=httpReq.getHeader("X-Edu-App-Ts");
-			ApplicationInfo app = ApplicationInfoList.getRepositoryInfoById(appId);
-			if(app==null){
-				logger.warn("X-Edu-App-Id header was sent but the tool "+appId+" was not found in the list of registered apps");
-			}
-			else{
-				SignatureVerifier.Result result = new SignatureVerifier().verify(appId, sig, signed, ts);
-				if(result.getStatuscode() == HttpServletResponse.SC_OK){
-					accessToolType.set(app.getType());
-					logger.debug("Connector request verified, setting accessToolType to "+accessToolType.get());
-				}
-				else{
-					logger.warn("X-Edu-App-Id header was sent but signature check failed: "+result.getMessage());
-				}
-			}
-
-		}
-	}
-
 
 	@Override
 	public void init(FilterConfig arg0) throws ServletException {

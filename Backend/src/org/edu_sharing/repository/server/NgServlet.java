@@ -48,6 +48,9 @@ public class NgServlet extends HttpServlet {
 				html = addLRMI(html,url);
 				html = addEmbed(html,url);
 			}
+			if(url.getPath().contains(COMPONENTS_ERROR)){
+				resp.setStatus(getErrorCode(url.getPath()));
+			}
 			if(req.getHeader("User-Agent")!=null){
 			    String platform="";
                 if(req.getHeader("User-Agent").contains("ios"))
@@ -73,6 +76,16 @@ public class NgServlet extends HttpServlet {
 		}catch(Throwable t) {
 			t.printStackTrace();
 			resp.sendError(500, "Fatal error preparing index.html: "+t.getMessage());
+		}
+	}
+
+	private int getErrorCode(String path) {
+		try{
+			String[] components=path.split("/");
+			return Integer.parseInt(components[components.length-1]);
+		}
+		catch(Throwable t){
+			return 500;
 		}
 	}
 
