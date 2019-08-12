@@ -25,7 +25,7 @@
         <h5 class="mat-heading-5" *ngIf="groupedNoData">{{'ADMIN.STATISTICS.NO_DATA' | translate}}</h5>
         <canvas #groupedChart [class.display-none]="groupedLoading || groupedNoData"></canvas>
     </mat-tab>
-    <mat-tab *ngIf="customGroups" label="{{'ADMIN.STATISTICS.CUSTOM_GROUPS' | translate}}" class="stats-custom-groups">
+    <mat-tab *ngIf="customGroups && customGroups.length" label="{{'ADMIN.STATISTICS.CUSTOM_GROUPS' | translate}}" class="stats-custom-groups">
         <h4 class="mat-heading-4 mat-heading-underline"><i icon iconId="view_list"></i> {{'ADMIN.STATISTICS.CUSTOM_GROUPS' | translate}}</h4>
         <div class="modes">
             <div class="group-multi">
