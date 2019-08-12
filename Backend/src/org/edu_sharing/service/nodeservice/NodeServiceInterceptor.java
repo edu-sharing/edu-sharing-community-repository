@@ -15,6 +15,7 @@ import org.apache.log4j.Logger;
 import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.server.authentication.Context;
+import org.edu_sharing.repository.server.authentication.ContextManagementFilter;
 import org.edu_sharing.repository.server.tools.ApplicationInfo;
 import org.edu_sharing.restservices.ApiAuthenticationFilter;
 import org.edu_sharing.service.InsufficientPermissionException;
@@ -98,7 +99,7 @@ public class NodeServiceInterceptor implements MethodInterceptor {
      * and run the task accordingly
      */
     private static Object checkIgnoreQuota(MethodInvocation invocation) throws Throwable {
-        if(ApplicationInfo.TYPE_CONNECTOR.equals(ApiAuthenticationFilter.accessToolType.get())){
+        if(ApplicationInfo.TYPE_CONNECTOR.equals(ContextManagementFilter.accessToolType.get())){
             return ignoreQuota(() -> {
                 try {
                     return invocation.proceed();
