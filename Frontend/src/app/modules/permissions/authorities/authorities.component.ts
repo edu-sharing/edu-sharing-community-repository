@@ -790,7 +790,7 @@ export class PermissionsAuthoritiesComponent {
   private deleteOrg(list: any) {
     this.globalProgress=true;
     let org=list[0];
-    this.organization.deleteOrganization(org.groupName).subscribe(()=>{
+    this.organization.deleteOrganization(org.authorityName).subscribe(()=>{
       this.toast.toast("PERMISSIONS.ORG_REMOVED");
       this.globalProgress=false;
       this.dialogTitle = null;
