@@ -54,8 +54,11 @@
    <bean name="eduSharingEduGroupCache" factory-bean="cacheFactory" factory-method="createCache">
    		<constructor-arg value="cache.eduSharingEduGroupCache"/> 
    </bean>
+   <bean name="eduSharingRatingCache" factory-bean="cacheFactory" factory-method="createCache">
+        <constructor-arg value="cache.eduSharingRatingCache"/>
+   </bean>
    
-    <bean name="eduSharingShibbolethSessionsCache" factory-bean="cacheFactory" factory-method="createCache">
+   <bean name="eduSharingShibbolethSessionsCache" factory-bean="cacheFactory" factory-method="createCache">
    		<constructor-arg value="cache.eduSharingShibbolethSessionsCache"/> 
    </bean> 
     

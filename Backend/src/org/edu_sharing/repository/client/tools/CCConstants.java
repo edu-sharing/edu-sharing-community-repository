@@ -203,6 +203,8 @@ public class CCConstants {
 
 	public final static String CCM_TYPE_COMMENT = "{http://www.campuscontent.de/model/1.0}comment";
 
+	public final static String CCM_TYPE_RATING = "{http://www.campuscontent.de/model/1.0}rating";
+
 	public final static String CCM_TYPE_LO = "{http://www.campuscontent.de/model/1.0}lo";
 
 	public final static String CCM_TYPE_EO = "{http://www.campuscontent.de/model/1.0}eo";
@@ -367,6 +369,9 @@ public class CCConstants {
 	public final static String CCM_PROP_COMMENT_REPLY = "{http://www.campuscontent.de/model/1.0}comment_reply";
 	public final static String CCM_PROP_COMMENT_CONTENT = "{http://www.campuscontent.de/model/1.0}comment_content";
 
+	public final static String CCM_PROP_RATING_VALUE = "{http://www.campuscontent.de/model/1.0}rating_value";
+	public final static String CCM_PROP_RATING_TEXT = "{http://www.campuscontent.de/model/1.0}rating_text";
+
 	public final static String CCM_PROP_FORKED_ORIGIN = "{http://www.campuscontent.de/model/1.0}forked_origin";
 	public final static String CCM_PROP_FORKED_ORIGIN_VERSION = "{http://www.campuscontent.de/model/1.0}forked_origin_version";
 
@@ -518,6 +523,8 @@ public class CCConstants {
 	public final static String CCM_ASSOC_ASSIGNED_SHARES = "{http://www.campuscontent.de/model/1.0}assignedshares";
 
 	public final static String CCM_ASSOC_COMMENT = "{http://www.campuscontent.de/model/1.0}childcomment";
+
+	public final static String CCM_ASSOC_RATING = "{http://www.campuscontent.de/model/1.0}childrating";
 	/**
 	 * update alfresco3stable auf alfresco34e
 	 *
@@ -1507,6 +1514,8 @@ public class CCConstants {
 
 	public final static String PERMISSION_COMMENT = "Comment";
 
+	public final static String PERMISSION_RATE = "Rate";
+
 	public final static String PERMISSION_ES_CHILD_MANAGER = "ESChildManager";
 
 	/**
@@ -1704,6 +1713,7 @@ public class CCConstants {
 			permission.add(PERMISSION_READ_PREVIEW);
 			permission.add(PERMISSION_READ_ALL);
 			permission.add(PERMISSION_COMMENT);
+			permission.add(PERMISSION_RATE);
 			permission.add(PERMISSION_WRITE);
 			permission.add(PERMISSION_DELETE);
 			permission.add(PERMISSION_DELETE_CHILDREN);

@@ -39,7 +39,7 @@ public class GuestCagePolicy implements BeforeCreateNodePolicy, BeforeDeleteAsso
 	}
 	
 	
-	class GuestPermissionDeniedException extends RuntimeException{
+	public static class GuestPermissionDeniedException extends RuntimeException{
 
 		public GuestPermissionDeniedException(String message) {
 			super(message);

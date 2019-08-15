@@ -95,6 +95,9 @@ public class NodeServiceHelper {
     public static String getProperty(NodeRef nodeRef,String key){
 		return NodeServiceFactory.getLocalService().getProperty(nodeRef.getStoreRef().getProtocol(),nodeRef.getStoreRef().getIdentifier(),nodeRef.getId(),key);
 	}
+	public static String getType(NodeRef nodeRef){
+		return NodeServiceFactory.getLocalService().getType(nodeRef.getStoreRef().getProtocol(),nodeRef.getStoreRef().getIdentifier(),nodeRef.getId());
+	}
 	public static String[] getAspects(NodeRef nodeRef){
 		return NodeServiceFactory.getLocalService().getAspects(nodeRef.getStoreRef().getProtocol(),nodeRef.getStoreRef().getIdentifier(),nodeRef.getId());
 	}

@@ -68,12 +68,13 @@
            <includePermissionGroup type="sys:base" permissionGroup="ReadChildren"/>
       </permissionGroup>
       
-      <!-- edu-sharing Read + read content permission + comment permissions(used by Consumer) -->
+      <!-- edu-sharing Read + read content permission + comment + rate permissions(used by Consumer) -->
 	  <permissionGroup name="ReadAll"  expose="true" allowFullControl="false">
            <includePermissionGroup type="sys:base" permissionGroup="Read"/>
            <includePermissionGroup type="sys:base" permissionGroup="ReadContent"/>
            <includePermissionGroup type="sys:base" permissionGroup="ReadPreview"/>
            <includePermissionGroup type="sys:base" permissionGroup="Comment"/>
+           <includePermissionGroup type="sys:base" permissionGroup="Rate"/>
       </permissionGroup>
       <permissionGroup name="Write" expose="true" allowFullControl="false">
            <includePermissionGroup type="sys:base" permissionGroup="WriteProperties"/>
@@ -114,8 +115,10 @@
       <!-- edu-sharing Read preview permission -->
       <permissionGroup name="ReadPreview" expose="true" allowFullControl="false" />
       <!-- edu-sharing comment permission --> 
-      <permissionGroup name="Comment" expose="true" allowFullControl="false" />  
- 	  <!-- edu-sharing Deny permission which will have priority to other permissions -->
+      <permissionGroup name="Comment" expose="true" allowFullControl="false" />
+      <!-- edu-sharing Rate permission -->
+      <permissionGroup name="Rate" expose="true" allowFullControl="false" />
+      <!-- edu-sharing Deny permission which will have priority to other permissions -->
       <permissionGroup name="Deny"  expose="true" allowFullControl="false" />     
       
       <!-- =========== -->
@@ -134,6 +137,10 @@
        <permission name="_Comment"  expose="false">
  	       <grantedToGroup permissionGroup="Comment" />
       </permission>
+       <!-- edu-sharing rate permission -->
+       <permission name="_Rate"  expose="false">
+           <grantedToGroup permissionGroup="Rate" />
+       </permission>
     
       <!-- The permission to read properties on a node                                    -->
       <!--                                                                                -->

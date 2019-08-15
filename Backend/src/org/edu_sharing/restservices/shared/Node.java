@@ -19,6 +19,7 @@ import com.google.gwt.core.client.GWT;
 
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
+import org.edu_sharing.service.rating.AccumulatedRatings;
 
 @ApiModel(description = "")
 public class Node {
@@ -51,6 +52,7 @@ public class Node {
 	private Collection collection;
 	private Person owner;
 	private int commentCount;
+	private AccumulatedRatings rating;
 
 	/**
    **/
@@ -392,4 +394,12 @@ public class Node {
 	public void setRemote(Remote remote) {
 		this.remote = remote;
 	}
+
+    public void setRating(AccumulatedRatings rating) {
+        this.rating = rating;
+    }
+
+    public AccumulatedRatings getRating() {
+        return rating;
+    }
 }

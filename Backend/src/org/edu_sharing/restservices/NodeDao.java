@@ -11,17 +11,14 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import org.alfresco.repo.domain.node.NodeEntity;
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.repo.security.authentication.AuthenticationUtil.RunAsWork;
 import org.alfresco.service.ServiceRegistry;
-import org.alfresco.service.cmr.dictionary.DictionaryService;
 import org.alfresco.service.cmr.repository.AssociationRef;
 import org.alfresco.service.cmr.repository.ChildAssociationRef;
 import org.alfresco.service.cmr.repository.DuplicateChildNodeNameException;
 import org.alfresco.service.cmr.repository.StoreRef;
 import org.alfresco.service.cmr.security.PermissionService;
-import org.alfresco.service.namespace.QName;
 import org.apache.log4j.Logger;
 import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
 import org.edu_sharing.metadataset.v2.MetadataQuery;
@@ -34,8 +31,6 @@ import org.edu_sharing.repository.client.tools.metadata.ValueTool;
 import org.edu_sharing.repository.server.AuthenticationToolAPI;
 import org.edu_sharing.repository.server.MCAlfrescoAPIClient;
 import org.edu_sharing.repository.server.SearchResultNodeRef;
-import org.edu_sharing.repository.server.tools.ApplicationInfo;
-import org.edu_sharing.repository.server.tools.ApplicationInfoList;
 import org.edu_sharing.repository.server.tools.ImageTool;
 import org.edu_sharing.repository.server.tools.LogTime;
 import org.edu_sharing.repository.server.tools.NameSpaceTool;
@@ -51,13 +46,15 @@ import org.edu_sharing.restservices.shared.NodeSearch.Facette;
 import org.edu_sharing.restservices.shared.NodeSearch.Facette.Value;
 import org.edu_sharing.service.Constants;
 import org.edu_sharing.service.comment.CommentService;
-import org.edu_sharing.service.comment.CommentServiceFactory;
 import org.edu_sharing.service.license.LicenseService;
 import org.edu_sharing.service.mime.MimeTypesV2;
 import org.edu_sharing.service.nodeservice.*;
 import org.edu_sharing.service.notification.NotificationServiceFactory;
 import org.edu_sharing.service.permission.PermissionServiceFactory;
 import org.edu_sharing.service.permission.PermissionServiceHelper;
+import org.edu_sharing.service.rating.AccumulatedRatings;
+import org.edu_sharing.service.rating.RatingService;
+import org.edu_sharing.service.rating.RatingServiceFactory;
 import org.edu_sharing.service.remote.RemoteObjectService;
 import org.edu_sharing.service.search.SearchService;
 import org.edu_sharing.service.search.SearchServiceFactory;
@@ -70,8 +67,6 @@ import org.json.JSONObject;
 
 import io.swagger.util.Json;
 import org.springframework.context.ApplicationContext;
-
-import javax.swing.text.html.parser.ContentModel;
 
 public class NodeDao {
 	private static Logger logger = Logger.getLogger(NodeDao.class);
@@ -821,10 +816,12 @@ public class NodeDao {
 		data.setCommentCount(getCommentCount());
 		data.setLicense(getLicense());
 		data.setSize(getSize());
+
+		data.setRating(getRating());
 		try {
 			data.setPreview(getPreview());
 		}catch(Exception e) {
-			e.printStackTrace();
+			logger.warn(e.getMessage(),e);
 		}
 		data.setRepositoryType(getRepositoryType());
 
@@ -1182,7 +1179,14 @@ public class NodeDao {
 	private String getContentUrl() {
 		return (String) nodeProps.get(CCConstants.CONTENTURL);
 	}
-	
+	private AccumulatedRatings getRating(){
+		try{
+			return RatingServiceFactory.getRatingService(repoDao.getId()).getAccumulatedRatings(nodeId);
+		}catch(Throwable t){
+			logger.warn("Can not fetch ratings for node "+nodeId+": "+t.getMessage(),t);
+			return null;
+		}
+	}
 	private boolean isLink(){
 		return nodeProps.containsKey(CCConstants.CCM_PROP_IO_WWWURL);
 	}
