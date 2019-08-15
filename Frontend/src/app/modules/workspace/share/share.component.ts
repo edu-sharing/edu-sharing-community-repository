@@ -38,16 +38,18 @@ import {
   ]
 })
 export class WorkspaceShareComponent{
-  public ALL_PERMISSIONS=["All","Read","ReadPreview","ReadAll","Write","Delete",
+  public ALL_PERMISSIONS=["All","Read","ReadPreview","ReadContent","ReadAll","Comment","Rate","Write","Delete",
     "DeleteChildren","DeleteNode","AddChildren","Consumer","ConsumerMetadata",
     "Editor","Contributor","Collaborator","Coordinator",
     "Publisher","ReadPermissions","ChangePermissions","CCPublish","Deny"];
   public PERMISSIONS_FORCES:any= [
     ["Read",["ConsumerMetadata"]],
     ["Read",["Consumer"]],
-    ["ReadPreview",["Consumer"]],
+    ["ReadPreview",["ReadAll"]],
+    ["ReadContent",["ReadAll"]],
     ["ReadAll",["Consumer"]],
-    ["Comment",["Consumer"]],
+    ["Comment",["ReadAll"]],
+    ["Rate",["ReadAll"]],
     ["Write",["Editor"]],
     ["DeleteChildren",["Delete"]],
     ["DeleteNode",["Delete"]],
