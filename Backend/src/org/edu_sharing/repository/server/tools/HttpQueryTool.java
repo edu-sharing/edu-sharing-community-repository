@@ -35,7 +35,6 @@ import java.util.Map;
 
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.httpclient.HttpClient;
-import org.apache.commons.httpclient.HttpException;
 import org.apache.commons.httpclient.HttpMethodBase;
 import org.apache.commons.httpclient.HttpStatus;
 import org.apache.commons.httpclient.UsernamePasswordCredentials;
@@ -98,15 +97,22 @@ public class HttpQueryTool {
 	public String query(String url) {
 		return this.query(url,null,null);
 	}
-	
+
+	/**
+	 * backward compatbility
+	 */
 	public String query(String url, Map<String,String> header, HttpMethodBase _method) {
 		logger.debug("url:" + url);
 		HttpClient client = new HttpClient();
-	
-		client.getParams().setParameter("http.useragent", "Test Client");
-		
-		HttpMethodBase method = (_method == null) ?  new GetMethod(url) : _method;
-		method.setFollowRedirects(true);
+
+		HttpMethodBase method;
+		if(_method == null) {
+			method = new GetMethod(url);
+			method.setFollowRedirects(true);
+		}
+		else{
+			method = _method;
+		}
 		
 		if(basicAuthUn != null && basicAuthPw != null) {
 			method.addRequestHeader("Authorization", "Basic " +java.util.Base64.getEncoder().encodeToString((basicAuthUn +":" +basicAuthPw) .getBytes()));
@@ -117,11 +123,22 @@ public class HttpQueryTool {
 				method.addRequestHeader(entry.getKey(), entry.getValue());
 			}
 		}
-		
+		return query(method);
+	}
+	public String query(HttpMethodBase method) {
+		HttpClient client = new HttpClient();
+
+		client.getParams().setParameter("http.useragent", "Test Client");
+
+
+		if(basicAuthUn != null && basicAuthPw != null) {
+			method.addRequestHeader("Authorization", "Basic " + Base64.encodeBase64String((basicAuthUn +":" +basicAuthPw) .getBytes()));
+		}
+
 		try {
 			
 			//get host of url to check if its an nonproxy host
-			URL urlObj = new URL(url);
+			URL urlObj = new URL(method.getURI().getURI());
 			String urlHost = urlObj.getHost();
 			
 			logger.debug("nonProxyHosts:"+nonProxyHosts+" current Host:"+urlHost);
@@ -163,14 +180,12 @@ public class HttpQueryTool {
 				result = method.getResponseBodyAsString();
 			}
 			
-			if(returnCode > 400){
-				throw new RuntimeException("Error HTTP Status: "+returnCode+" "+result);
+			if(returnCode >= 400){
+				throw new HttpException(returnCode,result);
 			}
 
-		}catch(HttpException e){
-			logger.error(e.getMessage(), e);
 		}catch(IOException e){
-			logger.error(e.getMessage(), e);
+			throw new HttpException(0,e.getMessage());
 		} finally {
 			method.releaseConnection();
 		}

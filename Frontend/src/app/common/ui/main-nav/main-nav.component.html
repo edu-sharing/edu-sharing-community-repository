@@ -152,5 +152,8 @@
   *ngIf="showNodeStore"
   (onClose)="setNodeStore(false)"
 ></search-node-store>
-
+<rocketchat
+  *ngIf="remoteAuthentications!=null && remoteAuthentications.ROCKETCHAT"
+  [data]="remoteAuthentications.ROCKETCHAT"
+></rocketchat>
 <cookie-info></cookie-info>

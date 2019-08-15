@@ -1976,6 +1976,8 @@ public class CCConstants {
 
 	public static final String SESSION_LAST_SEARCH_TOKENS = "LAST_SEARCH_TOKENS";
 
+	public static final String SESSION_REMOTE_AUTHENTICATIONS = "SESSION_REMOTE_AUTHENTICATIONS";
+
 	public static final String COLLECTION_ORDER_MODE_CUSTOM = "custom";
 
 	public static final String ISO8601_SUFFIX = "ISO8601";

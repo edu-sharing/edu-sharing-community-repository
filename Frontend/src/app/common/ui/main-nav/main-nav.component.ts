@@ -169,6 +169,7 @@ export class MainNavComponent implements AfterViewInit{
     private about: About;
     licenseDialog: boolean;
     private licenseDetails: string;
+    remoteAuthentications: any;
   @HostListener('document:keydown', ['$event'])
   handleKeyboardEvent(event: KeyboardEvent) {
       if(event.code=="Escape" && this.canOpen && this.displaySidebar){
@@ -368,6 +369,7 @@ export class MainNavComponent implements AfterViewInit{
     this.connector.getAbout().subscribe((about)=> {
         this.about = about;
         this.connector.isLoggedIn().subscribe((data: LoginResult) => {
+            this.remoteAuthentications=data.remoteAuthentications;
             if (!data.isValidLogin) {
                 this.canOpen = data.isGuest;
                 this.checkConfig([]);

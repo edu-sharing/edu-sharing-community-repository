@@ -114,7 +114,8 @@ public class ApplicationInfo implements Comparable<ApplicationInfo>{
 	public static final String KEY_LOGOUT_URL = "logouturl";
 	
 	public static final String KEY_API_KEY = "apikey";
-	
+	public static final String KEY_API_URL = "apiurl";
+
 	public static final String KEY_ORDER = "order";
 
 	
@@ -131,7 +132,13 @@ public class ApplicationInfo implements Comparable<ApplicationInfo>{
 	public static final String TYPE_RENDERSERVICE = "SERVICE";
 	
 	public static final String TYPE_CONNECTOR = "CONNECTOR";
-	
+
+	/**
+	 * ROCKETCHAT = reserved for a rocketchat system
+	 */
+	public static final String TYPE_ROCKETCHAT = "ROCKETCHAT";
+
+
 	public static final String REPOSITORY_TYPE_ALFRESCO = "ALFRESCO"; // a remote alfresco repository
 	
 	public static final String REPOSITORY_TYPE_LOCAL = "LOCAL"; // the local alfreso repository

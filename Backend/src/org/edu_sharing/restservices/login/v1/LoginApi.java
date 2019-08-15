@@ -1,6 +1,7 @@
 package org.edu_sharing.restservices.login.v1;
 
 import java.util.HashMap;
+import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.GET;
@@ -12,9 +13,9 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;
 
 import org.alfresco.service.cmr.repository.NodeRef;
-import org.alfresco.service.cmr.repository.NodeService;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.server.AuthenticationToolAPI;
+import org.edu_sharing.repository.server.authentication.LoginHelper;
 import org.edu_sharing.repository.server.tools.Edu_SharingProperties;
 import org.edu_sharing.repository.server.tools.security.ShibbolethSessions;
 import org.edu_sharing.repository.server.tools.security.ShibbolethSessions.SessionInfo;
@@ -24,11 +25,9 @@ import org.edu_sharing.restservices.login.v1.model.Login;
 import org.edu_sharing.restservices.login.v1.model.LoginCredentials;
 import org.edu_sharing.restservices.login.v1.model.ScopeAccess;
 import org.edu_sharing.restservices.shared.ErrorResponse;
-import org.edu_sharing.service.Constants;
 import org.edu_sharing.service.authentication.ScopeAuthenticationService;
 import org.edu_sharing.service.authentication.ScopeAuthenticationServiceFactory;
 import org.edu_sharing.service.authentication.ScopeUserHomeServiceFactory;
-import org.edu_sharing.service.authority.AuthorityService;
 import org.edu_sharing.service.authority.AuthorityServiceFactory;
 import org.edu_sharing.service.nodeservice.NodeServiceFactory;
 
@@ -60,7 +59,6 @@ public class LoginApi  {
 		
     	AuthenticationToolAPI authTool = new AuthenticationToolAPI();
     	boolean authenticated = (authTool.validateAuthentication(req.getSession()) == null) ? false : true;
-    	
     	String personActiveStatus = Edu_SharingProperties.instance.getPersonActiveStatus();
 		if(authenticated && personActiveStatus != null && !personActiveStatus.trim().equals("")) {
 			String username = (String)req.getSession().getAttribute(CCConstants.AUTH_USERNAME);
@@ -75,8 +73,6 @@ public class LoginApi  {
 				req.getSession().invalidate();
 			}
 		}
-    	
-    	
     	return Response.ok(new Login(authenticated,authTool.getScope(),req.getSession())).build();
     }
     
@@ -99,11 +95,11 @@ public class LoginApi  {
        	
        		HashMap<String,String> auth = authTool.validateAuthentication(req.getSession());
        		if(auth == null){
-       			return Response.ok(new Login(false,null,null,req.getSession(),Login.STATUS_CODE_PREVIOUS_SESSION_REQUIRED)).build();
+       			return Response.ok(new Login(false,null,  null,req.getSession(),Login.STATUS_CODE_PREVIOUS_SESSION_REQUIRED)).build();
        		}
        		
        		if(!credentials.getUserName().equals(auth.get(CCConstants.AUTH_USERNAME))){
-       			return Response.ok(new Login(false,null,null,req.getSession(),Login.STATUS_CODE_PREVIOUS_USER_WRONG)).build();
+       			return Response.ok(new Login(false,null,  null,req.getSession(),Login.STATUS_CODE_PREVIOUS_USER_WRONG)).build();
        		}
        		
        		/**
@@ -144,7 +140,7 @@ public class LoginApi  {
        		}else{
        			statusCode = Login.STATUS_CODE_INVALID_CREDENTIALS;
        		}
-       		return Response.ok(new Login(authenticated,authTool.getScope(),userHome,req.getSession(),statusCode)).build();
+       		return Response.ok(new Login(authenticated,authTool.getScope(), userHome,req.getSession(),statusCode)).build();
        }
     
     @GET       

@@ -818,6 +818,7 @@ export interface LoginResult{
   sessionTimeout : number;
   isGuest : boolean;
   toolPermissions : string[];
+  remoteAuthentications : any;
 }
 export interface AccessScope{
   hasAccess : boolean;
