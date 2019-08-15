@@ -690,11 +690,19 @@ public class RecordHandlerLOM implements RecordHandlerInterface {
 			toSafeMap.put(CCConstants.CCM_PROP_IO_REPL_TAXON_ID, lomReplicationTaxonId);
 
 		} else {
-			/**
-			 * alf5 solr4 don't likes to get null for mltext properties (solr tracking failed). So we put an empty list here
-			 */
+
+			/*
+			//
+			//alf5 solr4 don't likes to get null for mltext properties (solr tracking failed). So we put an empty list here
+			//
 			toSafeMap.put(CCConstants.CCM_PROP_IO_REPL_TAXON_ENTRY, new ArrayList<String>());
 			toSafeMap.put(CCConstants.CCM_PROP_IO_REPL_TAXON_ID, new ArrayList<String>());
+			*/
+			/**
+			 * add them to the remove list, this is better than empty lists
+			 */
+			toRemoveList.add(CCConstants.CCM_PROP_IO_REPL_TAXON_ENTRY);
+			toRemoveList.add(CCConstants.CCM_PROP_IO_REPL_TAXON_ID);
 
 		}
 
