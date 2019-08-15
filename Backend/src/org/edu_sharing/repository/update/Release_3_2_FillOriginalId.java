@@ -8,6 +8,7 @@ import javax.transaction.UserTransaction;
 
 import org.alfresco.model.ContentModel;
 import org.alfresco.repo.policy.BehaviourFilter;
+import org.alfresco.repo.transaction.RetryingTransactionHelper.RetryingTransactionCallback;
 import org.alfresco.service.ServiceRegistry;
 import org.alfresco.service.cmr.repository.ChildAssociationRef;
 import org.alfresco.service.cmr.repository.NodeRef;
@@ -89,10 +90,7 @@ public class Release_3_2_FillOriginalId implements Update {
 	
 	void run(boolean test){
 	
-		UserTransaction transaction = serviceRegistry.getTransactionService().getNonPropagatingUserTransaction();
 		try{
-		    transaction.begin();
-		    
 			Protocol protocol = new Protocol();
 			HashMap<String,Object> updateInfo = protocol.getSysUpdateEntry(this.getId());
 			if(updateInfo == null){
@@ -104,17 +102,10 @@ public class Release_3_2_FillOriginalId implements Update {
 				if(this.out != null) this.out.println("Updater "+this.getId() + " already done");
 				logger.debug("Updater "+this.getId() + " already done");
 			}
-			transaction.commit();
 			
 		}catch(Throwable e){
 			if(this.out != null) this.out.println(e.getMessage());
 			logger.error(e.getMessage(),e);
-			
-			try{
-				transaction.rollback();
-			}catch(Exception e2){
-				logger.error(e.getMessage(),e2);
-			}
 		}
 	
 	}
@@ -129,9 +120,18 @@ public class Release_3_2_FillOriginalId implements Update {
 				logger.info("updateing node:"+ noderef +" in "+ nodeService.getPath(child.getChildRef()));
 				if(this.out != null) this.out.println("updateing node:"+ noderef +" in "+ nodeService.getPath(child.getChildRef()));
 				if(!test){
-					policyBehaviourFilter.disableBehaviour(child.getChildRef());
-					nodeService.setProperty(child.getChildRef(), QName.createQName(CCConstants.CCM_PROP_IO_ORIGINAL), noderef.getId());
-					policyBehaviourFilter.enableBehaviour(child.getChildRef());
+					
+					serviceRegistry.getRetryingTransactionHelper().doInTransaction(new RetryingTransactionCallback<Void>() {
+						@Override
+						public Void execute() throws Throwable {
+							policyBehaviourFilter.disableBehaviour(child.getChildRef());
+							nodeService.setProperty(child.getChildRef(), QName.createQName(CCConstants.CCM_PROP_IO_ORIGINAL), noderef.getId());
+							policyBehaviourFilter.enableBehaviour(child.getChildRef());
+							return null;
+						}
+					});
+					
+					
 				}
 			}else if(CCConstants.CCM_TYPE_MAP.equals(nodeType) 
 					|| CCConstants.CM_TYPE_FOLDER.equals(nodeType)){
