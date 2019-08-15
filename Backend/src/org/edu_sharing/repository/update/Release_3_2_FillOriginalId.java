@@ -94,7 +94,10 @@ public class Release_3_2_FillOriginalId implements Update {
 			Protocol protocol = new Protocol();
 			HashMap<String,Object> updateInfo = protocol.getSysUpdateEntry(this.getId());
 			if(updateInfo == null){
+				logger.info("starting");
 				setOrignalIds(nodeService.getRootNode(MCAlfrescoAPIClient.storeRef), test);
+				logger.info("finished");
+				
 				if(!test){
 					protocol.writeSysUpdateEntry(getId());
 				}
