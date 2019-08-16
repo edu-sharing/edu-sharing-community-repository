@@ -424,6 +424,7 @@ $badgeWidth:250px;
   color:#fff!important;
 }
 .nodeCollection {
+  overflow: visible;
   .selected {
     background-color: transparent;
   }
