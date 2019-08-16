@@ -1,9 +1,10 @@
 @import "../../../styles/variables.scss";
 
 .frame{
-  position:relative;
+  /*position:relative;
   display:table;
   z-index:95;
+  */
   width:100%;
   height:100%;
 }
@@ -80,10 +81,10 @@ user-quota{
   padding:20px;
 }
 .addDesktop,.addMobile {
-  z-index: 115;
+  z-index: 65;
 }
 .addMobile{
-  z-index:85;
+  z-index:66;
   position:fixed;
   right:25px;
   bottom:25px+$mobileTabNavHeight;
@@ -96,7 +97,7 @@ user-quota{
   top: 13px+$mainnavHeight;
 }
 .dialogAddDesktop{
-  z-index:100;
+  z-index:66;
 }
 .addDesktopMenu{
   top:42px+$mainnavHeight;
@@ -196,7 +197,7 @@ user-quota{
   top: $mainnavHeight;
   left:0;
   width:100%;
-  z-index:96;
+  z-index:60;
   >div {
     height:$workspaceBreadcrumbsHeight;
     background-color: #fff;

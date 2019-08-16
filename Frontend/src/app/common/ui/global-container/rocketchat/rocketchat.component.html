@@ -1,0 +1,11 @@
+<div class="chat" *ngIf="_data" [class.opened]="opened" [class.fullscreen]="fullscreen">
+    <div class="bar" [class.unread]="unread">
+        <div class="title">{{'ROCKETCHAT.TITLE' | translate}} <span *ngIf="unread">({{unread}})</span></div>
+        <div class="options">
+            <mat-spinner *ngIf="!loaded" diameter="20"></mat-spinner>
+            <div *ngIf="loaded && opened" class="toggle-fullscreen clickable" (click)="fullscreen=!fullscreen"><i icon [iconId]="fullscreen ? 'fullscreen_exit' : 'fullscreen'"></i></div>
+            <div *ngIf="loaded && !fullscreen" class="toggle-open clickable" (click)="opened=!opened;unread=0"><i icon [iconId]="opened ? 'remove' : 'launch'"></i></div>
+        </div>
+    </div>
+    <iframe #frame [src]="src" [class.opened]="opened"></iframe>
+</div>

@@ -68,7 +68,7 @@ import {UIService} from '../../services/ui.service';
   ]
 })
 /**
- * An edu-sharing file-picker modal dialog
+ * The main nav (top bar + menus)
  */
 export class MainNavComponent implements AfterViewInit{
   private static bannerPositionInterval: any;
@@ -169,7 +169,6 @@ export class MainNavComponent implements AfterViewInit{
     private about: About;
     licenseDialog: boolean;
     private licenseDetails: string;
-    remoteAuthentications: any;
   @HostListener('document:keydown', ['$event'])
   handleKeyboardEvent(event: KeyboardEvent) {
       if(event.code=="Escape" && this.canOpen && this.displaySidebar){
@@ -369,7 +368,6 @@ export class MainNavComponent implements AfterViewInit{
     this.connector.getAbout().subscribe((about)=> {
         this.about = about;
         this.connector.isLoggedIn().subscribe((data: LoginResult) => {
-            this.remoteAuthentications=data.remoteAuthentications;
             if (!data.isValidLogin) {
                 this.canOpen = data.isGuest;
                 this.checkConfig([]);
@@ -874,7 +872,10 @@ export class MainNavComponent implements AfterViewInit{
             }
         }
     }
-    getPreloading(){
+    public getPreloading(){
+        return MainNavComponent.preloading;
+    }
+    public static getPreloading(){
         return MainNavComponent.preloading;
     }
     public finishPreloading(){

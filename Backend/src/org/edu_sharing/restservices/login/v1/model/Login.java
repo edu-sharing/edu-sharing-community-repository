@@ -62,7 +62,7 @@ public Login(boolean isValidLogin, String scope, HttpSession session) {
 	this.isAdmin=service.isGlobalAdmin();
 	this.isValidLogin = isValidLogin;
 	this.currentScope = scope;
-	if(scope==null && !service.isGuest())
+	if(isValidLogin && scope==null && !service.isGuest())
 	    this.remoteAuthentications = LoginHelper.getRemoteAuthsForSession();
 	this.userHome = userHome;
 	this.isGuest = service.isGuest();

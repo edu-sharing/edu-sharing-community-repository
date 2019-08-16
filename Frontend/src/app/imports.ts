@@ -14,7 +14,7 @@ import {
   MatFormFieldModule,
   MatInputModule,
   MatNativeDateModule,
-  MatOptionModule
+  MatOptionModule, MatProgressSpinnerModule
 } from "@angular/material";
 import { LazyLoadImageModule } from 'ng-lazyload-image';
 
@@ -28,6 +28,7 @@ export const IMPORTS=[
   MatDatepickerModule,
   MatNativeDateModule,
   MatAutocompleteModule,
+  MatProgressSpinnerModule,
   MatOptionModule,
   MatFormFieldModule,
   ReactiveFormsModule,

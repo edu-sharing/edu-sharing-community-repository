@@ -147,9 +147,13 @@ export class RestConnectorService {
       let url=this.createUrl("_about",null);
       return this.get<About>(url,this.getRequestOptions());
   }
-  public isLoggedIn(){
+  public isLoggedIn(forceRenew=true){
     let url=this.createUrl("authentication/:version/validateSession",null);
     return new Observable<LoginResult>((observer : Observer<LoginResult>)=> {
+        if(!forceRenew && this.getCurrentLogin()){
+            observer.next(this.getCurrentLogin());
+            observer.complete();
+        }
         this.locator.locateApi().subscribe(() => {
             this.get<LoginResult>(url, this.getRequestOptions()).subscribe(
                 (data: LoginResult) => {

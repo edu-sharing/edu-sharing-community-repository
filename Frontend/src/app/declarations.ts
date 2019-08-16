@@ -49,7 +49,8 @@
   import {IconComponent} from './common/ui/icon/icon.component';
   import {UserQuotaComponent} from "./common/ui/user-quota/user-quota.component";
   import {UrlPipe} from "./common/url.pipe";
-  import {RocketchatComponent} from "./common/ui/main-nav/rocketchat/rocketchat.component";
+  import {GlobalContainerComponent} from "./common/ui/global-container/global-container.component";
+  import {RocketchatComponent} from "./common/ui/global-container/rocketchat/rocketchat.component";
 
   export const DECLARATIONS = [
       MdsTestComponent,
@@ -80,6 +81,7 @@
       NodeInfoComponent,
       SmallCollectionComponent,
       MainNavComponent,
+      GlobalContainerComponent,
       RocketchatComponent,
       UserProfileComponent,
       UserAvatarComponent,
