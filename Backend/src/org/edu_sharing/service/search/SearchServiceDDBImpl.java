@@ -638,5 +638,6 @@ public class SearchServiceDDBImpl extends SearchServiceAdapter{
 			e.printStackTrace();
 		}
 	}
+
 	
 }
