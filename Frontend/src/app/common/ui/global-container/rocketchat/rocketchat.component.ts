@@ -69,6 +69,9 @@ export class RocketchatComponent implements EventListener{
 
     private initalize(forceRenew=false) {
         this._data=null;
+        this.src=null;
+        this.opened=false;
+        this.fullscreen=false;
         if(MainNavComponent.getPreloading()) {
             setTimeout(() => this.initalize(), 100);
             return;

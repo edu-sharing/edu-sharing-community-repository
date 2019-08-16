@@ -125,10 +125,12 @@ export class RestConnectorService {
   });
 
 }
-  public logout() : Observable<Response>{
+  public logout() {
     let url=this.createUrl("authentication/:version/destroySession",null);
-    this.event.broadcastEvent(FrameEventsService.EVENT_USER_LOGGED_OUT);
-    return this.get(url,this.getRequestOptions());
+    return this.get(url,this.getRequestOptions()).do(()=> {
+        this.storage.remove(TemporaryStorageService.SESSION_INFO);
+        this.event.broadcastEvent(FrameEventsService.EVENT_USER_LOGGED_OUT)
+    });
   }
   public logoutSync() : any{
     let url=this.createUrl("authentication/:version/destroySession",null);
