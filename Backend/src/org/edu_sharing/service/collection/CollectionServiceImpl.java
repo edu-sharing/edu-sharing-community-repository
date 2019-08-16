@@ -289,7 +289,11 @@ public class CollectionServiceImpl implements CollectionService{
 		toSafe.put(CCConstants.CCM_PROP_IO_COMMONLICENSE_KEY, props.get(CCConstants.CCM_PROP_IO_COMMONLICENSE_KEY));
 		toSafe.put(CCConstants.CCM_PROP_IO_THUMBNAILURL, props.get(CCConstants.CM_ASSOC_THUMBNAILS));
 		
-		//
+		// set the wwwurl so that the rendering will redirect to the source
+		// @TODO: We also need to store repository information for remote edu-sharing objects
+		// @TODO: Check behaviour for each connected repository type
+		toSafe.put(CCConstants.CCM_PROP_IO_WWWURL, props.get(CCConstants.LOM_PROP_TECHNICAL_LOCATION));
+
 		String nodeId = client.createNode(containerId, CCConstants.CCM_TYPE_IO,toSafe);
 		this.addToCollection(collectionId, nodeId);
 		return null;
