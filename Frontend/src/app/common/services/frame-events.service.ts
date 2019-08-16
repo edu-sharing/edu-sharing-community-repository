@@ -47,6 +47,7 @@ export class FrameEventsService {
   public static EVENT_UPDATE_SESSION_TIMEOUT="UPDATE_SESSION_TIMEOUT";
 
   private eventListeners :EventListener[]=[];
+  private eventSelfListeners :EventListener[]=[];
   private windows: Window[]=[];
 
   constructor() {
@@ -77,9 +78,27 @@ export class FrameEventsService {
               listener.onEvent(event.data.event,event.data.data);
           });
       }
-  }
+      if (event.source===window.self && event.data){
+        this.eventSelfListeners.forEach(function(listener:EventListener){
+          listener.onEvent(event.data.event,event.data.data);
+        });
+      }
+    }
+
+  /**
+   * add listener that listens ONLY for all events posted by opened windows or iframes
+   * @param listener
+   */
   public addListener(listener:EventListener) : void {
     this.eventListeners.push(listener);
+  }
+
+  /**
+   * add listener that listens ONLY for all events posted by the system itself
+   * @param listener
+   */
+  public addSelfListener(listener:EventListener) : void {
+    this.eventSelfListeners.push(listener);
   }
   /**
    * sends a message to a parent view

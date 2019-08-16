@@ -18,7 +18,11 @@ import {MainNavComponent} from "../../main-nav/main-nav.component";
 /**
  * An edu-sharing file-picker modal dialog
  */
-export class RocketchatComponent{
+export class RocketchatComponent implements EventListener{
+    onEvent(event: string, data: any): void {
+        if(event==FrameEventsService.EVENT_USER_LOGGED_IN || event==FrameEventsService.EVENT_USER_LOGGED_OUT)
+            this.initalize(true)
+    }
     @ViewChild('frame') frame:ElementRef;
     @HostListener('document:keydown', ['$event'])
     handleKeyboardEvent(event: KeyboardEvent) {
@@ -37,40 +41,44 @@ export class RocketchatComponent{
     unread=0;
     constructor(
         private sanitizer: DomSanitizer,
-        private connector: RestConnectorService
+        private connector: RestConnectorService,
+        private events: FrameEventsService
     ){
-        this.initalize();
+        this.events.addSelfListener(this);
+        this.initalize(false);
+        window.addEventListener('message', (event:any)=>{
+            if(event.source!==window.self) {
+                console.log(event);
+                if(event.data.eventName=='startup') {
+                    this.loaded=true;
+                    this.frame.nativeElement.contentWindow.postMessage({
+                        externalCommand: 'login-with-token',
+                        token: this._data.token
+                    }, this._data.url);
+                }
+                if(event.data.eventName=='new-message' && !this.opened){
+                    this.unread++;
+                }
+            }
+        }, false);
     }
     getFrameUrl() {
         //return this.sanitizer.bypassSecurityTrustResourceUrl(this._data.url+'/channel/general?layout=embedded');
         return this.sanitizer.bypassSecurityTrustResourceUrl(this._data.url+'/channel/general');
     }
 
-    private initalize() {
+    private initalize(forceRenew=false) {
+        this._data=null;
         if(MainNavComponent.getPreloading()) {
             setTimeout(() => this.initalize(), 100);
             return;
         }
-        this.connector.isLoggedIn(false).subscribe((login)=>{
+        this.connector.isLoggedIn(forceRenew).subscribe((login)=>{
             if(login.remoteAuthentications && login.remoteAuthentications.ROCKETCHAT){
                 this._data=login.remoteAuthentications.ROCKETCHAT;
                 this.src=this.getFrameUrl();
                 console.log("initalizing rocketchat "+this.src);
-                window.addEventListener('message', (event:any)=>{
-                    if(event.source!==window.self) {
-                        console.log(event);
-                        if(event.data.eventName=='startup') {
-                            this.loaded=true;
-                            this.frame.nativeElement.contentWindow.postMessage({
-                                externalCommand: 'login-with-token',
-                                token: this._data.token
-                            }, this._data.url);
-                        }
-                        if(event.data.eventName=='new-message' && !this.opened){
-                            this.unread++;
-                        }
-                    }
-                }, false);
+
             }
         });
     }
