@@ -3,13 +3,14 @@ package org.edu_sharing.restservices.login.v1.model;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 
-import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import javax.servlet.http.HttpSession;
 
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
-import org.edu_sharing.repository.client.MCAlfrescoService;
+import org.edu_sharing.repository.server.authentication.LoginHelper;
+import org.edu_sharing.repository.server.authentication.RemoteAuthDescription;
 import org.edu_sharing.repository.server.tools.ApplicationInfoList;
 import org.edu_sharing.service.authority.AuthorityServiceFactory;
 import org.edu_sharing.service.toolpermission.ToolPermissionServiceFactory;
@@ -19,7 +20,8 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 @ApiModel(description = "")
 public class Login  {
-  
+
+  private Map<String, RemoteAuthDescription> remoteAuthentications;
   private boolean isValidLogin;
   private String currentScope;
   private String userHome;
@@ -40,11 +42,11 @@ public class Login  {
 
 
 
-public Login(boolean isValidLogin, String scope,HttpSession session) {
+public Login(boolean isValidLogin, String scope, HttpSession session) {
 	  this(isValidLogin,scope,null,session, (isValidLogin) ? STATUS_CODE_OK : STATUS_CODE_INVALID_CREDENTIALS );
   }
   
-  public Login(boolean isValidLogin, String scope, String userHome,HttpSession session, String statusCode) {
+  public Login(boolean isValidLogin, String scope, String userHome, HttpSession session, String statusCode) {
 	
 	org.edu_sharing.service.authority.AuthorityService service=AuthorityServiceFactory.getAuthorityService(ApplicationInfoList.getHomeRepository().getAppId());
 	
@@ -60,6 +62,8 @@ public Login(boolean isValidLogin, String scope,HttpSession session) {
 	this.isAdmin=service.isGlobalAdmin();
 	this.isValidLogin = isValidLogin;
 	this.currentScope = scope;
+	if(isValidLogin && scope==null && !service.isGuest())
+	    this.remoteAuthentications = LoginHelper.getRemoteAuthsForSession();
 	this.userHome = userHome;
 	this.isGuest = service.isGuest();
 	this.sessionTimeout = session.getMaxInactiveInterval();
@@ -126,7 +130,11 @@ public void setSessionTimeout(int sessionTimeout) {
   public List<String> getToolPermissions() {
 	return toolPermissions;
   }
-  
+  @JsonProperty
+  public Map<String, RemoteAuthDescription> getRemoteAuthentications() {
+      return remoteAuthentications;
+  }
+
   @JsonProperty("statusCode")
   public String getStatusCode() {
 	return statusCode;

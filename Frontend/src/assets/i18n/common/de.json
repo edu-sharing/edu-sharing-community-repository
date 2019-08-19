@@ -713,5 +713,8 @@
     "ancient_greek": "Altgriechisch",
     "latin": "Latein",
     "ancient_indian": "Altindisch"
+  },
+  "ROCKETCHAT": {
+    "TITLE": "Chat"
   }
 }

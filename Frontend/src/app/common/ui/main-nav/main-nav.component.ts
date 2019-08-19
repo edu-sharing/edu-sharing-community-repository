@@ -72,7 +72,7 @@ import {BridgeService} from "../../../core-bridge-module/bridge.service";
     ]
 })
 /**
- * An edu-sharing file-picker modal dialog
+ * The main nav (top bar + menus)
  */
 export class MainNavComponent implements AfterViewInit{
     private static bannerPositionInterval: any;
@@ -854,7 +854,10 @@ export class MainNavComponent implements AfterViewInit{
             }
         }
     }
-    getPreloading(){
+    public getPreloading(){
+        return MainNavComponent.preloading;
+    }
+    public static getPreloading(){
         return MainNavComponent.preloading;
     }
     public finishPreloading(){
