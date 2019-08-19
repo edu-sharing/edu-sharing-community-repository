@@ -73,7 +73,7 @@
     <div class="card-action card-action-info" *ngIf="showProviders">
       {{'LOGIN.ACTION_HELP' | translate}}
     </div>
-  <powered-by mode="white"></powered-by>
+  <powered-by mode="white" *ngIf="!showProviders"></powered-by>
   </div>
 </div>
 </div>
