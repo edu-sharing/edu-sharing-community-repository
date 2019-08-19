@@ -1,6 +1,5 @@
 package org.edu_sharing.repository.server.remote;
 
-import groovy.util.logging.Log;
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.apache.commons.httpclient.HttpMethodBase;
 import org.apache.commons.httpclient.methods.GetMethod;
@@ -13,11 +12,9 @@ import org.edu_sharing.repository.server.tools.ApplicationInfo;
 import org.edu_sharing.repository.server.tools.ApplicationInfoList;
 import org.edu_sharing.repository.server.tools.HttpQueryTool;
 import org.edu_sharing.service.authority.AuthorityServiceFactory;
-import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.Serializable;
-import java.rmi.Remote;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
@@ -76,12 +73,26 @@ public class Rocketchat {
             return createUser();
         }
     }
-
+    private String getCleanedUsername(){
+        String name=AuthenticationUtil.getFullyAuthenticatedUser();
+        String escaped="";
+        //@TODO in a non-perfect world, this could in theory cause collisions for specific usernames
+        for(int i=0;i<name.length();i++){
+            char c=name.charAt(i);
+            if(!(Character.isLetter(c) || Character.isDigit(c) || c=='_' || c=='-')){
+                escaped+="_";
+            }
+            else{
+                escaped+=c;
+            }
+        }
+        return escaped;
+    }
     private String fetchUser() {
         try {
             JSONObject json = callApi("v1/users.createToken", "POST",
                     new JSONObject()
-                            .put("username", AuthenticationUtil.getFullyAuthenticatedUser())
+                            .put("username", getCleanedUsername())
                             .toString()
                     , true);
             return json.getJSONObject("data").getString("authToken");
@@ -93,9 +104,10 @@ public class Rocketchat {
 
     private String createUser() throws Exception {
         Map<String, Serializable> user = AuthorityServiceFactory.getLocalService().getUserInfo(AuthenticationUtil.getFullyAuthenticatedUser());
+        logger.info("Creating rocketchat user");
         JSONObject json = callApi("v1/users.create", "POST",
                 new JSONObject()
-                        .put("username", AuthenticationUtil.getFullyAuthenticatedUser())
+                        .put("username", getCleanedUsername())
                         .put("email", user.get(CCConstants.PROP_USER_EMAIL))
                         .put("name", (user.get(CCConstants.PROP_USER_FIRSTNAME) + " " + user.get(CCConstants.PROP_USER_LASTNAME)).trim())
                         .put("password", UUID.randomUUID().toString())
@@ -103,11 +115,7 @@ public class Rocketchat {
                         .put("verified", false)
                         .toString()
                 , true);
-        try {
-            return json.getJSONObject("data").getString("authToken");
-        }catch(JSONException e){
-            throw new Exception("Can not create rocketchat user: "+e.getMessage()+" "+json.toString(),e);
-        }
+        return fetchUser();
     }
 
     public RemoteAuthDescription getAuthDescription() {
