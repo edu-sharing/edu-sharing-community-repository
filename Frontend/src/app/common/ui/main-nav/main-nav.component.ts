@@ -882,6 +882,6 @@ export class MainNavComponent implements AfterViewInit{
     }
 
     showAdminButton() {
-        return this.isAdmin || this.toolpermissions.indexOf(RestConstants.TOOLPERMISSION_GLOBAL_STATISTICS) || this.manageMediacenters;
+        return this.isAdmin || this.toolpermissions.indexOf(RestConstants.TOOLPERMISSION_GLOBAL_STATISTICS)!=-1 || this.manageMediacenters;
     }
 }
