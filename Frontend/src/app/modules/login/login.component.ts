@@ -266,6 +266,7 @@ export class LoginComponent  implements OnInit{
     url=url.
       replace(':target',encodeURIComponent(target)).
       replace(':entity',encodeURIComponent(this.currentProvider.url));
+    console.log("redirecting to: "+url);
     //@TODO: Redirect to shibboleth provider
     UIHelper.openUrl(url,this.cordova,OPEN_URL_MODE.Current);
   }
