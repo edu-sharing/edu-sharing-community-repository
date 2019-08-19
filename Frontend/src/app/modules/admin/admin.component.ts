@@ -943,7 +943,7 @@ export class AdminComponent {
                     icon: "create_new_folder"
                 }];
         }
-        if(this.loginResult.isAdmin || this.loginResult.toolPermissions.indexOf(RestConstants.TOOLPERMISSION_GLOBAL_STATISTICS)){
+        if(this.loginResult.isAdmin || this.loginResult.toolPermissions.indexOf(RestConstants.TOOLPERMISSION_GLOBAL_STATISTICS)!=-1){
             this.buttons.splice(1,0,{
                 id: "STATISTICS",
                 icon: "assessment"
