@@ -13,6 +13,7 @@ import org.edu_sharing.repository.server.tools.ApplicationInfo;
 import org.edu_sharing.repository.server.tools.ApplicationInfoList;
 import org.edu_sharing.repository.server.tools.HttpQueryTool;
 import org.edu_sharing.service.authority.AuthorityServiceFactory;
+import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.Serializable;
@@ -102,7 +103,11 @@ public class Rocketchat {
                         .put("verified", false)
                         .toString()
                 , true);
-        return json.getJSONObject("data").getString("authToken");
+        try {
+            return json.getJSONObject("data").getString("authToken");
+        }catch(JSONException e){
+            throw new Exception("Can not create rocketchat user: "+e.getMessage()+" "+json.toString(),e);
+        }
     }
 
     public RemoteAuthDescription getAuthDescription() {
