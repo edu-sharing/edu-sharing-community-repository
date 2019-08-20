@@ -65,7 +65,7 @@
                [listClass]=""
                (onDrop)="drop($event)"
                (clickRow)="clickCollection($event.node)"></listTable>
-    <h5 class="noElements" *ngIf="!isLoadingLatest && !listLatest.length && searchQuery==''">{{'COLLECTION_CHOOSER.NO_MORE_ELEMENTS' | translate }}</h5>
-    <h5 class="noElements" *ngIf="!isLoadingLatest && !listLatest.length && searchQuery!=''">{{'COLLECTION_CHOOSER.NO_MATCHES' | translate }}</h5>
+    <h5 class="noElements" *ngIf="!isLoadingLatest && !listLatest.length && searchQuery==''">{{'NO_MORE_ELEMENTS' | translate }}</h5>
+    <h5 class="noElements" *ngIf="!isLoadingLatest && !listLatest.length && searchQuery!=''">{{'NO_MATCHES' | translate }}</h5>
   </div>
 </div>
