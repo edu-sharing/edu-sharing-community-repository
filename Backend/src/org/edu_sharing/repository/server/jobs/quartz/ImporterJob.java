@@ -28,6 +28,7 @@
 package org.edu_sharing.repository.server.jobs.quartz;
 
 import java.lang.reflect.Constructor;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -35,49 +36,55 @@ import java.util.Map;
 
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.repo.security.authentication.AuthenticationUtil.RunAsWork;
-import org.apache.commons.logging.LogFactory;
-import org.edu_sharing.repository.client.tools.CCConstants;
-import org.edu_sharing.repository.server.authentication.Context;
+import org.alfresco.service.ServiceRegistry;
+import org.apache.log4j.Logger;
+import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
 import org.edu_sharing.repository.server.importer.BinaryHandler;
 import org.edu_sharing.repository.server.importer.Importer;
 import org.edu_sharing.repository.server.importer.OAIPMHLOMImporter;
 import org.edu_sharing.repository.server.importer.PersistentHandlerEdusharing;
 import org.edu_sharing.repository.server.importer.RecordHandlerInterface;
 import org.edu_sharing.repository.server.importer.RecordHandlerLOM;
+import org.quartz.JobDataMap;
 import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
+import org.springframework.context.ApplicationContext;
 
 public class ImporterJob extends AbstractJob {
 
-	public ImporterJob() {
-		this.logger = LogFactory.getLog(ImporterJob.class);
-	}
+	public static Logger logger=Logger.getLogger(ImporterJob.class);
+	private JobExecutionContext context;
 
+	public ImporterJob() {
+
+	}
 	@Override
 	public void execute(JobExecutionContext context) throws JobExecutionException {
-		Map jobDataMap = context.getJobDetail().getJobDataMap();
-		String username = (String) jobDataMap.get(OAIConst.PARAM_USERNAME);
+		super.execute(context);
+		String username = (String) context.getJobDetail().getJobDataMap().get(OAIConst.PARAM_USERNAME);
 		
 		if(username == null || username.trim().equals("")) {
 			throw new JobExecutionException("no user provided");
 		}
-		
+
 		RunAsWork<Void> runAs = new RunAsWork<Void>() {
-			
+
 			@Override
 			public Void doWork() throws Exception {
-				start(context);
+				start(context,context.getJobDetail().getJobDataMap());
 				return null;
 			}
-			
-		}; 
+
+		};
 		AuthenticationUtil.runAs(runAs, username);
 		
 	}
-	
-	private void start(JobExecutionContext context) {
+	public String start(JobDataMap jobDataMap){
+		this.jobDataMap=jobDataMap;
+		return start(null,jobDataMap);
+	}
+	private String start(JobExecutionContext context, Map jobDataMap) {
 		logger.info("starting");
-		Map jobDataMap = context.getJobDetail().getJobDataMap();
 
 		Object setsParamObj = jobDataMap.get(OAIConst.PARAM_OAI_SETS);
 		// String setsParam = (String) jobDataMap.get("sets");
@@ -89,17 +96,18 @@ public class ImporterJob extends AbstractJob {
 		}
 
 		String urlImport = null;
-
-		for (String set : splitted) {
-			if (set.contains("http://")) {
-				urlImport = set.trim();
+		String[] sets = null;
+		if(splitted!=null) {
+			for (String set : splitted) {
+				if (set.contains("http://")) {
+					urlImport = set.trim();
+				}
 			}
+			if (urlImport != null) {
+				splitted.remove(urlImport);
+			}
+			sets = splitted.toArray(new String[splitted.size()]);
 		}
-		if (urlImport != null) {
-			splitted.remove(urlImport);
-		}
-
-		String[] sets = splitted.toArray(new String[splitted.size()]);
 		String oaiBaseUrl = (String) jobDataMap.get(OAIConst.PARAM_OAI_BASE_URL);
 		String metadataPrefix = (String) jobDataMap.get(OAIConst.PARAM_OAI_METADATA_PREFIX);
 		metadataPrefix = (metadataPrefix == null || metadataPrefix.trim().equals("")) ? "oai_lom-de" : metadataPrefix;
@@ -113,76 +121,127 @@ public class ImporterJob extends AbstractJob {
 		String oaiIds = (String) jobDataMap.get(OAIConst.PARAM_OAI_IDS);
 		
 		String[] idArr = (oaiIds != null) ? oaiIds.split(",") : null;
-		
-		start(urlImport, oaiBaseUrl, metadataSetId, metadataPrefix, sets, recordHandlerClass,binaryHandlerClass, importerClass,idArr);
-		logger.info("returns");
+
+
+		byte[] xmlData= (byte[]) jobDataMap.get(OAIConst.PARAM_XMLDATA);
+
+
+		this.context = context;
+		ApplicationContext applicationContext = AlfAppContextGate.getApplicationContext();
+		ServiceRegistry serviceRegistry = (ServiceRegistry) applicationContext.getBean(ServiceRegistry.SERVICE_REGISTRY);
+
+		String finalUrlImport = urlImport;
+		String finalMetadataPrefix = metadataPrefix;
+		String[] finalSets = sets;
+		if (xmlData != null) {
+			return start(xmlData, recordHandlerClass, binaryHandlerClass);
+		}
+		start(finalUrlImport, oaiBaseUrl, metadataSetId, finalMetadataPrefix, finalSets, recordHandlerClass, binaryHandlerClass, importerClass, idArr);
+		return null;
+	}
+
+	private String start(byte[] xmlData, String recordHandlerClass, String binaryHandlerClass){
+		try {
+			OAIPMHLOMImporter importer = new OAIPMHLOMImporter();
+			Constructor<RecordHandlerInterface> recordHandler = null;
+			Constructor<BinaryHandler> binaryHandler = null;
+
+			if (recordHandlerClass != null) {
+				Class tClass = Class.forName(recordHandlerClass);
+				recordHandler = tClass.getConstructor(String.class);
+			} else {
+				recordHandler = (Constructor) RecordHandlerLOM.class.getConstructor(String.class);
+			}
+			if (binaryHandlerClass != null) {
+				Class tClass = Class.forName(binaryHandlerClass);
+				binaryHandler = tClass.getConstructor();
+			} else {
+				binaryHandler = null;
+			}
+
+			logger.info("importer:" + importer.getClass().getName());
+
+			importer.setBinaryHandler(binaryHandler);
+			// quick import: do not build up cache, always import xml file
+			importer.setPersistentHandler(new PersistentHandlerEdusharing(this,importer,false));
+			importer.setRecordHandler(recordHandler);
+			importer.setJob(this);
+			importer.setSet("xml-import");
+			return importer.startImport(xmlData);
+		}catch(Throwable t){
+			logger.error(t.getMessage(),t);
+			return null;
+		}
 	}
 
 	protected void start(String urlImport, String oaiBaseUrl, String metadataSetId, String metadataPrefix,
 			String[] sets, String recordHandlerClass, String binaryHandlerClass, String importerClass, String[] idList) {
 		try {
+			for(String set : sets) {
+				Importer importer = null;
+				if (importerClass != null) {
+					Class tClass = Class.forName(importerClass);
+					Constructor<Importer> constructor = tClass.getConstructor();
+					importer = constructor.newInstance();
+				} else {
+					importer = new OAIPMHLOMImporter();
+				}
+				try {
+					JobHandler.getInstance().updateJobName(context==null ? null : context.getJobDetail(), "Importer Job " + importer.getClass().getSimpleName() + " " + new URL(oaiBaseUrl).getHost());
+				} catch (Throwable t) {
+				}
 
-			Importer importer = null;
-			if (importerClass != null) {
-				Class tClass = Class.forName(importerClass);
-				Constructor constructor = tClass.getConstructor();
-				importer = (Importer) constructor.newInstance();
-			} else {
-				importer = new OAIPMHLOMImporter();
-			}
+				Constructor<RecordHandlerInterface> recordHandler = null;
+				Constructor<BinaryHandler> binaryHandler = null;
 
-			RecordHandlerInterface recordHandler = null;
-			BinaryHandler binaryHandler = null;
+				if (recordHandlerClass != null) {
+					Class tClass = Class.forName(recordHandlerClass);
+					recordHandler = tClass.getConstructor(String.class);
+				} else {
+					recordHandler = (Constructor)RecordHandlerLOM.class.getConstructor(String.class);
+				}
+				if (binaryHandlerClass != null) {
+					Class tClass = Class.forName(binaryHandlerClass);
+					binaryHandler = tClass.getConstructor();
+				} else {
+					binaryHandler = null;
+				}
 
-			if (recordHandlerClass != null) {
-				Class tClass = Class.forName(recordHandlerClass);
-				Constructor constructor = tClass.getConstructor(String.class);
-				recordHandler = (RecordHandlerInterface) constructor.newInstance(metadataSetId);
-			} else {
-				recordHandler = new RecordHandlerLOM(metadataSetId);
-			}
-			if (binaryHandlerClass != null) {
-				Class tClass = Class.forName(binaryHandlerClass);
-				Constructor constructor = tClass.getConstructor();
-				binaryHandler = (BinaryHandler) constructor.newInstance();
-			} else {
-				binaryHandler = null;
-			}
-			
-			logger.info("importer:" + importer.getClass().getName());
-			logger.info("recordHandler:" + recordHandler.getClass().getName());
-			
-			importer.setBaseUrl(oaiBaseUrl);
-			importer.setBinaryHandler(binaryHandler);
-			importer.setMetadataPrefix(metadataPrefix);
-			importer.setNrOfRecords(-1);
-			importer.setNrOfResumptions(-1);
-			importer.setPersistentHandler(new PersistentHandlerEdusharing());
-			importer.setSet(sets[0]);
-			importer.setRecordHandler(recordHandler);
+				logger.info("importer:" + importer.getClass().getName());
 
-			if (urlImport != null) {
-				RecordHandlerLOM recordHandlerLom = new RecordHandlerLOM(null);
-				((OAIPMHLOMImporter)importer).importOAIObjectsFromFile(urlImport, recordHandlerLom);
-				new RefreshCacheExecuter().excecute(null, true, null);
-				return;
-			}
-			
-			if(idList != null && idList.length > 0) {
-				importer.startImport(idList, sets[0]);
-				return;
-			}
+				importer.setBaseUrl(oaiBaseUrl);
+				importer.setBinaryHandler(binaryHandler);
+				importer.setMetadataPrefix(metadataPrefix);
+				importer.setNrOfRecords(-1);
+				importer.setNrOfResumptions(-1);
+				importer.setPersistentHandler(new PersistentHandlerEdusharing(this,importer,true));
+				importer.setSet(set);
+				importer.setMetadataSetId(metadataSetId);
+				importer.setRecordHandler(recordHandler);
+				importer.setJob(this);
+				if (urlImport != null) {
+					RecordHandlerLOM recordHandlerLom = new RecordHandlerLOM(null);
+					((OAIPMHLOMImporter) importer).importOAIObjectsFromFile(urlImport, recordHandlerLom);
+					new RefreshCacheExecuter().excecute(null, true, null);
+					return;
+				}
 
-			long millisec = System.currentTimeMillis();
-			logger.info("starting import");
-			importer.startImport();
-			logger.info("finished import in " + (System.currentTimeMillis() - millisec) / 1000 + " secs");
+				if (idList != null && idList.length > 0) {
+					importer.startImport(idList);
+					return;
+				}
 
-			// refresh cache after importing
+				long millisec = System.currentTimeMillis();
+				logger.info("starting import of set "+set);
+				importer.startImport();
+				logger.info("finished import in " + (System.currentTimeMillis() - millisec) / 1000 + " secs");
+		}
+		// refresh cache after importing
+		if (!isInterrupted)
 			new RefreshCacheExecuter().excecute(null, true, null);
 
 		} catch (Throwable e) {
-			logger.error(e.getMessage(), e);
+			logger.error(e.getMessage(),e);
 			e.printStackTrace();
 		}
 	}

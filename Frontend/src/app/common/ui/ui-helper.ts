@@ -2,12 +2,26 @@ import {TranslateService} from "@ngx-translate/core";
 import {Title} from "@angular/platform-browser";
 import {ConfigurationService} from "../services/configuration.service";
 import {
-    Collection, Connector, ConnectorList, Filetype, LoginResult, MdsInfo, Node,
-    NodeLock, ParentList
+    Collection,
+    Connector,
+    ConnectorList,
+    Filetype,
+    LoginResult,
+    MdsInfo,
+    Node,
+    NodeLock,
+    ParentList
 } from "../rest/data-object";
 import {ActivatedRoute, NavigationExtras, Router} from "@angular/router";
-import {UIConstants} from "./ui-constants";
-import {ElementRef, EventEmitter, HostListener} from "@angular/core";
+import {OPEN_URL_MODE, UIConstants} from "./ui-constants";
+import {
+    ComponentFactoryResolver,
+    ElementRef,
+    EmbeddedViewRef,
+    EventEmitter,
+    Type,
+    ViewContainerRef
+} from "@angular/core";
 import {RestConstants} from "../rest/rest-constants";
 import {RestHelper} from "../rest/rest-helper";
 import {Toast} from "./toast";
@@ -15,15 +29,30 @@ import {TemporaryStorageService} from "../services/temporary-storage.service";
 import {UIService} from "../services/ui.service";
 import {RestCollectionService} from "../rest/services/rest-collection.service";
 import {NodeHelper} from "./node-helper";
-import {RestConnectorService} from "../rest/services/rest-connector.service";
 import {RestConnectorsService} from "../rest/services/rest-connectors.service";
 import {FrameEventsService} from "../services/frame-events.service";
 import {RestNodeService} from "../rest/services/rest-node.service";
 import {PlatformLocation} from "@angular/common";
-import {AbstractRestService} from "../rest/services/abstract-rest-service";
+import {ListItem} from './list-item';
 import {CordovaService} from "../services/cordova.service";
 import {SearchService} from "../../modules/search/search.service";
+import {OptionItem} from "./actionbar/option-item";
+import {RestConnectorService} from "../rest/services/rest-connector.service";
+import {Observable, Observer} from "rxjs";
+import {RestIamService} from "../rest/services/rest-iam.service";
+import {DialogButton} from "./modal-dialog/modal-dialog.component";
+import {SpinnerComponent} from "./spinner/spinner.component";
+
 export class UIHelper{
+
+  public static evaluateMediaQuery(type:string,value:number){
+    if(type==UIConstants.MEDIA_QUERY_MAX_WIDTH)
+      return value>window.innerWidth;
+    if(type==UIConstants.MEDIA_QUERY_MIN_WIDTH)
+        return value<window.innerWidth;
+    console.warn("Unsupported media query "+type);
+    return true;
+  }
 
   public static setTitleNoTranslation(name:string,title:Title,config:ConfigurationService) {
     config.get("branding").subscribe((branding:boolean)=>{
@@ -240,38 +269,56 @@ export class UIHelper{
         UIHelper.addToCollection(collectionService,router,toast,collection,nodes,callback,position+1,true);
       });
   }
-  static openConnector(connector:RestConnectorsService,events:FrameEventsService,toast:Toast,connectorList:ConnectorList,node : Node,type : Filetype=null,win : any = null,connectorType : Connector = null,newWindow=true){
+  static openConnector(connector:RestConnectorsService,iam:RestIamService,events:FrameEventsService,toast:Toast,node : Node,type : Filetype=null,win : any = null,connectorType : Connector = null,newWindow=true){
     if(connectorType==null){
-      connectorType=RestConnectorsService.connectorSupportsEdit(connectorList,node);
+      connectorType=connector.connectorSupportsEdit(node);
     }
     let isCordova=connector.getRestConnector().getCordovaService().isRunningCordova();
-    if(win==null && newWindow && !isCordova)
-      win=window.open("");
+    if(win==null && newWindow) {
+        win = UIHelper.getNewWindow(connector.getRestConnector());
+    }
 
-    connector.nodeApi.isLocked(node.ref.id).subscribe((result:NodeLock)=>{
+      connector.nodeApi.isLocked(node.ref.id).subscribe((result:NodeLock)=>{
       if(result.isLocked) {
         toast.error(null, "TOAST.NODE_LOCKED");
-        win.close();
+        if(win)
+            win.close();
         return;
       }
-      connector.generateToolUrl(connectorList,connectorType,type,node).subscribe((url:string)=>{
-          if(win)
-            win.location.href=url;
-          else if(isCordova){
-            UIHelper.openBlankWindow(url,connector.getRestConnector().getCordovaService());
+      iam.getUser().subscribe((user)=> {
+          if(user.person.quota.enabled && user.person.quota.sizeCurrent>=user.person.quota.sizeQuota){
+              toast.showModalDialog('CONNECTOR_QUOTA_REACHED_TITLE','CONNECTOR_QUOTA_REACHED_MESSAGE',DialogButton.getOk(()=>{
+                  toast.closeModalDialog();
+              }),true,false);
+              if(win)
+                  win.close();
+              return;
           }
-          else {
-              window.location.replace(url);
-          }
-          if(win) {
-              events.addWindow(win);
-          }
-        },
-        (error:string)=>{
-          toast.error(null,error);
-          if(win)
-            win.close();
-        });
+          connector.generateToolUrl(connectorType, type, node).subscribe((url: string) => {
+                  if (win) {
+                      win.location.href = url;
+                      console.log(win);
+                  }
+                  else if (isCordova) {
+                      UIHelper.openUrl(url, connector.getRestConnector().getCordovaService(), OPEN_URL_MODE.Blank);
+                  }
+                  else {
+                      window.location.replace(url);
+                  }
+                  if (win) {
+                      events.addWindow(win);
+                  }
+              },
+              (error) => {
+                  toast.error(null, error);
+                  if (win)
+                      win.close();
+              });
+      },(error)=>{
+          toast.error(null, error);
+          if (win)
+              win.close();
+      });
     },(error:any)=> {
       toast.error(error);
       if(win)
@@ -311,26 +358,70 @@ export class UIHelper{
      * @param {y} number
      * @param {smoothness} lower numbers indicate less smoothness, higher more smoothness
      */
-    static scrollSmoothElement(y: number=0,element:Element,smoothness=1) {
-        let mode=element.scrollTop>y;
-        let divider=3*smoothness;
-        let minSpeed=7/smoothness;
-        let lastY=y;
-        let interval=setInterval(()=>{
-            let yDiff=element.scrollTop-lastY;
-            lastY=element.scrollTop;
-            if(element.scrollTop>y && mode && yDiff){
-                element.scrollTop-=Math.max((element.scrollTop-y)/divider,minSpeed);
+    static scrollSmoothElement(pos: number=0,element:Element,smoothness=1,axis='y') {
+        return new Promise((resolve)=> {
+            let currentPos = axis == 'x' ? element.scrollLeft : element.scrollTop;
+            if(element.getAttribute('data-is-scrolling')=='true'){
+                console.log("is scrolling, skip");
+                return;
             }
-            else if(element.scrollTop<y && !mode && yDiff){
-                element.scrollTop+=Math.max((y-element.scrollTop)/divider,minSpeed);
+            console.log(currentPos, pos);
+            let mode = currentPos > pos;
+            let divider = 3 * smoothness;
+            let minSpeed = 7 / smoothness;
+            let lastPos = pos;
+            let maxPos = axis=='x' ? element.scrollWidth - element.clientWidth : element.scrollHeight - element.clientHeight;
+            let limitReached=false;
+            if(mode && pos<=0) {
+                pos = 0;
+                limitReached=true;
             }
-            else {
-                clearInterval(interval);
+            if(!mode && pos>=maxPos) {
+                pos = maxPos;
+                limitReached=true;
             }
-        },16);
+            let interval = setInterval(() => {
+                let currentPos = axis == 'x' ? element.scrollLeft : element.scrollTop;
+                let posDiff = currentPos - lastPos;
+                lastPos = currentPos;
+                let finished=true;
+                if (currentPos > pos) {
+                    currentPos -= Math.max((currentPos - pos) / divider, minSpeed);
+                    finished=currentPos<=pos;
+                }
+                else if (currentPos < pos && !mode) {
+                    currentPos += Math.max((pos - currentPos) / divider, minSpeed);
+                    finished=currentPos>=pos;
+                }
+                if(finished) {
+                    clearInterval(interval);
+                    element.removeAttribute('data-is-scrolling');
+                    resolve();
+                }
+                if (axis == 'x')
+                    element.scrollLeft = currentPos;
+                else
+                    element.scrollTop = currentPos;
+            }, 16);
+            element.setAttribute('data-is-scrolling','true');
+        });
     }
-  static setFocusOnCard() {
+
+    /**
+     * smoothly scroll to the given child inside an element (The child will be placed around the first 1/3 of the parent's top)
+     * @param child
+     * @param element
+     * @param smoothness
+     */
+    static scrollSmoothElementToChild(child:Element,element:Element,smoothness=1) {
+        // y equals to the top of the child + any scrolling of the parent - the top of the parent
+        let y=child.getBoundingClientRect().top+element.scrollTop-element.getBoundingClientRect().top;
+        // move the focused element to 1/3 at the top of the container
+        y+=child.getBoundingClientRect().height/2 - element.getBoundingClientRect().height/3;
+        this.scrollSmoothElement(y,element,smoothness);
+    }
+
+    static setFocusOnCard() {
     let elements=document.getElementsByClassName("card")[0].getElementsByTagName("*");
     this.focusElements(elements);
   }
@@ -348,6 +439,14 @@ export class UIHelper{
     }
   }
 
+  static getDefaultCollectionColumns() {
+      let columns=[];
+      columns.push(new ListItem("COLLECTION","title"));
+      columns.push(new ListItem("COLLECTION","info"));
+      columns.push(new ListItem("COLLECTION","scope"));
+      return columns;
+  }
+
   static addHttpIfRequired(link: string) {
       if(link.indexOf("://")==-1){
         return "http://"+link;
@@ -358,43 +457,115 @@ export class UIHelper{
   static goToDefaultLocation(router: Router,configService : ConfigurationService,extras:NavigationExtras={}) {
       return router.navigate([UIConstants.ROUTER_PREFIX + configService.instant("loginDefaultLocation","workspace")],extras);
   }
-
-    /**
-     * try to navigate to given url using angular routing
-     */
-    static navigateToAbsoluteUrl(platformLocation: PlatformLocation,router:Router,url: string,replaceUrl=false) {
-        let cleanUrl=url.replace((platformLocation as any).location.origin+platformLocation.getBaseHrefFromDOM(),"");
-        let parsed=router.parseUrl(cleanUrl);
-        let segments:string[]=[];
-        try {
-            for (let segment of parsed.root.children.primary.segments) {
-                segments.push(segment.path);
-            }
+    static openUrl(url:string, cordova: CordovaService,mode=OPEN_URL_MODE.Current) {
+        if(cordova.isRunningCordova()){
+          if(mode==OPEN_URL_MODE.BlankSystemBrowser) {
+              return cordova.openBrowser(url);
+          }
+          else {
+              return cordova.openInAppBrowser(url);
+          }
         }
-        catch(e){
-            // some users get a nlp if a not parsable url is given. Use default redirect in this case
-            console.warn(e);
-            if(replaceUrl)
-                window.location.replace(url);
-            else
-                window.location.assign(url);
-            return;
+        else {
+          if(mode==OPEN_URL_MODE.Current) {
+              window.location.href = url;
+              return;
+          }
+          else {
+              return window.open(url, '_blank',);
+          }
         }
-        router.navigate(segments, {queryParams: parsed.queryParams, replaceUrl: replaceUrl}).catch((error:any)=>{
-          console.warn(error);
-          if(replaceUrl)
-              window.location.replace(url);
-          else
-              window.location.assign(url)
-        });
     }
 
-    static openBlankWindow(url:string, cordova: CordovaService) {
-      if(cordova.isRunningCordova()){
-        return cordova.openInAppBrowser(url);
-      }
-      else {
-        return window.open(url, '_blank',);
-      }
+    static filterValidOptions(ui: UIService, options: OptionItem[]) {
+        if(options==null)
+            return null;
+        let optionsFiltered:OptionItem[]=[];
+        for(let option of options){
+            if((!option.onlyMobile || option.onlyMobile && ui.isMobile()) &&
+                (!option.onlyDesktop || option.onlyDesktop && !ui.isMobile()) &&
+                (!option.mediaQueryType || option.mediaQueryType && UIHelper.evaluateMediaQuery(option.mediaQueryType,option.mediaQueryValue)))
+                optionsFiltered.push(option);
+        }
+        return optionsFiltered;
+    }
+    static filterToggleOptions(options: OptionItem[],toggle:boolean) {
+        let result:OptionItem[]=[];
+        for(let option of options){
+            if(option.isToggle==toggle)
+                result.push(option);
+        }
+        return result;
+    }
+
+    /**
+     * open a window (blank) to prevent popup blocking
+     * @param {RestConnectorService} connector
+     * @returns {any}
+     */
+    public static getNewWindow(connector:RestConnectorService) {
+        if(connector.getCordovaService().isRunningCordova())
+            return null;
+        return window.open("");
+    }
+
+    /**
+     * dynamically inject an angular component into a regular html dom element
+     * @param componentFactoryResolver The resolver service
+     * @param viewContainerRef The viewContainerRef service
+     * @param componentName The name of the angular component (e.g. SpinnerComponent)
+     * @param targetElement The target element of the dom. If the element is null (not found), nothing is done
+     * @param bindings Optional bindings (inputs & outputs) to the given component
+     * @param delay Optional inflating delay in ms(some components may need some time to "init" the layout)
+     */
+    public static injectAngularComponent<T>(componentFactoryResolver:ComponentFactoryResolver,viewContainerRef:ViewContainerRef,
+                                         componentName:  Type<T>,targetElement: Element,bindings:any=null,delay=0){
+        if(targetElement==null)
+            return;
+        let factory = componentFactoryResolver.resolveComponentFactory(componentName);
+        let component = viewContainerRef.createComponent(factory);
+        if(bindings){
+            for(let key in bindings){
+                if(bindings[key] instanceof Function){
+                    // subscribe so callback can properly invoked
+                    (component.instance as any)[key].subscribe((o:any)=>bindings[key](o));
+                }
+                else {
+                    (component.instance as any)[key] = bindings[key];
+                }
+            }
+        }
+        //component.changeDetectorRef.detectChanges();
+
+        // 3. Get DOM element from component
+        const domElem = (component.hostView as EmbeddedViewRef<any>)
+            .rootNodes[0] as HTMLElement;
+        domElem.style.display='none';
+        targetElement.innerHTML=null;
+        targetElement.appendChild(domElem);
+        setTimeout(()=>{
+            domElem.style.display=null;
+        },delay);
+    }
+
+    /**
+     * returns common active route parameters that should be keeped
+     * currently including: mainnav,
+     * @param route
+     */
+    static getCommonParameters(route: ActivatedRoute) {
+        const COPY_PARAMS=['mainnav','reurl','applyDirectories']
+        return new Observable<any>((observer: Observer<any>) => {
+            route.queryParams.pipe().first().subscribe((queryParams)=>{
+                let result:any={};
+                COPY_PARAMS.forEach((params)=>{
+                    if(queryParams[params]) {
+                        result[params] = queryParams[params];
+                    }
+                });
+                observer.next(result);
+                observer.complete();
+            });
+        });
     }
 }

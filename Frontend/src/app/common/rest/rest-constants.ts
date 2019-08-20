@@ -1,4 +1,4 @@
-import {WorkflowDefinition} from "./data-object";
+import {SortItem, WorkflowDefinition} from "./data-object";
 
 export class RestConstants {
   public static DOCUMENT_EDITOR_URL="http://appserver9.metaventis.com/eduConDev/";
@@ -46,6 +46,9 @@ export class RestConstants {
   public static CCM_ASPECT_COLLECTION = "ccm:collection";
   public static CCM_ASPECT_LOMREPLICATION = "ccm:lomreplication";
   public static CCM_ASPECT_CCLOM_GENERAL = "cclom:general";
+  public static CCM_ASPECT_IO_CHILDOBJECT = "ccm:io_childobject";
+
+  public static CCM_ASSOC_CHILDIO = "ccm:childio";
 
   public static CM_TYPE_FOLDER = "cm:folder";
   public static CM_TYPE_PERSON = "cm:person";
@@ -83,6 +86,7 @@ export class RestConstants {
   public static CCM_PROP_AUTHOR_FREETEXT = "ccm:author_freetext";
   public static CCM_PROP_EAF_PRODUCTIONYEAR = "ccm:eaf_productionyear";
   public static CCM_PROP_LIFECYCLECONTRIBUTER_AUTHOR_FN = "ccm:lifecyclecontributer_authorFN";
+  public static CCM_PROP_LIFECYCLECONTRIBUTER_PUBLISHER_FN = "ccm:lifecyclecontributer_publisherFN";
   public static CCM_PROP_EDITOR_TYPE = "ccm:editorType";
   public static CCM_PROP_CCRESSOURCETYPE = "ccm:ccressourcetype";
   public static CCM_PROP_CCRESSOURCESUBTYPE = "ccm:ccresourcesubtype";
@@ -95,13 +99,18 @@ export class RestConstants {
   public static CCM_PROP_LINKTYPE = "ccm:linktype";
   public static CCM_PROP_IO_ORIGINAL = "ccm:original";
   public static CCM_PROP_AUTHORITY_GROUPTYPE="ccm:groupType";
+  public static CCM_PROP_TRACKING_VIEWS="ccm:tracking_views";
+  public static CCM_PROP_TRACKING_DOWNLOADS="ccm:tracking_downloads";
+  public static CCM_PROP_CHILDOBJECT_ORDER = "ccm:childobject_order";
   public static CCM_PROP_PUBLISHED_HANDLE_ID="ccm:published_handle_id";
   public static CCM_PROP_TOOL_INSTANCE_KEY="ccm:tool_instance_key";
   public static CCM_PROP_TOOL_INSTANCE_SECRET="ccm:tool_instance_secret";
+  public static CCM_PROP_FORKED_ORIGIN="ccm:forked_origin";
 
   public static LINKTYPE_USER_GENERATED="USER_GENERATED";
   public static CM_PROP_AUTHORITY_AUTHORITYNAME = "cm:authorityName";
   public static VIRTUAL_PROP_USAGECOUNT = "virtual:usagecount";
+  public static VIRTUAL_PROP_CHILDOBJECTCOUNT = "virtual:childobjectcount";
   public static GROUP_PREFIX="GROUP_";
 
   public static CONTRIBUTOR_LIFECYCLE_PREFIX="ccm:lifecyclecontributer_";
@@ -110,6 +119,7 @@ export class RestConstants {
     "editor","graphical_designer","technical_implementer","content_provider",
     "educational_validator","script_writer","instructional_designer","subject_matter_expert"];
   public static CONTRIBUTOR_ROLES_METADATA=["creator","validator","provider"];
+  public static CONTENT_QUOTA_EXCEPTION="DAOQuotaException";
   public static getAllVCardFields(){
       let list=[];
       for(let role of RestConstants.CONTRIBUTOR_ROLES_LIFECYCLE){
@@ -136,6 +146,7 @@ export class RestConstants {
   public static STATUS_CODE_PREVIOUS_USER_WRONG = "PREVIOUS_USER_WRONG";
 
   public static FILTER_FILES="files";
+  public static FILTER_SPECIAL="special";
   public static FILTER_FOLDERS="folders";
   public static ALL="-all-";
   public static COUNT_UNLIMITED = 2147483647;
@@ -226,19 +237,21 @@ export class RestConstants {
   public static WORKFLOW_STATUS_HASFLAWS:WorkflowDefinition={id:'300_hasflaws',color:"#D58553",hasReceiver:true,next:null};
   public static WORKFLOW_STATUS_CHECKED:WorkflowDefinition={id:'400_checked',color:"#42A053",hasReceiver:false,next:null};
 
-  public static POSSIBLE_SORT_BY_FIELDS=[RestConstants.CM_NAME,
-    RestConstants.CM_MODIFIED_DATE,
-    RestConstants.CM_PROP_C_CREATED,
-    RestConstants.CM_CREATOR,
-    RestConstants.NODE_ID,
-    RestConstants.CCM_PROP_WF_STATUS,
-    RestConstants.CM_ARCHIVED_DATE,
-    RestConstants.LOM_PROP_GENERAL_KEYWORD,
-    RestConstants.CCM_PROP_LICENSE,
-    RestConstants.AUTHORITY_DISPLAYNAME,
-    RestConstants.AUTHORITY_FIRSTNAME,
-    RestConstants.AUTHORITY_GROUPTYPE,
-  ];
+    public static POSSIBLE_SORT_BY_FIELDS=[
+        new SortItem("NODE",RestConstants.CM_NAME),
+        new SortItem("NODE",RestConstants.CM_MODIFIED_DATE),
+        new SortItem("NODE",RestConstants.LOM_PROP_TITLE),
+        new SortItem("NODE",RestConstants.CM_PROP_C_CREATED),
+        new SortItem("NODE",RestConstants.CM_CREATOR),
+        new SortItem("NODE",RestConstants.NODE_ID),
+        new SortItem("NODE",RestConstants.CCM_PROP_WF_STATUS),
+        new SortItem("NODE",RestConstants.CM_ARCHIVED_DATE),
+        new SortItem("NODE",RestConstants.LOM_PROP_GENERAL_KEYWORD),
+        new SortItem("NODE",RestConstants.CCM_PROP_LICENSE),
+        new SortItem("NODE",RestConstants.AUTHORITY_DISPLAYNAME),
+        new SortItem("NODE",RestConstants.AUTHORITY_FIRSTNAME),
+        new SortItem("NODE",RestConstants.AUTHORITY_GROUPTYPE),
+    ];
   public static LICENSE_URLS={
     "CC_BY_ABOUT":"https://creativecommons.org/licenses/?lang=de",
     "CC_BY":"https://creativecommons.org/licenses/by/#version/legalcode.de",
@@ -267,8 +280,10 @@ export class RestConstants {
   public static CCM_PROP_SAVED_SEARCH_PARAMETERS="ccm:saved_search_parameters";
   public static GROUP_TYPE_ADMINISTRATORS="ORG_ADMINISTRATORS";
   public static GROUP_TYPE_EDITORIAL="EDITORIAL";
+  public static GROUP_SCOPETYPE_GLOBAL = "global";
   public static VALID_GROUP_TYPES = [null,RestConstants.GROUP_TYPE_ADMINISTRATORS,RestConstants.GROUP_TYPE_EDITORIAL];
   public static VALID_GROUP_TYPES_ORG = [null,RestConstants.GROUP_TYPE_EDITORIAL];
+  public static VALID_SCOPE_TYPES = [null,RestConstants.GROUP_SCOPETYPE_GLOBAL];
   public static COLLECTIONTYPE_DEFAULT = "default";
   public static COLLECTIONTYPE_EDITORIAL = "EDITORIAL";
   public static COLLECTIONTYPE_CURRICULUM = "CURRICULUM";

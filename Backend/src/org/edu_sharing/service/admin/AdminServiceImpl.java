@@ -26,6 +26,7 @@ import java.util.TreeSet;
 
 import javax.management.MBeanServer;
 import javax.management.ObjectName;
+import javax.servlet.ServletContext;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.transform.Result;
@@ -58,19 +59,12 @@ import org.edu_sharing.repository.server.authentication.Context;
 import org.edu_sharing.repository.server.importer.ExcelLOMImporter;
 import org.edu_sharing.repository.server.importer.OAIPMHLOMImporter;
 import org.edu_sharing.repository.server.importer.collections.CollectionImporter;
-import org.edu_sharing.repository.server.jobs.quartz.ExporterJob;
-import org.edu_sharing.repository.server.jobs.quartz.ImmediateJobListener;
-import org.edu_sharing.repository.server.jobs.quartz.JobHandler;
+import org.edu_sharing.repository.server.jobs.quartz.*;
 import org.edu_sharing.repository.server.jobs.quartz.JobHandler.JobConfig;
-import org.edu_sharing.repository.server.jobs.quartz.OAIConst;
-import org.edu_sharing.repository.server.tools.ApplicationInfo;
-import org.edu_sharing.repository.server.tools.ApplicationInfoList;
-import org.edu_sharing.repository.server.tools.HttpQueryTool;
-import org.edu_sharing.repository.server.tools.NameSpaceTool;
-import org.edu_sharing.repository.server.tools.PropertiesHelper;
-import org.edu_sharing.repository.server.tools.VCardConverter;
+import org.edu_sharing.repository.server.tools.*;
 import org.edu_sharing.repository.server.tools.cache.CacheManagerFactory;
 import org.edu_sharing.repository.server.tools.cache.EduGroupCache;
+import org.edu_sharing.repository.server.tools.mailtemplates.MailTemplate;
 import org.edu_sharing.repository.update.ClassificationKWToGeneralKW;
 import org.edu_sharing.repository.update.Edu_SharingAuthoritiesUpdate;
 import org.edu_sharing.repository.update.Edu_SharingPersonEsuidUpdate;
@@ -86,13 +80,16 @@ import org.edu_sharing.repository.update.Release_1_7_UnmountGroupFolders;
 import org.edu_sharing.repository.update.Release_3_2_DefaultScope;
 import org.edu_sharing.repository.update.Release_3_2_FillOriginalId;
 import org.edu_sharing.repository.update.Release_4_1_FixClassificationKeywordPrefix;
+import org.edu_sharing.repository.update.Release_4_2_PersonStatusUpdater;
 import org.edu_sharing.repository.update.SystemFolderNameToDisplayName;
 import org.edu_sharing.repository.update.Update;
 import org.edu_sharing.service.admin.model.GlobalGroup;
+import org.edu_sharing.repository.server.jobs.quartz.JobInfo;
 import org.edu_sharing.service.admin.model.ServerUpdateInfo;
 import org.edu_sharing.service.editlock.EditLockServiceFactory;
 import org.edu_sharing.service.foldertemplates.FolderTemplatesImpl;
 import org.springframework.context.ApplicationContext;
+import org.springframework.util.StreamUtils;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
@@ -148,7 +145,16 @@ public class AdminServiceImpl implements AdminService  {
 		writePublisherToMDSXml(result,StringUtils.join(vcardProps,","),valueSpaceProp,ignoreValues,authInfo);
 		return writer.toString();
 	}
-	
+	@Override
+	public List<JobInfo> getJobs() throws Throwable {
+		return JobHandler.getInstance().getAllJobs();
+	}
+	@Override
+	public void cancelJob(String jobName) throws Throwable {
+		if(!JobHandler.getInstance().cancelJob(jobName)){
+			throw new Exception("Job could not be canceled. Scheduler returned false");
+		}
+	}
 	public void writePublisherToMDSXml(Result result,String vcardProps, String valueSpaceProp, String ignoreValues, HashMap authInfo) throws Throwable {
 		
 		List<String> ignoreValuesList = null;
@@ -436,7 +442,8 @@ public class AdminServiceImpl implements AdminService  {
 				result.add(new ServerUpdateInfo(Edu_SharingPersonEsuidUpdate.ID,Edu_SharingPersonEsuidUpdate.description));
 				result.add(new ServerUpdateInfo(Release_3_2_FillOriginalId.ID,Release_3_2_FillOriginalId.description));
 				result.add(new ServerUpdateInfo(Release_3_2_DefaultScope.ID,Release_3_2_DefaultScope.description));			
-				result.add(new ServerUpdateInfo(Release_4_1_FixClassificationKeywordPrefix.ID,Release_4_1_FixClassificationKeywordPrefix.description));					
+				result.add(new ServerUpdateInfo(Release_4_1_FixClassificationKeywordPrefix.ID,Release_4_1_FixClassificationKeywordPrefix.description));
+				result.add(new ServerUpdateInfo(Release_4_2_PersonStatusUpdater.ID,Release_4_2_PersonStatusUpdater.description));
 		return result;
 	}
 	
@@ -444,7 +451,7 @@ public class AdminServiceImpl implements AdminService  {
 	public String runUpdate(String updateId,boolean execute) throws Exception{
 		StringWriter result=new StringWriter();
 		PrintWriter out=new PrintWriter(result);
-		Update[] avaiableUpdates = new Update[]{new Licenses1(out),new Licenses2(out),new ClassificationKWToGeneralKW(out), new SystemFolderNameToDisplayName(out), new Release_1_6_SystemFolderNameRename(out),new Release_1_7_UnmountGroupFolders(out), new  Edu_SharingAuthoritiesUpdate(out), new Release_1_7_SubObjectsToFlatObjects(out), new RefreshMimetypPreview(out), new KeyGenerator(out), new FixMissingUserstoreNode(out), new FolderToMap(out), new Edu_SharingPersonEsuidUpdate(out), new Release_3_2_FillOriginalId(out), new Release_3_2_DefaultScope(out), new Release_4_1_FixClassificationKeywordPrefix(out)};
+		Update[] avaiableUpdates = new Update[]{new Licenses1(out),new Licenses2(out),new ClassificationKWToGeneralKW(out), new SystemFolderNameToDisplayName(out), new Release_1_6_SystemFolderNameRename(out),new Release_1_7_UnmountGroupFolders(out), new  Edu_SharingAuthoritiesUpdate(out), new Release_1_7_SubObjectsToFlatObjects(out), new RefreshMimetypPreview(out), new KeyGenerator(out), new FixMissingUserstoreNode(out), new FolderToMap(out), new Edu_SharingPersonEsuidUpdate(out), new Release_3_2_FillOriginalId(out), new Release_3_2_DefaultScope(out), new Release_4_1_FixClassificationKeywordPrefix(out),new Release_4_2_PersonStatusUpdater(out)};
 
 		ApplicationContext applicationContext = AlfAppContextGate.getApplicationContext();
 		ServiceRegistry serviceRegistry = (ServiceRegistry) applicationContext.getBean(ServiceRegistry.SERVICE_REGISTRY);
@@ -473,7 +480,24 @@ public class AdminServiceImpl implements AdminService  {
 			EduGroupCache.refresh();
 		}
 	}
-	
+
+	@Override
+	public void testMail(String receiver, String template) {
+		try {
+			String currentLocale = new AuthenticationToolAPI().getCurrentLocale();
+			String subject = MailTemplate.getSubject(template, currentLocale);
+			String content = MailTemplate.getContent(template, currentLocale, true);
+			Mail mail = new Mail();
+			ServletContext context = Context.getCurrentInstance().getRequest().getSession().getServletContext();
+			mail.sendMailHtml(
+					context,
+					receiver,
+					subject, content, null);
+		}catch(Throwable t){
+			throw new RuntimeException(t);
+		}
+	}
+
 	@Override
 	public CacheInfo getCacheInfo(String name){
 		return CacheManagerFactory.getCacheInfo(name);
@@ -599,20 +623,35 @@ public class AdminServiceImpl implements AdminService  {
 	public int importExcel(String parent,InputStream csv) throws Exception{
 		return new ExcelLOMImporter(parent,csv).getRowCount();
 	}
-	
+
 	@Override
-	public void importOai(String set,String fileUrl, String oaiBaseUrl, String metadataSetId, String metadataPrefix, String importerJobClassName, String importerClassName, String recordHandlerClassName, String binaryHandlerClassName, String oaiIds) throws Exception{	
+	public String importOaiXml(InputStream xml, String recordHandlerClassName, String binaryHandlerClassName) throws Exception {
+		HashMap<String, Object> paramsMap=new HashMap<>();
+		if(recordHandlerClassName != null && !recordHandlerClassName.trim().equals("")){
+			paramsMap.put(OAIConst.PARAM_RECORDHANDLER,recordHandlerClassName);
+		}
+		if(binaryHandlerClassName != null && !binaryHandlerClassName.trim().equals("")){
+			paramsMap.put(OAIConst.PARAM_BINARYHANDLER,binaryHandlerClassName);
+		}
+		paramsMap.put(OAIConst.PARAM_USERNAME, AuthenticationUtil.getFullyAuthenticatedUser());
+		paramsMap.put(OAIConst.PARAM_XMLDATA, StreamUtils.copyToByteArray(xml));
+		paramsMap.put(OAIConst.PARAM_FORCE_UPDATE,true);
+		return new ImporterJob().start(JobHandler.createJobDataMap(paramsMap));
+	}
+
+	@Override
+	public void importOai(String set, String fileUrl, String oaiBaseUrl, String metadataSetId, String metadataPrefix, String importerJobClassName, String importerClassName, String recordHandlerClassName, String binaryHandlerClassName, String oaiIds, boolean forceUpdate) throws Exception{
 		//new JobExecuter().start(ImporterJob.class, authInfo, setsParam.toArray(new String[setsParam.size()]));
 		
 		HashMap<String,Object> paramsMap = new HashMap<String,Object>();
-		List<String> sets=new ArrayList<>();
-		sets.add(set);
+		List<String> sets=new ArrayList(Arrays.asList(set.split(",")));
 		if(fileUrl!=null && !fileUrl.isEmpty() && !(fileUrl.startsWith("http://") || fileUrl.startsWith("https://")))
 				throw new Exception("file url "+fileUrl+" is not a valid url");
-		if(fileUrl!=null)
+		if(fileUrl!=null && !fileUrl.isEmpty())
 			sets.add(fileUrl);
 		paramsMap.put(JobHandler.AUTH_INFO_KEY, getAuthInfo());
 		paramsMap.put("sets", sets);
+		paramsMap.put(OAIConst.PARAM_FORCE_UPDATE,forceUpdate);
 		if(oaiBaseUrl != null && !oaiBaseUrl.trim().equals("")){
 			paramsMap.put(OAIConst.PARAM_OAI_BASE_URL, oaiBaseUrl);
 		}

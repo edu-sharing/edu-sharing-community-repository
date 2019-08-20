@@ -1,6 +1,7 @@
 
 
 import {Injectable} from "@angular/core";
+import {Node} from '../rest/data-object';
 /**
  Service to store any data temporary (lost after reloading page)
  Note that all components share the same data source. So uses prefixes for your name if applicable!
@@ -14,6 +15,7 @@ export class TemporaryStorageService {
   public static COLLECTION_ADD_NODES = "collection_add_nodes";
   public static SESSION_INFO = "SESSION_INFO";
   public static LIST_DRAG_DATA = "list_drag";
+  public static MAIN_NAV_BUTTONS = "main_nav_buttons";
 
   private data : any={};
 
@@ -41,4 +43,9 @@ export class TemporaryStorageService {
   public remove(name : string) {
     this.data[name]=null;
   }
+}
+export interface ClipboardObject {
+    nodes: Node[];
+    sourceNode: Node;
+    copy: boolean;
 }

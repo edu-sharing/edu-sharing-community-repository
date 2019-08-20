@@ -17,6 +17,7 @@ import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.repository.NodeService;
 import org.alfresco.service.cmr.security.AuthenticationService;
 import org.alfresco.service.namespace.QName;
+import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.validator.EmailValidator;
 import org.apache.log4j.Logger;
 import org.edu_sharing.alfresco.policy.ScopeNodeWrongScopeException;
@@ -30,6 +31,8 @@ import org.edu_sharing.repository.server.tools.KeyTool;
 import org.edu_sharing.repository.server.tools.Mail;
 import org.edu_sharing.repository.server.tools.URLTool;
 import org.edu_sharing.service.Constants;
+import org.edu_sharing.service.authentication.oauth2.TokenService;
+import org.edu_sharing.service.nodeservice.NodeServiceFactory;
 import org.edu_sharing.service.toolpermission.ToolPermissionException;
 import org.edu_sharing.service.toolpermission.ToolPermissionService;
 import org.edu_sharing.service.toolpermission.ToolPermissionServiceFactory;
@@ -43,6 +46,7 @@ public class ShareServiceImpl implements ShareService {
 	public static final QName SHARES_ASPECT = QName.createQName(CCConstants.CCM_ASPECT_SHARES);
 	
 	public static final QName SHARE_PROP_EXPIRYDATE = QName.createQName(CCConstants.CCM_PROP_SHARE_EXPIRYDATE);
+	public static final QName SHARE_PROP_PASSWORD = QName.createQName(CCConstants.CCM_PROP_SHARE_PASSWORD);
 	public static final QName SHARE_PROP_SHARE_MAIL = QName.createQName(CCConstants.CCM_PROP_SHARE_MAIL);
 	public static final QName SHARE_PROP_SHARE_TOKEN = QName.createQName(CCConstants.CCM_PROP_SHARE_TOKEN);
 	public static final QName SHARE_PROP_DOWNLOAD_COUNTER = QName.createQName(CCConstants.CCM_PROP_SHARE_DOWNLOAD_COUNTER);
@@ -62,12 +66,12 @@ public class ShareServiceImpl implements ShareService {
 		serviceRegistry = (ServiceRegistry) applicationContext.getBean(ServiceRegistry.SERVICE_REGISTRY);
 	}
 	
-	public Share createShare(String nodeId, long expiryDate) throws EMailValidationException, EMailSendFailedException, ExpiryDateValidationException, NodeDoesNotExsistException, PermissionFailedException{
-			return getShare(nodeId, createShare(nodeId,new String[]{EMAIL_TYPE_LINK},expiryDate,null));
+	public Share createShare(String nodeId, long expiryDate, String password) throws EMailValidationException, EMailSendFailedException, ExpiryDateValidationException, NodeDoesNotExsistException, PermissionFailedException{
+			return getShare(nodeId, createShare(nodeId,new String[]{EMAIL_TYPE_LINK},expiryDate,password,null));
 	}
 	
 	@Override
-	public String createShare(String nodeId, String[] emails, long expiryDate, String emailMessageLocale) throws EMailValidationException, EMailSendFailedException, ExpiryDateValidationException,
+	public String createShare(String nodeId, String[] emails, long expiryDate, String password, String emailMessageLocale) throws EMailValidationException, EMailSendFailedException, ExpiryDateValidationException,
 			NodeDoesNotExsistException, PermissionFailedException {
 		if(!ToolPermissionServiceFactory.getInstance().hasToolPermission(CCConstants.CCM_VALUE_TOOLPERMISSION_INVITE_LINK)) {
 			throw new ToolPermissionException(CCConstants.CCM_VALUE_TOOLPERMISSION_INVITE_LINK);
@@ -122,6 +126,7 @@ public class ShareServiceImpl implements ShareService {
 			
 			props.put(SHARE_PROP_EXPIRYDATE, expiryDate);
 			props.put(SHARE_PROP_SHARE_MAIL, email);
+			props.put(SHARE_PROP_PASSWORD, encryptPassword(password));
 			
 			token = new KeyTool().getKey();
 			
@@ -162,7 +167,13 @@ public class ShareServiceImpl implements ShareService {
 		}
 		return token;
 	}
-	
+
+	public static String encryptPassword(String password) {
+		if(password==null || password.isEmpty())
+			return null;
+		return DigestUtils.shaHex(password);
+	}
+
 	private void throwIfScopedNode(NodeRef io) {
 		if(serviceRegistry.getNodeService().getProperty(io, QName.createQName(CCConstants.CCM_PROP_SCOPE_TYPE))!=null){
 			throw new ScopeNodeWrongScopeException("Not allowed to share a scoped node!");
@@ -177,12 +188,17 @@ public class ShareServiceImpl implements ShareService {
 	public void updateShare(String nodeId, String email, long expiryDate) throws EMailValidationException, ExpiryDateValidationException,
 			NodeDoesNotExsistException, PermissionFailedException {
 	}
-	
+	public void updateDownloadCount(Share share){
+		throwIfScopedNode(new NodeRef(Constants.storeRef,share.getIoNodeId()));
+		serviceRegistry.getNodeService().setProperty(new NodeRef(Constants.storeRef, share.getNodeId()), SHARE_PROP_DOWNLOAD_COUNTER,share.getDownloadCount());
+	}
 	@Override
 	public void updateShare(Share share) {
 		Map<QName,Serializable> props = new HashMap<QName,Serializable>();
 		props.put(SHARE_PROP_SHARE_TOKEN, share.getToken());
 		props.put(SHARE_PROP_EXPIRYDATE, share.getExpiryDate());
+		if(share.getPassword()!=null && !share.getPassword().isEmpty())
+			props.put(SHARE_PROP_PASSWORD, encryptPassword(share.getPassword()));
 		props.put(SHARE_PROP_SHARE_MAIL, share.getEmail());
 		props.put(SHARE_PROP_DOWNLOAD_COUNTER, share.getDownloadCount());
 		throwIfScopedNode(new NodeRef(Constants.storeRef,share.getIoNodeId()));
@@ -199,36 +215,9 @@ public class ShareServiceImpl implements ShareService {
 		List<Share> result = new ArrayList<Share>();
 		for(ChildAssociationRef childRef : childNodeRefs){
 			Map<QName,Serializable> props =  serviceRegistry.getNodeService().getProperties(childRef.getChildRef());
-			Share share = new Share();
-			share.setIoNodeId(nodeId);
-			share.setNodeId(childRef.getChildRef().getId());
-			share.setEmail((String)props.get(SHARE_PROP_SHARE_MAIL));
-			share.setExpiryDate((Long)props.get(SHARE_PROP_EXPIRYDATE));
-			share.setDownloadCount((Integer)props.get(SHARE_PROP_DOWNLOAD_COUNTER));
-			
-			if(share.getExpiryDate() != null && share.getExpiryDate() != -1){
-				share.setExpiryDateFormated(new DateTool().formatDate(share.getExpiryDate(),DateFormat.LONG,null));
-			}
-			
-			share.setToken((String)props.get(SHARE_PROP_SHARE_TOKEN));
-			String creator = (String)props.get(QName.createQName(CCConstants.CM_PROP_C_CREATOR));
-			share.setInvitedBy(creator);
-			NodeRef personNodeRef = serviceRegistry.getPersonService().getPerson(creator);
-			String firstName = (String)serviceRegistry.getNodeService().getProperty(personNodeRef, ContentModel.PROP_FIRSTNAME);
-			String lastName = (String)serviceRegistry.getNodeService().getProperty(personNodeRef, ContentModel.PROP_LASTNAME);
-			String email = (String)serviceRegistry.getNodeService().getProperty(personNodeRef, ContentModel.PROP_EMAIL);
-			String invitedByCaption = firstName + " " +lastName+" (" +email+")";
-			share.setInvitedByCaption(invitedByCaption);
-			
-			share.setInvitedAt((Date)props.get(QName.createQName(CCConstants.CM_PROP_C_CREATED)));
-			
-			if(share.getInvitedAt() != null){
-				share.setInvitedAtFormated(new DateTool().formatDate(share.getInvitedAt().getTime(),DateFormat.LONG,null));
-			}
-			
+			Share share = getNodeShareObject(nodeId,childRef.getChildRef());
 			result.add(share);
 		}
-		
 		return result.toArray(new Share[result.size()]);
 	}
 	
@@ -237,40 +226,47 @@ public class ShareServiceImpl implements ShareService {
 		List<ChildAssociationRef> childAssocRefs = serviceRegistry.getNodeService().getChildAssocsByPropertyValue(new NodeRef(Constants.storeRef,nodeId), SHARE_PROP_SHARE_TOKEN,token);
 		if(childAssocRefs.size() == 1){
 			NodeRef shareNodeRef = childAssocRefs.get(0).getChildRef();
-			Map<QName,Serializable> props =  serviceRegistry.getNodeService().getProperties(shareNodeRef);
-			Share share = new Share();
-			share.setIoNodeId(nodeId);
-			share.setNodeId(shareNodeRef.getId());
-			share.setEmail((String)props.get(SHARE_PROP_SHARE_MAIL));
-			share.setExpiryDate((Long)props.get(SHARE_PROP_EXPIRYDATE));
-			share.setDownloadCount((Integer)props.get(SHARE_PROP_DOWNLOAD_COUNTER));
-			
-			if(share.getExpiryDate() != null && share.getExpiryDate() != -1){
-				share.setExpiryDateFormated(new DateTool().formatDate(share.getExpiryDate(),DateFormat.LONG,null));
-			}
-			
-			share.setToken((String)props.get(SHARE_PROP_SHARE_TOKEN));
-			
-			String creator = (String)props.get(QName.createQName(CCConstants.CM_PROP_C_CREATOR));
-			share.setInvitedBy(creator);
-			NodeRef personNodeRef = serviceRegistry.getPersonService().getPerson(creator);
-			String firstName = (String)serviceRegistry.getNodeService().getProperty(personNodeRef, ContentModel.PROP_FIRSTNAME);
-			String lastName = (String)serviceRegistry.getNodeService().getProperty(personNodeRef, ContentModel.PROP_LASTNAME);
-			String email = (String)serviceRegistry.getNodeService().getProperty(personNodeRef, ContentModel.PROP_EMAIL);
-			String invitedByCaption = firstName + " " +lastName+" (" +email+")";
-			share.setInvitedByCaption(invitedByCaption);
-			
-			share.setInvitedAt((Date)props.get(QName.createQName(CCConstants.CM_PROP_C_CREATED)));		
-			
-			if(share.getInvitedAt() != null){
-				share.setInvitedAtFormated(new DateTool().formatDate(share.getInvitedAt().getTime(),DateFormat.LONG,null));
-			}
-			
+			Share share = getNodeShareObject(nodeId, shareNodeRef);
 			return share;
 			
 		}else{
 			logger.error("invalid number of share objects for io:"+childAssocRefs.size()+" "+nodeId);
 			return null;
 		}
+	}
+	@Override
+	public boolean isNodeAccessibleViaShare(NodeRef sharedNode, String accessNodeId){
+		boolean isChild=false;
+		for(ChildAssociationRef ref : serviceRegistry.getNodeService().getChildAssocs(sharedNode)){
+			if(ref.getChildRef().getId().equals(accessNodeId)){
+				isChild=true;
+				break;
+			}
+		}
+		return isChild;
+	}
+	private Share getNodeShareObject(String nodeId, NodeRef shareNodeRef) {
+		HashMap<String, Object> props;
+		Map<QName, Serializable> propsNative;
+		try {
+			props = NodeServiceFactory.getLocalService().getProperties(shareNodeRef.getStoreRef().getProtocol(),
+					shareNodeRef.getStoreRef().getIdentifier(),
+					shareNodeRef.getId());
+			propsNative = serviceRegistry.getNodeService().getProperties(shareNodeRef);
+		}catch(Throwable t){
+			throw new RuntimeException(t);
+		}
+		Share share = new Share();
+		share.setProperties(props);
+		share.setIoNodeId(nodeId);
+		share.setNodeId(shareNodeRef.getId());
+		share.setEmail((String)propsNative.get(SHARE_PROP_SHARE_MAIL));
+		share.setPassword((String)propsNative.get(SHARE_PROP_PASSWORD));
+		share.setExpiryDate((Long)propsNative.get(SHARE_PROP_EXPIRYDATE));
+		share.setDownloadCount((Integer)propsNative.get(SHARE_PROP_DOWNLOAD_COUNTER));
+		share.setInvitedAt((Date)propsNative.get(QName.createQName(CCConstants.CM_PROP_C_CREATED)));
+		share.setToken((String)propsNative.get(SHARE_PROP_SHARE_TOKEN));
+
+		return share;
 	}
 }

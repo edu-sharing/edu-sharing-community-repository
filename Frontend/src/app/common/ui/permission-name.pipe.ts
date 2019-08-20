@@ -12,12 +12,22 @@ export class PermissionNamePipe implements PipeTransform {
         field=this.config.instant('userSecondaryDisplayName',null);
       }
 
-      if(field=='email') {
+      if(field=='email' || field=='email-domain') {
+          let email;
           if(permission.user){
-            return permission.user.email || permission.user.mailbox;
+              email=permission.user.email || permission.user.mailbox;
           }
           if(permission.profile){
-              return permission.profile.email || permission.profile.mailbox;
+              email=permission.profile.email || permission.profile.mailbox;
+          }
+          if(field=='email-domain'){
+              email=email ? email.substr(email.indexOf("@")+1) : null;
+          }
+          return email;
+      }
+      if(field=='authorityName'){
+          if(permission.authorityType=='USER') {
+              return permission.authorityName;
           }
       }
       return "";

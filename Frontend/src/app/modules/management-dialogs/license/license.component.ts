@@ -12,6 +12,8 @@ import {VCard} from "../../../common/VCard";
 import {UIHelper} from "../../../common/ui/ui-helper";
 import {trigger} from "@angular/animations";
 import {UIAnimation} from "../../../common/ui/ui-animation";
+import {UIService} from '../../../common/services/ui.service';
+import {DialogButton} from "../../../common/ui/modal-dialog/modal-dialog.component";
 
 @Component({
   selector: 'workspace-license',
@@ -27,7 +29,14 @@ export class WorkspaceLicenseComponent  {
   @ViewChild('releaseCheckbox') releaseCheckbox : ElementRef;
   @ViewChild('selectLicense') selectLicense : ElementRef;
 
-  private _type="";
+  /**
+   * priority, useful if the dialog seems not to be in the foreground
+   * Values greater 0 will raise the z-index
+   * Default is 1 for mds
+   */
+  @Input() priority = 1;
+  _type="";
+  _properties: any;
   private doiPermission: boolean;
   private doiActive: boolean;
   private doiDisabled: boolean;
@@ -54,6 +63,11 @@ export class WorkspaceLicenseComponent  {
   private contact=true;
   private release=false;
   private eduDownload=true;
+  dialogTitle : string;
+  dialogMessage : string;
+  dialogCancel : Function;
+  dialogButtons : DialogButton[];
+
   private _oerMode=true;
   public set oerMode(oerMode:boolean){
     this._oerMode=oerMode;
@@ -68,7 +82,6 @@ export class WorkspaceLicenseComponent  {
                      "uk","hu"];
   public ALL_LICENSE_TYPES=["NONE","CC_0","CC_BY","SCHULFUNK","UNTERRICHTS_UND_LEHRMEDIEN","COPYRIGHT","CUSTOM"];
   public licenseMainTypes:string[];
-  count: number;
   _nodes:Node[];
   private permissions: LocalPermissionsResult;
   public loading=true;
@@ -85,6 +98,12 @@ export class WorkspaceLicenseComponent  {
     return this.getLicenseProperty()=="CC_0" || this.getLicenseProperty()=="PDM"
       || this.getLicenseProperty()=="CC_BY" || this.getLicenseProperty()=="CC_BY_SA";
   }
+  @Input() set properties(properties : any){
+    this.loadConfig();
+    this._properties = properties;
+    this.readLicense();
+    this.loading=false;
+  }
   public loadNodes(nodes:Node[],callback:Function,pos=0){
     if(pos==nodes.length){
       callback();
@@ -99,11 +118,30 @@ export class WorkspaceLicenseComponent  {
     });
   }
   @Input() set nodes(nodes : Node[]){
-    this._nodes=[];
-    this.count=nodes.length;
-    this.loadNodes(nodes,()=>{
-        this.config.get("allowedLicenses").subscribe((data:string[])=>{
-            if(!data) {
+      this._nodes=[];
+      this.loadNodes(nodes,()=>{
+          this.loadConfig();
+          this.checkAllowRelease();
+          this.readLicense();
+          this.loading=false;
+          this.releaseMulti=null;
+          let i=0;
+          for(let node of this._nodes) {
+              i++;
+              this.nodeApi.getNodePermissions(node.ref.id).subscribe((permissions: NodePermissions) => {
+                  this.permissions = permissions.permissions.localPermissions;
+                  this.readPermissions(i==this._nodes.length);
+                  if(this._nodes.length==1) {
+                      this.doiActive = NodeHelper.isDOIActive(node, permissions.permissions);
+                      this.doiDisabled = this.doiActive;
+                  }
+              });
+          }
+      });
+  }
+    private loadConfig() {
+        this.config.get("allowedLicenses").subscribe((data: string[]) => {
+            if (!data) {
                 this.licenseMainTypes = this.ALL_LICENSE_TYPES;
                 this.allowedLicenses = null;
             }
@@ -130,34 +168,19 @@ export class WorkspaceLicenseComponent  {
                 }
             }
             for(let license of this.config.instant("customLicenses",[])){
-              this.licenseMainTypes.splice(license.position>=0 ? license.position : this.licenseMainTypes.length-license.position,0,license.id);
-            }
-            this.checkAllowRelease();
-            this.readLicense();
-            this.loading=false;
-            this.releaseMulti=null;
-            let i=0;
-            for(let node of this._nodes) {
-                i++;
-                this.nodeApi.getNodePermissions(node.ref.id).subscribe((permissions: NodePermissions) => {
-                    this.permissions = permissions.permissions.localPermissions;
-                    this.readPermissions(i==this._nodes.length);
-                    if(this._nodes.length==1) {
-                        this.doiActive = NodeHelper.isDOIActive(node, permissions.permissions);
-                        this.doiDisabled = this.doiActive;
-                    }
-                });
+                this.licenseMainTypes.splice(license.position>=0 ? license.position : this.licenseMainTypes.length-license.position,0,license.id);
             }
         });
-    });
-  }
+    }
   @Output() onCancel=new EventEmitter();
   @Output() onLoading=new EventEmitter();
   @Output() onDone=new EventEmitter();
+  @Output() openContributor=new EventEmitter();
   constructor(
     private connector : RestConnectorService,
     private translate : TranslateService,
     private config : ConfigurationService,
+    private ui : UIService,
     private toast : Toast,
     private nodeApi : RestNodeService) {
       this.connector.hasToolPermission(RestConstants.TOOLPERMISSION_HANDLESERVICE).subscribe((has:boolean)=>this.doiPermission=has);
@@ -166,34 +189,18 @@ export class WorkspaceLicenseComponent  {
     this.onCancel.emit();
   }
 
-  public saveLicense(){
+  public saveLicense(callback:Function=null){
+    if(this._properties){
+        this.onDone.emit(this.getProperties(this._properties));
+        return;
+    }
     if(!this.getLicenseProperty() && this.release){
       //this.toast.error(null,'WORKSPACE.LICENSE.RELEASE_WITHOUT_LICENSE');
       //return;
     }
     let prop:any={};
 
-    prop[RestConstants.CCM_PROP_LICENSE]=[this.getLicenseProperty()];
-    if(!this.contactCheckbox.nativeElement.indeterminate)
-      prop[RestConstants.CCM_PROP_QUESTIONSALLOWED]=[this.contact];
-    if(this.type=='CC_BY'){
-      if(this.ccTitleOfWork)
-        prop[RestConstants.CCM_PROP_LICENSE_TITLE_OF_WORK]=[this.ccTitleOfWork];
-      if(this.ccSourceUrl)
-        prop[RestConstants.CCM_PROP_LICENSE_SOURCE_URL]=[this.ccSourceUrl];
-      if(this.ccProfileUrl)
-        prop[RestConstants.CCM_PROP_LICENSE_PROFILE_URL]=[this.ccProfileUrl];
-      if(this.ccVersion)
-        prop[RestConstants.CCM_PROP_LICENSE_CC_VERSION]=[this.ccVersion];
-      if(this.ccLocale)
-        prop[RestConstants.CCM_PROP_LICENSE_CC_LOCALE]=[this.ccLocale];
-    }
-    //prop[RestConstants.CCM_PROP_LIFECYCLECONTRIBUTER_AUTHOR][0]=this.authorVCard.toVCardString();
-    prop[RestConstants.CCM_PROP_AUTHOR_FREETEXT]=[this.authorFreetext];
-
-    if(this.type=='CUSTOM') {
-      prop[RestConstants.LOM_PROP_RIGHTS_DESCRIPTION] = [this.rightsDescription];
-    }
+    prop=this.getProperties(prop);
     let i=0;
     this.onLoading.emit(true);
     for(let node of this._nodes) {
@@ -208,7 +215,9 @@ export class WorkspaceLicenseComponent  {
         if(i==this._nodes.length){
           this.toast.toast('WORKSPACE.TOAST.LICENSE_UPDATED');
           this.onLoading.emit(false);
-          this.onDone.emit();
+          this.onDone.emit(prop);
+          if(callback)
+            callback();
         }
       }, (error: any) => {
         this.onLoading.emit(false);
@@ -219,6 +228,9 @@ export class WorkspaceLicenseComponent  {
   private getValueForAll(prop:string,fallbackNotIdentical:any="",fallbackIsEmpty=fallbackNotIdentical,asArray=false){
     let found=null;
     let foundAny=false;
+    if(this._properties){
+      return this._properties[prop] ? this._properties[prop][0] : fallbackIsEmpty;
+    }
     for(let node of this._nodes){
       let v=node.properties[prop];
       let value=v ? asArray ? v : v[0] : fallbackIsEmpty;
@@ -279,7 +291,7 @@ export class WorkspaceLicenseComponent  {
 
     this.rightsDescription=this.getValueForAll(RestConstants.LOM_PROP_RIGHTS_DESCRIPTION);
     let contactState=this.getValueForAll(RestConstants.CCM_PROP_QUESTIONSALLOWED,"multi","true");
-    this.contact=contactState=='true';
+    this.contact=contactState=='true' || contactState==true;
     this.oerMode=this.isOerLicense() || this.type=='NONE';
     this.authorVCard=new VCard(this.getValueForAll(RestConstants.CCM_PROP_LIFECYCLECONTRIBUTER_AUTHOR));
     this.authorFreetext=this.getValueForAll(RestConstants.CCM_PROP_AUTHOR_FREETEXT);
@@ -433,8 +445,56 @@ export class WorkspaceLicenseComponent  {
     this.cc0Type='CC_0';
   }
 
+    private getProperties(prop: any) {
+        prop[RestConstants.CCM_PROP_LICENSE]=[this.getLicenseProperty()];
+        if(!this.contactCheckbox.nativeElement.indeterminate)
+            prop[RestConstants.CCM_PROP_QUESTIONSALLOWED]=[this.contact];
+        if(this.type=='CC_BY'){
+            if(this.ccTitleOfWork)
+                prop[RestConstants.CCM_PROP_LICENSE_TITLE_OF_WORK]=[this.ccTitleOfWork];
+            if(this.ccSourceUrl)
+                prop[RestConstants.CCM_PROP_LICENSE_SOURCE_URL]=[this.ccSourceUrl];
+            if(this.ccProfileUrl)
+                prop[RestConstants.CCM_PROP_LICENSE_PROFILE_URL]=[this.ccProfileUrl];
+            if(this.ccVersion)
+                prop[RestConstants.CCM_PROP_LICENSE_CC_VERSION]=[this.ccVersion];
+            if(this.ccLocale)
+                prop[RestConstants.CCM_PROP_LICENSE_CC_LOCALE]=[this.ccLocale];
+        }
+        prop[RestConstants.CCM_PROP_AUTHOR_FREETEXT]=[this.authorFreetext];
+
+        if(this.type=='CUSTOM') {
+            prop[RestConstants.LOM_PROP_RIGHTS_DESCRIPTION] = [this.rightsDescription];
+        }
+        return prop;
+    }
+
+    openContributorDialog() {
+        let nodes=this._nodes;
+        this.saveLicense(()=>{
+          console.log("open contr");
+            this.openContributor.emit(nodes);
+        });
+    }
+
     changeRelease(release:boolean) {
         if(release){
+            if(this.config.instant('publishingNotice',false)){
+                this.dialogTitle='WORKSPACE.SHARE.PUBLISHING_WARNING_TITLE';
+                this.dialogMessage='WORKSPACE.SHARE.PUBLISHING_WARNING_MESSAGE';
+                this.dialogCancel=()=>{
+                    this.dialogTitle=null;
+                    this.release=false;
+                };
+                this.dialogButtons=DialogButton.getYesNo(()=>{
+                    this.dialogCancel();
+                }, ()=>{
+                    this.release=true;
+                    this.doiActive=true;
+                    this.dialogTitle=null;
+                });
+                return;
+            }
           this.doiActive=true;
         }
     }

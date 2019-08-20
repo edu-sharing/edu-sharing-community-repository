@@ -300,7 +300,15 @@
             <ref bean="nodeService" />
         </property> 
    	 </bean>
-   	 
+
+    <bean id="BeforeCreateNodePolicyGuardSysFolders" class="org.edu_sharing.alfresco.policy.BeforeCreateNodePolicyGuardSysFolders" init-method="init">
+        <property name="policyComponent">
+            <ref bean="policyComponent"/>
+        </property>
+        <property name="nodeService">
+            <ref bean="nodeService" />
+        </property>
+    </bean>
    	 
    	 <bean id="onThumbnailContentUpdatePolicy" class="org.edu_sharing.alfresco.policy.OnThumbnailContentUpdatePolicy" init-method="init">
    	 	<property name="policyComponent">
@@ -609,8 +617,18 @@
         </property>
         <property name="repositoryHelper" ref="repositoryHelper"/>
     </bean>
-    
-    
+
+    <bean id="onRestoreCollectionPolicy" class="org.edu_sharing.alfresco.policy.OnRestoreCollectionPolicy" init-method="init">
+        <property name="policyComponent">
+            <ref bean="policyComponent"/>
+        </property>
+        <property name="nodeService">
+            <ref bean="nodeService" />
+        </property>
+        <property name="versionService">
+            <ref bean="versionService" />
+        </property>
+    </bean>
      <bean id="beforeDeleteIOPolicy" class="org.edu_sharing.alfresco.policy.BeforeDeleteIOPolicy" init-method="init">
    	  <property name="policyComponent">
             <ref bean="policyComponent"/>
@@ -689,7 +707,7 @@
     </bean>
      -->
      
-       <!-- for remembering current authentication method -->
+       <!-- for remembering current authentication method, record login date -->
      <bean id="authenticationService"
         class="org.edu_sharing.alfresco.authentication.subsystems.SubsystemChainingAuthenticationService">
         <property name="sysAdminParams">
@@ -701,5 +719,16 @@
         <property name="sourceBeanName">
             <value>localAuthenticationService</value>
         </property>
+        <property name="nodeService">
+            <ref bean="nodeService" />
+        </property>
+        <property name="personService">
+            <ref bean="personService" />
+        </property>
+        <property name="transactionService">
+        	<ref bean="transactionService" />
+      	</property>
     </bean>
+    
+    
 </beans>

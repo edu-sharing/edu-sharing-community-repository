@@ -64,8 +64,17 @@ public class PermissionServiceAdapter implements PermissionService {
 	}
 
 	@Override
-	public Result<List<User>> findUsers(HashMap<String, String> propVals, boolean globalContext, int from,
-			int nrOfResults) {
+	public StringBuffer getFindUsersSearchString(String query, List<String> searchFields, boolean globalContext) {
+		return null;
+	}
+
+	@Override
+	public StringBuffer getFindGroupsSearchString(String searchWord, boolean globalContext) {
+		return null;
+	}
+
+	@Override
+	public Result<List<User>> findUsers(String query,List<String> searchFields, boolean globalContext, int from, int nrOfResults) {
 		return null;
 	}
 
@@ -118,4 +127,13 @@ public class PermissionServiceAdapter implements PermissionService {
 		
 	}
 
+	@Override
+	public boolean hasPermission(String storeProtocol, String storeId, String nodeId, String authority, String permission) {
+		return false;
+	}
+
+	@Override
+	public HashMap<String, Boolean> hasAllPermissions(String storeProtocol, String storeId, String nodeId, String authority, String[] permissions) {
+		return null;
+	}
 }

@@ -1,7 +1,5 @@
 package org.edu_sharing.repository.server.importer;
 
-import java.util.HashMap;
-
 import org.alfresco.repo.transaction.RetryingTransactionHelper;
 import org.alfresco.repo.transaction.RetryingTransactionHelper.RetryingTransactionCallback;
 import org.alfresco.service.ServiceRegistry;
@@ -16,7 +14,7 @@ import org.w3c.dom.Node;
 public class BinaryHandlerSerlo implements BinaryHandler{
 
 	@Override
-	public void safe(String alfrescoNodeId, HashMap<String, Object> properties, Node nodeRecord) {	
+	public void safe(String alfrescoNodeId, RecordHandlerInterfaceBase recordHandler, Node nodeRecord) {
 		ServiceRegistry serviceRegistry = (ServiceRegistry)AlfAppContextGate.getApplicationContext().getBean(ServiceRegistry.SERVICE_REGISTRY);
 		
 		TransactionService transactionService = serviceRegistry.getTransactionService();
@@ -28,7 +26,7 @@ public class BinaryHandlerSerlo implements BinaryHandler{
 			public Void execute() throws Throwable {
 				NodeCustomizationPolicies codeCustom = (NodeCustomizationPolicies)AlfAppContextGate.getApplicationContext().getBean("nodeCustomizationPolicies");
 				
-				String techLocation = (String) properties.get(CCConstants.LOM_PROP_TECHNICAL_LOCATION);
+				String techLocation = (String) recordHandler.getProperties().get(CCConstants.LOM_PROP_TECHNICAL_LOCATION);
 				if(techLocation != null) {
 					techLocation += "?contentOnly";
 					codeCustom.generateWebsitePreview(new NodeRef(MCAlfrescoAPIClient.storeRef, alfrescoNodeId), techLocation);

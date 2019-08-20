@@ -3,17 +3,26 @@ package org.edu_sharing.service.nodeservice;
 import java.io.InputStream;
 import java.io.Serializable;
 import java.util.*;
+import java.util.stream.Collectors;
 
 import org.alfresco.model.ContentModel;
 import org.alfresco.repo.model.Repository;
+import org.alfresco.repo.security.authentication.AuthenticationUtil;
+import org.alfresco.repo.security.permissions.AccessDeniedException;
 import org.alfresco.service.ServiceRegistry;
+import org.alfresco.service.cmr.action.Action;
+import org.alfresco.service.cmr.action.ActionStatus;
+import org.alfresco.service.cmr.dictionary.DictionaryService;
 import org.alfresco.service.cmr.repository.*;
 import org.alfresco.service.cmr.repository.NodeService;
 import org.alfresco.service.cmr.security.PermissionService;
+import org.alfresco.service.cmr.version.VersionService;
 import org.alfresco.service.namespace.QName;
+import org.alfresco.service.namespace.RegexQNamePattern;
 import org.apache.commons.lang.ArrayUtils;
 import org.apache.log4j.Logger;
 import org.edu_sharing.alfresco.authentication.HttpContext;
+import org.edu_sharing.alfresco.tools.EduSharingNodeHelper;
 import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
 import org.edu_sharing.metadataset.v2.MetadataSetV2;
 import org.edu_sharing.metadataset.v2.MetadataWidget;
@@ -28,10 +37,12 @@ import org.edu_sharing.repository.server.AuthenticationToolAPI;
 import org.edu_sharing.repository.server.MCAlfrescoAPIClient;
 import org.edu_sharing.repository.server.RepoFactory;
 import org.edu_sharing.repository.server.authentication.Context;
-import org.edu_sharing.repository.server.tools.ApplicationInfo;
-import org.edu_sharing.repository.server.tools.ApplicationInfoList;
-import org.edu_sharing.repository.server.tools.VCardConverter;
+import org.edu_sharing.repository.server.tools.*;
+import org.edu_sharing.repository.server.tools.cache.RepositoryCache;
 import org.edu_sharing.service.Constants;
+import org.edu_sharing.service.nodeservice.model.GetPreviewResult;
+import org.edu_sharing.service.permission.PermissionServiceFactory;
+import org.edu_sharing.service.search.model.SortDefinition;
 import org.edu_sharing.service.toolpermission.ToolPermissionServiceFactory;
 import org.springframework.context.ApplicationContext;
 
@@ -60,9 +71,14 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
 			CCConstants.CCM_PROP_SAVED_SEARCH_QUERY,
 			CCConstants.CCM_PROP_SAVED_SEARCH_PARAMETERS,
 			CCConstants.CCM_PROP_AUTHOR_FREETEXT,
+			CCConstants.CCM_PROP_CHILDOBJECT_ORDER,
 			CCConstants.CCM_PROP_LINKTYPE,
 			CCConstants.CCM_PROP_TOOL_INSTANCE_KEY,
 			CCConstants.CCM_PROP_TOOL_INSTANCE_SECRET,
+			CCConstants.CCM_PROP_SERVICE_NODE_NAME,
+			CCConstants.CCM_PROP_SERVICE_NODE_DESCRIPTION,
+			CCConstants.CCM_PROP_SERVICE_NODE_TYPE,
+			CCConstants.CCM_PROP_SERVICE_NODE_DATA,
 			};
 	private static final String[] LICENSE_PROPS = new String[]{
 			CCConstants.LOM_PROP_RIGHTS_RIGHTS_DESCRIPTION,
@@ -74,10 +90,12 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
 			CCConstants.CCM_PROP_IO_LICENSE_PROFILE_URL,
 			CCConstants.CCM_PROP_IO_COMMONLICENSE_QUESTIONSALLOWED
 	};
+	private DictionaryService dictionaryService;
 	String repositoryId = ApplicationInfoList.getHomeRepository().getAppId();
 	MetadataSets metadataSets = RepoFactory.getMetadataSetsForRepository(repositoryId);
 	private ServiceRegistry serviceRegistry = null;
 	private NodeService nodeService = null;
+	private VersionService versionService;
 	private ApplicationInfo application;
 	
 	Logger logger = Logger.getLogger(NodeServiceImpl.class);
@@ -85,11 +103,17 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
 	Repository repositoryHelper = null;
 
 	MCAlfrescoAPIClient apiClient;
-	
+
+	public NodeServiceImpl() {
+		this(ApplicationInfoList.getHomeRepository().getAppId());
+	}
+
 	public NodeServiceImpl(String appId) {
 		ApplicationContext applicationContext = AlfAppContextGate.getApplicationContext();
 		serviceRegistry = (ServiceRegistry) applicationContext.getBean(ServiceRegistry.SERVICE_REGISTRY);
 		nodeService = serviceRegistry.getNodeService();
+		versionService = serviceRegistry.getVersionService();
+		dictionaryService = serviceRegistry.getDictionaryService();
 		repositoryHelper = (Repository) applicationContext.getBean("repositoryHelper");
 		application=ApplicationInfoList.getRepositoryInfoById(appId);
 		HashMap homeAuthInfo = null;
@@ -111,7 +135,16 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
 			HashMap<String,Object> toSafeProps = getToSafeProps(props,nodeType,aspects, parentId,null);
 			updateNodeNative(nodeId, toSafeProps);
 	}
-	
+
+	@Override
+	public void createAssoc(String parentId, String childId, String assocName) {
+		nodeService.createAssociation(
+				new NodeRef(Constants.storeRef, parentId),
+				new NodeRef(Constants.storeRef, childId),
+				QName.createQName(assocName)
+		);
+	}
+
 	public NodeRef copyNode(String nodeId, String toNodeId, boolean copyChildren) throws Throwable {
 		NodeRef nodeRef = new NodeRef(Constants.storeRef, nodeId);
 
@@ -143,11 +176,11 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
 		HashMap<String,Object> toSafeProps = getToSafeProps(props,nodeType,null,parentId,null);
 		return this.createNodeBasic(Constants.storeRef, parentId, nodeType,childAssociation, toSafeProps);
 	}
-	
+
 	public String createNodeBasic(String parentID, String nodeTypeString, HashMap<String, Object> _props) {
 		return this.createNodeBasic(Constants.storeRef, parentID, nodeTypeString,CCConstants.CM_ASSOC_FOLDER_CONTAINS, _props);
 	}
-	
+
 	public String createNodeBasic(StoreRef store, String parentID, String nodeTypeString, String childAssociation, HashMap<String, Object> _props) {
 		childAssociation = (childAssociation == null) ? CCConstants.CM_ASSOC_FOLDER_CONTAINS : childAssociation;
 		Map<QName, Serializable> properties = transformPropMap(_props);
@@ -168,6 +201,9 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
 
 		ChildAssociationRef childRef = nodeService.createNode(parentNodeRef, QName.createQName(childAssociation), QName.createQName(assocName), nodeType,
 				properties);
+		if(childAssociation.equals(CCConstants.CCM_ASSOC_CHILDIO)){
+			new RepositoryCache().remove(parentID);
+		}
 		return childRef.getChildRef().getId();
 	}
 	
@@ -226,18 +262,20 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
 				toSafe.put(id,widget.getDefaultvalue());
 				continue;
 			}
-			if(values==null || values.length==0)
+			// changed: otherwise reset values for multivalue fields is not possible
+			// if(values==null || values.length==0)
+			if(values==null)
 				continue;
 			if(!widget.isMultivalue() && values.length>1)
 				throw new IllegalArgumentException("Multiple values given for a non-multivalue widget: ID "+id+", widget type "+widget.getType());
 			if(widget.isMultivalue()){
-				toSafe.put(id,new ArrayList<String>(Arrays.asList(values)));
+				toSafe.put(id,values.length==0 ? null : new ArrayList<String>(Arrays.asList(values)));
 			}
 			else{
-				toSafe.put(id,values[0]);
+				toSafe.put(id,values.length==0 ? null : values[0]);
 			}
 		}
-		
+
 		for(String property : getAllSafeProps()){
 			if(!props.containsKey(property)) continue;
 			
@@ -325,35 +363,59 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
 		}
 		return null;
 	}
-	
-	public HashMap<String, HashMap<String, Object>> getChildrenByType(StoreRef store, String nodeId, String type) {
-		HashMap<String, HashMap<String, Object>> result = new HashMap<String, HashMap<String, Object>>();
-		List<ChildAssociationRef> childAssocList = nodeService.getChildAssocs(new NodeRef(store, nodeId));
+    private List<ChildAssociationRef> getChildrenAssocsByType(StoreRef store, String nodeId, String type) {
+        List<ChildAssociationRef> childAssocList = nodeService.getChildAssocs(new NodeRef(store, nodeId), Collections.singleton(QName.createQName(type)));
+        return childAssocList;
+    }
+
+    public HashMap<String, HashMap<String, Object>> getChildrenByType(StoreRef store, String nodeId, String type) {
+        HashMap<String, HashMap<String, Object>> result = new HashMap<String, HashMap<String, Object>>();
+        List<ChildAssociationRef> childAssocList = getChildrenAssocsByType(store,nodeId,type);
 		for (ChildAssociationRef child : childAssocList) {
-
-			String childType = nodeService.getType(child.getChildRef()).toString();
-			if (childType.equals(type)) {
-
-				HashMap<String, Object> resultProps = getPropertiesWithoutChildren(child.getChildRef());
-				String childNodeId = child.getChildRef().getId();
-				result.put(childNodeId, resultProps);
-
-			}
+			HashMap<String, Object> resultProps = getPropertiesWithoutChildren(child.getChildRef());
+			String childNodeId = child.getChildRef().getId();
+			result.put(childNodeId, resultProps);
 		}
 		return result;
 	}
-	
-	public HashMap<String, Object> getChild(StoreRef store, String parentId, String type, String property, String value) {
-		HashMap<String, HashMap<String, Object>> children = this.getChildrenByType(store, parentId, type);
-		for (String childNodeId : children.keySet()) {
-			HashMap<String, Object> childProps = children.get(childNodeId);
-			String propValue = (String) childProps.get(property);
+	@Override
+	public List<NodeRef> getChildrenRecursive(StoreRef store, String nodeId,List<String> types) {
+		List<ChildAssociationRef> assocs;
+		if(types==null){
+			assocs = nodeService.getChildAssocs(new NodeRef(store, nodeId));
+		}
+		else {
+			Set<QName> typesConverted = types.stream().map(QName::createQName).collect(Collectors.toSet());
+			assocs = nodeService.getChildAssocs(new NodeRef(store, nodeId), typesConverted);
+		}
+		List<NodeRef> result=new ArrayList<>();
+		for(ChildAssociationRef assoc : assocs){
+			result.add(assoc.getChildRef());
+		}
+		List<ChildAssociationRef> maps = nodeService.getChildAssocs(new NodeRef(store, nodeId), new HashSet<>(Arrays.asList(QName.createQName(CCConstants.CCM_TYPE_MAP),QName.createQName(CCConstants.CM_TYPE_FOLDER))));
+		String user = AuthenticationUtil.getFullyAuthenticatedUser();
+		// run in parallel to increase performance
+		maps.parallelStream().forEach((map)->{
+			AuthenticationUtil.runAs(()->result.addAll(getChildrenRecursive(store,map.getChildRef().getId(),types))
+			,user);
+		});
+		logger.info("Get children recursive finished with "+result.size()+" nodes");
+		return result;
+	}
+
+		@Override
+	public NodeRef getChild(StoreRef store, String parentId, String type, String property, Serializable value) {
+		List<ChildAssociationRef> children = this.getChildrenAssocsByType(store, parentId, type);
+		for (ChildAssociationRef child : children) {
+			Serializable propValue = nodeService.getProperty(child.getChildRef(),QName.createQName(property));
 			if (propValue != null && propValue.equals(value))
-				return childProps;
+				return child.getChildRef();
 		}
 		return null;
 	}
-	
+
+
+
 	private HashMap<String, Object> getPropertiesWithoutChildren(NodeRef nodeRef) {
 		Map<QName, Serializable> childPropMap = nodeService.getProperties(nodeRef);
 		HashMap<String, Object> resultProps = new HashMap<String, Object>();
@@ -411,7 +473,7 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
 	
 	protected String getValue(String type, String prop, Object _value, String metadataSetId) {
 
-		MetadataSetModelProperty mdsmProp = getMetadataSetModelProperty(metadataSetId, type, prop);
+		//MetadataSetModelProperty mdsmProp = getMetadataSetModelProperty(metadataSetId, type, prop);
 
 		if (_value instanceof List && ((List) _value).size() > 0) {
 			String result = null;
@@ -420,7 +482,7 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
 					result += CCConstants.MULTIVALUE_SEPARATOR;
 				if (value != null) {
 					if (value instanceof MLText) {
-						String tmpStr = getMLTextString(value, mdsmProp);
+						String tmpStr = getMLTextString(value);
 						if (result != null)
 							result += tmpStr;
 						else
@@ -443,7 +505,7 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
 		} else if (_value instanceof Number) {
 			return _value.toString();
 		} else if (_value instanceof MLText) {
-			return getMLTextString(_value, mdsmProp);
+			return getMLTextString(_value);
 		} else {
 			return _value.toString();
 		}
@@ -471,13 +533,13 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
 	}
 	
 	
-	protected String getMLTextString(Object _mlText, MetadataSetModelProperty mdsmp) {
+	protected String getMLTextString(Object _mlText) {
 
 		if (_mlText instanceof MLText) {
 
 			MLText mlText = (MLText) _mlText;
 
-			if (mdsmp == null || (mdsmp != null && !mdsmp.getMultilang())) {
+			if (true /*mdsmp == null || (mdsmp != null && !mdsmp.getMultilang())*/) {
 				return mlText.getDefaultValue();
 			}
 
@@ -518,8 +580,17 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
 	public void updateNodeNative(StoreRef store, String nodeId, HashMap<String, Object> _props) {
 
 		try {
-			Map<QName, Serializable> props = transformPropMap(_props);
 			NodeRef nodeRef = new NodeRef(store, nodeId);
+			Map<QName, Serializable> props = transformPropMap(_props);
+			Map<QName, Serializable> propsNotNull = new HashMap<>();
+
+			for(Map.Entry<QName, Serializable> prop : props.entrySet()){
+				// instead of storing props as null (which can cause solr erros), remove them completely from the node!
+				if(prop.getValue()==null)
+					nodeService.removeProperty(nodeRef,prop.getKey());
+				else
+					propsNotNull.put(prop.getKey(),prop.getValue());
+			}
 
 			// don't do this cause it's slow:
 			/*
@@ -529,15 +600,15 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
 			 */
 
 			// prevent overwriting of properties that don't come with param _props
-			Set<QName> changedProps = props.keySet();
+			Set<QName> changedProps = propsNotNull.keySet();
 			Map<QName, Serializable> currentProps = nodeService.getProperties(nodeRef);
 			for (Map.Entry<QName, Serializable> entry : currentProps.entrySet()) {
 				if (!changedProps.contains(entry.getKey())) {
-					props.put(entry.getKey(), entry.getValue());
+					propsNotNull.put(entry.getKey(), entry.getValue());
 				}
 			}
 
-			nodeService.setProperties(nodeRef, props);
+			nodeService.setProperties(nodeRef, propsNotNull);
 
 		} catch (org.hibernate.StaleObjectStateException e) {
 			// this occurs sometimes in workspace
@@ -652,9 +723,153 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
 		properties.put(CCConstants.CCM_PROP_MAP_TYPE,CCConstants.CCM_VALUE_MAP_TYPE_USERSAVEDSEARCH);		
 		return createNodeBasic(userhome.getId(),CCConstants.CCM_TYPE_MAP,properties);
 	}
-	
+
+	/**
+	 * Supported values for filter:
+	 * special: show all files which are usually not displayed anyway (usage, share, thumbnail)
+	 * files: return only files
+	 * @param list
+	 * @param filter
+	 * @param sortDefinition
+	 * @param <T>
+	 * @return
+	 */
 	@Override
-	public List<ChildAssociationRef> getChildrenChildAssociationRef(String parentID){
+    public <T>List<T> sortNodeRefList(List<T> list,List<String> filter, SortDefinition sortDefinition){
+	    // make a copy so we have a modifiable list object
+	    list=new ArrayList<>(list);
+		List<T> filtered = new ArrayList<>();
+		for(T obj : list){
+			if(!EduSharingNodeHelper.shouldFilter(getAsNode(obj),filter)){
+				filtered.add(obj);
+			}
+		}
+		list=filtered;
+
+        HashMap<String,Object> cache=new HashMap();
+        Collections.sort(list, (o1, o2) -> sortNodes(cache,getAsNode(o1),getAsNode(o2),sortDefinition));
+        return list;
+    }
+
+    private <T> NodeRef getAsNode(T obj) {
+        NodeRef node;
+        if(obj instanceof ChildAssociationRef){
+            node=((ChildAssociationRef) obj).getChildRef();
+        }
+        else if(obj instanceof AssociationRef){
+            node=((AssociationRef) obj).getTargetRef();
+        }
+        else if(obj instanceof NodeRef){
+            node= (NodeRef) obj;
+        }
+        else{
+            throw new IllegalArgumentException("Given type not supported");
+        }
+        return node;
+    }
+
+    private int sortNodes(HashMap<String, Object> cache, NodeRef n1, NodeRef n2, SortDefinition sortDefinition) {
+		String keyType1=n1.toString()+"_TYPE";
+		String keyType2=n2.toString()+"_TYPE";
+
+		String type1,type2;
+		if(cache.containsKey(keyType1)){
+			type1= (String) cache.get(keyType1);
+		}
+		else{
+			type1=nodeService.getType(n1).toString();
+			cache.put(keyType1,type1);
+		}
+		if(cache.containsKey(keyType2)){
+			type2= (String) cache.get(keyType2);
+		}
+		else{
+			type2=nodeService.getType(n2).toString();
+			cache.put(keyType2,type2);
+		}
+        if(EduSharingNodeHelper.typeIsDirectory(type1)!=EduSharingNodeHelper.typeIsDirectory(type2)){
+            return EduSharingNodeHelper.typeIsDirectory(type1) ? -1 : 1;
+        }
+        if(!sortDefinition.hasContent())
+            return 0;
+        for(SortDefinition.SortDefinitionEntry entry : sortDefinition.getSortDefinitionEntries()){
+            QName prop = QName.createQName(CCConstants.getValidGlobalName(entry.getProperty()));
+            Object prop1,prop2;
+            String key1=n1.toString()+prop.toString();
+            String key2=n2.toString()+prop.toString();
+            if(cache.containsKey(key1)){
+                prop1=cache.get(key1);
+            }
+            else{
+                prop1 = nodeService.getProperty(n1, prop);
+                cache.put(key1,prop1);
+            }
+            if(cache.containsKey(key2)){
+                prop2=cache.get(key2);
+            }
+            else{
+                prop2 = nodeService.getProperty(n2, prop);
+                cache.put(key2,prop2);
+            }
+            int compare=0;
+            if(prop1==null && prop2!=null) {
+				try {
+					prop1=prop2.getClass().getConstructor().newInstance();
+				}catch(Throwable t){}
+
+			}
+            else if(prop1!=null && prop2==null) {
+				try {
+					prop2=prop1.getClass().getConstructor().newInstance();
+				}catch(Throwable t){}
+			}
+			if(prop1==null && prop2==null){
+            	continue;
+			}
+            else {
+				// some int fields are parsed as string. make sure to compare them correctly
+				// e.g. for collection sorting
+
+				String fieldType = dictionaryService.getProperty(prop).getDataType().getJavaClassName();
+				if (fieldType.equals(Integer.class.getName())) {
+					if (prop1 instanceof String && prop2 instanceof String) {
+						compare = Integer.compare(Integer.parseInt((String) prop1), Integer.parseInt((String) prop2));
+					}
+				}
+
+				if (compare == 0) {
+					if (prop1 instanceof String && prop2 instanceof String) {
+						compare = ((String) prop1).compareToIgnoreCase((String) prop2);
+					} else if (prop1 instanceof Date && prop2 instanceof Date) {
+						compare = ((Date) prop1).compareTo((Date) prop2);
+					} else if (prop1 instanceof Comparable && prop2 instanceof Comparable) {
+						compare = ((Comparable) prop1).compareTo((Comparable) prop2);
+					}
+				}
+			}
+            if(!entry.isAscending())
+                compare*=-1;
+            if(compare!=0)
+                return compare;
+        }
+        return 0;
+    }
+
+    @Override
+	public List<ChildAssociationRef> getChildrenChildAssociationRefAssoc(String parentID, String assocName, List<String> filter, SortDefinition sortDefinition){
+		NodeRef parentNodeRef = getParentRef(parentID);
+        List<ChildAssociationRef> result;
+        if(assocName==null || assocName.isEmpty()){
+            result=nodeService.getChildAssocs(parentNodeRef);
+		}
+		else{
+            result=nodeService.getChildAssocs(parentNodeRef,QName.createQName(assocName),RegexQNamePattern.MATCH_ALL);
+		}
+        result=sortNodeRefList(result,filter,sortDefinition);
+        return result;
+	}
+
+    private NodeRef getParentRef(String parentID) {
 		if (parentID == null) {
 
 			String startParentId = apiClient.getRootNodeId();
@@ -665,15 +880,18 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
 			}
 		}
 
-		NodeRef parentNodeRef = new NodeRef(Constants.storeRef, parentID);
-		List<ChildAssociationRef> childAssocList = nodeService.getChildAssocs(parentNodeRef);
-		return childAssocList;
+		return new NodeRef(Constants.storeRef, parentID);
 	}
 
 	public void createVersion(String nodeId, HashMap _properties) throws Exception{
 		apiClient.createVersion(nodeId, _properties);
 	}
-	
+
+	@Override
+	public void deleteVersionHistory(String nodeId) throws Exception {
+		versionService.deleteVersionHistory(new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE,nodeId));
+	}
+
 	@Override
 	public void writeContent(StoreRef store, String nodeID, InputStream content, String mimetype, String _encoding,
 			String property) throws Exception {
@@ -687,6 +905,12 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
 	
 	@Override
 	public void removeNode(String nodeId, String parentId, boolean recycle) {
+		List<ChildAssociationRef> assocs = nodeService.getParentAssocs(new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, nodeId));
+		for(ChildAssociationRef assoc : assocs){
+			if(assoc.getTypeQName().toString().equals(CCConstants.CCM_ASSOC_CHILDIO)){
+				new RepositoryCache().remove(assoc.getParentRef().getId());
+			}
+		}
 		apiClient.removeNode(nodeId, parentId, recycle);
 	}
 	
@@ -706,10 +930,12 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
 			throw new IllegalArgumentException("Setting templates for nodes is only supported for type "+CCConstants.CCM_TYPE_MAP);
 		}
 
-		QName qname=QName.createQName(CCConstants.CCM_ASSOC_METADATA_PRESETTING_TEMPLATE);
-		List<AssociationRef> result = nodeService.getTargetAssocs(new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, nodeId),qname);
-		if(result!=null && result.size()>0)
-			return result.get(0).getTargetRef().getId();
+		QName assocQName=QName.createQName(CCConstants.CCM_ASSOC_METADATA_PRESETTING_TEMPLATE);
+		//List<AssociationRef> result = nodeService.getTargetAssocs(new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, nodeId),qname);
+		NodeRef result = nodeService.getChildByName(new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, nodeId),ContentModel.ASSOC_CONTAINS,CCConstants.TEMPLATE_NODE_NAME);
+
+		if(result!=null)
+			return result.getId();
 		if(!create)
 			return null;
 
@@ -719,7 +945,7 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
 		String id=createNode(nodeId,CCConstants.CCM_TYPE_IO,props);
 		nodeService.createAssociation(new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE,nodeId),
 				new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE,id),
-				qname);
+				assocQName);
 		addAspect(id,CCConstants.CCM_ASPECT_METADATA_PRESETTING_TEMPLATE);
 		return id;
 	}
@@ -782,12 +1008,8 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
 	}
 	
 	@Override
-	public HashMap<String, HashMap<String, Object>> getVersionHistory(String nodeId) throws Exception {
-		try{
-			return apiClient.getVersionHistory(nodeId);
-		}catch(Throwable e){
-			throw new Exception(e);
-		}
+	public HashMap<String, HashMap<String, Object>> getVersionHistory(String nodeId) throws Throwable {
+		return apiClient.getVersionHistory(nodeId);
 	}
 	@Override
 	public String importNode(String nodeId,String localParent) throws Throwable {
@@ -807,6 +1029,84 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
 	public boolean exists(String protocol, String store, String nodeId) {
 		return nodeService.exists(new NodeRef(new StoreRef(protocol, store), nodeId));
 	}
+
+	@Override
+	public String getContentMimetype(String protocol, String storeId, String nodeId) {
+		if(PermissionServiceFactory.getPermissionService(application.getAppId()).hasPermission(protocol,storeId,nodeId,CCConstants.PERMISSION_READ))
+			return new MCAlfrescoAPIClient().getAlfrescoMimetype(new NodeRef(protocol,storeId,nodeId));
+		else
+			throw new AccessDeniedException("No "+CCConstants.PERMISSION_READ+" permission on node "+nodeId);
+	}
+	@Override
+	public List<AssociationRef> getNodesByAssoc(String nodeId, AssocInfo assoc) {
+		NodeRef ref = new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE,nodeId);
+		if(assoc.getDirection().equals(AssocInfo.Direction.SOURCE)) {
+			return nodeService.getSourceAssocs(ref,QName.createQName(assoc.getAssocName()));
+		}
+		else{
+			return nodeService.getTargetAssocs(ref,QName.createQName(assoc.getAssocName()));
+		}
+	}
+
+	public void setProperty(String protocol, String storeId, String nodeId, String property, Serializable value) {
+		property = NameSpaceTool.transformToLongQName(property);
+		nodeService.setProperty(new NodeRef(new StoreRef(protocol,storeId), nodeId), QName.createQName(property),value);
+	}
+
+	@Override
+	public GetPreviewResult getPreview(String storeProtocol, String storeIdentifier, String nodeId){
+
+		StoreRef storeRef = new StoreRef(storeProtocol,storeIdentifier);
+		NodeRef nodeRef = new NodeRef(storeRef,nodeId);
+		if(!getType(nodeId).equals(CCConstants.CCM_TYPE_IO)){
+			return null;
+		}
+
+		String extThumbnail = getProperty(storeProtocol,storeIdentifier,nodeId,CCConstants.CCM_PROP_IO_THUMBNAILURL);
+		if (extThumbnail != null && !extThumbnail.trim().equals("")) {
+			return new GetPreviewResult(extThumbnail, GetPreviewResult.TYPE_EXTERNAL, false);
+		}
+
+		String defaultImageUrl = URLTool.getBaseUrl() + "/"
+				+ CCConstants.DEFAULT_PREVIEW_IMG;
+
+		InputStream crUserDefinedPreview = null;
+		try{
+			/**
+			 * userdefined
+			 */
+			crUserDefinedPreview=this.getContent(storeProtocol,storeIdentifier,nodeId,CCConstants.CCM_PROP_IO_USERDEFINED_PREVIEW);
+			if (crUserDefinedPreview != null && crUserDefinedPreview.available() > 0) {
+				String url = URLTool.getPreviewServletUrl(new NodeRef(storeRef, nodeId));
+				return new GetPreviewResult(url, GetPreviewResult.TYPE_USERDEFINED, false);
+			}
+
+		}catch(Throwable t){
+			// may fails if the user does not has access for content
+		}
+
+
+		/**
+		 * generated and action active
+		 */
+		Action action = ActionObserver.getInstance().getAction(nodeRef, CCConstants.ACTION_NAME_CREATE_THUMBNAIL);
+		if (action != null && action.getExecutionStatus().equals(ActionStatus.Running)) {
+			return new GetPreviewResult(defaultImageUrl, GetPreviewResult.TYPE_DEFAULT, true);
+		}
+
+		/**
+		 * generated and no action active
+		 */
+		NodeRef previewProps = getChild(storeRef, nodeId, CCConstants.CM_TYPE_THUMBNAIL, CCConstants.CM_NAME,
+				CCConstants.CM_VALUE_THUMBNAIL_NAME_imgpreview_png);
+		if (previewProps != null) {
+			String url = URLTool.getPreviewServletUrl(new NodeRef(storeRef, nodeId));
+			return new GetPreviewResult(url, GetPreviewResult.TYPE_GENERATED, false);
+		}
+
+		return new GetPreviewResult(defaultImageUrl, GetPreviewResult.TYPE_DEFAULT, false);
+	}
+
 	@Override
 	public String getPrimaryParent(String protocol, String store, String nodeId) {
 		return nodeService.getPrimaryParent(new NodeRef(new StoreRef(protocol, store), nodeId)).getParentRef().getId();

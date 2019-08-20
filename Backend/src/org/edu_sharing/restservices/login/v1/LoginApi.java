@@ -12,8 +12,10 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;
 
 import org.alfresco.service.cmr.repository.NodeRef;
+import org.alfresco.service.cmr.repository.NodeService;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.server.AuthenticationToolAPI;
+import org.edu_sharing.repository.server.tools.Edu_SharingProperties;
 import org.edu_sharing.repository.server.tools.security.ShibbolethSessions;
 import org.edu_sharing.repository.server.tools.security.ShibbolethSessions.SessionInfo;
 import org.edu_sharing.restservices.ApiService;
@@ -22,9 +24,13 @@ import org.edu_sharing.restservices.login.v1.model.Login;
 import org.edu_sharing.restservices.login.v1.model.LoginCredentials;
 import org.edu_sharing.restservices.login.v1.model.ScopeAccess;
 import org.edu_sharing.restservices.shared.ErrorResponse;
+import org.edu_sharing.service.Constants;
 import org.edu_sharing.service.authentication.ScopeAuthenticationService;
 import org.edu_sharing.service.authentication.ScopeAuthenticationServiceFactory;
 import org.edu_sharing.service.authentication.ScopeUserHomeServiceFactory;
+import org.edu_sharing.service.authority.AuthorityService;
+import org.edu_sharing.service.authority.AuthorityServiceFactory;
+import org.edu_sharing.service.nodeservice.NodeServiceFactory;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -50,8 +56,26 @@ public class LoginApi  {
     	})
 
     public Response login(@Context HttpServletRequest req) {
+		
+		
     	AuthenticationToolAPI authTool = new AuthenticationToolAPI();
     	boolean authenticated = (authTool.validateAuthentication(req.getSession()) == null) ? false : true;
+    	
+    	String personActiveStatus = Edu_SharingProperties.instance.getPersonActiveStatus();
+		if(authenticated && personActiveStatus != null && !personActiveStatus.trim().equals("")) {
+			String username = (String)req.getSession().getAttribute(CCConstants.AUTH_USERNAME);
+			NodeRef authorityNodeRef = AuthorityServiceFactory.getLocalService().getAuthorityNodeRef(username);
+			
+			String personStatus = NodeServiceFactory.getLocalService().getProperty(authorityNodeRef.getStoreRef().getProtocol(), 
+					authorityNodeRef.getStoreRef().getIdentifier(), 
+					authorityNodeRef.getId(), CCConstants.CM_PROP_PERSON_ESPERSONSTATUS);
+			if(!personActiveStatus.equals(personStatus)) {
+				authenticated = false;
+				authTool.logoutWithoutSecurityContext(authTool.getTicketFromSession(req.getSession()));
+				req.getSession().invalidate();
+			}
+		}
+    	
     	
     	return Response.ok(new Login(authenticated,authTool.getScope(),req.getSession())).build();
     }

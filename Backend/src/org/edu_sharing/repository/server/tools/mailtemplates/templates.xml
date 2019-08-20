@@ -2,7 +2,7 @@
 	<template name="header">
 		<message><![CDATA[
 			<div class="logo">
-			<img src="{{logo}}">
+			<img src="{{image:/images/logos/edu-sharing-mail.png}}">
 			</div>
 		]]>
 		</message>
@@ -86,6 +86,22 @@
 			<div class="rights">{{permissions}}</div>
 			<br>
 			<div class="center"><a class="btn" href="{{link}}">Link to the material</a></div>
+			<br><br>
+			{{if message}}Message from {{inviterFirstName}} {{inviterLastName}}:<br>
+				{{message}}
+			{{endif}}
+		]]>
+		</message>
+	</template>
+	<template name="invited_collection">
+		<subject>{{inviterFirstName}} {{inviterLastName}} invited you to a collection.</subject>
+		<message><![CDATA[
+			<h1>Hello {{firstName}} {{lastName}}</h1>
+			<h2>{{inviterFirstName}} {{inviterLastName}} invited you to collection "{{name}}".</h2>
+			Your access rights are:<br>
+			<div class="rights">{{permissions}}</div>
+			<br>
+			<div class="center"><a class="btn" href="{{link}}">Link to collection</a></div>
 			<br><br>
 			{{if message}}Message from {{inviterFirstName}} {{inviterLastName}}:<br>
 				{{message}}

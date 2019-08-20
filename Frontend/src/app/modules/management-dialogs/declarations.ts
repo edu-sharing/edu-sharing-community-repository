@@ -8,6 +8,7 @@ import {WorkspaceFileUploadSelectComponent} from "./file-upload-select/file-uplo
 import {WorkspaceContributorComponent} from "./contributor/contributor.component";
 import {NodeReportComponent} from "./node-report/node-report.component";
 import {NodeTemplateComponent} from "./node-template/node-template.component";
+import {NodeVariantComponent} from './node-variant/node-variant.component';
 
 export const DECLARATIONS_MANAGEMENT_DIALOGS = [
   WorkspaceLicenseComponent,
@@ -19,5 +20,6 @@ export const DECLARATIONS_MANAGEMENT_DIALOGS = [
   WorkspaceFileUploadSelectComponent,
   WorkspaceContributorComponent,
   NodeReportComponent,
+  NodeVariantComponent,
   NodeTemplateComponent
 ];

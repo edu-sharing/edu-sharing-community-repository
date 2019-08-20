@@ -1,6 +1,8 @@
 {
   "SEARCH": {
     "TITLE": "Search",
+    "TUTORIAL_HEADING":"searching an finding",
+    "TUTORIAL_DESCRIPTION":"The search field allows you to quickly find interesting materials. Use filters to narrow down your search results.",
     "COLLECTIONS": "Collections",
     "MATERIALS": "Materials",
     "IGNORED_PARAMETERS": "The result contains objects which may not fit all given search criterias",
@@ -9,7 +11,7 @@
     "TO_COLLECTIONS": "View collections",
     "SEARCH_STUFF": "Search for stuff ...",
     "EXPANDED_SEARCH": "Extended Search",
-    "EXPANDED_SEARCH_SHORT": "Filter",
+    "EXPANDED_SEARCH_SHORT": "Extended Search",
     "METADATASET": "Choose Metadataset",
     "METADATASET_INFO": "Filter other search criterias",
     "APPLY": "APPLY",

@@ -13,17 +13,20 @@
 @mixin materialShadow($important: false){
   box-shadow:0px 0px 5px rgba(0,0,0,0.3) if($important,!important,null);
 }
+@mixin materialShadowMediumLarge($important: false){
+  box-shadow:0px 0px 25px rgba(0,0,0,0.6) if($important,!important,null);
+}
 @mixin materialShadowLarge($important: false){
   box-shadow:0px 10px 200px rgba(0, 0, 0, 0.15) if($important,!important,null);
 }
-@mixin limitLineCount($N){
+@mixin limitLineCount($count,$lineHeight:1.0){
   overflow: hidden;
   text-overflow: ellipsis;
   display: -webkit-box;
-  line-height: 1em;        /* fallback */
-  max-height: $N+em;       /* fallback */
+  line-height: $lineHeight+em;
+  max-height: $count*$lineHeight+em;
   -webkit-box-orient: vertical;
-  -webkit-line-clamp: $N; /* number of lines to show */
+  -webkit-line-clamp: $count; /* number of lines to show */
 }
 @mixin fadeRight($color,$position){
   background: linear-gradient(to right,rgba(red($color),green($color),blue($color),0.001) 0,$color $position);
@@ -58,6 +61,12 @@
 }
 @mixin darken(){
   background-color:$darkenColor;
+}
+@mixin darkenLight(){
+  background-color:$darkenLightColor;
+}
+@mixin blurBackground($radius: 5px){
+  backdrop-filter: blur($radius);
 }
 @mixin  setGlobalFocus(){
   //respect element border radius

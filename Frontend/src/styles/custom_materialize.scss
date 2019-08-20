@@ -1,28 +1,34 @@
 @import "./variables";
 
 /*
-  Custom CSS for colors and looks which override the materializecss
+  Custom CSS for colors and looks which override the materialize.css
 */
 .btn{
   background-color:$primary!important;
   color:$textOnPrimary!important;
 }
 .btn,.btn-flat{
+  display:inline-flex;
+  align-items: center;
+  >span{
+    margin-left: 5px;
+    flex-grow:1;
+  }
   >.material-icons{
     display: inline-flex;
     align-items: center;
-    position: relative;
-    top: 4px;
   }
 }
 .btn:focus:not(.disabled){
-    background-color:$primaryDark!important;
+  background-color:$primaryDark!important;
 }
 .btn-flat{
   color:$primary;
   background: #fff;
 }
 .btn,.btn-flat{
+  text-align: center;
+  line-height: 1.25;
   overflow-y: hidden;
 }
 .card .btn-flat{
@@ -99,21 +105,63 @@ input[type="checkbox"].filled-in:checked+label:before{
 }
 input:not([type]),
 input[type=text],
+input[type=email],
+input[type=password],
 input[type=number],
 select,
+textarea.materialize-textarea,
 input[type=search]{
-  height:2.5rem;
+  &:not(.mat-input-element) {
+    height: 3rem;
+    -webkit-appearance: none;
+    border: 1px solid #ccc;
+    padding: 0 0.75em;
+    width: calc(100% - 1.65em);
+    border-radius: 3px;
+    background-color: #fff;
+    &:disabled {
+      border-style: dashed;
+    }
+  }
+}
+select{
+  width:100%;
+}
+textarea.materialize-textarea{
+  padding: 0.75em;
+  width: calc(100% - 1.65em);
 }
 
-input:not([type]):focus:not([readonly]),
-input[type=search]:focus:not([readonly]),
-input[type=email]:focus:not([readonly]),
-input[type=password]:focus:not([readonly]),
-input[type=number]:focus:not([readonly]),
-input[type=text]:focus:not([readonly]),
-.materialize-textarea:focus:not([readonly]){
-  box-shadow: 0 1px 0 0 $primary!important;
-  border-bottom: 1px solid $primary!important;
+input[type=checkbox]+label,
+input[type=radio]+label,
+.switch >label{
+  font-weight: normal;
+  color:$textLight;
+  font-size: 1rem;
+  margin-left: 0;
+  text-transform: none;
+  line-height: 17pt;
+}
+input:not([type]),
+input[type=search],
+input[type=email],
+input[type=password],
+input[type=number],
+input[type=text],
+.materialize-textarea{
+  &:not(.mat-input-element) {
+    /*box-shadow: 0 1px 0 0 $primary!important;
+    border-bottom: 1px solid $primary!important;*/
+    &:focus:not([readonly]) {
+      border-color: $primaryMediumLight !important;
+      box-shadow: none !important;
+    }
+
+    &.valid {
+      border-color: $colorStatusPositive !important;
+      box-shadow: none !important;
+    }
+  }
 }
 .materialize-textarea{
   overflow-y: auto!important;
@@ -132,13 +180,10 @@ select {
   -moz-appearance: none;
   appearance: none;
   display: inherit;
-  border: none;
-  border-bottom: 1px solid #aaa;
-  border-radius: 0;
   background-position: calc(100% - 10px);
 }
 select,.select-wrapper .caret{
-  background-color:transparent;
+  background-color:#fff;
   background-image:url('../assets/images/select-arrow.svg');
   background-size:8px;
   background-repeat: no-repeat;
@@ -160,8 +205,8 @@ option {
 }
 .collection{
   .disabled{
-      color:$textLight!important;
-      cursor:default;
+    color:$textLight!important;
+    cursor:default;
   }
   a.collection-item {
     color: $primary;
@@ -169,6 +214,9 @@ option {
 }
 .btn-shadow{
   box-shadow: 0px 1px 3px #aaa!important;
+}
+.determinate-failed{
+  background-color: $colorStatusNegative!important;
 }
 .progress{
   background-color: $primaryLight;
@@ -198,7 +246,7 @@ input:focus:not([readonly])+label {
 input[type=text]:read-only:not(.select-dropdown),
 input[type=password]:read-only,
 input[type=search]:read-only{
-  border-bottom-style: dashed;
+  border-style: dashed;
 }
 /* materialize select dropdowns */
 .dropdown-content li>a, .dropdown-content li>span{
@@ -229,7 +277,6 @@ input[type=search]:read-only{
 }
 .btn-icon i,.btn-icon-only i, .align-icon{
   position:relative;
-  top:4px;
   left:-10px;
 }
 
@@ -262,11 +309,12 @@ img.align-icon {
   background-color: $workspaceTopBarBackground;
 }
 .row-dark .tab a{
-  color:rgba(255,255,255,0.65)!important;
+  color:mix($workspaceTopBarBackground,$workspaceTopBarFontColor,45%)!important;
 }
 .row-dark .tab .active{
-  color:#fff!important;
+  color:$workspaceTopBarFontColor!important;
   background: linear-gradient(to top, $tabColorLight 0,$tabColorLight 5px,transparent 5px,transparent 5%);
+  font-weight: bold;
 }
 .collection .collection-item.active{
   color:$primary;
@@ -277,11 +325,6 @@ img.align-icon {
   i{
     height: 100%;
   }
-}
-.btn-floating.btn-large i {
-  line-height: 0px;
-  position: relative;
-  top: 7px;
 }
 .btn-floating-inverted{
   background-color:#fff;
@@ -299,13 +342,26 @@ img.align-icon {
 }
 .collection i{
   position: relative;
-    top: 7px;
-    left: -5px;
+  top: 7px;
+  left: -5px;
 }
 span.thumb{
   display:none; /* preview thumb for range does not work */
 }
-
+.btn-floating.btn-large i{
+  font-size:28px;
+}
+.btn, .btn-large,
+.btn-floating,
+.btn-large,
+.btn-flat {
+  icon{
+    font-size:1.3rem;
+    i {
+      font-size: inherit;
+    }
+  }
+}
 .collection {
   .collection-item {
     padding: 2px 20px 9px 20px;
@@ -325,18 +381,17 @@ span.thumb{
 .collection-item-seperate-bottom {
   border-bottom:1px solid #ccc!important;
 }
-label,
-label:active{
-  font-size:1rem;
-  color:$textLight;
+.ngx-datepicker-container .ngx-datepicker-calendar-container{
+  top: 10px !important;
 }
 /* ng2-datepicker */
 .ngx-datepicker-input{
+  padding: 0!important;
   color:$textPrimary!important;
-  border:none!important;
-  padding-top: 0!important;
-  padding-bottom: 0!important;
-  border-bottom: 1px solid $inputBorderColor!important;
+  margin-top: 10px !important;
+  text-align: center;
+  width: 298px !important;
+  cursor: pointer;
 }
 
 /* material angular2 */
@@ -362,7 +417,7 @@ label:active{
   border: 2px solid $backgroundColor;
 }
 .noUi-target{
-  background: #999;
+  background: #ccc;
   border-radius: 4px;
   border:none;
   box-shadow: none;
@@ -378,18 +433,18 @@ label:active{
   font-size: 8pt;
   min-width: 50px;
   label{
-    float: left;
     font-size: 6pt;
-    width: 100%;
+    margin-right: 5px;
   }
 }
 .noUi-connect{
   margin-left: -10px;
   margin-right: 5px;
-  background-color: $primary;
+  background-color: $primaryMediumLight;
 }
 .noUi-base{
   right: -10px;
+  background-color: #ccc;
 }
 @media all and (max-width: ($mobileWidth)) {
   .collectionContainer {
@@ -418,6 +473,13 @@ label:active{
       padding: 5px 20px 13px 20px;
       border-bottom: none;
     }
+  }
+  /* ng2-datepicker */
+  .ngx-datepicker-input {
+    width: auto !important;
+  }
+  .ngx-datepicker-container .ngx-datepicker-calendar-container {
+    left: -2% !important;
   }
 
 }

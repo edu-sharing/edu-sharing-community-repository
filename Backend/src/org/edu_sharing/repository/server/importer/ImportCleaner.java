@@ -41,6 +41,7 @@ import javax.xml.xpath.XPathConstants;
 import javax.xml.xpath.XPathExpressionException;
 import javax.xml.xpath.XPathFactory;
 
+import org.alfresco.service.cmr.repository.NodeRef;
 import org.apache.log4j.Logger;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.server.AuthenticationTool;
@@ -49,6 +50,7 @@ import org.edu_sharing.repository.server.RepoFactory;
 import org.edu_sharing.repository.server.tools.ApplicationInfo;
 import org.edu_sharing.repository.server.tools.ApplicationInfoList;
 import org.edu_sharing.repository.server.tools.HttpQueryTool;
+import org.edu_sharing.service.nodeservice.NodeServiceHelper;
 import org.w3c.dom.Document;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
@@ -123,7 +125,7 @@ public class ImportCleaner {
 	}
 	
 	
-	public void removeDeletedImportedObjects(HashMap<String, HashMap<String, Object>>  allNodes) throws Throwable{
+	public void removeDeletedImportedObjects(List<NodeRef> allNodes) throws Throwable{
 		logger.info("starting");
 		
 		ApplicationInfo homeRep  = ApplicationInfoList.getHomeRepository();
@@ -133,10 +135,10 @@ public class ImportCleaner {
 		int countDeletedObjects = 0;
 		if(allNodes != null){
 			
-			for(Map.Entry<String,HashMap<String,Object>> entry : allNodes.entrySet()){
-				String alfNodeId = (String)entry.getValue().get(CCConstants.SYS_PROP_NODE_UID);
-				String importedKatalog = (String)entry.getValue().get(CCConstants.CCM_PROP_IO_REPLICATIONSOURCE);
-				String importedId = (String)entry.getValue().get(CCConstants.CCM_PROP_IO_REPLICATIONSOURCEID);
+			for(NodeRef entry : allNodes){
+				String alfNodeId = entry.getId();
+				String importedKatalog = NodeServiceHelper.getProperty(entry,CCConstants.CCM_PROP_IO_REPLICATIONSOURCE);
+				String importedId = NodeServiceHelper.getProperty(entry,CCConstants.CCM_PROP_IO_REPLICATIONSOURCEID);
 				
 				boolean nodeExists = nodeExists(importedId, importedKatalog);
 				if(!nodeExists){
@@ -147,8 +149,8 @@ public class ImportCleaner {
 					countDeletedObjects++;
 				}
 			}
+			logger.info("returns (deleted objects counter:" + countDeletedObjects + ", processed nodes: "+allNodes.size()+")");
 		}
-		logger.info("returns (deleted objects counter:" + countDeletedObjects + ")");
 	}
 	
 }

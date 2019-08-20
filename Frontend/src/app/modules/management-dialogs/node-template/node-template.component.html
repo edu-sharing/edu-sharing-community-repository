@@ -20,6 +20,7 @@
             [groupId]="'io_template'"
             [currentValues]="node ? node.properties : {}"
             [invalidate]="true"
+            [class.display-none]="!enabled"
           ></mds>
             <div *ngIf="!enabled" class="template-disabled">
                 <div class="disabled-info"  data-i18n="[html]content.body">

@@ -20,6 +20,7 @@ import org.edu_sharing.repository.server.tools.cache.PreviewCache;
 import org.edu_sharing.restservices.collection.v1.model.Collection;
 import org.edu_sharing.restservices.collection.v1.model.CollectionBase;
 import org.edu_sharing.restservices.collection.v1.model.CollectionReference;
+import org.edu_sharing.restservices.node.v1.model.NodeEntries;
 import org.edu_sharing.restservices.shared.Filter;
 import org.edu_sharing.restservices.shared.Node;
 import org.edu_sharing.restservices.shared.NodeRef;
@@ -28,6 +29,7 @@ import org.edu_sharing.restservices.shared.User;
 import org.edu_sharing.restservices.shared.UserProfile;
 import org.edu_sharing.service.Constants;
 import org.edu_sharing.service.collection.CollectionService;
+import org.edu_sharing.service.collection.CollectionServiceFactory;
 import org.edu_sharing.service.search.model.SortDefinition;
 import org.edu_sharing.service.toolpermission.ToolPermissionException;
 import org.edu_sharing.service.toolpermission.ToolPermissionServiceFactory;
@@ -88,26 +90,27 @@ public class CollectionDao {
 		}			
 	}
 
-	public static List<CollectionBase> getCollections(RepositoryDao repoDao, String parentId, SearchScope scope, Filter filter,SortDefinition sortDefinition)
-			throws DAOException {
+	public static List<CollectionBase> getCollections(RepositoryDao repoDao, String parentId, SearchScope scope, Filter filter, SortDefinition sortDefinition, int skipCount, int maxItems)	throws DAOException {
 
 		try {
 			
 			List<CollectionBase> result = new ArrayList<CollectionBase>();
-			
+
+            // if this collection is ordered by user, use the position of the elements as primary order criteria
+            if(!ROOT.equals(parentId) && CCConstants.COLLECTION_ORDER_MODE_CUSTOM.equals(getCollection(repoDao, parentId).getOrderMode())) {
+                sortDefinition.addSortDefinitionEntry(
+                        new SortDefinition.SortDefinitionEntry(CCConstants.getValidLocalName(CCConstants.CCM_PROP_COLLECTION_ORDERED_POSITION),true),0);
+            }
+
 			List<org.alfresco.service.cmr.repository.NodeRef> children = 
 					repoDao.getCollectionClient().getChildReferences(
 							ROOT.equals(parentId) ? null : parentId, 
-							scope.toString());
-			
-			// if this collection is ordered by user, use the position of the elements as primary order criteria
-			if(!ROOT.equals(parentId) && CCConstants.COLLECTION_ORDER_MODE_CUSTOM.equals(getCollection(repoDao, parentId).getOrderMode())) {
-				sortDefinition.addSortDefinitionEntry(
-						new SortDefinition.SortDefinitionEntry(CCConstants.getValidLocalName(CCConstants.CCM_PROP_COLLECTION_ORDERED_POSITION),true),0);
-			}
-			
-			List<Node> sorted = NodeDao.sortAndFilterByType(repoDao, NodeDao.convertAlfrescoNodeRef(repoDao,children), sortDefinition,null,Filter.createShowAllFilter());
-			for (Node child : sorted) {
+							scope.toString(),sortDefinition);
+
+
+            //NodeDao.convertAlfrescoNodeRef(repoDao,children)
+			NodeEntries sorted = NodeDao.convertToRest(repoDao,Filter.createShowAllFilter(),NodeDao.convertAlfrescoNodeRef(repoDao,children),skipCount,maxItems);
+			for (Node child : sorted.getNodes()) {
 	
 				String nodeType = child.getType();
 				
@@ -137,6 +140,7 @@ public class CollectionDao {
 					final Node node=child;
 					collRef.setReference(node);
 					collRef.setAccess(node.getAccess());
+					collRef.setAspects(node.getAspects());
 					HashMap<String,String[]> props = collRef.getReference().getProperties();
 					String[] prop=props.get(shortproporiginal);
 					final String originalId=prop!=null && prop.length>0 ? prop[0] : null;
@@ -279,7 +283,17 @@ public class CollectionDao {
 		}
 			
 	}
+	public static void addToCollection(RepositoryDao repoDao,String collectionId,String nodeId) throws DAOException {
+		try {
 
+			CollectionServiceFactory.getCollectionService(repoDao.getApplicationInfo().getAppId()).
+					addToCollection(collectionId,nodeId);
+
+		} catch (Throwable t) {
+
+			throw DAOException.mapping(t);
+		}
+	}
 	public void addToCollection(NodeDao node) throws DAOException {
 		
 		try {

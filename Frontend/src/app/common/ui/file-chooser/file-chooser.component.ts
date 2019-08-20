@@ -8,6 +8,7 @@ import {RestConstants} from "../../rest/rest-constants";
 import {RestCollectionService} from "../../rest/services/rest-collection.service";
 import {Toast} from "../toast";
 import {ListItem} from "../list-item";
+import {UIHelper} from '../ui-helper';
 
 @Component({
   selector: 'file-chooser',
@@ -56,7 +57,12 @@ export class FileChooserComponent implements OnInit{
    * Set true if the user should pick a collection, not a regular node
    * @param collections
    */
-  @Input() set collections(collections : boolean){
+    /**
+     * relevant for directory picking: allow to choose the root directory (userhome)?
+     */
+  @Input() public allowRoot=true;
+
+    @Input() set collections(collections : boolean){
     this._collections=collections;
     this.viewType=2;
     this.homeDirectory=RestConstants.ROOT;
@@ -65,10 +71,7 @@ export class FileChooserComponent implements OnInit{
     this.icon='layers';
     this.searchMode=true;
     this.searchQuery="";
-    this.columns=[];
-    this.columns.push(new ListItem("COLLECTION","title"));
-    this.columns.push(new ListItem("COLLECTION","info"));
-    this.columns.push(new ListItem("COLLECTION","scope"));
+    this.columns=UIHelper.getDefaultCollectionColumns();
     this.sortBy=RestConstants.CM_MODIFIED_DATE;
     this.sortAscending=false;
   }
@@ -88,6 +91,7 @@ export class FileChooserComponent implements OnInit{
    * @type {Array}
    */
   @Input() filter : string[] = [];
+  @Input() priority = 0;
   private sortBy : string;
   private sortAscending=true;
   /**
@@ -129,11 +133,7 @@ export class FileChooserComponent implements OnInit{
       }
       return {status:true};
   }
-  private setHome(home: string) {
-    this.homeDirectory=home;
-    this.viewDirectory(this.homeDirectory);
 
-  }
   private selectBreadcrumb(position : number){
     if(position==0)
       this.viewDirectory(this.homeDirectory);
@@ -238,6 +238,13 @@ export class FileChooserComponent implements OnInit{
     }
   }
   private chooseDirectory(){
+      // is root directory
+      if(!this.path.length){
+          this.node.getNodeMetadata(this.homeDirectory).subscribe((node)=>{
+              this.onChoose.emit([node.node]);
+          });
+          return;
+      }
     let node=this.path[this.path.length-1];
     if(this._collections){
       if(node.access.indexOf(RestConstants.ACCESS_WRITE)==-1){

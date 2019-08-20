@@ -3,4 +3,5 @@ import javax.xml.bind.annotation.XmlElement;
 
 public class Rendering {
 	@XmlElement Boolean showPreview;
+	@XmlElement Boolean showDownloadButton;
 }

@@ -27,9 +27,10 @@ public class BinaryHandlerTechnicalLocation implements BinaryHandler{
 	}
 	
 	@Override
-	public void safe(String alfrescoNodeId, HashMap<String, Object> properties,Node nodeRecord) {
-		String technicalLocation = (String)properties.get(CCConstants.LOM_PROP_TECHNICAL_LOCATION);
-		technicalLocation = technicalLocation.trim();
+	public void safe(String alfrescoNodeId, RecordHandlerInterfaceBase recordHandler, Node nodeRecord) {
+		String technicalLocation = (String) recordHandler.getProperties().get(CCConstants.LOM_PROP_TECHNICAL_LOCATION);
+		if(technicalLocation!=null)
+			technicalLocation = technicalLocation.trim();
 		if(technicalLocation != null && technicalLocation.startsWith("http")){
 			
 			try{

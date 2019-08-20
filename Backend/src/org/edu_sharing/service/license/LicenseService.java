@@ -2,16 +2,20 @@ package org.edu_sharing.service.license;
 
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.server.tools.ApplicationInfoList;
+import org.edu_sharing.repository.server.tools.URLTool;
 
 public class LicenseService {
 
-	public String getIconUrl(String license){
+	public String getIconUrl(String license,boolean dynamic){
 		if(license==null || license.isEmpty())
 			license="none";
 		String ccImageName = license.toLowerCase().replace("_", "-")+".svg";
-		String url = ApplicationInfoList.getHomeRepository().getClientBaseUrl() + "/ccimages/licenses/" + ccImageName;
-		
+		String url = URLTool.getBaseUrl(dynamic) + "/ccimages/licenses/" + ccImageName;
+
 		return url;
+	}
+	public String getIconUrl(String license){
+		return getIconUrl(license,true);
 	}
 
 	public String getLicenseUrl(String license, String locale){

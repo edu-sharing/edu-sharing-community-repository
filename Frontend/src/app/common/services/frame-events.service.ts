@@ -1,5 +1,4 @@
 import { Injectable } from '@angular/core';
-import { Http, Response } from '@angular/http';
 import {RestNodeService} from "../rest/services/rest-node.service";
 import {RestConstants} from "../rest/rest-constants";
 import {RestHelper} from "../rest/rest-helper";
@@ -93,7 +92,9 @@ export class FrameEventsService {
     }
     if (this.isRunningInFrame()) {
       window.parent.postMessage({event: event, data: data}, '*');
-    } else {
+    } else if(window.opener) {
+      window.opener.postMessage({event: event, data: data}, '*');
+    } else{
       window.postMessage({event: event, data: data}, '*');
     }
     for(let w of this.windows){

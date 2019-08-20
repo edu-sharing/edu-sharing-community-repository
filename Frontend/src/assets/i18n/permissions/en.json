@@ -13,6 +13,7 @@
     "MENU_DELETE":"Delete",
     "MANAGE_GROUP":"Manage group {{group}}",
     "ADD_MEMBER_TO_GROUP":"Add user to group {{group}}",
+    "EDIT_MEMBER_GROUPS":"User is member of",
     "EXPORT_MEMBER":"Export users",
     "ADD_ORG":"Create organization",
     "USER_EXISTS_IN_GROUP":"User is already member of that group",
@@ -20,13 +21,17 @@
     "MENU_ADD_TO_GROUP":"Add to group",
     "MENU_MANAGE_GROUP":"Manage members",
     "MENU_ADD_GROUP_MEMBERS":"Add user",
+    "MENU_EDIT_GROUPS":"Manage memberships",
     "MENU_EXCLUDE":"Exclude",
+    "MENU_REMOVE_MEMBERSHIP":"Remove from group(s)",
     "SEARCH_GROUP":"Search for groups...",
     "SEARCH_USER":"Search for users..",
+    "SEARCH_GROUPS":"Search for groups...",
     "SEARCH_MEMBER":"Search for members...",
     "SEARCH_ORG":"Search for organizations...",
     "NO_ELEMENTS":"No elements",
     "NO_ELEMENTS_SEARCH":"No elements matching your search",
+    "MEMBERSHIP_REMOVED":"memberships have been canceled",
     "USER_EDITED":"User saved",
     "GROUP_EDITED":"Group saved",
     "GROUP_CREATED":"Group created",
@@ -53,6 +58,7 @@
     "DELETE_GROUP":"Are you sure you want to delete the selected groups?",
     "DELETE_GROUP_SINGLE":"Are you sure you want to delete the group {{name}}?",
     "DELETE_ORG_SINGLE":"Are you sure you want to remove the organization {{name}}? All users remain and the organization data store will not be deleted",
+    "DELETE_ERROR_ADMINISTRATORS":"Administrators-Groups may not be deleted",
     "DELETED_USER":"User(s) removed successfully",
     "DELETED_GROUP":"Group(s) removed successfully",
     "MEMBER_REMOVED":"User removed from group",
@@ -65,11 +71,15 @@
     "NO_ORG":"View all",
     "INTERNAL_NAME":"Internal name",
     "CURRENT_MEMBERS":"Current members of group {{group}}:",
-    "DOWNLOAD_MEMBER_FILENAME":"Users.csv"
-  },
-  "GROUP_TYPE":{
-    "null":"None / Regular group",
-    "EDITORIAL":"Editorial group",
-    "ORG_ADMINISTRATORS":"Administration group"
+    "DOWNLOAD_MEMBER_FILENAME":"Users.csv",
+    "GROUP_TYPE":{
+      "null":"none / regular group",
+      "EDITORIAL":"editorial group",
+      "ORG_ADMINISTRATORS":"administrators"
+    },
+    "SCOPE_TYPE":{
+      "null":"Local / Default visibility",
+      "global":"Global / Across repositories"
+    }
   }
 }

@@ -115,9 +115,9 @@ public class VCardConverter {
 		
 		return result;
 	}
-	
+
 	public static String getNameForVCard(String prefix,HashMap<String,Object> data){
-		if(data.containsKey(prefix+CCConstants.VCARD_GIVENNAME) || data.containsKey(prefix+CCConstants.VCARD_SURNAME)){
+		if(isPersonVCard(prefix,data)){
 			String name="";
 			if(data.containsKey(prefix+CCConstants.VCARD_GIVENNAME))
 				name+=data.get(prefix+CCConstants.VCARD_GIVENNAME)+" ";
@@ -242,5 +242,9 @@ public class VCardConverter {
 		}
 		return propsNew;
 	}
-	
+
+    public static boolean isPersonVCard(String prefix, HashMap<String, Object> data) {
+        return data.get(prefix+CCConstants.VCARD_GIVENNAME)!=null && !data.get(prefix+CCConstants.VCARD_GIVENNAME).toString().isEmpty() ||
+                data.containsKey(prefix+CCConstants.VCARD_SURNAME) && !data.get(prefix+CCConstants.VCARD_SURNAME).toString().isEmpty();
+    }
 }

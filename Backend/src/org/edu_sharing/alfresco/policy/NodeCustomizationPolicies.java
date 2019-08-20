@@ -93,7 +93,11 @@ import com.coremedia.iso.boxes.TrackHeaderBox;
  * * - only if create_version value is true (default = true)
  */
 public class NodeCustomizationPolicies implements OnContentUpdatePolicy, OnCreateNodePolicy, OnUpdatePropertiesPolicy{
-	
+
+	/**
+	 * These are the properties that will be copied to all io_reference nodes inside collections
+	 * if the original node gets changed
+	 */
 	private static final String[] IO_REFERENCE_COPY_PROPERTIES = new String[]{
 			CCConstants.CCM_PROP_IO_COMMONLICENSE_KEY,
 			CCConstants.CCM_PROP_IO_COMMONLICENSE_CC_LOCALE,
@@ -108,6 +112,12 @@ public class NodeCustomizationPolicies implements OnContentUpdatePolicy, OnCreat
 			CCConstants.CCM_PROP_IO_LICENSE_TO,
 			CCConstants.CCM_PROP_IO_LICENSE_VALID,
 
+
+			// fix for 4.2, override all relevant metadata when changed on original
+			CCConstants.LOM_PROP_GENERAL_TITLE,
+			CCConstants.LOM_PROP_GENERAL_KEYWORD,
+			CCConstants.LOM_PROP_GENERAL_DESCRIPTION,
+			CCConstants.LOM_PROP_EDUCATIONAL_LEARNINGRESOURCETYPE,
 	};
 
 	static Logger logger = Logger.getLogger(NodeCustomizationPolicies.class);
@@ -145,6 +155,7 @@ public class NodeCustomizationPolicies implements OnContentUpdatePolicy, OnCreat
 		policyComponent.bindClassBehaviour(OnCreateNodePolicy.QNAME, QName.createQName(CCConstants.CCM_TYPE_IO), new JavaBehaviour(this, "onCreateNode"));
 		policyComponent.bindClassBehaviour(OnCreateNodePolicy.QNAME, QName.createQName(CCConstants.CCM_TYPE_MAP), new JavaBehaviour(this, "onCreateNode"));
 		
+		policyComponent.bindClassBehaviour(OnContentUpdatePolicy.QNAME, ContentModel.TYPE_CONTENT, new JavaBehaviour(this, "onContentUpdate"));
 		policyComponent.bindClassBehaviour(OnContentUpdatePolicy.QNAME, QName.createQName(CCConstants.CCM_TYPE_IO), new JavaBehaviour(this, "onContentUpdate"));
 		
 		//for async changed properties refresh node in cache
@@ -181,93 +192,8 @@ public class NodeCustomizationPolicies implements OnContentUpdatePolicy, OnCreat
 					&& (LockStatus.NO_LOCK.equals(lockStatus) || LockStatus.LOCK_EXPIRED.equals(lockStatus))
 					&& (reader!=null) && (reader.getContentData()!=null) && reader.getContentData().getSize() > 0){
 			
-				logger.debug("will do the thumbnail");
-				
-				if(reader.getMimetype().contains("video")){
-					
-					ReadableByteChannel rbc = null;
-					try{
-						
-						rbc = Channels.newChannel(reader.getContentInputStream());
-						IsoFile isoFile = new IsoFile(rbc);
-						MovieBox moov = isoFile.getMovieBox();
-						if(moov != null && moov.getBoxes() != null){
-							for(Box b : moov.getBoxes()) {
-							   
-							    
-							    if(b instanceof TrackBox){
-							    	TrackHeaderBox thb = ((TrackBox)b).getTrackHeaderBox();
-							    	
-							    	if(thb.getWidth() > 0 && thb.getHeight() > 0){
-							    		nodeService.setProperty(nodeRef, QName.createQName(CCConstants.CCM_PROP_IO_WIDTH), thb.getWidth());
-							    		nodeService.setProperty(nodeRef, QName.createQName(CCConstants.CCM_PROP_IO_HEIGHT), thb.getHeight());
-							    	}
-							 
-							    }
-							    
-							}
-						}
-						
-					}catch(Exception e){
-						logger.error(e.getMessage(), e);
-					}finally{
-						
-						if(rbc != null){
-							try{
-							
-								rbc.close();
-							}catch(IOException e){
-								logger.error(e.getMessage(), e);
-							}
-						}
-					}
-				}
-				// alfresco does not read image size for all images, so we try to fix it
-				// trying to load not the whole image but just the bounding rect, see also:
-				// http://stackoverflow.com/questions/1559253/java-imageio-getting-image-dimensions-without-reading-the-entire-file
-				if(reader.getMimetype().contains("image")){
-					try{
-						try(ImageInputStream in = ImageIO.createImageInputStream(reader.getContentInputStream())){
-						    final Iterator<ImageReader> readers = ImageIO.getImageReaders(in);
-						    if (readers.hasNext()) {
-						        ImageReader imageReader = readers.next();
-						        try {
-						        	imageReader.setInput(in);
-						        	nodeService.setProperty(nodeRef, QName.createQName(CCConstants.EXIF_PROP_PIXELXDIMENSION), imageReader.getWidth(0));
-									nodeService.setProperty(nodeRef, QName.createQName(CCConstants.EXIF_PROP_PIXELYDIMENSION), imageReader.getHeight(0));
-						        } finally {
-						        	imageReader.dispose();
-						        }
-						    }
-						} 
-					}catch(Throwable t){}
-				}
-				
-				Action thumbnailAction = actionService.createAction(CCConstants.ACTION_NAME_CREATE_THUMBNAIL);
-				thumbnailAction.setTrackStatus(true);
-				thumbnailAction.setExecuteAsynchronously(true);
-				thumbnailAction.setParameterValue("thumbnail-name", CCConstants.CM_VALUE_THUMBNAIL_NAME_imgpreview_png);
-				thumbnailAction.setParameterValue(ActionObserver.ACTION_OBSERVER_ADD_DATE, new Date());
-			
-				ActionObserver.getInstance().addAction(nodeRef, thumbnailAction);
-				
-				SimpleTrigger st = new SimpleTrigger();
-				st.setName("ImmediateTrigger");
-				st.setRepeatCount(0);
-				st.setStartTime(new Date(System.currentTimeMillis() + 500));
-				JobDetail jd = new JobDetail();
-				jd.setJobClass(PreviewJob.class);
-				jd.setName(PreviewJob.class.getName() + " Immediate " + System.currentTimeMillis());
-				
-				try {
-					scheduler.scheduleJob(jd,st);
-				}catch(ObjectAlreadyExistsException e) {
-					//only when debug, the job should only be executed as a singelton, so this exception is fine
-					logger.debug(e.getMessage());
-				}catch(SchedulerException e) {
-					logger.error(e.getMessage(),e);
-				}			
-			}
+	     	    new ThumbnailHandling().thumbnailHandling(nodeRef);
+    		}
 			
 			logger.debug("will do the resourceinfo. noderef:"+nodeRef);
 			Action resourceInfoAction = actionService.createAction(CCConstants.ACTION_NAME_RESOURCEINFO);
@@ -297,7 +223,7 @@ public class NodeCustomizationPolicies implements OnContentUpdatePolicy, OnCreat
 		}
 	
 	}
-	
+
 	@Override
 	public void onCreateNode(ChildAssociationRef childAssocRef) {
 		
@@ -345,7 +271,9 @@ public class NodeCustomizationPolicies implements OnContentUpdatePolicy, OnCreat
 	        	}
 	        	
 	        	//for collections and solr set originalid (will be overwritten by collectionservice if a reference io is created)
-	        	nodeService.setProperty(eduNodeRef, QName.createQName(CCConstants.CCM_PROP_IO_ORIGINAL),eduNodeRef.getId());
+				// the id will be written on copy, so may it already exists -> then keep it
+				if(nodeService.getProperty(eduNodeRef,QName.createQName(CCConstants.CCM_PROP_IO_ORIGINAL))==null)
+	        		nodeService.setProperty(eduNodeRef, QName.createQName(CCConstants.CCM_PROP_IO_ORIGINAL),eduNodeRef.getId());
 	        	
 				NodeRef personRef = personService.getPerson((String) props.get(ContentModel.PROP_CREATOR));
 				Map<QName, Serializable> userInfo = nodeService.getProperties(personRef);
@@ -409,7 +337,7 @@ public class NodeCustomizationPolicies implements OnContentUpdatePolicy, OnCreat
 	public void onUpdateProperties(NodeRef nodeRef, Map<QName, Serializable> before, Map<QName, Serializable> after) {
 		
 		//System.out.println("********** onUpdateProperties node("+nodeRef.getId()+")");
-		
+
 		// make the title like the name(when webdav rename is done), @TODO mybe just show the name in the gui
 		String nameBefore = (String)before.get(ContentModel.PROP_NAME);
 		String nameAfter =  (String)after.get(ContentModel.PROP_NAME);
@@ -430,6 +358,11 @@ public class NodeCustomizationPolicies implements OnContentUpdatePolicy, OnCreat
 			Map<QName, Serializable> properties = nodeService.getProperties(nodeRef);
 			for(NodeRef ref : result.getNodeRefs()){
 				Map<QName, Serializable> originalProperties = nodeService.getProperties(ref);
+				// security check: make sure we have an object which really matches the solr query
+				if(nodeService.hasAspect(ref,QName.createQName(CCConstants.CCM_ASPECT_COLLECTION_IO_REFERENCE)) || !originalProperties.get(QName.createQName(CCConstants.CCM_PROP_IO_ORIGINAL)).equals(nodeRef.getId())){
+					logger.warn("Solr query for node "+nodeRef.getId()+" returned node "+ref.getId()+", but it's metadata do not match");
+					continue;
+				}
 				for(QName prop : properties.keySet()){
 					if(Arrays.asList(IO_REFERENCE_COPY_PROPERTIES).contains(prop.toString())){
 						originalProperties.put(prop, properties.get(prop));
@@ -462,13 +395,13 @@ public class NodeCustomizationPolicies implements OnContentUpdatePolicy, OnCreat
 			String linktype = (String)after.get(QName.createQName(CCConstants.CCM_PROP_LINKTYPE));
 			String previewImageBase64 = (linktype != null && linktype.equals(CCConstants.CCM_VALUE_LINK_LINKTYPE_USER_GENERATED)) ? getPreviewFromURL(afterURL) : null;
 			writeBase64Image(nodeRef,previewImageBase64);
-			
+
 		}
-		
+
 	}
-	
-	
-	
+
+
+
 	private void writeBase64Image(NodeRef nodeRef, String previewImageBase64) {
 		if (previewImageBase64!=null) {
 
@@ -495,12 +428,12 @@ public class NodeCustomizationPolicies implements OnContentUpdatePolicy, OnCreat
 				e.printStackTrace();
 			}
 			logger.info("---> OK IMAGE WRITTEN");
-			
+
 		} else {
 			logger.warn("---> NO PREVIEW IMAGE");
 		}
 	}
-	
+
 	public  void generateWebsitePreview(NodeRef nodeRef, String url) {
 		if(nodeRef == null || url == null) {
 			return;
@@ -591,8 +524,7 @@ public class NodeCustomizationPolicies implements OnContentUpdatePolicy, OnCreat
 		// the following service: https://github.com/rootzoll/web-screenshot
 		// --> IF NOT AVAILABLE WILL JUST WARN
 		try {
-			final String localServiceUrl = websitePreviewRenderService+"/?url="+java.net.URLEncoder.encode(httpURL, "ISO-8859-1")+"&scale="+scale+"&base64=1"; 
-			//System.out.println("Calling external Service: "+localServiceUrl);
+			final String localServiceUrl = websitePreviewRenderService+"/?url="+java.net.URLEncoder.encode(httpURL, "ISO-8859-1")+"&scale="+scale+"&base64=1";
 		    HttpClient client = new HttpClient();
 		    GetMethod method = new GetMethod(localServiceUrl);
 		    int statusCode = client.executeMethod(method);

@@ -54,7 +54,7 @@
         <h2 class="noHistory" *ngIf="!history.length">{{'WORKSPACE.WORKFLOW.NO_HISTORY' | translate}}</h2>
         <div class="history">
           <div *ngFor="let entry of history;let i=index">
-            <div class="user">{{ entry.editor | authorityName }}</div><div class="date">{{entry.time | formatDate:{time:true} }}</div>
+            <div class="user">{{ entry.editor | authorityName }}</div><div class="date">{{entry.time | formatDate:{time:true,relative:true} }}</div>
             <div class="box">
               <div class="table">
                 <div class="row">

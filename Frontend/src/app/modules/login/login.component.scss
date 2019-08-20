@@ -3,12 +3,10 @@
 md-input{
   width:100%;
 }
-.powered{
-  text-align: center;
-  width: 100%;
-  position:fixed;
-  top:calc(15% + 490px);
-  color: $textVeryLight;
+powered-by{
+  position: fixed;
+  left: 0;
+  bottom: 5%;
 }
 .card-cancel{
   z-index: 1;
@@ -39,20 +37,90 @@ md-input{
 .register{
   color:$textLight;
 }
-@media screen and (max-height: ($mobileHeight)) {
-  .card{
-    top: 15%;
-    bottom:auto;
+.groups{
+  display: flex;
+  padding:$cardPadding 0;
+  >div{
+    width: 0;
+    flex-grow: 1;
+    padding:0 10px;
+    .group-heading{
+      width: 100%;
+      padding: 5px 10px;
+      margin-bottom: 10px;
+      color:$textLight;
+      text-transform: uppercase;
+      font-size: 130%;
+      border-bottom:1px solid $textLight;
+      text-align: center;
+    }
+    .group-description{
+      color:$textLight;
+      padding: 0 10px 20px 10px;
+      text-align: center;
+    }
+    .sso-group{
+      display: flex;
+      .group-actions{
+        flex-grow: 1;
+        align-self: flex-end;
+      }
+      .sso-logo{
+        padding-left: 10px;
+        height: 114px;
+      }
+    }
+    mat-form-field{
+      width: 100%;
+    }
+  }
+}
+// @todo: remove this when switching to full angular material
+:host /deep/ {
+  .mat-form-field-appearance-outline .mat-form-field-outline{
+    top: 0;
+  }
+  .mat-form-field-appearance-outline .mat-form-field-infix {
+    padding-top: 0.15em;
+  }
+}
+.useUrl{
+  .goto{
+    display: inline-flex;
+    align-items: center;
+    text-transform: uppercase;
+    padding-top: 5px;
+    i{
+      padding-left: 4px;
+      font-size: 20px;
+    }
   }
 }
 @media screen and (max-width: $mobileWidth+$mobileStage*1) {
-  .card-title{
-    margin-bottom: 15px;
+  .groups{
+    flex-direction: column;
+    >div{
+      padding:10px 0;
+      width: 100%;
+    }
   }
-  .powered{
-    top:calc(15% + 410px);
+}
+@media screen and (max-width: $mobileTabSwitchWidth){
+  powered-by{
+    display: none;
   }
-
+  .card{
+    top: 0;
+    bottom:$mobileTabNavHeight;
+  }
+  .center-card .card-scroll{
+    height:calc(100% + 69px);
+  }
+  .card-action-info{
+    display: none;
+  }
+}
+@media screen and (max-width: $mobileWidth+$mobileStage*1) {
   .branding{
     position: absolute;
     top: -27px;

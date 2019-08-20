@@ -1,0 +1,28 @@
+@import "../../../../styles/variables.scss";
+
+.calendar{
+ position: relative;
+ >div {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  input{
+   margin-bottom: 0;
+  }
+  .material-icons{
+   color:$textLight;
+   margin-left: 15px;
+  }
+ }
+}
+.picker{
+ position: absolute;
+ z-index: $dialogZIndex+1;
+ background-color: #fff;
+ padding: 5px;
+ width: 250px;
+ @include materialShadowMediumLarge();
+ mat-calendar{
+  width: 100%;
+ }
+}

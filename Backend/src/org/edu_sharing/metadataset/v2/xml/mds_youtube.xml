@@ -4,6 +4,16 @@
 		<i18n>mds</i18n>
 		<widgets>
 		</widgets>
+		<sorts>
+			<sort>
+				<id>search</id>
+				<default>
+					<sortBy>score</sortBy>
+					<sortAscending>false</sortAscending>
+				</default>
+				<!-- no columns because we currently don't support sorting for this repository -->
+			</sort>
+		</sorts>
 		<lists>
 			<list>
 				<id>search</id>

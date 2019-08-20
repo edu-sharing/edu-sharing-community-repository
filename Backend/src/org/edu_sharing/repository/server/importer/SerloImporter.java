@@ -1,5 +1,6 @@
 package org.edu_sharing.repository.server.importer;
 
+import java.lang.reflect.Constructor;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -17,6 +18,7 @@ import org.edu_sharing.repository.client.tools.forms.VCardTool;
 import org.edu_sharing.repository.server.MCAlfrescoAPIClient;
 import org.edu_sharing.repository.server.RepoFactory;
 import org.edu_sharing.repository.server.SchoolContextServiceImpl;
+import org.edu_sharing.repository.server.jobs.quartz.ImporterJob;
 import org.edu_sharing.repository.server.tools.HttpQueryTool;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
@@ -76,8 +78,12 @@ public class SerloImporter implements Importer{
 	}
 	
 	@Override
-	public void setBinaryHandler(BinaryHandler binaryHandler) {
-		this.binaryHandler = binaryHandler;
+	public void setBinaryHandler(Constructor<BinaryHandler> binaryHandler) {
+		try {
+			this.binaryHandler = binaryHandler.newInstance();
+		} catch (Exception e) {
+			logger.error(e);
+		}
 	}
 	
 	@Override
@@ -99,7 +105,7 @@ public class SerloImporter implements Importer{
 	}
 	
 	@Override
-	public void setRecordHandler(RecordHandlerInterface recordHandler) {
+	public void setRecordHandler(Constructor<RecordHandlerInterface> recordHandler) {
 		
 	}
 	
@@ -295,7 +301,7 @@ public class SerloImporter implements Importer{
 				link = link.replaceAll("\\\\", "");
 				link = "https://de.serlo.org"+link;
 				eduProps.put(CCConstants.LOM_PROP_TECHNICAL_LOCATION, link);
-				
+				eduProps.put(CCConstants.CCM_PROP_IO_WWWURL, link);
 				//eduProps.put(CCConstants.CCM_PROP_IO_THUMBNAILURL, "http://web-screenshot.serlo.org:2341/?url="+link+"&scale=0.4");
 				eduProps.put(CCConstants.LOM_PROP_GENERAL_KEYWORD, generalKeywords);
 				
@@ -316,8 +322,8 @@ public class SerloImporter implements Importer{
 				//just for filling search widget
 				eduProps.put(CCConstants.CCM_PROP_IO_REPL_LIFECYCLECONTRIBUTER_CONTENT_PROVIDER,"serlo");
 				
-				String nodeId = persistentHandler.safe(eduProps, null, "serlo_"+set);
-				binaryHandler.safe(nodeId, eduProps, null);
+				String nodeId = persistentHandler.safe(new RecordHandlerStatic(eduProps), null, "serlo_"+set);
+				binaryHandler.safe(nodeId, new RecordHandlerStatic(eduProps), null);
 			}
 			
 		}catch(Throwable e){
@@ -327,8 +333,23 @@ public class SerloImporter implements Importer{
 	}
 	
 	@Override
-	public void startImport(String[] oaiIDs, String set) {
+	public void startImport(String[] oaiIDs) {
 		logger.error("not implemented yet");
 	}
-	
+
+	@Override
+	public void setJob(ImporterJob importerJob) {
+
+	}
+
+	@Override
+	public void setMetadataSetId(String metadataSetId) {
+
+	}
+
+	@Override
+	public RecordHandlerInterface getRecordHandler() {
+		return null;
+	}
+
 }

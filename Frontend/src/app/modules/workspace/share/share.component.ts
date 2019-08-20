@@ -4,9 +4,9 @@ import {
 } from '@angular/core';
 import {RestNodeService} from "../../../common/rest/services/rest-node.service";
 import {
-  Node, NodeList, NodePermissions, Permission, Permissions, LocalPermissions,
-  NodeWrapper, IamUsers, IamGroups, NodeShare, IamAuthorities, LoginResult, Authority
-} from "../../../common/rest/data-object";
+    Node, NodeList, NodePermissions, Permission, Permissions, LocalPermissions,
+    NodeWrapper, IamUsers, IamGroups, NodeShare, IamAuthorities, LoginResult, Authority, Collection, UsageList, CollectionUsage
+} from '../../../common/rest/data-object';
 import {Toast} from "../../../common/ui/toast";
 import {RestConstants} from "../../../common/rest/rest-constants";
 import {Subject} from "rxjs";
@@ -19,7 +19,12 @@ import {RestHelper} from "../../../common/rest/rest-helper";
 import {Helper} from "../../../common/helper";
 import {trigger} from "@angular/animations";
 import {UIAnimation} from "../../../common/ui/ui-animation";
-import {UIHelper} from "../../../common/ui/ui-helper";
+import {RestUsageService} from '../../../common/rest/services/rest-usage.service';
+import {UIHelper} from '../../../common/ui/ui-helper';
+import {UIConstants} from '../../../common/ui/ui-constants';
+import {RestCollectionService} from '../../../common/rest/services/rest-collection.service';
+import {ConfigurationService} from "../../../common/services/configuration.service";
+import {DialogButton} from "../../../common/ui/modal-dialog/modal-dialog.component";
 
 @Component({
   selector: 'workspace-share',
@@ -31,9 +36,6 @@ import {UIHelper} from "../../../common/ui/ui-helper";
   ]
 })
 export class WorkspaceShareComponent implements AfterViewInit{
-  ngAfterViewInit(): void {
-    setTimeout(()=>UIHelper.setFocusOnCard());
-  }
   public ALL_PERMISSIONS=["All","Read","ReadPreview","ReadAll","Write","Delete",
     "DeleteChildren","DeleteNode","AddChildren","Consumer","ConsumerMetadata",
     "Editor","Contributor","Collaborator","Coordinator",
@@ -70,6 +72,10 @@ export class WorkspaceShareComponent implements AfterViewInit{
   public linkDisabled : Permission;
   public link = false;
   private _node : Node;
+  dialogTitle : string;
+  dialogMessage : string;
+  dialogCancel : Function;
+  dialogButtons : DialogButton[];
 
   private searchStr: string;
   private inheritAllowed=false;
@@ -88,7 +94,17 @@ export class WorkspaceShareComponent implements AfterViewInit{
   public doiDisabled: boolean;
   private originalPermissions: LocalPermissions;
   private isSafe = false;
+  collectionColumns=UIHelper.getDefaultCollectionColumns();
+  collections: CollectionUsage[];
+  // store authorities marked for deletion
+  public deletedPermissions:string[]=[];
+  public deletedUsages:any[]=[];
+  usages: any;
+  showCollections = false;
 
+    ngAfterViewInit(): void {
+        setTimeout(()=>UIHelper.setFocusOnCard());
+    }
   public isCollection(){
     if(this._node==null)
       return true;
@@ -140,6 +156,7 @@ export class WorkspaceShareComponent implements AfterViewInit{
           this.doiDisabled = this.doiActive;
         }
       },(error:any)=>this.toast.error(error));
+      this.reloadUsages();
     }
     if(node.parent && node.parent.id) {
       this.nodeApi.getNodePermissions(node.parent.id).subscribe((data: NodePermissions) => {
@@ -147,8 +164,7 @@ export class WorkspaceShareComponent implements AfterViewInit{
           this.inherit = data.permissions.inheritedPermissions;
           this.removePermissions(this.inherit, 'OWNER');
           this.removePermissions(data.permissions.localPermissions.permissions, 'OWNER');
-          for (let permission of data.permissions.localPermissions.permissions)
-            this.inherit.push(permission);
+          this.inherit = this.mergePermissions(this.inherit,data.permissions.localPermissions.permissions);
           this.updatePublishState();
           this.initialState=this.getState();
         }
@@ -200,6 +216,10 @@ export class WorkspaceShareComponent implements AfterViewInit{
         this.history=null;
         return;
       }
+      if(this.showCollections){
+        this.showCollections=false;
+        return;
+      }
       if(this.linkNode){
         this.linkNode=null;
         return;
@@ -217,12 +237,22 @@ export class WorkspaceShareComponent implements AfterViewInit{
   private chooseTypeList(p : Permission){
     this.showChooseTypeList=p;
   }
+  isDeleted(p : Permission){
+      return this.deletedPermissions.indexOf(p.authority.authorityName)!=-1;
+  }
   private removePermission(p : Permission){
-    if(this.newPermissions.indexOf(p)!=-1)
+      if(this.isDeleted(p))
+          this.deletedPermissions.splice(this.deletedPermissions.indexOf(p.authority.authorityName),1);
+      else
+          this.deletedPermissions.push(p.authority.authorityName);
+      this.updatePublishState();
+      /*
+      if(this.newPermissions.indexOf(p)!=-1)
       this.newPermissions.splice(this.newPermissions.indexOf(p),1);
     this.permissions.splice(this.permissions.indexOf(p),1);
     this.setPermissions(this.permissions);
     this.updatePublishState();
+    */
   }
   private setType(type : any){
     this.currentType=type.permissions;
@@ -246,6 +276,9 @@ export class WorkspaceShareComponent implements AfterViewInit{
     }
     return false;
   }
+  hasUsages(){
+      return this.usages && Object.keys(this.usages).length;
+  }
   public showHistory(){
     this.history=this._node;
   }
@@ -265,7 +298,10 @@ export class WorkspaceShareComponent implements AfterViewInit{
     }
     permission.permissions=this.currentType;
     permission=Helper.deepCopy(permission);
-    if(!this.contains(this.permissions,permission,false)) {
+    if(this.deletedPermissions.indexOf(permission.authority.authorityName)!=-1){
+      this.deletedPermissions.splice(this.deletedPermissions.indexOf(permission.authority.authorityName),1);
+    }
+    else if(!this.contains(this.permissions,permission,false)) {
       this.newPermissions.push(permission);
       this.permissions.push(permission);
       this.setPermissions(this.permissions);
@@ -280,18 +316,29 @@ export class WorkspaceShareComponent implements AfterViewInit{
     return !this.contains(this.originalPermissions.permissions,p,true);
     //return this.contains(this.newPermissions,p);
   }
-  private save(){
+  filterDisabledPermissions(permissions:Permission[]){
+    let result:Permission[]=[];
+    if(!permissions)
+      return result;
+    for(let p of permissions){
+      if(this.deletedPermissions.indexOf(p.authority.authorityName)==-1)
+        result.push(p);
+    }
+    return result;
+  }
+    private save(){
     if(this.permissions!=null) {
       this.onLoading.emit(true);
-      let permissions=RestHelper.copyAndCleanPermissions(this.permissions,this.inherited && this.inheritAllowed && !this.disableInherition);
-      if(!this.sendToApi) {
-        this.onClose.emit(permissions);
+      let inherit=this.inherited && this.inheritAllowed && !this.disableInherition;
+      let permissions=Helper.deepCopy(this.permissions);
+      permissions=permissions.filter((p:Permission)=>!this.isDeleted(p));
+      let permissionsCopy=RestHelper.copyAndCleanPermissions(permissions,inherit);
+        if(!this.sendToApi) {
+        this.onClose.emit(this.getEmitObject(RestHelper.copyPermissions(permissions,inherit)));
         return;
       }
-      this.nodeApi.setNodePermissions(this._node.ref.id,permissions,this.notifyUsers && this.sendMessages,this.notifyMessage,false,this.doiPermission && this.allowDOI() && this.doiActive && this.publishActive).subscribe(() => {
-          this.onLoading.emit(false);
-          this.onClose.emit(permissions);
-          this.toast.toast('WORKSPACE.PERMISSIONS_UPDATED');
+      this.nodeApi.setNodePermissions(this._node.ref.id,permissionsCopy,this.notifyUsers && this.sendMessages,this.notifyMessage,false,this.doiPermission && this.allowDOI() && this.doiActive && this.publishActive).subscribe(() => {
+          this.updateUsages(RestHelper.copyPermissions(permissions,inherit));
         },
         (error : any)=> {
           this.toast.error(error);
@@ -302,8 +349,11 @@ export class WorkspaceShareComponent implements AfterViewInit{
   }
   constructor(private nodeApi : RestNodeService,
               private translate : TranslateService,
+              private collectionService : RestCollectionService,
               private applicationRef : ApplicationRef,
+              private config : ConfigurationService,
               private toast : Toast,
+              private usageApi : RestUsageService,
               private iam : RestIamService,
               private connector:RestConnectorService){
     //this.dataService=new SearchData(iam);
@@ -413,7 +463,7 @@ export class WorkspaceShareComponent implements AfterViewInit{
   }
   private updatePublishState() {
     this.publishInherit=this.inherited && this.getAuthorityPos(this.inherit,RestConstants.AUTHORITY_EVERYONE)!=-1;
-    this.publishActive=this.publishInherit || this.getAuthorityPos(this.permissions,RestConstants.AUTHORITY_EVERYONE)!=-1;
+    this.publishActive=this.publishInherit || this.getAuthorityPos(this.permissions,RestConstants.AUTHORITY_EVERYONE)!=-1 && this.deletedPermissions.indexOf(RestConstants.AUTHORITY_EVERYONE)==-1;
   }
 
   private getAuthorityPos(permissions: Permission[], authority: string) {
@@ -425,8 +475,28 @@ export class WorkspaceShareComponent implements AfterViewInit{
     }
     return -1;
   }
-  public setPublish(status:boolean){
-    if(status){
+  public setPublish(status:boolean,force=false){
+    if(status && !force){
+      if(this.config.instant('publishingNotice',false)){
+        this.dialogTitle='WORKSPACE.SHARE.PUBLISHING_WARNING_TITLE';
+        this.dialogMessage='WORKSPACE.SHARE.PUBLISHING_WARNING_MESSAGE';
+        this.dialogCancel=()=>{
+            this.dialogTitle=null;
+            this.publishActive=false;
+        };
+        this.dialogButtons=DialogButton.getYesNo(()=>{
+            this.dialogCancel();
+        }, ()=>{
+            this.publishActive=true;
+            this.dialogTitle=null;
+            this.setPublish(status,true);
+        });
+        return;
+      }
+      if(this.deletedPermissions.indexOf(RestConstants.AUTHORITY_EVERYONE)!=-1){
+          this.deletedPermissions.splice(this.deletedPermissions.indexOf(RestConstants.AUTHORITY_EVERYONE),1);
+          return;
+      }
       let perm=RestHelper.getAllAuthoritiesPermission();
       perm.permissions=[RestConstants.PERMISSION_CONSUMER];
       this.permissions.push(perm);
@@ -443,6 +513,19 @@ export class WorkspaceShareComponent implements AfterViewInit{
     this.updatePublishState();
   }
 
+    reloadUsages() {
+    this.usageApi.getNodeUsagesCollection(this._node.ref.id).subscribe((data)=>{
+        this.collections=data;
+    });
+    this.usageApi.getNodeUsages(this._node.ref.id).subscribe((data:UsageList)=>{
+        this.usages = RestUsageService.getNodeUsagesByRepositoryType(data);
+        console.log(this.usages);
+    });
+  }
+  openCollection(collection:Collection){
+    window.open(UIConstants.ROUTER_PREFIX+"collections?id="+collection.ref.id);
+  }
+
     isStateModified() {
         return this.initialState!=this.getState();
     }
@@ -457,6 +540,59 @@ export class WorkspaceShareComponent implements AfterViewInit{
         }
         return 'PRIVATE';
   }
+
+    private updateUsages(permissions:LocalPermissions,pos=0,error=false) {
+      if(pos==this.deletedUsages.length){
+          this.onLoading.emit(false);
+          this.onClose.emit(this.getEmitObject(permissions));
+          if(!error) {
+              this.toast.toast('WORKSPACE.PERMISSIONS_UPDATED');
+          }
+          return;
+      }
+        console.log(this.deletedUsages);
+        let usage=this.deletedUsages[pos];
+        // collection
+        if(usage.collection){
+            this.collectionService.removeFromCollection(usage.resourceId,usage.collection.ref.id).subscribe(()=>{
+                this.updateUsages(permissions,pos+1);
+            },(error)=>{
+                this.toast.error(error);
+                this.updateUsages(permissions,pos+1,true);
+            });
+        }
+        else{
+            this.usageApi.deleteNodeUsage(this._node.ref.id,usage.nodeId).subscribe(()=>{
+                this.updateUsages(permissions,pos+1);
+            },(error)=>{
+                this.toast.error(error);
+                this.updateUsages(permissions,pos+1,true);
+            });
+        }
+    }
+
+    private mergePermissions(source: Permission[], add: Permission[]) {
+      let merge=source;
+      for(let p2 of add){
+        // do only add new, unique permissions
+        if(merge.filter((p1)=> Helper.objectEquals(p1,p2)).length==0){
+            merge.push(p2);
+        }
+      }
+      return merge;
+    }
+
+  private getEmitObject(localPermissions: LocalPermissions) {
+    return {
+      permissions: localPermissions,
+      notify: this.notifyUsers,
+      notifyMessage: this.notifyMessage
+    };
+  }
+
+    showShareLink() {
+        return this._node.aspects.indexOf(RestConstants.CCM_ASPECT_COLLECTION)==-1 && this.connector.hasToolPermissionInstant(RestConstants.TOOLPERMISSION_INVITE_LINK);
+    }
 }
 /*
 class SearchData extends Subject<CompleterItem[]> implements CompleterData {

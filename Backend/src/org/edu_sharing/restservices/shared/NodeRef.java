@@ -5,6 +5,8 @@ import io.swagger.annotations.ApiModelProperty;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+import java.util.Objects;
+
 @ApiModel(description = "")
 public class NodeRef implements Comparable<NodeRef> {
 
@@ -87,5 +89,10 @@ public class NodeRef implements Comparable<NodeRef> {
 			return this.repo.equals(o.repo) && this.id.equals(o.id);
 		}
 		return false;
+	}
+
+	@Override
+	public int hashCode() {
+		return Objects.hash(repo, id, archived);
 	}
 }

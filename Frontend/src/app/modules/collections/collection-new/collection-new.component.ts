@@ -11,7 +11,6 @@ import {RestCollectionService} from "../../../common/rest/services/rest-collecti
 import {RestNodeService} from "../../../common/rest/services/rest-node.service";
 import {RestConstants} from "../../../common/rest/rest-constants";
 import {RestHelper} from "../../../common/rest/rest-helper";
-import {GwtInterfaceService} from "../../../common/services/gwt-interface.service";
 import {Toast} from "../../../common/ui/toast";
 import {RestIamService} from "../../../common/rest/services/rest-iam.service";
 import {Group, IamGroups, IamUser, LoginResult, NodeRef, Permission} from '../../../common/rest/data-object';
@@ -35,14 +34,13 @@ import {UIHelper} from "../../../common/ui/ui-helper";
 @Component({
   selector: 'app-collection-new',
   templateUrl: 'collection-new.component.html',
-  styleUrls: ['collection-new.component.scss'],
-  providers: [GwtInterfaceService]
+  styleUrls: ['collection-new.component.scss']
 })
 export class CollectionNewComponent {
   @ViewChild('mds') mds : MdsComponent;
   public hasCustomScope: boolean;
-  public COLORS1=['#975B5D','#692426','#E6B247','#A89B39','#699761','#32662A'];
-  public COLORS2=['#60998F','#29685C','#759CB7','#537997','#976097','#692869'];
+  public COLORS:string[];
+  public DEFAULT_COLORS:string[]=['#975B5D','#692426','#E6B247','#A89B39','#699761','#32662A','#60998F','#29685C','#759CB7','#537997','#976097','#692869'];
   public isLoading = true;
   public showPermissions = false;
   private currentCollection:Collection;
@@ -83,6 +81,7 @@ export class CollectionNewComponent {
   private availableSteps: string[];
   private parentCollection: Collection;
   private originalPermissions: LocalPermissions;
+  private permissionsInfo: any;
 
 
   @HostListener('document:keydown', ['$event'])
@@ -111,8 +110,11 @@ export class CollectionNewComponent {
         private translationService:TranslateService) {
         Translation.initialize(this.translationService,this.config,this.storage,this.route).subscribe(()=>{
           this.connector.isLoggedIn().subscribe((data:LoginResult)=>{
+            this.COLORS=this.config.instant('collections.colors',this.DEFAULT_COLORS);
             if(data.statusCode!=RestConstants.STATUS_CODE_OK){
-              this.router.navigate([UIConstants.ROUTER_PREFIX+"collections"]);
+              UIHelper.getCommonParameters(this.route).subscribe((params)=> {
+                this.router.navigate([UIConstants.ROUTER_PREFIX + "collections",{queryParams:params}]);
+              });
               return;
             }
             this.connector.hasToolPermission(RestConstants.TOOLPERMISSION_INVITE).subscribe((has:boolean)=>this.canInvite=has);
@@ -198,9 +200,11 @@ export class CollectionNewComponent {
          //this.toast.error(error)
        });
     }
-    private setPermissions(permissions : LocalPermissions){
+    private setPermissions(permissions : any){
+      console.log(permissions);
       if(permissions) {
-        this.permissions = permissions;
+        this.permissionsInfo = permissions;
+        this.permissions = permissions.permissions;
         this.permissions.inherited=false;
         if(this.permissions.permissions && this.permissions.permissions.length){
           this.currentCollection.scope=RestConstants.COLLECTIONSCOPE_CUSTOM;
@@ -417,7 +421,12 @@ export class CollectionNewComponent {
     }
     navigateToCollectionId(id:string) : void {
       this.isLoading = false;
-      this.router.navigate([UIConstants.ROUTER_PREFIX+'collections'], {queryParams:{id:id,mainnav:this.mainnav}});
+      UIHelper.getCommonParameters(this.route).subscribe((params)=> {
+        params.id=id;
+        this.router.navigate([UIConstants.ROUTER_PREFIX + 'collections'], {
+          queryParams:params
+        });
+      });
     }
   private syncMetadata(goToNext:boolean){
       this.properties=this.mds.getValues({},goToNext);
@@ -452,12 +461,12 @@ export class CollectionNewComponent {
         }
         this.permissions=this.getEditorialGroupPermissions();
     }
-    if((this.newCollectionType==RestConstants.COLLECTIONSCOPE_CUSTOM || this.newCollectionType==RestConstants.GROUP_TYPE_EDITORIAL) && this.permissions && this.permissions.permissions && this.permissions.permissions.length){
+    if((this.newCollectionType==RestConstants.COLLECTIONSCOPE_CUSTOM || this.newCollectionType==RestConstants.GROUP_TYPE_EDITORIAL) && this.permissions && this.permissions.permissions){
       if(this.originalPermissions && this.originalPermissions.inherited){
         console.log("current collection had inherited permissions set. Will keep these setting");
       }
       let permissions=RestHelper.copyAndCleanPermissions(this.permissions.permissions,this.originalPermissions ? this.originalPermissions.inherited : false);
-      this.nodeService.setNodePermissions(collection.ref.id,permissions).subscribe(()=>{
+      this.nodeService.setNodePermissions(collection.ref.id,permissions,this.permissionsInfo ? this.permissionsInfo.notify : false,this.permissionsInfo ? this.permissionsInfo.notifyMessage : null).subscribe(()=>{
         this.save4(collection);
       });
     }
@@ -515,7 +524,7 @@ export class CollectionNewComponent {
     this.currentCollection=new Collection();
     this.currentCollection.title="";
     this.currentCollection.description="";
-    this.currentCollection.color=this.COLORS1[0];
+    this.currentCollection.color=this.COLORS[0];
       if(this.parentCollection && this.parentCollection.type==RestConstants.COLLECTIONTYPE_EDITORIAL){
           this.setCollectionType(RestConstants.COLLECTIONTYPE_EDITORIAL);
       }

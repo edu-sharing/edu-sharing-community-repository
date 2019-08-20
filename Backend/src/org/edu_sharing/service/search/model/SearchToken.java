@@ -1,9 +1,11 @@
 package org.edu_sharing.service.search.model;
 
+import java.io.Serializable;
 import java.util.List;
 import java.util.Map;
 
 import org.apache.log4j.Logger;
+import org.edu_sharing.metadataset.v2.MetadataQueries;
 import org.edu_sharing.metadataset.v2.MetadataQuery;
 import org.edu_sharing.metadataset.v2.tools.MetadataSearchHelper;
 import org.edu_sharing.repository.client.rpc.SearchCriterias;
@@ -15,8 +17,8 @@ import com.sun.star.lang.IllegalArgumentException;
 
 import org.edu_sharing.service.search.SearchService.ContentType;
 
-public class SearchToken {
-	Logger logger = Logger.getLogger(SearchToken.class);
+public class SearchToken implements Serializable {
+	static Logger logger = Logger.getLogger(SearchToken.class);
 
 	SortDefinition sortDefinition;
 	
@@ -39,6 +41,7 @@ public class SearchToken {
 	List<String> authorityScope;
 
 	private ContentType contentType;
+	private MetadataQueries queries;
 
 	public ContentType getContentType(){
 		if(contentType==null)
@@ -84,15 +87,17 @@ public class SearchToken {
 
 	public String getLuceneString() throws QueryValidationFailedException, IllegalArgumentException {
 		if(query!=null){
-			return MetadataSearchHelper.getLuceneString(query,searchCriterias,parameters);
+			return MetadataSearchHelper.getLuceneString(queries,query,searchCriterias,parameters);
 		}
 		if(searchCriterias!=null){
-			logger.warn("Using legacy search method");
-			QueryBuilder queryBuilder = new QueryBuilder();
+			logger.warn("Using lucene string only search");
+			/*QueryBuilder queryBuilder = new QueryBuilder();
 			queryBuilder.setSearchCriterias(searchCriterias);
 			if(luceneString==null || luceneString.trim().isEmpty())
 				return queryBuilder.getSearchString();
 			return "("+queryBuilder.getSearchString()+") AND ("+luceneString+")";
+			*/
+			return MetadataSearchHelper.convertSearchCriteriasToLucene(luceneString,searchCriterias);
 		}
 		return luceneString;
 	}
@@ -105,10 +110,16 @@ public class SearchToken {
 	public void setLuceneString(String luceneString) {
 		this.luceneString = luceneString;
 	}
-	public void setMetadataQuery(MetadataQuery query, Map<String, String[]> parameters) {
-		this.query = query;
+	public void setMetadataQuery(MetadataQueries queries, String queryId, Map<String, String[]> parameters) {
+		this.queries = queries;
+		this.query = queries.findQuery(queryId);
 		this.parameters = parameters;
 	}
+
+	public Map<String, String[]> getParameters() {
+		return parameters;
+	}
+
 	public String getStoreProtocol() {
 		return storeProtocol;
 	}
@@ -156,6 +167,11 @@ public class SearchToken {
 		this.searchCriterias=searchCriterias;
 		updateSearchCriterias(false);
 	}
+
+	public SearchCriterias getSearchCriterias() {
+		return searchCriterias;
+	}
+
 	private void updateSearchCriterias(boolean rebuild) {
 		if(searchCriterias==null || rebuild)
 			searchCriterias=new SearchCriterias();

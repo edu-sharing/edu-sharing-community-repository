@@ -20,7 +20,7 @@ public class ConnectorDAO {
 		
 		ConnectorList result = new ConnectorList();
 		
-		org.edu_sharing.service.connector.ConnectorList connectorList = ConnectorServiceFactory.getConnectorService().getConnectorList();
+		org.edu_sharing.service.connector.ConnectorList connectorList = ConnectorServiceFactory.getConnectorList();
 		
 		ApplicationInfo service = ApplicationInfoList.getRepositoryInfoByType(ApplicationInfo.TYPE_CONNECTOR);
 		if(service==null){
@@ -56,6 +56,8 @@ public class ConnectorDAO {
 			
 			resultConnector.setIcon(connector.getIcon());
 			resultConnector.setId(connector.getId());
+			resultConnector.setOnlyDesktop(connector.isOnlyDesktop());
+			resultConnector.setHasViewMode(connector.isHasViewMode());
 			if(connector.getParameters() != null){
 				resultConnector.setParameters(connector.getParameters().toArray(new String[0]));
 			}

@@ -1,13 +1,14 @@
 package org.edu_sharing.metadataset.v2;
 
+import java.io.Serializable;
 import java.util.*;
 
 import org.apache.log4j.Logger;
 import org.edu_sharing.metadataset.v2.MetadataWidget.Subwidget;
 import org.edu_sharing.repository.client.tools.CCConstants;
 
-public class MetadataSetV2 {
-	Logger logger = Logger.getLogger(MetadataSetV2.class);
+public class MetadataSetV2 implements Serializable {
+	static Logger logger = Logger.getLogger(MetadataSetV2.class);
 
 	public static String DEFAULT_CLIENT_QUERY="ngsearch";
 	public static String DEFAULT_CLIENT_QUERY_CRITERIA = "ngsearchword";	
@@ -18,6 +19,7 @@ public class MetadataSetV2 {
 	private List<MetadataTemplate> templates;
 	private List<MetadataGroup> groups;
 	private List<MetadataList> lists;
+	private List<MetadataSort> sorts;
 	private MetadataQueries queries;
 	private MetadataCreate create;
 	public String getId() {
@@ -100,6 +102,15 @@ public class MetadataSetV2 {
 	public void setLists(List<MetadataList> lists) {
 		this.lists = lists;
 	}
+
+	public List<MetadataSort> getSorts() {
+		return sorts;
+	}
+
+	public void setSorts(List<MetadataSort> sorts) {
+		this.sorts = sorts;
+	}
+
 	public void overrideWith(MetadataSetV2 mdsOverride) {
 		if(mdsOverride.getId()!=null)
 			setId(mdsOverride.getId());
@@ -143,6 +154,15 @@ public class MetadataSetV2 {
 			}
 			else{
 				lists.add(0,list);
+			}
+		}
+		for(MetadataSort sort : mdsOverride.getSorts()){
+			if(sorts.contains(sort)){
+				sorts.remove(sort);
+				sorts.add(0,sort);
+			}
+			else{
+				sorts.add(0,sort);
 			}
 		}
 		if(mdsOverride.getCreate()!=null) {
@@ -233,16 +253,15 @@ public class MetadataSetV2 {
 		  List<MetadataWidget> found=new ArrayList<>();
 		  boolean hasTemplate=false;
 		  for(MetadataWidget widget : widgets){
-		   if(widget.getId().equals(widgetId))
-			   found.add(widget);
-		   if(widget.getId().equals(widgetId) && template.equals(widget.getTemplate())) {
-		   		if(!hasTemplate) found.clear();
-		   		hasTemplate=true;
-			   found.add(widget);
-		   }
+			  if(widget.getId().equals(widgetId) && widget.getTemplate()==null)
+					found.add(widget);
+			  if(widget.getId().equals(widgetId) && template.equals(widget.getTemplate())) {
+					if(!hasTemplate) found.clear();
+					hasTemplate=true;
+					found.add(widget);
+			  }
 		  }
-		  if(found.size()==0)
-		  	throw new IllegalArgumentException("Widget "+widgetId+" was not found in the mds "+id);
+		  List<MetadataWidget> result=new ArrayList<>();
 		  for(MetadataWidget widget : found) {
 			  boolean allowed = true;
 			  MetadataWidget.Condition cond = widget.getCondition();
@@ -253,11 +272,19 @@ public class MetadataSetV2 {
 			  	  allowed=empty==cond.isNegate();
 			  }
 			  if(allowed) {
-				  return widget;
+				  result.add(widget);
 			  }
 		  }
-		  found.get(0).setHideIfEmpty(true);
-		  return found.get(0);
+		// no condition matched
+		if(result.size()==0) result=found;
+
+		if(result.size()==0)
+			throw new IllegalArgumentException("Widget "+widgetId+" was not found in the mds "+id);
+		if (result.size() > 1) {
+			logger.warn("Widget " + widgetId + " has multiple candidates (" + result.size() + ") when rendered with template " + template + ", will use the first one that matches. Check the metadataset definitions for that widget to ensure only one candidate always matches.");
+		}
+		result.get(0).setHideIfEmpty(true);
+		return result.get(0);
 	 }
 
 	private boolean isValueEmpty(String[] value) {

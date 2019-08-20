@@ -28,10 +28,14 @@
 package org.edu_sharing.repository.server.tools;
 
 import java.text.MessageFormat;
+import java.util.HashMap;
+
+import javax.servlet.http.HttpServletRequest;
 
 import org.alfresco.service.ServiceRegistry;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.repository.NodeService;
+import org.alfresco.service.cmr.repository.StoreRef;
 import org.alfresco.service.namespace.QName;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -40,9 +44,8 @@ import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.client.tools.UrlTool;
 import org.edu_sharing.repository.server.MCAlfrescoAPIClient;
 import org.edu_sharing.repository.server.authentication.Context;
+import org.edu_sharing.service.nodeservice.NodeServiceFactory;
 import org.springframework.extensions.surf.util.URLEncoder;
-
-import javax.servlet.http.HttpServletRequest;
 
 
 public class URLTool{
@@ -137,16 +140,10 @@ public class URLTool{
 	}
 	public static String getBaseUrl(boolean dynamic){
 		ApplicationInfo homeRepository = ApplicationInfoList.getHomeRepository();
-		if(dynamic) {
+		if(dynamic && homeRepository.getBoolean(ApplicationInfo.KEY_URL_DYNAMIC,false)) {
 			try {
 				HttpServletRequest req = Context.getCurrentInstance().getRequest();
-				String path = req.getScheme() + "://" + req.getServerName();
-				int port = req.getLocalPort();
-				if (port != 80 && port != 443) {
-					path += ":" + port;
-				}
-				path += "/" + homeRepository.getWebappname();
-				return path;
+				return getBaseUrlFromRequest(req);
 			}
 			catch(Throwable t){
 				logger.debug("Failed to get dynamic base url, will use the one defined in homeApp");
@@ -155,7 +152,18 @@ public class URLTool{
 
 		return getBaseUrl(homeRepository.getAppId());
 	}
-	
+
+	public static String getBaseUrlFromRequest(HttpServletRequest req) {
+		ApplicationInfo homeRepository = ApplicationInfoList.getHomeRepository();
+		String path = req.getScheme() + "://" + req.getServerName();
+		int port = req.getServerPort();
+		if (port != 80 && port != 443) {
+			path += ":" + port;
+		}
+		path += "/" + homeRepository.getWebappname();
+		return path;
+	}
+
 	public static String getBaseUrl(String repositoryId){
 		ApplicationInfo repository = ApplicationInfoList.getRepositoryInfoById(repositoryId);
 		String hostOrDomain = (repository.getDomain() == null || repository.getDomain().trim().equals(""))? repository.getHost() : repository.getDomain();
@@ -181,6 +189,9 @@ public class URLTool{
 	public static String getNgMessageUrl(String messageId){
 		return getNgComponentsUrl()+"messages/"+messageId;
 	}
+	public static String getNgErrorUrl(String errorId){
+		return getNgComponentsUrl()+"error/"+errorId;
+	}
 	public static String getNgComponentsUrl(){
 		return getBaseUrl(true)+"/components/";
 	}
@@ -199,23 +210,45 @@ public class URLTool{
 		}
 		return result;
 	}
-	
+	public static String getPreviewServletUrl(String node, String storeProtocol,String storeId,String baseUrl) {
+		ServiceRegistry serviceRegistry = (ServiceRegistry)AlfAppContextGate.getApplicationContext().getBean(ServiceRegistry.SERVICE_REGISTRY);
+		NodeService alfNodeService = serviceRegistry.getNodeService();
+		NodeRef nodeRef = new NodeRef(new StoreRef(storeProtocol,storeId),node);
+		QName type = serviceRegistry.getNodeService().getType(nodeRef);
+		if(type.equals(QName.createQName(CCConstants.CCM_TYPE_REMOTEOBJECT))) {
+			String repoId = (String)alfNodeService.getProperty(nodeRef, QName.createQName(CCConstants.CCM_PROP_REMOTEOBJECT_REPOSITORYID));
+			String remoteNodeId = (String)alfNodeService.getProperty(nodeRef, QName.createQName(CCConstants.CCM_PROP_REMOTEOBJECT_NODEID));
+			try {
+				HashMap<String, Object> props = NodeServiceFactory.getNodeService(repoId).getProperties(null,null,remoteNodeId);
+				return  (String)props.get(CCConstants.CM_ASSOC_THUMBNAILS);
+			} catch (Throwable e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+				return null;
+			}
+
+		}else {
+			String previewURL = baseUrl;
+			previewURL += "/preview?nodeId="+node+"&storeProtocol="+storeProtocol+"&storeId="+storeId+"&dontcache="+System.currentTimeMillis();
+			previewURL =  addOAuthAccessToken(previewURL);
+			return previewURL;
+		}
+	}
 	public static String getPreviewServletUrl(String node, String storeProtocol,String storeId){
-		String previewURL = getBaseUrl();
-		previewURL += "/preview?nodeId="+node+"&storeProtocol="+storeProtocol+"&storeId="+storeId+"&dontcache="+System.currentTimeMillis();
-		previewURL =  addOAuthAccessToken(previewURL);
-		return previewURL;
+		return getPreviewServletUrl(node,storeProtocol,storeId,getBaseUrl(true));
 	}
 	public static String getPreviewServletUrl(NodeRef node){
 		return getPreviewServletUrl(node.getId(), node.getStoreRef().getProtocol(), node.getStoreRef().getIdentifier());
 	}
-
+	public static String getPreviewServletUrl(org.edu_sharing.service.model.NodeRef node) {
+		return getPreviewServletUrl(node.getNodeId(), node.getStoreProtocol(), node.getStoreId());
+	}
 	
 	
 	
 	
 	public static String getShareServletUrl(NodeRef node, String token){
-		String shareUrl = getBaseUrl();
+		String shareUrl = getBaseUrl(true);
 		shareUrl += "/share?nodeId="+node.getId()+"&token="+token;
 		return shareUrl;
 	}
@@ -232,14 +265,12 @@ public class URLTool{
 		
 		String CONTENTURLKEY = "contenturl";
 		String PREVIEWURLKEY = "previewurl";
-		String NOIDKEY_KEY = "nodeid_key";
-		
+
 		String url = null;
 		
-		String nodeIdKey = null;
+		String nodeIdKey = "obj_id";
 		ApplicationInfo appInfo = ApplicationInfoList.getHomeRepository();
 		try{
-			nodeIdKey = appInfo.getNodeIdKey();
 			if(preview){
 				url = appInfo.getPreviewUrl();
 			}else{
@@ -331,25 +362,27 @@ public class URLTool{
 	public static String getNgRenderNodeUrl(String nodeId,String version) {
 		return getNgRenderNodeUrl(nodeId, version, false);
 	}
+	
+	public static String getNgRenderNodeUrl(String nodeId,String version,boolean dynamic) {
+		return getNgRenderNodeUrl(nodeId, version, dynamic, null);
+	}
+	
 	/**
 	 * Get the url to the angular rendering component
 	 * @param nodeId
 	 * @param version may be null to use the latest
 	 * @return
 	 */
-	public static String getNgRenderNodeUrl(String nodeId,String version,boolean dynamic) {
-		return getNgComponentsUrl()+"render/"+nodeId+(version!=null && !version.trim().isEmpty() ? "/"+version : "");
+	public static String getNgRenderNodeUrl(String nodeId,String version,boolean dynamic, String repository) {
+		String ngComponentsUrl =  getNgComponentsUrl()+"render/"+nodeId+(version!=null && !version.trim().isEmpty() ? "/"+version : "");
+		if(repository != null) {
+			ngComponentsUrl+="?repository="+repository;
+		}
+		return ngComponentsUrl;
 	}
 	
 	public static String getRedirectServletLink(String repId, String nodeId){
-		
-		
-		ApplicationInfo homeRepository = ApplicationInfoList.getHomeRepository();
-		
-		
-		String hostOrDomain = (homeRepository.getDomain() == null || homeRepository.getDomain().trim().equals(""))? homeRepository.getHost() : homeRepository.getDomain();
-		
-		String url = homeRepository.getClientprotocol()+"://"+hostOrDomain+":"+homeRepository.getClientport()+"/"+homeRepository.getWebappname() + "/" + CCConstants.EDU_SHARING_SERVLET_PATH_REDIRECT;
+		String url = getBaseUrl(true) + "/" + CCConstants.EDU_SHARING_SERVLET_PATH_REDIRECT;
 		//if no cookies are allowed render jsessionid in url. Attention: the host or domain in appinfo must match the client ones
 		Context context = Context.getCurrentInstance();
 		//context can be null when not accessing true ContextManagementFilter (i.i by calling nativealfrsco webservice)
@@ -362,4 +395,12 @@ public class URLTool{
 		
 		return url;
 	}
+
+    public static String getRestServiceUrl() {
+        return getBaseUrl()+"/rest/";
+    }
+
+    public static String getEduservletUrl() {
+        return getBaseUrl()+"/eduservlet/";
+    }
 }

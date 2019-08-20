@@ -11,6 +11,7 @@ import javax.servlet.ServletRequest;
 import java.util.List;
 
 public class ConfigServiceFactory {
+	private static final String[] DEFAULT_LANGUAGES = new String[]{"de", "en"};
 	static Logger logger = Logger.getLogger(ConfigServiceFactory.class);
 	public static ConfigService getConfigService(){
 		return new ConfigServiceImpl();
@@ -20,7 +21,7 @@ public class ConfigServiceFactory {
 	}
 	public static Config getCurrentConfig(ServletRequest req) throws Exception {
 		try {
-			return getConfigService().getConfigByDomain(getCurrentDomain());
+			return getConfigService().getConfigByDomain(req==null ? getCurrentDomain() : getCurrentDomain(req));
 		}catch(Throwable t) {
 			return getConfigService().getConfig();
 		}
@@ -53,6 +54,19 @@ public class ConfigServiceFactory {
 	public static List<KeyValuePair> getLanguageData() throws Exception {
 		String language=new AuthenticationToolAPI().getCurrentLanguage();
 		return getLanguageData(language);
+	}
+
+
+	/**
+	 * get supported languages for the current config or returns @DEFAULT_LANGUAGES
+	 * @return
+	 */
+	public static String[] getSupportedLanguages() {
+		try {
+			return ConfigServiceFactory.getCurrentConfig().getValue("language", DEFAULT_LANGUAGES);
+		}catch(Throwable t){
+			return DEFAULT_LANGUAGES;
+		}
 	}
 
 }

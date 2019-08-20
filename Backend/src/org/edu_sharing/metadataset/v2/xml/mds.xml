@@ -7,7 +7,6 @@
 				<caption>cm_name</caption>
 				<placeholder>cm_name_placeholder</placeholder>
 				<bottomCaption>cm_name_bottom</bottomCaption>
-				<icon>description</icon>
 				<type>text</type>
 				<required>true</required>
 				<!-- <condition>!ccm:wwwurl</condition>  -->
@@ -26,7 +25,7 @@
 				<caption>cm_title_wwwurl</caption>
 				<placeholder>cm_title_placeholder</placeholder>
 				<type>text</type>
-				<condition type="PROPERTY">ccm:wwwurl</condition>			
+				<condition type="PROPERTY">ccm:wwwurl</condition>
 			</widget>
 			<widget>
 				<id>ccm:wwwurl</id>
@@ -34,7 +33,7 @@
 				<placeholder>cm_wwwurl_placeholder</placeholder>
 				<type>text</type>
 				<required>true</required>
-				<condition type="PROPERTY">ccm:wwwurl</condition>			
+				<condition type="PROPERTY">ccm:wwwurl</condition>
 			</widget>
 			<widget>
 				<id>cclom:general_description</id>
@@ -68,6 +67,16 @@
 				<caption>lom_prop_author_freetext</caption>
 				<hideIfEmpty>true</hideIfEmpty>
 			</widget>
+			<widget>
+				<id>ccm:educationallearningresourcetype</id>
+				<type>multivalueFixedBadges</type>
+				<caption>lom_prop_educationallearningresourcetype</caption>
+				<placeholder>lom_prop_educationallearningresourcetype_placeholder</placeholder>
+				<hideIfEmpty>true</hideIfEmpty>
+				<valuespace>valuespaces.xml</valuespace>
+				<valuespace_i18n>valuespaces_i18n</valuespace_i18n>
+			</widget>
+
 			<widget>
 				<id>ccm:tool_category</id>
 				<type>singleoption</type>
@@ -322,6 +331,12 @@
 				<valuespace>context.xml</valuespace>
 				<valuespace_i18n>valuespace_context_i18n</valuespace_i18n>
 			</widget>
+			<widget>
+				<id>ccm:imported_object_appname</id>
+				<caption>lom_prop_imported_object_appname</caption>
+				<type>text</type>
+				<hideIfEmpty>true</hideIfEmpty>
+			</widget>
 		</widgets>
 		<templates>
 			<template>
@@ -333,11 +348,24 @@
               <ccm:wwwurl>		 
               <cm:name>
               <cclom:title>
+              <ccm:educationallearningresourcetype>
               <cclom:general_keyword>
               <cclom:general_description>
               <author>
               <license>
               <version>
+              <childobjects>
+				]]></html>
+			</template>
+			<template>
+				<id>node_childobject</id>
+				<caption>dialog_upload_tab_basic</caption>
+				<icon>description</icon>
+				<html><![CDATA[
+              <ccm:wwwurl>
+              <cm:name>
+              <cclom:title>
+              <author>
 				]]></html>
 			</template>
 			<template>
@@ -345,6 +373,7 @@
 				<caption>dialog_upload_tab_basic</caption>
 				<icon>description</icon>
 				<html><![CDATA[
+			  <ccm:educationallearningresourcetype>
               <cclom:general_keyword>
               <cclom:general_description>
 				]]></html>
@@ -426,6 +455,7 @@
 			<template>
 				<id>search</id>
 				<html><![CDATA[
+			  <ccm:educationallearningresourcetype>
               <cclom:general_keyword>
               <license>
 				]]></html>
@@ -443,21 +473,21 @@
 				<html><![CDATA[
               <cclom:title>
               <cm:name>
-              <cclom:general_keyword>
-              
-              <license>
-              <ccm:author_freetext>
+			  <ccm:educationallearningresourcetype>
               <cclom:general_description>
+              <cclom:general_keyword>
               <cclom:size>
               <cm:created>
               <cm:modified>
-              <sys:node-uuid>
 				]]></html>
 			</template>
 			<template>
 				<id>node_contributor_render</id>
 				<caption>dialog_upload_tab_contributers</caption>
 				<html><![CDATA[
+				<license>
+                <ccm:imported_object_appname>
+                <ccm:author_freetext>
 				<div class="mdsContributorGroup mdsWidgetCaption">
 					<div id="mdsLifecyclecontributorsTitle" class="mdsContributorTitle">{{ cb_contr_material }}</div>
 					<div id="mdsLifecyclecontributors">
@@ -495,6 +525,14 @@
 				]]></html>
 			</template>
 			<template>
+				<id>node_collections_render</id>
+				<caption>dialog_upload_tab_collections</caption>
+				<hideIfEmpty>true</hideIfEmpty>
+				<html><![CDATA[
+					<collections>
+				]]></html>
+			</template>
+			<template>
 				<id>collection_editorial</id>
 				<caption>collection_editorial</caption>
 				<html><![CDATA[
@@ -516,6 +554,12 @@
 				<id>io_template</id>
 				<views>
 					<view>node_general_template</view>
+				</views>
+			</group>
+			<group>
+				<id>io_childobject</id>
+				<views>
+					<view>node_childobject</view>
 				</views>
 			</group>
 			<group>
@@ -549,6 +593,14 @@
 				<views>
 					<view>node_general_render</view>
 					<view>node_contributor_render</view>
+					<view>node_collections_render</view>
+				</views>
+			</group>
+			<group>
+				<id>io_render_inline</id>
+				<views>
+					<view>node_general_render</view>
+					<view>node_contributor_render</view>
 				</views>
 			</group>
 			<group>
@@ -565,10 +617,50 @@
 				</views>
 			</group>
 		</groups>
+		<sorts>
+			<sort>
+				<id>search</id>
+				<default>
+					<sortBy>score</sortBy>
+					<sortAscending>false</sortAscending>
+				</default>
+				<columns>
+					<column mode="descending">score</column>
+					<column>cm:modified</column>
+					<!-- currently not working (solr error) -->
+					<!-- <column>ccm:commonlicense_key</column> -->
+					<!-- currently not working (cm:name vs cclom:title) -->
+					<!-- <column>cclom:title</column> -->
+					<!-- <column>ccm:replicationsource</column> -->
+				</columns>
+			</sort>
+		</sorts>
+		<lists>
+			<list>
+				<id>search</id>
+				<columns>
+					<column>cclom:title</column>
+					<column>cm:modified</column>
+					<column>ccm:commonlicense_key</column>
+					<column>ccm:replicationsource</column>
+				</columns>
+			</list>
+		</lists>
+		<lists>
+			<list>
+				<id>collectionReferences</id>
+				<columns>
+					<column>cclom:title</column>
+					<column>cm:modified</column>
+					<column>ccm:commonlicense_key</column>
+					<column>ccm:replicationsource</column>
+				</columns>
+			</list>
+		</lists>
 		<queries>
-			<basequery>-TYPE:"ccm:toolpermission" AND NOT ASPECT:"ccm:metadataPresettingTemplate" AND NOT @cm\:name:"._*" AND NOT @cm\:name:".DS_Store*" AND NOT PATH:"/sys\:system/sys\:people//*"</basequery>
+			<basequery>-TYPE:"ccm:toolpermission" AND NOT ASPECT:"ccm:metadataPresettingTemplate" AND NOT @cm\:name:"._*" AND NOT @cm\:name:".DS_Store*" AND NOT PATH:"/sys\:system/sys\:people//*" AND -ASPECT:"ccm:io_childobject"</basequery>
 			<allowSearchWithoutCriteria>true</allowSearchWithoutCriteria>
-			
+
 			<query join="AND"  id="ngsearch">
 				<basequery>ISNULL:@ccm\:tool_category</basequery>
 				<property name="ngsearchword">
@@ -595,6 +687,29 @@
 					<statement value="COPYRIGHT_OTHERS">@ccm\:commonlicense_key:"COPYRIGHT*" OR @ccm\:commonlicense_key:"SCHULFUNK"</statement>
 					<multiple>true</multiple>
 					<multiplejoin>OR</multiplejoin>
+				</property>
+				<property name="workflow">
+					<statement>@ccm\:wf_status:"${value}"</statement>
+					<statement value="100_unchecked">@ccm\:wf_status:"${value}" or ISNULL:@ccm\:wf_status</statement>
+					<multiple>true</multiple>
+					<multiplejoin>OR</multiplejoin>
+				</property>
+			</query>
+			<query join="AND" id="oai">
+				<basequery>ISNULL:@ccm\:tool_category</basequery>
+				<property name="from">
+					<statement>@cm\:modified:[${value} TO MAX]</statement>
+				</property>
+				<property name="until">
+					<statement>@cm\:modified:[MIN TO ${value}]</statement>
+				</property>
+			</query>
+			<query join="AND"  id="collections">
+				<property name="ngsearchword">
+					<statement>(@sys\:node-uuid:"${value}" OR @cm\:name:"*${value}*" OR @cclom\:title:"*${value}*" OR @cclom\:general_description:"*${value}*" OR @cclom\:general_keyword:"*${value}*" OR @ccm\:taxonentry:"*${value}*" OR @ccm\:classification_keyword:"*${value}*" OR @ccm\:educationallearningresourcetype:"*${value}*" OR @ccm\:educationalcontext:"*${value}*" OR @ccm\:learninggoal:"*${value}*" OR @ccm\:guidanceteachers:"*${value}*" OR @ccm\:guidancestudents:"*${value}*")</statement>
+					<exactMatching>false</exactMatching>
+					<multiple>true</multiple>
+					<multiplejoin>AND</multiplejoin>
 				</property>
 			</query>
 			<query join="AND" id="archive" applyBasequery="false">
@@ -627,10 +742,15 @@
 			</query>
 			<query join="AND"  id="workspace">
 		   		<property name="ngsearchword">
-				    <statement>NOT TYPE:"ccm:notify" AND NOT ASPECT:"ccm:collection_io_reference" AND NOT ASPECT:"ccm:collection" AND (@sys\:node-uuid:"${value}" OR TEXT:"${value}" OR @cm\:name:"*${value}*" OR @cclom\:title:"*${value}*" OR @cclom\:general_description:"*${value}*" OR @cclom\:general_keyword:"*${value}*" OR @ccm\:taxonentry:"*${value}*" OR @ccm\:classification_keyword:"*${value}*" OR @ccm\:educationallearningresourcetype:"*${value}*" OR @ccm\:educationalcontext:"*${value}*" OR @ccm\:learninggoal:"*${value}*" OR @ccm\:guidanceteachers:"*${value}*" OR @ccm\:guidancestudents:"*${value}*")</statement>
+				    <statement>NOT TYPE:"ccm:notify" AND NOT ASPECT:"ccm:collection_io_reference" AND (@sys\:node-uuid:"${value}" OR TEXT:"${value}" OR @cm\:name:"*${value}*" OR @cclom\:title:"*${value}*" OR @cclom\:general_description:"*${value}*" OR @cclom\:general_keyword:"*${value}*" OR @ccm\:taxonentry:"*${value}*" OR @ccm\:classification_keyword:"*${value}*" OR @ccm\:educationallearningresourcetype:"*${value}*" OR @ccm\:educationalcontext:"*${value}*" OR @ccm\:learninggoal:"*${value}*" OR @ccm\:guidanceteachers:"*${value}*" OR @ccm\:guidancestudents:"*${value}*")</statement>
 				    <multiple>true</multiple>
 				    <multiplejoin>AND</multiplejoin>
 			    </property>
+				<property name="parent">
+					<statement>PATH:"${value}//*"</statement>
+					<preprocessor>node_path</preprocessor>
+                    <mandatory>false</mandatory>
+				</property>
 		   </query>
 		</queries>
 </metadataset>

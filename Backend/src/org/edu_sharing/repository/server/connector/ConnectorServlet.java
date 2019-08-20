@@ -2,6 +2,7 @@ package org.edu_sharing.repository.server.connector;
 
 import java.io.IOException;
 import java.net.URLEncoder;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -14,6 +15,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.service.cmr.repository.NodeRef;
+import org.alfresco.service.cmr.repository.StoreRef;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.log4j.Logger;
 import org.edu_sharing.repository.client.tools.CCConstants;
@@ -39,6 +41,8 @@ import org.edu_sharing.service.editlock.LockedException;
 import org.edu_sharing.service.mime.MimeTypesV2;
 import org.edu_sharing.service.nodeservice.NodeService;
 import org.edu_sharing.service.nodeservice.NodeServiceFactory;
+import org.edu_sharing.service.permission.PermissionService;
+import org.edu_sharing.service.permission.PermissionServiceFactory;
 import org.edu_sharing.service.toolpermission.ToolPermissionServiceFactory;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -75,18 +79,27 @@ public class ConnectorServlet extends HttpServlet  {
 		String toolInstanceNodeId = null;
 		try{
 			MCAlfrescoBaseClient repoClient = null;
-			repoClient = (MCAlfrescoBaseClient)RepoFactory.getInstance(homeRepo.getAppId(), req.getSession());
-			readOnly=!repoClient.hasPermissions(nodeId, new String[]{CCConstants.PERMISSION_WRITE});
-			if(!repoClient.hasPermissions(nodeId, new String[]{CCConstants.PERMISSION_READ})){
+			NodeService nodeService = NodeServiceFactory.getLocalService();
+			PermissionService permissionService = PermissionServiceFactory.getLocalService();
+			// if collection ref, use original node
+			String realNodeId=nodeId;
+			if(Arrays.asList(nodeService.getAspects(StoreRef.PROTOCOL_WORKSPACE,StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(),nodeId)).contains(CCConstants.CCM_ASPECT_COLLECTION_IO_REFERENCE)){
+				logger.info("ConnectorServlet detected io reference "+nodeId+", will sent original io node ref to service");
+				nodeId = nodeService.getProperty(StoreRef.PROTOCOL_WORKSPACE,StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(),nodeId,CCConstants.CCM_PROP_IO_ORIGINAL);
+			}
+			// for writing, access to the original is required
+			readOnly=!permissionService.hasPermission(StoreRef.PROTOCOL_WORKSPACE,StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(),nodeId,CCConstants.PERMISSION_WRITE);
+			// check if user has permissions on the real node (i.e. the reference io)
+			if(!permissionService.hasPermission(StoreRef.PROTOCOL_WORKSPACE,StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(),realNodeId,CCConstants.PERMISSION_READ_ALL)){
 				resp.sendError(HttpServletResponse.SC_FORBIDDEN);
 				return;
 			}
 			
-			String toolInstanceNodeRef = repoClient.getProperty(MCAlfrescoAPIClient.storeRef.getProtocol(), MCAlfrescoAPIClient.storeRef.getIdentifier(), nodeId, CCConstants.CCM_PROP_TOOL_OBJECT_TOOLINSTANCEREF);
+			String toolInstanceNodeRef = nodeService.getProperty(MCAlfrescoAPIClient.storeRef.getProtocol(), MCAlfrescoAPIClient.storeRef.getIdentifier(), nodeId, CCConstants.CCM_PROP_TOOL_OBJECT_TOOLINSTANCEREF);
 			if(toolInstanceNodeRef != null) {
 				toolInstanceNodeId = new NodeRef(toolInstanceNodeRef).getId();
 			}
-			
+
 		}catch(Throwable e){
 			logger.error(e.getMessage(),e);
 			resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR,e.getMessage());
@@ -95,7 +108,7 @@ public class ConnectorServlet extends HttpServlet  {
 		
 		Connector connector = null;
 		if(connectorId != null) {
-			for(Connector con : ConnectorServiceFactory.getConnectorService().getConnectorList().getConnectors()){
+			for(Connector con : ConnectorServiceFactory.getConnectorList().getConnectors()){
 				if(con.getId().equals(connectorId)){
 					connector = con;
 				}
@@ -105,7 +118,7 @@ public class ConnectorServlet extends HttpServlet  {
 				resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR,"no valid connector");
 				return;
 			}
-			
+
 			if(!ToolPermissionServiceFactory.getInstance().hasToolPermissionForConnector(connectorId)){
 				resp.sendError(HttpServletResponse.SC_FORBIDDEN);
 				return;
@@ -152,7 +165,7 @@ public class ConnectorServlet extends HttpServlet  {
 		try{
 			JSONObject jsonObject = new JSONObject();
 			jsonObject.put("node",nodeId);
-			
+
 			if(connector != null) {
 				jsonObject.put("endpoint",connector.getUrl());
 				jsonObject.put("tool", connector.getId());
@@ -163,17 +176,17 @@ public class ConnectorServlet extends HttpServlet  {
 					if(filetype.getMimetype().equals(mimetype))
 						jsonObject.put("filetype", filetype.getFiletype());
 				}
-			
+
 				for(ConnectorFileType filetype : connector.getFiletypes()){
 					if(filetype.getMimetype().equals(mimetype))
 						jsonObject.put("filetype", filetype.getFiletype());
 				}
 			}
-			
+
 			if(toolInstanceNodeId != null && !toolInstanceNodeId.trim().equals("")) {
 				jsonObject.put("tool","LTI");
 			}
-			
+
 			jsonObject.put("ts", System.currentTimeMillis() / 1000);
             jsonObject.put("sessionId", req.getSession().getId());
             try{
@@ -195,17 +208,17 @@ public class ConnectorServlet extends HttpServlet  {
 				
 			
 			pushToConnector(jsonObject,connectorAppInfo,resp);
-		
+
 		}catch(Exception e){
 			logger.error(e.getMessage(), e);
 			resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR,e.getMessage());
 			return;
 		}
-		
-		
-		
+
+
+
 	}
-	
+
 	public void pushToConnector(JSONObject jsonObject, ApplicationInfo connectorAppInfo, HttpServletResponse resp) throws Exception{
 		/**
 		 * encrypt the values with AES to prevent the length limit of 245 bytes with RSA
@@ -217,14 +230,14 @@ public class ConnectorServlet extends HttpServlet  {
 		SecretKey aesKey = keygen.generateKey();
 		Encryption eAES = new Encryption("AES");
 		byte[] encrypted = eAES.encrypt(jsonObject.toString(), aesKey);
-		String url = UrlTool.setParam(connectorAppInfo.getContentUrl(), "e", URLEncoder.encode(Base64.encodeBase64String(encrypted)));
+		String url = UrlTool.setParam(connectorAppInfo.getContentUrl(), "e", URLEncoder.encode(java.util.Base64.getEncoder().encodeToString(encrypted)));
 		
 		/**
 		 * encrypt the AES key with RSA public key
 		 */
 		Encryption eRSA = new Encryption("RSA");
 		byte[] aesKeyEncrypted = eRSA.encrypt(aesKey.getEncoded(), eRSA.getPemPublicKey(connectorAppInfo.getPublicKey()));
-		url = UrlTool.setParam(url, "k", URLEncoder.encode(Base64.encodeBase64String(aesKeyEncrypted)));
+		url = UrlTool.setParam(url, "k", URLEncoder.encode(java.util.Base64.getEncoder().encodeToString(aesKeyEncrypted)));
 		logger.info("url:" + url + "  length:" + url.length());
 		resp.sendRedirect(url);
 	}

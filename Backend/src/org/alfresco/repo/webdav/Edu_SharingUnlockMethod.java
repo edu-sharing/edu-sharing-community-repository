@@ -23,19 +23,13 @@ import java.util.Set;
 import javax.servlet.http.HttpServletResponse;
 
 import org.alfresco.model.ContentModel;
-import org.alfresco.service.ServiceRegistry;
-import org.alfresco.service.cmr.action.Action;
-import org.alfresco.service.cmr.action.ActionService;
 import org.alfresco.service.cmr.lock.UnableToReleaseLockException;
 import org.alfresco.service.cmr.model.FileInfo;
 import org.alfresco.service.cmr.model.FileNotFoundException;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.rule.RuleService;
 import org.alfresco.service.cmr.rule.RuleType;
-import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
-import org.edu_sharing.repository.client.tools.CCConstants;
-import org.edu_sharing.repository.server.tools.ActionObserver;
-import org.springframework.context.ApplicationContext;
+import org.edu_sharing.alfresco.policy.ThumbnailHandling;
 
 /**
  * Implements the WebDAV UNLOCK method
@@ -229,17 +223,12 @@ public class Edu_SharingUnlockMethod extends WebDAVMethod
                if(lockNodeInfo != null 
             		&& lockNodeInfo.getContentData() != null && lockNodeInfo.getContentData().getSize() > 0 
             		&& lockNodeInfo.getName() != null && !lockNodeInfo.getName().startsWith("._") ){
-                    ApplicationContext context = AlfAppContextGate.getApplicationContext();
-    	            ServiceRegistry serviceRegistry = (ServiceRegistry)context.getBean(ServiceRegistry.SERVICE_REGISTRY);
-    	            ActionService actionService = serviceRegistry.getActionService();
-    	            Action thumbnailAction = actionService.createAction(CCConstants.ACTION_NAME_CREATE_THUMBNAIL);
-    				thumbnailAction.setTrackStatus(true);
-    				
-    				thumbnailAction.setParameterValue("thumbnail-name", CCConstants.CM_VALUE_THUMBNAIL_NAME_imgpreview_png);
-    				ActionObserver.getInstance().addAction(lockNodeInfo.getNodeRef(), thumbnailAction);
-    				
-    				//cause its already async set executeAsynchronously to false
-    				actionService.executeAction(thumbnailAction, lockNodeInfo.getNodeRef(), true, true);
+            	   
+            	  
+            	   /**
+            	    * for windows also add thumbnail action here
+            	    */
+            	   new ThumbnailHandling().thumbnailHandling(nodeRef);
                 }
     
                 if (logger.isDebugEnabled())

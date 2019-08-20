@@ -4,14 +4,15 @@
 }
 /**
   ios fix for wrong positioned input cursor
- */
-html,body{ @include iosScrolling(); }
+  nop: when enabled, it will break positio
+  font-smoothing: antialiased;n fixed dialog layouts.
+*/
+  //html,body{ @include iosScrolling(); }
 
 html,body,md-card{
   height:100%;
   font-family:'open_sansregular',sans-serif!important;
   font-size:10pt;
-  font-smoothing: antialiased;
   -webkit-font-smoothing: antialiased;
   background-color: $backgroundColor;
 }
@@ -28,6 +29,9 @@ a{
 }
 .center{
   margin: 0 auto;
+}
+.display-none{
+  display: none!important;
 }
 .invisible{
   opacity:0;
@@ -111,7 +115,20 @@ a{
 .uppercase {
   text-transform: uppercase;
 }
+.general-warning{
+  display: flex;
+  align-items: center;
+  background-color: lighten($warningMedium,50%);
+  border: 1px solid $warningMedium;
+  border-radius: 2px;
+  padding: 15px 20px;
+  color: #674E04;
+  >div:first-child{
+    padding-right: 20px;
+  }
+}
 .input-hint-bottom{
+  margin: 0 0.75em;
   margin-top:-15px;
   color:$textLight;
   font-size: 0.8em;

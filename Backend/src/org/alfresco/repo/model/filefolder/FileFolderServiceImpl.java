@@ -20,6 +20,7 @@ package org.alfresco.repo.model.filefolder;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
@@ -32,6 +33,7 @@ import java.util.Map;
 import java.util.ResourceBundle.Control;
 import java.util.Set;
 import java.util.Stack;
+import java.util.stream.Collectors;
 
 import org.alfresco.model.ContentModel;
 import org.alfresco.query.CannedQueryFactory;
@@ -81,7 +83,9 @@ import org.alfresco.util.SearchLanguageConversion;
 import org.alfresco.util.registry.NamedObjectRegistry;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.edu_sharing.alfresco.tools.EduSharingNodeHelper;
 import org.edu_sharing.repository.client.tools.CCConstants;
+import org.edu_sharing.service.nodeservice.NodeServiceFactory;
 import org.springframework.extensions.surf.util.I18NUtil;
 
 /**
@@ -377,9 +381,18 @@ public class FileFolderServiceImpl extends AbstractBaseCopyService implements Fi
 					toTransform.add(childRef.getChildRef());
 				}
 				results = toFileInfo(toTransform);
-				
+
 			}
-    		}
+			else{
+                List<ChildAssociationRef> childRefs = nodeService.getChildAssocs(contextNodeRef);
+                // use the helper which is also used by the local node service and filter out special nodes which are also invisible in workspace
+                List<NodeRef> toTransform = childRefs.stream().
+                        map((ChildAssociationRef::getChildRef)).
+                        filter((NodeRef ref)->!EduSharingNodeHelper.shouldFilter(ref,new ArrayList<String>(Arrays.asList(new String[] {"edugroup"})))).
+                        collect(Collectors.toList());
+                results = toFileInfo(toTransform);
+            }
+        }
     	
     	
     		if(results == null){

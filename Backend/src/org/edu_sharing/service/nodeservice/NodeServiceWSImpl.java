@@ -65,13 +65,7 @@ public class NodeServiceWSImpl extends NodeServiceAdapter {
 		return null;
 	}
 
-	@Override
-	public HashMap<String, Object> getChild(StoreRef store, String parentId, String type, String property,
-			String value) {
-		return null;
-	}
-
-	@Override
+    @Override
 	public void setOwner(String nodeId, String username) {
 	}
 

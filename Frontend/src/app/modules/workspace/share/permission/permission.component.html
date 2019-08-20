@@ -1,3 +1,9 @@
+<div class="group">
+<div class="deleted-info" *ngIf="isDeleted">
+    <div class="line"><hr></div>
+    <div class="info">{{'WORKSPACE.SHARE.DELETED' | translate}}</div>
+    <div class="line"><hr></div>
+</div>
 <div class="container" [class.added]="added">
 <div class="icon"><i class="type material-icons">{{_permission.authority.authorityType=='USER' ? "person" : _permission.authority.authorityType=='LINK' ? "link" : "group"}}{{added ? "_add" : "" }}</i></div>
 <div class="permissionName">
@@ -14,16 +20,15 @@
       <div class="select"></div>
     </div>
   </div>
-  <div *ngIf="!invalidPermission">
+  <div *ngIf="!invalidPermission" class="permission-type">
     <div *ngIf="_permission.permissions.indexOf('Owner')>-1" (click)="chooseType()"><i class="material-icons align">home</i> <span>{{'WORKSPACE.SHARE.GROUP_OWNER' | translate}}</span>
-      <div class="select"></div>
-      </div>
+    </div>
     <div *ngIf="_permission.permissions.indexOf('Consumer')>-1" tabindex="0" (keyup.enter)="chooseType()" (click)="chooseType()"><i class="material-icons align">remove_red_eye</i> <span>{{'WORKSPACE.SHARE.TYPE_VIEWER' | translate}}</span>
-      <div class="select"><i *ngIf="!readOnly && !isEveryone" class="material-icons align">keyboard_arrow_down</i></div></div>
+      <div *ngIf="!readOnly && !isEveryone" class="select"><i class="material-icons align">keyboard_arrow_down</i></div></div>
     <div *ngIf="_permission.permissions.indexOf('Collaborator')>-1" tabindex="0" (keyup.enter)="chooseType()" (click)="chooseType()"><i class="material-icons align">edit</i> <span>{{'WORKSPACE.SHARE.TYPE_COWORKER' | translate}}</span>
-      <div class="select"><i *ngIf="!readOnly && !isEveryone" class="material-icons align">keyboard_arrow_down</i></div></div>
+      <div *ngIf="!readOnly && !isEveryone" class="select"><i class="material-icons align">keyboard_arrow_down</i></div></div>
     <div *ngIf="_permission.permissions.indexOf('Coordinator')>-1 || _permission.permissions.indexOf('All')>-1" tabindex="0" (keyup.enter)="chooseType()" (click)="chooseType()"><i class="material-icons align">work</i> <span>{{'WORKSPACE.SHARE.TYPE_COORDINATOR' | translate}}</span>
-      <div class="select"><i *ngIf="!readOnly && !isEveryone" class="material-icons align">keyboard_arrow_down</i></div></div>
+      <div *ngIf="!readOnly && !isEveryone" class="select"><i class="material-icons align">keyboard_arrow_down</i></div></div>
     <div *ngIf="_permission.permissions.length==0"></div>
 
     <workspace-share-choose-type *ngIf="showChooseType" class="typeAdd"
@@ -35,8 +40,10 @@
     ></workspace-share-choose-type>
   </div>
 </div>
-<div class="remove" tabindex="0" (keyup.enter)="remove()" (click)="remove()" [class.invisible]="!showDelete" [class.clickable]="!readOnly">
-  <i *ngIf="!inherit" class="material-icons">cancel</i>
+<div class="remove" tabindex="0" (keyup.enter)="remove()" (click)="remove()" *ngIf="showDelete" [class.clickable]="!readOnly">
+  <i *ngIf="!inherit && !isDeleted" class="material-icons">cancel</i>
+  <i *ngIf="!inherit && isDeleted" class="material-icons">undo</i>
   <img *ngIf="inherit" class="inherit" src="assets/images/inherit.svg" title="{{ 'WORKSPACE.SHARE.INHERIT_HINT' | translate}}"/>
+</div>
 </div>
 </div>

@@ -11,10 +11,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import org.alfresco.repo.domain.node.NodeEntity;
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.repo.security.authentication.AuthenticationUtil.RunAsWork;
 import org.alfresco.service.ServiceRegistry;
 import org.alfresco.service.cmr.dictionary.DictionaryService;
+import org.alfresco.service.cmr.repository.AssociationRef;
 import org.alfresco.service.cmr.repository.ChildAssociationRef;
 import org.alfresco.service.cmr.repository.DuplicateChildNodeNameException;
 import org.alfresco.service.cmr.repository.StoreRef;
@@ -32,39 +34,21 @@ import org.edu_sharing.repository.server.AuthenticationToolAPI;
 import org.edu_sharing.repository.server.MCAlfrescoAPIClient;
 import org.edu_sharing.repository.server.SearchResultNodeRef;
 import org.edu_sharing.repository.server.tools.ImageTool;
+import org.edu_sharing.repository.server.tools.LogTime;
 import org.edu_sharing.repository.server.tools.NameSpaceTool;
 import org.edu_sharing.repository.server.tools.cache.PreviewCache;
 import org.edu_sharing.restservices.collection.v1.model.Collection;
+import org.edu_sharing.restservices.node.v1.model.NodeEntries;
 import org.edu_sharing.restservices.node.v1.model.NodeShare;
 import org.edu_sharing.restservices.node.v1.model.NotifyEntry;
 import org.edu_sharing.restservices.node.v1.model.WorkflowHistory;
-import org.edu_sharing.restservices.shared.ACE;
-import org.edu_sharing.restservices.shared.ACL;
-import org.edu_sharing.restservices.shared.Authority;
-import org.edu_sharing.restservices.shared.Filter;
-import org.edu_sharing.restservices.shared.Group;
-import org.edu_sharing.restservices.shared.GroupProfile;
-import org.edu_sharing.restservices.shared.MdsQueryCriteria;
-import org.edu_sharing.restservices.shared.Node;
-import org.edu_sharing.restservices.shared.NodeAccess;
-import org.edu_sharing.restservices.shared.NodePermissions;
-import org.edu_sharing.restservices.shared.NodeRef;
-import org.edu_sharing.restservices.shared.NodeRemote;
-import org.edu_sharing.restservices.shared.NodeSearch;
+import org.edu_sharing.restservices.shared.*;
 import org.edu_sharing.restservices.shared.NodeSearch.Facette;
 import org.edu_sharing.restservices.shared.NodeSearch.Facette.Value;
-import org.edu_sharing.restservices.shared.NodeVersion;
-import org.edu_sharing.restservices.shared.NodeVersionRef;
-import org.edu_sharing.restservices.shared.Person;
-import org.edu_sharing.restservices.shared.Preview;
-import org.edu_sharing.restservices.shared.UserProfile;
-import org.edu_sharing.restservices.shared.UserSimple;
 import org.edu_sharing.service.Constants;
 import org.edu_sharing.service.license.LicenseService;
 import org.edu_sharing.service.mime.MimeTypesV2;
-import org.edu_sharing.service.nodeservice.NodeService;
-import org.edu_sharing.service.nodeservice.NodeServiceFactory;
-import org.edu_sharing.service.nodeservice.NodeServiceHelper;
+import org.edu_sharing.service.nodeservice.*;
 import org.edu_sharing.service.notification.NotificationServiceFactory;
 import org.edu_sharing.service.permission.PermissionServiceFactory;
 import org.edu_sharing.service.permission.PermissionServiceHelper;
@@ -80,11 +64,19 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 
 import io.swagger.util.Json;
+import org.springframework.context.ApplicationContext;
 
 public class NodeDao {
 	
 	private static final StoreRef storeRef = new StoreRef(StoreRef.PROTOCOL_WORKSPACE, "SpacesStore");
-
+	private static final String[] DAO_PERMISSIONS = new String[]{
+			org.alfresco.service.cmr.security.PermissionService.ADD_CHILDREN,
+			org.alfresco.service.cmr.security.PermissionService.CHANGE_PERMISSIONS,
+			org.alfresco.service.cmr.security.PermissionService.WRITE,
+			org.alfresco.service.cmr.security.PermissionService.DELETE,
+			CCConstants.PERMISSION_CC_PUBLISH,
+			CCConstants.PERMISSION_READ_ALL
+	};
 	public static NodeDao getNode(RepositoryDao repoDao, String nodeId)
 			throws DAOException {
 		return getNode(repoDao, nodeId, new Filter());
@@ -141,6 +133,12 @@ public class NodeDao {
 			org.edu_sharing.service.search.model.SearchToken searchToken) throws DAOException {
 		SearchService searchService=SearchServiceFactory.getSearchService(repoDao.getId());
 		return transform(repoDao,searchService.search(searchToken));
+	}
+	
+	public static NodeSearch search(RepositoryDao repoDao,
+			org.edu_sharing.service.search.model.SearchToken searchToken, boolean scoped) throws DAOException {
+		SearchService searchService=SearchServiceFactory.getSearchService(repoDao.getId());
+		return transform(repoDao,searchService.search(searchToken,scoped));
 	}
 	
 	public static NodeSearch searchV2(RepositoryDao repoDao,MdsDaoV2 mdsDao,
@@ -328,8 +326,8 @@ public class NodeDao {
 	 */
 	public static NodeDao getByParent(RepositoryDao repoDao, String parentId,String type,String name) throws Throwable {
 		NodeService nodeService = NodeServiceFactory.getNodeService(repoDao.getId());
-		HashMap<String, Object> properties = nodeService.getChild(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, parentId,type,CCConstants.CM_NAME, name);
-		return new NodeDao(repoDao,(String)properties.get(CCConstants.SYS_PROP_NODE_UID));
+		org.alfresco.service.cmr.repository.NodeRef ref = nodeService.getChild(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, parentId,type,CCConstants.CM_NAME, name);
+		return new NodeDao(repoDao,ref.getId());
 	}
 	private NodeDao(RepositoryDao repoDao, String nodeId, Filter filter) throws Throwable {
 
@@ -339,7 +337,24 @@ public class NodeDao {
 	private NodeDao(RepositoryDao repoDao, String storeProtocol, String storeId, String nodeId, Filter filter) throws DAOException {
 		this(repoDao,new org.edu_sharing.service.model.NodeRefImpl(repoDao.getId(),storeProtocol,storeId,nodeId),filter);
 	}
-	
+
+	public static String mapNodeConstants(RepositoryDao repoDao,String node) throws DAOException {
+		try {
+			if ("-userhome-".equals(node)) {
+				node = repoDao.getUserHome();
+			}
+			if ("-inbox-".equals(node)) {
+				node = repoDao.getUserInbox();
+			}
+			if ("-saved_search-".equals(node)) {
+				node = repoDao.getUserSavedSearch();
+			}
+			return node;
+		}catch (Exception e){
+			throw DAOException.mapping(e);
+		}
+	}
+
 	private NodeDao(RepositoryDao repoDao, org.edu_sharing.service.model.NodeRef nodeRef, Filter filter) throws DAOException {
 		try{
 	
@@ -362,7 +377,7 @@ public class NodeDao {
 				this.nodeProps = nodeRef.getProperties();
 			}
 	
-			this.hasPermissions = new PermissionServiceHelper(permissionService).hasAllPermissions(storeProtocol, storeId, nodeId);
+			this.hasPermissions = permissionService.hasAllPermissions(storeProtocol, storeId, nodeId,DAO_PERMISSIONS);
 	
 			
 			if(nodeProps.containsKey(CCConstants.NODETYPE)){
@@ -382,15 +397,27 @@ public class NodeDao {
 			throw DAOException.mapping(t,nodeRef.getNodeId());
 		}
 	}
-	
-	private String renameNode(String oldName,int number){
-		String[] split=oldName.split("\\.");
-		int i=split.length-2;
-		i=Math.max(0, i);
-		split[i]+=" - "+number;
-		return String.join(".",split);
-	}
-	
+
+    public static NodeEntries convertToRest(RepositoryDao repoDao,Filter propFilter,List<NodeRef> children, Integer skipCount, Integer maxItems) throws DAOException {
+        NodeEntries result=new NodeEntries();
+        List<Node> nodes=new ArrayList<>();
+        for(int i=skipCount;i<Math.min(children.size(),skipCount+maxItems);i++){
+            nodes.add(NodeDao.getNode(repoDao,children.get(i).getId(),propFilter).asNode());
+        }
+
+        Pagination pagination=new Pagination();
+        pagination.setFrom(skipCount);
+        pagination.setCount(nodes.size());
+        pagination.setTotal(children.size());
+        result.setPagination(pagination);
+        result.setNodes(nodes);
+        return result;
+    }
+
+    public static List<NodeRef> sortApiNodeRefs(RepositoryDao repoDao, List<NodeRef> refList, List<String> filter, SortDefinition sortDefinition) {
+        return NodeDao.convertAlfrescoNodeRef(repoDao,NodeDao.sortAlfrescoRefs(NodeDao.convertApiNodeRef(refList), filter, sortDefinition));
+    }
+
 	public NodeDao createChild(String type, List<String> aspects,
 			HashMap<String, String[]> properties,boolean renameIfExists) throws DAOException {
 		return this.createChild(type, aspects, properties, renameIfExists, null);
@@ -402,7 +429,8 @@ public class NodeDao {
 		try {
 			NameSpaceTool<String> nameSpaceTool = new NameSpaceTool<String>();
 			type = nameSpaceTool.transformToLongQName(type);
-			
+			if(childAssoc!=null)
+				childAssoc=CCConstants.getValidGlobalName(childAssoc);
 			HashMap<String, String[]> props = transformProperties(properties);
 			String childId;
 			
@@ -418,7 +446,7 @@ public class NodeDao {
 					break;
 				}catch(DuplicateChildNodeNameException e){
 					if(renameIfExists){
-						props.put(CCConstants.CM_NAME, new String[]{renameNode(originalName,i)});
+						props.put(CCConstants.CM_NAME, new String[]{NodeServiceHelper.renameNode(originalName,i)});
 						i++;
 						continue;
 					}
@@ -471,15 +499,19 @@ public class NodeDao {
 			throw DAOException.mapping(t);
 		}
 	}
-
 	public List<NodeRef> getChildren() throws DAOException {
+		return getChildren(null,null,new SortDefinition());
+	}
+	public List<NodeRef> getChildren(String assocName, List<String> filter, SortDefinition sortDefinition) throws DAOException {
 
 		try {
 			List<NodeRef> result = new ArrayList<NodeRef>();
 	
 			
-			
-			for (ChildAssociationRef childRef : nodeService.getChildrenChildAssociationRef(getId())) {
+			if(assocName!=null && !assocName.isEmpty()){
+				assocName=CCConstants.getValidGlobalName(assocName);
+			}
+			for (ChildAssociationRef childRef : nodeService.getChildrenChildAssociationRefAssoc(getId(),assocName,filter,sortDefinition)) {
 	
 				NodeRef ref = new NodeRef();
 				ref.setRepo(this.repoDao.getId());
@@ -501,7 +533,35 @@ public class NodeDao {
 			throw DAOException.mapping(t);
 		}
 	}
+	public List<NodeRef> getAssocs(AssocInfo assoc,List<String> filter,SortDefinition sortDefinition) throws DAOException {
 
+		try {
+			List<NodeRef> result = new ArrayList<NodeRef>();
+			assoc.setAssocName(CCConstants.getValidGlobalName(assoc.getAssocName()));
+            List<AssociationRef> assocs = nodeService.getNodesByAssoc(getId(), assoc);
+            assocs=((NodeServiceImpl)NodeServiceFactory.getLocalService()).sortNodeRefList(assocs,filter,sortDefinition);
+			for (AssociationRef childRef : assocs) {
+
+				NodeRef ref = new NodeRef();
+				ref.setRepo(this.repoDao.getId());
+				ref.setHomeRepo(this.repoDao.isHomeRepo());
+				ref.setId(childRef.getTargetRef().getId());
+
+				String storeProtocol = childRef.getTargetRef().getStoreRef().getProtocol();
+				if(Constants.archiveStoreRef.getProtocol().equals(storeProtocol)){
+					ref.setArchived(true);
+				}
+
+				result.add(ref);
+			}
+
+			return result;
+
+		} catch (Throwable t) {
+
+			throw DAOException.mapping(t);
+		}
+	}
 	public NodeDao changeProperties(HashMap<String,String[]> properties)
 			throws DAOException {
 
@@ -509,7 +569,7 @@ public class NodeDao {
 			
 			this.nodeService.updateNode(nodeId, transformProperties(properties));
 	
-			return new NodeDao(repoDao, nodeId);
+			return new NodeDao(repoDao, nodeId, Filter.createShowAllFilter());
 			
 		} catch (Throwable t) {
 			
@@ -600,20 +660,15 @@ public class NodeDao {
 	public List<NodeVersion> getHistory() throws DAOException {
 
 		List<NodeVersion> history = new ArrayList<NodeVersion>();
-		for (String versionLabel : getNodeHistory().keySet()) {
-			NodeDao node=NodeDao.getNode(repoDao,nodeId);
-			String[] version=versionLabel.split("\\.");
-			NodeVersion nodeVersion=node.getVersion(Integer.parseInt(version[0]),Integer.parseInt(version[1]));
+		for (Entry<String, HashMap<String, Object>> version : getNodeHistory().entrySet()) {
+			NodeVersion nodeVersion=convertVersionProps(version.getKey(),version.getValue());
 			history.add(nodeVersion);
 		}
 		// Sort by version
-		Collections.sort(history,new Comparator<NodeVersion>() {
-			@Override
-			public int compare(NodeVersion o1, NodeVersion o2) {
-				if(o1.getVersion().getMajor()==o2.getVersion().getMajor())
-					return o1.getVersion().getMinor()>o2.getVersion().getMinor() ? 1 : -1;
-				return o1.getVersion().getMajor()>o2.getVersion().getMajor() ? 1 : -1;
-			}
+		Collections.sort(history, (o1, o2) -> {
+			if(o1.getVersion().getMajor()==o2.getVersion().getMajor())
+				return o1.getVersion().getMinor()>o2.getVersion().getMinor() ? 1 : -1;
+			return o1.getVersion().getMajor()>o2.getVersion().getMajor() ? 1 : -1;
 		});
 
 		return history;
@@ -650,7 +705,7 @@ public class NodeDao {
 		data.setRef(getRef());
 		data.setParent(getParentRef());
 		
-		data.setType(NameSpaceTool.transformToShortQName(this.type));
+		data.setType(getType());
 		data.setIsDirectory(isDirectory());
 		data.setAspects(NameSpaceTool.transFormToShortQName(this.aspects));
 
@@ -680,7 +735,11 @@ public class NodeDao {
 		data.setIconURL(getIconURL());
 		data.setLicenseURL(getLicenseURL());
 		data.setSize(getSize());
-		data.setPreview(getPreview());
+		try {
+			data.setPreview(getPreview());
+		}catch(Exception e) {
+			e.printStackTrace();
+		}
 		data.setRepositoryType(getRepositoryType());
 
 		if(isCollection()){
@@ -689,6 +748,10 @@ public class NodeDao {
 		}
 		
 		return data;
+	}
+
+	public String getType() {
+		return NameSpaceTool.transformToShortQName(this.type);
 	}
 
 	private String getMetadataSet() {
@@ -764,7 +827,9 @@ public class NodeDao {
 							if(tmpPerms == null){
 								tmpPerms = new ArrayList<String>();
 							}
-							tmpPerms.add(ace.getPermission());
+							// do not duplicate existing permissions
+							if(!tmpPerms.contains(ace.getPermission()))
+								tmpPerms.add(ace.getPermission());
 							authPermInherited.put(authority, tmpPerms);
 								
 						} else {
@@ -772,7 +837,9 @@ public class NodeDao {
 							if(tmpPerms == null){
 								tmpPerms = new ArrayList<String>();
 							}
-							tmpPerms.add(ace.getPermission());
+							// do not duplicate existing permissions
+							if(!tmpPerms.contains(ace.getPermission()))
+								tmpPerms.add(ace.getPermission());
 							authPerm.put(authority, tmpPerms);
 						}
 					}
@@ -1019,6 +1086,10 @@ public class NodeDao {
 
 		HashMap<String, Object> versionProps = getNodeHistory().get(versionLabel);
 
+		return convertVersionProps(versionLabel, versionProps);
+	}
+
+	private NodeVersion convertVersionProps(String versionLabel, HashMap<String, Object> versionProps) throws DAOException {
 		if (versionProps == null) {
 			return null;
 		}
@@ -1197,12 +1268,10 @@ public class NodeDao {
 			return new HashMap<String, String[]>();
 		}
 
-		ValueTool vt = new ValueTool();
-		
 		HashMap<String,String[]> properties = new HashMap<String,String[]>();
 		for (Entry<String, Object> entry : props.entrySet()) {
 
-			List<String> values = getPropertyValues(vt, entry.getValue());
+			List<String> values = getPropertyValues(entry.getValue());
 
 			String shortPropName = NameSpaceTool.transformToShortQName(entry.getKey());
 			
@@ -1214,7 +1283,7 @@ public class NodeDao {
 					continue;
 				}
 				if(props.containsKey(entry.getKey()+CCConstants.LONG_DATE_SUFFIX)){
-					values = getPropertyValues(vt, props.get(entry.getKey()+CCConstants.LONG_DATE_SUFFIX));
+					values = getPropertyValues(props.get(entry.getKey()+CCConstants.LONG_DATE_SUFFIX));
 					properties.put(shortPropName, values.toArray(new String[values.size()]));
 				}
 				else{
@@ -1227,10 +1296,10 @@ public class NodeDao {
 		return properties;
 	}
 
-	private List<String> getPropertyValues(ValueTool vt,Object value) {
+	private List<String> getPropertyValues(Object value) {
 		List<String> values = new ArrayList<String>();
 		if (value != null ){
-			for (String mv : vt.getMultivalue(value.toString())) {
+			for (String mv : ValueTool.getMultivalue(value.toString())) {
 				values.add(mv);
 			}
 		}
@@ -1291,6 +1360,7 @@ public class NodeDao {
 
 	public List<NotifyEntry> getNotifys() throws DAOException {
 		try{
+			throwIfPermissionIsMissing(CCConstants.PERMISSION_CHANGEPERMISSIONS);
 			List<Notify> notifys = permissionService.getNotifyList(nodeId);
 			List<NotifyEntry> result = new ArrayList<>(notifys.size());
 			for(Notify notify : notifys){
@@ -1303,59 +1373,65 @@ public class NodeDao {
 		}
 	}
 
-	public static List<NodeRef> getFilesSharedByMe(RepositoryDao repoDao) throws DAOException {
-		SearchService searchService = SearchServiceFactory.getSearchService(repoDao.getApplicationInfo().getAppId());
-		try {
-			List<org.alfresco.service.cmr.repository.NodeRef> refs = searchService.getFilesSharedByMe();
-			List<NodeRef> result=new ArrayList(refs.size());
-			for(org.alfresco.service.cmr.repository.NodeRef ref : refs){
-				result.add(new NodeRef(repoDao.getId(),ref.getId()));
-			}
-			return result;
-		} catch (Exception e) {
-			throw DAOException.mapping(e);
+	private void throwIfPermissionIsMissing(String permission) throws DAOSecurityException {
+		if(!permissionService.hasPermission(storeProtocol,storeId,nodeId,permission)){
+			throw new DAOSecurityException(new SecurityException("Current user has no "+permission+" on node "+nodeId));
 		}
 	}
-	
-	/**
+
+	public static List<NodeRef> getFilesSharedByMe(RepositoryDao repoDao,List<String> filter,SortDefinition sortDefinition) throws DAOException {
+		ApplicationContext applicationContext = AlfAppContextGate.getApplicationContext();
+		ServiceRegistry serviceRegistry = (ServiceRegistry) applicationContext.getBean(ServiceRegistry.SERVICE_REGISTRY);
+		return serviceRegistry.getTransactionService().getRetryingTransactionHelper().doInTransaction(()-> {
+			SearchService searchService = SearchServiceFactory.getSearchService(repoDao.getApplicationInfo().getAppId());
+			try {
+				List<org.alfresco.service.cmr.repository.NodeRef> refs = searchService.getFilesSharedByMe();
+				refs = sortAlfrescoRefs(refs, filter, sortDefinition);
+				return convertAlfrescoNodeRef(repoDao, refs);
+			} catch (Exception e) {
+				throw DAOException.mapping(e);
+			}
+		});
+	}
+
+    public static List<org.alfresco.service.cmr.repository.NodeRef> sortAlfrescoRefs(List<org.alfresco.service.cmr.repository.NodeRef> refs, List<String> filter, SortDefinition sortDefinition) {
+        return NodeServiceFactory.getLocalService().sortNodeRefList(refs,filter,sortDefinition);
+    }
+
+    /**
 	 * All files the current user is a receiver of the workflow
 	 * @param repoDao
 	 * @return
 	 * @throws DAOException
 	 */
-	public static List<NodeRef> getWorkflowReceive(RepositoryDao repoDao) throws DAOException {
+	public static List<NodeRef> getWorkflowReceive(RepositoryDao repoDao,List<String> filter, SortDefinition sortDefinition) throws DAOException {
 		SearchService searchService = SearchServiceFactory.getSearchService(repoDao.getApplicationInfo().getAppId());
 		try {
 			List<org.alfresco.service.cmr.repository.NodeRef> refs = searchService.getWorkflowReceive(AuthenticationUtil.getFullyAuthenticatedUser());
-			List<NodeRef> result=new ArrayList(refs.size());
-			for(org.alfresco.service.cmr.repository.NodeRef ref : refs){
-				result.add(new NodeRef(repoDao.getId(),ref.getId()));
-			}
-			return result;
+			refs=NodeDao.sortAlfrescoRefs(refs,filter,sortDefinition);
+			return convertAlfrescoNodeRef(repoDao,refs);
 		} catch (Exception e) {
 			throw DAOException.mapping(e);
 		}
 	}
 	
-	public static List<NodeRef> getFilesSharedToMe(RepositoryDao repoDao) throws DAOException {
-		SearchService searchService = SearchServiceFactory.getSearchService(repoDao.getApplicationInfo().getAppId());
-		try {
-			List<org.alfresco.service.cmr.repository.NodeRef> refs = searchService.getFilesSharedToMe();
-			
-			int performanceMax = 100;
-			
-			List<NodeRef> result = new ArrayList<NodeRef>(refs.size());
-			for(org.alfresco.service.cmr.repository.NodeRef ref : refs){
-				if(result.size() < performanceMax)
-				result.add(new NodeRef(repoDao.getId(),ref.getId()));
+	public static List<NodeRef> getFilesSharedToMe(RepositoryDao repoDao, List<String> filter, SortDefinition sortDefinition) throws DAOException {
+		ApplicationContext applicationContext = AlfAppContextGate.getApplicationContext();
+		ServiceRegistry serviceRegistry = (ServiceRegistry) applicationContext.getBean(ServiceRegistry.SERVICE_REGISTRY);
+		return serviceRegistry.getTransactionService().getRetryingTransactionHelper().doInTransaction(()-> {
+			SearchService searchService = SearchServiceFactory.getSearchService(repoDao.getApplicationInfo().getAppId());
+			try {
+				List<org.alfresco.service.cmr.repository.NodeRef> refs = searchService.getFilesSharedToMe();
+				List<org.alfresco.service.cmr.repository.NodeRef> sorted = LogTime.log("Sorting node refs from getFilesSharedToMe (" + refs.size() + ")", () -> NodeDao.sortAlfrescoRefs(refs, filter, sortDefinition));
+				return convertAlfrescoNodeRef(repoDao, sorted);
+			} catch (Exception e) {
+				throw DAOException.mapping(e);
 			}
-			return result;
-		} catch (Exception e) {
-			throw DAOException.mapping(e);
-		}
+		});
 	}
 
-	public List<NodeShare> getShares(String email) {
+	public List<NodeShare> getShares(String email) throws DAOSecurityException {
+		throwIfPermissionIsMissing(CCConstants.PERMISSION_CHANGEPERMISSIONS);
 		ShareServiceImpl service = new ShareServiceImpl();
 		List<NodeShare> entries=new ArrayList<>();
 		for(Share share : service.getShares(this.nodeId)){
@@ -1365,17 +1441,19 @@ public class NodeDao {
 		return entries;
 	}
 
-	public NodeShare createShare(long expiryDate) throws DAOException {
+	public NodeShare createShare(long expiryDate,String password) throws DAOException {
 		ShareServiceImpl service = new ShareServiceImpl();
 		try {
-			return new NodeShare(new org.alfresco.service.cmr.repository.NodeRef(NodeDao.storeRef,this.nodeId),service.createShare(nodeId, expiryDate));
+			throwIfPermissionIsMissing(CCConstants.PERMISSION_CHANGEPERMISSIONS);
+			return new NodeShare(new org.alfresco.service.cmr.repository.NodeRef(NodeDao.storeRef,this.nodeId),service.createShare(nodeId, expiryDate,password));
 		} catch (Exception e) {
 			throw DAOException.mapping(e);
 		}
 	}
 	
 	public void removeShare(String shareId) throws DAOException {
-    	ShareServiceImpl service=new ShareServiceImpl();
+		throwIfPermissionIsMissing(CCConstants.PERMISSION_CHANGEPERMISSIONS);
+		ShareServiceImpl service=new ShareServiceImpl();
     	for(Share share : service.getShares(this.nodeId)){
     		if(share.getNodeId().equals(shareId)){
     			service.removeShare(shareId);
@@ -1385,11 +1463,13 @@ public class NodeDao {
     	throw DAOException.mapping(new Exception("share "+shareId+" was not found on node "+nodeId));
 	}
 	
-	public NodeShare updateShare(String shareId, long expiryDate) throws DAOException {
+	public NodeShare updateShare(String shareId, long expiryDate, String password) throws DAOException {
+		throwIfPermissionIsMissing(CCConstants.PERMISSION_CHANGEPERMISSIONS);
 		ShareServiceImpl service=new ShareServiceImpl();
     	for(Share share : service.getShares(this.nodeId)){
     		if(share.getNodeId().equals(shareId)){
     			share.setExpiryDate(expiryDate);
+    			share.setPassword(password);
     			service.updateShare(share);
     			return new NodeShare(new org.alfresco.service.cmr.repository.NodeRef(NodeDao.storeRef,this.nodeId),share);
     		}
@@ -1409,7 +1489,14 @@ public class NodeDao {
  	public void createVersion(String comment) throws DAOException, Exception {
 		this.changePropertiesWithVersioning(getAllProperties(), comment);
 	}
- 	
+
+    public static List<org.alfresco.service.cmr.repository.NodeRef> convertApiNodeRef(List<NodeRef> refs) {
+        List<org.alfresco.service.cmr.repository.NodeRef> converted=new ArrayList<>(refs.size());
+        for(NodeRef ref : refs){
+            converted.add(new org.alfresco.service.cmr.repository.NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE,ref.getId()));
+        }
+        return converted;
+    }
  	public static List<NodeRef> convertAlfrescoNodeRef(RepositoryDao repoDao,List<org.alfresco.service.cmr.repository.NodeRef> refs){
  		List<NodeRef> converted=new ArrayList<>(refs.size());
  		for(org.alfresco.service.cmr.repository.NodeRef ref : refs){
@@ -1418,160 +1505,7 @@ public class NodeDao {
  		return converted;
  	}
 
- 	public static List<Node> sortAndFilterByType(RepositoryDao repoDao, List<NodeRef> children,SortDefinition sort, List<String> filter,Filter propFilter) throws DAOException {
-		DictionaryService dictionaryService = ((ServiceRegistry) AlfAppContextGate.getApplicationContext().getBean(ServiceRegistry.SERVICE_REGISTRY)).getDictionaryService();
-
-		List<NodeDao> nodes=new ArrayList<NodeDao>(children.size());
-    	for(NodeRef child : children){
-			nodes.add(NodeDao.getNode(repoDao, child.getId(),propFilter));
-    	}
-    	for(int i=0;i<nodes.size();i++){
-    		String type=(String)nodes.get(i).getNativeProperties(null).get(CCConstants.CCM_PROP_MAP_TYPE);
-    		String name=nodes.get(i).getName();
-    		if(".DS_Store".equals(name) || "._.DS_Store".equals(name)){
-        		nodes.remove(i);
-        		i--;
-        		continue;
-        	}
-        	// filter the metadata template file
-        	if(nodes.get(i).getAspectsNative().contains(CCConstants.CCM_ASSOC_METADATA_PRESETTING_TEMPLATE)) {
-				nodes.remove(i);
-				i--;
-				continue;
-			}
-    		if(type==null)
-    			continue;
-    		if(CCConstants.CCM_VALUE_MAP_TYPE_FAVORITE.equals(type) || CCConstants.CCM_VALUE_MAP_TYPE_EDUGROUP.equals(type)){
-    			nodes.remove(i);
-    			i--;
-    		}
-    	}
-    	if(sort!=null && sort.hasContent()){
-    		final DAOException[] exception=new DAOException[1];
-    		Collections.sort(nodes,new Comparator<NodeDao>() {
-				@Override
-				public int compare(NodeDao o1, NodeDao o2) {
-					
-					if(o1.isDirectory()!=o2.isDirectory()){
-						return o1.isDirectory() ? -1 : 1;
-					}
-					HashMap<String, Object> o1props=null;
-					HashMap<String, Object> o2props=null;
-					try{
-						o1props=o1.getNativeProperties();
-						o2props=o2.getNativeProperties();
-					}catch(DAOException e){
-						e.printStackTrace();
-						return 0;
-					}
-					for(SortDefinitionEntry criteria : sort.getSortDefinitionEntries()){
-						int value=0;
-						String property=CCConstants.getValidGlobalName(criteria.getProperty());
-
-						Object prop1=null,prop2=null;
-							
-						prop1=o1props.get(property);
-						prop2=o2props.get(property);
-						if(o1props.containsKey(property+CCConstants.ISO8601_SUFFIX)) {
-							prop1=o1props.get(property+CCConstants.ISO8601_SUFFIX);
-							prop2=o2props.get(property+CCConstants.ISO8601_SUFFIX);
-						}
-						
-						// TODO: Use Node and nodeProps to get values for sorting!
-						
-						if(prop1==null || prop2==null){
-							//exception[0]=DAOException.mapping(new InvalidParameterException("Sort criteria "+criteria.getProperty()+" not found"));
-							//break;
-						}
-						if(prop1==null || !(prop1 instanceof Comparable))
-							prop1="";
-						if(prop2==null || !(prop2 instanceof Comparable))
-							prop2="";
-						if(prop1 instanceof String) {
-							prop1=((String) prop1).toLowerCase();
-						}
-						if(prop2 instanceof String) {
-							prop2=((String) prop2).toLowerCase();
-						}
-						try {
-							String fieldType = dictionaryService.getProperty(QName.createQName(property)).getDataType().getJavaClassName();
-
-							prop1=castPropertyByType(fieldType,prop1);
-							prop2=castPropertyByType(fieldType,prop2);
-
-						}catch(Throwable t){ //  conversion can fail in some cases (null pointer, wrong data types stored
-						}
-						if(criteria.isAscending())
-							value=((Comparable)prop1).compareTo(prop2);
-						else
-							value=((Comparable)prop2).compareTo(prop1);
-							
-						if(value!=0)
-							return value;
-					}
-					return 0;
-				}
-    			
-			});
-    		if(exception[0]!=null)
-    			throw exception[0];
-    	}
-    	List<Node> converted=new ArrayList<>(nodes.size());
-    	for(NodeDao node : nodes){
-    		converted.add(node.asNode());
-    	}
-    	if(filter==null || filter.size()==0)
-    		return converted;
-    	if(filter.size()==1 && filter.get(0).isEmpty())
-    		return converted;
-    	List<Node> filtered=new ArrayList<Node>();
-
-		for(Node node : converted){
-			boolean add=false;
-			for(String f : filter){
-				if(f.equals("folders") && node.isDirectory()){
-					add=true;
-					break;	
-				}
-				if(f.equals("files") && !node.isDirectory()){
-					add=true;
-					break;	
-				}
-				if(f.startsWith("mime:") && node.getMimetype()!=null){
-					String mime=f.substring(5).toLowerCase();
-					if(mime.endsWith("*")){
-						if(node.getMimetype().startsWith(mime.substring(0,mime.length()-1))){
-							add=true;
-							break;
-						}
-					}
-					else if(mime.equals(node.getMimetype())){
-						add=true;
-						break;
-					}
-				}
-			}
-			if(add)
-				filtered.add(node);
-		}
-		return filtered;
-	}
-
-	private static Object castPropertyByType(String fieldType, Object prop) {
-		if(prop==null)
-			return null;
-		if(prop instanceof String){
-			String str= (String) prop;
-			if(fieldType.equals(Integer.class.getName())){
-				if(str.isEmpty())
-					return Integer.valueOf(0);
-				return Integer.valueOf(str);
-			}
-		}
-		return prop;
-	}
-
-	public void reportNode(String reason, String userEmail, String userComment) throws DAOException {
+    public void reportNode(String reason, String userEmail, String userComment) throws DAOException {
 		try{
 			NotificationServiceFactory.getNotificationService(repoDao.getApplicationInfo().getAppId())
 			.notifyNodeIssue(nodeId, reason, userEmail, userComment);
@@ -1657,6 +1591,30 @@ public class NodeDao {
 			return getTemplateNode();
 		}
 		catch(Throwable t){
+			throw DAOException.mapping(t);
+		}
+	}
+
+	public void setOwner(String username) {
+		nodeService.setOwner( this.getId(), username);
+	}
+
+	public void setProperty(String property, String value) {
+		nodeService.setProperty(Constants.storeRef.getProtocol(), Constants.storeRef.getIdentifier(), this.getId(), property, value);
+	}
+
+	public NodeDao createFork(String sourceId) throws DAOException {
+		try {
+			org.alfresco.service.cmr.repository.NodeRef newNode = nodeService.copyNode(sourceId, nodeId, false);
+			permissionService.createNotifyObject(newNode.getId(), new AuthenticationToolAPI().getCurrentUser(), CCConstants.CCM_VALUE_NOTIFY_EVENT_PERMISSION,
+					CCConstants.CCM_VALUE_NOTIFY_ACTION_PERMISSION_ADD);
+			nodeService.addAspect(newNode.getId(),CCConstants.CCM_ASPECT_FORKED);
+			nodeService.setProperty(newNode.getStoreRef().getProtocol(),newNode.getStoreRef().getIdentifier(),newNode.getId(),CCConstants.CCM_PROP_FORKED_ORIGIN,
+					new org.alfresco.service.cmr.repository.NodeRef(storeProtocol,storeId,sourceId));
+			nodeService.setProperty(newNode.getStoreRef().getProtocol(),newNode.getStoreRef().getIdentifier(),newNode.getId(),CCConstants.CCM_PROP_FORKED_ORIGIN_VERSION,
+					nodeService.getProperty(storeProtocol,storeId,sourceId,CCConstants.LOM_PROP_LIFECYCLE_VERSION));
+			return new NodeDao(repoDao, newNode.getId());
+		}catch(Throwable t){
 			throw DAOException.mapping(t);
 		}
 	}

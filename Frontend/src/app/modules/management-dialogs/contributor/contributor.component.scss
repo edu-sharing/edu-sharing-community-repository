@@ -50,15 +50,14 @@ h2{
     >div{
       display:flex;
       align-items: center;
-      width:100%;
-      padding-top:6px;
+      padding-top:8px;
       margin-bottom: 24px;
-      justify-content: center;
+      justify-content: right;
       >i{
-        margin-right: 5px;
+        margin: 0 5px;
       }
     }
-    ng-datepicker{
+    calendar{
       flex-grow: 1;
     }
   }
@@ -66,6 +65,11 @@ h2{
 .btnAdd{
   margin-top: 10px;
   float:none!important;
+  display: inline-flex;
+  align-items: center;
+  .material-icons{
+    top: 0;
+  }
 }
 .moreOpen{
   margin-top: 20px;
@@ -78,13 +82,12 @@ h2{
   }
 }
 :host /deep/{
-  .datepicker-input{
-    width:calc(100% - 30px)!important;
-  }
-  .ngx-datepicker-calendar-container{
-    left: -80px!important;
-  }
-  .ngx-datepicker-input{
-    width:165px!important;
+  calendar{
+    input{
+      width:100px;
+    }
+    .picker {
+      left: -40px;
+    }
   }
 }

@@ -14,9 +14,11 @@ import org.alfresco.repo.security.authentication.AuthenticationUtil.RunAsWork;
 import org.alfresco.service.ServiceRegistry;
 import org.alfresco.service.cmr.repository.MLText;
 import org.alfresco.service.cmr.repository.NodeRef;
+import org.alfresco.service.cmr.repository.StoreRef;
 import org.alfresco.service.namespace.QName;
 import org.alfresco.util.ISO8601DateFormat;
 import org.apache.log4j.Logger;
+import org.apache.lucene.queryParser.QueryParser;
 import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.server.AuthenticationTool;
@@ -28,7 +30,16 @@ import org.edu_sharing.repository.server.tools.ApplicationInfo;
 import org.edu_sharing.repository.server.tools.ApplicationInfoList;
 import org.edu_sharing.repository.server.tools.DateTool;
 import org.edu_sharing.repository.server.tools.cache.RepositoryCache;
+import org.edu_sharing.service.authentication.SSOAuthorityMapper;
+import org.edu_sharing.service.collection.CollectionServiceFactory;
+import org.edu_sharing.service.collection.CollectionServiceImpl;
+import org.edu_sharing.service.nodeservice.NodeServiceFactory;
+import org.edu_sharing.service.nodeservice.NodeServiceHelper;
+import org.edu_sharing.service.search.SearchServiceFactory;
+import org.edu_sharing.service.search.model.SearchToken;
 import org.springframework.context.ApplicationContext;
+
+import javax.ws.rs.QueryParam;
 
 public class Usage2Service {
 	
@@ -157,16 +168,28 @@ Logger logger = Logger.getLogger(Usage2Service.class);
 		
 		return result;
 	}
+	
+	public List<Usage> getUsages(String repositoryId,
+			String nodeId,
+			Long from,
+			Long to) throws Exception {
+		 List<Usage> result = new ArrayList<Usage>();
+		 
+		 for(Map.Entry<String, HashMap<String, Object>> entry : usageDao.getUsages(repositoryId, nodeId, from, to).entrySet()) {
+			 result.add(getUsageResult(entry.getValue()));
+		 }
+		 
+		 return result;
+	}
 
 
-	public Usage setUsage(String repoId, String user, String lmsId, String courseId, String parentNodeId, String userMail, Calendar fromUsed, Calendar toUsed, int distinctPersons, String _version, String resourceId, String xmlParams) throws UsageException{
-		if (user == null || user.trim().equals("") || lmsId == null || lmsId.trim().equals("") || courseId == null || courseId.trim().equals("") || parentNodeId == null
+	public Usage setUsage(String repoId, String userIn, String lmsId, String courseId, String parentNodeId, String userMail, Calendar fromUsed, Calendar toUsed, int distinctPersons, String _version, String resourceId, String xmlParams) throws UsageException{
+		if (userIn == null || userIn.trim().equals("") || lmsId == null || lmsId.trim().equals("") || courseId == null || courseId.trim().equals("") || parentNodeId == null
 				|| parentNodeId.trim().equals("")) {
 			throw new UsageException(UsageService.MISSING_PARAM);
 		}
-
-
-
+		// if the user is admin, map it for the requesting repo
+		final String user=SSOAuthorityMapper.mapAdminAuthority(userIn,lmsId);
 		RunAsWork<Usage> runAs = new RunAsWork<Usage>() {
 			@Override
 			public Usage doWork() throws Exception {
@@ -177,12 +200,19 @@ Logger logger = Logger.getLogger(Usage2Service.class);
 
 					//only check publish permission for new content so that an teacher who modifies the course/wysiwyg can safe changes of permission
 					if(usage == null){
-
+						String usageNodeId=parentNodeId;
+						// for collection references, we always rely on the main object permissions
+						if(NodeServiceFactory.getLocalService().hasAspect(StoreRef.PROTOCOL_WORKSPACE,StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(),usageNodeId, CCConstants.CCM_ASPECT_COLLECTION_IO_REFERENCE)){
+							usageNodeId=NodeServiceHelper.getProperty(new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE,usageNodeId),CCConstants.CCM_PROP_IO_ORIGINAL);
+						}
 						boolean hasPublishPerm = ((MCAlfrescoClient)RepoFactory.getInstance(ApplicationInfoList.getHomeRepository().getAppId(),
-								(HashMap)null)).hasPermissions(parentNodeId, user, new String[]{CCConstants.PERMISSION_CC_PUBLISH});
+								(HashMap)null)).hasPermissions(usageNodeId, user, new String[]{CCConstants.PERMISSION_CC_PUBLISH});
 
 						if(!hasPublishPerm){
-							logger.info("User "+user+" has no publish permission on " + parentNodeId);
+							logger.info("User "+user+" has no publish permission on " + usageNodeId);
+							if(!parentNodeId.equals(usageNodeId)){
+								logger.info("The element "+parentNodeId+" is a collection ref for object "+usageNodeId+", but the user is missing "+CCConstants.PERMISSION_CC_PUBLISH+" on the primary object");
+							}
 							throw new UsageException(UsageService.NO_CCPUBLISH_PERMISSION);
 						}
 					}
@@ -311,7 +341,7 @@ Logger logger = Logger.getLogger(Usage2Service.class);
 			for (String key : usages.keySet()) {
 				result.add(getUsageResult(usages.get(key)));
 			}
-			
+			addUsagesFromReferenceObjects(parentNodeId,result);
 			return result;
 		}catch(Throwable e){
 			logger.error(e.getMessage(), e);
@@ -328,7 +358,24 @@ Logger logger = Logger.getLogger(Usage2Service.class);
 	
     }
 
-    public boolean deleteUsage(String repoId, String user, String lmsId, String courseId, String parentNodeId, String resourceId) throws UsageException {
+	/**
+	 * Add indirect usages which are attached to collection reference objects
+	 * @param parentNodeId
+	 * @param result
+	 */
+	private void addUsagesFromReferenceObjects(String parentNodeId, ArrayList<Usage> result) {
+		List<org.edu_sharing.service.model.NodeRef> nodes = CollectionServiceFactory.getLocalService().getReferenceObjects(parentNodeId);
+		for(org.edu_sharing.service.model.NodeRef node : nodes){
+			HashMap<String, HashMap<String, Object>> usages = usageDao.getUsages(node.getNodeId());
+			for (String key : usages.keySet()) {
+				Usage usage = getUsageResult(usages.get(key));
+				usage.setType(Usage.Type.INDIRECT);
+				result.add(usage);
+			}
+		}
+	}
+
+	public boolean deleteUsage(String repoId, String user, String lmsId, String courseId, String parentNodeId, String resourceId) throws UsageException {
     	logger.info("starting");
 		
 		
@@ -338,7 +385,7 @@ Logger logger = Logger.getLogger(Usage2Service.class);
 		AuthenticationTool authTool = new AuthenticationToolAPI();
 		HashMap<String, String> currentAuthentication = null;
 		try {
-			currentAuthentication = authTool.validateAuthentication(Context.getCurrentInstance().getCurrentInstance().getRequest().getSession());
+			currentAuthentication = authTool.validateAuthentication(Context.getCurrentInstance().getRequest().getSession());
 		}catch(Exception e) {
 			//when run as
 		}
@@ -417,6 +464,12 @@ Logger logger = Logger.getLogger(Usage2Service.class);
 		if (usageCounter != null) {
 			usageResult.setUsageCounter(new Integer((String) usageCounter));
 		}
+		
+		String modified = (String)usage.get(CCConstants.CM_PROP_C_MODIFIED);
+		usageResult.setModified(new Date(new Long(modified)));
+		
+		String created = (String)usage.get(CCConstants.CM_PROP_C_CREATED);
+		usageResult.setCreated(new Date(new Long(created)));
 
 		logger.info("returning");
 		return usageResult;

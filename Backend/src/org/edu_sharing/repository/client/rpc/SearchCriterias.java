@@ -27,6 +27,7 @@
  */
 package org.edu_sharing.repository.client.rpc;
 
+import java.io.Serializable;
 import java.util.HashMap;
 
 import org.edu_sharing.repository.client.rpc.metadataset.MetadataSetQuery;
@@ -35,7 +36,7 @@ import org.edu_sharing.repository.client.rpc.metadataset.MetadataSetQueryPropert
 import com.google.gwt.user.client.rpc.IsSerializable;
 
 
-public class SearchCriterias implements IsSerializable {
+public class SearchCriterias implements IsSerializable, Serializable {
 	
 	
 	public SearchCriterias(){

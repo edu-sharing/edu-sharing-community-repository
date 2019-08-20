@@ -1,7 +1,7 @@
 import {UIAnimation} from "../ui-animation";
 import {Component, EventEmitter, Input, Output} from "@angular/core";
 import {trigger} from "@angular/animations";
-import {Node,NodeList} from "../../rest/data-object";
+import {Node, NodeList, NodePermissions, Permissions} from "../../rest/data-object";
 import {RestNodeService} from "../../rest/services/rest-node.service";
 import {ConfigurationService} from "../../services/configuration.service";
 import {RestHelper} from "../../rest/rest-helper";
@@ -26,6 +26,7 @@ import {RestConstants} from "../../rest/rest-constants";
 export class NodeInfoComponent{
     _path: Node[];
     _children: Node[];
+    _permissions: Permissions;
     _node : Node;
     _properties : any[];
     _creator: string;
@@ -42,8 +43,11 @@ export class NodeInfoComponent{
     this.nodeApi.getNodeParents(this._node.ref.id,true).subscribe((data:NodeList)=>{
       this._path=data.nodes.reverse();
     });
-    this.nodeApi.getChildren(this._node.ref.id,[],{propertyFilter:[RestConstants.ALL],count:RestConstants.COUNT_UNLIMITED}).subscribe((data:NodeList)=>{
+    this.nodeApi.getChildren(this._node.ref.id,[RestConstants.FILTER_SPECIAL],{propertyFilter:[RestConstants.ALL],count:RestConstants.COUNT_UNLIMITED}).subscribe((data:NodeList)=>{
       this._children=data.nodes;
+    });
+    this.nodeApi.getNodePermissions(this._node.ref.id,).subscribe((data)=>{
+        this._permissions=data.permissions;
     });
   }
   @Output() onClose = new EventEmitter();

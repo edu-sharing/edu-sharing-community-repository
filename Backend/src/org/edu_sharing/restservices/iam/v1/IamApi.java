@@ -40,18 +40,7 @@ import org.edu_sharing.restservices.iam.v1.model.Preferences;
 import org.edu_sharing.restservices.iam.v1.model.UserEntries;
 import org.edu_sharing.restservices.iam.v1.model.UserEntry;
 import org.edu_sharing.restservices.node.v1.model.NodeEntries;
-import org.edu_sharing.restservices.shared.Authority;
-import org.edu_sharing.restservices.shared.ErrorResponse;
-import org.edu_sharing.restservices.shared.Filter;
-import org.edu_sharing.restservices.shared.Group;
-import org.edu_sharing.restservices.shared.GroupProfile;
-import org.edu_sharing.restservices.shared.Node;
-import org.edu_sharing.restservices.shared.NodeRef;
-import org.edu_sharing.restservices.shared.Pagination;
-import org.edu_sharing.restservices.shared.User;
-import org.edu_sharing.restservices.shared.UserCredential;
-import org.edu_sharing.restservices.shared.UserProfile;
-import org.edu_sharing.restservices.shared.UserSimple;
+import org.edu_sharing.restservices.shared.*;
 import org.edu_sharing.service.authority.AuthorityServiceFactory;
 import org.edu_sharing.service.search.SearchServiceFactory;
 import org.edu_sharing.service.search.model.SearchResult;
@@ -236,8 +225,8 @@ public class IamApi  {
 	    	NodeEntries result=new NodeEntries();
 	    	List<NodeRef> refList = personDao.getNodeList(list);
 	    	if(refList!=null){
-	    		List<Node> nodes = NodeDao.sortAndFilterByType(repoDao,refList,sortDefinition,null,propFilter);
-	    		result.setNodes(nodes);
+                refList=NodeDao.sortApiNodeRefs(repoDao,refList,null,sortDefinition);
+	    	    result=NodeDao.convertToRest(repoDao,propFilter,refList,0,Integer.MAX_VALUE);
 	    	}
 	    	return Response.status(Response.Status.OK).entity(result).build();
 		}catch(Throwable t){
@@ -395,7 +384,7 @@ public class IamApi  {
     public Response createUser(
     		@ApiParam(value = "ID of repository (or \"-home-\" for home repository)",required=true, defaultValue="-home-" ) @PathParam("repository") String repository,
     		@ApiParam(value = "username",required=true) @PathParam("person") String person,
-    	    @ApiParam(value = "profile" ,required=true ) UserProfile profile,
+    	    @ApiParam(value = "profile" ,required=true ) UserProfileEdit profile,
     	    @ApiParam(value = "Password, leave empty if you don't want to set any" ,required=false )@QueryParam("password") String password,
     		@Context HttpServletRequest req) {
 
@@ -512,7 +501,7 @@ public class IamApi  {
     public Response changeUserProfile(
     		@ApiParam(value = "ID of repository (or \"-home-\" for home repository)",required=true, defaultValue="-home-" ) @PathParam("repository") String repository,
     		@ApiParam(value = "username (or \"-me-\" for current user)",required=true, defaultValue="-me-" ) @PathParam("person") String person,
-    	    @ApiParam(value = "properties" ,required=true ) UserProfile profile,
+    	    @ApiParam(value = "properties" ,required=true ) UserProfileEdit profile,
     		@Context HttpServletRequest req) {
 
     	try {

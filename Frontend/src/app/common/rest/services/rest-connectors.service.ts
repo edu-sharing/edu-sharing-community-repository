@@ -1,5 +1,4 @@
 import { Injectable } from '@angular/core';
-import { Http, Response } from '@angular/http';
 import 'rxjs/add/operator/map'
 import { Observable } from 'rxjs/Observable';
 import {RestConnectorService} from "./rest-connector.service";
@@ -10,40 +9,51 @@ import {Node, Connector, OAuthResult, ConnectorList, Filetype, NodeLock, RestErr
 import {Observer} from "rxjs";
 import {RestNodeService} from "./rest-node.service";
 import {AbstractRestService} from "./abstract-rest-service";
+import {UIService} from '../../services/ui.service';
 
 @Injectable()
 export class RestConnectorsService extends AbstractRestService{
+    private static MODE_NONE=0;
+    private static MODE_CREATE=1;
+    private static MODE_EDIT=2;
+
+  private currentList: ConnectorList;
   constructor(connector : RestConnectorService,
-              public nodeApi : RestNodeService) {
+              public nodeApi : RestNodeService,
+              public ui : UIService) {
       super(connector);
   }
 
   public list = (repository=RestConstants.HOME_REPOSITORY
-                  ): Observable<ConnectorList> => {
+                  ) => {
     let query=this.connector.createUrl("connector/:version/connectors/:repository/list",repository);
-          return this.connector.get(query,this.connector.getRequestOptions())
-      .map((response: Response) => response.json());
+          return this.connector.get<ConnectorList>(query,this.connector.getRequestOptions())
+          .do((data)=>this.currentList=data);
   }
-  public static connectorSupportsEdit(connectorList:ConnectorList,node: Node) {
-    if(connectorList==null || connectorList.connectors==null)
+  public connectorSupportsEdit(node: Node) {
+    let connectors=this.getConnectors();
+    if(connectors==null)
       return null;
-    for(let connector of connectorList.connectors){
+    for(let connector of connectors){
+        // do not allow opening on a desktop-only connector on mobile
+        if(connector.onlyDesktop && this.ui.isMobile())
+            continue;
+        if(!connector.hasViewMode && node.access.indexOf(RestConstants.ACCESS_WRITE)==-1)
+            continue;
       if(RestConnectorsService.getFiletype(node,connector))
         return connector;
     }
     return null;
   }
 
-  private static MODE_NONE=0;
-  private static MODE_CREATE=1;
-  private static MODE_EDIT=2;
+
   public static getFiletype(node:Node,connector:Connector,mode=this.MODE_NONE){
     for(let filetype of connector.filetypes){
       if(filetype.mimetype==node.mimetype && (mode==this.MODE_NONE || mode==this.MODE_EDIT && filetype.editable || mode==this.MODE_CREATE && filetype.creatable)) {
         if(filetype.mimetype=='application/zip'){
-         if(   filetype.ccressourceversion==node.properties[RestConstants.CCM_PROP_CCRESSOURCEVERSION]
-           && filetype.ccressourcetype==node.properties[RestConstants.CCM_PROP_CCRESSOURCETYPE]
-           && filetype.ccresourcesubtype==node.properties[RestConstants.CCM_PROP_CCRESSOURCESUBTYPE])
+         if((!filetype.ccressourceversion || filetype.ccressourceversion==node.properties[RestConstants.CCM_PROP_CCRESSOURCEVERSION])
+            && filetype.ccressourcetype==node.properties[RestConstants.CCM_PROP_CCRESSOURCETYPE]
+            && (!filetype.ccresourcesubtype || filetype.ccresourcesubtype==node.properties[RestConstants.CCM_PROP_CCRESSOURCESUBTYPE]))
            return filetype;
          continue;
         }
@@ -55,7 +65,7 @@ export class RestConnectorsService extends AbstractRestService{
     }
     return null;
   }
-  public generateToolUrl(connectorList:ConnectorList,connectorType:Connector,type:Filetype,node:Node):Observable<string> {
+  public generateToolUrl(connectorType:Connector,type:Filetype,node:Node):Observable<string> {
     return new Observable<string>((observer: Observer<string>) => {
       let send: any = {};
       send["connectorId"] = connectorType.id;
@@ -74,63 +84,14 @@ export class RestConnectorsService extends AbstractRestService{
       }
       observer.next(req);
       observer.complete();
-      /*
-      this.connector.getOAuthToken().subscribe((oauth: OAuthResult) => {
-          if (!oauth.access_token) {
-            observer.error("oauth failed");
-            observer.complete();
-            return;
-          }
-          if (type == null) {
-            type=RestConnectorsService.getFiletype(node,connectorType);
-          }
-          let send: any = {};
-          send["endpoint"] = this.connector.getAbsoluteEndpointUrl();
-          send["tool"] = connectorType.id;
-          send["accessToken"] = oauth.access_token;
-          send["refreshToken"] = oauth.refresh_token;
-          send["tokenExpires"] = oauth.expires_in;
-          send["filetype"] = type.filetype;
-          send["mimetype"] = node.mimetype;
-          send["node"] = node.ref.id;
-          let i = 0;
-          let req = connectorList.url.indexOf("?") != -1 ? "&" : "?";
-          let params: string[] = [];
-          // add mandatory params
-          params.push("endpoint");
-          params.push("tool");
-          params.push("node");
-          params.push("accessToken");
-          params.push("refreshToken");
-          params.push("tokenExpires");
-          if(connectorType.parameters) {
-            for (let param of connectorType.parameters)
-              params.push(param);
-          }
-          for (let param of params) {
-            if (!send[param]) {
-              observer.error("invalid parameter " + param + " for connector, not in known list");
-              observer.complete();
-              return;
-            }
-            if (i > 0) {
-              req += "&";
-            }
-            req += param + "=" + encodeURIComponent(send[param]);
-            i++;
-          }
-          console.log("main request "+req);
-
-          let url = connectorList.url + this.connector.createUrl(req, null);
-          observer.next(url);
-          observer.complete();
-        },
-        (error: any) => {
-          observer.error(error);
-          observer.complete();
-        }
-      );
-      */
     });
   }
+
+    getConnectors() {
+      if(this.currentList && this.currentList.connectors) {
+          // filter connectors which are only available on desktop
+          return this.currentList.connectors.filter((connector) => !connector.onlyDesktop || !this.ui.isMobile());
+      }
+      return null;
+    }
 }

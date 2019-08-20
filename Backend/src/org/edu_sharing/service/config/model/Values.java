@@ -6,6 +6,8 @@ public class Values{
 	@XmlElement public String extension;
 	@XmlElement public String loginUrl;
 	@XmlElement public Boolean loginAllowLocal;
+	@XmlElement public String loginProvidersUrl;
+	@XmlElement public String loginProviderTargetUrl;
 	@XmlElement public String registerUrl;
 	@XmlElement public String recoverPasswordUrl;
 	@XmlElement	public String imprintUrl;
@@ -20,6 +22,8 @@ public class Values{
 	@XmlElement	public MenuEntry[] menuEntries;
 	@XmlElement	public ContextMenuEntry[] nodeOptions;
 	@XmlElement	public ContextMenuEntry[] searchNodeOptions;
+	@XmlElement	public ContextMenuEntry[] renderNodeOptions;
+	@XmlElement	public ContextMenuEntry[] collectionNodeOptions;
 	@XmlElement	public ContextMenuEntry[] nodeStoreOptions;
 	@XmlElement	public String[] allowedLicenses;
 	@XmlElement	public License[] customLicenses;
@@ -27,6 +31,7 @@ public class Values{
 	@XmlElement	public Boolean licenseDialogOnUpload;
 	@XmlElement	public Boolean nodeReport;
 	@XmlElement	public Boolean branding;
+	@XmlElement	public Boolean publishingNotice;
 	@XmlElement	public String siteTitle;
 	@XmlElement	public String userDisplayName;
 	@XmlElement	public String userSecondaryDisplayName;
@@ -44,5 +49,9 @@ public class Values{
 	@XmlElement	public Mainnav mainnav;
 	@XmlElement	public String searchSidenavMode;
 	@XmlElement	public Guest guest;
+	@XmlElement	public Collections collections;
 	@XmlElement	public LicenseAgreement licenseAgreement;
+	@XmlElement	public Services services;
+	@XmlElement	public HelpMenuOptions[] helpMenuOptions;
+	@XmlElement	public Image[] images;
 }

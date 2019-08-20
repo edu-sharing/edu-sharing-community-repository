@@ -1,5 +1,6 @@
 package org.edu_sharing.service.search;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -12,6 +13,7 @@ import org.edu_sharing.restservices.DAOException;
 import org.edu_sharing.restservices.MdsDao;
 import org.edu_sharing.restservices.RepositoryDao;
 import org.edu_sharing.restservices.iam.v1.model.UserEntries;
+import org.edu_sharing.restservices.search.v1.model.SearchParameters;
 import org.edu_sharing.restservices.shared.MdsQueryCriteria;
 import org.edu_sharing.service.InsufficientPermissionException;
 import org.edu_sharing.service.search.model.SearchResult;
@@ -81,9 +83,9 @@ public interface SearchService {
 	SearchResult<String> searchPersonGroups(String authorityName, String pattern, int skipCount, int maxValues,
 			SortDefinition sort);
 
-	SearchToken getLastSearchToken() throws Throwable;
+	HashMap<ContentType,SearchToken> getLastSearchTokens() throws Throwable;
 	
-	public default List<? extends  SuggestOracle.Suggestion> getSuggestions(MetadataSetV2 mds, String queryId, String parameterId, String value) {
+	public default List<? extends  SuggestOracle.Suggestion> getSuggestions(MetadataSetV2 mds, String queryId, String parameterId, String value, List<MdsQueryCriteria> criterias) {
 		return null;	
 	}
 		

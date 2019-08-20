@@ -1,22 +1,30 @@
-<div class="dialog dialogOptions" *ngIf="dropdown" (contextmenu)="dropdown=false;$event.preventDefault();$event.stopPropagation();" (click)="dropdown=false"></div>
-<div class="collectionContainer"
-     #dropdownContainer
-     [@openOverlay]="dropdown" *ngIf="dropdown" (contextmenu)="dropdown=false;$event.preventDefault();$event.stopPropagation();" (click)="dropdown=false">
-  <div [@openOverlay]="dropdown"
-       #dropdownRef
-       class="moreOpen collection" (keydown.escape)="dropdown=false;$event.preventDefault();$event.stopPropagation();">
-      <a class="collection-item waves-effect"
-         *ngFor="let option of optionsMenu;let i=index;"
-         [class.collection-item-seperate]="option.isSeperate"
-         [class.collection-item-seperate-bottom]="option.isSeperateBottom && (i<optionsMenu.length-1 && !optionsMenu[i+1].isSeperate)"
-         [class.disabled]="!option.isEnabled"
-         tabindex="0"
-         (keyup.enter)="click(option)"
-         (click)="click(option)"
-      ><i class="material-icons">{{option.icon}}</i> {{option.name | translate}}</a>
-  </div>
-</div>
+<dropdown [(show)]="dropdown"
+          [callbackObject]="node"
+          [options]="optionsMenu"
+          [showDisabled]="showDisabled"
+></dropdown>
 <div class="actionbar">
+  <div *ngFor="let option of optionsAlways;let i=index;"
+       class="
+       action-always waves-effect waves-light
+       action-always-{{option.name | replaceChars:{search:'.',replace:'-'} }}
+      {{ option.isEnabled ? '' : 'disabled'}} {{ option.isEnabled || showDisabled ? '' : 'display-none'}}
+      {{ i==0 ? 'btn' : 'btn-flat'}}
+      {{ (i==0 && backgroundType=='primary') ? 'primary' : ''}}
+      {{ (backgroundType=='dark' || backgroundType=='primary') ? 'light' : ''}}
+      "
+       tabindex="0"
+       (keyup.enter)="click(option)"
+       (click)="click(option)">
+    <i class="material-icons" title="{{option.showName ? null : (option.name | translate)}}">{{option.icon}}</i><span class="action-always-caption" *ngIf="option.showName"> {{option.name | translate}}</span>
+  </div>
+  <div class="more btn-flat waves-effect"
+       (click)="showDropdown()"
+       tabindex="0"
+       (keyup.enter)="showDropdown()"
+       [class.light]="backgroundType=='dark' || backgroundType=='primary'"
+       *ngIf="canShowDropdown()"><a><i class="material-icons">more_vert</i></a>
+  </div>
   <div *ngIf="optionsToggle.length" class="actionToggle" [class.actionToggleDivider]="optionsAlways.length">
     <a *ngFor="let option of optionsToggle"
        tabindex="0"
@@ -26,26 +34,5 @@
        [class.disabled]="!option.isEnabled">
       <i class="material-icons">{{option.icon}}</i>
     </a>
-
   </div>
-<div class="more btn-flat waves-effect"
-       (click)="showDropdown(true)"
-       tabindex="0"
-       (keyup.enter)="showDropdown(true)"
-       [class.light]="backgroundType=='dark' || backgroundType=='primary'"
-       *ngIf="optionsMenu.length"><a><i class="material-icons">more_vert</i></a></div>
-
-  <div *ngFor="let option of optionsAlways.slice().reverse();let i=index;"
-       [class.light]="backgroundType=='dark' || backgroundType=='primary'"
-       [class.primary]="i==optionsAlways.length-1 && backgroundType=='primary'"
-       [class.disabled]="!option.isEnabled"
-       class="actionAlways waves-effect waves-light"
-       [class.btn-flat]="i!=optionsAlways.length-1 || style=='flat'"
-       [class.btn]="i==optionsAlways.length-1 && style!='flat'"
-       tabindex="0"
-       (keyup.enter)="click(option)"
-       (click)="click(option)">
-    <i class="material-icons" title="{{option.showName ? null : (option.name | translate)}}">{{option.icon}}</i><span class="actionAlwaysCaption" *ngIf="option.showName"> {{option.name | translate}}</span>
-  </div>
-
 </div>

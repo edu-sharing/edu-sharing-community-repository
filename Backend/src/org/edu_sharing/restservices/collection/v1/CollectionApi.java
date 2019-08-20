@@ -339,7 +339,9 @@ public class CollectionApi {
 			@ApiParam(value = "ID of repository (or \"-home-\" for home repository)", required = true, defaultValue = "-home-") @PathParam("repository") String repository,
 			@ApiParam(value = "ID of parent collection (or \"-root-\" for level0 collections)", required = true) @PathParam("collection") String parentId,
 			@ApiParam(value = "scope", required = true) @QueryParam("scope") @DefaultValue(value = "MY") SearchScope scope,
-			@ApiParam(value = RestConstants.MESSAGE_SORT_PROPERTIES) @QueryParam("sortProperties") List<String> sortProperties,
+            @ApiParam(value = RestConstants.MESSAGE_MAX_ITEMS, defaultValue="500" ) @QueryParam("maxItems") Integer maxItems,
+            @ApiParam(value = RestConstants.MESSAGE_SKIP_COUNT, defaultValue="0" ) @QueryParam("skipCount") Integer skipCount,
+            @ApiParam(value = RestConstants.MESSAGE_SORT_PROPERTIES) @QueryParam("sortProperties") List<String> sortProperties,
 		    @ApiParam(value = RestConstants.MESSAGE_SORT_ASCENDING) @QueryParam("sortAscending") List<Boolean> sortAscending,
 			@ApiParam(value = "property filter for result nodes (or \"-all-\" for all properties)") @QueryParam("propertyFilter") List<String> propertyFilter,
 			@Context HttpServletRequest req) {
@@ -363,7 +365,7 @@ public class CollectionApi {
 			Filter filter = new Filter();
 			filter.setProperties(propertyFilter);
 			
-			for (CollectionBase item : CollectionDao.getCollections(repoDao, parentId, scope, filter,sortDefinition)) {
+			for (CollectionBase item : CollectionDao.getCollections(repoDao, parentId, scope, filter,sortDefinition,skipCount==null ? 0 : skipCount,maxItems==null ? 500 : maxItems)) {
 				
 				if (item instanceof Collection) {
 					collections.add((Collection) item);
@@ -487,23 +489,7 @@ public class CollectionApi {
 				return Response.status(Response.Status.NOT_FOUND).build();
 			}
 
-			CollectionDao collectionDao = CollectionDao.getCollection(repoDao,
-					collectionId);
-
-			if (collectionDao == null) {
-
-				return Response.status(Response.Status.NOT_FOUND).build();
-			}
-
-			NodeDao nodeDao = NodeDao.getNode(repoDao, nodeId);
-			
-			if (nodeDao == null) {
-
-				return Response.status(Response.Status.NOT_FOUND).build();
-			}
-			
-			collectionDao.addToCollection(nodeDao);
-
+			CollectionDao.addToCollection(repoDao,collectionId,nodeId);
 			return Response.status(Response.Status.OK).build();
 
     	} catch (Throwable t) {

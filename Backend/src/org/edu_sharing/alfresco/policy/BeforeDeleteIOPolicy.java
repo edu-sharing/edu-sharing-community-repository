@@ -3,10 +3,9 @@ package org.edu_sharing.alfresco.policy;
 import org.alfresco.repo.node.NodeServicePolicies.BeforeDeleteNodePolicy;
 import org.alfresco.repo.policy.JavaBehaviour;
 import org.alfresco.repo.policy.PolicyComponent;
-import org.alfresco.service.cmr.dictionary.InvalidAspectException;
-import org.alfresco.service.cmr.repository.InvalidNodeRefException;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.repository.NodeService;
+import org.alfresco.service.cmr.repository.StoreRef;
 import org.alfresco.service.cmr.version.Version;
 import org.alfresco.service.cmr.version.VersionHistory;
 import org.alfresco.service.cmr.version.VersionService;
@@ -14,7 +13,9 @@ import org.alfresco.service.namespace.QName;
 import org.apache.log4j.Logger;
 import org.edu_sharing.alfresco.service.handleservice.HandleService;
 import org.edu_sharing.alfresco.service.handleservice.HandleServiceNotConfiguredException;
+import org.edu_sharing.alfresco.tools.UsageTool;
 import org.edu_sharing.repository.client.tools.CCConstants;
+import org.edu_sharing.repository.server.tools.ApplicationInfoList;
 
 import net.handle.hdllib.HandleException;
 
@@ -42,7 +43,11 @@ public class BeforeDeleteIOPolicy implements BeforeDeleteNodePolicy {
 	
 	@Override
 	public void beforeDeleteNode(NodeRef nodeRef) {
-		
+		if(nodeService.hasAspect(nodeRef,QName.createQName(CCConstants.CCM_ASPECT_COLLECTION_IO_REFERENCE))){
+			removeCollectionRefUsage(nodeRef);
+			//don't delete handle when it's an collection ref
+			return;
+		}
 		if(handleService != null) {
 			String handleId = (String)nodeService.getProperty(nodeRef, QName.createQName(CCConstants.CCM_PROP_PUBLISHED_HANDLE_ID));
 			if(handleId != null && handleId.trim().length() > 0) {
@@ -57,28 +62,48 @@ public class BeforeDeleteIOPolicy implements BeforeDeleteNodePolicy {
 			}
 			
 			VersionHistory vh = versionService.getVersionHistory(nodeRef);
-			for(Version v : vh.getAllVersions()) {
-				String vhandleId = (String)nodeService.getProperty( v.getFrozenStateNodeRef(), QName.createQName(CCConstants.CCM_PROP_PUBLISHED_HANDLE_ID));
-				if(vhandleId != null && vhandleId.trim().length() > 0) {
-					
-					try {
-						handleService.deleteHandle(vhandleId);
-					} catch (HandleException e) {
-						logger.error(e.getMessage());
-					} catch (Exception e) {
-						// TODO Auto-generated catch block
-						logger.error(e.getMessage(), e);
+			if(vh != null) {
+				for(Version v : vh.getAllVersions()) {
+					String vhandleId = (String)nodeService.getProperty( v.getFrozenStateNodeRef(), QName.createQName(CCConstants.CCM_PROP_PUBLISHED_HANDLE_ID));
+					if(vhandleId != null && vhandleId.trim().length() > 0) {
+						
+						try {
+							handleService.deleteHandle(vhandleId);
+						} catch (HandleException e) {
+							logger.error(e.getMessage());
+						} catch (Exception e) {
+							// TODO Auto-generated catch block
+							logger.error(e.getMessage(), e);
+						}
 					}
+					
+					/**
+					 * not able to remove aspect published here cause version can not be manipulated
+					 */
 				}
-				
-				/**
-				 * not able to remove aspect published here cause version can not be manipulated
-				 */
 			}
 		}
 	}
-	
-	
+
+	private void removeCollectionRefUsage(NodeRef nodeRef) {
+		logger.info("removing usage of collection ref: "+nodeRef.getId());
+		try {
+			
+			String originalId = (String)nodeService.getProperty(nodeRef,QName.createQName(CCConstants.CCM_PROP_IO_ORIGINAL));
+			if(nodeService.exists(new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, originalId))) {
+				new UsageTool().removeUsage(ApplicationInfoList.getHomeRepository().getAppId(),
+						nodeService.getPrimaryParent(nodeRef).getParentRef().getId(),
+						originalId,
+						nodeRef.getId()
+						);
+			}
+		} catch (Exception e) {
+			logger.warn("failed to delete ref usage",e);
+		}
+
+	}
+
+
 	public void setPolicyComponent(PolicyComponent policyComponent) {
 		this.policyComponent = policyComponent;
 	}

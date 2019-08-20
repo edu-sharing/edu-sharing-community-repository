@@ -8,7 +8,6 @@ import java.util.List;
 import org.edu_sharing.repository.server.importer.PersistentHandlerEdusharing;
 import org.edu_sharing.repository.server.importer.RecordHandlerInterfaceBase;
 import org.edu_sharing.repository.server.importer.sax.ListIdentifiersHandler;
-import org.edu_sharing.repository.server.importer.sax.RecordHandlerInterface;
 import org.edu_sharing.repository.server.importer.sax.RecordHandlerLOM;
 
 
@@ -41,7 +40,7 @@ public class ImporterJobSAX extends ImporterJob {
 					recordHandler = new RecordHandlerLOM(metadataSetId);
 				}
 				
-				new ListIdentifiersHandler(recordHandler, new PersistentHandlerEdusharing(), null, oaiBaseUrl, set, metadataPrefix, metadataSetId);
+				new ListIdentifiersHandler(recordHandler, new PersistentHandlerEdusharing(this,null,true), null, oaiBaseUrl, set, metadataPrefix, metadataSetId);
 				logger.info("finished import in "+(System.currentTimeMillis() - millisec)/1000+" secs");
 			}
 		}catch(Throwable e){

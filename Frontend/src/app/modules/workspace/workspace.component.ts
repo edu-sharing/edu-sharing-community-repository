@@ -1,4 +1,4 @@
-import {Component, ElementRef, HostListener, ViewChild} from '@angular/core';
+import {AfterViewInit, Component, ElementRef, HostListener, OnDestroy, ViewChild} from '@angular/core';
 import {TranslateService} from "@ngx-translate/core";
 import {Translation} from "../../common/translation";
 import {RestNodeService} from "../../common/rest/services/rest-node.service";
@@ -13,7 +13,7 @@ import {DialogButton, ModalDialogComponent} from "../../common/ui/modal-dialog/m
 import {RestConstants} from "../../common/rest/rest-constants";
 import {RestHelper} from "../../common/rest/rest-helper";
 import {Toast} from "../../common/ui/toast";
-import {TemporaryStorageService} from "../../common/services/temporary-storage.service";
+import {ClipboardObject, TemporaryStorageService} from '../../common/services/temporary-storage.service';
 import {UIAnimation} from "../../common/ui/ui-animation";
 import {RestConnectorService} from "../../common/rest/services/rest-connector.service";
 import {SessionStorageService} from "../../common/services/session-storage.service";
@@ -26,17 +26,18 @@ import {ConfigurationService} from "../../common/services/configuration.service"
 import {FrameEventsService} from "../../common/services/frame-events.service";
 import {Title} from "@angular/platform-browser";
 import {UIHelper} from "../../common/ui/ui-helper";
-import {Http,Response} from "@angular/http";
 import {trigger} from "@angular/animations";
 import {RestToolService} from "../../common/rest/services/rest-tool.service";
 import {UIConstants} from "../../common/ui/ui-constants";
 import {RestSearchService} from "../../common/rest/services/rest-search.service";
-import {ActionbarHelper} from "../../common/ui/actionbar/actionbar-helper";
+import {ActionbarHelperService} from "../../common/services/actionbar-helper";
 import {Helper} from "../../common/helper";
 import {RestMdsService} from '../../common/rest/services/rest-mds.service';
 import {DateHelper} from '../../common/ui/DateHelper';
 import {CordovaService} from "../../common/services/cordova.service";
 import {EventListener} from "../../common/services/frame-events.service";
+import {HttpClient} from '@angular/common/http';
+import {MainNavComponent} from '../../common/ui/main-nav/main-nav.component';
 
 @Component({
     selector: 'workspace-main',
@@ -52,7 +53,7 @@ import {EventListener} from "../../common/services/frame-events.service";
 })
 export class WorkspaceMainComponent implements EventListener{
     private static VALID_ROOTS=['MY_FILES','SHARED_FILES','MY_SHARED_FILES','TO_ME_SHARED_FILES','WORKFLOW_RECEIVE','RECYCLE'];
-    private static VALID_ROOTS_NODES=[RestConstants.USERHOME,'-shared_files-','-my_shared_files-','-to_me_shared_files-'];
+    private static VALID_ROOTS_NODES=[RestConstants.USERHOME,'-shared_files-','-my_shared_files-','-to_me_shared_files-','-workflow_receive-'];
     private isRootFolder : boolean;
     private homeDirectory : string;
     private sharedFolders : Node[]=[];
@@ -77,8 +78,8 @@ export class WorkspaceMainComponent implements EventListener{
 
     private showSelectRoot = false;
     public showUploadSelect = false;
-    private createConnectorName : string;
-    private createConnectorType : Connector;
+    createConnectorName : string;
+    createConnectorType : Connector;
     private addFolderName : string;
 
     public allowBinary = true;
@@ -93,13 +94,14 @@ export class WorkspaceMainComponent implements EventListener{
     private nodeDisplayedVersion : string;
     private createAllowed : boolean;
     private currentFolder : any|Node;
-    private currentFolderRef : any|string;
     private user : IamUser;
-    public searchQuery : string;
+    public searchQuery : any;
     public isSafe = false;
     private isLoggedIn = false;
     public addNodesToCollection : Node[];
+    public variantNode : Node;
     @ViewChild('dropdown') dropdownElement : ElementRef;
+    @ViewChild('mainNav') mainNavRef : MainNavComponent;
     private dropdownPosition: string;
     private dropdownLeft: string;
     private dropdownRight: string;
@@ -118,6 +120,7 @@ export class WorkspaceMainComponent implements EventListener{
     private currentNodes: Node[];
     private appleCmd=false;
     public workflowNode: Node;
+    public deleteNode: Node[];
     private reurl: string;
     private mdsParentNode: Node;
     public showLtiTools=false;
@@ -129,11 +132,18 @@ export class WorkspaceMainComponent implements EventListener{
     public shareLinkNode : Node;
     private viewType = 0;
     private infoToggle: OptionItem;
+    private reurlDirectories: boolean;
     @HostListener('window:beforeunload', ['$event'])
     beforeunloadHandler(event:any) {
         if(this.isSafe){
             this.connector.logoutSync();
         }
+    }
+    @HostListener('window:scroll', ['$event'])
+    handleScroll(event: Event) {
+        let scroll=(window.pageYOffset || document.documentElement.scrollTop);
+        if(scroll>0)
+            this.storage.set( 'workspace_scroll', scroll);
     }
     @HostListener('document:keyup', ['$event'])
     handleKeyboardEventUp(event: KeyboardEvent) {
@@ -176,19 +186,13 @@ export class WorkspaceMainComponent implements EventListener{
             return;
         }
         if(event.code=="Delete" && !hasOpenWindow && !fromInputField && this.selection.length){
-            this.deleteNode();
+            this.deleteNodes();
             event.preventDefault();
             event.stopPropagation();
             return;
         }
         if(event.key=="Escape"){
-            if(this.shareLinkNode!=null){
-                this.shareLinkNode=null;
-            }
-            else if(this.workflowNode!=null){
-                this.workflowNode=null;
-            }
-            else if(this.addFolderName!=null){
+            if(this.addFolderName!=null){
                 this.addFolderName=null;
             }
             else if(this.showUploadSelect){
@@ -215,10 +219,12 @@ export class WorkspaceMainComponent implements EventListener{
     constructor(private toast : Toast,
                 private route : ActivatedRoute,
                 private router : Router,
+                private http : HttpClient,
                 private translate : TranslateService,
                 private storage : TemporaryStorageService,
                 private config: ConfigurationService,
                 private connectors : RestConnectorsService,
+                private actionbar : ActionbarHelperService,
                 private collectionApi : RestCollectionService,
                 private toolService : RestToolService,
                 private session : SessionStorageService,
@@ -227,7 +233,6 @@ export class WorkspaceMainComponent implements EventListener{
                 private node : RestNodeService,
                 private ui : UIService,
                 private title : Title,
-                private http : Http,
                 private event : FrameEventsService,
                 private connector : RestConnectorService,
                 private cordova : CordovaService
@@ -239,7 +244,7 @@ export class WorkspaceMainComponent implements EventListener{
         });
         this.connector.setRoute(this.route);
         this.globalProgress=true;
-        this.explorerOptions=this.getOptions([new Node()],true);
+        this.explorerOptions=this.getOptions(null,true);
         //this.nodeOptions.push(new OptionItem("DOWNLOAD", "cloud_download", (node:Node) => this.downloadNode(node)));
     }
     private uploadCamera(event:any){
@@ -251,7 +256,7 @@ export class WorkspaceMainComponent implements EventListener{
     private openCamera(){
         this.cordova.getPhotoFromCamera((data:any)=>{
             console.log(data);
-            let name=this.translate.instant('SHARE_APP.IMAGE')+" "+DateHelper.formatDate(this.translate,new Date().getTime(),true,false)+".jpg";
+            let name=this.translate.instant('SHARE_APP.IMAGE')+" "+DateHelper.formatDate(this.translate,new Date().getTime(),{showAlwaysTime:true,useRelativeLabels:false})+".jpg";
             let blob:any=Helper.base64toBlob(data,"image/jpeg");
             blob.name=name;
             let list:any={};
@@ -294,6 +299,19 @@ export class WorkspaceMainComponent implements EventListener{
         while (s.length < size) s = "0" + s;
         return s;
     }
+    showCreateConnector(connector:Connector){
+        this.createConnectorName='';
+        this.createConnectorType=connector;
+        this.iam.getUser().subscribe((user)=>{
+            if(user.person.quota.enabled && user.person.quota.sizeCurrent>=user.person.quota.sizeQuota){
+                this.toast.showModalDialog('CONNECTOR_QUOTA_REACHED_TITLE','CONNECTOR_QUOTA_REACHED_MESSAGE',DialogButton.getOk(()=>{
+                    this.toast.closeModalDialog();
+                }),true,false);
+                this.createConnectorName=null;
+            }
+
+        });
+    }
     private createConnector(event : any){
         let name=event.name+"."+event.type.filetype;
         this.createConnectorName=null;
@@ -325,7 +343,7 @@ export class WorkspaceMainComponent implements EventListener{
 
     }
     private editConnector(node : Node=null,type : Filetype=null,win : any = null,connectorType : Connector = null){
-        UIHelper.openConnector(this.connectors,this.event,this.toast,this.connectorList,this.getNodeList(node)[0],type,win,connectorType);
+        UIHelper.openConnector(this.connectors,this.iam,this.event,this.toast,this.getNodeList(node)[0],type,win,connectorType);
     }
     private handleDrop(event:any){
         for(let s of event.source) {
@@ -462,9 +480,13 @@ export class WorkspaceMainComponent implements EventListener{
                                 if(params['root'] && WorkspaceMainComponent.VALID_ROOTS.indexOf(params['root'])!=-1) {
                                     this.root = params['root'];
                                 }
+                                else{
+                                    this.root = "MY_FILES";
+                                }
                                 if(params['reurl']) {
                                     this.reurl = params['reurl'];
                                 }
+                                this.reurlDirectories = params['applyDirectories']=='true';
                                 this.createAllowed=this.root=='MY_FILES';
                                 this.mainnav=params['mainnav']=='false' ? false : true;
 
@@ -479,17 +501,7 @@ export class WorkspaceMainComponent implements EventListener{
                                 if(!needsUpdate)
                                     return;
 
-                                this.searchQuery='';
-                                if(params['query']) {
-                                    this.searchQuery=params['query'];
-                                    this.doSearchFromRoute(this.searchQuery);
-                                }
-                                else if(params['id']) {
-                                    this.openDirectoryFromRoute(params['id']);
-                                }
-                                else{
-                                    this.openDirectoryFromRoute("");
-                                }
+                                this.openDirectoryFromRoute(params);
                                 if(params['showAlpha']){
                                     this.showAlpha();
                                 }
@@ -506,26 +518,31 @@ export class WorkspaceMainComponent implements EventListener{
     }
 
     public doSearch(query:any){
-        this.routeTo(this.root,null,query.query);
+        let id=this.currentFolder ? this.currentFolder.ref.id :
+                    this.searchQuery && this.searchQuery.node ? this.searchQuery.node.ref.id : null;
+        this.routeTo(this.root,id,query.query);
         if(!query.cleared){
             this.ui.hideKeyboardIfMobile();
         }
     }
-    private doSearchFromRoute(query:string){
-        this.searchQuery=query;
+    private doSearchFromRoute(params:any,node:Node|any){
+        node=this.isRootFolder ? null : node;
+        this.searchQuery={
+            query:params['query'],
+            node:node
+        };
+        if(node==null && this.root!='RECYCLE'){
+            this.root='ALL_FILES';
+        }
         this.createAllowed=false;
         this.path=[];
         this.selection=[];
-        this.currentFolder=null;
         this.actionOptions = this.getOptions(null,false);
 
+        /*
         if(this.root=='MY_SHARED_FILES' || this.root=='SHARED_FILES')
             this.root='MY_FILES';
-        if(!this.searchQuery){
-            this.openDirectory(null);
-            return;
-        }
-
+        */
     }
     private manageContributorsNode(node: Node) {
         let list=this.getNodeList(node);
@@ -575,10 +592,17 @@ export class WorkspaceMainComponent implements EventListener{
             }
         )
     }
+    private afterUpload(node:Node[]){
+        if(this.reurl){
+            NodeHelper.addNodeToLms(this.router,this.storage,node[0],this.reurl);
+        }
+    }
     private uploadFiles(files : FileList){
         this.onFileDrop(files);
     }
     public onFileDrop(files : FileList){
+        if(!this.showUploadSelect && this.hasOpenWindows())
+            return;
         if(this.searchQuery){
             this.toast.error(null,"WORKSPACE.TOAST.NOT_POSSIBLE_IN_SEARCH");
             return;
@@ -594,61 +618,23 @@ export class WorkspaceMainComponent implements EventListener{
         this.showUploadSelect=false;
         this.filesToUpload=files;
     }
-    private deleteConfirmed(nodes : Node[],position=0,error=false) : void {
-        if (position >= nodes.length) {
-            this.globalProgress = false;
-            this.metadataNode = null;
-            this.refresh();
-            if (!error)
-                this.toast.toast("WORKSPACE.TOAST.DELETE_FINISHED");
-            this.selection = [];
-            return;
-        }
-        this.hideDialog();
-        this.globalProgress = true;
-        this.node.deleteNode(nodes[position].ref.id).subscribe(data => {
-            this.removeNodeFromClipboard(nodes[position]);
-            this.deleteConfirmed(nodes, position + 1, error);
-        }, (error: any) => {
-            this.toast.error(error);
-            this.deleteConfirmed(nodes, position + 1, true);
-        });
-    }
-    private removeNodeFromClipboard(node: Node) {
-        let clip=(this.storage.get("workspace_clipboard") as ClipboardObject);
-        if(clip==null)
-            return;
 
-        for(let n of clip.nodes){
-            if(n.ref.id==node.ref.id){
-                clip.nodes.splice(clip.nodes.indexOf(n),1);
-            }
-            if(clip.nodes.length==0){
-                console.log("all items in clipboard removed");
-                this.storage.remove("workspace_clipboard");
-            }
-        }
-    }
-    private deleteNode(node: Node=null) {
+
+    private deleteNodes(node: Node=null) {
         let list=this.getNodeList(node);
         if(list==null)
             return;
-        this.dialogTitle="WORKSPACE.DELETE_TITLE"+(list.length==1 ? "_SINGLE" : "");
-        this.dialogCancelable=true;
-        this.dialogMessage="WORKSPACE.DELETE_MESSAGE"+(list.length==1 ? "_SINGLE" : "");
-        this.dialogMessageParameters={name:list[0].name};
-        this.dialogButtons=DialogButton.getOkCancel(() => this.hideDialog(),()=>this.deleteConfirmed(list));
+        this.deleteNode=list;
+    }
+    private deleteDone(data:any){
+        this.metadataNode=null;
+        this.refresh();
     }
 
     private pasteNode(position=0){
         let clip=(this.storage.get("workspace_clipboard") as ClipboardObject);
-        if(this.searchQuery || this.isRootFolder)
+        if(!this.canPasteInCurrentLocation())
             return;
-        if(!clip || !clip.nodes.length)
-            return;
-        if(clip.sourceNode && clip.sourceNode.ref.id==this.currentFolder.ref.id && !clip.copy){
-            return;
-        }
         if(position>=clip.nodes.length){
             this.globalProgress=false;
             this.storage.remove("workspace_clipboard");
@@ -737,7 +723,8 @@ export class WorkspaceMainComponent implements EventListener{
     }
     private setRoot(root : string){
         this.root=root;
-        this.routeTo(root);
+        this.searchQuery=null;
+        this.routeTo(root,null,null);
     }
     private updateList(nodes : Node[]){
         this.currentNodes=nodes;
@@ -778,13 +765,10 @@ export class WorkspaceMainComponent implements EventListener{
         }
     }
     public updateOptions(node : Node) : void{
-        this.explorerOptions=this.getOptions([node ? node : new Node()],true);
+        this.explorerOptions=this.getOptions(node ? [node] : null,true);
     }
 
-    public closeWorkflow(){
-        this.workflowNode=null;
-        this.refresh();
-    }
+
     public debugNode(node:Node){
         this.nodeDebug=this.getNodeList(node)[0];
         /*
@@ -803,21 +787,29 @@ export class WorkspaceMainComponent implements EventListener{
 
         let allFiles = NodeHelper.allFiles(nodes);
         let savedSearch = nodes && nodes.length && nodes[0].type==RestConstants.CCM_TYPE_SAVED_SEARCH;
-        let clip=(this.storage.get("workspace_clipboard") as ClipboardObject);
-        if(this.currentFolder && !nodes && !this.searchQuery && clip && ((!clip.sourceNode || clip.sourceNode.ref.id!=this.currentFolder.ref.id) || clip.copy) && this.createAllowed) {
+        if(!nodes && this.canPasteInCurrentLocation()) {
             options.push(new OptionItem("WORKSPACE.OPTION.PASTE", "content_paste", (node: Node) => this.pasteNode()));
         }
         if (nodes && nodes.length == 1) {
-            if(this.reurl && !nodes[0].isDirectory){
-                let apply=new OptionItem("APPLY", "redo", (node: Node) => NodeHelper.addNodeToLms(this.router,this.storage,this.getNodeList(node)[0],this.reurl));
+            if(this.reurl){
+                let apply=new OptionItem("APPLY", "redo", (node: Node) => this.applyNode(this.getNodeList(node)[0]));
                 apply.showAsAction=true;
+                apply.showAlways=true;
                 apply.enabledCallback=((node:Node)=> {
                     return node.access.indexOf(RestConstants.ACCESS_CC_PUBLISH) != -1;
                 });
-                options.push(apply);
+                apply.showCallback=((node:Node)=> {
+                    let result=NodeHelper.getActionbarNodes(nodes,node);
+                    if(result==null || !result.length)
+                        return false;
+                    return (this.reurlDirectories || !result[0].isDirectory);
+                });
+                if(apply.showCallback(nodes[0]))
+                    options.push(apply);
             }
-            if(this.isAdmin){
+            if(this.isAdmin || (window as any).esDebug===true){
                 let debug = new OptionItem("WORKSPACE.OPTION.DEBUG", "build", (node: Node) => this.debugNode(node));
+                debug.onlyDesktop=true;
                 options.push(debug);
             }
             let open = new OptionItem("WORKSPACE.OPTION.SHOW", "remove_red_eye", (node: Node) => this.displayNode(node));
@@ -826,13 +818,12 @@ export class WorkspaceMainComponent implements EventListener{
         }
         let view = new OptionItem("WORKSPACE.OPTION.VIEW", "launch", (node: Node) => this.editConnector(node));
         if(fromList){
-            view.showAlways = true;
             view.showCallback=((node:Node)=>{
-                return RestConnectorsService.connectorSupportsEdit(this.connectorList, node) != null;
+                return this.connectors.connectorSupportsEdit(node) != null;
             });
             options.push(view);
         }
-        else if(nodes && nodes.length==1 && RestConnectorsService.connectorSupportsEdit(this.connectorList,nodes[0])){
+        else if(nodes && nodes.length==1 && this.connectors.connectorSupportsEdit(nodes[0])){
             options.push(view);
         }
         if(nodes && nodes.length==1 && !savedSearch){
@@ -842,30 +833,29 @@ export class WorkspaceMainComponent implements EventListener{
             if(edit.isEnabled)
                 options.push(edit);
         }
-        if(nodes && nodes.length && allFiles) {
-            let collection = ActionbarHelper.createOptionIfPossible('ADD_TO_COLLECTION',nodes,this.connector,(node:Node)=>this.addToCollection(node));
-            if (collection && !this.isSafe)
-                options.push(collection);
-        }
+        let collection = this.actionbar.createOptionIfPossible('ADD_TO_COLLECTION', nodes, (node: Node) => this.addToCollection(node));
+        if (collection && !this.isSafe)
+            options.push(collection);
+        let variant = this.actionbar.createOptionIfPossible('CREATE_VARIANT',nodes, (node: Node) => this.createVariant(node));
+        if (variant && !this.isSafe)
+            options.push(variant);
+
         let share:OptionItem;
-        if (nodes && nodes.length == 1) {
-            let template = ActionbarHelper.createOptionIfPossible('NODE_TEMPLATE',nodes,this.connector,(node:Node)=>this.nodeTemplate(node));
-            if(template)
-                options.push(template);
-            share=ActionbarHelper.createOptionIfPossible('INVITE',nodes,this.connector,(node: Node) => this.shareNode(node));
-            if(share) {
-                share.isEnabled = share.isEnabled && (
-                    (this.connector.hasToolPermissionInstant(RestConstants.TOOLPERMISSION_INVITE) && !this.isSafe)
-                    || (this.connector.hasToolPermissionInstant(RestConstants.TOOLPERMISSION_INVITE_SAFE) && this.isSafe)
-                );
-                //if (this.isSafe && this.root != 'SHARED_FILES')
-                //    share.isEnabled = false;
-                options.push(share);
-            }
-            let shareLink = ActionbarHelper.createOptionIfPossible('SHARE_LINK',nodes,this.connector,(node: Node) => this.setShareLinkNode(node));
-            if (shareLink && !this.isSafe)
-                options.push(shareLink);
+            let template = this.actionbar.createOptionIfPossible('NODE_TEMPLATE', nodes, (node: Node) => this.nodeTemplate(node));
+        if(template)
+            options.push(template);
+        share=this.actionbar.createOptionIfPossible('INVITE', nodes, (node: Node) => this.shareNode(node));
+        if(share) {
+            share.isEnabled = share.isEnabled && (
+                (this.connector.hasToolPermissionInstant(RestConstants.TOOLPERMISSION_INVITE) && !this.isSafe)
+                || (this.connector.hasToolPermissionInstant(RestConstants.TOOLPERMISSION_INVITE_SAFE) && this.isSafe)
+            );
+            options.push(share);
         }
+        /*let shareLink = ActionbarHelper.createOptionIfPossible('SHARE_LINK',nodes,this.connector,(node: Node) => this.setShareLinkNode(node));
+        if (shareLink && !this.isSafe)
+            options.push(shareLink);*/
+
         if(nodes) {
             let license = new OptionItem("WORKSPACE.OPTION.LICENSE", "copyright", (node: Node) => this.editLicense(node));
             license.isEnabled = !this.isSafe && allFiles && NodeHelper.getNodesRight(nodes, RestConstants.ACCESS_DELETE) && this.connector.hasToolPermissionInstant(RestConstants.TOOLPERMISSION_LICENSE);
@@ -875,25 +865,21 @@ export class WorkspaceMainComponent implements EventListener{
         if (nodes && nodes.length == 1 && !savedSearch) {
             let contributor=new OptionItem("WORKSPACE.OPTION.CONTRIBUTOR","group",(node:Node)=>this.manageContributorsNode(node));
             contributor.isEnabled=NodeHelper.getNodesRight(nodes,RestConstants.ACCESS_WRITE);
+            contributor.onlyDesktop = true;
             if(nodes && !nodes[0].isDirectory && !this.isSafe)
                 options.push(contributor);
-            if(share) {
-                let workflow = new OptionItem("WORKSPACE.OPTION.WORKFLOW", "swap_calls", (node: Node) => this.manageWorkflowNode(node));
-                workflow.isEnabled = share.isEnabled;
-                if (nodes && !nodes[0].isDirectory && this.supportsWorkflow() && !savedSearch)
-                    options.push(workflow);
-            }
+            let workflow = this.actionbar.createOptionIfPossible('WORKFLOW', nodes, (node: Node) => this.manageWorkflowNode(node));
+            if(workflow)
+                options.push(workflow);
+
 
             this.infoToggle=new OptionItem("WORKSPACE.OPTION.METADATA", "info_outline", (node: Node) => this.openMetadata(node));
             this.infoToggle.isToggle=true;
-            //info.onlyMobile=!nodes[0].isDirectory;
             options.push(this.infoToggle);
-            //options[0].showAlways = true;
-
 
         }
         if(fromList || nodes && nodes.length) {
-            let download = ActionbarHelper.createOptionIfPossible('DOWNLOAD', nodes, this.connector, (node: Node) => this.downloadNode(node));
+            let download = this.actionbar.createOptionIfPossible('DOWNLOAD', nodes, (node: Node) => this.downloadNode(node));
             if (download)
                 options.push(download);
         }
@@ -903,10 +889,10 @@ export class WorkspaceMainComponent implements EventListener{
             cut.isEnabled=NodeHelper.getNodesRight(nodes,RestConstants.ACCESS_WRITE) && (this.root=='MY_FILES' || this.root=='SHARED_FILES');
             options.push(cut);
             options.push(new OptionItem("WORKSPACE.OPTION.COPY", "content_copy", (node: Node) => this.cutCopyNode(node, true)));
-            let del=new OptionItem("WORKSPACE.OPTION.DELETE","delete", (node : Node) => this.deleteNode(node));
-            del.isEnabled=NodeHelper.getNodesRight(nodes,RestConstants.ACCESS_DELETE);
-            del.isSeperate=true;
-            options.push(del);
+            let del=this.actionbar.createOptionIfPossible('DELETE', nodes, (node: Node) => this.deleteNodes(node));
+            if(del){
+                options.push(del);
+            }
             let custom=this.config.instant("nodeOptions");
             NodeHelper.applyCustomNodeOptions(this.toast,this.http,this.connector,custom,this.currentNodes, nodes, options,(load:boolean)=>this.globalProgress=load);
         }
@@ -917,54 +903,61 @@ export class WorkspaceMainComponent implements EventListener{
         }
         return options;
     }
-    public supportsWorkflow(){
-        return this.connector.getApiVersion()>=RestConstants.API_VERSION_4_0;
-    }
     private setSelection(nodes : Node[]) {
         this.selection=nodes;
         this.actionOptions=this.getOptions(nodes,false);
+        this.setFixMobileNav();
+    }
+    private setFixMobileNav() {
+        this.mainNavRef.setFixMobileElements(this.selection && this.selection.length>0);
     }
     private updateLicense(){
         this.closeMetadata();
     }
     private closeMetadata() {
         this.metadataNode=null;
-        this.infoToggle.icon='info_outline';
+        if(this.infoToggle)
+            this.infoToggle.icon='info_outline';
     }
     private openDirectory(id:string){
-        this.routeTo(this.root, id ? id : null);
+        this.routeTo(this.root, id);
     }
-    private openDirectoryFromRoute(id : string,createRoute = true){
+    searchGlobal(query:string){
+        this.routeTo(this.root,null,query);
+    }
+    private openDirectoryFromRoute(params : any){
+        let id=params['id'];
         this.selection=[];
         this.closeMetadata();
         this.createAllowed = false;
         this.actionOptions = this.getOptions(null,false);
-        let hasId=id;
         if(!id){
             this.path=[];
             id=this.getRootFolderId();
-            if(this.root=='RECYCLE')
-                return;
+            //if(this.root=='RECYCLE')
+            //    return;
         }
         else{
             this.selectedNodeTree=id;
             this.node.getNodeParents(id).subscribe((data : NodeList)=>{
-                this.path = data.nodes.reverse();
+                if(this.root=='RECYCLE'){
+                    this.path = [];
+                }
+                else {
+                    this.path = data.nodes.reverse();
+                }
                 this.selectedNodeTree=null;
             },(error:any)=>{
                 this.selectedNodeTree=null;
                 this.path=[];
             });
         }
-
-        this.searchQuery=null;
         this.currentFolder=null;
         this.allowBinary=true;
-        let root=WorkspaceMainComponent.VALID_ROOTS_NODES.indexOf(id)!=-1;
-        if(!root || id==RestConstants.USERHOME) {
+        let root=!id || WorkspaceMainComponent.VALID_ROOTS_NODES.indexOf(id)!=-1;
+        if(!root) {
             this.isRootFolder=false;
             console.log("open path: "+id);
-            this.currentFolderRef=id;
             this.node.getNodeMetadata(id).subscribe((data: NodeWrapper) => {
                 this.mds.getSet(data.node.metadataset ? data.node.metadataset : RestConstants.DEFAULT).subscribe((mds:any)=>{
                     if(mds.create) {
@@ -973,14 +966,12 @@ export class WorkspaceMainComponent implements EventListener{
                             console.log("mds does not allow binary files, will switch mode");
                     }
                 });
-                this.currentFolder = data.node;
-                this.event.broadcastEvent(FrameEventsService.EVENT_NODE_FOLDER_OPENED, this.currentFolder);
-                this.createAllowed = NodeHelper.getNodesRight([this.currentFolder], RestConstants.ACCESS_ADD_CHILDREN);
+                this.updateNodeByParams(params,data.node);
+                this.createAllowed = !this.searchQuery && NodeHelper.getNodesRight([data.node], RestConstants.ACCESS_ADD_CHILDREN);
                 this.actionOptions = this.getOptions(this.selection, false);
+                this.recoverScrollposition();
             }, (error: any) => {
-                this.currentFolder = {ref: {id: id}};
-                this.event.broadcastEvent(FrameEventsService.EVENT_NODE_FOLDER_OPENED, this.currentFolder);
-                this.searchQuery = null;
+                this.updateNodeByParams(params,{ref: {id: id}});
             });
         }
         else{
@@ -989,10 +980,7 @@ export class WorkspaceMainComponent implements EventListener{
             if(id==RestConstants.USERHOME){
                 this.createAllowed = true;
             }
-            this.currentFolder = {ref: {id: id}};
-            this.currentFolderRef = id;
-            this.event.broadcastEvent(FrameEventsService.EVENT_NODE_FOLDER_OPENED, this.currentFolder);
-            this.searchQuery = null;
+            this.updateNodeByParams(params,{ref: {id: id},name:this.translate.instant('WORKSPACE.'+this.root)});
         }
 
     }
@@ -1007,13 +995,13 @@ export class WorkspaceMainComponent implements EventListener{
     }
     private openNode(node : Node,useConnector=true) {
         if(!node.isDirectory){
-            if(RestSearchService.isSavedSearchObject(node)){
+            if(NodeHelper.isSavedSearchObject(node)){
                 UIHelper.routeToSearchNode(this.router,null,node);
             }
             else if(RestToolService.isLtiObject(node)){
                 this.toolService.openLtiObject(node);
             }
-            else if(useConnector && RestConnectorsService.connectorSupportsEdit(this.connectorList,node)){
+            else if(useConnector && this.connectors.connectorSupportsEdit(node)){
                 this.editConnector(node);
             }
             else {
@@ -1043,13 +1031,13 @@ export class WorkspaceMainComponent implements EventListener{
 
         this.openDirectory(id);
     }
-
+    getConnectors(){
+        return this.connectors.getConnectors();
+    }
     private refresh(refreshPath=true) {
         let search=this.searchQuery;
         let folder=this.currentFolder;
-        let ref=this.currentFolderRef;
         this.currentFolder=null;
-        this.currentFolderRef=null;
         this.searchQuery=null;
         this.selection=[];
         this.actionOptions=this.getOptions(this.selection,false);
@@ -1059,7 +1047,6 @@ export class WorkspaceMainComponent implements EventListener{
         setTimeout(()=>{
             this.path=path;
             this.currentFolder=folder;
-            this.currentFolderRef=ref;
             this.searchQuery=search;
         });
     }
@@ -1078,14 +1065,14 @@ export class WorkspaceMainComponent implements EventListener{
     }
 
     private refreshRoute(){
-        console.log(this.isRootFolder);
-        this.routeTo(this.root,!this.isRootFolder && this.currentFolder ? this.currentFolder.ref.id : null,this.searchQuery);
+        this.routeTo(this.root,!this.isRootFolder && this.currentFolder ? this.currentFolder.ref.id : null,this.searchQuery.query);
     }
-    private routeTo(root: string,node : string=null,search="") {
-        console.log("update route "+root+" "+node);
-        let params:any={root:root,id:node?node:"",viewType:this.viewType,query:search,mainnav:this.mainnav};
+    private routeTo(root: string,node : string=null,search:string=null) {
+        let params:any={root:root,id:node,viewType:this.viewType,query:search,mainnav:this.mainnav};
         if(this.reurl)
             params.reurl=this.reurl;
+        if(this.reurlDirectories)
+            params.applyDirectories=this.reurlDirectories;
         this.router.navigate(["./"],{queryParams:params,relativeTo:this.route})
             .then((result:boolean)=>{
                 if(!result){
@@ -1108,6 +1095,10 @@ export class WorkspaceMainComponent implements EventListener{
     private addToCollection(node: Node) {
         let nodes=this.getNodeList(node);
         this.addNodesToCollection=nodes;
+    }
+    private createVariant(node: Node) {
+        let nodes=this.getNodeList(node);
+        this.variantNode=nodes[0];
     }
     private createContext(event:any=null){
         if(!this.createAllowed)
@@ -1140,8 +1131,6 @@ export class WorkspaceMainComponent implements EventListener{
         this.dropdownPosition = "fixed";
         this.dropdownTop = "auto";
         this.dropdownLeft = "auto";
-        this.dropdownBottom = "30px";
-        this.dropdownRight = "70px";
     }
 
     private goToLogin() {
@@ -1184,12 +1173,44 @@ export class WorkspaceMainComponent implements EventListener{
         this.showAddMobile=false;
     }
 
-    private hasOpenWindows() {
-        return this.editNodeLicense || this.editNodeTemplate || this.editNodeMetadata || this.createConnectorName || this.showUploadSelect || this.dialogTitle || this.addFolderName || this.sharedNode || this.workflowNode;
+    hasOpenWindows() {
+        return this.editNodeLicense || this.nodeDebug || this.editNodeTemplate || this.editNodeMetadata || this.createConnectorName || this.showUploadSelect || this.dialogTitle || this.addFolderName || this.sharedNode || this.workflowNode || this.filesToUpload;
     }
-}
-interface ClipboardObject{
-    nodes : Node[];
-    sourceNode : Node;
-    copy : boolean;
+    private recoverScrollposition() {
+        console.log("recover scroll "+this.storage.get('workspace_scroll',0));
+        window.scrollTo(0,this.storage.get('workspace_scroll',0));
+    }
+
+    private applyNode(node: Node,force=false) {
+        /*if(node.isDirectory && !force){
+            this.dialogTitle='WORKSPACE.APPLY_NODE.DIRECTORY_TITLE';
+            this.dialogCancelable=true;
+            this.dialogMessage='WORKSPACE.APPLY_NODE.DIRECTORY_MESSAGE';
+            this.dialogMessageParameters={name:node.name};
+            this.dialogButtons=DialogButton.getYesNo(()=>{
+                this.dialogTitle=null;
+            },()=>{
+                this.dialogTitle=null;
+                this.applyNode(node,true);
+            });
+            return;
+        }*/
+        NodeHelper.addNodeToLms(this.router,this.storage,node,this.reurl)
+    }
+
+    private updateNodeByParams(params: any, node: Node|any) {
+        if(params['query']){
+            this.doSearchFromRoute(params,node);
+        }
+        else {
+            this.searchQuery=null;
+            this.currentFolder = node;
+            this.event.broadcastEvent(FrameEventsService.EVENT_NODE_FOLDER_OPENED, this.currentFolder);
+        }
+    }
+
+    private canPasteInCurrentLocation() {
+        let clip=(this.storage.get("workspace_clipboard") as ClipboardObject);
+        return this.currentFolder  && !this.searchQuery && clip && ((!clip.sourceNode || clip.sourceNode.ref.id!=this.currentFolder.ref.id) || clip.copy) && this.createAllowed;
+    }
 }

@@ -52,12 +52,12 @@ import org.edu_sharing.repository.server.AuthenticationToolAPI;
 import org.edu_sharing.repository.server.MCAlfrescoAPIClient;
 import org.edu_sharing.repository.server.SearchResultNodeRef;
 import org.edu_sharing.repository.server.tools.ApplicationInfoList;
+import org.edu_sharing.repository.server.tools.LogTime;
 import org.edu_sharing.restservices.MdsDao;
 import org.edu_sharing.restservices.shared.MdsQueryCriteria;
 import org.edu_sharing.service.Constants;
 import org.edu_sharing.service.InsufficientPermissionException;
 import org.edu_sharing.service.permission.PermissionServiceFactory;
-import org.edu_sharing.service.permission.PermissionServiceImpl;
 import org.edu_sharing.service.search.model.SearchResult;
 import org.edu_sharing.service.search.model.SearchToken;
 import org.edu_sharing.service.search.model.SortDefinition;
@@ -102,12 +102,11 @@ public class SearchServiceImpl implements SearchService {
 		}
 		parameters.addStore(Constants.storeRef);
 		parameters.setLanguage(org.alfresco.service.cmr.search.SearchService.LANGUAGE_LUCENE);
-		parameters.setMaxItems(Integer.MAX_VALUE);
 		parameters.addAllAttribute(CCConstants.CCM_PROP_AUTHORITYCONTAINER_EDUHOMEDIR);
 		parameters.setQuery("TYPE:\"" + CCConstants.CCM_TYPE_NOTIFY
 				+ "\" AND PATH:\"/app\\:company_home/ccm\\:Edu_Sharing_System/ccm\\:Edu_Sharing_Sys_Notify"+postfix+"//.\" AND @cm\\:creator:\"" + QueryParser.escape(username) + "\"");
-		ResultSet resultSet = searchService.query(parameters);
-		List<NodeRef> refs = convertNotifysToObjects(resultSet.getNodeRefs());
+		List<NodeRef> resultSet = queryAll(parameters);
+		Set<NodeRef> refs = convertNotifysToObjects(resultSet);
 		List<NodeRef> result = new ArrayList<>();
 		for (NodeRef node : refs) {
 			if (result.contains(node))
@@ -134,8 +133,8 @@ public class SearchServiceImpl implements SearchService {
 		return result;
 	}
 
-	private List<NodeRef> convertNotifysToObjects(List<NodeRef> nodeRefs) {
-		List<NodeRef> result=new ArrayList<NodeRef>();
+	private Set<NodeRef> convertNotifysToObjects(List<NodeRef> nodeRefs) {
+		Set<NodeRef> result=new HashSet<>();
 
 		HashSet<QName> types = new HashSet<QName>();
 		types.add(QName.createQName(CCConstants.CCM_TYPE_IO));
@@ -157,11 +156,12 @@ public class SearchServiceImpl implements SearchService {
 			}
 			if (childsOfNotify != null && childsOfNotify.size() > 0) {
 				NodeRef ref = childsOfNotify.get(0).getChildRef();
-				QName type = serviceRegistry.getNodeService().getType(ref);
-				if(types.contains(type)) {
-					if(!serviceRegistry.getNodeService().hasAspect(ref,QName.createQName(CCConstants.CCM_ASPECT_COLLECTION)) && !result.contains(ref))
-						result.add(ref);
-				}
+				// unnecessary, already handled by getChildAssocs
+				//QName type = serviceRegistry.getNodeService().getType(ref);
+				//if(types.contains(type)) {
+				if(!serviceRegistry.getNodeService().hasAspect(ref,QName.createQName(CCConstants.CCM_ASPECT_COLLECTION)) && !result.contains(ref))
+					result.add(ref);
+				//}
 			}
 		}
 		return result;
@@ -172,35 +172,29 @@ public class SearchServiceImpl implements SearchService {
 	public List<NodeRef> getFilesSharedToMe() throws Exception {
 		String username = AuthenticationUtil.getFullyAuthenticatedUser();
 		String homeFolder = baseClient.getHomeFolderID(username);
-		String postfix="";
-		if(NodeServiceInterceptor.getEduSharingScope()!=null) {
-			postfix+="_"+NodeServiceInterceptor.getEduSharingScope();
-		}
-
-		SearchParameters parameters = new SearchParameters();
-		parameters.addStore(Constants.storeRef);
-		parameters.setLanguage(org.alfresco.service.cmr.search.SearchService.LANGUAGE_LUCENE);
-		//parameters.setMaxItems(Integer.MAX_VALUE);
-		parameters.setMaxItems(200);
-		parameters.addAllAttribute(CCConstants.CCM_PROP_AUTHORITYCONTAINER_EDUHOMEDIR);
-		parameters.addSort("@" + CCConstants.CM_PROP_C_MODIFIED, false);
-
-		// TODO: The amount of files seems to be HUGE, we need a better query for filtering!
-		parameters.setQuery("TYPE:\"" + CCConstants.CCM_TYPE_NOTIFY
-				+ "\" AND PATH:\"/app\\:company_home/ccm\\:Edu_Sharing_System/ccm\\:Edu_Sharing_Sys_Notify"+postfix+"//.\" AND NOT @cm\\:creator:\"" + QueryParser.escape(username) + "\"");
-		ResultSet resultSet = searchService.query(parameters);
-		List<NodeRef> result = convertNotifysToObjects(resultSet.getNodeRefs());
 		Set<String> memberships = new HashSet<>();
 		memberships.addAll(serviceRegistry.getAuthorityService().getAuthorities());
 		memberships.remove(CCConstants.AUTHORITY_GROUP_EVERYONE);
+		List<NodeRef> notifyResults=LogTime.log("Fetching notify objects",()-> {
+			String postfix="";
+			if(NodeServiceInterceptor.getEduSharingScope()!=null) {
+				postfix+="_"+NodeServiceInterceptor.getEduSharingScope();
+			}
+			SearchParameters parameters = new SearchParameters();
+			parameters.addStore(Constants.storeRef);
+			parameters.setLanguage(org.alfresco.service.cmr.search.SearchService.LANGUAGE_LUCENE);
+			parameters.addAllAttribute(CCConstants.CCM_PROP_AUTHORITYCONTAINER_EDUHOMEDIR);
+			parameters.addSort("@" + CCConstants.CM_PROP_C_MODIFIED, false);
 
-		return AuthenticationUtil.runAsSystem(new RunAsWork<List<NodeRef>>() {
-			@Override
-			public List<NodeRef> doWork() throws Exception {
+			parameters.setQuery("TYPE:\"" + CCConstants.CCM_TYPE_NOTIFY
+					+ "\" AND PATH:\"/app\\:company_home/ccm\\:Edu_Sharing_System/ccm\\:Edu_Sharing_Sys_Notify" + postfix + "//.\" AND NOT @cm\\:creator:\"" + QueryParser.escape(username) + "\"");
+			return queryAll(parameters);
+		});
+		Set<NodeRef> result=LogTime.log("Converting notify objects to real nodes ("+notifyResults.size()+")",()->convertNotifysToObjects(notifyResults));
+
+		return LogTime.log("Validating node permissions ("+result.size()+")",()-> AuthenticationUtil.runAsSystem(()->{
 				List<NodeRef> refs = new ArrayList<>(result.size());
 				for (NodeRef node : result) {
-					if (refs.contains(node))
-						continue;
 					if (node.getId().equals(homeFolder))
 						continue;
 					try {
@@ -223,8 +217,21 @@ public class SearchServiceImpl implements SearchService {
 				}
 				return refs;
 			}
-		});
+		));
+	}
 
+	private List<NodeRef> queryAll(SearchParameters parameters) {
+		List<NodeRef> result=new ArrayList<>();
+		int MAX_PER_PAGE=1000;
+		for(int offset=0;;offset+=MAX_PER_PAGE) {
+			parameters.setSkipCount(offset);
+			parameters.setMaxItems(MAX_PER_PAGE);
+			ResultSet data = searchService.query(parameters);
+			result.addAll(data.getNodeRefs());
+			if(data.getNodeRefs().size()<MAX_PER_PAGE)
+				break;
+		}
+		return result;
 	}
 
 	@Override
@@ -373,11 +380,39 @@ public class SearchServiceImpl implements SearchService {
 		List<String> list = new ArrayList<>();
 		if (pattern != null && !pattern.isEmpty()) {
 			for (String authority : list2) {
+				
+				NodeRef authorityNodeRef = serviceRegistry.getAuthorityService().getAuthorityNodeRef(authority);
+				
 				String name = authority;
 
-				if (name.startsWith(PermissionService.GROUP_PREFIX))
+				String toCompare = "" + name;
+				
+				if (name.startsWith(PermissionService.GROUP_PREFIX)) {
 					name = name.substring(PermissionService.GROUP_PREFIX.length());
-				if (name.toLowerCase().contains(pattern.toLowerCase()))
+					
+					if(authorityNodeRef != null) {
+						String displayName = (String)serviceRegistry.getNodeService().getProperty(authorityNodeRef, ContentModel.PROP_AUTHORITY_DISPLAY_NAME);
+						if(displayName != null) {
+							toCompare += displayName;
+						}
+					}
+						
+					
+				}else {
+					if(authorityNodeRef != null) {
+						String firstName = (String)serviceRegistry.getNodeService().getProperty(authorityNodeRef, ContentModel.PROP_FIRSTNAME);
+						String lastName = (String)serviceRegistry.getNodeService().getProperty(authorityNodeRef, ContentModel.PROP_LASTNAME);
+						if(firstName != null) {
+							toCompare+=firstName;
+						}
+						if(lastName != null) {
+							toCompare+=lastName;
+						}
+					}
+				}
+				
+				
+				if (toCompare.toLowerCase().contains(pattern.toLowerCase()))
 					list.add(authority);
 			}
 		} else {
@@ -646,19 +681,26 @@ public class SearchServiceImpl implements SearchService {
 	public SearchResultNodeRef searchV2(MetadataSetV2 mds, String query,Map<String,String[]> criterias,
 			SearchToken searchToken) throws Throwable {
 		MetadataQueries queries = mds.getQueries();
-		searchToken.setMetadataQuery(queries.findQuery(query),criterias);
+		searchToken.setMetadataQuery(queries,query,criterias);
 		SearchCriterias scParam = new SearchCriterias();
 		scParam.setRepositoryId(mds.getRepositoryId());
 		scParam.setMetadataSetId(mds.getId());
 		scParam.setMetadataSetQuery(query);
 		searchToken.setSearchCriterias(scParam);
-		org.edu_sharing.repository.server.authentication.Context.getCurrentInstance().getRequest().getSession().setAttribute(CCConstants.SESSION_LAST_SEARCH_TOKEN, searchToken);
+
+		HashMap<ContentType, SearchToken> lastTokens = getLastSearchTokens();
+		lastTokens.put(searchToken.getContentType(),searchToken);
+		org.edu_sharing.repository.server.authentication.Context.getCurrentInstance().getRequest().getSession().setAttribute(CCConstants.SESSION_LAST_SEARCH_TOKENS,lastTokens);
+
 		SearchResultNodeRef search = search(searchToken,true);
 		return search;
 	}
 	@Override
-	public SearchToken getLastSearchToken() throws Throwable {
-		return (SearchToken) org.edu_sharing.repository.server.authentication.Context.getCurrentInstance().getRequest().getSession().getAttribute(CCConstants.SESSION_LAST_SEARCH_TOKEN);
+	public HashMap<ContentType,SearchToken> getLastSearchTokens() throws Throwable {
+		if(org.edu_sharing.repository.server.authentication.Context.getCurrentInstance().getRequest().getSession().getAttribute(CCConstants.SESSION_LAST_SEARCH_TOKENS)!=null) {
+			return (HashMap<ContentType, SearchToken>) org.edu_sharing.repository.server.authentication.Context.getCurrentInstance().getRequest().getSession().getAttribute(CCConstants.SESSION_LAST_SEARCH_TOKENS);
+		}
+		return new HashMap<>();
 
 	}
 	public SearchResultNodeRef search(SearchToken searchToken) {
@@ -712,15 +754,14 @@ public class SearchServiceImpl implements SearchService {
 					searchParameters.addFieldFacet(fieldFacet);
 				}
 			}
-			if (searchToken.getSortDefinition() != null) {
-				searchToken.getSortDefinition().applyToSearchParameters(searchParameters);
-			}
 			ResultSet resultSet;
-			if (scoped)
-				resultSet = searchService.query(searchParameters);
-			else
-				resultSet = serviceRegistry.getSearchService().query(searchParameters);
-
+			logger.info(searchParameters.getQuery());
+			resultSet=LogTime.log("Searching Solr",()-> {
+				if (scoped)
+					return searchService.query(searchParameters);
+				else
+					return serviceRegistry.getSearchService().query(searchParameters);
+			});
 			SearchResultNodeRef sr = new SearchResultNodeRef();
 			sr.setData(AlfrescoDaoHelper.unmarshall(resultSet.getNodeRefs(), ApplicationInfoList.getHomeRepository().getAppId()));
 			sr.setStartIDX(searchToken.getFrom());
@@ -765,7 +806,7 @@ public class SearchServiceImpl implements SearchService {
 				sr.setCountedProps(newCountPropsMap);
 
 			}
-
+			SearchLogger.logSearch(searchToken,sr);
 			return sr;
 
 		} catch (Throwable e) {
@@ -801,16 +842,16 @@ public class SearchServiceImpl implements SearchService {
 	public SearchResult<String> findAuthorities(AuthorityType type,String searchWord, boolean globalContext, int from, int nrOfResults,SortDefinition sort,Map<String,String> customProperties) throws InsufficientPermissionException {
 		if(globalContext)
 			checkGlobalSearchPermission();
-		HashMap<String, String> toSearch = new HashMap<String, String>();
+		List<String> searchFields = new ArrayList<>();
 
 		// fields to search in - not using username
-		toSearch.put("email", searchWord);
-		toSearch.put("firstName", searchWord);
-		toSearch.put("lastName", searchWord);
+		searchFields.add("email");
+		searchFields.add("firstName");
+		searchFields.add("lastName");
 		
-		PermissionServiceImpl permissionService = (PermissionServiceImpl)PermissionServiceFactory.getPermissionService(null);
+		org.edu_sharing.service.permission.PermissionService permissionService = PermissionServiceFactory.getPermissionService(null);
 
-		StringBuffer findUsersQuery =  permissionService.getFindUsersSearchString(toSearch, globalContext);
+		StringBuffer findUsersQuery =  permissionService.getFindUsersSearchString(searchWord,searchFields, globalContext);
 		StringBuffer findGroupsQuery = permissionService.getFindGroupsSearchString(searchWord, globalContext);
 		
 

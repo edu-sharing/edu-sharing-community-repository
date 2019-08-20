@@ -12,9 +12,13 @@ import {ConfigurationService} from "../services/configuration.service";
 import {UIConstants} from "../ui/ui-constants";
 import NumberFormat = Intl.NumberFormat;
 import NumberFormatOptions = Intl.NumberFormatOptions;
-import {CordovaService} from '../services/cordova.service';
+import {RestConnectorService} from './services/rest-connector.service';
+import {Toast} from '../ui/toast';
+import {RestIamService} from './services/rest-iam.service';
+import {Helper} from "../helper";
 
 export class RestHelper{
+    private static SPACES_STORE_REF = "workspace://SpacesStore/";
   public static getNodeIds(nodes : Node[]|Collection[]|CollectionReference[]): Array<string>{
     let data=new Array<string>(nodes.length);
     for(let i=0;i<nodes.length;i++){
@@ -22,6 +26,13 @@ export class RestHelper{
     }
     return data;
   }
+  static copyPermissions(permissionsIn: Permission[],inherited=true) {
+      let permissions: LocalPermissions = new LocalPermissions();
+      permissions.inherited=inherited;
+      permissions.permissions=Helper.deepCopy(permissionsIn);
+      return permissions;
+  }
+
   static copyAndCleanPermissions(permissionsIn: Permission[],inherited=true) {
     let permissions: LocalPermissions = new LocalPermissions();
     permissions.inherited=inherited;
@@ -49,17 +60,23 @@ export class RestHelper{
     return type;
   }
 
-  public static errorClassContains(error:any,needle:string){
+    /**
+     * checks a rest error message and returns true if the string was found in the error or message text
+     * @param error
+     * @param needle
+     */
+  public static errorMatchesAny(error:any,needle:string){
     try{
-      let json=JSON.parse(error._body);
-      return json.error.indexOf(needle)!=-1;
+      console.log(error);
+      let json=JSON.parse(error.response);
+      console.log(json);
+      return json.error.indexOf(needle)!=-1 || json.message.indexOf(needle)!=-1;
     }catch(e){}
     return false;
   }
   public static errorMessageContains(error:any,needle:string){
     try{
-      let json=JSON.parse(error._body);
-      return json.message.indexOf(needle)!=-1;
+      return error.error.message.indexOf(needle)!=-1;
     }catch(e){}
     return false;
   }
@@ -268,6 +285,9 @@ export class RestHelper{
       if (node.title) return node.title;
       return node.name;
     }
+    public static getTitleFromProperties(properties:any):string {
+        return properties[RestConstants.LOM_PROP_TITLE] ? properties[RestConstants.LOM_PROP_TITLE] : properties[RestConstants.CM_NAME];
+    }
     public static getCreatorName(node:Node):string {
         let result:string = "";
         if (node.createdBy!=null) {
@@ -295,8 +315,14 @@ export class RestHelper{
     }
 
   static createSpacesStoreRef(node: Node) {
-    return "workspace://SpacesStore/"+node.ref.id;
+    return RestHelper.SPACES_STORE_REF+node.ref.id;
   }
+    static removeSpacesStoreRef(id: string) {
+        if(id.startsWith(RestHelper.SPACES_STORE_REF)){
+            return id.substr(RestHelper.SPACES_STORE_REF.length);
+        }
+        return id;
+    }
 
   static getAllAuthoritiesPermission() {
     let perm=new Permission();
@@ -304,8 +330,8 @@ export class RestHelper{
     return perm;
   }
 
-  public static goToLogin(router : Router,config:ConfigurationService,scope="",next=window.location.href) {
-      
+  public static goToLogin(router : Router,config:ConfigurationService,scope:string=null,next=window.location.href) {
+
     if(config.getLocator().getCordova().isRunningCordova()){
           config.getLocator().getCordova().reinitStatus(config.getLocator().endpointUrl);
           return;
@@ -345,6 +371,24 @@ export class RestHelper{
             }
         }
         return null;
+    }
+    static guessMediatypeForFile(file: File){
+        if(file.type.startsWith("image"))
+            return "file-image";
+        if(file.type.startsWith("video"))
+            return "file-video";
+        if(file.type.startsWith("audio"))
+            return "file-audio";
+        if(file.type=="text/xml")
+            return "file-xml";
+        if(file.type=="text/plain")
+            return "file-txt";
+        if(file.type=="application/zip" || file.type=="application/x-zip-compressed")
+            return "file-zip";
+        return "file";
+    }
+    static guessMediatypeIconForFile(connector:RestConnectorService,file:File){
+        return connector.getThemeMimeIconSvg(this.guessMediatypeForFile(file)+'.svg');
     }
 
     static getRestObjectPositionInArray(search: any, haystack: any[]) {

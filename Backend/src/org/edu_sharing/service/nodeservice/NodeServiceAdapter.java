@@ -1,17 +1,22 @@
 package org.edu_sharing.service.nodeservice;
 
 import java.io.InputStream;
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map.Entry;
 
+import org.alfresco.service.cmr.repository.AssociationRef;
 import org.alfresco.service.cmr.repository.ChildAssociationRef;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.repository.StoreRef;
 import org.edu_sharing.repository.client.rpc.User;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.client.tools.metadata.ValueTool;
+import org.edu_sharing.repository.server.tools.ApplicationInfoList;
+import org.edu_sharing.service.nodeservice.model.GetPreviewResult;
+import org.edu_sharing.service.search.model.SortDefinition;
 
 public class NodeServiceAdapter implements NodeService {
 	
@@ -23,6 +28,11 @@ public class NodeServiceAdapter implements NodeService {
 
 	@Override
 	public void updateNode(String nodeId, HashMap<String, String[]> props) throws Throwable {
+	}
+
+	@Override
+	public void createAssoc(String parentId, String childId, String assocName) {
+
 	}
 
 	@Override
@@ -56,12 +66,16 @@ public class NodeServiceAdapter implements NodeService {
 	}
 
 	@Override
-	public HashMap<String, Object> getChild(StoreRef store, String parentId, String type, String property,
-			String value) {
+	public List<NodeRef> getChildrenRecursive(StoreRef store, String nodeId, List<String> types) {
 		return null;
 	}
 
 	@Override
+    public NodeRef getChild(StoreRef store, String parentId, String type, String property, Serializable value) {
+        return null;
+    }
+
+    @Override
 	public void setOwner(String nodeId, String username) {
 	}
 
@@ -76,12 +90,12 @@ public class NodeServiceAdapter implements NodeService {
 	}
 
 	@Override
-	public List<ChildAssociationRef> getChildrenChildAssociationRef(String parentID) {
-		return null;
+	public void createVersion(String nodeId, HashMap _properties) throws Exception {
 	}
 
 	@Override
-	public void createVersion(String nodeId, HashMap _properties) throws Exception {
+	public void deleteVersionHistory(String nodeId) throws Exception {
+
 	}
 
 	@Override
@@ -116,7 +130,7 @@ public class NodeServiceAdapter implements NodeService {
 	}
 	
 	@Override
-	public HashMap<String, HashMap<String, Object>> getVersionHistory(String nodeId) throws Exception {
+	public HashMap<String, HashMap<String, Object>> getVersionHistory(String nodeId) throws Throwable {
 		return null;
 	}
 	
@@ -153,16 +167,23 @@ public class NodeServiceAdapter implements NodeService {
 	 */
 	@Override
 	public String importNode(String nodeId,String localParent) throws Throwable {
-		HashMap<String, String[]> props = convertProperties(getProperties(null, null, nodeId));
+		HashMap<String, Object> props = getProperties(null, null, nodeId);
 		String mimetype=null;
 		if(props.containsKey(CCConstants.LOM_PROP_TECHNICAL_FORMAT))
-			mimetype=props.get(CCConstants.LOM_PROP_TECHNICAL_FORMAT)[0];
+			mimetype= (String) props.get(CCConstants.LOM_PROP_TECHNICAL_FORMAT);
 		InputStream content=getContent(nodeId);
 		NodeService service=NodeServiceFactory.getLocalService();
+
+		// Aspect ccm:imported_object properties
+		props.put(CCConstants.CCM_PROP_IMPORTED_OBJECT_NODEID,props.get(CCConstants.SYS_PROP_NODE_UID));
+		props.put(CCConstants.CCM_PROP_IMPORTED_OBJECT_APPID,appId);
+		props.put(CCConstants.CCM_PROP_IMPORTED_OBJECT_APPNAME,ApplicationInfoList.getRepositoryInfoById(appId).getAppCaption());
+
 		props.remove(CCConstants.SYS_PROP_NODE_UID);
 		props.remove(CCConstants.CM_PROP_C_CREATED);
 		props.remove(CCConstants.CM_PROP_C_MODIFIED);
-		String localNode=service.createNode(localParent, CCConstants.CCM_TYPE_IO,props);
+
+		String localNode=service.createNodeBasic(localParent, CCConstants.CCM_TYPE_IO,props);
 		service.writeContent(new StoreRef(StoreRef.PROTOCOL_WORKSPACE, "SpacesStore"), localNode, content,mimetype, null, CCConstants.CM_PROP_CONTENT);
 		return localNode;
 	}
@@ -250,6 +271,36 @@ public class NodeServiceAdapter implements NodeService {
 
 	}
 
+	@Override
+	public String getContentMimetype(String protocol, String storeId, String nodeId) {
+		return null;
+	}
+
+	@Override
+	public List<AssociationRef> getNodesByAssoc(String nodeId, AssocInfo assoc) {
+		return null;
+	}
+
+	@Override
+	public List<ChildAssociationRef> getChildrenChildAssociationRefAssoc(String parentID, String asoocName, List<String> filter, SortDefinition sortDefinition) {
+		return null;
+	}
+
+	@Override
+	public void setProperty(String protocol, String storeId, String nodeId, String property, Serializable value) {
+		// TODO Auto-generated method stub
+
+	}
+
+	@Override
+	public GetPreviewResult getPreview(String storeProtocol, String storeIdentifier, String nodeId) {
+		return null;
+	}
+
+	@Override
+	public <T> List<T> sortNodeRefList(List<T> list, List<String> filter, SortDefinition sortDefinition) {
+		return list;
+	}
 	@Override
 	public String getPrimaryParent(String protocol, String store, String nodeId) {
 		return null;

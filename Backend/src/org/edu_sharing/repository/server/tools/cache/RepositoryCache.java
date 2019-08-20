@@ -206,7 +206,7 @@ public class RepositoryCache implements Cache {
 		PreviewCache.purgeCache(nodeId);
 	}
 	
-	protected static void setCache(Map<String, Map<String, Object>> cache) {
+	public static void setCache(Map<String, Map<String, Object>> cache) {
 		
 		CACHE.setCache(cache);
 		

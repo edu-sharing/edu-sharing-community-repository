@@ -31,7 +31,7 @@
 	<classpathentry exported="true" kind="lib" path="lib/swagger-core-1.5.3.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/swagger-jaxrs-1.5.3.jar" sourcepath="/Users/frank/.m2/repository/io/swagger/swagger-jaxrs/1.5.3/swagger-jaxrs-1.5.3-sources.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/swagger-models-1.5.3.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/javax.ws.rs-api-2.0.1.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/javax.ws.rs-api-2.0.1.jar" sourcepath="/Users/mv/.m2/repository/javax/ws/rs/javax.ws.rs-api/2.0.1/javax.ws.rs-api-2.0.1-sources.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/jersey-common-2.22.jar" sourcepath="/Users/frank/.m2/repository/org/glassfish/jersey/core/jersey-common/2.22/jersey-common-2.22-sources.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/jersey-media-multipart-2.22.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/jersey-server-2.22.jar" sourcepath="/Users/frank/.m2/repository/org/glassfish/jersey/core/jersey-server/2.22/jersey-server-2.22-sources.jar"/>
@@ -359,7 +359,14 @@
 	<classpathentry kind="var" path="ALFRESCO_50d_TOMCAT_LIB"/>
 	<classpathentry kind="var" path="ALFRESCO_50d_WEBAPP_LIB"/>
 	<classpathentry kind="lib" path="lib/pdfbox-1.8.10-alfresco-patched.jar"/>
-	<classpathentry kind="lib" path="lib/handle-client.jar"/>
-	<classpathentry kind="lib" path="lib/gson-2.6.2.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/handle-client.jar"/>
+	<classpathentry kind="lib" path="/Applications/alfresco-5.0.d/tomcat/lib/postgresql-9.3-1102-jdbc41.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/swagger-java-client-1.0.0.jar"/>
+	<classpathentry kind="lib" path="lib/gson-2.8.1.jar"/>
+	<classpathentry kind="lib" path="lib/gson-fire-1.8.0.jar"/>
+	<classpathentry kind="lib" path="lib/hamcrest-core-1.3.jar"/>
+	<classpathentry kind="lib" path="lib/logging-interceptor-2.7.5.jar"/>
+	<classpathentry kind="lib" path="lib/okhttp-2.7.5.jar"/>
+	<classpathentry kind="lib" path="lib/okio-1.6.0.jar"/>
 	<classpathentry kind="output" path="war/WEB-INF/classes"/>
 </classpath>

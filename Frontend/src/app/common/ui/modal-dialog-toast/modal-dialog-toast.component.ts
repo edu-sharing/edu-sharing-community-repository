@@ -19,6 +19,7 @@ import {trigger} from "@angular/animations";
 })
 export class ModalDialogToastComponent{
   private buttons: DialogButton;
+  private onCancel: Function;
   @HostListener('document:keydown', ['$event'])
   handleKeyboardEvent(event: KeyboardEvent) {
     if(event.code=="Escape" && this.isCancelable){
@@ -34,12 +35,20 @@ export class ModalDialogToastComponent{
       this.title=data.title;
       this.message=data.message;
       this.messageParameters=data.translation;
+      this.isCancelable=data.isCancelable;
+      this.isHigh=data.isHigh;
       this.buttons=data.buttons;
-      this.visible=true
+      this.onCancel=data.onCancel;
+      this.visible=this.title!=null;
     });
   }
 
   public visible=false;
+
+  /**
+   * use the "high" card layout (for longer messages)
+   */
+  private isHigh = true;
   private isCancelable = true;
   /**
    * The title, will be translated automatically
@@ -60,8 +69,15 @@ export class ModalDialogToastComponent{
   public click(btn : DialogButton){
     btn.callback();
     this.visible=false;
+    this.reset();
   }
   private cancel(){
     this.visible=false;
+    if(this.onCancel!=null) this.onCancel();
+    this.reset();
   }
+
+    private reset() {
+        this.onCancel=null;
+    }
 }

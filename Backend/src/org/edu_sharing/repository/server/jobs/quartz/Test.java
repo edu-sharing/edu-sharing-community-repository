@@ -2,19 +2,16 @@ package org.edu_sharing.repository.server.jobs.quartz;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Set;
 
-import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.xpath.XPath;
 import javax.xml.xpath.XPathConstants;
 import javax.xml.xpath.XPathFactory;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.edu_sharing.repository.server.importer.OAIPMHLOMImporter;
 import org.edu_sharing.repository.server.importer.PersistentHandlerInterface;
 import org.edu_sharing.repository.server.importer.RecordHandlerInterface;
+import org.edu_sharing.repository.server.importer.RecordHandlerInterfaceBase;
 import org.edu_sharing.repository.server.importer.RecordHandlerLOM;
 import org.w3c.dom.Node;
 
@@ -27,17 +24,18 @@ public class Test {
 				// TODO Auto-generated method stub
 				return true;
 			}
-			
-			public String safe(java.util.Map props, String cursor, String set) throws Throwable {
+
+			@Override
+			public String safe(RecordHandlerInterfaceBase recordHandler, String cursor, String set) throws Throwable {
 				return null;
-			};
+			}
 		};
 		
 		TestRecordHandler trh = new TestRecordHandler();
 		
 		try {
-			OAIPMHLOMImporter imp = new OAIPMHLOMImporter("http://sodis.de/cp/oai_pmh/oai.php",ph, trh, null,-1, -1, "oai_lom-de", new String[] {"omega_activated"});
-			imp.startImport();
+			//OAIPMHLOMImporter imp = new OAIPMHLOMImporter("http://sodis.de/cp/oai_pmh/oai.php",ph, trh, null,-1, -1, "oai_lom-de", new String[] {"omega_activated"});
+			//imp.startImport();
 			System.out.println("count:" + trh.getCounter());
 			for(Map.Entry<String,Integer> entry : trh.getReplicationIdCounter().entrySet()) {
 				System.out.println("replid:" + entry.getKey() +": " + entry.getValue());

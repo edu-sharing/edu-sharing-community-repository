@@ -49,6 +49,8 @@ export class ShareAppComponent {
     private editorType: string;
     private file: File;
     private fileName: string;
+    private text: string;
+    private loading=true;
   constructor(private toast: Toast,
               private route: ActivatedRoute,
               private router: Router,
@@ -100,6 +102,9 @@ export class ShareAppComponent {
             let prop: any = RestHelper.createNameProperty(this.title);
             if(this.editorType){
                 prop[RestConstants.CCM_PROP_EDITOR_TYPE]=[this.editorType];
+            }
+            if(this.text){
+                prop[RestConstants.LOM_PROP_GENERAL_DESCRIPTION]=[this.text];
             }
             this.node.createNode(this.inbox.ref.id, RestConstants.CCM_TYPE_IO, [], prop, true).subscribe((data: NodeWrapper) => {
                 this.node.uploadNodeContent(data.node.ref.id, this.file, RestConstants.COMMENT_MAIN_FILE_UPLOAD,this.mimetype).subscribe(() => {
@@ -154,9 +159,11 @@ export class ShareAppComponent {
         Translation.initialize(this.translate, this.config, this.storage, this.route).subscribe(() => {
             console.log("translate");
             this.route.queryParams.subscribe((params:any)=>{
+                console.log("share app query params",params);
                 this.uri=params['uri'];
                 this.mimetype=params['mimetype'];
                 this.fileName=params['file'];
+                this.text=params['text']; // ios only: custom description
                 this.description=null;
                 console.log(this.uri);
                 this.collectionApi.search("",{
@@ -166,6 +173,10 @@ export class ShareAppComponent {
                     sortAscending:false,
                 }).subscribe((data:CollectionContent)=>{
                     this.collections=data.collections;
+                    this.loading=false;
+                },(error)=>{
+                    this.toast.error(error)
+                    this.loading=false;
                 });
                 this.node.getNodeParents(RestConstants.INBOX, false).subscribe((data: ParentList) => {
                     this.inboxPath = data.nodes;
@@ -174,7 +185,12 @@ export class ShareAppComponent {
                 this.previewUrl=this.connector.getThemeMimePreview(this.getType()+'.svg');
                 if(this.isLink()) {
                     this.utilities.getWebsiteInformation(this.uri).subscribe((data: any) => {
-                        this.title = data.title + " - " + data.page;
+                        if(data.title) {
+                            this.title = data.title + " - " + data.page;
+                        }
+                        else{
+                            this.title = this.uri;
+                        }
                         this.description = data.description;
                         this.globalProgress = false;
                     });
@@ -188,7 +204,7 @@ export class ShareAppComponent {
                     })
                 }
                 else{
-                    if(this.cordova.isRunningCordova() && this.cordova.getLastIntent().stream){
+                    if(this.cordova.isRunningCordova() && this.cordova.getLastIntent() && this.cordova.getLastIntent().stream){
                         let base64=this.cordova.getLastIntent().stream;
                         if(this.mimetype.startsWith("image/")) {
                             this.previewUrl = this.sanitizer.bypassSecurityTrustResourceUrl("data:" + this.mimetype + ";base64," + base64);
@@ -260,7 +276,7 @@ export class ShareAppComponent {
             }
         }
         this.title = this.translate.instant('SHARE_APP.TEXT_SNIPPET')+" "+
-            DateHelper.formatDate(this.translate,new Date().getTime(),true,false)+"."+filetype;
+            DateHelper.getDateForNewFile()+"."+filetype;
         this.file = (new Blob([this.uri], {
             type: this.mimetype
         }) as any);

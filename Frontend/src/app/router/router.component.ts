@@ -1,5 +1,4 @@
 import { Component } from '@angular/core';
-import {RestTestComponent} from "../common/rest/directives/rest-test/rest-test.component";
 import {NodeRenderComponent} from "../common/ui/node-render/node-render.component";
 import {Router, ActivatedRoute} from "@angular/router";
 import { ApplyToLmsComponent} from "../common/ui/apply-to-lms/apply-to-lms.component";
@@ -21,6 +20,10 @@ import {MessagesComponent} from "../modules/messages/messages.component";
 import {UIConstants} from "../common/ui/ui-constants";
 import {StartupComponent} from '../modules/startup/startup.component';
 import {ShareAppComponent} from "../modules/share-app/share-app.component";
+import {SharingComponent} from "../modules/sharing/sharing.component";
+import {ServicesComponent} from "../modules/services/services.components";
+import {FileUploadComponent} from '../modules/file-upload/file-upload.component';
+
 
 
 
@@ -75,9 +78,8 @@ export var ROUTES=[
     { path: '', component: StartupComponent },
     { path: UIConstants.ROUTER_PREFIX+'app', component: LoginAppComponent },
     { path: UIConstants.ROUTER_PREFIX+'app/share', component: ShareAppComponent },
-    { path: UIConstants.ROUTER_PREFIX+'sharing', component: ShareAppComponent },
+    { path: UIConstants.ROUTER_PREFIX+'sharing', component: SharingComponent },
     { path: UIConstants.ROUTER_PREFIX+'test/mds',component: MdsTestComponent},
-    { path: UIConstants.ROUTER_PREFIX+'test/rest',component: RestTestComponent},
     { path: UIConstants.ROUTER_PREFIX+'render/:node', component: NodeRenderComponent},
     { path: UIConstants.ROUTER_PREFIX+'render/:node/:version', component: NodeRenderComponent},
     { path: UIConstants.ROUTER_PREFIX+'apply-to-lms/:repo/:node', component: ApplyToLmsComponent},
@@ -94,7 +96,9 @@ export var ROUTES=[
     { path: UIConstants.ROUTER_PREFIX+'collections/collection/:mode/:id', component: CollectionNewComponent},
   // login
     { path: UIConstants.ROUTER_PREFIX+'login', component: LoginComponent },
-  // admin
+  // file upload
+    { path: UIConstants.ROUTER_PREFIX+'upload', component: FileUploadComponent },
+// admin
     { path: UIConstants.ROUTER_PREFIX+'admin', component: AdminComponent },
   // permissions
     { path: UIConstants.ROUTER_PREFIX+'permissions', component: PermissionsRoutingComponent,
@@ -108,7 +112,13 @@ export var ROUTES=[
 
     // messages
     { path: UIConstants.ROUTER_PREFIX+'messages/:message', component: MessagesComponent },
+    // error (same as message)
+    { path: UIConstants.ROUTER_PREFIX+'error/:message', component: MessagesComponent },
 
+    // link-share
+    { path: UIConstants.ROUTER_PREFIX+'sharing', component: SharingComponent },
+    // services
+    { path: UIConstants.ROUTER_PREFIX+'services', component: ServicesComponent },
   ]
 ;
 

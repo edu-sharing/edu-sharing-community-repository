@@ -1,11 +1,11 @@
 
 import {Component, Input, Output, EventEmitter, HostListener, ChangeDetectorRef, ApplicationRef} from "@angular/core";
 import {
-  Group, IamGroups, IamUsers, NodeList, IamUser, IamAuthorities,
-  Authority, OrganizationOrganizations, Organization
+    Node, Group, IamGroups, IamUsers, NodeList, IamUser, IamAuthorities,
+    Authority, OrganizationOrganizations, Organization, Person, User, HomeFolder, SharedFolder
 } from "../../../common/rest/data-object";
 import {Toast} from "../../../common/ui/toast";
-import {ActivatedRoute} from "@angular/router";
+import {ActivatedRoute, Router} from "@angular/router";
 import {RestIamService} from "../../../common/rest/services/rest-iam.service";
 import {TranslateService} from "@ngx-translate/core";
 import {RestConnectorService} from "../../../common/rest/services/rest-connector.service";
@@ -21,6 +21,7 @@ import {ConfigurationService} from "../../../common/services/configuration.servi
 import {Helper} from "../../../common/helper";
 import {trigger} from "@angular/animations";
 import {ListItem} from "../../../common/ui/list-item";
+import {UIHelper} from "../../../common/ui/ui-helper";
 @Component({
   selector: 'permissions-authorities',
   templateUrl: 'authorities.component.html',
@@ -33,6 +34,7 @@ import {ListItem} from "../../../common/ui/list-item";
 })
 export class PermissionsAuthoritiesComponent {
   public GROUP_TYPES=RestConstants.VALID_GROUP_TYPES;
+  public SCOPE_TYPES=RestConstants.VALID_SCOPE_TYPES;
   public ORG_TYPES=RestConstants.VALID_GROUP_TYPES_ORG;
   public list : any[]=[];
   public edit : any;
@@ -41,6 +43,7 @@ export class PermissionsAuthoritiesComponent {
   private offset = 0
   public columns : ListItem[]=[];
   public addMemberColumns : ListItem[]=[];
+  public editGroupColumns : ListItem[]=[];
   public sortBy : string;
   public sortAscending = true;
   public loading = true;
@@ -50,6 +53,7 @@ export class PermissionsAuthoritiesComponent {
   public optionsActionbar:OptionItem[];
   private orgs: OrganizationOrganizations;
   public addMembers: any;
+  public editGroups: User;
   private memberOptions: OptionItem[];
   private addToList: any[];
   private isAdmin = false;
@@ -136,13 +140,21 @@ export class PermissionsAuthoritiesComponent {
      this.sortBy="displayName";
    }
    this.columns=this.getColumns(mode,this.embedded);
-   this.addMemberColumns=this.getColumns('USER',true);
+    this.addMemberColumns=this.getColumns('USER',true);
+    this.editGroupColumns=this.getColumns('GROUP',true);
    this.loadAuthorities();
   }
   private getMemberOptions() : OptionItem[]{
     let options:OptionItem[]=[];
-    if(this.selectedMembers.length){
-      options.push(new OptionItem("PERMISSIONS.MENU_REMOVE_MEMBER","delete",(data:any)=>this.deleteMember()))
+    if(this.editGroups){
+        if (this.selectedMembers.length) {
+            options.push(new OptionItem("PERMISSIONS.MENU_REMOVE_MEMBERSHIP", "delete", (data: any) => this.deleteMembership()))
+        }
+    }
+    else {
+        if (this.selectedMembers.length) {
+            options.push(new OptionItem("PERMISSIONS.MENU_REMOVE_MEMBER", "delete", (data: any) => this.deleteMember()))
+        }
     }
     return options;
   }
@@ -169,6 +181,7 @@ export class PermissionsAuthoritiesComponent {
   constructor(private toast: Toast,
               private node : RestNodeService,
               private config : ConfigurationService,
+              private router : Router,
               private translate : TranslateService,
               private organization : RestOrganizationService,
               private connector : RestConnectorService,
@@ -195,7 +208,7 @@ export class PermissionsAuthoritiesComponent {
     this.onSelection.emit(data);
     this.updateOptions(false);
   }
-  private getList(data : any){
+  private getList<T>(data:T) : T[]{
     if(data)
       return [data];
     return this.selected;
@@ -215,7 +228,9 @@ export class PermissionsAuthoritiesComponent {
         if(this.orgs && this.orgs.canCreate){
           options.push(new OptionItem("PERMISSIONS.MENU_CREATE_USER", "add", (data: any) => this.createAuthority()));
         }
-        options.push(new OptionItem("PERMISSIONS.EXPORT_MEMBER", "cloud_download", (data: any) => this.downloadMembers()));
+        let download = new OptionItem("PERMISSIONS.EXPORT_MEMBER", "cloud_download", (data: any) => this.downloadMembers())
+        download.onlyDesktop=true;
+        options.push(download);
       }
     }
     if(!all && this._mode=='ORG' && this.orgs && this.orgs.canCreate){
@@ -224,7 +239,8 @@ export class PermissionsAuthoritiesComponent {
 
     if(all || list.length){
       if(this._mode=='USER' && !all){
-        options.push(new OptionItem("PERMISSIONS.MENU_ADD_TO_GROUP","group",(data:any)=>this.addToGroup(data)))
+        options.push(new OptionItem("PERMISSIONS.MENU_ADD_TO_GROUP","group_add",(data:any)=>this.addToGroup(data)))
+          options.push(new OptionItem("PERMISSIONS.MENU_EDIT_GROUPS", "group", (data: any) => this.openEditGroups(data)));
       }
       if(list.length==1 || all) {
         if(this._mode=='GROUP') {
@@ -257,6 +273,7 @@ export class PermissionsAuthoritiesComponent {
   private cancelEditMembers(){
     this.editMembers=null;
     this.addMembers=null;
+    this.editGroups=null;
     //this.refresh();
   }
   private addMembersToGroup(){
@@ -297,6 +314,7 @@ export class PermissionsAuthoritiesComponent {
         }
         else {
           this.globalProgress=true;
+          console.log("groupescope:" , this.edit.profile);
           this.iam.createGroup(name, this.edit.profile, this.org ? this.org.groupName : "").subscribe(() => {
             this.edit = null;
             this.globalProgress=false;
@@ -317,11 +335,13 @@ export class PermissionsAuthoritiesComponent {
         (error : any)=>this.toast.error(error));
     }
     else{
+      let editStore=Helper.deepCopy(this.edit);
+      editStore.profile.sizeQuota*=1024*1024;
+      this.globalProgress=true;
       if(this.editId==null){
         let name=this.editDetails.authorityName;
         let password=this.editDetails.password;
-        this.globalProgress=true;
-        this.iam.createUser(name,password,this.edit.profile).subscribe(() => {
+        this.iam.createUser(name,password,editStore.profile).subscribe(() => {
             this.edit=null;
             this.globalProgress=false;
             if(this.org){
@@ -342,12 +362,16 @@ export class PermissionsAuthoritiesComponent {
           });
       }
       else {
-        this.iam.editUser(this.editId, this.edit.profile).subscribe(() => {
+        this.iam.editUser(this.editId, editStore.profile).subscribe(() => {
             this.edit = null;
             this.toast.toast("PERMISSIONS.USER_EDITED");
             this.refresh();
+            this.globalProgress=false;
           },
-          (error: any) => this.toast.error(error));
+          (error: any) => {
+            this.toast.error(error);
+            this.globalProgress=false;
+          });
       }
     }
   }
@@ -447,6 +471,13 @@ export class PermissionsAuthoritiesComponent {
         this.editId = this.edit.authorityName;
       },(error:any)=>this.toast.error(error));
     }
+    else if(this._mode=='USER'){
+      this.iam.getUser(list[0].authorityName).subscribe((user)=>{
+          this.edit = Helper.deepCopy(user.person);
+          this.edit.profile.sizeQuota=user.person.quota.sizeQuota/1024/1024;
+          this.editId = this.edit.authorityName;
+      });
+    }
     else {
       this.edit = Helper.deepCopy(list[0]);
       this.editId = this.edit.authorityName;
@@ -460,6 +491,14 @@ export class PermissionsAuthoritiesComponent {
 
     this.addTo=list;
     this.addToSelection=null;
+  }
+  private openEditGroups(data: User) {
+      let list=this.getList(data);
+      this.editGroups=list[0];
+      this.manageMemberSearch='';
+      this.memberList = [];
+      this.memberListOffset = 0;
+      this.searchMembers();
   }
   private addToSelect(){
     this.addToList=this.selected;
@@ -522,6 +561,10 @@ export class PermissionsAuthoritiesComponent {
   }
   private deleteAuthority(data: any,callback:Function) {
     let list=this.getList(data);
+    if(this._mode=='GROUP' && list.filter((l)=>l.groupType==RestConstants.GROUP_TYPE_ADMINISTRATORS).length){
+        this.toast.error(null,'PERMISSIONS.DELETE_ERROR_ADMINISTRATORS');
+        return;
+    }
     this.dialogTitle="PERMISSIONS.DELETE_TITLE";
     this.dialogMessage="PERMISSIONS.DELETE_"+this._mode;
     this.dialogCancelable=true;
@@ -587,6 +630,7 @@ export class PermissionsAuthoritiesComponent {
   private createGroup(){
       this.createAuthority();
       this.edit.profile.groupType=null;
+      this.edit.profile.scopeType=null;
   }
   private createOrg() {
     this.createGroup();
@@ -634,6 +678,22 @@ export class PermissionsAuthoritiesComponent {
       this.deleteMember(position+1);
     },(error:any)=>this.toast.error(error));
   }
+    private deleteMembership(position=0) {
+        if(this.selectedMembers.length==position){
+            this.toast.toast("PERMISSIONS.MEMBERSHIP_REMOVED");
+            this.selectedMembers=[];
+            this.memberOptions=this.getMemberOptions();
+            this.memberList=[];
+            this.memberListOffset=0;
+            this.searchMembers();
+            this.globalProgress=false;
+            return;
+        }
+        this.globalProgress=true;
+        this.iam.deleteGroupMember(this.selectedMembers[position].authorityName,this.editGroups.authorityName).subscribe(()=>{
+            this.deleteMembership(position+1);
+        },(error:any)=>this.toast.error(error));
+    }
   private searchMembers(){
     this.selectedMembers=[];
     this.memberOptions=this.getMemberOptions();
@@ -651,8 +711,7 @@ export class PermissionsAuthoritiesComponent {
         };
         this.memberListOffset+=this.connector.numberPerRequest;
         this.iam.getGroupMembers(this.org.authorityName,this.manageMemberSearch, RestConstants.AUTHORITY_TYPE_USER, request).subscribe((data: IamAuthorities) => {
-          for (let member of data.authorities)
-            this.memberList.push(member);
+          this.memberList=this.memberList.concat(data.authorities);
           this.memberList=Helper.deepCopy(this.memberList);
         });
       }else {
@@ -661,12 +720,22 @@ export class PermissionsAuthoritiesComponent {
           offset: this.memberListOffset
         };
         this.memberListOffset+=this.connector.numberPerRequest;
-        this.iam.searchUsers(this.manageMemberSearch, true, request).subscribe((data: IamUsers) => {
-          for (let member of data.users)
-            this.memberList.push(member);
-          this.memberList=Helper.deepCopy(this.memberList);
+        this.iam.searchUsers(this.manageMemberSearch, true, request).subscribe((data) => {
+            this.memberList=this.memberList.concat(data.users);
+            this.memberList=Helper.deepCopy(this.memberList);
         });
       }
+    }
+    else if(this.editGroups){
+        let request:any={
+            sortBy: ["authorityName"],
+            offset: this.memberListOffset
+        };
+        this.memberListOffset+=this.connector.numberPerRequest;
+        this.iam.getUserGroups(this.editGroups.authorityName,this.manageMemberSearch, request).subscribe((data) => {
+            this.memberList=this.memberList.concat(data.groups);
+            this.memberList=Helper.deepCopy(this.memberList);
+        });
     }
     else {
       let request:any={
@@ -674,10 +743,9 @@ export class PermissionsAuthoritiesComponent {
         offset: this.memberListOffset
       };
       this.memberListOffset+=this.connector.numberPerRequest;
-      this.iam.getGroupMembers((this.editMembers as Group).authorityName, this.manageMemberSearch, RestConstants.AUTHORITY_TYPE_USER, request).subscribe((data: IamAuthorities) => {
-        for (let member of data.authorities)
-          this.memberList.push(member);
-        this.memberList=Helper.deepCopy(this.memberList);
+      this.iam.getGroupMembers((this.editMembers as Group).authorityName, this.manageMemberSearch, RestConstants.AUTHORITY_TYPE_USER, request).subscribe((data) => {
+          this.memberList=this.memberList.concat(data.authorities);
+          this.memberList=Helper.deepCopy(this.memberList);
       });
     }
   }
@@ -750,5 +818,8 @@ export class PermissionsAuthoritiesComponent {
       }
     }
     Helper.downloadContent(this.translate.instant("PERMISSIONS.DOWNLOAD_MEMBER_FILENAME"),data);
+  }
+  openFolder(folder:SharedFolder){
+      UIHelper.goToWorkspaceFolder(this.node,this.router,this.connector.getCurrentLogin(),folder.id);
   }
 }

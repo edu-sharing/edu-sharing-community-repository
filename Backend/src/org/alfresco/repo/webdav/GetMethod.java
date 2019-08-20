@@ -648,7 +648,7 @@ public class GetMethod extends WebDAVMethod
         }
         catch (Throwable e)
         {
-            logger.error(e);
+            logger.error(e.getMessage(),e);
 
             if (writer != null)
             {

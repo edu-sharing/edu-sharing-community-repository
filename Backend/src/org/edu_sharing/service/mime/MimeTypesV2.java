@@ -10,13 +10,14 @@ import org.edu_sharing.alfresco.action.RessourceInfoTool;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.client.tools.Theme;
 import org.edu_sharing.repository.server.tools.ApplicationInfo;
+import org.edu_sharing.repository.server.tools.URLTool;
 import org.edu_sharing.restservices.RepositoryDao;
 
 public class MimeTypesV2 {
 	public static final String MIME_DIRECTORY="application/x-directory";
 
 	private static HashMap<String, String> extensionMimeMap;
-	private String basePath;
+	private final ApplicationInfo appInfo;
 	private String theme;
 
 	public static List<String> WORD=Arrays.asList(new String[]{	
@@ -60,26 +61,20 @@ public class MimeTypesV2 {
 			});
 	
 	public MimeTypesV2(ApplicationInfo appInfo){
-		this.basePath=appInfo.getClientBaseUrl();
-		if(this.basePath.endsWith("/")){
-			this.basePath = this.basePath.substring(0, this.basePath.length() - 1);
-		}
-		if(!this.basePath.startsWith("http") && !this.basePath.startsWith("/")){
-			this.basePath = "/" +this.basePath;
-		}
+		this.appInfo=appInfo;
 		this.theme=Theme.getThemeId();
 		if(theme == null){
 			theme = CCConstants.THEME_DEFAULT_ID;
 		}
 		
 	}
-	public static boolean isDirectory(HashMap<String,Object> properties){
+	public static boolean isDirectory(Map<String,Object> properties){
 		String type=(String) properties.get(CCConstants.NODETYPE);
 		if(type == null) return false;
 		return type.equals(CCConstants.CCM_TYPE_MAP) 
 			|| type.equals(CCConstants.CM_TYPE_FOLDER);
 	}
-	public static boolean isCollection(HashMap<String,Object> properties){
+	public static boolean isCollection(Map<String,Object> properties){
 		String type=(String) properties.get(CCConstants.CCM_PROP_MAP_COLLECTIONTYPE);
 		if(type == null) return false;
 		return true;
@@ -89,7 +84,21 @@ public class MimeTypesV2 {
 	 * @return
 	 */
 	public String getThemePath(){
-		return basePath + "/themes/"+theme+"/";
+		return getBasePath() + "/themes/"+theme+"/";
+	}
+	private String getBasePath(){
+		if(appInfo.ishomeNode()){
+			// @TODO 5.1 This can be set to dynamic!
+			return URLTool.getBaseUrl(false);
+		}
+		String basePath=appInfo.getClientBaseUrl();
+		if(basePath.endsWith("/")){
+			basePath = basePath.substring(0, basePath.length() - 1);
+		}
+		if(!basePath.startsWith("http") && !basePath.startsWith("/")){
+			basePath = "/" +basePath;
+		}
+		return basePath;
 	}
 	/**
 	 * Gets the path where the repo stores mime type icons
@@ -109,14 +118,14 @@ public class MimeTypesV2 {
 	 * Gets a full icon path for a small mime icon for the given node properties
 	 * @return
 	 */
-	public String getIcon(String nodeType,HashMap<String,Object> properties,List<String> aspects){
+	public String getIcon(String nodeType,Map<String,Object> properties,List<String> aspects){
 		return getIconPath()+getNodeType(nodeType,properties,aspects)+".svg";
 	}
 	/**
 	 * Gets a full preview path for a large mime image with background for the given node properties
 	 * @return
 	 */
-	public String getPreview(String nodeType,HashMap<String,Object> properties,List<String> aspects){
+	public String getPreview(String nodeType,Map<String,Object> properties,List<String> aspects){
 		return getPreviewPath()+getNodeType(nodeType,properties,aspects)+".svg";
 	}
 	/**
@@ -134,11 +143,18 @@ public class MimeTypesV2 {
 		return getPreviewPath()+"no-permissions.svg";
 	}
 	/**
+	 * Gets a "Element deleted" preview image
+	 * @return
+	 */
+	public String getNodeDeletedPreview() {
+		return getPreviewPath()+"node-deleted.svg";
+	}
+	/**
 	 * Returns the guessed node-type (used for the preview files), e.g. file-folder, file-word or file-image
 	 * @param properties
 	 * @return
 	 */
-	public static String getNodeType(String nodeType,HashMap<String,Object> properties,List<String> aspects){
+	public static String getNodeType(String nodeType,Map<String,Object> properties,List<String> aspects){
 		if(isCollection(properties))
 			return "collection";
 		if(isDirectory(properties))
@@ -173,23 +189,35 @@ public class MimeTypesV2 {
 	if(COMPRESSED.contains(mimetype)){
 		if(properties!=null) {
 		String ccressourcetype=(String) properties.get(CCConstants.CCM_PROP_CCRESSOURCETYPE);
+		String ccressourcesubtype=(String) properties.get(CCConstants.CCM_PROP_CCRESSOURCESUBTYPE);
 			if("imsqti".equals(ccressourcetype))
 				return "file-qti";
 			if(RessourceInfoExecuter.CCM_RESSOURCETYPE_H5P.equals(ccressourcetype))
 				return "file-h5p";
+			if(RessourceInfoExecuter.CCM_RESSOURCETYPE_EDUHTML.equals(ccressourcetype)){
+				if("webgl".equals(ccressourcesubtype)) {
+					return "file-webgl";
+				}
+			}
 		}
 		return "file-zip";
 	}
 	if(SCRIPT.contains(mimetype))
 		return "file-script";
-	
+
+	if(mimetype.equals("application/vnd.oasis.opendocument.text"))
+		return "file-odt";
+	if(mimetype.equals("application/vnd.oasis.opendocument.spreadsheet"))
+		return "file-ods";
+	if(mimetype.equals("application/vnd.oasis.opendocument.presentation"))
+		return "file-odp";
 	if(mimetype.equals("text/xml"))
 		return "file-xml";
 	if(mimetype.equals("application/pdf"))
 		return "file-pdf";
 	if(mimetype.equals("imsqti"))
 		return "file-qti";
-	if(mimetype.equals("moodle"))
+	if(mimetype.equals("moodle") || mimetype.equals("application/vnd.moodle.backup"))
 		return "file-moodle";
 	if(mimetype.equals("scorm") || mimetype.equals("ADL SCORM"))
 		return "file-scorm";
@@ -327,7 +355,7 @@ public static HashMap<String, String> getExtensionMimeMap() {
 	 * If it won't find an alfresco mime type, it will guess it by the file ending
 	 * @return
 	 */
-	public static String getMimeType(HashMap<String, Object> properties) {
+	public static String getMimeType(Map<String, Object> properties) {
 		if(isDirectory(properties))
 			return MIME_DIRECTORY;
 		String mimeType=(String) properties.get(CCConstants.LOM_PROP_TECHNICAL_FORMAT);

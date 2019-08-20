@@ -1,17 +1,16 @@
-import { Injectable, HostListener } from "@angular/core";
-import { setTimeout } from "core-js/library/web/timers";
-import { Observable, Observer, ConnectableObservable } from "rxjs";
-import { Headers, Http, RequestOptions, RequestOptionsArgs, Response } from "@angular/http";
+import {Injectable, Injector} from '@angular/core';
+import {setTimeout} from 'core-js/library/web/timers';
+import {Observable, Observer} from 'rxjs';
+import {Headers, Http, Response} from '@angular/http';
 
-import { OAuthResult, LoginResult, NodeRef } from '../rest/data-object';
-import { RestConstants } from '../rest/rest-constants';
-import {PlatformLocation} from "@angular/common";
-import {Helper} from "../helper";
-import {UIConstants} from "../ui/ui-constants";
-import {NavigationEnd, Router} from "@angular/router";
-import {FrameEventsService} from "./frame-events.service";
+import {OAuthResult} from '../rest/data-object';
 import {Location} from '@angular/common';
-import {RestLocatorService} from "../rest/services/rest-locator.service";
+import {UIConstants} from '../ui/ui-constants';
+import {Router} from '@angular/router';
+import {FrameEventsService} from './frame-events.service';
+import {DateHelper} from "../ui/DateHelper";
+import {TranslateService} from "@ngx-translate/core";
+import {HttpClient} from '@angular/common/http';
 
 declare var cordova : any;
 
@@ -22,25 +21,19 @@ declare var cordova : any;
 export class CordovaService {
 
   // change this during development for testing true, but false is default
-  private forceCordovaMode: boolean = false;
+  private forceCordovaMode = false;
 
-  private deviceIsReady: boolean = false;
+  private deviceIsReady = false;
 
-  private deviceReadyCallback : Function = null;
-  private devicePauseCallback : Function = null;
   private deviceResumeCallback : Function = null;
 
-  private observerDeviceReady : Observer<void> = null;
   private observerShareContent : Observer<any> = null;
-
-  private deviceReadyObservable: ConnectableObservable<{}>;
 
   private appGoneBackgroundTS : number = null;
 
   private _oauth:OAuthResult;
   private serviceIsReady = false;
 
-  private lastShareTS:number = 0;
   private lastIntent: any;
 
   get oauth(){
@@ -62,10 +55,11 @@ export class CordovaService {
    * CONSTRUCTOR
    */
   constructor(
-    private http : Http,
     private router : Router,
+    private http : HttpClient,
     private location: Location,
-    private events : FrameEventsService
+    private injector:Injector,
+    private events : FrameEventsService,
   ) {
 
     this.initialHref = window.location.href;
@@ -93,6 +87,10 @@ export class CordovaService {
       if (this.deviceResumeCallback!=null) this.deviceResumeCallback();
     };
 
+    if(this.isRunningCordova()) {
+        // deviceready may not work, because cordova is already loaded, so try to set it ready after some time
+        setTimeout(() => this.deviceIsReady = true, 1000);
+    }
     //adding listener for cordova events
     document.addEventListener('deviceready', () => {
       this.deviceIsReady = true;
@@ -111,7 +109,7 @@ export class CordovaService {
   }
 
     /**
-     * get the last android intent
+     * get the last android/ios intent
      */
     public getLastIntent(){
       return this.lastIntent;
@@ -145,8 +143,6 @@ export class CordovaService {
               clearInterval(shareInterval);
               this.onNewShareContent().subscribe(
                   (data: any) => {
-                      // TODO: take URI and processes on share screen
-                      // this.router.navigate(['share', URI]);
                       this.router.navigate([UIConstants.ROUTER_PREFIX,'app', 'share'], {queryParams: data});
                   }, (error) => {
                       console.log("ERROR on new share event", error);
@@ -272,6 +268,37 @@ export class CordovaService {
 
            });*/
        }
+       if(this.isIOS()){
+           // Initialize the plugin
+           cordova.openwith.init(()=>{}, ()=>{
+               console.warn("failed to init openWith ios");
+           });
+
+           // Define your file handler
+           cordova.openwith.addHandler((intent:any)=>{
+               console.log('intent received');
+
+               console.log('  action: ' + intent.action); // type of action requested by the user
+               console.log('  exit: ' + intent.exit); // if true, you should exit the app after processing
+
+               let item = intent.items[0];
+               console.log('  type: ', item.type);   // mime type
+               console.log('  uri:  ', item.uri);     // uri to the file, probably NOT a web uri
+               console.log('  image base64 string length: ', item.base64.length)
+               //console.log('  image base64 string: ', item.base64)
+
+               // some optional additional info
+               console.log('  text: ', item.text);   // text to share alongside the item, iOS only
+               console.log('  file: ', item.file);   // suggested name of the image, iOS 11+ only
+               console.log('  utis: ', item.utis);
+               console.log('  path: ', item.path);   // path on the device, generally undefined
+               item.stream=item.base64; // convert it so it's like on android
+               //alert(item.type+" : "+item.name+" : "+item.path+" : "+item.uri);
+               item.uri=DateHelper.getDateForNewFile()+".jpg";
+               this.lastIntent=item;
+               this.observerShareContent.next({uri:item.uri,mimetype:item.type,file:item.name,text:item.text});
+           });
+       }
    }
 
    /*
@@ -350,7 +377,6 @@ export class CordovaService {
       let device:any = (window as any).device;
       return device.platform=="iOS";
     } catch (e) {
-        console.error(e);
       console.log("FAIL on Plugin cordova-plugin-device (1)");
       return false;
     }
@@ -433,7 +459,13 @@ export class CordovaService {
     this.setPermanentStorage(CordovaService.STORAGE_OAUTHTOKENS,null);
     if(parameters)
         parameters="&"+parameters;
-    window.location.replace("http://app-registry.edu-sharing.com/ng/?reset=true"+parameters);
+    if(navigator.userAgent.indexOf("ionic / edu-sharing-app")!=-1) {
+        // go to ionic local server
+        window.location.replace("http://localhost:54361/?reset=true" + parameters);
+    }
+    else{
+        window.location.replace("http://app-registry.edu-sharing.com/ng/?reset=true" + parameters);
+    }
     /*
     try {
       (navigator as any).splashscreen.show();
@@ -842,6 +874,7 @@ export class CordovaService {
 
    downloadContent(downloadURL:string, fileName:string, winCallback:Function=null, failCallback:Function=null) : void {
      let status=0;
+     let resultPath="";
      try {
        this.makeSurePermission("WRITE_EXTERNAL_STORAGE", (win: any) => {
 
@@ -860,7 +893,7 @@ export class CordovaService {
 
            // iOS: following redirects works automatically - so go direct
            console.log("downloadContent IOS URL: " + downloadURL);
-           this.startContentDownload(downloadURL, fileName, ()=>status=1, ()=>status=-1);
+           this.startContentDownload(downloadURL, fileName, (filePath:string)=>{status=1;resultPath=filePath;}, ()=>status=-1);
 
          } else {
 
@@ -868,7 +901,10 @@ export class CordovaService {
            /*console.log("resolving redirects for downloadContent URL ANDROID: " + downloadURL);
            (window as any).CordovaHttpPlugin.head(downloadURL, {}, {}, (response: any) => {
              console.log("200 NOT A REDIRECT URL - use original: " + downloadURL);*/
-             this.startContentDownload(downloadURL, fileName,()=>status=1, ()=>status=-1);
+             this.startContentDownload(downloadURL, fileName,(filePath:string)=>{
+                 resultPath=filePath;
+                 status=1;
+             }, ()=>status=-1);
            /*}, (response: any) => {
              if (response.status == 302) {
                let redirectURL = decodeURIComponent(response.headers.Location);
@@ -894,8 +930,14 @@ export class CordovaService {
        if(status==0)
          return;
        clearInterval(interval);
-       if(status==1 && winCallback)
-         winCallback();
+       if(status==1 && winCallback) {
+           if(this.isAndroid()) {
+               // suggest user to open the file
+               console.log("android, openWith", resultPath);
+               (window as any).plugins.intent.showOpenWith(resultPath, () => {}, () => {});
+           }
+           winCallback();
+       }
        if(status==-1 && failCallback)
          failCallback();
      },100);
@@ -906,40 +948,28 @@ export class CordovaService {
      // set path to store on device
      let targetPath = (window as any).cordova.file.externalRootDirectory + "Download/";
      if (this.isIOS()) targetPath = (window as any).cordova.file.documentsDirectory;
-     let filePath = encodeURI(targetPath + fileName);
-
+       let localPath = targetPath + fileName;
+       let filePath = encodeURI(localPath);
+    console.log("target path: "+filePath+" (local "+localPath+")");
      // iOS
      let fileTransfer:any = new (window as any).FileTransfer();
      fileTransfer.download(downloadURL, filePath, (result:any)=>{
-         winCallback(filePath);
+         winCallback(localPath);
      }, (err:any) => {
          console.log("FAIL startContentDownload");
          failCallback("FAIL startContentDownload", err);
      }, true, {});
-       /*
-     if (this.isIOS()) {
-
-
-       
-     } else {
-
-       // Android
-       (window as any).cordovaHTTP.acceptAllCerts(true, () => {
-         (window as any).CordovaHttpPlugin.downloadFile(downloadURL, {}, {}, filePath, function (result: any) {
-           if(winCallback) winCallback(filePath);
-         }, function (response: any) {
-           console.log("FAIL startContentDownload");
-           failCallback("FAIL startContentDownload ANDROID", response);
-         });
-       }, (error: any) => {
-         failCallback("FAIL accepting all certs", error);
-       });
-
-     }*/
    }
 
    openInAppBrowser(url:string){
-       let win:any=window.open(url,"_blank","location=no,zoom=no");
+       let params:string;
+       if(this.isAndroid()){
+           params="location=no,zoom=no";
+       }
+       else if(this.isIOS()){
+           params="toolbar=yes,hideurlbar=yes,hidenavigationbuttons=yes,closebuttoncolor=#ffffff,closebuttoncaption="+this.injector.get(TranslateService).instant("CANCEL");
+       }
+       let win:any=cordova.InAppBrowser.open(url,"_blank",params);
        win.addEventListener( "loadstop", ()=> {
            // register iframe handling
            win.executeScript({code:`
@@ -1039,36 +1069,6 @@ export class CordovaService {
    }
 
   /**********************************************************
-   * Basic Server Communication
-   **********************************************************
-   * Before app starts as app it needs to set server config.
-   * To manage this, some basic HTTP requests are needed.
-   * These are part of the cordova service, so that it can
-   * run seperate from the rest of the app, that needs this
-   * config before starting up.
-   */
-
-  // get the metadata about what servers that are part of the public listing
-  public getPublicServerList() : Observable<any> {
-    let url='http://app-registry.edu-sharing.com/servers.php?version=2.0';
-    let headers=new Headers();
-    headers.set('Accept','application/json');
-    let options={headers:headers};
-    return this.http.get(url,options)
-        .map((response: Response) => response.json());
-  }
-
-  // check connection to server
-  public getServerAbout(server:string) : Observable<any> {
-      let url=server+'rest/_about'
-      let headers=new Headers();
-      headers.set('Accept','application/json');
-      let options={headers:headers};
-      return this.http.get(url,options)
-          .map((response: Response) => response.json());
-  }
-
-  /**********************************************************
    * OAUTH Server Communication
    **********************************************************
    * The REST-Services depend on Configuration Service that already need config from a fixed server.
@@ -1092,9 +1092,7 @@ export class CordovaService {
   public loginOAuth(endpointUrl:string, username: string = "", password: string = ""): Observable<OAuthResult> {
 
     let url = endpointUrl + "../oauth2/token";
-    let headers = new Headers();
-    headers.append('Content-Type', 'application/x-www-form-urlencoded');
-    headers.append('Accept', '*/*');
+    let headers = {'Content-Type':'application/x-www-form-urlencoded','Accept': '*/*'};
     let options = { headers: headers, withCredentials: false };
 
     let data = "client_id=eduApp&grant_type=password&client_secret=secret" +
@@ -1102,11 +1100,11 @@ export class CordovaService {
       "&password=" + encodeURIComponent(password);
 
     return new Observable<OAuthResult>((observer: Observer<OAuthResult>) => {
-      this.http.post(url, data, options).map((response: Response) => response.json()).subscribe(
+      this.http.post<OAuthResult>(url, data, options).subscribe(
         (oauth: OAuthResult) => {
 
           if (oauth == null) {
-            observer.error("INVALID_CREDENTIALS"); "LOGIN.ERROR"
+            observer.error("INVALID_CREDENTIALS");
             observer.complete();
             return;
           }
@@ -1187,17 +1185,15 @@ export class CordovaService {
   private refreshOAuth(endpointUrl:string,oauth: OAuthResult): Observable<OAuthResult> {
 
     let url = endpointUrl + "../oauth2/token";
-    let headers = new Headers();
-    headers.append('Content-Type', 'application/x-www-form-urlencoded');
-    headers.append('Accept', '*/*');
+    let headers = {'Content-Type': 'application/x-www-form-urlencoded','Accept': '*/*'};
     let options = { headers: headers, withCredentials: false }
 
     let data = "grant_type=refresh_token&client_id=eduApp&client_secret=secret" +
       "&refresh_token=" + encodeURIComponent(oauth.refresh_token);
 
     return new Observable<OAuthResult>((observer: Observer<OAuthResult>) => {
-      this.http.post(url, data, options).map((response: Response) => response.json()).subscribe(
-        (oauthNew: OAuthResult) => {
+      this.http.post<OAuthResult>(url, data, options).subscribe(
+        (oauthNew) => {
 
           // set local expire ts on token
           this.oauth=oauthNew;
@@ -1265,8 +1261,9 @@ export class CordovaService {
 
     getLanguage() {
       return new Observable<string>((observer: Observer<string>) => {
-
-        try {
+          observer.next(navigator.language.split("-")[0]);
+          observer.complete();
+        /*try {
           (navigator as any).globalization.getPreferredLanguage(
             (lang:any)=>{
               // WIN
@@ -1285,6 +1282,7 @@ export class CordovaService {
           observer.next("de");
           observer.complete();
         }
+        */
 
       });
     }

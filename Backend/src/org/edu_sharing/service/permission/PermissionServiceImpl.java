@@ -1,7 +1,6 @@
 package org.edu_sharing.service.permission;
 
 import java.io.Serializable;
-import java.math.BigDecimal;
 import java.sql.SQLException;
 import java.text.DateFormat;
 import java.util.ArrayList;
@@ -40,16 +39,14 @@ import org.alfresco.service.namespace.QName;
 import org.alfresco.util.ISO9075;
 import org.apache.commons.validator.routines.EmailValidator;
 import org.apache.log4j.Logger;
-import org.edu_sharing.alfresco.service.OrganisationService;
 import org.apache.lucene.queryParser.QueryParser;
+import org.edu_sharing.alfresco.service.OrganisationService;
 import org.edu_sharing.alfresco.service.handleservice.HandleService;
-import org.edu_sharing.alfresco.service.handleservice.HandleServiceNotConfiguredException;
 import org.edu_sharing.alfresco.workspace_administration.NodeServiceInterceptor;
 import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
 import org.edu_sharing.repository.client.rpc.ACE;
 import org.edu_sharing.repository.client.rpc.ACL;
 import org.edu_sharing.repository.client.rpc.Authority;
-import org.edu_sharing.repository.client.rpc.EduGroup;
 import org.edu_sharing.repository.client.rpc.Group;
 import org.edu_sharing.repository.client.rpc.Notify;
 import org.edu_sharing.repository.client.rpc.Result;
@@ -58,14 +55,24 @@ import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.server.AuthenticationToolAPI;
 import org.edu_sharing.repository.server.MCAlfrescoAPIClient;
 import org.edu_sharing.repository.server.authentication.Context;
-import org.edu_sharing.repository.server.tools.*;
+import org.edu_sharing.repository.server.tools.ApplicationInfo;
+import org.edu_sharing.repository.server.tools.ApplicationInfoList;
+import org.edu_sharing.repository.server.tools.DateTool;
+import org.edu_sharing.repository.server.tools.Edu_SharingProperties;
+import org.edu_sharing.repository.server.tools.I18nServer;
+import org.edu_sharing.repository.server.tools.Mail;
+import org.edu_sharing.repository.server.tools.StringTool;
+import org.edu_sharing.repository.server.tools.URLTool;
+import org.edu_sharing.repository.server.tools.UserEnvironmentTool;
 import org.edu_sharing.repository.server.tools.mailtemplates.MailTemplate;
 import org.edu_sharing.service.Constants;
 import org.edu_sharing.service.InsufficientPermissionException;
-import org.edu_sharing.service.search.SearchServiceFactory;
+import org.edu_sharing.service.nodeservice.NodeServiceFactory;
+import org.edu_sharing.service.oai.OAIExporterService;
 import org.edu_sharing.service.toolpermission.ToolPermissionException;
 import org.edu_sharing.service.toolpermission.ToolPermissionService;
 import org.edu_sharing.service.toolpermission.ToolPermissionServiceFactory;
+import org.edu_sharing.service.version.VersionTool;
 import org.springframework.context.ApplicationContext;
 
 public class PermissionServiceImpl implements org.edu_sharing.service.permission.PermissionService {
@@ -95,8 +102,15 @@ public class PermissionServiceImpl implements org.edu_sharing.service.permission
 		permissionService = serviceRegistry.getPermissionService();
 
 		personService = serviceRegistry.getPersonService();
-		toolPermission = ToolPermissionServiceFactory.getInstance();
 
+	}
+
+	public PermissionServiceImpl() {
+		this(ApplicationInfoList.getHomeRepository().getAppId());
+	}
+	
+	public PermissionServiceImpl(boolean test) {
+		
 	}
 
 	/**
@@ -216,8 +230,51 @@ public class PermissionServiceImpl implements org.edu_sharing.service.permission
 
 
 		if(createHandle) {
+
+			/**
+			 * no transaction cause of
+			 * org.hibernate.HibernateException: connnection proxy not usable after transaction completion
+			 *
+			 * problem is when handle service fails
+			 */
 			createHandle(AuthorityType.EVERYONE,nodeId);
 		}
+
+
+		OAIExporterService service = new OAIExporterService();
+		if(service.available()) {
+			boolean publishToOAI = false;
+
+			List<String> licenseList = (List<String>)serviceRegistry.getNodeService().getProperty(new NodeRef(MCAlfrescoAPIClient.storeRef,nodeId), QName.createQName(CCConstants.CCM_PROP_IO_COMMONLICENSE_KEY));
+
+			if(licenseList != null) {
+				for(String license : licenseList) {
+					if(license != null && license.startsWith("CC_")) {
+						for(ACE ace : acesToAdd) {
+							if(ace.getAuthorityType().equals(AuthorityType.EVERYONE.toString())) {
+								publishToOAI = true;
+							}
+						}
+
+						for(ACE ace : acesToUpdate) {
+							if(ace.getAuthorityType().equals(AuthorityType.EVERYONE.toString())) {
+								publishToOAI = true;
+							}
+						}
+
+						for(ACE ace : acesNotChanged) {
+							if(ace.getAuthorityType().equals(AuthorityType.EVERYONE.toString())) {
+								publishToOAI = true;
+							}
+						}
+					}
+				}
+			}
+			if(publishToOAI) {
+				service.export(nodeId);
+			}
+		}
+
 
 	}
 
@@ -247,16 +304,11 @@ public class PermissionServiceImpl implements org.edu_sharing.service.permission
 			}
 		}
 
-		String subject = I18nServer.getTranslationDefaultResourcebundle("dialog_inviteusers_mailtext_subject_default",
-				currentLocale);
-		subject = subject.replace("{user}", senderName);
-
 		for (String authority : _authPerm.keySet()) {
 			String[] permissions = _authPerm.get(authority);
 			setPermissions(_nodeId, authority, permissions, _inheritPermissions);
 
 			String emailaddress = null;
-			String receiverName = null;
 			String receiverFirstName = null, receiverLastName = null;
 
 			AuthorityType authorityType = AuthorityType.getAuthorityType(authority);
@@ -268,9 +320,14 @@ public class PermissionServiceImpl implements org.edu_sharing.service.permission
 				if (personInfo != null) {
 					receiverFirstName = personInfo.get(CCConstants.CM_PROP_PERSON_FIRSTNAME);
 					receiverLastName = personInfo.get(CCConstants.CM_PROP_PERSON_LASTNAME);
-					receiverName = receiverFirstName + " " + receiverLastName;
 					emailaddress = personInfo.get(CCConstants.CM_PROP_PERSON_EMAIL);
 				}
+			}
+			// send group email notifications
+			if(AuthorityType.GROUP.equals(authorityType)){
+				receiverLastName="";
+				receiverFirstName= (String) nodeService.getProperty(authorityService.getAuthorityNodeRef(authority),QName.createQName(CCConstants.CM_PROP_AUTHORITY_AUTHORITYDISPLAYNAME));
+				emailaddress= (String) nodeService.getProperty(authorityService.getAuthorityNodeRef(authority),QName.createQName(CCConstants.CCM_PROP_GROUPEXTENSION_GROUPEMAIL));
 			}
 
 			if (mailValidator.isValid(emailaddress) && _sendMail) {
@@ -313,39 +370,33 @@ public class PermissionServiceImpl implements org.edu_sharing.service.permission
 				ServletContext context = Context.getCurrentInstance().getRequest().getSession().getServletContext();
 				Map<String, String> replace = new HashMap<>();
 				replace.put("inviterFirstName", senderFirstName.trim());
-				replace.put("inviterLastName", senderFirstName.trim());
+				replace.put("inviterLastName", senderLastName.trim());
 				replace.put("firstName", receiverFirstName.trim());
 				replace.put("lastName", receiverLastName.trim());
 				replace.put("name", name.trim());
 				replace.put("message", _mailText.trim());
 				replace.put("permissions", permText.trim());
 				replace.put("link", MailTemplate.generateContentLink(appInfo, _nodeId));
-				mail.sendMailHtml(context, senderName, emailaddress, MailTemplate.getSubject("invited", currentLocale),
-						MailTemplate.getContent("invited", currentLocale, true), replace);
+				String template="invited";
+				boolean send=true;
+				org.edu_sharing.service.nodeservice.NodeService nodeServiceApp = NodeServiceFactory.getNodeService(appInfo.getAppId());
+				if(nodeType.equals(CCConstants.CCM_TYPE_MAP) &&
+						nodeServiceApp.hasAspect(StoreRef.PROTOCOL_WORKSPACE,StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(),_nodeId,CCConstants.CCM_ASPECT_COLLECTION)){
+					template="invited_collection";
+					// if the receiver is the creator itself, skip it (because it is automatically added)
+					if(authority.equals(nodeServiceApp.getProperty(StoreRef.PROTOCOL_WORKSPACE,StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(),_nodeId,CCConstants.CM_PROP_C_CREATOR))){
+						send=false;
+					}
+				}
+				if(send) {
+					mail.sendMailHtml(context, senderName, emailaddress, MailTemplate.getSubject(template, currentLocale),
+							MailTemplate.getContent(template, currentLocale, true), replace);
+				}
 
 			} else {
 				logger.info("username/authority: " + authority + " has no valid emailaddress:" + emailaddress);
 			}
 
-		}
-
-		if (_sendMail && _sendCopy) {
-			Mail mail = new Mail();
-			String emailaddress = null;
-			try {
-				HashMap<String, String> personInfo = repoClient.getUserInfo(user);
-				if (personInfo != null) {
-					emailaddress = personInfo.get(CCConstants.CM_PROP_PERSON_EMAIL);
-				}
-			} catch (Exception e) {
-				// do nothing: user has no valid email
-			}
-
-			if (mailValidator.isValid(emailaddress)) {
-				mail.sendMail(senderName, emailaddress, subject, copyMailText);
-			} else {
-				logger.info("username: " + _sendMail + " has no valid emailaddress:" + emailaddress);
-			}
 		}
 
 		org.edu_sharing.service.permission.PermissionService permissionService = PermissionServiceFactory
@@ -355,7 +406,9 @@ public class PermissionServiceImpl implements org.edu_sharing.service.permission
 				CCConstants.CCM_VALUE_NOTIFY_ACTION_PERMISSION_ADD);
 	}
 
-	public void createHandle(AuthorityType authorityType, String _nodeId) {
+	public void createHandle(AuthorityType authorityType, String _nodeId) throws Exception {
+
+
 		if (AuthorityType.EVERYONE.equals(authorityType)) {
 
 			String version = (String)nodeService.getProperty(new NodeRef(Constants.storeRef,_nodeId),
@@ -371,10 +424,7 @@ public class PermissionServiceImpl implements org.edu_sharing.service.permission
 				return;
 			}
 
-			//get new version label
-			//use BigDecimal cause of rounding Problem with double
-			BigDecimal bd = BigDecimal.valueOf(Double.valueOf(version)).add(BigDecimal.valueOf(0.1));
-			String newVersion = bd.toString();
+			String newVersion = new VersionTool().incrementVersion(version);
 
 			HandleService handleService = null;
 			String handle = null;
@@ -383,16 +433,14 @@ public class PermissionServiceImpl implements org.edu_sharing.service.permission
 			if(toolPermission.hasToolPermission(CCConstants.CCM_VALUE_TOOLPERMISSION_HANDLESERVICE)) {
 				try {
 					 handleService = new HandleService();
+					 /**
+					  * test handleservice to prevent property handleid isset but can not be pushed to handleservice cause of configration problems
+					  */
+					 handleService.handleServiceAvailable();
 					 handle = handleService.generateHandle();
 
-				}catch(HandleServiceNotConfiguredException e) {
-					logger.info("handle server not configured");
-					return;
-				} catch (SQLException e) {
+				}catch (SQLException e) {
 					logger.error("sql error while creating handle id",e);
-					return;
-				}catch(Exception e) {
-					logger.error(e.getMessage(),e);
 					return;
 				}
 			}
@@ -429,15 +477,15 @@ public class PermissionServiceImpl implements org.edu_sharing.service.permission
 				logger.error(e1.getMessage(), e1);
 			}
 			if(handleService != null && handle != null) {
-				try {
-					String contentLink = URLTool.getNgRenderNodeUrl(_nodeId, newVersion) ;
-					handleService.createHandle(handle,handleService.getDefautValues(contentLink));
-				}catch(Exception e) {
-					logger.error(e.getMessage());
-				}
+
+				String contentLink = URLTool.getNgRenderNodeUrl(_nodeId, newVersion) ;
+				handleService.createHandle(handle,handleService.getDefautValues(contentLink));
+
 			}
 		}
 	}
+	
+	
 
 	@Override
 	public List<Notify> getNotifyList(final String nodeId) throws Throwable {
@@ -930,24 +978,18 @@ public class PermissionServiceImpl implements org.edu_sharing.service.permission
 		}
 	}
 
-	public StringBuffer getFindUsersSearchString(HashMap<String, String> propVals, boolean globalContext) {
+	@Override
+	public StringBuffer getFindUsersSearchString(String query,List<String> searchFields, boolean globalContext) {
 
 		boolean fuzzyUserSearch = !globalContext || ToolPermissionServiceFactory.getInstance()
 				.hasToolPermission(CCConstants.CCM_VALUE_TOOLPERMISSION_GLOBAL_AUTHORITY_SEARCH_FUZZY);
 
 		StringBuffer searchQuery = new StringBuffer("TYPE:cm\\:person");
-
-		StringBuffer subQuery = new StringBuffer();
+		StringBuffer subQuery=new StringBuffer();
 
 		if (fuzzyUserSearch) {
-
-			for (String property : propVals.keySet()) {
-
-				String propValue = propVals.get(property);
-
-				if (propValue != null) {
-
-					for (String token : StringTool.getPhrases(propValue)) {
+				if (query != null) {
+					for (String token : StringTool.getPhrases(query)) {
 
 						boolean isPhrase = token.startsWith("\"") && token.endsWith("\"");
 
@@ -965,23 +1007,22 @@ public class PermissionServiceImpl implements org.edu_sharing.service.permission
 								token = token + "*";
 							}
 						}
-
-						if (token.length() > 0) {
-
-							subQuery.append(subQuery.length() > 0 ? " OR " : "").append("@cm\\:").append(property)
-									.append(":").append("\"").append(token).append("\"");
-
+						StringBuffer fieldQuery=new StringBuffer();
+						for(String field : searchFields) {
+							if(fieldQuery.length()>0) {
+								fieldQuery.append(" OR ");
+							}
+							fieldQuery.append("@cm\\:").append(field).append(":").append("\"").append(token).append("\"");
 						}
+						subQuery.append(subQuery.length() > 0 ? " AND " : "").append("(").append(fieldQuery).append(")");
 					}
 				}
-			}
-
 		} else {
 
 			// when no fuzzy search remove "*" from searchstring and remove all params
 			// except email
 
-			String emailValue = propVals.get("email");
+			String emailValue = query;
 
 			// remove wildcards (*,?)
 			if (emailValue != null) {
@@ -1022,7 +1063,7 @@ public class PermissionServiceImpl implements org.edu_sharing.service.permission
 		}else{
 
 			List<String> eduGroupAuthorityNames = organisationService.getMyOrganisations(true);
-		
+
 			/**
 			 * if there are no edugroups you you are not allowed to search global return
 			 * nothing
@@ -1031,7 +1072,7 @@ public class PermissionServiceImpl implements org.edu_sharing.service.permission
 				if (!hasToolPermission) {
 					return null;
 				}
-				return getFindUsersSearchString(propVals, true);
+				return getFindUsersSearchString(query, searchFields, true);
 			}
 
 			StringBuffer groupPathQuery = new StringBuffer();
@@ -1057,6 +1098,18 @@ public class PermissionServiceImpl implements org.edu_sharing.service.permission
 			searchQuery.append(" AND (").append(subQuery).append(")");
 		}
 
+		//cm:espersonstatus
+		String personActiveStatus = Edu_SharingProperties.instance.getPersonActiveStatus();
+		if(personActiveStatus != null && !personActiveStatus.trim().equals("")) {
+			searchQuery.append(" AND @cm\\:espersonstatus:\"" + personActiveStatus + "\"");
+		}
+
+		/**
+		 * filter out remote users
+		 */
+		String homeRepo = ApplicationInfoList.getHomeRepository().getAppId();
+		searchQuery.append(" AND (ISUNSET:\"cm:repositoryid\" OR ISNULL:\"cm:repositoryid\" OR @cm\\:repositoryId:\"" + homeRepo + "\")");
+
 		logger.info("findUsers: " + searchQuery);
 
 		return searchQuery;
@@ -1070,6 +1123,7 @@ public class PermissionServiceImpl implements org.edu_sharing.service.permission
 		}
 	}
 
+	@Override
 	public StringBuffer getFindGroupsSearchString(String searchWord, boolean globalContext) {
 		boolean fuzzyGroupSearch = !globalContext || ToolPermissionServiceFactory.getInstance()
 				.hasToolPermission(CCConstants.CCM_VALUE_TOOLPERMISSION_GLOBAL_AUTHORITY_SEARCH_FUZZY);
@@ -1196,11 +1250,10 @@ public class PermissionServiceImpl implements org.edu_sharing.service.permission
 	}
 
 	@Override
-	public Result<List<User>> findUsers(HashMap<String, String> propVals, boolean globalContext, int from,
-			int nrOfResults) {
+	public Result<List<User>> findUsers(String query,List<String> searchFields, boolean globalContext, int from, int nrOfResults) {
 
 		StringBuffer searchQuery = null;
-		searchQuery = getFindUsersSearchString(propVals, globalContext);
+		searchQuery = getFindUsersSearchString(query, searchFields, globalContext);
 
 		if (searchQuery == null) {
 			return new Result<List<User>>();
@@ -1261,14 +1314,13 @@ public class PermissionServiceImpl implements org.edu_sharing.service.permission
 	public Result<List<Authority>> findAuthorities(String searchWord, boolean globalContext, int from,
 			int nrOfResults) {
 
-		HashMap<String, String> toSearch = new HashMap<String, String>();
-
 		// fields to search in - not using username
-		toSearch.put("email", searchWord);
-		toSearch.put("firstName", searchWord);
-		toSearch.put("lastName", searchWord);
+		List<String> searchFields = new ArrayList<>();
+		searchFields.add("email");
+		searchFields.add("firstName");
+		searchFields.add("lastName");
 
-		StringBuffer findUsersQuery = getFindUsersSearchString(toSearch, globalContext);
+		StringBuffer findUsersQuery = getFindUsersSearchString(searchWord,searchFields, globalContext);
 		StringBuffer findGroupsQuery = getFindGroupsSearchString(searchWord, globalContext);
 
 		/**
@@ -1431,8 +1483,7 @@ public class PermissionServiceImpl implements org.edu_sharing.service.permission
 					// create new repo client so that current admin authinfo from the runAs thread
 					// is used
 					MCAlfrescoAPIClient repoClient = new MCAlfrescoAPIClient();
-					org.edu_sharing.service.permission.PermissionService permissionService = new PermissionServiceImpl(
-							ApplicationInfoList.getHomeRepository().getAppId());
+
 					String notifyId = repoClient.createNode(notifyFolder, CCConstants.CCM_TYPE_NOTIFY, notifyProps);
 
 					String nameInvitedObj = repoClient.getProperty(Constants.storeRef, nodeId, CCConstants.CM_NAME);
@@ -1445,7 +1496,7 @@ public class PermissionServiceImpl implements org.edu_sharing.service.permission
 					for (ACE ace : aclToCopy.getAces()) {
 						// set inherited to false so that no permissions from the parent systemfolder
 						// are inherited
-						permissionService.setPermissions(notifyId, ace.getAuthority(),
+						setPermissions(notifyId, ace.getAuthority(),
 								new String[] { ace.getPermission() }, false);
 					}
 
@@ -1466,7 +1517,15 @@ public class PermissionServiceImpl implements org.edu_sharing.service.permission
 	public boolean hasPermission(String storeProtocol, String storeId, String nodeId, String permission) {
 		return hasAllPermissions(storeProtocol,storeId,nodeId,new String[]{permission}).get(permission);
 	}
-
+	@Override
+	public boolean hasPermission(String storeProtocol, String storeId, String nodeId, String authority, String permission) {
+		return hasAllPermissions(storeProtocol,storeId,nodeId,authority,new String[]{permission}).get(permission);
+	}
+	@Override
+	public HashMap<String, Boolean> hasAllPermissions(String storeProtocol, String storeId, String nodeId, String authority,
+													  String[] permissions) {
+		return AuthenticationUtil.runAs(()->hasAllPermissions(storeProtocol,storeId,nodeId,permissions),authority);
+	}
 	@Override
 	public HashMap<String, Boolean> hasAllPermissions(String storeProtocol, String storeId, String nodeId,
 			String[] permissions) {
@@ -1478,7 +1537,7 @@ public class PermissionServiceImpl implements org.edu_sharing.service.permission
 		NodeRef nodeRef = new NodeRef(new StoreRef(storeProtocol, storeId), nodeId);
 		if (permissions != null && permissions.length > 0) {
 			for (String permission : permissions) {
-				AccessStatus accessStatus = permissionService.hasPermission(nodeRef, permission);
+					AccessStatus accessStatus = permissionService.hasPermission(nodeRef, permission);
 				// Guest only has read permissions, no modify permissions
 				if(guest && !Arrays.asList(GUEST_PERMISSIONS).contains(permission)){
 					accessStatus=AccessStatus.DENIED;
@@ -1533,4 +1592,9 @@ public class PermissionServiceImpl implements org.edu_sharing.service.permission
 	public void setPermission(String nodeId, String authority, String permission) {
 		permissionService.setPermission(new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE,nodeId), authority, permission, true);
 	}
+
+	public void setToolPermission(ToolPermissionService toolPermission) {
+		this.toolPermission = toolPermission;
+	}
+	
 }

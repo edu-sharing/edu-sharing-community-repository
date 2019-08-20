@@ -2,12 +2,12 @@
 
 $sidenavWidth:300px;
 .switchToCollections{
-  float:left;
   font-weight:bold;
 }
 .extendedSearch,.switchToCollections{
   text-transform: uppercase;
   padding-top: 3px;
+  flex-grow: 1;
 }
 .repository{
   width:calc(100% - 10px);
@@ -37,11 +37,14 @@ $sidenavWidth:300px;
 .rowRepositories{
   position: fixed;
   top:$mainnavHeight;
-  width:100%;
-  z-index:11;
-  margin-bottom: 0;
-  ul{
-    border-bottom: none;
+  width: 100%;
+  z-index: 13;
+  >div {
+    width: 100%;
+    margin-bottom: 0;
+    ul {
+      border-bottom: none;
+    }
   }
 }
 .rowRepositories.no-mainnav{
@@ -49,7 +52,7 @@ $sidenavWidth:300px;
 }
 .sidenav .row{
   margin:0 -30px;
-  margin-top: -10px;
+  margin-top: 0;
 }
 .repositoryActive{
   background: $workspaceTreeSelectedBackgroundEffect;
@@ -58,13 +61,22 @@ $sidenavWidth:300px;
 .collectionsHeading .toggle{
   text-transform: uppercase;
   float:right;
-  font-weight: bold;
-  margin-right: 10px;
+  padding: 0 10px;
 }
 .heading{
   color:$textLight;
   padding-bottom: 5px;
   margin-left: 15px;
+  >div{
+    display: inline-flex;
+    >span{
+      padding-left: 3px;
+    }
+    >i{
+      font-size: 20px;
+      padding-left: 5px;
+    }
+  }
 }
 .collections{
   min-height: $listCardSmallHeight+10px;
@@ -78,6 +90,25 @@ $sidenavWidth:300px;
 }
 .extendedSearch a, .switchToCollections a, .switchToSearch a{
   padding: 5px;
+}
+.sorting{
+  position: absolute;
+  right: 10px;
+  .sorting-info {
+    padding: 0 10px;
+    display: flex;
+    align-items: center;
+    color: $primary;
+    text-transform: uppercase;
+    .material-icons {
+      padding-left: 5px;
+      font-size: 18px;
+    }
+  }
+}
+sort-dropdown{
+  position: absolute;
+  right: 250px;
 }
 .extendedSearch{
   .mobile{
@@ -123,14 +154,21 @@ $sidenavWidth:300px;
   color: rgba(255, 255, 255, 1);
 }
 
-.content_wrapper {
-  transition: all $transitionNormal;
-  text-align: center;
-  margin: 0 10px;
-  min-height: 100%;
+.content-with-footer {
   position: absolute;
   top: 0;
-  width: calc(100% - 20px);
+  width: 100%;
+  .content_wrapper {
+    transition: all $transitionNormal;
+    text-align: center;
+    margin: 0 10px;
+    min-height: 100%;
+    width: calc(100% - 20px);
+  }
+  .contentSidenav{
+    margin-left: $sidenavWidth + 10px;
+    width:calc(100% - 20px - #{$sidenavWidth});
+  }
 }
 
 md-sidenav-container,.sidenav,#top {
@@ -142,12 +180,13 @@ md-sidenav-container,.sidenav,#top {
     margin-bottom: 50px;
 }
 
-i {
-    vertical-align: middle;
-}
+
 
 a, a:hover, a:visited, a:active, button {
     color: $primary;
+  i, span {
+    vertical-align: middle;
+  }
 }
 
 .infobutton {
@@ -239,17 +278,18 @@ a, a:hover, a:visited, a:active, button {
 
 .top {
   position: fixed;
-  background-color: #fff;
-  display: flex;
-  justify-content: space-between;
-  padding: 20px;
   top: $mainnavHeight+48px;
   z-index: 12;
   width:100%;
-  height:$secondaryBarHeight;
-  @include materialShadow();
-  &.no-mainnav{
-    top:48px;
+  >div {
+    height: $secondaryBarHeight;
+    background-color: #fff;
+    display: flex;
+    padding: 20px;
+    @include materialShadow();
+    &.no-mainnav {
+      top: 48px;
+    }
   }
 }
 small-collection{
@@ -266,11 +306,10 @@ small-collection{
 }
 .mdsSelect{
   float:left;
-  width:calc(100% + 40px);
+  width:100%;
   >div {
     width: 100%;
-    padding: 10px 10px;
-    margin: 0 -20px;
+    padding: 10px 15px;
     margin-top: 20px;
     background-color: #fff;
     > div {
@@ -283,7 +322,8 @@ small-collection{
         color: $textLight;
         font-size: 16px;
         vertical-align: top;
-        padding-top: 9px;
+        padding-top: 13px;
+        padding-right: 10px;
       }
     }
     .info {
@@ -299,13 +339,11 @@ small-collection{
   box-shadow: none;
   -webkit-box-shadow: none;
   -moz-box-shadow: none;
-  padding: 20px;
   overflow-x: hidden;
   overflow-y: auto;
   width: $sidenavWidth;
-  padding-top: 10px;
   top:$mainnavHeight+110px;
-  height: calc(100% - #{$mainnavHeight} - 110px - 70px);
+  height: calc(100% - #{$mainnavHeight} - 180px);
   transition: $transitionNormal all ease;
   @include iosScrolling();
   &.no-mainnav{
@@ -324,10 +362,6 @@ small-collection{
     top:65px;
     height: calc(100% - 65px - 70px);
   }
-}
-.contentSidenav{
-  margin-left: calc(#{$sidenavWidth} + 10px);
-  width:calc(100% - 20px - #{$sidenavWidth});
 }
 #sub {
     padding-top: 20px;
@@ -567,6 +601,7 @@ div.dialog.darken {
     .mdsEmbeddedGroup {
       float:left;
       width: 100%;
+      padding:0 20px 20px;
       /* margin-bottom: 40px; */
     }
   }
@@ -598,6 +633,13 @@ div.dialog.darken {
   }
   .collections{
     overflow-x: auto;
+    @include iosScrolling();
+  }
+}
+@media all and (max-width: $mobileWidth) {
+  .contentSidenav{
+    width:calc(100% - 20px)!important;
+    margin-left: 10px!important;
   }
 }
 @media all and (max-width: $mobileWidth+$mobileStage*1) {
@@ -618,10 +660,6 @@ div.dialog.darken {
     .content_wrapper {
         margin: 0;
     }
-  .contentSidenav{
-    width:calc(100% - 20px);
-  }
-
     #results {
         width: 100%;
     }
@@ -646,3 +684,17 @@ div.dialog.darken {
   }
 }
 
+@media all and (max-width: $mobileTabSwitchWidth) {
+  .results{
+    margin-bottom: $mobileTabNavHeight;
+  }
+  .sidenav{
+    height: calc(100% - #{$mainnavHeight} - #{$mobileTabNavHeight} - 180px);
+  }
+  .sidenavNoRepositories{
+    height: calc(100% - #{$mainnavHeight} - #{$mobileTabNavHeight} - 65px - 70px);
+  }
+  .sidenavContainer .apply{
+    bottom:$mobileTabNavHeight;
+  }
+}

@@ -90,6 +90,15 @@ public class RenderInfoSoapBindingStub extends org.apache.axis.client.Stub imple
             java.lang.Class simpledf = org.apache.axis.encoding.ser.SimpleDeserializerFactory.class;
             java.lang.Class simplelistsf = org.apache.axis.encoding.ser.SimpleListSerializerFactory.class;
             java.lang.Class simplelistdf = org.apache.axis.encoding.ser.SimpleListDeserializerFactory.class;
+            qName = new javax.xml.namespace.QName("http://render.webservices.edu_sharing.org", "ArrayOf_tns2_Child");
+            cachedSerQNames.add(qName);
+            cls = org.edu_sharing.webservices.types.Child[].class;
+            cachedSerClasses.add(cls);
+            qName = new javax.xml.namespace.QName("http://types.webservices.edu_sharing.org", "Child");
+            qName2 = new javax.xml.namespace.QName("http://render.webservices.edu_sharing.org", "item");
+            cachedSerFactories.add(new org.apache.axis.encoding.ser.ArraySerializerFactory(qName, qName2));
+            cachedDeserFactories.add(new org.apache.axis.encoding.ser.ArrayDeserializerFactory());
+
             qName = new javax.xml.namespace.QName("http://render.webservices.edu_sharing.org", "ArrayOf_tns2_KeyValue");
             cachedSerQNames.add(qName);
             cls = org.edu_sharing.webservices.types.KeyValue[].class;
@@ -111,6 +120,13 @@ public class RenderInfoSoapBindingStub extends org.apache.axis.client.Stub imple
             qName = new javax.xml.namespace.QName("http://render.webservices.edu_sharing.org", "RenderInfoResult");
             cachedSerQNames.add(qName);
             cls = org.edu_sharing.webservices.render.RenderInfoResult.class;
+            cachedSerClasses.add(cls);
+            cachedSerFactories.add(beansf);
+            cachedDeserFactories.add(beandf);
+
+            qName = new javax.xml.namespace.QName("http://types.webservices.edu_sharing.org", "Child");
+            cachedSerQNames.add(qName);
+            cls = org.edu_sharing.webservices.types.Child.class;
             cachedSerClasses.add(cls);
             cachedSerFactories.add(beansf);
             cachedDeserFactories.add(beandf);

@@ -7,7 +7,7 @@ import java.util.List;
 
 import org.edu_sharing.repository.client.rpc.ACL;
 import org.edu_sharing.repository.client.rpc.EduGroup;
-import org.edu_sharing.repository.client.rpc.GetPreviewResult;
+import org.edu_sharing.service.nodeservice.model.GetPreviewResult;
 import org.edu_sharing.repository.client.rpc.Group;
 import org.edu_sharing.repository.client.rpc.Notify;
 import org.edu_sharing.repository.client.rpc.SearchResult;
@@ -149,10 +149,6 @@ public class MCAlfrescoClientAdapter extends MCAlfrescoBaseClient {
 
 	@Override
 	public void removeNodeAndRelations(String nodeID, String fromID) throws Throwable {
-	}
-
-	@Override
-	public void checkAndLinkPublicFolder(String targetFolderId) throws Exception {
 	}
 
 	@Override

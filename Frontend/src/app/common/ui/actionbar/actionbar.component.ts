@@ -36,35 +36,44 @@ export class ActionbarComponent{
    * @type {boolean}
    */
   @Input() backgroundType = 'bright';
+  /**
+   * Set a node that will be returned by callbacks (optional, otherwise the return value is always null)
+   * @type {null}
+   */
   @Input() node:Node = null;
-
+  /**
+   * Should disabled ("greyed out") options be shown or hidden?
+   * @type {boolean}
+   */
+  @Input() showDisabled = true;
   /**
    * Set the options, see @OptionItem
    * @param options
    */
   @Input() set options(options : OptionItem[]){
-    options=OptionItem.filterValidOptions(this.ui,Helper.deepCopyArray(options));
+    options=UIHelper.filterValidOptions(this.ui,Helper.deepCopyArray(options));
+    // this will fail if an option is altered after it was added (e.g. node-render show in folder)
+    //options=this.filterDisabled(options);
     if(options==null){
       this.optionsAlways=[];
       this.optionsMenu=[];
       return;
     }
-    this.optionsToggle=OptionItem.filterToggleOptions(options,true);
-
-    this.optionsAlways=this.getActionOptions(OptionItem.filterToggleOptions(options,false)).slice(0,this.getNumberOptions());
+    console.log(options);
+    this.optionsToggle=UIHelper.filterToggleOptions(options,true);
+    options = this.filterCallbacks(options);
+    this.optionsAlways=this.getActionOptions(UIHelper.filterToggleOptions(options,false)).slice(0,this.getNumberOptions());
     if(!this.optionsAlways.length){
-      this.optionsAlways=OptionItem.filterToggleOptions(options,false).slice(0,this.getNumberOptions());
+      this.optionsAlways=UIHelper.filterToggleOptions(options,false).slice(0,this.getNumberOptions());
     }
-    this.optionsMenu=this.hideActionOptions(OptionItem.filterToggleOptions(options,false),this.optionsAlways);
-    if(this.optionsMenu.length<2){
+    this.optionsMenu=this.hideActionOptions(UIHelper.filterToggleOptions(options,false),this.optionsAlways);
+    if(this.optionsMenu.length<1){
       this.optionsAlways=this.optionsAlways.concat(this.optionsMenu);
       this.optionsMenu=[];
     }
+    console.log(this.optionsMenu);
 
   }
-
-  @ViewChild('dropdownRef') dropdownElement : ElementRef;
-  @ViewChild('dropdownContainer') dropdownContainerElement : ElementRef;
 
   @HostListener('document:keydown', ['$event'])
   handleKeyboardEvent(event: KeyboardEvent) {
@@ -93,15 +102,8 @@ export class ActionbarComponent{
     option.callback(this.node);
     this.dropdown=false;
   }
-  private showDropdown(setFocus=true){
+  private showDropdown(){
     this.dropdown=true;
-    if(!setFocus)
-      return;
-
-    setTimeout(()=> {
-      UIHelper.setFocusOnDropdown(this.dropdownElement);
-      UIHelper.scrollSmoothElement(this.dropdownContainerElement.nativeElement.scrollHeight,this.dropdownContainerElement.nativeElement);
-    });
   }
 
 
@@ -123,4 +125,29 @@ export class ActionbarComponent{
     }
     return result;
   }
+
+    private filterDisabled(options: OptionItem[]) {
+      if(options==null)
+          return null;
+      let filtered=[];
+      for(let option of options){
+          if(option.isEnabled || this.showDisabled)
+              filtered.push(option);
+      }
+      return filtered;
+    }
+
+    canShowDropdown() {
+        if(!this.optionsMenu.length)
+          return false;
+        for(let option of this.optionsMenu){
+          if(option.isEnabled || this.node && option.enabledCallback && option.enabledCallback(this.node))
+            return true;
+        }
+        return false;
+    }
+
+    private filterCallbacks(options: OptionItem[]) {
+      return options.filter((option)=>!option.showCallback || option.showCallback(null));
+    }
 }

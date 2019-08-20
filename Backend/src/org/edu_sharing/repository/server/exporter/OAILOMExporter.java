@@ -1,9 +1,6 @@
 package org.edu_sharing.repository.server.exporter;
 
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.Serializable;
+import java.io.*;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
@@ -26,6 +23,7 @@ import org.edu_sharing.repository.client.rpc.metadataset.MetadataSetValueKatalog
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.server.MCAlfrescoAPIClient;
 import org.edu_sharing.repository.server.tools.ApplicationInfoList;
+import org.edu_sharing.repository.server.tools.URLTool;
 import org.edu_sharing.repository.server.tools.metadataset.MetadataReader;
 import org.springframework.context.ApplicationContext;
 import org.springframework.extensions.surf.util.ISO8601DateFormat;
@@ -57,8 +55,18 @@ public class OAILOMExporter {
 		// root element record
 		doc = docBuilder.newDocument();
 	}
-
 	public void export(String outputDir) {
+		try {
+			String sourceId = nodeRef.getId();
+
+			File f = new File(outputDir + "/" + sourceId + ".xml");
+			FileOutputStream os=new FileOutputStream(f);
+
+		} catch (IOException e) {
+			logger.error(e.getMessage(), e);
+		}
+	}
+	public void write(OutputStream os) {
 
 		QName type = nodeService.getType(nodeRef);
 
@@ -82,7 +90,11 @@ public class OAILOMExporter {
 		createAndAppendElement("entry",identifier, QName.createQName(CCConstants.SYS_PROP_NODE_UID));
 		
 		Element titleEle = createAndAppendElement("title", general);
-		Element titleStrEle = createAndAppendElement("string", titleEle,QName.createQName(CCConstants.LOM_PROP_GENERAL_TITLE));
+		String title= (String) nodeService.getProperty(nodeRef,QName.createQName(CCConstants.LOM_PROP_GENERAL_TITLE));
+		if(title==null || title.isEmpty()){
+			title= (String) nodeService.getProperty(nodeRef,QName.createQName(CCConstants.CM_NAME));
+		}
+		Element titleStrEle = createAndAppendElement("string", titleEle,title);
 		if(titleStrEle != null)titleStrEle.setAttribute("language", "de");
 		createAndAppendElement("language", general,QName.createQName(CCConstants.LOM_PROP_GENERAL_LANGUAGE));
 		Element descriptionEle = createAndAppendElement("description", general);
@@ -133,7 +145,7 @@ public class OAILOMExporter {
 		//technical
 		Element technical = createAndAppendElement("technical", lom);
 		createAndAppendElement("format",technical,QName.createQName(CCConstants.LOM_PROP_TECHNICAL_FORMAT));
-		createAndAppendElement("location",technical,QName.createQName(CCConstants.LOM_PROP_TECHNICAL_LOCATION));
+		createAndAppendElement("location",technical,URLTool.getNgRenderNodeUrl(nodeRef.getId(),null));
 		
 		//educational
 		Element educational = createAndAppendElement("educational", lom);
@@ -147,6 +159,9 @@ public class OAILOMExporter {
 				createAndAppendElement("value", eduContext,context);	
 			}
 		}
+		
+		Element ieur = createAndAppendElement("intendedEndUserRole", educational);
+		createAndAppendElement("value",ieur,QName.createQName(CCConstants.CCM_PROP_IO_REPL_EDUCATIONAL_INTENDEDENDUSERROLE));
 		
 		//@todo when its available
 		String tarFrom = (String)nodeService.getProperty(nodeRef, QName.createQName(CCConstants.CCM_PROP_IO_REPL_EDUCATIONAL_TYPICALAGERANGEFROM));
@@ -170,6 +185,10 @@ public class OAILOMExporter {
 			
 			String urlKey = commonLicenceKey.toLowerCase().replaceAll("_", "-").replaceFirst("cc-", "");
 			String url = "https://creativecommons.org/licenses/" + urlKey + "/" + commonLicenseVersion;
+			
+			if(commonLicenceKey.equals(CCConstants.COMMON_LICENSE_CC_ZERO)) {
+				url = CCConstants.COMMON_LICENSE_CC_ZERO_LINK.replace("deed.${locale}", "legalcode");
+			}
 			
 			createAndAppendElement("value",copyrightAndOtherRestrictions,"yes");
 			Element description = createAndAppendElement("description",rights);
@@ -195,46 +214,52 @@ public class OAILOMExporter {
 			string.setAttribute("language", "en");
 		}
 		
-		List<String> taxonIds = (List<String>)nodeService.getProperty(nodeRef, QName.createQName(CCConstants.CCM_PROP_IO_REPL_TAXON_ID));
-		if(taxonIds != null){
+		List<String> taxonIds = (List<String>)nodeService.getProperty(nodeRef, QName.createQName(CCConstants.CCM_PROP_IO_REPL_TAXON_ID));	
+		List<String> classificationKeyword = (List<String>)nodeService.getProperty(nodeRef, QName.createQName(CCConstants.CCM_PROP_IO_REPL_CLASSIFICATION_KEYWORD));
+		if(taxonIds != null || classificationKeyword != null){
 			Element classification = createAndAppendElement("classification", lom);
 			Element purpose = createAndAppendElement("purpose", classification);
 			createAndAppendElement("source", purpose,"LOMv1.0");
 			createAndAppendElement("value", purpose,"discipline");
 			
-			Element taxonPath = createAndAppendElement("taxonPath", classification);
-			Element tpSource = createAndAppendElement("source", taxonPath);
-			Element tpSourceString = createAndAppendElement("string", tpSource,"EAF Thesaurus");
-			tpSourceString.setAttribute("language", "x-t-eaf");
-			try{
-				List<MetadataSetValueKatalog> mdsValueKata = new MetadataReader().getValuespace("/org/edu_sharing/metadataset/valuespace_eaf_discipline.xml", "org.edu_sharing.metadataset.valuespaces_i18n", null, "{http://www.campuscontent.de/model/1.0}taxonid");
-				for(String taxonId:taxonIds){
-					Element taxon = createAndAppendElement("taxon", taxonPath);
-					createAndAppendElement("id", taxon,taxonId);
-					//ask eaf kataolog todo allow other kataloges
-					
-					for(MetadataSetValueKatalog cata : mdsValueKata){
-						if(cata.getKey().equals(taxonId)){
-							Element entry = createAndAppendElement("entry", taxon);
-							Element string = createAndAppendElement("string", entry,cata.getCaption());
-							//<string language="de">Sachkunde</string>
-							string.setAttribute("language", "de");
+			if(classificationKeyword != null) {
+				for(String kw : classificationKeyword) {
+					Element keyword = createAndAppendElement("keyword", classification);
+					Element kwStrEle = createAndAppendElement("string", keyword,kw);
+					if(kwStrEle != null)kwStrEle.setAttribute("language", "de");
+				}	
+			}
+			
+			if(taxonIds != null) {
+				Element taxonPath = createAndAppendElement("taxonPath", classification);
+				Element tpSource = createAndAppendElement("source", taxonPath);
+				Element tpSourceString = createAndAppendElement("string", tpSource,"EAF Thesaurus");
+				tpSourceString.setAttribute("language", "x-t-eaf");
+				try{
+					List<MetadataSetValueKatalog> mdsValueKata = new MetadataReader().getValuespace("/org/edu_sharing/metadataset/valuespace_eaf_discipline.xml", "org.edu_sharing.metadataset.valuespaces_i18n", null, "{http://www.campuscontent.de/model/1.0}taxonid");
+					for(String taxonId:taxonIds){
+						Element taxon = createAndAppendElement("taxon", taxonPath);
+						createAndAppendElement("id", taxon,taxonId);
+						//ask eaf kataolog todo allow other kataloges
+						
+						for(MetadataSetValueKatalog cata : mdsValueKata){
+							if(cata.getKey().equals(taxonId)){
+								Element entry = createAndAppendElement("entry", taxon);
+								Element string = createAndAppendElement("string", entry,cata.getCaption());
+								//<string language="de">Sachkunde</string>
+								string.setAttribute("language", "de");
+							}
 						}
+								
 					}
-							
+				}catch(Throwable e){
+					logger.error(e.getMessage(), e);
 				}
-			}catch(Throwable e){
-				logger.error(e.getMessage(), e);
 			}
 		}
 		
 		//formatted output
 		try{
-			String sourceId = nodeRef.getId();
-			
-			File f = new File(outputDir + "/" + sourceId +".xml");
-			FileOutputStream os = new FileOutputStream(f);
-			
 			XMLSerializer serializer = new XMLSerializer(os, new OutputFormat(doc,"UTF-8", true));
 			serializer.serialize(doc);
 		}catch(IOException e){

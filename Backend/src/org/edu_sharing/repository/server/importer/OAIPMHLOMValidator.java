@@ -1,14 +1,10 @@
 package org.edu_sharing.repository.server.importer;
 
-import java.io.StringReader;
-import java.util.Map;
-
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.xpath.XPathConstants;
 
 import org.apache.log4j.Logger;
 import org.w3c.dom.Document;
-import org.xml.sax.InputSource;
 
 public class OAIPMHLOMValidator extends OAIPMHLOMImporter{
 	
@@ -25,15 +21,15 @@ public class OAIPMHLOMValidator extends OAIPMHLOMImporter{
 		this.setMetadataPrefix(metadataPrefix);
 		this.setSet(sets[0]);
 		this.setPersistentHandler(new  PersistentHandlerInterface( ){
-			
+
+			@Override
+			public String safe(RecordHandlerInterfaceBase recordHandler, String cursor, String set) throws Throwable {
+				return null;
+			}
+
 			@Override
 			public boolean mustBePersisted(String replId, String timeStamp) {
 				return true;
-			}
-			
-			@Override
-			public String safe(Map props, String cursor, String set) throws Throwable {
-				return null;
 			}
 		});
 	}

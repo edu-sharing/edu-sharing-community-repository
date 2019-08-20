@@ -3,6 +3,8 @@
   "COLLECTIONS": {
     "TITLE": "Sammlungen",
     "CREATE_COLLECTION" : "Sammlung\nerstellen",
+    "TUTORIAL_HEADING":"Einsammeln was dir gefällt",
+    "TUTORIAL_DESCRIPTION":"Eigene Sammlungen erstellen und mit interessanten Materialien füllen - privat oder zusammen mit Anderen.",
     "ADD_MATERIAL" : "Material\nhinzufügen",
     "ERROR_DELETE": "Fehler beim Löschen der Sammlung",
     "ENTER_NAME" : "Bitte einen Namen für die Sammlung eingeben.",
@@ -30,10 +32,10 @@
       "EDU_ALL_LONG" : "Alle Sammlungen, die öffentlich verfügbar sind",
       "TYPE_EDITORIAL":"Redaktionelle",
       "MY" : "Meine",
-      "EDU_GROUPS" : "Gemeinsame",
+      "EDU_GROUPS" : "Eingeladen",
       "EDU_ALL" : "Öffentlich",
       "MY_SHORT" : "Meine",
-      "EDU_GROUPS_SHORT" : "Gemeinsame",
+      "EDU_GROUPS_SHORT" : "Eingeladen",
       "EDU_ALL_SHORT" : "Öffentlich",
       "TYPE_EDITORIAL_SHORT":"Redaktionelle"
     },
@@ -84,7 +86,7 @@
 
 
     "collections_description" : "Beschreibung",
-    "collections_noOrgaCollections" : "Ihre Gruppen haben noch keine Sammlungen freigegeben.",
+    "collections_noOrgaCollections" : "Sie wurden bisher zu keiner Sammlung eingeladen.",
     "collections_noCollections" : "Es sind keine öffentlichen Sammlungen verfügbar.",
 
     "collections_content" : "Materialien",

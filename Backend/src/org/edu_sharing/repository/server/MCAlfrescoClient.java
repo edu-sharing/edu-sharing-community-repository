@@ -32,13 +32,10 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
-import org.edu_sharing.repository.client.rpc.ACE;
-import org.edu_sharing.repository.client.rpc.Authority;
 import org.edu_sharing.repository.client.rpc.EduGroup;
-import org.edu_sharing.repository.client.rpc.GetPreviewResult;
+import org.edu_sharing.service.nodeservice.model.GetPreviewResult;
 import org.edu_sharing.repository.client.rpc.Group;
 import org.edu_sharing.repository.client.rpc.Notify;
-import org.edu_sharing.repository.client.rpc.Result;
 import org.edu_sharing.repository.client.rpc.SearchResult;
 import org.edu_sharing.repository.client.rpc.Share;
 import org.edu_sharing.repository.client.rpc.User;
@@ -305,16 +302,7 @@ public interface MCAlfrescoClient {
 	public void removeNodeAndRelations(String nodeID, String fromID) throws Throwable;
 	
 	public void removeNodeAndRelations(String nodeID, String fromID, boolean recycle) throws Throwable;
-	
-	/**
-	 * 
-	 * link the public folder to the node with targetFolderId if it's not already done
-	 * 
-	 * @param targetFolderId
-	 * @throws Exception
-	 */
-	public void checkAndLinkPublicFolder(String targetFolderId) throws Exception;
-	
+
 	/**
 	 * get the root folder of the current user. if admin then it's null else its the user home
 	 * @return root nodeId

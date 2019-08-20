@@ -12,19 +12,27 @@
   max-height:1.5em;
   display:flex;
   overflow:hidden;
+  cursor: default;
   div{
     float:left;
     color:$primary;
     padding:2px 4px;
     font-size: 9pt;
     max-height: 20px;
+    overflow: hidden;
+    word-break: break-all;
   }
   .homeIsIcon{
-    margin-top: -4px;
+    margin-top: 3px;
   }
   .homeIcon{
     margin-top: 0;
     max-height: none;
+    min-width: 30px;
+  }
+  .breadcrumb-arrow{
+    font-size: 14pt;
+    margin-left: -10px;
   }
 }
 .selected{
@@ -34,19 +42,25 @@
 }
 .breadcrumb div:last-child{
   font-weight: bold;
-  color:#383838;
+  color:$textMain;
 }
 .breadcrumbMobile{
   display:none;
 }
-@media screen and (max-width: $mobileWidth) {
+@media screen and (max-width: $mobileTabSwitchWidth) {
   .breadcrumbMobile{
     display:flex;
     align-items: center;
     margin-top: -2px;
     min-height: 25px;
+    .folder{
+      max-width: calc(100% - 24px);
+    }
   }
   .breadcrumbDesktop{
     display:none;
+  }
+  .home i{
+    float: right;
   }
 }

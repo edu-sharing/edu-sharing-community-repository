@@ -27,6 +27,7 @@
  */
 package org.edu_sharing.repository.server.jobs.quartz;
 
+import org.apache.log4j.Logger;
 import org.quartz.JobExecutionContext;
 import org.quartz.JobListener;
 
@@ -60,12 +61,11 @@ public class ImmediateJobListener implements JobListener {
 	public void jobExecutionVetoed(JobExecutionContext jobExecutionContext) {
 		vetoed = true; 
 		try{
-			
 			System.out.println("ImmediateJobListener VETOED!");
-			
 			vetoBy = (String)jobExecutionContext.getJobDetail().getJobDataMap().get(JobHandler.VETO_BY_KEY);
-			
-			jobExecutionContext.getScheduler().deleteJob(this.jobName, null);
+			Logger.getLogger(jobExecutionContext.getJobDetail().getJobClass()).error("Job was vetoed by "+vetoBy);
+            JobHandler.getInstance().finishJob(jobExecutionContext.getJobDetail(),JobInfo.Status.Aborted);
+            jobExecutionContext.getScheduler().deleteJob(this.jobName, null);
 			jobExecutionContext.getScheduler().removeJobListener(this.jobName);
 		}catch(Exception e){
 			e.printStackTrace();

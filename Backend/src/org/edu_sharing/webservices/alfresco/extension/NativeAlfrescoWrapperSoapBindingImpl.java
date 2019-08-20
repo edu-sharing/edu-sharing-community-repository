@@ -70,7 +70,7 @@ import org.edu_sharing.alfresco.HasPermissionsWork;
 import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
 import org.edu_sharing.repository.client.rpc.ACE;
 import org.edu_sharing.repository.client.rpc.ACL;
-import org.edu_sharing.repository.client.rpc.GetPreviewResult;
+import org.edu_sharing.service.nodeservice.model.GetPreviewResult;
 import org.edu_sharing.repository.client.rpc.Group;
 import org.edu_sharing.repository.client.rpc.Notify;
 import org.edu_sharing.repository.client.rpc.Result;
@@ -930,16 +930,17 @@ public class NativeAlfrescoWrapperSoapBindingImpl implements org.edu_sharing.web
 	
 	@Override
 	public SearchResult findUsers(KeyValue[] searchProps, String eduGroupNodeId, int from, int nrOfResults) throws RemoteException {
-		
-		HashMap<String,String> searchParams = new HashMap<String,String>();
+
+		// mapping to new findUsers method signature
+		List<String> searchFields = new ArrayList<>();
 		for(KeyValue kv:searchProps){
-			searchParams.put(kv.getKey(),kv.getValue());
+			searchFields.add(kv.getKey());
 		}
 		
 		try {
 			
 			org.edu_sharing.service.permission.PermissionService permissionService = PermissionServiceFactory.getPermissionService(ApplicationInfoList.getHomeRepository().getAppId());
-			Result<List<User>> apiResult =  permissionService.findUsers(searchParams, true, from, nrOfResults);
+			Result<List<User>> apiResult =  permissionService.findUsers(searchProps[0].getValue(),searchFields, true, from, nrOfResults);
 			
 			SearchResult sr = new SearchResult();
 			sr.setStartIDX(apiResult.getStartIDX());

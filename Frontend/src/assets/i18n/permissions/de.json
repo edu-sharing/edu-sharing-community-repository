@@ -13,6 +13,7 @@
     "MENU_DELETE":"Löschen",
     "MANAGE_GROUP":"Gruppe {{group}} verwalten",
     "ADD_MEMBER_TO_GROUP":"Nutzer zu {{group}} hinzufügen",
+    "EDIT_MEMBER_GROUPS":"Nutzer ist Mitglied von",
     "EXPORT_MEMBER":"Nutzer exportieren",
     "ADD_ORG":"Organisation erstellen",
     "USER_EXISTS_IN_GROUP":"Nutzer ist bereits Mitglied dieser Gruppe",
@@ -20,13 +21,17 @@
     "MENU_ADD_TO_GROUP":"In Gruppe",
     "MENU_MANAGE_GROUP":"Mitglieder Verwalten",
     "MENU_ADD_GROUP_MEMBERS":"Nutzer hinzufügen",
+    "MENU_EDIT_GROUPS":"Mitgliedschaften verwalten",
     "MENU_EXCLUDE":"Ausschließen",
+    "MENU_REMOVE_MEMBERSHIP":"Aus Gruppe(n) entfernen",
     "SEARCH_GROUP":"Gruppen suchen...",
     "SEARCH_USER":"Nutzer suchen...",
+    "SEARCH_GROUPS":"Gruppen durchsuchen...",
     "SEARCH_MEMBER":"Mitglieder suchen...",
     "SEARCH_ORG":"Org. suchen...",
     "NO_ELEMENTS":"Keine Elemente vorhanden",
     "NO_ELEMENTS_SEARCH":"Keine Elemente entsprechen der Suchanfrage",
+    "MEMBERSHIP_REMOVED":"Mitgliedschaften wurden aufgehoben",
     "USER_EDITED":"Nutzer gespeichert",
     "GROUP_EDITED":"Gruppe gespeichert",
     "GROUP_CREATED":"Gruppe erstellt",
@@ -53,6 +58,7 @@
     "DELETE_GROUP":"Möchten Sie die gewählten Gruppen löschen?",
     "DELETE_GROUP_SINGLE":"Möchten Sie die Gruppe {{name}} löschen?",
     "DELETE_ORG_SINGLE":"Möchten Sie die Organisation {{name}} entfernen? Alle Nutzer bleiben bestehen und der Organisationsordner wird nicht gelöscht",
+    "DELETE_ERROR_ADMINISTRATORS":"Administrations-Gruppen dürfen nicht gelöscht werden",
     "DELETED_USER":"Nutzer erfolgreich entfernt",
     "DELETED_GROUP":"Gruppe(n) erfolgreich gelöscht",
     "MEMBER_REMOVED":"Nutzer aus Gruppe entfernt",
@@ -70,6 +76,10 @@
       "null":"Kein / Normale Gruppe",
       "EDITORIAL":"Redaktionsgruppe",
       "ORG_ADMINISTRATORS":"Administrationsgruppe"
+    },
+    "SCOPE_TYPE":{
+      "null":"Lokal / Normale Sichtbarkeit",
+      "global":"Global / Repository übergreifend"
     }
   }
 }

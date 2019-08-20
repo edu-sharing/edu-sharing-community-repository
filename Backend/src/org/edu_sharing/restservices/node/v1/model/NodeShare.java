@@ -13,6 +13,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 @ApiModel(description = "")
 public class NodeShare  {
+	private boolean password;
 	private String token;
 	private String email;
 	private Long expiryDate;
@@ -27,11 +28,21 @@ public class NodeShare  {
 		shareId=share.getNodeId();
 		token=share.getToken();
 		email=share.getEmail();
+		password=share.getPassword()!=null;
 		expiryDate=share.getExpiryDate();
 		invitedAt=share.getInvitedAt().getTime();
 		downloadCount=share.getDownloadCount();
 		url=URLTool.getShareServletUrl(node, share.getToken());
 	}
+
+	public boolean isPassword() {
+		return password;
+	}
+
+	public void setPassword(boolean password) {
+		this.password = password;
+	}
+
 	@JsonProperty("shareId")
 	public String getShareId() {
 		return shareId;

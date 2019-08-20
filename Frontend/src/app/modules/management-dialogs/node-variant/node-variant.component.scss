@@ -1,0 +1,40 @@
+@import "../../../../styles/variables.scss";
+
+.report{
+  margin-bottom: 20px;
+}
+h4{
+  margin-bottom:20px;
+  font-size: 110%;
+  font-weight: bold;
+  color: $textLight;
+}
+
+
+.breadcrumb-style{
+  margin: 20px -20px;
+  padding: 20px 20px;
+  //padding-right: 30px;
+  background: #f6f6f6;
+  float: left;
+  width: calc(100% + 40px);
+
+  .breadcrumb-info{
+    margin: 3px 3px 15px;
+  }
+}
+
+.btnVersion{
+  margin-top: 10px;
+}
+.license-warning{
+  >div {
+    > .warning {
+      white-space: pre-line;
+    }
+    > .link {
+      color: $primary;
+      text-transform: uppercase;
+    }
+  }
+}

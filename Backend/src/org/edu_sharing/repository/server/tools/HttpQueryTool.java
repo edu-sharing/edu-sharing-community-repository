@@ -109,7 +109,7 @@ public class HttpQueryTool {
 		method.setFollowRedirects(true);
 		
 		if(basicAuthUn != null && basicAuthPw != null) {
-			method.addRequestHeader("Authorization", "Basic " + Base64.encodeBase64String((basicAuthUn +":" +basicAuthPw) .getBytes()));  
+			method.addRequestHeader("Authorization", "Basic " +java.util.Base64.getEncoder().encodeToString((basicAuthUn +":" +basicAuthPw) .getBytes()));
 		}
 		
 		if(header != null){
@@ -164,7 +164,7 @@ public class HttpQueryTool {
 			}
 			
 			if(returnCode > 400){
-				throw new RuntimeException("Error HTTP Status: "+returnCode);
+				throw new RuntimeException("Error HTTP Status: "+returnCode+" "+result);
 			}
 
 		}catch(HttpException e){

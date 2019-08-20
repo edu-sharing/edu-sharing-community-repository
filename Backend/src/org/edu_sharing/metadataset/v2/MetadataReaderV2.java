@@ -1,5 +1,7 @@
 package org.edu_sharing.metadataset.v2;
 
+import org.apache.commons.lang3.ObjectUtils;
+import org.apache.commons.lang3.SerializationUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
 import org.edu_sharing.metadataset.v2.MetadataWidget.Condition.CONDITION_TYPE;
@@ -61,7 +63,7 @@ public class MetadataReaderV2 {
 	    try {
             String id = appId.getAppId() + "_" + mdsName + "_" + locale;
             if (mdsCache.containsKey(id) && !"true".equalsIgnoreCase(ApplicationInfoList.getHomeRepository().getDevmode()))
-                return mdsCache.get(id);
+                return SerializationUtils.clone(mdsCache.get(id));
             reader = new MetadataReaderV2(mdsNameDefault + ".xml", locale);
             mds = reader.getMetadatasetForFile(mdsNameDefault);
             mds.setRepositoryId(appId.getAppId());
@@ -115,7 +117,7 @@ public class MetadataReaderV2 {
 		NodeList queriesNode = (NodeList) xpath.evaluate("/metadataset/queries/query", doc, XPathConstants.NODESET);
 		List<MetadataQuery> queries=new ArrayList<>();
 		for(int i=0;i<queriesNode.getLength();i++){
-			MetadataQuery query=new MetadataQuery(result);
+			MetadataQuery query=new MetadataQuery();
 			Node node=queriesNode.item(i);
 			NamedNodeMap nodeMap = node.getAttributes();
 			query.setId(nodeMap.getNamedItem("id").getTextContent());
@@ -165,6 +167,10 @@ public class MetadataReaderV2 {
 					}
 					if(name.equals("ignorable"))
 						parameter.setIgnorable(Integer.parseInt(value));
+					if(name.equals("preprocessor"))
+						parameter.setPreprocessor(value);
+                    if(name.equals("mandatory"))
+                        parameter.setMandatory(value.equalsIgnoreCase("true"));
 					if(name.equals("exactMatching"))
 						parameter.setExactMatching(value.equalsIgnoreCase("true"));
 					if(name.equals("multiple"))
@@ -188,7 +194,7 @@ public class MetadataReaderV2 {
 			prefix+="valuespaces/";
 		InputStream is=MetadataReaderV2.class.getResourceAsStream(prefix+name);
 		if(is==null)
-			throw new IOException("file "+name+" not found");
+			throw new IOException("file "+name+" not found: "+prefix+name);
 		return is;
 	}
 	
@@ -246,6 +252,7 @@ public class MetadataReaderV2 {
 		mds.setTemplates(getTemplates());
 		mds.setGroups(getGroups());
 		mds.setLists(getLists());
+		mds.setSorts(getSorts());
 		mds.setQueries(getQueries());
 		
 		return mds;
@@ -463,7 +470,9 @@ public class MetadataReaderV2 {
 				if(name.equals("icon"))
 					template.setIcon(value);
 				if(name.equals("html"))
-					template.setHtml(translateHtml(i18nPath,value));				
+					template.setHtml(translateHtml(i18nPath,value));
+				if(name.equals("hideIfEmpty"))
+					template.setHideIfEmpty(value.equalsIgnoreCase("true"));
 			}
 			templates.add(template);
 
@@ -523,7 +532,7 @@ public class MetadataReaderV2 {
 				String name=data.getNodeName();
 				String value=data.getTextContent();
 				if(name.equals("id"))
-					list.setId(value);			
+					list.setId(value);
 				if(name.equals("columns")){
 					List<MetadataColumn> columns=new ArrayList<>();
 					NodeList list3=data.getChildNodes();
@@ -551,7 +560,55 @@ public class MetadataReaderV2 {
 		}
 		return lists;
 	}
-	
+	private List<MetadataSort> getSorts() throws XPathExpressionException {
+		List<MetadataSort> sorts=new ArrayList<>();
+		NodeList sortsNode = (NodeList) xpath.evaluate("/metadataset/sorts/sort", doc, XPathConstants.NODESET);
+		for(int i=0;i<sortsNode.getLength();i++){
+			Node listNode=sortsNode.item(i);
+			NodeList list2=listNode.getChildNodes();
+			MetadataSort sort=new MetadataSort();
+			for(int j=0;j<list2.getLength();j++){
+				Node data=list2.item(j);
+				String name=data.getNodeName();
+				String value=data.getTextContent();
+				if(name.equals("id"))
+					sort.setId(value);
+				if(name.equals("default")){
+					NodeList list3=data.getChildNodes();
+					for(int k=0;k<list3.getLength();k++){
+						Node data2=list3.item(k);
+						if(data2.getNodeName().equals("sortBy")){
+							sort.getDefaultValue().setSortBy(data2.getTextContent());
+						}
+						if(data2.getNodeName().equals("sortAscending")){
+							sort.getDefaultValue().setSortAscending(new Boolean(data2.getTextContent()).booleanValue());
+						}
+					}
+				}
+				if(name.equals("columns")){
+					List<MetadataSortColumn> columns=new ArrayList<>();
+					NodeList list3=data.getChildNodes();
+					for(int k=0;k<list3.getLength();k++){
+						String column=list3.item(k).getTextContent();
+						NamedNodeMap attributes = list3.item(k).getAttributes();
+						if(!column.trim().isEmpty()){
+							MetadataSortColumn col=new MetadataSortColumn();
+							col.setId(column);
+							if(attributes!=null){
+								Node mode = attributes.getNamedItem("mode");
+								if(mode!=null)
+									col.setMode(mode.getTextContent());
+							}
+							columns.add(col);
+						}
+					}
+					sort.setColumns(columns);
+				}
+			}
+			sorts.add(sort);
+		}
+		return sorts;
+	}
 	private String getTranslation(MetadataTranslatable translatable,String key,String fallback){
 		return getTranslation(translatable,key,fallback,locale);
 	}

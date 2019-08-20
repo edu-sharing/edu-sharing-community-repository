@@ -1,6 +1,6 @@
 <div>
 <div class="header">
-  <img src="assets/images/layout/oer_bg.jpg">
+  <img src="assets/images/layout/oer_bg.jpg" image-config alt="">
   <div class="headerGradient"></div>
 </div>
   <main-nav
@@ -19,7 +19,7 @@
 <div class="content">
 <div class="collectionsGroup" *ngIf="nodes[COLLECTIONS] && nodes[COLLECTIONS].length">
   <div class="caption">{{ 'OER.COLLECTIONS' | translate}}</div>
-  <div class="more" *ngIf="hasMore[COLLECTIONS] || true"><a class="clickable" (click)="goToCollections()">{{(showMore[COLLECTIONS] ? 'HIDE_MORE' : 'SHOW_MORE') | translate}}</a> </div>
+  <div class="more" *ngIf="hasMore[COLLECTIONS] || true"><a tabindex="0" class="clickable" (click)="goToCollections()" (keyup.enter)="goToCollections()">{{(showMore[COLLECTIONS] ? 'HIDE_MORE' : 'SHOW_MORE') | translate}}</a> </div>
   <div class="noResults collections" *ngIf="!loading[COLLECTIONS] && !nodes[COLLECTIONS].length">{{'OER.NO_COLLECTION_RESULTS' | translate}}</div>
   <div>
   <listTable  *ngIf="loading[COLLECTIONS] || nodes[COLLECTIONS].length"
@@ -37,14 +37,14 @@
     [viewType]="2"
     [scrollWindow]="true"
     (clickRow)="click($event)"
-    (doubleClickRow)="doubleClick($event)"
+    (doubleClickRow)="click($event)"
     (loadMore)="loadMore(COLLECTIONS)"
     [isLoading]="loading[COLLECTIONS]"></listTable>
   </div>
 </div>
   <div class="materials">
     <div class="caption">{{ 'OER.MATERIALS' | translate}}</div>
-    <div class="more" *ngIf="hasMore[MATERIALS]"><a class="clickable" (click)="goToSearch()">{{(showMore[MATERIALS] ? 'HIDE_MORE' : 'SHOW_MORE') | translate}}</a> </div>
+    <div class="more" *ngIf="hasMore[MATERIALS]"><a tabindex="0" class="clickable" (click)="goToSearch()">{{(showMore[MATERIALS] ? 'HIDE_MORE' : 'SHOW_MORE') | translate}}</a> </div>
     <div class="noResults materials" *ngIf="!(loading[MATERIALS] || nodes[MATERIALS] && nodes[MATERIALS].length)">{{'OER.NO_MATERIAL_RESULTS' | translate}}</div>
     <listTable *ngIf="loading[MATERIALS] || nodes[MATERIALS] && nodes[MATERIALS].length"
       id="materials"
@@ -62,14 +62,13 @@
       [scrollWindow]="true"
       (clickRow)="click($event)"
       (onUpdateOptions)="updateOptions(MATERIALS,$event)"
-      (doubleClickRow)="doubleClick($event)"
+      (doubleClickRow)="click($event)"
       (loadMore)="loadMore(MATERIALS)"
       [isLoading]="loading[MATERIALS]"></listTable>
-
   </div>
   <div class="tools" *ngIf="false">
     <div class="caption">{{ 'OER.TOOLS' | translate}}</div>
-    <div class="more" *ngIf="hasMore[TOOLS]"><a class="clickable" (click)="toggleMore(TOOLS)">{{(showMore[TOOLS] ? 'HIDE_MORE' : 'SHOW_MORE') | translate}}</a> </div>
+    <div class="more" *ngIf="hasMore[TOOLS]"><a tabindex="0" class="clickable" (click)="toggleMore(TOOLS)" (keyup.enter)="toggleMore(TOOLS)">{{(showMore[TOOLS] ? 'HIDE_MORE' : 'SHOW_MORE') | translate}}</a> </div>
     <div class="noResults tools" *ngIf="!loading[TOOLS] && !nodes[TOOLS].length">{{'OER.NO_TOOL_RESULTS' | translate}}</div>
     <listTable *ngIf="loading[TOOLS] || nodes[TOOLS].length"
                id="tools"
@@ -86,10 +85,9 @@
                [viewType]="1"
                [scrollWindow]="true"
                (clickRow)="click($event)"
-               (doubleClickRow)="doubleClick($event)"
+               (doubleClickRow)="click($event)"
                (loadMore)="loadMore(TOOLS)"
                [isLoading]="loading[TOOLS]"></listTable>
-
   </div>
 </div>
 </div>

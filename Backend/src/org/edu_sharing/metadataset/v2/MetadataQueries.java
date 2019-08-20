@@ -1,8 +1,9 @@
 package org.edu_sharing.metadataset.v2;
 
+import java.io.Serializable;
 import java.util.List;
 
-public class MetadataQueries {
+public class MetadataQueries implements Serializable {
 	private String basequery;
 	private boolean allowSearchWithoutCriteria;
 	private List<MetadataQuery> queries;
@@ -30,7 +31,6 @@ public class MetadataQueries {
 		if(queries2.getBasequery()!=null)
 			setBasequery(queries2.getBasequery());
 		for(MetadataQuery query: queries2.getQueries()){
-			query.setParent(this);
 			int pos=queries.lastIndexOf(query);
 			if(pos!=-1){
 				queries.get(pos).overrideWith(query);

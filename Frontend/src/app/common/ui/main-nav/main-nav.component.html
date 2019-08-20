@@ -2,8 +2,19 @@
   *ngIf="showProfile"
   (onCancel)="showProfile=false"
 ></user-profile>
+<modal-dialog
+        [title]="dialogTitle"
+        [isCancelable]="dialogCancelable"
+        (onCancel)="hideDialog()"
+        [message]="dialogMessage"
+        [messageParameters]="dialogMessageParameters"
+        [buttons]="dialogButtons"
+        [priority]="10"
+></modal-dialog>
 <app-banner [scope]="_currentScope" (onUpdate)="refreshBanner()"></app-banner>
 <global-progress *ngIf="globalProgress"></global-progress>
+<!-- <tutorial [element]="tutorialElement" [heading]="'USER_TUTORIAL_HEADING'" [description]="'USER_TUTORIAL_DESCRIPTION'" [showSkip]="false"></tutorial> -->
+
 <div class="dialog darken" *ngIf="licenseAgreement" [@fade]="licenseAgreement"></div>
 <div class="card center-card card-scroll card-high card-wide card-action" *ngIf="licenseAgreement" [@cardAnimation]="licenseAgreement">
   <div class="card-content">
@@ -20,10 +31,10 @@
     <a class="waves-effect waves-light btn-flat" (keyup.enter)="logout()" (click)="logout()">{{'LICENSE_AGREEMENT.DECLINE' | translate }}</a>
   </div>
 </div>
-<div class="dialog darken" *ngIf="displaySidebar" [@fade]="displaySidebar" (click)="displaySidebar=false" (keyup.enter)="displaySidebar=false" tabindex="0"></div>
+<div class="dialog darken dialog-sidenav" *ngIf="displaySidebar" [@fade]="displaySidebar" (click)="displaySidebar=false" (keyup.enter)="displaySidebar=false" tabindex="0"></div>
 
 <div #sidebar tabindex="0" class="sidenav" *ngIf="displaySidebar" [@fromLeft]="displaySidebar">
-  <div class="sidenavClose clickable" (click)="displaySidebar=false"><i class="material-icons">close</i></div>
+  <div class="sidenavClose clickable" tabindex="0" (click)="displaySidebar=false" (keyup.enter)="displaySidebar=false"><i class="material-icons">close</i></div>
   <div class="sidenavImage">
     <img src="assets/images/layout/sidenav.jpg">
     <div><i class="material-icons">account_circle</i>
@@ -43,15 +54,17 @@
   </div>
 </div>
 <div #topbar class="topBar {{ 'topBar-'+_currentScope}} scrollWithBanner" [class.noUser]="!_showUser">
+    <div class="mobile-move-top2">
   <div class="menuButtonOuter">
     <div (click)="openSidenav()" (keyup.enter)="openSidenav()" tabindex="0" class="menuButton" [class.clickable]="canOpen" *ngIf="showScope" title="{{'CHOOSEENVIRONMENT' | translate}}">
-      <img class="material-icons eduImage" [src]="getIconSource()" alt="{{'EDU_LOGO_ALT' | translate}}"/>
+      <img class="material-icons eduImage" [src]="getIconSource()" alt=""/>
       <i class="material-icons scopeIcon">{{getCurrentScopeIcon()}}</i>
       <span>{{title | translate}}</span>
       <i class="material-icons barIcon">keyboard_arrow_right</i>
     </div>
   </div>
   <div class="topBarSearch" [class.noScope]="!showScope">
+    <div class="scopeNameMobile" *ngIf="!searchEnabled">{{title | translate}}</div>
   <form (ngSubmit)="doSearch()" autocomplete="off" *ngIf="searchEnabled" role="search">
     <div class="searchInputGroup">
       <input #search name="search" type="search" [(ngModel)]="searchQuery" (change)="searchQueryChange.emit(searchQuery)"
@@ -65,7 +78,7 @@
     <a *ngIf="config.imprintUrl" class="clickable" (click)="openImprint()">{{ 'IMPRINT' | translate }}</a>
     <a *ngIf="config.privacyInformationUrl" class="clickable" (click)="openPrivacy()">{{ 'PRIVACY_INFORMATION' | translate }}</a>
   </div>
-  <div *ngIf="user && _currentScope=='search'" #nodeStoreRef class="nodeStore" class="clickable nodeStore" (click)="setNodeStore(true)" title="{{'SEARCH.NODE_STORE.TITLE' | translate}}">
+  <div *ngIf="user && _currentScope=='search'" #nodeStoreRef class="nodeStore" class="clickable nodeStore" tabindex="0" (click)="setNodeStore(true)" (keyup.enter)="setNodeStore(true)" title="{{'SEARCH.NODE_STORE.TITLE' | translate}}">
     <i class="material-icons barIcon">bookmark_border</i>
     <div class="nodeStoreCount">{{nodeStoreCount}}</div>
     <div *ngIf="nodeStoreAnimation>0" [@nodeStore]="nodeStoreAnimation>0" class="clickable nodeStoreAnimation" (click)="setNodeStore(true)">
@@ -73,44 +86,42 @@
     </div>
   </div>
 
-  <div class="user clickable" *ngIf="user && _showUser" (click)="showUserMenu()" (keyup.enter)="showUserMenu()" tabindex="0" title="{{'USERMENU' | translate}}">
+  <div class="user clickable" #userRef *ngIf="user && _showUser" (click)="showUserMenu()" (keyup.enter)="showUserMenu()" tabindex="0" title="{{'USERMENU' | translate}}">
       <div *ngIf="!isGuest">{{userName}}</div>
       <div *ngIf="isGuest">{{'USER_GUEST' | translate}}</div>
       <i class="material-icons barIcon iconArrow">keyboard_arrow_down</i>
       <i class="material-icons barIcon iconPerson">account_circle</i>
     </div>
-    <div class="dialog" *ngIf="userOpen" (click)="userOpen=false" (keyup.enter)="userOpen=false" tabindex="0"></div>
-    <div class="userMenu collection" [@overlay]="userOpen" *ngIf="userOpen">
-      <a *ngIf="editUrl && !isGuest" class="collection-item"
-         (click)="editProfile()"
-         (keyup.enter)="editProfile()"
-         tabindex="0"
-         title="{{ 'EDIT_ACCOUNT' | translate}}"><i class="material-icons">assignment_ind</i> {{ 'EDIT_ACCOUNT' | translate}}</a>
-      <a *ngIf="showEditProfile && canEditProfile && !editUrl && !isGuest" class="collection-item"
-         (click)="openProfileDialog()"
-         (keyup.enter)="openProfileDialog()"
-         tabindex="0"
-         title="{{ 'EDIT_ACCOUNT' | translate}}"><i class="material-icons">assignment_ind</i> {{ 'EDIT_ACCOUNT' | translate}}</a>
-
-      <a *ngIf="!isGuest" class="collection-item" (click)="showAddDesktop=false;logout()" (keyup.enter)="showAddDesktop=false;logout()" tabindex="0" title="{{ 'LOGOUT' | translate}}"><i class="material-icons">undo</i> {{ 'LOGOUT' | translate}}</a>
-      <a *ngIf="isGuest && !config.loginOptions" class="collection-item" (click)="showAddDesktop=false;login(true)" (keyup.enter)="showAddDesktop=false;login(true)" tabindex="0" title="{{ 'SIDEBAR.LOGIN' | translate}}"><i class="material-icons">person</i> {{ 'SIDEBAR.LOGIN' | translate}}</a>
-      <a *ngFor="let loginOption of isGuest?config.loginOptions:null" class="collection-item" tabindex="0" title="{{loginOption.name}}" href="{{loginOption.url}}">{{loginOption.name}}</a>
-    </div>
-  <div class="help clickable" (click)="showHelpMenu()" (keyup.enter)="showHelpMenu()" tabindex="0">
+  <dropdown class="userMenu"
+    [(show)]="userOpen"
+    [options]="userMenuOptions"
+  ></dropdown>
+  <div *ngIf="helpOptions.length" class="help clickable" (click)="showHelpMenu()" (keyup.enter)="showHelpMenu()" tabindex="0">
     <i class="material-icons">help_outline</i>
   </div>
-  <div class="dialog" *ngIf="helpOpen" (click)="helpOpen=false" (keyup.enter)="helpOpen=false" tabindex="0"></div>
-  <div class="helpMenu collection" [@overlay]="helpOpen" *ngIf="helpOpen">
-    <a class="collection-item" *ngIf="helpUrl"
-       (click)="showHelp(helpUrl)"
-       title="{{ 'ONLINE_HELP' | translate}}"><i class="material-icons">help_outline</i> {{ 'ONLINE_HELP' | translate}}</a>
-    <a class="collection-item"
-       (click)="showHelp(whatsNewUrl)" *ngIf="whatsNewUrl"
-       title="{{ 'WHATS_NEW' | translate}}"><i class="material-icons">lightbulb_outline</i> {{ 'WHATS_NEW' | translate}}</a>
-  </div>
+  <dropdown class="helpMenu"
+            [(show)]="helpOpen"
+            [options]="helpOptions"
+  ></dropdown>
+    </div>
 </div>
 <div #scrolltotop class="btn" id="scrollToTop" tabindex="0" (click)="scrollToTop()" (keyup.enter)="scrollToTop()"><i class="material-icons">keyboard_arrow_up</i></div>
-
+<div class="tab-nav" #tabNav *ngIf="canOpen && _currentScope!='render'" [style.bottom]="-navbarOffsetY+'px'">
+    <div class="mobile-move-bottom">
+          <div *ngFor="let button of sidebarButtons" [class.selected]="_currentScope==button.scope"
+               (click)="openButton(button)"
+               (keyup.enter)="openButton(button)"
+               class="button waves-effect"
+               [class.collection-item-seperate]="button.isSeperate"
+               [class.clickable]="!button.isDisabled"
+               [class.disabled]="button.isDisabled"
+               tabindex="0"
+               title="{{'GOTO' | translate}} {{button.name | translate}}">
+            <i *ngIf="button.icon" class="material-icons">{{button.icon}}</i><img *ngIf="button.alticon" class="align-icon" src="{{button.alticon}}">
+              <span>{{(button.isCustom ? button.name : button.name+"_SHORT") | translate}}</span>
+          </div>
+    </div>
+</div>
 <search-node-store
   *ngIf="showNodeStore"
   (onClose)="setNodeStore(false)"

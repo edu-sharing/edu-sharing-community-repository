@@ -12,10 +12,10 @@ import org.apache.log4j.Logger;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.server.tools.ApplicationInfo;
 import org.edu_sharing.repository.server.tools.ApplicationInfoList;
+import org.edu_sharing.service.permission.PermissionService;
 
 public class SignatureVerifier {
 
-	public static final long DEFAULT_OFFSET_MS = 10000;
 	Logger logger = Logger.getLogger(SignatureVerifier.class);
 	
 	public class Result{
@@ -63,18 +63,13 @@ public class SignatureVerifier {
 			long messageSendTs = new Long(timeStamp);
 			long messageArrivedTs = System.currentTimeMillis();
 						
-			long messageSendOffset = DEFAULT_OFFSET_MS;
-			if(appInfo.getMessageSendOffsetMs() != null){
-				messageSendOffset  = new Long(appInfo.getMessageSendOffsetMs());
-			}
+			long messageSendOffset = appInfo.getMessageSendOffsetMs();
+
 			if((messageSendTs - messageSendOffset) > messageArrivedTs){
 				return new Result(HttpServletResponse.SC_BAD_REQUEST,"MESSAGE SEND TIMESTAMP newer than MESSAGE ARRIVED TIMESTAMP");
 			}
 			
-			long messageOffset = 10000;
-			if(appInfo.getMessageOffsetMs() != null){
-				messageOffset  = new Long(appInfo.getMessageOffsetMs());
-			}
+			long messageOffset = appInfo.getMessageOffsetMs();
 			
 			if((messageArrivedTs - messageSendTs) > messageOffset ){
 				return new Result(HttpServletResponse.SC_BAD_REQUEST,"MESSAGE SEND TIMESTAMP TO OLD");
@@ -112,27 +107,4 @@ public class SignatureVerifier {
 			return new Result(HttpServletResponse.SC_OK, "OK");
 		
 	}
-
-	/**
-	 * Checks if the given node is currently accessed via auth by usage and if so, runs the task as system
-	 * Otherwise (default), the task will run as the current user
-	 * @param nodeId
-	 * @param httpSession
-	 * @param runAsWork
-	 * @throws Exception 
-	 */
-	public static <T> T runAsAuthByUsage(String nodeId, HttpSession httpSession, RunAsWork<T> runAsWork){
-		String authSingleUseNodeId = (String)httpSession.getAttribute(CCConstants.AUTH_SINGLE_USE_NODEID);
-		String authSingleUseTs = (String)httpSession.getAttribute(CCConstants.AUTH_SINGLE_USE_TIMESTAMP);
-		if(authSingleUseNodeId != null 
-				&& authSingleUseNodeId.equals(nodeId) 
-				&& Long.parseLong(authSingleUseTs) > (System.currentTimeMillis() - SignatureVerifier.DEFAULT_OFFSET_MS)) {
-				return AuthenticationUtil.runAsSystem(runAsWork);
-		}else {
-			return AuthenticationUtil.runAs(runAsWork, AuthenticationUtil.getFullyAuthenticatedUser());
-		}
-	}
-	
-	
-	
 }

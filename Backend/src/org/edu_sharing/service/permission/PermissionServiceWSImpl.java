@@ -108,15 +108,16 @@ public class PermissionServiceWSImpl implements PermissionService {
 	}
 
 	@Override
-	public org.edu_sharing.repository.client.rpc.Result<List<User>> findUsers(HashMap<String, String> propVals,
+	public org.edu_sharing.repository.client.rpc.Result<List<User>> findUsers(String query, List<String> searchFields,
 			boolean globalContext, int from, int nrOfResults) {
 
 		try {
 			NativeAlfrescoWrapper naw = EduWebServiceFactory.getNativeAlfrescoWrapper(appInfo.getWebServiceHotUrl());
 
+			// mapping to new findUsers method signature
 			List<KeyValue> wsParam = new ArrayList<KeyValue>();
-			for (Map.Entry<String, String> entry : propVals.entrySet()) {
-				wsParam.add(new KeyValue(entry.getKey(), entry.getValue()));
+			for (String entry : searchFields) {
+				wsParam.add(new KeyValue(entry, query));
 			}
 			org.edu_sharing.webservices.alfresco.extension.SearchResult wsResult = naw
 					.findUsers(wsParam.toArray(new KeyValue[wsParam.size()]), null, from, nrOfResults);
@@ -165,6 +166,16 @@ public class PermissionServiceWSImpl implements PermissionService {
 
 	@Override
 	public void removePermissions(String nodeId, String authority, String[] _permissions) throws Exception {
+	}
+
+	@Override
+	public StringBuffer getFindUsersSearchString(String query, List<String> searchFields, boolean globalContext) {
+		return null;
+	}
+
+	@Override
+	public StringBuffer getFindGroupsSearchString(String searchWord, boolean globalContext) {
+		return null;
 	}
 
 	@Override
@@ -223,5 +234,15 @@ public class PermissionServiceWSImpl implements PermissionService {
 	public void setPermission(String nodeId, String authority, String permission) {
 		// TODO Auto-generated method stub
 		
+	}
+
+	@Override
+	public boolean hasPermission(String storeProtocol, String storeId, String nodeId, String authority, String permission) {
+		return false;
+	}
+
+	@Override
+	public HashMap<String, Boolean> hasAllPermissions(String storeProtocol, String storeId, String nodeId, String authority, String[] permissions) {
+		return null;
 	}
 }

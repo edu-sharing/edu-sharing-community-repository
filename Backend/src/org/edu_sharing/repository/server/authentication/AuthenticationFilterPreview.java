@@ -14,6 +14,7 @@ import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
 
 import org.alfresco.repo.security.authentication.AuthenticationException;
 import org.alfresco.service.ServiceRegistry;
@@ -32,6 +33,7 @@ import org.edu_sharing.repository.server.tools.security.SignatureVerifier;
 import org.edu_sharing.repository.server.tools.security.Signing;
 import org.edu_sharing.service.authentication.oauth2.TokenService;
 import org.edu_sharing.service.authentication.oauth2.TokenService.Token;
+import org.edu_sharing.service.mime.MimeTypesV2;
 import org.edu_sharing.service.usage.Usage;
 import org.edu_sharing.service.usage.Usage2Service;
 import org.edu_sharing.service.usage.UsageException;
@@ -156,17 +158,19 @@ public class AuthenticationFilterPreview implements javax.servlet.Filter {
 				Usage usage = u2.getUsage(appId, courseId, nodeId, resourceId);
 
 				if(usage == null ){
-					httpServletResponse.sendError(HttpServletResponse.SC_BAD_REQUEST, "No usage Found!");
+					noPermissions(httpServletResponse);
 					return;
 				}
 
 			} catch(UsageException e) {
-				httpServletResponse.sendError(HttpServletResponse.SC_BAD_REQUEST, e.getMessage());
+				nodeDeleted(httpServletResponse);
+				return;
 			}
 
-			authService.authenticate(ApplicationInfoList.getHomeRepository().getUsername(), ApplicationInfoList.getHomeRepository().getPassword().toCharArray());
-			ticket = authService.getCurrentTicket();
-			invalidateTicket = true;
+			//authService.authenticate(ApplicationInfoList.getHomeRepository().getUsername(), ApplicationInfoList.getHomeRepository().getPassword().toCharArray());
+			//ticket = authService.getCurrentTicket();
+            //invalidateTicket = true;
+            ((HttpServletRequest)req).getSession(true).setAttribute(CCConstants.AUTH_SINGLE_USE_NODEID,nodeId);
 		}
 		else if (accessToken != null && !accessToken.trim().equals("")) {
 			//oAuth
@@ -218,11 +222,10 @@ public class AuthenticationFilterPreview implements javax.servlet.Filter {
 				return;
 			}
 		}
-		
 		try{
 			chain.doFilter(req, resp);
 		} finally {
-			
+
 			if (invalidateTicket) {
 				authService.invalidateTicket(ticket);
 			}else{
@@ -235,9 +238,17 @@ public class AuthenticationFilterPreview implements javax.servlet.Filter {
 				}
 			}
 		}
-		
 	}
-	
+
+	private void noPermissions(HttpServletResponse resp) throws IOException {
+		MimeTypesV2 mime=new MimeTypesV2(ApplicationInfoList.getHomeRepository());
+		resp.sendRedirect(mime.getNoPermissionsPreview());
+	}
+	private void nodeDeleted(HttpServletResponse resp) throws IOException {
+		MimeTypesV2 mime=new MimeTypesV2(ApplicationInfoList.getHomeRepository());
+		resp.sendRedirect(mime.getNodeDeletedPreview());
+	}
+
 	private void remotePreview(ServletRequest req, HttpServletResponse httpServletResponse, String rep_id, String remoteTicket) throws IOException{
 		
 			ApplicationInfo appInfo = ApplicationInfoList.getRepositoryInfoById(rep_id);
@@ -281,7 +292,7 @@ public class AuthenticationFilterPreview implements javax.servlet.Filter {
 					if(privateKey != null){
 						byte[] signature = sigTool.sign(sigTool.getPemPrivateKey(privateKey, CCConstants.SECURITY_KEY_ALGORITHM), data, CCConstants.SECURITY_SIGN_ALGORITHM);
 							
-						String urlSig = URLEncoder.encode(new Base64().encodeToString(signature));
+						String urlSig = URLEncoder.encode(java.util.Base64.getEncoder().encodeToString(signature));
 						url = UrlTool.setParam(url, "sig",urlSig);
 					}
 				} catch (GeneralSecurityException e) {

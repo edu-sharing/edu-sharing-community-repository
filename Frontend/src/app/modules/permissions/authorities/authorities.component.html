@@ -49,19 +49,30 @@
           <div *ngIf="_mode=='GROUP'">
             <label for="groupName">{{'GROUP.displayName' | translate}}</label>
             <input type="text" id="groupName" name="groupName" [(ngModel)]="edit.profile.displayName" autofocus required>
+            <label for="groupEmail">{{'GROUP.groupEmail' | translate}}</label>
+            <input type="email" id="groupEmail" name="groupEmail" [(ngModel)]="edit.profile.groupEmail">
             <label for="groupType">{{'GROUP.groupType' | translate}}</label>
             <select id="groupType" name="groupType" [(ngModel)]="edit.profile.groupType">
               <option *ngFor="let type of GROUP_TYPES" [value]="type">{{('PERMISSIONS.GROUP_TYPE.'+type) | translate}}</option>
             </select>
+            <div *ngIf="isAdmin">
+              <label for="scopeType">{{'GROUP.scopeType' | translate}}</label>
+              <select id="scopeType" name="scopeType" [(ngModel)]="edit.profile.scopeType">
+                <option *ngFor="let scope of SCOPE_TYPES" [value]="scope">{{('PERMISSIONS.SCOPE_TYPE.'+scope) | translate}}</option>
+              </select>
+            </div>
           </div>
           <div *ngIf="_mode=='ORG'">
             <label for="orgName">{{'ORG.displayName' | translate}}</label>
-            <input type="text" id="orgName" name="orgName" [(ngModel)]="edit.profile.displayName" autofocus required>
-            <label for="orgName">{{'ORG.groupType' | translate}}</label>
+            <input type="email" id="orgName" name="orgName" [(ngModel)]="edit.profile.displayName" autofocus required>
+            <label for="orgEmail">{{'ORG.groupEmail' | translate}}</label>
+            <input type="text" id="orgEmail" name="orgEmail" [(ngModel)]="edit.profile.groupEmail">
+            <label for="orgType">{{'ORG.groupType' | translate}}</label>
             <select id="orgType" name="orgType" [(ngModel)]="edit.profile.groupType">
               <option *ngFor="let type of ORG_TYPES" [value]="type">{{('PERMISSIONS.GROUP_TYPE.'+type) | translate}}</option>
             </select>
-            <div class="infoText">{{edit.folder}}</div>
+            <label>{{'ORG.folderLocation' | translate}}</label>
+            <div class="infoText folderLocation clickable" (click)="openFolder(edit.sharedFolder)">{{edit.folder}}</div>
           </div>
           <div *ngIf="_mode=='USER'">
             <div *ngIf="!editId">
@@ -78,6 +89,11 @@
               <label for="password">{{'USER.password' | translate}}</label>
               <input type="password" id="password" name="password" [(ngModel)]="editDetails.password">
             </div>
+            <div class="quota">
+              <label for="lastName">{{'USER.sizeQuota' | translate}}</label>
+              <input type="text" id="sizeQuota" name="sizeQuota" [(ngModel)]="edit.profile.sizeQuota">
+              <user-quota *ngIf="editId && edit.quota.enabled" [quota]="edit.quota"></user-quota>
+            </div>
           </div>
           </form>
         </div>
@@ -88,22 +104,25 @@
       <a class="btn-flat" (click)="cancelEdit()">{{'CANCEL' | translate }}</a>
     </div>
   </div>
-<div *ngIf="editMembers || addMembers" class="dialog darken">
+<div *ngIf="editGroups || editMembers || addMembers" class="dialog darken">
   <div class="card center-card card-action card-high card-xwide">
     <div class="card-content">
       <div class="card-cancel" (click)="cancelEditMembers()"><i class="material-icons">close</i></div>
       <div class="card-title" *ngIf="addMembers">{{'PERMISSIONS.ADD_MEMBER_TO_GROUP' | translate:{group:addMembers.profile.displayName} }}</div>
       <div class="card-title" *ngIf="editMembers">{{(editMembers=='ALL' ? 'PERMISSIONS.EDIT_ORG_MEMBERS' : 'PERMISSIONS.EDIT_MEMBERS') | translate:{name: editMembers.profile.displayName} }}</div>
+      <div class="card-title" *ngIf="editGroups">{{'PERMISSIONS.EDIT_MEMBER_GROUPS' | translate}}</div>
       <div class="card-scroll"  infinite-scroll [scrollWindow]="false" (scrolled)="refreshMemberList()">
         <div class="memberActions">
-          <form (ngSubmit)="searchMembers()"><input type="search" name="manageMemberSearch" [(ngModel)]="manageMemberSearch"  placeholder="{{(addMembers ? 'PERMISSIONS.SEARCH_USER' : 'PERMISSIONS.SEARCH_MEMBER') | translate}}"></form>
-        <actionbar class="memberItem memberActionBar" *ngIf="editMembers"
-          [options]="memberOptions"
-        ></actionbar>
+          <form (ngSubmit)="searchMembers()">
+            <input type="search" name="manageMemberSearch" [(ngModel)]="manageMemberSearch"  placeholder="{{(addMembers ? 'PERMISSIONS.SEARCH_USER' : editGroups ? 'PERMISSIONS.SEARCH_GROUPS' : 'PERMISSIONS.SEARCH_MEMBER') | translate}}">
+          </form>
+          <actionbar class="memberItem memberActionBar" *ngIf="editMembers || editGroups"
+            [options]="memberOptions"
+          ></actionbar>
         </div>
         <div class="currentMembers" *ngIf="editMembers">{{ 'PERMISSIONS.CURRENT_MEMBERS' |translate:{group:editMembers.profile ? editMembers.profile.displayName : org.profile.displayName} }}</div>
         <listTable
-          [columns]="addMemberColumns"
+          [columns]="editGroups ? editGroupColumns : addMemberColumns"
           [nodes]="memberList"
           [hasCheckbox]="true"
           [icon]="'person'"
