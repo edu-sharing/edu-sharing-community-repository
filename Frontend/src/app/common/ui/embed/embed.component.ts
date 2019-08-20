@@ -35,7 +35,7 @@ export class EmbedComponent implements EventListener{
                this.component=params['component'];
                 this.route.queryParams.subscribe((params) => {
                     if (params['group'])
-                        this.groupId = 'io';
+                        this.groupId = params['group'];
                     if (params['data'])
                         this.data = JSON.parse(params['data']);
                     this.refresh = new Boolean(true);
