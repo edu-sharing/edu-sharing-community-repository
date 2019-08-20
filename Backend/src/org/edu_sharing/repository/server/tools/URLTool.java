@@ -210,7 +210,43 @@ public class URLTool{
 		}
 		return result;
 	}
-	
+	public static String getPreviewServletUrl(String node, String storeProtocol,String storeId,String baseUrl) {
+		ServiceRegistry serviceRegistry = (ServiceRegistry)AlfAppContextGate.getApplicationContext().getBean(ServiceRegistry.SERVICE_REGISTRY);
+		NodeService alfNodeService = serviceRegistry.getNodeService();
+		NodeRef nodeRef = new NodeRef(new StoreRef(storeProtocol,storeId),node);
+		QName type = serviceRegistry.getNodeService().getType(nodeRef);
+		if(type.equals(QName.createQName(CCConstants.CCM_TYPE_REMOTEOBJECT))) {
+			String repoId = (String)alfNodeService.getProperty(nodeRef, QName.createQName(CCConstants.CCM_PROP_REMOTEOBJECT_REPOSITORYID));
+			String remoteNodeId = (String)alfNodeService.getProperty(nodeRef, QName.createQName(CCConstants.CCM_PROP_REMOTEOBJECT_NODEID));
+			try {
+				HashMap<String, Object> props = NodeServiceFactory.getNodeService(repoId).getProperties(null,null,remoteNodeId);
+				return  (String)props.get(CCConstants.CM_ASSOC_THUMBNAILS);
+			} catch (Throwable e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+				return null;
+			}
+
+		}else {
+			String previewURL = baseUrl;
+			previewURL += "/preview?nodeId="+node+"&storeProtocol="+storeProtocol+"&storeId="+storeId+"&dontcache="+System.currentTimeMillis();
+			previewURL =  addOAuthAccessToken(previewURL);
+			return previewURL;
+		}
+	}
+	public static String getPreviewServletUrl(String node, String storeProtocol,String storeId){
+		return getPreviewServletUrl(node,storeProtocol,storeId,getBaseUrl(true));
+	}
+	public static String getPreviewServletUrl(NodeRef node){
+		return getPreviewServletUrl(node.getId(), node.getStoreRef().getProtocol(), node.getStoreRef().getIdentifier());
+	}
+	public static String getPreviewServletUrl(org.edu_sharing.service.model.NodeRef node) {
+		return getPreviewServletUrl(node.getNodeId(), node.getStoreProtocol(), node.getStoreId());
+	}
+
+
+
+
 	public static String getShareServletUrl(NodeRef node, String token){
 		String shareUrl = getBaseUrl(true);
 		shareUrl += "/share?nodeId="+node.getId()+"&token="+token;
