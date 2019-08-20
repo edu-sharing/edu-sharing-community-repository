@@ -202,7 +202,8 @@ public class OAILOMExporter {
 			createAndAppendElement("description", rights,QName.createQName(CCConstants.LOM_PROP_RIGHTS_RIGHTS_DESCRIPTION));
 		}
 		
-		String thumbnailUrl = (String)nodeService.getProperty(nodeRef, QName.createQName(CCConstants.CCM_PROP_IO_THUMBNAILURL));
+		//String thumbnailUrl = (String)nodeService.getProperty(nodeRef, QName.createQName(CCConstants.CCM_PROP_IO_THUMBNAILURL));
+		String thumbnailUrl = URLTool.getPreviewServletUrl(nodeRef);
 		if(thumbnailUrl != null){
 			Element relation = createAndAppendElement("relation", lom);
 			Element kind = createAndAppendElement("kind", relation);
