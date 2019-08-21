@@ -142,11 +142,19 @@ public class OAILOMExporter {
 		addContributer(metaMetadata,QName.createQName(CCConstants.CCM_PROP_IO_REPL_METADATACONTRIBUTER_PROVIDER),"provider");
 		addContributer(metaMetadata,QName.createQName(CCConstants.CCM_PROP_IO_REPL_METADATACONTRIBUTER_VALIDATOR),"validator");
 		
-		//technical
-		Element technical = createAndAppendElement("technical", lom);
-		createAndAppendElement("format",technical,QName.createQName(CCConstants.LOM_PROP_TECHNICAL_FORMAT));
+		//technical -> first is the "real" binary data
+		Element technical;
+		Serializable format = nodeService.getProperty(nodeRef, QName.createQName(CCConstants.LOM_PROP_TECHNICAL_FORMAT));
+		if(format!=null) {
+			technical = createAndAppendElement("technical", lom);
+			createAndAppendElement("format", technical, QName.createQName(CCConstants.LOM_PROP_TECHNICAL_FORMAT));
+			createAndAppendElement("location", technical, URLTool.getDownloadServletUrl(nodeRef.getId(), null));
+		}
+		// second is text/html for rendering
+		technical = createAndAppendElement("technical", lom);
+		createAndAppendElement("format",technical,"text/html");
 		createAndAppendElement("location",technical,URLTool.getNgRenderNodeUrl(nodeRef.getId(),null));
-		
+
 		//educational
 		Element educational = createAndAppendElement("educational", lom);
 		Element lrt = createAndAppendElement("learningResourceType", educational);
