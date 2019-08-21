@@ -32,14 +32,14 @@
                 <div class="group">
                     <mat-label>{{'ADMIN.STATISTICS.CUSTOM_GROUP_MODE' | translate}}</mat-label>
                     <mat-radio-group [(ngModel)]="customGroup">
-                        <mat-radio-button *ngFor="let group of customGroups" value="{{group}}">{{group}}</mat-radio-button>
+                        <mat-radio-button *ngFor="let group of customGroups" value="{{group}}">{{'ADMIN.STATISTICS.HEADERS.'+group | translate}}</mat-radio-button>
                     </mat-radio-group>
                 </div>
                 <div class="group">
                     <mat-label>{{'ADMIN.STATISTICS.CUSTOM_UNFOLD_MODE' | translate}}</mat-label>
                     <mat-radio-group [(ngModel)]="customUnfold">
                         <mat-radio-button value="">{{'ADMIN.STATISTICS.UNFOLD_NONE' | translate}}</mat-radio-button>
-                        <mat-radio-button *ngFor="let group of customGroups" value="{{group}}" [disabled]="group==customGroup">{{group}}</mat-radio-button>
+                        <mat-radio-button *ngFor="let group of customGroups" value="{{group}}" [disabled]="group==customGroup">{{'ADMIN.STATISTICS.HEADERS.'+group | translate}}</mat-radio-button>
                     </mat-radio-group>
                 </div>
             </div>

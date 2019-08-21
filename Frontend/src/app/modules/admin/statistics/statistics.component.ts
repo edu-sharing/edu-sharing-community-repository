@@ -361,14 +361,16 @@ export class AdminStatisticsComponent {
         console.log(set);
         this.customGroupRows=this.customGroupRows.concat(set);
       }
-      this.customGroupData=result.map((entry)=> {
-        let result=[];
-        for(let key in entry.counts) {
-          result.push({"entry": entry, "count": entry.counts[key], "action": key});
-        }
-        return result;
-      }).reduce((a,b)=>a.concat(b));
-      console.log(this.customGroupData);
+      if(result.length) {
+        this.customGroupData = result.map((entry) => {
+          let result = [];
+          for (let key in entry.counts) {
+            result.push({"entry": entry, "count": entry.counts[key], "action": key});
+          }
+          return result;
+        }).reduce((a, b) => a.concat(b));
+        console.log(this.customGroupData);
+      }
       this.customGroupLoading=false;
     };
     if(this._customGroupMode=='NODES'){
