@@ -481,7 +481,7 @@ public class PersistentHandlerEdusharing implements PersistentHandlerInterface {
 		if (replId == null) {
 			return false;
 		}
-		if(job!=null && job.getJobDataMap().getBoolean(OAIConst.PARAM_FORCE_UPDATE)) {
+		if(job != null && job.getJobDataMap() != null && job.getJobDataMap().getBoolean(OAIConst.PARAM_FORCE_UPDATE)) {
 			return true;
 		}
 		String oldTimeStamp = getReplicationIdTimestampMap().get(replId);
