@@ -33,7 +33,7 @@
           <div class="sso-group">
             <img class="sso-logo" src="assets/images/sso_logo.svg">
             <div class="group-actions">
-              <a class="waves-effect waves-light btn" (click)="goToProvider()">{{'LOGIN.GO_TO_PROVIDER' | translate }}</a>
+              <a class="waves-effect waves-light btn"  tabindex="0" (click)="goToProvider()" (keyup.enter)="goToProvider()">{{'LOGIN.GO_TO_PROVIDER' | translate }}</a>
             </div>
           </div>
         </div>
@@ -59,7 +59,7 @@
             <a tabindex="0" (click)="register()" (keyup.enter)="register()" class="clickable">{{'LOGIN.REGISTER_LINK' | translate}}</a>
           </div>
           <div class="group-actions" *ngIf="showProviders">
-            <a class="waves-effect waves-light btn" [class.disabled]="disabled" (click)="login()">{{'LOGIN.LOGIN' | translate }}</a>
+            <a class="waves-effect waves-light btn" [class.disabled]="disabled" tabindex="0" (click)="login()" (keyup.enter)="login()">{{'LOGIN.LOGIN' | translate }}</a>
             <a class="btn-flat" *ngIf="config.recoverPasswordUrl" (click)="recoverPassword()">{{'LOGIN.RECOVER_PASSWORD' | translate }}</a>
           </div>
         </div>
