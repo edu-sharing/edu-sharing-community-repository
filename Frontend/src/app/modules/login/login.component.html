@@ -20,7 +20,7 @@
           <div class="group-description">{{'LOGIN.PROVIDER_SELECT_GROUP_DESCRIPTION' | translate}}</div>
           <label>{{'LOGIN.PROVIDER_LABEL' | translate}}</label>
           <mat-form-field class="mat-form-field-autocomplete">
-            <input type="text" matInput placeholder="{{'LOGIN.PROVIDER_PLACEHOLDER' | translate}}" [formControl]="providerControl" [matAutocomplete]="autoProvider">
+            <input type="text" matInput placeholder="{{'LOGIN.PROVIDER_PLACEHOLDER' | translate}}" [formControl]="providerControl" [matAutocomplete]="autoProvider" (keyup.enter)="goToProvider()">
             <mat-autocomplete #autoProvider="matAutocomplete" [displayWith]="currentProviderDisplay">
               <mat-optgroup *ngFor="let group of filteredProviders | async" [label]="group.group.name">
                 <mat-option *ngFor="let option of group.providers" [value]="option" (onSelectionChange)="currentProvider=option">
