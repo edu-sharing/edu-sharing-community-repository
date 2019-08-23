@@ -108,7 +108,7 @@ public class RatingServiceImpl implements RatingService {
         //@TODO: Duplicated call for getRatings
         Rating userRating = this.getRatingForUser(nodeId);
 
-        accumulated = new AccumulatedRatings();
+        AccumulatedRatings accumulated = new AccumulatedRatings();
         accumulated.setOverall(new AccumulatedRatings.RatingData(ratings.stream().map(Rating::getRating).reduce((a, b)->a+b).orElse(0.),ratings.size()));
         accumulated.setUser(userRating==null ? 0 : userRating.getRating());
         HashMap<Object, AccumulatedRatings.RatingData> affiliation = new HashMap<>();
