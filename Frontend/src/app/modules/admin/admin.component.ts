@@ -896,9 +896,9 @@ export class AdminComponent {
         job=new SuggestItem("org.edu_sharing.repository.server.jobs.quartz.RemoveNodeJob",this.translate.instant("ADMIN.JOBS.NAMES.RemoveNodeJob"));
         job.secondaryTitle=job.id;
         this.jobClasses.push(job);
-      job=new SuggestItem("org.edu_sharing.repository.server.jobs.quartz.ConvertMultivalueToSinglevalueJob",this.translate.instant("ADMIN.JOBS.NAMES.ConvertMultivalueToSinglevalueJob"));
-      job.secondaryTitle=job.id;
-      this.jobClasses.push(job);
+        job=new SuggestItem("org.edu_sharing.repository.server.jobs.quartz.ConvertMultivalueToSinglevalueJob",this.translate.instant("ADMIN.JOBS.NAMES.ConvertMultivalueToSinglevalueJob"));
+        job.secondaryTitle=job.id;
+        this.jobClasses.push(job);
     }
     getJobName(job:any){
       if(job && job.class) {
@@ -909,8 +909,8 @@ export class AdminComponent {
       return null;
     }
 
-  updateJobSuggestions(event: any) {
-    let name=event.input.toString();
+  updateJobSuggestions(event: any = null) {
+    let name=event ? event.input.toString().toLowerCase() : '';
     this.jobClassesSuggested=this.jobClasses.filter((j)=>j.title.toLowerCase().indexOf(name)!=-1 || j.secondaryTitle.toLowerCase().indexOf(name)!=-1);
   }
 }
