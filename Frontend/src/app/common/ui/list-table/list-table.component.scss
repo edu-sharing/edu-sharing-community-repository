@@ -359,6 +359,9 @@ $badgeWidth:250px;
   margin-bottom:0;
   background-color: #fff;
 }
+.tableList .row .column{
+  height:$listItemHeight;
+}
 .list .nodeCollection .row {
   background-color: transparent;
   &:focus{
@@ -562,7 +565,6 @@ $orderAnimationTime:$transitionNormal*5;
   top:3px;
 }
 .more{
-  height:$listItemHeight;
   padding:0 20px!important;
 }
 .heading .more{
