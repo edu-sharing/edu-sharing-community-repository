@@ -51,9 +51,9 @@ public class VCardConverter {
 			method.setAccessible(true);
 			for(VCard vcard : (List<VCard>)method.invoke(engine,vcardString)) {
 				HashMap<String,Object> vcardMap = new HashMap<>();
-				String fn=vcard.getFN().getFormattedName();
-				String familyName=vcard.getN().getFamilyName();
-				String givenName=vcard.getN().getGivenName();
+				String fn=vcard.getFN()==null ? null : vcard.getFN().getFormattedName();
+				String familyName=vcard.getN()==null ? null : vcard.getN().getFamilyName();
+				String givenName=vcard.getN()==null ? null : vcard.getN().getGivenName();
 				String mail=null;
 				if(vcard.getEmails()!=null && vcard.getEmails().size()>0){
 					mail=vcard.getEmails().get(0).getEmail();
