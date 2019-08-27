@@ -1,14 +1,14 @@
 package org.edu_sharing.repository.server.tools;
 
-import com.google.gson.JsonObject;
-import com.google.gwt.json.client.JSONNull;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.repository.StoreRef;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang3.time.DateFormatUtils;
-import org.apache.qpid.proton.amqp.messaging.Properties;
+import org.apache.log4j.Logger;
 import org.edu_sharing.repository.client.tools.CCConstants;
+import org.edu_sharing.repository.client.tools.forms.VCardTool;
 import org.edu_sharing.repository.client.tools.metadata.ValueTool;
+import org.edu_sharing.repository.server.tools.cache.PersonCache;
 import org.edu_sharing.service.license.LicenseService;
 import org.edu_sharing.service.nodeservice.NodeServiceFactory;
 import org.edu_sharing.service.nodeservice.NodeServiceHelper;
@@ -16,24 +16,34 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.Serializable;
 import java.util.*;
 import java.util.stream.Collectors;
 
 public class LRMITool {
+
+    private static final List<String> IGNORED_PROPERTIES = Arrays.asList(CCConstants.SYS_PROP_NODE_UID);
+    private static final Map<String,String> VCARD_MAPPING=new HashMap<>();
+    static{
+        VCARD_MAPPING.put("contributor",CCConstants.CCM_PROP_IO_REPL_LIFECYCLECONTRIBUTER_MITWIRKENDE);
+        VCARD_MAPPING.put("creator",CCConstants.CCM_PROP_IO_REPL_LIFECYCLECONTRIBUTER_AUTHOR);
+        VCARD_MAPPING.put("publisher",CCConstants.CCM_PROP_IO_REPL_LIFECYCLECONTRIBUTER_PUBLISHER);
+    }
+    private static Logger logger=Logger.getLogger(LRMITool.class);
+
+    private static final String OR_SEPERATOR = ",";
+    private static final String AND_SEPERATOR = "+";
+
     public static JSONObject getLRMIJson(String nodeId) throws Throwable {
-        String propFile = "org/edu_sharing/repository/server/tools/lrmi.properties";
         JSONObject lrmi=new JSONObject();
         // TODO: This probably has to work for remote repos in future
         HashMap<String, Object> props = NodeServiceFactory.getLocalService().getProperties(StoreRef.PROTOCOL_WORKSPACE, StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(), nodeId);
-        java.util.Properties lrmiProps = PropertiesHelper.getProperties(propFile, PropertiesHelper.TEXT);
+        Properties lrmiProps = getMappingFile();
         lrmi.put("@context","http://schema.org/");
         lrmi.put("@type",new String[]{"CreativeWork","MediaObject"});
-        Object contributor=getFromVCard(CCConstants.CCM_PROP_IO_REPL_LIFECYCLECONTRIBUTER_MITWIRKENDE,props);
-        lrmi.put("contributor",contributor);
-        Object author=getFromVCard(CCConstants.CCM_PROP_IO_REPL_LIFECYCLECONTRIBUTER_AUTHOR,props);
-        lrmi.put("creator",author);
-        Object publisher=getFromVCard(CCConstants.CCM_PROP_IO_REPL_LIFECYCLECONTRIBUTER_PUBLISHER,props);
-        lrmi.put("publisher",publisher);
+        for(Map.Entry<String,String> vcard : VCARD_MAPPING.entrySet()){
+            lrmi.put(vcard.getKey(),getFromVCard(vcard.getValue(),props));
+        }
         lrmi.put("url",URLTool.getNgRenderNodeUrl(nodeId,null));
         lrmi.put("thumbnailUrl",NodeServiceHelper.getPreview(new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE,nodeId)).getUrl());
         lrmi.put("dateCreated",getDate(getProperty(props, Collections.singletonList(CCConstants.CM_PROP_C_CREATED+CCConstants.LONG_DATE_SUFFIX))));
@@ -47,8 +57,8 @@ public class LRMITool {
         for(String prop : lrmiProps.stringPropertyNames()){
             // split by "," (or) first, than combine all the "+" concats (and)
             // finally, convert them to global names
-            List<List<String>> propsListAnd = Arrays.stream(lrmiProps.getProperty(prop).split(",")).map((f) ->
-                    Arrays.stream(f.split("\\+")).
+            List<List<String>> propsListAnd = Arrays.stream(lrmiProps.getProperty(prop).split(OR_SEPERATOR)).map((f) ->
+                    Arrays.stream(f.split("\\"+AND_SEPERATOR)).
                             map(CCConstants::getValidGlobalName).
                             collect(Collectors.toList())).
                     collect(Collectors.toList()
@@ -63,6 +73,11 @@ public class LRMITool {
         lrmi.put("timeRequired",getProperty(props,CCConstants.CCM_PROP_IO_REPL_EDUCATIONAL_TYPICALLEARNINGTIME));
         */
         return lrmi;
+    }
+
+    private static Properties getMappingFile() throws Exception {
+        String propFile = "org/edu_sharing/repository/server/tools/lrmi.properties";
+        return PropertiesHelper.getProperties(propFile, PropertiesHelper.TEXT);
     }
 
     private static String getDate(Object property) {
@@ -141,5 +156,69 @@ public class LRMITool {
     }
     private static Object getProperty(HashMap<String, Object> props, List<String> keys) {
         return getPropertyCombined(props,Collections.singletonList(keys));
+    }
+
+    public static Map<String, String[]> fromLRMIJsonToProperties(JSONObject jsonObject) throws Exception {
+        Map<String,String[]> props=new HashMap<>();
+        Properties lrmiProps = getMappingFile();
+        for(Map.Entry<String,String> vcard : VCARD_MAPPING.entrySet()){
+            try {
+                props.put(vcard.getValue(), new String[]{asVCard(jsonObject.getJSONObject(vcard.getKey()))});
+            }catch(Exception e){
+                logger.info("Can not map vcard lrmi value for "+vcard.getKey()+": "+e.getMessage());
+            }
+        }
+        for(String name : lrmiProps.stringPropertyNames()){
+            try{
+                if(!jsonObject.has(name)){
+                    logger.debug("Can not map lrmi field "+name+" because the json is missing it.");
+                    continue;
+                }
+                Object data=jsonObject.get(name);
+                String property=lrmiProps.getProperty(name);
+                // if there are multiple targets, use the first for reverse mapping
+                property=property.split(OR_SEPERATOR)[0].split("\\"+AND_SEPERATOR)[0];
+                if(IGNORED_PROPERTIES.contains(property)){
+                    continue;
+                }
+                if(data instanceof JSONArray){
+                    JSONArray jsonArray = (JSONArray) data;
+                    props.put(property,new String[jsonArray.length()]);
+                    for(int i=0;i<jsonArray.length();i++){
+                        props.get(property)[i]=jsonArray.getString(i);
+                    }
+                }
+                else if(data instanceof String){
+                    props.put(property,new String[]{(String)data});
+                }
+                else{
+                    logger.warn("Can not map lrmi attribute "+name+" to "+property+" because the object type is unsupported: "+data.getClass().getSimpleName());
+                }
+            }catch(Throwable t){
+                logger.info("Error mapping lrmi: "+t.getMessage(),t);
+            }
+        }
+        return props;
+    }
+
+    /**
+     * map the givven lrmi json person entry into a vcard string
+     * "publisher": {
+     *     "@type": "Person",
+     *     "givenName": "A",
+     *     "familyName": "B"
+     *   },
+     */
+    private static String asVCard(JSONObject object) throws JSONException {
+        HashMap<String, String> map=new HashMap<>();
+        String type = object.getString("@type");
+        if(type.equals("Person")){
+            map.put(CCConstants.VCARD_GIVENNAME, object.getString("givenName"));
+            map.put(CCConstants.VCARD_SURNAME, object.getString("familyName"));
+        }
+        else if(type.equals("Organization")){
+            map.put(CCConstants.VCARD_ORG, object.getString("legalName"));
+        }
+        return VCardTool.hashMap2VCard(map);
     }
 }

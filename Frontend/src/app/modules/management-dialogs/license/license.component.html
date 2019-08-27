@@ -183,14 +183,14 @@
           <div class="currentLicense">
           <h4  *ngIf="type!='MULTI'">{{'WORKSPACE.LICENSE.CURRENT' | translate}}</h4>
           <img *ngIf="type!='MULTI'" class="currentLicenseIcon" src="{{getLicenseIcon()}}">
-          <div *ngIf="type=='CC_BY' && ccVersion!='4.0'" class="licenseLocale">
+          <div *ngIf="(type=='CC_BY' || type=='CC_BY_SA') && ccVersion!='4.0'" class="licenseLocale">
             <label for="version">{{'WORKSPACE.LICENSE.LOCALE' | translate}}</label>
             <select id="localeLanguage" [(ngModel)]="ccLocale">
               <option value="">{{'LANGUAGE.INTERNATIONAL' | translate}}</option>
               <option *ngFor="let option of ccLocales" value="{{option}}">{{'LANGUAGE.'+option | translate}}</option>
             </select>
           </div>
-          <div *ngIf="type=='CC_BY'" class="licenseVersion">
+          <div *ngIf="type=='CC_BY' || type=='CC_BY_SA'" class="licenseVersion">
             <label for="version">{{'WORKSPACE.LICENSE.VERSION' | translate}}</label>
             <select id="version" [(ngModel)]="ccVersion">
               <option value="2.0">2.0</option>
