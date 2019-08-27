@@ -90,6 +90,9 @@ public class SearchServiceTutoryImpl extends SearchServiceAdapter{
 			properties.put(CCConstants.LOM_PROP_GENERAL_DESCRIPTION,description);
 		}
 		String thumbUrl = "https://www.tutory.de/worksheet/"+id+".jpg";
+		
+		//for the source icon
+		properties.put(CCConstants.CCM_PROP_IO_REPLICATIONSOURCE, "tutory");
 		properties.put(CCConstants.CCM_PROP_IO_THUMBNAILURL, thumbUrl);
 		properties.put(CCConstants.CM_ASSOC_THUMBNAILS, thumbUrl);
 		properties.put(CCConstants.LOM_PROP_TECHNICAL_LOCATION, "https://www.tutory.de/worksheet/"+id);
