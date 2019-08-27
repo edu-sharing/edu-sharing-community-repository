@@ -2,9 +2,11 @@ package org.edu_sharing.restservices.node.v1;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.Consumes;
@@ -1133,7 +1135,14 @@ public class NodeApi  {
 	    	properties.put(CCConstants.getValidLocalName(CCConstants.LOM_PROP_GENERAL_DESCRIPTION),new String[]{info.getDescription()});
 	    if(info.getKeywords()!=null)
 	    	properties.put(CCConstants.getValidLocalName(CCConstants.LOM_PROP_GENERAL_KEYWORD),info.getKeywords());
-
+	    if(info.getLicense()!=null){
+	    	properties.put(CCConstants.getValidLocalName(CCConstants.CCM_PROP_IO_COMMONLICENSE_KEY),new String[]{info.getLicense().getName()});
+	    	if(info.getLicense().getCcVersion()!=null)
+	    		properties.put(CCConstants.getValidLocalName(CCConstants.CCM_PROP_IO_COMMONLICENSE_CC_VERSION),new String[]{info.getLicense().getCcVersion()});
+		}
+	    if(info.getLrmiProperties()!=null){
+	    	properties.putAll(info.getLrmiProperties());
+		}
 	}
 	@OPTIONS    
     @Path("/nodes/{repository}/{node}/children")

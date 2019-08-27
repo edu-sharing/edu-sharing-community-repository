@@ -7,6 +7,7 @@ import org.apache.commons.lang.StringEscapeUtils;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.server.RepoFactory;
 import org.edu_sharing.repository.server.tools.HttpQueryTool;
+import org.edu_sharing.repository.server.tools.LRMITool;
 import org.htmlparser.Node;
 import org.htmlparser.NodeFilter;
 import org.htmlparser.Parser;
@@ -16,8 +17,10 @@ import org.htmlparser.filters.TagNameFilter;
 import org.htmlparser.lexer.Lexer;
 import org.htmlparser.tags.LinkTag;
 import org.htmlparser.tags.MetaTag;
+import org.htmlparser.tags.ScriptTag;
 import org.htmlparser.tags.TitleTag;
 import org.htmlparser.util.NodeList;
+import org.json.JSONObject;
 
 public class ClientUtilsService {
 	public static WebsiteInformation getWebsiteInformation(String url) {
@@ -39,7 +42,7 @@ public class ClientUtilsService {
 			if (result == null)
 				return null;
 			Parser parser = new Parser(new Lexer(result));
-			
+
 			NodeFilter filter = new NodeClassFilter(TitleTag.class);
 
 			NodeList list = parser.parse(filter);
@@ -55,6 +58,16 @@ public class ClientUtilsService {
 						title = null;
 					info.setTitle(title);
 					
+				}
+			}
+			parser = new Parser(new Lexer(result));
+			filter = new NodeClassFilter(ScriptTag.class);
+			list = parser.parse(filter);
+			for (int i = 0; i < list.size(); i++) {
+				ScriptTag scriptTag = (ScriptTag) list.elementAt(i);
+				String scriptType = scriptTag.getType();
+				if (scriptType != null && scriptType.equals("application/ld+json")) {
+					info.setLrmiProperties(LRMITool.fromLRMIJsonToProperties(new JSONObject(scriptTag.getScriptCode())));
 				}
 			}
 
