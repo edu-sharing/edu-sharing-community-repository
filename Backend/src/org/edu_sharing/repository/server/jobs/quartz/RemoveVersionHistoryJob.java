@@ -56,6 +56,9 @@ public class RemoveVersionHistoryJob extends AbstractJob {
 			}
 		});
 		runner.setStartFolder(startFolder);
+		runner.setRunAsSystem(true);
+		int count=runner.run();
+		logger.info("Processed "+count+" nodes");
 
 	}
 	
