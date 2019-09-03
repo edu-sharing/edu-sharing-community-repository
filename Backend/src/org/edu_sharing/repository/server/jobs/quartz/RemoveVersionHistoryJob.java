@@ -1,6 +1,7 @@
 package org.edu_sharing.repository.server.jobs.quartz;
 
 import org.alfresco.model.ContentModel;
+import org.alfresco.repo.security.authentication.AuthenticationUtil.RunAsWork;
 import org.alfresco.service.ServiceRegistry;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.repository.NodeService;
@@ -41,7 +42,8 @@ public class RemoveVersionHistoryJob extends AbstractJob {
 			return;
 		}
 		
-		logger.info("removing version history from start folder: " + nodeService.getProperty(new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE,startFolder ),ContentModel.PROP_NAME));
+		
+		logger.info("removing version history from start folder: " + startFolder );
 		
 		NodeRunner runner = new NodeRunner();
 		runner.setTask((ref)->{
