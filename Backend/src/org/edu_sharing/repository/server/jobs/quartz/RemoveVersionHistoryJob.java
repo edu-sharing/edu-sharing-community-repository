@@ -1,5 +1,7 @@
 package org.edu_sharing.repository.server.jobs.quartz;
 
+import java.util.Collections;
+
 import org.alfresco.model.ContentModel;
 import org.alfresco.repo.security.authentication.AuthenticationUtil.RunAsWork;
 import org.alfresco.service.ServiceRegistry;
@@ -12,6 +14,7 @@ import org.apache.log4j.Logger;
 import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.server.jobs.helper.NodeRunner;
+import org.edu_sharing.repository.server.jobs.helper.NodeRunner.TransactionMode;
 import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
 import org.springframework.context.ApplicationContext;
@@ -48,15 +51,18 @@ public class RemoveVersionHistoryJob extends AbstractJob {
 		NodeRunner runner = new NodeRunner();
 		runner.setTask((ref)->{
 			org.alfresco.service.cmr.repository.NodeRef nodeRef = new org.alfresco.service.cmr.repository.NodeRef(ref.getStoreRef(), ref.getId());
-			QName type = nodeService.getType(nodeRef);
 			String name = (String)nodeService.getProperty(nodeRef, QName.createQName(CCConstants.CM_NAME));
 			logger.info("delete VersionHistory for: " + name + " nodeRef:" + nodeRef);
-			if(type.equals(QName.createQName(CCConstants.CCM_TYPE_IO))) {
-				versionService.deleteVersionHistory(nodeRef);
-			}
+			versionService.deleteVersionHistory(nodeRef);
+			
 		});
+		runner.setTypes(Collections.singletonList(CCConstants.CCM_TYPE_IO));
 		runner.setStartFolder(startFolder);
 		runner.setRunAsSystem(true);
+		runner.setTransaction(TransactionMode.Local);
+		runner.setThreaded(false);
+		runner.setKeepModifiedDate(true);
+		
 		int count=runner.run();
 		logger.info("Processed "+count+" nodes");
 
