@@ -34,7 +34,7 @@ public class RemoveVersionHistoryJob extends AbstractJob {
 		nodeService = serviceRegistry.getNodeService();
 		versionService = serviceRegistry.getVersionService();
 		
-		String startFolder = (String)jobExecutionContext.get(PARAM_START_FOLDER);
+		String startFolder = (String)jobExecutionContext.getJobDetail().getJobDataMap().get(PARAM_START_FOLDER);
 		
 		if(startFolder == null || startFolder.trim().equals("")) {
 			logger.error("no start folder provided");
