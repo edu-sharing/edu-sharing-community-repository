@@ -249,12 +249,19 @@ public  class ListIdentifiersHandler extends DefaultHandler {
 							Node nodeRecord = (Node)xpath.evaluate("/OAI-PMH/GetRecord/record", doc, XPathConstants.NODE);
 							((org.edu_sharing.repository.server.importer.RecordHandlerInterface)recordHandler).handleRecord(nodeRecord, cursor, set);
 							
+							logger.info("staring exists check:" + replId);
+							boolean exists = persistentHandler.exists(replId);
+							logger.info("finished exists check" + replId+ " exists:" + exists);
+							
 							String nodeId = persistentHandler.safe((org.edu_sharing.repository.server.importer.RecordHandlerInterface) recordHandler, cursor, set);
 							if(nodeId != null) {
 								if(binaryHandler != null){
 									binaryHandler.safe(nodeId, (org.edu_sharing.repository.server.importer.RecordHandlerInterface) recordHandler,nodeRecord);
 								}
-								new MCAlfrescoAPIClient().createVersion(nodeId,null);
+								
+								if(!exists) {
+									new MCAlfrescoAPIClient().createVersion(nodeId,null);
+								}
 							}
 						}else{
 							logger.error(errorcode);

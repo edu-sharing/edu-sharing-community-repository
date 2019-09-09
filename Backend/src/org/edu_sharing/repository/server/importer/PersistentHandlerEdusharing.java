@@ -521,4 +521,17 @@ public class PersistentHandlerEdusharing implements PersistentHandlerInterface {
 		}
 		return false;
 	}
+	
+	@Override
+	public boolean exists(String replId) {
+		String oldTimeStamp = getReplicationIdTimestampMap().get(replId);
+
+		// does not exist
+		if (oldTimeStamp == null || oldTimeStamp.isEmpty()) {
+			return false;
+		}else {
+			return true;
+		}
+			
+	}
 }
