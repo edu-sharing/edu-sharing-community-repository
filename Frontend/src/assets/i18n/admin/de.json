@@ -280,8 +280,8 @@
         "count": "Anzahl",
         "node": "Element",
         "authority": "Nutzer/Session",
-        "organizations": "Organisation",
-        "mediacenters": "Medienzentrum",
+        "authority_organization": "Organisation",
+        "authority_mediacenter": "Medienzentrum",
         "date": "Datum"
       },
       "ACTIONS": {

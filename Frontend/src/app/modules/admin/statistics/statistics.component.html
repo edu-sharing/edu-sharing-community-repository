@@ -70,10 +70,10 @@
                         <span *ngIf="(key=='action' || key=='count' || key==customGroup)">{{'ADMIN.STATISTICS.HEADERS.'+key | translate}}</span>
                         <span *ngIf="!(key=='action' || key=='count' || key==customGroup)">{{key}}</span>
                     </mat-header-cell>
-                    <mat-cell *matCellDef="let element" (click)="openNode(element.entry ? element.entry : null)">
+                    <mat-cell *matCellDef="let element">
                         <span *ngIf="key=='action'">{{'ADMIN.STATISTICS.ACTIONS.'+element[key] | translate}}</span>
                         <span *ngIf="key=='count'">{{element[key]}}</span>
-                        <span *ngIf="key==customGroup">{{element.entry.fields[key]}}</span>
+                        <span *ngIf="key==customGroup">{{element.displayValue}}</span>
                         <span *ngIf="!(key=='action' || key=='count' || key==customGroup)">{{element.entry.groups[customUnfold][key]}}</span>
                     </mat-cell>
                 </ng-container>
@@ -139,12 +139,12 @@
                         <span *ngIf="key=='action'">{{'ADMIN.STATISTICS.ACTIONS.'+element[key] | translate}}</span>
                         <span *ngIf="key=='date'">{{element[key] | formatDate:{time:true,relative:false} }}</span>
                         <span *ngIf="key=='authority'">{{element.authority.hash | slice:0:8 }}</span>
-                        <span *ngIf="key=='organizations'">
+                        <span *ngIf="key=='authority_organization'">
                             <div *ngFor="let org of element.authority.organization">
                                 {{org | authorityName}}
                             </div>
                         </span>
-                        <span *ngIf="key=='mediacenters'">
+                        <span *ngIf="key=='authority_mediacenter'">
                             <div *ngFor="let med of element.authority.mediacenter">
                                 {{med | authorityName}}
                             </div>

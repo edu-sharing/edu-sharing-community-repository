@@ -9,6 +9,7 @@ import {NodeHelper} from "../../../core-ui-module/node-helper";
 import {ConfigurationService} from "../../../core-module/rest/services/configuration.service";
 import {UIHelper} from "../../../core-ui-module/ui-helper";
 import {RestStatisticsService} from "../../../core-module/rest/services/rest-statistics.service";
+import {AuthorityNamePipe} from "../../../core-ui-module/pipes/authority-name.pipe";
 
 // Charts.js
 declare var Chart:any;
@@ -30,19 +31,21 @@ export class AdminStatisticsComponent {
   static DEFAULT_OFFSET=AdminStatisticsComponent.DAY_OFFSET*7; // 7 days
   static DEFAULT_OFFSET_SINGLE=AdminStatisticsComponent.DAY_OFFSET*3; // 3 days
   today = new Date();
-  _groupedStart = new Date(new Date().getTime()-AdminStatisticsComponent.DEFAULT_OFFSET);
-  _groupedEnd = new Date();
-  _singleStart = new Date(new Date().getTime()-AdminStatisticsComponent.DEFAULT_OFFSET_SINGLE);
-  _singleEnd = new Date();
-  _customGroupStart = new Date(new Date().getTime()-AdminStatisticsComponent.DEFAULT_OFFSET);
-  _customGroupEnd = new Date();
+  _groupedStart=new Date();
+  _groupedEnd=new Date();
+  _singleStart=new Date();
+  _singleEnd=new Date();
+  _customGroupStart=new Date();
+  _customGroupEnd=new Date();
   _customGroup : string;
   _customUnfold = '';
+  _nodesStart=new Date();
+  _nodesEnd=new Date();
   customGroupRows:string[];
+  additionalGroups:string[];
   customGroups:string[];
   customGroupData:any;
-  _nodesStart = new Date(new Date().getTime()-AdminStatisticsComponent.DEFAULT_OFFSET);
-  _nodesEnd = new Date();
+
   _groupedMode = 'Daily';
   groupedLoading: boolean;
   singleLoading: boolean;
@@ -61,6 +64,7 @@ export class AdminStatisticsComponent {
 
   set groupedStart(groupedStart:Date){
     this._groupedStart=groupedStart;
+    this._groupedStart.setHours(0,0,0);
     this.refreshGroups();
   }
   get groupedStart(){
@@ -68,6 +72,7 @@ export class AdminStatisticsComponent {
   }
   set groupedEnd(groupedEnd:Date){
     this._groupedEnd=groupedEnd;
+    this._groupedEnd.setHours(23,59,59);
     this.refreshGroups();
   }
   get groupedEnd(){
@@ -82,6 +87,7 @@ export class AdminStatisticsComponent {
   }
   set customGroupStart(customGroupStart:Date){
     this._customGroupStart=customGroupStart;
+    this._customGroupStart.setHours(0,0,0);
     this.refreshCustomGroups();
   }
   get customGroupStart(){
@@ -89,6 +95,7 @@ export class AdminStatisticsComponent {
   }
   set customGroupEnd(customGroupEnd:Date){
     this._customGroupEnd=customGroupEnd;
+    this._customGroupEnd.setHours(23,59,59);
     this.refreshCustomGroups();
   }
   get customGroupEnd(){
@@ -117,6 +124,7 @@ export class AdminStatisticsComponent {
   }
   set singleStart(singleStart:Date){
     this._singleStart=singleStart;
+    this._singleStart.setHours(0,0,0);
     this.refreshSingle();
   }
   get singleStart(){
@@ -124,6 +132,7 @@ export class AdminStatisticsComponent {
   }
   set singleEnd(singleEnd:Date){
     this._singleEnd=singleEnd;
+    this._singleEnd.setHours(23,59,59);
     this.refreshSingle();
   }
   get singleEnd(){
@@ -138,6 +147,7 @@ export class AdminStatisticsComponent {
   }
   set nodesStart(nodesStart:Date){
     this._nodesStart=nodesStart;
+    this._nodesStart.setHours(0,0,0);
     this.refreshNodes();
   }
   get nodesStart(){
@@ -145,6 +155,7 @@ export class AdminStatisticsComponent {
   }
   set nodesEnd(nodesEnd:Date){
     this._nodesEnd=nodesEnd;
+    this._nodesEnd.setHours(23,59,59);
     this.refreshNodes();
   }
   get nodesEnd(){
@@ -161,11 +172,20 @@ export class AdminStatisticsComponent {
           new ListItem('NODE','counts.VIEW_MATERIAL'),
           new ListItem('NODE','counts.VIEW_MATERIAL_EMBEDDED'),
           new ListItem('NODE','counts.DOWNLOAD_MATERIAL'),
-      ]
+      ];
+      this.groupedStart = new Date(new Date().getTime()-AdminStatisticsComponent.DEFAULT_OFFSET);
+      this.groupedEnd = new Date();
+      this.singleStart = new Date(new Date().getTime()-AdminStatisticsComponent.DEFAULT_OFFSET_SINGLE);
+      this.singleEnd = new Date();
+      this.customGroupStart = new Date(new Date().getTime()-AdminStatisticsComponent.DEFAULT_OFFSET);
+      this.customGroupEnd = new Date();
+      this.nodesStart = new Date(new Date().getTime()-AdminStatisticsComponent.DEFAULT_OFFSET);
+      this.nodesEnd = new Date();
+
       // e.g. ['school']
       this.config.get('admin.statistics.groups',[]).subscribe((v)=>{
-        //this.customGroups=['authority_organization','authority_mediacenter'].concat(v);
-        this.customGroups=[].concat(v);
+        this.additionalGroups=v;
+        this.customGroups=['authority_organization','authority_mediacenter'].concat(v);
         if(this.customGroups.length)
           this.customGroup=this.customGroups[0];
       });
@@ -175,6 +195,7 @@ export class AdminStatisticsComponent {
     this.refreshGroups();
     this.refreshNodes();
     this.refreshSingle();
+    this.refreshCustomGroups();
   }
 
   private refreshGroups() {
@@ -325,8 +346,8 @@ export class AdminStatisticsComponent {
     this.singleDataRows=null;
     this.singleLoading=true;
     if(this._singleMode=='NODES'){
-      this.singleDataRows=["date","action","node","authority","organizations","mediacenters"].concat(this.customGroups || []);
-      this.statistics.getStatisticsNode(this._singleStart,new Date(this._singleEnd.getTime()+AdminStatisticsComponent.DAY_OFFSET),'None',this.getMediacenter(),this.customGroups).subscribe((result)=>{
+      this.singleDataRows=["date","action","node","authority","authority_organization","authority_mediacenter"].concat(this.additionalGroups || []);
+      this.statistics.getStatisticsNode(this._singleStart,new Date(this._singleEnd.getTime()+AdminStatisticsComponent.DAY_OFFSET),'None',this.getMediacenter(),this.additionalGroups).subscribe((result)=>{
         this.singleData=result.map((entry)=> {
           return {"action": Object.keys(entry.counts)[0], "date": entry.date, "node": RestHelper.getName(entry.node), "authority":entry.authority, "entry": entry}
         });
@@ -334,8 +355,8 @@ export class AdminStatisticsComponent {
       });
     }
     if(this._singleMode=='USERS'){
-      this.singleDataRows=["date","action","authority","organizations","mediacenters"].concat(this.customGroups || []);
-      this.statistics.getStatisticsUser(this._singleStart,new Date(this._singleEnd.getTime()+AdminStatisticsComponent.DAY_OFFSET),'None',this.getMediacenter(),this.customGroups).subscribe((result)=>{
+      this.singleDataRows=["date","action","authority","authority_organization","authority_mediacenter"].concat(this.additionalGroups || []);
+      this.statistics.getStatisticsUser(this._singleStart,new Date(this._singleEnd.getTime()+AdminStatisticsComponent.DAY_OFFSET),'None',this.getMediacenter(),this.additionalGroups).subscribe((result)=>{
         this.singleData=result.map((entry)=> {
           return {"action": Object.keys(entry.counts)[0], "date": entry.date, "authority":entry.authority, "entry": entry}
         });
@@ -358,6 +379,18 @@ export class AdminStatisticsComponent {
             reduce((a,b)=>a.concat(b)).
             filter((a)=>a!="")
         ));
+        if(this.customUnfold=='authority_organization' || this.customUnfold=='authority_mediacenter'){
+          // transform the value for the horizontal list data if it's org/group
+          set = set.map((key)=>{
+            let authority=result.map((entry)=>((this.customUnfold=='authority_organization' ? entry.authority.organization : entry.authority.mediacenter as any[])))
+            .reduce((a,b)=>a.concat(b))
+            .filter((a)=>a.authorityName==key);
+            console.log(authority);
+            if(authority.length)
+              return new AuthorityNamePipe(this.translate).transform(authority,null);
+            return key;
+          });
+        }
         console.log(set);
         this.customGroupRows=this.customGroupRows.concat(set);
       }
@@ -365,7 +398,16 @@ export class AdminStatisticsComponent {
         this.customGroupData = result.map((entry) => {
           let result = [];
           for (let key in entry.counts) {
-            result.push({"entry": entry, "count": entry.counts[key], "action": key});
+            console.log(entry);
+            let displayValue=entry.fields[this.customGroup];
+            // transform the value for the vertical list data if it's org/group
+            if(this.customGroup=='authority_organization' || this.customGroup=='authority_mediacenter'){
+             displayValue= ((this.customGroup=='authority_organization' ? entry.authority.organization : entry.authority.mediacenter) as any).map((group:any)=>{
+                return new AuthorityNamePipe(this.translate).transform(group,null);
+              }).join(" ");
+
+            }
+            result.push({"entry": entry,"displayValue": displayValue, "count": entry.counts[key], "action": key});
           }
           return result;
         }).reduce((a, b) => a.concat(b));

@@ -122,7 +122,6 @@ public class TrackingServiceImpl extends TrackingServiceDefault{
                 version=nodeVersion;
             }
             return execDatabaseQuery(TRACKING_INSERT_NODE, statement -> {
-                // @Todo: track the node version
                 statement.setLong(1, (Long) nodeService.getProperty(nodeRef, QName.createQName(CCConstants.SYS_PROP_NODE_DBID)));
                 statement.setString(2, nodeRef.getId());
                 statement.setString(3, version);
@@ -306,6 +305,8 @@ public class TrackingServiceImpl extends TrackingServiceDefault{
             if (orgs != null) {
                 entry.getAuthorityInfo().setOrganizations((String[]) orgs.getArray());
             }
+        }catch(PSQLException e){}
+        try{
             Array mediacenters = resultSet.getArray("authority_mediacenter");
             if (mediacenters != null) {
                 entry.getAuthorityInfo().setMediacenters((String[]) mediacenters.getArray());
@@ -379,19 +380,19 @@ public class TrackingServiceImpl extends TrackingServiceDefault{
                 filter.append(" AND (");
                 for (Map.Entry<String, String> entry : filters.entrySet()) {
                     filter.append(" AND ");
-                    filter.append(makeDbField(entry.getKey())).append(" = ?");
+                    filter.append(makeDbField(entry.getKey(),false)).append(" = ?");
                 }
                 filter.append(")");
             }
             if (groupFields != null && !groupFields.isEmpty()) {
                 for (String field : groupFields) {
-                    grouping.append(",").append(makeDbField(field));
-                    fields.append(",").append(makeDbField(field) + " as " + field);
+                    grouping.append(",").append(makeDbField(field,false));
+                    fields.append(",").append(makeDbField(field,false) + " as " + field);
                 }
             }
             if (additionalFields != null && additionalFields.size() > 0) {
                 for (String field : additionalFields) {
-                    fields.append(",ARRAY_AGG(").append(makeDbField(field) + ") as " + field);
+                    fields.append(",ARRAY_AGG(").append(makeDbField(field,true) + ") as " + field);
                     // if additional fields and no grouping is provided, add them to grouping otherwise there will be a postgres exception when fetching
                     // nope: it is now using ARRAY_AGG
                     //if(groupFields==null || groupFields.isEmpty()){
@@ -408,8 +409,10 @@ public class TrackingServiceImpl extends TrackingServiceDefault{
         }
     }
 
-    private String makeDbField(String field) {
+    private String makeDbField(String field,boolean useFirstIndex) {
         if(EXISTING_FIELDS.contains(field)){
+            if(useFirstIndex)
+                return field+"[1]";
             return field;
         }
         else if(field.toLowerCase().matches("[a-z]*[0-9]*")){
