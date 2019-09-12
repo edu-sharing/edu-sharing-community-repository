@@ -42,6 +42,7 @@ import javax.xml.xpath.XPathFactory;
 
 import net.sf.acegisecurity.AuthenticationCredentialsNotFoundException;
 
+import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.service.ServiceRegistry;
 import org.apache.log4j.Logger;
 import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
@@ -219,19 +220,7 @@ public class JobHandler {
 				logger.info("TriggerListener.vetoJobExecution called");
 				try {
 					
-					//check Authinfo when it's an IMMEDIATE excecuted job
-					if(jobExecutionContext.getJobDetail().getName().contains(IMMEDIATE_JOBNAME_SUFFIX)){
-						HashMap authInfo = (HashMap)jobExecutionContext.getJobDetail().getJobDataMap().get(AUTH_INFO_KEY);
-						
-						//we have to validate ticket here so that is it set in the Job Thread Context
-						ServiceRegistry serviceRegistry = (ServiceRegistry)AlfAppContextGate.getApplicationContext().getBean(ServiceRegistry.SERVICE_REGISTRY);
-						serviceRegistry.getAuthenticationService().validate((String)authInfo.get(CCConstants.AUTH_TICKET));
-						
-						if(authInfo == null || !new CheckAuthentication().isAdmin(null, authInfo)){
-							jobExecutionContext.getJobDetail().getJobDataMap().put(VETO_BY_KEY, "not an admin");
-							return true;
-						}
-					}
+					
 					
 					List currentlyExecutingJobsList = jobExecutionContext.getScheduler().getCurrentlyExecutingJobs();
 					boolean veto = false;

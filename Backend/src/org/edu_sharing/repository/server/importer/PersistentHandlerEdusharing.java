@@ -495,6 +495,7 @@ public class PersistentHandlerEdusharing implements PersistentHandlerInterface {
 
 		// does not exist
 		if (oldTimeStamp == null || oldTimeStamp.isEmpty()) {
+			getLogger().debug("oldTimeStamp is null or empty. returning true");
 			return true;
 		}
 
@@ -503,6 +504,7 @@ public class PersistentHandlerEdusharing implements PersistentHandlerInterface {
 			newDate = sdf.parse(timeStamp);
 			Date oldDate = sdf.parse(oldTimeStamp);
 			if (newDate.after(oldDate)) {
+				getLogger().debug("newDate.after(oldDate) newDate:" + newDate+ " oldDate:"+ oldDate+" returning true");
 				return true;
 			}
 
@@ -512,6 +514,7 @@ public class PersistentHandlerEdusharing implements PersistentHandlerInterface {
 
 			// if old date was damaged but new date is ok
 			if (newDate != null) {
+				getLogger().debug("old date was damaged but new date is ok. returning true");
 				return true;
 			}
 
@@ -520,5 +523,18 @@ public class PersistentHandlerEdusharing implements PersistentHandlerInterface {
 			t.printStackTrace();
 		}
 		return false;
+	}
+	
+	@Override
+	public boolean exists(String replId) {
+		String oldTimeStamp = getReplicationIdTimestampMap().get(replId);
+
+		// does not exist
+		if (oldTimeStamp == null || oldTimeStamp.isEmpty()) {
+			return false;
+		}else {
+			return true;
+		}
+			
 	}
 }

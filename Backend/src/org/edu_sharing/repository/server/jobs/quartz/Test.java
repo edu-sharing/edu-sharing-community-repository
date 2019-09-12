@@ -29,6 +29,12 @@ public class Test {
 			public String safe(RecordHandlerInterfaceBase recordHandler, String cursor, String set) throws Throwable {
 				return null;
 			}
+			
+			@Override
+			public boolean exists(String replId) {
+				// TODO Auto-generated method stub
+				return false;
+			}
 		};
 		
 		TestRecordHandler trh = new TestRecordHandler();

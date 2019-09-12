@@ -10,6 +10,8 @@ import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.repo.security.authentication.AuthenticationUtil.RunAsWork;
 import org.alfresco.repo.transaction.AlfrescoTransactionSupport;
 import org.alfresco.repo.transaction.AlfrescoTransactionSupport.TxnReadState;
+import org.alfresco.repo.transaction.RetryingTransactionHelper.RetryingTransactionCallback;
+import org.alfresco.repo.transaction.RetryingTransactionHelper;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.repository.NodeService;
 import org.alfresco.service.cmr.security.AuthenticationService;
@@ -76,21 +78,13 @@ public class SubsystemChainingAuthenticationService extends org.alfresco.repo.se
         		//alfresco share login is in readOnlyMode, so check to prevent exception
         		if (AlfrescoTransactionSupport.getTransactionReadState() == TxnReadState.TXN_READ_WRITE) {
         			
-        			UserTransaction trx_A = transactionService.getNonPropagatingUserTransaction();
-        			try{
-            			trx_A.begin();
-            			nodeService.setProperty(nodeRefPerson, QName.createQName(CCConstants.PROP_USER_ESLASTLOGIN), new Date());
-            			trx_A.commit();
-        			} catch(Throwable e) {
-        				try {
-        					logger.info("failed to set cm:esLastLogin. try to rollback", e);
-        					trx_A.rollback();
-    			         } catch (Throwable ee) {
-    			        	 logger.info("rollback failed", ee);
-    			         }
-        			}
-        			
-        			
+        			RetryingTransactionCallback<Void> txnWork = new RetryingTransactionCallback<Void>() {
+						public Void execute() throws Exception {
+							nodeService.setProperty(nodeRefPerson, QName.createQName(CCConstants.PROP_USER_ESLASTLOGIN), new Date());
+							return null;
+						}
+					};
+					return transactionService.getRetryingTransactionHelper().doInTransaction(txnWork, false);
         		}
         		return null;
         	}
