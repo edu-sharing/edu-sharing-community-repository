@@ -222,9 +222,6 @@ export class CollectionsMainComponent{
           this.parentCollectionId = new EduData.Reference(RestConstants.HOME_REPOSITORY, RestConstants.ROOT);
           this.contentDetailObject = null;
           this.navigate();
-
-          this.refreshContent();
-
       }
     }
     selectTabMyCollections():void {
@@ -462,7 +459,6 @@ export class CollectionsMainComponent{
 
         // set correct scope
         let scope=this.tabSelected ? this.tabSelected : RestConstants.COLLECTIONSCOPE_ALL;
-
         this.collectionService.getCollectionContent(this.collectionContent.collection.ref.id,
           scope,
           [RestConstants.CCM_PROP_LIFECYCLECONTRIBUTER_AUTHOR],
@@ -591,7 +587,6 @@ export class CollectionsMainComponent{
     displayCollectionById(id:string,callback:Function=null) : void {
             if (id==null) id=RestConstants.ROOT;
             if (id=="-root-") {
-
                 // display root collections with tabs
                 this.collectionContent = new EduData.CollectionContent();
                 this.collectionContent.setCollectionID(RestConstants.ROOT);
