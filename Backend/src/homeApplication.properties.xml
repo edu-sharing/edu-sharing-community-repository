@@ -32,6 +32,10 @@
 	Shall the client url dynamically generated depending on the request domain of the client
 	-->
 	<entry key="url_dynamic">false</entry>
+	<!--
+		list of allowed CORS domains
+	-->
+	<entry key="allow_origin"></entry>
 
 	<entry key="webappname">edu-sharing</entry>
 	<entry key="wspath">/alfresco/api</entry>

@@ -117,7 +117,8 @@ public class ApplicationInfo implements Comparable<ApplicationInfo>{
 	
 	public static final String KEY_ORDER = "order";
 
-	
+	public static final String KEY_ALLOW_ORIGIN = "allow_origin";
+
 	/**
 	 * property file vals
 	 */
@@ -151,7 +152,7 @@ public class ApplicationInfo implements Comparable<ApplicationInfo>{
 	public static final String WEBSITEPREVIEWRENDERSERVICE = "websitepreviewrenderservice";
 
 	public static final String REPOSITORY_TYPE_MEMUCHO = "MEMUCHO";
-	private final Properties properties;
+    private final Properties properties;
 
 	private String host = null;
 	
