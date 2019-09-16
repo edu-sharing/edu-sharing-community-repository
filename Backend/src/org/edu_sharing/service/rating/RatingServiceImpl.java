@@ -1,12 +1,13 @@
 package org.edu_sharing.service.rating;
 
-import com.google.gdata.util.common.base.Pair;
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
+import org.alfresco.service.ServiceRegistry;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.repository.StoreRef;
-import org.apache.commons.collections.KeyValue;
+import org.alfresco.service.namespace.QName;
 import org.apache.log4j.Logger;
 import org.edu_sharing.alfresco.policy.GuestCagePolicy;
+import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.server.tools.cache.EduSharingRatingCache;
 import org.edu_sharing.service.InsufficientPermissionException;
@@ -17,18 +18,18 @@ import org.edu_sharing.service.nodeservice.NodeServiceFactory;
 import org.edu_sharing.service.nodeservice.NodeServiceHelper;
 import org.edu_sharing.service.permission.PermissionService;
 import org.edu_sharing.service.permission.PermissionServiceFactory;
+import org.springframework.context.ApplicationContext;
 
-import java.util.AbstractMap;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 public class RatingServiceImpl implements RatingService {
 
     private Logger logger= Logger.getLogger(RatingServiceImpl.class);
 
+    ApplicationContext alfApplicationContext = AlfAppContextGate.getApplicationContext();
+    ServiceRegistry serviceRegistry = (ServiceRegistry) alfApplicationContext.getBean(ServiceRegistry.SERVICE_REGISTRY);
+    org.alfresco.service.cmr.repository.NodeService nodeServiceAlfresco = serviceRegistry.getNodeService();
     private PermissionService permissionService;
     private AuthorityService authorityService;
     private NodeService nodeService;
@@ -63,8 +64,19 @@ public class RatingServiceImpl implements RatingService {
     }
 
     @Override
-    public List<Rating> getRatings(String nodeId) {
+    public List<Rating> getRatings(String nodeId, Date after) {
         return this.nodeService.getChildrenChildAssociationRefType(nodeId,CCConstants.CCM_TYPE_RATING).stream().
+                filter((ref)->{
+                    if(after==null)
+                        return true;
+                    try {
+                        Date date = (Date) nodeServiceAlfresco.getProperty(ref.getChildRef(), QName.createQName(CCConstants.CM_PROP_C_MODIFIED));
+                        return date.after(after);
+                    }catch(Exception e){
+                        logger.warn(e.getMessage(),e);
+                        return false;
+                    }
+                }).
                 map((ref)->{
                     Rating rating = new Rating();
                     rating.setRef(ref.getChildRef());
@@ -75,7 +87,7 @@ public class RatingServiceImpl implements RatingService {
                 }).collect(Collectors.toList());
     }
     private Rating getRatingForUser(String nodeId){
-       return getRatings(nodeId).stream().filter((r) -> r.getAuthority().equals(AuthenticationUtil.getFullyAuthenticatedUser())).findFirst().orElse(null);
+       return getRatings(nodeId, null).stream().filter((r) -> r.getAuthority().equals(AuthenticationUtil.getFullyAuthenticatedUser())).findFirst().orElse(null);
     }
     @Override
     public void deleteRating(String nodeId) throws Exception {
@@ -92,26 +104,33 @@ public class RatingServiceImpl implements RatingService {
         });
     }
 
+    /**
+     * Get the accumulated ratings data
+     * @param nodeId the id of the node
+     * @param after the date which the ratings should have at least. Use null (default) to use ratings of all times and also use the cache
+     * @return
+     */
     @Override
-    public AccumulatedRatings getAccumulatedRatings(String nodeId){
-        try {
-            AccumulatedRatings accumulated = EduSharingRatingCache.get(new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, nodeId));
-            if (accumulated != null) {
-                logger.info("using rating cache for node " + nodeId);
-                return accumulated;
+    public AccumulatedRatings getAccumulatedRatings(String nodeId, Date after){
+        if(after==null) {
+            try {
+                AccumulatedRatings accumulated = EduSharingRatingCache.get(new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, nodeId));
+                if (accumulated != null) {
+                    logger.info("using rating cache for node " + nodeId);
+                    return accumulated;
+                }
+            } catch (Exception e) {
+                logger.warn("Failed to resolve rating cache for node " + nodeId + ": " + e.getMessage());
             }
-        }catch(Exception e){
-            logger.warn("Failed to resolve rating cache for node "+nodeId+": "+e.getMessage());
         }
-
-        List<Rating> ratings = this.getRatings(nodeId);
+        List<Rating> ratings = this.getRatings(nodeId,after);
         //@TODO: Duplicated call for getRatings
         Rating userRating = this.getRatingForUser(nodeId);
 
         AccumulatedRatings accumulated = new AccumulatedRatings();
         accumulated.setOverall(new AccumulatedRatings.RatingData(ratings.stream().map(Rating::getRating).reduce((a, b)->a+b).orElse(0.),ratings.size()));
         accumulated.setUser(userRating==null ? 0 : userRating.getRating());
-        HashMap<Object, AccumulatedRatings.RatingData> affiliation = new HashMap<>();
+        HashMap<String, AccumulatedRatings.RatingData> affiliation = new HashMap<>();
         // collect counts for each affiliation group
         ratings.forEach((r)->{
             String authorityAffiliation= (String)authorityService.getAuthorityProperty(r.getAuthority(), CCConstants.CM_PROP_PERSON_EDU_SCHOOL_PRIMARY_AFFILIATION);
@@ -123,7 +142,9 @@ public class RatingServiceImpl implements RatingService {
             affiliation.put(authorityAffiliation,entry);
         });
         accumulated.setAffiliation(affiliation);
-        EduSharingRatingCache.put(new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, nodeId),accumulated);
+        if(after==null){
+            EduSharingRatingCache.put(new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, nodeId),accumulated);
+        }
         return accumulated;
     }
 

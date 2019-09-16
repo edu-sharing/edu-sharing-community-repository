@@ -78,6 +78,7 @@ public class XApiTool {
     private static JSONObject addData(String nodeId, JSONObject xApiData) throws Throwable {
         NodeRef nodeRef = new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, nodeId);
         HashMap<String, String[]> props = NodeServiceHelper.getPropertiesMultivalue(nodeRef);
+        //xApiData.getJSONObject("object").getJSONObject("definition").put("name","");
         if(!xApiData.getJSONObject("object").getJSONObject("definition").has("extensions"))
             xApiData.getJSONObject("object").getJSONObject("definition").put("extensions",new JSONObject());
         JSONObject propsData = new JSONObject();

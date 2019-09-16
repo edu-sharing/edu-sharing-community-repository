@@ -1,16 +1,15 @@
 package org.edu_sharing.service.rating;
 
-import org.alfresco.service.cmr.repository.ChildAssociationRef;
-
+import java.util.Date;
 import java.util.List;
 
 public interface RatingService {
 
 	void addOrUpdateRating(String node, Double rating, String text) throws Exception;
 
-	List<Rating> getRatings(String node);
+	List<Rating> getRatings(String nodeId, Date after);
 
 	void deleteRating(String nodeId) throws Exception;
 
-	AccumulatedRatings getAccumulatedRatings(String nodeId);
+	AccumulatedRatings getAccumulatedRatings(String nodeId,Date after);
 }

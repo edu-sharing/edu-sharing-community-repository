@@ -56,6 +56,10 @@ public class TrackingServiceImpl extends TrackingServiceDefault{
             " WHERE time BETWEEN ? AND ? AND (:filter)" +
             " GROUP BY node,type :grouping" +
             " ORDER BY count DESC";
+    public static String TRACKING_STATISTICS_NODE_SINGLE = "SELECT type,COUNT(*) from edu_tracking_node as tracking" +
+            " WHERE node_uuid = ? AND time BETWEEN ? AND ?" +
+            " GROUP BY type" +
+            " ORDER BY count DESC";
     public static String TRACKING_STATISTICS_DAILY = "SELECT type,COUNT(*),TO_CHAR(time,'yyyy-mm-dd') as date :fields from :table as tracking" +
             " WHERE time BETWEEN ? AND ? AND (:filter)" +
             " GROUP BY type,date :grouping" +
@@ -289,6 +293,42 @@ public class TrackingServiceImpl extends TrackingServiceDefault{
             }
             Collections.sort(result);
             return result;
+        }catch(Throwable t){
+            throw t;
+        }finally {
+            dbAlf.cleanUp(con, statement);
+        }
+    }
+
+    /**
+     * fechtes the counts for each event type for the given node, while the date must be between the given dates
+     * If both dates are null, it will take the values across all dates
+     * @return
+     * @throws Throwable
+     */
+    @Override
+    public StatisticEntry getSingleNodeData(NodeRef node,java.util.Date dateFrom,java.util.Date dateTo) throws Throwable{
+        ConnectionDBAlfresco dbAlf = new ConnectionDBAlfresco();
+        Connection con = null;
+        PreparedStatement statement = null;
+        try {
+            con = dbAlf.getConnection();
+            String query = TRACKING_STATISTICS_NODE_SINGLE;
+            statement=con.prepareStatement(query);
+            int index=1;
+            statement.setString(index++,node.getId());
+            if(dateFrom==null)
+                dateFrom = new java.util.Date(0);
+            statement.setTimestamp(index++, Timestamp.valueOf(dateFrom.toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime()));
+            if(dateTo==null)
+                dateTo = new java.util.Date();
+            statement.setTimestamp(index++, Timestamp.valueOf(dateTo.toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime()));
+            ResultSet resultSet = statement.executeQuery();
+            StatisticEntry entry = new StatisticEntry();
+            while (resultSet.next()) {
+                entry.getCounts().put(EventType.valueOf(resultSet.getString("type")), resultSet.getInt("count"));
+            }
+            return entry;
         }catch(Throwable t){
             throw t;
         }finally {

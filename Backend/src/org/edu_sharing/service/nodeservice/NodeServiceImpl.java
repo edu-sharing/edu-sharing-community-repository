@@ -1137,4 +1137,9 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
 	public String getPrimaryParent(String protocol, String store, String nodeId) {
 		return nodeService.getPrimaryParent(new NodeRef(new StoreRef(protocol, store), nodeId)).getParentRef().getId();
 	}
+
+	@Override
+	public List<NodeRef> getFrontpageNodes() throws Throwable {
+		return new NodeFrontpage().getNodesForCurrentUserAndConfig();
+	}
 }

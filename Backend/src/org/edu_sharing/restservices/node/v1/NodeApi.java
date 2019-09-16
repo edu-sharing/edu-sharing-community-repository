@@ -766,6 +766,9 @@ public class NodeApi  {
 	    	else if("-to_me_shared_files-".equals(node)){
 	    		children = NodeDao.getFilesSharedToMe(repoDao,filter,sortDefinition);
 	    	}
+	    	else if("-frontpage-".equals(node)){
+				children = NodeDao.getFrontpageNodes(repoDao);
+			}
 	    	else{
 		    	NodeDao nodeDao = NodeDao.getNode(repoDao, node, propFilter);
 	    		children = nodeDao.getChildren(assocName,filter,sortDefinition);

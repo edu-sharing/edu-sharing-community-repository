@@ -330,6 +330,11 @@ public class NodeServiceAdapter implements NodeService {
 	}
 
 	@Override
+	public List<NodeRef> getFrontpageNodes() throws Throwable {
+		return null;
+	}
+
+	@Override
 	public <T> List<T> sortNodeRefList(List<T> list, List<String> filter, SortDefinition sortDefinition) {
 		return list;
 	}

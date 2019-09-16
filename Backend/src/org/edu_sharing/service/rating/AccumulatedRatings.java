@@ -5,7 +5,7 @@ import java.util.HashMap;
 public class AccumulatedRatings {
     private RatingData overall;
     private double user;
-    private HashMap<Object, RatingData> affiliation;
+    private HashMap<String, RatingData> affiliation;
 
     public RatingData getOverall() {
         return overall;
@@ -23,11 +23,11 @@ public class AccumulatedRatings {
         this.user = user;
     }
 
-    public void setAffiliation(HashMap<Object, RatingData> affiliation) {
+    public void setAffiliation(HashMap<String, RatingData> affiliation) {
         this.affiliation = affiliation;
     }
 
-    public HashMap<Object, RatingData> getAffiliation() {
+    public HashMap<String, RatingData> getAffiliation() {
         return affiliation;
     }
 

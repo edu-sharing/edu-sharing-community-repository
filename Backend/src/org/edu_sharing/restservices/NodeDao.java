@@ -10,6 +10,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.stream.Collectors;
 
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.repo.security.authentication.AuthenticationUtil.RunAsWork;
@@ -62,11 +63,14 @@ import org.edu_sharing.service.search.model.SearchToken;
 import org.edu_sharing.service.search.model.SortDefinition;
 import org.edu_sharing.service.share.ShareService;
 import org.edu_sharing.service.share.ShareServiceImpl;
+import org.edu_sharing.service.statistic.StatisticsGlobal;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
 import io.swagger.util.Json;
 import org.springframework.context.ApplicationContext;
+
+import static org.codehaus.groovy.runtime.DefaultGroovyMethods.collect;
 
 public class NodeDao {
 	private static Logger logger = Logger.getLogger(NodeDao.class);
@@ -1181,7 +1185,7 @@ public class NodeDao {
 	}
 	private AccumulatedRatings getRating(){
 		try{
-			return RatingServiceFactory.getRatingService(repoDao.getId()).getAccumulatedRatings(nodeId);
+			return RatingServiceFactory.getRatingService(repoDao.getId()).getAccumulatedRatings(nodeId,null);
 		}catch(Throwable t){
 			logger.warn("Can not fetch ratings for node "+nodeId+": "+t.getMessage(),t);
 			return null;
@@ -1743,6 +1747,14 @@ public class NodeDao {
 			JSONObject json = new JSONObject(xApi);
 			return XApiTool.sendToXApi(nodeId,json);
 		} catch (Throwable t) {
+			throw DAOException.mapping(t);
+		}
+	}
+	public static List<NodeRef> getFrontpageNodes(RepositoryDao repoDao) throws DAOException {
+		try {
+			return NodeServiceFactory.getNodeService(repoDao.getId()).
+					getFrontpageNodes().stream().map((ref)->new NodeRef(repoDao,ref.getId())).collect(Collectors.toList());
+		}catch(Throwable t){
 			throw DAOException.mapping(t);
 		}
 	}

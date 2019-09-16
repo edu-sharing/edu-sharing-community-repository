@@ -9,6 +9,7 @@ import java.util.List;
 import java.util.Map;
 
 public interface TrackingService {
+
     enum GroupingType {
         None,
         Daily,
@@ -30,4 +31,5 @@ public interface TrackingService {
     boolean trackActivityOnNode(NodeRef nodeRef,NodeTrackingDetails details,EventType type);
     List<StatisticEntryNode> getNodeStatisics(GroupingType type, Date dateFrom, Date dateTo, String mediacenter, List<String> additionalFields, List<String> groupFields, Map<String, String> filters) throws Throwable;
     List<StatisticEntry> getUserStatistics(GroupingType type, java.util.Date dateFrom, java.util.Date dateTo, String mediacenter, List<String> additionalFields, List<String> groupFields, Map<String, String> filters) throws Throwable;
+    StatisticEntry getSingleNodeData(NodeRef nodeRef,java.util.Date dateFrom,java.util.Date dateTo) throws Throwable;
 }
