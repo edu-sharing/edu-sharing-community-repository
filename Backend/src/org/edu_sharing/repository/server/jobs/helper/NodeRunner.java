@@ -169,7 +169,8 @@ public class NodeRunner {
                     task.accept(ref);
                     new RepositoryCache().remove(ref.getId());
                 }
-                policyBehaviourFilter.enableBehaviour(ref);
+                if(keepModifiedDate)
+                    policyBehaviourFilter.enableBehaviour(ref);
             };
             if (threaded)
                 nodes.parallelStream().filter(callFilter).forEach(callTask);
