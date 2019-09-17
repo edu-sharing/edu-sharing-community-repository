@@ -69,6 +69,11 @@ public class NodeRunner {
      */
     private boolean transaction;
 
+    /**
+     * shall the cache for each processed node be invalidated/cleared?
+     */
+    private boolean invalidateCache = true;
+
 
     private ApplicationContext applicationContext = AlfAppContextGate.getApplicationContext();
     ServiceRegistry serviceRegistry = (ServiceRegistry) applicationContext.getBean(ServiceRegistry.SERVICE_REGISTRY);
@@ -122,6 +127,14 @@ public class NodeRunner {
         this.runAsSystem = runAsSystem;
     }
 
+    public boolean isInvalidateCache() {
+        return invalidateCache;
+    }
+
+    public void setInvalidateCache(boolean invalidateCache) {
+        this.invalidateCache = invalidateCache;
+    }
+
     /**
      * runs the job for each node
      * @return the number of nodes that have been processed (also if they may have been filtered in the filter expression)
@@ -162,12 +175,14 @@ public class NodeRunner {
                 if (runAsSystem) {
                     AuthenticationUtil.runAsSystem(() -> {
                         task.accept(ref);
-                        new RepositoryCache().remove(ref.getId());
+                        if(invalidateCache)
+                            new RepositoryCache().remove(ref.getId());
                         return null;
                     });
                 } else {
                     task.accept(ref);
-                    new RepositoryCache().remove(ref.getId());
+                    if(invalidateCache)
+                        new RepositoryCache().remove(ref.getId());
                 }
                 if(keepModifiedDate)
                     policyBehaviourFilter.enableBehaviour(ref);
