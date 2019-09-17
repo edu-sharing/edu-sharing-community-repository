@@ -3,6 +3,7 @@ package org.edu_sharing.service.nodeservice;
 import java.io.InputStream;
 import java.io.Serializable;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 
@@ -158,5 +159,5 @@ public interface NodeService {
 
     GetPreviewResult getPreview(String storeProtocol, String storeIdentifier, String nodeId, String version);
 
-    List<NodeRef> getFrontpageNodes() throws Throwable;
+    Collection<NodeRef> getFrontpageNodes() throws Throwable;
 }

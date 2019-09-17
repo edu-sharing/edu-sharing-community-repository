@@ -202,7 +202,7 @@ public class ToolPermissionService {
 		return result;
 	}
 
-	private String getEdu_SharingSystemFolderBase() throws Throwable{
+	public String getEdu_SharingSystemFolderBase() throws Throwable{
 		if(!isAdmin()){
 			throw new Exception("Admin group required");
 		}

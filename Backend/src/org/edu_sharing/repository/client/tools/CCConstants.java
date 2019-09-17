@@ -1164,6 +1164,10 @@ public class CCConstants {
 
 	public final static String CCM_VALUE_MAP_TYPE_EDU_SHARING_SYSTEM_VALUESPACE = "EDUSYSTEM_VALUESPACE";
 
+
+	public final static String CCM_VALUE_IO_NAME_CONFIG_NODE_NAME = "RepositoryConfig";
+
+
 	/**
 	 * this property comes from alfresco when calling queryChildren
 	 */

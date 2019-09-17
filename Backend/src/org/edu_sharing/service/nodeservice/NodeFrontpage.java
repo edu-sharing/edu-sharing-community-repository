@@ -1,5 +1,6 @@
 package org.edu_sharing.service.nodeservice;
 
+import org.alfresco.model.ContentModel;
 import org.alfresco.repo.security.permissions.PermissionReference;
 import org.alfresco.repo.security.permissions.impl.PermissionReferenceImpl;
 import org.alfresco.repo.security.permissions.impl.model.PermissionModel;
@@ -14,6 +15,9 @@ import org.apache.log4j.Logger;
 import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.server.jobs.helper.NodeRunner;
+import org.edu_sharing.service.admin.AdminServiceFactory;
+import org.edu_sharing.service.admin.RepositoryConfigFactory;
+import org.edu_sharing.service.admin.model.RepositoryConfig;
 import org.edu_sharing.service.permission.PermissionService;
 import org.edu_sharing.service.permission.PermissionServiceFactory;
 import org.edu_sharing.service.rating.AccumulatedRatings;
@@ -21,10 +25,10 @@ import org.edu_sharing.service.rating.RatingService;
 import org.edu_sharing.service.rating.RatingServiceFactory;
 import org.edu_sharing.service.search.SearchService;
 import org.edu_sharing.service.search.SearchServiceFactory;
-import org.edu_sharing.service.search.model.SortDefinition;
 import org.edu_sharing.service.stream.StreamServiceHelper;
 import org.edu_sharing.service.tracking.TrackingService;
 import org.edu_sharing.service.tracking.TrackingServiceFactory;
+import org.edu_sharing.service.tracking.TrackingServiceImpl;
 import org.edu_sharing.service.tracking.model.StatisticEntry;
 import org.elasticsearch.action.admin.indices.create.CreateIndexRequest;
 import org.elasticsearch.action.admin.indices.delete.DeleteIndexRequest;
@@ -44,6 +48,7 @@ import org.elasticsearch.search.sort.SortOrder;
 import org.springframework.context.ApplicationContext;
 
 import java.io.IOException;
+import java.io.Serializable;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -62,10 +67,10 @@ public class NodeFrontpage {
         APPLY_DATES=new HashMap<>();
         Calendar calendar = Calendar.getInstance();
         calendar.add(Calendar.DATE, -30);
-        APPLY_DATES.put("30_days",calendar.getTime());
+        APPLY_DATES.put("days_30",calendar.getTime());
         calendar = Calendar.getInstance();
         calendar.add(Calendar.DATE, -100);
-        APPLY_DATES.put("100_days",calendar.getTime());
+        APPLY_DATES.put("days_100",calendar.getTime());
         // null means of all time
         APPLY_DATES.put("all",null);
         initElastic();
@@ -73,48 +78,20 @@ public class NodeFrontpage {
     public void buildCache() {
         try {
             resetElastic();
-            ApplicationContext applicationContext = AlfAppContextGate.getApplicationContext();
-            ServiceRegistry serviceRegistry = (ServiceRegistry) applicationContext
-                    .getBean(ServiceRegistry.SERVICE_REGISTRY);
+
             NodeRunner runner=new NodeRunner();
             runner.setRunAsSystem(true);
             runner.setTypes(Collections.singletonList(CCConstants.CCM_TYPE_IO));
             runner.setThreaded(true);
+            runner.setInvalidateCache(false);
             runner.setTask((ref)->{
                 try {
                     XContentBuilder builder = jsonBuilder().startObject();
 
-                    Set<AccessPermission> permissions = serviceRegistry.getPermissionService().getAllSetPermissions(ref);
-                    PermissionModel permissionModel= (PermissionModel) applicationContext.getBean("permissionsModelDAO");
-                    builder.startArray("authorities");
-                    permissions.stream().
-                            filter((permission)->{
-                                if(!permission.getAccessStatus().equals(AccessStatus.ALLOWED))
-                                    return false;
-
-                                try {
-                                    // Get the subset of all permissions for the particular permission
-                                    Set<PermissionReference> subPermissions = permissionModel.getGranteePermissions(PermissionReferenceImpl.getPermissionReference(QName.createQName(CCConstants.NAMESPACE_CM, "content"), permission.getPermission()));
-                                    //filter if this permission includes the Read Permission
-                                    return subPermissions.stream().anyMatch((p) -> p.getName().equals(org.alfresco.service.cmr.security.PermissionService.READ));
-                                }catch(Throwable t){
-                                    // unknown permission, ignore for now
-                                    return false;
-                                }
-                            }).
-                            map(AccessPermission::getAuthority).
-                            collect(Collectors.toSet()).
-                            forEach((authority)->{
-                                try {
-                                    builder.value(authority);
-                                } catch (IOException e) {}
-                            });
-                    builder.endArray();
-
-                    //@TODO add properties for later queries
+                    addAuthorities(ref, builder);
+                    addNodeMetadata(ref, builder);
                     addRatings(ref, builder);
                     addTracking(ref, builder);
-
 
                     builder.endObject();
 
@@ -137,6 +114,41 @@ public class NodeFrontpage {
             logger.warn(e.getMessage(),e);
         }
     }
+
+    private void addAuthorities(NodeRef ref, XContentBuilder builder) throws IOException {
+        ApplicationContext applicationContext = AlfAppContextGate.getApplicationContext();
+        ServiceRegistry serviceRegistry = (ServiceRegistry) applicationContext
+                .getBean(ServiceRegistry.SERVICE_REGISTRY);
+        Set<AccessPermission> permissions = serviceRegistry.getPermissionService().getAllSetPermissions(ref);
+        PermissionModel permissionModel= (PermissionModel) applicationContext.getBean("permissionsModelDAO");
+        builder.startArray("authorities");
+        permissions.stream().
+                filter((permission)->{
+                    if(!permission.getAccessStatus().equals(AccessStatus.ALLOWED))
+                        return false;
+
+                    try {
+                        // Get the subset of all permissions for the particular permission
+                        Set<PermissionReference> subPermissions = permissionModel.getGranteePermissions(PermissionReferenceImpl.getPermissionReference(QName.createQName(CCConstants.NAMESPACE_CM, "content"), permission.getPermission()));
+                        //filter if this permission includes the Read Permission
+                        return subPermissions.stream().anyMatch((p) -> p.getName().equals(org.alfresco.service.cmr.security.PermissionService.READ));
+                    }catch(Throwable t){
+                        // unknown permission, ignore for now
+                        return false;
+                    }
+                }).
+                map(AccessPermission::getAuthority).
+                collect(Collectors.toSet()).
+                forEach((authority)->{
+                    try {
+                        builder.value(authority);
+                    } catch (IOException e) {}
+                });
+        // add the creator / owner as well
+        builder.value(serviceRegistry.getNodeService().getProperty(ref, ContentModel.PROP_CREATOR));
+        builder.endArray();
+    }
+
     private void addTracking(NodeRef ref, XContentBuilder builder) throws IOException {
         TrackingService trackingService = TrackingServiceFactory.getTrackingService();
         builder.startObject("actions");
@@ -153,6 +165,23 @@ public class NodeFrontpage {
             }
         }
         builder.endObject();
+    }
+    private void addNodeMetadata(NodeRef ref, XContentBuilder builder){
+        try {
+            builder.field("type",NodeServiceHelper.getType(ref));
+            builder.startObject("properties");
+            for(Map.Entry<QName, Serializable> prop : NodeServiceHelper.getPropertiesNative(ref).entrySet()){
+                builder.field(prop.getKey().toString(),prop.getValue());
+            }
+            builder.endObject();
+            builder.startArray("aspects");
+            for(String aspects : NodeServiceHelper.getAspects(ref)){
+                builder.value(aspects);
+            }
+            builder.endArray();
+        } catch (Throwable t) {
+            logger.info(t.getMessage(),t);
+        }
     }
 
     private void addRatings(NodeRef ref, XContentBuilder builder) throws IOException {
@@ -221,7 +250,8 @@ public class NodeFrontpage {
         return hosts;
     }
 
-    public List<NodeRef> getNodesForCurrentUserAndConfig() throws Throwable {
+    public Collection<NodeRef> getNodesForCurrentUserAndConfig() throws Throwable {
+        RepositoryConfig.Frontpage config = RepositoryConfigFactory.getConfig().frontpage;
         //@TODO read and apply config
         BoolQueryBuilder query = QueryBuilders.boolQuery();
         BoolQueryBuilder audience = QueryBuilders.boolQuery();
@@ -232,15 +262,33 @@ public class NodeFrontpage {
         query.must(audience);
         SearchSourceBuilder searchSourceBuilder = new SearchSourceBuilder();
         searchSourceBuilder.query(query);
-        searchSourceBuilder.sort("ratings.30_days.overall", SortOrder.DESC);
-        searchSourceBuilder.size(50);
+        if(config.mode.equals(RepositoryConfig.Frontpage.Mode.rating)){
+            searchSourceBuilder.sort("ratings."+config.timespan.name()+".overall", SortOrder.DESC);
+        }
+        else if(config.mode.equals(RepositoryConfig.Frontpage.Mode.downloads)){
+            searchSourceBuilder.sort("actions."+config.timespan.name()+"."+ TrackingService.EventType.DOWNLOAD_MATERIAL.name(), SortOrder.DESC);
+        }
+        else{
+            searchSourceBuilder.sort("actions."+config.timespan.name()+"."+ TrackingService.EventType.VIEW_MATERIAL.name(), SortOrder.DESC);
+        }
+        searchSourceBuilder.size(config.totalCount);
         searchSourceBuilder.from(0);
         SearchRequest searchRequest = new SearchRequest().source(searchSourceBuilder);
         searchRequest.indices(INDEX_NAME);
         SearchResponse searchResult = client.search(searchRequest);
         List<NodeRef> result=new ArrayList<>();
         for(SearchHit hit : searchResult.getHits().getHits()){
-            result.add(new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE,hit.getId()));
+            if(permissionService.hasPermission(StoreRef.PROTOCOL_WORKSPACE,StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(),hit.getId(),CCConstants.PERMISSION_READ)){
+                result.add(new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE,hit.getId()));
+            }
+        }
+        if(config.displayCount<config.totalCount) {
+            Set<NodeRef> randoms = new HashSet<>();
+            // grab a random count of elements (equals displayCount) of the whole array
+            while (randoms.size() < config.displayCount) {
+                randoms.add(result.get(new Random().nextInt(result.size())));
+            }
+            return randoms;
         }
         return result;
     }

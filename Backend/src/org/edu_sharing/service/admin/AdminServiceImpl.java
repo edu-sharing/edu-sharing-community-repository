@@ -1,13 +1,6 @@
 package org.edu_sharing.service.admin;
 
-import java.io.ByteArrayInputStream;
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.PrintWriter;
-import java.io.Serializable;
-import java.io.StringWriter;
+import java.io.*;
 import java.lang.management.ManagementFactory;
 import java.text.Collator;
 import java.util.ArrayList;
@@ -37,10 +30,12 @@ import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 
+import com.google.gson.Gson;
 import org.alfresco.repo.cache.SimpleCache;
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.service.ServiceRegistry;
 import org.alfresco.service.cmr.repository.NodeRef;
+import org.alfresco.service.cmr.repository.StoreRef;
 import org.alfresco.service.cmr.security.AuthorityType;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.input.ReversedLinesFileReader;
@@ -71,12 +66,15 @@ import org.edu_sharing.restservices.RepositoryDao;
 import org.edu_sharing.restservices.shared.Group;
 import org.edu_sharing.service.admin.model.GlobalGroup;
 import org.edu_sharing.repository.server.jobs.quartz.JobInfo;
+import org.edu_sharing.service.admin.model.RepositoryConfig;
 import org.edu_sharing.service.admin.model.ServerUpdateInfo;
 import org.edu_sharing.service.admin.model.ToolPermission;
 import org.edu_sharing.service.authority.AuthorityServiceFactory;
 import org.edu_sharing.service.editlock.EditLockServiceFactory;
 import org.edu_sharing.service.foldertemplates.FolderTemplatesImpl;
+import org.edu_sharing.service.nodeservice.NodeService;
 import org.edu_sharing.service.nodeservice.NodeServiceFactory;
+import org.edu_sharing.service.nodeservice.NodeServiceHelper;
 import org.edu_sharing.service.permission.PermissionService;
 import org.edu_sharing.service.permission.PermissionServiceFactory;
 import org.edu_sharing.service.toolpermission.ToolPermissionService;
@@ -124,7 +122,14 @@ public class AdminServiceImpl implements AdminService  {
 
 		return result;
 	}
-	
+	@Override
+	public RepositoryConfig getConfig(){
+		return RepositoryConfigFactory.getConfig();
+	}
+	@Override
+	public void setConfig(RepositoryConfig config){
+		RepositoryConfigFactory.setConfig(config);
+	}
 	@Override
 	public Map<String, ToolPermission> getToolpermissions(String authority) throws Throwable {
 

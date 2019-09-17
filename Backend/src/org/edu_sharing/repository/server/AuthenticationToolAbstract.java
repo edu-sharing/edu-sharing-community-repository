@@ -70,7 +70,7 @@ public abstract class AuthenticationToolAbstract implements AuthenticationTool {
 			return currentLocale;
 		}catch(Throwable t){
 			String primary=getPrimaryLocale();
-			log.info("error fetching current locale from session, will use primary "+primary);
+			log.debug("error fetching current locale from session, will use primary "+primary);
 			return primary;
 		}
 	}

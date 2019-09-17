@@ -1,14 +1,20 @@
 package org.edu_sharing.service.nodeservice;
 
+import java.io.ByteArrayInputStream;
+import java.io.InputStream;
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
+import org.alfresco.model.ContentModel;
+import org.alfresco.service.ServiceRegistry;
 import org.alfresco.service.cmr.repository.ChildAssociationRef;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.repository.StoreRef;
+import org.alfresco.service.namespace.QName;
+import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.client.tools.metadata.ValueTool;
 import org.edu_sharing.repository.server.MCAlfrescoAPIClient;
@@ -16,6 +22,7 @@ import org.edu_sharing.repository.server.RepoFactory;
 import org.edu_sharing.repository.server.tools.NameSpaceTool;
 import org.edu_sharing.service.nodeservice.model.GetPreviewResult;
 import org.edu_sharing.service.search.model.SortDefinition;
+import org.springframework.context.ApplicationContext;
 
 public class NodeServiceHelper {
 	/**
@@ -108,6 +115,49 @@ public class NodeServiceHelper {
         return NodeServiceFactory.getLocalService().getProperties(nodeRef.getStoreRef().getProtocol(),nodeRef.getStoreRef().getIdentifier(),nodeRef.getId());
     }
 
+	/**
+	 * return the native properties
+	 * this means:
+	 *  - no edu-sharing caches
+	 *  - no post-processing for dates or valuespaces
+	 *  - no type conversion, use raw alfresco types
+	 * @return
+	 */
+	public static Map<QName, Serializable> getPropertiesNative(NodeRef nodeRef) throws Throwable {
+		ApplicationContext applicationContext = AlfAppContextGate.getApplicationContext();
+		ServiceRegistry serviceRegistry = (ServiceRegistry) applicationContext.getBean(ServiceRegistry.SERVICE_REGISTRY);
+		return serviceRegistry.getNodeService().getProperties(nodeRef);
+	}
+	public static InputStream getContent(NodeRef nodeRef) throws Throwable {
+		return NodeServiceFactory.getLocalService().getContent(nodeRef.getStoreRef().getProtocol(),nodeRef.getStoreRef().getIdentifier(),nodeRef.getId(),null, ContentModel.PROP_CONTENT.toString());
+	}
+	public static void writeContent(NodeRef nodeRef,InputStream content,String mimetype) throws Throwable {
+		NodeServiceFactory.getLocalService().writeContent(
+				nodeRef.getStoreRef(),
+				nodeRef.getId(),
+				content,
+				mimetype,
+				null,
+				ContentModel.PROP_CONTENT.toString()
+		);
+	}
+
+	/**
+	 * write the given text as text/plain content to node
+	 * @param nodeRef
+	 * @param content
+	 * @throws Throwable
+	 */
+	public static void writeContentText(NodeRef nodeRef,String content) throws Throwable {
+		NodeServiceFactory.getLocalService().writeContent(
+				nodeRef.getStoreRef(),
+				nodeRef.getId(),
+				new ByteArrayInputStream(content.getBytes()),
+				"text/plain",
+				null,
+				ContentModel.PROP_CONTENT.toString()
+		);
+	}
     /**
      * Get all properties automatically splitted by multivalue
      * Each property is always returned as an array

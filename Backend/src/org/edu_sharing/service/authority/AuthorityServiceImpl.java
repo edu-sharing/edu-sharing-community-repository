@@ -50,7 +50,6 @@ public class AuthorityServiceImpl implements AuthorityService {
 	NodeService nodeService = serviceRegistry.getNodeService();
 	OwnableService ownableService = serviceRegistry.getOwnableService();
 	PermissionService permissionService = serviceRegistry.getPermissionService();
-	MCAlfrescoAPIClient baseClient = new MCAlfrescoAPIClient();
     org.edu_sharing.alfresco.service.AuthorityService eduAuthorityService = (org.edu_sharing.alfresco.service.AuthorityService)alfApplicationContext.getBean("eduAuthorityService");
 
 
@@ -93,7 +92,7 @@ public class AuthorityServiceImpl implements AuthorityService {
                     {
                 		String key =  authorityName;
                 		String groupType = (String) getAuthorityProperty(key,CCConstants.CCM_PROP_GROUPEXTENSION_GROUPTYPE);
-                		if(groupType!=null && groupType.equals(CCConstants.ADMINISTRATORS_GROUP_TYPE) && !baseClient.isAdmin(AuthenticationUtil.getFullyAuthenticatedUser()))
+                		if(groupType!=null && groupType.equals(CCConstants.ADMINISTRATORS_GROUP_TYPE) && !new MCAlfrescoAPIClient().isAdmin(AuthenticationUtil.getFullyAuthenticatedUser()))
                 			throw new AccessDeniedException("An admin group can not be deleted");
                 		authorityService.deleteAuthority(key, true);
 
@@ -296,7 +295,7 @@ public EduGroup getEduGroup(String authority){
 
 			@Override
 			public String doWork() throws Exception {
-				return baseClient.createOrUpdateGroup(groupName, displayName,parentGroupFinal,true);
+				return new MCAlfrescoAPIClient().createOrUpdateGroup(groupName, displayName,parentGroupFinal,true);
 			}
 		});
 	}

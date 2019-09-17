@@ -364,7 +364,10 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
 		map.put(CCConstants.CM_NAME, new String[]{name});
 		return map;
 	}
-	
+
+	/**
+	 * returns the child with the given name, or null if no child matched
+	 */
 	@Override
 	public String findNodeByName(String parentId, String name){
 		List<ChildAssociationRef> children = nodeService.getChildAssocs(new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE,parentId));
@@ -1139,7 +1142,7 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
 	}
 
 	@Override
-	public List<NodeRef> getFrontpageNodes() throws Throwable {
+	public Collection<NodeRef> getFrontpageNodes() throws Throwable {
 		return new NodeFrontpage().getNodesForCurrentUserAndConfig();
 	}
 }

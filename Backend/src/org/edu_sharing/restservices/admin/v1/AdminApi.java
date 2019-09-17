@@ -4,7 +4,6 @@ import java.io.InputStream;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -42,14 +41,12 @@ import org.edu_sharing.restservices.DAOException;
 import org.edu_sharing.restservices.NodeDao;
 import org.edu_sharing.restservices.RepositoryDao;
 import org.edu_sharing.restservices.RestConstants;
-import org.edu_sharing.restservices.TrackingDAO;
 import org.edu_sharing.restservices.admin.v1.model.AdminStatistics;
 import org.edu_sharing.restservices.admin.v1.model.CollectionsResult;
 import org.edu_sharing.restservices.admin.v1.model.ExcelResult;
 import org.edu_sharing.restservices.admin.v1.model.UpdateResult;
 import org.edu_sharing.restservices.admin.v1.model.UploadResult;
 import org.edu_sharing.restservices.admin.v1.model.XMLResult;
-import org.edu_sharing.restservices.node.v1.model.NodeEntry;
 import org.edu_sharing.restservices.shared.ErrorResponse;
 import org.edu_sharing.restservices.shared.Filter;
 import org.edu_sharing.restservices.shared.Group;
@@ -57,11 +54,10 @@ import org.edu_sharing.restservices.shared.Node;
 import org.edu_sharing.restservices.shared.NodeSearch;
 import org.edu_sharing.restservices.shared.Pagination;
 import org.edu_sharing.restservices.shared.SearchResult;
-import org.edu_sharing.restservices.tracking.v1.model.Tracking;
-import org.edu_sharing.restservices.tracking.v1.model.TrackingNode;
 import org.edu_sharing.service.NotAnAdminException;
 import org.edu_sharing.service.admin.AdminService;
 import org.edu_sharing.service.admin.AdminServiceFactory;
+import org.edu_sharing.service.admin.model.RepositoryConfig;
 import org.edu_sharing.service.admin.model.GlobalGroup;
 import org.edu_sharing.service.admin.model.ServerUpdateInfo;
 import org.edu_sharing.service.lifecycle.PersonLifecycleService;
@@ -69,7 +65,6 @@ import org.edu_sharing.service.search.SearchService.ContentType;
 import org.edu_sharing.service.search.model.SearchToken;
 import org.edu_sharing.service.search.model.SortDefinition;
 import org.edu_sharing.service.admin.model.ToolPermission;
-import org.edu_sharing.service.tracking.TrackingService;
 import org.glassfish.jersey.media.multipart.FormDataParam;
 
 import io.swagger.annotations.Api;
@@ -82,7 +77,7 @@ import io.swagger.annotations.ApiResponses;
 @Api(tags = { "ADMIN v1" })
 @ApiService(value = "ADMIN", major = 1, minor = 0)
 public class AdminApi {
-	public static Map<String, String[]> XML_FILTER = new HashMap<>();
+	static Map<String, String[]> XML_FILTER = new HashMap<>();
 	static {
 		XML_FILTER.put(AdminServiceFactory.HOME_APPLICATION_PROPERTIES, new String[] { "private_key", "password" });
 	}
@@ -1244,14 +1239,40 @@ public class AdminApi {
 
     }
 
-    @OPTIONS
-    @Path("/log")
-    @ApiOperation(hidden = true, value = "")
 
-    public Response options15() {
-
-		return Response.status(Response.Status.OK).header("Allow", "OPTIONS, POST").build();
+	@GET
+	@Path("/repositoryConfig")
+	@ApiOperation(value = "get the repository config object")
+	@ApiResponses(value = {
+			@ApiResponse(code = 200, message = RestConstants.HTTP_200, response = RepositoryConfig.class),
+			@ApiResponse(code = 400, message = RestConstants.HTTP_400, response = ErrorResponse.class),
+			@ApiResponse(code = 401, message = RestConstants.HTTP_401, response = ErrorResponse.class),
+			@ApiResponse(code = 403, message = RestConstants.HTTP_403, response = ErrorResponse.class),
+			@ApiResponse(code = 404, message = RestConstants.HTTP_404, response = ErrorResponse.class),
+			@ApiResponse(code = 500, message = RestConstants.HTTP_500, response = ErrorResponse.class) })
+	public Response setConfig(@Context HttpServletRequest req) {
+		try {
+			return Response.ok().entity(AdminServiceFactory.getInstance().getConfig()).build();
+		} catch (Throwable t) {
+			return ErrorResponse.createResponse(t);
+		}
 	}
-
-
+	@PUT
+	@Path("/repositoryConfig")
+	@ApiOperation(value = "set/update the repository config object")
+	@ApiResponses(value = {
+			@ApiResponse(code = 200, message = RestConstants.HTTP_200, response = Void.class),
+			@ApiResponse(code = 400, message = RestConstants.HTTP_400, response = ErrorResponse.class),
+			@ApiResponse(code = 401, message = RestConstants.HTTP_401, response = ErrorResponse.class),
+			@ApiResponse(code = 403, message = RestConstants.HTTP_403, response = ErrorResponse.class),
+			@ApiResponse(code = 404, message = RestConstants.HTTP_404, response = ErrorResponse.class),
+			@ApiResponse(code = 500, message = RestConstants.HTTP_500, response = ErrorResponse.class) })
+	public Response getConfig(@Context HttpServletRequest req,RepositoryConfig config) {
+		try {
+			AdminServiceFactory.getInstance().setConfig(config);
+			return Response.ok().build();
+		} catch (Throwable t) {
+			return ErrorResponse.createResponse(t);
+		}
+	}
 }

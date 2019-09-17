@@ -116,10 +116,11 @@ public class RatingServiceImpl implements RatingService {
             try {
                 AccumulatedRatings accumulated = EduSharingRatingCache.get(new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, nodeId));
                 if (accumulated != null) {
-                    logger.info("using rating cache for node " + nodeId);
                     return accumulated;
                 }
-            } catch (Exception e) {
+            }catch(ClassCastException e){
+                // ignore
+            }catch (Exception e) {
                 logger.warn("Failed to resolve rating cache for node " + nodeId + ": " + e.getMessage());
             }
         }
