@@ -35,9 +35,12 @@ public class DbNodeServiceImpl extends org.alfresco.repo.node.db.DbNodeServiceIm
 	
 	@Override
 	public List<ChildAssociationRef> getChildAssocs(NodeRef nodeRef, java.util.Set<QName> childNodeTypeQNames) {
-		List<ChildAssociationRef> result = new VirtualEduGroupFolderTool(serviceRegistry,this).getGroupMapChildren(nodeRef);
-		if(result != null){
-			return result;
+		// check if the maps are allowed to be displayed
+		if(childNodeTypeQNames==null || childNodeTypeQNames.contains(QName.createQName(CCConstants.CCM_TYPE_MAP))) {
+			List<ChildAssociationRef> result = new VirtualEduGroupFolderTool(serviceRegistry, this).getGroupMapChildren(nodeRef);
+			if (result != null) {
+				return result;
+			}
 		}
 		
 		return super.getChildAssocs(nodeRef, childNodeTypeQNames);
