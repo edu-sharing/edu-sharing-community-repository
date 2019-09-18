@@ -102,6 +102,7 @@ public class BeforeDeleteIOPolicy implements BeforeDeleteNodePolicy {
 							originalId,
 							nodeRef.getId()
 					);
+					return null;
 				});
 			}
 		} catch (Exception e) {
