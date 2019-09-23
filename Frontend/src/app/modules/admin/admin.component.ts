@@ -911,6 +911,10 @@ export class AdminComponent {
                     icon: "info_outline"
                 },
                 {
+                  id: "FRONTPAGE",
+                  icon: "home"
+                },
+                {
                     id: "CONFIG",
                     icon: "build"
                 },
@@ -950,7 +954,7 @@ export class AdminComponent {
             });
         }
         if(this.loginResult.isAdmin || this.mediacenters.filter((mc)=>mc.administrationAccess).length){
-            this.buttons.splice(2,0,{
+            this.buttons.splice(3,0,{
                 id: "MEDIACENTER",
                 icon: "business"
             });

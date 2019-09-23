@@ -1,0 +1,61 @@
+<global-progress *ngIf="loading"></global-progress>
+<div class="frontpage">
+    <form *ngIf="config" [formGroup]="form">
+        <h4 class="mat-heading-4 mat-heading-underline"><i icon iconId="settings"></i>{{'ADMIN.FRONTPAGE.GENERAL' | translate}}</h4>
+        <div class="group">
+            <mat-form-field>
+                <mat-label>{{'ADMIN.FRONTPAGE.MODE_LABEL' | translate}}</mat-label>
+                <mat-hint>{{'ADMIN.FRONTPAGE.MODE_HINT' | translate}}</mat-hint>
+                <mat-select id="mode" [(ngModel)]="config.frontpage.mode" [ngModelOptions]="{standalone: true}">
+                    <mat-option *ngFor="let mode of modes" [value]="mode">{{'ADMIN.FRONTPAGE.MODE.'+mode | translate}}</mat-option>
+                </mat-select>
+            </mat-form-field>
+            <mat-form-field>
+                <mat-label>{{'ADMIN.FRONTPAGE.TIMESPAN_LABEL' | translate}}</mat-label>
+                <mat-hint>{{'ADMIN.FRONTPAGE.TIMESPAN_HINT' | translate}}</mat-hint>
+                <mat-select id="timespan" [(ngModel)]="config.frontpage.timespan" [ngModelOptions]="{standalone: true}">
+                    <mat-option *ngFor="let timespan of timespans" [value]="timespan">{{'ADMIN.FRONTPAGE.TIMESPAN.'+timespan | translate}}</mat-option>
+                </mat-select>
+            </mat-form-field>
+        </div>
+        <div class="group">
+            <mat-form-field>
+                <mat-label>{{'ADMIN.FRONTPAGE.TOTAL_COUNT_LABEL' | translate}}</mat-label>
+                <mat-hint>{{'ADMIN.FRONTPAGE.TOTAL_COUNT_HINT' | translate}}</mat-hint>
+                <input matInput id="totalCount" formControlName="totalCount" type="number">
+                <mat-error *ngIf="form.get('totalCount').errors">
+                    <span *ngIf="form.get('totalCount').errors.required">{{'FIELD_REQUIRED' | translate}}</span>
+                    <span *ngIf="form.get('totalCount').errors.pattern">{{'FIELD_VALIDATION_ERROR_INTEGER' | translate}}</span>
+                    <span *ngIf="form.get('totalCount').errors.outOfRange">{{'ADMIN.FRONTPAGE.TOTAL_COUNT_OUT_OF_RANGE' | translate}}</span>
+                </mat-error>
+            </mat-form-field>
+            <mat-form-field>
+                <mat-label>{{'ADMIN.FRONTPAGE.DISPLAY_COUNT_LABEL' | translate}}</mat-label>
+                <mat-hint>{{'ADMIN.FRONTPAGE.DISPLAY_COUNT_HINT' | translate}}</mat-hint>
+                <input matInput id="displayCount" type="number" formControlName="displayCount" [(ngModel)]="config.frontpage.displayCount">
+            </mat-form-field>
+        </div>
+        <div class="group">
+            <div class="save">
+                <button mat-raised-button color="primary" (click)="save()" [disabled]="!form.valid">{{'SAVE' | translate}}</button>
+            </div>
+        </div>
+    </form>
+    <h4 class="mat-heading-4 mat-heading-underline preview-heading"><i icon iconId="apps"></i>{{'ADMIN.FRONTPAGE.PREVIEW' | translate}}
+        <div class="reload"><button mat-icon-button (click)="updatePreviews()"><i icon iconId="refresh"></i></button></div>
+    </h4>
+    <div class="group preview">
+        <h5 class="mat-heading-5 preview-error" *ngIf="previewError">{{'ADMIN.FRONTPAGE.PREVIEW_ERROR.'+previewError | translate}}</h5>
+        <listTable *ngIf="!previewError"
+            [isLoading]="previewLoading"
+            [nodes]="previewNodes"
+            [columns]="previewColumns"
+            [hasCheckbox]="false"
+            [hasIcon]="true"
+            [viewType]="1"
+            [isClickable]="true"
+            (clickRow)="openNode($event)"
+            ></listTable>
+    </div>
+    <h5 class="mat-heading-5 preview-hint" *ngIf="!previewLoading && !previewError" innerHTML="{{'ADMIN.FRONTPAGE.PREVIEW_HINT' | translate}}"></h5>
+</div>

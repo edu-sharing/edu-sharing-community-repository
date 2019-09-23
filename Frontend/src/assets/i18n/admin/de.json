@@ -7,6 +7,7 @@
     "MODE": {
       "INFO": "Info",
       "STATISTICS": "Statistiken",
+      "FRONTPAGE": "Startseite",
       "MEDIACENTER": "Medienzentren",
       "CONFIG": "Grundkonfiguration",
       "APPLICATIONS": "Remote-Systeme (Rendering, LMS, Suchen)",
@@ -338,6 +339,35 @@
       },
       "STATISTICS": {
         "TITLE": "Statistiken"
+      }
+    },
+    "FRONTPAGE": {
+      "GENERAL": "Allgemeine Einstellungen",
+      "MODE_LABEL": "Modus",
+      "MODE_HINT": "Nach welchem Schema sollen die Elemente der Startseite ausgewählt werden",
+      "MODE": {
+        "rating" : "Bestbewertete Elemente",
+        "views" : "Am häufigsten aufgerufene Elemente",
+        "downloads" : "Am häufigsten heruntergeladene Elemente"
+      },
+      "TIMESPAN_LABEL": "Zeitspanne",
+      "TIMESPAN_HINT": "Über welchen Zeitbereich soll die Auswertung der Daten erfolgen",
+      "TIMESPAN": {
+        "days_30": "Letzte 30 Tage",
+        "days_100": "Letzte 100 Tage",
+        "all": "Gesamter Zeitraum"
+      },
+      "SAVED": "Einstellungen wurden gespeichert",
+      "TOTAL_COUNT_LABEL": "Gesamtzahl Elemente",
+      "TOTAL_COUNT_HINT": "Gesamtzahl an Elementen, welche ausgewählt werden. Ist dieser Wert >= der angezeigten Elemente, wird immer zufällig die gewählte Anzahl der angezeigten Elemente aus diesem Pool ausgewählt",
+      "DISPLAY_COUNT_LABEL": "Anzahl angezeigter Elemente",
+      "DISPLAY_COUNT_HINT": "Anzahl der Elemente, die beim Öffnen der Startseite angezeigt werden sollen",
+      "TOTAL_COUNT_OUT_OF_RANGE": "Die Gesamtzahl der Elemente muss >= der angezeigten Elemente sein",
+      "PREVIEW": "Vorschau der Elemente",
+      "PREVIEW_HINT": "Hinweis: Die hier dargestellte Vorschau hat folgende Einschränkungen:<ul><li>Soeben vorgenommene Anpassungen müssen zunächst gespeichert werden</li><li>Es werden alle Materialien, unabhängig von der Sichtbarkeit eines Nutzers, dargestellt</li><li>Die Elemente der Startseite werden abhängig von einem Cache aktualisiert (i.d.R Nachts)</li></ul>",
+      "PREVIEW_ERROR": {
+        "ELASTICSEARCH" : "Der Verbindungsaufbau zu Elasticsearch ist fehlgeschlagen",
+        "UNKNOWN": "Beim abrufen der Inhalte für die Startseite ist ein unbekannter Fehler aufgetreten"
       }
     }
   }

@@ -42,8 +42,8 @@ public class RepositoryConfigFactory {
                 return new Gson().fromJson(new InputStreamReader(content), RepositoryConfig.class);
             } catch (Throwable t) {
                 logger.warn(t.getMessage(),t);
+                return new RepositoryConfig();
             }
-            return null;
         });
     }
     public static void setConfig(RepositoryConfig config){

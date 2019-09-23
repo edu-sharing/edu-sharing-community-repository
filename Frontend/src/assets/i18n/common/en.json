@@ -24,6 +24,7 @@
   "MORE_SELECTBOX":"more elements",
   "HIDE_MORE": "hide",
   "FIELD_REQUIRED" : "Required",
+  "FIELD_VALIDATION_ERROR_INTEGER" : "Use integer numbers",
   "EXTENSION_NOT_MATCH":"Change file extension?",
   "EXTENSION_NOT_MATCH_INFO":"Are you sure you want to change the file extension from '{{extensionOld}}' to '{{extensionNew}}'?\n\n{{warning}}",
   "EXTENSION_NOT_MATCH_INFO_OLD":"Are you sure you want to remove the file extension '{{extensionOld}}'?\n\n{{warning}}",

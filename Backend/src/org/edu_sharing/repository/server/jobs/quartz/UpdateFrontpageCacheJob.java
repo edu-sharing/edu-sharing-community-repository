@@ -87,7 +87,7 @@ public class UpdateFrontpageCacheJob extends AbstractJob{
 	@Override
 	public void execute(JobExecutionContext context) throws JobExecutionException {
 		AuthenticationUtil.runAsSystem(() -> {
-			new NodeFrontpage().buildCache();
+			new NodeFrontpage().buildCache(this);
 			return null;
 		});
 	

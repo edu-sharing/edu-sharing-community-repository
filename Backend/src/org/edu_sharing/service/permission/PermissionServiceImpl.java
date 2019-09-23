@@ -1531,7 +1531,7 @@ public class PermissionServiceImpl implements org.edu_sharing.service.permission
 			}
 		}
 
-		if(!CCConstants.AUTHORITY_GROUP_EVERYONE.equals(authorityId) && !authorityService.authorityExists(authorityId)){
+		if(!CCConstants.AUTHORITY_GROUP_EVERYONE.equals(authorityId) && !"System".equals(authorityId) && !authorityService.authorityExists(authorityId)){
 			throw new IllegalArgumentException("Authority "+authorityId+" does not exist");
 		}
 		return AuthenticationUtil.runAs(() -> {

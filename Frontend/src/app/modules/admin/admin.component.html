@@ -142,6 +142,11 @@
     <app-admin-mediacenter
     ></app-admin-mediacenter>
 </div>
+<div *ngIf="mode=='FRONTPAGE'" class="content frontpage">
+    <app-admin-frontpage
+        (onOpenNode)="debugNode($event)"
+    ></app-admin-frontpage>
+</div>
 <div *ngIf="mode=='APPLICATIONS'" class="content applications">
   <input #xmlSelect type="file" style="display:none" id="xmlSelect" accept="application/xml" (change)="registerAppXml($event)" />
   <form (ngSubmit)="registerApp()">

@@ -1,6 +1,7 @@
 package org.edu_sharing.service.nodeservice;
 
 import org.alfresco.model.ContentModel;
+import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.repo.security.permissions.PermissionReference;
 import org.alfresco.repo.security.permissions.impl.PermissionReferenceImpl;
 import org.alfresco.repo.security.permissions.impl.model.PermissionModel;
@@ -10,11 +11,14 @@ import org.alfresco.service.cmr.repository.StoreRef;
 import org.alfresco.service.cmr.security.AccessPermission;
 import org.alfresco.service.cmr.security.AccessStatus;
 import org.alfresco.service.namespace.QName;
+import org.apache.http.Header;
 import org.apache.http.HttpHost;
 import org.apache.log4j.Logger;
 import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.server.jobs.helper.NodeRunner;
+import org.edu_sharing.repository.server.jobs.quartz.AbstractJob;
+import org.edu_sharing.repository.server.jobs.quartz.UpdateFrontpageCacheJob;
 import org.edu_sharing.service.admin.AdminServiceFactory;
 import org.edu_sharing.service.admin.RepositoryConfigFactory;
 import org.edu_sharing.service.admin.model.RepositoryConfig;
@@ -75,7 +79,7 @@ public class NodeFrontpage {
         APPLY_DATES.put("all",null);
         initElastic();
     }
-    public void buildCache() {
+    public void buildCache(AbstractJob job) {
         try {
             resetElastic();
 
@@ -86,12 +90,31 @@ public class NodeFrontpage {
             runner.setInvalidateCache(false);
             runner.setTask((ref)->{
                 try {
+                    if (job.isInterrupted())
+                        return;
+                    // dummy task, only for test
+                    /*AuthenticationUtil.runAsSystem(()->{
+                        RatingServiceFactory.getLocalService().addOrUpdateRating(ref.getId(), (double) Math.round(Math.random()*4 + 1),"test");
+                        TrackingServiceFactory.getTrackingService().trackActivityOnNode(ref,null, TrackingService.EventType.VIEW_MATERIAL);
+                        TrackingServiceFactory.getTrackingService().trackActivityOnNode(ref,null, TrackingService.EventType.VIEW_MATERIAL_EMBEDDED);
+                        TrackingServiceFactory.getTrackingService().trackActivityOnNode(ref,null, TrackingService.EventType.DOWNLOAD_MATERIAL);
+                        return null;
+                    });*/
                     XContentBuilder builder = jsonBuilder().startObject();
 
+                    long time=System.currentTimeMillis();
                     addAuthorities(ref, builder);
+                    logger.info("Authorities: "+(System.currentTimeMillis()-time)+" ms");
+                    time=System.currentTimeMillis();
                     addNodeMetadata(ref, builder);
+                    logger.info("Metadata: "+(System.currentTimeMillis()-time)+" ms");
+                    time=System.currentTimeMillis();
                     addRatings(ref, builder);
+                    logger.info("Ratings: "+(System.currentTimeMillis()-time)+" ms");
+                    time=System.currentTimeMillis();
                     addTracking(ref, builder);
+                    logger.info("Tracking: "+(System.currentTimeMillis()-time)+" ms");
+                    time=System.currentTimeMillis();
 
                     builder.endObject();
 
@@ -102,9 +125,10 @@ public class NodeFrontpage {
 
                     indexRequest.source(builder);
                     IndexResponse result = client.index(indexRequest);
-                    String id=result.getId();
-                    logger.debug("added node cache for "+ref.getId()+" to elastic");
-                }catch(Throwable t){
+                    String id = result.getId();
+                    logger.debug("added node cache for " + ref.getId() + " to elastic");
+                }
+                catch(Throwable t){
                     logger.warn(t.getMessage(),t);
                 }
             });
@@ -215,7 +239,15 @@ public class NodeFrontpage {
                 hosts.toArray(new HttpHost[0]));
         client = new RestHighLevelClient(restClient);
         try {
+            if(!client.ping()){
+                throw new Exception();
+            }
+        } catch (Exception e) {
+            throw new RuntimeException("No Elasticsearch instance was found at "+hosts.get(0));
+        }
+        try {
             CreateIndexRequest  indexRequest = new CreateIndexRequest(INDEX_NAME);
+            /*
             XContentBuilder builder = jsonBuilder().
                     startObject().
                     startObject(TYPE_NAME).
@@ -226,7 +258,8 @@ public class NodeFrontpage {
             builder.endObject().
                     endObject().
                     endObject();
-            //indexRequest.mapping(TYPE_NAME, builder);
+            indexRequest.mapping(TYPE_NAME, builder);
+            */
 
             client.indices().create(indexRequest);
         } catch (Exception e) {

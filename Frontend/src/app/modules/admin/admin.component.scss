@@ -88,6 +88,13 @@ $sidenavWidthMobile:66px;
     margin-left: 10px;
   }
 }
+.frontpage{
+  display: flex;
+  justify-content: center;
+  app-admin-frontpage{
+    width: 100%;
+  }
+}
 .info{
   max-width: 800px;
   margin: auto;

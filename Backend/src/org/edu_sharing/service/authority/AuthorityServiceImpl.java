@@ -62,7 +62,10 @@ public class AuthorityServiceImpl implements AuthorityService {
 	 */
 	@Override
 	public Object getAuthorityProperty(String authority,String property){
-		return nodeService.getProperty(authorityService.getAuthorityNodeRef(authority),QName.createQName(property));
+		NodeRef ref = authorityService.getAuthorityNodeRef(authority);
+		if(ref==null)
+			return null;
+		return nodeService.getProperty(ref,QName.createQName(property));
 	}
 	/**
 	 * returns the node id for the given authority (useful if you want to change metadata)

@@ -24,6 +24,7 @@
   "MORE_SELECTBOX": "weitere Elemente",
   "HIDE_MORE": "weniger anzeigen",
   "FIELD_REQUIRED" : "Pflichtfeld",
+  "FIELD_VALIDATION_ERROR_INTEGER" : "Ganze Zahlen verwenden",
   "EXTENSION_NOT_MATCH":"Dateierweiterung ändern?",
   "EXTENSION_NOT_MATCH_INFO":"Sind Sie sicher, dass Sie die Dateierweiterung von '{{extensionOld}}' auf '{{extensionNew}}' ändern möchten?\n\n{{warning}}",
   "EXTENSION_NOT_MATCH_INFO_OLD":"Sind Sie sicher, dass Sie die Dateierweiterung '{{extensionOld}}' entfernen möchten?\n\n{{warning}}",
