@@ -46,20 +46,24 @@ public class TrackingServiceImpl extends TrackingServiceDefault{
     public static String TRACKING_STATISTICS_USER = "SELECT authority,authority_organization,authority_mediacenter,time as date,type,COUNT(*) :fields from edu_tracking_user as tracking" +
             " WHERE time BETWEEN ? AND ? AND (:filter)" +
             " GROUP BY authority,authority_organization,authority_mediacenter,time,type :grouping" +
-            " ORDER BY date";
+            " ORDER BY date" +
+            " LIMIT 100";
     public static String TRACKING_STATISTICS_NODE = "SELECT node_uuid as node,authority,authority_organization,authority_mediacenter,time as date,type,COUNT(*) :fields from edu_tracking_node as tracking" +
             //" LEFT JOIN alf_node_properties as props ON (tracking.node_id=props.node_id and props.qname_id=28)" +
             " WHERE time BETWEEN ? AND ? AND (:filter)" +
             " GROUP BY node,authority,authority_organization,authority_mediacenter,time,type :grouping" +
-            " ORDER BY date";
+            " ORDER BY date" +
+            " LIMIT 100";
     public static String TRACKING_STATISTICS_NODE_GROUPED = "SELECT node_uuid as node,type,COUNT(*) :fields from edu_tracking_node as tracking" +
             " WHERE time BETWEEN ? AND ? AND (:filter)" +
             " GROUP BY node,type :grouping" +
-            " ORDER BY count DESC";
+            " ORDER BY count DESC" +
+            " LIMIT 300";
     public static String TRACKING_STATISTICS_NODE_SINGLE = "SELECT type,COUNT(*) from edu_tracking_node as tracking" +
             " WHERE node_uuid = ? AND time BETWEEN ? AND ?" +
             " GROUP BY type" +
-            " ORDER BY count DESC";
+            " ORDER BY count DESC" +
+            " LIMIT 300";
     public static String TRACKING_STATISTICS_DAILY = "SELECT type,COUNT(*),TO_CHAR(time,'yyyy-mm-dd') as date :fields from :table as tracking" +
             " WHERE time BETWEEN ? AND ? AND (:filter)" +
             " GROUP BY type,date :grouping" +
