@@ -1,5 +1,6 @@
 package org.edu_sharing.service.nodeservice;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -8,15 +9,19 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
+import org.alfresco.service.ServiceRegistry;
 import org.alfresco.service.cmr.repository.ChildAssociationRef;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.repository.StoreRef;
 import org.alfresco.service.namespace.QName;
+import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
 import org.edu_sharing.repository.client.tools.CCConstants;
+import org.edu_sharing.repository.client.tools.metadata.ValueTool;
 import org.edu_sharing.repository.server.MCAlfrescoAPIClient;
 import org.edu_sharing.repository.server.RepoFactory;
 import org.edu_sharing.repository.server.tools.NameSpaceTool;
 import org.edu_sharing.service.search.model.SortDefinition;
+import org.springframework.context.ApplicationContext;
 
 public class NodeServiceHelper {
 	/**
@@ -95,6 +100,42 @@ public class NodeServiceHelper {
 	 */
     public static String getProperty(NodeRef nodeRef,String key){
 		return NodeServiceFactory.getLocalService().getProperty(nodeRef.getStoreRef().getProtocol(),nodeRef.getStoreRef().getIdentifier(),nodeRef.getId(),key);
+	}
+	public static String[] getAspects(NodeRef nodeRef){
+		return NodeServiceFactory.getLocalService().getAspects(nodeRef.getStoreRef().getProtocol(),nodeRef.getStoreRef().getIdentifier(),nodeRef.getId());
+	}
+	public static boolean hasAspect(NodeRef nodeRef,String aspect){
+		return NodeServiceFactory.getLocalService().hasAspect(nodeRef.getStoreRef().getProtocol(),nodeRef.getStoreRef().getIdentifier(),nodeRef.getId(),aspect);
+	}
+    public static HashMap<String, Object> getProperties(NodeRef nodeRef) throws Throwable {
+        return NodeServiceFactory.getLocalService().getProperties(nodeRef.getStoreRef().getProtocol(),nodeRef.getStoreRef().getIdentifier(),nodeRef.getId());
+    }
+
+	/**
+	 * return the native properties
+	 * this means:
+	 *  - no edu-sharing caches
+	 *  - no post-processing for dates or valuespaces
+	 *  - no type conversion, use raw alfresco types
+	 * @return
+	 */
+	public static Map<QName, Serializable> getPropertiesNative(NodeRef nodeRef) throws Throwable {
+		ApplicationContext applicationContext = AlfAppContextGate.getApplicationContext();
+		ServiceRegistry serviceRegistry = (ServiceRegistry) applicationContext.getBean(ServiceRegistry.SERVICE_REGISTRY);
+		return serviceRegistry.getNodeService().getProperties(nodeRef);
+	}
+	/**
+	 * Get all properties automatically splitted by multivalue
+	 * Each property is always returned as an array
+	 * @param nodeRef
+	 * @return
+	 * @throws Throwable
+	 */
+	public static HashMap<String, String[]> getPropertiesMultivalue(NodeRef nodeRef) throws Throwable {
+		HashMap<String, Object> properties = getProperties(nodeRef);
+		HashMap<String, String[]> propertiesMultivalue = new HashMap<>();
+		properties.entrySet().forEach((e)->propertiesMultivalue.put(e.getKey(), e.getValue()==null ? null : ValueTool.getMultivalue(e.getValue().toString())));
+		return propertiesMultivalue;
 	}
     public static boolean downloadAllowed(String nodeId){
 		NodeRef ref=new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE,nodeId);

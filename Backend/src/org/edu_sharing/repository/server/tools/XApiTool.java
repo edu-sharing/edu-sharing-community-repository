@@ -1,18 +1,21 @@
 package org.edu_sharing.repository.server.tools;
 
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
+import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.repository.StoreRef;
 import org.apache.commons.httpclient.methods.ByteArrayRequestEntity;
 import org.apache.commons.httpclient.methods.PostMethod;
+import org.edu_sharing.metadataset.v2.MetadataWidget;
+import org.edu_sharing.metadataset.v2.tools.MetadataHelper;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.service.nodeservice.NodeServiceFactory;
+import org.edu_sharing.service.nodeservice.NodeServiceHelper;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.net.URLEncoder;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
+import java.util.stream.Collectors;
 
 public class XApiTool {
     public static String sendToXApi(String nodeId, JSONObject xApiData) throws Throwable {
@@ -37,14 +40,21 @@ public class XApiTool {
     }
 
     private static JSONObject addData(String nodeId, JSONObject xApiData) throws Throwable {
-        HashMap<String, Object> props = NodeServiceFactory.getLocalService().getProperties(StoreRef.PROTOCOL_WORKSPACE, StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(), nodeId);
+        NodeRef nodeRef = new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, nodeId);
+        HashMap<String, String[]> props = NodeServiceHelper.getPropertiesMultivalue(nodeRef);
+        //xApiData.getJSONObject("object").getJSONObject("definition").put("name","");
         if(!xApiData.getJSONObject("object").getJSONObject("definition").has("extensions"))
             xApiData.getJSONObject("object").getJSONObject("definition").put("extensions",new JSONObject());
         JSONObject propsData = new JSONObject();
-        props.entrySet().stream().forEach((entry)->{
-            try {
-                propsData.put(CCConstants.getValidLocalName(entry.getKey()),entry.getValue());
-            } catch (JSONException e) {}
+        List<MetadataWidget> widgets = MetadataHelper.getWidgetsByNode(nodeRef);
+        // widgets objects to unique id set
+        Set<String> storedProperties = widgets.stream().map((w) -> CCConstants.getValidGlobalName(w.getId())).collect(Collectors.toSet());
+        props.entrySet().stream().
+                filter((entry)->storedProperties.contains(entry.getKey())).
+                forEach((entry)->{
+                    try {
+                        propsData.put(entry.getKey(),entry.getValue());
+                    } catch (JSONException e) {}
         });
         xApiData.getJSONObject("object").getJSONObject("definition").getJSONObject("extensions").put("http://edu-sharing.net/x-api",propsData);
 

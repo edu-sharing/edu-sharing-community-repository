@@ -4,22 +4,40 @@ import io.swagger.config.ConfigFactory;
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.apache.lucene.queryParser.QueryParser;
 import org.edu_sharing.alfresco.policy.NodeCustomizationPolicies;
+import org.alfresco.service.cmr.repository.NodeRef;
 import org.edu_sharing.metadataset.v2.MetadataReaderV2;
 import org.edu_sharing.metadataset.v2.MetadataSetV2;
+import org.edu_sharing.metadataset.v2.MetadataWidget;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.server.AuthenticationToolAPI;
 import org.edu_sharing.repository.server.tools.ApplicationInfo;
 import org.edu_sharing.repository.server.tools.ApplicationInfoList;
 import org.edu_sharing.restservices.admin.v1.Application;
 import org.edu_sharing.service.config.ConfigServiceFactory;
+import org.edu_sharing.service.nodeservice.NodeServiceFactory;
+import org.edu_sharing.service.nodeservice.NodeServiceHelper;
+
+import java.util.Arrays;
+import java.util.List;
 
 public class MetadataHelper {
 
 	public static MetadataSetV2 getMetadataset(ApplicationInfo appId,String mdsSet) throws Exception{
 		return MetadataReaderV2.getMetadataset(appId, mdsSet,getLocale());
 	}
+	public static MetadataSetV2 getMetadataset(NodeRef node) throws Exception{
+		String mdsSet = NodeServiceHelper.getProperty(node, CCConstants.CM_PROP_METADATASET_EDU_METADATASET);
+		if(mdsSet==null || mdsSet.isEmpty())
+			mdsSet=CCConstants.metadatasetdefault_id;
 
-	private static String getLocale() {
+		return MetadataReaderV2.getMetadataset(ApplicationInfoList.getHomeRepository(), mdsSet,getLocale());
+	}
+	public static List<MetadataWidget> getWidgetsByNode(NodeRef node) throws Exception{
+		MetadataSetV2 metadata = getMetadataset(node);
+		return metadata.getWidgetsByNode(NodeServiceFactory.getLocalService().getType(node.getId()),Arrays.asList(NodeServiceHelper.getAspects(node)));
+	}
+
+		private static String getLocale() {
 		String locale="default";
 		try{
 			locale = new AuthenticationToolAPI().getCurrentLocale();
