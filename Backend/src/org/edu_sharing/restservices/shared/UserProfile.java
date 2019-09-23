@@ -15,6 +15,7 @@ public class UserProfile  {
   private String lastName = null;
   private String email = null;
   private String avatar = null;
+  private String primaryAffiliation = null;
 
   public UserProfile(){
 	  
@@ -70,15 +71,13 @@ public class UserProfile  {
 public void setAvatar(String avatar) {
 	this.avatar = avatar;
 }
-@Override
-  public String toString()  {
-    StringBuilder sb = new StringBuilder();
-    sb.append("class UserProfile {\n");
-    
-    sb.append("  firstName: ").append(firstName).append("\n");
-    sb.append("  lastName: ").append(lastName).append("\n");
-    sb.append("  email: ").append(email).append("\n");
-    sb.append("}\n");
-    return sb.toString();
+
+  public String getPrimaryAffiliation() {
+    return primaryAffiliation;
+  }
+
+  @JsonProperty
+  public void setPrimaryAffiliation(String primaryAffiliation) {
+    this.primaryAffiliation = primaryAffiliation;
   }
 }
