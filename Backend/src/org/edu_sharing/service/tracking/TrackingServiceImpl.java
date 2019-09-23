@@ -62,8 +62,7 @@ public class TrackingServiceImpl extends TrackingServiceDefault{
     public static String TRACKING_STATISTICS_NODE_SINGLE = "SELECT type,COUNT(*) from edu_tracking_node as tracking" +
             " WHERE node_uuid = ? AND time BETWEEN ? AND ?" +
             " GROUP BY type" +
-            " ORDER BY count DESC" +
-            " LIMIT 300";
+            " ORDER BY count DESC";
     public static String TRACKING_STATISTICS_DAILY = "SELECT type,COUNT(*),TO_CHAR(time,'yyyy-mm-dd') as date :fields from :table as tracking" +
             " WHERE time BETWEEN ? AND ? AND (:filter)" +
             " GROUP BY type,date :grouping" +
