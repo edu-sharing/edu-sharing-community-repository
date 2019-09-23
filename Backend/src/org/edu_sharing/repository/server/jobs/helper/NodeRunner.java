@@ -7,15 +7,24 @@ import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.repository.StoreRef;
 import org.apache.log4j.Logger;
 import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
+import org.edu_sharing.repository.server.importer.OAIPMHLOMImporter;
 import org.edu_sharing.repository.server.tools.cache.RepositoryCache;
 import org.edu_sharing.service.nodeservice.NodeService;
 import org.edu_sharing.service.nodeservice.NodeServiceFactory;
 import org.springframework.context.ApplicationContext;
+import org.springframework.extensions.webscripts.Runtime;
 
 import javax.transaction.*;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * This is a class that will do a task for all nodes with a given type (or all) in a given folder
@@ -53,6 +62,8 @@ public class NodeRunner {
 
     /**
      * Threading enabled
+     * Note: Currently, only the task is threaded, not previous filter actions
+     * The thread pool uses the same Thread Size as the @OAIPMHLOMImporter
      */
     private boolean threaded = true;
 
@@ -187,10 +198,25 @@ public class NodeRunner {
                 if(keepModifiedDate)
                     policyBehaviourFilter.enableBehaviour(ref);
             };
-            if (threaded)
-                nodes.parallelStream().filter(callFilter).forEach(callTask);
+            Stream<NodeRef> filteredStream = nodes.stream().filter(callFilter);
+            if (threaded) {
+                ExecutorService executor = Executors.newFixedThreadPool(OAIPMHLOMImporter.THREAD_COUNT);
+                List<Callable<Void>> threads=new ArrayList<>();
+                filteredStream.forEach((ref)->{
+                    threads.add(()-> {
+                        callTask.accept(ref);
+                        return null;
+                    });
+                });
+                try {
+                    executor.invokeAll(threads);
+                    executor.shutdown();
+                } catch (InterruptedException e) {
+                    throw new RuntimeException(e);
+                }
+            }
             else
-                nodes.stream().filter(callFilter).forEach(callTask);
+                filteredStream.forEach(callTask);
             return nodes.size();
         }
         finally{
