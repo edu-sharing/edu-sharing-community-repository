@@ -54,6 +54,7 @@
 	<entry key="password">admin</entry>
 	<entry key="devmode">false</entry>
 	<entry key="recommend_objects_query">@cm\:modified:[2011\-03\-24T00:00:00 TO NOW]</entry>
+	<entry key="notify_fetch_limit">0</entry>
 	<entry key="logo">/edu-sharing/images/logos/edu_sharing_com_login.svg</entry>
 	
 	<!-- Website Preview Image Render Service

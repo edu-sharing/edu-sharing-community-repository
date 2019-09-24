@@ -67,7 +67,8 @@
         "custom_html_headers":"Beliebige Daten (z.B. für Suchmaschinen oder Google Analytics), die im <head> Bereich der Seite eingebunden werden",
         "resolve_website_title":"Wenn true, löst das Repository Titel und Metadaten bei der Erstellung von Links auf",
         "url_dynamic":"Wenn true, werden alle generierten Links (z.B. zu Previews) immer auf die anfragende Domain des Clients gemappt. Wenn false, wird der Wert immer fest anhand clientprotocol, clientport und domain generiert",
-        "allow_origin": "Kommagetrennte Liste aller Origin-Adressen, für die CORS-Zugriffe erlaubt sind. Ein leerer Wert erlaubt CORS von jeder anfragenden Domain. Beispiel: \"https://example.com\""
+        "allow_origin": "Kommagetrennte Liste aller Origin-Adressen, für die CORS-Zugriffe erlaubt sind. Ein leerer Wert erlaubt CORS von jeder anfragenden Domain. Beispiel: \"https://example.com\"",
+        "notify_fetch_limit": "Maximale Anzahl an Notify-Objekten, die beim Laden der \"Für mich freigegeben\" / \"Von mir freigegeben\" Ordner abgerufen wird. Empfohlene Werte zwischen 200-1000. 0 deaktiviert das Limit"
       }
     },
     "UPDATE":{
