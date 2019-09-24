@@ -1805,5 +1805,23 @@
 				</property>
 			</properties>
 		</aspect>
+		
+		<aspect name="ccm:address">
+			<title>extend persons,groups with address info</title>
+			<properties>
+				<property name="ccm:postalCode">
+					<type>d:text</type>
+				</property>
+				<property name="ccm:city">
+					<type>d:text</type>
+				</property>
+				<property name="ccm:street">
+					<type>d:text</type>
+				</property>
+				<property name="ccm:houseNumber">
+					<type>d:text</type>
+				</property>
+			</properties>
+		</aspect>
 	</aspects>
 </model>
