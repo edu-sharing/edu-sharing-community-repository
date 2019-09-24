@@ -4,7 +4,6 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
-import org.edu_sharing.alfresco.service.AuthorityService;
 import org.edu_sharing.metadataset.v2.MetadataSetV2;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.client.tools.I18nAngular;
@@ -16,10 +15,8 @@ import org.edu_sharing.restservices.statistic.v1.model.FilterEntry;
 import org.edu_sharing.restservices.statistic.v1.model.StatisticEntity;
 import org.edu_sharing.restservices.statistic.v1.model.StatisticEntry;
 import org.edu_sharing.restservices.statistic.v1.model.Statistics;
-import org.edu_sharing.service.authority.AuthorityServiceFactory;
 import org.edu_sharing.service.mime.MimeTypesV2;
 import org.edu_sharing.service.search.SearchServiceFactory;
-import org.edu_sharing.service.search.SearchServiceImpl;
 import org.edu_sharing.service.search.model.SortDefinition;
 import org.edu_sharing.service.statistic.StatisticService;
 import org.edu_sharing.service.statistic.StatisticServiceFactory;
@@ -58,8 +55,8 @@ public class StatisticDao {
 			StatisticsGlobal.User user=new StatisticsGlobal.User();
 			user.count=countUser(null);
 			statistics.setUser(user);
-			List<StatisticsGlobal.KeyGroup> groups=new ArrayList<>();
-			StatisticsGlobal.Group overall=new StatisticsGlobal.Group();
+			List<StatisticsGlobal.StatisticsKeyGroup> groups=new ArrayList<>();
+			StatisticsGlobal.StatisticsGroup overall=new StatisticsGlobal.StatisticsGroup();
             overall.count=(countElements(null));
             overall.subGroups =getFacettes(null,subGroup);
             statistics.setOverall(overall);
@@ -67,7 +64,7 @@ public class StatisticDao {
 				String lucene=escapeProperty(getGroupProperty(group))+":\""+g+"\"";
 				int count=countElements(lucene);
 				if(count>0) {
-					StatisticsGlobal.KeyGroup entry=new StatisticsGlobal.KeyGroup();
+					StatisticsGlobal.StatisticsKeyGroup entry=new StatisticsGlobal.StatisticsKeyGroup();
 					entry.key = g;
 					entry.displayName = I18nAngular.getTranslationAngular("common", "LICENSE." + g);
 					entry.count = count;
@@ -113,7 +110,7 @@ public class StatisticDao {
         throw new IllegalArgumentException("Unsupported groupe type: "+group);
     }
 
-    private static List<StatisticsGlobal.Group.SubGroup> getFacettes(String lucene, List<String> properties) throws Throwable {
+    private static List<StatisticsGlobal.StatisticsGroup.StatisticsSubGroup> getFacettes(String lucene, List<String> properties) throws Throwable {
 	    if(properties.size()==0)
 	        return null;
         List<String> mappedProps = new ArrayList<>(properties.stream().map(prop -> {
@@ -125,13 +122,13 @@ public class StatisticDao {
 
 		List<Map<String, Integer>> data = countFacettes(lucene, mappedProps);
 		int i=0;
-		List<StatisticsGlobal.Group.SubGroup> facettes = new ArrayList<>();
+		List<StatisticsGlobal.StatisticsGroup.StatisticsSubGroup> facettes = new ArrayList<>();
 		for(String prop : properties) {
 		    String mapped=CCConstants.getValidLocalName(SUB_GROUP_MAPPING.get(prop));
-            StatisticsGlobal.Group.SubGroup facette = new StatisticsGlobal.Group.SubGroup();
+            StatisticsGlobal.StatisticsGroup.StatisticsSubGroup facette = new StatisticsGlobal.StatisticsGroup.StatisticsSubGroup();
 			facette.id=prop;
 			Map<String, Integer> counts = data.get(mappedProps.indexOf(mapped));
-			List<StatisticsGlobal.Group.SubGroup.SubGroupItem> result = new ArrayList<>();
+			List<StatisticsGlobal.StatisticsGroup.StatisticsSubGroup.SubGroupItem> result = new ArrayList<>();
 			if(prop.equals("fileFormat")) {
 				Map<String, Integer> countsSum=new HashMap<>();
 				for(String key : counts.keySet()) {
@@ -146,12 +143,12 @@ public class StatisticDao {
 				counts=countsSum;
 				counts.remove("file");
                 for(String key : counts.keySet()) {
-                    result.add(new StatisticsGlobal.Group.SubGroup.SubGroupItem(key,I18nAngular.getTranslationAngular("common","MEDIATYPE."+key),counts.get(key)));
+                    result.add(new StatisticsGlobal.StatisticsGroup.StatisticsSubGroup.SubGroupItem(key,I18nAngular.getTranslationAngular("common","MEDIATYPE."+key),counts.get(key)));
                 }
 			}
 			else {
                 for (String key : counts.keySet()) {
-                    result.add(new StatisticsGlobal.Group.SubGroup.SubGroupItem(key, counts.get(key)));
+                    result.add(new StatisticsGlobal.StatisticsGroup.StatisticsSubGroup.SubGroupItem(key, counts.get(key)));
                 }
             }
 

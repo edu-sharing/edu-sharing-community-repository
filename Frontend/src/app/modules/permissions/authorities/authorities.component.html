@@ -88,6 +88,15 @@
             <input type="text" id="lastName" name="lastName" [(ngModel)]="edit.profile.lastName" required>
             <label for="email">{{'USER.email' | translate}}</label>
             <input type="text" id="email" name="email" [(ngModel)]="edit.profile.email" required>
+            <label for="primaryAffiliation">{{'USER.primaryAffiliation' | translate}}</label>
+            <div class="group">
+              <select *ngIf="primaryAffiliationList" id="primaryAffiliation" name="primaryAffiliation" [(ngModel)]="edit.profile.primaryAffiliation">
+                <option></option>
+                <option *ngFor="let a of PRIMARY_AFFILIATIONS" [value]="a">{{('USER.PRIMARY_AFFILIATION.'+a) | translate}}</option>
+              </select>
+              <input *ngIf="!primaryAffiliationList" type="text" id="primaryAffiliation" name="primaryAffiliation" [(ngModel)]="edit.profile.primaryAffiliation">
+              <div class="btn-flat" (click)="primaryAffiliationList=!primaryAffiliationList"><i class="material-icons">{{ primaryAffiliationList ? 'edit' : 'list'}}</i></div>
+            </div>
             <div *ngIf="!editId">
               <label for="password">{{'USER.password' | translate}}</label>
               <input type="password" id="password" name="password" [(ngModel)]="editDetails.password">

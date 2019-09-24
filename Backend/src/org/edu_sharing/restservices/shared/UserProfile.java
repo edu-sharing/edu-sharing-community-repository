@@ -17,6 +17,7 @@ public class UserProfile  {
   private String lastName = null;
   private String email = null;
   private String avatar = null;
+  private String primaryAffiliation = null;
   private String about = null;
   private String[] skills = null;
   private String[] types = null;
@@ -68,13 +69,22 @@ public class UserProfile  {
     this.email = email;
   }
   
-	@JsonProperty("avatar")
-	public String getAvatar() {
-		return avatar;
-	}
-	public void setAvatar(String avatar) {
-		this.avatar = avatar;
-	}
+  @JsonProperty("avatar")
+  public String getAvatar() {
+	return avatar;
+}
+public void setAvatar(String avatar) {
+	this.avatar = avatar;
+}
+
+  public String getPrimaryAffiliation() {
+    return primaryAffiliation;
+  }
+
+  @JsonProperty
+  public void setPrimaryAffiliation(String primaryAffiliation) {
+    this.primaryAffiliation = primaryAffiliation;
+  }
 	@JsonProperty("about")
 	public String getAbout() {
 		return about;

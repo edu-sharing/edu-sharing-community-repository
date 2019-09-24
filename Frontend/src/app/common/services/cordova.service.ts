@@ -303,8 +303,11 @@ export class CordovaService {
                item.stream=item.base64; // convert it so it's like on android
                //alert(item.type+" : "+item.name+" : "+item.path+" : "+item.uri);
                item.uri=DateHelper.getDateForNewFile()+".jpg";
+
                this.lastIntent=item;
-               this.observerShareContent.next({uri:item.uri,mimetype:item.type,file:item.name,text:item.text});
+               let data={uri:item.uri,mimetype:item.type,file:item.name,text:item.text};
+               console.log("observer data:",data);
+               this.observerShareContent.next(data);
            });
        }
    }

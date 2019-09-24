@@ -263,6 +263,7 @@ public class OAIPMHLOMImporter implements Importer{
 		else{
 			logger.warn("Result for query url "+url+" was empty!");
 		}
+		executor.shutdown();
 	}
 
 	

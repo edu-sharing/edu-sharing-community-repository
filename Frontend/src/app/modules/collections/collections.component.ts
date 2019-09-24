@@ -238,9 +238,6 @@ export class CollectionsMainComponent {
       this.parentCollectionId = new EduData.Reference(RestConstants.HOME_REPOSITORY, RestConstants.ROOT);
       this.contentDetailObject = null;
       this.navigate();
-
-      this.refreshContent();
-
     }
   }
   selectTabMyCollections():void {

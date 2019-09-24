@@ -36,6 +36,7 @@ export class PermissionsAuthoritiesComponent {
   public GROUP_TYPES=RestConstants.VALID_GROUP_TYPES;
   public SCOPE_TYPES=RestConstants.VALID_SCOPE_TYPES;
   public ORG_TYPES=RestConstants.VALID_GROUP_TYPES_ORG;
+  public PRIMARY_AFFILIATIONS=RestConstants.USER_PRIMARY_AFFILIATIONS;
   public list : any[]=[];
   public edit : any;
   private editDetails : any;
@@ -86,6 +87,8 @@ export class PermissionsAuthoritiesComponent {
   private selectedMembers : Authority[]=[];
   private memberSugesstions : SuggestItem[];
   private memberListOffset : number;
+  // show primary affiliations as list (or free text)
+  primaryAffiliationList = true;
   private updateMemberSuggestions(event : any){
     if(this.editMembers==this.org || this.org==null){
       this.iam.searchUsers(event.input).subscribe(

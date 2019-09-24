@@ -29,6 +29,8 @@ package org.edu_sharing.repository.server.jobs.quartz;
 
 import java.util.HashMap;
 
+import org.alfresco.repo.security.authentication.AuthenticationUtil;
+import org.alfresco.repo.security.authentication.AuthenticationUtil.RunAsWork;
 import org.apache.commons.logging.LogFactory;
 import org.quartz.JobDataMap;
 import org.quartz.JobExecutionContext;
@@ -54,7 +56,22 @@ public class RefreshCacheJob extends AbstractJob{
 		HashMap authInfo = (HashMap)jobDataMap.get("authInfo");
 		
 		try {
-			new RefreshCacheExecuter().excecute(rootFolderId, sticky, authInfo);
+			if(authInfo == null) {
+				RunAsWork<Void> runAs = new RunAsWork<Void>() {
+					@Override
+					public Void doWork() throws Exception {
+						try {
+							new RefreshCacheExecuter().excecute(rootFolderId, sticky, authInfo);
+						} catch (Throwable e) {
+							logger.error(e);
+						}
+						return null;
+					}
+				};
+				AuthenticationUtil.runAsSystem(runAs);
+			}else {
+				new RefreshCacheExecuter().excecute(rootFolderId, sticky, authInfo);
+			}
 		} catch (Throwable e) {
 			logger.error("I will throw an JobExecutionException:"+e.getMessage());
 			throw new JobExecutionException(e);

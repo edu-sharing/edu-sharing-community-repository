@@ -33,6 +33,7 @@ $previewHeight:160px;
   border-bottom:1px solid #aaa;
   font-weight:normal;
   padding:0;
+  padding-top:5px;
   overflow: hidden;
 }
 .heading a{
@@ -147,6 +148,9 @@ $badgeWidth:250px;
   /* fallback for unset/unknown fields */
   >div{
     min-width: 120px;
+  }
+  .collectionEditorial{
+    min-width: initial;
   }
   .editColumns{
     min-width: initial;
@@ -273,7 +277,6 @@ $badgeWidth:250px;
 {
   display:table-cell;
   padding:0px 5px;
-  padding-top:12px;
   vertical-align: middle;
   color:$textLight;
 }
@@ -282,7 +285,7 @@ $badgeWidth:250px;
   .totalCount {
     position: absolute;
     left: 56px;
-    top: 14px;
+    top: 7px;
     color:$textLight;
   }
   .sortMenu{
@@ -291,7 +294,7 @@ $badgeWidth:250px;
   }
 }
 .row .icon{
-  padding-top:20px;
+  padding-top:8px;
 }
 .row{
   transition: none;
@@ -310,8 +313,8 @@ $badgeWidth:250px;
   }
 
 }
-.tableList .row.selected,
-.cardList .row.selected{
+.tableList.collection-item:not(.nodeCollection) .row.selected,
+.cardList.collection-item:not(.nodeCollection) .row.selected{
   background: $workspaceSelectedBackgroundEffect;
   background-color:$workspaceSelectedBackground;
   .more{
@@ -323,9 +326,6 @@ $badgeWidth:250px;
   background: $backgroundColor;
   background-color:$backgroundColor;
   outline:2px solid $primary;
-  .more{
-    @include fadeRight($backgroundColor,20px)
-  }
 }
 .row:focus{
   @include setGlobalInsetFocus();
@@ -342,7 +342,7 @@ $badgeWidth:250px;
 .row_1{
   color:$textMain!important;
 }
-.list .row:hover{
+.list .collection-item:not(.nodeCollection) .row:hover{
   background-color:$workspaceSelectedBackground;
   .more{
     @include fadeRight($workspaceSelectedBackground,20px);
@@ -363,6 +363,9 @@ $badgeWidth:250px;
   height:$listItemHeight;
   margin-bottom:0;
   background-color: #fff;
+}
+.tableList .row .column{
+  height:$listItemHeight;
 }
 .list .nodeCollection .row {
   background-color: transparent;
@@ -603,14 +606,16 @@ $orderAnimationTime:$transitionNormal*5;
 .cardList .rowInner{
   max-height: none;
 }
-.checkbox,
-.more{
+.checkbox{
   padding-left:15px!important;
   position:relative;
   top:3px;
 }
 .more{
-  padding-right:20px!important;
+  padding:0 20px!important;
+}
+.heading .more{
+  height:auto;
 }
 .checkbox{
   padding-left:25px!important;
@@ -730,7 +735,7 @@ $orderAnimationTime:$transitionNormal*5;
   text-align: center;
 }
 .cardSmallList .row_1{
-  top: 5px;
+  top: 22px;
   font-size: 110%;
   overflow: hidden;
 }
@@ -835,17 +840,21 @@ $orderAnimationTime:$transitionNormal*5;
   padding-left:22px;
 }
 .cardList{
-  .more{
-    position:absolute;
-    right: 1px;  // leave space for fade background
-    top:$cardHeight - 50px;
-    padding:10px!important;
-    @include fadeRight(#fff,20px);
+  .more {
+    position: absolute;
+    right: 1px; // leave space for fade background
+    top: $cardHeight - 50px;
+    padding: 10px !important;
     padding-bottom: 5px;
-    a{
+    a {
       padding-left: 5px;
       position: relative;
-      left:10px;
+      left: 10px;
+    }
+  }
+  &.collection-item:not(.nodeCollection) {
+    .more{
+      @include fadeRight(#fff, 20px);
     }
   }
   .moreAlways{

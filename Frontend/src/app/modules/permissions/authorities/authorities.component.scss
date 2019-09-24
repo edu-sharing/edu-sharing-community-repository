@@ -31,6 +31,16 @@ input[type=search]{
     min-width: 170px;
   }
 }
+.card-scroll{
+  .group{
+    display: flex;
+    align-items: center;
+    margin-bottom: 20px;
+    >input{
+      margin-bottom: 0;
+    }
+  }
+}
 .memberActions{
   height:50px;
   display: table;

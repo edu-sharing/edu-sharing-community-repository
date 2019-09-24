@@ -66,7 +66,9 @@
         "appid":"ID des Repositories. Sollte eindeutig sein, z.B. die Hauptdomain des Systems",
         "custom_html_headers":"Beliebige Daten (z.B. für Suchmaschinen oder Google Analytics), die im <head> Bereich der Seite eingebunden werden",
         "resolve_website_title":"Wenn true, löst das Repository Titel und Metadaten bei der Erstellung von Links auf",
-        "url_dynamic":"Wenn true, werden alle generierten Links (z.B. zu Previews) immer auf die anfragende Domain des Clients gemappt. Wenn false, wird der Wert immer fest anhand clientprotocol, clientport und domain generiert"
+        "url_dynamic":"Wenn true, werden alle generierten Links (z.B. zu Previews) immer auf die anfragende Domain des Clients gemappt. Wenn false, wird der Wert immer fest anhand clientprotocol, clientport und domain generiert",
+        "allow_origin": "Kommagetrennte Liste aller Origin-Adressen, für die CORS-Zugriffe erlaubt sind. Ein leerer Wert erlaubt CORS von jeder anfragenden Domain. Beispiel: \"https://example.com\"",
+        "notify_fetch_limit": "Maximale Anzahl an Notify-Objekten, die beim Laden der \"Für mich freigegeben\" / \"Von mir freigegeben\" Ordner abgerufen wird. Empfohlene Werte zwischen 200-1000. 0 deaktiviert das Limit"
       }
     },
     "UPDATE":{
@@ -123,6 +125,13 @@
           "STATUS_OK":"Die Funktion ist aktiv, eingehende Anfragen werden an die Adresse {{mail.report.receiver}} versendet.",
           "STATUS_FAIL":"Die Funktion ist aktiv, aber die Konfiguration ist ungültig.",
           "SOLUTION":"Wechseln Sie in den Bereich \"Quellen\" und bearbeiten Sie die Datei ccmail.properties.xml. Fügen Sie \"mail.report.receiver\" hinzu und tragen Sie die E-Mail-Adresse für eingehende Anfragen ein"
+        },
+        "CORS": {
+          "TITLE":"CORS-Konfiguration",
+          "STATUS_OK":"Es wurde konfiguriert, das AJAX-Requests über die folgenden Domains erlaubt sind: {{allow_origin}}.",
+          "STATUS_WARN":"Es wurden bislang keine Domains gesetzt. Das System erlaubt deshalb den AJAX-Zugriff von beliebigen Quell-Domains.",
+          "SOLUTION":"Prüfen Sie, welche Systeme ggf. AJAX-Requests senden können. Wechseln Sie anschließend zu \"Quellen\" und bearbeiten Sie das Feld \"allow_origin\" in der homeApplication.properties.xml",
+          "SOLUTION_LINK": "homeApplication.properties.xml bearbeiten"
         }
       }
     },

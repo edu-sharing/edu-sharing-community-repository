@@ -825,6 +825,7 @@ export class AdminComponent {
                 translate:{count:count}
             });
         });
+        // check status of nodeReport + mail server
         this.admin.getApplicationXML(RestConstants.CCMAIL_APPLICATION_XML).subscribe((mail)=>{
             if(this.config.instant("nodeReport",false)){
                 this.systemChecks.push({
@@ -838,6 +839,17 @@ export class AdminComponent {
                 status:mail['mail.smtp.server'] ? 'OK' : 'FAIL',
                 translate:mail
             });
+        });
+        this.admin.getApplicationXML(RestConstants.HOME_APPLICATION_XML).subscribe((home)=>{
+          this.systemChecks.push({
+            name:"CORS",
+            status:home['allow_origin'] ? 'OK' : 'WARN',
+            translate:home,
+            callback:()=>{
+              this.setTab('APPLICATIONS');
+              this.editApp(this.editableXmls.filter((xml)=>xml.name=='HOMEAPP')[0]);
+            }
+          });
         });
     }
     private createSystemCheck(name: string, status: string,error: any = null) {
@@ -915,7 +927,7 @@ export class AdminComponent {
     }
 
   updateJobSuggestions(event: any) {
-    let name=event.input.toString().toLowerCase();
+    let name=event ? event.input.toString().toLowerCase() : '';
     this.jobClassesSuggested=this.jobClasses.filter((j)=>j.title.toLowerCase().indexOf(name)!=-1 || j.secondaryTitle.toLowerCase().indexOf(name)!=-1);
     console.log(name);
     console.log(this.jobClassesSuggested);

@@ -118,7 +118,8 @@ public class ApplicationInfo implements Comparable<ApplicationInfo>{
 
 	public static final String KEY_ORDER = "order";
 
-	
+	public static final String KEY_ALLOW_ORIGIN = "allow_origin";
+
 	/**
 	 * property file vals
 	 */
@@ -162,8 +163,10 @@ public class ApplicationInfo implements Comparable<ApplicationInfo>{
 	
 	public static final String WEBSITEPREVIEWRENDERSERVICE = "websitepreviewrenderservice";
 
+	public static final String NOTIFY_FETCH_LIMIT = "notify_fetch_limit";
+
 	public static final String REPOSITORY_TYPE_MEMUCHO = "MEMUCHO";
-	private final Properties properties;
+    private final Properties properties;
 
 	private String host = null;
 	
@@ -537,6 +540,13 @@ public class ApplicationInfo implements Comparable<ApplicationInfo>{
 
 	public String getString(String key,String defaultValue){
 		return properties.getProperty(key,defaultValue);
+	}
+
+	public int getInteger(String key,int defaultValue){
+		String property = properties.getProperty(key);
+		if(property==null || property.isEmpty())
+			return defaultValue;
+		return Integer.parseInt(property);
 	}
 
 	public boolean getBoolean(String key,boolean defaultValue){

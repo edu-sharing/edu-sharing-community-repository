@@ -16,8 +16,8 @@
           <div class="group-heading">{{'LOGIN.PROVIDER_SELECT_GROUP' | translate}}</div>
           <div class="group-description">{{'LOGIN.PROVIDER_SELECT_GROUP_DESCRIPTION' | translate}}</div>
           <label>{{'LOGIN.PROVIDER_LABEL' | translate}}</label>
-          <mat-form-field>
-            <input type="text" matInput placeholder="{{'LOGIN.PROVIDER_PLACEHOLDER' | translate}}" [formControl]="providerControl" [matAutocomplete]="autoProvider">
+          <mat-form-field class="mat-form-field-autocomplete">
+            <input type="text" matInput placeholder="{{'LOGIN.PROVIDER_PLACEHOLDER' | translate}}" [formControl]="providerControl" [matAutocomplete]="autoProvider" (keyup.enter)="goToProvider()">
             <mat-autocomplete #autoProvider="matAutocomplete" [displayWith]="currentProviderDisplay">
               <mat-optgroup *ngFor="let group of filteredProviders | async" [label]="group.group.name">
                 <mat-option *ngFor="let option of group.providers" [value]="option" (onSelectionChange)="currentProvider=option">
@@ -30,7 +30,7 @@
           <div class="sso-group">
             <img class="sso-logo" src="assets/images/sso_logo.svg">
             <div class="group-actions">
-              <a class="waves-effect waves-light btn" (click)="goToProvider()">{{'LOGIN.GO_TO_PROVIDER' | translate }}</a>
+              <a class="waves-effect waves-light btn"  tabindex="0" (click)="goToProvider()" (keyup.enter)="goToProvider()">{{'LOGIN.GO_TO_PROVIDER' | translate }}</a>
             </div>
           </div>
         </div>
@@ -67,10 +67,8 @@
         <a class="waves-effect waves-light btn" [class.disabled]="disabled" (click)="login()">{{'LOGIN.LOGIN' | translate }}</a>
         <a class="btn-flat" *ngIf="config.recoverPasswordUrl" (click)="recoverPassword()">{{'LOGIN.RECOVER_PASSWORD' | translate }}</a>
       </div>
-    <div class="card-action card-action-info" *ngIf="showProviders">
-      {{'LOGIN.ACTION_HELP' | translate}}
-    </div>
-  <powered-by mode="white"></powered-by>
+    <div class="card-action card-action-info" *ngIf="showProviders"><div innerHTML="{{'LOGIN.ACTION_HELP' | translate}}"></div></div>
+  <powered-by mode="white" *ngIf="!showProviders"></powered-by>
   </div>
 </div>
 </div>

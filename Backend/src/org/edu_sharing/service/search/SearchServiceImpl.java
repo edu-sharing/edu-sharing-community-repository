@@ -53,6 +53,7 @@ import org.edu_sharing.repository.client.tools.metadata.search.SearchMetadataHel
 import org.edu_sharing.repository.server.AuthenticationToolAPI;
 import org.edu_sharing.repository.server.MCAlfrescoAPIClient;
 import org.edu_sharing.repository.server.SearchResultNodeRef;
+import org.edu_sharing.repository.server.tools.ApplicationInfo;
 import org.edu_sharing.repository.server.tools.ApplicationInfoList;
 import org.edu_sharing.repository.server.tools.LogTime;
 import org.edu_sharing.restservices.MdsDao;
@@ -104,17 +105,17 @@ public class SearchServiceImpl implements SearchService {
 		parameters.addAllAttribute(CCConstants.CCM_PROP_AUTHORITYCONTAINER_EDUHOMEDIR);
 		parameters.setQuery("(TYPE:\"" + CCConstants.CCM_TYPE_IO + "\" OR TYPE:\"" + CCConstants.CCM_TYPE_MAP +"\") "
 				+ 	"AND @ccm\\:ph_users:\"" + QueryParser.escape(username) + "\"");
-        List<NodeRef> resultSet = queryAll(parameters);
+		List<NodeRef> resultSet = queryAll(parameters,ApplicationInfoList.getHomeRepository().getInteger(ApplicationInfo.NOTIFY_FETCH_LIMIT,0));
 
 		List<NodeRef> result = new ArrayList<>();
 		for (NodeRef node : resultSet) {
 			if (result.contains(node))
 				continue;
 			try {
-				ACE[] permissions = baseClient.getPermissions(node.getId()).getAces();
-				if (permissions != null && permissions.length > 0) {
+				Set<AccessPermission> permissions = serviceRegistry.getPermissionService().getAllSetPermissions(node);
+				if (permissions != null && permissions.size() > 0) {
 					boolean add = false;
-					for (ACE perm : permissions) {
+					for (AccessPermission perm : permissions) {
 						if (perm.isInherited())
 							continue;
 						add = true;
@@ -149,7 +150,7 @@ public class SearchServiceImpl implements SearchService {
 		parameters.setQuery("(TYPE:\"" + CCConstants.CCM_TYPE_IO +"\" OR TYPE:\"" + CCConstants.CCM_TYPE_MAP +"\") "
 				+ "AND ISNOTNULL:\"ccm:ph_users\" "
 				+ "AND NOT @ccm\\:ph_users:\"" + QueryParser.escape(username) + "\"");
-		List<NodeRef> result =  queryAll(parameters);
+		List<NodeRef> result =  queryAll(parameters,ApplicationInfoList.getHomeRepository().getInteger(ApplicationInfo.NOTIFY_FETCH_LIMIT,0));
 
 		Set<String> memberships = new HashSet<>();
 		memberships.addAll(serviceRegistry.getAuthorityService().getAuthorities());
@@ -163,10 +164,13 @@ public class SearchServiceImpl implements SearchService {
 					if (node.getId().equals(homeFolder))
 						continue;
 					try {
-						ACE[] permissions = baseClient.getPermissions(node.getId()).getAces();
-						if (permissions != null && permissions.length > 0) {
+						// this is expensive: it also fetches all user + group props we do not need here
+						// takes almost 15x of the time instead of direct service call
+						//ACE[] permissions = baseClient.getPermissions(node.getId()).getAces();
+						Set<AccessPermission> permSet = serviceRegistry.getPermissionService().getAllSetPermissions(node);
+						if (permSet != null && permSet.size() > 0) {
 							boolean add = false;
-							for (ACE perm : permissions) {
+							for (AccessPermission perm : permSet) {
 								if (!perm.isInherited() && (perm.getAuthority().equals(username) || memberships.contains(perm.getAuthority()))) {
 									add = true;
 									break;
@@ -179,21 +183,25 @@ public class SearchServiceImpl implements SearchService {
 						logger.info("Error fetching permissions for node "+node.getId()+". It's may deleted or the user has no more permissions");
 						t.printStackTrace();
 					}
+
 				}
 				return refs;
 			}
 		));
 	}
 
-	private List<NodeRef> queryAll(SearchParameters parameters) {
+	private List<NodeRef> queryAll(SearchParameters parameters,int limit) {
+		if(limit<=0)
+			limit=Integer.MAX_VALUE;
+
 		List<NodeRef> result=new ArrayList<>();
 		int MAX_PER_PAGE=1000;
-		for(int offset=0;;offset+=MAX_PER_PAGE) {
+		for(int offset=0;;offset=result.size()) {
 			parameters.setSkipCount(offset);
-			parameters.setMaxItems(MAX_PER_PAGE);
+			parameters.setMaxItems(Math.min(MAX_PER_PAGE,limit-result.size()));
 			ResultSet data = searchService.query(parameters);
 			result.addAll(data.getNodeRefs());
-			if(data.getNodeRefs().size()<MAX_PER_PAGE)
+			if(result.size()>=limit || data.getNodeRefs().size()<MAX_PER_PAGE)
 				break;
 		}
 		return result;

@@ -321,8 +321,17 @@
     "firstName" : "first name",
     "lastName" : "family name",
     "email" : "e-mail",
+    "primaryAffiliation": "Primary affiliation",
     "password" : "password",
-    "sizeQuota" : "Quota size in MB"
+    "sizeQuota" : "Quota size in MB",
+    "PRIMARY_AFFILIATION": {
+      "teacher": "teacher",
+      "student": "student",
+      "employee": "employee",
+      "extern": "external user",
+      "system": "system account",
+      "function": "function account"
+    }
   },
   "CONNECTOR":{
     "ONLY_OFFICE": {

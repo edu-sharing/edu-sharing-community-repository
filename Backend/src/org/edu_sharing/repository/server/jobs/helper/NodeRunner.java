@@ -67,7 +67,7 @@ public class NodeRunner {
      * Shall a transaction be spawned for the task
      * This WILL NOT WORK in conjunction with threaded=true
      */
-    private boolean transaction;
+    private TransactionMode transaction=TransactionMode.None;
 
 
     private ApplicationContext applicationContext = AlfAppContextGate.getApplicationContext();
@@ -131,14 +131,13 @@ public class NodeRunner {
             throw new IllegalArgumentException("No task has been set yet");
 
         UserTransaction userTransaction = null;
-        if(transaction){
+        if(transaction.equals(TransactionMode.Global)){
             userTransaction = serviceRegistry.getTransactionService().getNonPropagatingUserTransaction();
             try {
                 userTransaction.begin();
             } catch (NotSupportedException|SystemException e) {
                 logger.error(e.getMessage(), e);
             }
-            policyBehaviourFilter.disableBehaviour();
         }
         try {
             List<NodeRef> nodes;
@@ -157,6 +156,15 @@ public class NodeRunner {
                 }
             };
             Consumer<? super NodeRef> callTask = (ref) -> {
+                UserTransaction userTransactionLocal = null;
+                if(transaction.equals(TransactionMode.Local)){
+                    userTransactionLocal = serviceRegistry.getTransactionService().getNonPropagatingUserTransaction();
+                    try {
+                        userTransactionLocal.begin();
+                    } catch (NotSupportedException|SystemException e) {
+                        logger.error(e.getMessage(), e);
+                    }
+                }
                 if(keepModifiedDate)
                     policyBehaviourFilter.disableBehaviour(ref);
                 if (runAsSystem) {
@@ -170,6 +178,18 @@ public class NodeRunner {
                     new RepositoryCache().remove(ref.getId());
                 }
                 policyBehaviourFilter.enableBehaviour(ref);
+                if(transaction.equals(TransactionMode.Local)){
+                    try {
+                        userTransactionLocal.commit();
+                    } catch (Exception e) {
+                        logger.error(e.getMessage(),e);
+                        try {
+                            userTransactionLocal.rollback();
+                        } catch (SystemException e1) {
+                            logger.error(e1.getMessage(),e1);
+                        }
+                    }
+                }
             };
             if (threaded)
                 nodes.parallelStream().filter(callFilter).forEach(callTask);
@@ -178,8 +198,7 @@ public class NodeRunner {
             return nodes.size();
         }
         finally{
-            if(transaction){
-                policyBehaviourFilter.enableBehaviour();
+            if(transaction.equals(TransactionMode.Global)){
                 try {
                     userTransaction.commit();
                 } catch (Exception e) {
@@ -203,11 +222,16 @@ public class NodeRunner {
         return keepModifiedDate;
     }
 
-    public boolean isTransaction() {
+    public TransactionMode isTransaction() {
         return transaction;
     }
 
-    public void setTransaction(boolean transaction) {
+    public void setTransaction(TransactionMode transaction) {
         this.transaction = transaction;
+    }
+    public enum TransactionMode{
+        None, // no transactions
+        Global, // for whole task
+        Local // per node
     }
 }

@@ -721,7 +721,11 @@
 				</property>
 				<property name="ccm:classification_purpose" />
 				<property name="ccm:commonlicense_key" />
-				<property name="ccm:educationallearningresourcetype" />
+				<property name="ccm:educationallearningresourcetype">
+                                        <statement>@ccm\:educationallearningresourcetype:"${value}"</statement>
+                                        <multiple>true</multiple>
+                                        <multiplejoin>OR</multiplejoin>
+                                </property>
 				<property name="license">
 					<statement>@ccm\:commonlicense_key:"${value}"</statement>
 					<statement value="OPEN">@ccm\:commonlicense_key:"CC_0" OR @ccm\:commonlicense_key:"PDM"</statement>

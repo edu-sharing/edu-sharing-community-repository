@@ -24,16 +24,17 @@
        tabindex="0"
        (keyup.enter)="showDropdown()"
        [class.light]="backgroundType=='dark' || backgroundType=='primary'"
-       *ngIf="canShowDropdown()"><a><i class="material-icons">more_vert</i></a>
+       *ngIf="canShowDropdown()"><i icon iconId="more_vert"></i>
   </div>
   <div *ngIf="optionsToggle.length" class="actionToggle" [class.actionToggleDivider]="optionsAlways.length">
-    <a *ngFor="let option of optionsToggle"
+    <i *ngFor="let option of optionsToggle"
+       icon
+       [iconId]="option.icon"
        tabindex="0"
        (keyup.enter)="click(option)"
        (click)="click(option)"
        [class.light]="backgroundType=='dark' || backgroundType=='primary'"
        [class.disabled]="!option.isEnabled">
-      <i icon [iconId]="option.icon"></i>
-    </a>
+    </i>
   </div>
 </div>

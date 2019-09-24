@@ -31,6 +31,12 @@ public class OAIPMHLOMValidator extends OAIPMHLOMImporter{
 			public boolean mustBePersisted(String replId, String timeStamp) {
 				return true;
 			}
+			
+			@Override
+			public boolean exists(String replId) {
+				// TODO Auto-generated method stub
+				return false;
+			}
 		});
 	}
 
