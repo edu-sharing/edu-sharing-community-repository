@@ -7,6 +7,8 @@ import org.alfresco.service.namespace.QName;
 import org.apache.log4j.Logger;
 import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
 import org.edu_sharing.repository.client.tools.CCConstants;
+import org.edu_sharing.repository.server.RepoFactory;
+import org.edu_sharing.repository.server.tools.ApplicationInfoList;
 import org.springframework.context.ApplicationContext;
 
 import java.util.ArrayList;
@@ -92,4 +94,16 @@ public class EduSharingNodeHelper {
     public static boolean typeIsDirectory(String type) {
         return type.equals(CCConstants.CM_TYPE_FOLDER) || type.equals(CCConstants.CCM_TYPE_MAP);
     }
+    
+    public static String cleanupCmName(String cmNameReadableName){
+		// replace chars that can lead to an
+		// org.alfresco.repo.node.integrity.IntegrityException
+		cmNameReadableName = cmNameReadableName.replaceAll(
+			ApplicationInfoList.getHomeRepository().getValidatorRegexCMName(), "_");
+
+		//replace ending dot with nothing
+		//cmNameReadableName = cmNameReadableName.replaceAll("\\.$", "");
+		cmNameReadableName = cmNameReadableName.replaceAll("[\\.]*$", "").trim();
+		return cmNameReadableName;
+	}
 }

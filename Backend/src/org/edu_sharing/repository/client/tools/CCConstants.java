@@ -404,6 +404,10 @@ public class CCConstants {
 	public final static String CCM_PROP_IO_REF_DESCRIPTION = "{http://www.campuscontent.de/model/1.0}ref_description";
 
 	public final static String CCM_PROP_IO_REF_VERSION = "{http://www.campuscontent.de/model/1.0}ref_version";
+	
+	public final static String CCM_PROP_ADDRESS_POSTALCODE = "{http://www.campuscontent.de/model/1.0}postalCode";
+	
+	public final static String CCM_PROP_ADDRESS_CITY = "{http://www.campuscontent.de/model/1.0}city";
 
 	public final static String CCM_ASPECT_POSITIONABLE = "{http://www.campuscontent.de/model/1.0}positionable";
 
@@ -414,6 +418,8 @@ public class CCConstants {
 	public final static String CCM_ASPECT_GROUPEXTENSION = "{http://www.campuscontent.de/model/1.0}groupExtension";
 
 	public final static String CCM_ASPECT_MEDIACENTER = "{http://www.campuscontent.de/model/1.0}mediacenter";
+	
+	public final static String CCM_ASPECT_ADDRESS = "{http://www.campuscontent.de/model/1.0}address";
 
 	public final static String CCM_PROP_GROUPEXTENSION_GROUPTYPE = "{http://www.campuscontent.de/model/1.0}groupType";
 
@@ -1872,8 +1878,6 @@ public class CCConstants {
 	/**
 	 * edu-sharing.properties
 	 */
-	public static String EDU_SHARING_PROPERTIES_PROPERTY_VALIDATOR_REGEX_CM_NAME = "property_validator_regex_cm_name";
-
 	public static String EDU_SHARING_PROPERTIES_PROPERTY_LMSCODES = "lmscodes";
 
 	public static String EDU_SHARING_PROPERTIES_PROPERTY_FUZZY_USERSEARCH = "fuzzy_usersearch";
