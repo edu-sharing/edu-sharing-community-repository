@@ -30,6 +30,7 @@ import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.server.MCAlfrescoAPIClient;
 import org.edu_sharing.repository.server.RepoFactory;
 import org.edu_sharing.repository.server.SchoolContextServiceImpl;
+import org.edu_sharing.repository.server.tools.ApplicationInfoList;
 
 public class ExcelSchroedelImporter {
 	
@@ -132,7 +133,7 @@ public class ExcelSchroedelImporter {
 							
 							
 							if(alfrescoProperty.equals(CCConstants.LOM_PROP_GENERAL_TITLE)){
-								nodeName = value.replaceAll(RepoFactory.getEdusharingProperty(CCConstants.EDU_SHARING_PROPERTIES_PROPERTY_VALIDATOR_REGEX_CM_NAME), "_");
+								nodeName = value.replaceAll(ApplicationInfoList.getHomeRepository().getValidatorRegexCMName(), "_");
 								toSafe.put(QName.createQName(CCConstants.CM_NAME), nodeName);
 							}
 						}
