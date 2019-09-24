@@ -39,9 +39,13 @@ public class GroupDao {
 			String result=authorityService.createGroup(groupName, profile.getDisplayName(), parentGroup);
 			GroupDao groupDao=GroupDao.getGroup(repoDao, result);
 			if(result!=null) {
-				groupDao.setGroupEmail(profile);
-				groupDao.setGroupType(profile);
-				groupDao.setScopeType(profile);
+				// permission check was done already, so run as system to allow org admin to set properties
+				AuthenticationUtil.runAsSystem(()-> {
+					groupDao.setGroupEmail(profile);
+					groupDao.setGroupType(profile);
+					groupDao.setScopeType(profile);
+					return null;
+				});
 			}
 			return groupDao;
 		} catch (Exception e) {
