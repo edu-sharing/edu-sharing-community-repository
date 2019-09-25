@@ -318,7 +318,9 @@ public class CCConstants {
 	public final static String CCM_PROP_PH_MODIFIED = "{http://www.campuscontent.de/model/1.0}ph_modified";
 	
 	public final static String CCM_PROP_PH_HISTORY = "{http://www.campuscontent.de/model/1.0}ph_history";
-	
+
+	public final static String CCM_PROP_PH_INVITED = "{http://www.campuscontent.de/model/1.0}ph_invited";
+
 	public final static String CCM_PROP_PH_USERS = "{http://www.campuscontent.de/model/1.0}ph_users";
 	
 	public final static String CCM_PROP_PH_ACTION = "{http://www.campuscontent.de/model/1.0}ph_action";

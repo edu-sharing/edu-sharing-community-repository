@@ -1748,7 +1748,18 @@
 	    		<property name="ccm:ph_users">
 	    			<type>d:text</type>
 	    			<multiple>true</multiple>
+					<index enabled="true">
+						<tokenised>false</tokenised>
+					</index>
 	    		</property>
+				<!-- explicitly, currently invited authorities of that node -->
+				<property name="ccm:ph_invited">
+					<type>d:text</type>
+					<multiple>true</multiple>
+					<index enabled="true">
+						<tokenised>false</tokenised>
+					</index>
+				</property>
 	    		<!-- add, modify ... -->
 	    		<property name="ccm:ph_action">
 	    			<type>d:text</type>

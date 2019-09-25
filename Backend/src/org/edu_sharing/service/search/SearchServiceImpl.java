@@ -17,7 +17,6 @@ import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.repo.security.authentication.AuthenticationUtil.RunAsWork;
 import org.alfresco.repo.transaction.RetryingTransactionHelper.RetryingTransactionCallback;
 import org.alfresco.service.ServiceRegistry;
-import org.alfresco.service.cmr.repository.ChildAssociationRef;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.repository.NodeService;
 import org.alfresco.service.cmr.repository.StoreRef;
@@ -41,7 +40,6 @@ import org.edu_sharing.alfresco.workspace_administration.NodeServiceInterceptor;
 import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
 import org.edu_sharing.metadataset.v2.MetadataQueries;
 import org.edu_sharing.metadataset.v2.MetadataSetV2;
-import org.edu_sharing.repository.client.rpc.ACE;
 import org.edu_sharing.repository.client.rpc.Authority;
 import org.edu_sharing.repository.client.rpc.EduGroup;
 import org.edu_sharing.repository.client.rpc.SearchCriterias;
@@ -96,66 +94,67 @@ public class SearchServiceImpl implements SearchService {
 	}
 
 	@Override
-	public List<NodeRef> getFilesSharedByMe() throws Exception {
+	public ResultSet getFilesSharedByMe(SortDefinition sortDefinition, int skipCount, int maxItems) throws Exception {
 		String username = AuthenticationUtil.getFullyAuthenticatedUser();
 		SearchParameters parameters = new SearchParameters();
-		parameters.addSort("@" + CCConstants.CCM_PROP_PH_MODIFIED, false);
+		if(sortDefinition!=null && sortDefinition.hasContent()) {
+			sortDefinition.applyToSearchParameters(parameters);
+		}
+		else{
+			parameters.addSort("@" + CCConstants.CCM_PROP_PH_MODIFIED, false);
+		}
+		parameters.setSkipCount(skipCount);
+		parameters.setMaxItems(maxItems);
 		parameters.addStore(Constants.storeRef);
 		parameters.setLanguage(org.alfresco.service.cmr.search.SearchService.LANGUAGE_LUCENE);
 		parameters.addAllAttribute(CCConstants.CCM_PROP_AUTHORITYCONTAINER_EDUHOMEDIR);
 		parameters.setQuery("(TYPE:\"" + CCConstants.CCM_TYPE_IO + "\" OR TYPE:\"" + CCConstants.CCM_TYPE_MAP +"\") "
 				+ 	"AND @ccm\\:ph_users:\"" + QueryParser.escape(username) + "\"");
-		List<NodeRef> resultSet = queryAll(parameters,ApplicationInfoList.getHomeRepository().getInteger(ApplicationInfo.NOTIFY_FETCH_LIMIT,0));
-
-		List<NodeRef> result = new ArrayList<>();
-		for (NodeRef node : resultSet) {
-			if (result.contains(node))
-				continue;
-			try {
-				Set<AccessPermission> permissions = serviceRegistry.getPermissionService().getAllSetPermissions(node);
-				if (permissions != null && permissions.size() > 0) {
-					boolean add = false;
-					for (AccessPermission perm : permissions) {
-						if (perm.isInherited())
-							continue;
-						add = true;
-						break;
-					}
-					if (add)
-						result.add(node);
-				}
-			}catch(Throwable t) {
-				logger.info("Error fetching permissions for node "+node.getId()+". It's may deleted or the user has no more permissions");
-				t.printStackTrace();
-			}
-		}
-
-		return result;
+		return searchService.query(parameters);
 	}
 
 
 	@Override
-	public List<NodeRef> getFilesSharedToMe() throws Exception {
+	public ResultSet getFilesSharedToMe(SortDefinition sortDefinition, int skipCount, int maxItems) throws Exception {
 		String username = AuthenticationUtil.getFullyAuthenticatedUser();
 		String homeFolder = baseClient.getHomeFolderID(username);
 
 		SearchParameters parameters = new SearchParameters();
 		parameters.addStore(Constants.storeRef);
 		parameters.setLanguage(org.alfresco.service.cmr.search.SearchService.LANGUAGE_LUCENE);
-		//parameters.setMaxItems(Integer.MAX_VALUE);
-		parameters.setMaxItems(300);
+		parameters.setSkipCount(skipCount);
+		parameters.setMaxItems(maxItems);
 		parameters.addAllAttribute(CCConstants.CCM_PROP_AUTHORITYCONTAINER_EDUHOMEDIR);
-		parameters.addSort("@" + CCConstants.CCM_PROP_PH_MODIFIED, false);
-
-		parameters.setQuery("(TYPE:\"" + CCConstants.CCM_TYPE_IO +"\" OR TYPE:\"" + CCConstants.CCM_TYPE_MAP +"\") "
-				+ "AND ISNOTNULL:\"ccm:ph_users\" "
-				+ "AND NOT @ccm\\:ph_users:\"" + QueryParser.escape(username) + "\"");
-		List<NodeRef> result =  queryAll(parameters,ApplicationInfoList.getHomeRepository().getInteger(ApplicationInfo.NOTIFY_FETCH_LIMIT,0));
+		if(sortDefinition!=null && sortDefinition.hasContent()) {
+			sortDefinition.applyToSearchParameters(parameters);
+		}
+		else{
+			parameters.addSort("@" + CCConstants.CCM_PROP_PH_MODIFIED, false);
+		}
 
 		Set<String> memberships = new HashSet<>();
+		memberships.add(username);
 		memberships.addAll(serviceRegistry.getAuthorityService().getAuthorities());
 		memberships.remove(CCConstants.AUTHORITY_GROUP_EVERYONE);
 
+		StringBuilder query= new StringBuilder("(TYPE:\"" + CCConstants.CCM_TYPE_IO + "\" OR TYPE:\"" + CCConstants.CCM_TYPE_MAP + "\") "
+				+ "AND ISNOTNULL:\"ccm:ph_users\" "
+				+ "AND NOT @ccm\\:ph_users:\"" + QueryParser.escape(username) + "\""
+				+ " AND (");
+		int i=0;
+		for(String m : memberships){
+			if(i++>0)
+				query.append(" OR ");
+			query.append("@ccm\\:ph_invited:\"").append(QueryParser.escape(m)).append("\"");
+		}
+		query.append(")");
+		parameters.setQuery(query.toString());
+
+
+		return searchService.query(parameters);
+
+		// Done via solr ccm:ph_invited now
+		/*
 		return LogTime.log("Validating node permissions ("+result.size()+")",()-> AuthenticationUtil.runAsSystem(()->{
 				List<NodeRef> refs = new ArrayList<>(result.size());
 				for (NodeRef node : result) {
@@ -188,6 +187,7 @@ public class SearchServiceImpl implements SearchService {
 				return refs;
 			}
 		));
+		*/
 	}
 
 	private List<NodeRef> queryAll(SearchParameters parameters,int limit) {

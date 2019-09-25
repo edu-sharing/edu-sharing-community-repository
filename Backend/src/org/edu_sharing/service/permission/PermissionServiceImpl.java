@@ -2,17 +2,7 @@ package org.edu_sharing.service.permission;
 
 import java.io.Serializable;
 import java.sql.SQLException;
-import java.text.DateFormat;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 import javax.servlet.ServletContext;
 
@@ -57,7 +47,6 @@ import org.edu_sharing.repository.server.MCAlfrescoAPIClient;
 import org.edu_sharing.repository.server.authentication.Context;
 import org.edu_sharing.repository.server.tools.ApplicationInfo;
 import org.edu_sharing.repository.server.tools.ApplicationInfoList;
-import org.edu_sharing.repository.server.tools.DateTool;
 import org.edu_sharing.repository.server.tools.Edu_SharingProperties;
 import org.edu_sharing.repository.server.tools.I18nServer;
 import org.edu_sharing.repository.server.tools.Mail;
@@ -80,6 +69,8 @@ public class PermissionServiceImpl implements org.edu_sharing.service.permission
 
 
 	public static final String NODE_PUBLISHED = "NODE_PUBLISHED";
+	// the maximal number of "notify" entries in the PH_HISTORY field that are serialized
+	private static final int MAX_NOTIFY_HISTORY_LENGTH = 100;
 	private NodeService nodeService = null;
 	private PersonService personService;
 	private ApplicationInfo appInfo;
@@ -1444,15 +1435,18 @@ public class PermissionServiceImpl implements org.edu_sharing.service.permission
 		nodeService.setProperty(nodeRef, QName.createQName(CCConstants.CCM_PROP_PH_USERS), phUsers);
 		Date created = new Date();
 		nodeService.setProperty(nodeRef, QName.createQName(CCConstants.CCM_PROP_PH_MODIFIED), created);
-		
+
 		
 		//ObjectMapper jsonMapper = new ObjectMapper(); 
 		Gson gson = new Gson();
 		Notify n = new Notify();
 		try {
 			ACL acl = repoClient.getPermissions(nodeId);
+			// set of all authority names that are not inherited, but explicitly set
+			nodeService.setProperty(nodeRef, QName.createQName(CCConstants.CCM_PROP_PH_INVITED), PermissionServiceHelper.getExplicitAuthoritiesFromACL(acl));
+
 			acl.setAces(acl.getAces());
-			
+
 			
 			n.setAcl(acl);
 			n.setCreated(created);
@@ -1467,6 +1461,9 @@ public class PermissionServiceImpl implements org.edu_sharing.service.permission
 			String jsonStringACL = gson.toJson(n);
 			List<String> history = (List<String>)nodeService.getProperty(nodeRef, QName.createQName(CCConstants.CCM_PROP_PH_HISTORY));
 			history = (history == null)? new ArrayList<String>() : history;
+			while(history.size()>MAX_NOTIFY_HISTORY_LENGTH){
+					history.remove(0);
+			}
 			history.add(jsonStringACL);
 			nodeService.setProperty(nodeRef, QName.createQName(CCConstants.CCM_PROP_PH_HISTORY), new ArrayList(history));
 		} catch (Exception e1) {

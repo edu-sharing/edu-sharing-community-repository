@@ -184,6 +184,7 @@ public class EduVersion2ServiceImpl extends org.alfresco.repo.version.Version2Se
         	newAspectQNames.add(QName.createQName(CCConstants.CCM_ASPECT_PERMISSION_HISTORY));
         	propsToLeaveAlone.add(QName.createQName(CCConstants.CCM_PROP_PH_ACTION));
         	propsToLeaveAlone.add(QName.createQName(CCConstants.CCM_PROP_PH_HISTORY));
+        	propsToLeaveAlone.add(QName.createQName(CCConstants.CCM_PROP_PH_INVITED));
         	propsToLeaveAlone.add(QName.createQName(CCConstants.CCM_PROP_PH_MODIFIED));
         	propsToLeaveAlone.add(QName.createQName(CCConstants.CCM_PROP_PH_USERS));
         	

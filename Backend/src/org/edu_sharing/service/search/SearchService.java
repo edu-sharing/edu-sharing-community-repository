@@ -5,15 +5,12 @@ import java.util.List;
 import java.util.Map;
 
 import org.alfresco.service.cmr.repository.NodeRef;
+import org.alfresco.service.cmr.search.ResultSet;
 import org.alfresco.service.cmr.security.AuthorityType;
 import org.edu_sharing.metadataset.v2.MetadataSetV2;
 import org.edu_sharing.repository.client.rpc.EduGroup;
 import org.edu_sharing.repository.server.SearchResultNodeRef;
-import org.edu_sharing.restservices.DAOException;
 import org.edu_sharing.restservices.MdsDao;
-import org.edu_sharing.restservices.RepositoryDao;
-import org.edu_sharing.restservices.iam.v1.model.UserEntries;
-import org.edu_sharing.restservices.search.v1.model.SearchParameters;
 import org.edu_sharing.restservices.shared.MdsQueryCriteria;
 import org.edu_sharing.service.InsufficientPermissionException;
 import org.edu_sharing.service.search.model.SearchResult;
@@ -41,9 +38,9 @@ public interface SearchService {
 	SearchResult<EduGroup> searchOrganizations(String pattern, int skipCount, int maxValues, SortDefinition sort,boolean scoped)
 			throws Throwable;
 
-	List<NodeRef> getFilesSharedByMe() throws Exception;
+	ResultSet getFilesSharedByMe(SortDefinition sortDefinition, int skipCount, int maxItems) throws Exception;
 
-	List<NodeRef> getFilesSharedToMe() throws Exception;
+	ResultSet getFilesSharedToMe(SortDefinition sortDefinition, int skipCount, int maxItems) throws Exception;
 	
 	List<NodeRef> getWorkflowReceive(String fullyAuthenticatedUser);
 

@@ -31,6 +31,7 @@ import org.edu_sharing.repository.server.MCAlfrescoAPIClient;
 import org.edu_sharing.service.Constants;
 
 import com.google.gson.Gson;
+import org.edu_sharing.service.permission.PermissionServiceHelper;
 
 public class Release_5_0_NotifyRefactoring extends UpdateAbstract {
 
@@ -146,6 +147,9 @@ public class Release_5_0_NotifyRefactoring extends UpdateAbstract {
 							directlySetAces.add(ace);
 						}
 					}
+					// set of all authority names that are not inherited, but explicitly set
+					nodeService.setProperty(nodeRef, QName.createQName(CCConstants.CCM_PROP_PH_INVITED), PermissionServiceHelper.getExplicitAuthoritiesFromACL(acl));
+
 					Date created = (Date) nodeService.getProperty(entry.getKey(), ContentModel.PROP_CREATED);
 					String action = (String) nodeService.getProperty(entry.getKey(),
 							QName.createQName(CCConstants.CCM_PROP_NOTIFY_ACTION));
