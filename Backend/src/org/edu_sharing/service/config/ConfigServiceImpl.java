@@ -24,7 +24,9 @@ import javax.xml.xpath.XPathFactory;
 
 import org.apache.camel.util.FileUtil;
 import org.apache.commons.io.FileUtils;
+import org.apache.log4j.Logger;
 import org.edu_sharing.metadataset.v2.MetadataReaderV2;
+import org.edu_sharing.repository.server.tools.ApplicationInfoList;
 import org.edu_sharing.service.config.model.Config;
 import org.edu_sharing.service.config.model.Context;
 import org.edu_sharing.service.config.model.KeyValuePair;
@@ -44,8 +46,23 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 
 public class ConfigServiceImpl implements ConfigService{
+	private static Logger logger=Logger.getLogger(ConfigServiceImpl.class);
+	// Cached config
+	private static Config currentConfig=null;
+	private static final Unmarshaller jaxbUnmarshaller;
 
-	
+	static{
+		Unmarshaller jaxbUnmarshaller1;
+		try {
+			JAXBContext jaxbContext = JAXBContext.newInstance(Config.class);
+			jaxbUnmarshaller1 = jaxbContext.createUnmarshaller();
+		} catch (JAXBException e) {
+			jaxbUnmarshaller1 = null;
+			logger.error(e.getMessage(),e);
+		}
+		jaxbUnmarshaller = jaxbUnmarshaller1;
+	}
+
 	/*
 	XPathFactory pfactory = XPathFactory.newInstance();
 	XPath xpath = pfactory.newXPath();
@@ -91,14 +108,19 @@ public class ConfigServiceImpl implements ConfigService{
 	*/
 	@Override
 	public Config getConfig() throws Exception {
-		JAXBContext jaxbContext = JAXBContext.newInstance(Config.class);
-		Unmarshaller jaxbUnmarshaller = jaxbContext.createUnmarshaller();
+	    if(!"true".equalsIgnoreCase(ApplicationInfoList.getHomeRepository().getDevmode()) && currentConfig!=null)
+	        return currentConfig;
 		InputStream is = getConfigInputStream();
 		if(is==null)
 			throw new IOException("client.config.xml file missing");
-		Config config = (Config)jaxbUnmarshaller.unmarshal(is);
-		is.close();
-		return config;
+		Config config;
+		synchronized (jaxbUnmarshaller) {
+            config = (Config) jaxbUnmarshaller.unmarshal(is);
+        }
+        is.close();
+		currentConfig = config;
+        return config;
+
 		
 	}
 	private InputStream getConfigInputStream() {
@@ -126,7 +148,7 @@ public class ConfigServiceImpl implements ConfigService{
 			}
 		}
 		throw new IllegalArgumentException("Context with domain "+domain+" does not exists");
-		
+
 	}
 	private Variables overrideVariables(Variables values, Variables override) {
 		if(values==null)
@@ -167,8 +189,18 @@ public class ConfigServiceImpl implements ConfigService{
 		}
 		
 	}
-	
-	
+
+	@Override
+	public void refresh() {
+		currentConfig = null;
+		try {
+			getConfig();
+		} catch (Exception e) {
+			logger.error("error refreshing client config: "+e.getMessage(),e);
+		}
+	}
+
+
 	/**
 	 * override the default json with all the json from the xml
 	 * @param copy
