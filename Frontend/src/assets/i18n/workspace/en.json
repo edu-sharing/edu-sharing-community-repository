@@ -67,6 +67,7 @@
     "FILE_LOCATION":"Storage location",
     "CHANGE__LOCATION":"Change",
     "CHOOSE_LOCATION":"Choose location",
+    "TREE_MORE_ITEMS": "+ {{count}} more folders",
     "SHARE": {
       "TITLE": "Manage Sharing",
       "NO_PERMISSIONS":"No explicit permissions have been stipulated for this object yet.",
@@ -198,6 +199,7 @@
       "PASTE":"Paste",
       "METADATA":"Details",
       "COLLECTION":"Add to collection",
+      "COLLECTION_OTHER":"Add to other",
       "STREAM":"Add to stream",
       "LICENSE":"Assign a license",
       "CONTRIBUTOR":"Contributors",

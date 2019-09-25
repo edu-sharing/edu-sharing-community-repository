@@ -388,8 +388,10 @@ export class CollectionsMainComponent {
             if (nodes && nodes.length) {
                 if (!originalDeleted && NodeHelper.getNodesRight(nodes, RestConstants.ACCESS_CC_PUBLISH,NodesRightMode.Original)) {
                     let collection = this.actionbar.createOptionIfPossible('ADD_TO_COLLECTION', nodes, (node: Node) => this.addToOther = ActionbarHelperService.getNodes(nodes, node));
-                    if (collection)
+                    if (collection) {
+                        collection.name='WORKSPACE.OPTION.COLLECTION_OTHER';
                         options.push(collection);
+                    }
                 }
                 if (this.isAllowedToDeleteNodes(nodes)) {
                     let remove = new OptionItem('COLLECTIONS.DETAIL.REMOVE', 'remove_circle_outline', (node: Node) => {
@@ -403,7 +405,7 @@ export class CollectionsMainComponent {
         if (fromList) {
             let collection = this.actionbar.createOptionIfPossible('ADD_TO_COLLECTION', nodes, (node: Node) => this.addToOtherCollection(node));
             if (collection) {
-                collection.name = 'COLLECTIONS.DETAIL.ADD_TO_OTHER';
+                collection.name='WORKSPACE.OPTION.COLLECTION_OTHER';
                 options.push(collection);
             }
         }
