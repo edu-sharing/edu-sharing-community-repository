@@ -22,6 +22,7 @@ import {UIHelper} from "../../../common/ui/ui-helper";
   ]
 })
 export class WorkspaceSubTreeComponent  {
+  private static MAX_FOLDER_COUNT = 100;
   public _node : string;
   public loading = true;
   public _nodes : Node[];
@@ -35,6 +36,8 @@ export class WorkspaceSubTreeComponent  {
   private dropdownTop: string;
   private dropdown: Node;
   public _hasChilds:boolean[]=[];
+  moreItems: number;
+  loadingMore: boolean;
   /**
    * Set the options which are valid for each node, similar to the action bar options, see @OptionItem
    * @param options
@@ -201,12 +204,25 @@ export class WorkspaceSubTreeComponent  {
     private refresh() {
       if(!this._node)
         return;
-        this.nodeApi.getChildren(this._node,[RestConstants.FILTER_FOLDERS],{count:RestConstants.COUNT_UNLIMITED}).subscribe((data : NodeList) => {
+        this.nodeApi.getChildren(this._node,[RestConstants.FILTER_FOLDERS],{count:WorkspaceSubTreeComponent.MAX_FOLDER_COUNT}).subscribe((data : NodeList) => {
             this._nodes=data.nodes;
+            this.moreItems=data.pagination.total-data.pagination.count;
             this.loadingStates=Helper.initArray(this._nodes.length,true);
             this.hasChilds.emit(this._nodes && this._nodes.length);
             this.onLoading.emit(false);
             this.loading=false;
         });
     }
+
+  loadAll() {
+    this.loadingMore = true;
+    this.nodeApi.getChildren(this._node, [RestConstants.FILTER_FOLDERS], {
+      offset: this._nodes.length,
+      count: RestConstants.COUNT_UNLIMITED
+    }).subscribe((data: NodeList) => {
+      this.loadingMore = false;
+      this._nodes = this._nodes.concat(data.nodes);
+      this.moreItems = 0;
+    });
+  }
 }
