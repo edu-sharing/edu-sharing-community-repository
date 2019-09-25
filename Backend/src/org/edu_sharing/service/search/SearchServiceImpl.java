@@ -51,7 +51,6 @@ import org.edu_sharing.repository.client.tools.metadata.search.SearchMetadataHel
 import org.edu_sharing.repository.server.AuthenticationToolAPI;
 import org.edu_sharing.repository.server.MCAlfrescoAPIClient;
 import org.edu_sharing.repository.server.SearchResultNodeRef;
-import org.edu_sharing.repository.server.tools.ApplicationInfo;
 import org.edu_sharing.repository.server.tools.ApplicationInfoList;
 import org.edu_sharing.repository.server.tools.LogTime;
 import org.edu_sharing.restservices.MdsDao;
@@ -94,43 +93,30 @@ public class SearchServiceImpl implements SearchService {
 	}
 
 	@Override
-	public ResultSet getFilesSharedByMe(SortDefinition sortDefinition, int skipCount, int maxItems) throws Exception {
+	public SearchResultNodeRef getFilesSharedByMe(SortDefinition sortDefinition, ContentType contentType, int skipCount, int maxItems) throws Exception {
 		String username = AuthenticationUtil.getFullyAuthenticatedUser();
-		SearchParameters parameters = new SearchParameters();
-		if(sortDefinition!=null && sortDefinition.hasContent()) {
-			sortDefinition.applyToSearchParameters(parameters);
-		}
-		else{
-			parameters.addSort("@" + CCConstants.CCM_PROP_PH_MODIFIED, false);
-		}
-		parameters.setSkipCount(skipCount);
-		parameters.setMaxItems(maxItems);
-		parameters.addStore(Constants.storeRef);
-		parameters.setLanguage(org.alfresco.service.cmr.search.SearchService.LANGUAGE_LUCENE);
-		parameters.addAllAttribute(CCConstants.CCM_PROP_AUTHORITYCONTAINER_EDUHOMEDIR);
-		parameters.setQuery("(TYPE:\"" + CCConstants.CCM_TYPE_IO + "\" OR TYPE:\"" + CCConstants.CCM_TYPE_MAP +"\") "
+
+		SearchToken token=new SearchToken();
+		token.setFrom(skipCount);
+		token.setMaxResult(maxItems);
+		token.setSortDefinition(sortDefinition);
+		token.setContentType(contentType);
+
+		token.setLuceneString("(TYPE:\"" + CCConstants.CCM_TYPE_IO + "\" OR TYPE:\"" + CCConstants.CCM_TYPE_MAP +"\") "
 				+ 	"AND @ccm\\:ph_users:\"" + QueryParser.escape(username) + "\"");
-		return searchService.query(parameters);
+		return search(token);
 	}
 
 
 	@Override
-	public ResultSet getFilesSharedToMe(SortDefinition sortDefinition, int skipCount, int maxItems) throws Exception {
+	public SearchResultNodeRef getFilesSharedToMe(SortDefinition sortDefinition, ContentType contentType, int skipCount, int maxItems) throws Exception {
 		String username = AuthenticationUtil.getFullyAuthenticatedUser();
-		String homeFolder = baseClient.getHomeFolderID(username);
 
-		SearchParameters parameters = new SearchParameters();
-		parameters.addStore(Constants.storeRef);
-		parameters.setLanguage(org.alfresco.service.cmr.search.SearchService.LANGUAGE_LUCENE);
-		parameters.setSkipCount(skipCount);
-		parameters.setMaxItems(maxItems);
-		parameters.addAllAttribute(CCConstants.CCM_PROP_AUTHORITYCONTAINER_EDUHOMEDIR);
-		if(sortDefinition!=null && sortDefinition.hasContent()) {
-			sortDefinition.applyToSearchParameters(parameters);
-		}
-		else{
-			parameters.addSort("@" + CCConstants.CCM_PROP_PH_MODIFIED, false);
-		}
+		SearchToken token=new SearchToken();
+		token.setFrom(skipCount);
+		token.setMaxResult(maxItems);
+		token.setSortDefinition(sortDefinition);
+		token.setContentType(contentType);
 
 		Set<String> memberships = new HashSet<>();
 		memberships.add(username);
@@ -148,10 +134,9 @@ public class SearchServiceImpl implements SearchService {
 			query.append("@ccm\\:ph_invited:\"").append(QueryParser.escape(m)).append("\"");
 		}
 		query.append(")");
-		parameters.setQuery(query.toString());
+		token.setLuceneString(query.toString());
 
-
-		return searchService.query(parameters);
+		return search(token);
 
 		// Done via solr ccm:ph_invited now
 		/*

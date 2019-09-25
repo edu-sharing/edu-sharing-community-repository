@@ -749,13 +749,13 @@ public class NodeApi  {
                 children=NodeDao.convertAlfrescoNodeRef(repoDao,NodeDao.sortAlfrescoRefs(converted,filter,sortDefinition));
             }
 	    	else if("-my_shared_files-".equals(node)){
-				response = searchResultToResponse(NodeDao.getFilesSharedByMe(repoDao, propertyFilter, sortDefinition, skipCount, maxItems));
+				response = searchResultToResponse(NodeDao.getFilesSharedByMe(repoDao, filter, propFilter, sortDefinition, skipCount, maxItems));
 			}
 	    	else if("-workflow_receive-".equals(node)){
 	    		children = NodeDao.getWorkflowReceive(repoDao,filter,sortDefinition);
 	    	}
 	    	else if("-to_me_shared_files-".equals(node)){
-				response = searchResultToResponse(NodeDao.getFilesSharedToMe(repoDao, propertyFilter,sortDefinition,skipCount,maxItems));
+				response = searchResultToResponse(NodeDao.getFilesSharedToMe(repoDao, filter, propFilter,sortDefinition,skipCount,maxItems));
 			}
 	    	else{
 		    	NodeDao nodeDao = NodeDao.getNode(repoDao, node, propFilter);

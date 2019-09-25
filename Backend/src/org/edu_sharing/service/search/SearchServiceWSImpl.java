@@ -6,7 +6,6 @@ import java.util.List;
 import java.util.Map;
 
 import org.alfresco.service.cmr.repository.NodeRef;
-import org.alfresco.service.cmr.search.ResultSet;
 import org.alfresco.service.cmr.security.AuthorityType;
 import org.edu_sharing.metadataset.v2.MetadataSetV2;
 import org.edu_sharing.repository.client.rpc.EduGroup;
@@ -49,12 +48,12 @@ public class SearchServiceWSImpl extends SearchServiceAdapter {
 	}
 	
 	@Override
-	public ResultSet getFilesSharedByMe(SortDefinition sortDefinition, int skipCount, int maxItems) throws Exception {
+	public SearchResultNodeRef getFilesSharedByMe(SortDefinition sortDefinition, ContentType contentType, int skipCount, int maxItems) throws Exception {
 		return null;
 	}
 	
 	@Override
-	public ResultSet getFilesSharedToMe(SortDefinition sortDefinition, int skipCount, int maxItems) throws Exception {
+	public SearchResultNodeRef getFilesSharedToMe(SortDefinition sortDefinition, ContentType contentType, int skipCount, int maxItems) throws Exception {
 		return null;
 	}
 	

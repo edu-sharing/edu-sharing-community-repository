@@ -5,7 +5,6 @@ import java.util.List;
 import java.util.Map;
 
 import org.alfresco.service.cmr.repository.NodeRef;
-import org.alfresco.service.cmr.search.ResultSet;
 import org.alfresco.service.cmr.security.AuthorityType;
 import org.edu_sharing.metadataset.v2.MetadataSetV2;
 import org.edu_sharing.repository.client.rpc.EduGroup;
@@ -38,9 +37,9 @@ public interface SearchService {
 	SearchResult<EduGroup> searchOrganizations(String pattern, int skipCount, int maxValues, SortDefinition sort,boolean scoped)
 			throws Throwable;
 
-	ResultSet getFilesSharedByMe(SortDefinition sortDefinition, int skipCount, int maxItems) throws Exception;
+	SearchResultNodeRef getFilesSharedByMe(SortDefinition sortDefinition, ContentType contentType, int skipCount, int maxItems) throws Exception;
 
-	ResultSet getFilesSharedToMe(SortDefinition sortDefinition, int skipCount, int maxItems) throws Exception;
+	SearchResultNodeRef getFilesSharedToMe(SortDefinition sortDefinition, ContentType contentType, int skipCount, int maxItems) throws Exception;
 	
 	List<NodeRef> getWorkflowReceive(String fullyAuthenticatedUser);
 
