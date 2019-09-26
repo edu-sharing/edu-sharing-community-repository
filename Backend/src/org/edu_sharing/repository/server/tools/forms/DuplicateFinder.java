@@ -32,6 +32,7 @@ import java.util.Map;
 
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.server.RepoFactory;
+import org.edu_sharing.repository.server.tools.ApplicationInfoList;
 
 public class DuplicateFinder {
 	
@@ -147,8 +148,7 @@ public class DuplicateFinder {
 
 			// replace chars that can lead to an
 			// org.alfresco.repo.node.integrity.IntegrityException
-			cmNameReadableName = cmNameReadableName.replaceAll(
-					RepoFactory.getEdusharingProperty(CCConstants.EDU_SHARING_PROPERTIES_PROPERTY_VALIDATOR_REGEX_CM_NAME), "_");
+			cmNameReadableName = cmNameReadableName.replaceAll(ApplicationInfoList.getHomeRepository().getValidatorRegexCMName(), "_");
 
 			//replace ending dot with nothing
 			cmNameReadableName = cmNameReadableName.replaceAll("[\\.]*$", "");

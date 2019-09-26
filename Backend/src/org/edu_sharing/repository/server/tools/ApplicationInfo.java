@@ -161,6 +161,9 @@ public class ApplicationInfo implements Comparable<ApplicationInfo>{
 	public static final String WEBSITEPREVIEWRENDERSERVICE = "websitepreviewrenderservice";
 
 	public static final String REPOSITORY_TYPE_MEMUCHO = "MEMUCHO";
+	
+	public static final String PROPERTY_VALIDATOR_REGEX_CM_NAME = "property_validator_regex_cm_name";
+	
 	private final Properties properties;
 
 	private String host = null;
@@ -312,6 +315,15 @@ public class ApplicationInfo implements Comparable<ApplicationInfo>{
 	Logger logger = Logger.getLogger(ApplicationInfo.class);
 
 	private String xml;
+	
+	/**
+	 * der Anfangsteil des alfresco Intergity Pattern:
+	 * (.*[\"\*\\\>\<\?\/\:\|]+.*)|(.*[\.]?.*[\.]+$)|(.*[ ]+$)
+	 * so das nur die kritischen Zeichen matchen und nicht der ganze string
+	 */
+	//default value ([\"\*\\\\\>\<\?\/\:\|'\r\n])
+	private String validatorRegexCMName = "([\\\"\\*\\\\\\\\\\>\\<\\?\\/\\:\\|'\\r\\n])";
+	
 
 	
 	public ApplicationInfo(String _appFile) throws Exception{
@@ -459,6 +471,11 @@ public class ApplicationInfo implements Comparable<ApplicationInfo>{
 
 		getWebServiceUrl();
 		getWebServerUrl();
+		
+		String cmNameRegex = properties.getProperty(PROPERTY_VALIDATOR_REGEX_CM_NAME);
+		if(cmNameRegex != null && !cmNameRegex.trim().equals("")) {
+			validatorRegexCMName = cmNameRegex;
+		}
 		
 	}
 	
@@ -888,6 +905,10 @@ public class ApplicationInfo implements Comparable<ApplicationInfo>{
 
 	public String getApiKey() {
 		return apiKey;
+	}
+	
+	public String getValidatorRegexCMName() {
+		return validatorRegexCMName;
 	}
 	
 	public String getWebsitepreviewrenderservice() {

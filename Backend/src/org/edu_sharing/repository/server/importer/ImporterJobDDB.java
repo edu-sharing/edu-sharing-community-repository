@@ -77,8 +77,7 @@ public class ImporterJobDDB extends AbstractJob{
 			
 			
 			String name = (String) ddbObject.get(CCConstants.LOM_PROP_GENERAL_TITLE);
-			name = name.replaceAll(
-					RepoFactory.getEdusharingProperty(CCConstants.EDU_SHARING_PROPERTIES_PROPERTY_VALIDATOR_REGEX_CM_NAME), "_");
+			name = name.replaceAll(ApplicationInfoList.getHomeRepository().getValidatorRegexCMName(), "_");
 
 			//replace ending dot with nothing
 			name = name.replaceAll("[\\.]*$", "");

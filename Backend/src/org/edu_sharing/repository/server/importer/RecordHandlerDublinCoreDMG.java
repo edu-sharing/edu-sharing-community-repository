@@ -13,6 +13,7 @@ import org.apache.commons.logging.LogFactory;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.client.tools.forms.VCardTool;
 import org.edu_sharing.repository.server.RepoFactory;
+import org.edu_sharing.repository.server.tools.ApplicationInfoList;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
@@ -94,7 +95,7 @@ public class RecordHandlerDublinCoreDMG implements RecordHandlerInterface {
 		String title = (String) xpath.evaluate("metadata/dc/title", nodeRecord, XPathConstants.STRING);
 		logger.info("title:"+title);
 		if(title != null){
-			String safeTitle = title.replaceAll( RepoFactory.getEdusharingProperty(CCConstants.EDU_SHARING_PROPERTIES_PROPERTY_VALIDATOR_REGEX_CM_NAME), "_");
+			String safeTitle = title.replaceAll( ApplicationInfoList.getHomeRepository().getValidatorRegexCMName(), "_");
 			safeTitle = clearEnd(safeTitle);
 			
 			

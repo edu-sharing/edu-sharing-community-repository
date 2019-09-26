@@ -152,7 +152,7 @@ public class WpImporter implements Importer{
 					eduProps.put(CCConstants.LOM_PROP_GENERAL_TITLE,jo.get("slug").toString());
 					
 					
-					String name = jo.get("slug").toString().replaceAll(RepoFactory.getEdusharingProperty(CCConstants.EDU_SHARING_PROPERTIES_PROPERTY_VALIDATOR_REGEX_CM_NAME), "_");
+					String name = jo.get("slug").toString().replaceAll(ApplicationInfoList.getHomeRepository().getValidatorRegexCMName(), "_");
 					
 					eduProps.put(CCConstants.CM_NAME, name);
 

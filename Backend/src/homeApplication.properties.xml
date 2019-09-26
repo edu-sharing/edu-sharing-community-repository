@@ -59,6 +59,8 @@
 	<entry key="guest_username">esguest</entry>
 	<entry key="guest_password">esguest</entry>
 	
+	<entry key="property_validator_regex_cm_name">([\"\*\\\\\&gt;\&lt;\?\/\:\|'\r\n])</entry>
+	
 	<!--
 	 <entry key="recommend_objects_query">PARENT:"workspace://SpacesStore/753d628c-0651-4785-a734-0b738fcb2053"</entry>
 	-->
