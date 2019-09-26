@@ -380,6 +380,14 @@ public class URLTool{
 		}
 		return ngComponentsUrl;
 	}
+	/**
+	 * Get the url to a angular collection
+	 * @param nodeId
+	 * @return
+	 */
+	public static String getNgCollectionUrl(String nodeId) {
+		return getNgComponentsUrl()+"collections?id="+nodeId;
+	}
 	
 	public static String getRedirectServletLink(String repId, String nodeId){
 		String url = getBaseUrl(true) + "/" + CCConstants.EDU_SHARING_SERVLET_PATH_REDIRECT;

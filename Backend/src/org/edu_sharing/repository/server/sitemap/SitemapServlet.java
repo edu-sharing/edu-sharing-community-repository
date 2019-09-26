@@ -1,6 +1,10 @@
 package org.edu_sharing.repository.server.sitemap;
 
 import java.io.IOException;
+import java.text.SimpleDateFormat;
+import java.time.format.DateTimeFormatter;
+import java.util.Arrays;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -11,6 +15,7 @@ import javax.servlet.http.HttpServletResponse;
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.Marshaller;
 
+import org.apache.catalina.ha.session.DeltaSession;
 import org.apache.log4j.Logger;
 import org.edu_sharing.metadataset.v2.MetadataReaderV2;
 import org.edu_sharing.metadataset.v2.MetadataSetV2;
@@ -34,7 +39,7 @@ import org.edu_sharing.service.search.model.SortDefinition;
 
 public class SitemapServlet extends HttpServlet{
     public final static String NS_SITEMAP="http://www.sitemaps.org/schemas/sitemap/0.9";
-
+    public final static SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd");
     Logger logger = Logger.getLogger(SitemapServlet.class);
     private static final int NODES_PER_MAP = 500;
     @Override
@@ -42,13 +47,14 @@ public class SitemapServlet extends HttpServlet{
             throws ServletException, IOException {
         try {
             String from = req.getParameter("from");
+            String type = req.getParameter("type");
 
             if(from==null){
                 Sitemapindex index = getAll(req);
                 toXml(index,resp);
             }
             else{
-                Urlset set = getNodes(req,Integer.parseInt(from));
+                Urlset set = getNodes(req,type,Integer.parseInt(from));
                 toXml(set,resp);
             }
         }
@@ -64,11 +70,18 @@ public class SitemapServlet extends HttpServlet{
 
         SearchToken token=new SearchToken();
         token.setContentType(SearchService.ContentType.FILES);
-        token.setMaxResult(Integer.MAX_VALUE);
-        SearchResultNodeRef result = search.searchV2(getMds(request), MetadataSetV2.DEFAULT_CLIENT_QUERY, getSearchAllCriterias(), token);
-        for(int i=0;i<result.getNodeCount();i+=NODES_PER_MAP){
+        token.setMaxResult(0);
+        SearchResultNodeRef resultFiles = search.searchV2(getMds(request), MetadataSetV2.DEFAULT_CLIENT_QUERY, getSearchAllCriterias(), token);
+        token.setContentType(SearchService.ContentType.COLLECTIONS);
+        SearchResultNodeRef resultCollections = search.searchV2(getMds(request), MetadataSetV2.DEFAULT_CLIENT_QUERY, getSearchAllCriterias(), token);
+        for(int i=0;i<resultFiles.getNodeCount();i+=NODES_PER_MAP){
             Sitemapindex.Sitemap map = new Sitemapindex.Sitemap();
-            map.loc=request.getRequestURL()+"?from="+i;
+            map.loc=request.getRequestURL()+"?type=io&from="+i;
+            index.sitemap.add(map);
+        }
+        for(int i=0;i<resultCollections.getNodeCount();i+=NODES_PER_MAP){
+            Sitemapindex.Sitemap map = new Sitemapindex.Sitemap();
+            map.loc=request.getRequestURL()+"?type=collection&from="+i;
             index.sitemap.add(map);
         }
         return index;
@@ -86,13 +99,16 @@ public class SitemapServlet extends HttpServlet{
         jaxbMarshaller.marshal(obj, resp.getOutputStream());
     }
 
-    private Urlset getNodes(HttpServletRequest request, int from) throws Throwable {
+    private Urlset getNodes(HttpServletRequest request, String type, int from) throws Throwable {
         Urlset set = new Urlset();
         SearchService search = SearchServiceFactory.getLocalService();
         NodeService nodeService = NodeServiceFactory.getLocalService();
 
         SearchToken token=new SearchToken();
-        token.setContentType(SearchService.ContentType.FILES);
+        if(type.equals("collection"))
+            token.setContentType(SearchService.ContentType.COLLECTIONS);
+        else
+            token.setContentType(SearchService.ContentType.FILES);
         token.setMaxResult(NODES_PER_MAP);
         token.setFrom(from);
         SortDefinition sort = new SortDefinition();
@@ -101,7 +117,15 @@ public class SitemapServlet extends HttpServlet{
         SearchResultNodeRef result = search.searchV2(getMds(request), MetadataSetV2.DEFAULT_CLIENT_QUERY, getSearchAllCriterias(), token);
         for(org.edu_sharing.service.model.NodeRef ref : result.getData()){
             Urlset.Url url=new Urlset.Url();
-            url.loc=URLTool.getNgRenderNodeUrl(ref.getNodeId(),null);
+            String[] aspects=nodeService.getAspects(ref.getStoreProtocol(),ref.getStoreId(),ref.getNodeId());
+            Date property = (Date) nodeService.getPropertyNative(ref.getStoreProtocol(), ref.getStoreId(), ref.getNodeId(), CCConstants.CM_PROP_C_MODIFIED);
+            url.lastmod = DATE_FORMAT.format(property);
+            if(Arrays.asList(aspects).contains(CCConstants.CCM_ASPECT_COLLECTION)){
+                url.loc=URLTool.getNgCollectionUrl(ref.getNodeId());
+            }
+            else {
+                url.loc = URLTool.getNgRenderNodeUrl(ref.getNodeId(), null);
+            }
             String mimetype=nodeService.getContentMimetype(ref.getStoreProtocol(),ref.getStoreId(),ref.getNodeId());
             if(MimeTypesV2.getTypeFromMimetype(mimetype).equals("file-video")){
                 Urlset.Url.Video video = new Urlset.Url.Video();
