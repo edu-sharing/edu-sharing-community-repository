@@ -24,6 +24,7 @@ import {
 } from '../../../core-module/core.module';
 import {AddElement} from "../../add-element";
 import {MatMenuTrigger} from "@angular/material";
+import {Router} from "@angular/router";
 
 @Component({
   selector: 'listTable',
@@ -81,6 +82,13 @@ export class ListTableComponent implements EventListener{
      }
      */
   };
+
+  /**
+   * Should the nodes be automatically linked via href
+   * This is important for crawlers
+   * Activate it for any kind of nodes list which is supposed to be clickable
+   */
+  @Input() createLink = false;
 
   @Output() nodesChange=new EventEmitter();
 
@@ -355,6 +363,7 @@ export class ListTableComponent implements EventListener{
               private storage : TemporaryStorageService,
               private network : RestNetworkService,
               private locator : RestLocatorService,
+              private router : Router,
               private toast : Toast,
               private frame : FrameEventsService,
               private sanitizer: DomSanitizer) {
@@ -652,7 +661,7 @@ export class ListTableComponent implements EventListener{
     return this.getReference(node).iconURL;
   }
   public isCollection(node : any){
-    return node.collection || node.hasOwnProperty('childCollectionsCount');
+    return NodeHelper.isNodeCollection(node);
   }
   public isReference(node : any){
     // when checking for aspects, we always detect a reference
@@ -701,10 +710,10 @@ export class ListTableComponent implements EventListener{
   }
   private select(node : Node,from : string=null,fireEvent=true,unselect=true){
     if(from!="checkbox" && !this.isClickable)
-      return;
+      return false;
     if(from!="checkbox" && !this.selectOnClick && fireEvent){
       this.clickRowSender(node,from);
-      return;
+      return false;
     }
 
     if(!this.hasCheckbox || from!="checkbox"){ // Single value select
@@ -713,7 +722,7 @@ export class ListTableComponent implements EventListener{
       else
         this.selectedNodes=[node];
       this.onSelectionChanged.emit(this.selectedNodes);
-      return;
+      return false;
     }
     let pos=this.getSelectedPos(node);
     // select from-to range via shift key
@@ -736,7 +745,7 @@ export class ListTableComponent implements EventListener{
     }
     this.onSelectionChanged.emit(this.selectedNodes);
     this.changes.detectChanges();
-
+    return false;
   }
   private getAttribute(data : any,item : ListItem) : SafeHtml{
 
@@ -806,4 +815,10 @@ export class ListTableComponent implements EventListener{
         */
     }
 
+  generateRoute(item: Node|any) {
+    if(this.createLink) {
+      return UIHelper.createUrlToNode(this.router,item);
+    }
+    return null;
+  }
 }

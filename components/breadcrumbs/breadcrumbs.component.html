@@ -3,7 +3,9 @@
         <button mat-button color="primary" *ngIf="home" tabindex="0" class="home mat-button-no-uppercase" [class.clickable]="clickable" (click)="openBreadcrumb(0)" (keyup.enter)="openBreadcrumb(0)">{{home | translate}}</button>
         <button mat-button color="primary" *ngIf="!home" tabindex="0" class="home homeIcon mat-button-no-uppercase" [class.clickable]="clickable" (click)="openBreadcrumb(0)"><i icon iconId="home"></i></button>
     </div>
-  <div *ngFor="let node of _breadcrumbsAsNode;let i=index">
+  <a *ngFor="let node of _breadcrumbsAsNode;let i=index"
+      [href]="generateUrl(node)"
+      (click)="openBreadcrumb(i+1)">
       <i aria-hidden="true" icon iconId="keyboard_arrow_right" class="breadcrumb-arrow"></i>
       <button mat-button color="primary"
        (dragend)="dragHover=null"
@@ -14,9 +16,8 @@
        [class.homeIsIcon]="!home"
        class="folder mat-button-no-uppercase"
        [class.clickable]="clickable"
-       [class.selected]="node && dragHover==node"
-       (click)="openBreadcrumb(i+1)">{{node ? node.name : ''}}</button>
-  </div>
+       [class.selected]="node && dragHover==node">{{node ? node.name : ''}}</button>
+  </a>
 </div>
 <!--
 <div class="breadcrumb breadcrumbMobile" *ngIf="_breadcrumbsAsNodeShort">

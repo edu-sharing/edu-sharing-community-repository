@@ -36,7 +36,7 @@ import {BridgeService} from "../core-bridge-module/bridge.service";
 import {OptionItem} from "./option-item";
 import {RestConnectorService} from "../core-module/rest/services/rest-connector.service";
 import {Observable, Observer} from "rxjs";
-import {DialogButton, RestIamService} from "../core-module/core.module";
+import {DialogButton, RestIamService, RestNetworkService} from "../core-module/core.module";
 
 export class UIHelper {
 
@@ -683,5 +683,33 @@ export class UIHelper {
                 }
             }, 1000 / 60);
         });
+    }
+
+    /**
+     * create a route to a given node
+     * The method currently supports folders (workspace), files (render) and collections
+     */
+    static createUrlToNode(router:Router,item: Node | any) {
+        let data: any;
+        if (NodeHelper.isNodeCollection(item)) {
+            data = {
+                routerLink: ['/' + UIConstants.ROUTER_PREFIX + "collections"],
+                queryParams: {id: item.ref.id}
+            };
+        } else {
+            if (item.isDirectory) {
+                data = {
+                    routerLink: ['/' + UIConstants.ROUTER_PREFIX + "workspace"],
+                    queryParams: {id: item.ref.id}
+                };
+            } else {
+                let fromeHome=RestNetworkService.isFromHomeRepo(item);
+                data = {
+                    routerLink: ['/' + UIConstants.ROUTER_PREFIX + "render/" + item.ref.id],
+                    queryParams: {repository: fromeHome ? null : item.ref.repo}
+                };
+            }
+        }
+        return router.createUrlTree(data.routerLink, {queryParams: data.queryParams});
     }
 }

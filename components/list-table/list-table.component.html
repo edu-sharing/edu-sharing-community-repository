@@ -176,7 +176,13 @@
                 <div *ngFor="let item of columnsVisible;let i = index" class="column {{getItemCssClass(item)}} row_{{i+1}}" [class.clickable]="isClickable">
                     <div class="display-none" [attr.property]="getLRMIProperty(node,item)">{{getLRMIAttribute(node,item)}}</div>
                     <div class="row-group">
-                        <div class="rowInner" [innerHTML]="getAttribute(node,item)"></div>
+                        <a *ngIf="i==0"
+                           [href]="generateRoute(node)"
+                           tabindex="-1"
+                           (click)="false"
+                           class="rowInner"
+                           [innerHTML]="getAttribute(node,item)"></a>
+                        <div *ngIf="i!=0" class="rowInner" [innerHTML]="getAttribute(node,item)"></div>
                         <div *ngIf="i==0 && viewType==0 && getReference(node).properties && getReference(node).properties['virtual:childobjectcount']>0" class="childobjectCount">
                             <span>{{getReference(node).properties['virtual:childobjectcount']*1+1}}</span><i icon iconId="filter_none"></i>
                         </div>

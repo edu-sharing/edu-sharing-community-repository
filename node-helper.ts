@@ -693,11 +693,15 @@ export class NodeHelper{
       return node ? [node] : nodes && nodes.length ? nodes  : null;
   }
 
-    static referenceOriginalExists(node: Node|CollectionReference) {
-      if(node==null)
-        return true;
-      return (node.hasOwnProperty('originalId') ? (node as any).originalId!=null : true)
-    }
+  static referenceOriginalExists(node: Node|CollectionReference) {
+    if(node==null)
+      return true;
+    return (node.hasOwnProperty('originalId') ? (node as any).originalId!=null : true)
+  }
+
+  static isNodeCollection(node: Node | any) {
+    return node.collection || node.hasOwnProperty('childCollectionsCount');
+  }
 }
 
 export enum NodesRightMode{

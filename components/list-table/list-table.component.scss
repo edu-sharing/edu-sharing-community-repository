@@ -421,7 +421,9 @@ $badgeWidth:250px;
 }
 .list .nodeCollection .row_1{
   opacity:1!important;
-  color:#fff!important;
+  .row-group a{
+    color:#fff!important;
+  }
 }
 .nodeCollection {
   overflow: visible;
@@ -583,6 +585,12 @@ $orderAnimationTime:$transitionNormal*5;
   max-height:1.5rem;
   overflow: hidden;
   flex-grow:1;
+}
+a.rowInner{
+  color:$textMain;
+  &:focus{
+    box-shadow: none!important;
+  }
 }
 .row-group{
   display: flex;

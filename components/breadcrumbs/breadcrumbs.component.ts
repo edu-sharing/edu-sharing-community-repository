@@ -1,6 +1,7 @@
 import {Component, Input, Output, EventEmitter, OnInit} from '@angular/core';
 import {UIHelper} from "../../ui-helper"
 import {NodeList, Node, RestNodeService, TemporaryStorageService, UIService} from "../../../core-module/core.module";
+import {Router} from "@angular/router";
 
 
 @Component({
@@ -125,9 +126,13 @@ export class BreadcrumbsComponent{
   */
   private openBreadcrumb(position : number){
     this.onClick.emit(position);
+    return false;
   }
 
-  constructor(private node : RestNodeService,private storage:TemporaryStorageService,private ui:UIService){}
+  constructor(private node : RestNodeService,
+              private router : Router,
+              private storage:TemporaryStorageService,
+              private ui:UIService){}
   private allowDrag(event:any,target:Node){
     if(UIHelper.handleAllowDragEvent(this.storage,this.ui,event,target,this.canDrop)) {
       this.dragHover = target;
@@ -183,5 +188,9 @@ export class BreadcrumbsComponent{
       i++;
     }
     */
+  }
+
+  generateUrl(node:Node) {
+    return UIHelper.createUrlToNode(this.router,node);
   }
 }
