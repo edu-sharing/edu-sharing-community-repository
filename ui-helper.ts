@@ -710,6 +710,10 @@ export class UIHelper {
                 };
             }
         }
-        return router.createUrlTree(data.routerLink, {queryParams: data.queryParams});
+        let url=router.createUrlTree(data.routerLink, {queryParams: data.queryParams}).toString();
+        // use relative url to make base-href work properly
+        if(url.startsWith('/'))
+            url=url.substring(1);
+        return url;
     }
 }
