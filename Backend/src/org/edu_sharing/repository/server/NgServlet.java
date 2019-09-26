@@ -13,9 +13,15 @@ import org.edu_sharing.repository.server.tools.ApplicationInfo;
 import org.edu_sharing.repository.server.tools.ApplicationInfoList;
 import org.edu_sharing.repository.server.tools.LRMITool;
 import org.edu_sharing.repository.server.tools.URLTool;
+import org.edu_sharing.service.config.ConfigService;
+import org.edu_sharing.service.config.ConfigServiceFactory;
 import org.edu_sharing.service.license.LicenseService;
+import org.edu_sharing.service.nodeservice.NodeServiceFactory;
 import org.edu_sharing.service.nodeservice.NodeServiceHelper;
 import org.json.JSONObject;
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Element;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
@@ -26,10 +32,15 @@ import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URL;
 import java.net.URLEncoder;
+import java.util.HashMap;
 
 public class NgServlet extends HttpServlet {
-	public static final String COMPONENTS_RENDER = "components/render/";
-	public static final String COMPONENTS_ERROR = "components/error/";
+	public static final String COMPONENTS_RENDER = "components/render";
+	public static final String COMPONENTS_COLLECTIONS = "components/collections";
+	public static final String COMPONENTS_ERROR = "components/error";
+	// max length for the html title value
+	private static final int MAX_TITLE_LENGTH = 45;
+	private static final int MAX_DESCRIPTION_LENGTH = 160;
 	private static Logger logger = Logger.getLogger(NgServlet.class);
 
 	@Override
@@ -42,11 +53,14 @@ public class NgServlet extends HttpServlet {
 			if(head!=null) {
 				html = addToHead(head, html);
 			}
-			URL url = new URL(req.getRequestURL().toString());
+			URL url = new URL(req.getRequestURL().toString()+"?"+req.getQueryString());
 			if(url.getPath().contains(COMPONENTS_RENDER)){
 				html = addLicenseMetadata(html,url);
 				html = addLRMI(html,url);
 				html = addEmbed(html,url);
+			}
+			if(url.getPath().contains(COMPONENTS_RENDER) || url.getPath().contains(COMPONENTS_COLLECTIONS)){
+				html = addSEO(html,url);
 			}
 			if(url.getPath().contains(COMPONENTS_ERROR)){
 				resp.setStatus(getErrorCode(url.getPath()));
@@ -79,6 +93,44 @@ public class NgServlet extends HttpServlet {
 		}
 	}
 
+	private static String addSEO(String html, URL url) {
+		try {
+			String nodeId = getNodeFromURL(url);
+			HashMap<String, Object> props = NodeServiceFactory.getLocalService().getProperties(StoreRef.PROTOCOL_WORKSPACE, StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(), nodeId);
+
+			Document doc = Jsoup.parse(html);
+			String title = (String) (props.get(CCConstants.LOM_PROP_GENERAL_TITLE));
+			if(title==null || title.trim().isEmpty()){
+				title= (String) props.get(CCConstants.CM_PROP_TITLE);
+			}
+			if(title==null || title.trim().isEmpty()){
+				title= (String) props.get(CCConstants.CM_NAME);
+			}
+			// truncate the title to a reasonable size
+			if(title.length()>MAX_TITLE_LENGTH) title = title.substring(0, MAX_TITLE_LENGTH-3) + "...";
+			if(ConfigServiceFactory.getCurrentConfig().values.branding) {
+				title += " – edu-sharing";
+			}
+			doc.title(title);
+			String description = (String) props.get(CCConstants.LOM_PROP_GENERAL_DESCRIPTION);
+			if(description==null || description.trim().isEmpty()){
+				description= (String) props.get(CCConstants.CM_PROP_DESCRIPTION);
+			}
+			if(description!=null && !description.trim().isEmpty()) {
+				// truncate the description to a reasonable size
+				if(description.length()>MAX_DESCRIPTION_LENGTH) {
+					description = description.substring(0, MAX_DESCRIPTION_LENGTH-3) + "...";
+				}
+				doc.head().appendElement("meta").attr("name","description").attr("content", description);
+			}
+			return doc.outerHtml();
+		}
+		catch(Throwable t){
+			logger.warn("Could not add any SEO data: "+t.getMessage());
+			return html;
+		}
+	}
+
 	private int getErrorCode(String path) {
 		try{
 			String[] components=path.split("/");
@@ -89,7 +141,7 @@ public class NgServlet extends HttpServlet {
 		}
 	}
 
-	private String addLicenseMetadata(String html, URL url) {
+	private static String addLicenseMetadata(String html, URL url) {
 		try {
 			String nodeId = getNodeFromURL(url);
 			NodeRef ref = new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, nodeId);
@@ -107,13 +159,13 @@ public class NgServlet extends HttpServlet {
 		}
 		return html;	}
 
-	private String addEmbed(String html, URL url) throws UnsupportedEncodingException {
+	private static String addEmbed(String html, URL url) throws UnsupportedEncodingException {
 		html=addToHead("<link rel=\"alternate\" type=\"application/json+oembed\" href=\""+URLTool.getEduservletUrl()+"oembed?format=json&url="+URLEncoder.encode(url.toString(),"UTF-8")+"\"/>",html);
 		html=addToHead("<link rel=\"alternate\" type=\"text/xml+oembed\" href=\""+URLTool.getEduservletUrl()+"oembed?format=xml&url="+URLEncoder.encode(url.toString(),"UTF-8")+"\"/>",html);
 		return html;
 	}
 
-	private String addLRMI(String html, URL url) {
+	private static String addLRMI(String html, URL url) {
 		try {
 			String nodeId = getNodeFromURL(url);
 			JSONObject lrmi = LRMITool.getLRMIJson(nodeId);
@@ -127,12 +179,23 @@ public class NgServlet extends HttpServlet {
 		return html;
 	}
 
-	private String getNodeFromURL(URL url) {
-		String[] path = url.getPath().split("/");
-		return path[path.length - 1];
+	private static String getNodeFromURL(URL url) {
+		if(url.toString().contains(COMPONENTS_RENDER)) {
+			String[] path = url.getPath().split("/");
+			return path[path.length - 1];
+		}
+		if(url.toString().contains(COMPONENTS_COLLECTIONS)){
+			if(!url.getQuery().contains("id="))
+				return null;
+			String param=url.getQuery().substring(url.getQuery().indexOf("id=")+3);
+			if(param.contains("&"))
+				param=param.substring(0,param.indexOf("&"));
+			return param;
+		}
+		return null;
 	}
 
-	private String addToHead(String head, String html) {
+	private static String addToHead(String head, String html) {
 		int pos=html.indexOf("</head>");
 		html=html.substring(0,pos)+head+html.substring(pos);
 		return html;

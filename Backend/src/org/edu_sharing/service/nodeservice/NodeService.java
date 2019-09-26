@@ -11,7 +11,6 @@ import org.alfresco.service.cmr.repository.AssociationRef;
 import org.alfresco.service.cmr.repository.ChildAssociationRef;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.repository.StoreRef;
-import org.alfresco.service.cmr.version.Version;
 import org.apache.log4j.Logger;
 import org.edu_sharing.repository.client.rpc.User;
 import org.edu_sharing.service.nodeservice.model.GetPreviewResult;
@@ -160,4 +159,6 @@ public interface NodeService {
     GetPreviewResult getPreview(String storeProtocol, String storeIdentifier, String nodeId, String version);
 
     Collection<NodeRef> getFrontpageNodes() throws Throwable;
+
+    Serializable getPropertyNative(String storeProtocol, String storeId, String nodeId, String property) throws Throwable;
 }

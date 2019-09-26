@@ -10,8 +10,6 @@ import org.alfresco.repo.model.Repository;
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.repo.security.permissions.AccessDeniedException;
 import org.alfresco.service.ServiceRegistry;
-import org.alfresco.service.cmr.action.Action;
-import org.alfresco.service.cmr.action.ActionStatus;
 import org.alfresco.service.cmr.dictionary.DictionaryService;
 import org.alfresco.service.cmr.repository.*;
 import org.alfresco.service.cmr.repository.NodeService;
@@ -950,6 +948,10 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
 	@Override
 	public String getProperty(String storeProtocol, String storeId, String nodeId, String property){
 		return apiClient.getProperty(new StoreRef(storeProtocol,storeId), nodeId, property);
+	}
+	@Override
+	public Serializable getPropertyNative(String storeProtocol, String storeId, String nodeId, String property){
+		return nodeService.getProperty(new NodeRef(new StoreRef(storeProtocol,storeId), nodeId), QName.createQName(property));
 	}
 
 	private String getPreviewUrl(String storeProtocol, String storeId, String nodeId, String version) {
