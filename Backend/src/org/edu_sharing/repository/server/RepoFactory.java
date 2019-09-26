@@ -51,6 +51,7 @@ import org.edu_sharing.repository.server.tools.AuthenticatorRemoteAppResult;
 import org.edu_sharing.repository.server.tools.AuthenticatorRemoteRepository;
 import org.edu_sharing.repository.server.tools.PropertiesHelper;
 import org.edu_sharing.repository.server.tools.metadataset.MetadataReader;
+import org.edu_sharing.service.config.ConfigServiceFactory;
 
 public class RepoFactory {
 
@@ -226,6 +227,7 @@ public class RepoFactory {
 		appClassCache.clear();
 		repositoryMetadataSets.clear();
 		MetadataReaderV2.refresh();
+		ConfigServiceFactory.refresh();
 		defaultMetadataSet = null;
 		eduSharingProps = null;
 	}

@@ -7,32 +7,54 @@ import java.util.HashMap;
 import java.util.List;
 
 import javax.xml.bind.JAXBContext;
+import javax.xml.bind.JAXBException;
 import javax.xml.bind.Unmarshaller;
-import javax.xml.transform.TransformerException;
 
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.repository.StoreRef;
+import org.apache.log4j.Logger;
 import org.edu_sharing.repository.client.rpc.ACE;
 import org.edu_sharing.repository.client.tools.CCConstants;
+import org.edu_sharing.repository.server.tools.ApplicationInfoList;
 import org.edu_sharing.repository.server.tools.UserEnvironmentTool;
 import org.edu_sharing.restservices.shared.Authority;
 import org.edu_sharing.service.NotAnAdminException;
 import org.edu_sharing.service.authority.AuthorityServiceFactory;
-import org.edu_sharing.service.config.model.*;
+import org.edu_sharing.service.config.model.Config;
+import org.edu_sharing.service.config.model.Context;
+import org.edu_sharing.service.config.model.KeyValuePair;
+import org.edu_sharing.service.config.model.Language;
+import org.edu_sharing.service.config.model.Values;
+import org.edu_sharing.service.config.model.Variables;
 import org.edu_sharing.service.nodeservice.NodeService;
 import org.edu_sharing.service.nodeservice.NodeServiceFactory;
 import org.edu_sharing.service.nodeservice.NodeServiceHelper;
 import org.edu_sharing.service.permission.PermissionService;
 import org.edu_sharing.service.permission.PermissionServiceFactory;
-import org.json.JSONException;
 import org.json.JSONObject;
 
 
 public class ConfigServiceImpl implements ConfigService{
+	private static Logger logger=Logger.getLogger(ConfigServiceImpl.class);
+	// Cached config
+	private static Config currentConfig=null;
+	private static final Unmarshaller jaxbUnmarshaller;
+	
 	private final NodeService nodeService;
 	private final PermissionService permissionService;
-
+	
+	static{
+		Unmarshaller jaxbUnmarshaller1;
+		try {
+			JAXBContext jaxbContext = JAXBContext.newInstance(Config.class);
+			jaxbUnmarshaller1 = jaxbContext.createUnmarshaller();
+		} catch (JAXBException e) {
+			jaxbUnmarshaller1 = null;
+			logger.error(e.getMessage(),e);
+		}
+		jaxbUnmarshaller = jaxbUnmarshaller1;
+	}
 
 	/*
 	XPathFactory pfactory = XPathFactory.newInstance();
@@ -81,14 +103,19 @@ public class ConfigServiceImpl implements ConfigService{
 	*/
 	@Override
 	public Config getConfig() throws Exception {
-		JAXBContext jaxbContext = JAXBContext.newInstance(Config.class);
-		Unmarshaller jaxbUnmarshaller = jaxbContext.createUnmarshaller();
+	    if(!"true".equalsIgnoreCase(ApplicationInfoList.getHomeRepository().getDevmode()) && currentConfig!=null)
+	        return currentConfig;
 		InputStream is = getConfigInputStream();
 		if(is==null)
 			throw new IOException("client.config.xml file missing");
-		Config config = (Config)jaxbUnmarshaller.unmarshal(is);
-		is.close();
-		return config;
+		Config config;
+		synchronized (jaxbUnmarshaller) {
+            config = (Config) jaxbUnmarshaller.unmarshal(is);
+        }
+        is.close();
+		currentConfig = config;
+        return config;
+
 		
 	}
 	private InputStream getConfigInputStream() {
@@ -226,8 +253,18 @@ public class ConfigServiceImpl implements ConfigService{
 		}
 		
 	}
-	
-	
+
+	@Override
+	public void refresh() {
+		currentConfig = null;
+		try {
+			getConfig();
+		} catch (Exception e) {
+			logger.error("error refreshing client config: "+e.getMessage(),e);
+		}
+	}
+
+
 	/**
 	 * override the default json with all the json from the xml
 	 * @param copy

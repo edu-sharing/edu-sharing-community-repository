@@ -297,6 +297,7 @@ public class PersistentHandlerEdusharing implements PersistentHandlerInterface {
 	private NodeRef getNodeIfExists(String nodeReplId,String importFolderId) throws Throwable {
 		return replIdMap.getOrDefault(nodeReplId,null);
 	}
+	
 
 	public List<NodeRef> getAllNodesInImportfolder() throws Throwable {
 		String importFolder = prepareImportFolder();
@@ -481,8 +482,8 @@ public class PersistentHandlerEdusharing implements PersistentHandlerInterface {
 		if (replId == null) {
 			return false;
 		}
-		if(job != null && 
-				job.getJobDataMap() != null 
+		if(job != null &&
+				job.getJobDataMap() != null
 				&& job.getJobDataMap().getBoolean(OAIConst.PARAM_FORCE_UPDATE)) {
 			return true;
 		}
@@ -524,7 +525,7 @@ public class PersistentHandlerEdusharing implements PersistentHandlerInterface {
 		}
 		return false;
 	}
-	
+
 	@Override
 	public boolean exists(String replId) {
 		String oldTimeStamp = getReplicationIdTimestampMap().get(replId);
@@ -535,6 +536,6 @@ public class PersistentHandlerEdusharing implements PersistentHandlerInterface {
 		}else {
 			return true;
 		}
-			
+
 	}
 }

@@ -21,4 +21,5 @@ public interface ConfigService {
     DynamicConfig setDynamicValue(String key, boolean readPublic, JSONObject object) throws Throwable;
 
     DynamicConfig getDynamicValue(String key) throws Throwable;
+    void refresh();
 }

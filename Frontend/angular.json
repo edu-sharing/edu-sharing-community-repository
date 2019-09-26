@@ -36,7 +36,7 @@
               "src/styles/override.scss"
             ],
             "scripts": [
-              "src/assets/js/jquery.1.12.4.min.js",
+              "src/assets/js/jquery-3.4.1.slim.min.js",
               "src/assets/js/nouislider.min.js",
               "node_modules/materialize-css/dist/js/materialize.min.js",
               "node_modules/moment/min/moment-with-locales.min.js",
@@ -86,7 +86,7 @@
             "main": "src/test.ts",
             "karmaConfig": "./karma.conf.js",
             "scripts": [
-              "src/assets/js/jquery.1.12.4.min.js",
+              "src/assets/js/jquery-3.4.1.slim.min.js",
               "src/assets/js/nouislider.min.js",
               "node_modules/materialize-css/dist/js/materialize.min.js"
             ],
