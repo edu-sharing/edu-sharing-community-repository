@@ -693,19 +693,19 @@ export class UIHelper {
         let data: any;
         if (NodeHelper.isNodeCollection(item)) {
             data = {
-                routerLink: ['/' + UIConstants.ROUTER_PREFIX + "collections"],
+                routerLink: [UIConstants.ROUTER_PREFIX + "collections"],
                 queryParams: {id: item.ref.id}
             };
         } else {
             if (item.isDirectory) {
                 data = {
-                    routerLink: ['/' + UIConstants.ROUTER_PREFIX + "workspace"],
+                    routerLink: [UIConstants.ROUTER_PREFIX + "workspace"],
                     queryParams: {id: item.ref.id}
                 };
             } else {
                 let fromeHome=RestNetworkService.isFromHomeRepo(item);
                 data = {
-                    routerLink: ['/' + UIConstants.ROUTER_PREFIX + "render/" + item.ref.id],
+                    routerLink: [UIConstants.ROUTER_PREFIX + "render/" + item.ref.id],
                     queryParams: {repository: fromeHome ? null : item.ref.repo}
                 };
             }
