@@ -89,7 +89,7 @@ export class AdminFrontpageComponent {
     this.updatePreviews();
   }
 
-  private updatePreviews() {
+  updatePreviews() {
     this.previewLoading = true;
     this.previewNodes = [];
     this.previewError = null;
