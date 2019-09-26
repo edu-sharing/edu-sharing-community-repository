@@ -335,6 +335,11 @@ public class NodeServiceAdapter implements NodeService {
 	}
 
 	@Override
+	public Serializable getPropertyNative(String storeProtocol, String storeId, String nodeId, String property) throws Throwable {
+		return null;
+	}
+
+	@Override
 	public <T> List<T> sortNodeRefList(List<T> list, List<String> filter, SortDefinition sortDefinition) {
 		return list;
 	}
