@@ -126,7 +126,7 @@ public class SearchServiceWSImpl implements SearchService {
 	}
 	
 	@Override
-	public SearchResult<EduGroup> searchOrganizations(String pattern, int skipCount, int maxValues, SortDefinition sort,boolean scoped)
+	public SearchResult<EduGroup> searchOrganizations(String pattern, int skipCount, int maxValues, SortDefinition sort,boolean scoped, boolean onlyMemberships)
 			throws Throwable {
 		return null;
 	}

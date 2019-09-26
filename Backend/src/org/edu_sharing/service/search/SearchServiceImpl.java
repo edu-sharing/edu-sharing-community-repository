@@ -244,15 +244,20 @@ public class SearchServiceImpl implements SearchService {
 
 	@Override
 	public SearchResult<EduGroup> getAllOrganizations(boolean scoped) throws Exception {
-		return searchOrganizations("", 0, Integer.MAX_VALUE, null,scoped);
+		return searchOrganizations("", 0, Integer.MAX_VALUE, null,scoped,false);
 	}
 
 	@Override
-	public SearchResult<EduGroup> searchOrganizations(String pattern, int skipCount, int maxValues, SortDefinition sort,boolean scoped)
+	public SearchResult<EduGroup> searchOrganizations(String pattern, int skipCount, int maxValues, SortDefinition sort,boolean scoped, boolean onlyMemberShips)
 			throws Exception {
 		try {
+			
+			
 			Set<String> memberships = serviceRegistry.getAuthorityService().getAuthorities();
 			boolean isSystemUser = AuthenticationUtil.isRunAsUserTheSystemUser();
+			boolean isAdmin = ((memberships != null && memberships.contains(CCConstants.AUTHORITY_GROUP_ALFRESCO_ADMINISTRATORS)) 
+					|| "admin".equals(AuthenticationUtil.getFullAuthentication().getName())) ? true : false;
+			
 			return AuthenticationUtil.runAsSystem(new RunAsWork<SearchResult<EduGroup>>() {
 
 				@Override
@@ -264,16 +269,58 @@ public class SearchServiceImpl implements SearchService {
 						SearchParameters parameters = new SearchParameters();
 						parameters.addStore(Constants.storeRef);
 						parameters.setLanguage(org.alfresco.service.cmr.search.SearchService.LANGUAGE_LUCENE);
-						parameters.setMaxItems(Integer.MAX_VALUE);
+						parameters.setSkipCount(skipCount);
+						parameters.setMaxItems(maxValues);
 						parameters.addAllAttribute(CCConstants.CCM_PROP_AUTHORITYCONTAINER_EDUHOMEDIR);
 						if (sort != null)
 							sort.applyToSearchParameters(parameters);
 						String param = QueryParser.escape(pattern == null ? "" : pattern);
+						
+						//only search organisations the curren user is in,except: its adminuser and onlyMemberShips == true
+						StringBuilder qbMemberShips=null;
+						if(onlyMemberShips == true || 
+								(onlyMemberShips == false && (!isSystemUser && !isAdmin))) {
+							
+						
+							
+							List<String> memberShibsOrg = new ArrayList<String>(); 
+							if(memberships != null && memberships.size() > 0) {
+								for(String membershib : memberships) {
+									NodeRef authorityNodeRef = serviceRegistry.getAuthorityService().getAuthorityNodeRef(membershib);
+									if(authorityNodeRef != null) {
+										if(serviceRegistry.getNodeService().hasAspect(authorityNodeRef,
+												QName.createQName(CCConstants.CCM_ASPECT_EDUGROUP))) {
+											memberShibsOrg.add(membershib);
+										}
+									}
+								}
+								if(memberShibsOrg.size() > 0) {
+									qbMemberShips = new StringBuilder();
+									qbMemberShips.append(" AND (");
+									int i = 0;
+									for(String membershibOrg : memberShibsOrg) {
+										if(i > 0) {
+											qbMemberShips.append(" OR ");
+										}
+										qbMemberShips.append("@cm\\:authorityName:\"" + QueryParser.escape(membershibOrg) + "\"");
+										i++;
+									}
+									qbMemberShips.append(")");
+								}else if(!isSystemUser && !isAdmin){
+									return new SearchResult<EduGroup>();
+								}
+								
+							}
+						}
+						
 						parameters
 								.setQuery(
 										"(@cm\\:authorityName:\"*" + param + "*\"" + 
 										" OR @cm\\:authorityDisplayName:\"*" + param + "*\"" + 
-										") AND @ccm\\:edu_homedir:\"workspace://*\"");
+										") AND @ccm\\:edu_homedir:\"workspace://*\"" + 
+										((qbMemberShips != null) ? " " + qbMemberShips.toString() : "") );
+						logger.info("query:" +parameters.getQuery());
+						
 						ResultSet edugroups = searchService.query(parameters);
 
 						for (ResultSetRow row : edugroups) {
@@ -314,7 +361,6 @@ public class SearchServiceImpl implements SearchService {
 							}
 						}
 						int count = result.size();
-						result = limitList(result, skipCount, maxValues);
 						return new SearchResult<EduGroup>(result, skipCount, count);
 					} catch (Throwable t) {
 						throw new Exception(t);
@@ -325,6 +371,9 @@ public class SearchServiceImpl implements SearchService {
 			throw t;
 		}
 	}
+	
+	
+	
 
 	private List limitList(List list, int skipCount, int maxValues) {
 		return list.subList(Math.min(skipCount, list.size()), Math.min(list.size(), skipCount + maxValues));

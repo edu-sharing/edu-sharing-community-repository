@@ -38,7 +38,7 @@ public interface SearchService {
 
 	public SearchResultNodeRef search(MdsDao mdsDao, String query, List<MdsQueryCriteria> criterias, SearchToken token) throws Throwable;
 
-	SearchResult<EduGroup> searchOrganizations(String pattern, int skipCount, int maxValues, SortDefinition sort,boolean scoped)
+	SearchResult<EduGroup> searchOrganizations(String pattern, int skipCount, int maxValues, SortDefinition sort,boolean scoped,boolean onlyMemberShips)
 			throws Throwable;
 
 	List<NodeRef> getFilesSharedByMe() throws Exception;
