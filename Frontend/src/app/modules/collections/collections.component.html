@@ -97,6 +97,7 @@
                   [nodes]="collectionContent.collections"
                   [isLoading]="collectionContent.collectionsLoading"
                   [hasMore]="collectionContent.collections.length<collectionContent.collectionsPagination.total"
+                  [createLink]="true"
                   (loadMore)="isRootLevelCollection() ? loadMoreCollections() : null"
                 ></listTable>
 
@@ -142,6 +143,7 @@
                   (onAddElement)="switchToSearch()"
                   [canDelete]="canDelete"
                   (onDelete)="deleteReference($event)"
+                  [createLink]="true"
                   [(nodes)]="collectionContent.references"
                   [isLoading]="collectionContent.referencesLoading"
                   [hasMore]="collectionContent.references.length<collectionContent.referencesPagination.total"
