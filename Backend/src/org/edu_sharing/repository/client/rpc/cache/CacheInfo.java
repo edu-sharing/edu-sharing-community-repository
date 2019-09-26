@@ -33,6 +33,13 @@ public class CacheInfo implements Serializable{
 	
 	String member;
 	
+	
+	/**
+	 * config values
+	 * @return
+	 */
+	int maxSize;
+	
 	public String getMember() {
 		return member;
 	}
@@ -121,6 +128,14 @@ public class CacheInfo implements Serializable{
 	
 	public long getGetOwnedEntryMemoryCost() {
 		return getOwnedEntryMemoryCost;
+	}
+	
+	public int getMaxSize() {
+		return maxSize;
+	}
+	
+	public void setMaxSize(int maxSize) {
+		this.maxSize = maxSize;
 	}
 
 }
