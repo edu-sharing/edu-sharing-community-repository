@@ -7,10 +7,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import javax.transaction.UserTransaction;
-
 import org.alfresco.model.ContentModel;
 import org.alfresco.repo.policy.BehaviourFilter;
+import org.alfresco.repo.transaction.RetryingTransactionHelper.RetryingTransactionCallback;
 import org.alfresco.service.ServiceRegistry;
 import org.alfresco.service.cmr.repository.ChildAssociationRef;
 import org.alfresco.service.cmr.repository.NodeRef;
@@ -39,6 +38,8 @@ public static String ID = "Release_3_2_DefaultScope";
 	ArrayList<NodeRef> processedEduGroups = new ArrayList<NodeRef>();
 	ArrayList<NodeRef> eduGroupFolderNodeIds = new ArrayList<NodeRef>();
 	
+	int processedNodeCounter = 0;
+	
 	public Release_3_2_DefaultScope(PrintWriter out) {
 		this.out = out;
 	}
@@ -64,9 +65,7 @@ public static String ID = "Release_3_2_DefaultScope";
 	}
 	
 	private void run(boolean test){
-		UserTransaction transaction = serviceRegistry.getTransactionService().getNonPropagatingUserTransaction();
 		try{
-		    transaction.begin();
 		    /**
 			 * disable policies for this node to prevent that beforeUpdateNode 
 			 * checks the scope which will be there after update
@@ -82,17 +81,10 @@ public static String ID = "Release_3_2_DefaultScope";
 				if(this.out != null) this.out.println("Updater "+this.getId() + " already done");
 				log("Updater "+this.getId() + " already done");
 			}
-			transaction.commit();
-			
+			log("finished");
 		}catch(Throwable e){
 			if(this.out != null) this.out.println(e.getMessage());
 			logger.error(e.getMessage(),e);
-			
-			try{
-				transaction.rollback();
-			}catch(Exception e2){
-				logger.error(e.getMessage(),e2);
-			}
 		}
 	}
 	
@@ -107,16 +99,28 @@ public static String ID = "Release_3_2_DefaultScope";
 				continue;
 			}
 			
-			policyBehaviourFilter.disableBehaviour(child.getChildRef());
+			//serviceRegistry.getTransactionService().getRetryingTransactionHelper().doInTransaction(cb)
 			
-			if(CCConstants.CCM_TYPE_IO.equals(nodeType)){
-				log("updateing node:"+ noderef +" in "+ nodeService.getPath(child.getChildRef()));
+			
+			
+			if(CCConstants.CCM_TYPE_IO.equals(nodeType) || CCConstants.CCM_TYPE_TOOLPERMISSION.equals(nodeType)){
+				log("updateing node:"+ noderef +" in "+ nodeService.getPath(child.getChildRef()) +" processedNodeCounter:" + processedNodeCounter);
 				if(!test){
 					
 					Map<QName,Serializable> aspectProps = new HashMap<QName,Serializable>();
 					aspectProps.put(QName.createQName(CCConstants.CCM_PROP_EDUSCOPE_NAME), null);
-					nodeService.addAspect(child.getChildRef(), QName.createQName(CCConstants.CCM_ASPECT_EDUSCOPE), aspectProps);
-		
+					
+					
+					serviceRegistry.getRetryingTransactionHelper().doInTransaction(new RetryingTransactionCallback<Void>() {
+						@Override
+						public Void execute() throws Throwable {
+							policyBehaviourFilter.disableBehaviour(child.getChildRef());
+							nodeService.addAspect(child.getChildRef(), QName.createQName(CCConstants.CCM_ASPECT_EDUSCOPE), aspectProps);
+							policyBehaviourFilter.enableBehaviour(child.getChildRef());
+							return null;
+						}
+					});
+					
 				}
 			}else if(CCConstants.CCM_TYPE_MAP.equals(nodeType) || CCConstants.CM_TYPE_FOLDER.equals(nodeType) ){
 				if(this.out != null) this.out.println("updateing Map:"+ noderef +" in "+ nodeService.getPath(child.getChildRef()));
@@ -124,7 +128,15 @@ public static String ID = "Release_3_2_DefaultScope";
 				if(!test){
 					Map<QName,Serializable> aspectProps = new HashMap<QName,Serializable>();
 					aspectProps.put(QName.createQName(CCConstants.CCM_PROP_EDUSCOPE_NAME), null);
-					nodeService.addAspect(child.getChildRef(), QName.createQName(CCConstants.CCM_ASPECT_EDUSCOPE), aspectProps);
+					serviceRegistry.getRetryingTransactionHelper().doInTransaction(new RetryingTransactionCallback<Void>() {
+						@Override
+						public Void execute() throws Throwable {
+							policyBehaviourFilter.disableBehaviour(child.getChildRef());
+							nodeService.addAspect(child.getChildRef(), QName.createQName(CCConstants.CCM_ASPECT_EDUSCOPE), aspectProps);
+							policyBehaviourFilter.enableBehaviour(child.getChildRef());
+							return null;
+						}
+					});
 				}
 				
 				if(eduGroupFolderNodeIds.contains(noderef)){
@@ -140,7 +152,8 @@ public static String ID = "Release_3_2_DefaultScope";
 				
 				setDefautScope(noderef, test);
 			}
-			policyBehaviourFilter.enableBehaviour(child.getChildRef());
+			processedNodeCounter++;
+			
 		}
 	}
 	
