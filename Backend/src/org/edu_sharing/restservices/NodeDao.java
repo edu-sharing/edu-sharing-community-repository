@@ -401,7 +401,7 @@ public class NodeDao {
     public static NodeEntries convertToRest(RepositoryDao repoDao,Filter propFilter,List<NodeRef> children, Integer skipCount, Integer maxItems) throws DAOException {
         NodeEntries result=new NodeEntries();
         List<Node> nodes=new ArrayList<>();
-        for(int i=skipCount;i<Math.min(children.size(),skipCount+maxItems);i++){
+        for(int i=skipCount;i<Math.min(children.size(),(long)skipCount+maxItems);i++){
             nodes.add(NodeDao.getNode(repoDao,children.get(i).getId(),propFilter).asNode());
         }
 
