@@ -61,7 +61,7 @@ public class OrganizationApi  {
     
     @ApiResponses(
         	value = { 
-    	        @ApiResponse(code = 200, message = RestConstants.HTTP_200, response = UserEntries.class),        
+    	        @ApiResponse(code = 200, message = RestConstants.HTTP_200, response = OrganizationEntries.class),
     	        @ApiResponse(code = 400, message = RestConstants.HTTP_400, response = ErrorResponse.class),        
     	        @ApiResponse(code = 401, message = RestConstants.HTTP_401, response = ErrorResponse.class),        
     	        @ApiResponse(code = 403, message = RestConstants.HTTP_403, response = ErrorResponse.class),        
