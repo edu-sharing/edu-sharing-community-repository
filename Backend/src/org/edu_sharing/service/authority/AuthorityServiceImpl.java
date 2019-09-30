@@ -305,7 +305,7 @@ public EduGroup getEduGroup(String authority){
 
 	@Override
 	public void createGroupWithType(String groupName, String displayName,String parentGroup,String groupType) throws Exception {
-		String group = createGroup(org.edu_sharing.alfresco.service.AuthorityService.MEDIACENTER_ADMINISTRATORS_GROUP, displayName, parentGroup);
+		String group = createGroup(groupName, displayName, parentGroup);
 		addAuthorityAspect(PermissionService.GROUP_PREFIX + group,CCConstants.CCM_ASPECT_GROUPEXTENSION);
 		setAuthorityProperty(PermissionService.GROUP_PREFIX + group,CCConstants.CCM_PROP_GROUPEXTENSION_GROUPTYPE, groupType);
 
