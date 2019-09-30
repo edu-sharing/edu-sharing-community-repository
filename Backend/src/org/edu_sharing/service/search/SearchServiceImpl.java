@@ -226,7 +226,7 @@ public class SearchServiceImpl implements SearchService {
 			List<String> result = new ArrayList<String>();
 			for(String memberShip : memberships) {
 				NodeRef nodeRef = serviceRegistry.getAuthorityService().getAuthorityNodeRef(memberShip);
-				if(serviceRegistry.getNodeService().hasAspect(nodeRef, QName.createQName(CCConstants.CCM_ASPECT_MEDIACENTER))) {
+				if(nodeRef != null && serviceRegistry.getNodeService().hasAspect(nodeRef, QName.createQName(CCConstants.CCM_ASPECT_MEDIACENTER))) {
 					result.add(memberShip);
 				}
 			}
