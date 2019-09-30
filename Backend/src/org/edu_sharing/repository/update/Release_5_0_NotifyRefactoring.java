@@ -92,14 +92,14 @@ public class Release_5_0_NotifyRefactoring extends UpdateAbstract {
 			processed[0]++;
 		});
 		runner.run();
-		logInfo("Added educontext default value to a total of "+processed[0]+" nodes");
+		logInfo("Converted a total of "+processed[0]+" notifys");
 	}
 
 	private void migrate(NodeRef nodeRef) throws Exception {
 		List<ChildAssociationRef> notifyParentAssocs = nodeService.getParentAssocs(nodeRef,
-				QName.createQName(CCConstants.CCM_TYPE_NOTIFY + "_nodes"), RegexQNamePattern.MATCH_ALL);
+				QName.createQName(CCConstants.CCM_ASSOC_NOTIFY_NODES), RegexQNamePattern.MATCH_ALL);
 
-		Map<NodeRef, Map<QName, Serializable>> notifyProps = new HashMap<NodeRef, Map<QName, Serializable>>();
+		Map<NodeRef, Map<QName, Serializable>> notifyProps = new HashMap<>();
 
 		for (ChildAssociationRef childRef : notifyParentAssocs) {
 			NodeRef notifyRef = childRef.getParentRef();
@@ -107,20 +107,12 @@ public class Release_5_0_NotifyRefactoring extends UpdateAbstract {
 			notifyProps.put(notifyRef, properties);
 		}
 
-		List<Map.Entry<NodeRef, Map<QName, Serializable>>> toSort = new ArrayList<Map.Entry<NodeRef, Map<QName, Serializable>>>();
+		List<Entry<NodeRef, Map<QName, Serializable>>> toSort = new ArrayList<>(notifyProps.entrySet());
 
-		for (Map.Entry<NodeRef, Map<QName, Serializable>> entry : notifyProps.entrySet()) {
-			toSort.add(entry);
-		}
-
-		Collections.sort(toSort, new Comparator<Map.Entry<NodeRef, Map<QName, Serializable>>>() {
-			@Override
-			public int compare(Entry<NodeRef, Map<QName, Serializable>> o1,
-							   Entry<NodeRef, Map<QName, Serializable>> o2) {
-				Date o1Created = (Date) o1.getValue().get(ContentModel.PROP_CREATED);
-				Date o2Created = (Date) o2.getValue().get(ContentModel.PROP_CREATED);
-				return o1Created.compareTo(o2Created);
-			}
+		Collections.sort(toSort, (o1, o2) -> {
+			Date o1Created = (Date) o1.getValue().get(ContentModel.PROP_CREATED);
+			Date o2Created = (Date) o2.getValue().get(ContentModel.PROP_CREATED);
+			return o1Created.compareTo(o2Created);
 		});
 
 		/**
