@@ -66,6 +66,7 @@
                   </div>
               </div>
           </div>
-       </card>
+          <div class="card-action card-action-info" *ngIf="showProviders"><div innerHTML="{{'LOGIN.ACTION_HELP' | translate}}"></div></div>
+      </card>
   <powered-by mode="color" [ngClass]="{'powered-down': config.register.local || config.register.registerUrl}"></powered-by>
   </div>

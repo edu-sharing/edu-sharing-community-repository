@@ -66,7 +66,7 @@
   "SHOW_IN_FOLDER":"Zum Speicherort",
   "SORT_BY":"Sortieren nach",
   "CLEAR_FILTERS":"Alle Filter zurücksetzen",
-  "EDIT_ACCOUNT":"Account Verwalten",
+  "EDIT_ACCOUNT":"Account verwalten",
   "CHANGE_LANGUAGE":"Sprache ändern",
   "DEFAULT_METADATASET":"Standard-Metadatenset ({{name}})",
   "NO_MATCHES" : "Keine übereinstimmenden Einträge",
@@ -403,8 +403,17 @@
     "firstName" : "Vorname",
     "lastName" : "Nachname",
     "email" : "E-Mail",
+    "primaryAffiliation": "Primäre Rolle",
     "password" : "Passwort",
-    "sizeQuota" : "Speicherkontingent in MB"
+    "sizeQuota" : "Speicherkontingent in MB",
+    "PRIMARY_AFFILIATION": {
+      "teacher": "Lehrender / Lehrer",
+      "student": "Lernender / Schüler",
+      "employee": "Mitarbeiter",
+      "extern": "Externer Nutzer",
+      "system": "Systemaccount",
+      "function": "Funktionsaccount"
+    }
   },
   "CONNECTOR":{
     "ONLY_OFFICE": {

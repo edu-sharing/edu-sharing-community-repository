@@ -138,7 +138,7 @@ public class BulkEditNodesJob extends AbstractJob{
 		runner.setThreaded(false);
 		runner.setStartFolder(startFolder);
 		runner.setKeepModifiedDate(true);
-		runner.setTransaction(true);
+		runner.setTransaction(NodeRunner.TransactionMode.Local);
 		int count=runner.run();
 		logger.info("Processed "+count+" nodes");
 	}

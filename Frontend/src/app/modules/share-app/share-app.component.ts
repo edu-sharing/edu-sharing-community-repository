@@ -2,12 +2,10 @@ import {Translation} from "../../core-ui-module/translation";
 import {UIHelper} from "../../core-ui-module/ui-helper";
 import {ActivatedRoute, Router} from "@angular/router";
 import {Toast} from "../../core-ui-module/toast";
-import {ConfigurationService, ListItem} from "../../core-module/core.module";
+import {ConfigurationService, ListItem, RestConnectorService, SessionStorageService} from "../../core-module/core.module";
 import {DomSanitizer, Title} from "@angular/platform-browser";
 import {TranslateService} from "@ngx-translate/core";
-import {SessionStorageService} from "../../core-module/core.module";
-import {RestConnectorService} from "../../core-module/core.module";
-import {Component, ViewChild, ElementRef} from "@angular/core";
+import {Component, ViewChild, ElementRef, ApplicationRef} from "@angular/core";
 import {
     LoginResult, ServerUpdate, CacheInfo, Application, Node, ParentList,
     Collection, NodeWrapper, ConnectorList, Connector
@@ -43,6 +41,7 @@ export class ShareAppComponent {
     private inbox: Node;
     private columns:ListItem[]=[];
     private collections: Collection[];
+    private cordovaType: string;
     private mimetype: string;
     private editorType: string;
     private file: File;
@@ -91,7 +90,7 @@ export class ShareAppComponent {
         this.globalProgress=true;
         if(this.isLink()){
             let prop:any={};
-            prop[RestConstants.CCM_PROP_IO_WWWURL]=[this.uri];
+            prop[RestConstants.CCM_PROP_IO_WWWURL]=[this.getUri()];
             this.node.createNode(this.inbox.ref.id,RestConstants.CCM_TYPE_IO,[],prop,true,RestConstants.COMMENT_MAIN_FILE_UPLOAD).subscribe((data:NodeWrapper)=>{
                 callback(data.node);
             });
@@ -101,7 +100,7 @@ export class ShareAppComponent {
             if(this.editorType){
                 prop[RestConstants.CCM_PROP_EDITOR_TYPE]=[this.editorType];
             }
-            if(this.text){
+            if(this.text && !this.isTextSnippet()){
                 prop[RestConstants.LOM_PROP_GENERAL_DESCRIPTION]=[this.text];
             }
             this.node.createNode(this.inbox.ref.id, RestConstants.CCM_TYPE_IO, [], prop, true).subscribe((data: NodeWrapper) => {
@@ -126,6 +125,8 @@ export class ShareAppComponent {
       });
     }
     private isLink() {
+        if(this.cordovaType=='public.url') // ios
+            return true;
         if(this.hasData())
             return false;
         if(!this.uri)
@@ -136,6 +137,8 @@ export class ShareAppComponent {
         return pos>0 && pos<10;
     }
     private isTextSnippet() {
+        if(this.cordovaType=='public.text') // ios
+            return true;
         if(this.hasData())
             return false;
         if(this.isLink())
@@ -160,10 +163,14 @@ export class ShareAppComponent {
                 console.log("share app query params",params);
                 this.uri=params['uri'];
                 this.mimetype=params['mimetype'];
+                if(this.mimetype=='public.image') // ios
+                    this.mimetype='image/jpeg';
+                this.cordovaType=params['mimetype'];
                 this.fileName=params['file'];
                 this.text=params['text']; // ios only: custom description
                 this.description=null;
                 console.log(this.uri);
+                console.log("detected type: "+(this.isLink() ? "link" : this.isTextSnippet() ? "text" : "generic-file") + " - "+this.getType());
                 this.collectionApi.search("",{
                     sortBy:[RestConstants.CM_MODIFIED_DATE],
                     offset:0,
@@ -182,14 +189,17 @@ export class ShareAppComponent {
                 });
                 this.previewUrl=this.connector.getThemeMimePreview(this.getType()+'.svg');
                 if(this.isLink()) {
-                    this.utilities.getWebsiteInformation(this.uri).subscribe((data: any) => {
+                    this.utilities.getWebsiteInformation(this.getUri()).subscribe((data: any) => {
                         if(data.title) {
                             this.title = data.title + " - " + data.page;
                         }
                         else{
-                            this.title = this.uri;
+                            this.title = this.getUri();
                         }
                         this.description = data.description;
+                        this.globalProgress = false;
+                    },(error)=>{
+                        this.title = this.getUri();
                         this.globalProgress = false;
                     });
                 }
@@ -208,7 +218,7 @@ export class ShareAppComponent {
                             this.previewUrl = this.sanitizer.bypassSecurityTrustResourceUrl("data:" + this.mimetype + ";base64," + base64);
                         }
                         this.file = Helper.base64toBlob(base64,this.mimetype) as any;
-                        this.cordova.getFileAsBlob(this.uri,this.mimetype).subscribe((data:any)=> {
+                        this.cordova.getFileAsBlob(this.getUri(),this.mimetype).subscribe((data:any)=> {
                             this.globalProgress=false;
                             this.updateTitle();
                         },(error:any)=>{
@@ -221,9 +231,9 @@ export class ShareAppComponent {
                         this.router.navigate([UIConstants.ROUTER_PREFIX,'messages','SHARING_ERROR']);
                     }
                     /*
-                    this.cordova.getFileAsBlob(this.uri,this.mimetype).subscribe((data:any)=>{
+                    this.cordova.getFileAsBlob(this.getUri(),this.mimetype).subscribe((data:any)=>{
                         console.log(this.fileName);
-                        let split=this.fileName ? this.fileName.split("/") : this.uri.split("/");
+                        let split=this.fileName ? this.fileName.split("/") : this.getUri().split("/");
                         console.log(data);
                         this.title=split[split.length-1];
                         this.file=data;
@@ -275,9 +285,21 @@ export class ShareAppComponent {
         }
         this.title = this.translate.instant('SHARE_APP.TEXT_SNIPPET')+" "+
             DateHelper.getDateForNewFile()+"."+filetype;
-        this.file = (new Blob([this.uri], {
+        let content=this.getTextContent();
+        if(this.mimetype=='text/html'){
+            content=content.replace(/\n/g,"<br />");
+        }
+        this.file = (new Blob([content], {
             type: this.mimetype
         }) as any);
+    }
+
+    getTextContent(): string {
+        return this.cordova.isAndroid() ? this.uri : this.text;
+    }
+
+    private getUri() {
+        return this.cordova.isAndroid() ? this.uri : this.cordova.getLastIntent().base64;
     }
 }
 

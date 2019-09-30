@@ -61,7 +61,7 @@ export class LoginComponent  implements OnInit{
   private buttons: DialogButton[];
 
   currentProviderDisplay(provider:any){
-    return provider ? provider.name : null;
+    return provider ? provider.name : '';
   }
   private filteredProviders: any;
   private checkConditions(){
@@ -195,13 +195,6 @@ export class LoginComponent  implements OnInit{
   }
   ngOnInit() {
 
-    this.filteredProviders = this.providerControl.valueChanges
-        .pipe(
-            startWith(''),
-            map((value:string) => this.filterProviders(value))
-        );
-    console.log(this.filteredProviders);
-
   }
   private login(){
     
@@ -268,10 +261,16 @@ export class LoginComponent  implements OnInit{
       data[type].providers.push(object);
     }
     this.providers = [];
-    for(let key in data){
+    for(let key in data)
       this.providers.push(data[key]);
-    }
-    console.log(this.providers);
+
+    // register observer for autocomplete
+    this.filteredProviders = this.providerControl.valueChanges
+        .pipe(
+            startWith(''),
+            map((value:string) => this.filterProviders(value))
+        );
+    console.log(this.filteredProviders);
   }
 
   private filterProviders(filter:any="") {
@@ -305,6 +304,7 @@ export class LoginComponent  implements OnInit{
     url=url.
       replace(':target',encodeURIComponent(target)).
       replace(':entity',encodeURIComponent(this.currentProvider.url));
+    console.log("redirecting to: "+url);
     //@TODO: Redirect to shibboleth provider
     UIHelper.openUrl(url,this.bridge,OPEN_URL_MODE.Current);
   }

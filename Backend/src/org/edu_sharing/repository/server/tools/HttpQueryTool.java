@@ -105,6 +105,8 @@ public class HttpQueryTool {
 		logger.debug("url:" + url);
 		HttpClient client = new HttpClient();
 
+		client.getParams().setParameter("http.useragent", "Test Client");
+
 		HttpMethodBase method;
 		if(_method == null) {
 			method = new GetMethod(url);

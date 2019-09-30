@@ -72,6 +72,7 @@
     "FILE_LOCATION":"Speicherort der Datei",
     "CHANGE__LOCATION":"Ändern",
     "CHOOSE_LOCATION":"Speicherort wählen",
+    "TREE_MORE_ITEMS": "+ {{count}} weitere Ordner",
     "SHARE": {
       "TITLE": "Freigaben verwalten",
       "NO_PERMISSIONS":"Noch keine expliziten Berechtigungen an diesem Element",
@@ -222,6 +223,7 @@
       "PASTE":"Einfügen",
       "METADATA":"Details",
       "COLLECTION":"In Sammlung",
+      "COLLECTION_OTHER":"In Weitere",
       "STREAM":"Auf Stream",
       "LICENSE":"Lizenz (& Veröffentlichung)",
       "CONTRIBUTOR":"Beteiligte",

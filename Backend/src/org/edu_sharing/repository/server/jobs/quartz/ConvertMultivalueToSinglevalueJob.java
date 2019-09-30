@@ -115,7 +115,7 @@ public class ConvertMultivalueToSinglevalueJob extends AbstractJob{
 		runner.setRunAsSystem(true);
 		runner.setThreaded(false);
 		runner.setKeepModifiedDate(true);
-		runner.setTransaction(true);
+		runner.setTransaction(NodeRunner.TransactionMode.Local);
 		int count=runner.run();
 		logger.info("Processed "+count+" nodes");
 	}

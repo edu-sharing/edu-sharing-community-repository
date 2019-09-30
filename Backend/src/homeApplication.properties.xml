@@ -32,6 +32,10 @@
 	Shall the client url dynamically generated depending on the request domain of the client
 	-->
 	<entry key="url_dynamic">false</entry>
+	<!--
+		list of allowed CORS domains
+	-->
+	<entry key="allow_origin"></entry>
 
 	<entry key="webappname">edu-sharing</entry>
 	<entry key="wspath">/alfresco/api</entry>
@@ -50,6 +54,7 @@
 	<entry key="password">admin</entry>
 	<entry key="devmode">false</entry>
 	<entry key="recommend_objects_query">@cm\:modified:[2011\-03\-24T00:00:00 TO NOW]</entry>
+	<entry key="notify_fetch_limit">0</entry>
 	<entry key="logo">/edu-sharing/images/logos/edu_sharing_com_login.svg</entry>
 	
 	<!-- Website Preview Image Render Service

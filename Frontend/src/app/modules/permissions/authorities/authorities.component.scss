@@ -54,8 +54,19 @@ input[type=search]{
   width:280px;
 }
 :host /deep/{
-  .card-edit mat-form-field{
-    width: 100%;
+  .card-edit {
+    mat-form-field {
+      width: 100%;
+    }
+    .group {
+      display: flex;
+      align-items: center;
+      margin-bottom: 20px;
+
+      .mat-form-field-wrapper {
+        padding-bottom: 0;
+      }
+    }
   }
 }
 .editSystemName{

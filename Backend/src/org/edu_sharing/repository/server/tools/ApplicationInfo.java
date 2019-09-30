@@ -116,7 +116,8 @@ public class ApplicationInfo implements Comparable<ApplicationInfo>{
 
 	public static final String KEY_ORDER = "order";
 
-	
+	public static final String KEY_ALLOW_ORIGIN = "allow_origin";
+
 	/**
 	 * property file vals
 	 */
@@ -160,10 +161,12 @@ public class ApplicationInfo implements Comparable<ApplicationInfo>{
 	
 	public static final String WEBSITEPREVIEWRENDERSERVICE = "websitepreviewrenderservice";
 
+	public static final String NOTIFY_FETCH_LIMIT = "notify_fetch_limit";
+
 	public static final String REPOSITORY_TYPE_MEMUCHO = "MEMUCHO";
-	
+
 	public static final String PROPERTY_VALIDATOR_REGEX_CM_NAME = "property_validator_regex_cm_name";
-	
+
 	private final Properties properties;
 
 	private String host = null;
@@ -315,7 +318,7 @@ public class ApplicationInfo implements Comparable<ApplicationInfo>{
 	Logger logger = Logger.getLogger(ApplicationInfo.class);
 
 	private String xml;
-	
+
 	/**
 	 * der Anfangsteil des alfresco Intergity Pattern:
 	 * (.*[\"\*\\\>\<\?\/\:\|]+.*)|(.*[\.]?.*[\.]+$)|(.*[ ]+$)
@@ -323,7 +326,7 @@ public class ApplicationInfo implements Comparable<ApplicationInfo>{
 	 */
 	//default value ([\"\*\\\\\>\<\?\/\:\|'\r\n])
 	private String validatorRegexCMName = "([\\\"\\*\\\\\\\\\\>\\<\\?\\/\\:\\|'\\r\\n])";
-	
+
 
 	
 	public ApplicationInfo(String _appFile) throws Exception{
@@ -476,7 +479,7 @@ public class ApplicationInfo implements Comparable<ApplicationInfo>{
 		if(cmNameRegex != null && !cmNameRegex.trim().equals("")) {
 			validatorRegexCMName = cmNameRegex;
 		}
-		
+
 	}
 	
 	public String getXml() {
@@ -544,6 +547,13 @@ public class ApplicationInfo implements Comparable<ApplicationInfo>{
 
 	public String getString(String key,String defaultValue){
 		return properties.getProperty(key,defaultValue);
+	}
+
+	public int getInteger(String key,int defaultValue){
+		String property = properties.getProperty(key);
+		if(property==null || property.isEmpty())
+			return defaultValue;
+		return Integer.parseInt(property);
 	}
 
 	public boolean getBoolean(String key,boolean defaultValue){
@@ -910,7 +920,7 @@ public class ApplicationInfo implements Comparable<ApplicationInfo>{
 	public String getValidatorRegexCMName() {
 		return validatorRegexCMName;
 	}
-	
+
 	public String getWebsitepreviewrenderservice() {
 		return websitepreviewrenderservice;
 	}	

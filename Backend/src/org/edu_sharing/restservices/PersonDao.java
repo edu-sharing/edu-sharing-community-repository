@@ -197,9 +197,10 @@ public class PersonDao {
 		newUserInfo.put(CCConstants.PROP_USER_FIRSTNAME, profile.getFirstName());
 		newUserInfo.put(CCConstants.PROP_USER_LASTNAME, profile.getLastName());
 		newUserInfo.put(CCConstants.PROP_USER_EMAIL, profile.getEmail());
+        newUserInfo.put(CCConstants.CM_PROP_PERSON_EDU_SCHOOL_PRIMARY_AFFILIATION, profile.getPrimaryAffiliation());
         newUserInfo.put(CCConstants.CM_PROP_PERSON_ABOUT, profile.getAbout());
         newUserInfo.put(CCConstants.CM_PROP_PERSON_SKILLS, profile.getSkills());
-        if(profile.getSizeQuota()>0)
+		if(profile.getSizeQuota()>0)
 			newUserInfo.put(CCConstants.CM_PROP_PERSON_SIZE_QUOTA, ""+profile.getSizeQuota());
 		else
 			newUserInfo.put(CCConstants.CM_PROP_PERSON_SIZE_QUOTA, null);
@@ -325,6 +326,7 @@ public class PersonDao {
     	profile.setFirstName(getFirstName());
     	profile.setLastName(getLastName());
     	profile.setEmail(getEmail());
+    	profile.setPrimaryAffiliation(getPrimaryAffiliation());
     	profile.setAvatar(getAvatar());
     	profile.setAbout(getAbout());
     	profile.setSkills(getSkills());
@@ -482,6 +484,11 @@ public class PersonDao {
 	public String getAbout() {
 		return (String)this.userInfo.get(CCConstants.CM_PROP_PERSON_ABOUT);
 	}
+
+	public String getPrimaryAffiliation() {
+		return (String) this.userInfo.get(CCConstants.CM_PROP_PERSON_EDU_SCHOOL_PRIMARY_AFFILIATION);
+	}
+
 	public String[] getSkills() {
 		return (String[])this.userInfo.get(CCConstants.CM_PROP_PERSON_SKILLS);
 	}

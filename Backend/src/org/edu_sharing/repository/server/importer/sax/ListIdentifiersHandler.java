@@ -60,12 +60,14 @@ public  class ListIdentifiersHandler extends DefaultHandler {
 	
 	BinaryHandler binaryHandler = null;
 	
+	boolean addSetToGetRecordUrl = false;
+	
 	public ListIdentifiersHandler() {
 		
 	}
 	
 	public ListIdentifiersHandler(String oaiBaseUrl, String set, String metadataPrefix) {
-		this(null, null, null, oaiBaseUrl, set, metadataPrefix, null);
+		this(null, null, null, oaiBaseUrl, set, metadataPrefix, null, false);
 	}
 
 	public ListIdentifiersHandler(RecordHandlerInterfaceBase recordHandler, 
@@ -74,7 +76,8 @@ public  class ListIdentifiersHandler extends DefaultHandler {
 			String oaiBaseUrl, 
 			String set, 
 			String metadataPrefix,
-			String esMetadataSetId) {
+			String esMetadataSetId,
+			boolean addSetToGetRecordUrl) {
 
 		this.oaiBaseUrl = oaiBaseUrl;
 		this.metadataPrefix = metadataPrefix;
@@ -83,6 +86,7 @@ public  class ListIdentifiersHandler extends DefaultHandler {
 		this.set = set;
 		this.recordHandler = recordHandler;
 		this.binaryHandler = binaryHandler;
+		this.addSetToGetRecordUrl = addSetToGetRecordUrl;
 
 		String url = this.oaiBaseUrl + "?verb=ListIdentifiers&metadataPrefix=" + metadataPrefix + "&set=" + set;
 		handleIdentifiersList(url);
@@ -249,12 +253,20 @@ public  class ListIdentifiersHandler extends DefaultHandler {
 							Node nodeRecord = (Node)xpath.evaluate("/OAI-PMH/GetRecord/record", doc, XPathConstants.NODE);
 							((org.edu_sharing.repository.server.importer.RecordHandlerInterface)recordHandler).handleRecord(nodeRecord, cursor, set);
 							
+							logger.info("staring exists check:" + replId);
+							boolean exists = persistentHandler.exists(replId);
+							logger.info("finished exists check" + replId+ " exists:" + exists);
+							
+							
 							String nodeId = persistentHandler.safe((org.edu_sharing.repository.server.importer.RecordHandlerInterface) recordHandler, cursor, set);
 							if(nodeId != null) {
 								if(binaryHandler != null){
 									binaryHandler.safe(nodeId, (org.edu_sharing.repository.server.importer.RecordHandlerInterface) recordHandler,nodeRecord);
 								}
-								new MCAlfrescoAPIClient().createVersion(nodeId,null);
+								
+								if(!exists) {
+									new MCAlfrescoAPIClient().createVersion(nodeId,null);
+								}
 							}
 						}else{
 							logger.error(errorcode);
@@ -284,7 +296,9 @@ public  class ListIdentifiersHandler extends DefaultHandler {
 	}
 	
 	public String getRecordUrl(String replicationSourceId) {
-		return this.oaiBaseUrl + "?verb=GetRecord&identifier=" + replicationSourceId + "&metadataPrefix=" + this.metadataPrefix;
+		String getRecordUrl = this.oaiBaseUrl + "?verb=GetRecord&identifier=" + replicationSourceId + "&metadataPrefix=" + this.metadataPrefix; 
+		if(this.addSetToGetRecordUrl) getRecordUrl += "&set=" + this.set;
+		return getRecordUrl;
 	}
 	
 	public boolean isCurrentRecordDeleted() {

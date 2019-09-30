@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.Consumes;
@@ -29,14 +30,7 @@ import org.apache.log4j.Logger;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.server.MCAlfrescoAPIClient;
 import org.edu_sharing.repository.server.tools.ApplicationInfoList;
-import org.edu_sharing.restservices.ApiService;
-import org.edu_sharing.restservices.DAOMissingException;
-import org.edu_sharing.restservices.DAOSecurityException;
-import org.edu_sharing.restservices.DAOValidationException;
-import org.edu_sharing.restservices.NodeDao;
-import org.edu_sharing.restservices.PersonDao;
-import org.edu_sharing.restservices.RepositoryDao;
-import org.edu_sharing.restservices.RestConstants;
+import org.edu_sharing.restservices.*;
 import org.edu_sharing.restservices.node.v1.model.*;
 import org.edu_sharing.restservices.shared.ACL;
 import org.edu_sharing.restservices.shared.ErrorResponse;
@@ -745,27 +739,26 @@ public class NodeApi  {
     		
 	    	RepositoryDao repoDao = RepositoryDao.getRepository(repository);
 	    	node=NodeDao.mapNodeConstants(repoDao,node);
-	    	List<NodeRef> children;
 
-            SortDefinition sortDefinition = new SortDefinition(sortProperties,sortAscending);
+			SortDefinition sortDefinition = new SortDefinition(sortProperties,sortAscending);
 
-            NodeEntries response;
-            if("-shared_files-".equals(node)){
+			NodeEntries response=null;
+			List<NodeRef> children=null;
+			if("-shared_files-".equals(node)){
 		    	User person = PersonDao.getPerson(repoDao, PersonDao.ME).asPerson();
 		    	children = person.getSharedFolders();
 		    	List<org.alfresco.service.cmr.repository.NodeRef> converted=NodeDao.convertApiNodeRef(children);
                 children=NodeDao.convertAlfrescoNodeRef(repoDao,NodeDao.sortAlfrescoRefs(converted,filter,sortDefinition));
-
             }
 	    	else if("-my_shared_files-".equals(node)){
-	    		children = NodeDao.getFilesSharedByMe(repoDao,filter,sortDefinition);
-            }
+				response = searchResultToResponse(NodeDao.getFilesSharedByMe(repoDao, filter, propFilter, sortDefinition, skipCount, maxItems));
+			}
 	    	else if("-workflow_receive-".equals(node)){
 	    		children = NodeDao.getWorkflowReceive(repoDao,filter,sortDefinition);
 	    	}
 	    	else if("-to_me_shared_files-".equals(node)){
-	    		children = NodeDao.getFilesSharedToMe(repoDao,filter,sortDefinition);
-	    	}
+				response = searchResultToResponse(NodeDao.getFilesSharedToMe(repoDao, filter, propFilter,sortDefinition,skipCount,maxItems));
+			}
 	    	else if("-frontpage-".equals(node)){
 				children = NodeDao.getFrontpageNodes(repoDao);
 			}
@@ -773,7 +766,8 @@ public class NodeApi  {
 		    	NodeDao nodeDao = NodeDao.getNode(repoDao, node, propFilter);
 	    		children = nodeDao.getChildren(assocName,filter,sortDefinition);
             }
-            response=NodeDao.convertToRest(repoDao,propFilter,children,skipCount==null ? 0 : skipCount,maxItems==null ? RestConstants.DEFAULT_MAX_ITEMS : maxItems);
+	    	if(response==null)
+            	response=NodeDao.convertToRest(repoDao,propFilter,children,skipCount==null ? 0 : skipCount,maxItems==null ? RestConstants.DEFAULT_MAX_ITEMS : maxItems);
 			//List<Node> sorted=NodeDao.sortAndFilterByType(repoDao,children,sortDefinition,filter,propFilter);
 	    	//Collections.sort(children);
 			//NodeEntries response=createResponseFromNodeList(sorted,skipCount,maxItems);
@@ -787,6 +781,20 @@ public class NodeApi  {
     	}
        
     }
+
+	public NodeEntries searchResultToResponse(org.edu_sharing.restservices.shared.SearchResult<NodeDao> data) throws DAOException {
+		NodeEntries response;
+		response=new NodeEntries();
+		response.setPagination(data.getPagination());
+		List<Node> list = new ArrayList<>();
+		for (NodeDao nodeDao : data.getNodes()) {
+			Node asNode = nodeDao.asNode();
+			list.add(asNode);
+		}
+		response.setNodes(list);
+		return response;
+	}
+
 	@GET
 	@Path("/nodes/{repository}/{node}/assocs")
 
@@ -1108,6 +1116,7 @@ public class NodeApi  {
     	}
 
     }
+
 
 	@POST
 	@Path("/nodes/{repository}/{node}/xapi")

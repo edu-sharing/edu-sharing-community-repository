@@ -9,11 +9,7 @@ import org.alfresco.service.cmr.security.AuthorityType;
 import org.edu_sharing.metadataset.v2.MetadataSetV2;
 import org.edu_sharing.repository.client.rpc.EduGroup;
 import org.edu_sharing.repository.server.SearchResultNodeRef;
-import org.edu_sharing.restservices.DAOException;
 import org.edu_sharing.restservices.MdsDao;
-import org.edu_sharing.restservices.RepositoryDao;
-import org.edu_sharing.restservices.iam.v1.model.UserEntries;
-import org.edu_sharing.restservices.search.v1.model.SearchParameters;
 import org.edu_sharing.restservices.shared.MdsQueryCriteria;
 import org.edu_sharing.service.InsufficientPermissionException;
 import org.edu_sharing.service.search.model.SearchResult;
@@ -38,14 +34,14 @@ public interface SearchService {
 
 	public SearchResultNodeRef search(MdsDao mdsDao, String query, List<MdsQueryCriteria> criterias, SearchToken token) throws Throwable;
 
+	SearchResult<EduGroup> searchOrganizations(String pattern, int skipCount, int maxValues, SortDefinition sort,boolean scoped,boolean onlyMemberShips) throws Throwable;
+
     List<String> getAllMediacenters() throws Exception;
 
-    SearchResult<EduGroup> searchOrganizations(String pattern, int skipCount, int maxValues, SortDefinition sort, boolean scoped)
-			throws Throwable;
 
-	List<NodeRef> getFilesSharedByMe() throws Exception;
+	SearchResultNodeRef getFilesSharedByMe(SortDefinition sortDefinition, ContentType contentType, int skipCount, int maxItems) throws Exception;
 
-	List<NodeRef> getFilesSharedToMe() throws Exception;
+	SearchResultNodeRef getFilesSharedToMe(SortDefinition sortDefinition, ContentType contentType, int skipCount, int maxItems) throws Exception;
 	
 	List<NodeRef> getWorkflowReceive(String fullyAuthenticatedUser);
 

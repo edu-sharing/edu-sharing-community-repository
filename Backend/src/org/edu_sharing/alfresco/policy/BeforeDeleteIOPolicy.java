@@ -3,6 +3,7 @@ package org.edu_sharing.alfresco.policy;
 import org.alfresco.repo.node.NodeServicePolicies.BeforeDeleteNodePolicy;
 import org.alfresco.repo.policy.JavaBehaviour;
 import org.alfresco.repo.policy.PolicyComponent;
+import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.repository.NodeService;
 import org.alfresco.service.cmr.repository.StoreRef;
@@ -91,11 +92,18 @@ public class BeforeDeleteIOPolicy implements BeforeDeleteNodePolicy {
 			
 			String originalId = (String)nodeService.getProperty(nodeRef,QName.createQName(CCConstants.CCM_PROP_IO_ORIGINAL));
 			if(nodeService.exists(new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, originalId))) {
-				new UsageTool().removeUsage(ApplicationInfoList.getHomeRepository().getAppId(),
-						nodeService.getPrimaryParent(nodeRef).getParentRef().getId(),
-						originalId,
-						nodeRef.getId()
-						);
+				// run as system, because:
+				// the user deleting the ref has permissions to edit the collection (and can delete refs inside),
+				// but he may not has any access to the original node(s)
+				// however, the collection ref will be deleted, so the usage has to be removed
+				AuthenticationUtil.runAsSystem(()-> {
+					new UsageTool().removeUsage(ApplicationInfoList.getHomeRepository().getAppId(),
+							nodeService.getPrimaryParent(nodeRef).getParentRef().getId(),
+							originalId,
+							nodeRef.getId()
+					);
+					return null;
+				});
 			}
 		} catch (Exception e) {
 			logger.warn("failed to delete ref usage",e);

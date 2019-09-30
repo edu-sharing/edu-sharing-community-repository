@@ -33,7 +33,6 @@ import org.edu_sharing.repository.server.AuthenticationToolAPI;
 import org.edu_sharing.repository.server.MCAlfrescoAPIClient;
 import org.edu_sharing.repository.server.SearchResultNodeRef;
 import org.edu_sharing.repository.server.tools.ImageTool;
-import org.edu_sharing.repository.server.tools.LogTime;
 import org.edu_sharing.repository.server.tools.NameSpaceTool;
 import org.edu_sharing.repository.server.tools.XApiTool;
 import org.edu_sharing.repository.server.tools.cache.PreviewCache;
@@ -452,7 +451,6 @@ public class NodeDao {
 	public void refreshPermissions() {
         this.hasPermissions = permissionService.hasAllPermissions(storeProtocol, storeId, nodeId,DAO_PERMISSIONS);
 	}
-
     public static NodeEntries convertToRest(RepositoryDao repoDao,Filter propFilter,List<NodeRef> children, Integer skipCount, Integer maxItems) throws DAOException {
         NodeEntries result=new NodeEntries();
         List<Node> nodes=new ArrayList<>();
@@ -1504,22 +1502,37 @@ public class NodeDao {
 		}
 	}
 
-	public static List<NodeRef> getFilesSharedByMe(RepositoryDao repoDao,List<String> filter,SortDefinition sortDefinition) throws DAOException {
+	public static SearchResult<NodeDao> getFilesSharedByMe(RepositoryDao repoDao, List<String> filter, Filter propertyFilter, SortDefinition sortDefinition, Integer skipCount, Integer maxItems) throws DAOException {
 		ApplicationContext applicationContext = AlfAppContextGate.getApplicationContext();
 		ServiceRegistry serviceRegistry = (ServiceRegistry) applicationContext.getBean(ServiceRegistry.SERVICE_REGISTRY);
 		return serviceRegistry.getTransactionService().getRetryingTransactionHelper().doInTransaction(()-> {
 			SearchService searchService = SearchServiceFactory.getSearchService(repoDao.getApplicationInfo().getAppId());
 			try {
-				List<org.alfresco.service.cmr.repository.NodeRef> refs = searchService.getFilesSharedByMe();
-				refs = sortAlfrescoRefs(refs, filter, sortDefinition);
-				return convertAlfrescoNodeRef(repoDao, refs);
+				SearchResultNodeRef result = searchService.getFilesSharedByMe(sortDefinition, mapFilterToContentType(filter), skipCount.intValue(), maxItems == null ? RestConstants.DEFAULT_MAX_ITEMS : maxItems.intValue());
+				return NodeDao.convertResultSet(repoDao,propertyFilter,result);
 			} catch (Exception e) {
 				throw DAOException.mapping(e);
 			}
 		});
 	}
 
-    public static List<org.alfresco.service.cmr.repository.NodeRef> sortAlfrescoRefs(List<org.alfresco.service.cmr.repository.NodeRef> refs, List<String> filter, SortDefinition sortDefinition) {
+	private static SearchService.ContentType mapFilterToContentType(List<String> filter) {
+		if(filter==null || filter.size()==0)
+			return SearchService.ContentType.ALL;
+		if(filter.contains("files") && filter.contains("folders")){
+			return SearchService.ContentType.FILES_AND_FOLDERS;
+		}
+		if(filter.contains("files")){
+			return SearchService.ContentType.FILES;
+		}
+		if(filter.contains("folders")){
+			return SearchService.ContentType.FOLDERS;
+		}
+		logger.warn("Could not map the given filter value(s) "+filter.get(0)+" to a given ContentType, will use ContentType.ALL");
+		return SearchService.ContentType.ALL;
+	}
+
+	public static List<org.alfresco.service.cmr.repository.NodeRef> sortAlfrescoRefs(List<org.alfresco.service.cmr.repository.NodeRef> refs, List<String> filter, SortDefinition sortDefinition) {
         return NodeServiceFactory.getLocalService().sortNodeRefList(refs,filter,sortDefinition);
     }
 
@@ -1540,19 +1553,36 @@ public class NodeDao {
 		}
 	}
 	
-	public static List<NodeRef> getFilesSharedToMe(RepositoryDao repoDao, List<String> filter, SortDefinition sortDefinition) throws DAOException {
+	public static SearchResult<NodeDao> getFilesSharedToMe(RepositoryDao repoDao, List<String> filter, Filter propertyFilter, SortDefinition sortDefinition, Integer skipCount, Integer maxItems) throws DAOException {
 		ApplicationContext applicationContext = AlfAppContextGate.getApplicationContext();
 		ServiceRegistry serviceRegistry = (ServiceRegistry) applicationContext.getBean(ServiceRegistry.SERVICE_REGISTRY);
 		return serviceRegistry.getTransactionService().getRetryingTransactionHelper().doInTransaction(()-> {
 			SearchService searchService = SearchServiceFactory.getSearchService(repoDao.getApplicationInfo().getAppId());
 			try {
-				List<org.alfresco.service.cmr.repository.NodeRef> refs = searchService.getFilesSharedToMe();
-				List<org.alfresco.service.cmr.repository.NodeRef> sorted = LogTime.log("Sorting node refs from getFilesSharedToMe (" + refs.size() + ")", () -> NodeDao.sortAlfrescoRefs(refs, filter, sortDefinition));
-				return convertAlfrescoNodeRef(repoDao, sorted);
+				SearchResultNodeRef result = searchService.getFilesSharedToMe(sortDefinition,mapFilterToContentType(filter),skipCount.intValue(),maxItems==null ? RestConstants.DEFAULT_MAX_ITEMS : maxItems.intValue());
+				return NodeDao.convertResultSet(repoDao, propertyFilter, result);
 			} catch (Exception e) {
 				throw DAOException.mapping(e);
 			}
 		});
+	}
+
+	private static SearchResult<NodeDao> convertResultSet(RepositoryDao repoDao, Filter propFilter, SearchResultNodeRef result) {
+		SearchResult<NodeDao> converted=new SearchResult<>();
+		Pagination pagination=new Pagination();
+		pagination.setFrom(result.getStartIDX());
+		pagination.setTotal(result.getNodeCount());
+		pagination.setCount(result.getData().size());
+		converted.setPagination(pagination);
+		converted.setNodes(result.getData().stream().map((ref)-> {
+			try {
+				return new NodeDao(repoDao,ref,propFilter);
+			} catch (DAOException e) {
+				logger.warn(e.getMessage(),e);
+			}
+			return null;
+		}).collect(Collectors.toList()));
+		return converted;
 	}
 
 	public List<NodeShare> getShares(String email) throws DAOSecurityException {

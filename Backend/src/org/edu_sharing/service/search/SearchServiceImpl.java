@@ -18,7 +18,6 @@ import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.repo.security.authentication.AuthenticationUtil.RunAsWork;
 import org.alfresco.repo.transaction.RetryingTransactionHelper.RetryingTransactionCallback;
 import org.alfresco.service.ServiceRegistry;
-import org.alfresco.service.cmr.repository.ChildAssociationRef;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.repository.NodeService;
 import org.alfresco.service.cmr.repository.StoreRef;
@@ -42,7 +41,6 @@ import org.edu_sharing.alfresco.workspace_administration.NodeServiceInterceptor;
 import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
 import org.edu_sharing.metadataset.v2.MetadataQueries;
 import org.edu_sharing.metadataset.v2.MetadataSetV2;
-import org.edu_sharing.repository.client.rpc.ACE;
 import org.edu_sharing.repository.client.rpc.Authority;
 import org.edu_sharing.repository.client.rpc.EduGroup;
 import org.edu_sharing.repository.client.rpc.SearchCriterias;
@@ -101,66 +99,53 @@ public class SearchServiceImpl implements SearchService {
 	}
 
 	@Override
-	public List<NodeRef> getFilesSharedByMe() throws Exception {
+	public SearchResultNodeRef getFilesSharedByMe(SortDefinition sortDefinition, ContentType contentType, int skipCount, int maxItems) throws Exception {
 		String username = AuthenticationUtil.getFullyAuthenticatedUser();
-		SearchParameters parameters = new SearchParameters();
-		parameters.addSort("@" + CCConstants.CCM_PROP_PH_MODIFIED, false);
-		parameters.addStore(Constants.storeRef);
-		parameters.setLanguage(org.alfresco.service.cmr.search.SearchService.LANGUAGE_LUCENE);
-		parameters.addAllAttribute(CCConstants.CCM_PROP_AUTHORITYCONTAINER_EDUHOMEDIR);
-		parameters.setQuery("(TYPE:\"" + CCConstants.CCM_TYPE_IO + "\" OR TYPE:\"" + CCConstants.CCM_TYPE_MAP +"\") "
+
+		SearchToken token=new SearchToken();
+		token.setFrom(skipCount);
+		token.setMaxResult(maxItems);
+		token.setSortDefinition(sortDefinition);
+		token.setContentType(contentType);
+
+		token.setLuceneString("(TYPE:\"" + CCConstants.CCM_TYPE_IO + "\" OR TYPE:\"" + CCConstants.CCM_TYPE_MAP +"\") "
 				+ 	"AND @ccm\\:ph_users:\"" + QueryParser.escape(username) + "\"");
-        List<NodeRef> resultSet = queryAll(parameters);
-
-		List<NodeRef> result = new ArrayList<>();
-		for (NodeRef node : resultSet) {
-			if (result.contains(node))
-				continue;
-			try {
-				ACE[] permissions = baseClient.getPermissions(node.getId()).getAces();
-				if (permissions != null && permissions.length > 0) {
-					boolean add = false;
-					for (ACE perm : permissions) {
-						if (perm.isInherited())
-							continue;
-						add = true;
-						break;
-					}
-					if (add)
-						result.add(node);
-				}
-			}catch(Throwable t) {
-				logger.info("Error fetching permissions for node "+node.getId()+". It's may deleted or the user has no more permissions");
-				t.printStackTrace();
-			}
-		}
-
-		return result;
+		return search(token);
 	}
 
 
 	@Override
-	public List<NodeRef> getFilesSharedToMe() throws Exception {
+	public SearchResultNodeRef getFilesSharedToMe(SortDefinition sortDefinition, ContentType contentType, int skipCount, int maxItems) throws Exception {
 		String username = AuthenticationUtil.getFullyAuthenticatedUser();
-		String homeFolder = baseClient.getHomeFolderID(username);
 
-		SearchParameters parameters = new SearchParameters();
-		parameters.addStore(Constants.storeRef);
-		parameters.setLanguage(org.alfresco.service.cmr.search.SearchService.LANGUAGE_LUCENE);
-		//parameters.setMaxItems(Integer.MAX_VALUE);
-		parameters.setMaxItems(300);
-		parameters.addAllAttribute(CCConstants.CCM_PROP_AUTHORITYCONTAINER_EDUHOMEDIR);
-		parameters.addSort("@" + CCConstants.CCM_PROP_PH_MODIFIED, false);
-
-		parameters.setQuery("(TYPE:\"" + CCConstants.CCM_TYPE_IO +"\" OR TYPE:\"" + CCConstants.CCM_TYPE_MAP +"\") "
-				+ "AND ISNOTNULL:\"ccm:ph_users\" "
-				+ "AND NOT @ccm\\:ph_users:\"" + QueryParser.escape(username) + "\"");
-		List<NodeRef> result =  queryAll(parameters);
+		SearchToken token=new SearchToken();
+		token.setFrom(skipCount);
+		token.setMaxResult(maxItems);
+		token.setSortDefinition(sortDefinition);
+		token.setContentType(contentType);
 
 		Set<String> memberships = new HashSet<>();
+		memberships.add(username);
 		memberships.addAll(serviceRegistry.getAuthorityService().getAuthorities());
 		memberships.remove(CCConstants.AUTHORITY_GROUP_EVERYONE);
 
+		StringBuilder query= new StringBuilder("(TYPE:\"" + CCConstants.CCM_TYPE_IO + "\" OR TYPE:\"" + CCConstants.CCM_TYPE_MAP + "\") "
+				+ "AND ISNOTNULL:\"ccm:ph_users\" "
+				+ "AND NOT @ccm\\:ph_users:\"" + QueryParser.escape(username) + "\""
+				+ " AND (");
+		int i=0;
+		for(String m : memberships){
+			if(i++>0)
+				query.append(" OR ");
+			query.append("@ccm\\:ph_invited:\"").append(QueryParser.escape(m)).append("\"");
+		}
+		query.append(")");
+		token.setLuceneString(query.toString());
+
+		return search(token);
+
+		// Done via solr ccm:ph_invited now
+		/*
 		return LogTime.log("Validating node permissions ("+result.size()+")",()-> AuthenticationUtil.runAsSystem(()->{
 				List<NodeRef> refs = new ArrayList<>(result.size());
 				for (NodeRef node : result) {
@@ -169,10 +154,13 @@ public class SearchServiceImpl implements SearchService {
 					if (node.getId().equals(homeFolder))
 						continue;
 					try {
-						ACE[] permissions = baseClient.getPermissions(node.getId()).getAces();
-						if (permissions != null && permissions.length > 0) {
+						// this is expensive: it also fetches all user + group props we do not need here
+						// takes almost 15x of the time instead of direct service call
+						//ACE[] permissions = baseClient.getPermissions(node.getId()).getAces();
+						Set<AccessPermission> permSet = serviceRegistry.getPermissionService().getAllSetPermissions(node);
+						if (permSet != null && permSet.size() > 0) {
 							boolean add = false;
-							for (ACE perm : permissions) {
+							for (AccessPermission perm : permSet) {
 								if (!perm.isInherited() && (perm.getAuthority().equals(username) || memberships.contains(perm.getAuthority()))) {
 									add = true;
 									break;
@@ -185,21 +173,26 @@ public class SearchServiceImpl implements SearchService {
 						logger.info("Error fetching permissions for node "+node.getId()+". It's may deleted or the user has no more permissions");
 						t.printStackTrace();
 					}
+
 				}
 				return refs;
 			}
 		));
+		*/
 	}
 
-	private List<NodeRef> queryAll(SearchParameters parameters) {
+	private List<NodeRef> queryAll(SearchParameters parameters,int limit) {
+		if(limit<=0)
+			limit=Integer.MAX_VALUE;
+
 		List<NodeRef> result=new ArrayList<>();
 		int MAX_PER_PAGE=1000;
-		for(int offset=0;;offset+=MAX_PER_PAGE) {
+		for(int offset=0;;offset=result.size()) {
 			parameters.setSkipCount(offset);
-			parameters.setMaxItems(MAX_PER_PAGE);
+			parameters.setMaxItems(Math.min(MAX_PER_PAGE,limit-result.size()));
 			ResultSet data = searchService.query(parameters);
 			result.addAll(data.getNodeRefs());
-			if(data.getNodeRefs().size()<MAX_PER_PAGE)
+			if(result.size()>=limit || data.getNodeRefs().size()<MAX_PER_PAGE)
 				break;
 		}
 		return result;
@@ -207,7 +200,7 @@ public class SearchServiceImpl implements SearchService {
 
 	@Override
 	public SearchResult<EduGroup> getAllOrganizations(boolean scoped) throws Exception {
-		return searchOrganizations("", 0, Integer.MAX_VALUE, null,scoped);
+		return searchOrganizations("", 0, Integer.MAX_VALUE, null,scoped,false);
 	}
 	@Override
 	public List<String> getAllMediacenters() throws Exception {
@@ -218,7 +211,7 @@ public class SearchServiceImpl implements SearchService {
 		parameters.addAllAttribute(CCConstants.MEDIA_CENTER_GROUP_TYPE);
 		parameters.addSort(CCConstants.CM_PROP_AUTHORITY_AUTHORITYDISPLAYNAME,true);
 		parameters.setQuery("@ccm\\:groupType:\"" + CCConstants.MEDIA_CENTER_GROUP_TYPE + "\"");
-		return queryAll(parameters).stream().map((ref) ->
+		return queryAll(parameters,0).stream().map((ref) ->
 				NodeServiceFactory.getNodeService(applicationId).getProperty(ref.getStoreRef().getProtocol(), ref.getStoreRef().getIdentifier(), ref.getId(), CCConstants.CM_PROP_AUTHORITY_AUTHORITYNAME)
 		).filter((authority)->{
 			if(AuthorityServiceHelper.isAdmin())
@@ -234,11 +227,16 @@ public class SearchServiceImpl implements SearchService {
 		}).collect(Collectors.toList());
 	}
 	@Override
-	public SearchResult<EduGroup> searchOrganizations(String pattern, int skipCount, int maxValues, SortDefinition sort,boolean scoped)
+	public SearchResult<EduGroup> searchOrganizations(String pattern, int skipCount, int maxValues, SortDefinition sort,boolean scoped, boolean onlyMemberShips)
 			throws Exception {
 		try {
+			
+			
 			Set<String> memberships = serviceRegistry.getAuthorityService().getAuthorities();
 			boolean isSystemUser = AuthenticationUtil.isRunAsUserTheSystemUser();
+			boolean isAdmin = ((memberships != null && memberships.contains(CCConstants.AUTHORITY_GROUP_ALFRESCO_ADMINISTRATORS)) 
+					|| "admin".equals(AuthenticationUtil.getFullAuthentication().getName())) ? true : false;
+			
 			return AuthenticationUtil.runAsSystem(new RunAsWork<SearchResult<EduGroup>>() {
 
 				@Override
@@ -250,16 +248,58 @@ public class SearchServiceImpl implements SearchService {
 						SearchParameters parameters = new SearchParameters();
 						parameters.addStore(Constants.storeRef);
 						parameters.setLanguage(org.alfresco.service.cmr.search.SearchService.LANGUAGE_LUCENE);
-						parameters.setMaxItems(Integer.MAX_VALUE);
+						parameters.setSkipCount(skipCount);
+						parameters.setMaxItems(maxValues);
 						parameters.addAllAttribute(CCConstants.CCM_PROP_AUTHORITYCONTAINER_EDUHOMEDIR);
 						if (sort != null)
 							sort.applyToSearchParameters(parameters);
 						String param = QueryParser.escape(pattern == null ? "" : pattern);
+						
+						//only search organisations the curren user is in,except: its adminuser and onlyMemberShips == true
+						StringBuilder qbMemberShips=null;
+						if(onlyMemberShips == true || 
+								(onlyMemberShips == false && (!isSystemUser && !isAdmin))) {
+							
+						
+							
+							List<String> memberShibsOrg = new ArrayList<String>(); 
+							if(memberships != null && memberships.size() > 0) {
+								for(String membershib : memberships) {
+									NodeRef authorityNodeRef = serviceRegistry.getAuthorityService().getAuthorityNodeRef(membershib);
+									if(authorityNodeRef != null) {
+										if(serviceRegistry.getNodeService().hasAspect(authorityNodeRef,
+												QName.createQName(CCConstants.CCM_ASPECT_EDUGROUP))) {
+											memberShibsOrg.add(membershib);
+										}
+									}
+								}
+								if(memberShibsOrg.size() > 0) {
+									qbMemberShips = new StringBuilder();
+									qbMemberShips.append(" AND (");
+									int i = 0;
+									for(String membershibOrg : memberShibsOrg) {
+										if(i > 0) {
+											qbMemberShips.append(" OR ");
+										}
+										qbMemberShips.append("@cm\\:authorityName:\"" + QueryParser.escape(membershibOrg) + "\"");
+										i++;
+									}
+									qbMemberShips.append(")");
+								}else if(!isSystemUser && !isAdmin){
+									return new SearchResult<EduGroup>();
+								}
+								
+							}
+						}
+						
 						parameters
 								.setQuery(
 										"(@cm\\:authorityName:\"*" + param + "*\"" + 
 										" OR @cm\\:authorityDisplayName:\"*" + param + "*\"" + 
-										") AND @ccm\\:edu_homedir:\"workspace://*\"");
+										") AND @ccm\\:edu_homedir:\"workspace://*\"" + 
+										((qbMemberShips != null) ? " " + qbMemberShips.toString() : "") );
+						logger.info("query:" +parameters.getQuery());
+						
 						ResultSet edugroups = searchService.query(parameters);
 
 						for (ResultSetRow row : edugroups) {
@@ -300,7 +340,6 @@ public class SearchServiceImpl implements SearchService {
 							}
 						}
 						int count = result.size();
-						result = limitList(result, skipCount, maxValues);
 						return new SearchResult<EduGroup>(result, skipCount, count);
 					} catch (Throwable t) {
 						throw new Exception(t);
@@ -311,6 +350,9 @@ public class SearchServiceImpl implements SearchService {
 			throw t;
 		}
 	}
+	
+	
+	
 
 	private List limitList(List list, int skipCount, int maxValues) {
 		return list.subList(Math.min(skipCount, list.size()), Math.min(list.size(), skipCount + maxValues));

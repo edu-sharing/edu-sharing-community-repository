@@ -1,10 +1,11 @@
 package org.edu_sharing.service.permission;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
+import java.util.*;
+import java.util.stream.Collectors;
 
 import org.alfresco.service.cmr.repository.StoreRef;
+import org.edu_sharing.repository.client.rpc.ACE;
+import org.edu_sharing.repository.client.rpc.ACL;
 import org.edu_sharing.repository.client.tools.CCConstants;
 
 public class PermissionServiceHelper {
@@ -25,7 +26,15 @@ public class PermissionServiceHelper {
 		public PermissionServiceHelper(PermissionService permissionService){
 			this.permissionService=permissionService;
 		}
-		public HashMap<String, Boolean> hasAllPermissions(String storeProtocol,String storeId,String nodeId){
+
+    public static HashSet<String> getExplicitAuthoritiesFromACL(ACL acl) {
+        return Arrays.stream(acl.getAces()).
+                filter((ace) -> !ace.isInherited()).
+                map(ACE::getAuthority).
+                collect(Collectors.toCollection(HashSet::new));
+    }
+
+    public HashMap<String, Boolean> hasAllPermissions(String storeProtocol,String storeId,String nodeId){
 			return permissionService.hasAllPermissions(storeProtocol, storeId, nodeId, PERMISSIONS);
 		}
 		public HashMap<String, Boolean> hasAllPermissions(String nodeId){

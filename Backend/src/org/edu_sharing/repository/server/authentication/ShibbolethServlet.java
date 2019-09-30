@@ -167,6 +167,9 @@ public class ShibbolethServlet extends HttpServlet {
 			if(alfAuthService instanceof SubsystemChainingAuthenticationService) {
 				SubsystemChainingAuthenticationService scAuthService = (SubsystemChainingAuthenticationService)alfAuthService;
 				String userName = ssoMap.get(ssoMapper.getSSOUsernameProp());
+				if(ssoMapper.isHashUserName()){
+					userName=ssoMapper.digest(userName);
+				}
 				scAuthService.setEsLastLoginToNow(userName);
 			}
 			

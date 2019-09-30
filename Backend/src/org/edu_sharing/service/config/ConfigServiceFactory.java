@@ -83,4 +83,9 @@ public class ConfigServiceFactory {
 		}
 	}
 
+	/* refresh the current config cache
+	 */
+	public static void refresh() {
+		ConfigServiceFactory.getConfigService().refresh();
+	}
 }

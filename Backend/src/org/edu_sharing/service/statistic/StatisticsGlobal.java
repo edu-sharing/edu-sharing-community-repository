@@ -1,20 +1,19 @@
 package org.edu_sharing.service.statistic;
 
 import java.util.List;
-import java.util.Map;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 public class StatisticsGlobal{
-    public static abstract class TranslatableKey{
+    public static abstract class StatisticsTranslatableKey {
         @JsonProperty public String key;
         @JsonProperty public String displayName;
-        TranslatableKey(){}
-        TranslatableKey(String key){
+        StatisticsTranslatableKey(){}
+        StatisticsTranslatableKey(String key){
             this.key=key;
             this.displayName=key;
         }
-        TranslatableKey(String key, String displayName){
+        StatisticsTranslatableKey(String key, String displayName){
             this(key);
             this.displayName=displayName;
         }
@@ -24,9 +23,9 @@ public class StatisticsGlobal{
 		@JsonProperty public String domain;
 		@JsonProperty public Long queryTime;
 	}
-	public static class Group{
-		public static class SubGroup{
-            public static class SubGroupItem extends TranslatableKey{
+	public static class StatisticsGroup {
+		public static class StatisticsSubGroup {
+            public static class SubGroupItem extends StatisticsTranslatableKey {
                 @JsonProperty public int count;
 
                 public SubGroupItem(String key, Integer count) {
@@ -42,35 +41,35 @@ public class StatisticsGlobal{
             @JsonProperty public List<SubGroupItem> count;
 		}
 		@JsonProperty public int count;
-		@JsonProperty public List<SubGroup> subGroups;
+		@JsonProperty public List<StatisticsSubGroup> subGroups;
 	}
-    public static class KeyGroup extends TranslatableKey{
+    public static class StatisticsKeyGroup extends StatisticsTranslatableKey {
         @JsonProperty public int count;
-        @JsonProperty public List<Group.SubGroup> subGroups;
+        @JsonProperty public List<StatisticsGroup.StatisticsSubGroup> subGroups;
     }
 	public static class User{
 		@JsonProperty public int count;
 	}
     @JsonProperty
-    private Group overall;
+    private StatisticsGroup overall;
 	@JsonProperty
-	private List<KeyGroup> groups;
+	private List<StatisticsKeyGroup> groups;
 	@JsonProperty
 	private User user;
 
-    public Group getOverall() {
+    public StatisticsGroup getOverall() {
         return overall;
     }
 
-    public void setOverall(Group overall) {
+    public void setOverall(StatisticsGroup overall) {
         this.overall = overall;
     }
 
-    public List<KeyGroup> getGroups() {
+    public List<StatisticsKeyGroup> getGroups() {
         return groups;
     }
 
-    public void setGroups(List<KeyGroup> groups) {
+    public void setGroups(List<StatisticsKeyGroup> groups) {
         this.groups = groups;
     }
 

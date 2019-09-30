@@ -44,7 +44,7 @@
       height="xlarge"
       (onCancel)="cancelEdit()">
         <div class="card-content-padding card-edit">
-          <form (submit)="saveEdits()">
+          <form>
           <div *ngIf="editId" class="editSystemName">
             <label>{{'PERMISSIONS.INTERNAL_NAME' | translate}}</label>
             <div class="infoText">{{edit.authorityName}}</div>
@@ -105,6 +105,17 @@
               <mat-label>{{'USER.email' | translate}}</mat-label>
               <input matInput name="email" [(ngModel)]="edit.profile.email" required>
             </mat-form-field>
+            <div class="group">
+              <mat-form-field>
+                <mat-label>{{'USER.primaryAffiliation' | translate}}</mat-label>
+                  <mat-select *ngIf="primaryAffiliationList" id="primaryAffiliation" name="primaryAffiliation" [(ngModel)]="edit.profile.primaryAffiliation">
+                      <mat-option></mat-option>
+                      <mat-option *ngFor="let a of PRIMARY_AFFILIATIONS" [value]="a">{{('USER.PRIMARY_AFFILIATION.'+a) | translate}}</mat-option>
+                  </mat-select>
+                  <input matInput *ngIf="!primaryAffiliationList" type="text" id="primaryAffiliation" name="primaryAffiliation" [(ngModel)]="edit.profile.primaryAffiliation">
+              </mat-form-field>
+              <button mat-flat-button (click)="primaryAffiliationList=!primaryAffiliationList"><i class="material-icons">{{ primaryAffiliationList ? 'edit' : 'list'}}</i></button>
+            </div>
             <div *ngIf="!editId">
               <input-password label="{{'USER.password' | translate}}" [(value)]="editDetails.password"></input-password>
             </div>
@@ -167,7 +178,7 @@
   </div>
 </div>
 <div *ngIf="embedded" class="searchEmbedded">
-  <form (ngSubmit)="searchQuery=embeddedQuery"><input type="search" [(ngModel)]="embeddedQuery" placeholder="{{'PERMISSIONS.SEARCH_USER' | translate}}" name="embeddedSearch"></form>
+  <form (ngSubmit)="searchQuery=embeddedQuery"><input matInput type="search" [(ngModel)]="embeddedQuery" placeholder="{{'PERMISSIONS.SEARCH_USER' | translate}}" name="embeddedSearch"></form>
 </div>
 <listTable class="list" infinite-scroll (scrolled)="loadAuthorities()" [scrollWindow]="false" [class.listEmbedded]="embedded"
   [columns]="columns"

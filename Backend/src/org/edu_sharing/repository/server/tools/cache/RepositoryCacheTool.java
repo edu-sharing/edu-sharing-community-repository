@@ -109,7 +109,7 @@ public class RepositoryCacheTool {
 		long time = System.currentTimeMillis();
 
 		logger.info("THREAD_COUNT:" + THREAD_COUNT);
-		int modulo = (childAssocRefs.size() > THREAD_COUNT) ? (int) (childAssocRefs.size() / THREAD_COUNT) : 2;
+		int modulo = (childAssocRefs.size() > THREAD_COUNT) ? (int) (childAssocRefs.size() / THREAD_COUNT) : 1;
 
 		List<List<String>> threadNodes = new ArrayList<>();
 

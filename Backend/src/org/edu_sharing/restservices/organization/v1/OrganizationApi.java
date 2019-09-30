@@ -76,6 +76,7 @@ public class OrganizationApi  {
     	    @ApiParam(value = RestConstants.MESSAGE_SKIP_COUNT, defaultValue="0") @QueryParam("skipCount") Integer skipCount,
     	    @ApiParam(value = RestConstants.MESSAGE_SORT_PROPERTIES) @QueryParam("sortProperties") List<String> sortProperties,
     	    @ApiParam(value = RestConstants.MESSAGE_SORT_ASCENDING) @QueryParam("sortAscending") List<Boolean> sortAscending,
+    	    @ApiParam(value = "search only in memberships, false can only be done by admin",defaultValue="true") @QueryParam("onlyMemberships") boolean onlyMemberships,
     		@Context HttpServletRequest req) {
     	
     	try {
@@ -90,7 +91,8 @@ public class OrganizationApi  {
 	    			skipCount!=null ? skipCount : 0, 
 	    			maxItems!=null ? maxItems : RestConstants.DEFAULT_MAX_ITEMS, 
 	    			new SortDefinition(sortProperties,sortAscending),
-	    			false);
+	    			false,
+	    			onlyMemberships);
 	    	for (EduGroup eduGroup : result.getData()) {
 	    		data.add(new OrganizationDao(repoDao,eduGroup).asOrganization());
 	    	}

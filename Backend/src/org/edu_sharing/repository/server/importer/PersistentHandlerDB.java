@@ -244,4 +244,10 @@ public class PersistentHandlerDB implements PersistentHandlerInterface{
 		return true;
 	}
 	
+	@Override
+	public boolean exists(String replId) {
+		// TODO Auto-generated method stub
+		return false;
+	}
+	
 }
