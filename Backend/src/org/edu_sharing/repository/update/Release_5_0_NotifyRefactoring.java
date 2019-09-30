@@ -74,14 +74,10 @@ public class Release_5_0_NotifyRefactoring extends UpdateAbstract {
 		runner.setTypes(Arrays.asList(CCConstants.CCM_TYPE_IO,CCConstants.CCM_TYPE_MAP));
 		runner.setThreaded(true);
 		runner.setKeepModifiedDate(true);
-		runner.setTransaction(NodeRunner.TransactionMode.Local);
+		runner.setTransaction(NodeRunner.TransactionMode.LocalRetrying);
 		int[] processed=new int[]{0};
 		runner.setTask((ref)->{
-			try {
-				migrate(ref);
-			} catch (Exception e) {
-				logger.warn("error transforming node "+ref+": "+e.getMessage(),e);
-			}
+			migrate(ref);
 			processed[0]++;
 		});
 		runner.run();
@@ -100,7 +96,7 @@ public class Release_5_0_NotifyRefactoring extends UpdateAbstract {
 
 	}
 
-	private void migrate(NodeRef nodeRef) throws Exception {
+	private void migrate(NodeRef nodeRef) {
 		List<ChildAssociationRef> notifyParentAssocs = nodeService.getParentAssocs(nodeRef,
 				QName.createQName(CCConstants.CCM_ASSOC_NOTIFY_NODES), RegexQNamePattern.MATCH_ALL);
 
@@ -134,7 +130,12 @@ public class Release_5_0_NotifyRefactoring extends UpdateAbstract {
 			 *  get acl from notify cause its the same as io
 			 *  does not really work for notifys cause there is one notify also with the inherited permissions
 			 */
-			ACL acl = apiClient.getPermissions(entry.getKey().getId());
+			ACL acl = null;
+			try {
+				acl = apiClient.getPermissions(entry.getKey().getId());
+			} catch (Exception e) {
+				throw new RuntimeException(e);
+			}
 			List<ACE> directlySetAces = new ArrayList<ACE>();
 			for (ACE ace : acl.getAces()) {
 				if (!ace.isInherited()) {
