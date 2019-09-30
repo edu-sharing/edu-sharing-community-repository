@@ -59,7 +59,7 @@ public class NodeRunner {
     /**
      * Shall the modified date of the edited nodes stay the same
      * (Enabling this will disable the behaviour filters while running)
-     * Required transaction to be set to true
+     * Required transaction to be set to Local or Global
      */
     private boolean keepModifiedDate;
 
