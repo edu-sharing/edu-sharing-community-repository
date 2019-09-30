@@ -200,31 +200,38 @@ public class SearchServiceImpl implements SearchService {
 
 	@Override
 	public SearchResult<EduGroup> getAllOrganizations(boolean scoped) throws Exception {
-		return searchOrganizations("", 0, Integer.MAX_VALUE, null,scoped,false);
+		return searchOrganizations("", 0, Integer.MAX_VALUE, null,scoped,true);
 	}
 	@Override
 	public List<String> getAllMediacenters() throws Exception {
-		List<EduGroup> userOrgs = getAllOrganizations(true).getData();
-		SearchParameters parameters = new SearchParameters();
-		parameters.addStore(Constants.storeRef);
-		parameters.setLanguage(org.alfresco.service.cmr.search.SearchService.LANGUAGE_LUCENE);
-		parameters.addAllAttribute(CCConstants.MEDIA_CENTER_GROUP_TYPE);
-		parameters.addSort(CCConstants.CM_PROP_AUTHORITY_AUTHORITYDISPLAYNAME,true);
-		parameters.setQuery("@ccm\\:groupType:\"" + CCConstants.MEDIA_CENTER_GROUP_TYPE + "\"");
-		return queryAll(parameters,0).stream().map((ref) ->
-				NodeServiceFactory.getNodeService(applicationId).getProperty(ref.getStoreRef().getProtocol(), ref.getStoreRef().getIdentifier(), ref.getId(), CCConstants.CM_PROP_AUTHORITY_AUTHORITYNAME)
-		).filter((authority)->{
-			if(AuthorityServiceHelper.isAdmin())
-				return true;
-
-			String[] memberships = authorityService.getMembershipsOfGroup(authority);
-			if(memberships!=null && memberships.length>0) {
-				// returns true if any of the organizations matches any of the managed groups of this mediacenter
-				return userOrgs.stream().anyMatch((eduGroup)->Arrays.stream(memberships).anyMatch((membership)->membership.equals(eduGroup.getGroupname())));
-
+		
+		
+		Set<String> memberships = serviceRegistry.getAuthorityService().getAuthorities();
+		boolean isSystemUser = AuthenticationUtil.isRunAsUserTheSystemUser();
+		boolean isAdmin = ((memberships != null && memberships.contains(CCConstants.AUTHORITY_GROUP_ALFRESCO_ADMINISTRATORS)) 
+				|| "admin".equals(AuthenticationUtil.getFullAuthentication().getName())
+				|| isSystemUser) ? true : false;
+		
+		if(isAdmin) {
+			SearchParameters parameters = new SearchParameters();
+			parameters.addStore(Constants.storeRef);
+			parameters.setLanguage(org.alfresco.service.cmr.search.SearchService.LANGUAGE_LUCENE);
+			parameters.addAllAttribute(CCConstants.MEDIA_CENTER_GROUP_TYPE);
+			parameters.addSort(CCConstants.CM_PROP_AUTHORITY_AUTHORITYDISPLAYNAME,true);
+			parameters.setQuery("@ccm\\:groupType:\"" + CCConstants.MEDIA_CENTER_GROUP_TYPE + "\"");
+			return queryAll(parameters,0).stream().map((ref) ->
+					NodeServiceFactory.getNodeService(applicationId).getProperty(ref.getStoreRef().getProtocol(), ref.getStoreRef().getIdentifier(), ref.getId(), CCConstants.CM_PROP_AUTHORITY_AUTHORITYNAME)
+			).collect(Collectors.toList());
+		}else {
+			List<String> result = new ArrayList<String>();
+			for(String memberShip : memberships) {
+				NodeRef nodeRef = serviceRegistry.getAuthorityService().getAuthorityNodeRef(memberShip);
+				if(serviceRegistry.getNodeService().hasAspect(nodeRef, QName.createQName(CCConstants.CCM_ASPECT_MEDIACENTER))) {
+					result.add(memberShip);
+				}
 			}
-			return false;
-		}).collect(Collectors.toList());
+			return result;
+		}
 	}
 	@Override
 	public SearchResult<EduGroup> searchOrganizations(String pattern, int skipCount, int maxValues, SortDefinition sort,boolean scoped, boolean onlyMemberShips)
