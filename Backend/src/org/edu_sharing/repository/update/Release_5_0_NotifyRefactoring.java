@@ -28,6 +28,7 @@ import org.edu_sharing.repository.client.rpc.Notify;
 import org.edu_sharing.repository.client.rpc.User;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.server.MCAlfrescoAPIClient;
+import org.edu_sharing.repository.server.jobs.helper.NodeRunner;
 import org.edu_sharing.service.Constants;
 
 import com.google.gson.Gson;
@@ -72,137 +73,124 @@ public class Release_5_0_NotifyRefactoring extends UpdateAbstract {
 
 	@Override
 	public void run() throws Throwable {
-		apiClient = new MCAlfrescoAPIClient();
-
-		SearchParameters sp = new SearchParameters();
-		sp.addStore(Constants.storeRef);
-		sp.setLanguage(SearchService.LANGUAGE_LUCENE);
-		sp.setMaxItems(maxItems);
-		sp.setQuery("TYPE:\"ccm:io\"");
-		sp.setSkipCount(0);
-
-		doIt(sp, null);
+		doTask();
 
 	}
+	public void doTask(){
+		NodeRunner runner=new NodeRunner();
+		runner.setRunAsSystem(true);
+		runner.setTypes(Collections.singletonList(CCConstants.CCM_TYPE_NOTIFY));
+		runner.setThreaded(false);
+		runner.setKeepModifiedDate(true);
+		int[] processed=new int[]{0};
+		runner.setTask((ref)->{
+			try {
+				migrate(ref);
+			} catch (Exception e) {
+				logger.warn("error transforming node "+ref+": "+e.getMessage(),e);
+			}
+			processed[0]++;
+		});
+		runner.run();
+		logInfo("Added educontext default value to a total of "+processed[0]+" nodes");
+	}
 
-	private void doIt(SearchParameters sp, ResultSet rs) throws Throwable{
-		if (rs != null) {
-			sp.setSkipCount(rs.getStart() + maxItems);
+	private void migrate(NodeRef nodeRef) throws Exception {
+		List<ChildAssociationRef> notifyParentAssocs = nodeService.getParentAssocs(nodeRef,
+				QName.createQName(CCConstants.CCM_TYPE_NOTIFY + "_nodes"), RegexQNamePattern.MATCH_ALL);
+
+		Map<NodeRef, Map<QName, Serializable>> notifyProps = new HashMap<NodeRef, Map<QName, Serializable>>();
+
+		for (ChildAssociationRef childRef : notifyParentAssocs) {
+			NodeRef notifyRef = childRef.getParentRef();
+			Map<QName, Serializable> properties = nodeService.getProperties(notifyRef);
+			notifyProps.put(notifyRef, properties);
 		}
-		rs = searchService.query(sp);
 
-		for (NodeRef nodeRef : rs.getNodeRefs()) {
+		List<Map.Entry<NodeRef, Map<QName, Serializable>>> toSort = new ArrayList<Map.Entry<NodeRef, Map<QName, Serializable>>>();
 
-			logger.info("migrating " + nodeService.getProperty(nodeRef, ContentModel.PROP_NAME));
+		for (Map.Entry<NodeRef, Map<QName, Serializable>> entry : notifyProps.entrySet()) {
+			toSort.add(entry);
+		}
 
-			List<ChildAssociationRef> notifyParentAssocs = nodeService.getParentAssocs(nodeRef,
-					QName.createQName(CCConstants.CCM_TYPE_NOTIFY + "_nodes"), RegexQNamePattern.MATCH_ALL);
-
-			Map<NodeRef, Map<QName, Serializable>> notifyProps = new HashMap<NodeRef, Map<QName, Serializable>>();
-
-			for (ChildAssociationRef childRef : notifyParentAssocs) {
-				NodeRef notifyRef = childRef.getParentRef();
-				Map<QName, Serializable> properties = nodeService.getProperties(notifyRef);
-				notifyProps.put(notifyRef, properties);
+		Collections.sort(toSort, new Comparator<Map.Entry<NodeRef, Map<QName, Serializable>>>() {
+			@Override
+			public int compare(Entry<NodeRef, Map<QName, Serializable>> o1,
+							   Entry<NodeRef, Map<QName, Serializable>> o2) {
+				Date o1Created = (Date) o1.getValue().get(ContentModel.PROP_CREATED);
+				Date o2Created = (Date) o2.getValue().get(ContentModel.PROP_CREATED);
+				return o1Created.compareTo(o2Created);
 			}
+		});
 
-			List<Map.Entry<NodeRef, Map<QName, Serializable>>> toSort = new ArrayList<Map.Entry<NodeRef, Map<QName, Serializable>>>();
+		/**
+		 * transform notify history
+		 */
+		int i=0;
+		for (Map.Entry<NodeRef, Map<QName, Serializable>> entry : toSort) {
+			logger.info(" transforming notify from: " + entry.getValue().get(ContentModel.PROP_CREATED));
 
-			for (Map.Entry<NodeRef, Map<QName, Serializable>> entry : notifyProps.entrySet()) {
-				toSort.add(entry);
-			}
-
-			Collections.sort(toSort, new Comparator<Map.Entry<NodeRef, Map<QName, Serializable>>>() {
-				@Override
-				public int compare(Entry<NodeRef, Map<QName, Serializable>> o1,
-						Entry<NodeRef, Map<QName, Serializable>> o2) {
-					Date o1Created = (Date) o1.getValue().get(ContentModel.PROP_CREATED);
-					Date o2Created = (Date) o2.getValue().get(ContentModel.PROP_CREATED);
-					return o1Created.compareTo(o2Created);
-				}
-			});
+			Gson gson = new Gson();
+			Notify n = new Notify();
 
 			/**
-			 * transform notify history
+			 *  get acl from notify cause its the same as io
+			 *  does not really work for notifys cause there is one notify also with the inherited permissions
 			 */
-			int i = 0;
-
-			try {
-				// prevent modified date change
-				policyBehaviourFilter.disableBehaviour(nodeRef);
-				for (Map.Entry<NodeRef, Map<QName, Serializable>> entry : toSort) {
-					logger.info(" transforming notify from: " + entry.getValue().get(ContentModel.PROP_CREATED));
-
-					Gson gson = new Gson();
-					Notify n = new Notify();
-
-					/**
-					 *  get acl from notify cause its the same as io
-					 *  does not really work for notifys cause there is one notify also with the inherited permissions
-					 */
-					ACL acl = apiClient.getPermissions(entry.getKey().getId());
-					List<ACE> directlySetAces = new ArrayList<ACE>();
-					for (ACE ace : acl.getAces()) {
-						if (!ace.isInherited()) {
-							directlySetAces.add(ace);
-						}
-					}
-					// set of all authority names that are not inherited, but explicitly set
-					nodeService.setProperty(nodeRef, QName.createQName(CCConstants.CCM_PROP_PH_INVITED), PermissionServiceHelper.getExplicitAuthoritiesFromACL(acl));
-
-					Date created = (Date) nodeService.getProperty(entry.getKey(), ContentModel.PROP_CREATED);
-					String action = (String) nodeService.getProperty(entry.getKey(),
-							QName.createQName(CCConstants.CCM_PROP_NOTIFY_ACTION));
-					String user = (String) nodeService.getProperty(entry.getKey(),
-							QName.createQName(CCConstants.CCM_PROP_NOTIFY_USER));
-					acl.setAces(directlySetAces.toArray(new ACE[] {}));
-					n.setAcl(acl);
-					n.setCreated(created);
-					n.setNotifyAction(action);
-					n.setNotifyUser(user);
-					User u = new User();
-					u.setAuthorityName(user);
-					u.setUsername(user);
-					n.setUser(u);
-
-					if (!nodeService.hasAspect(nodeRef, QName.createQName(CCConstants.CCM_ASPECT_PERMISSION_HISTORY))) {
-						nodeService.addAspect(nodeRef, QName.createQName(CCConstants.CCM_ASPECT_PERMISSION_HISTORY),
-								null);
-					}
-					String jsonStringACL = gson.toJson(n);
-					List<String> history = (List<String>) nodeService.getProperty(nodeRef,
-							QName.createQName(CCConstants.CCM_PROP_PH_HISTORY));
-					history = (history == null) ? new ArrayList<String>() : history;
-					history.add(jsonStringACL);
-					nodeService.setProperty(nodeRef, QName.createQName(CCConstants.CCM_PROP_PH_HISTORY),
-							new ArrayList(history));
-
-					/**
-					 * last one will be current
-					 */
-					if (i == (toSort.size() - 1)) {
-						nodeService.setProperty(nodeRef, QName.createQName(CCConstants.CCM_PROP_PH_ACTION), action);
-						
-						ArrayList<String> phUsers = (ArrayList<String>)nodeService.getProperty(nodeRef, QName.createQName(CCConstants.CCM_PROP_PH_USERS));
-						if(phUsers == null) phUsers = new ArrayList<String>();
-						if(!phUsers.contains(user)) phUsers.add(user);
-						nodeService.setProperty(nodeRef, QName.createQName(CCConstants.CCM_PROP_PH_USERS), phUsers);
-						nodeService.setProperty(nodeRef, QName.createQName(CCConstants.CCM_PROP_PH_MODIFIED), created);
-					}
-					nodeService.addAspect(entry.getKey(), ContentModel.ASPECT_TEMPORARY, null);
-					nodeService.deleteNode(entry.getKey());
-
-					i++;
-
+			ACL acl = apiClient.getPermissions(entry.getKey().getId());
+			List<ACE> directlySetAces = new ArrayList<ACE>();
+			for (ACE ace : acl.getAces()) {
+				if (!ace.isInherited()) {
+					directlySetAces.add(ace);
 				}
-			} catch (Throwable e1) {
-				logger.error(e1.getMessage(), e1);
-				throw e1;
-			}finally {
-				policyBehaviourFilter.enableBehaviour(nodeRef);
 			}
+			// set of all authority names that are not inherited, but explicitly set
+			nodeService.setProperty(nodeRef, QName.createQName(CCConstants.CCM_PROP_PH_INVITED), PermissionServiceHelper.getExplicitAuthoritiesFromACL(acl));
 
+			Date created = (Date) nodeService.getProperty(entry.getKey(), ContentModel.PROP_CREATED);
+			String action = (String) nodeService.getProperty(entry.getKey(),
+					QName.createQName(CCConstants.CCM_PROP_NOTIFY_ACTION));
+			String user = (String) nodeService.getProperty(entry.getKey(),
+					QName.createQName(CCConstants.CCM_PROP_NOTIFY_USER));
+			acl.setAces(directlySetAces.toArray(new ACE[]{}));
+			n.setAcl(acl);
+			n.setCreated(created);
+			n.setNotifyAction(action);
+			n.setNotifyUser(user);
+			User u = new User();
+			u.setAuthorityName(user);
+			u.setUsername(user);
+			n.setUser(u);
+
+			if (!nodeService.hasAspect(nodeRef, QName.createQName(CCConstants.CCM_ASPECT_PERMISSION_HISTORY))) {
+				nodeService.addAspect(nodeRef, QName.createQName(CCConstants.CCM_ASPECT_PERMISSION_HISTORY),
+						null);
+			}
+			String jsonStringACL = gson.toJson(n);
+			List<String> history = (List<String>) nodeService.getProperty(nodeRef,
+					QName.createQName(CCConstants.CCM_PROP_PH_HISTORY));
+			history = (history == null) ? new ArrayList<>() : history;
+			history.add(jsonStringACL);
+			nodeService.setProperty(nodeRef, QName.createQName(CCConstants.CCM_PROP_PH_HISTORY),
+					new ArrayList<>(history));
+
+			/**
+			 * last one will be current
+			 */
+			if (i == (toSort.size() - 1)) {
+				nodeService.setProperty(nodeRef, QName.createQName(CCConstants.CCM_PROP_PH_ACTION), action);
+
+				ArrayList<String> phUsers = (ArrayList<String>) nodeService.getProperty(nodeRef, QName.createQName(CCConstants.CCM_PROP_PH_USERS));
+				if (phUsers == null) phUsers = new ArrayList<>();
+				if (!phUsers.contains(user)) phUsers.add(user);
+				nodeService.setProperty(nodeRef, QName.createQName(CCConstants.CCM_PROP_PH_USERS), phUsers);
+				nodeService.setProperty(nodeRef, QName.createQName(CCConstants.CCM_PROP_PH_MODIFIED), created);
+			}
+			nodeService.addAspect(entry.getKey(), ContentModel.ASPECT_TEMPORARY, null);
+			nodeService.deleteNode(entry.getKey());
+			i++;
 		}
+
 	}
 
 	@Override
