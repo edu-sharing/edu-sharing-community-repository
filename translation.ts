@@ -216,60 +216,54 @@ export class TranslationLoader implements TranslateLoader {
                 .subscribe((data: any) => translations.push(data));
         }
     }
-    maxCount++;
-    this.locator.getConfigLanguage(Translation.LANGUAGES[lang]).subscribe((data: any) => {
-        translations.push(data);
-    });
-
     return new Observable<any>((observer : Observer<any>) => {
       let callback = ()=> {
         if (translations.length < maxCount) {
           setTimeout(callback, 10);
           return;
         }
-        let final:any = {};
-        for (const obj of translations) {
-          for (const key in obj) {
-            //copy all the fields
+          this.locator.getConfigLanguage(Translation.LANGUAGES[lang]).subscribe((data: any) => {
+              translations.push(data);
+              let final: any = {};
+              for (const obj of translations) {
+                  for (const key in obj) {
+                      //copy all the fields
 
-              let path=key.split(".");
-            if(path.length==1) {
-              final[key] = obj[key];
-            }
-          }
-        }
-        for (const obj of translations) {
-          for (const key in obj) {
-              try {
-                  let path = key.split(".");
-
-                  // init non-existing objects first
-                  if(path.length>=2 && !final[path[0]]) final[path[0]]={};
-                  if(path.length>=3 && !final[path[0]][path[1]]) final[path[0]][path[1]]={};
-                  if(path.length>=4 && !final[path[0]][path[1]][path[2]]) final[path[0]][path[1]][path[2]]={};
-
-                  if (path.length == 1) {
-                      continue;
-                  }
-                  else if (path.length == 2) {
-                      final[path[0]][path[1]] = obj[key];
-                  }
-                  else if (path.length == 3) {
-                      final[path[0]][path[1]][path[2]] = obj[key];
-                  }
-                  else if (path.length == 4) {
-                      final[path[0]][path[1]][path[2]][path[3]] = obj[key];
+                      let path = key.split(".");
+                      if (path.length == 1) {
+                          final[key] = obj[key];
+                      }
                   }
               }
-              catch (e) {
-                  console.error("error while language override of " + key, e);
+              for (const obj of translations) {
+                  for (const key in obj) {
+                      try {
+                          let path = key.split(".");
+
+                          // init non-existing objects first
+                          if (path.length >= 2 && !final[path[0]]) final[path[0]] = {};
+                          if (path.length >= 3 && !final[path[0]][path[1]]) final[path[0]][path[1]] = {};
+                          if (path.length >= 4 && !final[path[0]][path[1]][path[2]]) final[path[0]][path[1]][path[2]] = {};
+
+                          if (path.length == 1) {
+                              continue;
+                          } else if (path.length == 2) {
+                              final[path[0]][path[1]] = obj[key];
+                          } else if (path.length == 3) {
+                              final[path[0]][path[1]][path[2]] = obj[key];
+                          } else if (path.length == 4) {
+                              final[path[0]][path[1]][path[2]][path[3]] = obj[key];
+                          }
+                      } catch (e) {
+                          console.error("error while language override of " + key, e);
+                      }
+                  }
               }
-          }
-        }
-        this.initializedLanguage=final;
-        this.initializing=null;
-        observer.next(final);
-        observer.complete();
+              this.initializedLanguage = final;
+              this.initializing = null;
+              observer.next(final);
+              observer.complete();
+          });
       };
 
 
