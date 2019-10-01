@@ -116,16 +116,9 @@ public class MCAlfrescoManager implements ServletContextListener {
 			new SQLUpdater().execute();
 			
 			new Release_4_2_PersonStatusUpdater(null).execute();
-			
+
 			//init the system folders so that are created with a admin
 			UserEnvironmentTool uet = new UserEnvironmentTool(appInfo.getUsername());
-			uet.getEdu_SharingNotifyFolder();
-			
-			//init the safe version
-			NodeServiceInterceptor.setEduSharingScope(CCConstants.CCM_VALUE_SCOPE_SAFE);
-			uet.getEdu_SharingNotifyFolder();
-			NodeServiceInterceptor.setEduSharingScope(null);
-			
 			uet.getEdu_SharingTemplateFolder();
 			
 			//init ToolPermisssions
