@@ -408,5 +408,6 @@
 	<classpathentry exported="true" kind="var" path="ALFRESCO_52_TOMCAT_LIB/servlet-api.jar"/>
 	<classpathentry kind="var" path="ALFRESCO_52_TOMCAT_LIB"/>
 	<classpathentry kind="var" path="ALFRESCO_52_WEBAPPS_LIB"/>
+	<classpathentry kind="lib" path="lib/cardme-0.4.0.jar"/>
 	<classpathentry kind="output" path="war/WEB-INF/classes"/>
 </classpath>
