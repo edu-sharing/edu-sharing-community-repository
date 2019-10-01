@@ -256,7 +256,7 @@ public class SearchServiceImpl implements SearchService {
 										i++;
 									}
 									qbMemberShips.append(")");
-								}else if(!isSystemUser && !isAdmin){
+								}else {
 									return new SearchResult<EduGroup>();
 								}
 								
