@@ -36,6 +36,17 @@
             </mat-form-field>
         </div>
         <div class="group">
+            <mat-form-field>
+                <mat-label>{{'ADMIN.FRONTPAGE.CUSTOM_QUERY_LABEL' | translate}}</mat-label>
+                <mat-hint><div>{{'ADMIN.FRONTPAGE.CUSTOM_QUERY_HINT' | translate}}</div><button mat-button (click)="queryHelp()">{{'ADMIN.FRONTPAGE.CUSTOM_QUERY_HINT_HELP' | translate}}</button></mat-hint>
+                <textarea matInput
+                          cdkTextareaAutosize
+                          cdkAutosizeMinRows="4"
+                          cdkAutosizeMaxRows="10"
+                          id="query" [(ngModel)]="config.frontpage.query" [ngModelOptions]="{standalone: true}"></textarea>
+            </mat-form-field>
+        </div>
+        <div class="group">
             <div class="save">
                 <button mat-raised-button color="primary" (click)="save()" [disabled]="!form.valid">{{'SAVE' | translate}}</button>
             </div>

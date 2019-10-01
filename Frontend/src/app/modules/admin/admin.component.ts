@@ -873,7 +873,8 @@ export class AdminComponent {
             new SuggestItem("org.edu_sharing.repository.server.jobs.quartz.RemoveOrphanCollectionReferencesJob",null),
             new SuggestItem("org.edu_sharing.repository.server.jobs.quartz.RemoveNodeJob",null),
             new SuggestItem("org.edu_sharing.repository.server.jobs.quartz.ConvertMultivalueToSinglevalueJob",null),
-            new SuggestItem("org.edu_sharing.repository.server.jobs.quartz.BulkEditNodesJob",null)
+            new SuggestItem("org.edu_sharing.repository.server.jobs.quartz.BulkEditNodesJob",null),
+            new SuggestItem("org.edu_sharing.repository.server.jobs.quartz.UpdateFrontpageCacheJob",null)
         ];
         this.jobClasses=jobs.map((job)=>{
           let id=job.id.split(".");

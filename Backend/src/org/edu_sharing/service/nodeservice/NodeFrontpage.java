@@ -14,6 +14,7 @@ import org.alfresco.service.namespace.QName;
 import org.apache.http.Header;
 import org.apache.http.HttpHost;
 import org.apache.log4j.Logger;
+import org.apache.lucene.search.Query;
 import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.server.jobs.helper.NodeRunner;
@@ -45,6 +46,7 @@ import org.elasticsearch.client.RestClientBuilder;
 import org.elasticsearch.client.RestHighLevelClient;
 import org.elasticsearch.common.xcontent.XContentBuilder;
 import org.elasticsearch.index.query.BoolQueryBuilder;
+import org.elasticsearch.index.query.QueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.search.SearchHit;
 import org.elasticsearch.search.builder.SearchSourceBuilder;
@@ -195,7 +197,7 @@ public class NodeFrontpage {
             builder.field("type",NodeServiceHelper.getType(ref));
             builder.startObject("properties");
             for(Map.Entry<QName, Serializable> prop : NodeServiceHelper.getPropertiesNative(ref).entrySet()){
-                builder.field(prop.getKey().toString(),prop.getValue());
+                builder.field(CCConstants.getValidLocalName(prop.getKey().toString()),prop.getValue());
             }
             builder.endObject();
             builder.startArray("aspects");
@@ -293,6 +295,9 @@ public class NodeFrontpage {
             audience.should(QueryBuilders.matchQuery("authorities", a));
         }
         query.must(audience);
+        if(config.query!=null) {
+            query.must(QueryBuilders.wrapperQuery(config.query));
+        }
         SearchSourceBuilder searchSourceBuilder = new SearchSourceBuilder();
         searchSourceBuilder.query(query);
         if(config.mode.equals(RepositoryConfig.Frontpage.Mode.rating)){

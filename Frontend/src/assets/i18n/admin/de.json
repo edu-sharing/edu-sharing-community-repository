@@ -248,7 +248,8 @@
         "RemoveOrphanCollectionReferencesJob":"Alle Sammlungsreferenzen mit fehlenden Originalobjekt löschen",
         "RemoveNodeJob":"Einen Node/Ordner vollständig löschen (Parameter \"id\" angeben)",
         "ConvertMultivalueToSinglevalueJob":"Eine Property von Multivalue in Singlevalue konvertieren",
-        "BulkEditNodesJob":"Bulk-Bearbeitung von einer Property für mehrere Nodes"
+        "BulkEditNodesJob":"Bulk-Bearbeitung von einer Property für mehrere Nodes",
+        "UpdateFrontpageCacheJob": "Baut den Cache für die Startseite neu auf"
       }
     },
     "FOLDERTEMPLATES": {
@@ -376,8 +377,11 @@
       "PREVIEW_HINT": "Hinweis: Die hier dargestellte Vorschau hat folgende Einschränkungen:<ul><li>Soeben vorgenommene Anpassungen müssen zunächst gespeichert werden</li><li>Es werden alle Materialien, unabhängig von der Sichtbarkeit eines Nutzers, dargestellt</li><li>Die Elemente der Startseite werden abhängig von einem Cache aktualisiert (i.d.R Nachts)</li></ul>",
       "PREVIEW_ERROR": {
         "ELASTICSEARCH" : "Der Verbindungsaufbau zu Elasticsearch ist fehlgeschlagen",
-        "UNKNOWN": "Beim abrufen der Inhalte für die Startseite ist ein unbekannter Fehler aufgetreten"
-      }
+        "UNKNOWN": "Beim Abruf der Inhalte für die Startseite ist ein unbekannter Fehler aufgetreten"
+      },
+      "CUSTOM_QUERY_LABEL": "Zusätzliches Query",
+      "CUSTOM_QUERY_HINT": "Ein Query, welches zusätzlich als \"AND\" Bedingung verknüpft wird. Kann beliebig weiter verschachtelt werden und muss der Elasticsearch-Abfragesprache (DSL) konform sein",
+      "CUSTOM_QUERY_HINT_HELP": "Dokumentation öffnen"
     }
   }
 }

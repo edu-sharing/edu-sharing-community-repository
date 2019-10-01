@@ -22,6 +22,7 @@ public class RepositoryConfig implements Serializable {
         public int displayCount=12;
         public Mode mode=Mode.rating;
         public Timespan timespan=Timespan.all;
+        public String query;
 
         public Frontpage(){}
     }
