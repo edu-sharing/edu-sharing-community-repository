@@ -119,7 +119,7 @@ public class TrackingServiceImpl extends TrackingServiceDefault{
     @Override
     public boolean trackActivityOnNode(NodeRef nodeRef,NodeTrackingDetails details, EventType type) {
         super.trackActivityOnNode(nodeRef,details,type);
-        return AuthenticationUtil.runAsSystem(()-> {
+        
             String version;
             String nodeVersion = details==null ? null : details.getNodeVersion();
             if(nodeVersion==null || nodeVersion.isEmpty() || nodeVersion.equals("-1")){
@@ -154,7 +154,7 @@ public class TrackingServiceImpl extends TrackingServiceDefault{
 
                 return true;
             });
-        });
+        
     }
 
     /**
