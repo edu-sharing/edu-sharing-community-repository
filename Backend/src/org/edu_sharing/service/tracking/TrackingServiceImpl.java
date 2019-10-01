@@ -90,7 +90,7 @@ public class TrackingServiceImpl extends TrackingServiceDefault{
         if(authorityName==null || authorityName.equals(ApplicationInfoList.getHomeRepository().getGuest_username()) || authorityName.equals(AuthenticationUtil.getSystemUserName())){
             return false;
         }
-        return AuthenticationUtil.runAsSystem(()-> execDatabaseQuery(TRACKING_INSERT_USER, statement -> {
+        return AuthenticationUtil.runAs(()-> execDatabaseQuery(TRACKING_INSERT_USER, statement -> {
             statement.setString(1, super.getTrackedUsername(authorityName));
             try {
                 statement.setArray(2,statement.getConnection().createArrayOf("VARCHAR",SearchServiceFactory.getLocalService().getAllOrganizations(true).getData().stream().map(EduGroup::getGroupname).toArray()));
@@ -112,7 +112,7 @@ public class TrackingServiceImpl extends TrackingServiceDefault{
             statement.setObject(6, obj);
 
             return true;
-        }));
+        }),authorityName);
 
     }
 
