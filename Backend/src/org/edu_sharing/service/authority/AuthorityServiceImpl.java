@@ -82,7 +82,11 @@ public class AuthorityServiceImpl implements AuthorityService {
 	}
 	@Override
 	public void addAuthorityAspect(String authority,String aspect){
-		nodeService.addAspect(authorityService.getAuthorityNodeRef(authority),QName.createQName(aspect),new HashMap<>());
+		
+		NodeRef nodeRef = authorityService.getAuthorityNodeRef(authority);
+		if(!nodeService.hasAspect(nodeRef, QName.createQName(aspect))) {
+			nodeService.addAspect(nodeRef,QName.createQName(aspect),new HashMap<>());
+		}
 	}
 	@Override
 	public void deleteAuthority(String authorityName) {

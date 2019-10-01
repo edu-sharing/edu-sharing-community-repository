@@ -1,6 +1,8 @@
 package org.edu_sharing.restservices;
 
 import com.google.gson.Gson;
+
+import org.alfresco.service.cmr.repository.StoreRef;
 import org.alfresco.service.cmr.security.PermissionService;
 import org.edu_sharing.alfresco.service.AuthorityService;
 import org.edu_sharing.repository.client.tools.CCConstants;
@@ -76,7 +78,7 @@ public class MediacenterDao extends AbstractDao{
 			try {
 				mProfile.setContentStatus(Mediacenter.MediacenterProfileExtension.ContentStatus.valueOf(authorityService.getProperty(mediacenter.getAuthorityName(), CCConstants.CCM_PROP_MEDIACENTER_CONTENT_STATUS)));
 			}catch(NullPointerException t){}
-			mProfile.setLocation(authorityService.getProperty(mediacenter.getAuthorityName(), CCConstants.CCM_PROP_MEDIACENTER_LOCATION));
+			mProfile.setLocation(authorityService.getProperty(mediacenter.getAuthorityName(), CCConstants.CCM_PROP_ADDRESS_CITY));
 			mProfile.setDistrictAbbreviation(authorityService.getProperty(mediacenter.getAuthorityName(), CCConstants.CCM_PROP_MEDIACENTER_DISTRICT_ABBREVIATION));
 			mProfile.setMainUrl(authorityService.getProperty(mediacenter.getAuthorityName(), CCConstants.CCM_PROP_MEDIACENTER_MAIN_URL));
 			try {
@@ -124,13 +126,15 @@ public class MediacenterDao extends AbstractDao{
 		// first, change the basic profile (admin access is checked there)
 		GroupDao.getGroup(repoDao,authorityName).changeProfile(profile);
 		// then, change the mediacenter releated data
+		
 		authorityService.addAuthorityAspect(authorityName,CCConstants.CCM_ASPECT_MEDIACENTER);
+		authorityService.addAuthorityAspect(authorityName, CCConstants.CCM_ASPECT_ADDRESS);
 		if(profile.getMediacenter()!=null) {
 			authorityService.setAuthorityProperty(authorityName, CCConstants.CCM_PROP_MEDIACENTER_ID, profile.getMediacenter().getId());
 			authorityService.setAuthorityProperty(authorityName, CCConstants.CCM_PROP_MEDIACENTER_CONTENT_STATUS,
 					profile.getMediacenter().getContentStatus()==null ? Mediacenter.MediacenterProfileExtension.ContentStatus.Deactivated.toString() : profile.getMediacenter().getContentStatus().toString()
 			);
-			authorityService.setAuthorityProperty(authorityName, CCConstants.CCM_PROP_MEDIACENTER_LOCATION, profile.getMediacenter().getLocation());
+			authorityService.setAuthorityProperty(authorityName, CCConstants.CCM_PROP_ADDRESS_CITY, profile.getMediacenter().getLocation());
 			authorityService.setAuthorityProperty(authorityName, CCConstants.CCM_PROP_MEDIACENTER_DISTRICT_ABBREVIATION, profile.getMediacenter().getDistrictAbbreviation());
 			authorityService.setAuthorityProperty(authorityName, CCConstants.CCM_PROP_MEDIACENTER_MAIN_URL, profile.getMediacenter().getMainUrl());
 			authorityService.setAuthorityProperty(authorityName, CCConstants.CCM_PROP_MEDIACENTER_CATALOGS, new Gson().toJson(profile.getMediacenter().getCatalogs()));

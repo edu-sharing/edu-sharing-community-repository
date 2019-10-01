@@ -1801,9 +1801,6 @@
 				<property name="ccm:mediacenterCatalogStatus">
 					<type>d:text</type>
 				</property>
-				<property name="ccm:mediacenterLocation">
-					<type>d:text</type>
-				</property>
 				<property name="ccm:mediacenterMainUrl">
 					<type>d:text</type>
 				</property>

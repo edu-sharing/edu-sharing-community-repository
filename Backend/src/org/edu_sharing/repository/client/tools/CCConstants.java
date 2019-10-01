@@ -431,7 +431,6 @@ public class CCConstants {
 
 	public final static String CCM_PROP_MEDIACENTER_ID = "{http://www.campuscontent.de/model/1.0}mediacenterId";
 	public final static String CCM_PROP_MEDIACENTER_CONTENT_STATUS = "{http://www.campuscontent.de/model/1.0}mediacenterContentStatus";
-	public final static String CCM_PROP_MEDIACENTER_LOCATION = "{http://www.campuscontent.de/model/1.0}mediacenterLocation";
 	public final static String CCM_PROP_MEDIACENTER_DISTRICT_ABBREVIATION = "{http://www.campuscontent.de/model/1.0}mediacenterDistrictAbbreviation";
 	public final static String CCM_PROP_MEDIACENTER_MAIN_URL = "{http://www.campuscontent.de/model/1.0}mediacenterMainUrl";
 	public final static String CCM_PROP_MEDIACENTER_CATALOGS = "{http://www.campuscontent.de/model/1.0}mediacenterCatalogs";
