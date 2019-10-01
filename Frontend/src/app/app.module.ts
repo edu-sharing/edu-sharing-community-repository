@@ -68,7 +68,27 @@ import {BreadcrumbsComponent} from "./core-ui-module/components/breadcrumbs/brea
         {provide: MAT_TOOLTIP_DEFAULT_OPTIONS, useValue: {showDelay: 500}}
     ],
     exports: [
-        BreadcrumbsComponent
+        DECLARATIONS,
+        DECLARATIONS_RECYCLE,
+        DECLARATIONS_WORKSPACE,
+        DECLARATIONS_SEARCH,
+        DECLARATIONS_COLLECTIONS,
+        DECLARATIONS_LOGIN,
+        DECLARATIONS_REGISTER,
+        DECLARATIONS_LOGINAPP,
+        DECLARATIONS_FILE_UPLOAD,
+        DECLARATIONS_STARTUP,
+        DECLARATIONS_PERMISSIONS,
+        DECLARATIONS_OER,
+        DECLARATIONS_STREAM,
+        DECLARATIONS_MANAGEMENT_DIALOGS,
+        DECLARATIONS_ADMIN,
+        DECLARATIONS_UPLOAD,
+        DECLARATIONS_PROFILES,
+        DECLARATIONS_MESSAGES,
+        DECLARATIONS_SHARING,
+        DECLARATIONS_SHARE_APP,
+        DECLARATIONS_SERVICES
     ],
     bootstrap: [RouterComponent]
 })
