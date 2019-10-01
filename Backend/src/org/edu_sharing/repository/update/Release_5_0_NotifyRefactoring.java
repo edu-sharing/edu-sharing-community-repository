@@ -17,6 +17,7 @@ import org.alfresco.service.cmr.search.SearchService;
 import org.alfresco.service.namespace.QName;
 import org.alfresco.service.namespace.RegexQNamePattern;
 import org.apache.log4j.Logger;
+import org.edu_sharing.alfresco.workspace_administration.NodeServiceInterceptor;
 import org.edu_sharing.repository.client.rpc.ACE;
 import org.edu_sharing.repository.client.rpc.ACL;
 import org.edu_sharing.repository.client.rpc.Notify;
@@ -83,15 +84,27 @@ public class Release_5_0_NotifyRefactoring extends UpdateAbstract {
 		runner.run();
 		logInfo("Converted a total of "+processed[0]+" nodes");
 		try {
-			String notify = new UserEnvironmentTool().getEdu_SharingNotifyFolder();
-			NodeServiceFactory.getLocalService().removeNode(notify, null, false);
-			logInfo("removed the notify folder");
-			String notifySafe = new UserEnvironmentTool().getEdu_SharingNotifyFolderToSafe();
-			NodeServiceFactory.getLocalService().removeNode(notifySafe, null, false);
-			logInfo("removed the notify safe folder");
+            String notify = new UserEnvironmentTool().getEdu_SharingNotifyFolder();
+            NodeRef ref = new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, notify);
+            nodeService.addAspect(ref, ContentModel.ASPECT_TEMPORARY, null);
+            nodeService.deleteNode(ref);
+            logInfo("removed the notify folder");
+        }catch(Throwable t) {
+            logger.error(t.getMessage(),t);
+        }
+		try{
+            NodeServiceInterceptor.setEduSharingScope(CCConstants.CCM_VALUE_SCOPE_SAFE);
+			String notifySafe = new UserEnvironmentTool().getEdu_SharingNotifyFolder();
+            NodeRef ref = new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, notifySafe);
+			nodeService.addAspect(ref, ContentModel.ASPECT_TEMPORARY, null);
+			nodeService.deleteNode(ref);
+            logInfo("removed the notify safe folder");
 		} catch (Throwable t) {
 			logger.error(t.getMessage(),t);
 		}
+		finally {
+            NodeServiceInterceptor.setEduSharingScope(null);;
+        }
 
 
 	}
@@ -109,7 +122,6 @@ public class Release_5_0_NotifyRefactoring extends UpdateAbstract {
 		}
 
 		List<Entry<NodeRef, Map<QName, Serializable>>> toSort = new ArrayList<>(notifyProps.entrySet());
-
 		Collections.sort(toSort, (o1, o2) -> {
 			Date o1Created = (Date) o1.getValue().get(ContentModel.PROP_CREATED);
 			Date o2Created = (Date) o2.getValue().get(ContentModel.PROP_CREATED);
@@ -121,7 +133,7 @@ public class Release_5_0_NotifyRefactoring extends UpdateAbstract {
 		 */
 		int i=0;
 		for (Map.Entry<NodeRef, Map<QName, Serializable>> entry : toSort) {
-			logger.info("transforming notify from: " + entry.getValue().get(ContentModel.PROP_CREATED));
+			logger.info("transforming notify from: " +entry.getKey()+" "+entry.getValue().get(ContentModel.PROP_CREATED));
 
 			Gson gson = new Gson();
 			Notify n = new Notify();
@@ -134,6 +146,7 @@ public class Release_5_0_NotifyRefactoring extends UpdateAbstract {
 			try {
 				acl = apiClient.getPermissions(entry.getKey().getId());
 			} catch (Exception e) {
+				logger.warn("getPermissions() failed: "+e.getMessage());
 				throw new RuntimeException(e);
 			}
 			List<ACE> directlySetAces = new ArrayList<ACE>();
@@ -160,10 +173,6 @@ public class Release_5_0_NotifyRefactoring extends UpdateAbstract {
 			if (!nodeService.hasAspect(nodeRef, QName.createQName(CCConstants.CCM_ASPECT_PERMISSION_HISTORY))) {
 				nodeService.addAspect(nodeRef, QName.createQName(CCConstants.CCM_ASPECT_PERMISSION_HISTORY),
 						null);
-			}
-			else{
-				logger.warn("Node "+nodeRef+" seems to be already processed (has Aspect "+CCConstants.CCM_ASPECT_PERMISSION_HISTORY+"), will not re-process it");
-				return;
 			}
 			// set of all authority names that are not inherited, but explicitly set
 			nodeService.setProperty(nodeRef, QName.createQName(CCConstants.CCM_PROP_PH_INVITED), PermissionServiceHelper.getExplicitAuthoritiesFromACL(acl));
