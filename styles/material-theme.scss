@@ -15,7 +15,8 @@ $custom-typography: mat-typography-config(
         $body-2: mat-typography-level(100%, normal, 600),
         $button: mat-typography-level(100%, normal, 400),
         $headline: mat-typography-level(150%, normal, 400),
-        $title: mat-typography-level(150%, normal, 400)
+        $title: mat-typography-level(150%, normal, 400),
+        $input: mat-typography-level(inherit, 1.25, 400)
 );
 // Override typography for all Angular Material, including mat-base-typography and all components.
 @include angular-material-typography($custom-typography);
