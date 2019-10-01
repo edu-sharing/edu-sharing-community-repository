@@ -173,6 +173,7 @@ import org.edu_sharing.service.comment.CommentServiceFactory;
 import org.edu_sharing.service.connector.ConnectorService;
 import org.edu_sharing.service.license.LicenseService;
 import org.edu_sharing.service.model.NodeRefImpl;
+import org.edu_sharing.service.nodeservice.NodeServiceFactory;
 import org.edu_sharing.service.nodeservice.model.GetPreviewResult;
 import org.edu_sharing.service.nodeservice.NodeServiceHelper;
 import org.edu_sharing.service.share.ShareService;
@@ -3209,20 +3210,14 @@ public class MCAlfrescoAPIClient extends MCAlfrescoBaseClient {
 		return getGroupFolderId(this.authenticationInfo.get(CCConstants.AUTH_USERNAME));
 	}
 
-	public String getGroupFolderId(String userName) throws Throwable {
-
-		HashMap<String, HashMap<String, Object>> children = getChildren(getHomeFolderID(userName), CCConstants.CCM_TYPE_MAP);
-
-		String groupFolderNodeId = null;
-		for (String key : children.keySet()) {
-			HashMap<String, Object> props = children.get(key);
-			if (CCConstants.CCM_VALUE_MAP_TYPE_EDUGROUP.equals(props.get(CCConstants.CCM_PROP_MAP_TYPE))) {
-				groupFolderNodeId = key;
-				break;
-			}
+	public String getGroupFolderId(String userName)  {
+		try {
+			NodeRef child = NodeServiceFactory.getLocalService().getChild(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, getHomeFolderID(userName), CCConstants.CCM_TYPE_MAP, CCConstants.CCM_PROP_MAP_TYPE, CCConstants.CCM_VALUE_MAP_TYPE_EDUGROUP);
+			return child.getId();
+		}catch(Exception e){
+			logger.warn(e.getMessage(),e);
+			return null;
 		}
-
-		return groupFolderNodeId;
 	}
 
 	public HashMap getGroupFolders() throws Throwable {
