@@ -240,7 +240,6 @@ public class SearchServiceImpl implements SearchService {
 			
 			
 			Set<String> memberships = serviceRegistry.getAuthorityService().getAuthorities();
-			boolean isSystemUser = AuthenticationUtil.isRunAsUserTheSystemUser();
 			boolean isAdmin = ((memberships != null && memberships.contains(CCConstants.AUTHORITY_GROUP_ALFRESCO_ADMINISTRATORS)) 
 					|| "admin".equals(AuthenticationUtil.getFullAuthentication().getName())) ? true : false;
 			
@@ -265,7 +264,7 @@ public class SearchServiceImpl implements SearchService {
 						//only search organisations the curren user is in,except: its adminuser and onlyMemberShips == true
 						StringBuilder qbMemberShips=null;
 						if(onlyMemberShips == true || 
-								(onlyMemberShips == false && (!isSystemUser && !isAdmin))) {
+								(onlyMemberShips == false && !isAdmin)) {
 							
 						
 							
@@ -329,7 +328,6 @@ public class SearchServiceImpl implements SearchService {
 								boolean add = false;
 								for (String group : memberships) {
 									if (group.equals(CCConstants.AUTHORITY_GROUP_ALFRESCO_ADMINISTRATORS)
-											|| isSystemUser
 											|| group.equals(eduGroup.getGroupname())) {
 										add = true;
 										break;
