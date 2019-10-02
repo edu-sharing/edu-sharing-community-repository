@@ -3212,7 +3212,12 @@ public class MCAlfrescoAPIClient extends MCAlfrescoBaseClient {
 
 	public String getGroupFolderId(String userName)  {
 		try {
-			NodeRef child = NodeServiceFactory.getLocalService().getChild(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, getHomeFolderID(userName), CCConstants.CCM_TYPE_MAP, CCConstants.CCM_PROP_MAP_TYPE, CCConstants.CCM_VALUE_MAP_TYPE_EDUGROUP);
+			String homeFolder=getHomeFolderID(userName);
+			if(homeFolder==null){
+				logger.info("User "+userName+" has no home folder, will return no group folder for person");
+				return null;
+			}
+			NodeRef child = NodeServiceFactory.getLocalService().getChild(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, homeFolder, CCConstants.CCM_TYPE_MAP, CCConstants.CCM_PROP_MAP_TYPE, CCConstants.CCM_VALUE_MAP_TYPE_EDUGROUP);
 			return child.getId();
 		}catch(Exception e){
 			logger.warn(e.getMessage(),e);
