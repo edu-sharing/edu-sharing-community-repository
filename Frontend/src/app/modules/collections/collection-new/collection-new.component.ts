@@ -31,6 +31,7 @@ import {TemporaryStorageService} from "../../../common/services/temporary-storag
 import {UIHelper} from "../../../common/ui/ui-helper";
 import {RegisterResetPasswordComponent} from "../../register/register-reset-password/register-reset-password.component";
 import {MainNavComponent} from '../../../common/ui/main-nav/main-nav.component';
+import {GlobalContainerComponent} from "../../../common/ui/global-container/global-container.component";
 
 // component class
 @Component({
@@ -153,7 +154,7 @@ export class CollectionNewComponent {
                       }
                       this.updateAvailableSteps();
                       this.isLoading=false;
-                      this.mainNavRef.finishPreloading();
+                      GlobalContainerComponent.finishPreloading();
                     });
                   });
                 });
@@ -541,7 +542,7 @@ export class CollectionNewComponent {
       }
     this.updateAvailableSteps();
     this.isLoading=false;
-    this.mainNavRef.finishPreloading();
+    GlobalContainerComponent.finishPreloading();
   }
 
   private save4(collection:Collection) {

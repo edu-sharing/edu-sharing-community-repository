@@ -45,6 +45,7 @@ import {ColorHelper} from '../../common/ui/color-helper';
 import {ActionbarHelperService} from "../../common/services/actionbar-helper";
 import {RestLocatorService} from '../../common/rest/services/rest-locator.service';
 import {HttpClient} from "@angular/common/http";
+import {GlobalContainerComponent} from "../../common/ui/global-container/global-container.component";
 
 // component class
 @Component({
@@ -536,7 +537,7 @@ export class CollectionsMainComponent {
         if (!this.isReady) return;
         this.onSelection([]);
         this.isLoading=true;
-        this.mainNavRef.finishPreloading();
+        GlobalContainerComponent.finishPreloading();
 
     // set correct scope
     let request:any=Helper.deepCopy(CollectionsMainComponent.DEFAULT_REQUEST);
@@ -718,7 +719,7 @@ export class CollectionsMainComponent {
           this.toast.error(error);
         }
         this.isLoading=false;
-        this.mainNavRef.finishPreloading();
+        GlobalContainerComponent.finishPreloading();
       });
 
     }

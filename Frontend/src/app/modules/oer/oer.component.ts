@@ -21,6 +21,7 @@ import {RestHelper} from "../../common/rest/rest-helper";
 import {ListItem} from "../../common/ui/list-item";
 import {MdsHelper} from "../../common/rest/mds-helper";
 import {MainNavComponent} from '../../common/ui/main-nav/main-nav.component';
+import {GlobalContainerComponent} from "../../common/ui/global-container/global-container.component";
 
 
 
@@ -62,7 +63,7 @@ export class OerComponent {
     private translate : TranslateService) {
       Translation.initialize(translate,this.config,this.session,this.route).subscribe(()=>{
         UIHelper.setTitle('SEARCH.TITLE',title,translate,config);
-        this.mainNavRef.finishPreloading();
+        GlobalContainerComponent.finishPreloading();
           for(let i=0;i<this.TYPE_COUNT;i++) {
               this.columns.push([]);
               this.updateOptions(i)

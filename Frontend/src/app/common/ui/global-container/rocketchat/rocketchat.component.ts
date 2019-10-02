@@ -5,7 +5,7 @@ import {EventListener, FrameEventsService} from "../../../services/frame-events.
 import {RestConnectorService} from "../../../rest/services/rest-connector.service";
 import {trigger} from "@angular/animations";
 import {UIAnimation} from "../../ui-animation";
-import {MainNavComponent} from "../../main-nav/main-nav.component";
+import {GlobalContainerComponent} from "../global-container.component";
 
 @Component({
   selector: 'rocketchat',
@@ -72,7 +72,7 @@ export class RocketchatComponent implements EventListener{
         this.src=null;
         this.opened=false;
         this.fullscreen=false;
-        if(MainNavComponent.getPreloading()) {
+        if(GlobalContainerComponent.getPreloading()) {
             setTimeout(() => this.initalize(), 100);
             return;
         }

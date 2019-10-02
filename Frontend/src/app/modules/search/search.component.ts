@@ -47,6 +47,7 @@ import {MainNavComponent} from '../../common/ui/main-nav/main-nav.component';
 import {UIService} from '../../common/services/ui.service';
 import {ActionbarHelperService} from "../../common/services/actionbar-helper";
 import {HttpClient} from '@angular/common/http';
+import {GlobalContainerComponent} from "../../common/ui/global-container/global-container.component";
 
 
 @Component({
@@ -1065,7 +1066,7 @@ export class SearchComponent {
       (param: any) => {
         this.searchService.init();
         this.mainNavRef.refreshBanner();
-        this.mainNavRef.finishPreloading();
+        GlobalContainerComponent.finishPreloading();
         this.hasCheckbox=true;
         this.searchService.reurl=null;
         if(param['addToCollection']){

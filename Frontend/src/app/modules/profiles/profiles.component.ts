@@ -19,6 +19,7 @@ import {RestConstants} from "../../common/rest/rest-constants";
 import {RestHelper} from "../../common/rest/rest-helper";
 import {MainNavComponent} from '../../common/ui/main-nav/main-nav.component';
 import {Helper} from "../../common/helper";
+import {GlobalContainerComponent} from "../../common/ui/global-container/global-container.component";
 
 @Component({
   selector: 'app-profiles',
@@ -71,7 +72,7 @@ export class ProfilesComponent {
             let name = new AuthorityNamePipe(this.translate).transform(this.user, null);
             UIHelper.setTitle('PROFILES.TITLE', this.title, this.translate, this.config, {name: name});
             this.globalProgress = false;
-            this.mainNavRef.finishPreloading();
+            GlobalContainerComponent.finishPreloading();
             this.iamService.getUser().subscribe((me)=>{
                 this.isMe = profile.person.authorityName == me.person.authorityName;
                 if(this.isMe && login.isGuest){
@@ -80,7 +81,7 @@ export class ProfilesComponent {
             });
         }, (error: any) => {
             this.globalProgress = false;
-            this.mainNavRef.finishPreloading();
+            GlobalContainerComponent.finishPreloading();
             this.toast.error(null, 'PROFILES.LOAD_ERROR');
         });
     });

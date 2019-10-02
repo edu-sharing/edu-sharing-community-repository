@@ -40,6 +40,7 @@ import * as moment from 'moment';
 import {ActionbarHelperService} from '../../common/services/actionbar-helper';
 import {RestIamService} from '../../common/rest/services/rest-iam.service';
 import {MainNavComponent} from '../../common/ui/main-nav/main-nav.component';
+import {GlobalContainerComponent} from "../../common/ui/global-container/global-container.component";
 
 
 @Component({
@@ -122,7 +123,7 @@ export class StreamComponent {
         this.connector.isLoggedIn().subscribe(data => {
             this.dateToDisplay = moment().locale(translate.currentLang).format('dddd, DD. MMMM YYYY');
             this.createAllowed=data.statusCode==RestConstants.STATUS_CODE_OK;
-            this.mainNavRef.finishPreloading();
+            GlobalContainerComponent.finishPreloading();
         });
           this.connectors.list().subscribe(list=>{
               this.connectorList=list;

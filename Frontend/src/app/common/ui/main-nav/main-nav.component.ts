@@ -32,6 +32,7 @@ import {OptionItem} from "../actionbar/option-item";
 import {HttpClient} from '@angular/common/http';
 import {DialogButton} from '../modal-dialog/modal-dialog.component';
 import {UIService} from '../../services/ui.service';
+import {GlobalContainerComponent} from "../global-container/global-container.component";
 
 @Component({
   selector: 'main-nav',
@@ -872,15 +873,7 @@ export class MainNavComponent implements AfterViewInit{
             }
         }
     }
-    public getPreloading(){
-        return MainNavComponent.preloading;
-    }
-    public static getPreloading(){
-        return MainNavComponent.preloading;
-    }
-    public finishPreloading(){
-        MainNavComponent.preloading=false;
-    }
+
 
     showLicenses() {
         this.licenseDialog=true;
@@ -897,5 +890,19 @@ export class MainNavComponent implements AfterViewInit{
                 console.error(error);
             });
         //});
+    }
+    showChat() {
+        return GlobalContainerComponent.instance.rocketchat._data;
+    }
+    getChatCount() {
+        return GlobalContainerComponent.instance.rocketchat.unread;
+    }
+
+    openChat() {
+        GlobalContainerComponent.instance.rocketchat.opened=true;
+        GlobalContainerComponent.instance.rocketchat.unread=0;
+    }
+    getPreloading() {
+        return GlobalContainerComponent.getPreloading();
     }
 }

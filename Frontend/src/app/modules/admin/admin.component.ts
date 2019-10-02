@@ -32,6 +32,7 @@ import {RestHelper} from '../../common/rest/rest-helper';
 import {Observable, Observer} from 'rxjs/index';
 import {RestNetworkService} from '../../common/rest/services/rest-network.service';
 import {MainNavComponent} from '../../common/ui/main-nav/main-nav.component';
+import {GlobalContainerComponent} from "../../common/ui/global-container/global-container.component";
 
 
 @Component({
@@ -196,7 +197,7 @@ export class AdminComponent {
           this.prepareJobClasses();
           this.storage.refresh();
       UIHelper.setTitle('ADMIN.TITLE', this.title, this.translate, this.config);
-      this.mainNavRef.finishPreloading();
+      GlobalContainerComponent.finishPreloading();
       this.warningButtons=[
         new DialogButton('CANCEL',DialogButton.TYPE_CANCEL,()=>{window.history.back()}),
         new DialogButton('ADMIN.UNDERSTAND',DialogButton.TYPE_PRIMARY,()=>{this.showWarning=false})

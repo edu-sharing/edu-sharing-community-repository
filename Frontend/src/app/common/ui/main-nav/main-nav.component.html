@@ -110,6 +110,10 @@
             <div>+{{nodeStoreAnimation}}</div>
           </div>
         </div>
+        <div *ngIf="user && showChat()" class="clickable rocketchat" tabindex="0" (click)="openChat()" (keyup.enter)="setNodeStore(true)">
+          <i icon iconId="message">message</i>
+          <div class="rocketchat-count" [class.rocketchat-count-none]="getChatCount()==0">{{getChatCount()}}</div>
+        </div>
         <div class="user clickable" #userRef *ngIf="user && _showUser" (click)="showUserMenu()" (keyup.enter)="showUserMenu()" tabindex="0" title="{{'USERMENU' | translate}}">
             <user-avatar [user]="user.person" [size]="'xsmall'"></user-avatar>
             <div *ngIf="!isGuest">{{userName}}</div>

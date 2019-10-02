@@ -38,6 +38,7 @@ import {CordovaService} from "../../common/services/cordova.service";
 import {EventListener} from "../../common/services/frame-events.service";
 import {HttpClient} from '@angular/common/http';
 import {MainNavComponent} from '../../common/ui/main-nav/main-nav.component';
+import {GlobalContainerComponent} from "../../common/ui/global-container/global-container.component";
 
 @Component({
     selector: 'workspace-main',
@@ -930,7 +931,7 @@ export class WorkspaceMainComponent implements EventListener{
             this.path=[];
             id=this.getRootFolderId();
             if(this.root=='RECYCLE') {
-                //this.mainNavRef.finishPreloading();
+                //GlobalContainerComponent.finishPreloading();
                 //return;
             }
         }
@@ -1200,7 +1201,7 @@ export class WorkspaceMainComponent implements EventListener{
     }
 
     private updateNodeByParams(params: any, node: Node|any) {
-        this.mainNavRef.finishPreloading();
+        GlobalContainerComponent.finishPreloading();
         if(params['query']){
             this.doSearchFromRoute(params,node);
         }

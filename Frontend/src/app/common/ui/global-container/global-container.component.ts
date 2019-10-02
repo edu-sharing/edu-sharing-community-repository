@@ -1,4 +1,4 @@
-import {Component} from "@angular/core";
+import {Component, ViewChild} from "@angular/core";
 
 @Component({
   selector: 'global-container',
@@ -9,5 +9,20 @@ import {Component} from "@angular/core";
  * Global components (always visible regardless of route
  */
 export class GlobalContainerComponent{
+  private static preloading=true;
+  static instance:GlobalContainerComponent;
+  @ViewChild('rocketchat') rocketchat :any; // using any to bypass Circular Dependency issues
 
+  constructor(){
+    GlobalContainerComponent.instance=this;
+  }
+  public getPreloading(){
+    return GlobalContainerComponent.preloading;
+  }
+  public static getPreloading(){
+    return GlobalContainerComponent.preloading;
+  }
+  public static finishPreloading(){
+    GlobalContainerComponent.preloading=false;
+  }
 }
