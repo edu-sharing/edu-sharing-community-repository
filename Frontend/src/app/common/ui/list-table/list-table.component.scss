@@ -313,8 +313,7 @@ $badgeWidth:250px;
   }
 
 }
-.tableList.collection-item:not(.nodeCollection) .row.selected,
-.cardList.collection-item:not(.nodeCollection) .row.selected{
+.tableList.collection-item:not(.nodeCollection) .row.selected{
   background: $workspaceSelectedBackgroundEffect;
   background-color:$workspaceSelectedBackground;
   .more{
