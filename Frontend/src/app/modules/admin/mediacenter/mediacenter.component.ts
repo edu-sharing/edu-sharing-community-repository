@@ -34,6 +34,8 @@ export class AdminMediacenterComponent {
   groupActions:OptionItem[];
   currentTab=0;
   private isAdmin: boolean;
+  public mediacentersFile: File;
+  public globalProgress=false;
   constructor(
       private mediacenterService: RestMediacenterService,
       private connector: RestConnectorService,
@@ -56,6 +58,8 @@ export class AdminMediacenterComponent {
         })
     ];
   }
+
+
   setMediacenter(mediacenter:any){
     this.currentMediacenter=mediacenter;
     this.currentMediacenterCopy=Helper.deepCopy(mediacenter);
@@ -155,4 +159,24 @@ export class AdminMediacenterComponent {
       this.toast.closeModalDialog();
     });
   }
+
+    public updateMediacentersFile(event:any){
+        this.mediacentersFile=event.target.files[0];
+    }
+
+    public importMediacenters(){
+        if(!this.mediacentersFile){
+            this.toast.error(null,'ADMIN.MEDIACENTER.IMPORT.CHOOSE_MEDIACENTERS');
+            return;
+        }
+        this.globalProgress=true;
+        this.mediacenterService.importMediacenters(this.mediacentersFile).subscribe((data:any)=>{
+            this.toast.toast('ADMIN.MEDIACENTER.IMPORT.IMPORTED',{rows:data.rows});
+            this.globalProgress=false;
+            this.mediacentersFile=null;
+        },(error:any)=>{
+            this.toast.error(error);
+            this.globalProgress=false;
+        });
+    }
 }

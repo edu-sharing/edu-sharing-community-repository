@@ -86,4 +86,15 @@
             </mat-tab>
         </mat-tab-group>
     </div>
+
+    <h4 class="mat-heading-4 mat-heading-underline"><i icon iconId="business"></i>{{'ADMIN.MEDIACENTER.IMPORT.TITLE' | translate}}</h4>
+    <div class="import">
+        <input #importMediacentersSelect type="file" style="display:none" id="importMediacentersSelect" accept=".csv" (change)="updateMediacentersFile($event)">
+        <div class="inputGroup">
+            <a class="btn-flat btn-shadow" (click)="importMediacentersSelect.click()">{{'ADMIN.MEDIACENTER.IMPORT.CHOOSE_MEDIACENTERS' | translate}}</a>
+            <div class="file">{{ (mediacentersFile ? mediacentersFile.name : '') }}</div>
+        </div>
+        <a class="btn waves-effect waves-light" (click)="importMediacenters()">{{'ADMIN.MEDIACENTER.IMPORT.MEDIACENTERS_START' | translate}}</a>
+    </div>
 </div>
+<global-progress *ngIf="globalProgress"></global-progress>

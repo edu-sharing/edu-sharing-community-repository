@@ -1,24 +1,39 @@
 package org.edu_sharing.restservices.mediacenter.v1;
 
-import io.swagger.annotations.*;
-import org.apache.log4j.Logger;
-import org.edu_sharing.repository.client.rpc.EduGroup;
-import org.edu_sharing.restservices.*;
-import org.edu_sharing.restservices.iam.v1.model.UserEntries;
-import org.edu_sharing.restservices.shared.*;
-import org.edu_sharing.service.authority.AuthorityServiceFactory;
-import org.edu_sharing.service.search.SearchServiceFactory;
-import org.edu_sharing.service.search.model.SearchResult;
-import org.edu_sharing.service.search.model.SortDefinition;
-
-import javax.servlet.http.HttpServletRequest;
-import javax.ws.rs.*;
-import javax.ws.rs.core.Context;
-import javax.ws.rs.core.Response;
-import java.util.ArrayList;
-import java.util.Arrays;
+import java.io.InputStream;
 import java.util.List;
 import java.util.stream.Collectors;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.ws.rs.DELETE;
+import javax.ws.rs.GET;
+import javax.ws.rs.POST;
+import javax.ws.rs.PUT;
+import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
+import javax.ws.rs.core.Context;
+import javax.ws.rs.core.Response;
+
+import org.apache.log4j.Logger;
+import org.edu_sharing.restservices.ApiService;
+import org.edu_sharing.restservices.GroupDao;
+import org.edu_sharing.restservices.MediacenterDao;
+import org.edu_sharing.restservices.RepositoryDao;
+import org.edu_sharing.restservices.RestConstants;
+import org.edu_sharing.restservices.admin.v1.model.ExcelResult;
+import org.edu_sharing.restservices.mediacenter.v1.model.MediacentersImportResult;
+import org.edu_sharing.restservices.shared.ErrorResponse;
+import org.edu_sharing.restservices.shared.Group;
+import org.edu_sharing.restservices.shared.Mediacenter;
+import org.edu_sharing.service.admin.AdminServiceFactory;
+import org.edu_sharing.service.mediacenter.MediacenterServiceFactory;
+import org.glassfish.jersey.media.multipart.FormDataParam;
+
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiParam;
+import io.swagger.annotations.ApiResponse;
+import io.swagger.annotations.ApiResponses;
 
 @Path("/mediacenter/v1")
 @Api(tags = {"MEDIACENTER v1"})
@@ -242,6 +257,29 @@ public class MediacenterApi {
 			return ErrorResponse.createResponse(t);
 		}
 
+	}
+	
+	@POST
+	@Path("/import/mediacenters")
+
+	@ApiOperation(value = "Import mediacenters", notes = "Import mediacenters.")
+
+	@ApiResponses(value = { @ApiResponse(code = 200, message = RestConstants.HTTP_200, response = MediacentersImportResult.class),
+			@ApiResponse(code = 400, message = RestConstants.HTTP_400, response = ErrorResponse.class),
+			@ApiResponse(code = 401, message = RestConstants.HTTP_401, response = ErrorResponse.class),
+			@ApiResponse(code = 403, message = RestConstants.HTTP_403, response = ErrorResponse.class),
+			@ApiResponse(code = 404, message = RestConstants.HTTP_404, response = ErrorResponse.class),
+			@ApiResponse(code = 500, message = RestConstants.HTTP_500, response = ErrorResponse.class) })
+	public Response importMediacenters(@ApiParam(value = "Mediacenters csv to import", required = true) @FormDataParam("mediacenters") InputStream is,
+			@Context HttpServletRequest req) {
+		try {
+			int count = MediacenterServiceFactory.getInstance().importMediacenters(is);
+			MediacentersImportResult result = new MediacentersImportResult();
+			result.setRows(count);
+			return Response.ok().entity(result).build();
+		} catch (Throwable t) {
+			return ErrorResponse.createResponse(t);
+		}
 	}
 
 }

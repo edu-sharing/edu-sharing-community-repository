@@ -349,6 +349,13 @@
       },
       "STATISTICS": {
         "TITLE": "Statistiken"
+      },
+      "IMPORT":{
+        "TITLE" : "Medienzentrum Import",
+        "CHOOSE_MEDIACENTERS" : "CSV Datei mit Medienzentren auswählen",
+        "MEDIACENTERS_START" : "Medienzentren import ausführen",
+        "IMPORTED" : "{{ rows }} Medienzentren importiert"
+
       }
     },
     "FRONTPAGE": {
