@@ -15,6 +15,7 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;
 
 import org.apache.log4j.Logger;
+import org.edu_sharing.repository.server.tools.ApplicationInfoList;
 import org.edu_sharing.restservices.ApiService;
 import org.edu_sharing.restservices.GroupDao;
 import org.edu_sharing.restservices.MediacenterDao;
@@ -22,10 +23,12 @@ import org.edu_sharing.restservices.RepositoryDao;
 import org.edu_sharing.restservices.RestConstants;
 import org.edu_sharing.restservices.admin.v1.model.ExcelResult;
 import org.edu_sharing.restservices.mediacenter.v1.model.MediacentersImportResult;
+import org.edu_sharing.restservices.mediacenter.v1.model.OrganisationsImportResult;
 import org.edu_sharing.restservices.shared.ErrorResponse;
 import org.edu_sharing.restservices.shared.Group;
 import org.edu_sharing.restservices.shared.Mediacenter;
 import org.edu_sharing.service.admin.AdminServiceFactory;
+import org.edu_sharing.service.authority.AuthorityServiceFactory;
 import org.edu_sharing.service.mediacenter.MediacenterServiceFactory;
 import org.glassfish.jersey.media.multipart.FormDataParam;
 
@@ -273,8 +276,43 @@ public class MediacenterApi {
 	public Response importMediacenters(@ApiParam(value = "Mediacenters csv to import", required = true) @FormDataParam("mediacenters") InputStream is,
 			@Context HttpServletRequest req) {
 		try {
+
+			org.edu_sharing.service.authority.AuthorityService eduAuthorityService = AuthorityServiceFactory.getAuthorityService(ApplicationInfoList.getHomeRepository().getAppId());
+			if(!eduAuthorityService.isGlobalAdmin()){
+				throw new Exception("Admin rights are required for this endpoint");
+			}
+
 			int count = MediacenterServiceFactory.getInstance().importMediacenters(is);
 			MediacentersImportResult result = new MediacentersImportResult();
+			result.setRows(count);
+			return Response.ok().entity(result).build();
+		} catch (Throwable t) {
+			return ErrorResponse.createResponse(t);
+		}
+	}
+
+	@POST
+	@Path("/import/organisations")
+
+	@ApiOperation(value = "Import Organisations", notes = "Import Organisations.")
+
+	@ApiResponses(value = { @ApiResponse(code = 200, message = RestConstants.HTTP_200, response = OrganisationsImportResult.class),
+			@ApiResponse(code = 400, message = RestConstants.HTTP_400, response = ErrorResponse.class),
+			@ApiResponse(code = 401, message = RestConstants.HTTP_401, response = ErrorResponse.class),
+			@ApiResponse(code = 403, message = RestConstants.HTTP_403, response = ErrorResponse.class),
+			@ApiResponse(code = 404, message = RestConstants.HTTP_404, response = ErrorResponse.class),
+			@ApiResponse(code = 500, message = RestConstants.HTTP_500, response = ErrorResponse.class) })
+	public Response importOrganisations(@ApiParam(value = "Organisations csv to import", required = true) @FormDataParam("organisations") InputStream is,
+									   @Context HttpServletRequest req) {
+		try {
+
+			org.edu_sharing.service.authority.AuthorityService eduAuthorityService = AuthorityServiceFactory.getAuthorityService(ApplicationInfoList.getHomeRepository().getAppId());
+			if(!eduAuthorityService.isGlobalAdmin()){
+				throw new Exception("Admin rights are required for this endpoint");
+			}
+
+			int count = MediacenterServiceFactory.getInstance().importOrganisations(is);
+			OrganisationsImportResult result = new OrganisationsImportResult();
 			result.setRows(count);
 			return Response.ok().entity(result).build();
 		} catch (Throwable t) {

@@ -96,5 +96,15 @@
         </div>
         <a class="btn waves-effect waves-light" (click)="importMediacenters()">{{'ADMIN.MEDIACENTER.IMPORT.MEDIACENTERS_START' | translate}}</a>
     </div>
+    <h4 class="mat-heading-4 mat-heading-underline"><i icon iconId="business"></i>{{'ADMIN.MEDIACENTER.ORGIMPORT.TITLE' | translate}}</h4>
+    <div class="import">
+        <input #importOrganisationsSelect type="file" style="display:none" id="importOrganisationsSelect" accept=".csv" (change)="updateOrganisationsFile($event)">
+        <div class="inputGroup">
+            <a class="btn-flat btn-shadow" (click)="importOrganisationsSelect.click()">{{'ADMIN.MEDIACENTER.ORGIMPORT.CHOOSE_ORGANISATIONS' | translate}}</a>
+            <div class="file">{{ (organisationsFile ? organisationsFile.name : '') }}</div>
+        </div>
+        <a class="btn waves-effect waves-light" (click)="importOrganisations()">{{'ADMIN.MEDIACENTER.ORGIMPORT.ORGANISATIONS_START' | translate}}</a>
+    </div>
+
 </div>
 <global-progress *ngIf="globalProgress"></global-progress>
