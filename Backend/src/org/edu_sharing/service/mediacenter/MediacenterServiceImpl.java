@@ -13,8 +13,10 @@ import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.repository.NodeService;
 import org.alfresco.service.cmr.security.AuthorityService;
 import org.alfresco.service.cmr.security.AuthorityType;
+import org.alfresco.service.cmr.security.PermissionService;
 import org.alfresco.service.namespace.QName;
 import org.apache.log4j.Logger;
+import org.edu_sharing.alfresco.service.OrganisationService;
 import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.server.tools.ApplicationInfoList;
@@ -31,7 +33,10 @@ public class MediacenterServiceImpl implements MediacenterService{
 	AuthorityService authorityService = serviceregistry.getAuthorityService();
 	NodeService nodeService = serviceregistry.getNodeService();
 	org.edu_sharing.alfresco.service.AuthorityService eduAuthorityService = (org.edu_sharing.alfresco.service.AuthorityService)applicationContext.getBean("eduAuthorityService");
-	
+	OrganisationService organisationService = (OrganisationService) applicationContext
+			.getBean("eduOrganisationService");
+	org.edu_sharing.service.authority.AuthorityService eduAuthorityService2 = AuthorityServiceFactory.getLocalService();
+
 	@Override
 	public int importMediacenters(InputStream csv) {
 		RunAsWork<Integer> runAs = new RunAsWork<Integer>() {
@@ -54,6 +59,9 @@ public class MediacenterServiceImpl implements MediacenterService{
 						
 						if(authorityService.authorityExists("GROUP_" + authorityName)) {
 							logger.info("authority already exists:" + authorityName);
+							NodeRef authorityNodeRef = authorityService.getAuthorityNodeRef("GROUP_" + authorityName);
+							String currentCity = (String)nodeService.getProperty(authorityNodeRef,QName.createQName(CCConstants.CCM_PROP_ADDRESS_CITY));
+							String currentDisplayName = (String)nodeService.getProperty(authorityNodeRef,QName.createQName(CCConstants.CCM_PROP_ADDRESS_CITY));
 							continue;
 						}
 						
@@ -90,6 +98,57 @@ public class MediacenterServiceImpl implements MediacenterService{
 						throw e;
 					}
 				}
+				return counter;
+			}
+		};
+
+		return AuthenticationUtil.runAs(runAs, ApplicationInfoList.getHomeRepository().getUsername());
+	}
+
+	@Override
+	public int importOrganisations(InputStream csv) {
+		RunAsWork<Integer> runAs = new RunAsWork<Integer>() {
+			@Override
+			public Integer doWork() throws Exception {
+				List<List<String>> records = new CSVTool().getRecords(csv, CSVTool.ENC_UTF8);
+
+				int counter = 0;
+				for (List<String> record : records) {
+					String schoolId = record.get(0);
+					String schoolName = record.get(1);
+					String plz = (record.size() > 2) ? record.get(2) : null;
+					String city = (record.size() > 3) ? record.get(3) : null;
+
+					try {
+						if(schoolId == null || schoolId.trim().length() == 0) {
+							logger.info("no schoolid provided:" + record);
+							continue;
+						}
+
+						if(authorityService.authorityExists("GROUP_ORG_" + schoolId)) {
+							logger.info("authority already exists:" + schoolId);
+							continue;
+						}
+
+						logger.info("creating: " + schoolId + " " + schoolName);
+						String organisationName = organisationService.createOrganization(schoolId, schoolName);
+
+						String authorityName = PermissionService.GROUP_PREFIX + organisationName;
+
+						eduAuthorityService2.addAuthorityAspect(authorityName, CCConstants.CCM_ASPECT_ADDRESS);
+						eduAuthorityService2.setAuthorityProperty(authorityName, CCConstants.CCM_PROP_ADDRESS_POSTALCODE,
+								plz);
+						eduAuthorityService2.setAuthorityProperty(authorityName, CCConstants.CCM_PROP_ADDRESS_CITY, city);
+
+
+						counter++;
+					} catch (Exception e) {
+						logger.error("error in record: " + ((record == null || record.size() < 1)?null:record.get(0)), e);
+						throw e;
+					}
+
+				}
+
 				return counter;
 			}
 		};

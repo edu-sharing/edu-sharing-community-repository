@@ -35,8 +35,11 @@ export class AdminMediacenterComponent {
   currentTab=0;
   private isAdmin: boolean;
   public mediacentersFile: File;
+  public organisationsFile: File;
   public globalProgress=false;
-  constructor(
+
+
+    constructor(
       private mediacenterService: RestMediacenterService,
       private connector: RestConnectorService,
       private iamService: RestIamService,
@@ -164,6 +167,10 @@ export class AdminMediacenterComponent {
         this.mediacentersFile=event.target.files[0];
     }
 
+    public updateOrganisationsFile(event:any){
+        this.organisationsFile=event.target.files[0];
+    }
+
     public importMediacenters(){
         if(!this.mediacentersFile){
             this.toast.error(null,'ADMIN.MEDIACENTER.IMPORT.CHOOSE_MEDIACENTERS');
@@ -174,6 +181,22 @@ export class AdminMediacenterComponent {
             this.toast.toast('ADMIN.MEDIACENTER.IMPORT.IMPORTED',{rows:data.rows});
             this.globalProgress=false;
             this.mediacentersFile=null;
+        },(error:any)=>{
+            this.toast.error(error);
+            this.globalProgress=false;
+        });
+    }
+
+    public importOrganisations(){
+        if(!this.organisationsFile){
+            this.toast.error(null,'ADMIN.MEDIACENTER.ORGIMPORT.CHOOSE_ORGANISATIONS');
+            return;
+        }
+        this.globalProgress=true;
+        this.mediacenterService.importOrganisations(this.organisationsFile).subscribe((data:any)=>{
+            this.toast.toast('ADMIN.MEDIACENTER.ORGIMPORT.IMPORTED',{rows:data.rows});
+            this.globalProgress=false;
+            this.organisationsFile=null;
         },(error:any)=>{
             this.toast.error(error);
             this.globalProgress=false;

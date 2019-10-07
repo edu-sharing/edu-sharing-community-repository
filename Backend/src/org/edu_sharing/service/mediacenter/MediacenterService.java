@@ -6,4 +6,7 @@ public interface MediacenterService {
 	
 	public int importMediacenters(InputStream csv);
 
+	public int importOrganisations(InputStream csv);
+
+
 }

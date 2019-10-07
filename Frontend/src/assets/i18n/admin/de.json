@@ -356,6 +356,12 @@
         "MEDIACENTERS_START" : "Medienzentren import ausführen",
         "IMPORTED" : "{{ rows }} Medienzentren importiert"
 
+      },
+      "ORGIMPORT" : {
+        "TITLE" : "Organisationen Import",
+        "CHOOSE_ORGANISATIONS" : "CSV Datei mit Organisationen auswählen",
+        "ORGANISATIONS_START" : "Organisationen Import ausführen",
+        "IMPORTED" : "{{ rows }} Organisationen importiert"
       }
     },
     "FRONTPAGE": {
