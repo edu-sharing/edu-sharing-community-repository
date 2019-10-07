@@ -112,6 +112,10 @@ public class NodeCustomizationPolicies implements OnContentUpdatePolicy, OnCreat
 			CCConstants.CCM_PROP_IO_LICENSE_TO,
 			CCConstants.CCM_PROP_IO_LICENSE_VALID,
 
+			// fix for 4.2, override changed content resource props
+			CCConstants.CCM_PROP_CCRESSOURCETYPE,
+			CCConstants.CCM_PROP_CCRESSOURCESUBTYPE,
+			CCConstants.CCM_PROP_CCRESSOURCEVERSION,
 
 			// fix for 4.2, override all relevant metadata when changed on original
 			CCConstants.LOM_PROP_GENERAL_TITLE,
