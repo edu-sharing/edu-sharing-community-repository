@@ -23,6 +23,7 @@ import org.edu_sharing.repository.server.jobs.quartz.UpdateFrontpageCacheJob;
 import org.edu_sharing.service.admin.AdminServiceFactory;
 import org.edu_sharing.service.admin.RepositoryConfigFactory;
 import org.edu_sharing.service.admin.model.RepositoryConfig;
+import org.edu_sharing.service.collection.CollectionServiceFactory;
 import org.edu_sharing.service.permission.PermissionService;
 import org.edu_sharing.service.permission.PermissionServiceFactory;
 import org.edu_sharing.service.rating.AccumulatedRatings;
@@ -30,6 +31,7 @@ import org.edu_sharing.service.rating.RatingService;
 import org.edu_sharing.service.rating.RatingServiceFactory;
 import org.edu_sharing.service.search.SearchService;
 import org.edu_sharing.service.search.SearchServiceFactory;
+import org.edu_sharing.service.search.model.SortDefinition;
 import org.edu_sharing.service.stream.StreamServiceHelper;
 import org.edu_sharing.service.tracking.TrackingService;
 import org.edu_sharing.service.tracking.TrackingServiceFactory;
@@ -79,10 +81,10 @@ public class NodeFrontpage {
         APPLY_DATES.put("days_100",calendar.getTime());
         // null means of all time
         APPLY_DATES.put("all",null);
-        initElastic();
     }
     public void buildCache(AbstractJob job) {
         try {
+            initElastic();
             resetElastic();
 
             NodeRunner runner=new NodeRunner();
@@ -287,6 +289,17 @@ public class NodeFrontpage {
 
     public Collection<NodeRef> getNodesForCurrentUserAndConfig() throws Throwable {
         RepositoryConfig.Frontpage config = RepositoryConfigFactory.getConfig().frontpage;
+        if(config.mode.equals(RepositoryConfig.Frontpage.Mode.collection)){
+            if(config.collection==null){
+                throw new RuntimeException("Frontpage mode "+RepositoryConfig.Frontpage.Mode.collection+" requires a collection id to be defined");
+            }
+            // only return io's
+            SortDefinition sortDefinition=new SortDefinition();
+            sortDefinition.addSortDefinitionEntry(
+                    new SortDefinition.SortDefinitionEntry(CCConstants.getValidLocalName(CCConstants.CCM_PROP_COLLECTION_ORDERED_POSITION),true),0);
+            return CollectionServiceFactory.getLocalService().getChildren(config.collection, null,sortDefinition, Collections.singletonList("files"));
+        }
+        initElastic();
         //@TODO read and apply config
         BoolQueryBuilder query = QueryBuilders.boolQuery();
         BoolQueryBuilder audience = QueryBuilders.boolQuery();

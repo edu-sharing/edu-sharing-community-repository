@@ -9,6 +9,7 @@ public class RepositoryConfig implements Serializable {
 
     public static class Frontpage implements Serializable{
         public enum Mode{
+            collection,
             rating,
             views,
             downloads
@@ -23,6 +24,8 @@ public class RepositoryConfig implements Serializable {
         public Mode mode=Mode.rating;
         public Timespan timespan=Timespan.all;
         public String query;
+        // the id of the collection, if mode == collection
+        public String collection;
 
         public Frontpage(){}
     }

@@ -1,13 +1,13 @@
 import {RestAdminService} from "../../../core-module/rest/services/rest-admin.service";
 import {Component, EventEmitter, Output} from "@angular/core";
 import {TranslateService} from "@ngx-translate/core";
-import {NodeStatistics, Node, Statistics, IamGroup, Group} from "../../../core-module/rest/data-object";
+import {NodeStatistics, Node, Statistics, IamGroup, Group, Collection} from "../../../core-module/rest/data-object";
 import {ListItem} from "../../../core-module/ui/list-item";
 import {RestConstants} from "../../../core-module/rest/rest-constants";
 import {RestHelper} from "../../../core-module/rest/rest-helper";
 import {NodeHelper} from "../../../core-ui-module/node-helper";
 import {ConfigurationService} from "../../../core-module/rest/services/configuration.service";
-import {DialogButton, RestConnectorService, RestIamService, RestMdsService, RestMediacenterService, RestNodeService} from "../../../core-module/core.module";
+import {DialogButton, RestCollectionService, RestConnectorService, RestIamService, RestMdsService, RestMediacenterService, RestNodeService} from "../../../core-module/core.module";
 import {Helper} from "../../../core-module/rest/helper";
 import {Toast} from "../../../core-ui-module/toast";
 import {OptionItem} from "../../../core-ui-module/option-item";
@@ -28,12 +28,14 @@ export class AdminFrontpageComponent {
   loading=true;
   previewLoading=true;
   config: any;
-  modes = ["rating","views","downloads"];
+  modes = ["collection","rating","views","downloads"];
   timespans = ["days_30","days_100","all"];
   private form: FormGroup;
   previewNodes: Node[];
   previewColumns: ListItem[]=[];
   previewError: string;
+  collectionName = '';
+  chooseCollection = false;
 
 
   /*
@@ -53,6 +55,7 @@ export class AdminFrontpageComponent {
       private adminService: RestAdminService,
       private iamService: RestIamService,
       private nodeService: RestNodeService,
+      private collectionService: RestCollectionService,
       private toast: Toast,
       private mdsService: RestMdsService
   ){
@@ -86,6 +89,11 @@ export class AdminFrontpageComponent {
       this.form.get('displayCount').setValue(this.config.frontpage.displayCount);
       this.form.get('totalCount').setValue(this.config.frontpage.totalCount);
       this.loading=false;
+      if(this.config.frontpage.collection){
+        this.collectionService.getCollection(this.config.frontpage.collection).subscribe((c)=>{
+          this.collectionName=c.collection.title;
+        });
+      }
     });
     this.updatePreviews();
   }
@@ -108,6 +116,12 @@ export class AdminFrontpageComponent {
   }
   openNode(node : any){
     this.onOpenNode.emit(node.node);
+  }
+
+  setCollection(collection : Collection){
+    this.config.frontpage.collection=collection.ref.id;
+    this.collectionName=collection.title;
+    this.chooseCollection=false;
   }
 
   queryHelp() {

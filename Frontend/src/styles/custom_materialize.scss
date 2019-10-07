@@ -246,11 +246,6 @@ input[type=search]:focus:not([readonly])+label,
 input:focus:not([readonly])+label {
   color:$textLight;
 }
-input[type=text]:read-only:not(.select-dropdown),
-input[type=password]:read-only,
-input[type=search]:read-only{
-  border-style: dashed;
-}
 /* materialize select dropdowns */
 .dropdown-content li>a, .dropdown-content li>span{
   color: $primary;

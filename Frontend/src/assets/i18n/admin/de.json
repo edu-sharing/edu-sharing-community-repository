@@ -363,10 +363,14 @@
       "MODE_LABEL": "Modus",
       "MODE_HINT": "Nach welchem Schema sollen die Elemente der Startseite ausgewählt werden",
       "MODE": {
+        "collection" : "Sammlung",
         "rating" : "Bestbewertete Elemente",
         "views" : "Am häufigsten aufgerufene Elemente",
         "downloads" : "Am häufigsten heruntergeladene Elemente"
       },
+      "COLLECTION_LABEL": "Gewählte Sammlung",
+      "COLLECTION_HINT": "Wählen Sie die Sammlung aus, deren Materialien auf der Startseite angezeigt werden sollen",
+      "CHOOSE_COLLECTION": "Sammlung wählen",
       "TIMESPAN_LABEL": "Zeitspanne",
       "TIMESPAN_HINT": "Über welchen Zeitbereich soll die Auswertung der Daten erfolgen",
       "TIMESPAN": {

@@ -14,7 +14,12 @@
       flex-grow: 1;
       padding: 0 10px;
     }
-
+    > .mode-collection{
+      flex-direction: column;
+      >button{
+        margin-top: 20px;
+      }
+    }
     &.preview {
       margin: 20px 20px 10px 20px;
     }

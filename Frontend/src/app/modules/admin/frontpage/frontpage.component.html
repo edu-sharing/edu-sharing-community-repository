@@ -1,4 +1,12 @@
 <global-progress *ngIf="loading"></global-progress>
+<collection-chooser
+        class="dialog-right scrollWithBanner"
+        *ngIf="chooseCollection"
+        [@fromRight]="chooseCollection"
+        title="WORKSPACE.SELECT_COLLECTION"
+        (onCancel)="chooseCollection=false"
+        (onChoose)="setCollection($event)"
+></collection-chooser>
 <div class="frontpage">
     <form *ngIf="config" [formGroup]="form">
         <h4 class="mat-heading-4 mat-heading-underline"><i icon iconId="settings"></i>{{'ADMIN.FRONTPAGE.GENERAL' | translate}}</h4>
@@ -10,7 +18,15 @@
                     <mat-option *ngFor="let mode of modes" [value]="mode">{{'ADMIN.FRONTPAGE.MODE.'+mode | translate}}</mat-option>
                 </mat-select>
             </mat-form-field>
-            <mat-form-field>
+            <div class="mode-collection" *ngIf="config.frontpage.mode=='collection'">
+                <mat-form-field >
+                    <mat-label>{{'ADMIN.FRONTPAGE.COLLECTION_LABEL' | translate}}</mat-label>
+                    <mat-hint>{{'ADMIN.FRONTPAGE.COLLECTION_HINT' | translate}}</mat-hint>
+                    <input matInput id="collection" [(ngModel)]="collectionName" [ngModelOptions]="{standalone: true}" type="text" readonly="true">
+                </mat-form-field>
+                <button mat-raised-button color="primary" (click)="chooseCollection=true">{{'ADMIN.FRONTPAGE.CHOOSE_COLLECTION' | translate}}</button>
+            </div>
+            <mat-form-field *ngIf="config.frontpage.mode!='collection'">
                 <mat-label>{{'ADMIN.FRONTPAGE.TIMESPAN_LABEL' | translate}}</mat-label>
                 <mat-hint>{{'ADMIN.FRONTPAGE.TIMESPAN_HINT' | translate}}</mat-hint>
                 <mat-select id="timespan" [(ngModel)]="config.frontpage.timespan" [ngModelOptions]="{standalone: true}">
@@ -18,33 +34,35 @@
                 </mat-select>
             </mat-form-field>
         </div>
-        <div class="group">
-            <mat-form-field>
-                <mat-label>{{'ADMIN.FRONTPAGE.TOTAL_COUNT_LABEL' | translate}}</mat-label>
-                <mat-hint>{{'ADMIN.FRONTPAGE.TOTAL_COUNT_HINT' | translate}}</mat-hint>
-                <input matInput id="totalCount" formControlName="totalCount" type="number">
-                <mat-error *ngIf="form.get('totalCount').errors">
-                    <span *ngIf="form.get('totalCount').errors.required">{{'FIELD_REQUIRED' | translate}}</span>
-                    <span *ngIf="form.get('totalCount').errors.pattern">{{'FIELD_VALIDATION_ERROR_INTEGER' | translate}}</span>
-                    <span *ngIf="form.get('totalCount').errors.outOfRange">{{'ADMIN.FRONTPAGE.TOTAL_COUNT_OUT_OF_RANGE' | translate}}</span>
-                </mat-error>
-            </mat-form-field>
-            <mat-form-field>
-                <mat-label>{{'ADMIN.FRONTPAGE.DISPLAY_COUNT_LABEL' | translate}}</mat-label>
-                <mat-hint>{{'ADMIN.FRONTPAGE.DISPLAY_COUNT_HINT' | translate}}</mat-hint>
-                <input matInput id="displayCount" type="number" formControlName="displayCount" [(ngModel)]="config.frontpage.displayCount">
-            </mat-form-field>
-        </div>
-        <div class="group">
-            <mat-form-field>
-                <mat-label>{{'ADMIN.FRONTPAGE.CUSTOM_QUERY_LABEL' | translate}}</mat-label>
-                <mat-hint><div>{{'ADMIN.FRONTPAGE.CUSTOM_QUERY_HINT' | translate}}</div><button mat-button (click)="queryHelp()">{{'ADMIN.FRONTPAGE.CUSTOM_QUERY_HINT_HELP' | translate}}</button></mat-hint>
-                <textarea matInput
-                          cdkTextareaAutosize
-                          cdkAutosizeMinRows="4"
-                          cdkAutosizeMaxRows="10"
-                          id="query" [(ngModel)]="config.frontpage.query" [ngModelOptions]="{standalone: true}"></textarea>
-            </mat-form-field>
+        <div *ngIf="config.frontpage.mode!='collection'">
+            <div class="group">
+                <mat-form-field>
+                    <mat-label>{{'ADMIN.FRONTPAGE.TOTAL_COUNT_LABEL' | translate}}</mat-label>
+                    <mat-hint>{{'ADMIN.FRONTPAGE.TOTAL_COUNT_HINT' | translate}}</mat-hint>
+                    <input matInput id="totalCount" formControlName="totalCount" type="number">
+                    <mat-error *ngIf="form.get('totalCount').errors">
+                        <span *ngIf="form.get('totalCount').errors.required">{{'FIELD_REQUIRED' | translate}}</span>
+                        <span *ngIf="form.get('totalCount').errors.pattern">{{'FIELD_VALIDATION_ERROR_INTEGER' | translate}}</span>
+                        <span *ngIf="form.get('totalCount').errors.outOfRange">{{'ADMIN.FRONTPAGE.TOTAL_COUNT_OUT_OF_RANGE' | translate}}</span>
+                    </mat-error>
+                </mat-form-field>
+                <mat-form-field>
+                    <mat-label>{{'ADMIN.FRONTPAGE.DISPLAY_COUNT_LABEL' | translate}}</mat-label>
+                    <mat-hint>{{'ADMIN.FRONTPAGE.DISPLAY_COUNT_HINT' | translate}}</mat-hint>
+                    <input matInput id="displayCount" type="number" formControlName="displayCount" [(ngModel)]="config.frontpage.displayCount">
+                </mat-form-field>
+            </div>
+            <div class="group">
+                <mat-form-field>
+                    <mat-label>{{'ADMIN.FRONTPAGE.CUSTOM_QUERY_LABEL' | translate}}</mat-label>
+                    <mat-hint><div>{{'ADMIN.FRONTPAGE.CUSTOM_QUERY_HINT' | translate}}</div><button mat-button (click)="queryHelp()">{{'ADMIN.FRONTPAGE.CUSTOM_QUERY_HINT_HELP' | translate}}</button></mat-hint>
+                    <textarea matInput
+                              cdkTextareaAutosize
+                              cdkAutosizeMinRows="4"
+                              cdkAutosizeMaxRows="10"
+                              id="query" [(ngModel)]="config.frontpage.query" [ngModelOptions]="{standalone: true}"></textarea>
+                </mat-form-field>
+            </div>
         </div>
         <div class="group">
             <div class="save">
