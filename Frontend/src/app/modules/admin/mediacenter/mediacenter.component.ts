@@ -38,6 +38,7 @@ export class AdminMediacenterComponent {
   public globalProgress=false;
   constructor(
       private mediacenterService: RestMediacenterService,
+      private translate: TranslateService,
       private connector: RestConnectorService,
       private iamService: RestIamService,
       private toast: Toast,
@@ -82,15 +83,15 @@ export class AdminMediacenterComponent {
   addMediacenter(){
     this.toast.showInputDialog('ADMIN.MEDIACENTER.ADD_MEDIACENTER_TITLE','ADMIN.MEDIACENTER.ADD_MEDIACENTER_MESSAGE','ADMIN.MEDIACENTER.ADD_MEDIACENTER_LABEL',
         DialogButton.getOkCancel(()=>this.toast.closeModalDialog(),()=>{
-          let name=this.toast.dialogInputValue;
-          let profile={displayName:name};
+          let id=this.toast.dialogInputValue;
+          let profile={displayName:this.translate.instant('ADMIN.MEDIACENTER.UNNAMED_MEDIACENTER',{id:id})};
           this.toast.showProgressDialog();
-          this.mediacenterService.addMediacenter(name,profile).subscribe((result)=>{
+          this.mediacenterService.addMediacenter(id,profile).subscribe((result)=>{
             RestHelper.waitForResult(()=>this.mediacenterService.getMediacenters(),(list:any[])=>{
               return list.filter((r)=>Helper.objectEquals(r,result)).length==1;
             },()=>{
               this.toast.closeModalDialog();
-              this.toast.toast('ADMIN.MEDIACENTER.CREATED',{name:name});
+              this.toast.toast('ADMIN.MEDIACENTER.CREATED',{name:id});
               this.setMediacenter(null);
               this.refresh();
             });
