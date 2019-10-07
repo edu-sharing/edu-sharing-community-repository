@@ -1997,6 +1997,7 @@ public class CCConstants {
 
 	public static final String ADMINISTRATORS_GROUP_TYPE = "ORG_ADMINISTRATORS";
 	public static final String MEDIA_CENTER_GROUP_TYPE = "MEDIA_CENTER";
+	public static final String MEDIA_CENTER_GROUP_PREFIX = "MEDIA_CENTER_";
 	public static final String EDITORIAL_GROUP_TYPE = "EDITORIAL";
 	public static final String COLLECTIONTYPE_DEFAULT = "default";
 	public static final String COLLECTIONTYPE_EDITORIAL = "EDITORIAL";

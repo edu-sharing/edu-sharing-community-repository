@@ -143,7 +143,7 @@ public class MediacenterDao extends AbstractDao{
 	private MediacenterDao create(String name,Mediacenter.Profile profile) throws DAOException {
 		try {
 			profile.setGroupType(CCConstants.MEDIA_CENTER_GROUP_TYPE);
-			String group = GroupDao.createGroup(repoDao, name, profile, null).getAuthorityName();
+			String group = GroupDao.createGroup(repoDao, CCConstants.MEDIA_CENTER_GROUP_PREFIX + name, profile, null).getAuthorityName();
 			this.authorityName = group;
 			changeProfile(profile);
 

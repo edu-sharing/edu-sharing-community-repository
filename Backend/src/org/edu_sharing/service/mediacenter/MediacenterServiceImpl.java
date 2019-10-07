@@ -54,7 +54,7 @@ public class MediacenterServiceImpl implements MediacenterService{
 
 					try {
 						
-						String authorityName = CCConstants.MEDIA_CENTER_GROUP_TYPE + "_" + mzId;
+						String authorityName = CCConstants.MEDIA_CENTER_GROUP_PREFIX + mzId;
 						logger.info("creating:" + authorityName);
 						
 						if(authorityService.authorityExists("GROUP_" + authorityName)) {

@@ -87,7 +87,12 @@ export class AdminMediacenterComponent {
     this.toast.showInputDialog('ADMIN.MEDIACENTER.ADD_MEDIACENTER_TITLE','ADMIN.MEDIACENTER.ADD_MEDIACENTER_MESSAGE','ADMIN.MEDIACENTER.ADD_MEDIACENTER_LABEL',
         DialogButton.getOkCancel(()=>this.toast.closeModalDialog(),()=>{
           let id=this.toast.dialogInputValue;
-          let profile={displayName:this.translate.instant('ADMIN.MEDIACENTER.UNNAMED_MEDIACENTER',{id:id})};
+          let profile={
+              displayName:this.translate.instant('ADMIN.MEDIACENTER.UNNAMED_MEDIACENTER',{id:id}),
+              mediacenter:{
+                  id:id
+              }
+          };
           this.toast.showProgressDialog();
           this.mediacenterService.addMediacenter(id,profile).subscribe((result)=>{
             RestHelper.waitForResult(()=>this.mediacenterService.getMediacenters(),(list:any[])=>{
