@@ -2,6 +2,7 @@ package org.edu_sharing.repository.server.jobs.helper;
 
 import org.alfresco.repo.policy.BehaviourFilter;
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
+import org.alfresco.repo.transaction.RetryingTransactionHelper;
 import org.alfresco.service.ServiceRegistry;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.repository.StoreRef;
@@ -11,6 +12,8 @@ import org.edu_sharing.repository.server.importer.OAIPMHLOMImporter;
 import org.edu_sharing.repository.server.tools.cache.RepositoryCache;
 import org.edu_sharing.service.nodeservice.NodeService;
 import org.edu_sharing.service.nodeservice.NodeServiceFactory;
+import org.postgresql.util.PSQLException;
+import org.postgresql.util.ServerErrorMessage;
 import org.springframework.context.ApplicationContext;
 import org.springframework.extensions.webscripts.Runtime;
 
@@ -70,7 +73,7 @@ public class NodeRunner {
     /**
      * Shall the modified date of the edited nodes stay the same
      * (Enabling this will disable the behaviour filters while running)
-     * Required transaction to be set to true
+     * Required transaction to be set to Local or Global
      */
     private boolean keepModifiedDate;
 
@@ -189,21 +192,16 @@ public class NodeRunner {
                         logger.error(e.getMessage(), e);
                     }
                 }
-                if(keepModifiedDate)
-                    policyBehaviourFilter.disableBehaviour(ref);
-                if (runAsSystem) {
-                    AuthenticationUtil.runAsSystem(() -> {
-                        task.accept(ref);
-                        if(invalidateCache)
-                            new RepositoryCache().remove(ref.getId());
+
+                if(transaction.equals(TransactionMode.LocalRetrying)){
+                    serviceRegistry.getRetryingTransactionHelper().doInTransaction(() -> {
+                        runTask(ref);
                         return null;
                     });
-                } else {
-                    task.accept(ref);
-                    if(invalidateCache)
-                        new RepositoryCache().remove(ref.getId());
                 }
-                policyBehaviourFilter.enableBehaviour(ref);
+                else {
+                    runTask(ref);
+                }
                 if(transaction.equals(TransactionMode.Local)){
                     try {
                         userTransactionLocal.commit();
@@ -255,6 +253,25 @@ public class NodeRunner {
         }
     }
 
+    private void runTask(NodeRef ref) {
+        try {
+            if (keepModifiedDate)
+                policyBehaviourFilter.disableBehaviour(ref);
+            if (runAsSystem) {
+                AuthenticationUtil.runAsSystem(() -> {
+                    task.accept(ref);
+                    new RepositoryCache().remove(ref.getId());
+                    return null;
+                });
+            } else {
+                task.accept(ref);
+                new RepositoryCache().remove(ref.getId());
+            }
+        }finally {
+            policyBehaviourFilter.enableBehaviour(ref);
+        }
+    }
+
     public void setKeepModifiedDate(boolean keepModifiedDate) {
         this.keepModifiedDate = keepModifiedDate;
     }
@@ -273,6 +290,7 @@ public class NodeRunner {
     public enum TransactionMode{
         None, // no transactions
         Global, // for whole task
-        Local // per node
+        Local, // per node
+        LocalRetrying // per node, with retrying transaction
     }
 }

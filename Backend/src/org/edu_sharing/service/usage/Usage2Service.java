@@ -137,35 +137,21 @@ Logger logger = Logger.getLogger(Usage2Service.class);
 	public List<Usage> getUsages(String appId)throws UsageException{
 		
 		List<Usage> result = new ArrayList<Usage>();
-		
-		AuthenticationTool authTool = new AuthenticationToolAPI();
-		HashMap<String, String> currentAuthentication = null;
-		try {
-			currentAuthentication = authTool.validateAuthentication(Context.getCurrentInstance().getCurrentInstance().getRequest().getSession());
-		}catch(Exception e) {
-			//when run as
-		}
-		HashMap<String,String> adminAuthentication = null;
+
 		ApplicationInfo homeRepository = ApplicationInfoList.getHomeRepository();
 		
 		try{
-			adminAuthentication = authTool.createNewSession(homeRepository.getUsername(), homeRepository.getPassword());
-			HashMap<String,HashMap<String,Object>> usages =  usageDao.getUsagesByAppId(appId);
-			for(Map.Entry<String, HashMap<String,Object>> entry : usages.entrySet()){
-				result.add(getUsageResult(entry.getValue()));
-			}
+			AuthenticationUtil.runAsSystem(()->{
+				HashMap<String,HashMap<String,Object>> usages =  usageDao.getUsagesByAppId(appId);
+				for(Map.Entry<String, HashMap<String,Object>> entry : usages.entrySet()){
+					result.add(getUsageResult(entry.getValue()));
+				}
+				return null;
+			});
 		}catch(Exception e){
 			logger.error(e.getMessage(),e);
 			throw new UsageException(e.getMessage());
-		}finally{
-		    //set authentication back to current user
-			if(adminAuthentication != null){
-				authTool.logout(adminAuthentication.get(CCConstants.AUTH_TICKET));
-			}
-		    if(currentAuthentication != null){
-		    	authTool.validateTicket(currentAuthentication.get(CCConstants.AUTH_TICKET));
-		    }
-		  }
+		}
 		
 		return result;
 	}
@@ -321,42 +307,21 @@ Logger logger = Logger.getLogger(Usage2Service.class);
 
 	public List<Usage> getUsageByParentNodeId(String repoId, String user, String parentNodeId) throws UsageException {
 		logger.info("starting");
-		//admin Authentication 
-		ApplicationInfo homeRepository = ApplicationInfoList.getHomeRepository();
-	    
-		AuthenticationTool authTool = new AuthenticationToolAPI();
-		HashMap<String, String> currentAuthentication = null;
-		try {
-			currentAuthentication = authTool.validateAuthentication(Context.getCurrentInstance().getCurrentInstance().getRequest().getSession());
-		}catch(Exception e) {
-			//when run as
-		}
-		HashMap<String,String> adminAuthentication = null;
-		
 		try{
-			adminAuthentication = authTool.createNewSession(homeRepository.getUsername(), homeRepository.getPassword());
-			
-			HashMap<String, HashMap<String, Object>> usages = usageDao.getUsages(parentNodeId);
-			logger.info("usages.keySet().size():"+usages.keySet().size());
-			ArrayList<Usage> result = new ArrayList<Usage>();
-			for (String key : usages.keySet()) {
-				result.add(getUsageResult(usages.get(key)));
-			}
-			addUsagesFromReferenceObjects(parentNodeId,result);
-			return result;
+			return AuthenticationUtil.runAsSystem(()->{
+				HashMap<String, HashMap<String, Object>> usages = usageDao.getUsages(parentNodeId);
+				logger.info("usages.keySet().size():"+usages.keySet().size());
+				ArrayList<Usage> result = new ArrayList<Usage>();
+				for (String key : usages.keySet()) {
+					result.add(getUsageResult(usages.get(key)));
+				}
+				addUsagesFromReferenceObjects(parentNodeId,result);
+				return result;
+			});
 		}catch(Throwable e){
 			logger.error(e.getMessage(), e);
 			throw new UsageException(e.getMessage());
-		}finally{
-		    //set authentication back to current user
-			if(adminAuthentication != null){
-				authTool.logout(adminAuthentication.get(CCConstants.AUTH_TICKET));
-			}
-		    if(currentAuthentication != null){
-		    	authTool.validateTicket(currentAuthentication.get(CCConstants.AUTH_TICKET));
-		    }
-		  }
-	
+		}
     }
 
 	/**

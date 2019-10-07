@@ -53,6 +53,7 @@ import {ActionbarHelperService} from "../../common/services/actionbar-helper";
 import {HttpClient} from '@angular/common/http';
 import {MdsHelper} from "../../core-module/rest/mds-helper";
 import {BridgeService} from "../../core-bridge-module/bridge.service";
+import {GlobalContainerComponent} from "../../common/ui/global-container/global-container.component";
 
 
 @Component({
@@ -1084,7 +1085,7 @@ export class SearchComponent {
       (param: any) => {
         this.searchService.init();
         this.mainNavRef.refreshBanner();
-        this.mainNavRef.finishPreloading();
+        GlobalContainerComponent.finishPreloading();
         this.hasCheckbox=true;
         this.searchService.reurl=null;
         if(param['addToCollection']){

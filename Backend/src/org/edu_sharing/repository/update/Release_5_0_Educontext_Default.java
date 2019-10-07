@@ -54,7 +54,8 @@ public class Release_5_0_Educontext_Default extends UpdateAbstract {
 		NodeRunner runner=new NodeRunner();
 		runner.setRunAsSystem(true);
 		runner.setTypes(CCConstants.EDUCONTEXT_TYPES);
-		runner.setThreaded(false);
+		runner.setThreaded(true);
+		runner.setTransaction(NodeRunner.TransactionMode.LocalRetrying);
 		runner.setKeepModifiedDate(true);
 		int[] processed=new int[]{0};
 		runner.setFilter((ref)->{

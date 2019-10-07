@@ -31,6 +31,8 @@ import {Observable, Observer} from 'rxjs/index';
 import {RestNetworkService} from '../../core-module/core.module';
 import {MainNavComponent} from '../../common/ui/main-nav/main-nav.component';
 import {CustomHelper} from "../../common/custom-helper";
+import {GlobalContainerComponent} from "../../common/ui/global-container/global-container.component";
+
 
 @Component({
   selector: 'admin-main',
@@ -207,7 +209,7 @@ export class AdminComponent {
           this.prepareJobClasses();
           this.storage.refresh();
       UIHelper.setTitle('ADMIN.TITLE', this.title, this.translate, this.config);
-      this.mainNavRef.finishPreloading();
+      GlobalContainerComponent.finishPreloading();
       this.warningButtons=[
         new DialogButton('CANCEL',DialogButton.TYPE_CANCEL,()=>{window.history.back()}),
         new DialogButton('ADMIN.UNDERSTAND',DialogButton.TYPE_PRIMARY,()=>{this.showWarning=false})

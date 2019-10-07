@@ -20,6 +20,7 @@ import {RestMdsService} from "../../core-module/core.module";
 import {RestHelper} from "../../core-module/core.module";
 import {MainNavComponent} from '../../common/ui/main-nav/main-nav.component';
 import {MdsHelper} from "../../core-module/rest/mds-helper";
+import {GlobalContainerComponent} from "../../common/ui/global-container/global-container.component";
 
 
 
@@ -61,7 +62,7 @@ export class OerComponent {
     private translate : TranslateService) {
       Translation.initialize(translate,this.config,this.session,this.route).subscribe(()=>{
         UIHelper.setTitle('SEARCH.TITLE',title,translate,config);
-        this.mainNavRef.finishPreloading();
+        GlobalContainerComponent.finishPreloading();
           for(let i=0;i<this.TYPE_COUNT;i++) {
               this.columns.push([]);
               this.updateOptions(i)

@@ -3053,7 +3053,7 @@ public class MCAlfrescoAPIClient extends MCAlfrescoBaseClient {
                 		return null;
                     }
                 }, false); 
-		
+
 		
 	}
 
@@ -3156,20 +3156,19 @@ public class MCAlfrescoAPIClient extends MCAlfrescoBaseClient {
 		return getGroupFolderId(this.authenticationInfo.get(CCConstants.AUTH_USERNAME));
 	}
 
-	public String getGroupFolderId(String userName) throws Throwable {
-
-		HashMap<String, HashMap<String, Object>> children = getChildren(getHomeFolderID(userName), CCConstants.CCM_TYPE_MAP);
-
-		String groupFolderNodeId = null;
-		for (String key : children.keySet()) {
-			HashMap<String, Object> props = children.get(key);
-			if (CCConstants.CCM_VALUE_MAP_TYPE_EDUGROUP.equals(props.get(CCConstants.CCM_PROP_MAP_TYPE))) {
-				groupFolderNodeId = key;
-				break;
+	public String getGroupFolderId(String userName)  {
+		try {
+			String homeFolder=getHomeFolderID(userName);
+			if(homeFolder==null){
+				logger.info("User "+userName+" has no home folder, will return no group folder for person");
+				return null;
 			}
+			NodeRef child = NodeServiceFactory.getLocalService().getChild(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, homeFolder, CCConstants.CCM_TYPE_MAP, CCConstants.CCM_PROP_MAP_TYPE, CCConstants.CCM_VALUE_MAP_TYPE_EDUGROUP);
+			return child.getId();
+		}catch(Exception e){
+			logger.warn(e.getMessage(),e);
+			return null;
 		}
-
-		return groupFolderNodeId;
 	}
 
 	public HashMap getGroupFolders() throws Throwable {

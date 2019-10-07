@@ -13,6 +13,7 @@ import org.alfresco.repo.security.authentication.AuthenticationUtil.RunAsWork;
 import org.alfresco.repo.security.permissions.impl.acegi.FilteringResultSet;
 import org.alfresco.repo.transaction.RetryingTransactionHelper.RetryingTransactionCallback;
 import org.alfresco.service.ServiceRegistry;
+import org.alfresco.service.cmr.repository.ChildAssociationRef;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.repository.NodeService;
 import org.alfresco.service.cmr.repository.StoreRef;
@@ -544,11 +545,10 @@ public class PermissionServiceImpl implements org.edu_sharing.service.permission
 	public void setPermissions(String nodeId, List<ACE> aces, Boolean inheritPermission) throws Exception {
 
 		if (inheritPermission != null) {
-			boolean shared = isSharedNode(nodeId);
-			if (!toolPermission.hasToolPermission(CCConstants.CCM_VALUE_TOOLPERMISSION_INVITE) && !shared) {
+			if (!toolPermission.hasToolPermission(CCConstants.CCM_VALUE_TOOLPERMISSION_INVITE) && !isSharedNode(nodeId)) {
 				throw new ToolPermissionException(CCConstants.CCM_VALUE_TOOLPERMISSION_INVITE);
 			}
-			if (!toolPermission.hasToolPermission(CCConstants.CCM_VALUE_TOOLPERMISSION_INVITE_SHARE) && shared) {
+			if (!toolPermission.hasToolPermission(CCConstants.CCM_VALUE_TOOLPERMISSION_INVITE_SHARE) && isSharedNode(nodeId)) {
 				throw new ToolPermissionException(CCConstants.CCM_VALUE_TOOLPERMISSION_INVITE_SHARE);
 			}
 		}
@@ -682,7 +682,6 @@ public class PermissionServiceImpl implements org.edu_sharing.service.permission
 				}
 			}
 		}
-		boolean shared = isSharedNode(nodeId);
 
 		// not required anymore, also private files can be shared in scope
 		/*
@@ -704,11 +703,11 @@ public class PermissionServiceImpl implements org.edu_sharing.service.permission
 		if (NodeServiceInterceptor.getEduSharingScope()!=null && hasAll) {
 			throw new SecurityException("Inviting of "+CCConstants.AUTHORITY_GROUP_EVERYONE+" is not allowed in scope "+NodeServiceInterceptor.getEduSharingScope());
 		}
-		if (!toolPermission.hasToolPermission(CCConstants.CCM_VALUE_TOOLPERMISSION_INVITE) && hasUsers && !shared) {
+		if (!toolPermission.hasToolPermission(CCConstants.CCM_VALUE_TOOLPERMISSION_INVITE) && hasUsers && !isSharedNode(nodeId)) {
 			throw new ToolPermissionException(CCConstants.CCM_VALUE_TOOLPERMISSION_INVITE);
 		}
 		if (!toolPermission.hasToolPermission(CCConstants.CCM_VALUE_TOOLPERMISSION_INVITE_SHARE) && hasUsers
-				&& shared) {
+				&& isSharedNode(nodeId)) {
 			throw new ToolPermissionException(CCConstants.CCM_VALUE_TOOLPERMISSION_INVITE_SHARE);
 		}
 	}
@@ -727,9 +726,9 @@ public class PermissionServiceImpl implements org.edu_sharing.service.permission
 			List<String> sharedFolderIds = new ArrayList<>();
 
 			if (groupFolderId != null) {
-				HashMap<String, HashMap<String, Object>> children = repoClient.getChildren(groupFolderId);
-				for (Object key : children.keySet()) {
-					sharedFolderIds.add(key.toString());
+				List<ChildAssociationRef> children = NodeServiceFactory.getLocalService().getChildrenChildAssociationRef(groupFolderId);
+				for (ChildAssociationRef key : children) {
+					sharedFolderIds.add(key.getChildRef().getId());
 				}
 			}
 			if (sharedFolderIds.size() == 0)

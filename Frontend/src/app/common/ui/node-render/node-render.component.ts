@@ -33,6 +33,7 @@ import {MdsHelper} from "../../../core-module/rest/mds-helper";
 import {ListTableComponent} from "../../../core-ui-module/components/list-table/list-table.component";
 import {SpinnerComponent} from "../../../core-ui-module/components/spinner/spinner.component";
 import {CommentsListComponent} from "../../../modules/management-dialogs/node-comments/comments-list/comments-list.component";
+import {GlobalContainerComponent} from "../global-container/global-container.component";
 
 declare var jQuery:any;
 declare var window: any;
@@ -353,12 +354,12 @@ export class NodeRenderComponent implements EventListener{
                 });
             }
             this.isLoading = false;
-            this.mainNavRef.finishPreloading();
+            GlobalContainerComponent.finishPreloading();
         },(error:any)=>{
             console.log(error);
             this.toast.error(error);
             this.isLoading = false;
-            this.mainNavRef.finishPreloading();
+            GlobalContainerComponent.finishPreloading();
         })
   }
     onDelete(event:any){

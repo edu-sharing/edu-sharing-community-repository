@@ -47,6 +47,7 @@ import {BridgeService} from "../../core-bridge-module/bridge.service";
 import {AddElement} from "../../core-ui-module/add-element";
 import {MatSlideToggle} from "@angular/material";
 import {HttpClient} from "@angular/common/http";
+import {GlobalContainerComponent} from "../../common/ui/global-container/global-container.component";
 
 // component class
 @Component({
@@ -559,7 +560,7 @@ export class CollectionsMainComponent {
         if (!this.isReady) return;
         this.onSelection([]);
         this.isLoading=true;
-        this.mainNavRef.finishPreloading();
+        GlobalContainerComponent.finishPreloading();
 
     // set correct scope
     let request:any=Helper.deepCopy(CollectionsMainComponent.DEFAULT_REQUEST);
@@ -741,7 +742,7 @@ export class CollectionsMainComponent {
           this.toast.error(error);
         }
         this.isLoading=false;
-        this.mainNavRef.finishPreloading();
+        GlobalContainerComponent.finishPreloading();
       });
 
     }

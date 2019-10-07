@@ -144,26 +144,27 @@ user-profile{
     position: relative;
     margin-left: 6px;
   }
+  .rocketchat{
+    display: none;
+    position: relative;
+    top: 3px;
+    .rocketchat-count-none{
+      background-color: $colorStatusNeutral;
+    }
+  }
+
   .nodeStore{
     margin-right: 4px;
     position: relative;
-    top: 8px;
+    top: 6px;
     >i{
       color:$primaryMediumLight;
     }
   }
   .nodeStoreCount{
-    position: absolute;
-    right: -3px;
-    top: -3px;
     background-color: #fff;
-    border-radius: 50%;
-    width: 16px;
-    height: 16px;
     color: $primary;
-    font-size: 0.8em;
-    display: flex;
-    justify-content: center;
+    right:5px;
   }
   .nodeStoreAnimation{
     position:absolute;
@@ -184,6 +185,9 @@ user-profile{
     width: 35px;
     height: 35px;
     padding-top: 7px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
   }
 }
 
@@ -221,12 +225,6 @@ user-profile{
 .topBar .topBarSearch input:focus {
   @include setGlobalInsetFocus();
 }
-
-.barIcon{
-  font-size: 24px;
-  z-index:115;
-
-}
 .searchIcon,.searchClearIcon{
   font-size: 22px !important;
   position: absolute;
@@ -244,7 +242,6 @@ user-profile{
   // space for links like imprint
   top:3px;
   display: flex;
-  padding-top: 5px;
   padding-left: 7px;
   padding-right: 0;
   div{
@@ -404,6 +401,12 @@ $licenseInfoHeight:40px;
     display: none;
   }
   .topBar{
+    .user {
+      top: 0;
+    }
+    .rocketchat {
+      display: flex;
+    }
     .nodeStore, .help, .imprint{
       display: none;
     }
@@ -456,11 +459,16 @@ $licenseInfoHeight:40px;
 }
 @media screen and (max-width: ($mobileWidth - $mobileStage*1)){
   .topBar .user{
+    padding: 0;
+    justify-content: center;
     .material-icons{
       margin-left: 0;
     }
     div {
       display: none;
+    }
+    .iconArrow {
+      display:none;
     }
   }
 }
@@ -473,9 +481,6 @@ $licenseInfoHeight:40px;
     display:none;
   }
   .topBar {
-    .user{
-      top: 0;
-    }
     .eduImage{
       display:none;
     }

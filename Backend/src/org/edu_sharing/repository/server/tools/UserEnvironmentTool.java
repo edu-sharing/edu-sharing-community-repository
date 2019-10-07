@@ -31,6 +31,8 @@ import java.util.Calendar;
 import java.util.HashMap;
 
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
+import org.alfresco.service.cmr.repository.NodeRef;
+import org.alfresco.service.cmr.repository.StoreRef;
 import org.alfresco.service.cmr.security.PermissionService;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -39,6 +41,7 @@ import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.server.MCAlfrescoAPIClient;
 import org.edu_sharing.repository.server.MCAlfrescoBaseClient;
 import org.edu_sharing.repository.server.RepoFactory;
+import org.edu_sharing.service.nodeservice.NodeServiceFactory;
 
 public class UserEnvironmentTool {
 	
@@ -100,7 +103,7 @@ public class UserEnvironmentTool {
 			throw new Exception("Admin group required");
 		}
 		String companyHomeNodeId = mcBaseClient.getCompanyHomeNodeId();
-		HashMap<String, Object> edu_SharingSysMap = mcBaseClient.getChild(companyHomeNodeId, CCConstants.CCM_TYPE_MAP, CCConstants.CCM_PROP_MAP_TYPE, CCConstants.CCM_VALUE_MAP_TYPE_EDU_SHARING_SYSTEM);
+		NodeRef edu_SharingSysMap = NodeServiceFactory.getLocalService().getChild(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE,companyHomeNodeId, CCConstants.CCM_TYPE_MAP, CCConstants.CCM_PROP_MAP_TYPE, CCConstants.CCM_VALUE_MAP_TYPE_EDU_SHARING_SYSTEM);
 		
 		String result = null;
 		if(edu_SharingSysMap == null){
@@ -118,7 +121,7 @@ public class UserEnvironmentTool {
 			newEdu_SharingSysMapProps.put(CCConstants.CCM_PROP_MAP_TYPE, CCConstants.CCM_VALUE_MAP_TYPE_EDU_SHARING_SYSTEM);
 			result = mcBaseClient.createNode(companyHomeNodeId, CCConstants.CCM_TYPE_MAP, newEdu_SharingSysMapProps);
 		}else{
-			result = (String)edu_SharingSysMap.get(CCConstants.SYS_PROP_NODE_UID);
+			result = edu_SharingSysMap.getId();
 		}
 		return result;
 	}
@@ -161,7 +164,7 @@ public class UserEnvironmentTool {
 		
 		String systemFolderName = I18nServer.getTranslationDefaultResourcebundle(CCConstants.I18n_SYSTEMFOLDER_NOTIFY);
 		systemFolderName = (currentScope == null || currentScope.trim().isEmpty()) ? systemFolderName: systemFolderName + "_" + currentScope;
-		HashMap<String, Object> edu_SharingSystemFolderNotify = mcBaseClient.getChild(systemFolderId, CCConstants.CCM_TYPE_MAP, CCConstants.CM_NAME, systemFolderName);
+		NodeRef edu_SharingSystemFolderNotify = NodeServiceFactory.getLocalService().getChild(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, systemFolderId, CCConstants.CCM_TYPE_MAP, CCConstants.CM_NAME,systemFolderName);
 		String result = null;
 		if(edu_SharingSystemFolderNotify == null){
 			
@@ -177,7 +180,7 @@ public class UserEnvironmentTool {
 			newEdu_SharingSysMapProps.put(CCConstants.CCM_PROP_MAP_TYPE, CCConstants.CCM_VALUE_MAP_TYPE_EDU_SHARING_SYSTEM_NOTIFY);
 			result = mcBaseClient.createNode(systemFolderId, CCConstants.CCM_TYPE_MAP, newEdu_SharingSysMapProps);
 		}else{
-			result = (String)edu_SharingSystemFolderNotify.get(CCConstants.SYS_PROP_NODE_UID);
+			result = edu_SharingSystemFolderNotify.getId();
 		}
 		return result;
 	}
@@ -289,21 +292,19 @@ public class UserEnvironmentTool {
 	 * @throws Throwable
 	 */
 	private String getMap(String parentId, String name, String mapType) throws Throwable{
-		HashMap<String,Object> childProps = mcBaseClient.getChild(parentId, CCConstants.CCM_TYPE_MAP, CCConstants.CM_NAME, name);
-		String childId = null;
-		
-		if(childProps == null){
+		NodeRef child = NodeServiceFactory.getLocalService().getChild(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, parentId, CCConstants.CCM_TYPE_MAP, CCConstants.CM_NAME,name);
+		if(child == null){
 			HashMap<String,Object> props = new HashMap<String,Object>();
 			props.put(CCConstants.CM_NAME, name);
 			props.put(CCConstants.CM_PROP_TITLE, name);
 			if(mapType != null){
 				props.put(CCConstants.CCM_PROP_MAP_TYPE, mapType);
 			}
-			childId = mcBaseClient.createNode(parentId, CCConstants.CCM_TYPE_MAP, props);
-		}else{
-			childId = (String)childProps.get(CCConstants.SYS_PROP_NODE_UID);
+			return mcBaseClient.createNode(parentId, CCConstants.CCM_TYPE_MAP, props);
 		}
-		return childId;
+		else{
+			return child.getId();
+		}
 	}
 	
 	

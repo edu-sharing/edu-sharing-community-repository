@@ -36,6 +36,7 @@ import {
     About, RestMediacenterService
 } from '../../../core-module/core.module';
 import {BridgeService} from "../../../core-bridge-module/bridge.service";
+import {GlobalContainerComponent} from "../global-container/global-container.component";
 
 @Component({
     selector: 'main-nav',
@@ -181,6 +182,10 @@ export class MainNavComponent implements AfterViewInit{
             this.displaySidebar=false;
             return;
         }
+    }
+    @HostListener('window:resize')
+    onResize(event:any){
+        this.updateUserOptions();
     }
     @HostListener('window:scroll', ['$event'])
     @HostListener('window:touchmove', ['$event'])
@@ -854,15 +859,7 @@ export class MainNavComponent implements AfterViewInit{
             }
         }
     }
-    public getPreloading(){
-        return MainNavComponent.preloading;
-    }
-    public static getPreloading(){
-        return MainNavComponent.preloading;
-    }
-    public finishPreloading(){
-        MainNavComponent.preloading=false;
-    }
+
 
     showLicenses() {
         this.licenseDialog=true;
@@ -879,6 +876,20 @@ export class MainNavComponent implements AfterViewInit{
             console.error(error);
         });
         //});
+    }
+    showChat() {
+        return GlobalContainerComponent.instance.rocketchat._data;
+    }
+    getChatCount() {
+        return GlobalContainerComponent.instance.rocketchat.unread;
+    }
+
+    openChat() {
+        GlobalContainerComponent.instance.rocketchat.opened=true;
+        GlobalContainerComponent.instance.rocketchat.unread=0;
+    }
+    getPreloading() {
+        return GlobalContainerComponent.getPreloading();
     }
 
     showAdminButton() {

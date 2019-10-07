@@ -28,6 +28,7 @@ import {FormControl} from '@angular/forms';
 import {map, startWith} from "rxjs/operators";
 import {MainNavComponent} from '../../common/ui/main-nav/main-nav.component';
 import {BridgeService} from "../../core-bridge-module/bridge.service";
+import {GlobalContainerComponent} from "../../common/ui/global-container/global-container.component";
 
 @Component({
   selector: 'workspace-login',
@@ -118,7 +119,7 @@ export class LoginComponent  implements OnInit{
 
           this.connector.onAllRequestsReady().subscribe(()=>{
             this.isLoading=false;
-            this.mainNavRef.finishPreloading();
+            GlobalContainerComponent.finishPreloading();
               setTimeout(()=>{
                   if (this.username && this.passwordInput)
                       this.passwordInput.nativeInput.nativeElement.focus();

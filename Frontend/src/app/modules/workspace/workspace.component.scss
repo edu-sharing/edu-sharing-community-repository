@@ -194,7 +194,7 @@ user-quota{
     height:$workspaceBreadcrumbsHeight;
     background-color: #fff;
     padding-left:320px;
-    padding-top: 22px;
+    padding-top: 18px;
     padding-bottom: 20px;
     padding-right: 50px;
     @include materialShadow();
@@ -203,7 +203,7 @@ user-quota{
 :host /deep/{
   .breadcrumbFrame .breadcrumb {
     position: relative;
-    top: -5px;
+    top: 0;
     div {
       word-break: break-all;
     }
@@ -239,6 +239,7 @@ user-quota{
   }
   .breadcrumbFrame >div{
     padding-left:10px;
+    padding-top:22px;
   }
   .addDesktopMenu{
     right:53px;

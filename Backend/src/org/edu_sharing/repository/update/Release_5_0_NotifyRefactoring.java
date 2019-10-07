@@ -2,13 +2,7 @@ package org.edu_sharing.repository.update;
 
 import java.io.PrintWriter;
 import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.Map.Entry;
 
 import org.alfresco.model.ContentModel;
@@ -16,12 +10,14 @@ import org.alfresco.repo.policy.BehaviourFilter;
 import org.alfresco.service.cmr.repository.ChildAssociationRef;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.repository.NodeService;
+import org.alfresco.service.cmr.repository.StoreRef;
 import org.alfresco.service.cmr.search.ResultSet;
 import org.alfresco.service.cmr.search.SearchParameters;
 import org.alfresco.service.cmr.search.SearchService;
 import org.alfresco.service.namespace.QName;
 import org.alfresco.service.namespace.RegexQNamePattern;
 import org.apache.log4j.Logger;
+import org.edu_sharing.alfresco.workspace_administration.NodeServiceInterceptor;
 import org.edu_sharing.repository.client.rpc.ACE;
 import org.edu_sharing.repository.client.rpc.ACL;
 import org.edu_sharing.repository.client.rpc.Notify;
@@ -29,9 +25,12 @@ import org.edu_sharing.repository.client.rpc.User;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.server.MCAlfrescoAPIClient;
 import org.edu_sharing.repository.server.jobs.helper.NodeRunner;
+import org.edu_sharing.repository.server.tools.UserEnvironmentTool;
 import org.edu_sharing.service.Constants;
 
 import com.google.gson.Gson;
+import org.edu_sharing.service.nodeservice.NodeServiceFactory;
+import org.edu_sharing.service.nodeservice.NodeServiceHelper;
 import org.edu_sharing.service.permission.PermissionServiceHelper;
 
 public class Release_5_0_NotifyRefactoring extends UpdateAbstract {
@@ -40,14 +39,8 @@ public class Release_5_0_NotifyRefactoring extends UpdateAbstract {
 
 	public static final String description = "remove notify objects, use permission_history aspect";
 
-	int maxItems = 100;
-
-	SearchService searchService = serviceRegistry.getSearchService();
 	NodeService nodeService = serviceRegistry.getNodeService();
-
-	BehaviourFilter policyBehaviourFilter = (BehaviourFilter) applicationContext.getBean("policyBehaviourFilter");
-
-	MCAlfrescoAPIClient apiClient;
+	MCAlfrescoAPIClient apiClient=new MCAlfrescoAPIClient();
 
 	public Release_5_0_NotifyRefactoring(PrintWriter out) {
 		this.out = out;
@@ -79,27 +72,48 @@ public class Release_5_0_NotifyRefactoring extends UpdateAbstract {
 	public void doTask(){
 		NodeRunner runner=new NodeRunner();
 		runner.setRunAsSystem(true);
-		runner.setTypes(Collections.singletonList(CCConstants.CCM_TYPE_NOTIFY));
-		runner.setThreaded(false);
+		runner.setTypes(Arrays.asList(CCConstants.CCM_TYPE_IO,CCConstants.CCM_TYPE_MAP));
+		runner.setThreaded(true);
 		runner.setKeepModifiedDate(true);
+		runner.setTransaction(NodeRunner.TransactionMode.LocalRetrying);
 		int[] processed=new int[]{0};
 		runner.setTask((ref)->{
-			try {
-				migrate(ref);
-			} catch (Exception e) {
-				logger.warn("error transforming node "+ref+": "+e.getMessage(),e);
-			}
+			migrate(ref);
 			processed[0]++;
 		});
 		runner.run();
-		logInfo("Added educontext default value to a total of "+processed[0]+" nodes");
+		logInfo("Converted a total of "+processed[0]+" nodes");
+		try {
+            String notify = new UserEnvironmentTool().getEdu_SharingNotifyFolder();
+            NodeRef ref = new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, notify);
+            nodeService.addAspect(ref, ContentModel.ASPECT_TEMPORARY, null);
+            nodeService.deleteNode(ref);
+            logInfo("removed the notify folder");
+        }catch(Throwable t) {
+            logger.error(t.getMessage(),t);
+        }
+		try{
+            NodeServiceInterceptor.setEduSharingScope(CCConstants.CCM_VALUE_SCOPE_SAFE);
+			String notifySafe = new UserEnvironmentTool().getEdu_SharingNotifyFolder();
+            NodeRef ref = new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, notifySafe);
+			nodeService.addAspect(ref, ContentModel.ASPECT_TEMPORARY, null);
+			nodeService.deleteNode(ref);
+            logInfo("removed the notify safe folder");
+		} catch (Throwable t) {
+			logger.error(t.getMessage(),t);
+		}
+		finally {
+            NodeServiceInterceptor.setEduSharingScope(null);;
+        }
+
+
 	}
 
-	private void migrate(NodeRef nodeRef) throws Exception {
+	private void migrate(NodeRef nodeRef) {
 		List<ChildAssociationRef> notifyParentAssocs = nodeService.getParentAssocs(nodeRef,
-				QName.createQName(CCConstants.CCM_TYPE_NOTIFY + "_nodes"), RegexQNamePattern.MATCH_ALL);
+				QName.createQName(CCConstants.CCM_ASSOC_NOTIFY_NODES), RegexQNamePattern.MATCH_ALL);
 
-		Map<NodeRef, Map<QName, Serializable>> notifyProps = new HashMap<NodeRef, Map<QName, Serializable>>();
+		Map<NodeRef, Map<QName, Serializable>> notifyProps = new HashMap<>();
 
 		for (ChildAssociationRef childRef : notifyParentAssocs) {
 			NodeRef notifyRef = childRef.getParentRef();
@@ -107,20 +121,11 @@ public class Release_5_0_NotifyRefactoring extends UpdateAbstract {
 			notifyProps.put(notifyRef, properties);
 		}
 
-		List<Map.Entry<NodeRef, Map<QName, Serializable>>> toSort = new ArrayList<Map.Entry<NodeRef, Map<QName, Serializable>>>();
-
-		for (Map.Entry<NodeRef, Map<QName, Serializable>> entry : notifyProps.entrySet()) {
-			toSort.add(entry);
-		}
-
-		Collections.sort(toSort, new Comparator<Map.Entry<NodeRef, Map<QName, Serializable>>>() {
-			@Override
-			public int compare(Entry<NodeRef, Map<QName, Serializable>> o1,
-							   Entry<NodeRef, Map<QName, Serializable>> o2) {
-				Date o1Created = (Date) o1.getValue().get(ContentModel.PROP_CREATED);
-				Date o2Created = (Date) o2.getValue().get(ContentModel.PROP_CREATED);
-				return o1Created.compareTo(o2Created);
-			}
+		List<Entry<NodeRef, Map<QName, Serializable>>> toSort = new ArrayList<>(notifyProps.entrySet());
+		Collections.sort(toSort, (o1, o2) -> {
+			Date o1Created = (Date) o1.getValue().get(ContentModel.PROP_CREATED);
+			Date o2Created = (Date) o2.getValue().get(ContentModel.PROP_CREATED);
+			return o1Created.compareTo(o2Created);
 		});
 
 		/**
@@ -128,7 +133,7 @@ public class Release_5_0_NotifyRefactoring extends UpdateAbstract {
 		 */
 		int i=0;
 		for (Map.Entry<NodeRef, Map<QName, Serializable>> entry : toSort) {
-			logger.info(" transforming notify from: " + entry.getValue().get(ContentModel.PROP_CREATED));
+			logger.info("transforming notify from: " +entry.getKey()+" "+entry.getValue().get(ContentModel.PROP_CREATED));
 
 			Gson gson = new Gson();
 			Notify n = new Notify();
@@ -137,16 +142,19 @@ public class Release_5_0_NotifyRefactoring extends UpdateAbstract {
 			 *  get acl from notify cause its the same as io
 			 *  does not really work for notifys cause there is one notify also with the inherited permissions
 			 */
-			ACL acl = apiClient.getPermissions(entry.getKey().getId());
+			ACL acl = null;
+			try {
+				acl = apiClient.getPermissions(entry.getKey().getId());
+			} catch (Exception e) {
+				logger.warn("getPermissions() failed: "+e.getMessage());
+				throw new RuntimeException(e);
+			}
 			List<ACE> directlySetAces = new ArrayList<ACE>();
 			for (ACE ace : acl.getAces()) {
 				if (!ace.isInherited()) {
 					directlySetAces.add(ace);
 				}
 			}
-			// set of all authority names that are not inherited, but explicitly set
-			nodeService.setProperty(nodeRef, QName.createQName(CCConstants.CCM_PROP_PH_INVITED), PermissionServiceHelper.getExplicitAuthoritiesFromACL(acl));
-
 			Date created = (Date) nodeService.getProperty(entry.getKey(), ContentModel.PROP_CREATED);
 			String action = (String) nodeService.getProperty(entry.getKey(),
 					QName.createQName(CCConstants.CCM_PROP_NOTIFY_ACTION));
@@ -166,6 +174,9 @@ public class Release_5_0_NotifyRefactoring extends UpdateAbstract {
 				nodeService.addAspect(nodeRef, QName.createQName(CCConstants.CCM_ASPECT_PERMISSION_HISTORY),
 						null);
 			}
+			// set of all authority names that are not inherited, but explicitly set
+			nodeService.setProperty(nodeRef, QName.createQName(CCConstants.CCM_PROP_PH_INVITED), PermissionServiceHelper.getExplicitAuthoritiesFromACL(acl));
+
 			String jsonStringACL = gson.toJson(n);
 			List<String> history = (List<String>) nodeService.getProperty(nodeRef,
 					QName.createQName(CCConstants.CCM_PROP_PH_HISTORY));

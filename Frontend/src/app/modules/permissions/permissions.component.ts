@@ -15,6 +15,7 @@ import {UIHelper} from "../../core-ui-module/ui-helper";
 import {SessionStorageService} from "../../core-module/core.module";
 import {RestHelper} from "../../core-module/core.module";
 import {MainNavComponent} from '../../common/ui/main-nav/main-nav.component';
+import {GlobalContainerComponent} from "../../common/ui/global-container/global-container.component";
 
 @Component({
   selector: 'permissions-main',
@@ -52,7 +53,7 @@ export class PermissionsMainComponent {
             else{
                 this.goToLogin();
             }
-            this.mainNavRef.finishPreloading();
+            GlobalContainerComponent.finishPreloading();
         }, (error: any) => this.goToLogin());
         this.config.get("hideMainMenu").subscribe((data:string[])=>{
             if(data && data.indexOf("permissions")!=-1){

@@ -4,6 +4,7 @@
         <div class="options">
             <mat-spinner *ngIf="!loaded" diameter="20"></mat-spinner>
             <button mat-button *ngIf="loaded && opened" class="toggle-fullscreen clickable" (click)="fullscreen=!fullscreen"><i icon [iconId]="fullscreen ? 'fullscreen_exit' : 'fullscreen'"></i></button>
+            <button mat-button *ngIf="loaded && opened" class="toggle-close clickable" (click)="opened=!opened;unread=0"><i icon iconId="close"></i></button>
             <button mat-button *ngIf="loaded && !fullscreen" class="toggle-open clickable" (click)="opened=!opened;unread=0"><i icon [iconId]="opened ? 'remove' : 'launch'"></i></button>
         </div>
     </div>

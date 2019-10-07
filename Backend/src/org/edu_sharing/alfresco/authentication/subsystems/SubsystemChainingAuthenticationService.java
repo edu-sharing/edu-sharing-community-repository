@@ -20,6 +20,8 @@ import org.alfresco.service.namespace.QName;
 import org.alfresco.service.transaction.TransactionService;
 import org.apache.log4j.Logger;
 import org.edu_sharing.repository.client.tools.CCConstants;
+import org.edu_sharing.repository.server.tools.ApplicationInfo;
+import org.edu_sharing.repository.server.tools.ApplicationInfoList;
 
 public class SubsystemChainingAuthenticationService extends org.alfresco.repo.security.authentication.subsystems.SubsystemChainingAuthenticationService {
 
@@ -71,7 +73,9 @@ public class SubsystemChainingAuthenticationService extends org.alfresco.repo.se
     
     public void setEsLastLoginToNow(String userName) {
     	NodeRef nodeRefPerson = personService.getPerson(userName,false);
-        
+    	// we won't do this for the guest
+        if(userName!=null && userName.equals(ApplicationInfoList.getHomeRepository().getGuest_username()))
+            return;
         RunAsWork<Void> runAs = new RunAsWork<Void>() {
         	@Override
         	public Void doWork() throws Exception {

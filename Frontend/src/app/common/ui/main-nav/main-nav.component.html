@@ -101,13 +101,17 @@
                     <a tabindex="0" class="focus-underline" *ngIf="config.imprintUrl" (click)="openImprint()" (keyup.enter)="openImprint()">{{ 'IMPRINT' | translate }}</a>
                     <a tabindex="0" class="focus-underline" *ngIf="config.privacyInformationUrl" (click)="openPrivacy()" (keyup.enter)="openPrivacy()">{{ 'PRIVACY_INFORMATION' | translate }}</a>
                 </div>
-                <div *ngIf="user && (_currentScope=='search' || _currentScope=='stream' || _currentScope=='collections')" #nodeStoreRef class="clickable nodeStore" tabindex="0" (click)="setNodeStore(true)" (keyup.enter)="setNodeStore(true)" title="{{'SEARCH.NODE_STORE.TITLE' | translate}}">
-                    <i aria-hidden="true" class="material-icons barIcon">bookmark_border</i>
-                    <div class="nodeStoreCount">{{nodeStoreCount}}</div>
+                <button mat-icon-button *ngIf="user && (_currentScope=='search' || _currentScope=='stream' || _currentScope=='collections')" #nodeStoreRef class="clickable nodeStore" tabindex="0" (click)="setNodeStore(true)" (keyup.enter)="setNodeStore(true)" title="{{'SEARCH.NODE_STORE.TITLE' | translate}}">
+                    <i icon iconId="bookmark_border" class="barIcon"></i>
+                    <div class="mat-button-badge nodeStoreCount">{{nodeStoreCount}}</div>
                     <div *ngIf="nodeStoreAnimation>0" [@nodeStore]="nodeStoreAnimation>0" class="clickable nodeStoreAnimation" (click)="setNodeStore(true)">
                         <div>+{{nodeStoreAnimation}}</div>
                     </div>
-                </div>
+                </button>
+                <button mat-icon-button *ngIf="user && showChat()" class="rocketchat" (click)="openChat()" >
+                    <i icon iconId="message"></i>
+                    <div class="mat-button-badge" [class.rocketchat-count-none]="getChatCount()==0">{{getChatCount()}}</div>
+                </button>
                 <button mat-button class="user clickable" #userRef *ngIf="user && _showUser" [matMenuTriggerFor]="userDropdown.menu" title="{{'USERMENU' | translate}}">
                     <user-avatar [user]="user.person" [size]="'xsmall'"></user-avatar>
                     <div *ngIf="!isGuest">{{userName}}</div>

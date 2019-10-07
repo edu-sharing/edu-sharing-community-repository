@@ -1,8 +1,17 @@
 @import "../../../../core-ui-module/styles/variables";
 
 $barHeight:30px;
+$barHeightMobile:60px;
 $chatWidth:300px;
 $chatHeight:450px;
+
+@mixin fullscreen($bar){
+  width:100%;
+  max-height: 100%;
+  iframe{
+    height:calc(100vh - #{$bar});
+  }
+}
 .chat{
   transition: all $transitionNormal;
   position: fixed;
@@ -36,6 +45,9 @@ $chatHeight:450px;
         padding: 0;
         min-width: unset;
       }
+      .toggle-close{
+        display: none;
+      }
     }
     &.unread{
       background-color: #ad4638;
@@ -51,15 +63,28 @@ $chatHeight:450px;
     }
   }
   &.fullscreen{
-    width:100%;
-    max-height: 100%;
-    iframe{
-      height:calc(100vh - #{$barHeight});
-    }
+   @include fullscreen($barHeight);
   }
 }
 @media screen and (max-width: $mobileTabSwitchWidth) {
-  .chat{
+  .chat:not(.opened){
     display: none;
+  }
+  .chat.opened{
+    @include fullscreen($barHeightMobile);
+    .bar{
+      height:$barHeightMobile;
+      .options {
+        >div{
+          padding:6px;
+        }
+        .toggle-close{
+          display: flex;
+        }
+        .toggle-fullscreen,.toggle-open {
+          display: none;
+        }
+      }
+    }
   }
 }

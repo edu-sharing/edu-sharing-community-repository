@@ -18,6 +18,7 @@ import {UIConstants} from "../../core-module/ui/ui-constants";
 import {RestConstants} from "../../core-module/core.module";
 import {HttpClient} from '@angular/common/http';
 import {MainNavComponent} from '../../common/ui/main-nav/main-nav.component';
+import {GlobalContainerComponent} from "../../common/ui/global-container/global-container.component";
 
 
 @Component({
@@ -52,7 +53,7 @@ export class ServicesComponent {
             UIHelper.setTitle('SERVICES.TITLE', title, translate, config);
             this.configService.getAll().subscribe((data: any) => {
                 this.refreshServiceList();
-                this.mainNavRef.finishPreloading();
+                GlobalContainerComponent.finishPreloading();
             });
         });
 
