@@ -155,6 +155,7 @@ input.mat-input-element, mat-label, .mat-select-value{
   color: $primary;
 }
 .mat-button-wrapper{
+  position: relative;
   display: flex !important;
   align-items: center;
   justify-content: center;
@@ -216,7 +217,23 @@ label .label-secondary{
   font-size: 90%;
   color: $textLight;
 }
-
+/* a badge (usually counter) inside an (icon) button
+ */
+.mat-button-badge{
+  position: absolute;
+  right: -3px;
+  top: -3px;
+  color: $textOnPrimary;
+  background-color: $colorStatusNegative;
+  border-radius: 50%;
+  width: 16px;
+  height: 16px;
+  font-weight: bold;
+  font-size: 0.8em;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
 .mat-card-subtitle,.mat-hint, .mat-slide-toggle-content{
   color: $textLight;
 }
