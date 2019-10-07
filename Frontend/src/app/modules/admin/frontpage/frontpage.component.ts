@@ -29,6 +29,7 @@ export class AdminFrontpageComponent {
   previewLoading=true;
   config: any;
   modes = ["collection","rating","views","downloads"];
+  conditionTypes = ["TOOLPERMISSION"];
   timespans = ["days_30","days_100","all"];
   private form: FormGroup;
   previewNodes: Node[];
@@ -36,7 +37,7 @@ export class AdminFrontpageComponent {
   previewError: string;
   collectionName = '';
   chooseCollection = false;
-
+  codeOptions={minimap:{enabled:false}, language: 'json'};
 
   /*
   totalCountFormControl = new FormControl('', [
@@ -127,6 +128,17 @@ export class AdminFrontpageComponent {
   queryHelp() {
     // @TODO: Link to edu-sharing manpage!
 
+  }
+
+  addQueryCondition() {
+    if(!this.config.frontpage.queries)
+      this.config.frontpage.queries=[];
+    this.config.frontpage.queries.push({
+      conditionType:this.conditionTypes[0]
+    });
+  }
+  removeQueryCondition(query:any) {
+    this.config.frontpage.queries.splice(this.config.frontpage.queries.indexOf(query),1);
   }
 }
 const ValidateForm: ValidatorFn=(control)=>{

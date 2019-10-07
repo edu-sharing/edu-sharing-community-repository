@@ -33,6 +33,7 @@ import {CustomModule} from './custom-module/custom.module';
 import {RestLocatorService, CoreModule} from "./core-module/core.module";
 import {CoreBridgeModule} from "./core-bridge-module/core.bridge.module";
 import {CoreUiModule} from "./core-ui-module/core-ui.module";
+import {MonacoEditorModule} from "ngx-monaco-editor";
 
 
 export const IMPORTS=[
@@ -70,5 +71,6 @@ export const IMPORTS=[
   CoreBridgeModule,
   CoreUiModule,
   CustomModule,
+  MonacoEditorModule.forRoot(),
   RouterModule.forRoot(ROUTES),
 ];

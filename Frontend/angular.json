@@ -17,7 +17,8 @@
             "tsConfig": "src/tsconfig.json",
             "showCircularDependencies": true,
             "assets": [
-              "src/assets"
+              { "glob": "**/*", "input": "src/assets/", "output": "/assets/" },
+              { "glob": "**/*", "input": "node_modules/ngx-monaco-editor/assets/monaco", "output": "/assets/monaco/" }
             ],
             "styles": [
               "src/app/core-ui-module/styles/core-base.scss",

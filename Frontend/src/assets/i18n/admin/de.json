@@ -399,7 +399,16 @@
       },
       "CUSTOM_QUERY_LABEL": "Zusätzliches Query",
       "CUSTOM_QUERY_HINT": "Ein Query, welches zusätzlich als \"AND\" Bedingung verknüpft wird. Kann beliebig weiter verschachtelt werden und muss der Elasticsearch-Abfragesprache (DSL) konform sein",
-      "CUSTOM_QUERY_HINT_HELP": "Dokumentation öffnen"
+      "CUSTOM_QUERY_HINT_HELP": "Dokumentation öffnen",
+      "CUSTOM_QUERY_CONDITION_TYPE": "Bedingungsart",
+      "CUSTOM_QUERY_CONDITION_TYPE_HINT": "z.B. eine vorhandene Toolpermission",
+      "CUSTOM_QUERY_CONDITION_VALUE": "Bedingungswert",
+      "CUSTOM_QUERY_CONDITION_VALUE_HINT": "Wert für die Bedingung, z.B. TOOLPERMISSION_SHOW_EDITORIAL",
+      "CUSTOM_QUERY_ADD_CONDITION": "Bedingung / Query hinzufügen",
+      "CUSTOM_QUERY_REMOVE_CONDITION": "Bedingung / Query löschen",
+      "CONDITION_TYPE":{
+        "TOOLPERMISSION": "Toolpermission"
+      }
     }
   }
 }

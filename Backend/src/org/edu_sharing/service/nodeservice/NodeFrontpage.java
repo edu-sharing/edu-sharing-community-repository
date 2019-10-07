@@ -33,6 +33,7 @@ import org.edu_sharing.service.search.SearchService;
 import org.edu_sharing.service.search.SearchServiceFactory;
 import org.edu_sharing.service.search.model.SortDefinition;
 import org.edu_sharing.service.stream.StreamServiceHelper;
+import org.edu_sharing.service.toolpermission.ToolPermissionServiceFactory;
 import org.edu_sharing.service.tracking.TrackingService;
 import org.edu_sharing.service.tracking.TrackingServiceFactory;
 import org.edu_sharing.service.tracking.TrackingServiceImpl;
@@ -308,8 +309,16 @@ public class NodeFrontpage {
             audience.should(QueryBuilders.matchQuery("authorities", a));
         }
         query.must(audience);
-        if(config.query!=null) {
-            query.must(QueryBuilders.wrapperQuery(config.query));
+        if(config.queries!=null && !config.queries.isEmpty()) {
+            // filter all queries with matching toolpermissions, than concat them via "must"
+            config.queries.stream().filter((q)->{
+                if(q.conditionType.equals(RepositoryConfig.Frontpage.Query.Type.TOOLPERMISSION)){
+                    return ToolPermissionServiceFactory.getInstance().hasToolPermission(q.conditionValue);
+                }
+                return false;
+            }).forEach((q)-> {
+             query.must(QueryBuilders.wrapperQuery(q.query));
+            });
         }
         SearchSourceBuilder searchSourceBuilder = new SearchSourceBuilder();
         searchSourceBuilder.query(query);

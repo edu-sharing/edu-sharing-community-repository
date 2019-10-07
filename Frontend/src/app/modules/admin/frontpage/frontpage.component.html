@@ -52,16 +52,34 @@
                     <input matInput id="displayCount" type="number" formControlName="displayCount" [(ngModel)]="config.frontpage.displayCount">
                 </mat-form-field>
             </div>
-            <div class="group">
-                <mat-form-field>
+            <div class="group queries" *ngFor="let query of config.frontpage.queries">
+                <div class="condition">
+                    <mat-form-field>
+                        <mat-label>{{'ADMIN.FRONTPAGE.CUSTOM_QUERY_CONDITION_TYPE' | translate}}</mat-label>
+                        <mat-hint>{{'ADMIN.FRONTPAGE.CUSTOM_QUERY_CONDITION_TYPE_HINT' | translate}}</mat-hint>
+                        <mat-select id="conditionType" [(ngModel)]="query.conditionType" [ngModelOptions]="{standalone: true}">
+                            <mat-option *ngFor="let type of conditionTypes" [value]="type">{{'ADMIN.FRONTPAGE.CONDITION_TYPE.'+type | translate}}</mat-option>
+                        </mat-select>
+                    </mat-form-field>
+                    <mat-form-field>
+                        <mat-label>{{'ADMIN.FRONTPAGE.CUSTOM_QUERY_CONDITION_VALUE' | translate}}</mat-label>
+                        <mat-hint>{{'ADMIN.FRONTPAGE.CUSTOM_QUERY_CONDITION_VALUE_HINT' | translate}}</mat-hint>
+                        <input matInput
+                                    id="conditionValue" [(ngModel)]="query.conditionValue" [ngModelOptions]="{standalone: true}">
+                    </mat-form-field>
+                    <button mat-raised-button color="warn" (click)="removeQueryCondition(query)">{{'ADMIN.FRONTPAGE.CUSTOM_QUERY_REMOVE_CONDITION' | translate}}</button>
+
+                </div>
+                <div class="monaco-editor">
                     <mat-label>{{'ADMIN.FRONTPAGE.CUSTOM_QUERY_LABEL' | translate}}</mat-label>
+                    <ngx-monaco-editor [options]="codeOptions" [(ngModel)]="query.query" [ngModelOptions]="{standalone: true}"></ngx-monaco-editor>
                     <mat-hint><div>{{'ADMIN.FRONTPAGE.CUSTOM_QUERY_HINT' | translate}}</div><button mat-button (click)="queryHelp()">{{'ADMIN.FRONTPAGE.CUSTOM_QUERY_HINT_HELP' | translate}}</button></mat-hint>
-                    <textarea matInput
-                              cdkTextareaAutosize
-                              cdkAutosizeMinRows="4"
-                              cdkAutosizeMaxRows="10"
-                              id="query" [(ngModel)]="config.frontpage.query" [ngModelOptions]="{standalone: true}"></textarea>
-                </mat-form-field>
+                </div>
+            </div>
+            <div class="group">
+                <div>
+                    <button mat-button color="primary" (click)="addQueryCondition()">{{'ADMIN.FRONTPAGE.CUSTOM_QUERY_ADD_CONDITION' | translate}}</button>
+                </div>
             </div>
         </div>
         <div class="group">

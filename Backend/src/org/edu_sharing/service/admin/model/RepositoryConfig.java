@@ -1,6 +1,7 @@
 package org.edu_sharing.service.admin.model;
 
 import java.io.Serializable;
+import java.util.List;
 
 public class RepositoryConfig implements Serializable {
     public Frontpage frontpage = new Frontpage();
@@ -23,10 +24,19 @@ public class RepositoryConfig implements Serializable {
         public int displayCount=12;
         public Mode mode=Mode.rating;
         public Timespan timespan=Timespan.all;
-        public String query;
+        public List<Query> queries;
         // the id of the collection, if mode == collection
         public String collection;
 
         public Frontpage(){}
+
+        public static class Query {
+            public enum Type{
+                TOOLPERMISSION
+            }
+            public Type conditionType;
+            public String conditionValue;
+            public String query;
+        }
     }
 }
