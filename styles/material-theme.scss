@@ -235,6 +235,14 @@ label .label-secondary{
   justify-content: center;
   align-items: center;
 }
+.monaco-editor{
+  background-color: transparent!important;
+  mat-label,mat-hint{
+    padding:2px 0;
+    font-size: 75%;
+    color: $textLight;
+  }
+}
 .mat-card-subtitle,.mat-hint, .mat-slide-toggle-content{
   color: $textLight;
 }
