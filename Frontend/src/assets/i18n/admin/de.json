@@ -363,6 +363,12 @@
         "CHOOSE_ORGANISATIONS" : "CSV Datei mit Organisationen auswählen",
         "ORGANISATIONS_START" : "Organisationen Import ausführen",
         "IMPORTED" : "{{ rows }} Organisationen importiert"
+      },
+      "ORG_MC_CONNECT" : {
+        "TITLE" : "Import der Verknüpfung von Medienzentren und Organisationen",
+        "CHOOSE" : "CSV Datei mit der Verknüpfung von Medienzentren und Organisationen auswählen",
+        "ORGANISATIONS_START" : "Verknüpfung Import ausführen",
+        "IMPORTED" : "{{ rows }} Verknüpfungen importiert"
       }
     },
     "FRONTPAGE": {

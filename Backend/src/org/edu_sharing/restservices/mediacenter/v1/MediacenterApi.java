@@ -22,6 +22,7 @@ import org.edu_sharing.restservices.MediacenterDao;
 import org.edu_sharing.restservices.RepositoryDao;
 import org.edu_sharing.restservices.RestConstants;
 import org.edu_sharing.restservices.admin.v1.model.ExcelResult;
+import org.edu_sharing.restservices.mediacenter.v1.model.McOrgConnectResult;
 import org.edu_sharing.restservices.mediacenter.v1.model.MediacentersImportResult;
 import org.edu_sharing.restservices.mediacenter.v1.model.OrganisationsImportResult;
 import org.edu_sharing.restservices.shared.ErrorResponse;
@@ -313,6 +314,35 @@ public class MediacenterApi {
 
 			int count = MediacenterServiceFactory.getInstance().importOrganisations(is);
 			OrganisationsImportResult result = new OrganisationsImportResult();
+			result.setRows(count);
+			return Response.ok().entity(result).build();
+		} catch (Throwable t) {
+			return ErrorResponse.createResponse(t);
+		}
+	}
+
+	@POST
+	@Path("/import/mc_org")
+
+	@ApiOperation(value = "Import Mediacenter Organisation Connection", notes = "Import Mediacenter Organisation Connection.")
+
+	@ApiResponses(value = { @ApiResponse(code = 200, message = RestConstants.HTTP_200, response = McOrgConnectResult.class),
+			@ApiResponse(code = 400, message = RestConstants.HTTP_400, response = ErrorResponse.class),
+			@ApiResponse(code = 401, message = RestConstants.HTTP_401, response = ErrorResponse.class),
+			@ApiResponse(code = 403, message = RestConstants.HTTP_403, response = ErrorResponse.class),
+			@ApiResponse(code = 404, message = RestConstants.HTTP_404, response = ErrorResponse.class),
+			@ApiResponse(code = 500, message = RestConstants.HTTP_500, response = ErrorResponse.class) })
+	public Response importMcOrgConnections(@ApiParam(value = "Mediacenter Organisation Connection csv to import", required = true) @FormDataParam("mcOrgs") InputStream is,
+										@Context HttpServletRequest req) {
+		try {
+
+			org.edu_sharing.service.authority.AuthorityService eduAuthorityService = AuthorityServiceFactory.getAuthorityService(ApplicationInfoList.getHomeRepository().getAppId());
+			if(!eduAuthorityService.isGlobalAdmin()){
+				throw new Exception("Admin rights are required for this endpoint");
+			}
+
+			int count = MediacenterServiceFactory.getInstance().importOrgMcConnections(is);
+			McOrgConnectResult result = new McOrgConnectResult();
 			result.setRows(count);
 			return Response.ok().entity(result).build();
 		} catch (Throwable t) {
