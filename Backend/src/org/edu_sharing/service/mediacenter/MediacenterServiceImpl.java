@@ -5,12 +5,18 @@ import java.io.Serializable;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
+import org.alfresco.model.ContentModel;
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.repo.security.authentication.AuthenticationUtil.RunAsWork;
 import org.alfresco.service.ServiceRegistry;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.repository.NodeService;
+import org.alfresco.service.cmr.repository.StoreRef;
+import org.alfresco.service.cmr.search.ResultSet;
+import org.alfresco.service.cmr.search.SearchParameters;
+import org.alfresco.service.cmr.search.SearchService;
 import org.alfresco.service.cmr.security.AuthorityService;
 import org.alfresco.service.cmr.security.AuthorityType;
 import org.alfresco.service.cmr.security.PermissionService;
@@ -36,6 +42,8 @@ public class MediacenterServiceImpl implements MediacenterService{
 	OrganisationService organisationService = (OrganisationService) applicationContext
 			.getBean("eduOrganisationService");
 	org.edu_sharing.service.authority.AuthorityService eduAuthorityService2 = AuthorityServiceFactory.getLocalService();
+	SearchService searchService = serviceregistry.getSearchService();
+
 
 	@Override
 	public int importMediacenters(InputStream csv) {
@@ -155,5 +163,70 @@ public class MediacenterServiceImpl implements MediacenterService{
 
 		return AuthenticationUtil.runAs(runAs, ApplicationInfoList.getHomeRepository().getUsername());
 	}
+
+	@Override
+	public int importOrgMcConnections(InputStream csv) {
+		RunAsWork<Integer> runAs = new RunAsWork<Integer>() {
+			@Override
+			public Integer doWork() throws Exception {
+
+				List<List<String>> records = new CSVTool().getRecords(csv, CSVTool.ENC_UTF8);
+
+				int counter = 0;
+				for (List<String> record : records) {
+					String mzId = record.get(0);
+					String schoolId = record.get(1);
+
+					SearchParameters sp = new SearchParameters();
+					sp.setQuery("ASPECT:\"ccm:mediacenter\" AND @ccm\\:mediacenterId:\"" + mzId + "\"");
+					sp.setMaxItems(1);
+					sp.setLanguage(SearchService.LANGUAGE_LUCENE);
+					sp.setSkipCount(0);
+					sp.addStore(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE);
+					ResultSet rs = searchService.query(sp);
+
+					if (rs == null || rs.length() < 1) {
+						logger.error("no mediacenter found for " + mzId);
+						continue;
+					}
+
+					NodeRef nodeRefAuthorityMediacenter = rs.getNodeRef(0);
+
+					String authorityNameSchool = "GROUP_ORG_" + schoolId;
+
+					sp = new SearchParameters();
+					sp.setQuery("@cm\\:authorityName:" + authorityNameSchool);
+					sp.setMaxItems(1);
+					sp.setLanguage(SearchService.LANGUAGE_LUCENE);
+					sp.setSkipCount(0);
+					sp.addStore(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE);
+					rs = searchService.query(sp);
+					if (rs == null || rs.length() < 1) {
+						logger.error("no school found for " + schoolId + " " + authorityNameSchool);
+						continue;
+					}
+
+					String authorityNameMZ = (String) nodeService.getProperty(nodeRefAuthorityMediacenter,
+							ContentModel.PROP_AUTHORITY_NAME);
+					
+					
+					Set<String> mzContains = authorityService.getContainedAuthorities(AuthorityType.GROUP,authorityNameMZ,true);
+					
+					if(!mzContains.contains(authorityNameSchool)) {
+						logger.info("adding school" + authorityNameSchool + " to MZ " + authorityNameMZ );
+						authorityService.addAuthority(authorityNameMZ, authorityNameSchool);
+						counter++;
+					}else {
+						logger.info("mediacenter:" + authorityNameMZ + " already contains " + authorityNameSchool);
+					}
+					
+				}
+				return counter;
+			}
+		};
+
+		return AuthenticationUtil.runAs(runAs, ApplicationInfoList.getHomeRepository().getUsername());
+	}
+
 
 }

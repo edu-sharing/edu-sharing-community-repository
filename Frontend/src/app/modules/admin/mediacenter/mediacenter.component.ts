@@ -36,7 +36,9 @@ export class AdminMediacenterComponent {
   private isAdmin: boolean;
   public mediacentersFile: File;
   public organisationsFile: File;
+  public orgMcFile: File;
   public globalProgress=false;
+
 
 
     constructor(
@@ -177,6 +179,10 @@ export class AdminMediacenterComponent {
         this.organisationsFile=event.target.files[0];
     }
 
+    public updateOrgMcFile(event:any){
+        this.orgMcFile=event.target.files[0];
+    }
+
     public importMediacenters(){
         if(!this.mediacentersFile){
             this.toast.error(null,'ADMIN.MEDIACENTER.IMPORT.CHOOSE_MEDIACENTERS');
@@ -203,6 +209,23 @@ export class AdminMediacenterComponent {
             this.toast.toast('ADMIN.MEDIACENTER.ORGIMPORT.IMPORTED',{rows:data.rows});
             this.globalProgress=false;
             this.organisationsFile=null;
+        },(error:any)=>{
+            this.toast.error(error);
+            this.globalProgress=false;
+        });
+    }
+
+    //importMcOrgConnections
+    public importOrgMc(){
+        if(!this.orgMcFile){
+            this.toast.error(null,'ADMIN.MEDIACENTER.ORG_MC_CONNECT.CHOOSE');
+            return;
+        }
+        this.globalProgress=true;
+        this.mediacenterService.importMcOrgConnections(this.orgMcFile).subscribe((data:any)=>{
+            this.toast.toast('ADMIN.MEDIACENTER.ORG_MC_CONNECT.IMPORTED',{rows:data.rows});
+            this.globalProgress=false;
+            this.orgMcFile=null;
         },(error:any)=>{
             this.toast.error(error);
             this.globalProgress=false;

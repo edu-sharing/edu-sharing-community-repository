@@ -106,5 +106,16 @@
         <a class="btn waves-effect waves-light" (click)="importOrganisations()">{{'ADMIN.MEDIACENTER.ORGIMPORT.ORGANISATIONS_START' | translate}}</a>
     </div>
 
+    <h4 class="mat-heading-4 mat-heading-underline"><i icon iconId="business"></i>{{'ADMIN.MEDIACENTER.ORG_MC_CONNECT.TITLE' | translate}}</h4>
+    <div class="import">
+        <input #importOrgMcSelect type="file" style="display:none" id="importOrgMcSelect" accept=".csv" (change)="updateOrgMcFile($event)">
+        <div class="inputGroup">
+            <a class="btn-flat btn-shadow" (click)="importOrgMcSelect.click()">{{'ADMIN.MEDIACENTER.ORG_MC_CONNECT.CHOOSE' | translate}}</a>
+            <div class="file">{{ (orgMcFile ? orgMcFile.name : '') }}</div>
+        </div>
+        <a class="btn waves-effect waves-light" (click)="importOrgMc()">{{'ADMIN.MEDIACENTER.ORG_MC_CONNECT.ORGANISATIONS_START' | translate}}</a>
+    </div>
+
+
 </div>
 <global-progress *ngIf="globalProgress"></global-progress>
