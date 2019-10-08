@@ -53,7 +53,7 @@ export class AuthoritySearchInputComponent{
         let ret:SuggestItem[] = [];
         for (let user of authorities.authorities) {
           let group = user.profile.displayName != null;
-          let item = new SuggestItem(user.authorityName, group ? user.profile.displayName : NodeHelper.getUserDisplayName(user), group ? 'group' : 'person', '');
+          let item = new SuggestItem(user.authorityName, group ? user.profile.displayName : NodeHelper.getUserDisplayName(user), /*group ? 'group' : 'person',*/null,null);
           item.originalObject = user;
           item.secondaryTitle = this.namePipe.transform(user,{field:'secondary'});
           ret.push(item);

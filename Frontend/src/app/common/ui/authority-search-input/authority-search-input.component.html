@@ -10,4 +10,8 @@
   [hintBottom]="hintBottom"
   [suggestions]="authoritySuggestions"
   (updateInput)="updateSuggestions($event)"
-></autocomplete>
+>
+    <ng-template #icon let-suggestion="suggestion">
+       <user-avatar [user]="suggestion.originalObject" size="small"></user-avatar>
+    </ng-template>
+</autocomplete>

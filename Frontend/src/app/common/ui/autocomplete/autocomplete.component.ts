@@ -1,4 +1,4 @@
-import {Component, Input, Output, EventEmitter, OnInit, SimpleChanges} from '@angular/core';
+import {Component, Input, Output, EventEmitter, OnInit, SimpleChanges, ContentChild, TemplateRef} from '@angular/core';
 import {TranslateService} from "@ngx-translate/core";
 
 @Component({
@@ -10,6 +10,7 @@ import {TranslateService} from "@ngx-translate/core";
 
 
 export class AutocompleteComponent{
+  @ContentChild('icon') iconRef: TemplateRef<any>;
 
   @Input() id: string;
   @Input() placeholder: string;
