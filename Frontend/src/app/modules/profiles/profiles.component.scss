@@ -3,14 +3,14 @@ $path:'../../../assets/images/';
 
 .profile-bg{
   div{
-    position: absolute;
+    position: fixed;
     top: 0;
     left: 0;
     width: 100%;
     height: 100%;
   }
     img {
-      position: absolute;
+      position: fixed;
       display: block;
       width: 100vw;
       height: 100vh;
@@ -35,6 +35,9 @@ $path:'../../../assets/images/';
   .name{
     font-size:140%;
     font-weight: bold;
+  }
+  .profile{
+    white-space: pre-line;
   }
   .top{
     position: relative;

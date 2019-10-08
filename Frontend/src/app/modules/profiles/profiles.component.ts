@@ -72,6 +72,7 @@ export class ProfilesComponent {
             let name = new AuthorityNamePipe(this.translate).transform(this.user, null);
             UIHelper.setTitle('PROFILES.TITLE', this.title, this.translate, this.config, {name: name});
             this.globalProgress = false;
+            this.userEdit=Helper.deepCopy(this.user);
             GlobalContainerComponent.finishPreloading();
             this.iamService.getUser().subscribe((me)=>{
                 this.isMe = profile.person.authorityName == me.person.authorityName;
@@ -160,18 +161,21 @@ export class ProfilesComponent {
     if(!this.userEdit.profile.avatar && !this.avatarFile){
       this.iamService.removeUserAvatar(this.userEdit.authorityName).subscribe(()=>{
         this.edit=false;
+        this.editAbout=false;
         this.loadUser(this.userEdit.authorityName);
       });
     }
     else if(this.avatarFile){
       this.iamService.setUserAvatar(this.avatarFile,this.userEdit.authorityName).subscribe(()=>{
         this.edit=false;
+        this.editAbout=false;
         this.loadUser(this.userEdit.authorityName);
       });
     }
     else{
       this.globalProgress=false;
       this.edit=false;
+      this.editAbout=false;
       this.loadUser(this.userEdit.authorityName);
     }
   }
