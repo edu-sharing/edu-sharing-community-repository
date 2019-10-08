@@ -36,7 +36,7 @@
 
 
 <div *ngIf="edit" [@fade]="edit" class="dialog darken"></div>
-  <div *ngIf="edit" [@cardAnimation]="edit" class="card center-card card-action">
+  <div *ngIf="edit" [@cardAnimation]="edit" class="card center-card card-high card-action">
     <div class="card-content">
       <div class="card-cancel" (click)="cancelEdit()"><i class="material-icons">close</i></div>
       <div class="card-title">{{'PERMISSIONS.'+(editId==null ? 'CREATE' : 'EDIT') + '_' +_mode | translate }}</div>
