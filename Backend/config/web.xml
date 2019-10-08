@@ -316,9 +316,13 @@
 	      <filter-name>Edu-Sharing Authentication Preview Filter</filter-name>
 	      <url-pattern>/preview</url-pattern>
    </filter-mapping>
-   
-    
-   <filter-mapping>
+    <filter-mapping>
+        <filter-name>REST Origin Filter</filter-name>
+        <url-pattern>/preview</url-pattern>
+    </filter-mapping>
+
+
+    <filter-mapping>
 	      <filter-name>ResponseTimeFilter</filter-name>
 	      <url-pattern>/*</url-pattern>
    </filter-mapping>
