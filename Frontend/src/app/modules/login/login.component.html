@@ -65,7 +65,7 @@
       </div>
       <div class="card-action" *ngIf="!showProviders">
         <a class="waves-effect waves-light btn" [class.disabled]="disabled" (click)="login()">{{'LOGIN.LOGIN' | translate }}</a>
-        <a class="btn-flat" *ngIf="config.recoverPasswordUrl" (click)="recoverPassword()">{{'LOGIN.RECOVER_PASSWORD' | translate }}</a>
+        <a class="btn-flat" *ngIf="config.register.local || config.register.recoverUrl" (click)="recoverPassword()">{{'LOGIN.RECOVER_PASSWORD' | translate }}</a>
       </div>
     <div class="card-action card-action-info" *ngIf="showProviders"><div innerHTML="{{'LOGIN.ACTION_HELP' | translate}}"></div></div>
   <powered-by mode="white" *ngIf="!showProviders"></powered-by>
