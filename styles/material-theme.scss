@@ -260,6 +260,14 @@ label .label-secondary{
     margin-right: 18px;
   }
 }
+.mat-slide-toggle-twoside{
+  display: flex;
+  align-items: center;
+  >mat-label{
+    color:$textLight;
+    padding:0 8px;
+  }
+}
 // Mobile Menus at bottom
 @media screen and (max-width:  ($mobileWidth - $mobileStage*1)) {
   .cdk-overlay-backdrop.mat-dropdown-menu{
