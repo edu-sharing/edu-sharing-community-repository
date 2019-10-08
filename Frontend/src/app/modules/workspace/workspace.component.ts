@@ -1053,7 +1053,7 @@ export class WorkspaceMainComponent implements EventListener{
         this.actionOptions=this.getOptions(this.selection,false);
         let path=this.path;
         if(refreshPath)
-            this.path=[null];
+            this.path=[];
         setTimeout(()=>{
             this.path=path;
             this.currentFolder=folder;
