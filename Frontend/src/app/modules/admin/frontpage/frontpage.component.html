@@ -57,7 +57,7 @@
                     <mat-form-field>
                         <mat-label>{{'ADMIN.FRONTPAGE.CUSTOM_QUERY_CONDITION_TYPE' | translate}}</mat-label>
                         <mat-hint>{{'ADMIN.FRONTPAGE.CUSTOM_QUERY_CONDITION_TYPE_HINT' | translate}}</mat-hint>
-                        <mat-select id="conditionType" [(ngModel)]="query.conditionType" [ngModelOptions]="{standalone: true}">
+                        <mat-select id="conditionType" [(ngModel)]="query.condition.type" [ngModelOptions]="{standalone: true}">
                             <mat-option *ngFor="let type of conditionTypes" [value]="type">{{'ADMIN.FRONTPAGE.CONDITION_TYPE.'+type | translate}}</mat-option>
                         </mat-select>
                     </mat-form-field>
@@ -65,10 +65,24 @@
                         <mat-label>{{'ADMIN.FRONTPAGE.CUSTOM_QUERY_CONDITION_VALUE' | translate}}</mat-label>
                         <mat-hint>{{'ADMIN.FRONTPAGE.CUSTOM_QUERY_CONDITION_VALUE_HINT' | translate}}</mat-hint>
                         <input matInput
-                                    id="conditionValue" [(ngModel)]="query.conditionValue" [ngModelOptions]="{standalone: true}">
+                                    id="conditionValue" [(ngModel)]="query.condition.value" [ngModelOptions]="{standalone: true}">
                     </mat-form-field>
+                    <mat-radio-group class="negate" [(ngModel)]="query.condition.negate" [ngModelOptions]="{standalone: true}">
+                        <mat-label>{{'ADMIN.FRONTPAGE.CUSTOM_QUERY_CONDITION_NEGATE' | translate}}</mat-label>
+                        <mat-radio-button [value]="false">true</mat-radio-button>
+                        <mat-radio-button [value]="true">false</mat-radio-button>
+                    </mat-radio-group>
+                    <!--
+                    <div class="negate">
+                        <mat-label>{{'ADMIN.FRONTPAGE.CUSTOM_QUERY_CONDITION_NEGATE' | translate}}</mat-label>
+                        <div class="mat-slide-toggle-twoside">
+                            <mat-label>false</mat-label>
+                            <mat-slide-toggle [ngModel]="!query.condition.negate" (ngModelChange)="query.condition.negate=!$event" [ngModelOptions]="{standalone: true}"></mat-slide-toggle>
+                            <mat-label>true</mat-label>
+                        </div>
+                    </div>
+                    -->
                     <button mat-raised-button color="warn" (click)="removeQueryCondition(query)">{{'ADMIN.FRONTPAGE.CUSTOM_QUERY_REMOVE_CONDITION' | translate}}</button>
-
                 </div>
                 <div class="monaco-editor">
                     <mat-label>{{'ADMIN.FRONTPAGE.CUSTOM_QUERY_LABEL' | translate}}</mat-label>

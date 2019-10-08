@@ -106,20 +106,10 @@ public class NodeFrontpage {
                         return null;
                     });*/
                     XContentBuilder builder = jsonBuilder().startObject();
-
-                    long time=System.currentTimeMillis();
                     addAuthorities(ref, builder);
-                    logger.info("Authorities: "+(System.currentTimeMillis()-time)+" ms");
-                    time=System.currentTimeMillis();
                     addNodeMetadata(ref, builder);
-                    logger.info("Metadata: "+(System.currentTimeMillis()-time)+" ms");
-                    time=System.currentTimeMillis();
                     addRatings(ref, builder);
-                    logger.info("Ratings: "+(System.currentTimeMillis()-time)+" ms");
-                    time=System.currentTimeMillis();
                     addTracking(ref, builder);
-                    logger.info("Tracking: "+(System.currentTimeMillis()-time)+" ms");
-                    time=System.currentTimeMillis();
 
                     builder.endObject();
 
@@ -312,8 +302,10 @@ public class NodeFrontpage {
         if(config.queries!=null && !config.queries.isEmpty()) {
             // filter all queries with matching toolpermissions, than concat them via "must"
             config.queries.stream().filter((q)->{
-                if(q.conditionType.equals(RepositoryConfig.Frontpage.Query.Type.TOOLPERMISSION)){
-                    return ToolPermissionServiceFactory.getInstance().hasToolPermission(q.conditionValue);
+                if(q.condition.type.equals(RepositoryConfig.Condition.Type.TOOLPERMISSION)){
+                    // should return true if query is launching
+                    // so toolpermission == true && negate ? false : true -> toolpermission!=negate
+                    return ToolPermissionServiceFactory.getInstance().hasToolPermission(q.condition.value)!=q.condition.negate;
                 }
                 return false;
             }).forEach((q)-> {

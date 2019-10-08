@@ -406,6 +406,7 @@
       "CUSTOM_QUERY_CONDITION_VALUE_HINT": "Wert für die Bedingung, z.B. TOOLPERMISSION_SHOW_EDITORIAL",
       "CUSTOM_QUERY_ADD_CONDITION": "Bedingung / Query hinzufügen",
       "CUSTOM_QUERY_REMOVE_CONDITION": "Bedingung / Query löschen",
+      "CUSTOM_QUERY_CONDITION_NEGATE": "Zielwert für Bedingung",
       "CONDITION_TYPE":{
         "TOOLPERMISSION": "Toolpermission"
       }

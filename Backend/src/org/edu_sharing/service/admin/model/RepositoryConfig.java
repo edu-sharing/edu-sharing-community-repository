@@ -31,12 +31,16 @@ public class RepositoryConfig implements Serializable {
         public Frontpage(){}
 
         public static class Query {
-            public enum Type{
-                TOOLPERMISSION
-            }
-            public Type conditionType;
-            public String conditionValue;
+            public Condition condition=new Condition();
             public String query;
         }
+    }
+    public static class Condition{
+        public enum Type{
+            TOOLPERMISSION
+        }
+        public Type type;
+        public boolean negate;
+        public String value;
     }
 }

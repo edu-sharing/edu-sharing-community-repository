@@ -1,7 +1,7 @@
 @import "../../../core-ui-module/styles/variables";
 .frontpage {
   width: 100%;
-  max-width: 1150px;
+  max-width: 1300px;
   .save{
     justify-content: flex-end;
   }
@@ -9,7 +9,7 @@
     display: flex;
     margin: 50px 10%;
     &.queries{
-      margin:90px 12%;
+      margin:30px 12%;
     }
     .monaco-editor{
       display: flex;
@@ -28,8 +28,19 @@
     }
     >.condition{
       flex-direction: column;
-      button{
+      .negate{
         margin-top: 30px;
+        display: flex;
+        flex-wrap: wrap;
+        mat-label{
+          width: 100%;
+        }
+        mat-radio-button{
+          padding:5px 10px;
+        }
+      }
+      button{
+        margin-top: 15px;
       }
     }
     &.preview {

@@ -134,7 +134,10 @@ export class AdminFrontpageComponent {
     if(!this.config.frontpage.queries)
       this.config.frontpage.queries=[];
     this.config.frontpage.queries.push({
-      conditionType:this.conditionTypes[0]
+      condition:{
+        type:this.conditionTypes[0],
+        negate:false
+      }
     });
   }
   removeQueryCondition(query:any) {
