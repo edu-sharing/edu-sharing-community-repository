@@ -864,7 +864,7 @@ export class MainNavComponent implements AfterViewInit{
         }
     }
 
-    private isSafe() {
+    isSafe() {
         return this.connector.getCurrentLogin() && this.connector.getCurrentLogin().currentScope==RestConstants.SAFE_SCOPE;
     }
 }
