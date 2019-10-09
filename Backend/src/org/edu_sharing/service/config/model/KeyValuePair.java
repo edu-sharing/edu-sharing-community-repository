@@ -2,8 +2,9 @@ package org.edu_sharing.service.config.model;
 
 import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlValue;
+import java.io.Serializable;
 
-public class KeyValuePair {
+public class KeyValuePair implements Serializable {
 	@XmlAttribute public java.lang.String key;
 	@XmlValue public java.lang.String value;
 	@Override

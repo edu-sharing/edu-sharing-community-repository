@@ -8,9 +8,9 @@ import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 
 @XmlRootElement
-public class Config {
+public class Config implements Serializable {
 
-	Logger logger=Logger.getLogger(Config.class);
+	static Logger logger=Logger.getLogger(Config.class);
 
 	@XmlElement public Values values;
 	@XmlElement public Contexts contexts;

@@ -24,6 +24,7 @@ import javax.xml.xpath.XPathFactory;
 
 import org.apache.camel.util.FileUtil;
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.lang3.SerializationUtils;
 import org.apache.log4j.Logger;
 import org.edu_sharing.metadataset.v2.MetadataReaderV2;
 import org.edu_sharing.repository.server.tools.ApplicationInfoList;
@@ -108,8 +109,10 @@ public class ConfigServiceImpl implements ConfigService{
 	*/
 	@Override
 	public Config getConfig() throws Exception {
-	    if(!"true".equalsIgnoreCase(ApplicationInfoList.getHomeRepository().getDevmode()) && currentConfig!=null)
-	        return currentConfig;
+	    if(!"true".equalsIgnoreCase(ApplicationInfoList.getHomeRepository().getDevmode()) && currentConfig!=null) {
+	    	// Deep copy to prevent override cache data from contexts
+			return SerializationUtils.clone(currentConfig);
+		}
 		InputStream is = getConfigInputStream();
 		if(is==null)
 			throw new IOException("client.config.xml file missing");
