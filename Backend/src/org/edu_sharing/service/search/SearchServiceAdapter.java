@@ -24,7 +24,7 @@ public class SearchServiceAdapter implements SearchService {
 	}
 
 	@Override
-	public SearchResult<EduGroup> searchOrganizations(String pattern, int skipCount, int maxValues, SortDefinition sort, boolean scoped) throws Throwable {
+	public SearchResult<EduGroup> searchOrganizations(String pattern, int skipCount, int maxValues, SortDefinition sort, boolean scoped, boolean onlyMemberships) throws Throwable {
 		return null;
 	}
 

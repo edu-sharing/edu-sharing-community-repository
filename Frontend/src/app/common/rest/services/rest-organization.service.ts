@@ -33,12 +33,12 @@ export class RestOrganizationService extends AbstractRestService{
       ]);
     return this.connector.put(query,null, this.connector.getRequestOptions());
   }
-  public getOrganizations = (pattern = "", request:any=null,repository = RestConstants.HOME_REPOSITORY): Observable<OrganizationOrganizations> => {
-    let query = this.connector.createUrlNoEscape("organization/:version/organizations/:repository/?pattern=:pattern&:request", repository,
+  public getOrganizations = (pattern = "",onlyMemberships=true, request:any=null,repository = RestConstants.HOME_REPOSITORY): Observable<OrganizationOrganizations> => {
+    let query = this.connector.createUrlNoEscape("organization/:version/organizations/:repository/?pattern=:pattern&onlyMemberships=:onlyMemberships&:request", repository,
     [
       [":pattern",encodeURIComponent(pattern)],
-      [":request",this.connector.createRequestString(request)]
-    ]);
+      [":request",this.connector.createRequestString(request)],
+      [":onlyMemberships",""+onlyMemberships]]);
     return this.connector.get(query, this.connector.getRequestOptions())
       .map((response: Response) => response.json());
   }

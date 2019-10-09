@@ -31,7 +31,7 @@ public class OrganizationDao {
 
 	public static List<EduGroup> getOrganizations(RepositoryDao repoDao) throws DAOException {
 		try{
-			return SearchServiceFactory.getSearchService(repoDao.getApplicationInfo().getAppId()).searchOrganizations("", 0, Integer.MAX_VALUE, null,false).getData();
+			return SearchServiceFactory.getSearchService(repoDao.getApplicationInfo().getAppId()).searchOrganizations("", 0, Integer.MAX_VALUE, null,false,false).getData();
 		}catch(Throwable t){
 			throw DAOException.mapping(t);
 		}
