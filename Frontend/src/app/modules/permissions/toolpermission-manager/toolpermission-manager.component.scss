@@ -93,12 +93,14 @@
     height:20px;
   }
 }
+.heading .result{
+  justify-content: center;
+}
 .result{
-  width: 130px;
-  min-width: 130px;
+  width: 100px;
+  min-width: 100px;
   display:flex;
   align-items: center;
-  justify-content: center;
   >div {
     display: flex;
     .text {
