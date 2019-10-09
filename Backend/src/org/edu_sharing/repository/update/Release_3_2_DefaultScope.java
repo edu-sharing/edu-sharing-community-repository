@@ -103,7 +103,9 @@ public static String ID = "Release_3_2_DefaultScope";
 			
 			
 			
-			if(CCConstants.CCM_TYPE_IO.equals(nodeType) || CCConstants.CCM_TYPE_TOOLPERMISSION.equals(nodeType)){
+			if(CCConstants.CCM_TYPE_IO.equals(nodeType) 
+					|| CCConstants.CCM_TYPE_TOOLPERMISSION.equals(nodeType)
+					|| CCConstants.CCM_TYPE_NOTIFY.equals(nodeType)){
 				log("updateing node:"+ noderef +" in "+ nodeService.getPath(child.getChildRef()) +" processedNodeCounter:" + processedNodeCounter);
 				if(!test){
 					
