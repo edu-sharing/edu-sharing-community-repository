@@ -215,7 +215,7 @@ export class RestConnectorService {
     if(scope) {
       url = this.createUrl("authentication/:version/loginToScope", null);
     }
-    return new Observable<string>((observer : Observer<string>)=>{
+    return new Observable<LoginResult>((observer)=>{
       if(scope){
         this.post<LoginResult>(url,JSON.stringify({
           userName:username,
@@ -226,7 +226,7 @@ export class RestConnectorService {
             if(data.isValidLogin)
               this.event.broadcastEvent(FrameEventsService.EVENT_USER_LOGGED_IN,data);
             this.storage.set(TemporaryStorageService.SESSION_INFO,data);
-            observer.next(data.statusCode);
+            observer.next(data);
             observer.complete();
           },
           (error:any) =>{
@@ -241,7 +241,7 @@ export class RestConnectorService {
             if(data.isValidLogin)
               this.event.broadcastEvent(FrameEventsService.EVENT_USER_LOGGED_IN,data);
             this.storage.set(TemporaryStorageService.SESSION_INFO,data);
-            observer.next(data.statusCode);
+            observer.next(data);
             observer.complete();
           },
           (error: any) => {
