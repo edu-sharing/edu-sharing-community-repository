@@ -389,6 +389,8 @@ public class RenderingProxy extends HttpServlet {
 				}
 				catch (Throwable t){
 					logger.warn("Usage fetching failed for node "+nodeId+": "+t.getMessage());
+					resp.sendRedirect(URLTool.getNgErrorUrl("usage_missing"));
+					return true;
 				}
 			}
 			else{
