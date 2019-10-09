@@ -13,6 +13,7 @@ import javax.xml.bind.Unmarshaller;
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.repository.StoreRef;
+import org.apache.commons.lang3.SerializationUtils;
 import org.apache.log4j.Logger;
 import org.edu_sharing.repository.client.rpc.ACE;
 import org.edu_sharing.repository.client.tools.CCConstants;
@@ -40,10 +41,10 @@ public class ConfigServiceImpl implements ConfigService{
 	// Cached config
 	private static Config currentConfig=null;
 	private static final Unmarshaller jaxbUnmarshaller;
-	
+
 	private final NodeService nodeService;
 	private final PermissionService permissionService;
-	
+
 	static{
 		Unmarshaller jaxbUnmarshaller1;
 		try {
@@ -103,8 +104,10 @@ public class ConfigServiceImpl implements ConfigService{
 	*/
 	@Override
 	public Config getConfig() throws Exception {
-	    if(!"true".equalsIgnoreCase(ApplicationInfoList.getHomeRepository().getDevmode()) && currentConfig!=null)
-	        return currentConfig;
+	    if(!"true".equalsIgnoreCase(ApplicationInfoList.getHomeRepository().getDevmode()) && currentConfig!=null) {
+	    	// Deep copy to prevent override cache data from contexts
+			return SerializationUtils.clone(currentConfig);
+		}
 		InputStream is = getConfigInputStream();
 		if(is==null)
 			throw new IOException("client.config.xml file missing");

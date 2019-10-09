@@ -131,8 +131,12 @@ export class LoginComponent  implements OnInit{
             }
             else if(data.currentScope==this.scope){
               if(data.statusCode==RestConstants.STATUS_CODE_OK && params['local']!='true'){
-                this.goToNext();
+                this.goToNext(data);
               }
+            }
+            // when there is a request to go into safe mode, first, the user needs to login regular
+            else if(data.statusCode!=RestConstants.STATUS_CODE_OK && this.scope){
+                //RestHelper.goToLogin()
             }
             if(configService.instant('loginProvidersUrl')){
               this.showProviders=true;
@@ -194,11 +198,11 @@ export class LoginComponent  implements OnInit{
     this.isLoading=true;
 
       this.connector.login(this.username,this.password,this.scope).subscribe(
-        (data:string) => {
-          if(data==RestConstants.STATUS_CODE_OK) {
-            this.goToNext();
+        (data) => {
+          if(data.statusCode==RestConstants.STATUS_CODE_OK) {
+            this.goToNext(data);
           }
-          else if(data==RestConstants.STATUS_CODE_PREVIOUS_SESSION_REQUIRED || data==RestConstants.STATUS_CODE_PREVIOUS_USER_WRONG){
+          else if(data.statusCode==RestConstants.STATUS_CODE_PREVIOUS_SESSION_REQUIRED || data.statusCode==RestConstants.STATUS_CODE_PREVIOUS_USER_WRONG){
             this.toast.error(null,'LOGIN.SAFE_PREVIOUS');
             this.password="";
             this.isLoading=false;
@@ -216,11 +220,14 @@ export class LoginComponent  implements OnInit{
 
   }
 
-  private goToNext() {
+  private goToNext(data:LoginResult) {
     if(this.next){
       this.next=Helper.addGetParameter('fromLogin','true',this.next);
       RouterHelper.navigateToAbsoluteUrl(this.platformLocation,this.router,this.next);
       //window.location.assign(this.next);
+    }
+    else if(data.currentScope==RestConstants.SAFE_SCOPE){
+      this.router.navigate([UIConstants.ROUTER_PREFIX,"workspace","safe"]);
     }
     else {
       UIHelper.goToDefaultLocation(this.router,this.configService);

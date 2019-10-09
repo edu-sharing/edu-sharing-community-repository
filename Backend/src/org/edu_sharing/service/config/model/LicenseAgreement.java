@@ -5,8 +5,9 @@ import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlValue;
+import java.io.Serializable;
 
-public class LicenseAgreement {
+public class LicenseAgreement implements Serializable {
 	@XmlAccessorType(XmlAccessType.FIELD)
 	private static class Node{
 		@XmlAttribute public String language;

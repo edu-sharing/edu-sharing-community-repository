@@ -39,7 +39,7 @@
 ></toolpermission-manager>
 
 <div *ngIf="edit" [@fade]="edit" class="dialog darken"></div>
-  <div *ngIf="edit" [@cardAnimation]="edit" class="card center-card card-action">
+  <div *ngIf="edit" [@cardAnimation]="edit" class="card center-card card-high card-action">
     <div class="card-content">
       <div class="card-cancel" (click)="cancelEdit()" tabindex="0" (keyup.enter)="cancelEdit()"><i icon iconId="close" aria="true"></i></div>
       <div class="card-title">{{'PERMISSIONS.'+(editId==null ? 'CREATE' : 'EDIT') + '_' +_mode | translate }}</div>

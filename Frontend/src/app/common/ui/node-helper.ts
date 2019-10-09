@@ -428,7 +428,7 @@ export class NodeHelper{
       if(item.name=="displayName")
         return data.profile.displayName;
       if(item.name=="groupType")
-        return data.profile.groupType;
+        return translate.instant('PERMISSIONS.GROUP_TYPE.'+data.profile.groupType);
     }
     if(item.type=='USER'){
       if(item.name=='firstName')

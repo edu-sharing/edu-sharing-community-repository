@@ -6,6 +6,7 @@ import {Translation} from "../translation";
 export class FormatOptions {
     showDate?=true;
     showAlwaysTime?=false;
+    showSeconds?=false;
     useRelativeLabels?=true;
 }
 
@@ -72,6 +73,9 @@ export class DateHelper{
       let diffDays = Math.ceil(timeDiff / (3600 * 24));
       let addDate=true;
       let timeFormat="HH:mm";
+      if(options.showSeconds){
+          timeFormat+=":ss";
+      }
       if(timeDiff<3600*6 && options.useRelativeLabels){
         if(timeDiff<90){
           prefix=translation.instant("JUST_NOW",{seconds:timeDiff})

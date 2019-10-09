@@ -10,6 +10,8 @@ import {UIConstants} from "./ui-constants";
 import {TranslateService} from "@ngx-translate/core";
 import {UIAnimation} from "./ui-animation";
 import {CordovaService} from "../services/cordova.service";
+import {UIHelper} from "./ui-helper";
+import {DateHelper} from "./DateHelper";
 
 @Injectable()
 export class Toast{
@@ -92,12 +94,18 @@ export class Toast{
 
     try {
       error=json.error+": "+json.message;
-    }catch(e){}
+    }catch(e){
+      // if error is not parsable, at least output the grabbed data
+      error=JSON.stringify(errorObject);
+    }
     this.dialogTitle=dialogTitle;
     this.dialogMessage=dialogMessage;
     if(message=="COMMON_API_ERROR") {
       this.dialogMessage = '';
       this.dialogTitle = 'COMMON_API_ERROR_TITLE';
+      this.dialogParameters={
+        date:DateHelper.formatDate(this.translate,new Date().getTime(),{useRelativeLabels:false,showAlwaysTime:true,showSeconds:true})
+      }
       console.log(errorObject);
       try {
         let error = json.error;
