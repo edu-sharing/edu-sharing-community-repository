@@ -1,10 +1,11 @@
 package org.edu_sharing.service.config.model;
 
+import java.io.Serializable;
 import java.util.List;
 
 import javax.xml.bind.annotation.XmlElement;
 
-public class Context {
+public class Context implements Serializable {
 	@XmlElement	public String id;
 	@XmlElement	public String[] domain;
 	@XmlElement	public Values values;
