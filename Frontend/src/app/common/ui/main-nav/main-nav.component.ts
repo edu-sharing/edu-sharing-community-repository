@@ -836,11 +836,6 @@ export class MainNavComponent implements AfterViewInit{
                 null,
                 {minutes:Math.round(this.connector.logoutTimeout/60)}
             );
-            this.dialogTitle='WORKSPACE.AUTOLOGOUT';
-            this.dialogMessage='WORKSPACE.AUTOLOGOUT_INFO';
-            this.dialogCancelable=false;
-            this.dialogMessageParameters={minutes:Math.round(this.connector.logoutTimeout/60)};
-            this.dialogButtons=[];
         }
         else
             this.timeout="";
