@@ -273,7 +273,7 @@ public class RenderInfoSoapBindingImpl implements org.edu_sharing.webservices.re
 			String licenseIcon = new LicenseService().getIconUrl(commonLicensekey);
 			if(licenseIcon != null) props.put(CCConstants.VIRT_PROP_LICENSE_ICON, licenseIcon);
 		}
-		
+		props=MetadataTemplateRenderer.cleanupHTMLProperties(props);
 		props=VCardConverter.addVCardProperties(nodeType,props);
 		List<KeyValue> propsresult = new ArrayList<KeyValue>();
 		
