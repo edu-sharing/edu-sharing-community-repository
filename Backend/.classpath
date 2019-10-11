@@ -225,7 +225,6 @@
 	<classpathentry exported="true" kind="var" path="ALFRESCO_50d_WEBAPP_LIB/lucene-snowball-2.4.1.jar"/>
 	<classpathentry exported="true" kind="var" path="ALFRESCO_50d_WEBAPP_LIB/maven-artifact-3.2.1.jar"/>
 	<classpathentry exported="true" kind="var" path="ALFRESCO_50d_WEBAPP_LIB/metadata-extractor-2.6.2.jar"/>
-	<classpathentry exported="true" kind="var" path="ALFRESCO_50d_WEBAPP_LIB/mimepull-1.9.4.jar"/>
 	<classpathentry exported="true" kind="var" path="ALFRESCO_50d_WEBAPP_LIB/mybatis-3.2.7.jar"/>
 	<classpathentry exported="true" kind="var" path="ALFRESCO_50d_WEBAPP_LIB/mybatis-spring-1.2.2.jar"/>
 	<classpathentry exported="true" kind="var" path="ALFRESCO_50d_WEBAPP_LIB/myfaces-api-1.1.8.jar"/>

@@ -1,4 +1,5 @@
-<div class="row row-dark" *ngIf="!disabled">
+<div *ngIf="!disabled">
+<div class="row row-dark">
   <div class="col s12">
     <ul class="tabs">
       <li class="clickable tab col s4" (click)="setTab('ORG')">
@@ -44,3 +45,4 @@
           [searchPlaceholder]="'PERMISSIONS.SEARCH_'+tab"
           (onSearch)="doSearch($event.query)"
 ></main-nav>
+</div>
