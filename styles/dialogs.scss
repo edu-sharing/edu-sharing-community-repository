@@ -10,6 +10,14 @@ $cardActionHeight:77px;
   position:fixed;
   z-index:$dialogZIndex;
 }
+.dialog-halign{
+  display: flex;
+  justify-content: center;
+}
+.dialog-valign{
+  display: flex;
+  align-items: center;
+}
 .globalProgress{
   z-index:$dialogZIndex+2;
 }
