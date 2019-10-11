@@ -1,9 +1,9 @@
 @import "../../../../styles/variables.scss";
 
 .edusharing-autocomplete-wrapper {
+  position: relative;
   width: 100%;
   margin-left: 0;
-  margin-bottom: 20px;
 }
 
 .searchInput {
@@ -30,7 +30,8 @@
   z-index: $dialogZIndex+1;
   margin-top: -20px;
   padding-left: 0;
-  margin-right: 2px;
+  left:0;
+  right:0;
   @include materialShadow();
   border-radius: 2px;
 }
@@ -45,9 +46,10 @@
 
 .suggestbox > li > a {
   display: flex;
+  position: relative;
   align-items: center;
   width: 100%;
-  padding:4px 12px 8px 12px;
+  padding:10px 12px;
   cursor: pointer;
   >.data{
     display: flex;

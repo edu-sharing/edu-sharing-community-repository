@@ -331,6 +331,9 @@
     display: inline-block;
     margin-top: 20px;
   }
+  .eduGroupsSelected{
+    margin: 20px 10px;
+  }
   .group {
     float: left;
     margin-top: 60px;
@@ -356,7 +359,6 @@
       flex-direction: column;
       >autocomplete{
         width: calc(100% - 18px);
-        margin-bottom: -30px;
       }
       >div{
         margin:0 20px;

@@ -1,4 +1,13 @@
+@import "../../../../styles/variables.scss";
+
 autocomplete{
   width:100%;
 }
-
+.affiliation{
+  color:$textLight;
+  text-transform: uppercase;
+  font-size: 80%;
+  position: absolute;
+  top: 13px;
+  right: 10px;
+}

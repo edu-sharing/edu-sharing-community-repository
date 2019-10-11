@@ -47,6 +47,7 @@
   import {ImageConfigDirective} from "./common/ui/image-config.directive";
   import {UserQuotaComponent} from "./common/ui/user-quota/user-quota.component";
   import {UrlPipe} from "./common/url.pipe";
+  import {AuthorityAffiliationPipe} from "./common/ui/authority-affiliation.pipe";
 
   export const DECLARATIONS = [
       MdsTestComponent,
@@ -60,6 +61,7 @@
       PermissionNamePipe,
       ReplaceCharsPipe,
       AuthorityNamePipe,
+      AuthorityAffiliationPipe,
       AutocompleteComponent,
       AuthoritySearchInputComponent,
       NodeTitlePipe,

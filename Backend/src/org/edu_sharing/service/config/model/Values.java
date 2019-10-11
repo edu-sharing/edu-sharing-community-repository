@@ -36,6 +36,7 @@ public class Values implements Serializable {
 	@XmlElement	public String siteTitle;
 	@XmlElement	public String userDisplayName;
 	@XmlElement	public String userSecondaryDisplayName;
+	@XmlElement	public Boolean userAffiliation;
 	@XmlElement	public String defaultUsername;
 	@XmlElement	public String defaultPassword;
 	@XmlElement	public Banner banner;

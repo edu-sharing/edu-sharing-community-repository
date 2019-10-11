@@ -229,6 +229,7 @@ export interface UserProfile {
   firstName: string;
   lastName: string;
   email: string;
+  primaryAffiliation: string;
 }
 export interface UserCredentials {
   oldPassword: string;

@@ -9,4 +9,8 @@
   [hintBottom]="hintBottom"
   [suggestions]="authoritySuggestions"
   (updateInput)="updateSuggestions($event)"
-></autocomplete>
+>
+    <ng-template #suggest let-suggestion="suggestion">
+       <div class="affiliation" *ngIf="affiliation && suggestion.originalObject.profile.primaryAffiliation">{{suggestion.originalObject | authorityAffiliation}}</div>
+    </ng-template>
+</autocomplete>

@@ -6,6 +6,7 @@ import {Authority, IamAuthorities} from "../../rest/data-object";
 import {RestIamService} from "../../rest/services/rest-iam.service";
 import {RestConstants} from "../../rest/rest-constants";
 import {PermissionNamePipe} from '../permission-name.pipe';
+import {ConfigurationService} from "../../services/configuration.service";
 
 @Component({
   selector: 'authority-search-input',
@@ -31,6 +32,7 @@ export class AuthoritySearchInputComponent{
   @Input() hintBottom = "";
   @Output() onChooseAuthority = new EventEmitter();
   private lastSuggestionSearch: string;
+  affiliation=true;
   public addSuggestion(data: any) {
     this.onChooseAuthority.emit(data.item.originalObject)
   }
@@ -40,8 +42,8 @@ export class AuthoritySearchInputComponent{
     authority.authorityType=RestConstants.AUTHORITY_TYPE_UNKNOWN;
     this.onChooseAuthority.emit(authority);
   }
-  constructor(private iam : RestIamService,private namePipe : PermissionNamePipe){
-
+  constructor(private iam : RestIamService,private namePipe : PermissionNamePipe,private config:ConfigurationService){
+    this.affiliation=this.config.instant('userAffiliation',true);
   }
   public updateSuggestions(event : any){
     this.lastSuggestionSearch = event.input;

@@ -8,10 +8,12 @@
      <li *ngFor="let suggestion of _suggestions">
          <a (click)="handleSuggestClick(suggestion)" [class.activeItem]="activeItem==suggestion.index" title="{{'SUGGESTION' | translate}} {{suggestion.title}}">
            <span *ngIf="suggestion.materialIcon" class="material-icons">{{suggestion.materialIcon}}</span>
+           <ng-container *ngTemplateOutlet="iconRef; context: { suggestion: suggestion }"></ng-container>
              <span class="data">
                  <span class="primary">{{suggestion.title}}</span>
-                 <span class="secondary">{{suggestion.secondaryTitle}}</span>
+                 <span class="secondary" *ngIf="suggestion.secondaryTitle">{{suggestion.secondaryTitle}}</span>
              </span>
+             <ng-container *ngTemplateOutlet="suggestRef; context: { suggestion: suggestion }"></ng-container>
          </a>
      </li>
  </ul>
