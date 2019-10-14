@@ -239,6 +239,7 @@ export class AdminStatisticsComponent {
             stat.counts['VIEW_MATERIAL_EMBEDDED'] || 0,
             stat.counts['DOWNLOAD_MATERIAL'] || 0)).
         reduce((a,b)=>Math.max(a,b));
+    max=Math.max(max,dataUser.map((stat)=>stat.counts['LOGIN_USER_SESSION'] || 0).reduce((a,b,)=>Math.max(a,b)));
     console.log(dataNode);
     console.log(max);
     let chartGroupedData = {
