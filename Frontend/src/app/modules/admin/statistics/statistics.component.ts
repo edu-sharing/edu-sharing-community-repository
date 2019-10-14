@@ -45,7 +45,7 @@ export class AdminStatisticsComponent {
   additionalGroups:string[];
   customGroups:string[];
   customGroupData:any;
-  customGroupLabels:any[];
+  customGroupLabels:any;
 
   _groupedMode = 'Daily';
   groupedLoading: boolean;
