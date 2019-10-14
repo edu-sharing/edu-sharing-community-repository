@@ -155,6 +155,28 @@ public class MediacenterServiceImpl implements MediacenterService{
 
 						if(authorityService.authorityExists("GROUP_ORG_" + schoolId)) {
 							logger.info("authority already exists:" + schoolId);
+							NodeRef authorityNodeRef = authorityService.getAuthorityNodeRef("GROUP_ORG_" + schoolId);
+							String alfAuthorityName = (String)nodeService.getProperty(authorityNodeRef,QName.createQName(CCConstants.CM_PROP_AUTHORITY_AUTHORITYNAME));
+							String currentDisplayName = (String)nodeService.getProperty(authorityNodeRef,QName.createQName(CCConstants.CM_PROP_AUTHORITY_AUTHORITYDISPLAYNAME));
+							String currentCity = (String)nodeService.getProperty(authorityNodeRef,QName.createQName(CCConstants.CCM_PROP_ADDRESS_CITY));
+							String currentPLZ = (String)nodeService.getProperty(authorityNodeRef,QName.createQName(CCConstants.CCM_PROP_ADDRESS_POSTALCODE));
+							
+							if(schoolName != null && !schoolName.equals(currentDisplayName)) {
+								authorityService.setAuthorityDisplayName(alfAuthorityName, schoolName);
+								String authorityNameOrgAdmin = organisationService.getOrganisationAdminGroup(alfAuthorityName);
+								if(authorityNameOrgAdmin != null) {
+									authorityService.setAuthorityDisplayName(authorityNameOrgAdmin, schoolName + org.edu_sharing.alfresco.service.AuthorityService.ADMINISTRATORS_GROUP_DISPLAY_POSTFIX);
+								}
+							}
+							
+							if(city != null && !city.equals(currentCity)) {
+								nodeService.setProperty(authorityNodeRef, QName.createQName(CCConstants.CCM_PROP_ADDRESS_CITY), currentCity);
+							}
+							
+							if(plz != null && !plz.equals(currentPLZ)) {
+								nodeService.setProperty(authorityNodeRef, QName.createQName(CCConstants.CCM_PROP_ADDRESS_POSTALCODE), plz);
+							}
+							
 							continue;
 						}
 
