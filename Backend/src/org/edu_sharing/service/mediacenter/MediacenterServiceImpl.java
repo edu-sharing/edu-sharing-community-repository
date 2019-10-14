@@ -11,6 +11,7 @@ import org.alfresco.model.ContentModel;
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.repo.security.authentication.AuthenticationUtil.RunAsWork;
 import org.alfresco.service.ServiceRegistry;
+import org.alfresco.service.cmr.repository.ChildAssociationRef;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.repository.NodeService;
 import org.alfresco.service.cmr.repository.StoreRef;
@@ -68,8 +69,27 @@ public class MediacenterServiceImpl implements MediacenterService{
 						if(authorityService.authorityExists("GROUP_" + authorityName)) {
 							logger.info("authority already exists:" + authorityName);
 							NodeRef authorityNodeRef = authorityService.getAuthorityNodeRef("GROUP_" + authorityName);
+							
+							String alfAuthorityName = (String)nodeService.getProperty(authorityNodeRef,QName.createQName(CCConstants.CM_PROP_AUTHORITY_AUTHORITYNAME));
+							String currentDisplayName = (String)nodeService.getProperty(authorityNodeRef,QName.createQName(CCConstants.CM_PROP_AUTHORITY_AUTHORITYDISPLAYNAME));
 							String currentCity = (String)nodeService.getProperty(authorityNodeRef,QName.createQName(CCConstants.CCM_PROP_ADDRESS_CITY));
-							String currentDisplayName = (String)nodeService.getProperty(authorityNodeRef,QName.createQName(CCConstants.CCM_PROP_ADDRESS_CITY));
+							String currentPLZ = (String)nodeService.getProperty(authorityNodeRef,QName.createQName(CCConstants.CCM_PROP_ADDRESS_POSTALCODE));
+							
+							if(mz != null && !mz.equals(currentDisplayName)) {
+								authorityService.setAuthorityDisplayName(alfAuthorityName, mz);
+								String mcAdminGroup = getMediacenterAdminGroup(alfAuthorityName);
+								if(mcAdminGroup != null) {
+									authorityService.setAuthorityDisplayName(mcAdminGroup, mz + org.edu_sharing.alfresco.service.AuthorityService.ADMINISTRATORS_GROUP_DISPLAY_POSTFIX);
+								}
+							}
+							
+							if(ort != null && !ort.equals(currentCity)) {
+								nodeService.setProperty(authorityNodeRef, QName.createQName(CCConstants.CCM_PROP_ADDRESS_CITY), currentCity);
+							}
+							
+							if(plz != null && !plz.equals(currentPLZ)) {
+								nodeService.setProperty(authorityNodeRef, QName.createQName(CCConstants.CCM_PROP_ADDRESS_POSTALCODE), plz);
+							}
 							continue;
 						}
 						
@@ -79,7 +99,7 @@ public class MediacenterServiceImpl implements MediacenterService{
 						//admin group
 						//authorityService.createGroupWithType(AuthorityService.ADMINISTRATORS_GROUP, profile.getDisplayName() + AuthorityService.ADMINISTRATORS_GROUP_DISPLAY_POSTFIX, group, AuthorityService.MEDIACENTER_ADMINISTRATORS_GROUP_TYPE);
 						AuthorityServiceFactory.getLocalService().createGroupWithType(
-								org.edu_sharing.alfresco.service.AuthorityService.ADMINISTRATORS_GROUP, 
+								org.edu_sharing.alfresco.service.AuthorityService.MEDIACENTER_ADMINISTRATORS_GROUP, 
 								mz + org.edu_sharing.alfresco.service.AuthorityService.ADMINISTRATORS_GROUP_DISPLAY_POSTFIX, 
 								authorityName, 
 								org.edu_sharing.alfresco.service.AuthorityService.MEDIACENTER_ADMINISTRATORS_GROUP_TYPE);
@@ -226,6 +246,21 @@ public class MediacenterServiceImpl implements MediacenterService{
 		};
 
 		return AuthenticationUtil.runAs(runAs, ApplicationInfoList.getHomeRepository().getUsername());
+	}
+	
+	public String getMediacenterAdminGroup(String alfAuthorityName) {
+		String authorityName = alfAuthorityName;
+
+		NodeRef eduGroupNodeRef =authorityService.getAuthorityNodeRef(authorityName);
+		List<ChildAssociationRef> childGroups = nodeService.getChildAssocs(eduGroupNodeRef);
+		for(ChildAssociationRef childGroup : childGroups){
+			String grouptype = (String)nodeService.getProperty(childGroup.getChildRef(), QName.createQName(CCConstants.CCM_PROP_GROUPEXTENSION_GROUPTYPE));
+			if(org.edu_sharing.alfresco.service.AuthorityService.MEDIACENTER_ADMINISTRATORS_GROUP_TYPE.equals(grouptype)){
+				return (String)nodeService.getProperty(childGroup.getChildRef(), QName.createQName(CCConstants.CM_PROP_AUTHORITY_AUTHORITYNAME));
+			}
+		}
+
+		return null;
 	}
 
 
