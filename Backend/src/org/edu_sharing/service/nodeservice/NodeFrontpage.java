@@ -337,7 +337,7 @@ public class NodeFrontpage {
         if(config.displayCount<config.totalCount) {
             Set<NodeRef> randoms = new HashSet<>();
             // grab a random count of elements (equals displayCount) of the whole array
-            while (randoms.size() < config.displayCount) {
+            while (randoms.size() < config.displayCount && randoms.size()<result.size()) {
                 randoms.add(result.get(new Random().nextInt(result.size())));
             }
             return randoms;
