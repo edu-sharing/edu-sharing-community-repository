@@ -31,6 +31,9 @@
     "APPLICATIONS": {
       "URL": "Url",
       "URL_HINT": "Geben Sie hier die URL für ein Repositorum oder Service an, welchen Sie anbinden möchten (z.B. Rendering-Service, moodle, mediawiki)",
+      "OWN_URL": "Repository-URL",
+      "OWN_URL_HINT": "Nutzen Sie die öffentliche URL des Repositoriums, um das System z.B. in einem LMS zu registrieren",
+      "COPY": "Kopieren",
       "ADD_URL": "anbinden",
       "APP_REGISTERED": "App wurde erfolgreich registriert",
       "SELECT_XML": "XML-Datei wählen",

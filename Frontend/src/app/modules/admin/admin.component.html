@@ -149,11 +149,30 @@
 </div>
 <div *ngIf="mode=='APPLICATIONS'" class="content applications">
   <input #xmlSelect type="file" style="display:none" id="xmlSelect" accept="application/xml" (change)="registerAppXml($event)" />
-  <form (ngSubmit)="registerApp()">
-    <input type="text" name="appUrl" class="appUrl" [(ngModel)]="appUrl" placeholder="{{'ADMIN.APPLICATIONS.URL' | translate}}">
-    <a class="btn waves-effect waves-light" (click)="registerApp()">{{'ADMIN.APPLICATIONS.ADD_URL' | translate}}</a>
-    <div class="input-hint-bottom">{{'ADMIN.APPLICATIONS.URL_HINT' | translate}}</div>
-    <div class="btn-flat btn-shadow btnXml" (click)="xmlSelect.click()">{{'ADMIN.APPLICATIONS.SELECT_XML' | translate}}</div>
+  <form class="register-app">
+    <div>
+      <mat-form-field>
+        <mat-label>{{'ADMIN.APPLICATIONS.URL' | translate}}</mat-label>
+        <input matInput type="text" name="appUrl" [(ngModel)]="appUrl">
+        <mat-hint>{{'ADMIN.APPLICATIONS.URL_HINT' | translate}}</mat-hint>
+      </mat-form-field>
+      <div><button mat-raised-button color="primary" (click)="registerApp()">{{'ADMIN.APPLICATIONS.ADD_URL' | translate}}</button></div>
+    </div>
+    <div>
+      <mat-form-field>
+        <mat-label>{{'ADMIN.APPLICATIONS.OWN_URL' | translate}}</mat-label>
+        <input matInput type="text" name="ownAppUrl" [ngModel]="getOwnAppUrl()" readonly>
+        <mat-hint>{{'ADMIN.APPLICATIONS.OWN_URL_HINT' | translate}}</mat-hint>
+      </mat-form-field>
+      <div><button mat-raised-button (click)="copyOwnApp()">{{'ADMIN.APPLICATIONS.COPY' | translate}}</button></div>
+    </div>
+    <mat-label>{{'ADMIN.APPLICATIONS.CHOOSE_APP_MODE' | translate}}</mat-label>
+    <mat-radio-group [(ngModel)]="ownAppMode">
+      <mat-radio-button value="repository">{{'ADMIN.APPLICATIONS.APP_MODE.REPOSITORY' | translate}}</mat-radio-button>
+      <mat-radio-button value="render">{{'ADMIN.APPLICATIONS.APP_MODE.RENDER' | translate}}</mat-radio-button>
+      <mat-radio-button value="lms">{{'ADMIN.APPLICATIONS.APP_MODE.LMS' | translate}}</mat-radio-button>
+    </mat-radio-group>
+    <div><button mat-raised-button (click)="xmlSelect.click()">{{'ADMIN.APPLICATIONS.SELECT_XML' | translate}}</button></div>
     <div class="useFile">{{'ADMIN.APPLICATIONS.USE_FILE' | translate}}</div>
   </form>
   <h2>{{'ADMIN.APPLICATIONS.LIST' | translate }}</h2>
@@ -178,10 +197,10 @@
       <div class="type">{{app.type}}</div>
       <div class="repoType">{{app.repositoryType}}</div>
       <div class="subtype">{{app.subtype}}</div>
-      <div class="config"><i *ngIf="app.configUrl" class="material-icons clickable" (click)="configApp(app)">settings</i></div>
-      <div class="edit"><i class="material-icons clickable" (click)="editApp(app)">edit</i></div>
-      <div class="download"><i class="material-icons clickable" (click)="downloadApp(app)">cloud_download</i></div>
-      <div class="delete"><i class="material-icons clickable" (click)="removeApp(app)">delete</i></div>
+      <div class="config"><button mat-icon-button *ngIf="app.configUrl" (click)="configApp(app)"><i icon iconId="settings" class="clickable"></i></button></div>
+      <div class="edit"><button mat-icon-button (click)="editApp(app)"><i icon iconId="edit" class="clickable" ></i></button></div>
+      <div class="download"><button mat-icon-button (click)="downloadApp(app)"><i icon iconId="cloud_download" class="clickable"></i></button></div>
+      <div class="delete"><button mat-icon-button (click)="removeApp(app)"><i icon iconId="delete" class="clickable"></i></button></div>
     </div>
   </div>
 </div>

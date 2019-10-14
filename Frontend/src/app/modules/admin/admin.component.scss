@@ -174,13 +174,20 @@ $sidenavWidthMobile:66px;
   .table{
     padding-bottom: 20px;
   }
-  .appUrl{
-    width:calc(100% - 200px);
-    float:left;
-  }
-  .input-hint-bottom{
-    float:left;
-    margin-bottom: 15px;
+  .register-app{
+   display: flex;
+    flex-direction: column;
+    >div{
+      display: flex;
+      padding:10px 0;
+      >mat-form-field{
+        flex-grow:1;
+        margin-right: 20px;
+      }
+      >div{
+        align-self: center;
+      }
+    }
   }
   .materialize-textarea{
     height:150px;
@@ -188,13 +195,9 @@ $sidenavWidthMobile:66px;
   .useFile{
     color:$textLight;
     float:left;
-    width:calc(100% - 200px);
   }
   .btn,.btn-flat{
     float:right;
-  }
-  .btnXml,.useFile{
-    margin-top: 20px;
   }
   .warning{
     width:100%;

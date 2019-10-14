@@ -123,6 +123,7 @@ export class AdminComponent {
   mailTemplate: string;
   private loginResult: LoginResult;
   private mediacenters: any[];
+  ownAppMode="repository";
   public startJob(){
     this.storage.set('admin_job',this.job);
     this.globalProgress=true;
@@ -1042,5 +1043,9 @@ export class AdminComponent {
             });
         }
     }
+
+  getOwnAppUrl() {
+    return this.connector.getAbsoluteEdusharingUrl()+"metadata?format="+this.ownAppMode;
+  }
 }
 
