@@ -29,11 +29,20 @@
       "MAIL_SENT": "Test-E-Mail an {{receiver}} gesendet"
     },
     "APPLICATIONS": {
+      "ADD_APPLICATION": "Neue Applikation hinzufügen (via URL oder Datei)",
+      "USE_OWN_URL": "Metadaten für anderes System abrufen",
       "URL": "Url",
       "URL_HINT": "Geben Sie hier die URL für ein Repositorum oder Service an, welchen Sie anbinden möchten (z.B. Rendering-Service, moodle, mediawiki)",
       "OWN_URL": "Repository-URL",
       "OWN_URL_HINT": "Nutzen Sie die öffentliche URL des Repositoriums, um das System z.B. in einem LMS zu registrieren",
+      "CHOOSE_APP_MODE": "Typ des Remotesystems wählen",
+      "APP_MODE":{
+        "REPOSITORY": "Repository (z.B. anderes edu-sharing)",
+        "LMS": "LMS/CMS (Moodle, Mediawiki, Wordpress, ...)",
+        "RENDER": "Rendering-Service"
+      },
       "COPY": "Kopieren",
+      "COPIED_CLIPBOARD": "In Zwischenablage kopiert",
       "ADD_URL": "anbinden",
       "APP_REGISTERED": "App wurde erfolgreich registriert",
       "SELECT_XML": "XML-Datei wählen",

@@ -175,8 +175,9 @@ $sidenavWidthMobile:66px;
     padding-bottom: 20px;
   }
   .register-app{
-   display: flex;
+    display: flex;
     flex-direction: column;
+    margin:30px 0;
     >div{
       display: flex;
       padding:10px 0;
@@ -186,6 +187,15 @@ $sidenavWidthMobile:66px;
       }
       >div{
         align-self: center;
+      }
+    }
+    mat-label{
+      margin:10px 0;
+    }
+    mat-radio-group {
+      margin: 10px 0;
+      mat-radio-button {
+        margin: 0 10px;
       }
     }
   }
@@ -210,21 +220,12 @@ $sidenavWidthMobile:66px;
     float:left;
     font-weight: bold;
   }
-  h2{
-    font-size:120%;
-    color:$textLight;
-    float: left;
-    width:100%;
-  }
   max-width: 1000px;
   margin: auto;
 }
 .toolkit .inputGroup,
 .jobs .inputGroup,
 .import .inputGroup{
-  input[type="radio"]+label{
-    padding-right:20px;
-  }
   padding:20px 0;
   display: flex;
   align-items: center;
@@ -240,27 +241,32 @@ $sidenavWidthMobile:66px;
 .import{
   max-width: 800px;
   margin: auto;
+  mat-radio-button{
+    margin-right: 20px;
+  }
   .collections,.csv,.oai{
     padding-bottom:50px;
   }
   .oai{
     max-width: 500px;
     .oaiSave,.oaiForce{
-      float: left;
       width: 100%;
     }
-    .input-hint-bottom{
-      margin-bottom: 15px;
-    }
-    select{
-      margin-bottom: 20px;
+    mat-form-field{
+      width: 100%;
+      margin:5px 0;
     }
   }
   >.btn{
     margin-top: 20px;
   }
-  .btn{
-    float:right;
+  .actions {
+    display: flex;
+    align-items: flex-end;
+    width: 100%;
+    button {
+      margin: 10px;
+    }
   }
 }
 .table{
@@ -425,13 +431,15 @@ $sidenavWidthMobile:66px;
     width:100%;
     .autocomplete{
       flex-direction: column;
-      >autocomplete{
+      >autocomplete {
         width: calc(100% - 18px);
-        margin-bottom: -30px;
       }
       >div{
         margin:0 20px;
       }
+    }
+    mat-form-field{
+      width: 100%;
     }
   }
   .job-class{
@@ -473,7 +481,14 @@ $sidenavWidthMobile:66px;
       }
     }
     .log-filters{
-        padding:10px 0!important;
+      padding:10px 0!important;
+      justify-content: space-between;
+      mat-form-field{
+        width: 100%;
+        .mat-form-field-wrapper{
+          width: 100%;
+        }
+      }
     }
     .log-level,.log-filter{
       min-width:70px;
@@ -524,11 +539,9 @@ $sidenavWidthMobile:66px;
       display: flex;
       align-items: center;
       spinner-small {
-        margin-left: 10px;
+        margin: 0 10px;
       }
-      i{
-        margin-left: 10px;
-      }
+
     }
     .col-more{
       justify-content: center;
@@ -573,6 +586,9 @@ $sidenavWidthMobile:66px;
       width: 100%;
       margin-bottom: 0;
     }
+  }
+  .jobs .log-filters .mat-form-field-wrapper{
+      width: 100%;
   }
 }
 .reload{

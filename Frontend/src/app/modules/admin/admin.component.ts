@@ -1047,5 +1047,10 @@ export class AdminComponent {
   getOwnAppUrl() {
     return this.connector.getAbsoluteEdusharingUrl()+"metadata?format="+this.ownAppMode;
   }
+
+  copyOwnApp() {
+    UIHelper.copyToClipboard(this.getOwnAppUrl());
+    this.toast.toast('ADMIN.APPLICATIONS.COPIED_CLIPBOARD');
+  }
 }
 

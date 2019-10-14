@@ -10,6 +10,7 @@ import {Helper} from "../../../core-module/rest/helper";
 import {DateHelper} from "../../../core-ui-module/DateHelper";
 import {trigger} from "@angular/animations";
 import {UIAnimation} from "../../../core-module/ui/ui-animation";
+import {UIHelper} from "../../../core-ui-module/ui-helper";
 
 @Component({
   selector: 'workspace-share-link',
@@ -72,23 +73,11 @@ export class WorkspaceShareLinkComponent  {
       }
     },(error:any)=>this.toast.error(error));
   }
-  //http://stackoverflow.com/questions/25099409/copy-to-clipboard-as-plain-text
-  private executeCopy(text:string){
-  let copyDiv:any = document.createElement('div');
-  copyDiv.contentEditable = true;
-  document.body.appendChild(copyDiv);
-  copyDiv.innerHTML = text;
-  copyDiv.unselectable = "off";
-  copyDiv.focus();
-  document.execCommand('SelectAll');
-  document.execCommand("Copy", false, null);
-  document.body.removeChild(copyDiv);
-}
   public copyClipboard(){
     if(!this.enabled)
       return;
     try {
-      this.executeCopy(this.currentShare.url);
+      UIHelper.copyToClipboard(this.currentShare.url);
       this.toast.toast('WORKSPACE.SHARE_LINK.COPIED_CLIPBOARD');
     }
     catch(e){
