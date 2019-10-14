@@ -68,7 +68,7 @@
                 <ng-container *ngFor="let key of customGroupRows" [matColumnDef]="key">
                     <mat-header-cell *matHeaderCellDef>
                         <span *ngIf="(key=='action' || key=='count' || key==customGroup)">{{'ADMIN.STATISTICS.HEADERS.'+key | translate}}</span>
-                        <span *ngIf="!(key=='action' || key=='count' || key==customGroup)">{{key}}</span>
+                        <span *ngIf="!(key=='action' || key=='count' || key==customGroup)">{{customGroupLabels[key] || key}}</span>
                     </mat-header-cell>
                     <mat-cell *matCellDef="let element">
                         <span *ngIf="key=='action'">{{'ADMIN.STATISTICS.ACTIONS.'+element[key] | translate}}</span>

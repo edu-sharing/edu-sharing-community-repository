@@ -45,6 +45,7 @@ export class AdminStatisticsComponent {
   additionalGroups:string[];
   customGroups:string[];
   customGroupData:any;
+  customGroupLabels:any[];
 
   _groupedMode = 'Daily';
   groupedLoading: boolean;
@@ -380,32 +381,37 @@ export class AdminStatisticsComponent {
             reduce((a,b)=>a.concat(b)).
             filter((a)=>a!="")
         ));
+        // container for storing the display (transformed authorities names) data for the table view
+        this.customGroupLabels=[];
         if(this.customUnfold=='authority_organization' || this.customUnfold=='authority_mediacenter'){
           // transform the value for the horizontal list data if it's org/group
           set = set.map((key)=>{
             let authority=result.map((entry)=>((this.customUnfold=='authority_organization' ? entry.authority.organization : entry.authority.mediacenter as any[])))
             .reduce((a,b)=>a.concat(b))
             .filter((a)=>a.authorityName==key);
-            console.log(authority);
             if(authority.length)
-              return new AuthorityNamePipe(this.translate).transform(authority,null);
+              this.customGroupLabels[key]=new AuthorityNamePipe(this.translate).transform(authority[0],null);
             return key;
           });
         }
-        console.log(set);
         this.customGroupRows=this.customGroupRows.concat(set);
       }
       if(result.length) {
         this.customGroupData = result.map((entry) => {
           let result = [];
           for (let key in entry.counts) {
-            console.log(entry);
             let displayValue=entry.fields[this.customGroup];
             // transform the value for the vertical list data if it's org/group
             if(this.customGroup=='authority_organization' || this.customGroup=='authority_mediacenter'){
-             displayValue= ((this.customGroup=='authority_organization' ? entry.authority.organization : entry.authority.mediacenter) as any).map((group:any)=>{
-                return new AuthorityNamePipe(this.translate).transform(group,null);
-              }).join(" ");
+              let obj=(((this.customGroup=='authority_organization' ? entry.authority.organization : entry.authority.mediacenter) as any));
+              if(obj) {
+                displayValue = obj.map((group: any) => {
+                  return new AuthorityNamePipe(this.translate).transform(group, null);
+                }).join(" ");
+              }
+              else{
+                displayValue='';
+              }
 
             }
             result.push({"entry": entry,"displayValue": displayValue, "count": entry.counts[key], "action": key});
