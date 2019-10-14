@@ -91,29 +91,29 @@
     <div class="import">
         <input #importMediacentersSelect type="file" style="display:none" id="importMediacentersSelect" accept=".csv" (change)="updateMediacentersFile($event)">
         <div class="inputGroup">
-            <a class="btn-flat btn-shadow" (click)="importMediacentersSelect.click()">{{'ADMIN.MEDIACENTER.IMPORT.CHOOSE_MEDIACENTERS' | translate}}</a>
+            <button mat-raised-button (click)="importMediacentersSelect.click()">{{'ADMIN.MEDIACENTER.IMPORT.CHOOSE_MEDIACENTERS' | translate}}</button>
             <div class="file">{{ (mediacentersFile ? mediacentersFile.name : '') }}</div>
         </div>
-        <a class="btn waves-effect waves-light" (click)="importMediacenters()">{{'ADMIN.MEDIACENTER.IMPORT.MEDIACENTERS_START' | translate}}</a>
+        <button mat-raised-button color="primary" (click)="importMediacenters()">{{'ADMIN.MEDIACENTER.IMPORT.MEDIACENTERS_START' | translate}}</button>
     </div>
     <h4 class="mat-heading-4 mat-heading-underline"><i icon iconId="business"></i>{{'ADMIN.MEDIACENTER.ORGIMPORT.TITLE' | translate}}</h4>
     <div class="import">
         <input #importOrganisationsSelect type="file" style="display:none" id="importOrganisationsSelect" accept=".csv" (change)="updateOrganisationsFile($event)">
         <div class="inputGroup">
-            <a class="btn-flat btn-shadow" (click)="importOrganisationsSelect.click()">{{'ADMIN.MEDIACENTER.ORGIMPORT.CHOOSE_ORGANISATIONS' | translate}}</a>
+            <button mat-raised-button (click)="importOrganisationsSelect.click()">{{'ADMIN.MEDIACENTER.ORGIMPORT.CHOOSE_ORGANISATIONS' | translate}}</button>
             <div class="file">{{ (organisationsFile ? organisationsFile.name : '') }}</div>
         </div>
-        <a class="btn waves-effect waves-light" (click)="importOrganisations()">{{'ADMIN.MEDIACENTER.ORGIMPORT.ORGANISATIONS_START' | translate}}</a>
+        <button mat-raised-button color="primary" (click)="importOrganisations()">{{'ADMIN.MEDIACENTER.ORGIMPORT.ORGANISATIONS_START' | translate}}</button>
     </div>
 
     <h4 class="mat-heading-4 mat-heading-underline"><i icon iconId="business"></i>{{'ADMIN.MEDIACENTER.ORG_MC_CONNECT.TITLE' | translate}}</h4>
     <div class="import">
         <input #importOrgMcSelect type="file" style="display:none" id="importOrgMcSelect" accept=".csv" (change)="updateOrgMcFile($event)">
         <div class="inputGroup">
-            <a class="btn-flat btn-shadow" (click)="importOrgMcSelect.click()">{{'ADMIN.MEDIACENTER.ORG_MC_CONNECT.CHOOSE' | translate}}</a>
+            <button mat-raised-button (click)="importOrgMcSelect.click()">{{'ADMIN.MEDIACENTER.ORG_MC_CONNECT.CHOOSE' | translate}}</button>
             <div class="file">{{ (orgMcFile ? orgMcFile.name : '') }}</div>
         </div>
-        <a class="btn waves-effect waves-light" (click)="importOrgMc()">{{'ADMIN.MEDIACENTER.ORG_MC_CONNECT.ORGANISATIONS_START' | translate}}</a>
+        <button mat-raised-button color="primary" (click)="importOrgMc()">{{'ADMIN.MEDIACENTER.ORG_MC_CONNECT.ORGANISATIONS_START' | translate}}</button>
     </div>
 
 
