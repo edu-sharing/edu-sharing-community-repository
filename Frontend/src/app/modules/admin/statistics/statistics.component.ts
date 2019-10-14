@@ -308,7 +308,7 @@ export class AdminStatisticsComponent {
       });
     }
 
-    Chart.defaults.global.defaultFontFamily = 'open_sansregular';
+    Chart.defaults.global.defaultFontFamily = 'inherit';
     return new Chart(ctx, {
       type: "bar",
       data: chartGroupedData,
