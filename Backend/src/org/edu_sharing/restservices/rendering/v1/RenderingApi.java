@@ -17,6 +17,7 @@ import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.repository.StoreRef;
 import org.apache.log4j.Logger;
 import org.edu_sharing.repository.server.tools.security.SignatureVerifier;
+import org.edu_sharing.repository.server.tracking.TrackingTool;
 import org.edu_sharing.restservices.ApiService;
 import org.edu_sharing.restservices.NodeDao;
 import org.edu_sharing.restservices.RenderingDao;
@@ -137,7 +138,7 @@ public class RenderingApi {
 			String mimeType = nodeJson.getMimetype();
 
 			if(repoDao.isHomeRepo())
-				TrackingServiceFactory.getTrackingService().trackActivityOnNode(new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE,node),new NodeTrackingDetails(nodeVersion),TrackingService.EventType.VIEW_MATERIAL);
+				TrackingTool.trackActivityOnNode(node,new NodeTrackingDetails(nodeVersion),TrackingService.EventType.VIEW_MATERIAL);
 
 
 			RenderingDetailsEntry response = new RenderingDetailsEntry();

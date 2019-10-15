@@ -1,47 +1,158 @@
 package org.edu_sharing.repository.server.tools;
 
+import com.google.gson.JsonArray;
+import com.google.gson.JsonObject;
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.repository.StoreRef;
+import org.alfresco.service.namespace.QName;
+import org.apache.commons.httpclient.HttpMethodBase;
 import org.apache.commons.httpclient.methods.ByteArrayRequestEntity;
+import org.apache.commons.httpclient.methods.GetMethod;
 import org.apache.commons.httpclient.methods.PostMethod;
+import org.apache.log4j.Logger;
+import org.edu_sharing.metadataset.v2.MetadataSetV2;
 import org.edu_sharing.metadataset.v2.MetadataWidget;
 import org.edu_sharing.metadataset.v2.tools.MetadataHelper;
 import org.edu_sharing.repository.client.tools.CCConstants;
-import org.edu_sharing.service.nodeservice.NodeServiceFactory;
+import org.edu_sharing.restservices.NodeDao;
+import org.edu_sharing.restservices.RepositoryDao;
+import org.edu_sharing.service.authority.AuthorityServiceFactory;
 import org.edu_sharing.service.nodeservice.NodeServiceHelper;
+import org.edu_sharing.service.tracking.TrackingService;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.json.JSONArray;
 
+import java.io.Serializable;
 import java.net.URLEncoder;
 import java.util.*;
 import java.util.stream.Collectors;
 
 public class XApiTool {
+    public static final String EDU_SHARING_XAPI_EXTENSION = "http://edu-sharing.net/x-api";
+    private static Logger logger = Logger.getLogger(XApiTool.class);
+
+    public static String VERB_OPEN="http://adlnet.gov/expapi/verbs/open";
+    public static String VERB_DOWNLOADED="http://adlnet.gov/expapi/verbs/downloaded";
+
     public static String sendToXApi(String nodeId, JSONObject xApiData) throws Throwable {
+        if(AuthorityServiceFactory.getLocalService().isGuest()){
+            throw new IllegalArgumentException("user is guest, will not track xApi data");
+        }
         JSONObject data = addData(nodeId, xApiData);
         return sendToStore(data);
     }
+    public static void trackActivity(String activityVerb,String nodeId,String nodeVersion){
+        ApplicationInfo learningLocker = ApplicationInfoList.getLearningLocker();
+        if(learningLocker==null || activityVerb==null)
+            return;
+        try {
+            JSONObject data = getTemplate(nodeId, nodeVersion);
+            data.getJSONObject("verb").put("id", activityVerb);
+            sendToXApi(nodeId, data);
+        }catch(IllegalArgumentException e){
+            logger.info(e);
+        }catch(Throwable t){
+            logger.warn("Tracking via xApi failed",t);
+        }
+    }
 
+    private static JSONObject getTemplate(String nodeId, String nodeVersion) throws JSONException {
+        return new JSONObject()
+            .put("actor",new JSONObject())
+            .put("verb",new JSONObject())
+            .put("object",new JSONObject()
+                .put("definition",new JSONObject())
+                .put("id",URLTool.getNgRenderNodeUrl(nodeId,nodeVersion)));
+    }
+    private static String queryStore(JSONArray query) throws Exception {
+        ApplicationInfo learningLocker = ApplicationInfoList.getLearningLocker();
+        if(learningLocker==null)
+            throw new Exception("No application with type LEARNING_LOCKER registered. Please register a xApi storage first");
+        String uuid = UUID.randomUUID().toString();
+        String url = learningLocker.getBaseUrl();
+        url += "/api/statements/aggregate?pipeline="+ URLEncoder.encode(query.toString());
+        GetMethod method=new GetMethod(url);
+        return storeHTTP(method);
+    }
     private static String sendToStore(JSONObject data) throws Exception {
         ApplicationInfo learningLocker = ApplicationInfoList.getLearningLocker();
         if(learningLocker==null)
             throw new Exception("No application with type LEARNING_LOCKER registered. Please register a xApi storage first");
         String uuid = UUID.randomUUID().toString();
         String url = learningLocker.getBaseUrl();
-        url += "/data/xAPI/statements?statementId="+URLEncoder.encode(uuid);
+        url += "/data/xAPI/statements?statementId="+ URLEncoder.encode(uuid);
+        PostMethod method=new PostMethod(url);
+        method.setRequestEntity(new ByteArrayRequestEntity(data.toString().getBytes()));
+        return storeHTTP(method);
+    }
+
+    private static String storeHTTP(HttpMethodBase data) throws Exception {
+        ApplicationInfo learningLocker = ApplicationInfoList.getLearningLocker();
         Map<String, String> header=new HashMap<>();
         header.put("X-Experience-API-Version","1.0.3");
         header.put("Content-Type","application/json");
         header.put("Authorization","Basic "+learningLocker.getApiKey());
-        PostMethod method=new PostMethod(url);
-        method.setRequestEntity(new ByteArrayRequestEntity(data.toString().getBytes()));
-        return new HttpQueryTool().query(url, header, method);
+        return new HttpQueryTool().query(null, header, data);
+    }
+
+    /**
+     *
+     * @param authority if null, do not filter by authority and fetch all facettes
+     * @param fieldName
+     * @return
+     */
+    public static List<String> getFacettesFromStore(String authority, String fieldName) throws Exception {
+        /**
+         * [
+         *   {
+         *     "$match": {
+         *       "statement.verb.id": "http://adlnet.gov/expapi/verbs/open",
+         *       "statement.actor.account.name": "admin"
+         *     }
+         *   },
+         *   {
+         *     "$group": {
+         *       "_id": "$statement.actor.account.name",
+         * 	  "data": {
+         * 		"$push": "$statement.object.definition.extensions.http://edu-sharing&46;net/x-api.<field>"
+         *            }
+         *     }
+         *   }
+         * ]
+         */
+        JSONArray array = new JSONArray();
+        JSONObject matchWrapper = new JSONObject();
+        JSONObject match = new JSONObject();
+        JSONObject groupWrapper = new JSONObject();
+        JSONObject group = new JSONObject();
+        JSONObject groupAggregator = new JSONObject();
+        // maybe not required
+        match.put("statement.verb.id", VERB_OPEN);
+        if(authority!=null)
+            match.put("statement.actor.account.name", authority);
+
+        group.put("_id","$statement.actor.account.name");
+        groupAggregator.put("$addToSet","$statement.object.definition.extensions."+EDU_SHARING_XAPI_EXTENSION.replace(".","&46;")+"."+CCConstants.getValidLocalName(fieldName));
+        group.put("data", groupAggregator);
+
+        matchWrapper.put("$match",match);
+        groupWrapper.put("$group",group);
+        array.put(matchWrapper);
+        array.put(groupWrapper);
+        JSONArray result = new JSONArray(queryStore(array));
+        JSONArray data = result.getJSONObject(0).getJSONArray("data");
+        List<String> mapped=new ArrayList<>();
+        for(int i=0;i<data.length();i++){
+            mapped.add(data.getJSONArray(i).getString(0));
+        }
+        return mapped;
     }
 
     private static JSONObject addData(String nodeId, JSONObject xApiData) throws Throwable {
         NodeRef nodeRef = new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, nodeId);
-        HashMap<String, String[]> props = NodeServiceHelper.getPropertiesMultivalue(nodeRef);
+        Map<QName, Serializable> props = NodeServiceHelper.getPropertiesNative(nodeRef);
         //xApiData.getJSONObject("object").getJSONObject("definition").put("name","");
         if(!xApiData.getJSONObject("object").getJSONObject("definition").has("extensions"))
             xApiData.getJSONObject("object").getJSONObject("definition").put("extensions",new JSONObject());
@@ -50,13 +161,13 @@ public class XApiTool {
         // widgets objects to unique id set
         Set<String> storedProperties = widgets.stream().map((w) -> CCConstants.getValidGlobalName(w.getId())).collect(Collectors.toSet());
         props.entrySet().stream().
-                filter((entry)->storedProperties.contains(entry.getKey())).
+                filter((entry)->storedProperties.contains(entry.getKey().toString())).
                 forEach((entry)->{
                     try {
-                        propsData.put(entry.getKey(),entry.getValue());
+                        propsData.put(CCConstants.getValidLocalName(entry.getKey().toString()),entry.getValue());
                     } catch (JSONException e) {}
         });
-        xApiData.getJSONObject("object").getJSONObject("definition").getJSONObject("extensions").put("http://edu-sharing.net/x-api",propsData);
+        xApiData.getJSONObject("object").getJSONObject("definition").getJSONObject("extensions").put(EDU_SHARING_XAPI_EXTENSION,propsData);
 
         // add the user account data
         xApiData.getJSONObject("actor").put("account",new JSONObject()
@@ -64,5 +175,15 @@ public class XApiTool {
                 .put("homePage",ApplicationInfoList.getHomeRepository().getClientBaseUrl())
         );
         return xApiData;
+    }
+
+    public static String mapActivityVerb(TrackingService.EventType type) {
+        switch(type){
+            case DOWNLOAD_MATERIAL:
+                return VERB_DOWNLOADED;
+            case VIEW_MATERIAL:
+                return VERB_OPEN;
+        }
+        return null;
     }
 }

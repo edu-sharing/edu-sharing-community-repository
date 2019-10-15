@@ -4,7 +4,7 @@
     "MENU": {
       "OPTION1":"Was gibt's Neues?",
       "OPTION2":"Schon gesehen",
-      "OPTION3":"Einstellungen"
+      "RELEVANT":"Vorgeschlagen"
     },
     "OBJECT":{
       "NOTITLE":"Keine Titel",

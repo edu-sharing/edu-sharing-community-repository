@@ -107,4 +107,11 @@ export class RestSearchService extends AbstractRestService{
         ]);
         return this.connector.post<NodeList>(q,null,this.connector.getRequestOptions());
     }
+
+    getRelevant(request: any=null, repository = RestConstants.HOME_REPOSITORY) {
+        let q=this.connector.createUrlNoEscape('search/:version/relevant/:repository/?:request',repository,[
+            [":request",this.connector.createRequestString(request)]
+        ]);
+        return this.connector.get<NodeList>(q,this.connector.getRequestOptions());
+    }
 }

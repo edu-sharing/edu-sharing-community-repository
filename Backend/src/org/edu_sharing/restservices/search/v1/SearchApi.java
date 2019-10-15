@@ -20,12 +20,7 @@ import org.alfresco.rest.framework.core.exceptions.InvalidArgumentException;
 import org.apache.log4j.Logger;
 import org.apache.lucene.queryParser.QueryParser;
 import org.edu_sharing.repository.client.tools.CCConstants;
-import org.edu_sharing.restservices.ApiService;
-import org.edu_sharing.restservices.MdsDao;
-import org.edu_sharing.restservices.MdsDaoV2;
-import org.edu_sharing.restservices.NodeDao;
-import org.edu_sharing.restservices.RepositoryDao;
-import org.edu_sharing.restservices.RestConstants;
+import org.edu_sharing.restservices.*;
 import org.edu_sharing.restservices.node.v1.model.NodeEntry;
 import org.edu_sharing.restservices.search.v1.model.SearchParameters;
 import org.edu_sharing.restservices.shared.ErrorResponse;
@@ -484,6 +479,45 @@ public class SearchApi {
     		return ErrorResponse.createResponse(t);
     	}
 
+	}
+
+	@GET
+	@Path("/relevant/{repository}")
+	@Consumes({ "application/json" })
+	@ApiOperation(value = "Get relevant nodes for the current user")
+	@ApiResponses(value = { @ApiResponse(code = 200, message = RestConstants.HTTP_200, response = SearchResult.class),
+			@ApiResponse(code = 400, message = RestConstants.HTTP_400, response = ErrorResponse.class),
+			@ApiResponse(code = 401, message = RestConstants.HTTP_401, response = ErrorResponse.class),
+			@ApiResponse(code = 403, message = RestConstants.HTTP_403, response = ErrorResponse.class),
+			@ApiResponse(code = 404, message = RestConstants.HTTP_404, response = ErrorResponse.class),
+			@ApiResponse(code = 500, message = RestConstants.HTTP_500, response = ErrorResponse.class) })
+	public Response getRelevantNodes(
+			@ApiParam(value = RestConstants.MESSAGE_REPOSITORY_ID,required=true, defaultValue="-home-" ) @PathParam("repository") String repository,
+			@ApiParam(value = "property filter for result nodes (or \"-all-\" for all properties)", defaultValue="-all-" ) @QueryParam("propertyFilter") List<String> propertyFilter,
+			@ApiParam(value = "maximum items per page", defaultValue = "10") @QueryParam("maxItems") Integer maxItems,
+			@ApiParam(value = "skip a number of items", defaultValue = "0") @QueryParam("skipCount") Integer skipCount,
+			@Context HttpServletRequest req) {
+		try {
+			RepositoryDao repoDao = RepositoryDao.getRepository(repository);
+			Filter filter = new Filter(propertyFilter);
+			NodeSearch nodeSearch = NodeDao.getRelevantNodes(repoDao,skipCount!=null ? skipCount : 0,maxItems!=null ? maxItems : RestConstants.DEFAULT_MAX_ITEMS);
+			SearchResult response = new SearchResult();
+
+			List<Node> data = new ArrayList<>();
+			for (org.edu_sharing.restservices.shared.NodeRef ref : nodeSearch.getResult()) {
+				data.add(NodeDao.getNode(repoDao, ref.getId(), filter).asNode());
+			}
+			response.setNodes(data);
+			Pagination pagination = new Pagination();
+			pagination.setFrom(nodeSearch.getSkip());
+			pagination.setCount(data.size());
+			pagination.setTotal(nodeSearch.getCount());
+			response.setPagination(pagination);
+			return Response.status(Response.Status.OK).entity(response).build();
+
+		}   catch (Throwable t) {
+			return ErrorResponse.createResponse(t);
+		}
 	}
 
 	@OPTIONS

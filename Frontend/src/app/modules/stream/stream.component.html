@@ -14,14 +14,17 @@
 (scrolled)="onScroll()"
 (click)="closeMenuOptions()">
 <div class="row">
-    <div class="rowRepositories row tab-group row-dark scrollWithBanner arrow-menu-arrow">
+    <div class="row tab-group row-dark scrollWithBanner arrow-menu-arrow">
         <div class="col s12">
             <ul class="tabs no-bgbottom tabsRepositories tabs-fixed-width">
                 <li class="clickable tab col s3" tabindex="0" (click)="goToOption('new')" (keyup.enter)="goToOption('new')">
-                        <a [class.active]="menuOption == 'new' ? true : false"><span class="repositoryTitle">{{'STREAM.MENU.OPTION1' | translate }}</span></a>
+                        <a [class.active]="menuOption == 'new' ? true : false"><span>{{'STREAM.MENU.OPTION1' | translate }}</span></a>
                 </li>
                 <li class="clickable tab col s3" tabindex="0" (click)="goToOption('seen')" (keyup.enter)="goToOption('new')">
-                        <a [class.active]="menuOption == 'seen' ? true : false"><span class="repositoryTitle">{{'STREAM.MENU.OPTION2' | translate }}</span></a>
+                        <a [class.active]="menuOption == 'seen' ? true : false"><span>{{'STREAM.MENU.OPTION2' | translate }}</span></a>
+                </li>
+                <li class="clickable tab col s3" tabindex="0" (click)="goToOption('relevant')" (keyup.enter)="goToOption('relevant')">
+                    <a [class.active]="menuOption == 'relevant' ? true : false"><span>{{'STREAM.MENU.RELEVANT' | translate }}</span></a>
                 </li>
             </ul>
         </div>
@@ -33,6 +36,9 @@
             <div tabindex="0" class="choose-menu" (click)="goToOption('seen')" (keyup.enter)="goToOption('seen')" [ngClass]="menuOption == 'seen' ? 'm-active' : 'm-inactive'">
                 <i aria-hidden="true" class="menuic material-icons ">visibility</i> <div class="menu-icon-text">{{'STREAM.MENU.OPTION2' | translate }}</div>
             </div>
+            <div tabindex="0" class="choose-menu" (click)="goToOption('relevant')" (keyup.enter)="goToOption('relevant')" [ngClass]="menuOption == 'relevant' ? 'm-active' : 'm-inactive'">
+                <i aria-hidden="true" class="menuic material-icons ">grade</i> <div class="menu-icon-text">{{'STREAM.MENU.RELEVANT' | translate }}</div>
+            </div>
     </div>
     <div class="col s12 m7 l6 remove-horizontal-padding">
         <div class="margin-show">
@@ -40,7 +46,8 @@
         <div class="stream-header-left row stream-marginfix">
             <div *ngIf="menuOption == 'new'" class="stream-title col s10 m12">{{'STREAM.MENU.OPTION1' | translate }}  </div>
             <div *ngIf="menuOption == 'seen'" class="stream-title col s10 m12">{{'STREAM.MENU.OPTION2' | translate }}  </div>
-            
+            <div *ngIf="menuOption == 'relevant'" class="stream-title col s10 m12">{{'STREAM.MENU.RELEVANT' | translate }}  </div>
+
             <span id="stream-title-date" class="stream-title-date col s12 m12">
                 {{dateToDisplay}}
             </span>
@@ -52,40 +59,67 @@
         </div>-->
         <div class="stream-emptytxt" *ngIf="streams.length === 0">
             <div *ngIf="imagesToLoad === 0">{{'STREAM.OBJECT.NOMATERIALS' | translate }} </div>    
-        </div>    
-
-        <div *ngFor="let strm of streams" [ngClass]="strm.nodes.length === 0 ? 'hide' : 'stream-box'" >
-           <div class="row row-nomargin" >
-                <div class="stream-box-icon col s1 " *ngIf="strm.nodes[0]">
-                    <img src="{{strm.nodes[0].iconURL}}" alt="" class="stream-icon">
-                </div>
-                <div class="stream-box-title col s9" (click)="onStreamObjectClick(strm)"> <span *ngIf="strm.properties['add_to_stream_title']">{{ strm.properties['add_to_stream_title'] }}</span> <span *ngIf="!strm.properties['add_to_stream_title']">{{ 'STREAM.OBJECT.NOTITLE' | translate }}</span> </div>
-                <div class="stream-box-main-vert col s2">
-                    <actionbar
-                        [numberOfAlwaysVisibleOptions]="0"
-                        [numberOfAlwaysVisibleOptionsMobile]="0"
-                        [style]="'flat'"
-                        [options]="actionOptions"
-                        [node]="strm"
-                        (click)="checkIfEnable(strm.nodes)"
-                    ></actionbar>
+        </div>
+            <div *ngIf="menuOption=='relevant'">
+                <div *ngFor="let node of streams" class="stream-box" >
+                    <div class="row row-nomargin" >
+                        <div class="stream-box-icon col s1 ">
+                            <img src="{{node.iconURL}}" alt="" class="stream-icon">
+                        </div>
+                        <div class="stream-box-title col s9" (click)="onStreamObjectClick(node)">{{ getTitle(node) }}</div>
+                        <div class="stream-box-main-vert col s2">
+                            <actionbar
+                                    [numberOfAlwaysVisibleOptions]="0"
+                                    [numberOfAlwaysVisibleOptionsMobile]="0"
+                                    [style]="'flat'"
+                                    [options]="actionOptions"
+                                    [node]="node"
+                                    (click)="checkIfEnable(node)"
+                            ></actionbar>
+                        </div>
+                    </div>
+                    <div class="stream-box-desc">{{node.properties['cclom:general_description']}}</div>
+                    <div class="stream-box-kompetenzen" > <div class="chip" *ngFor="let keyword of node.properties['cclom:general_keyword']">{{keyword}}</div> </div>
+                    <div tabindex="0" [lazyLoad]="node.preview.url" class="stream-box-image" (click)="onStreamObjectClick(node)" (keyup.enter)="onStreamObjectClick(node)">
+                        <div class="bottom-right">{{ node.commentCount }} </div>
+                        <div class="bottom-right-icon"><i class="material-icons stic" >comment</i> </div>
+                    </div>
                 </div>
             </div>
-            
-                <div class="stream-box-desc"><span *ngIf="strm.properties['add_to_stream_description']">{{ strm.properties['add_to_stream_description'] }}</span></div>
+            <div *ngIf="menuOption!='relevant'">
+                <div *ngFor="let strm of streams" [ngClass]="strm.nodes.length === 0 ? 'hide' : 'stream-box'" >
+                    <div class="row row-nomargin" >
+                        <div class="stream-box-icon col s1 " *ngIf="strm.nodes[0]">
+                            <img src="{{strm.nodes[0].iconURL}}" alt="" class="stream-icon">
+                        </div>
+                        <div class="stream-box-title col s9" (click)="onStreamObjectClick(strm)"> <span *ngIf="strm.properties['add_to_stream_title']">{{ strm.properties['add_to_stream_title'] }}</span> <span *ngIf="!strm.properties['add_to_stream_title']">{{ 'STREAM.OBJECT.NOTITLE' | translate }}</span> </div>
+                        <div class="stream-box-main-vert col s2">
+                            <actionbar
+                                    [numberOfAlwaysVisibleOptions]="0"
+                                    [numberOfAlwaysVisibleOptionsMobile]="0"
+                                    [style]="'flat'"
+                                    [options]="actionOptions"
+                                    [node]="strm"
+                                    (click)="checkIfEnable(strm.nodes)"
+                            ></actionbar>
+                        </div>
+                    </div>
 
-                <div class="stream-box-kompetenzen" > <div class="chip" *ngFor="let keyword of strm.properties['cclom:general_keyword']">{{keyword}}</div> </div>
+                    <div class="stream-box-desc"><span *ngIf="strm.properties['add_to_stream_description']">{{ strm.properties['add_to_stream_description'] }}</span></div>
 
-            <div class="stream-box-nonodes" *ngIf="strm.nodes.length === 0"> {{'STREAM.OBJECT.NONODES' | translate }} </div>
-            <div tabindex="0" [lazyLoad]="strm.nodes[0].preview.url" class="stream-box-image" (click)="onStreamObjectClick(strm)" (keyup.enter)="onStreamObjectClick(strm)" *ngIf="strm.nodes[0]">
-                <div class="bottom-left">{{ (strm.nodes[0].name.length > 40) ? (strm.nodes[0].name | slice:0:40)+'...':(strm.nodes[0].name) }}</div>
-                <div class="bottom-right">{{ strm.nodes[0].commentCount }} </div>
-                <div class="bottom-right-icon"><i class="material-icons stic" >comment</i> </div>
+                    <div class="stream-box-kompetenzen" > <div class="chip" *ngFor="let keyword of strm.properties['cclom:general_keyword']">{{keyword}}</div> </div>
+
+                    <div class="stream-box-nonodes" *ngIf="strm.nodes.length === 0"> {{'STREAM.OBJECT.NONODES' | translate }} </div>
+                    <div tabindex="0" [lazyLoad]="strm.nodes[0].preview.url" class="stream-box-image" (click)="onStreamObjectClick(strm)" (keyup.enter)="onStreamObjectClick(strm)" *ngIf="strm.nodes[0]">
+                        <div class="bottom-left">{{ (strm.nodes[0].name.length > 40) ? (strm.nodes[0].name | slice:0:40)+'...':(strm.nodes[0].name) }}</div>
+                        <div class="bottom-right">{{ strm.nodes[0].commentCount }} </div>
+                        <div class="bottom-right-icon"><i class="material-icons stic" >comment</i> </div>
+                    </div>
+
+                </div>
             </div>
-
         </div>
     </div>
-    </div> <!-- cols8 -->
     <div class="col m1 l3"></div>
 </div> <!-- row -->
 

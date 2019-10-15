@@ -41,6 +41,7 @@ import {ActionbarHelperService} from '../../common/services/actionbar-helper';
 import {RestIamService} from '../../common/rest/services/rest-iam.service';
 import {MainNavComponent} from '../../common/ui/main-nav/main-nav.component';
 import {GlobalContainerComponent} from "../../common/ui/global-container/global-container.component";
+import {RequestObject} from "../../common/rest/request-object";
 
 
 @Component({
@@ -156,13 +157,10 @@ export class StreamComponent {
 
   setStreamMode() {
     this.route.queryParams.subscribe((params: Params) => {
-      if (params.mode === 'new') {
+      if (params.mode === 'new' || params.mode === 'seen' || params.mode === 'relevant') {
         this.menuOptions(params.mode);
       }
-      if (params.mode === 'seen') {
-        this.menuOptions(params.mode);
-      }
-      if (params.mode !== 'new' && params.mode !== 'seen') {
+      else{
         this.goToOption('new');
       }
     });
@@ -198,7 +196,7 @@ export class StreamComponent {
     }
   }
 
-  checkIfEnable(nodes: any) {
+  checkIfEnable(nodes: Node[]) {
     this.collectionOption.isEnabled = NodeHelper.getNodesRight(nodes, RestConstants.ACCESS_CC_PUBLISH);
   }
 
@@ -236,13 +234,16 @@ export class StreamComponent {
     this.menuOption = option;
     this.imagesToLoad = -1;
     this.actionOptions=[];
+    this.streams = [];
     if (option === 'new') {
-      this.streams = [];
       this.updateDataFromJSON(STREAM_STATUS.OPEN);
       this.actionOptions[0] = this.moveUpOption;
       this.actionOptions[1] = this.collectionOption;
-    } else {
-      this.streams = [];
+    }
+    else if(option == 'relevant'){
+      this.searchRelevant();
+    }
+    else {
       this.updateDataFromJSON(STREAM_STATUS.READ);
       this.actionOptions[0] = this.collectionOption;
       this.actionOptions[1] = this.removeOption;
@@ -253,7 +254,7 @@ export class StreamComponent {
       this.actionOptions.push(nodeStore);
   }
 
-  goToOption(option: any) {
+  goToOption(option: string) {
     this.router.navigate(["./"],{queryParams:{mode:option},relativeTo:this.route})
   }
 
@@ -295,10 +296,16 @@ export class StreamComponent {
   }
 
   onStreamObjectClick(node: any) {
-    console.log(node.nodes[0].ref.id);
-    this.seen(node.id);
-    document.cookie = "jumpToScrollPosition="+window.pageYOffset;
-    this.router.navigate([UIConstants.ROUTER_PREFIX+"render", node.nodes[0].ref.id])
+    if(node.nodes) {
+      console.log(node.nodes[0].ref.id);
+      this.seen(node.id);
+      document.cookie = "jumpToScrollPosition="+window.pageYOffset;
+      this.router.navigate([UIConstants.ROUTER_PREFIX+"render", node.nodes[0].ref.id])
+    }
+    else{
+      this.router.navigate([UIConstants.ROUTER_PREFIX+"render", node.ref.id])
+    }
+
   }
 
   private addToCollection(nodes: any) {
@@ -358,4 +365,18 @@ export class StreamComponent {
     private editConnector(node:Node,type : Filetype=null,win : any = null,connectorType : Connector = null){
         UIHelper.openConnector(this.connectors,this.iam,this.event,this.toast,node,type,win,connectorType);
     }
+
+  private searchRelevant() {
+    let request:RequestObject={
+      propertyFilter:[RestConstants.ALL]
+    };
+    this.searchService.getRelevant(request).subscribe((relevant)=>{
+      console.log(relevant);
+      this.streams=relevant.nodes;
+      this.imagesToLoad=this.streams.length;
+    });
+  }
+  public getTitle(node:Node){
+    return RestHelper.getTitle(node);
+  }
 }

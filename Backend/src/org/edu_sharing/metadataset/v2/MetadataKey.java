@@ -1,8 +1,14 @@
 package org.edu_sharing.metadataset.v2;
 
+import java.util.List;
+
 public class MetadataKey extends MetadataTranslatable {
 	
 	private String key,caption,description,parent;
+	/**
+	 * List of other keys this child is a precedor of
+	 */
+	private List<String> preceds;
 
 	public String getParent() {
 		return parent;
@@ -38,5 +44,12 @@ public class MetadataKey extends MetadataTranslatable {
 	public void setCaption(String caption) {
 		this.caption = caption;
 	}
-	
+
+	public List<String> getPreceds() {
+		return preceds;
+	}
+
+	public void setPreceds(List<String> preceds) {
+		this.preceds = preceds;
+	}
 }

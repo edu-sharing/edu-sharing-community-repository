@@ -40,6 +40,7 @@ import org.edu_sharing.repository.server.AuthenticationToolAPI;
 import org.edu_sharing.repository.server.MCAlfrescoAPIClient;
 import org.edu_sharing.repository.server.authentication.Context;
 import org.edu_sharing.repository.server.tools.*;
+import org.edu_sharing.repository.server.tracking.TrackingTool;
 import org.edu_sharing.service.license.LicenseService;
 import org.edu_sharing.service.mime.MimeTypesV2;
 import org.edu_sharing.service.nodeservice.NodeService;
@@ -88,7 +89,7 @@ public class RenderInfoSoapBindingImpl implements org.edu_sharing.webservices.re
 				lms.setCourseId(courseId);
 				lms.setResourceId(resourceId);
 				details.setLms(lms);
-				TrackingServiceFactory.getTrackingService().trackActivityOnNode(new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE,nodeId),details,TrackingService.EventType.VIEW_MATERIAL_EMBEDDED);
+				TrackingTool.trackActivityOnNode(nodeId,details,TrackingService.EventType.VIEW_MATERIAL_EMBEDDED);
 			}
 			UsageDAO usageDao = new AlfServicesWrapper();
 			if(lmsId!=null && courseId!=null) {
