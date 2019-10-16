@@ -103,7 +103,7 @@ public class XApiTool {
      * @param fieldName
      * @return
      */
-    public static List<String> getFacettesFromStore(String authority, String fieldName) throws Exception {
+    public static List<String> getFacettesFromStore(String authority, String fieldName,int limit) throws Exception {
         /**
          * [
          *   {
@@ -116,16 +116,18 @@ public class XApiTool {
          *     "$group": {
          *       "_id": "$statement.actor.account.name",
          * 	  "data": {
-         * 		"$push": "$statement.object.definition.extensions.http://edu-sharing&46;net/x-api.<field>"
+         * 		"$addToSet": "$statement.object.definition.extensions.http://edu-sharing&46;net/x-api.<field>"
          *            }
          *     }
          *   }
          * ]
          */
+        //@TODO: Limit to a fixed number of last elements to prevent unlimited results for search
         JSONArray array = new JSONArray();
         JSONObject matchWrapper = new JSONObject();
         JSONObject match = new JSONObject();
         JSONObject groupWrapper = new JSONObject();
+        JSONObject limitWrapper = new JSONObject();
         JSONObject group = new JSONObject();
         JSONObject groupAggregator = new JSONObject();
         // maybe not required
@@ -140,6 +142,10 @@ public class XApiTool {
         matchWrapper.put("$match",match);
         groupWrapper.put("$group",group);
         array.put(matchWrapper);
+        if(limit>0) {
+            limitWrapper.put("$limit", limit);
+            array.put(limitWrapper);
+        }
         array.put(groupWrapper);
         JSONArray result = new JSONArray(queryStore(array));
         JSONArray data = result.getJSONObject(0).getJSONArray("data");
@@ -160,6 +166,8 @@ public class XApiTool {
         List<MetadataWidget> widgets = MetadataHelper.getWidgetsByNode(nodeRef);
         // widgets objects to unique id set
         Set<String> storedProperties = widgets.stream().map((w) -> CCConstants.getValidGlobalName(w.getId())).collect(Collectors.toSet());
+        // fixed properties that always should be added
+        storedProperties.add(CCConstants.SYS_PROP_NODE_UID);
         props.entrySet().stream().
                 filter((entry)->storedProperties.contains(entry.getKey().toString())).
                 forEach((entry)->{

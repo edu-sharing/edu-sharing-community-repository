@@ -174,7 +174,7 @@ export class StreamComponent {
     console.log("scrolled!!");
     //this.updateDataFromJSON(STREAM_STATUS.OPEN);
     let curStat = this.menuOption === 'new' ? STREAM_STATUS.OPEN : STREAM_STATUS.READ;
-    let sortWay = this.menuOption === 'new' ? true : false;
+    let sortWay = this.menuOption === 'new' ? false : false;
     this.getJSON(curStat, sortWay).subscribe(data => {
       console.log("r, data: ",data['stream']);
       this.streams = this.streams.concat(data['stream']);
@@ -263,13 +263,13 @@ export class StreamComponent {
       let openStreams: any[];
       let progressStreams: any[];
       let unSortedStream: any[];
-      this.getSimpleJSON(STREAM_STATUS.OPEN, true).subscribe(data => {
+      this.getSimpleJSON(STREAM_STATUS.OPEN, false).subscribe(data => {
         openStreams = data['stream'].filter( (n : any) => n.nodes.length !== 0);
-        this.getSimpleJSON(STREAM_STATUS.PROGRESS, true).subscribe(data => {
+        this.getSimpleJSON(STREAM_STATUS.PROGRESS, false).subscribe(data => {
           progressStreams = data['stream'].filter( (n : any) => n.nodes.length !== 0);
           console.log("streams received: ",  progressStreams.concat(openStreams));
           unSortedStream = progressStreams.concat(openStreams);
-          unSortedStream.length >= this.amountToRandomize ? this.randomizeTop(unSortedStream,this.amountToRandomize) : console.log('not big enough to randomize');
+          //unSortedStream.length >= this.amountToRandomize ? this.randomizeTop(unSortedStream,this.amountToRandomize) : console.log('not big enough to randomize');
           this.streams = unSortedStream;
           console.log("objs: ",this.streams);
           this.imagesToLoad = this.streams.length;

@@ -24,12 +24,16 @@ public class SearchRelevancyTool {
      * how many successors (depth) should be used
      * 1 means just the immediate successors, while 2 means immediate + all successor of the immediate sucessors, and so one
      */
-    private static int MAX_DEPTH = 3;
+    private static int MAX_DEPTH = 1;
+    /**
+     * limit the amount of the facettes by the count of the last actions
+     */
+    private static final int LAST_ACTIONS_LIMIT = 10;
     public static String getLuceneQuery() throws Exception {
         //throw new NotImplementedException("SearchRelevancyTool.getLuceneQuery is not implemented for this repository");
         MetadataSetV2 mds = MetadataHelper.getMetadataset(ApplicationInfoList.getHomeRepository(), CCConstants.metadatasetdefault_id);
         // fetch all facettes for already viewed contents from xapi
-        List<String> facettes = XApiTool.getFacettesFromStore(AuthenticationUtil.getFullyAuthenticatedUser(), PROPERTY);
+        List<String> facettes = XApiTool.getFacettesFromStore(AuthenticationUtil.getFullyAuthenticatedUser(), PROPERTY,LAST_ACTIONS_LIMIT);
         // get the valuespace from the property
         Map<String, MetadataKey> values = mds.findWidget(CCConstants.getValidLocalName(PROPERTY)).getValuesAsMap();
         Set<String> valuesToQuery=new HashSet<>();
@@ -45,6 +49,7 @@ public class SearchRelevancyTool {
                 }
             }
         }
+        valuesToQuery.addAll(facettes);
         StringBuilder luceneQuery = toLuceneQuery(valuesToQuery);
         return luceneQuery.toString();
     }
