@@ -61,6 +61,11 @@ public class SearchServiceAdapter implements SearchService {
 	}
 
 	@Override
+	public SearchResultNodeRef getRelevantNodes(int skipCount, int maxItems) throws Throwable {
+		return null;
+	}
+
+	@Override
 	public List<NodeRef> getWorkflowReceive(String fullyAuthenticatedUser) {
 		return null;
 	}
