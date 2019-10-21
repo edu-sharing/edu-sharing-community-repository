@@ -12,34 +12,45 @@ import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.server.tools.ApplicationInfo;
 import org.edu_sharing.repository.server.tools.ApplicationInfoList;
 import org.edu_sharing.repository.server.tools.XApiTool;
+import org.edu_sharing.service.stream.StreamServiceFactory;
 
 import java.util.*;
 
 public class SearchRelevancyTool {
-    /**
-     * property to look for successors
-     */
-    private static String PROPERTY = CCConstants.CCM_PROP_IO_COMPETENCE_DIGITAL2;
-    /**
-     * how many successors (depth) should be used
-     * 1 means just the immediate successors, while 2 means immediate + all successor of the immediate sucessors, and so one
-     */
-    private static int MAX_DEPTH = 1;
-    /**
-     * limit the amount of the facettes by the count of the last actions
-     */
-    private static final int LAST_ACTIONS_LIMIT = 10;
+
     public static String getLuceneQuery() throws Exception {
+        /**
+         * property to look for successors
+         */
+        String property = (String) StreamServiceFactory.getConfig().get("relevancyProperty");
+        if(property==null){
+            throw new IllegalArgumentException("No property for relevancy specified");
+        }
+        /**
+         * how many successors (depth) should be used
+         * 1 means just the immediate successors, while 2 means immediate + all successor of the immediate sucessors, and so one
+         */
+        int maxDepth = Integer.parseInt((String) StreamServiceFactory.getConfig().getOrDefault("relevancyDepth",1));
+        /**
+         * limit the amount of the facettes by the count of the last actions
+         */
+        int lastActionsLimit = Integer.parseInt((String) StreamServiceFactory.getConfig().getOrDefault("relevancyActionLimit",10));
+
+
         //throw new NotImplementedException("SearchRelevancyTool.getLuceneQuery is not implemented for this repository");
         MetadataSetV2 mds = MetadataHelper.getMetadataset(ApplicationInfoList.getHomeRepository(), CCConstants.metadatasetdefault_id);
         // fetch all facettes for already viewed contents from xapi
-        List<String> facettes = XApiTool.getFacettesFromStore(AuthenticationUtil.getFullyAuthenticatedUser(), PROPERTY,LAST_ACTIONS_LIMIT);
+        List<String> facettes = XApiTool.getFacettesFromStore(AuthenticationUtil.getFullyAuthenticatedUser(), property,lastActionsLimit);
         // get the valuespace from the property
-        Map<String, MetadataKey> values = mds.findWidget(CCConstants.getValidLocalName(PROPERTY)).getValuesAsMap();
+        Map<String, MetadataKey> values = mds.findWidget(property).getValuesAsMap();
         Set<String> valuesToQuery=new HashSet<>();
+        boolean hasPrecedes=values.entrySet().stream().anyMatch((e)->e.getValue().getPreceds()!=null);
+        if(!hasPrecedes){
+            throw new IllegalArgumentException("Specified "+property+" to use for relevancy, but the valuespace does not include any precedes relations");
+        }
         // map all viewed facettes, find their succesors (by checking which other values this one preceds)
         Set<String> searchPool=new HashSet<>(facettes);
-        for(int i=0;i<MAX_DEPTH;i++) {
+        for(int i=0;i<maxDepth;i++) {
             for (String key : new HashSet<>(searchPool)) {
                 MetadataKey mdsKey = values.get(key);
                 if (mdsKey != null && mdsKey.getPreceds() != null) {
@@ -50,11 +61,11 @@ public class SearchRelevancyTool {
             }
         }
         valuesToQuery.addAll(facettes);
-        StringBuilder luceneQuery = toLuceneQuery(valuesToQuery);
+        StringBuilder luceneQuery = toLuceneQuery(property,valuesToQuery);
         return luceneQuery.toString();
     }
 
-    private static StringBuilder toLuceneQuery(Collection<String> valuesToQuery) {
+    private static StringBuilder toLuceneQuery(String property,Collection<String> valuesToQuery) {
         StringBuilder luceneQuery=new StringBuilder();
         for(String value : valuesToQuery){
             if(luceneQuery.length()>0){
@@ -62,7 +73,7 @@ public class SearchRelevancyTool {
             }
             luceneQuery.
                     append("@").
-                    append(QueryParser.escape(CCConstants.getValidLocalName(PROPERTY))).
+                    append(QueryParser.escape(property)).
                     append(":\"").
                     append(QueryParser.escape(value)).
                     append("\"");

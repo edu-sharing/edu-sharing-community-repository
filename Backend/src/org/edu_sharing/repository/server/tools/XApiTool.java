@@ -136,7 +136,7 @@ public class XApiTool {
             match.put("statement.actor.account.name", authority);
 
         group.put("_id","$statement.actor.account.name");
-        groupAggregator.put("$addToSet","$statement.object.definition.extensions."+EDU_SHARING_XAPI_EXTENSION.replace(".","&46;")+"."+CCConstants.getValidLocalName(fieldName));
+        groupAggregator.put("$addToSet","$statement.object.definition.extensions."+EDU_SHARING_XAPI_EXTENSION.replace(".","&46;")+"."+fieldName);
         group.put("data", groupAggregator);
 
         matchWrapper.put("$match",match);
