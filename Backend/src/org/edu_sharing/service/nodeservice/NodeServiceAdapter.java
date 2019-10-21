@@ -172,6 +172,8 @@ public class NodeServiceAdapter implements NodeService {
 		if(props.containsKey(CCConstants.LOM_PROP_TECHNICAL_FORMAT))
 			mimetype= (String) props.get(CCConstants.LOM_PROP_TECHNICAL_FORMAT);
 		InputStream content=getContent(nodeId);
+		if(content==null)
+			throw new IllegalArgumentException("The remote service did not provide any data to import");
 		NodeService service=NodeServiceFactory.getLocalService();
 
 		// Aspect ccm:imported_object properties

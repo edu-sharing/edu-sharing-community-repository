@@ -21,6 +21,9 @@ import javax.net.ssl.SSLSession;
 import javax.net.ssl.TrustManager;
 import javax.net.ssl.X509TrustManager;
 
+import com.google.common.cache.Cache;
+import com.google.common.cache.CacheBuilder;
+import com.google.common.cache.LoadingCache;
 import org.apache.commons.collections.map.LRUMap;
 import org.apache.log4j.Logger;
 import org.edu_sharing.metadataset.v2.MetadataSetV2;
@@ -50,8 +53,11 @@ public class SearchServicePixabayImpl extends SearchServiceAdapter{
 	String repositoryId = null;
 
 	String APIKey = null;
-			
-	private static LRUMap searchCache=new LRUMap(1000);
+	private static Cache<String, String> searchCache = CacheBuilder.newBuilder()
+			.maximumSize(100)
+			.expireAfterWrite(1, TimeUnit.MINUTES)
+			.build();
+
 	public SearchServicePixabayImpl(String appId) {
 		ApplicationInfo appInfo = ApplicationInfoList.getRepositoryInfoById(appId);
 		this.repositoryId = appInfo.getAppId();		
@@ -92,9 +98,9 @@ public class SearchServicePixabayImpl extends SearchServiceAdapter{
 	public static SearchResultNodeRef searchPixabay(String repositoryId,String apiKey,String path) throws Exception{
 		String lang=new AuthenticationToolAPI().getCurrentLocale().split("_")[0];
 		String url=PIXABAY_API+"?key="+URLEncoder.encodeUriComponent(apiKey)+"&lang="+lang+path;
-		String jsonString;
-		if(searchCache.containsKey(url)){
-			jsonString= (String) searchCache.get(url);
+		String jsonString=searchCache.getIfPresent(url);
+		if(jsonString!=null){
+			// already fetched
 		}
 		else{
 			URL urlURL=new URL(url);
