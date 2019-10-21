@@ -41,6 +41,9 @@ public class SearchRelevancyTool {
         MetadataSetV2 mds = MetadataHelper.getMetadataset(ApplicationInfoList.getHomeRepository(), CCConstants.metadatasetdefault_id);
         // fetch all facettes for already viewed contents from xapi
         List<String> facettes = XApiTool.getFacettesFromStore(AuthenticationUtil.getFullyAuthenticatedUser(), property,lastActionsLimit);
+        // propably nothing viewed or xapi store failed, return empty query
+        if(facettes==null)
+            return "";
         // get the valuespace from the property
         Map<String, MetadataKey> values = mds.findWidget(property).getValuesAsMap();
         Set<String> valuesToQuery=new HashSet<>();
