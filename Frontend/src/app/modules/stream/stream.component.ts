@@ -1,16 +1,16 @@
-import {Component, ViewChild, HostListener, ElementRef} from '@angular/core';
+import {Component, ViewChild} from '@angular/core';
 import 'rxjs/add/operator/map';
-import {Router, ActivatedRoute, Params} from '@angular/router';
+import {ActivatedRoute, Params, Router, RoutesRecognized} from '@angular/router';
 import {TranslateService} from "@ngx-translate/core";
 import {Translation} from "../../common/translation";
 import * as EduData from "../../common/rest/data-object"; //
+import {Connector, ConnectorList, Filetype, Node, NodeWrapper, STREAM_STATUS} from "../../common/rest/data-object";
 import {RestCollectionService} from "../../common/rest/services/rest-collection.service"; //
 import {Toast} from "../../common/ui/toast"; //
 import {RestSearchService} from '../../common/rest/services/rest-search.service';
 import {RestNodeService} from '../../common/rest/services/rest-node.service';
 import {RestConstants} from '../../common/rest/rest-constants';
 import {RestConnectorService} from "../../common/rest/services/rest-connector.service";
-import {Node, NodeList, LoginResult, STREAM_STATUS, ConnectorList} from '../../common/rest/data-object';
 import {OptionItem} from "../../common/ui/actionbar/option-item";
 import {TemporaryStorageService} from "../../common/services/temporary-storage.service";
 import {UIHelper} from "../../common/ui/ui-helper";
@@ -18,24 +18,17 @@ import {Title} from "@angular/platform-browser";
 import {ConfigurationService} from "../../common/services/configuration.service";
 import {SessionStorageService} from "../../common/services/session-storage.service";
 import {UIConstants} from "../../common/ui/ui-constants";
-import {RestMdsService} from "../../common/rest/services/rest-mds.service";
 import {RestHelper} from "../../common/rest/rest-helper";
-import {ListItem} from "../../common/ui/list-item";
-import {MdsHelper} from "../../common/rest/mds-helper";
 import {NodeHelper} from "../../common/ui/node-helper"; //
 import {Observable} from 'rxjs/Rx';
 import {RestStreamService} from "../../common/rest/services/rest-stream.service";
 import {RestConnectorsService} from '../../common/rest/services/rest-connectors.service';
 import {UIAnimation} from '../../common/ui/ui-animation';
 import {trigger} from '@angular/animations';
-import {Connector} from '../../common/rest/data-object';
-import {NodeWrapper} from '../../common/rest/data-object';
-import {Filetype} from '../../common/rest/data-object';
 import {FrameEventsService} from '../../common/services/frame-events.service';
 import {CordovaService} from '../../common/services/cordova.service';
 import 'rxjs/add/operator/pairwise';
-import { Subscription } from 'rxjs/Subscription';
-import { RoutesRecognized } from '@angular/router';
+import {Subscription} from 'rxjs/Subscription';
 import * as moment from 'moment';
 import {ActionbarHelperService} from '../../common/services/actionbar-helper';
 import {RestIamService} from '../../common/rest/services/rest-iam.service';
@@ -77,24 +70,26 @@ export class StreamComponent {
   dateToDisplay: string;
   amountToRandomize: number;
 
-  moveUpOption = new OptionItem('STREAM.OBJECT.OPTION.MOVEUP','arrow_upward',(node: any)=>{
-    this.updateStream(node.id, STREAM_STATUS.PROGRESS).subscribe( (data) => {
-      this.updateDataFromJSON(STREAM_STATUS.OPEN);
-      this.toast.toast("STREAM.TOAST.MOVEUP");
+  moveUpOption = new OptionItem('STREAM.OBJECT.OPTION.MARK','toc',(node: any)=>{
+    this.updateStatus(node.id, STREAM_STATUS.PROGRESS).subscribe( () => {
+      //this.updateDataFromJSON(STREAM_STATUS.OPEN);
+      this.streams = this.streams.filter((n: any) => n.id !== node.id);
+      this.toast.toast("STREAM.TOAST.MARKED");
     }, error => console.log(error));
   });
 
   collectionOption = new OptionItem("WORKSPACE.OPTION.COLLECTION", "layers",(node: Node) => this.addToCollection(node));
 
-  removeOption = new OptionItem('STREAM.OBJECT.OPTION.REMOVE','remove_circle',(node: Node)=> {
-    this.updateStream(node, STREAM_STATUS.DONE).subscribe( (data) => {
-      let result = this.streams.filter( (n : any) => n.id !== node );
-      this.streams = result;
-    } , error => console.log(error));
+  removeOption = new OptionItem('STREAM.OBJECT.OPTION.REMOVE','delete',(node: any)=> {
+    this.updateStatus(node.id, STREAM_STATUS.DONE).subscribe( () => {
+      this.streams = this.streams.filter((n: any) => n.id !== node.id);
+      this.toast.toast("STREAM.TOAST.REMOVED");
+    });
   });
 
   // TODO: Store and use current search query
   searchQuery:string;
+  isLoading=true;
   doSearch(query:string){
     this.searchQuery=query;
     console.log(query);
@@ -157,7 +152,7 @@ export class StreamComponent {
 
   setStreamMode() {
     this.route.queryParams.subscribe((params: Params) => {
-      if (params.mode === 'new' || params.mode === 'seen' || params.mode === 'relevant') {
+      if (params.mode === 'new' || params.mode === 'seen' || params.mode === 'relevant' || params.mode === 'marked') {
         this.menuOptions(params.mode);
       }
       else{
@@ -167,13 +162,13 @@ export class StreamComponent {
   }
 
   seen(id: any) {
-    this.updateStream(id, STREAM_STATUS.READ).subscribe(data => this.updateDataFromJSON(STREAM_STATUS.OPEN) , error => console.log(error));
+    this.updateStatus(id, STREAM_STATUS.READ).subscribe(data => this.updateDataFromJSON(STREAM_STATUS.OPEN) , error => console.log(error));
   }
 
   onScroll() {
     console.log("scrolled!!");
     //this.updateDataFromJSON(STREAM_STATUS.OPEN);
-    let curStat = this.menuOption === 'new' ? STREAM_STATUS.OPEN : STREAM_STATUS.READ;
+    let curStat = this.menuOption === 'new' ? STREAM_STATUS.OPEN : this.menuOption=='marked'? STREAM_STATUS.PROGRESS : STREAM_STATUS.READ;
     let sortWay = this.menuOption === 'new' ? false : false;
     this.getJSON(curStat, sortWay).subscribe(data => {
       console.log("r, data: ",data['stream']);
@@ -237,16 +232,21 @@ export class StreamComponent {
     this.streams = [];
     if (option === 'new') {
       this.updateDataFromJSON(STREAM_STATUS.OPEN);
-      this.actionOptions[0] = this.moveUpOption;
-      this.actionOptions[1] = this.collectionOption;
+      this.actionOptions.push(this.moveUpOption);
+      this.actionOptions.push(this.collectionOption);
+    }
+    else if (option === 'marked') {
+      this.updateDataFromJSON(STREAM_STATUS.PROGRESS);
+      this.actionOptions.push(this.collectionOption);
+      this.actionOptions.push(this.removeOption);
     }
     else if(option == 'relevant'){
       this.searchRelevant();
     }
     else {
       this.updateDataFromJSON(STREAM_STATUS.READ);
-      this.actionOptions[0] = this.collectionOption;
-      this.actionOptions[1] = this.removeOption;
+      this.actionOptions.push(this.collectionOption);
+      this.actionOptions.push(this.removeOption);
     }
       let nodeStore = this.actionbar.createOptionIfPossible('ADD_NODE_STORE',null,(node: Node) => {
           this.addToStore(node);
@@ -259,7 +259,7 @@ export class StreamComponent {
   }
 
   updateDataFromJSON(streamStatus: any) {
-    if (streamStatus == STREAM_STATUS.OPEN) {
+    /*if (streamStatus == STREAM_STATUS.OPEN) {
       let openStreams: any[];
       let progressStreams: any[];
       let unSortedStream: any[];
@@ -277,13 +277,16 @@ export class StreamComponent {
         });
       }, error => console.log(error));
     }
-    else {
+    else {*/
+      this.streams = [];
+      this.isLoading = true;
       this.getSimpleJSON(streamStatus).subscribe(data => {
         this.streams = data['stream'].filter( (n : any) => n.nodes.length !== 0);
         this.imagesToLoad = this.streams.length;
+        this.isLoading = false;
         this.scrollToDown();
       }, error => console.log(error));
-    }
+    //}
 
   }
 
@@ -334,7 +337,7 @@ export class StreamComponent {
     return this.streamService.getStream(streamStatus,this.searchQuery,{},request);
   }
 
-  public updateStream(idToUpdate: any, status: any): Observable<any> {
+  public updateStatus(idToUpdate: any, status: any): Observable<any> {
     return this.streamService.updateStatus(idToUpdate, this.connector.getCurrentLogin().authorityName, status)
   }
     private create(){
@@ -370,10 +373,12 @@ export class StreamComponent {
     let request:RequestObject={
       propertyFilter:[RestConstants.ALL]
     };
+    this.isLoading=true;
     this.searchService.getRelevant(request).subscribe((relevant)=>{
       console.log(relevant);
       this.streams=relevant.nodes;
       this.imagesToLoad=this.streams.length;
+      this.isLoading=false;
     });
   }
   public getTitle(node:Node){

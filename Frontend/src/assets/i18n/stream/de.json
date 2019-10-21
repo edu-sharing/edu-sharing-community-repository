@@ -2,22 +2,26 @@
   "STREAM": {
     "TITLE":"Stream",
     "MENU": {
-      "OPTION1":"Was gibt's Neues?",
-      "OPTION2":"Schon gesehen",
+      "NEW":"Empfehlungen",
+      "READ":"Schon gesehen",
+      "MARKED":"Meine Liste",
       "RELEVANT":"Vorgeschlagen"
     },
     "OBJECT":{
       "NOTITLE":"Keine Titel",
-      "NOMATERIALS":"Noch Keine Materialien vorhanden.",
+      "NOMATERIALS":"Noch Keine Elemente vorhanden.",
       "NONODES":"Es wurden keine Knoten gefunden",
       "OPTION": {
         "MOVEUP":"Ganz oben anzeigen",
-        "REMOVE":"Aus Stream entfernen"
+        "REMOVE":"Aus Liste entfernen",
+        "MARK": "Auf meine Liste"
       }  
     },
     "TOAST":{
       "MOVEUP":"wird jetzt ganz oben angezeigt",
-      "SEEN":"Das eben benutzte Material ist jetzt in \"Schon gesehen\" zu finden."
+      "MARKED":"Zu meiner Liste hinzugefügt",
+      "SEEN":"Das eben benutzte Element ist jetzt in \"Schon gesehen\" zu finden.",
+      "REMOVED":"Das Element wird nicht mehr angezeigt"
     }
   }
 }

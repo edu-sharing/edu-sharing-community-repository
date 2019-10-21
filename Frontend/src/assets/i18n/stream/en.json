@@ -2,22 +2,26 @@
   "STREAM": {
     "TITLE":"Activity-Stream",
     "MENU": {
-      "OPTION1":"What's New?",
-      "OPTION2":"Already seen",
-      "OPTION3":"settings"
+      "NEW":"Recommendations",
+      "READ":"History",
+      "MARKED":"My list",
+      "RELEVANT":"Auto suggestions"
     },
     "OBJECT":{
       "NOTITLE":"No title",
-      "NOMATERIALS":"No materials are available yet.",
+      "NOMATERIALS":"No elements are available yet.",
       "NONODES":"No nodes were found",
       "OPTION": {
         "MOVEUP":"Show at the top",
-        "REMOVE":"Remove from stream"
+        "REMOVE":"Remove from list",
+        "MARK": "Add to my list"
       }  
     },
     "TOAST":{
       "MOVEUP":"is now displayed at the top",
-      "SEEN":"The material just used can now be found in \"Seen\""
+      "MARKED": "added to my list",
+      "SEEN":"The element just used can now be found in \"Already seen\"",
+      "REMOVED": "The element was removed"
     }
   }
 }

@@ -3,7 +3,26 @@
 .stream-container{
     padding-top: $mainnavHeight;
 }
-
+.stream-title{
+    padding-bottom: 5px;
+}
+.tabs > li{
+    width:auto;
+}
+.table-tab-title-short {
+    display: flex!important;
+    align-items: center;
+    justify-content: center;
+    >span{
+        display:none;
+    }
+    &.active > span{
+        display:flex;
+    }
+    >i{
+        display: flex;
+    }
+}
 @media screen and (max-width: 330px){
     .stream-title{
         font-weight: bold;
