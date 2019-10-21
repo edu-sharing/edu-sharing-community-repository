@@ -49,13 +49,13 @@
     <div class="col s12 m7 l6 remove-horizontal-padding">
         <div class="margin-show">
 
-        <div class="stream-header-left row stream-marginfix">
-            <div *ngIf="menuOption == 'new'" class="stream-title col s10 m12">{{'STREAM.MENU.NEW' | translate }}  </div>
-            <div *ngIf="menuOption == 'seen'" class="stream-title col s10 m12">{{'STREAM.MENU.READ' | translate }}  </div>
-            <div *ngIf="menuOption == 'relevant'" class="stream-title col s10 m12">{{'STREAM.MENU.RELEVANT' | translate }}  </div>
-            <div *ngIf="menuOption == 'marked'" class="stream-title col s10 m12">{{'STREAM.MENU.MARKED' | translate }}  </div>
+        <div class="stream-header-left stream-marginfix">
+            <div *ngIf="menuOption == 'new'" class="stream-title s10 m12">{{'STREAM.MENU.NEW' | translate }}  </div>
+            <div *ngIf="menuOption == 'seen'" class="stream-title s10 m12">{{'STREAM.MENU.READ' | translate }}  </div>
+            <div *ngIf="menuOption == 'relevant'" class="stream-title s10 m12">{{'STREAM.MENU.RELEVANT' | translate }}  </div>
+            <div *ngIf="menuOption == 'marked'" class="stream-title s10 m12">{{'STREAM.MENU.MARKED' | translate }}  </div>
 
-            <span id="stream-title-date" class="stream-title-date col s12 m12">
+            <span id="stream-title-date" class="stream-title-date s12 m12">
                 {{dateToDisplay}}
             </span>
 
@@ -67,7 +67,7 @@
         <div class="stream-emptytxt" *ngIf="streams.length === 0 && !isLoading">
             {{'STREAM.OBJECT.NOMATERIALS' | translate }}
         </div>
-            <div *ngIf="menuOption=='relevant'">
+            <div *ngIf="menuOption=='relevant'" class="stream-boxes">
                 <div *ngFor="let node of streams" class="stream-box" >
                     <div class="row row-nomargin" >
                         <div class="stream-box-icon col s1 ">
@@ -93,7 +93,7 @@
                     </div>
                 </div>
             </div>
-            <div *ngIf="menuOption!='relevant'">
+            <div *ngIf="menuOption!='relevant'" class="stream-boxes">
                 <div *ngFor="let strm of streams" [ngClass]="strm.nodes.length === 0 ? 'hide' : 'stream-box'" >
                     <div class="row row-nomargin" >
                         <div class="stream-box-icon col s1 " *ngIf="strm.nodes[0]">

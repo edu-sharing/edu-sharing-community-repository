@@ -3,7 +3,14 @@
 .stream-container{
     padding-top: $mainnavHeight;
 }
+.stream-boxes{
+    display: flex;
+    flex-wrap: wrap;
+    margin-top: 10px;
+}
 .stream-title{
+    font-weight: bold;
+    font-size: 180%;
     padding-bottom: 5px;
 }
 .tabs > li{
@@ -25,9 +32,10 @@
 }
 @media screen and (max-width: 330px){
     .stream-title{
-        font-weight: bold;
-        font-size: 24px;
-        padding-left: 20px;
+        font-size: 140%;
+    }
+    .margin-show{
+        padding:0 15px;
     }
     .choose-menu-main {
         padding-left: 0 !important;
@@ -55,9 +63,10 @@
 
 @media screen and (min-width: 331px) and (max-width: 600px) {
     .stream-title{
-        font-weight: bold;
-        font-size: 28px;
-        padding-left: 20px;
+        font-size: 165%;
+    }
+    .margin-show{
+        padding:0 15px;
     }
     .choose-menu-main {
         padding-left: 0 !important;
@@ -83,10 +92,12 @@
 }
 
 @media screen and (min-width: 601px) {
-    .stream-title{
-        font-weight: bold;
-        font-size: 28px;
-        padding-left: 20px;
+    .choose-menu-main{
+        width: 220px!important;
+    }
+    .remove-horizontal-padding{
+        width: calc(100% - 220px)!important;
+        padding-right: 40px;
     }
     .arrow-menu-arrow {
         display: none;
@@ -154,16 +165,15 @@
 
 .stream-box{
     background-color: white;
-    margin-top: 15px;
+    margin: 15px;
     box-shadow: 0 2px 2px 0 rgba(0, 0, 0, 0.2), 0 3px 10px 0 rgba(0, 0, 0, 0.19);
     border-radius: 2px;
-    max-width: 600px;
+    width: 460px;
 }
 
 .stream-title-date{
     font-size: 12px;
     color: grey;
-    padding-left: 20px;
 }
 
 .stream-box-title{
@@ -199,7 +209,7 @@
 .stream-box-desc{
     padding-top: 15px;
     padding-left: 20px;
-    
+    height: 40px;
 }
 
 .stream-box-nonodes{
@@ -222,6 +232,7 @@
     line-height: 0;
     padding-top: 67%;
     background-size: cover;
+    background-position: 50%;
     &:focus{
         @include setGlobalDashedFocus();
     }
@@ -292,7 +303,8 @@
 }
 
 .stream-header-left{
-    display: inline-block;    
+    display: inline-block;
+    margin-left:15px;
 }
 
 .stream-header-right{
