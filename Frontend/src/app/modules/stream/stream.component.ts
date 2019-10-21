@@ -234,6 +234,7 @@ export class StreamComponent {
       this.updateDataFromJSON(STREAM_STATUS.OPEN);
       this.actionOptions.push(this.moveUpOption);
       this.actionOptions.push(this.collectionOption);
+      this.actionOptions.push(this.removeOption);
     }
     else if (option === 'marked') {
       this.updateDataFromJSON(STREAM_STATUS.PROGRESS);
