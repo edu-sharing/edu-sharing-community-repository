@@ -287,16 +287,22 @@ public class MetadataTemplateRenderer {
 	public static Map<String, Object> cleanupHTMLProperties(Map<String, Object> properties) {
 		Map<String,Object> cleaned=new HashMap<>();
 		for(Map.Entry<String,Object> entry : properties.entrySet()){
-			cleaned.put(entry.getKey(),cleanupHTML(entry.getValue().toString()));
+			if(entry.getValue()==null)
+				cleaned.put(entry.getKey(), null);
+			else
+				cleaned.put(entry.getKey(),cleanupHTML(entry.getValue().toString()));
 		}
 		return cleaned;
 	}
 	public static Map<String, String[]> cleanupHTMLMultivalueProperties(Map<String, String[]> properties) {
 		Map<String,String[]> cleaned=new HashMap<>();
 		for(Map.Entry<String,String[]> entry : properties.entrySet()){
-			cleaned.put(entry.getKey(),
+			if(entry.getValue()==null)
+				cleaned.put(entry.getKey(), null);
+			else
+				cleaned.put(entry.getKey(),
 					Arrays.stream(entry.getValue()).map(MetadataTemplateRenderer::cleanupHTML).toArray(String[]::new)
-			);
+				);
 		}
 		return cleaned;
 	}
