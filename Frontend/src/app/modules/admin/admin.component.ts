@@ -882,7 +882,7 @@ export class AdminComponent {
     }
     getSystemChecks(){
       this.systemChecks.sort((a:any,b:any)=>{
-          let status:any={'FAIL':0,'WARN':1,'OK':2};
+          let status:any={'FAIL':0,'WARN':1,'INFO':2,'OK':3};
           let statusA=status[a.status];
           let statusB=status[b.status];
           if(statusA!=statusB)
