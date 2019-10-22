@@ -34,6 +34,7 @@ import {ListTableComponent} from "../../../core-ui-module/components/list-table/
 import {SpinnerComponent} from "../../../core-ui-module/components/spinner/spinner.component";
 import {CommentsListComponent} from "../../../modules/management-dialogs/node-comments/comments-list/comments-list.component";
 import {GlobalContainerComponent} from "../global-container/global-container.component";
+import {VideoControlsComponent} from "../../../core-ui-module/components/video-controls/video-controls.component";
 
 declare var jQuery:any;
 declare var window: any;
@@ -348,6 +349,7 @@ export class NodeRenderComponent implements EventListener{
                     jQuery('#nodeRenderContent').html(data.detailsSnippet);
                     this.postprocessHtml();
                     this.addCollections();
+                    this.addVideoControls();
                     this.addComments();
                     this.loadNode();
                     this.isLoading = false;
@@ -367,6 +369,27 @@ export class NodeRenderComponent implements EventListener{
             return;
         this.close();
     }
+    addVideoControls() {
+        let videoElement: HTMLVideoElement;
+        let target: Element;
+        if(!this.isCollectionRef()){
+            return;
+        }
+        try {
+            videoElement = document.getElementsByClassName("videoWrapperOuter")[0].getElementsByTagName("video")[0];
+            target = document.createElement('div');
+            videoElement.parentElement.appendChild(target);
+        } catch (e) {
+            console.log("did not find video element, skipping controls",e);
+            return;
+        }
+        let data={
+            "video":videoElement,
+            "node":this._node
+        }
+        UIHelper.injectAngularComponent(this.componentFactoryResolver,this.viewContainerRef,VideoControlsComponent,target,data);
+    }
+
     addCollections(){
         let domContainer:Element;
         let domCollections:Element;
