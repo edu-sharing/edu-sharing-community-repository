@@ -8,7 +8,7 @@ import javax.xml.bind.annotation.XmlValue;
 
 public class LicenseAgreement {
 	@XmlAccessorType(XmlAccessType.FIELD)
-	private static class Node{
+	private static class Node implements Serializable{
 		@XmlAttribute public String language;
 		@XmlValue public String value;
 	}
