@@ -147,13 +147,18 @@ public class XApiTool {
             array.put(limitWrapper);
         }
         array.put(groupWrapper);
-        JSONArray result = new JSONArray(queryStore(array));
-        JSONArray data = result.getJSONObject(0).getJSONArray("data");
-        List<String> mapped=new ArrayList<>();
-        for(int i=0;i<data.length();i++){
-            mapped.add(data.getJSONArray(i).getString(0));
+        try {
+            JSONArray result = new JSONArray(queryStore(array));
+            JSONArray data = result.getJSONObject(0).getJSONArray("data");
+            List<String> mapped = new ArrayList<>();
+            for (int i = 0; i < data.length(); i++) {
+                mapped.add(data.getJSONArray(i).getString(0));
+            }
+            return mapped;
+        }catch(Exception e){
+            logger.info("Could not fetch facettes from xapi store: "+e.getMessage());
+            return null;
         }
-        return mapped;
     }
 
     private static JSONObject addData(String nodeId, JSONObject xApiData) throws Throwable {
