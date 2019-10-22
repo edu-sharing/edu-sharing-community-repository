@@ -34,6 +34,8 @@
   right:0;
   @include materialShadow();
   border-radius: 2px;
+  max-height: 300px;
+  overflow-y: auto;
 }
 
 .suggestbox > li {
@@ -41,14 +43,15 @@
   line-height: 1.8;
 }
 .suggestbox > li:hover{
-  background-color: #ddd;
+  background-color: $workspaceSelectedBackground;
 }
 
-.suggestbox > li > a {
+.suggestbox > li > a > div {
   display: flex;
+  position: relative;
   align-items: center;
   width: 100%;
-  padding:8px 12px 8px 12px;
+  padding:10px 16px;
   cursor: pointer;
   >.data{
     display: flex;

@@ -1527,7 +1527,8 @@ public class CCConstants {
 
 	public final static String LICENSE_COPYRIGHT_LICENSE = "COPYRIGHT_LICENSE";
 
-	public final static String LICENSE_NONE = "COPYRIGHT_NONE";
+	// a missing license is just stored as an empy value
+	public final static String LICENSE_NONE = "";
 
 
 	/**

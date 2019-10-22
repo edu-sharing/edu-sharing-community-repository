@@ -1,7 +1,62 @@
+@import "../../../../styles/variables.scss";
+
 autocomplete{
   width:100%;
 }
 user-avatar{
   height: 40px;
+}
+
+.suggestion-content{
+  width: 100%;
+  display: flex;
+  align-items: center;
+  >i{
+    color: #6d6d6d;
+    font-size: 30px;
+  }
+  .text-content {
+    display: flex;
+    flex-grow: 1;
+    justify-content: center;
+    > .data {
+      flex-grow: 1;
+      margin: 0 15px;
+      >div{
+        @include limitLineCount(1,1.6);
+        word-break: break-all;
+        color:$textMain;
+      }
+      >.primary{
+        font-size: 110%;
+      }
+      >.secondary{
+        font-size: 90%;
+        color:$textLight;
+      }
+    }
+
+    > .affiliation {
+      color: $textMediumLight;
+      text-transform: uppercase;
+      font-size: 75%;
+      @include limitLineCount(1,2);
+      display: flex;
+      justify-content: flex-end;
+      word-break: break-all;
+      min-width: 100px;
+      max-width: 30%;
+    }
+  }
+}
+@media screen and (max-width: $mobileWidth) {
+  .suggestion-content .text-content{
+    flex-direction: column;
+    >.affiliation{
+      max-width: unset;
+      margin: 3px 15px 0 15px;
+      justify-content: flex-start;
+    }
+  }
 }
 

@@ -49,6 +49,7 @@
   import {IconComponent} from './common/ui/icon/icon.component';
   import {UserQuotaComponent} from "./common/ui/user-quota/user-quota.component";
   import {UrlPipe} from "./common/url.pipe";
+  import {AuthorityAffiliationPipe} from "./common/ui/authority-affiliation.pipe";
   import {GlobalContainerComponent} from "./common/ui/global-container/global-container.component";
   import {RocketchatComponent} from "./common/ui/global-container/rocketchat/rocketchat.component";
 
@@ -64,6 +65,7 @@
       PermissionNamePipe,
       ReplaceCharsPipe,
       AuthorityNamePipe,
+      AuthorityAffiliationPipe,
       AutocompleteComponent,
       AuthoritySearchInputComponent,
       AuthorityColorPipe,

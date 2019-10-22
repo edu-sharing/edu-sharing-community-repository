@@ -304,6 +304,7 @@
     "AUTHOR": "author",
     "SOURCE": "source"
   },
+  "AUTHORITY_TYPE_GROUP": "Group",
   "GROUP" : {
     "displayName" : "group name",
     "groupEmail" : "e-mail",

@@ -19,6 +19,14 @@ Contributing
 ------------
 For contribution on a regular basis please visit our [community site](http://edu-sharing-network.org/?lang=en).
 
+Security Issues
+---------------
+If you found something which might could be a vulnerability or a security issue, please contact us first instead of making a public issue. This can help us tracking down the issue first and may provide patches beforehand.
+
+Please provide such concerns via mail to security@edu-sharing.com
+
+Thanks!
+
 Setting up your development environment
 ---------------------------------------
 1. Install a [Java JDK](http://www.oracle.com/technetwork/java/javase/downloads/jdk8-downloads-2133151.html)

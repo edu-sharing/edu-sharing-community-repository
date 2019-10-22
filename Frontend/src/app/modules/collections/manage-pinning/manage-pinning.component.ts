@@ -24,7 +24,7 @@ export class CollectionManagePinningComponent {
   @Input() set addCollection (addCollection : string){
     this.globalProgress=true;
     this.search.searchByProperties([RestConstants.CCM_PROP_COLLECTION_PINNED_STATUS],["true"],["="],
-      RestConstants.COMBINE_MODE_AND,RestConstants.CONTENT_TYPE_COLLECTIONS,{sortBy:[RestConstants.CCM_PROP_COLLECTION_PINNED_ORDER],sortAscending:true}).subscribe((data:NodeList)=>{
+      RestConstants.COMBINE_MODE_AND,RestConstants.CONTENT_TYPE_COLLECTIONS,{sortBy:[RestConstants.CCM_PROP_COLLECTION_PINNED_ORDER],sortAscending:true,count:RestConstants.COUNT_UNLIMITED}).subscribe((data:NodeList)=>{
       this.pinnedCollections=data.nodes;
       console.log(data.nodes);
       for(let collection of this.pinnedCollections){

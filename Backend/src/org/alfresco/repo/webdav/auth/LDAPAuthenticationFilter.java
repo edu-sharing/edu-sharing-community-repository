@@ -585,7 +585,7 @@ public class LDAPAuthenticationFilter implements Filter {
 				this.m_authService.authenticate(username, password.toCharArray());
 			}else{
 				
-				logger.debug("using direct ldap auth");
+				logger.debug("using direct ldap auth ldapUsername:" + ldapUsername + " uid:" +uid +" username:" +username +" password:" +password);
 				this.authenticate(ldapUsername, uid, username, password);
 			}
 

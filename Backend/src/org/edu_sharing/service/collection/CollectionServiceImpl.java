@@ -9,6 +9,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
@@ -16,12 +17,13 @@ import org.alfresco.repo.policy.BehaviourFilter;
 import org.alfresco.repo.search.impl.solr.ESSearchParameters;
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.repo.security.authentication.AuthenticationUtil.RunAsWork;
-import org.alfresco.repo.transaction.RetryingTransactionHelper;
 import org.alfresco.service.ServiceRegistry;
 import org.alfresco.service.cmr.repository.ChildAssociationRef;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.repository.StoreRef;
 import org.alfresco.service.cmr.search.SearchParameters;
+import org.alfresco.service.cmr.security.AccessPermission;
+import org.alfresco.service.cmr.security.PermissionService;
 import org.alfresco.service.cmr.thumbnail.ThumbnailService;
 import org.alfresco.service.transaction.TransactionService;
 import org.apache.log4j.Logger;
@@ -59,8 +61,8 @@ import org.edu_sharing.service.nodeservice.NodeServiceHelper;
 import org.edu_sharing.service.nodeservice.NodeServiceInterceptor;
 import org.edu_sharing.service.permission.PermissionServiceFactory;
 import org.edu_sharing.service.search.SearchService;
-import org.edu_sharing.service.search.SearchServiceFactory;
 import org.edu_sharing.service.search.SearchService.ContentType;
+import org.edu_sharing.service.search.SearchServiceFactory;
 import org.edu_sharing.service.search.model.SearchToken;
 import org.edu_sharing.service.search.model.SortDefinition;
 import org.edu_sharing.service.toolpermission.ToolPermissionException;
@@ -169,7 +171,24 @@ public class CollectionServiceImpl implements CollectionService{
 				throw new Exception(message);
 			}
 			
-			if(!toolPermissionService.hasToolPermission(CCConstants.CCM_VALUE_TOOLPERMISSION_INVITE_ALLAUTHORITIES) 
+			boolean collectionIsPublic = false;
+			PermissionService alfPermissionService = serviceRegistry.getPermissionService();
+			Set<AccessPermission> permissions = alfPermissionService.getAllSetPermissions(new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE,collectionId));
+			for(AccessPermission accessPermission : permissions) {
+				if(PermissionService.ALL_AUTHORITIES.equals(accessPermission.getAuthority())) {
+					if(PermissionService.READ.equals(accessPermission.getPermission())
+							|| PermissionService.CONSUMER.equals(accessPermission.getPermission())
+							|| "ConsumerMetadata".equals(accessPermission.getPermission())
+							|| PermissionService.EDITOR.equals(accessPermission.getPermission())
+							|| PermissionService.CONTRIBUTOR.equals(accessPermission.getPermission())
+							|| PermissionService.COORDINATOR.equals(accessPermission.getPermission())) {
+						collectionIsPublic = true;
+					}
+				}
+				
+			}
+			
+			if(collectionIsPublic && !toolPermissionService.hasToolPermission(CCConstants.CCM_VALUE_TOOLPERMISSION_INVITE_ALLAUTHORITIES) 
 					&& !client.isOwner(collectionId, AuthenticationUtil.getFullyAuthenticatedUser())){
 				throw new ToolPermissionException(CCConstants.CCM_VALUE_TOOLPERMISSION_INVITE_ALLAUTHORITIES);
 			}

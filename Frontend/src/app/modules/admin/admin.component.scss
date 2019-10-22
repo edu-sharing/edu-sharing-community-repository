@@ -93,6 +93,9 @@
       &.check-fail {
         background-color: lighten($warning, 60%);
       }
+      &.check-info {
+        background-color: lighten($colorStatusNeutral, 45%);
+      }
       &.check-warn {
         background-color: lighten($warningMedium, 50%);
       }
@@ -362,7 +365,6 @@
       flex-direction: column;
       >autocomplete{
         width: calc(100% - 18px);
-        margin-bottom: -30px;
       }
       >div{
         margin:0 20px;

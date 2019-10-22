@@ -3,7 +3,6 @@ package org.edu_sharing.repository.server.importer;
 import java.io.IOException;
 import java.io.StringReader;
 import java.net.HttpURLConnection;
-import java.net.MalformedURLException;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
@@ -32,9 +31,9 @@ import org.w3c.dom.NodeList;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 
-public class RecordHandleMods implements RecordHandlerInterface {
+public class RecordHandlerMods implements RecordHandlerInterface {
 	
-	Logger logger = Logger.getLogger(RecordHandleMods.class);
+	Logger logger = Logger.getLogger(RecordHandlerMods.class);
 	
 	XPathFactory pfactory = XPathFactory.newInstance();
 	XPath xpath = pfactory.newXPath();
@@ -43,7 +42,7 @@ public class RecordHandleMods implements RecordHandlerInterface {
 	String metadataSetId = null;
 	HashMap<String, Object> toSafeMap = new HashMap<String, Object>();
 	
-	public RecordHandleMods(String metadataSetId) {
+	public RecordHandlerMods(String metadataSetId) {
 		if(metadataSetId == null || metadataSetId.trim().equals("")){
 			metadataSetId = "default";
 		}
@@ -88,6 +87,9 @@ public class RecordHandleMods implements RecordHandlerInterface {
 			
 		String technicalLocation = (String) xpath.evaluate("location/url[@access='raw object']", nodeMods, XPathConstants.STRING);
 		toSafeMap.put(CCConstants.LOM_PROP_TECHNICAL_LOCATION, technicalLocation);
+
+		String wwwurl = (String) xpath.evaluate("location/url[@access='object in context']", nodeMods, XPathConstants.STRING);
+		toSafeMap.put(CCConstants.CCM_PROP_IO_WWWURL, wwwurl);
 		
 		String lrt = (String) xpath.evaluate("typeOfResource", nodeMods, XPathConstants.STRING);
 		toSafeMap.put(CCConstants.CCM_PROP_IO_REPL_EDUCATIONAL_LEARNINGRESSOURCETYPE, lrt);

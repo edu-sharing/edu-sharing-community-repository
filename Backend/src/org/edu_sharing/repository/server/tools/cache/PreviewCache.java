@@ -80,8 +80,14 @@ public class PreviewCache {
 		ArrayList<String> ids=new ArrayList<String>();
 		ids.add(nodeId);
 		
+		//check if node exists to prevent InvalidNodeRefException: Node does not exist when calling nodeService.getType on startup with clean database
+		NodeRef nodeRef = new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE,nodeId);
+		if(!nodeService.exists(nodeRef)) {
+			return;
+		}
+		
 		//only for IO's
-		if(nodeService.getType(new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE,nodeId)).
+		if(nodeService.getType(nodeRef).
 				equals(QName.createQName(CCConstants.CCM_TYPE_IO))) {
 			for(ChildAssociationRef ref : nodeService.getChildAssocs(new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE,nodeId))){
 				ids.add(ref.getChildRef().getId());

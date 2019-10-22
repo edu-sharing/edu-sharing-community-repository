@@ -128,10 +128,18 @@
         },
         "CORS": {
           "TITLE":"CORS-Konfiguration",
-          "STATUS_OK":"Es wurde konfiguriert, das AJAX-Requests über die folgenden Domains erlaubt sind: {{allow_origin}}.",
-          "STATUS_WARN":"Es wurden bislang keine Domains gesetzt. Das System erlaubt deshalb den AJAX-Zugriff von beliebigen Quell-Domains.",
+          "STATUS_OK":"Es wurde konfiguriert, das AJAX-Requests über die folgende(n) Domain(s) erlaubt sind: {{allow_origin}}.",
+          "STATUS_FAIL":"Es wurden bislang keine Domains gesetzt. Das System erlaubt deshalb den AJAX-Zugriff von beliebigen Quell-Domains.",
           "SOLUTION":"Prüfen Sie, welche Systeme ggf. AJAX-Requests senden können. Wechseln Sie anschließend zu \"Quellen\" und bearbeiten Sie das Feld \"allow_origin\" in der homeApplication.properties.xml",
           "SOLUTION_LINK": "homeApplication.properties.xml bearbeiten"
+        },
+        "RS_XSS": {
+          "TITLE":"Renderingservice-Konfiguration für Cross-Side-Scripting",
+          "STATUS_OK":"Das Repository liegt auf einer anderen Domain ({{repo}}) als der Renderingservice ({{render}}). Dadurch können Nutzergenerierte Javascripte nicht auf die API zugreifen",
+          "STATUS_INFO":"Das Repository liegt auf einer anderen Domain ({{repo}}) als der Renderingservice ({{render}}). Der Zustand der CORS-Konfiguration ist jedoch ungültig. Prüfen Sie die CORS-Konfiguration",
+          "STATUS_FAIL":"Repository und Renderingservice liegen auf derselben Domain ({{repo}}). Javascripte, die auf dem Renderingservice ausgeführt werden, haben dadurch Zugriff auf die API und ggf. Cookies.",
+          "SOLUTION":"Repository und Renderingservice sollten aus Sicherheitsgründen auf unterschiedlichen (Sub-)Domains liegen. Weitere Informationen finden Sie in der Dokumentation",
+          "SOLUTION_LINK": "Dokumentation öffnen"
         }
       }
     },

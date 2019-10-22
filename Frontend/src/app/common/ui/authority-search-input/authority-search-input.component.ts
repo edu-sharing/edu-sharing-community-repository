@@ -6,6 +6,7 @@ import {Authority, IamAuthorities} from "../../rest/data-object";
 import {RestIamService} from "../../rest/services/rest-iam.service";
 import {RestConstants} from "../../rest/rest-constants";
 import {PermissionNamePipe} from '../permission-name.pipe';
+import {ConfigurationService} from "../../services/configuration.service";
 
 @Component({
   selector: 'authority-search-input',
@@ -26,12 +27,16 @@ export class AuthoritySearchInputComponent{
    * Group type to filter the groups searched for
    */
   @Input() groupType = "";
+  /**
+   * maximum number of authorities to fetch in total
+   */
+  @Input() authorityCount = 50;
   @Input() disabled = false;
-  @Input() maxSuggestions = 10;
   @Input() placeholder = 'WORKSPACE.INVITE_FIELD';
   @Input() hintBottom = "";
   @Output() onChooseAuthority = new EventEmitter();
   private lastSuggestionSearch: string;
+  affiliation=true;
   public addSuggestion(data: any) {
     this.onChooseAuthority.emit(data.item.originalObject)
   }
@@ -41,12 +46,12 @@ export class AuthoritySearchInputComponent{
     authority.authorityType=RestConstants.AUTHORITY_TYPE_UNKNOWN;
     this.onChooseAuthority.emit(authority);
   }
-  constructor(private iam : RestIamService,private namePipe : PermissionNamePipe){
-
+  constructor(private iam : RestIamService,private namePipe : PermissionNamePipe,private config:ConfigurationService){
+    this.affiliation=this.config.instant('userAffiliation',true);
   }
   public updateSuggestions(event : any){
     this.lastSuggestionSearch = event.input;
-    this.iam.searchAuthorities(event.input,this.globalSearch,this.groupType).subscribe(
+    this.iam.searchAuthorities(event.input,this.globalSearch,this.groupType,{count:this.authorityCount}).subscribe(
       (authorities:IamAuthorities)=>{
         if(this.lastSuggestionSearch!=event.input)
           return;

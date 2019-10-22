@@ -1,11 +1,9 @@
-
-import {Component, ViewChild, HostListener, ElementRef} from '@angular/core';
+import {Component, ElementRef, HostListener, ViewChild} from '@angular/core';
 import 'rxjs/add/operator/map';
-import { SearchService } from './search.service';
-import { WindowRefService } from './window-ref.service';
-import { Subscription } from 'rxjs/Subscription';
-import { SuggestItem} from '../../common/ui/autocomplete/autocomplete.component';
-import {Router, ActivatedRoute} from '@angular/router';
+import {SearchService} from './search.service';
+import {WindowRefService} from './window-ref.service';
+import {Subscription} from 'rxjs/Subscription';
+import {ActivatedRoute, Router} from '@angular/router';
 import {TranslateService} from '@ngx-translate/core';
 import {Translation} from '../../common/translation';
 import {RestSearchService} from '../../common/rest/services/rest-search.service';
@@ -13,8 +11,18 @@ import {RestNodeService} from '../../common/rest/services/rest-node.service';
 import {RestConstants} from '../../common/rest/rest-constants';
 import {RestConnectorService} from '../../common/rest/services/rest-connector.service';
 import {
-    Node, NodeList, LoginResult, NetworkRepositories, Repository, NodeWrapper,
-    MdsMetadatasets, MdsInfo, Collection, CollectionWrapper, SearchList, SortItem
+  Collection,
+  CollectionWrapper,
+  LoginResult,
+  MdsInfo,
+  MdsMetadatasets,
+  NetworkRepositories,
+  Node,
+  NodeList,
+  NodeWrapper,
+  Repository,
+  SearchList,
+  SortItem
 } from '../../common/rest/data-object';
 import {ListTableComponent} from '../../common/ui/list-table/list-table.component';
 import {OptionItem} from '../../common/ui/actionbar/option-item';
@@ -26,7 +34,6 @@ import {ConfigurationService} from '../../common/services/configuration.service'
 import {Toast} from '../../common/ui/toast';
 import {SessionStorageService} from '../../common/services/session-storage.service';
 import {RestNetworkService} from '../../common/rest/services/rest-network.service';
-import {WorkspaceMainComponent} from '../workspace/workspace.component';
 import {UIAnimation} from '../../common/ui/ui-animation';
 import {trigger} from '@angular/animations';
 import {NodeHelper, NodesRightMode} from '../../common/ui/node-helper';
@@ -38,7 +45,6 @@ import {SearchNodeStoreComponent} from './node-store/node-store.component';
 import {OPEN_URL_MODE, UIConstants} from '../../common/ui/ui-constants';
 import {ListItem} from '../../common/ui/list-item';
 import {MdsComponent} from '../../common/ui/mds/mds.component';
-import {RequestObject} from '../../common/rest/request-object';
 import {DialogButton} from '../../common/ui/modal-dialog/modal-dialog.component';
 import {WorkspaceManagementDialogsComponent} from '../management-dialogs/management-dialogs.component';
 import {ConfigurationHelper} from '../../common/rest/configuration-helper';
@@ -620,7 +626,7 @@ export class SearchComponent {
     if(this.searchService.reurl) {
       let apply=new OptionItem('APPLY', 'redo', (node: Node) => NodeHelper.addNodeToLms(this.router,this.temporaryStorageService,ActionbarHelperService.getNodes(this.selection,node)[0],this.searchService.reurl));
       apply.enabledCallback=((node:Node)=> {
-        return node.access.indexOf(RestConstants.ACCESS_CC_PUBLISH,NodesRightMode.Original) != -1;
+        return NodeHelper.getNodesRight([node],RestConstants.ACCESS_CC_PUBLISH,NodesRightMode.Original);
       });
       if(fromList || (nodes && nodes.length==1))
         options.push(apply);

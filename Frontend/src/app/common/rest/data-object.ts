@@ -247,6 +247,7 @@ export interface UserProfile {
   firstName: string;
   lastName: string;
   email: string;
+  primaryAffiliation: string;
   avatar: string;
   about: string;
   skills: string[];

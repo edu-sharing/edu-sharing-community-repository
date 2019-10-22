@@ -370,6 +370,7 @@
     "AUTHOR": "Autor",
     "SOURCE": "Quelle"
   },
+  "AUTHORITY_TYPE_GROUP": "Gruppe",
   "GROUP" : {
     "displayName" : "Gruppenname",
     "groupEmail" : "E-Mail",

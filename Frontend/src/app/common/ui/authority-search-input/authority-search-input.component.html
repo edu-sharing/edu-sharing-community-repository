@@ -5,13 +5,23 @@
   (addAny)="addAny($event)"
   [disabled]="disabled"
   [allowAny]="allowAny"
-  [maxSuggestions]="maxSuggestions"
   [placeholder]="placeholder"
   [hintBottom]="hintBottom"
   [suggestions]="authoritySuggestions"
+  [maxSuggestions]="authorityCount"
   (updateInput)="updateSuggestions($event)"
 >
-    <ng-template #icon let-suggestion="suggestion">
-       <user-avatar [user]="suggestion.originalObject" size="small"></user-avatar>
+    <ng-template #content let-suggestion="suggestion">
+        <div class="suggestion-content">
+            <user-avatar [user]="suggestion.originalObject" size="small"></user-avatar>
+            <div class="text-content">
+                <div class="data">
+                     <div class="primary">{{suggestion.title}}</div>
+                     <div class="secondary" *ngIf="suggestion.secondaryTitle">{{suggestion.secondaryTitle}}</div>
+                 </div>
+                <div class="affiliation" *ngIf="affiliation && suggestion.originalObject.profile.primaryAffiliation">{{suggestion.originalObject | authorityAffiliation}}</div>
+                <div class="affiliation affiliation-group" *ngIf="affiliation && suggestion.originalObject.profile.displayName">{{'AUTHORITY_TYPE_GROUP' | translate}}</div>
+            </div>
+        </div>
     </ng-template>
 </autocomplete>
