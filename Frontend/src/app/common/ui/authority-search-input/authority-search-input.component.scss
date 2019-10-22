@@ -3,11 +3,56 @@
 autocomplete{
   width:100%;
 }
-.affiliation{
-  color:$textLight;
-  text-transform: uppercase;
-  font-size: 80%;
-  position: absolute;
-  top: 13px;
-  right: 15px;
+
+.suggestion-content{
+  width: 100%;
+  display: flex;
+  align-items: center;
+  >i{
+    color: #6d6d6d;
+    font-size: 30px;
+  }
+  .text-content {
+    display: flex;
+    flex-grow: 1;
+    justify-content: center;
+    > .data {
+      flex-grow: 1;
+      margin: 0 15px;
+      >div{
+        @include limitLineCount(1,1.6);
+        word-break: break-all;
+        color:$textMain;
+      }
+      >.primary{
+        font-size: 110%;
+      }
+      >.secondary{
+        font-size: 90%;
+        color:$textLight;
+      }
+    }
+
+    > .affiliation {
+      color: $textMediumLight;
+      text-transform: uppercase;
+      font-size: 75%;
+      text-align: right;
+      @include limitLineCount(1);
+      word-break: break-all;
+      min-width: 100px;
+      max-width: 30%;
+    }
+  }
 }
+@media screen and (max-width: $mobileWidth) {
+  .suggestion-content .text-content{
+    flex-direction: column;
+    >.affiliation{
+      max-width: unset;
+      margin: 3px 15px 0 15px;
+      text-align: left;
+    }
+  }
+}
+

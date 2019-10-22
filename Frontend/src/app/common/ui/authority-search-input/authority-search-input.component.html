@@ -8,9 +8,19 @@
   [placeholder]="placeholder"
   [hintBottom]="hintBottom"
   [suggestions]="authoritySuggestions"
+  [maxSuggestions]="authorityCount"
   (updateInput)="updateSuggestions($event)"
 >
-    <ng-template #suggest let-suggestion="suggestion">
-       <div class="affiliation" *ngIf="affiliation && suggestion.originalObject.profile.primaryAffiliation">{{suggestion.originalObject | authorityAffiliation}}</div>
+    <ng-template #content let-suggestion="suggestion">
+        <div class="suggestion-content">
+            <i *ngIf="suggestion.materialIcon" class="material-icons">{{suggestion.materialIcon}}</i>
+            <div class="text-content">
+                <div class="data">
+                     <div class="primary">{{suggestion.title}}</div>
+                     <div class="secondary" *ngIf="suggestion.secondaryTitle">{{suggestion.secondaryTitle}}</div>
+                 </div>
+                <div class="affiliation" *ngIf="affiliation && suggestion.originalObject.profile.primaryAffiliation">{{suggestion.originalObject | authorityAffiliation}}</div>
+            </div>
+        </div>
     </ng-template>
 </autocomplete>
