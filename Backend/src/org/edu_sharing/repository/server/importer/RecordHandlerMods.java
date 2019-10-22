@@ -87,6 +87,9 @@ public class RecordHandlerMods implements RecordHandlerInterface {
 			
 		String technicalLocation = (String) xpath.evaluate("location/url[@access='raw object']", nodeMods, XPathConstants.STRING);
 		toSafeMap.put(CCConstants.LOM_PROP_TECHNICAL_LOCATION, technicalLocation);
+
+		String wwwurl = (String) xpath.evaluate("location/url[@access='object in context']", nodeMods, XPathConstants.STRING);
+		toSafeMap.put(CCConstants.CCM_PROP_IO_WWWURL, wwwurl);
 		
 		String lrt = (String) xpath.evaluate("typeOfResource", nodeMods, XPathConstants.STRING);
 		toSafeMap.put(CCConstants.CCM_PROP_IO_REPL_EDUCATIONAL_LEARNINGRESSOURCETYPE, lrt);
