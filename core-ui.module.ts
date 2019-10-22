@@ -28,6 +28,7 @@ import {CardComponent} from "./components/card/card.component";
 import {PermissionNamePipe} from "./pipes/permission-name.pipe";
 import {BrowserAnimationsModule} from '@angular/platform-browser/animations';
 import {BreadcrumbsComponent} from "./components/breadcrumbs/breadcrumbs.component";
+import {VideoControlsComponent} from "./components/video-controls/video-controls.component";
 
 @NgModule({
     declarations: [
@@ -41,6 +42,7 @@ import {BreadcrumbsComponent} from "./components/breadcrumbs/breadcrumbs.compone
         BreadcrumbsComponent,
         SpinnerSmallComponent,
         GlobalProgressComponent,
+        VideoControlsComponent,
         InfiniteScrollDirective,
         AuthorityNamePipe,
         AuthorityColorPipe,
@@ -79,6 +81,7 @@ import {BreadcrumbsComponent} from "./components/breadcrumbs/breadcrumbs.compone
     entryComponents: [
         SpinnerComponent,
         ListTableComponent,
+        VideoControlsComponent,
     ],
     exports: [
         TranslateModule,
@@ -87,6 +90,7 @@ import {BreadcrumbsComponent} from "./components/breadcrumbs/breadcrumbs.compone
         BreadcrumbsComponent,
         SpinnerSmallComponent,
         GlobalProgressComponent,
+        VideoControlsComponent,
         IconComponent,
         CardComponent,
         CollectionChooserComponent,

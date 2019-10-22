@@ -1,0 +1,9 @@
+<div *ngIf="video && false">
+  video-controls
+  {{this.video.currentTime}}
+
+  <div *ngIf="isReadOnly()">
+    Read Only mode
+  </div>
+
+</div>
