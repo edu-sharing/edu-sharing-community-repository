@@ -93,6 +93,9 @@
       &.check-fail {
         background-color: lighten($warning, 60%);
       }
+      &.check-info {
+        background-color: lighten($colorStatusNeutral, 45%);
+      }
       &.check-warn {
         background-color: lighten($warningMedium, 50%);
       }
