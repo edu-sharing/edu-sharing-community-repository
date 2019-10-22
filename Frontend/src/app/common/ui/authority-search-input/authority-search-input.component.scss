@@ -37,8 +37,9 @@ autocomplete{
       color: $textMediumLight;
       text-transform: uppercase;
       font-size: 75%;
-      text-align: right;
-      @include limitLineCount(1);
+      @include limitLineCount(1,2);
+      display: flex;
+      justify-content: flex-end;
       word-break: break-all;
       min-width: 100px;
       max-width: 30%;
@@ -51,7 +52,7 @@ autocomplete{
     >.affiliation{
       max-width: unset;
       margin: 3px 15px 0 15px;
-      text-align: left;
+      justify-content: flex-start;
     }
   }
 }
