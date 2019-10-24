@@ -295,7 +295,7 @@ public class MetadataTemplateRenderer {
 		return cleaned;
 	}
 	public static HashMap<String, String[]> cleanupHTMLMultivalueProperties(Map<String, String[]> properties) {
-		Map<String,String[]> cleaned=new HashMap<>();
+		HashMap<String,String[]> cleaned=new HashMap<>();
 		for(Map.Entry<String,String[]> entry : properties.entrySet()){
 			if(entry.getValue()==null)
 				cleaned.put(entry.getKey(), null);
