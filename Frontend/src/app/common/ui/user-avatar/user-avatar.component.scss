@@ -2,17 +2,24 @@
 
 .avatarCircle{
   border-radius: 50%;
-  border:3px solid #fff;
+  //border:3px solid #fff;
+  position: relative;
   overflow: hidden;
   display:inline-block;
-  position: relative;
+  .user-letter{
+    display: flex;
+    color: #fff;
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    justify-content: center;
+    align-items: center;
+  }
   .userImage, svg {
     overflow: hidden;
     border-radius: 50%;
     object-fit: cover;
-    position: absolute;
-    top: -3px;
-    left: -3px;
+    position: relative;
   }
 }
 .avatarOuter{
@@ -20,16 +27,19 @@
   position: relative;
   .editorial-badge{
     position: absolute;
-    bottom:0;
-    right:0;
-    width:30px;
+    bottom:5px;
+    right:5px;
+    width:25px;
     height:auto;
   }
 }
 
 .size_large {
   .avatarCircle{
-    @include materialShadow();
+    //@include materialShadow();
+  }
+  .user-letter{
+    font-size: 56px;
   }
   .avatarCircle,.userImage, svg {
     width: 120px;
@@ -38,52 +48,50 @@
 }
 .size_medium {
   .avatarCircle {
-    @include materialShadow();
+    //@include materialShadow();
+  }
+  .user-letter{
+    font-size: 32px;
   }
   .avatarCircle, .userImage, svg {
     width: 70px;
     height: 70px;
-
-    border-width: 2px;
-  }
-  .userImage, svg {
-    left: -2px;
-    top: -2px;
   }
   .editorial-badge {
-    width: 25px;
+    bottom:1px;
+    right:1px;
+    width:20px;
   }
 }
 .size_small {
   .avatarCircle {
-    @include materialShadow();
+    //@include materialShadow();
+  }
+  .user-letter {
+    font-size: 18px;
   }
   .avatarCircle,.userImage, svg {
     width: 40px;
     height: 40px;
-
-    border-width: 2px;
-  }
-  .userImage, svg {
-    left: -2px;
-    top: -2px;
   }
   .editorial-badge {
-    width: 16px;
+    right:0;
+    bottom:0;
+    width: 12px;
   }
 }
 
 .size_xsmall{
   .avatarCircle,.userImage,svg{
-      width:20px;
-      height:20px;
-      border-width: 1px;
+      width:24px;
+      height:24px;
   }
-  .userImage, svg {
-    left: -1px;
-    top: -1px;
+  .user-letter {
+    font-size: 11px;
   }
   .editorial-badge {
+    right: 0;
+    bottom: 0;
     width: 8px;
   }
 }

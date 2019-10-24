@@ -124,6 +124,7 @@ export class AdminComponent {
   private loginResult: LoginResult;
   private mediacenters: any[];
   ownAppMode="repository";
+  static RS_CONFIG_HELP='https://docs.edu-sharing.com/confluence/edp/de/installation-en/installation-of-the-edu-sharing-rendering-service';
   public startJob(){
     this.storage.set('admin_job',this.job);
     this.globalProgress=true;
@@ -808,17 +809,33 @@ export class AdminComponent {
                 translate:mail
             });
         });
-        this.admin.getApplicationXML(RestConstants.HOME_APPLICATION_XML).subscribe((home)=>{
-          this.systemChecks.push({
-            name:"CORS",
-            status:home['allow_origin'] ? 'OK' : 'WARN',
-            translate:home,
-            callback:()=>{
-              this.setMode('APPLICATIONS');
-              this.editApp(this.editableXmls.filter((xml)=>xml.name=='HOMEAPP')[0]);
-            }
-          });
+      this.admin.getApplicationXML(RestConstants.HOME_APPLICATION_XML).subscribe((home)=>{
+        this.systemChecks.push({
+          name:"CORS",
+          status:home['allow_origin'] ? 'OK' : 'FAIL',
+          translate:home,
+          callback:()=>{
+            this.setMode('APPLICATIONS');
+            this.editApp(this.editableXmls.filter((xml)=>xml.name=='HOMEAPP')[0]);
+          }
         });
+        let domainRepo = home['domain'];
+        let domainRender:string;
+        try {
+          domainRender = new URL(home['contenturl']).host;
+        }catch(e){
+          console.warn(e);
+        }
+        this.systemChecks.push({
+          name:"RS_XSS",
+          status:domainRepo==domainRender ? 'FAIL' : home['allow_origin'] ? 'OK' : 'INFO',
+          translate:{repo:domainRepo,render:domainRender},
+          callback:()=>{
+            window.open(AdminComponent.RS_CONFIG_HELP);
+          }
+        });
+      });
+
     }
     private createSystemCheck(name: string, status: string,error: any = null) {
         let check:any={
@@ -837,7 +854,7 @@ export class AdminComponent {
     }
     getSystemChecks(){
       this.systemChecks.sort((a:any,b:any)=>{
-          let status:any={'FAIL':0,'WARN':1,'OK':2};
+          let status:any={'FAIL':0,'WARN':1,'INFO':2,'OK':3};
           let statusA=status[a.status];
           let statusB=status[b.status];
           if(statusA!=statusB)

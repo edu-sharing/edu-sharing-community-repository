@@ -57,10 +57,13 @@ $headingHeight:60px;
     display: flex;
     align-items: center;
     padding:20px 0;
-    >input{
+    >mat-form-field{
       flex-grow: 1;
       width: auto;
-      margin: 0;
+      margin: 0 30px;
+    }
+    >button{
+      margin: 0 30px;
     }
   }
 }
@@ -77,7 +80,7 @@ $headingHeight:60px;
   padding:10px 0;
   word-break: break-word;
   .technicalName{
-    font-size:80%;
+    font-size:70%;
     word-break: break-all;
     color:$textVeryLight;
     font-style: italic;
@@ -99,13 +102,21 @@ $headingHeight:60px;
     width:20px;
     height:20px;
   }
+  .mat-checkbox-inner-container{
+    margin: 0;
+  }
+  .add .mat-form-field-wrapper{
+    padding: 0;
+  }
+}
+.heading .result{
+  justify-content: center;
 }
 .result{
-  width: 130px;
-  min-width: 130px;
+  width: 100px;
+  min-width: 100px;
   display:flex;
   align-items: center;
-  justify-content: center;
   >div {
     display: flex;
     .text {

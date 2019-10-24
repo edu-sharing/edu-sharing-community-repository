@@ -84,11 +84,15 @@
   <div class="heading">{{'ADMIN.INFO.SYSTEM_CHECKS' | translate}}</div>
   <div class="checks">
       <div class="reload"><i class="material-icons clickable" (click)="runChecks()">refresh</i></div>
-      <div *ngFor="let check of getSystemChecks()" class="check" [class.check-fail]="check.status=='FAIL'" [class.check-warn]="check.status=='WARN'">
+      <div *ngFor="let check of getSystemChecks();let ok=false;" class="check"
+           [class.check-fail]="check.status=='FAIL'"
+           [class.check-ok]="check.status=='OK'"
+           [class.check-info]="check.status=='INFO'"
+           [class.check-warn]="check.status=='WARN'">
             <div class="data">
                 <div class="title">{{('ADMIN.INFO.CHECK.'+check.name+'.TITLE') | translate:check.translate }}</div>
                 <div class="description">{{('ADMIN.INFO.CHECK.'+check.name+'.STATUS_'+check.status) | translate:check.translate }}</div>
-                <div *ngIf="check.status!='OK'" class="solution">
+                <div *ngIf="check.status!='OK' && check.status!='INFO'" class="solution">
                     <i class="material-icons">forward</i>
                     <div>
                     {{('ADMIN.INFO.CHECK.'+check.name+'.SOLUTION') | translate:check.translate }}

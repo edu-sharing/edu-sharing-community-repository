@@ -65,20 +65,20 @@ public class HomeFolderTool {
 		
 		//this folders can not be deleted cause it will be prevented by BeforeMapDeletePolicy
 		//set owner so that user can see his folder(read permission for all authorities will be prevented by uncheck inherit permission see: NodeCustomizationPolicy
-		NodeRef docsFolder = createMap(homefolder, CCConstants.CCM_VALUE_MAP_TYPE_DOCUMENTS, CCConstants.I18n_USERFOLDER_DOCUMENTS);
+		NodeRef docsFolder = createMap(homefolder, CCConstants.CCM_VALUE_MAP_TYPE_DOCUMENTS, CCConstants.I18n_USERFOLDER_DOCUMENTS,userName);
 		if(docsFolder != null){
 			ownableService.setOwner(docsFolder, userName);
 		}
-		NodeRef groupFolder = createMap(homefolder, CCConstants.CCM_VALUE_MAP_TYPE_EDUGROUP, CCConstants.I18n_USERFOLDER_GROUPS);
+		NodeRef groupFolder = createMap(homefolder, CCConstants.CCM_VALUE_MAP_TYPE_EDUGROUP, CCConstants.I18n_USERFOLDER_GROUPS, userName);
 		if(groupFolder != null){
 			ownableService.setOwner(groupFolder, userName);
 		}
-		NodeRef favoriteFolder = createMap(homefolder, CCConstants.CCM_VALUE_MAP_TYPE_FAVORITE, CCConstants.I18n_USERFOLDER_FAVORITES);
+		NodeRef favoriteFolder = createMap(homefolder, CCConstants.CCM_VALUE_MAP_TYPE_FAVORITE, CCConstants.I18n_USERFOLDER_FAVORITES, userName);
 		if(favoriteFolder != null){
 			ownableService.setOwner(favoriteFolder, userName);
 		}
 		
-		NodeRef imageFolder = createMap(homefolder, CCConstants.CCM_VALUE_MAP_TYPE_IMAGES, CCConstants.I18n_USERFOLDER_IMAGES);
+		NodeRef imageFolder = createMap(homefolder, CCConstants.CCM_VALUE_MAP_TYPE_IMAGES, CCConstants.I18n_USERFOLDER_IMAGES, userName);
 		if(imageFolder != null){
 			ownableService.setOwner(imageFolder, userName);
 		}
@@ -90,7 +90,7 @@ public class HomeFolderTool {
 		}
 	}
 	
-	private NodeRef createMap(NodeRef parent, String mapType, String nameI18nKey){
+	private NodeRef createMap(NodeRef parent, String mapType, String nameI18nKey, String userName){
 		List<ChildAssociationRef> childAssocs = nodeService.getChildAssocsByPropertyValue(parent, QName.createQName(CCConstants.CCM_PROP_MAP_TYPE), mapType);
 		if(childAssocs == null || childAssocs.size() == 0){
 			String userDataFolderName = I18nServer.getTranslationDefaultResourcebundle(nameI18nKey);
@@ -101,6 +101,7 @@ public class HomeFolderTool {
 			mlTitle.addValue(new Locale("en","US"),I18nServer.getTranslationDefaultResourcebundle(nameI18nKey, "en_US"));
 			mlTitle.addValue(new Locale("en","EN"),I18nServer.getTranslationDefaultResourcebundle(nameI18nKey, "en_EN"));
 			props.put(ContentModel.PROP_TITLE, mlTitle);
+			props.put(ContentModel.PROP_CREATOR, userName);
 			props.put(QName.createQName(CCConstants.CCM_PROP_MAP_TYPE),  mapType);
 			
 			return nodeService.createNode(parent, ContentModel.ASSOC_CONTAINS, QName.createQName(userDataFolderName), QName.createQName(CCConstants.CCM_TYPE_MAP), props).getChildRef();

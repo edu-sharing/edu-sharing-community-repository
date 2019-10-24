@@ -17,24 +17,6 @@
   width:100%;
   padding-top:25px;
 }
-.timeout{
-  background-color: $toastLeftError;
-  color: white;
-  border-radius: 20pt;
-  position: fixed;
-  top: 15px;
-  left: 200px;
-  font-size: 1rem;
-  padding: 10px 15px;
-  padding-left: 40px;
-  z-index: 105;
-
-  i{
-    position: absolute;
-    top: 7px;
-    left: 10px;
-  }
-}
 
 .tree,.explorer{
   display:table-cell;
@@ -203,7 +185,7 @@ user-quota{
 :host /deep/{
   .breadcrumbFrame .breadcrumb {
     position: relative;
-    top: 0;
+    top: 5px;
     div {
       word-break: break-all;
     }
@@ -238,8 +220,8 @@ user-quota{
     display:inherit;
   }
   .breadcrumbFrame >div{
-    padding-left:10px;
-    padding-top:22px;
+    padding-left:20px;
+    padding-top:20px;
   }
   .addDesktopMenu{
     right:53px;
@@ -248,9 +230,6 @@ user-quota{
   .explorer{
     left:0;
     width:100%;
-  }
-  .timeout {
-    display: none;
   }
   :host /deep/{
     workspace-explorer .list{

@@ -141,6 +141,8 @@ public class RenderingServiceImpl implements RenderingService{
 		RepositoryDao repoDao = RepositoryDao.getRepository(appInfo.getAppId());
 		NodeDao nodeDao = NodeDao.getNodeWithVersion(repoDao, nodeId, nodeVersion);
 		Node node = nodeDao.asNode();
+		// remove any javascript (important for title)
+		node.setProperties(MetadataTemplateRenderer.cleanupHTMLMultivalueProperties(node.getProperties()));
 		data.setNode(node);
 		data.setChildren(
 				NodeDao.convertToRest(repoDao,Filter.createShowAllFilter(),nodeDao.getChildrenSubobjects(),0,Integer.MAX_VALUE).getNodes()

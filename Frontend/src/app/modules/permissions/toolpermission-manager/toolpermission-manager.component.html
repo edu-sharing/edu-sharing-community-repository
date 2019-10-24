@@ -37,11 +37,11 @@
                 <div class="card-title-element"><i class="material-icons">add</i>{{'PERMISSIONS.TOOLPERMISSIONS.GROUP.ADD' | translate}}</div>
                 <div class="add">
                     <mat-form-field>
-                      <mat-label></mat-label>
+                      <mat-label>{{'PERMISSIONS.TOOLPERMISSIONS.GROUP.ADD_LABEL' | translate}}</mat-label>
                       <input matInput name="addName" [(ngModel)]="addName">
                     </mat-form-field>
                     <spinner-small *ngIf="creatingToolpermission"></spinner-small>
-                    <div class="btn waves-effect waves-light" *ngIf="!creatingToolpermission" (click)="createToolpermission()" [class.disabled]="!addName.trim()">{{'PERMISSIONS.TOOLPERMISSIONS.ADD' | translate}}</div>
+                    <button mat-raised-button color="primary" *ngIf="!creatingToolpermission" (click)="createToolpermission()" [class.disabled]="!addName.trim()">{{'PERMISSIONS.TOOLPERMISSIONS.ADD' | translate}}</button>
                 </div>
             </div>
         </div>

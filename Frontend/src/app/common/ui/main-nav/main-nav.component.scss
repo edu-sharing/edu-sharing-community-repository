@@ -127,6 +127,7 @@ user-profile{
 .sidenavImage .sidenavProfile > div{
   font-size: 120%;
   overflow: hidden;
+  margin-top: 5px;
 }
 .sidenavImage .sidenavProfile > div,.sidenavClose{
   text-shadow: 0 0 30px rgba(0,0,0,.5);
@@ -188,6 +189,24 @@ user-profile{
     display: flex;
     align-items: center;
     justify-content: center;
+  }
+  .timeout{
+    background-color: $toastLeftError;
+    color: white;
+    border-radius: 20pt;
+    position: fixed;
+    top: 15px;
+    left: 200px;
+    font-size: 1rem;
+    padding: 10px 15px;
+    padding-left: 40px;
+    z-index: 105;
+
+    i{
+      position: absolute;
+      top: 7px;
+      left: 10px;
+    }
   }
 }
 
@@ -416,6 +435,9 @@ $licenseInfoHeight:40px;
     .topBarSearch{
       padding-left: 20px;
       padding-right: 12px;
+    }
+    .timeout{
+      display: none;
     }
   }
 

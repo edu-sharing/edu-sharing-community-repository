@@ -147,6 +147,9 @@ $sidenavWidthMobile:66px;
       &.check-fail {
         background-color: lighten($warning, 35%);
       }
+      &.check-info {
+        background-color: lighten($colorStatusNeutral, 45%);
+      }
       &.check-warn {
         background-color: lighten($warningMedium, 50%);
       }
@@ -400,6 +403,9 @@ $sidenavWidthMobile:66px;
   .goto-folder {
     display: inline-block;
     margin-top: 20px;
+  }
+  .eduGroupsSelected{
+    margin: 20px 10px;
   }
   .group {
     float: left;

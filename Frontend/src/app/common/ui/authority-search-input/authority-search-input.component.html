@@ -19,13 +19,17 @@
         <input type="text" matInput [matAutocomplete]="autoGroup" placeholder="{{placeholder | translate}}" name="authoritySearch" [(ngModel)]="inputValue" (ngModelChange)="updateSuggestions($event)">
             <mat-autocomplete #autoGroup="matAutocomplete">
                 <mat-optgroup *ngFor="let group of suggestionGroups" label="{{ group.label | translate}}">
-                    <mat-option class="authority-search-input-option" *ngFor="let data of group.values" [value]="data">
-                        <div>
-                            <i *ngIf="data.materialIcon" icon [iconId]="data.materialIcon"></i>
-                        </div>
-                        <div>
-                            <div>{{data.title}}</div>
-                            <div class="small" *ngIf="data.secondaryTitle">{{data.secondaryTitle}}</div>
+                    <mat-option class="authority-search-input-option" *ngFor="let suggestion of group.values" [value]="suggestion">
+                        <div class="suggestion-content">
+                            <user-avatar [user]="suggestion.originalObject" size="small"></user-avatar>
+                            <div class="text-content">
+                                <div class="data">
+                                    <div class="primary">{{suggestion.title}}</div>
+                                    <div class="secondary" *ngIf="suggestion.secondaryTitle">{{suggestion.secondaryTitle}}</div>
+                                </div>
+                                <div class="affiliation" *ngIf="affiliation && suggestion.originalObject.profile.primaryAffiliation">{{suggestion.originalObject | authorityAffiliation}}</div>
+                                <div class="affiliation affiliation-group" *ngIf="affiliation && suggestion.originalObject.profile.displayName">{{'AUTHORITY_TYPE_GROUP' | translate}}</div>
+                            </div>
                         </div>
                     </mat-option>
                 </mat-optgroup>

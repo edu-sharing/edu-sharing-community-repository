@@ -169,7 +169,6 @@ export class MainNavComponent implements AfterViewInit{
     private elementsTopY = 0;
     private elementsBottomY = 0;
     private fixScrollElements = false;
-    private isSafe = false;
     private about: About;
     licenseDialog: boolean;
     private licenseDetails: string;
@@ -386,7 +385,6 @@ export class MainNavComponent implements AfterViewInit{
                     this.checkConfig([]);
                     return;
                 }
-                this.isSafe = data.currentScope == RestConstants.SAFE_SCOPE;
                 setInterval(() => this.updateTimeout(), 1000);
                 this.toolpermissions = data.toolPermissions;
                 this.canAccessWorkspace = this.toolpermissions && this.toolpermissions.indexOf(RestConstants.TOOLPERMISSION_WORKSPACE) != -1;
@@ -819,7 +817,7 @@ export class MainNavComponent implements AfterViewInit{
     }
     private showTimeout(){
         return !this.bridge.isRunningCordova() && !this.isGuest && this.timeIsValid && this.dialogTitle!='WORKSPACE.AUTOLOGOUT' &&
-            (this.isSafe || !this.isSafe && this.configService.instant('sessionExpiredDialog',{show:true}).show);
+            (this.isSafe() || !this.isSafe() && this.configService.instant('sessionExpiredDialog',{show:true}).show);
     }
     private updateTimeout(){
         let time=this.connector.logoutTimeout - Math.floor((new Date().getTime()-this.connector.lastActionTime)/1000);
@@ -831,12 +829,15 @@ export class MainNavComponent implements AfterViewInit{
             this.timeIsValid=true;
         }
         else if(this.showTimeout()){
-            this.dialogTitle='WORKSPACE.AUTOLOGOUT';
-            this.dialogMessage='WORKSPACE.AUTOLOGOUT_INFO';
-            this.dialogCancelable=false;
-            this.dialogMessageParameters={minutes:Math.round(this.connector.logoutTimeout/60)};
-            this.dialogButtons=[];
-            this.dialogButtons.push(new DialogButton("WORKSPACE.RELOGIN",DialogButton.TYPE_PRIMARY,()=>RestHelper.goToLogin(this.router,this.configService)));
+            this.bridge.showModalDialog(
+                'WORKSPACE.AUTOLOGOUT',
+                'WORKSPACE.AUTOLOGOUT_INFO',
+                [new DialogButton("WORKSPACE.RELOGIN",DialogButton.TYPE_PRIMARY,
+                    ()=>RestHelper.goToLogin(this.router,this.configService,this.isSafe() ? RestConstants.SAFE_SCOPE : null,null))],
+                false,
+                null,
+                {minutes:Math.round(this.connector.logoutTimeout/60)}
+            );
         }
         else
             this.timeout="";
@@ -858,6 +859,10 @@ export class MainNavComponent implements AfterViewInit{
                 i--;
             }
         }
+    }
+
+    isSafe() {
+        return this.connector.getCurrentLogin() && this.connector.getCurrentLogin().currentScope==RestConstants.SAFE_SCOPE;
     }
 
 

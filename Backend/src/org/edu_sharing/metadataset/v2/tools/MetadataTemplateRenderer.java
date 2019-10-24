@@ -11,11 +11,12 @@ import org.edu_sharing.repository.client.tools.I18nAngular;
 import org.edu_sharing.repository.server.tools.DateTool;
 import org.edu_sharing.repository.server.tools.VCardConverter;
 import org.edu_sharing.service.license.LicenseService;
+import org.owasp.html.PolicyFactory;
+import org.owasp.html.Sanitizers;
 
 import java.lang.reflect.Field;
 import java.text.NumberFormat;
 import java.util.*;
-import java.util.stream.Collector;
 import java.util.stream.Collectors;
 
 
@@ -34,7 +35,7 @@ public class MetadataTemplateRenderer {
 
 	public MetadataTemplateRenderer(MetadataSetV2 mds,Map<String,String[]> properties) {
 		this.mds = mds;
-		this.properties = properties;
+		this.properties = cleanupHTMLMultivalueProperties(properties);
 	}
 
 	public String render(String groupName) throws IllegalArgumentException {
@@ -180,7 +181,7 @@ public class MetadataTemplateRenderer {
 
 						if(CCConstants.COMMON_LICENSE_CUSTOM.equals(licenseName) && properties.containsKey(CCConstants.getValidLocalName(CCConstants.LOM_PROP_RIGHTS_RIGHTS_DESCRIPTION))) {
 							String licenseDescription=properties.get(CCConstants.getValidLocalName(CCConstants.LOM_PROP_RIGHTS_RIGHTS_DESCRIPTION))[0];
-							value+="<div class='licenseDescription'>"+StringEscapeUtils.escapeHtml(licenseDescription)+"</div>";
+							value+="<div class='licenseDescription'>"+licenseDescription+"</div>";
 						}
 						else{
 							value+="<div class='licenseDescription'>" +getLicenseDescription(licenseName) +"</div>";
@@ -282,6 +283,36 @@ public class MetadataTemplateRenderer {
 		}
 		return value;
 	}
+
+	public static Map<String, Object> cleanupHTMLProperties(Map<String, Object> properties) {
+		Map<String,Object> cleaned=new HashMap<>();
+		for(Map.Entry<String,Object> entry : properties.entrySet()){
+			if(entry.getValue()==null)
+				cleaned.put(entry.getKey(), null);
+			else
+				cleaned.put(entry.getKey(),cleanupHTML(entry.getValue().toString()));
+		}
+		return cleaned;
+	}
+	public static HashMap<String, String[]> cleanupHTMLMultivalueProperties(Map<String, String[]> properties) {
+		Map<String,String[]> cleaned=new HashMap<>();
+		for(Map.Entry<String,String[]> entry : properties.entrySet()){
+			if(entry.getValue()==null)
+				cleaned.put(entry.getKey(), null);
+			else
+				cleaned.put(entry.getKey(),
+					Arrays.stream(entry.getValue()).map(MetadataTemplateRenderer::cleanupHTML).toArray(String[]::new)
+				);
+		}
+		return cleaned;
+	}
+
+	private static String cleanupHTML(String untrustedHTML) {
+		PolicyFactory policy = Sanitizers.FORMATTING.and(Sanitizers.LINKS);
+		return policy.sanitize(untrustedHTML);
+
+	}
+
 	private String getLicenseName(String licenseName, Map<String, String[]> properties) {
 		if(licenseName==null || licenseName.isEmpty())
 			return null;

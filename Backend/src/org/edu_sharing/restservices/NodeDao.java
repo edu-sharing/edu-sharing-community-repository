@@ -390,7 +390,15 @@ public class NodeDao {
 		}
 	}
 
-    private int getCommentCount(){
+	public static NodeSearch getRelevantNodes(RepositoryDao repoDao, int skipCount, int maxItems) throws DAOException {
+		try {
+			return transform(repoDao, SearchServiceFactory.getSearchService(repoDao.getId()).getRelevantNodes(skipCount,maxItems));
+		}catch(Throwable t){
+			throw DAOException.mapping(t);
+		}
+	}
+
+	private int getCommentCount(){
 		if(nodeProps.containsKey(CCConstants.VIRT_PROP_COMMENTCOUNT)){
 			return (int) nodeProps.get(CCConstants.VIRT_PROP_COMMENTCOUNT);
 		}

@@ -26,12 +26,13 @@
     line-height: 150%;
   }
   .link{
-    padding-top: 40px;
+    padding-top: 20px;
   }
   a{
-    color: #efd84d;
+    color: $primaryLight;
     text-transform: uppercase;
     font-weight: bold;
+    margin-left: 10px;
   }
 }
 

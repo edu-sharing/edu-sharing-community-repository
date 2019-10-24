@@ -80,7 +80,7 @@
   "ORIGINAL_DELETED":"Content deleted",
   "ORIGINAL_DELETED_INFO":"Only metadata accessable",
   "COMMON_API_ERROR": "An error occured. Please try again.",
-  "COMMON_API_ERROR_TITLE": "Error details",
+  "COMMON_API_ERROR_TITLE": "Error details ({{date}})",
   "RENDERSERVICE_API_ERROR":"error while reaching rendering service. Please report this error an administrator.",
   "SYSTEM_FOLDER_DELETE_ERROR":"This system folder can not be deleted",
   "GENERIC_QUOTA_ERROR_TITLE":"The operation could not be carried out because the upload quota was exceeded",
@@ -307,6 +307,7 @@
     "AUTHOR": "author",
     "SOURCE": "source"
   },
+  "AUTHORITY_TYPE_GROUP": "Group",
   "GROUP" : {
     "displayName" : "group name",
     "groupEmail" : "e-mail",

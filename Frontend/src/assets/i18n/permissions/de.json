@@ -108,7 +108,8 @@
         "SAFE":"Gesicherter Bereich (Safe)",
         "COLLECTIONS":"Sammlungen",
         "OTHER":"Andere / Nicht kategorisiert",
-        "ADD": "Eigene Berechtigung anlegen"
+        "ADD": "Eigene Berechtigung anlegen",
+        "ADD_LABEL": "Toolpermission-Name"
       }
     }
   }

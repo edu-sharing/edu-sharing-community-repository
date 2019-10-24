@@ -85,6 +85,10 @@
                     <i aria-hidden="true" class="material-icons barIcon">keyboard_arrow_right</i>
                 </button>
             </div>
+            <div class="timeout" *ngIf="isSafe() && timeout">
+                <i icon iconId="av_timer"></i>
+                {{ timeout }}
+            </div>
             <div class="topBarSearch" [class.noScope]="!showScope">
                 <div class="scopeNameMobile" *ngIf="!searchEnabled">{{title | translate}}</div>
                 <form (ngSubmit)="doSearch()" autocomplete="off" *ngIf="searchEnabled" role="search">

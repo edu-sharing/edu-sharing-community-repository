@@ -159,7 +159,7 @@ public class RedirectServlet extends HttpServlet implements SingleThreadModel {
                         for(NameValuePair pair : parsed){
                             if(pair.getName().equals("display") && pair.getValue().equals("download")){
                                 // Track download action for node
-                                TrackingServiceFactory.getTrackingService().trackActivityOnNode(new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE,nodeId),new NodeTrackingDetails(version),TrackingService.EventType.DOWNLOAD_MATERIAL);
+								TrackingTool.trackActivityOnNode(nodeId,new NodeTrackingDetails(version),TrackingService.EventType.DOWNLOAD_MATERIAL);
                                 break;
                             }
                         }

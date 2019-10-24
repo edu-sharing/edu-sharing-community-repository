@@ -108,7 +108,8 @@
         "SAFE":"Secure Area (Safe)",
         "COLLECTIONS":"Collections",
         "OTHER":"Other  / Not categorized",
-        "ADD": "Creating custom  Authorizations"
+        "ADD": "Creating custom  Authorizations",
+        "ADD_LABEL": "Toolpermission name"
       }
     },
     "TOOLPERMISSION": {

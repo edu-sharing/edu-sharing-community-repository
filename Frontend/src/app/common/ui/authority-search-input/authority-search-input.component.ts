@@ -24,6 +24,10 @@ export class AuthoritySearchInputComponent{
    * Group type to filter the groups searched for
    */
   @Input() groupType = "";
+    /**
+     * maximum number of authorities to fetch in total
+     */
+    @Input() authorityCount = 50;
   @Input() mode = AuthoritySearchMode.UsersAndGroups;
   @Input() disabled = false;
   @Input() maxSuggestions = 10;
@@ -34,6 +38,7 @@ export class AuthoritySearchInputComponent{
 
   inputValue='';
   suggestionGroups: any;
+  affiliation=true;
   public addSuggestion(data: any) {
     this.onChooseAuthority.emit(data.originalObject)
   }

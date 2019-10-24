@@ -19,6 +19,7 @@ import java.util.List;
 
 public class OpenSALTReader {
     private static final String ASSOCIATION_IS_CHILD_OF = "isChildOf";
+    private static final String ASSOCIATION_PRECEDES = "precedes";
     private final String baseUrl;
     private static Logger logger = Logger.getLogger(OpenSALTReader.class);
 
@@ -30,31 +31,39 @@ public class OpenSALTReader {
         List<MetadataKey> result=new ArrayList<>();
         JSONObject list = getApi("CFPackages", uuid);
         JSONArray array = list.getJSONArray("CFItems");
+        JSONArray associations = list.getJSONArray("CFAssociations");
         for(int i=0;i<array.length();i++){
             JSONObject entry=array.getJSONObject(i);
 
             String key = entry.getString("identifier");
             String caption = entry.getString("fullStatement");
-            String parentId = getParentId(key,uuid);
+            String parentId = getParentId(key,uuid,associations);
 
             MetadataKey metadataKey=new MetadataKey();
             metadataKey.setKey(key);
             metadataKey.setCaption(caption);
             metadataKey.setParent(parentId);
+            metadataKey.setPreceds(getAssocs(key,ASSOCIATION_PRECEDES,associations));
             result.add(metadataKey);
         }
         return result;
     }
-
-    private String getParentId(String key,String mainParent) throws IOException, JSONException {
-        JSONObject entryAssocs=getApi("CFItemAssociations",key);
-        JSONArray entryassocsArray = entryAssocs.getJSONArray("CFAssociations");
-        for(int i=0;i<entryassocsArray.length();i++){
-            if(entryassocsArray.getJSONObject(i).getString("associationType").equals(ASSOCIATION_IS_CHILD_OF)){
-                String parent = entryassocsArray.getJSONObject(i).getJSONObject("destinationNodeURI").getString("identifier");
-                if(!parent.equals(mainParent) && !parent.equals(key))
-                    return parent;
+    private List<String> getAssocs(String key, String assocName, JSONArray associations) throws IOException, JSONException {
+        List<String> assocs=new ArrayList<>();
+        for(int i=0;i<associations.length();i++){
+            if(associations.getJSONObject(i).getJSONObject("originNodeURI").getString("identifier").equals(key) && associations.getJSONObject(i).getString("associationType").equals(assocName)){
+                String assoc = associations.getJSONObject(i).getJSONObject("destinationNodeURI").getString("identifier");
+                if(!assoc.equals(key))
+                    assocs.add(assoc);
             }
+        }
+        return assocs;
+    }
+
+    private String getParentId(String key, String mainParent, JSONArray associations) throws IOException, JSONException {
+        for(String assoc : getAssocs(key,ASSOCIATION_IS_CHILD_OF,associations)){
+            if(!assoc.equals(mainParent))
+                return assoc;
         }
         return null;
     }

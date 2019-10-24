@@ -55,7 +55,7 @@ public interface SearchService {
 
 	SearchResult<EduGroup> getAllOrganizations(boolean scoped) throws Exception;
 
-
+	SearchResultNodeRef getRelevantNodes(int skipCount, int maxItems) throws Throwable;
 
 	SearchResultNodeRef searchV2(MetadataSetV2 mds, String query, Map<String, String[]> criterias,
 			SearchToken searchToken) throws Throwable;

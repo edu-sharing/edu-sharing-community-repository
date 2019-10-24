@@ -234,6 +234,19 @@ public class SearchServiceImpl implements SearchService {
 		}
 	}
 	@Override
+	public SearchResultNodeRef getRelevantNodes(int skipCount, int maxItems) throws Throwable {
+		String query=SearchRelevancyTool.getLuceneQuery();
+		if(query.isEmpty()){
+			return new SearchResultNodeRef();
+		}
+		SearchToken token = new SearchToken();
+		token.setLuceneString(query);
+		token.setFrom(skipCount);
+		token.setMaxResult(maxItems);
+		return search(token);
+	}
+
+	@Override
 	public SearchResult<EduGroup> searchOrganizations(String pattern, int skipCount, int maxValues, SortDefinition sort,boolean scoped, boolean onlyMemberShips)
 			throws Exception {
 		try {

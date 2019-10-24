@@ -316,15 +316,25 @@ export class PermissionsAuthoritiesComponent {
     if(this._mode=='GROUP' || this._mode=='ORG'){
       if(this.editId==null){
         let name=this.edit.profile.displayName;
+        let profile=this.edit.profile;
         if(this._mode=='ORG'){
-          this.organization.createOrganization(name).subscribe(() => {
+          this.globalProgress=true;
+          this.organization.createOrganization(name).subscribe((result) => {
             this.edit = null;
-            this.loadingTitle="PERMISSIONS.ORG_CREATING";
-            this.loadingMessage="PERMISSIONS.ORG_CREATING_INFO";
-            setTimeout(()=>this.checkOrgExists(name),2000);
-
+            this.iam.editGroup(result.authorityName,profile).subscribe(()=>{
+              this.globalProgress=false;
+              this.loadingTitle="PERMISSIONS.ORG_CREATING";
+              this.loadingMessage="PERMISSIONS.ORG_CREATING_INFO";
+              setTimeout(()=>this.checkOrgExists(name),2000);
+            },(error)=>{
+              this.toast.error(error);
+              this.globalProgress=false;
+            });
           },
-            (error:any)=>this.toast.error(error));
+            (error)=>{
+              this.toast.error(error);
+              this.globalProgress=false;
+            });
         }
         else {
           this.globalProgress=true;

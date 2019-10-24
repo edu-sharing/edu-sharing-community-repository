@@ -28,10 +28,6 @@
 <div *ngIf="isBlocked" class="isBlocked">{{'NO_PERMISSIONS_FOR_SCOPE'|translate}}</div>
 <div *ngIf="!isBlocked" [class.hide]="globalProgress">
 
-  <div class="timeout" *ngIf="isSafe && timeout">
-    <i class="material-icons">av_timer</i>
-    {{ timeout }}
-  </div>
   <modal-dialog
                 [title]="dialogTitle"
                 [isCancelable]="dialogCancelable"

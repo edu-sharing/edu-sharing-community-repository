@@ -4,14 +4,11 @@ import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.HashMap;
-import java.util.List;
-import java.util.concurrent.ConcurrentMap;
-import java.util.concurrent.TimeUnit;
 
 import javax.net.ssl.HttpsURLConnection;
 
-import org.apache.camel.util.LRUCache;
 import org.apache.commons.collections.map.LRUMap;
+import org.apache.log4j.Logger;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.server.SearchResultNodeRef;
 import org.edu_sharing.repository.server.tools.ApplicationInfo;
@@ -25,6 +22,8 @@ public class NodeServicePixabayImpl extends NodeServiceAdapter{
 	private String repositoryId;
 	private String APIKey;
 	private static LRUMap propertyCache=new LRUMap(1000);
+	private Logger logger= Logger.getLogger(NodeServicePixabayImpl.class);
+
 	public NodeServicePixabayImpl(String appId) {
 		super(appId);
 		ApplicationInfo appInfo = ApplicationInfoList.getRepositoryInfoById(appId);
@@ -34,12 +33,18 @@ public class NodeServicePixabayImpl extends NodeServiceAdapter{
 	
 	@Override
 	public InputStream getContent(String nodeId) throws Throwable {
-		HashMap<String, Object> properties = getProperties(null, null, nodeId);
-		String download=(String) properties.get(CCConstants.DOWNLOADURL);
-		URL url=new URL(download);
-		HttpsURLConnection connection = SearchServicePixabayImpl.openPixabayUrl(url);
-		connection.connect();
-		return connection.getInputStream();
+		try {
+			HashMap<String, Object> properties = getProperties(null, null, nodeId);
+			String download = (String) properties.get(CCConstants.DOWNLOADURL);
+			URL url = new URL(download);
+			HttpsURLConnection connection = SearchServicePixabayImpl.openPixabayUrl(url);
+			connection.connect();
+			return connection.getInputStream();
+		}catch(Throwable t){
+			// this is likely to fail since pixabay does block any programatic image access
+			logger.warn("Can not fetch inputStream from pixabay for node "+nodeId+": "+t.getMessage(),t);
+			return null;
+		}
 	}
 	public static void updateCache(String id,HashMap<String,Object> properties) {
 		propertyCache.put(id, properties);

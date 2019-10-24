@@ -1,10 +1,10 @@
-import {Component, ViewChild, HostListener, ElementRef} from '@angular/core';
+import {Component, ViewChild} from '@angular/core';
 import 'rxjs/add/operator/map';
-import {Router, ActivatedRoute, Params} from '@angular/router';
+import {ActivatedRoute, Params, Router, RoutesRecognized} from '@angular/router';
 import {TranslateService} from "@ngx-translate/core";
 import {Translation} from "../../core-ui-module/translation";
 import * as EduData from "../../core-module/core.module"; //
-import {RestCollectionService} from "../../core-module/core.module"; //
+import {RequestObject, RestCollectionService} from "../../core-module/core.module"; //
 import {Toast} from "../../core-ui-module/toast"; //
 import {RestSearchService} from '../../core-module/core.module';
 import {RestNodeService} from '../../core-module/core.module';
@@ -32,8 +32,7 @@ import {Filetype} from '../../core-module/core.module';
 import {FrameEventsService} from '../../core-module/core.module';
 import {CordovaService} from '../../common/services/cordova.service';
 import 'rxjs/add/operator/pairwise';
-import { Subscription } from 'rxjs/Subscription';
-import { RoutesRecognized } from '@angular/router';
+import {Subscription} from 'rxjs/Subscription';
 import * as moment from 'moment';
 import {ActionbarHelperService} from '../../common/services/actionbar-helper';
 import {RestIamService} from '../../core-module/core.module';
@@ -75,24 +74,26 @@ export class StreamComponent {
   dateToDisplay: string;
   amountToRandomize: number;
 
-  moveUpOption = new OptionItem('STREAM.OBJECT.OPTION.MOVEUP','arrow_upward',(node: any)=>{
-    this.updateStream(node.id, STREAM_STATUS.PROGRESS).subscribe( (data) => {
-      this.updateDataFromJSON(STREAM_STATUS.OPEN);
-      this.toast.toast("STREAM.TOAST.MOVEUP");
+  moveUpOption = new OptionItem('STREAM.OBJECT.OPTION.MARK','toc',(node: any)=>{
+    this.updateStatus(node.id, STREAM_STATUS.PROGRESS).subscribe( () => {
+      //this.updateDataFromJSON(STREAM_STATUS.OPEN);
+      this.streams = this.streams.filter((n: any) => n.id !== node.id);
+      this.toast.toast("STREAM.TOAST.MARKED");
     }, error => console.log(error));
   });
 
   collectionOption = new OptionItem("WORKSPACE.OPTION.COLLECTION", "layers",(node: Node) => this.addToCollection(node));
 
-  removeOption = new OptionItem('STREAM.OBJECT.OPTION.REMOVE','remove_circle',(node: Node)=> {
-    this.updateStream(node, STREAM_STATUS.DONE).subscribe( (data) => {
-      let result = this.streams.filter( (n : any) => n.id !== node );
-      this.streams = result;
-    } , error => console.log(error));
+  removeOption = new OptionItem('STREAM.OBJECT.OPTION.REMOVE','delete',(node: any)=> {
+    this.updateStatus(node.id, STREAM_STATUS.DONE).subscribe( () => {
+      this.streams = this.streams.filter((n: any) => n.id !== node.id);
+      this.toast.toast("STREAM.TOAST.REMOVED");
+    });
   });
 
   // TODO: Store and use current search query
   searchQuery:string;
+  isLoading=true;
   doSearch(query:string){
     this.searchQuery=query;
     console.log(query);
@@ -156,27 +157,24 @@ export class StreamComponent {
 
   setStreamMode() {
     this.route.queryParams.subscribe((params: Params) => {
-      if (params.mode === 'new') {
+      if (params.mode === 'new' || params.mode === 'seen' || params.mode === 'relevant' || params.mode === 'marked') {
         this.menuOptions(params.mode);
       }
-      if (params.mode === 'seen') {
-        this.menuOptions(params.mode);
-      }
-      if (params.mode !== 'new' && params.mode !== 'seen') {
+      else{
         this.goToOption('new');
       }
     });
   }
 
   seen(id: any) {
-    this.updateStream(id, STREAM_STATUS.READ).subscribe(data => this.updateDataFromJSON(STREAM_STATUS.OPEN) , error => console.log(error));
+    this.updateStatus(id, STREAM_STATUS.READ).subscribe(data => this.updateDataFromJSON(STREAM_STATUS.OPEN) , error => console.log(error));
   }
 
   onScroll() {
     console.log("scrolled!!");
     //this.updateDataFromJSON(STREAM_STATUS.OPEN);
-    let curStat = this.menuOption === 'new' ? STREAM_STATUS.OPEN : STREAM_STATUS.READ;
-    let sortWay = this.menuOption === 'new' ? true : false;
+    let curStat = this.menuOption === 'new' ? STREAM_STATUS.OPEN : this.menuOption=='marked'? STREAM_STATUS.PROGRESS : STREAM_STATUS.READ;
+    let sortWay = this.menuOption === 'new' ? false : false;
     this.getJSON(curStat, sortWay).subscribe(data => {
       console.log("r, data: ",data['stream']);
       this.streams = this.streams.concat(data['stream']);
@@ -198,7 +196,7 @@ export class StreamComponent {
     }
   }
 
-  checkIfEnable(nodes: any) {
+  checkIfEnable(nodes: Node[]) {
     this.collectionOption.isEnabled = NodeHelper.getNodesRight(nodes, RestConstants.ACCESS_CC_PUBLISH);
   }
 
@@ -236,16 +234,25 @@ export class StreamComponent {
     this.menuOption = option;
     this.imagesToLoad = -1;
     this.actionOptions=[];
+    this.streams = [];
     if (option === 'new') {
-      this.streams = [];
       this.updateDataFromJSON(STREAM_STATUS.OPEN);
-      this.actionOptions[0] = this.moveUpOption;
-      this.actionOptions[1] = this.collectionOption;
-    } else {
-      this.streams = [];
+      this.actionOptions.push(this.moveUpOption);
+      this.actionOptions.push(this.collectionOption);
+      this.actionOptions.push(this.removeOption);
+    }
+    else if (option === 'marked') {
+      this.updateDataFromJSON(STREAM_STATUS.PROGRESS);
+      this.actionOptions.push(this.collectionOption);
+      this.actionOptions.push(this.removeOption);
+    }
+    else if(option == 'relevant'){
+      this.searchRelevant();
+    }
+    else {
       this.updateDataFromJSON(STREAM_STATUS.READ);
-      this.actionOptions[0] = this.collectionOption;
-      this.actionOptions[1] = this.removeOption;
+      this.actionOptions.push(this.collectionOption);
+      this.actionOptions.push(this.removeOption);
     }
       let nodeStore = this.actionbar.createOptionIfPossible('ADD_NODE_STORE',null,(node: Node) => {
           this.addToStore(node);
@@ -253,22 +260,22 @@ export class StreamComponent {
       this.actionOptions.push(nodeStore);
   }
 
-  goToOption(option: any) {
+  goToOption(option: string) {
     this.router.navigate(["./"],{queryParams:{mode:option},relativeTo:this.route})
   }
 
   updateDataFromJSON(streamStatus: any) {
-    if (streamStatus == STREAM_STATUS.OPEN) {
+    /*if (streamStatus == STREAM_STATUS.OPEN) {
       let openStreams: any[];
       let progressStreams: any[];
       let unSortedStream: any[];
-      this.getSimpleJSON(STREAM_STATUS.OPEN, true).subscribe(data => {
+      this.getSimpleJSON(STREAM_STATUS.OPEN, false).subscribe(data => {
         openStreams = data['stream'].filter( (n : any) => n.nodes.length !== 0);
-        this.getSimpleJSON(STREAM_STATUS.PROGRESS, true).subscribe(data => {
+        this.getSimpleJSON(STREAM_STATUS.PROGRESS, false).subscribe(data => {
           progressStreams = data['stream'].filter( (n : any) => n.nodes.length !== 0);
           console.log("streams received: ",  progressStreams.concat(openStreams));
           unSortedStream = progressStreams.concat(openStreams);
-          unSortedStream.length >= this.amountToRandomize ? this.randomizeTop(unSortedStream,this.amountToRandomize) : console.log('not big enough to randomize');
+          //unSortedStream.length >= this.amountToRandomize ? this.randomizeTop(unSortedStream,this.amountToRandomize) : console.log('not big enough to randomize');
           this.streams = unSortedStream;
           console.log("objs: ",this.streams);
           this.imagesToLoad = this.streams.length;
@@ -276,13 +283,16 @@ export class StreamComponent {
         });
       }, error => console.log(error));
     }
-    else {
+    else {*/
+      this.streams = [];
+      this.isLoading = true;
       this.getSimpleJSON(streamStatus).subscribe(data => {
         this.streams = data['stream'].filter( (n : any) => n.nodes.length !== 0);
         this.imagesToLoad = this.streams.length;
+        this.isLoading = false;
         this.scrollToDown();
       }, error => console.log(error));
-    }
+    //}
 
   }
 
@@ -295,10 +305,16 @@ export class StreamComponent {
   }
 
   onStreamObjectClick(node: any) {
-    console.log(node.nodes[0].ref.id);
-    this.seen(node.id);
-    document.cookie = "jumpToScrollPosition="+window.pageYOffset;
-    this.router.navigate([UIConstants.ROUTER_PREFIX+"render", node.nodes[0].ref.id])
+    if(node.nodes) {
+      console.log(node.nodes[0].ref.id);
+      this.seen(node.id);
+      document.cookie = "jumpToScrollPosition="+window.pageYOffset;
+      this.router.navigate([UIConstants.ROUTER_PREFIX+"render", node.nodes[0].ref.id])
+    }
+    else{
+      this.router.navigate([UIConstants.ROUTER_PREFIX+"render", node.ref.id])
+    }
+
   }
 
   private addToCollection(nodes: any) {
@@ -327,7 +343,7 @@ export class StreamComponent {
     return this.streamService.getStream(streamStatus,this.searchQuery,{},request);
   }
 
-  public updateStream(idToUpdate: any, status: any): Observable<any> {
+  public updateStatus(idToUpdate: any, status: any): Observable<any> {
     return this.streamService.updateStatus(idToUpdate, this.connector.getCurrentLogin().authorityName, status)
   }
     private create(){
@@ -358,4 +374,20 @@ export class StreamComponent {
     private editConnector(node:Node,type : Filetype=null,win : any = null,connectorType : Connector = null){
         UIHelper.openConnector(this.connectors,this.iam,this.event,this.toast,node,type,win,connectorType);
     }
+
+  private searchRelevant() {
+    let request:RequestObject={
+      propertyFilter:[RestConstants.ALL]
+    };
+    this.isLoading=true;
+    this.searchService.getRelevant(request).subscribe((relevant)=>{
+      console.log(relevant);
+      this.streams=relevant.nodes;
+      this.imagesToLoad=this.streams.length;
+      this.isLoading=false;
+    });
+  }
+  public getTitle(node:Node){
+    return RestHelper.getTitle(node);
+  }
 }

@@ -1,7 +1,8 @@
 package org.edu_sharing.service.config.model;
 import javax.xml.bind.annotation.XmlElement;
+import java.io.Serializable;
 
-public class Values{
+public class Values implements Serializable {
 	@XmlElement public String[] supportedLanguages;
 	@XmlElement public String extension;
 	@XmlElement public String loginUrl;
@@ -35,6 +36,7 @@ public class Values{
 	@XmlElement	public String siteTitle;
 	@XmlElement	public String userDisplayName;
 	@XmlElement	public String userSecondaryDisplayName;
+	@XmlElement	public Boolean userAffiliation;
 	@XmlElement	public String defaultUsername;
 	@XmlElement	public String defaultPassword;
 	@XmlElement	public Banner banner;
