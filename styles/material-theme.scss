@@ -130,6 +130,9 @@ input.mat-input-element, mat-label, .mat-select-value{
 .mat-form-field-appearance-outline .mat-form-field-label{
   margin-top: -6px;
 }
+.mat-autocomplete-high{
+  max-height: 350px;
+}
 .mat-checkbox-inner-container{
   width:18px !important;
   height:18px !important;
