@@ -47,7 +47,7 @@ public class MailTemplate {
 	public static String generateContentLink(ApplicationInfo appInfo,String nodeId) throws Throwable{
 		NodeService nodeService=NodeServiceFactory.getNodeService(appInfo.getAppId());
 		String mime=MimeTypesV2.getMimeType(nodeService.getProperties(StoreRef.PROTOCOL_WORKSPACE, StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(), nodeId));
-		if(mime.equals(MimeTypesV2.MIME_DIRECTORY)){
+		if(MimeTypesV2.MIME_DIRECTORY.equals(mime)){
 			if(nodeService.hasAspect(StoreRef.PROTOCOL_WORKSPACE, StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(), nodeId,CCConstants.CCM_ASPECT_COLLECTION)){
 				return URLTool.getNgComponentsUrl()+"collections/?id="+nodeId;
 			}
