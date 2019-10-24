@@ -17,7 +17,7 @@
         <i matPrefix icon [iconId]="inputIcon" *ngIf="inputIcon"></i>
         <mat-label>{{placeholder | translate}}</mat-label>
         <input type="text" matInput [matAutocomplete]="autoGroup" placeholder="{{placeholder | translate}}" name="authoritySearch" [(ngModel)]="inputValue" (ngModelChange)="updateSuggestions($event)">
-            <mat-autocomplete #autoGroup="matAutocomplete">
+            <mat-autocomplete #autoGroup="matAutocomplete" class="mat-autocomplete-high">
                 <mat-optgroup *ngFor="let group of suggestionGroups" label="{{ group.label | translate}}">
                     <mat-option class="authority-search-input-option" *ngFor="let suggestion of group.values" [value]="suggestion">
                         <div class="suggestion-content">
