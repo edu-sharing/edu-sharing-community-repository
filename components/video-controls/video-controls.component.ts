@@ -2,6 +2,7 @@ import {Component, Input, OnInit} from '@angular/core';
 import {RestNodeService} from "../../../core-module/rest/services/rest-node.service";
 import {Node} from "../../../core-module/rest/data-object"
 import {RestConstants} from "../../../core-module/rest/rest-constants";
+import {Toast} from "../../toast";
 
 @Component({
   selector: 'video-controls',
@@ -15,14 +16,18 @@ export class VideoControlsComponent{
   _chapterName:any;
 
   @Input() set video(video:HTMLVideoElement){
-    this._video = video;
-    this.track = video.addTextTrack("chapters", "English", "en");
-    this.track.mode = "showing"
-    this.vtt.forEach((item)=> {
-      let parts = item.split(",");
-      this.track.addCue(new VTTCue(parseFloat(parts[0]), parseFloat(parts[1]), parts[2]));
+    // timeout to make sure node is already bound
+    setTimeout(()=> {
+      this._video = video;
+      this.track = video.addTextTrack("chapters", "English", "en");
+      this.track.mode = "showing";
+      let vtt = this.node.properties[RestConstants.CCM_PROP_IO_REF_VIDEO_VTT];
+      if (vtt && vtt.length == 1) {
+        vtt = JSON.parse(vtt[0]);
+        this.objectToCues(vtt, this.track);
+      }
+      this.render();
     });
-    this.render();
   }
   @Input() node:Node;
 
@@ -35,7 +40,7 @@ export class VideoControlsComponent{
     '147.6, 370.7, Somwhere in the middle',
     '370.7, 735, Beginning of the end',]
 
-  constructor(private nodeService : RestNodeService) {
+  constructor(private nodeService : RestNodeService,private toast:Toast) {
 
   }
 
@@ -80,17 +85,33 @@ export class VideoControlsComponent{
   updateChapters() {
     this.track.addCue(new VTTCue(this.secs(this._startTime), this.secs(this._endTime), this._chapterName));
     this.render();
+    let props:any={};
+    console.log(this.track.cues);
+    props[RestConstants.CCM_PROP_IO_REF_VIDEO_VTT]=[JSON.stringify(this.cuesToObject((this.track.cues)))];
+    this.nodeService.editNodeMetadata(this.node.ref.id,props).subscribe(()=>{
+      // no feedback at the moment
+    },(error)=>{
+      this.toast.error(error);
+    });
   }
 
   getProgress() {
     return this._video.currentTime/this._video.duration*100;
   }
 
-  setStartTime() {
-    this._startTime = this.toHHMMSS(this._video.currentTime);
+  private objectToCues(obj:any[],track:TextTrack){
+    obj.forEach((o)=>{
+      track.addCue(new VTTCue(o.startTime,o.endTime,o.text));
+    });
   }
-
-  setEndTime() {
-    this._endTime = this.toHHMMSS(this._video.currentTime);
+  private cuesToObject(cues : TextTrackCueList) {
+    let result=[];
+    for(let i=0;i<cues.length;i++){
+      let c=cues[i];
+      result.push({
+        startTime:c.startTime,endTime:c.endTime,text:c.text
+      });
+    }
+    return result;
   }
 }
