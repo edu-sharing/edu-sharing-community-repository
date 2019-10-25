@@ -397,7 +397,7 @@ export class MdsComponent{
       let extended=`<div class="mdsExtended `+(this.isSearch() ? 'mdsExtendedSearch' : '')+`"><div class="label">`+this.translate.instant(this.isSearch() ? 'MDS.SHOW_EXTENDED_SEARCH' : 'MDS.SHOW_EXTENDED')+`</div><div class="switch">
             <label>
               `+this.translate.instant('OFF')+`
-                <input type="checkbox" id="mdsExtendedCheckbox" onchange="`+this.getWindowComponent()+`.showExtended(this.checked)">
+                <input type="checkbox" id="`+this.getDomId('mdsExtendedCheckbox')+`" onchange="`+this.getWindowComponent()+`.showExtended(this.checked)">
                 <span class="lever"></span>
               `+this.translate.instant('ON')+`
               </label>
@@ -409,7 +409,7 @@ export class MdsComponent{
   private showExtended(show:boolean){
     this.extended=show;
     this.extendedChange.emit(show);
-    let checkbox:any=document.getElementById('mdsExtendedCheckbox');
+    let checkbox=(document.getElementById(this.getDomId('mdsExtendedCheckbox')) as HTMLInputElement);
     if(!checkbox)
       return;
     checkbox.checked=show;
