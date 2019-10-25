@@ -1,0 +1,64 @@
+#bar {
+  width: 90%;
+  margin: 0 auto;
+  position: relative;
+  top: 10px;
+  cursor: pointer;
+  background: #555;
+  color: #fff;
+  height:24px;
+  border-radius: 12px;
+  opacity: 1;
+}
+
+#bar span {
+  display: inline-flex;
+  align-items: center;
+  position: absolute;
+  border-left: 2px solid #fff;
+  height: 24px;
+  text-shadow: -1px -1px 1px rgba(255,255,255,.1), 1px 1px 1px rgba(0,0,0,.5);
+  padding-left: 3px;
+  line-height: 12px;
+}
+
+#bar span:nth-child(1) {
+  border-left: none;
+}
+
+.chapterTitle{
+  text-align: left;
+  visibility: hidden;
+  transition: 0.2s ease-in-out;
+  z-index: 5000;
+}
+
+#bar span:hover .chapterTitle{
+  visibility: visible;
+}
+
+.addChapter{
+  display: flex;
+  justify-content: space-evenly;
+  margin-top: 25px;
+}
+
+.addChapter input[type=text]{
+  width: auto;
+  background: #555;
+  color: #fff;
+  padding-left: 5px;
+  margin-bottom: 0;
+}
+
+.addChapter h3{
+  font-size: 100%;
+  margin: auto 8px;
+}
+
+.time{
+  max-width: 33%;
+  margin: 0 5px;
+  display: inline-flex;
+  align-items: center;
+}

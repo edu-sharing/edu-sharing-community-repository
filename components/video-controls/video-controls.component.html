@@ -1,6 +1,18 @@
-<div *ngIf="video && false">
-  video-controls
-  {{this.video.currentTime}}
+<div *ngIf="_video">
+
+  <div id="bar" style.background="linear-gradient(to right, #778fd1 {{getProgress()}}%, #555 {{getProgress()}}%)">
+    <span *ngFor="let marker of markers" [style.width]="(marker.endTime-marker.startTime)/_video.duration*100+'%'" [style.left]="(marker.startTime/_video.duration)*100+'%'" (click)="seek(marker.startTime)">
+      <span class='chapterTitle'>{{marker.text}}</span>
+    </span>
+  </div>
+  <div>
+    <form class="addChapter">
+      <div class="time"><h3>Start:</h3> <input type="text" name="startTime" id="startTime" [(ngModel)]="_startTime" (click)="setStartTime()"></div>
+      <div class="time"><h3>Stop:</h3> <input type="text" name="endTime" id="endTime" [(ngModel)]="_endTime" (click)="setEndTime()"></div>
+      <div class="time"><h3>Titel:</h3> <input type="text"  name="chapterName" id="chapterName" [(ngModel)]="_chapterName"></div>
+      <input class="btn" type="button" value="Anlegen" (click)="updateChapters()">
+    </form>
+  </div>
 
   <div *ngIf="isReadOnly()">
     Read Only mode
