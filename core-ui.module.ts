@@ -29,6 +29,7 @@ import {PermissionNamePipe} from "./pipes/permission-name.pipe";
 import {BrowserAnimationsModule} from '@angular/platform-browser/animations';
 import {BreadcrumbsComponent} from "./components/breadcrumbs/breadcrumbs.component";
 import {VideoControlsComponent} from "./components/video-controls/video-controls.component";
+import {AuthorityAffiliationPipe} from "./pipes/authority-affiliation.pipe";
 
 @NgModule({
     declarations: [
@@ -51,7 +52,8 @@ import {VideoControlsComponent} from "./components/video-controls/video-controls
         KeysPipe,
         ReplaceCharsPipe,
         PermissionNamePipe,
-        UrlPipe
+        UrlPipe,
+        AuthorityAffiliationPipe
     ],
     imports: [
         BrowserModule,
@@ -105,7 +107,8 @@ import {VideoControlsComponent} from "./components/video-controls/video-controls
         KeysPipe,
         ReplaceCharsPipe,
         PermissionNamePipe,
-        UrlPipe
+        UrlPipe,
+        AuthorityAffiliationPipe
     ]
 })
 export class CoreUiModule { }

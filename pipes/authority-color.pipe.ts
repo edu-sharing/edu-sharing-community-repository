@@ -3,7 +3,7 @@ import {Helper} from "../../core-module/rest/helper";
 import {ColorHelper} from "../../core-module/ui/color-helper";
 @Pipe({name: 'authorityColor'})
 export class AuthorityColorPipe implements PipeTransform {
-  public static COLORS=['#48708e','#975B5D','#6A9663','#62998F','#769CB6','#968758'];
+  public static COLORS=['#4584B3','#9B393C','#84B97C','#71B0A4','#7A79D5','#AE9957'];
   transform(authority : any,args:string[]): string {
     if(!authority)
       return AuthorityColorPipe.COLORS[0];

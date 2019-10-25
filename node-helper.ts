@@ -438,7 +438,7 @@ export class NodeHelper{
       if(item.name=="displayName")
         return data.profile.displayName;
       if(item.name=="groupType")
-        return data.profile.groupType;
+        return translate.instant('PERMISSIONS.GROUP_TYPE.'+data.profile.groupType);
     }
     if(item.type=='USER'){
       if(item.name=='firstName')
@@ -693,11 +693,11 @@ export class NodeHelper{
       return node ? [node] : nodes && nodes.length ? nodes  : null;
   }
 
-  static referenceOriginalExists(node: Node|CollectionReference) {
-    if(node==null)
-      return true;
-    return (node.hasOwnProperty('originalId') ? (node as any).originalId!=null : true)
-  }
+    static referenceOriginalExists(node: Node|CollectionReference) {
+      if(node==null)
+        return true;
+      return (node.hasOwnProperty('originalId') ? (node as any).originalId!=null : true)
+    }
 
   static isNodeCollection(node: Node | any) {
     return node.collection || node.hasOwnProperty('childCollectionsCount');
