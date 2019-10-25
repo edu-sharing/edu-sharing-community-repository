@@ -1642,6 +1642,10 @@
 				<property name="ccm:ref_version">
 					<type>d:text</type>
 				</property>
+				<!-- property to store video text tracks data, e.g. for cutting specific parts -->
+				<property name="ccm:ref_video_vtt">
+					<type>d:text</type>
+				</property>
 			</properties>
 		</aspect>
 		<aspect name="ccm:collection_ordered">

@@ -80,6 +80,7 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
 			CCConstants.CCM_PROP_SERVICE_NODE_DESCRIPTION,
 			CCConstants.CCM_PROP_SERVICE_NODE_TYPE,
 			CCConstants.CCM_PROP_SERVICE_NODE_DATA,
+			CCConstants.CCM_PROP_IO_REF_VIDEO_VTT
 			};
 	private static final String[] LICENSE_PROPS = new String[]{
 			CCConstants.LOM_PROP_RIGHTS_RIGHTS_DESCRIPTION,

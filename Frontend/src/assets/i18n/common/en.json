@@ -13,6 +13,8 @@
   "APPLY" : "apply",
   "CANCEL" : "cancel",
   "YES_DELETE" : "Yes, delete",
+  "START": "Start",
+  "STOP": "Stop",
   "RENAME" : "rename",
   "USER_GUEST" : "guest",
   "IMPRINT" : "Imprint",

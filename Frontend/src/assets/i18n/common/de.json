@@ -13,6 +13,8 @@
   "APPLY" : "Übernehmen",
   "CANCEL" : "Abbrechen",
   "YES_DELETE" : "Ja, löschen",
+  "START": "Start",
+  "STOP": "Stop",
   "RENAME" : "Umbenennen",
   "USERMENU": "Nutzermenü",
   "USER_GUEST" : "Gast",

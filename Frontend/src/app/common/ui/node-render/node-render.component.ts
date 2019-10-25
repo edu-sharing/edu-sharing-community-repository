@@ -376,11 +376,12 @@ export class NodeRenderComponent implements EventListener{
             return;
         }
         try {
-            videoElement = document.getElementsByClassName("videoWrapperOuter")[0].getElementsByTagName("video")[0];
+            videoElement = document.getElementById("edusharing_rendering_content").getElementsByTagName("video")[0];
             target = document.createElement('div');
             videoElement.parentElement.appendChild(target);
         } catch (e) {
-            console.log("did not find video element, skipping controls",e);
+            //console.log("did not find video element, skipping controls",e);
+            setTimeout(()=>this.addVideoControls(),1000/30);
             return;
         }
         let data={

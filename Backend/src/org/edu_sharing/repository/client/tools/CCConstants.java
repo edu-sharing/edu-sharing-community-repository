@@ -406,7 +406,9 @@ public class CCConstants {
 	public final static String CCM_PROP_IO_REF_DESCRIPTION = "{http://www.campuscontent.de/model/1.0}ref_description";
 
 	public final static String CCM_PROP_IO_REF_VERSION = "{http://www.campuscontent.de/model/1.0}ref_version";
-	
+
+	public final static String CCM_PROP_IO_REF_VIDEO_VTT = "{http://www.campuscontent.de/model/1.0}ref_video_vtt";
+
 	public final static String CCM_PROP_ADDRESS_POSTALCODE = "{http://www.campuscontent.de/model/1.0}postalCode";
 	
 	public final static String CCM_PROP_ADDRESS_CITY = "{http://www.campuscontent.de/model/1.0}city";
