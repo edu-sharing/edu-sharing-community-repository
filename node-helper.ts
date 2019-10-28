@@ -208,6 +208,10 @@ export class NodeHelper{
       icon="star";
       scopeName="TYPE_EDITORIAL";
     }
+    if(collection.type==RestConstants.COLLECTIONTYPE_MEDIA_CENTER){
+      icon="business";
+      scopeName="TYPE_MEDIA_CENTER";
+    }
     return {icon:icon,scopeName:scopeName};
   }
   /**
