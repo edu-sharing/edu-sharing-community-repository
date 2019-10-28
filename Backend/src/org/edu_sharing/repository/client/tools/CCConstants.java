@@ -2008,6 +2008,7 @@ public class CCConstants {
 	public static final String EDITORIAL_GROUP_TYPE = "EDITORIAL";
 	public static final String COLLECTIONTYPE_DEFAULT = "default";
 	public static final String COLLECTIONTYPE_EDITORIAL = "EDITORIAL";
+	public static final String COLLECTIONTYPE_MEDIA_CENTER = "MEDIA_CENTER";
 
 	public static final String COLLECTION_COLOR_DEFAULT = "#975B5D";
 

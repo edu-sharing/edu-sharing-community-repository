@@ -148,7 +148,7 @@ public class MediacenterDao extends AbstractDao{
 			changeProfile(profile);
 
 			// create the admin group
-			authorityService.createGroupWithType(AuthorityService.ADMINISTRATORS_GROUP, profile.getDisplayName() + AuthorityService.ADMINISTRATORS_GROUP_DISPLAY_POSTFIX, group, AuthorityService.MEDIACENTER_ADMINISTRATORS_GROUP_TYPE);
+			authorityService.createGroupWithType(AuthorityService.MEDIACENTER_ADMINISTRATORS_GROUP, profile.getDisplayName() + AuthorityService.ADMINISTRATORS_GROUP_DISPLAY_POSTFIX, group, AuthorityService.MEDIACENTER_ADMINISTRATORS_GROUP_TYPE);
 			return this;
 		}catch(Throwable t){
 			throw DAOException.mapping(t);

@@ -85,6 +85,17 @@ $imagePath: '../../../../assets/images/collections/';
   align-items: center;
   padding-top: $mainnavHeight;
 }
+:host /deep/{
+  .createCollection{
+    .collection-item{
+      >.mat-button-wrapper{
+        width: 100%;
+        justify-content: flex-start;
+        text-transform: none;
+      }
+    }
+  }
+}
 .createCollection{
   background-color: #fff;
   .headline{
@@ -108,9 +119,10 @@ $imagePath: '../../../../assets/images/collections/';
   }
   .collection-item{
     padding:10px 5px;
-    >div,i{
-      display: table-cell;
-    }
+    width: 100%;
+    border-radius: 0;
+    line-height: 2em;
+    white-space: normal;
     .title{
       color:$primary;
       font-weight: bold;
@@ -121,14 +133,20 @@ $imagePath: '../../../../assets/images/collections/';
     }
     .content{
       padding:10px 0;
+      text-align: left;
+      flex-grow: 1;
     }
     .iconLeft{
       vertical-align: middle;
       padding-right: 15px;
       padding-left: 20px;
       i {
+        display: flex;
         background-color: #fff;
-        padding: 10px;
+        width: 50px;
+        height: 50px;
+        align-items: center;
+        justify-content: center;
         border-radius: 50%;
         @include materialShadowBottom();
       }

@@ -765,13 +765,16 @@
 				<basequery>ASPECT:"ccm:collection" AND @ccm\:collectionlevel0:true AND OWNER:"${authority}"</basequery>
 			</query>
 			<query join="AND"  id="collections_scope_shared">
-				<basequery>ASPECT:"ccm:collection" AND @ccm\:collectionlevel0:true AND NOT OWNER:"${authority}" AND NOT @ccm\:collectiontype:"EDITORIAL"</basequery>
+				<basequery>ASPECT:"ccm:collection" AND @ccm\:collectionlevel0:true AND NOT OWNER:"${authority}" AND NOT @ccm\:collectiontype:"EDITORIAL" AND NOT @ccm\:collectiontype:"MEDIA_CENTER"</basequery>
 			</query>
 			<query join="AND"  id="collections_scope_editorial">
 				<basequery>ASPECT:"ccm:collection" AND @ccm\:collectionlevel0:true AND @ccm\:collectiontype:"EDITORIAL"</basequery>
 			</query>
+			<query join="AND"  id="collections_scope_media_center">
+				<basequery>ASPECT:"ccm:collection" AND @ccm\:collectionlevel0:true AND @ccm\:collectiontype:"MEDIA_CENTER"</basequery>
+			</query>
 			<query join="AND"  id="collections_scope_public">
-				<basequery>ASPECT:"ccm:collection" AND @ccm\:collectionlevel0:true AND NOT @ccm\:collectiontype:"EDITORIAL"</basequery>
+				<basequery>ASPECT:"ccm:collection" AND @ccm\:collectionlevel0:true AND NOT @ccm\:collectiontype:"EDITORIAL" AND NOT @ccm\:collectiontype:"MEDIA_CENTER"</basequery>
 			</query>
 			<query join="AND" id="archive" applyBasequery="false">
 				<property name="ngsearchword">

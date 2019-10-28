@@ -12,6 +12,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
+import java.util.stream.Collectors;
 
 import org.alfresco.repo.policy.BehaviourFilter;
 import org.alfresco.repo.search.impl.solr.ESSearchParameters;
@@ -54,6 +55,9 @@ import org.edu_sharing.restservices.CollectionDao.Scope;
 import org.edu_sharing.restservices.CollectionDao.SearchScope;
 import org.edu_sharing.restservices.shared.Authority;
 import org.edu_sharing.service.Constants;
+import org.edu_sharing.service.authority.AuthorityService;
+import org.edu_sharing.service.authority.AuthorityServiceFactory;
+import org.edu_sharing.service.mediacenter.MediacenterServiceFactory;
 import org.edu_sharing.service.nodeservice.NodeService;
 import org.edu_sharing.service.nodeservice.NodeServiceFactory;
 import org.edu_sharing.service.nodeservice.NodeServiceHelper;
@@ -563,7 +567,7 @@ public class CollectionServiceImpl implements CollectionService{
 		props.remove(CCConstants.CCM_PROP_MAP_COLLECTIONLEVEL0);
 		client.updateNode(collection.getNodeId(), props);
 	}
-	
+
 	@Override
 	public void updateAndSetScope(Collection collection) throws Exception {
 		update(collection);
@@ -763,6 +767,9 @@ public class CollectionServiceImpl implements CollectionService{
 					case TYPE_EDITORIAL:
 						queryId="collections_scope_editorial";
 						break;
+					case TYPE_MEDIA_CENTER:
+						queryId="collections_scope_media_center";
+						break;
 				}
 				String queryString=mds.findQuery(queryId).getBasequery();
 				/**
@@ -820,8 +827,25 @@ public class CollectionServiceImpl implements CollectionService{
 		List<org.edu_sharing.repository.client.rpc.ACE> aces=new ArrayList<>();
 		if(acl.getAces()!=null)
 			aces.addAll(Arrays.asList(acl.getAces()));
+		if(CCConstants.COLLECTIONTYPE_MEDIA_CENTER.equals(collection.getType())){
+			List<String> mediacenters = searchService.getAllMediacenters().stream().filter((m) -> AuthorityServiceFactory.getLocalService().hasAdminAccessToGroup(m)).collect(Collectors.toList());
+			if(mediacenters.size()!=1){
+				throw new IllegalArgumentException("Current user is assigned to "+mediacenters.size()+" mediacenters, but must be assigned to exactly 1");
+			}
+			ACE ace=new ACE();
+			ace.setAuthority(mediacenters.get(0));
+			ace.setAuthorityType(Authority.Type.GROUP.name());
+			ace.setPermission(CCConstants.PERMISSION_CONSUMER);
+			aces.add(ace);
+			ACE ace2=new ACE();
+			ace2.setAuthority(PermissionService.GROUP_PREFIX+AuthorityService.getGroupName(org.edu_sharing.alfresco.service.AuthorityService.MEDIACENTER_ADMINISTRATORS_GROUP,mediacenters.get(0)));
+			ace2.setAuthorityType(Authority.Type.GROUP.name());
+			ace2.setPermission(CCConstants.PERMISSION_COORDINATOR);
+			aces.add(ace2);
 
-		if(custom){
+			permissionService.setPermissions(collectionId, aces,false);
+		}
+		else if(custom){
 			
 			if(collection.isLevel0()) { // don't allow inherition on root level
 				permissionService.setPermissionInherit(collectionId, false);

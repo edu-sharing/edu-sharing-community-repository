@@ -346,7 +346,8 @@
       "PUBLIC" : "Öffentlich",
       "SHARED" : "Freigegeben",
       "CUSTOM" : "Benutzerdefiniert",
-      "TYPE_EDITORIAL" : "Redaktionell"
+      "TYPE_EDITORIAL" : "Redaktionell",
+      "TYPE_MEDIA_CENTER" : "Medienzentrum"
     }
   },
   "CREATE_NODE":{

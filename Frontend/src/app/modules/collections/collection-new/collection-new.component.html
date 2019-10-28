@@ -29,39 +29,39 @@
         title="{{'COLLECTIONS.CREATE_TYPE' | translate}}"
         (onCancel)="newCollectionCancel()">
     <div class="createCollection collectionShadow">
-      <div class="collection-item clickable" tabindex="0" (keyup.enter)="setCollectionType('MY')" (click)="setCollectionType('MY')">
+      <button mat-button class="collection-item clickable" (click)="setCollectionType('MY')">
         <div class="iconLeft"><i class="material-icons" style="color:#995b5b;">lock</i></div>
         <div class="content">
           <div class="title">{{'COLLECTIONS.CREATE.PRIVATE' | translate}}</div>
           <div class="description">{{'COLLECTIONS.CREATE.PRIVATE_DESCRIPTION' | translate}}</div>
         </div>
         <i class="material-icons next">keyboard_arrow_right</i>
-      </div>
-      <div class="collection-item clickable" *ngIf="canInvite" tabindex="0" (keyup.enter)="setCollectionType('CUSTOM')" (click)="setCollectionType('CUSTOM')">
+      </button>
+      <button mat-button class="collection-item clickable" *ngIf="canInvite" (click)="setCollectionType('CUSTOM')">
         <div class="iconLeft"><i class="material-icons" style="color:#4F7899;">group</i></div>
         <div class="content">
           <div class="title">{{'COLLECTIONS.CREATE.SHARED' | translate}}</div>
           <div class="description">{{'COLLECTIONS.CREATE.SHARED_DESCRIPTION' | translate}}</div>
         </div>
         <i class="material-icons next">keyboard_arrow_right</i>
-      </div>
-      <div class="collection-item clickable" *ngIf="shareToAll && canInvite" tabindex="0" (keyup.enter)="setCollectionType('EDU_ALL')" (click)="setCollectionType('EDU_ALL')">
+      </button>
+      <button mat-button class="collection-item clickable" *ngIf="shareToAll && canInvite" (click)="setCollectionType('EDU_ALL')">
         <div class="iconLeft"> <i class="material-icons" style="color:#5C998F;">public</i></div>
         <div class="content">
           <div class="title">{{'COLLECTIONS.CREATE.PUBLIC' | translate}}</div>
           <div class="description">{{'COLLECTIONS.CREATE.PUBLIC_DESCRIPTION' | translate}}</div>
         </div>
         <i class="material-icons next">keyboard_arrow_right</i>
-      </div>
+      </button>
       <div class="group" *ngIf="createEditorial">
-        <div class="collection-item clickable" *ngIf="createEditorial" tabindex="0" (keyup.enter)="setCollectionType('EDITORIAL')" (click)="setCollectionType('EDITORIAL')">
+        <button mat-button class="collection-item clickable" *ngIf="createEditorial" (click)="setCollectionType('EDITORIAL')">
           <div class="iconLeft"><i class="material-icons" style="color:#E9B42A;">star</i></div>
           <div class="content">
             <div class="title">{{'COLLECTIONS.CREATE.EDITORIAL' | translate}}</div>
             <div class="description">{{'COLLECTIONS.CREATE.EDITORIAL_DESCRIPTION' | translate}}</div>
           </div>
           <i class="material-icons next">keyboard_arrow_right</i>
-        </div>
+        </button>
         <!--
         <div class="collection-item clickable" *ngIf="createCurriculum" (click)="setCollectionType('CURRICULUM')">
           <div class="iconLeft"><i class="material-icons" style="color:#995C99;">school</i></div>
@@ -72,8 +72,16 @@
           <i class="material-icons next">keyboard_arrow_right</i>
         </div>
         -->
+        </div>
+          <button mat-button class="collection-item clickable" *ngIf="createMediacenter" (click)="setCollectionType('MEDIA_CENTER')">
+              <div class="iconLeft"><i icon iconId="business" style="color:#4e4b99;"></i></div>
+              <div class="content">
+                  <div class="title">{{'COLLECTIONS.CREATE.MEDIA_CENTER' | translate}}</div>
+                  <div class="description">{{'COLLECTIONS.CREATE.MEDIA_CENTER_DESCRIPTION' | translate}}</div>
+              </div>
+              <i icon iconId="keyboard_arrow_right" class="next"></i>
+          </button>
       </div>
-    </div>
   </card>
   <card *ngIf="newCollectionStep==STEP_GENERAL"
         [buttons]="buttons"

@@ -68,6 +68,7 @@ export class CollectionsMainComponent {
         RestConstants.COLLECTIONSCOPE_MY,
         RestConstants.COLLECTIONSCOPE_ORGA,
         RestConstants.COLLECTIONSCOPE_TYPE_EDITORIAL,
+        RestConstants.COLLECTIONSCOPE_TYPE_MEDIA_CENTER,
         RestConstants.COLLECTIONSCOPE_ALL,
     ]
     public tabSelected:string = RestConstants.COLLECTIONSCOPE_MY;
@@ -84,6 +85,8 @@ export class CollectionsMainComponent {
         if(this.isGuest)
             pos-=2;
         if(!this.hasEditorial && pos>1)
+            pos--;
+        if(!this.hasMediacenter && pos>1)
             pos--;
         return pos;
     }
@@ -109,6 +112,7 @@ export class CollectionsMainComponent {
     public mainnav = true;
     private path : EduData.Node[];
     private hasEditorial = false;
+    private hasMediacenter = false;
     public isGuest = true;
     public addToOther:EduData.Node[];
     private showCollection=true;
@@ -186,6 +190,9 @@ export class CollectionsMainComponent {
                         this.isGuest=data.isGuest;
                         this.collectionService.getCollectionSubcollections(RestConstants.ROOT,RestConstants.COLLECTIONSCOPE_TYPE_EDITORIAL).subscribe((data)=>{
                             this.hasEditorial=data.collections.length>0;
+                        });
+                        this.collectionService.getCollectionSubcollections(RestConstants.ROOT,RestConstants.COLLECTIONSCOPE_TYPE_MEDIA_CENTER).subscribe((data)=>{
+                            this.hasMediacenter=data.collections.length>0;
                         });
                         this.initialize();
                     }else

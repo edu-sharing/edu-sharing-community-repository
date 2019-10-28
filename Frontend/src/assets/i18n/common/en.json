@@ -268,7 +268,8 @@
       "PUBLIC" : "public",
       "SHARED":"shared",
       "CUSTOM" : "custom",
-      "TYPE_EDITORIAL" : "editorial"
+      "TYPE_EDITORIAL" : "editorial",
+      "TYPE_MEDIA_CENTER" : "media center"
     }
   },
   "CREATE_NODE":{

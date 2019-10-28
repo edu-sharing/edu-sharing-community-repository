@@ -23,6 +23,7 @@
     <mat-tab *ngIf="!isGuest" label="{{'COLLECTIONS.TAB.MY' | translate}}"></mat-tab>
     <mat-tab *ngIf="!isGuest" label="{{'COLLECTIONS.TAB.EDU_GROUPS' | translate}}"></mat-tab>
     <mat-tab *ngIf="hasEditorial" label="{{'COLLECTIONS.TAB.TYPE_EDITORIAL' | translate}}"></mat-tab>
+    <mat-tab *ngIf="hasMediacenter" label="{{'COLLECTIONS.TAB.TYPE_MEDIA_CENTER' | translate}}"></mat-tab>
     <mat-tab label="{{'COLLECTIONS.TAB.EDU_ALL' | translate}}" (click)="tabSelected='EDU_ALL'"></mat-tab>
 </mat-tab-group>
 <!--

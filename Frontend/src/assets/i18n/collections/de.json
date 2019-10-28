@@ -26,11 +26,13 @@
       "DONE":"Fertig"
     },
     "TAB":{
-      "TYPE_EDITORIAL_LONG":" Redaktionell betreute Sammlungen",
+      "TYPE_EDITORIAL_LONG":"Redaktionell betreute Sammlungen",
+      "TYPE_MEDIA_CENTER_LONG":"Vom Medienzentrum bereitgestellte Sammlungen",
       "MY_LONG" : "Sammlungen, die von Ihnen erstellt wurden",
       "EDU_GROUPS_LONG" : "Sammlungen, die für Sie freigegeben wurden",
       "EDU_ALL_LONG" : "Alle Sammlungen, die öffentlich verfügbar sind",
       "TYPE_EDITORIAL":"Redaktionelle",
+      "TYPE_MEDIA_CENTER":"Medienzentrum",
       "MY" : "Meine",
       "EDU_GROUPS" : "Eingeladen",
       "EDU_ALL" : "Öffentlich",
@@ -50,7 +52,9 @@
       "EDITORIAL":"Redaktionelle Sammlung",
       "EDITORIAL_DESCRIPTION":"Hier sagt eine Redaktionsgruppe wo es lang geht und pflegt die Inhalte. Sie können an eine bestimmte Position festgepinnt werden.",
       "CURRICULUM":"Lehrplan-Sammlung",
-      "CURRICULUM_DESCRIPTION":"Erstellen Sie eine (moderierte) Sammlung gemäß vorgegebener Lehrplan-Strukturen"
+      "CURRICULUM_DESCRIPTION":"Erstellen Sie eine (moderierte) Sammlung gemäß vorgegebener Lehrplan-Strukturen",
+      "MEDIA_CENTER":"Medienzentrum",
+      "MEDIA_CENTER_DESCRIPTION":"Erstellen Sie eine Sammlung für Ihr Medienzentrum. Alle Nutzer, die an diesem Medienzentrum angeschlossen sind, finden diese Sammlung unter dem Reiter \"Medienzentrum\""
     },
     "PINNING":{
       "TITLE":"Gepinnte Sammlungen",

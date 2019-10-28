@@ -11,4 +11,7 @@ public class MediacenterServiceFactory {
 		}
 		return new MediacenterServiceImpl();
 	}
+	public static MediacenterService getLocalService(){
+		return new MediacenterServiceImpl();
+	}
 }

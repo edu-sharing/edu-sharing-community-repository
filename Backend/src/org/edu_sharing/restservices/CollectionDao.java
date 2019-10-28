@@ -45,6 +45,7 @@ public class CollectionDao {
 		EDU_ALL,
 		EDU_GROUPS,
 		TYPE_EDITORIAL,
+		TYPE_MEDIA_CENTER,
 		MY
 	}
 	

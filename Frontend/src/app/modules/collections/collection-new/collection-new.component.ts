@@ -7,7 +7,7 @@ import {Translation} from '../../../core-ui-module/translation';
 
 import * as EduData from "../../../core-module/core.module";
 
-import {RestCollectionService, ListItem, DialogButton} from "../../../core-module/core.module";
+import {RestCollectionService, ListItem, DialogButton, RestMediacenterService} from "../../../core-module/core.module";
 import {RestNodeService} from "../../../core-module/core.module";
 import {RestConstants} from "../../../core-module/core.module";
 import {RestHelper} from "../../../core-module/core.module";
@@ -60,6 +60,8 @@ export class CollectionNewComponent {
   public shareToAll: boolean;
   public createEditorial = false;
   public createCurriculum = false;
+  public createMediacenter = false;
+  public mediacenter:any;
   public parentId: any;
   public editId: any;
   public editorialGroups:Group[]=[];
@@ -107,6 +109,7 @@ export class CollectionNewComponent {
         private nodeService : RestNodeService,
         private connector : RestConnectorService,
         private iamService : RestIamService,
+        private mediacenterService : RestMediacenterService,
         private route:ActivatedRoute,
         private router: Router,
         private toast : Toast,
@@ -129,6 +132,12 @@ export class CollectionNewComponent {
             this.shareToAll=this.connector.hasToolPermissionInstant(RestConstants.TOOLPERMISSION_INVITE_ALLAUTHORITIES);
             this.createEditorial=this.connector.hasToolPermissionInstant(RestConstants.TOOLPERMISSION_COLLECTION_EDITORIAL);
             this.createCurriculum=this.connector.hasToolPermissionInstant(RestConstants.TOOLPERMISSION_COLLECTION_CURRICULUM);
+            this.mediacenterService.getMediacenters().subscribe((mediacenters)=>{
+              this.createMediacenter=mediacenters.filter((m)=>m.administrationAccess).length==1;
+              if(this.createMediacenter)
+                this.mediacenter=mediacenters[0];
+            })
+            this.createMediacenter=this.connector.hasToolPermissionInstant(RestConstants.TOOLPERMISSION_COLLECTION_CURRICULUM);
             this.authorFreetextAllowed=this.connector.hasToolPermissionInstant(RestConstants.TOOLPERMISSION_COLLECTION_CHANGE_OWNER);
 
             this.iamService.getUser().subscribe((user : IamUser) => this.user=user.person);
@@ -307,8 +316,8 @@ export class CollectionNewComponent {
           this.currentCollection.description="";
         this.currentCollection.title = this.currentCollection.title.trim();
         this.currentCollection.description = this.currentCollection.description.trim();
-        if(this.newCollectionType==RestConstants.COLLECTIONTYPE_EDITORIAL){
-          this.currentCollection.type=this.newCollectionType;
+        if(this.newCollectionType==RestConstants.COLLECTIONTYPE_EDITORIAL || this.newCollectionType==RestConstants.COLLECTIONTYPE_MEDIA_CENTER) {
+          this.currentCollection.type = this.newCollectionType;
         }
         else{
           this.currentCollection.type=RestConstants.COLLECTIONTYPE_DEFAULT;
@@ -370,6 +379,9 @@ export class CollectionNewComponent {
       }
       if(type==RestConstants.COLLECTIONSCOPE_CUSTOM || type==RestConstants.COLLECTIONTYPE_EDITORIAL){
         this.currentCollection.scope=RestConstants.COLLECTIONSCOPE_CUSTOM;
+      }
+      if(type==RestConstants.COLLECTIONTYPE_MEDIA_CENTER){
+        this.switchToAuthorFreetext();
       }
       this.updateAvailableSteps();
       this.goToNextStep();
@@ -496,7 +508,7 @@ export class CollectionNewComponent {
   }
 
   private getTypeForCollection(collection: Collection) {
-    if(collection.type==RestConstants.GROUP_TYPE_EDITORIAL){
+    if(collection.type==RestConstants.COLLECTIONTYPE_EDITORIAL || collection.type==RestConstants.COLLECTIONTYPE_MEDIA_CENTER){
       return collection.type;
     }
     if(collection.scope==RestConstants.COLLECTIONSCOPE_MY && !this.canInvite){
@@ -591,7 +603,9 @@ export class CollectionNewComponent {
 
   switchToAuthorFreetext() {
     this.authorFreetext=true;
-    this.currentCollection.authorFreetext=new AuthorityNamePipe(this.translationService).transform(this.user,null);
+    this.currentCollection.authorFreetext=new AuthorityNamePipe(this.translationService).transform(
+        this.newCollectionType==RestConstants.COLLECTIONTYPE_MEDIA_CENTER || this.currentCollection.type==RestConstants.COLLECTIONTYPE_MEDIA_CENTER ?
+            this.mediacenter : this.user,null);
   }
 
   cancelAuthorFreetext() {
