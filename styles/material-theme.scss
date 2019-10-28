@@ -106,11 +106,19 @@ $candy-app-theme: mat-light-theme($candy-app-primary, $candy-app-accent, $candy-
   top: 0.4em!important;
   left: -0.1em;
 }
+.mat-form-field.mat-form-field-no-padding{
+      .mat-form-field-wrapper {
+        padding-bottom: 0;
+      }
+}
 // form border on hover
 .mat-form-field-appearance-outline .mat-form-field-outline-thick{
   color:$primaryMediumLight;
 }
 .mat-form-field-bright{
+  input,textarea {
+    caret-color: $primaryLight;
+  }
   .mat-form-field-outline,
   .mat-form-field-label{
     color: rgba(255,255,255,0.5);
