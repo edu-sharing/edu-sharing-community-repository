@@ -375,6 +375,7 @@ public class CollectionDao {
 		result.setY(collection.getY());
 		result.setZ(collection.getZ());
 		result.setPinned(collection.isPinned());
+		result.setAuthorFreetext(collection.getAuthorFreetext());
 		
 		if (collection.getRef() != null) {
 			
@@ -446,6 +447,7 @@ public class CollectionDao {
 		result.setY(collection.getY());
 		result.setZ(collection.getZ());
 		result.setPinned(collection.isPinned());
+		result.setAuthorFreetext(collection.getAuthorFreetext());
 
 		result.setScope(collection.getScope());
 

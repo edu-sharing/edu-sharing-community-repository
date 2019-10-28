@@ -1616,6 +1616,10 @@
 				<property name="ccm:collectionordermode">
 					<type>d:text</type>
 				</property>
+				<!-- freetext author info -->
+				<property name="ccm:collection_author_freetext">
+					<type>d:text</type>
+				</property>
 			</properties>
 		</aspect>
 		<aspect name="ccm:collection_pinned">

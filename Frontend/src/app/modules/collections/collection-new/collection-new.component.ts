@@ -31,6 +31,7 @@ import {RegisterResetPasswordComponent} from "../../register/register-reset-pass
 import {MainNavComponent} from '../../../common/ui/main-nav/main-nav.component';
 import {UIHelper} from "../../../core-ui-module/ui-helper";
 import {GlobalContainerComponent} from "../../../common/ui/global-container/global-container.component";
+import {AuthorityNamePipe} from "../../../core-ui-module/pipes/authority-name.pipe";
 
 // component class
 @Component({
@@ -88,6 +89,8 @@ export class CollectionNewComponent {
 
   @ViewChild('file') imageFileRef : ElementRef;
   buttons: DialogButton[];
+  authorFreetext=false;
+  authorFreetextAllowed=false;
 
   @HostListener('document:keydown', ['$event'])
   handleKeyboardEvent(event: KeyboardEvent) {
@@ -122,10 +125,12 @@ export class CollectionNewComponent {
               });
               return;
             }
-            this.connector.hasToolPermission(RestConstants.TOOLPERMISSION_INVITE).subscribe((has:boolean)=>this.canInvite=has);
-            this.connector.hasToolPermission(RestConstants.TOOLPERMISSION_INVITE_ALLAUTHORITIES).subscribe((has)=>this.shareToAll=has);
-            this.connector.hasToolPermission(RestConstants.TOOLPERMISSION_COLLECTION_EDITORIAL).subscribe((has)=>this.createEditorial=has);
-            this.connector.hasToolPermission(RestConstants.TOOLPERMISSION_COLLECTION_CURRICULUM).subscribe((has)=>this.createCurriculum=has);
+            this.canInvite=this.connector.hasToolPermissionInstant(RestConstants.TOOLPERMISSION_INVITE);
+            this.shareToAll=this.connector.hasToolPermissionInstant(RestConstants.TOOLPERMISSION_INVITE_ALLAUTHORITIES);
+            this.createEditorial=this.connector.hasToolPermissionInstant(RestConstants.TOOLPERMISSION_COLLECTION_EDITORIAL);
+            this.createCurriculum=this.connector.hasToolPermissionInstant(RestConstants.TOOLPERMISSION_COLLECTION_CURRICULUM);
+            this.authorFreetextAllowed=this.connector.hasToolPermissionInstant(RestConstants.TOOLPERMISSION_COLLECTION_CHANGE_OWNER);
+
             this.iamService.getUser().subscribe((user : IamUser) => this.user=user.person);
             this.route.queryParams.subscribe(params => {
               this.mainnav=params['mainnav']!='false';
@@ -144,6 +149,7 @@ export class CollectionNewComponent {
                       this.editorialGroupsSelected=this.getEditoralGroups(perm.permissions.localPermissions.permissions);
                       this.editId=id;
                       this.currentCollection=data.collection;
+                      this.authorFreetext=this.currentCollection.authorFreetext!=null;
                       this.originalPermissions=perm.permissions.localPermissions;
                       this.properties=node.node.properties;
                       this.newCollectionType=this.getTypeForCollection(this.currentCollection);
@@ -582,4 +588,14 @@ export class CollectionNewComponent {
             new DialogButton(this.isLastStep() ? 'SAVE' : 'NEXT',DialogButton.TYPE_PRIMARY,()=>this.goToNextStep())
         ]
     }
+
+  switchToAuthorFreetext() {
+    this.authorFreetext=true;
+    this.currentCollection.authorFreetext=new AuthorityNamePipe(this.translationService).transform(this.user,null);
+  }
+
+  cancelAuthorFreetext() {
+    this.authorFreetext=false;
+    this.currentCollection.authorFreetext=null;
+  }
 }

@@ -133,12 +133,20 @@
                                 ></textarea>
                   </mat-form-field>
             </div>
-              <div class="collection-new-owner">
-                  <i icon iconId="person" class="icon-bottom"></i> {{user | authorityName}}</div>
+            <div class="collection-new-owner" *ngIf="!authorFreetext">
+                <i icon iconId="person"></i>
+                <span>{{user | authorityName}}</span>
+                <button mat-icon-button *ngIf="authorFreetextAllowed" (click)="switchToAuthorFreetext()"><i icon iconId="edit"></i></button>
+            </div>
+            <div class="collection-new-owner" *ngIf="authorFreetext">
+                <i icon iconId="person"></i>
+                <mat-form-field class="mat-form-field-no-padding" [class.mat-form-field-bright]="!isBrightColor()">
+                    <mat-label>{{'COLLECTIONS.NEW.AUTHOR_FREETEXT' | translate }}</mat-label>
+                    <input matInput [(ngModel)]="currentCollection.authorFreetext">
+                </mat-form-field>
+                <button mat-icon-button (click)="cancelAuthorFreetext()"><i icon iconId="close"></i></button>
+            </div>
 
-          </div>
-
-          <div>
               <div class="dialog-basic-area dialog-color-group">
                   <div class="collection-new-preview-infoline">
                       {{ 'collectionNew_setColor' | translate }}

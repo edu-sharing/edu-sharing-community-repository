@@ -798,6 +798,8 @@ public class CCConstants {
 
 	public final static String CCM_VALUE_TOOLPERMISSION_CONNECTOR_PREFIX = "TOOLPERMISSION_CONNECTOR_";
 
+	public final static String CCM_VALUE_TOOLPERMISSION_COLLECTION_CHANGE_OWNER = "TOOLPERMISSION_COLLECTION_CHANGE_OWNER";
+
 	public final static String CCM_VALUE_TOOLPERMISSION_COLLECTION_EDITORIAL = "TOOLPERMISSION_COLLECTION_EDITORIAL";
 
 	public final static String CCM_VALUE_TOOLPERMISSION_COLLECTION_CURRICULUM = "TOOLPERMISSION_COLLECTION_CURRICULUM";
@@ -1130,6 +1132,8 @@ public class CCConstants {
 	public final static String CCM_PROP_MAP_COLLECTIONCOLOR = "{http://www.campuscontent.de/model/1.0}collectioncolor";
 
 	public final static String CCM_PROP_MAP_COLLECTIONVIEWTYPE = "{http://www.campuscontent.de/model/1.0}collectionviewtype";
+
+	public final static String CCM_PROP_MAP_COLLECTION_AUTHOR_FREETEXT = "{http://www.campuscontent.de/model/1.0}collection_author_freetext";
 
 	public final static String CCM_PROP_MAP_COLLECTIONTYPE = "{http://www.campuscontent.de/model/1.0}collectiontype";
 	public final static String CCM_PROP_MAP_COLLECTIONSCOPE = "{http://www.campuscontent.de/model/1.0}collectionscope";

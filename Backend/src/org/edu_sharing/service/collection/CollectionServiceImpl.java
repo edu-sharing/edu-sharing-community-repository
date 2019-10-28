@@ -29,7 +29,6 @@ import org.alfresco.service.transaction.TransactionService;
 import org.apache.log4j.Logger;
 import org.apache.lucene.queryParser.QueryParser;
 import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
-import org.edu_sharing.metadataset.v2.MetadataReaderV2;
 import org.edu_sharing.metadataset.v2.MetadataSetV2;
 import org.edu_sharing.metadataset.v2.tools.MetadataHelper;
 import org.edu_sharing.repository.client.rpc.ACE;
@@ -66,11 +65,11 @@ import org.edu_sharing.service.search.SearchServiceFactory;
 import org.edu_sharing.service.search.model.SearchToken;
 import org.edu_sharing.service.search.model.SortDefinition;
 import org.edu_sharing.service.toolpermission.ToolPermissionException;
+import org.edu_sharing.service.toolpermission.ToolPermissionHelper;
 import org.edu_sharing.service.toolpermission.ToolPermissionService;
 import org.edu_sharing.service.toolpermission.ToolPermissionServiceFactory;
 import org.edu_sharing.service.usage.Usage;
 import org.edu_sharing.service.usage.Usage2Service;
-import org.edu_sharing.webservices.alfresco.extension.Search;
 import org.springframework.context.ApplicationContext;
 
 
@@ -588,6 +587,10 @@ public class CollectionServiceImpl implements CollectionService{
 		props.put(CCConstants.CCM_PROP_MAP_COLLECTIONTYPE, collection.getType());
 		props.put(CCConstants.CCM_PROP_MAP_COLLECTIONVIEWTYPE, collection.getViewtype());
 		props.put(CCConstants.CCM_PROP_MAP_COLLECTIONLEVEL0, collection.isLevel0());
+		if(collection.getAuthorFreetext()!=null && !collection.getAuthorFreetext().isEmpty()) {
+			ToolPermissionHelper.throwIfToolpermissionMissing(CCConstants.CCM_VALUE_TOOLPERMISSION_COLLECTION_CHANGE_OWNER);
+			props.put(CCConstants.CCM_PROP_MAP_COLLECTION_AUTHOR_FREETEXT, collection.getAuthorFreetext());
+		}
 		return props;
 	}
 	
@@ -612,6 +615,7 @@ public class CollectionServiceImpl implements CollectionService{
 		collection.setViewtype((String)props.get(CCConstants.CCM_PROP_MAP_COLLECTIONVIEWTYPE));		
 		collection.setScope((String)props.get(CCConstants.CCM_PROP_MAP_COLLECTIONSCOPE));		
 		collection.setOrderMode((String)props.get(CCConstants.CCM_PROP_MAP_COLLECTION_ORDER_MODE));		
+		collection.setAuthorFreetext((String)props.get(CCConstants.CCM_PROP_MAP_COLLECTION_AUTHOR_FREETEXT));
 		if(props.containsKey(CCConstants.CCM_PROP_COLLECTION_PINNED_STATUS))
 			collection.setPinned(new Boolean((String)props.get(CCConstants.CCM_PROP_COLLECTION_PINNED_STATUS)));
 		

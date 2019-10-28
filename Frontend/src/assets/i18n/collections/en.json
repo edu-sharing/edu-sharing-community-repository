@@ -85,6 +85,9 @@
       "EDIT":"Edit",
       "PIN":"Pin collection",
       "DELETE":"Delete collection"
+    },
+    "NEW": {
+      "AUTHOR_FREETEXT": "Name of author"
     }
   },
 
@@ -101,7 +104,7 @@
   "collectionNew_createCollection" : "create",
   "collectionNew_storeChanges" : "save changes",
 
-  "collectionNew_placeholderTitle" : "title of your collection ...",
+  "collectionNew_placeholderTitle" : "title of your collection",
   "collectionNew_placeholderDescription" : "Whats is your collection about?"
 
 }

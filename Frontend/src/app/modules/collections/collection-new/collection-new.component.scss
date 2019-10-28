@@ -174,7 +174,15 @@ $imagePath: '../../../../assets/images/collections/';
     padding-bottom: 0;
   }
   .collection-new-owner{
-    padding-left: $cardPadding;
+    display: flex;
+    align-items: center;
+    padding: 0 $cardPadding;
+    >i{
+      margin:5px;
+    }
+    >span{
+      flex-grow: 1;
+    }
   }
   .color-group{
     display: flex;
@@ -258,8 +266,8 @@ $imagePath: '../../../../assets/images/collections/';
 }
 
 .collection-new-preview-infoline {
+    opacity: 0.75;
     margin-bottom: 10px;
-    color: $textLight;
 }
 
 .collection-nocontent-big {

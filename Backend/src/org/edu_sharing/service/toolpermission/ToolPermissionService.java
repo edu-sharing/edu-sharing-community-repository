@@ -30,10 +30,7 @@ import org.edu_sharing.service.connector.Connector;
 import org.edu_sharing.service.connector.ConnectorList;
 import org.edu_sharing.service.connector.ConnectorService;
 import org.edu_sharing.service.connector.ConnectorServiceFactory;
-import org.edu_sharing.service.nodeservice.NodeServiceFactory;
 import org.springframework.context.ApplicationContext;
-
-import com.sun.java.accessibility.util.TopLevelWindowListener;
 
 import net.sf.acegisecurity.AuthenticationCredentialsNotFoundException;
 
@@ -344,6 +341,7 @@ public class ToolPermissionService {
 		toInit.add(CCConstants.CCM_VALUE_TOOLPERMISSION_WORKSPACE);
 		toInit.add(CCConstants.CCM_VALUE_TOOLPERMISSION_CONFIDENTAL);
 
+		toInit.add(CCConstants.CCM_VALUE_TOOLPERMISSION_COLLECTION_CHANGE_OWNER);
 		toInit.add(CCConstants.CCM_VALUE_TOOLPERMISSION_COLLECTION_EDITORIAL);
 		toInit.add(CCConstants.CCM_VALUE_TOOLPERMISSION_COLLECTION_CURRICULUM);
 		toInit.add(CCConstants.CCM_VALUE_TOOLPERMISSION_COLLECTION_PINNING);

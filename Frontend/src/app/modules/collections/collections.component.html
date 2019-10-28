@@ -234,7 +234,10 @@
     </div>
 
     <div class="collection-new-preview-infoline">
-      <i class="material-icons icon-bottom">person</i> {{collectionContent.collection.owner.profile.firstName}} {{collectionContent.collection.owner.profile.lastName}}</div>
+      <i class="material-icons icon-bottom">person</i>
+        <span *ngIf="!collectionContent.collection.authorFreetext">{{collectionContent.collection.owner | authorityName}}</span>
+        <span *ngIf="collectionContent.collection.authorFreetext">{{collectionContent.collection.authorFreetext}}</span>
+    </div>
 
     <div
       class="collection-new-preview-infoline">

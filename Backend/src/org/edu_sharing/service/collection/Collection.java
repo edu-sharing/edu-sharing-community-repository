@@ -20,8 +20,9 @@ public class Collection {
 	int childReferencesCount;
 	
 	User owner;
-	
-	
+	private String authorFreetext;
+
+
 	public boolean isLevel0() {
 		return level0;
 	}
@@ -152,6 +153,13 @@ public class Collection {
 	public void setOrderMode(String orderMode) {
 		this.orderMode = orderMode;
 	}
-	
 
+
+    public String getAuthorFreetext() {
+        return authorFreetext;
+    }
+
+    public void setAuthorFreetext(String authorFreetext) {
+        this.authorFreetext = authorFreetext;
+    }
 }

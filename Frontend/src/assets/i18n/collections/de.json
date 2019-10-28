@@ -85,6 +85,9 @@
       "EDIT":"Bearbeiten",
       "PIN":"Sammlung pinnen",
       "DELETE":"Sammlung löschen"
+    },
+    "NEW": {
+      "AUTHOR_FREETEXT": "Bezeichnung des Autors"
     }
   },
 
@@ -103,7 +106,7 @@
     "collectionNew_createCollection" : "erstellen",
     "collectionNew_storeChanges" : "speichern",
 
-    "collectionNew_placeholderTitle" : "Titel Ihrer Sammlung...",
+    "collectionNew_placeholderTitle" : "Titel Ihrer Sammlung",
     "collectionNew_placeholderDescription" : "Worum geht es in Ihrer Sammlung?"
 
 

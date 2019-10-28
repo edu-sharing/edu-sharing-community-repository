@@ -20,7 +20,8 @@ public class CollectionBase {
 	private Preview preview;
 
 	private String scope;
-	
+	private String authorFreetext;
+
 	/**
 	   **/
 		@ApiModelProperty(required = true, value = "")
@@ -65,4 +66,12 @@ public class CollectionBase {
 				public void setPreview(Preview preview) {
 					this.preview = preview;
 				}
+
+    public String getAuthorFreetext() {
+        return authorFreetext;
+    }
+
+    public void setAuthorFreetext(String authorFreetext) {
+        this.authorFreetext = authorFreetext;
+    }
 }
