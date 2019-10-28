@@ -403,15 +403,21 @@ export class CollectionsMainComponent{
         return false;
       if(event.target.ref.id==this.collectionContent.collection.ref.id)
         return false;
-      // do not allow to move anything else than editorial collections into editorial collections
-      if(      event.source.type==RestConstants.COLLECTIONTYPE_EDITORIAL && event.target.type!=RestConstants.COLLECTIONTYPE_EDITORIAL
-            || event.source.type!=RestConstants.COLLECTIONTYPE_EDITORIAL && event.target.type==RestConstants.COLLECTIONTYPE_EDITORIAL)
-          return false;
-      if(event.source.reference && event.source[0].access && event.source[0].access.indexOf(RestConstants.ACCESS_CC_PUBLISH)==-1)
+      // in case it's via breadcrums, unmarshall the collection item
+      if(event.target.collection)
+          event.target=event.target.collection;
+      console.log(event.source,event.target);
+      // do not allow to move anything else than editorial collections into editorial collections (if the source is a collection)
+      if(event.source[0].hasOwnProperty('childCollectionsCount')) {
+          if (event.source[0].type == RestConstants.COLLECTIONTYPE_EDITORIAL && event.target.type != RestConstants.COLLECTIONTYPE_EDITORIAL
+              || event.source[0].type != RestConstants.COLLECTIONTYPE_EDITORIAL && event.target.type == RestConstants.COLLECTIONTYPE_EDITORIAL)
+              return false;
+      }
+
+      if(event.source[0].reference && !NodeHelper.getNodesRight(event.source[0], RestConstants.ACCESS_CC_PUBLISH,NodesRightMode.Original))
         return false;
-      if(!event.source.reference && event.source[0].access && event.source[0].access.indexOf(RestConstants.ACCESS_WRITE)==-1)
-        return false;
-      if(event.target.access && event.target.access.indexOf(RestConstants.ACCESS_WRITE)==-1)
+
+      if(!NodeHelper.getNodesRight(event.target, RestConstants.ACCESS_WRITE,NodesRightMode.Local))
         return false;
 
       return true;
