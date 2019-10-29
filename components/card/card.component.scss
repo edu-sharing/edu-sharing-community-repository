@@ -124,7 +124,7 @@
         @include content();
       }
       .card-content-header{
-        max-height: calc(100vh - #{$titleHeight} - #{$actionMenuHeight});
+        max-height: calc(100vh - #{$titleHeight});
       }
       &.height-small mat-card-content {
         height: $height-small - $titleHeight;
@@ -166,6 +166,18 @@
         height: $height-xxlarge - $titleHeight - $actionMenuHeight - $tabHeight;
       }
     }
+    /*
+      move a non-modal card downwards to center it below the main-nav
+     */
+    &:not(.card-modal){
+      margin-top: $mainnavHeight;
+      .card-content-header{
+        max-height: calc(100vh - #{$titleHeight} - #{$actionMenuHeight} - #{$mainnavHeight} - #{$nonModalPadding});
+      }
+      &.card-no-buttons .card-content-header{
+        max-height: calc(100vh - #{$titleHeight} - #{$mainnavHeight} - #{$nonModalPadding});
+      }
+    }
     .card-content-padding{
       padding: $cardPadding;
     }
@@ -199,13 +211,19 @@
 
   @media screen and (max-width: $mobileTabSwitchWidth){
     .mat-card:not(.card-modal){
+      margin-top: 0;
       /*position: fixed;
       top: $mainnavHeight;
       bottom: $mainnavHeight + $mobileTabNavHeight;
       */
       &:not(.card-tabbed) {
         mat-card-content {
-          max-height: calc(100vh - #{$titleHeight} - #{$actionMenuHeight} - #{$mobileTabNavHeight * 2});
+          max-height: calc(100vh - #{$titleHeight} - #{$actionMenuHeight} - #{$mainnavHeight} - #{$mobileTabNavHeight * 2});
+        }
+      }
+      &.card-no-buttons{
+        .card-content-header {
+          max-height: calc(100vh - #{$titleHeight} - #{$mainnavHeight} - #{$mobileTabNavHeight * 2});
         }
       }
     }
