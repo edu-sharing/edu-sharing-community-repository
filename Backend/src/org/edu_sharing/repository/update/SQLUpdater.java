@@ -3,6 +3,7 @@ package org.edu_sharing.repository.update;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
+import java.nio.charset.StandardCharsets;
 import java.sql.Connection;
 import java.util.HashMap;
 
@@ -82,15 +83,16 @@ public class SQLUpdater extends UpdateAbstract {
 		
 		ConnectionDBAlfresco dbAlf = new ConnectionDBAlfresco();
 		Connection connection = dbAlf.getConnection();
+		connection.setAutoCommit(false);
 		ScriptRunner scriptRunner = new ScriptRunner(connection);
 		
 		InputStream is = this.getClass().getClassLoader().getResourceAsStream(script);
-		scriptRunner.setAutoCommit(true);
 		scriptRunner.setSendFullScript(true);
 		//scriptRunner.setEscapeProcessing(true);
 		scriptRunner.setStopOnError(true);
 		scriptRunner.setErrorLogWriter(new PrintWriter(System.out));
-		scriptRunner.runScript(new InputStreamReader(is,"UTF8"));
+		scriptRunner.runScript(new InputStreamReader(is, StandardCharsets.UTF_8));
+		connection.commit();
 	
 		dbAlf.cleanUp(connection);
 	}
