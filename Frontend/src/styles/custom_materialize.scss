@@ -128,8 +128,10 @@ select{
   width:100%;
 }
 textarea.materialize-textarea{
-  padding: 0.75em;
-  width: calc(100% - 1.65em);
+  &:not(.mat-input-element) {
+    padding: 0.75em;
+    width: calc(100% - 1.65em);
+  }
 }
 
 input[type=checkbox]+label,
