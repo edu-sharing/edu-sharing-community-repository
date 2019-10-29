@@ -489,6 +489,7 @@ export class PermissionsAuthoritiesComponent {
           this.edit = Helper.deepCopy(user.person);
           this.edit.profile.sizeQuota=user.person.quota.sizeQuota/1024/1024;
           this.editId = this.edit.authorityName;
+          this.primaryAffiliationList=this.edit.profile.primaryAffiliation ? this.PRIMARY_AFFILIATIONS.indexOf(this.edit.profile.primaryAffiliation)!=-1 : true;
       });
     }
     else {
