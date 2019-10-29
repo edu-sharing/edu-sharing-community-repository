@@ -92,7 +92,11 @@
                 <option *ngFor="let a of PRIMARY_AFFILIATIONS" [value]="a">{{('USER.PRIMARY_AFFILIATION.'+a) | translate}}</option>
               </select>
               <input *ngIf="!primaryAffiliationList" type="text" id="primaryAffiliation" name="primaryAffiliation" [(ngModel)]="edit.profile.primaryAffiliation">
-              <div class="btn-flat" (click)="primaryAffiliationList=!primaryAffiliationList"><i class="material-icons">{{ primaryAffiliationList ? 'edit' : 'list'}}</i></div>
+              <div class="btn-flat" (click)="primaryAffiliationList=!primaryAffiliationList">
+                <i class="material-icons">{{ primaryAffiliationList ? 'edit' : 'list'}}</i>
+                <span *ngIf="primaryAffiliationList">{{'PERMISSIONS.USER_AFFILIATION_FREETEXT' | translate}}</span>
+                <span *ngIf="!primaryAffiliationList">{{'PERMISSIONS.USER_AFFILIATION_LIST' | translate}}</span>
+              </div>
             </div>
             <div *ngIf="!editId">
               <label for="password">{{'USER.password' | translate}}</label>

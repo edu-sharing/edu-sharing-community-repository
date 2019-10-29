@@ -37,6 +37,8 @@
     "GROUP_CREATED":"Gruppe erstellt",
     "ORG_CREATED":"Organisation erstellt",
     "USER_CREATED":"Nutzer erstellt",
+    "USER_AFFILIATION_FREETEXT": "eigene Bezeichnung",
+    "USER_AFFILIATION_LIST": "Rolle wählen",
     "ORG_CREATING":"Organisation erstellen...",
     "ORG_CREATING_INFO":"Die Organisationsstruktur wird initalisiert. Dieser Vorgang dauert einige Zeit. Bitte haben Sie einen Moment Geduld...",
     "EDIT_USER":"Nutzer bearbeiten",
