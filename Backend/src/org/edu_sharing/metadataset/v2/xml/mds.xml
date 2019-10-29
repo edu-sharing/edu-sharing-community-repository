@@ -580,6 +580,15 @@
 					<cclom:general_keyword>
 				]]></html>
 			</template>
+			<template>
+				<id>collection_media_center</id>
+				<caption>collection_media_center</caption>
+				<html><![CDATA[
+					<ccm:taxonid>
+					<ccm:educationalcontext>
+					<cclom:general_keyword>
+				]]></html>
+			</template>
 		</templates>
 		<groups>
 			<group>
@@ -604,6 +613,12 @@
 				<id>collection_editorial</id>
 				<views>
 					<view>collection_editorial</view>
+				</views>
+			</group>
+			<group>
+				<id>collection_media_center</id>
+				<views>
+					<view>collection_media_center</view>
 				</views>
 			</group>
 			<group>

@@ -389,16 +389,16 @@ export class CollectionNewComponent {
     public getAvailableSteps():string[]{
       let steps:string[]=[];
       steps.push(this.STEP_GENERAL);
-      if(this.newCollectionType=='EDITORIAL'){
+      if(this.newCollectionType==RestConstants.COLLECTIONTYPE_EDITORIAL || this.newCollectionType==RestConstants.COLLECTIONTYPE_MEDIA_CENTER){
         steps.push(this.STEP_METADATA);
       }
-      if(this.newCollectionType=='CUSTOM' && this.canInvite){
+      if(this.newCollectionType==RestConstants.COLLECTIONSCOPE_CUSTOM && this.canInvite){
         steps.push(this.STEP_PERMISSIONS);
       }
-      if(this.newCollectionType=='EDITORIAL'){
+      if(this.newCollectionType==RestConstants.COLLECTIONTYPE_EDITORIAL){
         //steps.push(this.STEP_SETTINGS);
       }
-      if(this.newCollectionType=='EDITORIAL' && this.canInvite){
+      if(this.newCollectionType==RestConstants.COLLECTIONTYPE_EDITORIAL && this.canInvite){
         steps.push(this.STEP_EDITORIAL_GROUPS);
       }
       return steps;
@@ -470,7 +470,7 @@ export class CollectionNewComponent {
       });
     }
   private save2(collection: Collection) {
-    if(this.newCollectionType==RestConstants.GROUP_TYPE_EDITORIAL){
+    if(this.newCollectionType==RestConstants.COLLECTIONTYPE_EDITORIAL || this.newCollectionType==RestConstants.COLLECTIONTYPE_MEDIA_CENTER){
       this.nodeService.AddNodeAspects(collection.ref.id,[RestConstants.CCM_ASPECT_LOMREPLICATION,RestConstants.CCM_ASPECT_CCLOM_GENERAL]).subscribe(()=> {
         this.nodeService.editNodeMetadata(collection.ref.id, this.properties).subscribe(() => {
           this.save3(collection);
