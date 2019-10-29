@@ -302,7 +302,7 @@
     "firstName" : "first name",
     "lastName" : "family name",
     "email" : "e-mail",
-    "primaryAffiliation": "Primary affiliation",
+    "primaryAffiliation": "Primary role",
     "password" : "password",
     "sizeQuota" : "Quota size in MB",
     "PRIMARY_AFFILIATION": {
