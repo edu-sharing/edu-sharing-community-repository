@@ -601,7 +601,9 @@ public class ApplicationInfo implements Comparable<ApplicationInfo>{
 	}
 
 	public String getAuthenticationwebservice() {
-		
+		if(authenticationwebservice==null || authenticationwebservice.isEmpty())
+			return getWebServiceHotUrl()+"/authentication";
+
 		return authenticationwebservice;
 	}
 
@@ -728,7 +730,9 @@ public class ApplicationInfo implements Comparable<ApplicationInfo>{
 	}
 
 	public String getWshotpath() {
-		
+		if(wshotpath==null || wshotpath.isEmpty()){
+			return "/edu-sharing/services/";
+		}
 		return wshotpath;
 	}
 
@@ -911,5 +915,12 @@ public class ApplicationInfo implements Comparable<ApplicationInfo>{
 	@Override
 	public int compareTo(ApplicationInfo o) {
 		return Integer.compare(getOrder(), o.getOrder());
+	}
+
+	/**
+	 * returns true if the given app is describing a remote alfresco (edu-sharing) instance
+	 */
+	public boolean isRemoteAlfresco() {
+		return REPOSITORY_TYPE_ALFRESCO.equals(getRepositoryType()) && TYPE_REPOSITORY.equals(getType());
 	}
 }

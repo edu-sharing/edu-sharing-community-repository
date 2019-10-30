@@ -231,7 +231,11 @@ public class RenderingProxy extends HttpServlet {
 						 *make sure that the remote user exists
 						 */
 						if(RepoProxyFactory.getRepoProxy().myTurn(rep_id)) {
-							RepoProxyFactory.getRepoProxy().remoteAuth(remoteRepo,false);
+							try {
+								RepoProxyFactory.getRepoProxy().remoteAuth(remoteRepo,false);
+							} catch (Throwable t) {
+								logger.error("Remote user auth failed",t);
+							}
 						}
 					
 						

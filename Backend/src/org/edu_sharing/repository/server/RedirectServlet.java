@@ -288,12 +288,7 @@ public class RedirectServlet extends HttpServlet implements SingleThreadModel {
 		resp.sendRedirect(redirectUrl);
 
 	}
-
-	private boolean isExternalRepository(String toLmsUrl,ApplicationInfo repInfo) {
-		return toLmsUrl != null && !toLmsUrl.trim().equals("") && !repInfo.ishomeNode() && repInfo.getRepositoryType() != null
-				&& !repInfo.getRepositoryType().trim().equals("") && !repInfo.getRepositoryType().equals(ApplicationInfo.REPOSITORY_TYPE_ALFRESCO);
-	}
-
+	
 	private String setUrlParameters(String appId, String nodeId, ApplicationInfo repInfo, String redirectUrl)
 			throws Throwable {
 		NodeService nodeService = NodeServiceFactory.getNodeService(appId);

@@ -735,11 +735,11 @@ public class NodeApi  {
 	    @ApiParam(value = RestConstants.MESSAGE_PROPERTY_FILTER, defaultValue="-all-" ) @QueryParam("propertyFilter") List<String> propertyFilter,
 		@Context HttpServletRequest req) {
 
-    	if(RepoProxyFactory.getRepoProxy().myTurn(repository)) {
-    		return RepoProxyFactory.getRepoProxy().getChildren(repository, node, maxItems, skipCount, filter, sortProperties, sortAscending, assocName, propertyFilter, req);
-    	}
-    	
     	try {
+			if(RepoProxyFactory.getRepoProxy().myTurn(repository)) {
+				return RepoProxyFactory.getRepoProxy().getChildren(repository, node, maxItems, skipCount, filter, sortProperties, sortAscending, assocName, propertyFilter, req);
+			}
+
     		Filter propFilter = new Filter(propertyFilter);
     		
 	    	RepositoryDao repoDao = RepositoryDao.getRepository(repository);

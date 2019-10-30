@@ -36,6 +36,7 @@ import javax.servlet.http.HttpSession;
 
 import org.alfresco.repo.node.MLPropertyInterceptor;
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
+import org.apache.catalina.tribes.membership.McastServiceImpl;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.edu_sharing.metadataset.v2.MetadataReaderV2;
@@ -181,12 +182,18 @@ public class RepoFactory {
 			logger.debug("returning " + result.getClass().getSimpleName());
 			return result;
 		} else {
-			logger.debug("getting MCBaseClient by REFLECTION for " + repositoryId);
-			String classname = repInfo.getSearchclass();
-			Class clazz = Class.forName(classname);
-			Object obj = clazz.getConstructor(new Class[] { String.class, HashMap.class }).newInstance(new Object[] { repInfo.getAppFile(), authInfo });
-			
-			MCBaseClient mcBaseClient = (MCBaseClient) obj;
+			MCBaseClient mcBaseClient;
+			if(repInfo.isRemoteAlfresco()){
+				mcBaseClient = new MCAlfrescoAPIClient(repInfo.getAppFile(),authInfo);
+			}
+			else {
+				logger.debug("getting MCBaseClient by REFLECTION for " + repositoryId);
+				String classname = repInfo.getSearchclass();
+				Class clazz = Class.forName(classname);
+				Object obj = clazz.getConstructor(new Class[]{String.class, HashMap.class}).newInstance(new Object[]{repInfo.getAppFile(), authInfo});
+
+				mcBaseClient = (MCBaseClient) obj;
+			}
 			appClassCache.put(repositoryId, mcBaseClient);
 			logger.debug("returning " + mcBaseClient.getClass().getSimpleName());
 

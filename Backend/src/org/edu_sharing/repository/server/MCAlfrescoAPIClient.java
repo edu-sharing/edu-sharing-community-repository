@@ -1372,19 +1372,13 @@ public class MCAlfrescoAPIClient extends MCAlfrescoBaseClient {
 				logger.error("No ApplicationInfo found for Repository:" + remoteRepository + " and remoteNodeId:" + remoteNodeId);
 				return null;
 			}
-			else if(remoteRepInfo.getRepositoryType().equals(remoteRepInfo.REPOSITORY_TYPE_ALFRESCO)){
+			else if(remoteRepInfo.isRemoteAlfresco()){
 				AuthenticatorRemoteRepository arr = new AuthenticatorRemoteRepository();
 				// when repository got no Authentication
 				HashMap<String, String> remoteAuthInfo = null;
 				if (remoteRepInfo.getAuthenticationwebservice() != null && !remoteRepInfo.getAuthenticationwebservice().equals("")) {
-					try {
-						AuthenticatorRemoteAppResult arar = arr.getAuthInfoForApp(authenticationInfo, remoteRepInfo);
-	
-						remoteAuthInfo = arar.getAuthenticationInfo();
-					} catch (Throwable e) {
-						logger.error("It seems that repository id:" + remoteRepInfo.getAppId() + "+ is not reachable:" + e.getMessage());
-						return null;
-					}
+					AuthenticatorRemoteAppResult arar = arr.getAuthInfoForApp(authenticationInfo, remoteRepInfo);
+					remoteAuthInfo = arar.getAuthenticationInfo();
 				} else {
 					// TODO check if that is right
 					remoteAuthInfo = authenticationInfo;
