@@ -728,14 +728,15 @@ public class AdminServiceImpl implements AdminService  {
 	}
 	
 	@Override
-	public void removeDeletedImports(String oaiBaseUrl, String cataloges, String oaiMetadataPrefix) throws Exception{			
+	public void removeDeletedImports(String oaiBaseUrl, String cataloges, String oaiMetadataPrefix) throws Exception{
 		HashMap<String,Object> paramsMap = new HashMap<String,Object>();
 		paramsMap.put(JobHandler.AUTH_INFO_KEY, getAuthInfo());
 		paramsMap.put(OAIConst.PARAM_OAI_BASE_URL, oaiBaseUrl);
-		paramsMap.put(OAIConst.PARAM_OAI_CATALOG_IDS, cataloges);
+		paramsMap.put(OAIConst.PARAM_OAI_SETS, cataloges);
 		paramsMap.put(OAIConst.PARAM_OAI_METADATA_PREFIX, oaiMetadataPrefix);
-		
-		ImmediateJobListener jobListener = JobHandler.getInstance().startJob(org.edu_sharing.repository.server.jobs.quartz.RemoveDeletedImportsJob.class, paramsMap);
+		paramsMap.put(RemoveDeletedImportsFromSetJob.PARAM_TESTMODE, "false");
+
+		ImmediateJobListener jobListener = JobHandler.getInstance().startJob(org.edu_sharing.repository.server.jobs.quartz.RemoveDeletedImportsFromSetJob.class, paramsMap);
 		
 		if(jobListener.isVetoed()){
 			throw new Exception("job was vetoed by "+jobListener.getVetoBy());

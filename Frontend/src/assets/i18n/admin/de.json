@@ -182,7 +182,7 @@
       "CACHE_REFRESHED":"Cache wird aufgebaut.\nÜberprüfen Sie die Aufgabenliste, um den Status einzusehen",
       "STICKY_REFRESH_CACHE":"Node-Cache aktualisieren (aktueller Cache bleibt)",
       "REMOVE_IMPORTS":"Remove Deleted Imports",
-      "IMPORTS_REMOVED":"Imports removed",
+      "IMPORTS_REMOVED":"Gelöschte OAI-Elemente werden entfernt.\nÜberprüfen Sie die Aufgabenliste, um den Status einzusehen",
       "PROPERTY_VALUESPACE":"Write Properties to Valuespacefile",
       "PROPERTY_NAME":"Property-Name (z.B. cm:name)",
       "EXCEL_IMPORTED":"Excel-Datei importiert ({{ rows }} Zeilen importiert)",
