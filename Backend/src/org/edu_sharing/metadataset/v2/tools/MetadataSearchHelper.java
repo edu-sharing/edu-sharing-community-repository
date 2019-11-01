@@ -322,8 +322,21 @@ public class MetadataSearchHelper {
 			if(lucene!=null && !lucene.trim().isEmpty())
 				andQuery=" AND (" + lucene + ")";
 			lucene=queries.getBasequery()+andQuery;
+			lucene = applyCondition(queries, lucene);
 		}
+		lucene = applyCondition(query, lucene);
 		lucene = convertSearchCriteriasToLucene(lucene,searchCriterias);
+		return lucene;
+	}
+
+	private static String applyCondition(MetadataQueryBase query, String lucene) {
+		for(MetadataQueryCondition condition : query.getConditions()){
+			boolean conditionState= MetadataHelper.checkConditionTrue(condition.getCondition());
+			if(conditionState && condition.getQueryTrue()!=null)
+				lucene += " AND ("+condition.getQueryTrue()+")";
+			if(!conditionState && condition.getQueryFalse()!=null)
+				lucene += " AND ("+condition.getQueryFalse()+")";
+		}
 		return lucene;
 	}
 

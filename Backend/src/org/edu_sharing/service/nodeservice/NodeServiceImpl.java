@@ -44,7 +44,6 @@ import org.edu_sharing.service.nodeservice.model.GetPreviewResult;
 import org.edu_sharing.service.permission.PermissionServiceFactory;
 import org.edu_sharing.service.rendering.RenderingTool;
 import org.edu_sharing.service.search.model.SortDefinition;
-import org.edu_sharing.service.toolpermission.ToolPermissionServiceFactory;
 import org.springframework.context.ApplicationContext;
 
 public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.NodeService {
@@ -253,7 +252,7 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
 				mds.getWidgetsByNode(nodeType,Arrays.asList(ArrayUtils.nullToEmpty(aspects))) :
 				mds.getWidgetsByTemplate(templateName))) {
 			String id=widget.getId();
-			if(!checkWidgetConditionTrue(widget)) {
+			if(!MetadataHelper.checkConditionTrue(widget.getCondition())) {
 				logger.info("widget "+id+" skipped because condition failed");
 				logger.info("condition that should match: "+widget.getCondition().getType()+" "+(widget.getCondition().isNegate() ? "!=" : "=" )+" "+widget.getCondition().getValue());
 				continue;
@@ -334,21 +333,7 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
 		return toSafe;
 	}
 	//transient Logger logger = Logger.getLogger(MetadataWidget.class);
-	/** resolves this widget's condition
-	 * only works for condition type TOOLPERMISSION
-	 * @return
-	 */
-	private boolean checkWidgetConditionTrue(MetadataWidget widget) {
-		MetadataWidget.Condition condition = widget.getCondition();
-		if(widget.getCondition()==null)
-			return true;
-		if(MetadataWidget.Condition.CONDITION_TYPE.TOOLPERMISSION.equals(condition.getType())){
-			boolean result=ToolPermissionServiceFactory.getInstance().hasToolPermission(condition.getValue());
-			return result!=condition.isNegate();
-		}
-		//logger.info("skipping condition type "+condition.getType()+" for widget "+getId()+" since it's not supported in backend");
-		return true;
-	}
+
 	private static Iterable<String> getAllSafeProps() {
 		List<String> safe=new ArrayList<>();
 		safe.addAll(Arrays.asList(SAFE_PROPS));

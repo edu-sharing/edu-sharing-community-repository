@@ -3,7 +3,7 @@ package org.edu_sharing.metadataset.v2;
 import org.apache.commons.lang3.SerializationUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
-import org.edu_sharing.metadataset.v2.MetadataWidget.Condition.CONDITION_TYPE;
+import org.edu_sharing.metadataset.v2.MetadataCondition.CONDITION_TYPE;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.server.tools.ApplicationInfo;
 import org.edu_sharing.repository.server.tools.ApplicationInfoList;
@@ -96,7 +96,7 @@ public class MetadataReaderV2 {
                 MetadataSetV2 mdsOverride = reader.getMetadatasetForFile(mdsName);
                 mds.overrideWith(mdsOverride);
             } catch (IOException e) {
-            	logger.info(e.getMessage(), e);
+            	logger.info(e.getMessage());
             }
             mdsCache.put(id, mds);
             return mds;
@@ -104,7 +104,30 @@ public class MetadataReaderV2 {
 	        throw new RuntimeException("Unexpected error while parsing metadataset "+mdsSet+", isDefault "+(mdsName.equals(mdsNameDefault)),t);
         }
 	}
-	
+	private void handleQueryCondition(Node node, MetadataQueryBase query){
+		MetadataQueryCondition result=new MetadataQueryCondition();
+		String id="<main>";
+		if(query instanceof MetadataQuery) {
+			id = ((MetadataQuery) query).getId();
+		}
+		for(int i=0;i<node.getChildNodes().getLength();i++){
+			Node condition=node.getChildNodes().item(i);
+			String name=condition.getNodeName();
+			String value=condition.getTextContent();
+			switch (name) {
+				case "condition":
+					result.setCondition(getCondition(condition, id));
+					break;
+				case "true":
+					result.setQueryTrue(value);
+					break;
+				case "false":
+					result.setQueryFalse(value);
+					break;
+			}
+		}
+		query.addCondition(result);
+	}
 	private MetadataQueries getQueries() throws Exception {
 		MetadataQueries result=new MetadataQueries();
 		Node queryNode = (Node) xpath.evaluate("/metadataset/queries", doc, XPathConstants.NODE);
@@ -119,6 +142,9 @@ public class MetadataReaderV2 {
 				result.setBasequery(value);
 			if(name.equals("allowSearchWithoutCriteria"))
 				result.setAllowSearchWithoutCriteria(value.equalsIgnoreCase("true"));
+			if(name.equals("condition")){
+				handleQueryCondition(data,result);
+			}
 		}
 		NodeList queriesNode = (NodeList) xpath.evaluate("/metadataset/queries/query", doc, XPathConstants.NODESET);
 		List<MetadataQuery> queries=new ArrayList<>();
@@ -143,6 +169,9 @@ public class MetadataReaderV2 {
 				Node parameterNode=list2.item(j);
 				if(parameterNode.getNodeName().equals("basequery")){
 					query.setBasequery(parameterNode.getTextContent());
+				}
+				if(parameterNode.getNodeName().equals("condition")){
+					handleQueryCondition(parameterNode,query);
 				}
 				MetadataQueryParameter parameter=new MetadataQueryParameter();
 				NodeList list3=parameterNode.getChildNodes();
@@ -323,23 +352,7 @@ public class MetadataReaderV2 {
 				if(name.equals("type"))
 					widget.setType(value);
 				if(name.equals("condition")) {
-					boolean negate=false;
-					NamedNodeMap attr = data.getAttributes();
-					CONDITION_TYPE type=CONDITION_TYPE.PROPERTY;
-					if(attr!=null && attr.getNamedItem("type")!=null) {
-						try {
-							type=CONDITION_TYPE.valueOf(attr.getNamedItem("type").getTextContent());
-						}catch(Throwable t) {
-							logger.warn("Widget "+widget.getId()+" has condition, but the given type "+attr.getNamedItem("type").getTextContent()+" is invalid. Will use default type "+type);
-						}
-					}
-					else {
-						logger.warn("Widget "+widget.getId()+" has condition, but no type for condition was specified. Using default type "+type);
-					}
-					if(attr!=null && attr.getNamedItem("negate")!=null && attr.getNamedItem("negate").getTextContent().equalsIgnoreCase("true")) {
-						negate=true;
-					}
-					widget.setCondition(new MetadataWidget.Condition(value,type,negate));
+					widget.setCondition(getCondition(data,widget.getId()));
 				}
 				if(name.equals("suggestionSource"))
 					widget.setSuggestionSource(value);
@@ -391,7 +404,25 @@ public class MetadataReaderV2 {
 		}
 		return widgets;
 	}
-	
+	private MetadataCondition getCondition(Node node,String id){
+		boolean negate=false;
+		NamedNodeMap attr = node.getAttributes();
+		CONDITION_TYPE type=CONDITION_TYPE.PROPERTY;
+		if(attr!=null && attr.getNamedItem("type")!=null) {
+			try {
+				type=CONDITION_TYPE.valueOf(attr.getNamedItem("type").getTextContent());
+			}catch(Throwable t) {
+				logger.warn("Object "+id+" has condition, but the given type "+attr.getNamedItem("type").getTextContent()+" is invalid. Will use default type "+type);
+			}
+		}
+		else {
+			logger.warn("Object "+id+" has condition, but no type for condition was specified. Using default type "+type);
+		}
+		if(attr!=null && attr.getNamedItem("negate")!=null && attr.getNamedItem("negate").getTextContent().equalsIgnoreCase("true")) {
+			negate=true;
+		}
+		return new MetadataCondition(node.getTextContent(),type,negate);
+	}
 	private List<MetadataKey> getValuespace(String value,MetadataWidget widget, String valuespaceI18n, String valuespaceI18nPrefix) throws Exception {
 		if(value.startsWith("http://") || value.startsWith("https://")){
 			return getValuespaceExternal(value);
