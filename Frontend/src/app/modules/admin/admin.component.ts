@@ -840,7 +840,7 @@ export class AdminComponent {
       this.admin.getApplicationXML(RestConstants.HOME_APPLICATION_XML).subscribe((home)=>{
         this.systemChecks.push({
           name:"CORS",
-          status:home['allow_origin'] ? 'OK' : 'FAIL',
+          status:home['allow_origin'] ? home['allow_origin'].indexOf('http://localhost:54361')!=-1 ? 'OK' : 'INFO' : 'FAIL',
           translate:home,
           callback:()=>{
             this.setTab('APPLICATIONS');

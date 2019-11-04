@@ -126,9 +126,10 @@
         },
         "CORS": {
           "TITLE":"CORS-Konfiguration",
-          "STATUS_OK":"Es wurde konfiguriert, das AJAX-Requests über die folgende(n) Domain(s) erlaubt sind: {{allow_origin}}.",
+          "STATUS_OK":"Es wurde konfiguriert, das AJAX-Requests über die folgende(n) Domain(s) erlaubt sind:\n{{allow_origin}}.",
+          "STATUS_INFO":"Die Liste zulässiger Clients wurde konfiguriert, jedoch fehlt der für die App notwendige Eintrag \"http://localhost:54361\". Zugriffe via App sind nicht möglich.",
           "STATUS_FAIL":"Es wurden bislang keine Domains gesetzt. Das System erlaubt deshalb den AJAX-Zugriff von beliebigen Quell-Domains.",
-          "SOLUTION":"Prüfen Sie, welche Systeme ggf. AJAX-Requests senden können. Wechseln Sie anschließend zu \"Quellen\" und bearbeiten Sie das Feld \"allow_origin\" in der homeApplication.properties.xml",
+          "SOLUTION":"Prüfen Sie, welche Systeme ggf. AJAX-Requests senden können. Wechseln Sie anschließend zu \"Quellen\" und bearbeiten Sie das Feld \"allow_origin\" in der homeApplication.properties.xml.\nWenn Sie die edu-sharing App benutzen, fügen Sie als Eintrag \"http://localhost:54361\" hinzu",
           "SOLUTION_LINK": "homeApplication.properties.xml bearbeiten"
         },
         "RS_XSS": {
