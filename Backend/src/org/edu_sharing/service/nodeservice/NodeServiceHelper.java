@@ -162,8 +162,11 @@ public class NodeServiceHelper {
     public static HashMap<String, String[]> getPropertiesMultivalue(NodeRef nodeRef) throws Throwable {
         HashMap<String, Object> properties = getProperties(nodeRef);
         HashMap<String, String[]> propertiesMultivalue = new HashMap<>();
-        properties.entrySet().forEach((e)->propertiesMultivalue.put(e.getKey(),ValueTool.getMultivalue(e.getValue().toString())));
-        return propertiesMultivalue;
+        if(properties!=null) {
+			properties.forEach((key, value) -> propertiesMultivalue.put(key, ValueTool.getMultivalue(value.toString())));
+			return propertiesMultivalue;
+		}
+        return null;
     }
     public static boolean downloadAllowed(String nodeId){
 		NodeRef ref=new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE,nodeId);
