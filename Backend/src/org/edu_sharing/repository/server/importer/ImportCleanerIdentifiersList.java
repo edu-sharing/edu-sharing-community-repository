@@ -2,10 +2,7 @@ package org.edu_sharing.repository.server.importer;
 
 import java.io.StringReader;
 import java.net.URLEncoder;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -13,11 +10,16 @@ import javax.xml.xpath.XPath;
 import javax.xml.xpath.XPathConstants;
 import javax.xml.xpath.XPathFactory;
 
+import org.alfresco.repo.security.authentication.AuthenticationUtil;
+import org.alfresco.service.cmr.repository.NodeRef;
+import org.alfresco.service.cmr.repository.StoreRef;
 import org.apache.log4j.Logger;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.server.MCAlfrescoAPIClient;
 import org.edu_sharing.repository.server.jobs.quartz.RemoveDeletedImportsFromSetJob;
 import org.edu_sharing.repository.server.tools.HttpQueryTool;
+import org.edu_sharing.service.nodeservice.NodeServiceFactory;
+import org.edu_sharing.service.nodeservice.NodeServiceHelper;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
@@ -43,7 +45,7 @@ public class ImportCleanerIdentifiersList {
 	/**
 	 * <nodeuuid,replicationsourceid>
 	 */
-	Map<String,String> allNodesInSet = new HashMap<String,String>();
+	Map<String,String> allNodesInSet;
 	
 	MCAlfrescoAPIClient mcAlfrescoBaseClient = new MCAlfrescoAPIClient();
 	
@@ -57,11 +59,13 @@ public class ImportCleanerIdentifiersList {
 			
 			
 			String url = oaiBaseUrl + "?verb=listIdentifiers&set=" + set + "&metadataPrefix=" + metadataPrefix;
-			readAllNodesAtOaiService(url,set,metadataPrefix);
+			readAllNodesAtOaiService(url);
 			
 			logger.info("found:" + allNodesInSet.size() +" in repository for set " + set);
 			logger.info("found:" + nodeAtOaiService.size() +" at oai service " + oaiBaseUrl + " set:" + set);
-			
+			if(allNodesInSet.size()<nodeAtOaiService.size()){
+				logger.warn("It seems that you have not yet imported the whole oai set");
+			}
 			
 			for(Map.Entry<String, String> entry : allNodesInSet.entrySet()) {
 				if(!nodeAtOaiService.contains(entry.getValue())){
@@ -71,10 +75,10 @@ public class ImportCleanerIdentifiersList {
 			
 			int deletedCounter = 0;
 			for(String toDelete : toDeleteList) {
-				logger.debug("will delete replicationsourceid:" + allNodesInSet.get(toDelete) +" alfresco id:" + toDelete +" cause it does not longer exist in set");
+				logger.info("will delete replicationsourceid:" + allNodesInSet.get(toDelete) +" alfresco id:" + toDelete +" cause it does not longer exist in set");
 				
 				if(!testMode) {
-					mcAlfrescoBaseClient.removeNode(toDelete, null, false);
+					NodeServiceFactory.getLocalService().removeNode(toDelete, null, false);
 				}
 				deletedCounter++;
 			}
@@ -91,35 +95,23 @@ public class ImportCleanerIdentifiersList {
 	}
 	
 	private void readAllNodesInRepository(String set) throws Throwable {
-		
-		String companyHomeId = mcAlfrescoBaseClient.getCompanyHomeNodeId();
-		HashMap<String, Object> importFolderProps = mcAlfrescoBaseClient.getChild(companyHomeId, CCConstants.CCM_TYPE_MAP, CCConstants.CM_NAME,
-				OAIPMHLOMImporter.FOLDER_NAME_IMPORTED_OBJECTS);
-		
-		if(importFolderProps == null) {
-			logger.error("no import folder found");
-			return;
+		String importFolder=PersistentHandlerEdusharing.prepareImportFolder();
+		NodeRef setFolderRef = NodeServiceFactory.getLocalService().getChild(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE,importFolder, CCConstants.CCM_TYPE_MAP, CCConstants.CM_NAME,
+				set);
+		if(setFolderRef==null){
+			throw new IllegalArgumentException("Set folder "+set+" was not found. Please check your "+OAIPMHLOMImporter.FOLDER_NAME_IMPORTED_OBJECTS+" folder");
 		}
-		
-		String impFolderId = (String)importFolderProps.get(CCConstants.SYS_PROP_NODE_UID);
-		HashMap<String, Object> setFolderProps = mcAlfrescoBaseClient.getChild(impFolderId, CCConstants.CCM_TYPE_MAP, CCConstants.CM_NAME, set);
-		
-		if(setFolderProps == null) {
-			logger.error("no set folder found");
-			return;
-		}
-		
-		String setFolderId = (String)setFolderProps.get(CCConstants.SYS_PROP_NODE_UID);
-		HashMap<String, HashMap<String, Object>> nodesInSet = mcAlfrescoBaseClient.getChildrenRecursive(setFolderId, CCConstants.CCM_TYPE_IO);
-	
-		for(Map.Entry<String, HashMap<String,Object>> entry : nodesInSet.entrySet()) {
-			allNodesInSet.put((String)entry.getValue().get(CCConstants.SYS_PROP_NODE_UID), (String)entry.getValue().get(CCConstants.CCM_PROP_IO_REPLICATIONSOURCEID));
-		}
+		List<NodeRef> allNodes = NodeServiceFactory.getLocalService().getChildrenRecursive(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, setFolderRef.getId(), Collections.singletonList(CCConstants.CCM_TYPE_IO));
+		allNodesInSet=new HashMap<>();
+		allNodes.parallelStream().forEach((entry)-> {
+			AuthenticationUtil.runAsSystem(()->allNodesInSet.put(entry.getId(), NodeServiceHelper.getProperty(entry, CCConstants.CCM_PROP_IO_REPLICATIONSOURCEID)));
+		});
+		logger.info("readAllNodesInRepository finished for set "+set+", found "+allNodesInSet.size()+" nodes");
 	}
 	
 
 	
-	private void readAllNodesAtOaiService(String url, String set, String metadataPrefix) throws Throwable{
+	private void readAllNodesAtOaiService(String url) throws Throwable{
 		
 		logger.info("url:"+url);
 		
@@ -134,32 +126,31 @@ public class ImportCleanerIdentifiersList {
 			
 			token = URLEncoder.encode(token);
 			
-			handleIdentifierList(doc,cursor,set);
+			handleIdentifierList(doc);
 			//&& completeListSize != null && cursor != null &&  (new Integer(completeListSize) > new Integer(cursor))
 		
 			if(token != null && token.trim().length() > 0 ){
 				try{
 					String urlNext = this.oaiBaseUrl+"?verb=ListIdentifiers&resumptionToken="+token;
-					readAllNodesAtOaiService(urlNext,set,metadataPrefix);
+					readAllNodesAtOaiService(urlNext);
 					
 				}catch(NumberFormatException e){
 					logger.error(e.getMessage(),e);
 				}
 			}else{
-				logger.info("no more resumption. import finished!");
+				logger.info("no more resumption. oai querying finished!");
 			}
 		}
 	}
 	
-	private void handleIdentifierList(Document docIdentifiers, String cursor, String set) throws Throwable{
+	private void handleIdentifierList(Document docIdentifiers) throws Throwable{
 		NodeList nodeList = (NodeList)xpath.evaluate("/OAI-PMH/ListIdentifiers/header", docIdentifiers, XPathConstants.NODESET);
 		
 		int nrOfRs = nodeList.getLength();
 		for(int i = 0; i < nrOfRs;i++){
 			Node headerNode = nodeList.item(i);
 			String identifier = (String)xpath.evaluate("identifier", headerNode, XPathConstants.STRING);
-			String timeStamp = (String)xpath.evaluate("datestamp", headerNode, XPathConstants.STRING);
-			
+
 			String status = (String)xpath.evaluate("@status", headerNode, XPathConstants.STRING);
 			if(status != null && status.trim().equals("deleted")){
 				

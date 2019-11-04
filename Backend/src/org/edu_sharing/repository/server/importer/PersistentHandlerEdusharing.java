@@ -260,7 +260,7 @@ public class PersistentHandlerEdusharing implements PersistentHandlerInterface {
 		return folderId;
 	}
 
-	private static String prepareImportFolder() throws Throwable {
+	public static String prepareImportFolder() throws Throwable {
 		MCAlfrescoAPIClient mcAlfrescoBaseClient = new MCAlfrescoAPIClient();
 		String companyHomeId = mcAlfrescoBaseClient.getCompanyHomeNodeId();
 		HashMap<String, Object> importFolderProps = mcAlfrescoBaseClient.getChild(companyHomeId, CCConstants.CCM_TYPE_MAP, CCConstants.CM_NAME,
