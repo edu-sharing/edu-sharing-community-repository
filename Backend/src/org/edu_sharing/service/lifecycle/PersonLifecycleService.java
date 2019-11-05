@@ -102,14 +102,12 @@ public class PersonLifecycleService {
 	OwnableService ownableService = serviceRegistry.getOwnableService();
 	
 	int maxItems = 20;
-	
-	public static String PERSON_STATUS_ACTIVE = "active";
-	
-	public static String PERSON_STATUS_BLOCKED = "blocked";
-	
-	public static String PERSON_STATUS_DEACTIVATED = "deactivated";
-	
-	public static String PERSON_STATUS_TODELETE = "todelete";
+
+	public enum PersonStatus{
+		active,
+		blocked,
+		todelete
+	}
 	
 	boolean keepOERFilesInUserHome = false;
 	
@@ -126,7 +124,7 @@ public class PersonLifecycleService {
 	
 	private void deletePersons(int skipCount) {
 		SearchParameters sp = new SearchParameters();
-		sp.setQuery("TYPE:\"cm:person\" AND @cm\\:espersonstatus:" + PERSON_STATUS_TODELETE);
+		sp.setQuery("TYPE:\"cm:person\" AND @cm\\:espersonstatus:" + PersonStatus.todelete.name());
 		sp.setSkipCount(skipCount);
 		sp.setMaxItems(maxItems);
 		ResultSet rs = searchService.query(sp);
@@ -148,7 +146,7 @@ public class PersonLifecycleService {
 				QName.createQName(CCConstants.CM_PROP_PERSON_ESPERSONSTATUS));
 		String role = (String)nodeService.getProperty(personNodeRef, QName.createQName(CCConstants.CM_PROP_PERSON_EDU_SCHOOL_PRIMARY_AFFILIATION));
 		String userName = (String)nodeService.getProperty(personNodeRef, QName.createQName(CCConstants.CM_PROP_PERSON_USERNAME));
-		if(status != null && PERSON_STATUS_TODELETE.equals(status)) {
+		if(status != null && PersonStatus.todelete.name().equals(status)) {
 			
 			/**
 			 * remove scope safe

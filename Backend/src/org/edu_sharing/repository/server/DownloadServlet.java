@@ -1,12 +1,7 @@
 package org.edu_sharing.repository.server;
 
-import java.io.ByteArrayOutputStream;
-import java.io.DataInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
+import java.io.*;
+import java.util.*;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
@@ -26,15 +21,19 @@ import org.alfresco.service.cmr.repository.ContentReader;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.repository.StoreRef;
 import org.alfresco.service.namespace.QName;
+import org.apache.commons.httpclient.methods.GetMethod;
 import org.apache.commons.lang.StringUtils;
+import org.apache.http.client.methods.HttpGet;
 import org.apache.log4j.Logger;
 import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
 import org.edu_sharing.repository.client.rpc.Share;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.server.tools.ApplicationInfo;
 import org.edu_sharing.repository.server.tools.ApplicationInfoList;
+import org.edu_sharing.repository.server.tools.HttpQueryTool;
 import org.edu_sharing.repository.server.tools.URLTool;
 import org.edu_sharing.repository.server.tracking.TrackingTool;
+import org.edu_sharing.restservices.shared.Node;
 import org.edu_sharing.service.nodeservice.NodeService;
 import org.edu_sharing.service.nodeservice.NodeServiceFactory;
 import org.edu_sharing.service.nodeservice.NodeServiceHelper;
@@ -59,15 +58,16 @@ public class DownloadServlet extends HttpServlet{
 
 		String nodeId = req.getParameter("nodeId");
 		String nodeIds = req.getParameter("nodeIds");
+		String fileName = req.getParameter("fileName");
+		Mode mode = req.getParameter("mode")!=null ? Mode.valueOf(req.getParameter("mode")) : Mode.redirect;
 		if(nodeIds!=null) {
-			String zipName = req.getParameter("fileName");
-			downloadZip(resp, nodeIds.split(","), null, null, null, zipName);
+			downloadZip(resp, nodeIds.split(","), null, null, null, fileName);
 		}
-		downloadNode(nodeId,req,resp);
+		downloadNode(nodeId,req,resp,fileName,mode);
 
 	}
 
-	private void downloadNode(String nodeId, HttpServletRequest req, HttpServletResponse resp) throws IOException {
+	private void downloadNode(String nodeId, HttpServletRequest req, HttpServletResponse resp, String fileName, Mode mode) throws IOException {
 		try {
 			if (!NodeServiceHelper.downloadAllowed(nodeId)) {
 				resp.sendRedirect(URLTool.getNgErrorUrl(""+HttpServletResponse.SC_FORBIDDEN));
@@ -77,19 +77,47 @@ public class DownloadServlet extends HttpServlet{
 			if(version!=null && version.isEmpty())
 			    version=null;
 			NodeService nodeService = NodeServiceFactory.getLocalService();
-			ByteArrayOutputStream bufferOut = new ByteArrayOutputStream();
+			OutputStream bufferOut = resp.getOutputStream();
 			TrackingServiceFactory.getTrackingService().trackActivityOnNode(new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE,nodeId),null,TrackingService.EventType.DOWNLOAD_MATERIAL);
+			InputStream is=null;
+			try {
+				is = nodeService.getContent(StoreRef.PROTOCOL_WORKSPACE, StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(), nodeId, version, ContentModel.PROP_CONTENT.toString());
+			}catch(Throwable t){
 
+			}
+			if(is==null || is.available()==0){
+				if(mode.equals(Mode.passthrough)) {
+					is = getStreamFromLocation(nodeId);
+				}
+				else if(mode.equals(Mode.redirect)){
+					resp.sendRedirect(NodeServiceHelper.getProperty(new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE,nodeId),CCConstants.LOM_PROP_TECHNICAL_LOCATION));
+					return;
+				}
+			}
+			setHeaders(resp,
+					fileName!=null ? fileName : NodeServiceHelper.getProperty(new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, nodeId)
+					, CCConstants.CM_NAME));
+			//resp.setHeader("Content-Length",""+is.available());
+			StreamUtils.copy(is,
+					bufferOut);
 
-			StreamUtils.copy(nodeService.getContent(StoreRef.PROTOCOL_WORKSPACE, StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(), nodeId, version, ContentModel.PROP_CONTENT.toString()),
-					bufferOut);
-			outputData(resp,
-					NodeServiceHelper.getProperty(new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, nodeId), CCConstants.CM_NAME),
-					bufferOut);
 		}catch(Throwable t){
 			logger.error(t);
 			resp.sendRedirect(URLTool.getNgErrorUrl(""+HttpServletResponse.SC_INTERNAL_SERVER_ERROR));
 		}
+	}
+
+	/**
+	 * tries to fetch the stream from the node's technical location, if available
+	 * @param nodeId
+	 * @return
+	 */
+	private InputStream getStreamFromLocation(String nodeId) {
+		String location = NodeServiceHelper.getProperty(new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, nodeId), CCConstants.LOM_PROP_TECHNICAL_LOCATION);
+		if(location==null)
+			return null;
+		Map<String, String> headers=new HashMap<>();
+		return new HttpQueryTool().getStream(new GetMethod(location));
 	}
 
 	public static void downloadZip(HttpServletResponse resp, String[] nodeIds, String parentNodeId, String token, String password, String zipName) throws IOException {
@@ -250,15 +278,28 @@ public class DownloadServlet extends HttpServlet{
 	}
 
 	private static void outputData(HttpServletResponse resp, String filename, ByteArrayOutputStream bufferOut) throws IOException {
+		setHeaders(resp, filename);
+		resp.setHeader("Content-Length",""+bufferOut.size());
+		resp.getOutputStream().write(bufferOut.toByteArray());
+	}
+
+	private static void setHeaders(HttpServletResponse resp, String filename) {
 		resp.setHeader("Content-type","application/octet-stream");
 		resp.setHeader("Content-Transfer-Encoding","binary");
 		resp.setHeader("Content-Disposition","attachment; filename=\""+cleanName(filename)+"\"");
-		resp.setHeader("Content-Length",""+bufferOut.size());
-		resp.getOutputStream().write(bufferOut.toByteArray());
 	}
 
 	public static String cleanName(String name) {
 		return name.replaceAll("[^a-zA-Z0-9-_\\.]", "_");
 	}
 
+	/**
+	 * The mode, only relevant if content is not stored localy but using the TECHNICAL_LOCATION
+	 * Default is redirect
+	 */
+	enum Mode {
+		redirect, // redirect the request to the TECHNICAL_LOCATION
+		passthrough, // Fetch the stream from the TECHNICAL_LOCATION, and pass it to the client (like a proxy)
+
+	}
 }

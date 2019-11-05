@@ -74,6 +74,10 @@
     "INTERNAL_NAME":"Internal name",
     "CURRENT_MEMBERS":"Current members of group {{group}}:",
     "DOWNLOAD_MEMBER_FILENAME":"Users.csv",
+    "SET_STATUS": "Set user status",
+    "STATUS_LABEL": "User status",
+    "STATUS_NOTIFY": "Inform user via mail about status change",
+    "STATUS_LAST_CHANGE": "Last change of status",
     "GROUP_TYPE":{
       "null":"none / regular group",
       "EDITORIAL":"editorial group",
@@ -82,6 +86,12 @@
     "SCOPE_TYPE":{
       "null":"Local / Default visibility",
       "global":"Global / Across repositories"
+    },
+    "USER_STATUS": {
+      "null": "Not set (equals activated)",
+      "active": "Activated",
+      "blocked": "Blocked (No access, not discoverable)",
+      "todelete": "Marked for deletion"
     },
     "TOOLPERMISSIONS":{
       "TITLE":"Set permissions for {{name}}",

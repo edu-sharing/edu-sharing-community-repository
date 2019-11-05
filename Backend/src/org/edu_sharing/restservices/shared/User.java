@@ -7,6 +7,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
+import org.edu_sharing.restservices.UserStatus;
 
 @ApiModel(description = "")
 public class User extends UserSimple {
@@ -15,6 +16,7 @@ public class User extends UserSimple {
 	private NodeRef homeFolder = null;
 	private List<NodeRef> sharedFolders = new ArrayList<NodeRef>();
 	private UserQuota quota;
+
 	public User(){super();}
 	public User(org.edu_sharing.repository.client.rpc.User user) {
 		super(user);
@@ -54,4 +56,5 @@ public class User extends UserSimple {
 	public void setQuota(UserQuota quota) {
 		this.quota = quota;
 	}
+
 }

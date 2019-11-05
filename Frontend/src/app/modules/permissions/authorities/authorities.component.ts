@@ -1,8 +1,8 @@
 
 import {Component, Input, Output, EventEmitter, HostListener, ChangeDetectorRef, ApplicationRef} from "@angular/core";
 import {
-    Node, Group, IamGroups, IamUsers, NodeList, IamUser, IamAuthorities,
-    Authority, OrganizationOrganizations, Organization, Person, User, HomeFolder, SharedFolder, ListItem, DialogButton
+  Node, Group, IamGroups, IamUsers, NodeList, IamUser, IamAuthorities,
+  Authority, OrganizationOrganizations, Organization, Person, User, HomeFolder, SharedFolder, ListItem, DialogButton, UserSimple
 } from "../../../core-module/core.module";
 import {Toast} from "../../../core-ui-module/toast";
 import {ActivatedRoute, Router} from "@angular/router";
@@ -20,6 +20,7 @@ import {ConfigurationService} from "../../../core-module/core.module";
 import {Helper} from "../../../core-module/rest/helper";
 import {trigger} from "@angular/animations";
 import {UIHelper} from "../../../core-ui-module/ui-helper";
+import {ActionbarHelperService} from "../../../common/services/actionbar-helper";
 @Component({
   selector: 'permissions-authorities',
   templateUrl: 'authorities.component.html',
@@ -32,6 +33,7 @@ import {UIHelper} from "../../../core-ui-module/ui-helper";
 })
 export class PermissionsAuthoritiesComponent {
   public GROUP_TYPES=RestConstants.VALID_GROUP_TYPES;
+  public STATUS_TYPES=RestConstants.VALID_PERSON_STATUS_TYPES;
   public SCOPE_TYPES=RestConstants.VALID_SCOPE_TYPES;
   public ORG_TYPES=RestConstants.VALID_GROUP_TYPES_ORG;
   public PRIMARY_AFFILIATIONS=RestConstants.USER_PRIMARY_AFFILIATIONS;
@@ -39,7 +41,7 @@ export class PermissionsAuthoritiesComponent {
   public edit : any;
   private editDetails : any;
   private editId : string;
-  private offset = 0
+  private offset = 0;
   public columns : ListItem[]=[];
   public addMemberColumns : ListItem[]=[];
   public editGroupColumns : ListItem[]=[];
@@ -60,6 +62,9 @@ export class PermissionsAuthoritiesComponent {
   private embeddedQuery:string;
   editButtons: DialogButton[];
   memberButtons: DialogButton[];
+  editStatus: UserSimple;
+  editStatusNotify = true;
+  editStatusButtons: DialogButton[];
   @Input() set searchQuery(searchQuery : string){
     this._searchQuery=searchQuery;
     if(this._mode)
@@ -93,7 +98,7 @@ export class PermissionsAuthoritiesComponent {
     if(this.editMembers==this.org || this.org==null){
       this.iam.searchUsers(event.input).subscribe(
         (users:IamUsers) => {
-          var ret:SuggestItem[] = [];
+          let ret:SuggestItem[] = [];
           for (let user of users.users){
             let item=new SuggestItem(user.authorityName,user.profile.firstName+" "+user.profile.lastName, 'person', '');
             item.originalObject=user;
@@ -106,7 +111,7 @@ export class PermissionsAuthoritiesComponent {
     else {
       this.iam.getGroupMembers(this.org.authorityName, event.input, 'USER').subscribe(
         (users: IamAuthorities) => {
-          var ret: SuggestItem[] = [];
+          let ret: SuggestItem[] = [];
           for (let user of users.authorities) {
             let item = new SuggestItem(user.authorityName, user.profile.firstName + " " + user.profile.lastName, 'person', '');
             item.originalObject = user;
@@ -169,8 +174,10 @@ export class PermissionsAuthoritiesComponent {
       columns.push(new ListItem(mode, RestConstants.AUTHORITY_NAME));
       columns.push(new ListItem(mode, RestConstants.AUTHORITY_FIRSTNAME));
       columns.push(new ListItem(mode, RestConstants.AUTHORITY_LASTNAME));
-      if(!fromDialog)
+      if(!fromDialog) {
         columns.push(new ListItem(mode, RestConstants.AUTHORITY_EMAIL));
+        columns.push(new ListItem(mode, RestConstants.AUTHORITY_STATUS));
+      }
     }
     else if(mode=='GROUP'){
       columns.push(new ListItem(mode, RestConstants.AUTHORITY_DISPLAYNAME));
@@ -264,13 +271,13 @@ export class PermissionsAuthoritiesComponent {
       if(this._mode=='GROUP')
         options.push(new OptionItem("PERMISSIONS.MENU_DELETE","delete",(data:any)=>this.deleteAuthority(data,(list:any)=>this.startDelete(list))));
       if(this._mode=='USER' && this.org)
-        options.push(new OptionItem("PERMISSIONS.MENU_EXCLUDE","delete",(data:any)=>this.deleteAuthority(data,(list:any)=>this.startExclude(list))));
+        options.push(new OptionItem("PERMISSIONS.MENU_EXCLUDE","delete",(data:any)=>this.startExclude(list)));
+      if(this._mode=='USER' && this.isAdmin && (list.length==1 || all)){
+        options.push(new OptionItem("PERMISSIONS.MENU_STATUS","check",(data:any)=>this.setPersonStatus(NodeHelper.getActionbarNodes(list,data)[0])));
+      }
       if(this._mode=='ORG' && this.orgs && this.orgs.canCreate)
         options.push(new OptionItem("PERMISSIONS.MENU_DELETE","delete",(data:any)=>this.deleteAuthority(data,(list:any)=>this.deleteOrg(list))));
     }
-    console.log(all);
-    console.log(list);
-    console.log(options);
     if(all){
       this.options=options;
     }
@@ -622,10 +629,7 @@ export class PermissionsAuthoritiesComponent {
     }
     this.globalProgress=true;
     if(this._mode=='USER'){
-      this.iam.deleteUser(data[position].authorityName).subscribe(()=>this.startDelete(data,position+1,error),(error:any)=>{
-        this.toast.error(error);
-        this.startDelete(data,position+1,true);
-      });
+        console.error("delete for user does not exists");
     }
     else{
       this.iam.deleteGroup(data[position].authorityName).subscribe(()=>this.startDelete(data,position+1,error),(error:any)=>{
@@ -870,5 +874,23 @@ export class PermissionsAuthoritiesComponent {
             new DialogButton('CLOSE',DialogButton.TYPE_CANCEL,()=>this.cancelEditMembers()),
             add
         ];
+      this.editStatusButtons=[
+        new DialogButton('CANCEL',DialogButton.TYPE_CANCEL,()=>{this.editStatus=null}),
+        new DialogButton('SAVE',DialogButton.TYPE_PRIMARY,()=>this.savePersonStatus())
+      ];
     }
+  private setPersonStatus(data: UserSimple) {
+    this.editStatus = data;
+  }
+
+  private savePersonStatus() {
+    this.toast.showProgressDialog();
+    this.iam.updateUserStatus(this.editStatus.authorityName,this.editStatus.status.status,this.editStatusNotify).subscribe(()=>{
+      this.toast.closeModalDialog();
+      this.editStatus=null;
+    },(error)=>{
+      this.toast.closeModalDialog();
+      this.toast.error(error);
+    });
+  }
 }

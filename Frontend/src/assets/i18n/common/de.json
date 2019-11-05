@@ -407,6 +407,7 @@
     "firstName" : "Vorname",
     "lastName" : "Nachname",
     "email" : "E-Mail",
+    "status" : "Status",
     "primaryAffiliation": "Primäre Rolle",
     "password" : "Passwort",
     "sizeQuota" : "Speicherkontingent in MB",

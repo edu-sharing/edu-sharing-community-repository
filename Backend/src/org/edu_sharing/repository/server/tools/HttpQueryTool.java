@@ -28,6 +28,7 @@
 package org.edu_sharing.repository.server.tools;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
@@ -127,47 +128,24 @@ public class HttpQueryTool {
 		}
 		return query(method);
 	}
-	public String query(HttpMethodBase method) {
-		HttpClient client = new HttpClient();
-
-		client.getParams().setParameter("http.useragent", "Test Client");
-
-
-		if(basicAuthUn != null && basicAuthPw != null) {
-			method.addRequestHeader("Authorization", "Basic " + Base64.encodeBase64String((basicAuthUn +":" +basicAuthPw) .getBytes()));
-		}
-
+	public InputStream getStream(HttpMethodBase method) {
+		HttpClient client = prepareClient(method);
 		try {
-			
-			//get host of url to check if its an nonproxy host
-			URL urlObj = new URL(method.getURI().getURI());
-			String urlHost = urlObj.getHost();
-			
-			logger.debug("nonProxyHosts:"+nonProxyHosts+" current Host:"+urlHost);
 
-			
-			if (host != null && proxyhost != null && proxyport != null && !(nonProxyHosts != null && nonProxyHosts.contains(urlHost)) ) {
-				logger.debug("using  proxy proxyhost:" + proxyhost + " proxyport:" + proxyport + " host" + host);
-				client.getHostConfiguration().setHost(host);
-				client.getHostConfiguration().setProxy(proxyhost, proxyport);
-
-				if (proxyUsername != null && proxyPass != null) {
-
-					List authPrefs = new ArrayList(2);
-					authPrefs.add(AuthPolicy.DIGEST);
-					authPrefs.add(AuthPolicy.BASIC);
-					
-					client.getParams().setParameter(AuthPolicy.AUTH_SCHEME_PRIORITY, authPrefs);
-					client.getState().setProxyCredentials(new AuthScope(proxyhost, proxyport), new UsernamePasswordCredentials(proxyUsername, proxyPass));
-
-				}
+			int returnCode = client.executeMethod(method);
+			if(returnCode==200){
+				return method.getResponseBodyAsStream();
 			}
-
-		} catch (Exception e) {
-			e.printStackTrace();
+			if(returnCode >= 400){
+				throw new HttpException(returnCode,method.getResponseBodyAsString());
+			}
+		} catch (IOException e) {
+			throw new HttpException(0,e.getMessage());
 		}
-
-		method.getParams().setContentCharset("utf-8");
+		return null;
+	}
+	public String query(HttpMethodBase method) {
+		HttpClient client = prepareClient(method);
 
 		String result = null;
 		try {
@@ -194,5 +172,49 @@ public class HttpQueryTool {
 
 		return result;
 	}
-	
+
+	private HttpClient prepareClient(HttpMethodBase method) {
+		HttpClient client = new HttpClient();
+
+		client.getParams().setParameter("http.useragent", "Test Client");
+
+
+		if(basicAuthUn != null && basicAuthPw != null) {
+			method.addRequestHeader("Authorization", "Basic " + Base64.encodeBase64String((basicAuthUn +":" +basicAuthPw) .getBytes()));
+		}
+
+		try {
+
+			//get host of url to check if its an nonproxy host
+			URL urlObj = new URL(method.getURI().getURI());
+			String urlHost = urlObj.getHost();
+
+			logger.debug("nonProxyHosts:"+nonProxyHosts+" current Host:"+urlHost);
+
+
+			if (host != null && proxyhost != null && proxyport != null && !(nonProxyHosts != null && nonProxyHosts.contains(urlHost)) ) {
+				logger.debug("using  proxy proxyhost:" + proxyhost + " proxyport:" + proxyport + " host" + host);
+				client.getHostConfiguration().setHost(host);
+				client.getHostConfiguration().setProxy(proxyhost, proxyport);
+
+				if (proxyUsername != null && proxyPass != null) {
+
+					List authPrefs = new ArrayList(2);
+					authPrefs.add(AuthPolicy.DIGEST);
+					authPrefs.add(AuthPolicy.BASIC);
+
+					client.getParams().setParameter(AuthPolicy.AUTH_SCHEME_PRIORITY, authPrefs);
+					client.getState().setProxyCredentials(new AuthScope(proxyhost, proxyport), new UsernamePasswordCredentials(proxyUsername, proxyPass));
+
+				}
+			}
+
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+
+		method.getParams().setContentCharset("utf-8");
+		return client;
+	}
+
 }

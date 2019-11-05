@@ -1200,7 +1200,7 @@ public class MCAlfrescoAPIClient extends MCAlfrescoBaseClient {
 			Serializable commonLicenseKey = (String)propsCopy.get(CCConstants.CCM_PROP_IO_COMMONLICENSE_KEY);
 			boolean downloadAllowed = downloadAllowed(nodeRef.getId(),commonLicenseKey,(String)propsCopy.get(CCConstants.CCM_PROP_EDITOR_TYPE));
 			
-			if (propsCopy.get(CCConstants.ALFRESCO_MIMETYPE) != null && downloadAllowed) {
+			if ((propsCopy.get(CCConstants.ALFRESCO_MIMETYPE) != null || propsCopy.get(CCConstants.LOM_PROP_TECHNICAL_LOCATION)!=null) && downloadAllowed) {
 				propsCopy.put(CCConstants.DOWNLOADURL,URLTool.getDownloadServletUrl(nodeRef.getId(),null));
 			}
 			

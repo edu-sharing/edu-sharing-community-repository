@@ -54,6 +54,12 @@ input[type=search]{
   width:280px;
 }
 :host /deep/{
+  .card-status{
+    mat-checkbox{
+      display: flex;
+      margin-bottom: 20px;
+    }
+  }
   .card-edit {
     mat-form-field {
       width: 100%;

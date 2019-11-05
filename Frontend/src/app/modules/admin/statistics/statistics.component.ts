@@ -104,6 +104,8 @@ export class AdminStatisticsComponent {
   }
   set customGroup(customGroup:string){
     this._customGroup=customGroup;
+    if(this.customGroup==this.customUnfold)
+      this.customUnfold=null;
     this.refreshCustomGroups();
   }
   get customGroup(){

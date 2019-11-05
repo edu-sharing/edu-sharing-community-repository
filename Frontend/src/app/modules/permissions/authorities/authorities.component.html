@@ -37,6 +37,25 @@
                         [authority]="toolpermissionAuthority"
                         (onClose)="toolpermissionAuthority=null"
 ></toolpermission-manager>
+<card *ngIf="editStatus"
+  title="{{'PERMISSIONS.SET_STATUS' | translate }}"
+  subtitle="{{editStatus | authorityName}}"
+  height="auto"
+  [isCancelable]="true"
+  [buttons]="editStatusButtons"
+  (onCancel)="editStatus=null"
+>
+  <div class="card-content-padding card-status">
+    <mat-form-field floatLabel="always" *ngIf="isAdmin">
+      <mat-label>{{'PERMISSIONS.STATUS_LABEL' | translate}}</mat-label>
+      <mat-select name="status" [(ngModel)]="editStatus.status.status" placeholder="{{'PERMISSIONS.STATUS.null' | translate}}">
+        <mat-option *ngFor="let type of STATUS_TYPES" [value]="type">{{('PERMISSIONS.USER_STATUS.'+type) | translate}}</mat-option>
+      </mat-select>
+    </mat-form-field>
+    <mat-checkbox [(ngModel)]="editStatusNotify">{{'PERMISSIONS.STATUS_NOTIFY' | translate}}</mat-checkbox>
+    <div class="status-change" *ngIf="editStatus.status.date">{{'PERMISSIONS.STATUS_LAST_CHANGE' | translate}}: {{editStatus.status.date | formatDate:{useRelativeLabels: false, time: true} }}</div>
+  </div>
+</card>
 <card *ngIf="edit"
       title="{{'PERMISSIONS.'+(editId==null ? 'CREATE' : 'EDIT') + '_' +_mode | translate }}"
       [subtitle]="editId ? edit.authorityName : editDetails.authorityName ? editDetails.authorityName : edit.profile.displayName"

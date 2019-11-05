@@ -42,6 +42,7 @@ import org.edu_sharing.restservices.iam.v1.model.UserEntry;
 import org.edu_sharing.restservices.node.v1.model.NodeEntries;
 import org.edu_sharing.restservices.shared.*;
 import org.edu_sharing.service.authority.AuthorityServiceFactory;
+import org.edu_sharing.service.lifecycle.PersonLifecycleService;
 import org.edu_sharing.service.search.SearchServiceFactory;
 import org.edu_sharing.service.search.model.SearchResult;
 import org.edu_sharing.service.search.model.SortDefinition;
@@ -417,27 +418,27 @@ public class IamApi  {
     	}
     }
 
-    @DELETE
-
-    @Path("/people/{repository}/{person}")    
-    
+    @PUT
+    @Path("/people/{repository}/{person}/status/{status}")
     @ApiOperation(
-    	value = "Delete the user.", 
-    	notes = "Delete the user. (admin rights are required.)")
+    	value = "update the user status.",
+    	notes = "update the user status. (admin rights are required.)")
 
     @ApiResponses(
-    	value = { 
-	        @ApiResponse(code = 200, message = "OK.", response = Void.class),        
-	        @ApiResponse(code = 400, message = "Preconditions are not present.", response = ErrorResponse.class),        
-	        @ApiResponse(code = 401, message = "Authorization failed.", response = ErrorResponse.class),        
-	        @ApiResponse(code = 403, message = "Session user has insufficient rights to perform this operation.", response = ErrorResponse.class),        
-	        @ApiResponse(code = 404, message = "Ressources are not found.", response = ErrorResponse.class), 
-	        @ApiResponse(code = 500, message = "Fatal error occured.", response = ErrorResponse.class) 
-	    })
+    	value = {
+			@ApiResponse(code = 200, message = RestConstants.HTTP_200, response = Void.class),
+			@ApiResponse(code = 400, message = RestConstants.HTTP_400, response = ErrorResponse.class),
+			@ApiResponse(code = 401, message = RestConstants.HTTP_401, response = ErrorResponse.class),
+			@ApiResponse(code = 403, message = RestConstants.HTTP_403, response = ErrorResponse.class),
+			@ApiResponse(code = 404, message = RestConstants.HTTP_404, response = ErrorResponse.class),
+			@ApiResponse(code = 500, message = RestConstants.HTTP_500, response = ErrorResponse.class)
+		})
 
-    public Response deleteUser(
-    		@ApiParam(value = "ID of repository (or \"-home-\" for home repository)",required=true, defaultValue="-home-" ) @PathParam("repository") String repository,
+    public Response updateUserStatus(
+    		@ApiParam(value = RestConstants.MESSAGE_REPOSITORY_ID,required=true, defaultValue="-home-" ) @PathParam("repository") String repository,
     		@ApiParam(value = "username",required=true) @PathParam("person") String person,
+    		@ApiParam(value = "the new status to set",required=true) @PathParam("status") PersonLifecycleService.PersonStatus status,
+    		@ApiParam(value = "notify the user via mail",required=true,defaultValue = "true") @QueryParam("notify") Boolean notifyMail,
     		@Context HttpServletRequest req) {
 
     	try {
@@ -445,7 +446,7 @@ public class IamApi  {
 	    	RepositoryDao repoDao = RepositoryDao.getRepository(repository);
 	    	PersonDao personDao = PersonDao.getPerson(repoDao, person);
 
-	    	personDao.delete();
+	    	personDao.setStatus(status,notifyMail==null ? true : notifyMail);
 	    	
 	    	return Response.status(Response.Status.OK).build();
 	    	

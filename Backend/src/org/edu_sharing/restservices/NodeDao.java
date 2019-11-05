@@ -1201,8 +1201,10 @@ public class NodeDao {
 		return nodeProps.containsKey(CCConstants.CCM_PROP_IO_WWWURL);
 	}
 	public String getDownloadUrl(){
-		if(isLink())
-			return null;
+		// the download servlet can may passthrough the TECHNICAL_LOCATION, so it depends on the actual state of the DOWNLOADURL
+		//if(isLink())
+		//	return null;
+
 		// no download url if user can not access the content
 		if(!getAccessAsString().contains(CCConstants.PERMISSION_READ_ALL))
 			return null;
