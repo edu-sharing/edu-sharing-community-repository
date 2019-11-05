@@ -4,7 +4,7 @@ import {TranslateService} from '@ngx-translate/core';
 @Pipe({name: 'authorityName'})
 export class AuthorityNamePipe implements PipeTransform {
   constructor(private translate:TranslateService){}
-  transform(authority : any,args:string[]): string {
+  transform(authority : any,args:string[]=[]): string {
     if(!authority)
       return "invalid";
     if(authority.profile && authority.profile.displayName)

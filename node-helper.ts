@@ -445,12 +445,11 @@ export class NodeHelper{
         return translate.instant('PERMISSIONS.GROUP_TYPE.'+data.profile.groupType);
     }
     if(item.type=='USER'){
-      if(item.name=='firstName')
-        return data.profile.firstName;
-      if(item.name=='lastName')
-        return data.profile.lastName;
-      if(item.name=='email')
-        return data.profile.email;
+      if([RestConstants.AUTHORITY_FIRSTNAME,RestConstants.AUTHORITY_LASTNAME,RestConstants.AUTHORITY_EMAIL].indexOf(item.name)!=-1)
+        return data.profile[item.name];
+      if(item.name==RestConstants.AUTHORITY_STATUS){
+        return translate.instant('PERMISSIONS.USER_STATUS.'+data.status.status);
+      }
     }
     return data[item.name];
   }
@@ -693,7 +692,7 @@ export class NodeHelper{
       }
       return prop;
   }
-  public static getActionbarNodes(nodes:Node[],node:Node):Node[] {
+  public static getActionbarNodes(nodes:Node[]|any[],node:Node|any):Node[]|any[] {
       return node ? [node] : nodes && nodes.length ? nodes  : null;
   }
 
