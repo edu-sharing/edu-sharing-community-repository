@@ -122,10 +122,9 @@ public class ConfigServiceImpl implements ConfigService{
         }
         is.close();
 		currentConfig = config;
-        return config;
-
-		
+        return SerializationUtils.clone(currentConfig);
 	}
+
 	private InputStream getConfigInputStream() {
 		ClassLoader classLoader = Thread.currentThread()
 				.getContextClassLoader();
