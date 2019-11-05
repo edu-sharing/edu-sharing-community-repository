@@ -207,7 +207,7 @@ export class PermissionsAuthoritiesComponent {
   }
   public changeSort(event : any){
     //this.sortBy=event.sortBy;
-    if(this._mode=='GROUP'){
+    if(this._mode=='GROUP' || this._mode=='USER'){
       this.sortBy=event.sortBy;
     }
     this.sortAscending=event.sortAscending;
@@ -421,7 +421,7 @@ export class PermissionsAuthoritiesComponent {
       }
     }
     if(this._mode=='USER' && !this.org)
-      sort="firstName";
+      sort=this.sortBy;
 
     let request={sortBy:[sort],sortAscending:this.sortAscending,offset:this.offset};
     let query=this._searchQuery? this._searchQuery : "";
