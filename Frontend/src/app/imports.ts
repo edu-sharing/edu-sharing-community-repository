@@ -71,6 +71,6 @@ export const IMPORTS=[
   CoreBridgeModule,
   CoreUiModule,
   CustomModule,
-  MonacoEditorModule.forRoot(),
+  MonacoEditorModule.forRoot({baseUrl: "./assets"}),
   RouterModule.forRoot(ROUTES),
 ];
