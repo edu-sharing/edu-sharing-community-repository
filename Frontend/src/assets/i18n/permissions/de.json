@@ -3,7 +3,8 @@
 	  "TAB":{
       "ORG":"Organisationen",
       "GROUP":"Gruppen",
-      "USER":"Nutzer"
+      "USER":"Nutzer",
+      "DELETE":"Löschverwaltung"
     },
     "TITLE":"Nutzerverwaltung",
     "SELECT_ORGANIZATION":"Bitte zuerst eine Organisation auswählen",
@@ -121,6 +122,61 @@
         "OTHER":"Andere / Nicht kategorisiert",
         "ADD": "Eigene Berechtigung anlegen",
         "ADD_LABEL": "Toolpermission-Name"
+      }
+    },
+    "DELETE": {
+      "MAIN_HEADING": "Nutzer & Daten löschen",
+      "USER_LIST": "Vorgang für folgende Benutzer & deren Daten durchführen",
+      "FOLDER_STRUCTURE_DISINTEGRATE": "auflösen (alle Dateien in einen Ordner überführen)",
+      "FOLDER_STRUCTURE_KEEP": "beibehalten",
+      "RECEIVER_CAPTION": "Der gewählte Nutzer wird zukünftig als Ersteller der Daten angezeigt",
+      "RECEIVER": "Nutzer suchen...",
+      "RECEIVER_GROUP_CAPTION": "Folgende Organisation soll Verwaltungsrechte auf die Daten erhalten",
+      "RECEIVER_GROUP": "Organisation suchen...",
+      "START": "Vorgang Starten",
+      "CONFIRM": {
+        "CAPTION": "Vorgang bestätigen",
+        "USERS": "Die Aktion wird für alle folgenden Benutzer und deren gespeicherte Daten angewandt:",
+        "RECEIVER": "Folgender Nutzer wird zum Eigentümer aller Daten: {{user}}",
+        "RECEIVER_GROUP": "Folgende Organisation erhält die Verwaltungsrechte für alle Daten: {{group}}",
+        "FINAL": "Durch betätigen von \"Vorgang Starten\" werden die gewählten Aktionen unwiderruflich durchgeführt. Prüfen Sie bitte alle Optionen, bevor Sie fortfahren."
+      },
+      "HOME_FOLDER": {
+        "CAPTION": "Stamm-Verzeichnisse der Nutzer & enthaltene Daten",
+        "PRIVATE_FILES_CAPTION": "Private Dateien (ohne Lizenzen)",
+        "CC_FILES_CAPTION": "Dateien mit offenen (CC-)Lizenzen",
+        "FOLDER_STRUCTURE_CAPTION": "Ordnerstrukur des Verzeichnisses..."
+      },
+      "SHARED_FOLDERS": {
+        "CAPTION": "Dateien & Ordner des Nutzers in gemeinsamen Verzeichnissen",
+        "PRIVATE_FILES_CAPTION": "Dateien ohne Lizenzen",
+        "CC_FILES_CAPTION": "Dateien mit offenen (CC-)Lizenzen"
+      },
+      "COLLECTIONS": {
+        "CAPTION": "Sammlungen des Nutzers",
+        "PRIVATE_COLLECTIONS_CAPTION": "Private oder freigegebene Sammlungen",
+        "PUBLIC_COLLECTIONS_CAPTION": "Öffentliche Sammlungen"
+      },
+      "USER_INTERACTIONS": {
+        "CAPTION": "Benutzer-Interaktionen und Statistik-Daten",
+        "STREAM": "Auf den Stream hinzugefügte Einträge",
+        "STREAM_HINT": "Wenn gesetzt, werden alle Stream-Einträge, die dieser Nutzer den Stream hinzugefügt hat, entfernt. Dies betrifft nicht die Elemente, auf die die jeweiligen Stream-Einträge verweisen",
+        "COMMENTS": "Kommentare an Elementen",
+        "COMMENTS_HINT": "Wenn gesetzt, werden alle Kommentare inkl. der Inhalte dieser von den betroffenen Nutzern entfernt",
+        "RATINGS": "Bewertungen an Elementen",
+        "RATINGS_HINT": "Wenn gesetzt, werden die Bewertungen der Nutzer von Elementen entfernt. Dadurch können sich die Gesamtbewertungen der Elemente ändern",
+        "STATISTICS": "Tracking- und Statistik-Daten",
+        "STATISTICS_HINT": "Wenn gesetzt, werden alle Nutzer-Interaktionen (Logins, Zugriffe auf Elemente) entfernt. Dadurch können sich Statistiken (auch rückwirkend) ändern"
+      },
+      "STATE": {
+        "NO_USERS": "Bislang sind keine Konten für eine Löschung freigegeben. Nutzer können freigegeben werden, indem der Status des Nutzers auf den entsprechenden Wert gesetzt wird",
+        "NO_RECEIVER": "Es wurde festgelegt, dass ein oder mehrere Elemente einen anderen Nutzer zugewiesen werden sollen, jedoch wurde kein Ziel-Nutzer bzw. eine Ziel-Organisation ausgewählt. Bitte legen Sie einen Zielnutzer sowie die verantwortliche Organisation fest",
+        "NON_CONFORM": "Es wurde festgelegt, dass ein oder mehrere Elemente unverändert bleiben. An diesen Elementen wird die User-Id des Nutzers erhalten bleiben. Prüfen Sie ggf., ob dies Datenschutzrechtlich möglich ist, oder weisen Sie die Dateien einen anderen Nutzer zu"
+      },
+      "DELETE_MODE": {
+        "none": "Nichts unternehmen (Elemente beibehalten)",
+        "assign": "Neuem Nutzer zuweisen",
+        "delete": "Unwiderruflich löschen"
       }
     }
   }

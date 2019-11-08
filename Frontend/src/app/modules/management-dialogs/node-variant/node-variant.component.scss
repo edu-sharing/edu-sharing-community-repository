@@ -29,14 +29,9 @@ h4{
 .btn-choose{
   margin-top: 10px;
 }
-.license-warning{
-  >div {
-    > .warning {
-      white-space: pre-line;
-    }
-    > .link {
-      color: $primary;
-      text-transform: uppercase;
-    }
+info-message{
+  .link {
+    color: $primary;
+    text-transform: uppercase;
   }
 }

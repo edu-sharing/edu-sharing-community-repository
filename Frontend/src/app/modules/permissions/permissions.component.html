@@ -1,49 +1,41 @@
 <div *ngIf="!disabled">
-<div class="row row-dark">
-  <div class="col s12">
-    <ul class="tabs">
-      <li class="clickable tab col s4" (click)="setTab('ORG')">
-        <a [class.active]="tab=='ORG'" >{{'PERMISSIONS.TAB.ORG' | translate}}</a>
-      </li>
-      <li class="clickable tab col s4" [class.disabled]="!selectedOrg && !isAdmin" (click)="setTab('GROUP')">
-        <a [class.active]="tab=='GROUP'">{{'PERMISSIONS.TAB.GROUP' | translate}}{{selectedOrg? ' ('+selectedOrg.profile.displayName+')' : ''}}</a>
-      </li>
-      <li class="clickable tab col s4" [class.disabled]="!selectedOrg && !isAdmin" (click)="setTab('USER')">
-        <a [class.active]="tab=='USER'">{{'PERMISSIONS.TAB.USER' | translate}}{{selectedOrg? ' ('+selectedOrg.profile.displayName+')' : ''}}</a>
-      </li>
-    </ul>
-  </div>
-</div>
-<div *ngIf="tab=='ORG'" class="content">
-  <permissions-authorities
-          [mode]="'ORG'"
-          [searchQuery]="searchQuery"
-          (onSelection)="selectedOrg=$event[0]"
-  ></permissions-authorities>
-</div>
-<div *ngIf="tab=='GROUP'" class="content">
-  <permissions-authorities
-          [mode]="'GROUP'"
-          [searchQuery]="searchQuery"
-          [org]="selectedOrg"
-          (setTab)="setTab($event)"
-  ></permissions-authorities>
-</div>
-<div *ngIf="tab=='USER'" class="content">
-  <permissions-authorities
-          [mode]="'USER'"
-          [searchQuery]="searchQuery"
-          [org]="selectedOrg"
-          (setTab)="setTab($event)"
-  ></permissions-authorities>
-</div>
-<main-nav *ngIf="!disabled"
-          #mainNav
-          [title]="'PERMISSIONS.TITLE'"
-          [currentScope]="'permissions'"
-          [searchEnabled]="tab"
-          [searchQuery]="searchQuery"
-          [searchPlaceholder]="'PERMISSIONS.SEARCH_'+tab"
-          (onSearch)="doSearch($event.query)"
-></main-nav>
+  <main-nav #mainNav
+            [title]="'PERMISSIONS.TITLE'"
+            [currentScope]="'permissions'"
+            [searchEnabled]="tab!=3"
+            [searchQuery]="searchQuery"
+            [searchPlaceholder]="'PERMISSIONS.SEARCH_'+TABS[tab]"
+            (onSearch)="doSearch($event.query)"
+  ></main-nav>
+  <mat-tab-group mat-stretch-tabs color="dark" [selectedIndex]="tab" (selectedIndexChange)="setTab($event)">
+    <mat-tab label="{{'PERMISSIONS.TAB.ORG' | translate}}">
+      <permissions-authorities
+              [mode]="'ORG'"
+              [searchQuery]="searchQuery"
+              [selected]="selectedOrg"
+              (onSelection)="selectedOrg=$event[0]"
+      ></permissions-authorities>
+    </mat-tab>
+    <mat-tab label="{{'PERMISSIONS.TAB.GROUP' | translate}}{{selectedOrg? ' ('+selectedOrg.profile.displayName+')' : ''}}" *ngIf="selectedOrg || isAdmin">
+      <permissions-authorities
+              [mode]="'GROUP'"
+              [searchQuery]="searchQuery"
+              [org]="selectedOrg"
+              (onDeselectOrg)="selectedOrg=null"
+              (setTab)="setTab($event)"
+      ></permissions-authorities>
+    </mat-tab>
+    <mat-tab label="{{'PERMISSIONS.TAB.USER' | translate}}{{selectedOrg? ' ('+selectedOrg.profile.displayName+')' : ''}}" *ngIf="selectedOrg || isAdmin">
+      <permissions-authorities
+              [mode]="'USER'"
+              [searchQuery]="searchQuery"
+              [org]="selectedOrg"
+              (onDeselectOrg)="selectedOrg=null"
+              (setTab)="setTab($event)"
+      ></permissions-authorities>
+    </mat-tab>
+    <mat-tab label="{{'PERMISSIONS.TAB.DELETE' | translate}}" *ngIf="!selectedOrg && isAdmin">
+      <permissions-delete></permissions-delete>
+    </mat-tab>
+  </mat-tab-group>
 </div>

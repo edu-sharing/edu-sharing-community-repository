@@ -1,17 +1,8 @@
 @import "../../core-ui-module/styles/variables";
 
 
-.content{
-  position:absolute;
-  top:45px;
-}
-.row{
-  position: fixed;
+mat-tab-group {
+  position: absolute;
   top: $mainnavHeight;
   width: 100%;
-  height: 48px;
-}
-.s12{
-  position: fixed;
-  z-index:10;
 }

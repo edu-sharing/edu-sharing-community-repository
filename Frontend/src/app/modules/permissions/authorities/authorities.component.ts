@@ -65,12 +65,14 @@ export class PermissionsAuthoritiesComponent {
   editStatus: UserSimple;
   editStatusNotify = true;
   editStatusButtons: DialogButton[];
+  private _org: Organization;
+  @Output() onDeselectOrg = new EventEmitter();
   @Input() set searchQuery(searchQuery : string){
     this._searchQuery=searchQuery;
     if(this._mode)
       this.search();
   }
-  private selected : any[]=[];
+  @Input() private selected : any[]=[];
 
   public _mode : string;
   public loadingTitle:string;
@@ -83,10 +85,16 @@ export class PermissionsAuthoritiesComponent {
   public addTo : any;
   private addToSelection : any;
   public globalProgress=false;
-  @Input() org : Organization;
+  @Input() set org(org : Organization){
+    this._org=org;
+    this.refresh();
+  };
+  get org(){
+    return this._org;
+  }
   @Input() embedded = false;
   @Output() onSelection = new EventEmitter();
-  @Output() setTab = new EventEmitter();
+  @Output() setTab = new EventEmitter<number>();
   public editMembers : any;
   private memberList : Authority[];
   private selectedMembers : Authority[]=[];
@@ -223,7 +231,7 @@ export class PermissionsAuthoritiesComponent {
   private getList<T>(data:T) : T[]{
     if(data)
       return [data];
-    return this.selected;
+    return this.selected ? this.selected : [];
   }
   private updateOptions(all:boolean) {
     if(this.embedded)
@@ -248,7 +256,7 @@ export class PermissionsAuthoritiesComponent {
         options.push(download);
       }
     }
-    if(!all && this._mode=='ORG' && this.orgs && this.orgs.canCreate){
+    if(!all && this._mode=='ORG' && this.orgs && this.orgs.canCreate && !list.length){
       options.push(new OptionItem("PERMISSIONS.ADD_ORG", "add", (data: any) => this.createOrg()));
     }
 
@@ -478,7 +486,7 @@ export class PermissionsAuthoritiesComponent {
       }
       else if(this._mode=='USER'){
         this.offset += this.connector.numberPerRequest;
-        this.iam.searchUsers(query,true,request).subscribe((data:IamUsers)=>{
+        this.iam.searchUsers(query,true,'',request).subscribe((data:IamUsers)=>{
           for (let auth of data.users)
             this.list.push(auth);
           this.loading = false;
@@ -820,11 +828,10 @@ export class PermissionsAuthoritiesComponent {
     });
   }
   private deselectOrg(){
-    this.org=null;
-    this.refresh();
+    this.onDeselectOrg.emit();
   }
   private setOrgTab(){
-    this.setTab.emit('ORG');
+    this.setTab.emit(0);
   }
 
   private downloadMembers() {

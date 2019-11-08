@@ -27,11 +27,12 @@ import {GlobalContainerComponent} from "../../common/ui/global-container/global-
 })
 export class PermissionsMainComponent {
   @ViewChild('mainNav') mainNavRef: MainNavComponent;
-  public tab : string;
+  public tab : number;
   public searchQuery: string;
   private selectedOrg: Group;
   public isAdmin = false;
   public disabled = false;
+  TABS = ["ORG","GROUP","USER","DELETE"];
   constructor(private toast: Toast,
               private route: ActivatedRoute,
               private router: Router,
@@ -48,7 +49,7 @@ export class PermissionsMainComponent {
                 this.organization.getOrganizations().subscribe((data: OrganizationOrganizations) => {
                     this.isAdmin = data.canCreate;
                 });
-                this.tab='ORG';
+                this.tab=0;
             }
             else{
                 this.goToLogin();
@@ -69,14 +70,15 @@ export class PermissionsMainComponent {
     this.searchQuery = event;
   }
 
-  setTab(tab: string) {
-    if (tab != 'ORG' && !this.selectedOrg && !this.isAdmin) {
+  setTab(tab: number) {
+    if (tab != 0 && !this.selectedOrg && !this.isAdmin) {
       this.toast.error(null, "PERMISSIONS.SELECT_ORGANIZATION");
+      this.tab = 0;
       return;
     }
     if (tab == this.tab)
       return;
-    if (tab == 'ORG') {
+    if (tab == 0) {
       this.selectedOrg = null;
     }
     this.searchQuery = null;

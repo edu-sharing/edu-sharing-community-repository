@@ -5,15 +5,9 @@
     <div *ngIf="_node" class="variant-content">
         <label for="variantName">{{'NODE_VARIANT.NEW_VARIANT' | translate}}</label>
         <input type="text" id="variantName" [(ngModel)]="variantName">
-        <div class="general-warning license-warning" *ngIf="licenseWarning">
-            <div>
-                <i class="material-icons">warning_outline</i>
-            </div>
-            <div>
-                <div class="warning">{{'NODE_VARIANT.WARNING.'+licenseWarning | translate}}</div>
-                <div class="clickable link" *ngIf="getLicenseUrl()" (click)="openLicense()">{{'NODE_VARIANT.WARNING.LINK' | translate}}</div>
-            </div>
-        </div>
+        <info-message *ngIf="licenseWarning" mode="warning" message="{{'NODE_VARIANT.WARNING.'+licenseWarning | translate}}">
+            <div class="clickable link" *ngIf="getLicenseUrl()" (click)="openLicense()">{{'NODE_VARIANT.WARNING.LINK' | translate}}</div>
+        </info-message>
         <div class="breadcrumb-style">
             <div class="breadcrumb-info">{{'NODE_VARIANT.BREADCRUMB_INFO' | translate}}</div>
             <breadcrumbs

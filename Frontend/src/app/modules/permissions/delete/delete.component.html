@@ -1,220 +1,129 @@
-<modal-dialog
-                [title]="dialogTitle"
-                [message]="dialogMessage"
-                [buttons]="dialogButtons"
-                [messageParameters]="dialogParameters"
-                [isCancelable]="dialogCancelable"
-                (onCancel)="dialogTitle=null"
-></modal-dialog>
-<modal-loading *ngIf="loadingTitle"
-               [title]="loadingTitle"
-               [message]="loadingMessage"
-></modal-loading>
-<div class="topFrame">
-  <div class="info">
-    <div  *ngIf="_mode!='ORG' && !embedded">
-      <div *ngIf="!org">
-        {{'PERMISSIONS.INFO_GLOBAL_'+_mode | translate}}
-        <br>
-        <a class="clickable" (click)="setOrgTab()">{{'PERMISSIONS.CHOOSE_ORG' | translate}}</a>
-      </div>
-      <div  *ngIf="org">
-        {{'PERMISSIONS.INFO_ORG_'+_mode | translate:{org:org.profile.displayName} }}
-        <br>
-        <span *ngIf="isAdmin">
-      <a class="clickable" (click)="deselectOrg()">{{'PERMISSIONS.NO_ORG' | translate}}</a>
-      |
-      </span>
-        <a class="clickable" (click)="setOrgTab()">{{'PERMISSIONS.CHOOSE_ORG' | translate}}</a>
-      </div>
+<div class="wrapper">
+  <h2 class="mat-heading-2 mat-heading-underline">{{'PERMISSIONS.DELETE.MAIN_HEADING' | translate}}</h2>
+  <div class="group">
+    <spinner *ngIf="loading"></spinner>
+    <h3 class="mat-heading-3 mat-heading-underline" *ngIf="!loading" ><span>{{'PERMISSIONS.DELETE.USER_LIST' | translate}}</span><button mat-icon-button (click)="refresh()"><i icon iconId="refresh" ></i></button></h3>
+    <div class="user-list" *ngIf="users && users.length">
+      <listTable
+              [nodes]="users"
+              [hasIcon]="true"
+              [hasCheckbox]="true"
+              [selectOnClick]="true"
+              [isClickable]="true"
+              [selectedNodes]="selectedUsers"
+              icon="person"
+              [isLoading]="loading"
+              [columns]="columns"
+              [totalCount]="users.length"
+              (onSelectionChanged)="selectedUsers=$event"
+      ></listTable>
     </div>
   </div>
-  <actionbar
-          [options]="optionsActionbar"
-  ></actionbar>
-</div>
-<toolpermission-manager *ngIf="toolpermissionAuthority"
-                        [authority]="toolpermissionAuthority"
-                        (onClose)="toolpermissionAuthority=null"
-></toolpermission-manager>
-<card *ngIf="editStatus"
-  title="{{'PERMISSIONS.SET_STATUS' | translate }}"
-  subtitle="{{editStatus | authorityName}}"
-  height="auto"
-  [isCancelable]="true"
-  [buttons]="editStatusButtons"
-  (onCancel)="editStatus=null"
->
-  <div class="card-content-padding card-status">
-    <mat-form-field floatLabel="always" *ngIf="isAdmin">
-      <mat-label>{{'PERMISSIONS.STATUS_LABEL' | translate}}</mat-label>
-      <mat-select name="status" [(ngModel)]="editStatus.status.status" placeholder="{{'PERMISSIONS.STATUS.null' | translate}}">
-        <mat-option *ngFor="let type of STATUS_TYPES" [value]="type">{{('PERMISSIONS.USER_STATUS.'+type) | translate}}</mat-option>
-      </mat-select>
-    </mat-form-field>
-    <mat-checkbox [(ngModel)]="editStatusNotify">{{'PERMISSIONS.STATUS_NOTIFY' | translate}}</mat-checkbox>
-    <div class="status-change" *ngIf="editStatus.status.date">{{'PERMISSIONS.STATUS_LAST_CHANGE' | translate}}: {{editStatus.status.date | formatDate:{useRelativeLabels: false, time: true} }}</div>
-  </div>
-</card>
-<card *ngIf="edit"
-      title="{{'PERMISSIONS.'+(editId==null ? 'CREATE' : 'EDIT') + '_' +_mode | translate }}"
-      [subtitle]="editId ? edit.authorityName : editDetails.authorityName ? editDetails.authorityName : edit.profile.displayName"
-      [buttons]="editButtons"
-      height="xlarge"
-      (onCancel)="cancelEdit()">
-        <div class="card-content-padding card-edit">
-          <form>
-          <div *ngIf="editId" class="editSystemName">
-            <label>{{'PERMISSIONS.INTERNAL_NAME' | translate}}</label>
-            <div class="infoText">{{edit.authorityName}}</div>
-          </div>
-          <div *ngIf="_mode=='GROUP'">
-            <mat-form-field>
-              <mat-label>{{'GROUP.displayName' | translate}}</mat-label>
-              <input matInput name="displayName" [(ngModel)]="edit.profile.displayName" required>
-            </mat-form-field>
-            <mat-form-field>
-              <mat-label>{{'GROUP.groupEmail' | translate}}</mat-label>
-              <input matInput name="groupEmail" [(ngModel)]="edit.profile.groupEmail">
-              </mat-form-field>
-            <mat-form-field floatLabel="always">
-              <mat-label>{{'GROUP.groupType' | translate}}</mat-label>
-              <mat-select name="orgType" [(ngModel)]="edit.profile.groupType" placeholder="{{'PERMISSIONS.GROUP_TYPE.null' | translate}}">
-                <mat-option *ngFor="let type of GROUP_TYPES" [value]="type">{{('PERMISSIONS.GROUP_TYPE.'+type) | translate}}</mat-option>
-              </mat-select>
-            </mat-form-field>
-            <mat-form-field floatLabel="always" *ngIf="isAdmin">
-              <mat-label>{{'GROUP.scopeType' | translate}}</mat-label>
-              <mat-select name="scopeType" [(ngModel)]="edit.profile.scopeType" placeholder="{{'PERMISSIONS.SCOPE_TYPE.null' | translate}}">
-                <mat-option *ngFor="let type of SCOPE_TYPES" [value]="type">{{('PERMISSIONS.SCOPE_TYPE.'+type) | translate}}</mat-option>
-              </mat-select>
-            </mat-form-field>
-          </div>
-          <div *ngIf="_mode=='ORG'">
-            <mat-form-field>
-              <mat-label>{{'ORG.displayName' | translate}}</mat-label>
-              <input matInput name="displayName" [(ngModel)]="edit.profile.displayName" required>
-            </mat-form-field>
-            <mat-form-field>
-                <mat-label>{{'ORG.groupEmail' | translate}}</mat-label>
-                <input matInput name="groupEmail" [(ngModel)]="edit.profile.groupEmail">
-            </mat-form-field>
-            <mat-form-field floatLabel="always">
-              <mat-label>{{'ORG.groupType' | translate}}</mat-label>
-              <mat-select name="orgType" [(ngModel)]="edit.profile.groupType" placeholder="{{'PERMISSIONS.GROUP_TYPE.null' | translate}}">
-                <mat-option *ngFor="let type of ORG_TYPES" [value]="type">{{('PERMISSIONS.GROUP_TYPE.'+type) | translate}}</mat-option>
-              </mat-select>
-            </mat-form-field>
-            <div class="infoText">{{edit.folder}}</div>
-          </div>
-          <div *ngIf="_mode=='USER'">
-            <mat-form-field *ngIf="!editId">
-              <mat-label>{{'USER.authorityName' | translate}}</mat-label>
-              <input matInput name="authorityName" [(ngModel)]="editDetails.authorityName" autofocus required>
-            </mat-form-field >
-            <mat-form-field>
-              <mat-label>{{'USER.firstName' | translate}}</mat-label>
-              <input matInput name="firstName" [(ngModel)]="edit.profile.firstName" required>
-            </mat-form-field>
-            <mat-form-field>
-              <mat-label>{{'USER.lastName' | translate}}</mat-label>
-              <input matInput name="lastName" [(ngModel)]="edit.profile.lastName" required>
-            </mat-form-field>
-            <mat-form-field>
-              <mat-label>{{'USER.email' | translate}}</mat-label>
-              <input matInput name="email" [(ngModel)]="edit.profile.email" required>
-            </mat-form-field>
-            <div class="group">
-              <mat-form-field>
-                <mat-label>{{'USER.primaryAffiliation' | translate}}</mat-label>
-                  <mat-select *ngIf="primaryAffiliationList" id="primaryAffiliation" name="primaryAffiliation" [(ngModel)]="edit.profile.primaryAffiliation">
-                      <mat-option></mat-option>
-                      <mat-option *ngFor="let a of PRIMARY_AFFILIATIONS" [value]="a">{{('USER.PRIMARY_AFFILIATION.'+a) | translate}}</mat-option>
-                  </mat-select>
-                  <input matInput *ngIf="!primaryAffiliationList" type="text" id="primaryAffiliation" name="primaryAffiliation" [(ngModel)]="edit.profile.primaryAffiliation">
-              </mat-form-field>
-              <button mat-flat-button (click)="primaryAffiliationList=!primaryAffiliationList"><i class="material-icons">{{ primaryAffiliationList ? 'edit' : 'list'}}</i></button>
-            </div>
-            <div *ngIf="!editId">
-              <input-password label="{{'USER.password' | translate}}" [(value)]="editDetails.password"></input-password>
-            </div>
-            <div class="quota">
-                <mat-form-field>
-                    <mat-label>{{'USER.sizeQuota' | translate}}</mat-label>
-                    <input matInput name="sizeQuota" [(ngModel)]="edit.profile.sizeQuota" required>
-                </mat-form-field>
-                <user-quota *ngIf="editId && edit.quota.enabled" [quota]="edit.quota"></user-quota>
-            </div>
-          </div>
-          </form>
+  <info-message mode="info" *ngIf="!loading && !(users && users.length)" message="{{'PERMISSIONS.DELETE.STATE.NO_USERS' | translate}}"></info-message>
+  <div *ngIf="!loading && users && users.length">
+    <div class="group">
+      <h3 class="mat-heading-3 mat-heading-underline">{{'PERMISSIONS.DELETE.HOME_FOLDER.CAPTION' | translate}}</h3>
+      <div class="side-by-side">
+        <div>
+          <h4 class="mat-heading-4">{{'PERMISSIONS.DELETE.HOME_FOLDER.PRIVATE_FILES_CAPTION' | translate}}</h4>
+          <mat-radio-group [(ngModel)]="options.homeFolder.privateFiles">
+            <mat-radio-button *ngFor="let mode of deleteModes" [value]="mode">{{'PERMISSIONS.DELETE.DELETE_MODE.'+mode | translate}}</mat-radio-button>
+          </mat-radio-group>
         </div>
-</card>
-<card *ngIf="editGroups || editMembers || addMembers"
-      title="{{(addMembers ? 'PERMISSIONS.ADD_MEMBER_TO_GROUP' : editMembers=='ALL' ? 'PERMISSIONS.EDIT_ORG_MEMBERS' : editMembers ? 'PERMISSIONS.EDIT_MEMBERS' : 'PERMISSIONS.EDIT_MEMBER_GROUPS') | translate }}"
-      [subtitle]="addMembers ? addMembers.profile.displayName : editMembers ? editMembers.profile.displayName : editGroups.authorityName"
-      width="xlarge"
-      height="xlarge"
-      [buttons]="memberButtons"
-      (onScrolled)="refreshMemberList()"
-      (onCancel)="cancelEditMembers()">
-    <div class="card-content-padding">
-        <div class="memberActions">
-          <form (ngSubmit)="searchMembers()">
-            <input type="search" name="manageMemberSearch" [(ngModel)]="manageMemberSearch"  placeholder="{{(addMembers ? 'PERMISSIONS.SEARCH_USER' : editGroups ? 'PERMISSIONS.SEARCH_GROUPS' : 'PERMISSIONS.SEARCH_MEMBER') | translate}}">
-          </form>
-          <actionbar class="memberItem memberActionBar" *ngIf="editMembers || editGroups"
-            [options]="memberOptions"
-          ></actionbar>
+        <div>
+          <h4 class="mat-heading-4">{{'PERMISSIONS.DELETE.HOME_FOLDER.CC_FILES_CAPTION' | translate}}</h4>
+          <mat-radio-group [(ngModel)]="options.homeFolder.ccFiles">
+            <mat-radio-button *ngFor="let mode of deleteModes" [value]="mode">{{'PERMISSIONS.DELETE.DELETE_MODE.'+mode | translate}}</mat-radio-button>
+          </mat-radio-group>
         </div>
-        <div class="currentMembers" *ngIf="editMembers">{{ 'PERMISSIONS.CURRENT_MEMBERS' |translate:{group:editMembers.profile ? editMembers.profile.displayName : org.profile.displayName} }}</div>
-        <listTable
-          [columns]="editGroups ? editGroupColumns : addMemberColumns"
-          [nodes]="memberList"
-          [hasCheckbox]="true"
-          [icon]="'person'"
-          [hasIcon]="true"
-          [selectedNodes]="selectedMembers"
-          [hasHeading]="true"
-          [selectOnClick]="true"
-          [isClickable]="true"
-          (onSelectionChanged)="updateSelectedMembers($event)"
-       ></listTable>
+      </div>
+      <div class="structure" *ngIf="options.homeFolder.privateFiles == 'assign' || options.homeFolder.ccFiles == 'assign'">
+        <h4 class="mat-heading-4">{{'PERMISSIONS.DELETE.HOME_FOLDER.FOLDER_STRUCTURE_CAPTION' | translate}}</h4>
+        <mat-radio-group [(ngModel)]="options.homeFolder.keepFolderStructure">
+          <mat-radio-button [value]="false">{{'PERMISSIONS.DELETE.FOLDER_STRUCTURE_DISINTEGRATE' | translate}}</mat-radio-button>
+          <mat-radio-button [value]="true">{{'PERMISSIONS.DELETE.FOLDER_STRUCTURE_KEEP' | translate}}</mat-radio-button>
+        </mat-radio-group>
+      </div>
     </div>
-</card>
-<!-- <div *ngIf="addTo" [@fade]="addTo" class="dialog darken"></div> -->
-<div *ngIf="addTo" [@fromRight]="addTo" class="addTo">
-  <div class="addToList">
-    <permissions-authorities
-      [mode]="'GROUP'"
-      [org]="org"
-      [embedded]="true"
-      (onSelection)="addToSelection=$event"
-    ></permissions-authorities>
+    <div class="group">
+      <h3 class="mat-heading-3 mat-heading-underline">{{'PERMISSIONS.DELETE.SHARED_FOLDERS.CAPTION' | translate}}</h3>
+      <div class="side-by-side">
+        <div>
+          <h4 class="mat-heading-4">{{'PERMISSIONS.DELETE.SHARED_FOLDERS.PRIVATE_FILES_CAPTION' | translate}}</h4>
+          <mat-radio-group [(ngModel)]="options.sharedFolders.privateFiles">
+            <mat-radio-button *ngFor="let mode of deleteModes" [value]="mode">{{'PERMISSIONS.DELETE.DELETE_MODE.'+mode | translate}}</mat-radio-button>
+          </mat-radio-group>
+        </div>
+        <div>
+          <h4 class="mat-heading-4">{{'PERMISSIONS.DELETE.SHARED_FOLDERS.CC_FILES_CAPTION' | translate}}</h4>
+          <mat-radio-group [(ngModel)]="options.sharedFolders.ccFiles">
+            <mat-radio-button *ngFor="let mode of deleteModes" [value]="mode">{{'PERMISSIONS.DELETE.DELETE_MODE.'+mode | translate}}</mat-radio-button>
+          </mat-radio-group>
+        </div>
+      </div>
+    </div>
+    <div class="group">
+      <h3 class="mat-heading-3 mat-heading-underline">{{'PERMISSIONS.DELETE.COLLECTIONS.CAPTION' | translate}}</h3>
+      <div class="side-by-side">
+        <div>
+          <h4 class="mat-heading-4">{{'PERMISSIONS.DELETE.COLLECTIONS.PRIVATE_COLLECTIONS_CAPTION' | translate}}</h4>
+          <mat-radio-group [(ngModel)]="options.collections.privateCollections">
+            <mat-radio-button *ngFor="let mode of deleteModes" [value]="mode">{{'PERMISSIONS.DELETE.DELETE_MODE.'+mode | translate}}</mat-radio-button>
+          </mat-radio-group>
+        </div>
+        <div>
+          <h4 class="mat-heading-4">{{'PERMISSIONS.DELETE.COLLECTIONS.PUBLIC_COLLECTIONS_CAPTION' | translate}}</h4>
+          <mat-radio-group [(ngModel)]="options.collections.publicCollections">
+            <mat-radio-button *ngFor="let mode of deleteModes" [value]="mode">{{'PERMISSIONS.DELETE.DELETE_MODE.'+mode | translate}}</mat-radio-button>
+          </mat-radio-group>
+        </div>
+      </div>
+    </div>
+    <div class="group">
+      <div *ngIf="hasAssigning()" class="assigning">
+        <h4 class="mat-heading-4">{{'PERMISSIONS.DELETE.RECEIVER_CAPTION' | translate}}</h4>
+        <!-- @TODO: The component does currently not support searching ONLY for users -->
+        <authority-search-input
+                (onChooseAuthority)="receiver=$event"
+                placeholder="{{'PERMISSIONS.DELETE.RECEIVER' | translate}}"
+        ></authority-search-input>
+        <mat-chip-list>
+          <mat-chip *ngIf="receiver" (removed)="receiver=null">
+            <span>{{receiver | authorityName}}</span>
+            <i matChipRemove icon iconId="cancel"></i>
+          </mat-chip>
+        </mat-chip-list>
+        <h4 class="mat-heading-4">{{'PERMISSIONS.DELETE.RECEIVER_GROUP_CAPTION' | translate}}</h4>
+        <authority-search-input
+                mode="Organizations"
+                (onChooseAuthority)="receiverGroup=$event"
+                placeholder="{{'PERMISSIONS.DELETE.RECEIVER_GROUP' | translate}}"
+        ></authority-search-input>
+        <mat-chip-list>
+          <mat-chip *ngIf="receiverGroup" (removed)="receiverGroup=null">
+            <span>{{receiverGroup | authorityName}}</span>
+            <i matChipRemove icon iconId="cancel"></i>
+          </mat-chip>
+        </mat-chip-list>
+      </div>
+    </div>
+    <div class="info-wrapper">
+      <info-message *ngIf="missingAssigning()" mode="warning" message="{{'PERMISSIONS.DELETE.STATE.NO_RECEIVER' | translate}}"></info-message>
+      <info-message *ngIf="!isValid()" mode="warning" message="{{'PERMISSIONS.DELETE.STATE.NON_CONFORM' | translate}}"></info-message>
+    </div>
   </div>
-  <div class="btns">
-      <a class="waves-effect waves-light btn" [class.disabled]="addToSelection==null" tabindex="0" (click)="addToSelect()" (keyup.enter)="addToSelect()">{{'PERMISSIONS.ADD_TO' | translate }}</a>
-      <a class="btn-flat" tabindex="0" (click)="cancelAddTo()" (keyup.enter)="cancelAddTo()">{{'CANCEL' | translate }}</a>
+    <div class="group group-interactions">
+      <h3 class="mat-heading-3 mat-heading-underline">{{'PERMISSIONS.DELETE.USER_INTERACTIONS.CAPTION' | translate}}</h3>
+      <mat-checkbox [(ngModel)]="options.comments.delete">{{'PERMISSIONS.DELETE.USER_INTERACTIONS.STREAM' | translate}}</mat-checkbox>
+      <mat-hint>{{'PERMISSIONS.DELETE.USER_INTERACTIONS.STREAM_HINT' | translate}}</mat-hint>
+      <mat-checkbox [(ngModel)]="options.comments.delete">{{'PERMISSIONS.DELETE.USER_INTERACTIONS.COMMENTS' | translate}}</mat-checkbox>
+      <mat-hint>{{'PERMISSIONS.DELETE.USER_INTERACTIONS.COMMENTS_HINT' | translate}}</mat-hint>
+      <mat-checkbox [(ngModel)]="options.ratings.delete">{{'PERMISSIONS.DELETE.USER_INTERACTIONS.RATINGS' | translate}}</mat-checkbox>
+      <mat-hint>{{'PERMISSIONS.DELETE.USER_INTERACTIONS.RATINGS_HINT' | translate}}</mat-hint>
+      <mat-checkbox [(ngModel)]="options.statistics.delete">{{'PERMISSIONS.DELETE.USER_INTERACTIONS.STATISTICS' | translate}}</mat-checkbox>
+      <mat-hint>{{'PERMISSIONS.DELETE.USER_INTERACTIONS.STATISTICS_HINT' | translate}}</mat-hint>
+    </div>
+  <div class="group group-buttons">
+    <button mat-raised-button color="primary" [disabled]="!canSubmit()" (click)="prepareStart()">{{'PERMISSIONS.DELETE.START' | translate}}</button>
   </div>
 </div>
-<div *ngIf="embedded" class="searchEmbedded">
-  <form (ngSubmit)="searchQuery=embeddedQuery"><input matInput type="search" [(ngModel)]="embeddedQuery" placeholder="{{'PERMISSIONS.SEARCH_USER' | translate}}" name="embeddedSearch"></form>
-</div>
-<listTable class="list" infinite-scroll (scrolled)="loadAuthorities()" [scrollWindow]="false" [class.listEmbedded]="embedded"
-  [columns]="columns"
-  [nodes]="list"
-  [hasCheckbox]="_mode!='ORG'"
-  [sortBy]="sortBy"
-  [isLoading]="loading"
-  [isClickable]="true"
-  (onSelectionChanged)="selection($event)"
-  [sortAscending]="sortAscending"
-  [hasHeading]="true"
-  [selectOnClick]="true"
-  [hasIcon]="true"
-  [options]="options"
-  [icon]="_mode=='USER' ? 'person' : (_mode=='ORG' ? 'work' : 'group')"
-  (sortListener)="changeSort($event)"
-  ></listTable>
-<h5 class="noElements" *ngIf="!loading && (!list || !list.length) && !_searchQuery">{{'PERMISSIONS.NO_ELEMENTS' | translate}}</h5>
-<h5 class="noElements" *ngIf="!loading && (!list || !list.length) && _searchQuery!='' && searchQuery!=null">{{'PERMISSIONS.NO_ELEMENTS_SEARCH' | translate}}</h5>
-<global-progress *ngIf="globalProgress"></global-progress>
