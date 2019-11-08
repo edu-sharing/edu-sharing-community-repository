@@ -30,6 +30,7 @@ import {BrowserAnimationsModule} from '@angular/platform-browser/animations';
 import {BreadcrumbsComponent} from "./components/breadcrumbs/breadcrumbs.component";
 import {VideoControlsComponent} from "./components/video-controls/video-controls.component";
 import {AuthorityAffiliationPipe} from "./pipes/authority-affiliation.pipe";
+import { InfoMessageComponent } from './components/info-message/info-message.component';
 
 @NgModule({
     declarations: [
@@ -44,6 +45,7 @@ import {AuthorityAffiliationPipe} from "./pipes/authority-affiliation.pipe";
         SpinnerSmallComponent,
         GlobalProgressComponent,
         VideoControlsComponent,
+        InfoMessageComponent,
         InfiniteScrollDirective,
         AuthorityNamePipe,
         AuthorityColorPipe,
@@ -98,6 +100,7 @@ import {AuthorityAffiliationPipe} from "./pipes/authority-affiliation.pipe";
         CollectionChooserComponent,
         DropdownComponent,
         SortDropdownComponent,
+        InfoMessageComponent,
         InfiniteScrollDirective,
         ToastyModule,
         AuthorityNamePipe,
