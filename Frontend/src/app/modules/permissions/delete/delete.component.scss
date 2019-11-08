@@ -1,0 +1,155 @@
+@import "../../../core-ui-module/styles/variables";
+
+input[type=search]{
+  max-width: 400px;
+  width: calc(100% - 240px);
+  padding-left:43px;
+  border: 1px solid $searchInputBorderColor;
+  border-radius: 5pt;
+  margin-left:42px;
+}
+.topFrame{
+  position:fixed;
+  z-index:1;
+  width: 100%;
+  top:65px+$mainnavHeight;
+  display:flex;
+  align-items: center;
+  padding:0 10px;
+  .info{
+    flex-grow: 1;
+    color:$textPrimary;
+    font-weight:bold;
+    line-height: 1.5em;
+    margin: 0 20px;
+    a{
+      text-transform: uppercase;
+    }
+    @include limitLineCount(3);
+  }
+  actionbar{
+    min-width: 170px;
+    display: flex;
+    justify-content: flex-end;
+  }
+}
+.memberActions{
+  height:50px;
+  display: table;
+  margin-bottom: 10px;
+}
+.memberActions input{
+  margin-left:10px;
+  width:100%;
+}
+.memberActionBar{
+  position: absolute;
+  top: 25px;
+  right: 40px;
+}
+.memberItem{
+  display: table-cell;
+}
+.memberInput{
+  width:280px;
+}
+:host /deep/{
+  .card-status{
+    mat-checkbox{
+      display: flex;
+      margin-bottom: 20px;
+    }
+  }
+  .card-edit {
+    mat-form-field {
+      width: 100%;
+    }
+    .group {
+      display: flex;
+      align-items: center;
+      margin-bottom: 20px;
+
+      .mat-form-field-wrapper {
+        padding-bottom: 0;
+      }
+    }
+  }
+}
+.editSystemName{
+  margin-bottom: 10px;
+}
+.noElements{
+  width:100%;
+  text-align: center;
+  padding-top:50px;
+  color:$noResultsColor;
+  position: fixed;
+  top: $mainnavHeight+100px;
+}
+.infoText{
+  padding:5px 15px;
+}
+#orgType{
+  margin-bottom: 1.5em;
+}
+.folderLocation{
+  color: $primary;
+}
+
+$addToWidth:350px;
+.list{
+  overflow-y: auto;
+  position:fixed;
+  top: 185px;
+  width:100%;
+  height: calc(100% - 185px);
+}
+.searchEmbedded{
+  padding:10px;
+  input{
+    width:calc(100% - 110px);
+  }
+}
+.listEmbedded{
+  top: 230px;
+  height: calc(100% - 300px);
+  width:350px;
+}
+.formEmbedded{
+  width:$addToWidth;
+}
+label.search{
+  position:relative;
+  top:8px;
+  left:82px;
+}
+.currentMembers{
+  margin-top: -10px;
+  margin-bottom: 10px;
+}
+.addTo{
+  position: fixed;
+  right: 0;
+  width: $addToWidth;
+  top: 115px+$mainnavHeight;
+  height: calc(100% - 115px - #{$mainnavHeight});
+  z-index: 2;
+  padding-bottom: 20px;
+  background-color: #fff;
+  @include materialShadow();
+}
+.addTo .btns{
+  padding:10px;
+}
+.addToList{
+  height: calc(100% - 37px);
+  overflow-y: auto;
+
+}
+.addTo .btn,
+.addTo .btn-flat{
+  float:right;
+}
+#groupType{
+  margin-bottom:20px;
+}

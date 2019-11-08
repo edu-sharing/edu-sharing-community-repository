@@ -4,6 +4,7 @@ import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.DELETE;
@@ -80,25 +81,30 @@ public class IamApi  {
 	    })
 
     public Response searchUser(
-    		@ApiParam(value = "ID of repository (or \"-home-\" for home repository)",required=true, defaultValue="-home-" ) @PathParam("repository") String repository,
-    		@ApiParam(value = "pattern",required=true) @QueryParam("pattern") String pattern,
-    		@ApiParam(value = "global search context, defaults to true, otherwise just searches for users within the organizations",required=false,defaultValue="true") @QueryParam("global") Boolean global,
-    		@ApiParam(value = RestConstants.MESSAGE_MAX_ITEMS, defaultValue=""+RestConstants.DEFAULT_MAX_ITEMS) @QueryParam("maxItems") Integer maxItems,
-    	    @ApiParam(value = RestConstants.MESSAGE_SKIP_COUNT, defaultValue="0") @QueryParam("skipCount") Integer skipCount,
-    	    @ApiParam(value = RestConstants.MESSAGE_SORT_PROPERTIES) @QueryParam("sortProperties") List<String> sortProperties,
-    	    @ApiParam(value = RestConstants.MESSAGE_SORT_ASCENDING) @QueryParam("sortAscending") List<Boolean> sortAscending,
-    		@Context HttpServletRequest req) {
+			@ApiParam(value = "ID of repository (or \"-home-\" for home repository)",required=true, defaultValue="-home-" ) @PathParam("repository") String repository,
+			@ApiParam(value = "pattern",required=true) @QueryParam("pattern") String pattern,
+			@ApiParam(value = "global search context, defaults to true, otherwise just searches for users within the organizations",required=false,defaultValue="true") @QueryParam("global") Boolean global,
+			@ApiParam(value = "the user status (e.g. active), if not set, all users are returned",required=false) @QueryParam("status") PersonLifecycleService.PersonStatus status,
+			@ApiParam(value = RestConstants.MESSAGE_MAX_ITEMS, defaultValue=""+RestConstants.DEFAULT_MAX_ITEMS) @QueryParam("maxItems") Integer maxItems,
+			@ApiParam(value = RestConstants.MESSAGE_SKIP_COUNT, defaultValue="0") @QueryParam("skipCount") Integer skipCount,
+			@ApiParam(value = RestConstants.MESSAGE_SORT_PROPERTIES) @QueryParam("sortProperties") List<String> sortProperties,
+			@ApiParam(value = RestConstants.MESSAGE_SORT_ASCENDING) @QueryParam("sortAscending") List<Boolean> sortAscending,
+			@Context HttpServletRequest req) {
 
     	try {
     		
 	    	RepositoryDao repoDao = RepositoryDao.getRepository(repository);
-	    	SearchResult<String> search=SearchServiceFactory.getSearchService(repoDao.getId()).searchUsers(
+			Map<String, String> filter=new HashMap<>();
+			if(status!=null)
+				filter.put(CCConstants.getValidLocalName(CCConstants.CM_PROP_PERSON_ESPERSONSTATUS),status.name());
+
+			SearchResult<String> search=SearchServiceFactory.getSearchService(repoDao.getId()).searchUsers(
 	    					pattern,
 	    					global==null ? true : global,
 	    					skipCount!=null ? skipCount : 0,
 	    	    			maxItems!=null ? maxItems : RestConstants.DEFAULT_MAX_ITEMS,
 	    					new SortDefinition(CCConstants.NAMESPACE_CM,sortProperties,sortAscending),
-	    					null
+	    					filter
 	    			);
 
 	    	List<UserSimple> result = new ArrayList<UserSimple>();
