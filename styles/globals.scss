@@ -22,6 +22,9 @@
   .edu-icon-base{
     margin: 0 5px;
   }
+  >span{
+    flex-grow: 1;
+  }
 }
 .mat-heading-1{
   color:$textLight;
