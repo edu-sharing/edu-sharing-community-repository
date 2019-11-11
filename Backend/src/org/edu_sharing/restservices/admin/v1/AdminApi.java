@@ -60,6 +60,7 @@ import org.edu_sharing.service.admin.AdminServiceFactory;
 import org.edu_sharing.service.admin.model.RepositoryConfig;
 import org.edu_sharing.service.admin.model.GlobalGroup;
 import org.edu_sharing.service.admin.model.ServerUpdateInfo;
+import org.edu_sharing.service.lifecycle.PersonDeleteOptions;
 import org.edu_sharing.service.lifecycle.PersonLifecycleService;
 import org.edu_sharing.service.search.SearchService.ContentType;
 import org.edu_sharing.service.search.model.SearchToken;
@@ -1136,13 +1137,9 @@ public class AdminApi {
 	}
 
 
-	@DELETE
-	@Path("/deletePerson")
-
-
-
-	@ApiOperation(value = "delete person", notes = "delete person.")
-
+	@PUT
+	@Path("/deletePersons")
+	@ApiOperation(value = "delete persons", notes = "delete the given persons. Their status must be set to \"todelete\"")
 	@ApiResponses(value = { @ApiResponse(code = 200, message = RestConstants.HTTP_200, response = Void.class),
 			@ApiResponse(code = 400, message = RestConstants.HTTP_400, response = ErrorResponse.class),
 			@ApiResponse(code = 401, message = RestConstants.HTTP_401, response = ErrorResponse.class),
@@ -1150,11 +1147,11 @@ public class AdminApi {
 			@ApiResponse(code = 404, message = RestConstants.HTTP_404, response = ErrorResponse.class),
 			@ApiResponse(code = 500, message = RestConstants.HTTP_500, response = ErrorResponse.class) })
 	public Response deletePerson(
-			@ApiParam(value = "username", required = true) @QueryParam("username") String username,
-
+			@ApiParam(value = "names of the users to delete", required = true) @QueryParam("username") List<String> username,
+			@ApiParam(value = "options object what and how to delete user contents") PersonDeleteOptions options,
 			@Context HttpServletRequest req) {
 		try {
-			new PersonLifecycleService().deletePerson(username);
+			new PersonLifecycleService().deletePersons(username,options);
 			return Response.ok().build();
 		} catch (Throwable t) {
 			return ErrorResponse.createResponse(t);

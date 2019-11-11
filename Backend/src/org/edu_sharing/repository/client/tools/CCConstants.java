@@ -1690,6 +1690,18 @@ public class CCConstants {
 		list.add(COMMON_LICENSE_CUSTOM);
 		return list;
 	}
+	public static List<String> getAllCCLicenseKeys(){
+		List<String> list=new ArrayList<>();
+		list.add(COMMON_LICENSE_CC_BY);
+		list.add(COMMON_LICENSE_CC_BY_SA);
+		list.add(COMMON_LICENSE_CC_BY_ND);
+		list.add(COMMON_LICENSE_CC_BY_NC);
+		list.add(COMMON_LICENSE_CC_BY_NC_SA);
+		list.add(COMMON_LICENSE_CC_BY_NC_ND);
+		list.add(COMMON_LICENSE_CC_ZERO);
+		list.add(COMMON_LICENSE_PDM);
+		return list;
+	}
 
 	public final static String COMMON_LICENSE_CC_ZERO_LINK = "https://creativecommons.org/publicdomain/zero/1.0/deed.${locale}";
 	public final static String COMMON_LICENSE_CC_PDM_LINK = "http://creativecommons.org/publicdomain/mark/1.0/deed.${locale}";

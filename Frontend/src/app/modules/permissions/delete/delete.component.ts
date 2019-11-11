@@ -1,5 +1,5 @@
 import {Component} from "@angular/core";
-import {DeleteMode, DialogButton, Group, ListItem, Person, RestConstants, RestIamService, User} from "../../../core-module/core.module";
+import {DeleteMode, DialogButton, Group, ListItem, Person, RestAdminService, RestConstants, RestIamService, User} from "../../../core-module/core.module";
 import {Toast} from "../../../core-ui-module/toast";
 import {TranslateService} from "@ngx-translate/core";
 import {AuthorityNamePipe} from "../../../core-ui-module/pipes/authority-name.pipe";
@@ -22,6 +22,7 @@ export class PermissionsDeleteComponent {
 
  constructor(
      private iam : RestIamService,
+     private admin : RestAdminService,
      private toast : Toast,
      private translate : TranslateService
  ){
@@ -115,6 +116,15 @@ export class PermissionsDeleteComponent {
     }
 
     start() {
+      this.options.receiver=this.receiver.authorityName;
+      this.options.receiverGroup=this.receiverGroup.authorityName;
+      this.toast.showProgressDialog();
+      this.admin.deletePersons(this.selectedUsers.map((u)=>u.authorityName),this.options).subscribe(()=>{
+          this.toast.closeModalDialog();
+      },(error)=>{
+          this.toast.error(error);
+          this.toast.closeModalDialog();
+      });
     }
 
     missingAssigning() {
