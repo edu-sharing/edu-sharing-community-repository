@@ -8,6 +8,7 @@ import {TemporaryStorageService} from "../core-module/rest/services/temporary-st
 import {DialogButton} from "../core-module/ui/dialog-button";
 import {RestConstants} from "../core-module/rest/rest-constants";
 import {ProgressType} from "../common/ui/modal-dialog/modal-dialog.component";
+import {DateHelper} from "./DateHelper";
 
 @Injectable()
 export class Toast{
@@ -96,6 +97,9 @@ export class Toast{
     if(message=="COMMON_API_ERROR") {
       this.dialogMessage = '';
       this.dialogTitle = 'COMMON_API_ERROR_TITLE';
+      this.dialogParameters={
+        date:DateHelper.formatDate(this.injector.get(TranslateService),new Date().getTime(),{useRelativeLabels:false,showAlwaysTime:true,showSeconds:true})
+      }
       console.log(errorObject);
       try {
         let error = json.error;
