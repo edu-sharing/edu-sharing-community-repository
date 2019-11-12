@@ -39,6 +39,7 @@ import {RestUtilitiesService} from "../../rest/services/rest-utilities.service";
 export class MdsComponent{
   @ViewChild('mdsScrollContainer') mdsScrollContainer: ElementRef;
   @ViewChild('jumpmarksRef') jumpmarksRef: ElementRef;
+  @ViewChild('mdsChildobject') mdsChildobject: MdsComponent;
 
   /**
    * priority, useful if the dialog seems not to be in the foreground
@@ -114,7 +115,7 @@ export class MdsComponent{
     this._groupId=groupId;
   }
   private isSearch(){
-    return this._groupId!=null;
+    return this._groupId==RestConstants.DEFAULT_QUERY_NAME;
   }
 
   private loadMdsFinal(callback:Function=null) {
@@ -2273,9 +2274,18 @@ export class MdsComponent{
       });
   }
   private setChildobjectProperties(props:any){
-    console.log(props);
     let edit=this.editChildobject || this.editChildobjectLicense;
-    edit.child.properties=props;
+    // keep any existing license data
+    if(this.editChildobject && edit.child.properties){
+      console.log(props);
+      for(let key in props){
+        edit.child.properties[key]=props[key];
+      }
+      console.log(edit.child.properties);
+    }
+    else {
+      edit.child.properties = props;
+    }
     edit.child.name=props[RestConstants.LOM_PROP_TITLE] ? props[RestConstants.LOM_PROP_TITLE] : props[RestConstants.CM_NAME];
     this.editChildobject=null;
     this.editChildobjectLicense=null;
