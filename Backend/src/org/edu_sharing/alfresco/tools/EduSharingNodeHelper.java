@@ -33,6 +33,7 @@ public class EduSharingNodeHelper {
 	        String name = (String) nodeService.getProperty(node, QName.createQName(CCConstants.CM_NAME));
 	        if (CCConstants.CCM_TYPE_SHARE.equals(type) ||
 	                CCConstants.CCM_TYPE_USAGE.equals(type) ||
+	                CCConstants.CCM_TYPE_COMMENT.equals(type) ||
 	                CCConstants.CM_TYPE_THUMBNAIL.equals(type)) {
 	            return true;
 	        }
