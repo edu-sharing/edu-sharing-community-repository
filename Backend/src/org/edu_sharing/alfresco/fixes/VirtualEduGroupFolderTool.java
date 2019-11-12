@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Set;
 
 import org.alfresco.model.ContentModel;
+import org.alfresco.repo.security.permissions.AccessDeniedException;
 import org.alfresco.service.ServiceRegistry;
 import org.alfresco.service.cmr.repository.ChildAssociationRef;
 import org.alfresco.service.cmr.repository.InvalidNodeRefException;
@@ -89,6 +90,10 @@ public class VirtualEduGroupFolderTool {
 							logger.warn("eduGroupHomeDir:" + eduGroupHomeDir + " does not longer exist.");
 						}catch(IllegalArgumentException e) {
 							logger.warn("eduGroupHomeDir:" + eduGroupHomeDir + " " + e.getMessage());
+						}catch(AccessDeniedException e) {
+							logger.warn("eduGroupHomeDir:" + eduGroupHomeDir + " " + e.getMessage());
+						}catch(Throwable e) {
+							logger.error(e.getMessage(), e);
 						}
 					}
 

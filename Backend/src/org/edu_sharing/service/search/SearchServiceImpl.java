@@ -104,6 +104,7 @@ public class SearchServiceImpl implements SearchService {
 		parameters.addStore(Constants.storeRef);
 		parameters.setLanguage(org.alfresco.service.cmr.search.SearchService.LANGUAGE_LUCENE);
 		parameters.addAllAttribute(CCConstants.CCM_PROP_AUTHORITYCONTAINER_EDUHOMEDIR);
+		parameters.addSort("@" + CCConstants.CM_PROP_C_MODIFIED, false);
 		parameters.setQuery("TYPE:\"" + CCConstants.CCM_TYPE_NOTIFY
 				+ "\" AND PATH:\"/app\\:company_home/ccm\\:Edu_Sharing_System/ccm\\:Edu_Sharing_Sys_Notify"+postfix+"//.\" AND @cm\\:creator:\"" + QueryParser.escape(username) + "\"");
 		List<NodeRef> resultSet = queryAll(parameters,ApplicationInfoList.getHomeRepository().getInteger(ApplicationInfo.NOTIFY_FETCH_LIMIT,0));
