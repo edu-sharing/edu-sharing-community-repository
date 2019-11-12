@@ -468,6 +468,9 @@ export class CollectionNewComponent {
       let permissions=RestHelper.copyAndCleanPermissions(this.permissions.permissions,this.originalPermissions ? this.originalPermissions.inherited : false);
       this.nodeService.setNodePermissions(collection.ref.id,permissions,this.permissionsInfo ? this.permissionsInfo.notify : false,this.permissionsInfo ? this.permissionsInfo.notifyMessage : null).subscribe(()=>{
         this.save4(collection);
+      },(error)=>{
+        this.toast.error(error);
+        this.isLoading=false;
       });
     }
     else {
