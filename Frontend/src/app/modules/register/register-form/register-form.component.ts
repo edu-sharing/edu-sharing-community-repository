@@ -32,6 +32,7 @@ export class RegisterFormComponent{
     public agree = false;
     public privacyUrl: string;
     public mailValid: boolean;
+    requiredFields:string[];
 
     public checkMail(mail:string) {
         this.mailValid = UIHelper.isEmail(mail);
@@ -65,7 +66,10 @@ export class RegisterFormComponent{
   }
 
     public canRegister(){
-        return this.info.firstName.trim() && this.mailValid && this.info.password && UIHelper.getPasswordStrengthString(this.info.password) != 'weak'
+        return (!this.isRequired('firstName') || this.info.firstName.trim())
+            && (!this.isRequired('lastName') || this.info.lastName.trim())
+            && (!this.isRequired('organization') || this.info.organization.trim())
+            && this.mailValid && this.info.password && UIHelper.getPasswordStrengthString(this.info.password) != 'weak'
             && this.agree;
     }
 
@@ -84,6 +88,11 @@ export class RegisterFormComponent{
     Translation.initialize(translate,this.configService,this.storage,this.route).subscribe(()=> {
         UIHelper.setTitle('REGISTER.TITLE', title, translate, configService);
         this.privacyUrl = this.configService.instant("privacyInformationUrl");
+        this.requiredFields = this.configService.instant('register.requiredFields',['firstName']);
     });
+  }
+
+  isRequired(field: string) {
+      return this.requiredFields.indexOf(field)!=-1;
   }
 }
