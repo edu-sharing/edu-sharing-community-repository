@@ -4,11 +4,13 @@ import org.alfresco.service.cmr.repository.NodeRef;
 import org.edu_sharing.service.tracking.model.StatisticEntry;
 import org.edu_sharing.service.tracking.model.StatisticEntryNode;
 
+import java.sql.SQLException;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
 public interface TrackingService {
+
 
     enum GroupingType {
         None,
@@ -32,4 +34,5 @@ public interface TrackingService {
     List<StatisticEntryNode> getNodeStatisics(GroupingType type, Date dateFrom, Date dateTo, String mediacenter, List<String> additionalFields, List<String> groupFields, Map<String, String> filters) throws Throwable;
     List<StatisticEntry> getUserStatistics(GroupingType type, java.util.Date dateFrom, java.util.Date dateTo, String mediacenter, List<String> additionalFields, List<String> groupFields, Map<String, String> filters) throws Throwable;
     StatisticEntry getSingleNodeData(NodeRef nodeRef,java.util.Date dateFrom,java.util.Date dateTo) throws Throwable;
+    void deleteUserData(String username) throws Throwable;
 }

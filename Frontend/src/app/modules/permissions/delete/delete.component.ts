@@ -116,8 +116,10 @@ export class PermissionsDeleteComponent {
     }
 
     start() {
-      this.options.receiver=this.receiver.authorityName;
-      this.options.receiverGroup=this.receiverGroup.authorityName;
+      if(this.hasAssigning()) {
+          this.options.receiver = this.receiver.authorityName;
+          this.options.receiverGroup = this.receiverGroup.authorityName;
+      }
       this.toast.showProgressDialog();
       this.admin.deletePersons(this.selectedUsers.map((u)=>u.authorityName),this.options).subscribe(()=>{
           this.toast.closeModalDialog();

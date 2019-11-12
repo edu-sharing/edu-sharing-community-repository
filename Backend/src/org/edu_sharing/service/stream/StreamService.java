@@ -31,4 +31,6 @@ public interface StreamService {
 	boolean canAccessNode(List<String> authorities, String nodeId) throws Exception;
 
 	void delete(String id) throws Exception;
+
+    void deleteEntriesByAuthority(String username);
 }

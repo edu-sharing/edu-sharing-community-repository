@@ -69,4 +69,9 @@ public class StreamServiceNone implements StreamService {
     public void delete(String id) throws Exception {
         notImplemented();
     }
+
+    @Override
+    public void deleteEntriesByAuthority(String username) {
+
+    }
 }

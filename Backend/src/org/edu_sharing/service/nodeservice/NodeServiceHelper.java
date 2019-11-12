@@ -9,6 +9,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.alfresco.model.ContentModel;
+import org.alfresco.repo.model.Repository;
 import org.alfresco.service.ServiceRegistry;
 import org.alfresco.service.cmr.repository.ChildAssociationRef;
 import org.alfresco.service.cmr.repository.NodeRef;
@@ -16,11 +17,9 @@ import org.alfresco.service.cmr.repository.StoreRef;
 import org.alfresco.service.namespace.QName;
 import org.edu_sharing.alfresco.tools.EduSharingNodeHelper;
 import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
-import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.client.tools.metadata.ValueTool;
 import org.edu_sharing.repository.server.MCAlfrescoAPIClient;
-import org.edu_sharing.repository.server.RepoFactory;
 import org.edu_sharing.repository.server.tools.NameSpaceTool;
 import org.edu_sharing.service.nodeservice.model.GetPreviewResult;
 import org.edu_sharing.service.search.model.SortDefinition;
@@ -191,5 +190,10 @@ public class NodeServiceHelper {
 	}
 	public static GetPreviewResult getPreview(org.edu_sharing.service.model.NodeRef ref) {
 		return NodeServiceFactory.getNodeService(ref.getRepositoryId()).getPreview(ref.getStoreProtocol(),ref.getStoreId(),ref.getNodeId(),null);
+	}
+	public static NodeRef getCompanyHome() {
+		ApplicationContext applicationContext = AlfAppContextGate.getApplicationContext();
+		Repository repositoryHelper = (Repository) applicationContext.getBean("repositoryHelper");
+		return repositoryHelper.getCompanyHome();
 	}
 }

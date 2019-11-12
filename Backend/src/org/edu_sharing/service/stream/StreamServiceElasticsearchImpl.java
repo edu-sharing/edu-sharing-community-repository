@@ -9,6 +9,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.lang3.NotImplementedException;
 import org.apache.http.HttpHost;
 import org.apache.lucene.search.join.ScoreMode;
 import org.edu_sharing.repository.server.tools.PropertiesHelper;
@@ -36,6 +37,7 @@ import org.elasticsearch.common.xcontent.XContentBuilder;
 import org.elasticsearch.index.query.BoolQueryBuilder;
 import org.elasticsearch.index.query.QueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
+import org.elasticsearch.index.reindex.DeleteByQueryRequest;
 import org.elasticsearch.script.Script;
 import org.elasticsearch.script.ScriptType;
 import org.elasticsearch.search.SearchHit;
@@ -275,6 +277,17 @@ public class StreamServiceElasticsearchImpl implements StreamService {
 		request.id(id);
 		client.delete(request);
 	}
+
+	@Override
+	public void deleteEntriesByAuthority(String username) {
+		//@TODO this is not supported in the current api version
+		// we need to update the api
+		// https://www.elastic.co/guide/en/elasticsearch/client/java-rest/6.5/java-rest-high-document-delete-by-query.html
+		//DeleteByQueryRequest request = new DeleteByQueryRequest();
+		//client.delete(request);
+		throw new NotImplementedException("deleteEntriesByAuthority");
+	}
+
 	@Override
 	public void updateStatus(String id,String authority,ContentEntry.Audience.STATUS status) throws Exception {
 		UpdateRequest updateRequest = new UpdateRequest();

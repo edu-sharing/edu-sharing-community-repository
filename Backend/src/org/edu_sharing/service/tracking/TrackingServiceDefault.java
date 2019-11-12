@@ -88,14 +88,24 @@ public abstract class TrackingServiceDefault implements TrackingService{
         if(username==null)
             username=AuthenticationUtil.getFullyAuthenticatedUser();
 
+        UserTrackingMode mode=getUserTrackingMode();
+        if (mode.equals(UserTrackingMode.obfuscate))
+            return DigestUtils.shaHex(username);
+        if (mode.equals(UserTrackingMode.full))
+            return username;
+
+        // we need any kind of stable id for tracking, so we'll generate a random, hopefully unique UUID
+        return UUID.randomUUID().toString();
+    }
+    protected UserTrackingMode getUserTrackingMode(){
         String mode=RepoFactory.getEdusharingProperty(CCConstants.EDU_SHARING_PROPERTIES_PROPERTY_TRACKING_USER);
         if(mode==null)
-            // we need any kind of stable id for tracking, so we'll generate a random, hopefully unique UUID
-            return UUID.randomUUID().toString();
-        if(mode.equalsIgnoreCase("obfuscate"))
-            return DigestUtils.shaHex(username);
-        if(mode.equalsIgnoreCase("full"))
-            return username;
-        return null;
+            return UserTrackingMode.none;
+        return UserTrackingMode.valueOf(mode);
+    }
+    protected enum UserTrackingMode{
+        none,
+        obfuscate,
+        full
     }
 }

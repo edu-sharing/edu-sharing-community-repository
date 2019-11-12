@@ -20,14 +20,18 @@ import org.apache.log4j.Logger;
 import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.server.MCAlfrescoAPIClient;
+import org.edu_sharing.repository.server.jobs.helper.NodeRunner;
 import org.edu_sharing.repository.server.tools.ApplicationInfoList;
 import org.edu_sharing.repository.server.tools.VCardConverter;
+import org.edu_sharing.repository.server.tools.cache.EduSharingRatingCache;
 import org.edu_sharing.repository.server.tools.cache.RepositoryCache;
 import org.edu_sharing.service.authentication.ScopeUserHomeService;
 import org.edu_sharing.service.authentication.ScopeUserHomeServiceFactory;
 import org.edu_sharing.service.collection.CollectionServiceFactory;
 import org.edu_sharing.service.nodeservice.NodeServiceFactory;
 import org.edu_sharing.service.nodeservice.NodeServiceHelper;
+import org.edu_sharing.service.stream.StreamServiceFactory;
+import org.edu_sharing.service.tracking.TrackingServiceFactory;
 import org.springframework.context.ApplicationContext;
 
 
@@ -155,7 +159,7 @@ public class PersonLifecycleService {
 		String userName = (String)nodeService.getProperty(personNodeRef, QName.createQName(CCConstants.CM_PROP_PERSON_USERNAME));
 		if(status != null && PersonStatus.todelete.name().equals(status)) {
 			if(hasAssigning(options) &&
-					(options.receiver==null || options.receiver.isEmpty()) || (options.receiverGroup==null || options.receiverGroup.isEmpty())){
+					((options.receiver==null || options.receiver.isEmpty()) || (options.receiverGroup==null || options.receiverGroup.isEmpty()))){
 				throw new IllegalArgumentException("Some options set to assign, but no user + org was specified for assigning");
 			}
 			//handleHomeHolder(personNodeRef,options,null);
@@ -164,6 +168,11 @@ public class PersonLifecycleService {
 			handleSharedFiles(personNodeRef,options);
 
 			handleCollections(personNodeRef,options);
+
+			handleStream(personNodeRef,options);
+			handleComments(personNodeRef,options);
+			handleRatings(personNodeRef,options);
+			handleStatistics(personNodeRef,options);
 			if(true) return;
 
 			logger.info("deleting person");
@@ -172,6 +181,51 @@ public class PersonLifecycleService {
 		}
 		else{
 			throw new IllegalArgumentException("Person "+userName+" is not marked for deletion. Cancelling");
+		}
+	}
+
+	private void handleStatistics(NodeRef personNodeRef, PersonDeleteOptions options) {
+		if(options.statistics.delete){
+			String username = (String)nodeService.getProperty(personNodeRef,
+					QName.createQName(CCConstants.CM_PROP_PERSON_USERNAME));
+			try {
+				TrackingServiceFactory.getTrackingService().deleteUserData(username);
+				logger.info("removed tracking/statistics data");
+			}catch(Throwable t){
+				throw new RuntimeException(t);
+			}
+		}
+	}
+	private void handleRatings(NodeRef personNodeRef, PersonDeleteOptions options) {
+		if(options.ratings.delete){
+			String username = (String)nodeService.getProperty(personNodeRef,
+					QName.createQName(CCConstants.CM_PROP_PERSON_USERNAME));
+
+			List<NodeRef> ratings = NodeServiceFactory.getLocalService().getChildrenRecursive(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, NodeServiceHelper.getCompanyHome().getId(), Collections.singletonList(CCConstants.CCM_TYPE_RATING));
+			ratings=ratings.stream().filter((ref)->ownableService.getOwner(ref).equals(username)).collect(Collectors.toList());
+			// invalidate the cache for all nodes where ratings have been removed
+			ratings.forEach((ref)-> EduSharingRatingCache.delete(nodeService.getPrimaryParent(ref).getParentRef()));
+			deleteAllRefs(ratings);
+			logger.info("removed "+ratings.size()+" ratings");
+		}
+	}
+	private void handleComments(NodeRef personNodeRef, PersonDeleteOptions options) {
+		if(options.comments.delete){
+			String username = (String)nodeService.getProperty(personNodeRef,
+					QName.createQName(CCConstants.CM_PROP_PERSON_USERNAME));
+
+			List<NodeRef> comments = NodeServiceFactory.getLocalService().getChildrenRecursive(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, NodeServiceHelper.getCompanyHome().getId(), Collections.singletonList(CCConstants.CCM_TYPE_COMMENT));
+			comments=comments.stream().filter((ref)->ownableService.getOwner(ref).equals(username)).collect(Collectors.toList());
+			deleteAllRefs(comments);
+			logger.info("removed "+comments.size()+" comments");
+		}
+	}
+
+	private void handleStream(NodeRef personNodeRef, PersonDeleteOptions options) {
+		if(options.stream.delete) {
+			String username = (String)nodeService.getProperty(personNodeRef,
+					QName.createQName(CCConstants.CM_PROP_PERSON_USERNAME));
+			StreamServiceFactory.getStreamService().deleteEntriesByAuthority(username);
 		}
 	}
 
@@ -548,28 +602,6 @@ public class PersonLifecycleService {
 			nodeService.addAspect(homeFolder, ContentModel.ASPECT_TEMPORARY, null);
 			nodeService.deleteNode(homeFolder);
 		}
-	}
-	
-	
-	
-	private boolean keepSharedContent(String role){
-		return false;
-	}
-	private void deleteUserHome(NodeRef personNodeRef, boolean keepCC) {
-		NodeRef homeFolder = getHomeFolder(personNodeRef);
-		
-		if(keepCC) {
-			//@TODO
-			logger.info("not implemented yet");
-			return;
-		}else {
-			/**
-			 * remove without archiving
-			 */
-			nodeService.addAspect(homeFolder, ContentModel.ASPECT_TEMPORARY, null);
-			nodeService.deleteNode(homeFolder);
-		}
-		
 	}
 	
 	private NodeRef getHomeFolder(NodeRef personNodeRef) {

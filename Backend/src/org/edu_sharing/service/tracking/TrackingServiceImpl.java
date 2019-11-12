@@ -37,6 +37,10 @@ public class TrackingServiceImpl extends TrackingServiceDefault{
 
     public static String TRACKING_NODE_TABLE_ID = "edu_tracking_node";
     public static String TRACKING_USER_TABLE_ID = "edu_tracking_user";
+
+    public static String TRACKING_DELETE_NODE = "DELETE FROM " + TRACKING_NODE_TABLE_ID +" WHERE authority = ?";
+    public static String TRACKING_DELETE_USER = "DELETE FROM " + TRACKING_USER_TABLE_ID +" WHERE authority = ?";
+
     public static String TRACKING_INSERT_NODE = "insert into " + TRACKING_NODE_TABLE_ID +" (node_id,node_uuid,node_version,authority,authority_organization,authority_mediacenter,time,type,data) VALUES (?,?,?,?,?,?,?,?,?)";
     public static String TRACKING_INSERT_USER = "insert into " + TRACKING_USER_TABLE_ID +" (authority,authority_organization,authority_mediacenter,time,type,data) VALUES (?,?,?,?,?,?)";
     public static String TRACKING_STATISTICS_CUSTOM_GROUPING = "SELECT type,COUNT(*) :fields from :table as tracking" +
@@ -337,6 +341,22 @@ public class TrackingServiceImpl extends TrackingServiceDefault{
         }finally {
             dbAlf.cleanUp(con, statement);
         }
+    }
+
+    @Override
+    public void deleteUserData(String username) throws Throwable {
+        if(getUserTrackingMode().equals(UserTrackingMode.none)){
+            logger.info("User tracking is set to none, deleteUserData will do nothing");
+            return;
+        }
+        execDatabaseQuery(TRACKING_DELETE_NODE,(statement)->{
+            statement.setString(1,getTrackedUsername(username));
+            return true;
+        });
+        execDatabaseQuery(TRACKING_DELETE_USER,(statement)->{
+            statement.setString(1,getTrackedUsername(username));
+            return true;
+        });
     }
 
     private void setAuthorityFromResult(ResultSet resultSet, StatisticEntry entry) throws SQLException {

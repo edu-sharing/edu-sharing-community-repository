@@ -391,7 +391,9 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
 		for(ChildAssociationRef assoc : assocs){
 			result.add(assoc.getChildRef());
 		}
-		List<ChildAssociationRef> maps = nodeService.getChildAssocs(new NodeRef(store, nodeId), new HashSet<>(Arrays.asList(QName.createQName(CCConstants.CCM_TYPE_MAP),QName.createQName(CCConstants.CM_TYPE_FOLDER))));
+		//List<ChildAssociationRef> maps = nodeService.getChildAssocs(new NodeRef(store, nodeId), new HashSet<>(Arrays.asList(QName.createQName(CCConstants.CCM_TYPE_MAP),QName.createQName(CCConstants.CM_TYPE_FOLDER))));
+		// in theory, every object may have children, so we need to access all of them
+		List<ChildAssociationRef> maps = nodeService.getChildAssocs(new NodeRef(store, nodeId));
 		String user = AuthenticationUtil.getFullyAuthenticatedUser();
 		// run in parallel to increase performance
 		maps.parallelStream().forEach((map)->{
