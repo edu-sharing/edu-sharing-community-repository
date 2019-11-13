@@ -22,6 +22,7 @@ import org.alfresco.repo.node.NodeServicePolicies.OnUpdatePropertiesPolicy;
 import org.alfresco.repo.policy.BehaviourFilter;
 import org.alfresco.repo.policy.JavaBehaviour;
 import org.alfresco.repo.policy.PolicyComponent;
+import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.repo.version.VersionModel;
 import org.alfresco.service.cmr.action.Action;
 import org.alfresco.service.cmr.action.ActionService;
@@ -360,23 +361,27 @@ public class NodeCustomizationPolicies implements OnContentUpdatePolicy, OnCreat
 				//nodeService.setProperty(nodeRef, QName.createQName(CCConstants.LOM_PROP_GENERAL_TITLE), nameAfter);
 			}
 			// refresh all collection io's metadata
-			String query="ASPECT:\""+CCConstants.CCM_ASPECT_COLLECTION_IO_REFERENCE+"\" AND @ccm\\:original:\""+nodeRef.getId()+"\"";
-			result=searchService.query(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE,SearchService.LANGUAGE_LUCENE,query);
-			for(NodeRef ref : result.getNodeRefs()){
-				Map<QName, Serializable> originalProperties = nodeService.getProperties(ref);
-				// security check: make sure we have an object which really matches the solr query
-				if(!nodeService.hasAspect(ref,QName.createQName(CCConstants.CCM_ASPECT_COLLECTION_IO_REFERENCE)) || !originalProperties.get(QName.createQName(CCConstants.CCM_PROP_IO_ORIGINAL)).equals(nodeRef.getId())){
-					logger.warn("Solr query for node "+nodeRef.getId()+" returned node "+ref.getId()+", but it's metadata do not match");
-					continue;
-				}
-				for(QName prop : after.keySet()){
-					if(Arrays.asList(IO_REFERENCE_COPY_PROPERTIES).contains(prop.toString())){
-						originalProperties.put(prop, after.get(prop));
+			// run as admin to refresh all, see ESPUB-633
+			AuthenticationUtil.runAsSystem(()-> {
+				String query = "ASPECT:\"" + CCConstants.CCM_ASPECT_COLLECTION_IO_REFERENCE + "\" AND @ccm\\:original:\"" + nodeRef.getId() + "\"";
+				result = searchService.query(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, SearchService.LANGUAGE_LUCENE, query);
+				for (NodeRef ref : result.getNodeRefs()) {
+					Map<QName, Serializable> originalProperties = nodeService.getProperties(ref);
+					// security check: make sure we have an object which really matches the solr query
+					if (!nodeService.hasAspect(ref, QName.createQName(CCConstants.CCM_ASPECT_COLLECTION_IO_REFERENCE)) || !originalProperties.get(QName.createQName(CCConstants.CCM_PROP_IO_ORIGINAL)).equals(nodeRef.getId())) {
+						logger.warn("Solr query for node " + nodeRef.getId() + " returned node " + ref.getId() + ", but it's metadata do not match");
+						continue;
 					}
+					for (QName prop : after.keySet()) {
+						if (Arrays.asList(IO_REFERENCE_COPY_PROPERTIES).contains(prop.toString())) {
+							originalProperties.put(prop, after.get(prop));
+						}
+					}
+					nodeService.setProperties(ref, originalProperties);
+					new RepositoryCache().remove(ref.getId());
 				}
-				nodeService.setProperties(ref, originalProperties);
-				new RepositoryCache().remove(ref.getId());
-			}
+				return null;
+			});
 		}
 		
 		// refresh Titel for Maps changed in webdav
