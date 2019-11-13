@@ -383,13 +383,13 @@ public class PersonLifecycleService {
 		}
 		if(!options.homeFolder.keepFolderStructure){
 			if(options.homeFolder.privateFiles.equals(PersonDeleteOptions.DeleteMode.assign)){
-				NodeRef privateFiles = getOrCreateTargetFolder(personNodeRef, options,scope,USERHOME_FILES);
+				NodeRef privateFiles = getOrCreateTargetFolder(personNodeRef, options,USERHOME_FILES,scope);
 				List<NodeRef> refs = getFilesByLicense(homeFolder, false);
 				setOwnerAndPermissions(refs,userName,options);
 				moveNodes(refs,privateFiles);
 			}
 			if(options.homeFolder.ccFiles.equals(PersonDeleteOptions.DeleteMode.assign)){
-				NodeRef ccFiles = getOrCreateTargetFolder(personNodeRef, options,scope,USERHOME_FILES_CC);
+				NodeRef ccFiles = getOrCreateTargetFolder(personNodeRef, options,USERHOME_FILES_CC,scope);
 				List<NodeRef> refs = getFilesByLicense(homeFolder, true);
 				setOwnerAndPermissions(refs,userName,options);
 				moveNodes(refs,ccFiles);
