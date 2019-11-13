@@ -757,7 +757,7 @@ export class PermissionsAuthoritiesComponent {
           offset: this.memberListOffset
         };
         this.memberListOffset+=this.connector.numberPerRequest;
-        this.iam.searchUsers(this.manageMemberSearch, true, request).subscribe((data) => {
+        this.iam.searchUsers(this.manageMemberSearch, true, '', request).subscribe((data) => {
             this.memberList=this.memberList.concat(data.users);
             this.memberList=Helper.deepCopy(this.memberList);
         });
