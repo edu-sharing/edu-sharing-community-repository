@@ -162,8 +162,8 @@ public class PersonLifecycleService {
 					((options.receiver==null || options.receiver.isEmpty()) || (options.receiverGroup==null || options.receiverGroup.isEmpty()))){
 				throw new IllegalArgumentException("Some options set to assign, but no user + org was specified for assigning");
 			}
-			//handleHomeHolder(personNodeRef,options,null);
-			//handleHomeHolder(personNodeRef,options,CCConstants.CCM_VALUE_SCOPE_SAFE);
+			handleHomeHolder(personNodeRef,options,null);
+			handleHomeHolder(personNodeRef,options,CCConstants.CCM_VALUE_SCOPE_SAFE);
 
 			handleSharedFiles(personNodeRef,options);
 
@@ -173,7 +173,6 @@ public class PersonLifecycleService {
 			handleComments(personNodeRef,options);
 			handleRatings(personNodeRef,options);
 			handleStatistics(personNodeRef,options);
-			if(true) return;
 
 			logger.info("deleting person");
 			nodeService.addAspect(personNodeRef, ContentModel.ASPECT_TEMPORARY, null);
