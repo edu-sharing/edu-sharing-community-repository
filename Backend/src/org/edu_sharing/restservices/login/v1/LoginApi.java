@@ -128,7 +128,7 @@ public class LoginApi  {
        		String statusCode = Login.STATUS_CODE_OK;
        		if(authenticated){
        			
-       			NodeRef ref  = ScopeUserHomeServiceFactory.getScopeUserHomeService().getUserHome(credentials.getUserName(), credentials.getScope());
+       			NodeRef ref  = ScopeUserHomeServiceFactory.getScopeUserHomeService().getUserHome(credentials.getUserName(), credentials.getScope(), true);
        			userHome = ref.getId();
                	req.getSession().setMaxInactiveInterval(service.getSessionTimeout());
                	

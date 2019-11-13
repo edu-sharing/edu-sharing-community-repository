@@ -2518,7 +2518,8 @@ public class MCAlfrescoAPIClient extends MCAlfrescoBaseClient {
 			
 			NodeRef userHome = ScopeUserHomeServiceFactory.getScopeUserHomeService().getUserHome(
 					username, 
-					NodeServiceInterceptor.getEduSharingScope());
+					NodeServiceInterceptor.getEduSharingScope(),
+					true);
 			String userHomeNodeId = (userHome != null) ? userHome.getId() : null;
 			return userHomeNodeId;
 		}

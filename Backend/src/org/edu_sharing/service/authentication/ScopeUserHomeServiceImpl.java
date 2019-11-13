@@ -76,12 +76,12 @@ public class ScopeUserHomeServiceImpl implements ScopeUserHomeService{
 	}
 	
 	@Override
-	public NodeRef getUserHome(String username, String scope) {
+	public NodeRef getUserHome(String username, String scope,boolean createIfNotExists) {
 		NodeRef nodeRefUserHome = null;
 		NodeRef personNodeRef = personService.getPerson(username);
 		List<ChildAssociationRef> childAssocs = nodeService.getChildAssocsByPropertyValue(personNodeRef, PROP_PERSON_SCOPE_NAME, scope);
 		
-		if(childAssocs == null || childAssocs.size() == 0){
+		if((childAssocs == null || childAssocs.size() == 0) && createIfNotExists){
 			
 			
 			RunAsWork<NodeRef> runAs = new RunAsWork<NodeRef>() {

@@ -83,7 +83,7 @@ import org.springframework.context.ApplicationContext;
 public class PersonLifecycleService {
 
 	private static final String DELETED_PERSONS_FOLDER = "DELETED_PERSONS";
-	private static final String USERHOME_FILES = "USERHOMEFILES";
+	private static final String USERHOME_FILES = "USERHOME_FILES";
 	private static final String USERHOME_FILES_CC = "USERHOME_CC_FILES";
 	private static final String SHARED_FILES = "SHARED_FILES";
 	private static final String SHARED_FILES_CC = "SHARED_CC_FILES";
@@ -245,7 +245,7 @@ public class PersonLifecycleService {
 			homeFolder = getHomeFolder(personNodeRef);
 		}else {
 			ScopeUserHomeService scopeUserHomeService = ScopeUserHomeServiceFactory.getScopeUserHomeService();
-			homeFolder = scopeUserHomeService.getUserHome(username, scope);
+			homeFolder = scopeUserHomeService.getUserHome(username, scope, false);
 		}
 		if(homeFolder != null) {
 			List<ChildAssociationRef> childAssocs = nodeService.getChildAssocs(homeFolder);
@@ -346,7 +346,7 @@ public class PersonLifecycleService {
 		}
 		else{
 			ScopeUserHomeService scopeUserHomeService = ScopeUserHomeServiceFactory.getScopeUserHomeService();
-			homeFolder = scopeUserHomeService.getUserHome((String) nodeService.getProperty(personNodeRef, QName.createQName(CCConstants.CM_PROP_PERSON_USERNAME)), scope);
+			homeFolder = scopeUserHomeService.getUserHome((String) nodeService.getProperty(personNodeRef, QName.createQName(CCConstants.CM_PROP_PERSON_USERNAME)), scope, false);
 			if(homeFolder==null){
 				logger.info("Person "+userName+" does not have a scope folder for "+scope+", skipping it");
 				return;
@@ -586,7 +586,7 @@ public class PersonLifecycleService {
 	
 	private void deleteScopeUserHome(String username, String scope, boolean keepCC) {
 		ScopeUserHomeService scopeUserHomeService = ScopeUserHomeServiceFactory.getScopeUserHomeService();
-		NodeRef homeFolder = scopeUserHomeService.getUserHome(username, scope);
+		NodeRef homeFolder = scopeUserHomeService.getUserHome(username, scope, false);
 		if(homeFolder == null) {
 			return;
 		}
