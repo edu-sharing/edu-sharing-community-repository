@@ -1,5 +1,5 @@
 import {Component} from "@angular/core";
-import {DeleteMode, DialogButton, Group, ListItem, Person, RestAdminService, RestConstants, RestIamService, User} from "../../../core-module/core.module";
+import {DeleteMode, DialogButton, Group, ListItem, Person, RestAdminService, RestConstants, RestIamService, SessionStorageService, User} from "../../../core-module/core.module";
 import {Toast} from "../../../core-ui-module/toast";
 import {TranslateService} from "@ngx-translate/core";
 import {AuthorityNamePipe} from "../../../core-ui-module/pipes/authority-name.pipe";
@@ -24,6 +24,7 @@ export class PermissionsDeleteComponent {
      private iam : RestIamService,
      private admin : RestAdminService,
      private toast : Toast,
+     private storage : SessionStorageService,
      private translate : TranslateService
  ){
      // send list of target users + options for these specific users
@@ -58,7 +59,9 @@ export class PermissionsDeleteComponent {
       receiver:'',
       receiverGroup:''
     };
-
+     this.storage.get('delete_users_options', this.options).subscribe((data: any) => {
+         this.options = data;
+     });
      this.columns.push(new ListItem('USER', RestConstants.AUTHORITY_NAME));
      this.columns.push(new ListItem('USER', RestConstants.AUTHORITY_FIRSTNAME));
      this.columns.push(new ListItem('USER', RestConstants.AUTHORITY_LASTNAME));
@@ -121,6 +124,7 @@ export class PermissionsDeleteComponent {
           this.options.receiverGroup = this.receiverGroup.authorityName;
       }
       this.toast.showProgressDialog();
+      this.storage.set('delete_users_options',this.options);
       this.admin.deletePersons(this.selectedUsers.map((u)=>u.authorityName),this.options).subscribe(()=>{
           this.toast.closeModalDialog();
       },(error)=>{
