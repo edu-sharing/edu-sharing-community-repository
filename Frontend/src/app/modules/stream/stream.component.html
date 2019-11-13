@@ -87,7 +87,7 @@
                     </div>
                     <div class="stream-box-desc">{{node.properties['cclom:general_description']}}</div>
                     <div class="stream-box-kompetenzen" > <div class="chip" *ngFor="let keyword of node.properties['cclom:general_keyword']">{{keyword}}</div> </div>
-                    <div tabindex="0" [lazyLoad]="node.preview.url" class="stream-box-image" (click)="onStreamObjectClick(node)" (keyup.enter)="onStreamObjectClick(node)">
+                    <div tabindex="0" [lazyLoad]="getPreview(node)" class="stream-box-image" (click)="onStreamObjectClick(node)" (keyup.enter)="onStreamObjectClick(node)">
                         <div class="bottom-right">{{ node.commentCount }} </div>
                         <div class="bottom-right-icon"><i class="material-icons stic" >comment</i> </div>
                     </div>
@@ -117,7 +117,7 @@
                     <div class="stream-box-kompetenzen" > <div class="chip" *ngFor="let keyword of strm.properties['cclom:general_keyword']">{{keyword}}</div> </div>
 
                     <div class="stream-box-nonodes" *ngIf="strm.nodes.length === 0"> {{'STREAM.OBJECT.NONODES' | translate }} </div>
-                    <div tabindex="0" [lazyLoad]="strm.nodes[0].preview.url" class="stream-box-image" (click)="onStreamObjectClick(strm)" (keyup.enter)="onStreamObjectClick(strm)" *ngIf="strm.nodes[0]">
+                    <div tabindex="0" [lazyLoad]="getPreview(strm.nodes[0])" class="stream-box-image" (click)="onStreamObjectClick(strm)" (keyup.enter)="onStreamObjectClick(strm)" *ngIf="strm.nodes[0]">
                         <div class="bottom-left">{{ (strm.nodes[0].name.length > 40) ? (strm.nodes[0].name | slice:0:40)+'...':(strm.nodes[0].name) }}</div>
                         <div class="bottom-right">{{ strm.nodes[0].commentCount }} </div>
                         <div class="bottom-right-icon"><i class="material-icons stic" >comment</i> </div>

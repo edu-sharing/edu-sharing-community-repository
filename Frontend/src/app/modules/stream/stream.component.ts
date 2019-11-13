@@ -385,4 +385,7 @@ export class StreamComponent {
   public getTitle(node:Node){
     return RestHelper.getTitle(node);
   }
+  getPreview(node: any) {
+    return node.preview.url+"&crop=true&maxWidth=500&maxHeight=500";
+  }
 }

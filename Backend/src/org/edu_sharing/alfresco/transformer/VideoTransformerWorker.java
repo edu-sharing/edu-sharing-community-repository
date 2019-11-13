@@ -75,7 +75,7 @@ public class VideoTransformerWorker extends ContentTransformerHelper implements 
 		
 		return false;
 	}
-	public static void convertFFMPEG(File sourceFile,File targetFile) throws InterruptedException, IOException {
+	public static void convertFFMPEG(File sourceFile,File targetFile,Format format) throws InterruptedException, IOException {
 
         
 	//        long videoLength = getViedeoLength(sourceFile.getAbsolutePath());
@@ -85,12 +85,24 @@ public class VideoTransformerWorker extends ContentTransformerHelper implements 
 	        
         		// create jpg at the start
 	        	//ProcessBuilder pb = new ProcessBuilder("ffmpeg", "-i",sourceFile.getCanonicalPath(),"-vf","thumbnail,scale=640:360","-frames:v","1","-ss","1", "-y", targetFile.getCanonicalPath());
-        	
+
+				ProcessBuilder pb;
         		// create gif animation
-    			String FRAME_COUNT="5";
-    			String GIF_FRAMERATE="1";
-        		ProcessBuilder pb = new ProcessBuilder("ffmpeg", "-i",sourceFile.getCanonicalPath(),"-t",FRAME_COUNT,"-preset","ultrafast","-lavfi","setpts=0.075*PTS,scale=400:-1","-r",GIF_FRAMERATE,"-f","gif","-y",targetFile.getCanonicalPath());
-	        	//ffmpeg -i <video> -vf  "thumbnail,scale=640:360" -frames:v 1 -ss 1 <image>
+				if(format.equals(Format.gif)) {
+					String FRAME_COUNT = "5";
+					String GIF_FRAMERATE = "1";
+					pb = new ProcessBuilder("ffmpeg", "-i", sourceFile.getCanonicalPath(), "-t", FRAME_COUNT, "-preset", "ultrafast", "-lavfi", "setpts=0.075*PTS,scale=400:-1", "-r", GIF_FRAMERATE, "-f", "gif", "-y", targetFile.getCanonicalPath());
+					//ffmpeg -i <video> -vf  "thumbnail,scale=640:360" -frames:v 1 -ss 1 <image>
+				}
+				else{
+					// create webp animation
+					String TIME_COUNT="15";
+					String WEBP_FRAMERATE="5";
+					String WEBP_QUALITY="20";
+					pb = new ProcessBuilder("ffmpeg", "-i",sourceFile.getCanonicalPath(),"-t",TIME_COUNT,"-loop","0","-q",WEBP_QUALITY,"-filter","setpts=0.15*PTS,scale=400:-1","-r",WEBP_FRAMERATE,"-f","webp","-y",targetFile.getCanonicalPath());
+				}
+
+
 	        	pb.environment().remove("LD_LIBRARY_PATH");
 				Process p = pb.start();
 				
@@ -99,10 +111,11 @@ public class VideoTransformerWorker extends ContentTransformerHelper implements 
 		          public void run(){
 		                Scanner stdin = new Scanner(p.getErrorStream());
 		                while(stdin.hasNextLine()){
-		                   stdin.nextLine();
-		                }
+							logger.warn("ffmpeg: "+stdin.nextLine());
+						}
 		                stdin.close();
 		                }
+
 			        }).start();
 
 				p.waitFor();
@@ -115,7 +128,7 @@ public class VideoTransformerWorker extends ContentTransformerHelper implements 
 				*/
 				
 
-	        	logger.info("ffmpeg: decoded gif, size: "+targetFile.length());
+	        	logger.info("ffmpeg: decoded size: "+targetFile.length());
 	//        }else{
 	//        	logger.error("determined videoLength is to small");
 	//        }
@@ -150,13 +163,19 @@ public class VideoTransformerWorker extends ContentTransformerHelper implements 
 	        
 	        // pull reader file into source temp file
 	        reader.getContent(sourceFile);
-	        convertFFMPEG(sourceFile, targetFile);
+	        convertFFMPEG(sourceFile, targetFile,Format.webp);
 	        
 	        if(targetFile.length() > 0){
 	        	writer.putContent(targetFile);
 	        }else{
-	        	logger.warn("ffmpeg: generated preview file has no content");
-	        	throw new AlfrescoRuntimeException("ffmpeg: generated preview file has no content");
+	        	logger.warn("ffmpeg failed to convert webp. Check version is greater or equal to (March 24, 2014, FFmpeg 2.2). Will fall back to gif.");
+				convertFFMPEG(sourceFile, targetFile,Format.gif);
+				if(targetFile.length() > 0){
+					writer.putContent(targetFile);
+				}
+				else {
+					throw new AlfrescoRuntimeException("ffmpeg: generated preview file has no content");
+				}
 	        }
 	        writeLength(sourceFile,options);
 	        
@@ -172,7 +191,7 @@ public class VideoTransformerWorker extends ContentTransformerHelper implements 
 	}
 	public static void main(String[] args){
 		try {
-			convertFFMPEG(new File("D:\\temp\\test.mp4"),new File("D:\\temp\\test"+System.currentTimeMillis()+".gif"));
+			convertFFMPEG(new File("C:\\temp\\test.mov"),new File("C:\\temp\\test"+System.currentTimeMillis()+".webp"),Format.webp);
 		}catch(Exception e) {
 			
 		}
@@ -281,6 +300,10 @@ public class VideoTransformerWorker extends ContentTransformerHelper implements 
 	public void setTransactionService(TransactionService transactionService) {
 		this.transactionService = transactionService;
 	}
-	
-	
+
+
+	private enum Format {
+		webp,
+		gif
+	}
 }
