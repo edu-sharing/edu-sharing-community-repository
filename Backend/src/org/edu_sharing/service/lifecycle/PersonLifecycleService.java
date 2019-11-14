@@ -312,34 +312,43 @@ public class PersonLifecycleService {
 		parameters.setLanguage(org.alfresco.service.cmr.search.SearchService.LANGUAGE_LUCENE);
 		List<NodeRef> files = SearchServiceHelper.queryAll(parameters, 0);
 		*/
-		List<NodeRef> allFiles = new ArrayList<NodeRef>();
-		getAllSharedFolders(personNodeRef,null).forEach(
-				(childAssociationRef -> {
-					allFiles.addAll(NodeServiceFactory.getLocalService().getChildrenRecursive(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE,childAssociationRef.getChildRef().getId(),null,RecurseMode.Folders));
-				})
-		);
-		logger.info("Total shared files to check: "+allFiles.size());
-		List<NodeRef> files = allFiles.stream().filter((ref) -> ownableService.getOwner(ref).equals(userName)).collect(Collectors.toList());
-		logger.info("Shared files where "+userName+" is owner: "+files.size());
 
-		List<NodeRef> filesPrivate = files.stream().filter((ref) -> !hasCCLicense(ref)).collect(Collectors.toList());
-		List<NodeRef> filesCC = files.stream().filter((ref) -> hasCCLicense(ref)).collect(Collectors.toList());
-		if(options.sharedFolders.privateFiles.equals(PersonDeleteOptions.DeleteMode.assign)){
-			NodeRef target = getOrCreateTargetFolder(personNodeRef, options, SHARED_FILES, null);
-			setOwnerAndPermissions(filesPrivate,userName,options);
-			moveNodes(filesPrivate,target);
+		List<ChildAssociationRef> shared = getAllSharedFolders(personNodeRef, null);
+		if(shared==null) {
+			logger.info("User "+userName+" has no shared folders / orgs");
+
 		}
-		if(options.sharedFolders.ccFiles.equals(PersonDeleteOptions.DeleteMode.assign)){
-			NodeRef target = getOrCreateTargetFolder(personNodeRef, options, SHARED_FILES_CC, null);
-			setOwnerAndPermissions(filesCC,userName,options);
-			moveNodes(filesCC,target);
+		else{
+			List<NodeRef> allFiles = new ArrayList<NodeRef>();
+			shared.forEach(
+					(childAssociationRef -> {
+						allFiles.addAll(NodeServiceFactory.getLocalService().getChildrenRecursive(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, childAssociationRef.getChildRef().getId(), null, RecurseMode.Folders));
+					})
+			);
+			logger.info("Total shared files to check: "+allFiles.size());
+			List<NodeRef> files = allFiles.stream().filter((ref) -> ownableService.getOwner(ref).equals(userName)).collect(Collectors.toList());
+			logger.info("Shared files where "+userName+" is owner: "+files.size());
+
+			List<NodeRef> filesPrivate = files.stream().filter((ref) -> !hasCCLicense(ref)).collect(Collectors.toList());
+			List<NodeRef> filesCC = files.stream().filter((ref) -> hasCCLicense(ref)).collect(Collectors.toList());
+			if(options.sharedFolders.privateFiles.equals(PersonDeleteOptions.DeleteMode.assign)){
+				NodeRef target = getOrCreateTargetFolder(personNodeRef, options, SHARED_FILES, null);
+				setOwnerAndPermissions(filesPrivate,userName,options);
+				moveNodes(filesPrivate,target);
+			}
+			if(options.sharedFolders.ccFiles.equals(PersonDeleteOptions.DeleteMode.assign)){
+				NodeRef target = getOrCreateTargetFolder(personNodeRef, options, SHARED_FILES_CC, null);
+				setOwnerAndPermissions(filesCC,userName,options);
+				moveNodes(filesCC,target);
+			}
+			if(options.sharedFolders.privateFiles.equals(PersonDeleteOptions.DeleteMode.delete)){
+				deleteAllRefs(filesPrivate);
+			}
+			if(options.sharedFolders.ccFiles.equals(PersonDeleteOptions.DeleteMode.delete)){
+				deleteAllRefs(filesCC);
+			}
 		}
-		if(options.sharedFolders.privateFiles.equals(PersonDeleteOptions.DeleteMode.delete)){
-			deleteAllRefs(filesPrivate);
-		}
-		if(options.sharedFolders.ccFiles.equals(PersonDeleteOptions.DeleteMode.delete)){
-			deleteAllRefs(filesCC);
-		}
+
 	}
 
 	private void handleHomeHolder(NodeRef personNodeRef, PersonDeleteOptions options, String scope) {
