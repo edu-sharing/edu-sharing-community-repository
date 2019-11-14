@@ -86,6 +86,7 @@
   "RENDERSERVICE_API_ERROR":"error while reaching rendering service. Please report this error an administrator.",
   "SYSTEM_FOLDER_DELETE_ERROR":"This system folder can not be deleted",
   "GENERIC_QUOTA_ERROR_TITLE":"The operation could not be carried out because the upload quota was exceeded",
+  "CONNECTOR_FORMAT_LABEL":"File type",
   "CONNECTOR_QUOTA_REACHED_TITLE":"Upload quota exceeded",
   "CONNECTOR_QUOTA_REACHED_MESSAGE":"This function is unavailable because the upload quota is fully exceeded.\n\nDelete files to reclaim storage space and try it again.",
   "TOOLPERMISSION_ERROR":"You have insufficient permissions for this task",
