@@ -380,7 +380,7 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
 		return result;
 	}
 	@Override
-	public List<NodeRef> getChildrenRecursive(StoreRef store, String nodeId,List<String> types) {
+	public List<NodeRef> getChildrenRecursive(StoreRef store, String nodeId,List<String> types,RecurseMode recurseMode) {
 		// this method uses nodeServiceAlfresco instead of nodeService
 		// to prevent that recursive fetch data of user homes will fetch (and also produce duplicates) of the shared org folders
 		List<ChildAssociationRef> assocs;
@@ -395,13 +395,21 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
 		for(ChildAssociationRef assoc : assocs){
 			result.add(assoc.getChildRef());
 		}
-		//List<ChildAssociationRef> maps = nodeServiceAlfresco.getChildAssocs(new NodeRef(store, nodeId), new HashSet<>(Arrays.asList(QName.createQName(CCConstants.CCM_TYPE_MAP),QName.createQName(CCConstants.CM_TYPE_FOLDER))));
-		// in theory, every object may have children, so we need to access all of them
-		List<ChildAssociationRef> maps = nodeServiceAlfresco.getChildAssocs(new NodeRef(store, nodeId));
+		List<ChildAssociationRef> maps;
+		if(recurseMode.equals(RecurseMode.Folders)) {
+			maps = nodeServiceAlfresco.getChildAssocs(new NodeRef(store, nodeId), new HashSet<>(Arrays.asList(QName.createQName(CCConstants.CCM_TYPE_MAP), QName.createQName(CCConstants.CM_TYPE_FOLDER))));
+		}
+		else if(recurseMode.equals(RecurseMode.All)){
+			// in theory, every object may have children, so we need to access all of them
+			maps = nodeServiceAlfresco.getChildAssocs(new NodeRef(store, nodeId));
+		}
+		else{
+			throw new IllegalArgumentException("invalid RecurseMode");
+		}
 		String user = AuthenticationUtil.getFullyAuthenticatedUser();
 		// run in parallel to increase performance
 		maps.parallelStream().forEach((map)->{
-			AuthenticationUtil.runAs(()->result.addAll(getChildrenRecursive(store,map.getChildRef().getId(),types))
+			AuthenticationUtil.runAs(()->result.addAll(getChildrenRecursive(store,map.getChildRef().getId(),types,recurseMode))
 			,user);
 		});
 		logger.info("Get children recursive finished with "+result.size()+" nodes");

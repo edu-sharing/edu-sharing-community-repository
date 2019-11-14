@@ -12,6 +12,7 @@ import org.edu_sharing.repository.server.importer.OAIPMHLOMImporter;
 import org.edu_sharing.repository.server.tools.cache.RepositoryCache;
 import org.edu_sharing.service.nodeservice.NodeService;
 import org.edu_sharing.service.nodeservice.NodeServiceFactory;
+import org.edu_sharing.service.nodeservice.RecurseMode;
 import org.postgresql.util.PSQLException;
 import org.postgresql.util.ServerErrorMessage;
 import org.springframework.context.ApplicationContext;
@@ -169,9 +170,9 @@ public class NodeRunner {
         try {
             List<NodeRef> nodes;
             if (runAsSystem)
-                nodes = AuthenticationUtil.runAsSystem(() -> nodeService.getChildrenRecursive(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, startFolder, types));
+                nodes = AuthenticationUtil.runAsSystem(() -> nodeService.getChildrenRecursive(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, startFolder, types, RecurseMode.Folders));
             else
-                nodes = nodeService.getChildrenRecursive(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, startFolder, types);
+                nodes = nodeService.getChildrenRecursive(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, startFolder, types, RecurseMode.Folders);
 
             Predicate<? super NodeRef> callFilter = (ref) -> {
                 if (filter == null)

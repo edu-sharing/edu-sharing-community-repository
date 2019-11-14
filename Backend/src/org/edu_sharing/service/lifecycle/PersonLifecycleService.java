@@ -30,6 +30,7 @@ import org.edu_sharing.service.authentication.ScopeUserHomeServiceFactory;
 import org.edu_sharing.service.collection.CollectionServiceFactory;
 import org.edu_sharing.service.nodeservice.NodeServiceFactory;
 import org.edu_sharing.service.nodeservice.NodeServiceHelper;
+import org.edu_sharing.service.nodeservice.RecurseMode;
 import org.edu_sharing.service.stream.StreamServiceFactory;
 import org.edu_sharing.service.tracking.TrackingServiceFactory;
 import org.springframework.context.ApplicationContext;
@@ -162,10 +163,13 @@ public class PersonLifecycleService {
 					((options.receiver==null || options.receiver.isEmpty()) || (options.receiverGroup==null || options.receiverGroup.isEmpty()))){
 				throw new IllegalArgumentException("Some options set to assign, but no user + org was specified for assigning");
 			}
+
+			//shared files are "mounted" in the user home, so always process them first!
+			handleSharedFiles(personNodeRef,options);
+
 			handleHomeHolder(personNodeRef,options,null);
 			handleHomeHolder(personNodeRef,options,CCConstants.CCM_VALUE_SCOPE_SAFE);
 
-			handleSharedFiles(personNodeRef,options);
 
 			handleCollections(personNodeRef,options);
 
@@ -200,7 +204,7 @@ public class PersonLifecycleService {
 			String username = (String)nodeService.getProperty(personNodeRef,
 					QName.createQName(CCConstants.CM_PROP_PERSON_USERNAME));
 
-			List<NodeRef> ratings = NodeServiceFactory.getLocalService().getChildrenRecursive(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, NodeServiceHelper.getCompanyHome().getId(), Collections.singletonList(CCConstants.CCM_TYPE_RATING));
+			List<NodeRef> ratings = NodeServiceFactory.getLocalService().getChildrenRecursive(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, NodeServiceHelper.getCompanyHome().getId(), Collections.singletonList(CCConstants.CCM_TYPE_RATING), RecurseMode.All);
 			ratings=ratings.stream().filter((ref)->ownableService.getOwner(ref).equals(username)).collect(Collectors.toList());
 			// invalidate the cache for all nodes where ratings have been removed
 			ratings.forEach((ref)-> EduSharingRatingCache.delete(nodeService.getPrimaryParent(ref).getParentRef()));
@@ -213,7 +217,7 @@ public class PersonLifecycleService {
 			String username = (String)nodeService.getProperty(personNodeRef,
 					QName.createQName(CCConstants.CM_PROP_PERSON_USERNAME));
 
-			List<NodeRef> comments = NodeServiceFactory.getLocalService().getChildrenRecursive(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, NodeServiceHelper.getCompanyHome().getId(), Collections.singletonList(CCConstants.CCM_TYPE_COMMENT));
+			List<NodeRef> comments = NodeServiceFactory.getLocalService().getChildrenRecursive(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, NodeServiceHelper.getCompanyHome().getId(), Collections.singletonList(CCConstants.CCM_TYPE_COMMENT),RecurseMode.All);
 			comments=comments.stream().filter((ref)->ownableService.getOwner(ref).equals(username)).collect(Collectors.toList());
 			deleteAllRefs(comments);
 			logger.info("removed "+comments.size()+" comments");
@@ -265,7 +269,7 @@ public class PersonLifecycleService {
 		}
 		String userName = (String)nodeService.getProperty(personNodeRef, QName.createQName(CCConstants.CM_PROP_PERSON_USERNAME));
 		NodeRef home = CollectionServiceFactory.getCollectionHome();
-		List<NodeRef> allCollections = NodeServiceFactory.getLocalService().getChildrenRecursive(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE,home.getId(), null);
+		List<NodeRef> allCollections = NodeServiceFactory.getLocalService().getChildrenRecursive(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE,home.getId(), null,RecurseMode.Folders);
 
 		logger.info("Total collection data to check: "+allCollections.size());
 		List<NodeRef> collections = allCollections.stream().filter((ref) -> ownableService.getOwner(ref).equals(userName)).collect(Collectors.toList());
@@ -311,7 +315,7 @@ public class PersonLifecycleService {
 		List<NodeRef> allFiles = new ArrayList<NodeRef>();
 		getAllSharedFolders(personNodeRef,null).forEach(
 				(childAssociationRef -> {
-					allFiles.addAll(NodeServiceFactory.getLocalService().getChildrenRecursive(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE,childAssociationRef.getChildRef().getId(),null));
+					allFiles.addAll(NodeServiceFactory.getLocalService().getChildrenRecursive(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE,childAssociationRef.getChildRef().getId(),null,RecurseMode.Folders));
 				})
 		);
 		logger.info("Total shared files to check: "+allFiles.size());
@@ -367,7 +371,7 @@ public class PersonLifecycleService {
 		if(options.homeFolder.privateFiles.equals(PersonDeleteOptions.DeleteMode.assign)
 				&& options.homeFolder.ccFiles.equals(PersonDeleteOptions.DeleteMode.assign)){
 			if(options.homeFolder.keepFolderStructure){
-				List<NodeRef> childrens = NodeServiceFactory.getLocalService().getChildrenRecursive(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, homeFolder.getId(), null);
+				List<NodeRef> childrens = NodeServiceFactory.getLocalService().getChildrenRecursive(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, homeFolder.getId(), null,RecurseMode.Folders);
 				childrens.add(homeFolder);
 				setOwnerAndPermissions(childrens,userName,options);
 
@@ -492,7 +496,7 @@ public class PersonLifecycleService {
 	 */
 	private List<NodeRef> getFilesByLicense(NodeRef homeFolder,boolean ccLicense) {
 		return NodeServiceFactory.getLocalService().
-				getChildrenRecursive(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE,homeFolder.getId(), Collections.singletonList(CCConstants.CCM_TYPE_IO)).				stream().
+				getChildrenRecursive(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE,homeFolder.getId(), Collections.singletonList(CCConstants.CCM_TYPE_IO),RecurseMode.Folders).stream().
 				filter((ref)-> hasCCLicense(ref)==ccLicense).collect(Collectors.toList());
 	}
 

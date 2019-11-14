@@ -40,7 +40,7 @@ public interface NodeService {
 
 	public HashMap<String, String[]> getNameProperty(String name);
 
-    List<NodeRef> getChildrenRecursive(StoreRef store, String nodeId, List<String> types);
+    List<NodeRef> getChildrenRecursive(StoreRef store, String nodeId, List<String> types,RecurseMode recurseMode);
 
     public NodeRef getChild(StoreRef store, String parentId, String type, String property, Serializable value);
 
