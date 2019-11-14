@@ -4,10 +4,11 @@ import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.apache.lucene.queryParser.QueryParser;
 import org.edu_sharing.alfresco.policy.NodeCustomizationPolicies;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
-public class MetadataQueryBase {
+public class MetadataQueryBase implements Serializable{
     protected String basequery;
     private List<MetadataQueryCondition> conditions=new ArrayList<>();
 
