@@ -119,7 +119,7 @@ public class ScopeUserHomeServiceImpl implements ScopeUserHomeService{
 			nodeRefUserHome = AuthenticationUtil.runAsSystem(runAs);
 			
 			
-		}else{
+		}else if((childAssocs == null || childAssocs.size() == 0)){
 			NodeRef personScope = childAssocs.iterator().next().getChildRef();
 			nodeRefUserHome = (NodeRef)nodeService.getProperty(personScope, PROP_PERSON_SCOPE_HOMEFOLDER);
 		}
