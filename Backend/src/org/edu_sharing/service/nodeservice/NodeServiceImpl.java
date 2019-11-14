@@ -98,6 +98,7 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
 	MetadataSets metadataSets = RepoFactory.getMetadataSetsForRepository(repositoryId);
 	private ServiceRegistry serviceRegistry = null;
 	private NodeService nodeService = null;
+	private NodeService nodeServiceAlfresco = null;
 	private VersionService versionService;
 
 	Logger logger = Logger.getLogger(NodeServiceImpl.class);
@@ -117,6 +118,7 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
 		ApplicationContext applicationContext = AlfAppContextGate.getApplicationContext();
 		serviceRegistry = (ServiceRegistry) applicationContext.getBean(ServiceRegistry.SERVICE_REGISTRY);
 		nodeService = serviceRegistry.getNodeService();
+		nodeServiceAlfresco = (NodeService) applicationContext.getBean("alfrescoDefaultDbNodeService");
 		contentService = serviceRegistry.getContentService();
 		versionService = serviceRegistry.getVersionService();
 		dictionaryService = serviceRegistry.getDictionaryService();
@@ -379,21 +381,23 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
 	}
 	@Override
 	public List<NodeRef> getChildrenRecursive(StoreRef store, String nodeId,List<String> types) {
+		// this method uses nodeServiceAlfresco instead of nodeService
+		// to prevent that recursive fetch data of user homes will fetch (and also produce duplicates) of the shared org folders
 		List<ChildAssociationRef> assocs;
 		if(types==null){
-			assocs = nodeService.getChildAssocs(new NodeRef(store, nodeId));
+			assocs = nodeServiceAlfresco.getChildAssocs(new NodeRef(store, nodeId));
 		}
 		else {
 			Set<QName> typesConverted = types.stream().map(QName::createQName).collect(Collectors.toSet());
-			assocs = nodeService.getChildAssocs(new NodeRef(store, nodeId), typesConverted);
+			assocs = nodeServiceAlfresco.getChildAssocs(new NodeRef(store, nodeId), typesConverted);
 		}
 		List<NodeRef> result=new ArrayList<>();
 		for(ChildAssociationRef assoc : assocs){
 			result.add(assoc.getChildRef());
 		}
-		//List<ChildAssociationRef> maps = nodeService.getChildAssocs(new NodeRef(store, nodeId), new HashSet<>(Arrays.asList(QName.createQName(CCConstants.CCM_TYPE_MAP),QName.createQName(CCConstants.CM_TYPE_FOLDER))));
+		//List<ChildAssociationRef> maps = nodeServiceAlfresco.getChildAssocs(new NodeRef(store, nodeId), new HashSet<>(Arrays.asList(QName.createQName(CCConstants.CCM_TYPE_MAP),QName.createQName(CCConstants.CM_TYPE_FOLDER))));
 		// in theory, every object may have children, so we need to access all of them
-		List<ChildAssociationRef> maps = nodeService.getChildAssocs(new NodeRef(store, nodeId));
+		List<ChildAssociationRef> maps = nodeServiceAlfresco.getChildAssocs(new NodeRef(store, nodeId));
 		String user = AuthenticationUtil.getFullyAuthenticatedUser();
 		// run in parallel to increase performance
 		maps.parallelStream().forEach((map)->{
