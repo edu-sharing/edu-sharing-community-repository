@@ -129,9 +129,10 @@
       "USER_LIST": "Vorgang für folgende Benutzer & deren Daten durchführen",
       "FOLDER_STRUCTURE_DISINTEGRATE": "auflösen (alle Dateien in einen Ordner überführen)",
       "FOLDER_STRUCTURE_KEEP": "beibehalten",
-      "RECEIVER_CAPTION": "Der gewählte Nutzer wird zukünftig als Ersteller der Daten angezeigt",
+      "RECEIVER_CAPTION": "Der gewählte Nutzer wird zukünftig als Ersteller der Daten & Sammlungen angezeigt",
       "RECEIVER": "Nutzer suchen...",
       "RECEIVER_GROUP_CAPTION": "Folgende Organisation soll Verwaltungsrechte auf die Daten erhalten",
+      "RECEIVER_GROUP_HINT": "Die Organisation wird Koordinator aller Ordner, Materialien & Sammlungen. Ausgenommen sind Sammlungsreferenzen in fremden Sammlungen",
       "RECEIVER_GROUP": "Organisation suchen...",
       "START": "Vorgang Starten",
       "CONFIRM": {

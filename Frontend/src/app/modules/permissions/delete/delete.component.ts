@@ -127,6 +127,7 @@ export class PermissionsDeleteComponent {
       this.storage.set('delete_users_options',this.options);
       this.admin.deletePersons(this.selectedUsers.map((u)=>u.authorityName),this.options).subscribe(()=>{
           this.toast.closeModalDialog();
+          this.refresh();
       },(error)=>{
           this.toast.error(error);
           this.toast.closeModalDialog();

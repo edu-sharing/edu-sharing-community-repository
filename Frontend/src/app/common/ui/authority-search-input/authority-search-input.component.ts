@@ -33,7 +33,7 @@ export class AuthoritySearchInputComponent{
   @Input() maxSuggestions = 10;
   @Input() inputIcon='search';
   @Input() placeholder = 'WORKSPACE.INVITE_FIELD';
-  @Input() hintBottom = '';
+  @Input() hint = '';
   @Output() onChooseAuthority = new EventEmitter();
 
   inputValue='';

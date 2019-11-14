@@ -294,7 +294,9 @@ public class PersonLifecycleService {
 			}
 			else if(options.collections.privateCollections.equals(PersonDeleteOptions.DeleteMode.assign)) {
 				setOwnerAndPermissions(collectionsMaps, userName, options);
-				setOwnerAndPermissions(collectionsIos, userName, options);
+				//setOwnerAndPermissions(collectionsIos, userName, options);
+				// io references should not support additional permissions (always inherit)
+				collectionsIos.forEach((ref)->setOwner(ref,userName,options.receiver));
 			}
 			return;
 		}
