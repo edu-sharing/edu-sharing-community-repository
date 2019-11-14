@@ -1,23 +1,25 @@
 package org.edu_sharing.service.connector;
 
+import com.typesafe.config.Optional;
+
 public class ConnectorFileType {
 
-	private String ccressourceversion;
-	
-	private String ccressourcetype;
-	
-	private String ccresourcesubtype;
-	
-	private String editorType;
+	@Optional private String ccressourceversion;
+
+	@Optional private String ccressourcetype;
+
+	@Optional private String ccresourcesubtype;
+
+	@Optional private String editorType;
 
 	
 	private String mimetype;
 	
 	private String filetype;
-	
-	private boolean createable;
-	
-	private boolean editable;
+
+	@Optional private boolean createable=true;
+
+	@Optional private boolean editable=true;
 
 	public String getCcressourceversion() {
 		return ccressourceversion;

@@ -194,22 +194,30 @@
 			<copy todir="${webserver.home}/shared/classes">
 				<fileset dir="${output.dir}" includes="${api_not_hotdeployable}, ${metadataset_files}">
 				</fileset>
-			</copy>      
+			</copy>
+			<copy todir="${webserver.home}/shared/classes/config">
+				<fileset dir="${config.dir}" includes="*.conf">
+				</fileset>
+			</copy>
+			<copy overwrite="true" todir="${webserver.home}/shared/classes/config" failonerror="false">
+				<fileset dir="${extensions.path}${extension-name}/config" includes="*.conf">
+				</fileset>
+			</copy>
 			<copy todir="${app.server.tomcat.webapps.alfresco.lib}">
-				<fileset dir="${lib.dir}" includes="${alfrescojars}"></fileset>
-			</copy>
-			<delete>
-				<fileset dir="${app.server.tomcat.webapps.ccsearch.lib}" includes="${ccsearchjars_clean}"/>
-			</delete>		
-			<copy todir="${app.server.tomcat.webapps.ccsearch.lib}">
-				<fileset dir="${lib.dir}" includes="${ccsearchjars_apimode}"></fileset>
-			</copy>
-			<copy todir="${app.server.tomcat.webapps.ccsearch.lib}">
-				<fileset dir="${gwt.lib.path}" includes="${gwtjars}"></fileset>
-			</copy>
-			<copy todir="${app.server.tomcat.shared.lib}">
-				<fileset dir="${lib.dir}" includes="edu-sharing_classloaderstuff.jar"></fileset>
-			</copy>
+					<fileset dir="${lib.dir}" includes="${alfrescojars}"></fileset>
+				</copy>
+				<delete>
+					<fileset dir="${app.server.tomcat.webapps.ccsearch.lib}" includes="${ccsearchjars_clean}"/>
+				</delete>
+				<copy todir="${app.server.tomcat.webapps.ccsearch.lib}">
+					<fileset dir="${lib.dir}" includes="${ccsearchjars_apimode}"></fileset>
+				</copy>
+				<copy todir="${app.server.tomcat.webapps.ccsearch.lib}">
+					<fileset dir="${gwt.lib.path}" includes="${gwtjars}"></fileset>
+				</copy>
+				<copy todir="${app.server.tomcat.shared.lib}">
+					<fileset dir="${lib.dir}" includes="edu-sharing_classloaderstuff.jar"></fileset>
+				</copy>
 		</target>
 		
 		<target name="undeploy-gwt">

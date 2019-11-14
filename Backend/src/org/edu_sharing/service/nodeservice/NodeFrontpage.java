@@ -16,6 +16,7 @@ import org.apache.http.HttpHost;
 import org.apache.log4j.Logger;
 import org.apache.lucene.search.Query;
 import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
+import org.edu_sharing.lightbend.LightbendConfigLoader;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.server.jobs.helper.NodeRunner;
 import org.edu_sharing.repository.server.jobs.quartz.AbstractJob;
@@ -265,10 +266,7 @@ public class NodeFrontpage {
         //@TODO make elastic server configurable
         List<HttpHost> hosts=null;
         try {
-            String[] servers=null;
-            if(servers==null) {
-                servers=new String[] {"127.0.0.1:9200"};
-            }
+            List<String> servers=LightbendConfigLoader.get().getStringList("elasticsearch.servers");
             hosts=new ArrayList<>();
             for(String server : servers) {
                 hosts.add(new HttpHost(server.split(":")[0],Integer.parseInt(server.split(":")[1])));

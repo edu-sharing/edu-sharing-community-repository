@@ -1,30 +1,32 @@
 package org.edu_sharing.service.connector;
 
+import com.typesafe.config.Optional;
+
 import java.util.List;
 
 public class Connector {
 	
 	private String id;
 
-	private String connectorId;
-	
 	private String icon;
-	
-	private boolean showNew;
 
-	private boolean onlyDesktop;
+	@Optional private String connectorId;
 
-	private boolean hasViewMode;
+	@Optional private boolean showNew=true;
 
-	private String url;
+	@Optional private boolean onlyDesktop=false;
+
+	@Optional private boolean hasViewMode=false;
+
+	@Optional private String url;
 	
 	/**
 	 * optional, create element if an empty node is created
 	 * Currently only used for h5p connector
 	 */
-	private String defaultCreateElement;
-	
-	private List<String> parameters;
+	@Optional private String defaultCreateElement;
+
+	@Optional private List<String> parameters;
 	
 	private List<ConnectorFileType> filetypes;
 

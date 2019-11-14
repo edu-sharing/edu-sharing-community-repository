@@ -12,6 +12,7 @@ import java.util.Map;
 import org.apache.commons.lang3.NotImplementedException;
 import org.apache.http.HttpHost;
 import org.apache.lucene.search.join.ScoreMode;
+import org.edu_sharing.lightbend.LightbendConfigLoader;
 import org.edu_sharing.repository.server.tools.PropertiesHelper;
 import org.edu_sharing.service.search.model.SortDefinition;
 import org.edu_sharing.service.stream.model.ContentEntry;
@@ -140,18 +141,7 @@ public class StreamServiceElasticsearchImpl implements StreamService {
 	private List<HttpHost> getConfiguredHosts() {
 		List<HttpHost> hosts=null;
 		try {
-			String[] servers=null;
-			String prop=null;
-			try {
-				prop=PropertiesHelper.getProperty("server",PROPERTY_XML,PropertiesHelper.TEXT);
-			}
-			catch(Exception e) {
-			}			
-			if(prop!=null)
-				servers=prop.split(",");				
-			if(servers==null) {
-				servers=new String[] {"127.0.0.1:9200"};
-			}
+			List<String> servers= LightbendConfigLoader.get().getStringList("elasticsearch.servers");
 			hosts=new ArrayList<>();
 			for(String server : servers) {
 				hosts.add(new HttpHost(server.split(":")[0],Integer.parseInt(server.split(":")[1])));		
