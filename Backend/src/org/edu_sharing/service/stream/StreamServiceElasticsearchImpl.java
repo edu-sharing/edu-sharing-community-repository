@@ -102,7 +102,6 @@ public class StreamServiceElasticsearchImpl implements StreamService {
 
 
 	}
-	private static String PROPERTY_XML = "/org/edu_sharing/service/stream/stream.elasticsearch.properties";
 	public StreamServiceElasticsearchImpl() {
 		if(client!=null)
 			return;
@@ -140,14 +139,10 @@ public class StreamServiceElasticsearchImpl implements StreamService {
 
 	private List<HttpHost> getConfiguredHosts() {
 		List<HttpHost> hosts=null;
-		try {
-			List<String> servers= LightbendConfigLoader.get().getStringList("elasticsearch.servers");
-			hosts=new ArrayList<>();
-			for(String server : servers) {
-				hosts.add(new HttpHost(server.split(":")[0],Integer.parseInt(server.split(":")[1])));		
-			}
-		}catch(Throwable t) {
-			throw new IllegalArgumentException("Parameter server in "+PROPERTY_XML+" seems invalid. Scheme: server-ip1:server-port1,server-ip2:server-port2...",t);
+		List<String> servers= LightbendConfigLoader.get().getStringList("elasticsearch.servers");
+		hosts=new ArrayList<>();
+		for(String server : servers) {
+			hosts.add(new HttpHost(server.split(":")[0],Integer.parseInt(server.split(":")[1])));
 		}
 		return hosts;
 	}
