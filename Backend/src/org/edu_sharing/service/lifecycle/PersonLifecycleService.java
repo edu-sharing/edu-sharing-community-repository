@@ -84,6 +84,7 @@ import org.springframework.context.ApplicationContext;
 public class PersonLifecycleService {
 
 	private static final String DELETED_PERSONS_FOLDER = "DELETED_PERSONS";
+	private static final String USERHOME_ALL = "USERHOME";
 	private static final String USERHOME_FILES = "USERHOME_FILES";
 	private static final String USERHOME_FILES_CC = "USERHOME_CC_FILES";
 	private static final String SHARED_FILES = "SHARED_FILES";
@@ -380,11 +381,12 @@ public class PersonLifecycleService {
 		if(options.homeFolder.privateFiles.equals(PersonDeleteOptions.DeleteMode.assign)
 				&& options.homeFolder.ccFiles.equals(PersonDeleteOptions.DeleteMode.assign)){
 			if(options.homeFolder.keepFolderStructure){
+				// @TODO: we need to check if we want to set explicit permissions on all sub items because if a folder has inherit=false, then the org will not propagate
 				List<NodeRef> childrens = NodeServiceFactory.getLocalService().getChildrenRecursive(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, homeFolder.getId(), null,RecurseMode.Folders);
 				childrens.add(homeFolder);
 				setOwnerAndPermissions(childrens,userName,options);
 
-				NodeRef deletedRef = getDeletedFolderForOrg(options.receiverGroup,scope);
+				NodeRef deletedRef = getOrCreateTargetFolder(personNodeRef,options,USERHOME_ALL,scope);
 				nodeService.moveNode(homeFolder,deletedRef,
 						ContentModel.ASSOC_CONTAINS,
 						QName.createQName(CCConstants.NAMESPACE_CCM, (String) nodeService.getProperty(homeFolder, QName.createQName(CCConstants.CM_NAME))));
@@ -486,10 +488,16 @@ public class PersonLifecycleService {
 	}
 
 	private void setOwnerAndPermissions(List<NodeRef> children, String userName, PersonDeleteOptions options) {
-		children.forEach((ref)->{
-			setOwner(ref,userName,options.receiver);
-			permissionService.setPermission(ref, options.receiverGroup, CCConstants.PERMISSION_COORDINATOR, true);
-			logger.info("setOwnerAndPermissions for "+ref);
+		RetryingTransactionHelper rth = transactionService.getRetryingTransactionHelper();
+		rth.doInTransaction((RetryingTransactionHelper.RetryingTransactionCallback<Void>) () -> {
+			children.forEach((ref) -> {
+				setOwner(ref, userName, options.receiver);
+				policyBehaviourFilter.disableBehaviour(ref);
+				permissionService.setPermission(ref, options.receiverGroup, CCConstants.PERMISSION_COORDINATOR, true);
+				policyBehaviourFilter.enableBehaviour(ref);
+				logger.info("setOwnerAndPermissions for " + ref);
+			});
+			return null;
 		});
 	}
 
