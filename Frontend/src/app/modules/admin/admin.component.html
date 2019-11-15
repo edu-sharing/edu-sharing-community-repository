@@ -151,6 +151,9 @@
         (onOpenNode)="debugNode($event)"
     ></app-admin-frontpage>
 </div>
+<div *ngIf="mode=='GLOBAL_CONFIG'" class="content global-config">
+    <app-admin-config></app-admin-config>
+</div>
 <div *ngIf="mode=='APPLICATIONS'" class="content applications">
   <input #xmlSelect type="file" style="display:none" id="xmlSelect" accept="application/xml" (change)="registerAppXml($event)" />
   <form class="register-app">

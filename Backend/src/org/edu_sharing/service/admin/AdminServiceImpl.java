@@ -2,6 +2,7 @@ package org.edu_sharing.service.admin;
 
 import java.io.*;
 import java.lang.management.ManagementFactory;
+import java.nio.charset.Charset;
 import java.text.Collator;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -37,11 +38,13 @@ import org.alfresco.service.ServiceRegistry;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.repository.StoreRef;
 import org.alfresco.service.cmr.security.AuthorityType;
+import org.apache.batik.ext.awt.image.Light;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.input.ReversedLinesFileReader;
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
+import org.edu_sharing.lightbend.LightbendConfigLoader;
 import org.edu_sharing.repository.client.exception.CCException;
 import org.edu_sharing.repository.client.rpc.ACE;
 import org.edu_sharing.repository.client.rpc.ACL;
@@ -359,7 +362,8 @@ public class AdminServiceImpl implements AdminService  {
 	@Override
 	public void refreshApplicationInfo() {
 				ApplicationInfoList.refresh();
-				RepoFactory.refresh();	
+				RepoFactory.refresh();
+				LightbendConfigLoader.refresh();
 	}
 	
 	private String getAppPropertiesApplications() throws Exception{
@@ -756,6 +760,24 @@ public class AdminServiceImpl implements AdminService  {
 		paramsMap.put(OAIConst.PARAM_XMLDATA, StreamUtils.copyToByteArray(xml));
 		paramsMap.put(OAIConst.PARAM_FORCE_UPDATE,true);
 		return new ImporterJob().start(JobHandler.createJobDataMap(paramsMap));
+	}
+	public void throwIfInvalidConfigFile(String filename){
+		if(!LightbendConfigLoader.BASE_FILE.equals(filename) && !LightbendConfigLoader.CUSTOM_FILE.equals(filename))
+			throw new IllegalArgumentException(filename+" is not a valid config filename");
+	}
+	@Override
+	public void updateConfigFile(String filename, String content) throws Throwable {
+		throwIfInvalidConfigFile(filename);
+		File file = new File(getCatalinaBase()+"/shared/classes/"+ LightbendConfigLoader.PATH_PREFIX+filename);
+		Files.copy(file, new File(file.getAbsolutePath()+System.currentTimeMillis()+".bak"));
+		FileUtils.write(file,content);
+	}
+
+	@Override
+	public String getConfigFile(String filename) throws Throwable {
+		throwIfInvalidConfigFile(filename);
+		File file = new File(getCatalinaBase()+"/shared/classes/"+ LightbendConfigLoader.PATH_PREFIX+filename);
+		return FileUtils.readFileToString(file);
 	}
 
 	@Override

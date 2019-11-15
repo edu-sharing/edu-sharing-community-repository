@@ -88,10 +88,10 @@ $sidenavWidthMobile:66px;
     margin-left: 10px;
   }
 }
-.frontpage{
+.frontpage,.global-config{
   display: flex;
   justify-content: center;
-  app-admin-frontpage{
+  app-admin-frontpage,app-admin-config{
     width: 100%;
   }
 }

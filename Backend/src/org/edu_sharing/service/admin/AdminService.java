@@ -104,4 +104,7 @@ public interface AdminService {
     void testMail(String receiver, String template);
 
     String importOaiXml(InputStream xml, String recordHandlerClassName, String binaryHandlerClassName) throws Exception;
+
+    void updateConfigFile(String filename,String content) throws Throwable;
+	String getConfigFile(String filename) throws Throwable;
 }

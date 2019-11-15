@@ -14,6 +14,9 @@ public class ConnectorServiceFactory {
 	public static ConnectorService getConnectorService(){
 		return cs;
 	}
+	public static void invalidate(){
+		cs = new ConnectorService();
+	}
 	public static ConnectorList getConnectorList(){
 
 		try{

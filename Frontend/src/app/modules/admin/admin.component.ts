@@ -948,6 +948,10 @@ export class AdminComponent {
                   icon: "home"
                 },
                 {
+                  id: "GLOBAL_CONFIG",
+                  icon: "edit"
+                },
+                {
                     id: "CONFIG",
                     icon: "build"
                 },

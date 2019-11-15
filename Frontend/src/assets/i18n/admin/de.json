@@ -9,7 +9,8 @@
       "STATISTICS": "Statistiken",
       "FRONTPAGE": "Startseite",
       "MEDIACENTER": "Medienzentren",
-      "CONFIG": "Grundkonfiguration",
+      "GLOBAL_CONFIG": "Globale Systemkonfiguration",
+      "CONFIG": "Erweiterte Systemkonfiguration",
       "APPLICATIONS": "Remote-Systeme (Rendering, LMS, Suchen)",
       "UPDATE": "Server Updates",
       "IMPORT": "Importieren",
@@ -17,6 +18,16 @@
       "TOOLKIT": "Tool Kit (Caches, Logfiles)",
       "BROWSER": "Node Browser & Solr-Debugging",
       "FOLDERTEMPLATES": "Ordnervorlagen"
+    },
+    "GLOBAL_CONFIG": {
+      "BASE_CONFIG_TITLE": "Globale Konfigurationsdatei (Defaultvalues)",
+      "BASE_CONFIG_HINT": "Diese Datei dient lediglich als Vorlage und darf nicht verändert werden. Geänderte Werte bitte in die spezifische Konfiguration eintragen",
+      "CONFIG_TITLE": "Spezifische Konfigurationsdatei (Override)",
+      "CONFIG_HINT": "Sie können hier Werte der Standard-Konfiguration überschreiben. Beachten Sie bitte, dass ungültige Werte/Syntax das System ggf. nicht mehr erreichbar macht",
+      "SIZE": "Editor-Größe",
+      "SIZE_MEDIUM": "Normal",
+      "SIZE_LARGE": "Groß",
+      "PARSE_ERROR": "Fehler beim Übernehmen der Config! Prüfen Sie den Syntax die Konfiguration, und wiederholen Sie den Vorgang.<br><b>Das Repository befindet sich aktuell in einem ungültigen Zustand!</b><br>Für weitere Details prüfen Sie bitte die Logdateien"
     },
     "CONFIG": {
       "XML_CONFIG": "XML-Konfigurationsdateien",
