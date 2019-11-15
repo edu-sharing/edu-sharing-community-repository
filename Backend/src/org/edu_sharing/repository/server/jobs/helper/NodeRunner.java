@@ -218,7 +218,7 @@ public class NodeRunner {
             };
             Stream<NodeRef> filteredStream = nodes.stream().filter(callFilter);
             if (threaded) {
-                ExecutorService executor = Executors.newFixedThreadPool(OAIPMHLOMImporter.THREAD_COUNT);
+                ExecutorService executor = Executors.newFixedThreadPool(OAIPMHLOMImporter.getThreadCount());
                 List<Callable<Void>> threads=new ArrayList<>();
                 filteredStream.forEach((ref)->{
                     threads.add(()-> {
