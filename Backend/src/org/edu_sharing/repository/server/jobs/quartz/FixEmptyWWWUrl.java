@@ -42,6 +42,8 @@ public class FixEmptyWWWUrl extends AbstractJob {
 	
 	public static final String PARAM_PERSIST = "PERSIST";
 	
+	int counter = 0;
+	
 	@Override
 	public void execute(JobExecutionContext context) throws JobExecutionException {
 		String persist = (String)context.getJobDetail().getJobDataMap().get(PARAM_PERSIST);
@@ -54,6 +56,7 @@ public class FixEmptyWWWUrl extends AbstractJob {
 			}
 		};
 		AuthenticationUtil.runAsSystem(runAs);
+		logger.info("counter: " + counter);
 	}
 	
 	private void execute(int page){
@@ -85,6 +88,7 @@ public class FixEmptyWWWUrl extends AbstractJob {
 							nodeService.removeProperty(nodeRef, QName.createQName(CCConstants.CCM_PROP_IO_WWWURL));
 							policyBehaviourFilter.enableBehaviour(nodeRef);
 						}
+						counter++;
 						return null;
 					}
 				});
