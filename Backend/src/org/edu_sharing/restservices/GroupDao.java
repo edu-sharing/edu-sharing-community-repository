@@ -47,7 +47,8 @@ public class GroupDao {
 					return null;
 				});
 			}
-			return groupDao;
+			// reload data after it was changed
+			return GroupDao.getGroup(repoDao, result);
 		} catch (Exception e) {
 			throw DAOException.mapping(e);
 		}
@@ -82,6 +83,7 @@ public class GroupDao {
 	private AuthorityService authorityService;
 
 	private String groupType;
+	private String scopeType;
 
 	private String groupEmail;
 
@@ -113,6 +115,7 @@ public class GroupDao {
 				
 			}
 			this.groupType= authorityService.getProperty(this.authorityName,CCConstants.CCM_PROP_GROUPEXTENSION_GROUPTYPE);
+			this.scopeType= authorityService.getProperty(this.authorityName,CCConstants.CCM_PROP_SCOPE_TYPE);
 
 			this.groupEmail= authorityService.getProperty(this.authorityName,CCConstants.CCM_PROP_GROUPEXTENSION_GROUPEMAIL);
 			this.ref = authorityService.getAuthorityNodeRef(this.authorityName);
@@ -270,12 +273,15 @@ public class GroupDao {
     	GroupProfile profile = new GroupProfile();
     	profile.setDisplayName(getDisplayName());
     	profile.setGroupType(getGroupType());
+    	profile.setScopeType(getScopeType());
     	profile.setGroupEmail(getGoupEmail());
     	data.setProfile(profile);
     	
     	return data;
 	}
-
+	private String getScopeType(){
+		return this.scopeType;
+	}
 	private String getGroupType() {
 		return this.groupType;
 	}
