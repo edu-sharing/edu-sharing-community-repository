@@ -63,7 +63,7 @@
           </mat-form-field>
           <mat-checkbox id="notify" [(ngModel)]="notifyUsers">
             <div>{{'WORKSPACE.NOTIFY_TITLE' | translate}}</div>
-            <div class="notify-info">{{'WORKSPACE.NOTIFY_INFO' | translate}}></div>
+            <div class="notify-info">{{'WORKSPACE.NOTIFY_INFO' | translate}}</div>
           </mat-checkbox>
         </div>
         <div [ngClass]="{'publish-grey': filterDisabledPermissions(newPermissions).length}" class="publish" *ngIf="!isSafe">

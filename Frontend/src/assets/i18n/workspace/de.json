@@ -145,6 +145,7 @@
     "PERMISSIONS_UPDATED":"Freigaben wurden aktualisiert",
 
     "NOTIFY_TITLE":"E-Mail Benachrichtigung senden",
+    "NOTIFY_INFO":"Die neu eingeladenenen Benutzer und Gruppen erhalten eine Benachrichtigung",
     "METADATA":{
       "INVITED_USERS":"eingeladene Benutzer",
       "INVITED_GROUPS":"eingeladene Gruppen",

@@ -142,6 +142,7 @@
     "PERMISSIONS_UPDATED":"Permissions updated",
 
     "NOTIFY_TITLE":"Send e-mail notification",
+    "NOTIFY_INFO":"The new users or groups will get an invitation notification",
     "METADATA":{
       "INVITED_USERS":"invited users",
       "INVITED_GROUPS":"invited groups",
