@@ -383,8 +383,8 @@ public class PersonLifecycleService {
 		if(options.homeFolder.privateFiles.equals(PersonDeleteOptions.DeleteMode.assign)
 				&& options.homeFolder.ccFiles.equals(PersonDeleteOptions.DeleteMode.assign)){
 			if(options.homeFolder.keepFolderStructure){
-				// @TODO: we need to check if we want to set explicit permissions on all sub items because if a folder has inherit=false, then the org will not propagate
 				List<NodeRef> childrens = NodeServiceFactory.getLocalService().getChildrenRecursive(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, homeFolder.getId(), null,RecurseMode.Folders);
+				// @TODO: we set explicit permissions on all sub items because if a folder has inherit=false, then the org will not propagate
 				childrens.add(homeFolder);
 				setOwnerAndPermissions(childrens,userName,options);
 
