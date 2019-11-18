@@ -196,11 +196,11 @@
 				</fileset>
 			</copy>
 			<copy todir="${webserver.home}/shared/classes/config">
-				<fileset dir="${config.dir}" includes="*.conf">
+				<fileset dir="${config.dir}" includes="*.conf, client.config.xml">
 				</fileset>
 			</copy>
 			<copy overwrite="true" todir="${webserver.home}/shared/classes/config" failonerror="false">
-				<fileset dir="${extensions.path}${extension-name}/config" includes="*.conf">
+				<fileset dir="${extensions.path}${extension-name}/config" includes="*.conf, client.config.xml">
 				</fileset>
 			</copy>
 			<copy todir="${app.server.tomcat.webapps.alfresco.lib}">

@@ -26,8 +26,11 @@ declare var Chart:any;
 export class AdminConfigComponent {
   public static CONFIG_FILE_BASE="edu-sharing.base.conf";
   public static CONFIG_FILE="edu-sharing.conf";
+  public static CLIENT_CONFIG_FILE="client.config.xml";
   codeOptionsGlobal = {minimap: {enabled: false}, language: 'json', readOnly: true, automaticLayout: true};
   codeOptions = {minimap: {enabled: false}, language: 'json', automaticLayout: true};
+  clientCodeOptions = {minimap: {enabled: false}, language: 'xml', automaticLayout: true};
+  configClient = '';
   configGlobal = '';
   config = '';
   size = 'medium';
@@ -36,26 +39,32 @@ export class AdminConfigComponent {
       private adminService: RestAdminService,
       private toast: Toast,
   ) {
-    this.adminService.getConfigFile(AdminConfigComponent.CONFIG_FILE_BASE).subscribe((data) => {
-      this.configGlobal = data;
-      this.adminService.getConfigFile(AdminConfigComponent.CONFIG_FILE).subscribe((data) => {
-        this.config = data;
+    this.adminService.getConfigFile(AdminConfigComponent.CLIENT_CONFIG_FILE).subscribe((data)=>{
+      this.configClient = data;
+      this.adminService.getConfigFile(AdminConfigComponent.CONFIG_FILE_BASE).subscribe((data) => {
+        this.configGlobal = data;
+        this.adminService.getConfigFile(AdminConfigComponent.CONFIG_FILE).subscribe((data) => {
+          this.config = data;
+        });
       });
     });
+
   }
 
   save() {
     this.toast.showProgressDialog();
-    this.adminService.updateConfigFile(AdminConfigComponent.CONFIG_FILE,this.config).subscribe(()=>{
-      this.adminService.refreshAppInfo().subscribe(()=>{
+    this.adminService.updateConfigFile(AdminConfigComponent.CONFIG_FILE,this.config).subscribe(()=> {
+      this.adminService.updateConfigFile(AdminConfigComponent.CLIENT_CONFIG_FILE, this.configClient).subscribe(() => {
+        this.adminService.refreshAppInfo().subscribe(() => {
+          this.toast.closeModalDialog();
+        }, (error) => {
+          this.toast.error(error, "ADMIN.GLOBAL_CONFIG.PARSE_ERROR");
+          this.toast.closeModalDialog();
+        })
+      }, (error) => {
+        this.toast.error(error);
         this.toast.closeModalDialog();
-      },(error)=>{
-        this.toast.error(error,"ADMIN.GLOBAL_CONFIG.PARSE_ERROR");
-        this.toast.closeModalDialog();
-      })
-    },(error)=>{
-      this.toast.error(error);
-      this.toast.closeModalDialog();
+      });
     });
   }
 }

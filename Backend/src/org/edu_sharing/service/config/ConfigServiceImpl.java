@@ -122,9 +122,8 @@ public class ConfigServiceImpl implements ConfigService{
 		
 	}
 	private InputStream getConfigInputStream() {
-		ClassLoader classLoader = Thread.currentThread()
-				.getContextClassLoader();
-		return classLoader.getResourceAsStream("/org/edu_sharing/service/config/client.config.xml");	
+		ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
+		return classLoader.getResourceAsStream("config/"+ConfigServiceFactory.CONFIG_FILENAME);
 	}
 	private Context getContext(String domain) throws Exception {
 		Config config=getConfig();

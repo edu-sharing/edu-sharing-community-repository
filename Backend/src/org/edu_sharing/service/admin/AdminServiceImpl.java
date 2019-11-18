@@ -73,6 +73,7 @@ import org.edu_sharing.service.admin.model.RepositoryConfig;
 import org.edu_sharing.service.admin.model.ServerUpdateInfo;
 import org.edu_sharing.service.admin.model.ToolPermission;
 import org.edu_sharing.service.authority.AuthorityServiceFactory;
+import org.edu_sharing.service.config.ConfigServiceFactory;
 import org.edu_sharing.service.editlock.EditLockServiceFactory;
 import org.edu_sharing.service.foldertemplates.FolderTemplatesImpl;
 import org.edu_sharing.service.nodeservice.NodeService;
@@ -762,14 +763,22 @@ public class AdminServiceImpl implements AdminService  {
 		return new ImporterJob().start(JobHandler.createJobDataMap(paramsMap));
 	}
 	public void throwIfInvalidConfigFile(String filename){
-		if(!LightbendConfigLoader.BASE_FILE.equals(filename) && !LightbendConfigLoader.CUSTOM_FILE.equals(filename))
+		if(		!LightbendConfigLoader.BASE_FILE.equals(filename) &&
+				!LightbendConfigLoader.CUSTOM_FILE.equals(filename) &&
+				!ConfigServiceFactory.CONFIG_FILENAME.equals(filename)
+		)
 			throw new IllegalArgumentException(filename+" is not a valid config filename");
 	}
 	@Override
 	public void updateConfigFile(String filename, String content) throws Throwable {
 		throwIfInvalidConfigFile(filename);
-		File file = new File(getCatalinaBase()+"/shared/classes/"+ LightbendConfigLoader.PATH_PREFIX+filename);
-		Files.copy(file, new File(file.getAbsolutePath()+System.currentTimeMillis()+".bak"));
+		File file = new File(getCatalinaBase() + "/shared/classes/" + LightbendConfigLoader.PATH_PREFIX + filename);
+		try {
+			Files.copy(file, new File(file.getAbsolutePath() + System.currentTimeMillis() + ".bak"));
+		}catch(FileNotFoundException e){
+			logger.info(e.getMessage());
+			// not exists yet
+		}
 		FileUtils.write(file,content);
 	}
 

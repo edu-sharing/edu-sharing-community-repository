@@ -6,6 +6,11 @@
             <mat-button-toggle value="large">{{'ADMIN.GLOBAL_CONFIG.SIZE_LARGE' | translate}}</mat-button-toggle>
         </mat-button-toggle-group>
     </div>
+    <h3 class="mat-heading-3 mat-heading-underline">{{ 'ADMIN.GLOBAL_CONFIG.CLIENT_CONFIG_TITLE' | translate}}</h3>
+    <div class="monaco-editor">
+        <ngx-monaco-editor [options]="clientCodeOptions" [(ngModel)]="configClient" [ngModelOptions]="{standalone: true}"></ngx-monaco-editor>
+        <mat-hint><div>{{'ADMIN.GLOBAL_CONFIG.CLIENT_CONFIG_HINT' | translate}}</div></mat-hint>
+    </div>
     <h3 class="mat-heading-3 mat-heading-underline">{{ 'ADMIN.GLOBAL_CONFIG.BASE_CONFIG_TITLE' | translate}}</h3>
     <div class="monaco-editor">
         <ngx-monaco-editor [options]="codeOptionsGlobal" [(ngModel)]="configGlobal" [ngModelOptions]="{standalone: true}"></ngx-monaco-editor>
@@ -16,6 +21,7 @@
         <ngx-monaco-editor [options]="codeOptions" [(ngModel)]="config" [ngModelOptions]="{standalone: true}"></ngx-monaco-editor>
         <mat-hint><div>{{'ADMIN.GLOBAL_CONFIG.CONFIG_HINT' | translate}}</div></mat-hint>
     </div>
+    <info-message mode="warning">{{'ADMIN.GLOBAL_CONFIG.WARNING' | translate}}</info-message>
     <div class="actions">
         <button mat-raised-button color="primary" (click)="save()">{{'SAVE' | translate}}</button>
     </div>

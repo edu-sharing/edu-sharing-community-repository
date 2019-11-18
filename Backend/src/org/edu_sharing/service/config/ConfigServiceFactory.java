@@ -12,7 +12,8 @@ import javax.servlet.http.HttpServletRequest;
 import java.util.List;
 
 public class ConfigServiceFactory {
-	private static final String[] DEFAULT_LANGUAGES = new String[]{"de", "en"};
+    public static final String CONFIG_FILENAME = "client.config.xml";
+    private static final String[] DEFAULT_LANGUAGES = new String[]{"de", "en"};
 	static Logger logger = Logger.getLogger(ConfigServiceFactory.class);
 	public static ConfigService getConfigService(){
 		return new ConfigServiceImpl();
