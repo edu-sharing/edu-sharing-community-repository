@@ -22,7 +22,7 @@ public class SearchRelevancyTool {
         /**
          * property to look for successors
          */
-        String property = (String) StreamServiceFactory.getConfig().get("relevancyProperty");
+        String property = StreamServiceFactory.getConfig().getString("relevancy.property");
         if(property==null){
             throw new IllegalArgumentException("No property for relevancy specified");
         }
@@ -30,11 +30,11 @@ public class SearchRelevancyTool {
          * how many successors (depth) should be used
          * 1 means just the immediate successors, while 2 means immediate + all successor of the immediate sucessors, and so one
          */
-        int maxDepth = Integer.parseInt((String) StreamServiceFactory.getConfig().getOrDefault("relevancyDepth",1));
+        int maxDepth = StreamServiceFactory.getConfig().getInt("relevancy.depth");
         /**
          * limit the amount of the facettes by the count of the last actions
          */
-        int lastActionsLimit = Integer.parseInt((String) StreamServiceFactory.getConfig().getOrDefault("relevancyActionLimit",10));
+        int lastActionsLimit =  StreamServiceFactory.getConfig().getInt("relevancy.actionLimit");
 
 
         //throw new NotImplementedException("SearchRelevancyTool.getLuceneQuery is not implemented for this repository");

@@ -119,13 +119,7 @@ public interface MCAlfrescoService extends RemoteService {
 
 	// public String createNode(String type, String parentID, String name,
 	// HashMap properties, HashMap<String, String> authenticationInfo) throws
-	// CCSessionExpiredException, Exception;
-
-	public boolean removeNodes(String[] nodeIDs, String fromID, String repositoryId)
-			throws CCSessionExpiredException, Exception;
-	
-	public boolean removeNodes(String[] nodeIDs, String fromID, String repositoryId, boolean recycle)
-			throws CCSessionExpiredException, Exception;
+	// CCSessionExpiredException, Exception	<import resource="classpath:org/edu_sharing/spring/helper-registry.xml" />;
 
 	public void removeRelations(String parentID) throws CCSessionExpiredException, Exception;
 
@@ -160,8 +154,6 @@ public interface MCAlfrescoService extends RemoteService {
 	public void removePermissions(String nodeId, String _authority, String[] permission)
 			throws CCSessionExpiredException, CCException;
 
-	
-	public RepositoryInfo getRepositoryiesInfo(String metadataSetName) throws CCException;
 
 	public HashMap<String, Object> getNode(String nodeId) throws CCSessionExpiredException, CCException;
 

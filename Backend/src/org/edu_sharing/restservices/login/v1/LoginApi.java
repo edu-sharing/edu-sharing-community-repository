@@ -1,7 +1,6 @@
 package org.edu_sharing.restservices.login.v1;
 
 import java.util.HashMap;
-import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.GET;
@@ -13,10 +12,9 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;
 
 import org.alfresco.service.cmr.repository.NodeRef;
+import org.edu_sharing.lightbend.LightbendConfigLoader;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.server.AuthenticationToolAPI;
-import org.edu_sharing.repository.server.authentication.LoginHelper;
-import org.edu_sharing.repository.server.tools.Edu_SharingProperties;
 import org.edu_sharing.repository.server.tools.security.ShibbolethSessions;
 import org.edu_sharing.repository.server.tools.security.ShibbolethSessions.SessionInfo;
 import org.edu_sharing.restservices.ApiService;
@@ -59,7 +57,10 @@ public class LoginApi  {
 		
     	AuthenticationToolAPI authTool = new AuthenticationToolAPI();
     	boolean authenticated = (authTool.validateAuthentication(req.getSession()) == null) ? false : true;
-    	String personActiveStatus = Edu_SharingProperties.instance.getPersonActiveStatus();
+		String personActiveStatus = null;
+		if(!LightbendConfigLoader.get().getIsNull("repository.personActiveStatus")) {
+			personActiveStatus = LightbendConfigLoader.get().getString("repository.personActiveStatus");
+		}
 		if(authenticated && personActiveStatus != null && !personActiveStatus.trim().equals("")) {
 			String username = (String)req.getSession().getAttribute(CCConstants.AUTH_USERNAME);
 			NodeRef authorityNodeRef = AuthorityServiceFactory.getLocalService().getAuthorityNodeRef(username);

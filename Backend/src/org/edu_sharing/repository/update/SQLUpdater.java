@@ -5,12 +5,14 @@ import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.sql.Connection;
 import java.util.HashMap;
+import java.util.List;
 
 import org.apache.ibatis.jdbc.ScriptRunner;
 import org.apache.ibatis.session.SqlSessionFactory;
 import org.apache.log4j.Logger;
 import org.edu_sharing.alfresco.service.ConnectionDBAlfresco;
 import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
+import org.edu_sharing.lightbend.LightbendConfigLoader;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.server.RepoFactory;
 import org.springframework.context.ApplicationContext;
@@ -21,7 +23,7 @@ public class SQLUpdater extends UpdateAbstract {
 	
 	public static final String ID = "SQLUpdater";
 	
-	public static final String description = "SQLUpdater to run sql scripts defined edu-sharing.proprties " + CCConstants.EDU_SHARING_PROPERTIES_PROPERTY_INITIAL_DBSCRIPTS;
+	public static final String description = "SQLUpdater to run sql scripts defined in the repository.database.scripts config";
 	
 	ApplicationContext applicationContext = AlfAppContextGate.getApplicationContext();
 	SqlSessionFactory sqlSessionFactoryBean = (SqlSessionFactory)applicationContext.getBean("repoSqlSessionFactory");
@@ -51,28 +53,27 @@ public class SQLUpdater extends UpdateAbstract {
 	}
 	
 	private void execute(boolean test){
-        executeScript(CCConstants.EDU_SHARING_PROPERTIES_PROPERTY_CORE_DBSCRIPTS,test);
-        executeScript(CCConstants.EDU_SHARING_PROPERTIES_PROPERTY_INITIAL_DBSCRIPTS,test);
+        executeScript("repository.database.scripts.core",test);
+        executeScript("repository.database.scripts.custom",test);
     }
 
-    private void executeScript(String property,boolean test) {
+    private void executeScript(String property, boolean test) {
         try {
-        String sqlScripts = RepoFactory.getEdusharingProperty(property);
-        if(sqlScripts != null && sqlScripts.trim().length() > 0) {
-            String[] scripts = sqlScripts.split(",");
-            for(String script : scripts) {
+			List<String> sqlScripts = LightbendConfigLoader.get().getStringList(property);
+			if(sqlScripts != null && sqlScripts.size() > 0) {
+				for(String script : sqlScripts) {
 
-                String sysProtocolEntry = ID + "_" + script;
-                HashMap<String, Object> entry = protocol.getSysUpdateEntry(sysProtocolEntry);
-                if(entry == null && !test) {
-                    logger.info("running sql script " + script);
-                    runSQLScript(script);
-                    protocol.writeSysUpdateEntry(sysProtocolEntry);
-                }
-            }
-        }else {
-            logger.info("no scripts to execute defined in property "+property);
-        }
+					String sysProtocolEntry = ID + "_" + script;
+					HashMap<String, Object> entry = protocol.getSysUpdateEntry(sysProtocolEntry);
+					if(entry == null && !test) {
+						logger.info("running sql script " + script);
+						runSQLScript(script);
+						protocol.writeSysUpdateEntry(sysProtocolEntry);
+					}
+				}
+			}else {
+				logger.info("no scripts to execute defined in property "+property);
+			}
         }catch(Throwable e) {
             logger.error("Error running one or more sql scripts defined in "+property, e);
         }

@@ -35,6 +35,7 @@ import org.edu_sharing.alfresco.service.OrganisationService;
 import org.edu_sharing.alfresco.service.handleservice.HandleService;
 import org.edu_sharing.alfresco.workspace_administration.NodeServiceInterceptor;
 import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
+import org.edu_sharing.lightbend.LightbendConfigLoader;
 import org.edu_sharing.repository.client.rpc.ACE;
 import org.edu_sharing.repository.client.rpc.ACL;
 import org.edu_sharing.repository.client.rpc.Authority;
@@ -48,7 +49,6 @@ import org.edu_sharing.repository.server.MCAlfrescoAPIClient;
 import org.edu_sharing.repository.server.authentication.Context;
 import org.edu_sharing.repository.server.tools.ApplicationInfo;
 import org.edu_sharing.repository.server.tools.ApplicationInfoList;
-import org.edu_sharing.repository.server.tools.Edu_SharingProperties;
 import org.edu_sharing.repository.server.tools.I18nServer;
 import org.edu_sharing.repository.server.tools.Mail;
 import org.edu_sharing.repository.server.tools.StringTool;
@@ -1052,8 +1052,8 @@ public class PermissionServiceImpl implements org.edu_sharing.service.permission
 		}
 
 		//cm:espersonstatus
-		String personActiveStatus = Edu_SharingProperties.instance.getPersonActiveStatus();
-		if(personActiveStatus != null && !personActiveStatus.trim().equals("")) {
+		if(!LightbendConfigLoader.get().getIsNull("repository.personActiveStatus")) {
+			String personActiveStatus = LightbendConfigLoader.get().getString("repository.personActiveStatus");
 			searchQuery.append(" AND @cm\\:espersonstatus:\"" + personActiveStatus + "\"");
 		}
 
@@ -1224,7 +1224,7 @@ public class PermissionServiceImpl implements org.edu_sharing.service.permission
 
 		List<User> data = new ArrayList<User>();
 		for (NodeRef nodeRef : resultSet.getNodeRefs()) {
-			User user = new User(Edu_SharingProperties.instance.isFuzzyUserSearch());
+			User user = new User();
 			user.setEmail((String) nodeService.getProperty(nodeRef, ContentModel.PROP_EMAIL));
 			user.setGivenName((String) nodeService.getProperty(nodeRef, ContentModel.PROP_FIRSTNAME));
 
@@ -1322,7 +1322,7 @@ public class PermissionServiceImpl implements org.edu_sharing.service.permission
 						(String) nodeService.getProperty(nodeRef, QName.createQName(CCConstants.CCM_PROP_SCOPE_TYPE)));
 				data.add(group);
 			} else {
-				User user = new User(Edu_SharingProperties.instance.isFuzzyUserSearch());
+				User user = new User();
 				user.setEmail((String) nodeService.getProperty(nodeRef, ContentModel.PROP_EMAIL));
 				user.setGivenName((String) nodeService.getProperty(nodeRef, ContentModel.PROP_FIRSTNAME));
 

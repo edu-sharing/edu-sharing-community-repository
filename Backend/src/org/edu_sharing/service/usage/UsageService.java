@@ -16,6 +16,7 @@ import org.alfresco.service.namespace.QName;
 import org.alfresco.util.ISO8601DateFormat;
 import org.apache.log4j.Logger;
 import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
+import org.edu_sharing.lightbend.LightbendConfigLoader;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.server.MCAlfrescoClient;
 import org.edu_sharing.repository.server.RepoFactory;
@@ -45,7 +46,7 @@ public class UsageService {
 	int updateIdx = 2;
 	
 	/**
-	 * edu-sharing.properties: lmscodes:metacoon,metacoon/course:delete,metacoon/course:update;moodle,moodle/course:delete,moodle/course:update;fronter,fronter/course:delete,fronter/course:update;opal,opal/course:delete,opal/course:update
+	 * see config "repository.lmsCodes"
 	 */
 	static String[][] lmsCodes = null;
 	
@@ -509,15 +510,15 @@ public class UsageService {
 			 synchronized(UsageService.class){
 			 
 				 Logger logger = Logger.getLogger(UsageService.class);
-				 String propValue = RepoFactory.getEdusharingProperty(CCConstants.EDU_SHARING_PROPERTIES_PROPERTY_LMSCODES);
+				 String propValue = LightbendConfigLoader.get().getString("repository.lmsCodes");
 				 if(propValue == null){
-					 logger.error("no "+CCConstants.EDU_SHARING_PROPERTIES_PROPERTY_LMSCODES+" found in edu-sharing.properties! can not speak with connect lms");
+					 logger.error("no repository.lmsCodes found in config! can not speak with connect lms");
 					 return null;
 				 }
 				 
 				 String[] lmsField = propValue.split(";");
 				 if(lmsField.length == 0){
-					 logger.error("no value for "+CCConstants.EDU_SHARING_PROPERTIES_PROPERTY_LMSCODES+" found in edu-sharing.properties! can not speak with connect lms");
+					 logger.error("no value forr epository.lmsCodes found in config! can not speak with connect lms");
 					 return null;
 				 }
 				 

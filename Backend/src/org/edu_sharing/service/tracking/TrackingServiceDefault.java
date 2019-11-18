@@ -10,6 +10,7 @@ import org.alfresco.service.namespace.QName;
 import org.alfresco.service.transaction.TransactionService;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
+import org.edu_sharing.lightbend.LightbendConfigLoader;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.server.MCAlfrescoAPIClient;
 import org.edu_sharing.repository.server.RepoFactory;
@@ -98,7 +99,7 @@ public abstract class TrackingServiceDefault implements TrackingService{
         return UUID.randomUUID().toString();
     }
     protected UserTrackingMode getUserTrackingMode(){
-        String mode=RepoFactory.getEdusharingProperty(CCConstants.EDU_SHARING_PROPERTIES_PROPERTY_TRACKING_USER);
+        String mode=LightbendConfigLoader.get().getString("repository.tracking.userMode");
         if(mode==null)
             return UserTrackingMode.none;
         return UserTrackingMode.valueOf(mode);

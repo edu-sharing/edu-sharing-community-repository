@@ -4,6 +4,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
+import org.edu_sharing.lightbend.LightbendConfigLoader;
 import org.edu_sharing.metadataset.v2.MetadataSetV2;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.client.tools.I18nAngular;
@@ -37,9 +38,10 @@ public class StatisticDao {
 
 	public static StatisticsGlobal getGlobal(String group, List<String> subGroup) throws DAOException {
 		try {
-            String activate=RepoFactory.getEdusharingProperty(CCConstants.EDU_SHARING_PROPERTIES_ENABLE_STATISTICS_API);
-            if(activate==null || !new Boolean(activate) && !new MCAlfrescoAPIClient().isAdmin()){
-                throw new SecurityException("enable_statistics_api is not set to true in edu-sharing.properties. No access allowed");
+			String property="repository.statistics.api.enabled";
+            boolean activate= LightbendConfigLoader.get().getBoolean(property);
+            if(!activate && !new MCAlfrescoAPIClient().isAdmin()){
+                throw new SecurityException(property+" is not set to true in config. No access allowed");
             }
             if(subGroup==null) {
                 subGroup = new ArrayList<>();

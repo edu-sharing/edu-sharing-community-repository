@@ -38,6 +38,7 @@ import org.alfresco.repo.node.MLPropertyInterceptor;
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.edu_sharing.lightbend.LightbendConfigLoader;
 import org.edu_sharing.metadataset.v2.MetadataReaderV2;
 import org.edu_sharing.metadataset.v2.MetadataSetInfo;
 import org.edu_sharing.metadataset.v2.MetadataSetV2;
@@ -164,10 +165,8 @@ public class RepoFactory {
 		// I wanted to do this only one time in the reflection Part, but it
 		// seems that is sometime set back, so we do it every time when we
 		// access the Repository
-		
-		String isMLAwareString = getEdusharingProperty("multilang");
-		if(isMLAwareString == null || isMLAwareString.trim().equals("")) isMLAwareString = "true";
-		boolean isMLAware = new Boolean(isMLAwareString);
+
+		boolean isMLAware = LightbendConfigLoader.get().getBoolean("repository.multilang");
 		logger.debug("isMLAware:"+isMLAware);
 		MLPropertyInterceptor.setMLAware(isMLAware);
 		//MLPropertyInterceptor.setMLAware(false);
@@ -347,17 +346,4 @@ public class RepoFactory {
 		}
 		return standAloneMDS;
 	}
-
-	public static String getEdusharingProperty(String key) {
-		try {
-			if (eduSharingProps == null) {
-				eduSharingProps = PropertiesHelper.getProperties("edu-sharing.properties", PropertiesHelper.TEXT);
-			}
-			return eduSharingProps.getProperty(key);
-		} catch (Exception e) {
-			logger.error("Problems opening edu-sharing.properties:" + e.getMessage());
-		}
-		return null;
-	}
-
 }

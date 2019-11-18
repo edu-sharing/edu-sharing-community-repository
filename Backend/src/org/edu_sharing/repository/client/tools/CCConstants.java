@@ -1896,27 +1896,6 @@ public class CCConstants {
 
 	private static HashMap<String, String> nameSpaceMap = null;
 
-	/**
-	 * edu-sharing.properties
-	 */
-	public static String EDU_SHARING_PROPERTIES_PROPERTY_LMSCODES = "lmscodes";
-
-	public static String EDU_SHARING_PROPERTIES_PROPERTY_FUZZY_USERSEARCH = "fuzzy_usersearch";
-
-	public static String EDU_SHARING_PROPERTIES_PROPERTY_TAXONID_VALUESPACEFILE = "taxonid_valuespacefile";
-
-	public static String EDU_SHARING_PROPERTIES_PROPERTY_TAXONID_VALUESPACE_I18N_PREFIX = "taxonid_valuespace_i18n_prefix";
-
-	public static String EDU_SHARING_PROPERTIES_PROPERTY_RESOLVE_WEBSITE_TITLE = "resolve_website_title";
-
-	public static String EDU_SHARING_PROPERTIES_ENABLE_STATISTICS_API= "enable_statistics_api";
-
-	public static String EDU_SHARING_PROPERTIES_PROPERTY_CORE_DBSCRIPTS = "core_dbscripts";
-
-	public static String EDU_SHARING_PROPERTIES_PROPERTY_INITIAL_DBSCRIPTS = "initial_dbscripts";
-
-    public static final String EDU_SHARING_PROPERTIES_PROPERTY_TRACKING_USER = "tracking_user";
-
     /**
 	 * @return <namespace,localnamespace>
 	 */

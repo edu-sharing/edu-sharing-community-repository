@@ -9,10 +9,9 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.edu_sharing.lightbend.LightbendConfigLoader;
 import org.edu_sharing.repository.server.tools.ApplicationInfo;
 import org.edu_sharing.repository.server.tools.ApplicationInfoList;
-import org.edu_sharing.repository.server.tools.Edu_SharingProperties;
-import org.edu_sharing.repository.server.tools.PropertiesHelper;
 
 public class MetadataServlet extends HttpServlet {
 
@@ -27,10 +26,9 @@ public class MetadataServlet extends HttpServlet {
 	protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
 		
 		try{
-			String metadata = PropertiesHelper.getProperty(Edu_SharingProperties.KEY_EXPORT_METADATA, "edu-sharing.properties", PropertiesHelper.TEXT);
-			boolean deliver = new Boolean(metadata);
+			boolean deliver = LightbendConfigLoader.get().getBoolean("repository.exportMetadata");
 			if(!deliver){
-				resp.getOutputStream().println("edu-sharing.properties: export_metadata=false");
+				resp.getOutputStream().println("repository.exportMetadata=false");
 				return;
 			}
 			

@@ -11,7 +11,7 @@ import java.util.Map;
 public class StreamServiceNone implements StreamService {
 
     private void notImplemented(){
-        throw new UnsupportedOperationException("The StreamServiceNone class does not implement any stream features. Please check your config file at "+StreamServiceFactory.getConfigFile()+" and set class to an implementation of StreamService");
+        throw new UnsupportedOperationException("The StreamServiceNone class does not implement any stream features. Please check your config file and set class to an implementation of StreamService");
     }
 
     @Override
