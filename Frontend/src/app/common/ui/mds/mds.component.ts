@@ -1198,11 +1198,12 @@ export class MdsComponent{
                 document.getElementById('` + id + `_suggestions').style.display='none';
                 `+this.getWindowComponent()+`.currentWidgetSuggestion=null;`;
 
+    /*
     if(singleValue){
       html+=`   document.getElementById('` + id + `').value=this.getAttribute('data-caption');
                 document.getElementById('` + id + `').setAttribute('data-value',this.getAttribute('data-value'));`;
-    }
-    else {
+    }*/
+
       html += `
                 document.getElementById('` + id + `_suggestionsInput').value='';`;
       if(!this.uiService.isMobile())
@@ -1214,8 +1215,8 @@ export class MdsComponent{
                         return;
                     }
                 }
-                badges.innerHTML+='` + this.getMultivalueBadgeEmbedded('this.getAttribute(\'data-caption\')', 'this.getAttribute(\'data-value\')') + `';`;
-    }
+                badges.innerHTML`+(singleValue ? '=' : '+=')+`'` + this.getMultivalueBadgeEmbedded('this.getAttribute(\'data-caption\')', 'this.getAttribute(\'data-value\')') + `';`;
+
     html+=`">` + (searchString ? this.highlightSearch(caption,searchString) : caption) + `</a>`;
     return html;
   }
@@ -1225,11 +1226,8 @@ export class MdsComponent{
     if(!openCallback && widget.type!='multivalueTree' && widget.type!='singlevalueTree')
       css+=' suggestInputNoOpen';
     let postfix='_suggestionsInput';
-    if(singleValue)
-      postfix='';
+
     let html=`<div class="auto-suggest-field"><input type="text" id="`+this.getWidgetDomId(widget)+postfix+`" `
-    if(singleValue)
-      html+='readonly ';
     html+=`aria-label="`+widget.caption+`" placeholder="`+(widget.placeholder ? widget.placeholder : '')+`" class="suggestInput `+css+`" 
             onkeyup="`+this.getWindowComponent()+`.openSuggestions('`+widget.id+`',event,`+allowCustom+`,`+(widget.values ? true  : false)+`,false,true)">`;
     if(widget.type=='singleoption' && !widget.allowempty){
@@ -1312,7 +1310,7 @@ export class MdsComponent{
   private renderTreeWidget(widget:any,attr:string){
     let domId=this.getWidgetDomId(widget);
     let html=this.autoSuggestField(widget,'',false,
-                this.getWindowComponent()+`.openTree('`+widget.id+`')`,'arrow_forward')
+                this.getWindowComponent()+`.openTree('`+widget.id+`')`,'arrow_forward',widget.type=='singlevalueTree')
         +`     <div class="dialog darken" style="display:none;z-index:`+(122 + this.priority)+`;" id="`+domId+`_tree">
                 <div class="card center-card card-wide card-high card-action">
                   <div class="card-content">
