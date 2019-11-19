@@ -661,7 +661,6 @@ export class PermissionsAuthoritiesComponent {
     this.searchMembers();
   }
   private updateSelectedMembers(data:Authority[]){
-    console.log(data);
     this.selectedMembers=data;
     this.memberOptions=this.getMemberOptions();
   }
@@ -717,7 +716,6 @@ export class PermissionsAuthoritiesComponent {
   }
   private refreshMemberList() {
     if(this.addMembers){
-      this.selectedMembers=[];
       if(this.org && this.addMembers.authorityName!=this.org.authorityName){
         let request:any={
           sortBy: ["authorityName"],
