@@ -42,6 +42,9 @@ public class OAIConst {
 	public static final String PARAM_OAI_IDS = "oai_ids";
 	// forcefully update all data, also override any existing ones
 	public static final String PARAM_FORCE_UPDATE = "force_update";
+	// do not create versions (basically, the node will always stay at 1.0)
+
+	public static final String PARAM_NO_VERSION = "no_version";
 
 	
 }
