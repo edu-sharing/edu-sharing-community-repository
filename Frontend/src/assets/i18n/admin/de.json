@@ -29,7 +29,7 @@
       "SIZE": "Editor-Größe",
       "SIZE_MEDIUM": "Normal",
       "SIZE_LARGE": "Groß",
-      "WARNING": " Beachten Sie bitte, dass ungültige Werte/Syntax das System ggf. nicht mehr erreichbar macht. Prüfen Sie bitte sorgfältig alle Änderungen, bevor Sie fortfahren.",
+      "WARNING": " Beachten Sie bitte, dass ungültige Werte/Syntax das System ggf. nicht mehr erreichbar machen. Prüfen Sie bitte sorgfältig alle Änderungen, bevor Sie fortfahren.",
       "PARSE_ERROR": "Fehler beim Übernehmen der Config! Prüfen Sie den Syntax die Konfiguration, und wiederholen Sie den Vorgang.<br><b>Das Repository befindet sich aktuell in einem ungültigen Zustand!</b><br>Für weitere Details prüfen Sie bitte die Logdateien"
     },
     "CONFIG": {

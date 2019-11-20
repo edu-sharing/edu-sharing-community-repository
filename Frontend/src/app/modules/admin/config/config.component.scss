@@ -26,3 +26,10 @@
     height:calc((100vh - 220px));
   }
 }
+:host /deep/{
+  ngx-monaco-editor.globalConfig{
+    .view-lines{
+      opacity: 0.7;
+    }
+  }
+}

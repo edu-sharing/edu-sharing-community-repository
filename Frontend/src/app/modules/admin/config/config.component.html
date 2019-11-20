@@ -13,10 +13,10 @@
     </div>
     <h3 class="mat-heading-3 mat-heading-underline">{{ 'ADMIN.GLOBAL_CONFIG.BASE_CONFIG_TITLE' | translate}}</h3>
     <div class="monaco-editor">
-        <ngx-monaco-editor [options]="codeOptionsGlobal" [(ngModel)]="configGlobal" [ngModelOptions]="{standalone: true}"></ngx-monaco-editor>
+        <ngx-monaco-editor class="globalConfig" [options]="codeOptionsGlobal" [(ngModel)]="configGlobal" [ngModelOptions]="{standalone: true}"></ngx-monaco-editor>
         <mat-hint><div>{{'ADMIN.GLOBAL_CONFIG.BASE_CONFIG_HINT' | translate}}</div></mat-hint>
     </div>
-    <h3 class="mat-heading-3 mat-heading-underline">{{ 'ADMIN.GLOBAL_CONFIG.CONFIG_TITLE' | translate}}</h3>
+    <h3 class="mat-heading-3 mat-heading-underline">{{'ADMIN.GLOBAL_CONFIG.CONFIG_TITLE' | translate}}</h3>
     <div class="monaco-editor">
         <ngx-monaco-editor [options]="codeOptions" [(ngModel)]="config" [ngModelOptions]="{standalone: true}"></ngx-monaco-editor>
         <mat-hint><div>{{'ADMIN.GLOBAL_CONFIG.CONFIG_HINT' | translate}}</div></mat-hint>
