@@ -160,9 +160,13 @@ public class PersonLifecycleService {
 		String role = (String)nodeService.getProperty(personNodeRef, QName.createQName(CCConstants.CM_PROP_PERSON_EDU_SCHOOL_PRIMARY_AFFILIATION));
 		String userName = (String)nodeService.getProperty(personNodeRef, QName.createQName(CCConstants.CM_PROP_PERSON_USERNAME));
 		if(status != null && PersonStatus.todelete.name().equals(status)) {
-			if(hasAssigning(options) &&
-					((options.receiver==null || options.receiver.isEmpty()) || (options.receiverGroup==null || options.receiverGroup.isEmpty()))){
-				throw new IllegalArgumentException("Some options set to assign, but no user + org was specified for assigning");
+			if(hasAssigning(options)){
+				if(options.receiver==null || options.receiver.isEmpty() || options.receiverGroup==null || options.receiverGroup.isEmpty()) {
+					throw new IllegalArgumentException("Some options set to assign, but no user + org was specified for assigning");
+				}
+				if(personService.getPersonOrNull(options.receiver)==null){
+					throw new IllegalArgumentException("The given receiver is not a valid user authority");
+				}
 			}
 
 			//shared files are "mounted" in the user home, so always process them first!
@@ -171,6 +175,7 @@ public class PersonLifecycleService {
 			handleHomeHolder(personNodeRef,options,null);
 			handleHomeHolder(personNodeRef,options,CCConstants.CCM_VALUE_SCOPE_SAFE);
 
+			//@TODO: We need to handle files inside home folders of other people as well
 
 			handleCollections(personNodeRef,options);
 
@@ -335,14 +340,24 @@ public class PersonLifecycleService {
 			List<NodeRef> filesPrivate = files.stream().filter((ref) -> !hasCCLicense(ref)).collect(Collectors.toList());
 			List<NodeRef> filesCC = files.stream().filter((ref) -> hasCCLicense(ref)).collect(Collectors.toList());
 			if(options.sharedFolders.privateFiles.equals(PersonDeleteOptions.DeleteMode.assign)){
-				NodeRef target = getOrCreateTargetFolder(personNodeRef, options, SHARED_FILES, null);
-				setOwnerAndPermissions(filesPrivate,userName,options);
-				moveNodes(filesPrivate,target);
+				if(options.sharedFolders.move) {
+					NodeRef target = getOrCreateTargetFolder(personNodeRef, options, SHARED_FILES, null);
+					setOwnerAndPermissions(filesPrivate, userName, options);
+					moveNodes(filesPrivate, target);
+				}
+				else{
+					setOwnerAndPermissions(filesPrivate, userName, options);
+				}
 			}
 			if(options.sharedFolders.ccFiles.equals(PersonDeleteOptions.DeleteMode.assign)){
-				NodeRef target = getOrCreateTargetFolder(personNodeRef, options, SHARED_FILES_CC, null);
-				setOwnerAndPermissions(filesCC,userName,options);
-				moveNodes(filesCC,target);
+				if(options.sharedFolders.move) {
+					NodeRef target = getOrCreateTargetFolder(personNodeRef, options, SHARED_FILES_CC, null);
+					setOwnerAndPermissions(filesCC, userName, options);
+					moveNodes(filesCC, target);
+				}
+				else{
+					setOwnerAndPermissions(filesCC, userName, options);
+				}
 			}
 			if(options.sharedFolders.privateFiles.equals(PersonDeleteOptions.DeleteMode.delete)){
 				deleteAllRefs(filesPrivate);

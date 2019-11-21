@@ -60,6 +60,9 @@
           </mat-radio-group>
         </div>
       </div>
+      <div class="move" *ngIf="options.sharedFolders.privateFiles == 'assign' || options.sharedFolders.ccFiles == 'assign'">
+        <mat-checkbox [(ngModel)]="options.sharedFolders.move">{{'PERMISSIONS.DELETE.MOVE_SHARED_FILES' | translate}}</mat-checkbox>
+      </div>
     </div>
     <div class="group">
       <h3 class="mat-heading-3 mat-heading-underline">{{'PERMISSIONS.DELETE.COLLECTIONS.CAPTION' | translate}}</h3>
@@ -110,6 +113,9 @@
     <div class="info-wrapper">
       <info-message *ngIf="missingAssigning()" mode="warning" message="{{'PERMISSIONS.DELETE.STATE.NO_RECEIVER' | translate}}"></info-message>
       <info-message *ngIf="!isValid()" mode="warning" message="{{'PERMISSIONS.DELETE.STATE.NON_CONFORM' | translate}}"></info-message>
+      <info-message *ngIf="options.sharedFolders.move && options.sharedFolders.privateFiles=='assign'" mode="info" message="{{'PERMISSIONS.DELETE.STATE.SHARED_FOLDER_MOVE' | translate}}"></info-message>
+      <info-message *ngIf="options.sharedFolders.privateFiles=='delete'" mode="warning" message="{{'PERMISSIONS.DELETE.STATE.SHARED_FOLDER_DELETE' | translate}}"></info-message>
+      <info-message *ngIf="options.homeFolder.privateFiles=='delete'" mode="warning" message="{{'PERMISSIONS.DELETE.STATE.HOME_FOLDER_DELETE' | translate}}"></info-message>
     </div>
   </div>
     <div class="group group-interactions">

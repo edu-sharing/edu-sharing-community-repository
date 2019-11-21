@@ -8,7 +8,7 @@ public class PersonDeleteOptions implements Serializable {
     }
 
     public HomeFolderOptions homeFolder;
-    public FolderOptions sharedFolders;
+    public SharedFolderOptions sharedFolders;
     public CollectionOptions collections;
     public DeleteOption ratings,comments,statistics,stream;
     public String receiver,receiverGroup;
@@ -19,7 +19,9 @@ public class PersonDeleteOptions implements Serializable {
     public static class HomeFolderOptions extends FolderOptions{
         public boolean keepFolderStructure;
     }
-
+    public static class SharedFolderOptions extends FolderOptions{
+        public boolean move;
+    }
 
     public static class CollectionOptions {
         public DeleteMode privateCollections,publicCollections;

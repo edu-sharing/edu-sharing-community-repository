@@ -129,6 +129,7 @@
       "USER_LIST": "Vorgang für folgende Benutzer & deren Daten durchführen",
       "FOLDER_STRUCTURE_DISINTEGRATE": "auflösen (alle Dateien in einen Ordner überführen)",
       "FOLDER_STRUCTURE_KEEP": "beibehalten",
+      "MOVE_SHARED_FILES": "Elemente in neuem Verzeichnis ablegen",
       "RECEIVER_CAPTION": "Der gewählte Nutzer wird zukünftig als Ersteller der Daten & Sammlungen angezeigt",
       "RECEIVER": "Nutzer suchen...",
       "RECEIVER_GROUP_CAPTION": "Folgende Organisation soll Verwaltungsrechte auf die Daten erhalten",
@@ -144,13 +145,13 @@
       },
       "HOME_FOLDER": {
         "CAPTION": "Stamm-Verzeichnisse der Nutzer & enthaltene Daten",
-        "PRIVATE_FILES_CAPTION": "Private Dateien (ohne Lizenzen)",
+        "PRIVATE_FILES_CAPTION": "Private Dateien (ohne Lizenzen) + Ordner",
         "CC_FILES_CAPTION": "Dateien mit offenen (CC-)Lizenzen",
         "FOLDER_STRUCTURE_CAPTION": "Ordnerstrukur des Verzeichnisses..."
       },
       "SHARED_FOLDERS": {
         "CAPTION": "Dateien & Ordner des Nutzers in gemeinsamen Verzeichnissen",
-        "PRIVATE_FILES_CAPTION": "Dateien ohne Lizenzen",
+        "PRIVATE_FILES_CAPTION": "Dateien ohne Lizenzen + Ordner",
         "CC_FILES_CAPTION": "Dateien mit offenen (CC-)Lizenzen"
       },
       "COLLECTIONS": {
@@ -172,7 +173,10 @@
       "STATE": {
         "NO_USERS": "Bislang sind keine Konten für eine Löschung freigegeben. Nutzer können freigegeben werden, indem der Status des Nutzers auf den entsprechenden Wert gesetzt wird",
         "NO_RECEIVER": "Es wurde festgelegt, dass ein oder mehrere Elemente einen anderen Nutzer zugewiesen werden sollen, jedoch wurde kein Ziel-Nutzer bzw. eine Ziel-Organisation ausgewählt. Bitte legen Sie einen Zielnutzer sowie die verantwortliche Organisation fest",
-        "NON_CONFORM": "Es wurde festgelegt, dass ein oder mehrere Elemente unverändert bleiben. An diesen Elementen wird die User-Id des Nutzers erhalten bleiben. Prüfen Sie ggf., ob dies Datenschutzrechtlich möglich ist, oder weisen Sie die Dateien einen anderen Nutzer zu"
+        "NON_CONFORM": "Es wurde festgelegt, dass ein oder mehrere Elemente unverändert bleiben. An diesen Elementen wird die User-Id des Nutzers erhalten bleiben. Prüfen Sie ggf., ob dies Datenschutzrechtlich möglich ist, oder weisen Sie die Dateien einem anderen Nutzer zu",
+        "SHARED_FOLDER_MOVE": "Die Elemente in gemeinsamen Verzeichnissen sollen in ein neues Verzeichnis verschoben werden. Beachten Sie, dass Dateien von anderen Nutzern innerhalb von Ordnern, die von dem zu löschende(n) Nutzern erstellt wurden, ebenfalls mit verschoben werden",
+        "SHARED_FOLDER_DELETE": "Die Ordner des Nutzers in gemeinsamen Verzeichnissen sollen gelöscht werden. Beachten Sie, dass Dateien von anderen Nutzern innerhalb von Ordnern, die von dem zu löschende(n) Nutzern erstellt wurden, ebenfalls unwiderruflich gelöscht werden",
+        "HOME_FOLDER_DELETE": "Die Ordner des Nutzers im Home-Verzeichnis sollen gelöscht werden. Beachten Sie, dass Dateien von anderen Nutzern innerhalb von Ordnern, die von dem zu löschende(n) Nutzern erstellt wurden und an diese zum verwenden freigegeben wurden, ebenfalls unwiderruflich gelöscht werden"
       },
       "DELETE_MODE": {
         "none": "Nichts unternehmen (Elemente beibehalten)",
