@@ -313,6 +313,7 @@ public class ToolPermissionService {
 		toInit.remove(CCConstants.CCM_VALUE_TOOLPERMISSION_COLLECTION_CURRICULUM); // curriculum collections
 		toInit.remove(CCConstants.CCM_VALUE_TOOLPERMISSION_COLLECTION_PINNING); // pin collections
 		toInit.remove(CCConstants.CCM_VALUE_TOOLPERMISSION_HANDLESERVICE); // use handle id
+		toInit.remove(CCConstants.CCM_VALUE_TOOLPERMISSION_USAGE_STATISTIC); // get all usages across all nodes (as system)
 		return toInit;
 	}
 	public List<String> getAllPredefinedToolPermissions(){
