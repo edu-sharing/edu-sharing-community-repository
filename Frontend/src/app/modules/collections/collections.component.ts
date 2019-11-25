@@ -15,7 +15,14 @@ import {RestConstants} from "../../common/rest/rest-constants";
 
 import {Toast} from "../../common/ui/toast";
 import {RestConnectorService} from "../../common/rest/services/rest-connector.service";
-import {Collection, NodeRef, CollectionReference, LoginResult, MdsMetadataset} from "../../common/rest/data-object";
+import {
+    Collection,
+    NodeRef,
+    CollectionReference,
+    LoginResult,
+    MdsMetadataset,
+    CollectionFeedback
+} from "../../common/rest/data-object";
 import {RestOrganizationService} from "../../common/rest/services/rest-organization.service";
 import {OrganizationOrganizations} from "../../common/rest/data-object";
 import {OptionItem} from "../../common/ui/actionbar/option-item";
@@ -52,6 +59,10 @@ import {GlobalContainerComponent} from "../../common/ui/global-container/global-
   selector: 'app-collections',
   templateUrl: 'collections.component.html',
   styleUrls: ['collections.component.scss'],
+  animations: [
+      trigger('fade', UIAnimation.fade()),
+      trigger('cardAnimation', UIAnimation.cardAnimation())
+  ]
 })
 export class CollectionsMainComponent {
   @ViewChild('mainNav') mainNavRef: MainNavComponent;
@@ -115,6 +126,9 @@ export class CollectionsMainComponent {
             ],
         sortAscending: [false,true,false],
     };
+    feedback: boolean;
+    feedbackView: boolean;
+    private feedbacks: CollectionFeedback[];
     set collectionShare(collectionShare: Collection){
         this._collectionShare=collectionShare;
         this.refreshAll();
@@ -327,13 +341,15 @@ export class CollectionsMainComponent {
     // This seems to be wrong: He may has created a public collection and wants to edit it
     if ((this.isRootLevelCollection()) && (this.tabSelected!=RestConstants.COLLECTIONSCOPE_MY)) return false;
 
-    if (RestHelper.hasAccessPermission(this.collectionContent.collection,'Delete')) return true;
+    if (RestHelper.hasAccessPermission(this.collectionContent.collection,RestConstants.PERMISSION_DELETE)) return true;
     return false;
   }
-
+    feedbackAllowed() : boolean {
+       return !this.isGuest && RestHelper.hasAccessPermission(this.collectionContent.collection,RestConstants.PERMISSION_FEEDBACK);
+    }
   isAllowedToDeleteCollection() : boolean {
     if (this.isRootLevelCollection()) return false;
-    if (RestHelper.hasAccessPermission(this.collectionContent.collection,'Delete')) return true;
+    if (RestHelper.hasAccessPermission(this.collectionContent.collection,RestConstants.PERMISSION_DELETE)) return true;
     return false;
   }
 
@@ -907,11 +923,18 @@ export class CollectionsMainComponent {
       if(this.pinningAllowed && this.isAllowedToDeleteCollection()) {
           this.optionsCollection.push(new OptionItem("COLLECTIONS.ACTIONBAR.PIN", "edu-pin", () => this.pinCollection()));
       }
+      if(this.isAllowedToDeleteCollection() && this.connector.hasToolPermissionInstant(RestConstants.TOOLPERMISSION_COLLECTION_FEEDBACK)){
+          this.optionsCollection.push(new OptionItem("COLLECTIONS.ACTIONBAR.FEEDBACK_VIEW", "speaker_notes",()=>this.collectionFeedbackView()));
+      }
       if(this.isAllowedToEditCollection() && this.collectionContent.collection.type!=RestConstants.COLLECTIONTYPE_EDITORIAL) {
           this.optionsCollection.push(new OptionItem("WORKSPACE.OPTION.INVITE", "group_add", () => this.collectionPermissions()));
       }
       if(this.isAllowedToDeleteCollection()) {
-            this.optionsCollection.push(new OptionItem("COLLECTIONS.ACTIONBAR.DELETE", "delete", () => this.collectionDelete()));
+          this.optionsCollection.push(new OptionItem("COLLECTIONS.ACTIONBAR.DELETE", "delete", () => this.collectionDelete()));
+      }
+
+      if(this.feedbackAllowed() && !this.isAllowedToDeleteCollection() && this.connector.hasToolPermissionInstant(RestConstants.TOOLPERMISSION_COLLECTION_FEEDBACK)){
+          this.optionsCollection.push(new OptionItem("COLLECTIONS.ACTIONBAR.FEEDBACK", "chat_bubble",()=>this.collectionFeedback()));
       }
     }
 
@@ -947,5 +970,35 @@ export class CollectionsMainComponent {
             this.globalProgress=false;
             this.mainNavRef.refreshNodeStore();
         });
+    }
+    private collectionFeedbackView() {
+        this.globalProgress=true;
+        this.collectionService.getFeedbacks(this.collectionContent.collection.ref.id).subscribe((data)=>{
+            this.feedbacks = data.reverse();
+            this.feedbackView = true;
+            this.globalProgress=false;
+        },(error)=>{
+            this.globalProgress=false;
+            this.toast.error(error);
+        });
+    }
+    private collectionFeedback() {
+        this.feedback=true;
+    }
+
+    addFeedback(data:any) {
+        if(!data)
+            return;
+        delete data[RestConstants.CM_NAME];
+        console.log(data);
+        this.globalProgress=true;
+        this.collectionService.addFeedback(this.collectionContent.collection.ref.id,data).subscribe(()=>{
+            this.globalProgress=false;
+            this.feedback=false;
+            this.toast.toast('COLLECTIONS.FEEDBACK_TOAST');
+        },(error)=>{
+            this.globalProgress=false;
+            this.toast.error(error);
+        })
     }
 }

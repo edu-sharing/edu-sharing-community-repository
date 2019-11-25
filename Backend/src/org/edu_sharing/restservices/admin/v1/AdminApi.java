@@ -1,6 +1,7 @@
 package org.edu_sharing.restservices.admin.v1;
 
 import java.io.InputStream;
+import java.io.Serializable;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -26,12 +27,14 @@ import javax.ws.rs.core.Response;
 
 import org.alfresco.rest.framework.core.exceptions.InvalidArgumentException;
 import org.alfresco.service.cmr.repository.NodeRef;
+import org.alfresco.service.cmr.repository.StoreRef;
 import org.apache.log4j.Level;
 import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
 import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
 import org.edu_sharing.repository.client.rpc.cache.CacheCluster;
 import org.edu_sharing.repository.client.rpc.cache.CacheInfo;
+import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.server.jobs.quartz.JobInfo;
 import org.edu_sharing.repository.server.tools.ApplicationInfo;
 import org.edu_sharing.repository.server.tools.ApplicationInfoList;
@@ -64,6 +67,8 @@ import org.edu_sharing.service.admin.AdminServiceFactory;
 import org.edu_sharing.service.admin.model.GlobalGroup;
 import org.edu_sharing.service.admin.model.ServerUpdateInfo;
 import org.edu_sharing.service.lifecycle.PersonLifecycleService;
+import org.edu_sharing.service.nodeservice.NodeServiceFactory;
+import org.edu_sharing.service.nodeservice.NodeServiceHelper;
 import org.edu_sharing.service.search.SearchService.ContentType;
 import org.edu_sharing.service.search.model.SearchToken;
 import org.edu_sharing.service.search.model.SortDefinition;
@@ -1120,7 +1125,7 @@ public class AdminApi {
 			AdminServiceFactory.getInstance();
 
 			Filter filter = new Filter(propertyFilter);
-			RepositoryDao repoDao = RepositoryDao.getRepository("-home-");
+			RepositoryDao repoDao = RepositoryDao.getHomeRepository();
 
 			SearchToken token = new SearchToken();
 			token.setSortDefinition(new SortDefinition(sortProperties, sortAscending));
@@ -1162,6 +1167,66 @@ public class AdminApi {
 	public Response options03() {
 
 		return Response.status(Response.Status.OK).header("Allow", "OPTIONS, GET").build();
+	}
+
+	@GET
+	@Path("/lucene/export")
+	@Consumes({ "application/json" })
+
+	@ApiOperation(value = "Search for custom lucene query and choose specific properties to load", notes = "e.g. @cm\\:name:\"*\"")
+
+	@ApiResponses(value = { @ApiResponse(code = 200, message = RestConstants.HTTP_200, response = List.class),
+			@ApiResponse(code = 400, message = RestConstants.HTTP_400, response = ErrorResponse.class),
+			@ApiResponse(code = 401, message = RestConstants.HTTP_401, response = ErrorResponse.class),
+			@ApiResponse(code = 403, message = RestConstants.HTTP_403, response = ErrorResponse.class),
+			@ApiResponse(code = 404, message = RestConstants.HTTP_404, response = ErrorResponse.class),
+			@ApiResponse(code = 500, message = RestConstants.HTTP_500, response = ErrorResponse.class) })
+
+	public Response exportByLucene(
+			@ApiParam(value = "query", defaultValue = "@cm\\:name:\"*\"") @QueryParam("query") String query,
+			@ApiParam(value = RestConstants.MESSAGE_SORT_PROPERTIES) @QueryParam("sortProperties") List<String> sortProperties,
+			@ApiParam(value = RestConstants.MESSAGE_SORT_ASCENDING) @QueryParam("sortAscending") List<Boolean> sortAscending,
+			@ApiParam(value = "properties to fetch, use parent::<property> to include parent property values") @QueryParam("properties") List<String> properties,
+			@Context HttpServletRequest req) {
+
+		try {
+
+			//check that there is an admin
+			AdminServiceFactory.getInstance();
+			RepositoryDao repoDao = RepositoryDao.getHomeRepository();
+
+			SearchToken token = new SearchToken();
+			token.setSortDefinition(new SortDefinition(sortProperties, sortAscending));
+			token.setFrom(0);
+			token.setMaxResult(Integer.MAX_VALUE);
+			token.setContentType(ContentType.ALL);
+			token.setLuceneString(query);
+			token.disableSearchCriterias();
+			NodeSearch search = NodeDao.search(repoDao, token, false);
+
+			List<Map<String,Serializable>> data = new ArrayList<>();
+			for (org.edu_sharing.restservices.shared.NodeRef ref : search.getResult()) {
+				NodeRef alfRef=new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE,ref.getId());
+				Map<String, Serializable> props=new HashMap<>();
+				for(String prop : properties){
+					if(prop.startsWith("parent::")){
+						String parentId = NodeServiceFactory.getLocalService().getPrimaryParent(ref.getId());
+						String realProp=prop.substring("parent::".length());
+						props.put(prop, NodeServiceHelper.getPropertyNative(new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE,parentId),CCConstants.getValidGlobalName(realProp)));
+					}
+					else{
+						props.put(prop, NodeServiceHelper.getPropertyNative(alfRef,CCConstants.getValidGlobalName(prop)));
+					}
+				}
+				data.add(props);
+			}
+			return Response.status(Response.Status.OK).entity(data).build();
+
+		} catch (DAOException e) {
+			return ErrorResponse.createResponse(e);
+		} catch (Throwable t) {
+			return ErrorResponse.createResponse(t);
+		}
 	}
 
 

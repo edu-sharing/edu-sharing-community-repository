@@ -73,7 +73,6 @@
            <includePermissionGroup type="sys:base" permissionGroup="Read"/>
            <includePermissionGroup type="sys:base" permissionGroup="ReadContent"/>
            <includePermissionGroup type="sys:base" permissionGroup="ReadPreview"/>
-           <includePermissionGroup type="sys:base" permissionGroup="Comment"/>
       </permissionGroup>
       <permissionGroup name="Write" expose="true" allowFullControl="false">
            <includePermissionGroup type="sys:base" permissionGroup="WriteProperties"/>
@@ -114,7 +113,9 @@
       <!-- edu-sharing Read preview permission -->
       <permissionGroup name="ReadPreview" expose="true" allowFullControl="false" />
       <!-- edu-sharing comment permission --> 
-      <permissionGroup name="Comment" expose="true" allowFullControl="false" />  
+      <permissionGroup name="Comment" expose="true" allowFullControl="false" />
+       <!-- edu-sharing feedback permission (for ccm:collection) -->
+      <permissionGroup name="Feedback" expose="true" allowFullControl="false" />
  	  <!-- edu-sharing Deny permission which will have priority to other permissions -->
       <permissionGroup name="Deny"  expose="true" allowFullControl="false" />     
       
@@ -134,6 +135,10 @@
        <permission name="_Comment"  expose="false">
  	       <grantedToGroup permissionGroup="Comment" />
       </permission>
+       <!-- edu-sharing feedback permission (for ccm:collection) -->
+       <permission name="_Feedback"  expose="false">
+           <grantedToGroup permissionGroup="Feedback" />
+       </permission>
     
       <!-- The permission to read properties on a node                                    -->
       <!--                                                                                -->
@@ -349,6 +354,8 @@
       <!-- edu-sharing The Consumer permission allows read to everything by default.   -->
       <permissionGroup name="Consumer" allowFullControl="false" expose="true" >
           <includePermissionGroup permissionGroup="ReadAll" type="sys:base" />
+          <includePermissionGroup type="sys:base" permissionGroup="Comment"/>
+          <includePermissionGroup type="sys:base" permissionGroup="Feedback"/>
       </permissionGroup>
       <!-- edu-sharing a restricted Consumer which can only read metadata of the node -->
       <permissionGroup name="ConsumerMetadata" allowFullControl="false" expose="true" >

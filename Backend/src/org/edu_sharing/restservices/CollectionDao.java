@@ -2,31 +2,27 @@ package org.edu_sharing.restservices;
 
 import java.io.InputStream;
 import java.util.*;
+import java.util.stream.Collectors;
 
+import com.google.gson.Gson;
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.repo.security.authentication.AuthenticationUtil.RunAsWork;
-import org.alfresco.service.ServiceRegistry;
+import org.alfresco.service.cmr.repository.StoreRef;
 import org.alfresco.service.cmr.security.PermissionService;
-import org.alfresco.service.cmr.thumbnail.ThumbnailService;
-import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
 import org.edu_sharing.repository.client.tools.CCConstants;
-import org.edu_sharing.repository.server.MCAlfrescoAPIClient;
 import org.edu_sharing.repository.server.MCAlfrescoBaseClient;
-import org.edu_sharing.repository.server.tools.ImageTool;
-import org.edu_sharing.repository.server.tools.cache.PreviewCache;
 import org.edu_sharing.restservices.collection.v1.model.Collection;
 import org.edu_sharing.restservices.collection.v1.model.CollectionBase;
 import org.edu_sharing.restservices.collection.v1.model.CollectionBaseEntries;
 import org.edu_sharing.restservices.collection.v1.model.CollectionReference;
 import org.edu_sharing.restservices.node.v1.model.NodeEntries;
 import org.edu_sharing.restservices.shared.*;
-import org.edu_sharing.service.Constants;
 import org.edu_sharing.service.collection.CollectionService;
 import org.edu_sharing.service.collection.CollectionServiceFactory;
+import org.edu_sharing.service.nodeservice.NodeServiceHelper;
 import org.edu_sharing.service.search.model.SortDefinition;
 import org.edu_sharing.service.toolpermission.ToolPermissionException;
 import org.edu_sharing.service.toolpermission.ToolPermissionServiceFactory;
-import org.springframework.context.ApplicationContext;
 
 import com.google.gwt.i18n.server.testing.Child;
 
@@ -202,7 +198,7 @@ public class CollectionDao {
 
 			this.collection = unmarshalling(repoDao.getId(), collectionClient.get(nodeDao.getStoreIdentifier(),nodeDao.getStoreProtocol(),collectionId));
 			this.baseClient = repoDao.getBaseClient();
-			this.access = nodeDao.asNode().getAccess();//baseClient.hasAllPermissions(collectionId, PERMISSIONS);
+			this.access = nodeDao.getAccessAsString();//baseClient.hasAllPermissions(collectionId, PERMISSIONS);
 			this.preview= nodeDao.asNode().getPreview();
 
 		} catch (Exception e) {
@@ -472,5 +468,32 @@ public class CollectionDao {
 		collectionClient.setOrder(collectionId,nodes);
 	}
 
-	
+	public void addFeedback(HashMap<String, String[]> feedbackData) throws DAOException {
+		try {
+			collectionClient.addFeedback(collection.getRef().getId(), feedbackData);
+		}catch(Throwable t){
+			throw new DAOException(t,collectionId);
+		}
+	}
+	public List<CollectionFeedback> getFeedbacks() throws DAOException {
+		try {
+			return collectionClient.getFeedbacks(collection.getRef().getId()).stream().map((id)->{
+				try {
+					NodeDao node=NodeDao.getNode(repoDao,id);
+					String data = NodeServiceHelper.getProperty(new org.alfresco.service.cmr.repository.NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, id), CCConstants.CCM_PROP_COLLECTION_FEEDBACK_DATA);
+					CollectionFeedback feedback = new CollectionFeedback();
+					feedback.setCreatedAt(node.getCreatedAt());
+					feedback.setCreatedBy(node.getCreatedBy());
+					feedback.setFeedback(new Gson().fromJson(data,Map.class));
+					return feedback;
+				} catch (DAOException e) {
+					throw new RuntimeException(e);
+				}
+
+			}).collect(Collectors.toList());
+		}catch(Throwable t){
+			throw new DAOException(t,collectionId);
+		}
+	}
+
 }

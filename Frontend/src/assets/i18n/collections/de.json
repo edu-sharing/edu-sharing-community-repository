@@ -84,8 +84,14 @@
     "ACTIONBAR":{
       "EDIT":"Bearbeiten",
       "PIN":"Sammlung pinnen",
-      "DELETE":"Sammlung löschen"
-    }
+      "DELETE":"Sammlung löschen",
+      "FEEDBACK":"Feedback...",
+      "FEEDBACK_VIEW":"Feedback ansehen"
+    },
+    "FEEDBACK_TITLE": "Feedback zur Sammlung geben",
+    "FEEDBACK_VIEW_TITLE": "Abgegebenes Feedback zur Sammlung",
+    "FEEDBACK_SAVE": "Absenden",
+    "FEEDBACK_TOAST": "Feedback gesendet. Vielen Dank!"
   },
 
 

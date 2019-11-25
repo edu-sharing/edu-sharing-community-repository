@@ -60,6 +60,19 @@ export class MdsComponent{
    */
   @Input() allowReplacing=true;
   @Input() parentNode:Node;
+
+  /**
+   * custom label for save (positive) action
+   */
+  @Input() labelPositive='SAVE';
+  /**
+   * custom label for cancel (negative) action
+   */
+  @Input() labelNegative='CANCEL';
+  /**
+   * custom title for card (only works if you don't edit an actual node)
+   */
+  @Input() customTitle:string;
   private _setId=RestConstants.DEFAULT;
   private _suggestions:any;
   private _groupId: string;

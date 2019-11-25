@@ -107,6 +107,8 @@
         "DATA_MANAGEMENT":"Dateimanagement",
         "SAFE":"Gesicherter Bereich (Safe)",
         "COLLECTIONS":"Sammlungen",
+        "CONNECTORS":"Konnektoren & Editoren",
+        "MANAGEMENT":"Verwaltung, Statistiken & Administration",
         "OTHER":"Andere / Nicht kategorisiert",
         "ADD": "Eigene Berechtigung anlegen"
       }

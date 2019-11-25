@@ -443,7 +443,22 @@
       <div class="info">{{'ADMIN.BROWSER.LUCENE_QUERY' | translate }}</div>
       <textarea name="luceneQuery" class="materialize-textarea" [(ngModel)]="lucene.query" placeholder='@cm\:name:"*"'></textarea>
     </div>
-    <div class="inputGroupGrow">
+      <div class="inputGroupGrow">
+          <div class="info">{{'ADMIN.BROWSER.OUTPUT_MODE' | translate }}</div>
+          <div>
+            <input type="radio" name="solrMode" id="solrModeView" [(ngModel)]="lucene.outputMode" value="view"><label for="solrModeView">{{'ADMIN.BROWSER.OUTPUT_MODE_VIEW' | translate}}</label>
+            <input type="radio" name="solrMode" id="solrModeExport" [(ngModel)]="lucene.outputMode" value="export"><label for="solrModeExport">{{'ADMIN.BROWSER.OUTPUT_MODE_EXPORT' | translate}}</label>
+          </div>
+      </div>
+      <div class="inputGroupGrow" *ngIf="lucene.outputMode=='export'">
+          <div class="info">{{'ADMIN.BROWSER.LUCENE_EXPORT_PROPERTIES_HINT' | translate }}</div>
+          <textarea class="materialize-textarea export-properties" [(ngModel)]="lucene.properties"></textarea>
+      </div>
+      <div class="inputGroupGrow" *ngIf="lucene.outputMode=='export'">
+          <div></div>
+          <div><a class="btn waves-effect waves-light" (click)="exportLucene()">{{'ADMIN.BROWSER.LUCENE_EXPORT_START' | translate}}</a></div>
+      </div>
+    <div class="inputGroupGrow" *ngIf="lucene.outputMode=='view'">
       <div class="info">{{'ADMIN.BROWSER.LUCENE_AUTHORITIES' | translate }}</div>
       <authority-search-input [globalSearch]="true" [placeholder]="'ADMIN.BROWSER.ADD_AUTHORITY'" [allowAny]="true" (onChooseAuthority)="addLuceneAuthority($event)"></authority-search-input>
     </div>
@@ -456,7 +471,7 @@
           </div>
         </div>
     </div>
-  <div class="inputGroupGrow lucenePaging">
+  <div class="inputGroupGrow lucenePaging" *ngIf="lucene.outputMode=='view'">
       <div class="info">{{'ADMIN.BROWSER.LUCENE_OFFSET' | translate }}</div>
       <input type="number" name="luceneOffset" [(ngModel)]="lucene.offset">
       <div class="info">{{'ADMIN.BROWSER.LUCENE_COUNT' | translate }}</div>
@@ -464,7 +479,7 @@
       <a class="btn waves-effect waves-light" (click)="searchLucene()">{{'ADMIN.BROWSER.LUCENE_START' | translate}}</a>
   </div>
   </div>
-    <div>
+    <div *ngIf="lucene.mode=='NODEREF' || lucene.outputMode=='view'">
         <listTable
                 [viewType]="0"
                 [columns]="searchColumns"

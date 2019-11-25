@@ -33,6 +33,7 @@ import {Observable, Observer} from 'rxjs/index';
 import {RestNetworkService} from '../../common/rest/services/rest-network.service';
 import {MainNavComponent} from '../../common/ui/main-nav/main-nav.component';
 import {GlobalContainerComponent} from "../../common/ui/global-container/global-container.component";
+import {DateHelper} from "../../common/ui/DateHelper";
 
 
 @Component({
@@ -68,7 +69,7 @@ export class AdminComponent {
   public jobsLogData:any = [];
   public jobClasses:SuggestItem[]=[];
   public jobClassesSuggested:SuggestItem[]=[];
-  public lucene:any={mode:'NODEREF',offset:0,count:100};
+  public lucene:any={mode:'NODEREF',offset:0,count:100,outputMode:'view'};
   public oaiSave=true;
   public repositoryVersion:string;
   public ngVersion:string;
@@ -954,6 +955,31 @@ export class AdminComponent {
   refreshUpdateList() {
     this.admin.getServerUpdates().subscribe((data:ServerUpdate[])=>{
       this.updates=data;
+    });
+  }
+
+  exportLucene() {
+    if(!this.lucene.properties) {
+      this.toast.error(null, 'ADMIN.BROWSER.LUCENE_PROPERTIES_REQUIRED');
+      return;
+    }
+    this.storage.set('admin_lucene',this.lucene);
+    this.globalProgress=true;
+    let props=this.lucene.properties.split("\n");
+    this.admin.exportLucene(this.lucene.query,props).subscribe((data)=>{
+      this.globalProgress=false;
+      console.log(data);
+      let csv=props.join(";");
+      for(let d of data){
+        csv+="\n";
+        let i=0;
+        for(let p of props){
+          if(i) csv+=';';
+          csv+='"'+d[p]+'"';
+          i++;
+        }
+      }
+      Helper.downloadContent("Export-"+DateHelper.formatDate(this.translate,new Date().getTime(),{useRelativeLabels:false})+".csv",csv);
     });
   }
 }

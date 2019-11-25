@@ -221,7 +221,14 @@
       "LUCENE_OFFSET":"Start bei:",
       "LUCENE_COUNT":"Anzahl Treffer:",
       "LUCENE_START":"Suchen",
-      "ADD_AUTHORITY":"Authority suchen..."
+      "LUCENE_EXPORT":"Daten Exportieren",
+      "ADD_AUTHORITY":"Authority suchen...",
+      "OUTPUT_MODE": "Ausgeben der Daten:",
+      "OUTPUT_MODE_VIEW": "Anzeigen",
+      "OUTPUT_MODE_EXPORT": "Als Datei herunterladen",
+      "LUCENE_EXPORT_PROPERTIES_HINT": "Im Export einzubindende Properties (1 pro Zeile). Referenzierung auf Properties des Parents mittels \"parent::<property>\"",
+      "LUCENE_EXPORT_START": "Exportieren & Herunterladen",
+      "LUCENE_PROPERTIES_REQUIRED": "Bitte gewünschte properties festlegen"
     },
     "JOBS":{
       "LOG":"Log-Einträge",

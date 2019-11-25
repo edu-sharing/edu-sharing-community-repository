@@ -4,7 +4,7 @@ import {DateHelper, FormatOptions} from './DateHelper';
 
 @Pipe({name: 'formatDate'})
 export class NodeDatePipe implements PipeTransform {
-  transform(value : any,args:any): string {
+  transform(value : any,args:any=null): string {
     let options=new FormatOptions();
     if(args && args.time!=null)
         options.showAlwaysTime=args.time;

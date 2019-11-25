@@ -358,6 +358,21 @@
 				<defaultvalue>5</defaultvalue>
 				<type>slider</type>
 			</widget>
+			<widget>
+				<id>feedback_rating</id>
+				<caption>feedback_rating</caption>
+				<type>slider</type>
+				<min>1</min>
+				<max>5</max>
+				<defaultvalue>3</defaultvalue>
+				<required>true</required>
+			</widget>
+			<widget>
+				<id>feedback_comment</id>
+				<caption>feedback_comment</caption>
+				<type>textarea</type>
+				<required>true</required>
+			</widget>
 		</widgets>
 		<templates>
 			<template>
@@ -580,6 +595,19 @@
 					<cclom:general_keyword>
 				]]></html>
 			</template>
+			<template>
+				<id>collection_feedback</id>
+				<html><![CDATA[
+					<style>
+					.feedback_comment_container textarea{
+						min-height:100px;
+					}
+					</style>
+
+					<feedback_rating>
+					<feedback_comment>
+				]]></html>
+			</template>
 		</templates>
 		<groups>
 			<group>
@@ -659,6 +687,12 @@
 				<id>add_to_stream</id>
 				<views>
 					<view>add_to_stream</view>
+				</views>
+			</group>
+			<group>
+				<id>collection_feedback</id>
+				<views>
+					<view>collection_feedback</view>
 				</views>
 			</group>
 		</groups>

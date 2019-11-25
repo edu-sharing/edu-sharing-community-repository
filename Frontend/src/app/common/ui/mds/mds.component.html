@@ -11,16 +11,17 @@
     <spinner class="loading" *ngIf="isLoading"></spinner>
     <div class="card-content" *ngIf="(currentNode || createType || _currentValues) && !isLoading">
       <div tabindex="0" class="card-cancel" (click)="cancel()" (keyup.enter)="cancel()"><i icon iconId="close" aria="true"></i></div>
-      <div class="card-title" *ngIf="currentNode || _groupId">{{currentNode ? currentNode.name : _currentValues['cm:name']}}</div>
-      <div class="card-title" *ngIf="!(currentNode || _groupId)">{{"CREATE_NODE."+createType | translate:{parent:parentNode ? parentNode.name : ""} }}</div>
+      <div class="card-title" *ngIf="(currentNode || _groupId) && !customTitle">{{currentNode ? currentNode.name : _currentValues['cm:name']}}</div>
+      <div class="card-title" *ngIf="customTitle">{{customTitle | translate:{parent:parentNode ? parentNode.name : ""} }}</div>
+      <div class="card-title" *ngIf="!(currentNode || _groupId) && !customTitle && createType ">{{"CREATE_NODE."+createType | translate:{parent:parentNode ? parentNode.name : ""} }}</div>
       <div class="card-scroll mdsCard" id="mdsScrollContainer" #mdsScrollContainer>
         <div class="dialogMds" *ngIf="currentWidgetSuggestion" (click)="closeDialog()" [style.top]="mdsScrollContainer.scrollTop+'px'"></div>
         <div [innerHTML]="rendered"></div>
       </div>
     </div>
     <div class="card-action" *ngIf="(currentNode || createType || _currentValues) && !isLoading">
-      <a class="btn" (click)="saveValues()" tabindex="0" (keyup.enter)="saveValues()">{{'SAVE' | translate}}</a>
-      <a class="btn-flat" tabindex="0" (click)="cancel()" (keyup.enter)="cancel()">{{'CANCEL' | translate }}</a>
+      <a class="btn" (click)="saveValues()" tabindex="0" (keyup.enter)="saveValues()">{{labelPositive | translate}}</a>
+      <a class="btn-flat" tabindex="0" (click)="cancel()" (keyup.enter)="cancel()">{{labelNegative | translate }}</a>
     </div>
   </div>
 </div>

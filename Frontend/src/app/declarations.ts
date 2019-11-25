@@ -52,6 +52,8 @@
   import {AuthorityAffiliationPipe} from "./common/ui/authority-affiliation.pipe";
   import {GlobalContainerComponent} from "./common/ui/global-container/global-container.component";
   import {RocketchatComponent} from "./common/ui/global-container/rocketchat/rocketchat.component";
+  import {MdsViewerComponent} from "./common/ui/mds-viewer/mds-viewer.component";
+  import {MdsWidgetComponent} from "./common/ui/mds-viewer/widget/mds-widget.component";
 
   export const DECLARATIONS = [
       MdsTestComponent,
@@ -88,6 +90,8 @@
       UserProfileComponent,
       UserAvatarComponent,
       MdsComponent,
+      MdsViewerComponent,
+      MdsWidgetComponent,
       RouterComponent,
       FileDropDirective,
       ModalDialogComponent,

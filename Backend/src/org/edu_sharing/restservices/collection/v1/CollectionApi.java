@@ -2,7 +2,9 @@ package org.edu_sharing.restservices.collection.v1;
 
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.Consumes;
@@ -23,16 +25,9 @@ import org.apache.log4j.Logger;
 import org.apache.lucene.queryParser.QueryParser;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.server.SearchResultNodeRef;
-import org.edu_sharing.restservices.ApiService;
-import org.edu_sharing.restservices.CollectionDao;
+import org.edu_sharing.restservices.*;
 import org.edu_sharing.restservices.CollectionDao.Scope;
 import org.edu_sharing.restservices.CollectionDao.SearchScope;
-import org.edu_sharing.restservices.DAOMissingException;
-import org.edu_sharing.restservices.DAOSecurityException;
-import org.edu_sharing.restservices.DAOValidationException;
-import org.edu_sharing.restservices.NodeDao;
-import org.edu_sharing.restservices.RepositoryDao;
-import org.edu_sharing.restservices.RestConstants;
 import org.edu_sharing.restservices.collection.v1.model.*;
 import org.edu_sharing.restservices.shared.ErrorResponse;
 import org.edu_sharing.restservices.shared.Filter;
@@ -672,6 +667,71 @@ public class CollectionApi {
 
 			return Response.status(Response.Status.OK).build();
 
+		} catch (Throwable t) {
+			return ErrorResponse.createResponse(t);
+		}
+	}
+
+	@POST
+	@Path("/collections/{repository}/{collection}/feedback")
+	@ApiOperation(value = "Post feedback to collection.", notes = "Requires permission \"Feedback\" on the specific collection")
+	@ApiResponses(value = {
+			@ApiResponse(code = 200, message = RestConstants.HTTP_200, response = Void.class),
+			@ApiResponse(code = 400, message = RestConstants.HTTP_400, response = ErrorResponse.class),
+			@ApiResponse(code = 401, message = RestConstants.HTTP_401, response = ErrorResponse.class),
+			@ApiResponse(code = 403, message = RestConstants.HTTP_403, response = ErrorResponse.class),
+			@ApiResponse(code = 404, message = RestConstants.HTTP_404, response = ErrorResponse.class),
+			@ApiResponse(code = 500, message = RestConstants.HTTP_500, response = ErrorResponse.class)
+	})
+	public Response addFeedbackToCollection(
+			@ApiParam(value = RestConstants.MESSAGE_REPOSITORY_ID, required = true, defaultValue = "-home-") @PathParam("repository") String repository,
+			@ApiParam(value = "ID of collection", required = true) @PathParam("collection") String collectionId,
+			HashMap<String,String[]> body,
+			@Context HttpServletRequest req) {
+
+		try {
+			RepositoryDao repoDao = RepositoryDao.getRepository(repository);
+			if (repoDao == null) {
+				return Response.status(Response.Status.NOT_FOUND).build();
+			}
+			CollectionDao collectionDao = CollectionDao.getCollection(repoDao,
+					collectionId);
+			if (collectionDao == null) {
+				return Response.status(Response.Status.NOT_FOUND).build();
+			}
+			collectionDao.addFeedback(body);
+			return Response.ok().build();
+		} catch (Throwable t) {
+			return ErrorResponse.createResponse(t);
+		}
+	}
+	@GET
+	@Path("/collections/{repository}/{collection}/feedback")
+	@ApiOperation(value = "Get feedback of collection.", notes = "Requires permission \"???\" on the specific permission")
+	@ApiResponses(value = {
+			@ApiResponse(code = 200, message = RestConstants.HTTP_200, response = CollectionFeedback[].class),
+			@ApiResponse(code = 400, message = RestConstants.HTTP_400, response = ErrorResponse.class),
+			@ApiResponse(code = 401, message = RestConstants.HTTP_401, response = ErrorResponse.class),
+			@ApiResponse(code = 403, message = RestConstants.HTTP_403, response = ErrorResponse.class),
+			@ApiResponse(code = 404, message = RestConstants.HTTP_404, response = ErrorResponse.class),
+			@ApiResponse(code = 500, message = RestConstants.HTTP_500, response = ErrorResponse.class)
+	})
+	public Response getFeedbackOfCollection(
+			@ApiParam(value = RestConstants.MESSAGE_REPOSITORY_ID, required = true, defaultValue = "-home-") @PathParam("repository") String repository,
+			@ApiParam(value = "ID of collection", required = true) @PathParam("collection") String collectionId,
+			@Context HttpServletRequest req) {
+
+		try {
+			RepositoryDao repoDao = RepositoryDao.getRepository(repository);
+			if (repoDao == null) {
+				return Response.status(Response.Status.NOT_FOUND).build();
+			}
+			CollectionDao collectionDao = CollectionDao.getCollection(repoDao,
+					collectionId);
+			if (collectionDao == null) {
+				return Response.status(Response.Status.NOT_FOUND).build();
+			}
+			return Response.ok().entity(collectionDao.getFeedbacks()).build();
 		} catch (Throwable t) {
 			return ErrorResponse.createResponse(t);
 		}

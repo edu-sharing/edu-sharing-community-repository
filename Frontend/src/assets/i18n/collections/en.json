@@ -84,8 +84,14 @@
     "ACTIONBAR":{
       "EDIT":"Edit",
       "PIN":"Pin collection",
-      "DELETE":"Delete collection"
-    }
+      "DELETE":"Delete collection",
+      "FEEDBACK":"Feedback..."
+      "FEEDBACK_VIEW":"View feedback"
+    },
+    "FEEDBACK_TITLE": "Give feedback for collection",
+    "FEEDBACK_VIEW_TITLE": "Given feedback for collection",
+    "FEEDBACK_SAVE": "Send",
+    "FEEDBACK_TOAST": "Feedback sent. Thank you!"
   },
 
   "collections_description" : "Description",

@@ -18,7 +18,38 @@
   [isCancelable]="true"
   (onCancel)="infoClose()"
 ></infobar>
-
+<mds
+    *ngIf="feedback"
+    customTitle="COLLECTIONS.FEEDBACK_TITLE"
+    [embedded]="false"
+    [invalidate]="true"
+    [currentValues]="{}"
+    groupId="collection_feedback"
+    labelPositive="COLLECTIONS.FEEDBACK_SAVE"
+    (onCancel)="feedback=false"
+    (onDone)="addFeedback($event)"
+    ></mds>
+<div class="dialog darken" [@fade]="feedbackView" *ngIf="feedbackView"></div>
+<div class="card center-card card-action card-high card-wide" [@cardAnimation]="feedbackView" *ngIf="feedbackView">
+    <div class="card-content">
+        <div tabindex="0" class="card-cancel" (click)="feedbackView=false" (keyup.enter)="feedbackView=false"><i icon iconId="close" aria="true"></i></div>
+        <div class="card-title">{{'COLLECTIONS.FEEDBACK_VIEW_TITLE' | translate }}</div>
+        <div class="card-scroll">
+            <div *ngFor="let feedback of feedbacks" class="feedback">
+                <div class="main-data">
+                    <div class="author">{{feedback.createdBy | authorityName }}</div>
+                    <div class="date">{{feedback.createdAt | formatDate:{useRelativeLabels:false,time:true} }}</div>
+                </div>
+                <div class="meta-data">
+                    <mds-viewer [data]="feedback.feedback" groupId="collection_feedback"></mds-viewer>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="card-action">
+        <a class="waves-effect waves-light btn" tabindex="0" (keyup.enter)="feedbackView=false" (click)="feedbackView=false">{{'CLOSE' | translate }}</a>
+    </div>
+</div>
 
 <div class="row tab-group row-dark scrollWithBanner" *ngIf="showTabs()">
   <div class="col s12">

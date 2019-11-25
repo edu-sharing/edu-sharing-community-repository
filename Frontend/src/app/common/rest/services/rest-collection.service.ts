@@ -7,7 +7,7 @@ import {RestHelper} from "../rest-helper";
 import {RestConstants} from "../rest-constants";
 
 import * as EduData from "../data-object";
-import {CollectionSubcollections, CollectionWrapper} from '../data-object';
+import {CollectionFeedback, CollectionSubcollections, CollectionWrapper} from '../data-object';
 import {AbstractRestService} from "./abstract-rest-service";
 
 @Injectable()
@@ -142,5 +142,15 @@ export class RestCollectionService extends AbstractRestService{
     let query:string = this.connector.createUrl("collection/:version/collections/:repository/:collectionid/references/:refid",repository,[[":collectionid",collectionId],[":refid",referenceId]]);
 
     return this.connector.delete(query, this.connector.getRequestOptions());
+  };
+
+
+  public addFeedback(collectionId:string,feedbackData:any, repository:string = RestConstants.HOME_REPOSITORY) {
+    let query:string = this.connector.createUrl("collection/:version/collections/:repository/:collectionid/feedback",repository,[[":collectionid",collectionId]]);
+    return this.connector.post(query, JSON.stringify(feedbackData), this.connector.getRequestOptions());
+  };
+  public getFeedbacks(collectionId:string, repository:string = RestConstants.HOME_REPOSITORY){
+    let query:string = this.connector.createUrl("collection/:version/collections/:repository/:collectionid/feedback",repository,[[":collectionid",collectionId]]);
+    return this.connector.get<CollectionFeedback[]>(query, this.connector.getRequestOptions());
   };
 }

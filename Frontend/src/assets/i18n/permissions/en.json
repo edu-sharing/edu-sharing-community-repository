@@ -107,6 +107,8 @@
         "DATA_MANAGEMENT":"File Management",
         "SAFE":"Secure Area (Safe)",
         "COLLECTIONS":"Collections",
+        "CONNECTORS":"Connectors & Editors",
+        "MANAGEMENT":"Management, Statistics & Administration",
         "OTHER":"Other  / Not categorized",
         "ADD": "Creating custom  Authorizations"
       }

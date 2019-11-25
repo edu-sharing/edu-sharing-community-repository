@@ -28,6 +28,7 @@ import {SpinnerComponent} from "./common/ui/spinner/spinner.component";
 import {ListTableComponent} from "./common/ui/list-table/list-table.component";
 import {CommentsListComponent} from "./modules/management-dialogs/node-comments/comments-list/comments-list.component";
 import {MAT_FORM_FIELD_DEFAULT_OPTIONS} from "@angular/material";
+import {MdsWidgetComponent} from "./common/ui/mds-viewer/widget/mds-widget.component";
 
 
 // http://blog.angular-university.io/angular2-ngmodule/
@@ -61,6 +62,7 @@ import {MAT_FORM_FIELD_DEFAULT_OPTIONS} from "@angular/material";
   entryComponents: [
       SpinnerComponent,
       ListTableComponent,
+      MdsWidgetComponent,
       CommentsListComponent,
   ],
   imports: IMPORTS,

@@ -188,6 +188,13 @@ export class RestAdminService extends AbstractRestService{
       ]);
       return this.connector.get<NodeList>(query,this.connector.getRequestOptions());
   }
+  public exportLucene(lucene:string,properties:string[]){
+    let query=this.connector.createUrlNoEscape("admin/:version/lucene/export/?query=:lucene&:properties",null,[
+        [":lucene",encodeURIComponent(lucene)],
+        [":properties",RestHelper.getQueryStringForList("properties",properties)],
+    ]);
+    return this.connector.get<any>(query,this.connector.getRequestOptions());
+  }
   public startJob(job:string,params:string){
       let query=this.connector.createUrl("admin/:version/job/:job",null,[
           [":job",job],
