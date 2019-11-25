@@ -22,6 +22,8 @@ public class CacheCluster implements Serializable{
 	
 	Date timeStamp;
 	
+	String groupName;
+	
 
 	public List<CacheInfo> getCacheInfos() {
 		return cacheInfos;
@@ -86,6 +88,14 @@ public class CacheCluster implements Serializable{
 	
 	public Date getTimeStamp() {
 		return timeStamp;
+	}
+	
+	public String getGroupName() {
+		return groupName;
+	}
+	
+	public void setGroupName(String groupName) {
+		this.groupName = groupName;
 	}
 	
 	
