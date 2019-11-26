@@ -90,6 +90,7 @@
     },
     "FEEDBACK_TITLE": "Feedback zur Sammlung geben",
     "FEEDBACK_VIEW_TITLE": "Abgegebenes Feedback zur Sammlung",
+    "FEEDBACK_VIEW_EMPTY": "Es wurde noch kein Feedback zur Sammlung abgegeben",
     "FEEDBACK_SAVE": "Absenden",
     "FEEDBACK_TOAST": "Feedback gesendet. Vielen Dank!"
   },

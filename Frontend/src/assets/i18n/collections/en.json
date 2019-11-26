@@ -85,7 +85,8 @@
       "EDIT":"Edit",
       "PIN":"Pin collection",
       "DELETE":"Delete collection",
-      "FEEDBACK":"Feedback..."
+      "FEEDBACK":"Feedback...",
+      "FEEDBACK_VIEW_EMPTY": "No feedback was given for this collection yet",
       "FEEDBACK_VIEW":"View feedback"
     },
     "FEEDBACK_TITLE": "Give feedback for collection",

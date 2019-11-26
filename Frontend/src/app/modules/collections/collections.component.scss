@@ -47,6 +47,12 @@ table, div {
     margin-top: 8px;
 }
 .feedback{
+  .empty{
+    text-align: center;
+    padding-top: 10%;
+    font-size: 120%;
+    color:$textLight;
+  }
   .main-data{
     background-color: $workspaceSelectedBackground;
     font-size: 120%;
