@@ -80,32 +80,45 @@ public class AuthenticatorRemoteRepository {
 	 * @return AuthenticatorRemoteAppResult
 	 */
 	public AuthenticatorRemoteAppResult getAuthInfoForApp(HashMap<String,String> localAuthInfo, ApplicationInfo remoteAppInfo) throws Throwable{
-		
-		HashMap<String,String> resultAuthInfo = new HashMap<String,String>();
-		
-		MCAlfrescoBaseClient mcAlfrescoBaseClient =	(MCAlfrescoBaseClient)RepoFactory.getInstance(null, localAuthInfo);
-		
-		logger.info("getting userinfo for" + localAuthInfo.get(CCConstants.AUTH_USERNAME));
-		HashMap<String,String> userInfo = mcAlfrescoBaseClient.getUserInfo(localAuthInfo.get(CCConstants.AUTH_USERNAME));
-		String exceptionMessage = null;
-		try{
-			logger.info("starting session with remoteAppId:"+remoteAppInfo.getAppId()+ " local usename:"+localAuthInfo.get(CCConstants.AUTH_USERNAME)+ " propUserMail:"+userInfo.get(CCConstants.PROP_USER_EMAIL) +" Ticket:"+localAuthInfo.get(CCConstants.AUTH_TICKET));
-			if(remoteAppInfo.getAuthenticationwebservice() != null && !remoteAppInfo.getAuthenticationwebservice().trim().equals("")){
-				
-				//AuthenticationUtil.startSession(remoteAppInfo.getAppId(), localAuthInfo.get(CCConstants.AUTH_USERNAME) , userInfo.get(CCConstants.PROP_USER_EMAIL), localAuthInfo.get(CCConstants.AUTH_TICKET), createRemoteUser);
-				remoteAuth(remoteAppInfo.getAppId(),localAuthInfo.get(CCConstants.AUTH_USERNAME),localAuthInfo.get(CCConstants.AUTH_TICKET),(MCAlfrescoAPIClient)mcAlfrescoBaseClient);
-			
-			}else{
-				return null;
+
+		HashMap<String, String> resultAuthInfo = new HashMap<String, String>();
+		MCAlfrescoBaseClient mcAlfrescoBaseClient = (MCAlfrescoBaseClient) RepoFactory.getInstance(null, localAuthInfo);
+
+		if(remoteAppInfo.getString("forced_user",null)!=null){
+			logger.info("forced_user is set for remote, will authenticate as the specified user");
+			try{
+				if(remoteAppInfo.getAuthenticationwebservice() != null && !remoteAppInfo.getAuthenticationwebservice().trim().equals("")){
+					remoteAuth(remoteAppInfo.getAppId(), remoteAppInfo.getString("forced_user",null), (MCAlfrescoAPIClient) mcAlfrescoBaseClient);
+				}else{
+					return null;
+				}
+			}catch(AxisFault e){
+
+				logger.info("Remote repository "+remoteAppInfo.getAppId()+" auth failed (check the remote repo log for more details) "+e.dumpToString());
+				//don't login as guest better throw exception so that we can inform the user that an email was send
+				throw e;
+
 			}
-		}catch(AxisFault e){
-			
-			logger.info("REMOTE REPOSITORY AUTH FAILED"+e.getMessage());
-			exceptionMessage = e.getMessage();
-			
-			//don't login as guest better throw exception so that we can inform the user that an email was send
-			throw e;
-			
+		}
+		else {
+			logger.info("getting userinfo for" + localAuthInfo.get(CCConstants.AUTH_USERNAME));
+			HashMap<String, String> userInfo = mcAlfrescoBaseClient.getUserInfo(localAuthInfo.get(CCConstants.AUTH_USERNAME));
+			try {
+				logger.info("starting session with remoteAppId:" + remoteAppInfo.getAppId() + " local usename:" + localAuthInfo.get(CCConstants.AUTH_USERNAME) + " propUserMail:" + userInfo.get(CCConstants.PROP_USER_EMAIL) + " Ticket:" + localAuthInfo.get(CCConstants.AUTH_TICKET));
+				if (remoteAppInfo.getAuthenticationwebservice() != null && !remoteAppInfo.getAuthenticationwebservice().trim().equals("")) {
+
+					//AuthenticationUtil.startSession(remoteAppInfo.getAppId(), localAuthInfo.get(CCConstants.AUTH_USERNAME) , userInfo.get(CCConstants.PROP_USER_EMAIL), localAuthInfo.get(CCConstants.AUTH_TICKET), createRemoteUser);
+					remoteAuth(remoteAppInfo.getAppId(), localAuthInfo.get(CCConstants.AUTH_USERNAME), (MCAlfrescoAPIClient) mcAlfrescoBaseClient);
+
+				} else {
+					return null;
+				}
+			} catch (AxisFault e) {
+
+				logger.info("Remote repository " + remoteAppInfo.getAppId() + " auth failed (check the remote repo log for more details) " + e.dumpToString());
+				//don't login as guest better throw exception so that we can inform the user that an email was send
+				throw e;
+			}
 		}
 		//TODO if exception repository unreachable -> special handling
 		logger.info("REMOTE APPID:"+ remoteAppInfo.getAppId() +"REMOTE USERNAME:"+AuthenticationUtils.getAuthenticationDetails().getUserName()+" REMOTETICKET:"+AuthenticationUtils.getAuthenticationDetails().getTicket()) ;
@@ -113,12 +126,11 @@ public class AuthenticatorRemoteRepository {
 		resultAuthInfo.put(CCConstants.AUTH_TICKET,AuthenticationUtils.getAuthenticationDetails().getTicket());
 		AuthenticatorRemoteAppResult result = new AuthenticatorRemoteAppResult();
 		result.setAuthenticationInfo(resultAuthInfo);
-		result.setExceptionMessage(exceptionMessage);
 		logger.info("REMOTE USERNAME2:"+resultAuthInfo.get(CCConstants.AUTH_USERNAME)+" REMOTETICKET:"+resultAuthInfo.get(CCConstants.AUTH_TICKET)) ;
 		return result;
 	}
 	
-	private void remoteAuth(String appId, String username, String localTicket, MCAlfrescoAPIClient apiClient) throws Exception{
+	private void remoteAuth(String appId, String username, MCAlfrescoAPIClient apiClient) throws Exception{
 		String localAppId = ApplicationInfoList.getHomeRepository().getAppId();
     	System.out.println("startSession remoteApplicationId:"+appId +" localAppId:"+localAppId);
     	
@@ -127,13 +139,22 @@ public class AuthenticatorRemoteRepository {
     	HashMap<String,String> personMapping = ssoAuthorityMapper.getMappingConfig().getPersonMapping();
     	
     	List<KeyValue> ssoData = new ArrayList<KeyValue>();
-    	
-    	HashMap<String,String> personData = apiClient.getUserInfo(username);
-    
-    	String esuid = personData.get(CCConstants.PROP_USER_ESUID);
-	if(esuid == null || esuid.trim().equals("")){
-		throw new Exception("missing esuid for user!!!");
-	}
+		String esuid;
+		HashMap<String, String> personData;
+		if(username.equals(ApplicationInfoList.getRepositoryInfoById(appId).getString("forced_user",null))){
+			// do not escape the guest, send them as a "plain" user
+			personData = new HashMap<>();
+			personData.put(CCConstants.CM_PROP_PERSON_FIRSTNAME,ApplicationInfoList.getHomeRepository().getAppCaption());
+			esuid = username;
+		}
+		else {
+			personData = apiClient.getUserInfo(username);
+			esuid = personData.get(CCConstants.PROP_USER_ESUID);
+			if(esuid == null || esuid.trim().equals("")){
+				throw new Exception("missing esuid for user!!!");
+			}
+		}
+
     	
     	for(Map.Entry<String, String> entry : personMapping.entrySet()){
     		
@@ -143,7 +164,7 @@ public class AuthenticatorRemoteRepository {
     		 * add an domain with appid to esuid to prevent interference with an existing user in remote repo
     		 */
     		if(entry.getValue().equals(CCConstants.CM_PROP_PERSON_USERNAME)){
-    			val = esuid + "@" + localAppId;	
+    			val = esuid + "@" + localAppId;
     		}
     		ssoData.add(new KeyValue(entry.getKey(), val));
     	}

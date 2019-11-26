@@ -218,7 +218,7 @@ public class AuthenticationFilter implements javax.servlet.Filter {
 		}
 		
 		if(allowedAuthTypes != null && !allowedAuthTypes.trim().equals("") && allowSSO){
-			String shibbUrl = URLTool.addSSOPathWhenConfigured(URLTool.getBaseUrl()) + ( req.getQueryString() != null ? "?"+req.getQueryString() : "");
+			String shibbUrl = URLTool.addSSOPathWhenConfigured(URLTool.getBaseUrl(true)) + ( req.getQueryString() != null ? "?"+req.getQueryString() : "");
 			resp.sendRedirect(shibbUrl);
 		}else{
 			// detect if the error component was requested -> then go ahead

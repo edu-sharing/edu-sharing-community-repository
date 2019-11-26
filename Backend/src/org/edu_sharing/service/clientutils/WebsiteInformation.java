@@ -1,9 +1,21 @@
 package org.edu_sharing.service.clientutils;
 
+import java.io.Serializable;
 import java.util.List;
+import java.util.Map;
 
 public class WebsiteInformation {
-	public static class License{
+	private Map<String, String[]> lrmiProperties;
+
+	public void setLrmiProperties(Map<String, String[]> properties) {
+        this.lrmiProperties = properties;
+    }
+
+    public Map<String, String[]> getLrmiProperties() {
+        return lrmiProperties;
+    }
+
+    public static class License{
 		public License(String name,String ccVersion){
 			this.name=name;
 			this.ccVersion=ccVersion;

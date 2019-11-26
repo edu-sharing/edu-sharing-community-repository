@@ -39,6 +39,7 @@ import {RestUtilitiesService} from "../../rest/services/rest-utilities.service";
 export class MdsComponent{
   @ViewChild('mdsScrollContainer') mdsScrollContainer: ElementRef;
   @ViewChild('jumpmarksRef') jumpmarksRef: ElementRef;
+  @ViewChild('mdsChildobject') mdsChildobject: MdsComponent;
 
   /**
    * priority, useful if the dialog seems not to be in the foreground
@@ -127,7 +128,7 @@ export class MdsComponent{
     this._groupId=groupId;
   }
   private isSearch(){
-    return this._groupId!=null;
+    return this._groupId==RestConstants.DEFAULT_QUERY_NAME;
   }
 
   private loadMdsFinal(callback:Function=null) {
@@ -410,7 +411,7 @@ export class MdsComponent{
       let extended=`<div class="mdsExtended `+(this.isSearch() ? 'mdsExtendedSearch' : '')+`"><div class="label">`+this.translate.instant(this.isSearch() ? 'MDS.SHOW_EXTENDED_SEARCH' : 'MDS.SHOW_EXTENDED')+`</div><div class="switch">
             <label>
               `+this.translate.instant('OFF')+`
-                <input type="checkbox" id="mdsExtendedCheckbox" onchange="`+this.getWindowComponent()+`.showExtended(this.checked)">
+                <input type="checkbox" id="`+this.getDomId('mdsExtendedCheckbox')+`" onchange="`+this.getWindowComponent()+`.showExtended(this.checked)">
                 <span class="lever"></span>
               `+this.translate.instant('ON')+`
               </label>
@@ -422,7 +423,7 @@ export class MdsComponent{
   private showExtended(show:boolean){
     this.extended=show;
     this.extendedChange.emit(show);
-    let checkbox:any=document.getElementById('mdsExtendedCheckbox');
+    let checkbox=(document.getElementById(this.getDomId('mdsExtendedCheckbox')) as HTMLInputElement);
     if(!checkbox)
       return;
     checkbox.checked=show;
@@ -1220,11 +1221,12 @@ export class MdsComponent{
                 document.getElementById('` + id + `_suggestions').style.display='none';
                 `+this.getWindowComponent()+`.currentWidgetSuggestion=null;`;
 
+    /*
     if(singleValue){
       html+=`   document.getElementById('` + id + `').value=this.getAttribute('data-caption');
                 document.getElementById('` + id + `').setAttribute('data-value',this.getAttribute('data-value'));`;
-    }
-    else {
+    }*/
+
       html += `
                 document.getElementById('` + id + `_suggestionsInput').value='';`;
       if(!this.uiService.isMobile())
@@ -1236,8 +1238,8 @@ export class MdsComponent{
                         return;
                     }
                 }
-                badges.innerHTML+='` + this.getMultivalueBadgeEmbedded('this.getAttribute(\'data-caption\')', 'this.getAttribute(\'data-value\')') + `';`;
-    }
+                badges.innerHTML`+(singleValue ? '=' : '+=')+`'` + this.getMultivalueBadgeEmbedded('this.getAttribute(\'data-caption\')', 'this.getAttribute(\'data-value\')') + `';`;
+
     html+=`">` + (searchString ? this.highlightSearch(caption,searchString) : caption) + `</a>`;
     return html;
   }
@@ -1247,11 +1249,8 @@ export class MdsComponent{
     if(!openCallback && widget.type!='multivalueTree' && widget.type!='singlevalueTree')
       css+=' suggestInputNoOpen';
     let postfix='_suggestionsInput';
-    if(singleValue)
-      postfix='';
+
     let html=`<div class="auto-suggest-field"><input type="text" id="`+this.getWidgetDomId(widget)+postfix+`" `
-    if(singleValue)
-      html+='readonly ';
     html+=`aria-label="`+widget.caption+`" placeholder="`+(widget.placeholder ? widget.placeholder : '')+`" class="suggestInput `+css+`" 
             onkeyup="`+this.getWindowComponent()+`.openSuggestions('`+widget.id+`',event,`+allowCustom+`,`+(widget.values ? true  : false)+`,false,true)">`;
     if(widget.type=='singleoption' && !widget.allowempty){
@@ -1334,7 +1333,7 @@ export class MdsComponent{
   private renderTreeWidget(widget:any,attr:string){
     let domId=this.getWidgetDomId(widget);
     let html=this.autoSuggestField(widget,'',false,
-                this.getWindowComponent()+`.openTree('`+widget.id+`')`,'arrow_forward')
+                this.getWindowComponent()+`.openTree('`+widget.id+`')`,'arrow_forward',widget.type=='singlevalueTree')
         +`     <div class="dialog darken" style="display:none;z-index:`+(122 + this.priority)+`;" id="`+domId+`_tree">
                 <div class="card center-card card-wide card-high card-action">
                   <div class="card-content">
@@ -2328,9 +2327,18 @@ export class MdsComponent{
       });
   }
   private setChildobjectProperties(props:any){
-    console.log(props);
     let edit=this.editChildobject || this.editChildobjectLicense;
-    edit.child.properties=props;
+    // keep any existing license data
+    if(this.editChildobject && edit.child.properties){
+      console.log(props);
+      for(let key in props){
+        edit.child.properties[key]=props[key];
+      }
+      console.log(edit.child.properties);
+    }
+    else {
+      edit.child.properties = props;
+    }
     edit.child.name=props[RestConstants.LOM_PROP_TITLE] ? props[RestConstants.LOM_PROP_TITLE] : props[RestConstants.CM_NAME];
     this.editChildobject=null;
     this.editChildobjectLicense=null;

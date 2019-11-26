@@ -38,8 +38,8 @@ public class VersionService {
 		throw new IllegalArgumentException("Unknown type "+type);
 	}
 	private static String getRenderserviceVersion() throws Exception{
-		ApplicationInfo rs=ApplicationInfoList.getRenderService();
-		String url=rs.getContentUrlBackend()!=null ? rs.getContentUrlBackend() : rs.getContentUrl();
+		ApplicationInfo homeRepo=ApplicationInfoList.getHomeRepository();
+		String url=homeRepo.getContentUrlBackend()!=null ? homeRepo.getContentUrlBackend() : homeRepo.getContentUrl();
 		url=url.replace("index.php", "version.php");
 		InputStream is = new URL(url).openStream();
 		String data=IOUtils.readAllLines(is);

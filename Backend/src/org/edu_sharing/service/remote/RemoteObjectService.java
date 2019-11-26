@@ -149,7 +149,7 @@ public class RemoteObjectService {
 	}
 
 	private boolean is3dPartyRepository(ApplicationInfo repInfo) {
-		return !repInfo.ishomeNode() && !ApplicationInfo.REPOSITORY_TYPE_ALFRESCO.equals(repInfo.getRepositoryType());
+		return !repInfo.ishomeNode() && !repInfo.isRemoteAlfresco();
 	}
 
 }

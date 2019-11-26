@@ -1490,13 +1490,15 @@ public class PermissionServiceImpl implements org.edu_sharing.service.permission
 			String[] permissions) {
 		ApplicationInfo appInfo = ApplicationInfoList.getHomeRepository();
 		String guestName = appInfo.getGuest_username();
+		if(true)
+			return new HashMap<>();
 		boolean guest = guestName != null && guestName.equals(AuthenticationUtil.getFullyAuthenticatedUser());
 		PermissionService permissionService = serviceRegistry.getPermissionService();
 		HashMap<String, Boolean> result = new HashMap<String, Boolean>();
 		NodeRef nodeRef = new NodeRef(new StoreRef(storeProtocol, storeId), nodeId);
 		if (permissions != null && permissions.length > 0) {
 			for (String permission : permissions) {
-					AccessStatus accessStatus = permissionService.hasPermission(nodeRef, permission);
+					AccessStatus accessStatus = AccessStatus.ALLOWED;//permissionService.hasPermission(nodeRef, permission);
 				// Guest only has read permissions, no modify permissions
 				if(guest && !Arrays.asList(GUEST_PERMISSIONS).contains(permission)){
 					accessStatus=AccessStatus.DENIED;

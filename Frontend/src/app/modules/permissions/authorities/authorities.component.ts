@@ -499,6 +499,7 @@ export class PermissionsAuthoritiesComponent {
           this.edit = Helper.deepCopy(user.person);
           this.edit.profile.sizeQuota=user.person.quota.sizeQuota/1024/1024;
           this.editId = this.edit.authorityName;
+          this.primaryAffiliationList=this.edit.profile.primaryAffiliation ? this.PRIMARY_AFFILIATIONS.indexOf(this.edit.profile.primaryAffiliation)!=-1 : true;
       });
     }
     else {
@@ -670,7 +671,6 @@ export class PermissionsAuthoritiesComponent {
     this.searchMembers();
   }
   private updateSelectedMembers(data:Authority[]){
-    console.log(data);
     this.selectedMembers=data;
     this.memberOptions=this.getMemberOptions();
   }
@@ -726,7 +726,6 @@ export class PermissionsAuthoritiesComponent {
   }
   private refreshMemberList() {
     if(this.addMembers){
-      this.selectedMembers=[];
       if(this.org && this.addMembers.authorityName!=this.org.authorityName){
         let request:any={
           sortBy: ["authorityName"],

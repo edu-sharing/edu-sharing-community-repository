@@ -29,9 +29,11 @@ package org.edu_sharing.repository.server.jobs.quartz;
 
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.repo.security.authentication.AuthenticationUtil.RunAsWork;
+import org.alfresco.service.cmr.repository.StoreRef;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.server.SearchResultNodeRef;
 import org.edu_sharing.repository.server.importer.PersistentHandlerEdusharing;
+import org.edu_sharing.repository.server.jobs.helper.NodeRunner;
 import org.edu_sharing.service.model.NodeRef;
 import org.edu_sharing.service.nodeservice.NodeService;
 import org.edu_sharing.service.nodeservice.NodeServiceFactory;
@@ -41,6 +43,8 @@ import org.edu_sharing.service.search.SearchServiceFactory;
 import org.edu_sharing.service.search.model.SearchToken;
 import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
+
+import java.util.Collections;
 
 
 public class RemoveOrphanCollectionReferencesJob extends AbstractJob{
@@ -67,26 +71,26 @@ public class RemoveOrphanCollectionReferencesJob extends AbstractJob{
 	
 	public void run() {
 		try {
-			SearchToken token=new SearchToken();
-			token.setLuceneString("ASPECT:\"ccm:collection_io_reference\"");
-			token.setMaxResult(Integer.MAX_VALUE);
-			token.setContentType(SearchService.ContentType.FILES);
-			SearchResultNodeRef result = searchService.search(token);
-			int deleted=0;
-			for(NodeRef node : result.getData()){
-				try {
-					String ref = nodeService.getProperty(node.getStoreProtocol(), node.getStoreId(), node.getNodeId(), CCConstants.CCM_PROP_IO_ORIGINAL);
-					if (ref != null && !nodeService.exists(node.getStoreProtocol(), node.getStoreId(), ref)) {
-						logger.info("Found orphan reference " + node.getNodeId() + ", removing it");
-						// parent=false == primary
-						nodeService.removeNode(node.getNodeId(), null, false);
-						deleted++;
-					}
-				}catch(Throwable t){
-					logger.warn(t.getMessage(),t);
+			final int[] deleted=new int[]{0};
+			NodeRunner runner=new NodeRunner();
+			runner.setTypes(Collections.singletonList(CCConstants.CCM_TYPE_IO));
+			runner.setTransaction(NodeRunner.TransactionMode.Local);
+			runner.setKeepModifiedDate(true);
+			runner.setThreaded(false);
+			runner.setFilter((node)->
+				nodeService.hasAspect(node.getStoreRef().getProtocol(),node.getStoreRef().getIdentifier(),node.getId(),CCConstants.CCM_ASPECT_COLLECTION_IO_REFERENCE)
+			);
+			runner.setTask((node)->{
+				String ref = nodeService.getProperty(node.getStoreRef().getProtocol(), node.getStoreRef().getIdentifier(), node.getId(), CCConstants.CCM_PROP_IO_ORIGINAL);
+				if (!nodeService.exists(StoreRef.PROTOCOL_WORKSPACE,StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(), ref)) {
+					logger.info("Found orphan reference " + node.getId() + ", removing it");
+					// parent=false == primary
+					nodeService.removeNode(node.getId(), null, false);
+					deleted[0]++;
 				}
-			}
-			logger.info("RemoveOrphanCollectionReferencesJob finished, processed "+result.getData().size()+" references, deleted "+deleted);
+			});
+			int count=runner.run();
+			logger.info("RemoveOrphanCollectionReferencesJob finished, processed "+count+" references, deleted "+deleted);
 		} catch (Throwable e) {
 			logger.warn(e.getMessage(),e);
 		}

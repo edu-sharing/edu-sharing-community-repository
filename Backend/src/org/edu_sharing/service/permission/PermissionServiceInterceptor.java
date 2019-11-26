@@ -8,6 +8,8 @@ import org.edu_sharing.repository.server.authentication.Context;
 import org.edu_sharing.repository.server.tools.security.SignatureVerifier;
 import org.edu_sharing.service.nodeservice.NodeServiceInterceptor;
 
+import java.util.HashMap;
+
 public class PermissionServiceInterceptor implements MethodInterceptor {
 
     public void init(){
@@ -19,6 +21,11 @@ public class PermissionServiceInterceptor implements MethodInterceptor {
         String methodName=invocation.getMethod().getName();
         if(methodName.equals("hasPermission") || methodName.equals("hasAllPermissions")) {
             String nodeId = (String) invocation.getArguments()[2];
+
+            if(methodName.equals("hasAllPermissions")){
+                ((HashMap<String,Boolean>)invocation.proceed()).en;
+            }
+
             return NodeServiceInterceptor.handleInvocation(nodeId, invocation,false);
         }
         return invocation.proceed();
