@@ -21,9 +21,18 @@ public class PermissionServiceInterceptor implements MethodInterceptor {
         String methodName=invocation.getMethod().getName();
         if(methodName.equals("hasPermission") || methodName.equals("hasAllPermissions")) {
             String nodeId = (String) invocation.getArguments()[2];
-
-            if(methodName.equals("hasAllPermissions")){
-                ((HashMap<String,Boolean>)invocation.proceed()).en;
+            if(methodName.equals("hasPermission")){
+                boolean result = (boolean) invocation.proceed();
+                // to improve performance, if node seems to have already valid permission, return true
+                if(result)
+                    return result;
+            }
+            else if(methodName.equals("hasAllPermissions")){
+                HashMap<String, Boolean> result = (HashMap<String, Boolean>) invocation.proceed();
+                // to improve performance, if node seems to have any valid permissions, return true
+                if(result.values().stream().anyMatch((v) -> v)){
+                    return result;
+                }
             }
 
             return NodeServiceInterceptor.handleInvocation(nodeId, invocation,false);
