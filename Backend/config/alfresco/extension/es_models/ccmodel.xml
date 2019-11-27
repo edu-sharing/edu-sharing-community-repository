@@ -53,6 +53,19 @@
 				<aspect>ccm:eduscope</aspect>
 			</mandatory-aspects>
 		</type>
+		<type name="ccm:collection_feedback">
+			<title>Campus Content feedback on ccm:map with aspect ccm:collection</title>
+			<parent>cm:cmobject</parent>
+			<properties>
+				<!-- json property with all feedback data -->
+				<property name="ccm:collection_feedback_data">
+					<type>d:text</type>
+				</property>
+			</properties>
+			<mandatory-aspects>
+				<aspect>ccm:eduscope</aspect>
+			</mandatory-aspects>
+		</type>
 		<type name="ccm:saved_search">
 			<title>Campus Content stored search queries</title>
 			<parent>cm:cmobject</parent>
@@ -280,6 +293,19 @@
 			<includedInSuperTypeQuery>true</includedInSuperTypeQuery>
 			<properties>
 			</properties>
+			<associations>
+				<child-association name="ccm:childcollectionfeedback">
+					<source>
+						<mandatory>false</mandatory>
+						<many>true</many>
+					</source>
+					<target>
+						<class>ccm:collection_feedback</class>
+						<mandatory>false</mandatory>
+						<many>true</many>
+					</target>
+				</child-association>
+			</associations>
 			<mandatory-aspects>
 				<aspect>ccm:mapdata</aspect>
 				<aspect>ccm:licenses</aspect>
@@ -1821,7 +1847,7 @@
 				</property>
 			</properties>
 		</aspect>
-		
+
 		<aspect name="ccm:address">
 			<title>extend persons,groups with address info</title>
 			<properties>

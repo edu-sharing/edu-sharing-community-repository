@@ -44,6 +44,7 @@ export class ToolpermissionManagerComponent {
     {name:"LICENSING",icon:"copyright",permissions:[
         RestConstants.TOOLPERMISSION_INVITE_ALLAUTHORITIES,
         RestConstants.TOOLPERMISSION_LICENSE,
+        RestConstants.TOOLPERMISSION_HANDLESERVICE,
     ]},
     {name:"DATA_MANAGEMENT",icon:"folder",permissions:[
         RestConstants.TOOLPERMISSION_WORKSPACE,
@@ -60,7 +61,12 @@ export class ToolpermissionManagerComponent {
       RestConstants.TOOLPERMISSION_COLLECTION_EDITORIAL,
         RestConstants.TOOLPERMISSION_COLLECTION_CURRICULUM,
         RestConstants.TOOLPERMISSION_COLLECTION_PINNING,
+        RestConstants.TOOLPERMISSION_COLLECTION_FEEDBACK,
     ]},
+    {name:"MANAGEMENT",icon:"settings",permissions:[
+        RestConstants.TOOLPERMISSION_USAGE_STATISTIC,
+    ]},
+    {name:"CONNECTORS",icon:"edit"},
     {name:"OTHER",icon:"help"}
   ];
   changing: string[]=[];
@@ -74,6 +80,10 @@ export class ToolpermissionManagerComponent {
       return group.permissions;
     }
     let permissions=Object.keys(this.permissions);
+    if(group.name=="CONNECTORS") {
+        return permissions.filter((p) => p.startsWith("TOOLPERMISSION_CONNECTOR"));
+    }
+    // filter "OTHER"
     for(let group of ToolpermissionManagerComponent.GROUPS){
       if(group.permissions){
         for(let tp of group.permissions){
@@ -82,6 +92,9 @@ export class ToolpermissionManagerComponent {
               permissions.splice(pos, 1);
           }
         }
+      }
+      else if(group.name=="CONNECTORS"){
+          permissions=permissions.filter((p)=>!p.startsWith("TOOLPERMISSION_CONNECTOR"));
       }
     }
     return permissions;
@@ -213,5 +226,14 @@ export class ToolpermissionManagerComponent {
             this.creatingToolpermission=false;
             this.toast.error(error);
         })
+    }
+    getTpConnector(tp:string){
+      tp=tp.substring("TOOLPERMISSION_CONNECTOR_".length);
+      if(tp.indexOf("_safe")!=-1) tp=tp.substring(0,tp.indexOf("_safe"));
+      let connector=this.translate.instant('CONNECTOR.'+tp+'.NAME');
+      return connector;
+    }
+    getTpSafe(tp:string){
+        return tp.endsWith("_safe");
     }
 }

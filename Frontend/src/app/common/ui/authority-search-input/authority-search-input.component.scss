@@ -8,6 +8,9 @@ form{
   .material-icons {
     color: $textLight;
   }
+  mat-hint{
+    margin-top: 15px;
+  }
 }
 
 user-avatar{

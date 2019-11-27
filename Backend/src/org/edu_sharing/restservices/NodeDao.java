@@ -80,6 +80,7 @@ public class NodeDao {
 			org.alfresco.service.cmr.security.PermissionService.WRITE,
 			org.alfresco.service.cmr.security.PermissionService.DELETE,
 			CCConstants.PERMISSION_COMMENT,
+			CCConstants.PERMISSION_FEEDBACK,
 			CCConstants.PERMISSION_CC_PUBLISH,
 			CCConstants.PERMISSION_READ_ALL
 	};
@@ -1267,22 +1268,6 @@ public class NodeDao {
 		version.setMinor(Integer.parseInt(versionTokens[1]));
 
 		return version;
-	}
-
-	private List<NodeAccess> getAccess() {
-
-		List<NodeAccess> result = new ArrayList<NodeAccess>();
-
-		for (String permission : PermissionServiceHelper.PERMISSIONS) {
-
-			NodeAccess access = new NodeAccess();
-			access.setPermission(permission);
-			access.setRight(hasPermissions.get(permission));
-
-			result.add(access);
-		}
-
-		return result;
 	}
 	
 	public List<String> getAccessAsString() {

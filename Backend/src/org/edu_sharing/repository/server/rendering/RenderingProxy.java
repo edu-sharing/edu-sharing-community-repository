@@ -244,13 +244,16 @@ public class RenderingProxy extends HttpServlet {
 
 					HashMap<String,String> personData = apiClient.getUserInfo(localUsername);
 
-					/**
-					 *make sure that the remote user exists
-					 */
-					if(RepoProxyFactory.getRepoProxy().myTurn(rep_id)) {
-						RepoProxyFactory.getRepoProxy().remoteAuth(remoteRepo,false);
-					}
-
+                    /**
+                     *make sure that the remote user exists
+                     */
+                    if(RepoProxyFactory.getRepoProxy().myTurn(rep_id)) {
+                        try {
+                            RepoProxyFactory.getRepoProxy().remoteAuth(remoteRepo,false);
+                        } catch (Throwable t) {
+                            logger.error("Remote user auth failed",t);
+                        }
+                    }
 
 					return personData.get(CCConstants.PROP_USER_ESUID);
 				};

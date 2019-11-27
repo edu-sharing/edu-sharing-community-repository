@@ -183,21 +183,27 @@
           <div class="currentLicense">
           <h4  *ngIf="type!='MULTI'">{{'WORKSPACE.LICENSE.CURRENT' | translate}}</h4>
           <img *ngIf="type!='MULTI'" class="currentLicenseIcon" src="{{getLicenseIcon()}}">
-          <div *ngIf="(type=='CC_BY' || type=='CC_BY_SA') && ccVersion!='4.0'" class="licenseLocale">
-            <label for="version">{{'WORKSPACE.LICENSE.LOCALE' | translate}}</label>
-            <select id="localeLanguage" [(ngModel)]="ccLocale">
-              <option value="">{{'LANGUAGE.INTERNATIONAL' | translate}}</option>
-              <option *ngFor="let option of ccLocales" value="{{option}}">{{'LANGUAGE.'+option | translate}}</option>
-            </select>
-          </div>
-          <div *ngIf="type=='CC_BY' || type=='CC_BY_SA'" class="licenseVersion">
-            <label for="version">{{'WORKSPACE.LICENSE.VERSION' | translate}}</label>
-            <select id="version" [(ngModel)]="ccVersion">
-              <option value="2.0">2.0</option>
-              <option value="3.0">3.0</option>
-              <option value="4.0">4.0</option>
-            </select>
-          </div>
+            <div class="license-additional-data" *ngIf="type=='CC_BY' || type=='CC_BY_SA'">
+              <div *ngIf="ccVersion!='4.0'" class="licenseLocale">
+                <mat-form-field>
+                  <mat-label>{{'WORKSPACE.LICENSE.LOCALE' | translate}}</mat-label>
+                  <mat-select id="localeLanguage" [(ngModel)]="ccLocale">
+                    <mat-option value="">{{'LANGUAGE.INTERNATIONAL' | translate}}</mat-option>
+                    <mat-option *ngFor="let option of ccLocales" value="{{option}}">{{'LANGUAGE.'+option | translate}}</mat-option>
+                  </mat-select>
+                </mat-form-field>
+              </div>
+              <div class="licenseVersion">
+                <mat-form-field>
+                  <mat-label>{{'WORKSPACE.LICENSE.VERSION' | translate}}</mat-label>
+                  <mat-select id="version" [(ngModel)]="ccVersion">
+                    <mat-option value="2.0">2.0</mat-option>
+                    <mat-option value="3.0">3.0</mat-option>
+                    <mat-option value="4.0">4.0</mat-option>
+                  </mat-select>
+                </mat-form-field>
+              </div>
+            </div>
             <div class="licenseName">
           <h4>{{getLicenseName()}}</h4>
               <div class="oerStatus" *ngIf="getLicenseProperty()!='MULTI'">

@@ -203,6 +203,8 @@ public class CCConstants {
 
 	public final static String CCM_TYPE_COMMENT = "{http://www.campuscontent.de/model/1.0}comment";
 
+	public final static String CCM_TYPE_COLLECTION_FEEDBACK = "{http://www.campuscontent.de/model/1.0}collection_feedback";
+
 	public final static String CCM_TYPE_RATING = "{http://www.campuscontent.de/model/1.0}rating";
 
 	public final static String CCM_TYPE_LO = "{http://www.campuscontent.de/model/1.0}lo";
@@ -372,6 +374,8 @@ public class CCConstants {
 	public final static String CCM_PROP_COMMENT_REPLY = "{http://www.campuscontent.de/model/1.0}comment_reply";
 	public final static String CCM_PROP_COMMENT_CONTENT = "{http://www.campuscontent.de/model/1.0}comment_content";
 
+	public final static String CCM_PROP_COLLECTION_FEEDBACK_DATA = "{http://www.campuscontent.de/model/1.0}collection_feedback_data";
+
 	public final static String CCM_PROP_RATING_VALUE = "{http://www.campuscontent.de/model/1.0}rating_value";
 	public final static String CCM_PROP_RATING_TEXT = "{http://www.campuscontent.de/model/1.0}rating_text";
 
@@ -411,7 +415,7 @@ public class CCConstants {
 	public final static String CCM_PROP_IO_REF_VIDEO_VTT = "{http://www.campuscontent.de/model/1.0}ref_video_vtt";
 
 	public final static String CCM_PROP_ADDRESS_POSTALCODE = "{http://www.campuscontent.de/model/1.0}postalCode";
-	
+
 	public final static String CCM_PROP_ADDRESS_CITY = "{http://www.campuscontent.de/model/1.0}city";
 
 	public final static String CCM_ASPECT_POSITIONABLE = "{http://www.campuscontent.de/model/1.0}positionable";
@@ -423,7 +427,7 @@ public class CCConstants {
 	public final static String CCM_ASPECT_GROUPEXTENSION = "{http://www.campuscontent.de/model/1.0}groupExtension";
 
 	public final static String CCM_ASPECT_MEDIACENTER = "{http://www.campuscontent.de/model/1.0}mediacenter";
-	
+
 	public final static String CCM_ASPECT_ADDRESS = "{http://www.campuscontent.de/model/1.0}address";
 
 	public final static String CCM_PROP_GROUPEXTENSION_GROUPTYPE = "{http://www.campuscontent.de/model/1.0}groupType";
@@ -468,7 +472,13 @@ public class CCConstants {
 	public static final int HTTP_INSUFFICIENT_STORAGE = 503;
 
     public static final List<String> CHILDOBJECT_IGNORED_PARENT_PROPERTIES = Arrays.asList(
-    		CCConstants.CM_NAME,CCConstants.LOM_PROP_GENERAL_TITLE,CCConstants.CCM_PROP_IO_WWWURL,CCConstants.ALFRESCO_MIMETYPE,CCConstants.LOM_PROP_TECHNICAL_FORMAT,CCConstants.LOM_PROP_TECHNICAL_SIZE
+    		CCConstants.CM_NAME,
+			CCConstants.LOM_PROP_GENERAL_TITLE,
+			CCConstants.CCM_PROP_IO_REPL_EDUCATIONAL_LEARNINGRESSOURCETYPE, // Materialart
+			CCConstants.CCM_PROP_IO_WWWURL,
+			CCConstants.ALFRESCO_MIMETYPE,
+			CCConstants.LOM_PROP_TECHNICAL_FORMAT,
+			CCConstants.LOM_PROP_TECHNICAL_SIZE
 	);
 
     public static String CCM_WF_STATUS_VALUE_UNCHECKED="100_unchecked";
@@ -535,6 +545,8 @@ public class CCConstants {
 	public final static String CCM_ASSOC_COMMENT = "{http://www.campuscontent.de/model/1.0}childcomment";
 
 	public final static String CCM_ASSOC_RATING = "{http://www.campuscontent.de/model/1.0}childrating";
+
+	public final static String CCM_ASSOC_COLLECTION_FEEDBACK = "{http://www.campuscontent.de/model/1.0}childcollectionfeedback";
 	/**
 	 * update alfresco3stable auf alfresco34e
 	 *
@@ -810,7 +822,11 @@ public class CCConstants {
 	public final static String CCM_VALUE_TOOLPERMISSION_CONFIDENTAL = "TOOLPERMISSION_CONFIDENTAL";
 
 	public final static String CCM_VALUE_TOOLPERMISSION_HANDLESERVICE = "TOOLPERMISSION_HANDLESERVICE";
-	
+
+	public final static String CCM_VALUE_TOOLPERMISSION_COLLECTION_FEEDBACK = "TOOLPERMISSION_COLLECTION_FEEDBACK";
+
+	public final static String CCM_VALUE_TOOLPERMISSION_USAGE_STATISTIC = "TOOLPERMISSION_USAGE_STATISTIC";
+
 	public final static String CCM_VALUE_TOOLPERMISSION_GLOBAL_STATISTICS = "TOOLPERMISSION_GLOBAL_STATISTICS";
 
 	/**
@@ -1533,6 +1549,9 @@ public class CCConstants {
 	public final static String PERMISSION_COMMENT = "Comment";
 
 	public final static String PERMISSION_RATE = "Rate";
+
+	// collection feedback permission
+	public final static String PERMISSION_FEEDBACK = "Feedback";
 
 	public final static String PERMISSION_ES_CHILD_MANAGER = "ESChildManager";
 

@@ -127,11 +127,11 @@
             <div class="group">
               <mat-form-field>
                 <mat-label>{{'USER.primaryAffiliation' | translate}}</mat-label>
-                  <mat-select *ngIf="primaryAffiliationList" id="primaryAffiliation" name="primaryAffiliation" [(ngModel)]="edit.profile.primaryAffiliation">
+                  <mat-select *ngIf="primaryAffiliationList" name="primaryAffiliation" [(ngModel)]="edit.profile.primaryAffiliation">
                       <mat-option></mat-option>
                       <mat-option *ngFor="let a of PRIMARY_AFFILIATIONS" [value]="a">{{('USER.PRIMARY_AFFILIATION.'+a) | translate}}</mat-option>
                   </mat-select>
-                  <input matInput *ngIf="!primaryAffiliationList" type="text" id="primaryAffiliation" name="primaryAffiliation" [(ngModel)]="edit.profile.primaryAffiliation">
+                  <input matInput *ngIf="!primaryAffiliationList" type="text" name="primaryAffiliation" [(ngModel)]="edit.profile.primaryAffiliation">
               </mat-form-field>
               <button mat-flat-button (click)="primaryAffiliationList=!primaryAffiliationList"><i class="material-icons">{{ primaryAffiliationList ? 'edit' : 'list'}}</i></button>
             </div>

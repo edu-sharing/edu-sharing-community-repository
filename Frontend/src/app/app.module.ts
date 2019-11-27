@@ -25,6 +25,7 @@ import {DECLARATIONS_REGISTER} from './modules/register/declarations';
 import {DECLARATIONS_SERVICES} from "./modules/services/declarations";
 import {DECLARATIONS_FILE_UPLOAD} from './modules/file-upload/declarations';
 import {CommentsListComponent} from "./modules/management-dialogs/node-comments/comments-list/comments-list.component";
+import {MdsWidgetComponent} from "./common/ui/mds-viewer/widget/mds-widget.component";
 import {MAT_FORM_FIELD_DEFAULT_OPTIONS, MAT_LABEL_GLOBAL_OPTIONS, MAT_TOOLTIP_DEFAULT_OPTIONS} from "@angular/material";
 import {BreadcrumbsComponent} from "./core-ui-module/components/breadcrumbs/breadcrumbs.component";
 
@@ -58,6 +59,7 @@ import {BreadcrumbsComponent} from "./core-ui-module/components/breadcrumbs/brea
         DECLARATIONS_SERVICES
     ],
     entryComponents: [
+        MdsWidgetComponent,
         CommentsListComponent,
     ],
     imports: IMPORTS,

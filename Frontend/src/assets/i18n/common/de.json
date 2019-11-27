@@ -115,10 +115,15 @@
     "TOOLPERMISSION_GLOBAL_AUTHORITY_SEARCH_FUZZY":"Suchen und Finden von Nutzern außerhalb der Organisation ohne Eingabe der gesamten Nutzer-ID",
     "TOOLPERMISSION_GLOBAL_AUTHORITY_SEARCH_SHARE_SAFE":"Suchen und Einladen Nutzer außerhalb der Organisation in gemeinsamen Ordnern im Safe",
     "TOOLPERMISSION_COLLECTION_PINNING":"Sammlungen anpinnen und gepinnte Sammlungen verwalten",
-    "TOOLPERMISSION_COLLECTION_CURRICULUM":"Lehrplansammlungen erstellen",
+    "TOOLPERMISSION_COLLECTION_CURRICULUM":"Lehrplansammlungen erstellen (aktuell nicht verwendet)",
+    "TOOLPERMISSION_COLLECTION_FEEDBACK":"Feedback an anderen Sammlungen abgeben",
     "TOOLPERMISSION_CONFIDENTAL":"Zugriff auf gesicherten Bereich (Safe)",
     "TOOLPERMISSION_UNCHECKEDCONTENT":"Quellen wie zbsp. Youtube in der Suche anzeigen",
-    "TOOLPERMISSION_WORKSPACE":"Zugriff auf den Workspace"
+    "TOOLPERMISSION_WORKSPACE":"Zugriff auf den Workspace",
+    "TOOLPERMISSION_HANDLESERVICE":"Eindeutige Ids für Materialien beim Handleservice anfordern",
+    "TOOLPERMISSION_USAGE_STATISTIC":"Informationen über die Verwendung aller Objekte dieses Repositories abfragen",
+    "TOOLPERMISSION_CONNECTOR":"Editor \"{{connector}}\" darf benutzt werden",
+    "TOOLPERMISSION_CONNECTOR_SAFE":"Editor \"{{connector}}\" darf im gesicherten Bereich benutzt werden"
   },
   "NO_WRITE_PERMISSIONS":"Keine Rechte für diesen Vorgang",
   "NODE_SEARCH":"Elemente suchen...",

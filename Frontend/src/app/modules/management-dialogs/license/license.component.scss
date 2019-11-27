@@ -15,17 +15,21 @@
     .mat-tab-labels {
       background-color: #fff;
     }
+    .mat-radio-label,.mat-checkbox-layout{
+      white-space: normal!important;
+      align-items: baseline !important;
+    }
   }
-  .modal-card mat-card-content {
+  .mat-card-content {
     h4 {
       font-weight: bold;
-      font-size: 11pt;
+      font-size: 100%;
       margin: 1.6rem 0 1rem 0;
     }
 
     h5 {
       font-weight: normal;
-      font-size: 9pt;
+      font-size: 90%;
       color: $textLight;
       margin: 0;
       line-height: 1.5;
@@ -65,7 +69,7 @@
   padding: 10px 30px;
   margin: 0 -20px;
   h4{
-    margin: 10px 0px 20px 0px;
+    margin: 10px 0 20px 0;
   }
   width: calc(100% + 40px);
 }
@@ -154,24 +158,17 @@ h4{
   text-align: center;
   font-weight: bold;
 }
-.licenseVersion,.licenseLocale{
-  width: 140px;
-  float: right;
-  padding-right: 40px;
-  margin-top:-8px;
-  select{
-    min-width: 70px;
+.license-additional-data {
+  display: flex;
+  justify-content: center;
+  padding-top: 10px;
+  >div{
+    margin:0 10px;
   }
-}
-.licenseLocale{
-  width: 170px;
 }
 .licenseUrl{
   margin:10px!important;
   text-transform: uppercase;
-}
-.licenseVersion{
-  width:100px;
 }
 .licenseCheckbox{
   padding-top:20px;
@@ -193,9 +190,4 @@ h4{
     margin-left: 35px;
     margin-right: 10px;
   }
-}
-
-.mat-radio-label,.mat-checkbox-layout{
-  white-space: normal!important;
-  align-items: baseline !important;
 }

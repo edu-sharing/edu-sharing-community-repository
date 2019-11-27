@@ -43,6 +43,28 @@ mat-tab-group{
     width: 100%;
     margin-top: 8px;
 }
+.feedback{
+  .empty{
+    text-align: center;
+    padding-top: 10%;
+    font-size: 120%;
+    color:$textLight;
+  }
+  .main-data{
+    background-color: $workspaceSelectedBackground;
+    font-size: 120%;
+    font-weight: bold;
+    width: 100%;
+    display: flex;
+    padding:10px;
+    >.author{
+      flex-grow: 1;
+    }
+  }
+  .meta-data{
+    padding:25px 20px;
+  }
+}
 
 .table-tab {
     vertical-align: bottom;

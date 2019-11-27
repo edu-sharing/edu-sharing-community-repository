@@ -1,0 +1,11 @@
+<div *ngIf="getValue() || !widget.hideIfEmpty" class="widget-wrapper">
+    <div class="widget-label">{{widget.caption}}</div>
+    <div *ngIf="!getValue()" class="widget-data widget-no-data widget-type-{{getBasicType()}}">-</div>
+    <div *ngIf="getValue()" class="widget-data widget-type-{{getBasicType()}}">
+        <div *ngIf="getBasicType()=='text'">{{getValue()[0]}}</div>
+        <div *ngIf="getBasicType()=='unknown'">
+            The widget type {{widget.type}} is currently not supported for rendering
+        </div>
+    </div>
+</div>
+

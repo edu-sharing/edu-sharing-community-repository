@@ -1,0 +1,12 @@
+@import "../../../../core-ui-module/styles/variables.scss";
+
+.widget-label{
+  font-size: 90%;
+  color: $textLight;
+}
+.widget-data{
+  padding:2px 10px;
+}
+.widget-type-text >div{
+  white-space: pre-line;
+}

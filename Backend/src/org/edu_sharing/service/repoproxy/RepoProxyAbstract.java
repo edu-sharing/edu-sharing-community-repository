@@ -23,7 +23,7 @@ public abstract class RepoProxyAbstract implements RepoProxy {
 	}
 	
 	@Override
-	public HashMap<String, String> remoteAuth(ApplicationInfo repoInfo, boolean validate) {
+	public HashMap<String, String> remoteAuth(ApplicationInfo repoInfo, boolean validate) throws Throwable {
 		// TODO Auto-generated method stub
 		return null;
 	}

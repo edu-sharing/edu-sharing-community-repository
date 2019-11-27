@@ -468,7 +468,7 @@ export class WorkspaceLicenseComponent  {
         prop[RestConstants.CCM_PROP_LICENSE]=[this.getLicenseProperty()];
         if(!this.contactIndeterminate)
             prop[RestConstants.CCM_PROP_QUESTIONSALLOWED]=[this.contact];
-        if(this.type=='CC_BY'){
+        if(this.type=='CC_BY' || this.type=='CC_BY_SA'){
             if(this.ccTitleOfWork)
                 prop[RestConstants.CCM_PROP_LICENSE_TITLE_OF_WORK]=[this.ccTitleOfWork];
             if(this.ccSourceUrl)

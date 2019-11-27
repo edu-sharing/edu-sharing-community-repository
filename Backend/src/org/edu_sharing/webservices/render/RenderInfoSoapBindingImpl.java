@@ -265,9 +265,6 @@ public class RenderInfoSoapBindingImpl implements org.edu_sharing.webservices.re
 		Map<String, Object> props=LogTime.log("Fetching properties for node "+nodeId,()-> {
 					return (finalVersionProps == null) ? client.getPropertiesCached(nodeRef, true, true, false) : finalVersionProps;//client.getProperties(nodeId);
 		});
-        // fix axis bug that emoji crash: https://issues.apache.org/jira/browse/AXIS-2908
-		props=removeUTF16Chars(props);
-
 		// child object: inherit all props from parent
 		if(Arrays.asList(aspects).contains(CCConstants.CCM_ASPECT_IO_CHILDOBJECT)){
 			ChildAssociationRef parentRef = client.getParent(nodeRef);
@@ -281,6 +278,7 @@ public class RenderInfoSoapBindingImpl implements org.edu_sharing.webservices.re
 			}
 			props=propsParent;
 		}
+
 		String nodeType = (String)props.get(CCConstants.NODETYPE);
 		boolean isRemoteObject = CCConstants.CCM_TYPE_REMOTEOBJECT.equals(nodeType);
 		ApplicationInfo appInfo=ApplicationInfoList.getHomeRepository();
@@ -319,8 +317,8 @@ public class RenderInfoSoapBindingImpl implements org.edu_sharing.webservices.re
 			String licenseIcon = new LicenseService().getIconUrl(commonLicensekey);
 			if(licenseIcon != null) props.put(CCConstants.VIRT_PROP_LICENSE_ICON, licenseIcon);
 		}
-		props=MetadataTemplateRenderer.cleanupHTMLProperties(props);
-		props=VCardConverter.addVCardProperties(nodeType,props);
+		// fix axis bug that emoji crash: https://issues.apache.org/jira/browse/AXIS-2908
+		props=processProperties(nodeType,props);
 		rir.setProperties(convertProperties(props));
 		// when baseUrl is not available from client (e.g. a request from LMS)
 		String baseUrl = getHeaderValue("baseUrl", MessageContext.getCurrentContext());
@@ -339,7 +337,7 @@ public class RenderInfoSoapBindingImpl implements org.edu_sharing.webservices.re
 					String childId = (String) child.get(CCConstants.SYS_PROP_NODE_UID);
 					String type = nodeService.getType(childId);
 					String[] childAspects = nodeService.getAspects((String) child.get(CCConstants.SYS_PROP_STORE_PROTOCOL), (String) child.get(CCConstants.SYS_PROP_STORE_IDENTIFIER), childId);
-					child = VCardConverter.addVCardProperties(type, child);
+					child = processProperties(type, child);
 					childConverted.setProperties(convertProperties(child));
 					childConverted.setAspects(aspects);
 					childConverted.setIconUrl(new MimeTypesV2(finalAppInfo).getIcon(type, child, Arrays.asList(childAspects)));
@@ -412,6 +410,14 @@ public class RenderInfoSoapBindingImpl implements org.edu_sharing.webservices.re
 		*/
         return null;
     }
+
+    private Map<String, Object> processProperties(String type, Map<String, Object> props) {
+        props=removeUTF16Chars(props);
+        props=MetadataTemplateRenderer.cleanupHTMLProperties(props);
+        props=VCardConverter.addVCardProperties(type,props);
+        return props;
+    }
+
     private KeyValue[] convertProperties(Map<String,Object> propertiesIn) {
         List<KeyValue> propsresult = new ArrayList<KeyValue>();
 

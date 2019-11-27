@@ -95,6 +95,11 @@ public class NodeServiceHelper {
     public static String getProperty(NodeRef nodeRef,String key){
 		return NodeServiceFactory.getLocalService().getProperty(nodeRef.getStoreRef().getProtocol(),nodeRef.getStoreRef().getIdentifier(),nodeRef.getId(),key);
 	}
+	public static Serializable getPropertyNative(NodeRef nodeRef, String key){
+		ApplicationContext applicationContext = AlfAppContextGate.getApplicationContext();
+		ServiceRegistry serviceRegistry = (ServiceRegistry) applicationContext.getBean(ServiceRegistry.SERVICE_REGISTRY);
+		return serviceRegistry.getNodeService().getProperty(nodeRef,QName.createQName(key));
+	}
 	public static String getType(NodeRef nodeRef){
 		return NodeServiceFactory.getLocalService().getType(nodeRef.getStoreRef().getProtocol(),nodeRef.getStoreRef().getIdentifier(),nodeRef.getId());
 	}

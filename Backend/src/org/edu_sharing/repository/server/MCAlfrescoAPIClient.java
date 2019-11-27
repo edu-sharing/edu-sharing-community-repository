@@ -1234,7 +1234,7 @@ public class MCAlfrescoAPIClient extends MCAlfrescoBaseClient {
 		 * run over all properties and format the date props with with current
 		 * user locale
 		 */
-		if (nodeType.equals(CCConstants.CCM_TYPE_IO) || nodeType.equals(CCConstants.CCM_TYPE_COMMENT) || nodeType.equals(CCConstants.CCM_TYPE_MAP) || nodeType.equals(CCConstants.CM_TYPE_FOLDER)) {
+		if (nodeType.equals(CCConstants.CCM_TYPE_IO) || nodeType.equals(CCConstants.CCM_TYPE_COMMENT) || nodeType.equals(CCConstants.CCM_TYPE_COLLECTION_FEEDBACK) || nodeType.equals(CCConstants.CCM_TYPE_MAP) || nodeType.equals(CCConstants.CM_TYPE_FOLDER)) {
 			String mdsId=CCConstants.metadatasetdefault_id;
 			if(propsCopy.containsKey(CCConstants.CM_PROP_METADATASET_EDU_METADATASET)){
 				mdsId=(String)propsCopy.get(CCConstants.CM_PROP_METADATASET_EDU_METADATASET);
@@ -1370,14 +1370,13 @@ public class MCAlfrescoAPIClient extends MCAlfrescoBaseClient {
 				logger.error("No ApplicationInfo found for Repository:" + remoteRepository + " and remoteNodeId:" + remoteNodeId);
 				return null;
 			}
-			else if(remoteRepInfo.getRepositoryType().equals(remoteRepInfo.REPOSITORY_TYPE_ALFRESCO)){
+			else if(remoteRepInfo.isRemoteAlfresco()){
 				AuthenticatorRemoteRepository arr = new AuthenticatorRemoteRepository();
 				// when repository got no Authentication
 				HashMap<String, String> remoteAuthInfo = null;
 				if (remoteRepInfo.getAuthenticationwebservice() != null && !remoteRepInfo.getAuthenticationwebservice().equals("")) {
 					try {
 						AuthenticatorRemoteAppResult arar = arr.getAuthInfoForApp(authenticationInfo, remoteRepInfo);
-	
 						remoteAuthInfo = arar.getAuthenticationInfo();
 					} catch (Throwable e) {
 						logger.error("It seems that repository id:" + remoteRepInfo.getAppId() + " is not reachable:" + e.getMessage()+". Check the configured value of "+ApplicationInfo.KEY_AUTHENTICATIONWEBSERVICE);
@@ -3048,7 +3047,7 @@ public class MCAlfrescoAPIClient extends MCAlfrescoBaseClient {
                     }
                 }, false); 
 
-		
+
 	}
 
 	public void setUserPassword(String userName, String newPassword){

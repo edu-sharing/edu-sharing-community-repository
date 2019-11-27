@@ -110,10 +110,15 @@
     "TOOLPERMISSION_GLOBAL_AUTHORITY_SEARCH_SHARE":"Searching and inviting users outside the organization in shared folders",
     "TOOLPERMISSION_GLOBAL_AUTHORITY_SEARCH_SHARE_SAFE":"Searching and inviting users outside the organization in shared folders in the safe",
     "TOOLPERMISSION_COLLECTION_PINNING":"Pinning collections and managing pinned collections",
-    "TOOLPERMISSION_COLLECTION_CURRICULUM":"Creating curriculum collections",
+    "TOOLPERMISSION_COLLECTION_CURRICULUM":"Creating curriculum collections (currently not used)",
+    "TOOLPERMISSION_COLLECTION_FEEDBACK":"Give feedback on other collections",
     "TOOLPERMISSION_CONFIDENTAL":"Access to the secure area (safe)",
     "TOOLPERMISSION_UNCHECKEDCONTENT":"Show sources like YouTube in your search",
-    "TOOLPERMISSION_WORKSPACE":"Access to the workspace"
+    "TOOLPERMISSION_WORKSPACE":"Access to the workspace",
+    "TOOLPERMISSION_HANDLESERVICE":"Resolve unique ids from a handle service for materials",
+    "TOOLPERMISSION_USAGE_STATISTIC":"Fetch information about the usage of all nodes of the repository",
+    "TOOLPERMISSION_CONNECTOR":"Editor \"{{connector}}\" can be used",
+    "TOOLPERMISSION_CONNECTOR_SAFE":"Editor \"{{connector}}\" can be used in safe"
   },
   "NO_WRITE_PERMISSIONS":"No permissions",
   "NODE_SEARCH":"Search elements...",
@@ -329,7 +334,7 @@
     "firstName" : "first name",
     "lastName" : "family name",
     "email" : "e-mail",
-    "primaryAffiliation": "Primary affiliation",
+    "primaryAffiliation": "Primary role",
     "password" : "password",
     "sizeQuota" : "Quota size in MB",
     "PRIMARY_AFFILIATION": {

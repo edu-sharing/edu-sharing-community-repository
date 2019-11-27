@@ -49,7 +49,9 @@ button{
 }
 .actionbar-round{
   .mat-flat-button{
-    padding: 5px;
+    width:45px;
+    height:45px;
+    justify-content: center;
   }
   button{
     border-radius: 50%;

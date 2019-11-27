@@ -14,6 +14,7 @@ import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.stream.Collectors;
 
+import com.google.gson.Gson;
 import org.alfresco.repo.policy.BehaviourFilter;
 import org.alfresco.repo.search.impl.solr.ESSearchParameters;
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
@@ -63,6 +64,7 @@ import org.edu_sharing.service.nodeservice.NodeServiceFactory;
 import org.edu_sharing.service.nodeservice.NodeServiceHelper;
 import org.edu_sharing.service.nodeservice.NodeServiceInterceptor;
 import org.edu_sharing.service.permission.PermissionServiceFactory;
+import org.edu_sharing.service.permission.PermissionServiceHelper;
 import org.edu_sharing.service.search.SearchService;
 import org.edu_sharing.service.search.SearchService.ContentType;
 import org.edu_sharing.service.search.SearchServiceFactory;
@@ -988,5 +990,28 @@ public class CollectionServiceImpl implements CollectionService{
 		token.setContentType(ContentType.ALL);
 		token.setLuceneString("ASPECT:\"ccm:collection_io_reference\" AND @ccm\\:original:"+ QueryParser.escape(nodeId)+" AND NOT @sys\\:node-uuid:"+QueryParser.escape(nodeId));
 		return SearchServiceFactory.getSearchService(appInfo.getAppId()).search(token).getData();
+	}
+
+	@Override
+	public String addFeedback(String id, HashMap<String, String[]> feedbackData) throws Throwable {
+		ToolPermissionHelper.throwIfToolpermissionMissing(CCConstants.CCM_VALUE_TOOLPERMISSION_COLLECTION_FEEDBACK);
+		new PermissionServiceHelper(PermissionServiceFactory.getLocalService()).validatePermissionOrThrow(id,CCConstants.PERMISSION_FEEDBACK);
+		return AuthenticationUtil.runAsSystem(()-> {
+			try {
+				HashMap<String, Object> props = new HashMap<>();
+				props.put(CCConstants.CCM_PROP_COLLECTION_FEEDBACK_DATA,new Gson().toJson(feedbackData));
+				return nodeService.createNodeBasic(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE,id,CCConstants.CCM_TYPE_COLLECTION_FEEDBACK,CCConstants.CCM_ASSOC_COLLECTION_FEEDBACK,props);
+			} catch (Throwable t) {
+				logger.warn(t.getMessage(),t);
+				throw t;
+			}
+		});
+	}
+
+	@Override
+	public List<String> getFeedbacks(String id) throws Throwable {
+		ToolPermissionHelper.throwIfToolpermissionMissing(CCConstants.CCM_VALUE_TOOLPERMISSION_COLLECTION_FEEDBACK);
+		new PermissionServiceHelper(PermissionServiceFactory.getLocalService()).validatePermissionOrThrow(id,CCConstants.PERMISSION_COORDINATOR);
+		return AuthenticationUtil.runAsSystem(()-> nodeService.getChildrenChildAssociationRefType(id, CCConstants.CCM_TYPE_COLLECTION_FEEDBACK).stream().map((ref)->ref.getChildRef().getId()).collect(Collectors.toList()));
 	}
 }

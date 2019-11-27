@@ -301,8 +301,9 @@ public class FolderTemplatesImpl implements FolderTemplates {
 
 		String grtempl = this.properties.getProperty(tgroupname);
 		if (grtempl == null){
-			logger.error("no Org-Admin Group found in properties File ");
-			loggingErrorHandler.getMessage().add("no Org-Admin Group found in properties File");
+			String message="no Org-Admin Group found in template.properties file that matches \""+tgroupname+"\"";
+			logger.error(message);
+			loggingErrorHandler.getMessage().add(message);
 			return "";
 		}
 		

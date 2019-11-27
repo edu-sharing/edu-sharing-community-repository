@@ -25,7 +25,7 @@ import {
     SessionStorageService,
     TemporaryStorageService,
     UIService,
-    CollectionReference
+    CollectionReference, CollectionFeedback
 } from "../../core-module/core.module";
 
 import {Toast} from "../../core-ui-module/toast";
@@ -98,7 +98,6 @@ export class CollectionsMainComponent {
   private filteredOutCollections:Array<EduData.Collection> = new Array<EduData.Collection>();
   private filteredOutReferences:Array<EduData.CollectionReference> = new Array<EduData.CollectionReference>();
   private collectionIdParamSubscription:any;
-  public lastError:string = null;
 
   private contentDetailObject:any = null;
 
@@ -142,6 +141,10 @@ export class CollectionsMainComponent {
             ],
         sortAscending: [false,true,false],
     };
+    feedback: boolean;
+    feedbackView: boolean;
+    feedbackViewButtons: DialogButton[];
+    private feedbacks: CollectionFeedback[];
     set collectionShare(collectionShare: Collection){
         this._collectionShare=collectionShare;
         this.refreshAll();
@@ -174,6 +177,7 @@ export class CollectionsMainComponent {
       private title:Title,
       private config:ConfigurationService,
         private translationService: TranslateService) {
+            this.feedbackViewButtons=DialogButton.getSingleButton('CLOSE',()=>this.feedbackView=false,DialogButton.TYPE_CANCEL);
             this.collectionsColumns.push(new ListItem("COLLECTION", 'title'));
             this.collectionsColumns.push(new ListItem("COLLECTION", 'info'));
             this.collectionsColumns.push(new ListItem("COLLECTION",'scope'));
@@ -357,13 +361,15 @@ export class CollectionsMainComponent {
     // This seems to be wrong: He may has created a public collection and wants to edit it
     if ((this.isRootLevelCollection()) && (this.tabSelected!=RestConstants.COLLECTIONSCOPE_MY)) return false;
 
-    if (RestHelper.hasAccessPermission(this.collectionContent.collection,'Delete')) return true;
+    if (RestHelper.hasAccessPermission(this.collectionContent.collection,RestConstants.PERMISSION_DELETE)) return true;
     return false;
   }
-
+    feedbackAllowed() : boolean {
+       return !this.isGuest && RestHelper.hasAccessPermission(this.collectionContent.collection,RestConstants.PERMISSION_FEEDBACK);
+    }
   isAllowedToDeleteCollection() : boolean {
     if (this.isRootLevelCollection()) return false;
-    if (RestHelper.hasAccessPermission(this.collectionContent.collection,'Delete')) return true;
+    if (RestHelper.hasAccessPermission(this.collectionContent.collection,RestConstants.PERMISSION_DELETE)) return true;
     return false;
   }
 
@@ -512,15 +518,21 @@ export class CollectionsMainComponent {
         return false;
       if(event.target.ref.id==this.collectionContent.collection.ref.id)
         return false;
-      // do not allow to move anything else than editorial collections into editorial collections
-      if(      event.source.type==RestConstants.COLLECTIONTYPE_EDITORIAL && event.target.type!=RestConstants.COLLECTIONTYPE_EDITORIAL
-            || event.source.type!=RestConstants.COLLECTIONTYPE_EDITORIAL && event.target.type==RestConstants.COLLECTIONTYPE_EDITORIAL)
-          return false;
-      if(event.source.reference && event.source[0].access && event.source[0].access.indexOf(RestConstants.ACCESS_CC_PUBLISH)==-1)
+      // in case it's via breadcrums, unmarshall the collection item
+      if(event.target.collection)
+          event.target=event.target.collection;
+      console.log(event.source,event.target);
+      // do not allow to move anything else than editorial collections into editorial collections (if the source is a collection)
+      if(event.source[0].hasOwnProperty('childCollectionsCount')) {
+          if (event.source[0].type == RestConstants.COLLECTIONTYPE_EDITORIAL && event.target.type != RestConstants.COLLECTIONTYPE_EDITORIAL
+              || event.source[0].type != RestConstants.COLLECTIONTYPE_EDITORIAL && event.target.type == RestConstants.COLLECTIONTYPE_EDITORIAL)
+              return false;
+      }
+
+      if(event.source[0].reference && !NodeHelper.getNodesRight(event.source[0], RestConstants.ACCESS_CC_PUBLISH,NodesRightMode.Original))
         return false;
-      if(!event.source.reference && event.source[0].access && event.source[0].access.indexOf(RestConstants.ACCESS_WRITE)==-1)
-        return false;
-      if(event.target.access && event.target.access.indexOf(RestConstants.ACCESS_WRITE)==-1)
+
+      if(!NodeHelper.getNodesRight(event.target, RestConstants.ACCESS_WRITE,NodesRightMode.Local))
         return false;
 
     return true;
@@ -579,7 +591,6 @@ export class CollectionsMainComponent {
       this.getScope(),[],request,this.collectionContent.collection.ref.repo
     ).subscribe((collection) => {
         console.log(collection);
-        this.lastError = null;
         // transfere sub collections and content
         this.collectionContent.collections = collection.collections;
         this.collectionContent.collectionsPagination = collection.pagination;
@@ -937,11 +948,18 @@ export class CollectionsMainComponent {
       if(this.pinningAllowed && this.isAllowedToDeleteCollection()) {
           this.optionsCollection.push(new OptionItem("COLLECTIONS.ACTIONBAR.PIN", "edu-pin", () => this.pinCollection()));
       }
+      if(this.isAllowedToDeleteCollection() && this.connector.hasToolPermissionInstant(RestConstants.TOOLPERMISSION_COLLECTION_FEEDBACK)){
+          this.optionsCollection.push(new OptionItem("COLLECTIONS.ACTIONBAR.FEEDBACK_VIEW", "speaker_notes",()=>this.collectionFeedbackView()));
+      }
       if(this.isAllowedToEditCollection() && this.collectionContent.collection.type!=RestConstants.COLLECTIONTYPE_EDITORIAL) {
           this.optionsCollection.push(new OptionItem("WORKSPACE.OPTION.INVITE", "group_add", () => this.collectionPermissions()));
       }
       if(this.isAllowedToDeleteCollection()) {
-            this.optionsCollection.push(new OptionItem("COLLECTIONS.ACTIONBAR.DELETE", "delete", () => this.collectionDelete()));
+          this.optionsCollection.push(new OptionItem("COLLECTIONS.ACTIONBAR.DELETE", "delete", () => this.collectionDelete()));
+      }
+
+      if(this.feedbackAllowed() && !this.isAllowedToDeleteCollection() && this.connector.hasToolPermissionInstant(RestConstants.TOOLPERMISSION_COLLECTION_FEEDBACK)){
+          this.optionsCollection.push(new OptionItem("COLLECTIONS.ACTIONBAR.FEEDBACK", "chat_bubble",()=>this.collectionFeedback()));
       }
     }
 
@@ -977,5 +995,35 @@ export class CollectionsMainComponent {
             this.globalProgress=false;
             this.mainNavRef.refreshNodeStore();
         });
+    }
+    private collectionFeedbackView() {
+        this.globalProgress=true;
+        this.collectionService.getFeedbacks(this.collectionContent.collection.ref.id).subscribe((data)=>{
+            this.feedbacks = data.reverse();
+            this.feedbackView = true;
+            this.globalProgress=false;
+        },(error)=>{
+            this.globalProgress=false;
+            this.toast.error(error);
+        });
+    }
+    private collectionFeedback() {
+        this.feedback=true;
+    }
+
+    addFeedback(data:any) {
+        if(!data)
+            return;
+        delete data[RestConstants.CM_NAME];
+        console.log(data);
+        this.globalProgress=true;
+        this.collectionService.addFeedback(this.collectionContent.collection.ref.id,data).subscribe(()=>{
+            this.globalProgress=false;
+            this.feedback=false;
+            this.toast.toast('COLLECTIONS.FEEDBACK_TOAST');
+        },(error)=>{
+            this.globalProgress=false;
+            this.toast.error(error);
+        })
     }
 }

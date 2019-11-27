@@ -41,15 +41,16 @@ export class WorkspaceShareComponent{
   public ALL_PERMISSIONS=["All","Read","ReadPreview","ReadContent","ReadAll","Comment","Rate","Write","Delete",
     "DeleteChildren","DeleteNode","AddChildren","Consumer","ConsumerMetadata",
     "Editor","Contributor","Collaborator","Coordinator",
-    "Publisher","ReadPermissions","ChangePermissions","CCPublish","Deny"];
+    "Publisher","ReadPermissions","ChangePermissions","CCPublish","Comment","Feedback","Deny"];
   public PERMISSIONS_FORCES:any= [
     ["Read",["ConsumerMetadata"]],
     ["Read",["Consumer"]],
     ["ReadPreview",["ReadAll"]],
     ["ReadContent",["ReadAll"]],
     ["ReadAll",["Consumer"]],
-    ["Comment",["ReadAll"]],
-    ["Rate",["ReadAll"]],
+    ["Comment",["Consumer"]],
+    ["Feedback",["Consumer"]],
+    ["Rate",["Consumer"]],
     ["Write",["Editor"]],
     ["DeleteChildren",["Delete"]],
     ["DeleteNode",["Delete"]],

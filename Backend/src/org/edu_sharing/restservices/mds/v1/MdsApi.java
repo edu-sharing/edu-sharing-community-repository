@@ -122,12 +122,12 @@ public class MdsApi {
     public Response getMetadataSetsV2(
     	@ApiParam(value = "ID of repository (or \"-home-\" for home repository)",required=true, defaultValue="-home-" ) @PathParam("repository") String repository,
 		@Context HttpServletRequest req) {
-    	
-    	if(RepoProxyFactory.getRepoProxy().myTurn(repository)) {
-    		return RepoProxyFactory.getRepoProxy().getMetadataSetsV2(repository, req);
-    	}
-    	
+
     	try {
+
+			if(RepoProxyFactory.getRepoProxy().myTurn(repository)) {
+				return RepoProxyFactory.getRepoProxy().getMetadataSetsV2(repository, req);
+			}
     			    		    	
 	    	RepositoryDao repoDao = RepositoryDao.getRepository(repository);
 	    	MdsEntriesV2 result=new MdsEntriesV2();
@@ -135,25 +135,8 @@ public class MdsApi {
 	    	
 	    	return Response.status(Response.Status.OK).entity(result).build();
 	
-    	} catch (DAOValidationException t) {
-    		
-    		logger.warn(t.getMessage(), t);
-    		return Response.status(Response.Status.BAD_REQUEST).entity(new ErrorResponse(t)).build();
-    		
-    	} catch (DAOSecurityException t) {
-    		
-    		logger.warn(t.getMessage(), t);
-    		return Response.status(Response.Status.FORBIDDEN).entity(new ErrorResponse(t)).build();
-    		
-    	} catch (DAOMissingException t) {
-    		
-    		logger.warn(t.getMessage(), t);
-    		return Response.status(Response.Status.NOT_FOUND).entity(new ErrorResponse(t)).build();
-    		
     	} catch (Throwable t) {
-    		
-    		logger.error(t.getMessage(), t);
-    		return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(new ErrorResponse(t)).build();
+    		return ErrorResponse.createResponse(t);
     	}
 
     }
@@ -216,14 +199,14 @@ public class MdsApi {
     	@ApiParam(value = "ID of repository (or \"-home-\" for home repository)",required=true, defaultValue="-home-" ) @PathParam("repository") String repository,
     	@ApiParam(value = "ID of metadataset (or \"-default-\" for default metadata set)",required=true, defaultValue="-default-" ) @PathParam("metadataset") String mdsId,
 		@Context HttpServletRequest req) {
-    	
-    	if(RepoProxyFactory.getRepoProxy().myTurn(repository)) {
-    		return RepoProxyFactory.getRepoProxy().getMetadataSetV2(repository, mdsId, req);
-    	}
-    	
+
     	try {
-    			    		    	
-	    	RepositoryDao repoDao = RepositoryDao.getRepository(repository);	    		    	
+
+			if(RepoProxyFactory.getRepoProxy().myTurn(repository)) {
+				return RepoProxyFactory.getRepoProxy().getMetadataSetV2(repository, mdsId, req);
+			}
+
+			RepositoryDao repoDao = RepositoryDao.getRepository(repository);
 	    
 	    	return Response.status(Response.Status.OK).entity((MdsDaoV2.getMds(repoDao, mdsId).asMds())).build();
 	
@@ -268,13 +251,14 @@ public class MdsApi {
         	@ApiParam(value = "ID of metadataset (or \"-default-\" for default metadata set)",required=true, defaultValue="-default-" ) @PathParam("metadataset") String mdsId,
         	@ApiParam(value = "suggestionParam") SuggestionParam suggestionParam,
     		@Context HttpServletRequest req) {
-    	
-    		if(RepoProxyFactory.getRepoProxy().myTurn(repository)) {
-    			return RepoProxyFactory.getRepoProxy().getValuesV2(repository, mdsId, suggestionParam, req);
-    		}
-    	
+
         	try {
-     	    	RepositoryDao repoDao = RepositoryDao.getRepository(repository);	    	
+
+				if(RepoProxyFactory.getRepoProxy().myTurn(repository)) {
+					return RepoProxyFactory.getRepoProxy().getValuesV2(repository, mdsId, suggestionParam, req);
+				}
+
+				RepositoryDao repoDao = RepositoryDao.getRepository(repository);
     	    	MdsDaoV2 mds = MdsDaoV2.getMds(repoDao, mdsId);
     	    	Suggestions response = mds.getSuggestions(suggestionParam.getValueParameters().getQuery(), 
     	    			suggestionParam.getValueParameters().getProperty(), 

@@ -88,11 +88,18 @@
     "ACTIONBAR":{
       "EDIT":"Edit",
       "PIN":"Pin collection",
-      "DELETE":"Delete collection"
+      "DELETE":"Delete collection",
+      "FEEDBACK":"Feedback...",
+      "FEEDBACK_VIEW":"View feedback"
     },
     "NEW": {
       "AUTHOR_FREETEXT": "Name of author"
-    }
+    },
+    "FEEDBACK_TITLE": "Give feedback for collection",
+    "FEEDBACK_VIEW_TITLE": "Given feedback for collection",
+    "FEEDBACK_VIEW_EMPTY": "No feedback was given for this collection yet",
+    "FEEDBACK_SAVE": "Send",
+    "FEEDBACK_TOAST": "Feedback sent. Thank you!"
   },
 
   "collections_description" : "Description",

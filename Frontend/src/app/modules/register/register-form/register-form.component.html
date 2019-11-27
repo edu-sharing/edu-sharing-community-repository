@@ -2,11 +2,11 @@
     <div class="name-input">
         <mat-form-field>
             <mat-label>{{'USER.firstName' | translate}}</mat-label>
-            <input matInput type="text" required name="username" id="username"  placeholder="{{'REGISTER.PL_USER' | translate}}" [(ngModel)]="info.firstName"/>
+            <input matInput type="text" [required]="isRequired('firstName')" name="username" id="username"  placeholder="{{'REGISTER.PL_USER' | translate}}" [(ngModel)]="info.firstName"/>
         </mat-form-field>
         <mat-form-field class="last-name">
             <mat-label>{{'USER.lastName' | translate}}</mat-label>
-            <input matInput type="text" name="lastname" id="lastname" placeholder="{{'REGISTER.PL_NAME' | translate}}" [(ngModel)]="info.lastName"/>
+            <input matInput type="text" [required]="isRequired('lastName')" name="lastname" id="lastname" placeholder="{{'REGISTER.PL_NAME' | translate}}" [(ngModel)]="info.lastName"/>
         </mat-form-field>
     </div>
 
@@ -17,7 +17,7 @@
     <input-password label="{{'USER.password' | translate}}" [hint]="true" [displayStrength]="true" autocomplete="new-password" id="password" required="true" (keydown.enter)="register()" [(value)]="info.password" placeholder="{{'REGISTER.PL_PASSWORD' | translate}}"></input-password>
     <mat-form-field class="organization">
         <mat-label>{{'REGISTER.ORGANIZATION' | translate}}</mat-label>
-        <input matInput type="text" name="organization" id="organization" placeholder="{{'REGISTER.PL_ORG' | translate}} {{'REGISTER.ORGANIZATION_TITLE' | translate}} ..." [(ngModel)]="info.organization"/>
+        <input matInput type="text" [required]="isRequired('organization')" name="organization" id="organization" placeholder="{{'REGISTER.PL_ORG' | translate}} {{'REGISTER.ORGANIZATION_TITLE' | translate}} ..." [(ngModel)]="info.organization"/>
     </mat-form-field>
 </form>
 <mat-checkbox [(ngModel)]="info.allowNotifications">{{'REGISTER.NEWSLETTER' | translate}}</mat-checkbox>

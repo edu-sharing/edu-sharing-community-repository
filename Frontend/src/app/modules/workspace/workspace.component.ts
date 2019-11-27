@@ -758,23 +758,25 @@ export class WorkspaceMainComponent implements EventListener{
         if(!nodes && this.canPasteInCurrentLocation()) {
             options.push(new OptionItem("WORKSPACE.OPTION.PASTE", "content_paste", (node: Node) => this.pasteNode()));
         }
-        if (nodes && nodes.length == 1) {
-            if(this.reurl){
-                let apply=new OptionItem("APPLY", "redo", (node: Node) => this.applyNode(this.getNodeList(node)[0]));
-                apply.showAsAction=true;
-                apply.showAlways=true;
-                apply.enabledCallback=((node:Node)=> {
+        if (fromList || nodes && nodes.length == 1) {
+            if (this.reurl) {
+                let apply = new OptionItem("APPLY", "redo", (node: Node) => this.applyNode(this.getNodeList(node)[0]));
+                apply.showAsAction = true;
+                apply.showAlways = true;
+                apply.enabledCallback = ((node: Node) => {
                     return node.access.indexOf(RestConstants.ACCESS_CC_PUBLISH) != -1;
                 });
-                apply.showCallback=((node:Node)=> {
-                    let result=NodeHelper.getActionbarNodes(nodes,node);
-                    if(result==null || !result.length)
+                apply.showCallback = ((node: Node) => {
+                    let result = NodeHelper.getActionbarNodes(nodes, node);
+                    if (result == null || !result.length)
                         return false;
                     return (this.reurlDirectories || !result[0].isDirectory);
                 });
-                if(apply.showCallback(nodes[0]))
-                    options.push(apply);
+                //if (fromList || apply.showCallback(nodes[0]))
+                options.push(apply);
             }
+        }
+        if (nodes && nodes.length == 1) {
             if(this.isAdmin || (window as any).esDebug===true){
                 let debug = new OptionItem("WORKSPACE.OPTION.DEBUG", "build", (node: Node) => this.debugNode(node));
                 debug.onlyDesktop=true;

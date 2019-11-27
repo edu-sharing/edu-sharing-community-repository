@@ -14,6 +14,7 @@ public class PermissionServiceHelper {
 			 CCConstants.PERMISSION_READ_PREVIEW,
 			 CCConstants.PERMISSION_READ_ALL,
 			 CCConstants.PERMISSION_COMMENT,
+			 CCConstants.PERMISSION_FEEDBACK,
 			 org.alfresco.service.cmr.security.PermissionService.ADD_CHILDREN,
 			 org.alfresco.service.cmr.security.PermissionService.READ_PERMISSIONS,
 			 org.alfresco.service.cmr.security.PermissionService.CHANGE_PERMISSIONS,
@@ -34,7 +35,12 @@ public class PermissionServiceHelper {
                 collect(Collectors.toCollection(HashSet::new));
     }
 
-    public HashMap<String, Boolean> hasAllPermissions(String storeProtocol,String storeId,String nodeId){
+	public void validatePermissionOrThrow(String nodeId, String permissionName) {
+		if(!permissionService.hasPermission(StoreRef.PROTOCOL_WORKSPACE,StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(), nodeId,permissionName))
+			throw new PermissionException(nodeId,permissionName);
+	}
+
+	public HashMap<String, Boolean> hasAllPermissions(String storeProtocol,String storeId,String nodeId){
 			return permissionService.hasAllPermissions(storeProtocol, storeId, nodeId, PERMISSIONS);
 		}
 		public HashMap<String, Boolean> hasAllPermissions(String nodeId){

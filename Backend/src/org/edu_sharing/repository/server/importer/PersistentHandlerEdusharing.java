@@ -188,7 +188,7 @@ public class PersistentHandlerEdusharing implements PersistentHandlerInterface {
 			}
 
 			if (mustBePersisted(replicationId,newTimeStamp)) {
-				getLogger().info(" newTimeStamp is after oldTimeStamp have to update object id:" + replicationId);
+				getLogger().info(" newTimeStamp "+newTimeStamp+" is after oldTimeStamp "+oldTimeStamp+" have to update object id:" + replicationId);
                 updateNode((String) childId.getId(), newNodeProps, recordHandler.getPropertiesToRemove());
                 setModifiedDate((String) childId.getId(), newNodeProps);
             } else if (licenseValidChanged) {
@@ -261,7 +261,7 @@ public class PersistentHandlerEdusharing implements PersistentHandlerInterface {
 		return folderId;
 	}
 
-	private static String prepareImportFolder() throws Throwable {
+	public static String prepareImportFolder() throws Throwable {
 		MCAlfrescoAPIClient mcAlfrescoBaseClient = new MCAlfrescoAPIClient();
 		String companyHomeId = mcAlfrescoBaseClient.getCompanyHomeNodeId();
 		HashMap<String, Object> importFolderProps = mcAlfrescoBaseClient.getChild(companyHomeId, CCConstants.CCM_TYPE_MAP, CCConstants.CM_NAME,

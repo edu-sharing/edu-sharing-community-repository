@@ -1,10 +1,10 @@
 package org.edu_sharing.service.collection;
 
 import java.io.InputStream;
+import java.util.HashMap;
 import java.util.List;
 
 import org.alfresco.service.cmr.repository.NodeRef;
-import org.edu_sharing.restservices.shared.Filter;
 import org.edu_sharing.service.search.model.SortDefinition;
 
 public interface CollectionService {
@@ -74,4 +74,8 @@ public interface CollectionService {
 	void writePreviewImage(String collectionId, InputStream is, String mimeType) throws Exception;
 
     List<org.edu_sharing.service.model.NodeRef> getReferenceObjects(String nodeId);
+
+    String addFeedback(String id, HashMap<String, String[]> feedbackData) throws Throwable;
+
+	List<String> getFeedbacks(String id) throws Throwable;
 }
