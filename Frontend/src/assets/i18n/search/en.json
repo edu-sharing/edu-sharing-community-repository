@@ -14,7 +14,7 @@
     "EXPANDED_SEARCH_SHORT": "Extended Search",
     "METADATASET": "Choose Metadataset",
     "METADATASET_INFO": "Filter other search criterias",
-    "APPLY": "APPLY",
+    "APPLY": "Apply",
     "INFORMATION": "Information",
     "TOGGLE_EXPANDED_SEARCH": "Toggleadvanced search",
     "TOGGLE_RESULT_VIEW": "Toggle view",
@@ -51,7 +51,7 @@
       "REMOVE_ITEM": "Remove",
       "REMOVED_ITEMS": "{{count}} Element(s) have been removed from the memo list."
     },
-    "APPLY_FILTER": "Apply",
+    "APPLY_FILTER": "Search",
     "TAB_FILTER": "filter",
     "TAB_SAVED": "saved",
     "MANAGE_SAVED_SEARCH": "manage searches",
