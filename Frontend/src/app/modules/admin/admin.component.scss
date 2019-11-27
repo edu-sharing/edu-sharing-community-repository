@@ -377,6 +377,11 @@ $sidenavWidthMobile:66px;
   }
 }
 .browser{
+  mat-radio-group{
+    mat-radio-button{
+      padding:0 10px;
+    }
+  }
   .lucenePaging{
     max-width: 700px;
     margin: auto;

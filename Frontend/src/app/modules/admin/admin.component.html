@@ -535,10 +535,10 @@
     </div>
       <div class="inputGroupGrow">
           <div class="info">{{'ADMIN.BROWSER.OUTPUT_MODE' | translate }}</div>
-          <div>
-            <input type="radio" name="solrMode" id="solrModeView" [(ngModel)]="lucene.outputMode" value="view"><label for="solrModeView">{{'ADMIN.BROWSER.OUTPUT_MODE_VIEW' | translate}}</label>
-            <input type="radio" name="solrMode" id="solrModeExport" [(ngModel)]="lucene.outputMode" value="export"><label for="solrModeExport">{{'ADMIN.BROWSER.OUTPUT_MODE_EXPORT' | translate}}</label>
-          </div>
+            <mat-radio-group [(ngModel)]="lucene.outputMode">
+                <mat-radio-button name="solrMode" value="view">{{'ADMIN.BROWSER.OUTPUT_MODE_VIEW' | translate}}</mat-radio-button>
+                <mat-radio-button name="solrMode" value="export">{{'ADMIN.BROWSER.OUTPUT_MODE_EXPORT' | translate}}</mat-radio-button>
+            </mat-radio-group>
       </div>
       <div class="inputGroupGrow" *ngIf="lucene.outputMode=='export'">
           <div class="info">{{'ADMIN.BROWSER.LUCENE_EXPORT_PROPERTIES_HINT' | translate }}</div>
@@ -552,7 +552,7 @@
       <div class="info">{{'ADMIN.BROWSER.LUCENE_AUTHORITIES' | translate }}</div>
       <authority-search-input [globalSearchAllowed]="true" [placeholder]="'ADMIN.BROWSER.ADD_AUTHORITY'" [allowAny]="true" (onChooseAuthority)="addLuceneAuthority($event)"></authority-search-input>
     </div>
-    <div class="inputGroupGrow luceneAuthorities" *ngIf="lucene.authorities && lucene.authorities.length">
+    <div class="inputGroupGrow luceneAuthorities" *ngIf="lucene.outputMode=='view' && lucene.authorities && lucene.authorities.length">
         <div></div>
         <mat-chip-list>
           <mat-chip *ngFor="let authority of lucene.authorities" (removed)="removeLuceneAuthority(authority)">
