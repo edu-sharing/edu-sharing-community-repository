@@ -158,7 +158,10 @@ $badgeWidth:250px;
   .more-header{
     min-width: 50px;
   }
-  .editColumns,.collectionEditorial{
+  .collectionEditorial,.collectionPinned{
+    min-width: initial;
+  }
+  .editColumns{
     min-width: initial;
   }
   .icon {

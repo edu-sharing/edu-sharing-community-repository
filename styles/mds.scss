@@ -311,7 +311,7 @@ mds .mdsGroup{
     margin-top: 35px;
     margin-bottom: 15px;
     float: left;
-    width: 100%;
+    width: calc(100% - 12px);
   }
   .inputTable{
     display:flex;
