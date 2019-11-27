@@ -1,7 +1,6 @@
 {
   "extends": "tslint:recommended",
   "rules": {
-    "one-line": [true, "check-whitespace", "check-open-brace"],
     "array-type": false,
     "arrow-parens": false,
     "deprecation": {
