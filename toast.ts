@@ -13,7 +13,7 @@ import {DateHelper} from './DateHelper';
 @Injectable()
 export class Toast {
   private static MIN_TIME_BETWEEN_TOAST = 2000;
-  private onShowModal: () => void;
+  private onShowModal: (params: any) => void;
   private dialogTitle: string;
   private dialogMessage: string;
   private dialogParameters: any;
@@ -208,7 +208,7 @@ export class Toast {
   public goToLogin(){
     this.router.navigate([UIConstants.ROUTER_PREFIX + 'login'], {queryParams: {next: window.location}});
   }
-  onShowModalDialog(param: Function) {
+  onShowModalDialog(param: (params: any) => void) {
     this.onShowModal = param;
   }
 
