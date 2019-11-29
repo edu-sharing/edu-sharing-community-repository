@@ -411,9 +411,11 @@ export class MainNavComponent implements AfterViewInit{
                     name: "SIDEBAR.COLLECTIONS",
                     queryParams: reurl
                 });
-                buttons.push({path: 'stream', scope: 'stream', icon: "event", name: "SIDEBAR.STREAM"});
+                if(this.configService.instant('stream.enabled',false)) {
+                    buttons.push({path: 'stream', scope: 'stream', icon: 'event', name: 'SIDEBAR.STREAM'});
+                }
                 if (data.isGuest) {
-                    buttons.push({path: 'login', scope: 'login', icon: "person", name: "SIDEBAR.LOGIN"});
+                    buttons.push({path: 'login', scope: 'login', icon: 'person', name: 'SIDEBAR.LOGIN'});
                 }
                 this.isGuest = data.isGuest;
                 this.isAdmin = data.isAdmin;
