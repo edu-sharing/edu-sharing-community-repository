@@ -491,6 +491,7 @@ public class PersonLifecycleService {
 		refs.forEach((ref)-> {
 			RetryingTransactionHelper rth = transactionService.getRetryingTransactionHelper();
 			rth.doInTransaction((RetryingTransactionHelper.RetryingTransactionCallback<Void>) () -> {
+				policyBehaviourFilter.disableBehaviour(ref);
 				try {
 					nodeService.moveNode(ref, targetRef,
 							ContentModel.ASSOC_CONTAINS,
@@ -503,6 +504,7 @@ public class PersonLifecycleService {
 							QName.createQName(CCConstants.NAMESPACE_CCM, newName)
 					);
 				}
+				policyBehaviourFilter.enableBehaviour(ref);
 				return null;
 			});
 		});
