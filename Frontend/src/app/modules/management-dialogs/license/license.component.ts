@@ -287,12 +287,10 @@ export class WorkspaceLicenseComponent  {
       this.ccLocale=this.getValueForAll(RestConstants.CCM_PROP_LICENSE_CC_LOCALE);
     }
     if(license=='CC_0'){
-      this.cc0Type='CC_0';
       this.type='CC_0';
     }
     if(license=='PDM'){
-      this.cc0Type='PDM';
-      this.type='CC_0';
+      this.type='PDM';
     }
     if(license.startsWith("COPYRIGHT")){
       this.type="COPYRIGHT";
