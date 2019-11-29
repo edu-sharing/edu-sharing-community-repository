@@ -68,7 +68,7 @@ export class PermissionsDeleteComponent {
             receiver: '',
             receiverGroup: ''
         };
-        this.storage.get('delete_users_options', this.options).subscribe((data: any) => {
+        this.storage.get('delete_users_options', defaultOptions).subscribe((data: any) => {
             if (data.version === defaultOptions.version) {
                 this.options = data;
             }else {
