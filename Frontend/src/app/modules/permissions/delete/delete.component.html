@@ -19,10 +19,16 @@
     </div>
   </div>
   <info-message mode="info" *ngIf="!loading && !(users && users.length)" message="{{'PERMISSIONS.DELETE.STATE.NO_USERS' | translate}}"></info-message>
-  <div *ngIf="!loading && users && users.length">
+  <div *ngIf="!loading && users && users.length && options">
     <div class="group">
       <h3 class="mat-heading-3 mat-heading-underline">{{'PERMISSIONS.DELETE.HOME_FOLDER.CAPTION' | translate}}</h3>
       <div class="side-by-side">
+        <div>
+          <h4 class="mat-heading-4">{{'PERMISSIONS.DELETE.HOME_FOLDER.FOLDERS_CAPTION' | translate}}</h4>
+          <mat-radio-group [(ngModel)]="options.homeFolder.folders">
+            <mat-radio-button *ngFor="let mode of deleteModesFolder" [value]="mode">{{'PERMISSIONS.DELETE.DELETE_MODE.'+mode | translate}}</mat-radio-button>
+          </mat-radio-group>
+        </div>
         <div>
           <h4 class="mat-heading-4">{{'PERMISSIONS.DELETE.HOME_FOLDER.PRIVATE_FILES_CAPTION' | translate}}</h4>
           <mat-radio-group [(ngModel)]="options.homeFolder.privateFiles">
@@ -47,6 +53,12 @@
     <div class="group">
       <h3 class="mat-heading-3 mat-heading-underline">{{'PERMISSIONS.DELETE.SHARED_FOLDERS.CAPTION' | translate}}</h3>
       <div class="side-by-side">
+        <div>
+          <h4 class="mat-heading-4">{{'PERMISSIONS.DELETE.SHARED_FOLDERS.FOLDERS_CAPTION' | translate}}</h4>
+          <mat-radio-group [(ngModel)]="options.sharedFolders.folders">
+            <mat-radio-button *ngFor="let mode of deleteModesFolder" [value]="mode">{{'PERMISSIONS.DELETE.DELETE_MODE.'+mode | translate}}</mat-radio-button>
+          </mat-radio-group>
+        </div>
         <div>
           <h4 class="mat-heading-4">{{'PERMISSIONS.DELETE.SHARED_FOLDERS.PRIVATE_FILES_CAPTION' | translate}}</h4>
           <mat-radio-group [(ngModel)]="options.sharedFolders.privateFiles">
@@ -113,11 +125,7 @@
     <div class="info-wrapper">
       <info-message *ngIf="missingAssigning()" mode="warning" message="{{'PERMISSIONS.DELETE.STATE.NO_RECEIVER' | translate}}"></info-message>
       <info-message *ngIf="!isValid()" mode="warning" message="{{'PERMISSIONS.DELETE.STATE.NON_CONFORM' | translate}}"></info-message>
-      <info-message *ngIf="options.sharedFolders.move && options.sharedFolders.privateFiles=='assign'" mode="info" message="{{'PERMISSIONS.DELETE.STATE.SHARED_FOLDER_MOVE' | translate}}"></info-message>
-      <info-message *ngIf="options.sharedFolders.privateFiles=='delete'" mode="warning" message="{{'PERMISSIONS.DELETE.STATE.SHARED_FOLDER_DELETE' | translate}}"></info-message>
-      <info-message *ngIf="options.homeFolder.privateFiles=='delete'" mode="warning" message="{{'PERMISSIONS.DELETE.STATE.HOME_FOLDER_DELETE' | translate}}"></info-message>
     </div>
-  </div>
     <div class="group group-interactions">
       <h3 class="mat-heading-3 mat-heading-underline">{{'PERMISSIONS.DELETE.USER_INTERACTIONS.CAPTION' | translate}}</h3>
       <mat-checkbox [(ngModel)]="options.comments.delete">{{'PERMISSIONS.DELETE.USER_INTERACTIONS.STREAM' | translate}}</mat-checkbox>
@@ -126,9 +134,12 @@
       <mat-hint>{{'PERMISSIONS.DELETE.USER_INTERACTIONS.COMMENTS_HINT' | translate}}</mat-hint>
       <mat-checkbox [(ngModel)]="options.ratings.delete">{{'PERMISSIONS.DELETE.USER_INTERACTIONS.RATINGS' | translate}}</mat-checkbox>
       <mat-hint>{{'PERMISSIONS.DELETE.USER_INTERACTIONS.RATINGS_HINT' | translate}}</mat-hint>
+      <mat-checkbox [(ngModel)]="options.collectionFeedback.delete">{{'PERMISSIONS.DELETE.USER_INTERACTIONS.COLLECTION_FEEDBACK' | translate}}</mat-checkbox>
+      <mat-hint>{{'PERMISSIONS.DELETE.USER_INTERACTIONS.COLLECTION_FEEDBACK_HINT' | translate}}</mat-hint>
       <mat-checkbox [(ngModel)]="options.statistics.delete">{{'PERMISSIONS.DELETE.USER_INTERACTIONS.STATISTICS' | translate}}</mat-checkbox>
       <mat-hint>{{'PERMISSIONS.DELETE.USER_INTERACTIONS.STATISTICS_HINT' | translate}}</mat-hint>
     </div>
+  </div>
   <div class="group group-buttons">
     <button mat-raised-button color="primary" [disabled]="!canSubmit()" (click)="prepareStart()">{{'PERMISSIONS.DELETE.START' | translate}}</button>
   </div>

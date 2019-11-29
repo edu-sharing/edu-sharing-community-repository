@@ -6,14 +6,17 @@ public class PersonDeleteOptions implements Serializable {
     public enum DeleteMode {
         none,assign,delete
     }
-
+    public enum FolderDeleteMode {
+        none,assign
+    }
     public HomeFolderOptions homeFolder;
     public SharedFolderOptions sharedFolders;
     public CollectionOptions collections;
-    public DeleteOption ratings,comments,statistics,stream;
+    public DeleteOption ratings,comments,collectionFeedback,statistics,stream;
     public String receiver,receiverGroup;
 
     public static class FolderOptions {
+        public FolderDeleteMode folders;
         public DeleteMode privateFiles,ccFiles;
     }
     public static class HomeFolderOptions extends FolderOptions{

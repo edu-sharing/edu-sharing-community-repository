@@ -3,9 +3,12 @@ package org.edu_sharing.service.lifecycle;
 
 
 import java.util.*;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
+import io.swagger.models.auth.In;
 import org.alfresco.model.ContentModel;
+import org.alfresco.opencmis.search.CMISQueryParser;
 import org.alfresco.repo.policy.BehaviourFilter;
 import org.alfresco.repo.transaction.RetryingTransactionHelper;
 import org.alfresco.service.ServiceRegistry;
@@ -86,6 +89,7 @@ public class PersonLifecycleService {
 	private static final String DELETED_PERSONS_FOLDER = "DELETED_PERSONS";
 	private static final String USERHOME_ALL = "USERHOME";
 	private static final String USERHOME_FILES = "USERHOME_FILES";
+	private static final String USERHOME_FOLDERS = "USERHOME_FOLDERS";
 	private static final String USERHOME_FILES_CC = "USERHOME_CC_FILES";
 	private static final String SHARED_FILES = "SHARED_FILES";
 	private static final String SHARED_FILES_CC = "SHARED_CC_FILES";
@@ -168,20 +172,25 @@ public class PersonLifecycleService {
 					throw new IllegalArgumentException("The given receiver is not a valid user authority");
 				}
 			}
-
 			//shared files are "mounted" in the user home, so always process them first!
-			handleSharedFiles(personNodeRef,options);
+			//handleSharedFiles(personNodeRef,options); -> is now done via foreignFiles
 
-			handleHomeHolder(personNodeRef,options,null);
+			List<NodeRef> homeFiles = handleHomeHolder(personNodeRef, options, null);
 			handleHomeHolder(personNodeRef,options,CCConstants.CCM_VALUE_SCOPE_SAFE);
-
-			//@TODO: We need to handle files inside home folders of other people as well
-
+			handleForeignFiles(personNodeRef,homeFiles,options);
 			handleCollections(personNodeRef,options);
 
 			handleStream(personNodeRef,options);
-			handleComments(personNodeRef,options);
-			handleRatings(personNodeRef,options);
+			if(options.comments.delete){
+				deleteAllOfType(personNodeRef, CCConstants.CCM_TYPE_COMMENT);
+			}
+			if(options.ratings.delete) {
+				List<NodeRef> ratings = deleteAllOfType(personNodeRef, CCConstants.CCM_TYPE_RATING);
+				ratings.forEach((ref)-> EduSharingRatingCache.delete(nodeService.getPrimaryParent(ref).getParentRef()));
+			}
+			if(options.collectionFeedback.delete){
+				deleteAllOfType(personNodeRef, CCConstants.CCM_TYPE_COLLECTION_FEEDBACK);
+			}
 			handleStatistics(personNodeRef,options);
 
 			logger.info("deleting person");
@@ -191,6 +200,18 @@ public class PersonLifecycleService {
 		else{
 			throw new IllegalArgumentException("Person "+userName+" is not marked for deletion. Cancelling");
 		}
+	}
+	public List<NodeRef> getAllNodeRefs(String username, String type){
+		SearchParameters params=new SearchParameters();
+		params.addStore(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE);
+		// will use the database
+		params.setLanguage(SearchService.LANGUAGE_CMIS_ALFRESCO);
+		params.setMaxItems(Integer.MAX_VALUE);
+		String query="SELECT cmis:name FROM "+CCConstants.getValidLocalName(type)+" WHERE cmis:createdBy = '"+ username + "'";
+		logger.info(query);
+		params.setQuery(query);
+		ResultSet result = searchService.query(params);
+		return result.getNodeRefs();
 	}
 
 	private void handleStatistics(NodeRef personNodeRef, PersonDeleteOptions options) {
@@ -205,29 +226,13 @@ public class PersonLifecycleService {
 			}
 		}
 	}
-	private void handleRatings(NodeRef personNodeRef, PersonDeleteOptions options) {
-		if(options.ratings.delete){
+	private List<NodeRef> deleteAllOfType(NodeRef personNodeRef,String type) {
 			String username = (String)nodeService.getProperty(personNodeRef,
 					QName.createQName(CCConstants.CM_PROP_PERSON_USERNAME));
-
-			List<NodeRef> ratings = NodeServiceFactory.getLocalService().getChildrenRecursive(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, NodeServiceHelper.getCompanyHome().getId(), Collections.singletonList(CCConstants.CCM_TYPE_RATING), RecurseMode.All);
-			ratings=ratings.stream().filter((ref)->ownableService.getOwner(ref).equals(username)).collect(Collectors.toList());
-			// invalidate the cache for all nodes where ratings have been removed
-			ratings.forEach((ref)-> EduSharingRatingCache.delete(nodeService.getPrimaryParent(ref).getParentRef()));
-			deleteAllRefs(ratings);
-			logger.info("removed "+ratings.size()+" ratings");
-		}
-	}
-	private void handleComments(NodeRef personNodeRef, PersonDeleteOptions options) {
-		if(options.comments.delete){
-			String username = (String)nodeService.getProperty(personNodeRef,
-					QName.createQName(CCConstants.CM_PROP_PERSON_USERNAME));
-
-			List<NodeRef> comments = NodeServiceFactory.getLocalService().getChildrenRecursive(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, NodeServiceHelper.getCompanyHome().getId(), Collections.singletonList(CCConstants.CCM_TYPE_COMMENT),RecurseMode.All);
-			comments=comments.stream().filter((ref)->ownableService.getOwner(ref).equals(username)).collect(Collectors.toList());
-			deleteAllRefs(comments);
-			logger.info("removed "+comments.size()+" comments");
-		}
+			List<NodeRef> refs = getAllNodeRefs(username,type);
+			logger.info("Deleting all files of type "+type);
+			deleteAllRefs(refs);
+			return refs;
 	}
 
 	private void handleStream(NodeRef personNodeRef, PersonDeleteOptions options) {
@@ -307,19 +312,55 @@ public class PersonLifecycleService {
 		}
 		throw new IllegalArgumentException("Currently collection deletion does only support the same modes for private and public");
 	}
+
+	/**
+	 * All files that are from this user and not in the filesToIgnore list (which should be the home folder files)
+	 * this can be files users contributed to other user homes he was invited to, or in shared folders
+	 * @param personNodeRef
+	 * @param filesToIgnore
+	 * @param options
+	 */
+	private void handleForeignFiles(NodeRef personNodeRef, List<NodeRef> filesToIgnore, PersonDeleteOptions options) {
+		String userName = (String)nodeService.getProperty(personNodeRef, QName.createQName(CCConstants.CM_PROP_PERSON_USERNAME));
+		// getting all ios (files) and maps (folders) where this user is the creator, but not any which should be ignored
+		List<NodeRef> refsIO = getAllNodeRefs(userName, CCConstants.CCM_TYPE_IO).stream().filter((ref)->!filesToIgnore.contains(ref)).collect(Collectors.toList());
+		List<NodeRef> refsMaps = getAllNodeRefs(userName, CCConstants.CCM_TYPE_MAP).stream().filter((ref)->!filesToIgnore.contains(ref)).collect(Collectors.toList());;
+
+		// split the files by their license type
+		List<NodeRef> filesPrivate = refsIO.stream().filter((ref) -> !hasCCLicense(ref)).collect(Collectors.toList());
+		List<NodeRef> filesCC = refsIO.stream().filter((ref) -> hasCCLicense(ref)).collect(Collectors.toList());
+
+		// handle cc files
+		if(options.sharedFolders.ccFiles.equals(PersonDeleteOptions.DeleteMode.assign) && filesCC.size()>0){
+			// switching the owner
+			setOwnerAndPermissions(filesCC, userName, options);
+			if(options.sharedFolders.move) {
+				moveNodes(filesCC, getOrCreateTargetFolder(personNodeRef, options, SHARED_FILES_CC, null));
+			}
+		}else if(options.sharedFolders.ccFiles.equals(PersonDeleteOptions.DeleteMode.delete)){
+			deleteAllRefs(filesCC);
+		}
+		// handle private files, that are not in the home dir
+		if(options.sharedFolders.privateFiles.equals(PersonDeleteOptions.DeleteMode.assign) && filesPrivate.size()>0){
+			setOwnerAndPermissions(filesPrivate, userName, options);
+			if(options.sharedFolders.move) {
+				moveNodes(filesPrivate, getOrCreateTargetFolder(personNodeRef, options, SHARED_FILES, null));
+			}
+		}else if(options.sharedFolders.privateFiles.equals(PersonDeleteOptions.DeleteMode.delete)){
+			deleteAllRefs(filesPrivate);
+		}
+		// assign the new user to all folders
+		if(options.sharedFolders.folders.equals(PersonDeleteOptions.FolderDeleteMode.assign)) {
+			setOwnerAndPermissions(refsMaps, userName, options);
+		}
+	}
+	/*
 	private void handleSharedFiles(NodeRef personNodeRef, PersonDeleteOptions options) {
 		if(options.sharedFolders.privateFiles.equals(PersonDeleteOptions.DeleteMode.none) &&
 			options.sharedFolders.ccFiles.equals(PersonDeleteOptions.DeleteMode.none)){
 			return;
 		}
 		String userName = (String)nodeService.getProperty(personNodeRef, QName.createQName(CCConstants.CM_PROP_PERSON_USERNAME));
-		/*
-		SearchParameters parameters=new SearchParameters();
-		parameters.setQuery("OWNER:"+ QueryParser.escape(userName));
-		parameters.addStore(Constants.storeRef);
-		parameters.setLanguage(org.alfresco.service.cmr.search.SearchService.LANGUAGE_LUCENE);
-		List<NodeRef> files = SearchServiceHelper.queryAll(parameters, 0);
-		*/
 
 		List<ChildAssociationRef> shared = getAllSharedFolders(personNodeRef, null);
 		if(shared==null) {
@@ -366,10 +407,10 @@ public class PersonLifecycleService {
 				deleteAllRefs(filesCC);
 			}
 		}
-
 	}
+	 */
 
-	private void handleHomeHolder(NodeRef personNodeRef, PersonDeleteOptions options, String scope) {
+	private List<NodeRef> handleHomeHolder(NodeRef personNodeRef, PersonDeleteOptions options, String scope) {
 		NodeRef homeFolder;
 		String userName = (String)nodeService.getProperty(personNodeRef, QName.createQName(CCConstants.CM_PROP_PERSON_USERNAME));
 		if(scope==null){
@@ -380,25 +421,20 @@ public class PersonLifecycleService {
 			homeFolder = scopeUserHomeService.getUserHome((String) nodeService.getProperty(personNodeRef, QName.createQName(CCConstants.CM_PROP_PERSON_USERNAME)), scope, false);
 			if(homeFolder==null){
 				logger.info("Person "+userName+" does not have a scope folder for "+scope+", skipping it");
-				return;
+				return new ArrayList<>();
 			}
 		}
-
-		if(options.homeFolder.privateFiles.equals(PersonDeleteOptions.DeleteMode.none) &&
-				options.homeFolder.ccFiles.equals(PersonDeleteOptions.DeleteMode.none)){
-			// we do basically nothing
-			return;
+		// remove the dummy EDUGROUP folder first, it will lead to problems otherwise
+		NodeRef child = NodeServiceFactory.getLocalService().getChild(homeFolder.getStoreRef(), homeFolder.getId(), CCConstants.CCM_TYPE_MAP, CCConstants.CCM_PROP_MAP_TYPE, CCConstants.CCM_VALUE_MAP_TYPE_EDUGROUP);
+		if(child!=null){
+			NodeServiceFactory.getLocalService().removeNode(child.getId(),null,false);
+			logger.info("Deleting the EDUGROUP folder of "+userName);
 		}
-		else if(options.homeFolder.privateFiles.equals(PersonDeleteOptions.DeleteMode.delete) &&
-				options.homeFolder.ccFiles.equals(PersonDeleteOptions.DeleteMode.delete)){
-			// equals a simple delete
-			NodeServiceFactory.getLocalService().removeNode(homeFolder.getId(),null,false);
-			return;
-		}
-		if(options.homeFolder.privateFiles.equals(PersonDeleteOptions.DeleteMode.assign)
+		List<NodeRef> childrens = NodeServiceFactory.getLocalService().getChildrenRecursive(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, homeFolder.getId(), null,RecurseMode.Folders);
+		if(options.homeFolder.folders.equals(PersonDeleteOptions.FolderDeleteMode.assign)
+				&& options.homeFolder.privateFiles.equals(PersonDeleteOptions.DeleteMode.assign)
 				&& options.homeFolder.ccFiles.equals(PersonDeleteOptions.DeleteMode.assign)){
 			if(options.homeFolder.keepFolderStructure){
-				List<NodeRef> childrens = NodeServiceFactory.getLocalService().getChildrenRecursive(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, homeFolder.getId(), null,RecurseMode.Folders);
 				// @TODO: we set explicit permissions on all sub items because if a folder has inherit=false, then the org will not propagate
 				childrens.add(homeFolder);
 				setOwnerAndPermissions(childrens,userName,options);
@@ -407,39 +443,47 @@ public class PersonLifecycleService {
 				nodeService.moveNode(homeFolder,deletedRef,
 						ContentModel.ASSOC_CONTAINS,
 						QName.createQName(CCConstants.NAMESPACE_CCM, (String) nodeService.getProperty(homeFolder, QName.createQName(CCConstants.CM_NAME))));
-				return;
+				return childrens;
 			}
 		}
 		if(options.homeFolder.keepFolderStructure){
-			throw new IllegalArgumentException("keepFolderStructure is only allowed when both privateFiles and ccFiles are set to assign");
+			throw new IllegalArgumentException("keepFolderStructure is only allowed when all modes are set to assign");
 		}
-		if(!options.homeFolder.keepFolderStructure){
-			if(options.homeFolder.privateFiles.equals(PersonDeleteOptions.DeleteMode.assign)){
-				NodeRef privateFiles = getOrCreateTargetFolder(personNodeRef, options,USERHOME_FILES,scope);
-				List<NodeRef> refs = getFilesByLicense(homeFolder, false);
-				setOwnerAndPermissions(refs,userName,options);
-				moveNodes(refs,privateFiles);
-			}
-			if(options.homeFolder.ccFiles.equals(PersonDeleteOptions.DeleteMode.assign)){
-				NodeRef ccFiles = getOrCreateTargetFolder(personNodeRef, options,USERHOME_FILES_CC,scope);
-				List<NodeRef> refs = getFilesByLicense(homeFolder, true);
-				setOwnerAndPermissions(refs,userName,options);
-				moveNodes(refs,ccFiles);
-			}
-		}
-		/*
-		if(options.homeFolder.privateFiles.equals(PersonDeleteOptions.DeleteMode.delete)) {
-			List<NodeRef> refs = getFilesByLicense(homeFolder, false);
-			deleteAllRefs(refs);
-		}
-		else if(options.homeFolder.ccFiles.equals(PersonDeleteOptions.DeleteMode.delete)) {
-			List<NodeRef> refs = getFilesByLicense(homeFolder, true);
-			deleteAllRefs(refs);
-		}
-		*/
-		NodeServiceFactory.getLocalService().removeNode(homeFolder.getId(),null,false);
+		else{
+			List<NodeRef> folders = childrens.stream().filter((ref)->nodeService.getType(ref).equals(QName.createQName(CCConstants.CCM_TYPE_MAP))).collect(Collectors.toList());
+			List<NodeRef> privateFiles =  childrens.stream().filter((ref)->nodeService.getType(ref).equals(QName.createQName(CCConstants.CCM_TYPE_IO)) && !hasCCLicense(ref)).collect(Collectors.toList());
+			List<NodeRef> ccFiles = childrens.stream().filter((ref)->nodeService.getType(ref).equals(QName.createQName(CCConstants.CCM_TYPE_IO)) && hasCCLicense(ref)).collect(Collectors.toList());
 
-		//throw new IllegalArgumentException("The given configuration for the homeFolder operations is currently not supported");
+			logger.info("Managing private files for "+userName);
+			// handle private files
+			if(options.homeFolder.privateFiles.equals(PersonDeleteOptions.DeleteMode.assign) && ccFiles.size()>0){
+				NodeRef privateTarget = getOrCreateTargetFolder(personNodeRef, options,USERHOME_FILES,scope);
+				setOwnerAndPermissions(privateFiles,userName,options);
+				moveNodes(privateFiles,privateTarget);
+			}else if(options.homeFolder.privateFiles.equals(PersonDeleteOptions.DeleteMode.delete)){
+				deleteAllRefs(privateFiles);
+			}
+			logger.info("Managing cc files for "+userName);
+			// handle cc files
+			if(options.homeFolder.ccFiles.equals(PersonDeleteOptions.DeleteMode.assign) && ccFiles.size()>0){
+				NodeRef ccTarget = getOrCreateTargetFolder(personNodeRef, options,USERHOME_FILES_CC,scope);
+				setOwnerAndPermissions(ccFiles,userName,options);
+				moveNodes(ccFiles,ccTarget);
+			}else if(options.homeFolder.ccFiles.equals(PersonDeleteOptions.DeleteMode.delete)){
+				deleteAllRefs(ccFiles);
+			}
+			logger.info("Managing folders for "+userName);
+			// handle folders
+			if(folders.size()>0) {
+				NodeRef foldersTarget = getOrCreateTargetFolder(personNodeRef, options, USERHOME_FOLDERS, scope);
+				if (options.homeFolder.folders.equals(PersonDeleteOptions.FolderDeleteMode.assign)) {
+					setOwnerAndPermissions(folders, userName, options);
+				}
+				moveNodes(folders, foldersTarget);
+			}
+		}
+		NodeServiceFactory.getLocalService().removeNode(homeFolder.getId(),null,false);
+		return childrens;
 	}
 
 	private void moveNodes(List<NodeRef> refs, NodeRef targetRef) {
@@ -512,7 +556,7 @@ public class PersonLifecycleService {
 				policyBehaviourFilter.disableBehaviour(ref);
 				permissionService.setPermission(ref, options.receiverGroup, CCConstants.PERMISSION_COORDINATOR, true);
 				policyBehaviourFilter.enableBehaviour(ref);
-				logger.info("setOwnerAndPermissions for " + ref);
+				logger.debug("setOwnerAndPermissions for " + ref);
 			});
 			return null;
 		});
@@ -522,17 +566,6 @@ public class PersonLifecycleService {
 		refs.forEach((ref)->NodeServiceFactory.getLocalService().removeNode(ref.getId(),null,false));
 	}
 
-	/**
-	 * return all CCM_IO files which are from type "CC License"
-	 * @param homeFolder
-	 * @param ccLicense
-	 * @return
-	 */
-	private List<NodeRef> getFilesByLicense(NodeRef homeFolder,boolean ccLicense) {
-		return NodeServiceFactory.getLocalService().
-				getChildrenRecursive(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE,homeFolder.getId(), Collections.singletonList(CCConstants.CCM_TYPE_IO),RecurseMode.Folders).stream().
-				filter((ref)-> hasCCLicense(ref)==ccLicense).collect(Collectors.toList());
-	}
 
 	private boolean hasCCLicense(NodeRef ref) {
 		String license = NodeServiceHelper.getProperty(ref, CCConstants.CCM_PROP_IO_COMMONLICENSE_KEY);
