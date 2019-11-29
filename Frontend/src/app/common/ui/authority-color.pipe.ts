@@ -4,7 +4,7 @@ import {ColorHelper} from "./color-helper";
 @Pipe({name: 'authorityColor'})
 export class AuthorityColorPipe implements PipeTransform {
   public static COLORS=['#4584B3','#9B393C','#84B97C','#71B0A4','#7A79D5','#AE9957'];
-  transform(authority : any,args:string[]): string {
+  transform(authority : any,args:string[]=null): string {
     if(!authority)
       return AuthorityColorPipe.COLORS[0];
     //if(authority.profile && authority.profile.avatar)
