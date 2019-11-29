@@ -324,7 +324,10 @@ public class PersonLifecycleService {
 	private void handleForeignFiles(NodeRef personNodeRef, List<NodeRef> filesToIgnore, PersonDeleteOptions options) {
 		String userName = (String)nodeService.getProperty(personNodeRef, QName.createQName(CCConstants.CM_PROP_PERSON_USERNAME));
 		// getting all ios (files) and maps (folders) where this user is the creator, but not any which should be ignored
-		List<NodeRef> refsIO = getAllNodeRefs(userName, CCConstants.CCM_TYPE_IO).stream().filter((ref)->!filesToIgnore.contains(ref)).collect(Collectors.toList());
+
+		List<NodeRef> refsIO = getAllNodeRefs(userName, CCConstants.CCM_TYPE_IO).stream().
+				filter((ref)->!filesToIgnore.contains(ref)).
+				collect(Collectors.toList());
 		List<NodeRef> refsMaps = getAllNodeRefs(userName, CCConstants.CCM_TYPE_MAP).stream().filter((ref)->!filesToIgnore.contains(ref)).collect(Collectors.toList());;
 
 		// split the files by their license type
@@ -489,6 +492,10 @@ public class PersonLifecycleService {
 
 	private void moveNodes(List<NodeRef> refs, NodeRef targetRef) {
 		refs.forEach((ref)-> {
+			if(nodeService.hasAspect(ref,QName.createQName(CCConstants.CCM_ASPECT_IO_CHILDOBJECT))){
+				logger.info("will not move io since it's a childobject: "+ref);
+				return;
+			}
 			RetryingTransactionHelper rth = transactionService.getRetryingTransactionHelper();
 			rth.doInTransaction((RetryingTransactionHelper.RetryingTransactionCallback<Void>) () -> {
 				policyBehaviourFilter.disableBehaviour(ref);
