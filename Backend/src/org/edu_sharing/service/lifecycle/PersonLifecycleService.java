@@ -491,9 +491,17 @@ public class PersonLifecycleService {
 	}
 
 	private void moveNodes(List<NodeRef> refs, NodeRef targetRef) {
+		List<QName> skipAspects = Arrays.asList(
+				QName.createQName(CCConstants.CCM_ASPECT_IO_CHILDOBJECT),
+				QName.createQName(CCConstants.CCM_ASPECT_COLLECTION),
+				QName.createQName(CCConstants.CCM_ASPECT_COLLECTION_IO_REFERENCE)
+		);
+
 		refs.forEach((ref)-> {
-			if(nodeService.hasAspect(ref,QName.createQName(CCConstants.CCM_ASPECT_IO_CHILDOBJECT))){
-				logger.info("will not move io since it's a childobject: "+ref);
+			Set<QName> aspects = nodeService.getAspects(ref);
+			List<QName> filtered = skipAspects.stream().filter((aspect) -> aspects.contains(aspect)).collect(Collectors.toList());
+			if(filtered.size()>0){
+				logger.info("will not move io since it contains an skip aspect "+filtered.get(0)+": "+ref);
 				return;
 			}
 			RetryingTransactionHelper rth = transactionService.getRetryingTransactionHelper();
