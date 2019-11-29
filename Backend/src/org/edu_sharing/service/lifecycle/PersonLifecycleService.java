@@ -489,19 +489,22 @@ public class PersonLifecycleService {
 
 	private void moveNodes(List<NodeRef> refs, NodeRef targetRef) {
 		refs.forEach((ref)-> {
-			try {
-				nodeService.moveNode(ref, targetRef,
-						ContentModel.ASSOC_CONTAINS,
-						QName.createQName(CCConstants.NAMESPACE_CCM, (String) nodeService.getProperty(ref, QName.createQName(CCConstants.CM_NAME))));
-			}
-			catch(DuplicateChildNodeNameException e){
-				String newName = nodeService.getProperty(ref, QName.createQName(CCConstants.CM_NAME)) + "_" + ref.getId();
-				nodeService.setProperty(ref,QName.createQName(CCConstants.CM_NAME),newName);
-				nodeService.moveNode(ref, targetRef,
-						ContentModel.ASSOC_CONTAINS,
-						QName.createQName(CCConstants.NAMESPACE_CCM,newName)
-				);
-			}
+			RetryingTransactionHelper rth = transactionService.getRetryingTransactionHelper();
+			rth.doInTransaction((RetryingTransactionHelper.RetryingTransactionCallback<Void>) () -> {
+				try {
+					nodeService.moveNode(ref, targetRef,
+							ContentModel.ASSOC_CONTAINS,
+							QName.createQName(CCConstants.NAMESPACE_CCM, (String) nodeService.getProperty(ref, QName.createQName(CCConstants.CM_NAME))));
+				} catch (DuplicateChildNodeNameException e) {
+					String newName = nodeService.getProperty(ref, QName.createQName(CCConstants.CM_NAME)) + "_" + ref.getId();
+					nodeService.setProperty(ref, QName.createQName(CCConstants.CM_NAME), newName);
+					nodeService.moveNode(ref, targetRef,
+							ContentModel.ASSOC_CONTAINS,
+							QName.createQName(CCConstants.NAMESPACE_CCM, newName)
+					);
+				}
+				return null;
+			});
 		});
 	}
 
