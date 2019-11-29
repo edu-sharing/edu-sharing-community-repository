@@ -185,8 +185,9 @@ public class PersonLifecycleService {
 				deleteAllOfType(personNodeRef, CCConstants.CCM_TYPE_COMMENT);
 			}
 			if(options.ratings.delete) {
-				List<NodeRef> ratings = deleteAllOfType(personNodeRef, CCConstants.CCM_TYPE_RATING);
+				List<NodeRef> ratings = getAllNodeRefs(userName, CCConstants.CCM_TYPE_RATING);
 				ratings.forEach((ref)-> EduSharingRatingCache.delete(nodeService.getPrimaryParent(ref).getParentRef()));
+				deleteAllRefs(ratings);
 			}
 			if(options.collectionFeedback.delete){
 				deleteAllOfType(personNodeRef, CCConstants.CCM_TYPE_COLLECTION_FEEDBACK);
