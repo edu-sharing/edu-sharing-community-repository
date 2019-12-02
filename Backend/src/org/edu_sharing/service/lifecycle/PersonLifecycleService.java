@@ -3,12 +3,10 @@ package org.edu_sharing.service.lifecycle;
 
 
 import java.util.*;
-import java.util.function.Predicate;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
 
-import io.swagger.models.auth.In;
 import org.alfresco.model.ContentModel;
-import org.alfresco.opencmis.search.CMISQueryParser;
 import org.alfresco.repo.policy.BehaviourFilter;
 import org.alfresco.repo.transaction.RetryingTransactionHelper;
 import org.alfresco.service.ServiceRegistry;
@@ -23,7 +21,6 @@ import org.apache.log4j.Logger;
 import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.server.MCAlfrescoAPIClient;
-import org.edu_sharing.repository.server.jobs.helper.NodeRunner;
 import org.edu_sharing.repository.server.tools.ApplicationInfoList;
 import org.edu_sharing.repository.server.tools.VCardConverter;
 import org.edu_sharing.repository.server.tools.cache.EduSharingRatingCache;
@@ -505,6 +502,7 @@ public class PersonLifecycleService {
 				return;
 			}
 			RetryingTransactionHelper rth = transactionService.getRetryingTransactionHelper();
+			AtomicBoolean rename= new AtomicBoolean(false);
 			rth.doInTransaction((RetryingTransactionHelper.RetryingTransactionCallback<Void>) () -> {
 				policyBehaviourFilter.disableBehaviour(ref);
 				try {
@@ -512,16 +510,27 @@ public class PersonLifecycleService {
 							ContentModel.ASSOC_CONTAINS,
 							QName.createQName(CCConstants.NAMESPACE_CCM, (String) nodeService.getProperty(ref, QName.createQName(CCConstants.CM_NAME))));
 				} catch (DuplicateChildNodeNameException e) {
-					String newName = nodeService.getProperty(ref, QName.createQName(CCConstants.CM_NAME)) + "_" + ref.getId();
-					nodeService.setProperty(ref, QName.createQName(CCConstants.CM_NAME), newName);
-					nodeService.moveNode(ref, targetRef,
-							ContentModel.ASSOC_CONTAINS,
-							QName.createQName(CCConstants.NAMESPACE_CCM, newName)
-					);
+					rename.set(true);
 				}
 				policyBehaviourFilter.enableBehaviour(ref);
 				return null;
 			});
+			if(rename.get()){
+				rth.doInTransaction((RetryingTransactionHelper.RetryingTransactionCallback<Void>) () -> {
+					policyBehaviourFilter.disableBehaviour(ref);
+					try {
+						String newName = nodeService.getProperty(ref, QName.createQName(CCConstants.CM_NAME)) + "_" + ref.getId();
+						nodeService.setProperty(ref, QName.createQName(CCConstants.CM_NAME), newName);
+						nodeService.moveNode(ref, targetRef,
+								ContentModel.ASSOC_CONTAINS,
+								QName.createQName(CCConstants.NAMESPACE_CCM, newName));
+					} catch (DuplicateChildNodeNameException e) {
+						rename.set(true);
+					}
+					policyBehaviourFilter.enableBehaviour(ref);
+					return null;
+				});
+			}
 		});
 	}
 
