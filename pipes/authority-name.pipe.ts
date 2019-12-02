@@ -16,7 +16,7 @@ export class AuthorityNamePipe implements PipeTransform {
     }
     if (authority.authorityName) {
       if (authority.authorityName.startsWith(RestConstants.AUTHORITY_DELETED_USER)) {
-        // 
+        // we could also add the date of the deletion (DELETED_USER_<timestamp>), but do we want that?
         return this.translate.instant('DELETED_USER');
       }
       return authority.authorityName;
