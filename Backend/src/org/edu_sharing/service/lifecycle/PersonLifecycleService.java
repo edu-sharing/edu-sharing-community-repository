@@ -18,6 +18,7 @@ import org.alfresco.service.cmr.security.*;
 import org.alfresco.service.namespace.QName;
 import org.alfresco.service.transaction.TransactionService;
 import org.apache.log4j.Logger;
+import org.edu_sharing.alfresco.workspace_administration.NodeServiceInterceptor;
 import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.server.MCAlfrescoAPIClient;
@@ -31,6 +32,7 @@ import org.edu_sharing.service.collection.CollectionServiceFactory;
 import org.edu_sharing.service.nodeservice.NodeServiceFactory;
 import org.edu_sharing.service.nodeservice.NodeServiceHelper;
 import org.edu_sharing.service.nodeservice.RecurseMode;
+import org.edu_sharing.service.search.CMISSearchHelper;
 import org.edu_sharing.service.stream.StreamServiceFactory;
 import org.edu_sharing.service.tracking.TrackingServiceFactory;
 import org.springframework.context.ApplicationContext;
@@ -185,29 +187,30 @@ public class PersonLifecycleService {
 
 			List<NodeRef> homeFiles = handleHomeHolder(personNodeRef, options, null);
 			handleHomeHolder(personNodeRef,options,CCConstants.CCM_VALUE_SCOPE_SAFE);
-			handleForeignFiles(personNodeRef,homeFiles,options);
+			handleForeignFiles(personNodeRef,homeFiles,options,null);
+			handleForeignFiles(personNodeRef,homeFiles,options,CCConstants.CCM_VALUE_SCOPE_SAFE);
 			handleCollections(personNodeRef,options);
 
 			handleStream(personNodeRef,options);
 			if(options.comments.delete){
-				deleteAllOfType(personNodeRef, CCConstants.CCM_TYPE_COMMENT);
+				deleteAllOfType(personNodeRef, CCConstants.CCM_TYPE_COMMENT,null);
 			}
 			else{
-				assignUserToType(personNodeRef, deletedUsername, CCConstants.CCM_TYPE_COMMENT);
+				assignUserToType(personNodeRef, deletedUsername, CCConstants.CCM_TYPE_COMMENT,null);
 			}
 			if(options.ratings.delete) {
-				List<NodeRef> ratings = getAllNodeRefs(userName, CCConstants.CCM_TYPE_RATING);
+				List<NodeRef> ratings = getAllNodeRefs(userName, CCConstants.CCM_TYPE_RATING,null);
 				ratings.forEach((ref)-> EduSharingRatingCache.delete(nodeService.getPrimaryParent(ref).getParentRef()));
 				deleteAllRefs(ratings);
 			}
 			else{
-				assignUserToType(personNodeRef, deletedUsername, CCConstants.CCM_TYPE_RATING);
+				assignUserToType(personNodeRef, deletedUsername, CCConstants.CCM_TYPE_RATING,null);
 			}
 			if(options.collectionFeedback.delete){
-				deleteAllOfType(personNodeRef, CCConstants.CCM_TYPE_COLLECTION_FEEDBACK);
+				deleteAllOfType(personNodeRef, CCConstants.CCM_TYPE_COLLECTION_FEEDBACK,null);
 			}
 			else{
-				assignUserToType(personNodeRef, deletedUsername, CCConstants.CCM_TYPE_COLLECTION_FEEDBACK);
+				assignUserToType(personNodeRef, deletedUsername, CCConstants.CCM_TYPE_COLLECTION_FEEDBACK,null);
 			}
 			handleStatistics(personNodeRef, deletedUsername,options);
 
@@ -219,17 +222,26 @@ public class PersonLifecycleService {
 			throw new IllegalArgumentException("Person "+userName+" is not marked for deletion. Cancelling");
 		}
 	}
-	public List<NodeRef> getAllNodeRefs(String username, String type){
+	public List<NodeRef> getAllNodeRefs(String username, String type, String scope){
+		Map<String, String> filters=new HashMap<>();
+		filters.put("cmis:createdBy",username);
+		filters.put(CCConstants.CCM_PROP_EDUSCOPE_NAME,scope);
+		return CMISSearchHelper.fetchNodesByTypeAndFilters(type,filters);
+		/*
 		SearchParameters params=new SearchParameters();
 		params.addStore(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE);
 		// will use the database
 		params.setLanguage(SearchService.LANGUAGE_CMIS_ALFRESCO);
 		params.setMaxItems(Integer.MAX_VALUE);
 		String query="SELECT cmis:name FROM "+CCConstants.getValidLocalName(type)+" WHERE cmis:createdBy = '"+ username + "'";
+		if(scope==null){
+			scope=
+		}
 		params.setQuery(query);
 		ResultSet result = searchService.query(params);
 		logger.info(query+": "+result.getNodeRefs().size());
 		return result.getNodeRefs();
+		*/
 	}
 
 	private void handleStatistics(NodeRef personNodeRef, String deletedUsername, PersonDeleteOptions options) {
@@ -254,10 +266,10 @@ public class PersonLifecycleService {
 	 * @param type
 	 * @return
 	 */
-	private List<NodeRef> deleteAllOfType(NodeRef personNodeRef,String type) {
+	private List<NodeRef> deleteAllOfType(NodeRef personNodeRef,String type,String scope) {
 			String username = (String)nodeService.getProperty(personNodeRef,
 					QName.createQName(CCConstants.CM_PROP_PERSON_USERNAME));
-			List<NodeRef> refs = getAllNodeRefs(username,type);
+			List<NodeRef> refs = getAllNodeRefs(username,type, scope);
 			logger.info("Deleting all files of type "+type);
 			deleteAllRefs(refs);
 			return refs;
@@ -269,10 +281,10 @@ public class PersonLifecycleService {
 	 * @param type
 	 * @return
 	 */
-	private List<NodeRef> assignUserToType(NodeRef personNodeRef,String newUsername,String type) {
+	private List<NodeRef> assignUserToType(NodeRef personNodeRef,String newUsername,String type,String scope) {
 		String username = (String)nodeService.getProperty(personNodeRef,
 				QName.createQName(CCConstants.CM_PROP_PERSON_USERNAME));
-		List<NodeRef> refs = getAllNodeRefs(username,type);
+		List<NodeRef> refs = getAllNodeRefs(username,type, scope);
 		logger.info("Reassigning deleted to all files of type "+type+" ("+refs.size()+")");
 		RetryingTransactionHelper rth = transactionService.getRetryingTransactionHelper();
 		refs.forEach((nodeRef)->{
@@ -376,14 +388,14 @@ public class PersonLifecycleService {
 	 * @param filesToIgnore
 	 * @param options
 	 */
-	private void handleForeignFiles(NodeRef personNodeRef, List<NodeRef> filesToIgnore, PersonDeleteOptions options) {
+	private void handleForeignFiles(NodeRef personNodeRef, List<NodeRef> filesToIgnore, PersonDeleteOptions options, String scope) {
 		String userName = (String)nodeService.getProperty(personNodeRef, QName.createQName(CCConstants.CM_PROP_PERSON_USERNAME));
 		// getting all ios (files) and maps (folders) where this user is the creator, but not any which should be ignored
 
-		List<NodeRef> refsIO = getAllNodeRefs(userName, CCConstants.CCM_TYPE_IO).stream().
+		List<NodeRef> refsIO = getAllNodeRefs(userName, CCConstants.CCM_TYPE_IO,scope).stream().
 				filter((ref)->!filesToIgnore.contains(ref)).
 				collect(Collectors.toList());
-		List<NodeRef> refsMaps = getAllNodeRefs(userName, CCConstants.CCM_TYPE_MAP).stream().filter((ref)->!filesToIgnore.contains(ref)).collect(Collectors.toList());;
+		List<NodeRef> refsMaps = getAllNodeRefs(userName, CCConstants.CCM_TYPE_MAP,scope).stream().filter((ref)->!filesToIgnore.contains(ref)).collect(Collectors.toList());;
 
 		// split the files by their license type
 		List<NodeRef> filesPrivate = refsIO.stream().filter((ref) -> !hasCCLicense(ref)).collect(Collectors.toList());
@@ -394,7 +406,7 @@ public class PersonLifecycleService {
 			// switching the owner
 			setOwnerAndPermissions(filesCC, userName, options);
 			if(options.sharedFolders.move) {
-				moveNodes(filesCC, getOrCreateTargetFolder(personNodeRef, options, SHARED_FILES_CC, null));
+				moveNodes(filesCC, getOrCreateTargetFolder(personNodeRef, options, SHARED_FILES_CC, scope));
 			}
 		}else if(options.sharedFolders.ccFiles.equals(PersonDeleteOptions.DeleteMode.delete)){
 			deleteAllRefs(filesCC);
@@ -403,7 +415,7 @@ public class PersonLifecycleService {
 		if(options.sharedFolders.privateFiles.equals(PersonDeleteOptions.DeleteMode.assign) && filesPrivate.size()>0){
 			setOwnerAndPermissions(filesPrivate, userName, options);
 			if(options.sharedFolders.move) {
-				moveNodes(filesPrivate, getOrCreateTargetFolder(personNodeRef, options, SHARED_FILES, null));
+				moveNodes(filesPrivate, getOrCreateTargetFolder(personNodeRef, options, SHARED_FILES, scope));
 			}
 		}else if(options.sharedFolders.privateFiles.equals(PersonDeleteOptions.DeleteMode.delete)){
 			deleteAllRefs(filesPrivate);
@@ -611,21 +623,28 @@ public class PersonLifecycleService {
 	 * @return
 	 */
 	private NodeRef getOrCreateTargetFolder(NodeRef personNodeRef, PersonDeleteOptions options,String subfolder,String scope) {
-		String username= (String) nodeService.getProperty(personNodeRef,QName.createQName(CCConstants.CM_PROP_PERSON_USERNAME));
-		NodeRef deleted = getDeletedFolderForOrg(options.receiverGroup, scope);
-		String userFolder=NodeServiceFactory.getLocalService().findNodeByName(deleted.getId(),username);
-		if(userFolder==null){
-			HashMap<String, Object> props=new HashMap<>();
-			props.put(CCConstants.CM_NAME,username);
-			userFolder=NodeServiceFactory.getLocalService().createNodeBasic(deleted.getId(), CCConstants.CCM_TYPE_MAP, props);
+		String oldScope=NodeServiceInterceptor.getEduSharingScope();
+		try {
+			NodeServiceInterceptor.setEduSharingScope(scope);
+			String username = (String) nodeService.getProperty(personNodeRef, QName.createQName(CCConstants.CM_PROP_PERSON_USERNAME));
+			NodeRef deleted = getDeletedFolderForOrg(options.receiverGroup, scope);
+			String userFolder = NodeServiceFactory.getLocalService().findNodeByName(deleted.getId(), username);
+			if (userFolder == null) {
+				HashMap<String, Object> props = new HashMap<>();
+				props.put(CCConstants.CM_NAME, username);
+				userFolder = NodeServiceFactory.getLocalService().createNodeBasic(deleted.getId(), CCConstants.CCM_TYPE_MAP, props);
+			}
+			if (subfolder == null)
+				return new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, userFolder);
+
+			HashMap<String, Object> props = new HashMap<>();
+			props.put(CCConstants.CM_NAME, subfolder);
+			return new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, NodeServiceFactory.getLocalService().createNodeBasic(userFolder, CCConstants.CCM_TYPE_MAP, props));
+		}catch(Exception e){
+			throw e;
+		}finally {
+			NodeServiceInterceptor.setEduSharingScope(oldScope);
 		}
-		if(subfolder==null)
-			return new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE,userFolder);
-
-		HashMap<String, Object> props=new HashMap<>();
-		props.put(CCConstants.CM_NAME,subfolder);
-		return new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE,NodeServiceFactory.getLocalService().createNodeBasic(userFolder, CCConstants.CCM_TYPE_MAP, props));
-
 	}
 
 
