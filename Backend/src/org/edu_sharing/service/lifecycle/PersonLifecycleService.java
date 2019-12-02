@@ -206,9 +206,9 @@ public class PersonLifecycleService {
 		params.setLanguage(SearchService.LANGUAGE_CMIS_ALFRESCO);
 		params.setMaxItems(Integer.MAX_VALUE);
 		String query="SELECT cmis:name FROM "+CCConstants.getValidLocalName(type)+" WHERE cmis:createdBy = '"+ username + "'";
-		logger.info(query);
 		params.setQuery(query);
 		ResultSet result = searchService.query(params);
+		logger.info(query+": "+result.getNodeRefs().size());
 		return result.getNodeRefs();
 	}
 
@@ -457,7 +457,7 @@ public class PersonLifecycleService {
 
 			logger.info("Managing private files for "+userName);
 			// handle private files
-			if(options.homeFolder.privateFiles.equals(PersonDeleteOptions.DeleteMode.assign) && ccFiles.size()>0){
+			if(options.homeFolder.privateFiles.equals(PersonDeleteOptions.DeleteMode.assign) && privateFiles.size()>0){
 				NodeRef privateTarget = getOrCreateTargetFolder(personNodeRef, options,USERHOME_FILES,scope);
 				setOwnerAndPermissions(privateFiles,userName,options);
 				moveNodes(privateFiles,privateTarget);
