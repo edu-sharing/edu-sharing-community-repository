@@ -90,6 +90,14 @@ public class PersonLifecycleService {
 	private static final String USERHOME_FILES_CC = "USERHOME_CC_FILES";
 	private static final String SHARED_FILES = "SHARED_FILES";
 	private static final String SHARED_FILES_CC = "SHARED_CC_FILES";
+	private static final List<QName> SKIP_ASPECTS = Arrays.asList(
+			QName.createQName(CCConstants.CCM_ASPECT_IO_CHILDOBJECT),
+			QName.createQName(CCConstants.CCM_ASPECT_COLLECTION),
+			QName.createQName(CCConstants.CCM_ASPECT_COLLECTION_IO_REFERENCE)
+	);
+	private static final List<QName> SKIP_TYPES = Arrays.asList(
+			QName.createQName(CCConstants.CCM_TYPE_TOOLPERMISSION)
+	);
 	public static String ROLE_STUDENT = "student";
 	public static String ROLE_EXTERNAL = "external";
 	public static String ROLE_TEACHER_TRAINEES = "teacher_trainees";
@@ -488,19 +496,8 @@ public class PersonLifecycleService {
 	}
 
 	private void moveNodes(List<NodeRef> refs, NodeRef targetRef) {
-		List<QName> skipAspects = Arrays.asList(
-				QName.createQName(CCConstants.CCM_ASPECT_IO_CHILDOBJECT),
-				QName.createQName(CCConstants.CCM_ASPECT_COLLECTION),
-				QName.createQName(CCConstants.CCM_ASPECT_COLLECTION_IO_REFERENCE)
-		);
-
 		refs.forEach((ref)-> {
-			Set<QName> aspects = nodeService.getAspects(ref);
-			List<QName> filtered = skipAspects.stream().filter((aspect) -> aspects.contains(aspect)).collect(Collectors.toList());
-			if(filtered.size()>0){
-				logger.info("will not move io since it contains an skip aspect "+filtered.get(0)+": "+ref);
-				return;
-			}
+			if (skipNode(ref)) return;
 			RetryingTransactionHelper rth = transactionService.getRetryingTransactionHelper();
 			AtomicBoolean rename= new AtomicBoolean(false);
 			rth.doInTransaction((RetryingTransactionHelper.RetryingTransactionCallback<Void>) () -> {
@@ -532,6 +529,22 @@ public class PersonLifecycleService {
 				});
 			}
 		});
+	}
+
+	private boolean skipNode(NodeRef ref) {
+		Set<QName> aspects = nodeService.getAspects(ref);
+		List<QName> filtered = SKIP_ASPECTS.stream().filter((aspect) -> aspects.contains(aspect)).collect(Collectors.toList());
+		if(filtered.size()>0){
+			logger.info("will not move io since it contains a skip aspect "+filtered.get(0)+": "+ref);
+			return true;
+		}
+		QName type = nodeService.getType(ref);
+		filtered = SKIP_TYPES.stream().filter((t) -> t.equals(type)).collect(Collectors.toList());
+		if(filtered.size()>0){
+			logger.info("will not move io since it contains a skip type "+filtered.get(0)+": "+ref);
+			return true;
+		}
+		return false;
 	}
 
 	/**
@@ -582,6 +595,7 @@ public class PersonLifecycleService {
 		RetryingTransactionHelper rth = transactionService.getRetryingTransactionHelper();
 		rth.doInTransaction((RetryingTransactionHelper.RetryingTransactionCallback<Void>) () -> {
 			children.forEach((ref) -> {
+				if (skipNode(ref)) return;
 				setOwner(ref, userName, options.receiver);
 				policyBehaviourFilter.disableBehaviour(ref);
 				permissionService.setPermission(ref, options.receiverGroup, CCConstants.PERMISSION_COORDINATOR, true);
