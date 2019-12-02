@@ -124,6 +124,7 @@
     </div>
     <div class="info-wrapper">
       <info-message *ngIf="missingAssigning()" mode="warning" message="{{'PERMISSIONS.DELETE.STATE.NO_RECEIVER' | translate}}"></info-message>
+      <info-message *ngIf="options.collections.privateCollections=='delete' || options.collections.publicCollections=='delete'" mode="warning" message="{{'PERMISSIONS.DELETE.STATE.DELETE_COLLECTIONS' | translate}}"></info-message>
       <info-message *ngIf="!isValid()" mode="warning" message="{{'PERMISSIONS.DELETE.STATE.NON_CONFORM' | translate}}"></info-message>
     </div>
     <div class="group group-interactions">
