@@ -15,7 +15,8 @@ export class AuthorityNamePipe implements PipeTransform {
       return this.translate.instant('GROUP_EVERYONE');
     }
     if (authority.authorityName) {
-      if (authority.authorityName === RestConstants.AUTHORITY_DELETED_USER) {
+      if (authority.authorityName.startsWith(RestConstants.AUTHORITY_DELETED_USER)) {
+        // 
         return this.translate.instant('DELETED_USER');
       }
       return authority.authorityName;
