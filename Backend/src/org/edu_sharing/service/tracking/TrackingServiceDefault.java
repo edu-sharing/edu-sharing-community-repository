@@ -104,9 +104,4 @@ public abstract class TrackingServiceDefault implements TrackingService{
             return UserTrackingMode.none;
         return UserTrackingMode.valueOf(mode);
     }
-    protected enum UserTrackingMode{
-        none,
-        obfuscate,
-        full
-    }
 }

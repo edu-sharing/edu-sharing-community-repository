@@ -142,7 +142,7 @@
       <info-message mode="info" message="{{'PERMISSIONS.DELETE.STATE.ASSIGNING_DELETED_USER' | translate}}"></info-message>
     </div>
   </div>
-  <div class="group group-buttons">
+  <div class="group group-buttons" *ngIf="!loading">
     <button mat-raised-button color="primary" [disabled]="!canSubmit()" (click)="prepareStart()">{{'PERMISSIONS.DELETE.START' | translate}}</button>
   </div>
 </div>

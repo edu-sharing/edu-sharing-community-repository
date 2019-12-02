@@ -48,7 +48,7 @@ public class CommentDao {
 					PersonDao person=PersonDao.getPerson(repoDao, (String) node.getNativeProperties().get(CCConstants.CM_PROP_C_CREATOR));
 					comment.setCreator(person.asPersonSimple());
 				}catch(Throwable t) {
-					comment.setCreator(UserSimple.getDeletedUser());
+					comment.setCreator(UserSimple.getDummy((String) node.getNativeProperties().get(CCConstants.CM_PROP_C_CREATOR)));
 				}
 				if(node.getNativeProperties().containsKey(CCConstants.CCM_PROP_COMMENT_REPLY)) {
 					comment.setReplyTo(

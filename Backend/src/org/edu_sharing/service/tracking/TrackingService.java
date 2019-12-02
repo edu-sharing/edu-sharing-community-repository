@@ -12,6 +12,7 @@ import java.util.Map;
 public interface TrackingService {
 
 
+
     enum GroupingType {
         None,
         Daily,
@@ -34,5 +35,23 @@ public interface TrackingService {
     List<StatisticEntryNode> getNodeStatisics(GroupingType type, Date dateFrom, Date dateTo, String mediacenter, List<String> additionalFields, List<String> groupFields, Map<String, String> filters) throws Throwable;
     List<StatisticEntry> getUserStatistics(GroupingType type, java.util.Date dateFrom, java.util.Date dateTo, String mediacenter, List<String> additionalFields, List<String> groupFields, Map<String, String> filters) throws Throwable;
     StatisticEntry getSingleNodeData(NodeRef nodeRef,java.util.Date dateFrom,java.util.Date dateTo) throws Throwable;
+
+    /**
+     * delete all tracked data for a given user
+     * This method can do nothing, depending on the configured @UserTrackingMode
+     * It will only do something if the mode is NOT set to "none"
+     */
     void deleteUserData(String username) throws Throwable;
+    /**
+     * reassign all tracked data for a given user to a new user (usually a dummy)
+     * This method can do nothing, depending on the configured @UserTrackingMode
+     * It will only do something if the mode is NOT set to "none"
+     */
+    void reassignUserData(String oldUsername, String newUsername);
+
+    enum UserTrackingMode{
+        none,
+        obfuscate,
+        full
+    }
 }

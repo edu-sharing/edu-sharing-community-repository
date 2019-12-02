@@ -41,6 +41,9 @@ public class TrackingServiceImpl extends TrackingServiceDefault{
     public static String TRACKING_DELETE_NODE = "DELETE FROM " + TRACKING_NODE_TABLE_ID +" WHERE authority = ?";
     public static String TRACKING_DELETE_USER = "DELETE FROM " + TRACKING_USER_TABLE_ID +" WHERE authority = ?";
 
+    public static String TRACKING_UPDATE_NODE = "UPDATE " + TRACKING_NODE_TABLE_ID +" SET authority = ? WHERE authority = ?";
+    public static String TRACKING_UPDATE_USER = "UPDATE " + TRACKING_USER_TABLE_ID +" SET authority = ? WHERE authority = ?";
+
     public static String TRACKING_INSERT_NODE = "insert into " + TRACKING_NODE_TABLE_ID +" (node_id,node_uuid,node_version,authority,authority_organization,authority_mediacenter,time,type,data) VALUES (?,?,?,?,?,?,?,?,?)";
     public static String TRACKING_INSERT_USER = "insert into " + TRACKING_USER_TABLE_ID +" (authority,authority_organization,authority_mediacenter,time,type,data) VALUES (?,?,?,?,?,?)";
     public static String TRACKING_STATISTICS_CUSTOM_GROUPING = "SELECT type,COUNT(*) :fields from :table as tracking" +
@@ -355,6 +358,24 @@ public class TrackingServiceImpl extends TrackingServiceDefault{
         });
         execDatabaseQuery(TRACKING_DELETE_USER,(statement)->{
             statement.setString(1,getTrackedUsername(username));
+            return true;
+        });
+    }
+
+    @Override
+    public void reassignUserData(String oldUsername, String newUsername) {
+        if(getUserTrackingMode().equals(UserTrackingMode.none)){
+            logger.info("User tracking is set to none, reassignUserData will do nothing");
+            return;
+        }
+        execDatabaseQuery(TRACKING_UPDATE_NODE,(statement)->{
+            statement.setString(1,getTrackedUsername(newUsername));
+            statement.setString(2,getTrackedUsername(oldUsername));
+            return true;
+        });
+        execDatabaseQuery(TRACKING_UPDATE_USER,(statement)->{
+            statement.setString(1,getTrackedUsername(newUsername));
+            statement.setString(2,getTrackedUsername(oldUsername));
             return true;
         });
     }

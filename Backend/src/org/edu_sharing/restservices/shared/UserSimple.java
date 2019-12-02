@@ -19,9 +19,9 @@ public class UserSimple extends Authority{
 		profile=new UserProfile(user);
 	}
 
-	public static UserSimple getDeletedUser(){
+	public static UserSimple getDummy(String name) {
 		UserSimple userSimple = new UserSimple();
-		userSimple.setAuthorityName(CCConstants.AUTHORITY_DELETED_USER);
+		userSimple.setAuthorityName(name);
 		userSimple.setAuthorityType(Type.USER);
 		return userSimple;
 	}

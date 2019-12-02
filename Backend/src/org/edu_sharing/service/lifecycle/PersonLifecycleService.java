@@ -168,7 +168,10 @@ public class PersonLifecycleService {
 				QName.createQName(CCConstants.CM_PROP_PERSON_ESPERSONSTATUS));
 		String role = (String)nodeService.getProperty(personNodeRef, QName.createQName(CCConstants.CM_PROP_PERSON_EDU_SCHOOL_PRIMARY_AFFILIATION));
 		String userName = (String)nodeService.getProperty(personNodeRef, QName.createQName(CCConstants.CM_PROP_PERSON_USERNAME));
-		if(status != null && PersonStatus.todelete.name().equals(status)) {
+
+		// in case some data stays in place (e.g. comments, statistics, ...), we will identify this user with an unique delete timestamp
+		String deletedUsername=CCConstants.AUTHORITY_DELETED_USER+"_"+System.currentTimeMillis();
+		if(PersonStatus.todelete.name().equals(status)) {
 			if(hasAssigning(options)){
 				if(options.receiver==null || options.receiver.isEmpty() || options.receiverGroup==null || options.receiverGroup.isEmpty()) {
 					throw new IllegalArgumentException("Some options set to assign, but no user + org was specified for assigning");
@@ -190,7 +193,7 @@ public class PersonLifecycleService {
 				deleteAllOfType(personNodeRef, CCConstants.CCM_TYPE_COMMENT);
 			}
 			else{
-				assignDeletedUserToType(personNodeRef, CCConstants.CCM_TYPE_COMMENT);
+				assignUserToType(personNodeRef, deletedUsername, CCConstants.CCM_TYPE_COMMENT);
 			}
 			if(options.ratings.delete) {
 				List<NodeRef> ratings = getAllNodeRefs(userName, CCConstants.CCM_TYPE_RATING);
@@ -198,15 +201,15 @@ public class PersonLifecycleService {
 				deleteAllRefs(ratings);
 			}
 			else{
-				assignDeletedUserToType(personNodeRef, CCConstants.CCM_TYPE_RATING);
+				assignUserToType(personNodeRef, deletedUsername, CCConstants.CCM_TYPE_RATING);
 			}
 			if(options.collectionFeedback.delete){
 				deleteAllOfType(personNodeRef, CCConstants.CCM_TYPE_COLLECTION_FEEDBACK);
 			}
 			else{
-				assignDeletedUserToType(personNodeRef, CCConstants.CCM_TYPE_COLLECTION_FEEDBACK);
+				assignUserToType(personNodeRef, deletedUsername, CCConstants.CCM_TYPE_COLLECTION_FEEDBACK);
 			}
-			handleStatistics(personNodeRef,options);
+			handleStatistics(personNodeRef, deletedUsername,options);
 
 			logger.info("deleting person");
 			nodeService.addAspect(personNodeRef, ContentModel.ASPECT_TEMPORARY, null);
@@ -229,17 +232,20 @@ public class PersonLifecycleService {
 		return result.getNodeRefs();
 	}
 
-	private void handleStatistics(NodeRef personNodeRef, PersonDeleteOptions options) {
-		if(options.statistics.delete){
+	private void handleStatistics(NodeRef personNodeRef, String deletedUsername, PersonDeleteOptions options) {
 			String username = (String)nodeService.getProperty(personNodeRef,
 					QName.createQName(CCConstants.CM_PROP_PERSON_USERNAME));
 			try {
-				TrackingServiceFactory.getTrackingService().deleteUserData(username);
-				logger.info("removed tracking/statistics data");
+				if(options.statistics.delete) {
+					TrackingServiceFactory.getTrackingService().deleteUserData(username);
+					logger.info("removed tracking/statistics data");
+				}else{
+					TrackingServiceFactory.getTrackingService().reassignUserData(username,deletedUsername);
+					logger.info("removed tracking/statistics data");
+				}
 			}catch(Throwable t){
 				throw new RuntimeException(t);
 			}
-		}
 	}
 
 	/**
@@ -258,12 +264,12 @@ public class PersonLifecycleService {
 	}
 
 	/**
-	 * assigns DELETED_USER to all nodes from the given person + type in the repository
+	 * assigns the given user to all nodes from the given person + type in the repository
 	 * @param personNodeRef
 	 * @param type
 	 * @return
 	 */
-	private List<NodeRef> assignDeletedUserToType(NodeRef personNodeRef,String type) {
+	private List<NodeRef> assignUserToType(NodeRef personNodeRef,String newUsername,String type) {
 		String username = (String)nodeService.getProperty(personNodeRef,
 				QName.createQName(CCConstants.CM_PROP_PERSON_USERNAME));
 		List<NodeRef> refs = getAllNodeRefs(username,type);
@@ -272,12 +278,12 @@ public class PersonLifecycleService {
 		refs.forEach((nodeRef)->{
 			rth.doInTransaction((RetryingTransactionHelper.RetryingTransactionCallback<Void>) () -> {
 				policyBehaviourFilter.disableBehaviour(nodeRef);
-				ownableService.setOwner(nodeRef, CCConstants.AUTHORITY_DELETED_USER);
+				ownableService.setOwner(nodeRef, newUsername);
 				if (username.equals(nodeService.getProperty(nodeRef, QName.createQName(CCConstants.CM_PROP_C_CREATOR)))) {
-					nodeService.setProperty(nodeRef, QName.createQName(CCConstants.CM_PROP_C_CREATOR), CCConstants.AUTHORITY_DELETED_USER);
+					nodeService.setProperty(nodeRef, QName.createQName(CCConstants.CM_PROP_C_CREATOR), newUsername);
 				}
 				if (username.equals(nodeService.getProperty(nodeRef, QName.createQName(CCConstants.CM_PROP_C_MODIFIER)))) {
-					nodeService.setProperty(nodeRef, QName.createQName(CCConstants.CM_PROP_C_MODIFIER), CCConstants.AUTHORITY_DELETED_USER);
+					nodeService.setProperty(nodeRef, QName.createQName(CCConstants.CM_PROP_C_MODIFIER), newUsername);
 				}
 				policyBehaviourFilter.enableBehaviour(nodeRef);
 				return null;
