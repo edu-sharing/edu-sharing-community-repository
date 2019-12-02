@@ -127,6 +127,7 @@
   },
   "NO_WRITE_PERMISSIONS":"Keine Rechte für diesen Vorgang",
   "NODE_SEARCH":"Elemente suchen...",
+  "DELETED_USER":"gelöschter Benutzer",
   "GROUP_EVERYONE":"Alle (Öffentlich)",
   "DETAILS": "Details",
   "INFO": "Infos",

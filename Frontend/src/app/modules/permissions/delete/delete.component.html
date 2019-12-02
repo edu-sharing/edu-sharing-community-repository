@@ -129,7 +129,7 @@
     </div>
     <div class="group group-interactions">
       <h3 class="mat-heading-3 mat-heading-underline">{{'PERMISSIONS.DELETE.USER_INTERACTIONS.CAPTION' | translate}}</h3>
-      <mat-checkbox [(ngModel)]="options.comments.delete">{{'PERMISSIONS.DELETE.USER_INTERACTIONS.STREAM' | translate}}</mat-checkbox>
+      <mat-checkbox [(ngModel)]="options.stream.delete">{{'PERMISSIONS.DELETE.USER_INTERACTIONS.STREAM' | translate}}</mat-checkbox>
       <mat-hint>{{'PERMISSIONS.DELETE.USER_INTERACTIONS.STREAM_HINT' | translate}}</mat-hint>
       <mat-checkbox [(ngModel)]="options.comments.delete">{{'PERMISSIONS.DELETE.USER_INTERACTIONS.COMMENTS' | translate}}</mat-checkbox>
       <mat-hint>{{'PERMISSIONS.DELETE.USER_INTERACTIONS.COMMENTS_HINT' | translate}}</mat-hint>
@@ -139,6 +139,7 @@
       <mat-hint>{{'PERMISSIONS.DELETE.USER_INTERACTIONS.COLLECTION_FEEDBACK_HINT' | translate}}</mat-hint>
       <mat-checkbox [(ngModel)]="options.statistics.delete">{{'PERMISSIONS.DELETE.USER_INTERACTIONS.STATISTICS' | translate}}</mat-checkbox>
       <mat-hint>{{'PERMISSIONS.DELETE.USER_INTERACTIONS.STATISTICS_HINT' | translate}}</mat-hint>
+      <info-message mode="info" message="{{'PERMISSIONS.DELETE.STATE.ASSIGNING_DELETED_USER' | translate}}"></info-message>
     </div>
   </div>
   <div class="group group-buttons">

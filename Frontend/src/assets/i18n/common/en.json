@@ -143,6 +143,7 @@
   "PASSWORD_MIN_LENGTH":"The password must be at least {{length}} characters",
   "PASSWORD_NOT_MATCH":"The passwords do not match",
   "LEARNINGAGE_YEAR":"Years",
+  "DELETED_USER":"deleted User",
   "GROUP_EVERYONE":"everybody",
   "DETAILS": "details",
   "INFO": "info",

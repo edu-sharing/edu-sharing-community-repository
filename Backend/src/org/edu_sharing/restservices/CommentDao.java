@@ -6,6 +6,7 @@ import org.apache.commons.lang.NotImplementedException;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.restservices.comment.v1.model.Comment;
 import org.edu_sharing.restservices.comment.v1.model.Comments;
+import org.edu_sharing.restservices.shared.UserSimple;
 import org.edu_sharing.service.comment.CommentService;
 import org.edu_sharing.service.comment.CommentServiceFactory;
 
@@ -46,7 +47,9 @@ public class CommentDao {
 				try {
 					PersonDao person=PersonDao.getPerson(repoDao, (String) node.getNativeProperties().get(CCConstants.CM_PROP_C_CREATOR));
 					comment.setCreator(person.asPersonSimple());
-				}catch(Throwable t) {}
+				}catch(Throwable t) {
+					comment.setCreator(UserSimple.getDeletedUser());
+				}
 				if(node.getNativeProperties().containsKey(CCConstants.CCM_PROP_COMMENT_REPLY)) {
 					comment.setReplyTo(
 						new org.edu_sharing.restservices.shared.NodeRef(repoDao,new NodeRef((String) node.getNativeProperties().get(CCConstants.CCM_PROP_COMMENT_REPLY)).getId())

@@ -480,6 +480,7 @@ public class CCConstants {
 			CCConstants.LOM_PROP_TECHNICAL_FORMAT,
 			CCConstants.LOM_PROP_TECHNICAL_SIZE
 	);
+    public static final String AUTHORITY_DELETED_USER = "DELETED_USER";
 
     public static String CCM_WF_STATUS_VALUE_UNCHECKED="100_unchecked";
 	public static String CCM_WF_STATUS_VALUE_TO_CHECK="200_tocheck";

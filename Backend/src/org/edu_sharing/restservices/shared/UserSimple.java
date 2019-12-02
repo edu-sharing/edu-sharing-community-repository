@@ -3,6 +3,7 @@ package org.edu_sharing.restservices.shared;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import io.swagger.annotations.ApiModelProperty;
+import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.restservices.UserStatus;
 
 public class UserSimple extends Authority{
@@ -17,6 +18,14 @@ public class UserSimple extends Authority{
 		userName=user.getAuthorityDisplayName();
 		profile=new UserProfile(user);
 	}
+
+	public static UserSimple getDeletedUser(){
+		UserSimple userSimple = new UserSimple();
+		userSimple.setAuthorityName(CCConstants.AUTHORITY_DELETED_USER);
+		userSimple.setAuthorityType(Type.USER);
+		return userSimple;
+	}
+
 	/**
 	 **/
 	@ApiModelProperty(value = "")

@@ -189,13 +189,22 @@ public class PersonLifecycleService {
 			if(options.comments.delete){
 				deleteAllOfType(personNodeRef, CCConstants.CCM_TYPE_COMMENT);
 			}
+			else{
+				assignDeletedUserToType(personNodeRef, CCConstants.CCM_TYPE_COMMENT);
+			}
 			if(options.ratings.delete) {
 				List<NodeRef> ratings = getAllNodeRefs(userName, CCConstants.CCM_TYPE_RATING);
 				ratings.forEach((ref)-> EduSharingRatingCache.delete(nodeService.getPrimaryParent(ref).getParentRef()));
 				deleteAllRefs(ratings);
 			}
+			else{
+				assignDeletedUserToType(personNodeRef, CCConstants.CCM_TYPE_RATING);
+			}
 			if(options.collectionFeedback.delete){
 				deleteAllOfType(personNodeRef, CCConstants.CCM_TYPE_COLLECTION_FEEDBACK);
+			}
+			else{
+				assignDeletedUserToType(personNodeRef, CCConstants.CCM_TYPE_COLLECTION_FEEDBACK);
 			}
 			handleStatistics(personNodeRef,options);
 
@@ -232,6 +241,13 @@ public class PersonLifecycleService {
 			}
 		}
 	}
+
+	/**
+	 * Deletes all nodes from the given person + type in the repository
+	 * @param personNodeRef
+	 * @param type
+	 * @return
+	 */
 	private List<NodeRef> deleteAllOfType(NodeRef personNodeRef,String type) {
 			String username = (String)nodeService.getProperty(personNodeRef,
 					QName.createQName(CCConstants.CM_PROP_PERSON_USERNAME));
@@ -241,6 +257,34 @@ public class PersonLifecycleService {
 			return refs;
 	}
 
+	/**
+	 * assigns DELETED_USER to all nodes from the given person + type in the repository
+	 * @param personNodeRef
+	 * @param type
+	 * @return
+	 */
+	private List<NodeRef> assignDeletedUserToType(NodeRef personNodeRef,String type) {
+		String username = (String)nodeService.getProperty(personNodeRef,
+				QName.createQName(CCConstants.CM_PROP_PERSON_USERNAME));
+		List<NodeRef> refs = getAllNodeRefs(username,type);
+		logger.info("Reassigning deleted to all files of type "+type+" ("+refs.size()+")");
+		RetryingTransactionHelper rth = transactionService.getRetryingTransactionHelper();
+		refs.forEach((nodeRef)->{
+			rth.doInTransaction((RetryingTransactionHelper.RetryingTransactionCallback<Void>) () -> {
+				policyBehaviourFilter.disableBehaviour(nodeRef);
+				ownableService.setOwner(nodeRef, CCConstants.AUTHORITY_DELETED_USER);
+				if (username.equals(nodeService.getProperty(nodeRef, QName.createQName(CCConstants.CM_PROP_C_CREATOR)))) {
+					nodeService.setProperty(nodeRef, QName.createQName(CCConstants.CM_PROP_C_CREATOR), CCConstants.AUTHORITY_DELETED_USER);
+				}
+				if (username.equals(nodeService.getProperty(nodeRef, QName.createQName(CCConstants.CM_PROP_C_MODIFIER)))) {
+					nodeService.setProperty(nodeRef, QName.createQName(CCConstants.CM_PROP_C_MODIFIER), CCConstants.AUTHORITY_DELETED_USER);
+				}
+				policyBehaviourFilter.enableBehaviour(nodeRef);
+				return null;
+			});
+		});
+		return refs;
+	}
 	private void handleStream(NodeRef personNodeRef, PersonDeleteOptions options) {
 		if(options.stream.delete) {
 			String username = (String)nodeService.getProperty(personNodeRef,
@@ -440,7 +484,13 @@ public class PersonLifecycleService {
 			logger.info("Deleting the EDUGROUP folder of "+userName);
 		}
 		List<NodeRef> childrens = NodeServiceFactory.getLocalService().getChildrenRecursive(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, homeFolder.getId(), null,RecurseMode.Folders);
-		if(options.homeFolder.folders.equals(PersonDeleteOptions.FolderDeleteMode.assign)
+		if(options.homeFolder.folders.equals(PersonDeleteOptions.FolderDeleteMode.none)
+				&& options.homeFolder.privateFiles.equals(PersonDeleteOptions.DeleteMode.none)
+				&& options.homeFolder.ccFiles.equals(PersonDeleteOptions.DeleteMode.none)){
+			logger.info("all modes are set to none for home folder, will keep everything in place");
+			return childrens;
+		}
+		else if(options.homeFolder.folders.equals(PersonDeleteOptions.FolderDeleteMode.assign)
 				&& options.homeFolder.privateFiles.equals(PersonDeleteOptions.DeleteMode.assign)
 				&& options.homeFolder.ccFiles.equals(PersonDeleteOptions.DeleteMode.assign)){
 			if(options.homeFolder.keepFolderStructure){
