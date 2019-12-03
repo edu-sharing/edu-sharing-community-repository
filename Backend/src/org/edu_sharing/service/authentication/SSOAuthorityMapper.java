@@ -132,11 +132,29 @@ public class SSOAuthorityMapper {
 	}
 
 	public static String mapAdminAuthority(String authority,String appid){
+		return AuthenticationUtil.runAsSystem(()-> {
+			ApplicationContext applicationContext = AlfAppContextGate.getApplicationContext();
+			ServiceRegistry serviceRegistry = (ServiceRegistry) applicationContext.getBean("ServiceRegistry");
 
-		if(authority.trim().equals(ApplicationInfoList.getHomeRepository().getUsername())){
-			return authority + "@" + appid;
-		}
-		return authority;
+			boolean scope;
+			// a new person, does not need to be scoped
+			if (!serviceRegistry.getPersonService().personExists(authority)) {
+				scope = false;
+			} // the main user (admin) has to be scoped
+			else if (authority.trim().equals(ApplicationInfoList.getHomeRepository().getUsername())) {
+				scope = true;
+			} // the user has to be scoped if he/she is an admin
+			else {
+				Set<String> memberships = serviceRegistry.getAuthorityService().getAuthoritiesForUser(authority);
+				scope = memberships != null && memberships.contains(CCConstants.AUTHORITY_GROUP_ALFRESCO_ADMINISTRATORS);
+			}
+
+			if (scope) {
+				return authority + "@" + appid;
+			} else {
+				return authority;
+			}
+		});
 	}
 
 	/**

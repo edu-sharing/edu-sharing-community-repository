@@ -30,6 +30,7 @@ import org.edu_sharing.repository.server.tools.URLTool;
 import org.edu_sharing.repository.server.tools.security.Encryption;
 import org.edu_sharing.repository.server.tools.security.SignatureVerifier;
 import org.edu_sharing.repository.server.tools.security.Signing;
+import org.edu_sharing.service.authentication.SSOAuthorityMapper;
 import org.edu_sharing.service.nodeservice.NodeServiceFactory;
 import org.edu_sharing.service.nodeservice.NodeServiceHelper;
 import org.edu_sharing.service.rendering.RenderingTool;
@@ -130,6 +131,7 @@ public class RenderingProxy extends HttpServlet {
 		try {
 			
 			usernameDecrypted = encryptionTool.decrypt(java.util.Base64.getDecoder().decode(uEncrypted.getBytes()), encryptionTool.getPemPrivateKey(homeRep.getPrivateKey()));
+			usernameDecrypted = SSOAuthorityMapper.mapAdminAuthority(usernameDecrypted, repoInfo.getAppId());
 		}catch(GeneralSecurityException e) {
 			logger.error(e.getMessage(), e);
 			resp.sendError(HttpServletResponse.SC_FORBIDDEN,e.getMessage());
