@@ -436,8 +436,11 @@ $badgeWidth:250px;
     background-color: #444;
     color:#fff;
     z-index: 1;
+    display: flex;
+    justify-content: center;
+    align-items: center;
     >i{
-      font-size: 12px;
+      font-size: 10px;
     }
   }
 }
