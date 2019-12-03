@@ -992,7 +992,9 @@ export class WorkspaceMainComponent implements EventListener{
             id=null;
         }
         else {
-            this.showSelectRoot = true;
+            if(UIHelper.evaluateMediaQuery(UIConstants.MEDIA_QUERY_MAX_WIDTH,UIConstants.MOBILE_TAB_SWITCH_WIDTH)) {
+                this.showSelectRoot = true;
+            }
             return;
         }
         console.log("breadcrumb "+position+" "+id);
