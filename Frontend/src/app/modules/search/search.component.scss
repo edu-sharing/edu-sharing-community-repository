@@ -529,7 +529,7 @@ listtable {
     margin-right: 20px;
   }
 }
-.sidenavContainer{
+.sidenav-container{
   .apply{
     position: fixed;
     background-color: $backgroundColor;
@@ -564,9 +564,11 @@ listtable {
       text-align: center;
     }
   }
-  input[type=search]{
-    width: calc(100% - 20px);
-    margin-bottom: 10px;
+  form {
+    padding:10px 20px;
+    input[type=search] {
+      margin-bottom: 0;
+    }
   }
   .manageSavedSearch{
     text-transform: uppercase;
@@ -587,13 +589,19 @@ div.dialog.darken {
     margin:0 -20px;
     margin-bottom: 20px;
   }
-  .sidenavContainer .actionAlwaysCaption{
-    display: inline-block!important;
-  }
-  .sidenavContainer actionbar .moreOpen{
-    left: 0px;
-    top: -56px;
-    width: 220px;
+  .sidenav-container actionbar {
+    .actionbar{
+      flex-direction: row-reverse;
+      justify-content: flex-start;
+    }
+    .action-always-caption {
+      display: inline-block !important;
+    }
+    .moreOpen{
+      left: 0px;
+      top: -56px;
+      width: 220px;
+    }
   }
   .btn-flat{
     //background: transparent;
@@ -697,7 +705,7 @@ div.dialog.darken {
   .sidenavNoRepositories{
     height: calc(100% - #{$mainnavHeight} - #{$mobileTabNavHeight} - 65px - 70px);
   }
-  .sidenavContainer .apply{
+  .sidenav-container .apply{
     bottom:$mobileTabNavHeight;
   }
 }
