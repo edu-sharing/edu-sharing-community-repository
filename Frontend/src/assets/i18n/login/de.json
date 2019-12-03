@@ -8,6 +8,7 @@
     "LOGIN":"Anmelden",
     "RECOVER_PASSWORD":"Login vergessen",
     "ERROR":"Zugangsdaten fehlerhaft",
+    "PASSWORD_EXPIRED": "Das Passwort ist abgelaufen und muss zuerst geändert werden",
     "REGISTER_TEXT":"Noch keinen Zugang?",
     "REGISTER_LINK":"Jetzt erstellen",
     "PROVIDER_SELECT_GROUP": "Hochschul Login",
