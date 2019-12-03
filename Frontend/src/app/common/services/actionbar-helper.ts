@@ -120,7 +120,7 @@ export class ActionbarHelperService{
       }
     }
     if(type=='ADD_TO_STREAM') {
-      if (NodeHelper.allFiles(nodes)) {
+      if (NodeHelper.allFiles(nodes) && this.connector.getConfigurationService().instant('stream.enabled',false)) {
         option = new OptionItem("WORKSPACE.OPTION.STREAM", "event", callback);
         option.enabledCallback = (node: Node) => {
           let n = ActionbarHelperService.getNodes(nodes, node);

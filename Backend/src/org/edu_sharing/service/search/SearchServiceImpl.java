@@ -108,7 +108,7 @@ public class SearchServiceImpl implements SearchService {
 		token.setContentType(contentType);
 
 		token.setLuceneString("(TYPE:\"" + CCConstants.CCM_TYPE_IO + "\" OR TYPE:\"" + CCConstants.CCM_TYPE_MAP +"\") "
-				+ 	"AND @ccm\\:ph_users:\"" + QueryParser.escape(username) + "\"");
+				+ 	"AND NOT ASPECT:\""+CCConstants.CCM_ASPECT_COLLECTION+"\" AND @ccm\\:ph_users:\"" + QueryParser.escape(username) + "\"");
 		return search(token);
 	}
 
@@ -130,7 +130,7 @@ public class SearchServiceImpl implements SearchService {
 
 		StringBuilder query= new StringBuilder("(TYPE:\"" + CCConstants.CCM_TYPE_IO + "\" OR TYPE:\"" + CCConstants.CCM_TYPE_MAP + "\") "
 				+ "AND ISNOTNULL:\"ccm:ph_users\" "
-				+ "AND NOT @ccm\\:ph_users:\"" + QueryParser.escape(username) + "\""
+				+ "AND NOT ASPECT:\""+CCConstants.CCM_ASPECT_COLLECTION+"\" AND NOT @ccm\\:ph_users:\"" + QueryParser.escape(username) + "\""
 				+ " AND (");
 		int i=0;
 		for(String m : memberships){

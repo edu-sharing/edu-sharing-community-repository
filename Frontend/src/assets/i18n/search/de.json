@@ -51,7 +51,7 @@
       "REMOVE_ITEM":"Entfernen",
       "REMOVED_ITEMS":"{{count}} Element(e) wurden von der Merkliste entfernt"
     },
-    "APPLY_FILTER":"Anwenden",
+    "APPLY_FILTER":"Suchen",
     "TAB_FILTER":"Filter",
     "TAB_SAVED":"Gespeichert",
     "MANAGE_SAVED_SEARCH":"Suchen verwalten",

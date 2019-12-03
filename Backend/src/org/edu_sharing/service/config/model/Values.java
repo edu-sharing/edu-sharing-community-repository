@@ -56,5 +56,6 @@ public class Values implements Serializable {
 	@XmlElement	public Services services;
 	@XmlElement	public HelpMenuOptions[] helpMenuOptions;
 	@XmlElement	public Image[] images;
+	@XmlElement	public Stream stream;
 	@XmlElement	public Admin admin;
 }

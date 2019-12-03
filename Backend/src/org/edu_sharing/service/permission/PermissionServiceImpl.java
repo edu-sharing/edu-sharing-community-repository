@@ -1515,13 +1515,15 @@ public class PermissionServiceImpl implements org.edu_sharing.service.permission
 	public ACL getPermissions(String nodeId) throws Exception {
 		return repoClient.getPermissions(nodeId);
 	}
+	private boolean isAdminOrSystem(){
+		return Arrays.asList(AuthenticationUtil.SYSTEM_USER_NAME,ApplicationInfoList.getHomeRepository().getUsername()).contains(AuthenticationUtil.getFullyAuthenticatedUser());
+	}
 
 	@Override
 	public List<String> getPermissionsForAuthority(String nodeId, String authorityId) throws Exception {
 		if(!authorityId.equals(AuthenticationUtil.getFullyAuthenticatedUser())){
-			if(!AuthenticationUtil.getFullyAuthenticatedUser().equals(AuthenticationUtil.SYSTEM_USER_NAME)) {
-				if(!getPermissionsForAuthority(nodeId, AuthenticationUtil.getFullyAuthenticatedUser())
-						.contains(PermissionService.READ_PERMISSIONS)) {
+			if(!isAdminOrSystem()) {
+				if(!hasPermission(StoreRef.PROTOCOL_WORKSPACE,StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(),nodeId,PermissionService.READ_PERMISSIONS)) {
 					throw new InsufficientPermissionException("Current user is missing "+PermissionService.READ_PERMISSIONS+" for this node");
 				}
 			}
@@ -1552,12 +1554,10 @@ public class PermissionServiceImpl implements org.edu_sharing.service.permission
 	 */
 	@Override
 	public List<String> getExplicitPermissionsForAuthority(String nodeId, String authorityId) throws Exception {
-		if(!authorityId.equals(AuthenticationUtil.getFullyAuthenticatedUser())){
-			if(!AuthenticationUtil.getFullyAuthenticatedUser().equals(AuthenticationUtil.SYSTEM_USER_NAME)) {
-				if(!getPermissionsForAuthority(nodeId, AuthenticationUtil.getFullyAuthenticatedUser())
-						.contains(PermissionService.READ_PERMISSIONS)) {
-					throw new InsufficientPermissionException("Current user is missing "+PermissionService.READ_PERMISSIONS+" for this node");
-				}
+		if(!authorityId.equals(AuthenticationUtil.getFullyAuthenticatedUser()) && !isAdminOrSystem()){
+			if(!getPermissionsForAuthority(nodeId, AuthenticationUtil.getFullyAuthenticatedUser())
+					.contains(PermissionService.READ_PERMISSIONS)) {
+				throw new InsufficientPermissionException("Current user is missing "+PermissionService.READ_PERMISSIONS+" for this node");
 			}
 		}
 
