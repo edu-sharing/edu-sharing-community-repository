@@ -455,6 +455,13 @@
           <textarea class="materialize-textarea export-properties" [(ngModel)]="lucene.properties"></textarea>
       </div>
       <div class="inputGroupGrow" *ngIf="lucene.outputMode=='export'">
+          <div class="info">{{'ADMIN.BROWSER.OUTPUT_MODE' | translate }}</div>
+          <div>
+              <input type="radio" name="exportFormat" id="exportFormatCSV" [(ngModel)]="lucene.exportFormat" value="csv"><label for="exportFormatCSV">{{'ADMIN.BROWSER.EXPORT_FORMAT_CSV' | translate}}</label>
+              <input type="radio" name="exportFormat" id="exportFormatJSON" [(ngModel)]="lucene.exportFormat" value="json"><label for="exportFormatJSON">{{'ADMIN.BROWSER.EXPORT_FORMAT_JSON' | translate}}</label>
+          </div>
+      </div>
+      <div class="inputGroupGrow" *ngIf="lucene.outputMode=='export'">
           <div></div>
           <div><a class="btn waves-effect waves-light" (click)="exportLucene()">{{'ADMIN.BROWSER.LUCENE_EXPORT_START' | translate}}</a></div>
       </div>

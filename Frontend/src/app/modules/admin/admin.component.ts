@@ -967,19 +967,25 @@ export class AdminComponent {
     this.globalProgress=true;
     let props=this.lucene.properties.split("\n");
     this.admin.exportLucene(this.lucene.query,props).subscribe((data)=>{
+      const filename="Export-"+DateHelper.formatDate(this.translate,new Date().getTime(),{useRelativeLabels:false});
       this.globalProgress=false;
       console.log(data);
-      let csv=props.join(";");
-      for(let d of data){
-        csv+="\n";
-        let i=0;
-        for(let p of props){
-          if(i) csv+=';';
-          csv+='"'+d[p]+'"';
-          i++;
-        }
+      if(this.lucene.exportFormat=='json'){
+        Helper.downloadContent(filename + ".json",JSON.stringify(data,null,2));
       }
-      Helper.downloadContent("Export-"+DateHelper.formatDate(this.translate,new Date().getTime(),{useRelativeLabels:false})+".csv",csv);
+      else {
+        let csv = props.join(";");
+        for (let d of data) {
+          csv += "\n";
+          let i = 0;
+          for (let p of props) {
+            if (i) csv += ';';
+            csv += '"' + d[p] + '"';
+            i++;
+          }
+        }
+        Helper.downloadContent(filename + ".csv", csv);
+      }
     });
   }
 }
