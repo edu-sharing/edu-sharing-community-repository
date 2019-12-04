@@ -969,8 +969,17 @@ export class AdminComponent {
     this.admin.exportLucene(this.lucene.query,props).subscribe((data)=>{
       const filename="Export-"+DateHelper.formatDate(this.translate,new Date().getTime(),{useRelativeLabels:false});
       this.globalProgress=false;
-      console.log(data);
       if(this.lucene.exportFormat=='json'){
+        // reformat data, move all parent:: props to a seperate child
+        data.map((d:any) => {
+          Object.keys(d).filter((k)=>k.startsWith("parent::")).forEach((key)=>{
+            if(!d.parent){
+              d.parent={};
+            }
+            d.parent[key.substring("parent::".length)] = d[key];
+            delete d[key];
+          })
+        });
         Helper.downloadContent(filename + ".json",JSON.stringify(data,null,2));
       }
       else {
