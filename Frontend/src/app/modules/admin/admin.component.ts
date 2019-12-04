@@ -971,14 +971,14 @@ export class AdminComponent {
       this.globalProgress=false;
       if(this.lucene.exportFormat=='json'){
         // reformat data, move all parent:: props to a seperate child
-        data.map((d:any) => {
+        data.forEach((d:any) => {
           Object.keys(d).filter((k)=>k.startsWith("parent::")).forEach((key)=>{
             if(!d.parent){
               d.parent={};
             }
             d.parent[key.substring("parent::".length)] = d[key];
             delete d[key];
-          })
+          });
         });
         Helper.downloadContent(filename + ".json",JSON.stringify(data,null,2));
       }

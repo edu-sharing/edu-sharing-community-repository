@@ -106,9 +106,11 @@ export class Helper {
    * @param data The string data to download
    */
   static downloadContent(name:string,data: string) {
-    let dataPath = 'data:text/plain;charset=utf-8,'+encodeURIComponent(data);
+    // let dataPath = 'data:text/plain;charset=utf-8,'+encodeURIComponent(data);
+    const blob = new Blob([data], {type: "text/plain;charset=utf-8"});
+    const url = window.URL.createObjectURL(blob);
     let a:any = document.createElement('A');
-    a.href = dataPath;
+    a.href = url;
     a.download = name;
     document.body.appendChild(a);
     a.click();
