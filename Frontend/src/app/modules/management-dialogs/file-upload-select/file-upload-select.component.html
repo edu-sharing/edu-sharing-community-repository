@@ -1,6 +1,6 @@
 <div class="dialog darken" [style.z-index]="120 + priority" [@fade]="this"></div>
 <input #fileSelect type="file" style="display:none" id="fileSelect" [multiple]="multiple" (change)="filesSelected($event)" />
-<div class="card center-card card-action" [style.z-index]="121 + priority" [class.card-high]="ltiAllowed && ltiActivated" [@cardAnimation]="this">
+<div class="card center-card card-wide card-action" [style.z-index]="121 + priority" [class.card-high]="ltiAllowed && ltiActivated" [@cardAnimation]="this">
     <div class="card-content">
         <div tabindex="0" class="card-cancel" (click)="cancel()" (keyup.enter)="cancel()"><i icon iconId="close" aria="true"></i></div>
         <div class="card-title">{{'WORKSPACE.ADD_OBJECT_TITLE' | translate }}</div>
@@ -8,22 +8,24 @@
             <div class="dropArea" [class.dropActive]="isFileOver" fileDrop
                  (onFileDrop)="onDrop($event)"
                  (fileOver)="isFileOver=$event">
-                <div><i class="material-icons">cloud_upload</i></div>
-                <div *ngIf="supportsDrop">{{ 'WORKSPACE.ADD_OBJECT_MESSAGE' | translate}}</div>
-                <div class="btn-flat btn-shadow" tabindex="0" (keyup.enter)="selectFile()" (click)="selectFile()">{{'WORKSPACE.SELECT_MATERIAL' | translate}}</div>
+                <div><i icon iconId="cloud_upload"></i></div>
+                <div *ngIf="supportsDrop">{{ 'WORKSPACE.ADD_OBJECT_MESSAGE' | translate}}
+                    <a class="clickable" tabindex="0" (keyup.enter)="selectFile()" (click)="selectFile()">{{ 'WORKSPACE.ADD_OBJECT_BROWSE' | translate}}</a>
+                </div>
             </div>
             <div class="quota" *ngIf="user && user.person.quota.enabled">
                 <user-quota [quota]="user.person.quota"></user-quota>
             </div>
-            <hr>
-            <div class="link"><div class="linkLabel"><i class="material-icons align-icon">link</i> <span class="linkTitle">{{ 'WORKSPACE.SELECT_LINK' | translate}}</span></div>
+            <div class="seperator-line">{{ 'WORKSPACE.SELECT_ORG' | translate}}</div>
+            <div class="link">
+                <label>{{'WORKSPACE.SELECT_LINK' | translate}}</label>
                 <input type="text" [(ngModel)]="link" (keyup.enter)="setLink()" placeholder="http://">
                 <div class="lti" *ngIf="showLti">
                     <div class="switch">
                         <label>
+                            {{ 'WORKSPACE.ADD_OBJECT_LTI' | translate}}
                             <input type="checkbox" [disabled]="!ltiAllowed" [(ngModel)]="ltiActivated">
                             <span class="lever"></span>
-                            {{ 'WORKSPACE.ADD_OBJECT_LTI' | translate}}
                         </label>
                     </div>
                     <div class="lti-data" *ngIf="ltiAllowed && ltiActivated">

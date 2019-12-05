@@ -84,6 +84,15 @@ $cardActionHeight:77px;
     max-width: 400px;
     word-break: break-all;
   }
+  .btn,.btn-flat{
+    font-weight: bold;
+  }
+  .btn-flat{
+    color:$textVeryLight!important;
+    &:hover{
+      color:$primary!important;
+    }
+  }
 }
 .card .card-action-info{
   align-items: center;

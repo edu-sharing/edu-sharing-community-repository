@@ -27,6 +27,25 @@ a{
   font-weight: bold;
   font-size: 80%;
 }
+.seperator-line{
+  display: flex;
+  color:$textMediumLight;
+  &:before,&:after{
+    display: flex;
+    flex-grow: 1;
+    content:'';
+    width:0;
+    height:1px;
+    background-color: $genericSeperatorLineColor;
+    margin: 9px 10px;
+  }
+  &:before{
+    margin-left: 0;
+  }
+  &:after{
+    margin-right: 0;
+  }
+}
 .center{
   margin: 0 auto;
 }

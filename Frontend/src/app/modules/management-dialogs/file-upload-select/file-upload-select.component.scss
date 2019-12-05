@@ -4,28 +4,33 @@
   border-radius:5px;
   width: 100%;
   text-align: center;
-  border: 2px dashed $primary;
-  padding: 20px;
-  margin-bottom:20px;
+  border: 2px dashed $cardSeperatorLineColor;
+  padding: 60px 30px;
+  margin-bottom:10px;
   color:$textLight;
+  a{
+    font-weight: bold;
+  }
+  i{
+    font-size:60px;
+  }
+  &.dropActive{
+    border-color:$primaryMediumLight;
+    background:$primaryLight;
+    i{
+      color:$primary;
+    }
+  }
+}
+.seperator-line{
+  margin:20px 5px;
 }
 .quota{
   padding-bottom: 5px;
 }
-.dropActive{
-  background:$primaryLight;
-}
-.dropActive i{
-  color:$primary;
-}
-hr{
-  margin-bottom:20px;
-}
-.dropArea i{
-  font-size:60px;
-}
+
 .lti-data{
-  background-color: $actionDialogBackground;
+  background-color: $cardLightBackground;
   margin: 20px $cardPadding*-1;
   padding:20px $cardPadding;
   .heading{

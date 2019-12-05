@@ -28,6 +28,9 @@
 .btn-flat{
   color:$primary;
   background: #fff;
+  &:hover{
+    background-color: rgba(0, 0, 0, 0.05);
+  }
 }
 .btn,.btn-flat{
   text-align: center;
@@ -257,6 +260,14 @@ input[type=search]:read-only{
 .dropdown-content li>a, .dropdown-content li>span{
   color: $primary;
   font-size: 10pt;
+}
+.switch label .lever:after{
+  width: 18px;
+  height: 18px;
+}
+.switch label input[type=checkbox]+.lever{
+  background-color:$cardSeperatorLineColor;
+  height:12px;
 }
 .switch label input[type=checkbox]:checked+.lever{
   background-color:$primaryMediumLight;
