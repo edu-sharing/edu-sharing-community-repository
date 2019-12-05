@@ -31,6 +31,7 @@ import {BreadcrumbsComponent} from "./components/breadcrumbs/breadcrumbs.compone
 import {VideoControlsComponent} from "./components/video-controls/video-controls.component";
 import {AuthorityAffiliationPipe} from "./pipes/authority-affiliation.pipe";
 import { InfoMessageComponent } from './components/info-message/info-message.component';
+import {InputPasswordComponent} from './components/input-password/input-password.component';
 
 @NgModule({
     declarations: [
@@ -46,6 +47,7 @@ import { InfoMessageComponent } from './components/info-message/info-message.com
         GlobalProgressComponent,
         VideoControlsComponent,
         InfoMessageComponent,
+        InputPasswordComponent,
         InfiniteScrollDirective,
         AuthorityNamePipe,
         AuthorityColorPipe,
@@ -86,6 +88,8 @@ import { InfoMessageComponent } from './components/info-message/info-message.com
         SpinnerComponent,
         ListTableComponent,
         VideoControlsComponent,
+        CardComponent,
+        InputPasswordComponent,
     ],
     exports: [
         TranslateModule,
@@ -93,6 +97,7 @@ import { InfoMessageComponent } from './components/info-message/info-message.com
         SpinnerComponent,
         BreadcrumbsComponent,
         SpinnerSmallComponent,
+        InputPasswordComponent,
         GlobalProgressComponent,
         VideoControlsComponent,
         IconComponent,
