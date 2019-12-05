@@ -21,6 +21,7 @@ import {Helper} from '../../../core-module/rest/helper';
 import {trigger} from '@angular/animations';
 import {UIHelper} from '../../../core-ui-module/ui-helper';
 import {ActionbarHelperService} from '../../../common/services/actionbar-helper';
+import {ModalDialogOptions} from '../../../common/ui/modal-dialog-toast/modal-dialog-toast.component';
 @Component({
   selector: 'permissions-authorities',
   templateUrl: 'authorities.component.html',
@@ -75,13 +76,6 @@ export class PermissionsAuthoritiesComponent {
   @Input() private selected: any[]= [];
 
   public _mode: string;
-  public loadingTitle: string;
-  private loadingMessage: string;
-  public dialogTitle: string;
-  public dialogMessage: string;
-  public dialogButtons: DialogButton[];
-  public dialogParameters: any;
-  public dialogCancelable: boolean;
   public addTo: any;
   private addToSelection: any;
   public globalProgress= false;
@@ -323,7 +317,7 @@ export class PermissionsAuthoritiesComponent {
   private checkOrgExists(orgName: string){
     this.organization.getOrganizations(orgName, false).subscribe((data: OrganizationOrganizations) => {
       if (data.organizations.length){
-        this.loadingTitle = null;
+        this.closeDialog()
         this.toast.toast('PERMISSIONS.ORG_CREATED');
         this.refresh();
       }
@@ -345,8 +339,7 @@ export class PermissionsAuthoritiesComponent {
             this.edit = null;
             this.iam.editGroup(result.authorityName, profile).subscribe(() => {
               this.globalProgress = false;
-              this.loadingTitle = 'PERMISSIONS.ORG_CREATING';
-              this.loadingMessage = 'PERMISSIONS.ORG_CREATING_INFO';
+              this.toast.showProgressDialog('PERMISSIONS.ORG_CREATING','PERMISSIONS.ORG_CREATING_INFO');
               setTimeout(() => this.checkOrgExists(name), 2000);
             }, (error) => {
               this.toast.error(error);
@@ -612,16 +605,20 @@ export class PermissionsAuthoritiesComponent {
         this.toast.error(null, 'PERMISSIONS.DELETE_ERROR_ADMINISTRATORS');
         return;
     }
-    this.dialogTitle = 'PERMISSIONS.DELETE_TITLE';
-    this.dialogMessage = 'PERMISSIONS.DELETE_' + this._mode;
-    this.dialogCancelable = true;
-    if (list.length == 1)
-      this.dialogMessage += '_SINGLE';
-    this.dialogParameters = {name: this._mode == 'USER' ? list[0].authorityName : list[0].profile.displayName};
-    this.dialogButtons = [
-      new DialogButton('CANCEL', DialogButton.TYPE_CANCEL, () => this.closeDialog()),
-      new DialogButton('PERMISSIONS.MENU_DELETE', DialogButton.TYPE_PRIMARY, () => callback(list))
-    ];
+    const options: ModalDialogOptions = {
+      title: 'PERMISSIONS.DELETE_TITLE',
+      message: 'PERMISSIONS.DELETE_' + this._mode,
+      messageParameters: {name: this._mode == 'USER' ? list[0].authorityName : list[0].profile.displayName},
+      buttons: [
+        new DialogButton('CANCEL', DialogButton.TYPE_CANCEL, () => this.closeDialog()),
+        new DialogButton('PERMISSIONS.MENU_DELETE', DialogButton.TYPE_PRIMARY, () => callback(list))
+      ],
+      isCancelable: true,
+    };
+    if (list.length === 1) {
+      options.message += '_SINGLE';
+    }
+    this.toast.showConfigurableDialog(options);
   }
   private refresh() {
     this.offset = 0;
@@ -631,11 +628,11 @@ export class PermissionsAuthoritiesComponent {
   }
 
   private closeDialog() {
-    this.dialogTitle = null;
+    this.toast.closeModalDialog();
   }
 
   private startDelete(data: any, position= 0, error= false) {
-    this.dialogTitle = null;
+    this.closeDialog();
     if (position == data.length) {
       this.globalProgress = false;
       this.refresh();
@@ -656,7 +653,7 @@ export class PermissionsAuthoritiesComponent {
 
   }
   private startExclude(data: any, position= 0) {
-    this.dialogTitle = null;
+    this.closeDialog()
     if (position == data.length) {
       this.globalProgress = false;
       this.refresh();
@@ -824,7 +821,7 @@ export class PermissionsAuthoritiesComponent {
     this.organization.deleteOrganization(org.authorityName).subscribe(() => {
       this.toast.toast('PERMISSIONS.ORG_REMOVED');
       this.globalProgress = false;
-      this.dialogTitle = null;
+      this.closeDialog();
       this.refresh();
     },
       (error: any) => {

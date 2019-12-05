@@ -88,12 +88,6 @@ h2{
 .history{
   padding-right: 20px;
   float:right;
-  text-transform: uppercase;
-  i{
-    font-size: 11pt;
-    position: relative;
-    top: 3px;
-  }
 }
 a.active{
   color:#000!important;
@@ -284,7 +278,6 @@ mat-tab-body-content{
 .manageLink{
   float:left;
   padding-left: 20px;
-  text-transform: uppercase;
   position: relative;
   top:14px;
 }

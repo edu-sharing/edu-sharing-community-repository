@@ -78,12 +78,6 @@ export class WorkspaceMainComponent implements EventListener {
     private selection: Node[] = [];
     public fileIsOver = false;
 
-    private dialogTitle: string;
-    private dialogCancelable = false;
-    private dialogMessage: string;
-    private dialogMessageParameters: any;
-    private dialogButtons: DialogButton[];
-
     private showSelectRoot = false;
     public showUploadSelect = false;
     createConnectorName: string;
@@ -257,7 +251,7 @@ export class WorkspaceMainComponent implements EventListener {
         this.filesToUpload = event.target.files;
     }
     private hideDialog(): void {
-        this.dialogTitle = null;
+        this.toast.closeModalDialog();
     }
     private openCamera() {
         this.cordova.getPhotoFromCamera((data: any) => {
@@ -381,7 +375,7 @@ export class WorkspaceMainComponent implements EventListener {
             });
     }
     private finishMoveCopy(target: Node, source: Node[], copy: boolean) {
-        this.dialogTitle = null;
+        this.toast.closeModalDialog();
         const info: any = {
             to: target.name,
             count: source.length,
@@ -685,11 +679,15 @@ export class WorkspaceMainComponent implements EventListener {
             this.router.navigate([UIConstants.ROUTER_PREFIX + 'render', list[0].ref.id, list[0].version ? list[0].version : '']);
         }
     }
-    private restoreVersion(version: Version) {
-        this.dialogTitle = 'WORKSPACE.METADATA.RESTORE_TITLE';
-        this.dialogCancelable = true;
-        this.dialogMessage = 'WORKSPACE.METADATA.RESTORE_MESSAGE';
-        this.dialogButtons = DialogButton.getYesNo(() => this.hideDialog(), () => this.doRestoreVersion(version));
+    private restoreVersion(restore:{version: Version,node: Node}) {
+        this.toast.showConfigurableDialog({
+            title: 'WORKSPACE.METADATA.RESTORE_TITLE',
+            message: 'WORKSPACE.METADATA.RESTORE_MESSAGE',
+            buttons: DialogButton.getYesNo(() => this.hideDialog(), () => this.doRestoreVersion(restore.version)),
+            node: restore.node,
+            isCancelable: true,
+            onCancel: () => this.hideDialog(),
+        });
     }
     // returns either the passed node as list, or the current selection if the passed node is invalid (actionbar)
     private getNodeList(node: Node): Node[] {
@@ -1111,11 +1109,11 @@ export class WorkspaceMainComponent implements EventListener {
     }
 
     private showAlpha() {
-        this.dialogTitle = 'WORKSPACE.ALPHA_TITLE';
-        this.dialogMessage = 'WORKSPACE.ALPHA_MESSAGE';
-        this.dialogButtons = DialogButton.getOk(() => {
-            this.dialogTitle = null;
-        });
+        this.toast.showModalDialog('WORKSPACE.ALPHA_TITLE',
+            'WORKSPACE.ALPHA_MESSAGE',
+            DialogButton.getOk(() => this.hideDialog()),
+            false
+        );
     }
 
     private nodeTemplate(node: Node) {
@@ -1191,7 +1189,7 @@ export class WorkspaceMainComponent implements EventListener {
             || this.editNodeMetadata
             || this.createConnectorName
             || this.showUploadSelect
-            || this.dialogTitle
+            || this.toast.isModalDialogOpen()
             || this.addFolderName
             || this.sharedNode
             || this.workflowNode

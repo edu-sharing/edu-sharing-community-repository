@@ -1,15 +1,3 @@
-<modal-dialog
-                [title]="dialogTitle"
-                [message]="dialogMessage"
-                [buttons]="dialogButtons"
-                [messageParameters]="dialogParameters"
-                [isCancelable]="dialogCancelable"
-                (onCancel)="dialogTitle=null"
-></modal-dialog>
-<modal-loading *ngIf="loadingTitle"
-               [title]="loadingTitle"
-               [message]="loadingMessage"
-></modal-loading>
 <div class="topFrame">
   <div class="info">
     <div  *ngIf="_mode!='ORG' && !embedded">
@@ -71,7 +59,7 @@
           <div *ngIf="_mode=='GROUP'">
             <mat-form-field>
               <mat-label>{{'GROUP.displayName' | translate}}</mat-label>
-              <input matInput name="displayName" [(ngModel)]="edit.profile.displayName" required>
+              <input matInput name="displayName" [(ngModel)]="edit.profile.displayName" required autofocus>
             </mat-form-field>
             <mat-form-field>
               <mat-label>{{'GROUP.groupEmail' | translate}}</mat-label>
@@ -93,7 +81,7 @@
           <div *ngIf="_mode=='ORG'">
             <mat-form-field>
               <mat-label>{{'ORG.displayName' | translate}}</mat-label>
-              <input matInput name="displayName" [(ngModel)]="edit.profile.displayName" required>
+              <input matInput name="displayName" [(ngModel)]="edit.profile.displayName" required autofocus>
             </mat-form-field>
             <mat-form-field>
                 <mat-label>{{'ORG.groupEmail' | translate}}</mat-label>
@@ -110,7 +98,7 @@
           <div *ngIf="_mode=='USER'">
             <mat-form-field *ngIf="!editId">
               <mat-label>{{'USER.authorityName' | translate}}</mat-label>
-              <input matInput name="authorityName" [(ngModel)]="editDetails.authorityName" autofocus required>
+              <input matInput name="authorityName" [(ngModel)]="editDetails.authorityName" required autofocus>
             </mat-form-field >
             <mat-form-field>
               <mat-label>{{'USER.firstName' | translate}}</mat-label>

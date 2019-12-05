@@ -1,4 +1,10 @@
-<card *ngIf="visible" title="{{title | translate:messageParameters }}" (onCancel)="cancel()" [isCancelable]="isCancelable" [buttons]="buttons" height="auto">
+<card *ngIf="visible"
+      title="{{title | translate:messageParameters }}"
+      (onCancel)="cancel()"
+      [isCancelable]="isCancelable"
+      [buttons]="buttons"
+      [node]="node"
+      height="auto">
   <div class="modal-dialog-toast">
     <span class="modal-dialog-toast-message">{{message | translate:messageParameters }}</span>
     <mat-form-field *ngIf="input">

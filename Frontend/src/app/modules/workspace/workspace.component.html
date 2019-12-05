@@ -28,18 +28,6 @@
 <div *ngIf="isBlocked" class="isBlocked">{{'NO_PERMISSIONS_FOR_SCOPE'|translate}}</div>
 <div *ngIf="!isBlocked" [class.hide]="globalProgress">
 
-  <modal-dialog
-                [title]="dialogTitle"
-                [isCancelable]="dialogCancelable"
-                (onCancel)="hideDialog()"
-                [message]="dialogMessage"
-                [messageParameters]="dialogMessageParameters"
-                [buttons]="dialogButtons"
-                [priority]="10"
-  ></modal-dialog>
-
-
-
   <div class="addMobile"
        *ngIf="createAllowed">
     <div class="mobile-move-bottom">

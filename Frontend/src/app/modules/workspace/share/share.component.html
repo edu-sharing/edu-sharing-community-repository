@@ -91,7 +91,7 @@
       </mat-tab>
       <mat-tab label="{{'WORKSPACE.TAB_INVITED' | translate}}" class="tabContent">
         <div class="invited">
-        <a *ngIf="_node && _node.ref.id" class="history clickable" (click)="showHistory()">{{ 'WORKSPACE.SHARE.SHOW_HISTORY' | translate}}<i class="material-icons">arrow_forward</i></a>
+        <mat-link *ngIf="_node && _node.ref.id" class="history uppercase" (click)="showHistory()">{{ 'WORKSPACE.SHARE.SHOW_HISTORY' | translate}} <i icon iconId="arrow_forward"></i></mat-link>
         <div class="groupName" *ngIf="owner">{{'WORKSPACE.SHARE.GROUP_OWNER' | translate}}</div>
         <workspace-share-permission class="groupEntry owner" *ngIf="owner"
           [permission]="owner"
@@ -165,7 +165,7 @@
 
 
         <div class="groupName" *ngIf="showLink && link">{{'WORKSPACE.SHARE.LINK' | translate}}</div>
-        <a class="manageLink clickable" (click)="openLink()" *ngIf="showLink && link">{{'WORKSPACE.SHARE.MANAGE_LINK' | translate}}</a>
+        <mat-link class="manageLink uppercase" (click)="openLink()" *ngIf="showLink && link">{{'WORKSPACE.SHARE.MANAGE_LINK' | translate}}</mat-link>
 
         <workspace-share-permission *ngIf="showLink && link"
                                     class="groupEntry link"

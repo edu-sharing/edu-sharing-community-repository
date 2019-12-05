@@ -14,7 +14,8 @@
       "CANCEL": "Abbrechen"
     },
     "RESTORE": {
-      "NEW_LOCATION_TITLE": "Objekte wiederherstellen",
+      "NEW_LOCATION_TITLE": "Wiederherstellen abgeschlossen",
+      "NEW_LOCATION_SUBTITLE": "Informationen über wiederhergestellte Elemente",
       "LIST_DUPLICATE_NAMES": "Der Name wird bereits verwendet:",
       "LIST_PARENT_FOLDER_MISSING": "Der ursprüngliche Speicherort ist nicht verfügbar:",
       "UNDERSTAND": "Verstanden",

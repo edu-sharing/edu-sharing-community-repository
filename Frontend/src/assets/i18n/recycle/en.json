@@ -14,7 +14,8 @@
       "CANCEL": "cancel"
     },
     "RESTORE": {
-      "NEW_LOCATION_TITLE": "restore object",
+      "NEW_LOCATION_TITLE": "restore finished",
+      "NEW_LOCATION_SUBTITLE": "Information about restored elements",
       "LIST_DUPLICATE_NAMES": "The title is already in use:",
       "LIST_PARENT_FOLDER_MISSING": "The original storage location is not available:",
       "UNDERSTAND": "okey dokey",

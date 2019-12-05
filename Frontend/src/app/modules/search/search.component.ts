@@ -135,12 +135,10 @@ export class SearchComponent {
   public savedSearch : Node[]=[];
   public savedSearchColumns : ListItem[]=[];
   private mdsActions: OptionItem[];
+  private mdsButtons: DialogButton[];
   public saveSearchDialog = false;
   private currentSavedSearch: Node;
   private login: LoginResult;
-  public dialogTitle: string;
-  public dialogMessage: string;
-  public dialogButtons: DialogButton[];
   private savedSearchOwn = true;
   public savedSearchLoading = false;
   public savedSearchQuery:string = null;
@@ -975,6 +973,8 @@ export class SearchComponent {
     save.showName=false;
     if(!this.isGuest)
       this.mdsActions.push(save);
+
+    this.mdsButtons = DialogButton.fromOptionItem(this.mdsActions).slice(0, 1)
   }
   private closeSaveSearchDialog(){
     this.saveSearchDialog=false;
@@ -989,16 +989,19 @@ export class SearchComponent {
         }
       },
       (error:any)=>{
-        if(error.status==RestConstants.DUPLICATE_NODE_RESPONSE){
-          this.dialogTitle='SEARCH.SAVE_SEARCH.SEARCH_EXISTS_TITLE';
-          this.dialogMessage='SEARCH.SAVE_SEARCH.SEARCH_EXISTS_MESSAGE';
-          this.dialogButtons=[
-            new DialogButton('RENAME',DialogButton.TYPE_CANCEL,()=>{this.dialogTitle=null}),
-            new DialogButton('REPLACE',DialogButton.TYPE_PRIMARY,()=>{
-              this.dialogTitle=null;
-              this.saveSearch(name,true);
-            })
-          ];
+        if(error.status===RestConstants.DUPLICATE_NODE_RESPONSE){
+            this.toast.showConfigurableDialog({
+                title: 'SEARCH.SAVE_SEARCH.SEARCH_EXISTS_TITLE',
+                message: 'SEARCH.SAVE_SEARCH.SEARCH_EXISTS_MESSAGE',
+                buttons: [
+                    new DialogButton('RENAME',DialogButton.TYPE_CANCEL,() => this.toast.closeModalDialog()),
+                    new DialogButton('REPLACE',DialogButton.TYPE_PRIMARY,() => {
+                        this.toast.closeModalDialog();
+                        this.saveSearch(name,true);
+                    })
+                ],
+                isCancelable: true
+            });
         }
         else {
           this.toast.error(error);
