@@ -19,7 +19,7 @@ import {RestHelper} from '../../core-module/core.module';
 import {PlatformLocation} from '@angular/common';
 
 import {CordovaService} from "../../common/services/cordova.service";
-import {InputPasswordComponent} from "../../common/ui/input-password/input-password.component";
+import {InputPasswordComponent} from "../../core-ui-module/components/input-password/input-password.component";
 import {RestNodeService} from '../../core-module/core.module';
 import {NodeHelper} from '../../core-ui-module/node-helper';
 import {TemporaryStorageService} from '../../core-module/core.module';

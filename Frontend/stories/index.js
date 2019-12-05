@@ -3,11 +3,12 @@ import { storiesOf } from '@storybook/angular';
 import { action } from '@storybook/addon-actions';
 import { withKnobs, text, number, boolean, array, select, radios, color, date, button } from '@storybook/addon-knobs';
 import {
+    MAT_FORM_FIELD_DEFAULT_OPTIONS, MAT_TOOLTIP_DEFAULT_OPTIONS,
     MatButtonModule,
-    MatCardModule,
+    MatCardModule, MatCheckboxModule,
     MatFormFieldModule,
-    MatIconModule,
-    MatMenuModule,
+    MatIconModule, MatInputModule,
+    MatMenuModule, MatRadioModule, MatSliderModule, MatSlideToggleModule,
     MatToolbarModule
 } from "@angular/material";
 import {BrowserModule} from "@angular/platform-browser";
@@ -41,15 +42,21 @@ import {DialogButton} from "../src/app/core-module/ui/dialog-button";
 import {Router} from "@angular/router";
 import {CoreBridgeModule} from "../src/app/core-bridge-module/core.bridge.module";
 import {ButtonsTestComponent} from "../src/app/common/test/buttons/buttons-test.component";
+import {InputsTestComponent} from "../src/app/common/test/inputs/inputs-test.component";
 
-let allImports=[
+const allImports=[
     CoreUiModule,
     CoreBridgeModule,
     MatCardModule,
     MatButtonModule,
     MatMenuModule,
+    MatInputModule,
     MatToolbarModule,
     MatIconModule,
+    MatCheckboxModule,
+    MatRadioModule,
+    MatSliderModule,
+    MatSlideToggleModule,
     BrowserModule,
     BrowserAnimationsModule,
     FormsModule,
@@ -84,8 +91,9 @@ let allProviders=[
     UIService,
     RestLocatorService,
     RestNodeService,
-    FrameEventsService
-
+    FrameEventsService,
+    {provide: MAT_FORM_FIELD_DEFAULT_OPTIONS, useValue: {appearance: 'outline'}},
+    {provide: MAT_TOOLTIP_DEFAULT_OPTIONS, useValue: {showDelay: 500}}
 ];
 
 storiesOf('Spinners & Progress', module)
@@ -103,6 +111,13 @@ storiesOf('Elements')
         component: ButtonsTestComponent,
         moduleMetadata: {
             imports: allImports
+        }
+    }))
+    .add('Inputs', () => ({
+        component: InputsTestComponent,
+        moduleMetadata: {
+            imports: allImports,
+            providers: allProviders
         }
     }))
     .add('Infobar', () => ({

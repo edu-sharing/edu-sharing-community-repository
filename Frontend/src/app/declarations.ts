@@ -23,7 +23,6 @@
   import {NodeInfoComponent} from "./common/ui/node-info/node-info.component";
   import {TutorialComponent} from "./common/ui/tutorial/tutorial.component";
   import {CookieInfoComponent} from './common/ui/cookie-info/cookie-info.component';
-  import {InputPasswordComponent} from "./common/ui/input-password/input-password.component";
   import {PoweredByComponent} from "./common/ui/powered-by/powered-by.component";
   import {FooterComponent} from "./common/ui/footer/footer.component";
   import {CalendarComponent} from "./common/ui/calendar/calendar.component";
@@ -36,10 +35,12 @@
   import {MdsViewerComponent} from "./common/ui/mds-viewer/mds-viewer.component";
   import {MdsWidgetComponent} from "./common/ui/mds-viewer/widget/mds-widget.component";
   import {ButtonsTestComponent} from './common/test/buttons/buttons-test.component';
+  import {InputsTestComponent} from './common/test/inputs/inputs-test.component';
 
   export const DECLARATIONS = [
       MdsTestComponent,
       ButtonsTestComponent,
+      InputsTestComponent,
       CalendarComponent,
       AutocompleteComponent,
       AuthoritySearchInputComponent,
@@ -47,7 +48,6 @@
       TimePipe,
       FileChooserComponent,
       ActionbarComponent,
-      InputPasswordComponent,
       NodeInfoComponent,
       SmallCollectionComponent,
       MainNavComponent,

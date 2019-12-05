@@ -21,7 +21,7 @@ import {PlatformLocation} from '@angular/common';
 import {CordovaService} from '../../common/services/cordova.service';
 import {trigger} from "@angular/animations";
 import {UIAnimation} from "../../core-module/ui/ui-animation";
-import {InputPasswordComponent} from "../../common/ui/input-password/input-password.component";
+import {InputPasswordComponent} from "../../core-ui-module/components/input-password/input-password.component";
 import {RouterHelper} from '../../common/router.helper';
 import {HttpClient} from "@angular/common/http";
 import {FormControl} from '@angular/forms';
