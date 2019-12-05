@@ -26,7 +26,7 @@ import {
     MatSidenavModule,
     MatSlideToggleModule,
     MatTabsModule,
-    MatToolbarModule, MatTooltipModule, MatRippleModule, MatProgressBarModule, MatButtonToggleModule
+    MatToolbarModule, MatTooltipModule, MatRippleModule, MatProgressBarModule, MatButtonToggleModule, MatIconModule
 } from '@angular/material';
 import { LazyLoadImageModule } from 'ng-lazyload-image';
 import {CustomModule} from './custom-module/custom.module';
@@ -68,6 +68,7 @@ export const IMPORTS=[
   MatButtonToggleModule,
   ReactiveFormsModule,
   MatInputModule,
+  MatIconModule,
   CoreModule,
   CoreBridgeModule,
   CoreUiModule,

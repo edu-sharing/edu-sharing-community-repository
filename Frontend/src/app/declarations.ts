@@ -35,9 +35,11 @@
   import {RocketchatComponent} from "./common/ui/global-container/rocketchat/rocketchat.component";
   import {MdsViewerComponent} from "./common/ui/mds-viewer/mds-viewer.component";
   import {MdsWidgetComponent} from "./common/ui/mds-viewer/widget/mds-widget.component";
+  import {ButtonsTestComponent} from './common/test/buttons/buttons-test.component';
 
   export const DECLARATIONS = [
       MdsTestComponent,
+      ButtonsTestComponent,
       CalendarComponent,
       AutocompleteComponent,
       AuthoritySearchInputComponent,

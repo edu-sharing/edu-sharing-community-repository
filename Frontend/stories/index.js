@@ -2,7 +2,14 @@ import { storiesOf } from '@storybook/angular';
 
 import { action } from '@storybook/addon-actions';
 import { withKnobs, text, number, boolean, array, select, radios, color, date, button } from '@storybook/addon-knobs';
-import {MatButtonModule, MatCardModule, MatFormFieldModule, MatMenuModule, MatToolbarModule} from "@angular/material";
+import {
+    MatButtonModule,
+    MatCardModule,
+    MatFormFieldModule,
+    MatIconModule,
+    MatMenuModule,
+    MatToolbarModule
+} from "@angular/material";
 import {BrowserModule} from "@angular/platform-browser";
 import {BrowserAnimationsModule} from "@angular/platform-browser/animations";
 import {Location} from '@angular/common';
@@ -33,6 +40,7 @@ import {PoweredByComponent} from "../src/app/common/ui/powered-by/powered-by.com
 import {DialogButton} from "../src/app/core-module/ui/dialog-button";
 import {Router} from "@angular/router";
 import {CoreBridgeModule} from "../src/app/core-bridge-module/core.bridge.module";
+import {ButtonsTestComponent} from "../src/app/common/test/buttons/buttons-test.component";
 
 let allImports=[
     CoreUiModule,
@@ -41,6 +49,7 @@ let allImports=[
     MatButtonModule,
     MatMenuModule,
     MatToolbarModule,
+    MatIconModule,
     BrowserModule,
     BrowserAnimationsModule,
     FormsModule,
@@ -90,6 +99,12 @@ storiesOf('Spinners & Progress', module)
     }));
 storiesOf('Elements')
     .addDecorator(withKnobs)
+    .add('Buttons', () => ({
+        component: ButtonsTestComponent,
+        moduleMetadata: {
+            imports: allImports
+        }
+    }))
     .add('Infobar', () => ({
         component: InfobarComponent,
         props: {

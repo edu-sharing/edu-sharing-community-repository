@@ -14,7 +14,8 @@
     "e2e": "protractor",
     "docs": "typedoc --mode file --experimentalDecorators --excludePrivate --ignoreCompilerErrors --target 'ES6' --module 'commonjs' --out docs src",
     "gitlog": "..\\Edu-Sharing-Internal\\Frontend\\gitlog.sh",
-    "storybook": "start-storybook -p 4300 -s ./src/assets"
+    "start-storybook": "start-storybook -p 4300 -s ./src/assets",
+    "build-storybook": "build-storybook -s ./src/assets"
   },
   "private": true,
   "dependencies": {

@@ -28,6 +28,7 @@ import {CommentsListComponent} from "./modules/management-dialogs/node-comments/
 import {MdsWidgetComponent} from "./common/ui/mds-viewer/widget/mds-widget.component";
 import {MAT_FORM_FIELD_DEFAULT_OPTIONS, MAT_LABEL_GLOBAL_OPTIONS, MAT_TOOLTIP_DEFAULT_OPTIONS} from "@angular/material";
 import {BreadcrumbsComponent} from "./core-ui-module/components/breadcrumbs/breadcrumbs.component";
+import {ButtonsTestComponent} from './common/test/buttons/buttons-test.component';
 
 
 // http://blog.angular-university.io/angular2-ngmodule/
@@ -61,6 +62,7 @@ import {BreadcrumbsComponent} from "./core-ui-module/components/breadcrumbs/brea
     entryComponents: [
         MdsWidgetComponent,
         CommentsListComponent,
+        ButtonsTestComponent,
     ],
     imports: IMPORTS,
     providers: [
