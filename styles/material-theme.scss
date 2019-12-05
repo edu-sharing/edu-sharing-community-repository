@@ -166,6 +166,12 @@ input.mat-input-element, mat-label, .mat-select-value{
 .mat-raised-button{
   color: $primary;
 }
+.mat-button{
+  color: $textMediumLight;
+  &:hover{
+    color: $primary;
+  }
+}
 .mat-button-wrapper{
   position: relative;
   display: flex !important;
