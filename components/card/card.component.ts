@@ -76,16 +76,17 @@ export class CardComponent implements OnDestroy{
      * @param node
      */
   @Input() set node(node: Node|Node[]){
-    if (!node)
-      return;
+    if (!node) {
+        return;
+    }
     let nodes: Node[] = (node as any);
-    if (!Array.isArray(nodes)){
+    if (!Array.isArray(nodes)) {
       nodes = [(node as any)];
     }
-    if (nodes && nodes.length){
-      if (nodes.length == 1 && nodes[0]){
+    if (nodes && nodes.length) {
+      if (nodes.length === 1 && nodes[0]) {
         this.avatar = nodes[0].iconURL;
-        this.subtitle = RestHelper.getName(nodes[0]);
+        this.subtitle = RestHelper.getTitle(nodes[0]);
       }
       else{
         this.avatar = null;

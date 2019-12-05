@@ -9,11 +9,13 @@ import {DialogButton} from '../core-module/ui/dialog-button';
 import {RestConstants} from '../core-module/rest/rest-constants';
 import {ProgressType} from '../common/ui/modal-dialog/modal-dialog.component';
 import {DateHelper} from './DateHelper';
+import {ModalDialogOptions} from '../common/ui/modal-dialog-toast/modal-dialog-toast.component';
 
 @Injectable()
 export class Toast {
   private static MIN_TIME_BETWEEN_TOAST = 2000;
-  private onShowModal: (params: any) => void;
+  private onShowModal: (params: ModalDialogOptions) => void;
+  private modalDialogOpen = false;
   private dialogTitle: string;
   private dialogMessage: string;
   private dialogParameters: any;
@@ -52,7 +54,8 @@ export class Toast {
     });
   }
   private openDetails(buttons: DialogButton[]= null){
-    this.onShowModal({title: this.dialogTitle, message: this.dialogMessage, translation: this.dialogParameters, buttons, isCancelable: true});
+    this.onShowModal({title: this.dialogTitle, message: this.dialogMessage, messageParameters: this.dialogParameters, buttons, isCancelable: true});
+    this.modalDialogOpen = true;
   }
 
   private getToastOptions(text: string) {
@@ -205,30 +208,38 @@ export class Toast {
     });
 
   }
-  public goToLogin(){
+  public goToLogin() {
     this.router.navigate([UIConstants.ROUTER_PREFIX + 'login'], {queryParams: {next: window.location}});
+  }
+  isModalDialogOpen() {
+    return this.modalDialogOpen;
   }
   onShowModalDialog(param: (params: any) => void) {
     this.onShowModal = param;
   }
 
   private handleAdditional(text: string, additional: any) {
-      if (additional && additional.link){
+      if (additional && additional.link) {
           text += '<br /><a onclick="window[\'toastComponent\'].linkCallback()">' + this.injector.get(TranslateService).instant(additional.link.caption) + '</a>';
           this.linkCallback = additional.link.callback;
       }
       return text;
   }
     closeModalDialog() {
-      this.onShowModal({title: null});
+      this.onShowModal({title: null, message: null});
+      this.modalDialogOpen = false;
     }
-    showModalDialog(title: string, message: string, buttons: DialogButton[], isCancelable= true, onCancel: Function= null, messageParamters: any= null) {
-        this.onShowModal({title, message, isCancelable, translation: messageParamters, onCancel, buttons});
+    showConfigurableDialog(options:ModalDialogOptions) {
+      this.onShowModal(options);
+      this.modalDialogOpen = true;
     }
-    showInputDialog(title: string, message: string, label: string, buttons: DialogButton[], isCancelable= true, onCancel: Function= null, messageParamters: any= null) {
-      this.onShowModal({title, message, input: label, isCancelable, translation: messageParamters, onCancel, buttons});
+    showModalDialog(title: string, message: string, buttons: DialogButton[], isCancelable= true, onCancel: () => void = null, messageParameters: any= null) {
+      this.showConfigurableDialog({title, message, isCancelable, messageParameters: messageParameters, onCancel, buttons});
+    }
+    showInputDialog(title: string, message: string, label: string, buttons: DialogButton[], isCancelable= true, onCancel: () => void = null, messageParamters: any= null) {
+      this.showConfigurableDialog({title, message, input: label, isCancelable, messageParameters: messageParamters, onCancel, buttons});
     }
     showProgressDialog(title= 'PROGRESS_DIALOG_DEFAULT_TITLE', message= 'PROGRESS_DIALOG_DEFAULT_MESSAGE', type = ProgressType.Indeterminate) {
-      this.onShowModal({title, message, progressType: type});
+      this.showConfigurableDialog({title, message, progressType: type});
     }
 }
