@@ -166,7 +166,7 @@ input.mat-input-element, mat-label, .mat-select-value{
 .mat-raised-button{
   color: $primary;
 }
-.mat-button{
+.mat-button.mat-cancel{
   color: $textMediumLight;
   &:hover{
     color: $primary;
