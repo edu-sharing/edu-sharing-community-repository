@@ -1,30 +1,35 @@
 <input #fileSelect type="file" style="display:none" id="fileSelect" [multiple]="multiple" (change)="filesSelected($event)" />
-<card title="{{'WORKSPACE.ADD_OBJECT_TITLE' | translate }}" [priority]="priority" subtitle="{{'WORKSPACE.ADD_OBJECT_SUBTITLE' | translate }}" width="small" height="large"
+<card title="{{'WORKSPACE.ADD_OBJECT_TITLE' | translate }}"
+      [priority]="priority"
+      subtitle="{{'WORKSPACE.ADD_OBJECT_SUBTITLE' | translate }}"
+      icon="cloud_upload"
+      width="normal"
+      height="large"
       [buttons]="buttons"
       (onCancel)="cancel()"
 >
-        <div class="file-upload-content">
+        <div class="card-content-padding file-upload-content">
             <div class="dropArea" [class.dropActive]="isFileOver" fileDrop
                  (onFileDrop)="onDrop($event)"
                  (fileOver)="isFileOver=$event">
                 <div><i icon iconId="cloud_upload"></i></div>
-                <div class="object-message" *ngIf="supportsDrop">{{ 'WORKSPACE.ADD_OBJECT_MESSAGE' | translate}}</div>
-                <button mat-raised-button (click)="selectFile()">{{'WORKSPACE.SELECT_MATERIAL' | translate}}</button>
+                <div *ngIf="supportsDrop">{{ 'WORKSPACE.ADD_OBJECT_MESSAGE' | translate}}
+                    <mat-link (click)="selectFile()">{{ 'WORKSPACE.ADD_OBJECT_BROWSE' | translate}}</mat-link>
+                </div>
             </div>
             <div class="quota" *ngIf="user && user.person.quota.enabled">
                 <user-quota [quota]="user.person.quota"></user-quota>
             </div>
-            <hr>
+            <div class="seperator-line uppercase">{{ 'WORKSPACE.SELECT_ORG' | translate}}</div>
             <div class="link">
                 <div class="link-info">
-                    <div class="linkLabel"><i icon iconId="link"></i> <span class="linkTitle">{{ 'WORKSPACE.SELECT_LINK' | translate}}</span></div>
                     <mat-form-field>
-                        <mat-label>{{ 'WORKSPACE.SELECT_LINK_LABEL' | translate}}</mat-label>
+                        <mat-label>{{ 'WORKSPACE.SELECT_LINK' | translate}}</mat-label>
                         <input matInput [(ngModel)]="link" (keyup.enter)="setLink()" placeholder="http://">
                     </mat-form-field>
                 </div>
                 <div class="lti" *ngIf="showLti">
-                    <mat-slide-toggle [disabled]="!ltiAllowed" [(ngModel)]="ltiActivated">{{ 'WORKSPACE.ADD_OBJECT_LTI' | translate}}</mat-slide-toggle>
+                    <div><mat-slide-toggle class="toggle-reverse" [disabled]="!ltiAllowed" [(ngModel)]="ltiActivated">{{ 'WORKSPACE.ADD_OBJECT_LTI' | translate}}</mat-slide-toggle></div>
                     <div class="lti-data" *ngIf="ltiAllowed && ltiActivated">
                         <div class="heading">{{'WORKSPACE.LTI_HEADING' | translate}}</div>
                         <div class="info">{{'WORKSPACE.LTI_INFO' | translate}}</div>

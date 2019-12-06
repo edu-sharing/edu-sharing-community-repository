@@ -970,10 +970,9 @@ export class SearchComponent {
     let save=new OptionItem(this.applyMode ? 'SEARCH.EMBED_SEARCH_ACTION' : 'SEARCH.SAVE_SEARCH_ACTION',this.applyMode ? 'redo' : 'save',()=>{
       this.saveSearchDialog=true;
     });
-    save.showName=false;
-    if(!this.isGuest)
+    if(!this.isGuest) {
       this.mdsActions.push(save);
-
+    }
     this.mdsButtons = DialogButton.fromOptionItem(this.mdsActions).slice(0, 1)
   }
   private closeSaveSearchDialog(){

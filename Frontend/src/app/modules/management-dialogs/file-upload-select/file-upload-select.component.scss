@@ -1,44 +1,51 @@
 @import "../../../core-ui-module/styles/variables";
 
-.dropArea{
-  border-radius:5px;
+.dropArea {
+  border-radius: 5px;
   text-align: center;
-  border: 2px dashed $primary;
-  margin: $cardPadding;
-  padding: 20px;
-  margin-bottom:20px;
-  color:$textLight;
+  border: 2px dashed $cardSeperatorLineColor;
+  padding: 60px 30px;
+  margin-bottom: 10px;
+  color: $textLight;
 
-  .object-message{
-    margin-bottom: 10px;
+  a {
+    font-weight: bold;
   }
+
+  i {
+    font-size: 60px;
+  }
+
+  &.dropActive {
+    border-color: $primaryMediumLight;
+    background: $primaryLight;
+
+    i {
+      color: $primary;
+    }
+
+    .object-message {
+      margin-bottom: 10px;
+    }
+  }
+}
+.seperator-line{
+  margin:20px 5px;
 }
 mat-form-field{
   width:100%;
 }
-.link-info{
-  padding:0 $cardPadding;
+.quota{
+  padding-bottom: 5px;
 }
 .quota{
   padding-bottom: 5px;
 }
-.dropActive{
-  background:$primaryLight;
-}
-.dropActive i{
-  color:$primary;
-}
-hr{
-  margin-bottom: 20px;
-  width: calc(100% - 40px);
-}
-.dropArea i{
-  font-size:60px;
-}
+
 .lti-data{
-  background-color: $actionDialogBackground;
+  background-color: $cardLightBackground;
+  margin: 20px $cardPadding*-1;
   padding:20px $cardPadding;
-  margin: 20px 0;
   .heading{
     font-size: 110%;
     font-weight: bold;
@@ -75,9 +82,6 @@ hr{
   .lti{
     display: flex;
     flex-direction: column;
-    mat-slide-toggle{
-      padding:0 30px;
-    }
   }
   .toolInfo{
     display:flex;

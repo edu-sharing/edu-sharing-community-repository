@@ -4,7 +4,6 @@ import {
   ElementRef,
   Sanitizer, ViewContainerRef, ComponentFactoryResolver, QueryList, ViewChildren
 } from '@angular/core';
-import {TranslateService} from '@ngx-translate/core';
 import {MdsWidgetComponent} from "./widget/mds-widget.component";
 import {RestMdsService} from "../../../core-module/core.module";
 import {DomSanitizer} from "@angular/platform-browser";
@@ -19,8 +18,8 @@ export class MdsViewerComponent{
   @ViewChildren('container') container : QueryList<ElementRef>;
   _groupId:string;
   _data: string;
-  private mds: any;
-  private templates: any[];
+  mds: any;
+  templates: any[];
   @Input() set groupId(groupId:string){
     this._groupId=groupId;
     this.inflate();
