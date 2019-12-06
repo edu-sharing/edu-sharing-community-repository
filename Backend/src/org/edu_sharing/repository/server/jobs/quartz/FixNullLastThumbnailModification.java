@@ -1,14 +1,13 @@
 package org.edu_sharing.repository.server.jobs.quartz;
 
-import java.io.Serializable;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
 
 import org.alfresco.model.ContentModel;
 import org.alfresco.repo.policy.BehaviourFilter;
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.repo.transaction.RetryingTransactionHelper.RetryingTransactionCallback;
-import org.alfresco.repo.version.VersionModel;
 import org.alfresco.service.ServiceRegistry;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.repository.NodeService;
@@ -16,77 +15,79 @@ import org.alfresco.service.cmr.repository.StoreRef;
 import org.alfresco.service.cmr.search.ResultSet;
 import org.alfresco.service.cmr.search.SearchParameters;
 import org.alfresco.service.cmr.search.SearchService;
-import org.alfresco.service.cmr.version.VersionHistory;
-import org.alfresco.service.cmr.version.VersionService;
-import org.alfresco.service.cmr.version.VersionType;
-import org.alfresco.service.namespace.QName;
 import org.apache.log4j.Logger;
 import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
 import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
 import org.springframework.context.ApplicationContext;
 
-public class FixInitialVersion extends AbstractJob {
-
-	Logger logger = Logger.getLogger(FixInitialVersion.class);
+public class FixNullLastThumbnailModification extends AbstractJob {
+	
+	Logger logger = Logger.getLogger(FixNullLastThumbnailModification.class);
 	
 	ApplicationContext applicationContext = AlfAppContextGate.getApplicationContext();
 	ServiceRegistry serviceRegistry = (ServiceRegistry) applicationContext.getBean(ServiceRegistry.SERVICE_REGISTRY);
-	
-	VersionService versionService = serviceRegistry.getVersionService();
 	SearchService searchService = serviceRegistry.getSearchService();
-	
-	NodeService nodeService = (NodeService)applicationContext.getBean("alfrescoDefaultDbNodeService");
-	
-	BehaviourFilter policyBehaviourFilter = (BehaviourFilter)applicationContext.getBean("policyBehaviourFilter");
+	NodeService nodeService = serviceRegistry.getNodeService();
 	
 	private static final int PAGE_SIZE = 100;
 	
+	BehaviourFilter policyBehaviourFilter = (BehaviourFilter)applicationContext.getBean("policyBehaviourFilter");
+	
+	boolean perisistentMode = false;
+	
+	public static final String PARAM_PERSIST = "PERSIST";
+	
+	int counter = 0;
+	
 	@Override
 	public void execute(JobExecutionContext context) throws JobExecutionException {
+		String persist = (String)context.getJobDetail().getJobDataMap().get(PARAM_PERSIST);
+		perisistentMode = new Boolean(persist);
 		AuthenticationUtil.RunAsWork<Void> runAs = new AuthenticationUtil.RunAsWork<Void>() {
 			@Override
 			public Void doWork() throws Exception {
-				execute(0);
+				execute(0, StoreRef.STORE_REF_WORKSPACE_SPACESSTORE);
+				logger.info("counter: " + counter +" for " + StoreRef.STORE_REF_WORKSPACE_SPACESSTORE);
+				counter= 0;
+				execute(0, StoreRef.STORE_REF_ARCHIVE_SPACESSTORE);
+				logger.info("counter: " + counter +" for " + StoreRef.STORE_REF_ARCHIVE_SPACESSTORE);
 				return null;
 			}
 		};
 		AuthenticationUtil.runAsSystem(runAs);
 		
-		
 	}
 	
-	private void execute(int page) {
+	private void execute(int page, StoreRef storeRef){
 		logger.info("page:" + page);
 		SearchParameters sp = new SearchParameters();
 		sp.setLanguage(SearchService.LANGUAGE_LUCENE);
-		sp.addStore(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE);
+		sp.addStore(storeRef);
 		sp.setSkipCount(page);
 		sp.setMaxItems(PAGE_SIZE);
 		
-		sp.setQuery("ISUNSET:\"cclom:version\" AND TYPE:\"ccm:io\"");
+		sp.setQuery("ASPECT:\"cm:thumbnailModification\" AND ISUNSET:\"cm:lastThumbnailModification\"");
 		
 		logger.info("query:" + sp.getQuery());
 		ResultSet resultSet = searchService.query(sp);
 		
-		
-		logger.info("page " + page + " from " + resultSet.getNumberFound());
-		
 		for(NodeRef nodeRef : resultSet.getNodeRefs()) {
-			
-			VersionHistory vh = versionService.getVersionHistory(nodeRef);
-			if(vh == null) {
-				logger.info("creating initial version for:" + nodeRef +"  " + nodeService.getProperty(nodeRef, ContentModel.PROP_NAME));
-				
-				Map<String, Serializable> transFormedProps = transformQNameKeyToString(nodeService.getProperties(nodeRef));
-				transFormedProps.put(VersionModel.PROP_VERSION_TYPE, VersionType.MAJOR);
+			List<String> thumbnailMods = (List<String>) nodeService.getProperty(nodeRef, ContentModel.PROP_LAST_THUMBNAIL_MODIFICATION_DATA);
+			String name = (String)nodeService.getProperty(nodeRef, ContentModel.PROP_NAME);
+			Date created = (Date)nodeService.getProperty(nodeRef, ContentModel.PROP_CREATED);
+			if(thumbnailMods == null) {
+				logger.info("setting cm:lastThumbnailModification for:" + name + " from:" + created );
 				
 				serviceRegistry.getRetryingTransactionHelper().doInTransaction(new RetryingTransactionCallback<Void>() {
 					@Override
 					public Void execute() throws Throwable {
-						policyBehaviourFilter.disableBehaviour(nodeRef);
-						versionService.createVersion(nodeRef, transFormedProps);
-						policyBehaviourFilter.enableBehaviour(nodeRef);
+						if(perisistentMode) {
+							policyBehaviourFilter.disableBehaviour(nodeRef);
+							nodeService.setProperty(nodeRef, ContentModel.PROP_LAST_THUMBNAIL_MODIFICATION_DATA, new ArrayList());
+							policyBehaviourFilter.enableBehaviour(nodeRef);
+						}
+						counter++;
 						return null;
 					}
 				});
@@ -94,22 +95,14 @@ public class FixInitialVersion extends AbstractJob {
 		}
 		
 		if(resultSet.hasMore()) {
-			execute(page + PAGE_SIZE);
+			execute(page + PAGE_SIZE, storeRef);
 		}
 	}
-	
-	Map<String,Serializable> transformQNameKeyToString(Map<QName, Serializable> props){
-		Map<String,Serializable> result = new HashMap<String,Serializable>();
-		for(Map.Entry<QName,Serializable> entry : props.entrySet()){
-			result.put(entry.getKey().toString(), entry.getValue());
-		}
-		return result;
-	}
-	
 	
 	@Override
 	public Class[] getJobClasses() {
-		super.addJobClass(FixInitialVersion.class);
-		return allJobs;
+		this.addJobClass(FixNullLastThumbnailModification.class);
+		return super.allJobs;
 	}
+
 }

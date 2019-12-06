@@ -33,6 +33,8 @@ public class CacheInfo implements Serializable{
 	
 	String member;
 	
+	String groupName;
+	
 	
 	/**
 	 * config values
@@ -46,6 +48,14 @@ public class CacheInfo implements Serializable{
 
 	public void setMember(String member) {
 		this.member = member;
+	}
+	
+	public String getGroupName() {
+		return groupName;
+	}
+	
+	public void setGroupName(String groupName) {
+		this.groupName = groupName;
 	}
 
 	public int getSize() {
