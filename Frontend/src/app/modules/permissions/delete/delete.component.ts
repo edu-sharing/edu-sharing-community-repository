@@ -32,7 +32,7 @@ export class PermissionsDeleteComponent {
         // send list of target users + options for these specific users
         const defaultOptions = {
             // change this value if the config needs to be reset to default
-            version: 1.1,
+            version: "1.0.0",
             homeFolder: {
                 folders: DeleteMode.none,
                 privateFiles: DeleteMode.none,
@@ -52,7 +52,7 @@ export class PermissionsDeleteComponent {
                 delete: false
             },
             comments: {
-                delete: true
+                delete: false
             },
             collectionFeedback: {
                 delete: false
@@ -66,7 +66,9 @@ export class PermissionsDeleteComponent {
             // change owner + (optional) invite a coordinator group
             // comments, ratings, feedback, stream, statistics
             receiver: '',
-            receiverGroup: ''
+            receiverGroup: '',
+            // shall the user be found & removed inside contributor metadata
+            cleanupMetadata: true
         };
         this.storage.get('delete_users_options', defaultOptions).subscribe((data: any) => {
             if (data.version === defaultOptions.version) {

@@ -165,6 +165,11 @@
         "PRIVATE_COLLECTIONS_CAPTION": "Private oder freigegebene Sammlungen",
         "PUBLIC_COLLECTIONS_CAPTION": "Öffentliche Sammlungen"
       },
+      "METADATA": {
+        "CAPTION": "Umgang mit Metadaten & Daten für Beteiligte Personen",
+        "DELETE": "Metadaten Einträge entfernen",
+        "HINT": "Beachten Sie, dass nur der letzte bekannte Vor- und Nachname des Nutzers an den Metadaten gefunden & entfernt werden kann"
+      },
       "USER_INTERACTIONS": {
         "CAPTION": "Benutzer-Interaktionen und Statistik-Daten",
         "STREAM": "Auf den Stream hinzugefügte Einträge löschen",

@@ -9,6 +9,7 @@ public class PersonDeleteOptions implements Serializable {
     public enum FolderDeleteMode {
         none,assign
     }
+    public boolean cleanupMetadata;
     public HomeFolderOptions homeFolder;
     public SharedFolderOptions sharedFolders;
     public CollectionOptions collections;

@@ -15,7 +15,7 @@
   .group{
     padding: 10px 20px;
   }
-  .group-interactions{
+  .group-interactions,.group-metadata{
     display: flex;
     flex-direction: column;
     >mat-hint{

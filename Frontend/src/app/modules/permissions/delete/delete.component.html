@@ -127,6 +127,11 @@
       <info-message *ngIf="options.collections.privateCollections=='delete' || options.collections.publicCollections=='delete'" mode="warning" message="{{'PERMISSIONS.DELETE.STATE.DELETE_COLLECTIONS' | translate}}"></info-message>
       <info-message *ngIf="!isValid()" mode="warning" message="{{'PERMISSIONS.DELETE.STATE.NON_CONFORM' | translate}}"></info-message>
     </div>
+    <div class="group group-metadata" *ngIf="hasAssigning()">
+      <h3 class="mat-heading-3 mat-heading-underline">{{'PERMISSIONS.DELETE.METADATA.CAPTION' | translate}}</h3>
+      <mat-checkbox [(ngModel)]="options.cleanupMetadata">{{'PERMISSIONS.DELETE.METADATA.DELETE' | translate}}</mat-checkbox>
+      <mat-hint>{{'PERMISSIONS.DELETE.METADATA.HINT' | translate}}</mat-hint>
+    </div>
     <div class="group group-interactions">
       <h3 class="mat-heading-3 mat-heading-underline">{{'PERMISSIONS.DELETE.USER_INTERACTIONS.CAPTION' | translate}}</h3>
       <mat-checkbox [(ngModel)]="options.stream.delete">{{'PERMISSIONS.DELETE.USER_INTERACTIONS.STREAM' | translate}}</mat-checkbox>

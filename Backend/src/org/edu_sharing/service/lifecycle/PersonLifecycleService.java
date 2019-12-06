@@ -2,6 +2,7 @@ package org.edu_sharing.service.lifecycle;
 
 
 
+import java.io.Serializable;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
@@ -362,7 +363,7 @@ public class PersonLifecycleService {
 
 		// set all path stuff to admin
 		collectionsPath.forEach((ref)->{
-			setOwner(ref,userName, ApplicationInfoList.getHomeRepository().getUsername());
+			setOwner(ref,userName, ApplicationInfoList.getHomeRepository().getUsername(), options);
 		});
 
 		logger.info("Collections where "+userName+" is owner: "+collectionsMaps.size());
@@ -378,7 +379,7 @@ public class PersonLifecycleService {
 				setOwnerAndPermissions(collectionsMaps, userName, options);
 				//setOwnerAndPermissions(collectionsIos, userName, options);
 				// io references should not support additional permissions (always inherit)
-				collectionsIos.forEach((ref)->setOwner(ref,userName,options.receiver));
+				collectionsIos.forEach((ref)->setOwner(ref,userName,options.receiver, options));
 			}
 			return;
 		}
@@ -675,7 +676,7 @@ public class PersonLifecycleService {
 		rth.doInTransaction((RetryingTransactionHelper.RetryingTransactionCallback<Void>) () -> {
 			children.forEach((ref) -> {
 				if (skipNode(ref,SKIP_ASPECTS_OWNER)) return;
-				setOwner(ref, userName, options.receiver);
+				setOwner(ref, userName, options.receiver, options);
 				policyBehaviourFilter.disableBehaviour(ref);
 				permissionService.setPermission(ref, options.receiverGroup, CCConstants.PERMISSION_COORDINATOR, true);
 				policyBehaviourFilter.enableBehaviour(ref);
@@ -695,7 +696,7 @@ public class PersonLifecycleService {
 		return CCConstants.getAllCCLicenseKeys().contains(license);
 	}
 	
-	private void setOwner(NodeRef nodeRef, String oldOwner, String newOwner) {
+	private void setOwner(NodeRef nodeRef, String oldOwner, String newOwner, PersonDeleteOptions options) {
 		RetryingTransactionHelper rth = transactionService.getRetryingTransactionHelper();
 		rth.doInTransaction((RetryingTransactionHelper.RetryingTransactionCallback<Void>) () -> {
 			policyBehaviourFilter.disableBehaviour(nodeRef);
@@ -706,12 +707,52 @@ public class PersonLifecycleService {
 			if (oldOwner.equals(nodeService.getProperty(nodeRef, QName.createQName(CCConstants.CM_PROP_C_MODIFIER)))) {
 				nodeService.setProperty(nodeRef, QName.createQName(CCConstants.CM_PROP_C_MODIFIER), newOwner);
 			}
+			updateMetadataCreator(nodeRef,oldOwner,options);
 			policyBehaviourFilter.enableBehaviour(nodeRef);
 			return null;
 		});
 		new RepositoryCache().remove(nodeRef.getId());
 	}
-	
+
+	private void updateMetadataCreator(NodeRef nodeRef, String oldOwner, PersonDeleteOptions options) {
+		if(!options.cleanupMetadata){
+			return;
+		}
+		Serializable creator = nodeService.getProperty(nodeRef, QName.createQName(CCConstants.CCM_PROP_IO_REPL_METADATACONTRIBUTER_CREATOR));
+		ArrayList<String> creators;
+		if(creator instanceof ArrayList){
+			creators= (ArrayList<String>) creator;
+		}else{
+			creators = new ArrayList<String>();
+			creators.add((String)creator);
+		}
+		if(creators.size()>0) {
+			// @TODO: Doing this for multiple calls may be time consuming, may make a cache
+			NodeRef authority = authorityService.getAuthorityNodeRef(oldOwner);
+			String firstName = (String) nodeService.getProperty(authority, QName.createQName(CCConstants.CM_PROP_PERSON_FIRSTNAME));
+			String lastName = (String) nodeService.getProperty(authority, QName.createQName(CCConstants.CM_PROP_PERSON_LASTNAME));
+			// filter all elements where current user is really attached
+			creators= creators.stream().filter((c) -> {
+				HashMap<String, Object> vcard = VCardConverter.
+						getVCardHashMap(CCConstants.CCM_TYPE_IO, CCConstants.CCM_PROP_IO_REPL_METADATACONTRIBUTER_CREATOR, c);
+				if (vcard != null && vcard.size() > 0) {
+					if (Objects.equals(firstName, vcard.get(CCConstants.CCM_PROP_IO_REPL_METADATACONTRIBUTER_CREATOR+CCConstants.VCARD_GIVENNAME)) &&
+							Objects.equals(lastName, vcard.get(CCConstants.CCM_PROP_IO_REPL_METADATACONTRIBUTER_CREATOR+CCConstants.VCARD_SURNAME))) {
+						logger.info("vcard creator is same as old username, will clean up vcard entry");
+						return false;
+					}
+				}
+				return true;
+			}).collect(Collectors.toCollection(ArrayList::new));
+			if(creators.size()==0){
+				nodeService.removeProperty(nodeRef, QName.createQName(CCConstants.CCM_PROP_IO_REPL_METADATACONTRIBUTER_CREATOR));
+			}else{
+				nodeService.setProperty(nodeRef,QName.createQName(CCConstants.CCM_PROP_IO_REPL_METADATACONTRIBUTER_CREATOR), creators);
+			}
+		}
+
+	}
+
 	private void deleteNode(NodeRef nodeRef) {
 		/**
 		 * remove without archiving
