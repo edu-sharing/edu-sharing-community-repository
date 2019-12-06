@@ -33,6 +33,7 @@ import {AuthorityAffiliationPipe} from './pipes/authority-affiliation.pipe';
 import { InfoMessageComponent } from './components/info-message/info-message.component';
 import {InputPasswordComponent} from './components/input-password/input-password.component';
 import { LinkComponent } from './components/link/link.component';
+import { UserAvatarComponent } from './components/user-avatar/user-avatar.component';
 
 @NgModule({
     declarations: [
@@ -42,6 +43,7 @@ import { LinkComponent } from './components/link/link.component';
         SortDropdownComponent,
         IconComponent,
         CardComponent,
+        UserAvatarComponent,
         LinkComponent,
         SpinnerComponent,
         BreadcrumbsComponent,
@@ -104,6 +106,7 @@ import { LinkComponent } from './components/link/link.component';
         VideoControlsComponent,
         IconComponent,
         CardComponent,
+        UserAvatarComponent,
         LinkComponent,
         CollectionChooserComponent,
         DropdownComponent,

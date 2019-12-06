@@ -1,1 +1,6 @@
-<div (click)="click.emit()" (keyup.enter)="click.emit()" (keyup.space)="click.emit()" tabindex="0"><ng-content></ng-content></div>
+<div (click)="click.emit();$event.stopPropagation()"
+     (keyup.enter)="click.emit();$event.stopPropagation()"
+     (keyup.space)="click.emit();$event.stopPropagation()"
+     tabindex="0">
+    <ng-content></ng-content>
+</div>
