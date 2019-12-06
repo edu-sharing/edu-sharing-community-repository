@@ -3,7 +3,6 @@ Edu-Sharing-Internal/
 Frontend/.editorconfig
 Frontend/node_modules
 node_modules/
-test/
 Backend/version.properties
 Backend/build.*.properties
 Backend/ng/
