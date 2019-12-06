@@ -92,9 +92,13 @@ public class PersonLifecycleService {
 	private static final String USERHOME_FILES_CC = "USERHOME_CC_FILES";
 	private static final String SHARED_FILES = "SHARED_FILES";
 	private static final String SHARED_FILES_CC = "SHARED_CC_FILES";
-	private static final List<QName> SKIP_ASPECTS = Arrays.asList(
+	private static final List<QName> SKIP_ASPECTS_MOVE = Arrays.asList(
 			QName.createQName(CCConstants.CCM_ASPECT_IO_CHILDOBJECT),
 			QName.createQName(CCConstants.CCM_ASPECT_COLLECTION),
+			QName.createQName(CCConstants.CCM_ASPECT_COLLECTION_IO_REFERENCE)
+	);
+	private static final List<QName> SKIP_ASPECTS_OWNER = Arrays.asList(
+			QName.createQName(CCConstants.CCM_ASPECT_IO_CHILDOBJECT),
 			QName.createQName(CCConstants.CCM_ASPECT_COLLECTION_IO_REFERENCE)
 	);
 	private static final List<QName> SKIP_TYPES = Arrays.asList(
@@ -565,7 +569,7 @@ public class PersonLifecycleService {
 
 	private void moveNodes(List<NodeRef> refs, NodeRef targetRef) {
 		refs.forEach((ref)-> {
-			if (skipNode(ref)) return;
+			if (skipNode(ref,SKIP_ASPECTS_MOVE)) return;
 			RetryingTransactionHelper rth = transactionService.getRetryingTransactionHelper();
 			AtomicBoolean rename= new AtomicBoolean(false);
 			rth.doInTransaction((RetryingTransactionHelper.RetryingTransactionCallback<Void>) () -> {
@@ -599,9 +603,9 @@ public class PersonLifecycleService {
 		});
 	}
 
-	private boolean skipNode(NodeRef ref) {
+	private boolean skipNode(NodeRef ref,List<QName> skipAspects) {
 		Set<QName> aspects = nodeService.getAspects(ref);
-		List<QName> filtered = SKIP_ASPECTS.stream().filter((aspect) -> aspects.contains(aspect)).collect(Collectors.toList());
+		List<QName> filtered = skipAspects.stream().filter((aspect) -> aspects.contains(aspect)).collect(Collectors.toList());
 		if(filtered.size()>0){
 			logger.info("will not move io since it contains a skip aspect "+filtered.get(0)+": "+ref);
 			return true;
@@ -670,7 +674,7 @@ public class PersonLifecycleService {
 		RetryingTransactionHelper rth = transactionService.getRetryingTransactionHelper();
 		rth.doInTransaction((RetryingTransactionHelper.RetryingTransactionCallback<Void>) () -> {
 			children.forEach((ref) -> {
-				if (skipNode(ref)) return;
+				if (skipNode(ref,SKIP_ASPECTS_OWNER)) return;
 				setOwner(ref, userName, options.receiver);
 				policyBehaviourFilter.disableBehaviour(ref);
 				permissionService.setPermission(ref, options.receiverGroup, CCConstants.PERMISSION_COORDINATOR, true);
