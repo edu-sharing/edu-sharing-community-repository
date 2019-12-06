@@ -4,7 +4,6 @@ import {
 } from '@angular/core';
 import {TranslateService} from '@ngx-translate/core';
 import {trigger} from '@angular/animations';
-import {MatDialog, MAT_DIALOG_DATA} from '@angular/material';
 import {UIAnimation} from '../../../core-module/ui/ui-animation';
 import {DialogButton, RestHelper, UIService, Node, UIConstants} from '../../../core-module/core.module';
 import {Helper} from '../../../core-module/rest/helper';
@@ -15,14 +14,12 @@ import {UIHelper} from '../../ui-helper';
   templateUrl: 'card.component.html',
   styleUrls: ['card.component.scss'],
   animations: [
-    trigger('fade', UIAnimation.fade()),
-    trigger('cardAnimation', UIAnimation.cardAnimation())
   ]
 })
 /**
  * A common edu-sharing modal card
  */
-export class CardComponent implements OnDestroy{
+export class CardComponent implements OnDestroy {
   @ViewChild('cardContainer') cardContainer: ElementRef;
   @ViewChild('jumpmarksRef') jumpmarksRef: ElementRef;
   private static modalCards: CardComponent[]= [];
@@ -122,6 +119,7 @@ export class CardComponent implements OnDestroy{
     }
   constructor(private uiService: UIService, private translate: TranslateService){
       CardComponent.modalCards.splice(0, 0, this);
+      document.body.style.overflow = 'hidden';
       UIHelper.waitForComponent(this, 'jumpmarksRef').subscribe(() => {
           console.log('jumpmarks ready');
           setInterval(() => {
@@ -157,6 +155,9 @@ export class CardComponent implements OnDestroy{
   }
   ngOnDestroy(){
       CardComponent.modalCards.splice(CardComponent.modalCards.indexOf(this), 1);
+      if (CardComponent.modalCards.length === 0) {
+          document.body.style.overflow=null;
+      }
   }
   handleEvent(event: any){
     if (event.key == 'Escape'){
