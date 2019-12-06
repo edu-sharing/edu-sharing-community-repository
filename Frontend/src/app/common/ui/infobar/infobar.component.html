@@ -7,16 +7,10 @@
       <div class="message">{{message | translate:messageParameters }}</div>
     </div>
     <div class="infobar-buttons" *ngIf="_buttons">
-      <a *ngFor="let button of _buttons;let i=index" #buttonElements
-         [class.btn-flat]="button.type==2"
-         [class.waves-effect]="button.type==1"
-         [class.waves-light]="button.type==1"
-         [class.btn]="button.type==1"
-         tabindex="0"
-         (focus)="i==0"
-         (keyup.enter)="click(button)"
-         (click)="click(button)"
-      >{{button.name | translate}}</a>
+      <div *ngFor="let button of _buttons;let i=index" #buttonElements>
+          <button mat-raised-button color="white" *ngIf="button.type==1" (click)="click(button)">{{button.name | translate}}</button>
+          <button mat-button color="white" *ngIf="button.type==2" (click)="click(button)">{{button.name | translate}}</button>
+      </div>
     </div>
     <div *ngIf="isCancelable" class="infobar-cancel clickable" (click)="cancel()"><i class="material-icons">close</i></div>
 </div>

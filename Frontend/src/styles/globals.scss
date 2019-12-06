@@ -9,11 +9,14 @@
 */
   //html,body{ @include iosScrolling(); }
 
-html,body,md-card{
+html,body{
   height:100%;
   font-family:'open_sansregular',sans-serif!important;
   font-size:10pt;
   -webkit-font-smoothing: antialiased;
+}
+// storybook no background
+body:not(.sb-show-main) {
   background-color: $backgroundColor;
 }
 a{

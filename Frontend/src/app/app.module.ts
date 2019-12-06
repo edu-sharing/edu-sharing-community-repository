@@ -27,9 +27,10 @@ import {DECLARATIONS_FILE_UPLOAD} from './modules/file-upload/declarations';
 import {CommentsListComponent} from "./modules/management-dialogs/node-comments/comments-list/comments-list.component";
 import {MdsWidgetComponent} from "./common/ui/mds-viewer/widget/mds-widget.component";
 import {MAT_FORM_FIELD_DEFAULT_OPTIONS, MAT_LABEL_GLOBAL_OPTIONS, MAT_TOOLTIP_DEFAULT_OPTIONS} from "@angular/material";
-import {BreadcrumbsComponent} from "./core-ui-module/components/breadcrumbs/breadcrumbs.component";
 import {ButtonsTestComponent} from './common/test/buttons/buttons-test.component';
 import {InputsTestComponent} from './common/test/inputs/inputs-test.component';
+import {UserAvatarTestComponent} from './common/test/user-avatar/user-avatar-test.component';
+import {ModalTestComponent} from './common/test/modal/modal-test.component';
 
 
 // http://blog.angular-university.io/angular2-ngmodule/
@@ -64,7 +65,9 @@ import {InputsTestComponent} from './common/test/inputs/inputs-test.component';
         MdsWidgetComponent,
         CommentsListComponent,
         ButtonsTestComponent,
-        InputsTestComponent
+        InputsTestComponent,
+        UserAvatarTestComponent,
+        ModalTestComponent
     ],
     imports: IMPORTS,
     providers: [

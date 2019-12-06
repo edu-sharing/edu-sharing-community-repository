@@ -8,7 +8,7 @@ import {
     MatCardModule, MatCheckboxModule,
     MatFormFieldModule,
     MatIconModule, MatInputModule,
-    MatMenuModule, MatRadioModule, MatSliderModule, MatSlideToggleModule,
+    MatMenuModule, MatRadioModule, MatSelectModule, MatSliderModule, MatSlideToggleModule,
     MatToolbarModule
 } from "@angular/material";
 import {BrowserModule} from "@angular/platform-browser";
@@ -34,19 +34,21 @@ import {APP_BASE_HREF, LocationStrategy, PathLocationStrategy} from "@angular/co
 import {SpinnerComponent} from "../src/app/core-ui-module/components/spinner/spinner.component";
 import {SpinnerSmallComponent} from "../src/app/core-ui-module/components/spinner-small/spinner-small.component";
 import {InfobarComponent} from "../src/app/common/ui/infobar/infobar.component";
-import {CardComponent} from "../src/app/core-ui-module/components/card/card.component";
-import {UserAvatarComponent} from "../src/app/common/ui/user-avatar/user-avatar.component";
+import {UserAvatarComponent} from "../src/app/core-ui-module/components/user-avatar/user-avatar.component";
 import {BreadcrumbsComponent} from "../src/app/core-ui-module/components/breadcrumbs/breadcrumbs.component";
 import {PoweredByComponent} from "../src/app/common/ui/powered-by/powered-by.component";
 import {DialogButton} from "../src/app/core-module/ui/dialog-button";
-import {Router} from "@angular/router";
+import {Router, RouterModule} from "@angular/router";
 import {CoreBridgeModule} from "../src/app/core-bridge-module/core.bridge.module";
 import {ButtonsTestComponent} from "../src/app/common/test/buttons/buttons-test.component";
 import {InputsTestComponent} from "../src/app/common/test/inputs/inputs-test.component";
+import {UserAvatarTestComponent} from "../src/app/common/test/user-avatar/user-avatar-test.component";
+import {CoreModule} from "../src/app/core-module/core.module";
+import {ModalTestComponent} from "../src/app/common/test/modal/modal-test.component";
 
 const allImports=[
+    CoreModule,
     CoreUiModule,
-    CoreBridgeModule,
     MatCardModule,
     MatButtonModule,
     MatMenuModule,
@@ -55,6 +57,7 @@ const allImports=[
     MatIconModule,
     MatCheckboxModule,
     MatRadioModule,
+    MatSelectModule,
     MatSliderModule,
     MatSlideToggleModule,
     BrowserModule,
@@ -84,37 +87,43 @@ let allProviders=[
     TemporaryStorageService,
     CordovaService,
     Location,
-    { provide: APP_BASE_HREF, useValue: '/' },
-    { provide: LocationStrategy, useClass: PathLocationStrategy },
     RestConnectorService,
     RestIamService,
     UIService,
     RestLocatorService,
     RestNodeService,
     FrameEventsService,
-    {provide: MAT_FORM_FIELD_DEFAULT_OPTIONS, useValue: {appearance: 'outline'}},
-    {provide: MAT_TOOLTIP_DEFAULT_OPTIONS, useValue: {showDelay: 500}}
+    { provide: APP_BASE_HREF, useValue: '/' },
+    { provide: LocationStrategy, useClass: PathLocationStrategy },
+    { provide: MAT_FORM_FIELD_DEFAULT_OPTIONS, useValue: {appearance: 'outline'} },
+    { provide: MAT_TOOLTIP_DEFAULT_OPTIONS, useValue: {showDelay: 500} }
 ];
 
-storiesOf('Spinners & Progress', module)
-    .add('Edu-Sharing', () => ({
-    component: SpinnerComponent,
-    props: {},
-}))
-    .add('Material Small', () => ({
-        component: SpinnerSmallComponent,
-        props: {},
-    }));
 storiesOf('Elements')
     .addDecorator(withKnobs)
     .add('Buttons', () => ({
         component: ButtonsTestComponent,
         moduleMetadata: {
-            imports: allImports
+            imports: allImports,
+            providers: allProviders
         }
     }))
     .add('Inputs', () => ({
         component: InputsTestComponent,
+        moduleMetadata: {
+            imports: allImports,
+            providers: allProviders
+        }
+    }))
+    .add('Modals & Cards', () => ({
+        component: ModalTestComponent,
+        moduleMetadata: {
+            imports: allImports,
+            providers: allProviders
+        }
+    }))
+    .add('User Avatars', () => ({
+        component: UserAvatarTestComponent,
         moduleMetadata: {
             imports: allImports,
             providers: allProviders
@@ -131,29 +140,6 @@ storiesOf('Elements')
         },
         moduleMetadata: {
             imports: allImports
-        }
-    }))
-    .add('Card', () => ({
-        component: CardComponent,
-        props: {
-            title:text('title', 'Title'),
-            subtitle:text('subtitle', 'Subtitle'),
-            isCancelable:boolean('isCancelable', true),
-            width:select('width',['auto','xsmall','small','normal','large','xlarge','xxlarge']),
-            height:select('height',['auto','small','normal','large','xlarge','xxlarge']),
-            buttons:select('buttons',{
-                '':null,
-                'OK':DialogButton.getOk(),
-                'CANCEL':DialogButton.getCancel(),
-                'OK CANCEL':DialogButton.getOkCancel(),
-                'YES NO':DialogButton.getYesNo()
-            }),
-            onCancel:action('onCancel')
-        },
-        //template:'<card>Lorem ipsum</card>',
-        moduleMetadata: {
-            imports: allImports,
-            providers: allProviders
         }
     }))
     /*
@@ -204,21 +190,13 @@ storiesOf('Elements')
         imports: allImports,
         providers: allProviders
     }
-}))
-    .add('User Avatar', () => ({
-    component: UserAvatarComponent,
-    props: {
-        user:select('user', {
-            'Color Test 1': {authorityName:'Test 1'},
-            'Color Test 2': {authorityName:'Test 2'},
-            'Color Test 3': {authorityName:'Test 3'},
-            'Color Test 4': {authorityName:'Test 4'},
-            'Color Test 5': {authorityName:'Test 5'},
-        }),
-        size:select('size',['xsmall','small','medium','large'])
-    },
-    moduleMetadata: {
-        imports: allImports,
-        providers: allProviders
-    }
 }));
+storiesOf('Spinners & Progress', module)
+    .add('Edu-Sharing', () => ({
+        component: SpinnerComponent,
+        props: {},
+    }))
+    .add('Material Small', () => ({
+        component: SpinnerSmallComponent,
+        props: {},
+    }));
