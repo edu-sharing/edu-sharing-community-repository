@@ -22,6 +22,8 @@ export class PermissionsDeleteComponent {
  selectedUsers: User[]= [];
  loading = false;
  columns: ListItem[]= [];
+ deleteResult: string;
+ deleteButtons: DialogButton[];
 
     constructor(
         private iam: RestIamService,
@@ -80,7 +82,9 @@ export class PermissionsDeleteComponent {
         this.columns.push(new ListItem('USER', RestConstants.AUTHORITY_NAME));
         this.columns.push(new ListItem('USER', RestConstants.AUTHORITY_FIRSTNAME));
         this.columns.push(new ListItem('USER', RestConstants.AUTHORITY_LASTNAME));
-
+        this.deleteButtons = DialogButton.getOk(() => {
+            this.deleteResult = null;
+        });
         this.refresh();
     }
 
@@ -146,8 +150,9 @@ export class PermissionsDeleteComponent {
       this.storage.set('delete_users_options', this.options);
       const submit = Helper.deepCopy(this.options);
       delete submit.version;
-      this.admin.deletePersons(this.selectedUsers.map((u) => u.authorityName), submit).subscribe(() => {
+      this.admin.deletePersons(this.selectedUsers.map((u) => u.authorityName), submit).subscribe((result) => {
           this.toast.closeModalDialog();
+          this.deleteResult = JSON.stringify(result, null, 2);
           this.refresh();
       }, (error) => {
           this.toast.error(error);

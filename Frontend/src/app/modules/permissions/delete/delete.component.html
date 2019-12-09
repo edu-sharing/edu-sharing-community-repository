@@ -1,3 +1,16 @@
+<card *ngIf="deleteResult"
+      title="{{'PERMISSIONS.DELETE.RESULTS' | translate}}"
+      icon="delete"
+      width="large"
+      height="xxlarge"
+      [isCancelable]="false"
+      [buttons]="deleteButtons"
+      >
+  <div class="card-result">
+    <textarea matInput [ngModel]="deleteResult" readonly></textarea>
+    <mat-hint>{{'PERMISSIONS.DELETE.RESULTS_HINT' | translate}}</mat-hint>
+  </div>
+</card>
 <div class="wrapper">
   <h2 class="mat-heading-2 mat-heading-underline">{{'PERMISSIONS.DELETE.MAIN_HEADING' | translate}}</h2>
   <div class="group">

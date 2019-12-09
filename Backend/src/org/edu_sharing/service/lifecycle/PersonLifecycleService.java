@@ -163,21 +163,29 @@ public class PersonLifecycleService {
 	}
     */
 	
-	public void deletePersons(List<String> usernames,PersonDeleteOptions options) {
+	public PersonReport deletePersons(List<String> usernames, PersonDeleteOptions options) {
+		List<PersonDeleteResult> results=new ArrayList<>();
 		for(String user : usernames) {
 			NodeRef personNodeRef = personService.getPerson(user);
-			deletePerson(personNodeRef,options);
+			results.add(deletePerson(personNodeRef,options));
 		}
+		PersonReport report=new PersonReport();
+		report.options=options;
+		report.results=results;
+		return report;
 	}
 	
-	private void deletePerson(NodeRef personNodeRef, PersonDeleteOptions options) {
-		String status = (String)nodeService.getProperty(personNodeRef, 
+	private PersonDeleteResult deletePerson(NodeRef personNodeRef, PersonDeleteOptions options) {
+		PersonDeleteResult result=new PersonDeleteResult();
+		String status = (String)nodeService.getProperty(personNodeRef,
 				QName.createQName(CCConstants.CM_PROP_PERSON_ESPERSONSTATUS));
 		String role = (String)nodeService.getProperty(personNodeRef, QName.createQName(CCConstants.CM_PROP_PERSON_EDU_SCHOOL_PRIMARY_AFFILIATION));
 		String userName = (String)nodeService.getProperty(personNodeRef, QName.createQName(CCConstants.CM_PROP_PERSON_USERNAME));
+		result.authorityName=userName;
 
 		// in case some data stays in place (e.g. comments, statistics, ...), we will identify this user with an unique delete timestamp
 		String deletedUsername=CCConstants.AUTHORITY_DELETED_USER+"_"+System.currentTimeMillis();
+		result.deletedName=deletedUsername;
 		if(PersonStatus.todelete.name().equals(status)) {
 			if(hasAssigning(options)){
 				if(options.receiver==null || options.receiver.isEmpty() || options.receiverGroup==null || options.receiverGroup.isEmpty()) {
@@ -190,38 +198,43 @@ public class PersonLifecycleService {
 			//shared files are "mounted" in the user home, so always process them first!
 			//handleSharedFiles(personNodeRef,options); -> is now done via foreignFiles
 
-			List<NodeRef> homeFiles = handleHomeHolder(personNodeRef, options, null);
-			handleHomeHolder(personNodeRef,options,CCConstants.CCM_VALUE_SCOPE_SAFE);
-			handleForeignFiles(personNodeRef,homeFiles,options,null);
-			handleForeignFiles(personNodeRef,homeFiles,options,CCConstants.CCM_VALUE_SCOPE_SAFE);
-			handleCollections(personNodeRef,options);
+			result.homeFolder.put("default",handleHomeHolder(personNodeRef, options, null));
+			List<NodeRef> filesToIgnore=result.homeFolder.get("default").
+					getElements().stream().map((e)->new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE,e.getId())).collect(Collectors.toList());
+			result.homeFolder.put(CCConstants.CCM_VALUE_SCOPE_SAFE,handleHomeHolder(personNodeRef, options, CCConstants.CCM_VALUE_SCOPE_SAFE));
+
+			result.sharedFolders.put("default",handleForeignFiles(personNodeRef,filesToIgnore,options,null));
+			result.sharedFolders.put(CCConstants.CCM_VALUE_SCOPE_SAFE,handleForeignFiles(personNodeRef,filesToIgnore,options,CCConstants.CCM_VALUE_SCOPE_SAFE));
+			result.collections=handleCollections(personNodeRef,options);
 
 			handleStream(personNodeRef,options);
 			if(options.comments.delete){
-				deleteAllOfType(personNodeRef, CCConstants.CCM_TYPE_COMMENT,null);
+				result.comments=deleteAllOfType(personNodeRef, CCConstants.CCM_TYPE_COMMENT,null).size();
 			}
 			else{
-				assignUserToType(personNodeRef, deletedUsername, CCConstants.CCM_TYPE_COMMENT,null);
+				result.comments=assignUserToType(personNodeRef, deletedUsername, CCConstants.CCM_TYPE_COMMENT,null).size();
 			}
 			if(options.ratings.delete) {
 				List<NodeRef> ratings = getAllNodeRefs(userName, CCConstants.CCM_TYPE_RATING,null);
 				ratings.forEach((ref)-> EduSharingRatingCache.delete(nodeService.getPrimaryParent(ref).getParentRef()));
 				deleteAllRefs(ratings);
+				result.ratings=ratings.size();
 			}
 			else{
-				assignUserToType(personNodeRef, deletedUsername, CCConstants.CCM_TYPE_RATING,null);
+				result.ratings=assignUserToType(personNodeRef, deletedUsername, CCConstants.CCM_TYPE_RATING,null).size();
 			}
 			if(options.collectionFeedback.delete){
-				deleteAllOfType(personNodeRef, CCConstants.CCM_TYPE_COLLECTION_FEEDBACK,null);
+				result.collectionFeedback=deleteAllOfType(personNodeRef, CCConstants.CCM_TYPE_COLLECTION_FEEDBACK,null).size();
 			}
 			else{
-				assignUserToType(personNodeRef, deletedUsername, CCConstants.CCM_TYPE_COLLECTION_FEEDBACK,null);
+				result.collectionFeedback=assignUserToType(personNodeRef, deletedUsername, CCConstants.CCM_TYPE_COLLECTION_FEEDBACK,null).size();
 			}
 			handleStatistics(personNodeRef, deletedUsername,options);
 
 			logger.info("deleting person");
 			nodeService.addAspect(personNodeRef, ContentModel.ASPECT_TEMPORARY, null);
 			personService.deletePerson(personNodeRef,true);
+			return result;
 		}
 		else{
 			throw new IllegalArgumentException("Person "+userName+" is not marked for deletion. Cancelling");
@@ -346,25 +359,21 @@ public class PersonLifecycleService {
 		}
 		return null;
 	}
-	private void handleCollections(NodeRef personNodeRef, PersonDeleteOptions options) {
+	private PersonDeleteResult.CollectionCounts handleCollections(NodeRef personNodeRef, PersonDeleteOptions options) {
 		if(options.collections.privateCollections.equals(PersonDeleteOptions.DeleteMode.none) &&
 				options.collections.publicCollections.equals(PersonDeleteOptions.DeleteMode.none)){
-			return;
+			return null;
 		}
+		PersonDeleteResult.CollectionCounts counts=new PersonDeleteResult.CollectionCounts();
 		String userName = (String)nodeService.getProperty(personNodeRef, QName.createQName(CCConstants.CM_PROP_PERSON_USERNAME));
-		NodeRef home = CollectionServiceFactory.getCollectionHome();
-		List<NodeRef> allCollections = NodeServiceFactory.getLocalService().getChildrenRecursive(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE,home.getId(), null,RecurseMode.Folders);
-
-		logger.info("Total collection data to check: "+allCollections.size());
-		List<NodeRef> collections = allCollections.stream().filter((ref) -> ownableService.getOwner(ref).equals(userName)).collect(Collectors.toList());
-		List<NodeRef> collectionsMaps = collections.stream().filter((ref) -> nodeService.hasAspect(ref, QName.createQName(CCConstants.CCM_ASPECT_COLLECTION))).collect(Collectors.toList());
-		List<NodeRef> collectionsIos = collections.stream().filter((ref) -> nodeService.hasAspect(ref, QName.createQName(CCConstants.CCM_ASPECT_COLLECTION_IO_REFERENCE))).collect(Collectors.toList());
-		List<NodeRef> collectionsPath = collections.stream().filter((ref) -> nodeService.getType(ref).equals(QName.createQName(CCConstants.CCM_TYPE_MAP)) && !nodeService.hasAspect(ref, QName.createQName(CCConstants.CCM_ASPECT_COLLECTION))).collect(Collectors.toList());
-
-		// set all path stuff to admin
-		collectionsPath.forEach((ref)->{
-			setOwner(ref,userName, ApplicationInfoList.getHomeRepository().getUsername(), options);
-		});
+		List<NodeRef> collectionsMaps = getAllNodeRefs(userName,CCConstants.CCM_TYPE_MAP,null).stream().
+				filter((ref)->nodeService.hasAspect(ref,QName.createQName(CCConstants.CCM_ASPECT_COLLECTION))).
+				collect(Collectors.toList());
+		List<NodeRef> collectionsIos = getAllNodeRefs(userName,CCConstants.CCM_TYPE_IO,null).stream().
+				filter((ref)->nodeService.hasAspect(ref,QName.createQName(CCConstants.CCM_ASPECT_COLLECTION_IO_REFERENCE))).
+				collect(Collectors.toList());
+		counts.setCollections(convertToElements(collectionsMaps));
+		counts.setRefs(convertToElements(collectionsIos));
 
 		logger.info("Collections where "+userName+" is owner: "+collectionsMaps.size());
 		logger.info("Collection Refs where "+userName+" is owner: "+collectionsIos.size());
@@ -372,7 +381,6 @@ public class PersonLifecycleService {
 			if(options.collections.privateCollections.equals(PersonDeleteOptions.DeleteMode.delete)) {
 				// the maps may be not enough if the user contributed to foreign collections
 				deleteAllRefs(collectionsIos);
-
 				deleteAllRefs(collectionsMaps);
 			}
 			else if(options.collections.privateCollections.equals(PersonDeleteOptions.DeleteMode.assign)) {
@@ -381,7 +389,7 @@ public class PersonLifecycleService {
 				// io references should not support additional permissions (always inherit)
 				collectionsIos.forEach((ref)->setOwner(ref,userName,options.receiver, options));
 			}
-			return;
+			return counts;
 		}
 		throw new IllegalArgumentException("Currently collection deletion does only support the same modes for private and public");
 	}
@@ -393,19 +401,22 @@ public class PersonLifecycleService {
 	 * @param filesToIgnore
 	 * @param options
 	 */
-	private void handleForeignFiles(NodeRef personNodeRef, List<NodeRef> filesToIgnore, PersonDeleteOptions options, String scope) {
+	private PersonDeleteResult.Counts handleForeignFiles(NodeRef personNodeRef, List<NodeRef> filesToIgnore, PersonDeleteOptions options, String scope) {
 		String userName = (String)nodeService.getProperty(personNodeRef, QName.createQName(CCConstants.CM_PROP_PERSON_USERNAME));
 		// getting all ios (files) and maps (folders) where this user is the creator, but not any which should be ignored
 
 		List<NodeRef> refsIO = getAllNodeRefs(userName, CCConstants.CCM_TYPE_IO,scope).stream().
 				filter((ref)->!filesToIgnore.contains(ref)).
 				collect(Collectors.toList());
-		List<NodeRef> refsMaps = getAllNodeRefs(userName, CCConstants.CCM_TYPE_MAP,scope).stream().filter((ref)->!filesToIgnore.contains(ref)).collect(Collectors.toList());;
+		List<NodeRef> refsMaps = getAllNodeRefs(userName, CCConstants.CCM_TYPE_MAP,scope).stream().
+				filter((ref)->!filesToIgnore.contains(ref)).
+				filter((ref)->!nodeService.hasAspect(ref, QName.createQName(CCConstants.CCM_ASPECT_COLLECTION))).
+				collect(Collectors.toList());;
 
 		// split the files by their license type
 		List<NodeRef> filesPrivate = refsIO.stream().filter((ref) -> !hasCCLicense(ref)).collect(Collectors.toList());
 		List<NodeRef> filesCC = refsIO.stream().filter((ref) -> hasCCLicense(ref)).collect(Collectors.toList());
-
+		PersonDeleteResult.Counts counts=new PersonDeleteResult.Counts(convertToElements(refsIO,refsMaps));
 		// handle cc files
 		if(options.sharedFolders.ccFiles.equals(PersonDeleteOptions.DeleteMode.assign) && filesCC.size()>0){
 			// switching the owner
@@ -429,6 +440,19 @@ public class PersonLifecycleService {
 		if(options.sharedFolders.folders.equals(PersonDeleteOptions.FolderDeleteMode.assign)) {
 			setOwnerAndPermissions(refsMaps, userName, options);
 		}
+		return counts;
+	}
+
+	private List<PersonDeleteResult.Element> convertToElements(List<NodeRef>... refs) {
+		List<PersonDeleteResult.Element> result=new ArrayList<>();
+		for (List<NodeRef> ref : refs) {
+			result.addAll(ref.stream().map((r)->
+				new PersonDeleteResult.Element(r.getId(),
+						(String) nodeService.getProperty(r, QName.createQName(CCConstants.CM_NAME)),
+						nodeService.getType(r).toString())
+			).collect(Collectors.toList()));
+		}
+		return result;
 	}
 	/*
 	private void handleSharedFiles(NodeRef personNodeRef, PersonDeleteOptions options) {
@@ -486,7 +510,7 @@ public class PersonLifecycleService {
 	}
 	 */
 
-	private List<NodeRef> handleHomeHolder(NodeRef personNodeRef, PersonDeleteOptions options, String scope) {
+	private PersonDeleteResult.Counts handleHomeHolder(NodeRef personNodeRef, PersonDeleteOptions options, String scope) {
 		NodeRef homeFolder;
 		String userName = (String)nodeService.getProperty(personNodeRef, QName.createQName(CCConstants.CM_PROP_PERSON_USERNAME));
 		if(scope==null){
@@ -497,7 +521,7 @@ public class PersonLifecycleService {
 			homeFolder = scopeUserHomeService.getUserHome((String) nodeService.getProperty(personNodeRef, QName.createQName(CCConstants.CM_PROP_PERSON_USERNAME)), scope, false);
 			if(homeFolder==null){
 				logger.info("Person "+userName+" does not have a scope folder for "+scope+", skipping it");
-				return new ArrayList<>();
+				return new PersonDeleteResult.Counts(new ArrayList<>());
 			}
 		}
 		// remove the dummy EDUGROUP folder first, it will lead to problems otherwise
@@ -507,11 +531,12 @@ public class PersonLifecycleService {
 			logger.info("Deleting the EDUGROUP folder of "+userName);
 		}
 		List<NodeRef> childrens = NodeServiceFactory.getLocalService().getChildrenRecursive(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, homeFolder.getId(), null,RecurseMode.Folders);
+		PersonDeleteResult.Counts counts = new PersonDeleteResult.Counts(convertToElements(childrens));
 		if(options.homeFolder.folders.equals(PersonDeleteOptions.FolderDeleteMode.none)
 				&& options.homeFolder.privateFiles.equals(PersonDeleteOptions.DeleteMode.none)
 				&& options.homeFolder.ccFiles.equals(PersonDeleteOptions.DeleteMode.none)){
 			logger.info("all modes are set to none for home folder, will keep everything in place");
-			return childrens;
+			return counts;
 		}
 		else if(options.homeFolder.folders.equals(PersonDeleteOptions.FolderDeleteMode.assign)
 				&& options.homeFolder.privateFiles.equals(PersonDeleteOptions.DeleteMode.assign)
@@ -525,7 +550,7 @@ public class PersonLifecycleService {
 				nodeService.moveNode(homeFolder,deletedRef,
 						ContentModel.ASSOC_CONTAINS,
 						QName.createQName(CCConstants.NAMESPACE_CCM, (String) nodeService.getProperty(homeFolder, QName.createQName(CCConstants.CM_NAME))));
-				return childrens;
+				return counts;
 			}
 		}
 		if(options.homeFolder.keepFolderStructure){
@@ -565,7 +590,7 @@ public class PersonLifecycleService {
 			}
 		}
 		NodeServiceFactory.getLocalService().removeNode(homeFolder.getId(),null,false);
-		return childrens;
+		return counts;
 	}
 
 	private void moveNodes(List<NodeRef> refs, NodeRef targetRef) {

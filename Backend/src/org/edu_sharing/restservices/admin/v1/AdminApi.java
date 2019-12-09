@@ -65,6 +65,7 @@ import org.edu_sharing.service.admin.model.GlobalGroup;
 import org.edu_sharing.service.admin.model.ServerUpdateInfo;
 import org.edu_sharing.service.lifecycle.PersonDeleteOptions;
 import org.edu_sharing.service.lifecycle.PersonLifecycleService;
+import org.edu_sharing.service.lifecycle.PersonReport;
 import org.edu_sharing.service.nodeservice.NodeServiceFactory;
 import org.edu_sharing.service.nodeservice.NodeServiceHelper;
 import org.edu_sharing.service.search.SearchService.ContentType;
@@ -1205,7 +1206,7 @@ public class AdminApi {
 	@PUT
 	@Path("/deletePersons")
 	@ApiOperation(value = "delete persons", notes = "delete the given persons. Their status must be set to \"todelete\"")
-	@ApiResponses(value = { @ApiResponse(code = 200, message = RestConstants.HTTP_200, response = Void.class),
+	@ApiResponses(value = { @ApiResponse(code = 200, message = RestConstants.HTTP_200, response = PersonReport.class),
 			@ApiResponse(code = 400, message = RestConstants.HTTP_400, response = ErrorResponse.class),
 			@ApiResponse(code = 401, message = RestConstants.HTTP_401, response = ErrorResponse.class),
 			@ApiResponse(code = 403, message = RestConstants.HTTP_403, response = ErrorResponse.class),
@@ -1216,8 +1217,8 @@ public class AdminApi {
 			@ApiParam(value = "options object what and how to delete user contents") PersonDeleteOptions options,
 			@Context HttpServletRequest req) {
 		try {
-			new PersonLifecycleService().deletePersons(username,options);
-			return Response.ok().build();
+			PersonReport result=new PersonLifecycleService().deletePersons(username,options);
+			return Response.ok().entity(result).build();
 		} catch (Throwable t) {
 			return ErrorResponse.createResponse(t);
 		}

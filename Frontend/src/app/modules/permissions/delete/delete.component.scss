@@ -46,3 +46,15 @@
     }
   }
 }
+.card-result{
+  height:100%;
+  display: flex;
+  flex-direction: column;
+  textarea{
+    flex-grow: 1;
+    padding:$cardPadding;
+  }
+  mat-hint{
+    padding: $cardPadding;
+  }
+}

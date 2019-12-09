@@ -140,6 +140,8 @@
       "RECEIVER_GROUP_HINT": "Die Organisation wird Koordinator aller Ordner, Materialien & Sammlungen. Ausgenommen sind Sammlungsreferenzen in fremden Sammlungen",
       "RECEIVER_GROUP": "Organisation suchen...",
       "START": "Vorgang Starten",
+      "RESULTS": "Löschergebnisse",
+      "RESULTS_HINT": "Bitte kopieren und archivieren Sie die Ergebnisse für einen späteren Nachweis der erfolgten Löschung",
       "CONFIRM": {
         "CAPTION": "Vorgang bestätigen",
         "USERS": "Die Aktion wird für alle folgenden Benutzer und deren gespeicherte Daten angewandt:",

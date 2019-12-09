@@ -140,6 +140,7 @@
 <card *ngIf="editGroups || editMembers || addMembers"
       title="{{(addMembers ? 'PERMISSIONS.ADD_MEMBER_TO_GROUP' : editMembers=='ALL' ? 'PERMISSIONS.EDIT_ORG_MEMBERS' : editMembers ? 'PERMISSIONS.EDIT_MEMBERS' : 'PERMISSIONS.EDIT_MEMBER_GROUPS') | translate }}"
       [subtitle]="addMembers ? addMembers.profile.displayName : editMembers ? editMembers.profile.displayName : editGroups.authorityName"
+      icon="person_add"
       width="xlarge"
       height="xlarge"
       [buttons]="memberButtons"
