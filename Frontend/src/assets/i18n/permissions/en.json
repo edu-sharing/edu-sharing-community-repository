@@ -14,7 +14,7 @@
     "MENU_TOOLPERMISSIONS":"Permissions",
     "MENU_TOOLPERMISSIONS_GLOBAL":"Global Permissions",
     "MANAGE_GROUP":"Manage group {{group}}",
-    "ADD_MEMBER_TO_GROUP":"Add users to group {{group}}",
+    "ADD_MEMBER_TO_GROUP":"Add users to group",
     "EDIT_MEMBER_GROUPS":"User is member of",
     "EXPORT_MEMBER":"Export users",
     "ADD_ORG":"Create organization",
@@ -96,7 +96,7 @@
       "todelete": "Marked for deletion"
     },
     "TOOLPERMISSIONS":{
-      "TITLE":"Set permissions for {{name}}",
+      "TITLE":"Set permissions",
       "EVERYONE_ALLOWED":"Initial value for all groups & users",
       "MEMBERS_ALLOWED":"Applies to all members",
       "USER_ALLOWED":"Applies to all selected users",
