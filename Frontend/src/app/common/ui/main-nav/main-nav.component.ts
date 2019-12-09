@@ -361,87 +361,88 @@ export class MainNavComponent implements AfterViewInit{
               private toast : Toast){
     // get last buttons from cache for faster app navigation
     this.sidebarButtons=this.storage.get(TemporaryStorageService.MAIN_NAV_BUTTONS,[]);
-    this.connector.getAbout().subscribe((about)=> {
-        this.about = about;
-        this.connector.isLoggedIn().subscribe((data: LoginResult) => {
-            if (!data.isValidLogin) {
-                this.canOpen = data.isGuest;
-                this.checkConfig([]);
-                return;
-            }
-            setInterval(() => this.updateTimeout(), 1000);
-            this.toolpermissions = data.toolPermissions;
-            this.canAccessWorkspace = this.toolpermissions && this.toolpermissions.indexOf(RestConstants.TOOLPERMISSION_WORKSPACE) != -1;
-
-            this.route.queryParams.subscribe((params: Params) => {
-                let buttons: any = [];
-                if (params["noNavigation"] == "true")
-                    this.canOpen = false;
-
-                let reurl = null;
-                if (params["reurl"])
-                    reurl = {reurl: params["reurl"], applyDirectories: params["applyDirectories"]};
-                this.showNodeStore = params['nodeStore'] == "true";
-                if (!data.isGuest && this.canAccessWorkspace) {
-                    //buttons.push({url:this.connector.getAbsoluteEndpointUrl()+"../classic.html",scope:'workspace_old',icon:"cloud",name:"SIDEBAR.WORKSPACE_OLD"});
-                    buttons.push({
-                        //isSeperate:true,
-                        path: 'workspace/files',
-                        scope: 'workspace',
-                        icon: "cloud",
-                        name: "SIDEBAR.WORKSPACE",
-                        queryParams: reurl
-                    });
+    this.connector.setRoute(this.route).subscribe(()=> {
+        this.connector.getAbout().subscribe((about) => {
+            this.about = about;
+            this.connector.isLoggedIn().subscribe((data: LoginResult) => {
+                if (!data.isValidLogin) {
+                    this.canOpen = data.isGuest;
+                    this.checkConfig([]);
+                    return;
                 }
-                buttons.push({
-                    path: 'search',
-                    scope: 'search',
-                    icon: "search",
-                    name: "SIDEBAR.SEARCH",
-                    queryParams: reurl
-                });
-                buttons.push({
-                    path: 'collections',
-                    scope: 'collections',
-                    icon: "layers",
-                    name: "SIDEBAR.COLLECTIONS",
-                    queryParams: reurl
-                });
-                if (data.isGuest) {
-                    buttons.push({path: 'login', scope: 'login', icon: "person", name: "SIDEBAR.LOGIN"});
-                }
-                this.isGuest = data.isGuest;
-                this.isAdmin = data.isAdmin;
-                this._showUser = this.currentScope != 'login' && this.showUser;
-                this.iam.getUser().subscribe((user: IamUser) => {
-                    this.user = user;
-                    this.canEditProfile = user.editProfile;
-                    this.configService.getAll().subscribe(() => {
-                        this.userName = ConfigurationHelper.getPersonWithConfigDisplayName(this.user.person, this.configService);
-                    });
-                    if (data.statusCode == RestConstants.STATUS_CODE_OK) {
-                        setTimeout(() => {
-                            this.tutorialElement = this.userRef;
+                setInterval(() => this.updateTimeout(), 1000);
+                this.toolpermissions = data.toolPermissions;
+                this.canAccessWorkspace = this.toolpermissions && this.toolpermissions.indexOf(RestConstants.TOOLPERMISSION_WORKSPACE) != -1;
+
+                this.route.queryParams.subscribe((params: Params) => {
+                    let buttons: any = [];
+                    if (params["noNavigation"] == "true")
+                        this.canOpen = false;
+
+                    let reurl = null;
+                    if (params["reurl"])
+                        reurl = {reurl: params["reurl"], applyDirectories: params["applyDirectories"]};
+                    this.showNodeStore = params['nodeStore'] == "true";
+                    if (!data.isGuest && this.canAccessWorkspace) {
+                        //buttons.push({url:this.connector.getAbsoluteEndpointUrl()+"../classic.html",scope:'workspace_old',icon:"cloud",name:"SIDEBAR.WORKSPACE_OLD"});
+                        buttons.push({
+                            //isSeperate:true,
+                            path: 'workspace/files',
+                            scope: 'workspace',
+                            icon: "cloud",
+                            name: "SIDEBAR.WORKSPACE",
+                            queryParams: reurl
                         });
                     }
-                });
-                this.onInvalidNodeStore = new Boolean(true);
-                this.connector.hasAccessToScope(RestConstants.SAFE_SCOPE).subscribe((data: AccessScope) => {
-                    // safe needs access and not be app (oauth not supported)
-                    if (data.hasAccess && !this.cordova.isRunningCordova())
-                        buttons.push({
-                            path: 'workspace/safe',
-                            scope: 'safe',
-                            icon: "lock",
-                            name: "SIDEBAR.SECURE",
-                            onlyDesktop: true
+                    buttons.push({
+                        path: 'search',
+                        scope: 'search',
+                        icon: "search",
+                        name: "SIDEBAR.SEARCH",
+                        queryParams: reurl
+                    });
+                    buttons.push({
+                        path: 'collections',
+                        scope: 'collections',
+                        icon: "layers",
+                        name: "SIDEBAR.COLLECTIONS",
+                        queryParams: reurl
+                    });
+                    if (data.isGuest) {
+                        buttons.push({path: 'login', scope: 'login', icon: "person", name: "SIDEBAR.LOGIN"});
+                    }
+                    this.isGuest = data.isGuest;
+                    this.isAdmin = data.isAdmin;
+                    this._showUser = this.currentScope != 'login' && this.showUser;
+                    this.iam.getUser().subscribe((user: IamUser) => {
+                        this.user = user;
+                        this.canEditProfile = user.editProfile;
+                        this.configService.getAll().subscribe(() => {
+                            this.userName = ConfigurationHelper.getPersonWithConfigDisplayName(this.user.person, this.configService);
                         });
-                    this.addMoreButtons(buttons);
-                }, (error: any) => this.addMoreButtons(buttons));
+                        if (data.statusCode == RestConstants.STATUS_CODE_OK) {
+                            setTimeout(() => {
+                                this.tutorialElement = this.userRef;
+                            });
+                        }
+                    });
+                    this.onInvalidNodeStore = new Boolean(true);
+                    this.connector.hasAccessToScope(RestConstants.SAFE_SCOPE).subscribe((data: AccessScope) => {
+                        // safe needs access and not be app (oauth not supported)
+                        if (data.hasAccess && !this.cordova.isRunningCordova())
+                            buttons.push({
+                                path: 'workspace/safe',
+                                scope: 'safe',
+                                icon: "lock",
+                                name: "SIDEBAR.SECURE",
+                                onlyDesktop: true
+                            });
+                        this.addMoreButtons(buttons);
+                    }, (error: any) => this.addMoreButtons(buttons));
+                });
             });
         });
     });
-
     event.addListener(this);
   }
 
