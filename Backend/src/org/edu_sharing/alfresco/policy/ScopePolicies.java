@@ -180,7 +180,6 @@ public class ScopePolicies implements BeforeDeleteNodePolicy, OnCreateNodePolicy
 	@Override
 	public void beforeUpdateNode(NodeRef nodeRef) {
 		QName type = nodeService.getType(nodeRef);
-		logger.info(type);
 		logger.debug(type + " nodeRef:" + nodeRef);
 		throwIfWrongScope(nodeRef);
 	}
@@ -192,7 +191,7 @@ public class ScopePolicies implements BeforeDeleteNodePolicy, OnCreateNodePolicy
 		// Set the current scope of the user as a property to the created node
 		String currentScope=NodeServiceInterceptor.getEduSharingScope();
 		QName type = nodeService.getType(eduNodeRef);
-		logger.info(type);
+		logger.debug(type);
 		
 		if(type.equals(ContentModel.TYPE_THUMBNAIL)){
 			currentScope=(String) nodeService.getProperty(childAssocRef.getParentRef(),QName.createQName(CCConstants.CCM_PROP_EDUSCOPE_NAME));
