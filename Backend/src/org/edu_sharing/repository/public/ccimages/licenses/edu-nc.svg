@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<svg width="100%" height="100%" viewBox="0 0 70 17" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" xml:space="preserve" xmlns:serif="http://www.serif.com/" style="fill-rule:evenodd;clip-rule:evenodd;stroke-linejoin:round;stroke-miterlimit:1.41421;">
+    <g transform="matrix(1,0,0,1,0,-4.38845)">
+        <g transform="matrix(1,0,0,1,-30.3925,0)">
+            <path d="M89.576,12.033L92.47,12.033L92.47,10.617L87.481,10.617C87.595,10.142 87.813,9.699 88.12,9.319C88.72,8.597 89.626,8.197 90.564,8.242C91.323,8.257 92.072,8.42 92.769,8.721L93.328,6.456C92.382,6.054 91.363,5.85 90.335,5.857C88.588,5.82 86.909,6.55 85.745,7.853C85.413,8.274 85.138,8.737 84.927,9.23L89.576,12.033Z" style="fill-rule:nonzero;"/>
+        </g>
+        <g transform="matrix(1,0,0,1,-30.3925,0)">
+            <path d="M91.133,12.961L92.47,13.77L92.47,12.961L91.133,12.961Z" style="fill-rule:nonzero;"/>
+        </g>
+        <g transform="matrix(0.515188,-0.857077,0.857077,0.515188,1.64668,81.7294)">
+            <rect x="86.872" y="1.287" width="2.993" height="22.51"/>
+        </g>
+        <g transform="matrix(1,0,0,1,-30.3925,0)">
+            <path d="M90.255,16.743C89.444,16.697 88.682,16.34 88.13,15.745C88.006,15.596 87.902,15.432 87.82,15.256L83.929,12.971L83.041,12.971L83.041,14.388L84.328,14.388C84.488,15.331 84.886,16.217 85.485,16.963C86.655,18.437 88.453,19.277 90.335,19.228C91.351,19.226 92.354,18.994 93.268,18.549L90.255,16.743Z" style="fill-rule:nonzero;"/>
+        </g>
+    </g>
+    <g transform="matrix(1,0,0,1,0,-4.38845)">
+        <path id="b050b6b8-320c-4ba0-811f-1c593f8fa383" d="M14.363,15.186L12.776,12.472L14.363,9.758L17.526,9.758L19.072,12.472L17.486,15.186L14.363,15.186" style="fill-rule:nonzero;"/>
+        <path id="d181e415-9943-4436-81b3-746afcfa0892" d="M8.805,11.974L7.218,9.24L8.805,6.526L11.968,6.526L13.554,9.24L11.968,11.974L8.805,11.974" style="fill-rule:nonzero;"/>
+        <path id="_559f5723-e0f1-4fe5-a1b2-4c08b24ada32" serif:id="559f5723-e0f1-4fe5-a1b2-4c08b24ada32" d="M8.805,18.419L7.218,15.705L8.805,12.971L11.968,12.971L13.554,15.685L11.968,18.399L8.805,18.399" style="fill-rule:nonzero;"/>
+    </g>
+    <g transform="matrix(1,0,0,1,0,-4.38845)">
+        <rect x="28.821" y="13.54" width="9.06" height="2.135"/>
+        <rect x="28.821" y="9.529" width="9.06" height="2.135"/>
+    </g>
+</svg>

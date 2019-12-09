@@ -65,6 +65,8 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
+import freemarker.ext.servlet.AllHttpScopesHashModel;
+
 /**
  * @author rudi start jobs, start scheduling of an job, stop scheduling of a job
  */
@@ -222,6 +224,18 @@ public class JobHandler {
 					
 					
 					
+					/**
+					 * don't veto
+					 * Allow jobs to run independend of other jobs
+					 */
+					Class[] allJobs = ((AbstractJob)jobExecutionContext.getJobInstance()).getJobClasses();
+					if(allJobs == null || allJobs.length == 0) {
+						return false;
+					}
+					
+					/**
+					 * veto if there is another job running
+					 */
 					List currentlyExecutingJobsList = jobExecutionContext.getScheduler().getCurrentlyExecutingJobs();
 					boolean veto = false;
 					for (Object o : currentlyExecutingJobsList) {

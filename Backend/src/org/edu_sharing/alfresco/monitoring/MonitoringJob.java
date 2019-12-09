@@ -1,4 +1,4 @@
-package org.edu_sharing.repository.server.monitoring;
+package org.edu_sharing.alfresco.monitoring;
 
 import java.util.Arrays;
 import java.util.HashMap;

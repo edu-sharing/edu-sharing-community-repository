@@ -32,6 +32,7 @@ import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.server.tools.ApplicationInfo;
 import org.edu_sharing.repository.server.tools.ApplicationInfoList;
 import org.edu_sharing.repository.server.tools.KeyTool;
+import org.edu_sharing.restservices.admin.v1.Application;
 import org.edu_sharing.service.authentication.sso.config.Condition;
 import org.edu_sharing.service.authentication.sso.config.CustomGroupMapping;
 import org.edu_sharing.service.authentication.sso.config.MappingGroup;
@@ -132,6 +133,10 @@ public class SSOAuthorityMapper {
 	}
 
 	public static String mapAdminAuthority(String authority,String appid){
+		// when coming from the native app, do not scope
+		if(ApplicationInfoList.getHomeRepository().getAppId().equals(appid)){
+			return authority;
+		}
 		return AuthenticationUtil.runAsSystem(()-> {
 			ApplicationContext applicationContext = AlfAppContextGate.getApplicationContext();
 			ServiceRegistry serviceRegistry = (ServiceRegistry) applicationContext.getBean("ServiceRegistry");
