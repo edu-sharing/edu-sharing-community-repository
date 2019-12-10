@@ -618,7 +618,7 @@ export class UIHelper{
         const domElem = (component.hostView as EmbeddedViewRef<any>)
             .rootNodes[0] as HTMLElement;
         domElem.style.display='none';
-        targetElement.innerHTML=null;
+        targetElement.innerHTML='';
         targetElement.appendChild(domElem);
         setTimeout(()=>{
             domElem.style.display=null;
