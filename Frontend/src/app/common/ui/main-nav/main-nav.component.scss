@@ -302,7 +302,7 @@ user-profile{
   display: inline-block;
 }
 .topBar .help{
-  margin-top: 15px;
+  margin-top: 10px;
   margin-right: 15px;
 }
 .topBar .user span{
@@ -409,7 +409,7 @@ $licenseInfoHeight:40px;
   display:none;
 }
 .topbar-search-right{
-  display: contents;
+  display: flex;
 }
 @media screen and (max-width: ($mobileWidth+$mobileStage*5)) {
   .searchInputGroup{
