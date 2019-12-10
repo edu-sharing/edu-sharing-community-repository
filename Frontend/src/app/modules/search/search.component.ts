@@ -665,7 +665,9 @@ export class SearchComponent {
         options.push(collection);
     }
     let stream = this.actionbar.createOptionIfPossible('ADD_TO_STREAM', nodes, (node: Node) => this.addToStream(node));
-    options.push(stream);
+    if(stream) {
+      options.push(stream);
+    }
     let variant = this.actionbar.createOptionIfPossible('CREATE_VARIANT', nodes, (node: Node) => this.nodeVariant = ActionbarHelperService.getNodes(nodes, node)[0]);
     if (variant)
         options.push(variant);
