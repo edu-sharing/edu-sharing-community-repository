@@ -3,7 +3,7 @@
     "TITLE": "Profile of {{ name }}",
     "TITLE_NAV": "Profile",
     "LOAD_ERROR": "Profile could not be found.",
-    "EDIT":"bearbeiten",
+    "EDIT":"edit",
     "CANCEL_EDIT":"cancel",
     "ABOUT_LABEL":"about me",
     "NO_ABOUT":"This user has not created a description yet.",
