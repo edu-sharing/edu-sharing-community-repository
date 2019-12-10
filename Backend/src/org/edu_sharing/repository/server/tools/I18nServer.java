@@ -149,7 +149,7 @@ public class I18nServer {
 	}
 	
 	
-	public static String getTranslation(String key,String language,String country, String resourceBoundle){
+	private static String getTranslation(String key,String language,String country, String resourceBoundle){
 		logger.debug("key:"+key+" lang:"+language+" country:"+country);
 		Locale currentLocale;
         ResourceBundle messages;

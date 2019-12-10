@@ -1960,9 +1960,7 @@ public class CCConstants {
 	public static final String LONG_DATE_SUFFIX = "_LONG";
 	public static final String DISPLAYNAME_SUFFIX = "_DISPLAYNAME";
 
-	public static final String I18N_CLIENTBUNDLE = "org.edu_sharing.repository.client.CCSearchI18n";
-
-	public static final String I18N_METADATASETBUNDLE = "org.edu_sharing.metadataset.CCSearchI18n";
+	public static final String I18N_METADATASETBUNDLE = "org.edu_sharing.metadataset.v2.i18n.mds";
 
 	public static final String SESSION_FEDERATED_AUTH = "SESSION_FEDERATED_AUTH";
 
