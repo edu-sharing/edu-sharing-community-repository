@@ -29,8 +29,6 @@ package org.edu_sharing.repository.client.tools.forms;
 
 import java.util.HashMap;
 
-import org.edu_sharing.repository.client.rpc.metadataset.Validator;
-import org.edu_sharing.repository.client.rpc.metadataset.ValidatorMandatoryField;
 import org.edu_sharing.repository.client.tools.CCConstants;
 
 
@@ -343,22 +341,6 @@ public class CCForms {
 		}
 		boolean result = (isMultiValue.get(property) == null) ? false : isMultiValue.get(property);
 		return result;
-	}
-	
-	
-	private static HashMap<String,Validator[]> propValidators = null;
-	
-	public static Validator[] getValidators(String property){
-		if(propValidators == null){
-			propValidators = new HashMap<String,Validator[]>();
-			propValidators.put(CCConstants.LOM_PROP_GENERAL_TITLE, new Validator[]{new ValidatorMandatoryField()});
-			propValidators.put(CCConstants.LOM_PROP_GENERAL_KEYWORD, new Validator[]{new ValidatorMandatoryField()});
-			propValidators.put(CCConstants.LOM_PROP_TAXON_ENTRY, new Validator[]{new ValidatorMandatoryField()});
-			//propValidators.put(CCConstants.LOM_PROP_EDUCATIONAL_LEARNINGRESOURCETYPE, new Validator[]{new MandatoryField()});
-			
-		}
-		
-		return propValidators.get(property);
 	}
 	
 }

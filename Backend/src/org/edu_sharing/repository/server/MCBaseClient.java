@@ -233,21 +233,7 @@ public abstract class MCBaseClient {
 	 */
 	public abstract boolean hasContent(String nodeId, String contentProp) throws Exception;
 	
-	
-	
-	/**
-	 * the default edu-sharing search method 
-	 * 
-	 * @param searchToken an object that contains information like the search criterias, the repository, from-to range for browsing ...
-	 * @return SearchResult an object that contains all the nodes that where found with all their properties
-	 * @throws Throwable
-	 */
-	public abstract SearchResult search(SearchToken searchToken) throws Throwable;
-	
-	
-	public abstract SearchResult searchRecommend(int startIdx, int nrOfResults) throws Throwable;
-	
-	
+
 	/**
 	 * returns a html snippet for the details panel. useful for no edu-sharing repositories 
 	 * 

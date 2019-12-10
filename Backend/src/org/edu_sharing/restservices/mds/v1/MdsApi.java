@@ -14,7 +14,6 @@ import org.edu_sharing.restservices.ApiService;
 import org.edu_sharing.restservices.DAOMissingException;
 import org.edu_sharing.restservices.DAOSecurityException;
 import org.edu_sharing.restservices.DAOValidationException;
-import org.edu_sharing.restservices.MdsDao;
 import org.edu_sharing.restservices.MdsDaoV2;
 import org.edu_sharing.restservices.RepositoryDao;
 import org.edu_sharing.restservices.RestConstants;
@@ -41,281 +40,136 @@ public class MdsApi {
 
 	private static Logger logger = Logger.getLogger(MdsApi.class);
 
-    @GET
-    @Path("/metadatasets/{repository}")
-        
-    @ApiOperation(
-    	value = "Get metadata sets of repository.", 
-    	notes = "Get metadata sets of repository.")
-    
-    @ApiResponses(
-    	value = { 
-	        @ApiResponse(code = 200, message = "OK.", response = MdsEntries.class),        
-	        @ApiResponse(code = 400, message = "Preconditions are not present.", response = ErrorResponse.class),        
-	        @ApiResponse(code = 401, message = "Authorization failed.", response = ErrorResponse.class),        
-	        @ApiResponse(code = 403, message = "Session user has insufficient rights to perform this operation.", response = ErrorResponse.class),        
-	        @ApiResponse(code = 404, message = "Ressources are not found.", response = ErrorResponse.class), 
-	        @ApiResponse(code = 500, message = "Fatal error occured.", response = ErrorResponse.class) 
-	    })
+	@GET
+	@Path("/metadatasetsV2/{repository}")
 
-    public Response getMetadataSets(
-    	@ApiParam(value = "ID of repository (or \"-home-\" for home repository)",required=true, defaultValue="-home-" ) @PathParam("repository") String repository,
-		@Context HttpServletRequest req) {
-    	
-    	try {
-    			    		    	
-	    	RepositoryDao repoDao = RepositoryDao.getRepository(repository);
+	@ApiOperation(
+			value = "Get metadata sets V2 of repository.",
+			notes = "Get metadata sets V2 of repository.")
 
-	    	MdsEntries response = new MdsEntries();
-	    	response.setMetadatasets(MdsDao.getAllMdsDesc(repoDao));
-	    	
-	    	return Response.status(Response.Status.OK).entity(response).build();
-	
-    	} catch (DAOValidationException t) {
-    		
-    		logger.warn(t.getMessage(), t);
-    		return Response.status(Response.Status.BAD_REQUEST).entity(new ErrorResponse(t)).build();
-    		
-    	} catch (DAOSecurityException t) {
-    		
-    		logger.warn(t.getMessage(), t);
-    		return Response.status(Response.Status.FORBIDDEN).entity(new ErrorResponse(t)).build();
-    		
-    	} catch (DAOMissingException t) {
-    		
-    		logger.warn(t.getMessage(), t);
-    		return Response.status(Response.Status.NOT_FOUND).entity(new ErrorResponse(t)).build();
-    		
-    	} catch (Throwable t) {
-    		
-    		logger.error(t.getMessage(), t);
-    		return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(new ErrorResponse(t)).build();
-    	}
+	@ApiResponses(
+			value = {
+					@ApiResponse(code = 200, message = "OK.", response = MdsEntriesV2.class),
+					@ApiResponse(code = 400, message = "Preconditions are not present.", response = ErrorResponse.class),
+					@ApiResponse(code = 401, message = "Authorization failed.", response = ErrorResponse.class),
+					@ApiResponse(code = 403, message = "Session user has insufficient rights to perform this operation.", response = ErrorResponse.class),
+					@ApiResponse(code = 404, message = "Ressources are not found.", response = ErrorResponse.class),
+					@ApiResponse(code = 500, message = "Fatal error occured.", response = ErrorResponse.class)
+			})
 
-    }
-	
-    @OPTIONS    
-    @Path("/metadatasets/{repository}")
-    @ApiOperation(hidden = true, value = "")
+	public Response getMetadataSetsV2(
+			@ApiParam(value = "ID of repository (or \"-home-\" for home repository)",required=true, defaultValue="-home-" ) @PathParam("repository") String repository,
+			@Context HttpServletRequest req) {
 
-    public Response options1() {
-    	
-    	return Response.status(Response.Status.OK).header("Allow", "OPTIONS, GET").build();
-    }
-    @GET
-    @Path("/metadatasetsV2/{repository}")
-        
-    @ApiOperation(
-    	value = "Get metadata sets V2 of repository.", 
-    	notes = "Get metadata sets V2 of repository.")
-    
-    @ApiResponses(
-    	value = { 
-	        @ApiResponse(code = 200, message = "OK.", response = MdsEntriesV2.class),        
-	        @ApiResponse(code = 400, message = "Preconditions are not present.", response = ErrorResponse.class),        
-	        @ApiResponse(code = 401, message = "Authorization failed.", response = ErrorResponse.class),        
-	        @ApiResponse(code = 403, message = "Session user has insufficient rights to perform this operation.", response = ErrorResponse.class),        
-	        @ApiResponse(code = 404, message = "Ressources are not found.", response = ErrorResponse.class), 
-	        @ApiResponse(code = 500, message = "Fatal error occured.", response = ErrorResponse.class) 
-	    })
-
-    public Response getMetadataSetsV2(
-    	@ApiParam(value = "ID of repository (or \"-home-\" for home repository)",required=true, defaultValue="-home-" ) @PathParam("repository") String repository,
-		@Context HttpServletRequest req) {
-
-    	try {
+		try {
 
 			if(RepoProxyFactory.getRepoProxy().myTurn(repository)) {
 				return RepoProxyFactory.getRepoProxy().getMetadataSetsV2(repository, req);
 			}
-    			    		    	
-	    	RepositoryDao repoDao = RepositoryDao.getRepository(repository);
-	    	MdsEntriesV2 result=new MdsEntriesV2();
-	    	result.setMetadatasets(MdsDaoV2.getAllMdsDesc(repoDao));
-	    	
-	    	return Response.status(Response.Status.OK).entity(result).build();
-	
-    	} catch (Throwable t) {
-    		return ErrorResponse.createResponse(t);
-    	}
 
-    }
-    @GET
-    @Path("/metadatasets/{repository}/{metadataset}")
-        
-    @ApiOperation(
-    	value = "Get metadata set.", 
-    	notes = "Get metadata set.")
-    
-    @ApiResponses(
-    	value = { 
-	        @ApiResponse(code = 200, message = RestConstants.HTTP_200, response = MdsEntry.class),        
-	        @ApiResponse(code = 400, message = RestConstants.HTTP_400, response = ErrorResponse.class),        
-	        @ApiResponse(code = 401, message = RestConstants.HTTP_401, response = ErrorResponse.class),        
-	        @ApiResponse(code = 403, message = RestConstants.HTTP_403, response = ErrorResponse.class),        
-	        @ApiResponse(code = 404, message = RestConstants.HTTP_404, response = ErrorResponse.class), 
-	        @ApiResponse(code = 500, message = RestConstants.HTTP_500, response = ErrorResponse.class) 
-	    })
+			RepositoryDao repoDao = RepositoryDao.getRepository(repository);
+			MdsEntriesV2 result=new MdsEntriesV2();
+			result.setMetadatasets(MdsDaoV2.getAllMdsDesc(repoDao));
 
-    public Response getMetadataSet(
-    	@ApiParam(value = "ID of repository (or \"-home-\" for home repository)",required=true, defaultValue="-home-" ) @PathParam("repository") String repository,
-    	@ApiParam(value = "ID of metadataset (or \"-default-\" for default metadata set)",required=true, defaultValue="-default-" ) @PathParam("metadataset") String mdsId,
-		@Context HttpServletRequest req) {
-    	
-    	try {
-    			    		    	
-	    	RepositoryDao repoDao = RepositoryDao.getRepository(repository);	    	
-	    	MdsDao mds = MdsDao.getMds(repoDao, mdsId);
-	    	
-	    	MdsEntry response = new MdsEntry();
-	    	response.setMds(mds.asMds());
-	    	
-	    	return Response.status(Response.Status.OK).entity(response).build();
-	    	//return Response.status(Response.Status.OK).entity((MdsDaoV2.getMds(repoDao, mdsId).asMds())).build();
-	
-    	} catch (Throwable t) {
-    		return ErrorResponse.createResponse(t);    		
-    	}
+			return Response.status(Response.Status.OK).entity(result).build();
 
-    }
-    @GET
-    @Path("/metadatasetsV2/{repository}/{metadataset}")
-        
-    @ApiOperation(
-    	value = "Get metadata set new.", 
-    	notes = "Get metadata set new.")
-    
-    @ApiResponses(
-    	value = { 
-	        @ApiResponse(code = 200, message = RestConstants.HTTP_200, response = MdsV2.class),        
-	        @ApiResponse(code = 400, message = RestConstants.HTTP_400, response = ErrorResponse.class),        
-	        @ApiResponse(code = 401, message = RestConstants.HTTP_401, response = ErrorResponse.class),        
-	        @ApiResponse(code = 403, message = RestConstants.HTTP_403, response = ErrorResponse.class),        
-	        @ApiResponse(code = 404, message = RestConstants.HTTP_404, response = ErrorResponse.class), 
-	        @ApiResponse(code = 500, message = RestConstants.HTTP_500, response = ErrorResponse.class) 
-	    })
+		} catch (Throwable t) {
+			return ErrorResponse.createResponse(t);
+		}
 
-    public Response getMetadataSetV2(
-    	@ApiParam(value = "ID of repository (or \"-home-\" for home repository)",required=true, defaultValue="-home-" ) @PathParam("repository") String repository,
-    	@ApiParam(value = "ID of metadataset (or \"-default-\" for default metadata set)",required=true, defaultValue="-default-" ) @PathParam("metadataset") String mdsId,
-		@Context HttpServletRequest req) {
+	}
+	@GET
+	@Path("/metadatasetsV2/{repository}/{metadataset}")
 
-    	try {
+	@ApiOperation(
+			value = "Get metadata set new.",
+			notes = "Get metadata set new.")
+
+	@ApiResponses(
+			value = {
+					@ApiResponse(code = 200, message = RestConstants.HTTP_200, response = MdsV2.class),
+					@ApiResponse(code = 400, message = RestConstants.HTTP_400, response = ErrorResponse.class),
+					@ApiResponse(code = 401, message = RestConstants.HTTP_401, response = ErrorResponse.class),
+					@ApiResponse(code = 403, message = RestConstants.HTTP_403, response = ErrorResponse.class),
+					@ApiResponse(code = 404, message = RestConstants.HTTP_404, response = ErrorResponse.class),
+					@ApiResponse(code = 500, message = RestConstants.HTTP_500, response = ErrorResponse.class)
+			})
+
+	public Response getMetadataSetV2(
+			@ApiParam(value = "ID of repository (or \"-home-\" for home repository)",required=true, defaultValue="-home-" ) @PathParam("repository") String repository,
+			@ApiParam(value = "ID of metadataset (or \"-default-\" for default metadata set)",required=true, defaultValue="-default-" ) @PathParam("metadataset") String mdsId,
+			@Context HttpServletRequest req) {
+
+		try {
 
 			if(RepoProxyFactory.getRepoProxy().myTurn(repository)) {
 				return RepoProxyFactory.getRepoProxy().getMetadataSetV2(repository, mdsId, req);
 			}
 
 			RepositoryDao repoDao = RepositoryDao.getRepository(repository);
-	    
-	    	return Response.status(Response.Status.OK).entity((MdsDaoV2.getMds(repoDao, mdsId).asMds())).build();
-	
-    	} catch (Throwable t) {
-    		return ErrorResponse.createResponse(t);    		
-    	}
 
-    }
-    
-    @OPTIONS    
-    @Path("/metadatasets/{repository}/{metadataset}")
-    @ApiOperation(hidden = true, value = "")
+			return Response.status(Response.Status.OK).entity((MdsDaoV2.getMds(repoDao, mdsId).asMds())).build();
 
-    public Response options2() {
-    	
-    	return Response.status(Response.Status.OK).header("Allow", "OPTIONS, GET").build();
-    }
-    
-    
-    /**
-     * 
-    */
-    
-    @POST
-    @Path("/metadatasetsV2/{repository}/{metadataset}/values")
-        
-    @ApiOperation(
-    	value = "Get values.", 
-    	notes = "Get values.")
-    
-    @ApiResponses(
-    	value = { 
-	        @ApiResponse(code = 200, message = "OK.", response = MdsEntry.class),        
-	        @ApiResponse(code = 400, message = "Preconditions are not present.", response = ErrorResponse.class),        
-	        @ApiResponse(code = 401, message = "Authorization failed.", response = ErrorResponse.class),        
-	        @ApiResponse(code = 403, message = "Session user has insufficient rights to perform this operation.", response = ErrorResponse.class),        
-	        @ApiResponse(code = 404, message = "Ressources are not found.", response = ErrorResponse.class), 
-	        @ApiResponse(code = 500, message = "Fatal error occured.", response = ErrorResponse.class) 
-	    })
-    public Response getValuesV2(
-        	@ApiParam(value = "ID of repository (or \"-home-\" for home repository)",required=true, defaultValue="-home-" ) @PathParam("repository") String repository,
-        	@ApiParam(value = "ID of metadataset (or \"-default-\" for default metadata set)",required=true, defaultValue="-default-" ) @PathParam("metadataset") String mdsId,
-        	@ApiParam(value = "suggestionParam") SuggestionParam suggestionParam,
-    		@Context HttpServletRequest req) {
+		} catch (Throwable t) {
+			return ErrorResponse.createResponse(t);
+		}
 
-        	try {
+	}
 
-				if(RepoProxyFactory.getRepoProxy().myTurn(repository)) {
-					return RepoProxyFactory.getRepoProxy().getValuesV2(repository, mdsId, suggestionParam, req);
-				}
+	@OPTIONS
+	@Path("/metadatasets/{repository}/{metadataset}")
+	@ApiOperation(hidden = true, value = "")
 
-				RepositoryDao repoDao = RepositoryDao.getRepository(repository);
-    	    	MdsDaoV2 mds = MdsDaoV2.getMds(repoDao, mdsId);
-    	    	Suggestions response = mds.getSuggestions(suggestionParam.getValueParameters().getQuery(), 
-    	    			suggestionParam.getValueParameters().getProperty(), 
-    	    			suggestionParam.getValueParameters().getPattern(),
-    	    			suggestionParam.getCriterias());
-    	    	  	
-    	    	return Response.status(Response.Status.OK).entity(response).build();
-    	
-        	} catch (Throwable t) {
-        		return ErrorResponse.createResponse(t);    		
-        	}
+	public Response options2() {
 
-        }
-    @POST
-    @Path("/metadatasets/{repository}/{metadataset}/values")
-        
-    @ApiOperation(
-    	value = "Get values.", 
-    	notes = "Get values.")
-    
-    @ApiResponses(
-    	value = { 
-	        @ApiResponse(code = 200, message = "OK.", response = MdsEntry.class),        
-	        @ApiResponse(code = 400, message = "Preconditions are not present.", response = ErrorResponse.class),        
-	        @ApiResponse(code = 401, message = "Authorization failed.", response = ErrorResponse.class),        
-	        @ApiResponse(code = 403, message = "Session user has insufficient rights to perform this operation.", response = ErrorResponse.class),        
-	        @ApiResponse(code = 404, message = "Ressources are not found.", response = ErrorResponse.class), 
-	        @ApiResponse(code = 500, message = "Fatal error occured.", response = ErrorResponse.class) 
-	    })
-    public Response getValues(
-    	@ApiParam(value = "ID of repository (or \"-home-\" for home repository)",required=true, defaultValue="-home-" ) @PathParam("repository") String repository,
-    	@ApiParam(value = "ID of metadataset (or \"-default-\" for default metadata set)",required=true, defaultValue="-default-" ) @PathParam("metadataset") String mdsId,
-    	@ApiParam(value = "value",required=true ) ValueParameters parameters,
-		@Context HttpServletRequest req) {
-    	
-    	try {
-    			    		    	
-	    	RepositoryDao repoDao = RepositoryDao.getRepository(repository);	    	
-	    	MdsDao mds = MdsDao.getMds(repoDao, mdsId);
-	    	
-	    	Suggestions response = mds.suggest(parameters.getQuery(), parameters.getProperty(), parameters.getPattern());
-	    	  	
-	    	return Response.status(Response.Status.OK).entity(response).build();
-	
-    	} catch (Throwable t) {
-    		return ErrorResponse.createResponse(t);    		
-    	}
+		return Response.status(Response.Status.OK).header("Allow", "OPTIONS, GET").build();
+	}
 
-    }
-    
-    @OPTIONS    
-    @Path("/metadatasets/{repository}/{metadataset}/values")
-    @ApiOperation(hidden = true, value = "")
 
-    public Response options3() {
-    	
-    	return Response.status(Response.Status.OK).header("Allow", "OPTIONS,  POST").build();
-    }
-    
+	/**
+	 *
+	 */
+
+	@POST
+	@Path("/metadatasetsV2/{repository}/{metadataset}/values")
+
+	@ApiOperation(
+			value = "Get values.",
+			notes = "Get values.")
+
+	@ApiResponses(
+			value = {
+					@ApiResponse(code = 200, message = "OK.", response = MdsEntry.class),
+					@ApiResponse(code = 400, message = "Preconditions are not present.", response = ErrorResponse.class),
+					@ApiResponse(code = 401, message = "Authorization failed.", response = ErrorResponse.class),
+					@ApiResponse(code = 403, message = "Session user has insufficient rights to perform this operation.", response = ErrorResponse.class),
+					@ApiResponse(code = 404, message = "Ressources are not found.", response = ErrorResponse.class),
+					@ApiResponse(code = 500, message = "Fatal error occured.", response = ErrorResponse.class)
+			})
+	public Response getValuesV2(
+			@ApiParam(value = "ID of repository (or \"-home-\" for home repository)",required=true, defaultValue="-home-" ) @PathParam("repository") String repository,
+			@ApiParam(value = "ID of metadataset (or \"-default-\" for default metadata set)",required=true, defaultValue="-default-" ) @PathParam("metadataset") String mdsId,
+			@ApiParam(value = "suggestionParam") SuggestionParam suggestionParam,
+			@Context HttpServletRequest req) {
+
+		try {
+
+			if(RepoProxyFactory.getRepoProxy().myTurn(repository)) {
+				return RepoProxyFactory.getRepoProxy().getValuesV2(repository, mdsId, suggestionParam, req);
+			}
+
+			RepositoryDao repoDao = RepositoryDao.getRepository(repository);
+			MdsDaoV2 mds = MdsDaoV2.getMds(repoDao, mdsId);
+			Suggestions response = mds.getSuggestions(suggestionParam.getValueParameters().getQuery(),
+					suggestionParam.getValueParameters().getProperty(),
+					suggestionParam.getValueParameters().getPattern(),
+					suggestionParam.getCriterias());
+
+			return Response.status(Response.Status.OK).entity(response).build();
+
+		} catch (Throwable t) {
+			return ErrorResponse.createResponse(t);
+		}
+
+	}
 }

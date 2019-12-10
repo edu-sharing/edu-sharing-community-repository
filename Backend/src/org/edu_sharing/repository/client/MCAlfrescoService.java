@@ -34,27 +34,20 @@ import java.util.List;
 
 import org.edu_sharing.repository.client.auth.CCSessionExpiredException;
 import org.edu_sharing.repository.client.exception.CCException;
-import org.edu_sharing.repository.client.rpc.ACE;
 import org.edu_sharing.repository.client.rpc.Authority;
 import org.edu_sharing.repository.client.rpc.CheckForDuplicatesResult;
 import org.edu_sharing.repository.client.rpc.EduGroup;
 import org.edu_sharing.repository.client.rpc.GetPermissions;
 import org.edu_sharing.service.nodeservice.model.GetPreviewResult;
 import org.edu_sharing.repository.client.rpc.Group;
-import org.edu_sharing.repository.client.rpc.Notify;
 import org.edu_sharing.repository.client.rpc.RepositoryInfo;
 import org.edu_sharing.repository.client.rpc.Result;
-import org.edu_sharing.repository.client.rpc.SearchCriterias;
 import org.edu_sharing.repository.client.rpc.SearchResult;
 import org.edu_sharing.repository.client.rpc.SearchToken;
 import org.edu_sharing.repository.client.rpc.ServerUpdateInfo;
-import org.edu_sharing.repository.client.rpc.SetPermissions;
-import org.edu_sharing.repository.client.rpc.SetPermissionsAndMail;
 import org.edu_sharing.repository.client.rpc.Share;
 import org.edu_sharing.repository.client.rpc.User;
 import org.edu_sharing.repository.client.rpc.cache.CacheInfo;
-import org.edu_sharing.repository.client.rpc.metadataset.MetadataSetQuery;
-import org.edu_sharing.repository.client.rpc.metadataset.MetadataSetQueryProperty;
 import org.edu_sharing.repository.client.tracking.TrackingEvent.ACTIVITY;
 import org.edu_sharing.repository.client.tracking.TrackingEvent.CONTEXT_ITEM;
 import org.edu_sharing.repository.client.tracking.TrackingEvent.PLACE;
@@ -72,14 +65,6 @@ public interface MCAlfrescoService extends RemoteService {
 	public HashMap<String,String> authenticateByGuest() throws CCException;
 	
 	public HashMap<String,String> getUserInfo() throws CCException;
-
-	public SearchResult search(SearchToken seachToken) throws CCException;
-	
-	public SearchResult searchRecommendObjects(String repositoryId, int startIdx, int nrOfResults) throws CCException;
-	
-	public HashMap<String, HashMap<String, Object>> searchByParentId(SearchCriterias searchCriterias, String parentId) throws CCException;
-	
-	public HashMap<String, HashMap<String, Object>> searchInvited(SearchToken searchToken) throws CCException;
 
 	public HashMap<String, HashMap<String, Object>> search(String searchWord, String type) throws CCException;
 	
@@ -120,12 +105,6 @@ public interface MCAlfrescoService extends RemoteService {
 	// public String createNode(String type, String parentID, String name,
 	// HashMap properties, HashMap<String, String> authenticationInfo) throws
 	// CCSessionExpiredException, Exception;
-
-	public boolean removeNodes(String[] nodeIDs, String fromID, String repositoryId)
-			throws CCSessionExpiredException, Exception;
-	
-	public boolean removeNodes(String[] nodeIDs, String fromID, String repositoryId, boolean recycle)
-			throws CCSessionExpiredException, Exception;
 
 	public void removeRelations(String parentID) throws CCSessionExpiredException, Exception;
 
@@ -203,8 +182,6 @@ public interface MCAlfrescoService extends RemoteService {
 	public ArrayList<String> getAllValuesFor(String property) throws CCException;
 
 	public ArrayList<String> getImporterJobList() throws CCException;
-	
-	public HashMap<MetadataSetQuery, HashMap<MetadataSetQueryProperty, String[]>> getRecommendObjectsQuery(String repositoryId, String metadataSetId);
 
 	public String getStylesheetByAppId(String appId) throws CCException;
 	

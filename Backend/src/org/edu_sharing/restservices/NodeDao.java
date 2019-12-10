@@ -175,16 +175,6 @@ public class NodeDao {
 		return removed;
 	}
 
-	public static NodeSearch search(RepositoryDao repoDao,MdsDao mdsDao,
-			String query, List<MdsQueryCriteria> criterias,SearchToken token, Filter filter) throws DAOException {
-		SearchService searchService=SearchServiceFactory.getSearchService(repoDao.getId());
-		try {
-			return transform(repoDao,searchService.search(mdsDao,query,criterias,token),filter);
-		} catch (Throwable e) {
-			throw DAOException.mapping(e);
-		}
-	}
-
 	public static NodeSearch searchFingerprint(RepositoryDao repoDao, String nodeId, Filter filter) throws DAOException {
 		SearchService searchService=SearchServiceFactory.getSearchService(repoDao.getId());
 		try {

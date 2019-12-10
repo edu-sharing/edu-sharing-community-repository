@@ -29,29 +29,6 @@ export class RestNodeService extends AbstractRestService{
       }
    }
 
-
-  /** Searches for nodes in the repositroy
-   *
-   * @param searchQuery A lucence query string, see https://community.alfresco.com/docs/DOC-4673-search
-   * @param facettes A list of attributes which should be grouped for counting
-   * @param request A common @RequestObject
-   * @param repository
-   * @returns {Observable<R>}
-   */
-  public searchNodes = (searchQuery : string,
-                        facettes : string[] = [],
-                        request : any = null,
-                        repository = RestConstants.HOME_REPOSITORY) => {
-    let query=this.connector.createUrlNoEscape("node/:version/nodes/:repository?query=:query&:facettes&:request",repository,
-      [
-        [":query",encodeURIComponent(searchQuery)],
-        [":facettes",RestHelper.getQueryStringForList("facettes",facettes)],
-        [":request",this.connector.createRequestString(request)]
-      ]);
-    return this.connector.post<NodeList>(query,"",this.connector.getRequestOptions());
-
-  }
-
   /** Get the home directory for the current user (a ref to the folder)
    *
    * @returns {Observable<R>}

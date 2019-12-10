@@ -435,16 +435,6 @@ public class MCAlfrescoClientAdapter extends MCAlfrescoBaseClient {
 	}
 
 	@Override
-	public SearchResult search(SearchToken searchToken) throws Throwable {
-		return null;
-	}
-
-	@Override
-	public SearchResult searchRecommend(int startIdx, int nrOfResults) throws Throwable {
-		return null;
-	}
-
-	@Override
 	public String getDetailsHtmlSnippet(String nodeId) throws Exception {
 		return null;
 	}

@@ -8,10 +8,9 @@ import org.edu_sharing.metadataset.v2.tools.MetadataHelper;
 import org.edu_sharing.metadataset.v2.tools.MetadataSearchHelper;
 import org.edu_sharing.repository.server.RepoFactory;
 import org.edu_sharing.restservices.mds.v1.model.*;
-import org.edu_sharing.restservices.search.v1.model.SearchParameters;
 import org.edu_sharing.restservices.shared.MdsQueryCriteria;
 import org.edu_sharing.restservices.shared.MdsV2;
-import com.google.gwt.user.client.ui.SuggestOracle;
+import org.edu_sharing.service.search.Suggestion;
 
 public class MdsDaoV2 {
 
@@ -23,25 +22,17 @@ public class MdsDaoV2 {
 	
 	public Suggestions getSuggestions(String queryId,String parameter,String value, List<MdsQueryCriteria> criterias) throws DAOException{
 		Suggestions result = new Suggestions();
-		ArrayList<Suggestions.Suggestion> suggestionsResult = new ArrayList<Suggestions.Suggestion>();
+		ArrayList<Suggestions.Suggestion> suggestionsResult = new ArrayList<>();
 		result.setValues(suggestionsResult);
 		try{
-			List<? extends SuggestOracle.Suggestion>  suggestions =		
+			List<? extends Suggestion>  suggestions =
 					MetadataSearchHelper.getSuggestions(this.repoDao.getId(), mds, queryId, parameter, value, criterias);
 
-			for(SuggestOracle.Suggestion suggest : suggestions){
+			for(Suggestion suggest : suggestions){
 				Suggestions.Suggestion suggestion = new Suggestions.Suggestion();
 				suggestion.setDisplayString(suggest.getDisplayString());
-				suggestion.setReplacementString(suggest.getReplacementString());
-
-				if(suggest instanceof org.edu_sharing.repository.client.rpc.Suggestion){
-					org.edu_sharing.repository.client.rpc.Suggestion esSuggest = (org.edu_sharing.repository.client.rpc.Suggestion)suggest;
-					suggestion.setKey(esSuggest.getKey());
-				}
-				if(suggest instanceof org.edu_sharing.repository.client.rpc.SuggestFacetDTO){
-					org.edu_sharing.repository.client.rpc.SuggestFacetDTO esSuggest = (org.edu_sharing.repository.client.rpc.SuggestFacetDTO)suggest;
-					suggestion.setKey(esSuggest.getKey());
-				}
+				//suggestion.setReplacementString(suggest.getReplacementString());
+				suggestion.setKey(suggest.getKey());
 				suggestionsResult.add(suggestion);
 			}
 			

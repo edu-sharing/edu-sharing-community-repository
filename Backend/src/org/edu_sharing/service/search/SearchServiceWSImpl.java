@@ -9,14 +9,12 @@ import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.security.AuthorityType;
 import org.edu_sharing.metadataset.v2.MetadataSetV2;
 import org.edu_sharing.repository.client.rpc.EduGroup;
-import org.edu_sharing.repository.client.rpc.SearchCriterias;
 import org.edu_sharing.repository.server.AuthenticationTool;
 import org.edu_sharing.repository.server.RepoFactory;
 import org.edu_sharing.repository.server.SearchResultNodeRef;
 import org.edu_sharing.repository.server.authentication.Context;
 import org.edu_sharing.repository.server.tools.ApplicationInfo;
 import org.edu_sharing.repository.server.tools.ApplicationInfoList;
-import org.edu_sharing.restservices.MdsDao;
 import org.edu_sharing.restservices.shared.MdsQueryCriteria;
 import org.edu_sharing.service.Constants;
 import org.edu_sharing.service.InsufficientPermissionException;
@@ -55,63 +53,6 @@ public class SearchServiceWSImpl extends SearchServiceAdapter {
 	@Override
 	public SearchResultNodeRef getFilesSharedToMe(SortDefinition sortDefinition, ContentType contentType, int skipCount, int maxItems) throws Exception {
 		return null;
-	}
-	
-	@Override
-	public SearchResultNodeRef search(MdsDao mdsDao, String query, List<MdsQueryCriteria> criterias, SearchToken token)
-			throws Throwable {
-		
-		AuthenticationTool authTool = RepoFactory.getAuthenticationToolInstance(this.appId);
-		
-		//do the network auth if necessary
-		HashMap<String,String> authInfo = authTool.validateAuthentication(Context.getCurrentInstance().getRequest().getSession());
-		
-		NativeAlfrescoWrapper stub = EduWebServiceFactory.getNativeAlfrescoWrapper(appInfo.getWebServiceHotUrl());
-		
-		
-		List<SearchCriteria> wsCriterias = new ArrayList<SearchCriteria>();
-		for(MdsQueryCriteria criteria : criterias){
-			SearchCriteria sc = new SearchCriteria();
-			sc.setProperty(criteria.getProperty());
-			sc.setQueryId(query);
-			sc.setValues(criteria.getValues().toArray(new String[0]));
-			wsCriterias.add(sc);
-		}
-		 org.edu_sharing.webservices.alfresco.extension.SearchResult sr = stub.search(wsCriterias.toArray(new SearchCriteria[wsCriterias.size()]), 
-				mdsDao.getMetadataSet().getId(), 
-				token.getFrom(), token.getMaxResult(), token.getFacettes().toArray(new String[0]));
-		 
-		SearchResultNodeRef srnr = new SearchResultNodeRef();
-		List<NodeRef> nodeRefs = new ArrayList<NodeRef>();
-		for(RepositoryNode node : sr.getData()) {
-			NodeRef nodeRef = new NodeRef(Constants.storeRef, node.getNodeId());
-			nodeRefs.add(nodeRef);
-		}
-		
-		Map<String,Map<String,Integer>> facettes = new HashMap<String,Map<String,Integer>>();
-		for(Facette f : sr.getFacettes()){
-			
-			Map<String,Integer> rf = new HashMap<String,Integer>();
-			for(FacettePair fp : f.getFacettePairs()){
-				rf.put(fp.getValue(), fp.getCount());
-			}
-			
-			facettes.put(f.getProperty(), rf);
-		}
-		
-		SearchCriterias rc = new SearchCriterias();
-		rc.setMetadataSetId(mdsDao.getMetadataSet().getId());
-		rc.setMetadataSetQuery(query);
-		rc.setRepositoryId(this.appId);
-
-		srnr.setCountedProps(facettes);
-		srnr.setData(AlfrescoDaoHelper.unmarshall(nodeRefs, this.appId));
-		srnr.setNodeCount(sr.getNodeCount());
-		srnr.setStartIDX(sr.getStartIDX());
-		
-		srnr.setSearchCriterias(rc);
-			
-		return srnr;
 	}
 	
 	@Override

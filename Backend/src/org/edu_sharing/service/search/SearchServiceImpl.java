@@ -1,16 +1,5 @@
 package org.edu_sharing.service.search;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Set;
-
 import org.alfresco.model.ContentModel;
 import org.alfresco.repo.search.impl.solr.ESSearchParameters;
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
@@ -20,11 +9,7 @@ import org.alfresco.service.ServiceRegistry;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.repository.NodeService;
 import org.alfresco.service.cmr.repository.StoreRef;
-import org.alfresco.service.cmr.search.FieldHighlightParameters;
-import org.alfresco.service.cmr.search.GeneralHighlightParameters;
-import org.alfresco.service.cmr.search.ResultSet;
-import org.alfresco.service.cmr.search.ResultSetRow;
-import org.alfresco.service.cmr.search.SearchParameters;
+import org.alfresco.service.cmr.search.*;
 import org.alfresco.service.cmr.search.SearchParameters.FieldFacet;
 import org.alfresco.service.cmr.security.AccessPermission;
 import org.alfresco.service.cmr.security.AuthorityService;
@@ -40,21 +25,15 @@ import org.edu_sharing.alfresco.workspace_administration.NodeServiceInterceptor;
 import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
 import org.edu_sharing.metadataset.v2.MetadataQueries;
 import org.edu_sharing.metadataset.v2.MetadataSetV2;
+import org.edu_sharing.metadataset.v2.SearchCriterias;
 import org.edu_sharing.repository.client.rpc.Authority;
 import org.edu_sharing.repository.client.rpc.EduGroup;
-import org.edu_sharing.repository.client.rpc.SearchCriterias;
-import org.edu_sharing.repository.client.rpc.metadataset.MetadataSet;
-import org.edu_sharing.repository.client.rpc.metadataset.MetadataSetQuery;
-import org.edu_sharing.repository.client.rpc.metadataset.MetadataSetQueryProperty;
 import org.edu_sharing.repository.client.tools.CCConstants;
-import org.edu_sharing.repository.client.tools.metadata.search.SearchMetadataHelper;
 import org.edu_sharing.repository.server.AuthenticationToolAPI;
 import org.edu_sharing.repository.server.MCAlfrescoAPIClient;
 import org.edu_sharing.repository.server.SearchResultNodeRef;
 import org.edu_sharing.repository.server.tools.ApplicationInfoList;
 import org.edu_sharing.repository.server.tools.LogTime;
-import org.edu_sharing.restservices.MdsDao;
-import org.edu_sharing.restservices.shared.MdsQueryCriteria;
 import org.edu_sharing.service.Constants;
 import org.edu_sharing.service.InsufficientPermissionException;
 import org.edu_sharing.service.permission.PermissionServiceFactory;
@@ -66,6 +45,9 @@ import org.edu_sharing.service.toolpermission.ToolPermissionServiceFactory;
 import org.edu_sharing.service.util.AlfrescoDaoHelper;
 import org.springframework.context.ApplicationContext;
 import org.springframework.extensions.surf.util.URLEncoder;
+
+import java.util.*;
+import java.util.Map.Entry;
 
 public class SearchServiceImpl implements SearchService {
 
@@ -219,7 +201,7 @@ public class SearchServiceImpl implements SearchService {
 			Set<String> memberships = serviceRegistry.getAuthorityService().getAuthorities();
 			boolean isAdmin = ((memberships != null && memberships.contains(CCConstants.AUTHORITY_GROUP_ALFRESCO_ADMINISTRATORS)) 
 					|| "admin".equals(AuthenticationUtil.getFullAuthentication().getName())) ? true : false;
-			
+
 			return AuthenticationUtil.runAsSystem(new RunAsWork<SearchResult<EduGroup>>() {
 
 				@Override
@@ -635,65 +617,6 @@ public class SearchServiceImpl implements SearchService {
 			result.add(name);
 		}
 		return new SearchResult<String>(result, skipCount, data.getNodeCount());
-	}
-
-	@Override
-	public SearchResultNodeRef search(MdsDao mdsDao, String query, List<MdsQueryCriteria> criterias,
-			SearchToken searchToken) throws Throwable {
-
-		MetadataSet mds = mdsDao.getMetadataSet();
-		SearchMetadataHelper smdh = new SearchMetadataHelper();
-		
-		SearchCriterias scParam = new SearchCriterias();
-		scParam.setMetadataSetId(mdsDao.getRef().getId());
-
-		HashMap<MetadataSetQuery, HashMap<MetadataSetQueryProperty, String[]>> searchData = new HashMap<MetadataSetQuery, HashMap<MetadataSetQueryProperty, String[]>>();
-
-		MetadataSetQuery origQuery = null;
-		MetadataSetQuery flatQuery = null;
-		for (MetadataSetQuery item : mds.getMetadataSetQueries().getMetadataSetQueries()) {
-			if (item.getCriteriaboxid().equals(query)) {
-				origQuery = item;
-				flatQuery = smdh.getFlatCopy(item);
-				break;
-			}
-		}
-
-		if (origQuery == null) {
-			throw new Throwable("Query id was not found");
-		}
-
-		for (MdsQueryCriteria criteria : criterias) {
-
-			MetadataSetQueryProperty flatQueryProperty = null;
-			String property = criteria.getProperty();
-			String propertyGlobal = CCConstants.getValidGlobalName(property);
-			for (MetadataSetQueryProperty item : origQuery.getProperties()) {
-				if (item.getName().equals(property) || item.getName().equals(propertyGlobal)) {
-					flatQueryProperty = smdh.getFlatCopy(item, origQuery);
-					break;
-				}
-			}
-
-			if (flatQueryProperty == null) {
-				throw new Throwable(
-						"could not find property: " + criteria.getProperty() + " in " + origQuery.getCriteriaboxid());
-			}
-
-			HashMap<MetadataSetQueryProperty, String[]> props = (searchData.get(flatQuery) == null)
-					? new HashMap<MetadataSetQueryProperty, String[]>() : searchData.get(flatQuery);
-
-			props.put(flatQueryProperty, criteria.getValues().toArray(new String[0]));
-			searchData.put(flatQuery, props);
-		}
-
-		scParam.setMetadataSetSearchData(searchData);
-
-		searchToken.setSearchCriterias(scParam);
-		SearchResultNodeRef search = search(searchToken, true);
-
-		return search;
-
 	}
 	@Override
 	public SearchResultNodeRef searchV2(MetadataSetV2 mds, String query,Map<String,String[]> criterias,

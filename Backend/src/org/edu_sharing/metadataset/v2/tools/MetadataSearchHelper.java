@@ -22,17 +22,13 @@ import org.apache.lucene.queryParser.QueryParser;
 import org.edu_sharing.alfresco.service.ConnectionDBAlfresco;
 import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
 import org.edu_sharing.metadataset.v2.*;
-import org.edu_sharing.repository.client.rpc.SQLKeyword;
-import org.edu_sharing.repository.client.rpc.SearchCriterias;
-import org.edu_sharing.repository.client.rpc.SuggestFacetDTO;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.server.tools.ApplicationInfoList;
 import org.edu_sharing.restservices.shared.MdsQueryCriteria;
 import org.edu_sharing.service.search.SearchServiceFactory;
+import org.edu_sharing.service.search.Suggestion;
 import org.springframework.context.ApplicationContext;
 
-import com.google.gwt.user.client.ui.SuggestOracle;
-import com.google.gwt.user.client.ui.SuggestOracle.Suggestion;
 import com.sun.star.lang.IllegalArgumentException;
 
 public class MetadataSearchHelper {
@@ -138,9 +134,9 @@ public class MetadataSearchHelper {
 		//return "("+queries.getBasequery()+") AND ("+parameter.getStatement().replace("${value}","*"+QueryParser.escape(value)+"*")+")";
 		return parameter.getStatement(value).replace("${value}","*"+QueryParser.escape(value)+"*");		
 	}
-	private static List<? extends  SuggestOracle.Suggestion> getSuggestionsSolr(MetadataQueryParameter parameter, MetadataWidget widget, String value, List<MdsQueryCriteria> criterias, MetadataSetV2 mds, String query)  {
+	private static List<? extends  Suggestion> getSuggestionsSolr(MetadataQueryParameter parameter, MetadataWidget widget, String value, List<MdsQueryCriteria> criterias, MetadataSetV2 mds, String query)  {
 
-		List<SuggestOracle.Suggestion> result = new ArrayList<SuggestOracle.Suggestion>();
+		List<Suggestion> result = new ArrayList<>();
 		ApplicationContext applicationContext = AlfAppContextGate.getApplicationContext();
 		SearchService searchService = (SearchService)applicationContext.getBean("scopedSearchService");
 
@@ -204,8 +200,8 @@ public class MetadataSearchHelper {
 
 				if (hit.toLowerCase().contains(value.toLowerCase())) {
 
-					SuggestFacetDTO dto = new SuggestFacetDTO();
-					dto.setFacet(hit);
+					Suggestion dto = new Suggestion();
+					dto.setKey(hit);
 					dto.setDisplayString(captions.containsKey(hit) ? captions.get(hit).getCaption() : null);
 
 					result.add(dto);
@@ -216,7 +212,7 @@ public class MetadataSearchHelper {
 		
 	}
 
-	public static List<? extends  SuggestOracle.Suggestion> getSuggestions(String repoId,MetadataSetV2 mds,String queryId,String parameterId,String value, List<MdsQueryCriteria> criterias) throws IllegalArgumentException  {
+	public static List<? extends Suggestion> getSuggestions(String repoId, MetadataSetV2 mds, String queryId, String parameterId, String value, List<MdsQueryCriteria> criterias) throws IllegalArgumentException  {
 		MetadataWidget widget=mds.findWidget(parameterId);
 		
 		String source=widget.getSuggestionSource();
@@ -254,7 +250,7 @@ public class MetadataSearchHelper {
 	private static List<? extends Suggestion> getSuggestionsSql(MetadataWidget widget,
 			String value) throws IllegalArgumentException {
 		String query=widget.getSuggestionQuery();
-		List<SQLKeyword> result = new ArrayList<SQLKeyword>();
+		List<Suggestion> result = new ArrayList<>();
 		Connection con = null;
 		PreparedStatement statement = null;
 		if(query == null || query.trim().equals("")){
@@ -273,8 +269,8 @@ public class MetadataSearchHelper {
 		
 			while(resultSet.next()){
 				String kwValue = resultSet.getString(1);
-				SQLKeyword sqlKw = new SQLKeyword();
-				sqlKw.setKeyword(kwValue.trim());
+				Suggestion sqlKw = new Suggestion();
+				sqlKw.setKey(kwValue.trim());
 				result.add(sqlKw);
 			}	
 		}catch(Throwable e){
@@ -287,14 +283,14 @@ public class MetadataSearchHelper {
 			String value) throws IllegalArgumentException {
 		if(widget.getValues()==null)
 			throw new IllegalArgumentException("Requested suggestion type "+MetadataReaderV2.SUGGESTION_SOURCE_MDS+" for widget "+widget.getId()+", but widget has no values attached");
-		List<SuggestOracle.Suggestion> result = new ArrayList<SuggestOracle.Suggestion>();
+		List<Suggestion> result = new ArrayList<>();
 		value=value.toLowerCase();
 		for(MetadataKey key : widget.getValues()){
 			if(key.getKey().toLowerCase().contains(value)
 					|| key.getCaption().toLowerCase().contains(value)
 					){
-				SuggestFacetDTO dto = new SuggestFacetDTO();
-				dto.setFacet(key.getKey());
+				Suggestion dto = new Suggestion();
+				dto.setKey(key.getKey());
 				dto.setDisplayString(key.getCaption());
 				result.add(dto);
 			}

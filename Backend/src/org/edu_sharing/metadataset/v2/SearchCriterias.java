@@ -25,18 +25,11 @@
  * 
  *
  */
-package org.edu_sharing.repository.client.rpc;
+package org.edu_sharing.metadataset.v2;
 
 import java.io.Serializable;
-import java.util.HashMap;
 
-import org.edu_sharing.repository.client.rpc.metadataset.MetadataSetQuery;
-import org.edu_sharing.repository.client.rpc.metadataset.MetadataSetQueryProperty;
-
-import com.google.gwt.user.client.rpc.IsSerializable;
-
-
-public class SearchCriterias implements IsSerializable, Serializable {
+public class SearchCriterias implements Serializable {
 	
 	
 	public SearchCriterias(){
@@ -66,9 +59,7 @@ public class SearchCriterias implements IsSerializable, Serializable {
 	 * @TODO build the queryString on the server side so that othe repositories can translate it in their language
 	 */
 	String metadataSetQuery = null;
-	
-	HashMap<MetadataSetQuery,HashMap<MetadataSetQueryProperty,String[]>> metadataSetSearchData = null;
-	
+
 	
 	/**
 	 * for getting the serverside representation of metadataset queries
@@ -139,15 +130,6 @@ public class SearchCriterias implements IsSerializable, Serializable {
 
 	public void setMetadataSetQuery(String metadataSetQuery) {
 		this.metadataSetQuery = metadataSetQuery;
-	}
-
-	public HashMap<MetadataSetQuery, HashMap<MetadataSetQueryProperty, String[]>> getMetadataSetSearchData() {
-		return metadataSetSearchData;
-	}
-
-	public void setMetadataSetSearchData(
-			HashMap<MetadataSetQuery, HashMap<MetadataSetQueryProperty, String[]>> metadataSetSearchData) {
-		this.metadataSetSearchData = metadataSetSearchData;
 	}
 
 	public String getRepositoryId() {

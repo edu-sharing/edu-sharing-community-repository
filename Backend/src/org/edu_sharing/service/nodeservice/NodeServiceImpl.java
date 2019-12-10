@@ -28,10 +28,6 @@ import org.edu_sharing.metadataset.v2.MetadataSetV2;
 import org.edu_sharing.metadataset.v2.MetadataWidget;
 import org.edu_sharing.metadataset.v2.tools.MetadataHelper;
 import org.edu_sharing.repository.client.rpc.User;
-import org.edu_sharing.repository.client.rpc.metadataset.MetadataSet;
-import org.edu_sharing.repository.client.rpc.metadataset.MetadataSetModelProperty;
-import org.edu_sharing.repository.client.rpc.metadataset.MetadataSetModelType;
-import org.edu_sharing.repository.client.rpc.metadataset.MetadataSets;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.server.AuthenticationToolAPI;
 import org.edu_sharing.repository.server.MCAlfrescoAPIClient;
@@ -93,7 +89,6 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
 	private String appId;
 	private DictionaryService dictionaryService;
 	String repositoryId = ApplicationInfoList.getHomeRepository().getAppId();
-	MetadataSets metadataSets = RepoFactory.getMetadataSetsForRepository(repositoryId);
 	private ServiceRegistry serviceRegistry = null;
 	private NodeService nodeService = null;
 	private VersionService versionService;
@@ -519,27 +514,6 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
 
 	}
 
-	MetadataSetModelProperty getMetadataSetModelProperty(String metadataSetId, String type, String prop) {
-		MetadataSetModelProperty mdsmProp = null;
-
-		// test take the deafault metadataset when metadatasetId is null
-		if (metadataSetId == null)
-			metadataSetId = CCConstants.metadatasetdefault_id;
-
-		if (metadataSetId != null) {
-	
-			MetadataSet mds = metadataSets.getMetadataSetById(metadataSetId);
-			if (mds != null) {
-				MetadataSetModelType mdsmt = mds.getMetadataSetModelType(type);
-				if (mdsmt != null) {
-					mdsmProp = mdsmt.getMetadataSetModelProperty(prop);
-				}
-			}
-		}
-		return mdsmProp;
-	}
-	
-	
 	protected String getMLTextString(Object _mlText) {
 
 		if (_mlText instanceof MLText) {

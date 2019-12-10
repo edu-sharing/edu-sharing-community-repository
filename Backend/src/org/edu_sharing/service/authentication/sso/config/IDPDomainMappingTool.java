@@ -13,7 +13,6 @@ import javax.xml.xpath.XPathFactory;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.edu_sharing.repository.server.tools.metadataset.MetadataReader;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
@@ -33,7 +32,7 @@ public class IDPDomainMappingTool {
 	HashMap<String,String> mapper = new HashMap<String,String>();
 
 	public IDPDomainMappingTool() {
-		URL url = MetadataReader.class.getResource(file);
+		URL url = IDPDomainMappingTool.class.getResource(file);
 		DocumentBuilder builder;
 		try {
 			builder = factory.newDocumentBuilder();

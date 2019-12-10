@@ -74,18 +74,10 @@ import org.edu_sharing.service.nodeservice.model.GetPreviewResult;
 import org.edu_sharing.repository.client.rpc.Group;
 import org.edu_sharing.repository.client.rpc.Notify;
 import org.edu_sharing.repository.client.rpc.Result;
-import org.edu_sharing.repository.client.rpc.SearchCriterias;
-import org.edu_sharing.repository.client.rpc.SearchToken;
 import org.edu_sharing.repository.client.rpc.Share;
 import org.edu_sharing.repository.client.rpc.User;
-import org.edu_sharing.repository.client.rpc.metadataset.MetadataSet;
-import org.edu_sharing.repository.client.rpc.metadataset.MetadataSetQuery;
-import org.edu_sharing.repository.client.rpc.metadataset.MetadataSetQueryProperty;
-import org.edu_sharing.repository.client.rpc.metadataset.MetadataSets;
 import org.edu_sharing.repository.client.tools.CCConstants;
-import org.edu_sharing.repository.client.tools.metadata.search.SearchMetadataHelper;
 import org.edu_sharing.repository.server.MCAlfrescoAPIClient;
-import org.edu_sharing.repository.server.RepoFactory;
 import org.edu_sharing.repository.server.tools.ApplicationInfoList;
 import org.edu_sharing.service.permission.PermissionServiceFactory;
 import org.edu_sharing.service.toolpermission.ToolPermissionService;
@@ -539,155 +531,7 @@ public class NativeAlfrescoWrapperSoapBindingImpl implements org.edu_sharing.web
 			throw new RemoteException(e.getMessage(), e);
 		}
 	}
-	
-	@Override
-	public SearchResult search(SearchCriteria[] searchCriterias, String metadatasetId, int start, int nrOfResults, String[] facettes) throws RemoteException {
-		
-		try {
-			MCAlfrescoAPIClient mcAlfrescoAPIClient = new MCAlfrescoAPIClient();
-			
-			SearchToken searchToken = new SearchToken();
-			SearchCriterias scParam = new SearchCriterias();
-			scParam.setMetadataSetId(metadatasetId);
-			
-			//build native searchdata
-			HashMap<MetadataSetQuery, HashMap<MetadataSetQueryProperty, String[]>> searchData = new  HashMap<MetadataSetQuery, HashMap<MetadataSetQueryProperty, String[]>>();
-		
-			MetadataSets mdss = RepoFactory.getRepositoryMetadataSets().get(ApplicationInfoList.getHomeRepository().getAppId());
-			MetadataSet mds = mdss.getMetadataSetById(metadatasetId);
-			
-			if(mds != null){
-				
-				mds.getMetadataSetQueries();
-				if(searchCriterias != null){
-					for(SearchCriteria searchCriteria : searchCriterias){
-						
-						//try to get Query from searchdata else from mds
-						MetadataSetQuery searchDataQuery = getQuery(searchCriteria.getQueryId(), searchData);
-						
-						MetadataSetQuery originalQuery = getQuery(searchCriteria.getQueryId(),mds);
-						if(originalQuery == null){
-							logger.error("unknown MedataSetQuery:"+searchCriteria.getQueryId());
-							continue;
-						}
-						
-						SearchMetadataHelper smdh =  new SearchMetadataHelper();
-						if(searchDataQuery == null){
-							searchDataQuery = smdh.getFlatCopy(originalQuery);
-							
-						}
-						
-						MetadataSetQueryProperty originalProperty = getQueryProperty(searchCriteria.getProperty(),originalQuery);
-						if(originalProperty != null){
-							MetadataSetQueryProperty searchDataProp = smdh.getFlatCopy(originalProperty, searchDataQuery);
-							
-							HashMap<MetadataSetQueryProperty, String[]> searchDataPropertyValues = searchData.get(searchDataQuery);
-							if(searchDataPropertyValues == null){
-								searchDataPropertyValues = new  HashMap<MetadataSetQueryProperty, String[]>();
-								searchData.put(searchDataQuery, searchDataPropertyValues);
-							}
-							searchDataPropertyValues.put(searchDataProp, searchCriteria.getValues());
-							searchData.put(searchDataQuery, searchDataPropertyValues);
-						}else{
-							logger.error("unknown property:"+searchCriteria.getProperty()+" for query:"+searchCriteria.getQueryId());
-						}
-					}
-				}
-				
-				scParam.setMetadataSetSearchData(searchData);
-				if(facettes != null) searchToken.setCountProps(new ArrayList<String>(Arrays.asList(facettes)));
-				searchToken.setStartIDX(start);
-				searchToken.setNrOfResults(nrOfResults);
-				searchToken.setRepositoryId(ApplicationInfoList.getHomeRepository().getAppId());
-				searchToken.setSearchCriterias(scParam);
-				
-				//search native
-				org.edu_sharing.repository.client.rpc.SearchResult nativeResult = mcAlfrescoAPIClient.search(searchToken);
-				
-				//build remote result
-				if(nativeResult != null){
-					SearchResult remoteResult = new SearchResult();
-					HashMap<String, HashMap<String, Object>> nodes = nativeResult.getData();
-					RepositoryNode[] remoteNodes = new RepositoryNode[nodes.size()];
-					int i = 0;
-					for(HashMap<String, Object> localProps : nodes.values() ){
-						String nodeId = (String)localProps.get(CCConstants.SYS_PROP_NODE_UID);
-						KeyValue[] remoteProps = new KeyValue[localProps.size()];
-						int j = 0;
-						for(String propKey : localProps.keySet()){
-							remoteProps[j] = new KeyValue(propKey,(String)localProps.get(propKey));
-							j++;
-						} 
-						remoteNodes[i] = new RepositoryNode(nodeId,remoteProps);
-						i++;
-					}
-					remoteResult.setData(remoteNodes);
-					remoteResult.setStartIDX(start);
-					remoteResult.setNodeCount(nativeResult.getNodeCount());
-					
-					Map<String, Map<String, Integer>> nativeFacettes = nativeResult.getCountedProps();
-					
-					if(nativeFacettes != null){
-					
-						List<Facette> remoteFacettes = new ArrayList<Facette>();
-						
-						for(Map.Entry<String, Map<String, Integer>> entry : nativeFacettes.entrySet()){
-							Facette remoteFacette = new Facette();
-							remoteFacette.setProperty(entry.getKey());
-							FacettePair[] facettePairs = new FacettePair[entry.getValue().size()];
-							int k = 0;
-							for(Map.Entry<String, Integer> valueCount : entry.getValue().entrySet()){
-								FacettePair facettePair = new FacettePair(valueCount.getValue(), valueCount.getKey());
-								facettePairs[k] = facettePair;
-								k++;
-							}
-							remoteFacette.setFacettePairs(facettePairs);
-							remoteFacettes.add(remoteFacette);
-						}
-						remoteResult.setFacettes(remoteFacettes.toArray(new Facette[remoteFacettes.size()]));
-					}
-					return remoteResult;
-				}
-				
-			}else{
-				logger.error("no metadataset found for metadatasetId:"+metadatasetId);
-			}
-						
-			return null;
-		} catch (Throwable e) {
-			logger.error(e.getMessage(), e);
-			throw new RemoteException(e.getMessage(), e);
-		}
-	}
-	
-	private MetadataSetQueryProperty getQueryProperty(String property, MetadataSetQuery query){
-	
-		for(MetadataSetQueryProperty prop : query.getProperties()){
-			if(prop.getName().equals(property)){
-				return prop;
-			}
-		}
-		return null;
-	}
-	
-	private MetadataSetQuery getQuery(String criteriaBoxId, MetadataSet mds){
-		for(MetadataSetQuery query : mds.getMetadataSetQueries().getMetadataSetQueries()){
-			if(query.getCriteriaboxid().equals(criteriaBoxId)){
-				return query;
-			}
-		}
-		return null;
-	}
-	
-	private MetadataSetQuery getQuery(String criteriaBoxId, HashMap<MetadataSetQuery, HashMap<MetadataSetQueryProperty, String[]>> searchData){
-		for(MetadataSetQuery query : searchData.keySet()){
-			if(query.getCriteriaboxid().equals(criteriaBoxId)){
-				return query;
-			}
-		}
-		return null;
-	}
-	
+
 	@Override
 	public SearchResult searchSolr(String query, int startIdx, int nrOfresults, String[] facettes,
 			int facettesMinCount, int facettesLimit) throws RemoteException {
@@ -1565,7 +1409,12 @@ public class NativeAlfrescoWrapperSoapBindingImpl implements org.edu_sharing.web
 			throw new RemoteException(e.getMessage(), e);
 		}	
 	}
-	
+
+	@Override
+	public SearchResult search(SearchCriteria[] searchCriteria, String s, int i, int i1, String[] strings) throws RemoteException {
+		return null;
+	}
+
 	@Override
 	public String[] getUserNames() throws RemoteException {
 		try {

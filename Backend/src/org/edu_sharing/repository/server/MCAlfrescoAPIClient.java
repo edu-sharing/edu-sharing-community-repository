@@ -35,7 +35,6 @@ import java.io.FilenameFilter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.Serializable;
-import java.io.UnsupportedEncodingException;
 import java.net.URISyntaxException;
 import java.net.URLEncoder;
 import java.rmi.RemoteException;
@@ -46,7 +45,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -76,7 +74,6 @@ import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.repo.security.authentication.AuthenticationUtil.RunAsWork;
 import org.alfresco.repo.security.authority.AuthorityInfo;
 import org.alfresco.repo.security.permissions.AccessDeniedException;
-import org.alfresco.repo.security.permissions.impl.acegi.FilteringResultSet;
 import org.alfresco.repo.thumbnail.ThumbnailDefinition;
 import org.alfresco.repo.thumbnail.ThumbnailRegistry;
 import org.alfresco.repo.transaction.RetryingTransactionHelper.RetryingTransactionCallback;
@@ -132,20 +129,14 @@ import org.edu_sharing.repository.client.rpc.ACE;
 import org.edu_sharing.repository.client.rpc.ACL;
 import org.edu_sharing.repository.client.rpc.EduGroup;
 import org.edu_sharing.repository.client.rpc.Group;
-import org.edu_sharing.repository.client.rpc.Notify;
-import org.edu_sharing.repository.client.rpc.SearchCriterias;
 import org.edu_sharing.repository.client.rpc.SearchResult;
 import org.edu_sharing.repository.client.rpc.SearchToken;
 import org.edu_sharing.repository.client.rpc.Share;
 import org.edu_sharing.repository.client.rpc.User;
-import org.edu_sharing.repository.client.rpc.metadataset.MetadataSetQuery;
-import org.edu_sharing.repository.client.rpc.metadataset.MetadataSetQueryProperty;
-import org.edu_sharing.repository.client.rpc.metadataset.MetadataSets;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.client.tools.MimeTypes;
 import org.edu_sharing.repository.client.tools.UrlTool;
 import org.edu_sharing.repository.client.tools.metadata.ValueTool;
-import org.edu_sharing.repository.client.tools.metadata.search.SearchMetadataHelper;
 import org.edu_sharing.repository.server.authentication.Context;
 import org.edu_sharing.repository.server.tools.ActionObserver;
 import org.edu_sharing.repository.server.tools.ApplicationInfo;
@@ -161,18 +152,11 @@ import org.edu_sharing.repository.server.tools.ServerConstants;
 import org.edu_sharing.repository.server.tools.URLTool;
 import org.edu_sharing.repository.server.tools.VCardConverter;
 import org.edu_sharing.repository.server.tools.cache.Cache;
-import org.edu_sharing.repository.server.tools.cache.EduGroupCache;
 import org.edu_sharing.repository.server.tools.cache.RepositoryCache;
 import org.edu_sharing.repository.server.tools.forms.DuplicateFinder;
-import org.edu_sharing.repository.server.tools.metadataset.MetadataCache;
-import org.edu_sharing.repository.server.tools.metadataset.MetadataReader;
-import org.edu_sharing.repository.server.tools.search.QueryBuilder;
-import org.edu_sharing.repository.server.tools.search.QueryValidationFailedException;
 import org.edu_sharing.service.authentication.ScopeUserHomeServiceFactory;
-import org.edu_sharing.service.comment.CommentServiceFactory;
 import org.edu_sharing.service.connector.ConnectorService;
 import org.edu_sharing.service.license.LicenseService;
-import org.edu_sharing.service.model.NodeRefImpl;
 import org.edu_sharing.service.nodeservice.NodeServiceFactory;
 import org.edu_sharing.service.nodeservice.model.GetPreviewResult;
 import org.edu_sharing.service.nodeservice.NodeServiceHelper;
@@ -232,8 +216,6 @@ public class MCAlfrescoAPIClient extends MCAlfrescoBaseClient {
 
 	protected ApplicationInfo appInfo = null;
 
-	private MetadataSets metadataSetsForRep = null;
-
 	Repository repositoryHelper = null;
 
 	private static String alfrescoSearchSubsystem = null;
@@ -269,8 +251,6 @@ public class MCAlfrescoAPIClient extends MCAlfrescoBaseClient {
 
 		appInfo = ApplicationInfoList.getHomeRepository();
 		repId = appInfo.getAppId();
-
-		metadataSetsForRep = null;
 
 		applicationContext = AlfAppContextGate.getApplicationContext();
 
@@ -341,76 +321,6 @@ public class MCAlfrescoAPIClient extends MCAlfrescoBaseClient {
 			alfrescoSearchSubsystem = sACF.getCurrentSourceBeanName();
 		}
 
-	}
-
-	/**
-	 * does a 2 step operation: 1. searching for nodes that match searchcriteria
-	 * with a path query to notify objects 2. running over the result and add a
-	 * temp prop PROP_NOTIFY_CREATEDATE
-	 * 
-	 * @param searchToken
-	 * @return
-	 * @throws Throwable
-	 */
-	public HashMap<String, HashMap<String, Object>> searchInvited(SearchToken searchToken) throws Throwable {
-
-		// for performance reasons only allow 10.000 as max io results
-		// this should be ok when properties of this nodes are cached
-		if (searchToken.getNrOfResults() == -1) {
-			searchToken.setNrOfResults(10000);
-		}
-
-		SearchResult result = this.search(searchToken);
-		if (result.getData() != null) {
-			for (Map.Entry<String, HashMap<String, Object>> entry : result.getData().entrySet()) {
-
-				HashMap<String, HashMap> parents = this.getParents(entry.getKey(), false);
-				for (Map.Entry<String, HashMap> parent : parents.entrySet()) {
-					String nodeType = (String) parent.getValue().get(CCConstants.NODETYPE);
-					if (nodeType != null && nodeType.equals(CCConstants.CCM_TYPE_NOTIFY)) {
-						Date notifyDate = (Date) nodeService.getProperty(new NodeRef(storeRef, parent.getKey()),
-								QName.createQName(CCConstants.CM_PROP_C_CREATED));
-						entry.getValue().put(CCConstants.VIRT_PROP_NOTIFY_CREATEDATE, new DateTool().formatDate(notifyDate.getTime()));
-						entry.getValue().put(CCConstants.VIRT_PROP_NOTIFY_CREATEDATE + CCConstants.LONG_DATE_SUFFIX, new Long(notifyDate.getTime()).toString());
-
-					}
-				}
-			}
-			return result.getData();
-		}
-		return new HashMap<String, HashMap<String, Object>>();
-	}
-
-	public SearchResult searchRecommend(int startIdx, int nrOfResults) throws Throwable {
-
-		ApplicationInfo appInfo = ApplicationInfoList.getHomeRepository();
-		String ro_query = appInfo.getRecommend_objects_query();
-		String value = "";
-		if (ro_query != null && !ro_query.trim().equals("")) {
-			value = "dummyvalue";
-			SearchMetadataHelper smdHelper = new SearchMetadataHelper();
-			final HashMap<MetadataSetQuery, HashMap<MetadataSetQueryProperty, String[]>> metadataSetSearchData = smdHelper.createSearchData(
-					"recommendobjectsproperty", ro_query, new String[] { value });
-			MetadataSetQueryProperty mdsqp = metadataSetSearchData.get(metadataSetSearchData.keySet().iterator().next()).keySet().iterator().next();
-			mdsqp.setEscape("false");
-			Integer propertyId = new MetadataReader().createPropertyId(appInfo.getAppId(), CCConstants.metadatasetdefault_id,
-					MetadataSetQuery.class.getSimpleName(), 0, "recommendobjectsproperty", 0);
-			mdsqp.setId(propertyId);
-			MetadataCache.add(mdsqp);
-
-			SearchToken st = new SearchToken();
-			SearchCriterias sc = new SearchCriterias();
-			sc.setRepositoryId(appInfo.getAppId());
-			sc.setMetadataSetSearchData(metadataSetSearchData);
-			st.setSearchCriterias(sc);
-			st.setStartIDX(startIdx);
-			st.setNrOfResults(nrOfResults);
-			st.setSort(CCConstants.CM_PROP_C_MODIFIED);
-			st.setSortAscending(false);
-			return this.search(st);
-		}
-		
-		return null;
 	}
 	
 	public SearchResult searchSolr(String query, int startIdx, int nrOfresults, List<String> facettes, int facettesMinCount, int facettesLimit)
@@ -520,202 +430,6 @@ public class MCAlfrescoAPIClient extends MCAlfrescoBaseClient {
 		searchResult.setData(AlfrescoDaoHelper.unmarshall(resultSet.getNodeRefs(), this.repId));
 		logger.info("returns");
 		return searchResult;
-
-	}
-
-	public SearchResult searchSolr(SearchToken searchToken) throws Throwable {
-		
-		logger.info("starting");
-		
-		SearchResultNodeRef srnr =  searchSolrNodeRef(searchToken);
-		SearchResult searchResult = new SearchResult();
-		searchResult.setSearchCriterias(searchToken.getSearchCriterias());
-		searchResult.setCountedProps(srnr.getCountedProps());
-		searchResult.setNodeCount(srnr.getNodeCount());
-		searchResult.setStartIDX(srnr.getNodeCount());
-		
-		List<NodeRef> resultNodeRefs = AlfrescoDaoHelper.marshall(srnr.getData());
-
-		HashMap<String, HashMap<String, Object>> returnVal = new LinkedHashMap<String, HashMap<String, Object>>();
-		int resultSubstract = 0;
-		for (int i = 0; i < resultNodeRefs.size(); i++) {
-			
-			NodeRef actNode = resultNodeRefs.get(i);
-
-			if (actNode == null || actNode.getId().equals("missing")) {
-				// solr was not fast enough
-				resultSubstract++;
-				continue;
-			}
-			
-			// logger.info("score for "+actNode+": "+resultSet.getScore(i));
-			
-			try {
-				HashMap<String, Object> properties = getProperties(actNode);
-				returnVal.put(actNode.getId(), properties);
-			} catch (AccessDeniedException e) {
-				logger.warn(e.getMessage() + " maybe the Object Permissions changed. solr was not fast enough.");
-				resultSubstract++;
-			}
-			
-		}
-
-		// correct for nodes that delivered by solr but are not available any longer
-		searchResult.setNodeCount(searchResult.getNodeCount() - resultSubstract);
-
-		searchResult.setData(returnVal);
-		logger.info("returns");
-		return searchResult;
-
-	}
-	
-	public SearchResultNodeRef searchSolrNodeRef(SearchToken searchToken) throws QueryValidationFailedException, UnsupportedEncodingException{
-		
-		SearchResultNodeRef searchResultNodeRef = new SearchResultNodeRef();
-		searchResultNodeRef.setSearchCriterias(searchToken.getSearchCriterias());
-		
-		QueryBuilder queryBuilder = new QueryBuilder();
-		queryBuilder.setSearchCriterias(searchToken.getSearchCriterias());
-
-		String searchString = queryBuilder.getSearchString();
-		logger.info("searchString: " + searchString);
-
-		SearchParameters searchParameters = new ESSearchParameters();
-		searchParameters.addStore(storeRef);
-
-		searchParameters.setLanguage(SearchService.LANGUAGE_LUCENE);
-
-		// searchParameters.setLanguage(SearchService.LANGUAGE_SOLR_ALFRESCO);
-
-		logger.info("searchToken.getStartIDX():" + searchToken.getStartIDX() + " searchToken.getNrOfResults():" + searchToken.getNrOfResults());
-
-		searchParameters.setQuery(searchString);
-
-		searchParameters.setSkipCount(searchToken.getStartIDX());
-		searchParameters.setMaxItems(searchToken.getNrOfResults());
-		
-		((ESSearchParameters)searchParameters).setGroupBy("text@sd___@"+CCConstants.CCM_PROP_IO_ORIGINAL);
-		//((ESSearchParameters)searchParameters).setGroupConfig("&group=true&group.main=true&group.limit=1");
-		((ESSearchParameters)searchParameters).setGroupConfig("&group=true&group.limit=1&group.ngroups=true");
-		//searchParameters.setMaxItems(10);
-		//searchParameters.setSkipCount(10);
-		
-		if (searchToken.getSort() != null) {
-			// searchParameters.addSort("@"+CCConstants.CM_PROP_C_MODIFIED,false);
-			searchParameters.addSort("@" + searchToken.getSort(), searchToken.isSortAscending());
-		}
-
-		if (searchToken.getCountProps() != null && searchToken.getCountProps().size() > 0) {
-			for (String facetteProp : searchToken.getCountProps()) {
-				String fieldFacette = "@" + facetteProp;
-				FieldFacet fieldFacet = new FieldFacet(fieldFacette);
-				fieldFacet.setLimit(100000);
-				
-				//it seems that this does not work anymore in alfresco 5
-				fieldFacet.setMinCount(searchToken.getCountPropsMinCount());		
-				searchParameters.addFieldFacet(fieldFacet);
-			}
-		}
-
-		ResultSet resultSet = searchService.query(searchParameters);
-		
-		long nrFound = 0;
-		
-		if(resultSet instanceof FilteringResultSet){
-			FilteringResultSet frs = (FilteringResultSet)resultSet;
-			nrFound = frs.getNumberFound();
-		}else{
-			nrFound = ((SolrJSONResultSet)resultSet).getNumberFound();
-		}
-		
-		List<NodeRef> resultNodeRefs = resultSet.getNodeRefs();
-		searchResultNodeRef.setNodeCount((int) nrFound);
-		
-		List<org.edu_sharing.service.model.NodeRef> eduNodeRefs = new ArrayList<org.edu_sharing.service.model.NodeRef>();
-		for(NodeRef nodeRef : resultNodeRefs){
-			eduNodeRefs.add(new NodeRefImpl(this.repId,nodeRef.getStoreRef().getProtocol(),nodeRef.getStoreRef().getIdentifier(),nodeRef.getId()));
-		}
-		
-		searchResultNodeRef.setData(eduNodeRefs);
-
-		int startIDX = searchToken.getStartIDX();
-		
-		if (nrFound <= searchToken.getStartIDX()) {
-			startIDX = 0;
-		}
-		searchResultNodeRef.setStartIDX(startIDX);
-		
-		// do facettes
-		if (searchToken.getCountProps() != null && searchToken.getCountProps().size() > 0) {
-			Map<String, Map<String, Integer>> newCountPropsMap = new HashMap<String, Map<String, Integer>>();
-			for (String facetteProp : searchToken.getCountProps()) {
-				Map<String, Integer> resultPairs = newCountPropsMap.get(facetteProp);
-				if (resultPairs == null) {
-					resultPairs = new HashMap<String, Integer>();
-				}
-				String fieldFacette = "@" + facetteProp;
-
-				List<Pair<String, Integer>> facettPairs = resultSet.getFieldFacet(fieldFacette);
-				Integer subStringCount = null;
-				if (searchToken.getCountPropsSubString() != null) {
-					subStringCount = searchToken.getCountPropsSubString().get(facetteProp);
-				}
-
-				if (subStringCount == null) {
-					// plain SOLR
-					logger.info("found " + facettPairs.size() + " facette pairs for" + fieldFacette);
-					for (Pair<String, Integer> pair : facettPairs) {
-
-						// value contains language information i.e. {de}
-						String first = new String(pair.getFirst().replaceAll("\\{[a-z]*\\}", "").getBytes(), "UTF-8");
-						// logger.info("pair.getFirst():"+first+" pair.getSecond():"+pair.getSecond());
-						// why ever: no values will be counted to so filter them
-						if (first != null && !first.trim().equals("") && pair.getSecond() > 0) {
-							resultPairs.put(first, pair.getSecond());
-						}
-					}
-				} else {
-					// substring handling
-					for (Pair<String, Integer> pair : facettPairs) {
-						String first = pair.getFirst().replaceAll("\\{[a-z][a-z]\\}", "");
-						String value = first;
-						if (value.length() >= subStringCount) {
-							int tmpSubStringMaxIdx = subStringCount;
-
-							value = value.substring(0, tmpSubStringMaxIdx);
-							Integer count = resultPairs.get(value);
-							if (count == null) {
-								count = 0;
-							}
-
-							count = count + pair.getSecond();
-							// logger.info("first:"+pair.getFirst()+":"+pair.getSecond()
-							// +" value:"+value+ ":"+count);
-							resultPairs.put(value, count);
-						}
-
-					}
-				}
-
-				if (resultPairs.size() > 0) newCountPropsMap.put(facetteProp, resultPairs);
-				
-			}
-			searchResultNodeRef.setCountedProps(newCountPropsMap);
-
-		}
-		// end facette
-				
-		return searchResultNodeRef;
-	}
-
-	public SearchResult search(SearchToken searchToken) throws Throwable {
-
-		if (MCAlfrescoAPIClient.alfrescoSearchSubsystem != null && MCAlfrescoAPIClient.alfrescoSearchSubsystem.contains(MCAlfrescoAPIClient.SEARCH_SUBSYSTEM_SOLR)) {
-			logger.info("doing the solr search");
-			return searchSolr(searchToken);
-		} else {
-			throw new Exception("unsupported searchsubsystem:" + MCAlfrescoAPIClient.alfrescoSearchSubsystem);
-		}
 
 	}
 

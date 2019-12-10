@@ -9,11 +9,10 @@ import java.util.Map;
 
 import org.apache.log4j.Logger;
 import org.edu_sharing.metadataset.v2.MetadataSetV2;
-import org.edu_sharing.repository.client.rpc.SearchCriterias;
+import org.edu_sharing.metadataset.v2.SearchCriterias;
 import org.edu_sharing.repository.server.SearchResultNodeRef;
 import org.edu_sharing.repository.server.tools.ApplicationInfo;
 import org.edu_sharing.repository.server.tools.ApplicationInfoList;
-import org.edu_sharing.restservices.MdsDao;
 import org.edu_sharing.restservices.shared.MdsQueryCriteria;
 import org.edu_sharing.service.Constants;
 import org.edu_sharing.service.nodeservice.NodeServiceYouTube;
@@ -38,18 +37,7 @@ public class SearchServiceYouTubeImpl extends SearchServiceAdapter{
 		this.repositoryId = appInfo.getAppId();		
 		googleAPIKey = appInfo.getApiKey(); 
 	}
-	
-	@Override
-	public SearchResultNodeRef search(MdsDao mdsDao, String query, List<MdsQueryCriteria> criterias, SearchToken token)
-			throws Throwable {
-		
-		SearchCriterias rc = new SearchCriterias();
-		rc.setMetadataSetId(mdsDao.getMetadataSet().getId());
-		rc.setMetadataSetQuery(query);
-		rc.setRepositoryId(this.repositoryId);
-		return searchInternal(rc,query,criterias,token);
-	}
-		
+
 	private SearchResultNodeRef searchInternal(SearchCriterias rc, String query, List<MdsQueryCriteria> criterias, SearchToken token)
 			throws Throwable {
 		

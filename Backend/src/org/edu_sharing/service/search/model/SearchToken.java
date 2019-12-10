@@ -7,11 +7,9 @@ import java.util.Map;
 import org.apache.log4j.Logger;
 import org.edu_sharing.metadataset.v2.MetadataQueries;
 import org.edu_sharing.metadataset.v2.MetadataQuery;
+import org.edu_sharing.metadataset.v2.SearchCriterias;
 import org.edu_sharing.metadataset.v2.tools.MetadataSearchHelper;
-import org.edu_sharing.repository.client.rpc.SearchCriterias;
 import org.edu_sharing.repository.client.tools.CCConstants;
-import org.edu_sharing.repository.server.tools.search.QueryBuilder;
-import org.edu_sharing.repository.server.tools.search.QueryValidationFailedException;
 
 import com.sun.star.lang.IllegalArgumentException;
 
@@ -85,7 +83,7 @@ public class SearchToken implements Serializable {
 		this.sortDefinition = sortDefinition;
 	}
 
-	public String getLuceneString() throws QueryValidationFailedException, IllegalArgumentException {
+	public String getLuceneString() throws IllegalArgumentException {
 		if(query!=null){
 			return MetadataSearchHelper.getLuceneString(queries,query,searchCriterias,parameters);
 		}
@@ -203,7 +201,7 @@ public class SearchToken implements Serializable {
 	public void setQueryString(String queryString) {
 		this.queryString=queryString;
 	}
-	public String getQueryString() throws QueryValidationFailedException, IllegalArgumentException {
+	public String getQueryString() throws IllegalArgumentException {
 		if(queryString!=null)
 			return queryString;
 		return getLuceneString();

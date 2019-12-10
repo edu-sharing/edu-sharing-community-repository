@@ -395,12 +395,7 @@
       <load-on-startup>5</load-on-startup>
    </servlet>
 	
-    <servlet>
-        <servlet-name>CCSearchService</servlet-name>
-        <servlet-class>
-            org.edu_sharing.repository.server.MCAlfrescoServiceImpl
-        </servlet-class> 
-    </servlet>
+
     <servlet>
         <servlet-name>SchoolContextService</servlet-name>
         <servlet-class>
@@ -605,10 +600,6 @@
 	<servlet-mapping> 
         <servlet-name>CCConfirmActivation</servlet-name>
         <url-pattern>/appactivation</url-pattern>
-    </servlet-mapping>    
-    <servlet-mapping> 
-        <servlet-name>CCSearchService</servlet-name>
-        <url-pattern>/eduservlet/service</url-pattern>
     </servlet-mapping>
     <servlet-mapping> 
         <servlet-name>SchoolContextService</servlet-name>

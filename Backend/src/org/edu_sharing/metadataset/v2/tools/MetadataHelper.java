@@ -22,6 +22,9 @@ import java.util.List;
 
 public class MetadataHelper {
 
+	public static MetadataSetV2 getLocalDefaultMetadataset() throws Exception{
+		return MetadataReaderV2.getMetadataset(ApplicationInfoList.getHomeRepository(),CCConstants.metadatasetdefault_id,getLocale());
+	}
 	public static MetadataSetV2 getMetadataset(ApplicationInfo appId,String mdsSet) throws Exception{
 		return MetadataReaderV2.getMetadataset(appId, mdsSet,getLocale());
 	}
