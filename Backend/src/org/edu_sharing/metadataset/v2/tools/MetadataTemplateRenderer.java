@@ -2,15 +2,24 @@ package org.edu_sharing.metadataset.v2.tools;
 
 import com.ibm.icu.text.SimpleDateFormat;
 import jersey.repackaged.com.google.common.collect.Lists;
+import org.alfresco.repo.security.authentication.AuthenticationUtil;
+import org.alfresco.service.cmr.repository.NodeRef;
+import org.alfresco.service.cmr.repository.StoreRef;
 import org.apache.commons.lang.StringEscapeUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
 import org.edu_sharing.metadataset.v2.*;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.client.tools.I18nAngular;
-import org.edu_sharing.repository.server.tools.DateTool;
-import org.edu_sharing.repository.server.tools.VCardConverter;
+import org.edu_sharing.repository.server.authentication.NetworkAuthentication;
+import org.edu_sharing.repository.server.tools.*;
 import org.edu_sharing.service.license.LicenseService;
+import org.edu_sharing.service.nodeservice.NodeServiceFactory;
+import org.edu_sharing.service.nodeservice.NodeServiceHelper;
+import org.edu_sharing.service.permission.PermissionServiceFactory;
+import org.edu_sharing.service.permission.PermissionServiceHelper;
+import org.edu_sharing.service.toolpermission.ToolPermissionService;
+import org.edu_sharing.service.toolpermission.ToolPermissionServiceFactory;
 import org.owasp.html.PolicyFactory;
 import org.owasp.html.Sanitizers;
 
@@ -29,21 +38,27 @@ import java.util.stream.Collectors;
 public class MetadataTemplateRenderer {
 
 	private static final String GROUP_MULTIVALUE_DELIMITER = "[+]";
+	private String userName;
+	private NodeRef nodeRef;
 	private MetadataSetV2 mds;
 	private Map<String, String[]> properties;
 	private static Logger logger=Logger.getLogger(MetadataTemplateRenderer.class);
 
-	public MetadataTemplateRenderer(MetadataSetV2 mds,Map<String,String[]> properties) {
+	public MetadataTemplateRenderer(MetadataSetV2 mds, NodeRef nodeRef, String userName, Map<String, String[]> properties) {
 		this.mds = mds;
+		this.nodeRef = nodeRef;
+		this.userName = userName;
 		this.properties = cleanupHTMLMultivalueProperties(properties);
 	}
 
 	public String render(String groupName) throws IllegalArgumentException {
-		for(MetadataGroup group : mds.getGroups()){
-			if(group.getId().equals(groupName))
-				return render(group);
-		}
-		throw new IllegalArgumentException("Group "+groupName+" was not found in the mds "+mds.getRepositoryId()+":"+mds.getId());
+		return AuthenticationUtil.runAs(()-> {
+			for (MetadataGroup group : mds.getGroups()) {
+				if (group.getId().equals(groupName))
+					return render(group);
+			}
+			throw new IllegalArgumentException("Group " + groupName + " was not found in the mds " + mds.getRepositoryId() + ":" + mds.getId());
+		},userName);
 	}
 
 	private String render(MetadataGroup group) throws IllegalArgumentException {
@@ -85,71 +100,28 @@ public class MetadataTemplateRenderer {
 				values=new String[]{"-"};
 				wasEmpty=true;
 			}
-			String widgetHtml="<div class='mdsWidget";
-			if(widget.getType()!=null)
-				widgetHtml+=" mdsWidget_"+widget.getType() ;
-			widgetHtml+="'"+attributes+"><div class='mdsWidgetCaption'>"+widget.getCaption()+"</div>";
-			widgetHtml+="<div class='mdsWidgetContent mds_"+widget.getId().replace(":","_");
-			if(widget.isMultivalue())
-				widgetHtml+=" mdsWidgetMultivalue";
+			StringBuffer widgetHtml=new StringBuffer("<div class='mdsWidget");
+			if(widget.getType()!=null) {
+				widgetHtml.append(" mdsWidget_").append(widget.getType());
+			}
+			widgetHtml.append("'").append(attributes).append("><div class='mdsWidgetCaption'>").append(widget.getCaption()).append("</div>");
+			widgetHtml.append("<div class='mdsWidgetContent mds_").append(widget.getId().replace(":", "_"));
+			if(widget.isMultivalue()) {
+				widgetHtml.append(" mdsWidgetMultivalue");
+			}
 
-			widgetHtml+="'>";
-			Map<String, MetadataKey> valuesMap = widget.getValuesAsMap();
+			widgetHtml.append("'>");
 			boolean empty=true;
 			if("multivalueTree".equals(widget.getType())) {
-				Map<Integer,List<String>> map=new HashMap<>();
-				for(String value:values) {
-					MetadataKey key=valuesMap.get(value);
-					if(key==null)
-						continue;
-					List<String> path=new ArrayList<String>();
-					int preventInfiniteLoop = 0;
-					while(key!=null) {
-						path.add(key.getCaption());
-						key=valuesMap.get(key.getParent());
-						if(preventInfiniteLoop++ > 100) {
-							logger.error("check valuespace for widget:" + widget.getId() + " key:" + key.getKey());
-							break;
-						}
-					}
-					path=Lists.reverse(path);
-					int i=0;
-					widgetHtml+="<div class='mdsValue'>";
-					empty=empty && path.size()==0;
-					for(String p : path) {
-						if(i>0) {
-							widgetHtml+="<i class='material-icons'>keyboard_arrow_right</i>";
-						}
-						widgetHtml+=p;
-						i++;
-					}
-					widgetHtml+="</div>";
-
-				}
+				empty = renderTree(widgetHtml, widget);
 			}
 			else if("multivalueCombined".equals(widget.getType())){
-				// use the property with the longest value list for render
-				long max=Collections.max(widget.getSubwidgets().stream().map((subwidget)->{
-					try{
-						return (long)properties.get(subwidget.getId()).length;
-					}catch(NullPointerException e){}
-					return 0L;
-				}).collect(Collectors.toSet()));
-				if(max>0) {
-					wasEmpty = false;
-					empty = false;
-					for (int i = 0; i < max; i++) {
-						widgetHtml += "<div class='mdsValue'>";
-						for (MetadataWidget.Subwidget subwidget : widget.getSubwidgets()) {
-							try {
-								widgetHtml += renderWidgetValue(mds.findWidget(subwidget.getId()), properties.get(subwidget.getId())[i]) + " ";
-							} catch (IndexOutOfBoundsException | NullPointerException e) {
-								logger.warn("Sub widget " + subwidget.getId() + " can not be rendered (main widget " + widget.getId() + "): The array values of the sub widgets do not match up", e);
-							}
-						}
-						widgetHtml += "</div>";
-					}
-				}
+				empty = renderWidgetSubwidgets(widget, widgetHtml);
+				wasEmpty = empty;
+			}
+			else if("collection_feedback".equals(widget.getType())){
+				empty = renderCollectionFeedback(widget,widgetHtml);
+				wasEmpty = empty;
 			}
 			else {
 				for(String value : values){
@@ -193,7 +165,7 @@ public class MetadataTemplateRenderer {
 					value=renderWidgetValue(widget,value);
 					boolean isLink=false;
 					if(widget.getLink()!=null && !widget.getLink().isEmpty()){
-						widgetHtml+="<a href=\""+value+"\" target=\""+widget.getLink()+"\">";
+						widgetHtml.append("<a href=\"").append(value).append("\" target=\"").append(widget.getLink()).append("\">");
 						isLink=true;
 					}
 					else if("vcard".equals(widget.getType())){
@@ -205,7 +177,7 @@ public class MetadataTemplateRenderer {
 								if(!url.isEmpty()) {
 									if (!url.contains("://"))
 										url = "http://" + url;
-									widgetHtml += "<a href=\"" + url + "\" target=\"_blank\">";
+									widgetHtml.append("<a href=\"").append(url).append("\" target=\"_blank\">");
 									isLink = true;
 								}
 							}
@@ -214,23 +186,23 @@ public class MetadataTemplateRenderer {
 						}
 					}
 
-					widgetHtml+="<div class='mdsValue'>";
+					widgetHtml.append("<div class='mdsValue'>");
 					if(widget.getIcon()!=null){
-						widgetHtml+=insertIcon(widget.getIcon());
+						widgetHtml.append(insertIcon(widget.getIcon()));
 					}
 					if(!value.trim().isEmpty())
 						empty=false;
-					widgetHtml+=value;
-					widgetHtml+="</div>";
+					widgetHtml.append(value);
+					widgetHtml.append("</div>");
 					if(isLink) {
-						widgetHtml+="</a>";
+						widgetHtml.append("</a>");
 					}
 
 				}
 			}
-			widgetHtml+="</div></div>";
+			widgetHtml.append("</div></div>");
 			if((empty || wasEmpty) && widget.isHideIfEmpty())
-				widgetHtml="";
+				widgetHtml=new StringBuffer();
 			content=first+widgetHtml+second;
 		}
 		// when hideIfEmpty for template is true, and no content was rendered -> hide
@@ -241,6 +213,105 @@ public class MetadataTemplateRenderer {
 		html+="</div></div>";
 		return html;
 	}
+
+	private boolean renderCollectionFeedback(MetadataWidget widget, StringBuffer widgetHtml) {
+		boolean empty=true;
+		String parent = NodeServiceFactory.getLocalService().getPrimaryParent(nodeRef.getId());
+		if(parent!=null){
+			/* check that
+				- the parent is of type collection
+				- the user has the toolpermission TOOLPERMISSION_COLLECTION_FEEDBACK
+				- the user is not guest (is handled via permissions)
+				- the user has the PERMISSION_FEEDBACK permission
+				- the user is not administrator (PERMISSION_DELETE) of the collection
+			 */
+			logger.info(ToolPermissionServiceFactory.getInstance().hasToolPermission(CCConstants.CCM_VALUE_TOOLPERMISSION_COLLECTION_FEEDBACK)+" "+PermissionServiceFactory.getLocalService().hasPermission(StoreRef.PROTOCOL_WORKSPACE,StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(),parent,CCConstants.PERMISSION_FEEDBACK)
+					+" "+PermissionServiceFactory.getLocalService().hasPermission(StoreRef.PROTOCOL_WORKSPACE,StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(),parent,CCConstants.PERMISSION_DELETE));
+			if(NodeServiceHelper.hasAspect(new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE,parent),CCConstants.CCM_ASPECT_COLLECTION) &&
+				ToolPermissionServiceFactory.getInstance().hasToolPermission(CCConstants.CCM_VALUE_TOOLPERMISSION_COLLECTION_FEEDBACK) &&
+				PermissionServiceFactory.getLocalService().hasPermission(StoreRef.PROTOCOL_WORKSPACE,StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(),parent,CCConstants.PERMISSION_FEEDBACK) &&
+				!PermissionServiceFactory.getLocalService().hasPermission(StoreRef.PROTOCOL_WORKSPACE,StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(),parent,CCConstants.PERMISSION_DELETE)
+			){
+				try {
+					widgetHtml.
+							append("<div class=\"mdsValue\">").
+							append("<a href=\"").
+							append(URLTool.getNgComponentsUrl()).append("collections?id=").append(parent).append("&feedback=true").
+							append("\">");
+					if(widget.getIcon()!=null){
+						widgetHtml.append(insertIcon(widget.getIcon()));
+					}
+					widgetHtml.append(MetadataHelper.getTranslation("collection_feedback_button")).append("</a></div>");
+					empty=false;
+				} catch (Exception e) {
+					logger.warn(e.getMessage(),e);
+				}
+			}
+		}
+		return empty;
+	}
+
+	private boolean renderWidgetSubwidgets(MetadataWidget widget, StringBuffer widgetHtml) {
+		boolean empty = true;
+		// use the property with the longest value list for render
+		long max= Collections.max(widget.getSubwidgets().stream().map((subwidget)->{
+			try{
+				return (long)properties.get(subwidget.getId()).length;
+			}catch(NullPointerException e){}
+			return 0L;
+		}).collect(Collectors.toSet()));
+		if(max>0) {
+			empty = false;
+			for (int i = 0; i < max; i++) {
+				widgetHtml.append("<div class='mdsValue'>");
+				for (MetadataWidget.Subwidget subwidget : widget.getSubwidgets()) {
+					try {
+						widgetHtml.append(renderWidgetValue(mds.findWidget(subwidget.getId()), properties.get(subwidget.getId())[i])).append(" ");
+					} catch (IndexOutOfBoundsException | NullPointerException e) {
+						logger.warn("Sub widget " + subwidget.getId() + " can not be rendered (main widget " + widget.getId() + "): The array values of the sub widgets do not match up", e);
+					}
+				}
+				widgetHtml.append("</div>");
+			}
+		}
+		return empty;
+	}
+
+	private boolean renderTree(StringBuffer widgetHtml, MetadataWidget widget) {
+		Map<String, MetadataKey> valuesMap=widget.getValuesAsMap();
+		Map<Integer, List<String>> map=new HashMap<>();
+		boolean empty=true;
+		for(String value:valuesMap.keySet()) {
+			MetadataKey key=valuesMap.get(value);
+			if(key==null)
+				continue;
+			List<String> path=new ArrayList<String>();
+			int preventInfiniteLoop = 0;
+			while(key!=null) {
+				path.add(key.getCaption());
+				key=valuesMap.get(key.getParent());
+				if(preventInfiniteLoop++ > 100) {
+					logger.error("check valuespace for widget:" + widget.getId() + " key:" + key.getKey());
+					break;
+				}
+			}
+			path= Lists.reverse(path);
+			int i=0;
+			widgetHtml.append("<div class='mdsValue'>");
+			empty=path.size()==0;
+			for(String p : path) {
+				if(i>0) {
+					widgetHtml.append("<i class='material-icons'>keyboard_arrow_right</i>");
+				}
+				widgetHtml.append(p);
+				i++;
+			}
+			widgetHtml.append("</div>");
+
+		}
+		return empty;
+	}
+
 	private String renderWidgetValue(MetadataWidget widget,String value){
 		if(widget.getType()!=null){
 			if(widget.getType().equals("date")){

@@ -481,9 +481,12 @@ public class CollectionDao {
 				try {
 					NodeDao node=NodeDao.getNode(repoDao,id);
 					String data = NodeServiceHelper.getProperty(new org.alfresco.service.cmr.repository.NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, id), CCConstants.CCM_PROP_COLLECTION_FEEDBACK_DATA);
+					String authority = NodeServiceHelper.getProperty(new org.alfresco.service.cmr.repository.NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, id), CCConstants.CCM_PROP_COLLECTION_FEEDBACK_AUTHORITY);
 					CollectionFeedback feedback = new CollectionFeedback();
 					feedback.setCreatedAt(node.getCreatedAt());
-					feedback.setCreatedBy(node.getCreatedBy());
+					if(authority!=null) {
+						feedback.setCreator(String.valueOf(Math.abs(authority.hashCode()) % 1000));
+					}
 					feedback.setFeedback(new Gson().fromJson(data,Map.class));
 					return feedback;
 				} catch (DAOException e) {

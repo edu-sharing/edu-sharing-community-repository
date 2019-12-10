@@ -91,6 +91,7 @@
     "FEEDBACK_TITLE": "Give feedback for collection",
     "FEEDBACK_VIEW_TITLE": "Given feedback for collection",
     "FEEDBACK_VIEW_EMPTY": "No feedback was given for this collection yet",
+    "FEEDBACK_CREATOR": "Author {{creator}}",
     "FEEDBACK_SAVE": "Send",
     "FEEDBACK_TOAST": "Feedback sent. Thank you!"
   },

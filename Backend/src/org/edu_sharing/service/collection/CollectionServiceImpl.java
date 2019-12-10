@@ -27,7 +27,9 @@ import org.alfresco.service.cmr.search.SearchParameters;
 import org.alfresco.service.cmr.security.AccessPermission;
 import org.alfresco.service.cmr.security.PermissionService;
 import org.alfresco.service.cmr.thumbnail.ThumbnailService;
+import org.alfresco.service.namespace.QName;
 import org.alfresco.service.transaction.TransactionService;
+import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.log4j.Logger;
 import org.apache.lucene.queryParser.QueryParser;
 import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
@@ -924,9 +926,13 @@ public class CollectionServiceImpl implements CollectionService{
 	public String addFeedback(String id, HashMap<String, String[]> feedbackData) throws Throwable {
 		ToolPermissionHelper.throwIfToolpermissionMissing(CCConstants.CCM_VALUE_TOOLPERMISSION_COLLECTION_FEEDBACK);
 		new PermissionServiceHelper(PermissionServiceFactory.getLocalService()).validatePermissionOrThrow(id,CCConstants.PERMISSION_FEEDBACK);
+		String hashedAuthority = getHashedAuthority();
 		return AuthenticationUtil.runAsSystem(()-> {
 			try {
+				// will reset after runAs automatically
+				AuthenticationUtil.setFullyAuthenticatedUser(AuthenticationUtil.SYSTEM_USER_NAME);
 				HashMap<String, Object> props = new HashMap<>();
+				props.put(CCConstants.CCM_PROP_COLLECTION_FEEDBACK_AUTHORITY,hashedAuthority);
 				props.put(CCConstants.CCM_PROP_COLLECTION_FEEDBACK_DATA,new Gson().toJson(feedbackData));
 				return nodeService.createNodeBasic(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE,id,CCConstants.CCM_TYPE_COLLECTION_FEEDBACK,CCConstants.CCM_ASSOC_COLLECTION_FEEDBACK,props);
 			} catch (Throwable t) {
@@ -934,6 +940,12 @@ public class CollectionServiceImpl implements CollectionService{
 				throw t;
 			}
 		});
+	}
+
+	private String getHashedAuthority() {
+		String authorityName=AuthenticationUtil.getFullyAuthenticatedUser();
+		String esuid= (String) serviceRegistry.getNodeService().getProperty(serviceRegistry.getAuthorityService().getAuthorityNodeRef(authorityName), QName.createQName(CCConstants.PROP_USER_ESUID));
+		return DigestUtils.shaHex(authorityName+esuid);
 	}
 
 	@Override

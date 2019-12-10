@@ -407,7 +407,7 @@ public class RenderInfoSoapBindingImpl implements org.edu_sharing.webservices.re
 		rir.setMimeTypeUrl(new MimeTypes(clientBaseUrl).getIconUrl(props, Theme.getThemeId()));
 		rir.setAspects(client.getAspects(nodeId));
 		rir.setDirectory(MimeTypesV2.isDirectory(props));
-		addMetadataTemplate(rir,locale,nodeType,props,appInfo,displayMode);
+		addMetadataTemplate(rir,locale,userName,nodeRef,nodeType,props,appInfo,displayMode);
 
 		return rir;
 	}
@@ -460,7 +460,7 @@ public class RenderInfoSoapBindingImpl implements org.edu_sharing.webservices.re
 		}
 		return propsClean;
 	}
-	private void addMetadataTemplate(RenderInfoResult rir, String locale, String type, Map<String, Object> props, ApplicationInfo appInfo, String displayMode) throws Exception {
+	private void addMetadataTemplate(RenderInfoResult rir, String locale, String userName, NodeRef nodeRef, String type, Map<String, Object> props, ApplicationInfo appInfo, String displayMode) throws Exception {
 		String mdsId = (String)props.get(CCConstants.CM_PROP_METADATASET_EDU_METADATASET);
 		if(mdsId==null)
 			mdsId = CCConstants.metadatasetdefault_id;
@@ -475,7 +475,7 @@ public class RenderInfoSoapBindingImpl implements org.edu_sharing.webservices.re
 			String[] values=new ValueTool().getMultivalue(props.get(key).toString());
 			propsConverted.put(keyLocal, values);
 		}
-		rir.setMdsTemplate(new MetadataTemplateRenderer(mds,propsConverted).render(displayMode.equals(RenderingTool.DISPLAY_INLINE) ? "io_render_inline" : "io_render"));
+		rir.setMdsTemplate(new MetadataTemplateRenderer(mds,nodeRef,userName,propsConverted).render(displayMode.equals(RenderingTool.DISPLAY_INLINE) ? "io_render_inline" : "io_render"));
 	}
 
 	String getHeaderValue(String key, MessageContext msgContext) throws SOAPException, AxisFault{

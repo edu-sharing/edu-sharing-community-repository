@@ -10,7 +10,7 @@ import java.util.Map;
 
 public class CollectionFeedback implements Serializable {
     @JsonProperty private Date createdAt;
-    @JsonProperty private Person createdBy;
+    @JsonProperty private String creator;
     @JsonProperty private Map<String,Serializable> feedback;
 
     public Date getCreatedAt() {
@@ -21,12 +21,12 @@ public class CollectionFeedback implements Serializable {
         this.createdAt = createdAt;
     }
 
-    public Person getCreatedBy() {
-        return createdBy;
+    public String getCreator() {
+        return creator;
     }
 
-    public void setCreatedBy(Person createdBy) {
-        this.createdBy = createdBy;
+    public void setCreator(String creator) {
+        this.creator = creator;
     }
 
     public Map<String, Serializable> getFeedback() {

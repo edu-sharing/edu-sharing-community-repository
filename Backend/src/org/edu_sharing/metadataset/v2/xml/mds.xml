@@ -373,6 +373,13 @@
 				<type>textarea</type>
 				<required>true</required>
 			</widget>
+			<widget>
+				<id>collection_feedback</id>
+				<type>collection_feedback</type>
+				<caption>collection_feedback</caption>
+				<icon>chat_bubble</icon>
+				<hideIfEmpty>true</hideIfEmpty>
+			</widget>
 		</widgets>
 		<templates>
 			<template>
