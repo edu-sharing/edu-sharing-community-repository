@@ -40,24 +40,6 @@ Built on Apr 22, 2006 (06:55:48 PDT)-->
     <sequence/>
    </complexType>
    <element name="fault" type="impl:Usage2Exception"/>
-   <element name="deleteUsage">
-    <complexType>
-     <sequence>
-      <element name="eduRef" type="xsd:string"/>
-      <element name="user" type="xsd:string"/>
-      <element name="lmsId" type="xsd:string"/>
-      <element name="courseId" type="xsd:string"/>
-      <element name="resourceId" type="xsd:string"/>
-     </sequence>
-    </complexType>
-   </element>
-   <element name="deleteUsageResponse">
-    <complexType>
-     <sequence>
-      <element name="deleteUsageReturn" type="xsd:boolean"/>
-     </sequence>
-    </complexType>
-   </element>
    <element name="getUsage">
     <complexType>
      <sequence>
@@ -73,6 +55,24 @@ Built on Apr 22, 2006 (06:55:48 PDT)-->
     <complexType>
      <sequence>
       <element name="getUsageReturn" type="impl:Usage2Result"/>
+     </sequence>
+    </complexType>
+   </element>
+   <element name="deleteUsage">
+    <complexType>
+     <sequence>
+      <element name="eduRef" type="xsd:string"/>
+      <element name="user" type="xsd:string"/>
+      <element name="lmsId" type="xsd:string"/>
+      <element name="courseId" type="xsd:string"/>
+      <element name="resourceId" type="xsd:string"/>
+     </sequence>
+    </complexType>
+   </element>
+   <element name="deleteUsageResponse">
+    <complexType>
+     <sequence>
+      <element name="deleteUsageReturn" type="xsd:boolean"/>
      </sequence>
     </complexType>
    </element>
@@ -169,21 +169,21 @@ Built on Apr 22, 2006 (06:55:48 PDT)-->
 
       </wsdl:operation>
 
-      <wsdl:operation name="deleteUsage">
-
-         <wsdl:input message="impl:deleteUsageRequest" name="deleteUsageRequest"/>
-
-         <wsdl:output message="impl:deleteUsageResponse" name="deleteUsageResponse"/>
-
-         <wsdl:fault message="impl:Usage2Exception" name="Usage2Exception"/>
-
-      </wsdl:operation>
-
       <wsdl:operation name="getUsage">
 
          <wsdl:input message="impl:getUsageRequest" name="getUsageRequest"/>
 
          <wsdl:output message="impl:getUsageResponse" name="getUsageResponse"/>
+
+         <wsdl:fault message="impl:Usage2Exception" name="Usage2Exception"/>
+
+      </wsdl:operation>
+
+      <wsdl:operation name="deleteUsage">
+
+         <wsdl:input message="impl:deleteUsageRequest" name="deleteUsageRequest"/>
+
+         <wsdl:output message="impl:deleteUsageResponse" name="deleteUsageResponse"/>
 
          <wsdl:fault message="impl:Usage2Exception" name="Usage2Exception"/>
 
@@ -229,17 +229,17 @@ Built on Apr 22, 2006 (06:55:48 PDT)-->
 
       </wsdl:operation>
 
-      <wsdl:operation name="deleteUsage">
+      <wsdl:operation name="getUsage">
 
          <wsdlsoap:operation soapAction=""/>
 
-         <wsdl:input name="deleteUsageRequest">
+         <wsdl:input name="getUsageRequest">
 
             <wsdlsoap:body use="literal"/>
 
          </wsdl:input>
 
-         <wsdl:output name="deleteUsageResponse">
+         <wsdl:output name="getUsageResponse">
 
             <wsdlsoap:body use="literal"/>
 
@@ -253,17 +253,17 @@ Built on Apr 22, 2006 (06:55:48 PDT)-->
 
       </wsdl:operation>
 
-      <wsdl:operation name="getUsage">
+      <wsdl:operation name="deleteUsage">
 
          <wsdlsoap:operation soapAction=""/>
 
-         <wsdl:input name="getUsageRequest">
+         <wsdl:input name="deleteUsageRequest">
 
             <wsdlsoap:body use="literal"/>
 
          </wsdl:input>
 
-         <wsdl:output name="getUsageResponse">
+         <wsdl:output name="deleteUsageResponse">
 
             <wsdlsoap:body use="literal"/>
 

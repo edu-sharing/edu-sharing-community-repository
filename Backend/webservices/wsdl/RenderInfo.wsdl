@@ -42,6 +42,7 @@ Built on Apr 22, 2006 (06:55:48 PDT)-->
      <element name="aspects" nillable="true" type="impl:ArrayOf_xsd_string"/>
      <element name="children" nillable="true" type="impl:ArrayOf_tns2_Child"/>
      <element name="contentHash" type="xsd:int"/>
+     <element name="directory" nillable="true" type="xsd:boolean"/>
      <element name="eduSchoolPrimaryAffiliation" nillable="true" type="xsd:string"/>
      <element name="guestReadAllowed" nillable="true" type="xsd:boolean"/>
      <element name="hasContentLicense" nillable="true" type="xsd:boolean"/>

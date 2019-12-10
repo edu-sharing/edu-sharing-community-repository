@@ -16,7 +16,6 @@ import org.edu_sharing.repository.server.authentication.Context;
 import org.edu_sharing.repository.server.tools.ApplicationInfo;
 import org.edu_sharing.repository.server.tools.ApplicationInfoList;
 import org.edu_sharing.webservices.alfresco.extension.KeyValue;
-import org.edu_sharing.webservices.alfresco.extension.NativeAlfrescoWrapper;
 import org.edu_sharing.webservices.alfresco.extension.RepositoryNode;
 import org.edu_sharing.webservices.util.EduWebServiceFactory;
 
