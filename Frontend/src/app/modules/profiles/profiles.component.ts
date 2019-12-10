@@ -111,6 +111,7 @@ export class ProfilesComponent {
   }
   public savePassword(){
     if(this.changePassword){
+      this.globalProgress=true;
       if(this.password.length<ProfilesComponent.PASSWORD_MIN_LENGTH){
         this.toast.error(null,'PASSWORD_MIN_LENGTH',{length:ProfilesComponent.PASSWORD_MIN_LENGTH});
         this.globalProgress=false;
@@ -162,7 +163,13 @@ export class ProfilesComponent {
       this.iamService.removeUserAvatar(this.userEdit.authorityName).subscribe(()=>{
         this.edit=false;
         this.editAbout=false;
+        this.oldPassword='';
+        this.password='';
+        this.changePassword=false;
+        this.toast.toast('PROFILE_UPDATED');
         this.loadUser(this.userEdit.authorityName);
+      },(error)=>{
+        this.toast.error(error);
       });
     }
     else if(this.avatarFile){
@@ -170,6 +177,8 @@ export class ProfilesComponent {
         this.edit=false;
         this.editAbout=false;
         this.loadUser(this.userEdit.authorityName);
+      },(error)=>{
+        this.toast.error(error);
       });
     }
     else{
