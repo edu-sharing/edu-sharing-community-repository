@@ -37,9 +37,9 @@
         <div class="card-scroll feedback">
             <h2 class="empty" *ngIf="!feedbacks || !feedbacks.length">{{'COLLECTIONS.FEEDBACK_VIEW_EMPTY' | translate}}</h2>
             <div *ngIf="feedbacks && feedbacks.length">
-                <div *ngFor="let feedback of feedbacks">
+                <div *ngFor="let feedback of feedbacks" class="feedback-container">
                     <div class="main-data">
-                        <div class="author">{{'COLLECTIONS.FEEDBACK_CREATOR' | translate:{creator:feedback.creator} }}</div>
+                        <div class="author"><user-avatar icon="person" [user]="{authorityName:feedback.creator}" size="xsmall"></user-avatar> {{'COLLECTIONS.FEEDBACK_CREATOR' | translate:{creator:feedback.creator} }}</div>
                         <div class="date">{{feedback.createdAt | formatDate:{useRelativeLabels:false,time:true} }}</div>
                     </div>
                     <div class="meta-data">
@@ -50,7 +50,7 @@
         </div>
     </div>
     <div class="card-action">
-        <a class="waves-effect waves-light btn-flat" tabindex="0" (keyup.enter)="feedbackView=false" (click)="feedbackView=false">{{'CLOSE' | translate }}</a>
+        <a class="waves-effect waves-light btn" tabindex="0" (keyup.enter)="feedbackView=false" (click)="feedbackView=false">{{'CLOSE' | translate }}</a>
     </div>
 </div>
 

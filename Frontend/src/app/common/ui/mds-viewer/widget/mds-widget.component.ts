@@ -27,9 +27,10 @@ export class MdsWidgetComponent{
       case 'email':
       case 'month':
       case 'color':
-      case 'slider':
       case 'textarea':
-        return 'text'
+        return 'text';
+      case 'slider':
+        return 'slider';
     }
     return 'unknown';
   }

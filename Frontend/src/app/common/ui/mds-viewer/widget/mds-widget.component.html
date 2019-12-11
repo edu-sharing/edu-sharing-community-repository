@@ -3,6 +3,7 @@
     <div *ngIf="!getValue()" class="widget-data widget-no-data widget-type-{{getBasicType()}}">-</div>
     <div *ngIf="getValue()" class="widget-data widget-type-{{getBasicType()}}">
         <div *ngIf="getBasicType()=='text'">{{getValue()[0]}}</div>
+        <div *ngIf="getBasicType()=='slider'"><span class="slider-value">{{getValue()[0]}}</span><span> / </span><span class="slider-max">{{widget.max}}</span></div>
         <div *ngIf="getBasicType()=='unknown'">
             The widget type {{widget.type}} is currently not supported for rendering
         </div>

@@ -25,6 +25,10 @@ export class UserAvatarComponent {
     @Input() link=false;
     @Input() user : UserSimple;
     /**
+     * when a regular material icon should be used instead of an avatar
+     */
+    @Input() icon : string;
+    /**
      * either xsmall, small, medium or large
      */
     @Input() size = 'large';
@@ -44,7 +48,8 @@ export class UserAvatarComponent {
                 private sanitizer : DomSanitizer) {
     }
     isEditorialUser(){
-        return this.user.profile && this.user.profile.types && this.user.profile.types.indexOf(RestConstants.GROUP_TYPE_EDITORIAL)!=-1;
+        return this.user && this.user.profile && this.user.profile.types &&
+            this.user.profile.types.indexOf(RestConstants.GROUP_TYPE_EDITORIAL)!=-1;
     }
     openProfile(){
         this.router.navigate([UIConstants.ROUTER_PREFIX+"profiles",this.user.authorityName]);
