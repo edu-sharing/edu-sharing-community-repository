@@ -5,13 +5,17 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.alfresco.model.ContentModel;
 import org.alfresco.repo.cache.SimpleCache;
 import org.alfresco.service.ServiceRegistry;
 import org.alfresco.service.cmr.repository.ChildAssociationRef;
 import org.alfresco.service.cmr.repository.NodeRef;
+import org.alfresco.service.cmr.repository.NodeService;
 import org.alfresco.service.cmr.repository.StoreRef;
+import org.alfresco.service.cmr.security.AuthorityService;
+import org.alfresco.service.cmr.security.AuthorityType;
 import org.alfresco.service.namespace.NamespaceService;
 import org.alfresco.service.namespace.QName;
 import org.apache.log4j.Logger;
@@ -111,7 +115,7 @@ public class EduGroupCache {
 		}		
 	}
 	
-	private static List<NodeRef> getEduGroupNodeRefs(){
+	private static List<NodeRef> getEduGroupNodeRefs2(){
 		List<NodeRef> result = new ArrayList<NodeRef>();
 		NodeRef rootNode = serviceRegistry.getNodeService().getRootNode(new StoreRef(StoreRef.PROTOCOL_WORKSPACE, "SpacesStore"));
 		List<ChildAssociationRef> rootChildAssocs = serviceRegistry.getNodeService().getChildAssocs(rootNode);
@@ -138,6 +142,23 @@ public class EduGroupCache {
 				
 			}
 		}
+		return result;
+		
+	}
+	
+	private static List<NodeRef> getEduGroupNodeRefs(){
+		logger.info("starting");
+		AuthorityService authorityService =serviceRegistry.getAuthorityService();
+		NodeService nodeService = serviceRegistry.getNodeService();
+		List<NodeRef> result = new ArrayList<NodeRef>();
+		Set<String> allGroups = authorityService.getAllAuthoritiesInZone(AuthorityService.ZONE_APP_DEFAULT, AuthorityType.GROUP);
+		for(String authority : allGroups) {
+			NodeRef authorityNodeRef = authorityService.getAuthorityNodeRef(authority);
+			if(nodeService.hasAspect(authorityNodeRef, QName.createQName(CCConstants.CCM_ASPECT_EDUGROUP))) {
+				result.add(authorityNodeRef);
+			}
+		}
+		logger.info("found groupCount: " + allGroups.size() + " eduGroupCount:" + result.size() );
 		return result;
 		
 	}

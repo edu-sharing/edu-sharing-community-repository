@@ -34,6 +34,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Properties;
+import java.util.stream.Collectors;
 
 import org.apache.log4j.Logger;
 
@@ -834,7 +835,8 @@ public class ApplicationInfo implements Comparable<ApplicationInfo>{
 		
 		if(this.getHostAliases() != null && !this.getHostAliases().trim().equals("")){
 			String[] splitted = this.getHostAliases().split(",");
-			hostList.addAll(Arrays.asList(splitted));
+			// add all and trim to fix stuff like "ip1, ip2"
+			hostList.addAll(Arrays.stream(splitted).map(String::trim).collect(Collectors.toList()));
 		}
 		
 		return hostList.contains(hostName);

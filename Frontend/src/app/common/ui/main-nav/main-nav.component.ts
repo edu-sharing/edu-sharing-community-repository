@@ -365,22 +365,23 @@ export class MainNavComponent implements AfterViewInit{
               private toast : Toast){
     // get last buttons from cache for faster app navigation
     this.sidebarButtons=this.storage.get(TemporaryStorageService.MAIN_NAV_BUTTONS,[]);
-    this.connector.getAbout().subscribe((about)=> {
-        this.about = about;
-        this.connector.isLoggedIn().subscribe((data: LoginResult) => {
-            if (!data.isValidLogin) {
-                this.canOpen = data.isGuest;
-                this.checkConfig([]);
-                return;
-            }
-            setInterval(() => this.updateTimeout(), 1000);
-            this.toolpermissions = data.toolPermissions;
-            this.canAccessWorkspace = this.toolpermissions && this.toolpermissions.indexOf(RestConstants.TOOLPERMISSION_WORKSPACE) != -1;
+    this.connector.setRoute(this.route).subscribe(()=> {
+        this.connector.getAbout().subscribe((about) => {
+            this.about = about;
+            this.connector.isLoggedIn().subscribe((data: LoginResult) => {
+                if (!data.isValidLogin) {
+                    this.canOpen = data.isGuest;
+                    this.checkConfig([]);
+                    return;
+                }
+                setInterval(() => this.updateTimeout(), 1000);
+                this.toolpermissions = data.toolPermissions;
+                this.canAccessWorkspace = this.toolpermissions && this.toolpermissions.indexOf(RestConstants.TOOLPERMISSION_WORKSPACE) != -1;
 
-            this.route.queryParams.subscribe((params: Params) => {
-                let buttons: any = [];
-                if (params["noNavigation"] == "true")
-                    this.canOpen = false;
+                this.route.queryParams.subscribe((params: Params) => {
+                    let buttons: any = [];
+                    if (params["noNavigation"] == "true")
+                        this.canOpen = false;
 
                 let reurl = null;
                 if (params["reurl"])
@@ -441,7 +442,7 @@ export class MainNavComponent implements AfterViewInit{
                     this.addMoreButtons(buttons);
                 }, (error: any) => this.addMoreButtons(buttons));
             });
-
+         });
         });
     });
     event.addListener(this);

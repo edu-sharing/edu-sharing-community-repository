@@ -24,6 +24,7 @@ import {RestNetworkService} from "../../rest/services/rest-network.service";
 import {ColorHelper} from '../color-helper';
 import {RestLocatorService} from '../../rest/services/rest-locator.service';
 import {UIConstants} from "../ui-constants";
+import {ActivatedRoute} from "@angular/router";
 
 @Component({
   selector: 'listTable',
@@ -355,6 +356,7 @@ export class ListTableComponent implements EventListener{
               private network : RestNetworkService,
               private locator : RestLocatorService,
               private toast : Toast,
+              private route : ActivatedRoute,
               private frame : FrameEventsService,
               private sanitizer: DomSanitizer) {
     this.id=Math.random();
@@ -364,11 +366,13 @@ export class ListTableComponent implements EventListener{
   loadRepos(){
     if(!this.loadRepositories)
       return;
-    this.locator.locateApi().subscribe(()=>{
-        this.network.getRepositories().subscribe((data:NetworkRepositories)=>{
-          this.repositories=data.repositories;
+    this.locator.setRoute(this.route).subscribe(()=> {
+      this.locator.locateApi().subscribe(() => {
+        this.network.getRepositories().subscribe((data: NetworkRepositories) => {
+          this.repositories = data.repositories;
           this.cd.detectChanges();
         });
+      });
     });
   }
   onEvent(event:string,data:any){

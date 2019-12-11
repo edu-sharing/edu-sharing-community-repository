@@ -207,6 +207,9 @@ export class LoginComponent  implements OnInit{
             this.password="";
             this.isLoading=false;
           }
+          else if(data.statusCode==RestConstants.STATUS_CODE_PASSWORD_EXPIRED){
+            this.toast.error(null,'LOGIN.PASSWORD_EXPIRED');
+          }
           else{
             this.toast.error(null,'LOGIN.ERROR');
             this.password="";

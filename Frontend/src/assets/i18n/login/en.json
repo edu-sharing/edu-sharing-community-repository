@@ -8,6 +8,7 @@
     "LOGIN":"Login",
     "RECOVER_PASSWORD":"Recover Password",
     "ERROR":"Invalid credentials",
+    "PASSWORD_EXPIRED": "The password expired. Please set a new password first",
     "REGISTER_TEXT":"No account yet?",
     "REGISTER_LINK":"Sign up here",
     "PROVIDER_SELECT_GROUP": "University Login",
