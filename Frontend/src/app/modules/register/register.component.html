@@ -1,7 +1,6 @@
-<div class="register-bg"></div>
 <global-progress *ngIf="isLoading"></global-progress>
 <div [class.display-none]="isLoading" class="dialog darken valign-wrapper">
-    <div class="card center-card card-action header-high card-high">
+    <div class="card center-card card-action header-high card-mwide card-high">
 
         <div class="card-content">
             <div tabindex="0" class="card-cancel" (click)="cancel()" (keyup.enter)="cancel()"><i icon iconId="close" aria="true"></i></div>
@@ -17,7 +16,7 @@
                 <app-register-done *ngIf="state=='done' || state=='done-reset'" (onModify)="modifyData()" [inputState]="state" #registerDone></app-register-done>
                 <app-register-request *ngIf="state=='request'" (onDone)="onPasswordRequested()" (onLoading)="isLoading=$event" #request></app-register-request>
                 <app-register-reset-password *ngIf="state=='reset-password'" (onLoading)="isLoading=$event" #resetPassword></app-register-reset-password>
-                <div *ngIf="state != 'register' && state != 'done' && state != 'done-reset'" class="register">
+                <div *ngIf="state != 'register' && state != 'done' && state != 'done-reset' && state != 'reset-password'" class="register">
                     {{'LOGIN.REGISTER_TEXT' | translate}}
                     <a (click)="linkRegister()" (keyup.enter)="linkRegister()" tabindex="0"  class="focus-underline">{{'LOGIN.REGISTER_LINK' | translate}} <i icon iconId="arrow_forward"></i></a>
                 </div>

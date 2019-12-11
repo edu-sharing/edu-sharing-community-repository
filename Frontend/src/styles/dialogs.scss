@@ -198,7 +198,10 @@ input[type=search]{
     height:calc(100% - 28px);
   }
 }
-
+.card-mwide{
+  width:600px;
+  margin-left:-300px!important;
+}
 .card-wide{
   width:650px;
   margin-left:-325px!important;
@@ -294,6 +297,12 @@ input[type=search]{
   left:0%;
   margin-left:0!important;
 }
+@media screen and (max-width: ($mobileWidth + $mobileStage*1)) {
+  .card-mwide{
+    @include fullsizeCard();
+  }
+}
+
 @media screen and (max-width: ($mobileWidth + $mobileStage*2)) {
   .card-wide{
     @include fullsizeCard();

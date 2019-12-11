@@ -6,7 +6,7 @@
 <div class="dialog darken valign-wrapper">
   <spinner *ngIf="isLoading" class="center"></spinner>
   <div *ngIf="!isLoading">
-  <div class="card center-card card-action" [class.card-xxwide]="showProviders">
+  <div class="card center-card card-action" [class.card-mwide]="!showProviders" [class.card-xxwide]="showProviders">
     <div class="card-content">
       <div class="card-title">{{caption | translate}}</div>
       <div class="branding"><img src="assets/images/logo.svg" image-config alt=""></div>
