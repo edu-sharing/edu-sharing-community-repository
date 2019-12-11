@@ -28,32 +28,6 @@ Built on Apr 22, 2006 (06:55:48 PDT)-->
     </sequence>
    </complexType>
    <element name="fault" type="impl:AuthenticationException"/>
-   <element name="authenticate">
-    <complexType>
-     <sequence>
-      <element name="username" type="xsd:string"/>
-      <element name="password" type="xsd:string"/>
-     </sequence>
-    </complexType>
-   </element>
-   <element name="authenticateResponse">
-    <complexType>
-     <sequence>
-      <element name="authenticateReturn" type="impl:AuthenticationResult"/>
-     </sequence>
-    </complexType>
-   </element>
-   <complexType name="AuthenticationResult">
-    <sequence>
-     <element name="courseId" nillable="true" type="xsd:string"/>
-     <element name="email" nillable="true" type="xsd:string"/>
-     <element name="givenname" nillable="true" type="xsd:string"/>
-     <element name="sessionid" nillable="true" type="xsd:string"/>
-     <element name="surname" nillable="true" type="xsd:string"/>
-     <element name="ticket" nillable="true" type="xsd:string"/>
-     <element name="username" nillable="true" type="xsd:string"/>
-    </sequence>
-   </complexType>
    <element name="authenticateByApp">
     <complexType>
      <sequence>
@@ -72,6 +46,17 @@ Built on Apr 22, 2006 (06:55:48 PDT)-->
      </sequence>
     </complexType>
    </element>
+   <complexType name="AuthenticationResult">
+    <sequence>
+     <element name="courseId" nillable="true" type="xsd:string"/>
+     <element name="email" nillable="true" type="xsd:string"/>
+     <element name="givenname" nillable="true" type="xsd:string"/>
+     <element name="sessionid" nillable="true" type="xsd:string"/>
+     <element name="surname" nillable="true" type="xsd:string"/>
+     <element name="ticket" nillable="true" type="xsd:string"/>
+     <element name="username" nillable="true" type="xsd:string"/>
+    </sequence>
+   </complexType>
    <element name="authenticateByTrustedApp">
     <complexType>
      <sequence>
@@ -100,6 +85,21 @@ Built on Apr 22, 2006 (06:55:48 PDT)-->
     <complexType>
      <sequence>
       <element name="authenticateByCASReturn" type="impl:AuthenticationResult"/>
+     </sequence>
+    </complexType>
+   </element>
+   <element name="authenticate">
+    <complexType>
+     <sequence>
+      <element name="username" type="xsd:string"/>
+      <element name="password" type="xsd:string"/>
+     </sequence>
+    </complexType>
+   </element>
+   <element name="authenticateResponse">
+    <complexType>
+     <sequence>
+      <element name="authenticateReturn" type="impl:AuthenticationResult"/>
      </sequence>
     </complexType>
    </element>
@@ -164,15 +164,15 @@ Built on Apr 22, 2006 (06:55:48 PDT)-->
 
    </wsdl:message>
 
-   <wsdl:message name="authenticateRequest">
-
-      <wsdl:part element="impl:authenticate" name="parameters"/>
-
-   </wsdl:message>
-
    <wsdl:message name="authenticateByCASRequest">
 
       <wsdl:part element="impl:authenticateByCAS" name="parameters"/>
+
+   </wsdl:message>
+
+   <wsdl:message name="authenticateRequest">
+
+      <wsdl:part element="impl:authenticate" name="parameters"/>
 
    </wsdl:message>
 
@@ -189,16 +189,6 @@ Built on Apr 22, 2006 (06:55:48 PDT)-->
          <wsdl:input message="impl:checkTicketRequest" name="checkTicketRequest"/>
 
          <wsdl:output message="impl:checkTicketResponse" name="checkTicketResponse"/>
-
-         <wsdl:fault message="impl:AuthenticationException" name="AuthenticationException"/>
-
-      </wsdl:operation>
-
-      <wsdl:operation name="authenticate">
-
-         <wsdl:input message="impl:authenticateRequest" name="authenticateRequest"/>
-
-         <wsdl:output message="impl:authenticateResponse" name="authenticateResponse"/>
 
          <wsdl:fault message="impl:AuthenticationException" name="AuthenticationException"/>
 
@@ -234,6 +224,16 @@ Built on Apr 22, 2006 (06:55:48 PDT)-->
 
       </wsdl:operation>
 
+      <wsdl:operation name="authenticate">
+
+         <wsdl:input message="impl:authenticateRequest" name="authenticateRequest"/>
+
+         <wsdl:output message="impl:authenticateResponse" name="authenticateResponse"/>
+
+         <wsdl:fault message="impl:AuthenticationException" name="AuthenticationException"/>
+
+      </wsdl:operation>
+
    </wsdl:portType>
 
    <wsdl:binding name="authenticationSoapBinding" type="impl:Authentication">
@@ -251,30 +251,6 @@ Built on Apr 22, 2006 (06:55:48 PDT)-->
          </wsdl:input>
 
          <wsdl:output name="checkTicketResponse">
-
-            <wsdlsoap:body use="literal"/>
-
-         </wsdl:output>
-
-         <wsdl:fault name="AuthenticationException">
-
-            <wsdlsoap:fault name="AuthenticationException" use="literal"/>
-
-         </wsdl:fault>
-
-      </wsdl:operation>
-
-      <wsdl:operation name="authenticate">
-
-         <wsdlsoap:operation soapAction=""/>
-
-         <wsdl:input name="authenticateRequest">
-
-            <wsdlsoap:body use="literal"/>
-
-         </wsdl:input>
-
-         <wsdl:output name="authenticateResponse">
 
             <wsdlsoap:body use="literal"/>
 
@@ -347,6 +323,30 @@ Built on Apr 22, 2006 (06:55:48 PDT)-->
          </wsdl:input>
 
          <wsdl:output name="authenticateByCASResponse">
+
+            <wsdlsoap:body use="literal"/>
+
+         </wsdl:output>
+
+         <wsdl:fault name="AuthenticationException">
+
+            <wsdlsoap:fault name="AuthenticationException" use="literal"/>
+
+         </wsdl:fault>
+
+      </wsdl:operation>
+
+      <wsdl:operation name="authenticate">
+
+         <wsdlsoap:operation soapAction=""/>
+
+         <wsdl:input name="authenticateRequest">
+
+            <wsdlsoap:body use="literal"/>
+
+         </wsdl:input>
+
+         <wsdl:output name="authenticateResponse">
 
             <wsdlsoap:body use="literal"/>
 

@@ -50,25 +50,6 @@ public class AuthenticationSoapBindingSkeleton implements org.edu_sharing.webser
         _fault.setXmlType(new javax.xml.namespace.QName("http://authentication.webservices.edu_sharing.org", "AuthenticationException"));
         _oper.addFault(_fault);
         _params = new org.apache.axis.description.ParameterDesc [] {
-            new org.apache.axis.description.ParameterDesc(new javax.xml.namespace.QName("http://authentication.webservices.edu_sharing.org", "username"), org.apache.axis.description.ParameterDesc.IN, new javax.xml.namespace.QName("http://www.w3.org/2001/XMLSchema", "string"), java.lang.String.class, false, false), 
-            new org.apache.axis.description.ParameterDesc(new javax.xml.namespace.QName("http://authentication.webservices.edu_sharing.org", "password"), org.apache.axis.description.ParameterDesc.IN, new javax.xml.namespace.QName("http://www.w3.org/2001/XMLSchema", "string"), java.lang.String.class, false, false), 
-        };
-        _oper = new org.apache.axis.description.OperationDesc("authenticate", _params, new javax.xml.namespace.QName("http://authentication.webservices.edu_sharing.org", "authenticateReturn"));
-        _oper.setReturnType(new javax.xml.namespace.QName("http://authentication.webservices.edu_sharing.org", "AuthenticationResult"));
-        _oper.setElementQName(new javax.xml.namespace.QName("http://authentication.webservices.edu_sharing.org", "authenticate"));
-        _oper.setSoapAction("");
-        _myOperationsList.add(_oper);
-        if (_myOperations.get("authenticate") == null) {
-            _myOperations.put("authenticate", new java.util.ArrayList());
-        }
-        ((java.util.List)_myOperations.get("authenticate")).add(_oper);
-        _fault = new org.apache.axis.description.FaultDesc();
-        _fault.setName("AuthenticationException");
-        _fault.setQName(new javax.xml.namespace.QName("http://authentication.webservices.edu_sharing.org", "fault"));
-        _fault.setClassName("org.edu_sharing.webservices.authentication.AuthenticationException");
-        _fault.setXmlType(new javax.xml.namespace.QName("http://authentication.webservices.edu_sharing.org", "AuthenticationException"));
-        _oper.addFault(_fault);
-        _params = new org.apache.axis.description.ParameterDesc [] {
             new org.apache.axis.description.ParameterDesc(new javax.xml.namespace.QName("http://authentication.webservices.edu_sharing.org", "applicationId"), org.apache.axis.description.ParameterDesc.IN, new javax.xml.namespace.QName("http://www.w3.org/2001/XMLSchema", "string"), java.lang.String.class, false, false), 
             new org.apache.axis.description.ParameterDesc(new javax.xml.namespace.QName("http://authentication.webservices.edu_sharing.org", "username"), org.apache.axis.description.ParameterDesc.IN, new javax.xml.namespace.QName("http://www.w3.org/2001/XMLSchema", "string"), java.lang.String.class, false, false), 
             new org.apache.axis.description.ParameterDesc(new javax.xml.namespace.QName("http://authentication.webservices.edu_sharing.org", "email"), org.apache.axis.description.ParameterDesc.IN, new javax.xml.namespace.QName("http://www.w3.org/2001/XMLSchema", "string"), java.lang.String.class, false, false), 
@@ -129,6 +110,25 @@ public class AuthenticationSoapBindingSkeleton implements org.edu_sharing.webser
         _fault.setClassName("org.edu_sharing.webservices.authentication.AuthenticationException");
         _fault.setXmlType(new javax.xml.namespace.QName("http://authentication.webservices.edu_sharing.org", "AuthenticationException"));
         _oper.addFault(_fault);
+        _params = new org.apache.axis.description.ParameterDesc [] {
+            new org.apache.axis.description.ParameterDesc(new javax.xml.namespace.QName("http://authentication.webservices.edu_sharing.org", "username"), org.apache.axis.description.ParameterDesc.IN, new javax.xml.namespace.QName("http://www.w3.org/2001/XMLSchema", "string"), java.lang.String.class, false, false), 
+            new org.apache.axis.description.ParameterDesc(new javax.xml.namespace.QName("http://authentication.webservices.edu_sharing.org", "password"), org.apache.axis.description.ParameterDesc.IN, new javax.xml.namespace.QName("http://www.w3.org/2001/XMLSchema", "string"), java.lang.String.class, false, false), 
+        };
+        _oper = new org.apache.axis.description.OperationDesc("authenticate", _params, new javax.xml.namespace.QName("http://authentication.webservices.edu_sharing.org", "authenticateReturn"));
+        _oper.setReturnType(new javax.xml.namespace.QName("http://authentication.webservices.edu_sharing.org", "AuthenticationResult"));
+        _oper.setElementQName(new javax.xml.namespace.QName("http://authentication.webservices.edu_sharing.org", "authenticate"));
+        _oper.setSoapAction("");
+        _myOperationsList.add(_oper);
+        if (_myOperations.get("authenticate") == null) {
+            _myOperations.put("authenticate", new java.util.ArrayList());
+        }
+        ((java.util.List)_myOperations.get("authenticate")).add(_oper);
+        _fault = new org.apache.axis.description.FaultDesc();
+        _fault.setName("AuthenticationException");
+        _fault.setQName(new javax.xml.namespace.QName("http://authentication.webservices.edu_sharing.org", "fault"));
+        _fault.setClassName("org.edu_sharing.webservices.authentication.AuthenticationException");
+        _fault.setXmlType(new javax.xml.namespace.QName("http://authentication.webservices.edu_sharing.org", "AuthenticationException"));
+        _oper.addFault(_fault);
     }
 
     public AuthenticationSoapBindingSkeleton() {
@@ -141,12 +141,6 @@ public class AuthenticationSoapBindingSkeleton implements org.edu_sharing.webser
     public boolean checkTicket(java.lang.String username, java.lang.String ticket) throws java.rmi.RemoteException, org.edu_sharing.webservices.authentication.AuthenticationException
     {
         boolean ret = impl.checkTicket(username, ticket);
-        return ret;
-    }
-
-    public org.edu_sharing.webservices.authentication.AuthenticationResult authenticate(java.lang.String username, java.lang.String password) throws java.rmi.RemoteException, org.edu_sharing.webservices.authentication.AuthenticationException
-    {
-        org.edu_sharing.webservices.authentication.AuthenticationResult ret = impl.authenticate(username, password);
         return ret;
     }
 
@@ -165,6 +159,12 @@ public class AuthenticationSoapBindingSkeleton implements org.edu_sharing.webser
     public org.edu_sharing.webservices.authentication.AuthenticationResult authenticateByCAS(java.lang.String username, java.lang.String proxyTicket) throws java.rmi.RemoteException, org.edu_sharing.webservices.authentication.AuthenticationException
     {
         org.edu_sharing.webservices.authentication.AuthenticationResult ret = impl.authenticateByCAS(username, proxyTicket);
+        return ret;
+    }
+
+    public org.edu_sharing.webservices.authentication.AuthenticationResult authenticate(java.lang.String username, java.lang.String password) throws java.rmi.RemoteException, org.edu_sharing.webservices.authentication.AuthenticationException
+    {
+        org.edu_sharing.webservices.authentication.AuthenticationResult ret = impl.authenticate(username, password);
         return ret;
     }
 

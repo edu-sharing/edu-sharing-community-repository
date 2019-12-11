@@ -494,6 +494,12 @@
 					<fileset dir="soap-generation/axis-1_4/lib/" includes="*.jar" />
 				</classpath>
 		</javac>
+		<!--NativeAlfrescoWrapper-->
+		<antcall target="AxisJava2wsdl_base">
+			<param name="serviceurl" value="http://localhost:8080/edu-sharing/services/NativeAlfrescoWrapper"/>
+			<param name="classname" value="org.edu_sharing.webservices.alfresco.extension.NativeAlfrescoWrapper"/>
+			<param name="wsdl" value="NativeAlfrescoWrapper.wsdl"/>
+		</antcall>
 		<!--authentication-->
 		<antcall target="AxisJava2wsdl_base">
 			<param name="serviceurl" value="http://localhost:8080/edu-sharing/services/authentication"/>
@@ -574,7 +580,13 @@
 	</target>
 	
 	<target name="AxisWsdl2java">
-
+			
+			<!--NativeAlfrescoWrapper-->
+			<antcall target="AxisWsdl2java_base">
+				<param name="package" value="org.edu_sharing.webservices.alfresco.extension"/>
+				<param name="wsdl" value="NativeAlfrescoWrapper.wsdl"/>
+				<param name="classname" value="NativeAlfrescoWrapper"/>			
+			</antcall>
 			<!--authentication-->
 			<antcall target="AxisWsdl2java_base">
 				<param name="package" value="org.edu_sharing.webservices.authentication"/>
