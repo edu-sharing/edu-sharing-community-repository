@@ -131,7 +131,7 @@ public class RenderingProxy extends HttpServlet {
 		try {
 			
 			usernameDecrypted = encryptionTool.decrypt(java.util.Base64.getDecoder().decode(uEncrypted.getBytes()), encryptionTool.getPemPrivateKey(homeRep.getPrivateKey()));
-			usernameDecrypted = SSOAuthorityMapper.mapAdminAuthority(usernameDecrypted, repoInfo.getAppId());
+			usernameDecrypted = SSOAuthorityMapper.mapAdminAuthority(usernameDecrypted,app_id);
 		}catch(GeneralSecurityException e) {
 			logger.error(e.getMessage(), e);
 			resp.sendError(HttpServletResponse.SC_FORBIDDEN,e.getMessage());
