@@ -81,11 +81,7 @@ public class MetadataTemplateRenderer {
 
 	private String renderTemplate(MetadataTemplate template) throws IllegalArgumentException {
 		String html="";
-		html+="<div class='mdsGroup'>";
-		if(template.getCaption()!=null) {
-			html += "<div class='mdsCaption " + template.getId() + "'>" + template.getCaption() + "</div>";
-		}
-		html+="<div class='mdsContent'>";
+		html+="<div class='mdsGroup'>"+"<div class='mdsCaption " + template.getId() + "'>" + template.getCaption() + "</div>"+"<div class='mdsContent'>";
 		String content=template.getHtml();
 		for(MetadataWidget srcWidget : mds.getWidgets()){
 			MetadataWidget widget=mds.findWidgetForTemplateAndCondition(srcWidget.getId(),template.getId(),properties);
@@ -107,7 +103,10 @@ public class MetadataTemplateRenderer {
 			if(widget.getType()!=null) {
 				widgetHtml.append(" mdsWidget_").append(widget.getType());
 			}
-			widgetHtml.append("'").append(attributes).append("><div class='mdsWidgetCaption'>").append(widget.getCaption()).append("</div>");
+			widgetHtml.append("'").append(attributes).append(">");
+			if(widget.getCaption()!=null) {
+				widgetHtml.append("<div class='mdsWidgetCaption'>").append(widget.getCaption()).append("</div>");
+			}
 			widgetHtml.append("<div class='mdsWidgetContent mds_").append(widget.getId().replace(":", "_"));
 			if(widget.isMultivalue()) {
 				widgetHtml.append(" mdsWidgetMultivalue");
