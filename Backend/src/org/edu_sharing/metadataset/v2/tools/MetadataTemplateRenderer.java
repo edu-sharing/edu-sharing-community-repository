@@ -81,8 +81,11 @@ public class MetadataTemplateRenderer {
 
 	private String renderTemplate(MetadataTemplate template) throws IllegalArgumentException {
 		String html="";
-		html+="<div class='mdsGroup'><div class='mdsCaption "+template.getId()+"'>"+template.getCaption()+"</div>"
-				+ "<div class='mdsContent'>";
+		html+="<div class='mdsGroup'>";
+		if(template.getCaption()!=null) {
+			html += "<div class='mdsCaption " + template.getId() + "'>" + template.getCaption() + "</div>";
+		}
+		html+="<div class='mdsContent'>";
 		String content=template.getHtml();
 		for(MetadataWidget srcWidget : mds.getWidgets()){
 			MetadataWidget widget=mds.findWidgetForTemplateAndCondition(srcWidget.getId(),template.getId(),properties);
