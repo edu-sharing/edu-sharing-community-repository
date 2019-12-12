@@ -7,7 +7,7 @@
       <img *ngIf="user && user.profile && user.profile.avatar" [src]="user.profile.avatar+'&crop=true&width=200&height=200'" class="userImage" alt="">
       <div class="user-letter"
            style.background-color="{{ user | authorityColor}}"
-           *ngIf="user && !(user.profile && user.profile.avatar)">{{getLetter(user)}}</div>
+           *ngIf="!icon && user && !(user.profile && user.profile.avatar)">{{getLetter(user)}}</div>
       <i class="user-icon" icon [iconId]="icon" style.background-color="{{ user | authorityColor}}" *ngIf="icon && !user"></i>
     </div>
   </div>
