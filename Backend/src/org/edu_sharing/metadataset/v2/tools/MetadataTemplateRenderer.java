@@ -239,7 +239,7 @@ public class MetadataTemplateRenderer {
 							append("<div class=\"mdsValue\">").
 							append("<a href=\"").
 							append(URLTool.getNgComponentsUrl()).append("collections?id=").append(parent).append("&feedback=true&feedbackClose=true").
-							append("\"");
+							append("\" data-es-auth-required=\"true\"");
 					if(widget.getLink()!=null){
 						widgetHtml.append(" target=\"").append(widget.getLink()).append("\"");
 					}
