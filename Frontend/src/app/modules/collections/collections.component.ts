@@ -82,7 +82,6 @@ export class CollectionsMainComponent {
   private collectionContentOriginal: any;
   private filteredOutCollections:Array<EduData.Collection> = new Array<EduData.Collection>();
   private filteredOutReferences:Array<EduData.CollectionReference> = new Array<EduData.CollectionReference>();
-  private collectionIdParamSubscription:any;
   public lastError:string = null;
 
   private contentDetailObject:any = null;
@@ -129,6 +128,7 @@ export class CollectionsMainComponent {
     feedback: boolean;
     feedbackView: boolean;
     private feedbacks: CollectionFeedback[];
+    private params: Params;
     set collectionShare(collectionShare: Collection){
         this._collectionShare=collectionShare;
         this.refreshAll();
@@ -779,8 +779,8 @@ export class CollectionsMainComponent {
       // set app to ready state
       this.isReady = true;
       // subscribe to parameters of url
-      this.collectionIdParamSubscription = this.route.queryParams.subscribe(params => {
-        console.log(params);
+      this.route.queryParams.subscribe(params => {
+        this.params = params;
         if(params.scope) {
             this.tabSelected = params.scope;
         }else {
@@ -996,6 +996,9 @@ export class CollectionsMainComponent {
     }
     private collectionFeedback(status:boolean) {
         this.navigate(this.collectionContent.collection.ref.id,'',status);
+        if(!status && this.params.feedbackClose==='true'){
+            window.close();
+        }
     }
 
     addFeedback(data:any) {
