@@ -14,6 +14,7 @@ import {UIHelper} from '../../ui-helper';
   templateUrl: 'card.component.html',
   styleUrls: ['card.component.scss'],
   animations: [
+      trigger('cardAnimation', UIAnimation.cardAnimation())
   ]
 })
 /**
