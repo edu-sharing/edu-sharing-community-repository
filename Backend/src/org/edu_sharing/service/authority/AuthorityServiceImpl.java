@@ -154,7 +154,7 @@ public class AuthorityServiceImpl implements AuthorityService {
 		return (String)nodeService.getProperty(authorityService.getAuthorityNodeRef(authorityName),QName.createQName(property));
 	}
 	@Override
-	public boolean hasAdminAccessToOrganization(String orgName){
+	public synchronized boolean hasAdminAccessToOrganization(String orgName){
 		try {
 	    	Set<String> memberships=serviceRegistry.getAuthorityService().getAuthorities();
 			if(memberships.contains(CCConstants.AUTHORITY_GROUP_ALFRESCO_ADMINISTRATORS))
@@ -166,7 +166,7 @@ public class AuthorityServiceImpl implements AuthorityService {
 				return groupIsOfType(group,ADMINISTRATORS_GROUP_TYPE);
 			
 		} catch (Throwable t) {
-			t.printStackTrace();
+			logger.error("Error while getting Admin access:" + orgName, t);
 		}
 		return false;
 	}
