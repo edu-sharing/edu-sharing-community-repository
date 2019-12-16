@@ -207,32 +207,6 @@ public class GroupDao {
 			throw DAOException.mapping(e);
 		}
 	}
-
-	public List<Authority> getMember() throws DAOException {
-
-		List<Authority> result = new ArrayList<Authority>();
-
-		try {
-
-			checkAdminAccess();
-						
-			for (String member : ((MCAlfrescoAPIClient)this.baseClient).getMemberships(groupName)) {
-				
-				result.add(   member.startsWith(PermissionService.GROUP_PREFIX) 
-							? GroupDao.getGroup(repoDao, member).asGroup()
-							: PersonDao.getPerson(repoDao, member).asPerson());
-							
-			}
-			
-		} catch (Exception e) {
-
-			throw DAOException.mapping(e);
-		}
-		
-		return result;
-		
-	}
-
 	
 	public Group asGroup() {
 		
