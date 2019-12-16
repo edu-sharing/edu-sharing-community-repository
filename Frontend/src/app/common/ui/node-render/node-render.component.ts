@@ -404,8 +404,8 @@ export class NodeRenderComponent implements EventListener{
                 nodes:usages.map((u)=>u.collection),
                 columns:ListItem.getCollectionDefaults(),
                 isClickable:true,
-                clickRow:(collection:Node)=>{
-                    UIHelper.goToCollection(this.router,collection);
+                clickRow:(event:any)=>{
+                    UIHelper.goToCollection(this.router,event.node);
                 },
                 viewType:ListTableComponent.VIEW_TYPE_GRID_SMALL,
             };
