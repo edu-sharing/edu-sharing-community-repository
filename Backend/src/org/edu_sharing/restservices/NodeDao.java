@@ -620,6 +620,8 @@ public class NodeDao {
 
 		try {
 			is=ImageTool.autoRotateImage(is,ImageTool.MAX_THUMB_SIZE);
+			nodeService.setProperty(storeProtocol,storeId,nodeId,
+					CCConstants.CCM_PROP_IO_VERSION_COMMENT, CCConstants.VERSION_COMMENT_PREVIEW_CHANGED);
 			nodeService.writeContent(storeRef, nodeId, is, mimetype, null,
 					isDirectory() ? CCConstants.CCM_PROP_MAP_ICON : CCConstants.CCM_PROP_IO_USERDEFINED_PREVIEW);
 			PreviewCache.purgeCache(nodeId);

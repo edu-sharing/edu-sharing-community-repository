@@ -166,7 +166,8 @@
         "CONTENT_UPDATE": "Updated content",
         "LICENSE_UPDATE": "Updated license",
         "EDITOR_UPLOAD": "File updated by editor",
-        "NODE_PUBLISHED": "File published"
+        "NODE_PUBLISHED": "File published",
+        "PREVIEW_CHANGED": "Preview image updated"
       }
     },
     "EDITOR":{

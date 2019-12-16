@@ -195,6 +195,7 @@ export class RestConstants {
   public static COMMENT_LICENSE_UPDATE="LICENSE_UPDATE";
   public static COMMENT_EDITOR_UPLOAD="EDITOR_UPLOAD";
   public static COMMENT_NODE_PUBLISHED="NODE_PUBLISHED";
+  public static COMMENT_PREVIEW_CHANGED="PREVIEW_CHANGED";
   public static ACCESS_ADD_CHILDREN="AddChildren";
   public static ACCESS_WRITE="Write";
   public static ACCESS_DELETE="Delete";

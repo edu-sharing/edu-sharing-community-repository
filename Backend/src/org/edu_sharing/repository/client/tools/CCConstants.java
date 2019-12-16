@@ -2002,4 +2002,6 @@ public class CCConstants {
 
 	public static final String ISO8601_SUFFIX = "ISO8601";
 
+	public static final String VERSION_COMMENT_PREVIEW_CHANGED = "PREVIEW_CHANGED";
+
 }
