@@ -72,17 +72,21 @@ user-quota{
   bottom:25px+$mobileTabNavHeight;
   display:none;
 }
+.addDesktop{
+  padding: 0 40px;
+  height: 43px;
+}
 .addDesktop,.addDesktopMenu{
   position: fixed;
-  width: 200px;
-  left: 50px;
-  top: 13px+$mainnavHeight;
+  left: 38px;
+  top: 10px+$mainnavHeight;
 }
 .dialogAddDesktop{
   z-index:66;
 }
 .addDesktopMenu{
-  top:42px+$mainnavHeight;
+  top:45px+$mainnavHeight;
+  width: 200px;
   z-index:105;
   .connectorBeta{
     height: auto;
@@ -91,6 +95,9 @@ user-quota{
     width: 30px;
     margin-top: 10px;
     right: 7px;
+  }
+  .collection-item{
+    padding: 6px 20px 14px 20px;
   }
 }
 .selectRootMenu{

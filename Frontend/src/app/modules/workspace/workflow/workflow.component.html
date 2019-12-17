@@ -1,5 +1,5 @@
 <div class="dialog darken" [@fade]="this"></div>
-  <div class="card center-card card-high card-action" [@cardAnimation]="this">
+  <div class="card center-card card-wide card-high card-action" [@cardAnimation]="this">
     <div class="card-content">
       <div tabindex="0" class="card-cancel" (click)="cancel()" (keyup.enter)="cancel()"><i icon iconId="close" aria="true"></i></div>
       <div class="card-title">{{'WORKSPACE.WORKFLOW.TITLE' | translate:{name:node ? node.name : ''} }}</div>
@@ -48,10 +48,10 @@
         </div>
         <input type="text" [(ngModel)]="comment" placeholder="{{'WORKSPACE.WORKFLOW.COMMENT' | translate}}">
         <div class="input-hint-bottom">{{'WORKSPACE.WORKFLOW.COMMENT_INFO' | translate}}</div>
-        <div class="historyLabel">
+        <div class="historyLabel" *ngIf="history.length">
           {{'WORKSPACE.WORKFLOW.HISTORY' | translate}}
         </div>
-        <h2 class="noHistory" *ngIf="!history.length">{{'WORKSPACE.WORKFLOW.NO_HISTORY' | translate}}</h2>
+        <div class="no-history" *ngIf="!history.length">{{'WORKSPACE.WORKFLOW.NO_HISTORY' | translate}}</div>
         <div class="history">
           <div *ngFor="let entry of history;let i=index">
             <div class="user">{{ entry.editor | authorityName }}</div><div class="date">{{entry.time | formatDate:{time:true,relative:true} }}</div>
