@@ -3,6 +3,7 @@ package org.edu_sharing.repository.server.tools.cache;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -73,6 +74,20 @@ public class EduGroupCache {
 		List<NodeRef> result = new ArrayList<NodeRef>();
 		for(NodeRef groupNodeRef : EduGroupCache.cache.getKeys()){
 			result.add((NodeRef)EduGroupCache.cache.get(groupNodeRef).get(QName.createQName(CCConstants.CCM_PROP_EDUGROUP_EDU_HOMEDIR)));
+		}
+		return result;
+	}
+	
+	/**
+	 * 
+	 * @return Map keys: EduGroup HomeFolder NodeRef, Values EduGroup Properties 
+	 */
+	public static Map<NodeRef,Map<QName,Serializable>> getAllEduGroupFolderAndEduGroupProps(){
+		Map<NodeRef,Map<QName,Serializable>> result = new HashMap<NodeRef,Map<QName,Serializable>>();
+		for(NodeRef groupNodeRef : EduGroupCache.cache.getKeys()){
+			
+			result.put((NodeRef)EduGroupCache.cache.get(groupNodeRef).get(QName.createQName(CCConstants.CCM_PROP_EDUGROUP_EDU_HOMEDIR)),
+					EduGroupCache.cache.get(groupNodeRef));
 		}
 		return result;
 	}
