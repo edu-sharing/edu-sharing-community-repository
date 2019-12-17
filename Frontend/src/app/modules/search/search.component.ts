@@ -129,7 +129,6 @@ export class SearchComponent {
   }
   public selection: Node[];
   private currentValues: any;
-  private reloadMds: Boolean;
   private currentMdsSet: any;
   public extendedRepositorySelected = false;
   public savedSearch : Node[]=[];
@@ -1056,12 +1055,11 @@ export class SearchComponent {
   private invalidateMds() {
     if(this.currentRepository==RestConstants.ALL){
       console.log('all repositories, invalidate manually');
-        this.reloadMds=new Boolean(false);
         this.onMdsReady();
     }
     else{
       console.log('invalidate mds');
-      this.reloadMds=new Boolean(true);
+      this.mdsRef.loadMds();
     }
   }
 

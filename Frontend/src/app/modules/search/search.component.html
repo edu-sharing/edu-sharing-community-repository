@@ -132,7 +132,6 @@
         [embedded]="true"
         [currentValues]="getValuesForMds()"
         [suggestions]="mdsSuggestions"
-        [invalidate]="reloadMds"
         [mode]="'search'"
         [(extended)]="mdsExtended"
         (onMdsLoaded)="onMdsReady($event)"
@@ -182,7 +181,7 @@
           [isLoading]="savedSearchLoading"
           [selectedNodes]="currentSavedSearch ? [currentSavedSearch] : null"
           [columns]="savedSearchColumns"
-          (clickRow)="loadSavedSearchNode($event)"
+          (clickRow)="loadSavedSearchNode($event.node)"
         ></listTable>
          <div class="manageSavedSearch" *ngIf="savedSearch.length && savedSearchOwn && isWorkspaceEnabled()">
            <a (click)="goToSaveSearchWorkspace()" class="clickable">{{'SEARCH.MANAGE_SAVED_SEARCH' | translate}}</a>
