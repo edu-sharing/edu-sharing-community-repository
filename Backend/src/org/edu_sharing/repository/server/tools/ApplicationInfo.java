@@ -155,6 +155,14 @@ public class ApplicationInfo implements Comparable<ApplicationInfo>{
 	public static final String NOTIFY_FETCH_LIMIT = "notify_fetch_limit";
 
 	public static final String REPOSITORY_TYPE_MEMUCHO = "MEMUCHO";
+
+	/**
+	 * Remote sso userid mapping. Only for remote alfresco repos
+	 * If it is not set, the one from the edu-sharing-sso-context.xml will be used
+	 * @TODO make the sso config not influcene remote logins!
+	 */
+	public static final String REMOTE_USERID = "remote_userid";
+
     private final Properties properties;
 
 	private String host = null;
