@@ -141,7 +141,6 @@ public class PersonDao {
 			}
 			
 		} catch (Throwable t) {
-			t.printStackTrace();
 			throw DAOException.mapping(t);
 		}
 	}

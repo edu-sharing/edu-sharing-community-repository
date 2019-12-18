@@ -98,7 +98,7 @@ public class AuthorityServiceImpl implements AuthorityService {
 	}
 
 	@Override
-	public boolean hasModifyAccessToGroup(String groupName){
+	public synchronized boolean hasModifyAccessToGroup(String groupName){
     	Set<String> memberships=serviceRegistry.getAuthorityService().getAuthorities();
     	if(memberships.contains(CCConstants.AUTHORITY_GROUP_ALFRESCO_ADMINISTRATORS))
 			return true;
@@ -128,7 +128,7 @@ public class AuthorityServiceImpl implements AuthorityService {
 		return false;
 	}
 	@Override
-	public boolean hasAdminAccessToGroup(String groupName){
+	public synchronized boolean hasAdminAccessToGroup(String groupName){
 		try {
 	    	Set<String> memberships=serviceRegistry.getAuthorityService().getAuthorities();
 			if(memberships.contains(CCConstants.AUTHORITY_GROUP_ALFRESCO_ADMINISTRATORS))
