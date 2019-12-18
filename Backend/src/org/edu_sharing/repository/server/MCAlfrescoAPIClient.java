@@ -2557,7 +2557,7 @@ public class MCAlfrescoAPIClient extends MCAlfrescoBaseClient {
 	}
 	
 	/**
-	 * returns null when user not exsists
+	 * Throws NoSuchPersonException when user not exists
 	 */
 	public HashMap<String, String> getUserInfo(String userName) throws Exception {
 		
