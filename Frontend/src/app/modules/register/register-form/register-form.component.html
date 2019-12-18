@@ -2,33 +2,33 @@
     <div class="name-input">
         <div>
             <label for="username">{{'USER.firstName' | translate}} <span *ngIf="isRequired('firstName')">*</span></label>
-            <input [ngClass]="{'valid': info.firstName.trim()}" type="text" [required]="isRequired('firstName')" name="username" id="username"  placeholder="{{'REGISTER.PL_USER' | translate}}" [(ngModel)]="info.firstName"/>
+            <input [ngClass]="{'valid': info.firstName.trim()}" type="text" [required]="isRequired('firstName')" name="username" id="username" [(ngModel)]="info.firstName"/>
         </div>
         <div class="last-name">
             <label for="lastname">{{'USER.lastName' | translate}} <span *ngIf="isRequired('lastName')">*</span></label>
-            <input [ngClass]="{'valid': info.lastName.trim()}" type="text" [required]="isRequired('lastName')" name="lastname" id="lastname" placeholder="{{'REGISTER.PL_NAME' | translate}}" [(ngModel)]="info.lastName"/>
+            <input [ngClass]="{'valid': info.lastName.trim()}" type="text" [required]="isRequired('lastName')" name="lastname" id="lastname" [(ngModel)]="info.lastName"/>
         </div>
     </div>
 
     <div>
         <label for="email">{{'USER.email' | translate}} *</label>
-        <input required [ngClass]="{'valid': mailValid, 'invalid': !mailValid && info.email.trim()}" type="email" name="email" id="email" placeholder="{{'REGISTER.PL_MAIL' | translate}}" (ngModelChange)="checkMail($event)" [(ngModel)]="info.email"/>
+        <input required [ngClass]="{'valid': mailValid, 'invalid': !mailValid && info.email.trim()}" type="email" name="email" id="email" (ngModelChange)="checkMail($event)" [(ngModel)]="info.email"/>
     </div>
     <div>
         <label for="password">{{'USER.password' | translate}} *</label>
-        <input-password [hint]="true" [displayStrength]="true" autocomplete="new-password" id="password" required="true" (keydown.enter)="register()" [(value)]="info.password" placeholder="{{'REGISTER.PL_PASSWORD' | translate}}"></input-password>
+        <input-password [hint]="true" [displayStrength]="true" autocomplete="new-password" id="password" required="true" (keydown.enter)="register()" [(value)]="info.password"></input-password>
     </div>
     <div>
         <label for="organization">{{'REGISTER.ORGANIZATION' | translate}} <span *ngIf="isRequired('organization')">*</span></label>
-        <input [ngClass]="{'valid': info.organization.trim()}" type="text"  [required]="isRequired('organization')" name="organization" id="organization" placeholder="{{'REGISTER.PL_ORG' | translate}} {{'REGISTER.ORGANIZATION_TITLE' | translate}} ..." [(ngModel)]="info.organization"/>
+        <input [ngClass]="{'valid': info.organization.trim()}" type="text"  [required]="isRequired('organization')" name="organization" id="organization" [(ngModel)]="info.organization"/>
+    </div>
+    <div class="accept">
+        <input id="accept" type="checkbox" class="filled-in" [(ngModel)]="agree" (change)="setAccept(agree)">
+        <label for="accept">{{'REGISTER.ACCEPT' | translate}}</label>
+        <a class="clickable imprint" *ngIf="privacyUrl" (click)="openPrivacy()">{{'REGISTER.PRIVACY-LINK' | translate}}</a>
+    </div>
+    <div>
+        <input id="newsletter" type="checkbox" [(ngModel)]="info.allowNotifications" class="filled-in">
+        <label for="newsletter">{{'REGISTER.NEWSLETTER' | translate}}</label>
     </div>
 </form>
-<div>
-    <input id="newsletter" type="checkbox" [(ngModel)]="info.allowNotifications" class="filled-in">
-    <label for="newsletter">{{'REGISTER.NEWSLETTER' | translate}}</label>
-</div>
-<div class="accept">
-    <input id="accept" type="checkbox" class="filled-in" [(ngModel)]="agree" (change)="setAccept(agree)">
-    <label for="accept">{{'REGISTER.ACCEPT' | translate}}</label>
-    <a class="clickable imprint" *ngIf="privacyUrl" (click)="openPrivacy()">{{'REGISTER.PRIVACY-LINK' | translate}}</a>
-</div>

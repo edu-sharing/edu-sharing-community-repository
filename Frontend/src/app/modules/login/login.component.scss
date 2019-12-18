@@ -43,17 +43,20 @@ powered-by{
     }
   }
 }
-.register{
-  padding-bottom: 10px;
-  color:$textLight;
-  a{
-    text-transform: uppercase;
-    i{
-      font-size: 11pt;
-      position: relative;
-      top: 3px;
+.password-label-container {
+  display: flex;
+  label {
+    flex: auto;
+  }
+  .forgot-password{
+    a{
+      text-transform: uppercase;
+      font-size: 85%;
     }
   }
+}
+.card-content input {
+  margin-bottom: 35px;
 }
 .groups{
   display: flex;
