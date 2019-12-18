@@ -46,6 +46,7 @@ import {SpinnerComponent} from "../spinner/spinner.component";
 import {ListTableComponent} from "../list-table/list-table.component";
 import {RestUsageService} from "../../rest/services/rest-usage.service";
 import {ListItem} from "../list-item";
+import {RestNetworkService} from "../../rest/services/rest-network.service";
 
 declare var jQuery:any;
 declare var window: any;
@@ -225,6 +226,7 @@ export class NodeRenderComponent implements EventListener{
       private config : ConfigurationService,
       private storage : SessionStorageService,
       private route : ActivatedRoute,
+      private networkService : RestNetworkService,
       private router : Router,
       private temporaryStorageService: TemporaryStorageService) {
       (window as any).ngRender = {setDownloadUrl:(url:string)=>{this.setDownloadUrl(url)}};
@@ -232,6 +234,7 @@ export class NodeRenderComponent implements EventListener{
         Translation.initialize(translate,config,storage,route).subscribe(()=>{
         this.banner = ConfigurationHelper.getBanner(this.config);
         this.connector.setRoute(this.route);
+        this.networkService.prepareCache();
         this.route.queryParams.subscribe((params:Params)=>{
           this.closeOnBack=params['closeOnBack']=='true';
           this.editor=params['editor'];
