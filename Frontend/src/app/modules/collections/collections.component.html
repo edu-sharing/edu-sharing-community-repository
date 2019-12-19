@@ -107,7 +107,7 @@
       
       <!-- content (collection cards) if not error -->
 
-<section class="collections-cards-div" *ngIf="((lastError==null) && (!isLoading))" >
+<section class="collections-cards-div" *ngIf="!isLoading)" >
 
                 <div class="section-headline" *ngIf="isAllowedToEditCollection() || collectionContent.collections.length">
                   <span *ngIf="isRootLevelCollection()">{{ 'COLLECTIONS.TAB.'+tabSelected+"_LONG" | translate }}</span>
