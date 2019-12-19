@@ -21,7 +21,7 @@ export class ModalTestComponent {
         new DialogButton('Negative',DialogButton.TYPE_CANCEL,() => this.card = false),
         new DialogButton('Positive',DialogButton.TYPE_PRIMARY,() => this.card = false),
     ];
-    private textSize = 3;
+    public textSize = 3;
 
     getTextSize() {
         return Array(this.textSize);

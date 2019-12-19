@@ -107,7 +107,7 @@
       
       <!-- content (collection cards) if not error -->
 
-<section class="collections-cards-div" *ngIf="!isLoading)" >
+<section class="collections-cards-div" *ngIf="!isLoading" >
 
                 <div class="section-headline" *ngIf="isAllowedToEditCollection() || collectionContent.collections.length">
                   <span *ngIf="isRootLevelCollection()">{{ 'COLLECTIONS.TAB.'+tabSelected+"_LONG" | translate }}</span>
@@ -149,7 +149,7 @@
 </section>
 
 <!-- content (content cards) if not error -->
-<section class="collections-cards-div" *ngIf="((lastError==null) && (!isLoading) && (isReady) && !isRootLevelCollection())" >
+<section class="collections-cards-div" *ngIf="((!isLoading) && (isReady) && !isRootLevelCollection())" >
 
     <div class="section-headline"><div>{{ 'collections_content' | translate }}</div>
                   <div class="custom-order" *ngIf="!isMobile() && collectionContent.references && collectionContent.references.length>1 && isUserAllowedToEdit(collectionContent.collection)">
@@ -197,7 +197,7 @@
 
 </section>
 
-<section class="collections-cards-div" *ngIf="((lastError==null) && (!isLoading) && (isReady) && !isRootLevelCollection())" style="padding-bottom: 10px;">
+<section class="collections-cards-div" *ngIf="((!isLoading) && (isReady) && !isRootLevelCollection())" style="padding-bottom: 10px;">
     <div *ngIf="collectionContent.references.length>0" style="padding-top:8px;">&nbsp;</div>
 </section>
 
