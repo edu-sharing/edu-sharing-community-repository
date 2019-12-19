@@ -1,2 +1,11 @@
 @import "../../../styles/variables.scss";
 $path:'../../../assets/images/layout/';
+
+@media screen and (min-height: ($mobileHeight)) {
+  .card {
+    top: unset;
+    .card-content {
+      min-height: 540px;
+    }
+  }
+}

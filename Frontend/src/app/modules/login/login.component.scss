@@ -117,6 +117,14 @@ powered-by{
     }
   }
 }
+@media screen and (min-height: ($mobileHeight)) {
+  .card {
+    top: unset;
+    .card-content {
+      min-height: 540px;
+    }
+  }
+}
 @media screen and (max-width: $mobileWidth+$mobileStage*1) {
   .groups{
     flex-direction: column;
