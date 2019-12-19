@@ -55,7 +55,7 @@ public class RenderingApi {
 		    
     @ApiResponses(
     	value = { 
-	        @ApiResponse(code = 200, message = "OK.", response = String.class),        
+	        @ApiResponse(code = 200, message = "OK.", response = RenderingDetailsEntry.class),
 	        @ApiResponse(code = 400, message = "Preconditions are not present.", response = ErrorResponse.class),        
 	        @ApiResponse(code = 401, message = "Authorization failed.", response = ErrorResponse.class),        
 	        @ApiResponse(code = 403, message = "Session user has insufficient rights to perform this operation.", response = ErrorResponse.class),        
@@ -105,7 +105,7 @@ public class RenderingApi {
 		    
     @ApiResponses(
     	value = { 
-	        @ApiResponse(code = 200, message = "OK.", response = String.class),        
+	        @ApiResponse(code = 200, message = "OK.", response = RenderingDetailsEntry.class),
 	        @ApiResponse(code = 400, message = "Preconditions are not present.", response = ErrorResponse.class),        
 	        @ApiResponse(code = 401, message = "Authorization failed.", response = ErrorResponse.class),        
 	        @ApiResponse(code = 403, message = "Session user has insufficient rights to perform this operation.", response = ErrorResponse.class),        
