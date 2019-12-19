@@ -239,6 +239,19 @@ public class MediacenterServiceImpl implements MediacenterService{
 						
 						for(String schoolAuthorityName : mzContains) {
 							//"GROUP_ORG_" + schoolId
+							NodeRef nodeRef = authorityService.getAuthorityNodeRef(schoolAuthorityName);
+							
+							if(nodeRef == null) {
+								logger.info("authority does not exist:" + schoolAuthorityName);
+								continue;
+							}
+							if(!nodeService.hasAspect(nodeRef, QName.createQName(CCConstants.CCM_ASPECT_EDUGROUP))) {
+								logger.info("authority is no edugroup:" + schoolAuthorityName);
+								continue;
+							}
+							
+							
+							
 							String schoolId = schoolAuthorityName.replace("GROUP_ORG_", "");
 							if(!entry.getValue().contains(schoolId)) {
 								logger.info("removing school " + schoolId + " from " + mzId +" cause its not in imported list");
