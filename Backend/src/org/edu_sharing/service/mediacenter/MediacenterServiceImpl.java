@@ -2,6 +2,7 @@ package org.edu_sharing.service.mediacenter;
 
 import java.io.InputStream;
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -46,6 +47,7 @@ public class MediacenterServiceImpl implements MediacenterService{
 	SearchService searchService = serviceregistry.getSearchService();
 
 
+	
 	@Override
 	public int importMediacenters(InputStream csv) {
 		RunAsWork<Integer> runAs = new RunAsWork<Integer>() {
@@ -207,24 +209,53 @@ public class MediacenterServiceImpl implements MediacenterService{
 	}
 
 	@Override
-	public int importOrgMcConnections(InputStream csv) {
+	public int importOrgMcConnections(InputStream csv, boolean removeSchoolsFromMC) {
 		RunAsWork<Integer> runAs = new RunAsWork<Integer>() {
 			@Override
 			public Integer doWork() throws Exception {
 
 				List<List<String>> records = new CSVTool().getRecords(csv, CSVTool.ENC_UTF8);
 
+				/**
+				 * remove schools from mediacenter
+				 */
+				if(removeSchoolsFromMC) {
+					
+					Map<String,List<String>> map = listToUniqueMap(records);
+					
+					for(Map.Entry<String,List<String>> entry : map.entrySet()) {
+						String mzId = entry.getKey();
+						SearchParameters sp = getSearchParameterMZ(mzId);
+						ResultSet rs = searchService.query(sp);
+						if (rs == null || rs.length() < 1) {
+							logger.error("no mediacenter found for " + mzId);
+							continue;
+						}
+						
+						NodeRef nodeRefAuthorityMediacenter = rs.getNodeRef(0);
+						String authorityNameMZ = (String) nodeService.getProperty(nodeRefAuthorityMediacenter,
+								ContentModel.PROP_AUTHORITY_NAME);
+						Set<String> mzContains = authorityService.getContainedAuthorities(AuthorityType.GROUP, authorityNameMZ, true);
+						
+						for(String schoolAuthorityName : mzContains) {
+							//"GROUP_ORG_" + schoolId
+							String schoolId = schoolAuthorityName.replace("GROUP_ORG_", "");
+							if(!entry.getValue().contains(schoolId)) {
+								logger.info("removing school " + schoolId + " from " + mzId +" cause its not in imported list");
+								authorityService.removeAuthority(authorityNameMZ, schoolAuthorityName);
+							}
+						}
+					}
+			
+				}
+				
+				
 				int counter = 0;
 				for (List<String> record : records) {
 					String mzId = record.get(0);
 					String schoolId = record.get(1);
 
-					SearchParameters sp = new SearchParameters();
-					sp.setQuery("ASPECT:\"ccm:mediacenter\" AND @ccm\\:mediacenterId:\"" + mzId + "\"");
-					sp.setMaxItems(1);
-					sp.setLanguage(SearchService.LANGUAGE_LUCENE);
-					sp.setSkipCount(0);
-					sp.addStore(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE);
+					SearchParameters sp = getSearchParameterMZ(mzId);
 					ResultSet rs = searchService.query(sp);
 
 					if (rs == null || rs.length() < 1) {
@@ -269,6 +300,33 @@ public class MediacenterServiceImpl implements MediacenterService{
 
 		return AuthenticationUtil.runAs(runAs, ApplicationInfoList.getHomeRepository().getUsername());
 	}
+	
+	Map<String,List<String>> listToUniqueMap(List<List<String>> records){
+		Map<String,List<String>> result = new HashMap<String,List<String>>();
+
+		for (List<String> record : records) {
+			if(!result.containsKey(record.get(0))) {
+				List<String> list = new ArrayList<String>();
+				list.add(record.get(1));
+				result.put(record.get(0), list);
+			}else {
+				result.get(record.get(0)).add(record.get(1));
+			}
+		}
+		
+		return result;
+	}
+	
+	private SearchParameters getSearchParameterMZ(String mzId) {
+		SearchParameters sp = new SearchParameters();
+		sp.setQuery("ASPECT:\"ccm:mediacenter\" AND @ccm\\:mediacenterId:\"" + mzId + "\"");
+		sp.setMaxItems(1);
+		sp.setLanguage(SearchService.LANGUAGE_LUCENE);
+		sp.setSkipCount(0);
+		sp.addStore(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE);
+		return sp;
+	}
+	
 	
 	public String getMediacenterAdminGroup(String alfAuthorityName) {
 		String authorityName = alfAuthorityName;

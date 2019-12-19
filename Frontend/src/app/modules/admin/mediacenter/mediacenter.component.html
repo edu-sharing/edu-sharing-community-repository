@@ -108,12 +108,15 @@
 
     <h4 class="mat-heading-4 mat-heading-underline"><i icon iconId="business"></i>{{'ADMIN.MEDIACENTER.ORG_MC_CONNECT.TITLE' | translate}}</h4>
     <div class="import">
-        <input #importOrgMcSelect type="file" style="display:none" id="importOrgMcSelect" accept=".csv" (change)="updateOrgMcFile($event)">
-        <div class="inputGroup">
-            <button mat-raised-button (click)="importOrgMcSelect.click()">{{'ADMIN.MEDIACENTER.ORG_MC_CONNECT.CHOOSE' | translate}}</button>
-            <div class="file">{{ (orgMcFile ? orgMcFile.name : '') }}</div>
-        </div>
-        <button mat-raised-button color="primary" (click)="importOrgMc()">{{'ADMIN.MEDIACENTER.ORG_MC_CONNECT.ORGANISATIONS_START' | translate}}</button>
+
+            <input #importOrgMcSelect type="file" style="display:none" id="importOrgMcSelect" accept=".csv" (change)="updateOrgMcFile($event)">
+            <div class="inputGroup">
+                <button mat-raised-button (click)="importOrgMcSelect.click()">{{'ADMIN.MEDIACENTER.ORG_MC_CONNECT.CHOOSE' | translate}}</button>
+                <div class="file">{{ (orgMcFile ? orgMcFile.name : '') }}</div>
+            </div>
+            <label>{{'ADMIN.MEDIACENTER.ORG_MC_CONNECT.REMOVE_SCHOOLS_FROM_MC' | translate}}</label>
+            <mat-checkbox class="example-margin" [(ngModel)]="removeSchoolsFromMC"></mat-checkbox>
+            <button mat-raised-button color="primary" (click)="importOrgMc()">{{'ADMIN.MEDIACENTER.ORG_MC_CONNECT.ORGANISATIONS_START' | translate}}</button>
     </div>
 
 

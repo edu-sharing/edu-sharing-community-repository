@@ -11,6 +11,7 @@ import javax.ws.rs.POST;
 import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
+import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;
 
@@ -333,6 +334,7 @@ public class MediacenterApi {
 			@ApiResponse(code = 404, message = RestConstants.HTTP_404, response = ErrorResponse.class),
 			@ApiResponse(code = 500, message = RestConstants.HTTP_500, response = ErrorResponse.class) })
 	public Response importMcOrgConnections(@ApiParam(value = "Mediacenter Organisation Connection csv to import", required = true) @FormDataParam("mcOrgs") InputStream is,
+										@ApiParam(value = "removeSchoolsFromMC" , defaultValue = "false") @QueryParam("removeSchoolsFromMC") boolean removeSchoolsFromMC,
 										@Context HttpServletRequest req) {
 		try {
 
@@ -341,7 +343,7 @@ public class MediacenterApi {
 				throw new Exception("Admin rights are required for this endpoint");
 			}
 
-			int count = MediacenterServiceFactory.getInstance().importOrgMcConnections(is);
+			int count = MediacenterServiceFactory.getInstance().importOrgMcConnections(is, removeSchoolsFromMC);
 			McOrgConnectResult result = new McOrgConnectResult();
 			result.setRows(count);
 			return Response.ok().entity(result).build();

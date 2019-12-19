@@ -8,7 +8,7 @@ public interface MediacenterService {
 
 	public int importOrganisations(InputStream csv);
 
-	public int importOrgMcConnections(InputStream csv);
+	public int importOrgMcConnections(InputStream csv, boolean removeSchoolsFromMC);
 
 
 }

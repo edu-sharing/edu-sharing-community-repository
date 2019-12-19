@@ -412,7 +412,8 @@
         "TITLE" : "Import der Verknüpfung von Medienzentren und Organisationen",
         "CHOOSE" : "CSV Datei mit der Verknüpfung von Medienzentren und Organisationen auswählen",
         "ORGANISATIONS_START" : "Verknüpfung Import ausführen",
-        "IMPORTED" : "{{ rows }} Verknüpfungen importiert"
+        "IMPORTED" : "{{ rows }} Verknüpfungen importiert",
+        "REMOVE_SCHOOLS_FROM_MC" : "gelöschte Verknüpfungen aktualisieren"
       }
     },
     "FRONTPAGE": {

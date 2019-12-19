@@ -39,6 +39,8 @@ export class AdminMediacenterComponent {
   public orgMcFile: File;
   public globalProgress=false;
 
+  public removeSchoolsFromMC=false;
+
 
 
     constructor(
@@ -222,7 +224,7 @@ export class AdminMediacenterComponent {
             return;
         }
         this.globalProgress=true;
-        this.mediacenterService.importMcOrgConnections(this.orgMcFile).subscribe((data:any)=>{
+        this.mediacenterService.importMcOrgConnections(this.orgMcFile, this.removeSchoolsFromMC).subscribe((data:any)=>{
             this.toast.toast('ADMIN.MEDIACENTER.ORG_MC_CONNECT.IMPORTED',{rows:data.rows});
             this.globalProgress=false;
             this.orgMcFile=null;
