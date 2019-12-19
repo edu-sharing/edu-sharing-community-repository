@@ -882,6 +882,13 @@ export class SearchComponent {
         sortBy=[this.searchService.sort.materialsSortBy];
         sortAscending=[this.searchService.sort.materialsSortAscending];
     }
+    let mdsId=this.mdsId;
+    if(this.currentRepository==RestConstants.ALL){
+        const mdsAllowed=ConfigurationHelper.filterValidMds(repo,null,this.config);
+        if(mdsAllowed){
+            mdsId=mdsAllowed[0];
+        }
+    }
     let properties=[RestConstants.ALL];
     this.search.search(criterias,
       [RestConstants.LOM_PROP_GENERAL_KEYWORD],
@@ -895,7 +902,7 @@ export class SearchComponent {
       },
       RestConstants.CONTENT_TYPE_FILES,
       repo ? repo.id : RestConstants.HOME_REPOSITORY,
-      this.mdsId
+      mdsId
     ).subscribe(
       (data: SearchList) => {
         if(!this.searchService.skipcount[position])
