@@ -10,6 +10,14 @@ form{
     text-transform: initial;
     font-weight: normal;
   }
+  input {
+    margin-bottom: 22px;
+  }
+  input[type="checkbox"] + label {
+    height: unset;
+    display: inline-block;
+    margin-bottom: 15px;
+  }
 }
 .name-input{
   div{
@@ -19,6 +27,9 @@ form{
   .last-name{
     margin-left: 10px;
   }
+}
+.accept {
+  margin-top: 5px;
 }
 .imprint{
   display: block;

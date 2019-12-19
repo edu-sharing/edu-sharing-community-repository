@@ -325,7 +325,7 @@
   "USER":{
     "authorityName" : "user name",
     "firstName" : "first name",
-    "lastName" : "family name",
+    "lastName" : "last name",
     "email" : "e-mail",
     "primaryAffiliation": "Primary role",
     "password" : "password",

@@ -1,31 +1,11 @@
 @import "../../../styles/variables.scss";
 $path:'../../../assets/images/layout/';
-.card-action a{
-  width: 100%;
-  max-width: 100%;
-  justify-content: center;
-}
 
-.register{
-  color:$textLight;
-  //text-align: center;
-  margin-bottom: 10px;
-  a{
-    text-transform: uppercase;
-    i{
-      font-size: 11pt;
-      position: relative;
-      top: 3px;
+@media screen and (min-height: ($mobileHeight)) {
+  .card {
+    top: unset;
+    .card-content {
+      min-height: 540px;
     }
   }
-}
-
-.register-bg{
-  position: absolute;
-  top: 0;
-  left: 0;
-  height: 100%;
-  width: 100%;
-  background: url($path + 'register.jpg') no-repeat center bottom;
-  background-size: cover;
 }

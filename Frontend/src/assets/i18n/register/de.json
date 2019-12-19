@@ -1,21 +1,15 @@
 {
   "REGISTER": {
-    "TITLE": "Registrierung",
-    "ORGANIZATION_TITLE": "edu-sharing",
+    "TITLE": "Registrieren",
     "ORGANIZATION": "Organisation",
     "NEWSLETTER": "Neuigkeiten per Mail erhalten",
-    "ACCEPT": "Ich bin mit der Verarbeitung meiner angegebenen Daten einverstanden.",
+    "ACCEPT": "Ich bin mit der Verarbeitung meiner Daten einverstanden",
     "PRIVACY-LINK": "Weitere Informationen",
-    "PL_USER": "z.B. Max",
-    "PL_NAME": "z.B. Mustermann",
-    "PL_MAIL": "z.B. max@mail.com",
     "PW_weak": "Zu schwach",
     "PW_accept": "Mittel",
     "PW_medium": "Gut",
     "PW_strong": "Stark",
-    "PL_PASSWORD": "Min. 5 verschiedene Zeichen",
-    "HINT": "Tipp: Verwende auch Zahlen und Sonderzeichen",
-    "PL_ORG": "z.B.",
+    "HINT": "Tipp: Verwenden Sie Zahlen und Sonderzeichen",
     "BUTTON": "Registrieren",
     "TOAST":"Die E-Mail wurde versendet.",
     "TOAST_DUPLICATE": "Diese E-Mail Adresse wird bereits verwendet.",
@@ -35,11 +29,10 @@
       "ACTIVATE_HINT": "Sie haben den Code in einer Bestätigungsmail erhalten."
     },
     "REQUEST":{
-      "TITLE": "Passwort anfordern",
+      "TITLE": "Passwort zurücksetzen",
       "HEADLINE": "Passwort vergessen?",
-      "INFO": "Geben Sie Ihre E-Mail Adresse ein, um ein neues Passwort anzufordern.",
-      "PLACEHOLDER":"Ihre E-Mail Adresse",
-      "BUTTON":"Neues Passwort anfordern",
+      "INFO": "Bitte geben Sie Ihre E-Mail-Adresse ein, um ein neues Passwort anzufordern",
+      "BUTTON":"Passwort zurücksetzen",
       "MAIL_NOTE": "Klicken Sie auf den Link in der E-Mail oder verwenden Sie den Aktivierungscode, um ein neues Passwort festzulegen."
     },
     "RESET":{

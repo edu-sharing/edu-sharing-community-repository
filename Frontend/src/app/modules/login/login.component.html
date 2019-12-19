@@ -1,74 +1,75 @@
 <main-nav *ngIf="mainnav" #mainNav
-          [title]="'SIDEBAR.LOGIN'"
-          [currentScope]="'login'"
-          [searchEnabled]="false"
+[title]="'SIDEBAR.LOGIN'"
+[currentScope]="'login'"
+[searchEnabled]="false"
 ></main-nav>
-<div class="dialog darken valign-wrapper">
-  <spinner *ngIf="isLoading" class="center"></spinner>
-  <div *ngIf="!isLoading">
+<spinner *ngIf="isLoading" class="center"></spinner>
+<div *ngIf="!isLoading" class="dialog darken valign-wrapper">
   <div class="card center-card card-action" [class.card-mwide]="!showProviders" [class.card-xxwide]="showProviders">
     <div class="card-content">
       <div class="card-title">{{caption | translate}}</div>
       <div class="branding"><img src="assets/images/logo.svg" image-config alt=""></div>
       <div class="card-scroll">
         <div class="groups">
-        <div class="providers-select" *ngIf="showProviders">
-          <div class="group-heading">{{'LOGIN.PROVIDER_SELECT_GROUP' | translate}}</div>
-          <div class="group-description">{{'LOGIN.PROVIDER_SELECT_GROUP_DESCRIPTION' | translate}}</div>
-          <label>{{'LOGIN.PROVIDER_LABEL' | translate}}</label>
-          <mat-form-field class="mat-form-field-autocomplete">
-            <input type="text" matInput placeholder="{{'LOGIN.PROVIDER_PLACEHOLDER' | translate}}" [formControl]="providerControl" [matAutocomplete]="autoProvider" (keyup.enter)="goToProvider()">
-            <mat-autocomplete #autoProvider="matAutocomplete" [displayWith]="currentProviderDisplay">
-              <mat-optgroup *ngFor="let group of filteredProviders | async" [label]="group.group.name">
-                <mat-option *ngFor="let option of group.providers" [value]="option" (onSelectionChange)="currentProvider=option">
-                  <div class="mat-option-primary">{{option.name}}</div>
-                  <div class="mat-option-secondary">{{option.url | url:{mode:'domain'} }}</div>
-                </mat-option>
-              </mat-optgroup>
-            </mat-autocomplete>
-          </mat-form-field>
-          <div class="sso-group">
-            <img class="sso-logo" src="assets/images/sso_logo.svg">
-            <div class="group-actions">
-              <a class="waves-effect waves-light btn"  tabindex="0" (click)="goToProvider()" (keyup.enter)="goToProvider()">{{'LOGIN.GO_TO_PROVIDER' | translate }}</a>
+          <div class="providers-select" *ngIf="showProviders">
+            <div class="group-heading">{{'LOGIN.PROVIDER_SELECT_GROUP' | translate}}</div>
+            <div class="group-description">{{'LOGIN.PROVIDER_SELECT_GROUP_DESCRIPTION' | translate}}</div>
+            <label>{{'LOGIN.PROVIDER_LABEL' | translate}}</label>
+            <mat-form-field class="mat-form-field-autocomplete">
+              <input type="text" matInput placeholder="{{'LOGIN.PROVIDER_PLACEHOLDER' | translate}}" [formControl]="providerControl" [matAutocomplete]="autoProvider" (keyup.enter)="goToProvider()">
+              <mat-autocomplete #autoProvider="matAutocomplete" [displayWith]="currentProviderDisplay">
+                <mat-optgroup *ngFor="let group of filteredProviders | async" [label]="group.group.name">
+                  <mat-option *ngFor="let option of group.providers" [value]="option" (onSelectionChange)="currentProvider=option">
+                    <div class="mat-option-primary">{{option.name}}</div>
+                    <div class="mat-option-secondary">{{option.url | url:{mode:'domain'} }}</div>
+                  </mat-option>
+                </mat-optgroup>
+              </mat-autocomplete>
+            </mat-form-field>
+            <div class="sso-group">
+              <img class="sso-logo" src="assets/images/sso_logo.svg">
+              <div class="group-actions">
+                <a class="waves-effect waves-light btn"  tabindex="0" (click)="goToProvider()" (keyup.enter)="goToProvider()">{{'LOGIN.GO_TO_PROVIDER' | translate }}</a>
+              </div>
             </div>
           </div>
-        </div>
-        <div class="login-form">
-          <div class="group-heading" *ngIf="showProviders">{{'LOGIN.LOGIN_GROUP' | translate}}</div>
-          <div class="group-description" *ngIf="showProviders">{{'LOGIN.LOGIN_GROUP_DESCRIPTION' | translate}}</div>
-          <form (ngSubmit)="login()" #loginForm>
-            <div *ngIf="showUsername">
-              <label for="username">{{'LOGIN.USERNAME' | translate}}</label>
-              <input #usernameInput type="text" required name="username" id="username" (keydown.enter)="login()" (keyup)="checkConditions()" [(ngModel)]="username" autofocus/>
-            </div>
-            <div>
-              <label for="password">{{'LOGIN.PASSWORD' | translate}}</label>
+          <div class="login-form">
+            <div class="group-heading" *ngIf="showProviders">{{'LOGIN.LOGIN_GROUP' | translate}}</div>
+            <div class="group-description" *ngIf="showProviders">{{'LOGIN.LOGIN_GROUP_DESCRIPTION' | translate}}</div>
+            <form (ngSubmit)="login()" #loginForm>
+              <div *ngIf="showUsername">
+                <label for="username">{{'LOGIN.USERNAME' | translate}}</label>
+                <input #usernameInput type="text" required name="username" id="username" (keydown.enter)="login()" (keyup)="checkConditions()" [(ngModel)]="username" autofocus/>
+              </div>
+              <div>
+                <div class="password-label-container">
+                  <label for="password">{{'LOGIN.PASSWORD' | translate}}</label>
+                  <span class="forgot-password" *ngIf="config.register.local || config.register.recoverUrl">
+                    <a (click)="recoverPassword()" (keyup.enter)="recoverPassword()" class="focus-underline" tabindex="0">
+                      {{'LOGIN.RECOVER_PASSWORD' | translate}}
+                    </a>
+                  </span>
+                </div>
                 <input-password #passwordInput id="password" required="true" (keydown.enter)="login()" [(value)]="password"></input-password>
-            </div>
-          </form>
-          <div class="useUrl" *ngIf="config.loginUrl && !showProviders">
+              </div>
+            </form>
+            <div class="useUrl" *ngIf="config.loginUrl && !showProviders">
               <div>{{'LOGIN.USE_URL_TEXT' | translate}}</div>
               <a (click)="openLoginUrl()" (keyup.enter)="register()" class="clickable goto" tabindex="0"><span>{{'LOGIN.USE_URL_LINK' | translate}}</span> <i class="material-icons">arrow_forward</i></a>
-          </div>
-            <div class="register" *ngIf="config.register.local || config.register.registerUrl">
-                {{'LOGIN.REGISTER_TEXT' | translate}}
-                <a (click)="register()" (keyup.enter)="register()" class="focus-underline" tabindex="0">{{'LOGIN.REGISTER_LINK' | translate}} <i icon iconId="arrow_forward"></i></a>
             </div>
-          <div class="group-actions" *ngIf="showProviders">
-            <a tabindex="0" class="waves-effect waves-light btn" [class.disabled]="disabled" (click)="login()" (keyup.enter)="login()">{{'LOGIN.LOGIN' | translate }}</a>
-            <a tabindex="0" class="btn-flat" *ngIf="config.register.local || config.register.recoverUrl" (click)="recoverPassword()" (keyup.enter)="recoverPassword()">{{'LOGIN.RECOVER_PASSWORD' | translate }}</a>
+            <div class="group-actions" *ngIf="showProviders">
+              <a tabindex="0" class="waves-effect waves-light btn" [class.disabled]="disabled" (click)="login()" (keyup.enter)="login()">{{'LOGIN.LOGIN' | translate }}</a>
+              <a tabindex="0" class="btn-flat" *ngIf="config.register.local || config.register.registerUrl" (click)="register()" (keyup.enter)="register()">{{ 'LOGIN.REGISTER_TEXT' | translate }}</a>
+            </div>
           </div>
         </div>
       </div>
-      </div>
-      </div>
-      <div class="card-action" *ngIf="!showProviders">
-        <a class="waves-effect waves-light btn" [class.disabled]="disabled" (click)="login()">{{'LOGIN.LOGIN' | translate }}</a>
-        <a class="btn-flat" *ngIf="config.register.local || config.register.recoverUrl" (click)="recoverPassword()">{{'LOGIN.RECOVER_PASSWORD' | translate }}</a>
-      </div>
+    </div>
+    <div class="card-action" *ngIf="!showProviders">
+      <a class="waves-effect waves-light btn" [class.disabled]="disabled" (click)="login()">{{'LOGIN.LOGIN' | translate }}</a>
+      <a class="btn-flat" *ngIf="config.register.local || config.register.registerUrl" (click)="register()">{{ 'LOGIN.REGISTER_TEXT' | translate }}</a>
+    </div>
     <div class="card-action card-action-info" *ngIf="showProviders"><div innerHTML="{{'LOGIN.ACTION_HELP' | translate}}"></div></div>
-  <powered-by mode="white" *ngIf="!showProviders"></powered-by>
+    <powered-by mode="white" *ngIf="!showProviders"></powered-by>
   </div>
-</div>
 </div>
