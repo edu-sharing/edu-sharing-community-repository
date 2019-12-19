@@ -45,7 +45,7 @@
                 <div class="password-label-container">
                   <label for="password">{{'LOGIN.PASSWORD' | translate}}</label>
                   <span class="forgot-password" *ngIf="config.register.local || config.register.recoverUrl">
-                    <a (click)="recoverPassword()" (keyup.enter)="recoverPassword()" class="focus-underline" tabindex="0">
+                    <a (click)="recoverPassword()" (keyup.enter)="recoverPassword()" class="focus-underline" tabindex="1">
                       {{'LOGIN.RECOVER_PASSWORD' | translate}}
                     </a>
                   </span>
@@ -55,7 +55,7 @@
             </form>
             <div class="useUrl" *ngIf="config.loginUrl && !showProviders">
               <div>{{'LOGIN.USE_URL_TEXT' | translate}}</div>
-              <a (click)="openLoginUrl()" (keyup.enter)="register()" class="clickable goto" tabindex="0"><span>{{'LOGIN.USE_URL_LINK' | translate}}</span> <i class="material-icons">arrow_forward</i></a>
+              <a (click)="openLoginUrl()" (keyup.enter)="openLoginUrl()" class="clickable goto" tabindex="0"><span>{{'LOGIN.USE_URL_LINK' | translate}}</span> <i class="material-icons">arrow_forward</i></a>
             </div>
             <div class="group-actions" *ngIf="showProviders">
               <a tabindex="0" class="waves-effect waves-light btn" [class.disabled]="disabled" (click)="login()" (keyup.enter)="login()">{{'LOGIN.LOGIN' | translate }}</a>
@@ -66,8 +66,8 @@
       </div>
     </div>
     <div class="card-action" *ngIf="!showProviders">
-      <a class="waves-effect waves-light btn" [class.disabled]="disabled" (click)="login()">{{'LOGIN.LOGIN' | translate }}</a>
-      <a class="btn-flat" *ngIf="config.register.local || config.register.registerUrl" (click)="register()">{{ 'LOGIN.REGISTER_TEXT' | translate }}</a>
+      <a tabindex="0" class="waves-effect waves-light btn" [class.disabled]="disabled" (click)="login()" (keyup.enter)="login()">{{'LOGIN.LOGIN' | translate }}</a>
+      <a tabindex="0" class="btn-flat" *ngIf="config.register.local || config.register.registerUrl" (click)="register()" (keyup.enter)="register()">{{ 'LOGIN.REGISTER_TEXT' | translate }}</a>
     </div>
     <div class="card-action card-action-info" *ngIf="showProviders"><div innerHTML="{{'LOGIN.ACTION_HELP' | translate}}"></div></div>
     <powered-by mode="white" *ngIf="!showProviders"></powered-by>
