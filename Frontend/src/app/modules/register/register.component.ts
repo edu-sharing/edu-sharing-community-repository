@@ -79,7 +79,7 @@ export class RegisterComponent{
             setTimeout(()=>this.setParams());
             this.connector.isLoggedIn().subscribe((data)=>{
                 if(data.statusCode=="OK"){
-                    UIHelper.goToDefaultLocation(this.router,this.configService);
+                    UIHelper.goToDefaultLocation(this.router,this.platformLocation,this.configService);
                 }
             });
     });

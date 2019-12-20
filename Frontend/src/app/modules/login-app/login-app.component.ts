@@ -17,6 +17,7 @@ import { RestHelper } from '../../common/rest/rest-helper';
 import { STATUS_CODES } from 'http';
 import {RestLocatorService} from "../../common/rest/services/rest-locator.service";
 import {SessionStorageService} from "../../common/services/session-storage.service";
+import { PlatformLocation } from '@angular/common';
 
 // possible states this UI component can be in
 enum StateUI { SERVERLIST = 0, LOGIN = 1, SERVERURL = 2, NOINTERNET = 3};
@@ -49,6 +50,7 @@ export class LoginAppComponent  implements OnInit {
         private route:ActivatedRoute,
         private translation: TranslateService,
         private storage: SessionStorageService,
+        private platformLocation: PlatformLocation,
         private cordova: CordovaService,
         private configService: ConfigurationService,
         private locator: RestLocatorService,
@@ -180,7 +182,7 @@ export class LoginAppComponent  implements OnInit {
         }
         else {
             this.configService.getAll().subscribe(() => {
-                UIHelper.goToDefaultLocation(this.router, this.configService, {replaceUrl: true});
+                UIHelper.goToDefaultLocation(this.router, this.platformLocation, this.configService, true);
             });
         }
     }

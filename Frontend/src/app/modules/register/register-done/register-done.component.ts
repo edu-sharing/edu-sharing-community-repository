@@ -59,6 +59,7 @@ export class RegisterDoneComponent{
     constructor(private connector: RestConnectorService,
                 private toast: Toast,
                 private register: RestRegisterService,
+                private platformLocation: PlatformLocation,
                 private config: ConfigurationService,
                 private cordova: CordovaService,
                 private locator: RestLocatorService,
@@ -89,13 +90,13 @@ export class RegisterDoneComponent{
             this.register.activate(keyUrl).subscribe(() => {
                 if(this.cordova.isRunningCordova()){
                     this.locator.createOAuthFromSession().subscribe(()=>{
-                        UIHelper.goToDefaultLocation(this.router, this.config);
+                        UIHelper.goToDefaultLocation(this.router, this.platformLocation, this.config);
                     },(error)=>{
                         this.toast.error(error);
                     });
                 }
                 else {
-                    UIHelper.goToDefaultLocation(this.router, this.config);
+                    UIHelper.goToDefaultLocation(this.router, this.platformLocation, this.config);
                 }
             }, (error) => {
                 if (UIHelper.errorContains(error, "InvalidKeyException")) {

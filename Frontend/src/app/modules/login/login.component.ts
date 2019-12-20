@@ -233,7 +233,7 @@ export class LoginComponent  implements OnInit{
       this.router.navigate([UIConstants.ROUTER_PREFIX,"workspace","safe"]);
     }
     else {
-      UIHelper.goToDefaultLocation(this.router,this.configService);
+      UIHelper.goToDefaultLocation(this.router,this.platformLocation,this.configService);
     }
   }
 

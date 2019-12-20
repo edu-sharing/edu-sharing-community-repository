@@ -35,6 +35,7 @@ import {Observable, Observer} from "rxjs";
 import {RestIamService} from "../rest/services/rest-iam.service";
 import {DialogButton} from "./modal-dialog/modal-dialog.component";
 import {SpinnerComponent} from "./spinner/spinner.component";
+import { RouterHelper } from "../router.helper";
 
 export class UIHelper{
 
@@ -530,8 +531,8 @@ export class UIHelper{
       return link;
   }
 
-  static goToDefaultLocation(router: Router,configService : ConfigurationService,extras:NavigationExtras={}) {
-      return router.navigate([UIConstants.ROUTER_PREFIX + configService.instant("loginDefaultLocation","workspace")],extras);
+  static goToDefaultLocation(router: Router,platformLocation : PlatformLocation,configService : ConfigurationService,replaceUrl=false) {
+      RouterHelper.navigateToAbsoluteUrl(platformLocation,router,UIConstants.ROUTER_PREFIX + configService.instant("loginDefaultLocation","workspace"),replaceUrl);
   }
     static openUrl(url:string, cordova: CordovaService,mode=OPEN_URL_MODE.Current) {
         if(cordova.isRunningCordova()){
