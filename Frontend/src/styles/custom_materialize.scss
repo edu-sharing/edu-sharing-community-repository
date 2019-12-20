@@ -131,7 +131,9 @@ input[type=search]{
   }
 }
 select{
-  width:100%;
+  &:not(.mat-input-element){
+    width:100%;
+  }
 }
 textarea.materialize-textarea{
   &:not(.mat-input-element) {
