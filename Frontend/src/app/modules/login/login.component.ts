@@ -61,7 +61,7 @@ export class LoginComponent  implements OnInit{
   }
   private filteredProviders: any;
   private checkConditions(){
-    this.disabled=!this.username;// || !this.password;
+    this.disabled=!this.username || this.currentProvider;// || !this.password;
   }
   private recoverPassword(){
       if(this.config.register.local){

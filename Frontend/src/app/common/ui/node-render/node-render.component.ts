@@ -49,6 +49,7 @@ import {SpinnerComponent} from "../spinner/spinner.component";
 import {ListTableComponent} from "../list-table/list-table.component";
 import {RestUsageService} from "../../rest/services/rest-usage.service";
 import {ListItem} from "../list-item";
+import {RestNetworkService} from "../../rest/services/rest-network.service";
 import {CommentsListComponent} from "../../../modules/management-dialogs/node-comments/comments-list/comments-list.component";
 import {GlobalContainerComponent} from "../global-container/global-container.component";
 
@@ -231,6 +232,7 @@ export class NodeRenderComponent implements EventListener{
       private config : ConfigurationService,
       private storage : SessionStorageService,
       private route : ActivatedRoute,
+      private networkService : RestNetworkService,
       private _ngZone: NgZone,
       private router : Router,
       private temporaryStorageService: TemporaryStorageService) {
@@ -244,6 +246,7 @@ export class NodeRenderComponent implements EventListener{
             });
         this.banner = ConfigurationHelper.getBanner(this.config);
         this.connector.setRoute(this.route);
+        this.networkService.prepareCache();
         this.route.queryParams.subscribe((params:Params)=>{
           this.closeOnBack=params['closeOnBack']=='true';
           this.editor=params['editor'];

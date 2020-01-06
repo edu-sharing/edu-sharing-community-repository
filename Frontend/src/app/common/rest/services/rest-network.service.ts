@@ -86,4 +86,10 @@ export class RestNetworkService extends AbstractRestService{
         return this.connector.get<any>(url,this.connector.getRequestOptions(), false);
     }
 
+    /**
+     * prepare the remote repos infos to be available in cache for static access
+     */
+    public prepareCache() {
+        this.getRepositories().subscribe(()=>{});
+    }
 }

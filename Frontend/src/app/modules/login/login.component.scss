@@ -61,10 +61,16 @@ powered-by{
 .groups{
   display: flex;
   padding:$cardPadding 0;
+  .providers-select{
+    border-right:1px solid $textLight;
+    padding-right:30px;
+  }
+  .login-form{
+    padding-left:30px;
+  }
   >div{
     width: 0;
     flex-grow: 1;
-    padding:0 10px;
     .group-heading{
       width: 100%;
       padding: 5px 10px;
@@ -128,6 +134,17 @@ powered-by{
 @media screen and (max-width: $mobileWidth+$mobileStage*1) {
   .groups{
     flex-direction: column;
+    .providers-select{
+      border-right: none;
+      padding-right:0;
+    }
+    .login-form{
+      padding-left:0;
+    }
+    .login-form{
+      padding-top:10px;
+      padding-left:0;
+    }
     >div{
       padding:10px 0;
       width: 100%;

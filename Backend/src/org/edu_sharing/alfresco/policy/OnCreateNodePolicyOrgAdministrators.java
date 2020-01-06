@@ -1,7 +1,8 @@
 package org.edu_sharing.alfresco.policy;
 
+import java.io.Serializable;
 import java.util.List;
-import java.util.Set;
+import java.util.Map;
 
 import org.alfresco.model.ContentModel;
 import org.alfresco.repo.model.Repository;
@@ -13,10 +14,10 @@ import org.alfresco.service.ServiceRegistry;
 import org.alfresco.service.cmr.repository.ChildAssociationRef;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.repository.NodeService;
+import org.alfresco.service.cmr.repository.StoreRef;
 import org.alfresco.service.cmr.search.ResultSet;
 import org.alfresco.service.cmr.search.ResultSetRow;
 import org.alfresco.service.cmr.search.SearchService;
-import org.alfresco.service.cmr.security.AccessPermission;
 import org.alfresco.service.cmr.security.PermissionService;
 import org.alfresco.service.namespace.QName;
 import org.edu_sharing.repository.client.tools.CCConstants;
@@ -74,13 +75,13 @@ public class OnCreateNodePolicyOrgAdministrators implements OnCreateNodePolicy, 
 	private String getAdminGroup(ChildAssociationRef childRef) {
 		NodeRef companyHome = repositoryHelper.getCompanyHome();
 		
-		List<NodeRef> eduGroupfolder = EduGroupCache.getAllEduGoupFolder();
+		Map<NodeRef,Map<QName,Serializable>>  eduGroupFoldersAndProps = EduGroupCache.getAllEduGroupFolderAndEduGroupProps();
 		
 		NodeRef currentNode = childRef.getParentRef();
 		NodeRef organisationNode = null;
 		while(!companyHome.equals(currentNode) && organisationNode == null){
 			
-			if(eduGroupfolder.contains(currentNode)){
+			if(eduGroupFoldersAndProps.keySet().contains(currentNode)){
 				organisationNode = currentNode;
 				break;
 			}
@@ -89,17 +90,15 @@ public class OnCreateNodePolicyOrgAdministrators implements OnCreateNodePolicy, 
 		}
 		
 		if(organisationNode != null){
-			String query = "@ccm\\:edu_homedir:\"" + organisationNode.toString() + "\"";
-			ResultSet rs = searchService.query(organisationNode.getStoreRef(), "lucene", query);
-			if(rs != null && rs.getNumberFound() > 0){
-				ResultSetRow rsr = rs.iterator().next();
-				List<ChildAssociationRef> childGroups = nodeService.getChildAssocs(rsr.getNodeRef());
-				for(ChildAssociationRef childGroup : childGroups){
-					String grouptype = (String)nodeService.getProperty(childGroup.getChildRef(), QName.createQName(CCConstants.CCM_PROP_GROUPEXTENSION_GROUPTYPE));
-					if(CCConstants.ADMINISTRATORS_GROUP_TYPE.equals(grouptype)){
-						String authorityName = (String)nodeService.getProperty(childGroup.getChildRef(), QName.createQName(CCConstants.CM_PROP_AUTHORITY_AUTHORITYNAME));
-						return authorityName;
-					}
+			
+			Map<QName, Serializable> eduGroupProps = eduGroupFoldersAndProps.get(organisationNode);
+			NodeRef eduGroupNodeRef = new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, (String)eduGroupProps.get(ContentModel.PROP_NODE_UUID));
+			List<ChildAssociationRef> childGroups = nodeService.getChildAssocs(eduGroupNodeRef);
+			for(ChildAssociationRef childGroup : childGroups){
+				String grouptype = (String)nodeService.getProperty(childGroup.getChildRef(), QName.createQName(CCConstants.CCM_PROP_GROUPEXTENSION_GROUPTYPE));
+				if(CCConstants.ADMINISTRATORS_GROUP_TYPE.equals(grouptype)){
+					String authorityName = (String)nodeService.getProperty(childGroup.getChildRef(), QName.createQName(CCConstants.CM_PROP_AUTHORITY_AUTHORITYNAME));
+					return authorityName;
 				}
 			}
 		}

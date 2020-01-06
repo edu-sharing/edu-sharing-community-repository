@@ -995,6 +995,8 @@ public class CCConstants {
 	public static final String CCM_PROP_IO_SCHOOLCONTEXT = "{http://www.campuscontent.de/model/1.0}schoolcontext";
 	public static final String CCM_PROP_IO_SCHOOLTOPIC = "{http://www.campuscontent.de/model/1.0}schooltopic";
 
+	public static final String CCM_PROP_IO_UNIVERSITY = "{http://www.campuscontent.de/model/1.0}university";
+	
 	public static final String SCHOOLCONTEXT_PATH_SEPARATOR = "#";
 
 	public final static String CCM_PROP_CONFIGOBJECT_VALUE = "{http://www.campuscontent.de/model/1.0}configvalue";

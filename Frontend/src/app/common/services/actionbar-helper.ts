@@ -91,7 +91,7 @@ export class ActionbarHelperService{
             let n=ActionbarHelperService.getNodes(nodes,node);
             if(n==null)
                 return false;
-            return NodeHelper.referenceOriginalExists(node) && NodeHelper.allFiles(nodes) && n.length>0;
+            return NodeHelper.referenceOriginalExists(node) && NodeHelper.allFiles(nodes) && n.length>0 && RestNetworkService.allFromHomeRepo(n);
         }
         option.enabledCallback = (node: Node) => {
           let list = ActionbarHelperService.getNodes(nodes, node);

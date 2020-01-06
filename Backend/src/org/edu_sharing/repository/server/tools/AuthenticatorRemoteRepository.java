@@ -132,12 +132,18 @@ public class AuthenticatorRemoteRepository {
 	
 	private void remoteAuth(String appId, String username, MCAlfrescoAPIClient apiClient) throws Exception{
 		String localAppId = ApplicationInfoList.getHomeRepository().getAppId();
-    	System.out.println("startSession remoteApplicationId:"+appId +" localAppId:"+localAppId);
+    	logger.info("startSession remoteApplicationId:"+appId +" localAppId:"+localAppId);
     	
     	ApplicationInfo appInfoRemoteApp = ApplicationInfoList.getRepositoryInfoById(appId);
     	
     	HashMap<String,String> personMapping = ssoAuthorityMapper.getMappingConfig().getPersonMapping();
-    	
+		String remoteUserid = ApplicationInfoList.getRepositoryInfoById(appId).getString(ApplicationInfo.REMOTE_USERID, null);
+		if(remoteUserid!=null && !remoteUserid.isEmpty()){
+			logger.info("remote_userid configured "+remoteUserid+", will change auth");
+			personMapping.values().remove(CCConstants.CM_PROP_PERSON_USERNAME);
+			personMapping.put(remoteUserid,CCConstants.CM_PROP_PERSON_USERNAME);
+		}
+
     	List<KeyValue> ssoData = new ArrayList<KeyValue>();
 		String esuid;
 		HashMap<String, String> personData;
@@ -177,7 +183,6 @@ public class AuthenticatorRemoteRepository {
     	logger.info(serviceRegistry.getAuthenticationService().getCurrentUserName());
     	Set<String> authoritiesForUser = authorityService.getAuthorities();
     	for(String authority : authoritiesForUser){
-    		logger.info("authority:"+authority);
     		NodeRef authorityNodeRef = authorityService.getAuthorityNodeRef(authority);
     		//i.i. noderef for GROUP_EVERYONE is null
     		if(authorityNodeRef == null) continue;
@@ -194,7 +199,8 @@ public class AuthenticatorRemoteRepository {
     	
     	if(globalGroups != null){
     		ssoData.add(new KeyValue(CCConstants.EDU_SHARING_GLOBAL_GROUPS, globalGroups));
-    	}
+            logger.info("global groups for user added");
+        }
     	
 		try{
 			
