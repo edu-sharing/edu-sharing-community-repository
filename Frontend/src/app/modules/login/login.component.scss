@@ -55,9 +55,6 @@ powered-by{
     }
   }
 }
-.card-content input {
-  margin-bottom: 35px;
-}
 .groups{
   display: flex;
   padding:$cardPadding 0;
@@ -67,6 +64,9 @@ powered-by{
   }
   .login-form{
     padding-left:30px;
+    input {
+      margin-bottom: 35px;
+    }
   }
   >div{
     width: 0;
