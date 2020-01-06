@@ -20,6 +20,8 @@ import org.edu_sharing.service.nodeservice.NodeService;
 import org.edu_sharing.service.nodeservice.NodeServiceFactory;
 import org.edu_sharing.service.rendering.RenderingService;
 import org.edu_sharing.service.rendering.RenderingServiceFactory;
+import org.edu_sharing.service.toolpermission.ToolPermissionService;
+import org.edu_sharing.service.toolpermission.ToolPermissionServiceFactory;
 
 public class RepositoryDao {
 
@@ -82,9 +84,11 @@ public class RepositoryDao {
 			
 			List<RepositoryDao> result = new ArrayList<RepositoryDao>();
 			for (ApplicationInfo appInfo : ApplicationInfoList.getRepositoryInfosOrdered()) {
-	
+				ToolPermissionService tp = ToolPermissionServiceFactory.getInstance();
 				if (ApplicationInfo.TYPE_REPOSITORY.equals(appInfo.getType()) && appInfo.getSearchable()) {
-					result.add(getRepository(appInfo.getAppId()));
+					if(tp.hasToolPermission(CCConstants.CCM_VALUE_TOOLPERMISSION_REPOSITORY_PREFIX+appInfo.getAppId())) {
+						result.add(getRepository(appInfo.getAppId()));
+					}
 				}
 			}
 			

@@ -17,8 +17,12 @@
           <div *ngFor="let group of getGroups()" class="group">
             <div class="card-title-element"><i class="material-icons">{{group.icon}}</i>{{'PERMISSIONS.TOOLPERMISSIONS.GROUP.'+group.name | translate}}</div>
             <div class="groupTable" *ngFor="let key of getToolpermissionsForGroup(group)">
-              <div class="name" *ngIf="group.name!='CONNECTORS'">{{'TOOLPERMISSION.'+key | translate}}<div class="technicalName">{{key}}</div></div>
-              <div class="name" *ngIf="group.name=='CONNECTORS'">{{('TOOLPERMISSION.TOOLPERMISSION_CONNECTOR'+(getTpSafe(key) ? '_SAFE' : '')) | translate:{connector:getTpConnector(key)} }}<div class="technicalName">{{key}}</div></div>
+              <div class="name">
+                  <div *ngIf="group.name!='CONNECTORS' && group.name!='REPOSITORIES'">{{'TOOLPERMISSION.'+key | translate}}</div>
+                  <div *ngIf="group.name=='CONNECTORS'">{{('TOOLPERMISSION.TOOLPERMISSION_CONNECTOR'+(getTpSafe(key) ? '_SAFE' : '')) | translate:{connector:getTpConnector(key)} }}</div>
+                  <div *ngIf="group.name=='REPOSITORIES'">{{('TOOLPERMISSION.TOOLPERMISSION_REPOSITORY') | translate:{repository:getTpRepository(key)} }}</div>
+                  <div class="technicalName">{{key}}</div>
+              </div>
               <div class="checkboxDiv checkboxInput"><input type="checkbox" class="filled-in" [disabled]="changing.indexOf(key)!=-1" [(ngModel)]="allow[key]" name="allow{{key}}" (change)="deny[key]=false;change(key)" id="allow{{key}}"><label for="allow{{key}}"></label></div>
               <div class="checkboxDiv checkboxInput" *ngIf="_authority.authorityType!='EVERYONE'"><input type="checkbox" class="filled-in" [disabled]="changing.indexOf(key)!=-1" [(ngModel)]="deny[key]" name="deny{{key}}" (change)="allow[key]=false;change(key)" id="deny{{key}}"><label for="deny{{key}}"></label></div>
               <div class="result" [class.allowed]="getEffective(key)=='ALLOWED'" [class.denied]="getEffective(key)!='ALLOWED'">

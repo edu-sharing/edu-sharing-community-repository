@@ -192,11 +192,10 @@ public class ToolPermissionService {
 		String result = eduNodeService.createNodeBasic(systemFolderId, CCConstants.CCM_TYPE_TOOLPERMISSION, props);
 		//set admin as owner cause if it was created by runAs with admin the current user not the runas on is taken
 		eduNodeService.setOwner(result, ApplicationInfoList.getHomeRepository().getUsername());
-		if(getAllDefaultAllowedToolpermissions().contains(toolPermission)){
+		if(getAllDefaultAllowedToolpermissions().contains(toolPermission) || toolPermission.startsWith(CCConstants.CCM_VALUE_TOOLPERMISSION_REPOSITORY_PREFIX)){
 			logger.info("ToolPermission" + toolPermission+ " is allowed by default. Will set GROUP_EVERYONE.");
 			eduNodeService.setPermissions(result,PermissionService.ALL_AUTHORITIES, new String[]{CCConstants.PERMISSION_READ}, false);
-		}
-		else{
+		}else{
 			eduNodeService.setPermissions(result, null,null, false);
 		}
 		return result;
