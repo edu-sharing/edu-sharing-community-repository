@@ -17,8 +17,8 @@ import {
   styleUrls: ['mds-widget.component.scss'],
 })
 export class MdsWidgetComponent{
-  private _data:any;
-  private value:any;
+  _data:any;
+  value:any;
   @Input() widget:any;
   @Input() set data(data:any){
     this._data=data; 
