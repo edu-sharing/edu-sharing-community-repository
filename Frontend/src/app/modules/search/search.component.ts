@@ -570,6 +570,8 @@ export class SearchComponent {
                 this.searchService.sort.materialsColumns.push(item);
             }
             console.log(this.searchService.sort,sort,sort.columns.length);
+        }else{
+          this.searchService.sort.materialsColumns = null;
         }
         return sort;
     }
@@ -577,6 +579,7 @@ export class SearchComponent {
         let state=this.currentRepository+":"+this.mdsId;
         console.log(state);
         let sort=this.updateSortMds();
+        console.log(sort);
         // do not update state if current state is valid (otherwise sort info is lost when comming back from rendering)
         // exception: if there is no state at all, refresh it with the default
         if(state==this.searchService.sort.state && !(sort && !this.searchService.sort.materialsSortBy))

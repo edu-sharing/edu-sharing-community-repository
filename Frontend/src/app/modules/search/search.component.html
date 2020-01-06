@@ -246,7 +246,7 @@
                         {{'SEARCH.QUERY_NO_RESULT' | translate}}
                     </div>
                     <div class="heading" *ngIf="searchService.searchResult.length">
-                        <div>
+                        <div *ngIf="searchService.sort.materialsColumns">
                             {{ 'SEARCH.MATERIALS' | translate}}
                             <span *ngIf="searchService.resultCount.materials && currentRepository!='-all-'">({{searchService.resultCount.materials}})</span>
                             <div class="sorting" [class.clickable]="searchService.sort.materialsColumns" (click)="searchService.sort.materialsColumns ? searchService.sort.materials=true : null">
@@ -255,7 +255,11 @@
                                     <i *ngIf="searchService.sort.materialsColumns" class="material-icons">arrow_{{searchService.sort.materialsSortAscending ? 'upward' : 'downward'}}</i>
                                 </div>
                             </div>
-                            <sort-dropdown [(open)]="searchService.sort.materials" [columns]="searchService.sort.materialsColumns" [sortAscending]="searchService.sort.materialsSortAscending" [sortBy]="searchService.sort.materialsSortBy" (onSort)="sortMaterials($event)"></sort-dropdown>
+                            <sort-dropdown [(open)]="searchService.sort.materials"
+                                           [columns]="searchService.sort.materialsColumns"
+                                           [sortAscending]="searchService.sort.materialsSortAscending"
+                                           [sortBy]="searchService.sort.materialsSortBy"
+                                           (onSort)="sortMaterials($event)"></sort-dropdown>
                         </div>
                     </div>
                     <div class="heading" *ngIf="searchService.searchResult.length && searchService.ignored && searchService.ignored.length">{{ 'SEARCH.IGNORED_PARAMETERS' | translate}}</div>
