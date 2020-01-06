@@ -62,7 +62,7 @@ powered-by{
     border-right:1px solid $textLight;
     padding-right:30px;
   }
-  .login-form{
+  .login-form-providers{
     padding-left:30px;
     input {
       margin-bottom: 35px;
@@ -138,10 +138,7 @@ powered-by{
       border-right: none;
       padding-right:0;
     }
-    .login-form{
-      padding-left:0;
-    }
-    .login-form{
+    .login-form-providers{
       padding-top:10px;
       padding-left:0;
     }

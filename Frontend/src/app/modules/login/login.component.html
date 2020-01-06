@@ -33,7 +33,7 @@
               </div>
             </div>
           </div>
-          <div class="login-form">
+          <div class="login-form" [class.login-form-providers]="showProviders">
             <div class="group-heading" *ngIf="showProviders">{{'LOGIN.LOGIN_GROUP' | translate}}</div>
             <div class="group-description" *ngIf="showProviders">{{'LOGIN.LOGIN_GROUP_DESCRIPTION' | translate}}</div>
             <form (ngSubmit)="login()" #loginForm>
