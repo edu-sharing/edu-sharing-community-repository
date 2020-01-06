@@ -221,45 +221,83 @@ public class MediacenterServiceImpl implements MediacenterService{
 				 */
 				if(removeSchoolsFromMC) {
 					
-					Map<String,List<String>> map = listToUniqueMap(records);
+					Map<String,List<String>> newMZsAndSchools = listToUniqueMap(records);
 					
-					for(Map.Entry<String,List<String>> entry : map.entrySet()) {
-						String mzId = entry.getKey();
-						SearchParameters sp = getSearchParameterMZ(mzId);
+					/**
+					 * get existing mediacenters
+					 */
+					{
+						SearchParameters sp = new SearchParameters();
+						sp.setQuery("ASPECT:\"ccm:mediacenter\"");
+						sp.setLanguage(SearchService.LANGUAGE_LUCENE);
+						sp.setSkipCount(0);
+						sp.addStore(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE);
+						
 						ResultSet rs = searchService.query(sp);
 						if (rs == null || rs.length() < 1) {
-							logger.error("no mediacenter found for " + mzId);
-							continue;
-						}
-						
-						NodeRef nodeRefAuthorityMediacenter = rs.getNodeRef(0);
-						String authorityNameMZ = (String) nodeService.getProperty(nodeRefAuthorityMediacenter,
-								ContentModel.PROP_AUTHORITY_NAME);
-						Set<String> mzContains = authorityService.getContainedAuthorities(AuthorityType.GROUP, authorityNameMZ, true);
-						
-						for(String schoolAuthorityName : mzContains) {
-							//"GROUP_ORG_" + schoolId
-							NodeRef nodeRef = authorityService.getAuthorityNodeRef(schoolAuthorityName);
-							
-							if(nodeRef == null) {
-								logger.info("authority does not exist:" + schoolAuthorityName);
-								continue;
+							logger.error("no mediacenters found");
+						}else {
+							Map<String,List<String>> existingMZsAndSchools = new HashMap<String,List<String>>();
+							for(NodeRef mzNodeRef : rs.getNodeRefs()) {
+								String authorityName = (String)nodeService.getProperty(mzNodeRef, ContentModel.PROP_AUTHORITY_NAME);
+								String mzId = authorityName.replace("GROUP_MEDIA_CENTER_", "");
+								try {
+									Integer.parseInt(mzId);
+									Set<String> mzContains = authorityService.getContainedAuthorities(AuthorityType.GROUP, authorityName, true);
+									
+									for(String schoolAuthorityName : mzContains) {
+										//"GROUP_ORG_" + schoolId
+										NodeRef nodeRef = authorityService.getAuthorityNodeRef(schoolAuthorityName);
+										
+										if(nodeRef == null) {
+											logger.info("authority does not exist:" + schoolAuthorityName);
+											continue;
+										}
+										if(!nodeService.hasAspect(nodeRef, QName.createQName(CCConstants.CCM_ASPECT_EDUGROUP))) {
+											logger.debug("authority is no edugroup:" + schoolAuthorityName);
+											continue;
+										}
+										
+										String schoolId = schoolAuthorityName.replace("GROUP_ORG_", "");
+										
+										List<String> schools = existingMZsAndSchools.get(mzId);
+										if(schools == null) {
+											schools = new ArrayList<String>();
+										}
+										if(!schools.contains(schoolId)) {
+											schools.add(schoolId);
+										}
+										existingMZsAndSchools.put(mzId, schools);
+									}
+								}catch(NumberFormatException e) {
+									logger.info("authorityName:" + authorityName + " mzId:" + mzId + " is no number" );
+								}
 							}
-							if(!nodeService.hasAspect(nodeRef, QName.createQName(CCConstants.CCM_ASPECT_EDUGROUP))) {
-								logger.info("authority is no edugroup:" + schoolAuthorityName);
-								continue;
-							}
 							
-							
-							
-							String schoolId = schoolAuthorityName.replace("GROUP_ORG_", "");
-							if(!entry.getValue().contains(schoolId)) {
-								logger.info("removing school " + schoolId + " from " + mzId +" cause its not in imported list");
-								authorityService.removeAuthority(authorityNameMZ, schoolAuthorityName);
+							for(Map.Entry<String,List<String>> mzAndSchools : existingMZsAndSchools.entrySet()) {
+								List<String> newSchools = newMZsAndSchools.get(mzAndSchools.getKey());
+								if(newSchools == null) {
+									logger.info("existing mz:" + mzAndSchools.getKey() +" has a null school list in new sheet");
+									newSchools = new ArrayList<String>();
+								}
+								
+								if(mzAndSchools.getValue() == null) {
+									logger.info("existing mz:" + mzAndSchools.getKey() +" has a null school list");
+									continue;
+								}
+								
+								
+								for(String existingSchoolId : mzAndSchools.getValue()) {
+									if(!newSchools.contains(existingSchoolId)) {
+										String mzAuthorityName = "GROUP_MEDIA_CENTER_" + mzAndSchools.getKey();
+										String schoolAuthorityName = "GROUP_ORG_" + existingSchoolId;
+										logger.info("removing school " + schoolAuthorityName + " from " + mzAuthorityName +" cause its not in imported list");
+										authorityService.removeAuthority(mzAuthorityName, schoolAuthorityName);
+									}
+								}
 							}
 						}
 					}
-			
 				}
 				
 				
