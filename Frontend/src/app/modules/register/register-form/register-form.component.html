@@ -23,12 +23,12 @@
         <input [ngClass]="{'valid': info.organization.trim()}" type="text"  [required]="isRequired('organization')" name="organization" id="organization" [(ngModel)]="info.organization"/>
     </div>
     <div class="accept">
-        <input id="accept" type="checkbox" class="filled-in" [(ngModel)]="agree" (change)="setAccept(agree)">
+        <input id="accept" name="accept" type="checkbox" class="filled-in" [(ngModel)]="agree">
         <label for="accept">{{'REGISTER.ACCEPT' | translate}}</label>
         <a class="clickable imprint" *ngIf="privacyUrl" (click)="openPrivacy()">{{'REGISTER.PRIVACY-LINK' | translate}}</a>
     </div>
     <div>
-        <input id="newsletter" type="checkbox" [(ngModel)]="info.allowNotifications" class="filled-in">
+        <input id="newsletter" name="newsletter" type="checkbox" [(ngModel)]="info.allowNotifications" class="filled-in">
         <label for="newsletter">{{'REGISTER.NEWSLETTER' | translate}}</label>
     </div>
 </form>
