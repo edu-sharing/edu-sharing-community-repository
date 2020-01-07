@@ -13,5 +13,5 @@ public interface ConfigService {
 
 	Config getConfigByDomain(String domain) throws Exception;
 
-	
+    void refresh();
 }

@@ -54,5 +54,9 @@ public class ConfigServiceFactory {
 		String language=new AuthenticationToolAPI().getCurrentLanguage();
 		return getLanguageData(language);
 	}
-
+	/* refresh the current config cache
+	 */
+	public static void refresh() {
+		ConfigServiceFactory.getConfigService().refresh();
+	}
 }
