@@ -92,6 +92,12 @@ export class ConfigurationService {
       return object[name];
     return defaultValue;
   }
+  /**
+   * Like `get`, but assumes that the configuration is already initialized.
+   * 
+   * It is the responsibility of the caller to assure that the configuration is initialized! If you
+   * are not sure, use `get` instead.
+   */
   public instant(name:string,defaultValue:any=null) : any {
     return this.instantInternal(name, defaultValue);
   }

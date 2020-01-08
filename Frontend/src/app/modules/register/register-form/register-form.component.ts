@@ -32,7 +32,7 @@ export class RegisterFormComponent{
     public agree = false;
     public privacyUrl: string;
     public mailValid: boolean;
-    requiredFields:string[];
+    public requiredFields: string[] = [];
 
     public checkMail(mail:string) {
         this.mailValid = UIHelper.isEmail(mail);
@@ -54,13 +54,6 @@ export class RegisterFormComponent{
         });
     }
 
-  public setAccept(value:boolean){
-      if(value){
-          this.agree = true;
-      } else{
-          this.agree = false;
-      }
-  }
   public openPrivacy(){
       window.open(this.privacyUrl);
   }
