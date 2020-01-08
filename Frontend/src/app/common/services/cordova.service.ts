@@ -137,16 +137,6 @@ export class CordovaService {
       // --> navigation issues exist anyway, need to check that later
       document.addEventListener("backbutton", ()=>this.onBackKeyDown(), false);
       // when new share contet - go to share screen
-      this.onNewShareContent().subscribe(
-          (data: any) => {
-              // this.router.navigate(['share', URI]);
-              if(this.hasValidConfig()) {
-                  this.router.navigate([UIConstants.ROUTER_PREFIX, 'app', 'share'], {queryParams: data});
-              }
-          }, (error) => {
-              console.log("ERROR on new share event", error);
-          });
-      /*
       let shareInterval=setInterval(()=>{
           if(this.hasValidConfig()) {
               console.log("share content register");
@@ -159,7 +149,6 @@ export class CordovaService {
                   });
           }
       },1000);
-      */
 
 
       // hide the splashscreen (if still showing)
