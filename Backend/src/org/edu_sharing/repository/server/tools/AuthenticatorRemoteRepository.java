@@ -76,7 +76,6 @@ public class AuthenticatorRemoteRepository {
 	 * authenticates at remote app with actual local userdata, if fails an guest ticket and the exception message will be returned 
 	 * @param localAuthInfo
 	 * @param remoteAppInfo
-	 * @param createRemoteUser
 	 * @return AuthenticatorRemoteAppResult
 	 */
 	public AuthenticatorRemoteAppResult getAuthInfoForApp(HashMap<String,String> localAuthInfo, ApplicationInfo remoteAppInfo) throws Throwable{
@@ -136,7 +135,7 @@ public class AuthenticatorRemoteRepository {
     	
     	ApplicationInfo appInfoRemoteApp = ApplicationInfoList.getRepositoryInfoById(appId);
     	
-    	HashMap<String,String> personMapping = ssoAuthorityMapper.getMappingConfig().getPersonMapping();
+    	HashMap<String,String> personMapping = new HashMap<>(ssoAuthorityMapper.getMappingConfig().getPersonMapping());
 		String remoteUserid = ApplicationInfoList.getRepositoryInfoById(appId).getString(ApplicationInfo.REMOTE_USERID, null);
 		if(remoteUserid!=null && !remoteUserid.isEmpty()){
 			logger.info("remote_userid configured "+remoteUserid+", will change auth");
