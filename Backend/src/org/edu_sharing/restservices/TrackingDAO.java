@@ -1,9 +1,6 @@
 package org.edu_sharing.restservices;
 
-import org.edu_sharing.restservices.shared.Group;
-import org.edu_sharing.restservices.shared.Node;
-import org.edu_sharing.restservices.shared.NodeRef;
-import org.edu_sharing.restservices.shared.Organization;
+import org.edu_sharing.restservices.shared.*;
 import org.edu_sharing.restservices.tracking.v1.model.Tracking;
 import org.edu_sharing.restservices.tracking.v1.model.TrackingNode;
 import org.edu_sharing.service.tracking.TrackingService;
@@ -25,7 +22,7 @@ public class TrackingDAO {
                     Node node=null;
                     if(track.getNode()!=null) {
                         try {
-                            node = NodeDao.getNode(RepositoryDao.getHomeRepository(), track.getNode()).asNode();
+                            node = NodeDao.getNode(RepositoryDao.getHomeRepository(), track.getNode(), Filter.createShowAllFilter()).asNode();
                         }catch(DAOMissingException e){
                             // node is propably deleted, only set the ref
                             node = new Node();

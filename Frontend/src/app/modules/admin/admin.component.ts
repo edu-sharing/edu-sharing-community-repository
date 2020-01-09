@@ -33,6 +33,7 @@ import {MainNavComponent} from '../../common/ui/main-nav/main-nav.component';
 import {CustomHelper} from "../../common/custom-helper";
 import {GlobalContainerComponent} from "../../common/ui/global-container/global-container.component";
 import {DateHelper} from "../../core-ui-module/DateHelper";
+import {CsvHelper} from '../../core-module/csv.helper';
 
 
 @Component({
@@ -951,17 +952,7 @@ export class AdminComponent {
         Helper.downloadContent(filename + ".json",JSON.stringify(data,null,2));
       }
       else {
-        let csv = props.join(";");
-        for (let d of data) {
-          csv += "\n";
-          let i = 0;
-          for (let p of props) {
-            if (i) csv += ';';
-            csv += '"' + d[p] + '"';
-            i++;
-          }
-        }
-        Helper.downloadContent(filename + ".csv", csv);
+        CsvHelper.download(filename, props, data);
       }
     });
   }

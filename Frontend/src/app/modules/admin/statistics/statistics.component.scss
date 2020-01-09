@@ -73,6 +73,14 @@ listTable{
   justify-content: center;
   align-items: center;
 }
+.export{
+  padding:30px 20px;
+  >div {
+    display: flex;
+    padding: 10px 5%;
+    width: 100%;
+  }
+}
 :host /deep/ {
   .mat-tab-body {
     padding: 0 20px;
