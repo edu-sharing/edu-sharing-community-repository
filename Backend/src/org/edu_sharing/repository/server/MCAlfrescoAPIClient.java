@@ -2928,7 +2928,7 @@ public class MCAlfrescoAPIClient extends MCAlfrescoBaseClient {
 			NodeRef child = NodeServiceFactory.getLocalService().getChild(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, homeFolder, CCConstants.CCM_TYPE_MAP, CCConstants.CCM_PROP_MAP_TYPE, CCConstants.CCM_VALUE_MAP_TYPE_EDUGROUP);
 			return child.getId();
 		}catch(Exception e){
-			logger.warn(e.getMessage(),e);
+            logger.info("Exception while fetching user "+userName+": "+e.getMessage()+", will return no group folder for person");
 			return null;
 		}
 	}
