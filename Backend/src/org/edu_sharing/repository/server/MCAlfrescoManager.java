@@ -37,6 +37,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.edu_sharing.alfresco.workspace_administration.NodeServiceInterceptor;
 import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
+import org.edu_sharing.metadataset.v2.MetadataReaderV2;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.server.jobs.quartz.JobHandler;
 import org.edu_sharing.repository.server.tools.ApplicationInfo;
@@ -76,8 +77,8 @@ public class MCAlfrescoManager implements ServletContextListener {
 			logger.info("load ApplicationInfos");			
 			ApplicationInfo appInfo = ApplicationInfoList.getHomeRepository();
 
-			logger.info("load MetaDataSets");
-			RepoFactory.getRepositoryMetadataSets();
+			logger.info("load Metadatasets");
+			MetadataReaderV2.refresh();
 			
 			//do update this class checks if it is already done
 			AuthenticationToolAPI authTool = new AuthenticationToolAPI();

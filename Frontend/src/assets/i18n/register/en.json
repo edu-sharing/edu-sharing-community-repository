@@ -1,22 +1,17 @@
 {
   "REGISTER": {
-    "TITLE": "Registration",
+    "TITLE": "Sign Up",
     "ORGANIZATION_TITLE": "edu-sharing",
     "ORGANIZATION": "Organization",
     "NEWSLETTER": "Receive news by e-mail",
-    "ACCEPT": "I agree with the processing of my given data",
+    "ACCEPT": "I agree with the processing of my data",
     "PRIVACY-LINK": "Further details",
-    "PL_USER": "e.g. Max",
-    "PL_NAME": "e.g. Sample",
-    "PL_MAIL": "e.g. max@mail.com",
     "PW_weak": "Too weak",
     "PW_accept": "Middle",
     "PW_medium": "Good",
     "PW_strong": "Strong",
-    "PL_PASSWORD": "At least 5 different characters",
-    "HINT": "Hint: Use also numbers and special characters",
-    "PL_ORG": "e.g.",
-    "BUTTON": "Register",
+    "HINT": "Hint: Use numbers and special characters",
+    "BUTTON": "Sign up",
     "TOAST":"The e-mail has been sent.",
     "TOAST_DUPLICATE": "This e-mail adress is already in use.",
     "TOAST_INVALID_MAIL": "No account was found for the given e-mail adress.",
@@ -35,11 +30,10 @@
       "ACTIVATE_HINT": "You received the activation code via e-mail."
     },
     "REQUEST": {
-      "TITLE": "Password request",
+      "TITLE": "Reset Password",
       "HEADLINE": "Forgot your password?",
-      "INFO": "Enter your e-mail adress to set a new password.",
-      "PLACEHOLDER":"Your e-mail adress",
-      "BUTTON":"request new password",
+      "INFO": "Please enter your e-mail address to set a new password",
+      "BUTTON":"Reset password",
       "MAIL_NOTE": "Use the link in the e-mail or enter the activation code to set a new password."
     },
     "RESET":{

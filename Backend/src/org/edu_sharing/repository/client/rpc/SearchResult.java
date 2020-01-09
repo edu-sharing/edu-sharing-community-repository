@@ -27,6 +27,8 @@
  */
 package org.edu_sharing.repository.client.rpc;
 
+import org.edu_sharing.metadataset.v2.SearchCriterias;
+
 import java.util.HashMap;
 import java.util.Map;
 

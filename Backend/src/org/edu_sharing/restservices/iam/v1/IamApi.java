@@ -20,10 +20,12 @@ import javax.ws.rs.core.Response;
 
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.repo.security.permissions.AccessDeniedException;
+import org.alfresco.repo.transaction.RetryingTransactionHelper;
 import org.alfresco.service.cmr.security.AuthorityType;
 import org.alfresco.service.cmr.security.PermissionService;
 import org.apache.log4j.Logger;
 import org.edu_sharing.repository.client.tools.CCConstants;
+import org.edu_sharing.repository.server.MCAlfrescoAPIClient;
 import org.edu_sharing.repository.server.tools.ApplicationInfoList;
 import org.edu_sharing.restservices.ApiService;
 import org.edu_sharing.restservices.DAOMissingException;
@@ -867,34 +869,18 @@ public class IamApi  {
     		@Context HttpServletRequest req) {
 
     	try {
-    		
-	    	RepositoryDao repoDao = RepositoryDao.getRepository(repository);
-	    	GroupDao groupDao = GroupDao.getGroup(repoDao, group);
+			new MCAlfrescoAPIClient().doInTransaction(()-> {
+				RepositoryDao repoDao = RepositoryDao.getRepository(repository);
+				GroupDao groupDao = GroupDao.getGroup(repoDao, group);
 
-	    	groupDao.delete();
-	    	
+				groupDao.delete();
+				return groupDao;
+			});
 	    	return Response.status(Response.Status.OK).build();
 	    	
-    	} catch (DAOValidationException t) {
-    		
-    		logger.warn(t.getMessage(), t);
-    		return Response.status(Response.Status.BAD_REQUEST).entity(new ErrorResponse(t)).build();
-    		
-    	} catch (DAOSecurityException t) {
-    		
-    		logger.warn(t.getMessage(), t);
-    		return Response.status(Response.Status.FORBIDDEN).entity(new ErrorResponse(t)).build();
-    		
-    	} catch (DAOMissingException t) {
-    		
-    		logger.warn(t.getMessage(), t);
-    		return Response.status(Response.Status.NOT_FOUND).entity(new ErrorResponse(t)).build();
-    		
     	} catch (Throwable t) {
-    		
-    		logger.error(t.getMessage(), t);
-    		return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(new ErrorResponse(t)).build();
-    	}
+			return ErrorResponse.createResponse(t);
+		}
     }
 
     @OPTIONS        
@@ -931,33 +917,15 @@ public class IamApi  {
     		@Context HttpServletRequest req) {
 
     	try {
-    		
-	    	RepositoryDao repoDao = RepositoryDao.getRepository(repository);
-	    	GroupDao groupDao = GroupDao.getGroup(repoDao, group);
-	    	
-	    	groupDao.changeProfile(profile);
-	    		    	
-	    	return Response.status(Response.Status.OK).build();
-	    	
-    	} catch (DAOValidationException t) {
-    		
-    		logger.warn(t.getMessage(), t);
-    		return Response.status(Response.Status.BAD_REQUEST).entity(new ErrorResponse(t)).build();
-    		
-    	} catch (DAOSecurityException t) {
-    		
-    		logger.warn(t.getMessage(), t);
-    		return Response.status(Response.Status.FORBIDDEN).entity(new ErrorResponse(t)).build();
-    		
-    	} catch (DAOMissingException t) {
-    		
-    		logger.warn(t.getMessage(), t);
-    		return Response.status(Response.Status.NOT_FOUND).entity(new ErrorResponse(t)).build();
-    		
+			new MCAlfrescoAPIClient().doInTransaction(()->{
+				RepositoryDao repoDao = RepositoryDao.getRepository(repository);
+				GroupDao groupDao = GroupDao.getGroup(repoDao, group);
+				groupDao.changeProfile(profile);
+				return groupDao;
+			});
+			return Response.status(Response.Status.OK).build();
     	} catch (Throwable t) {
-    		
-    		logger.error(t.getMessage(), t);
-    		return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(new ErrorResponse(t)).build();
+			return ErrorResponse.createResponse(t);
     	}
     }
 
@@ -1112,12 +1080,12 @@ public class IamApi  {
     		@Context HttpServletRequest req) {
 
     	try {
-    		
-	    	RepositoryDao repoDao = RepositoryDao.getRepository(repository);
-	    	GroupDao groupDao = GroupDao.getGroup(repoDao, group);
-	    	
-	    	groupDao.addMember(member);
-	    		    	
+			new MCAlfrescoAPIClient().doInTransaction(()-> {
+				RepositoryDao repoDao = RepositoryDao.getRepository(repository);
+				GroupDao groupDao = GroupDao.getGroup(repoDao, group);
+				groupDao.addMember(member);
+				return groupDao;
+			});
 	    	return Response.status(Response.Status.OK).build();
 	    	
     	} catch (Throwable t) {
@@ -1150,34 +1118,16 @@ public class IamApi  {
     		@Context HttpServletRequest req) {
 
     	try {
-    		
-	    	RepositoryDao repoDao = RepositoryDao.getRepository(repository);
-	    	GroupDao groupDao = GroupDao.getGroup(repoDao, group);
-	    	
-	    	groupDao.deleteMember(member);
-	    		    	
+			new MCAlfrescoAPIClient().doInTransaction(()-> {
+				RepositoryDao repoDao = RepositoryDao.getRepository(repository);
+				GroupDao groupDao = GroupDao.getGroup(repoDao, group);
+				groupDao.deleteMember(member);
+				return groupDao;
+			});
 	    	return Response.status(Response.Status.OK).build();
-	    	
-    	} catch (DAOValidationException t) {
-    		
-    		logger.warn(t.getMessage(), t);
-    		return Response.status(Response.Status.BAD_REQUEST).entity(new ErrorResponse(t)).build();
-    		
-    	} catch (DAOSecurityException t) {
-    		
-    		logger.warn(t.getMessage(), t);
-    		return Response.status(Response.Status.FORBIDDEN).entity(new ErrorResponse(t)).build();
-    		
-    	} catch (DAOMissingException t) {
-    		
-    		logger.warn(t.getMessage(), t);
-    		return Response.status(Response.Status.NOT_FOUND).entity(new ErrorResponse(t)).build();
-    		
     	} catch (Throwable t) {
-    		
-    		logger.error(t.getMessage(), t);
-    		return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(new ErrorResponse(t)).build();
-    	}
+			return  ErrorResponse.createResponse(t);
+		}
     }
 
     @OPTIONS        

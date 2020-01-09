@@ -21,10 +21,14 @@
           <div *ngFor="let group of getGroups()" class="group">
             <div class="card-title-element"><i icon [iconId]="group.icon"></i>{{'PERMISSIONS.TOOLPERMISSIONS.GROUP.'+group.name | translate}}</div>
             <div class="groupTable" *ngFor="let key of getToolpermissionsForGroup(group)">
-                <div class="name" *ngIf="group.name!='CONNECTORS'">{{'TOOLPERMISSION.'+key | translate}}<div class="technicalName">{{key}}</div></div>
-                <div class="name" *ngIf="group.name=='CONNECTORS'">{{('TOOLPERMISSION.TOOLPERMISSION_CONNECTOR'+(getTpSafe(key) ? '_SAFE' : '')) | translate:{connector:getTpConnector(key)} }}<div class="technicalName">{{key}}</div></div>
-                <div class="checkboxDiv checkboxInput"><mat-checkbox [disabled]="changing.indexOf(key)!=-1" [(ngModel)]="allow[key]" name="allow{{key}}" (change)="deny[key]=false;change(key)"></mat-checkbox></div>
-                <div class="checkboxDiv checkboxInput" *ngIf="_authority.authorityType!='EVERYONE'"><mat-checkbox [disabled]="changing.indexOf(key)!=-1" [(ngModel)]="deny[key]" name="deny{{key}}" (change)="allow[key]=false;change(key)"></mat-checkbox></div>              <div class="result" [class.allowed]="getEffective(key)=='ALLOWED'" [class.denied]="getEffective(key)!='ALLOWED'">
+              <div class="name">
+                  <div *ngIf="group.name!='CONNECTORS' && group.name!='REPOSITORIES'">{{'TOOLPERMISSION.'+key | translate}}</div>
+                  <div *ngIf="group.name=='CONNECTORS'">{{('TOOLPERMISSION.TOOLPERMISSION_CONNECTOR'+(getTpSafe(key) ? '_SAFE' : '')) | translate:{connector:getTpConnector(key)} }}</div>
+                  <div *ngIf="group.name=='REPOSITORIES'">{{('TOOLPERMISSION.TOOLPERMISSION_REPOSITORY') | translate:{repository:getTpRepository(key)} }}</div>
+                  <div class="technicalName">{{key}}</div>
+              </div>
+              <div class="checkboxDiv checkboxInput"><mat-checkbox [disabled]="changing.indexOf(key)!=-1" [(ngModel)]="allow[key]" name="allow{{key}}" (change)="deny[key]=false;change(key)"></mat-checkbox></div>
+              <div class="checkboxDiv checkboxInput" *ngIf="_authority.authorityType!='EVERYONE'"><mat-checkbox [disabled]="changing.indexOf(key)!=-1" [(ngModel)]="deny[key]" name="deny{{key}}" (change)="allow[key]=false;change(key)"></mat-checkbox></div>              <div class="result" [class.allowed]="getEffective(key)=='ALLOWED'" [class.denied]="getEffective(key)!='ALLOWED'">
                 <div *ngIf="changing.indexOf(key)!=-1"><spinner-small></spinner-small></div>
                 <div *ngIf="changing.indexOf(key)==-1"  [title]="isImplicit(key) ? getImplicitDetail(key) : ''">
                     <div class="text">{{'PERMISSIONS.TOOLPERMISSIONS.STATUS_'+getEffective(key) | translate}}</div>

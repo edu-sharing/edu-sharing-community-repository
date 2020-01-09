@@ -1,3 +1,4 @@
+<dropdown #dropdown [options]="options"></dropdown>
 <div *ngIf="_node" class="group">
   <div class="new" *ngIf="canComment()">
     <div class="left">
@@ -29,27 +30,23 @@
         <div class="right">
           <div class="creator">
             <div class="name">{{comment.creator | authorityName}}</div>
-            <div class="date">{{comment.created | formatDate}}</div>
+            <button mat-icon-button #menuTrigger="matMenuTrigger" mat-button class="dropdown-dummy" [matMenuTriggerFor]="dropdown.menu" (click)="options=getOptions(comment)">
+              <i icon iconId="more_vert" class="dropdown" *ngIf="getOptions(comment) && getOptions(comment).length"></i>
+            </button>
           </div>
           <div class="commentText" *ngIf="comment!=editComment">{{comment.comment}}</div>
           <div class="commentTextEdit" *ngIf="comment==editComment">
             <form (ngSubmit)="saveEditComment()">
               <textarea name="comment" class="materialize-textarea" placeholder="{{'NODE_COMMENTS.NEW_COMMENT_PLACEHOLDER' | translate}}" [(ngModel)]="editCommentText"></textarea>
-              <div class="icons">
-                <i tabindex="0" class="material-icons clickable" (click)="editComment=null" (keyup.enter)="editComment=null">close</i>
-                <i tabindex="0" class="material-icons clickable" (click)="saveEditComment()" (keyup.enter)="saveEditComment()">save</i>
-              </div>
             </form>
           </div>
         </div>
       </div>
-      <div *ngIf="!readOnly" class="actions" [class.actionsAvailable]="(options[i] && options[i].length)">
-        <actionbar
-                [numberOfAlwaysVisibleOptions]="1"
-                [options]="options[i]"
-                [style]="'flat'"
-        ></actionbar>
+      <div class="icons" *ngIf="comment==editComment">
+        <div class="btn-negative" tabindex="0" (click)="editComment=null" (keyup.enter)="editComment=null"><i icon iconId="close"></i></div>
+        <div class="btn-positive" tabindex="0" (click)="saveEditComment()" (keyup.enter)="saveEditComment()"><i icon iconId="check"></i></div>
       </div>
+      <div class="date" *ngIf="comment!=editComment">{{comment.created | formatDate}}</div>
     </div>
   </div>
 </div>

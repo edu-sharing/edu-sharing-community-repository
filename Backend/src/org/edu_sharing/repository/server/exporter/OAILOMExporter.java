@@ -19,12 +19,14 @@ import org.apache.log4j.Logger;
 import org.apache.xml.serialize.OutputFormat;
 import org.apache.xml.serialize.XMLSerializer;
 import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
-import org.edu_sharing.repository.client.rpc.metadataset.MetadataSetValueKatalog;
+import org.edu_sharing.metadataset.v2.MetadataKey;
+import org.edu_sharing.metadataset.v2.MetadataReaderV2;
+import org.edu_sharing.metadataset.v2.MetadataWidget;
+import org.edu_sharing.metadataset.v2.tools.MetadataHelper;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.server.MCAlfrescoAPIClient;
 import org.edu_sharing.repository.server.tools.ApplicationInfoList;
 import org.edu_sharing.repository.server.tools.URLTool;
-import org.edu_sharing.repository.server.tools.metadataset.MetadataReader;
 import org.springframework.context.ApplicationContext;
 import org.springframework.extensions.surf.util.ISO8601DateFormat;
 import org.w3c.dom.Document;
@@ -245,21 +247,24 @@ public class OAILOMExporter {
 				Element tpSourceString = createAndAppendElement("string", tpSource,"EAF Thesaurus");
 				tpSourceString.setAttribute("language", "x-t-eaf");
 				try{
-					List<MetadataSetValueKatalog> mdsValueKata = new MetadataReader().getValuespace("/org/edu_sharing/metadataset/valuespace_eaf_discipline.xml", "org.edu_sharing.metadataset.valuespaces_i18n", null, "{http://www.campuscontent.de/model/1.0}taxonid");
-					for(String taxonId:taxonIds){
-						Element taxon = createAndAppendElement("taxon", taxonPath);
-						createAndAppendElement("id", taxon,taxonId);
-						//ask eaf kataolog todo allow other kataloges
-						
-						for(MetadataSetValueKatalog cata : mdsValueKata){
-							if(cata.getKey().equals(taxonId)){
-								Element entry = createAndAppendElement("entry", taxon);
-								Element string = createAndAppendElement("string", entry,cata.getCaption());
-								//<string language="de">Sachkunde</string>
-								string.setAttribute("language", "de");
+					MetadataWidget widget = MetadataHelper.getLocalDefaultMetadataset().findWidget("ccm:taxonid");
+					Map<String, MetadataKey> values = widget.getValuesAsMap();
+					if(values!=null){
+						for(String taxonId:taxonIds){
+							Element taxon = createAndAppendElement("taxon", taxonPath);
+							createAndAppendElement("id", taxon,taxonId);
+							//ask eaf kataolog todo allow other kataloges
+
+							for(Map.Entry<String,MetadataKey> cata : values.entrySet()){
+								if(cata.getKey().equals(taxonId)){
+									Element entry = createAndAppendElement("entry", taxon);
+									Element string = createAndAppendElement("string", entry,cata.getValue().getCaption());
+									//<string language="de">Sachkunde</string>
+									string.setAttribute("language", "de");
+								}
 							}
+
 						}
-								
 					}
 				}catch(Throwable e){
 					logger.error(e.getMessage(), e);

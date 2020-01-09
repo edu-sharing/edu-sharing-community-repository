@@ -129,7 +129,6 @@ export class SearchComponent {
   }
   public selection: Node[];
   private currentValues: any;
-  private reloadMds: Boolean;
   private currentMdsSet: any;
   public extendedRepositorySelected = false;
   public savedSearch : Node[]=[];
@@ -572,6 +571,8 @@ export class SearchComponent {
                 this.searchService.sort.materialsColumns.push(item);
             }
             console.log(this.searchService.sort,sort,sort.columns.length);
+        }else{
+          this.searchService.sort.materialsColumns = null;
         }
         return sort;
     }
@@ -579,6 +580,7 @@ export class SearchComponent {
         let state=this.currentRepository+":"+this.mdsId;
         console.log(state);
         let sort=this.updateSortMds();
+        console.log(sort);
         // do not update state if current state is valid (otherwise sort info is lost when comming back from rendering)
         // exception: if there is no state at all, refresh it with the default
         if(state==this.searchService.sort.state && !(sort && !this.searchService.sort.materialsSortBy))
@@ -675,7 +677,9 @@ export class SearchComponent {
         options.push(collection);
     }
     let stream = this.actionbar.createOptionIfPossible('ADD_TO_STREAM', nodes, (node: Node) => this.addToStream(node));
-    options.push(stream);
+    if(stream) {
+      options.push(stream);
+    }
     let variant = this.actionbar.createOptionIfPossible('CREATE_VARIANT', nodes, (node: Node) => this.nodeVariant = ActionbarHelperService.getNodes(nodes, node)[0]);
     if (variant)
         options.push(variant);
@@ -892,6 +896,13 @@ export class SearchComponent {
         sortBy=[this.searchService.sort.materialsSortBy];
         sortAscending=[this.searchService.sort.materialsSortAscending];
     }
+    let mdsId=this.mdsId;
+    if(this.currentRepository==RestConstants.ALL){
+        const mdsAllowed=ConfigurationHelper.filterValidMds(repo,null,this.config);
+        if(mdsAllowed){
+            mdsId=mdsAllowed[0];
+        }
+    }
     let properties=[RestConstants.ALL];
     this.search.search(criterias,
       [RestConstants.LOM_PROP_GENERAL_KEYWORD],
@@ -905,7 +916,7 @@ export class SearchComponent {
       },
       RestConstants.CONTENT_TYPE_FILES,
       repo ? repo.id : RestConstants.HOME_REPOSITORY,
-      this.mdsId
+      mdsId
     ).subscribe(
       (data: SearchList) => {
         if(!this.searchService.skipcount[position])
@@ -1069,12 +1080,11 @@ export class SearchComponent {
   private invalidateMds() {
     if(this.currentRepository==RestConstants.ALL){
       console.log('all repositories, invalidate manually');
-        this.reloadMds=new Boolean(false);
         this.onMdsReady();
     }
     else{
       console.log('invalidate mds');
-      this.reloadMds=new Boolean(true);
+      this.mdsRef.loadMds();
     }
   }
 

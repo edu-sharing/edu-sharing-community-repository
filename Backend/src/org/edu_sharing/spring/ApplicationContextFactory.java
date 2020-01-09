@@ -13,13 +13,4 @@ public class ApplicationContextFactory {
 	 public static ApplicationContext getApplicationContext(){
 		 return applicationContext;
 	 }
-	 
-	 
-	 public static String BEAN_ID_HELPER_PRE_CREATE = "helperPreCreate";
-	 
-	 public static String BEAN_ID_HELPER_POST_CREATE = "helperPostCreate";
-	 
-	 public static String BEAN_ID_HELPER_POST_UPDATE_METADATA = "helperPostUpdateBaseMetadata";
-	 
-	 public static String BEAN_ID_HELPER_POST_DELETE = "helperPostDelete";
 }

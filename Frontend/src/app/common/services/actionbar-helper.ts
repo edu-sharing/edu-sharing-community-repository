@@ -97,9 +97,6 @@ export class ActionbarHelperService{
             let n=ActionbarHelperService.getNodes(nodes,node);
             if(n==null)
                 return false;
-
-            console.log(n);
-
             return NodeHelper.referenceOriginalExists(node) && NodeHelper.allFiles(nodes) && n.length>0;
         }
         option.enabledCallback = (node: Node) => {

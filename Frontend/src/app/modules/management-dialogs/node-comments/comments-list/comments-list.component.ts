@@ -40,7 +40,8 @@ export class CommentsListComponent  {
   private user: User;
   private comments: Comment[];
   private edit: Comment[];
-  private options: OptionItem[][];
+  private options: OptionItem[];
+
   public newComment="";
   public editComment:Comment=null;
   public editCommentText:string;
@@ -59,6 +60,7 @@ export class CommentsListComponent  {
      * @type {EventEmitter<any>}
      */
   @Output() onChange=new EventEmitter();
+  dropdown = -1;
 
 
   constructor(
@@ -158,10 +160,6 @@ export class CommentsListComponent  {
       this.commentsApi.getComments(this._node.ref.id,this._node.ref.repo).subscribe((data:Comments)=>{
         this.loading=false;
         this.comments=data.comments.reverse();
-      this.options=[];
-      for(let comment of this.comments){
-        this.options.push(this.getOptions(comment));
-      }
     },(error:any)=>{
       this.loading=false;
       this.toast.error(error);

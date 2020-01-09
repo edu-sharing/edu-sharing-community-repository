@@ -12,6 +12,7 @@ import com.fasterxml.jackson.databind.SerializationFeature;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
+import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.repository.StoreRef;
 import org.apache.commons.httpclient.methods.PostMethod;
 import org.apache.commons.httpclient.methods.StringRequestEntity;
@@ -153,6 +154,8 @@ public class RenderingServiceImpl implements RenderingService{
 		data.setMetadataHTML(new MetadataTemplateRenderer(
 				MetadataHelper.getMetadataset(
 						remoteApp,node.getMetadataset()==null ? CCConstants.metadatasetdefault_id : node.getMetadataset()),
+				new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE,nodeId),
+				user,
 				nodeDao.getAllProperties()).render(RenderingTool.DISPLAY_INLINE.equals(displayMode) ? "io_render_inline" : "io_render"));
 
 		// user

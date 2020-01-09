@@ -3,21 +3,23 @@
 mat-form-field{
   width: 100%;
 }
-.request-info{
+.header{
   margin-bottom: 20px;
   text-align: center;
+  img {
+    width: auto;
+    height: 51px;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+  }
+  h4.headline {
+    margin-top: 8px;
+    font-weight: bold;
+  }
 }
-img{
-  width: auto;
-  height: 130px;
-  -webkit-user-select: none;
-  -moz-user-select: none;
-  -ms-user-select: none;
-  user-select: none;
-}
-h4{
-  //margin-bottom: 20px;
-}
-p{
+p.info {
   white-space: pre-line;
+  margin-bottom: 21px;
 }

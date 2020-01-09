@@ -1,6 +1,6 @@
 import {Component, ElementRef, ViewChild} from '@angular/core';
 
-import {ActivatedRoute, Router} from "@angular/router";
+import {ActivatedRoute, Params, Router} from "@angular/router";
 
 import {Translation} from "../../core-ui-module/translation";
 
@@ -145,6 +145,7 @@ export class CollectionsMainComponent {
     feedbackView: boolean;
     feedbackViewButtons: DialogButton[];
     private feedbacks: CollectionFeedback[];
+    private params: Params;
     set collectionShare(collectionShare: Collection){
         this._collectionShare=collectionShare;
         this.refreshAll();
@@ -251,15 +252,19 @@ export class CollectionsMainComponent {
   public get orderActive(){
     return this._orderActive;
   }
-  navigate(id="",addToOther=""){
+  navigate(id = '',addToOther = '',feedback = false){
     let params:any={};
-    params.scope=this.tabSelected;
-    params.id=id;
-    params.mainnav=this.mainnav;
-    if(addToOther)
-      params.addToOther=addToOther;
-    params.reurl=this.reurl;
-      this.router.navigate([UIConstants.ROUTER_PREFIX+"collections"],{queryParams:params});
+    UIHelper.getCommonParameters(this.route).subscribe((params)=>{
+        params.scope=this.tabSelected;
+        params.id=id;
+        if(feedback) {
+            params.feedback = feedback;
+        }
+        if(addToOther) {
+            params.addToOther = addToOther;
+        }
+        this.router.navigate([UIConstants.ROUTER_PREFIX+"collections"],{queryParams:params});
+    });
   }
   closeAddToOther(){
     this.navigate(this.collectionContent.collection.ref.id);
@@ -794,34 +799,36 @@ export class CollectionsMainComponent {
       // set app to ready state
       this.isReady = true;
       // subscribe to parameters of url
-      this.collectionIdParamSubscription = this.route.queryParams.subscribe(params => {
-        console.log(params);
-        if(params['scope'])
-            this.tabSelected=params['scope'];
-        else
-            this.tabSelected=this.isGuest ? RestConstants.COLLECTIONSCOPE_ALL : RestConstants.COLLECTIONSCOPE_MY;
-        this.reurl=params['reurl'];
+      this.route.queryParams.subscribe(params => {
+        this.params = params;
+        if(params.scope) {
+            this.tabSelected = params.scope;
+        }else {
+            this.tabSelected = this.isGuest ? RestConstants.COLLECTIONSCOPE_ALL : RestConstants.COLLECTIONSCOPE_MY;
+        }
+        this.reurl=params.reurl;
 
-        if(params['mainnav'])
-          this.mainnav=params['mainnav']!='false';
+        if(params.mainnav) {
+            this.mainnav = params.mainnav !== 'false';
+        }
+        this.feedback = params.feedback === 'true';
 
         this.listOptions = this.getOptions(null,true);
 
         this._orderActive = false;
         this.infoTitle = null;
         // get id from route and validate input data
-        let id = params['id'] || '-root-';
+        let id = params.id || '-root-';
         if (id==":id") id = "-root-";
         if (id=="") id = "-root-";
-        if(params['addToOther']){
+        if(params.addToOther){
           this.nodeService.getNodeMetadata(params['addToOther']).subscribe((data:EduData.NodeWrapper)=>{
             this.addToOther=[data.node];
           });
         }
-        if(params['nodeId']){
+        if(params.nodeId){
           let node=params['nodeId'].split("/");
           node=node[node.length-1];
-          console.log("node: "+node);
           this.collectionService.addNodeToCollection(id,node,null).subscribe(()=> this.navigate(id),(error:any)=>{
             this.handleError(error);
             this.navigate(id);
@@ -831,7 +838,7 @@ export class CollectionsMainComponent {
         else {
           this.showCollection=id!='-root-';
           this.displayCollectionById(id,(collection:EduData.Collection)=>{
-            if(params['content']){
+            if(params.content){
               console.log("search content");
               for(let content of this.collectionContent.references) {
                 console.log(content);
@@ -959,7 +966,7 @@ export class CollectionsMainComponent {
       }
 
       if(this.feedbackAllowed() && !this.isAllowedToDeleteCollection() && this.connector.hasToolPermissionInstant(RestConstants.TOOLPERMISSION_COLLECTION_FEEDBACK)){
-          this.optionsCollection.push(new OptionItem("COLLECTIONS.ACTIONBAR.FEEDBACK", "chat_bubble",()=>this.collectionFeedback()));
+          this.optionsCollection.push(new OptionItem("COLLECTIONS.ACTIONBAR.FEEDBACK", "chat_bubble",() => this.collectionFeedback(true)));
       }
     }
 
@@ -1007,8 +1014,11 @@ export class CollectionsMainComponent {
             this.toast.error(error);
         });
     }
-    private collectionFeedback() {
-        this.feedback=true;
+    private collectionFeedback(status:boolean) {
+        this.navigate(this.collectionContent.collection.ref.id,'',status);
+        if(!status && this.params.feedbackClose==='true'){
+            window.close();
+        }
     }
 
     addFeedback(data:any) {
@@ -1019,7 +1029,7 @@ export class CollectionsMainComponent {
         this.globalProgress=true;
         this.collectionService.addFeedback(this.collectionContent.collection.ref.id,data).subscribe(()=>{
             this.globalProgress=false;
-            this.feedback=false;
+            this.collectionFeedback(false);
             this.toast.toast('COLLECTIONS.FEEDBACK_TOAST');
         },(error)=>{
             this.globalProgress=false;

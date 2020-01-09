@@ -61,6 +61,10 @@
 				<property name="ccm:collection_feedback_data">
 					<type>d:text</type>
 				</property>
+				<!-- hashed authority name sha1(authorityName + esuid) -->
+				<property name="ccm:collection_feedback_authority">
+					<type>d:text</type>
+				</property>
 			</properties>
 			<mandatory-aspects>
 				<aspect>ccm:eduscope</aspect>

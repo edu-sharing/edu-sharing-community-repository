@@ -1,4 +1,3 @@
-<div class="register-bg"></div>
 <global-progress *ngIf="isLoading"></global-progress>
 <card [class.display-none]="isLoading"
       avatar="assets/images/app-icon.svg"
@@ -8,7 +7,7 @@
       width="normal" height="large"
       (onCancel)="cancel()"
 >
-    <div class="register-content">
+    <div class="register-content card-content-padding">
         <app-register-form [class.display-none]="!(state=='register')" (onLoading)="isLoading=$event" (onRegisterDone)="onRegisterDone()" #registerForm></app-register-form>
         <app-register-done *ngIf="state=='done' || state=='done-reset'" (onModify)="modifyData()" [inputState]="state" #registerDone></app-register-done>
         <app-register-request *ngIf="state=='request'" (onDone)="onPasswordRequested()" (onLoading)="isLoading=$event" #request></app-register-request>

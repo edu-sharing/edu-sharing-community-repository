@@ -48,10 +48,10 @@
           <input matInput [(ngModel)]="comment">
           <mat-hint>{{'WORKSPACE.WORKFLOW.COMMENT_INFO' | translate}}</mat-hint>
         </mat-form-field>
-        <div class="historyLabel">
+        <div class="historyLabel" *ngIf="history.length">
           {{'WORKSPACE.WORKFLOW.HISTORY' | translate}}
         </div>
-        <h2 class="noHistory" *ngIf="!history.length">{{'WORKSPACE.WORKFLOW.NO_HISTORY' | translate}}</h2>
+        <div class="no-history" *ngIf="!history.length">{{'WORKSPACE.WORKFLOW.NO_HISTORY' | translate}}</div>
         <div class="history">
           <div *ngFor="let entry of history;let i=index">
             <div class="user">{{ entry.editor | authorityName }}</div><div class="date">{{entry.time | formatDate:{time:true,relative:true} }}</div>

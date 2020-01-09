@@ -36,7 +36,7 @@ export class RegisterFormComponent{
     public news = true;
     public agree = false;
     public privacyUrl: string;
-    requiredFields:string[];
+    requiredFields:string[] = [];
 
     public register(){
         this.info.email=this.emailFormControl.value;
@@ -57,13 +57,6 @@ export class RegisterFormComponent{
         });
     }
 
-  public setAccept(value:boolean){
-      if(value){
-          this.agree = true;
-      } else{
-          this.agree = false;
-      }
-  }
   public openPrivacy(){
       window.open(this.privacyUrl);
   }

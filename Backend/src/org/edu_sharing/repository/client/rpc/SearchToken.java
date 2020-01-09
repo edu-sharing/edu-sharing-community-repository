@@ -31,6 +31,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 
 import com.google.gwt.user.client.rpc.IsSerializable;
+import org.edu_sharing.metadataset.v2.SearchCriterias;
 
 public class SearchToken implements IsSerializable {
 	//private String query = "";

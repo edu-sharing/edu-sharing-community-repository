@@ -134,7 +134,7 @@ export class MdsComponent{
       if(callback) callback();
     },5);
   }
-  private loadMds(){
+  loadMds(){
     if(this.isLoading) {
       setTimeout(()=>this.loadMds(),5);
       return;

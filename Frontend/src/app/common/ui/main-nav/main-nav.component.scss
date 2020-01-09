@@ -386,7 +386,7 @@ $licenseInfoHeight:40px;
   display:none;
 }
 .topbar-search-right{
-  display: contents;
+  display: flex;
 }
 @media screen and (max-width: ($mobileWidth+$mobileStage*5)) {
   .searchInputGroup{

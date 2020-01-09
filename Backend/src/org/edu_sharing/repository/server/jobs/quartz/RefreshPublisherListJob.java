@@ -51,6 +51,9 @@ import javax.xml.transform.stream.StreamResult;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
+import org.edu_sharing.metadataset.v2.MetadataReaderV2;
+import org.edu_sharing.metadataset.v2.MetadataSetV2;
+import org.edu_sharing.metadataset.v2.tools.MetadataHelper;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.client.tools.StringTool;
 import org.edu_sharing.repository.server.AuthenticationTool;
@@ -109,10 +112,8 @@ public class RefreshPublisherListJob extends AbstractJob {
 			HashMap<String, String>  authInfo = authTool.createNewSession(homeRep.getUsername(), homeRep.getPassword());
 			
 			AdminServiceFactory.getInstance().writePublisherToMDSXml(vcardProps, valuespaceProp, ignoreEntries, filePath, authInfo);
-			
-			RepoFactory.clearMetadataSets();
-			RepoFactory.getRepositoryMetadataSets();
-			
+
+			MetadataReaderV2.refresh();
 		}catch(org.alfresco.webservice.authentication.AuthenticationFault e){
 			logger.error("AuthenticationFault while excecuting RefreshPublisherListJob:"+e.getMessage());
 			throw new JobExecutionException(e);

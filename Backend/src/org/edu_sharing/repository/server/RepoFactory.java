@@ -36,7 +36,6 @@ import javax.servlet.http.HttpSession;
 
 import org.alfresco.repo.node.MLPropertyInterceptor;
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
-import org.apache.catalina.tribes.membership.McastServiceImpl;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.edu_sharing.lightbend.LightbendConfigLoader;
@@ -44,15 +43,12 @@ import org.edu_sharing.metadataset.v2.MetadataReaderV2;
 import org.edu_sharing.metadataset.v2.MetadataSetInfo;
 import org.edu_sharing.metadataset.v2.MetadataSetV2;
 import org.edu_sharing.metadataset.v2.tools.MetadataHelper;
-import org.edu_sharing.repository.client.rpc.metadataset.MetadataSet;
-import org.edu_sharing.repository.client.rpc.metadataset.MetadataSets;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.server.tools.ApplicationInfo;
 import org.edu_sharing.repository.server.tools.ApplicationInfoList;
 import org.edu_sharing.repository.server.tools.AuthenticatorRemoteAppResult;
 import org.edu_sharing.repository.server.tools.AuthenticatorRemoteRepository;
 import org.edu_sharing.repository.server.tools.PropertiesHelper;
-import org.edu_sharing.repository.server.tools.metadataset.MetadataReader;
 import org.edu_sharing.service.config.ConfigServiceFactory;
 
 public class RepoFactory {
@@ -231,102 +227,11 @@ public class RepoFactory {
 
 	public static void refresh() {
 		appClassCache.clear();
-		repositoryMetadataSets.clear();
 		MetadataReaderV2.refresh();
 		ConfigServiceFactory.refresh();
-		defaultMetadataSet = null;
 		eduSharingProps = null;
 	}
 
-	public static void clearMetadataSets() {
-		repositoryMetadataSets.clear();
-	}
-
-	public static HashMap<String, MetadataSets> getRepositoryMetadataSets() {
-		logger.debug("starting");
-		String devmode = ApplicationInfoList.getHomeRepository().getDevmode();
-		if (devmode != null && new Boolean(devmode) == true) {
-			repositoryMetadataSets.clear();
-			defaultMetadataSet = null;
-		}
-		/*
-		if (repositoryMetadataSets.size() == 0) {
-			fillMetadatasets(repositoryMetadataSets);
-		}
-		*/
-		logger.debug("returning");
-		return repositoryMetadataSets;
-	}
-	
-	/**
-	 * creates a new repoMDS Map HashMap<String, MetadataSets> 
-	 * fills it
-	 * let the repositoryMetadataSets reference point to the new
-	 */
-	public static void refreshMetadataSets(){
-		HashMap<String, MetadataSets> newRepositoryMetadataSets = new HashMap<String, MetadataSets>();
-		//fillMetadatasets(newRepositoryMetadataSets);
-		
-		//umhängen aber arauf achten das niemand drauf zu greift
-		synchronized(repositoryMetadataSets){
-			repositoryMetadataSets = newRepositoryMetadataSets;
-		}
-		
-	}
-	
-	/**
-	 * adds metdatasets to param repositoryMetadataSets without clearing it
-	 * @param repositoryMetadataSets
-	 */
-	/*
-	private static void fillMetadatasets(HashMap<String, MetadataSets> repositoryMetadataSets){
-		for (String key : ApplicationInfoList.getApplicationInfos().keySet()) {
-			ApplicationInfo tmpAppInfo = ApplicationInfoList.getRepositoryInfoById(key);
-			if (tmpAppInfo.getType().equals(CCConstants.APPLICATIONTYPE_REPOSITORY)) {
-				String metadatasets = tmpAppInfo.getMetadatsets();
-				// when no metadatasets are konfigured take the default one
-				if (metadatasets == null) {
-					logger.info("no metadatasets kopnfigured for Repository " + tmpAppInfo.getAppId() + " taking default metadatasets");
-					metadatasets = "/org/edu_sharing/metadataset/metadatasets_default.xml";
-				}
-				MetadataReader mdr = new MetadataReader();
-				MetadataSets metadataSets = mdr.getMetadataSets(metadatasets, tmpAppInfo.getAppId());
-				if (metadataSets != null) {
-					logger.debug("putting metadatasets for rep:" + tmpAppInfo.getAppId() + " metadataSets:" + metadataSets);
-					repositoryMetadataSets.put(key, metadataSets);
-				} else {
-					logger.info("no metadatasets found for rep" + tmpAppInfo.getAppId());
-				}
-			}
-		}
-	}
-	*/
-
-	private static HashMap<String, MetadataSets> repositoryMetadataSets = new HashMap<String, MetadataSets>();
-
-	private static MetadataSet defaultMetadataSet = null;
-
-	public static MetadataSet getDefaultMetadataSet() {
-		if (defaultMetadataSet == null) {
-			String homeAppId = ApplicationInfoList.getHomeRepository().getAppId();
-			defaultMetadataSet = getMetadataSetsForRepository(homeAppId).getMetadataSetById(CCConstants.metadatasetdefault_id);
-		}
-		return defaultMetadataSet;
-	}
-
-	public static MetadataSets getMetadataSetsForRepository(String repositoryId) {
-		if (repositoryId == null) {
-			repositoryId = ApplicationInfoList.getHomeRepository().getAppId();
-		}
-
-		HashMap<String, MetadataSets> repMetadataSets = getRepositoryMetadataSets();
-		for (String key : repMetadataSets.keySet()) {
-			if (key.equals(repositoryId)) {
-				return repMetadataSets.get(key);
-			}
-		}
-		return null;
-	}
 	public static List<MetadataSetInfo> getMetadataSetsV2ForRepository(String repositoryId) throws Exception {
 		if (repositoryId == null) {
 			repositoryId = ApplicationInfoList.getHomeRepository().getAppId();
@@ -342,15 +247,17 @@ public class RepoFactory {
 		}
 		return sets;
 	}
-	static HashMap<String, MetadataSet> standaloneMetadataSets = new HashMap<String, MetadataSet>();
 
-	public static MetadataSet getStandaloneMetadataSet(String file) throws Throwable {
-		MetadataSet standAloneMDS = standaloneMetadataSets.get(file);
-		if (standAloneMDS == null) {
-			MetadataReader mdr = new MetadataReader();
-			standAloneMDS = mdr.getMetadataSet(file);
-			standaloneMetadataSets.put(file, standAloneMDS);
+	public static String getEdusharingProperty(String key) {
+		try {
+			if (eduSharingProps == null) {
+				eduSharingProps = PropertiesHelper.getProperties("edu-sharing.properties", PropertiesHelper.TEXT);
+			}
+			return eduSharingProps.getProperty(key);
+		} catch (Exception e) {
+			logger.error("Problems opening edu-sharing.properties:" + e.getMessage());
 		}
-		return standAloneMDS;
+		return null;
 	}
+
 }

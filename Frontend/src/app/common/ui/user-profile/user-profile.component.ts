@@ -69,8 +69,7 @@ export class UserProfileComponent{
       },(error:any)=>{
         if(RestHelper.errorMessageContains(error,"BadCredentialsException")){
           this.toast.error(null,"WRONG_PASSWORD");
-        }
-        else {
+        }else {
           this.toast.error(error);
         }
       });

@@ -17,8 +17,13 @@ import {
   styleUrls: ['mds-widget.component.scss'],
 })
 export class MdsWidgetComponent{
+  _data:any;
+  value:any;
   @Input() widget:any;
-  @Input() data:any;
+  @Input() set data(data:any){
+    this._data=data; 
+    this.value=this.getValue();
+  }
 
   getBasicType(){
     switch(this.widget.type){
@@ -27,17 +32,25 @@ export class MdsWidgetComponent{
       case 'email':
       case 'month':
       case 'color':
-      case 'slider':
       case 'textarea':
-        return 'text'
+      case 'singleoption':
+        return 'text';
+      case 'slider':
+        return 'slider';
     }
     return 'unknown';
   }
 
   getValue() {
-    if(this.widget.valuespace){
-
+    if(!this._data){
+      return '-';
     }
-    return this.data;
+    if(this.widget.values){
+        const mapping=this.widget.values.filter((v:any) => v.id.indexOf(this._data)!=-1).map((v:any) => v.caption);
+        if(mapping){
+          return mapping;
+        }
+    }
+    return this._data;
   }
 }

@@ -2,8 +2,8 @@ import {Component, ViewChild, ElementRef} from '@angular/core';
 import {TranslateService} from "@ngx-translate/core";
 import {Translation} from "../../core-ui-module/translation";
 import {
-  NodeRef, IamUser, NodeWrapper, Node, Version, NodeVersions, LoginResult,
-  IamGroups, Group, OrganizationOrganizations
+    NodeRef, IamUser, NodeWrapper, Node, Version, NodeVersions, LoginResult,
+    IamGroups, Group, OrganizationOrganizations, Organization
 } from "../../core-module/core.module";
 import {Router, Params, ActivatedRoute, Routes} from "@angular/router";
 import {Toast} from "../../core-ui-module/toast";
@@ -29,7 +29,7 @@ export class PermissionsMainComponent {
   @ViewChild('mainNav') mainNavRef: MainNavComponent;
   public tab : number;
   public searchQuery: string;
-  private selectedOrg: Group;
+  private selected: Organization[];
   public isAdmin = false;
   public disabled = false;
   TABS = ["ORG","GROUP","USER","DELETE"];
@@ -71,15 +71,15 @@ export class PermissionsMainComponent {
   }
 
   setTab(tab: number) {
-    if (tab != 0 && !this.selectedOrg && !this.isAdmin) {
+    if (tab != 0 && !this.selected && !this.isAdmin) {
       this.toast.error(null, "PERMISSIONS.SELECT_ORGANIZATION");
       this.tab = 0;
       return;
     }
-    if (tab == this.tab)
+    if (tab === this.tab)
       return;
-    if (tab == 0) {
-      this.selectedOrg = null;
+    if (tab === 0) {
+      this.selected = null;
     }
     this.searchQuery = null;
     this.tab = tab;

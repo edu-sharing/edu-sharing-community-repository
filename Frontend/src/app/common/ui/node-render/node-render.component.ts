@@ -27,7 +27,7 @@ import {
     RestConnectorsService, Node, NodeList,
     RestConstants, RestHelper, RestMdsService, RestIamService, RestNodeService, RestSearchService,
     RestToolService, SessionStorageService,
-    TemporaryStorageService, RestUsageService
+    TemporaryStorageService, RestUsageService, RestNetworkService
 } from "../../../core-module/core.module";
 import {MdsHelper} from "../../../core-module/rest/mds-helper";
 import {ListTableComponent} from "../../../core-ui-module/components/list-table/list-table.component";
@@ -215,6 +215,7 @@ export class NodeRenderComponent implements EventListener{
       private config : ConfigurationService,
       private storage : SessionStorageService,
       private route : ActivatedRoute,
+      private networkService : RestNetworkService,
       private _ngZone: NgZone,
       private router : Router,
       private temporaryStorageService: TemporaryStorageService) {
@@ -228,6 +229,7 @@ export class NodeRenderComponent implements EventListener{
             });
         this.banner = ConfigurationHelper.getBanner(this.config);
         this.connector.setRoute(this.route);
+        this.networkService.prepareCache();
         this.route.queryParams.subscribe((params:Params)=>{
           this.closeOnBack=params['closeOnBack']=='true';
           this.editor=params['editor'];
@@ -412,8 +414,8 @@ export class NodeRenderComponent implements EventListener{
                 nodes:usages.map((u)=>u.collection),
                 columns:ListItem.getCollectionDefaults(),
                 isClickable:true,
-                clickRow:(collection:Node)=>{
-                    UIHelper.goToCollection(this.router,collection);
+                clickRow:(event:any)=>{
+                    UIHelper.goToCollection(this.router,event.node);
                 },
                 viewType:ListTableComponent.VIEW_TYPE_GRID_SMALL,
             };

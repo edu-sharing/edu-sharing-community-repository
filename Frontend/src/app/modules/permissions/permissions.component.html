@@ -12,29 +12,29 @@
       <permissions-authorities
               [mode]="'ORG'"
               [searchQuery]="searchQuery"
-              [selected]="selectedOrg"
-              (onSelection)="selectedOrg=$event[0]"
+              [selected]="selected"
+              (onSelection)="selected=$event"
       ></permissions-authorities>
     </mat-tab>
-    <mat-tab label="{{'PERMISSIONS.TAB.GROUP' | translate}}{{selectedOrg? ' ('+selectedOrg.profile.displayName+')' : ''}}" *ngIf="selectedOrg || isAdmin">
+    <mat-tab label="{{'PERMISSIONS.TAB.GROUP' | translate}}{{selected ? ' ('+selected[0].profile.displayName+')' : ''}}" *ngIf="selected || isAdmin">
       <permissions-authorities
               [mode]="'GROUP'"
               [searchQuery]="searchQuery"
-              [org]="selectedOrg"
-              (onDeselectOrg)="selectedOrg=null"
+              [org]="selected ? selected[0] : null"
+              (onDeselectOrg)="selected=null"
               (setTab)="setTab($event)"
       ></permissions-authorities>
     </mat-tab>
-    <mat-tab label="{{'PERMISSIONS.TAB.USER' | translate}}{{selectedOrg? ' ('+selectedOrg.profile.displayName+')' : ''}}" *ngIf="selectedOrg || isAdmin">
+    <mat-tab label="{{'PERMISSIONS.TAB.USER' | translate}}{{selected ? ' ('+selected[0].profile.displayName+')' : ''}}" *ngIf="selected || isAdmin">
       <permissions-authorities
               [mode]="'USER'"
               [searchQuery]="searchQuery"
-              [org]="selectedOrg"
-              (onDeselectOrg)="selectedOrg=null"
+              [org]="selected ? selected[0] : null"
+              (onDeselectOrg)="selected=null"
               (setTab)="setTab($event)"
       ></permissions-authorities>
     </mat-tab>
-    <mat-tab label="{{'PERMISSIONS.TAB.DELETE' | translate}}" *ngIf="!selectedOrg && isAdmin">
+    <mat-tab label="{{'PERMISSIONS.TAB.DELETE' | translate}}" *ngIf="!selected && isAdmin">
       <permissions-delete></permissions-delete>
     </mat-tab>
   </mat-tab-group>

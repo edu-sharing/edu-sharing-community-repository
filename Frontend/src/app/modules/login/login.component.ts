@@ -22,7 +22,7 @@ import {CordovaService} from '../../common/services/cordova.service';
 import {trigger} from "@angular/animations";
 import {UIAnimation} from "../../core-module/ui/ui-animation";
 import {InputPasswordComponent} from "../../core-ui-module/components/input-password/input-password.component";
-import {RouterHelper} from '../../common/router.helper';
+import {RouterHelper} from '../../core-ui-module/router.helper';
 import {HttpClient} from "@angular/common/http";
 import {FormControl} from '@angular/forms';
 import {map, startWith} from "rxjs/operators";
@@ -66,8 +66,8 @@ export class LoginComponent  implements OnInit{
   }
   private filteredProviders: any;
   private checkConditions(){
-    this.disabled=!this.username;// || !this.password;
-      this.updateButtons();
+    this.disabled=!this.username || this.currentProvider;// || !this.password;
+    this.updateButtons();
   }
   private recoverPassword(){
       if(this.config.register.local){
@@ -202,7 +202,7 @@ export class LoginComponent  implements OnInit{
 
   }
   private login(){
-    
+
     this.isLoading=true;
 
       this.connector.login(this.username,this.password,this.scope).subscribe(
@@ -214,6 +214,9 @@ export class LoginComponent  implements OnInit{
             this.toast.error(null,'LOGIN.SAFE_PREVIOUS');
             this.password="";
             this.isLoading=false;
+          }
+          else if(data.statusCode==RestConstants.STATUS_CODE_PASSWORD_EXPIRED){
+            this.toast.error(null,'LOGIN.PASSWORD_EXPIRED');
           }
           else{
             this.toast.error(null,'LOGIN.ERROR');
@@ -238,7 +241,7 @@ export class LoginComponent  implements OnInit{
       this.router.navigate([UIConstants.ROUTER_PREFIX,"workspace","safe"]);
     }
     else {
-      UIHelper.goToDefaultLocation(this.router,this.configService);
+      UIHelper.goToDefaultLocation(this.router,this.platformLocation,this.configService);
     }
   }
 
@@ -247,8 +250,8 @@ export class LoginComponent  implements OnInit{
       if(this.showProviders){
         return;
       }
-      if(this.config.register && (this.config.register.local || this.config.register.recoverUrl)) {
-          this.buttons.push(new DialogButton('LOGIN.RECOVER_PASSWORD', DialogButton.TYPE_CANCEL, () => this.recoverPassword()));
+      if(this.config.register && (this.config.register.local || this.config.register.registerUrl)) {
+          this.buttons.push(new DialogButton('LOGIN.REGISTER_TEXT', DialogButton.TYPE_CANCEL, () => this.recoverPassword()));
       }
       let login=new DialogButton('LOGIN.LOGIN',DialogButton.TYPE_PRIMARY,()=>this.login());
       login.disabled=this.disabled;

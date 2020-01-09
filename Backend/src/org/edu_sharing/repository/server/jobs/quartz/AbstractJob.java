@@ -46,7 +46,7 @@ public abstract class AbstractJob implements Job,InterruptableJob {
 		return jobDataMap;
 	}
 
-	protected Class[] allJobs =  new Class[] { ImporterJob.class, RefreshCacheJob.class,RemoveDeletedImportsJob.class,RemoveImportedObjectsJob.class,GetAllDamagedObjects.class,RefreshPublisherListJob.class, TrackingJob.class, ExporterJob.class,RefreshValuespaceFileJob.class};
+	protected Class[] allJobs =  new Class[] { ImporterJob.class, RefreshCacheJob.class,RemoveDeletedImportsJob.class,RemoveImportedObjectsJob.class,GetAllDamagedObjects.class,RefreshPublisherListJob.class, TrackingJob.class, ExporterJob.class};
 	protected boolean isInterrupted=false;
 
 	//important for immediate executed Jobs so that we can give an user feedback if the job was vetoed

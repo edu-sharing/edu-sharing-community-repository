@@ -96,6 +96,7 @@ export class WorkspaceMetadataComponent{
                         || version.comment == RestConstants.COMMENT_CONTENT_UPDATE
                         || version.comment == RestConstants.COMMENT_LICENSE_UPDATE
                         || version.comment == RestConstants.COMMENT_NODE_PUBLISHED
+                        || version.comment==RestConstants.COMMENT_PREVIEW_CHANGED
                         || version.comment.startsWith(RestConstants.COMMENT_EDITOR_UPLOAD)) {
                         const parameters = version.comment.split(',');
                         let editor = '';

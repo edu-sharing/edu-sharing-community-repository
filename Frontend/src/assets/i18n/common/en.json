@@ -118,7 +118,8 @@
     "TOOLPERMISSION_HANDLESERVICE":"Resolve unique ids from a handle service for materials",
     "TOOLPERMISSION_USAGE_STATISTIC":"Fetch information about the usage of all nodes of the repository",
     "TOOLPERMISSION_CONNECTOR":"Editor \"{{connector}}\" can be used",
-    "TOOLPERMISSION_CONNECTOR_SAFE":"Editor \"{{connector}}\" can be used in safe"
+    "TOOLPERMISSION_CONNECTOR_SAFE":"Editor \"{{connector}}\" can be used in safe",
+    "TOOLPERMISSION_REPOSITORY":"Repository \"{{repository}}\" can be viewed & browsed"
   },
   "NO_WRITE_PERMISSIONS":"No permissions",
   "NODE_SEARCH":"Search elements...",
@@ -333,7 +334,7 @@
   "USER":{
     "authorityName" : "user name",
     "firstName" : "first name",
-    "lastName" : "family name",
+    "lastName" : "last name",
     "email" : "e-mail",
     "primaryAffiliation": "Primary role",
     "password" : "password",

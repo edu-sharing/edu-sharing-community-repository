@@ -22,6 +22,6 @@
 </form>
 <mat-checkbox [(ngModel)]="info.allowNotifications">{{'REGISTER.NEWSLETTER' | translate}}</mat-checkbox>
 <div class="accept">
-    <mat-checkbox [(ngModel)]="agree" (change)="setAccept(agree)">{{'REGISTER.ACCEPT' | translate}}</mat-checkbox>
+    <mat-checkbox [(ngModel)]="agree">{{'REGISTER.ACCEPT' | translate}}</mat-checkbox>
     <a class="clickable imprint" *ngIf="privacyUrl" (click)="openPrivacy()">{{'REGISTER.PRIVACY-LINK' | translate}}</a>
 </div>

@@ -377,7 +377,8 @@ export class MainNavComponent implements AfterViewInit{
         // get last buttons from cache for faster app navigation
         this.sidebarButtons=this.storage.get(TemporaryStorageService.MAIN_NAV_BUTTONS,[]);
         this.visible=!this.storage.get(TemporaryStorageService.OPTION_HIDE_MAINNAV,false);
-        this.connector.getAbout().subscribe((about)=> {
+        this.connector.setRoute(this.route).subscribe(()=> {
+            this.connector.getAbout().subscribe((about)=> {
             this.about = about;
             this.connector.isLoggedIn().subscribe((data: LoginResult) => {
                 if (!data.isValidLogin) {
@@ -394,51 +395,68 @@ export class MainNavComponent implements AfterViewInit{
                     if (params["noNavigation"] == "true")
                         this.canOpen = false;
 
-                    let reurl = null;
-                    if (params["reurl"])
-                        reurl = {reurl: params["reurl"], applyDirectories: params["applyDirectories"]};
-                    this.showNodeStore = params['nodeStore'] == "true";
-                    if (!data.isGuest && this.canAccessWorkspace) {
-                        //buttons.push({url:this.connector.getAbsoluteEndpointUrl()+"../classic.html",scope:'workspace_old',icon:"cloud",name:"SIDEBAR.WORKSPACE_OLD"});
-                        buttons.push({
-                            //isSeperate:true,
-                            path: 'workspace/files',
-                            scope: 'workspace',
-                            icon: "cloud",
-                            name: "SIDEBAR.WORKSPACE",
-                            queryParams: reurl
-                        });
-                    }
-                    buttons.push({path: 'search', scope: 'search', icon: "search", name: "SIDEBAR.SEARCH", queryParams: reurl});
-                    buttons.push({path: 'collections', scope: 'collections', icon: "layers", name: "SIDEBAR.COLLECTIONS", queryParams: reurl});
-                    if(this.configService.instant('stream.enabled',false)) {
-                        buttons.push({path: 'stream', scope: 'stream', icon: 'event', name: 'SIDEBAR.STREAM'});
-                    }
-                    if (data.isGuest) {
-                        buttons.push({path: 'login', scope: 'login', icon: "person", name: "SIDEBAR.LOGIN"});
-                    }
-                    this.isGuest = data.isGuest;
-                    this.isAdmin = data.isAdmin;
-                    this._showUser = this.currentScope != 'login' && this.showUser;
-                    this.iam.getUser().subscribe((user: IamUser) => {
-                        this.user = user;
-                        this.canEditProfile = user.editProfile;
-                        this.configService.getAll().subscribe(() => {
-                            this.userName = ConfigurationHelper.getPersonWithConfigDisplayName(this.user.person, this.configService);
-                        });
+                let reurl = null;
+                if (params["reurl"])
+                    reurl = {reurl: params["reurl"], applyDirectories: params["applyDirectories"]};
+                this.showNodeStore = params['nodeStore'] == "true";
+                if (!data.isGuest && this.canAccessWorkspace) {
+                    //buttons.push({url:this.connector.getAbsoluteEndpointUrl()+"../classic.html",scope:'workspace_old',icon:"cloud",name:"SIDEBAR.WORKSPACE_OLD"});
+                    buttons.push({
+                        //isSeperate:true,
+                        path: 'workspace/files',
+                        scope: 'workspace',
+                        icon: "cloud",
+                        name: "SIDEBAR.WORKSPACE",
+                        queryParams: reurl
                     });
-                    this.refreshNodeStore();
-                    this.connector.hasAccessToScope(RestConstants.SAFE_SCOPE).subscribe((data: AccessScope) => {
-                        // safe needs access and not be app (oauth not supported)
-                        if (data.hasAccess && !this.bridge.isRunningCordova())
-                            buttons.push({path: 'workspace/safe', scope: 'safe', icon: "lock", name: "SIDEBAR.SECURE", onlyDesktop: true});
-                        this.addMoreButtons(buttons);
-                    }, (error: any) => this.addMoreButtons(buttons));
+                }
+                buttons.push({
+                    path: 'search',
+                    scope: 'search',
+                    icon: "search",
+                    name: "SIDEBAR.SEARCH",
+                    queryParams: reurl
                 });
-
+                buttons.push({
+                    path: 'collections',
+                    scope: 'collections',
+                    icon: "layers",
+                    name: "SIDEBAR.COLLECTIONS",
+                    queryParams: reurl
+                });
+                if(this.configService.instant('stream.enabled',false)) {
+                    buttons.push({path: 'stream', scope: 'stream', icon: 'event', name: 'SIDEBAR.STREAM'});
+                }
+                if (data.isGuest) {
+                    buttons.push({path: 'login', scope: 'login', icon: 'person', name: 'SIDEBAR.LOGIN'});
+                }
+                this.isGuest = data.isGuest;
+                this.isAdmin = data.isAdmin;
+                this._showUser = this.currentScope != 'login' && this.showUser;
+                this.iam.getUser().subscribe((user: IamUser) => {
+                    this.user = user;
+                    this.canEditProfile = user.editProfile;
+                    this.configService.getAll().subscribe(() => {
+                        this.userName = ConfigurationHelper.getPersonWithConfigDisplayName(this.user.person, this.configService);
+                    });
+                });
+                this.refreshNodeStore();
+                this.connector.hasAccessToScope(RestConstants.SAFE_SCOPE).subscribe((data: AccessScope) => {
+                    // safe needs access and not be app (oauth not supported)
+                    if (data.hasAccess && !this.bridge.getCordova().isRunningCordova())
+                        buttons.push({
+                            path: 'workspace/safe',
+                            scope: 'safe',
+                            icon: "lock",
+                            name: "SIDEBAR.SECURE",
+                            onlyDesktop: true
+                        });
+                    this.addMoreButtons(buttons);
+                }, (error: any) => this.addMoreButtons(buttons));
             });
+          });
         });
-
+    });
     event.addListener(this);
   }
 

@@ -9,14 +9,11 @@ import org.alfresco.service.cmr.security.AuthorityType;
 import org.edu_sharing.metadataset.v2.MetadataSetV2;
 import org.edu_sharing.repository.client.rpc.EduGroup;
 import org.edu_sharing.repository.server.SearchResultNodeRef;
-import org.edu_sharing.restservices.MdsDao;
 import org.edu_sharing.restservices.shared.MdsQueryCriteria;
 import org.edu_sharing.service.InsufficientPermissionException;
 import org.edu_sharing.service.search.model.SearchResult;
 import org.edu_sharing.service.search.model.SearchToken;
 import org.edu_sharing.service.search.model.SortDefinition;
-
-import com.google.gwt.user.client.ui.SuggestOracle;
 
 public interface SearchService {
 	public static enum ContentType{
@@ -31,8 +28,6 @@ public interface SearchService {
 		AND,
 		OR
 	};
-
-	public SearchResultNodeRef search(MdsDao mdsDao, String query, List<MdsQueryCriteria> criterias, SearchToken token) throws Throwable;
 
 	SearchResult<EduGroup> searchOrganizations(String pattern, int skipCount, int maxValues, SortDefinition sort,boolean scoped,boolean onlyMemberShips) throws Throwable;
 
@@ -83,7 +78,7 @@ public interface SearchService {
 
 	HashMap<ContentType,SearchToken> getLastSearchTokens() throws Throwable;
 	
-	public default List<? extends  SuggestOracle.Suggestion> getSuggestions(MetadataSetV2 mds, String queryId, String parameterId, String value, List<MdsQueryCriteria> criterias) {
+	public default List<? extends  Suggestion> getSuggestions(MetadataSetV2 mds, String queryId, String parameterId, String value, List<MdsQueryCriteria> criterias) {
 		return null;	
 	}
 

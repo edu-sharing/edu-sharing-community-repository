@@ -1,11 +1,13 @@
-<div class="request-info">
+<div class="header">
     <img src="assets/images/register/register-password.svg" alt="">
-    <h4>{{'REGISTER.REQUEST.HEADLINE' | translate}}</h4>
-    <p>{{'REGISTER.REQUEST.INFO' | translate}}</p>
+    <h4 class="headline">{{'REGISTER.REQUEST.HEADLINE' | translate}}</h4>
 </div>
-<form (ngSubmit)="submit()">
-    <mat-form-field>
-        <mat-label>{{'USER.email' | translate}}</mat-label>
-        <input matInput type="email" name="email" id="email" placeholder="{{'REGISTER.REQUEST.PLACEHOLDER' | translate}}" [formControl]="emailFormControl" />
-    </mat-form-field>
-</form>
+<div>
+    <p class="info">{{'REGISTER.REQUEST.INFO' | translate}}</p>
+    <form (ngSubmit)="submit()">
+        <mat-form-field>
+            <mat-label>{{'USER.email' | translate}}</mat-label>
+            <input matInput type="email" name="email" id="email" placeholder="{{'REGISTER.REQUEST.PLACEHOLDER' | translate}}" [formControl]="emailFormControl" />
+        </mat-form-field>
+    </form>
+</div>

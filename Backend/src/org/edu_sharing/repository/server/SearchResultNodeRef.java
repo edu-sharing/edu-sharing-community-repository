@@ -3,8 +3,8 @@ package org.edu_sharing.repository.server;
 import java.util.List;
 import java.util.Map;
 
+import org.edu_sharing.metadataset.v2.SearchCriterias;
 import org.edu_sharing.repository.client.rpc.Result;
-import org.edu_sharing.repository.client.rpc.SearchCriterias;
 import org.edu_sharing.service.model.NodeRef;
 
 public class SearchResultNodeRef extends Result<List<NodeRef>> {

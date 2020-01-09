@@ -49,17 +49,37 @@ powered-by{
     }
   }
 }
-.register{
-  padding-bottom: 20px;
-  color:$textLight;
+.password-label-container {
+  display: flex;
+  label {
+    flex: auto;
+  }
+  .forgot-password{
+    display: flex;
+    width: 100%;
+    justify-content: flex-end;
+    a{
+      text-transform: uppercase;
+      font-size: 85%;
+    }
+  }
 }
 .groups{
   display: flex;
-  padding:15px 0;
+  padding:$cardPadding 0;
+  .providers-select{
+    border-right:1px solid $textLight;
+    padding-right:30px;
+  }
+  .login-form-providers{
+    padding-left:30px;
+    input {
+      margin-bottom: 35px;
+    }
+  }
   >div{
     width: 0;
     flex-grow: 1;
-    padding:0 10px;
     .group-heading{
       width: 100%;
       padding: 5px 10px;
@@ -106,9 +126,25 @@ powered-by{
     }
   }
 }
+@media screen and (min-height: ($mobileHeight)) {
+  .card {
+    top: unset;
+    .card-content {
+      min-height: 540px;
+    }
+  }
+}
 @media screen and (max-width: $mobileWidth+$mobileStage*1) {
   .groups{
     flex-direction: column;
+    .providers-select{
+      border-right: none;
+      padding-right:0;
+    }
+    .login-form-providers{
+      padding-top:10px;
+      padding-left:0;
+    }
     >div{
       padding:10px 0;
       width: 100%;
@@ -131,5 +167,8 @@ powered-by{
 @media screen and (max-height: $mobileHeightWithKeyboard) {
   .card{
     top: 0;
+  }
+  .dialog {
+    z-index: 120;
   }
 }

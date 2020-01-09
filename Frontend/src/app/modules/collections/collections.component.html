@@ -26,7 +26,7 @@
     [currentValues]="{}"
     groupId="collection_feedback"
     labelPositive="COLLECTIONS.FEEDBACK_SAVE"
-    (onCancel)="feedback=false"
+    (onCancel)="collectionFeedback(false)"
     (onDone)="addFeedback($event)"
     ></mds>
 <card *ngIf="feedbackView"
@@ -39,9 +39,9 @@
         <div class="feedback">
             <h2 class="empty" *ngIf="!feedbacks || !feedbacks.length">{{'COLLECTIONS.FEEDBACK_VIEW_EMPTY' | translate}}</h2>
             <div *ngIf="feedbacks && feedbacks.length">
-                <div *ngFor="let feedback of feedbacks">
+                <div *ngFor="let feedback of feedbacks" class="feedback-container">
                     <div class="main-data">
-                        <div class="author">{{feedback.createdBy | authorityName }}</div>
+                        <div class="author"><user-avatar icon="person" [user]="{authorityName:feedback.creator}" size="xsmall"></user-avatar> {{'COLLECTIONS.FEEDBACK_CREATOR' | translate:{creator:feedback.creator} }}</div>
                         <div class="date">{{feedback.createdAt | formatDate:{useRelativeLabels:false,time:true} }}</div>
                     </div>
                     <div class="meta-data">

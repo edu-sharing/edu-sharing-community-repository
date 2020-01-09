@@ -82,7 +82,7 @@ public class AuthorityServiceImpl implements AuthorityService {
 	}
 	@Override
 	public void addAuthorityAspect(String authority,String aspect){
-		
+
 		NodeRef nodeRef = authorityService.getAuthorityNodeRef(authority);
 		if(!nodeService.hasAspect(nodeRef, QName.createQName(aspect))) {
 			nodeService.addAspect(nodeRef,QName.createQName(aspect),new HashMap<>());
@@ -109,7 +109,7 @@ public class AuthorityServiceImpl implements AuthorityService {
 	}
 
 	@Override
-	public boolean hasModifyAccessToGroup(String groupName){
+	public synchronized boolean hasModifyAccessToGroup(String groupName){
     	Set<String> memberships=serviceRegistry.getAuthorityService().getAuthorities();
     	if(memberships.contains(CCConstants.AUTHORITY_GROUP_ALFRESCO_ADMINISTRATORS))
 			return true;
@@ -145,7 +145,7 @@ public class AuthorityServiceImpl implements AuthorityService {
 		}
 		return false;
 	}
-	private boolean hasAdminAccessToGroup(String groupName,String postfix){
+    private synchronized boolean hasAdminAccessToGroup(String groupName,String postfix){
 		try {
 			Set<String> memberships=serviceRegistry.getAuthorityService().getAuthorities();
 			if(memberships.contains(CCConstants.AUTHORITY_GROUP_ALFRESCO_ADMINISTRATORS))
@@ -179,7 +179,7 @@ public class AuthorityServiceImpl implements AuthorityService {
 		return (String)nodeService.getProperty(authorityService.getAuthorityNodeRef(authorityName),QName.createQName(property));
 	}
 	@Override
-	public boolean hasAdminAccessToOrganization(String orgName){
+	public synchronized boolean hasAdminAccessToOrganization(String orgName){
 		try {
 	    	Set<String> memberships=serviceRegistry.getAuthorityService().getAuthorities();
 			if(memberships.contains(CCConstants.AUTHORITY_GROUP_ALFRESCO_ADMINISTRATORS))
@@ -191,7 +191,7 @@ public class AuthorityServiceImpl implements AuthorityService {
 				return groupIsOfType(group,CCConstants.ADMINISTRATORS_GROUP_TYPE);
 			
 		} catch (Throwable t) {
-			t.printStackTrace();
+			logger.error("Error while getting Admin access:" + orgName, t);
 		}
 		return false;
 	}

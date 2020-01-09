@@ -29,8 +29,6 @@ package org.edu_sharing.repository.client.rpc;
 
 import java.util.HashMap;
 
-import org.edu_sharing.repository.client.rpc.metadataset.MetadataSets;
-
 /**
  * @author rudolph
  */
@@ -40,12 +38,7 @@ public class RepositoryInfo implements com.google.gwt.user.client.rpc.IsSerializ
 	 * repositoryId, repository Properties
 	 */
 	HashMap<String, HashMap<String,String>> repInfoMap;
-	
-	/**
-	 * repositoryId, MetadataSets
-	 */
-	HashMap<String,MetadataSets> repMetadataSetsMap;
-	
+
 	/**
 	 * Help URLs
 	 */
@@ -72,20 +65,6 @@ public class RepositoryInfo implements com.google.gwt.user.client.rpc.IsSerializ
 	 */
 	public void setRepInfoMap(HashMap<String, HashMap<String, String>> repInfoMap) {
 		this.repInfoMap = repInfoMap;
-	}
-
-	/**
-	 * @return the repMetadataSetsMap
-	 */
-	public HashMap<String, MetadataSets> getRepMetadataSetsMap() {
-		return repMetadataSetsMap;
-	}
-
-	/**
-	 * @param repMetadataSetsMap the repMetadataSetsMap to set
-	 */
-	public void setRepMetadataSetsMap(HashMap<String, MetadataSets> repMetadataSetsMap) {
-		this.repMetadataSetsMap = repMetadataSetsMap;
 	}
 
 	public String getHelpUrlCC() {

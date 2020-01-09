@@ -46,6 +46,7 @@
     textarea{
       flex-grow: 1;
       margin-right: 10px;
+      margin-bottom: 6px;
       max-height: 2em;
     }
     display: flex;
@@ -88,7 +89,7 @@
       }
       .left {
         padding-right: 15px;
-        padding-top: 10px;
+        padding-top: 3px;
       }
       .right {
         flex-grow: 1;
@@ -96,23 +97,51 @@
         input {
           flex-grow: 1;
         }
-        flex-grow: 1;
-        flex-direction: column;
         .creator {
           display: flex;
           flex-direction: row;
-          padding-bottom: 2px;
+          padding-bottom: 8px;
           .name {
             font-weight: bold;
             flex-grow: 1;
           }
-          .date {
-            color: $textLight;
+          .dropdown{
+            color:$primary;
+            @include clickable();
           }
         }
         .commentText {
           white-space: pre-wrap;
         }
+      }
+    }
+    .date {
+      color: $textLight;
+      display: flex;
+      justify-content: flex-end;
+      font-size: 80%;
+    }
+    .icons{
+      display:flex;
+      justify-content: flex-end;
+      padding:0 10px;
+      .btn-negative,.btn-positive{
+        @include clickable();
+        width:40px;
+        height:30px;
+        border-radius: $buttonBorderRadius;
+        border:1px solid $inputBorderColor;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+      .btn-negative{
+        color:$colorStatusNegative;
+        background-color:lighten($colorStatusNegative,62%);
+      }
+      .btn-positive{
+        color:$colorStatusPositive;
+        background-color:lighten($colorStatusPositive,45%);
       }
     }
     .actions{

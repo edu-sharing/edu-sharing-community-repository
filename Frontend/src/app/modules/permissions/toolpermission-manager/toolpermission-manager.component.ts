@@ -67,6 +67,7 @@ export class ToolpermissionManagerComponent {
         RestConstants.TOOLPERMISSION_USAGE_STATISTIC,
     ]},
     {name:"CONNECTORS",icon:"edit"},
+    {name:"REPOSITORIES",icon:"cloud"},
     {name:"OTHER",icon:"help"}
   ];
   changing: string[]=[];
@@ -81,7 +82,9 @@ export class ToolpermissionManagerComponent {
     }
     let permissions=Object.keys(this.permissions);
     if(group.name=="CONNECTORS") {
-        return permissions.filter((p) => p.startsWith("TOOLPERMISSION_CONNECTOR"));
+        return permissions.filter((p) => p.startsWith(RestConstants.TOOLPERMISSION_CONNECTOR_PREFIX));
+    }else if(group.name=="REPOSITORIES") {
+        return permissions.filter((p) => p.startsWith(RestConstants.TOOLPERMISSION_REPOSITORY_PREFIX));
     }
     // filter "OTHER"
     for(let group of ToolpermissionManagerComponent.GROUPS){
@@ -92,9 +95,10 @@ export class ToolpermissionManagerComponent {
               permissions.splice(pos, 1);
           }
         }
-      }
-      else if(group.name=="CONNECTORS"){
-          permissions=permissions.filter((p)=>!p.startsWith("TOOLPERMISSION_CONNECTOR"));
+      }else if(group.name=="CONNECTORS"){
+          permissions=permissions.filter((p)=>!p.startsWith(RestConstants.TOOLPERMISSION_CONNECTOR_PREFIX));
+      }else if(group.name=="REPOSITORIES"){
+          permissions=permissions.filter((p)=>!p.startsWith(RestConstants.TOOLPERMISSION_REPOSITORY_PREFIX));
       }
     }
     return permissions;
@@ -228,12 +232,16 @@ export class ToolpermissionManagerComponent {
         })
     }
     getTpConnector(tp:string){
-      tp=tp.substring("TOOLPERMISSION_CONNECTOR_".length);
+      tp=tp.substring(RestConstants.TOOLPERMISSION_CONNECTOR_PREFIX.length);
       if(tp.indexOf("_safe")!=-1) tp=tp.substring(0,tp.indexOf("_safe"));
       let connector=this.translate.instant('CONNECTOR.'+tp+'.NAME');
       return connector;
     }
     getTpSafe(tp:string){
         return tp.endsWith("_safe");
+    }
+    getTpRepository(tp: any) {
+        tp=tp.substring(RestConstants.TOOLPERMISSION_REPOSITORY_PREFIX.length);
+        return tp;
     }
 }

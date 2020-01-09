@@ -34,6 +34,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Properties;
+import java.util.stream.Collectors;
 
 import org.apache.log4j.Logger;
 
@@ -164,6 +165,13 @@ public class ApplicationInfo implements Comparable<ApplicationInfo>{
 	public static final String NOTIFY_FETCH_LIMIT = "notify_fetch_limit";
 
 	public static final String REPOSITORY_TYPE_MEMUCHO = "MEMUCHO";
+
+	/**
+	 * Remote sso userid mapping. Only for remote alfresco repos
+	 * If it is not set, the one from the edu-sharing-sso-context.xml will be used
+	 * @TODO make the sso config not influcene remote logins!
+	 */
+	public static final String REMOTE_USERID = "remote_userid";
 
 	public static final String PROPERTY_VALIDATOR_REGEX_CM_NAME = "property_validator_regex_cm_name";
 
@@ -328,7 +336,7 @@ public class ApplicationInfo implements Comparable<ApplicationInfo>{
 	private String validatorRegexCMName = "([\\\"\\*\\\\\\\\\\>\\<\\?\\/\\:\\|'\\r\\n])";
 
 
-	
+
 	public ApplicationInfo(String _appFile) throws Exception{
 		if(_appFile == null) throw new Exception("Application Filename was null!");
 		appFile = _appFile;
@@ -833,7 +841,8 @@ public class ApplicationInfo implements Comparable<ApplicationInfo>{
 		
 		if(this.getHostAliases() != null && !this.getHostAliases().trim().equals("")){
 			String[] splitted = this.getHostAliases().split(",");
-			hostList.addAll(Arrays.asList(splitted));
+			// add all and trim to fix stuff like "ip1, ip2"
+			hostList.addAll(Arrays.stream(splitted).map(String::trim).collect(Collectors.toList()));
 		}
 		
 		return hostList.contains(hostName);

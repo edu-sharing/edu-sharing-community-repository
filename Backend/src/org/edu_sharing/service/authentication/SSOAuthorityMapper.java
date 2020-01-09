@@ -32,6 +32,7 @@ import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.server.tools.ApplicationInfo;
 import org.edu_sharing.repository.server.tools.ApplicationInfoList;
 import org.edu_sharing.repository.server.tools.KeyTool;
+import org.edu_sharing.restservices.admin.v1.Application;
 import org.edu_sharing.service.authentication.sso.config.Condition;
 import org.edu_sharing.service.authentication.sso.config.CustomGroupMapping;
 import org.edu_sharing.service.authentication.sso.config.MappingGroup;
@@ -132,11 +133,33 @@ public class SSOAuthorityMapper {
 	}
 
 	public static String mapAdminAuthority(String authority,String appid){
-
-		if(authority.trim().equals(ApplicationInfoList.getHomeRepository().getUsername())){
-			return authority + "@" + appid;
+		// when coming from the native app, do not scope
+		if(ApplicationInfoList.getHomeRepository().getAppId().equals(appid)){
+			return authority;
 		}
-		return authority;
+		return AuthenticationUtil.runAsSystem(()-> {
+			ApplicationContext applicationContext = AlfAppContextGate.getApplicationContext();
+			ServiceRegistry serviceRegistry = (ServiceRegistry) applicationContext.getBean("ServiceRegistry");
+
+			boolean scope;
+			// a new person, does not need to be scoped
+			if (!serviceRegistry.getPersonService().personExists(authority)) {
+				scope = false;
+			} // the main user (admin) has to be scoped
+			else if (authority.trim().equals(ApplicationInfoList.getHomeRepository().getUsername())) {
+				scope = true;
+			} // the user has to be scoped if he/she is an admin
+			else {
+				Set<String> memberships = serviceRegistry.getAuthorityService().getAuthoritiesForUser(authority);
+				scope = memberships != null && memberships.contains(CCConstants.AUTHORITY_GROUP_ALFRESCO_ADMINISTRATORS);
+			}
+
+			if (scope) {
+				return authority + "@" + appid;
+			} else {
+				return authority;
+			}
+		});
 	}
 
 	/**

@@ -42,17 +42,13 @@ import javax.xml.xpath.XPathFactory;
 
 import org.alfresco.service.cmr.security.AuthorityType;
 import org.apache.log4j.Logger;
-import org.edu_sharing.repository.client.rpc.metadataset.MetadataSetValueKatalog;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.client.tools.forms.VCardTool;
 import org.edu_sharing.repository.server.tools.ApplicationInfo;
 import org.edu_sharing.repository.server.tools.ApplicationInfoList;
 import org.edu_sharing.repository.server.tools.VCardConverter;
-import org.edu_sharing.repository.server.tools.metadataset.MetadataReader;
 import org.edu_sharing.service.nodeservice.NodeServiceHelper;
 import org.joda.time.DateTime;
-import org.joda.time.format.DateTimeFormatter;
-import org.joda.time.format.ISODateTimeFormat;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
@@ -65,8 +61,6 @@ public class RecordHandlerLOM implements RecordHandlerInterface {
 	DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
 
 	boolean askElixier = false;
-
-	List<MetadataSetValueKatalog> taxonKatalog = null;
 
 	String metadataSetId = null;
 
@@ -95,13 +89,6 @@ public class RecordHandlerLOM implements RecordHandlerInterface {
 		}
 
 		this.metadataSetId = metadataSetId;
-
-		try{
-			MetadataReader metadataReader = new MetadataReader();
-			taxonKatalog = metadataReader.getValuespace("/org/edu_sharing/metadataset/valuespace_eaf_discipline.xml", "org.edu_sharing.metadataset.valuespaces_i18n", null, "{http://www.campuscontent.de/model/1.0}taxonid");
-		}catch(Throwable e){
-			logger.error("can't load taxon Katalog. \"Sachgebiete\" will not be imported properly", e);
-		}
 	}
 
 
@@ -742,7 +729,6 @@ public class RecordHandlerLOM implements RecordHandlerInterface {
 		 */
 		// getting Thumbnail thru elixier dialect
 
-		String[] fach_sachgebietIdsTranslated = null;
 		ArrayList<String> fach_sachgebietListOriginal = new ArrayList<String>();
 		String serientitel = null;
 
@@ -798,89 +784,6 @@ public class RecordHandlerLOM implements RecordHandlerInterface {
 		}
 		if (serientitel != null && !serientitel.trim().equals("")) {
 			toSafeMap.put(CCConstants.CCM_PROP_IO_TITLE_SERIES, serientitel);
-		}
-
-		// to safe Fachgebiete
-		Map<String, String> taxonMap = new HashMap<String, String>();
-		if (fach_sachgebietIdsTranslated != null) {
-
-			for (String fGId : fach_sachgebietIdsTranslated) {
-				for (MetadataSetValueKatalog cataEntry : taxonKatalog) {
-					if (cataEntry.getKey().equals(fGId)) {
-						taxonMap.put(fGId, cataEntry.getCaption());
-					}
-				}
-			}
-		}
-
-		if (taxonMap.size() > 0) {
-			HashMap classificationProps = new HashMap();
-			classificationProps.put(CCConstants.LOM_PROP_CLASSIFICATION_PURPOSE, "dicipline");
-			List taxonList = new ArrayList();
-
-			ArrayList taxonPathToSafeList = new ArrayList();
-			HashMap taxonPathProps = new HashMap();
-			HashMap<String, String> sourceI18n = new HashMap<String, String>();
-			sourceI18n.put("de", "EAF_SYS");
-			taxonPathProps.put(CCConstants.LOM_PROP_TAXONPATH_SOURCE, sourceI18n);
-
-			for (Map.Entry<String, String> tEntry : taxonMap.entrySet()) {
-				HashMap taxonProps = new HashMap();
-				taxonProps.put(CCConstants.LOM_PROP_TAXON_ID, tEntry.getKey());
-				Map multilangTaxonEntry = new HashMap();
-				multilangTaxonEntry.put("default", tEntry.getValue());
-				taxonProps.put(CCConstants.LOM_PROP_TAXON_ENTRY, multilangTaxonEntry);
-				taxonList.add(taxonProps);
-			}
-			taxonPathProps.put("TYPE#" + CCConstants.LOM_TYPE_TAXON + "#" + CCConstants.LOM_ASSOC_TAXONPATH_TAXON, taxonList);
-			taxonPathToSafeList.add(taxonPathProps);
-
-			classificationProps.put("TYPE#" + CCConstants.LOM_TYPE_TAXON_PATH + "#" + CCConstants.LOM_ASSOC_CLASSIFICATION_TAXONPATH, taxonPathToSafeList);
-
-			List classificationList = (List) toSafeMap.get("TYPE#" + CCConstants.LOM_TYPE_CLASSIFICATION + "#" + CCConstants.LOM_ASSOC_SCHEMA_CLASSIFICATION);
-			if (classificationList == null) {
-				classificationList = new ArrayList();
-			}
-			classificationList.add(classificationProps);
-			toSafeMap.put("TYPE#" + CCConstants.LOM_TYPE_CLASSIFICATION + "#" + CCConstants.LOM_ASSOC_SCHEMA_CLASSIFICATION, classificationList);
-
-			// TO SAFE LOM Replication
-			// alfreco don't likes to safe empty lists
-			// java.lang.ClassCastException: java.util.Arrays$ArrayList cannot be cast to java.util.ArrayList
-			if (fach_sachgebietIdsTranslated.length > 0){
-
-				//toSafeMap.put(CCConstants.CCM_PROP_IO_REPL_TAXON_ID, new ArrayList(Arrays.asList(fach_sachgebietIdsTranslated)));
-				//101123 merge translated ids mit ids die aus LOM kommen
-				HashSet<String> uniqueTaxonIds = new HashSet<String>();
-				List<String> lomTaxIds = (ArrayList<String>) toSafeMap.get(CCConstants.CCM_PROP_IO_REPL_TAXON_ID);
-				if(lomTaxIds != null){
-					for(String tId:lomTaxIds){
-						uniqueTaxonIds.add(tId);
-					}
-				}
-				for(String tId:fach_sachgebietIdsTranslated){
-					uniqueTaxonIds.add(tId);
-				}
-				toSafeMap.put(CCConstants.CCM_PROP_IO_REPL_TAXON_ID,new ArrayList(uniqueTaxonIds));
-			}
-			if (taxonMap.values().size() > 0) {
-				ArrayList taxonEntryList = new ArrayList();
-				for (String entry : taxonMap.values()) {
-					HashMap map = new HashMap();
-					map.put("default", entry);
-					taxonEntryList.add(map);
-				}
-				// also the original values
-				for (String f_sgebietOrig : fach_sachgebietListOriginal) {
-					HashMap map = new HashMap();
-					map.put("default", adaptValue(f_sgebietOrig));
-					taxonEntryList.add(map);
-				}
-				if(taxonEntryList.size() > 0){
-					toSafeMap.put(CCConstants.CCM_PROP_IO_REPL_TAXON_ENTRY, taxonEntryList);
-				}
-			}
-
 		}
 	}
 

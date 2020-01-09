@@ -28,7 +28,6 @@ import org.springframework.context.ApplicationContext;
 
 public class FixInitialVersion extends AbstractJob {
 
-	public static final String PARAM_ROOT_NODE = "ROOT_NODE";
 	Logger logger = Logger.getLogger(FixInitialVersion.class);
 	
 	ApplicationContext applicationContext = AlfAppContextGate.getApplicationContext();

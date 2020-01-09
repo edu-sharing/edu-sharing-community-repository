@@ -374,6 +374,8 @@ public class CCConstants {
 	public final static String CCM_PROP_COMMENT_REPLY = "{http://www.campuscontent.de/model/1.0}comment_reply";
 	public final static String CCM_PROP_COMMENT_CONTENT = "{http://www.campuscontent.de/model/1.0}comment_content";
 
+	public final static String CCM_PROP_COLLECTION_FEEDBACK_AUTHORITY = "{http://www.campuscontent.de/model/1.0}collection_feedback_authority";
+
 	public final static String CCM_PROP_COLLECTION_FEEDBACK_DATA = "{http://www.campuscontent.de/model/1.0}collection_feedback_data";
 
 	public final static String CCM_PROP_RATING_VALUE = "{http://www.campuscontent.de/model/1.0}rating_value";
@@ -812,6 +814,8 @@ public class CCConstants {
 
 	public final static String CCM_VALUE_TOOLPERMISSION_CONNECTOR_PREFIX = "TOOLPERMISSION_CONNECTOR_";
 
+	public final static String CCM_VALUE_TOOLPERMISSION_REPOSITORY_PREFIX = "TOOLPERMISSION_REPOSITORY_";
+
 	public final static String CCM_VALUE_TOOLPERMISSION_COLLECTION_CHANGE_OWNER = "TOOLPERMISSION_COLLECTION_CHANGE_OWNER";
 
 	public final static String CCM_VALUE_TOOLPERMISSION_COLLECTION_EDITORIAL = "TOOLPERMISSION_COLLECTION_EDITORIAL";
@@ -1021,6 +1025,8 @@ public class CCConstants {
 
 	public static final String CCM_PROP_IO_SCHOOLCONTEXT = "{http://www.campuscontent.de/model/1.0}schoolcontext";
 	public static final String CCM_PROP_IO_SCHOOLTOPIC = "{http://www.campuscontent.de/model/1.0}schooltopic";
+
+	public static final String CCM_PROP_IO_UNIVERSITY = "{http://www.campuscontent.de/model/1.0}university";
 
 	public static final String SCHOOLCONTEXT_PATH_SEPARATOR = "#";
 
@@ -1987,9 +1993,7 @@ public class CCConstants {
 	public static final String LONG_DATE_SUFFIX = "_LONG";
 	public static final String DISPLAYNAME_SUFFIX = "_DISPLAYNAME";
 
-	public static final String I18N_CLIENTBUNDLE = "org.edu_sharing.repository.client.CCSearchI18n";
-
-	public static final String I18N_METADATASETBUNDLE = "org.edu_sharing.metadataset.CCSearchI18n";
+	public static final String I18N_METADATASETBUNDLE = "org.edu_sharing.metadataset.v2.i18n.mds";
 
 	public static final String SESSION_FEDERATED_AUTH = "SESSION_FEDERATED_AUTH";
 
@@ -2031,5 +2035,7 @@ public class CCConstants {
 	public static final String COLLECTION_ORDER_MODE_CUSTOM = "custom";
 
 	public static final String ISO8601_SUFFIX = "ISO8601";
+
+	public static final String VERSION_COMMENT_PREVIEW_CHANGED = "PREVIEW_CHANGED";
 
 }

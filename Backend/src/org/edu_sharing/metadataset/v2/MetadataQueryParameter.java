@@ -31,7 +31,7 @@ public class MetadataQueryParameter implements Serializable {
 		if(statements!=null) {
 			if(statements.containsKey(value))
 				statement=statements.get(value);
-			if(statements.get(null)!=null)
+			else if(statements.get(null)!=null)
 				statement=statements.get(null);
 		}
 		if(statement==null) {

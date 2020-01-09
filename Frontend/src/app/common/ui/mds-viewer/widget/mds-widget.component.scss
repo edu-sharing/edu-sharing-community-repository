@@ -3,9 +3,17 @@
 .widget-label{
   font-size: 90%;
   color: $textLight;
+  text-transform: uppercase;
 }
 .widget-data{
-  padding:2px 10px;
+  padding:4px 0 10px 0;
+  &.widget-type-slider {
+    color: $textLight;
+    .slider-value {
+      color: $textMain;
+      font-weight: bold;
+    }
+  }
 }
 .widget-type-text >div{
   white-space: pre-line;

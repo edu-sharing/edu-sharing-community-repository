@@ -24,7 +24,6 @@ import javax.net.ssl.X509TrustManager;
 
 import org.apache.log4j.Logger;
 import org.edu_sharing.metadataset.v2.MetadataSetV2;
-import org.edu_sharing.repository.client.rpc.SuggestFacetDTO;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.client.tools.forms.VCardTool;
 import org.edu_sharing.repository.server.SearchResultNodeRef;
@@ -32,16 +31,11 @@ import org.edu_sharing.repository.server.tools.ApplicationInfo;
 import org.edu_sharing.repository.server.tools.ApplicationInfoList;
 import org.edu_sharing.repository.server.tools.URLTool;
 import org.edu_sharing.service.Constants;
-import org.edu_sharing.service.mime.MimeTypesV2;
 import org.edu_sharing.service.model.NodeRef;
 import org.edu_sharing.service.search.model.SearchToken;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.json.simple.parser.JSONParser;
-import org.json.simple.parser.ParseException;
-
-import com.google.gwt.user.client.ui.SuggestOracle;
 
 public class SearchServiceDDBImpl extends SearchServiceAdapter{
 	
@@ -424,9 +418,9 @@ public class SearchServiceDDBImpl extends SearchServiceAdapter{
 		return properties;
 	}
 
-	public List<? extends  SuggestOracle.Suggestion> getSuggestions(MetadataSetV2 mds, String queryId, String parameterId, String value) {
+	public List<? extends  Suggestion> getSuggestions(MetadataSetV2 mds, String queryId, String parameterId, String value) {
 		
-		List<SuggestOracle.Suggestion> result = new ArrayList<SuggestOracle.Suggestion>();
+		List<Suggestion> result = new ArrayList<Suggestion>();
 		
 		List<String> facets = mds.getQueries().findQuery(queryId).findParameterByName(parameterId).getFacets();
 		//String url = getUrl("/search",parameterId +":("+value+")",facets, 0, 0);
@@ -453,8 +447,8 @@ public class SearchServiceDDBImpl extends SearchServiceAdapter{
 						String val = facetteVal.getString("value");
 
 						if(val.contains(value)) {
-							SuggestFacetDTO dto = new SuggestFacetDTO();
-							dto.setFacet(val);
+							Suggestion dto = new Suggestion();
+							dto.setKey(val);
 							dto.setDisplayString(val);
 
 							result.add(dto);

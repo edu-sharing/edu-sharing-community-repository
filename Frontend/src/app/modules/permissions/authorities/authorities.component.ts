@@ -73,7 +73,7 @@ export class PermissionsAuthoritiesComponent {
     if (this._mode)
       this.search();
   }
-  @Input() private selected: any[]= [];
+  @Input() private selected: Organization[]|Group[]|UserSimple[] = null;
 
   public _mode: string;
   public addTo: any;
@@ -218,24 +218,25 @@ export class PermissionsAuthoritiesComponent {
     this.loadAuthorities();
   }
   public selection(data: any){
+    if(data && !data.length){
+      data = null;
+    }
     this.selected = data;
     this.onSelection.emit(data);
     this.updateOptions(false);
   }
-  private getList<T>(data: T): T[]{
-    if (data)
-      return [data];
-    return this.selected ? this.selected : [];
+  private getList<T>(data: T): T[] {
+    return NodeHelper.getActionbarNodes((this.selected as any), data);
   }
   private updateOptions(all: boolean) {
     if (this.embedded)
       return;
     const options: OptionItem[] = [];
     const list = this.getList(null);
-    if (!all && this.isAdmin && this._mode == 'ORG' && !list.length){
+    if (!all && this.isAdmin && this._mode == 'ORG' && !list){
       options.push(new OptionItem('PERMISSIONS.MENU_TOOLPERMISSIONS_GLOBAL', 'playlist_add_check', (data: any) => {this.toolpermissionAuthority = RestConstants.getAuthorityEveryone(); }));
     }
-    if (!all && !list.length){
+    if (!all && !list){
       if (this._mode == 'GROUP') {
         options.push(new OptionItem('PERMISSIONS.MENU_CREATE_GROUP', 'add', (data: any) => this.createGroup()));
       }
@@ -250,16 +251,16 @@ export class PermissionsAuthoritiesComponent {
         options.push(download);
       }
     }
-    if (!all && this._mode == 'ORG' && this.orgs && this.orgs.canCreate && !list.length){
+    if (!all && this._mode == 'ORG' && this.orgs && this.orgs.canCreate && !list){
       options.push(new OptionItem('PERMISSIONS.ADD_ORG', 'add', (data: any) => this.createOrg()));
     }
 
-    if (all || list.length){
+    if (all || list){
       if (this._mode === 'USER' && !all){
         options.push(new OptionItem('PERMISSIONS.MENU_ADD_TO_GROUP', 'group_add', (data: any) => this.addToGroup(data)));
         options.push(new OptionItem('PERMISSIONS.MENU_EDIT_GROUPS', 'group', (data: any) => this.openEditGroups(data)));
       }
-      if (list.length === 1 || all) {
+      if (list && list.length === 1 || all) {
         if (this._mode === 'GROUP') {
           options.push(new OptionItem('PERMISSIONS.MENU_ADD_GROUP_MEMBERS', 'group_add', (data: any) => this.addMembersFunction(data)));
           options.push(new OptionItem('PERMISSIONS.MENU_MANAGE_GROUP', 'group', (data: any) => this.manageMembers(data)));
@@ -277,7 +278,7 @@ export class PermissionsAuthoritiesComponent {
       if (this._mode === 'GROUP') {
         options.push(new OptionItem('PERMISSIONS.MENU_DELETE', 'delete', (data: any) => this.deleteAuthority(data, (list: any) => this.startDelete(list))));
       }
-      if (this._mode === 'USER' && this.isAdmin && (list.length == 1 || all)){
+      if (this._mode === 'USER' && this.isAdmin && (list && list.length === 1 || all)){
         options.push(new OptionItem('PERMISSIONS.MENU_STATUS', 'check', (data: any) => this.setPersonStatus(NodeHelper.getActionbarNodes(list, data)[0])));
       }
       if (this._mode === 'USER' && this.org) {
@@ -497,7 +498,7 @@ export class PermissionsAuthoritiesComponent {
 
   private editAuthority(data: any) {
     const list = this.getList(data);
-    console.log(list);
+    console.log(data,this.selected);
 
     if (this._mode == 'ORG'){
       this.node.getNodeParents(list[0].sharedFolder.id, true).subscribe((data: NodeList) => {
