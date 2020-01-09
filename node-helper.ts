@@ -692,7 +692,7 @@ export class NodeHelper{
       }
       return prop;
   }
-  public static getActionbarNodes(nodes:Node[]|any[],node:Node|any):Node[]|any[] {
+  public static getActionbarNodes<T>(nodes:T[],node:T):T[] {
       return node ? [node] : nodes && nodes.length ? nodes  : null;
   }
 

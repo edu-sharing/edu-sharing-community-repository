@@ -30,6 +30,7 @@ $cardActionHeight:77px;
 }
 .card{
   z-index:$dialogZIndex+1;
+  color: $textMain;
   background-color: #fff!important;
   transition: all $transitionNormal;
 }
@@ -194,7 +195,10 @@ $cardActionHeight:77px;
     height:calc(100% - 28px);
   }
 }
-
+.card-mwide{
+  width:600px;
+  margin-left:-300px!important;
+}
 .card-wide{
   width:650px;
   margin-left:-325px!important;
@@ -277,6 +281,12 @@ $cardActionHeight:77px;
   left:0%;
   margin-left:0!important;
 }
+@media screen and (max-width: ($mobileWidth + $mobileStage*1)) {
+  .card-mwide{
+    @include fullsizeCard();
+  }
+}
+
 @media screen and (max-width: ($mobileWidth + $mobileStage*2)) {
   .card-wide{
     @include fullsizeCard();

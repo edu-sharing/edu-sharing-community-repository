@@ -6,7 +6,7 @@
   position: relative;
   overflow: hidden;
   display:inline-block;
-  .user-letter{
+  .user-letter,.user-icon{
     display: flex;
     color: #fff;
     position: absolute;
@@ -41,6 +41,9 @@
   .user-letter{
     font-size: 56px;
   }
+  .user-icon{
+    font-size: 60px;
+  }
   .avatarCircle,.userImage, svg {
     width: 120px;
     height: 120px;
@@ -52,6 +55,9 @@
   }
   .user-letter{
     font-size: 32px;
+  }
+  .user-icon{
+    font-size: 36px;
   }
   .avatarCircle, .userImage, svg {
     width: 70px;
@@ -69,6 +75,9 @@
   }
   .user-letter {
     font-size: 18px;
+  }
+  .user-icon{
+    font-size: 22px;
   }
   .avatarCircle,.userImage, svg {
     width: 40px;
@@ -88,6 +97,9 @@
   }
   .user-letter {
     font-size: 11px;
+  }
+  .user-icon{
+    font-size: 14px;
   }
   .editorial-badge {
     right: 0;

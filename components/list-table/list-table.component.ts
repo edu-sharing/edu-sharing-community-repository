@@ -24,7 +24,7 @@ import {
 } from '../../../core-module/core.module';
 import {AddElement} from "../../add-element";
 import {MatMenuTrigger} from "@angular/material";
-import {Router} from "@angular/router";
+import {ActivatedRoute, Router} from "@angular/router";
 
 @Component({
   selector: 'listTable',
@@ -364,6 +364,7 @@ export class ListTableComponent implements EventListener{
               private storage : TemporaryStorageService,
               private network : RestNetworkService,
               private locator : RestLocatorService,
+              private route : ActivatedRoute,
               private router : Router,
               private toast : Toast,
               private frame : FrameEventsService,
@@ -379,11 +380,13 @@ export class ListTableComponent implements EventListener{
   loadRepos(){
     if(!this.loadRepositories)
       return;
-    this.locator.locateApi().subscribe(()=>{
-        this.network.getRepositories().subscribe((data:NetworkRepositories)=>{
-          this.repositories=data.repositories;
+    this.locator.setRoute(this.route).subscribe(()=> {
+      this.locator.locateApi().subscribe(() => {
+        this.network.getRepositories().subscribe((data: NetworkRepositories) => {
+          this.repositories = data.repositories;
           this.cd.detectChanges();
         });
+      });
     });
   }
   onEvent(event:string,data:any){
