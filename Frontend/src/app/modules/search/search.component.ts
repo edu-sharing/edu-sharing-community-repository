@@ -1031,7 +1031,7 @@ export class SearchComponent {
     return criterias;
   }
   private loadSavedSearchNode(node:Node){
-    this.sidenavTab=0;
+    this.sidenavTab = 0;
     UIHelper.routeToSearchNode(this.router,this.searchService.reurl,node);
     this.currentSavedSearch=node;
   }
@@ -1098,25 +1098,30 @@ export class SearchComponent {
         this.searchService.init();
         this.mainNavRef.refreshBanner();
         GlobalContainerComponent.finishPreloading();
-        this.hasCheckbox=true;
-        this.searchService.reurl=null;
-        if(param['addToCollection']){
-          this.collectionApi.getCollection(param['addToCollection']).subscribe((data:CollectionWrapper)=>{
+        this.hasCheckbox = true;
+        this.searchService.reurl = null;
+        if (param.addToCollection){
+          this.collectionApi.getCollection(param.addToCollection).subscribe((data:CollectionWrapper)=>{
             this.addToCollection=data.collection;
             // add to collection layout is only designed for GRIDS, otherwise missing permission info will fail
             this.setViewType(ListTableComponent.VIEW_TYPE_GRID);
             this.refreshListOptions();
             this.updateActionbar(null);
-          },(error)=>{
+          },(error) => {
             this.toast.error(error);
           });
+        }else if (param.reurl) {
+          this.searchService.reurl = param.reurl;
+          this.applyMode = true;
+          this.hasCheckbox = false;
+        }else if (param.savedSearch) {
+            console.log(param);
+            this.nodeApi.getNodeMetadata(param.savedSearch, [RestConstants.ALL]).subscribe((node) => {
+                this.loadSavedSearchNode(node.node);
+            });
+            return;
         }
-        else if(param['reurl']) {
-          this.searchService.reurl = param['reurl'];
-          this.applyMode=true;
-          this.hasCheckbox=false;
-        }
-        this.mainnav=param['mainnav']=='false' ? false : true;
+        this.mainnav = param.mainnav==='false' ? false : true;
 
 
         if(param['query'])
