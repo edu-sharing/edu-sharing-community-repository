@@ -330,6 +330,10 @@
       "SINGLE_MODE": "Aktions-Typ",
       "MODE_NODES": "Material-Interaktionen (Ansichten, Downloads)",
       "MODE_USERS": "Nutzer-Interaktionen (Logins & Logouts)",
+      "EXPORT": "Herunterladen",
+      "EXPORT_LABEL": "Angezeigte Daten exportieren",
+      "EXPORT_PROPERTIES": "Zu exportierende Properties",
+      "EXPORT_PROPERTIES_HINT": "z.B: cm:name, cclom:general_title",
       "HEADERS": {
         "action": "Aktion",
         "count": "Anzahl",

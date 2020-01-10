@@ -77,8 +77,12 @@ listTable{
   padding:30px 20px;
   >div {
     display: flex;
+    flex-direction: column;
     padding: 10px 5%;
     width: 100%;
+    >mat-form-field{
+      margin-bottom: 20px;
+    }
   }
 }
 :host /deep/ {

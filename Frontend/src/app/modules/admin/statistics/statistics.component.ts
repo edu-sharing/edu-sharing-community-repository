@@ -13,6 +13,7 @@ import {AuthorityNamePipe} from '../../../core-ui-module/pipes/authority-name.pi
 import {Toast} from '../../../core-ui-module/toast';
 import {Helper} from '../../../core-module/rest/helper';
 import {CsvHelper} from '../../../core-module/csv.helper';
+import {SessionStorageService} from '../../../core-module/rest/services/session-storage.service';
 
 // Charts.js
 declare var Chart: any;
@@ -173,6 +174,7 @@ export class AdminStatisticsComponent {
         private admin: RestAdminService,
         private statistics: RestStatisticsService,
         private toast: Toast,
+        private storage: SessionStorageService,
         private translate: TranslateService,
         private config: ConfigurationService,
       ) {
@@ -195,12 +197,14 @@ export class AdminStatisticsComponent {
       this.config.get('admin.statistics.groups', []).subscribe((v) => {
         this.additionalGroups = v;
         this.customGroups = ['authority_organization', 'authority_mediacenter'].concat(v);
-        if (this.customGroups.length)
+        if (this.customGroups.length) {
           this.customGroup = this.customGroups[0];
+        }
       });
+      this.storage.get('admin_statistics_properties', 'cm:name\ncclom:general_title\ncclom:general_keyword').subscribe((p) => this.exportProperties = p);
       this.refresh();
     }
-  refresh(){
+  refresh() {
     this.refreshGroups();
     this.refreshNodes();
     this.refreshSingle();
@@ -450,6 +454,7 @@ export class AdminStatisticsComponent {
   export() {
     let csvHeaders: string[];
     let csvData: any;
+    // node export
     switch (this.currentTab) {
       // chart per day/month/year data
       case 0: {
@@ -491,13 +496,30 @@ export class AdminStatisticsComponent {
         break;
       }
       case 2: {
-        // per node
-        csvHeaders = this.columns.map((c) => c.name);
+        const properties = this.exportProperties.split('\n').map((e) => e.trim());
+        this.storage.set('admin_statistics_properties', this.exportProperties);
+        csvHeaders = properties;
         csvData = this.nodes.map((n) => {
-
+          const c: any = {};
+          for (const prop of properties) {
+            c[prop] = n.properties[prop];
+          }
+          return c;
         });
         console.log(this.columns);
         console.log(this.nodes);
+        break;
+      }
+      case 3: {
+        csvHeaders = this.singleDataRows; // .map((s) => this.translate.instant('ADMIN.STATISTICS.HEADERS.' + s));
+        csvData = this.singleData.map((data: any) => {
+          const c: any = Helper.deepCopy(data);
+          // c.action = this.translate.instant('ADMIN.STATISTICS.ACTIONS.' + data.action);
+          c.authority = data.authority.hash.substring(0, 8);
+          c.authority_organization = data.authority.organization.map((m: any) => new AuthorityNamePipe(this.translate).transform((m)));
+          c.authority_mediacenter = data.authority.mediacenter.map((m: any) => new AuthorityNamePipe(this.translate).transform((m)));
+          return c;
+        });
         break;
       }
     }
