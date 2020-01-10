@@ -30,10 +30,15 @@ import org.edu_sharing.repository.server.tools.*;
 import org.edu_sharing.restservices.*;
 import org.edu_sharing.restservices.shared.Filter;
 import org.edu_sharing.restservices.shared.Node;
+import org.edu_sharing.restservices.shared.SearchResult;
 import org.edu_sharing.service.InsufficientPermissionException;
 import org.edu_sharing.service.config.ConfigServiceFactory;
+import org.edu_sharing.service.nodeservice.NodeServiceFactory;
+import org.edu_sharing.service.nodeservice.NodeServiceHelper;
 import org.edu_sharing.service.permission.PermissionService;
 import org.edu_sharing.service.permission.PermissionServiceFactory;
+import org.edu_sharing.service.search.SearchService;
+import org.edu_sharing.service.search.model.SortDefinition;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -136,7 +141,7 @@ public class RenderingServiceImpl implements RenderingService{
 		}
 	}
 	@Override
-	public RenderingServiceData getData(String nodeId, String nodeVersion, String user, String displayMode) throws Exception {
+	public RenderingServiceData getData(String nodeId, String nodeVersion, String user, RenderingServiceOptions options) throws Exception {
 		long time=System.currentTimeMillis();
 		RenderingServiceData data=new RenderingServiceData();
 		RepositoryDao repoDao = RepositoryDao.getRepository(appInfo.getAppId());
@@ -145,9 +150,18 @@ public class RenderingServiceImpl implements RenderingService{
 		// remove any javascript (important for title)
 		node.setProperties(MetadataTemplateRenderer.cleanupHTMLMultivalueProperties(node.getProperties()));
 		data.setNode(node);
-		data.setChildren(
-				NodeDao.convertToRest(repoDao,Filter.createShowAllFilter(),nodeDao.getChildrenSubobjects(),0,Integer.MAX_VALUE).getNodes()
-		);
+		if(NodeServiceHelper.getType(new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE,nodeId)).equals(CCConstants.CCM_TYPE_SAVED_SEARCH)){
+			SearchResult<Node> search = nodeDao.runSavedSearch(0,
+					options.savedSearch.count,
+					SearchService.ContentType.FILES,
+					new SortDefinition(options.savedSearch.sortBy,options.savedSearch.sortAscending),
+					null);
+			data.setChildren(search.getNodes());
+		}else{
+			data.setChildren(
+					NodeDao.convertToRest(repoDao, Filter.createShowAllFilter(), nodeDao.getChildrenSubobjects(), 0, Integer.MAX_VALUE).getNodes()
+			);
+		}
 		// template
 		// switch to the remote appInfo (for shadow objects) so the mds is the right one
 		ApplicationInfo remoteApp=ApplicationInfoList.getRepositoryInfoById(nodeDao.getRepositoryDao().getId());
@@ -156,7 +170,7 @@ public class RenderingServiceImpl implements RenderingService{
 						remoteApp,node.getMetadataset()==null ? CCConstants.metadatasetdefault_id : node.getMetadataset()),
 				new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE,nodeId),
 				user,
-				nodeDao.getAllProperties()).render(RenderingTool.DISPLAY_INLINE.equals(displayMode) ? "io_render_inline" : "io_render"));
+				nodeDao.getAllProperties()).render(RenderingTool.DISPLAY_INLINE.equals(options.displayMode) ? "io_render_inline" : "io_render"));
 
 		// user
 		if(!AuthenticationUtil.isRunAsUserTheSystemUser()) {

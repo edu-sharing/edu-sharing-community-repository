@@ -199,53 +199,14 @@ public class SearchApi {
 
 			Filter filter = new Filter(propertyFilter);
 
-			NodeDao saved = NodeDao.getNode(RepositoryDao.getHomeRepository(), nodeId);
-			HashMap<String, Object> props = saved.getNativeProperties();
-
-			RepositoryDao repoDao = RepositoryDao
-					.getRepository((String) props.get(CCConstants.CCM_PROP_SAVED_SEARCH_REPOSITORY));
-			MdsDaoV2 mdsDao = MdsDaoV2.getMds(repoDao, (String) props.get(CCConstants.CCM_PROP_SAVED_SEARCH_MDS));
-
-			SearchToken token = new SearchToken();
-			token.setFacettes(facettes);
-			token.setSortDefinition(new SortDefinition(sortProperties, sortAscending));
-			token.setFrom(skipCount != null ? skipCount : 0);
-			token.setMaxResult(maxItems != null ? maxItems : RestConstants.DEFAULT_MAX_ITEMS);
-			token.setContentType(contentType);
-
-			ObjectMapper mapper = new ObjectMapper();
-			List<MdsQueryCriteria> parameters = Arrays.asList(mapper.readValue(
-					(String) props.get(CCConstants.CCM_PROP_SAVED_SEARCH_PARAMETERS), MdsQueryCriteria[].class));
-			NodeSearch search = NodeDao.searchV2(repoDao, mdsDao,
-					(String) props.get(CCConstants.CCM_PROP_SAVED_SEARCH_QUERY), parameters, token, filter);
-
-		    	List<Node> data = null;//new ArrayList<Node>();
-		    	if(search.getNodes().size() < search.getResult().size()){
-		    		//searched repo deliveres only nodeRefs by query time
-		    		data = new ArrayList<Node>();
-		    		for (NodeRef ref : search.getResult()) {
-			    		data.add(NodeDao.getNode(repoDao, ref.getId(),filter).asNode());
-			    	}
-		    	}else{
-		    		//searched repo delivered properties by query time
-		    		data = search.getNodes();
-		    	}
-		    	
-		    	
-		    	Pagination pagination = new Pagination();
-		    	pagination.setFrom(search.getSkip());
-		    	pagination.setCount(data.size());
-		    	pagination.setTotal(search.getCount());
-		    	
-		    	
-		    	SearchResult<Node> response = new SearchResult<>();
-		    	response.setNodes(data);
-		    	response.setPagination(pagination);	    	
-		    	response.setFacettes(search.getFacettes());
-		    	
-		    	return Response.status(Response.Status.OK).entity(response).build();
-		
-		
+			SearchResult<Node> result = NodeDao.getNode(RepositoryDao.getHomeRepository(), nodeId, filter).
+					runSavedSearch(skipCount != null ? skipCount : 0,
+							maxItems != null ? maxItems : RestConstants.DEFAULT_MAX_ITEMS,
+							contentType,
+							new SortDefinition(sortProperties,sortAscending),
+							facettes
+							);
+			return Response.status(Response.Status.OK).entity(result).build();
 	    	}  catch (Throwable t) {
 	    		return ErrorResponse.createResponse(t);
 	    	}
