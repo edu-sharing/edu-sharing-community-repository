@@ -3,10 +3,7 @@ package org.edu_sharing.repository.server.rendering;
 import java.io.IOException;
 import java.net.URLEncoder;
 import java.security.GeneralSecurityException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
@@ -34,10 +31,7 @@ import org.edu_sharing.repository.server.tools.security.SignatureVerifier;
 import org.edu_sharing.service.nodeservice.NodeServiceFactory;
 import org.edu_sharing.service.nodeservice.NodeServiceHelper;
 import org.edu_sharing.service.permission.PermissionServiceFactory;
-import org.edu_sharing.service.rendering.RenderingService;
-import org.edu_sharing.service.rendering.RenderingServiceData;
-import org.edu_sharing.service.rendering.RenderingServiceFactory;
-import org.edu_sharing.service.rendering.RenderingTool;
+import org.edu_sharing.service.rendering.*;
 import org.edu_sharing.service.repoproxy.RepoProxyFactory;
 import org.edu_sharing.service.tracking.NodeTrackingDetails;
 import org.edu_sharing.service.tracking.TrackingService;
@@ -318,7 +312,12 @@ public class RenderingProxy extends HttpServlet {
 			RenderingService service = RenderingServiceFactory.getRenderingService(homeRep.getAppId());
 			// @todo 5.1 should version inline be transfered?
 			try {
-				RenderingServiceData renderData = service.getData(nodeId, null,usernameDecrypted, display);
+				RenderingServiceOptions options = new RenderingServiceOptions();
+				options.displayMode=display;
+				options.savedSearch.count = Integer.parseInt(req.getParameter("count"));
+				options.savedSearch.sortBy = Collections.singletonList(req.getParameter("sortBy"));
+				options.savedSearch.sortAscending = Collections.singletonList(Boolean.valueOf(req.getParameter("sortAscending")));
+				RenderingServiceData renderData = service.getData(nodeId, null,usernameDecrypted, options);
 				resp.getOutputStream().write(
 						service.getDetails(finalContentUrl, renderData).getBytes("UTF-8"));
 				// track inline / lms
