@@ -12,6 +12,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.stream.Collectors;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.repo.security.authentication.AuthenticationUtil.RunAsWork;
 import org.alfresco.service.ServiceRegistry;
@@ -53,7 +54,6 @@ import org.edu_sharing.service.notification.NotificationServiceFactory;
 import org.edu_sharing.service.permission.PermissionServiceFactory;
 import org.edu_sharing.service.permission.PermissionServiceHelper;
 import org.edu_sharing.service.rating.AccumulatedRatings;
-import org.edu_sharing.service.rating.RatingService;
 import org.edu_sharing.service.rating.RatingServiceFactory;
 import org.edu_sharing.service.remote.RemoteObjectService;
 import org.edu_sharing.service.search.SearchService;
@@ -62,7 +62,6 @@ import org.edu_sharing.service.search.model.SearchToken;
 import org.edu_sharing.service.search.model.SortDefinition;
 import org.edu_sharing.service.share.ShareService;
 import org.edu_sharing.service.share.ShareServiceImpl;
-import org.edu_sharing.service.statistic.StatisticsGlobal;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
@@ -380,7 +379,58 @@ public class NodeDao {
 			throw DAOException.mapping(e);
 		}
 	}
+	public SearchResult<Node> runSavedSearch(int skipCount, int maxItems, SearchService.ContentType contentType, SortDefinition sort, List<String> facettes) throws DAOException {
+		try {
+			if(!CCConstants.getValidLocalName(CCConstants.CCM_TYPE_SAVED_SEARCH).equals(getType())){
+				throw new IllegalArgumentException("The given node must be of type "+CCConstants.CCM_TYPE_SAVED_SEARCH);
+			}
+			HashMap<String, Object> props = getNativeProperties();
+			RepositoryDao repoDao = RepositoryDao
+					.getRepository((String) props.get(CCConstants.CCM_PROP_SAVED_SEARCH_REPOSITORY));
+			MdsDaoV2 mdsDao = MdsDaoV2.getMds(repoDao, (String) props.get(CCConstants.CCM_PROP_SAVED_SEARCH_MDS));
 
+			SearchToken token = new SearchToken();
+			token.setFacettes(facettes);
+			token.setSortDefinition(sort);
+			token.setFrom(skipCount);
+			token.setMaxResult(maxItems);
+			token.setContentType(contentType);
+
+			ObjectMapper mapper = new ObjectMapper();
+			List<MdsQueryCriteria> parameters = Arrays.asList(mapper.readValue(
+					(String) props.get(CCConstants.CCM_PROP_SAVED_SEARCH_PARAMETERS), MdsQueryCriteria[].class));
+			NodeSearch search = NodeDao.searchV2(repoDao, mdsDao,
+					(String) props.get(CCConstants.CCM_PROP_SAVED_SEARCH_QUERY), parameters, token, filter);
+
+			List<Node> data;
+			if (search.getNodes().size() < search.getResult().size()) {
+				//searched repo deliveres only nodeRefs by query time
+				data = new ArrayList<>();
+				for (NodeRef ref : search.getResult()) {
+					data.add(NodeDao.getNode(repoDao, ref.getId(), filter).asNode());
+				}
+			} else {
+				//searched repo delivered properties by query time
+				data = search.getNodes();
+			}
+
+
+			Pagination pagination = new Pagination();
+			pagination.setFrom(search.getSkip());
+			pagination.setCount(data.size());
+			pagination.setTotal(search.getCount());
+
+
+			SearchResult<Node> response = new SearchResult<>();
+			response.setNodes(data);
+			response.setPagination(pagination);
+			response.setFacettes(search.getFacettes());
+
+			return response;
+		}catch(Throwable t){
+			throw DAOException.mapping(t);
+		}
+	}
 	public static NodeSearch getRelevantNodes(RepositoryDao repoDao, int skipCount, int maxItems) throws DAOException {
 		try {
 			return transform(repoDao, SearchServiceFactory.getSearchService(repoDao.getId()).getRelevantNodes(skipCount,maxItems));
