@@ -98,14 +98,22 @@
   <div class="about">
     <i icon iconId="edu-quotes" class="quotes">quotes</i>
     <div class="about-buttons" *ngIf="isMe && editProfile">
-      <a class="edit clickable" *ngIf="!editAbout && !edit" (click)="aboutEdit()">{{'PROFILES.EDIT' | translate}}</a>
-      <a class="edit clickable" *ngIf="editAbout" (click)="editAbout=false">{{'PROFILES.CANCEL_EDIT' | translate}}</a>
+      <button mat-button color="primary" class="edit" *ngIf="!editAbout && !edit" (click)="aboutEdit()">{{'PROFILES.EDIT' | translate}}</button>
+      <button mat-button color="primary" class="edit" *ngIf="editAbout" (click)="editAbout=false">{{'PROFILES.CANCEL_EDIT' | translate}}</button>
     </div>
     <div *ngIf="editAbout">
-      <label for="about">{{'PROFILES.ABOUT_LABEL' | translate}}</label>
-      <textarea id="about" class="materialize-textarea" [(ngModel)]="userEdit.profile.about"></textarea>
+      <mat-form-field>
+        <mat-label>{{'PROFILES.ABOUT_LABEL' | translate}}</mat-label>
+        <textarea
+          matInput
+          cdkTextareaAutosize
+          cdkAutosizeMinRows="2"
+          cdkAutosizeMaxRows="4"
+          id="about"
+          [(ngModel)]="userEdit.profile.about"></textarea>
+      </mat-form-field>
       <div class="change-buttons">
-        <a tabindex="0" (keyup.enter)="saveEdits()" (click)="saveEdits()" class="waves-effect waves-light btn">{{'SAVE' | translate}}</a>
+        <button mat-raised-button color="primary" (click)="saveEdits()">{{'SAVE' | translate}}</button>
       </div>
     </div>
     <div *ngIf="!editAbout">
@@ -124,13 +132,11 @@
       </div>
     </div>
     <div *ngIf="changePassword" class="password" [@overlay]="changePassword">
-      <label for="oldPassword">{{'OLD_PASSWORD' | translate }}</label>
-      <input-password [hint]="false" [displayStrength]="false" [(value)]="oldPassword" required="true" id="oldPassword"></input-password>
+      <input-password label="{{'OLD_PASSWORD' | translate }}" [hint]="false" [displayStrength]="false" [(value)]="oldPassword" required="true" id="oldPassword"></input-password>
       <!--<input type="password" id="oldPassword" name="oldPassword" [(ngModel)]="" required="true">-->
-      <label for="password">{{'NEW_PASSWORD' | translate }}</label>
-      <input-password #newPassword [hint]="true" [displayStrength]="true" [(value)]="password" required="true" id="password"></input-password>
+      <input-password #newPassword label="{{'NEW_PASSWORD' | translate }}" [hint]="true" [displayStrength]="true" [(value)]="password" required="true" id="password"></input-password>
       <div class="change-buttons">
-        <a tabindex="0" [class.disabled]="!oldPassword.trim() || newPassword.passwordStrength == 'weak'"  (keyup.enter)="savePassword()" (click)="savePassword()" class="waves-effect waves-light btn">{{'SAVE' | translate}}</a>
+        <button mat-raised-button color="primary" [disabled]="!oldPassword.trim() || newPassword.passwordStrength == 'weak'"  (click)="savePassword()">{{'SAVE' | translate}}</button>
       </div>
      </div>
   </div>

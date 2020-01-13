@@ -136,9 +136,11 @@ $path:'../../../assets/images/';
   }
   .about{
     position: relative;
-    padding-left: 70px;
     >div{
       padding-top: 20px;
+    }
+    mat-form-field{
+      width: 100%;
     }
     .about-buttons{
       text-align: right;
@@ -202,6 +204,11 @@ $path:'../../../assets/images/';
     button {
       float: right;
     }
+  }
+}
+:host /deep/{
+  input-password mat-form-field{
+    width: 100%;
   }
 }
 @media screen and (max-width: ($mobileTabSwitchWidth)) {
