@@ -40,7 +40,7 @@ export class CommentsListComponent  {
   private user: User;
   private comments: Comment[];
   private edit: Comment[];
-  private options: OptionItem[];
+  options: OptionItem[];
 
   public newComment="";
   public editComment:Comment=null;
