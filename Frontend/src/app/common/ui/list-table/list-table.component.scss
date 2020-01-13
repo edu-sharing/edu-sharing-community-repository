@@ -586,7 +586,7 @@ $orderAnimationTime:$transitionNormal*5;
   left: 5px;
 }
 .rowInner{
-  max-height:1.5rem;
+  max-height:1.5em;
   overflow: hidden;
   flex-grow:1;
 }
@@ -604,9 +604,12 @@ $orderAnimationTime:$transitionNormal*5;
     overflow-wrap: break-word;
   }
 }
-.node_ccm_commonlicense_key .rowInner,
-.cardList .rowInner{
-  max-height: none;
+.row_1,
+.node_ccm_commonlicense_key,
+.node_ccm_replicationsource{
+  .rowInner {
+    max-height: none;
+  }
 }
 .checkbox{
   padding-left:15px!important;
@@ -752,10 +755,6 @@ $orderAnimationTime:$transitionNormal*5;
 .cardSmallList .row{
   height:100%;
   border-bottom: none;
-}
-.cardList .row_2 .rowInner,
-.cardList .row_3 .rowInner{
-  max-height: 1.5rem;
 }
 .cardList .row_2,
 .cardList .row_3,
