@@ -246,10 +246,10 @@
                         {{'SEARCH.QUERY_NO_RESULT' | translate}}
                     </div>
                     <div class="heading" *ngIf="searchService.searchResult.length">
-                        <div *ngIf="searchService.sort.materialsColumns">
+                        <div>
                             {{ 'SEARCH.MATERIALS' | translate}}
                             <span *ngIf="searchService.resultCount.materials && currentRepository!='-all-'">({{searchService.resultCount.materials}})</span>
-                            <div class="sorting" [class.clickable]="searchService.sort.materialsColumns" (click)="searchService.sort.materialsColumns ? searchService.sort.materials=true : null">
+                            <div *ngIf="searchService.sort.materialsColumns" class="sorting" [class.clickable]="searchService.sort.materialsColumns" (click)="searchService.sort.materialsColumns ? searchService.sort.materials=true : null">
                                 <div class="sorting-info">
                                     <div>{{'NODE.'+searchService.sort.materialsSortBy | translate}}</div>
                                     <i *ngIf="searchService.sort.materialsColumns" class="material-icons">arrow_{{searchService.sort.materialsSortAscending ? 'upward' : 'downward'}}</i>
