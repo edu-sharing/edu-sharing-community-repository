@@ -90,7 +90,9 @@ public class RenderingServiceImpl implements RenderingService{
 			// base url for dynamic context routing of domains
 			renderingServiceUrl = UrlTool.setParam(renderingServiceUrl, "baseUrl",URLEncoder.encode(URLTool.getBaseUrl(true)));
 			logger.debug(renderingServiceUrl);
-			RenderingServiceData data = getData(nodeId,nodeVersion,AuthenticationUtil.getFullyAuthenticatedUser(),displayMode);
+			RenderingServiceOptions options = new RenderingServiceOptions();
+			options.displayMode = displayMode;
+			RenderingServiceData data = getData(nodeId, nodeVersion, AuthenticationUtil.getFullyAuthenticatedUser(), options);
 			return getDetails(renderingServiceUrl, data);
 		}catch(Throwable t) {
 			logger.warn(t.getMessage(),t);
@@ -152,7 +154,7 @@ public class RenderingServiceImpl implements RenderingService{
 		data.setNode(node);
 		if(NodeServiceHelper.getType(new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE,nodeId)).equals(CCConstants.CCM_TYPE_SAVED_SEARCH)){
 			SearchResult<Node> search = nodeDao.runSavedSearch(0,
-					options.savedSearch.count,
+					options.savedSearch.maxItems,
 					SearchService.ContentType.FILES,
 					new SortDefinition(options.savedSearch.sortBy,options.savedSearch.sortAscending),
 					null);
