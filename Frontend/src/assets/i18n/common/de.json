@@ -209,6 +209,7 @@
     "cm:creator": "erstellt von",
     "cclom:title": "Titel",
     "cclom:general_keyword": "Schlagwörter",
+    "cclom:general_description": "Beschreibung",
     "cclom:duration": "Dauer",
     "sys:archivedDate": "gelöscht",
     "cclom:version": "Version",
