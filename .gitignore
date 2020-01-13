@@ -9,6 +9,8 @@ Backend/ng/
 Backend/war/
 *.class
 /Internal/
+Backend/.gradle
+Backend/.settings
 Backend/build.number
 Backend/edu-sharing/
 Backend/release/
