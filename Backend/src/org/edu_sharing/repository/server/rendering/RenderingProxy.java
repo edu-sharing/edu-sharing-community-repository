@@ -25,6 +25,7 @@ import org.edu_sharing.repository.server.authentication.Context;
 import org.edu_sharing.repository.server.tools.ApplicationInfo;
 import org.edu_sharing.repository.server.tools.ApplicationInfoList;
 import org.edu_sharing.repository.server.tools.HttpException;
+import org.edu_sharing.repository.server.tools.RequestHelper;
 import org.edu_sharing.repository.server.tools.URLTool;
 import org.edu_sharing.repository.server.tools.security.Encryption;
 import org.edu_sharing.repository.server.tools.security.SignatureVerifier;
@@ -313,10 +314,11 @@ public class RenderingProxy extends HttpServlet {
 			// @todo 5.1 should version inline be transfered?
 			try {
 				RenderingServiceOptions options = new RenderingServiceOptions();
+				RequestHelper requestHelper = new RequestHelper(req);
 				options.displayMode=display;
-				options.savedSearch.count = Integer.parseInt(req.getParameter("count"));
-				options.savedSearch.sortBy = Collections.singletonList(req.getParameter("sortBy"));
-				options.savedSearch.sortAscending = Collections.singletonList(Boolean.valueOf(req.getParameter("sortAscending")));
+				options.savedSearch.maxItems = requestHelper.parseParam("maxItems", Integer::parseInt);
+				options.savedSearch.sortBy = Collections.singletonList(requestHelper.readParam("sortBy"));
+				options.savedSearch.sortAscending = Collections.singletonList(requestHelper.parseParam("sortAscending", Boolean::valueOf));
 				RenderingServiceData renderData = service.getData(nodeId, null,usernameDecrypted, options);
 				resp.getOutputStream().write(
 						service.getDetails(finalContentUrl, renderData).getBytes("UTF-8"));

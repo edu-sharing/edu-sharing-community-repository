@@ -7,7 +7,7 @@ public class RenderingServiceOptions {
     public SavedSearch savedSearch = new SavedSearch();
 
     public static class SavedSearch {
-        public int count;
+        public int maxItems;
         public List<String> sortBy;
         public List<Boolean> sortAscending;
     }
