@@ -249,6 +249,14 @@ public class SearchApi {
 				}
 				response.setNodes(data);
 				
+				
+				Pagination pagination = new Pagination();
+		    	pagination.setFrom(nodeSearch.getSkip());
+		    	pagination.setCount(data.size());
+		    	pagination.setTotal(nodeSearch.getCount());
+		    	
+		    	response.setPagination(pagination);
+				
 				/*response.setPagination(pagination);
 				response.setFacettes(search.getFacettes());
 				*/

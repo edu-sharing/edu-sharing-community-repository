@@ -354,6 +354,7 @@ export class NodeRenderComponent implements EventListener{
                     this.addVideoControls();
                     this.addComments();
                     this.loadNode();
+                    this.loadSimilarNodes();
                     this.isLoading = false;
                 });
             }
@@ -658,8 +659,14 @@ export class NodeRenderComponent implements EventListener{
         return RestHelper.getTitle(node);
     }
 
-    public switchNode(node:Node){
+    public switchNode(event : any){
         UIHelper.scrollSmooth();
-        this.node=node;
+        this.node = event.node;
+    }
+
+    private loadSimilarNodes() {
+        this.searchApi.searchFingerprint(this._nodeId).subscribe( (data: NodeList) => {
+            this.similarNodes = data.nodes;
+        });
     }
 }
