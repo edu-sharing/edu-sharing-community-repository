@@ -25,7 +25,6 @@ import org.edu_sharing.repository.server.MCAlfrescoAPIClient;
 import org.edu_sharing.repository.server.tools.ApplicationInfo;
 import org.edu_sharing.repository.server.tools.ApplicationInfoList;
 import org.edu_sharing.repository.server.tools.HttpException;
-import org.edu_sharing.repository.server.tools.RequestHelper;
 import org.edu_sharing.repository.server.tools.URLTool;
 import org.edu_sharing.repository.server.tools.security.Encryption;
 import org.edu_sharing.repository.server.tools.security.SignatureVerifier;
@@ -304,22 +303,16 @@ public class RenderingProxy extends HttpServlet {
 		return contentUrl;
 	}
 
-	private void render(ApplicationInfo homeRep, String display, HttpServletRequest req, HttpServletResponse resp,
-			String nodeId, String usernameDecrypted, String finalContentUrl, Usage usage) throws RenderingException {
+	private void render(ApplicationInfo homeRep, HttpServletRequest req, HttpServletResponse resp,
+			String nodeId, String usernameDecrypted, String finalContentUrl, Usage usage, 
+			RenderingServiceOptions options) throws RenderingException {
 		RenderingService service = RenderingServiceFactory.getRenderingService(homeRep.getAppId());
 		// @todo 5.1 should version inline be transfered?
 		try {
-			RenderingServiceOptions options = new RenderingServiceOptions();
-			RequestHelper requestHelper = new RequestHelper(req);
-			options.displayMode = display;
-			options.savedSearch.maxItems = requestHelper.parseParam("maxItems", Integer::parseInt);
-			options.savedSearch.sortBy = Collections.singletonList(requestHelper.readParam("sortBy"));
-			options.savedSearch.sortAscending = Collections
-					.singletonList(requestHelper.parseParam("sortAscending", Boolean::valueOf));
 			RenderingServiceData renderData = service.getData(nodeId, null, usernameDecrypted, options);
 			resp.getOutputStream().write(service.getDetails(finalContentUrl, renderData).getBytes("UTF-8"));
 			// track inline / lms
-			if (display.equals(RenderingTool.DISPLAY_INLINE)) {
+			if (options.displayMode.equals(RenderingTool.DISPLAY_INLINE)) {
 				NodeTrackingDetails details = new NodeTrackingDetails(getVersion(req));
 				details.setLms(new NodeTrackingDetails.NodeTrackingLms(usage));
 				TrackingServiceFactory.getTrackingService().trackActivityOnNode(
@@ -351,7 +344,6 @@ public class RenderingProxy extends HttpServlet {
 	private void queryRendering(HttpServletRequest req, HttpServletResponse resp, String nodeId, Usage usage,
 			ApplicationInfo repoInfo) throws Exception {
 		String rep_id = req.getParameter("rep_id");
-		String display = req.getParameter("display");
 		ApplicationInfo homeRep = ApplicationInfoList.getHomeRepository();
 		String usernameDecrypted = getDecryptedUsername(req);
 		String contentUrl = getContentUrl(homeRep, rep_id, repoInfo);
@@ -359,8 +351,9 @@ public class RenderingProxy extends HttpServlet {
 				usernameDecrypted, nodeId);
 		// it is a trusted app who requested and signature was verified, so we can
 		// render the node
+		RenderingServiceOptions options = RenderingServiceOptions.fromRequestParameters(req);
 		runAsSystem(() -> {
-			render(homeRep, display, req, resp, nodeId, usernameDecrypted, finalContentUrl, usage);
+			render(homeRep, req, resp, nodeId, usernameDecrypted, finalContentUrl, usage, options);
 		});
 	}
 
