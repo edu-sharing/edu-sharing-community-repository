@@ -26,6 +26,7 @@ export class RegisterDoneComponent{
     keyInput = '';
     private _keyUrl = '';
     private static STATUS_INTERVAL = 5000;
+    private activated = false;
     get keyUrl(){
         return this._keyUrl;
     }
@@ -70,6 +71,9 @@ export class RegisterDoneComponent{
 
     // loop and check if the user has already registered in an other tab
     private checkStatus() {
+        if(this.activated){
+            return;
+        }
         if(this.inputState!='done') {
             setTimeout(()=>this.checkStatus(),RegisterDoneComponent.STATUS_INTERVAL);
             return;
@@ -88,6 +92,7 @@ export class RegisterDoneComponent{
         this.loading=true;
         if(this.inputState=='done') {
             this.register.activate(keyUrl).subscribe(() => {
+                this.activated = true;
                 if(this.cordova.isRunningCordova()){
                     this.locator.createOAuthFromSession().subscribe(()=>{
                         UIHelper.goToDefaultLocation(this.router, this.platformLocation, this.config);
