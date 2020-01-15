@@ -2,6 +2,7 @@ package org.edu_sharing.service.rendering;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -154,9 +155,10 @@ public class RenderingServiceImpl implements RenderingService{
 		data.setNode(node);
 		if(NodeServiceHelper.getType(new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE,nodeId)).equals(CCConstants.CCM_TYPE_SAVED_SEARCH)){
 			SearchResult<Node> search = nodeDao.runSavedSearch(0,
-					options.savedSearch.maxItems,
+					options.savedSearch.getMaxItems(),
 					SearchService.ContentType.FILES,
-					new SortDefinition(options.savedSearch.sortBy,options.savedSearch.sortAscending),
+					new SortDefinition(Collections.singletonList(options.savedSearch.getSortBy()),
+							Collections.singletonList(options.savedSearch.getSortAscending())),
 					null);
 			data.setChildren(search.getNodes());
 		}else{

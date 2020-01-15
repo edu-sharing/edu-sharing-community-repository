@@ -64,7 +64,7 @@ export class AdminStatisticsComponent {
   singleDataRows: string[];
   groupedChart: any;
   nodesLoading: boolean;
-  nodes: Node[];
+  nodes: any[];
   columns: ListItem[];
   currentTab= 0;
   exportProperties: string;
@@ -496,18 +496,19 @@ export class AdminStatisticsComponent {
         break;
       }
       case 2: {
-        const properties = this.exportProperties.split('\n').map((e) => e.trim());
+        let properties = this.exportProperties.split('\n').map((e) => e.trim());
         this.storage.set('admin_statistics_properties', this.exportProperties);
-        csvHeaders = properties;
+        csvHeaders = properties.concat(Helper.uniqueArray(this.nodes.map((n) => Object.keys(n.counts)).reduce((a: any, b: any) => a.concat(b))));
         csvData = this.nodes.map((n) => {
           const c: any = {};
           for (const prop of properties) {
-            c[prop] = n.properties[prop];
+            c[prop] = n.properties ? n.properties[prop] : n.ref.id;
+            for (const key of Object.keys(n.counts)) {
+              c[key] = n.counts[key];
+            }
           }
           return c;
         });
-        console.log(this.columns);
-        console.log(this.nodes);
         break;
       }
       case 3: {

@@ -1,6 +1,7 @@
 package org.edu_sharing.repository.server.rendering;
 
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.security.GeneralSecurityException;
 import java.util.*;
@@ -21,11 +22,9 @@ import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.client.tools.UrlTool;
 import org.edu_sharing.repository.server.AuthenticationToolAPI;
 import org.edu_sharing.repository.server.MCAlfrescoAPIClient;
-import org.edu_sharing.repository.server.authentication.Context;
 import org.edu_sharing.repository.server.tools.ApplicationInfo;
 import org.edu_sharing.repository.server.tools.ApplicationInfoList;
 import org.edu_sharing.repository.server.tools.HttpException;
-import org.edu_sharing.repository.server.tools.RequestHelper;
 import org.edu_sharing.repository.server.tools.URLTool;
 import org.edu_sharing.repository.server.tools.security.Encryption;
 import org.edu_sharing.repository.server.tools.security.SignatureVerifier;
@@ -182,167 +181,180 @@ public class RenderingProxy extends HttpServlet {
 			throw new SecurityException("Parameter \"u\" (username) could not be decrypted: "+e.getMessage(),e);
 		}
 	}
-	private void queryRendering(HttpServletRequest req, HttpServletResponse resp, String nodeId, Usage usage, ApplicationInfo repoInfo) throws Exception {
-		String rep_id = req.getParameter("rep_id");
-		String display = req.getParameter("display");
-		ApplicationInfo homeRep = ApplicationInfoList.getHomeRepository();
-		String usernameDecrypted=getDecryptedUsername(req);
-		Encryption encryptionTool = new Encryption("RSA");
+
+	private String getContentUrl(ApplicationInfo homeRep, String rep_id, ApplicationInfo repoInfo)
+			throws RenderingException {
 		String contentUrl;
-		if(homeRep.getAppId().equals(rep_id)){
+		if (homeRep.getAppId().equals(rep_id)) {
 			contentUrl = homeRep.getContentUrl();
-			if(contentUrl == null) {
+			if (contentUrl == null) {
 				logger.warn("no content url configured");
-				throw new RenderingException(HttpServletResponse.SC_INTERNAL_SERVER_ERROR,"no content url configured",RenderingException.I18N.internal);
+				throw new RenderingException(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "no content url configured",
+						RenderingException.I18N.internal);
 			}
-		}else{
-
-			if(repoInfo == null){
-				throw new RenderingException(HttpServletResponse.SC_BAD_REQUEST,"unknown rep_id "+rep_id,RenderingException.I18N.invalid_parameters);
+		} else {
+			if (repoInfo == null) {
+				throw new RenderingException(HttpServletResponse.SC_BAD_REQUEST, "unknown rep_id " + rep_id,
+						RenderingException.I18N.invalid_parameters);
 			}
-
-			contentUrl = repoInfo.getClientBaseUrl() +"/renderingproxy";
+			contentUrl = repoInfo.getClientBaseUrl() + "/renderingproxy";
 			contentUrl = UrlTool.setParam(contentUrl, "proxyRepId", ApplicationInfoList.getHomeRepository().getAppId());
 		}
+		return contentUrl;
+	}
 
-		//put all Parameters to url but not sig signeddata and ts
-		Map parameterMap = req.getParameterMap();
-		for(Object o : parameterMap.entrySet()){
-			Map.Entry entry = (Map.Entry)o;
-			String key = (String)entry.getKey();
-			String value = null;
-			if(entry.getValue() instanceof String[]){
+	private String handleUserParameter(ApplicationInfo homeRep, String rep_id, String usernameDecrypted, String value)
+			throws RenderingException {
+		Encryption encryptionTool = new Encryption("RSA");
+		if (homeRep.getAppId().equals(rep_id)) {
+			// request.getParameter encodes the value, so we have to decode it again
+			try {
+				ApplicationInfo targetApplication = ApplicationInfoList.getRenderService();
+				if (!homeRep.getAppId().equals(rep_id)) {
+					targetApplication = ApplicationInfoList.getRepositoryInfoById(rep_id);
+				}
+				byte[] userEncryptedBytes = encryptionTool.encrypt(usernameDecrypted.getBytes(),
+						encryptionTool.getPemPublicKey(targetApplication.getPublicKey()));
+				value = java.util.Base64.getEncoder().encodeToString(userEncryptedBytes);
 
-				value = ((String[])entry.getValue())[0];
-
-			}else{
-				value = (String)entry.getValue();
+			} catch (Exception e) {
+				logger.error(e.getMessage(), e);
 			}
+		} else {
+			final String usernameDecrypted2 = usernameDecrypted;
+			ApplicationInfo remoteRepo = ApplicationInfoList.getRepositoryInfoById(rep_id);
+			AuthenticationUtil.RunAsWork<String> runAs = () -> {
+				String localUsername = new String(usernameDecrypted2).trim();
+				MCAlfrescoAPIClient apiClient = new MCAlfrescoAPIClient();
+				HashMap<String, String> personData = apiClient.getUserInfo(localUsername);
 
+				/**
+				 * make sure that the remote user exists
+				 */
+				if (RepoProxyFactory.getRepoProxy().myTurn(rep_id)) {
+					try {
+						RepoProxyFactory.getRepoProxy().remoteAuth(remoteRepo, false);
+					} catch (Throwable t) {
+						logger.error("Remote user auth failed", t);
+					}
+				}
+				return personData.get(CCConstants.PROP_USER_ESUID);
+			};
 
-			//leave out the following cause we add our own signature
-			if(key.equals("sig") || key.equals("signed") || key.equals("ts")){
+			try {
+				String esuid = AuthenticationUtil.runAs(runAs, usernameDecrypted.trim());
+				value = esuid + "@" + homeRep.getAppId();
+				byte[] esuidEncrptedBytes = encryptionTool.encrypt(value.getBytes(),
+						encryptionTool.getPemPublicKey(remoteRepo.getPublicKey()));
+				value = java.util.Base64.getEncoder().encodeToString(esuidEncrptedBytes);
+			} catch (Exception e) {
+				throw new RenderingException(HttpServletResponse.SC_BAD_REQUEST, "remote user auth failed " + rep_id,
+						RenderingException.I18N.invalid_parameters, e);
+			}
+		}
+		return value;
+	}
+
+	private Iterable<Map.Entry<String, String>> getParameters(HttpServletRequest req) {
+		Map parameterMap = req.getParameterMap();
+		ArrayList<Map.Entry<String, String>> parameters = new ArrayList<Map.Entry<String, String>>();
+		for (Object o : parameterMap.entrySet()) {
+			Map.Entry entry = (Map.Entry) o;
+			String key = (String) entry.getKey();
+			String value = null;
+			if (entry.getValue() instanceof String[]) {
+				value = ((String[]) entry.getValue())[0];
+			} else {
+				value = (String) entry.getValue();
+			}
+			parameters.add(new AbstractMap.SimpleEntry<String, String>(key, value));
+		}
+		return parameters;
+	}
+
+	private String populateContentUrlParameters(String contentUrl,
+			Iterable<Map.Entry<String, String>> requestParameters, ApplicationInfo homeRep, String rep_id,
+			String usernameDecrypted, String nodeId) throws RenderingException, UnsupportedEncodingException {
+		// put all Parameters to url but not sig signeddata and ts
+		for (Map.Entry<String, String> parameter : requestParameters) {
+			// leave out the following cause we add our own signature
+			if (parameter.getKey().equals("sig") || parameter.getKey().equals("signed")
+					|| parameter.getKey().equals("ts")) {
 				continue;
 			}
-			if(key.equals("u") && !homeRep.getAppId().equals(rep_id)){
-				final String usernameDecrypted2 = usernameDecrypted;
-
-				ApplicationInfo remoteRepo = ApplicationInfoList.getRepositoryInfoById(rep_id);
-
-				AuthenticationUtil.RunAsWork<String> runAs = () -> {
-
-					String localUsername = new String(usernameDecrypted2).trim();
-
-					MCAlfrescoAPIClient apiClient = new MCAlfrescoAPIClient();
-
-
-
-					HashMap<String,String> personData = apiClient.getUserInfo(localUsername);
-
-                    /**
-                     *make sure that the remote user exists
-                     */
-                    if(RepoProxyFactory.getRepoProxy().myTurn(rep_id)) {
-                        try {
-                            RepoProxyFactory.getRepoProxy().remoteAuth(remoteRepo,false);
-                        } catch (Throwable t) {
-                            logger.error("Remote user auth failed",t);
-                        }
-                    }
-
-					return personData.get(CCConstants.PROP_USER_ESUID);
-				};
-
-				try{
-					String esuid = AuthenticationUtil.runAs(runAs, usernameDecrypted.trim());
-					value = esuid + "@" + homeRep.getAppId();
-
-					byte[] esuidEncrptedBytes = encryptionTool.encrypt(value.getBytes(), encryptionTool.getPemPublicKey(remoteRepo.getPublicKey()));
-					value = java.util.Base64.getEncoder().encodeToString(esuidEncrptedBytes);
-
-				}catch(Exception e){
-					throw new RenderingException(HttpServletResponse.SC_BAD_REQUEST,"remote user auth failed "+ rep_id,RenderingException.I18N.invalid_parameters,e);
-				}
-			}else {
-
-				//request.getParameter encodes the value, so we have to decode it again
-				if(key.equals("u")){
-					try {
-						ApplicationInfo targetApplication = ApplicationInfoList.getRenderService();
-						if(!homeRep.getAppId().equals(rep_id)){
-							targetApplication = ApplicationInfoList.getRepositoryInfoById(rep_id);
-						}
-						byte[] userEncryptedBytes = encryptionTool.encrypt(usernameDecrypted.getBytes(), encryptionTool.getPemPublicKey(targetApplication.getPublicKey()));
-						value = java.util.Base64.getEncoder().encodeToString(userEncryptedBytes);
-	
-					}catch(Exception e) {
-						logger.error(e.getMessage(), e);
-					}
-
-
-				}
+			String value = parameter.getValue();
+			if (parameter.getKey().equals("u")) {
+				value = handleUserParameter(homeRep, rep_id, usernameDecrypted, value);
 			}
-			value = URLEncoder.encode(value, "UTF-8");
-			contentUrl = UrlTool.setParam(contentUrl, key, value);
+			contentUrl = UrlTool.setParam(contentUrl, parameter.getKey(), URLEncoder.encode(value, "UTF-8"));
 		}
 
-		//@todo 5.1 refactoring: check if "signed" is relevant -> renderer only uses "sig"
-		/*
+		// @todo 5.1 refactoring: check if "signed" is relevant -> renderer only uses
+		// "sig"
 		long timestamp = System.currentTimeMillis();
-		contentUrl = UrlTool.setParam(contentUrl, "ts",""+timestamp);
-
-		try{
-			contentUrl = UrlTool.setParam(contentUrl, "signed",RenderingTool.getSignatureSigned(repoInfo,nodeId,timestamp));
-
-		}catch(GeneralSecurityException e){
-			e.printStackTrace();
-			resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-			return;
-		}
-		*/
-		long timestamp=System.currentTimeMillis();
-		contentUrl = UrlTool.setParam(contentUrl, "ts",timestamp+"");
+		contentUrl = UrlTool.setParam(contentUrl, "ts", timestamp + "");
 		try {
-			contentUrl = UrlTool.setParam(contentUrl, "sig", RenderingTool.getSignatureSigned(rep_id, nodeId, timestamp));
-		}catch(GeneralSecurityException e){
-			throw new RenderingException(HttpServletResponse.SC_INTERNAL_SERVER_ERROR,"Error building signature "+rep_id+" "+nodeId,RenderingException.I18N.encryption,e);
+			contentUrl = UrlTool.setParam(contentUrl, "sig",
+					RenderingTool.getSignatureSigned(rep_id, nodeId, timestamp));
+		} catch (GeneralSecurityException e) {
+			throw new RenderingException(HttpServletResponse.SC_INTERNAL_SERVER_ERROR,
+					"Error building signature " + rep_id + " " + nodeId, RenderingException.I18N.encryption, e);
 		}
-		String finalContentUrl = contentUrl;
-		// it is a trusted app who requested and signature was verified, so we can render the node
-		RenderingException result=AuthenticationUtil.runAsSystem(()-> {
-			RenderingService service = RenderingServiceFactory.getRenderingService(homeRep.getAppId());
-			// @todo 5.1 should version inline be transfered?
-			try {
-				RenderingServiceOptions options = new RenderingServiceOptions();
-				RequestHelper requestHelper = new RequestHelper(req);
-				options.displayMode=display;
-				options.savedSearch.maxItems = requestHelper.parseParam("maxItems", Integer::parseInt);
-				options.savedSearch.sortBy = Collections.singletonList(requestHelper.readParam("sortBy"));
-				options.savedSearch.sortAscending = Collections.singletonList(requestHelper.parseParam("sortAscending", Boolean::valueOf));
-				RenderingServiceData renderData = service.getData(nodeId, null,usernameDecrypted, options);
-				resp.getOutputStream().write(
-						service.getDetails(finalContentUrl, renderData).getBytes("UTF-8"));
-				// track inline / lms
-				if(display.equals(RenderingTool.DISPLAY_INLINE)) {
-					NodeTrackingDetails details = new NodeTrackingDetails(getVersion(req));
-					details.setLms(new NodeTrackingDetails.NodeTrackingLms(usage));
-					TrackingServiceFactory.getTrackingService().trackActivityOnNode(new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, nodeId), details, TrackingService.EventType.VIEW_MATERIAL_EMBEDDED);
-				}
+		return contentUrl;
+	}
 
-			} catch (HttpException e) {
-				return new RenderingException(e);
-			} catch (Exception e) {
-				return new RenderingException(HttpServletResponse.SC_INTERNAL_SERVER_ERROR,e.getMessage(),RenderingException.I18N.unknown,e);
+	private void render(ApplicationInfo homeRep, HttpServletRequest req, HttpServletResponse resp,
+			String nodeId, String usernameDecrypted, String finalContentUrl, Usage usage, 
+			RenderingServiceOptions options) throws RenderingException {
+		RenderingService service = RenderingServiceFactory.getRenderingService(homeRep.getAppId());
+		// @todo 5.1 should version inline be transfered?
+		try {
+			RenderingServiceData renderData = service.getData(nodeId, null, usernameDecrypted, options);
+			resp.getOutputStream().write(service.getDetails(finalContentUrl, renderData).getBytes("UTF-8"));
+			// track inline / lms
+			if (options.displayMode.equals(RenderingTool.DISPLAY_INLINE)) {
+				NodeTrackingDetails details = new NodeTrackingDetails(getVersion(req));
+				details.setLms(new NodeTrackingDetails.NodeTrackingLms(usage));
+				TrackingServiceFactory.getTrackingService().trackActivityOnNode(
+						new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, nodeId), details,
+						TrackingService.EventType.VIEW_MATERIAL_EMBEDDED);
+			}
+		} catch (HttpException e) {
+			throw new RenderingException(e);
+		} catch (Exception e) {
+			throw new RenderingException(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e.getMessage(),
+					RenderingException.I18N.unknown, e);
+		}
+	}
+
+	private void runAsSystem(ThrowingProcedure<RenderingException> f) throws RenderingException {
+		RenderingException error = AuthenticationUtil.runAsSystem(() -> {
+			try {
+				f.run();
+			} catch (RenderingException e) {
+				return e;
 			}
 			return null;
 		});
-		if(result!=null)
-			throw result;
-		/*
-		HttpQueryTool httpQuery = new HttpQueryTool();
-		String result = httpQuery.query(contentUrl);
-		resp.getWriter().println(result);
-		*/
+		if (error != null) {
+			throw error;
+		}
+	}
+
+	private void queryRendering(HttpServletRequest req, HttpServletResponse resp, String nodeId, Usage usage,
+			ApplicationInfo repoInfo) throws Exception {
+		String rep_id = req.getParameter("rep_id");
+		ApplicationInfo homeRep = ApplicationInfoList.getHomeRepository();
+		String usernameDecrypted = getDecryptedUsername(req);
+		String contentUrl = getContentUrl(homeRep, rep_id, repoInfo);
+		String finalContentUrl = populateContentUrlParameters(contentUrl, getParameters(req), homeRep, rep_id,
+				usernameDecrypted, nodeId);
+		// it is a trusted app who requested and signature was verified, so we can
+		// render the node
+		RenderingServiceOptions options = RenderingServiceOptions.fromRequestParameters(req);
+		runAsSystem(() -> {
+			render(homeRep, req, resp, nodeId, usernameDecrypted, finalContentUrl, usage, options);
+		});
 	}
 
 	private void openWindow(HttpServletRequest req, HttpServletResponse resp, String nodeId, String parentId, ApplicationInfo repoInfo) throws Exception {
@@ -496,4 +508,8 @@ public class RenderingProxy extends HttpServlet {
 
 	}
 
+	@FunctionalInterface
+	private interface ThrowingProcedure<E extends Exception> {
+		void run() throws E;
+	}
 }
