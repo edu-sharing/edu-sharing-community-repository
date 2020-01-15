@@ -378,7 +378,7 @@ export class NodeRenderComponent implements EventListener{
             return;
         }
         try {
-            videoElement = document.getElementById("edusharing_rendering_content").getElementsByTagName("video")[0];
+            videoElement = document.getElementsByClassName("edusharing_rendering_content_wrapper")[0].getElementsByTagName("video")[0];
             target = document.createElement('div');
             videoElement.parentElement.appendChild(target);
         } catch (e) {
