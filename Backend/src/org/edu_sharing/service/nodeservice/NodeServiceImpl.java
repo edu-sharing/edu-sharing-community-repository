@@ -46,7 +46,7 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
 	
 	/* Some safe properties they're not necessary in the mds, but the client is allowed to define */
 	private static final String[] SAFE_PROPS = new String[]{
-			CCConstants.CM_PROP_TITLE,
+			CCConstants.LOM_PROP_GENERAL_TITLE,
 			CCConstants.LOM_PROP_TECHNICAL_FORMAT,
 			CCConstants.CCM_PROP_IO_WWWURL,
 			CCConstants.CCM_PROP_IO_CREATE_VERSION,
