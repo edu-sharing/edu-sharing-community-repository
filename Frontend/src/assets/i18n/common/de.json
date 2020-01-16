@@ -528,6 +528,9 @@
     "PASSWORD_PLACEHOLDER": "Passwort eingeben ...",
     "PASSWORD_CORRECT": "Passwort korrekt"
   },
+  "VIDEO_CONTROLS": {
+    "SAVED": "Änderungen wurden gespeichert"
+  },
   "TOAST":{
     "NODE_LOCKED":"Das gewünschte Dokument wird aktuell von einem anderen Nutzer verwendet und kann deshalb nicht geöffnet werden",
     "FIELD_REQUIRED":"Das Feld {{ name }} muss ausgefüllt sein",
