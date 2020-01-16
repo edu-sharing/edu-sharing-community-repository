@@ -1,25 +1,37 @@
 <div *ngIf="_video && node">
 
   <div id="bar" style.background="linear-gradient(to right, #778fd1 {{getProgress()}}%, #555 {{getProgress()}}%)">
-    <span *ngFor="let marker of markers" [style.width]="(marker.endTime-marker.startTime)/_video.duration*100+'%'" [style.left]="(marker.startTime/_video.duration)*100+'%'" (click)="seek(marker.startTime)">
+    <span class="chapter" *ngFor="let marker of markers"
+          [style.width]="(marker.endTime - marker.startTime) / _video.duration * 100 +'%'"
+          [style.left]="(marker.startTime / _video.duration) * 100 +'%'" (click)="seek(marker.startTime)">
       <span class='chapterTitle'>{{marker.text}}</span>
     </span>
   </div>
   <div>
     <form class="addChapter">
-      <mat-form-field class="time">
+      <div class="time">
+        <mat-form-field>
           <mat-label>{{'START' | translate}}</mat-label>
-          <input matInput type="text" name="startTime" id="startTime" [(ngModel)]="_startTime" (click)="_startTime=toHHMMSS(_video.currentTime)">
-      </mat-form-field>
-      <mat-form-field class="time">
-        <mat-label>{{'STOP' | translate}}</mat-label>
-        <input matInput type="text" name="endTime" id="endTime" [(ngModel)]="_endTime" (click)="_endTime=toHHMMSS(_video.currentTime)">
-      </mat-form-field>
-      <mat-form-field class="time">
-        <mat-label>{{'NODE.cm:title' | translate}}</mat-label>
-        <input matInput type="text" name="chapterName" id="chapterName" [(ngModel)]="_chapterName" (click)="updateChapters()">
-      </mat-form-field>
-      <button mat-raised-button color="primary" (click)="updateChapters()">{{'CREATE' | translate}}</button>
+          <input matInput type="text" name="startTime" id="startTime" [(ngModel)]="_startTime"
+                 (click)="_startTime=toHHMMSS(_video.currentTime)">
+        </mat-form-field>
+      </div>
+      <div class="time">
+        <mat-form-field>
+          <mat-label>{{'STOP' | translate}}</mat-label>
+          <input matInput type="text" name="endTime" id="endTime" [(ngModel)]="_endTime"
+                 (click)="_endTime=toHHMMSS(_video.currentTime)">
+        </mat-form-field>
+      </div>
+      <div class="title">
+        <mat-form-field>
+          <mat-label>{{'NODE.cm:title' | translate}}</mat-label>
+          <input matInput type="text" name="chapterName" id="chapterName" [(ngModel)]="_title">
+        </mat-form-field>
+      </div>
+      <div class="save">
+        <button mat-raised-button color="primary" (click)="updateChapters()">{{'SAVE' | translate}}</button>
+      </div>
     </form>
   </div>
 

@@ -13,7 +13,7 @@ export class VideoControlsComponent{
   _video: HTMLVideoElement;
   _startTime:any = "00:00:00";
   _endTime:any = "00:00:00";
-  _chapterName:any;
+  _title:any;
 
   @Input() set video(video:HTMLVideoElement){
     // timeout to make sure node is already bound
@@ -21,10 +21,14 @@ export class VideoControlsComponent{
       this._video = video;
       this.track = video.addTextTrack("chapters", "English", "en");
       this.track.mode = "showing";
+      this._title = this.node.properties[RestConstants.LOM_PROP_TITLE] ? this.node.properties[RestConstants.LOM_PROP_TITLE][0] : '';
       let vtt = this.node.properties[RestConstants.CCM_PROP_IO_REF_VIDEO_VTT];
-      if (vtt && vtt.length == 1) {
+      if (vtt && vtt.length===1) {
         vtt = JSON.parse(vtt[0]);
         this.objectToCues(vtt, this.track);
+        const c = vtt[vtt.length-1];
+        this._startTime=this.toHHMMSS(c.startTime);
+        this._endTime=this.toHHMMSS(c.endTime);
       }
       this.render();
     });
@@ -83,11 +87,12 @@ export class VideoControlsComponent{
   }
 
   updateChapters() {
-    this.track.addCue(new VTTCue(this.secs(this._startTime), this.secs(this._endTime), this._chapterName));
+    this.track.addCue(new VTTCue(this.secs(this._startTime), this.secs(this._endTime), ''));
     this.render();
     let props:any={};
     console.log(this.track.cues);
     props[RestConstants.CCM_PROP_IO_REF_VIDEO_VTT]=[JSON.stringify(this.cuesToObject((this.track.cues)))];
+    props[RestConstants.LOM_PROP_TITLE]=[this._title];
     this.nodeService.editNodeMetadata(this.node.ref.id,props).subscribe(()=>{
       // no feedback at the moment
     },(error)=>{
