@@ -2,6 +2,7 @@ package org.edu_sharing.restservices.shared;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
@@ -16,6 +17,7 @@ public class User extends UserSimple {
 	private NodeRef homeFolder = null;
 	private List<NodeRef> sharedFolders = new ArrayList<NodeRef>();
 	private UserQuota quota;
+	private Map<String, String[]> properties;
 
 	public User(){super();}
 	public User(org.edu_sharing.repository.client.rpc.User user) {
@@ -23,9 +25,6 @@ public class User extends UserSimple {
 		homeFolder=new NodeRef(user.getRepositoryId(),user.getNodeId());
 	}
 
-	
-	/**
-	 **/
 	@ApiModelProperty(required = true, value = "")
 	@JsonProperty("homeFolder")
 	public NodeRef getHomeFolder() {
@@ -36,8 +35,6 @@ public class User extends UserSimple {
 		this.homeFolder = homeFolder;
 	}
 
-	/**
-	 **/
 	@ApiModelProperty(value = "")
 	@JsonProperty("sharedFolders")
 	public List<NodeRef> getSharedFolders() {
@@ -56,5 +53,14 @@ public class User extends UserSimple {
 	public void setQuota(UserQuota quota) {
 		this.quota = quota;
 	}
+
+	@JsonProperty
+	public Map<String, String[]> getProperties() {
+		return properties;
+	}
+
+	public void setProperties(Map<String, String[]> properties) {
+        this.properties = properties;
+    }
 
 }
