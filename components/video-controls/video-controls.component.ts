@@ -11,9 +11,9 @@ import {Toast} from "../../toast";
 })
 export class VideoControlsComponent{
   _video: HTMLVideoElement;
-  _startTime:any = "00:00:00";
-  _endTime:any = "00:00:00";
-  _chapterName:any;
+  _startTime:string = "00:00:00";
+  _endTime:string = "00:00:00";
+  _chapterName:string = 'Title';
 
   @Input() set video(video:HTMLVideoElement){
     // timeout to make sure node is already bound
@@ -35,11 +35,6 @@ export class VideoControlsComponent{
   private b = document.querySelector("#bar");
   markers:any[]=[];
 
-  private vtt = ['0, 40.7, Start',
-    '40.7, 147.6, Part Two',
-    '147.6, 370.7, Somwhere in the middle',
-    '370.7, 735, Beginning of the end',]
-
   constructor(private nodeService : RestNodeService,private toast:Toast) {
 
   }
@@ -53,11 +48,27 @@ export class VideoControlsComponent{
     for(let t of (this._video.textTracks as any) ) {
       if (t.kind == 'chapters'){
         for(let c of t.cues ) {
-          this.markers = this.markers.concat(c);
+          this.markers = []; //only use the last cue
+          this.markers.push(c);
+          this._video.currentTime = c.startTime;
         }
       }
     }
-    console.log(this.markers);
+
+    this._video.currentTime = this.markers[0].startTime;
+    let that = this;
+    this._video.addEventListener("timeupdate", function pausing_function(){
+        if(this.currentTime >= that.markers[0].endTime) {
+            console.log('pause');
+            this.pause();
+
+            if(this.paused){
+                this.removeEventListener("timeupdate",pausing_function, false);
+                console.log('hey');
+            }
+            // remove the event listener after you paused the playback
+        }
+    });
   }
 
   seek(startTime:number) {
