@@ -37,6 +37,8 @@ import {OptionItem} from "./option-item";
 import {RestConnectorService} from "../core-module/rest/services/rest-connector.service";
 import {Observable, Observer} from "rxjs";
 import {DialogButton, RestIamService, RestNetworkService} from "../core-module/core.module";
+import {RouterHelper} from './router.helper';
+import {PlatformLocation} from '@angular/common';
 
 export class UIHelper {
 
@@ -538,8 +540,8 @@ export class UIHelper {
         return link;
     }
 
-    static goToDefaultLocation(router: Router, configService: ConfigurationService, extras: NavigationExtras = {}) {
-        return router.navigate([UIConstants.ROUTER_PREFIX + configService.instant("loginDefaultLocation", "workspace")], extras);
+    static goToDefaultLocation(router: Router,platformLocation : PlatformLocation,configService : ConfigurationService,replaceUrl=false) {
+        RouterHelper.navigateToAbsoluteUrl(platformLocation,router,UIConstants.ROUTER_PREFIX + configService.instant("loginDefaultLocation","workspace"),replaceUrl);
     }
 
     static openUrl(url: string, bridge: BridgeService, mode = OPEN_URL_MODE.Current) {

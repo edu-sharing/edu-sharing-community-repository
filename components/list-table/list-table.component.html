@@ -3,36 +3,26 @@
 <button #menuTrigger="matMenuTrigger" mat-button class="dropdown-dummy" [style.left]="dropdownLeft" [style.top]="dropdownTop" [matMenuTriggerFor]="dropdown.menu"></button>
 <dropdown #dropdown [options]="_options" [callbackObject]="selectedNodes ? selectedNodes[0] : null"></dropdown>
 
-<div class="dialog darken" *ngIf="reorderDialog">
-    <div class="card center-card card-action">
-        <div class="card-content">
-            <div class="card-cancel" (click)="closeReorder(false)" tabindex="0" (keyup.enter)="closeReorder(false)"><i icon iconId="close" aria="true"></i></div>
-            <span class="card-title ">{{'LIST.REORDER_TITLE' | translate }}</span>
-            <div class="hint">{{'LIST.REORDER_DRAG_DROP' | translate }}</div>
-            <div *ngFor="let item of columnsAll;let i=index;"
-                 class="checkbox"
-                 [draggable]="i>0"
-                 (dragend)="currentDragColumn=null"
-                 (dragover)="allowDragColumn($event,i,item)" (drop)="dropColumn($event,i,item)"
-                 (dragstart)="dragStartColumn($event,i,item)"
-            >
+<card
+    *ngIf="reorderDialog"
+    height="large"
+    title="{{'LIST.REORDER_TITLE' | translate }}"
+    subtitle="{{'LIST.REORDER_DRAG_DROP' | translate }}"
+    icon="settings"
+    [isCancelable]="true"
+    (onCancel)="closeReorder(false)"
+    [buttons]="reorderButtons">
+    <div class="card-content-padding reorder-dialog">
+        <div *ngFor="let item of columnsAll;let i=index;"
+             class="checkbox"
+             [draggable]="i>0"
+             (dragend)="currentDragColumn=null"
+             (dragover)="allowDragColumn($event,i,item)" (drop)="dropColumn($event,i,item)"
+             (dragstart)="dragStartColumn($event,i,item)">
                 <mat-checkbox [disabled]="i==0" [(ngModel)]="item.visible">{{item.type+"."+item.name | translate}}</mat-checkbox>
-            </div>
-        </div>
-        <div class="card-action">
-            <a class="btn"
-               tabindex="0"
-               (keyup.enter)="closeReorder(true)"
-               (click)="closeReorder(true)"
-            >{{'SAVE' | translate}}</a>
-            <a class="btn-flat"
-               tabindex="0"
-               (keyup.enter)="closeReorder(false)"
-               (click)="closeReorder(false)"
-            >{{'CANCEL' | translate}}</a>
         </div>
     </div>
-</div>
+</card>
 <div [className]="'list '+listClass" infinite-scroll [scrollWindow]="scrollWindow" (scrolled)="scroll(false)">
     <div class="headingGroup" *ngIf="hasHeading && viewType==0">
         <div class="totalCount" *ngIf="totalCount && hasCheckbox && !isLoading">({{selectedNodes && selectedNodes.length ? selectedNodes.length+'/'+totalCount : totalCount}})</div>
@@ -58,9 +48,9 @@
         <div class="removeColumn" *ngIf="currentDragColumn && reorderColumns"
              (dragover)="allowDeleteColumn($event)" (drop)="deleteColumn($event)"
         ><i icon iconId="delete"></i></div>
-        <div class="editColumns clickable" *ngIf="!currentDragColumn && reorderColumns && columnsVisible && columnsVisible.length"
+        <button mat-icon-button class="editColumns clickable" *ngIf="!currentDragColumn && reorderColumns && columnsVisible && columnsVisible.length"
              (click)="reorderDialog=true"
-        ><i icon iconId="settings"></i></div>
+        ><i icon iconId="settings"></i></button>
         </div>
     </div>
     <div [class.cardContainer]="viewType==1 || viewType==2" *ngIf="!reorderDialog">

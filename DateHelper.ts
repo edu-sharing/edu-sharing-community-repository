@@ -126,9 +126,12 @@ export class DateHelper{
       if(timeFormat){
         if(str)
           str+=", ";
-        let timeValue=dateObject.toLocaleTimeString(Translation.getLanguage());
-        let times=timeValue.split(":");
-        str += timeFormat.replace("HH",times[0]).replace("mm",times[1]).replace("ss",times[2]);
+
+        //let timeValue=dateObject.toLocaleTimeString(Translation.getLanguage());
+        //let times=timeValue.split(":");
+        str += timeFormat.replace("HH",DateHelper.fillDate(dateObject.getHours())).
+                replace("mm",DateHelper.fillDate(dateObject.getMinutes())).
+                replace("ss",DateHelper.fillDate(dateObject.getSeconds()));
       }
       return str;
       /*

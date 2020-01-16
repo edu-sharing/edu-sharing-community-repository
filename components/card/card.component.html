@@ -8,6 +8,7 @@
             [@cardAnimation]="this">
     <mat-card-header *ngIf="header">
       <div *ngIf="avatar" class="avatar" mat-card-avatar><img [src]="avatar" alt="" image-config></div>
+      <div *ngIf="icon" class="avatar" mat-card-avatar><i icon [iconId]="icon"></i></div>
       <mat-card-title>{{title}}</mat-card-title>
       <mat-card-subtitle>{{subtitle}}</mat-card-subtitle>
       <div class="cancel">
@@ -25,7 +26,7 @@
     <mat-card-actions *ngIf="_buttons && _buttons.length">
       <div *ngFor="let button of _buttons">
         <button *ngIf="button.type==1" mat-flat-button color="primary" [disabled]="button.disabled" (click)="button.callback()">{{button.name | translate}}</button>
-        <button *ngIf="button.type==2" mat-button color="primary" [disabled]="button.disabled" (click)="button.callback()">{{button.name | translate}}</button>
+        <button *ngIf="button.type==2" mat-button color="cancel" [disabled]="button.disabled" (click)="button.callback()">{{button.name | translate}}</button>
       </div>
     </mat-card-actions>
   </mat-card>

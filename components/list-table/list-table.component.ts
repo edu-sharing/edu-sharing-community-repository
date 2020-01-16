@@ -15,16 +15,16 @@ import {Helper} from "../../../core-module/rest/helper";
 import {ColorHelper} from '../../../core-module/ui/color-helper';
 import {UIConstants} from "../../../core-module/ui/ui-constants";
 import {
-    ConfigurationService,
-    FrameEventsService, EventListener,
-    ListItem, NetworkRepositories,
-    Repository, Node,
-    RestConstants, RestHelper, RestLocatorService, RestNetworkService,
-    TemporaryStorageService, UIService
+  ConfigurationService,
+  FrameEventsService, EventListener,
+  ListItem, NetworkRepositories,
+  Repository, Node,
+  RestConstants, RestHelper, RestLocatorService, RestNetworkService,
+  TemporaryStorageService, UIService, DialogButton
 } from '../../../core-module/core.module';
 import {AddElement} from "../../add-element";
 import {MatMenuTrigger} from "@angular/material";
-import {Router} from "@angular/router";
+import {ActivatedRoute, Router} from "@angular/router";
 
 @Component({
   selector: 'listTable',
@@ -69,6 +69,7 @@ export class ListTableComponent implements EventListener{
   private animateNode: Node;
   private repositories: Repository[];
   private sortMenu = false;
+  reorderButtons: DialogButton[];
 
   /**
    * Set the current list of nodes to render
@@ -363,11 +364,13 @@ export class ListTableComponent implements EventListener{
               private storage : TemporaryStorageService,
               private network : RestNetworkService,
               private locator : RestLocatorService,
+              private route : ActivatedRoute,
               private router : Router,
               private toast : Toast,
               private frame : FrameEventsService,
               private sanitizer: DomSanitizer) {
-    this.id=Math.random();
+    this.reorderButtons = DialogButton.getSaveCancel(()=>this.closeReorder(false),()=>this.closeReorder(true));
+    this.id = Math.random();
     frame.addListener(this);
     setTimeout(()=>this.loadRepos());
   }
@@ -377,11 +380,13 @@ export class ListTableComponent implements EventListener{
   loadRepos(){
     if(!this.loadRepositories)
       return;
-    this.locator.locateApi().subscribe(()=>{
-        this.network.getRepositories().subscribe((data:NetworkRepositories)=>{
-          this.repositories=data.repositories;
+    this.locator.setRoute(this.route).subscribe(()=> {
+      this.locator.locateApi().subscribe(() => {
+        this.network.getRepositories().subscribe((data: NetworkRepositories) => {
+          this.repositories = data.repositories;
           this.cd.detectChanges();
         });
+      });
     });
   }
   onEvent(event:string,data:any){
@@ -395,13 +400,6 @@ export class ListTableComponent implements EventListener{
       this.toggleAll();
       event.preventDefault();
       event.stopPropagation();
-    }
-    if(event.key=="Escape"){
-      if(this.reorderDialog) {
-        this.closeReorder(false);
-        event.preventDefault();
-        event.stopPropagation();
-      }
     }
   }
 

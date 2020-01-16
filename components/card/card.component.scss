@@ -46,6 +46,9 @@
           width: 24px;
           height: 24px;
         }
+        >  i {
+          color: $textLight;
+        }
       }
       .mat-card-title, .mat-card-subtitle{
         white-space: nowrap;

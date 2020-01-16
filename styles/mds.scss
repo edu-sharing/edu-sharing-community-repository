@@ -56,10 +56,9 @@ mds .mdsGroup{
   label{
     display: inline-flex;
     .required{
-      padding-left: 5px;
-      font-size: 80%;
+      font-size: 75%;
       font-weight: bold;
-      display: flex;
+      display: inline-flex;
       align-self: center;
     }
   }
