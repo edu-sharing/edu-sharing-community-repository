@@ -1,6 +1,6 @@
 <div *ngIf="_video && node">
 
-  <div id="bar" style.background="linear-gradient(to right, #778fd1 {{getProgress()}}%, #555 {{getProgress()}}%)">
+  <div id="bar" style.background-image="linear-gradient(to right, transparent {{getProgress()}}%, #555 {{getProgress()}}%)">
     <span class="chapter" *ngFor="let marker of markers"
           [style.width]="(marker.endTime - marker.startTime) / _video.duration * 100 +'%'"
           [style.left]="(marker.startTime / _video.duration) * 100 +'%'" (click)="seek(marker.startTime)">

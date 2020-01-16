@@ -11,9 +11,9 @@ import {Toast} from "../../toast";
 })
 export class VideoControlsComponent{
   _video: HTMLVideoElement;
-  _startTime:any = "00:00:00";
-  _endTime:any = "00:00:00";
-  _title:any;
+  _startTime:string = "00:00:00";
+  _endTime:string = "00:00:00";
+  _title:string = 'Title';
 
   @Input() set video(video:HTMLVideoElement){
     // timeout to make sure node is already bound
@@ -25,6 +25,7 @@ export class VideoControlsComponent{
       let vtt = this.node.properties[RestConstants.CCM_PROP_IO_REF_VIDEO_VTT];
       if (vtt && vtt.length===1) {
         vtt = JSON.parse(vtt[0]);
+        console.log(vtt);
         this.objectToCues(vtt, this.track);
         const c = vtt[vtt.length-1];
         this._startTime=this.toHHMMSS(c.startTime);
@@ -39,11 +40,6 @@ export class VideoControlsComponent{
   private b = document.querySelector("#bar");
   markers:any[]=[];
 
-  private vtt = ['0, 40.7, Start',
-    '40.7, 147.6, Part Two',
-    '147.6, 370.7, Somwhere in the middle',
-    '370.7, 735, Beginning of the end',]
-
   constructor(private nodeService : RestNodeService,private toast:Toast) {
 
   }
@@ -57,11 +53,25 @@ export class VideoControlsComponent{
     for(let t of (this._video.textTracks as any) ) {
       if (t.kind == 'chapters'){
         for(let c of t.cues ) {
-          this.markers = this.markers.concat(c);
+          this.markers = []; //only use the last cue
+          this.markers.push(c);
+          this._video.currentTime = c.startTime;
         }
       }
     }
-    console.log(this.markers);
+
+    this._video.currentTime = this.markers[0].startTime;
+    let that = this;
+    this._video.addEventListener("timeupdate", function pausing_function(){
+        if(this.currentTime >= that.markers[0].endTime) {
+            this.pause();
+
+            if(this.paused){
+                this.removeEventListener("timeupdate",pausing_function, false);
+            }
+            // remove the event listener after you paused the playback
+        }
+    });
   }
 
   seek(startTime:number) {
@@ -87,6 +97,11 @@ export class VideoControlsComponent{
   }
 
   updateChapters() {
+    if(this.track.cues){
+      while(this.track.cues.length){
+        this.track.removeCue(this.track.cues[0]);
+      }
+  }
     this.track.addCue(new VTTCue(this.secs(this._startTime), this.secs(this._endTime), ''));
     this.render();
     let props:any={};
