@@ -277,7 +277,7 @@ public class PersonDao {
 	private String getNodeId() {
 		return (String) this.userInfo.get(CCConstants.SYS_PROP_NODE_UID);
 	}
-	public User asPerson() {
+	public User asPerson() throws DAOException {
 		
     	User data = new User();
     	
@@ -290,6 +290,7 @@ public class PersonDao {
     	data.setProfile(getProfile());
     	data.setStats(getStats());
     	data.setStatus(getStatus());
+    	data.setProperties(getProperties());
 
     	if(isCurrentUserOrAdmin()) {
 	    	NodeRef homeDir = new NodeRef();
@@ -310,6 +311,10 @@ public class PersonDao {
 	    	data.setSharedFolders(sharedFolderRefs);
     	}
     	return data;
+	}
+
+	private Map<String,String[]> getProperties() throws DAOException {
+		return NodeDao.getNode(repoDao,getNodeId()).getAllProperties();
 	}
 
 	private UserQuota getQuota() {
