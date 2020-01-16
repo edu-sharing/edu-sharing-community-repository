@@ -30,7 +30,8 @@
         </mat-form-field>
       </div>
       <div class="save">
-        <button mat-raised-button color="primary" (click)="updateChapters()">{{'SAVE' | translate}}</button>
+        <button mat-raised-button color="primary" (click)="updateChapters()" *ngIf="!loading">{{'SAVE' | translate}}</button>
+        <spinner-small *ngIf="loading">{{'SAVE' | translate}}</spinner-small>
       </div>
     </form>
   </div>

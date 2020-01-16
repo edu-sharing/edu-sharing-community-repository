@@ -1,4 +1,4 @@
-import {Component, Input, OnInit} from '@angular/core';
+import {Component, EventEmitter, Input, OnInit, Output} from '@angular/core';
 import {RestNodeService} from "../../../core-module/rest/services/rest-node.service";
 import {Node} from "../../../core-module/rest/data-object"
 import {RestConstants} from "../../../core-module/rest/rest-constants";
@@ -11,9 +11,10 @@ import {Toast} from "../../toast";
 })
 export class VideoControlsComponent{
   _video: HTMLVideoElement;
-  _startTime:string = "00:00:00";
-  _endTime:string = "00:00:00";
-  _title:string = 'Title';
+  _startTime = "00:00:00";
+  _endTime = "00:00:00";
+  _title = 'Title';
+  loading = false;
 
   @Input() set video(video:HTMLVideoElement){
     // timeout to make sure node is already bound
@@ -35,7 +36,7 @@ export class VideoControlsComponent{
     });
   }
   @Input() node:Node;
-
+  @Output() save = new EventEmitter<VideoData>();
   private track:TextTrack;
   private b = document.querySelector("#bar");
   markers:any[]=[];
@@ -97,6 +98,7 @@ export class VideoControlsComponent{
   }
 
   updateChapters() {
+    this.loading=true;
     if(this.track.cues){
       while(this.track.cues.length){
         this.track.removeCue(this.track.cues[0]);
@@ -108,10 +110,18 @@ export class VideoControlsComponent{
     console.log(this.track.cues);
     props[RestConstants.CCM_PROP_IO_REF_VIDEO_VTT]=[JSON.stringify(this.cuesToObject((this.track.cues)))];
     props[RestConstants.LOM_PROP_TITLE]=[this._title];
-    this.nodeService.editNodeMetadata(this.node.ref.id,props).subscribe(()=>{
+    this.nodeService.editNodeMetadata(this.node.ref.id,props).subscribe((node)=>{
       // no feedback at the moment
+      this.save.emit({
+        node:node.node,
+        startTime:this.secs(this._startTime),
+        endTime:this.secs(this._endTime),
+      });
+      this.loading=false;
+      this.toast.toast('VIDEO_CONTROLS.SAVED');
     },(error)=>{
       this.toast.error(error);
+      this.loading=false;
     });
   }
 
@@ -134,4 +144,9 @@ export class VideoControlsComponent{
     }
     return result;
   }
+}
+export class VideoData{
+  node: Node;
+  startTime: number;
+  endTime: number;
 }

@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import {Component, Input, OnInit} from '@angular/core';
 
 @Component({
   selector: 'spinner-small',
@@ -6,7 +6,8 @@ import { Component, OnInit } from '@angular/core';
   styleUrls: ['spinner-small.component.scss']
 })
 export class SpinnerSmallComponent{
-
+  @Input() diameter = 20;
   constructor() { }
 
 }
+
