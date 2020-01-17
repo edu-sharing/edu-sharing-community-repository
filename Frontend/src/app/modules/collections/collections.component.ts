@@ -74,20 +74,28 @@ export class CollectionsMainComponent {
     public tabSelected:string = RestConstants.COLLECTIONSCOPE_MY;
 
     set tabSelectedIndex(pos:number){
-        if(this.isGuest)
-            pos+=2; // skip first 2 tabs
-        if(!this.hasEditorial && pos>1)
-            pos++; // skip editorial
+        if(this.isGuest) {
+          pos += 2; // skip first 2 tabs
+        }
+        if(!this.hasEditorial && pos>1) {
+          pos++; // skip editorial
+        }
+        if(!this.hasMediacenter && pos>2) {
+          pos++; // skip mediacenter
+        }
         this.selectTab(CollectionsMainComponent.INDEX_MAPPING[pos]);
     }
     get tabSelectedIndex(){
         let pos=CollectionsMainComponent.INDEX_MAPPING.indexOf(this.tabSelected);
-        if(this.isGuest)
-            pos-=2;
-        if(!this.hasEditorial && pos>1)
-            pos--;
-        if(!this.hasMediacenter && pos>1)
-            pos--;
+        if(this.isGuest) {
+          pos -= 2;
+        }
+        if(!this.hasEditorial && pos>1) {
+          pos--;
+        }
+        if(!this.hasMediacenter && pos>2) {
+          pos--;
+        }
         return pos;
     }
     public isLoading:boolean = true;
