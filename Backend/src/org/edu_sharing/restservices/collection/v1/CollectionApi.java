@@ -29,6 +29,8 @@ import org.edu_sharing.restservices.*;
 import org.edu_sharing.restservices.CollectionDao.Scope;
 import org.edu_sharing.restservices.CollectionDao.SearchScope;
 import org.edu_sharing.restservices.collection.v1.model.*;
+import org.edu_sharing.restservices.node.v1.model.NodeEntries;
+import org.edu_sharing.restservices.node.v1.model.NodeEntry;
 import org.edu_sharing.restservices.shared.ErrorResponse;
 import org.edu_sharing.restservices.shared.Filter;
 import org.edu_sharing.service.search.SearchService;
@@ -473,7 +475,7 @@ public class CollectionApi {
 	@ApiOperation(value = "Add a node to a collection.", notes = "Add a node to a collection.")
 	
 	@ApiResponses(value = {
-			@ApiResponse(code = 200, message = RestConstants.HTTP_200, response = Void.class),
+			@ApiResponse(code = 200, message = RestConstants.HTTP_200, response = NodeEntry.class),
 	        @ApiResponse(code = 400, message = RestConstants.HTTP_400, response = ErrorResponse.class),        
 	        @ApiResponse(code = 401, message = RestConstants.HTTP_401, response = ErrorResponse.class),        
 	        @ApiResponse(code = 403, message = RestConstants.HTTP_403, response = ErrorResponse.class),        
@@ -496,9 +498,9 @@ public class CollectionApi {
 				
 				return Response.status(Response.Status.NOT_FOUND).build();
 			}
-
-			CollectionDao.addToCollection(repoDao,collectionId,nodeId);
-			return Response.status(Response.Status.OK).build();
+			NodeEntry entry=new NodeEntry();
+			entry.setNode(CollectionDao.addToCollection(repoDao,collectionId,nodeId).asNode());
+			return Response.status(Response.Status.OK).entity(entry).build();
 
     	} catch (Throwable t) {
     		return ErrorResponse.createResponse(t);

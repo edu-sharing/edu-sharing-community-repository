@@ -284,12 +284,12 @@ public class CollectionDao {
 		}
 			
 	}
-	public static void addToCollection(RepositoryDao repoDao,String collectionId,String nodeId) throws DAOException {
+	public static NodeDao addToCollection(RepositoryDao repoDao, String collectionId, String nodeId) throws DAOException {
 		try {
 
-			CollectionServiceFactory.getCollectionService(repoDao.getApplicationInfo().getAppId()).
+			String resultId=CollectionServiceFactory.getCollectionService(repoDao.getApplicationInfo().getAppId()).
 					addToCollection(collectionId,nodeId);
-
+			return NodeDao.getNode(repoDao,resultId,Filter.createShowAllFilter());
 		} catch (Throwable t) {
 
 			throw DAOException.mapping(t);
