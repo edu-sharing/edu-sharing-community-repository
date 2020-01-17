@@ -1,4 +1,12 @@
-<div *ngIf="_video && node">
+<collection-chooser
+  class="dialog-right scrollWithBanner"
+  *ngIf="chooseCollection"
+  [@fromRight]="chooseCollection"
+  title="WORKSPACE.SELECT_COLLECTION"
+  (onCancel)="chooseCollection=false"
+  (onChoose)="addToCollection($event)"
+></collection-chooser>
+<div *ngIf="_video && node && !isGuest">
 
   <div id="bar" style.background-image="linear-gradient(to right, transparent {{getProgress()}}%, #555 {{getProgress()}}%)">
     <span class="chapter" *ngFor="let marker of markers"
@@ -35,9 +43,4 @@
       </div>
     </form>
   </div>
-
-  <div *ngIf="isReadOnly()">
-    Read Only mode
-  </div>
-
 </div>

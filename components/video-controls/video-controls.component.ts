@@ -1,13 +1,22 @@
 import {Component, EventEmitter, Input, OnInit, Output} from '@angular/core';
 import {RestNodeService} from "../../../core-module/rest/services/rest-node.service";
-import {Node} from "../../../core-module/rest/data-object"
+import {Collection, Node} from "../../../core-module/rest/data-object"
 import {RestConstants} from "../../../core-module/rest/rest-constants";
 import {Toast} from "../../toast";
+import * as Rest from "../../../core-module/core.module";
+import {trigger} from "@angular/animations";
+import {UIAnimation} from "../../../core-module/ui/ui-animation";
+import {UIHelper} from "../../ui-helper";
+import {RestCollectionService, RestConnectorService} from "../../../core-module/core.module";
+import {Router} from "@angular/router";
 
 @Component({
   selector: 'video-controls',
   templateUrl: 'video-controls.component.html',
-  styleUrls: ['video-controls.component.scss']
+  styleUrls: ['video-controls.component.scss'],
+  animations: [
+    trigger('fromRight', UIAnimation.fromRight()),
+  ]
 })
 export class VideoControlsComponent{
   _video: HTMLVideoElement;
@@ -15,6 +24,8 @@ export class VideoControlsComponent{
   _endTime = "00:00:00";
   _title = 'Title';
   loading = false;
+  chooseCollection = false;
+  private isGuest: boolean;
 
   @Input() set video(video:HTMLVideoElement){
     // timeout to make sure node is already bound
@@ -29,8 +40,10 @@ export class VideoControlsComponent{
         console.log(vtt);
         this.objectToCues(vtt, this.track);
         const c = vtt[vtt.length-1];
-        this._startTime=this.toHHMMSS(c.startTime);
-        this._endTime=this.toHHMMSS(c.endTime);
+        if(c) {
+          this._startTime = this.toHHMMSS(c.startTime);
+          this._endTime = this.toHHMMSS(c.endTime);
+        }
       }
       this.render();
     });
@@ -41,12 +54,18 @@ export class VideoControlsComponent{
   private b = document.querySelector("#bar");
   markers:any[]=[];
 
-  constructor(private nodeService : RestNodeService,private toast:Toast) {
+  constructor(
+              private nodeService : RestNodeService,
+              private collectionService : RestCollectionService,
+              private connector : RestConnectorService,
+              private router : Router,
+              private toast:Toast) {
+    this.isGuest = this.connector.getCurrentLogin().isGuest;
 
   }
 
-  isReadOnly(){
-    return this.node.access.indexOf(RestConstants.ACCESS_WRITE)==-1;
+  private isCollectionRef() {
+    return this.node.aspects.indexOf(RestConstants.CCM_ASPECT_IO_REFERENCE)!=-1;
   }
 
   render() {
@@ -60,8 +79,9 @@ export class VideoControlsComponent{
         }
       }
     }
-
-    this._video.currentTime = this.markers[0].startTime;
+    if(this.markers.length) {
+      this._video.currentTime = this.markers[0].startTime;
+    }
     let that = this;
     this._video.addEventListener("timeupdate", function pausing_function(){
         if(this.currentTime >= that.markers[0].endTime) {
@@ -98,6 +118,11 @@ export class VideoControlsComponent{
   }
 
   updateChapters() {
+    if(!this.isCollectionRef()){
+      // not an individual object, choose new location first
+      this.chooseCollection=true;
+      return;
+    }
     this.loading=true;
     if(this.track.cues){
       while(this.track.cues.length){
@@ -143,6 +168,20 @@ export class VideoControlsComponent{
       });
     }
     return result;
+  }
+
+  addToCollection(collection: Collection) {
+    this.chooseCollection=false;
+    this.loading=true;
+    UIHelper.addToCollection(this.collectionService,this.router,this.toast,collection,[this.node],(elements)=>{
+      console.log(elements);
+      if(elements.length){
+        this.node = elements[0];
+        this.updateChapters();
+      }else{
+        this.loading=false;
+      }
+    });
   }
 }
 export class VideoData{

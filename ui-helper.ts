@@ -334,17 +334,18 @@ export class UIHelper {
                 mdsSets[i].name = translate.instant('DEFAULT_METADATASET', {name: mdsSets[i].name});
         }
     }
-    static addToCollection(collectionService: RestCollectionService, router: Router, toast: Toast, collection: Node | Collection, nodes: Node[], callback: Function = null, position = 0, error = false) {
+    static addToCollection(collectionService: RestCollectionService, router: Router, toast: Toast, collection: Node | Collection, nodes: Node[], callback: Function = null, position = 0, error = false,results=[]) {
         if (position >= nodes.length) {
             if (!error)
                 UIHelper.showAddedToCollectionToast(toast, router, collection, nodes.length);
             if (callback)
-                callback(error);
+                callback(results);
             return;
         }
 
-        collectionService.addNodeToCollection(collection.ref.id, nodes[position].ref.id,nodes[position].ref.repo).subscribe(() => {
-                UIHelper.addToCollection(collectionService, router, toast, collection, nodes, callback, position + 1, error);
+        collectionService.addNodeToCollection(collection.ref.id, nodes[position].ref.id,nodes[position].ref.repo).subscribe((result) => {
+                results.push(result.node);
+                UIHelper.addToCollection(collectionService, router, toast, collection, nodes, callback, position + 1, error, results);
             },
             (error: any) => {
                 if (error.status == RestConstants.DUPLICATE_NODE_RESPONSE) {
@@ -352,7 +353,7 @@ export class UIHelper {
                 }
                 else
                     NodeHelper.handleNodeError(toast, RestHelper.getTitle(nodes[position]), error);
-                UIHelper.addToCollection(collectionService, router, toast, collection, nodes, callback, position + 1, true);
+                UIHelper.addToCollection(collectionService, router, toast, collection, nodes, callback, position + 1, true, results);
             });
     }
   static openConnector(connector:RestConnectorsService,iam:RestIamService,events:FrameEventsService,toast:Toast,node : Node,type : Filetype=null,win : any = null,connectorType : Connector = null,newWindow=true){
