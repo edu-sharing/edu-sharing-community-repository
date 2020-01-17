@@ -13,6 +13,8 @@
   "APPLY" : "Übernehmen",
   "CANCEL" : "Abbrechen",
   "YES_DELETE" : "Ja, löschen",
+  "START": "Start",
+  "STOP": "Stop",
   "RENAME" : "Umbenennen",
   "USERMENU": "Nutzermenü",
   "USER_GUEST" : "Gast",
@@ -24,6 +26,7 @@
   "MORE_SELECTBOX": "weitere Elemente",
   "HIDE_MORE": "weniger anzeigen",
   "FIELD_REQUIRED" : "Pflichtfeld",
+  "FIELD_VALIDATION_ERROR_INTEGER" : "Ganze Zahlen verwenden",
   "EXTENSION_NOT_MATCH":"Dateierweiterung ändern?",
   "EXTENSION_NOT_MATCH_INFO":"Sind Sie sicher, dass Sie die Dateierweiterung von '{{extensionOld}}' auf '{{extensionNew}}' ändern möchten?\n\n{{warning}}",
   "EXTENSION_NOT_MATCH_INFO_OLD":"Sind Sie sicher, dass Sie die Dateierweiterung '{{extensionOld}}' entfernen möchten?\n\n{{warning}}",
@@ -42,7 +45,9 @@
   "NO_MORE_ELEMENTS" : "Keine weiteren Elemente",
   "FIELD_MUST_BE_FILLED" : "Dieses Feld muss ausgefüllt sein",
   "CHOOSE_DATE":"Datum wählen",
+  "CARD_SUBTITLE_MULTIPLE":"{{count}} Elemente",
   "SELECT_COLLECTION" : "In '{{name}}' einsortieren",
+  "SELECT_ROOT_NAME" : "Hauptverzeichnis",
   "SELECT_ROOT" : "Hauptverzeichnis wählen",
   "SELECT_ROOT_DISABLED" : "Element wählen",
   "CLOSE" : "Schließen",
@@ -68,8 +73,14 @@
   "DEFAULT_METADATASET":"Standard-Metadatenset ({{name}})",
   "NO_MATCHES" : "Keine übereinstimmenden Einträge",
   "NO_CC_PUBLISH" : "Kein Recht zum Veröffentlichen",
-  "ADD_TO_RECENT_COLLECTION":"In zuletzt verwendete Sammlungen",
-  "SEARCH_COLLECTIONS":"Sammlung suchen...",
+  "COLLECTION_CHOOSER": {
+    "ADD_TO_RECENT_COLLECTION": "In zuletzt verwendete Sammlungen",
+    "SEARCH_COLLECTIONS": "Sammlung suchen...",
+    "NO_SUB_COLLECTIONS": "Keine weiteren Sammlungen",
+    "NO_PERSONAL_COLLECTIONS": "Noch keine eigenen Sammlungen",
+    "ADD_TO_MY_COLLECTION": "In meine Sammlungen",
+    "ADD_TO_SELECTED_COLLECTION": "Hier einfügen"
+  },
   "ASK_CC_PUBLISH" : "Nachfragen",
   "ASK_CC_PUBLISH_SUBJECT" : "Anfrage für Berechtigungen des Elements {{name}}",
   "ORIGINAL_DELETE":"Entfernen",
@@ -80,6 +91,7 @@
   "RENDERSERVICE_API_ERROR":"Fehler beim Verbinden mit dem Renderingservice. Bitte melden Sie diesen Fehler einen Administrator",
   "SYSTEM_FOLDER_DELETE_ERROR":"Dieser Ordner wurde vom System erstellt und kann nicht gelöscht werden",
   "GENERIC_QUOTA_ERROR_TITLE":"Der Vorgang konnte nicht ausgeführt werden, da das Speicherplatz-Quota überschritten wurde",
+  "CONNECTOR_FORMAT_LABEL":"Dateityp",
   "CONNECTOR_QUOTA_REACHED_TITLE":"Speicherplatz-Quota überschritten",
   "CONNECTOR_QUOTA_REACHED_MESSAGE":"Diese Funktion ist nicht mehr verfügbar, da Sie das Speicherplatz-Quota vollständig überschritten haben.\n\nLöschen Sie einige Dateien, um Speicherplatz zu schaffen und versuchen Sie es anschließend erneut.",
   "TOOLPERMISSION_ERROR":"Ihnen fehlt für diesen Vorgang die notwendige Berechtigung",
@@ -116,6 +128,7 @@
   },
   "NO_WRITE_PERMISSIONS":"Keine Rechte für diesen Vorgang",
   "NODE_SEARCH":"Elemente suchen...",
+  "DELETED_USER":"gelöschter Benutzer",
   "GROUP_EVERYONE":"Alle (Öffentlich)",
   "DETAILS": "Details",
   "INFO": "Infos",
@@ -142,6 +155,8 @@
   "PASSWORD_MIN_LENGTH":"Das Passwort muss mindestens {{length}} Zeichen lang sein",
   "PASSWORD_NOT_MATCH":"Die Passwörter stimmen nicht überein",
   "LEARNINGAGE_YEAR":"Jahre",
+  "PROGRESS_DIALOG_DEFAULT_TITLE": "Vorgang wird ausgeführt...",
+  "PROGRESS_DIALOG_DEFAULT_MESSAGE": "Bitte warten, der Vorgang wird ausgeführt...",
   "NODE_INFO":{
     "TITLE":"Node \"{{name}}\"",
     "LOCATION":"Pfad zum Element",
@@ -216,7 +231,12 @@
     "ccm:author_freetext":"Freie Urheber-Angabe",
     "ccm:lifecyclecontributer_authorFN":"Autor",
     "ccm:wf_status":"Status",
-    "ccm:eaf_productionyear":"Prod. Jahr"
+    "ccm:eaf_productionyear":"Prod. Jahr",
+    "counts": {
+      "VIEW_MATERIAL": "Aufrufe",
+      "VIEW_MATERIAL_EMBEDDED": "Aufrufe (Remote)",
+      "DOWNLOAD_MATERIAL": "Downloads"
+    }
   },
   "LICENSE":{
     "NAMES": {
@@ -274,7 +294,7 @@
     "OVERALL":""
   },
   "NODE_VARIANT":{
-    "TITLE": "Neue Variante anlegen für {{name}}",
+    "TITLE": "Neue Variante anlegen",
     "NEW_VARIANT":"Name der Variante:",
     "DEFAULT_NAME":"Variante von {{name}}",
     "BREADCRUMB_INFO": "Variante speichern in:",
@@ -296,7 +316,7 @@
     "OPTION":"Problem melden",
     "REPORT":"Melden",
     "REPORT_INFO":"Problem mit \"{{name}}\" melden",
-    "COMMENT":"Bitte nennen Sie zusätzliche Hinweise zum aufgetretenen Problem",
+    "COMMENT":"Nennen Sie zusätzliche Hinweise zum aufgetretenen Problem",
     "COMMENT_PLACEHOLDER":"Details angeben...",
     "EMAIL":"Ihre E-Mail-Adresse",
     "EMAIL_PLACEHOLDER":"jemand@beispiel.de",
@@ -334,7 +354,8 @@
       "PUBLIC" : "Öffentlich",
       "SHARED" : "Freigegeben",
       "CUSTOM" : "Benutzerdefiniert",
-      "TYPE_EDITORIAL" : "Redaktionell"
+      "TYPE_EDITORIAL" : "Redaktionell",
+      "TYPE_MEDIA_CENTER" : "Medienzentrum"
     }
   },
   "CREATE_NODE":{
@@ -394,6 +415,7 @@
     "firstName" : "Vorname",
     "lastName" : "Nachname",
     "email" : "E-Mail",
+    "status" : "Status",
     "primaryAffiliation": "Primäre Rolle",
     "password" : "Passwort",
     "sizeQuota" : "Speicherkontingent in MB",
@@ -461,6 +483,7 @@
   "NO_SIZE":"-",
   "VERSION_COMMENT":"Versionskommentar",
   "MDS":{
+    "TITLE":"Metadaten bearbeiten",
     "SHOW_EXTENDED":"Erweitere Metadaten anzeigen",
     "SHOW_EXTENDED_SEARCH":"Weitere Filter anzeigen",
     "AUTHOR_LABEL":"Urheber-Angaben",
@@ -504,6 +527,9 @@
     "PASSWORD": "Passwort",
     "PASSWORD_PLACEHOLDER": "Passwort eingeben ...",
     "PASSWORD_CORRECT": "Passwort korrekt"
+  },
+  "VIDEO_CONTROLS": {
+    "SAVED": "Änderungen wurden gespeichert"
   },
   "TOAST":{
     "NODE_LOCKED":"Das gewünschte Dokument wird aktuell von einem anderen Nutzer verwendet und kann deshalb nicht geöffnet werden",
@@ -553,7 +579,8 @@
     "keyboard_arrow_right": "weiter",
     "keyboard_arrow_up": "nach oben",
     "file_upload": "Datei hochladen",
-    "delete": "Löschen"
+    "delete": "Löschen",
+    "add": "Neu"
   },
   "LANGUAGE":{
     "INTERNATIONAL": "International",

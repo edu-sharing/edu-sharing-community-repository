@@ -15,6 +15,7 @@ import org.edu_sharing.repository.client.rpc.cache.CacheInfo;
 import org.edu_sharing.repository.server.tools.ApplicationInfo;
 import org.edu_sharing.service.admin.model.GlobalGroup;
 import org.edu_sharing.repository.server.jobs.quartz.JobInfo;
+import org.edu_sharing.service.admin.model.RepositoryConfig;
 import org.edu_sharing.service.admin.model.ServerUpdateInfo;
 import org.edu_sharing.service.admin.model.ToolPermission;
 
@@ -87,7 +88,11 @@ public interface AdminService {
 
 	void startJob(String jobClass, HashMap<String, Object> params) throws Exception;
 
-	Map<String, ToolPermission> getToolpermissions(String authority) throws Throwable;
+    RepositoryConfig getConfig();
+
+    void setConfig(RepositoryConfig config);
+
+    Map<String, ToolPermission> getToolpermissions(String authority) throws Throwable;
 
     String addToolpermission(String name) throws Throwable;
 
@@ -99,4 +104,7 @@ public interface AdminService {
     void testMail(String receiver, String template);
 
     String importOaiXml(InputStream xml, String recordHandlerClassName, String binaryHandlerClassName) throws Exception;
+
+    void updateConfigFile(String filename,String content) throws Throwable;
+	String getConfigFile(String filename) throws Throwable;
 }

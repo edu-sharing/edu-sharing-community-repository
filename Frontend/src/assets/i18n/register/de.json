@@ -1,6 +1,7 @@
 {
   "REGISTER": {
     "TITLE": "Registrieren",
+    "ORGANIZATION_TITLE": "edu-sharing",
     "ORGANIZATION": "Organisation",
     "NEWSLETTER": "Neuigkeiten per Mail erhalten",
     "ACCEPT": "Ich bin mit der Verarbeitung meiner Daten einverstanden",

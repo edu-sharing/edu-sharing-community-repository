@@ -6,10 +6,9 @@ import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 
 @ApiModel(description = "")
-public class Organization extends Group {
+public class Organization extends ManagableGroup {
 
 	private NodeRef folderId = null;
-	private boolean administrationAccess;
 
 	/**
 	 **/
@@ -22,13 +21,5 @@ public class Organization extends Group {
 	public void setSharedFolder(NodeRef folderId) {
 		this.folderId = folderId;
 	}
-	@ApiModelProperty(value = "")
-	@JsonProperty("administrationAccess")
-	public boolean getAdministrationAccess() {
-		return administrationAccess;
-	}
 
-	public void setAdministrationAccess(boolean administrationAccess) {
-		this.administrationAccess = administrationAccess;
-	}
 }

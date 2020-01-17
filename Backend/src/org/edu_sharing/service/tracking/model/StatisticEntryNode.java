@@ -2,10 +2,11 @@ package org.edu_sharing.service.tracking.model;
 
 import org.edu_sharing.service.tracking.TrackingService;
 
+import java.util.HashMap;
 import java.util.Map;
 
 public class StatisticEntryNode extends StatisticEntry{
-    private String node,date;
+    private String node;
 
     public String getNode() {
         return node;
@@ -15,13 +16,6 @@ public class StatisticEntryNode extends StatisticEntry{
         this.node = node;
     }
 
-    public String getDate() {
-        return date;
-    }
-
-    public void setDate(String date) {
-        this.date = date;
-    }
 
     @Override
     public boolean equals(Object obj) {

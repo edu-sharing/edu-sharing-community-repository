@@ -47,9 +47,11 @@ import javax.xml.xpath.XPathConstants;
 import javax.xml.xpath.XPathExpressionException;
 import javax.xml.xpath.XPathFactory;
 
+import com.typesafe.config.Config;
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.apache.commons.httpclient.util.URIUtil;
 import org.apache.log4j.Logger;
+import org.edu_sharing.lightbend.LightbendConfigLoader;
 import org.edu_sharing.repository.server.MCAlfrescoAPIClient;
 import org.edu_sharing.repository.server.jobs.quartz.ImporterJob;
 import org.edu_sharing.repository.server.jobs.quartz.OAIConst;
@@ -64,8 +66,13 @@ import org.xml.sax.SAXException;
 public class OAIPMHLOMImporter implements Importer{
 
 	// best thread scaling seems to be at a max at 4-8 threads
-	// check the cpu and choose between a thread count between 1 - 6, leaving 1 core from the cpu at least untouched
-	public static final int THREAD_COUNT = Math.max(1, Math.min(6,Runtime.getRuntime().availableProcessors()-1));
+	public static int getThreadCount(){
+		Config config=LightbendConfigLoader.get().getConfig("importer.threads");
+		return Math.max(config.getInt("min")
+				,Math.min(config.getInt("max"),
+				Runtime.getRuntime().availableProcessors()-config.getInt("minSpare")));
+	}
+
 	private int totalResults = 0;
 	Logger logger = Logger.getLogger(OAIPMHLOMImporter.class);
 	
@@ -267,7 +274,7 @@ public class OAIPMHLOMImporter implements Importer{
 	}
 
 	
-	private ExecutorService executor = Executors.newFixedThreadPool(THREAD_COUNT, r -> {
+	private ExecutorService executor = Executors.newFixedThreadPool(getThreadCount(), r -> {
 		Thread t = new Thread(r);
 		t.setPriority(Thread.NORM_PRIORITY-1);
 		return t;
@@ -327,7 +334,7 @@ public class OAIPMHLOMImporter implements Importer{
 		time=(System.currentTimeMillis()-time);
 		if(threads.size()>0) {
 			logger.info("Import progress: "+totalResults+" entries processed so far");
-			logger.info(THREAD_COUNT + " Threads finished (" + threads.size() + ", " + (time / 1000) + " s -> " + (time / threads.size()) + "ms per entry)");
+			logger.info(getThreadCount() + " Threads finished (" + threads.size() + ", " + (time / 1000) + " s -> " + (time / threads.size()) + "ms per entry)");
 		}
 	}
 

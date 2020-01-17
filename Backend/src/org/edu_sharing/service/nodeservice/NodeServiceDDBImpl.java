@@ -1,5 +1,6 @@
 package org.edu_sharing.service.nodeservice;
 
+import java.io.InputStream;
 import java.util.HashMap;
 
 import org.edu_sharing.repository.client.tools.CCConstants;
@@ -33,5 +34,9 @@ public class NodeServiceDDBImpl extends NodeServiceAdapter{
 		// TODO Auto-generated method stub
 		return new String[] {};
 	}
-	
+
+	@Override
+	public InputStream getContent(String nodeId) throws Throwable {
+		return null;
+	}
 }

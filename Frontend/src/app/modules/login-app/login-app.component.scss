@@ -1,4 +1,4 @@
-@import "../../../styles/variables.scss";
+@import "../../core-ui-module/styles/variables";
 
 .appLogin {
   background-color:#333;
@@ -8,6 +8,9 @@
 .card,.card-high{
   top:15%;
   @include materialShadowLarge();
+}
+:host /deep/ mat-form-field{
+  width: 100%;
 }
 .infoTop{
   position: absolute;

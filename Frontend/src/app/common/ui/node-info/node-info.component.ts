@@ -1,15 +1,18 @@
-import {UIAnimation} from "../ui-animation";
+import {UIAnimation} from "../../../core-module/ui/ui-animation";
 import {Component, EventEmitter, Input, Output} from "@angular/core";
 import {trigger} from "@angular/animations";
-import {Node, NodeList, NodePermissions, Permissions} from "../../rest/data-object";
-import {RestNodeService} from "../../rest/services/rest-node.service";
-import {ConfigurationService} from "../../services/configuration.service";
-import {RestHelper} from "../../rest/rest-helper";
-import {ConfigurationHelper} from "../../rest/configuration-helper";
 import {Router} from "@angular/router";
-import {UIConstants} from "../ui-constants";
-import {RestConstants} from "../../rest/rest-constants";
-import {Toast} from "../toast";
+import {UIConstants} from "../../../core-module/ui/ui-constants";
+import {
+    ConfigurationHelper,
+    ConfigurationService,
+    Node,
+    Permissions,
+    NodeList,
+    RestConstants,
+    RestNodeService, DialogButton
+} from "../../../core-module/core.module";
+import {Toast} from "../../../core-ui-module/toast";
 
 
 @Component({
@@ -32,6 +35,7 @@ export class NodeInfoComponent{
     _properties : any[];
     _creator: string;
     _json: string;
+    buttons: DialogButton[];
     saving: boolean;
     customProperty:string[]=[];
   @Input() set node(node : Node){
@@ -39,9 +43,11 @@ export class NodeInfoComponent{
     this._creator=ConfigurationHelper.getPersonWithConfigDisplayName(this._node.createdBy,this.config);
     this._json=JSON.stringify(this._node,null,4);
     this._properties=[];
-    for(let k of Object.keys(node.properties).sort()) {
-      if(node.properties[k].join(""))
-        this._properties.push([k, node.properties[k].join(", ")]);
+    if(node.properties) {
+        for (let k of Object.keys(node.properties).sort()) {
+            if (node.properties[k].join(""))
+                this._properties.push([k, node.properties[k].join(", ")]);
+        }
     }
     this.nodeApi.getNodeParents(this._node.ref.id,true).subscribe((data:NodeList)=>{
       this._path=data.nodes.reverse();
@@ -58,7 +64,11 @@ export class NodeInfoComponent{
   constructor(private nodeApi : RestNodeService,
               private toast : Toast,
               private config : ConfigurationService,
-              private router : Router){}
+              private router : Router){
+    this.buttons=[
+        new DialogButton('CLOSE',DialogButton.TYPE_CANCEL,()=>this.close())
+    ];
+  }
 
   close(){
     this.onClose.emit();

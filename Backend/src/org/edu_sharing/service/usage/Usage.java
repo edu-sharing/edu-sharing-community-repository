@@ -1,5 +1,6 @@
 package org.edu_sharing.service.usage;
 
+import java.io.Serializable;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
@@ -7,7 +8,7 @@ import java.util.Map;
 
 import org.edu_sharing.repository.client.tools.CCConstants;
 
-public class Usage {
+public class Usage implements Serializable {
 	// type of the usage. Default is Direct (directly associated to the node)
 	// Indirect = The usage is from an other node which is related to this
 	// (e.g. a collection reference which has an usage)

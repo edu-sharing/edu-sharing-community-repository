@@ -1,4 +1,4 @@
-@import "../../../styles/variables.scss";
+@import "../../core-ui-module/styles/variables";
 $path:'../../../assets/images/';
 
 .profile-bg{
@@ -62,40 +62,34 @@ $path:'../../../assets/images/';
     }
     user-avatar{
     }
-    input{
+    mat-form-field{
       width: auto;
       margin:10px;
-      background-color: rgba(255,255,255,0.1);
+      z-index: 2;
+      //background-color: rgba(255,255,255,0.1);
     }
     .edit{
       position: absolute;
       right:20px;
       top:20px;
-      text-transform: uppercase;
-      i{
-        position: relative;
-        top:6px;
-        left:-3px;
-      }
+      z-index: 1;
     }
     .editAvatar{
       position: absolute;
       left: calc(50% + 60px);
-      top: 85px;
+      top: 82px;
       user-select: none;
-      >i{
-        padding: 20px;
-        display: initial;
-        cursor: pointer;
+      >button{
+        padding: 10px;
       }
 
       .new-avatar-button{
-        left: -120px;
+        left: -118px;
         border-radius: 50%;
         position: absolute;
         top: -45px;
         height: 120px;
-        width: 120px;
+        width: 116px;
         cursor: pointer;
         overflow: hidden;
         span{
@@ -142,9 +136,11 @@ $path:'../../../assets/images/';
   }
   .about{
     position: relative;
-    padding-left: 70px;
     >div{
       padding-top: 20px;
+    }
+    mat-form-field{
+      width: 100%;
     }
     .about-buttons{
       text-align: right;
@@ -199,13 +195,20 @@ $path:'../../../assets/images/';
     flex-grow: 1;
   }
   .save{
+    position: relative;
+    z-index: 2;
     width:100%;
     .btn-flat:hover{
       background-color: #eee;
     }
-    div {
+    button {
       float: right;
     }
+  }
+}
+:host /deep/{
+  input-password mat-form-field{
+    width: 100%;
   }
 }
 @media screen and (max-width: ($mobileTabSwitchWidth)) {

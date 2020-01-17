@@ -205,6 +205,8 @@ public class CCConstants {
 
 	public final static String CCM_TYPE_COLLECTION_FEEDBACK = "{http://www.campuscontent.de/model/1.0}collection_feedback";
 
+	public final static String CCM_TYPE_RATING = "{http://www.campuscontent.de/model/1.0}rating";
+
 	public final static String CCM_TYPE_LO = "{http://www.campuscontent.de/model/1.0}lo";
 
 	public final static String CCM_TYPE_EO = "{http://www.campuscontent.de/model/1.0}eo";
@@ -310,6 +312,7 @@ public class CCConstants {
 	public final static String CM_PROP_PERSON_ESORIGINALUID = "{http://www.alfresco.org/model/content/1.0}esoriginaluid";
 	
 	public final static String CM_PROP_PERSON_ESPERSONSTATUS = "{http://www.alfresco.org/model/content/1.0}espersonstatus";
+	public final static String CM_PROP_PERSON_ESPERSONSTATUSDATE = "{http://www.alfresco.org/model/content/1.0}espersonstatusdate";
 
 	public final static String CM_PROP_PERSON_EDU_SCHOOL_PRIMARY_AFFILIATION = "{http://www.alfresco.org/model/content/1.0}eduSchoolPrimaryAffiliation";
 
@@ -375,6 +378,9 @@ public class CCConstants {
 
 	public final static String CCM_PROP_COLLECTION_FEEDBACK_DATA = "{http://www.campuscontent.de/model/1.0}collection_feedback_data";
 
+	public final static String CCM_PROP_RATING_VALUE = "{http://www.campuscontent.de/model/1.0}rating_value";
+	public final static String CCM_PROP_RATING_TEXT = "{http://www.campuscontent.de/model/1.0}rating_text";
+
 	public final static String CCM_PROP_FORKED_ORIGIN = "{http://www.campuscontent.de/model/1.0}forked_origin";
 	public final static String CCM_PROP_FORKED_ORIGIN_VERSION = "{http://www.campuscontent.de/model/1.0}forked_origin_version";
 
@@ -408,6 +414,12 @@ public class CCConstants {
 
 	public final static String CCM_PROP_IO_REF_VERSION = "{http://www.campuscontent.de/model/1.0}ref_version";
 
+	public final static String CCM_PROP_IO_REF_VIDEO_VTT = "{http://www.campuscontent.de/model/1.0}ref_video_vtt";
+
+	public final static String CCM_PROP_ADDRESS_POSTALCODE = "{http://www.campuscontent.de/model/1.0}postalCode";
+
+	public final static String CCM_PROP_ADDRESS_CITY = "{http://www.campuscontent.de/model/1.0}city";
+
 	public final static String CCM_ASPECT_POSITIONABLE = "{http://www.campuscontent.de/model/1.0}positionable";
 
 	public final static String CCM_ASPECT_COMMON_LICENSES ="{http://www.campuscontent.de/model/1.0}commonlicenses";
@@ -416,11 +428,21 @@ public class CCConstants {
 
 	public final static String CCM_ASPECT_GROUPEXTENSION = "{http://www.campuscontent.de/model/1.0}groupExtension";
 
+	public final static String CCM_ASPECT_MEDIACENTER = "{http://www.campuscontent.de/model/1.0}mediacenter";
+
+	public final static String CCM_ASPECT_ADDRESS = "{http://www.campuscontent.de/model/1.0}address";
+
 	public final static String CCM_PROP_GROUPEXTENSION_GROUPTYPE = "{http://www.campuscontent.de/model/1.0}groupType";
 
 	public final static String CCM_PROP_GROUPEXTENSION_GROUPEMAIL = "{http://www.campuscontent.de/model/1.0}groupEmail";
 
 	public final static String CCM_PROP_GROUPEXTENSION_GROUPSOURCE = "{http://www.campuscontent.de/model/1.0}groupSource";
+
+	public final static String CCM_PROP_MEDIACENTER_ID = "{http://www.campuscontent.de/model/1.0}mediacenterId";
+	public final static String CCM_PROP_MEDIACENTER_CONTENT_STATUS = "{http://www.campuscontent.de/model/1.0}mediacenterContentStatus";
+	public final static String CCM_PROP_MEDIACENTER_DISTRICT_ABBREVIATION = "{http://www.campuscontent.de/model/1.0}mediacenterDistrictAbbreviation";
+	public final static String CCM_PROP_MEDIACENTER_MAIN_URL = "{http://www.campuscontent.de/model/1.0}mediacenterMainUrl";
+	public final static String CCM_PROP_MEDIACENTER_CATALOGS = "{http://www.campuscontent.de/model/1.0}mediacenterCatalogs";
 
 	public final static String CCM_PROP_AUTHOR_FREETEXT = "{http://www.campuscontent.de/model/1.0}author_freetext";
 
@@ -460,6 +482,7 @@ public class CCConstants {
 			CCConstants.LOM_PROP_TECHNICAL_FORMAT,
 			CCConstants.LOM_PROP_TECHNICAL_SIZE
 	);
+    public static final String AUTHORITY_DELETED_USER = "DELETED_USER";
 
     public static String CCM_WF_STATUS_VALUE_UNCHECKED="100_unchecked";
 	public static String CCM_WF_STATUS_VALUE_TO_CHECK="200_tocheck";
@@ -523,6 +546,8 @@ public class CCConstants {
 	public final static String CCM_ASSOC_ASSIGNED_SHARES = "{http://www.campuscontent.de/model/1.0}assignedshares";
 
 	public final static String CCM_ASSOC_COMMENT = "{http://www.campuscontent.de/model/1.0}childcomment";
+
+	public final static String CCM_ASSOC_RATING = "{http://www.campuscontent.de/model/1.0}childrating";
 
 	public final static String CCM_ASSOC_COLLECTION_FEEDBACK = "{http://www.campuscontent.de/model/1.0}childcollectionfeedback";
 	/**
@@ -791,6 +816,8 @@ public class CCConstants {
 
 	public final static String CCM_VALUE_TOOLPERMISSION_REPOSITORY_PREFIX = "TOOLPERMISSION_REPOSITORY_";
 
+	public final static String CCM_VALUE_TOOLPERMISSION_COLLECTION_CHANGE_OWNER = "TOOLPERMISSION_COLLECTION_CHANGE_OWNER";
+
 	public final static String CCM_VALUE_TOOLPERMISSION_COLLECTION_EDITORIAL = "TOOLPERMISSION_COLLECTION_EDITORIAL";
 
 	public final static String CCM_VALUE_TOOLPERMISSION_COLLECTION_CURRICULUM = "TOOLPERMISSION_COLLECTION_CURRICULUM";
@@ -804,6 +831,8 @@ public class CCConstants {
 	public final static String CCM_VALUE_TOOLPERMISSION_COLLECTION_FEEDBACK = "TOOLPERMISSION_COLLECTION_FEEDBACK";
 
 	public final static String CCM_VALUE_TOOLPERMISSION_USAGE_STATISTIC = "TOOLPERMISSION_USAGE_STATISTIC";
+
+	public final static String CCM_VALUE_TOOLPERMISSION_GLOBAL_STATISTICS = "TOOLPERMISSION_GLOBAL_STATISTICS";
 
 	/**
 	 * dynamic generated properties
@@ -998,7 +1027,7 @@ public class CCConstants {
 	public static final String CCM_PROP_IO_SCHOOLTOPIC = "{http://www.campuscontent.de/model/1.0}schooltopic";
 
 	public static final String CCM_PROP_IO_UNIVERSITY = "{http://www.campuscontent.de/model/1.0}university";
-	
+
 	public static final String SCHOOLCONTEXT_PATH_SEPARATOR = "#";
 
 	public final static String CCM_PROP_CONFIGOBJECT_VALUE = "{http://www.campuscontent.de/model/1.0}configvalue";
@@ -1128,6 +1157,8 @@ public class CCConstants {
 
 	public final static String CCM_PROP_MAP_COLLECTIONVIEWTYPE = "{http://www.campuscontent.de/model/1.0}collectionviewtype";
 
+	public final static String CCM_PROP_MAP_COLLECTION_AUTHOR_FREETEXT = "{http://www.campuscontent.de/model/1.0}collection_author_freetext";
+
 	public final static String CCM_PROP_MAP_COLLECTIONTYPE = "{http://www.campuscontent.de/model/1.0}collectiontype";
 	public final static String CCM_PROP_MAP_COLLECTIONSCOPE = "{http://www.campuscontent.de/model/1.0}collectionscope";
 	public final static String CCM_PROP_MAP_COLLECTIONREMOTEID = "{http://www.campuscontent.de/model/1.0}collectionremoteid";
@@ -1169,6 +1200,10 @@ public class CCConstants {
 	public final static String CCM_VALUE_MAP_TYPE_EDU_SHARING_SYSTEM_TOOLPERMISSIONS = "EDUSYSTEM_TOOLPERMISSIONS";
 
 	public final static String CCM_VALUE_MAP_TYPE_EDU_SHARING_SYSTEM_VALUESPACE = "EDUSYSTEM_VALUESPACE";
+
+
+	public final static String CCM_VALUE_IO_NAME_CONFIG_NODE_NAME = "RepositoryConfig";
+
 
 	/**
 	 * this property comes from alfresco when calling queryChildren
@@ -1520,6 +1555,8 @@ public class CCConstants {
 
 	public final static String PERMISSION_COMMENT = "Comment";
 
+	public final static String PERMISSION_RATE = "Rate";
+
 	// collection feedback permission
 	public final static String PERMISSION_FEEDBACK = "Feedback";
 
@@ -1679,6 +1716,18 @@ public class CCConstants {
 		list.add(COMMON_LICENSE_CUSTOM);
 		return list;
 	}
+	public static List<String> getAllCCLicenseKeys(){
+		List<String> list=new ArrayList<>();
+		list.add(COMMON_LICENSE_CC_BY);
+		list.add(COMMON_LICENSE_CC_BY_SA);
+		list.add(COMMON_LICENSE_CC_BY_ND);
+		list.add(COMMON_LICENSE_CC_BY_NC);
+		list.add(COMMON_LICENSE_CC_BY_NC_SA);
+		list.add(COMMON_LICENSE_CC_BY_NC_ND);
+		list.add(COMMON_LICENSE_CC_ZERO);
+		list.add(COMMON_LICENSE_PDM);
+		return list;
+	}
 
 	public final static String COMMON_LICENSE_CC_ZERO_LINK = "https://creativecommons.org/publicdomain/zero/1.0/deed.${locale}";
 	public final static String COMMON_LICENSE_CC_PDM_LINK = "http://creativecommons.org/publicdomain/mark/1.0/deed.${locale}";
@@ -1721,6 +1770,7 @@ public class CCConstants {
 			permission.add(PERMISSION_READ_PREVIEW);
 			permission.add(PERMISSION_READ_ALL);
 			permission.add(PERMISSION_COMMENT);
+			permission.add(PERMISSION_RATE);
 			permission.add(PERMISSION_WRITE);
 			permission.add(PERMISSION_DELETE);
 			permission.add(PERMISSION_DELETE_CHILDREN);
@@ -1872,29 +1922,6 @@ public class CCConstants {
 
 	private static HashMap<String, String> nameSpaceMap = null;
 
-	/**
-	 * edu-sharing.properties
-	 */
-	public static String EDU_SHARING_PROPERTIES_PROPERTY_VALIDATOR_REGEX_CM_NAME = "property_validator_regex_cm_name";
-
-	public static String EDU_SHARING_PROPERTIES_PROPERTY_LMSCODES = "lmscodes";
-
-	public static String EDU_SHARING_PROPERTIES_PROPERTY_FUZZY_USERSEARCH = "fuzzy_usersearch";
-
-	public static String EDU_SHARING_PROPERTIES_PROPERTY_TAXONID_VALUESPACEFILE = "taxonid_valuespacefile";
-
-	public static String EDU_SHARING_PROPERTIES_PROPERTY_TAXONID_VALUESPACE_I18N_PREFIX = "taxonid_valuespace_i18n_prefix";
-
-	public static String EDU_SHARING_PROPERTIES_PROPERTY_RESOLVE_WEBSITE_TITLE = "resolve_website_title";
-
-	public static String EDU_SHARING_PROPERTIES_ENABLE_STATISTICS_API= "enable_statistics_api";
-
-	public static String EDU_SHARING_PROPERTIES_PROPERTY_CORE_DBSCRIPTS = "core_dbscripts";
-
-	public static String EDU_SHARING_PROPERTIES_PROPERTY_INITIAL_DBSCRIPTS = "initial_dbscripts";
-
-    public static final String EDU_SHARING_PROPERTIES_PROPERTY_TRACKING_USER = "tracking_user";
-
     /**
 	 * @return <namespace,localnamespace>
 	 */
@@ -1992,9 +2019,12 @@ public class CCConstants {
 	public static final String EDU_SHARING_GLOBAL_GROUPS = "EDU_SHARING_GLOBAL_GROUPS";
 
 	public static final String ADMINISTRATORS_GROUP_TYPE = "ORG_ADMINISTRATORS";
+	public static final String MEDIA_CENTER_GROUP_TYPE = "MEDIA_CENTER";
+	public static final String MEDIA_CENTER_GROUP_PREFIX = "MEDIA_CENTER_";
 	public static final String EDITORIAL_GROUP_TYPE = "EDITORIAL";
 	public static final String COLLECTIONTYPE_DEFAULT = "default";
 	public static final String COLLECTIONTYPE_EDITORIAL = "EDITORIAL";
+	public static final String COLLECTIONTYPE_MEDIA_CENTER = "MEDIA_CENTER";
 
 	public static final String COLLECTION_COLOR_DEFAULT = "#975B5D";
 

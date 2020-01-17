@@ -1,19 +1,15 @@
-<div class="dialog darken" [@fade]="this"></div>
-<div class="card center-card card-high card-wide card-action" [@cardAnimation]="this">
-  <div class="card-content">
-    <div tabindex="0" class="card-cancel" (click)="close()" (keyup.enter)="close()"><i icon iconId="close" aria="true"></i></div>
-    <div class="card-title">{{'NODE_INFO.TITLE' | translate:{name:_node.name} }}</div>
-    <div class="card-scroll node-info">
+<card title="{{'NODE_INFO.TITLE' | translate:{name:_node.name} }}" [node]="_node" (onCancel)="close()" [buttons]="buttons" height="xxlarge" width="xxlarge">
+    <div class="debug-content">
       <div><span>{{'NODE.cm:name' | translate}}</span><span>{{_node.name}}</span></div>
       <div><span>{{'NODE.sys:node-uuid' | translate}}</span><span><a class="clickable" (click)="openNodeWorkspace(_node)">{{_node.ref.id}}</a></span></div>
       <div><span>{{'NODE_INFO.NODE_TYPE' | translate}}</span><span>{{_node.type}}</span></div>
       <div><span>{{'NODE_INFO.NODE_ASPECTS' | translate}}</span><span class="aspects">{{_node.aspects.join("\n")}}</span></div>
       <div><span>{{'NODE.mimetype' | translate}}</span><span>{{_node.mimetype}} / {{_node.mediatype}}</span></div>
-      <div *ngIf="_node.properties['cm:created_LONG']"><span>{{'NODE.cm:created' | translate}}</span><span>{{_node.properties['cm:created_LONG'][0] | formatDate:{time:true} }}</span></div>
-      <div *ngIf="_node.properties['cm:modified_LONG']"><span>{{'NODE.cm:modified' | translate}}</span><span>{{_node.properties['cm:modified_LONG'][0] | formatDate:{time:true} }}</span></div>
+      <div *ngIf="_node.properties && _node.properties['cm:created_LONG']"><span>{{'NODE.cm:created' | translate}}</span><span>{{_node.properties['cm:created_LONG'][0] | formatDate:{time:true} }}</span></div>
+      <div *ngIf="_node.properties && _node.properties['cm:modified_LONG']"><span>{{'NODE.cm:modified' | translate}}</span><span>{{_node.properties['cm:modified_LONG'][0] | formatDate:{time:true} }}</span></div>
       <div><span>{{'NODE.cm:creator' | translate}}</span><span>{{_creator}}</span></div>
       <div><span>{{'DOWNLOAD' | translate}}</span><span><a *ngIf="_node.downloadUrl" [href]="_node.downloadUrl" target="_blank">{{_node.downloadUrl}}</a><div *ngIf="!_node.downloadUrl">-</div></span></div>
-      <div><span>{{'WORKSPACE.EDITOR.PREVIEW' | translate}}</span><span><a [href]="_node.preview.url" target="_blank">{{_node.preview.url}}</a></span><span>isIcon: {{_node.preview.isIcon}}</span> <img [src]="_node.preview.url"></div>
+      <div *ngIf="_node.preview"><span>{{'WORKSPACE.EDITOR.PREVIEW' | translate}}</span><span><a [href]="_node.preview.url" target="_blank">{{_node.preview.url}}</a></span><span>isIcon: {{_node.preview.isIcon}}</span> <img [src]="_node.preview.url"></div>
       <div><span>{{'NODE_INFO.PERMISSIONS' | translate}}</span>
         <spinner-small *ngIf="!_permissions"></spinner-small>
         <div *ngIf="_permissions">
@@ -73,8 +69,4 @@
         <div><span>{{'NODE_INFO.JSON' | translate}}</span><span class="json">{{_json}}</span></div>
       </div>
     </div>
-  </div>
-  <div class="card-action">
-    <a class="btn waves-effect waves-light" tabindex="0" (keyup.enter)="close()" (click)="close()">{{'CLOSE' | translate}}</a>
-  </div>
-</div>
+</card>

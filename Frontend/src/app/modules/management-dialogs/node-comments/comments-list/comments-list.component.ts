@@ -1,15 +1,29 @@
-import {DialogButton} from "../../../../common/ui/modal-dialog/modal-dialog.component";
-import {Comments, Comment, LoginResult, Node, User} from "../../../../common/rest/data-object";
-import {RestConstants} from "../../../../common/rest/rest-constants";
-import {OptionItem} from "../../../../common/ui/actionbar/option-item";
-import {RestNodeService} from "../../../../common/rest/services/rest-node.service";
+import {Component, Input, EventEmitter, Output, ViewChild, ElementRef, HostListener} from '@angular/core';
+import {
+  NodeWrapper,
+  Node,
+  NodePermissions,
+  LocalPermissionsResult,
+  Permission,
+  LoginResult,
+  UserProfile,
+  Comments,
+  Comment,
+  User,
+  RestCommentsService,
+  DialogButton,
+  RestIamService,
+  RestConstants,
+  RestNodeService, RestConnectorService
+} from "../../../../core-module/core.module";
+import {ConfigurationService} from "../../../../core-module/core.module";
+import {UIHelper} from "../../../../core-ui-module/ui-helper";
+import {TranslateService} from "@ngx-translate/core";
 import {trigger} from "@angular/animations";
-import {Component, EventEmitter, HostListener, Input, Output} from "@angular/core";
-import {RestConnectorService} from "../../../../common/rest/services/rest-connector.service";
-import {UIAnimation} from "../../../../common/ui/ui-animation";
-import {RestCommentsService} from "../../../../common/rest/services/rest-comments.service";
-import {RestIamService} from "../../../../common/rest/services/rest-iam.service";
-import {Toast} from "../../../../common/ui/toast";
+import {UIAnimation} from "../../../../core-module/ui/ui-animation";
+import {OptionItem} from "../../../../core-ui-module/option-item";
+import {Toast} from "../../../../core-ui-module/toast";
+
 
 @Component({
   selector: 'comments-list',
@@ -26,7 +40,7 @@ export class CommentsListComponent  {
   private user: User;
   private comments: Comment[];
   private edit: Comment[];
-  private options: OptionItem[];
+  options: OptionItem[];
 
   public newComment="";
   public editComment:Comment=null;
@@ -101,7 +115,7 @@ export class CommentsListComponent  {
               this.onLoading.emit(false);
             });
           }
-        ),true,false);
+        ),true);
       }));
     }
     return options;
@@ -143,9 +157,9 @@ export class CommentsListComponent  {
       return;
     }
     this.loading=true;
-    this.commentsApi.getComments(this._node.ref.id).subscribe((data:Comments)=>{
-      this.loading=false;
-      this.comments=data.comments.reverse();
+      this.commentsApi.getComments(this._node.ref.id,this._node.ref.repo).subscribe((data:Comments)=>{
+        this.loading=false;
+        this.comments=data.comments.reverse();
     },(error:any)=>{
       this.loading=false;
       this.toast.error(error);

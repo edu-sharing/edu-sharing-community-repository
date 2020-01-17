@@ -1,10 +1,56 @@
-@import "../../../styles/variables.scss";
+@import "../../core-ui-module/styles/variables";
 
-.content{
-  padding:20px;
-  padding-top:$mainnavHeight + 70px;
+
+$sidenavWidth:250px;
+$sidenavWidthMobile:66px;
+.main{
+  display: flex;
   width: 100%;
-  margin: auto;
+  height: 100%;
+  padding-top:$mainnavHeight;
+  .main-nav{
+    position: fixed;
+    display: flex;
+    flex-direction: column;
+    background-color: #fff;
+    height: calc(100% - #{$mainnavHeight});
+    overflow-y: auto;
+    width: $sidenavWidth;
+    >div {
+      height: 100%;
+      .button {
+        display: flex;
+        align-items: center;
+        padding: 20px 30px 20px 20px;
+        width: 100%;
+        i {
+          margin-right: 10px;
+        }
+        &:hover{
+          background-color: $veryLightBackground;
+        }
+        &.active {
+          color: $primary;
+          font-weight: bold;
+          background: $workspaceSelectedBackgroundEffect;
+        }
+      }
+    }
+  }
+  .main-content{
+    padding:20px;
+    width: 100%;
+    margin-left: $sidenavWidth;
+    flex-grow: 1;
+    .btn-flat{
+      min-height: 36px;
+      height: auto;
+    }
+  }
+  // has own padding cause of tabs
+  .main-content-statistics{
+    padding:0;
+  }
 }
 .tabs{
   display: flex;
@@ -42,8 +88,16 @@
     margin-left: 10px;
   }
 }
+.frontpage,.global-config{
+  display: flex;
+  justify-content: center;
+  app-admin-frontpage,app-admin-config{
+    width: 100%;
+  }
+}
 .info{
   max-width: 800px;
+  margin: auto;
   .version{
     white-space: pre-line;
     padding:0 20px;
@@ -91,7 +145,7 @@
         margin-bottom: 5px;
       }
       &.check-fail {
-        background-color: lighten($warning, 60%);
+        background-color: lighten($warning, 35%);
       }
       &.check-info {
         background-color: lighten($colorStatusNeutral, 45%);
@@ -99,6 +153,17 @@
       &.check-warn {
         background-color: lighten($warningMedium, 50%);
       }
+    }
+  }
+}
+.config{
+  .xml{
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    >div {
+      padding: 30px 20px;
     }
   }
 }
@@ -112,13 +177,30 @@
   .table{
     padding-bottom: 20px;
   }
-  .appUrl{
-    width:calc(100% - 200px);
-    float:left;
-  }
-  .input-hint-bottom{
-    float:left;
-    margin-bottom: 15px;
+  .register-app{
+    display: flex;
+    flex-direction: column;
+    margin:30px 0;
+    >div{
+      display: flex;
+      padding:10px 0;
+      >mat-form-field{
+        flex-grow:1;
+        margin-right: 20px;
+      }
+      >div{
+        align-self: center;
+      }
+    }
+    mat-label{
+      margin:10px 0;
+    }
+    mat-radio-group {
+      margin: 10px 0;
+      mat-radio-button {
+        margin: 0 10px;
+      }
+    }
   }
   .materialize-textarea{
     height:150px;
@@ -126,16 +208,9 @@
   .useFile{
     color:$textLight;
     float:left;
-    width:calc(100% - 200px);
   }
   .btn,.btn-flat{
     float:right;
-  }
-  .btnXml,.useFile{
-    margin-top: 20px;
-  }
-  .btnXmlEditor{
-    margin-left: 15px;
   }
   .warning{
     width:100%;
@@ -148,36 +223,12 @@
     float:left;
     font-weight: bold;
   }
-  h2{
-    font-size:120%;
-    color:$textLight;
-    float: left;
-    width:100%;
-  }
-  .appEditor{
-    .addProperty{
-      width:100%;
-      float:left;
-    }
-    .inputGroup{
-      textarea,input{
-        /*width:calc(100% - 40px);*/
-      }
-      .material-icons{
-        color:$textLight;
-        float:right;
-      }
-    }
-  }
-  padding-top: calc(#{$mainnavHeight} + 70px + 5%);
   max-width: 1000px;
+  margin: auto;
 }
 .toolkit .inputGroup,
 .jobs .inputGroup,
 .import .inputGroup{
-  input[type="radio"]+label{
-    padding-right:20px;
-  }
   padding:20px 0;
   display: flex;
   align-items: center;
@@ -192,40 +243,32 @@
 }
 .import{
   max-width: 800px;
+  margin: auto;
+  mat-radio-button{
+    margin-right: 20px;
+  }
   .collections,.csv,.oai{
     padding-bottom:50px;
   }
   .oai{
     max-width: 500px;
     .oaiSave,.oaiForce{
-      float: left;
       width: 100%;
     }
-    .input-hint-bottom{
-      margin-bottom: 15px;
-    }
-    select{
-      margin-bottom: 20px;
+    mat-form-field{
+      width: 100%;
+      margin:5px 0;
     }
   }
   >.btn{
     margin-top: 20px;
   }
-  .btn{
-    float:right;
-  }
-  .administration{
-    input{
-      width:200px;
-      margin-left: 50px;
-      position: relative;
-      top: 8px;
-    }
-    .cacheGroup,.propertyGroup{
-      width: 100%;
-    }
-    .propertyGroup{
-      padding-top: 30px;
+  .actions {
+    display: flex;
+    align-items: flex-end;
+    width: 100%;
+    button {
+      margin: 10px;
     }
   }
 }
@@ -259,10 +302,11 @@
     min-width: 160px;
   }
   max-width: 1000px;
+  margin: auto;
   .hint{
     font-weight: bold;
     text-align: center;
-    padding:40px 0;
+    padding:0 0 40px;
   }
   .test a{
     text-transform: uppercase;
@@ -292,6 +336,28 @@
       margin-bottom: 10px;
     }
   }
+  .caches{
+    input{
+      width:200px;
+    }
+    .cacheGroup,.propertyGroup{
+      width: 100%;
+    }
+    .inputGroup .btn-flat{
+      margin:0 5px;
+    }
+    .propertyGroup{
+      padding-top: 30px;
+      display: flex;
+      align-items: center;
+      >input{
+        margin-bottom: 0;
+      }
+      >a{
+        margin-left: 10px;
+      }
+    }
+  }
   .group{
     padding:20px 0;
     float:left;
@@ -311,6 +377,11 @@
   }
 }
 .browser{
+  mat-radio-group{
+    mat-radio-button{
+      padding:0 10px;
+    }
+  }
   .lucenePaging{
     max-width: 700px;
     margin: auto;
@@ -320,9 +391,9 @@
     }
   }
   .luceneAuthorities{
-    margin-top: -40px;
+    margin-bottom: 20px;
   }
-  listTable{
+  .search-list{
     padding-top: 20px;
   }
   .export-properties{
@@ -332,6 +403,7 @@
 
 .foldertemplates {
   max-width: 900px;
+  margin: auto;
   .btn {
     float:right;
     margin-top: 40px;
@@ -355,6 +427,13 @@
     }
   }
 }
+.statistics{
+  display: flex;
+  justify-content: center;
+  app-admin-statistics{
+    width: 100%;
+  }
+}
 .jobs{
   max-width: 1200px;
   display: flex;
@@ -366,12 +445,15 @@
     width:100%;
     .autocomplete{
       flex-direction: column;
-      >autocomplete{
+      >autocomplete {
         width: calc(100% - 18px);
       }
       >div{
         margin:0 20px;
       }
+    }
+    mat-form-field{
+      width: 100%;
     }
   }
   .job-class{
@@ -413,7 +495,14 @@
       }
     }
     .log-filters{
-        padding:10px 0!important;
+      padding:10px 0!important;
+      justify-content: space-between;
+      mat-form-field{
+        width: 100%;
+        .mat-form-field-wrapper{
+          width: 100%;
+        }
+      }
     }
     .log-level,.log-filter{
       min-width:70px;
@@ -464,11 +553,9 @@
       display: flex;
       align-items: center;
       spinner-small {
-        margin-left: 10px;
+        margin: 0 10px;
       }
-      i{
-        margin-left: 10px;
-      }
+
     }
     .col-more{
       justify-content: center;
@@ -489,13 +576,33 @@
       background-color: #ffdcd8;
     }
   }
-
-
+}
+.card-xml {
+  .warning{
+    padding:10px 0;
+  }
+  .mat-input-group {
+    width: 100%;
+    margin:15px 0;
+  }
+  .add-property{
+    display: flex;
+    flex-direction: column;
+  }
 }
 :host /deep/{
   .preloader-wrapper.small{
     width:16px;
     height:16px;
+  }
+  .inputGroupGrow{
+    .mat-form-field-wrapper{
+      width: 100%;
+      margin-bottom: 0;
+    }
+  }
+  .jobs .log-filters .mat-form-field-wrapper{
+      width: 100%;
   }
 }
 .reload{
@@ -518,7 +625,21 @@
   position: fixed;
   z-index:10;
 }
-@media all and (max-width: $mobileWidth) {
+@media all and (max-width: $mobileWidth+$mobileStage*1) {
+  .main {
+    .main-nav {
+      .button > span {
+        display: none;
+      }
+      width: $sidenavWidthMobile;
+    }
+    .main-content{
+      margin-left: $sidenavWidthMobile;
+    }
+  }
+}
+
+@media all and (max-width: $mobileWidth+$mobileStage*3) {
   .applications {
     .file{
       display: none;
@@ -539,7 +660,7 @@
     }
   }
 }
-@media all and (max-width: $mobileWidth+$mobileStage*2) {
+@media all and (max-width: $mobileWidth+$mobileStage*5) {
   .applications{
     .type,.repoType,.subtype{
       display: none;

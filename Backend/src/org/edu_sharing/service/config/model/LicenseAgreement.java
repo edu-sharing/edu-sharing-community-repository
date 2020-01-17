@@ -9,9 +9,9 @@ import java.io.Serializable;
 
 public class LicenseAgreement implements Serializable {
 	@XmlAccessorType(XmlAccessType.FIELD)
-	private static class Node implements Serializable{
+	private static class LicenseAgreementNode implements Serializable{
 		@XmlAttribute public String language;
 		@XmlValue public String value;
 	}
-	@XmlElement	public Node[] nodeId;
+	@XmlElement	public LicenseAgreementNode[] nodeId;
 }

@@ -1,14 +1,14 @@
 import {Component, Input, EventEmitter, Output, ViewChild, ElementRef} from '@angular/core';
-import {RestNodeService} from "../../../common/rest/services/rest-node.service";
-import {RestConstants} from "../../../common/rest/rest-constants";
-import {NodeWrapper,NodeList, Node, IamUsers, WorkflowEntry} from "../../../common/rest/data-object";
-import {Toast} from "../../../common/ui/toast";
+import {RestNodeService} from "../../../core-module/core.module";
+import {RestConstants} from "../../../core-module/core.module";
+import {NodeWrapper,NodeList, Node, IamUsers, WorkflowEntry} from "../../../core-module/core.module";
+import {Toast} from "../../../core-ui-module/toast";
 import {TranslateService} from "@ngx-translate/core";
-import {RestSearchService} from "../../../common/rest/services/rest-search.service";
-import {OptionItem} from "../../../common/ui/actionbar/option-item";
+import {RestSearchService} from "../../../core-module/core.module";
+import {OptionItem} from "../../../core-ui-module/option-item";
 import {MdsComponent} from "../../../common/ui/mds/mds.component";
-import {RestToolService} from "../../../common/rest/services/rest-tool.service";
-import {UIAnimation} from "../../../common/ui/ui-animation";
+import {RestToolService} from "../../../core-module/core.module";
+import {UIAnimation} from "../../../core-module/ui/ui-animation";
 import {trigger} from "@angular/animations";
 
 @Component({

@@ -6,9 +6,11 @@ import org.alfresco.util.MD5;
 import org.apache.log4j.Logger;
 
 public class AuthorityService {
-	
+
+	public static String MEDIACENTER_ADMINISTRATORS_GROUP = "MEDIACENTER_ADMINISTRATORS";
 	public static String ADMINISTRATORS_GROUP_TYPE = "ORG_ADMINISTRATORS";
-	
+	public static String MEDIACENTER_ADMINISTRATORS_GROUP_TYPE = "MEDIACENTER_ADMINISTRATORS";
+
 	public static String ADMINISTRATORS_GROUP = "ORG_ADMINISTRATORS";
 	public static String ORG_GROUP_PREFIX = "ORG_";
 	public static String ADMINISTRATORS_GROUP_DISPLAY_POSTFIX = "_Admins";
@@ -48,7 +50,7 @@ public class AuthorityService {
 
 	public void addMemberships(String groupName, String[] members) {
 
-		String key = PermissionService.GROUP_PREFIX + groupName;
+		String key = groupName.startsWith(PermissionService.GROUP_PREFIX ) ? groupName : PermissionService.GROUP_PREFIX + groupName;
 
 		for (String member : members) {
 

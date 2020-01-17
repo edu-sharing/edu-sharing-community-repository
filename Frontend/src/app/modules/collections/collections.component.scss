@@ -1,4 +1,4 @@
-@import "../../../styles/variables.scss";
+@import "../../core-ui-module/styles/variables";
 
 /*
 table, div {
@@ -6,10 +6,7 @@ table, div {
    font-size: 14px;
 }
 */
-.tabs{
-  max-width:1200px;
-}
-.tab-group{
+mat-tab-group{
   margin-bottom:0;
   position:fixed;
   top:$mainnavHeight;
@@ -110,7 +107,6 @@ table, div {
 
 .collections-breadcrumb {
     margin-top: 10px;
-    padding: 8px;
 }
 
 .coll-breadcrumb {
@@ -125,7 +121,7 @@ table, div {
 }
 
 .collections-master-div {
-    padding:20px 10% 20px 15%;
+    padding:0 10% 20px 15%;
     float: left;
     width: 100%;
 }
@@ -312,10 +308,8 @@ table, div {
   }
 }
 .breadcrumb-space{
-  padding: 20px 50px;
-  padding-bottom: 0;
+  padding: 15px 30px;
   background: #fff;
-  margin-top: -40px;
   margin-left: -40px;
   margin-right: -16px;
   @include materialShadow();

@@ -1,31 +1,27 @@
-import {Translation} from "../../common/translation";
-import {UIHelper} from "../../common/ui/ui-helper";
+import {Translation} from "../../core-ui-module/translation";
+import {UIHelper} from "../../core-ui-module/ui-helper";
 import {ActivatedRoute, Router} from "@angular/router";
-import {Toast} from "../../common/ui/toast";
-import {ConfigurationService} from "../../common/services/configuration.service";
+import {Toast} from "../../core-ui-module/toast";
+import {ConfigurationService, ListItem, RestConnectorService, SessionStorageService} from "../../core-module/core.module";
 import {DomSanitizer, Title} from "@angular/platform-browser";
 import {TranslateService} from "@ngx-translate/core";
-import {SessionStorageService} from "../../common/services/session-storage.service";
-import {RestConnectorService} from "../../common/rest/services/rest-connector.service";
 import {Component, ViewChild, ElementRef, ApplicationRef} from "@angular/core";
 import {
     LoginResult, ServerUpdate, CacheInfo, Application, Node, ParentList,
     Collection, NodeWrapper, ConnectorList, Connector
-} from "../../common/rest/data-object";
-import {RestAdminService} from "../../common/rest/services/rest-admin.service";
-import {DialogButton} from "../../common/ui/modal-dialog/modal-dialog.component";
-import {Helper} from "../../common/helper";
-import {RestConstants} from "../../common/rest/rest-constants";
-import {UIConstants} from "../../common/ui/ui-constants";
-import {RestUtilitiesService} from "../../common/rest/services/rest-utilities.service";
-import {RestNodeService} from "../../common/rest/services/rest-node.service";
-import {ListItem} from "../../common/ui/list-item";
-import {RestCollectionService} from "../../common/rest/services/rest-collection.service";
-import {RestHelper} from "../../common/rest/rest-helper";
+} from "../../core-module/core.module";
+import {RestAdminService} from "../../core-module/core.module";
+import {Helper} from "../../core-module/rest/helper";
+import {RestConstants} from "../../core-module/core.module";
+import {UIConstants} from "../../core-module/ui/ui-constants";
+import {RestUtilitiesService} from "../../core-module/core.module";
+import {RestNodeService} from "../../core-module/core.module";
+import {RestCollectionService} from "../../core-module/core.module";
+import {RestHelper} from "../../core-module/core.module";
 import {CordovaService} from "../../common/services/cordova.service";
-import {DateHelper} from "../../common/ui/DateHelper";
-import {RestConnectorsService} from "../../common/rest/services/rest-connectors.service";
-import {FrameEventsService} from "../../common/services/frame-events.service";
+import {DateHelper} from "../../core-ui-module/DateHelper";
+import {RestConnectorsService} from "../../core-module/core.module";
+import {FrameEventsService} from "../../core-module/core.module";
 @Component({
   selector: 'share-app',
   templateUrl: 'share-app.component.html',
@@ -122,7 +118,7 @@ export class ShareAppComponent {
     }
     private saveToCollection(collection:Node){
       this.saveInternal((node:Node)=>{
-          this.collectionApi.addNodeToCollection(collection.ref.id,node.ref.id).subscribe(()=>{
+          this.collectionApi.addNodeToCollection(collection.ref.id,node.ref.id,node.ref.repo).subscribe(()=>{
               UIHelper.goToCollection(this.router,collection,{replaceUrl:true});
               this.events.broadcastEvent(FrameEventsService.EVENT_SHARED,node);
           });

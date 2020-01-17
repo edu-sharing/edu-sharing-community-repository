@@ -1,4 +1,4 @@
-@import "../../../../styles/variables.scss";
+@import "../../../core-ui-module/styles/variables";
 
 $imagePath: '../../../../assets/images/collections/';
 .createContainer{
@@ -85,6 +85,17 @@ $imagePath: '../../../../assets/images/collections/';
   align-items: center;
   padding-top: $mainnavHeight;
 }
+:host /deep/{
+  .createCollection{
+    .collection-item{
+      >.mat-button-wrapper{
+        width: 100%;
+        justify-content: flex-start;
+        text-transform: none;
+      }
+    }
+  }
+}
 .createCollection{
   background-color: #fff;
   .headline{
@@ -108,9 +119,10 @@ $imagePath: '../../../../assets/images/collections/';
   }
   .collection-item{
     padding:10px 5px;
-    >div,i{
-      display: table-cell;
-    }
+    width: 100%;
+    border-radius: 0;
+    line-height: 2em;
+    white-space: normal;
     .title{
       color:$primary;
       font-weight: bold;
@@ -119,20 +131,22 @@ $imagePath: '../../../../assets/images/collections/';
     .description{
       color:$textLight;
     }
-    .title,.description{
-      float:left;
-      width:100%;
-    }
     .content{
       padding:10px 0;
+      text-align: left;
+      flex-grow: 1;
     }
     .iconLeft{
       vertical-align: middle;
       padding-right: 15px;
       padding-left: 20px;
       i {
+        display: flex;
         background-color: #fff;
-        padding: 10px;
+        width: 50px;
+        height: 50px;
+        align-items: center;
+        justify-content: center;
         border-radius: 50%;
         @include materialShadowBottom();
       }
@@ -160,33 +174,54 @@ $imagePath: '../../../../assets/images/collections/';
     padding-bottom: 20px;
   }
   .status{
-    margin: -20px;
+    margin: $cardPadding*-1;
     margin-top: 20px;
     padding: 6px 20px;
     background: $actionDialogBackground;
   }
 }
-.collection-new-container {
-  display:flex;
-  flex-direction: column;
-  margin: 0px auto;
-  max-width: 600px;
-  min-width: 300px;
-  width:100%;
-}
-.collection-basic{
-  width: 350px;
-  max-height:770px;
-  margin-left: -175px!important;
-  left:50%;
-  .card-scroll{
-    padding-top:0;
-    padding-left:0;
-    padding-right:0;
+.collection-general{
+  mat-form-field{
+    width: 100%;
+    textarea{
+      resize: none;
+    }
   }
-}
-.card-high{
-  top:calc(#{$mainnavHeight} + 5%);
+  .dialog-input-area{
+    padding-top: 0;
+    padding-bottom: 0;
+  }
+  .collection-new-owner{
+    display: flex;
+    align-items: center;
+    padding: 0 $cardPadding;
+    >i{
+      margin:5px;
+    }
+    >span{
+      flex-grow: 1;
+    }
+  }
+  .color-group{
+    display: flex;
+    flex-wrap: wrap;
+    margin: auto;
+    //max-width: 220px;
+    justify-content: center;
+    .color-option {
+      display:inline-block;
+      border-radius: 4pt;
+      width: 14%;
+      height: 30px;
+      margin-left: 3px;
+      margin-right: 3px;
+      margin-bottom: 8px;
+      cursor: pointer;
+    }
+    .color-selected {
+      border: 2px solid #333;
+    }
+  }
 }
 .collection-metadata{
   .noGroups{
@@ -249,9 +284,8 @@ $imagePath: '../../../../assets/images/collections/';
 }
 
 .collection-new-preview-infoline {
-    margin-left: -2px;
-    opacity: 0.85;
-    margin-bottom: 4px;
+    opacity: 0.75;
+    margin-bottom: 10px;
 }
 
 .collection-nocontent-big {
@@ -271,33 +305,13 @@ $imagePath: '../../../../assets/images/collections/';
   top: 20%;
   text-align: center;
 }
-.color-group{
-  display: flex;
-  flex-wrap: wrap;
-  margin: auto;
-  max-width: 220px;
-  justify-content: center;
-  .color-option {
-    display:inline-block;
-    border-radius: 50%;
-    width: 29px;
-    height: 29px;
-    margin-left: 3px;
-    margin-right: 3px;
-    margin-bottom: 8px;
-    cursor: pointer;
-  }
-  .color-selected {
-    border: 2px solid #333;
-  }
-}
 
 .icon-bottom {
     vertical-align: bottom;
 }
 
 .dialog-basic-area {
-    padding: 20px;
+    padding: $cardPadding;
     padding-bottom: 15px;
 }
 
@@ -333,7 +347,9 @@ $imagePath: '../../../../assets/images/collections/';
     max-height: 200px;
     margin-top: 5px;
 }
-
+.card-content{
+  padding: $cardPadding;
+}
 .card-collection-icon-container {
     text-align: center;
     vertical-align: middle;
@@ -399,9 +415,12 @@ $imagePath: '../../../../assets/images/collections/';
 
 .button-icon{
   position: absolute;
-  bottom: 8px;
-  right: 27px;
+  bottom: 10px;
+  right: 5px;
   z-index: 2;
+  .mat-fab{
+    margin: 0 5px;
+  }
 }
 label{
 }
@@ -456,7 +475,7 @@ input[type="radio"] {
 .blurred-image{
   display: none;
 }
-@media screen and (max-height: $mobileHeight + $mobileStage*1){
+@media screen and (max-height: $mobileHeight + $mobileStage*2){
   .card, .card-high, .card-low {
     top:$mainnavHeight+15px;
   }
@@ -489,20 +508,6 @@ input[type="radio"] {
     margin: auto;
     z-index: 1;
     @include materialShadowLarge();
-  }
-  .collection-new-preview-infoline{
-    margin-left: 15px;
-  }
-
-}
-@media screen and (max-height: $mobileHeight - $mobileStage*1){
-  .card, .card-high, .card-low {
-    top:0;
-  }
-}
-@media only screen and (max-width: $mobileTabSwitchWidth) {
-  .collections-master-div{
-    margin-bottom: $mobileTabNavHeight;
   }
 }
 @media screen and (max-width: $mobileWidth+$mobileStage*3) and (max-height: $mobileHeight+$mobileStage*2) {

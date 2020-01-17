@@ -2,9 +2,11 @@ package org.edu_sharing.restservices;
 
 import org.alfresco.service.cmr.repository.ChildAssociationRef;
 import org.alfresco.service.cmr.repository.NodeRef;
+import org.apache.commons.lang.NotImplementedException;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.restservices.comment.v1.model.Comment;
 import org.edu_sharing.restservices.comment.v1.model.Comments;
+import org.edu_sharing.restservices.shared.UserSimple;
 import org.edu_sharing.service.comment.CommentService;
 import org.edu_sharing.service.comment.CommentServiceFactory;
 
@@ -18,8 +20,12 @@ public class CommentDao {
 	private RepositoryDao repoDao;
 	private CommentService commentService;
 	public CommentDao(RepositoryDao repoDao) {
-		this.repoDao = repoDao;		
-		this.commentService=CommentServiceFactory.getCommentService();
+		this.repoDao = repoDao;
+		try {
+			this.commentService = CommentServiceFactory.getCommentService(repoDao.getId());
+		}catch(NotImplementedException e){
+			// ignore and accept that for remote repos there are currently no comments
+		}
 	}
 	public void addComment(String nodeId,String commentReference,String comment) throws DAOException{
 		try{
@@ -30,6 +36,8 @@ public class CommentDao {
 	}
 	public Comments getComments(String nodeId) throws DAOException {
 		try{
+			if(this.commentService==null)
+				return null;
 			List<ChildAssociationRef> refs = this.commentService.getComments(nodeId);
 			List<Comment> comments=new ArrayList<>();
 			for(ChildAssociationRef ref : refs) {
@@ -39,7 +47,9 @@ public class CommentDao {
 				try {
 					PersonDao person=PersonDao.getPerson(repoDao, (String) node.getNativeProperties().get(CCConstants.CM_PROP_C_CREATOR));
 					comment.setCreator(person.asPersonSimple());
-				}catch(Throwable t) {}
+				}catch(Throwable t) {
+					comment.setCreator(UserSimple.getDummy((String) node.getNativeProperties().get(CCConstants.CM_PROP_C_CREATOR)));
+				}
 				if(node.getNativeProperties().containsKey(CCConstants.CCM_PROP_COMMENT_REPLY)) {
 					comment.setReplyTo(
 						new org.edu_sharing.restservices.shared.NodeRef(repoDao,new NodeRef((String) node.getNativeProperties().get(CCConstants.CCM_PROP_COMMENT_REPLY)).getId())

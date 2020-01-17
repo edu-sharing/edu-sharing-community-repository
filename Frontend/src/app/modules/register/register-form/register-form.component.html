@@ -1,34 +1,27 @@
 <form (ngSubmit)="register()" #loginForm>
     <div class="name-input">
-        <div>
-            <label for="username">{{'USER.firstName' | translate}} <span *ngIf="isRequired('firstName')">*</span></label>
-            <input [ngClass]="{'valid': info.firstName.trim()}" type="text" [required]="isRequired('firstName')" name="username" id="username" [(ngModel)]="info.firstName"/>
-        </div>
-        <div class="last-name">
-            <label for="lastname">{{'USER.lastName' | translate}} <span *ngIf="isRequired('lastName')">*</span></label>
-            <input [ngClass]="{'valid': info.lastName.trim()}" type="text" [required]="isRequired('lastName')" name="lastname" id="lastname" [(ngModel)]="info.lastName"/>
-        </div>
+        <mat-form-field>
+            <mat-label>{{'USER.firstName' | translate}}</mat-label>
+            <input matInput type="text" [required]="isRequired('firstName')" name="username" id="username"  placeholder="{{'REGISTER.PL_USER' | translate}}" [(ngModel)]="info.firstName"/>
+        </mat-form-field>
+        <mat-form-field class="last-name">
+            <mat-label>{{'USER.lastName' | translate}}</mat-label>
+            <input matInput type="text" [required]="isRequired('lastName')" name="lastname" id="lastname" placeholder="{{'REGISTER.PL_NAME' | translate}}" [(ngModel)]="info.lastName"/>
+        </mat-form-field>
     </div>
 
-    <div>
-        <label for="email">{{'USER.email' | translate}} *</label>
-        <input required [ngClass]="{'valid': mailValid, 'invalid': !mailValid && info.email.trim()}" type="email" name="email" id="email" (ngModelChange)="checkMail($event)" [(ngModel)]="info.email"/>
-    </div>
-    <div>
-        <label for="password">{{'USER.password' | translate}} *</label>
-        <input-password [hint]="true" [displayStrength]="true" autocomplete="new-password" id="password" required="true" (keydown.enter)="register()" [(value)]="info.password"></input-password>
-    </div>
-    <div>
-        <label for="organization">{{'REGISTER.ORGANIZATION' | translate}} <span *ngIf="isRequired('organization')">*</span></label>
-        <input [ngClass]="{'valid': info.organization.trim()}" type="text"  [required]="isRequired('organization')" name="organization" id="organization" [(ngModel)]="info.organization"/>
-    </div>
-    <div class="accept">
-        <input id="accept" name="accept" type="checkbox" class="filled-in" [(ngModel)]="agree">
-        <label for="accept">{{'REGISTER.ACCEPT' | translate}}</label>
-        <a class="clickable imprint" *ngIf="privacyUrl" (click)="openPrivacy()">{{'REGISTER.PRIVACY-LINK' | translate}}</a>
-    </div>
-    <div>
-        <input id="newsletter" name="newsletter" type="checkbox" [(ngModel)]="info.allowNotifications" class="filled-in">
-        <label for="newsletter">{{'REGISTER.NEWSLETTER' | translate}}</label>
-    </div>
+    <mat-form-field>
+        <mat-label>{{'USER.email' | translate}}</mat-label>
+        <input matInput required [formControl]="emailFormControl" type="email" name="email" id="email" placeholder="{{'REGISTER.PL_MAIL' | translate}}"/>
+    </mat-form-field>
+    <input-password label="{{'USER.password' | translate}}" [hint]="true" [displayStrength]="true" autocomplete="new-password" id="password" required="true" (keydown.enter)="register()" [(value)]="info.password" placeholder="{{'REGISTER.PL_PASSWORD' | translate}}"></input-password>
+    <mat-form-field class="organization">
+        <mat-label>{{'REGISTER.ORGANIZATION' | translate}}</mat-label>
+        <input matInput type="text" [required]="isRequired('organization')" name="organization" id="organization" placeholder="{{'REGISTER.PL_ORG' | translate}} {{'REGISTER.ORGANIZATION_TITLE' | translate}} ..." [(ngModel)]="info.organization"/>
+    </mat-form-field>
 </form>
+<mat-checkbox [(ngModel)]="info.allowNotifications">{{'REGISTER.NEWSLETTER' | translate}}</mat-checkbox>
+<div class="accept">
+    <mat-checkbox [(ngModel)]="agree">{{'REGISTER.ACCEPT' | translate}}</mat-checkbox>
+    <a class="clickable imprint" *ngIf="privacyUrl" (click)="openPrivacy()">{{'REGISTER.PRIVACY-LINK' | translate}}</a>
+</div>

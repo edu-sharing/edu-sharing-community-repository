@@ -1,4 +1,4 @@
-@import "../../../../../styles/variables.scss";
+@import "../../../../core-ui-module/styles/variables";
 
 
 .container{
@@ -18,7 +18,8 @@
     padding:3px 5px;
     >.primary{
       word-break: break-all;
-      max-height: 1.3rem;
+      max-height: 1.5em;
+      line-height: 1.5em;
       overflow: hidden;
     }
     >.secondary{
@@ -27,6 +28,9 @@
       margin-top: -3px;
       min-height: 3px;
     }
+  }
+  .permission-type{
+    position: relative;
   }
 }
 .deleted-info{
@@ -89,7 +93,7 @@
   position:absolute;
   right: 20px;
   width: 310px!important;
-  top: 28px;
+  top: -60px;
 }
 .select{
   width:25px;

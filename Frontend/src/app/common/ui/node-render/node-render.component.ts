@@ -2,56 +2,39 @@ import {
     Component, OnInit, OnDestroy, Input, EventEmitter, Output, ViewChild, ElementRef,
     HostListener, ChangeDetectorRef, ApplicationRef, NgZone, ComponentFactoryResolver, ViewContainerRef, EmbeddedViewRef
 } from '@angular/core';
-import {RestConnectorService} from "../../rest/services/rest-connector.service";
-import {RestConstants} from "../../rest/rest-constants";
-import {
-    NodeList,
-    Node,
-    NodeWrapper,
-    LoginResult,
-    ConnectorList,
-    CollectionUsage,
-    Collection
-} from "../../rest/data-object";
-import {Toast} from "../toast";
-import {RestNodeService} from "../../rest/services/rest-node.service";
+import {Toast} from "../../../core-ui-module/toast";
 import {ActivatedRoute, Params, Router} from "@angular/router";
 import {TranslateService} from "@ngx-translate/core";
-import {Translation} from "../../translation";
-import {TemporaryStorageService} from "../../services/temporary-storage.service";
-import {OptionItem} from "../actionbar/option-item";
-import {UIAnimation} from "../ui-animation";
-import {FrameEventsService} from "../../services/frame-events.service";
-import {UIHelper} from "../ui-helper";
-import {ConfigurationService} from "../../services/configuration.service";
+import {Translation} from "../../../core-ui-module/translation";
+import {OptionItem} from "../../../core-ui-module/option-item";
+import {UIAnimation} from "../../../core-module/ui/ui-animation";
+import {UIHelper} from "../../../core-ui-module/ui-helper";
 import {Title} from "@angular/platform-browser";
-import {SessionStorageService} from "../../services/session-storage.service";
-import {RestConnectorsService} from "../../rest/services/rest-connectors.service";
 import {trigger} from "@angular/animations";
 import {Location} from "@angular/common";
-import {NodeHelper} from "../node-helper";
-import {RestToolService} from "../../rest/services/rest-tool.service";
-import {UIConstants} from "../ui-constants";
-import {ConfigurationHelper} from "../../rest/configuration-helper";
+import {NodeHelper} from "../../../core-ui-module/node-helper";
+import {UIConstants} from "../../../core-module/ui/ui-constants";
 import {SearchService} from "../../../modules/search/search.service";
-import {Helper} from "../../helper";
-import {RestHelper} from "../../rest/rest-helper";
-import {EventListener} from "../../../common/services/frame-events.service";
+import {Helper} from "../../../core-module/rest/helper";
 import {ActionbarHelperService} from "../../services/actionbar-helper";
-import {SuggestItem} from "../autocomplete/autocomplete.component";
 import {MainNavComponent} from "../main-nav/main-nav.component";
-import {RestSearchService} from '../../rest/services/rest-search.service';
-import {RestMdsService} from '../../rest/services/rest-mds.service';
-import {MdsHelper} from '../../rest/mds-helper';
 import {HttpClient} from "@angular/common/http";
-import {RestIamService} from "../../rest/services/rest-iam.service";
-import {SpinnerComponent} from "../spinner/spinner.component";
-import {ListTableComponent} from "../list-table/list-table.component";
-import {RestUsageService} from "../../rest/services/rest-usage.service";
-import {ListItem} from "../list-item";
-import {RestNetworkService} from "../../rest/services/rest-network.service";
+import {
+    ConfigurationHelper, ConfigurationService,
+    EventListener,
+    ConnectorList, FrameEventsService, ListItem,
+    LoginResult, NodeWrapper, RestConnectorService,
+    RestConnectorsService, Node, NodeList,
+    RestConstants, RestHelper, RestMdsService, RestIamService, RestNodeService, RestSearchService,
+    RestToolService, SessionStorageService,
+    TemporaryStorageService, RestUsageService, RestNetworkService
+} from "../../../core-module/core.module";
+import {MdsHelper} from "../../../core-module/rest/mds-helper";
+import {ListTableComponent} from "../../../core-ui-module/components/list-table/list-table.component";
+import {SpinnerComponent} from "../../../core-ui-module/components/spinner/spinner.component";
 import {CommentsListComponent} from "../../../modules/management-dialogs/node-comments/comments-list/comments-list.component";
 import {GlobalContainerComponent} from "../global-container/global-container.component";
+import {VideoControlsComponent} from "../../../core-ui-module/components/video-controls/video-controls.component";
 
 declare var jQuery:any;
 declare var window: any;
@@ -355,7 +338,8 @@ export class NodeRenderComponent implements EventListener{
     };
     this._node=null;
     this.isBuildingPage=true;
-    this.nodeApi.getNodeRenderSnippet(this._nodeId,this.version && !this.isChildobject ? this.version : "-1",parameters,this.repository)
+      // we only fetching versions for the primary parent (child objects don't have versions)
+      this.nodeApi.getNodeRenderSnippet(this._nodeId,this.version && !this.isChildobject ? this.version : "-1",parameters,this.repository)
         .subscribe((data:any)=>{
             if (!data.detailsSnippet) {
                 console.error(data);
@@ -367,8 +351,10 @@ export class NodeRenderComponent implements EventListener{
                     jQuery('#nodeRenderContent').html(data.detailsSnippet);
                     this.postprocessHtml();
                     this.addCollections();
+                    this.addVideoControls();
                     this.addComments();
                     this.loadNode();
+                    this.loadSimilarNodes();
                     this.isLoading = false;
                 });
             }
@@ -386,6 +372,28 @@ export class NodeRenderComponent implements EventListener{
             return;
         this.close();
     }
+    addVideoControls() {
+        let videoElement: HTMLVideoElement;
+        let target: Element;
+        if(!this.isCollectionRef()){
+            return;
+        }
+        try {
+            videoElement = document.getElementsByClassName("edusharing_rendering_content_wrapper")[0].getElementsByTagName("video")[0];
+            target = document.createElement('div');
+            videoElement.parentElement.appendChild(target);
+        } catch (e) {
+            //console.log("did not find video element, skipping controls",e);
+            setTimeout(()=>this.addVideoControls(),1000/30);
+            return;
+        }
+        let data={
+            "video":videoElement,
+            "node":this._node
+        }
+        UIHelper.injectAngularComponent(this.componentFactoryResolver,this.viewContainerRef,VideoControlsComponent,target,data);
+    }
+
     addCollections(){
         let domContainer:Element;
         let domCollections:Element;
@@ -435,10 +443,10 @@ export class NodeRenderComponent implements EventListener{
       let element=jQuery('#edusharing_rendering_content_href');
       console.log(element);
       element.click((event:any)=>{
-          if(this.connector.getCordovaService().isRunningCordova()){
+          if(this.connector.getBridgeService().isRunningCordova()){
               let href=element.attr('href');
               console.log(href);
-              this.connector.getCordovaService().openBrowser(href);
+              this.connector.getBridgeService().getCordova().openBrowser(href);
               event.preventDefault();
           }
       });
@@ -453,9 +461,9 @@ export class NodeRenderComponent implements EventListener{
 
   private downloadCurrentNode() {
       if(this.downloadUrl) {
-          NodeHelper.downloadUrl(this.toast, this.connector.getCordovaService(), this.downloadUrl);
+          NodeHelper.downloadUrl(this.toast, this.connector.getBridgeService(), this.downloadUrl);
       } else {
-          NodeHelper.downloadNode(this.toast, this.connector.getCordovaService(), this._node, this.version);
+          NodeHelper.downloadNode(this.toast, this.connector.getBridgeService(), this._node, this.version);
       }
   }
 
@@ -483,9 +491,11 @@ export class NodeRenderComponent implements EventListener{
             if(!this.connector.getCurrentLogin().isGuest) {
                 let openFolder = new OptionItem('SHOW_IN_FOLDER', 'folder', () => this.goToWorkspace(login, this._node));
                 openFolder.isEnabled = false;
-                this.nodeApi.getNodeParents(this._node.parent.id, false, [], this._node.parent.repo).subscribe((data: NodeList) => {
-                    openFolder.isEnabled = true;
-                });
+                if(this._node.parent.id) {
+                    this.nodeApi.getNodeParents(this._node.parent.id, false, [], this._node.parent.repo).subscribe((data: NodeList) => {
+                        openFolder.isEnabled = true;
+                    });
+                }
 
                 if (this._node.type != RestConstants.CCM_TYPE_REMOTEOBJECT && ConfigurationHelper.hasMenuButton(this.config, "workspace"))
                     options.push(openFolder);
@@ -513,8 +523,8 @@ export class NodeRenderComponent implements EventListener{
         let addCollection = this.actionbar.createOptionIfPossible('ADD_TO_COLLECTION', [this._node], () => this.addToCollection = [this._node]);
         if (addCollection) {
             addCollection.showAsAction = false;
-            addCollection.isEnabled = this._node.type != RestConstants.CCM_TYPE_REMOTEOBJECT;
-            options.push(addCollection);
+            addCollection.isEnabled = addCollection.isEnabled && this._node.type != RestConstants.CCM_TYPE_REMOTEOBJECT;
+            this.options.push(addCollection);
         }
         let variant = this.actionbar.createOptionIfPossible('CREATE_VARIANT', [this._node], () => this.nodeVariant = this._node);
         if (variant) {
@@ -588,9 +598,8 @@ export class NodeRenderComponent implements EventListener{
               options.splice(0, 0, apply);
           }
           this.checkConnector(options);
-
-      });
-    UIHelper.setTitleNoTranslation(this._node.name,this.title,this.config);
+    });
+    UIHelper.setTitleNoTranslation(RestHelper.getName(this._node),this.title,this.config);
   }
   setDownloadUrl(url:string){
       if(this.downloadButton!=null)
@@ -650,8 +659,14 @@ export class NodeRenderComponent implements EventListener{
         return RestHelper.getTitle(node);
     }
 
-    public switchNode(node:Node){
+    public switchNode(event : any){
         UIHelper.scrollSmooth();
-        this.node=node;
+        this.node = event.node;
+    }
+
+    private loadSimilarNodes() {
+        this.searchApi.searchFingerprint(this._nodeId).subscribe( (data: NodeList) => {
+            this.similarNodes = data.nodes;
+        });
     }
 }

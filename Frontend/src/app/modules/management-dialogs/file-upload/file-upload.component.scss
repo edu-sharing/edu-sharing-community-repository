@@ -1,4 +1,4 @@
-@import "../../../../styles/variables.scss";
+@import "../../../core-ui-module/styles/variables";
 
 
 .loading{
@@ -6,6 +6,10 @@
   >div{
     display:flex;
   }
+}
+
+.content{
+  padding: $cardPadding;
 }
 .group{
   width:100%;

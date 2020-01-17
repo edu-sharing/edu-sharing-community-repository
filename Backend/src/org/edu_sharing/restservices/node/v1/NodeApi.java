@@ -6,6 +6,7 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.Map;
 
@@ -759,6 +760,9 @@ public class NodeApi  {
 	    	else if("-to_me_shared_files-".equals(node)){
 				response = searchResultToResponse(NodeDao.getFilesSharedToMe(repoDao, filter, propFilter,sortDefinition,skipCount,maxItems));
 			}
+	    	else if("-frontpage-".equals(node)){
+				children = NodeDao.getFrontpageNodes(repoDao);
+			}
 	    	else{
 		    	NodeDao nodeDao = NodeDao.getNode(repoDao, node, propFilter);
 	    		children = nodeDao.getChildren(assocName,filter,sortDefinition);
@@ -1113,6 +1117,7 @@ public class NodeApi  {
     	}
 
     }
+
 
 	@POST
 	@Path("/nodes/{repository}/{node}/xapi")

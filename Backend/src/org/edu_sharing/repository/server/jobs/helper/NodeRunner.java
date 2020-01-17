@@ -12,19 +12,22 @@ import org.edu_sharing.repository.server.importer.OAIPMHLOMImporter;
 import org.edu_sharing.repository.server.tools.cache.RepositoryCache;
 import org.edu_sharing.service.nodeservice.NodeService;
 import org.edu_sharing.service.nodeservice.NodeServiceFactory;
+import org.edu_sharing.service.nodeservice.RecurseMode;
 import org.postgresql.util.PSQLException;
 import org.postgresql.util.ServerErrorMessage;
 import org.springframework.context.ApplicationContext;
+import org.springframework.extensions.webscripts.Runtime;
 
 import javax.transaction.*;
 import java.util.ArrayList;
-import java.util.Collections;
+import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 /**
@@ -63,6 +66,8 @@ public class NodeRunner {
 
     /**
      * Threading enabled
+     * Note: Currently, only the task is threaded, not previous filter actions
+     * The thread pool uses the same Thread Size as the @OAIPMHLOMImporter
      */
     private boolean threaded = true;
 
@@ -78,6 +83,11 @@ public class NodeRunner {
      * This WILL NOT WORK in conjunction with threaded=true
      */
     private TransactionMode transaction=TransactionMode.None;
+
+    /**
+     * shall the cache for each processed node be invalidated/cleared?
+     */
+    private boolean invalidateCache = true;
 
 
     private ApplicationContext applicationContext = AlfAppContextGate.getApplicationContext();
@@ -132,6 +142,14 @@ public class NodeRunner {
         this.runAsSystem = runAsSystem;
     }
 
+    public boolean isInvalidateCache() {
+        return invalidateCache;
+    }
+
+    public void setInvalidateCache(boolean invalidateCache) {
+        this.invalidateCache = invalidateCache;
+    }
+
     /**
      * runs the job for each node
      * @return the number of nodes that have been processed (also if they may have been filtered in the filter expression)
@@ -152,9 +170,9 @@ public class NodeRunner {
         try {
             List<NodeRef> nodes;
             if (runAsSystem)
-                nodes = AuthenticationUtil.runAsSystem(() -> nodeService.getChildrenRecursive(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, startFolder, types));
+                nodes = AuthenticationUtil.runAsSystem(() -> nodeService.getChildrenRecursive(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, startFolder, types, RecurseMode.Folders));
             else
-                nodes = nodeService.getChildrenRecursive(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, startFolder, types);
+                nodes = nodeService.getChildrenRecursive(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, startFolder, types, RecurseMode.Folders);
 
             Predicate<? super NodeRef> callFilter = (ref) -> {
                 if (filter == null)
@@ -200,7 +218,7 @@ public class NodeRunner {
             };
             Stream<NodeRef> filteredStream = nodes.stream().filter(callFilter);
             if (threaded) {
-                ExecutorService executor = Executors.newFixedThreadPool(OAIPMHLOMImporter.THREAD_COUNT);
+                ExecutorService executor = Executors.newFixedThreadPool(OAIPMHLOMImporter.getThreadCount());
                 List<Callable<Void>> threads=new ArrayList<>();
                 filteredStream.forEach((ref)->{
                     threads.add(()-> {
@@ -216,7 +234,7 @@ public class NodeRunner {
                 }
             }
             else
-                nodes.stream().filter(callFilter).forEach(callTask);
+                filteredStream.forEach(callTask);
             return nodes.size();
         }
         finally{

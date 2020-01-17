@@ -5,7 +5,9 @@
 <div>
     <p class="info">{{'REGISTER.REQUEST.INFO' | translate}}</p>
     <form (ngSubmit)="submit()">
-        <label for="email">{{'USER.email' | translate}} *</label>
-        <input required [ngClass]="{'valid': checkMail(), 'invalid': !checkMail() && email.trim()}" type="email" name="email" id="email" [(ngModel)]="email"/>
+        <mat-form-field>
+            <mat-label>{{'USER.email' | translate}}</mat-label>
+            <input matInput type="email" name="email" id="email" placeholder="{{'REGISTER.REQUEST.PLACEHOLDER' | translate}}" [formControl]="emailFormControl" />
+        </mat-form-field>
     </form>
 </div>

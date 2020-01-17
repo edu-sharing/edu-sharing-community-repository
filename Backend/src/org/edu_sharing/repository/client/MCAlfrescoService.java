@@ -139,8 +139,6 @@ public interface MCAlfrescoService extends RemoteService {
 	public void removePermissions(String nodeId, String _authority, String[] permission)
 			throws CCSessionExpiredException, CCException;
 
-	
-	public RepositoryInfo getRepositoryiesInfo(String metadataSetName) throws CCException;
 
 	public HashMap<String, Object> getNode(String nodeId) throws CCSessionExpiredException, CCException;
 

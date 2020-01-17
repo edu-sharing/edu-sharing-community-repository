@@ -43,7 +43,7 @@
 <div class="remove" tabindex="0" (keyup.enter)="remove()" (click)="remove()" *ngIf="showDelete" [class.clickable]="!readOnly">
   <i *ngIf="!inherit && !isDeleted" class="material-icons">cancel</i>
   <i *ngIf="!inherit && isDeleted" class="material-icons">undo</i>
-  <i *ngIf="inherit" class="inherit" icon iconId="edu-inherit" title="{{ 'WORKSPACE.SHARE.INHERIT_HINT' | translate}}"></i>
+  <i *ngIf="inherit" class="inherit" icon iconId="edu-inherit" matTooltip="{{ 'WORKSPACE.SHARE.INHERIT_HINT' | translate}}"></i>
 </div>
 </div>
 </div>

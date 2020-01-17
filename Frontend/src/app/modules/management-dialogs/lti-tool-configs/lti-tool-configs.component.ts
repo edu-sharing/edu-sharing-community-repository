@@ -1,14 +1,12 @@
 import {Component, Input, EventEmitter, Output, ViewChild, ElementRef} from '@angular/core';
-import {RestNodeService} from "../../../common/rest/services/rest-node.service";
-import {RestConstants} from "../../../common/rest/rest-constants";
-import {NodeWrapper,NodeList, Node, IamUsers, WorkflowEntry} from "../../../common/rest/data-object";
-import {Toast} from "../../../common/ui/toast";
-import {ModalDialogComponent, DialogButton} from "../../../common/ui/modal-dialog/modal-dialog.component";
+import {DialogButton, ListItem, RestNodeService} from "../../../core-module/core.module";
+import {RestConstants} from "../../../core-module/core.module";
+import {NodeWrapper,NodeList, Node, IamUsers, WorkflowEntry} from "../../../core-module/core.module";
+import {Toast} from "../../../core-ui-module/toast";
 import {TranslateService} from "@ngx-translate/core";
 import {MdsComponent} from "../../../common/ui/mds/mds.component";
-import {RestToolService} from "../../../common/rest/services/rest-tool.service";
-import {ListItem} from "../../../common/ui/list-item";
-import {OptionItem} from "../../../common/ui/actionbar/option-item";
+import {RestToolService} from "../../../core-module/core.module";
+import {OptionItem} from "../../../core-ui-module/option-item";
 
 @Component({
   selector: 'workspace-lti-tool-configs',

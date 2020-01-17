@@ -1,15 +1,14 @@
 import {Component, Input, EventEmitter, Output, ViewChild, ElementRef} from '@angular/core';
-import {RestNodeService} from "../../../common/rest/services/rest-node.service";
-import {RestConstants} from "../../../common/rest/rest-constants";
-import {NodeWrapper,Node} from "../../../common/rest/data-object";
-import {VCard} from "../../../common/VCard";
-import {Toast} from "../../../common/ui/toast";
-import {ModalDialogComponent, DialogButton} from "../../../common/ui/modal-dialog/modal-dialog.component";
-import {Translation} from "../../../common/translation";
+import {DialogButton, RestNodeService} from "../../../core-module/core.module";
+import {RestConstants} from "../../../core-module/core.module";
+import {NodeWrapper,Node} from "../../../core-module/core.module";
+import {VCard} from "../../../core-module/ui/VCard";
+import {Toast} from "../../../core-ui-module/toast";
+import {Translation} from "../../../core-ui-module/translation";
 import {TranslateService} from "@ngx-translate/core";
-import {DateHelper} from "../../../common/ui/DateHelper";
+import {DateHelper} from "../../../core-ui-module/DateHelper";
 import {trigger} from "@angular/animations";
-import {UIAnimation} from "../../../common/ui/ui-animation";
+import {UIAnimation} from "../../../core-module/ui/ui-animation";
 
 @Component({
   selector: 'workspace-contributor',
@@ -31,7 +30,7 @@ export class WorkspaceContributorComponent  {
   public loading=true;
   public edit: VCard;
   public editMode: string;
-  public editType: string;
+  public editType: number;
   public more = false;
   public editScopeNew: string;
   private editScopeOld: string;
@@ -42,6 +41,10 @@ export class WorkspaceContributorComponent  {
   public dialogParameters: any;
   public node: Node;
   public date : Date;
+  buttons: DialogButton[];
+  private editButtons: DialogButton[];
+  private static TYPE_PERSON = 0;
+  private static TYPE_ORG = 1;
   @Input() set nodeId(nodeId : string){
     this._nodeId=nodeId;
     this.loading=true;
@@ -88,7 +91,7 @@ export class WorkspaceContributorComponent  {
   }
   public addVCard(mode:string) {
     this.date=null;
-    this.editType='person';
+    this.editType=WorkspaceContributorComponent.TYPE_PERSON;
     this.editMode=mode;
     this.edit=new VCard();
     this.editOriginal=null;
@@ -106,7 +109,7 @@ export class WorkspaceContributorComponent  {
     this.edit=vcard.copy();
     this.editScopeOld=scope;
     this.editScopeNew=scope;
-    this.editType=vcard.givenname||vcard.surname ? 'person' : 'org';
+    this.editType=vcard.givenname||vcard.surname ? WorkspaceContributorComponent.TYPE_PERSON : WorkspaceContributorComponent.TYPE_ORG;
     this.date=null;
     let contributeDate=vcard.contributeDate;
     console.log(contributeDate);
@@ -124,15 +127,15 @@ export class WorkspaceContributorComponent  {
     }
   }
   public saveEdits(){
-    if(this.editType=='person' && (!this.edit.givenname || !this.edit.surname)){
+    if(this.editType==WorkspaceContributorComponent.TYPE_PERSON && (!this.edit.givenname || !this.edit.surname)){
       this.toast.error(null,'WORKSPACE.CONTRIBUTOR.ERROR_PERSON_NAME');
       return;
     }
-    if(this.editType=='org' && (!this.edit.org)){
+    if(this.editType==WorkspaceContributorComponent.TYPE_ORG && (!this.edit.org)){
       this.toast.error(null,'WORKSPACE.CONTRIBUTOR.ERROR_ORG_NAME');
       return;
     }
-    if(this.editType=='org'){
+    if(this.editType==WorkspaceContributorComponent.TYPE_ORG){
       this.edit.givenname='';
       this.edit.surname='';
       this.edit.title='';
@@ -154,9 +157,6 @@ export class WorkspaceContributorComponent  {
     }
     console.log(array);
     this.edit=null;
-  }
-  public setTab(tab:string){
-    this.editType=tab;
   }
   public saveContributor(){
     this.onLoading.emit(true);
@@ -187,6 +187,10 @@ export class WorkspaceContributorComponent  {
     });
   }
   public cancel(){
+    if(this.edit!=null){
+      this.edit=null;
+      return;
+    }
     this.onClose.emit();
   }
   public constructor(
@@ -194,7 +198,14 @@ export class WorkspaceContributorComponent  {
     private translate:TranslateService,
     private toast:Toast,
   ){
-
+    this.buttons=[
+        new DialogButton('CANCEL',DialogButton.TYPE_CANCEL,()=>this.cancel()),
+        new DialogButton('APPLY',DialogButton.TYPE_PRIMARY,()=>this.saveContributor())
+    ];
+    this.editButtons=[
+        new DialogButton('CANCEL',DialogButton.TYPE_CANCEL,()=>this.cancel()),
+        new DialogButton('APPLY',DialogButton.TYPE_PRIMARY,()=>this.saveEdits())
+    ];
   }
 
 }

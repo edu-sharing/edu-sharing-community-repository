@@ -370,6 +370,10 @@
 		           <tokenised>false</tokenised>
 		       </index>
             </property>
+            <!-- date of the modify of the person status... -->
+            <property name="cm:espersonstatusdate">
+               <type>d:datetime</type>
+            </property>
             
             <property name="cm:esLastLogin">
             	<type>d:datetime</type>

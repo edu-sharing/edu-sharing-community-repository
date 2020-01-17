@@ -1,32 +1,17 @@
 package org.edu_sharing.restservices.register.v1;
 
 import io.swagger.annotations.*;
-import org.alfresco.service.cmr.repository.NodeRef;
-import org.edu_sharing.repository.client.tools.CCConstants;
-import org.edu_sharing.repository.server.AuthenticationToolAPI;
-import org.edu_sharing.repository.server.tools.Edu_SharingProperties;
-import org.edu_sharing.repository.server.tools.security.ShibbolethSessions;
-import org.edu_sharing.repository.server.tools.security.ShibbolethSessions.SessionInfo;
 import org.edu_sharing.restservices.ApiService;
 import org.edu_sharing.restservices.RegisterDao;
 import org.edu_sharing.restservices.RestConstants;
-import org.edu_sharing.restservices.login.v1.model.Login;
-import org.edu_sharing.restservices.login.v1.model.LoginCredentials;
-import org.edu_sharing.restservices.login.v1.model.ScopeAccess;
 import org.edu_sharing.restservices.register.v1.model.RegisterExists;
 import org.edu_sharing.restservices.register.v1.model.RegisterInformation;
 import org.edu_sharing.restservices.shared.ErrorResponse;
-import org.edu_sharing.service.authentication.ScopeAuthenticationService;
-import org.edu_sharing.service.authentication.ScopeAuthenticationServiceFactory;
-import org.edu_sharing.service.authentication.ScopeUserHomeServiceFactory;
-import org.edu_sharing.service.authority.AuthorityServiceFactory;
-import org.edu_sharing.service.nodeservice.NodeServiceFactory;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.*;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;
-import java.util.HashMap;
 
 @Path("/register/v1")
 @Api(tags = {"REGISTER v1"})

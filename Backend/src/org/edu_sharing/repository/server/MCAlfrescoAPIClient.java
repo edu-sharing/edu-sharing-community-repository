@@ -81,7 +81,6 @@ import org.alfresco.repo.version.VersionModel;
 import org.alfresco.service.ServiceRegistry;
 import org.alfresco.service.cmr.action.Action;
 import org.alfresco.service.cmr.action.ActionService;
-import org.alfresco.service.cmr.action.ActionStatus;
 import org.alfresco.service.cmr.dictionary.DataTypeDefinition;
 import org.alfresco.service.cmr.dictionary.DictionaryService;
 import org.alfresco.service.cmr.dictionary.PropertyDefinition;
@@ -138,6 +137,7 @@ import org.edu_sharing.repository.client.tools.MimeTypes;
 import org.edu_sharing.repository.client.tools.UrlTool;
 import org.edu_sharing.repository.client.tools.metadata.ValueTool;
 import org.edu_sharing.repository.server.authentication.Context;
+import org.edu_sharing.repository.server.authentication.ContextManagementFilter;
 import org.edu_sharing.repository.server.tools.ActionObserver;
 import org.edu_sharing.repository.server.tools.ApplicationInfo;
 import org.edu_sharing.repository.server.tools.ApplicationInfoList;
@@ -145,7 +145,6 @@ import org.edu_sharing.repository.server.tools.AuthenticatorRemoteAppResult;
 import org.edu_sharing.repository.server.tools.AuthenticatorRemoteRepository;
 import org.edu_sharing.repository.server.tools.DateTool;
 import org.edu_sharing.repository.server.tools.EduGroupTool;
-import org.edu_sharing.repository.server.tools.Edu_SharingProperties;
 import org.edu_sharing.repository.server.tools.I18nServer;
 import org.edu_sharing.repository.server.tools.PropertiesHelper;
 import org.edu_sharing.repository.server.tools.ServerConstants;
@@ -158,8 +157,8 @@ import org.edu_sharing.service.authentication.ScopeUserHomeServiceFactory;
 import org.edu_sharing.service.connector.ConnectorService;
 import org.edu_sharing.service.license.LicenseService;
 import org.edu_sharing.service.nodeservice.NodeServiceFactory;
-import org.edu_sharing.service.nodeservice.model.GetPreviewResult;
 import org.edu_sharing.service.nodeservice.NodeServiceHelper;
+import org.edu_sharing.service.nodeservice.model.GetPreviewResult;
 import org.edu_sharing.service.share.ShareService;
 import org.edu_sharing.service.share.ShareServiceImpl;
 import org.edu_sharing.service.util.AlfrescoDaoHelper;
@@ -854,7 +853,11 @@ public class MCAlfrescoAPIClient extends MCAlfrescoBaseClient {
 				);
 	}
 	public boolean downloadAllowed(String nodeId,Serializable commonLicenseKey,String editorType){
-        boolean downloadAllowed;
+		// when there is a signed request from the connector, the download (binary content delivery) is allowed
+		if(ApplicationInfo.TYPE_CONNECTOR.equals(ContextManagementFilter.accessToolType.get())) {
+			return true;
+		}
+		boolean downloadAllowed;
         // Array value
 	    if(commonLicenseKey instanceof ArrayList)
 		    downloadAllowed = (CCConstants.COMMON_LICENSE_EDU_P_NR_ND.equals(((ArrayList)commonLicenseKey).get(0))) ? false : true;
@@ -897,10 +900,10 @@ public class MCAlfrescoAPIClient extends MCAlfrescoBaseClient {
 		boolean isSubOfContent = serviceRegistry.getDictionaryService().isSubClass(QName.createQName(nodeType), QName.createQName(CCConstants.CM_TYPE_CONTENT));
 
 		logger.debug("setting external URL");
-		String redirectServletLink = this.getRedirectServletLink(repId, nodeRef.getId());
+		String contentUrl = URLTool.getNgRenderNodeUrl(nodeRef.getId(),null);
 
-		redirectServletLink = URLTool.addOAuthAccessToken(redirectServletLink);
-		propsCopy.put(CCConstants.CONTENTURL, redirectServletLink);
+		contentUrl = URLTool.addOAuthAccessToken(contentUrl);
+		propsCopy.put(CCConstants.CONTENTURL, contentUrl);
 
 		// external URL
 		if (isSubOfContent) {
@@ -908,10 +911,8 @@ public class MCAlfrescoAPIClient extends MCAlfrescoBaseClient {
 			Serializable commonLicenseKey = (String)propsCopy.get(CCConstants.CCM_PROP_IO_COMMONLICENSE_KEY);
 			boolean downloadAllowed = downloadAllowed(nodeRef.getId(),commonLicenseKey,(String)propsCopy.get(CCConstants.CCM_PROP_EDITOR_TYPE));
 			
-			if (propsCopy.get(CCConstants.ALFRESCO_MIMETYPE) != null && redirectServletLink != null && downloadAllowed) {
-				String params = URLEncoder.encode("display=download");
-				String downLoadUrl = UrlTool.setParam(redirectServletLink, "params", params);
-				propsCopy.put(CCConstants.DOWNLOADURL, downLoadUrl);
+			if ((propsCopy.get(CCConstants.ALFRESCO_MIMETYPE) != null || propsCopy.get(CCConstants.LOM_PROP_TECHNICAL_LOCATION)!=null) && downloadAllowed) {
+				propsCopy.put(CCConstants.DOWNLOADURL,URLTool.getDownloadServletUrl(nodeRef.getId(),null));
 			}
 			
 			String commonLicensekey = (String)propsCopy.get(CCConstants.CCM_PROP_IO_COMMONLICENSE_KEY);
@@ -943,7 +944,7 @@ public class MCAlfrescoAPIClient extends MCAlfrescoBaseClient {
 			if (renderServiceUrlPreview != null) {
 				propsCopy.put(CCConstants.CM_ASSOC_THUMBNAILS, renderServiceUrlPreview);
 			} else {
-				propsCopy.put(CCConstants.CM_ASSOC_THUMBNAILS, URLTool.getPreviewServletUrl(nodeRef));
+				propsCopy.put(CCConstants.CM_ASSOC_THUMBNAILS, NodeServiceHelper.getPreview((nodeRef)).getUrl());
 			}
 		}
 		
@@ -1092,8 +1093,13 @@ public class MCAlfrescoAPIClient extends MCAlfrescoBaseClient {
 				// when repository got no Authentication
 				HashMap<String, String> remoteAuthInfo = null;
 				if (remoteRepInfo.getAuthenticationwebservice() != null && !remoteRepInfo.getAuthenticationwebservice().equals("")) {
-					AuthenticatorRemoteAppResult arar = arr.getAuthInfoForApp(authenticationInfo, remoteRepInfo);
-					remoteAuthInfo = arar.getAuthenticationInfo();
+					try {
+						AuthenticatorRemoteAppResult arar = arr.getAuthInfoForApp(authenticationInfo, remoteRepInfo);
+						remoteAuthInfo = arar.getAuthenticationInfo();
+					} catch (Throwable e) {
+						logger.error("It seems that repository id:" + remoteRepInfo.getAppId() + " is not reachable:" + e.getMessage()+". Check the configured value of "+ApplicationInfo.KEY_AUTHENTICATIONWEBSERVICE);
+						return null;
+					}
 				} else {
 					// TODO check if that is right
 					remoteAuthInfo = authenticationInfo;
@@ -1275,7 +1281,8 @@ public class MCAlfrescoAPIClient extends MCAlfrescoBaseClient {
 
 		// Preview
 		if (nodeType.equals(CCConstants.CCM_TYPE_IO)) {
-			
+			//@todo 5.1: check if this is needed since it only is used in the PreviewServlet
+			/*
 			GetPreviewResult prevResult = getPreviewUrl(nodeRef.getStoreRef(), nodeRef.getId());
 
 			if (prevResult.getType().equals(GetPreviewResult.TYPE_USERDEFINED)) {
@@ -1291,6 +1298,7 @@ public class MCAlfrescoAPIClient extends MCAlfrescoBaseClient {
 			} else {
 				properties.remove(CCConstants.KEY_PREVIEW_GENERATION_RUNS);
 			}
+			*/
 
 			List<NodeRef> usages = this.getChildrenByAssociationNodeIds(nodeRef.getStoreRef(),nodeRef.getId(), CCConstants.CCM_ASSOC_USAGEASPECT_USAGES);
 			if (usages != null) {
@@ -2220,7 +2228,8 @@ public class MCAlfrescoAPIClient extends MCAlfrescoBaseClient {
 			
 			NodeRef userHome = ScopeUserHomeServiceFactory.getScopeUserHomeService().getUserHome(
 					username, 
-					NodeServiceInterceptor.getEduSharingScope());
+					NodeServiceInterceptor.getEduSharingScope(),
+					true);
 			String userHomeNodeId = (userHome != null) ? userHome.getId() : null;
 			return userHomeNodeId;
 		}
@@ -2381,7 +2390,7 @@ public class MCAlfrescoAPIClient extends MCAlfrescoBaseClient {
                 {
                     public String execute() throws Throwable
                     {
-                		String key = PermissionService.GROUP_PREFIX + groupName;
+                		String key = groupName.startsWith(PermissionService.GROUP_PREFIX) ? groupName : PermissionService.GROUP_PREFIX + groupName;
                 		
                 		return 	  authorityService.authorityExists(key)
                 				? authorityService.getAuthorityNodeRef(key).getId()
@@ -2399,7 +2408,7 @@ public class MCAlfrescoAPIClient extends MCAlfrescoBaseClient {
                 {
                     public String execute() throws Throwable
                     {
-                		String key = PermissionService.GROUP_PREFIX + groupName;
+						String key = groupName.startsWith(PermissionService.GROUP_PREFIX) ? groupName : PermissionService.GROUP_PREFIX + groupName;
                 		
                     	NodeRef nodeRef = serviceRegistry.getAuthorityService().getAuthorityNodeRef(key);
                     	
@@ -2755,68 +2764,8 @@ public class MCAlfrescoAPIClient extends MCAlfrescoBaseClient {
                 		return null;
                     }
                 }, false); 
-		
-		
-	}
 
-	public String[] getMemberships(String groupName) {
-		
-		AuthorityService authorityService = serviceRegistry.getAuthorityService();
-		
-		return serviceRegistry.getTransactionService().getRetryingTransactionHelper().doInTransaction(
-				
-                new RetryingTransactionCallback<String[]>()
-                {
-                    public String[] execute() throws Throwable
-                    {
-                		String key = PermissionService.GROUP_PREFIX + groupName;
-                		
-                		return authorityService.getContainedAuthorities(null, key, true).toArray(new String[0]);		
-                    }
-                }, true); 
-		
-	}
-	
-	public void addMemberships(String groupName, String[] members) {
-		
-		serviceRegistry.getTransactionService().getRetryingTransactionHelper().doInTransaction(
-				
-                new RetryingTransactionCallback<Void>()
-                {
-                    public Void execute() throws Throwable
-                    {
-                			eduAuthorityService.addMemberships(groupName, members);
-                			return null;
-                    }
-                }, false); 
-		
-	}
 
-	public void removeMemberships(String groupName, String[] members) {
-		
-		AuthorityService authorityService = serviceRegistry.getAuthorityService();
-		
-		serviceRegistry.getTransactionService().getRetryingTransactionHelper().doInTransaction(
-				
-                new RetryingTransactionCallback<Void>()
-                {
-                    public Void execute() throws Throwable
-                    {
-                		String key = PermissionService.GROUP_PREFIX + groupName;
-                		
-                		for (String member : members) {
-                			
-                			if (member == null) {
-                				continue;
-                			}
-                			
-                			authorityService.removeAuthority(key, member);
-                		}
-
-                		return null;
-                    }
-                }, false); 
-		
 	}
 
 	public void setUserPassword(String userName, String newPassword){
@@ -3318,7 +3267,7 @@ public class MCAlfrescoAPIClient extends MCAlfrescoBaseClient {
 							}
 							
 							Map<QName, Serializable> personProps = nodeService.getProperties(personNodeRef);
-							User user = new User(Edu_SharingProperties.instance.isFuzzyUserSearch());
+							User user = new User();
 							user.setNodeId(personNodeRef.getId());
 							user.setEmail((String) personProps.get(ContentModel.PROP_EMAIL));
 							user.setGivenName((String) personProps.get(ContentModel.PROP_FIRSTNAME));
@@ -3659,16 +3608,14 @@ public class MCAlfrescoAPIClient extends MCAlfrescoBaseClient {
 				logger.debug(" version prop UID:" + props.get(CCConstants.SYS_PROP_NODE_UID));
 				logger.debug(" version NodeID:" + props.get(CCConstants.NODEID));
 
+				props.put(CCConstants.ALFRESCO_MIMETYPE, getAlfrescoMimetype(version.getFrozenStateNodeRef()));
 				// contenturl
-				String redirectServletLink = this.getRedirectServletLink(repId, nodeId);
-				redirectServletLink = UrlTool.setParam(redirectServletLink, "version", version.getVersionLabel());
-				redirectServletLink = URLTool.addOAuthAccessToken(redirectServletLink);
+				String contentUrl = URLTool.getNgRenderNodeUrl(nodeId,version.getVersionLabel());
+				contentUrl = URLTool.addOAuthAccessToken(contentUrl);
 				
-				props.put(CCConstants.CONTENTURL, redirectServletLink);
-				if (props.get(CCConstants.ALFRESCO_MIMETYPE) != null && redirectServletLink != null) {
-					String params = URLEncoder.encode("display=download");
-					String downLoadUrl = UrlTool.setParam(redirectServletLink, "params", params);
-					props.put(CCConstants.DOWNLOADURL, downLoadUrl);
+				props.put(CCConstants.CONTENTURL, contentUrl);
+				if (props.get(CCConstants.ALFRESCO_MIMETYPE) != null && contentUrl != null) {
+					props.put(CCConstants.DOWNLOADURL, URLTool.getDownloadServletUrl(nodeId,version.getVersionLabel()));
 				}
 
 				// thumbnail take the current thumbnail cause subobjects
@@ -3768,7 +3715,9 @@ public class MCAlfrescoAPIClient extends MCAlfrescoBaseClient {
 
 	public void setPreviewUrlWithoutTicket(StoreRef storeRef, String nodeId, HashMap<String, Object> properties) {
 		try {
-
+			properties.put(CCConstants.CM_ASSOC_THUMBNAILS, NodeServiceHelper.getPreview(new NodeRef(storeRef,nodeId)).getUrl());
+			// @todo 5.1: Check if this is needed in the client
+			/*
 			GetPreviewResult prevResult = getPreviewUrl(storeRef, nodeId);
 
 			if (prevResult.getType().equals(GetPreviewResult.TYPE_USERDEFINED)) {
@@ -3786,7 +3735,7 @@ public class MCAlfrescoAPIClient extends MCAlfrescoBaseClient {
 			} else {
 				properties.remove(CCConstants.KEY_PREVIEW_GENERATION_RUNS);
 			}
-
+			*/
 		} catch (Exception e) {
 			logger.error(e.getMessage(), e);
 		}
@@ -3945,56 +3894,7 @@ public class MCAlfrescoAPIClient extends MCAlfrescoBaseClient {
 	}
 	
 	public GetPreviewResult getPreviewUrl(String storeProtocol, String storeIdentifier, String nodeId){
-		
-		StoreRef storeRef = new StoreRef(storeProtocol,storeIdentifier);
-		NodeRef nodeRef = new NodeRef(storeRef,nodeId);
-		if(!nodeService.getType(nodeRef).equals(QName.createQName(CCConstants.CCM_TYPE_IO))){
-			return null;
-		}
-
-		String extThumbnail = (String) nodeService.getProperty(nodeRef, QName.createQName(CCConstants.CCM_PROP_IO_THUMBNAILURL));
-		if (extThumbnail != null && !extThumbnail.trim().equals("")) {
-			return new GetPreviewResult(extThumbnail, GetPreviewResult.TYPE_EXTERNAL, false);
-		}
-
-		String defaultImageUrl = getUrl() + "/"
-				+ CCConstants.DEFAULT_PREVIEW_IMG;
-
-		ContentReader crUserDefinedPreview = null;
-		try{
-			crUserDefinedPreview=this.contentService.getReader(new NodeRef(storeRef, nodeId),
-				QName.createQName(CCConstants.CCM_PROP_IO_USERDEFINED_PREVIEW));
-		}catch(Throwable t){
-			// may fails if the user does not has access for content
-		}
-
-		/**
-		 * userdefined
-		 */
-		if (crUserDefinedPreview != null && crUserDefinedPreview.getSize() > 0) {
-			String url = URLTool.getPreviewServletUrl(new NodeRef(storeRef, nodeId));
-			return new GetPreviewResult(url, GetPreviewResult.TYPE_USERDEFINED, false);
-		}
-
-		/**
-		 * generated and action active
-		 */
-		Action action = ActionObserver.getInstance().getAction(nodeRef, CCConstants.ACTION_NAME_CREATE_THUMBNAIL);
-		if (action != null && action.getExecutionStatus().equals(ActionStatus.Running)) {
-			return new GetPreviewResult(defaultImageUrl, GetPreviewResult.TYPE_DEFAULT, true);
-		}
-
-		/**
-		 * generated and no action active
-		 */
-		HashMap<String, Object> previewProps = getChild(storeRef, nodeId, CCConstants.CM_TYPE_THUMBNAIL, CCConstants.CM_NAME,
-				CCConstants.CM_VALUE_THUMBNAIL_NAME_imgpreview_png);
-		if (previewProps != null) {
-			String url = URLTool.getPreviewServletUrl(new NodeRef(storeRef, nodeId));
-			return new GetPreviewResult(url, GetPreviewResult.TYPE_GENERATED, false);
-		}
-
-		return new GetPreviewResult(defaultImageUrl, GetPreviewResult.TYPE_DEFAULT, false);
+		return NodeServiceHelper.getPreview(new NodeRef(storeRef, nodeId));
 	}
 
 	@Override

@@ -4,7 +4,8 @@ import {
 } from '@angular/core';
 import {TranslateService} from "@ngx-translate/core";
 import {trigger} from "@angular/animations";
-import {UIAnimation} from "../ui-animation";
+import {UIAnimation} from "../../../core-module/ui/ui-animation";
+import {DialogButton} from "../../../core-module/core.module";
 
 @Component({
   selector: 'modal-dialog',
@@ -39,16 +40,6 @@ export class ModalDialogComponent{
    */
   @Input() isCancelable = false;
   /**
-   * Allow the dialog to scroll it contents
-   * @type {boolean}
-   */
-  @Input() isScrollable = false;
-  /**
-   * Should the dialog be fill the whole height? (use with isScrollable=true)
-   * @type {boolean}
-   */
-  @Input() isHigh = false;
-  /**
    * The title, will be translated automatically
    * The dialog will only be visible if the title is not null
    */
@@ -63,6 +54,8 @@ export class ModalDialogComponent{
    * And use messageParameters={name:'World'}
    */
   @Input() messageParameters : any;
+
+  @Input() node : Node|Node[];
   /**
    * Will be emitted when the users cancels the dialog
    * @type {EventEmitter}
@@ -71,18 +64,7 @@ export class ModalDialogComponent{
   /** A list of buttons, see @DialogButton
    * Also use the DialogButton.getYesNo() and others if applicable!
    */
-  public _buttons : DialogButton[];
-  @Input() set buttons (buttons :  DialogButton[]){
-    if(!buttons){
-      this._buttons=null;
-      return;
-    }
-   this._buttons=buttons.reverse();
-   setTimeout(()=> {
-     if(this.buttonElements)
-      this.buttonElements.nativeElement.focus();
-   },10);
-  }
+  @Input() public buttons : DialogButton[];
 
   @ViewChild('buttonElements') buttonElements : ElementRef;
 
@@ -93,45 +75,6 @@ export class ModalDialogComponent{
     this.onCancel.emit();
   }
 }
-
-export class DialogButton {
-  public static getOkCancel(cancel : Function,ok : Function) : DialogButton[]{
-    return [
-          new DialogButton("CANCEL",DialogButton.TYPE_CANCEL,cancel),
-          new DialogButton("OK",DialogButton.TYPE_PRIMARY,ok),
-    ];
-  }
-  public static getOk(ok : Function) : DialogButton[]{
-    return DialogButton.getSingleButton("OK",ok);
-  }
-    public static getCancel(cancel : Function) : DialogButton[]{
-        return DialogButton.getSingleButton("CANCEL",cancel,DialogButton.TYPE_CANCEL);
-    }
-  public static getSingleButton(label:string,ok : Function,type = DialogButton.TYPE_PRIMARY) : DialogButton[]{
-    return [
-      new DialogButton(label,type,ok),
-    ];
-  }
-  public static getYesNo(no : Function,yes : Function) : DialogButton[]{
-    return [
-      new DialogButton("NO",DialogButton.TYPE_CANCEL,no),
-      new DialogButton("YES",DialogButton.TYPE_PRIMARY,yes),
-    ];
-  }
-  public static getNextCancel(cancel : Function,next : Function) : DialogButton[]{
-    return [
-      new DialogButton("CANCEL",DialogButton.TYPE_CANCEL,cancel),
-      new DialogButton("NEXT",DialogButton.TYPE_PRIMARY,next),
-    ];
-  }
-  public static TYPE_PRIMARY=1;
-  public static TYPE_CANCEL=2;
-  /**
-   * @param name the button name, which is used for the translation
-   * @param type the button type, use one of the constants
-   * @param callback A function callback when this option is choosen.
-   */
-  constructor(public name: string,public type : number, public callback: Function) {
-  }
-
+export enum ProgressType {
+  Indeterminate="indeterminate"
 }

@@ -13,6 +13,8 @@
   "APPLY" : "apply",
   "CANCEL" : "cancel",
   "YES_DELETE" : "Yes, delete",
+  "START": "Start",
+  "STOP": "Stop",
   "RENAME" : "rename",
   "USER_GUEST" : "guest",
   "IMPRINT" : "Imprint",
@@ -24,6 +26,7 @@
   "MORE_SELECTBOX":"more elements",
   "HIDE_MORE": "hide",
   "FIELD_REQUIRED" : "Required",
+  "FIELD_VALIDATION_ERROR_INTEGER" : "Use integer numbers",
   "EXTENSION_NOT_MATCH":"Change file extension?",
   "EXTENSION_NOT_MATCH_INFO":"Are you sure you want to change the file extension from '{{extensionOld}}' to '{{extensionNew}}'?\n\n{{warning}}",
   "EXTENSION_NOT_MATCH_INFO_OLD":"Are you sure you want to remove the file extension '{{extensionOld}}'?\n\n{{warning}}",
@@ -43,7 +46,9 @@
   "NO_MORE_ELEMENTS" : "no further elements",
   "FIELD_MUST_BE_FILLED" : "This field cannot be empty.",
   "CHOOSE_DATE":"Choose date",
+  "CARD_SUBTITLE_MULTIPLE":"{{count}} elements",
   "SELECT_COLLECTION" : "Add to '{{name}}'",
+  "SELECT_ROOT_NAME" : "Home",
   "SELECT_ROOT" : "select home",
   "SELECT_ROOT_DISABLED" : "select element",
   "CLOSE" : "close",
@@ -81,6 +86,7 @@
   "RENDERSERVICE_API_ERROR":"error while reaching rendering service. Please report this error an administrator.",
   "SYSTEM_FOLDER_DELETE_ERROR":"This system folder can not be deleted",
   "GENERIC_QUOTA_ERROR_TITLE":"The operation could not be carried out because the upload quota was exceeded",
+  "CONNECTOR_FORMAT_LABEL":"File type",
   "CONNECTOR_QUOTA_REACHED_TITLE":"Upload quota exceeded",
   "CONNECTOR_QUOTA_REACHED_MESSAGE":"This function is unavailable because the upload quota is fully exceeded.\n\nDelete files to reclaim storage space and try it again.",
   "TOOLPERMISSION_ERROR":"You have insufficient permissions for this task",
@@ -138,6 +144,7 @@
   "PASSWORD_MIN_LENGTH":"The password must be at least {{length}} characters",
   "PASSWORD_NOT_MATCH":"The passwords do not match",
   "LEARNINGAGE_YEAR":"Years",
+  "DELETED_USER":"deleted User",
   "GROUP_EVERYONE":"everybody",
   "DETAILS": "details",
   "INFO": "info",
@@ -209,7 +216,7 @@
     "OVERALL":""
   },
   "NODE_VARIANT":{
-    "TITLE": "Create new variant for {{name}}",
+    "TITLE": "Create new variant",
     "NEW_VARIANT":"New Title:",
     "DEFAULT_NAME":"Variant of {{name}}",
     "BREADCRUMB_INFO": "Save variant in:",
@@ -231,8 +238,8 @@
     "OPTION":"Report problem",
     "REPORT":"report",
     "REPORT_INFO":"Report problem with \"{{name}}\"",
-    "COMMENT":"Please provide additional information about the problem that has occurred.",
-    "COMMENT_PLACEHOLDER":"provide details...",
+    "COMMENT":"Provide additional information about the problem that has occurred",
+    "COMMENT_PLACEHOLDER":"Provide details...",
     "EMAIL":"your e-mail-address",
     "EMAIL_PLACEHOLDER":"somebody@example.net",
     "EMAIL_REQUIRED":"Please provide a valind e-mail address.",
@@ -269,7 +276,8 @@
       "PUBLIC" : "public",
       "SHARED":"shared",
       "CUSTOM" : "custom",
-      "TYPE_EDITORIAL" : "editorial"
+      "TYPE_EDITORIAL" : "editorial",
+      "TYPE_MEDIA_CENTER" : "media center"
     }
   },
   "CREATE_NODE":{
@@ -425,6 +433,7 @@
   "NO_SIZE":"-",
   "VERSION_COMMENT":"Version comment",
   "MDS":{
+    "TITLE":"Edit Metadata",
     "SHOW_EXTENDED":"Show extended metadata",
     "SHOW_EXTENDED_SEARCH":"Show more filters",
     "AUTHOR_LABEL":"About the Author",
@@ -470,6 +479,9 @@
     "PASSWORD_PLACEHOLDER": "Enter password ...",
     "PASSWORD_CORRECT": "Password correct"
   },
+  "VIDEO_CONTROLS": {
+    "SAVED": "Saved changes"
+  },
   "TOAST":{
     "NODE_LOCKED":"The document is currently used by an other user and can not be opened",
     "FIELD_REQUIRED":"The field {{ name }} is required",
@@ -501,7 +513,8 @@
     "keyboard_arrow_right": "next",
     "keyboard_arrow_up": "up",
     "file_upload": "file upload",
-    "delete": "delete"
+    "delete": "delete",
+    "add": "New"
   },
   "LANGUAGE":{
     "INTERNATIONAL":"international",

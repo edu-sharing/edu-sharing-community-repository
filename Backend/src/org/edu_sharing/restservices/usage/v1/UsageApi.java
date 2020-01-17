@@ -23,6 +23,7 @@ import org.edu_sharing.restservices.UsageDao;
 import org.edu_sharing.restservices.collection.v1.model.Collection;
 import org.edu_sharing.restservices.shared.ErrorResponse;
 import org.edu_sharing.restservices.usage.v1.model.Usages;
+import org.edu_sharing.service.toolpermission.ToolPermissionHelper;
 import org.edu_sharing.service.toolpermission.ToolPermissionService;
 import org.edu_sharing.service.toolpermission.ToolPermissionServiceFactory;
 
@@ -208,17 +209,12 @@ public class UsageApi {
 			if("-all-".equals(nodeId)) {
 				nodeId = null;
 			}
+			ToolPermissionHelper.throwIfToolpermissionMissing(CCConstants.CCM_VALUE_TOOLPERMISSION_GLOBAL_STATISTICS);
 			
-			ToolPermissionService tps = ToolPermissionServiceFactory.getInstance();
-			
-			if(tps.hasToolPermission(CCConstants.CCM_VALUE_TOOLPERMISSION_USAGE_STATISTIC)) {
-			
-				List<Usages.NodeUsage> usages = new UsageDao(homeRepo).
-						getUsages(repositoryId, nodeId, from, to);
-				return Response.status(Response.Status.OK).entity(usages).build();
-			}else {
-				throw new Exception("no toolpermission to use this service");
-			}
+			List<Usages.NodeUsage> usages = new UsageDao(homeRepo).
+					getUsages(repositoryId, nodeId, from, to);
+			return Response.status(Response.Status.OK).entity(usages).build();
+
 		} catch (Throwable t) {
 			return ErrorResponse.createResponse(t);
 		}

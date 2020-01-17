@@ -1,9 +1,9 @@
 import {Component, Input, EventEmitter, Output, ViewChild, ElementRef} from '@angular/core';
-import {RestMdsService} from "../../../common/rest/services/rest-mds.service";
-import {MdsMetadatasets, Node, MdsInfo,NodeList} from "../../../common/rest/data-object";
+import {RestMdsService} from "../../../core-module/core.module";
+import {MdsMetadatasets, Node, MdsInfo,NodeList} from "../../../core-module/core.module";
 import {TranslateService} from "@ngx-translate/core";
-import {RestHelper} from "../../../common/rest/rest-helper";
-import {RestNodeService} from "../../../common/rest/services/rest-node.service";
+import {RestHelper} from "../../../core-module/core.module";
+import {RestNodeService} from "../../../core-module/core.module";
 
 @Component({
   selector: 'workspace-create-lti',

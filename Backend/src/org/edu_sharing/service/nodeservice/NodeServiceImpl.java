@@ -10,12 +10,12 @@ import org.alfresco.repo.model.Repository;
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.repo.security.permissions.AccessDeniedException;
 import org.alfresco.service.ServiceRegistry;
-import org.alfresco.service.cmr.action.Action;
-import org.alfresco.service.cmr.action.ActionStatus;
 import org.alfresco.service.cmr.dictionary.DictionaryService;
 import org.alfresco.service.cmr.repository.*;
 import org.alfresco.service.cmr.repository.NodeService;
 import org.alfresco.service.cmr.security.PermissionService;
+import org.alfresco.service.cmr.version.Version;
+import org.alfresco.service.cmr.version.VersionHistory;
 import org.alfresco.service.cmr.version.VersionService;
 import org.alfresco.service.namespace.QName;
 import org.alfresco.service.namespace.RegexQNamePattern;
@@ -38,14 +38,15 @@ import org.edu_sharing.repository.server.tools.cache.RepositoryCache;
 import org.edu_sharing.service.Constants;
 import org.edu_sharing.service.nodeservice.model.GetPreviewResult;
 import org.edu_sharing.service.permission.PermissionServiceFactory;
+import org.edu_sharing.service.rendering.RenderingTool;
 import org.edu_sharing.service.search.model.SortDefinition;
-import org.edu_sharing.service.toolpermission.ToolPermissionServiceFactory;
 import org.springframework.context.ApplicationContext;
 
 public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.NodeService {
 	
 	/* Some safe properties they're not necessary in the mds, but the client is allowed to define */
 	private static final String[] SAFE_PROPS = new String[]{
+			CCConstants.LOM_PROP_GENERAL_TITLE,
 			CCConstants.LOM_PROP_TECHNICAL_FORMAT,
 			CCConstants.CCM_PROP_IO_WWWURL,
 			CCConstants.CCM_PROP_IO_CREATE_VERSION,
@@ -75,6 +76,7 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
 			CCConstants.CCM_PROP_SERVICE_NODE_DESCRIPTION,
 			CCConstants.CCM_PROP_SERVICE_NODE_TYPE,
 			CCConstants.CCM_PROP_SERVICE_NODE_DATA,
+			CCConstants.CCM_PROP_IO_REF_VIDEO_VTT
 			};
 	private static final String[] LICENSE_PROPS = new String[]{
 			CCConstants.LOM_PROP_RIGHTS_RIGHTS_DESCRIPTION,
@@ -87,10 +89,12 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
 			CCConstants.CCM_PROP_IO_COMMONLICENSE_QUESTIONSALLOWED
 	};
 	private String appId;
+	private ContentService contentService;
 	private DictionaryService dictionaryService;
 	String repositoryId = ApplicationInfoList.getHomeRepository().getAppId();
 	private ServiceRegistry serviceRegistry = null;
 	private NodeService nodeService = null;
+	private NodeService nodeServiceAlfresco = null;
 	private VersionService versionService;
 
 	Logger logger = Logger.getLogger(NodeServiceImpl.class);
@@ -110,6 +114,8 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
 		ApplicationContext applicationContext = AlfAppContextGate.getApplicationContext();
 		serviceRegistry = (ServiceRegistry) applicationContext.getBean(ServiceRegistry.SERVICE_REGISTRY);
 		nodeService = serviceRegistry.getNodeService();
+		nodeServiceAlfresco = (NodeService) applicationContext.getBean("alfrescoDefaultDbNodeService");
+		contentService = serviceRegistry.getContentService();
 		versionService = serviceRegistry.getVersionService();
 		dictionaryService = serviceRegistry.getDictionaryService();
 		repositoryHelper = (Repository) applicationContext.getBean("repositoryHelper");
@@ -244,7 +250,7 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
 				mds.getWidgetsByNode(nodeType,Arrays.asList(ArrayUtils.nullToEmpty(aspects))) :
 				mds.getWidgetsByTemplate(templateName))) {
 			String id=widget.getId();
-			if(!checkWidgetConditionTrue(widget)) {
+			if(!MetadataHelper.checkConditionTrue(widget.getCondition())) {
 				logger.info("widget "+id+" skipped because condition failed");
 				logger.info("condition that should match: "+widget.getCondition().getType()+" "+(widget.getCondition().isNegate() ? "!=" : "=" )+" "+widget.getCondition().getValue());
 				continue;
@@ -325,21 +331,7 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
 		return toSafe;
 	}
 	//transient Logger logger = Logger.getLogger(MetadataWidget.class);
-	/** resolves this widget's condition
-	 * only works for condition type TOOLPERMISSION
-	 * @return
-	 */
-	private boolean checkWidgetConditionTrue(MetadataWidget widget) {
-		MetadataWidget.Condition condition = widget.getCondition();
-		if(widget.getCondition()==null)
-			return true;
-		if(MetadataWidget.Condition.CONDITION_TYPE.TOOLPERMISSION.equals(condition.getType())){
-			boolean result=ToolPermissionServiceFactory.getInstance().hasToolPermission(condition.getValue());
-			return result!=condition.isNegate();
-		}
-		//logger.info("skipping condition type "+condition.getType()+" for widget "+getId()+" since it's not supported in backend");
-		return true;
-	}
+
 	private static Iterable<String> getAllSafeProps() {
 		List<String> safe=new ArrayList<>();
 		safe.addAll(Arrays.asList(SAFE_PROPS));
@@ -354,7 +346,10 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
 		map.put(CCConstants.CM_NAME, new String[]{name});
 		return map;
 	}
-	
+
+	/**
+	 * returns the child with the given name, or null if no child matched
+	 */
 	@Override
 	public String findNodeByName(String parentId, String name){
 		List<ChildAssociationRef> children = nodeService.getChildAssocs(new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE,parentId));
@@ -381,24 +376,36 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
 		return result;
 	}
 	@Override
-	public List<NodeRef> getChildrenRecursive(StoreRef store, String nodeId,List<String> types) {
+	public List<NodeRef> getChildrenRecursive(StoreRef store, String nodeId,List<String> types,RecurseMode recurseMode) {
+		// this method uses nodeServiceAlfresco instead of nodeService
+		// to prevent that recursive fetch data of user homes will fetch (and also produce duplicates) of the shared org folders
 		List<ChildAssociationRef> assocs;
 		if(types==null){
-			assocs = nodeService.getChildAssocs(new NodeRef(store, nodeId));
+			assocs = nodeServiceAlfresco.getChildAssocs(new NodeRef(store, nodeId));
 		}
 		else {
 			Set<QName> typesConverted = types.stream().map(QName::createQName).collect(Collectors.toSet());
-			assocs = nodeService.getChildAssocs(new NodeRef(store, nodeId), typesConverted);
+			assocs = nodeServiceAlfresco.getChildAssocs(new NodeRef(store, nodeId), typesConverted);
 		}
 		List<NodeRef> result=new ArrayList<>();
 		for(ChildAssociationRef assoc : assocs){
 			result.add(assoc.getChildRef());
 		}
-		List<ChildAssociationRef> maps = nodeService.getChildAssocs(new NodeRef(store, nodeId), new HashSet<>(Arrays.asList(QName.createQName(CCConstants.CCM_TYPE_MAP),QName.createQName(CCConstants.CM_TYPE_FOLDER))));
+		List<ChildAssociationRef> maps;
+		if(recurseMode.equals(RecurseMode.Folders)) {
+			maps = nodeServiceAlfresco.getChildAssocs(new NodeRef(store, nodeId), new HashSet<>(Arrays.asList(QName.createQName(CCConstants.CCM_TYPE_MAP), QName.createQName(CCConstants.CM_TYPE_FOLDER))));
+		}
+		else if(recurseMode.equals(RecurseMode.All)){
+			// in theory, every object may have children, so we need to access all of them
+			maps = nodeServiceAlfresco.getChildAssocs(new NodeRef(store, nodeId));
+		}
+		else{
+			throw new IllegalArgumentException("invalid RecurseMode");
+		}
 		String user = AuthenticationUtil.getFullyAuthenticatedUser();
 		// run in parallel to increase performance
 		maps.parallelStream().forEach((map)->{
-			AuthenticationUtil.runAs(()->result.addAll(getChildrenRecursive(store,map.getChildRef().getId(),types))
+			AuthenticationUtil.runAs(()->result.addAll(getChildrenRecursive(store,map.getChildRef().getId(),types,recurseMode))
 			,user);
 		});
 		logger.info("Get children recursive finished with "+result.size()+" nodes");
@@ -643,8 +650,8 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
 	}
 	
 	@Override
-	public String getType(String nodeId) {
-		return nodeService.getType(new NodeRef(Constants.storeRef, nodeId)).toString();
+	public String getType(String storeProtocol,String storeId,String nodeId) {
+		return nodeService.getType(new NodeRef(new StoreRef(storeProtocol,storeId), nodeId)).toString();
 	}
 	
 	public ChildAssociationRef getParent(NodeRef nodeRef){
@@ -889,6 +896,7 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
 	public void writeContent(StoreRef store, String nodeID, InputStream content, String mimetype, String _encoding,
 			String property) throws Exception {
 		apiClient.writeContent(store, nodeID, content, mimetype, _encoding, property);
+		RenderingTool.buildRenderingCache(nodeID);
 	}
 	
 	@Override
@@ -913,8 +921,38 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
 	}
 	
 	@Override
-	public String getProperty(String storeProtocol, String storeId, String nodeId, String property) {
+	public String getProperty(String storeProtocol, String storeId, String nodeId, String property){
 		return apiClient.getProperty(new StoreRef(storeProtocol,storeId), nodeId, property);
+	}
+	@Override
+	public Serializable getPropertyNative(String storeProtocol, String storeId, String nodeId, String property){
+		return nodeService.getProperty(new NodeRef(new StoreRef(storeProtocol,storeId), nodeId), QName.createQName(property));
+	}
+
+	private String getPreviewUrl(String storeProtocol, String storeId, String nodeId, String version) {
+		if(getType(storeProtocol,storeId,nodeId).equals(CCConstants.CCM_TYPE_REMOTEOBJECT)) {
+			// @TODO: Basically, when the method getPreviewResult is overriden by the service, we don't need to do that!
+			NodeRef nodeRef=new NodeRef(new StoreRef(storeProtocol,storeId),nodeId);
+			String repoId = (String)nodeService.getProperty(nodeRef, QName.createQName(CCConstants.CCM_PROP_REMOTEOBJECT_REPOSITORYID));
+			String remoteNodeId = (String)nodeService.getProperty(nodeRef, QName.createQName(CCConstants.CCM_PROP_REMOTEOBJECT_NODEID));
+			try {
+				HashMap<String, Object> props = NodeServiceFactory.getNodeService(repoId).getProperties(null,null,remoteNodeId);
+				return  (String)props.get(CCConstants.CM_ASSOC_THUMBNAILS);
+			} catch (Throwable e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+				return null;
+			}
+
+		}else {
+			String previewURL = URLTool.getBaseUrl(true);
+			previewURL += "/preview?nodeId="+nodeId+"&storeProtocol="+storeProtocol+"&storeId="+storeId+"&dontcache="+System.currentTimeMillis();
+			if(version!=null){
+				previewURL +="&version="+version;
+			}
+			previewURL =  URLTool.addOAuthAccessToken(previewURL);
+			return previewURL;
+		}
 	}
 
 	@Override
@@ -959,11 +997,32 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
 				enable);
 
 	}
+	private ContentReader getContentReader(String storeProtocol, String storeId, String nodeId,String version,String contentProp){
+		NodeRef nodeRef=new NodeRef(new StoreRef(storeProtocol, storeId), nodeId);
+		if(version==null) {
+			return contentService.getReader(nodeRef, QName.createQName(contentProp)).getReader();
+		}
+		else{
+			VersionHistory versionHistory = serviceRegistry.getVersionService().getVersionHistory(nodeRef);
+			Version versionObj = versionHistory.getVersion(version);
+			return contentService.getReader(versionObj.getFrozenStateNodeRef(), QName.createQName(contentProp)).getReader();
+		}
+	}
+	@Override
+	public InputStream getContent(String storeProtocol, String storeId, String nodeId,String version,String contentProp) throws Throwable{
+		return getContentReader(storeProtocol,storeId,nodeId,version,contentProp).getContentInputStream();
+	}
 
 	@Override
-	public InputStream getContent(String storeProtocol, String storeId, String nodeId,String contentProp) throws Throwable{
-		return apiClient.getContent(nodeId,contentProp);
+	public String getContentHash(String storeProtocol, String storeId, String nodeId, String version, String contentProp) {
+		try{
+
+			return ""+getContentReader(storeProtocol,storeId,nodeId,version,contentProp).getContentData().hashCode();
+		}catch(Throwable t){
+			return null;
+		}
 	}
+
 	@Override
 	public void addAspect(String nodeId, String aspect) {
 		apiClient.addAspect(nodeId, aspect);
@@ -1004,6 +1063,7 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
 	public HashMap<String, HashMap<String, Object>> getVersionHistory(String nodeId) throws Throwable {
 		return apiClient.getVersionHistory(nodeId);
 	}
+
 	@Override
 	public String importNode(String nodeId,String localParent) throws Throwable {
 		throw new Exception("Not supported for local repository");
@@ -1047,61 +1107,19 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
 	}
 
 	@Override
-	public GetPreviewResult getPreview(String storeProtocol, String storeIdentifier, String nodeId){
-
-		StoreRef storeRef = new StoreRef(storeProtocol,storeIdentifier);
-		NodeRef nodeRef = new NodeRef(storeRef,nodeId);
-		if(!getType(nodeId).equals(CCConstants.CCM_TYPE_IO)){
-			return null;
-		}
-
-		String extThumbnail = getProperty(storeProtocol,storeIdentifier,nodeId,CCConstants.CCM_PROP_IO_THUMBNAILURL);
-		if (extThumbnail != null && !extThumbnail.trim().equals("")) {
-			return new GetPreviewResult(extThumbnail, GetPreviewResult.TYPE_EXTERNAL, false);
-		}
-
-		String defaultImageUrl = URLTool.getBaseUrl() + "/"
-				+ CCConstants.DEFAULT_PREVIEW_IMG;
-
-		InputStream crUserDefinedPreview = null;
-		try{
-			/**
-			 * userdefined
-			 */
-			crUserDefinedPreview=this.getContent(storeProtocol,storeIdentifier,nodeId,CCConstants.CCM_PROP_IO_USERDEFINED_PREVIEW);
-			if (crUserDefinedPreview != null && crUserDefinedPreview.available() > 0) {
-				String url = URLTool.getPreviewServletUrl(new NodeRef(storeRef, nodeId));
-				return new GetPreviewResult(url, GetPreviewResult.TYPE_USERDEFINED, false);
-			}
-
-		}catch(Throwable t){
-			// may fails if the user does not has access for content
-		}
-
-
-		/**
-		 * generated and action active
-		 */
-		Action action = ActionObserver.getInstance().getAction(nodeRef, CCConstants.ACTION_NAME_CREATE_THUMBNAIL);
-		if (action != null && action.getExecutionStatus().equals(ActionStatus.Running)) {
-			return new GetPreviewResult(defaultImageUrl, GetPreviewResult.TYPE_DEFAULT, true);
-		}
-
-		/**
-		 * generated and no action active
-		 */
-		NodeRef previewProps = getChild(storeRef, nodeId, CCConstants.CM_TYPE_THUMBNAIL, CCConstants.CM_NAME,
-				CCConstants.CM_VALUE_THUMBNAIL_NAME_imgpreview_png);
-		if (previewProps != null) {
-			String url = URLTool.getPreviewServletUrl(new NodeRef(storeRef, nodeId));
-			return new GetPreviewResult(url, GetPreviewResult.TYPE_GENERATED, false);
-		}
-
-		return new GetPreviewResult(defaultImageUrl, GetPreviewResult.TYPE_DEFAULT, false);
+	public GetPreviewResult getPreview(String storeProtocol, String storeIdentifier, String nodeId,String version){
+		NodeRef nodeRef = new NodeRef(new StoreRef(storeProtocol, storeIdentifier), nodeId);
+		boolean isIcon=NodeServiceHelper.getProperty(nodeRef,CCConstants.CCM_PROP_MAP_ICON)!=null && NodeServiceHelper.getProperty(nodeRef,CCConstants.CM_ASSOC_THUMBNAILS)!=null;
+		return new GetPreviewResult(getPreviewUrl(storeProtocol,storeIdentifier,nodeId,version),isIcon);
 	}
 
 	@Override
 	public String getPrimaryParent(String protocol, String store, String nodeId) {
 		return nodeService.getPrimaryParent(new NodeRef(new StoreRef(protocol, store), nodeId)).getParentRef().getId();
+	}
+
+	@Override
+	public Collection<NodeRef> getFrontpageNodes() throws Throwable {
+		return new NodeFrontpage().getNodesForCurrentUserAndConfig();
 	}
 }

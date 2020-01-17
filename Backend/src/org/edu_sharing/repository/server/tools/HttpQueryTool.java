@@ -28,11 +28,13 @@
 package org.edu_sharing.repository.server.tools;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import com.typesafe.config.Config;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.HttpMethodBase;
@@ -43,12 +45,13 @@ import org.apache.commons.httpclient.auth.AuthScope;
 import org.apache.commons.httpclient.methods.GetMethod;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.edu_sharing.lightbend.LightbendConfigLoader;
 
 public class HttpQueryTool {
 
 	Log logger = LogFactory.getLog(HttpQueryTool.class);
 	
-	static boolean initFinished = false;
+	public static boolean initFinished = false;
 	
 	static String host = null;
 	static String proxyhost = null;
@@ -78,16 +81,16 @@ public class HttpQueryTool {
 	private void init(){
 		if(!initFinished){
 			try{
-				host = PropertiesHelper.getProperty("host", "importerproxy.properties", PropertiesHelper.TEXT);
-				proxyhost = PropertiesHelper.getProperty("proxyhost", "importerproxy.properties", PropertiesHelper.TEXT);
-				proxyUsername = PropertiesHelper.getProperty("proxyuser", "importerproxy.properties", PropertiesHelper.TEXT);
-				proxyPass = PropertiesHelper.getProperty("proxypass", "importerproxy.properties", PropertiesHelper.TEXT);
-				String proxyportStr = PropertiesHelper.getProperty("proxyport", "importerproxy.properties", PropertiesHelper.TEXT);
-				if (proxyportStr!=null) proxyport = new Integer(PropertiesHelper.getProperty("proxyport", "importerproxy.properties", PropertiesHelper.TEXT));
-				nonProxyHosts = PropertiesHelper.getProperty("nonproxyhosts", "importerproxy.properties", PropertiesHelper.TEXT);
-				
+				Config config = LightbendConfigLoader.get().getConfig("repository.config");
+				host = config.getString("host");
+				proxyhost = config.getString("proxyhost");
+				proxyUsername = config.getString("proxyuser");
+				proxyPass = config.getString("proxypass");
+				proxyport = config.getInt("proxyport");
+				nonProxyHosts = config.getString("nonproxyhosts");
 			}catch(Exception e){
-				e.printStackTrace();
+				logger.info("No proxy to use found or invalid proxy config: "+e.getMessage());
+				logger.info("If no proxy should be used, you can ignore this message");
 			}
 			initFinished = true;
 		}
@@ -127,47 +130,24 @@ public class HttpQueryTool {
 		}
 		return query(method);
 	}
-	public String query(HttpMethodBase method) {
-		HttpClient client = new HttpClient();
-
-		client.getParams().setParameter("http.useragent", "Test Client");
-
-
-		if(basicAuthUn != null && basicAuthPw != null) {
-			method.addRequestHeader("Authorization", "Basic " + Base64.encodeBase64String((basicAuthUn +":" +basicAuthPw) .getBytes()));
-		}
-
+	public InputStream getStream(HttpMethodBase method) {
+		HttpClient client = prepareClient(method);
 		try {
-			
-			//get host of url to check if its an nonproxy host
-			URL urlObj = new URL(method.getURI().getURI());
-			String urlHost = urlObj.getHost();
-			
-			logger.debug("nonProxyHosts:"+nonProxyHosts+" current Host:"+urlHost);
 
-			
-			if (host != null && proxyhost != null && proxyport != null && !(nonProxyHosts != null && nonProxyHosts.contains(urlHost)) ) {
-				logger.debug("using  proxy proxyhost:" + proxyhost + " proxyport:" + proxyport + " host" + host);
-				client.getHostConfiguration().setHost(host);
-				client.getHostConfiguration().setProxy(proxyhost, proxyport);
-
-				if (proxyUsername != null && proxyPass != null) {
-
-					List authPrefs = new ArrayList(2);
-					authPrefs.add(AuthPolicy.DIGEST);
-					authPrefs.add(AuthPolicy.BASIC);
-					
-					client.getParams().setParameter(AuthPolicy.AUTH_SCHEME_PRIORITY, authPrefs);
-					client.getState().setProxyCredentials(new AuthScope(proxyhost, proxyport), new UsernamePasswordCredentials(proxyUsername, proxyPass));
-
-				}
+			int returnCode = client.executeMethod(method);
+			if(returnCode==200){
+				return method.getResponseBodyAsStream();
 			}
-
-		} catch (Exception e) {
-			e.printStackTrace();
+			if(returnCode >= 400){
+				throw new HttpException(returnCode,method.getResponseBodyAsString());
+			}
+		} catch (IOException e) {
+			throw new HttpException(0,e.getMessage());
 		}
-
-		method.getParams().setContentCharset("utf-8");
+		return null;
+	}
+	public String query(HttpMethodBase method) {
+		HttpClient client = prepareClient(method);
 
 		String result = null;
 		try {
@@ -194,5 +174,49 @@ public class HttpQueryTool {
 
 		return result;
 	}
-	
+
+	private HttpClient prepareClient(HttpMethodBase method) {
+		HttpClient client = new HttpClient();
+
+		client.getParams().setParameter("http.useragent", "Test Client");
+
+
+		if(basicAuthUn != null && basicAuthPw != null) {
+			method.addRequestHeader("Authorization", "Basic " + Base64.encodeBase64String((basicAuthUn +":" +basicAuthPw) .getBytes()));
+		}
+
+		try {
+
+			//get host of url to check if its an nonproxy host
+			URL urlObj = new URL(method.getURI().getURI());
+			String urlHost = urlObj.getHost();
+
+			logger.debug("nonProxyHosts:"+nonProxyHosts+" current Host:"+urlHost);
+
+
+			if (host != null && proxyhost != null && proxyport != null && !(nonProxyHosts != null && nonProxyHosts.contains(urlHost)) ) {
+				logger.debug("using  proxy proxyhost:" + proxyhost + " proxyport:" + proxyport + " host" + host);
+				client.getHostConfiguration().setHost(host);
+				client.getHostConfiguration().setProxy(proxyhost, proxyport);
+
+				if (proxyUsername != null && proxyPass != null) {
+
+					List authPrefs = new ArrayList(2);
+					authPrefs.add(AuthPolicy.DIGEST);
+					authPrefs.add(AuthPolicy.BASIC);
+
+					client.getParams().setParameter(AuthPolicy.AUTH_SCHEME_PRIORITY, authPrefs);
+					client.getState().setProxyCredentials(new AuthScope(proxyhost, proxyport), new UsernamePasswordCredentials(proxyUsername, proxyPass));
+
+				}
+			}
+
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+
+		method.getParams().setContentCharset("utf-8");
+		return client;
+	}
+
 }

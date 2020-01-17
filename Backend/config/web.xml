@@ -270,6 +270,14 @@
         <url-pattern>/eduservlet/oai/*</url-pattern>
     </filter-mapping>
     <filter-mapping>
+        <filter-name>Edu-Sharing Guest Filter</filter-name>
+        <url-pattern>/eduservlet/oembed</url-pattern>
+    </filter-mapping>
+    <filter-mapping>
+        <filter-name>Edu-Sharing Guest Filter</filter-name>
+        <url-pattern>/eduservlet/render</url-pattern>
+    </filter-mapping>
+   <filter-mapping>
        <filter-name>Edu-Sharing Authentication Filter</filter-name>
        <url-pattern>/search</url-pattern>
    </filter-mapping>
@@ -498,6 +506,16 @@
 		<servlet-name>RenderingProxy</servlet-name>
 		<servlet-class>org.edu_sharing.repository.server.rendering.RenderingProxy</servlet-class>
 	</servlet>
+    <!-- servlet for just outputing rendering data, e.g. for playout or embed links -->
+    <servlet>
+        <servlet-name>RenderingServlet</servlet-name>
+        <servlet-class>org.edu_sharing.repository.server.rendering.RenderingServlet</servlet-class>
+    </servlet>
+    <!-- servlet for oEmbed standard -->
+    <servlet>
+        <servlet-name>oEmbedServlet</servlet-name>
+        <servlet-class>org.edu_sharing.repository.server.oembed.oEmbedServlet</servlet-class>
+    </servlet>
      <servlet>
     	<servlet-name>ExcelImport</servlet-name>
     	<servlet-class>org.edu_sharing.repository.server.ExcelImportServlet</servlet-class>   
@@ -601,7 +619,15 @@
         <servlet-name>CCConfirmActivation</servlet-name>
         <url-pattern>/appactivation</url-pattern>
     </servlet-mapping>
-    <servlet-mapping> 
+    <servlet-mapping>
+        <servlet-name>RenderingServlet</servlet-name>
+        <url-pattern>/eduservlet/render</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>oEmbedServlet</servlet-name>
+        <url-pattern>/eduservlet/oembed</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
         <servlet-name>SchoolContextService</servlet-name>
         <url-pattern>/eduservlet/schoolcontextservice</url-pattern>
     </servlet-mapping>
@@ -692,9 +718,17 @@
     	<servlet-name>DispatchToIndexServlet</servlet-name>
     	<url-pattern>/search</url-pattern>
     </servlet-mapping>
-    
-    
-    
+
+    <servlet>
+        <servlet-name>RenderingErrorServlet</servlet-name>
+        <servlet-class>org.edu_sharing.repository.server.rendering.RenderingErrorServlet</servlet-class>
+        <!-- <jsp-file>/index.jsp</jsp-file> -->
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>RenderingErrorServlet</servlet-name>
+        <url-pattern>/rendering-error</url-pattern>
+    </servlet-mapping>
+
     <!-- Axis mapping stuff -->
     <servlet-mapping>
 		<servlet-name>AxisServlet</servlet-name>
@@ -773,5 +807,10 @@
     <error-page>
         <error-code>500</error-code>
         <location>/error.html</location>
+    </error-page>
+
+    <error-page>
+        <exception-type>org.edu_sharing.repository.server.rendering.RenderingException</exception-type>
+        <location>/rendering-error</location>
     </error-page>
 </web-app>

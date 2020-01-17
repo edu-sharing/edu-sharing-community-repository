@@ -1,17 +1,24 @@
 package org.edu_sharing.service.tracking;
 
 import org.alfresco.service.cmr.repository.NodeRef;
+import org.edu_sharing.service.tracking.model.StatisticEntry;
 import org.edu_sharing.service.tracking.model.StatisticEntryNode;
 
+import java.sql.SQLException;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 
 public interface TrackingService {
+
+
+
     enum GroupingType {
         None,
         Daily,
         Monthly,
-        Yearly
+        Yearly,
+        Node,
     }
     enum EventType {
         DOWNLOAD_MATERIAL,
@@ -25,5 +32,26 @@ public interface TrackingService {
     }
     boolean trackActivityOnUser(String authorityName,EventType type);
     boolean trackActivityOnNode(NodeRef nodeRef,NodeTrackingDetails details,EventType type);
-    List<StatisticEntryNode> getNodeStatisics(GroupingType grouping,Date dateFrom, Date dateTo);
+    List<StatisticEntryNode> getNodeStatisics(GroupingType type, Date dateFrom, Date dateTo, String mediacenter, List<String> additionalFields, List<String> groupFields, Map<String, String> filters) throws Throwable;
+    List<StatisticEntry> getUserStatistics(GroupingType type, java.util.Date dateFrom, java.util.Date dateTo, String mediacenter, List<String> additionalFields, List<String> groupFields, Map<String, String> filters) throws Throwable;
+    StatisticEntry getSingleNodeData(NodeRef nodeRef,java.util.Date dateFrom,java.util.Date dateTo) throws Throwable;
+
+    /**
+     * delete all tracked data for a given user
+     * This method can do nothing, depending on the configured @UserTrackingMode
+     * It will only do something if the mode is NOT set to "none"
+     */
+    void deleteUserData(String username) throws Throwable;
+    /**
+     * reassign all tracked data for a given user to a new user (usually a dummy)
+     * This method can do nothing, depending on the configured @UserTrackingMode
+     * It will only do something if the mode is NOT set to "none"
+     */
+    void reassignUserData(String oldUsername, String newUsername);
+
+    enum UserTrackingMode{
+        none,
+        obfuscate,
+        full
+    }
 }

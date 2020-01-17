@@ -26,13 +26,13 @@ public class Usage2SoapBindingImpl implements org.edu_sharing.webservices.usage2
 	
 	private void validate(String eduRef) throws Usage2Exception{
 		if(eduRef == null){
-			Usage2Exception u2 = new Usage2Exception();
+			Usage2Exception u2 = new Usage2Exception(new Exception("invalid eduRef null"));
 			u2.setFaultReason("invalid eduRef null");
 			throw u2;
 		}
 		
 		if(!eduRef.matches("ccrep://[a-zA-Z0-9._-]*/[a-zA-Z0-9-]*")){
-			Usage2Exception u2 = new Usage2Exception();
+			Usage2Exception u2 = new Usage2Exception(new Exception("invalid eduRef"));
 			u2.setFaultReason("invalid eduRef");
 			throw u2;
 		}
@@ -78,10 +78,8 @@ public class Usage2SoapBindingImpl implements org.edu_sharing.webservices.usage2
     	if(ApplicationInfoList.getHomeRepository().getAppId().equals(repoId)){
     		try{
     			return transform(new org.edu_sharing.service.usage.Usage2Service().getUsage(lmsId, courseId, parentNodeId, resourceId));
-    		}catch(UsageException e){
-    			Usage2Exception e2 = new Usage2Exception();
-    			e2.setFaultString(e.getMessage());
-    			throw e2;
+    		}catch(Usage2Exception e){
+    			throw e;
     		}
     	//remote
     	}else{
@@ -96,13 +94,13 @@ public class Usage2SoapBindingImpl implements org.edu_sharing.webservices.usage2
     				
     				return u2.getUsage(eduRef, lmsId, courseId, user, resourceId);
     			}catch(Exception e){
-    				Usage2Exception e2 = new Usage2Exception();
+    				Usage2Exception e2 = new Usage2Exception(e);
         			e2.setFaultString(e.getMessage());
         			throw e2;
     			}
     	//unknown
     		}else{
-    			Usage2Exception e2 = new Usage2Exception();
+    			Usage2Exception e2 = new Usage2Exception(new Exception("unknown application " + repoId));
     			e2.setFaultString("unknown application " + repoId);
     			throw e2;
     		}
@@ -129,7 +127,7 @@ public class Usage2SoapBindingImpl implements org.edu_sharing.webservices.usage2
     			
     			return result.toArray(new Usage2Result[result.size()]);
     		}catch(UsageException e){
-    			Usage2Exception e2 = new Usage2Exception();
+    			Usage2Exception e2 = new Usage2Exception(e);
     			e2.setFaultString(e.getMessage());
     			throw e2;
     		}
@@ -144,13 +142,13 @@ public class Usage2SoapBindingImpl implements org.edu_sharing.webservices.usage2
     				sign((Stub)u2);
     				return u2.getUsagesByEduRef(eduRef,user);
     			}catch(Exception e){
-    				Usage2Exception e2 = new Usage2Exception();
+    				Usage2Exception e2 = new Usage2Exception(e);
         			e2.setFaultString(e.getMessage());
         			throw e2;
     			}
     	//unknown
     		}else{
-    			Usage2Exception e2 = new Usage2Exception();
+    			Usage2Exception e2 = new Usage2Exception(new Exception("unknown application " + repoId));
     			e2.setFaultString("unknown application " + repoId);
     			throw e2;
     		}
@@ -168,7 +166,7 @@ public class Usage2SoapBindingImpl implements org.edu_sharing.webservices.usage2
     			return new org.edu_sharing.service.usage.Usage2Service().deleteUsage(repoId, user, lmsId, courseId, parentNodeId, resourceId);
     			
     		}catch(UsageException e){
-    			Usage2Exception e2 = new Usage2Exception();
+    			Usage2Exception e2 = new Usage2Exception(e);
     			e2.setFaultString(e.getMessage());
     			throw e2;
     		}
@@ -183,13 +181,13 @@ public class Usage2SoapBindingImpl implements org.edu_sharing.webservices.usage2
     				sign((Stub)u2);
     				return u2.deleteUsage(eduRef, user, lmsId, courseId, resourceId);
     			}catch(Exception e){
-    				Usage2Exception e2 = new Usage2Exception();
+    				Usage2Exception e2 = new Usage2Exception(e);
         			e2.setFaultString(e.getMessage());
         			throw e2;
     			}
     	//unknown
     		}else{
-    			Usage2Exception e2 = new Usage2Exception();
+    			Usage2Exception e2 = new Usage2Exception(new Exception("unknown application " + repoId));
     			e2.setFaultString("unknown application " + repoId);
     			throw e2;
     		}
@@ -207,7 +205,7 @@ public class Usage2SoapBindingImpl implements org.edu_sharing.webservices.usage2
     			org.edu_sharing.service.usage.Usage localUsage = new org.edu_sharing.service.usage.Usage2Service().setUsage(repoId, user, lmsId, courseId, parentNodeId, userMail, fromUsed, toUsed, distinctPersons, version, resourceId, xmlParams);
     			return transform(localUsage);
     		}catch(UsageException e){
-    			Usage2Exception e2 = new Usage2Exception();
+    			Usage2Exception e2 = new Usage2Exception(e);
     			e2.setFaultString(e.getMessage());
     			throw e2;
     		}
@@ -222,13 +220,13 @@ public class Usage2SoapBindingImpl implements org.edu_sharing.webservices.usage2
     				sign((Stub)u2);
     				return u2.setUsage(eduRef, user, lmsId, courseId, userMail, fromUsed, toUsed, distinctPersons, version, resourceId, xmlParams);
     			}catch(Exception e){
-    				Usage2Exception e2 = new Usage2Exception();
+    				Usage2Exception e2 = new Usage2Exception(e);
         			e2.setFaultString(e.getMessage());
         			throw e2;
     			}
     	//unknown
     		}else{
-    			Usage2Exception e2 = new Usage2Exception();
+    			Usage2Exception e2 = new Usage2Exception(new Exception("unknown application " + repoId));
     			e2.setFaultString("unknown application " + repoId);
     			throw e2;
     		}

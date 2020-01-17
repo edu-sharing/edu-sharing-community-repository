@@ -12,7 +12,6 @@ import io.swagger.annotations.ApiModelProperty;
 public class Group extends Authority {
 
 	private String groupName = null;
-	private String groupType = null;
 	private GroupProfile profile = null;
 	private NodeRef ref = null;
 
@@ -34,25 +33,14 @@ public class Group extends Authority {
 		groupName=group.getName();
 		setAuthorityType(Authority.Type.GROUP);
 		setGroupName(group.getName());
-    	setGroupType(group.getGroupType());
-    	
+
     	GroupProfile profile = new GroupProfile();
     	profile.setDisplayName(group.getDisplayName());
+    	profile.setGroupType(group.getGroupType());
     	setProfile(profile);
     	
 	}
 
-	/**
-	 **/
-	@ApiModelProperty(value = "")
-	@JsonProperty("groupType")
-	public String getGroupType() {
-		return groupType;
-	}
-
-	public void setGroupType(String groupType) {
-		this.groupType = groupType;
-	}
 	@ApiModelProperty(value = "")
 	@JsonProperty("groupName")
 	public String getGroupName() {

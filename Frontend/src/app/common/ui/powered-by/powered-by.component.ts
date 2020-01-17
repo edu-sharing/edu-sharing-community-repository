@@ -3,8 +3,6 @@
  */
 
 import {Component, EventEmitter, Input, Output} from '@angular/core';
-import {ConfigurationService} from "../../services/configuration.service";
-import {ConfigurationHelper} from "../../rest/configuration-helper";
 
 @Component({
   selector: 'powered-by',
@@ -14,12 +12,12 @@ import {ConfigurationHelper} from "../../rest/configuration-helper";
 export class PoweredByComponent {
   /**
    * The mode do display
-   * Either 'white' (like on login') or 'colored'
+   * Either 'white' or 'color'
    * @type {string}
    */
   @Input() mode='white';
 
-  constructor(private config:ConfigurationService) {
+  constructor() {
     /*
     this.config.getAll().subscribe(()=>{
       this.config = ConfigurationHelper.getBanner(this.config);

@@ -1,19 +1,19 @@
 import {Component, ViewChild, ElementRef} from '@angular/core';
 import {TranslateService} from "@ngx-translate/core";
-import {Translation} from "../../common/translation";
+import {Translation} from "../../core-ui-module/translation";
 import {
-  NodeRef, IamUser, NodeWrapper, Node, Version, NodeVersions, LoginResult,
-  IamGroups, Group, OrganizationOrganizations
-} from "../../common/rest/data-object";
+    NodeRef, IamUser, NodeWrapper, Node, Version, NodeVersions, LoginResult,
+    IamGroups, Group, OrganizationOrganizations, Organization
+} from "../../core-module/core.module";
 import {Router, Params, ActivatedRoute, Routes} from "@angular/router";
-import {Toast} from "../../common/ui/toast";
-import {RestConnectorService} from "../../common/rest/services/rest-connector.service";
-import {RestOrganizationService} from "../../common/rest/services/rest-organization.service";
-import {ConfigurationService} from "../../common/services/configuration.service";
+import {Toast} from "../../core-ui-module/toast";
+import {RestConnectorService} from "../../core-module/core.module";
+import {RestOrganizationService} from "../../core-module/core.module";
+import {ConfigurationService} from "../../core-module/core.module";
 import {Title} from "@angular/platform-browser";
-import {UIHelper} from "../../common/ui/ui-helper";
-import {SessionStorageService} from "../../common/services/session-storage.service";
-import {RestHelper} from "../../common/rest/rest-helper";
+import {UIHelper} from "../../core-ui-module/ui-helper";
+import {SessionStorageService} from "../../core-module/core.module";
+import {RestHelper} from "../../core-module/core.module";
 import {MainNavComponent} from '../../common/ui/main-nav/main-nav.component';
 import {GlobalContainerComponent} from "../../common/ui/global-container/global-container.component";
 
@@ -27,11 +27,12 @@ import {GlobalContainerComponent} from "../../common/ui/global-container/global-
 })
 export class PermissionsMainComponent {
   @ViewChild('mainNav') mainNavRef: MainNavComponent;
-  public tab : string;
+  public tab : number;
   public searchQuery: string;
-  private selectedOrg: Group;
+  private selected: Organization[];
   public isAdmin = false;
   public disabled = false;
+  TABS = ["ORG","GROUP","USER","DELETE"];
   constructor(private toast: Toast,
               private route: ActivatedRoute,
               private router: Router,
@@ -48,7 +49,7 @@ export class PermissionsMainComponent {
                 this.organization.getOrganizations().subscribe((data: OrganizationOrganizations) => {
                     this.isAdmin = data.canCreate;
                 });
-                this.tab='ORG';
+                this.tab=0;
             }
             else{
                 this.goToLogin();
@@ -69,15 +70,16 @@ export class PermissionsMainComponent {
     this.searchQuery = event;
   }
 
-  setTab(tab: string) {
-    if (tab != 'ORG' && !this.selectedOrg && !this.isAdmin) {
+  setTab(tab: number) {
+    if (tab != 0 && !this.selected && !this.isAdmin) {
       this.toast.error(null, "PERMISSIONS.SELECT_ORGANIZATION");
+      this.tab = 0;
       return;
     }
-    if (tab == this.tab)
+    if (tab === this.tab)
       return;
-    if (tab == 'ORG') {
-      this.selectedOrg = null;
+    if (tab === 0) {
+      this.selected = null;
     }
     this.searchQuery = null;
     this.tab = tab;

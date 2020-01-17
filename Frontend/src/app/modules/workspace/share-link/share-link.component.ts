@@ -1,16 +1,16 @@
 import {Component, Input, EventEmitter, Output, ViewChild, ElementRef} from '@angular/core';
-import {RestNodeService} from "../../../common/rest/services/rest-node.service";
-import {RestConstants} from "../../../common/rest/rest-constants";
-import {NodeWrapper, Node, NodeShare} from "../../../common/rest/data-object";
-import {VCard} from "../../../common/VCard";
-import {Toast} from "../../../common/ui/toast";
-import {ModalDialogComponent, DialogButton} from "../../../common/ui/modal-dialog/modal-dialog.component";
-import {Translation} from "../../../common/translation";
+import {DialogButton, RestNodeService} from "../../../core-module/core.module";
+import {RestConstants} from "../../../core-module/core.module";
+import {NodeWrapper, Node, NodeShare} from "../../../core-module/core.module";
+import {VCard} from "../../../core-module/ui/VCard";
+import {Toast} from "../../../core-ui-module/toast";
+import {Translation} from "../../../core-ui-module/translation";
 import {TranslateService} from "@ngx-translate/core";
-import {Helper} from "../../../common/helper";
-import {DateHelper} from "../../../common/ui/DateHelper";
+import {Helper} from "../../../core-module/rest/helper";
+import {DateHelper} from "../../../core-ui-module/DateHelper";
 import {trigger} from "@angular/animations";
-import {UIAnimation} from "../../../common/ui/ui-animation";
+import {UIAnimation} from "../../../core-module/ui/ui-animation";
+import {UIHelper} from "../../../core-ui-module/ui-helper";
 
 @Component({
   selector: 'workspace-share-link',
@@ -31,6 +31,7 @@ export class WorkspaceShareLinkComponent  {
   public _expiryDate : Date;
   private currentDate: number;
   private edit: boolean;
+  public buttons: DialogButton[];
   public today = new Date();
   public set expiryDate(date:Date){
     this._expiryDate=date;
@@ -72,23 +73,11 @@ export class WorkspaceShareLinkComponent  {
       }
     },(error:any)=>this.toast.error(error));
   }
-  //http://stackoverflow.com/questions/25099409/copy-to-clipboard-as-plain-text
-  private executeCopy(text:string){
-  let copyDiv:any = document.createElement('div');
-  copyDiv.contentEditable = true;
-  document.body.appendChild(copyDiv);
-  copyDiv.innerHTML = text;
-  copyDiv.unselectable = "off";
-  copyDiv.focus();
-  document.execCommand('SelectAll');
-  document.execCommand("Copy", false, null);
-  document.body.removeChild(copyDiv);
-}
   public copyClipboard(){
     if(!this.enabled)
       return;
     try {
-      this.executeCopy(this.currentShare.url);
+      UIHelper.copyToClipboard(this.currentShare.url);
       this.toast.toast('WORKSPACE.SHARE_LINK.COPIED_CLIPBOARD');
     }
     catch(e){
@@ -139,12 +128,7 @@ export class WorkspaceShareLinkComponent  {
     private translate:TranslateService,
     private toast:Toast,
   ){
-    /*
-    this.dateOptions={};
-    this.dateOptions.minDate=new Date(Date.now() - 1000 * 3600 * 24); // Minimal selectable date
-    this.dateOptions.minYear=new Date().getFullYear();
-    this.dateOptions.maxYear=new Date(new Date().getTime() * 1000 * 3600 * 365).getFullYear();
-    */
+    this.buttons=[new DialogButton('CLOSE',DialogButton.TYPE_PRIMARY,()=>this.cancel())];
   }
 
     private createShare() {

@@ -36,6 +36,8 @@ import org.edu_sharing.repository.server.tools.ApplicationInfoList;
 import org.edu_sharing.repository.server.tools.LogTime;
 import org.edu_sharing.service.Constants;
 import org.edu_sharing.service.InsufficientPermissionException;
+import org.edu_sharing.service.authority.AuthorityServiceFactory;
+import org.edu_sharing.service.nodeservice.NodeServiceFactory;
 import org.edu_sharing.service.permission.PermissionServiceFactory;
 import org.edu_sharing.service.search.model.SearchResult;
 import org.edu_sharing.service.search.model.SearchToken;
@@ -48,9 +50,11 @@ import org.springframework.extensions.surf.util.URLEncoder;
 
 import java.util.*;
 import java.util.Map.Entry;
+import java.util.stream.Collectors;
 
 public class SearchServiceImpl implements SearchService {
 
+	private final org.edu_sharing.service.authority.AuthorityService authorityService;
 	MCAlfrescoAPIClient apiClient = new MCAlfrescoAPIClient();
 
 	ApplicationContext alfApplicationContext = AlfAppContextGate.getApplicationContext();
@@ -72,6 +76,7 @@ public class SearchServiceImpl implements SearchService {
 		this.applicationId = applicationId;
 		this.baseClient = new MCAlfrescoAPIClient();
 		this.toolPermissionService = ToolPermissionServiceFactory.getInstance();
+		this.authorityService = AuthorityServiceFactory.getAuthorityService(applicationId);
 	}
 
 	@Override
@@ -157,28 +162,41 @@ public class SearchServiceImpl implements SearchService {
 		*/
 	}
 
-	private List<NodeRef> queryAll(SearchParameters parameters,int limit) {
-		if(limit<=0)
-			limit=Integer.MAX_VALUE;
-
-		List<NodeRef> result=new ArrayList<>();
-		int MAX_PER_PAGE=1000;
-		for(int offset=0;;offset=result.size()) {
-			parameters.setSkipCount(offset);
-			parameters.setMaxItems(Math.min(MAX_PER_PAGE,limit-result.size()));
-			ResultSet data = searchService.query(parameters);
-			result.addAll(data.getNodeRefs());
-			if(result.size()>=limit || data.getNodeRefs().size()<MAX_PER_PAGE)
-				break;
-		}
-		return result;
-	}
-
 	@Override
 	public SearchResult<EduGroup> getAllOrganizations(boolean scoped) throws Exception {
-		return searchOrganizations("", 0, Integer.MAX_VALUE, null,scoped,false);
+		return searchOrganizations("", 0, Integer.MAX_VALUE, null,scoped,true);
 	}
+	@Override
+	public List<String> getAllMediacenters() throws Exception {
 
+
+		Set<String> memberships = serviceRegistry.getAuthorityService().getAuthorities();
+		boolean isSystemUser = AuthenticationUtil.isRunAsUserTheSystemUser();
+		boolean isAdmin = ((memberships != null && memberships.contains(CCConstants.AUTHORITY_GROUP_ALFRESCO_ADMINISTRATORS))
+				|| "admin".equals(AuthenticationUtil.getFullAuthentication().getName())
+				|| isSystemUser) ? true : false;
+
+		if(isAdmin) {
+			SearchParameters parameters = new SearchParameters();
+			parameters.addStore(Constants.storeRef);
+			parameters.setLanguage(org.alfresco.service.cmr.search.SearchService.LANGUAGE_LUCENE);
+			parameters.addAllAttribute(CCConstants.MEDIA_CENTER_GROUP_TYPE);
+			parameters.addSort(CCConstants.CM_PROP_AUTHORITY_AUTHORITYDISPLAYNAME,true);
+			parameters.setQuery("@ccm\\:groupType:\"" + CCConstants.MEDIA_CENTER_GROUP_TYPE + "\"");
+			return SearchServiceHelper.queryAll(parameters,0).stream().map((ref) ->
+					NodeServiceFactory.getNodeService(applicationId).getProperty(ref.getStoreRef().getProtocol(), ref.getStoreRef().getIdentifier(), ref.getId(), CCConstants.CM_PROP_AUTHORITY_AUTHORITYNAME)
+			).collect(Collectors.toList());
+		}else {
+			List<String> result = new ArrayList<String>();
+			for(String memberShip : memberships) {
+				NodeRef nodeRef = serviceRegistry.getAuthorityService().getAuthorityNodeRef(memberShip);
+				if(nodeRef != null && serviceRegistry.getNodeService().hasAspect(nodeRef, QName.createQName(CCConstants.CCM_ASPECT_MEDIACENTER))) {
+					result.add(memberShip);
+				}
+			}
+			return result;
+		}
+	}
 	@Override
 	public SearchResultNodeRef getRelevantNodes(int skipCount, int maxItems) throws Throwable {
 		String query=SearchRelevancyTool.getLuceneQuery();

@@ -1,19 +1,23 @@
-<div class="dialog darken" [@fade]="this"></div>
-<div class="card center-card card-action card-high" [@cardAnimation]="this">
+<card
+        title="{{'WORKSPACE.SHARE.HISTORY.TITLE' | translate }}"
+        height="xlarge"
+        width="small"
+        [node]="_node"
+        [isCancelable]="true"
+        (onCancel)="close()"
+        [buttons]="buttons"
+>
   <div class="card-content">
-    <div tabindex="0" class="card-cancel" (click)="close()" (keyup.enter)="close()"><i icon iconId="close" aria="true"></i></div>
-    <div class="card-title">{{'WORKSPACE.SHARE.HISTORY.TITLE' | translate }}</div>
-    <div class="card-scroll historyCard">
-      <spinner *ngIf="loading"></spinner>
-      <div *ngIf="(!history || !history.length) && !loading" class="empty">
-        {{'WORKSPACE.SHARE.HISTORY.EMPTY' | translate }}
+    <spinner *ngIf="loading"></spinner>
+    <div *ngIf="(!history || !history.length) && !loading" class="empty">
+      {{'WORKSPACE.SHARE.HISTORY.EMPTY' | translate }}
+    </div>
+    <div *ngFor="let entry of history" class="groupHistory">
+      <div class="heading">
+        <div class="name"><i class="material-icons">person</i> {{entry.user}}</div>
+        <div class="date">{{entry.date}}</div>
       </div>
-      <div *ngFor="let entry of history" class="groupHistory">
-        <div class="heading">
-          <div class="name"><i class="material-icons">person</i> {{entry.user}}</div>
-          <div class="date">{{entry.date}}</div>
-        </div>
-        <div class="content">
+      <div class="content">
         <div class="group added" *ngIf="entry.added.length">
           <div class="type"><i class="material-icons">add_circle_outline</i> {{'WORKSPACE.SHARE.HISTORY.ADDED' | translate}}</div>
           <div *ngFor="let add of entry.added" class="entry">
@@ -32,12 +36,7 @@
             <span class="name">{{ remove.name }}</span> <span class="permissions">({{remove.permissions}})</span>
           </div>
         </div>
-        </div>
       </div>
-
     </div>
   </div>
-  <div class="card-action">
-      <a class="waves-effect waves-light btn" tabindex="0" (keyup.enter)="close()" (click)="close()">{{'CLOSE' | translate }}</a>
-    </div>
-</div>
+</card>

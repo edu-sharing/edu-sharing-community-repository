@@ -11,19 +11,24 @@ import org.alfresco.service.namespace.QName;
 import org.apache.log4j.Logger;
 import org.apache.lucene.queryParser.QueryParser;
 import org.edu_sharing.repository.client.tools.CCConstants;
+import org.edu_sharing.repository.client.tools.I18nAngular;
+import org.edu_sharing.repository.server.AuthenticationToolAPI;
 import org.edu_sharing.repository.server.MCAlfrescoAPIClient;
 import org.edu_sharing.repository.server.MCAlfrescoBaseClient;
 import org.edu_sharing.repository.server.SearchResultNodeRef;
 import org.edu_sharing.repository.server.authentication.Context;
 import org.edu_sharing.repository.server.tools.ApplicationInfoList;
 import org.edu_sharing.repository.server.tools.ImageTool;
+import org.edu_sharing.repository.server.tools.Mail;
 import org.edu_sharing.repository.server.tools.URLTool;
 import org.edu_sharing.repository.server.tools.cache.PersonCache;
+import org.edu_sharing.repository.server.tools.mailtemplates.MailTemplate;
 import org.edu_sharing.restservices.iam.v1.model.GroupEntries;
 import org.edu_sharing.restservices.shared.*;
 import org.edu_sharing.service.NotAnAdminException;
 import org.edu_sharing.service.authority.AuthorityService;
 import org.edu_sharing.service.authority.AuthorityServiceFactory;
+import org.edu_sharing.service.lifecycle.PersonLifecycleService;
 import org.edu_sharing.service.nodeservice.NodeService;
 import org.edu_sharing.service.nodeservice.NodeServiceFactory;
 import org.edu_sharing.service.nodeservice.NodeServiceHelper;
@@ -272,7 +277,7 @@ public class PersonDao {
 	private String getNodeId() {
 		return (String) this.userInfo.get(CCConstants.SYS_PROP_NODE_UID);
 	}
-	public User asPerson() {
+	public User asPerson() throws DAOException {
 		
     	User data = new User();
     	
@@ -284,6 +289,8 @@ public class PersonDao {
 
     	data.setProfile(getProfile());
     	data.setStats(getStats());
+    	data.setStatus(getStatus());
+    	data.setProperties(getProperties());
 
     	if(isCurrentUserOrAdmin()) {
 	    	NodeRef homeDir = new NodeRef();
@@ -304,6 +311,10 @@ public class PersonDao {
 	    	data.setSharedFolders(sharedFolderRefs);
     	}
     	return data;
+	}
+
+	private Map<String,String[]> getProperties() throws DAOException {
+		return NodeDao.getNode(repoDao,getNodeId()).getAllProperties();
 	}
 
 	private UserQuota getQuota() {
@@ -331,6 +342,13 @@ public class PersonDao {
     	profile.setSkills(getSkills());
     	profile.setType(getType());
     	return profile;
+	}
+	private UserStatus getStatus() {
+		UserStatus status = new UserStatus();
+		if(this.userInfo.get(CCConstants.CM_PROP_PERSON_ESPERSONSTATUS)!=null)
+			status.setStatus(PersonLifecycleService.PersonStatus.valueOf((String) this.userInfo.get(CCConstants.CM_PROP_PERSON_ESPERSONSTATUS)));
+		status.setDate((Date) this.userInfo.get(CCConstants.CM_PROP_PERSON_ESPERSONSTATUSDATE));
+		return status;
 	}
 	private UserStats getStats() {
 		UserStats stats = new UserStats();
@@ -373,7 +391,7 @@ public class PersonDao {
 		org.alfresco.service.cmr.repository.NodeRef avatar=getAvatarNode();
 		if(avatar==null)
 			return null;
-		return URLTool.getPreviewServletUrl(avatar);
+		return NodeServiceHelper.getPreview(avatar).getUrl();
 	}
 	public void removeAvatar() throws DAOException {
 		try {
@@ -410,12 +428,23 @@ public class PersonDao {
     	data.setAuthorityType(Authority.Type.USER);    	
     	data.setUserName(getUserName());    	
     	data.setProfile(getProfile());
-    	if(isCurrentUserOrAdmin()) {
+		data.setStatus(getStatus());
+		if(isCurrentUserOrAdmin()) {
 	    	NodeRef homeDir = new NodeRef();
 	    	homeDir.setRepo(repoDao.getId());
 	    	homeDir.setId(getHomeFolder());
     	}
     	return data;
+	}
+	public UserRender asPersonRender() {
+		UserRender data = new UserRender();
+		data.setAuthorityName(getAuthorityName());
+		data.setAuthorityType(Authority.Type.USER);
+		data.setUserName(getUserName());
+		data.setProfile(getProfile());
+		data.setPrimaryAffiliation((String) userInfo.get(CCConstants.CM_PROP_PERSON_EDU_SCHOOL_PRIMARY_AFFILIATION));
+		data.setRemoteRoles((List<String>) userInfo.get(CCConstants.PROP_USER_ESREMOTEROLES));
+		return data;
 	}
 	public String getId() {
 		return getNodeId();
@@ -442,7 +471,6 @@ public class PersonDao {
 			public String[] doWork() throws Exception {
 				 PersonCache.get(getAuthorityName(),PersonCache.TYPE);
 				if(PersonCache.contains(getAuthorityName(),PersonCache.TYPE)) {
-					logger.info("using person cache for "+getAuthorityName());
 					return (String[]) PersonCache.get(getAuthorityName(),PersonCache.TYPE);
 				}
 				Set<String> types=new HashSet<>();
@@ -595,6 +623,31 @@ public class PersonDao {
 			newUserInfo.put(CCConstants.PROP_USERNAME, getUserName());
 			newUserInfo.put(CCConstants.CCM_PROP_PERSON_NODE_LISTS, json.toString());
 			((MCAlfrescoAPIClient)this.baseClient).updateUser(newUserInfo);
+		}
+	}
+
+	public void setStatus(PersonLifecycleService.PersonStatus status,boolean notifyMail) {
+		String oldStatus= (String) userInfo.get(CCConstants.CM_PROP_PERSON_ESPERSONSTATUS);
+		NodeServiceFactory.getLocalService().setProperty(StoreRef.PROTOCOL_WORKSPACE,StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(),getNodeId(),CCConstants.CM_PROP_PERSON_ESPERSONSTATUS,status.name());
+		NodeServiceFactory.getLocalService().setProperty(StoreRef.PROTOCOL_WORKSPACE,StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(),getNodeId(),CCConstants.CM_PROP_PERSON_ESPERSONSTATUSDATE,new Date());
+		if(notifyMail){
+			Mail mail=new Mail();
+			Map<String, String> replace=new HashMap<>();
+			replace.put("firstName", getFirstName());
+			replace.put("lastName", getLastName());
+			replace.put("oldStatus", I18nAngular.getTranslationAngular("permissions","PERMISSIONS.USER_STATUS."+oldStatus));
+			replace.put("newStatus", I18nAngular.getTranslationAngular("permissions","PERMISSIONS.USER_STATUS."+status.name()));
+			try {
+				String template="userStatusChanged";
+				mail.sendMailHtml(Context.getCurrentInstance().getRequest().getSession().getServletContext(),
+						(String) userInfo.get(CCConstants.CM_PROP_PERSON_EMAIL),
+						MailTemplate.getSubject(template,new AuthenticationToolAPI().getCurrentLocale()),
+						MailTemplate.getContent(template,new AuthenticationToolAPI().getCurrentLocale(),true),
+
+						replace);
+			} catch (Exception e) {
+				logger.warn("Can not send status notify mail to user: "+e.getMessage(),e);
+			}
 		}
 	}
 }

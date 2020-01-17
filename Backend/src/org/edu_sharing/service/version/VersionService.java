@@ -39,7 +39,7 @@ public class VersionService {
 	}
 	private static String getRenderserviceVersion() throws Exception{
 		ApplicationInfo homeRepo=ApplicationInfoList.getHomeRepository();
-		String url=homeRepo.getContentUrlBackend()!=null ? homeRepo.getContentUrlBackend() : homeRepo.getContentUrl();
+		String url=homeRepo.getContentUrl();
 		url=url.replace("index.php", "version.php");
 		InputStream is = new URL(url).openStream();
 		String data=IOUtils.readAllLines(is);

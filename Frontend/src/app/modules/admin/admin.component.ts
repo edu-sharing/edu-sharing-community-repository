@@ -1,13 +1,13 @@
-import {Translation} from '../../common/translation';
-import {UIHelper} from '../../common/ui/ui-helper';
+import {Translation} from '../../core-ui-module/translation';
+import {UIHelper} from '../../core-ui-module/ui-helper';
 import {ActivatedRoute, Router} from '@angular/router';
-import {Toast} from '../../common/ui/toast';
-import {ConfigurationService} from '../../common/services/configuration.service';
+import {Toast} from '../../core-ui-module/toast';
+import {ConfigurationService, DialogButton, ListItem, RestMediacenterService} from '../../core-module/core.module';
 import {Title} from '@angular/platform-browser';
 import {TranslateService} from '@ngx-translate/core';
-import {SessionStorageService} from '../../common/services/session-storage.service';
-import {RestConnectorService} from '../../common/rest/services/rest-connector.service';
-import {Component, ViewChild, ElementRef} from '@angular/core';
+import {SessionStorageService} from '../../core-module/core.module';
+import {RestConnectorService} from '../../core-module/core.module';
+import {Component, ViewChild, ElementRef, ViewContainerRef, ComponentFactoryResolver} from '@angular/core';
 import {
     LoginResult,
     ServerUpdate,
@@ -17,23 +17,23 @@ import {
     Authority,
     NodeList,
     NodeWrapper, RestoreResult
-} from '../../common/rest/data-object';
-import {RestAdminService} from '../../common/rest/services/rest-admin.service';
-import {DialogButton} from '../../common/ui/modal-dialog/modal-dialog.component';
-import {Helper} from '../../common/helper';
-import {RestConstants} from '../../common/rest/rest-constants';
-import {UIConstants} from '../../common/ui/ui-constants';
-import {ListItem} from '../../common/ui/list-item';
-import {RestNodeService} from '../../common/rest/services/rest-node.service';
+} from '../../core-module/core.module';
+import {RestAdminService} from '../../core-module/core.module';
+import {Helper} from '../../core-module/rest/helper';
+import {RestConstants} from '../../core-module/core.module';
+import {UIConstants} from '../../core-module/ui/ui-constants';
+import {RestNodeService} from '../../core-module/core.module';
 import {SuggestItem} from '../../common/ui/autocomplete/autocomplete.component';
-import {RestOrganizationService} from '../../common/rest/services/rest-organization.service';
-import {RestSearchService} from '../../common/rest/services/rest-search.service';
-import {RestHelper} from '../../common/rest/rest-helper';
+import {RestOrganizationService} from '../../core-module/core.module';
+import {RestSearchService} from '../../core-module/core.module';
+import {RestHelper} from '../../core-module/core.module';
 import {Observable, Observer} from 'rxjs/index';
-import {RestNetworkService} from '../../common/rest/services/rest-network.service';
+import {RestNetworkService} from '../../core-module/core.module';
 import {MainNavComponent} from '../../common/ui/main-nav/main-nav.component';
+import {CustomHelper} from "../../common/custom-helper";
 import {GlobalContainerComponent} from "../../common/ui/global-container/global-container.component";
-import {DateHelper} from "../../common/ui/DateHelper";
+import {DateHelper} from "../../core-ui-module/DateHelper";
+import {CsvHelper} from '../../core-module/csv.helper';
 
 
 @Component({
@@ -52,7 +52,7 @@ export class AdminComponent {
       "passwordRequest",
       "userRegisterInformation"
   ];
-  public tab : string;
+  public mode : string;
   public globalProgress=true;
   public appUrl:string;
   public propertyName:string;
@@ -81,6 +81,7 @@ export class AdminComponent {
   public dialogButtons:DialogButton[]=[];
   public dialogParameters:any;
   public warningButtons:DialogButton[]=[];
+  public xmlCardButtons:DialogButton[]=[];
   public xmlAppProperties:any;
   public xmlAppAdditionalPropertyName:string;
   public xmlAppAdditionalPropertyValue:string;
@@ -94,6 +95,9 @@ export class AdminComponent {
   @ViewChild('xmlSelect') xmlSelect : ElementRef;
   @ViewChild('excelSelect') excelSelect : ElementRef;
   @ViewChild('templateSelect') templateSelect : ElementRef;
+  @ViewChild('dynamic',{read: ViewContainerRef}) dynamicComponent : any;
+
+  buttons:any[]=[];
   private excelFile: File;
   private collectionsFile: File;
   private uploadTempFile: File;
@@ -119,6 +123,9 @@ export class AdminComponent {
   systemChecks : any = [];
   mailReceiver: string;
   mailTemplate: string;
+  private loginResult: LoginResult;
+  private mediacenters: any[];
+  ownAppMode="repository";
   static RS_CONFIG_HELP='https://docs.edu-sharing.com/confluence/edp/de/installation-en/installation-of-the-edu-sharing-rendering-service';
   public startJob(){
     this.storage.set('admin_job',this.job);
@@ -134,6 +141,9 @@ export class AdminComponent {
   public debugNode(node:Node){
     console.log(node);
     this.nodeInfo=node;
+  }
+  public getModeButton(mode=this.mode) : any{
+      return this.buttons[Helper.indexOfObjectArray(this.buttons,'id',mode)];
   }
     public searchNoderef() {
         this.storage.set('admin_lucene', this.lucene);
@@ -159,7 +169,7 @@ export class AdminComponent {
       offset:this.lucene.offset ? this.lucene.offset : 0,
       count:this.lucene.count,
       propertyFilter:[RestConstants.ALL]
-    }
+    };
     this.globalProgress=true;
     this.admin.searchLucene(this.lucene.query,authorities,request).subscribe((data:NodeList)=>{
       this.globalProgress=false;
@@ -187,11 +197,15 @@ export class AdminComponent {
               private translate: TranslateService,
               private storage : SessionStorageService,
               private networkService : RestNetworkService,
+              private mediacenterService : RestMediacenterService,
+              private componentFactoryResolver : ComponentFactoryResolver,
+              private viewContainerRef : ViewContainerRef,
               private admin : RestAdminService,
               private connector: RestConnectorService,
               private node: RestNodeService,
               private searchApi: RestSearchService,
               private organization: RestOrganizationService) {
+      this.addCustomComponents(CustomHelper.getCustomComponents("AdminComponent",this.componentFactoryResolver));
       this.searchColumns.push(new ListItem('NODE', RestConstants.CM_NAME));
       this.searchColumns.push(new ListItem('NODE', RestConstants.NODE_ID));
       this.searchColumns.push(new ListItem('NODE', RestConstants.CM_MODIFIED_DATE));
@@ -204,63 +218,17 @@ export class AdminComponent {
         new DialogButton('CANCEL',DialogButton.TYPE_CANCEL,()=>{window.history.back()}),
         new DialogButton('ADMIN.UNDERSTAND',DialogButton.TYPE_PRIMARY,()=>{this.showWarning=false})
       ];
+      this.xmlCardButtons=[
+          new DialogButton('CANCEL',DialogButton.TYPE_CANCEL,()=>{this.xmlAppProperties=null}),
+          new DialogButton('APPLY',DialogButton.TYPE_PRIMARY,()=>{this.saveApp()})
+      ];
       this.getTemplates();
       this.connector.isLoggedIn().subscribe((data: LoginResult) => {
-        if (!data.isAdmin) {
-          this.router.navigate([UIConstants.ROUTER_PREFIX+'workspace']);
-          return;
-        }
-        this.globalProgress=false;
-        this.route.queryParams.subscribe((data:any)=>{
-            if(data['mode'])
-                this.tab=data['mode'];
-            else
-              this.tab='INFO';
-        });
-        this.showWarning=true;
-        this.refreshUpdateList();
-        this.refreshCatalina();
-        this.refreshAppList();
-        this.storage.get('admin_job',this.job).subscribe((data:any)=>{
-          this.job=data;
-        });
-        this.storage.get('admin_lucene',this.lucene).subscribe((data:any)=>{
-            this.lucene=data;
-        });
-        this.reloadJobStatus();
-        this.runChecks();
-          setInterval(()=>{
-            if(this.tab=='JOBS')
-                this.reloadJobStatus();
-        },10000);
-        this.admin.getOAIClasses().subscribe((classes:string[])=>{
-          this.oaiClasses=classes;
-          this.storage.get('admin_oai').subscribe((data:any)=>{
-            if(data)
-              this.oai=data;
-            else{
-              this.oai={
-                className:classes[0],
-                importerClassName:'org.edu_sharing.repository.server.importer.OAIPMHLOMImporter',
-                recordHandlerClassName:'org.edu_sharing.repository.server.importer.RecordHandlerLOM'
-              };
-            }
-            if(!this.oai.binaryHandlerClassName)
-              this.oai.binaryHandlerClassName='';
+          this.loginResult=data;
+          this.mediacenterService.getMediacenters().subscribe((mediacenters)=>{
+              this.mediacenters=mediacenters;
+              this.init();
           });
-        });
-        this.admin.getRepositoryVersion().subscribe((data:string)=>{
-          this.repositoryVersion=data;
-        },(error:any)=>{
-            console.info(error);
-            this.repositoryVersion="Error accessing version information. Are you in dev mode?";
-        });
-        this.admin.getNgVersion().subscribe((data:string)=>{
-          this.ngVersion=data;
-        },(error:any)=>{
-            console.info(error);
-            this.ngVersion="Error accessing version information. Are you in dev mode?";
-        });
       });
     });
   }
@@ -399,8 +367,8 @@ export class AdminComponent {
       }),
     ];
   }
-  public setTab(tab:string){
-    this.router.navigate(['./'],{queryParams:{mode:tab},relativeTo:this.route});
+  public setMode(mode:string){
+    this.router.navigate(['./'],{queryParams:{mode:mode},relativeTo:this.route});
   }
   public pickDirectory(event : Node[]){
     this.parentNode=event[0];
@@ -474,7 +442,7 @@ export class AdminComponent {
     this.globalProgress=true;
     this.admin.refreshCache(this.parentNode ? this.parentNode.ref.id : RestConstants.USERHOME,sticky).subscribe(()=>{
       this.globalProgress=false;
-      this.toast.toast('ADMIN.IMPORT.CACHE_REFRESHED');
+      this.toast.toast('ADMIN.TOOLKIT.CACHE_REFRESHED');
     },(error:any)=>{
       this.globalProgress=false;
       this.toast.error(error);
@@ -510,7 +478,7 @@ export class AdminComponent {
             let additional: any = {
                 link: {
                     caption: "ADMIN.IMPORT.OPEN_JOBS",
-                    callback: () => this.setTab('JOBS')
+                    callback: () => this.setMode('JOBS')
                 },
             };
             this.toast.toast('ADMIN.IMPORT.OAI_STARTED', null, null, null, additional);
@@ -776,9 +744,9 @@ export class AdminComponent {
             this.systemChecks.push({
               name:"RENDERING",
                 status:about.version.repository=='unknown' ? 'WARN' : about.version.repository==about.version.renderservice ? 'OK' : 'FAIL',
-              translate:about.version,
+                translate:about.version,
               callback:()=>{
-                  this.setTab('APPLICATIONS');
+                  this.setMode('APPLICATIONS');
               }
             });
         },(error)=>{
@@ -787,7 +755,7 @@ export class AdminComponent {
                 status:"FAIL",
                 error:error,
                 callback:()=>{
-                    this.setTab('APPLICATIONS');
+                    this.setMode('APPLICATIONS');
                 }
             });
         });
@@ -799,7 +767,7 @@ export class AdminComponent {
                 status:id=='local' ? 'WARN' : 'OK',
                 translate:{id:id},
                 callback:()=>{
-                    this.setTab('APPLICATIONS');
+                    this.setMode('APPLICATIONS');
                     this.editApp(this.editableXmls.filter((xml)=>xml.name=='HOMEAPP')[0]);
                 }
             });
@@ -849,7 +817,7 @@ export class AdminComponent {
           status:home['allow_origin'] ? home['allow_origin'].indexOf('http://localhost:54361')!=-1 ? 'OK' : 'INFO' : 'FAIL',
           translate:home,
           callback:()=>{
-            this.setTab('APPLICATIONS');
+            this.setMode('APPLICATIONS');
             this.editApp(this.editableXmls.filter((xml)=>xml.name=='HOMEAPP')[0]);
           }
         });
@@ -901,7 +869,7 @@ export class AdminComponent {
     testMail() {
         this.globalProgress=true;
         this.admin.testMail(this.mailReceiver,this.mailTemplate).subscribe(()=>{
-          this.toast.toast('ADMIN.TOOLKIT.MAIL_SENT',{receiver:this.mailReceiver});
+          this.toast.toast('ADMIN.CONFIG.MAIL_SENT',{receiver:this.mailReceiver});
             this.globalProgress=false;
         },(error)=>{
           this.toast.error(error);
@@ -927,7 +895,8 @@ export class AdminComponent {
             new SuggestItem("org.edu_sharing.repository.server.jobs.quartz.RemoveOrphanCollectionReferencesJob",null),
             new SuggestItem("org.edu_sharing.repository.server.jobs.quartz.RemoveNodeJob",null),
             new SuggestItem("org.edu_sharing.repository.server.jobs.quartz.ConvertMultivalueToSinglevalueJob",null),
-            new SuggestItem("org.edu_sharing.repository.server.jobs.quartz.BulkEditNodesJob",null)
+            new SuggestItem("org.edu_sharing.repository.server.jobs.quartz.BulkEditNodesJob",null),
+            new SuggestItem("org.edu_sharing.repository.server.jobs.quartz.UpdateFrontpageCacheJob",null)
         ];
         this.jobClasses=jobs.map((job)=>{
           let id=job.id.split(".");
@@ -983,19 +952,158 @@ export class AdminComponent {
         Helper.downloadContent(filename + ".json",JSON.stringify(data,null,2));
       }
       else {
-        let csv = props.join(";");
-        for (let d of data) {
-          csv += "\n";
-          let i = 0;
-          for (let p of props) {
-            if (i) csv += ';';
-            csv += '"' + d[p] + '"';
-            i++;
-          }
-        }
-        Helper.downloadContent(filename + ".csv", csv);
+        CsvHelper.download(filename, props, data);
       }
     });
+  }
+
+    private addCustomComponents(customComponents: any[]) {
+      console.log(customComponents);
+      for(let c of customComponents){
+          if(c.targetType=="BUTTON"){
+              let item=c.payload;
+              item.factory=c.factory;
+              this.buttons.splice(c.payload.position>=0 ? c.payload.position : this.buttons.length+c.payload.position,0,item);
+          }
+      }
+    }
+
+    private initButtons() {
+        if(this.loginResult.isAdmin) {
+            this.buttons = [
+                {
+                    id: "INFO",
+                    icon: "info_outline"
+                },
+                {
+                  id: "FRONTPAGE",
+                  icon: "home"
+                },
+                {
+                  id: "GLOBAL_CONFIG",
+                  icon: "edit"
+                },
+                {
+                    id: "CONFIG",
+                    icon: "build"
+                },
+                {
+                    id: "APPLICATIONS",
+                    icon: "apps"
+                },
+                {
+                    id: "UPDATE",
+                    icon: "update"
+                },
+                {
+                    id: "IMPORT",
+                    icon: "cloud_download"
+                },
+                {
+                    id: "JOBS",
+                    icon: "check"
+                },
+                {
+                    id: "TOOLKIT",
+                    icon: "settings"
+                },
+                {
+                    id: "BROWSER",
+                    icon: "search"
+                },
+                {
+                    id: "FOLDERTEMPLATES",
+                    icon: "create_new_folder"
+                }];
+        }
+        if(this.loginResult.isAdmin || this.loginResult.toolPermissions.indexOf(RestConstants.TOOLPERMISSION_GLOBAL_STATISTICS)!=-1){
+            this.buttons.splice(1,0,{
+                id: "STATISTICS",
+                icon: "assessment"
+            });
+        }
+        if(this.loginResult.isAdmin || this.mediacenters.filter((mc)=>mc.administrationAccess).length){
+            this.buttons.splice(3,0,{
+                id: "MEDIACENTER",
+                icon: "business"
+            });
+        }
+    }
+
+    private init() {
+        this.initButtons();
+        this.globalProgress=false;
+        this.route.queryParams.subscribe((data:any)=>{
+            if(data['mode']) {
+                this.mode = data['mode'];
+                if(this.getModeButton().factory){
+                    console.log("init dynamic");
+                    setTimeout(()=> {
+                        let ref = this.dynamicComponent.createComponent(this.getModeButton().factory);
+                    });
+                }
+            }
+            else
+                this.setMode(this.buttons[0].id);
+        });
+        if(this.loginResult.isAdmin) {
+            this.showWarning = true;
+            this.admin.getServerUpdates().subscribe((data: ServerUpdate[]) => {
+                this.updates = data;
+            });
+            this.refreshUpdateList();
+            this.refreshCatalina();
+            this.refreshAppList();
+            this.storage.get('admin_job', this.job).subscribe((data: any) => {
+                this.job = data;
+            });
+            this.storage.get('admin_lucene', this.lucene).subscribe((data: any) => {
+                this.lucene = data;
+            });
+            this.reloadJobStatus();
+            this.runChecks();
+            setInterval(() => {
+                if (this.mode == 'JOBS')
+                    this.reloadJobStatus();
+            }, 10000);
+            this.admin.getOAIClasses().subscribe((classes: string[]) => {
+                this.oaiClasses = classes;
+                this.storage.get('admin_oai').subscribe((data: any) => {
+                    if (data)
+                        this.oai = data;
+                    else {
+                        this.oai = {
+                            className: classes[0],
+                            importerClassName: 'org.edu_sharing.repository.server.importer.OAIPMHLOMImporter',
+                            recordHandlerClassName: 'org.edu_sharing.repository.server.importer.RecordHandlerLOM'
+                        };
+                    }
+                    if (!this.oai.binaryHandlerClassName)
+                        this.oai.binaryHandlerClassName = '';
+                });
+            });
+            this.admin.getRepositoryVersion().subscribe((data: string) => {
+                this.repositoryVersion = data;
+            }, (error: any) => {
+                console.info(error);
+                this.repositoryVersion = "Error accessing version information. Are you in dev mode?";
+            });
+            this.admin.getNgVersion().subscribe((data: string) => {
+                this.ngVersion = data;
+            }, (error: any) => {
+                console.info(error);
+                this.ngVersion = "Error accessing version information. Are you in dev mode?";
+            });
+        }
+    }
+
+  getOwnAppUrl() {
+    return this.connector.getAbsoluteEdusharingUrl()+"metadata?format="+this.ownAppMode;
+  }
+
+  copyOwnApp() {
+    UIHelper.copyToClipboard(this.getOwnAppUrl());
+    this.toast.toast('ADMIN.APPLICATIONS.COPIED_CLIPBOARD');
   }
 }
 

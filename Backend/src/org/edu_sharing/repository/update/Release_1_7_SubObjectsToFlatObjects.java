@@ -29,6 +29,7 @@ import org.alfresco.service.namespace.QName;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
+import org.edu_sharing.lightbend.LightbendConfigLoader;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.client.tools.forms.TaxonTool;
 import org.edu_sharing.repository.server.MCAlfrescoAPIClient;
@@ -97,12 +98,10 @@ public class Release_1_7_SubObjectsToFlatObjects implements Update {
 		
 		counter = 0;
 		archivCounter = 0;
-		
-		String isMLAwareString = RepoFactory.getEdusharingProperty("multilang");
-		if(isMLAwareString == null || isMLAwareString.trim().equals("")) isMLAwareString = "true";
-		boolean isMLAware = new Boolean(isMLAwareString);
+
+		boolean isMLAware = LightbendConfigLoader.get().getBoolean("repository.multilang");
 		if(!isMLAware){
-			String errorMsg = "please set multilang to true in edu-sharing.properties to run this updater. This updater is important to otherwise you could loose data";
+			String errorMsg = "please set multilang to true in config to run this updater. This updater is important to otherwise you could loose data";
 			logDebug(errorMsg);
 			//logError(errorMsg, new Exception(errorMsg));
 			return;

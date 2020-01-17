@@ -195,7 +195,7 @@ public class GroupDao {
 
 				@Override
 				public Void doWork() throws Exception {
-					((MCAlfrescoAPIClient)baseClient).addMemberships(groupName, new String[]{member});
+					authorityService.addMemberships(groupName, new String[]{member});
 					PersonCache.reset(member);
 					return null;
 				}
@@ -225,7 +225,7 @@ public class GroupDao {
 
 				@Override
 				public Void doWork() throws Exception {
-					((MCAlfrescoAPIClient)baseClient).removeMemberships(groupName, new String[]{member});
+					authorityService.removeMemberships(groupName, new String[]{member});
 					PersonCache.reset(member);
 					return null;
 				}

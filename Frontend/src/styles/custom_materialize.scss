@@ -1,4 +1,4 @@
-@import "./variables";
+@import "../app/core-ui-module/styles/variables";
 
 /*
   Custom CSS for colors and looks which override the materialize.css
@@ -194,7 +194,7 @@ select {
 }
 select,.select-wrapper .caret{
   background-color:#fff;
-  background-image:url('../assets/images/select-arrow.svg');
+  background-image:url('/src/assets/images/select-arrow.svg');
   background-size:8px;
   background-repeat: no-repeat;
 }
@@ -252,11 +252,6 @@ input[type=search]:focus:not([readonly])+label,
 .md-input-wrapper input:focus:not([readonly])+label,
 input:focus:not([readonly])+label {
   color:$textLight;
-}
-input[type=text]:read-only:not(.select-dropdown),
-input[type=password]:read-only,
-input[type=search]:read-only{
-  border-style: dashed;
 }
 /* materialize select dropdowns */
 .dropdown-content li>a, .dropdown-content li>span{

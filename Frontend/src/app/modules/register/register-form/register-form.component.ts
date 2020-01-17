@@ -1,16 +1,17 @@
 import {Component, EventEmitter, Output} from '@angular/core';
-import {Toast} from '../../../common/ui/toast';
+import {Toast} from '../../../core-ui-module/toast';
 import {Router, ActivatedRoute, UrlSerializer} from '@angular/router';
-import {RegisterInformation} from '../../../common/rest/data-object';
+import {RegisterInformation} from '../../../core-module/core.module';
 import {TranslateService} from '@ngx-translate/core';
-import {Translation} from '../../../common/translation';
-import {RestConnectorService} from '../../../common/rest/services/rest-connector.service';
-import {ConfigurationService} from '../../../common/services/configuration.service';
+import {Translation} from '../../../core-ui-module/translation';
+import {RestConnectorService} from '../../../core-module/core.module';
+import {ConfigurationService} from '../../../core-module/core.module';
 import {Title} from '@angular/platform-browser';
-import {UIHelper} from '../../../common/ui/ui-helper';
-import {SessionStorageService} from '../../../common/services/session-storage.service';
+import {UIHelper} from '../../../core-ui-module/ui-helper';
+import {SessionStorageService} from '../../../core-module/core.module';
 import {PlatformLocation} from '@angular/common';
-import {RestRegisterService} from '../../../common/rest/services/rest-register.service';
+import {RestRegisterService} from '../../../core-module/core.module';
+import {FormControl, ValidationErrors, Validators} from '@angular/forms';
 
 @Component({
   selector: 'app-register-form',
@@ -28,16 +29,18 @@ export class RegisterFormComponent{
         password: '',
         allowNotifications: false
     };
+    emailFormControl = new FormControl('', [
+        Validators.required,
+        Validators.email,
+    ]);
     public news = true;
     public agree = false;
     public privacyUrl: string;
-    public mailValid: boolean;
-    public requiredFields: string[] = [];
+    requiredFields:string[] = [];
 
-    public checkMail(mail:string) {
-        this.mailValid = UIHelper.isEmail(mail);
-    }
     public register(){
+        this.info.email=this.emailFormControl.value;
+        console.log(this.info,this.emailFormControl);
         this.onLoading.emit(true);
         this.registerService.register(this.info).subscribe(()=>{
             this.onRegisterDone.emit();
@@ -45,7 +48,7 @@ export class RegisterFormComponent{
             this.toast.toast("REGISTER.TOAST");
         },(error)=>{
             if(UIHelper.errorContains(error,"DuplicateAuthorityException")){
-                this.mailValid = false;
+                this.emailFormControl.setErrors({'incorrect': true});
                 this.toast.error(null,"REGISTER.TOAST_DUPLICATE");
             }else {
                 this.toast.error(error);
@@ -62,7 +65,7 @@ export class RegisterFormComponent{
         return (!this.isRequired('firstName') || this.info.firstName.trim())
             && (!this.isRequired('lastName') || this.info.lastName.trim())
             && (!this.isRequired('organization') || this.info.organization.trim())
-            && this.mailValid && this.info.password && UIHelper.getPasswordStrengthString(this.info.password) != 'weak'
+            && this.emailFormControl.valid && this.info.password && UIHelper.getPasswordStrengthString(this.info.password) != 'weak'
             && this.agree;
     }
 

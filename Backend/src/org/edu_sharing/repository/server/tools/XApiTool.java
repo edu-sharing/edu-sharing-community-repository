@@ -45,7 +45,7 @@ public class XApiTool {
     }
     public static void trackActivity(String activityVerb,String nodeId,String nodeVersion){
         ApplicationInfo learningLocker = ApplicationInfoList.getLearningLocker();
-        if(learningLocker==null || activityVerb==null)
+        if(learningLocker==null)
             return;
         try {
             JSONObject data = getTemplate(nodeId, nodeVersion);

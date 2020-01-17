@@ -19,12 +19,14 @@ import com.google.gwt.core.client.GWT;
 
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
+import org.edu_sharing.service.rating.AccumulatedRatings;
 
 @ApiModel(description = "")
 public class Node {
 
 	private NodeRef ref = null;
 	private NodeRef parent = null;
+	private Remote remote = null;
 	private String type = null;
 	private List<String> aspects = new ArrayList<String>();
 	private String name = null;
@@ -37,20 +39,20 @@ public class Node {
 	private Date modifiedAt = null;
 	private Person modifiedBy = null;
 	private List<String> access = null;
-	private String contentVersion = null;
-	private String contentUrl = null;
 	private String downloadUrl = null;
 	private HashMap<String,String[]> properties = null;
 	private String mimetype = null;
 	private String mediatype = null;
 	private String size = null;
 	private Preview preview = null;
+	private Content content = null;
 	private String iconURL;
-	private String licenseURL;
+	private License license;
 	private boolean isDirectory;
 	private Collection collection;
 	private Person owner;
 	private int commentCount;
+	private AccumulatedRatings rating;
 
 	/**
    **/
@@ -104,11 +106,6 @@ public class Node {
 	@JsonProperty("iconURL")
 	public String getIconURL() {
 		return iconURL;
-	}
-	@ApiModelProperty(value = "")
-	@JsonProperty("licenseURL")
-	public String getLicenseURL() {
-		return licenseURL;
 	}
 	@ApiModelProperty(value = "")
 	@JsonProperty("isDirectory")
@@ -228,30 +225,15 @@ public class Node {
 		this.modifiedBy = modifiedBy;
 	}
 
-	/**
-   **/
-	@ApiModelProperty(required = true, value = "")
-	@JsonProperty("contentVersion")
-	public String getContentVersion() {
-		return contentVersion;
+	@JsonProperty
+	public Content getContent() {
+		return content;
 	}
 
-	public void setContentVersion(String contentVersion) {
-		this.contentVersion = contentVersion;
+	public void setContent(Content content) {
+		this.content = content;
 	}
 
-	/**
-   **/
-	@ApiModelProperty(required = true, value = "")
-	@JsonProperty("contentUrl")
-	public String getContentUrl() {
-		return contentUrl;
-	}
-
-	public void setContentUrl(String contentUrl) {
-		this.contentUrl = contentUrl;
-	}
-	
 	
 	public void setDownloadUrl(String downloadUrl) {
 		this.downloadUrl = downloadUrl;
@@ -376,8 +358,6 @@ public class Node {
 		sb.append("  modifiedAt: ").append(modifiedAt).append("\n");
 		sb.append("  modifiedBy: ").append(modifiedBy).append("\n");
 		sb.append("  access: ").append(access).append("\n");
-		sb.append("  contentVersion: ").append(contentVersion).append("\n");
-		sb.append("  contentUrl: ").append(contentUrl).append("\n");
 		sb.append("  properties: ").append(properties).append("\n");
 		sb.append("  mimetype: ").append(mimetype).append("\n");
 		sb.append("  size: ").append(size).append("\n");
@@ -390,10 +370,7 @@ public class Node {
 		this.iconURL=iconURL;
 		
 	}
-	public void setLicenseURL(String licenseURL) {
-		this.licenseURL=licenseURL;
-		
-	}
+
 	public void setIsDirectory(boolean isDirectory) {
 		this.isDirectory=isDirectory;
 	}
@@ -401,4 +378,28 @@ public class Node {
 	public void setCollection(Collection collection) {
 		this.collection=collection;
 	}
+
+	public License getLicense() {
+		return license;
+	}
+
+	public void setLicense(License license) {
+		this.license = license;
+	}
+
+	public Remote getRemote() {
+		return remote;
+	}
+
+	public void setRemote(Remote remote) {
+		this.remote = remote;
+	}
+
+    public void setRating(AccumulatedRatings rating) {
+        this.rating = rating;
+    }
+
+    public AccumulatedRatings getRating() {
+        return rating;
+    }
 }

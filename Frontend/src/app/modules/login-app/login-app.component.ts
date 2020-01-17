@@ -4,20 +4,20 @@ import {
     //ApplicationRef 
 } from '@angular/core';
 
-import { Toast } from "../../common/ui/toast";
+import { Toast } from "../../core-ui-module/toast";
 import {Router, Route, ActivatedRoute} from "@angular/router";
-import { OAuthResult, LoginResult, AccessScope } from "../../common/rest/data-object";
-import {OPEN_URL_MODE, UIConstants} from "../../common/ui/ui-constants";
+import {OAuthResult, LoginResult, AccessScope, RestConstants, DialogButton} from "../../core-module/core.module";
+import {OPEN_URL_MODE, UIConstants} from "../../core-module/ui/ui-constants";
 import { CordovaService } from "../../common/services/cordova.service";
-import { ConfigurationService } from '../../common/services/configuration.service';
-import { UIHelper } from '../../common/ui/ui-helper';
-import { Translation } from '../../common/translation';
+import { ConfigurationService } from '../../core-module/core.module';
+import { UIHelper } from '../../core-ui-module/ui-helper';
+import { Translation } from '../../core-ui-module/translation';
 import { TranslateService } from '@ngx-translate/core';
-import { RestHelper } from '../../common/rest/rest-helper';
-import { STATUS_CODES } from 'http';
-import {RestLocatorService} from "../../common/rest/services/rest-locator.service";
-import {SessionStorageService} from "../../common/services/session-storage.service";
-import { PlatformLocation } from '@angular/common';
+import { RestHelper } from '../../core-module/core.module';
+import {RestLocatorService} from "../../core-module/core.module";
+import {SessionStorageService} from "../../core-module/core.module";
+import {BridgeService} from "../../core-bridge-module/bridge.service";
+import {PlatformLocation} from '@angular/common';
 
 // possible states this UI component can be in
 enum StateUI { SERVERLIST = 0, LOGIN = 1, SERVERURL = 2, NOINTERNET = 3};
@@ -28,8 +28,6 @@ enum StateUI { SERVERLIST = 0, LOGIN = 1, SERVERURL = 2, NOINTERNET = 3};
     styleUrls: ['login-app.component.scss']
 })
 export class LoginAppComponent  implements OnInit {
-
-    private state:StateUI = StateUI.NOINTERNET;
 
     public isLoading=true;
     public disabled=true;
@@ -43,6 +41,7 @@ export class LoginAppComponent  implements OnInit {
     currentServer: any;
     private locationNext: string;
     config: any;
+    buttons: DialogButton[];
 
     constructor(
         private toast:Toast,
@@ -52,6 +51,7 @@ export class LoginAppComponent  implements OnInit {
         private storage: SessionStorageService,
         private platformLocation: PlatformLocation,
         private cordova: CordovaService,
+        private bridge: BridgeService,
         private configService: ConfigurationService,
         private locator: RestLocatorService,
     ){
@@ -108,6 +108,7 @@ export class LoginAppComponent  implements OnInit {
 
     private checkConditions() :void  {
         this.disabled=!this.username;// || !this.password;
+        this.updateButtons();
     }
 
     private buttonLoginBack() : void {
@@ -115,10 +116,6 @@ export class LoginAppComponent  implements OnInit {
         //window.location.replace(this.cordova.getIndexPath()+"?reset=true");
         this.cordova.restartCordova();
         //(navigator as any).app.loadUrl(this.cordova.getIndexPath()+"?reset=true");
-    }
-
-    private buttonEnterServer() : void {
-        this.state = StateUI.SERVERURL;
     }
 
     private login(){
@@ -154,7 +151,7 @@ export class LoginAppComponent  implements OnInit {
         this.isLoading=true;
         // APP: oAuth Login
         this.cordova.loginOAuth(this.locator.endpointUrl,this.username, this.password).subscribe((oauthTokens: OAuthResult) => {
-                this.cordova.setPermanentStorage(CordovaService.STORAGE_OAUTHTOKENS, JSON.stringify(oauthTokens));
+                this.cordova.setPermanentStorage(RestConstants.CORDOVA_STORAGE_OAUTHTOKENS, JSON.stringify(oauthTokens));
                 // continue to within the app
                 this.goToDefaultLocation();
             },
@@ -194,7 +191,6 @@ export class LoginAppComponent  implements OnInit {
             console.log("INIT TranslationService .. OK");
             this.locator.locateApi().subscribe(()=>{
                 this.serverurl=this.locator.endpointUrl;
-                this.state=StateUI.LOGIN;
                 this.configService.getAll().subscribe((config)=>{
                     this.config=config;
                     if(!this.config.register)
@@ -212,7 +208,18 @@ export class LoginAppComponent  implements OnInit {
             this.router.navigate([UIConstants.ROUTER_PREFIX+"register"]);
         }
         else {
-            UIHelper.openUrl(this.config.register.registerUrl,this.cordova,OPEN_URL_MODE.BlankSystemBrowser);
+            UIHelper.openUrl(this.config.register.registerUrl,this.bridge,OPEN_URL_MODE.BlankSystemBrowser);
+        }
+    }
+    updateButtons(){
+        let login=new DialogButton('LOGIN.LOGIN',DialogButton.TYPE_PRIMARY,()=>this.login());
+        login.disabled=this.disabled;
+        if(this.config && (this.config.register.local || this.config.register.recoverUrl)){
+            let recover=new DialogButton('LOGIN.RECOVER_PASSWORD',DialogButton.TYPE_CANCEL,()=>this.recoverPassword());
+            this.buttons=[recover,login];
+        }
+        else{
+            this.buttons=[login];
         }
     }
 }

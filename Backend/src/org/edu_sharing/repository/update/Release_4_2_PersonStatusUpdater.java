@@ -1,30 +1,26 @@
 package org.edu_sharing.repository.update;
 
 import java.io.PrintWriter;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 import org.alfresco.query.PagingRequest;
-import org.alfresco.query.PagingResults;
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.repo.security.authentication.AuthenticationUtil.RunAsWork;
 import org.alfresco.service.ServiceRegistry;
-import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.security.PersonService;
 import org.alfresco.service.cmr.security.PersonService.PersonInfo;
 import org.alfresco.service.namespace.QName;
 import org.apache.log4j.Logger;
 import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
+import org.edu_sharing.lightbend.LightbendConfigLoader;
 import org.edu_sharing.repository.client.tools.CCConstants;
-import org.edu_sharing.repository.server.tools.Edu_SharingProperties;
 import org.springframework.context.ApplicationContext;
 
 public class Release_4_2_PersonStatusUpdater extends UpdateAbstract{
 
 	public static final String ID = "Release_4_2_PersonStatusUpdater";
 	
-	public static final String description = "when person_active_status is set in edu-sharing.properties set this value for existing person objects." ;
+	public static final String description = "when personActiveStatus is set in config set this value for existing person objects.";
 	
 	String personActiveStatus = null;
 	
@@ -35,7 +31,9 @@ public class Release_4_2_PersonStatusUpdater extends UpdateAbstract{
 	public Release_4_2_PersonStatusUpdater(PrintWriter out) {
 		this.out = out;
 		logger = Logger.getLogger(Release_4_2_PersonStatusUpdater.class);
-		personActiveStatus = Edu_SharingProperties.instance.getPersonActiveStatus();
+		if(!LightbendConfigLoader.get().getIsNull("repository.personActiveStatus")) {
+			personActiveStatus = LightbendConfigLoader.get().getString("repository.personActiveStatus");
+		}
 	}
 	
 	@Override

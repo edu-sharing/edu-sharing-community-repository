@@ -264,8 +264,8 @@ public class MetadataSetV2 implements Serializable {
 		  List<MetadataWidget> result=new ArrayList<>();
 		  for(MetadataWidget widget : found) {
 			  boolean allowed = true;
-			  MetadataWidget.Condition cond = widget.getCondition();
-			  if (cond != null && cond.getType().equals(MetadataWidget.Condition.CONDITION_TYPE.PROPERTY)) {
+			  MetadataCondition cond = widget.getCondition();
+			  if (cond != null && cond.getType().equals(MetadataCondition.CONDITION_TYPE.PROPERTY)) {
 			  	  String[] value=properties.get(CCConstants.getValidGlobalName(cond.getValue()));
 				  boolean empty = isValueEmpty(value);
 

@@ -1,5 +1,5 @@
 import {Component, Input, EventEmitter, Output, ViewChild, ElementRef} from '@angular/core';
-import {Connector} from "../../../common/rest/data-object";
+import {Connector, DialogButton} from '../../../core-module/core.module';
 
 @Component({
   selector: 'workspace-create-connector',
@@ -7,36 +7,40 @@ import {Connector} from "../../../common/rest/data-object";
   styleUrls: ['create-connector.component.scss']
 })
 export class WorkspaceCreateConnector  {
-  @ViewChild('input') input : ElementRef;
   public type = 0;
-  public _name="";
-  public _connector : Connector;
-  @Input() set connector  (connector : Connector){
-    for(let i=0;i<connector.filetypes.length;i++){
-      if(!connector.filetypes[i].creatable)
-        connector.filetypes.splice(i,1);
+  public _name= '';
+  public _connector: Connector;
+  buttons: DialogButton[];
+  @Input() set connector(connector: Connector){
+    for (let i = 0; i < connector.filetypes.length; i++) {
+      if (!connector.filetypes[i].creatable) {
+        connector.filetypes.splice(i, 1);
+      }
     }
-    this._connector=connector;
+    this._connector = connector;
   }
-  @Input() set name(name : string){
-    this._name=name;
-    this.input.nativeElement.focus();
+  @Input() set name(name: string){
+    this._name = name;
   }
-  @Output() onCancel=new EventEmitter();
-  @Output() onCreate=new EventEmitter();
+  @Output() onCancel= new EventEmitter();
+  @Output() onCreate= new EventEmitter();
 
-  public cancel(){
+  public cancel() {
     this.onCancel.emit();
   }
-  public create(){
-    if(!this._name.trim())
+  public create() {
+    if (!this._name.trim()) {
       return;
-    this.onCreate.emit({name:this._name,type:this.getType()});
+    }
+    this.onCreate.emit({name: this._name, type: this.getType()});
   }
-  constructor(){
+  constructor() {
+    this.buttons = [
+        new DialogButton('CANCEL', DialogButton.TYPE_CANCEL, () => this.cancel()),
+        new DialogButton('CREATE', DialogButton.TYPE_PRIMARY, () => this.create()),
+    ];
   }
   private getType() {
-    //return NodeHelper.OPEN_OFFICE_SUBTYPES[this.type];
     return this._connector.filetypes[this.type];
   }
 }

@@ -18,6 +18,7 @@ import org.alfresco.service.cmr.security.AuthorityType;
 import org.alfresco.service.cmr.security.PermissionService;
 import org.alfresco.service.namespace.QName;
 import org.apache.log4j.Logger;
+import org.edu_sharing.alfresco.tools.EduSharingNodeHelper;
 import org.edu_sharing.alfresco.workspace_administration.NodeServiceInterceptor;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.server.tools.cache.EduGroupCache;
@@ -70,6 +71,8 @@ public class OrganisationService {
 		}
 
 		String orgFolderName = (groupDisplayName != null && !groupDisplayName.trim().isEmpty()) ? groupDisplayName : orgName;
+		orgFolderName = EduSharingNodeHelper.cleanupCmName(orgFolderName);
+		
 		NodeRef orgFolder = createNode(shared, CCConstants.CCM_TYPE_MAP, orgFolderName);
 		if(metadataset != null) {
 			nodeService.setProperty(orgFolder, QName.createQName(CCConstants.CM_PROP_METADATASET_EDU_METADATASET), metadataset.trim());

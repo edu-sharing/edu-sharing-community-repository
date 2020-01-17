@@ -1,11 +1,16 @@
-import {NodeHelper, NodesRightMode} from "../ui/node-helper";
-import {CollectionReference, Node, Repository} from '../rest/data-object';
-import {RestConstants} from "../rest/rest-constants";
-import {OptionItem} from "../ui/actionbar/option-item";
-import {RestConnectorService} from "../rest/services/rest-connector.service";
-import {RestConnectorsService} from "../rest/services/rest-connectors.service";
+import {NodeHelper, NodesRightMode} from "../../core-ui-module/node-helper";
 import {Injectable} from "@angular/core";
-import {RestNetworkService} from '../rest/services/rest-network.service';
+import {
+    Node,
+    Repository,
+    RestConnectorService,
+    RestConnectorsService,
+    RestConstants,
+    RestNetworkService
+} from "../../core-module/core.module";
+import {OptionItem} from "../../core-ui-module/option-item";
+import {MessageType} from "../../core-module/ui/message-type";
+
 @Injectable()
 export class ActionbarHelperService{
   private repositories: Repository[];
@@ -74,6 +79,7 @@ export class ActionbarHelperService{
             let n=ActionbarHelperService.getNodes(nodes,node);
             if(n==null)
                 return false;
+            console.log(n);
             option.name="WORKSPACE.OPTION.VARIANT" + (this.connectors.connectorSupportsEdit(n[0]) ? "_OPEN" : "");
             return NodeHelper.allFiles(n) && n && n.length==1  && n[0].aspects.indexOf(RestConstants.CCM_ASPECT_IO_REFERENCE)==-1 && RestNetworkService.allFromHomeRepo(n) && !this.connector.getCurrentLogin().isGuest;
         };
@@ -91,14 +97,14 @@ export class ActionbarHelperService{
             let n=ActionbarHelperService.getNodes(nodes,node);
             if(n==null)
                 return false;
-            return NodeHelper.referenceOriginalExists(node) && NodeHelper.allFiles(nodes) && n.length>0 && RestNetworkService.allFromHomeRepo(n);
+            return NodeHelper.referenceOriginalExists(node) && NodeHelper.allFiles(nodes) && n.length>0;
         }
         option.enabledCallback = (node: Node) => {
           let list = ActionbarHelperService.getNodes(nodes, node);
           return NodeHelper.getNodesRight(list,RestConstants.ACCESS_CC_PUBLISH,NodesRightMode.Original);
         }
         option.disabledCallback = () =>{
-          this.connectors.getRestConnector().getToastService().error(null,'WORKSPACE.TOAST.ADD_TO_COLLECTION_DISABLED');
+          this.connectors.getRestConnector().getBridgeService().showTemporaryMessage(MessageType.error, null,'WORKSPACE.TOAST.ADD_TO_COLLECTION_DISABLED');
         };
       }
     }

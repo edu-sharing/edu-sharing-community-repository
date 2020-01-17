@@ -15,25 +15,14 @@
             "index": "src/index.html",
             "main": "src/main.ts",
             "tsConfig": "src/tsconfig.json",
+            "showCircularDependencies": true,
             "assets": [
-              "src/assets"
+              { "glob": "**/*", "input": "src/assets/", "output": "/assets/" },
+              { "glob": "**/*", "input": "node_modules/ngx-monaco-editor/assets/monaco", "output": "/assets/monaco/" }
             ],
             "styles": [
-              "src/styles/materialize.scss",
-              "src/assets/fonts/opensans_regular/stylesheet.css",
-              "src/assets/fonts/opensans_bold/stylesheet.css",
-              "src/assets/fonts/material-design-icons/material-icons.css",
-              "src/assets/fonts/edu-icons/edu-icons.scss",
-              "src/assets/css/nouislider.min.css",
-              "src/styles/custom_materialize.scss",
-              "src/styles/material-theme.scss",
-              "src/styles/dialogs.scss",
-              "src/styles/file-chooser.scss",
-              "src/styles/globals.scss",
-              "src/styles/toast.scss",
-              "src/styles/mds.scss",
-              "src/styles/ng2-calendar.scss",
-              "src/styles/override.scss"
+              "src/app/core-ui-module/styles/core-base.scss",
+              "src/styles/main.scss"
             ],
             "scripts": [
               "src/assets/js/jquery-3.4.1.min.js",
@@ -91,20 +80,7 @@
               "node_modules/materialize-css/dist/js/materialize.min.js"
             ],
             "styles": [
-              "node_modules/materialize-css/dist/css/materialize.min.css",
-              "src/assets/fonts/opensans_regular/stylesheet.css",
-              "src/assets/fonts/opensans_bold/stylesheet.css",
-              "src/assets/fonts/material-design-icons/material-icons.css",
-              "src/assets/fonts/edu-icons/edu-icons.scss",
-              "src/assets/css/nouislider.min.css",
-              "src/styles/custom_materialize.scss",
-              "src/styles/dialogs.scss",
-              "src/styles/file-chooser.scss",
-              "src/styles/globals.scss",
-              "src/styles/toast.scss",
-              "src/styles/mds.scss",
-              "src/styles/ng2-calendar.scss",
-              "src/styles/override.scss"
+              "src/styles/main.scss"
             ],
             "assets": [
               "src/assets"
@@ -114,8 +90,12 @@
         "lint": {
           "builder": "@angular-devkit/build-angular:tslint",
           "options": {
-            "tsConfig": [],
-            "exclude": []
+            "tsConfig": [
+              "src/tsconfig.json"
+            ],
+            "exclude": [
+              "**/node_modules/**"
+            ]
           }
         }
       }

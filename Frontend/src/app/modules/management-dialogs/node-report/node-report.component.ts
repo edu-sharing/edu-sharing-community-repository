@@ -1,17 +1,17 @@
 import {Component, Input, EventEmitter, Output, ViewChild, ElementRef} from '@angular/core';
-import {RestConnectorService} from "../../../common/rest/services/rest-connector.service";
-import {Toast} from "../../../common/ui/toast";
-import {RestNodeService} from "../../../common/rest/services/rest-node.service";
+import {DialogButton, RestConnectorService} from '../../../core-module/core.module';
+import {Toast} from '../../../core-ui-module/toast';
+import {RestNodeService} from '../../../core-module/core.module';
 import {
   NodeWrapper, Node, NodePermissions, LocalPermissionsResult, Permission,
   LoginResult
-} from "../../../common/rest/data-object";
-import {ConfigurationService} from "../../../common/services/configuration.service";
-import {UIHelper} from "../../../common/ui/ui-helper";
-import {RestIamService} from "../../../common/rest/services/rest-iam.service";
-import {TranslateService} from "@ngx-translate/core";
-import {trigger} from "@angular/animations";
-import {UIAnimation} from "../../../common/ui/ui-animation";
+} from '../../../core-module/core.module';
+import {ConfigurationService} from '../../../core-module/core.module';
+import {UIHelper} from '../../../core-ui-module/ui-helper';
+import {RestIamService} from '../../../core-module/core.module';
+import {TranslateService} from '@ngx-translate/core';
+import {trigger} from '@angular/animations';
+import {UIAnimation} from '../../../core-module/ui/ui-animation';
 
 @Component({
   selector: 'node-report',
@@ -24,62 +24,67 @@ import {UIAnimation} from "../../../common/ui/ui-animation";
 })
 export class NodeReportComponent  {
   public reasons = [
-    "UNAVAILABLE","INAPPROPRIATE_CONTENT","INVALID_METADATA","OTHER"
-  ]
-  public selectedReason : string;
-  public comment : string;
-  public email : string;
+    'UNAVAILABLE', 'INAPPROPRIATE_CONTENT', 'INVALID_METADATA', 'OTHER'
+  ];
+  public selectedReason: string;
+  public comment: string;
+  public email: string;
   public _node: Node;
   private isGuest: boolean;
-  @Input() set node(node : Node){
-    this._node=node;
+  @Input() set node(node: Node){
+    this._node = node;
   }
-  @Output() onCancel=new EventEmitter();
-  @Output() onLoading=new EventEmitter();
-  @Output() onDone=new EventEmitter();
+  @Output() onCancel= new EventEmitter();
+  @Output() onLoading= new EventEmitter();
+  @Output() onDone= new EventEmitter();
+  buttons: DialogButton[];
   constructor(
-    private connector : RestConnectorService,
-    private iam : RestIamService,
-    private translate : TranslateService,
-    private config : ConfigurationService,
-    private toast : Toast,
-    private nodeApi : RestNodeService) {
-    this.connector.isLoggedIn().subscribe((data:LoginResult)=>{
-      this.isGuest=data.isGuest;
-      if(!data.isGuest){
-        this.iam.getUser().subscribe((data)=>{
-          this.email=data.person.profile.email;
+    private connector: RestConnectorService,
+    private iam: RestIamService,
+    private translate: TranslateService,
+    private config: ConfigurationService,
+    private toast: Toast,
+    private nodeApi: RestNodeService) {
+    this.buttons = [
+      new DialogButton('CANCEL', DialogButton.TYPE_CANCEL, () => this.cancel()),
+      new DialogButton('NODE_REPORT.REPORT', DialogButton.TYPE_PRIMARY, () => this.report()),
+    ];
+    this.connector.isLoggedIn().subscribe((data: LoginResult) => {
+      this.isGuest = data.isGuest;
+      if (!data.isGuest){
+        this.iam.getUser().subscribe((user) => {
+          this.email = user.person.profile.email;
         });
       }
     });
   }
-  public cancel(){
+  public cancel() {
     this.onCancel.emit();
   }
-  public done(){
+  public done() {
     this.onDone.emit();
   }
   public report(){
-    if(!this.selectedReason){
-      this.toast.error(null,'NODE_REPORT.REASON_REQUIRED');
+    if (!this.selectedReason){
+      this.toast.error(null, 'NODE_REPORT.REASON_REQUIRED');
       return;
     }
-    if(!UIHelper.isEmail(this.email)){
-      this.toast.error(null,'NODE_REPORT.EMAIL_REQUIRED');
+    if (!UIHelper.isEmail(this.email)){
+      this.toast.error(null, 'NODE_REPORT.EMAIL_REQUIRED');
       return;
     }
     this.onLoading.emit(true);
-    this.nodeApi.reportNode(this._node.ref.id,this.getReasonAsString(),this.email,this.comment,this._node.ref.repo).subscribe(()=>{
+    this.nodeApi.reportNode(this._node.ref.id, this.getReasonAsString(), this.email, this.comment, this._node.ref.repo).subscribe(() => {
       this.toast.toast('NODE_REPORT.DONE');
       this.onLoading.emit(false);
       this.onDone.emit();
-    },(error:any)=>{
+    }, (error: any) => {
       this.onLoading.emit(false);
       this.toast.error(error);
     });
   }
 
   private getReasonAsString() {
-    return this.translate.instant("NODE_REPORT.REASONS."+this.selectedReason)+" ("+this.selectedReason+")";
+    return this.translate.instant('NODE_REPORT.REASONS.' + this.selectedReason) + ' (' + this.selectedReason + ')';
   }
 }

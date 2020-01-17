@@ -1,4 +1,4 @@
-@import "../../../../styles/variables.scss";
+@import "../../../core-ui-module/styles/variables";
 
 .report{
   margin-bottom: 20px;
@@ -9,7 +9,9 @@ h4{
   font-weight: bold;
   color: $textLight;
 }
-
+.variant-content{
+  padding: $cardPadding;
+}
 
 .breadcrumb-style{
   margin: 20px -20px;
@@ -24,17 +26,12 @@ h4{
   }
 }
 
-.btnVersion{
+.btn-choose{
   margin-top: 10px;
 }
-.license-warning{
-  >div {
-    > .warning {
-      white-space: pre-line;
-    }
-    > .link {
-      color: $primary;
-      text-transform: uppercase;
-    }
+info-message{
+  .link {
+    color: $primary;
+    text-transform: uppercase;
   }
 }

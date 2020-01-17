@@ -19,6 +19,7 @@ import org.edu_sharing.repository.server.MCAlfrescoAPIClient;
 import org.edu_sharing.repository.server.RepoFactory;
 import org.edu_sharing.repository.server.SchoolContextServiceImpl;
 import org.edu_sharing.repository.server.jobs.quartz.ImporterJob;
+import org.edu_sharing.repository.server.tools.ApplicationInfoList;
 import org.edu_sharing.repository.server.tools.HttpQueryTool;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
@@ -160,7 +161,7 @@ public class SerloImporter implements Importer{
 				eduProps.put(CCConstants.LOM_PROP_GENERAL_TITLE,jo.get("title").toString());
 				
 				
-				String name = jo.get("title").toString().replaceAll(RepoFactory.getEdusharingProperty(CCConstants.EDU_SHARING_PROPERTIES_PROPERTY_VALIDATOR_REGEX_CM_NAME), "_");
+				String name = jo.get("title").toString().replaceAll(ApplicationInfoList.getHomeRepository().getValidatorRegexCMName(), "_");
 				name = name.trim();
 				eduProps.put(CCConstants.CM_NAME, name);
 				eduProps.put(CCConstants.LOM_PROP_GENERAL_DESCRIPTION, (String) jo.get("description"));

@@ -13,15 +13,15 @@ public class RenderInfoSoapBindingSkeleton implements org.edu_sharing.webservice
     private static java.util.Collection _myOperationsList = new java.util.ArrayList();
 
     /**
-    * Returns List of OperationDesc objects with this name
-    */
+     * Returns List of OperationDesc objects with this name
+     */
     public static java.util.List getOperationDescByName(java.lang.String methodName) {
         return (java.util.List)_myOperations.get(methodName);
     }
 
     /**
-    * Returns Collection of OperationDescs
-    */
+     * Returns Collection of OperationDescs
+     */
     public static java.util.Collection getOperationDescs() {
         return _myOperationsList;
     }
@@ -31,9 +31,9 @@ public class RenderInfoSoapBindingSkeleton implements org.edu_sharing.webservice
         org.apache.axis.description.FaultDesc _fault;
         org.apache.axis.description.ParameterDesc [] _params;
         _params = new org.apache.axis.description.ParameterDesc [] {
-            new org.apache.axis.description.ParameterDesc(new javax.xml.namespace.QName("http://render.webservices.edu_sharing.org", "userName"), org.apache.axis.description.ParameterDesc.IN, new javax.xml.namespace.QName("http://www.w3.org/2001/XMLSchema", "string"), java.lang.String.class, false, false), 
-            new org.apache.axis.description.ParameterDesc(new javax.xml.namespace.QName("http://render.webservices.edu_sharing.org", "nodeId"), org.apache.axis.description.ParameterDesc.IN, new javax.xml.namespace.QName("http://www.w3.org/2001/XMLSchema", "string"), java.lang.String.class, false, false), 
-            new org.apache.axis.description.ParameterDesc(new javax.xml.namespace.QName("http://render.webservices.edu_sharing.org", "version"), org.apache.axis.description.ParameterDesc.IN, new javax.xml.namespace.QName("http://www.w3.org/2001/XMLSchema", "string"), java.lang.String.class, false, false), 
+                new org.apache.axis.description.ParameterDesc(new javax.xml.namespace.QName("http://render.webservices.edu_sharing.org", "userName"), org.apache.axis.description.ParameterDesc.IN, new javax.xml.namespace.QName("http://www.w3.org/2001/XMLSchema", "string"), java.lang.String.class, false, false),
+                new org.apache.axis.description.ParameterDesc(new javax.xml.namespace.QName("http://render.webservices.edu_sharing.org", "nodeId"), org.apache.axis.description.ParameterDesc.IN, new javax.xml.namespace.QName("http://www.w3.org/2001/XMLSchema", "string"), java.lang.String.class, false, false),
+                new org.apache.axis.description.ParameterDesc(new javax.xml.namespace.QName("http://render.webservices.edu_sharing.org", "version"), org.apache.axis.description.ParameterDesc.IN, new javax.xml.namespace.QName("http://www.w3.org/2001/XMLSchema", "string"), java.lang.String.class, false, false),
         };
         _oper = new org.apache.axis.description.OperationDesc("getRenderInfoRepo", _params, new javax.xml.namespace.QName("http://render.webservices.edu_sharing.org", "getRenderInfoRepoReturn"));
         _oper.setReturnType(new javax.xml.namespace.QName("http://render.webservices.edu_sharing.org", "RenderInfoResult"));
@@ -45,12 +45,12 @@ public class RenderInfoSoapBindingSkeleton implements org.edu_sharing.webservice
         }
         ((java.util.List)_myOperations.get("getRenderInfoRepo")).add(_oper);
         _params = new org.apache.axis.description.ParameterDesc [] {
-            new org.apache.axis.description.ParameterDesc(new javax.xml.namespace.QName("http://render.webservices.edu_sharing.org", "userName"), org.apache.axis.description.ParameterDesc.IN, new javax.xml.namespace.QName("http://www.w3.org/2001/XMLSchema", "string"), java.lang.String.class, false, false), 
-            new org.apache.axis.description.ParameterDesc(new javax.xml.namespace.QName("http://render.webservices.edu_sharing.org", "nodeId"), org.apache.axis.description.ParameterDesc.IN, new javax.xml.namespace.QName("http://www.w3.org/2001/XMLSchema", "string"), java.lang.String.class, false, false), 
-            new org.apache.axis.description.ParameterDesc(new javax.xml.namespace.QName("http://render.webservices.edu_sharing.org", "lmsId"), org.apache.axis.description.ParameterDesc.IN, new javax.xml.namespace.QName("http://www.w3.org/2001/XMLSchema", "string"), java.lang.String.class, false, false), 
-            new org.apache.axis.description.ParameterDesc(new javax.xml.namespace.QName("http://render.webservices.edu_sharing.org", "courseId"), org.apache.axis.description.ParameterDesc.IN, new javax.xml.namespace.QName("http://www.w3.org/2001/XMLSchema", "string"), java.lang.String.class, false, false), 
-            new org.apache.axis.description.ParameterDesc(new javax.xml.namespace.QName("http://render.webservices.edu_sharing.org", "resourceId"), org.apache.axis.description.ParameterDesc.IN, new javax.xml.namespace.QName("http://www.w3.org/2001/XMLSchema", "string"), java.lang.String.class, false, false), 
-            new org.apache.axis.description.ParameterDesc(new javax.xml.namespace.QName("http://render.webservices.edu_sharing.org", "version"), org.apache.axis.description.ParameterDesc.IN, new javax.xml.namespace.QName("http://www.w3.org/2001/XMLSchema", "string"), java.lang.String.class, false, false), 
+                new org.apache.axis.description.ParameterDesc(new javax.xml.namespace.QName("http://render.webservices.edu_sharing.org", "userName"), org.apache.axis.description.ParameterDesc.IN, new javax.xml.namespace.QName("http://www.w3.org/2001/XMLSchema", "string"), java.lang.String.class, false, false),
+                new org.apache.axis.description.ParameterDesc(new javax.xml.namespace.QName("http://render.webservices.edu_sharing.org", "nodeId"), org.apache.axis.description.ParameterDesc.IN, new javax.xml.namespace.QName("http://www.w3.org/2001/XMLSchema", "string"), java.lang.String.class, false, false),
+                new org.apache.axis.description.ParameterDesc(new javax.xml.namespace.QName("http://render.webservices.edu_sharing.org", "lmsId"), org.apache.axis.description.ParameterDesc.IN, new javax.xml.namespace.QName("http://www.w3.org/2001/XMLSchema", "string"), java.lang.String.class, false, false),
+                new org.apache.axis.description.ParameterDesc(new javax.xml.namespace.QName("http://render.webservices.edu_sharing.org", "courseId"), org.apache.axis.description.ParameterDesc.IN, new javax.xml.namespace.QName("http://www.w3.org/2001/XMLSchema", "string"), java.lang.String.class, false, false),
+                new org.apache.axis.description.ParameterDesc(new javax.xml.namespace.QName("http://render.webservices.edu_sharing.org", "resourceId"), org.apache.axis.description.ParameterDesc.IN, new javax.xml.namespace.QName("http://www.w3.org/2001/XMLSchema", "string"), java.lang.String.class, false, false),
+                new org.apache.axis.description.ParameterDesc(new javax.xml.namespace.QName("http://render.webservices.edu_sharing.org", "version"), org.apache.axis.description.ParameterDesc.IN, new javax.xml.namespace.QName("http://www.w3.org/2001/XMLSchema", "string"), java.lang.String.class, false, false),
         };
         _oper = new org.apache.axis.description.OperationDesc("getRenderInfoLMS", _params, new javax.xml.namespace.QName("http://render.webservices.edu_sharing.org", "getRenderInfoLMSReturn"));
         _oper.setReturnType(new javax.xml.namespace.QName("http://render.webservices.edu_sharing.org", "RenderInfoResult"));

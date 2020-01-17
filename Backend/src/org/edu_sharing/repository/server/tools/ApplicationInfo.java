@@ -96,14 +96,12 @@ public class ApplicationInfo implements Comparable<ApplicationInfo>{
 
 	public static final String KEY_URL_DYNAMIC = "url_dynamic";
 
-	public static final String KEY_CONTENTURL_BACKEND = "contenturlBackend";
-	
 	public static final String KEY_PREVIEWURL = "previewurl";
 	
 	public static final String KEY_IS_HOME_NODE = "is_home_node";
 	
 	public static final String KEY_CUSTOM_HTML_HEADERS = "custom_html_headers";
-	
+
 	public static final String KEY_METADATASETS_V2 = "metadatasetsV2";
 	
 	public static final String KEY_PUBLIC_KEY = "public_key";
@@ -175,7 +173,9 @@ public class ApplicationInfo implements Comparable<ApplicationInfo>{
 	 */
 	public static final String REMOTE_USERID = "remote_userid";
 
-    private final Properties properties;
+	public static final String PROPERTY_VALIDATOR_REGEX_CM_NAME = "property_validator_regex_cm_name";
+
+	private final Properties properties;
 
 	private String host = null;
 	
@@ -253,12 +253,6 @@ public class ApplicationInfo implements Comparable<ApplicationInfo>{
 	 * this is a property used to redirect to content deliverd by repositories renderservice
 	 */
 	private String contentUrl = null;
-	
-	/**
-	 * use this property for a call to the renderservice from an backend service like renderingproxy
-	 * this url contains the internal ip of the renderservice
-	 */
-	private String contentUrlBackend = null;
 
 	/**
 	 * this is a property used redirect to preview deliverd by repositories renderservice
@@ -333,7 +327,16 @@ public class ApplicationInfo implements Comparable<ApplicationInfo>{
 
 	private String xml;
 
-	
+	/**
+	 * der Anfangsteil des alfresco Intergity Pattern:
+	 * (.*[\"\*\\\>\<\?\/\:\|]+.*)|(.*[\.]?.*[\.]+$)|(.*[ ]+$)
+	 * so das nur die kritischen Zeichen matchen und nicht der ganze string
+	 */
+	//default value ([\"\*\\\\\>\<\?\/\:\|'\r\n])
+	private String validatorRegexCMName = "([\\\"\\*\\\\\\\\\\>\\<\\?\\/\\:\\|'\\r\\n])";
+
+
+
 	public ApplicationInfo(String _appFile) throws Exception{
 		if(_appFile == null) throw new Exception("Application Filename was null!");
 		appFile = _appFile;
@@ -349,9 +352,9 @@ public class ApplicationInfo implements Comparable<ApplicationInfo>{
 		
 		host = properties.getProperty(KEY_HOST);
 				
-		hostAliases = properties.getProperty("host_aliases");	
+		hostAliases = properties.getProperty("host_aliases");
 		
-		domain = properties.getProperty(KEY_DOMAIN);	
+		domain = properties.getProperty(KEY_DOMAIN);
 		
 		port = properties.getProperty(KEY_PORT);
 		if(port == null || port.trim().equals("")){
@@ -399,21 +402,21 @@ public class ApplicationInfo implements Comparable<ApplicationInfo>{
 		
 		trustedclient = properties.getProperty(KEY_TRUSTEDCLIENT);
 		
-		type = properties.getProperty(KEY_TYPE); 
+		type = properties.getProperty(KEY_TYPE);
 		
-		authenticationwebservice = properties.getProperty("authenticationwebservice"); 
+		authenticationwebservice = properties.getProperty("authenticationwebservice");
 		
 		permissionwebservice = properties.getProperty("permissionwebservice");
-		
+
 		subtype  = properties.getProperty("subtype");
 
-		searchclass = properties.getProperty(KEY_SEARCHCLASS);	
+		searchclass = properties.getProperty(KEY_SEARCHCLASS);
 		
-		searchService = properties.getProperty("searchService");	
+		searchService = properties.getProperty("searchService");
 		
-		permissionService = properties.getProperty("permissionService");	
+		permissionService = properties.getProperty("permissionService");
 		
-		nodeService = properties.getProperty("nodeService");	
+		nodeService = properties.getProperty("nodeService");
 		
 		authenticationtoolclass = properties.getProperty("authenticationtoolclass");
 		
@@ -421,8 +424,6 @@ public class ApplicationInfo implements Comparable<ApplicationInfo>{
 		
 		contentUrl = properties.getProperty(KEY_CONTENTURL);
 
-		contentUrlBackend = properties.getProperty(KEY_CONTENTURL_BACKEND);
-		
 		previewUrl = properties.getProperty(KEY_PREVIEWURL);
 		
 		customHtmlHeaders = properties.getProperty(KEY_CUSTOM_HTML_HEADERS);
@@ -430,7 +431,7 @@ public class ApplicationInfo implements Comparable<ApplicationInfo>{
 		logoutUrl = properties.getProperty(KEY_LOGOUT_URL);
 
 		searchable = properties.getProperty(KEY_SEARCHABLE);
-		
+
 		if(searchable == null) searchable = "true";
 		
 		path = properties.getProperty("path");
@@ -438,7 +439,7 @@ public class ApplicationInfo implements Comparable<ApplicationInfo>{
 		metadatsetsV2 = properties.getProperty(KEY_METADATASETS_V2);
 		
 		devmode = properties.getProperty("devmode");
-		
+
 		devmode = (devmode == null)? "false": devmode;
 		
 		alfrescocontext = properties.getProperty(KEY_ALFRESCOCONTEXT);
@@ -482,6 +483,11 @@ public class ApplicationInfo implements Comparable<ApplicationInfo>{
 		getWebServiceUrl();
 		getWebServerUrl();
 		
+		String cmNameRegex = properties.getProperty(PROPERTY_VALIDATOR_REGEX_CM_NAME);
+		if(cmNameRegex != null && !cmNameRegex.trim().equals("")) {
+			validatorRegexCMName = cmNameRegex;
+		}
+
 	}
 	
 	public String getXml() {
@@ -680,15 +686,7 @@ public class ApplicationInfo implements Comparable<ApplicationInfo>{
 		
 		return contentUrl;
 	}
-	
-	public String getContentUrlBackend() {
-		
-		return contentUrlBackend;
-	
-	}
-	
-	
-	
+
 	/**
 	 * this is a property used redirect to preview deliverd by repositories renderservice
 	 * 
@@ -711,7 +709,7 @@ public class ApplicationInfo implements Comparable<ApplicationInfo>{
 		
 		return logoutUrl;
 	}
-	
+
 	/**
 	 * @return the searchable
 	 */
@@ -932,6 +930,10 @@ public class ApplicationInfo implements Comparable<ApplicationInfo>{
 		return apiKey;
 	}
 	
+	public String getValidatorRegexCMName() {
+		return validatorRegexCMName;
+	}
+
 	public String getWebsitepreviewrenderservice() {
 		return websitepreviewrenderservice;
 	}	

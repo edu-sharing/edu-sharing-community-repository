@@ -24,11 +24,13 @@ import {DECLARATIONS_SHARING} from './modules/sharing/declarations';
 import {DECLARATIONS_REGISTER} from './modules/register/declarations';
 import {DECLARATIONS_SERVICES} from "./modules/services/declarations";
 import {DECLARATIONS_FILE_UPLOAD} from './modules/file-upload/declarations';
-import {SpinnerComponent} from "./common/ui/spinner/spinner.component";
-import {ListTableComponent} from "./common/ui/list-table/list-table.component";
 import {CommentsListComponent} from "./modules/management-dialogs/node-comments/comments-list/comments-list.component";
-import {MAT_FORM_FIELD_DEFAULT_OPTIONS} from "@angular/material";
 import {MdsWidgetComponent} from "./common/ui/mds-viewer/widget/mds-widget.component";
+import {MAT_FORM_FIELD_DEFAULT_OPTIONS, MAT_LABEL_GLOBAL_OPTIONS, MAT_TOOLTIP_DEFAULT_OPTIONS} from "@angular/material";
+import {ButtonsTestComponent} from './common/test/buttons/buttons-test.component';
+import {InputsTestComponent} from './common/test/inputs/inputs-test.component';
+import {UserAvatarTestComponent} from './common/test/user-avatar/user-avatar-test.component';
+import {ModalTestComponent} from './common/test/modal/modal-test.component';
 
 
 // http://blog.angular-university.io/angular2-ngmodule/
@@ -36,41 +38,67 @@ import {MdsWidgetComponent} from "./common/ui/mds-viewer/widget/mds-widget.compo
 
 
 @NgModule({
-  declarations: [
-    DECLARATIONS,
-    DECLARATIONS_RECYCLE,
-    DECLARATIONS_WORKSPACE,
-    DECLARATIONS_SEARCH,
-    DECLARATIONS_COLLECTIONS,
-    DECLARATIONS_LOGIN,
-    DECLARATIONS_REGISTER,
-    DECLARATIONS_LOGINAPP,
-    DECLARATIONS_FILE_UPLOAD,
-    DECLARATIONS_STARTUP,
-    DECLARATIONS_PERMISSIONS,
-    DECLARATIONS_OER,
-    DECLARATIONS_STREAM,
-    DECLARATIONS_MANAGEMENT_DIALOGS,
-    DECLARATIONS_ADMIN,
-    DECLARATIONS_UPLOAD,
-    DECLARATIONS_PROFILES,
-    DECLARATIONS_MESSAGES,
-    DECLARATIONS_SHARING,
-    DECLARATIONS_SHARE_APP,
-    DECLARATIONS_SERVICES
-  ],
-  entryComponents: [
-      SpinnerComponent,
-      ListTableComponent,
-      MdsWidgetComponent,
-      CommentsListComponent,
-  ],
-  imports: IMPORTS,
-  providers: [
-    PROVIDERS,
-    PROVIDERS_SEARCH,
-    {provide: MAT_FORM_FIELD_DEFAULT_OPTIONS, useValue: {appearance: 'outline'}}
-  ],
-  bootstrap: [RouterComponent]
+    declarations: [
+        DECLARATIONS,
+        DECLARATIONS_RECYCLE,
+        DECLARATIONS_WORKSPACE,
+        DECLARATIONS_SEARCH,
+        DECLARATIONS_COLLECTIONS,
+        DECLARATIONS_LOGIN,
+        DECLARATIONS_REGISTER,
+        DECLARATIONS_LOGINAPP,
+        DECLARATIONS_FILE_UPLOAD,
+        DECLARATIONS_STARTUP,
+        DECLARATIONS_PERMISSIONS,
+        DECLARATIONS_OER,
+        DECLARATIONS_STREAM,
+        DECLARATIONS_MANAGEMENT_DIALOGS,
+        DECLARATIONS_ADMIN,
+        DECLARATIONS_UPLOAD,
+        DECLARATIONS_PROFILES,
+        DECLARATIONS_MESSAGES,
+        DECLARATIONS_SHARING,
+        DECLARATIONS_SHARE_APP,
+        DECLARATIONS_SERVICES
+    ],
+    entryComponents: [
+        MdsWidgetComponent,
+        CommentsListComponent,
+        ButtonsTestComponent,
+        InputsTestComponent,
+        UserAvatarTestComponent,
+        ModalTestComponent
+    ],
+    imports: IMPORTS,
+    providers: [
+        PROVIDERS,
+        PROVIDERS_SEARCH,
+        {provide: MAT_FORM_FIELD_DEFAULT_OPTIONS, useValue: {appearance: 'outline'}},
+        {provide: MAT_TOOLTIP_DEFAULT_OPTIONS, useValue: {showDelay: 500}}
+    ],
+    exports: [
+        DECLARATIONS,
+        DECLARATIONS_RECYCLE,
+        DECLARATIONS_WORKSPACE,
+        DECLARATIONS_SEARCH,
+        DECLARATIONS_COLLECTIONS,
+        DECLARATIONS_LOGIN,
+        DECLARATIONS_REGISTER,
+        DECLARATIONS_LOGINAPP,
+        DECLARATIONS_FILE_UPLOAD,
+        DECLARATIONS_STARTUP,
+        DECLARATIONS_PERMISSIONS,
+        DECLARATIONS_OER,
+        DECLARATIONS_STREAM,
+        DECLARATIONS_MANAGEMENT_DIALOGS,
+        DECLARATIONS_ADMIN,
+        DECLARATIONS_UPLOAD,
+        DECLARATIONS_PROFILES,
+        DECLARATIONS_MESSAGES,
+        DECLARATIONS_SHARING,
+        DECLARATIONS_SHARE_APP,
+        DECLARATIONS_SERVICES
+    ],
+    bootstrap: [RouterComponent]
 })
 export class AppModule { }

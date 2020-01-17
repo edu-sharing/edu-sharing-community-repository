@@ -9,16 +9,9 @@ public class User extends Authority {
 	String surname;
 	String repositoryId;
 	String username;
-		
-	boolean fuzzySearchMode;
-	
-	public User() {
-		this(false);	
-	}
 
-	public User(boolean fuzzySearchMode) {
+	public User() {
 		super("USER");
-		this.fuzzySearchMode = fuzzySearchMode;
 	}
 
 
@@ -78,10 +71,7 @@ public class User extends Authority {
 	
 	@Override
 	public String getAuthorityDisplayName() {
-		return 
-			  (this.fuzzySearchMode) 
-			? (getGivenName() + " " + getSurname())
-			: (getEmail());
+		return getGivenName() + " " + getSurname();
 	}
 	
 }

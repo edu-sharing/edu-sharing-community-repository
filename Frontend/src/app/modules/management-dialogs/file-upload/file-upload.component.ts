@@ -1,8 +1,8 @@
 import {Component, Input, EventEmitter, Output} from '@angular/core';
-import {RestNodeService} from "../../../common/rest/services/rest-node.service";
-import {Node, NodeList, NodeWrapper} from "../../../common/rest/data-object";
-import {RestConstants} from "../../../common/rest/rest-constants";
-import {RestHelper} from "../../../common/rest/rest-helper";
+import {RestNodeService} from "../../../core-module/core.module";
+import {Node, NodeList, NodeWrapper} from "../../../core-module/core.module";
+import {RestConstants} from "../../../core-module/core.module";
+import {RestHelper} from "../../../core-module/core.module";
 import {TimePipe} from "../../../common/ui/time.pipe";
 import {TranslateService} from "@ngx-translate/core";
 
@@ -18,6 +18,7 @@ export class WorkspaceFileUploadComponent  {
   private _files : FileList;
   private error = false;
   public showClose = false;
+  processed = 0;
   @Input() set files(files : FileList){
     console.log(files);
     this._files=files;
@@ -60,6 +61,7 @@ export class WorkspaceFileUploadComponent  {
           () => {
             this.resultList.push(data.node);
             this.progress[number].progress.progress=100;
+            this.processed++;
             this.upload(number+1);
           },(error)=>{
                 this.error=true;

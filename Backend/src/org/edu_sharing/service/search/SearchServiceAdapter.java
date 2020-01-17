@@ -4,6 +4,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.google.gwt.user.client.ui.SuggestOracle;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.security.AuthorityType;
 import org.edu_sharing.metadataset.v2.MetadataSetV2;
@@ -17,6 +18,10 @@ import org.edu_sharing.service.search.model.SortDefinition;
 
 public class SearchServiceAdapter implements SearchService {
 
+    @Override
+    public List<String> getAllMediacenters() throws Exception {
+        return null;
+    }
 	@Override
 	public SearchResult<EduGroup> searchOrganizations(String pattern, int skipCount, int maxValues, SortDefinition sort, boolean scoped, boolean onlyMemberships) throws Throwable {
 		return null;

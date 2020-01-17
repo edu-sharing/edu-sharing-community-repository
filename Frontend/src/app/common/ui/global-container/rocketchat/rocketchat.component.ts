@@ -1,10 +1,10 @@
 import {AfterViewInit, ChangeDetectorRef, Component, ElementRef, HostListener, Input, Output, ViewChild} from "@angular/core";
 import {DomSanitizer, SafeResourceUrl} from "@angular/platform-browser";
-import {UIHelper} from "../../ui-helper";
-import {EventListener, FrameEventsService} from "../../../services/frame-events.service";
-import {RestConnectorService} from "../../../rest/services/rest-connector.service";
 import {trigger} from "@angular/animations";
-import {UIAnimation} from "../../ui-animation";
+import {MainNavComponent} from "../../main-nav/main-nav.component";
+import {EventListener,FrameEventsService} from "../../../../core-module/rest/services/frame-events.service";
+import {UIAnimation} from "../../../../core-module/ui/ui-animation";
+import {RestConnectorService} from "../../../../core-module/core.module";
 import {GlobalContainerComponent} from "../global-container.component";
 
 @Component({

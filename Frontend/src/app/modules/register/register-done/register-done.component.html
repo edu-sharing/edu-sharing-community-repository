@@ -7,8 +7,11 @@
     <p>{{(inputState=='done-reset' ? 'REGISTER.REQUEST' : 'REGISTER.DONE')+'.MAIL_NOTE' | translate}}</p>
     <div *ngIf="!keyUrl" class="keyForm">
         <form (ngSubmit)="keyInput.trim() ? activate(keyInput) : null">
-            <input type="text" placeholder="{{'REGISTER.DONE.KEY_PL' | translate}}" id="key" name="key" [(ngModel)]="keyInput">
-            <div class="input-hint-bottom">{{'REGISTER.DONE.ACTIVATE_HINT' | translate}}</div>
+            <mat-form-field>
+                <mat-label>{{'REGISTER.DONE.KEY_PL' | translate}}</mat-label>
+                <input matInput id="key" name="key" [(ngModel)]="keyInput">
+                <mat-hint>{{'REGISTER.DONE.ACTIVATE_HINT' | translate}}</mat-hint>
+            </mat-form-field>
         </form>
 
     </div>

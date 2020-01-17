@@ -1,7 +1,10 @@
-@import "../../../../styles/variables.scss";
+@import "../../../core-ui-module/styles/variables";
 
-.header {
-  margin-bottom: 36px;
+mat-form-field{
+  width: 100%;
+}
+.header{
+  margin-bottom: 20px;
   text-align: center;
   img {
     width: auto;

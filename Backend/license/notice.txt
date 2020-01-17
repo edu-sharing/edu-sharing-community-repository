@@ -23,8 +23,8 @@ http://blowfishj.sourceforge.net/
 jmimemagic							GNU LESSER GENERAL PUBLIC LICENSE Version 2.1, February 1999
 http://jmimemagic.sourceforge.net/index.html
 ------------------------------------------------------------------------------------------------------
-vcard4j									GNU Lesser General Public License
-http://vcard4j.sourceforge.net/
+cardme									BSD License, Apache License V2.0
+https://sourceforge.net/projects/cardme/
 ------------------------------------------------------------------------------------------------------
 xalan										Apache License, Version 2.0
 http://xml.apache.org/xalan-j/

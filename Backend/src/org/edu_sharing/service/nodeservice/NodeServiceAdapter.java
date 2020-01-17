@@ -66,7 +66,7 @@ public class NodeServiceAdapter implements NodeService {
 	}
 
 	@Override
-	public List<NodeRef> getChildrenRecursive(StoreRef store, String nodeId, List<String> types) {
+	public List<NodeRef> getChildrenRecursive(StoreRef store, String nodeId, List<String> types, RecurseMode recurseMode) {
 		return null;
 	}
 
@@ -175,6 +175,17 @@ public class NodeServiceAdapter implements NodeService {
 		if(content==null)
 			throw new IllegalArgumentException("The remote service did not provide any data to import");
 		NodeService service=NodeServiceFactory.getLocalService();
+		
+		//fix name
+		String name = (String) props.get(CCConstants.CM_NAME);
+		name = NodeServiceHelper.cleanupCmName(name);
+		props.put(CCConstants.CM_NAME, name);
+		
+		//preview
+		String thumbnail = (String)props.get(CCConstants.CM_ASSOC_THUMBNAILS);
+		if(thumbnail != null) {
+			props.put(CCConstants.CCM_PROP_IO_THUMBNAILURL, thumbnail);
+		}
 
 		// Aspect ccm:imported_object properties
 		props.put(CCConstants.CCM_PROP_IMPORTED_OBJECT_NODEID,props.get(CCConstants.SYS_PROP_NODE_UID));
@@ -186,7 +197,9 @@ public class NodeServiceAdapter implements NodeService {
 		props.remove(CCConstants.CM_PROP_C_MODIFIED);
 
 		String localNode=service.createNodeBasic(localParent, CCConstants.CCM_TYPE_IO,props);
-		service.writeContent(new StoreRef(StoreRef.PROTOCOL_WORKSPACE, "SpacesStore"), localNode, content,mimetype, null, CCConstants.CM_PROP_CONTENT);
+		if(content != null) {
+			service.writeContent(new StoreRef(StoreRef.PROTOCOL_WORKSPACE, "SpacesStore"), localNode, content,mimetype, null, CCConstants.CM_PROP_CONTENT);
+		}
 		return localNode;
 	}
 	
@@ -201,13 +214,17 @@ public class NodeServiceAdapter implements NodeService {
 		// TODO Auto-generated method stub
 		return null;
 	}
-	
+
 	@Override
-	public InputStream getContent(String storeProtocol, String storeId, String nodeId, String contentProp)
-			throws Throwable {
+	public InputStream getContent(String storeProtocol, String storeId, String nodeId, String version, String contentProp) throws Throwable {
 		return null;
 	}
-	
+
+	@Override
+	public String getContentHash(String storeProtocol, String storeId, String nodeId, String version, String contentProp) {
+		return null;
+	}
+
 	@Override
 	public void removeNode(String nodeId, String parentId, boolean recycle) {
 	}
@@ -248,7 +265,7 @@ public class NodeServiceAdapter implements NodeService {
 	}
 
 	@Override
-	public String getType(String nodeId) {
+	public String getType(String storeProtocol,String storeId,String nodeId) {
 		// TODO Auto-generated method stub
 		return null;
 	}
@@ -257,12 +274,6 @@ public class NodeServiceAdapter implements NodeService {
 	public boolean exists(String protocol, String store, String nodeId) {
 		// TODO Auto-generated method stub
 		return false;
-	}
-
-	@Override
-	public String getProperty(String storeProtocol, String storeId, String nodeId, String property) {
-		// TODO Auto-generated method stub
-		return null;
 	}
 
 	@Override
@@ -302,7 +313,7 @@ public class NodeServiceAdapter implements NodeService {
 
 	@Override
 	public List<ChildAssociationRef> getChildrenChildAssociationRefAssoc(String parentID, String asoocName, List<String> filter, SortDefinition sortDefinition) {
-		return null;
+		return new ArrayList<>();
 	}
 
 	@Override
@@ -312,7 +323,21 @@ public class NodeServiceAdapter implements NodeService {
 	}
 
 	@Override
-	public GetPreviewResult getPreview(String storeProtocol, String storeIdentifier, String nodeId) {
+	public GetPreviewResult getPreview(String storeProtocol, String storeIdentifier, String nodeId,String version) {
+	    try {
+            return new GetPreviewResult(getProperty(storeProtocol, storeIdentifier, nodeId, CCConstants.CM_ASSOC_THUMBNAILS), false);
+        }catch(Throwable t){
+	        return null;
+        }
+	}
+
+	@Override
+	public List<NodeRef> getFrontpageNodes() throws Throwable {
+		return null;
+	}
+
+	@Override
+	public Serializable getPropertyNative(String storeProtocol, String storeId, String nodeId, String property) throws Throwable {
 		return null;
 	}
 

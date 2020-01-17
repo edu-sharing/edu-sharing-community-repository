@@ -1,28 +1,19 @@
-
-import {Component, Input, Output, EventEmitter, HostListener, ChangeDetectorRef, ApplicationRef} from "@angular/core";
+import {Component, EventEmitter, Input, Output} from "@angular/core";
 import {
-    Group, IamGroups, IamUsers, NodeList, IamUser, IamAuthorities,
-    Authority, OrganizationOrganizations, Organization, ToolPermission
-} from '../../../common/rest/data-object';
-import {Toast} from "../../../common/ui/toast";
-import {ActivatedRoute} from "@angular/router";
-import {RestIamService} from "../../../common/rest/services/rest-iam.service";
+    DialogButton,
+    RestAdminService,
+    RestConstants,
+    RestIamService,
+    RestNodeService,
+    ToolPermission
+} from '../../../core-module/core.module';
+import {Toast} from "../../../core-ui-module/toast";
 import {TranslateService} from "@ngx-translate/core";
-import {RestConnectorService} from "../../../common/rest/services/rest-connector.service";
-import {OptionItem} from "../../../common/ui/actionbar/option-item";
-import {DialogButton} from "../../../common/ui/modal-dialog/modal-dialog.component";
-import {UIAnimation} from "../../../common/ui/ui-animation";
-import {SuggestItem} from "../../../common/ui/autocomplete/autocomplete.component";
-import {NodeHelper} from "../../../common/ui/node-helper";
-import {RestConstants} from "../../../common/rest/rest-constants";
-import {RestOrganizationService} from "../../../common/rest/services/rest-organization.service";
-import {RestNodeService} from "../../../common/rest/services/rest-node.service";
-import {ConfigurationService} from "../../../common/services/configuration.service";
-import {Helper} from "../../../common/helper";
+import {UIAnimation} from "../../../core-module/ui/ui-animation";
+import {Helper} from "../../../core-module/rest/helper";
 import {trigger} from "@angular/animations";
-import {ListItem} from "../../../common/ui/list-item";
-import {RestAdminService} from '../../../common/rest/services/rest-admin.service';
-import {AuthorityNamePipe} from '../../../common/ui/authority-name.pipe';
+import {AuthorityNamePipe} from '../../../core-ui-module/pipes/authority-name.pipe';
+
 @Component({
   selector: 'toolpermission-manager',
   templateUrl: 'toolpermission-manager.component.html',
@@ -80,6 +71,8 @@ export class ToolpermissionManagerComponent {
     {name:"OTHER",icon:"help"}
   ];
   changing: string[]=[];
+  buttons: DialogButton[];
+
   getGroups(){
     return ToolpermissionManagerComponent.GROUPS;
   }
@@ -132,7 +125,7 @@ export class ToolpermissionManagerComponent {
               private node : RestNodeService,
               private translate : TranslateService,
               private iam: RestIamService) {
-
+    this.buttons=DialogButton.getSingleButton('CLOSE',()=>this.close(),DialogButton.TYPE_CANCEL);
   }
   close(){
     this.onClose.emit();

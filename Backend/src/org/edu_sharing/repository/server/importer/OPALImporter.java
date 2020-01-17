@@ -98,7 +98,7 @@ public class OPALImporter {
 					eduProps.put(
 							CCConstants.CM_NAME, 
 							name.replaceAll(
-									RepoFactory.getEdusharingProperty(CCConstants.EDU_SHARING_PROPERTIES_PROPERTY_VALIDATOR_REGEX_CM_NAME), 
+									ApplicationInfoList.getHomeRepository().getValidatorRegexCMName(), 
 									"_"));
 
 					Parser parser = new Parser();

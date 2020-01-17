@@ -1,7 +1,10 @@
-@import "../../../../styles/variables.scss";
+@import "../../../core-ui-module/styles/variables";
 
 .done-info{
   text-align: center;
+  mat-form-field{
+    width: 100%;
+  }
   h4{
     margin-bottom: 20px;
   }
@@ -41,9 +44,6 @@
   small{
     font-size: 100%;
     color: $textLight;
-  }
-  .input-hint-bottom{
-    margin-bottom: 15px;
   }
   .keyForm{
     display: flex;

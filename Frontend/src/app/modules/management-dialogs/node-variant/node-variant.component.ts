@@ -1,21 +1,21 @@
 import {Component, EventEmitter, Input, Output} from '@angular/core';
-import {RestConnectorService} from "../../../common/rest/services/rest-connector.service";
-import {Toast} from "../../../common/ui/toast";
-import {RestNodeService} from "../../../common/rest/services/rest-node.service";
-import {Connector, Node} from "../../../common/rest/data-object";
-import {ConfigurationService} from "../../../common/services/configuration.service";
-import {UIHelper} from "../../../common/ui/ui-helper";
-import {RestIamService} from "../../../common/rest/services/rest-iam.service";
+import {DialogButton, RestConnectorService} from "../../../core-module/core.module";
+import {Toast} from "../../../core-ui-module/toast";
+import {RestNodeService} from "../../../core-module/core.module";
+import {Connector, Node} from "../../../core-module/core.module";
+import {ConfigurationService} from "../../../core-module/core.module";
+import {UIHelper} from "../../../core-ui-module/ui-helper";
+import {RestIamService} from "../../../core-module/core.module";
 import {TranslateService} from "@ngx-translate/core";
 import {trigger} from "@angular/animations";
-import {UIAnimation} from "../../../common/ui/ui-animation";
-import {RestConstants} from '../../../common/rest/rest-constants';
+import {UIAnimation} from "../../../core-module/ui/ui-animation";
+import {RestConstants} from '../../../core-module/core.module';
 import {Router} from '@angular/router';
-import {RestHelper} from '../../../common/rest/rest-helper';
-import {RestConnectorsService} from "../../../common/rest/services/rest-connectors.service";
-import {FrameEventsService} from "../../../common/services/frame-events.service";
-import {NodeHelper} from "../../../common/ui/node-helper";
-import {OPEN_URL_MODE} from "../../../common/ui/ui-constants";
+import {RestHelper} from '../../../core-module/core.module';
+import {RestConnectorsService} from "../../../core-module/core.module";
+import {FrameEventsService} from "../../../core-module/core.module";
+import {NodeHelper} from "../../../core-ui-module/node-helper";
+import {OPEN_URL_MODE} from "../../../core-module/ui/ui-constants";
 
 @Component({
   selector: 'node-variant',
@@ -33,6 +33,7 @@ export class NodeVariantComponent  {
   variantName : string;
   openViaConnector: Connector;
   licenseWarning: string;
+  buttons: DialogButton[];
   @Input() set node(node : Node){
     this._node=node;
     this.variantName=this.translate.instant('NODE_VARIANT.DEFAULT_NAME',{name:this._node.name});
@@ -48,6 +49,7 @@ export class NodeVariantComponent  {
     else if(!license){
       this.licenseWarning='NO_LICENSE';
     }
+    this.updateButtons();
   }
   @Output() onLoading=new EventEmitter();
   @Output() onCancel=new EventEmitter();
@@ -63,6 +65,7 @@ export class NodeVariantComponent  {
     private router : Router,
     private nodeApi : RestNodeService) {
       this.updateBreadcrumbs(RestConstants.INBOX);
+      this.updateButtons();
   }
   public cancel(){
     this.onCancel.emit();
@@ -120,10 +123,16 @@ export class NodeVariantComponent  {
         })
     }
     openLicense(){
-      UIHelper.openUrl(this.getLicenseUrl(),this.connector.getCordovaService(),OPEN_URL_MODE.BlankSystemBrowser);
+      UIHelper.openUrl(this.getLicenseUrl(),this.connector.getBridgeService(),OPEN_URL_MODE.BlankSystemBrowser);
     }
 
     getLicenseUrl(): string {
         return NodeHelper.getLicenseUrlByString(this._node.properties[RestConstants.CCM_PROP_LICENSE],this._node.properties[RestConstants.CCM_PROP_LICENSE_CC_VERSION])
   }
+    updateButtons(): any {
+        this.buttons=[
+            new DialogButton('CANCEL',DialogButton.TYPE_CANCEL,()=>this.cancel()),
+            new DialogButton('NODE_VARIANT.CREATE'+(this.openViaConnector ? '_EDIT' : ''),DialogButton.TYPE_PRIMARY,()=>this.create())
+        ]
+    }
 }

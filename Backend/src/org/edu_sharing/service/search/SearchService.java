@@ -29,8 +29,10 @@ public interface SearchService {
 		OR
 	};
 
-	SearchResult<EduGroup> searchOrganizations(String pattern, int skipCount, int maxValues, SortDefinition sort,boolean scoped,boolean onlyMemberShips)
-			throws Throwable;
+	SearchResult<EduGroup> searchOrganizations(String pattern, int skipCount, int maxValues, SortDefinition sort,boolean scoped,boolean onlyMemberShips) throws Throwable;
+
+    List<String> getAllMediacenters() throws Exception;
+
 
 	SearchResultNodeRef getFilesSharedByMe(SortDefinition sortDefinition, ContentType contentType, int skipCount, int maxItems) throws Exception;
 

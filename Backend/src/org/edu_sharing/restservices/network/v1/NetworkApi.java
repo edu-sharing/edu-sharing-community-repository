@@ -49,19 +49,7 @@ public class NetworkApi {
 
             List<Repo> repos = new ArrayList<Repo>();
             for (RepositoryDao repository : RepositoryDao.getRepositories()) {
-
-                Repo repo = new Repo();
-
-                repo.setId(repository.getId());
-                //if(repository.isHomeRepo())
-                //	repo.setId(RepositoryDao.HOME);
-                repo.setTitle(repository.getCaption());
-                repo.setIcon(repository.getIcon());
-                repo.setLogo(repository.getLogo());
-                repo.setHomeRepo(repository.isHomeRepo());
-                repo.setRepositoryType(repository.getRepositoryType());
-
-                repos.add(repo);
+                repos.add(repository.asRepo());
             }
 
             RepoEntries response = new RepoEntries();

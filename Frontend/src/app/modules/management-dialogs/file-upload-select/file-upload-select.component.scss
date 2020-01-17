@@ -1,36 +1,48 @@
-@import "../../../../styles/variables.scss";
+@import "../../../core-ui-module/styles/variables";
 
-.dropArea{
-  border-radius:5px;
-  width: 100%;
+.dropArea {
+  border-radius: 5px;
   text-align: center;
   border: 2px dashed $cardSeperatorLineColor;
   padding: 60px 30px;
-  margin-bottom:10px;
-  color:$textLight;
-  a{
+  margin-bottom: 10px;
+  color: $textLight;
+
+  a {
     font-weight: bold;
   }
-  i{
-    font-size:60px;
+
+  i {
+    font-size: 60px;
   }
-  &.dropActive{
-    border-color:$primaryMediumLight;
-    background:$primaryLight;
-    i{
-      color:$primary;
+
+  &.dropActive {
+    border-color: $primaryMediumLight;
+    background: $primaryLight;
+
+    i {
+      color: $primary;
+    }
+
+    .object-message {
+      margin-bottom: 10px;
     }
   }
 }
 .seperator-line{
   margin:20px 5px;
 }
+mat-form-field{
+  width:100%;
+}
+.quota{
+  padding-bottom: 5px;
+}
 .quota{
   padding-bottom: 5px;
 }
 
 .lti-data{
-  background-color: $cardLightBackground;
   margin: 20px $cardPadding*-1;
   padding:20px $cardPadding;
   .heading{
@@ -53,7 +65,12 @@
 .link{
   width:100%;
   .linkLabel{
-    text-align: center;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    .material-icons{
+      margin-right: 5px;
+    }
   }
   .linkTitle{
     color:$textLight;

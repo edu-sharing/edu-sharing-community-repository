@@ -1,22 +1,27 @@
 package org.edu_sharing.service.nodeservice;
 
+import java.io.ByteArrayInputStream;
+import java.io.InputStream;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.alfresco.model.ContentModel;
+import org.alfresco.repo.model.Repository;
 import org.alfresco.service.ServiceRegistry;
 import org.alfresco.service.cmr.repository.ChildAssociationRef;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.repository.StoreRef;
 import org.alfresco.service.namespace.QName;
+import org.edu_sharing.alfresco.tools.EduSharingNodeHelper;
 import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.client.tools.metadata.ValueTool;
 import org.edu_sharing.repository.server.MCAlfrescoAPIClient;
-import org.edu_sharing.repository.server.RepoFactory;
 import org.edu_sharing.repository.server.tools.NameSpaceTool;
+import org.edu_sharing.service.nodeservice.model.GetPreviewResult;
 import org.edu_sharing.service.search.model.SortDefinition;
 import org.springframework.context.ApplicationContext;
 
@@ -27,15 +32,7 @@ public class NodeServiceHelper {
 	 * @return
 	 */
 	public static String cleanupCmName(String cmNameReadableName){
-		// replace chars that can lead to an
-		// org.alfresco.repo.node.integrity.IntegrityException
-		cmNameReadableName = cmNameReadableName.replaceAll(
-			RepoFactory.getEdusharingProperty(CCConstants.EDU_SHARING_PROPERTIES_PROPERTY_VALIDATOR_REGEX_CM_NAME), "_");
-
-		//replace ending dot with nothing
-		//cmNameReadableName = cmNameReadableName.replaceAll("\\.$", "");
-		cmNameReadableName = cmNameReadableName.replaceAll("[\\.]*$", "").trim();
-		return cmNameReadableName;
+		return EduSharingNodeHelper.cleanupCmName(cmNameReadableName);
 	}
 
 	/**
@@ -103,6 +100,9 @@ public class NodeServiceHelper {
 		ServiceRegistry serviceRegistry = (ServiceRegistry) applicationContext.getBean(ServiceRegistry.SERVICE_REGISTRY);
 		return serviceRegistry.getNodeService().getProperty(nodeRef,QName.createQName(key));
 	}
+	public static String getType(NodeRef nodeRef){
+		return NodeServiceFactory.getLocalService().getType(nodeRef.getStoreRef().getProtocol(),nodeRef.getStoreRef().getIdentifier(),nodeRef.getId());
+	}
 	public static String[] getAspects(NodeRef nodeRef){
 		return NodeServiceFactory.getLocalService().getAspects(nodeRef.getStoreRef().getProtocol(),nodeRef.getStoreRef().getIdentifier(),nodeRef.getId());
 	}
@@ -126,19 +126,52 @@ public class NodeServiceHelper {
 		ServiceRegistry serviceRegistry = (ServiceRegistry) applicationContext.getBean(ServiceRegistry.SERVICE_REGISTRY);
 		return serviceRegistry.getNodeService().getProperties(nodeRef);
 	}
+	public static InputStream getContent(NodeRef nodeRef) throws Throwable {
+		return NodeServiceFactory.getLocalService().getContent(nodeRef.getStoreRef().getProtocol(),nodeRef.getStoreRef().getIdentifier(),nodeRef.getId(),null, ContentModel.PROP_CONTENT.toString());
+	}
+	public static void writeContent(NodeRef nodeRef,InputStream content,String mimetype) throws Throwable {
+		NodeServiceFactory.getLocalService().writeContent(
+				nodeRef.getStoreRef(),
+				nodeRef.getId(),
+				content,
+				mimetype,
+				null,
+				ContentModel.PROP_CONTENT.toString()
+		);
+	}
+
 	/**
-	 * Get all properties automatically splitted by multivalue
-	 * Each property is always returned as an array
+	 * write the given text as text/plain content to node
 	 * @param nodeRef
-	 * @return
+	 * @param content
 	 * @throws Throwable
 	 */
-	public static HashMap<String, String[]> getPropertiesMultivalue(NodeRef nodeRef) throws Throwable {
-		HashMap<String, Object> properties = getProperties(nodeRef);
-		HashMap<String, String[]> propertiesMultivalue = new HashMap<>();
-		properties.entrySet().forEach((e)->propertiesMultivalue.put(e.getKey(), e.getValue()==null ? null : ValueTool.getMultivalue(e.getValue().toString())));
-		return propertiesMultivalue;
+	public static void writeContentText(NodeRef nodeRef,String content) throws Throwable {
+		NodeServiceFactory.getLocalService().writeContent(
+				nodeRef.getStoreRef(),
+				nodeRef.getId(),
+				new ByteArrayInputStream(content.getBytes()),
+				"text/plain",
+				null,
+				ContentModel.PROP_CONTENT.toString()
+		);
 	}
+    /**
+     * Get all properties automatically splitted by multivalue
+     * Each property is always returned as an array
+     * @param nodeRef
+     * @return
+     * @throws Throwable
+     */
+    public static HashMap<String, String[]> getPropertiesMultivalue(NodeRef nodeRef) throws Throwable {
+        HashMap<String, Object> properties = getProperties(nodeRef);
+        HashMap<String, String[]> propertiesMultivalue = new HashMap<>();
+        if(properties!=null) {
+			properties.forEach((key, value) -> propertiesMultivalue.put(key, ValueTool.getMultivalue(value.toString())));
+			return propertiesMultivalue;
+		}
+        return null;
+    }
     public static boolean downloadAllowed(String nodeId){
 		NodeRef ref=new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE,nodeId);
 		return new MCAlfrescoAPIClient().downloadAllowed(
@@ -156,4 +189,16 @@ public class NodeServiceHelper {
 		return String.join(".",split);
 	}
 
+
+	public static GetPreviewResult getPreview(NodeRef ref) {
+		return NodeServiceFactory.getLocalService().getPreview(ref.getStoreRef().getProtocol(),ref.getStoreRef().getIdentifier(),ref.getId(),null);
+	}
+	public static GetPreviewResult getPreview(org.edu_sharing.service.model.NodeRef ref) {
+		return NodeServiceFactory.getNodeService(ref.getRepositoryId()).getPreview(ref.getStoreProtocol(),ref.getStoreId(),ref.getNodeId(),null);
+	}
+	public static NodeRef getCompanyHome() {
+		ApplicationContext applicationContext = AlfAppContextGate.getApplicationContext();
+		Repository repositoryHelper = (Repository) applicationContext.getBean("repositoryHelper");
+		return repositoryHelper.getCompanyHome();
+	}
 }

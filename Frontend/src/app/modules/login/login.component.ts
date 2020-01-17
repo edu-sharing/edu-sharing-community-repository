@@ -1,29 +1,33 @@
-import {Component, ElementRef, OnInit, ViewChild} from '@angular/core';
-import {Toast} from '../../common/ui/toast';
-import {ActivatedRoute, Params, Router, UrlSerializer} from '@angular/router';
-import {AccessScope, LoginResult} from '../../common/rest/data-object';
+import {Component, Input, EventEmitter, Output, ElementRef, ViewChild, OnInit} from '@angular/core';
+import {Toast} from '../../core-ui-module/toast';
+import {Router, Route, Params, ActivatedRoute, UrlSerializer} from '@angular/router';
+import {OAuthResult, LoginResult, AccessScope, DialogButton} from '../../core-module/core.module';
+import {RouterComponent} from '../../router/router.component';
 import {TranslateService} from '@ngx-translate/core';
-import {Translation} from '../../common/translation';
-import {RestConnectorService} from '../../common/rest/services/rest-connector.service';
-import {RestConstants} from '../../common/rest/rest-constants';
-import {ConfigurationService} from '../../common/services/configuration.service';
+import {Translation} from '../../core-ui-module/translation';
+import {RestConnectorService} from '../../core-module/core.module';
+import {RestConstants} from '../../core-module/core.module';
+import {ConfigurationService} from '../../core-module/core.module';
+import {FrameEventsService} from '../../core-module/core.module';
 import {Title} from '@angular/platform-browser';
-import {UIHelper} from '../../common/ui/ui-helper';
-import {SessionStorageService} from '../../common/services/session-storage.service';
-import {OPEN_URL_MODE, UIConstants} from '../../common/ui/ui-constants';
-import {Helper} from '../../common/helper';
-import {RestHelper} from '../../common/rest/rest-helper';
+import {UIHelper} from '../../core-ui-module/ui-helper';
+import {SessionStorageService} from '../../core-module/core.module';
+import {Scope} from '@angular/core/src/profile/wtf_impl';
+import {OPEN_URL_MODE, UIConstants} from '../../core-module/ui/ui-constants';
+import {Helper} from '../../core-module/rest/helper';
+import {RestHelper} from '../../core-module/core.module';
 import {PlatformLocation} from '@angular/common';
 
 import {CordovaService} from '../../common/services/cordova.service';
 import {trigger} from "@angular/animations";
-import {UIAnimation} from "../../common/ui/ui-animation";
-import {InputPasswordComponent} from "../../common/ui/input-password/input-password.component";
-import {RouterHelper} from '../../common/router.helper';
+import {UIAnimation} from "../../core-module/ui/ui-animation";
+import {InputPasswordComponent} from "../../core-ui-module/components/input-password/input-password.component";
+import {RouterHelper} from '../../core-ui-module/router.helper';
 import {HttpClient} from "@angular/common/http";
 import {FormControl} from '@angular/forms';
 import {map, startWith} from "rxjs/operators";
 import {MainNavComponent} from '../../common/ui/main-nav/main-nav.component';
+import {BridgeService} from "../../core-bridge-module/bridge.service";
 import {GlobalContainerComponent} from "../../common/ui/global-container/global-container.component";
 
 @Component({
@@ -35,7 +39,7 @@ import {GlobalContainerComponent} from "../../common/ui/global-container/global-
     ]
 })
 export class LoginComponent  implements OnInit{
-    loginUrl: any;
+  loginUrl: any;
   @ViewChild('mainNav') mainNavRef : MainNavComponent;
   @ViewChild('passwordInput') passwordInput : InputPasswordComponent;
   @ViewChild('usernameInput') usernameInput : ElementRef;
@@ -55,6 +59,7 @@ export class LoginComponent  implements OnInit{
   private providers: any;
   providerControl = new FormControl();
   currentProvider:any;
+  private buttons: DialogButton[];
 
   currentProviderDisplay(provider:any){
     return provider ? provider.name : '';
@@ -62,10 +67,11 @@ export class LoginComponent  implements OnInit{
   private filteredProviders: any;
   private checkConditions(){
     this.disabled=!this.username || this.currentProvider;// || !this.password;
+    this.updateButtons();
   }
   private recoverPassword(){
       if(this.config.register.local){
-          this.router.navigate([UIConstants.ROUTER_PREFIX+"register","request"]);
+          this.router.navigate([UIConstants.ROUTER_PREFIX+'register','request']);
       }
       else {
           window.location.href = this.config.register.recoverUrl;
@@ -73,7 +79,7 @@ export class LoginComponent  implements OnInit{
   }
   private register(){
       if(this.config.register.local){
-          this.router.navigate([UIConstants.ROUTER_PREFIX+"register"]);
+          this.router.navigate([UIConstants.ROUTER_PREFIX+'register']);
       }
       else {
           window.location.href = this.config.register.registerUrl;
@@ -93,17 +99,18 @@ export class LoginComponent  implements OnInit{
               private title:Title,
               private storage : SessionStorageService,
               private route : ActivatedRoute,
-              private cordova: CordovaService
+              private bridge: BridgeService
             ){
-
+    this.updateButtons();
     Translation.initialize(translate,this.configService,this.storage,this.route).subscribe(()=>{
       UIHelper.setTitle('LOGIN.TITLE',title,translate,configService);
       this.configService.getAll().subscribe((data:any)=>{
         this.config=data;
-        if(!this.config.register)
+        if(!this.config.register) {
             // default register mode: allow local registration if not disabled
-            this.config.register={local:true};
-
+            this.config.register = {local: true};
+        }
+        this.updateButtons();
         this.username=this.configService.instant('defaultUsername','');
         this.password=this.configService.instant('defaultPassword','');
         this.route.queryParams.forEach((params: Params) => {
@@ -140,6 +147,7 @@ export class LoginComponent  implements OnInit{
             }
             if(configService.instant('loginProvidersUrl')){
               this.showProviders=true;
+              this.updateButtons();
               this.http.get(configService.instant('loginProvidersUrl')).subscribe((providers)=>{
                   this.processProviders(providers);
               });
@@ -194,7 +202,7 @@ export class LoginComponent  implements OnInit{
 
   }
   private login(){
-    
+
     this.isLoading=true;
 
       this.connector.login(this.username,this.password,this.scope).subscribe(
@@ -237,6 +245,18 @@ export class LoginComponent  implements OnInit{
     }
   }
 
+    updateButtons(): any {
+      this.buttons = [];
+      if(this.showProviders){
+        return;
+      }
+      if(this.config.register && (this.config.register.local || this.config.register.registerUrl)) {
+          this.buttons.push(new DialogButton('LOGIN.REGISTER_TEXT', DialogButton.TYPE_CANCEL, () => this.recoverPassword()));
+      }
+      let login=new DialogButton('LOGIN.LOGIN',DialogButton.TYPE_PRIMARY,()=>this.login());
+      login.disabled=this.disabled;
+      this.buttons.push(login);
+    }
   private processProviders(providers: any) {
     let data:any={};
     for(let provider in providers.wayf_idps){
@@ -297,6 +317,6 @@ export class LoginComponent  implements OnInit{
       replace(':entity',encodeURIComponent(this.currentProvider.url));
     console.log("redirecting to: "+url);
     //@TODO: Redirect to shibboleth provider
-    UIHelper.openUrl(url,this.cordova,OPEN_URL_MODE.Current);
+    UIHelper.openUrl(url,this.bridge,OPEN_URL_MODE.Current);
   }
 }

@@ -5,54 +5,54 @@ import {WindowRefService} from './window-ref.service';
 import {Subscription} from 'rxjs/Subscription';
 import {ActivatedRoute, Router} from '@angular/router';
 import {TranslateService} from '@ngx-translate/core';
-import {Translation} from '../../common/translation';
-import {RestSearchService} from '../../common/rest/services/rest-search.service';
-import {RestNodeService} from '../../common/rest/services/rest-node.service';
-import {RestConstants} from '../../common/rest/rest-constants';
-import {RestConnectorService} from '../../common/rest/services/rest-connector.service';
+import {Translation} from '../../core-ui-module/translation';
 import {
-  Collection,
-  CollectionWrapper,
-  LoginResult,
-  MdsInfo,
-  MdsMetadatasets,
-  NetworkRepositories,
-  Node,
-  NodeList,
-  NodeWrapper,
-  Repository,
-  SearchList,
-  SortItem
-} from '../../common/rest/data-object';
-import {ListTableComponent} from '../../common/ui/list-table/list-table.component';
-import {OptionItem} from '../../common/ui/actionbar/option-item';
-import {TemporaryStorageService} from '../../common/services/temporary-storage.service';
-import {Helper} from '../../common/helper';
-import {UIHelper} from '../../common/ui/ui-helper';
+    Collection,
+    CollectionWrapper,
+    ConfigurationHelper,
+    ConfigurationService,
+    DialogButton,
+    ListItem,
+    LoginResult,
+    MdsInfo,
+    MdsMetadatasets,
+    NetworkRepositories,
+    Node,
+    NodeList,
+    NodeWrapper,
+    Repository,
+    RestCollectionService,
+    RestConnectorService,
+    RestConstants,
+    RestHelper,
+    RestIamService,
+    RestMdsService,
+    RestNetworkService,
+    RestNodeService,
+    RestSearchService,
+    SearchList,
+    SessionStorageService,
+    SortItem,
+    TemporaryStorageService,
+    UIService
+} from '../../core-module/core.module';
+import {ListTableComponent} from '../../core-ui-module/components/list-table/list-table.component';
+import {OptionItem} from '../../core-ui-module/option-item';
+import {Helper} from '../../core-module/rest/helper';
+import {UIHelper} from '../../core-ui-module/ui-helper';
 import {Title} from '@angular/platform-browser';
-import {ConfigurationService} from '../../common/services/configuration.service';
-import {Toast} from '../../common/ui/toast';
-import {SessionStorageService} from '../../common/services/session-storage.service';
-import {RestNetworkService} from '../../common/rest/services/rest-network.service';
-import {UIAnimation} from '../../common/ui/ui-animation';
+import {Toast} from '../../core-ui-module/toast';
+import {UIAnimation} from '../../core-module/ui/ui-animation';
 import {trigger} from '@angular/animations';
-import {NodeHelper, NodesRightMode} from '../../common/ui/node-helper';
-import {RestCollectionService} from '../../common/rest/services/rest-collection.service';
-import {RestMdsService} from '../../common/rest/services/rest-mds.service';
-import {RestHelper} from '../../common/rest/rest-helper';
-import {RestIamService} from '../../common/rest/services/rest-iam.service';
-import {SearchNodeStoreComponent} from './node-store/node-store.component';
-import {OPEN_URL_MODE, UIConstants} from '../../common/ui/ui-constants';
-import {ListItem} from '../../common/ui/list-item';
+import {NodeHelper, NodesRightMode} from '../../core-ui-module/node-helper';
+import {UIConstants} from '../../core-module/ui/ui-constants';
 import {MdsComponent} from '../../common/ui/mds/mds.component';
-import {DialogButton} from '../../common/ui/modal-dialog/modal-dialog.component';
 import {WorkspaceManagementDialogsComponent} from '../management-dialogs/management-dialogs.component';
-import {ConfigurationHelper} from '../../common/rest/configuration-helper';
-import {MdsHelper} from '../../common/rest/mds-helper';
 import {MainNavComponent} from '../../common/ui/main-nav/main-nav.component';
-import {UIService} from '../../common/services/ui.service';
 import {ActionbarHelperService} from "../../common/services/actionbar-helper";
 import {HttpClient} from '@angular/common/http';
+import {MdsHelper} from "../../core-module/rest/mds-helper";
+import {BridgeService} from "../../core-bridge-module/bridge.service";
 import {GlobalContainerComponent} from "../../common/ui/global-container/global-container.component";
 
 
@@ -134,12 +134,10 @@ export class SearchComponent {
   public savedSearch : Node[]=[];
   public savedSearchColumns : ListItem[]=[];
   private mdsActions: OptionItem[];
+  private mdsButtons: DialogButton[];
   public saveSearchDialog = false;
   private currentSavedSearch: Node;
   private login: LoginResult;
-  public dialogTitle: string;
-  public dialogMessage: string;
-  public dialogButtons: DialogButton[];
   private savedSearchOwn = true;
   public savedSearchLoading = false;
   public savedSearchQuery:string = null;
@@ -161,6 +159,7 @@ export class SearchComponent {
     private connector:RestConnectorService,
     private RestNodeService: RestNodeService,
     private mdsService:RestMdsService,
+    private bridge:BridgeService,
     private iam:RestIamService,
     private search: RestSearchService,
     private collectionApi : RestCollectionService,
@@ -463,12 +462,14 @@ export class SearchComponent {
       this.switchToCollections(node.ref.id);
       return;
     }
+    /*
     let useRender=RestNetworkService.isFromHomeRepo(node,this.allRepositories) ||
       RestNetworkService.getRepositoryById(node.ref.repo,this.allRepositories) && RestNetworkService.getRepositoryById(node.ref.repo,this.allRepositories).repositoryType==RestConstants.REPOSITORY_TYPE_ALFRESCO;
     if(!useRender){
       UIHelper.openUrl(node.contentUrl,this.connector.getCordovaService(),OPEN_URL_MODE.Blank);
       return;
     }
+    */
     this.renderedNode = node;
     this.render_options=[];
     let queryParams={
@@ -599,20 +600,29 @@ export class SearchComponent {
       this.searchService.sort.materialsSortAscending=sort.ascending || sort.sortAscending;
       this.routeSearch();
   }
-  private importNode(node: Node) {
+  private importNode(nodes: Node[],pos=0,errors=false,lastData:Node=null) {
+    if(pos>=nodes.length){
+        this.globalProgress=false;
+        let additional;
+        if(nodes.length==1 && lastData){
+            additional={link:
+                {caption:'SEARCH.NODE_IMPORTED_VIEW',
+                callback:()=>{
+                        UIHelper.goToWorkspace(this.nodeApi,this.router,this.login,lastData);
+                    }
+                }
+            };
+        }
+        if(!errors)
+            this.toast.toast('SEARCH.NODE_IMPORTED',null,null,null,additional);
+        return;
+    }
     this.globalProgress=true;
-    this.nodeApi.importNode(node.ref.repo,node.ref.id,RestConstants.INBOX).subscribe((data:NodeWrapper)=>{
-      this.globalProgress=false;
-      this.toast.toast('SEARCH.NODE_IMPORTED',null,null,null,
-          {link:
-                        {caption:'SEARCH.NODE_IMPORTED_VIEW',
-                         callback:()=>{
-                            UIHelper.goToWorkspace(this.nodeApi,this.router,this.login,data.node);
-                        }}
-      });
+    this.nodeApi.importNode(nodes[pos].ref.repo,nodes[pos].ref.id,RestConstants.INBOX).subscribe((data:NodeWrapper)=>{
+        this.importNode(nodes,pos+1,errors,data.node);
     },(error:any)=>{
-      this.toast.error(error);
-      this.globalProgress=false;
+        this.toast.error(error);
+        this.importNode(nodes,pos+1,true,null);
     });
   }
 
@@ -662,7 +672,7 @@ export class SearchComponent {
             let n=ActionbarHelperService.getNodes(nodes,node);
             if(n==null)
               return false;
-            return this.addToCollection == null && !this.isGuest && RestNetworkService.allFromHomeRepo(n,this.allRepositories);
+            return this.addToCollection == null && !this.isGuest;// && RestNetworkService.allFromHomeRepo(n,this.allRepositories);
         };
         options.push(collection);
     }
@@ -701,12 +711,13 @@ export class SearchComponent {
         */
       }
 
-      let save = new OptionItem('SAVE', 'reply', (node: Node) => this.importNode(this.getCurrentNode(node)));
+      let save = new OptionItem('SAVE', 'reply', (node: Node) => this.importNode(ActionbarHelperService.getNodes(nodes, node)));
       save.showCallback=(node:Node)=>{
           let n=ActionbarHelperService.getNodes(nodes,node);
           if(n==null)
               return false;
-        return !this.isGuest && n.length==1 && RestNetworkService.supportsImport(n[0].ref.repo, this.allRepositories);
+          // only for logged in users when all nods are supported for import
+          return !this.isGuest && n.length && n.filter((node)=>RestNetworkService.supportsImport(node.ref.repo, this.allRepositories)).length==n.length;
       };
       options.push(save);
 
@@ -764,7 +775,7 @@ export class SearchComponent {
 
   private addToStore(selection: Node[]) {
     this.globalProgress=true;
-    RestHelper.addToStore(selection,this.toast,this.iam,()=>{
+    RestHelper.addToStore(selection,this.bridge,this.iam,()=>{
         this.globalProgress=false;
         this.updateSelection([]);
         this.mainNavRef.refreshNodeStore();
@@ -973,6 +984,7 @@ export class SearchComponent {
     if(!this.isGuest) {
       this.mdsActions.push(save);
     }
+    this.mdsButtons = DialogButton.fromOptionItem(this.mdsActions).slice(0, 1)
   }
   private closeSaveSearchDialog(){
     this.saveSearchDialog=false;
@@ -987,16 +999,19 @@ export class SearchComponent {
         }
       },
       (error:any)=>{
-        if(error.status==RestConstants.DUPLICATE_NODE_RESPONSE){
-          this.dialogTitle='SEARCH.SAVE_SEARCH.SEARCH_EXISTS_TITLE';
-          this.dialogMessage='SEARCH.SAVE_SEARCH.SEARCH_EXISTS_MESSAGE';
-          this.dialogButtons=[
-            new DialogButton('RENAME',DialogButton.TYPE_CANCEL,()=>{this.dialogTitle=null}),
-            new DialogButton('REPLACE',DialogButton.TYPE_PRIMARY,()=>{
-              this.dialogTitle=null;
-              this.saveSearch(name,true);
-            })
-          ];
+        if(error.status===RestConstants.DUPLICATE_NODE_RESPONSE){
+            this.toast.showConfigurableDialog({
+                title: 'SEARCH.SAVE_SEARCH.SEARCH_EXISTS_TITLE',
+                message: 'SEARCH.SAVE_SEARCH.SEARCH_EXISTS_MESSAGE',
+                buttons: [
+                    new DialogButton('RENAME',DialogButton.TYPE_CANCEL,() => this.toast.closeModalDialog()),
+                    new DialogButton('REPLACE',DialogButton.TYPE_PRIMARY,() => {
+                        this.toast.closeModalDialog();
+                        this.saveSearch(name,true);
+                    })
+                ],
+                isCancelable: true
+            });
         }
         else {
           this.toast.error(error);
@@ -1011,13 +1026,13 @@ export class SearchComponent {
     if(!addAll)
       return criterias;
     if(properties) {
-        criterias=criterias.concat(RestSearchService.convertCritierias(properties,this.mdsRef));
+        criterias=criterias.concat(RestSearchService.convertCritierias(properties,this.mdsRef.currentWidgets));
     }
     return criterias;
   }
   private loadSavedSearchNode(node:Node){
-    this.sidenavTab=0;
-    UIHelper.routeToSearchNode(this.router,this.searchService,node);
+    this.sidenavTab = 0;
+    UIHelper.routeToSearchNode(this.router,this.searchService.reurl,node);
     this.currentSavedSearch=node;
   }
   private goToSaveSearchWorkspace() {
@@ -1083,25 +1098,30 @@ export class SearchComponent {
         this.searchService.init();
         this.mainNavRef.refreshBanner();
         GlobalContainerComponent.finishPreloading();
-        this.hasCheckbox=true;
-        this.searchService.reurl=null;
-        if(param['addToCollection']){
-          this.collectionApi.getCollection(param['addToCollection']).subscribe((data:CollectionWrapper)=>{
+        this.hasCheckbox = true;
+        this.searchService.reurl = null;
+        if (param.addToCollection){
+          this.collectionApi.getCollection(param.addToCollection).subscribe((data:CollectionWrapper)=>{
             this.addToCollection=data.collection;
             // add to collection layout is only designed for GRIDS, otherwise missing permission info will fail
             this.setViewType(ListTableComponent.VIEW_TYPE_GRID);
             this.refreshListOptions();
             this.updateActionbar(null);
-          },(error)=>{
+          },(error) => {
             this.toast.error(error);
           });
+        }else if (param.reurl) {
+          this.searchService.reurl = param.reurl;
+          this.applyMode = true;
+          this.hasCheckbox = false;
+        }else if (param.savedSearch) {
+            console.log(param);
+            this.nodeApi.getNodeMetadata(param.savedSearch, [RestConstants.ALL]).subscribe((node) => {
+                this.loadSavedSearchNode(node.node);
+            });
+            return;
         }
-        else if(param['reurl']) {
-          this.searchService.reurl = param['reurl'];
-          this.applyMode=true;
-          this.hasCheckbox=false;
-        }
-        this.mainnav=param['mainnav']=='false' ? false : true;
+        this.mainnav = param.mainnav==='false' ? false : true;
 
 
         if(param['query'])

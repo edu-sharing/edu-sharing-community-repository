@@ -9,8 +9,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.lang3.NotImplementedException;
 import org.apache.http.HttpHost;
 import org.apache.lucene.search.join.ScoreMode;
+import org.edu_sharing.lightbend.LightbendConfigLoader;
 import org.edu_sharing.repository.server.tools.PropertiesHelper;
 import org.edu_sharing.service.search.model.SortDefinition;
 import org.edu_sharing.service.stream.model.ContentEntry;
@@ -36,6 +38,7 @@ import org.elasticsearch.common.xcontent.XContentBuilder;
 import org.elasticsearch.index.query.BoolQueryBuilder;
 import org.elasticsearch.index.query.QueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
+import org.elasticsearch.index.reindex.DeleteByQueryRequest;
 import org.elasticsearch.script.Script;
 import org.elasticsearch.script.ScriptType;
 import org.elasticsearch.search.SearchHit;
@@ -99,7 +102,6 @@ public class StreamServiceElasticsearchImpl implements StreamService {
 
 
 	}
-	private static String PROPERTY_XML = "/org/edu_sharing/service/stream/stream.elasticsearch.properties";
 	public StreamServiceElasticsearchImpl() {
 		if(client!=null)
 			return;
@@ -137,25 +139,10 @@ public class StreamServiceElasticsearchImpl implements StreamService {
 
 	private List<HttpHost> getConfiguredHosts() {
 		List<HttpHost> hosts=null;
-		try {
-			String[] servers=null;
-			String prop=null;
-			try {
-				prop=PropertiesHelper.getProperty("server",PROPERTY_XML,PropertiesHelper.TEXT);
-			}
-			catch(Exception e) {
-			}			
-			if(prop!=null)
-				servers=prop.split(",");				
-			if(servers==null) {
-				servers=new String[] {"127.0.0.1:9200"};
-			}
-			hosts=new ArrayList<>();
-			for(String server : servers) {
-				hosts.add(new HttpHost(server.split(":")[0],Integer.parseInt(server.split(":")[1])));		
-			}
-		}catch(Throwable t) {
-			throw new IllegalArgumentException("Parameter server in "+PROPERTY_XML+" seems invalid. Scheme: server-ip1:server-port1,server-ip2:server-port2...",t);
+		List<String> servers= LightbendConfigLoader.get().getStringList("elasticsearch.servers");
+		hosts=new ArrayList<>();
+		for(String server : servers) {
+			hosts.add(new HttpHost(server.split(":")[0],Integer.parseInt(server.split(":")[1])));
 		}
 		return hosts;
 	}
@@ -275,6 +262,17 @@ public class StreamServiceElasticsearchImpl implements StreamService {
 		request.id(id);
 		client.delete(request);
 	}
+
+	@Override
+	public void deleteEntriesByAuthority(String username) {
+		//@TODO this is not supported in the current api version
+		// we need to update the api
+		// https://www.elastic.co/guide/en/elasticsearch/client/java-rest/6.5/java-rest-high-document-delete-by-query.html
+		//DeleteByQueryRequest request = new DeleteByQueryRequest();
+		//client.delete(request);
+		throw new NotImplementedException("deleteEntriesByAuthority");
+	}
+
 	@Override
 	public void updateStatus(String id,String authority,ContentEntry.Audience.STATUS status) throws Exception {
 		UpdateRequest updateRequest = new UpdateRequest();

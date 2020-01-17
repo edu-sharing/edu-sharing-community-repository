@@ -1,22 +1,22 @@
 import {Component, Input, EventEmitter, Output, ViewChild, ElementRef} from '@angular/core';
-import {RestConnectorService} from "../../../common/rest/services/rest-connector.service";
-import {Toast} from "../../../common/ui/toast";
-import {RestNodeService} from "../../../common/rest/services/rest-node.service";
+import {DialogButton, RestConnectorService} from "../../../core-module/core.module";
+import {Toast} from "../../../core-ui-module/toast";
+import {RestNodeService} from "../../../core-module/core.module";
 import {
   NodeWrapper, Node, NodePermissions, LocalPermissionsResult, Permission,
   LoginResult, View, STREAM_STATUS, IamUser, AuthorityProfile
-} from "../../../common/rest/data-object";
-import {ConfigurationService} from "../../../common/services/configuration.service";
-import {UIHelper} from "../../../common/ui/ui-helper";
-import {RestIamService} from "../../../common/rest/services/rest-iam.service";
+} from "../../../core-module/core.module";
+import {ConfigurationService} from "../../../core-module/core.module";
+import {UIHelper} from "../../../core-ui-module/ui-helper";
+import {RestIamService} from "../../../core-module/core.module";
 import {TranslateService} from "@ngx-translate/core";
 import {MdsComponent} from "../../../common/ui/mds/mds.component";
-import {RestConstants} from "../../../common/rest/rest-constants";
-import {UIAnimation} from "../../../common/ui/ui-animation";
+import {RestConstants} from "../../../core-module/core.module";
+import {UIAnimation} from "../../../core-module/ui/ui-animation";
 import {trigger} from "@angular/animations";
-import {RestStreamService} from "../../../common/rest/services/rest-stream.service";
-import {RestHelper} from "../../../common/rest/rest-helper";
-import {Helper} from "../../../common/helper";
+import {RestStreamService} from "../../../core-module/core.module";
+import {RestHelper} from "../../../core-module/core.module";
+import {Helper} from "../../../core-module/rest/helper";
 
 @Component({
   selector: 'add-stream',
@@ -35,8 +35,9 @@ export class AddStreamComponent  {
   AUDIENCE_MODE_EVERYONE="0";
   AUDIENCE_MODE_CUSTOM="1";
   audienceMode=this.AUDIENCE_MODE_EVERYONE;
-  private _nodes: any;
+  _nodes: any;
   private invite: AuthorityProfile[]=[];
+  buttons: DialogButton[];
   @Input() set nodes(nodes : Node[]){
     this._nodes=nodes;
   }
@@ -50,6 +51,10 @@ export class AddStreamComponent  {
     private config : ConfigurationService,
     private toast : Toast,
     private nodeApi : RestNodeService) {
+    this.buttons=[
+        new DialogButton("CANCEL",DialogButton.TYPE_CANCEL,()=>this.cancel()),
+        new DialogButton("SAVE",DialogButton.TYPE_PRIMARY,()=>this.save()),
+    ]
     this.connector.isLoggedIn().subscribe((data:LoginResult)=>{
 
     });

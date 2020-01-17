@@ -1,4 +1,4 @@
-@import "../../../../styles/variables.scss";
+@import "../../../core-ui-module/styles/variables";
 
 .edusharing-autocomplete-wrapper {
   position: relative;
@@ -6,7 +6,7 @@
   margin-left: 0;
 }
 
-.searchInput {
+mat-form-field {
   width: 100%;
 }
 

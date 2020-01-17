@@ -2,39 +2,43 @@ import {Component, ViewChild} from '@angular/core';
 import 'rxjs/add/operator/map';
 import {ActivatedRoute, Params, Router, RoutesRecognized} from '@angular/router';
 import {TranslateService} from "@ngx-translate/core";
-import {Translation} from "../../common/translation";
-import * as EduData from "../../common/rest/data-object"; //
-import {Connector, ConnectorList, Filetype, Node, NodeWrapper, STREAM_STATUS} from "../../common/rest/data-object";
-import {RestCollectionService} from "../../common/rest/services/rest-collection.service"; //
-import {Toast} from "../../common/ui/toast"; //
-import {RestSearchService} from '../../common/rest/services/rest-search.service';
-import {RestNodeService} from '../../common/rest/services/rest-node.service';
-import {RestConstants} from '../../common/rest/rest-constants';
-import {RestConnectorService} from "../../common/rest/services/rest-connector.service";
-import {OptionItem} from "../../common/ui/actionbar/option-item";
-import {TemporaryStorageService} from "../../common/services/temporary-storage.service";
-import {UIHelper} from "../../common/ui/ui-helper";
+import {Translation} from "../../core-ui-module/translation";
+import * as EduData from "../../core-module/core.module"; //
+import {RequestObject, RestCollectionService} from "../../core-module/core.module"; //
+import {Toast} from "../../core-ui-module/toast"; //
+import {RestSearchService} from '../../core-module/core.module';
+import {RestNodeService} from '../../core-module/core.module';
+import {RestConstants} from '../../core-module/core.module';
+import {RestConnectorService} from "../../core-module/core.module";
+import {Node, NodeList, LoginResult, STREAM_STATUS, ConnectorList} from '../../core-module/core.module';
+import {OptionItem} from "../../core-ui-module/option-item";
+import {TemporaryStorageService} from "../../core-module/core.module";
+import {UIHelper} from "../../core-ui-module/ui-helper";
 import {Title} from "@angular/platform-browser";
-import {ConfigurationService} from "../../common/services/configuration.service";
-import {SessionStorageService} from "../../common/services/session-storage.service";
-import {UIConstants} from "../../common/ui/ui-constants";
-import {RestHelper} from "../../common/rest/rest-helper";
-import {NodeHelper} from "../../common/ui/node-helper"; //
+import {ConfigurationService} from "../../core-module/core.module";
+import {SessionStorageService} from "../../core-module/core.module";
+import {UIConstants} from "../../core-module/ui/ui-constants";
+import {RestMdsService} from "../../core-module/core.module";
+import {RestHelper} from "../../core-module/core.module";
+import {NodeHelper} from "../../core-ui-module/node-helper"; //
 import {Observable} from 'rxjs/Rx';
-import {RestStreamService} from "../../common/rest/services/rest-stream.service";
-import {RestConnectorsService} from '../../common/rest/services/rest-connectors.service';
-import {UIAnimation} from '../../common/ui/ui-animation';
+import {RestStreamService} from "../../core-module/core.module";
+import {RestConnectorsService} from '../../core-module/core.module';
+import {UIAnimation} from '../../core-module/ui/ui-animation';
 import {trigger} from '@angular/animations';
-import {FrameEventsService} from '../../common/services/frame-events.service';
+import {Connector} from '../../core-module/core.module';
+import {NodeWrapper} from '../../core-module/core.module';
+import {Filetype} from '../../core-module/core.module';
+import {FrameEventsService} from '../../core-module/core.module';
 import {CordovaService} from '../../common/services/cordova.service';
 import 'rxjs/add/operator/pairwise';
 import {Subscription} from 'rxjs/Subscription';
 import * as moment from 'moment';
 import {ActionbarHelperService} from '../../common/services/actionbar-helper';
-import {RestIamService} from '../../common/rest/services/rest-iam.service';
+import {RestIamService} from '../../core-module/core.module';
 import {MainNavComponent} from '../../common/ui/main-nav/main-nav.component';
+import {BridgeService} from "../../core-bridge-module/bridge.service";
 import {GlobalContainerComponent} from "../../common/ui/global-container/global-container.component";
-import {RequestObject} from "../../common/rest/request-object";
 
 
 @Component({
@@ -110,6 +114,7 @@ export class StreamComponent {
     private session : SessionStorageService,
     private title : Title,
     private toast : Toast,
+    private bridge : BridgeService,
     private actionbar: ActionbarHelperService,
     private collectionService : RestCollectionService,
     private config : ConfigurationService,
@@ -322,7 +327,7 @@ export class StreamComponent {
   }
   private addToStore(nodes:any) {
     this.globalProgress=true;
-    RestHelper.addToStore(nodes.nodes,this.toast,this.iam,()=>{
+    RestHelper.addToStore(nodes.nodes,this.bridge,this.iam,()=>{
         this.globalProgress=false;
         this.mainNavRef.refreshNodeStore();
     });

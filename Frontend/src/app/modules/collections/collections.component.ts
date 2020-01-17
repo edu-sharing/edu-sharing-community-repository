@@ -1,56 +1,51 @@
-import {Component, ElementRef, OnInit, ViewChild} from '@angular/core';
+import {Component, ElementRef, ViewChild} from '@angular/core';
 
-import {Router, Params, ActivatedRoute} from "@angular/router";
-import {RouterComponent} from "../../router/router.component";
+import {ActivatedRoute, Params, Router} from "@angular/router";
 
-import {Translation} from "../../common/translation";
+import {Translation} from "../../core-ui-module/translation";
 
-import * as EduData from "../../common/rest/data-object";
-
-import {RestCollectionService} from "../../common/rest/services/rest-collection.service";
-import {RestNodeService} from "../../common/rest/services/rest-node.service";
-import {RestIamService} from "../../common/rest/services/rest-iam.service";
-import {RestHelper} from "../../common/rest/rest-helper";
-import {RestConstants} from "../../common/rest/rest-constants";
-
-import {Toast} from "../../common/ui/toast";
-import {RestConnectorService} from "../../common/rest/services/rest-connector.service";
+import * as EduData from "../../core-module/core.module";
 import {
     Collection,
-    NodeRef,
-    CollectionReference,
+    ConfigurationService, DialogButton,
+    FrameEventsService, ListItem,
     LoginResult,
     MdsMetadataset,
-    CollectionFeedback
-} from "../../common/rest/data-object";
-import {RestOrganizationService} from "../../common/rest/services/rest-organization.service";
-import {OrganizationOrganizations} from "../../common/rest/data-object";
-import {OptionItem} from "../../common/ui/actionbar/option-item";
-import {TemporaryStorageService} from "../../common/services/temporary-storage.service";
+    Node,
+    NodeRef,
+    NodeWrapper,
+    RestCollectionService,
+    RestConnectorService,
+    RestConstants,
+    RestHelper,
+    RestIamService,
+    RestMdsService,
+    RestNodeService,
+    RestOrganizationService,
+    SessionStorageService,
+    TemporaryStorageService,
+    UIService,
+    CollectionReference, CollectionFeedback
+} from "../../core-module/core.module";
+
+import {Toast} from "../../core-ui-module/toast";
+import {OptionItem} from "../../core-ui-module/option-item";
 import {NodeRenderComponent} from "../../common/ui/node-render/node-render.component";
-import {DialogButton} from "../../common/ui/modal-dialog/modal-dialog.component";
-import {NodeWrapper,Node} from "../../common/rest/data-object";
-import {FrameEventsService} from "../../common/services/frame-events.service";
-import {UIHelper} from "../../common/ui/ui-helper";
+import {UIHelper} from "../../core-ui-module/ui-helper";
 import {Title} from "@angular/platform-browser";
-import {ConfigurationService} from "../../common/services/configuration.service";
-import {SessionStorageService} from "../../common/services/session-storage.service";
-import {UIConstants} from "../../common/ui/ui-constants";
-import {ListItem} from "../../common/ui/list-item";
-import {AddElement, ListTableComponent} from "../../common/ui/list-table/list-table.component";
-import {RestMdsService} from "../../common/rest/services/rest-mds.service";
-import {NodeHelper, NodesRightMode} from "../../common/ui/node-helper";
+import {UIConstants} from "../../core-module/ui/ui-constants";
+import {ListTableComponent} from "../../core-ui-module/components/list-table/list-table.component";
+import {NodeHelper, NodesRightMode} from "../../core-ui-module/node-helper";
 import {TranslateService} from "@ngx-translate/core";
-import {MdsHelper} from "../../common/rest/mds-helper";
-import {UIAnimation} from "../../common/ui/ui-animation";
-import {trigger} from "@angular/animations";
 import {Location} from "@angular/common";
-import {Helper} from "../../common/helper";
-import {UIService} from "../../common/services/ui.service";
+import {Helper} from "../../core-module/rest/helper";
 import {MainNavComponent} from "../../common/ui/main-nav/main-nav.component";
-import {ColorHelper} from '../../common/ui/color-helper';
+import {ColorHelper} from '../../core-module/ui/color-helper';
 import {ActionbarHelperService} from "../../common/services/actionbar-helper";
-import {RestLocatorService} from '../../common/rest/services/rest-locator.service';
+import {MdsHelper} from "../../core-module/rest/mds-helper";
+import {BridgeService} from "../../core-bridge-module/bridge.service";
+import {AddElement} from "../../core-ui-module/add-element";
+import {MatSlideToggle} from "@angular/material";
 import {HttpClient} from "@angular/common/http";
 import {GlobalContainerComponent} from "../../common/ui/global-container/global-container.component";
 
@@ -59,10 +54,6 @@ import {GlobalContainerComponent} from "../../common/ui/global-container/global-
   selector: 'app-collections',
   templateUrl: 'collections.component.html',
   styleUrls: ['collections.component.scss'],
-  animations: [
-      trigger('fade', UIAnimation.fade()),
-      trigger('cardAnimation', UIAnimation.cardAnimation())
-  ]
 })
 export class CollectionsMainComponent {
   @ViewChild('mainNav') mainNavRef: MainNavComponent;
@@ -73,8 +64,40 @@ export class CollectionsMainComponent {
   public dialogCancelable = false;
   public dialogMessage : string;
   public dialogButtons : DialogButton[];
-
+  static INDEX_MAPPING=[
+        RestConstants.COLLECTIONSCOPE_MY,
+        RestConstants.COLLECTIONSCOPE_ORGA,
+        RestConstants.COLLECTIONSCOPE_TYPE_EDITORIAL,
+        RestConstants.COLLECTIONSCOPE_TYPE_MEDIA_CENTER,
+        RestConstants.COLLECTIONSCOPE_ALL,
+    ]
     public tabSelected:string = RestConstants.COLLECTIONSCOPE_MY;
+
+    set tabSelectedIndex(pos:number){
+        if(this.isGuest) {
+          pos += 2; // skip first 2 tabs
+        }
+        if(!this.hasEditorial && pos>1) {
+          pos++; // skip editorial
+        }
+        if(!this.hasMediacenter && pos>2) {
+          pos++; // skip mediacenter
+        }
+        this.selectTab(CollectionsMainComponent.INDEX_MAPPING[pos]);
+    }
+    get tabSelectedIndex(){
+        let pos=CollectionsMainComponent.INDEX_MAPPING.indexOf(this.tabSelected);
+        if(this.isGuest) {
+          pos -= 2;
+        }
+        if(!this.hasEditorial && pos>1) {
+          pos--;
+        }
+        if(!this.hasMediacenter && pos>2) {
+          pos--;
+        }
+        return pos;
+    }
     public isLoading:boolean = true;
     public isReady:boolean = false;
 
@@ -82,7 +105,7 @@ export class CollectionsMainComponent {
   private collectionContentOriginal: any;
   private filteredOutCollections:Array<EduData.Collection> = new Array<EduData.Collection>();
   private filteredOutReferences:Array<EduData.CollectionReference> = new Array<EduData.CollectionReference>();
-  public lastError:string = null;
+  private collectionIdParamSubscription:any;
 
   private contentDetailObject:any = null;
 
@@ -96,6 +119,7 @@ export class CollectionsMainComponent {
     public mainnav = true;
     private path : EduData.Node[];
     private hasEditorial = false;
+    private hasMediacenter = false;
     public isGuest = true;
     public addToOther:EduData.Node[];
     private showCollection=true;
@@ -127,6 +151,7 @@ export class CollectionsMainComponent {
     };
     feedback: boolean;
     feedbackView: boolean;
+    feedbackViewButtons: DialogButton[];
     private feedbacks: CollectionFeedback[];
     private params: Params;
     set collectionShare(collectionShare: Collection){
@@ -157,9 +182,11 @@ export class CollectionsMainComponent {
         private router : Router,
         private tempStorage :TemporaryStorageService,
         private toast : Toast,
+        private bridge : BridgeService,
       private title:Title,
       private config:ConfigurationService,
         private translationService: TranslateService) {
+            this.feedbackViewButtons=DialogButton.getSingleButton('CLOSE',()=>this.feedbackView=false,DialogButton.TYPE_CANCEL);
             this.collectionsColumns.push(new ListItem("COLLECTION", 'title'));
             this.collectionsColumns.push(new ListItem("COLLECTION", 'info'));
             this.collectionsColumns.push(new ListItem("COLLECTION",'scope'));
@@ -177,6 +204,9 @@ export class CollectionsMainComponent {
                         this.collectionService.getCollectionSubcollections(RestConstants.ROOT,RestConstants.COLLECTIONSCOPE_TYPE_EDITORIAL).subscribe((data)=>{
                             this.hasEditorial=data.collections.length>0;
                         });
+                        this.collectionService.getCollectionSubcollections(RestConstants.ROOT,RestConstants.COLLECTIONSCOPE_TYPE_MEDIA_CENTER).subscribe((data)=>{
+                            this.hasMediacenter=data.collections.length>0;
+                        });
                         this.initialize();
                     }else
                         RestHelper.goToLogin(this.router,this.config);
@@ -190,8 +220,8 @@ export class CollectionsMainComponent {
     public isMobileWidth(){
         return window.innerWidth<UIConstants.MOBILE_WIDTH;
     }
-  public setCustomOrder(event:any){
-    let checked=event.target.checked;
+  public setCustomOrder(event:MatSlideToggle){
+    let checked=event.checked;
     this.collectionContent.collection.orderMode=checked ? RestConstants.COLLECTION_ORDER_MODE_CUSTOM : null;
     if(checked){
       this.orderActive=true;
@@ -201,7 +231,6 @@ export class CollectionsMainComponent {
       this.collectionService.setOrder(this.collectionContent.collection.ref.id).subscribe(()=>{
         this.globalProgress = false;
         this.orderActive=false;
-        //this.refreshContent(()=>this.globalProgress=false);
       });
     }
 
@@ -477,7 +506,7 @@ export class CollectionsMainComponent {
         });
       }
       else {
-        this.collectionService.addNodeToCollection(target.ref.id, source.ref.id).subscribe(() => {
+        this.collectionService.addNodeToCollection(target.ref.id, source.ref.id, source.ref.repo).subscribe(() => {
           UIHelper.showAddedToCollectionToast(this.toast,this.router, target, 1);
           if (event.type == 'copy') {
             this.globalProgress = false;
@@ -575,7 +604,6 @@ export class CollectionsMainComponent {
       this.getScope(),[],request,this.collectionContent.collection.ref.repo
     ).subscribe((collection) => {
         console.log(collection);
-        this.lastError = null;
         // transfere sub collections and content
         this.collectionContent.collections = collection.collections;
         this.collectionContent.collectionsPagination = collection.pagination;
@@ -809,7 +837,7 @@ export class CollectionsMainComponent {
         if(params.nodeId){
           let node=params['nodeId'].split("/");
           node=node[node.length-1];
-          this.collectionService.addNodeToCollection(id,node).subscribe(()=> this.navigate(id),(error:any)=>{
+          this.collectionService.addNodeToCollection(id,node,null).subscribe(()=> this.navigate(id),(error:any)=>{
             this.handleError(error);
             this.navigate(id);
             //this.displayCollectionById(id)
@@ -978,7 +1006,7 @@ export class CollectionsMainComponent {
 
     private addToStore(nodes:Node[]) {
         this.globalProgress=true;
-        RestHelper.addToStore(nodes,this.toast,this.iamService,()=>{
+        RestHelper.addToStore(nodes,this.bridge,this.iamService,()=>{
             this.globalProgress=false;
             this.mainNavRef.refreshNodeStore();
         });

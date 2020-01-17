@@ -1,4 +1,4 @@
-@import "../../../../styles/variables.scss";
+@import "../../../core-ui-module/styles/variables";
 
 .dialog{
   z-index: $dialogZIndex + 10;
@@ -7,7 +7,12 @@
   z-index: $dialogZIndex + 11;
 }
 :host /deep/ .modal-dialog-toast{
-  .card-content p {
+  padding: $cardPadding;
+  >mat-form-field{
+    width: 100%;
+    padding-top: 20px;
+  }
+  .modal-dialog-toast-message {
     white-space: pre-line;
     h1 {
       font-size: 1.5rem;

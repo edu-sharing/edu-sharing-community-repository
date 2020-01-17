@@ -22,8 +22,8 @@
     <img *ngIf="!edit && user.profile.avatar" class="blurred-image" [src]="user.profile.avatar+'&crop=true&width=400&height=400'" alt="">
     <img *ngIf="edit && !avatarFile && userEdit.profile.avatar" class="blurred-image" [src]="user.profile.avatar+'&crop=true&width=400&height=400'" alt="">
     <img *ngIf="edit && avatarFile" class="blurred-image" [src]="avatarImage" alt="">
-    <a class="edit clickable" *ngIf="isMe && !edit && !editAbout && editProfile" (click)="beginEdit()"><i class="material-icons">edit</i><span>{{'PROFILES.EDIT' | translate}}</span></a>
-    <a class="edit clickable" *ngIf="isMe && edit" (click)="edit=false"><i icon iconId="close"></i><span>{{'PROFILES.CANCEL_EDIT' | translate}}</span></a>
+    <button mat-button class="edit clickable" *ngIf="isMe && !edit && editProfile" (click)="beginEdit()"><i class="material-icons">edit</i><span>{{'PROFILES.EDIT' | translate}}</span></button>
+    <button mat-button class="edit clickable" *ngIf="isMe && edit" (click)="edit=false"><i icon iconId="close"></i><span>{{'PROFILES.CANCEL_EDIT' | translate}}</span></button>
     <user-avatar *ngIf="!edit"
      [user]="user"
     ></user-avatar>
@@ -37,7 +37,7 @@
       <div class="new-avatar-button" (click)="avatar.click()">
         <span>{{'PROFILES.IMG_CHANGE' | translate}}</span>
       </div>
-      <i *ngIf="hasAvatar()" class="material-icons clickable" (click)="clearAvatar()">delete</i>
+      <button mat-button *ngIf="hasAvatar()" (click)="clearAvatar()"><i icon iconId="delete"></i></button>
     </div>
 
     <div *ngIf="!edit">
@@ -48,14 +48,23 @@
       <!--</div>-->
     </div>
     <div *ngIf="edit">
-      <input type="text" [(ngModel)]="userEdit.profile.firstName" placeholder="{{'USER.firstName' | translate}}">
-      <input type="text" [(ngModel)]="userEdit.profile.lastName" placeholder="{{'USER.lastName' | translate}}">
-      <div class="email">
-        <input type="email" [(ngModel)]="userEdit.profile.email" placeholder="{{'USER.email' | translate}}">
+      <div>
+        <mat-form-field class="mat-form-field-bright">
+          <mat-label>{{'USER.firstName' | translate}}</mat-label>
+          <input matInput type="text" [(ngModel)]="userEdit.profile.firstName">
+        </mat-form-field>
+        <mat-form-field class="mat-form-field-bright">
+          <mat-label>{{'USER.lastName' | translate}}</mat-label>
+          <input matInput type="text" [(ngModel)]="userEdit.profile.lastName">
+        </mat-form-field>
       </div>
+      <mat-form-field class="mat-form-field-bright email">
+        <mat-label>{{'USER.email' | translate}}</mat-label>
+        <input matInput type="email" [(ngModel)]="userEdit.profile.email">
+      </mat-form-field>
     </div>
     <div class="save">
-      <div tabindex="0" *ngIf="edit" class="btn-flat btn-shadow waves-effect waves-light" (click)="saveEdits()" (keyup.enter)="saveEdits()">{{'SAVE' | translate}}</div>
+      <button mat-raised-button *ngIf="edit" (click)="saveEdits()">{{'SAVE' | translate}}</button>
     </div>
   </div>
   <div class="statsBackground">
@@ -89,14 +98,22 @@
   <div class="about">
     <i icon iconId="edu-quotes" class="quotes">quotes</i>
     <div class="about-buttons" *ngIf="isMe && editProfile">
-      <a class="edit clickable" *ngIf="!editAbout && !edit" (click)="aboutEdit()">{{'PROFILES.EDIT' | translate}}</a>
-      <a class="edit clickable" *ngIf="editAbout" (click)="editAbout=false">{{'PROFILES.CANCEL_EDIT' | translate}}</a>
+      <button mat-button color="primary" class="edit" *ngIf="!editAbout && !edit" (click)="aboutEdit()">{{'PROFILES.EDIT' | translate}}</button>
+      <button mat-button color="primary" class="edit" *ngIf="editAbout" (click)="editAbout=false">{{'PROFILES.CANCEL_EDIT' | translate}}</button>
     </div>
     <div *ngIf="editAbout">
-      <label for="about">{{'PROFILES.ABOUT_LABEL' | translate}}</label>
-      <textarea id="about" class="materialize-textarea" [(ngModel)]="userEdit.profile.about"></textarea>
+      <mat-form-field>
+        <mat-label>{{'PROFILES.ABOUT_LABEL' | translate}}</mat-label>
+        <textarea
+          matInput
+          cdkTextareaAutosize
+          cdkAutosizeMinRows="2"
+          cdkAutosizeMaxRows="4"
+          id="about"
+          [(ngModel)]="userEdit.profile.about"></textarea>
+      </mat-form-field>
       <div class="change-buttons">
-        <a tabindex="0" (keyup.enter)="saveEdits()" (click)="saveEdits()" class="waves-effect waves-light btn">{{'SAVE' | translate}}</a>
+        <button mat-raised-button color="primary" (click)="saveEdits()">{{'SAVE' | translate}}</button>
       </div>
     </div>
     <div *ngIf="!editAbout">
@@ -115,13 +132,11 @@
       </div>
     </div>
     <div *ngIf="changePassword" class="password" [@overlay]="changePassword">
-      <label for="oldPassword">{{'OLD_PASSWORD' | translate }}</label>
-      <input-password [hint]="false" [displayStrength]="false" [(value)]="oldPassword" required="true" id="oldPassword"></input-password>
+      <input-password label="{{'OLD_PASSWORD' | translate }}" [hint]="false" [displayStrength]="false" [(value)]="oldPassword" required="true" id="oldPassword"></input-password>
       <!--<input type="password" id="oldPassword" name="oldPassword" [(ngModel)]="" required="true">-->
-      <label for="password">{{'NEW_PASSWORD' | translate }}</label>
-      <input-password #newPassword [hint]="true" [displayStrength]="true" [(value)]="password" required="true" id="password"></input-password>
+      <input-password #newPassword label="{{'NEW_PASSWORD' | translate }}" [hint]="true" [displayStrength]="true" [(value)]="password" required="true" id="password"></input-password>
       <div class="change-buttons">
-        <a tabindex="0" [class.disabled]="!oldPassword.trim() || newPassword.passwordStrength == 'weak'"  (keyup.enter)="savePassword()" (click)="savePassword()" class="waves-effect waves-light btn">{{'SAVE' | translate}}</a>
+        <button mat-raised-button color="primary" [disabled]="!oldPassword.trim() || newPassword.passwordStrength == 'weak'"  (click)="savePassword()">{{'SAVE' | translate}}</button>
       </div>
      </div>
   </div>

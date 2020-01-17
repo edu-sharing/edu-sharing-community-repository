@@ -24,7 +24,7 @@
 			<parent>cm:folder</parent>
 		</type>
 		<type name="ccm:comment">
-			<title>Campus Content comments on ccm:ios</title>
+			<title>Campus Content comments on ccm:io's</title>
 			<parent>cm:cmobject</parent>
 			<properties>
 				<property name="ccm:comment_reply">
@@ -37,6 +37,21 @@
 			<mandatory-aspects>
     			<aspect>ccm:eduscope</aspect>
    			</mandatory-aspects>
+		</type>
+		<type name="ccm:rating">
+			<title>Campus Content ratings on ccm:io's</title>
+			<parent>cm:cmobject</parent>
+			<properties>
+				<property name="ccm:rating_value">
+					<type>d:double</type>
+				</property>
+				<property name="ccm:rating_Text">
+					<type>d:text</type>
+				</property>
+			</properties>
+			<mandatory-aspects>
+				<aspect>ccm:eduscope</aspect>
+			</mandatory-aspects>
 		</type>
 		<type name="ccm:collection_feedback">
 			<title>Campus Content feedback on ccm:map with aspect ccm:collection</title>
@@ -145,6 +160,17 @@
 					</source>
 					<target>
 						<class>ccm:comment</class>
+						<mandatory>false</mandatory>
+						<many>true</many>
+					</target>
+				</child-association>
+				<child-association name="ccm:childrating">
+					<source>
+						<mandatory>false</mandatory>
+						<many>true</many>
+					</source>
+					<target>
+						<class>ccm:rating</class>
 						<mandatory>false</mandatory>
 						<many>true</many>
 					</target>
@@ -1620,6 +1646,10 @@
 				<property name="ccm:collectionordermode">
 					<type>d:text</type>
 				</property>
+				<!-- freetext author info -->
+				<property name="ccm:collection_author_freetext">
+					<type>d:text</type>
+				</property>
 			</properties>
 		</aspect>
 		<aspect name="ccm:collection_pinned">
@@ -1644,6 +1674,10 @@
 					<type>d:text</type>
 				</property>
 				<property name="ccm:ref_version">
+					<type>d:text</type>
+				</property>
+				<!-- property to store video text tracks data, e.g. for cutting specific parts -->
+				<property name="ccm:ref_video_vtt">
 					<type>d:text</type>
 				</property>
 			</properties>
@@ -1796,6 +1830,44 @@
 	    		</property>			
 			</properties>
 		</aspect>
-		
+		<aspect name="ccm:mediacenter">
+			<title>extend group to become a mediacenter</title>
+			<properties>
+				<property name="ccm:mediacenterId">
+					<type>d:text</type>
+				</property>
+				<property name="ccm:mediacenterCatalogStatus">
+					<type>d:text</type>
+				</property>
+				<property name="ccm:mediacenterMainUrl">
+					<type>d:text</type>
+				</property>
+				<property name="ccm:mediacenterDistrictAbbreviation">
+					<type>d:text</type>
+				</property>
+				<!-- internally stored as a json array of type @Mediacenter.Catalog -->
+				<property name="ccm:mediacenterCatalogs">
+					<type>d:text</type>
+				</property>
+			</properties>
+		</aspect>
+
+		<aspect name="ccm:address">
+			<title>extend persons,groups with address info</title>
+			<properties>
+				<property name="ccm:postalCode">
+					<type>d:text</type>
+				</property>
+				<property name="ccm:city">
+					<type>d:text</type>
+				</property>
+				<property name="ccm:street">
+					<type>d:text</type>
+				</property>
+				<property name="ccm:houseNumber">
+					<type>d:text</type>
+				</property>
+			</properties>
+		</aspect>
 	</aspects>
 </model>

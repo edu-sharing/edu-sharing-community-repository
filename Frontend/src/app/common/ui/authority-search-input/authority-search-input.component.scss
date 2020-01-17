@@ -1,16 +1,29 @@
-@import "../../../../styles/variables.scss";
+@import "../../../../app/core-ui-module/styles/variables";
 
-autocomplete{
-  width:100%;
+form{
+  width: 100%;
 }
+.authority-search-input{
+  width:100%;
+  .material-icons {
+    color: $textLight;
+  }
+  mat-hint{
+    margin-top: 15px;
+  }
+}
+
 user-avatar{
   height: 40px;
 }
-
+.mat-option{
+  height: auto;
+}
 .suggestion-content{
   width: 100%;
   display: flex;
   align-items: center;
+  padding: 10px 0;
   >i{
     color: #6d6d6d;
     font-size: 30px;
@@ -22,6 +35,7 @@ user-avatar{
     > .data {
       flex-grow: 1;
       margin: 0 15px;
+      width: 0;
       >div{
         @include limitLineCount(1,1.6);
         word-break: break-all;
@@ -44,7 +58,6 @@ user-avatar{
       display: flex;
       justify-content: flex-end;
       word-break: break-all;
-      min-width: 100px;
       max-width: 30%;
     }
   }

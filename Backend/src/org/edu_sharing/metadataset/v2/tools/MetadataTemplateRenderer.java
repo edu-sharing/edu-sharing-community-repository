@@ -372,8 +372,8 @@ public class MetadataTemplateRenderer {
 		}
 		return cleaned;
 	}
-	public static Map<String, String[]> cleanupHTMLMultivalueProperties(Map<String, String[]> properties) {
-		Map<String,String[]> cleaned=new HashMap<>();
+	public static HashMap<String, String[]> cleanupHTMLMultivalueProperties(Map<String, String[]> properties) {
+		HashMap<String,String[]> cleaned=new HashMap<>();
 		for(Map.Entry<String,String[]> entry : properties.entrySet()){
 			if(entry.getValue()==null)
 				cleaned.put(entry.getKey(), null);
@@ -492,7 +492,7 @@ public class MetadataTemplateRenderer {
 	      if(str.charAt(0)=='"'){
 	        search="\"";
 	      }
-	      if(search!=" ")
+	      if(!search.equals(" "))
 	        str=str.substring(1);
 	      int end=str.indexOf(search);
 	      String value=str.substring(0,end);

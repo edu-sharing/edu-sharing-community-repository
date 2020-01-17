@@ -1,29 +1,27 @@
 import {Component, Input, EventEmitter, Output, AfterViewInit} from '@angular/core';
-import {RestNodeService} from "../../../common/rest/services/rest-node.service";
+import {ListItem, RestNodeService} from '../../../core-module/core.module';
 import {
     Node, NodeList, NodeWrapper, NodePermissions, NodeVersions, UsageList,
     Version, LoginResult, IamUser, Permission, Usage, Collection, CollectionUsage
-} from '../../../common/rest/data-object';
-import {RestConstants} from "../../../common/rest/rest-constants";
-import {TranslateService} from "@ngx-translate/core";
-import {NodeHelper} from "../../../common/ui/node-helper";
-import {RestUsageService} from "../../../common/rest/services/rest-usage.service";
-import {DialogButton} from "../../../common/ui/modal-dialog/modal-dialog.component";
-import {Toast} from "../../../common/ui/toast";
-import {RestConnectorService} from "../../../common/rest/services/rest-connector.service";
-import {RestIamService} from "../../../common/rest/services/rest-iam.service";
-import {ConfigurationService} from "../../../common/services/configuration.service";
-import {VCard} from "../../../common/VCard";
-import {RestHelper} from "../../../common/rest/rest-helper";
-import {Router} from "@angular/router";
-import {UIHelper} from "../../../common/ui/ui-helper";
-import {UIConstants} from "../../../common/ui/ui-constants";
-import {ListItem} from "../../../common/ui/list-item";
-import {ConfigurationHelper} from "../../../common/rest/configuration-helper";
-import {RestSearchService} from "../../../common/rest/services/rest-search.service";
+} from '../../../core-module/core.module';
+import {RestConstants} from '../../../core-module/core.module';
+import {TranslateService} from '@ngx-translate/core';
+import {NodeHelper} from '../../../core-ui-module/node-helper';
+import {RestUsageService} from '../../../core-module/core.module';
+import {Toast} from '../../../core-ui-module/toast';
+import {RestConnectorService} from '../../../core-module/core.module';
+import {RestIamService} from '../../../core-module/core.module';
+import {ConfigurationService} from '../../../core-module/core.module';
+import {VCard} from '../../../core-module/ui/VCard';
+import {RestHelper} from '../../../core-module/core.module';
+import {Router} from '@angular/router';
+import {UIHelper} from '../../../core-ui-module/ui-helper';
+import {UIConstants} from '../../../core-module/ui/ui-constants';
+import {ConfigurationHelper} from '../../../core-module/core.module';
+import {RestSearchService} from '../../../core-module/core.module';
 
 // Charts.js
-declare var Chart:any;
+declare var Chart: any;
 
 @Component({
   selector: 'workspace-metadata',
@@ -31,186 +29,186 @@ declare var Chart:any;
   styleUrls: ['metadata.component.scss']
 })
 export class WorkspaceMetadataComponent{
-  private _node : string;
-  public loading=true;
-  public data : any;
-  private INFO="INFO";
-  private PROPERTIES="PROPERTIES";
-  private VERSIONS="VERSIONS";
-  private tab=this.INFO;
-  private permissions : any;
-  private usages : Usage[];
-  private usagesCollection : CollectionUsage[];
-  private nodeObject : Node;
-  private versions : Version[];
-  private versionsLoading=false;
-  private columns:ListItem[]=[];
-  private columnsCollections:ListItem[]=[];
+  private _node: string;
+  public loading= true;
+  public data: any;
+  private INFO= 'INFO';
+  private PROPERTIES= 'PROPERTIES';
+  private VERSIONS= 'VERSIONS';
+  private tab= this.INFO;
+  private permissions: any;
+  private usages: Usage[];
+  private usagesCollection: CollectionUsage[];
+  private nodeObject: Node;
+  private versions: Version[];
+  private versionsLoading= false;
+  private columns: ListItem[]= [];
+  private columnsCollections: ListItem[]= [];
   /*Chart.js*/
   canvas: any;
   ctx: any;
-  stats:any= {
+  stats: any= {
       labels: [],
       points: [],
-      pointsIcons: ["input","layers","cloud_download","remove_red_eye"],
-      colors: ['rgba(230, 178, 71, .8)', 'rgba(151, 91, 93, .8)', 'rgba(27, 102, 49, .8)','rgba(102,167,217,.8)']
+      pointsIcons: ['input', 'layers', 'cloud_download', 'remove_red_eye'],
+      colors: ['rgba(230, 178, 71, .8)', 'rgba(151, 91, 93, .8)', 'rgba(27, 102, 49, .8)', 'rgba(102,167,217,.8)']
   };
 
   statsTotalPoints: number;
-  @Input() isAdmin:boolean;
+  @Input() isAdmin: boolean;
   forkedParent: Node;
   forkedChilds: Node[];
-  @Input() set node(node : string){
-    this._node=node;
+  @Input() set node(node: string){
+    this._node = node;
     this.load();
   }
-  @Output() onEditMetadata=new EventEmitter();
-  @Output() onDownload=new EventEmitter();
-  @Output() onDisplay=new EventEmitter();
-  @Output() onClose=new EventEmitter();
-  @Output() onRestore=new EventEmitter();
+  @Output() onEditMetadata= new EventEmitter();
+  @Output() onDownload= new EventEmitter();
+  @Output() onDisplay= new EventEmitter();
+  @Output() onClose= new EventEmitter();
+  @Output() onRestore= new EventEmitter();
   private load(){
-    this.versions=null;
-    this.loading=true;
-    this.versionsLoading=true;
-    this.data=null;
+    this.versions = null;
+    this.loading = true;
+    this.versionsLoading = true;
+    this.data = null;
     this.resetStats();
-    let currentNode=this._node;
-    this.nodeApi.getNodeMetadata(this._node,[RestConstants.ALL]).subscribe((data : NodeWrapper) => {
-      if(currentNode!=this._node)
+    const currentNode = this._node;
+    this.nodeApi.getNodeMetadata(this._node, [RestConstants.ALL]).subscribe((data: NodeWrapper) => {
+      if (currentNode != this._node)
         return;
       console.log(data);
-      this.nodeObject=data.node;
-      if(this.nodeObject.isDirectory)
+      this.nodeObject = data.node;
+      if (this.nodeObject.isDirectory)
         this.tab = this.INFO;
 
 
-      this.data=this.format(data.node);
-      this.loading=false;
-        this.nodeApi.getNodeVersions(this._node).subscribe((data : NodeVersions)=>{
-            if(currentNode!=this._node)
+      this.data = this.format(data.node);
+      this.loading = false;
+      this.nodeApi.getNodeVersions(this._node).subscribe((data: NodeVersions) => {
+            if (currentNode != this._node)
                 return;
-            this.versions=data.versions.reverse();
-            for(let version of this.versions) {
-                if(version.comment){
-                    if(version.comment==RestConstants.COMMENT_MAIN_FILE_UPLOAD
-                        || version.comment==RestConstants.COMMENT_METADATA_UPDATE
-                        || version.comment==RestConstants.COMMENT_CONTENT_UPDATE
-                        || version.comment==RestConstants.COMMENT_LICENSE_UPDATE
-                        || version.comment==RestConstants.COMMENT_NODE_PUBLISHED
+            this.versions = data.versions.reverse();
+            for (const version of this.versions) {
+                if (version.comment){
+                    if (version.comment == RestConstants.COMMENT_MAIN_FILE_UPLOAD
+                        || version.comment == RestConstants.COMMENT_METADATA_UPDATE
+                        || version.comment == RestConstants.COMMENT_CONTENT_UPDATE
+                        || version.comment == RestConstants.COMMENT_LICENSE_UPDATE
+                        || version.comment == RestConstants.COMMENT_NODE_PUBLISHED
                         || version.comment==RestConstants.COMMENT_PREVIEW_CHANGED
                         || version.comment.startsWith(RestConstants.COMMENT_EDITOR_UPLOAD)) {
-                        let parameters = version.comment.split(",");
-                        let editor = "";
+                        const parameters = version.comment.split(',');
+                        let editor = '';
                         if (parameters.length > 1)
-                            editor = this.translate.instant("CONNECTOR." + parameters[1] + ".NAME");
-                        version.comment = this.translate.instant('WORKSPACE.METADATA.COMMENT.' + parameters[0], {editor: editor});
+                            editor = this.translate.instant('CONNECTOR.' + parameters[1] + '.NAME');
+                        version.comment = this.translate.instant('WORKSPACE.METADATA.COMMENT.' + parameters[0], {editor});
                     }
                 }
             }
-            let i=0;
-            for(let version of this.versions){
-                if(this.isCurrentVersion(version)){
-                    this.versions.splice(i,1);
-                    this.versions.splice(0,0,version);
+            let i = 0;
+            for (const version of this.versions){
+                if (this.isCurrentVersion(version)){
+                    this.versions.splice(i, 1);
+                    this.versions.splice(0, 0, version);
                     break;
                 }
                 i++;
             }
-            this.versionsLoading=false;
+            this.versionsLoading = false;
         });
-        this.iamApi.getUser().subscribe((login:IamUser)=>{
-            this.nodeApi.getNodePermissions(this._node).subscribe((data : NodePermissions) => {
-                this.permissions=this.formatPermissions(login,data);
+      this.iamApi.getUser().subscribe((login: IamUser) => {
+            this.nodeApi.getNodePermissions(this._node).subscribe((data: NodePermissions) => {
+                this.permissions = this.formatPermissions(login, data);
             });
         });
-        this.usages=null;
-        this.forkedParent=null;
-        this.forkedChilds=null;
-        if(data.node.properties[RestConstants.CCM_PROP_FORKED_ORIGIN]){
-           this.nodeApi.getNodeMetadata(RestHelper.removeSpacesStoreRef(data.node.properties[RestConstants.CCM_PROP_FORKED_ORIGIN][0])).subscribe((parent)=>{
-              this.forkedParent=parent.node;
-           },(error)=>{
+      this.usages = null;
+      this.forkedParent = null;
+      this.forkedChilds = null;
+      if (data.node.properties[RestConstants.CCM_PROP_FORKED_ORIGIN]){
+           this.nodeApi.getNodeMetadata(RestHelper.removeSpacesStoreRef(data.node.properties[RestConstants.CCM_PROP_FORKED_ORIGIN][0])).subscribe((parent) => {
+              this.forkedParent = parent.node;
+           }, (error) => {
 
            });
         }
-        this.searchApi.searchByProperties([RestConstants.CCM_PROP_FORKED_ORIGIN],[RestHelper.createSpacesStoreRef(data.node)],["="]).subscribe((childs)=>{
-            this.forkedChilds=childs.nodes;
+      this.searchApi.searchByProperties([RestConstants.CCM_PROP_FORKED_ORIGIN], [RestHelper.createSpacesStoreRef(data.node)], ['=']).subscribe((childs) => {
+            this.forkedChilds = childs.nodes;
         });
-        this.usageApi.getNodeUsages(this._node).subscribe((usages : UsageList) =>{
-            this.usages=usages.usages;
-            this.usageApi.getNodeUsagesCollection(this._node).subscribe((collection)=>{
-                this.usagesCollection=collection;
+      this.usageApi.getNodeUsages(this._node).subscribe((usages: UsageList) => {
+            this.usages = usages.usages;
+            this.usageApi.getNodeUsagesCollection(this._node).subscribe((collection) => {
+                this.usagesCollection = collection;
                 this.getStats();
             });
         });
     });
   }
-  private isCurrentVersion(version : Version) : boolean{
-    if(!this.nodeObject)
+  private isCurrentVersion(version: Version): boolean{
+    if (!this.nodeObject)
       return false;
-    let prop=this.nodeObject.properties[RestConstants.LOM_PROP_LIFECYCLE_VERSION];
-    if(!prop)
+    const prop = this.nodeObject.properties[RestConstants.LOM_PROP_LIFECYCLE_VERSION];
+    if (!prop)
       return false;
 
-    return prop[0]==(version.version.major+"."+version.version.minor);
+    return prop[0] == (version.version.major + '.' + version.version.minor);
   }
-  private setTab(tab : string){
-    this.tab=tab;
+  private setTab(tab: string){
+    this.tab = tab;
   }
-  private display(version:string=null){
-    this.nodeObject.version=version;
+  private display(version: string= null){
+    this.nodeObject.version = version;
     this.onDisplay.emit(this.nodeObject);
   }
-  private displayNode(node:Node){
-      this.router.navigate([UIConstants.ROUTER_PREFIX+"render",node.ref.id]);
+  private displayNode(node: Node){
+      this.router.navigate([UIConstants.ROUTER_PREFIX + 'render', node.ref.id]);
   }
-  private displayCollection(collection:CollectionUsage){
-      UIHelper.goToCollection(this.router,(collection.collection as any));
+  private displayCollection(collection: CollectionUsage){
+      UIHelper.goToCollection(this.router, (collection.collection as any));
   }
   private openPermalink(){
       this.displayNode(this.nodeObject);
   }
-  private displayVersion(version : Version){
-    if(this.isCurrentVersion(version))
+  private displayVersion(version: Version){
+    if (this.isCurrentVersion(version))
       this.display();
     else
-      this.display(version.version.major+"."+version.version.minor);
+      this.display(version.version.major + '.' + version.version.minor);
   }
-  private format(node: Node) : any{
-    let data : any = {};
-    data["name"]=node.name;
-    data["title"]=node.title;
-    data["isDirectory"]=node.isDirectory;
-    data["isCollection"]=node.collection!=null;
-    data["description"]=node.description;
-    data["preview"]=node.preview.url;
-    data["keywords"]=node.properties[RestConstants.LOM_PROP_GENERAL_KEYWORD];
-    if(data["keywords"] && data["keywords"].length==1 && !data["keywords"][0])
-      data["keywords"]=null;
+  private format(node: Node): any{
+    const data: any = {};
+    data.name = node.name;
+    data.title = node.title;
+    data.isDirectory = node.isDirectory;
+    data.isCollection = node.collection != null;
+    data.description = node.description;
+    data.preview = node.preview.url;
+    data.keywords = node.properties[RestConstants.LOM_PROP_GENERAL_KEYWORD];
+    if (data.keywords && data.keywords.length == 1 && !data.keywords[0])
+      data.keywords = null;
     //data["creator"]=node.properties[RestConstants.CM_CREATOR];
-    data["creator"]=ConfigurationHelper.getPersonWithConfigDisplayName(node.createdBy,this.config);
-    data["createDate"]=NodeHelper.getNodeAttribute(this.translate,this.config,node,new ListItem("NODE",RestConstants.CM_PROP_C_CREATED));
-    data["duration"]=RestHelper.getDurationFormatted(node);
-    data["author"]=this.toVCards(node.properties[RestConstants.CCM_PROP_LIFECYCLECONTRIBUTER_AUTHOR]).join(", ");
-    data["author_freetext"]=node.properties[RestConstants.CCM_PROP_AUTHOR_FREETEXT] ? node.properties[RestConstants.CCM_PROP_AUTHOR_FREETEXT][0] : null;
-    data["mediatype"]=node.mediatype=="file" ? node.mimetype : node.mediatype;
-    data["mimetype"]=node.mimetype;
-    data["size"]=node.size;
-    if(node.properties[RestConstants.EXIF_PROP_DATE_TIME_ORIGINAL])
-      data["exifDate"]=NodeHelper.getNodeAttribute(this.translate,this.config,node,new ListItem("NODE",RestConstants.EXIF_PROP_DATE_TIME_ORIGINAL));
+    data.creator = ConfigurationHelper.getPersonWithConfigDisplayName(node.createdBy, this.config);
+    data.createDate = NodeHelper.getNodeAttribute(this.translate, this.config, node, new ListItem('NODE', RestConstants.CM_PROP_C_CREATED));
+    data.duration = RestHelper.getDurationFormatted(node);
+    data.author = this.toVCards(node.properties[RestConstants.CCM_PROP_LIFECYCLECONTRIBUTER_AUTHOR]).join(', ');
+    data.author_freetext = node.properties[RestConstants.CCM_PROP_AUTHOR_FREETEXT] ? node.properties[RestConstants.CCM_PROP_AUTHOR_FREETEXT][0] : null;
+    data.mediatype = node.mediatype == 'file' ? node.mimetype : node.mediatype;
+    data.mimetype = node.mimetype;
+    data.size = node.size;
+    if (node.properties[RestConstants.EXIF_PROP_DATE_TIME_ORIGINAL])
+      data.exifDate = NodeHelper.getNodeAttribute(this.translate, this.config, node, new ListItem('NODE', RestConstants.EXIF_PROP_DATE_TIME_ORIGINAL));
 
-    data["dimensions"]=NodeHelper.getNodeAttribute(this.translate,this.config,node,new ListItem("NODE",RestConstants.DIMENSIONS));
-    data["dimensions"]=NodeHelper.getNodeAttribute(this.translate,this.config,node,new ListItem("NODE",RestConstants.DIMENSIONS),null);
+    data.dimensions = NodeHelper.getNodeAttribute(this.translate, this.config, node, new ListItem('NODE', RestConstants.DIMENSIONS));
+    data.dimensions = NodeHelper.getNodeAttribute(this.translate, this.config, node, new ListItem('NODE', RestConstants.DIMENSIONS), null);
 
-    data["license"]=NodeHelper.getLicenseIcon(node);
-    data["licenseName"]=NodeHelper.getLicenseName(node,this.translate);
+    data.license = NodeHelper.getLicenseIcon(node);
+    data.licenseName = NodeHelper.getLicenseName(node, this.translate);
 
-    data["properties"]=[];
-    data["aspects"]=node.aspects.sort();
+    data.properties = [];
+    data.aspects = node.aspects.sort();
 
-    for(let k of Object.keys(node.properties).sort()) {
-      data["properties"].push([k, node.properties[k].join(", ")]);
+    for (const k of Object.keys(node.properties).sort()) {
+      data.properties.push([k, node.properties[k].join(', ')]);
     }
     return data;
   }
@@ -220,63 +218,63 @@ export class WorkspaceMetadataComponent{
   private edit(){
     this.onEditMetadata.emit(this.nodeObject);
   }
-  constructor(private translate : TranslateService,
-              private config : ConfigurationService,
+  constructor(private translate: TranslateService,
+              private config: ConfigurationService,
               private router: Router,
-              private iamApi : RestIamService,
-              private nodeApi : RestNodeService,
-              private searchApi : RestSearchService,
-              private usageApi : RestUsageService,
-              private toast : Toast) {
-      this.columns.push(new ListItem("NODE",RestConstants.CM_NAME));
-      this.columnsCollections.push(new ListItem("COLLECTION",'title'));
+              private iamApi: RestIamService,
+              private nodeApi: RestNodeService,
+              private searchApi: RestSearchService,
+              private usageApi: RestUsageService,
+              private toast: Toast) {
+      this.columns.push(new ListItem('NODE', RestConstants.CM_NAME));
+      this.columnsCollections.push(new ListItem('COLLECTION', 'title'));
   }
-  private restoreVersion(restore : Version){
-    this.onRestore.emit(restore);
+  private restoreVersion(restore: Version) {
+    this.onRestore.emit({version: restore, node: this.nodeObject});
   }
   canRevert(){
-    return this.nodeObject && this.nodeObject.access.indexOf(RestConstants.ACCESS_WRITE)!=-1;
+    return this.nodeObject && this.nodeObject.access.indexOf(RestConstants.ACCESS_WRITE) != -1;
   }
   private isAnimated(){
     return NodeHelper.hasAnimatedPreview(this.nodeObject);
   }
-  private formatPermissions(login:IamUser,permissions: NodePermissions) : any{
-    let data : any = {};
-    data["users"]=[];
-    data["groups"]=[];
-    if(!permissions.permissions)
+  private formatPermissions(login: IamUser, permissions: NodePermissions): any{
+    const data: any = {};
+    data.users = [];
+    data.groups = [];
+    if (!permissions.permissions)
       return data;
-    for(let permission of permissions.permissions.inheritedPermissions){
-      if(permission.authority.authorityName==login.person.authorityName || permission.authority.authorityType==RestConstants.AUTHORITY_TYPE_OWNER){
+    for (const permission of permissions.permissions.inheritedPermissions){
+      if (permission.authority.authorityName == login.person.authorityName || permission.authority.authorityType == RestConstants.AUTHORITY_TYPE_OWNER){
 
       }
-      else if(permission.authority.authorityType==RestConstants.AUTHORITY_TYPE_USER){
-        data["users"].push(permission);
+      else if (permission.authority.authorityType == RestConstants.AUTHORITY_TYPE_USER){
+        data.users.push(permission);
       }
       else{
-        data["groups"].push(permission);
+        data.groups.push(permission);
       }
     }
-    for(let permission of permissions.permissions.localPermissions.permissions){
-      if(permission.authority.authorityName==login.person.authorityName || permission.authority.authorityType==RestConstants.AUTHORITY_TYPE_OWNER){
+    for (const permission of permissions.permissions.localPermissions.permissions){
+      if (permission.authority.authorityName == login.person.authorityName || permission.authority.authorityType == RestConstants.AUTHORITY_TYPE_OWNER){
 
       }
-      else if(permission.authority.authorityType==RestConstants.AUTHORITY_TYPE_USER){
-        if(!this.containsPermission(data["groups"],permission))
-          data["users"].push(permission);
+      else if (permission.authority.authorityType == RestConstants.AUTHORITY_TYPE_USER){
+        if (!this.containsPermission(data.groups, permission))
+          data.users.push(permission);
       }
       else{
-        if(!this.containsPermission(data["groups"],permission))
-          data["groups"].push(permission);
+        if (!this.containsPermission(data.groups, permission))
+          data.groups.push(permission);
       }
     }
     return data;
   }
 
   private toVCards(properties: any[]) {
-    let vcards:string[]=[];
-    if(properties) {
-      for (let p of properties) {
+    const vcards: string[] = [];
+    if (properties) {
+      for (const p of properties) {
         vcards.push(new VCard(p).getDisplayName());
       }
     }
@@ -285,36 +283,36 @@ export class WorkspaceMetadataComponent{
   }
 
   private containsPermission(permissions: Permission[], permission: Permission) {
-    for(let perm of permissions){
-      if(perm.authority.authorityName==permission.authority.authorityName)
+    for (const perm of permissions){
+      if (perm.authority.authorityName == permission.authority.authorityName)
         return true;
     }
     return false;
   }
   resetStats(){
-      this.stats.labels=[];
-      this.stats.points=[];
-      this.statsTotalPoints=null;
+      this.stats.labels = [];
+      this.stats.points = [];
+      this.statsTotalPoints = null;
   }
   getStats() {
         this.resetStats();
-        this.stats.labels.push(this.translate.instant("WORKSPACE.METADATA.USAGE_TYPE.LMS"));
-        this.stats.labels.push(this.translate.instant("WORKSPACE.METADATA.USAGE_TYPE.COLLECTION"));
-        this.stats.labels.push(this.translate.instant("WORKSPACE.METADATA.USAGE_TYPE.DOWNLOAD"));
-        this.stats.labels.push(this.translate.instant("WORKSPACE.METADATA.USAGE_TYPE.VIEW"));
+        this.stats.labels.push(this.translate.instant('WORKSPACE.METADATA.USAGE_TYPE.LMS'));
+        this.stats.labels.push(this.translate.instant('WORKSPACE.METADATA.USAGE_TYPE.COLLECTION'));
+        this.stats.labels.push(this.translate.instant('WORKSPACE.METADATA.USAGE_TYPE.DOWNLOAD'));
+        this.stats.labels.push(this.translate.instant('WORKSPACE.METADATA.USAGE_TYPE.VIEW'));
 
-        this.stats.points.push(this.usages.length-this.usagesCollection.length);
+        this.stats.points.push(this.usages.length - this.usagesCollection.length);
         this.stats.points.push(this.usagesCollection.length);
         this.stats.points.push(this.nodeObject.properties[RestConstants.CCM_PROP_TRACKING_DOWNLOADS] ? this.nodeObject.properties[RestConstants.CCM_PROP_TRACKING_DOWNLOADS] : 0);
         this.stats.points.push(this.nodeObject.properties[RestConstants.CCM_PROP_TRACKING_VIEWS] ? this.nodeObject.properties[RestConstants.CCM_PROP_TRACKING_VIEWS] : 0);
-        this.statsTotalPoints=this.stats.points.reduce((a:any,b:any)=>parseInt(a)+parseInt(b));
-        let statsMax=this.stats.points.reduce((a:any,b:any)=>Math.max(parseInt(a),parseInt(b)));
+        this.statsTotalPoints = this.stats.points.reduce((a: any, b: any) => parseInt(a) + parseInt(b));
+        const statsMax = this.stats.points.reduce((a: any, b: any) => Math.max(parseInt(a), parseInt(b)));
         this.canvas = document.getElementById('myChart');
         this.ctx = this.canvas.getContext('2d');
         // FontFamily
         Chart.defaults.global.defaultFontFamily = 'open_sansregular';
-        let myChart = new Chart(this.ctx, {
-            type: "bar",
+        const myChart = new Chart(this.ctx, {
+            type: 'bar',
             data: {
                 labels: this.stats.labels,
                 datasets: [{
@@ -325,8 +323,8 @@ export class WorkspaceMetadataComponent{
             },
             options: {
                 responsive: false,
-                legend:{
-                    display:false
+                legend: {
+                    display: false
                 },
                 mode: 'index',
                 layout: {
@@ -345,8 +343,8 @@ export class WorkspaceMetadataComponent{
                     }],
                     yAxes: [{
                         ticks: {
-                            beginAtZero:true,
-                            max:Math.max(Math.round(statsMax*1.25),6)
+                            beginAtZero: true,
+                            max: Math.max(Math.round(statsMax * 1.25), 6)
                         }
                     }]
                 }

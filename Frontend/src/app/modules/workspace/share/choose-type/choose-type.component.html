@@ -12,12 +12,10 @@
     <i class="material-icons">work</i> {{'WORKSPACE.SHARE.TYPE_COORDINATOR' | translate}}
     <i class="material-icons selected" *ngIf="contains('Coordinator')">check</i>
     <p>{{'WORKSPACE.SHARE.TYPE_COORDINATOR_DESCRIPTION' | translate}}</p></a>
-  <div class="collection-item switch" *ngIf="!isDirectory && canPublish" title="{{'WORKSPACE.SHARE.PUBLISHER_TOOLTIP' | translate}}">
-      <label>
-        <i class="material-icons">public</i><span>{{'WORKSPACE.SHARE.PUBLISHER' | translate}}</span>
-      <input #publish type="checkbox" (change)="setPublish($event)">
-      <span class="lever"></span>
-      </label>
+  <div class="publish-toggle" *ngIf="!isDirectory && canPublish">
+      <mat-slide-toggle  [ngModel]="publish" [disabled]="publishDisabled" (change)="setPublish($event)" class="collection-item" title="{{'WORKSPACE.SHARE.PUBLISHER_TOOLTIP' | translate}}">
+          <div class="toggle"><i class="material-icons">public</i><span>{{'WORKSPACE.SHARE.PUBLISHER' | translate}}</span></div>
+      </mat-slide-toggle>
   </div>
 </div>
 

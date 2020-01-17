@@ -1,3 +1,4 @@
+<dropdown #dropdown [options]="options"></dropdown>
 <div *ngIf="_node" class="group">
   <div class="new" *ngIf="canComment()">
     <div class="left">
@@ -29,8 +30,9 @@
         <div class="right">
           <div class="creator">
             <div class="name">{{comment.creator | authorityName}}</div>
-            <i icon iconId="more_vert" class="dropdown" *ngIf="getOptions(comment) && getOptions(comment).length" (click)="options=getOptions(comment);dropdown=i"></i>
-            <dropdown [options]="options" [show]="dropdown==i" (showChange)="dropdown=-1"></dropdown>
+            <button mat-icon-button #menuTrigger="matMenuTrigger" mat-button class="dropdown-dummy" [matMenuTriggerFor]="dropdown.menu" (click)="options=getOptions(comment)">
+              <i icon iconId="more_vert" class="dropdown" *ngIf="getOptions(comment) && getOptions(comment).length"></i>
+            </button>
           </div>
           <div class="commentText" *ngIf="comment!=editComment">{{comment.comment}}</div>
           <div class="commentTextEdit" *ngIf="comment==editComment">

@@ -4,6 +4,7 @@ import java.net.URL;
 import java.util.HashMap;
 
 import org.apache.commons.lang.StringEscapeUtils;
+import org.edu_sharing.lightbend.LightbendConfigLoader;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.server.RepoFactory;
 import org.edu_sharing.repository.server.tools.HttpQueryTool;
@@ -31,7 +32,7 @@ public class ClientUtilsService {
 		if (page.startsWith("https://"))
 			page = page.substring(8);
 		info.setPage(page);
-		boolean resolveWebsites = Boolean.parseBoolean(RepoFactory.getEdusharingProperty(CCConstants.EDU_SHARING_PROPERTIES_PROPERTY_RESOLVE_WEBSITE_TITLE));
+		boolean resolveWebsites = LightbendConfigLoader.get().getBoolean("repository.communication.resolveUrlInformation");
 		if (!resolveWebsites) {
 			return info;
 		}

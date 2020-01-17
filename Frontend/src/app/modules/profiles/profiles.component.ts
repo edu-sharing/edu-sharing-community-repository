@@ -1,24 +1,24 @@
 
 import {Component, ElementRef, ViewChild} from '@angular/core';
-import {Translation} from "../../common/translation";
-import {UIHelper} from "../../common/ui/ui-helper";
-import {SessionStorageService} from "../../common/services/session-storage.service";
+import {Translation} from "../../core-ui-module/translation";
+import {UIHelper} from "../../core-ui-module/ui-helper";
+import {SessionStorageService} from "../../core-module/core.module";
 import {TranslateService} from "@ngx-translate/core";
 import {DomSanitizer, Title} from "@angular/platform-browser";
 import {ActivatedRoute, Router} from '@angular/router';
-import {Toast} from "../../common/ui/toast";
-import {RestConnectorService} from "../../common/rest/services/rest-connector.service";
-import {ConfigurationService} from "../../common/services/configuration.service";
-import {RestIamService} from "../../common/rest/services/rest-iam.service";
-import {IamUser, User} from "../../common/rest/data-object";
-import {AuthorityNamePipe} from "../../common/ui/authority-name.pipe";
+import {Toast} from "../../core-ui-module/toast";
+import {RestConnectorService} from "../../core-module/core.module";
+import {ConfigurationService} from "../../core-module/core.module";
+import {RestIamService} from "../../core-module/core.module";
+import {IamUser, User} from "../../core-module/core.module";
+import {AuthorityNamePipe} from "../../core-ui-module/pipes/authority-name.pipe";
 import {trigger} from "@angular/animations";
-import {UIAnimation} from "../../common/ui/ui-animation";
+import {UIAnimation} from "../../core-module/ui/ui-animation";
 import {UserProfileComponent} from "../../common/ui/user-profile/user-profile.component";
-import {RestConstants} from "../../common/rest/rest-constants";
-import {RestHelper} from "../../common/rest/rest-helper";
+import {RestConstants} from "../../core-module/core.module";
+import {RestHelper} from "../../core-module/core.module";
 import {MainNavComponent} from '../../common/ui/main-nav/main-nav.component';
-import {Helper} from "../../common/helper";
+import {Helper} from "../../core-module/rest/helper";
 import {GlobalContainerComponent} from "../../common/ui/global-container/global-container.component";
 
 @Component({

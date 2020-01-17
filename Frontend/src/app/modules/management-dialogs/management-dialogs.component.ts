@@ -1,23 +1,22 @@
 import {Component, Input, EventEmitter, Output, ViewChild, ElementRef, HostListener} from '@angular/core';
-import {RestNodeService} from "../../common/rest/services/rest-node.service";
+import {DialogButton, RestNodeService} from "../../core-module/core.module";
 import {TranslateService} from "@ngx-translate/core";
-import {RestSearchService} from "../../common/rest/services/rest-search.service";
-import {Toast} from "../../common/ui/toast";
-import {RestConstants} from "../../common/rest/rest-constants";
-import {NodeWrapper, Node, Collection} from "../../common/rest/data-object";
-import {RestHelper} from "../../common/rest/rest-helper";
-import {RestToolService} from "../../common/rest/services/rest-tool.service";
-import {ConfigurationService} from "../../common/services/configuration.service";
+import {RestSearchService} from "../../core-module/core.module";
+import {Toast} from "../../core-ui-module/toast";
+import {RestConstants} from "../../core-module/core.module";
+import {NodeWrapper, Node, Collection} from "../../core-module/core.module";
+import {RestHelper} from "../../core-module/core.module";
+import {RestToolService} from "../../core-module/core.module";
+import {ConfigurationService} from "../../core-module/core.module";
 import {MdsComponent} from "../../common/ui/mds/mds.component";
-import {RestCollectionService} from "../../common/rest/services/rest-collection.service";
+import {RestCollectionService} from "../../core-module/core.module";
 import {trigger} from "@angular/animations";
-import {UIAnimation} from "../../common/ui/ui-animation";
-import {UIHelper} from "../../common/ui/ui-helper";
-import {DialogButton} from "../../common/ui/modal-dialog/modal-dialog.component";
+import {UIAnimation} from "../../core-module/ui/ui-animation";
+import {UIHelper} from "../../core-ui-module/ui-helper";
 import {Router} from '@angular/router';
-import {UIConstants} from "../../common/ui/ui-constants";
-import {ClipboardObject, TemporaryStorageService} from '../../common/services/temporary-storage.service';
-import {RestUsageService} from "../../common/rest/services/rest-usage.service";
+import {UIConstants} from "../../core-module/ui/ui-constants";
+import {ClipboardObject, TemporaryStorageService} from '../../core-module/core.module';
+import {RestUsageService} from "../../core-module/core.module";
 
 @Component({
   selector: 'workspace-management',
@@ -50,7 +49,8 @@ export class WorkspaceManagementDialogsComponent  {
         this.dialogTitle="WORKSPACE.DELETE_TITLE"+(nodeDelete.length==1 ? "_SINGLE" : "");
         this.dialogCancelable=true;
         this.dialogMessage="WORKSPACE.DELETE_MESSAGE"+(nodeDelete.length==1 ? "_SINGLE" : "");
-        this.dialogMessageParameters={name:nodeDelete[0].name};
+        this.dialogMessageParameters={name:RestHelper.getName(nodeDelete[0])};
+        this.dialogNode=nodeDelete;
         this.dialogButtons=DialogButton.getCancel(()=> {this.dialogTitle = null});
         this.dialogButtons.push(new DialogButton('YES_DELETE',DialogButton.TYPE_PRIMARY,()=>{this.deleteConfirmed(nodeDelete)}));
 
@@ -105,6 +105,7 @@ export class WorkspaceManagementDialogsComponent  {
   public dialogMessage:string;
   public dialogMessageParameters:any;
   public dialogCancelable:boolean;
+  public dialogNode:Node|Node[];
   public dialogButtons:DialogButton[];
   private currentLtiTool: Node;
   private ltiToolRefresh: Boolean;
@@ -124,42 +125,18 @@ export class WorkspaceManagementDialogsComponent  {
         event.stopPropagation();
         return;
       }
-      if(this.addToCollection!=null){
-        this.cancelAddToCollection();
-        event.preventDefault();
-        event.stopPropagation();
-        return;
+      if(this.addToCollection!=null) {
+          this.cancelAddToCollection();
+          event.preventDefault();
+          event.stopPropagation();
+          return;
       }
-        if(this.nodeWorkflow!=null){
-            this.closeWorkflow();
-            event.preventDefault();
-            event.stopPropagation();
-            return;
-        }
-        if(this.nodeShare!=null){
-            this.closeShare();
-            event.preventDefault();
-            event.stopPropagation();
-            return;
-        }
-        if(this.nodeShareLink!=null){
-            this.closeShareLink();
-            event.preventDefault();
-            event.stopPropagation();
-            return;
-        }
         if(this.nodeTemplate!=null){
             this.closeTemplate();
             event.preventDefault();
             event.stopPropagation();
             return;
         }
-      if(this.nodeContributor!=null){
-        this.closeContributor();
-        event.preventDefault();
-        event.stopPropagation();
-        return;
-      }
       if(this.nodeLicense!=null){
         this.closeLicense();
         event.preventDefault();
@@ -178,12 +155,6 @@ export class WorkspaceManagementDialogsComponent  {
         event.stopPropagation();
         return;
       }
-        if(this.nodeVariant!=null){
-            this.closeVariant();
-            event.preventDefault();
-            event.stopPropagation();
-            return;
-        }
       if(this.ltiObject){
         this.ltiObject=null;
         event.preventDefault();
@@ -424,9 +395,9 @@ export class WorkspaceManagementDialogsComponent  {
     this.addToCollectionChange.emit(null);
     this.onCloseAddToCollection.emit();
   }
-  public addToCollectionCreate(){
+  public addToCollectionCreate(parent:Node|Collection=null){
       this.temporaryStorage.set(TemporaryStorageService.COLLECTION_ADD_NODES,this.addToCollection);
-      this.router.navigate([UIConstants.ROUTER_PREFIX,"collections","collection","new",RestConstants.ROOT]);
+      this.router.navigate([UIConstants.ROUTER_PREFIX,"collections","collection","new",parent ? parent.ref.id : RestConstants.ROOT]);
       this.addToCollection=null;
       this.addToCollectionChange.emit(null);
   }

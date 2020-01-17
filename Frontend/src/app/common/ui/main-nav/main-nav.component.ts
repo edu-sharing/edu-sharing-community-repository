@@ -3,86 +3,91 @@ import {
     HostListener, ChangeDetectorRef, AfterViewInit
 } from '@angular/core';
 import {TranslateService} from "@ngx-translate/core";
-import {UIAnimation} from "../ui-animation";
-import {RestIamService} from "../../rest/services/rest-iam.service";
-import {
-    IamUser, AccessScope, LoginResult, Organizations, OrganizationOrganizations, NodeList,
-    NodeTextContent, NodeWrapper, Node, About
-} from '../../rest/data-object';
+import {UIAnimation} from "../../../core-module/ui/ui-animation";
 import {Router, Params, ActivatedRoute} from "@angular/router";
-import {RouterComponent} from "../../../router/router.component";
-import {RestConnectorService} from "../../rest/services/rest-connector.service";
-import {RestConstants} from "../../rest/rest-constants";
-import {RestOrganizationService} from "../../rest/services/rest-organization.service";
-import {FrameEventsService} from "../../services/frame-events.service";
-import {ConfigurationService} from "../../services/configuration.service";
 import {style, transition, trigger, animate, keyframes} from "@angular/animations";
-import {SearchNodeStoreComponent} from "../../../modules/search/node-store/node-store.component";
-import {UIHelper} from "../ui-helper";
-import {OPEN_URL_MODE, UIConstants} from "../ui-constants";
-import {RestHelper} from "../../rest/rest-helper";
-import {Toast} from "../toast";
-import {TemporaryStorageService} from "../../services/temporary-storage.service";
-import {ConfigurationHelper} from "../../rest/configuration-helper";
-import {CordovaService} from '../../services/cordova.service';
-import {SessionStorageService} from "../../services/session-storage.service";
-import {RestNodeService} from "../../rest/services/rest-node.service";
-import {Translation} from "../../translation";
-import {OptionItem} from "../actionbar/option-item";
+import {UIHelper} from "../../../core-ui-module/ui-helper";
+import {OPEN_URL_MODE, UIConstants} from "../../../core-module/ui/ui-constants";
+import {Toast} from "../../../core-ui-module/toast";
+import {Translation} from "../../../core-ui-module/translation";
+import {OptionItem} from "../../../core-ui-module/option-item";
 import {HttpClient} from '@angular/common/http';
-import {DialogButton} from '../modal-dialog/modal-dialog.component';
-import {UIService} from '../../services/ui.service';
+import {
+    AccessScope,
+    ConfigurationHelper,
+    ConfigurationService,
+    DialogButton,
+    FrameEventsService,
+    IamUser,
+    LoginResult,
+    Node,
+    NodeList,
+    NodeTextContent,
+    NodeWrapper,
+    OrganizationOrganizations,
+    RestConnectorService,
+    RestConstants, RestHelper,
+    RestIamService,
+    RestNodeService,
+    RestOrganizationService,
+    SessionStorageService,
+    TemporaryStorageService,
+    UIService,
+    About, RestMediacenterService
+} from '../../../core-module/core.module';
+import {BridgeService} from "../../../core-bridge-module/bridge.service";
 import {GlobalContainerComponent} from "../global-container/global-container.component";
 
 @Component({
-  selector: 'main-nav',
-  templateUrl: 'main-nav.component.html',
-  styleUrls: ['main-nav.component.scss'],
-  animations: [
-    trigger('fromLeft', UIAnimation.fromLeft()),
-    trigger('overlay', UIAnimation.openOverlay()),
-    trigger('cardAnimation', UIAnimation.cardAnimation()),
-    trigger('fade', UIAnimation.fade()),
-    trigger('nodeStore', [
-      transition(':enter', [
-        animate(UIAnimation.ANIMATION_TIME_SLOW+'ms ease-in', keyframes([
-          style({opacity: 0, top:'0', transform: 'scale(0.25)', offset: 0}),
-          style({opacity: 1, top:'10px', transform: 'scale(1)', offset: 1}),
-          //style({opacity:0,offset:0}),
-          //style({opacity:1,offset:1}),
+    selector: 'main-nav',
+    templateUrl: 'main-nav.component.html',
+    styleUrls: ['main-nav.component.scss'],
+    animations: [
+        trigger('fromLeft', UIAnimation.fromLeft()),
+        trigger('overlay', UIAnimation.openOverlay()),
+        trigger('cardAnimation', UIAnimation.cardAnimation()),
+        trigger('fade', UIAnimation.fade()),
+        trigger('nodeStore', [
+            transition(':enter', [
+                animate(UIAnimation.ANIMATION_TIME_SLOW+'ms ease-in', keyframes([
+                    style({opacity: 0, top:'0', transform: 'scale(0.25)', offset: 0}),
+                    style({opacity: 1, top:'10px', transform: 'scale(1)', offset: 1}),
+                    //style({opacity:0,offset:0}),
+                    //style({opacity:1,offset:1}),
 
-        ]))
-      ]),
-      transition(':leave', [
-        animate(UIAnimation.ANIMATION_TIME_SLOW+'ms ease-in', keyframes([
-          style({opacity: 1, transform: 'scale(1)', offset: 0}),
-          style({opacity: 0, transform: 'scale(10)', offset: 1}),
-          /*
-          style({offset:0}),
-          style({transform:'scale(1)',
-            left:this.nodeStoreRef ? this.nodeStoreRef.nativeElement.getBoundingClientRect().left : '100%',
-            top:this.nodeStoreRef ? this.nodeStoreRef.nativeElement.getBoundingClientRect().top : 0,offset:1})
-          */
-        ]))
+                ]))
+            ]),
+            transition(':leave', [
+                animate(UIAnimation.ANIMATION_TIME_SLOW+'ms ease-in', keyframes([
+                    style({opacity: 1, transform: 'scale(1)', offset: 0}),
+                    style({opacity: 0, transform: 'scale(10)', offset: 1}),
+                    /*
+                    style({offset:0}),
+                    style({transform:'scale(1)',
+                      left:this.nodeStoreRef ? this.nodeStoreRef.nativeElement.getBoundingClientRect().left : '100%',
+                      top:this.nodeStoreRef ? this.nodeStoreRef.nativeElement.getBoundingClientRect().top : 0,offset:1})
+                    */
+                ]))
 
-      ])]),
-  ]
+            ])]),
+    ]
 })
 /**
  * The main nav (top bar + menus)
  */
 export class MainNavComponent implements AfterViewInit{
-  private static bannerPositionInterval: any;
-  private static preloading=true;
-  private static ID_ATTRIBUTE_NAME='data-banner-id';
+    private static bannerPositionInterval: any;
+    private static preloading=true;
+    visible=false;
+    private static ID_ATTRIBUTE_NAME='data-banner-id';
 
-  @ViewChild('search') search : ElementRef;
-  @ViewChild('sidebar') sidebar:ElementRef;
-  @ViewChild('topbar') topbar:ElementRef;
-  @ViewChild('nodeStoreRef') nodeStoreRef:ElementRef;
-  @ViewChild('scrolltotop') scrolltotop:ElementRef;
-  @ViewChild('userRef') userRef:ElementRef;
-  @ViewChild('tabNav') tabNav:ElementRef;
+    @ViewChild('search') search : ElementRef;
+    @ViewChild('sidebar') sidebar:ElementRef;
+    @ViewChild('topbar') topbar:ElementRef;
+    @ViewChild('nodeStoreRef') nodeStoreRef:ElementRef;
+    @ViewChild('scrolltotop') scrolltotop:ElementRef;
+    @ViewChild('userRef') userRef:ElementRef;
+    @ViewChild('tabNav') tabNav:ElementRef;
     dialogTitle : string;
     dialogCancelable = false;
     dialogMessage : string;
@@ -90,67 +95,65 @@ export class MainNavComponent implements AfterViewInit{
     dialogButtons : DialogButton[];
     timeout: string;
     timeIsValid = false;
-  public config: any={};
-  private editUrl: string;
-  public nodeStoreAnimation=0;
-  public showNodeStore=false;
-  private nodeStoreCount = 0;
-  acceptLicenseAgreement: boolean;
-  licenseAgreement: boolean;
-  licenseAgreementHTML: string;
-  canEditProfile: boolean;
-  private licenseAgreementNode: Node;
-  userMenuOptions: OptionItem[];
-  helpOptions: OptionItem[]=[];
-  tutorialElement: ElementRef;
-  globalProgress = false;
+    public config: any={};
+    private editUrl: string;
+    public nodeStoreAnimation=0;
+    public showNodeStore=false;
+    private nodeStoreCount = 0;
+    acceptLicenseAgreement: boolean;
+    licenseAgreement: boolean;
+    licenseAgreementHTML: string;
+    canEditProfile: boolean;
+    private licenseAgreementNode: Node;
+    userMenuOptions: OptionItem[];
+    helpOptions: OptionItem[]=[];
+    tutorialElement: ElementRef;
+    globalProgress = false;
 
-  public showEditProfile: boolean;
-  public showProfile: boolean;
+    public showEditProfile: boolean;
+    public showProfile: boolean;
 
-  private toolpermissions: string[];
-  public canAccessWorkspace = true;
-  private scrollInitialPositions : any[]=[];
+    private toolpermissions: string[];
+    public canAccessWorkspace = true;
+    private scrollInitialPositions : any[]=[];
 
-  private touchStart : any;
+    private touchStart : any;
 
 
-  private sidebarButtons : any=[];
-  public displaySidebar=false;
-  public user : IamUser;
-  public userName : string;
-  public userOpen = false;
-  public helpOpen = false;
-  public _currentScope:string;
+    private sidebarButtons : any=[];
+    public displaySidebar=false;
+    public user : IamUser;
+    public userName : string;
+    public _currentScope:string;
 
-  /**
-   * Show and enables the search field
-   */
-  @Input() searchEnabled : boolean;
-  /**
-   * Shows the current location
-   */
-  @Input() showScope=true;
-  /**
-   * Shows and enables the user menu
-   */
-  @Input() showUser=true;
-  /**
-   * The placeholder text for the search field, will be translated
-   */
-  @Input() searchPlaceholder : string;
-  /**
-   * When true, the sidebar can be clicked to open the menu
-   * @type {boolean}
-   */
-  @Input() canOpen = true;
-  /**
-   * The title on the left side, will be translated
-   */
-  @Input() title : string;
-  /**
-   * The current scope identifier, to mark correct element in the menu as active
-   */
+    /**
+     * Show and enables the search field
+     */
+    @Input() searchEnabled : boolean;
+    /**
+     * Shows the current location
+     */
+    @Input() showScope=true;
+    /**
+     * Shows and enables the user menu
+     */
+    @Input() showUser=true;
+    /**
+     * The placeholder text for the search field, will be translated
+     */
+    @Input() searchPlaceholder : string;
+    /**
+     * When true, the sidebar can be clicked to open the menu
+     * @type {boolean}
+     */
+    @Input() canOpen = true;
+    /**
+     * The title on the left side, will be translated
+     */
+    @Input() title : string;
+    /**
+     * The current scope identifier, to mark correct element in the menu as active
+     */
     /**
      * Called when a search event happened, emits the search string and additional event info
      * {query:string,cleared:boolean}
@@ -160,8 +163,8 @@ export class MainNavComponent implements AfterViewInit{
     public isGuest = false;
     private isAdmin = false;
     public _showUser = false;
-  @Input() searchQuery:string;
-  @Output() searchQueryChange = new EventEmitter<string>();
+    @Input() searchQuery:string;
+    @Output() searchQueryChange = new EventEmitter<string>();
     private lastScroll = -1;
     private elementsTopY = 0;
     private elementsBottomY = 0;
@@ -169,18 +172,25 @@ export class MainNavComponent implements AfterViewInit{
     private about: About;
     licenseDialog: boolean;
     private licenseDetails: string;
-  @HostListener('document:keydown', ['$event'])
-  handleKeyboardEvent(event: KeyboardEvent) {
-      if(event.code=="Escape" && this.canOpen && this.displaySidebar){
-          event.preventDefault();
-          event.stopPropagation();
-          this.displaySidebar=false;
-          return;
-      }
-  }
+    private manageMediacenters = false;
+    @HostListener('document:keydown', ['$event'])
+    handleKeyboardEvent(event: KeyboardEvent) {
+        if(event.code=="Escape" && this.canOpen && this.displaySidebar){
+            event.preventDefault();
+            event.stopPropagation();
+            this.displaySidebar=false;
+            return;
+        }
+    }
+    @HostListener('window:resize')
+    onResize(event:any){
+        this.updateUserOptions();
+    }
     @HostListener('window:scroll', ['$event'])
     @HostListener('window:touchmove', ['$event'])
     handleScroll(event: any) {
+        if(this.storage.get(TemporaryStorageService.OPTION_DISABLE_SCROLL_LAYOUT,false))
+            return;
         let elementsScroll=document.getElementsByClassName('scrollWithBanner');
         let elementsAlign=document.getElementsByClassName('alignWithBanner');
         let elements:any=[];
@@ -253,15 +263,17 @@ export class MainNavComponent implements AfterViewInit{
                 element.style.top = Number.parseInt(this.scrollInitialPositions[element.getAttribute(MainNavComponent.ID_ATTRIBUTE_NAME)])+y + 'px';
             }
         }
-        if((window.pageYOffset || document.documentElement.scrollTop) > 400) {
-            this.scrolltotop.nativeElement.style.display = 'flex';
-        } else {
-            this.scrolltotop.nativeElement.style.display = 'none';
+        if(this.scrolltotop && this.scrolltotop.nativeElement) {
+            if ((window.pageYOffset || document.documentElement.scrollTop) > 400) {
+                this.scrolltotop.nativeElement.style.display = 'flex';
+            } else {
+                this.scrolltotop.nativeElement.style.display = 'none';
+            }
         }
     }
-  @HostListener('document:touchstart',['$event']) onTouchStart(event:any) {
-      this.touchStart=event;
-  }
+    @HostListener('document:touchstart',['$event']) onTouchStart(event:any) {
+        this.touchStart=event;
+    }
     @HostListener('document:touchend',['$event']) onTouchEnd(event:any) {
         let horizontal=event.changedTouches[0].clientX-this.touchStart.changedTouches[0].clientX;
         let vertical=event.changedTouches[0].clientY-this.touchStart.changedTouches[0].clientY;
@@ -281,92 +293,92 @@ export class MainNavComponent implements AfterViewInit{
             }
         }
     }
-  public setNodeStore(value:boolean){
-      UIHelper.changeQueryParameter(this.router,this.route,"nodeStore",value);
-  }
-  @Input() set currentScope(currentScope:string){
-    this._currentScope=currentScope;
-    this.event.broadcastEvent(FrameEventsService.EVENT_VIEW_OPENED,currentScope);
-  }
-  public refreshNodeStore(){
-      this.iam.getNodeList(RestConstants.NODE_STORE_LIST).subscribe((data:NodeList)=>{
-          if(data.nodes.length-this.nodeStoreCount>0 && this.nodeStoreAnimation==-1)
-              this.nodeStoreAnimation=data.nodes.length-this.nodeStoreCount;
-          this.nodeStoreCount=data.nodes.length;
-          setTimeout(()=>{
-              this.nodeStoreAnimation=-1;
-          },1500);
-      });
-  }
+    public setNodeStore(value:boolean){
+        UIHelper.changeQueryParameter(this.router,this.route,"nodeStore",value);
+    }
+    @Input() set currentScope(currentScope:string){
+        this._currentScope=currentScope;
+        this.event.broadcastEvent(FrameEventsService.EVENT_VIEW_OPENED,currentScope);
+    }
+    public refreshNodeStore(){
+        this.iam.getNodeList(RestConstants.NODE_STORE_LIST).subscribe((data:NodeList)=>{
+            if(data.nodes.length-this.nodeStoreCount>0 && this.nodeStoreAnimation==-1)
+                this.nodeStoreAnimation=data.nodes.length-this.nodeStoreCount;
+            this.nodeStoreCount=data.nodes.length;
+            setTimeout(()=>{
+                this.nodeStoreAnimation=-1;
+            },1500);
+        });
+    }
 
-  onEvent(event:string,data:any){
-    if(event==FrameEventsService.EVENT_PARENT_SEARCH){
-      this.doSearch(data,false);
+    onEvent(event:string,data:any){
+        if(event==FrameEventsService.EVENT_PARENT_SEARCH){
+            this.doSearch(data,false);
+        }
     }
-  }
-  public openProfileDialog(){
-    this.userOpen=false;
-    this.showProfile=true;
-  }
-  public openProfile(){
-    this.router.navigate([UIConstants.ROUTER_PREFIX+"profiles",RestConstants.ME]);
-    this.displaySidebar=false;
-    this.userOpen=false;
-  }
-  public getCurrentScopeIcon(){
-    if(this._currentScope=='login' || this._currentScope=='profiles')
-      return 'person';
-    if(this._currentScope=='oer')
-        return 'public'
-    for(let button of this.sidebarButtons){
-      if(button.scope==this._currentScope)
-        return button.icon;
+    public openProfileDialog(){
+        this.showProfile=true;
     }
-    return null;
-  }
-  refreshBanner(){
-    setTimeout(()=>this.handleScroll(null));
-  }
-  ngAfterViewInit() {
-    this.refreshBanner();
-    /*
-    for(let i=0;i<200;i++) {
-      setTimeout(() => this.handleScroll(null), i * 50);
+    public openProfile(){
+        this.router.navigate([UIConstants.ROUTER_PREFIX+"profiles",RestConstants.ME]);
+        this.displaySidebar=false;
     }
-    */
+    public getCurrentScopeIcon(){
+        if(this._currentScope=='login' || this._currentScope=='profiles')
+            return 'person';
+        if(this._currentScope=='oer')
+            return 'public'
+        for(let button of this.sidebarButtons){
+            if(button.scope==this._currentScope)
+                return button.icon;
+        }
+        return null;
+    }
+    refreshBanner(){
+        setTimeout(()=>this.handleScroll(null));
+    }
+    ngAfterViewInit() {
+        this.refreshBanner();
+        /*
+        for(let i=0;i<200;i++) {
+          setTimeout(() => this.handleScroll(null), i * 50);
+        }
+        */
 
-    // too slow and buggy
-    /*
-    if(MainNavComponent.bannerPositionInterval){
-      clearInterval(MainNavComponent.bannerPositionInterval);
+        // too slow and buggy
+        /*
+        if(MainNavComponent.bannerPositionInterval){
+          clearInterval(MainNavComponent.bannerPositionInterval);
+        }
+        MainNavComponent.bannerPositionInterval=setInterval(()=>this.handleScroll(null),100);
+        */
     }
-    MainNavComponent.bannerPositionInterval=setInterval(()=>this.handleScroll(null),100);
-    */
+    private clearSearch(){
+        this.searchQuery="";
+        this.searchQueryChange.emit("");
+        this.onSearch.emit({query:"",cleared:true});
     }
-  private clearSearch(){
-    this.searchQuery="";
-    this.searchQueryChange.emit("");
-    this.onSearch.emit({query:"",cleared:true});
-  }
-  constructor(private iam : RestIamService,
-              private connector : RestConnectorService,
-              private cordova : CordovaService,
-              private ui : UIService,
-              private changeDetector :  ChangeDetectorRef,
-              private event : FrameEventsService,
-              private nodeService : RestNodeService,
-              private configService : ConfigurationService,
-              private storage : TemporaryStorageService,
-              private session : SessionStorageService,
-              private http : HttpClient,
-              private org : RestOrganizationService,
-              private router : Router,
-              private route : ActivatedRoute,
-              private toast : Toast){
-    // get last buttons from cache for faster app navigation
-    this.sidebarButtons=this.storage.get(TemporaryStorageService.MAIN_NAV_BUTTONS,[]);
-    this.connector.setRoute(this.route).subscribe(()=> {
-        this.connector.getAbout().subscribe((about) => {
+    constructor(private iam : RestIamService,
+                private connector : RestConnectorService,
+                private bridge : BridgeService,
+                private ui : UIService,
+                private changeDetector :  ChangeDetectorRef,
+                private event : FrameEventsService,
+                private nodeService : RestNodeService,
+                private configService : ConfigurationService,
+                private storage : TemporaryStorageService,
+                private session : SessionStorageService,
+                private http : HttpClient,
+                private org : RestOrganizationService,
+                private mediacenterService : RestMediacenterService,
+                private router : Router,
+                private route : ActivatedRoute,
+                private toast : Toast){
+        // get last buttons from cache for faster app navigation
+        this.sidebarButtons=this.storage.get(TemporaryStorageService.MAIN_NAV_BUTTONS,[]);
+        this.visible=!this.storage.get(TemporaryStorageService.OPTION_HIDE_MAINNAV,false);
+        this.connector.setRoute(this.route).subscribe(()=> {
+            this.connector.getAbout().subscribe((about)=> {
             this.about = about;
             this.connector.isLoggedIn().subscribe((data: LoginResult) => {
                 if (!data.isValidLogin) {
@@ -431,7 +443,7 @@ export class MainNavComponent implements AfterViewInit{
                 this.refreshNodeStore();
                 this.connector.hasAccessToScope(RestConstants.SAFE_SCOPE).subscribe((data: AccessScope) => {
                     // safe needs access and not be app (oauth not supported)
-                    if (data.hasAccess && !this.cordova.isRunningCordova())
+                    if (data.hasAccess && !this.bridge.getCordova().isRunningCordova())
                         buttons.push({
                             path: 'workspace/safe',
                             scope: 'safe',
@@ -442,297 +454,288 @@ export class MainNavComponent implements AfterViewInit{
                     this.addMoreButtons(buttons);
                 }, (error: any) => this.addMoreButtons(buttons));
             });
-         });
+          });
         });
     });
     event.addListener(this);
   }
 
-  scrollToTop() {
-    UIHelper.scrollSmooth(0);
-    //window.scrollTo(0,0);
-  }
-  editProfile(){
-    if(this.cordova.isRunningCordova()){
-      window.open(this.editUrl,'_system');
+    scrollToTop() {
+        UIHelper.scrollSmooth(0);
+        //window.scrollTo(0,0);
     }
-    else {
-      window.location.href = this.editUrl;
-    }
-  }
-  openSidenav() {
-    if(this.canOpen) {
-      this.displaySidebar=!this.displaySidebar;
-      setTimeout(() => {
-          try {
-              this.sidebar.nativeElement.focus();
-          }catch(e){
-              // ignore error, may open was canceled
-          }
-      }, 100);
-    }
-  }
-
-  private showUserMenu(){
-    if(this._currentScope=='login')
-      return;
-    this.updateUserOptions();
-    this.userOpen=true;
-  }
-  public showHelpMenu(){
-    this.updateHelpOptions();
-    this.helpOpen=true;
-  }
-  public showHelp(url:string){
-    this.helpOpen=false;
-    UIHelper.openUrl(url,this.cordova,OPEN_URL_MODE.BlankSystemBrowser);
-  }
-  private logout(){
-    this.globalProgress=true;
-    if(this.cordova.isRunningCordova()){
-      this.connector.logout().subscribe(()=> {
-          this.cordova.restartCordova();
-      });
-      return;
-    }
-    if(this.config.logout) {
-      let sessionData=this.connector.getCurrentLogin();
-      if(this.config.logout.ajax){
-        this.http.get(this.config.logout.url).subscribe(()=>{
-            if(this.config.logout.destroySession){
-                this.connector.logout().subscribe((response) => {
-                    this.finishLogout();
-                });
-                return;
-            }
-          this.finishLogout();
-        },(error:any)=>{
-          this.toast.error(error);
-        });
-      }
-      else {
-        if(this.config.logout.destroySession){
-          this.connector.logout().subscribe((response) => {
-            if(sessionData.currentScope==RestConstants.SAFE_SCOPE){
-              this.finishLogout();
-            }
-            else {
-              window.location.href = this.config.logout.url;
-            }
-          });
+    editProfile(){
+        if(this.bridge.isRunningCordova()){
+            window.open(this.editUrl,'_system');
         }
         else {
-          if(sessionData.currentScope==RestConstants.SAFE_SCOPE){
-              this.finishLogout();
-          }
-          else {
-              window.location.href = this.config.logout.url;
-          }
+            window.location.href = this.editUrl;
         }
-      }
     }
-    else {
-      this.connector.logout().subscribe((response) => {
-        this.finishLogout();
-      });
-    }
-  }
-  private login(reurl=false){
-    RestHelper.goToLogin(this.router,this.configService,"",reurl?window.location.href:"")
-  }
-  private doSearch(value=this.search.nativeElement.value,broadcast=true){
-    if(broadcast)
-      this.event.broadcastEvent(FrameEventsService.EVENT_GLOBAL_SEARCH,value);
-    this.onSearch.emit({query:value,cleared:false});
-  }
-  private openButton(button : any){
-    if(button.isDisabled)
-      return;
-    this.displaySidebar=false;
-    // if(button.scope==this._currentScope){
-    //   return;
-    // }
-    this.event.broadcastEvent(FrameEventsService.EVENT_VIEW_SWITCHED,button.scope);
-    if(button.url){
-      UIHelper.openUrl(button.url,this.cordova,OPEN_URL_MODE.BlankSystemBrowser);
-    }
-    else {
-      let queryParams=button.queryParams?button.queryParams:{};
-      queryParams.mainnav=true;
-      this.router.navigate([UIConstants.ROUTER_PREFIX + button.path], {queryParams:queryParams});
-    }
-  }
-
-  private hideButtons(buttons:any[]) {
-    let hideMainMenu:string[]=null;
-    if(this.config) hideMainMenu=this.config.hideMainMenu;
-    this.sidebarButtons=buttons;
-    if(hideMainMenu) {
-      for (let i=0;i<this.sidebarButtons.length;i++) {
-        let pos=hideMainMenu.indexOf(this.sidebarButtons[i].scope);
-        if (pos != -1) {
-          this.sidebarButtons.splice(i,1);
-          i--;
+    openSidenav() {
+        if(this.canOpen) {
+            this.displaySidebar=!this.displaySidebar;
+            setTimeout(() => {
+                try {
+                    this.sidebar.nativeElement.focus();
+                }catch(e){
+                    // ignore error, may open was canceled
+                }
+            }, 100);
         }
-      }
     }
-  }
 
-  private addMoreButtons(buttons:any[]) {
-    this.org.getOrganizations().subscribe((data:OrganizationOrganizations)=>{
-      let add=data.canCreate;
-      for(let orga of data.organizations){
-        if(orga.administrationAccess){
-          add=true;
-          break;
+    private showUserMenu(){
+        if(this._currentScope=='login')
+            return;
+    }
+    public showHelp(url:string){
+        UIHelper.openUrl(url,this.bridge,OPEN_URL_MODE.BlankSystemBrowser);
+    }
+    private logout(){
+        this.globalProgress=true;
+        if(this.bridge.isRunningCordova()){
+            this.connector.logout().subscribe(()=> {
+                this.bridge.getCordova().restartCordova();
+            });
+            return;
         }
-      }
-      if(add) {
-        buttons.push({path: 'permissions', scope: 'permissions', icon: "group_add", name: "SIDEBAR.PERMISSIONS",onlyDesktop: true});
-      }
-      if(this.isAdmin){
-        buttons.push({path:'admin',scope:'admin',icon:"settings",name:"SIDEBAR.ADMIN",onlyDesktop: true});
-      }
-      this.checkConfig(buttons);
-    },(error:any)=>this.checkConfig(buttons));
-  }
-  private openImprint(){
-    UIHelper.openUrl(this.config.imprintUrl,this.cordova,OPEN_URL_MODE.BlankSystemBrowser);
-  }
-  private openPrivacy(){
-    UIHelper.openUrl(this.config.privacyInformationUrl,this.cordova,OPEN_URL_MODE.BlankSystemBrowser);
-  }
-  private checkConfig(buttons: any[]) {
-    this.configService.getAll().subscribe((data:any)=>{
-      this.config=data;
-      this.updateHelpOptions();
-      this.editUrl=data["editProfileUrl"];
-      this.showEditProfile=data["editProfile"];
-      this.hideButtons(buttons);
-      this.addButtons(buttons);
-      this.filterButtons();
-      this.storage.set(TemporaryStorageService.MAIN_NAV_BUTTONS,this.sidebarButtons);
-      this.showLicenseAgreement();
-    },(error:any)=>this.hideButtons(buttons));
-  }
-
-  private addButtons(buttons: any[]) {
-    if(!this.config.menuEntries)
-      return;
-
-    for(let button of this.config.menuEntries) {
-      let pos=button.position;
-      if(pos<0)
-        pos=this.sidebarButtons.length-pos;
-      button.isCustom=true;
-      this.sidebarButtons.splice(pos,0,button);
+        if(this.config.logout) {
+            let sessionData=this.connector.getCurrentLogin();
+            if(this.config.logout.ajax){
+                this.http.get(this.config.logout.url).subscribe(()=>{
+                    if(this.config.logout.destroySession){
+                        this.connector.logout().subscribe((response) => {
+                            this.finishLogout();
+                        });
+                        return;
+                    }
+                    this.finishLogout();
+                },(error:any)=>{
+                    this.toast.error(error);
+                });
+            }
+            else {
+                if(this.config.logout.destroySession){
+                    this.connector.logout().subscribe((response) => {
+                        if(sessionData.currentScope==RestConstants.SAFE_SCOPE){
+                            this.finishLogout();
+                        }
+                        else {
+                            window.location.href = this.config.logout.url;
+                        }
+                    });
+                }
+                else {
+                    if(sessionData.currentScope==RestConstants.SAFE_SCOPE){
+                        this.finishLogout();
+                    }
+                    else {
+                        window.location.href = this.config.logout.url;
+                    }
+                }
+            }
+        }
+        else {
+            this.connector.logout().subscribe((response) => {
+                this.finishLogout();
+            });
+        }
     }
-    console.log(this.sidebarButtons);
-  }
+    private login(reurl=false){
+        RestHelper.goToLogin(this.router,this.configService,"",reurl?window.location.href:"")
+    }
+    private doSearch(value=this.search.nativeElement.value,broadcast=true){
+        if(broadcast)
+            this.event.broadcastEvent(FrameEventsService.EVENT_GLOBAL_SEARCH,value);
+        this.onSearch.emit({query:value,cleared:false});
+    }
+    private openButton(button : any){
+        if(button.isDisabled)
+            return;
+        this.displaySidebar=false;
+        // if(button.scope==this._currentScope){
+        //   return;
+        // }
+        this.event.broadcastEvent(FrameEventsService.EVENT_VIEW_SWITCHED,button.scope);
+        if(button.url){
+            UIHelper.openUrl(button.url,this.bridge,OPEN_URL_MODE.BlankSystemBrowser);
+        }
+        else {
+            let queryParams=button.queryParams?button.queryParams:{};
+            queryParams.mainnav=true;
+            this.router.navigate([UIConstants.ROUTER_PREFIX + button.path], {queryParams:queryParams});
+        }
+    }
 
-  private finishLogout() {
-    if(this.config.logout && this.config.logout.next)
-      window.location.href=this.config.logout.next;
-    else
-      this.login(false);
-    this.globalProgress=false;
-  }
-  getIconSource() {
-    return this.configService.instant('mainnav.icon.url','assets/images/edu-white.svg');
-  }
-  saveLicenseAgreement(){
-    this.licenseAgreement=false;
-    if(this.licenseAgreementNode)
-      this.session.set('licenseAgreement',this.licenseAgreementNode.contentVersion);
-    else
-      this.session.set('licenseAgreement','0.0');
-    this.startTutorial();
-  }
-  startTutorial(){
-      if(this.connector.getCurrentLogin().statusCode=='OK') {
-          UIHelper.waitForComponent(this, 'userRef').subscribe(() => {
-              this.tutorialElement = this.userRef;
-          });
-      }
-  }
-  private showLicenseAgreement() {
-    if(!this.config.licenseAgreement || this.isGuest || !this.connector.getCurrentLogin().isValidLogin) {
+    private hideButtons(buttons:any[]) {
+        let hideMainMenu:string[]=null;
+        if(this.config) hideMainMenu=this.config.hideMainMenu;
+        this.sidebarButtons=buttons;
+        if(hideMainMenu) {
+            for (let i=0;i<this.sidebarButtons.length;i++) {
+                let pos=hideMainMenu.indexOf(this.sidebarButtons[i].scope);
+                if (pos != -1) {
+                    this.sidebarButtons.splice(i,1);
+                    i--;
+                }
+            }
+        }
+    }
+
+    private addMoreButtons(buttons:any[]) {
+        this.org.getOrganizations().subscribe((data:OrganizationOrganizations)=>{
+            if(data.canCreate || data.organizations.filter((org)=>org.administrationAccess).length) {
+                buttons.push({path: 'permissions', scope: 'permissions', icon: "group_add", name: "SIDEBAR.PERMISSIONS",onlyDesktop: true});
+            }
+            this.mediacenterService.getMediacenters().subscribe((data)=>{
+                this.manageMediacenters=data.filter((mc)=>mc.administrationAccess).length!=0;
+                if(this.showAdminButton()){
+                    buttons.push({path:'admin',scope:'admin',icon:"settings",name:"SIDEBAR.ADMIN",onlyDesktop: true});
+                }
+                this.checkConfig(buttons);
+            });
+        },(error:any)=>this.checkConfig(buttons));
+    }
+    private openImprint(){
+        UIHelper.openUrl(this.config.imprintUrl,this.bridge,OPEN_URL_MODE.BlankSystemBrowser);
+    }
+    private openPrivacy(){
+        UIHelper.openUrl(this.config.privacyInformationUrl,this.bridge,OPEN_URL_MODE.BlankSystemBrowser);
+    }
+    private checkConfig(buttons: any[]) {
+        this.configService.getAll().subscribe((data:any)=>{
+            this.config=data;
+            this.updateHelpOptions();
+            this.editUrl=data["editProfileUrl"];
+            this.showEditProfile=data["editProfile"];
+            this.hideButtons(buttons);
+            this.addButtons(buttons);
+            this.filterButtons();
+            this.storage.set(TemporaryStorageService.MAIN_NAV_BUTTONS,this.sidebarButtons);
+            this.showLicenseAgreement();
+            this.updateUserOptions();
+            this.updateHelpOptions();
+        },(error:any)=>this.hideButtons(buttons));
+    }
+
+    private addButtons(buttons: any[]) {
+        if(!this.config.menuEntries)
+            return;
+
+        for(let button of this.config.menuEntries) {
+            let pos=button.position;
+            if(pos<0)
+                pos=this.sidebarButtons.length-pos;
+            button.isCustom=true;
+            this.sidebarButtons.splice(pos,0,button);
+        }
+        console.log(this.sidebarButtons);
+    }
+
+    private finishLogout() {
+        if(this.config.logout && this.config.logout.next)
+            window.location.href=this.config.logout.next;
+        else
+            this.login(false);
+        this.globalProgress=false;
+    }
+    getIconSource() {
+        return this.configService.instant('mainnav.icon.url','assets/images/edu-white.svg');
+    }
+    saveLicenseAgreement(){
+        this.licenseAgreement=false;
+        if(this.licenseAgreementNode)
+            this.session.set('licenseAgreement',this.licenseAgreementNode.contentVersion);
+        else
+            this.session.set('licenseAgreement','0.0');
         this.startTutorial();
-        return;
     }
-    this.session.get('licenseAgreement',false).subscribe((version:string)=>{
-      console.log("user accepted agreement at version "+version);
-      this.licenseAgreementHTML=null;
-      let nodeId:string=null;
-      for(let node of this.config.licenseAgreement.nodeId) {
-        if(node.language==null)
-          nodeId=node.value;
-        if(node.language==Translation.getLanguage()){
-          nodeId=node.value;
-          break;
+    startTutorial(){
+        if(this.connector.getCurrentLogin().statusCode=='OK') {
+            UIHelper.waitForComponent(this, 'userRef').subscribe(() => {
+                this.tutorialElement = this.userRef;
+            });
         }
-      }
-      this.nodeService.getNodeMetadata(nodeId).subscribe((data:NodeWrapper)=>{
-        this.licenseAgreementNode=data.node;
-        console.log(data.node);
-        if(version==data.node.contentVersion) {
+    }
+    private showLicenseAgreement() {
+        if(!this.config.licenseAgreement || this.isGuest || !this.connector.getCurrentLogin().isValidLogin) {
             this.startTutorial();
             return;
         }
-        this.licenseAgreement=true;
-        this.nodeService.getNodeTextContent(nodeId).subscribe((data: NodeTextContent) => {
-            this.licenseAgreementHTML = data.html ? data.html : data.raw ? data.raw : data.text;
-        }, (error: any) => {
-            this.licenseAgreementHTML = "Error loading content for license agreement node '" + nodeId + "'";
+        this.session.get('licenseAgreement',false).subscribe((version:string)=>{
+            console.log("user accepted agreement at version "+version);
+            this.licenseAgreementHTML=null;
+            let nodeId:string=null;
+            for(let node of this.config.licenseAgreement.nodeId) {
+                if(node.language==null)
+                    nodeId=node.value;
+                if(node.language==Translation.getLanguage()){
+                    nodeId=node.value;
+                    break;
+                }
+            }
+            this.nodeService.getNodeMetadata(nodeId).subscribe((data:NodeWrapper)=>{
+                this.licenseAgreementNode=data.node;
+                console.log(data.node);
+                if(version==data.node.contentVersion) {
+                    this.startTutorial();
+                    return;
+                }
+                this.licenseAgreement=true;
+                this.nodeService.getNodeTextContent(nodeId).subscribe((data: NodeTextContent) => {
+                    this.licenseAgreementHTML = data.html ? data.html : data.raw ? data.raw : data.text;
+                }, (error: any) => {
+                    this.licenseAgreementHTML = "Error loading content for license agreement node '" + nodeId + "'";
+                });
+            },(error:any)=>{
+                if(version==='0.0') {
+                    this.startTutorial();
+                    return;
+                }
+                this.licenseAgreement=true;
+                this.licenseAgreementHTML = "Error loading metadata for license agreement node '" + nodeId + "'";
+            })
+
         });
-      },(error:any)=>{
-          if(version==='0.0') {
-              this.startTutorial();
-              return;
-          }
-          this.licenseAgreement=true;
-          this.licenseAgreementHTML = "Error loading metadata for license agreement node '" + nodeId + "'";
-      })
 
-    });
-
-  }
+    }
 
     private updateUserOptions() {
-      this.userMenuOptions=[];
+        this.userMenuOptions=[];
         //<a *ngIf="isGuest && !config.loginOptions" class="collection-item" (click)="showAddDesktop=false;login(true)" (keyup.enter)="showAddDesktop=false;login(true)" tabindex="0" title="{{ 'SIDEBAR.LOGIN' | translate}}"><i class="material-icons">person</i> {{ 'SIDEBAR.LOGIN' | translate}}</a>
         //<a *ngFor="let loginOption of isGuest?config.loginOptions:null" class="collection-item" tabindex="0" title="{{loginOption.name}}" href="{{loginOption.url}}">{{loginOption.name}}</a>
         if(!this.isGuest){
             this.userMenuOptions.push(new OptionItem('EDIT_ACCOUNT','assignment_ind',()=>this.openProfile()));
         }
         if(this.isGuest){
-          if(this.config.loginOptions){
-            for(let login of this.config.loginOptions){
-              this.userMenuOptions.push(new OptionItem(login.name,'',()=>window.location.href=login.url));
+            if(this.config.loginOptions){
+                for(let login of this.config.loginOptions){
+                    this.userMenuOptions.push(new OptionItem(login.name,'',()=>window.location.href=login.url));
+                }
             }
-          }
-          else{
-              this.userMenuOptions.push(new OptionItem('SIDEBAR.LOGIN','person',()=>this.login(true)));
-          }
-      }
-      if(this._currentScope=='search') {
-        let option=new OptionItem('SEARCH.NODE_STORE.TITLE','bookmark_border',()=>this.setNodeStore(true));
-          option.mediaQueryType=UIConstants.MEDIA_QUERY_MAX_WIDTH;
-          option.mediaQueryValue=UIConstants.MOBILE_TAB_SWITCH_WIDTH;
-          option.isSeperateBottom=true;
-          this.userMenuOptions.push(option);
-      }for(let option of this.getConfigMenuHelpOptions()){
-          option.mediaQueryType=UIConstants.MEDIA_QUERY_MAX_WIDTH;
-          option.mediaQueryValue=UIConstants.MOBILE_TAB_SWITCH_WIDTH;
-          this.userMenuOptions.push(option);
-      }
-      if(this.config.imprintUrl){
-          let option=new OptionItem('IMPRINT','info_outline',()=>this.openImprint());
-          option.mediaQueryType=UIConstants.MEDIA_QUERY_MAX_WIDTH;
-          option.mediaQueryValue=UIConstants.MOBILE_TAB_SWITCH_WIDTH;
-          option.isSeperateBottom=!this.config.privacyInformationUrl;
-          this.userMenuOptions.push(option);
-      }
+            else{
+                this.userMenuOptions.push(new OptionItem('SIDEBAR.LOGIN','person',()=>this.login(true)));
+            }
+        }
+        if(this._currentScope=='search') {
+            let option=new OptionItem('SEARCH.NODE_STORE.TITLE','bookmark_border',()=>this.setNodeStore(true));
+            option.mediaQueryType=UIConstants.MEDIA_QUERY_MAX_WIDTH;
+            option.mediaQueryValue=UIConstants.MOBILE_TAB_SWITCH_WIDTH;
+            option.isSeperateBottom=true;
+            this.userMenuOptions.push(option);
+        }for(let option of this.getConfigMenuHelpOptions()){
+            option.mediaQueryType=UIConstants.MEDIA_QUERY_MAX_WIDTH;
+            option.mediaQueryValue=UIConstants.MOBILE_TAB_SWITCH_WIDTH;
+            this.userMenuOptions.push(option);
+        }
+        if(this.config.imprintUrl){
+            let option=new OptionItem('IMPRINT','info_outline',()=>this.openImprint());
+            option.mediaQueryType=UIConstants.MEDIA_QUERY_MAX_WIDTH;
+            option.mediaQueryValue=UIConstants.MOBILE_TAB_SWITCH_WIDTH;
+            option.isSeperateBottom=!this.config.privacyInformationUrl;
+            this.userMenuOptions.push(option);
+        }
         if(this.config.privacyInformationUrl){
             let option=new OptionItem('PRIVACY_INFORMATION','verified_user',()=>this.openPrivacy());
             option.mediaQueryType=UIConstants.MEDIA_QUERY_MAX_WIDTH;
@@ -747,20 +750,20 @@ export class MainNavComponent implements AfterViewInit{
         this.userMenuOptions.push(option);
 
 
-      if(!this.isGuest){
-        this.userMenuOptions.push(new OptionItem('LOGOUT','undo',()=>this.logout()));
-      }
+        if(!this.isGuest){
+            this.userMenuOptions.push(new OptionItem('LOGOUT','undo',()=>this.logout()));
+        }
     }
 
     private updateHelpOptions() {
-      this.helpOptions=this.getConfigMenuHelpOptions();
+        this.helpOptions=this.getConfigMenuHelpOptions();
     }
 
     private getConfigMenuHelpOptions() {
-      if(!this.config.helpMenuOptions){
-          console.warn("config does not contain helpMenuOptions, will not display any options");
-          return [];
-      }
+        if(!this.config.helpMenuOptions){
+            console.warn("config does not contain helpMenuOptions, will not display any options");
+            return [];
+        }
         let options:OptionItem[]=[];
         let version:string[]|string=this.about.version.repository.split(".");
         version=version[0]+version[1];
@@ -775,56 +778,56 @@ export class MainNavComponent implements AfterViewInit{
      * Add css class mobile-move-top or mobile-move-bottom for specific items
      */
     private handleScrollHide() {
-      if(this.tabNav==null || this.tabNav.nativeElement==null)
-          return;
-      if(this.lastScroll==-1) {
-          this.lastScroll=window.scrollY;
-          return;
-      }
-      let elementsTop:any=document.getElementsByClassName("mobile-move-top");
-      let elementsBottom:any=document.getElementsByClassName("mobile-move-bottom");
-      let top=-1,bottom=-1;
-      for(let i=0;i<elementsTop.length;i++) {
-          let rect=elementsTop.item(i).getBoundingClientRect();
-          if(bottom==-1 || bottom<rect.bottom){
-              bottom=rect.bottom;
-          }
-      }
+        if(this.tabNav==null || this.tabNav.nativeElement==null)
+            return;
+        if(this.lastScroll==-1) {
+            this.lastScroll=window.scrollY;
+            return;
+        }
+        let elementsTop:any=document.getElementsByClassName("mobile-move-top");
+        let elementsBottom:any=document.getElementsByClassName("mobile-move-bottom");
+        let top=-1,bottom=-1;
+        for(let i=0;i<elementsTop.length;i++) {
+            let rect=elementsTop.item(i).getBoundingClientRect();
+            if(bottom==-1 || bottom<rect.bottom){
+                bottom=rect.bottom;
+            }
+        }
         for(let i=0;i<elementsBottom.length;i++) {
             let rect=elementsBottom.item(i).getBoundingClientRect();
             if(top==-1 || top>rect.top){
                 top=rect.top;
             }
         }
-      let diffTop=window.scrollY-this.lastScroll;
-      let diffBottom=window.scrollY-this.lastScroll;
-      if(diffTop<0) diffTop*=2;
-      if(diffBottom<0) diffBottom*=2;
+        let diffTop=window.scrollY-this.lastScroll;
+        let diffBottom=window.scrollY-this.lastScroll;
+        if(diffTop<0) diffTop*=2;
+        if(diffBottom<0) diffBottom*=2;
 
-      if(diffTop>0 && bottom<0){
-          diffTop=0;
-      }
+        if(diffTop>0 && bottom<0){
+            diffTop=0;
+        }
         if(diffBottom>0 && top>window.innerHeight){
             diffBottom=0;
         }
-      this.elementsTopY+=diffTop;
-      this.elementsTopY=Math.max(0,this.elementsTopY);
-      this.elementsBottomY+=diffBottom;
-      this.elementsBottomY=Math.max(0,this.elementsBottomY);
-      // for ios elastic scroll
+        this.elementsTopY+=diffTop;
+        this.elementsTopY=Math.max(0,this.elementsTopY);
+        this.elementsBottomY+=diffBottom;
+        this.elementsBottomY=Math.max(0,this.elementsBottomY);
+        // for ios elastic scroll
         if(window.scrollY<=0 || this.fixScrollElements || !UIHelper.evaluateMediaQuery(UIConstants.MEDIA_QUERY_MAX_WIDTH,UIConstants.MOBILE_TAB_SWITCH_WIDTH)){
             this.elementsTopY=0;
             this.elementsBottomY=0;
         }
-      //this.navbarOffsetY=Math.min(this.navbarOffsetY,bottom-top);
+        //this.navbarOffsetY=Math.min(this.navbarOffsetY,bottom-top);
         for(let i=0;i<elementsTop.length;i++) {
             elementsTop.item(i).style.position="relative";
             elementsTop.item(i).style.top=-this.elementsTopY+"px";
         }
-      for(let i=0;i<elementsBottom.length;i++) {
-          elementsBottom.item(i).style.position="relative";
-          elementsBottom.item(i).style.top=this.elementsBottomY+"px";
-      }
+        for(let i=0;i<elementsBottom.length;i++) {
+            elementsBottom.item(i).style.position="relative";
+            elementsBottom.item(i).style.top=this.elementsBottomY+"px";
+        }
         this.lastScroll=window.scrollY;
         //console.log(event);
     }
@@ -833,7 +836,7 @@ export class MainNavComponent implements AfterViewInit{
         this.handleScrollHide();
     }
     private showTimeout(){
-        return !this.cordova.isRunningCordova() && !this.isGuest && this.timeIsValid && this.dialogTitle!='WORKSPACE.AUTOLOGOUT' &&
+        return !this.bridge.isRunningCordova() && !this.isGuest && this.timeIsValid && this.dialogTitle!='WORKSPACE.AUTOLOGOUT' &&
             (this.isSafe() || !this.isSafe() && this.configService.instant('sessionExpiredDialog',{show:true}).show);
     }
     private updateTimeout(){
@@ -846,12 +849,11 @@ export class MainNavComponent implements AfterViewInit{
             this.timeIsValid=true;
         }
         else if(this.showTimeout()){
-            this.toast.showModalDialog(
+            this.bridge.showModalDialog(
                 'WORKSPACE.AUTOLOGOUT',
                 'WORKSPACE.AUTOLOGOUT_INFO',
                 [new DialogButton("WORKSPACE.RELOGIN",DialogButton.TYPE_PRIMARY,
                     ()=>RestHelper.goToLogin(this.router,this.configService,this.isSafe() ? RestConstants.SAFE_SCOPE : null,null))],
-                false,
                 false,
                 null,
                 {minutes:Math.round(this.connector.logoutTimeout/60)}
@@ -892,12 +894,12 @@ export class MainNavComponent implements AfterViewInit{
         },(error)=>{
             console.info("Could not load license data for "+Translation.getLanguage()+", using default en");
             */
-            this.http.get('assets/licenses/en.html',{responseType:'text'}).subscribe((text)=>{
-                console.log(text);
-                this.licenseDetails=(text as any);
-            },(error)=> {
-                console.error(error);
-            });
+        this.http.get('assets/licenses/en.html',{responseType:'text'}).subscribe((text)=>{
+            console.log(text);
+            this.licenseDetails=(text as any);
+        },(error)=> {
+            console.error(error);
+        });
         //});
     }
     showChat() {
@@ -913,5 +915,9 @@ export class MainNavComponent implements AfterViewInit{
     }
     getPreloading() {
         return GlobalContainerComponent.getPreloading();
+    }
+
+    showAdminButton() {
+        return this.isAdmin || this.toolpermissions.indexOf(RestConstants.TOOLPERMISSION_GLOBAL_STATISTICS)!=-1 || this.manageMediacenters;
     }
 }

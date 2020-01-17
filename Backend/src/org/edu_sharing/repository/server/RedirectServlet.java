@@ -71,7 +71,14 @@ public class RedirectServlet extends HttpServlet implements SingleThreadModel {
 
 	@Override
 	protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-
+		// todo: check how we add remote repo + other checks in new rs implementation 5.1!
+		String url=URLTool.getNgRenderNodeUrl(req.getParameter("NODE_ID"),req.getParameter("version"));
+		String params = req.getParameter("params");
+		if (params != null && !params.trim().equals("")) {
+			url=UrlTool.setParamEncode(url,"params",params);
+		}
+		resp.sendRedirect(url);
+		/*
 		// gets appID und NodeId
 		// checks if app id is an repository and if there is a node with the given nodid
 		// if true, creates AlfrescoRemoteNode object
@@ -115,7 +122,7 @@ public class RedirectServlet extends HttpServlet implements SingleThreadModel {
 		
 		// renderservice
 		if (toLmsUrl == null || toLmsUrl.trim().equals("")) {
-			
+
 			String renderServiceUrl = null;
 			if(repInfo.getContentUrl() != null 
 					//remote alfresco repo we don't need a contenturl
@@ -126,14 +133,15 @@ public class RedirectServlet extends HttpServlet implements SingleThreadModel {
 						renderServiceUrl = new RenderingTool().getRenderServiceUrl(repInfo,renderUrlNodeId,username,null,false,true);
 						renderServiceUrl = UrlTool.setParam(renderServiceUrl,"com",RenderingTool.COM_INTERNAL);
 					}else {
-						renderServiceUrl = new RenderingTool().getRenderServiceUrl(repInfo,renderUrlNodeId, username);
+						renderServiceUrl = new RenderingSe().getRenderServiceUrl(repInfo,renderUrlNodeId, username);
 					}
 					
 				}catch(GeneralSecurityException e){
 					logger.error(e.getMessage(), e);
 					resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
 					return;
-				}	
+				}
+
 			}
 			
 			logger.info("renderServiceUrl:"+renderServiceUrl);
@@ -358,6 +366,7 @@ public class RedirectServlet extends HttpServlet implements SingleThreadModel {
 			}
 		}
 		return redirectUrl;
+		*/
 	}
 	
 }

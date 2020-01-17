@@ -3,6 +3,7 @@ package org.edu_sharing.service.nodeservice;
 import java.io.InputStream;
 import java.io.Serializable;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 
@@ -10,6 +11,7 @@ import org.alfresco.service.cmr.repository.AssociationRef;
 import org.alfresco.service.cmr.repository.ChildAssociationRef;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.repository.StoreRef;
+import org.apache.log4j.Logger;
 import org.edu_sharing.repository.client.rpc.User;
 import org.edu_sharing.service.nodeservice.model.GetPreviewResult;
 import org.edu_sharing.service.search.model.SortDefinition;
@@ -38,11 +40,17 @@ public interface NodeService {
 
 	public HashMap<String, String[]> getNameProperty(String name);
 
-    List<NodeRef> getChildrenRecursive(StoreRef store, String nodeId, List<String> types);
+    List<NodeRef> getChildrenRecursive(StoreRef store, String nodeId, List<String> types,RecurseMode recurseMode);
 
     public NodeRef getChild(StoreRef store, String parentId, String type, String property, Serializable value);
-	
-	public void setOwner(String nodeId, String username);
+
+    String getType(String storeProtocol, String storeId, String nodeId);
+
+    default String getType(String nodeId){
+    	return getType(StoreRef.PROTOCOL_WORKSPACE,StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(),nodeId);
+	}
+
+    public void setOwner(String nodeId, String username);
 	
 	public void setPermissions(String nodeId, String authority, String[] permissions, Boolean inheritPermission) throws Exception;
 
@@ -73,13 +81,15 @@ public interface NodeService {
 	
 	public HashMap<String, Object> getProperties(String storeProtocol, String storeId, String nodeId) throws Throwable;
 
-	public InputStream getContent(String storeProtocol, String storeId, String nodeId, String contentProp) throws Throwable;
-
 	public default boolean hasAspect(String storeProtocol, String storeId, String nodeId, String aspect){
 		return Arrays.asList(getAspects(storeProtocol,storeId,nodeId)).contains(aspect);
 	}
 	public String[] getAspects(String storeProtocol, String storeId, String nodeId);
-	
+
+	InputStream getContent(String storeProtocol, String storeId, String nodeId, String version, String contentProp) throws Throwable;
+
+	String getContentHash(String storeProtocol, String storeId, String nodeId, String version, String contentProp);
+
 	public void addAspect(String nodeId, String aspect);
 	
 	public void moveNode(String newParentId, String childAssocType, String nodeId);
@@ -109,11 +119,16 @@ public interface NodeService {
 
 	public void removeProperty(String storeProtocol, String storeId, String nodeId, String property);
 
-	public String getType(String nodeId);
-
 	public boolean exists(String protocol, String store, String nodeId);
 
-	String getProperty(String storeProtocol, String storeId, String nodeId, String property);
+	default String getProperty(String storeProtocol, String storeId, String nodeId, String property) {
+	    try {
+            return (String)getProperties(storeProtocol, storeId, nodeId).get(property);
+        }catch(Throwable t){
+			Logger.getLogger(NodeService.class).warn(t);
+	        return null;
+        }
+    };
 
 
 	String getTemplateNode(String nodeId,boolean createIfNotExists) throws Throwable;
@@ -141,5 +156,9 @@ public interface NodeService {
 
 	void setProperty(String protocol, String storeId, String nodeId, String property, Serializable value);
 
-    GetPreviewResult getPreview(String storeProtocol, String storeIdentifier, String nodeId);
+    GetPreviewResult getPreview(String storeProtocol, String storeIdentifier, String nodeId, String version);
+
+    Collection<NodeRef> getFrontpageNodes() throws Throwable;
+
+    Serializable getPropertyNative(String storeProtocol, String storeId, String nodeId, String property) throws Throwable;
 }

@@ -1,5 +1,7 @@
 package org.edu_sharing.service.tracking;
 
+import org.edu_sharing.service.usage.Usage;
+
 public class NodeTrackingDetails {
     private String nodeVersion;
     // the lms which initiated the request (if any)
@@ -26,30 +28,25 @@ public class NodeTrackingDetails {
     }
 
     public static class NodeTrackingLms {
-        private String appId,courseId,resourceId;
+        // since 5.1, usage is used, just a wrapper object
+        private final Usage usage;
 
+        public NodeTrackingLms(Usage usage){
+            this.usage=usage;
+        }
+
+        public Usage getUsage() {
+            return usage;
+        }
+        // for backward compatbility wrapper functions
         public String getAppId() {
-            return appId;
+            return usage.getLmsId();
         }
-
-        public void setAppId(String appId) {
-            this.appId = appId;
-        }
-
         public String getCourseId() {
-            return courseId;
+            return usage.getCourseId();
         }
-
-        public void setCourseId(String courseId) {
-            this.courseId = courseId;
-        }
-
         public String getResourceId() {
-            return resourceId;
-        }
-
-        public void setResourceId(String resourceId) {
-            this.resourceId = resourceId;
+            return usage.getResourceId();
         }
     }
 }

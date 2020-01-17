@@ -1,6 +1,7 @@
 package org.edu_sharing.service.nodeservice;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.HashMap;
 import java.util.List;
 
@@ -173,5 +174,10 @@ public class NodeServiceYouTube extends NodeServiceAdapter{
 			public void initialize(com.google.api.client.http.HttpRequest request) throws IOException {
 			}
 		}).setApplicationName("youtube-cmdline-search-sample").build();
+	}
+	
+	@Override
+	public InputStream getContent(String nodeId) throws Throwable {
+		return null;
 	}
 }

@@ -12,13 +12,16 @@ import javax.servlet.http.HttpServletRequest;
 import java.util.List;
 
 public class ConfigServiceFactory {
-	private static final String[] DEFAULT_LANGUAGES = new String[]{"de", "en"};
+    public static final String CONFIG_FILENAME = "client.config.xml";
+    private static final String[] DEFAULT_LANGUAGES = new String[]{"de", "en"};
 	static Logger logger = Logger.getLogger(ConfigServiceFactory.class);
 	public static ConfigService getConfigService(){
 		return new ConfigServiceImpl();
 	}
 	public static Config getCurrentConfig() throws Exception {
-		return getCurrentConfig(Context.getCurrentInstance().getRequest());
+		if(Context.getCurrentInstance()!=null)
+			return getCurrentConfig(Context.getCurrentInstance().getRequest());
+		return getConfigService().getConfig();
 	}
 	public static String getCurrentContextId(){
 		return getCurrentContextId(Context.getCurrentInstance().getRequest());

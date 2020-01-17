@@ -3,35 +3,35 @@ import {Component, OnInit, NgZone, HostListener, ViewChild, Sanitizer, ElementRe
 
 import {Router, Params, ActivatedRoute} from "@angular/router";
 
-import {Translation} from './../../../common/translation';
+import {Translation} from '../../../core-ui-module/translation';
 
-import * as EduData from "../../../common/rest/data-object";
+import * as EduData from "../../../core-module/core.module";
 
-import {RestCollectionService} from "../../../common/rest/services/rest-collection.service";
-import {RestNodeService} from "../../../common/rest/services/rest-node.service";
-import {RestConstants} from "../../../common/rest/rest-constants";
-import {RestHelper} from "../../../common/rest/rest-helper";
-import {Toast} from "../../../common/ui/toast";
-import {RestIamService} from "../../../common/rest/services/rest-iam.service";
-import {Group, IamGroups, IamUser, LoginResult, NodeRef, Permission} from '../../../common/rest/data-object';
-import {User} from "../../../common/rest/data-object";
-import {LocalPermissions} from "../../../common/rest/data-object";
-import {Collection} from "../../../common/rest/data-object";
-import {RestConnectorService} from "../../../common/rest/services/rest-connector.service";
-import {ConfigurationService} from "../../../common/services/configuration.service";
-import {SessionStorageService} from "../../../common/services/session-storage.service";
-import {UIConstants} from "../../../common/ui/ui-constants";
+import {RestCollectionService, ListItem, DialogButton, RestMediacenterService} from "../../../core-module/core.module";
+import {RestNodeService} from "../../../core-module/core.module";
+import {RestConstants} from "../../../core-module/core.module";
+import {RestHelper} from "../../../core-module/core.module";
+import {Toast} from "../../../core-ui-module/toast";
+import {RestIamService} from "../../../core-module/core.module";
+import {Group, IamGroups, IamUser, LoginResult, NodeRef, Permission} from '../../../core-module/core.module';
+import {User} from "../../../core-module/core.module";
+import {LocalPermissions} from "../../../core-module/core.module";
+import {Collection} from "../../../core-module/core.module";
+import {RestConnectorService} from "../../../core-module/core.module";
+import {ConfigurationService} from "../../../core-module/core.module";
+import {SessionStorageService} from "../../../core-module/core.module";
+import {UIConstants} from "../../../core-module/ui/ui-constants";
 import {MdsComponent} from "../../../common/ui/mds/mds.component";
-import {ListItem} from "../../../common/ui/list-item";
 import {TranslateService} from "@ngx-translate/core";
-import {NodeHelper} from "../../../common/ui/node-helper";
-import {ColorHelper} from '../../../common/ui/color-helper';
+import {NodeHelper} from "../../../core-ui-module/node-helper";
+import {ColorHelper} from '../../../core-module/ui/color-helper';
 import {DomSanitizer} from "@angular/platform-browser";
-import {TemporaryStorageService} from "../../../common/services/temporary-storage.service";
-import {UIHelper} from "../../../common/ui/ui-helper";
+import {TemporaryStorageService} from "../../../core-module/core.module";
 import {RegisterResetPasswordComponent} from "../../register/register-reset-password/register-reset-password.component";
 import {MainNavComponent} from '../../../common/ui/main-nav/main-nav.component';
+import {UIHelper} from "../../../core-ui-module/ui-helper";
 import {GlobalContainerComponent} from "../../../common/ui/global-container/global-container.component";
+import {AuthorityNamePipe} from "../../../core-ui-module/pipes/authority-name.pipe";
 
 // component class
 @Component({
@@ -60,6 +60,8 @@ export class CollectionNewComponent {
   public shareToAll: boolean;
   public createEditorial = false;
   public createCurriculum = false;
+  public createMediacenter = false;
+  public mediacenter:any;
   public parentId: any;
   public editId: any;
   public editorialGroups:Group[]=[];
@@ -88,6 +90,9 @@ export class CollectionNewComponent {
   private permissionsInfo: any;
 
   @ViewChild('file') imageFileRef : ElementRef;
+  buttons: DialogButton[];
+  authorFreetext=false;
+  authorFreetextAllowed=false;
 
   @HostListener('document:keydown', ['$event'])
   handleKeyboardEvent(event: KeyboardEvent) {
@@ -104,6 +109,7 @@ export class CollectionNewComponent {
         private nodeService : RestNodeService,
         private connector : RestConnectorService,
         private iamService : RestIamService,
+        private mediacenterService : RestMediacenterService,
         private route:ActivatedRoute,
         private router: Router,
         private toast : Toast,
@@ -122,10 +128,18 @@ export class CollectionNewComponent {
               });
               return;
             }
-            this.connector.hasToolPermission(RestConstants.TOOLPERMISSION_INVITE).subscribe((has:boolean)=>this.canInvite=has);
-            this.connector.hasToolPermission(RestConstants.TOOLPERMISSION_INVITE_ALLAUTHORITIES).subscribe((has)=>this.shareToAll=has);
-            this.connector.hasToolPermission(RestConstants.TOOLPERMISSION_COLLECTION_EDITORIAL).subscribe((has)=>this.createEditorial=has);
-            this.connector.hasToolPermission(RestConstants.TOOLPERMISSION_COLLECTION_CURRICULUM).subscribe((has)=>this.createCurriculum=has);
+            this.canInvite=this.connector.hasToolPermissionInstant(RestConstants.TOOLPERMISSION_INVITE);
+            this.shareToAll=this.connector.hasToolPermissionInstant(RestConstants.TOOLPERMISSION_INVITE_ALLAUTHORITIES);
+            this.createEditorial=this.connector.hasToolPermissionInstant(RestConstants.TOOLPERMISSION_COLLECTION_EDITORIAL);
+            this.createCurriculum=this.connector.hasToolPermissionInstant(RestConstants.TOOLPERMISSION_COLLECTION_CURRICULUM);
+            this.mediacenterService.getMediacenters().subscribe((mediacenters)=>{
+              this.createMediacenter=mediacenters.filter((m)=>m.administrationAccess).length==1;
+              if(this.createMediacenter)
+                this.mediacenter=mediacenters[0];
+            })
+            this.createMediacenter=this.connector.hasToolPermissionInstant(RestConstants.TOOLPERMISSION_COLLECTION_CURRICULUM);
+            this.authorFreetextAllowed=this.connector.hasToolPermissionInstant(RestConstants.TOOLPERMISSION_COLLECTION_CHANGE_OWNER);
+
             this.iamService.getUser().subscribe((user : IamUser) => this.user=user.person);
             this.route.queryParams.subscribe(params => {
               this.mainnav=params['mainnav']!='false';
@@ -144,6 +158,7 @@ export class CollectionNewComponent {
                       this.editorialGroupsSelected=this.getEditoralGroups(perm.permissions.localPermissions.permissions);
                       this.editId=id;
                       this.currentCollection=data.collection;
+                      this.authorFreetext=this.currentCollection.authorFreetext!=null;
                       this.originalPermissions=perm.permissions.localPermissions;
                       this.properties=node.node.properties;
                       this.newCollectionType=this.getTypeForCollection(this.currentCollection);
@@ -301,8 +316,8 @@ export class CollectionNewComponent {
           this.currentCollection.description="";
         this.currentCollection.title = this.currentCollection.title.trim();
         this.currentCollection.description = this.currentCollection.description.trim();
-        if(this.newCollectionType==RestConstants.COLLECTIONTYPE_EDITORIAL){
-          this.currentCollection.type=this.newCollectionType;
+        if(this.newCollectionType==RestConstants.COLLECTIONTYPE_EDITORIAL || this.newCollectionType==RestConstants.COLLECTIONTYPE_MEDIA_CENTER) {
+          this.currentCollection.type = this.newCollectionType;
         }
         else{
           this.currentCollection.type=RestConstants.COLLECTIONTYPE_DEFAULT;
@@ -365,22 +380,25 @@ export class CollectionNewComponent {
       if(type==RestConstants.COLLECTIONSCOPE_CUSTOM || type==RestConstants.COLLECTIONTYPE_EDITORIAL){
         this.currentCollection.scope=RestConstants.COLLECTIONSCOPE_CUSTOM;
       }
+      if(type==RestConstants.COLLECTIONTYPE_MEDIA_CENTER){
+        this.switchToAuthorFreetext();
+      }
       this.updateAvailableSteps();
       this.goToNextStep();
     }
     public getAvailableSteps():string[]{
       let steps:string[]=[];
       steps.push(this.STEP_GENERAL);
-      if(this.newCollectionType=='EDITORIAL'){
+      if(this.newCollectionType==RestConstants.COLLECTIONTYPE_EDITORIAL || this.newCollectionType==RestConstants.COLLECTIONTYPE_MEDIA_CENTER){
         steps.push(this.STEP_METADATA);
       }
-      if(this.newCollectionType=='CUSTOM' && this.canInvite){
+      if(this.newCollectionType==RestConstants.COLLECTIONSCOPE_CUSTOM && this.canInvite){
         steps.push(this.STEP_PERMISSIONS);
       }
-      if(this.newCollectionType=='EDITORIAL'){
+      if(this.newCollectionType==RestConstants.COLLECTIONTYPE_EDITORIAL){
         //steps.push(this.STEP_SETTINGS);
       }
-      if(this.newCollectionType=='EDITORIAL' && this.canInvite){
+      if(this.newCollectionType==RestConstants.COLLECTIONTYPE_EDITORIAL && this.canInvite){
         steps.push(this.STEP_EDITORIAL_GROUPS);
       }
       return steps;
@@ -390,6 +408,17 @@ export class CollectionNewComponent {
       return pos>=this.availableSteps.length-1;
     }
     public goToNextStep(){
+      if(this.newCollectionStep==this.STEP_GENERAL){
+          if(!this.currentCollection.title){
+              this.toast.error(null,'COLLECTIONS.ENTER_NAME');
+              return;
+          }
+      }
+      if(this.newCollectionStep==this.STEP_METADATA){
+          this.properties=this.mds.getValues({},true);
+          if(this.properties==null)
+              return;
+      }
       if(this.isLastStep()){
         this.save();
       }
@@ -398,19 +427,18 @@ export class CollectionNewComponent {
         this.newCollectionStep=this.availableSteps[pos+1];
         this.reloadMds=new Boolean(true);
       }
-
+      this.updateButtons();
     }
     setCollectionGeneral(){
-      if(!this.currentCollection.title){
-        this.toast.error(null,'COLLECTIONS.ENTER_NAME');
-        return;
-      }
-      this.goToNextStep();
+
     }
     currentStepPosition(){
       return this.availableSteps.indexOf(this.newCollectionStep);
     }
     goBack(){
+      if(this.newCollectionStep==this.STEP_METADATA){
+          this.properties=this.mds.getValues({},false);
+      }
        let pos=this.currentStepPosition();
        if(pos==-1){
          this.navigateToCollectionId(this.parentId);
@@ -430,6 +458,7 @@ export class CollectionNewComponent {
          this.newCollectionStep = this.availableSteps[pos - 1];
          this.reloadMds=new Boolean(true);
        }
+       this.updateButtons();
     }
     navigateToCollectionId(id:string) : void {
       this.isLoading = false;
@@ -440,17 +469,8 @@ export class CollectionNewComponent {
         });
       });
     }
-  private syncMetadata(goToNext:boolean){
-      this.properties=this.mds.getValues({},goToNext);
-      if(goToNext && this.properties!=null){
-        this.goToNextStep();
-      }
-      if(!goToNext){
-        this.goBack();
-      }
-  }
   private save2(collection: Collection) {
-    if(this.newCollectionType==RestConstants.GROUP_TYPE_EDITORIAL){
+    if(this.newCollectionType==RestConstants.COLLECTIONTYPE_EDITORIAL || this.newCollectionType==RestConstants.COLLECTIONTYPE_MEDIA_CENTER){
       this.nodeService.AddNodeAspects(collection.ref.id,[RestConstants.CCM_ASPECT_LOMREPLICATION,RestConstants.CCM_ASPECT_CCLOM_GENERAL]).subscribe(()=> {
         this.nodeService.editNodeMetadata(collection.ref.id, this.properties).subscribe(() => {
           this.save3(collection);
@@ -491,7 +511,7 @@ export class CollectionNewComponent {
   }
 
   private getTypeForCollection(collection: Collection) {
-    if(collection.type==RestConstants.GROUP_TYPE_EDITORIAL){
+    if(collection.type==RestConstants.COLLECTIONTYPE_EDITORIAL || collection.type==RestConstants.COLLECTIONTYPE_MEDIA_CENTER){
       return collection.type;
     }
     if(collection.scope==RestConstants.COLLECTIONSCOPE_MY && !this.canInvite){
@@ -504,6 +524,7 @@ export class CollectionNewComponent {
 
   private updateAvailableSteps() {
     this.availableSteps=this.getAvailableSteps();
+    this.updateButtons();
   }
 
   private getEditorialGroupPermissions() {
@@ -568,4 +589,30 @@ export class CollectionNewComponent {
       this.imageFileRef.nativeElement.value = null;
       this.currentCollection.preview = null;
     }
+
+    private updateButtons() {
+        /**
+         *  <a class="waves-effect btn" tabindex="0" (keyup.enter)="setCollectionGeneral()" (click)="setCollectionGeneral()">
+         <span>{{(isLastStep() ? 'SAVE' : 'NEXT') | translate }}</span>
+         </a>
+         <a class="waves-effect waves-light btn-flat" tabindex="0" (keyup.enter)="goBack()" (click)="goBack()">{{ 'BACK' | translate }}</a>
+
+         */
+        this.buttons=[
+            new DialogButton('BACK',DialogButton.TYPE_CANCEL,()=>this.goBack()),
+            new DialogButton(this.isLastStep() ? 'SAVE' : 'NEXT',DialogButton.TYPE_PRIMARY,()=>this.goToNextStep())
+        ]
+    }
+
+  switchToAuthorFreetext() {
+    this.authorFreetext=true;
+    this.currentCollection.authorFreetext=new AuthorityNamePipe(this.translationService).transform(
+        this.newCollectionType==RestConstants.COLLECTIONTYPE_MEDIA_CENTER || this.currentCollection.type==RestConstants.COLLECTIONTYPE_MEDIA_CENTER ?
+            this.mediacenter : this.user,null);
+  }
+
+  cancelAuthorFreetext() {
+    this.authorFreetext=false;
+    this.currentCollection.authorFreetext=null;
+  }
 }

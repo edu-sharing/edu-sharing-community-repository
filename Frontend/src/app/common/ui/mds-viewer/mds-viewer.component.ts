@@ -4,10 +4,10 @@ import {
   ElementRef,
   Sanitizer, ViewContainerRef, ComponentFactoryResolver, QueryList, ViewChildren
 } from '@angular/core';
-import {RestMdsService} from '../../rest/services/rest-mds.service';
-import {DomSanitizer, SafeHtml} from '@angular/platform-browser';
-import {UIHelper} from '../ui-helper';
 import {MdsWidgetComponent} from "./widget/mds-widget.component";
+import {RestMdsService} from "../../../core-module/core.module";
+import {DomSanitizer} from "@angular/platform-browser";
+import {UIHelper} from "../../../core-ui-module/ui-helper";
 
 @Component({
   selector: 'mds-viewer',

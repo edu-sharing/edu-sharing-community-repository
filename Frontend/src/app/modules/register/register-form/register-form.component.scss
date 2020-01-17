@@ -1,5 +1,10 @@
-@import "../../../../styles/variables.scss";
+@import "../../../core-ui-module/styles/variables";
 
+:host /deep/ {
+  mat-form-field {
+    width: 100%;
+  }
+}
 form{
   div{
     position: relative;
@@ -10,7 +15,7 @@ form{
     text-transform: initial;
     font-weight: normal;
   }
-  input {
+  mat-form-field{
     margin-bottom: 22px;
   }
   input[type="checkbox"] + label {
@@ -19,8 +24,11 @@ form{
     margin-bottom: 15px;
   }
 }
+.accept{
+  margin-top: 10px;
+}
 .name-input{
-  div{
+  mat-form-field{
     display: inline-block;
     width: calc(50% - 5px);
   }
@@ -34,4 +42,8 @@ form{
 .imprint{
   display: block;
   margin: 0 35px;
+  font-size: 1rem;
+}
+.organization{
+  margin-top: 10px;
 }

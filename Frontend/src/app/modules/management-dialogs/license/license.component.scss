@@ -1,220 +1,193 @@
-@import "../../../../styles/variables.scss";
+@import "../../../core-ui-module/styles/variables";
 
-.card {
-  .card-content .cc label{
-    width:100%;
+.license-content{
+  padding: $cardPadding;
+}
+.card-content .cc label{
+  width:100%;
+}
+.licenseType{
+  width: 100%;
+  margin:10px 0;
+}
+:host /deep/ {
+  .license-content {
+    .mat-tab-labels {
+      background-color: #fff;
+    }
+    .mat-radio-label,.mat-checkbox-layout{
+      white-space: normal!important;
+      align-items: baseline !important;
+    }
   }
-  .licenseType{
-    margin-bottom:30px;
-  }
-  h4 {
-    font-weight: bold;
-    font-size: 110%;
-    margin: 2rem 0 0.912rem 0;
-  }
-
-  h5 {
-    font-weight: normal;
-    font-size: 90%;
-    color: $textLight;
-    margin: 0;
-    line-height: 1.5;
-  }
-
-  .ccAuthor {
-    color: $primary;
-    text-transform: uppercase;
-    font-weight: bold;
-    margin-bottom: 10px;
-  }
-
-  .ccAuthor i {
-    position: relative;
-    top: 7px;
-    color: $textLight;
-  }
-
-  .ccAuthorGroup {
-    padding: 10px;
-    margin: 0 20px;
-  }
-
-  .ccAuthorGroupOer {
-    margin: 0 40px;
-  }
-
-  .cc h5 {
-    padding-bottom: 5px;
-  }
-
-  .currentLicense {
-    text-align: center;
-    background-color: $backgroundColor;
-    padding: 10px 30px;
-    margin: 0 -20px;
-
+  .mat-card-content {
     h4 {
-      margin: 10px 0px 20px 0px;
-    }
-
-    float: left;
-    width: calc(100% + 40px);
-  }
-
-  .licenseName {
-    display: table;
-    margin: auto;
-    padding: 10px 0;
-
-    h4, div {
-      display: table-cell;
-    }
-  }
-
-  .oerStatus {
-    padding-left: 10px;
-    font-weight: bold;
-    text-transform: uppercase;
-    font-size: 80%;
-    color: $textOnPrimary;
-
-    .oer {
-      background: #0b0;
-    }
-
-    .notOer {
-      background: #F5A623;
-    }
-
-    .oer, .notOer {
-      padding: 4px 12px;
-      border-radius: 8px;
-    }
-  }
-
-  .oerLicenses {
-    float: left;
-    width: 100%;
-
-    .ccAuthor {
-      margin-left: 20px;
-    }
-  }
-
-  .authorFreetext, .authorPerson {
-    padding: 0 10px;
-  }
-
-  .authorFreetext {
-    textarea {
-      min-height: 2.5rem;
-      margin-top: 10px;
-    }
-  }
-
-  .oerCC0, .oerCCBY {
-    > h4 {
-      color: $textLight;
       font-weight: bold;
+      font-size: 100%;
+      margin: 1.6rem 0 1rem 0;
     }
 
-    .radio {
-      padding-left: 20px;
-      padding-right: 20px;
+    h5 {
+      font-weight: normal;
+      font-size: 90%;
+      color: $textLight;
+      margin: 0;
+      line-height: 1.5;
+    }
+    .mat-radio-container{
+      position: relative;
+      top:6px;
     }
   }
-
-  .oerSelect {
-    float: right;
-  }
-
-  .licenseTypeLabel {
-    float: left;
-    width: 100%;
-  }
-
-  .currentLicenseIcon {
-    height: 40px;
-    width: auto;
-  }
-
-  .currentLicenseDescription {
+}
+.ccAuthor {
+  font-weight: bold;
+  margin-bottom: 10px;
+  i {
     color: $textLight;
   }
-
-  .customLicenseDescription {
-    white-space: pre-line;
-  }
-
-  .currentLicenseDescription div {
-    margin: 0 10px;
-  }
-
-  .cc .ccAbout {
-    text-transform: uppercase;
-    text-align: center;
-    font-weight: bold;
-  }
-
-  .licenseVersion, .licenseLocale {
-    width: 140px;
-    float: right;
-    padding-right: 40px;
-    margin-top: -8px;
-
-    select {
-      min-width: 70px;
-    }
-  }
-
-  .licenseLocale {
-    width: 170px;
-  }
-
-  .licenseUrl {
-    margin: 10px !important;
-    text-transform: uppercase;
-  }
-
-  .licenseVersion {
-    width: 100px;
-  }
-
-  .licenseCheckbox {
-    padding-top: 20px;
-    float: left;
-  }
-
-  .licenseCheckbox label {
+}
+.contributors{
+  margin-bottom: 30px;
+}
+.ccAuthorGroup{
+  padding:10px;
+  margin:0 20px;
+  mat-form-field{
     width: 100%;
   }
-
-  .release, .strong {
-    font-weight: bold;
+}
+.ccAuthorGroupOer{
+  margin:0 40px;
+}
+.cc h5{
+  padding-bottom:5px;
+}
+.currentLicense{
+  text-align: center;
+  background-color: $backgroundColor;
+  padding: 10px 30px;
+  margin: 0 -20px;
+  h4{
+    margin: 10px 0 20px 0;
   }
-
-  .radio {
-    padding-bottom: 15px;
+  width: calc(100% + 40px);
+}
+.licenseName{
+  display: table;
+  margin: auto;
+  padding: 10px 0;
+  h4,div{
+    display: table-cell;
   }
-
-  .radio h4 {
-    margin-top: 4px;
+}
+.oerStatus{
+  padding-left: 10px;
+  font-weight: bold;
+  text-transform: uppercase;
+  font-size: 80%;
+  color:$textOnPrimary;
+  .oer{
+    background: #0b0;
   }
-
-  .switch-release {
-    padding-bottom: 25px;
-    margin-left: -10px;
+  .notOer{
+    background: #F5A623;
   }
-
-  .doi {
-    margin-left: 77px;
-    margin-top: 15px;
+  .oer,.notOer{
+    padding: 4px 12px;
+    border-radius: 8px;
+  }
+}
+.oerLicenses{
+  width:100%;
+  .ccAuthor{
+    margin:5px 20px;
+  }
+}
+.authorFreetext,.authorPerson{
+  padding: 0 10px;
+}
+.authorFreetext{
+  width: 100%;
+  margin-top: 5px;
+  textarea{
+    overflow: hidden;
+  }
+}
+mat-radio-button{
+  padding-left:20px;
+  padding-right:20px;
+  h4{
+    margin: 2rem 0 0.2rem 0;
+  }
+}
+h4{
+  color:$textLight;
+  font-weight: bold;
+}
+.oerSelect{
+  float:right;
+}
+.licenseTypeLabel{
+  width:100%;
+}
+.currentLicenseIcon{
+  height:40px;
+  width:auto;
+}
+.currentLicenseDescription{
+  color: $textLight;
+}
+.customLicenseDescription{
+  white-space: pre-line;
+}
+.currentLicenseDescription div{
+  margin:0 10px;
+}
+.cc{
+  mat-radio-group{
     display: flex;
     flex-direction: column;
-
-    span {
-      margin-left: 35px;
-      margin-right: 10px;
+    mat-radio-button{
+      margin: 3px 0;
     }
+  }
+}
+.cc .ccAbout{
+  text-transform: uppercase;
+  text-align: center;
+  font-weight: bold;
+}
+.license-additional-data {
+  display: flex;
+  justify-content: center;
+  padding-top: 10px;
+  >div{
+    margin:0 10px;
+  }
+}
+.licenseUrl{
+  margin:10px!important;
+  text-transform: uppercase;
+}
+.licenseCheckbox{
+  padding-top:20px;
+}
+.licenseCheckbox label{
+  width:100%;
+}
+.release, .strong{
+  font-weight: bold;
+  display: block;
+  margin-bottom: 5px;
+}
+
+.doi{
+  margin:10px 0 10px 50px;
+  display: flex;
+  flex-direction: column;
+  span{
+    margin-left: 35px;
+    margin-right: 10px;
   }
 }

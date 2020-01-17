@@ -1,19 +1,15 @@
-@import "../../../../styles/variables.scss";
+@import "../../../core-ui-module/styles/variables";
 
 .calendar{
  position: relative;
- >div {
-  display: flex;
-  flex-direction: row;
-  align-items: center;
-  input{
-   margin-bottom: 0;
-  }
-  .material-icons{
-   color:$textLight;
-   margin-left: 15px;
-  }
- }
+ display: flex;
+}
+.reset{
+ position: absolute;
+ top:14px;
+ right:0;
+ color:$textLight;
+ margin-left: 15px;
 }
 .picker{
  position: absolute;

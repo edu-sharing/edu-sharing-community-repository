@@ -22,6 +22,7 @@ import org.apache.log4j.Logger;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.client.tools.forms.VCardTool;
 import org.edu_sharing.repository.server.RepoFactory;
+import org.edu_sharing.service.nodeservice.NodeServiceHelper;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -64,7 +65,7 @@ public class RecordHandlerMods implements RecordHandlerInterface {
 		toSafeMap.put(CCConstants.CCM_PROP_IO_REPLICATIONSOURCE, catalogId);
 		
 		String title = (String) xpath.evaluate("titleInfo/title", nodeMods, XPathConstants.STRING);
-		String safeTitle = title.replaceAll( RepoFactory.getEdusharingProperty(CCConstants.EDU_SHARING_PROPERTIES_PROPERTY_VALIDATOR_REGEX_CM_NAME), "_");
+		String safeTitle = NodeServiceHelper.cleanupCmName(title);
 		toSafeMap.put(CCConstants.CM_NAME, safeTitle);
 		toSafeMap.put(CCConstants.LOM_PROP_GENERAL_TITLE, title);
 		

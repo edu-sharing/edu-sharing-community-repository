@@ -50,10 +50,11 @@ public class AuthorityServiceImpl implements AuthorityService {
 	NodeService nodeService = serviceRegistry.getNodeService();
 	OwnableService ownableService = serviceRegistry.getOwnableService();
 	PermissionService permissionService = serviceRegistry.getPermissionService();
-	MCAlfrescoAPIClient baseClient = new MCAlfrescoAPIClient();
+    org.edu_sharing.alfresco.service.AuthorityService eduAuthorityService = (org.edu_sharing.alfresco.service.AuthorityService)alfApplicationContext.getBean("eduAuthorityService");
 
 
-	/**
+
+    /**
 	 * Returns a property for a certain authority (it will fetch the coressponding node and load the property)
 	 * @param authority
 	 * @param property
@@ -61,7 +62,10 @@ public class AuthorityServiceImpl implements AuthorityService {
 	 */
 	@Override
 	public Object getAuthorityProperty(String authority,String property){
-		return nodeService.getProperty(authorityService.getAuthorityNodeRef(authority),QName.createQName(property));
+		NodeRef ref = authorityService.getAuthorityNodeRef(authority);
+		if(ref==null)
+			return null;
+		return nodeService.getProperty(ref,QName.createQName(property));
 	}
 	/**
 	 * returns the node id for the given authority (useful if you want to change metadata)
@@ -78,7 +82,11 @@ public class AuthorityServiceImpl implements AuthorityService {
 	}
 	@Override
 	public void addAuthorityAspect(String authority,String aspect){
-		nodeService.addAspect(authorityService.getAuthorityNodeRef(authority),QName.createQName(aspect),new HashMap<>());
+
+		NodeRef nodeRef = authorityService.getAuthorityNodeRef(authority);
+		if(!nodeService.hasAspect(nodeRef, QName.createQName(aspect))) {
+			nodeService.addAspect(nodeRef,QName.createQName(aspect),new HashMap<>());
+		}
 	}
 	@Override
 	public void deleteAuthority(String authorityName) {
@@ -91,7 +99,7 @@ public class AuthorityServiceImpl implements AuthorityService {
                     {
                 		String key =  authorityName;
                 		String groupType = (String) getAuthorityProperty(key,CCConstants.CCM_PROP_GROUPEXTENSION_GROUPTYPE);
-                		if(groupType!=null && groupType.equals(ADMINISTRATORS_GROUP_TYPE) && !baseClient.isAdmin(AuthenticationUtil.getFullyAuthenticatedUser()))
+                		if(groupType!=null && groupType.equals(CCConstants.ADMINISTRATORS_GROUP_TYPE) && !new MCAlfrescoAPIClient().isAdmin(AuthenticationUtil.getFullyAuthenticatedUser()))
                 			throw new AccessDeniedException("An admin group can not be deleted");
                 		authorityService.deleteAuthority(key, true);
 
@@ -109,11 +117,18 @@ public class AuthorityServiceImpl implements AuthorityService {
     	String[] split=groupName.split("_");
     	if(split.length<2)
     		return false;
-    	String adminGroup=PermissionService.GROUP_PREFIX+split[0]+"_"+ADMINISTRATORS_GROUP;
-    	if(memberships.contains(adminGroup))
-    		return groupIsOfType(adminGroup,ADMINISTRATORS_GROUP_TYPE);
+    	String adminGroup=PermissionService.GROUP_PREFIX+split[0]+"_"+org.edu_sharing.alfresco.service.AuthorityService.ADMINISTRATORS_GROUP;
+    	if(memberships.contains(adminGroup)) {
+			return isAdminGroup(adminGroup);
+		}
     	return false;
 	}
+
+	private boolean isAdminGroup(String group) {
+		return groupIsOfType(group, org.edu_sharing.alfresco.service.AuthorityService.ADMINISTRATORS_GROUP_TYPE) ||
+				groupIsOfType(group, org.edu_sharing.alfresco.service.AuthorityService.MEDIACENTER_ADMINISTRATORS_GROUP_TYPE);
+	}
+
 	private boolean groupIsOfType(String adminGroup, String type) {
 		String typeProp=(String) serviceRegistry.getNodeService().getProperty(serviceRegistry.getAuthorityService().getAuthorityNodeRef(adminGroup),QName.createQName(CCConstants.CCM_PROP_GROUPEXTENSION_GROUPTYPE));
     	return typeProp.equals(type);
@@ -130,28 +145,35 @@ public class AuthorityServiceImpl implements AuthorityService {
 		}
 		return false;
 	}
-	@Override
-	public synchronized boolean hasAdminAccessToGroup(String groupName){
+    private synchronized boolean hasAdminAccessToGroup(String groupName,String postfix){
 		try {
-	    	Set<String> memberships=serviceRegistry.getAuthorityService().getAuthorities();
+			Set<String> memberships=serviceRegistry.getAuthorityService().getAuthorities();
 			if(memberships.contains(CCConstants.AUTHORITY_GROUP_ALFRESCO_ADMINISTRATORS))
 				return true;
-			String group=PermissionService.GROUP_PREFIX+AuthorityService.getGroupName(ADMINISTRATORS_GROUP,groupName);
+			String group=PermissionService.GROUP_PREFIX+AuthorityService.getGroupName(postfix,groupName);
 			if(memberships.contains(group))
-				return groupIsOfType(group, ADMINISTRATORS_GROUP_TYPE);
-			
+				return isAdminGroup(group);
+
 			// Detect the group prefix and decide
 			String[] split=groupName.split("_");
 			if(split.length<2)
 				return false;
-			group=PermissionService.GROUP_PREFIX+split[0]+"_"+ADMINISTRATORS_GROUP;
+			group=PermissionService.GROUP_PREFIX+split[0]+"_"+postfix;
 			if(memberships.contains(group))
-				return groupIsOfType(group, ADMINISTRATORS_GROUP_TYPE);
-			
+				return isAdminGroup(group);
+
 		} catch (Throwable t) {
 			t.printStackTrace();
 		}
 		return false;
+	}
+	@Override
+	public boolean hasAdminAccessToGroup(String groupName){
+		return hasAdminAccessToGroup(groupName,org.edu_sharing.alfresco.service.AuthorityService.ADMINISTRATORS_GROUP);
+	}
+	@Override
+	public boolean hasAdminAccessToMediacenter(String groupName){
+		return hasAdminAccessToGroup(groupName,org.edu_sharing.alfresco.service.AuthorityService.MEDIACENTER_ADMINISTRATORS_GROUP);
 	}
 	public String getProperty(String authorityName, String property){
 		return (String)nodeService.getProperty(authorityService.getAuthorityNodeRef(authorityName),QName.createQName(property));
@@ -164,9 +186,9 @@ public class AuthorityServiceImpl implements AuthorityService {
 				return true;
 			
 			
-			String group=PermissionService.GROUP_PREFIX+AuthorityService.getGroupName(ADMINISTRATORS_GROUP,orgName);
+			String group=PermissionService.GROUP_PREFIX+AuthorityService.getGroupName(org.edu_sharing.alfresco.service.AuthorityService.ADMINISTRATORS_GROUP,orgName);
 			if(memberships.contains(group))
-				return groupIsOfType(group,ADMINISTRATORS_GROUP_TYPE);
+				return groupIsOfType(group,CCConstants.ADMINISTRATORS_GROUP_TYPE);
 			
 		} catch (Throwable t) {
 			logger.error("Error while getting Admin access:" + orgName, t);
@@ -191,17 +213,17 @@ public class AuthorityServiceImpl implements AuthorityService {
 	}
 
 	@Override
-	public ArrayList<EduGroup> getAllEduGroups() {
+	public ArrayList<EduGroup> getAllEduGroups(String authority) {
 		org.alfresco.service.cmr.security.AuthorityService alfAuthorityService = serviceRegistry.getAuthorityService();
 		Set<String> authoritiesForUser = alfAuthorityService
-				.getAuthoritiesForUser(AuthenticationUtil.getFullyAuthenticatedUser());
+				.getAuthoritiesForUser(authority);
 
 		
 		
 		ArrayList<EduGroup> result = new ArrayList<EduGroup>();
 
-		for (String authority : authoritiesForUser) {
-			EduGroup eg = getEduGroup(authority);
+		for (String a : authoritiesForUser) {
+			EduGroup eg = getEduGroup(a);
 			if(eg != null)result.add(eg);
 		}
 
@@ -248,10 +270,10 @@ public EduGroup getEduGroup(String authority){
 	}
 
 	@Override
-	public ArrayList<EduGroup> getEduGroups(String scope) {
+	public ArrayList<EduGroup> getEduGroups(String authority,String scope) {
 		ArrayList<EduGroup> result = new ArrayList<EduGroup>();
 
-		for (EduGroup eduGroup : getAllEduGroups()) {
+		for (EduGroup eduGroup : getAllEduGroups(authority)) {
 			if ((eduGroup.getScope() == null && scope == null)
 					|| (eduGroup.getScope() != null && eduGroup.getScope().equals(scope))) {
 				result.add(eduGroup);
@@ -264,33 +286,35 @@ public EduGroup getEduGroup(String authority){
 		return serviceRegistry.getAuthorityService().getAuthoritiesForUser(username);
 	}
 	@Override
-	public String createGroup(String groupName, String displayName,String parentGroup) throws DAOException {	
-		try {
-			
-			if(parentGroup!=null && parentGroup.isEmpty())
-				parentGroup=null;
-			
-			if(parentGroup==null){
-				if(!isGlobalAdmin())
-					throw new AccessDeniedException("No permission to create global group");
-			}
-			else if(!hasAdminAccessToGroup(parentGroup)){
-				throw new AccessDeniedException("No permission to create group in "+parentGroup);
-			}
-			final String parentGroupFinal=parentGroup;
-			return AuthenticationUtil.runAsSystem(new RunAsWork<String>() {
+	public String createGroup(String groupName, String displayName,String parentGroup) throws Exception {
+		if(parentGroup!=null && parentGroup.isEmpty())
+			parentGroup=null;
 
-				@Override
-				public String doWork() throws Exception {
-					return baseClient.createOrUpdateGroup(groupName, displayName,parentGroupFinal,true);
-				}
-			});
-			
-		} catch (Exception e) {
-
-			throw DAOException.mapping(e);
+		if(parentGroup==null){
+			if(!isGlobalAdmin())
+				throw new AccessDeniedException("No permission to create global group");
 		}
+		else if(!hasAdminAccessToGroup(parentGroup)){
+			throw new AccessDeniedException("No permission to create group in "+parentGroup);
+		}
+		final String parentGroupFinal=parentGroup;
+		return AuthenticationUtil.runAsSystem(new RunAsWork<String>() {
+
+			@Override
+			public String doWork() throws Exception {
+				return new MCAlfrescoAPIClient().createOrUpdateGroup(groupName, displayName,parentGroupFinal,true);
+			}
+		});
 	}
+
+	@Override
+	public void createGroupWithType(String groupName, String displayName,String parentGroup,String groupType) throws Exception {
+		String group = createGroup(groupName, displayName, parentGroup);
+		addAuthorityAspect(PermissionService.GROUP_PREFIX + group,CCConstants.CCM_ASPECT_GROUPEXTENSION);
+		setAuthorityProperty(PermissionService.GROUP_PREFIX + group,CCConstants.CCM_PROP_GROUPEXTENSION_GROUPTYPE, groupType);
+
+	}
+
 	public EduGroup getOrCreateEduGroup(EduGroup eduGroup, EduGroup unscopedEduGroup, String folderParentId) {
 
 		AuthenticationUtil.RunAsWork<EduGroup> createEduGroupWorker = new AuthenticationUtil.RunAsWork<EduGroup>() {
@@ -359,13 +383,13 @@ public EduGroup getEduGroup(String authority){
 							for(String containedAuthority : containedAuthorities){
 								NodeRef containedAuthorityNodeRef = authorityService.getAuthorityNodeRef(containedAuthority);
 								String groupType = (String)nodeService.getProperty(containedAuthorityNodeRef,QName.createQName(CCConstants.CCM_PROP_GROUPEXTENSION_GROUPTYPE));
-								if(ADMINISTRATORS_GROUP_TYPE.equals(groupType)){
+								if(CCConstants.ADMINISTRATORS_GROUP_TYPE.equals(groupType)){
 									String groupname = (String)nodeService.getProperty(containedAuthorityNodeRef, QName.createQName(CCConstants.CM_PROP_AUTHORITY_AUTHORITYNAME));
 									groupname = groupname.replace(AuthorityType.GROUP.getPrefixString(), "");
 									String groupDisplayName = (String)nodeService.getProperty(containedAuthorityNodeRef, QName.createQName(CCConstants.CM_PROP_AUTHORITY_AUTHORITYDISPLAYNAME));
 									String groupAdministrators = authorityService.createAuthority(AuthorityType.GROUP, groupname + "_" + eduGroup.getScope() , groupDisplayName + "_"  + eduGroup.getScope(), authorityService.getDefaultZones());
 									NodeRef groupAdministratorsNodeRef = authorityService.getAuthorityNodeRef(groupAdministrators);
-									nodeService.setProperty(groupAdministratorsNodeRef, QName.createQName(CCConstants.CCM_PROP_GROUPEXTENSION_GROUPTYPE), ADMINISTRATORS_GROUP_TYPE);
+									nodeService.setProperty(groupAdministratorsNodeRef, QName.createQName(CCConstants.CCM_PROP_GROUPEXTENSION_GROUPTYPE), CCConstants.ADMINISTRATORS_GROUP_TYPE);
 									//scope
 									nodeService.addAspect(groupAdministratorsNodeRef, QName.createQName(CCConstants.CCM_ASPECT_EDUSCOPE), propsAspectEduScope);
 									
@@ -530,4 +554,67 @@ public EduGroup getEduGroup(String authority){
 			}
 			return transformed;
 		}
+
+	public String[] getMembershipsOfGroup(String groupName) {
+
+		org.alfresco.service.cmr.security.AuthorityService authorityService = serviceRegistry.getAuthorityService();
+
+		return serviceRegistry.getTransactionService().getRetryingTransactionHelper().doInTransaction(
+
+				new RetryingTransactionCallback<String[]>()
+				{
+					public String[] execute() throws Throwable
+					{
+						String key = groupName.startsWith(PermissionService.GROUP_PREFIX) ? groupName : PermissionService.GROUP_PREFIX + groupName;
+
+						return authorityService.getContainedAuthorities(null, key, true).toArray(new String[0]);
+					}
+				}, true);
+
+	}
+
+    @Override
+	public void addMemberships(String groupName, String[] members) {
+
+		serviceRegistry.getTransactionService().getRetryingTransactionHelper().doInTransaction(
+
+				new RetryingTransactionCallback<Void>()
+				{
+					public Void execute() throws Throwable
+					{
+						eduAuthorityService.addMemberships(groupName, members);
+						return null;
+					}
+				}, false);
+
+	}
+
+	@Override
+	public void removeMemberships(String groupName, String[] members) {
+
+		org.alfresco.service.cmr.security.AuthorityService authorityService = serviceRegistry.getAuthorityService();
+
+		serviceRegistry.getTransactionService().getRetryingTransactionHelper().doInTransaction(
+
+				new RetryingTransactionCallback<Void>()
+				{
+					public Void execute() throws Throwable
+					{
+						String key = groupName.startsWith(PermissionService.GROUP_PREFIX) ? groupName : PermissionService.GROUP_PREFIX + groupName;
+
+						for (String member : members) {
+
+							if (member == null) {
+								continue;
+							}
+
+							authorityService.removeAuthority(key, member);
+						}
+
+						return null;
+					}
+				}, false);
+
+	}
+
 }

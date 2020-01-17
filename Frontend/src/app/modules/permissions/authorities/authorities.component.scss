@@ -1,4 +1,4 @@
-@import "../../../../styles/variables.scss";
+@import "../../../core-ui-module/styles/variables";
 
 input[type=search]{
   max-width: 400px;
@@ -29,16 +29,8 @@ input[type=search]{
   }
   actionbar{
     min-width: 170px;
-  }
-}
-.card-scroll{
-  .group{
     display: flex;
-    align-items: center;
-    margin-bottom: 20px;
-    >input{
-      margin-bottom: 0;
-    }
+    justify-content: flex-end;
   }
 }
 .memberActions{
@@ -60,6 +52,28 @@ input[type=search]{
 }
 .memberInput{
   width:280px;
+}
+:host /deep/{
+  .card-status{
+    mat-checkbox{
+      display: flex;
+      margin-bottom: 20px;
+    }
+  }
+  .card-edit {
+    mat-form-field {
+      width: 100%;
+    }
+    .group {
+      display: flex;
+      align-items: center;
+      margin-bottom: 20px;
+
+      .mat-form-field-wrapper {
+        padding-bottom: 0;
+      }
+    }
+  }
 }
 .editSystemName{
   margin-bottom: 10px;

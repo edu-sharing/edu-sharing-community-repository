@@ -114,6 +114,18 @@
 		]]>
 		</message>
 	</template>
+	<template name="userStatusChanged">
+		<subject>Der Status für Ihren Account hat sich geändert</subject>
+		<message><![CDATA[
+			<h1>Hallo {{firstName}} {{lastName}}!</h1>
+			<h2>Der Status Ihres Accounts hat sich geändert</h2>
+			Bisheriger Status: {{oldStatus}}<br><br>
+			Neuer Status: {{newStatus}}
+			<br><br><br>
+			Sollte diese Änderung nicht in Ihrem Interesse sein, setzen Sie sich bitte umgehend mit dem Betreiber des Systems in Verbindung.
+		]]>
+		</message>
+	</template>
 	<template name="footer">
 		<message><![CDATA[
 			<a href="http://edu-sharing.com" style="float:left;">www.edu-sharing.com</a>

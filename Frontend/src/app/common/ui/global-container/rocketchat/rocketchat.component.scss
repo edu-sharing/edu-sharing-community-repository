@@ -1,4 +1,4 @@
-@import "../../../../../styles/variables.scss";
+@import "../../../../core-ui-module/styles/variables";
 
 $barHeight:30px;
 $barHeightMobile:60px;
@@ -21,7 +21,7 @@ $chatHeight:450px;
   z-index: 100;
   display: flex;
   flex-direction: column;
-  width:100px;
+  width:115px;
   @include materialShadow();
   &.opened{
     width:$chatWidth;
@@ -39,9 +39,11 @@ $chatHeight:450px;
     }
     .options{
       display: flex;
-      >div{
+      >button{
         display: flex;
         align-items: center;
+        padding: 0;
+        min-width: unset;
       }
       .toggle-close{
         display: none;

@@ -3,8 +3,7 @@
  */
 
 import {Component, EventEmitter, Input, Output} from '@angular/core';
-import {ConfigurationService} from '../../services/configuration.service';
-import {ConfigurationHelper} from '../../rest/configuration-helper';
+import {ConfigurationHelper, ConfigurationService} from '../../../core-module/core.module';
 
 @Component({
   selector: 'app-footer',

@@ -1,5 +1,6 @@
 package org.edu_sharing.repository.server.authentication;
 
+import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -8,7 +9,8 @@ import org.edu_sharing.repository.client.tools.CCConstants;
 public class Context {
 
     private static ThreadLocal<Context> instance = new ThreadLocal<Context>();
-    
+    private static ServletContext globalContext;
+
     private HttpServletRequest request;
     private HttpServletResponse response;
 
@@ -21,8 +23,14 @@ public class Context {
         return instance.get();
     }
 
-    public static Context newInstance(HttpServletRequest request,HttpServletResponse response) {
+    public static ServletContext getGlobalContext() {
+        return globalContext;
+    }
+
+    public static Context newInstance(HttpServletRequest request, HttpServletResponse response, ServletContext servletContext) {
         Context context = new Context(request,response);
+        if(globalContext==null)
+            globalContext=servletContext;
         instance.set(context);
         return context;
     }

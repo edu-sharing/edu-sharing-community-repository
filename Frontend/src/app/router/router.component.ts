@@ -14,10 +14,10 @@ import {PermissionsRoutingComponent} from "../modules/permissions/permissions-ro
 import {PermissionsMainComponent} from "../modules/permissions/permissions.component";
 import {OerComponent} from "../modules/oer/oer.component";
 import {MdsTestComponent} from "../common/test/mds-test/mds-test.component";
-import {ConfigurationService} from "../common/services/configuration.service";
+import {ConfigurationService} from "../core-module/core.module";
 import {AdminComponent} from "../modules/admin/admin.component";
 import {MessagesComponent} from "../modules/messages/messages.component";
-import {UIConstants} from "../common/ui/ui-constants";
+import {UIConstants} from "../core-module/ui/ui-constants";
 import {StreamComponent} from "../modules/stream/stream.component";
 import {ProfilesComponent} from "../modules/profiles/profiles.component";
 import {StartupComponent} from '../modules/startup/startup.component';
@@ -26,6 +26,7 @@ import {SharingComponent} from "../modules/sharing/sharing.component";
 import {RegisterComponent} from '../modules/register/register.component';
 import {ServicesComponent} from "../modules/services/services.components";
 import {FileUploadComponent} from '../modules/file-upload/file-upload.component';
+import {EmbedComponent} from "../common/ui/embed/embed.component";
 
 
 
@@ -130,6 +131,10 @@ export var ROUTES=[
     { path: UIConstants.ROUTER_PREFIX+'sharing', component: SharingComponent },
     // services
     { path: UIConstants.ROUTER_PREFIX+'services', component: ServicesComponent },
-  ]
+
+    // embed
+    { path: UIConstants.ROUTER_PREFIX+'embed/:component', component: EmbedComponent },
+
+    ]
 ;
 

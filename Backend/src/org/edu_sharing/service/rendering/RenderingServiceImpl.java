@@ -1,27 +1,48 @@
 package org.edu_sharing.service.rendering;
 
+import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.ObjectWriter;
+import com.fasterxml.jackson.databind.SerializationFeature;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
+import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.repository.StoreRef;
+import org.apache.commons.httpclient.methods.PostMethod;
+import org.apache.commons.httpclient.methods.StringRequestEntity;
 import org.apache.log4j.Logger;
+import org.edu_sharing.metadataset.v2.tools.MetadataHelper;
+import org.edu_sharing.metadataset.v2.tools.MetadataTemplateRenderer;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.client.tools.UrlTool;
 import org.edu_sharing.repository.server.AuthenticationTool;
-import org.edu_sharing.repository.server.MCAlfrescoAPIClient;
-import org.edu_sharing.repository.server.MCAlfrescoBaseClient;
 import org.edu_sharing.repository.server.RepoFactory;
 import org.edu_sharing.repository.server.authentication.Context;
-import org.edu_sharing.repository.server.tools.ApplicationInfo;
-import org.edu_sharing.repository.server.tools.ApplicationInfoList;
-import org.edu_sharing.repository.server.tools.HttpQueryTool;
-import org.edu_sharing.repository.server.tools.URLTool;
+import org.edu_sharing.repository.server.rendering.RenderingErrorServlet;
+import org.edu_sharing.repository.server.rendering.RenderingException;
+import org.edu_sharing.repository.server.tools.*;
+import org.edu_sharing.restservices.*;
+import org.edu_sharing.restservices.shared.Filter;
+import org.edu_sharing.restservices.shared.Node;
+import org.edu_sharing.restservices.shared.SearchResult;
 import org.edu_sharing.service.InsufficientPermissionException;
+import org.edu_sharing.service.config.ConfigServiceFactory;
+import org.edu_sharing.service.nodeservice.NodeServiceFactory;
+import org.edu_sharing.service.nodeservice.NodeServiceHelper;
 import org.edu_sharing.service.permission.PermissionService;
 import org.edu_sharing.service.permission.PermissionServiceFactory;
-import org.edu_sharing.service.version.VersionService;
+import org.edu_sharing.service.search.SearchService;
+import org.edu_sharing.service.search.model.SortDefinition;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
 public class RenderingServiceImpl implements RenderingService{
 
@@ -58,7 +79,7 @@ public class RenderingServiceImpl implements RenderingService{
 	}
 	
 	@Override
-	public String getDetails(String nodeId,String nodeVersion,Map<String,String> parameters) throws InsufficientPermissionException, Exception{		
+	public String getDetails(String nodeId,String nodeVersion,String displayMode,Map<String,String> parameters) throws InsufficientPermissionException, Exception{
 		
 		if(!this.permissionService.hasPermission(StoreRef.PROTOCOL_WORKSPACE,StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(),nodeId,CCConstants.PERMISSION_READ)){
 			throw new InsufficientPermissionException("no read permission");
@@ -66,12 +87,19 @@ public class RenderingServiceImpl implements RenderingService{
 		String renderingServiceUrl = "";
 		try {
 			ApplicationInfo appInfo = ApplicationInfoList.getRepositoryInfoById(this.appInfo.getAppId());
-			renderingServiceUrl = new RenderingTool().getRenderServiceUrl(appInfo, nodeId, AuthenticationUtil.getFullyAuthenticatedUser(),nodeVersion,parameters,RenderingTool.DISPLAY_DYNAMIC);
+			renderingServiceUrl = new RenderingTool().getRenderServiceUrl(appInfo,nodeId,parameters,displayMode);
 			// base url for dynamic context routing of domains
 			renderingServiceUrl = UrlTool.setParam(renderingServiceUrl, "baseUrl",URLEncoder.encode(URLTool.getBaseUrl(true)));
 			logger.debug(renderingServiceUrl);
-			return new HttpQueryTool().query(renderingServiceUrl);
+			RenderingServiceOptions options = new RenderingServiceOptions();
+			options.displayMode = displayMode;
+			RenderingServiceData data = getData(nodeId, nodeVersion, AuthenticationUtil.getFullyAuthenticatedUser(), options);
+			return getDetails(renderingServiceUrl, data);
 		}catch(Throwable t) {
+			logger.warn(t.getMessage(),t);
+			return RenderingErrorServlet.errorToHTML(null,
+					new RenderingException(HttpServletResponse.SC_INTERNAL_SERVER_ERROR,t.getMessage(),RenderingException.I18N.unknown,t));
+			/*
 			String repository=VersionService.getVersionNoException(VersionService.Type.REPOSITORY);
 			String rs=VersionService.getVersionNoException(VersionService.Type.RENDERSERVICE);
 			String info="Repository version "+repository+", Renderservice version "+rs;
@@ -83,9 +111,80 @@ public class RenderingServiceImpl implements RenderingService{
 			else {
 				info+=" do not match";
 				logger.warn(info);
-				throw new Exception(info,t);
+				throw new Exception(t.getMessage()+" ("+info+")",t);
 			}
+			*/
 		}
 	
+	}
+
+	@Override
+	public String getDetails(String renderingServiceUrl, RenderingServiceData data) throws JsonProcessingException, UnsupportedEncodingException {
+		PostMethod post = new PostMethod(renderingServiceUrl);
+		/*
+		ObjectMapper mapper = new ObjectMapper();
+		ObjectWriter ow = mapper.writer().withDefaultPrettyPrinter();
+		String json = ow.writeValueAsString(data);
+		*/
+		String json=new GsonBuilder().serializeNulls().create().toJson(data);
+		/*
+		Encryption encryption=new Encryption("RSA");
+		try {
+			json=new String(encryption.encrypt(json, encryption.getPemPublicKey(ApplicationInfoList.getRenderService().getPublicKey())));
+		} catch (Exception e) {
+			logger.warn(e);
+			return "";
+		}
+		*/
+		post.setRequestEntity(new StringRequestEntity(json,"application/json","UTF-8"));
+		try {
+			return new HttpQueryTool().query(post);
+		}catch(HttpException e){
+			return RenderingErrorServlet.errorToHTML(null,new RenderingException(e));
+		}
+	}
+	@Override
+	public RenderingServiceData getData(String nodeId, String nodeVersion, String user, RenderingServiceOptions options) throws Exception {
+		long time=System.currentTimeMillis();
+		RenderingServiceData data=new RenderingServiceData();
+		RepositoryDao repoDao = RepositoryDao.getRepository(appInfo.getAppId());
+		NodeDao nodeDao = NodeDao.getNodeWithVersion(repoDao, nodeId, nodeVersion);
+		Node node = nodeDao.asNode();
+		// remove any javascript (important for title)
+		node.setProperties(MetadataTemplateRenderer.cleanupHTMLMultivalueProperties(node.getProperties()));
+		data.setNode(node);
+		if(NodeServiceHelper.getType(new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE,nodeId)).equals(CCConstants.CCM_TYPE_SAVED_SEARCH)){
+			SearchResult<Node> search = nodeDao.runSavedSearch(0,
+					options.savedSearch.getMaxItems(),
+					SearchService.ContentType.FILES,
+					new SortDefinition(Collections.singletonList(options.savedSearch.getSortBy()),
+							Collections.singletonList(options.savedSearch.getSortAscending())),
+					null);
+			data.setChildren(search.getNodes());
+		}else{
+			data.setChildren(
+					NodeDao.convertToRest(repoDao, Filter.createShowAllFilter(), nodeDao.getChildrenSubobjects(), 0, Integer.MAX_VALUE).getNodes()
+			);
+		}
+		// template
+		// switch to the remote appInfo (for shadow objects) so the mds is the right one
+		ApplicationInfo remoteApp=ApplicationInfoList.getRepositoryInfoById(nodeDao.getRepositoryDao().getId());
+		data.setMetadataHTML(new MetadataTemplateRenderer(
+				MetadataHelper.getMetadataset(
+						remoteApp,node.getMetadataset()==null ? CCConstants.metadatasetdefault_id : node.getMetadataset()),
+				new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE,nodeId),
+				user,
+				nodeDao.getAllProperties()).render(RenderingTool.DISPLAY_INLINE.equals(options.displayMode) ? "io_render_inline" : "io_render"));
+
+		// user
+		if(!AuthenticationUtil.isRunAsUserTheSystemUser()) {
+			data.setUser(PersonDao.getPerson(RepositoryDao.getHomeRepository(), user).asPersonRender());
+		}
+
+		// context/config
+		data.setConfigValues(ConfigServiceFactory.getCurrentConfig().values);
+
+		logger.info("Preparing rendering data took "+(System.currentTimeMillis()-time)+" ms");
+		return data;
 	}
 }

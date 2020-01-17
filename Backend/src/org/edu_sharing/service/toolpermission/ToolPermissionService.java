@@ -30,10 +30,7 @@ import org.edu_sharing.service.connector.Connector;
 import org.edu_sharing.service.connector.ConnectorList;
 import org.edu_sharing.service.connector.ConnectorService;
 import org.edu_sharing.service.connector.ConnectorServiceFactory;
-import org.edu_sharing.service.nodeservice.NodeServiceFactory;
 import org.springframework.context.ApplicationContext;
-
-import com.sun.java.accessibility.util.TopLevelWindowListener;
 
 import net.sf.acegisecurity.AuthenticationCredentialsNotFoundException;
 
@@ -201,7 +198,7 @@ public class ToolPermissionService {
 		return result;
 	}
 
-	private String getEdu_SharingSystemFolderBase() throws Throwable{
+	public String getEdu_SharingSystemFolderBase() throws Throwable{
 		if(!isAdmin()){
 			throw new Exception("Admin group required");
 		}
@@ -320,6 +317,7 @@ public class ToolPermissionService {
 		toInit.remove(CCConstants.CCM_VALUE_TOOLPERMISSION_HANDLESERVICE); // use handle id
 		toInit.remove(CCConstants.CCM_VALUE_TOOLPERMISSION_USAGE_STATISTIC); // get all usages across all nodes (as system)
 		toInit.remove(CCConstants.CCM_VALUE_TOOLPERMISSION_COLLECTION_FEEDBACK); // give feedback on collections
+		toInit.remove(CCConstants.CCM_VALUE_TOOLPERMISSION_GLOBAL_STATISTICS);
 		return toInit;
 	}
 	public List<String> getAllPredefinedToolPermissions(){
@@ -344,12 +342,14 @@ public class ToolPermissionService {
 		toInit.add(CCConstants.CCM_VALUE_TOOLPERMISSION_WORKSPACE);
 		toInit.add(CCConstants.CCM_VALUE_TOOLPERMISSION_CONFIDENTAL);
 
+		toInit.add(CCConstants.CCM_VALUE_TOOLPERMISSION_COLLECTION_CHANGE_OWNER);
 		toInit.add(CCConstants.CCM_VALUE_TOOLPERMISSION_COLLECTION_EDITORIAL);
 		toInit.add(CCConstants.CCM_VALUE_TOOLPERMISSION_COLLECTION_CURRICULUM);
 		toInit.add(CCConstants.CCM_VALUE_TOOLPERMISSION_COLLECTION_PINNING);
 		toInit.add(CCConstants.CCM_VALUE_TOOLPERMISSION_HANDLESERVICE);
 		toInit.add(CCConstants.CCM_VALUE_TOOLPERMISSION_COLLECTION_FEEDBACK);
 		toInit.add(CCConstants.CCM_VALUE_TOOLPERMISSION_USAGE_STATISTIC);
+		toInit.add(CCConstants.CCM_VALUE_TOOLPERMISSION_GLOBAL_STATISTICS);
 
 		addConnectorToolpermissions(toInit);
 		return toInit;

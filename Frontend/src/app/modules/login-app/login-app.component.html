@@ -8,57 +8,46 @@
       <h1>{{'LOGIN_APP.LOGIN' | translate}}</h1>
       <div>{{'LOGIN_APP.LOGIN_INFO' | translate}}</div>
     </div>
-    <div class="card center-card card-action">
-      <div class="card-content">
-        <div class="card-title"><i class="material-icons card-title-back" (click)="buttonLoginBack()">arrow_back</i>
-          <img class="card-title-image" src="assets/images/app-icon.svg" image-config> {{'LOGIN_APP.LOGIN_TITLE' | translate}}
-          </div>
-        <div class="card-scroll">
+    <card [modal]="false" title="{{'LOGIN_APP.LOGIN_TITLE' | translate}}" width="normal" height="auto" avatar="assets/images/app-icon.svg" [isCancelable]="true" (onCancel)="buttonLoginBack()" [buttons]="buttons">
+        <div class="card-content-padding">
           <form (ngSubmit)="login()" #loginForm>
+            <mat-form-field>
+              <mat-label>{{'LOGIN.USERNAME' | translate}}</mat-label>
+              <input matInput required autofocus name="username" id="username" (ngModelChange)="checkConditions()" [(ngModel)]="username"/>
+            </mat-form-field>
             <div>
-              <label for="username">{{'LOGIN.USERNAME' | translate}}</label>
-              <input type="text" required name="username" id="username" (ngModelChange)="checkConditions()" [(ngModel)]="username"/>
-            </div>
-            <div>
-              <label for="password">{{'LOGIN.PASSWORD' | translate}}</label>
-              <!-- input requried type="password" name="password" id="password" (keydown.enter)="login()" (keyup)="checkConditions()" [(ngModel)]="password"/> -->
-              <input-password id="password" required (valueChange)="checkConditions()" (keydown.enter)="login()" [(value)]="password"></input-password>
+              <input-password label="{{'LOGIN.PASSWORD' | translate}}" id="password" required (valueChange)="checkConditions()" (keydown.enter)="login()" [(value)]="password"></input-password>
             </div>
           </form>
           <div class="register" *ngIf="config.register.local || config.register.registerUrl">
             {{'LOGIN.REGISTER_TEXT' | translate}}
-            <a (click)="register()" class="clickable">{{'LOGIN.REGISTER_LINK' | translate}} <i icon iconId="arrow_forward"></i></a>
+            <button mat-button color="primary" (click)="register()">{{'LOGIN.REGISTER_LINK' | translate}} <i icon iconId="arrow_forward"></i></button>
           </div>
         </div>
-      </div>
-      <div class="card-action">
-        <a class="waves-effect waves-light btn" (click)="login()">{{'LOGIN.LOGIN' | translate }}</a>
-        <a class="btn-flat" *ngIf="config.register.local || config.register.recoverUrl" (click)="recoverPassword()">{{'LOGIN.RECOVER_PASSWORD' | translate }}</a>
-      </div>
-    </div>
-  </div>
+    </card>
+</div>
 
-  <!--------------------
-     STATE: NO INTERNET 
-    ------------------- -->
+    <!--------------------
+       STATE: NO INTERNET
+      ------------------- -->
     <div *ngIf="state==3">
         <div class="infoTop" style="margin-top: -10px;">
-          <h1>{{'LOGIN_APP.NOTINTERNET' | translate }}</h1>
-          <div>{{'LOGIN_APP.NOTINTERNET_SUB' | translate }}</div>
+            <h1>{{'LOGIN_APP.NOTINTERNET' | translate }}</h1>
+            <div>{{'LOGIN_APP.NOTINTERNET_SUB' | translate }}</div>
         </div>
         <div class="card center-card card-action">
-          <div class="card-content">
-              <div class="card-title"><i class="material-icons card-title-back">warning</i>
-                {{'LOGIN_APP.NOTINTERNET_INFO' | translate }}
-              </div>
-              <div class="card-scroll">
-                  {{'LOGIN_APP.NOTINTERNET_TEXT' | translate }}
-              </div>
-          </div>
-          <div class="card-action">
-            <a class="waves-effect waves-light btn" (click)="init()">{{'LOGIN_APP.NOTINTERNET_RETRY' | translate }}</a>
-            <a class="btn-flat" (click)="buttonExitApp()">{{'LOGIN_APP.NOTINTERNET_EXIT' | translate }}</a>
-          </div>
+            <div class="card-content">
+                <div class="card-title"><i class="material-icons card-title-back">warning</i>
+                    {{'LOGIN_APP.NOTINTERNET_INFO' | translate }}
+                </div>
+                <div class="card-scroll">
+                    {{'LOGIN_APP.NOTINTERNET_TEXT' | translate }}
+                </div>
+            </div>
+            <div class="card-action">
+                <a class="waves-effect waves-light btn" (click)="init()">{{'LOGIN_APP.NOTINTERNET_RETRY' | translate }}</a>
+                <a class="btn-flat" (click)="buttonExitApp()">{{'LOGIN_APP.NOTINTERNET_EXIT' | translate }}</a>
+            </div>
         </div>
-      </div>
+    </div>
 </div>

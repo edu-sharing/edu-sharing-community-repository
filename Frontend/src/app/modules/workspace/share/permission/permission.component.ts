@@ -1,6 +1,6 @@
 import {Component, Input, EventEmitter, Output, ViewChild, ElementRef} from '@angular/core';
-import {Permission} from "../../../../common/rest/data-object";
-import {RestConstants} from "../../../../common/rest/rest-constants";
+import {Permission} from "../../../../core-module/core.module";
+import {RestConstants} from "../../../../core-module/core.module";
 
 @Component({
   selector: 'workspace-share-permission',

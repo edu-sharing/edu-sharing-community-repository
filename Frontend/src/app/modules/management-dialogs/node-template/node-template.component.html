@@ -1,36 +1,26 @@
-<div class="dialog darken" [@fade]="this"></div>
-    <div class="card center-card card-high card-action" [@cardAnimation]="this">
-        <div class="card-content">
-            <div tabindex="0" class="card-cancel" (click)="cancel()" (keyup.enter)="cancel()"><i icon iconId="close" aria="true"></i></div>
-        <div class="card-title">{{'WORKSPACE.OPTION.TEMPLATE' | translate:{name:node ? node.name : ''} }}</div>
+<card title="{{'WORKSPACE.OPTION.TEMPLATE' | translate}}" [node]="node" [buttons]="buttons" (onCancel)="cancel()" width="normal" height="xlarge">
         <spinner *ngIf="loading"></spinner>
-        <div class="card-scroll" [class.no-scroll]="!enabled" *ngIf="!loading">
-            <div class="switch">
-                <label>
-                    <input type="checkbox" [(ngModel)]="enabled">
-                    <span class="lever"></span>
-                </label>
+        <div *ngIf="!loading">
+            <div class="enable-toggle">
+            <mat-slide-toggle [(ngModel)]="enabled"></mat-slide-toggle>
                 <div class="node-status">
                     <strong>{{ 'WORKSPACE.NODE_TEMPLATE.STATUS' | translate}}</strong>
                     <p>{{ 'WORKSPACE.NODE_TEMPLATE.STATUS_DESKRIPTION' | translate}}</p>
                 </div>
             </div>
-          <mds #mds
-            [embedded]="true"
-            [groupId]="'io_template'"
-            [currentValues]="node ? node.properties : {}"
-            [invalidate]="true"
-            [class.display-none]="!enabled"
-          ></mds>
-            <div *ngIf="!enabled" class="template-disabled">
-                <div class="disabled-info"  data-i18n="[html]content.body">
-                    {{ 'WORKSPACE.NODE_TEMPLATE.STATUS_DISABLED' | translate}}
+            <div class="template-content">
+                <mds #mds
+                [embedded]="true"
+                [groupId]="'io_template'"
+                [currentValues]="node ? node.properties : {}"
+                [invalidate]="true"
+                [class.display-none]="!enabled"
+                ></mds>
+                <div *ngIf="!enabled" class="template-disabled">
+                    <div class="disabled-info"  data-i18n="[html]content.body">
+                        {{ 'WORKSPACE.NODE_TEMPLATE.STATUS_DISABLED' | translate}}
+                    </div>
                 </div>
             </div>
         </div>
-    </div>
-    <div class="card-action">
-        <a tabindex="0" class="waves-effect waves-light btn" [class.disabled]="loading" (click)="save()" (keyup.enter)="save()">{{'SAVE' | translate }}</a>
-        <a tabindex="0" class="btn-flat" (click)="cancel()" (keyup.enter)="cancel()">{{'CANCEL' | translate }}</a>
-    </div>
-</div>
+</card>

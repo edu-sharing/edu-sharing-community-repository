@@ -1,4 +1,4 @@
-@import "../../../../styles/variables.scss";
+@import "../../../core-ui-module/styles/variables";
 
 :host /deep/{
   .table .allowed #Mask{
@@ -12,18 +12,25 @@
   top:0;
   height:calc(100% - 67px);
 }
-.fade{
-  position: absolute;
-  z-index: 100;
-  left:0;
-  top:108px;
+$headingHeight:60px;
+.heading-group {
   width: 100%;
-  height:20px;
-  background: linear-gradient(to bottom,#fff 15%,rgba(255,255,255,0.0001));
+  background-color: #fff;
+  height: $headingHeight;
+  .fade {
+    position: absolute;
+    z-index: 100;
+    left: 0;
+    top: 108px;
+    width: 100%;
+    height: 20px;
+    background: linear-gradient(to bottom, #fff 15%, rgba(255, 255, 255, 0.0001));
+  }
 }
-.card-title-element{
-  margin-left:$cardPadding*-1;
-  width:calc(100% + #{$cardPadding*2});
+.toolpermissions{
+  .groupTable{
+    padding: 0 $cardPadding;
+  }
 }
 .heading,.groupTable{
   display:flex;
@@ -50,10 +57,13 @@
     display: flex;
     align-items: center;
     padding:20px 0;
-    >input{
+    >mat-form-field{
       flex-grow: 1;
       width: auto;
-      margin: 0;
+      margin: 0 30px;
+    }
+    >button{
+      margin: 0 30px;
     }
   }
 }
@@ -70,7 +80,7 @@
   padding:10px 0;
   word-break: break-word;
   .technicalName{
-    font-size:80%;
+    font-size:70%;
     word-break: break-all;
     color:$textVeryLight;
     font-style: italic;
@@ -91,6 +101,12 @@
   .result spinner-small .preloader-wrapper.small{
     width:20px;
     height:20px;
+  }
+  .mat-checkbox-inner-container{
+    margin: 0;
+  }
+  .add .mat-form-field-wrapper{
+    padding: 0;
   }
 }
 .heading .result{

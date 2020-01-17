@@ -5,4 +5,5 @@ import java.io.Serializable;
 public class Rendering implements Serializable {
 	@XmlElement Boolean showPreview;
 	@XmlElement Boolean showDownloadButton;
+	@XmlElement Boolean prerender;
 }

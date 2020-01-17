@@ -12,9 +12,9 @@
     "MENU_EDIT":"Edit",
     "MENU_DELETE":"Delete",
     "MENU_TOOLPERMISSIONS":"Permissions",
-    "MENU_TOOLPERMISSIONS_GLOBAL":"Global PErmissions",
+    "MENU_TOOLPERMISSIONS_GLOBAL":"Global Permissions",
     "MANAGE_GROUP":"Manage group {{group}}",
-    "ADD_MEMBER_TO_GROUP":"Add user to group {{group}}",
+    "ADD_MEMBER_TO_GROUP":"Add users to group",
     "EDIT_MEMBER_GROUPS":"User is member of",
     "EXPORT_MEMBER":"Export users",
     "ADD_ORG":"Create organization",
@@ -76,6 +76,10 @@
     "INTERNAL_NAME":"Internal name",
     "CURRENT_MEMBERS":"Current members of group {{group}}:",
     "DOWNLOAD_MEMBER_FILENAME":"Users.csv",
+    "SET_STATUS": "Set user status",
+    "STATUS_LABEL": "User status",
+    "STATUS_NOTIFY": "Inform user via mail about status change",
+    "STATUS_LAST_CHANGE": "Last change of status",
     "GROUP_TYPE":{
       "null":"none / regular group",
       "EDITORIAL":"editorial group",
@@ -85,8 +89,14 @@
       "null":"Local / Default visibility",
       "global":"Global / Across repositories"
     },
+    "USER_STATUS": {
+      "null": "Not set (equals activated)",
+      "active": "Activated",
+      "blocked": "Blocked (No access, not discoverable)",
+      "todelete": "Marked for deletion"
+    },
     "TOOLPERMISSIONS":{
-      "TITLE":"Set permissions for {{name}}",
+      "TITLE":"Set permissions",
       "EVERYONE_ALLOWED":"Initial value for all groups & users",
       "MEMBERS_ALLOWED":"Applies to all members",
       "USER_ALLOWED":"Applies to all selected users",
@@ -113,7 +123,8 @@
         "REPOSITORIES": "Repositories & Remote-Sources",
         "MANAGEMENT":"Management, Statistics & Administration",
         "OTHER":"Other  / Not categorized",
-        "ADD": "Creating custom Authorizations"
+        "ADD": "Creating custom Authorizations",
+        "ADD_LABEL": "Toolpermission name"
       }
     }
   }

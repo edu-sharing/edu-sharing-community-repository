@@ -12,6 +12,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.stream.Collectors;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.repo.security.authentication.AuthenticationUtil.RunAsWork;
 import org.alfresco.service.ServiceRegistry;
@@ -52,6 +53,8 @@ import org.edu_sharing.service.nodeservice.*;
 import org.edu_sharing.service.notification.NotificationServiceFactory;
 import org.edu_sharing.service.permission.PermissionServiceFactory;
 import org.edu_sharing.service.permission.PermissionServiceHelper;
+import org.edu_sharing.service.rating.AccumulatedRatings;
+import org.edu_sharing.service.rating.RatingServiceFactory;
 import org.edu_sharing.service.remote.RemoteObjectService;
 import org.edu_sharing.service.search.SearchService;
 import org.edu_sharing.service.search.SearchServiceFactory;
@@ -64,6 +67,8 @@ import org.json.JSONObject;
 
 import io.swagger.util.Json;
 import org.springframework.context.ApplicationContext;
+
+import static org.codehaus.groovy.runtime.DefaultGroovyMethods.collect;
 
 public class NodeDao {
 	private static Logger logger = Logger.getLogger(NodeDao.class);
@@ -78,6 +83,25 @@ public class NodeDao {
 			CCConstants.PERMISSION_CC_PUBLISH,
 			CCConstants.PERMISSION_READ_ALL
 	};
+	// id of the object by the remote repository (null if not a remote object)
+	private String remoteId;
+	private RepositoryDao remoteRepository;
+
+	private String version;
+
+
+	public static NodeDao getNodeWithVersion(RepositoryDao repoDao, String nodeId,String versionLabel) throws DAOException {
+		if(versionLabel!=null && versionLabel.equals("-1"))
+			versionLabel=null;
+		NodeDao nodeDao=getNode(repoDao,nodeId,Filter.createShowAllFilter());
+		if(versionLabel!=null) {
+			nodeDao.version = versionLabel;
+			nodeDao.nodeProps = nodeDao.getNodeHistory().get(nodeDao.version);
+			if(nodeDao.nodeProps==null)
+				throw new DAOMissingException(new Exception("Node "+nodeId+" does not have this version: "+versionLabel));
+		}
+		return nodeDao;
+	}
 	public static NodeDao getNode(RepositoryDao repoDao, String nodeId)
 			throws DAOException {
 		return getNode(repoDao, nodeId, new Filter());
@@ -288,7 +312,7 @@ public class NodeDao {
 	private final RepositoryDao repoDao;
 	private final String nodeId;
 
-	private final HashMap<String, Object> nodeProps;
+	private HashMap<String, Object> nodeProps;
 	private HashMap<String, HashMap<String, Object>> nodeHistory;
 
 	private HashMap<String, Boolean> hasPermissions;
@@ -355,7 +379,58 @@ public class NodeDao {
 			throw DAOException.mapping(e);
 		}
 	}
+	public SearchResult<Node> runSavedSearch(int skipCount, int maxItems, SearchService.ContentType contentType, SortDefinition sort, List<String> facettes) throws DAOException {
+		try {
+			if(!CCConstants.getValidLocalName(CCConstants.CCM_TYPE_SAVED_SEARCH).equals(getType())){
+				throw new IllegalArgumentException("The given node must be of type "+CCConstants.CCM_TYPE_SAVED_SEARCH);
+			}
+			HashMap<String, Object> props = getNativeProperties();
+			RepositoryDao repoDao = RepositoryDao
+					.getRepository((String) props.get(CCConstants.CCM_PROP_SAVED_SEARCH_REPOSITORY));
+			MdsDaoV2 mdsDao = MdsDaoV2.getMds(repoDao, (String) props.get(CCConstants.CCM_PROP_SAVED_SEARCH_MDS));
 
+			SearchToken token = new SearchToken();
+			token.setFacettes(facettes);
+			token.setSortDefinition(sort);
+			token.setFrom(skipCount);
+			token.setMaxResult(maxItems);
+			token.setContentType(contentType);
+
+			ObjectMapper mapper = new ObjectMapper();
+			List<MdsQueryCriteria> parameters = Arrays.asList(mapper.readValue(
+					(String) props.get(CCConstants.CCM_PROP_SAVED_SEARCH_PARAMETERS), MdsQueryCriteria[].class));
+			NodeSearch search = NodeDao.searchV2(repoDao, mdsDao,
+					(String) props.get(CCConstants.CCM_PROP_SAVED_SEARCH_QUERY), parameters, token, filter);
+
+			List<Node> data;
+			if (search.getNodes().size() < search.getResult().size()) {
+				//searched repo deliveres only nodeRefs by query time
+				data = new ArrayList<>();
+				for (NodeRef ref : search.getResult()) {
+					data.add(NodeDao.getNode(repoDao, ref.getId(), filter).asNode());
+				}
+			} else {
+				//searched repo delivered properties by query time
+				data = search.getNodes();
+			}
+
+
+			Pagination pagination = new Pagination();
+			pagination.setFrom(search.getSkip());
+			pagination.setCount(data.size());
+			pagination.setTotal(search.getCount());
+
+
+			SearchResult<Node> response = new SearchResult<>();
+			response.setNodes(data);
+			response.setPagination(pagination);
+			response.setFacettes(search.getFacettes());
+
+			return response;
+		}catch(Throwable t){
+			throw DAOException.mapping(t);
+		}
+	}
 	public static NodeSearch getRelevantNodes(RepositoryDao repoDao, int skipCount, int maxItems) throws DAOException {
 		try {
 			return transform(repoDao, SearchServiceFactory.getSearchService(repoDao.getId()).getRelevantNodes(skipCount,maxItems));
@@ -382,7 +457,7 @@ public class NodeDao {
 			
 			this.nodeService = NodeServiceFactory.getNodeService(repoDao.getId());
 			this.permissionService = PermissionServiceFactory.getPermissionService(repoDao.getId());
-			
+
 			/**
 			 * call getProperties on demand
 			 */
@@ -392,7 +467,6 @@ public class NodeDao {
 			}else{
 				this.nodeProps = nodeRef.getProperties();
 			}
-	
 			refreshPermissions();
 			
 			if(nodeProps.containsKey(CCConstants.NODETYPE)){
@@ -401,7 +475,14 @@ public class NodeDao {
 			else{
 				this.type = CCConstants.CCM_TYPE_IO;
 			}
-			
+			if(this.type.equals(CCConstants.CCM_TYPE_REMOTEOBJECT)){
+				this.remoteId=(String)this.nodeProps.get(CCConstants.CCM_PROP_REMOTEOBJECT_NODEID);
+				this.remoteRepository=RepositoryDao.getRepository((String)this.nodeProps.get(CCConstants.CCM_PROP_REMOTEOBJECT_REPOSITORYID));
+				this.nodeService=NodeServiceFactory.getNodeService(this.remoteRepository.getId());
+				this.permissionService=PermissionServiceFactory.getPermissionService(this.remoteRepository.getId());
+				this.nodeProps = this.nodeService.getProperties(null,null, this.remoteId);
+			}
+
 			String[] aspects = nodeService.getAspects(this.storeProtocol,this.storeId, nodeId);
 			
 			this.aspects = (aspects != null) ? Arrays.asList(aspects) : new ArrayList<String>();
@@ -413,7 +494,9 @@ public class NodeDao {
 			throw DAOException.mapping(t,nodeRef.getNodeId());
 		}
 	}
-
+	public boolean isFromRemoteRepository(){
+		return remoteId!=null || !this.repoDao.isHomeRepo();
+	}
 	public void refreshPermissions() {
         this.hasPermissions = permissionService.hasAllPermissions(storeProtocol, storeId, nodeId,DAO_PERMISSIONS);
 	}
@@ -516,6 +599,14 @@ public class NodeDao {
 			
 			throw DAOException.mapping(t);
 		}
+	}
+	public List<NodeRef> getChildrenSubobjects() throws DAOException {
+		SortDefinition sort=new SortDefinition();
+		sort.addSortDefinitionEntry(new SortDefinition.SortDefinitionEntry(CCConstants.getValidLocalName(CCConstants.CCM_PROP_CHILDOBJECT_ORDER),true));
+		sort.addSortDefinitionEntry(new SortDefinition.SortDefinitionEntry(CCConstants.getValidLocalName(CCConstants.CM_NAME),true));
+		List<String> filter=new ArrayList<>();
+		filter.add("files");
+		return getChildren(null,filter,sort);
 	}
 	public List<NodeRef> getChildren() throws DAOException {
 		return getChildren(null,null,new SortDefinition());
@@ -628,7 +719,7 @@ public class NodeDao {
 			return new NodeDao(repoDao, nodeId);
 			
 		} catch (Throwable t) {
-			
+
 			throw DAOException.mapping(t);
 		}
 	}
@@ -730,12 +821,24 @@ public class NodeDao {
 		return this.aspects;
 	}
 	public Node asNode() throws DAOException {
-
+		if(this.version!=null){
+			VersionedNode node=new VersionedNode();
+			fillNodeObject(node);
+			VersionedNode.Version version=new VersionedNode.Version();
+			version.setComment((String)nodeProps.get(CCConstants.CCM_PROP_IO_VERSION_COMMENT));
+			node.setVersion(version);
+			return node;
+		}
 		Node data = new Node();
-		
+		fillNodeObject(data);
+		return data;
+	}
+
+	private void fillNodeObject(Node data) throws DAOException {
 		data.setRef(getRef());
 		data.setParent(getParentRef());
-		
+		data.setRemote(getRemote());
+
 		data.setType(getType());
 		data.setIsDirectory(isDirectory());
 		data.setAspects(NameSpaceTool.transFormToShortQName(this.aspects));
@@ -751,9 +854,8 @@ public class NodeDao {
 		data.setModifiedAt(getModifiedAt());
 		data.setModifiedBy(getModifiedBy());
 
-		data.setContentVersion(getContentVersion());
-		data.setContentUrl(getContentUrl());
-		
+		data.setContent(getContent());
+
 		data.setDownloadUrl(getDownloadUrl());
 		data.setMetadataset(getMetadataSet());
 
@@ -765,12 +867,14 @@ public class NodeDao {
 		data.setMediatype(getMediatype());
 		data.setIconURL(getIconURL());
 		data.setCommentCount(getCommentCount());
-		data.setLicenseURL(getLicenseURL());
+		data.setLicense(getLicense());
 		data.setSize(getSize());
+
+		data.setRating(getRating());
 		try {
 			data.setPreview(getPreview());
 		}catch(Exception e) {
-			e.printStackTrace();
+			logger.warn(e.getMessage(),e);
 		}
 		data.setRepositoryType(getRepositoryType());
 
@@ -778,8 +882,42 @@ public class NodeDao {
 			Collection collection=new CollectionDao(repoDao, getRef().getId(),this,data).asCollection();
 			data.setCollection(collection);
 		}
-		
-		return data;
+	}
+	public RepositoryDao getRepositoryDao(){
+		return remoteRepository!=null ? remoteRepository : repoDao;
+	}
+	private Remote getRemote() throws DAOException {
+		if(!isFromRemoteRepository())
+			return null;
+		Remote remote=new Remote();
+		if(remoteId!=null){
+			remote.setId(remoteId);
+			remote.setRepository(remoteRepository.asRepo());
+		}
+		else {
+			// this is the case if NodeDao was already called via a remote ref (and not a shadow object)
+			remote.setId(getId());
+			remote.setRepository(repoDao.asRepo());
+		}
+		return remote;
+	}
+
+	private License getLicense() {
+		if(isDirectory())
+			return null;
+		License license=new License();
+		license.setIcon(new LicenseService().getIconUrl((String) nodeProps.get(CCConstants.CCM_PROP_IO_COMMONLICENSE_KEY)));
+		license.setUrl(new LicenseService().getLicenseUrl((String) nodeProps.get(CCConstants.CCM_PROP_IO_COMMONLICENSE_KEY),(String) nodeProps.get(CCConstants.CCM_PROP_IO_COMMONLICENSE_CC_LOCALE)));
+		return license;
+	}
+
+	private Content getContent() {
+		Content content=new Content();
+		content.setVersion(getContentVersion());
+		content.setUrl(getContentUrl());
+
+		content.setHash(nodeService.getContentHash(storeProtocol,storeId,nodeId,this.version,org.alfresco.model.ContentModel.PROP_CONTENT.toString()));
+		return content;
 	}
 
 	public String getType() {
@@ -788,11 +926,6 @@ public class NodeDao {
 
 	private String getMetadataSet() {
 		return (String)nodeProps.get(CCConstants.CM_PROP_METADATASET_EDU_METADATASET);
-	}
-	private String getLicenseURL() {
-		if(isDirectory())
-			return null;
-		return new LicenseService().getIconUrl((String) nodeProps.get(CCConstants.CCM_PROP_IO_COMMONLICENSE_KEY));
 	}
 
 	private String getIconURL() {
@@ -846,7 +979,8 @@ public class NodeDao {
 						Authority authority = (Authority.Type.valueOf(ace.getAuthorityType()) == Authority.Type.GROUP )? new Group() : new Authority();
 						if(authority instanceof Group) {
 							Group g = (Group)authority;
-							g.setGroupType(ace.getGroup().getGroupType());
+							g.setProfile(new GroupProfile());
+							g.getProfile().setGroupType(ace.getGroup().getGroupType());
 							g.setEditable(ace.getGroup().isEditable());
 						}
 						
@@ -995,18 +1129,20 @@ public class NodeDao {
 
 		return nodeRef;
 	}
-
 	private NodeRef getParentRef() {
 		return createNodeRef(repoDao,getParentId());
 	}
-	public static NodeRef createNodeRef(RepositoryDao repoDao,String nodeId) {
+	private static NodeRef createNodeRef(String repoId,boolean isHomeRepo,String nodeId) {
 		NodeRef parentRef = new NodeRef();
-		parentRef.setRepo(repoDao.getId());
+		parentRef.setRepo(repoId);
 		parentRef.setId(nodeId);
-		parentRef.setHomeRepo(repoDao.isHomeRepo());		
+		parentRef.setHomeRepo(isHomeRepo);
 		return parentRef;
 	}
-	
+	public static NodeRef createNodeRef(RepositoryDao repoDao,String nodeId) {
+		return createNodeRef(repoDao.getId(),repoDao.isHomeRepo(),nodeId);
+	}
+
 	public String getStoreProtocol(){
 		return (String)nodeProps.get(CCConstants.SYS_PROP_STORE_PROTOCOL);
 	}
@@ -1090,19 +1226,28 @@ public class NodeDao {
 	}
 
 	private String getContentVersion() {
-		return (String) nodeProps.get(CCConstants.LOM_PROP_LIFECYCLE_VERSION);
+		return (String) nodeProps.get(CCConstants.CM_PROP_VERSIONABLELABEL);
 	}
 
 	private String getContentUrl() {
 		return (String) nodeProps.get(CCConstants.CONTENTURL);
 	}
-	
+	private AccumulatedRatings getRating(){
+		try{
+			return RatingServiceFactory.getRatingService(repoDao.getId()).getAccumulatedRatings(nodeId,null);
+		}catch(Throwable t){
+			logger.warn("Can not fetch ratings for node "+nodeId+": "+t.getMessage(),t);
+			return null;
+		}
+	}
 	private boolean isLink(){
 		return nodeProps.containsKey(CCConstants.CCM_PROP_IO_WWWURL);
 	}
-	private String getDownloadUrl(){
-		if(isLink())
-			return null;
+	public String getDownloadUrl(){
+		// the download servlet can may passthrough the TECHNICAL_LOCATION, so it depends on the actual state of the DOWNLOADURL
+		//if(isLink())
+		//	return null;
+
 		// no download url if user can not access the content
 		if(!getAccessAsString().contains(CCConstants.PERMISSION_READ_ALL))
 			return null;
@@ -1150,7 +1295,7 @@ public class NodeDao {
 		return result;
 	}
 
-	private String getVersionLabel(int major, int minor) {
+	private static String getVersionLabel(int major, int minor) {
 		return major + "." + minor;
 	}
 
@@ -1323,7 +1468,7 @@ public class NodeDao {
 		return MimeTypesV2.getMimeType(nodeProps);
 	}
 	
-	private String getMediatype() {
+	public String getMediatype() {
 		return MimeTypesV2.getNodeType(type,nodeProps,aspects);
 	}
 
@@ -1337,9 +1482,11 @@ public class NodeDao {
 	}
 	
 	private Preview getPreview() {
-		Preview result = new Preview(	getRepositoryType(),
-										getRef().getId(),getStoreProtocol(),
+		Preview result = new Preview(	nodeService,
+										getStoreProtocol(),
 										getStoreIdentifier(),
+										remoteId!=null ? remoteId : getRef().getId(),
+										this.version,
 										nodeProps);
 			return result;
 	}
@@ -1560,8 +1707,7 @@ public class NodeDao {
 		
 	}
 	/** store a new search node 
-	 * @return 
-	 * @throws DAO */
+	 * @return */
 	public static NodeDao saveSearch(String repoId, String mdsId, String query, String name,
 			List<MdsQueryCriteria> parameters,boolean replace) throws DAOException {
 		try{
@@ -1668,6 +1814,14 @@ public class NodeDao {
 			JSONObject json = new JSONObject(xApi);
 			return XApiTool.sendToXApi(nodeId,json);
 		} catch (Throwable t) {
+			throw DAOException.mapping(t);
+		}
+	}
+	public static List<NodeRef> getFrontpageNodes(RepositoryDao repoDao) throws DAOException {
+		try {
+			return NodeServiceFactory.getNodeService(repoDao.getId()).
+					getFrontpageNodes().stream().map((ref)->new NodeRef(repoDao,ref.getId())).collect(Collectors.toList());
+		}catch(Throwable t){
 			throw DAOException.mapping(t);
 		}
 	}

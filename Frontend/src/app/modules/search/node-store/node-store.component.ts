@@ -1,20 +1,23 @@
-import {Component, Input, Output, EventEmitter} from "@angular/core";
-import {RestConstants} from "../../../common/rest/rest-constants";
-import {Toast} from "../../../common/ui/toast";
-import {ArchiveRestore,Node,NodeList} from "../../../common/rest/data-object";
-import {TemporaryStorageService} from "../../../common/services/temporary-storage.service";
-import {RestSearchService} from "../../../common/rest/services/rest-search.service";
-import {RestIamService} from "../../../common/rest/services/rest-iam.service";
-import {ConfigurationService} from "../../../common/services/configuration.service";
-import {NodeHelper} from "../../../common/ui/node-helper";
-import {RestConnectorService} from "../../../common/rest/services/rest-connector.service";
+import {Component, EventEmitter, Output} from "@angular/core";
+import {
+  ConfigurationService, DialogButton,
+  ListItem,
+  Node,
+  NodeList,
+  RestConnectorService,
+  RestConstants,
+  RestIamService,
+  RestSearchService,
+  TemporaryStorageService
+} from "../../../core-module/core.module";
+import {Toast} from "../../../core-ui-module/toast";
+import {NodeHelper} from "../../../core-ui-module/node-helper";
 import {Router} from "@angular/router";
-import {UIConstants} from "../../../common/ui/ui-constants";
-import {ListItem} from "../../../common/ui/list-item";
+import {UIConstants} from "../../../core-module/ui/ui-constants";
 import {TranslateService} from "@ngx-translate/core";
-import {OptionItem} from "../../../common/ui/actionbar/option-item";
+import {OptionItem} from "../../../core-ui-module/option-item";
 import {trigger} from "@angular/animations";
-import {UIAnimation} from "../../../common/ui/ui-animation";
+import {UIAnimation} from "../../../core-module/ui/ui-animation";
 import {ActionbarHelperService} from "../../../common/services/actionbar-helper";
 import {HttpClient} from '@angular/common/http';
 
@@ -34,6 +37,7 @@ export class SearchNodeStoreComponent {
 
   public columns : ListItem[]=[];
   public options : OptionItem[]=[];
+  public buttons = DialogButton.getCancel(()=>this.cancel());
   public loading=true;
   public actionOptions : OptionItem[]=[];
   public sortBy=RestConstants.CM_PROP_TITLE;

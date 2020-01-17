@@ -26,11 +26,13 @@
       "DONE":"Done"
     },
     "TAB":{
-      "TYPE_EDITORIAL_LONG":" editorially managed collections ",
+      "TYPE_EDITORIAL_LONG":"editorially managed collections",
+      "TYPE_MEDIA_CENTER_LONG":"collections provided by your media center",
       "MY_LONG" : " collections created by you ",
-      "EDU_GROUPS_LONG" : " collections that have been shared with you. ",
+      "EDU_GROUPS_LONG" : " collections that have been shared with you.",
       "EDU_ALL_LONG" : " all collections that are publicly available",
       "TYPE_EDITORIAL":"Editorial",
+      "TYPE_MEDIA_CENTER":"Mediacenter",
       "MY" : "My",
       "EDU_GROUPS" : "Invited",
       "EDU_ALL" : "Public",
@@ -50,7 +52,9 @@
       "EDITORIAL":"editorial collection",
       "EDITORIAL_DESCRIPTION":"Here an editorial group takes care of the collection and maintains its contents. Collections can be pinned to a certain position.",
       "CURRICULUM":"curriculum collection",
-      "CURRICULUM_DESCRIPTION":"Create a (moderated) collection according to predefined curriculum structures."
+      "CURRICULUM_DESCRIPTION":"Create a (moderated) collection according to predefined curriculum structures.",
+      "MEDIA_CENTER":"media center",
+      "MEDIA_CENTER_DESCRIPTION":"create a collection for your media center. All users which are connected to this media center will see this collection in the \"media center\" tab"
     },
     "PINNING":{
       "TITLE":"pinned collections",
@@ -88,6 +92,9 @@
       "FEEDBACK":"Feedback...",
       "FEEDBACK_VIEW":"View feedback"
     },
+    "NEW": {
+      "AUTHOR_FREETEXT": "Name of author"
+    },
     "FEEDBACK_TITLE": "Give feedback for collection",
     "FEEDBACK_VIEW_TITLE": "Given feedback for collection",
     "FEEDBACK_VIEW_EMPTY": "No feedback was given for this collection yet",
@@ -109,7 +116,7 @@
   "collectionNew_createCollection" : "create",
   "collectionNew_storeChanges" : "save changes",
 
-  "collectionNew_placeholderTitle" : "title of your collection ...",
+  "collectionNew_placeholderTitle" : "title of your collection",
   "collectionNew_placeholderDescription" : "Whats is your collection about?"
 
 }

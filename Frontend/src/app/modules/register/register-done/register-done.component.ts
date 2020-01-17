@@ -1,17 +1,17 @@
-import {Component, EventEmitter, Input, Output} from '@angular/core';
-import {RestConnectorService} from "../../../common/rest/services/rest-connector.service";
-import {Toast} from "../../../common/ui/toast";
+import {ChangeDetectorRef, Component, EventEmitter, Input, Output} from '@angular/core';
+import {RestConnectorService} from "../../../core-module/core.module";
+import {Toast} from "../../../core-ui-module/toast";
 import {PlatformLocation} from "@angular/common";
 import {ActivatedRoute, Router, UrlSerializer} from "@angular/router";
 import {TranslateService} from "@ngx-translate/core";
-import {ConfigurationService} from "../../../common/services/configuration.service";
+import {ConfigurationService} from "../../../core-module/core.module";
 import {Title} from "@angular/platform-browser";
-import {SessionStorageService} from "../../../common/services/session-storage.service";
-import {UIConstants} from "../../../common/ui/ui-constants";
-import {RestRegisterService} from '../../../common/rest/services/rest-register.service';
-import {UIHelper} from "../../../common/ui/ui-helper";
+import {SessionStorageService} from "../../../core-module/core.module";
+import {UIConstants} from "../../../core-module/ui/ui-constants";
+import {RestRegisterService} from '../../../core-module/core.module';
+import {UIHelper} from "../../../core-ui-module/ui-helper";
 import {CordovaService} from "../../../common/services/cordova.service";
-import {RestLocatorService} from "../../../common/rest/services/rest-locator.service";
+import {RestLocatorService} from "../../../core-module/core.module";
 
 @Component({
   selector: 'app-register-done',
@@ -40,19 +40,24 @@ export class RegisterDoneComponent{
     }
     public sendMail(){
         this.loading=true;
+        this.changes.detectChanges();
         if(this.inputState=='done') {
             this.register.resendMail(this.email).subscribe(() => {
                 this.toast.toast("REGISTER.TOAST");
                 this.loading=false;
+                this.changes.detectChanges();
             },(error)=>{
                 this.loading=false;
+                this.changes.detectChanges();
             });
         }
         else{
             this.register.recoverPassword(this.email).subscribe(()=>{
                 this.loading=false;
+                this.changes.detectChanges();
             },(error)=>{
                 this.loading=false;
+                this.changes.detectChanges();
             });
         }
     }
@@ -62,6 +67,7 @@ export class RegisterDoneComponent{
                 private platformLocation: PlatformLocation,
                 private config: ConfigurationService,
                 private cordova: CordovaService,
+                private changes: ChangeDetectorRef,
                 private locator: RestLocatorService,
                 private router: Router
     ) {
@@ -84,8 +90,9 @@ export class RegisterDoneComponent{
             setTimeout(()=>this.checkStatus(),RegisterDoneComponent.STATUS_INTERVAL);
         });
     }
-    private activate(keyUrl: string) {
+    public activate(keyUrl: string) {
         this.loading=true;
+        this.changes.detectChanges();
         if(this.inputState=='done') {
             this.register.activate(keyUrl).subscribe(() => {
                 if(this.cordova.isRunningCordova()){
@@ -106,6 +113,7 @@ export class RegisterDoneComponent{
                     this.toast.error(error);
                 }
                 this.loading = false;
+                this.changes.detectChanges();
             });
         }
         else{

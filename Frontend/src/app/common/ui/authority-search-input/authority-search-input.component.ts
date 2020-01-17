@@ -1,12 +1,10 @@
 import {Component, Input, Output, EventEmitter, OnInit, SimpleChanges} from '@angular/core';
 import {TranslateService} from "@ngx-translate/core";
 import {SuggestItem} from "../autocomplete/autocomplete.component";
-import {NodeHelper} from "../node-helper";
-import {Authority, IamAuthorities} from "../../rest/data-object";
-import {RestIamService} from "../../rest/services/rest-iam.service";
-import {RestConstants} from "../../rest/rest-constants";
-import {PermissionNamePipe} from '../permission-name.pipe';
-import {ConfigurationService} from "../../services/configuration.service";
+import {NodeHelper} from "../../../core-ui-module/node-helper";
+import {PermissionNamePipe} from '../../../core-ui-module/pipes/permission-name.pipe';
+import {Authority, AuthorityProfile, Group, IamAuthorities, Organization, RestConnectorService, RestConstants, RestIamService, RestOrganizationService} from '../../../core-module/core.module';
+import {Helper} from "../../../core-module/rest/helper";
 
 @Component({
   selector: 'authority-search-input',
@@ -16,8 +14,7 @@ import {ConfigurationService} from "../../services/configuration.service";
 
 
 export class AuthoritySearchInputComponent{
-  public authoritySuggestions : SuggestItem[];
-  @Input() globalSearch = false;
+  @Input() globalSearchAllowed = false;
   /**
    * Do allow any entered authority (not recommended for general use)
    * @type {boolean}
@@ -27,18 +24,23 @@ export class AuthoritySearchInputComponent{
    * Group type to filter the groups searched for
    */
   @Input() groupType = "";
-  /**
-   * maximum number of authorities to fetch in total
-   */
-  @Input() authorityCount = 50;
+    /**
+     * maximum number of authorities to fetch in total
+     */
+    @Input() authorityCount = 50;
+  @Input() mode = AuthoritySearchMode.UsersAndGroups;
   @Input() disabled = false;
+  @Input() maxSuggestions = 10;
+  @Input() inputIcon='search';
   @Input() placeholder = 'WORKSPACE.INVITE_FIELD';
-  @Input() hintBottom = "";
+  @Input() hint = '';
   @Output() onChooseAuthority = new EventEmitter();
-  private lastSuggestionSearch: string;
+
+  inputValue='';
+  suggestionGroups: any;
   affiliation=true;
   public addSuggestion(data: any) {
-    this.onChooseAuthority.emit(data.item.originalObject)
+    this.onChooseAuthority.emit(data.originalObject)
   }
   public addAny(data:string){
     let authority=new Authority();
@@ -46,46 +48,76 @@ export class AuthoritySearchInputComponent{
     authority.authorityType=RestConstants.AUTHORITY_TYPE_UNKNOWN;
     this.onChooseAuthority.emit(authority);
   }
-  constructor(private iam : RestIamService,private namePipe : PermissionNamePipe,private config:ConfigurationService){
-    this.affiliation=this.config.instant('userAffiliation',true);
+  public onSubmit(){
+    if(this.allowAny) {
+        this.addAny(this.inputValue);
+    }
   }
-  public updateSuggestions(event : any){
-    this.lastSuggestionSearch = event.input;
-    this.iam.searchAuthorities(event.input,this.globalSearch,this.groupType,{count:this.authorityCount}).subscribe(
-      (authorities:IamAuthorities)=>{
-        if(this.lastSuggestionSearch!=event.input)
-          return;
-        let ret:SuggestItem[] = [];
-        for (let user of authorities.authorities) {
-          let group = user.profile.displayName != null;
-          let item = new SuggestItem(user.authorityName, group ? user.profile.displayName : NodeHelper.getUserDisplayName(user), /*group ? 'group' : 'person',*/null,null);
-          item.originalObject = user;
-          item.secondaryTitle = this.namePipe.transform(user,{field:'secondary'});
-          ret.push(item);
-        }
-        this.authoritySuggestions=ret;
-      });
-    /*
-        this.iam.searchUsers(event.input,this.globalSearch).subscribe(
-          (users:IamUsers) => {
-            var ret:SuggestItem[] = [];
-            for (let user of users.users){
-              let item=new SuggestItem(user.authorityName,user.profile.firstName+" "+user.profile.lastName, 'person', '');
-              item.originalObject=user;
-              ret.push(item);
-            }
-            this.iam.searchGroups(event.input,this.globalSearch).subscribe(
-              (groups:IamGroups) => {
-                for (let group of groups.groups){
-                  let item=new SuggestItem(group.authorityName,group.profile.displayName, 'group', '');
-                  item.originalObject=group;
-                  ret.push(item);
-                }
-                this.authoritySuggestions=ret;
-              });
-          },
-          error => console.log(error));
-          */
+  constructor(private iam : RestIamService,
+              private organization : RestOrganizationService,
+              private namePipe : PermissionNamePipe,
+              private connector : RestConnectorService){
+  }
 
+    private convertData(suggestionGroup: any, authorities: AuthorityProfile[]|Group[]) {
+        for (let user of authorities) {
+            let group = user.profile.displayName != null;
+            let item = new SuggestItem(user.authorityName, group ? user.profile.displayName : NodeHelper.getUserDisplayName((user as AuthorityProfile)), group ? 'group' : 'person', '');
+            item.originalObject = user;
+            item.secondaryTitle = this.namePipe.transform(user,{field:'secondary'});
+            suggestionGroup.push(item);
+        }
+    }
+
+    public updateSuggestions(event : any){
+    console.log(event);
+    if(event instanceof SuggestItem){
+      this.addSuggestion(event);
+      this.inputValue='';
+      this.suggestionGroups=null;
+      return;
+    }
+    this.suggestionGroups=[
+        {label:'WORKSPACE.INVITE_LOCAL_RESULTS',values:[]}
+    ];
+    if(event.length<2)
+        return;
+    if(this.mode==AuthoritySearchMode.UsersAndGroups) {
+        if(this.globalSearchAllowed) {
+            this.suggestionGroups.push({label: 'WORKSPACE.INVITE_GLOBAL_RESULTS', values: []});
+        }
+        this.iam.searchAuthorities(event, false, this.groupType).subscribe(
+            (authorities: IamAuthorities) => {
+                if (this.inputValue != event)
+                    return;
+                this.convertData(this.suggestionGroups[0].values, authorities.authorities);
+                if (authorities.authorities.length == 0)
+                    this.suggestionGroups.splice(0, 1);
+                if (this.globalSearchAllowed) {
+                    this.iam.searchAuthorities(event, true, this.groupType).subscribe(
+                        (authorities2: IamAuthorities) => {
+                            if (this.inputValue != event)
+                                return;
+                            // leave out all local existing persons
+                            authorities2.authorities = authorities2.authorities.filter((authority) => Helper.indexOfObjectArray(authorities.authorities, 'authorityName', authority.authorityName) == -1);
+                            this.convertData(this.suggestionGroups[this.suggestionGroups.length - 1].values, authorities2.authorities);
+                            if (authorities2.authorities.length == 0)
+                                this.suggestionGroups.splice(1, 1);
+
+                        });
+                }
+            });
+    }
+    if(this.mode==AuthoritySearchMode.Organizations) {
+        this.organization.getOrganizations(event).subscribe((orgs) => {
+            if (this.inputValue != event)
+                return;
+            this.convertData(this.suggestionGroups[0].values,orgs.organizations);
+        });
+    }
   }
+}
+export enum AuthoritySearchMode{
+    UsersAndGroups="UsersAndGroups",
+    Organizations="Organizations"
 }

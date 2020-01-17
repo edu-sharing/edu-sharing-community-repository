@@ -1,30 +1,32 @@
-import {
-  Component, Input, EventEmitter, Output, ViewChild, ElementRef, HostListener,
-  ApplicationRef, AfterViewInit
-} from '@angular/core';
-import {RestNodeService} from "../../../common/rest/services/rest-node.service";
-import {
-    Node, NodeList, NodePermissions, Permission, Permissions, LocalPermissions,
-    NodeWrapper, IamUsers, IamGroups, NodeShare, IamAuthorities, LoginResult, Authority, Collection, UsageList, CollectionUsage
-} from '../../../common/rest/data-object';
-import {Toast} from "../../../common/ui/toast";
-import {RestConstants} from "../../../common/rest/rest-constants";
-import {Subject} from "rxjs";
-import {RestIamService} from "../../../common/rest/services/rest-iam.service";
-import {SuggestItem} from "../../../common/ui/autocomplete/autocomplete.component";
-import {RestConnectorService} from "../../../common/rest/services/rest-connector.service";
+import {AfterViewInit, ApplicationRef, Component, EventEmitter, HostListener, Input, Output} from '@angular/core';
+
+import {Toast} from "../../../core-ui-module/toast";
 import {TranslateService} from "@ngx-translate/core";
-import {NodeHelper} from "../../../common/ui/node-helper";
-import {RestHelper} from "../../../common/rest/rest-helper";
-import {Helper} from "../../../common/helper";
+import {NodeHelper} from "../../../core-ui-module/node-helper";
+import {Helper} from "../../../core-module/rest/helper";
 import {trigger} from "@angular/animations";
-import {UIAnimation} from "../../../common/ui/ui-animation";
-import {RestUsageService} from '../../../common/rest/services/rest-usage.service';
-import {UIHelper} from '../../../common/ui/ui-helper';
-import {UIConstants} from '../../../common/ui/ui-constants';
-import {RestCollectionService} from '../../../common/rest/services/rest-collection.service';
-import {ConfigurationService} from "../../../common/services/configuration.service";
-import {DialogButton} from "../../../common/ui/modal-dialog/modal-dialog.component";
+import {UIAnimation} from "../../../core-module/ui/ui-animation";
+import {UIHelper} from '../../../core-ui-module/ui-helper';
+import {UIConstants} from '../../../core-module/ui/ui-constants';
+import {ConfigurationService} from "../../../core-module/core.module";
+import {
+    Collection,
+    CollectionUsage,
+    DialogButton,
+    LocalPermissions,
+    LoginResult,
+    Node,
+    NodeList,
+    NodePermissions, NodeShare,
+    NodeWrapper,
+    Permission, RestCollectionService,
+    RestConnectorService,
+    RestConstants,
+    RestHelper,
+    RestIamService,
+    RestNodeService,
+    RestUsageService, UsageList
+} from "../../../core-module/core.module";
 
 @Component({
   selector: 'workspace-share',
@@ -35,18 +37,20 @@ import {DialogButton} from "../../../common/ui/modal-dialog/modal-dialog.compone
     trigger('cardAnimation', UIAnimation.cardAnimation())
   ]
 })
-export class WorkspaceShareComponent implements AfterViewInit{
-  public ALL_PERMISSIONS=["All","Read","ReadPreview","ReadAll","Write","Delete",
+export class WorkspaceShareComponent{
+  public ALL_PERMISSIONS=["All","Read","ReadPreview","ReadContent","ReadAll","Comment","Rate","Write","Delete",
     "DeleteChildren","DeleteNode","AddChildren","Consumer","ConsumerMetadata",
     "Editor","Contributor","Collaborator","Coordinator",
     "Publisher","ReadPermissions","ChangePermissions","CCPublish","Comment","Feedback","Deny"];
   public PERMISSIONS_FORCES:any= [
     ["Read",["ConsumerMetadata"]],
     ["Read",["Consumer"]],
-    ["ReadPreview",["Consumer"]],
+    ["ReadPreview",["ReadAll"]],
+    ["ReadContent",["ReadAll"]],
     ["ReadAll",["Consumer"]],
     ["Comment",["Consumer"]],
     ["Feedback",["Consumer"]],
+    ["Rate",["Consumer"]],
     ["Write",["Editor"]],
     ["DeleteChildren",["Delete"]],
     ["DeleteNode",["Delete"]],
@@ -54,11 +58,15 @@ export class WorkspaceShareComponent implements AfterViewInit{
     ["ReadPermissions",["Contributor"]],
     ["Contributor",["Collaborator"]]
   ];
-  public INVITE="INVITE";
-  public INVITED="INVITED";
-  public ADVANCED="ADVANCED";
   initialState: string;
-  public tab=this.INVITE;
+  _tab=0;
+  public set tab(tab:number){
+    this._tab=tab;
+    this.updateButtons();
+  }
+  public get tab(){
+    return this._tab;
+  }
   private currentType=[RestConstants.ACCESS_CONSUMER,RestConstants.ACCESS_CC_PUBLISH];
   private inherited : boolean;
   private notifyUsers = true;
@@ -67,23 +75,18 @@ export class WorkspaceShareComponent implements AfterViewInit{
   private permissions : Permission[]=[];
   public permissionsUser : Permission[];
   public permissionsGroup : Permission[];
-  private newPermissions : Permission[]=[];
+  newPermissions : Permission[]=[];
   inheritAccessDenied = false;
   public owner : Permission;
   public linkEnabled : Permission;
   public linkDisabled : Permission;
   public link = false;
-  private _node : Node;
-  dialogTitle : string;
-  dialogMessage : string;
-  dialogCancel : Function;
-  dialogButtons : DialogButton[];
-
-  private searchStr: string;
-  private inheritAllowed=false;
-  private globalSearch=false;
-  private globalAllowed=false;
-  private fuzzyAllowed=false;
+  _node : Node;
+  searchStr: string;
+  inheritAllowed=false;
+  globalSearch=false;
+  globalAllowed=false;
+  fuzzyAllowed=false;
   public history: Node;
   public linkNode: Node;
   public showLink: boolean;
@@ -95,7 +98,7 @@ export class WorkspaceShareComponent implements AfterViewInit{
   public doiActive: boolean;
   public doiDisabled: boolean;
   private originalPermissions: LocalPermissions;
-  private isSafe = false;
+  isSafe = false;
   collectionColumns=UIHelper.getDefaultCollectionColumns();
   collections: CollectionUsage[];
   // store authorities marked for deletion
@@ -103,11 +106,9 @@ export class WorkspaceShareComponent implements AfterViewInit{
   public deletedUsages:any[]=[];
   usages: any;
   showCollections = false;
+    buttons: DialogButton[];
 
-    ngAfterViewInit(): void {
-        setTimeout(()=>UIHelper.setFocusOnCard());
-    }
-  public isCollection(){
+    public isCollection(){
     if(this._node==null)
       return true;
     return this._node.aspects.indexOf(RestConstants.CCM_ASPECT_COLLECTION)!=-1;
@@ -115,7 +116,7 @@ export class WorkspaceShareComponent implements AfterViewInit{
   public openLink(){
     this.linkNode=this._node;
   }
-  private addSuggestion(data: any) {
+  addSuggestion(data: any) {
     this.addAuthority(data);
   }
   @Input() sendMessages=true;
@@ -209,30 +210,7 @@ export class WorkspaceShareComponent implements AfterViewInit{
   @Output() onLoading=new EventEmitter();
   private showChooseType = false;
   private showChooseTypeList : Permission;
-  @HostListener('document:keydown', ['$event'])
-  handleKeyboardEvent(event: KeyboardEvent) {
-    if(event.key=="Escape"){
-      event.stopPropagation();
-      event.preventDefault();
-      if(this.history){
-        this.history=null;
-        return;
-      }
-      if(this.showCollections){
-        this.showCollections=false;
-        return;
-      }
-      if(this.linkNode){
-        this.linkNode=null;
-        return;
-      }
-      this.cancel();
-      return;
-    }
-  }
-  public setTab(tab : string){
-    this.tab=tab;
-  }
+
   private chooseType(){
     this.showChooseType=true;
   }
@@ -369,6 +347,7 @@ export class WorkspaceShareComponent implements AfterViewInit{
 
     this.connector.isLoggedIn().subscribe((data:LoginResult)=>{
       this.isSafe=data.currentScope!=null;
+      this.updateButtons();
       this.connector.hasToolPermission(this.isSafe ? RestConstants.TOOLPERMISSION_GLOBAL_AUTHORITY_SEARCH_SAFE : RestConstants.TOOLPERMISSION_GLOBAL_AUTHORITY_SEARCH).subscribe((has:boolean)=>this.globalAllowed=has);
       this.connector.hasToolPermission(RestConstants.TOOLPERMISSION_GLOBAL_AUTHORITY_SEARCH_FUZZY).subscribe((has:boolean)=>this.fuzzyAllowed=has);
       this.connector.hasToolPermission(RestConstants.TOOLPERMISSION_INVITE_ALLAUTHORITIES).subscribe((has:boolean)=>this.publishPermission=has);
@@ -396,8 +375,8 @@ export class WorkspaceShareComponent implements AfterViewInit{
     }
   }
   public setPermission(permission:Permission,name:string,status:any){
-    console.log("set "+name+" "+status);
-    if(status.srcElement.checked){
+    console.log("set "+name+" "+status,status);
+    if(status.checked){
       if(permission.permissions.indexOf(name)==-1)
         permission.permissions.push(name);
     }
@@ -478,21 +457,19 @@ export class WorkspaceShareComponent implements AfterViewInit{
     return -1;
   }
   public setPublish(status:boolean,force=false){
-    if(status && !force){
-      if(this.config.instant('publishingNotice',false)){
-        this.dialogTitle='WORKSPACE.SHARE.PUBLISHING_WARNING_TITLE';
-        this.dialogMessage='WORKSPACE.SHARE.PUBLISHING_WARNING_MESSAGE';
-        this.dialogCancel=()=>{
-            this.dialogTitle=null;
-            this.publishActive=false;
-        };
-        this.dialogButtons=DialogButton.getYesNo(()=>{
-            this.dialogCancel();
-        }, ()=>{
-            this.publishActive=true;
-            this.dialogTitle=null;
-            this.setPublish(status,true);
-        });
+    if(status){
+      if(!force && this.config.instant('publishingNotice',false)){
+          let cancel=()=>{
+              this.publishActive=false;
+              this.toast.closeModalDialog();
+          };
+          this.toast.showModalDialog('WORKSPACE.SHARE.PUBLISHING_WARNING_TITLE',
+              'WORKSPACE.SHARE.PUBLISHING_WARNING_MESSAGE',
+              DialogButton.getYesNo(cancel, ()=>{
+                  this.publishActive=true;
+                  this.setPublish(status,true);
+                  this.toast.closeModalDialog();
+              }),true,cancel);
         return;
       }
       if(this.deletedPermissions.indexOf(RestConstants.AUTHORITY_EVERYONE)!=-1){
@@ -594,6 +571,13 @@ export class WorkspaceShareComponent implements AfterViewInit{
 
     showShareLink() {
         return !this.isCollection() && this.connector.hasToolPermissionInstant(RestConstants.TOOLPERMISSION_INVITE_LINK);
+    }
+
+    updateButtons() {
+        this.buttons=[
+            new DialogButton('CANCEL',DialogButton.TYPE_CANCEL,()=>this.cancel()),
+            new DialogButton(this.tab==0 ? 'WORKSPACE.BTN_INVITE' : 'APPLY',DialogButton.TYPE_PRIMARY,()=>this.save()),
+        ];
     }
 }
 /*

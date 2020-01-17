@@ -8,8 +8,10 @@ import org.apache.log4j.Logger;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.client.tools.forms.VCardTool;
 import org.edu_sharing.repository.client.tools.metadata.ValueTool;
+import org.edu_sharing.repository.server.tools.cache.PersonCache;
 import org.edu_sharing.service.license.LicenseService;
 import org.edu_sharing.service.nodeservice.NodeServiceFactory;
+import org.edu_sharing.service.nodeservice.NodeServiceHelper;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -43,7 +45,7 @@ public class LRMITool {
             lrmi.put(vcard.getKey(),getFromVCard(vcard.getValue(),props));
         }
         lrmi.put("url",URLTool.getNgRenderNodeUrl(nodeId,null));
-        lrmi.put("thumbnailUrl",URLTool.getPreviewServletUrl(nodeId,StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getProtocol(),StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier()));
+        lrmi.put("thumbnailUrl",NodeServiceHelper.getPreview(new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE,nodeId)).getUrl());
         lrmi.put("dateCreated",getDate(getProperty(props, Collections.singletonList(CCConstants.CM_PROP_C_CREATED+CCConstants.LONG_DATE_SUFFIX))));
         lrmi.put("dateModified",getDate(getProperty(props, Collections.singletonList(CCConstants.CM_PROP_C_MODIFIED+CCConstants.LONG_DATE_SUFFIX))));
         lrmi.put("datePublished",getDate(getProperty(props, Collections.singletonList(CCConstants.CCM_PROP_PUBLISHED_DATE+CCConstants.LONG_DATE_SUFFIX))));

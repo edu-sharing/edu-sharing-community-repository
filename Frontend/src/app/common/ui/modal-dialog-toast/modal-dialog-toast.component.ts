@@ -2,11 +2,13 @@ import {
   Component, Input, Output, EventEmitter, OnInit, HostListener, ViewChild, ElementRef,
   QueryList
 } from '@angular/core';
-import {TranslateService} from "@ngx-translate/core";
-import {Toast} from "../toast";
-import {DialogButton} from "../modal-dialog/modal-dialog.component";
-import {UIAnimation} from "../ui-animation";
-import {trigger} from "@angular/animations";
+import {TranslateService} from '@ngx-translate/core';
+import {Node} from '../../../core-module/rest/data-object.js';
+import {Toast} from '../../../core-ui-module/toast';
+import {DialogButton} from '../../../core-module/core.module';
+import {UIAnimation} from '../../../core-module/ui/ui-animation';
+import {trigger} from '@angular/animations';
+import {ProgressType} from '../modal-dialog/modal-dialog.component';
 
 @Component({
   selector: 'modal-dialog-toast',
@@ -17,12 +19,13 @@ import {trigger} from "@angular/animations";
     trigger('cardAnimation', UIAnimation.cardAnimation())
   ]
 })
-export class ModalDialogToastComponent{
-  private buttons: DialogButton;
-  private onCancel: Function;
+export class ModalDialogToastComponent {
+  private buttons: DialogButton[];
+  private onCancel: () => void;
+  node: Node | Node[];
   @HostListener('document:keydown', ['$event'])
   handleKeyboardEvent(event: KeyboardEvent) {
-    if(event.code=="Escape" && this.isCancelable){
+    if (event.code === 'Escape' && this.isCancelable){
       event.preventDefault();
       event.stopPropagation();
       this.cancel();
@@ -30,54 +33,67 @@ export class ModalDialogToastComponent{
     }
   }
 
-  constructor(private toast : Toast){
-    toast.onShowModalDialog((data:any)=>{
-      this.title=data.title;
-      this.message=data.message;
-      this.messageParameters=data.translation;
-      this.isCancelable=data.isCancelable;
-      this.isHigh=data.isHigh;
-      this.buttons=data.buttons;
-      this.onCancel=data.onCancel;
-      this.visible=this.title!=null;
+  constructor(private toast: Toast) {
+    this.toast.onShowModalDialog((data: ModalDialogOptions) => {
+      this.title = data.title;
+      this.message = data.message;
+      this.input = data.input;
+      this.toast.dialogInputValue = '';
+      this.progressType = data.progressType;
+      this.node = data.node;
+      this.messageParameters = data.messageParameters;
+      this.isCancelable = data.isCancelable;
+      this.buttons = data.buttons;
+      this.onCancel = data.onCancel;
+      this.visible = this.title != null;
     });
   }
 
-  public visible=false;
+  public visible= false;
 
-  /**
-   * use the "high" card layout (for longer messages)
-   */
-  private isHigh = true;
   private isCancelable = true;
+  /**
+   * Name/Label of the input that should be displayed
+   */
+  private input: string;
   /**
    * The title, will be translated automatically
    */
-  private  title : string;
+  private  title: string;
   /**
    * The message, will be translated automatically
    */
-  private message : string;
+  private message: string;
   /**
    * Additional dynamic content for your language string, use an object, e.g.
    * Language String: Hello {{ name }}
    * And use messageParameters={name:'World'}
    */
-  private messageParameters : any;
+  private messageParameters: any;
+  /**
+   * type of the progress to display. Null if this is not an progress dialog
+   */
+  private progressType: ProgressType;
+  /* value stored in the input, if enabled */
+  inputValue: string;
 
-
-  public click(btn : DialogButton){
-    btn.callback();
-    this.visible=false;
-    this.reset();
-  }
   private cancel(){
-    this.visible=false;
-    if(this.onCancel!=null) this.onCancel();
+    this.visible = false;
+    if (this.onCancel != null) this.onCancel();
     this.reset();
   }
-
-    private reset() {
-        this.onCancel=null;
-    }
+  private reset() {
+      this.onCancel = null;
+  }
+}
+export class ModalDialogOptions {
+  title: string;
+  message: string;
+  buttons?: DialogButton[];
+  input?: string;
+  progressType?: ProgressType;
+  messageParameters?: any;
+  node?: Node|Node[];
+  isCancelable? = true;
+  onCancel?: () => void;
 }

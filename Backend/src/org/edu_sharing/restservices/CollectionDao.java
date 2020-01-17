@@ -41,6 +41,7 @@ public class CollectionDao {
 		EDU_ALL,
 		EDU_GROUPS,
 		TYPE_EDITORIAL,
+		TYPE_MEDIA_CENTER,
 		MY
 	}
 	
@@ -295,6 +296,19 @@ public class CollectionDao {
 			throw DAOException.mapping(t);
 		}
 	}
+	
+	public static void addToCollection(RepositoryDao repoDao,String collectionId,String nodeId, String sourceRepositoryId) throws DAOException {
+		try {
+
+			CollectionServiceFactory.getCollectionService(repoDao.getApplicationInfo().getAppId()).
+					addToCollection(collectionId,nodeId,sourceRepositoryId);
+
+		} catch (Throwable t) {
+
+			throw DAOException.mapping(t);
+		}
+	}
+	
 	public void addToCollection(NodeDao node) throws DAOException {
 		
 		try {
@@ -358,6 +372,7 @@ public class CollectionDao {
 		result.setY(collection.getY());
 		result.setZ(collection.getZ());
 		result.setPinned(collection.isPinned());
+		result.setAuthorFreetext(collection.getAuthorFreetext());
 		
 		if (collection.getRef() != null) {
 			
@@ -429,6 +444,7 @@ public class CollectionDao {
 		result.setY(collection.getY());
 		result.setZ(collection.getZ());
 		result.setPinned(collection.isPinned());
+		result.setAuthorFreetext(collection.getAuthorFreetext());
 
 		result.setScope(collection.getScope());
 

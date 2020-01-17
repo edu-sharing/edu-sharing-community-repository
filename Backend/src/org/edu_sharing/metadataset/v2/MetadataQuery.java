@@ -3,18 +3,13 @@ package org.edu_sharing.metadataset.v2;
 import java.io.Serializable;
 import java.util.List;
 
-public class MetadataQuery implements Serializable {
-	private String id,join,basequery;
+public class MetadataQuery extends MetadataQueryBase implements Serializable {
+	protected String id;
+	protected String join;
+	protected Boolean applyBasequery;
 	private List<MetadataQueryParameter> parameters;
-	private Boolean applyBasequery;
-	public MetadataQuery(){}
 
-	public boolean isApplyBasequery() {
-		if(applyBasequery==null)
-			return true;
-		
-		return applyBasequery;
-	}
+	public MetadataQuery(){}
 
 	public void setApplyBasequery(Boolean applyBasequery) {
 		this.applyBasequery = applyBasequery;
@@ -34,14 +29,6 @@ public class MetadataQuery implements Serializable {
 
 	public void setJoin(String join) {
 		this.join = join;
-	}
-	
-	public String getBasequery() {
-		return MetadataQueries.replaceCommonQueryParams(basequery);
-	}
-
-	public void setBasequery(String basequery) {
-		this.basequery = basequery;
 	}
 
 	public List<MetadataQueryParameter> getParameters() {
@@ -85,5 +72,11 @@ public class MetadataQuery implements Serializable {
 			}
 		}
 	}
-	
+
+	public boolean isApplyBasequery() {
+		if(applyBasequery==null)
+			return true;
+
+		return applyBasequery;
+	}
 }

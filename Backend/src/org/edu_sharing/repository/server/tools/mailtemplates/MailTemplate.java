@@ -93,7 +93,10 @@ public class MailTemplate {
 		// no context specific template found, fallback to default
 		if(node==null)
 			node=nodes.get(new TemplateDescription(template,null));
-
+		if(node==null){
+			logger.info("No mail template found for id "+template);
+			return null;
+		}
 		NodeList childs = node.getChildNodes();
 		for(int j=0;j<childs.getLength();j++){
 			if(childs.item(j).getNodeName().equals(name))

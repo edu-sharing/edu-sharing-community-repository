@@ -29,12 +29,14 @@
     (onCancel)="collectionFeedback(false)"
     (onDone)="addFeedback($event)"
     ></mds>
-<div class="dialog darken" [@fade]="feedbackView" *ngIf="feedbackView"></div>
-<div class="card center-card card-action card-high card-wide" [@cardAnimation]="feedbackView" *ngIf="feedbackView">
-    <div class="card-content">
-        <div tabindex="0" class="card-cancel" (click)="feedbackView=false" (keyup.enter)="feedbackView=false"><i icon iconId="close" aria="true"></i></div>
-        <div class="card-title">{{'COLLECTIONS.FEEDBACK_VIEW_TITLE' | translate }}</div>
-        <div class="card-scroll feedback">
+<card *ngIf="feedbackView"
+    title="{{'COLLECTIONS.FEEDBACK_VIEW_TITLE' | translate }}"
+    [node]="collectionContent.collection"
+    [isCancelable]="true"
+    [buttons]="feedbackViewButtons"
+    (onCancel)="feedbackView=false">
+    <div class="card-content-padding">
+        <div class="feedback">
             <h2 class="empty" *ngIf="!feedbacks || !feedbacks.length">{{'COLLECTIONS.FEEDBACK_VIEW_EMPTY' | translate}}</h2>
             <div *ngIf="feedbacks && feedbacks.length">
                 <div *ngFor="let feedback of feedbacks" class="feedback-container">
@@ -49,12 +51,17 @@
             </div>
         </div>
     </div>
-    <div class="card-action">
-        <a class="waves-effect waves-light btn" tabindex="0" (keyup.enter)="feedbackView=false" (click)="feedbackView=false">{{'CLOSE' | translate }}</a>
-    </div>
-</div>
+</card>
 
-<div class="row tab-group row-dark scrollWithBanner" *ngIf="showTabs()">
+<mat-tab-group mat-stretch-tabs color="dark" [(selectedIndex)]="tabSelectedIndex" *ngIf="showTabs()">
+    <mat-tab *ngIf="!isGuest" label="{{'COLLECTIONS.TAB.MY' | translate}}"></mat-tab>
+    <mat-tab *ngIf="!isGuest" label="{{'COLLECTIONS.TAB.EDU_GROUPS' | translate}}"></mat-tab>
+    <mat-tab *ngIf="hasEditorial" label="{{'COLLECTIONS.TAB.TYPE_EDITORIAL' | translate}}"></mat-tab>
+    <mat-tab *ngIf="hasMediacenter" label="{{'COLLECTIONS.TAB.TYPE_MEDIA_CENTER' | translate}}"></mat-tab>
+    <mat-tab label="{{'COLLECTIONS.TAB.EDU_ALL' | translate}}" (click)="tabSelected='EDU_ALL'"></mat-tab>
+</mat-tab-group>
+<!--
+<div class="row tab-group row-dark scrollWithBanner" [class.active]="(tabSelected==='MY')" *ngIf="showTabs()">
   <div class="col s12">
     <ul class="tabs tabs-fixed-width">
       <li class="clickable tab col s3" tabindex="0" (keyup.enter)="selectTabMyCollections()" (click)="selectTabMyCollections()" *ngIf="!isGuest">
@@ -76,6 +83,7 @@
     </ul>
   </div>
 </div>
+-->
 <div class="alignWithBanner">
 <div [class.collectionsContainerTabs]="showTabs()" class="collectionsContainer">
 
@@ -99,7 +107,7 @@
       
       <!-- content (collection cards) if not error -->
 
-<section class="collections-cards-div" *ngIf="((lastError==null) && (!isLoading))" >
+<section class="collections-cards-div" *ngIf="!isLoading" >
 
                 <div class="section-headline" *ngIf="isAllowedToEditCollection() || collectionContent.collections.length">
                   <span *ngIf="isRootLevelCollection()">{{ 'COLLECTIONS.TAB.'+tabSelected+"_LONG" | translate }}</span>
@@ -124,6 +132,7 @@
                   [nodes]="collectionContent.collections"
                   [isLoading]="collectionContent.collectionsLoading"
                   [hasMore]="collectionContent.collections.length<collectionContent.collectionsPagination.total"
+                  [createLink]="true"
                   (loadMore)="isRootLevelCollection() ? loadMoreCollections() : null"
                 ></listTable>
 
@@ -140,17 +149,11 @@
 </section>
 
 <!-- content (content cards) if not error -->
-<section class="collections-cards-div" *ngIf="((lastError==null) && (!isLoading) && (isReady) && !isRootLevelCollection())" >
+<section class="collections-cards-div" *ngIf="((!isLoading) && (isReady) && !isRootLevelCollection())" >
 
     <div class="section-headline"><div>{{ 'collections_content' | translate }}</div>
                   <div class="custom-order" *ngIf="!isMobile() && collectionContent.references && collectionContent.references.length>1 && isUserAllowedToEdit(collectionContent.collection)">
-                    <div class="switch">
-                      <label>
-                        <input type="checkbox" [ngModel]="collectionContent.collection.orderMode=='custom'" (change)="setCustomOrder($event)">
-                        <span class="lever"></span>
-                        {{ 'COLLECTIONS.CUSTOM_ORDER' | translate}}
-                      </label>
-                    </div>
+                    <mat-slide-toggle [ngModel]="collectionContent.collection.orderMode=='custom'" (change)="setCustomOrder($event)">{{ 'COLLECTIONS.CUSTOM_ORDER' | translate}}</mat-slide-toggle>
                   </div>
         <actionbar class="actionbarMaterials"
             [options]="optionsMaterials"
@@ -175,6 +178,7 @@
                   (onAddElement)="switchToSearch()"
                   [canDelete]="canDelete"
                   (onDelete)="deleteReference($event)"
+                  [createLink]="true"
                   [(nodes)]="collectionContent.references"
                   [isLoading]="collectionContent.referencesLoading"
                   [hasMore]="collectionContent.references.length<collectionContent.referencesPagination.total"
@@ -193,14 +197,8 @@
 
 </section>
 
-<section class="collections-cards-div" *ngIf="((lastError==null) && (!isLoading) && (isReady) && !isRootLevelCollection())" style="padding-bottom: 10px;">
+<section class="collections-cards-div" *ngIf="((!isLoading) && (isReady) && !isRootLevelCollection())" style="padding-bottom: 10px;">
     <div *ngIf="collectionContent.references.length>0" style="padding-top:8px;">&nbsp;</div>
-</section>
-
-<!-- error if present-->
-<section *ngIf="(lastError!=null)" style="text-align: center;">
-    <p style="color:red;">{{lastError}}</p>
-    <button md-raised-button color="warn" (click)="resetCollections()">{{ 'collections_reload' | translate }}</button>
 </section>
 
 </div>
@@ -251,7 +249,8 @@
                  [options]="optionsCollection"
                  [numberOfAlwaysVisibleOptions]="1"
                  [numberOfAlwaysVisibleOptionsMobile]="1"
-                 [appearance]="'round'"
+                 appearance="round"
+                 [style]="'flat'"
                  [dropdownPosition]="'right'"
       ></actionbar>
     <div class="collection-new-preview-headline collections-header-texttop" style="overflow:hidden;">
@@ -264,7 +263,10 @@
     </div>
 
     <div class="collection-new-preview-infoline">
-      <i class="material-icons icon-bottom">person</i> {{collectionContent.collection.owner.profile.firstName}} {{collectionContent.collection.owner.profile.lastName}}</div>
+      <i class="material-icons icon-bottom">person</i>
+        <span *ngIf="!collectionContent.collection.authorFreetext">{{collectionContent.collection.owner | authorityName}}</span>
+        <span *ngIf="collectionContent.collection.authorFreetext">{{collectionContent.collection.authorFreetext}}</span>
+    </div>
 
     <div
       class="collection-new-preview-infoline">

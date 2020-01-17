@@ -5,19 +5,13 @@ import java.util.ArrayList;
 import java.util.Map;
 import java.util.Set;
 
+import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.util.MD5;
 import org.edu_sharing.repository.client.rpc.EduGroup;
 import org.edu_sharing.restservices.DAOException;
 
 public interface AuthorityService {
-	public static String ORGANIZATION_GROUP_FOLDER="EDU_SHARED";
-	public static String ADMINISTRATORS_GROUP="ORG_ADMINISTRATORS";
-	public static String ADMINISTRATORS_GROUP_TYPE="ORG_ADMINISTRATORS";
-	public static String MEDIA_CENTER_GROUP_TYPE = "MEDIA_CENTER";
-	public static String ORG_GROUP_PREFIX = "ORG_";
-	public static String ADMINISTRATORS_GROUP_DISPLAY_POSTFIX = "_Admins";
-
 	Set<String> getMemberships(String username) throws Exception;
 	boolean isGlobalAdmin();
 	boolean hasAdminAccessToOrganization(String orgName);
@@ -39,17 +33,24 @@ public interface AuthorityService {
 	
 	/**
 	 * 
-	 * @return ALL edugroups of user
+	 * @return ALL edugroups of current user
 	 */
-	public ArrayList<EduGroup> getAllEduGroups();
-	
+	default ArrayList<EduGroup> getAllEduGroups(){
+		return getAllEduGroups(AuthenticationUtil.getFullyAuthenticatedUser());
+	};
+
+	public ArrayList<EduGroup> getAllEduGroups(String authority);
+
 	/**
 	 * 
 	 * @return edugroups of current scope
 	 */
 	public ArrayList<EduGroup> getEduGroups();
-	
-	public ArrayList<EduGroup> getEduGroups(String scope);
+
+	default ArrayList<EduGroup> getEduGroups(String scope){
+		return getEduGroups(AuthenticationUtil.getFullyAuthenticatedUser(),scope);
+	}
+	public ArrayList<EduGroup> getEduGroups(String authority,String scope);
 	
 	/**
 	 * creates an edugroup with groupadministrators group in a scoped area
@@ -62,10 +63,12 @@ public interface AuthorityService {
 	 */
 	public EduGroup getOrCreateEduGroup(EduGroup eduGroup, EduGroup unscopedEduGroup, String folderParentId);
 	boolean isGuest();
-	public String getProperty(String authorityName, String ccmPropGroupextensionGrouptype);
+
+    boolean hasAdminAccessToMediacenter(String groupName);
+
+    public String getProperty(String authorityName, String ccmPropGroupextensionGrouptype);
 	EduGroup getEduGroup(String authority);
-	String createGroup(String groupName, String displayName, String parentGroup) throws DAOException;
-	
+	String createGroup(String groupName, String displayName, String parentGroup) throws Exception;
 	static String getGroupName(String groupName,String parentGroup){
 		return org.edu_sharing.alfresco.service.AuthorityService.getGroupName(groupName, parentGroup);
 	}
@@ -75,4 +78,11 @@ public interface AuthorityService {
 
 	NodeRef getAuthorityNodeRef(String authority);
 
+    void addMemberships(String groupName, String[] members);
+
+	void removeMemberships(String groupName, String[] members);
+
+	String[] getMembershipsOfGroup(String groupName);
+
+	void createGroupWithType(String groupName, String displayName, String parentGroup, String groupType) throws Exception;
 }

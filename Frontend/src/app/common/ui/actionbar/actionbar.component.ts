@@ -1,12 +1,12 @@
 import {Component, Input, Output, EventEmitter, OnInit, ViewChild, ElementRef, HostListener} from '@angular/core';
 import {TranslateService} from "@ngx-translate/core";
-import {UIAnimation} from "../ui-animation";
-import {UIService} from "../../services/ui.service";
+import {UIAnimation} from "../../../core-module/ui/ui-animation";
 import {trigger} from "@angular/animations";
-import {UIHelper} from "../ui-helper";
-import {OptionItem} from "./option-item";
-import {Helper} from '../../helper';
-import {UIConstants} from "../ui-constants";
+import {UIHelper} from "../../../core-ui-module/ui-helper"
+import {OptionItem} from "../../../core-ui-module/option-item";
+import {Helper} from '../../../core-module/rest/helper';
+import {UIConstants} from "../../../core-module/ui/ui-constants";
+import {UIService} from "../../../core-module/core.module";
 
 @Component({
   selector: 'actionbar',
@@ -41,7 +41,6 @@ export class ActionbarComponent{
   public optionsAlways : OptionItem[] = [];
   public optionsMenu : OptionItem[] = [];
   public optionsToggle : OptionItem[] = [];
-  public dropdown = false;
 
   /**
    * backgroundType for color matching, either bright, dark or primary
@@ -89,14 +88,6 @@ export class ActionbarComponent{
     }
   }
 
-  @HostListener('document:keydown', ['$event'])
-  handleKeyboardEvent(event: KeyboardEvent) {
-    if(this.dropdown && event.key=="Escape"){
-      this.dropdown=false;
-      event.preventDefault();
-      event.stopPropagation();
-    }
-  }
   public getNumberOptions(){
     if(window.innerWidth<UIConstants.MOBILE_WIDTH){
       return this.numberOfAlwaysVisibleOptionsMobile;
@@ -114,14 +105,7 @@ export class ActionbarComponent{
       return;
     }
     option.callback(this.node);
-    this.dropdown=false;
   }
-  private showDropdown(){
-    this.dropdown=true;
-  }
-
-
-
   private getActionOptions(options: OptionItem[]) {
     let result:OptionItem[]=[];
     for(let option of options){

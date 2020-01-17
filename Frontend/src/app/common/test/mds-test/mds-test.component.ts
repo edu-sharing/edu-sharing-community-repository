@@ -1,8 +1,5 @@
 import {Component} from "@angular/core";
-import {RestNodeService} from "../../rest/services/rest-node.service";
-import {Collection} from "../../rest/data-object";
-import {RestCollectionService} from "../../rest/services/rest-collection.service";
-import {RestConnectorService} from "../../rest/services/rest-connector.service";
+import {Collection, RestCollectionService, RestConnectorService} from "../../../core-module/core.module";
 
 @Component({
   selector: 'app-mds-test',

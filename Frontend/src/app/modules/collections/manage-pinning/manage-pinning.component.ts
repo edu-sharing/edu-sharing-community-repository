@@ -1,13 +1,13 @@
 import {Component, Input, Output, EventEmitter} from "@angular/core";
-import {RestConstants} from "../../../common/rest/rest-constants";
-import {Node,NodeList,NodeWrapper} from "../../../common/rest/data-object";
-import {Toast} from "../../../common/ui/toast";
-import {RestSearchService} from "../../../common/rest/services/rest-search.service";
-import {RestHelper} from "../../../common/rest/rest-helper";
-import {RestNodeService} from "../../../common/rest/services/rest-node.service";
-import {Helper} from "../../../common/helper";
-import {UIService} from "../../../common/services/ui.service";
-import {RestCollectionService} from "../../../common/rest/services/rest-collection.service";
+import {DialogButton, RestConstants} from "../../../core-module/core.module";
+import {Node,NodeList,NodeWrapper} from "../../../core-module/core.module";
+import {Toast} from "../../../core-ui-module/toast";
+import {RestSearchService} from "../../../core-module/core.module";
+import {RestHelper} from "../../../core-module/core.module";
+import {RestNodeService} from "../../../core-module/core.module";
+import {Helper} from "../../../core-module/rest/helper";
+import {UIService} from "../../../core-module/core.module";
+import {RestCollectionService} from "../../../core-module/core.module";
 import {TranslateService} from "@ngx-translate/core";
 
 @Component({
@@ -21,6 +21,7 @@ export class CollectionManagePinningComponent {
   public isMobile: boolean;
   public globalProgress: boolean;
   public checked:string[]=[];
+  buttons: DialogButton[];
   @Input() set addCollection (addCollection : string){
     this.globalProgress=true;
     this.search.searchByProperties([RestConstants.CCM_PROP_COLLECTION_PINNED_STATUS],["true"],["="],
@@ -51,6 +52,10 @@ export class CollectionManagePinningComponent {
               private translate : TranslateService
              ){
     this.isMobile=ui.isMobile();
+    this.buttons=[
+        new DialogButton('CANCEL',DialogButton.TYPE_CANCEL,()=>this.cancel()),
+        new DialogButton('APPLY',DialogButton.TYPE_PRIMARY,()=>this.apply())
+    ]
   }
   public isChecked(collection:Node){
     return this.checked.indexOf(collection.ref.id)!=-1;

@@ -37,6 +37,7 @@ import org.edu_sharing.service.mime.MimeTypesV2;
 import org.edu_sharing.service.usage.Usage;
 import org.edu_sharing.service.usage.Usage2Service;
 import org.edu_sharing.service.usage.UsageException;
+import org.edu_sharing.webservices.usage2.Usage2Exception;
 import org.springframework.context.ApplicationContext;
 
 import net.sf.acegisecurity.AuthenticationCredentialsNotFoundException;
@@ -62,12 +63,13 @@ public class AuthenticationFilterPreview implements javax.servlet.Filter {
 		HttpServletRequest httpServletRequest = (HttpServletRequest)req;
 		HttpServletResponse httpServletResponse = (HttpServletResponse)resp;
 		
-		/**
-		 * Ticket Auth from 
-		 */
+		// If we didn't have a session, a fallback guest session might have been created, so a
+		// ticket provided via request parameter takes precedence.
 		AuthenticationToolAPI authTool = new AuthenticationToolAPI();
-		String ticket = authTool.getTicketFromSession(httpServletRequest.getSession());
-		if(ticket==null) ticket = req.getParameter("ticket");
+		String ticket = req.getParameter("ticket");
+		if (ticket == null || ticket.length() == 0) {
+			ticket = authTool.getTicketFromSession(httpServletRequest.getSession());
+		}
 		
 		boolean invalidateTicket = false;
 		
@@ -162,7 +164,7 @@ public class AuthenticationFilterPreview implements javax.servlet.Filter {
 					return;
 				}
 
-			} catch(UsageException e) {
+			} catch(Usage2Exception e) {
 				nodeDeleted(httpServletResponse);
 				return;
 			}
