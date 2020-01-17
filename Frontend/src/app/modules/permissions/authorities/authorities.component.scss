@@ -12,10 +12,9 @@ input[type=search]{
   position:fixed;
   z-index:1;
   width: 100%;
-  top:65px+$mainnavHeight;
+  padding: 15px 10px;
   display:flex;
   align-items: center;
-  padding:0 10px;
   .info{
     flex-grow: 1;
     color:$textPrimary;
