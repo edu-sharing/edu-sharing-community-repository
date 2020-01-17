@@ -63,12 +63,13 @@ public class AuthenticationFilterPreview implements javax.servlet.Filter {
 		HttpServletRequest httpServletRequest = (HttpServletRequest)req;
 		HttpServletResponse httpServletResponse = (HttpServletResponse)resp;
 		
-		/**
-		 * Ticket Auth from 
-		 */
+		// If we didn't have a session, a fallback guest session might have been created, so a
+		// ticket provided via request parameter takes precedence.
 		AuthenticationToolAPI authTool = new AuthenticationToolAPI();
-		String ticket = authTool.getTicketFromSession(httpServletRequest.getSession());
-		if(ticket==null) ticket = req.getParameter("ticket");
+		String ticket = req.getParameter("ticket");
+		if (ticket == null || ticket.length() == 0) {
+			ticket = authTool.getTicketFromSession(httpServletRequest.getSession());
+		}
 		
 		boolean invalidateTicket = false;
 		
