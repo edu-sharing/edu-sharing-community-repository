@@ -25,7 +25,7 @@ export class VideoControlsComponent{
   _title = 'Title';
   loading = false;
   chooseCollection = false;
-  private isGuest: boolean;
+  isGuest: boolean;
 
   @Input() set video(video:HTMLVideoElement){
     // timeout to make sure node is already bound
