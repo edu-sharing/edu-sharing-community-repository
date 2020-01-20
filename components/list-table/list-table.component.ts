@@ -75,14 +75,14 @@ export class ListTableComponent implements EventListener{
    * Set the current list of nodes to render
    * @param nodes
    */
-  @Input() set nodes(nodes : Node[]){
-    this._nodes=nodes;
-    /*
-     if(!nodes || !nodes.length){
-     this.selectedNodes=[];
-     }
-     */
-  };
+  @Input() set nodes(nodes: Node[]){
+    // remove all non-virtual nodes which are replaced by the virtual nodes (virtual have higher prio)
+    if (nodes) {
+      const virtual = nodes.filter((n) => n.virtual);
+      nodes = nodes.filter((n) => n.virtual || !virtual.find((v) => v.ref.id === n.ref.id));
+    }
+    this._nodes = nodes;
+  }
 
   /**
    * Should the nodes be automatically linked via href

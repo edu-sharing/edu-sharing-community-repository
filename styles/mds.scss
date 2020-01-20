@@ -312,13 +312,21 @@ mds .mdsGroup{
     float: left;
     width: calc(100% - 12px);
   }
-  .inputTable{
-    display:flex;
+  .inputTable {
+    display: flex;
     width: 100%;
     align-items: center;
-  }
-  .inputTable input{
-    display:flex;
+    flex-direction: column;
+    .bulk-enable{
+      display: flex;
+      justify-content: flex-end;
+      width: 100%;
+      position: absolute;
+      top: -25px;
+    }
+    input {
+      display: flex;
+    }
   }
   .inputIcon{
     display:flex;

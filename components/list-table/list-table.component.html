@@ -70,6 +70,7 @@
         <div matRipple *ngFor="let node of _nodes; let i = index" class="rowFrame"
              [class.order-animation]="orderElementsActive"
              [class.nodeCollection]="isCollection(node)"
+             [class.node-virtual]="node.virtual"
              [style.border-color]="isCollection(node) ? getCollectionColor(node) : null"
              [class.tableList]="viewType==0"
              [class.cardList]="viewType==1"

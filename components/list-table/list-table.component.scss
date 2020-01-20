@@ -427,6 +427,11 @@ $badgeWidth:250px;
     color:#fff!important;
   }
 }
+.node-virtual{
+  .row {
+    background-color: $workspaceNewBackground !important;
+  }
+}
 .nodeCollection {
   overflow: visible;
   .selected {
