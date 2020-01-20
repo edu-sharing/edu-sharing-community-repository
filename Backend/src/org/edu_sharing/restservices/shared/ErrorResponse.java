@@ -17,10 +17,14 @@ import org.edu_sharing.restservices.*;
 import org.edu_sharing.restservices.node.v1.NodeApi;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import org.edu_sharing.service.foldertemplates.LoggingErrorHandler;
 
 @ApiModel(description = "")
 public class ErrorResponse {
-
+	public enum ErrorResponseLogging{
+		strict, // default, log every error, including stacktrace
+		relaxed, // stacktrace only for unknown errors, otherwise just one-line logging (recommended for get endpoints)
+	}
 	private String error = null;
 	private String message = null;
 	private String stacktrace = null;
@@ -30,21 +34,18 @@ public class ErrorResponse {
 		
 	}
 	private static Logger logger = Logger.getLogger(ErrorResponse.class);
-
-	public static Response createResponse(Throwable t){
+	public static Response createResponse(Throwable t) {
+		return createResponse(t,ErrorResponseLogging.strict);
+	}
+	public static Response createResponse(Throwable t,ErrorResponseLogging logging){
+		handleLog(t,logging);
 		if(t instanceof DAOValidationException) {
-    		
-    		logger.warn(t.getMessage(), t);
     		return Response.status(Response.Status.BAD_REQUEST).entity(new ErrorResponse(t)).build();
 		}
     	if(t instanceof DAOSecurityException) {
-    		
-    		logger.warn(t.getMessage(), t);
     		return Response.status(Response.Status.FORBIDDEN).entity(new ErrorResponse(t)).build();
     	}
         if(t instanceof DAOMissingException) {
-    		
-    		logger.warn(t.getMessage(), t);
     		return Response.status(Response.Status.NOT_FOUND).entity(new ErrorResponse(t)).build();
     	}
     	if(t instanceof DAOQuotaException){
@@ -53,15 +54,28 @@ public class ErrorResponse {
 			return Response.status(CCConstants.HTTP_INSUFFICIENT_STORAGE).entity(new ErrorResponse(t)).build();
 		}
         if(t instanceof DAODuplicateNodeNameException){
-
-        	logger.info(t.getMessage(), t);
         	return Response.status(Response.Status.CONFLICT).entity(new ErrorResponse(t)).build();
         }
-    		
-		logger.error(t.getMessage(), t);
 		return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(new ErrorResponse(t)).build();
-    	
 	}
+
+	private static void handleLog(Throwable t, ErrorResponseLogging logging) {
+		if(t instanceof DAOValidationException ||
+				t instanceof DAOSecurityException ||
+				t instanceof DAOMissingException ||
+				t instanceof DAODuplicateNodeNameException){
+			if(logging.equals(ErrorResponseLogging.strict)) {
+				logger.warn(t.getMessage(), t);
+			}else if(logging.equals(ErrorResponseLogging.relaxed)){
+				logger.info(t.getMessage());
+			}
+		}
+		else{
+			// unknown error, log at highest level with stacktrace
+			logger.error(t.getMessage(),t);
+		}
+	}
+
 	public ErrorResponse(Throwable t) {
 		Level level=logger.getEffectiveLevel();
 		
