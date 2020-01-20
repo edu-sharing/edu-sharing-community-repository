@@ -87,7 +87,7 @@ export class WorkspaceMainComponent implements EventListener {
     public allowBinary = true;
     private filesToUpload: FileList;
     public globalProgress = false;
-    public editNodeMetadata: Node;
+    public editNodeMetadata: Node[];
     public editNodeTemplate: Node;
     public editNodeDeleteOnCancel = false;
     private createMds: string;
@@ -536,7 +536,7 @@ export class WorkspaceMainComponent implements EventListener {
     }
     private editNode(node: Node) {
         const list = this.getNodeList(node);
-        this.editNodeMetadata = list[0];
+        this.editNodeMetadata = list;
         this.editNodeAllowReplace = new Boolean(true);
     }
     private editLicense(node: Node) {
@@ -786,7 +786,7 @@ export class WorkspaceMainComponent implements EventListener {
         const options: OptionItem[] = [];
 
         const allFiles = NodeHelper.allFiles(nodes);
-        const savedSearch = nodes && nodes.length && nodes[0].type === RestConstants.CCM_TYPE_SAVED_SEARCH;
+        const savedSearch = nodes && nodes.length && nodes.find((n)=> n.type === RestConstants.CCM_TYPE_SAVED_SEARCH);
         if (!nodes && this.canPasteInCurrentLocation()) {
             options.push(new OptionItem('WORKSPACE.OPTION.PASTE', 'content_paste', (node: Node) => this.pasteNode()));
         }
@@ -830,7 +830,7 @@ export class WorkspaceMainComponent implements EventListener {
         else if (nodes && nodes.length === 1 && this.connectors.connectorSupportsEdit(nodes[0])) {
             options.push(view);
         }
-        if (nodes && nodes.length === 1 && !savedSearch) {
+        if (nodes && !savedSearch) {
             const edit = new OptionItem('WORKSPACE.OPTION.EDIT', 'info_outline', (node: Node) => this.editNode(node));
             edit.isEnabled = NodeHelper.getNodesRight(nodes, RestConstants.ACCESS_WRITE);
             edit.isSeperateBottom = true;
@@ -1015,8 +1015,8 @@ export class WorkspaceMainComponent implements EventListener {
         this.globalProgress = true;
         const prop = RestHelper.createNameProperty(DateHelper.formatDateByPattern(new Date().getTime(), 'y-M-d'));
         this.node.createNode(this.currentFolder.ref.id, RestConstants.CCM_TYPE_IO, [], prop, true, RestConstants.COMMENT_MAIN_FILE_UPLOAD)
-            .subscribe((data: NodeWrapper) => {
-                this.editNodeMetadata = data.node;
+            .subscribe((data) => {
+                this.editNodeMetadata = [data.node];
                 this.editNodeDeleteOnCancel = true;
                 this.globalProgress = false;
             });

@@ -74,7 +74,7 @@ export class NodeRenderComponent implements EventListener{
   private isSafe=false;
   private isOpenable: boolean;
   private closeOnBack: boolean;
-  public nodeMetadata: Node;
+  public nodeMetadata: Node[];
   public nodeShare: Node;
   public nodeShareLink: Node;
   public nodeWorkflow: Node;
@@ -312,7 +312,7 @@ export class NodeRenderComponent implements EventListener{
     download.isEnabled=this._node.downloadUrl!=null;
     download.showAsAction=true;
     if(this.isCollectionRef()){
-      this.nodeApi.getNodeMetadata(this._node.properties[RestConstants.CCM_PROP_IO_ORIGINAL]).subscribe((node:NodeWrapper)=>{
+      this.nodeApi.getNodeMetadata(this._node.properties[RestConstants.CCM_PROP_IO_ORIGINAL]).subscribe((node) => {
         this.addDownloadButton(opt,download);
       },(error:any)=>{
         if(error.status==RestConstants.HTTP_NOT_FOUND) {
@@ -500,7 +500,7 @@ export class NodeRenderComponent implements EventListener{
                 if (this._node.type != RestConstants.CCM_TYPE_REMOTEOBJECT && ConfigurationHelper.hasMenuButton(this.config, "workspace"))
                     options.push(openFolder);
             }
-            let edit = new OptionItem('WORKSPACE.OPTION.EDIT', 'info_outline', () => this.nodeMetadata = this._node);
+            let edit = new OptionItem('WORKSPACE.OPTION.EDIT', 'info_outline', () => this.nodeMetadata = [this._node]);
             edit.isEnabled = this._node.access.indexOf(RestConstants.ACCESS_WRITE) != -1 && this._node.type != RestConstants.CCM_TYPE_REMOTEOBJECT;
             if (this.version == RestConstants.NODE_VERSION_CURRENT)
                 options.push(edit);

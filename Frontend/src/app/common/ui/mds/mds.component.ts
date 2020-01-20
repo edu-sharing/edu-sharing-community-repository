@@ -21,6 +21,8 @@ import {
 } from '../../../core-module/core.module';
 import {CardJumpmark} from "../../../core-ui-module/components/card/card.component";
 import {MdsHelper} from "../../../core-module/rest/mds-helper";
+import {Observable} from 'rxjs';
+import {getClosureSafeProperty} from '@angular/core/src/util/property';
 
 @Component({
   selector: 'mds',
@@ -41,6 +43,8 @@ export class MdsComponent{
   @Input() addWidget=false;
   @Input() embedded=false;
   private activeAuthorType: number;
+  public static TYPE_IO = 'io';
+  public static TYPE_MAP = 'map';
   public static TYPE_CHILDOBJECT = 'io_childobject';
   public static TYPE_TOOLDEFINITION = 'tool_definition';
   public static TYPE_TOOLINSTANCE = 'tool_instance';
@@ -166,41 +170,46 @@ export class MdsComponent{
     });
   }
 
-    @Input() set nodeId(nodeId:string){
-        this.currentNode=null;
-        if(nodeId==null)
-            return;
-        this.isLoading=true;
-        this.node.getNodeMetadata(nodeId,[RestConstants.ALL]).subscribe((node : NodeWrapper)=>{
-            this._setId = node.node.metadataset ? node.node.metadataset : RestConstants.DEFAULT;
-            this.mdsService.getSet(this._setId).subscribe((data:any)=>{
-                // test a widget
-                //data.widgets.push({caption:'Test',id:'test',type:'range',min:0,max:60});
-                //data.views[0].html+="<test>";
-                this.mds = data;
-                this.currentNode = node.node;
-                if(node.node.type==RestConstants.CCM_TYPE_IO) {
-                    this.node.getNodeChildobjects(nodeId).subscribe((childs: NodeList) => {
-                        this.currentChildobjects = childs.nodes;
-                        this.loadConfig();
+    @Input() set nodes(nodes: Node[]){
+        this.currentNodes = null;
+        if (nodes == null) {
+          return;
+        }
+        this.isLoading = true;
+        const requests = nodes.map((n) => this.node.getNodeMetadata(n.ref.id, [RestConstants.ALL]));
+        Observable.forkJoin(requests).subscribe((nodesApi) => {
+          const nodesConverted = nodesApi.map((n) => n.node);
+          const mds = new Set(nodesConverted.map((n) => n.metadataset ? n.metadataset : RestConstants.DEFAULT));
+          const types = new Set(nodesConverted.map((n) => n.type));
+          if (types.size !== 1) {
+            this.toast.error(null, 'MDS.ERROR_INVALID_TYPE_COMBINATION');
+            this.cancel();
+          }else if (mds.size !== 1) {
+            this.toast.error(null, 'MDS.ERROR_INVALID_MDS_COMBINATION');
+            this.cancel();
+          }
+          this.mdsService.getSet(this._setId).subscribe((data: any) => {
+            this.mds = data;
+            this.currentNodes = nodesConverted;
+            if(nodesConverted[0].type === RestConstants.CCM_TYPE_IO && nodesConverted.length === 1) {
+              this.node.getNodeChildobjects(nodesConverted[0].ref.id).subscribe((childs: NodeList) => {
+                this.currentChildobjects = childs.nodes;
+                this.loadConfig();
 
-                    }, (error: any) => {
-                        this.toast.error(error);
-                        this.cancel();
-                    });
-                }
-                else{
-                  this.loadConfig();
-                }
-            },(error:any)=>{
+              }, (error: any) => {
                 this.toast.error(error);
                 this.cancel();
-            });
-        },(error:any)=>{
-            this.toast.error(error);
-            this.cancel();
+              });
+            }
+            else{
+              this.loadConfig();
+            }
+        },(error) => {
+          this.toast.error(error);
+          this.cancel();
         });
-    };
+    });
+  }
   @Output() onCancel=new EventEmitter();
   @Output() onDone=new EventEmitter();
   @Output() openLicense=new EventEmitter();
@@ -214,7 +223,7 @@ export class MdsComponent{
 
   private widgetName='cclom:general_keyword';
   private widgetType='multivalueFixedBadges';
-  private currentNode: Node;
+  private currentNodes: Node[];
   public addChildobject = false;
   public editChildobject:any;
   public editChildobjectLicense:any;
@@ -351,7 +360,7 @@ export class MdsComponent{
                     element.style.display=selected ? '' : 'none';
                     header.childNodes[0].className=selected ? 'active' : 'none';
                  }
-                    
+
                     "><a class="`+(i==0 ? 'active' : '')+'">'+view.caption+'</a></li>';
           content+='<div id="mds_tab_'+i+'"'+(i>0 ? 'style="display:none;"' : '')+'>'+this.renderTemplate(view,data,null,node)+'</div>';
           i++;
@@ -518,6 +527,10 @@ export class MdsComponent{
         }
         continue;
       }
+      if(this.isPrimitiveWidget(widget) && element.disabled){
+        // disabled => ignore property
+        continue;
+      }
       element.className=element.className.replace('invalid','').trim();
       let v=element.value;
       if(element.getAttribute('data-value') && !this.isPrimitiveWidget(widget)){
@@ -636,7 +649,7 @@ export class MdsComponent{
             return;
         }
     }
-    if(this.embedded || this.currentNode==null && this.createType==null){
+    if(this.embedded || this.currentNodes==null && this.createType==null){
       this.onDone.emit(this.getValues());
       return this.getValues();
     }
@@ -646,8 +659,6 @@ export class MdsComponent{
     for(let key in values){
       properties[key]=values[key];
     }
-    if(this.currentNode)
-      this.currentNode.properties=properties;
     let version='';
     let files:File[]=[];
     try {
@@ -666,59 +677,32 @@ export class MdsComponent{
     }catch (e){console.info(e);}
 
     this.globalProgress=true;
-    if(version){
-      if(files.length){
-          this.node.editNodeMetadata(this.currentNode.ref.id,this.currentNode.properties).subscribe((node) => {
-            this.currentNode = node.node;
-            this.node.uploadNodeContent(this.currentNode.ref.id,files[0],version).subscribe(()=>{
-              this.onUpdatePreview(callback);
-          },(error:any)=>{
-            this.toast.error(error);
-            this.globalProgress=false;
-          });
-        },(error:any)=>{
-          this.toast.error(error)
-          this.globalProgress=false;
-        });
-      }
-      else{
-        this.node.editNodeMetadataNewVersion(this.currentNode.ref.id,version,this.currentNode.properties).subscribe((node)=>{
-          this.currentNode = node.node;
+    // can only happen for single element
+    if (files.length) {
+      this.node.editNodeMetadata(this.currentNodes[0].ref.id,properties).subscribe((node) => {
+        this.currentNodes[0] = node.node;
+        this.node.uploadNodeContent(this.currentNodes[0].ref.id,files[0],version).subscribe(()=>{
           this.onUpdatePreview(callback);
         },(error:any)=>{
           this.toast.error(error);
           this.globalProgress=false;
         });
-      }
+      },(error:any)=>{
+        this.toast.error(error)
+        this.globalProgress = false;
+      });
     }
     else {
-      if(this.createType==MdsComponent.TYPE_TOOLDEFINITION){
-        this.tools.createToolDefinition(properties).subscribe((data:NodeWrapper)=>{
-          this.currentNode=data.node;
-          this.onUpdatePreview(callback);
-        }, (error: any) => {
-          this.toast.error(error);
-          this.globalProgress = false;
-        });
-      }
-      else if(this.createType==MdsComponent.TYPE_TOOLINSTANCE){
-        this.tools.createToolInstance(this.parentNode.ref.id,properties).subscribe((data:NodeWrapper)=>{
-          this.currentNode=data.node;
-          this.onUpdatePreview(callback);
-        }, (error: any) => {
-          this.toast.error(error);
-          this.globalProgress = false;
-        });
-      }
-      else {
-        this.node.editNodeMetadata(this.currentNode.ref.id, this.currentNode.properties).subscribe((node) => {
-          this.currentNode = node.node;
-          this.onUpdatePreview(callback);
-        }, (error: any) => {
-          this.toast.error(error);
-          this.globalProgress = false;
-        });
-      }
+      // can be bulk mode
+      console.log(properties);
+      Observable.forkJoin(this.currentNodes.map((n) => this.node.editNodeMetadataNewVersion(n.ref.id,version,properties)))
+          .subscribe((nodes) => {
+            this.currentNodes = nodes.map((n) => n.node);
+            this.onUpdatePreview(callback);
+          },(error) => {
+            this.toast.error(error);
+            this.globalProgress = false;
+          });
     }
   }
   public setValuesByProperty(data:any,properties:any){
@@ -826,7 +810,7 @@ export class MdsComponent{
             }catch(e){
               // fails in ie11
             }
-            if(element.value!=props[0]) {
+            if(element.value !== props[0]) {
               element.setAttribute('data-value', props[0]);
             }
           }
@@ -846,19 +830,19 @@ export class MdsComponent{
     },10);
   }
 
-  private getValueCaption(widget:any, id:string) {
+  private getValueCaption(widget: any, id: string) {
     if (widget.values) {
       for (let value of widget.values) {
-        if (value.id == id) {
+        if (value.id === id) {
           return value.caption ? value.caption : id;
         }
       }
     }
     return id;
   }
-  private readValues(data:any){
+  private readValues(data: any){
     this.setGeneralNodeData();
-    this.setValuesByProperty(data,this.currentNode ? this.currentNode.properties : []);
+    this.setValuesByProperty(data, this.currentNodes ? this.getMergedProperties() : []);
   }
   private renderTemplate(template : any,data:any,extended:boolean[]) {
     if(!template.html || !template.html.trim()){
@@ -916,12 +900,33 @@ export class MdsComponent{
     return html;
 
     }
-  private renderPrimitiveWidget(widget:any,attr:string,type:string,css=''){
+    private isBulkMode() {
+      return this.currentNodes && this.currentNodes.length > 1;
+    }
+    private addBulkCheckbox(widget: any) {
+      if (!this.isBulkMode()) {
+        return '';
+      }
+      const id = this.getDomId(widget.id + '_bulk');
+      return `<div class="bulk-enable"><input type="checkbox" class="filled-in" id="` + id + `" 
+                onchange="` + this.getWindowComponent() + `.toggleBulk('` + widget.id + `', event)">
+               <label for="` + id + `">` + this.translate.instant('MDS.BULK_OVERRIDE') + `</label></div>`;
+    }
+    toggleBulk(widget: string, event: any) {
+      const element = (document.getElementById(this.getDomId(widget)) as HTMLInputElement);
+      element.disabled = !event.srcElement.checked;
+    }
+  private renderPrimitiveWidget(widget: any,attr:string,type:string,css=''){
     let html='<div class="inputTable">';
+    html += this.addBulkCheckbox(widget);
     if(widget.icon){
       html+='<i class="inputIcon material-icons">'+widget.icon+'</i>';
     }
-    html+='<input type="'+type+'" id="'+this.getWidgetDomId(widget)+'" placeholder="'+(widget.placeholder ? widget.placeholder : '')+'" class="'+css+'">';
+    html+='<input type="'+type+'" id="'+this.getWidgetDomId(widget)+'" placeholder="'+(widget.placeholder ? widget.placeholder : '')+'" class="'+css+'"';
+    if(this.isBulkMode()){
+      html+=" disabled";
+    }
+    html+='>';
     if(widget.type=='checkbox'){
       html+=this.getCaption(widget);
     }
@@ -1203,7 +1208,7 @@ export class MdsComponent{
     return html;
   }
   private autoSuggestField(widget:any,css='',allowCustom=false,openCallback:string,openIcon='arrow_drop_down',singleValue=false){
-    if(widget.values==null/* || this._groupId*/)
+    if(widget.values == null/* || this._groupId*/)
         openCallback=null;
     if(!openCallback && widget.type!='multivalueTree' && widget.type!='singlevalueTree')
       css+=' suggestInputNoOpen';
@@ -1248,9 +1253,10 @@ export class MdsComponent{
       html += this.getListEntry(this.getWidgetDomId(widget),'','',singleValue);
     }
     if(widget.values) {
-      for (let value of widget.values) {
-        if (value.disabled/* || value.parent*/) // find all fields, not only main nodes of a tree
+      for (const value of widget.values) {
+        if (value.disabled) {
           continue;
+        }
         html += this.getListEntry(this.getWidgetDomId(widget),value.id,value.caption,singleValue);
       }
     }
@@ -1652,6 +1658,10 @@ export class MdsComponent{
     return '';
   }
   private renderAuthor(widget: any) {
+    const constrain = this.handleWidgetConstrains(widget, {requiresNode: false, supportsBulk: false});
+    if(constrain) {
+      return constrain;
+    }
     let authorWidget={id:RestConstants.CCM_PROP_LIFECYCLECONTRIBUTER_AUTHOR};
     let freetextWidget={id:RestConstants.CCM_PROP_AUTHOR_FREETEXT,placeholder:this.translate.instant('MDS.AUTHOR_FREETEXT_PLACEHOLDER')};
     let author=`
@@ -1669,7 +1679,7 @@ export class MdsComponent{
          </div>
          <div id="`+this.getDomId('mdsAuthorFreetext')+`" class="mdsAuthorFreetext">`+this.renderTextareaWidget(freetextWidget,null)+`</div>
           <div id="`+this.getDomId('mdsAuthorPerson')+`" class="mdsAuthorPerson">`+this.renderVCardWidget(authorWidget,null);
-    if(this.currentNode && !this.uiService.isMobile()){
+    if(this.currentNodes && this.currentNodes.length === 1 && !this.uiService.isMobile()){
       author+=`<div class="mdsContributors">
             <a class="clickable contributorsLink" onclick="`+this.getWindowComponent()+`.openContributorsDialog();">`+
             this.translate.instant('MDS.CONTRIBUTOR_LINK')+` <i class="material-icons">arrow_forward</i></a>
@@ -1696,36 +1706,44 @@ export class MdsComponent{
         document.getElementById(this.getDomId('preview-deleted')).style.display=null;
         document.getElementById(this.getDomId('preview-delete')).style.display='none';
     }
-
-    private renderPreview(widget: any,attr:string) {
-    if(!this.currentNode){
-        return "Widget 'preview' is only supported if a node object is available";
+    private handleWidgetConstrains(widget: any, options: {requiresNode?: boolean, supportsBulk?: boolean}) {
+        if (options.requiresNode && !(this.currentNodes || this.currentNodes.length)) {
+          return 'Widget \'' + widget.id + '\' is only supported if a node object is available';
+        }else if (!options.supportsBulk && this.isBulkMode()) {
+          return 'Widget \'' + widget.id + '\' is not supported in bulk mode';
+        }
+        return null;
     }
-    let preview=`<div class="mdsPreview">`;
+    private renderPreview(widget: any,attr: string) {
+      const constrain = this.handleWidgetConstrains(widget, {requiresNode: true, supportsBulk: false});
+      if(constrain) {
+          return constrain;
+      }
+      let preview=`<div class="mdsPreview">`;
 
-    preview+=`<input type="file" style="display:none" id="`+this.getDomId('preview-select')+`" accept="image/*" onchange="`+this.getWindowComponent()+`.changePreview(this)" />
-            <label>`+this.translate.instant('WORKSPACE.EDITOR.PREVIEW')+`</label>`;
-    preview+=`<div class="previewImage">
-            <div id="`+this.getDomId('preview-deleted')+`" class="preview-deleted" style="display:none">
-                <i class="material-icons">delete</i><div>`+this.translate.instant('WORKSPACE.EDITOR.PREVIEW_DELETED')+`</div>
-            </div>`;
-      preview+=`<img id="`+this.getDomId('preview')+`" `+attr+` alt=""></div>`;
-    if(this.connector.getApiVersion()>=RestConstants.API_VERSION_4_0) {
-      preview += `<div class="changePreview">
-                    <a tabindex="0" 
-                    onclick="document.getElementById('`+this.getDomId('preview-select')+`').click()" 
-                    onkeydown="if(event.keyCode==13)this.click();" class="btn-circle"><i class="material-icons" aria-label="`+this.translate.instant('WORKSPACE.EDITOR.REPLACE_PREVIEW')+`">file_upload</i></a>
-                        <a tabindex="0" 
-                        id="`+this.getDomId('preview-delete')+`"
-                        `+(this.currentNode.preview.isGenerated ? 'style="display:none"' : '')+`
-                        onclick="`+this.getWindowComponent()+`.deletePreview()" 
-                        onkeydown="if(event.keyCode==13) this.click();" 
-                        class="btn-circle"><i class="material-icons" aria-label="`+this.translate.instant('WORKSPACE.EDITOR.DELETE_PREVIEW')+`">delete</i></a>
-                    </div>`;
+      preview+=`<input type="file" style="display:none" id="`+this.getDomId('preview-select')+`" accept="image/*" onchange="`+this.getWindowComponent()+`.changePreview(this)" />
+              <label>`+this.translate.instant('WORKSPACE.EDITOR.PREVIEW')+`</label>`;
+      preview+=`<div class="previewImage">
+              <div id="`+this.getDomId('preview-deleted')+`" class="preview-deleted" style="display:none">
+                  <i class="material-icons">delete</i><div>`+this.translate.instant('WORKSPACE.EDITOR.PREVIEW_DELETED')+`</div>
+              </div>`;
+        preview+=`<img id="`+this.getDomId('preview')+`" `+attr+` alt=""></div>`;
+      if(this.connector.getApiVersion()>=RestConstants.API_VERSION_4_0) {
+        preview += `<div class="changePreview">
+                      <a tabindex="0" 
+                      onclick="document.getElementById('`+this.getDomId('preview-select')+`').click()" 
+                      onkeydown="if(event.keyCode==13)this.click();" class="btn-circle"><i class="material-icons" aria-label="`+this.translate.instant('WORKSPACE.EDITOR.REPLACE_PREVIEW')+`">file_upload</i></a>
+                          <a tabindex="0" 
+                          id="`+this.getDomId('preview-delete')+`"
+                          `+(this.currentNodes[0].preview.isGenerated ? 'style="display:none"' : '')+`
+                          onclick="`+this.getWindowComponent()+`.deletePreview()" 
+                          onkeydown="if(event.keyCode==13) this.click();" 
+                          class="btn-circle"><i class="material-icons" aria-label="`+this.translate.instant('WORKSPACE.EDITOR.DELETE_PREVIEW')+`">delete</i></a>
+                      </div>`;
+      }
+      preview+=`</div>`;
+      return preview;
     }
-    preview+=`</div>`;
-    return preview;
-  }
   private setEditChildobject(pos:number){
     this.editChildobject={
       child:this.childobjects[pos],
@@ -1830,22 +1848,27 @@ export class MdsComponent{
     this.refreshChildobjects();
   }
   private renderChildobjects(widget: any) {
-      let html=`<div class="mdsChildobjects">
-        <div class="label-light">`+this.translate.instant('MDS.ADD_CHILD_OBJECT_DESCRIPTION')+`</div>
-        <input type="file" style="display:none" id="childSelect" onchange="`+this.getWindowComponent()+`.addChildobject(this)" />
-        <div class="list" id="`+this.getDomId('mdsChildobjects')+`"></div>
-        <a class="btn-flat btn-shadow waves-light waves-effect btn-icon" onclick="`+this.getWindowComponent()+`.addChildobject=true">
-            <i class="material-icons">add</i> `+this.translate.instant('ADD')+`
-        </a>
-        </div>
-        `;
-      return html;
+    const constrain = this.handleWidgetConstrains(widget, {requiresNode: false, supportsBulk: false});
+    if (constrain) {
+      return constrain;
+    }
+    let html=`<div class="mdsChildobjects">
+      <div class="label-light">`+this.translate.instant('MDS.ADD_CHILD_OBJECT_DESCRIPTION')+`</div>
+      <input type="file" style="display:none" id="childSelect" onchange="`+this.getWindowComponent()+`.addChildobject(this)" />
+      <div class="list" id="`+this.getDomId('mdsChildobjects')+`"></div>
+      <a class="btn-flat btn-shadow waves-light waves-effect btn-icon" onclick="`+this.getWindowComponent()+`.addChildobject=true">
+          <i class="material-icons">add</i> `+this.translate.instant('ADD')+`
+      </a>
+      </div>
+      `;
+    return html;
   }
   private renderVersion(widget: any) {
     if(!this.allowReplacing)
       return '';
-    if(!this.currentNode){
-      return "Widget 'version' is only supported if a node object is available";
+    const constrain = this.handleWidgetConstrains(widget, {requiresNode: true, supportsBulk: false});
+    if(constrain) {
+      return constrain;
     }
     let html=`<div class="mdsVersion">
           <input type="file" style="display:none" id="fileSelect" onchange="
@@ -1974,6 +1997,10 @@ export class MdsComponent{
       return html;
   }
   private renderLicense(widget: any) {
+    const constrain = this.handleWidgetConstrains(widget, {requiresNode: false, supportsBulk: false});
+    if (constrain) {
+      return constrain;
+    }
     if(this.mode=='search'){
       if(!widget.values){
         return 'widget \'license\' does not have values connected, can\'t render it.';
@@ -1990,7 +2017,7 @@ export class MdsComponent{
     else {
         let html=`<div class="mdsLicense">`
         let isSafe=this.connector.getCurrentLogin() && this.connector.getCurrentLogin().currentScope!=null;
-        let canDelete=(this.currentNode && this.currentNode.access.indexOf(RestConstants.ACCESS_DELETE)!=-1);
+        let canDelete=(this.currentNodes[0] && this.currentNodes[0].access.indexOf(RestConstants.ACCESS_DELETE)!=-1);
         if(isSafe || !this.connector.hasToolPermissionInstant(RestConstants.TOOLPERMISSION_LICENSE)){
             html+=`<div class="mdsNoPermissions">`+this.translate.instant('MDS.LICENSE_NO_PERMISSIONS'+(isSafe ? '_SAFE' : ''))+`</div>`;
         }
@@ -2026,7 +2053,7 @@ export class MdsComponent{
   private setPreview(counter=1) {
     let preview:any=document.getElementById(this.getDomId('preview'));
     if(preview){
-      if(!this.currentNode){
+      if(!this.currentNodes){
         if(this.createType==MdsComponent.TYPE_TOOLDEFINITION){
           preview.src = this.connector.getThemeMimePreview('tool_definition.svg');
         }
@@ -2035,9 +2062,9 @@ export class MdsComponent{
         }
         return;
       }
-      if(preview.src && !preview.src.startsWith(this.currentNode.preview.url))
+      if(preview.src && !preview.src.startsWith(this.currentNodes[0].preview.url))
         return;
-      preview.src=this.currentNode.preview.url+'&crop=true&width=400&height=300&dontcache='+new Date().getMilliseconds();
+      preview.src=this.currentNodes[0].preview.url+'&crop=true&width=400&height=300&dontcache='+new Date().getMilliseconds();
       //if(node.preview.isIcon){
         setTimeout(()=>{
           //this.node.getNodeMetadata(node.ref.id).subscribe((data:NodeWrapper)=>{this.setPreview(data.node)});
@@ -2062,7 +2089,7 @@ export class MdsComponent{
       preview = (document.getElementById(this.getDomId('preview-select')) as any).files[0];
     }catch(e){}
     if(remove){
-        this.node.deleteNodePreview(this.currentNode.ref.id).subscribe(()=>{
+        this.node.deleteNodePreview(this.currentNodes[0].ref.id).subscribe(()=>{
             this.onAddChildobject(callback);
         },(error:any)=>{
             this.toast.error(error);
@@ -2070,7 +2097,7 @@ export class MdsComponent{
         });
     }
     else if(preview){
-      this.node.uploadNodePreview(this.currentNode.ref.id,preview).subscribe(()=>{
+      this.node.uploadNodePreview(this.currentNodes[0].ref.id,preview).subscribe(()=>{
         this.onAddChildobject(callback);
 
       },(error:any)=>{
@@ -2134,9 +2161,9 @@ export class MdsComponent{
   }
 
   private isContentEditable() {
-    let editor=this.currentNode && this.currentNode.properties[RestConstants.CCM_PROP_EDITOR_TYPE];
-    let wwwurl=this.currentNode && this.currentNode.properties[RestConstants.CCM_PROP_IO_WWWURL];
-    return editor!='tinymce' && !wwwurl;
+    let editor = this.currentNodes && this.currentNodes[0].properties[RestConstants.CCM_PROP_EDITOR_TYPE];
+    let wwwurl = this.currentNodes && this.currentNodes[0].properties[RestConstants.CCM_PROP_IO_WWWURL];
+    return editor !== 'tinymce' && !wwwurl;
   }
 
   private isExtendedWidget(widget: any) {
@@ -2228,8 +2255,8 @@ export class MdsComponent{
     return string;
   }
   private finish(){
-      this.onDone.emit(this.currentNode);
-      this.globalProgress=false;
+      this.onDone.emit(this.currentNodes);
+      this.globalProgress = false;
       this.toast.toast('WORKSPACE.EDITOR.UPDATED');
   }
   private getRemovedChildobjects(){
@@ -2340,22 +2367,26 @@ export class MdsComponent{
     private loadConfig() {
         this.locator.getConfigVariables().subscribe((variables: string[]) => {
             this.variables = variables;
-            for (let property in this.currentNode.properties) {
+            const node = this.currentNodes[0];
+            for (const property in node.properties) {
                 this.properties.push(property);
             }
             this.properties.sort();
-            let nodeGroup = this.currentNode.isDirectory ? 'map' : 'io';
-            if (this.currentNode.aspects.indexOf(RestConstants.CCM_ASPECT_IO_CHILDOBJECT) != -1) {
+            let nodeGroup = node.isDirectory ? MdsComponent.TYPE_MAP : MdsComponent.TYPE_IO;
+            if (node.aspects.indexOf(RestConstants.CCM_ASPECT_IO_CHILDOBJECT) !== -1) {
                 nodeGroup = MdsComponent.TYPE_CHILDOBJECT;
             }
-            if (this.currentNode.aspects.indexOf(RestConstants.CCM_ASPECT_TOOL_DEFINITION) != -1) {
+            if (node.aspects.indexOf(RestConstants.CCM_ASPECT_TOOL_DEFINITION) !== -1) {
                 nodeGroup = MdsComponent.TYPE_TOOLDEFINITION;
             }
-            if (this.currentNode.type == RestConstants.CCM_TYPE_TOOL_INSTANCE) {
+            if (node.type === RestConstants.CCM_TYPE_TOOL_INSTANCE) {
                 nodeGroup = MdsComponent.TYPE_TOOLINSTANCE;
             }
-            if (this.currentNode.type == RestConstants.CCM_TYPE_SAVED_SEARCH) {
+            if (node.type === RestConstants.CCM_TYPE_SAVED_SEARCH) {
                 nodeGroup = MdsComponent.TYPE_SAVED_SEARCH;
+            }
+            if (this.currentNodes.length > 1) {
+                nodeGroup = MdsComponent.TYPE_IO;
             }
             this.renderGroup(nodeGroup, this.mds);
             this.isLoading = false;
@@ -2370,6 +2401,24 @@ export class MdsComponent{
     }
 
   getCurrentProperties() {
-    return this.currentNode ? this.currentNode.properties : this._currentValues;
+    return this.currentNodes ? this.currentNodes[0].properties : this._currentValues;
+  }
+
+  private getMergedProperties() {
+      if (this.currentNodes && this.currentNodes.length === 1) {
+        return this.currentNodes[0].properties;
+      }
+      let properties: any = {};
+      for (const key of Object.keys(this.currentNodes[0].properties)) {
+        const identical = this.currentNodes.map((n) => n.properties[key]).reduce((a, b) =>
+          Helper.arrayEquals(a, b)
+        );
+        if (identical) {
+          properties[key] = this.currentNodes[0].properties[key];
+        }
+        console.log(key, identical);
+      }
+      console.log(properties);
+      return properties;
   }
 }

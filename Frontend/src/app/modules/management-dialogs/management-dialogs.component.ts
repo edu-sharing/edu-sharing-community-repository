@@ -17,6 +17,7 @@ import {Router} from '@angular/router';
 import {UIConstants} from "../../core-module/ui/ui-constants";
 import {ClipboardObject, TemporaryStorageService} from '../../core-module/core.module';
 import {RestUsageService} from "../../core-module/core.module";
+import {Observable} from 'rxjs';
 
 @Component({
   selector: 'workspace-management',
@@ -78,8 +79,8 @@ export class WorkspaceManagementDialogsComponent  {
   @Output() addNodesStreamChange = new EventEmitter();
     @Input() nodeVariant : Node;
     @Output() nodeVariantChange = new EventEmitter();
-  @Input() nodeMetadata : Node;
-    @Output() nodeMetadataChange = new EventEmitter();
+  @Input() nodeMetadata : Node[];
+    @Output() nodeMetadataChange = new EventEmitter<Node[]>();
     @Input() nodeTemplate : Node;
     @Output() nodeTemplateChange = new EventEmitter();
     @Input() nodeContributor : Node;
@@ -269,7 +270,7 @@ export class WorkspaceManagementDialogsComponent  {
         this.globalProgress=false;
         this.nodeDeleteOnCancel=true;
         this.nodeDeleteOnCancelChange.emit(true);
-        this.nodeMetadata=data.node;
+        this.nodeMetadata=[data.node];
         this.nodeMetadataAllowReplace=true;
         this.onRefresh.emit();
       });
@@ -284,7 +285,7 @@ export class WorkspaceManagementDialogsComponent  {
  public closeContributor(){
      if(this.editorPending){
          this.editorPending=false;
-         this.nodeMetadata=this.nodeContributor;
+         this.nodeMetadata=[this.nodeContributor];
      }
    this.nodeContributor=null;
    this.nodeContributorChange.emit(null);
@@ -294,7 +295,7 @@ export class WorkspaceManagementDialogsComponent  {
     this.showLtiToolsChange.emit(false);
   }
   private closeLicense() {
-    if(this.nodeLicenseOnUpload && this.nodeLicense.length==1){
+    if(this.nodeLicenseOnUpload){
       this.showMetadataAfterUpload(this.nodeLicense);
     }
     else {
@@ -304,7 +305,7 @@ export class WorkspaceManagementDialogsComponent  {
     }
       if(this.editorPending){
           this.editorPending=false;
-          this.nodeMetadata=this.nodeLicense[0];
+          this.nodeMetadata=this.nodeLicense;
       }
     this.nodeLicense=null;
     this.nodeLicenseOnUpload=false;
@@ -315,21 +316,22 @@ export class WorkspaceManagementDialogsComponent  {
     this.onUpdateLicense.emit();
     this.onRefresh.emit(nodes);
   }
-  private closeEditor(refresh:boolean,node:Node=null){
-      if(node!=null && this.wasUploaded){
-          this.onUploadFilesProcessed.emit([node]);
+  private closeEditor(refresh:boolean,node: Node[]=null){
+      if(node!=null && this.wasUploaded) {
+          this.onUploadFilesProcessed.emit(node);
       }
       this.wasUploaded=false;
-      if(this.nodeDeleteOnCancel && node==null){
-          this.globalProgress=true;
-          this.nodeService.deleteNode(this.nodeMetadata.ref.id,false).subscribe(()=>{
-            this.nodeDeleteOnCancel=false;
-            this.nodeDeleteOnCancelChange.emit(false);
-            this.globalProgress=false;
-            this.closeEditor(true);
-          });
+      if (this.nodeDeleteOnCancel && node == null) {
+          this.globalProgress = true;
+          Observable.forkJoin(this.nodeMetadata.map((n) => this.nodeService.deleteNode(n.ref.id, false)))
+              .subscribe(() => {
+                  this.nodeDeleteOnCancel = false;
+                  this.nodeDeleteOnCancelChange.emit(false);
+                  this.globalProgress = false;
+                  this.closeEditor(true);
+              });
           return;
-    }
+      }
     this.nodeDeleteOnCancel=false;
     this.nodeDeleteOnCancelChange.emit(false);
     this.nodeMetadata=null;
@@ -337,9 +339,9 @@ export class WorkspaceManagementDialogsComponent  {
     this.createMetadata=null;
     this.onCloseMetadata.emit(node);
     if(refresh) {
-      this.onRefresh.emit([node]);
-      if(node && node.aspects.indexOf(RestConstants.CCM_ASPECT_TOOL_DEFINITION)!=-1) {
-        this.currentLtiTool = node;
+      this.onRefresh.emit(node);
+      if(node && node.length === 1 && node[0].aspects.indexOf(RestConstants.CCM_ASPECT_TOOL_DEFINITION) !== -1) {
+        this.currentLtiTool = node[0];
       }
       else{
         this.ltiToolRefresh=new Boolean();
@@ -348,7 +350,7 @@ export class WorkspaceManagementDialogsComponent  {
   }
   public editLti(event:Node){
     //this.closeLtiTools();
-    this.nodeMetadata=event;
+    this.nodeMetadata=[event];
   }
   public createLti(event:any){
     //this.closeLtiTools();
@@ -426,9 +428,9 @@ export class WorkspaceManagementDialogsComponent  {
   }
 
     private showMetadataAfterUpload(event: Node[]) {
-        this.nodeMetadata=event[0];
-        this.nodeMetadataChange.emit(event[0]);
-        this.nodeMetadataAllowReplace=false;
+        this.nodeMetadata = event;
+        this.nodeMetadataChange.emit(event);
+        this.nodeMetadataAllowReplace = false;
         this.nodeDeleteOnCancel=true;
         this.nodeDeleteOnCancelChange.emit(true);
     }
