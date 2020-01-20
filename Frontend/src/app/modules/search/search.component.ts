@@ -232,10 +232,10 @@ export class SearchComponent {
            if(this.setSidenavSettings()) {
              // auto, never, always
              let sidenavMode = this.config.instant('searchSidenavMode','never');
-             if (sidenavMode == 'never') {
+             if (sidenavMode === 'never') {
                this.searchService.sidenavOpened = false;
              }
-             if (sidenavMode == 'always') {
+             if (sidenavMode === 'always') {
                this.searchService.sidenavOpened = true;
              }
            }
@@ -385,6 +385,7 @@ export class SearchComponent {
       repositoryFilter:this.getEnabledRepositories().join(','),
       mds:mds,repository:repository,
       mdsExtended:this.mdsExtended,
+      sidenav:this.searchService.sidenavOpened,
       materialsSortBy:this.searchService.sort.materialsSortBy,
       materialsSortAscending:this.searchService.sort.materialsSortAscending,
       reurl:this.searchService.reurl}});
@@ -1121,12 +1122,14 @@ export class SearchComponent {
             });
             return;
         }
-        this.mainnav = param.mainnav==='false' ? false : true;
-
-
-        if(param['query'])
-          this.searchService.searchTerm=param['query'];
-        if(param['repositoryFilter']) {
+        this.mainnav = param.mainnav !== 'false';
+        if (param.sidenav) {
+            this.searchService.sidenavOpened = param.sidenav !== 'false';
+        }
+        if (param.query) {
+            this.searchService.searchTerm = param.query;
+        }
+        if (param.repositoryFilter) {
             this.enabledRepositories = param['repositoryFilter'].split(',');
             // do a reload of the repos
             this.repositoryIds=[];
@@ -1209,6 +1212,7 @@ export class SearchComponent {
     toggleSidenav() {
         this.searchService.sidenavOpened=!this.searchService.sidenavOpened;
         this.setFixMobileNav();
+        //this.routeSearch();
     }
 
     private setFixMobileNav() {
