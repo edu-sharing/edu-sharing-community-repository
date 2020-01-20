@@ -2025,7 +2025,7 @@ public class NodeApi  {
 	    
 	    @ApiOperation(
 	    	value = "Set single property of node.", 
-	    	notes = "Set single property of node.")
+	    	notes = "When the property is unset (null), it will be removed")
 	    
 	    @ApiResponses(
 	    	value = { 
@@ -2041,7 +2041,7 @@ public class NodeApi  {
 	    	@ApiParam(value = RestConstants.MESSAGE_REPOSITORY_ID,required=true, defaultValue="-home-" ) @PathParam("repository") String repository,
 	    	@ApiParam(value = RestConstants.MESSAGE_NODE_ID,required=true ) @PathParam("node") String node,
 	    	@ApiParam(value = "property",required=true ) @QueryParam("property")  String property,
-	    	@ApiParam(value = "value",required=true ) @QueryParam("value")  String value,
+	    	@ApiParam(value = "value",required=false ) @QueryParam("value")  String value,
 			@Context HttpServletRequest req) {
 	    
 	    	try {
