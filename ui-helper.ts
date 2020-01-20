@@ -334,7 +334,17 @@ export class UIHelper {
                 mdsSets[i].name = translate.instant('DEFAULT_METADATASET', {name: mdsSets[i].name});
         }
     }
-    static addToCollection(collectionService: RestCollectionService, router: Router, toast: Toast, collection: Node | Collection, nodes: Node[], callback: Function = null, position = 0, error = false,results=[]) {
+    static addToCollection(
+        collectionService: RestCollectionService,
+        router: Router,
+        toast: Toast,
+        collection: Node | Collection,
+        nodes: Node[],
+        callback: (nodes: Node[]) => void = null,
+        position = 0,
+        error = false,
+        results: Node[] = [],
+    ) {
         if (position >= nodes.length) {
             if (!error)
                 UIHelper.showAddedToCollectionToast(toast, router, collection, nodes.length);
