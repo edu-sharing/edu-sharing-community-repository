@@ -17,7 +17,18 @@ import {GlobalProgressComponent} from './components/global-progress/global-progr
 import {Toast} from './toast';
 import {ToastyModule} from 'ngx-toasty';
 import {DropdownComponent} from './components/dropdown/dropdown.component';
-import {MatButtonModule, MatCardModule, MatCheckboxModule, MatInputModule, MatMenuModule, MatRadioModule, MatRippleModule, MatTabsModule, MatProgressBarModule} from '@angular/material';
+import {
+    MatButtonModule,
+    MatCardModule,
+    MatCheckboxModule,
+    MatInputModule,
+    MatMenuModule,
+    MatRadioModule,
+    MatRippleModule,
+    MatTabsModule,
+    MatProgressBarModule,
+    MatProgressSpinnerModule
+} from '@angular/material';
 import {AuthorityNamePipe} from './pipes/authority-name.pipe';
 import {AuthorityColorPipe} from './pipes/authority-color.pipe';
 import {FormatSizePipe} from './pipes/file-size.pipe';
@@ -76,6 +87,7 @@ import { UserAvatarComponent } from './components/user-avatar/user-avatar.compon
         MatProgressBarModule,
         MatInputModule,
         MatCheckboxModule,
+        MatProgressSpinnerModule,
         ToastyModule.forRoot(),
         TranslateModule.forRoot({
             loader: {
