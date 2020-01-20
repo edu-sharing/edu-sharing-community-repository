@@ -4,7 +4,7 @@
   (onLoading)="globalProgress=$event"
   (onCancel)="closeLicense()"
   (openContributor)="nodeContributor=$event[0]"
-  (onDone)="updateLicense()"
+  (onDone)="updateLicense($event)"
 ></workspace-license>
 <add-stream
   *ngIf="addNodesStream"
@@ -22,7 +22,7 @@
 <workspace-workflow *ngIf="nodeWorkflow"
                     [nodeId]="nodeWorkflow.ref.id"
                     (onLoading)="globalProgress=$event"
-                    (onDone)="closeWorkflow(true)"
+                    (onDone)="closeWorkflow($event)"
                     (onClose)="closeWorkflow()"
 ></workspace-workflow>
 <workspace-share-link *ngIf="nodeShareLink"

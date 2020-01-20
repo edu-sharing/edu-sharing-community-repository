@@ -19,9 +19,13 @@ import {Helper} from "../../../core-module/rest/helper";
   styleUrls: ['explorer.component.scss']
 })
 export class WorkspaceExplorerComponent{
-  public _nodes : Node[]=[];
-  public sortBy : string=RestConstants.CM_NAME;
-  public sortAscending=RestConstants.DEFAULT_SORT_ASCENDING;
+  public _nodes: Node[] = [];
+  @Input() set nodes(nodes: Node[]){
+    this._nodes = nodes;
+  }
+  @Output() nodesChange = new EventEmitter<Node[]>();
+  public sortBy: string = RestConstants.CM_NAME;
+  public sortAscending = RestConstants.DEFAULT_SORT_ASCENDING;
 
 
   public columns : ListItem[]=[];
@@ -55,7 +59,6 @@ export class WorkspaceExplorerComponent{
   }
   @Output() onOpenNode=new EventEmitter();
   @Output() onSelectionChanged=new EventEmitter();
-  @Output() onListChange=new EventEmitter();
   @Output() onSelectNode=new EventEmitter();
   @Output() onUpdateOptions=new EventEmitter();
   @Output() onSearchGlobal=new EventEmitter();
@@ -90,7 +93,9 @@ export class WorkspaceExplorerComponent{
     }
     this.loading=true;
     this.showLoading=true;
-	let request : any={offset:this._nodes.length,propertyFilter:[
+    // ignore virtual (new) added/uploaded elements
+    const offset = this.getRealNodeCount();
+	let request: any={offset:offset,propertyFilter:[
 	  RestConstants.ALL
 	  /*RestConstants.CM_MODIFIED_DATE,
     RestConstants.CM_CREATOR,
@@ -144,17 +149,18 @@ export class WorkspaceExplorerComponent{
         this.loading=false;
         this.showLoading=false;
     }
-  private addNodes(data : NodeList,wasSearch:boolean){
-    if(this.lastRequestSearch!=wasSearch)
+  private addNodes(data: NodeList,wasSearch: boolean){
+    if (this.lastRequestSearch !== wasSearch) {
       return;
-      console.log(data);
-      if(data && data.nodes) {
+    }
+      if (data && data.nodes) {
         this.totalCount=data.pagination.total;
         this._nodes=this._nodes.concat(data.nodes);
       }
-      if(data.pagination.total==this._nodes.length)
-        this.hasMoreToLoad=false;
-      this.onListChange.emit(this._nodes);
+      if (data.pagination.total === this.getRealNodeCount()) {
+        this.hasMoreToLoad = false;
+      }
+      this.nodesChange.emit(this._nodes);
       this.loading=false;
       this.showLoading=false;
   }
@@ -331,5 +337,9 @@ export class WorkspaceExplorerComponent{
   }
   canDrop = (event:any)=>{
     return event.target.isDirectory;
+  }
+
+  private getRealNodeCount() {
+    return this._nodes.filter((n) => !n.virtual).length;
   }
 }

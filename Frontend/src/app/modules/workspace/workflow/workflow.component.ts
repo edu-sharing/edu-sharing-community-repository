@@ -71,7 +71,7 @@ export class WorkspaceWorkflowComponent{
 
     });
   }
-  @Output() onDone=new EventEmitter();
+  @Output() onDone=new EventEmitter<Node>();
   @Output() onClose=new EventEmitter();
   @Output() onLoading=new EventEmitter();
   public isAllowedAsNext(status:WorkflowDefinition){
@@ -148,11 +148,16 @@ export class WorkspaceWorkflowComponent{
     entry.comment=this.comment;
     entry.status=this.status.id;
     this.onLoading.emit(true);
-    this.nodeService.addWorkflow(this._nodeId,entry).subscribe(()=>{
+    this.nodeService.addWorkflow(this._nodeId, entry).subscribe(() => {
       this.toast.toast('WORKSPACE.TOAST.WORKFLOW_UPDATED');
-      this.onDone.emit();
-      this.onLoading.emit(false);
-    },(error:any)=>{
+      this.nodeService.getNodeMetadata(this._nodeId, [RestConstants.ALL]).subscribe((node) => {
+        this.onDone.emit(node.node);
+        this.onLoading.emit(false);
+      }, (error) => {
+        this.toast.error(error);
+        this.onLoading.emit(false);
+      });
+    }, (error) => {
       this.toast.error(error);
       this.onLoading.emit(false);
     });

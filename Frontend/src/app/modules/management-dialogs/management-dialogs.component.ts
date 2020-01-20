@@ -89,7 +89,7 @@ export class WorkspaceManagementDialogsComponent  {
   @Input() nodeMetadataAllowReplace : Boolean;
   @Output() onClose=new EventEmitter();
   @Output() onCreate=new EventEmitter();
-  @Output() onRefresh=new EventEmitter();
+  @Output() onRefresh=new EventEmitter<Node[]|void>();
   @Output() onUploadFilesProcessed=new EventEmitter();
   @Output() onCloseMetadata=new EventEmitter();
   @Output() onUploadFileSelected=new EventEmitter();
@@ -192,11 +192,12 @@ export class WorkspaceManagementDialogsComponent  {
      this.nodeShare = null
      this.nodeShareChange.emit(null);
  }
-    public closeWorkflow(refresh=false){
-        this.nodeWorkflow=null;
+    public closeWorkflow(node: Node = null){
+        this.nodeWorkflow = null;
         this.nodeWorkflowChange.emit(null);
-        if(refresh)
-            this.onRefresh.emit();
+        if (node) {
+            this.onRefresh.emit([node]);
+        }
     }
     private deleteConfirmed(nodes : Node[],position=0,error=false) : void {
         if (position >= nodes.length) {
@@ -231,21 +232,18 @@ export class WorkspaceManagementDialogsComponent  {
             }
         }
     }
- public uploadDone(event : Node[]){
-    if(this.config.instant('licenseDialogOnUpload',false)){
-         this.nodeLicense=event;
-         this.nodeLicenseOnUpload=true;
-    }
-    else if(this.filesToUpload.length==1){
+ public uploadDone(event: Node[]){
+    if (this.config.instant('licenseDialogOnUpload', false)) {
+         this.nodeLicense = event;
+         this.nodeLicenseOnUpload = true;
+    }else if (this.filesToUpload.length === 1) {
         this.showMetadataAfterUpload(event);
-    }
-    else{
+    }else {
         this.onUploadFilesProcessed.emit(event);
     }
-    this.wasUploaded=true;
-    this.filesToUpload=null;
+    this.wasUploaded = true;
+    this.filesToUpload = null;
     this.filesToUploadChange.emit(null);
-    this.onRefresh.emit();
   }
   public refresh(){
     this.onRefresh.emit();
@@ -312,10 +310,10 @@ export class WorkspaceManagementDialogsComponent  {
     this.nodeLicenseOnUpload=false;
     this.nodeLicenseChange.emit(null);
   }
-  private updateLicense(){
+  private updateLicense(nodes:Node[]){
     this.closeLicense();
     this.onUpdateLicense.emit();
-    this.onRefresh.emit();
+    this.onRefresh.emit(nodes);
   }
   private closeEditor(refresh:boolean,node:Node=null){
       if(node!=null && this.wasUploaded){
@@ -339,7 +337,7 @@ export class WorkspaceManagementDialogsComponent  {
     this.createMetadata=null;
     this.onCloseMetadata.emit(node);
     if(refresh) {
-      this.onRefresh.emit();
+      this.onRefresh.emit([node]);
       if(node && node.aspects.indexOf(RestConstants.CCM_ASPECT_TOOL_DEFINITION)!=-1) {
         this.currentLtiTool = node;
       }

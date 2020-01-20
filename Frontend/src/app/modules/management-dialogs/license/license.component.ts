@@ -196,7 +196,7 @@ export class WorkspaceLicenseComponent  {
     }
   @Output() onCancel=new EventEmitter();
   @Output() onLoading=new EventEmitter();
-  @Output() onDone=new EventEmitter();
+  @Output() onDone=new EventEmitter<Node[]|void>();
   @Output() openContributor=new EventEmitter();
   constructor(
     private connector : RestConnectorService,
@@ -226,21 +226,26 @@ export class WorkspaceLicenseComponent  {
     prop=this.getProperties(prop);
     let i=0;
     this.onLoading.emit(true);
+    const updatedNodes: Node[] = [];
     for(let node of this._nodes) {
       let authors=this._nodes[i].properties[RestConstants.CCM_PROP_LIFECYCLECONTRIBUTER_AUTHOR];
-      if(!authors)
-          authors=[];
+      if(!authors) {
+          authors = [];
+      }
       authors[0]=this.authorVCard.toVCardString();
       prop[RestConstants.CCM_PROP_LIFECYCLECONTRIBUTER_AUTHOR]=authors;
+      node.properties=prop;
       i++;
-      this.nodeApi.editNodeMetadataNewVersion(node.ref.id,RestConstants.COMMENT_LICENSE_UPDATE, prop).subscribe(() => {
+      this.nodeApi.editNodeMetadataNewVersion(node.ref.id,RestConstants.COMMENT_LICENSE_UPDATE, prop).subscribe((result) => {
+        updatedNodes.push(result.node);
         this.savePermissions(node);
-        if(i==this._nodes.length){
+        if(updatedNodes.length === this._nodes.length){
           this.toast.toast('WORKSPACE.TOAST.LICENSE_UPDATED');
           this.onLoading.emit(false);
-          this.onDone.emit(prop);
-          if(callback)
-            callback();
+          this.onDone.emit(updatedNodes);
+          if (callback) {
+              callback();
+          }
         }
       }, (error: any) => {
         this.onLoading.emit(false);

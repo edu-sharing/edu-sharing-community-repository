@@ -115,6 +115,7 @@ export class WorkspaceMainComponent implements EventListener {
     public isBlocked = false;
     private isGuest: boolean;
     private currentNodes: Node[];
+    private newNodes: Node[];
     private appleCmd = false;
     public workflowNode: Node;
     public deleteNode: Node[];
@@ -565,10 +566,17 @@ export class WorkspaceMainComponent implements EventListener {
             }
         );
     }
-    private afterUpload(node: Node[]) {
+    private afterUpload(nodes: Node[]) {
         if (this.reurl) {
-            NodeHelper.addNodeToLms(this.router, this.storage, node[0], this.reurl);
+            NodeHelper.addNodeToLms(this.router, this.storage, nodes[0], this.reurl);
         }
+        console.log(nodes);
+        nodes = nodes.map((n) => {
+            n.virtual = true;
+            return n;
+        });
+        this.updateList(nodes.concat(this.currentNodes));
+        this.selection = nodes;
     }
     private uploadFiles(files: FileList) {
         this.onFileDrop(files);
@@ -1054,7 +1062,13 @@ export class WorkspaceMainComponent implements EventListener {
 
         this.openDirectory(id);
     }
-    private refresh(refreshPath = true) {
+    private refresh(refreshPath = true,nodes: Node[] = null) {
+        // only refresh properties in this case
+        if(nodes && nodes.length){
+            console.log(nodes);
+            this.updateNodes(nodes);
+            return;
+        }
         const search = this.searchQuery;
         const folder = this.currentFolder;
         this.currentFolder = null;
@@ -1238,5 +1252,14 @@ export class WorkspaceMainComponent implements EventListener {
             && clip
             && ((!clip.sourceNode || clip.sourceNode.ref.id !== this.currentFolder.ref.id) || clip.copy)
             && this.createAllowed;
+    }
+
+    private updateNodes(nodes: Node[]) {
+        for(let node of this.currentNodes){
+            const hit = nodes.filter((n) => n.ref.id === node.ref.id);
+            if (hit && hit.length === 1) {
+                Helper.copyObjectProperties(node, hit[0]);
+            }
+        }
     }
 }
