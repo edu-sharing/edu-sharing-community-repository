@@ -105,7 +105,7 @@ mds .mdsGroup{
       justify-content: flex-end;
       width: 100%;
       position: absolute;
-      top: -25px;
+      top: -26px;
       label:not(:last-child){
         padding-right: 10px;
       }
@@ -150,7 +150,6 @@ mds .mdsGroup{
   .suggestionList{
     position: absolute;
     width:100%;
-    max-width:600px;
     margin-top: -18px;
     top: 60px;
   }
@@ -191,6 +190,9 @@ mds .mdsGroup{
       height: 41px;
       padding: 0.3em 1rem;
       background: transparent;
+      position: absolute;
+      top:0;
+      right:0;
     }
   }
   .widget_range{
