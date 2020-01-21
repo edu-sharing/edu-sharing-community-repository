@@ -39,7 +39,6 @@ mat-tab-group{
 }
 
 .collections-cards-div {
-    clear: left;
     width: 100%;
     margin-top: 8px;
 }
@@ -122,7 +121,6 @@ mat-tab-group{
 
 .collections-master-div {
     padding:0 10% 20px 15%;
-    float: left;
     width: 100%;
 }
 
@@ -267,6 +265,8 @@ mat-tab-group{
     position: fixed;
     //overflow-y: auto;
     top:$mainnavHeight;
+    float: left;
+    z-index: 1;
 }
 .dark-color{
   color: #000;
@@ -310,7 +310,7 @@ mat-tab-group{
 .breadcrumb-space{
   padding: 15px 30px;
   background: #fff;
-  margin-left: -40px;
+  margin-left: -35px;
   margin-right: -16px;
   @include materialShadow();
 }
@@ -349,8 +349,8 @@ mat-tab-group{
 }
 @media only screen and (max-width: $mobileWidth) {
     :host /deep/{
-      .collections-master-div-notabs .subcollections{
-        margin-top: 240px+$mainnavHeight;
+      .collections-master-div-notabs {
+        padding-top: 240px+$mainnavHeight;
       }
     }
   .collection-new-preview-headline{
