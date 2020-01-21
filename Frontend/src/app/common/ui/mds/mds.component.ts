@@ -44,6 +44,7 @@ export class MdsComponent{
   @Input() embedded=false;
   private activeAuthorType: number;
   public static TYPE_IO = 'io';
+  public static TYPE_IO_BULK = 'io_bulk';
   public static TYPE_MAP = 'map';
   public static TYPE_CHILDOBJECT = 'io_childobject';
   public static TYPE_TOOLDEFINITION = 'tool_definition';
@@ -515,8 +516,9 @@ export class MdsComponent{
         continue;
       }
       let element=(document.getElementById(domId) as any);
-      if(!element)
+      if (!element) {
         continue;
+      }
       if(widget.type=='checkboxVertical' || widget.type=='checkboxHorizontal'){
         let inputs=element.getElementsByTagName('input');
         properties[widget.id]=[];
@@ -527,16 +529,16 @@ export class MdsComponent{
         }
         continue;
       }
-      if(this.isPrimitiveWidget(widget) && element.disabled){
+      if ((this.isPrimitiveWidget(widget)
+          || widget.type === 'textarea'
+          || widget.type === 'singleoption')
+          && element.disabled) {
         // disabled => ignore property
         continue;
       }
-      if(this.isMultivalueWidget(widget) && this.isBulkMode()){
-
-      }
       element.className=element.className.replace('invalid','').trim();
-      let v=element.value;
-      if(element.getAttribute('data-value') && !this.isPrimitiveWidget(widget)){
+      let v = element.value;
+      if(element.getAttribute('data-value') && !this.isPrimitiveWidget(widget)) {
         v=element.getAttribute('data-value');
       }
       let props=[v];
@@ -563,21 +565,34 @@ export class MdsComponent{
             props = valueClean;
           else
             props = [valueClean];
-      }
-      else if(this.isMultivalueWidget(widget)){
-        props=[];
+      }else if (this.isMultivalueWidget(widget)) {
+        props = [];
+        if (this.isMultivalueWidget(widget) && this.isBulkMode()) {
+          const mode = element.getAttribute('data-bulk');
+          if(mode === 'replace'){
+            // keep an empty property array -> replace
+          }else{
+            // add props
+            if (propertiesIn[widget.id]) {
+              props = propertiesIn[widget.id];
+            }
+          }
+        }
         for(let i=0;i<element.childNodes.length;i++){
-          var e=(element.childNodes.item(i) as HTMLElement);
-          props.push(e.getAttribute('data-value'));
+          const e = (element.childNodes.item(i) as HTMLElement);
+          const value = e.getAttribute('data-value');
+          if (props.indexOf(value) === -1) {
+            props.push(value);
+          }
         }
       }
       else if(widget.type=='checkbox'){
         props=[(element as any).checked];
       }
-      if(this.isRequiredWidget(widget) && (!props.length || props[0]=='')){
-        if(showError) {
+      if (this.isRequiredWidget(widget) && (!props.length || props[0]=='')) {
+        if (showError) {
           let inputField=element;
-          if(this.isMultivalueWidget(widget)){
+          if (this.isMultivalueWidget(widget)) {
             inputField=document.getElementById(domId+'_suggestionsInput');
           }
           if(inputField)
@@ -593,16 +608,22 @@ export class MdsComponent{
         if(props.length==1 && props[0]=='')
           props=[];
       }
-      properties[widget.id]=props;
+      properties[widget.id] = props;
     }
-    if(!properties[RestConstants.CM_NAME]){
-      properties[RestConstants.CM_NAME]=properties[RestConstants.LOM_PROP_TITLE];
+    if (!properties[RestConstants.CM_NAME]) {
+      if (this.isBulkMode()) {
+        properties[RestConstants.CM_NAME] = propertiesIn[RestConstants.CM_NAME];
+      }
+      else{
+        properties[RestConstants.CM_NAME] = properties[RestConstants.LOM_PROP_TITLE];
+      }
     }
     return properties;
   }
   private checkFileExtension(name:string,callback:Function=null,values:any){
-    if(values==null)
+    if (values == null) {
       return true;
+    }
     let ext1=name.split('.');
     let ext2=values[RestConstants.CM_NAME][0].split('.');
     let extV1=ext1[ext1.length-1];
@@ -636,13 +657,14 @@ export class MdsComponent{
     }
     return true;
   }
-  public saveValues(callback:Function=null,force=false){
-      let properties:any={};
-      if(this.currentNodes)
-          properties=this.currentNodes[0].properties;
-    let values=this.getValues(properties);
+  public saveValues(callback: Function=null,force = false){
+      let properties: any = {};
+      if (this.currentNodes) {
+        properties = this.currentNodes[0].properties;
+      }
+    const values = this.getValues(properties);
     // check if file extension changed and warn
-    if(!force){
+    if(!force) {
         // for regular nodes
         if(this.currentNodes[0] && this.currentNodes.length === 1 && this.currentNodes[0].type === RestConstants.CCM_TYPE_IO && !this.currentNodes[0].properties[RestConstants.CCM_PROP_IO_WWWURL] && !this.checkFileExtension(this.currentNodes[0].name,callback,values)){
             return;
@@ -656,12 +678,7 @@ export class MdsComponent{
       this.onDone.emit(this.getValues());
       return this.getValues();
     }
-    if(values==null)
-      return;
 
-    for(let key in values){
-      properties[key]=values[key];
-    }
     let version='';
     let files:File[]=[];
     try {
@@ -697,8 +714,7 @@ export class MdsComponent{
     }
     else {
       // can be bulk mode
-      console.log(properties);
-      Observable.forkJoin(this.currentNodes.map((n) => this.node.editNodeMetadataNewVersion(n.ref.id,version,properties)))
+      Observable.forkJoin(this.currentNodes.map((n) => this.node.editNodeMetadataNewVersion(n.ref.id,version,this.getValues(n.properties))))
           .subscribe((nodes) => {
             this.currentNodes = nodes.map((n) => n.node);
             this.onUpdatePreview(callback);
@@ -921,9 +937,9 @@ export class MdsComponent{
     }
     const id = this.getDomId(widget.id + '_bulk');
     return `<div class="bulk-enable">
-                <input type="radio" name="´ + id + ´" class="filled-in" id="` + id + `_append" value="append" onchange="` + this.getWindowComponent() + `.setBulkMode('` + widget.id + `', event)" checked>
+                <input type="radio" name="` + id + `" class="filled-in" id="` + id + `_append" value="append" onchange="` + this.getWindowComponent() + `.setBulkMode('` + widget.id + `', event)" checked>
                 <label for="` + id + `_append">` + this.translate.instant('MDS.BULK_APPEND') + `</label>
-                <input type="radio" name="´ + id + ´" class="filled-in" id="` + id + `_replace" value="replace" onchange="` + this.getWindowComponent() + `.setBulkMode('` + widget.id + `', event)">
+                <input type="radio" name="` + id + `" class="filled-in" id="` + id + `_replace" value="replace" onchange="` + this.getWindowComponent() + `.setBulkMode('` + widget.id + `', event)">
                 <label for="` + id + `_replace">` + this.translate.instant('MDS.BULK_REPLACE') + `</label>
             </div>`;
   }
@@ -1318,6 +1334,13 @@ export class MdsComponent{
       }
   }
   private renderTreeWidget(widget:any,attr:string){
+    const constrain = this.handleWidgetConstrains(widget, {
+      requiresNode: false,
+      supportsBulk: widget.type === 'multivalueTree'
+    });
+    if (constrain) {
+      return constrain;
+    }
     let domId=this.getWidgetDomId(widget);
     let html=this.autoSuggestField(widget,'',false,
                 this.getWindowComponent()+`.openTree('`+widget.id+`')`,'arrow_forward',widget.type=='singlevalueTree')
@@ -1367,14 +1390,23 @@ export class MdsComponent{
     }
   }
   private renderTextareaWidget(widget:any,attr:string){
-    let html='<textarea class="materialize-textarea" id="'+this.getWidgetDomId(widget)+'"';
+    let html = '';
+    html += this.addBulkCheckbox(widget);
+    html += '<textarea class="materialize-textarea" id="'+this.getWidgetDomId(widget)+'"';
+    if(this.isBulkMode()){
+      html += ' disabled';
+    }
     if(widget.placeholder){
-      html+=' placeholder="'+widget.placeholder+'"';
+      html += ' placeholder="'+widget.placeholder+'"';
     }
     html += '></textarea>';
     return html;
   }
   private renderDurationWidget(widget:any,attr:string){
+    const constrain = this.handleWidgetConstrains(widget, {requiresNode: false, supportsBulk: false});
+    if(constrain) {
+      return constrain;
+    }
     let id=this.getWidgetDomId(widget);
     let html=`
               <div class="inputField"><label for="`+id+`_hours">`+this.translate.instant('INPUT_HOURS')+`</label>
@@ -1425,9 +1457,13 @@ export class MdsComponent{
     return html;
   }
   private renderRangeWidget(widget:any,attr:string){
-      let id=this.getWidgetDomId(widget);
-      let html=`
-              <div class="inputRange" id="`+id+`"></div>
+    const constrain = this.handleWidgetConstrains(widget, {requiresNode: false, supportsBulk: false});
+    if (constrain) {
+      return constrain;
+    }
+    let id=this.getWidgetDomId(widget);
+    let html=`
+      <div class="inputRange" id="`+id+`"></div>
     `;
     setTimeout(()=>{
       let values=widget.defaultvalue!=null ? widget.defaultvalue : widget.min;
@@ -1462,9 +1498,16 @@ export class MdsComponent{
   }
 
   private renderSingleoptionWidget(widget:any,attr:string){
-    if(widget.values==null)
-      return 'Error at '+widget.id+': No values for a singleoption widget is not possible';
-    let html='<select id="'+this.getWidgetDomId(widget)+'">';
+    let html = '';
+    html += this.addBulkCheckbox(widget);
+    if (widget.values == null) {
+      return 'Error at ' + widget.id + ': No values for a singleoption widget is not possible';
+    }
+    html += '<select id="'+this.getWidgetDomId(widget)+'"';
+    if(this.isBulkMode()){
+      html += ' disabled';
+    }
+    html += '>';
     if(widget.allowempty==true){
       html+='<option value=""></option>';
     }
@@ -1680,7 +1723,7 @@ export class MdsComponent{
   }
   private renderAuthor(widget: any) {
     const constrain = this.handleWidgetConstrains(widget, {requiresNode: false, supportsBulk: false});
-    if(constrain) {
+    if (constrain) {
       return constrain;
     }
     let authorWidget={id:RestConstants.CCM_PROP_LIFECYCLECONTRIBUTER_AUTHOR};
@@ -1728,16 +1771,17 @@ export class MdsComponent{
         document.getElementById(this.getDomId('preview-delete')).style.display='none';
     }
     private handleWidgetConstrains(widget: any, options: {requiresNode?: boolean, supportsBulk?: boolean}) {
+        const name = widget.type || widget.id;
         if (options.requiresNode && !(this.currentNodes || this.currentNodes.length)) {
-          return 'Widget \'' + widget.id + '\' is only supported if a node object is available';
+          return 'Widget \'' + name + '\' is only supported if a node object is available';
         }else if (!options.supportsBulk && this.isBulkMode()) {
-          return 'Widget \'' + widget.id + '\' is not supported in bulk mode';
+          return 'Widget \'' + name + '\' is not supported in bulk mode';
         }
         return null;
     }
     private renderPreview(widget: any,attr: string) {
       const constrain = this.handleWidgetConstrains(widget, {requiresNode: true, supportsBulk: false});
-      if(constrain) {
+      if (constrain) {
           return constrain;
       }
       let preview=`<div class="mdsPreview">`;
@@ -1888,7 +1932,7 @@ export class MdsComponent{
     if(!this.allowReplacing)
       return '';
     const constrain = this.handleWidgetConstrains(widget, {requiresNode: true, supportsBulk: false});
-    if(constrain) {
+    if (constrain) {
       return constrain;
     }
     let html=`<div class="mdsVersion">
@@ -2407,7 +2451,12 @@ export class MdsComponent{
                 nodeGroup = MdsComponent.TYPE_SAVED_SEARCH;
             }
             if (this.currentNodes.length > 1) {
-                nodeGroup = MdsComponent.TYPE_IO;
+                if (nodeGroup !== MdsComponent.TYPE_IO) {
+                  this.toast.error(null, 'MDS.ERROR_INVALID_TYPE_BULK');
+                  this.cancel();
+                  return;
+                }
+                nodeGroup = MdsComponent.TYPE_IO_BULK;
             }
             this.renderGroup(nodeGroup, this.mds);
             this.isLoading = false;
