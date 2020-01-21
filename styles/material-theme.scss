@@ -103,8 +103,12 @@ $candy-app-theme: mat-light-theme($candy-app-primary, $candy-app-accent, $candy-
 }
 // align prefix in input fields
 .mat-form-field-appearance-outline .mat-form-field-prefix {
-  top: 0.4em!important;
+  top: 0.4em !important;
   left: -0.1em;
+}
+// align subscript/bottom hint to complete left/right
+.mat-form-field-appearance-outline .mat-form-field-subscript-wrapper{
+  padding: 0 !important;
 }
 .mat-form-field.mat-form-field-no-padding{
       .mat-form-field-wrapper {
