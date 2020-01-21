@@ -77,7 +77,8 @@ export class ListTableComponent implements EventListener{
    */
   @Input() set nodes(nodes: Node[]){
     // remove all non-virtual nodes which are replaced by the virtual nodes (virtual have higher prio)
-    if (nodes) {
+    // also validate that this is only enabled for regular nodes
+    if (nodes && nodes.length && nodes[0].ref.id) {
       const virtual = nodes.filter((n) => n.virtual);
       nodes = nodes.filter((n) => n.virtual || !virtual.find((v) => v.ref.id === n.ref.id));
     }
