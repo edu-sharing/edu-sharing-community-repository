@@ -98,11 +98,21 @@ mds .mdsGroup{
     padding: 0 10px 0 10px;
   }
 
-  .mdsWidget{
+  .mdsWidget {
     position: relative;
-  }
-  .mdsWidget select{
-    margin-bottom: 20px;
+    .bulk-enable{
+      display: flex;
+      justify-content: flex-end;
+      width: 100%;
+      position: absolute;
+      top: -25px;
+      label:not(:last-child){
+        padding-right: 10px;
+      }
+    }
+    select {
+      margin-bottom: 20px;
+    }
   }
   .hint{
     color:$textLight;
@@ -317,13 +327,6 @@ mds .mdsGroup{
     width: 100%;
     align-items: center;
     flex-direction: column;
-    .bulk-enable{
-      display: flex;
-      justify-content: flex-end;
-      width: 100%;
-      position: absolute;
-      top: -25px;
-    }
     input {
       display: flex;
     }
