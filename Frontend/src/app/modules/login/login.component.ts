@@ -251,7 +251,7 @@ export class LoginComponent  implements OnInit{
         return;
       }
       if(this.config.register && (this.config.register.local || this.config.register.registerUrl)) {
-          this.buttons.push(new DialogButton('LOGIN.REGISTER_TEXT', DialogButton.TYPE_CANCEL, () => this.recoverPassword()));
+          this.buttons.push(new DialogButton('LOGIN.REGISTER_TEXT', DialogButton.TYPE_CANCEL, () => this.register()));
       }
       let login=new DialogButton('LOGIN.LOGIN',DialogButton.TYPE_PRIMARY,()=>this.login());
       login.disabled=this.disabled;

@@ -15,9 +15,6 @@ form{
     text-transform: initial;
     font-weight: normal;
   }
-  mat-form-field{
-    margin-bottom: 22px;
-  }
   input[type="checkbox"] + label {
     height: unset;
     display: inline-block;
@@ -36,8 +33,12 @@ form{
     margin-left: 10px;
   }
 }
+mat-checkbox{
+  display: flex;
+  margin-top: 12px;
+}
 .accept {
-  margin-top: 5px;
+  margin-top: 12px;
 }
 .imprint{
   display: block;

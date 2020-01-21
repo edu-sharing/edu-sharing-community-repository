@@ -115,7 +115,6 @@ export class WorkspaceMainComponent implements EventListener {
     public isBlocked = false;
     private isGuest: boolean;
     private currentNodes: Node[];
-    private newNodes: Node[];
     private appleCmd = false;
     public workflowNode: Node;
     public deleteNode: Node[];
@@ -570,13 +569,13 @@ export class WorkspaceMainComponent implements EventListener {
         if (this.reurl) {
             NodeHelper.addNodeToLms(this.router, this.storage, nodes[0], this.reurl);
         }
-        console.log(nodes);
         nodes = nodes.map((n) => {
             n.virtual = true;
             return n;
         });
         this.updateList(nodes.concat(this.currentNodes));
         this.selection = nodes;
+        this.actionOptions = this.getOptions(this.selection, false);
     }
     private uploadFiles(files: FileList) {
         this.onFileDrop(files);
