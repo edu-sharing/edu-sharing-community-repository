@@ -531,6 +531,9 @@ export class MdsComponent{
         // disabled => ignore property
         continue;
       }
+      if(this.isMultivalueWidget(widget) && this.isBulkMode()){
+
+      }
       element.className=element.className.replace('invalid','').trim();
       let v=element.value;
       if(element.getAttribute('data-value') && !this.isPrimitiveWidget(widget)){
@@ -635,17 +638,17 @@ export class MdsComponent{
   }
   public saveValues(callback:Function=null,force=false){
       let properties:any={};
-      if(this.currentNode)
-          properties=this.currentNode.properties;
+      if(this.currentNodes)
+          properties=this.currentNodes[0].properties;
     let values=this.getValues(properties);
     // check if file extension changed and warn
     if(!force){
         // for regular nodes
-        if(this.currentNode && this.currentNode.type==RestConstants.CCM_TYPE_IO && !this.currentNode.properties[RestConstants.CCM_PROP_IO_WWWURL] && !this.checkFileExtension(this.currentNode.name,callback,values)){
+        if(this.currentNodes[0] && this.currentNodes.length === 1 && this.currentNodes[0].type === RestConstants.CCM_TYPE_IO && !this.currentNodes[0].properties[RestConstants.CCM_PROP_IO_WWWURL] && !this.checkFileExtension(this.currentNodes[0].name,callback,values)){
             return;
         }
         // for childobjects
-        if(this._groupId==MdsComponent.TYPE_CHILDOBJECT && !this._currentValues[RestConstants.CCM_PROP_IO_WWWURL] && !this.checkFileExtension(this._currentValues[RestConstants.CM_NAME][0],callback,values)){
+        if(this._groupId === MdsComponent.TYPE_CHILDOBJECT && !this._currentValues[RestConstants.CCM_PROP_IO_WWWURL] && !this.checkFileExtension(this._currentValues[RestConstants.CM_NAME][0],callback,values)){
             return;
         }
     }
@@ -912,9 +915,24 @@ export class MdsComponent{
                 onchange="` + this.getWindowComponent() + `.toggleBulk('` + widget.id + `', event)">
                <label for="` + id + `">` + this.translate.instant('MDS.BULK_OVERRIDE') + `</label></div>`;
     }
+  private addBulkMode(widget: any) {
+    if (!this.isBulkMode()) {
+      return '';
+    }
+    const id = this.getDomId(widget.id + '_bulk');
+    return `<div class="bulk-enable">
+                <input type="radio" name="´ + id + ´" class="filled-in" id="` + id + `_append" value="append" onchange="` + this.getWindowComponent() + `.setBulkMode('` + widget.id + `', event)" checked>
+                <label for="` + id + `_append">` + this.translate.instant('MDS.BULK_APPEND') + `</label>
+                <input type="radio" name="´ + id + ´" class="filled-in" id="` + id + `_replace" value="replace" onchange="` + this.getWindowComponent() + `.setBulkMode('` + widget.id + `', event)">
+                <label for="` + id + `_replace">` + this.translate.instant('MDS.BULK_REPLACE') + `</label>
+            </div>`;
+  }
     toggleBulk(widget: string, event: any) {
       const element = (document.getElementById(this.getDomId(widget)) as HTMLInputElement);
       element.disabled = !event.srcElement.checked;
+    }
+    setBulkMode(widget: string, event: any){
+      (document.getElementById(this.getDomId(widget)) as HTMLInputElement).setAttribute('data-bulk',event.srcElement.value);
     }
   private renderPrimitiveWidget(widget: any,attr:string,type:string,css=''){
     let html='<div class="inputTable">';
@@ -1208,13 +1226,17 @@ export class MdsComponent{
     return html;
   }
   private autoSuggestField(widget:any,css='',allowCustom=false,openCallback:string,openIcon='arrow_drop_down',singleValue=false){
-    if(widget.values == null/* || this._groupId*/)
-        openCallback=null;
-    if(!openCallback && widget.type!='multivalueTree' && widget.type!='singlevalueTree')
-      css+=' suggestInputNoOpen';
+    let html = '';
+    html += this.addBulkMode(widget);
+    if (widget.values == null/* || this._groupId*/) {
+      openCallback = null;
+    }
+    if (!openCallback && widget.type!='multivalueTree' && widget.type!='singlevalueTree') {
+      css += ' suggestInputNoOpen';
+    }
     let postfix='_suggestionsInput';
 
-    let html=`<div class="auto-suggest-field"><input type="text" id="`+this.getWidgetDomId(widget)+postfix+`" `
+    html+=`<div class="auto-suggest-field"><input type="text" id="`+this.getWidgetDomId(widget)+postfix+`" `
     html+=`aria-label="`+widget.caption+`" placeholder="`+(widget.placeholder ? widget.placeholder : '')+`" class="suggestInput `+css+`" 
             onkeyup="`+this.getWindowComponent()+`.openSuggestions('`+widget.id+`',event,`+allowCustom+`,`+(widget.values ? true  : false)+`,false,true)">`;
     if(widget.type=='singleoption' && !widget.allowempty){
@@ -1551,7 +1573,6 @@ export class MdsComponent{
       html+=this.renderCheckboxWidget(widget,attr,widget.type=='checkboxVertical');
     }
     else if(widget.type=='multivalueBadges'){
-      //html+=this.renderMultivalueBadgesWidget(widget,attr);
       html+=this.renderSuggestBadgesWidget(widget,attr,true);
     }
     else if(widget.type=='multivalueSuggestBadges' || widget.type=='multivalueFixedBadges'){
@@ -2329,7 +2350,7 @@ export class MdsComponent{
 
       let child=this.childobjects[pos];
       if(child.file){
-          this.node.createNode(this.currentNode.ref.id,RestConstants.CCM_TYPE_IO,[RestConstants.CCM_ASPECT_IO_CHILDOBJECT],this.getChildobjectProperties(child,pos),true,'',RestConstants.CCM_ASSOC_CHILDIO).subscribe((data:NodeWrapper)=> {
+          this.node.createNode(this.currentNodes[0].ref.id,RestConstants.CCM_TYPE_IO,[RestConstants.CCM_ASPECT_IO_CHILDOBJECT],this.getChildobjectProperties(child,pos),true,'',RestConstants.CCM_ASSOC_CHILDIO).subscribe((data:NodeWrapper)=> {
               this.node.uploadNodeContent(data.node.ref.id, child.file, RestConstants.COMMENT_MAIN_FILE_UPLOAD).subscribe(() => {
                   this.onAddChildobject(callback, pos + 1);
               }, (error) => {
@@ -2345,7 +2366,7 @@ export class MdsComponent{
       else if(child.link){
         let properties:any={};
         properties[RestConstants.CCM_PROP_IO_WWWURL]=[child.link];
-        this.node.createNode(this.currentNode.ref.id,RestConstants.CCM_TYPE_IO,[RestConstants.CCM_ASPECT_IO_CHILDOBJECT],this.getChildobjectProperties(child,pos),true,RestConstants.COMMENT_MAIN_FILE_UPLOAD,RestConstants.CCM_ASSOC_CHILDIO).subscribe((data:NodeWrapper)=>{
+        this.node.createNode(this.currentNodes[0].ref.id,RestConstants.CCM_TYPE_IO,[RestConstants.CCM_ASPECT_IO_CHILDOBJECT],this.getChildobjectProperties(child,pos),true,RestConstants.COMMENT_MAIN_FILE_UPLOAD,RestConstants.CCM_ASSOC_CHILDIO).subscribe((data:NodeWrapper)=>{
             this.onAddChildobject(callback,pos+1);
         });
       }

@@ -493,6 +493,8 @@
     "LICENSE":"Lizenz",
     "WORKFLOW":"Workflow-Status",
     "BULK_OVERRIDE":"Wert ersetzen",
+    "BULK_REPLACE":"ersetzen",
+    "BULK_APPEND":"erweitern",
     "LICENSE_LINK":"Lizenz verwalten",
     "TEMPLATE_LINK":"Metadaten-Vorlage verwalten",
     "CONTRIBUTOR_LINK":"Weitere Beteiligte",

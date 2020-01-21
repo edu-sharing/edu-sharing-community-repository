@@ -443,6 +443,8 @@
     "LICENSE":"license",
     "WORKFLOW":"workflow state",
     "BULK_OVERRIDE":"Replace value",
+    "BULK_REPLACE":"replace",
+    "BULK_APPEND":"extend",
     "LICENSE_LINK":"manage license",
     "TEMPLATE_LINK":"Manage metadata template",
     "CONTRIBUTOR_LINK":"Additional Contributors",
