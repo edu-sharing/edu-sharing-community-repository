@@ -552,9 +552,9 @@ export class WorkspaceMainComponent implements EventListener {
         }
         this.node.createNode(this.currentFolder.ref.id, RestConstants.CM_TYPE_FOLDER, [], properties).subscribe(
             (data: NodeWrapper) => {
-                // this.openNode(data.node.ref.id,false);
                 this.globalProgress = false;
-                this.refresh();
+                this.refreshWithVirtualNodes([data.node]);
+                // this.refresh();
                 this.toast.toast('WORKSPACE.TOAST.FOLDER_ADDED');
             },
             (error: any) => {
@@ -569,13 +569,7 @@ export class WorkspaceMainComponent implements EventListener {
         if (this.reurl) {
             NodeHelper.addNodeToLms(this.router, this.storage, nodes[0], this.reurl);
         }
-        nodes = nodes.map((n) => {
-            n.virtual = true;
-            return n;
-        });
-        this.updateList(nodes.concat(this.currentNodes));
-        this.selection = nodes;
-        this.actionOptions = this.getOptions(this.selection, false);
+        this.refreshWithVirtualNodes(nodes);
     }
     private uploadFiles(files: FileList) {
         this.onFileDrop(files);
@@ -613,12 +607,12 @@ export class WorkspaceMainComponent implements EventListener {
         this.refresh();
     }
 
-    private pasteNode(position = 0) {
+    private pasteNode(nodes: Node[] = []) {
         const clip = (this.storage.get('workspace_clipboard') as ClipboardObject);
         if (!this.canPasteInCurrentLocation()) {
             return;
         }
-        if (position >= clip.nodes.length) {
+        if (nodes.length === clip.nodes.length) {
             this.globalProgress = false;
             this.storage.remove('workspace_clipboard');
             const info: any = {
@@ -628,26 +622,26 @@ export class WorkspaceMainComponent implements EventListener {
                 mode: this.translate.instant('WORKSPACE.' + (clip.copy ? 'PASTE_COPY' : 'PASTE_MOVE'))
             };
             this.toast.toast('WORKSPACE.TOAST.PASTE', info);
-            this.refresh();
+            this.refreshWithVirtualNodes(nodes);
             return;
         }
         this.globalProgress = true;
         const target = this.currentFolder.ref.id;
         console.log(this.currentFolder);
-        const source = clip.nodes[position].ref.id;
+        const source = clip.nodes[nodes.length].ref.id;
         if (clip.copy) {
             this.node.copyNode(target, source).subscribe(
-                (data: NodeWrapper) => this.pasteNode(position + 1),
+                (data: NodeWrapper) => this.pasteNode(nodes.concat(data.node)),
                 (error: any) => {
-                    NodeHelper.handleNodeError(this.toast, clip.nodes[position].name, error);
+                    NodeHelper.handleNodeError(this.toast, clip.nodes[nodes.length].name, error);
                     this.globalProgress = false;
                 });
         }
         else {
             this.node.moveNode(target, source).subscribe(
-                (data: NodeWrapper) => this.pasteNode(position + 1),
+                (data: NodeWrapper) => this.pasteNode(nodes.concat(data.node)),
                 (error: any) => {
-                    NodeHelper.handleNodeError(this.toast, clip.nodes[position].name, error);
+                    NodeHelper.handleNodeError(this.toast, clip.nodes[nodes.length].name, error);
                     this.globalProgress = false;
                 }
             );
@@ -1260,5 +1254,15 @@ export class WorkspaceMainComponent implements EventListener {
                 Helper.copyObjectProperties(node, hit[0]);
             }
         }
+    }
+
+    private refreshWithVirtualNodes(nodes: Node[]) {
+        nodes = nodes.map((n) => {
+            n.virtual = true;
+            return n;
+        });
+        this.updateList(nodes.concat(this.currentNodes));
+        this.selection = nodes;
+        this.actionOptions = this.getOptions(this.selection, false);
     }
 }

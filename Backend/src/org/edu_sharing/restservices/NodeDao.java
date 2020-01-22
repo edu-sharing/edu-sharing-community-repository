@@ -563,7 +563,7 @@ public class NodeDao {
 				}
 			}
 	
-			return new NodeDao(repoDao, childId);
+			return new NodeDao(repoDao, childId, Filter.createShowAllFilter());
 			
 		} catch (Throwable t) {
 			
@@ -579,7 +579,7 @@ public class NodeDao {
 			nodeService.moveNode(nodeId, CCConstants.CM_ASSOC_FOLDER_CONTAINS,
 					sourceId);
 	
-			return new NodeDao(repoDao, sourceId);
+			return new NodeDao(repoDao, sourceId, Filter.createShowAllFilter());
 			
 		} catch (Throwable t) {
 			
@@ -593,7 +593,7 @@ public class NodeDao {
 		try {
 			org.alfresco.service.cmr.repository.NodeRef newNode = nodeService.copyNode(sourceId, nodeId, withChildren);
 			permissionService.createNotifyObject(newNode.getId(), new AuthenticationToolAPI().getCurrentUser(), CCConstants.CCM_VALUE_NOTIFY_ACTION_PERMISSION_ADD);
-			return new NodeDao(repoDao, sourceId);
+			return new NodeDao(repoDao, sourceId, Filter.createShowAllFilter());
 			
 		} catch (Throwable t) {
 			
