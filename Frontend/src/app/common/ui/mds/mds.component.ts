@@ -23,6 +23,7 @@ import {CardJumpmark} from "../../../core-ui-module/components/card/card.compone
 import {MdsHelper} from "../../../core-module/rest/mds-helper";
 import {Observable} from 'rxjs';
 import {getClosureSafeProperty} from '@angular/core/src/util/property';
+declare var noUiSlider: any;
 
 @Component({
   selector: 'mds',
@@ -542,7 +543,10 @@ export class MdsComponent{
         v=element.getAttribute('data-value');
       }
       let props=[v];
-      if(this.isSliderWidget(widget)) {
+      if (this.isSliderWidget(widget)) {
+        if (element.getAttribute('disabled') === 'true') {
+          continue;
+        }
         let value = element.noUiSlider.get();
         let valueClean = [];
         for (let v of Array.isArray(value) ? value : [value]) {
@@ -694,7 +698,7 @@ export class MdsComponent{
             version=RestConstants.COMMENT_METADATA_UPDATE;
           }
       }
-    }catch (e){console.info(e);}
+    }catch (ignored){}
 
     this.globalProgress=true;
     // can only happen for single element
@@ -717,6 +721,7 @@ export class MdsComponent{
       Observable.forkJoin(this.currentNodes.map((n) => this.node.editNodeMetadataNewVersion(n.ref.id,version,this.getValues(n.properties))))
           .subscribe((nodes) => {
             this.currentNodes = nodes.map((n) => n.node);
+            console.log(this.currentNodes);
             this.onUpdatePreview(callback);
           },(error) => {
             this.toast.error(error);
@@ -944,8 +949,17 @@ export class MdsComponent{
             </div>`;
   }
     toggleBulk(widget: string, event: any) {
+      const widgetData = this.getWidget(widget);
       const element = (document.getElementById(this.getDomId(widget)) as HTMLInputElement);
-      element.disabled = !event.srcElement.checked;
+      if (widgetData.type === 'slider' || widgetData.type === 'range') {
+        if (event.srcElement.checked) {
+          element.removeAttribute('disabled');
+        }else {
+          element.setAttribute('disabled', 'true');
+        }
+      }else {
+        element.disabled = !event.srcElement.checked;
+      }
     }
     setBulkMode(widget: string, event: any){
       (document.getElementById(this.getDomId(widget)) as HTMLInputElement).setAttribute('data-bulk',event.srcElement.value);
@@ -1457,43 +1471,43 @@ export class MdsComponent{
     return html;
   }
   private renderRangeWidget(widget:any,attr:string){
-    const constrain = this.handleWidgetConstrains(widget, {requiresNode: false, supportsBulk: false});
-    if (constrain) {
-      return constrain;
-    }
+    let html = '';
+    html += this.addBulkCheckbox(widget);
     let id=this.getWidgetDomId(widget);
-    let html=`
+    html += `
       <div class="inputRange" id="`+id+`"></div>
     `;
     setTimeout(()=>{
-      let values=widget.defaultvalue!=null ? widget.defaultvalue : widget.min;
-      if(widget.type=='range') {
-        values = (widget.defaultMin != null ? widget.defaultMin : widget.min) + `,` +
-                 (widget.defaultMax != null ? widget.defaultMax : widget.max);
+      let values=widget.defaultvalue != null ? widget.defaultvalue : widget.min;
+      if (widget.type === 'range') {
+        values = [(widget.defaultMin != null ? widget.defaultMin : widget.min),
+                 (widget.defaultMax != null ? widget.defaultMax : widget.max)];
       }
-      let unit=widget.unit ? widget.unit : '';
-      eval(`
-                var slider = document.getElementById('`+id+`');
-                          noUiSlider.create(slider, {
-                           start: [`+values+`],
-                           step: `+(widget.step>1 ? widget.step : 1)+`,
-                           connect: true,
-                           tooltips: true,
-                           format: {
-                            to: function ( value ) {
-                              return Math.round(value)+' `+unit+`';
-                            },
-                            from:function(value){
-                              return value;
-                            }
-                           },
-                           range: {
-                             'min': `+widget.min+`,
-                             'max': `+widget.max+`
-                           },
-                          });
-            `);
-    },5);
+      const unit = widget.unit ? widget.unit : '';
+      const slider = document.getElementById(id);
+      noUiSlider.create(slider, {
+       start: values,
+       step: (widget.step > 1 ? widget.step : 1),
+       connect: true,
+       tooltips: true,
+       disabled: true,
+       format: {
+        to: (value: any) => {
+          return Math.round(value) + ' ' + unit;
+        },
+        from:(value: any) => {
+          return value;
+        }
+       },
+       range: {
+         min: widget.min,
+         max: widget.max
+       },
+      });
+      if (this.isBulkMode()) {
+        slider.setAttribute('disabled', 'true');
+      }
+    }, 5);
     return html;
   }
 
@@ -1702,18 +1716,18 @@ export class MdsComponent{
  }
 
   private isMultivalueWidget(widget: any) {
-    return widget.type == 'multivalueBadges'
-    || widget.type=='multioption'
-    || widget.type=='multivalueFixedBadges'
-    || widget.type=='multivalueSuggestBadges'
-    || widget.type=='singlevalueTree' // it basically uses the tree so all functions relay on multivalue stuff
-    || widget.type=='multivalueTree'
-    || widget.type=='multivalueGroup'
+    return widget.type === 'multivalueBadges'
+    || widget.type === 'multioption'
+    || widget.type === 'multivalueFixedBadges'
+    || widget.type === 'multivalueSuggestBadges'
+    || widget.type === 'singlevalueTree' // it basically uses the tree so all functions relay on multivalue stuff
+    || widget.type === 'multivalueTree'
+    || widget.type === 'multivalueGroup'
   }
   private isSliderWidget(widget: any) {
-    return widget.type == 'duration'
-      || widget.type == 'range'
-      || widget.type == 'slider';
+    return widget.type === 'duration'
+      || widget.type === 'range'
+      || widget.type === 'slider';
   }
   private addBottomCaption(widget: any) {
     if(widget.bottomCaption){

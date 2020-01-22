@@ -432,6 +432,14 @@ span.thumb{
   box-shadow: none;
   border: 2px solid $backgroundColor;
 }
+[disabled] {
+  .noUi-handle {
+    background-color: #aaa;
+  }
+  .noUi-connect{
+    background-color: #fff;
+  }
+}
 .noUi-target{
   background: #ccc;
   border-radius: 4px;
