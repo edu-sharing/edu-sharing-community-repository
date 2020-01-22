@@ -206,8 +206,7 @@ public class CollectionServiceImpl implements CollectionService{
 			}
 			NodeRef child = nodeService.getChild(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, collectionId, CCConstants.CCM_TYPE_IO, CCConstants.CCM_PROP_IO_ORIGINAL, originalNodeId);
 			if(child!=null){
-				String message = I18nServer.getTranslationDefaultResourcebundle("collection_already_in", locale);
-				throw new DuplicateNodeException(message);
+				throw new DuplicateNodeException("Node is already in collection");
 			}
 			/*
 			for(ChildAssociationRef node : nodeService.getChildrenChildAssociationRef(collectionId)){
