@@ -27,7 +27,7 @@ $sidenavWidthMobile:66px;
           margin-right: 10px;
         }
         &:hover{
-          background-color: $veryLightBackground;
+          background-color: $itemSelectedBackground;
         }
         &.active {
           color: $primary;

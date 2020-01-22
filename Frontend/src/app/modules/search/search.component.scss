@@ -57,7 +57,7 @@ $sidenavTopBaseOffset:110px;
 }
 .repositoryActive{
   background: $workspaceTreeSelectedBackgroundEffect;
-  background-color: $workspaceSelectedBackground;
+  background-color: $itemSelectedBackground;
 }
 .collectionsHeading .toggle{
   text-transform: uppercase;
