@@ -319,9 +319,9 @@ $badgeWidth:250px;
 }
 .tableList.collection-item:not(.nodeCollection) .row.selected{
   background: $workspaceSelectedBackgroundEffect;
-  background-color:$workspaceSelectedBackground;
+  background-color:$itemSelectedBackground;
   .more{
-    @include fadeRight($workspaceSelectedBackground,20px)
+    @include fadeRight($itemSelectedBackground,20px)
   }
 }
 
@@ -333,7 +333,7 @@ $badgeWidth:250px;
 .row:focus{
   @include setGlobalInsetFocus();
   outline: 1px $primary solid;
-  /* background-color:$workspaceSelectedBackground!important; */
+  /* background-color:$itemSelectedBackground!important; */
 }
 .cardSmallList .row:focus{
   box-shadow: none!important;
@@ -346,9 +346,9 @@ $badgeWidth:250px;
   color:$textMain!important;
 }
 .list .collection-item:not(.nodeCollection) .row:hover{
-  background-color:$workspaceSelectedBackground;
+  background-color:$itemSelectedBackground;
   .more{
-    @include fadeRight($workspaceSelectedBackground,20px);
+    @include fadeRight($itemSelectedBackground,20px);
   }
 }
 

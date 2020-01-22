@@ -29,7 +29,7 @@
   color:$primary;
   background: #fff;
   &:hover{
-    background-color: rgba(0, 0, 0, 0.05);
+    background-color: $buttonHoverBackground;
   }
 }
 .btn,.btn-flat{
@@ -220,6 +220,9 @@ option {
   }
   a.collection-item {
     color: $primary;
+    &:not(.active):hover{
+      background-color: $itemSelectedBackground;
+    }
   }
 }
 .btn-shadow{

@@ -14,13 +14,14 @@ $backgroundColor: #fff;
 $workspaceSidebarWidth: 300px;
 $workspaceInheritColor: #42CA8D;
 $editorialCollectionsBackground: #f5ec19;
-$workspaceSelectedBackground:     #F1F6FA;
+$itemSelectedBackground:     #F1F6FA;
+$buttonHoverBackground: rgba(red($primary), green($primary), blue($primary), 0.08);
 $secondaryBarHeight: 65px; // the white bar height in search and workspace
 $workspaceSelectedBackgroundEffect: linear-gradient(to right, $primary 0,$primary 5px,rgba(0,0,0,0) 5px,rgba(0,0,0,0) 5px);
 $workspaceTreeBackground: #fff;
 $mainnavHeight: 70px;
 $dialogRightWidth: 320px;
-$workspaceTreeSelectedBackground: $workspaceSelectedBackground;
+$workspaceTreeSelectedBackground: $itemSelectedBackground;
 $workspaceBreadcrumbsHeight: $secondaryBarHeight;
 $workspaceTreeSelectedBackgroundEffect: linear-gradient(to right, $primary 0,$primary 5px,rgba(0,0,0,0) 5px,rgba(0,0,0,0) 5px);
 $workspaceMetadataBackground: #f7f7f7;

@@ -91,10 +91,10 @@ $cardActionHeight:77px;
     word-break: break-all;
   }
   .btn,.btn-flat{
-    font-weight: bold;
+    font-weight: 600;
   }
   .btn-flat{
-    color:$textVeryLight!important;
+    color:$primary!important;
     &:hover{
       color:$primary!important;
     }
