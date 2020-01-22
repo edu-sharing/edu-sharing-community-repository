@@ -380,7 +380,7 @@ mds .mdsGroup{
           cursor: default;
         }
         > div:hover {
-          background-color: $workspaceSelectedBackground;
+          background-color: $itemSelectedBackground;
         }
         .icon {
           min-width: $tableIconSize;
@@ -481,7 +481,7 @@ mds .mdsGroup{
   .treeSelected {
     /* Not working when scrolling */
     background: $workspaceSelectedBackgroundEffect;
-    background-color: $workspaceSelectedBackground;
+    background-color: $itemSelectedBackground;
     /*position: absolute;
     left: 0;*/
   }

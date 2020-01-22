@@ -86,13 +86,13 @@ $candy-app-theme: mat-light-theme($candy-app-primary, $candy-app-accent, $candy-
     background-color: $primaryLight;
   }
 }
-// a mat table with clickable columsn
+// a mat table with clickable columns
 .mat-table-clickable{
   .mat-row{
     @include clickable();
     transition: all $transitionNormal;
     &:hover{
-      background-color: $workspaceSelectedBackground;
+      background-color: $itemSelectedBackground;
     }
   }
 }
@@ -203,9 +203,13 @@ input.mat-input-element, mat-label, .mat-select-value{
     padding: 0!important;
   }
 }
+.mat-button-focus-overlay{
+  background: $primary;
+}
 .mat-menu-item{
-  height: 40px;
-  line-height: 40px;
+  &:hover:not([disabled]){
+    background: $itemSelectedBackground !important;
+  }
 }
 .mat-menu-item-seperate {
   border-top:1px solid #ccc!important;

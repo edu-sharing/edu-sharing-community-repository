@@ -328,7 +328,7 @@ $badgeWidth:250px;
 .tableList .row.selected,
 .cardList .row.selected{
   background: $workspaceSelectedBackgroundEffect;
-  background-color:$workspaceSelectedBackground;
+  background-color:$itemSelectedBackground;
 }
 
 .cardList .row.selected{
@@ -352,7 +352,7 @@ $badgeWidth:250px;
   color:$textMain!important;
 }
 .list .row:hover{
-  background-color:$workspaceSelectedBackground;
+  background-color:$itemSelectedBackground;
 }
 
 .list .filled-in:checked+label:after{
@@ -461,6 +461,9 @@ $badgeWidth:250px;
     background-color: #444;
     color:#fff;
     z-index: 1;
+    display: flex;
+    justify-content: center;
+    align-items: center;
     >i{
       font-size: 12px;
     }
@@ -613,9 +616,13 @@ a.rowInner{
     overflow-wrap: break-word;
   }
 }
-.node_ccm_commonlicense_key .rowInner,
-.cardList .rowInner{
-  max-height: none;
+.row_1,
+.node_ccm_commonlicense_key,
+.node_ccm_replicationsource,
+.cardList{
+  .rowInner {
+    max-height: none;
+  }
 }
 .checkbox{
   padding-left:25px!important;
