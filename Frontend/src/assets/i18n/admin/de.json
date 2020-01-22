@@ -212,6 +212,7 @@
       "OAI_IMPORTER": "Importer Job",
       "OAI_CLASS_NAME": "Klassenname",
       "OAI_IMPORTER_CLASS_NAME": "Importer Klassenname",
+      "OAI_IMPORTER_CLASS_NAME_EXAMPLE": "org.edu_sharing.repository.server.importer.OAIPMHLOMImporter",
       "OAI_RECORD_HANDLER_CLASS_NAME": "Record Handler Klassenname",
       "OAI_RECORD_HANDLER_CLASS_NAME_EXAMPLE": "org.edu_sharing.repository.server.importer.RecordHandlerLOM",
       "OAI_BINARY_HANDLER_CLASS_NAME": "Binary Handler Klassenname (Optional)",
