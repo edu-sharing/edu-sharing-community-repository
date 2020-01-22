@@ -699,7 +699,7 @@ public class NodeDao {
 			this.nodeService.createVersion(nodeId,
 					transformProperties(properties));
 	
-			return new NodeDao(repoDao, nodeId);
+			return new NodeDao(repoDao, nodeId, Filter.createShowAllFilter());
 			
 		} catch (Throwable t) {
 			
