@@ -27,6 +27,7 @@ import org.alfresco.service.namespace.QName;
 import org.apache.log4j.Logger;
 import org.edu_sharing.alfresco.workspace_administration.NodeServiceInterceptor;
 import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
+import org.edu_sharing.lightbend.LightbendConfigLoader;
 import org.edu_sharing.repository.client.rpc.EduGroup;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.server.MCAlfrescoAPIClient;
@@ -492,6 +493,12 @@ public EduGroup getEduGroup(String authority){
 
 			if (!currentUser.equals(userName) && !AuthorityServiceFactory.getLocalService().isGlobalAdmin()) {
 				throw new NotAnAdminException();
+			}
+			
+			String personActiveStatus = LightbendConfigLoader.get().getString("repository.personActiveStatus");
+			//if configured initialize with active status
+			if(personActiveStatus != null) {
+				userInfo.put(CCConstants.CM_PROP_PERSON_ESPERSONSTATUS, personActiveStatus);
 			}
 
 			PersonService personService = serviceRegistry.getPersonService();

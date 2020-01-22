@@ -83,6 +83,8 @@ public class Release_4_2_PersonStatusUpdater extends UpdateAbstract{
 		if(personActiveStatus != null 
 				&& !personActiveStatus.trim().equals("") ) {
 			this.executeWithProtocolEntry();
+		}else {
+			logInfo("personActiveStatus not set in config");
 		}
 		
 	}
