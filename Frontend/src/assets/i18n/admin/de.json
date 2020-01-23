@@ -402,21 +402,21 @@
       },
       "IMPORT":{
         "TITLE" : "Medienzentrum Import",
-        "CHOOSE_MEDIACENTERS" : "CSV Datei mit Medienzentren auswählen",
-        "MEDIACENTERS_START" : "Medienzentren import ausführen",
+        "CHOOSE_MEDIACENTERS" : "CSV-Datei auswählen",
+        "MEDIACENTERS_START" : "Import ausführen",
         "IMPORTED" : "{{ rows }} Medienzentren importiert"
 
       },
       "ORGIMPORT" : {
         "TITLE" : "Organisationen Import",
-        "CHOOSE_ORGANISATIONS" : "CSV Datei mit Organisationen auswählen",
-        "ORGANISATIONS_START" : "Organisationen Import ausführen",
+        "CHOOSE_ORGANISATIONS" : "CSV-Datei auswählen",
+        "ORGANISATIONS_START" : "Import ausführen",
         "IMPORTED" : "{{ rows }} Organisationen importiert"
       },
       "ORG_MC_CONNECT" : {
         "TITLE" : "Import der Verknüpfung von Medienzentren und Organisationen",
-        "CHOOSE" : "CSV Datei mit der Verknüpfung von Medienzentren und Organisationen auswählen",
-        "ORGANISATIONS_START" : "Verknüpfung Import ausführen",
+        "CHOOSE": "CSV-Datei auswählen",
+        "ORGANISATIONS_START" : "Import ausführen",
         "IMPORTED" : "{{ rows }} Verknüpfungen importiert",
         "REMOVE_SCHOOLS_FROM_MC" : "gelöschte Verknüpfungen aktualisieren"
       }
