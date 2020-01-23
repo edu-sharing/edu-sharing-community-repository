@@ -48,6 +48,7 @@ import {AddElement} from "../../core-ui-module/add-element";
 import {MatSlideToggle} from "@angular/material";
 import {HttpClient} from "@angular/common/http";
 import {GlobalContainerComponent} from "../../common/ui/global-container/global-container.component";
+import {Observable} from 'rxjs';
 
 // component class
 @Component({
@@ -492,7 +493,7 @@ export class CollectionsMainComponent {
       this.globalProgress=true;
       console.log(source);
       if(source.hasOwnProperty('childCollectionsCount')){
-        if(event.type=='copy'){
+        if(event.type === 'copy'){
           this.toast.error(null,'INVALID_OPERATION');
           this.globalProgress=false;
           return;
@@ -506,24 +507,25 @@ export class CollectionsMainComponent {
         });
       }
       else {
-        this.collectionService.addNodeToCollection(target.ref.id, source.ref.id, source.ref.repo).subscribe(() => {
-          UIHelper.showAddedToCollectionToast(this.toast,this.router, target, 1);
-          if (event.type == 'copy') {
-            this.globalProgress = false;
-            this.refreshContent();
-            return;
-          }
-          this.collectionService.removeFromCollection(source.ref.id, this.collectionContent.collection.ref.id).subscribe(() => {
-            this.globalProgress = false;
-            this.refreshContent();
-          }, (error: any) => {
-            this.handleError(error);
-            this.globalProgress = false;
+          UIHelper.addToCollection(this.collectionService, this.router, this.toast, event.target, event.source, (nodes) => {
+              if (event.type === 'copy') {
+                  this.globalProgress = false;
+                  this.refreshContent();
+                  return;
+              }
+              if (event.source.length === nodes.length) {
+                  const observables = event.source.map((n: any) => this.collectionService.removeFromCollection(n.ref.id, this.collectionContent.collection.ref.id));
+                  Observable.forkJoin(observables).subscribe(() => {
+                      this.globalProgress = false;
+                      this.refreshContent();
+                  }, (error) => {
+                      this.handleError(error);
+                      this.globalProgress = false;
+                  });
+              }else{
+                  this.globalProgress = false;
+              }
           });
-        }, (error: any) => {
-            this.handleError(error);
-            this.globalProgress = false;
-        });
       }
     }
     canDropOnCollection = (event:any)=>{
