@@ -68,7 +68,7 @@
 <div class="main">
 <div class="main-nav">
     <div>
-        <div matRipple *ngFor="let button of buttons" class="button clickable" [class.active]="mode==button.id" tabindex="0" (click)="setMode(button.id)" (keyup.enter)="setMode(button.id)">
+        <div matRipple matRippleColor="primary" *ngFor="let button of buttons" class="button clickable" [class.active]="mode==button.id" tabindex="0" (click)="setMode(button.id)" (keyup.enter)="setMode(button.id)">
             <i icon [iconId]="button.icon"></i><span>{{('ADMIN.MODE.'+button.id) | translate }}</span>
         </div>
     </div>
