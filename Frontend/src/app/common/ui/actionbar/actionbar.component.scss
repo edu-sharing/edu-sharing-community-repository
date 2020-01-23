@@ -48,7 +48,7 @@ button{
   }
 }
 .actionbar-round{
-  .mat-flat-button{
+  .mat-button, .mat-flat-button{
     width:45px;
     height:45px;
     justify-content: center;
