@@ -4,6 +4,7 @@
   -moz-user-select: none;
   -ms-user-select: none;
   user-select: none;
+  -webkit-tap-highlight-color: transparent;
 }
 @mixin imageDisabledBlur(){
   -webkit-filter: blur(3px);

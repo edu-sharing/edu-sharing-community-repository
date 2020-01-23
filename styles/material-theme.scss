@@ -67,8 +67,13 @@ $candy-app-theme: mat-light-theme($candy-app-primary, $candy-app-accent, $candy-
 // that you are using.
 @include angular-material-theme($candy-app-theme);
 
-
 /** custom project specifics */
+[matripplecolor=primary] {
+  > .mat-ripple-element {
+    background-color: $primary;
+    opacity: $mat-ripple-color-opacity;
+  }
+}
 .mat-tab-labels {
   background-color: $actionDialogBackground;
   .mat-tab-label {

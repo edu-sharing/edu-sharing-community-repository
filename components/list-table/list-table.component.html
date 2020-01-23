@@ -67,7 +67,7 @@
                 <div class="label">{{addElement.label | translate}}</div>
             </div>
         </div>
-        <div matRipple *ngFor="let node of _nodes; let i = index" class="rowFrame"
+        <div matRipple matRippleColor="primary" *ngFor="let node of _nodes; let i = index" class="rowFrame"
              [class.order-animation]="orderElementsActive"
              [class.nodeCollection]="isCollection(node)"
              [class.node-virtual]="node.virtual"
