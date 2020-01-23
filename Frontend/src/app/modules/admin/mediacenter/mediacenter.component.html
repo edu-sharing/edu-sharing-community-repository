@@ -114,8 +114,7 @@
                 <button mat-raised-button (click)="importOrgMcSelect.click()">{{'ADMIN.MEDIACENTER.ORG_MC_CONNECT.CHOOSE' | translate}}</button>
                 <div class="file">{{ (orgMcFile ? orgMcFile.name : '') }}</div>
             </div>
-            <label>{{'ADMIN.MEDIACENTER.ORG_MC_CONNECT.REMOVE_SCHOOLS_FROM_MC' | translate}}</label>
-            <mat-checkbox class="example-margin" [(ngModel)]="removeSchoolsFromMC"></mat-checkbox>
+            <mat-checkbox class="example-margin" [(ngModel)]="removeSchoolsFromMC">{{'ADMIN.MEDIACENTER.ORG_MC_CONNECT.REMOVE_SCHOOLS_FROM_MC' | translate}}</mat-checkbox>
             <button mat-raised-button color="primary" (click)="importOrgMc()">{{'ADMIN.MEDIACENTER.ORG_MC_CONNECT.ORGANISATIONS_START' | translate}}</button>
     </div>
 
