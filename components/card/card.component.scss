@@ -121,6 +121,9 @@
       &.height-xxlarge mat-card-content {
         height: $height-xxlarge - $titleHeight - $actionMenuHeight;
       }
+      &.height-xxxlarge mat-card-content {
+        height: $height-xxxlarge - $titleHeight - $actionMenuHeight;
+      }
       &.height-auto mat-card-content {
         height: auto;
       }
@@ -148,6 +151,9 @@
       &.height-xxlarge mat-card-content {
         height: $height-xxlarge - $titleHeight;
       }
+      &.height-xxxlarge mat-card-content {
+        height: $height-xxxlarge - $titleHeight;
+      }
       &.height-auto mat-card-content {
         height: auto;
       }
@@ -171,6 +177,9 @@
       }
       &.height-xxlarge .mat-tab-body-wrapper {
         height: $height-xxlarge - $titleHeight - $actionMenuHeight - $tabHeight;
+      }
+      &.height-xxxlarge .mat-tab-body-wrapper {
+        height: $height-xxxlarge - $titleHeight - $actionMenuHeight - $tabHeight;
       }
     }
     /*

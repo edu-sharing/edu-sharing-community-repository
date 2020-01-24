@@ -297,14 +297,17 @@ mds .mdsGroup{
     }
   }
   .version {
+    width: 100%;
+    float: left;
     margin-top: 10px;
-  }
-  #versionGroup{
-    padding-top:20px;
-  }
-  .mdsVersion .btn-flat{
-    float:left;
-    margin-bottom: 15px;
+    display: flex;
+    align-items: center;
+    #selectFileBtn{
+      margin-right: 40px;
+    }
+    #versionGroup {
+      flex-grow: 1;
+    }
   }
   #versionChooser{
     padding-left: 20px;
