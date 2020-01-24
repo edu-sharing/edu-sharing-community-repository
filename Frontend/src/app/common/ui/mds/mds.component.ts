@@ -1945,7 +1945,7 @@ export class MdsComponent{
   private renderVersion(widget: any) {
     if(!this.allowReplacing)
       return '';
-    const constrain = this.handleWidgetConstrains(widget, {requiresNode: true, supportsBulk: false});
+    const constrain = this.handleWidgetConstrains(widget, {requiresNode: true, supportsBulk: true});
     if (constrain) {
       return constrain;
     }
@@ -1960,8 +1960,9 @@ export class MdsComponent{
           " />
             <label for="comment">`+this.translate.instant('WORKSPACE.EDITOR.VERSION')+`</label>
             <div class="version">`;
-    if(this.isContentEditable())
-      html+=`<div class="btn-flat btn-shadow" id="selectFileBtn" onclick="document.getElementById('fileSelect').click()">`+this.translate.instant('WORKSPACE.EDITOR.REPLACE_MATERIAL')+`</div>`;
+    if (this.isContentEditable() && !this.isBulkMode()) {
+      html += `<div class="btn-flat btn-shadow" id="selectFileBtn" onclick="document.getElementById('fileSelect').click()">` + this.translate.instant('WORKSPACE.EDITOR.REPLACE_MATERIAL') + `</div>`;
+    }
     html+=`
               <div id="selectedFile" class="badge" style="display:none;"><span id="selectedFileContent"></span>
               <i class="material-icons clickable" onclick="
@@ -1970,11 +1971,11 @@ export class MdsComponent{
               document.getElementById('selectFileBtn').style.display='';
               ">cancel</i></div>
 
-            </div>
             <div id="versionGroup">
             <input type="text" class="comment" id="comment" placeholder="`+this.translate.instant('WORKSPACE.EDITOR.VERSION_COMMENT')+`" required />
               <div class="input-hint-bottom"`+this.translate.instant('FIELD_MUST_BE_FILLED')+`</div>
             </div>
+           </div>
           </div>
          </div>`;
     return html;
