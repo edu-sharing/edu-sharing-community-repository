@@ -30,6 +30,17 @@ a, a:hover, a:visited, a:active {
   color:#fff;
 }
 :host /deep/{
+  card.qr{
+    mat-card-content{
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+    qrcode canvas{
+      width: 100% !important;
+      height: 100% !important;
+    }
+  }
   .topBar-render{
     display: none!important;
   }

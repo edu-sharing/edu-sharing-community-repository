@@ -87,7 +87,9 @@ export class ActionbarHelperService{
             return node.size > 0 && node.downloadUrl;
         };
     }
-
+    if (type === 'QR_CODE'){
+        option = new OptionItem('WORKSPACE.OPTION.QR_CODE', 'code', callback);
+    }
     if(type=='ADD_TO_COLLECTION') {
       if (this.connector.getCurrentLogin() && !this.connector.getCurrentLogin().isGuest) {
         option = new OptionItem("WORKSPACE.OPTION.COLLECTION", "layers", callback);

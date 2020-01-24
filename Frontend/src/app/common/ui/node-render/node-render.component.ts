@@ -69,6 +69,7 @@ export class NodeRenderComponent implements EventListener{
    */
   @Input() metadata=true;
   private isRoute = false;
+  qrCode = false;
   private options: OptionItem[]=[];
   private list: Node[];
   private isSafe=false;
@@ -548,6 +549,10 @@ export class NodeRenderComponent implements EventListener{
         if(stream){
             options.push(stream);
         }
+        const qr = this.actionbar.createOptionIfPossible('QR_CODE',[this._node], (node: Node) => this.qrCode = true);
+        if (qr) {
+            options.push(qr);
+        }
         if (this.config.instant("nodeReport", false)) {
             let nodeReport = new OptionItem('NODE_REPORT.OPTION', 'flag', () => this.nodeReport = this._node);
             options.push(nodeReport);
@@ -668,5 +673,8 @@ export class NodeRenderComponent implements EventListener{
         this.searchApi.searchFingerprint(this._nodeId).subscribe( (data: NodeList) => {
             this.similarNodes = data.nodes;
         });
+    }
+    getQRData() {
+        return window.location.href;
     }
 }

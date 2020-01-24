@@ -211,7 +211,10 @@
       "SHARE_LINK":"Share download-link",
       "WORKFLOW":"Workflow",
       "TEMPLATE":"Metadata Template",
-      "VARIANT": "Create variant"
+      "VARIANT": "Create variant",
+      "VARIANT_OPEN": "Open as variant",
+      "QR_CODE": "QR-Code Link"
+
     },
     "NODE_TEMPLATE" : {
       "STATUS": "Automatic Metadata Inheritance",

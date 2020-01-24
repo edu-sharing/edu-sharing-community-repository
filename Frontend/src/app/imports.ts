@@ -34,6 +34,7 @@ import {RestLocatorService, CoreModule} from "./core-module/core.module";
 import {CoreBridgeModule} from "./core-bridge-module/core.bridge.module";
 import {CoreUiModule} from "./core-ui-module/core-ui.module";
 import {MonacoEditorModule} from "ngx-monaco-editor";
+import {QRCodeModule} from 'angularx-qrcode';
 
 
 export const IMPORTS=[
@@ -42,6 +43,7 @@ export const IMPORTS=[
   ReactiveFormsModule,
   HttpClientModule,
   LazyLoadImageModule,
+  QRCodeModule,
   MatButtonModule,
   MatTabsModule,
   MatSidenavModule,

@@ -233,7 +233,8 @@
       "WORKFLOW":"Workflow",
       "TEMPLATE":"Metadaten Vorlage",
       "VARIANT": "Variante anlegen",
-      "VARIANT_OPEN": "Als Variante öffnen"
+      "VARIANT_OPEN": "Als Variante öffnen",
+      "QR_CODE": "QR-Code Link"
     },
     "NODE_TEMPLATE" : {
       "STATUS": "Automatische Übernahme von Metadaten",
