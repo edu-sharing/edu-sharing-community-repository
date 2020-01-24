@@ -1276,10 +1276,9 @@ public class NodeDao {
 				.get(CCConstants.CCM_PROP_IO_VERSION_COMMENT));
 		result.setContentUrl((String) versionProps.get(CCConstants.CONTENTURL));
 
-		String keyCreated = CCConstants.CM_PROP_C_MODIFIED
-				+ CCConstants.LONG_DATE_SUFFIX;
+		String keyCreated = CCConstants.CM_PROP_C_MODIFIED;
 		result.setModifiedAt(versionProps.containsKey(keyCreated) ? ((String) versionProps.get(keyCreated)) : null);
-
+		result.setProperties(convertProperties(filter,versionProps));
 		Person ref = new Person();
 
 		ref.setFirstName((String) versionProps
@@ -1415,13 +1414,15 @@ public class NodeDao {
 	}
 	
 	private HashMap<String,String[]>  getProperties(String versionLabel,Filter filter) throws DAOException {
-
 		HashMap<String, Object> props = getNativeProperties(versionLabel);
-	
+		return convertProperties(filter, props);
+	}
+
+	private HashMap<String, String[]> convertProperties(Filter filter, HashMap<String, Object> props) {
 		if (props == null) {
 			return null;
 		}
-		
+
 		if(filter.getProperties().size() == 0){
 			return new HashMap<String, String[]>();
 		}
@@ -1432,15 +1433,15 @@ public class NodeDao {
 			List<String> values = getPropertyValues(entry.getValue());
 
 			String shortPropName = NameSpaceTool.transformToShortQName(entry.getKey());
-			
+
 			if(shortPropName != null){
-				
-				if(filter.getProperties().size() > 0 && 
-						!filter.getProperties().contains(Filter.ALL) 
+
+				if(filter.getProperties().size() > 0 &&
+						!filter.getProperties().contains(Filter.ALL)
 						&& !filter.getProperties().contains(shortPropName)){
 					continue;
 				}
-				if(props.containsKey(entry.getKey()+CCConstants.LONG_DATE_SUFFIX)){
+				if(props.containsKey(entry.getKey()+ CCConstants.LONG_DATE_SUFFIX)){
 					values = getPropertyValues(props.get(entry.getKey()+CCConstants.LONG_DATE_SUFFIX));
 					properties.put(shortPropName, values.toArray(new String[values.size()]));
 				}
@@ -1448,7 +1449,7 @@ public class NodeDao {
 					properties.put(shortPropName, values.toArray(new String[values.size()]));
 				}
 			}
-			
+
 		}
 
 		return properties;

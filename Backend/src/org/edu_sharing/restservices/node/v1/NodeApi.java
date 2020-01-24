@@ -1599,7 +1599,7 @@ public class NodeApi  {
     	try {
     		
 	    	RepositoryDao repoDao = RepositoryDao.getRepository(repository);
-	    	NodeDao nodeDao = NodeDao.getNode(repoDao, node);
+	    	NodeDao nodeDao = NodeDao.getNode(repoDao, node, Filter.createShowAllFilter());
 	    	
 	    	NodeVersionEntries response=new NodeVersionEntries();
 	    	response.setVersions(nodeDao.getHistory());
