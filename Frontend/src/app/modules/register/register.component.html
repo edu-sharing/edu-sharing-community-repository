@@ -8,6 +8,7 @@
       width="normal"
       height="large"
       (onCancel)="cancel()"
+      [isCancelable]="false"
 >
     <div class="register-content card-content-padding">
         <app-register-form [class.display-none]="!(state=='register')" (onLoading)="isLoading=$event" (onRegisterDone)="onRegisterDone()" #registerForm></app-register-form>
