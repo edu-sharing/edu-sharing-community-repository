@@ -22,6 +22,7 @@ import org.alfresco.service.namespace.RegexQNamePattern;
 import org.apache.commons.lang.ArrayUtils;
 import org.apache.log4j.Logger;
 import org.edu_sharing.alfresco.authentication.HttpContext;
+import org.edu_sharing.alfresco.policy.NodeCustomizationPolicies;
 import org.edu_sharing.alfresco.tools.EduSharingNodeHelper;
 import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
 import org.edu_sharing.metadataset.v2.MetadataSetV2;
@@ -43,41 +44,7 @@ import org.edu_sharing.service.search.model.SortDefinition;
 import org.springframework.context.ApplicationContext;
 
 public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.NodeService {
-	
-	/* Some safe properties they're not necessary in the mds, but the client is allowed to define */
-	private static final String[] SAFE_PROPS = new String[]{
-			CCConstants.LOM_PROP_GENERAL_TITLE,
-			CCConstants.LOM_PROP_TECHNICAL_FORMAT,
-			CCConstants.CCM_PROP_IO_WWWURL,
-			CCConstants.CCM_PROP_IO_CREATE_VERSION,
-			CCConstants.CCM_PROP_IO_VERSION_COMMENT,
-			CCConstants.CCM_PROP_CCRESSOURCETYPE,
-			CCConstants.CCM_PROP_CCRESSOURCESUBTYPE,
-			CCConstants.CCM_PROP_CCRESSOURCEVERSION,
-			CCConstants.CCM_PROP_WF_INSTRUCTIONS,
-			CCConstants.CCM_PROP_WF_PROTOCOL,
-			CCConstants.CCM_PROP_WF_RECEIVER,
-			CCConstants.CCM_PROP_WF_STATUS,
-			CCConstants.CCM_PROP_MAP_COLLECTIONREMOTEID,
-			CCConstants.CM_PROP_METADATASET_EDU_METADATASET,
-			CCConstants.CM_PROP_METADATASET_EDU_FORCEMETADATASET,
-			CCConstants.CCM_PROP_EDITOR_TYPE,
-			CCConstants.CCM_PROP_TOOL_OBJECT_TOOLINSTANCEREF,
-			CCConstants.CCM_PROP_SAVED_SEARCH_REPOSITORY,
-			CCConstants.CCM_PROP_SAVED_SEARCH_MDS,
-			CCConstants.CCM_PROP_SAVED_SEARCH_QUERY,
-			CCConstants.CCM_PROP_SAVED_SEARCH_PARAMETERS,
-			CCConstants.CCM_PROP_AUTHOR_FREETEXT,
-			CCConstants.CCM_PROP_CHILDOBJECT_ORDER,
-			CCConstants.CCM_PROP_LINKTYPE,
-			CCConstants.CCM_PROP_TOOL_INSTANCE_KEY,
-			CCConstants.CCM_PROP_TOOL_INSTANCE_SECRET,
-			CCConstants.CCM_PROP_SERVICE_NODE_NAME,
-			CCConstants.CCM_PROP_SERVICE_NODE_DESCRIPTION,
-			CCConstants.CCM_PROP_SERVICE_NODE_TYPE,
-			CCConstants.CCM_PROP_SERVICE_NODE_DATA,
-			CCConstants.CCM_PROP_IO_REF_VIDEO_VTT
-			};
+
 	private static final String[] LICENSE_PROPS = new String[]{
 			CCConstants.LOM_PROP_RIGHTS_RIGHTS_DESCRIPTION,
 			CCConstants.CCM_PROP_IO_COMMONLICENSE_KEY,
@@ -334,7 +301,7 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
 
 	private static Iterable<String> getAllSafeProps() {
 		List<String> safe=new ArrayList<>();
-		safe.addAll(Arrays.asList(SAFE_PROPS));
+		safe.addAll(Arrays.asList(NodeCustomizationPolicies.SAFE_PROPS));
 		safe.addAll(Arrays.asList(LICENSE_PROPS));
 		safe.addAll(CCConstants.getLifecycleContributerPropsMap().values());
 		safe.addAll(CCConstants.getMetadataContributerPropsMap().values());

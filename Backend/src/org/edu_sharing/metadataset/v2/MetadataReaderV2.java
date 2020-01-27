@@ -1,12 +1,17 @@
 package org.edu_sharing.metadataset.v2;
 
+import org.alfresco.service.ServiceRegistry;
+import org.alfresco.service.cmr.repository.NodeRef;
+import org.alfresco.service.namespace.QName;
 import org.apache.commons.lang3.SerializationUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
+import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
 import org.edu_sharing.metadataset.v2.MetadataCondition.CONDITION_TYPE;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.server.tools.ApplicationInfo;
 import org.edu_sharing.repository.server.tools.ApplicationInfoList;
+import org.springframework.context.ApplicationContext;
 import org.w3c.dom.Document;
 import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
@@ -23,6 +28,7 @@ import java.io.InputStream;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 public class MetadataReaderV2 {
 	
@@ -46,7 +52,19 @@ public class MetadataReaderV2 {
 	public static String getPath(){
 		return "/org/edu_sharing/metadataset/v2/";
 	}
-	
+
+	public static List<MetadataWidget> getWidgetsByNode(NodeRef node,String locale) throws Exception{
+		ApplicationContext alfApplicationContext = AlfAppContextGate.getApplicationContext();
+		ServiceRegistry serviceRegistry = (ServiceRegistry) alfApplicationContext.getBean(ServiceRegistry.SERVICE_REGISTRY);
+		String mdsSet = serviceRegistry.getNodeService().getProperty(node, QName.createQName(CCConstants.CM_PROP_METADATASET_EDU_METADATASET)).toString();
+		if(mdsSet==null || mdsSet.isEmpty()) {
+			mdsSet = CCConstants.metadatasetdefault_id;
+		}
+		MetadataSetV2 metadata = MetadataReaderV2.getMetadataset(ApplicationInfoList.getHomeRepository(), mdsSet, locale);
+		return metadata.getWidgetsByNode(serviceRegistry.getNodeService().getType(node).toString(),
+				serviceRegistry.getNodeService().getAspects(node).stream().map(QName::toString).collect(Collectors.toList()));
+	}
+
 	public static MetadataSetV2 getMetadataset(ApplicationInfo appId,String mdsSet,String locale) throws Exception{
         MetadataReaderV2 reader;
         MetadataSetV2 mds;

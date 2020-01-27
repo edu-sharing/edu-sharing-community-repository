@@ -3,11 +3,8 @@ package org.edu_sharing.alfresco.policy;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.Serializable;
-import java.util.Arrays;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.Map;
+import java.util.*;
+import java.util.stream.Collectors;
 
 import javax.imageio.ImageIO;
 import javax.imageio.ImageReader;
@@ -27,15 +24,7 @@ import org.alfresco.service.cmr.action.Action;
 import org.alfresco.service.cmr.action.ActionService;
 import org.alfresco.service.cmr.lock.LockService;
 import org.alfresco.service.cmr.lock.LockStatus;
-import org.alfresco.service.cmr.repository.ChildAssociationRef;
-import org.alfresco.service.cmr.repository.ContentIOException;
-import org.alfresco.service.cmr.repository.ContentReader;
-import org.alfresco.service.cmr.repository.ContentService;
-import org.alfresco.service.cmr.repository.ContentStreamListener;
-import org.alfresco.service.cmr.repository.ContentWriter;
-import org.alfresco.service.cmr.repository.NodeRef;
-import org.alfresco.service.cmr.repository.NodeService;
-import org.alfresco.service.cmr.repository.StoreRef;
+import org.alfresco.service.cmr.repository.*;
 import org.alfresco.service.cmr.search.ResultSet;
 import org.alfresco.service.cmr.search.SearchService;
 import org.alfresco.service.cmr.security.PermissionService;
@@ -51,6 +40,9 @@ import org.apache.commons.httpclient.methods.GetMethod;
 import org.apache.log4j.Logger;
 import org.apache.tika.io.TikaInputStream;
 import org.edu_sharing.alfresco.jobs.PreviewJob;
+import org.edu_sharing.metadataset.v2.MetadataReaderV2;
+import org.edu_sharing.metadataset.v2.MetadataWidget;
+import org.edu_sharing.metadataset.v2.tools.MetadataHelper;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.client.tools.forms.VCardTool;
 import org.edu_sharing.repository.server.authentication.Context;
@@ -58,6 +50,7 @@ import org.edu_sharing.repository.server.tools.ActionObserver;
 import org.edu_sharing.repository.server.tools.ApplicationInfo;
 import org.edu_sharing.repository.server.tools.ApplicationInfoList;
 import org.edu_sharing.repository.server.tools.cache.RepositoryCache;
+import org.edu_sharing.service.nodeservice.NodeServiceImpl;
 import org.quartz.JobDetail;
 import org.quartz.ObjectAlreadyExistsException;
 import org.quartz.Scheduler;
@@ -101,34 +94,39 @@ public class NodeCustomizationPolicies implements OnContentUpdatePolicy, OnCreat
 	 */
 	static ThreadLocal<String> eduSharingContext = new ThreadLocal<String>();
 
-	/**
-	 * These are the properties that will be copied to all io_reference nodes inside collections
-	 * if the original node gets changed
-	 */
-	private static final String[] IO_REFERENCE_COPY_PROPERTIES = new String[]{
-			CCConstants.CCM_PROP_IO_COMMONLICENSE_KEY,
-			CCConstants.CCM_PROP_IO_COMMONLICENSE_CC_LOCALE,
-			CCConstants.CCM_PROP_IO_COMMONLICENSE_CC_VERSION,
-			CCConstants.CCM_PROP_IO_COMMONLICENSE_QUESTIONSALLOWED,
-			CCConstants.CCM_PROP_IO_LICENSE,
-			CCConstants.CCM_PROP_IO_LICENSE_DESCRIPTION,
-			CCConstants.CCM_PROP_IO_LICENSE_FROM,
-			CCConstants.CCM_PROP_IO_LICENSE_PROFILE_URL,
-			CCConstants.CCM_PROP_IO_LICENSE_SOURCE_URL,
-			CCConstants.CCM_PROP_IO_LICENSE_TITLE_OF_WORK,
-			CCConstants.CCM_PROP_IO_LICENSE_TO,
-			CCConstants.CCM_PROP_IO_LICENSE_VALID,
-
-			// fix for 4.2, override changed content resource props
+	/* Some safe properties they're not necessary in the mds, but the client is allowed to define */
+	public static final String[] SAFE_PROPS = new String[]{
+			CCConstants.LOM_PROP_GENERAL_TITLE,
+			CCConstants.LOM_PROP_TECHNICAL_FORMAT,
+			CCConstants.CCM_PROP_IO_WWWURL,
+			CCConstants.CCM_PROP_IO_CREATE_VERSION,
+			CCConstants.CCM_PROP_IO_VERSION_COMMENT,
 			CCConstants.CCM_PROP_CCRESSOURCETYPE,
 			CCConstants.CCM_PROP_CCRESSOURCESUBTYPE,
 			CCConstants.CCM_PROP_CCRESSOURCEVERSION,
-
-			// fix for 4.2, override all relevant metadata when changed on original
-			CCConstants.LOM_PROP_GENERAL_TITLE,
-			CCConstants.LOM_PROP_GENERAL_KEYWORD,
-			CCConstants.LOM_PROP_GENERAL_DESCRIPTION,
-			CCConstants.LOM_PROP_EDUCATIONAL_LEARNINGRESOURCETYPE,
+			CCConstants.CCM_PROP_WF_INSTRUCTIONS,
+			CCConstants.CCM_PROP_WF_PROTOCOL,
+			CCConstants.CCM_PROP_WF_RECEIVER,
+			CCConstants.CCM_PROP_WF_STATUS,
+			CCConstants.CCM_PROP_MAP_COLLECTIONREMOTEID,
+			CCConstants.CM_PROP_METADATASET_EDU_METADATASET,
+			CCConstants.CM_PROP_METADATASET_EDU_FORCEMETADATASET,
+			CCConstants.CCM_PROP_EDITOR_TYPE,
+			CCConstants.CCM_PROP_TOOL_OBJECT_TOOLINSTANCEREF,
+			CCConstants.CCM_PROP_SAVED_SEARCH_REPOSITORY,
+			CCConstants.CCM_PROP_SAVED_SEARCH_MDS,
+			CCConstants.CCM_PROP_SAVED_SEARCH_QUERY,
+			CCConstants.CCM_PROP_SAVED_SEARCH_PARAMETERS,
+			CCConstants.CCM_PROP_AUTHOR_FREETEXT,
+			CCConstants.CCM_PROP_CHILDOBJECT_ORDER,
+			CCConstants.CCM_PROP_LINKTYPE,
+			CCConstants.CCM_PROP_TOOL_INSTANCE_KEY,
+			CCConstants.CCM_PROP_TOOL_INSTANCE_SECRET,
+			CCConstants.CCM_PROP_SERVICE_NODE_NAME,
+			CCConstants.CCM_PROP_SERVICE_NODE_DESCRIPTION,
+			CCConstants.CCM_PROP_SERVICE_NODE_TYPE,
+			CCConstants.CCM_PROP_SERVICE_NODE_DATA,
+			CCConstants.CCM_PROP_IO_REF_VIDEO_VTT
 	};
 
 	static Logger logger = Logger.getLogger(NodeCustomizationPolicies.class);
@@ -421,8 +419,13 @@ public class NodeCustomizationPolicies implements OnContentUpdatePolicy, OnCreat
 						logger.warn("Solr query for node " + nodeRef.getId() + " returned node " + ref.getId() + ", but it's metadata do not match");
 						continue;
 					}
+					Set<String> props = new HashSet<>(Arrays.asList(SAFE_PROPS));
+					props.addAll(MetadataReaderV2.getWidgetsByNode(ref,"de_DE").stream().
+							map(MetadataWidget::getId).map(CCConstants::getValidGlobalName).
+							collect(Collectors.toList()));
 					for (QName prop : after.keySet()) {
-						if (Arrays.asList(IO_REFERENCE_COPY_PROPERTIES).contains(prop.toString())) {
+						// the prop is contained in the mds of the node or a SAFE_PROP, than check if it still the original one -> replace it on the ref
+						if (props.contains(prop.toString()) && propertyEquals(before.get(prop), originalProperties.get(prop))) {
 							originalProperties.put(prop, after.get(prop));
 						}
 					}
@@ -459,7 +462,41 @@ public class NodeCustomizationPolicies implements OnContentUpdatePolicy, OnCreat
 		}
 
 	}
-
+	private static String propertyToString(Object p){
+		if(p instanceof MLText){
+			return ((MLText) p).getDefaultValue();
+		}
+		if(p instanceof String) {
+			return (String)p;
+		}
+		return p.toString();
+	}
+	private static boolean isEmpty(Serializable p){
+		if(p==null) {
+			return true;
+		}else if(p instanceof List){
+			return ((List) p).isEmpty() || ((List) p).size()==1 && propertyToString(((List) p).get(0)).isEmpty();
+		}else{
+			return propertyToString(p).isEmpty();
+		}
+	}
+	private static boolean propertyEquals(Serializable p1, Serializable p2) {
+		if(Objects.equals(p1,p2)) {
+			return true;
+		}
+		if(isEmpty(p1) && isEmpty(p2)){
+			return true;
+		}
+		if(p1 instanceof List && p2 instanceof List && ((List) p1).size()==((List) p2).size()){
+			for(int i=0;i<((List) p1).size();i++){
+				if(!Objects.equals(propertyToString(((List) p1).get(0)),propertyToString(((List) p2).get(0)))) {
+					return false;
+				}
+			}
+			return true;
+		}
+		return false;
+	}
 
 
 	private void writeBase64Image(NodeRef nodeRef, String previewImageBase64) {
