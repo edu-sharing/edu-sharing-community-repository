@@ -157,9 +157,9 @@
 <div *ngIf="mode=='APPLICATIONS'" class="content applications">
   <input #xmlSelect type="file" style="display:none" id="xmlSelect" accept="application/xml" (change)="registerAppXml($event)" />
   <form class="register-app">
-    <h5 class="mat-heading-5 mat-heading-underline">
+    <h4 class="mat-heading-4 mat-heading-underline">
       <span>{{'ADMIN.APPLICATIONS.ADD_APPLICATION' | translate}}</span>
-    </h5>
+    </h4>
     <div>
       <mat-form-field>
         <mat-label>{{'ADMIN.APPLICATIONS.URL' | translate}}</mat-label>
@@ -172,9 +172,9 @@
     <div class="useFile">{{'ADMIN.APPLICATIONS.USE_FILE' | translate}}</div>
   </form>
   <form class="register-app">
-    <h5 class="mat-heading-5 mat-heading-underline">
+    <h4 class="mat-heading-4 mat-heading-underline">
       <span>{{'ADMIN.APPLICATIONS.USE_OWN_URL' | translate}}</span>
-    </h5>
+    </h4>
       <mat-label>{{'ADMIN.APPLICATIONS.CHOOSE_APP_MODE' | translate}}</mat-label>
       <mat-radio-group name="ownAppMode" [(ngModel)]="ownAppMode">
           <mat-radio-button value="repository">{{'ADMIN.APPLICATIONS.APP_MODE.REPOSITORY' | translate}}</mat-radio-button>
@@ -190,36 +190,42 @@
       <div><button mat-raised-button (click)="copyOwnApp()">{{'ADMIN.APPLICATIONS.COPY' | translate}}</button></div>
     </div>
   </form>
-  <h5 class="mat-heading-5 mat-heading-underline">
-      <span>{{'ADMIN.APPLICATIONS.LIST' | translate }}</span>
-  </h5>
-  <div class="table">
-    <div class="tableRow header">
+    <h4 class="mat-heading-4 mat-heading-underline">
+        <span>{{'ADMIN.APPLICATIONS.LIST' | translate }}</span>
+    </h4>
+    <div *ngFor="let type of getAppTypes()">
+        <div class="app-type">
+        <h6 class="mat-heading-6">
+            {{type}} ({{getApplications(type).length}})
+        </h6>
+            <button mat-icon-button color="primary"><i icon [iconId]="applicationsOpen[type] ? 'keyboard_arrow_up' : 'keyboard_arrow_down'" (click)="applicationsOpen[type]=!applicationsOpen[type]"></i></button>
+        </div>
+        <div class="app-list" *ngIf="applicationsOpen[type]" [@openOverlay]="applicationsOpen[type]">
+            <div class="header">
 
-      <div class="id">{{'ADMIN.APPLICATIONS.ID' | translate}}</div>
-      <div class="title">{{'ADMIN.APPLICATIONS.TITLE' | translate}}</div>
-      <div class="file">{{'ADMIN.APPLICATIONS.FILE' | translate}}</div>
-      <div class="type">{{'ADMIN.APPLICATIONS.TYPE' | translate}}</div>
-      <div class="repoType">{{'ADMIN.APPLICATIONS.REPOTYPE' | translate}}</div>
-      <div class="subtype">{{'ADMIN.APPLICATIONS.SUBTYPE' | translate}}</div>
-      <div class="config">&nbsp;</div>
-      <div class="edit">&nbsp;</div>
-      <div class="download">&nbsp;</div>
-      <div class="delete">&nbsp;</div>
+                <div class="id">{{'ADMIN.APPLICATIONS.ID' | translate}}</div>
+                <div class="title">{{'ADMIN.APPLICATIONS.TITLE' | translate}}</div>
+                <div class="file">{{'ADMIN.APPLICATIONS.FILE' | translate}}</div>
+                <div class="repoType">{{'ADMIN.APPLICATIONS.REPOTYPE' | translate}}</div>
+                <div class="subtype">{{'ADMIN.APPLICATIONS.SUBTYPE' | translate}}</div>
+                <div class="config">&nbsp;</div>
+                <div class="edit">&nbsp;</div>
+                <div class="download">&nbsp;</div>
+                <div class="delete">&nbsp;</div>
+            </div>
+            <div *ngFor="let app of getApplications(type)">
+                <div class="id">{{app.id}}</div>
+                <div class="title">{{app.title}}</div>
+                <div class="file">{{app.file}}</div>
+                <div class="repoType">{{app.repositoryType}}</div>
+                <div class="subtype">{{app.subtype}}</div>
+                <div class="config"><button mat-icon-button color="primary" *ngIf="app.configUrl" (click)="configApp(app)"><i icon iconId="settings" class="clickable"></i></button></div>
+                <div class="edit"><button mat-icon-button color="primary" (click)="editApp(app)"><i icon iconId="edit" class="clickable" ></i></button></div>
+                <div class="download"><button mat-icon-button color="primary" (click)="downloadApp(app)"><i icon iconId="cloud_download" class="clickable"></i></button></div>
+                <div class="delete"><button mat-icon-button color="primary" (click)="removeApp(app)"><i icon iconId="delete" class="clickable"></i></button></div>
+            </div>
+        </div>
     </div>
-    <div *ngFor="let app of applications" class="tableRow">
-      <div class="id">{{app.id}}</div>
-      <div class="title">{{app.title}}</div>
-      <div class="file">{{app.file}}</div>
-      <div class="type">{{app.type}}</div>
-      <div class="repoType">{{app.repositoryType}}</div>
-      <div class="subtype">{{app.subtype}}</div>
-      <div class="config"><button mat-icon-button *ngIf="app.configUrl" (click)="configApp(app)"><i icon iconId="settings" class="clickable"></i></button></div>
-      <div class="edit"><button mat-icon-button (click)="editApp(app)"><i icon iconId="edit" class="clickable" ></i></button></div>
-      <div class="download"><button mat-icon-button (click)="downloadApp(app)"><i icon iconId="cloud_download" class="clickable"></i></button></div>
-      <div class="delete"><button mat-icon-button (click)="removeApp(app)"><i icon iconId="delete" class="clickable"></i></button></div>
-    </div>
-  </div>
 </div>
 <div *ngIf="mode=='UPDATE'" class="content update">
   <div class="hint">

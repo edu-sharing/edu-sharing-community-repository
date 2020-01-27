@@ -34,6 +34,8 @@ import {CustomHelper} from "../../common/custom-helper";
 import {GlobalContainerComponent} from "../../common/ui/global-container/global-container.component";
 import {DateHelper} from "../../core-ui-module/DateHelper";
 import {CsvHelper} from '../../core-module/csv.helper';
+import {trigger} from '@angular/animations';
+import {UIAnimation} from '../../core-module/ui/ui-animation';
 
 
 @Component({
@@ -41,7 +43,7 @@ import {CsvHelper} from '../../core-module/csv.helper';
   templateUrl: 'admin.component.html',
   styleUrls: ['admin.component.scss'],
   animations: [
-
+    trigger('openOverlay', UIAnimation.openOverlay(UIAnimation.ANIMATION_TIME_FAST))
   ]
 })
 export class AdminComponent {
@@ -75,6 +77,7 @@ export class AdminComponent {
   public ngVersion:string;
   public updates: ServerUpdate[]=[];
   public applications: Application[]=[];
+  public applicationsOpen: any = {};
   public showWarning=false;
   public dialogTitle: string;
   public dialogMessage: string;
@@ -548,7 +551,11 @@ export class AdminComponent {
 
   private refreshAppList() {
     this.admin.getApplications().subscribe((data:Application[])=>{
-      this.applications=data;
+      this.applications = data;
+      this.applicationsOpen = {};
+      if (this.applications && this.applications.length) {
+        this.getAppTypes().forEach((t) => this.applicationsOpen[t] = true);
+      }
     });
   }
 
@@ -1104,6 +1111,13 @@ export class AdminComponent {
   copyOwnApp() {
     UIHelper.copyToClipboard(this.getOwnAppUrl());
     this.toast.toast('ADMIN.APPLICATIONS.COPIED_CLIPBOARD');
+  }
+
+  getAppTypes() {
+    return Array.from(new Set(this.applications.map((a) => a.type)));
+  }
+  getApplications(type: string) {
+    return this.applications.filter((a) => a.type === type);
   }
 }
 

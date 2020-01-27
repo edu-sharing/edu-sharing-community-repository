@@ -168,8 +168,37 @@ $sidenavWidthMobile:66px;
   }
 }
 .applications{
-  .tableRow div{
-    max-width: 160px;
+  .app-list{
+    display: flex;
+    flex-direction: column;
+    >div {
+      display: flex;
+      align-items: center;
+      border-bottom: 1px solid $cardSeperatorLineColor;
+      div {
+        width: 0;
+        flex-grow: 2;
+        word-break: break-word;
+        padding: 5px;
+        &.title {
+          flex-grow: 4;
+        }
+        &.config,
+        &.edit,
+        &.download,
+        &.delete {
+          max-width: 50px;
+        }
+      }
+    }
+  }
+  .app-type{
+    display: flex;
+    align-items: center;
+    h6 {
+      margin: 25px 0 15px 0;
+      flex-grow: 1;
+    }
   }
   .btn{
     margin-bottom: 15px;
