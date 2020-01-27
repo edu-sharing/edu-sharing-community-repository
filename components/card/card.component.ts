@@ -56,7 +56,7 @@ export class CardComponent implements OnDestroy {
      * allowed values: always (default), auto, never
      * auto: Automatically make the dialog modal when viewed on very tiny screens (e.g. mobile), otherwise use non-modal view
      */
-    @Input() modal = 'always';
+    @Input() modal: 'always' | 'auto' = 'always';
     /**
      * Should the heading be shown
      */
@@ -181,11 +181,6 @@ export class CardComponent implements OnDestroy {
         this.onScrolled.emit();
     }
 
-    showAsModal() {
-        return this.modal === 'always' ? true : this.modal === 'never' ? false :
-            // also configured in the css media query
-            UIHelper.evaluateMediaQuery(UIConstants.MEDIA_QUERY_MAX_HEIGHT, UIConstants.MOBILE_HEIGHT_WITH_KEYBOARD);
-    }
 }
 export class CardJumpmark {
     /**

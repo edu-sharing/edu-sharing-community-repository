@@ -1,23 +1,106 @@
 @import "../../styles/variables";
 @import "variables";
 
-
 @mixin content{
   overflow-y: auto;
   @include iosScrolling();
   background-color: #fff;
 }
+
+// Maximize both horizontally and vertically.
+//
+// As soon as the screenwidth falls below a threshold, we maximize dialogs in both directions in
+// order to maintain a consistent look, i.e., the dialog should not go edge-to-edge horizontally but
+// have borders vertically.
+@mixin maximize {
+  padding: 0px;
+  // When we show the mobile (bottom) nav bar, we can draw over the top bar since all important
+  // functions are accessible via the bottom bar.
+  @media screen and (max-width: $mobileTabSwitchWidth) {
+    top: 0px;
+  }
+  .mat-card {
+    height: 100%;
+    width: 100%;
+  }
+}
+
+// Draw over everything and darken the background if visible.
+//
+// This will make the user unable to navigate the application.
+//
+// This mode can be enforced by setting the `modal` input to `always` to direct user focus to the
+// dialog. It is also triggered automatically in case the viewport's height becomes to small to
+// comfortably fit the dialog.
+@mixin modal {
+  @include darken();
+  @include blurBackground();
+  @include setZIndex($dialogZIndex);
+  height: 100%;
+}
+
+@mixin no-modal {
+  padding: #{$nonModalPadding};
+  top: #{$mainnavHeight};
+  height: unset;
+  @media screen and (max-width: $mobileTabSwitchWidth){
+    bottom: #{$mobileTabNavHeight};
+  }
+  @include setZIndex($dialogNonModalZIndex)
+}
+
+@mixin setZIndex($baseZIndex) {
+  @each $p in 0, 1, 2, 3, 4, 5 {
+    &[priority="#{$p}"] {
+      z-index: $baseZIndex + $p;
+    }
+  }
+}
+
 :host /deep/ .card-dialog{
+  top: 0px;
+  bottom: 0px;
   display: flex;
-  z-index: $dialogZIndex+1;
   align-items: center;
   justify-content: center;
+  &[modal=always] {
+    @include modal();
+  }
+  @media (max-height: $mobileHeightWithKeyboard) {
+    @include modal();
+  }
+  @media (min-height: $mobileHeightWithKeyboard) {
+    &:not([modal=always]) {
+      @include no-modal();
+    }
+  }
+  @each $name, $value in $heights {
+    &[height=#{$name}] {
+      .mat-card {
+        height: $value;
+      }
+    }
+  }
+  @each $name, $value in $widths {
+    &[width=#{$name}] {
+      .mat-card {
+        width: $value;
+      }
+      @media (max-width: $value + 2*$nonModalPadding) {
+        @include maximize();
+      }
+    }
+  }
   .mat-card {
+    display: flex;
+    flex-direction: column;
     max-width: 100%;
+    max-height: 100%;
     position: relative;
     padding: 0;
     @include materialShadowLarge();
     .mat-card-header {
+      flex-shrink: 0;
       background-color: $actionDialogBackground;
       display: flex;
       align-items: center;
@@ -62,7 +145,6 @@
     background-color: $backgroundColor;
     border-radius: 2px;
     mat-card-actions {
-      $height: $actionMenuHeight;
       background-color: #fff;
       border-top:1px solid $cardSeperatorLineColor;
       display: flex;
@@ -79,122 +161,15 @@
     mat-card-content {
       margin: 0;
       position: relative;
+      flex-grow: 1;
     }
-    &.width-xsmall {
-      width: 400px;
+    &:not(.card-tabbed) mat-card-content {
+      @include content();
     }
-    &.width-small {
-      width: 500px;
+    &.card-tabbed .mat-tab-body-wrapper {
+      @include content();
     }
-    &.width-normal {
-      width: 600px;
-    }
-    &.width-mlarge {
-      width: 650px;
-    }
-    &.width-large {
-      width: 700px;
-    }
-    &.width-xlarge {
-      width: 800px;
-    }
-    &.width-xxlarge {
-      width: 900px;
-    }
-    &:not(.card-tabbed) {
-      mat-card-content {
-        max-height: calc(100vh - #{$titleHeight} - #{$actionMenuHeight});
-        @include content();
-      }
-      &.height-small mat-card-content {
-        height: $height-small - $titleHeight - $actionMenuHeight;
-      }
-      &.height-normal mat-card-content {
-        height: $height-normal - $titleHeight - $actionMenuHeight;
-      }
-      &.height-large mat-card-content {
-        height: $height-large - $titleHeight - $actionMenuHeight;
-      }
-      &.height-xlarge mat-card-content {
-        height: $height-xlarge - $titleHeight - $actionMenuHeight;
-      }
-      &.height-xxlarge mat-card-content {
-        height: $height-xxlarge - $titleHeight - $actionMenuHeight;
-      }
-      &.height-xxxlarge mat-card-content {
-        height: $height-xxxlarge - $titleHeight - $actionMenuHeight;
-      }
-      &.height-auto mat-card-content {
-        height: auto;
-      }
-    }
-    &.card-no-buttons {
-      mat-card-content {
-        max-height: 100vh;
-        @include content();
-      }
-      .card-content-header{
-        max-height: calc(100vh - #{$titleHeight});
-      }
-      &.height-small mat-card-content {
-        height: $height-small - $titleHeight;
-      }
-      &.height-normal mat-card-content {
-        height: $height-normal - $titleHeight;
-      }
-      &.height-large mat-card-content {
-        height: $height-large - $titleHeight;
-      }
-      &.height-xlarge mat-card-content {
-        height: $height-xlarge - $titleHeight;
-      }
-      &.height-xxlarge mat-card-content {
-        height: $height-xxlarge - $titleHeight;
-      }
-      &.height-xxxlarge mat-card-content {
-        height: $height-xxxlarge - $titleHeight;
-      }
-      &.height-auto mat-card-content {
-        height: auto;
-      }
-    }
-    &.card-tabbed {
-      .mat-tab-body-wrapper {
-        max-height: calc(100vh - #{$titleHeight} - #{$actionMenuHeight} - #{$tabHeight});
-        @include content();
-      }
-      &.height-small .mat-tab-body-wrapper {
-        height: $height-small - $titleHeight - $actionMenuHeight - $tabHeight;
-      }
-      &.height-normal .mat-tab-body-wrapper {
-        height: $height-normal - $titleHeight - $actionMenuHeight - $tabHeight;
-      }
-      &.height-large .mat-tab-body-wrapper {
-        height: $height-large - $titleHeight - $actionMenuHeight - $tabHeight;
-      }
-      &.height-xlarge .mat-tab-body-wrapper {
-        height: $height-xlarge - $titleHeight - $actionMenuHeight - $tabHeight;
-      }
-      &.height-xxlarge .mat-tab-body-wrapper {
-        height: $height-xxlarge - $titleHeight - $actionMenuHeight - $tabHeight;
-      }
-      &.height-xxxlarge .mat-tab-body-wrapper {
-        height: $height-xxxlarge - $titleHeight - $actionMenuHeight - $tabHeight;
-      }
-    }
-    /*
-      move a non-modal card downwards to center it below the main-nav
-     */
-    &:not(.card-modal){
-      margin-top: $mainnavHeight;
-      .card-content-header{
-        max-height: calc(100vh - #{$titleHeight} - #{$actionMenuHeight} - #{$mainnavHeight} - #{$nonModalPadding});
-      }
-      &.card-no-buttons .card-content-header{
-        max-height: calc(100vh - #{$titleHeight} - #{$mainnavHeight} - #{$nonModalPadding});
-      }
-    }
-    .card-content-padding{
+    .card-content-padding {
       padding: $cardPadding;
     }
   }
@@ -222,28 +197,6 @@
       button.active {
         background: $workspaceTreeSelectedBackgroundEffect;
         background-color: $workspaceTreeSelectedBackground;
-      }
-    }
-  }
-  // @TODO: using position fixed is may not the best way since it can fail for different combinations
-  // however, it's currently just used for non-modal dialogs which are relatively rare
-
-  @media screen and (max-width: $mobileTabSwitchWidth){
-    .mat-card:not(.card-modal){
-      margin-top: 0;
-      /*position: fixed;
-      top: $mainnavHeight;
-      bottom: $mainnavHeight + $mobileTabNavHeight;
-      */
-      &:not(.card-tabbed) {
-        mat-card-content {
-          max-height: calc(100vh - #{$titleHeight} - #{$actionMenuHeight} - #{$mainnavHeight} - #{$mobileTabNavHeight * 2});
-        }
-      }
-      &.card-no-buttons{
-        .card-content-header {
-          max-height: calc(100vh - #{$titleHeight} - #{$mainnavHeight} - #{$mobileTabNavHeight * 2});
-        }
       }
     }
   }
