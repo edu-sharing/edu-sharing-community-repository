@@ -33,9 +33,12 @@ form{
     margin-left: 10px;
   }
 }
-mat-checkbox{
+mat-checkbox {
   display: flex;
   margin-top: 12px;
+}
+:host mat-checkbox /deep/ .mat-checkbox-layout {
+  white-space: normal !important;
 }
 .accept {
   margin-top: 12px;
