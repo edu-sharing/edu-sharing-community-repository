@@ -4,7 +4,7 @@ import { HttpClient } from '@angular/common/http';
 import { Component, ElementRef, OnInit, ViewChild } from '@angular/core';
 import { FormControl } from '@angular/forms';
 import { Title } from '@angular/platform-browser';
-import { ActivatedRoute, Params, Router, UrlSerializer } from '@angular/router';
+import { ActivatedRoute, Params, Router } from '@angular/router';
 import { TranslateService } from '@ngx-translate/core';
 import { map, startWith } from 'rxjs/operators';
 import { GlobalContainerComponent } from '../../common/ui/global-container/global-container.component';
@@ -57,7 +57,6 @@ export class LoginComponent implements OnInit {
         private connector: RestConnectorService,
         private toast: Toast,
         private platformLocation: PlatformLocation,
-        private urlSerializer: UrlSerializer,
         private router: Router,
         private http: HttpClient,
         private translate: TranslateService,
@@ -168,6 +167,10 @@ export class LoginComponent implements OnInit {
         this.isLoading = true;
     }
 
+    canRegister(): boolean {
+        return this.config.register && (this.config.register.local || this.config.register.registerUrl);
+    }
+
     checkConditions() {
         this.disabled = !this.username || this.currentProvider; // || !this.password;
         this.updateButtons();
@@ -250,19 +253,6 @@ export class LoginComponent implements OnInit {
         }
     }
 
-    private updateButtons(): any {
-        this.buttons = [];
-        if (this.showProviders) {
-            return;
-        }
-        if (this.config.register && (this.config.register.local || this.config.register.registerUrl)) {
-            this.buttons.push(new DialogButton('LOGIN.REGISTER_TEXT', DialogButton.TYPE_CANCEL, () => this.register()));
-        }
-        const login = new DialogButton('LOGIN.LOGIN', DialogButton.TYPE_PRIMARY, () => this.login());
-        login.disabled = this.disabled;
-        this.buttons.push(login);
-    }
-
     private filterProviders(filter: any = '') {
         console.log(filter);
         const filtered = [];
@@ -326,5 +316,19 @@ export class LoginComponent implements OnInit {
             );
         console.log(this.filteredProviders);
     }
+
+    private updateButtons(): any {
+        this.buttons = [];
+        if (this.showProviders) {
+            return;
+        }
+        if (this.canRegister()) {
+            this.buttons.push(new DialogButton('LOGIN.REGISTER_TEXT', DialogButton.TYPE_CANCEL, () => this.register()));
+        }
+        const login = new DialogButton('LOGIN.LOGIN', DialogButton.TYPE_PRIMARY, () => this.login());
+        login.disabled = this.disabled;
+        this.buttons.push(login);
+    }
+
 
 }

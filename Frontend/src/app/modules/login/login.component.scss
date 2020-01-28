@@ -9,22 +9,16 @@
     width: calc(100% - .2rem);
   }
 }
-.dialog{
-  z-index: 10;
-}
-.card{
-  z-index: 11;
-}
 powered-by{
   position: fixed;
   left: 0;
   bottom: 5%;
 }
-.powered-down{
-  top: calc(50% + 280px);
-}
-.card-cancel{
-  z-index: 1;
+.powered-down {
+  top: calc(50% + 375px);
+  @media (max-height: 850px) {
+    display: none;
+  }
 }
 .branding {
   width: 100%;
@@ -33,20 +27,6 @@ powered-by{
   margin-top: 10px;
   img {
     max-height: 100px;
-  }
-}
-.choose{
-  display: flex;
-  flex-direction: column;
-  justify-content: space-evenly;
-  height: 230px;
-  >div{
-    display:flex;
-    flex-direction: column;
-    .choose-label{
-      color: $textLight;
-      margin: 0 0 5px 10px;
-    }
   }
 }
 .password-label-container {
@@ -71,10 +51,15 @@ powered-by{
     border-right:1px solid $textLight;
     padding-right:30px;
   }
-  .login-form-providers{
+  .login-form {
     padding-left:30px;
-    input {
-      margin-bottom: 35px;
+    display: flex;
+    flex-direction: column;
+    > form {
+      flex-grow: 1;
+      [showProviders=false] & > mat-form-field {
+        margin-bottom: 20px;
+      }
     }
   }
   >div{
@@ -126,14 +111,7 @@ powered-by{
     }
   }
 }
-@media screen and (min-height: ($mobileHeight)) {
-  .card {
-    top: unset;
-    .card-content {
-      min-height: 540px;
-    }
-  }
-}
+
 @media screen and (max-width: $mobileWidth+$mobileStage*1) {
   .groups{
     flex-direction: column;
@@ -141,7 +119,7 @@ powered-by{
       border-right: none;
       padding-right:0;
     }
-    .login-form-providers{
+    .login-form {
       padding-top:10px;
       padding-left:0;
     }
@@ -159,16 +137,13 @@ powered-by{
     display: none;
   }
 }
-@media screen and (max-width: $mobileWidth+$mobileStage*1) {
-  .branding{
+@media screen and (max-width: $mobileWidth+$mobileStage*1), (max-height: 750px) {
+  [showProviders=true] .branding{
     display: none;
   }
 }
-@media screen and (max-height: $mobileHeightWithKeyboard) {
-  .card{
-    top: 0;
-  }
-  .dialog {
-    z-index: 120;
+@media screen and (max-height: 650px) {
+  .branding{
+    display: none;
   }
 }
