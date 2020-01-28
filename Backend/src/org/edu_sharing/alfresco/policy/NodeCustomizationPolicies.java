@@ -128,6 +128,16 @@ public class NodeCustomizationPolicies implements OnContentUpdatePolicy, OnCreat
 			CCConstants.CCM_PROP_SERVICE_NODE_DATA,
 			CCConstants.CCM_PROP_IO_REF_VIDEO_VTT
 	};
+	public static final String[] LICENSE_PROPS = new String[]{
+			CCConstants.LOM_PROP_RIGHTS_RIGHTS_DESCRIPTION,
+			CCConstants.CCM_PROP_IO_COMMONLICENSE_KEY,
+			CCConstants.CCM_PROP_IO_COMMONLICENSE_CC_LOCALE,
+			CCConstants.CCM_PROP_IO_COMMONLICENSE_CC_VERSION,
+			CCConstants.CCM_PROP_IO_LICENSE_TITLE_OF_WORK,
+			CCConstants.CCM_PROP_IO_LICENSE_SOURCE_URL,
+			CCConstants.CCM_PROP_IO_LICENSE_PROFILE_URL,
+			CCConstants.CCM_PROP_IO_COMMONLICENSE_QUESTIONSALLOWED
+	};
 
 	static Logger logger = Logger.getLogger(NodeCustomizationPolicies.class);
 
@@ -420,6 +430,7 @@ public class NodeCustomizationPolicies implements OnContentUpdatePolicy, OnCreat
 						continue;
 					}
 					Set<String> props = new HashSet<>(Arrays.asList(SAFE_PROPS));
+					props.addAll(Arrays.asList(LICENSE_PROPS));
 					props.addAll(MetadataReaderV2.getWidgetsByNode(ref,"de_DE").stream().
 							map(MetadataWidget::getId).map(CCConstants::getValidGlobalName).
 							collect(Collectors.toList()));
