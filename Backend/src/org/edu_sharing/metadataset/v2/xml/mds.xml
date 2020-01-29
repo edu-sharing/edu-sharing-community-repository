@@ -578,6 +578,32 @@
 				]]></html>
 			</template>
 			<template>
+				<id>node_contributor_text</id>
+				<caption>dialog_upload_tab_contributers</caption>
+				<html><![CDATA[
+				<license>
+                <ccm:imported_object_appname>
+                <ccm:author_freetext>
+				<ccm:lifecyclecontributer_author>
+				<ccm:lifecyclecontributer_publisher>
+				<ccm:lifecyclecontributer_unknown>
+				<ccm:lifecyclecontributer_initiator>
+				<ccm:lifecyclecontributer_terminator>
+				<ccm:lifecyclecontributer_validator>
+				<ccm:lifecyclecontributer_editor>
+				<ccm:lifecyclecontributer_graphical_designer>
+				<ccm:lifecyclecontributer_technical_implementer>
+				<ccm:lifecyclecontributer_content_provider>
+				<ccm:lifecyclecontributer_educational_validator>
+				<ccm:lifecyclecontributer_script_writer>
+				<ccm:lifecyclecontributer_instructional_designer>
+				<ccm:lifecyclecontributer_subject_matter_expert>
+				<ccm:metadatacontributer_creator>
+				<ccm:metadatacontributer_validator>
+				<ccm:metadatacontributer_provider>
+				]]></html>
+			</template>
+			<template>
 				<id>node_collections_render</id>
 				<caption>dialog_upload_tab_collections</caption>
 				<hideIfEmpty>true</hideIfEmpty>
@@ -700,6 +726,13 @@
 					<view>node_collections_render</view>
                     <view>node_comments_render</view>
                 </views>
+			</group>
+			<group>
+				<id>io_text</id>
+				<views>
+					<view>node_general_render</view>
+					<view>node_contributor_text</view>
+				</views>
 			</group>
 			<group>
 				<id>io_render_inline</id>

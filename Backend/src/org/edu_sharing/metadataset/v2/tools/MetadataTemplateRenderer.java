@@ -11,6 +11,7 @@ import org.apache.log4j.Logger;
 import org.edu_sharing.metadataset.v2.*;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.client.tools.I18nAngular;
+import org.edu_sharing.repository.client.tools.metadata.ValueTool;
 import org.edu_sharing.repository.server.authentication.NetworkAuthentication;
 import org.edu_sharing.repository.server.tools.*;
 import org.edu_sharing.service.license.LicenseService;
@@ -36,8 +37,13 @@ import java.util.stream.Collectors;
  *
  */
 public class MetadataTemplateRenderer {
-
+	public enum RenderingMode{
+		HTML,
+		TEXT
+	}
+	private RenderingMode renderingMode = RenderingMode.HTML;
 	private static final String GROUP_MULTIVALUE_DELIMITER = "[+]";
+	private static final String TEXT_LICENSE_SEPERATOR = " / ";
 	private String userName;
 	private NodeRef nodeRef;
 	private MetadataSetV2 mds;
@@ -51,7 +57,28 @@ public class MetadataTemplateRenderer {
 		this.properties = cleanupHTMLMultivalueProperties(properties);
 	}
 
-	public String render(String groupName) throws IllegalArgumentException {
+	public static HashMap<String, String[]> convertProps(Map<String, Object> props) {
+		HashMap<String, String[]> propsConverted = new HashMap<>();
+		for(String key : props.keySet()){
+			String keyLocal= CCConstants.getValidLocalName(key);
+
+			if(props.get(key) == null) continue;
+
+			String[] values=ValueTool.getMultivalue(props.get(key).toString());
+			propsConverted.put(keyLocal, values);
+		}
+		return propsConverted;
+	}
+
+    public RenderingMode getRenderingMode() {
+        return renderingMode;
+    }
+
+    public void setRenderingMode(RenderingMode renderingMode) {
+        this.renderingMode = renderingMode;
+    }
+
+    public String render(String groupName) throws IllegalArgumentException {
 		return AuthenticationUtil.runAs(()-> {
 			for (MetadataGroup group : mds.getGroups()) {
 				if (group.getId().equals(groupName))
@@ -81,7 +108,9 @@ public class MetadataTemplateRenderer {
 
 	private String renderTemplate(MetadataTemplate template) throws IllegalArgumentException {
 		String html="";
-		html+="<div class='mdsGroup'>"+"<div class='mdsCaption " + template.getId() + "'>" + template.getCaption() + "</div>"+"<div class='mdsContent'>";
+		if(renderingMode.equals(RenderingMode.HTML)) {
+			html += "<div class='mdsGroup'>" + "<div class='mdsCaption " + template.getId() + "'>" + template.getCaption() + "</div>" + "<div class='mdsContent'>";
+		}
 		String content=template.getHtml();
 		for(MetadataWidget srcWidget : mds.getWidgets()){
 			MetadataWidget widget=mds.findWidgetForTemplateAndCondition(srcWidget.getId(),template.getId(),properties);
@@ -99,20 +128,25 @@ public class MetadataTemplateRenderer {
 				values=new String[]{"-"};
 				wasEmpty=true;
 			}
-			StringBuffer widgetHtml=new StringBuffer("<div class='mdsWidget");
-			if(widget.getType()!=null) {
-				widgetHtml.append(" mdsWidget_").append(widget.getType());
-			}
-			widgetHtml.append("'").append(attributes).append(">");
-			if(widget.getCaption()!=null) {
-				widgetHtml.append("<div class='mdsWidgetCaption'>").append(widget.getCaption()).append("</div>");
-			}
-			widgetHtml.append("<div class='mdsWidgetContent mds_").append(widget.getId().replace(":", "_"));
-			if(widget.isMultivalue()) {
-				widgetHtml.append(" mdsWidgetMultivalue");
-			}
+			StringBuffer widgetHtml=new StringBuffer("");
+			if(renderingMode.equals(RenderingMode.HTML)) {
+				widgetHtml.append("<div class='mdsWidget");
+				if (widget.getType() != null) {
+					widgetHtml.append(" mdsWidget_").append(widget.getType());
+				}
+				widgetHtml.append("'").append(attributes).append(">");
+				if (widget.getCaption() != null) {
+					widgetHtml.append("<div class='mdsWidgetCaption'>").append(widget.getCaption()).append("</div>");
+				}
+				widgetHtml.append("<div class='mdsWidgetContent mds_").append(widget.getId().replace(":", "_"));
+				if (widget.isMultivalue()) {
+					widgetHtml.append(" mdsWidgetMultivalue");
+				}
 
-			widgetHtml.append("'>");
+				widgetHtml.append("'>");
+			}else if(renderingMode.equals(RenderingMode.TEXT)){
+				widgetHtml.append(widget.getCaption()).append(": ");
+			}
 			boolean empty=true;
 			if("multivalueTree".equals(widget.getType())) {
 				empty = renderTree(widgetHtml, widget);
@@ -138,27 +172,55 @@ public class MetadataTemplateRenderer {
 						LicenseService license=new LicenseService();
 						String link=license.getLicenseUrl(licenseName,mds.getI18n(), licenseVersion);
 						value="";
-						if(link!=null)
-							value="<a href='"+link+"' target='_blank'>";
-						value+="<img src='"+
-								// @TODO 5.1 This can be set to dynamic!
-								license.getIconUrl(licenseName,false)+
-								"'>";
-						if(link!=null)
-							value+="</a>";
+						if(renderingMode.equals(RenderingMode.HTML)) {
+							if (link != null)
+								value = "<a href='" + link + "' target='_blank'>";
+							value += "<img src='" +
+									// @TODO 5.1 This can be set to dynamic!
+									license.getIconUrl(licenseName, false) +
+									"'>";
+							if (link != null)
+								value += "</a>";
+						}
 						String name = getLicenseName(licenseName, properties);
 						String group = getLicenseGroup(licenseName, properties);
-						if(name!=null)
-							value+="<div class='licenseName'>"+name+"</div>";
-						if(!group.equals(name))
-							value+="<div class='licenseGroup'>"+group+"</div>";
-
+						if(name!=null) {
+							if(renderingMode.equals(RenderingMode.HTML)) {
+								value += "<div class='licenseName'>" + name + "</div>";
+							}else if(renderingMode.equals(RenderingMode.TEXT)){
+								value += name;
+							}
+						}
+						if(!group.equals(name)) {
+							if(renderingMode.equals(RenderingMode.HTML)) {
+								value += "<div class='licenseGroup'>" + group + "</div>";
+							}else if(renderingMode.equals(RenderingMode.TEXT)){
+								if(!value.isEmpty()){
+									value += TEXT_LICENSE_SEPERATOR;
+								}
+								value += group;
+							}
+						}
 						if(CCConstants.COMMON_LICENSE_CUSTOM.equals(licenseName) && properties.containsKey(CCConstants.getValidLocalName(CCConstants.LOM_PROP_RIGHTS_RIGHTS_DESCRIPTION))) {
 							String licenseDescription=properties.get(CCConstants.getValidLocalName(CCConstants.LOM_PROP_RIGHTS_RIGHTS_DESCRIPTION))[0];
-							value+="<div class='licenseDescription'>"+licenseDescription+"</div>";
+							if(renderingMode.equals(RenderingMode.HTML)) {
+								value+="<div class='licenseDescription'>"+licenseDescription+"</div>";
+							}else if(renderingMode.equals(RenderingMode.TEXT)){
+								if(!value.isEmpty()){
+									value += TEXT_LICENSE_SEPERATOR;
+								}
+								value += licenseDescription;
+							}
 						}
 						else{
-							value+="<div class='licenseDescription'>" +getLicenseDescription(licenseName) +"</div>";
+							if(renderingMode.equals(RenderingMode.HTML)) {
+								value+="<div class='licenseDescription'>" +getLicenseDescription(licenseName) +"</div>";
+							}else if(renderingMode.equals(RenderingMode.TEXT)){
+								if(!value.isEmpty()){
+									value += TEXT_LICENSE_SEPERATOR;
+								}
+								value += getLicenseDescription(licenseName).replace("\n",TEXT_LICENSE_SEPERATOR);
+							}
 						}
 
 					}
@@ -166,7 +228,7 @@ public class MetadataTemplateRenderer {
 						continue;
 					value=renderWidgetValue(widget,value);
 					boolean isLink=false;
-					if(widget.getLink()!=null && !widget.getLink().isEmpty()){
+					if(widget.getLink()!=null && !widget.getLink().isEmpty() && renderingMode.equals(RenderingMode.HTML)){
 						widgetHtml.append("<a href=\"").append(value).append("\" target=\"").append(widget.getLink()).append("\">");
 						isLink=true;
 					}
@@ -176,7 +238,7 @@ public class MetadataTemplateRenderer {
 							value = VCardConverter.getNameForVCard("",data);
 							if (data.get(CCConstants.VCARD_URL) != null) {
 								String url = data.get(CCConstants.VCARD_URL).toString();
-								if(!url.isEmpty()) {
+								if(!url.isEmpty() && renderingMode.equals(RenderingMode.HTML)) {
 									if (!url.contains("://"))
 										url = "http://" + url;
 									widgetHtml.append("<a href=\"").append(url).append("\" target=\"_blank\">");
@@ -187,32 +249,53 @@ public class MetadataTemplateRenderer {
 							// empty or invalid value
 						}
 					}
-
-					widgetHtml.append("<div class='mdsValue'>");
-					if(widget.getIcon()!=null){
-						widgetHtml.append(insertIcon(widget.getIcon()));
+					if(renderingMode.equals(RenderingMode.HTML)){
+						widgetHtml.append("<div class='mdsValue'>");
+						if(widget.getIcon()!=null){
+							widgetHtml.append(insertIcon(widget.getIcon()));
+						}
 					}
-					if(!value.trim().isEmpty())
-						empty=false;
+					if(!value.trim().isEmpty()) {
+						if(!empty && renderingMode.equals(RenderingMode.TEXT)){
+							widgetHtml.append(", ");
+						}
+						empty = false;
+					}
 					widgetHtml.append(value);
-					widgetHtml.append("</div>");
-					if(isLink) {
-						widgetHtml.append("</a>");
+					if(renderingMode.equals(RenderingMode.HTML)) {
+						widgetHtml.append("</div>");
+						if (isLink) {
+							widgetHtml.append("</a>");
+						}
 					}
-
 				}
 			}
-			widgetHtml.append("</div></div>");
-			if((empty || wasEmpty) && widget.isHideIfEmpty())
-				widgetHtml=new StringBuffer();
-			content=first+widgetHtml+second;
+			if(renderingMode.equals(RenderingMode.HTML)) {
+				widgetHtml.append("</div></div>");
+			}
+			if((empty || wasEmpty) && widget.isHideIfEmpty()) {
+				widgetHtml = new StringBuffer();
+			}
+
+			content = first.trim();
+			content += widgetHtml.toString().trim();
+			if(!widgetHtml.toString().isEmpty() && renderingMode.equals(RenderingMode.TEXT)){
+				// mark line breaks via multivalue seperator so they are not trimmed, and replace them later
+				content += CCConstants.MULTIVALUE_SEPARATOR;
+			}
+			content += second.trim();
 		}
 		// when hideIfEmpty for template is true, and no content was rendered -> hide
 		if(content.trim().isEmpty() && template.getHideIfEmpty()){
 			return "";
 		}
+		if(renderingMode.equals(RenderingMode.TEXT)){
+			content = content.replace(CCConstants.MULTIVALUE_SEPARATOR,"\n");
+		}
 		html+=content;
-		html+="</div></div>";
+		if(renderingMode.equals(RenderingMode.HTML)) {
+			html += "</div></div>";
+		}
 		return html;
 	}
 
@@ -304,16 +387,24 @@ public class MetadataTemplateRenderer {
 			}
 			path= Lists.reverse(path);
 			int i=0;
-			widgetHtml.append("<div class='mdsValue'>");
+			if(renderingMode.equals(RenderingMode.HTML)) {
+				widgetHtml.append("<div class='mdsValue'>");
+			}
 			empty=path.size()==0;
 			for(String p : path) {
 				if(i>0) {
-					widgetHtml.append("<i class='material-icons'>keyboard_arrow_right</i>");
+					if(renderingMode.equals(RenderingMode.HTML)){
+						widgetHtml.append("<i class='material-icons'>keyboard_arrow_right</i>");
+					}else if(renderingMode.equals(RenderingMode.TEXT)){
+						widgetHtml.append(" -> ");
+					}
 				}
 				widgetHtml.append(p);
 				i++;
 			}
-			widgetHtml.append("</div>");
+			if(renderingMode.equals(RenderingMode.HTML)) {
+				widgetHtml.append("</div>");
+			}
 
 		}
 		return empty;
