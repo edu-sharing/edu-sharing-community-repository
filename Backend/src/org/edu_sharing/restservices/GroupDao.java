@@ -111,7 +111,7 @@ public class GroupDao {
 			if (displayName == null) {
 				
 				throw new DAOMissingException(
-						new IllegalArgumentException(groupName));
+						new IllegalArgumentException("Group does not exist: "+groupName));
 				
 			}
 			this.groupType= authorityService.getProperty(this.authorityName,CCConstants.CCM_PROP_GROUPEXTENSION_GROUPTYPE);
