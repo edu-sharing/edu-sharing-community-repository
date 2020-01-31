@@ -282,7 +282,18 @@ public class SSOAuthorityMapper {
 					}
 					
 					if(!authenticationService.authenticationExists(userName)){
-						authenticationService.createAuthentication(userName, new KeyTool().getRandomPassword().toCharArray());
+						
+						/**
+						 * get the existent username, this can be different to the parameter username 
+						 * when this has another case(lower/upper) than the person object username
+						 */
+						NodeRef personNodeRef = personService.getPersonOrNull(userName);
+						if(personNodeRef == null) {
+							logger.error("person " + userName + " does not exist. can not create authentication object in userstore." );
+							return null;
+						}
+						String existentUserName = (String)nodeService.getProperty(personNodeRef, ContentModel.PROP_USERNAME);
+						authenticationService.createAuthentication(existentUserName, new KeyTool().getRandomPassword().toCharArray());
 					}
 					
 				} else {
