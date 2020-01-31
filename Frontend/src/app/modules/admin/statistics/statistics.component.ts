@@ -24,7 +24,7 @@ declare var Chart: any;
   styleUrls: ['statistics.component.scss']
 })
 export class AdminStatisticsComponent {
-  @ViewChild('groupedChart') groupedChartRef: ElementRef;
+  @ViewChild('groupedChart', {static: true}) groupedChartRef: ElementRef;
   private _mediacenter: any;
   private groupedChartData: { node: NodeStatistics[]; user: Statistics[] };
   @Input() set mediacenter(mediacenter: any){

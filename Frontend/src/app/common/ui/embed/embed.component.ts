@@ -18,8 +18,8 @@ import {WorkspaceLicenseComponent} from "../../../modules/management-dialogs/lic
     styleUrls: ['embed.component.scss']
 })
 export class EmbedComponent implements EventListener{
-    @ViewChild('mdsRef') mdsRef : MdsComponent;
-    @ViewChild('licenseRef') licenseRef : WorkspaceLicenseComponent;
+    @ViewChild('mdsRef', {static: true}) mdsRef : MdsComponent;
+    @ViewChild('licenseRef', {static: true}) licenseRef : WorkspaceLicenseComponent;
     component:string;
     data:any={};
     groupId = 'io';

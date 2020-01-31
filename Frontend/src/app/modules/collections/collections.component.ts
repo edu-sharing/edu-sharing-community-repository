@@ -44,7 +44,7 @@ import { ActionbarHelperService } from '../../common/services/actionbar-helper';
 import { MdsHelper } from '../../core-module/rest/mds-helper';
 import { BridgeService } from '../../core-bridge-module/bridge.service';
 import { AddElement } from '../../core-ui-module/add-element';
-import { MatSlideToggle } from '@angular/material';
+import { MatSlideToggle } from '@angular/material/slide-toggle';
 import { HttpClient } from '@angular/common/http';
 import { GlobalContainerComponent } from '../../common/ui/global-container/global-container.component';
 import { Observable } from 'rxjs';
@@ -75,8 +75,8 @@ export class CollectionsMainComponent {
         sortAscending: [false, true, false],
     };
 
-    @ViewChild('mainNav') mainNavRef: MainNavComponent;
-    @ViewChild('listCollections') listCollections: ListTableComponent;
+    @ViewChild('mainNav', {static: true}) mainNavRef: MainNavComponent;
+    @ViewChild('listCollections', {static: true}) listCollections: ListTableComponent;
 
     dialogTitle: string;
     globalProgress = false;

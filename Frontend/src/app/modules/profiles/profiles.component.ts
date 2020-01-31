@@ -44,8 +44,8 @@ export class ProfilesComponent {
   private editProfile: boolean;
   private editProfileUrl: string;
   private avatarImage: any;
-  @ViewChild('mainNav') mainNavRef: MainNavComponent;
-  @ViewChild('avatar') avatarElement : ElementRef;
+  @ViewChild('mainNav', {static: true}) mainNavRef: MainNavComponent;
+  @ViewChild('avatar', {static: true}) avatarElement : ElementRef;
   constructor(private toast: Toast,
               private route: ActivatedRoute,
               private title: Title,

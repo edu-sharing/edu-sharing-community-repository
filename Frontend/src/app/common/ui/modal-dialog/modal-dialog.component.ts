@@ -66,7 +66,7 @@ export class ModalDialogComponent{
    */
   @Input() public buttons : DialogButton[];
 
-  @ViewChild('buttonElements') buttonElements : ElementRef;
+  @ViewChild('buttonElements', {static: true}) buttonElements : ElementRef;
 
   public click(btn : DialogButton){
     btn.callback();

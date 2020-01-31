@@ -20,8 +20,8 @@ import {RestIamService} from '../../../core-module/core.module';
 export class WorkspaceFileUploadSelectComponent  {
   public disabled= true;
   public chooseParent= false;
-  @ViewChild('fileSelect') file: ElementRef;
-  @ViewChild('link') linkRef: ElementRef;
+  @ViewChild('fileSelect', {static: true}) file: ElementRef;
+  @ViewChild('link', {static: true}) linkRef: ElementRef;
   /**
    * priority, useful if the dialog seems not to be in the foreground
    * Values greater 0 will raise the z-index

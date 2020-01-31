@@ -30,10 +30,10 @@ import { UIHelper } from '../../core-ui-module/ui-helper';
     ]
 })
 export class LoginComponent implements OnInit {
-    @ViewChild('loginForm') loginForm: ElementRef;
-    @ViewChild('mainNav') mainNavRef: MainNavComponent;
-    @ViewChild('passwordInput') passwordInput: InputPasswordComponent;
-    @ViewChild('usernameInput') usernameInput: ElementRef;
+    @ViewChild('loginForm', {static: true}) loginForm: ElementRef;
+    @ViewChild('mainNav', {static: true}) mainNavRef: MainNavComponent;
+    @ViewChild('passwordInput', {static: true}) passwordInput: InputPasswordComponent;
+    @ViewChild('usernameInput', {static: true}) usernameInput: ElementRef;
 
     buttons: DialogButton[];
     caption = 'LOGIN.TITLE';

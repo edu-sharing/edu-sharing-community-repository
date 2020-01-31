@@ -13,7 +13,7 @@ import {TemporaryStorageService} from "../../../core-module/core.module";
   templateUrl: 'recycle.component.html'
 })
 export class RecycleMainComponent {
-  @ViewChild('list') list : NodeList;
+  @ViewChild('list', {static: true}) list : NodeList;
   public toDelete:Node[] = null;
   public restoreResult:ArchiveRestore;
 

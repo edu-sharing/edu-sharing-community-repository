@@ -22,7 +22,6 @@ import {
 import {CardJumpmark} from "../../../core-ui-module/components/card/card.component";
 import {MdsHelper} from "../../../core-module/rest/mds-helper";
 import {Observable} from 'rxjs';
-import {getClosureSafeProperty} from '@angular/core/src/util/property';
 declare var noUiSlider: any;
 
 @Component({

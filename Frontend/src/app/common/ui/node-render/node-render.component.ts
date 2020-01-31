@@ -100,8 +100,8 @@ export class NodeRenderComponent implements EventListener{
   public similarNodes: Node[];
   mds: any;
 
-  @ViewChild('sequencediv') sequencediv : ElementRef;
-  @ViewChild('mainNav') mainNavRef : MainNavComponent;
+  @ViewChild('sequencediv', {static: true}) sequencediv : ElementRef;
+  @ViewChild('mainNav', {static: true}) mainNavRef : MainNavComponent;
   isChildobject = false;
 
 

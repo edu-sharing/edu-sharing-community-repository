@@ -40,8 +40,8 @@ import {AuthorityNamePipe} from "../../../core-ui-module/pipes/authority-name.pi
   styleUrls: ['collection-new.component.scss']
 })
 export class CollectionNewComponent {
-  @ViewChild('mainNav') mainNavRef: MainNavComponent;
-  @ViewChild('mds') mds : MdsComponent;
+  @ViewChild('mainNav', {static: true}) mainNavRef: MainNavComponent;
+  @ViewChild('mds', {static: true}) mds : MdsComponent;
   public hasCustomScope: boolean;
   public COLORS:string[];
   public DEFAULT_COLORS:string[]=['#975B5D','#692426','#E6B247','#A89B39','#699761','#32662A','#60998F','#29685C','#759CB7','#537997','#976097','#692869'];
@@ -89,7 +89,7 @@ export class CollectionNewComponent {
   private originalPermissions: LocalPermissions;
   private permissionsInfo: any;
 
-  @ViewChild('file') imageFileRef : ElementRef;
+  @ViewChild('file', {static: true}) imageFileRef : ElementRef;
   buttons: DialogButton[];
   authorFreetext=false;
   authorFreetextAllowed=false;

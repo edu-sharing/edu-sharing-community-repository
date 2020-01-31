@@ -81,13 +81,13 @@ export class MainNavComponent implements AfterViewInit{
     visible=false;
     private static ID_ATTRIBUTE_NAME='data-banner-id';
 
-    @ViewChild('search') search : ElementRef;
-    @ViewChild('sidebar') sidebar:ElementRef;
-    @ViewChild('topbar') topbar:ElementRef;
-    @ViewChild('nodeStoreRef') nodeStoreRef:ElementRef;
-    @ViewChild('scrolltotop') scrolltotop:ElementRef;
-    @ViewChild('userRef') userRef:ElementRef;
-    @ViewChild('tabNav') tabNav:ElementRef;
+    @ViewChild('search', {static: true}) search : ElementRef;
+    @ViewChild('sidebar', {static: true}) sidebar:ElementRef;
+    @ViewChild('topbar', {static: true}) topbar:ElementRef;
+    @ViewChild('nodeStoreRef', {static: true}) nodeStoreRef:ElementRef;
+    @ViewChild('scrolltotop', {static: true}) scrolltotop:ElementRef;
+    @ViewChild('userRef', {static: true}) userRef:ElementRef;
+    @ViewChild('tabNav', {static: true}) tabNav:ElementRef;
     dialogTitle : string;
     dialogCancelable = false;
     dialogMessage : string;

@@ -54,7 +54,7 @@ h2{
   .datePicker{
     display:flex;
     width: 100%;
-    align-items: start;
+    align-items: flex-start;
     .clickable{
       color:$textLight;
     }
