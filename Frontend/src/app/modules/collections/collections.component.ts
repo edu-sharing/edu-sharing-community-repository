@@ -109,6 +109,7 @@ export class CollectionsMainComponent {
     feedback: boolean;
     feedbackView: boolean;
     feedbackViewButtons: DialogButton[];
+    customNodeList = false;
     set collectionShare(collectionShare: Collection) {
         this._collectionShare = collectionShare;
         this.refreshAll();
@@ -282,6 +283,7 @@ export class CollectionsMainComponent {
                 (error: any) => RestHelper.goToLogin(this.router, this.config),
             );
         });
+        this.initCustomNodeList();
     }
 
     isMobile() {
@@ -1454,5 +1456,12 @@ export class CollectionsMainComponent {
         if (!status && this.params.feedbackClose === 'true') {
             window.close();
         }
+    }
+
+    private initCustomNodeList(): void {
+        const customNodeListComponent = this.tempStorage.get(
+            TemporaryStorageService.CUSTOM_NODE_LIST_COMPONENT,
+        );
+        this.customNodeList = !!customNodeListComponent;
     }
 }

@@ -338,7 +338,12 @@
                     ></actionbar>
                 </div>
 
+                <app-custom-node-list-wrapper
+                    *ngIf="customNodeList"
+                    [nodes]="collectionContent.references"
+                ></app-custom-node-list-wrapper>
                 <listTable
+                    *ngIf="!customNodeList"
                     [addElement]="
                         isUserAllowedToEdit(collectionContent.collection)
                             ? createCollectionReference
