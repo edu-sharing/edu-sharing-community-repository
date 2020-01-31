@@ -126,7 +126,8 @@
       },
       "USAGE_TYPE":{
         "MOODLE":"Moodle-Courses",
-        "COLLECTION":"Collections"
+        "COLLECTION":"Collections",
+        "UNKNOWN":"Other / Unknown"
       },
       "USAGE_SUBTYPE":{
         "COURSE":"Course",

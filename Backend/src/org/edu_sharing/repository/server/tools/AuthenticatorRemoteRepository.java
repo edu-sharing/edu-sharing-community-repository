@@ -50,6 +50,7 @@ import org.edu_sharing.repository.server.MCAlfrescoAPIClient;
 import org.edu_sharing.repository.server.MCAlfrescoBaseClient;
 import org.edu_sharing.repository.server.RepoFactory;
 import org.edu_sharing.repository.server.tools.security.Signing;
+import org.edu_sharing.restservices.admin.v1.Application;
 import org.edu_sharing.service.authentication.SSOAuthorityMapper;
 import org.edu_sharing.webservices.authbyapp.AuthByApp;
 import org.edu_sharing.webservices.authbyapp.AuthByAppServiceLocator;
@@ -74,15 +75,12 @@ public class AuthenticatorRemoteRepository {
 	
 	/**
 	 * authenticates at remote app with actual local userdata, if fails an guest ticket and the exception message will be returned 
-	 * @param localAuthInfo
-	 * @param remoteAppInfo
-	 * @param createRemoteUser
 	 * @return AuthenticatorRemoteAppResult
 	 */
-	public AuthenticatorRemoteAppResult getAuthInfoForApp(HashMap<String,String> localAuthInfo, ApplicationInfo remoteAppInfo) throws Throwable{
+	public AuthenticatorRemoteAppResult getAuthInfoForApp(String username, ApplicationInfo remoteAppInfo) throws Throwable{
 
 		HashMap<String, String> resultAuthInfo = new HashMap<String, String>();
-		MCAlfrescoBaseClient mcAlfrescoBaseClient = (MCAlfrescoBaseClient) RepoFactory.getInstance(null, localAuthInfo);
+		MCAlfrescoBaseClient mcAlfrescoBaseClient = new MCAlfrescoAPIClient();
 
 		if(remoteAppInfo.getString("forced_user",null)!=null){
 			logger.info("forced_user is set for remote, will authenticate as the specified user");
@@ -101,14 +99,14 @@ public class AuthenticatorRemoteRepository {
 			}
 		}
 		else {
-			logger.info("getting userinfo for" + localAuthInfo.get(CCConstants.AUTH_USERNAME));
-			HashMap<String, String> userInfo = mcAlfrescoBaseClient.getUserInfo(localAuthInfo.get(CCConstants.AUTH_USERNAME));
+			logger.info("getting userinfo for" + username);
+			HashMap<String, String> userInfo = mcAlfrescoBaseClient.getUserInfo(username);
 			try {
-				logger.info("starting session with remoteAppId:" + remoteAppInfo.getAppId() + " local usename:" + localAuthInfo.get(CCConstants.AUTH_USERNAME) + " propUserMail:" + userInfo.get(CCConstants.PROP_USER_EMAIL) + " Ticket:" + localAuthInfo.get(CCConstants.AUTH_TICKET));
+				logger.info("starting session with remoteAppId:" + remoteAppInfo.getAppId() + " local usename:" + username + " propUserMail:" + userInfo.get(CCConstants.PROP_USER_EMAIL));
 				if (remoteAppInfo.getAuthenticationwebservice() != null && !remoteAppInfo.getAuthenticationwebservice().trim().equals("")) {
 
 					//AuthenticationUtil.startSession(remoteAppInfo.getAppId(), localAuthInfo.get(CCConstants.AUTH_USERNAME) , userInfo.get(CCConstants.PROP_USER_EMAIL), localAuthInfo.get(CCConstants.AUTH_TICKET), createRemoteUser);
-					remoteAuth(remoteAppInfo.getAppId(), localAuthInfo.get(CCConstants.AUTH_USERNAME), (MCAlfrescoAPIClient) mcAlfrescoBaseClient);
+					remoteAuth(remoteAppInfo.getAppId(), username, (MCAlfrescoAPIClient) mcAlfrescoBaseClient);
 
 				} else {
 					return null;
@@ -136,7 +134,7 @@ public class AuthenticatorRemoteRepository {
     	
     	ApplicationInfo appInfoRemoteApp = ApplicationInfoList.getRepositoryInfoById(appId);
     	
-    	HashMap<String,String> personMapping = ssoAuthorityMapper.getMappingConfig().getPersonMapping();
+    	HashMap<String,String> personMapping = new HashMap<>(ssoAuthorityMapper.getMappingConfig().getPersonMapping());
 		String remoteUserid = ApplicationInfoList.getRepositoryInfoById(appId).getString(ApplicationInfo.REMOTE_USERID, null);
 		if(remoteUserid!=null && !remoteUserid.isEmpty()){
 			logger.info("remote_userid configured "+remoteUserid+", will change auth");
@@ -147,7 +145,7 @@ public class AuthenticatorRemoteRepository {
     	List<KeyValue> ssoData = new ArrayList<KeyValue>();
 		String esuid;
 		HashMap<String, String> personData;
-		if(username.equals(ApplicationInfoList.getRepositoryInfoById(appId).getString("forced_user",null))){
+		if(username.equals(ApplicationInfoList.getRepositoryInfoById(appId).getString(ApplicationInfo.FORCED_USER,null))){
 			// do not escape the guest, send them as a "plain" user
 			personData = new HashMap<>();
 			personData.put(CCConstants.CM_PROP_PERSON_FIRSTNAME,ApplicationInfoList.getHomeRepository().getAppCaption());

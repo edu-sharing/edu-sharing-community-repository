@@ -132,7 +132,7 @@ public class RepoFactory {
 
 			// automatisch anlegen wenn der user noch nicht da ist
 			// getAuthInfoForApp(authInfo, repInfo, true);
-			AuthenticatorRemoteAppResult resultRemoteAuth = new AuthenticatorRemoteRepository().getAuthInfoForApp(homeRepAuthInfo, repInfo);
+			AuthenticatorRemoteAppResult resultRemoteAuth = new AuthenticatorRemoteRepository().getAuthInfoForApp((String) homeRepAuthInfo.get(CCConstants.AUTH_USERNAME), repInfo);
 			remoteAuthInfo = resultRemoteAuth.getAuthenticationInfo();
 			return getInstanceForRepo(repInfo, remoteAuthInfo);
 		}else{

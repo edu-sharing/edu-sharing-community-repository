@@ -1092,7 +1092,7 @@ public class MCAlfrescoAPIClient extends MCAlfrescoBaseClient {
 				// when repository got no Authentication
 				HashMap<String, String> remoteAuthInfo = null;
 				if (remoteRepInfo.getAuthenticationwebservice() != null && !remoteRepInfo.getAuthenticationwebservice().equals("")) {
-					AuthenticatorRemoteAppResult arar = arr.getAuthInfoForApp(authenticationInfo, remoteRepInfo);
+					AuthenticatorRemoteAppResult arar = arr.getAuthInfoForApp(authenticationInfo.get(CCConstants.AUTH_USERNAME), remoteRepInfo);
 					remoteAuthInfo = arar.getAuthenticationInfo();
 				} else {
 					// TODO check if that is right
@@ -2309,7 +2309,7 @@ public class MCAlfrescoAPIClient extends MCAlfrescoBaseClient {
 	}
 	
 	/**
-	 * returns null when user not exsists
+	 * Throws NoSuchPersonException when user not exists
 	 */
 	public HashMap<String, String> getUserInfo(String userName) throws Exception {
 		

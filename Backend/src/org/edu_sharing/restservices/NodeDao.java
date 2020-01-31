@@ -1645,7 +1645,11 @@ public class NodeDao {
 	}
 
 	public void setProperty(String property, String value) {
-		nodeService.setProperty(Constants.storeRef.getProtocol(), Constants.storeRef.getIdentifier(), this.getId(), property, value);
+		if(value==null){
+			nodeService.removeProperty(Constants.storeRef.getProtocol(), Constants.storeRef.getIdentifier(), this.getId(), property);
+		}else {
+			nodeService.setProperty(Constants.storeRef.getProtocol(), Constants.storeRef.getIdentifier(), this.getId(), property, value);
+		}
 	}
 
 	public NodeDao createFork(String sourceId) throws DAOException {

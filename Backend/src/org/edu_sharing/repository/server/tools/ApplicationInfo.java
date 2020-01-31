@@ -174,8 +174,9 @@ public class ApplicationInfo implements Comparable<ApplicationInfo>{
 	 * @TODO make the sso config not influcene remote logins!
 	 */
 	public static final String REMOTE_USERID = "remote_userid";
+	public static final String FORCED_USER = "forced_user";
 
-    private final Properties properties;
+	private final Properties properties;
 
 	private String host = null;
 	
