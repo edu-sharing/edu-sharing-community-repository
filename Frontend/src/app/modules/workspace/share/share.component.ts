@@ -590,9 +590,9 @@ export class WorkspaceShareComponent implements AfterViewInit{
     };
   }
 
-    showShareLink() {
-        return this._node.aspects.indexOf(RestConstants.CCM_ASPECT_COLLECTION)==-1 && this.connector.hasToolPermissionInstant(RestConstants.TOOLPERMISSION_INVITE_LINK);
-    }
+  showShareLink() {
+      return this._node && this._node.aspects.indexOf(RestConstants.CCM_ASPECT_COLLECTION)==-1 && this.connector.hasToolPermissionInstant(RestConstants.TOOLPERMISSION_INVITE_LINK);
+  }
 }
 /*
 class SearchData extends Subject<CompleterItem[]> implements CompleterData {
