@@ -686,7 +686,7 @@ export class NodeRenderComponent implements EventListener{
 
     private linkSearchableWidgets() {
         try {
-            this.mds.widgets.filter((w: any) => w.isSearchable).forEach((w) => {
+            this.mds.widgets.filter((w: any) => w.isSearchable).forEach((w: any) => {
                 try {
                     const values = document.querySelectorAll('#edusharing_rendering_metadata [data-widget-id=\'' + w.id + '\'] .mdsWidgetMultivalue .mdsValue');
                     values.forEach((v: HTMLElement) => {
