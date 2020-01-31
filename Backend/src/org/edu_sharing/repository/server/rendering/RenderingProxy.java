@@ -11,6 +11,7 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import com.benfante.jslideshare.App;
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.repo.security.authentication.AuthenticationUtil.RunAsWork;
 import org.alfresco.service.cmr.repository.InvalidNodeRefException;
@@ -28,6 +29,9 @@ import org.edu_sharing.repository.server.tools.HttpException;
 import org.edu_sharing.repository.server.tools.URLTool;
 import org.edu_sharing.repository.server.tools.security.Encryption;
 import org.edu_sharing.repository.server.tools.security.SignatureVerifier;
+import org.edu_sharing.repository.server.tools.security.Signing;
+import org.edu_sharing.restservices.admin.v1.Application;
+import org.edu_sharing.service.authentication.SSOAuthorityMapper;
 import org.edu_sharing.service.nodeservice.NodeServiceFactory;
 import org.edu_sharing.service.nodeservice.NodeServiceHelper;
 import org.edu_sharing.service.permission.PermissionServiceFactory;
@@ -233,11 +237,16 @@ public class RenderingProxy extends HttpServlet {
 				 */
 				if (RepoProxyFactory.getRepoProxy().myTurn(rep_id)) {
 					try {
-						RepoProxyFactory.getRepoProxy().remoteAuth(remoteRepo, false);
+                        RepoProxyFactory.getRepoProxy().remoteAuth(remoteRepo, localUsername,false);
 					} catch (Throwable t) {
 						logger.error("Remote user auth failed", t);
 					}
 				}
+                String forcedUser = remoteRepo.getString(ApplicationInfo.FORCED_USER, null);
+                if(forcedUser != null && !forcedUser.isEmpty()){
+                    logger.info(ApplicationInfo.FORCED_USER + "is set, will use forced user "+forcedUser);
+                    return forcedUser;
+                }
 				return personData.get(CCConstants.PROP_USER_ESUID);
 			};
 
@@ -304,7 +313,7 @@ public class RenderingProxy extends HttpServlet {
 	}
 
 	private void render(ApplicationInfo homeRep, HttpServletRequest req, HttpServletResponse resp,
-			String nodeId, String usernameDecrypted, String finalContentUrl, Usage usage, 
+			String nodeId, String usernameDecrypted, String finalContentUrl, Usage usage,
 			RenderingServiceOptions options) throws RenderingException {
 		RenderingService service = RenderingServiceFactory.getRenderingService(homeRep.getAppId());
 		// @todo 5.1 should version inline be transfered?

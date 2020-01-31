@@ -541,13 +541,7 @@
       <parameter name="scope" value="Session"/>
 
   </ns1:service>
-  
-	<ns1:service name="AdminService" provider="java:MSG">
-		<ns1:parameter name="allowedMethods" value="AdminService" />
-		<ns1:parameter name="enableRemoteAdmin" value="false" />
-		<ns1:parameter name="className" value="org.apache.axis.utils.Admin" />
-		<ns1:namespace>http://xml.apache.org/axis/wsdd/</ns1:namespace>
-	</ns1:service>
+
 	<ns1:service name="Version" provider="java:RPC">
 		<ns1:parameter name="allowedMethods" value="getVersion" />
 		<ns1:parameter name="className" value="org.apache.axis.Version" />

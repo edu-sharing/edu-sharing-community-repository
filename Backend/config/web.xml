@@ -550,14 +550,7 @@
 		<servlet-class>
 		org.apache.axis.transport.http.AxisServlet</servlet-class>
 	</servlet>
-	<servlet>
-		<display-name>Axis Admin Servlet</display-name>
-		<servlet-name>AdminServlet</servlet-name>
-		<servlet-class>
-		org.apache.axis.transport.http.AdminServlet</servlet-class>
-		<load-on-startup>100</load-on-startup>
-	</servlet>
-	
+
     <servlet>
         <servlet-name>REST API</servlet-name>
         <servlet-class>org.glassfish.jersey.servlet.ServletContainer</servlet-class>
@@ -741,10 +734,6 @@
 	<servlet-mapping>
 		<servlet-name>AxisServlet</servlet-name>
 		<url-pattern>/services/*</url-pattern>
-	</servlet-mapping>
-	<servlet-mapping>
-		<servlet-name>AdminServlet</servlet-name>
-		<url-pattern>/servlet/AdminServlet</url-pattern>
 	</servlet-mapping>
 
 	<servlet-mapping>
