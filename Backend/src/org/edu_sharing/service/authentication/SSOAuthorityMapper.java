@@ -222,10 +222,13 @@ public class SSOAuthorityMapper {
 
 				logger.debug("ut status:" + transactionService.getUserTransaction().getStatus());
 				
+				
 				if (personExsists == false && !createUser) {
 					logger.info("personExsists == null && !createUser -> returning null");
 					return null;
 				}
+				
+				
 
 				// person
 				HashMap<String, String> personMapping = mappingConfig.getPersonMapping();
@@ -281,23 +284,25 @@ public class SSOAuthorityMapper {
 						personService.setPersonProperties(userName, personProperties);
 					}
 					
-					if(!authenticationService.authenticationExists(userName)){
-						
-						/**
-						 * get the existent username, this can be different to the parameter username 
-						 * when this has another case(lower/upper) than the person object username
-						 */
-						NodeRef personNodeRef = personService.getPersonOrNull(userName);
-						if(personNodeRef == null) {
-							logger.error("person " + userName + " does not exist. can not create authentication object in userstore." );
-							return null;
-						}
-						String existentUserName = (String)nodeService.getProperty(personNodeRef, ContentModel.PROP_USERNAME);
-						authenticationService.createAuthentication(existentUserName, new KeyTool().getRandomPassword().toCharArray());
-					}
+					
 					
 				} else {
 					logger.warn("no personproperties delivered by sso context for user " + userName);
+				}
+				
+				if(!authenticationService.authenticationExists(userName)){
+					logger.info("no authentication object for " +userName +" trying to create!");
+					/**
+					 * get the existent username, this can be different to the parameter username 
+					 * when this has another case(lower/upper) than the person object username
+					 */
+					NodeRef personNodeRef = personService.getPersonOrNull(userName);
+					if(personNodeRef == null) {
+						logger.error("person " + userName + " does not exist. can not create authentication object in userstore." );
+						return null;
+					}
+					String existentUserName = (String)nodeService.getProperty(personNodeRef, ContentModel.PROP_USERNAME);
+					authenticationService.createAuthentication(existentUserName, new KeyTool().getRandomPassword().toCharArray());
 				}
 
 				// group memberships
