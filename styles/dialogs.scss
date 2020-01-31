@@ -89,7 +89,7 @@ $cardActionHeight:77px;
 
 .card .card-action {
   display: flex;
-  align-items: end;
+  align-items: flex-end;
   justify-items: right;
   min-height: $cardActionHeight;
   /* justify-content: space-between; */

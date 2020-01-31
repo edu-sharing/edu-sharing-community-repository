@@ -5,7 +5,7 @@ import {UIHelper} from "../../ui-helper"
 import {Helper} from '../../../core-module/rest/helper';
 import {OptionItem} from "../../option-item";
 import {UIService} from "../../../core-module/core.module";
-import {MatMenu, MatMenuTrigger} from '@angular/material';
+import { MatMenu, MatMenuTrigger } from '@angular/material/menu';
 
 @Component({
   selector: 'mat-link',

@@ -25,8 +25,7 @@ import {DateHelper} from "./DateHelper";
 import {UIConstants} from "../core-module/ui/ui-constants";
 import {Helper} from "../core-module/rest/helper";
 import {VCard} from "../core-module/ui/VCard";
-import {HttpClient} from '@angular/common/http';
-import {HttpResponse} from '@angular/common/http/src/response';
+import {HttpClient, HttpResponse} from '@angular/common/http';
 import {ConfigurationHelper} from "../core-module/rest/configuration-helper";
 import {BridgeService} from "../core-bridge-module/bridge.service";
 export class NodeHelper{

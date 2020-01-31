@@ -11,7 +11,7 @@ import {
     TemplateRef,
     ViewChild,
 } from '@angular/core';
-import { MatMenuTrigger } from '@angular/material';
+import { MatMenuTrigger } from '@angular/material/menu';
 import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
 import { ActivatedRoute, Router } from '@angular/router';
 import { TranslateService } from '@ngx-translate/core';
@@ -73,13 +73,13 @@ export class ListTableComponent implements EventListener {
     public static VIEW_TYPE_GRID = 1;
     public static VIEW_TYPE_GRID_SMALL = 2;
 
-    @ViewChild('addElementRef') addElementRef: ElementRef;
-    @ViewChild('drag') drag: ElementRef;
-    @ViewChild('menuTrigger') menuTrigger: MatMenuTrigger;
-    @ViewChild('dropdown') dropdownElement: ElementRef;
-    @ViewChild('dropdownContainer') dropdownContainerElement: ElementRef;
+    @ViewChild('addElementRef', {static: true}) addElementRef: ElementRef;
+    @ViewChild('drag', {static: true}) drag: ElementRef;
+    @ViewChild('menuTrigger', {static: true}) menuTrigger: MatMenuTrigger;
+    @ViewChild('dropdown', {static: true}) dropdownElement: ElementRef;
+    @ViewChild('dropdownContainer', {static: true}) dropdownContainerElement: ElementRef;
 
-    @ContentChild('itemContent') itemContentRef: TemplateRef<any>;
+    @ContentChild('itemContent', {static: true}) itemContentRef: TemplateRef<any>;
 
     /** Set the current list of nodes to render */
     @Input() set nodes(nodes: Node[]) {

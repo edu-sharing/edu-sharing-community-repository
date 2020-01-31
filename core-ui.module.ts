@@ -17,18 +17,16 @@ import {GlobalProgressComponent} from './components/global-progress/global-progr
 import {Toast} from './toast';
 import {ToastyModule} from 'ngx-toasty';
 import {DropdownComponent} from './components/dropdown/dropdown.component';
-import {
-    MatButtonModule,
-    MatCardModule,
-    MatCheckboxModule,
-    MatInputModule,
-    MatMenuModule,
-    MatRadioModule,
-    MatRippleModule,
-    MatTabsModule,
-    MatProgressBarModule,
-    MatProgressSpinnerModule
-} from '@angular/material';
+import { MatButtonModule } from '@angular/material/button';
+import { MatCardModule } from '@angular/material/card';
+import { MatCheckboxModule } from '@angular/material/checkbox';
+import { MatRippleModule } from '@angular/material/core';
+import { MatInputModule } from '@angular/material/input';
+import { MatMenuModule } from '@angular/material/menu';
+import { MatProgressBarModule } from '@angular/material/progress-bar';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { MatRadioModule } from '@angular/material/radio';
+import { MatTabsModule } from '@angular/material/tabs';
 import {AuthorityNamePipe} from './pipes/authority-name.pipe';
 import {AuthorityColorPipe} from './pipes/authority-color.pipe';
 import {FormatSizePipe} from './pipes/file-size.pipe';

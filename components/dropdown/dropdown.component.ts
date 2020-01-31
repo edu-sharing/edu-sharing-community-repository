@@ -5,7 +5,7 @@ import {UIHelper} from "../../ui-helper"
 import {Helper} from '../../../core-module/rest/helper';
 import {OptionItem} from "../../option-item";
 import {UIService} from "../../../core-module/core.module";
-import {MatMenu, MatMenuTrigger} from '@angular/material';
+import { MatMenu, MatMenuTrigger } from '@angular/material/menu';
 
 @Component({
   selector: 'dropdown',
@@ -16,7 +16,7 @@ import {MatMenu, MatMenuTrigger} from '@angular/material';
  * The dropdown is one base component of the action bar (showing more actions), but can also be used standalone
  */
 export class DropdownComponent{
-  @ViewChild('dropdown') menu : MatMenu;
+  @ViewChild('dropdown', {static: true}) menu : MatMenu;
   _options: OptionItem[];
   @Input() position = 'left';
   @Input() set options(options:OptionItem[]) {

@@ -21,8 +21,8 @@ import { UIHelper } from '../../ui-helper';
  * A common edu-sharing modal card
  */
 export class CardComponent implements OnDestroy {
-    @ViewChild('cardContainer') cardContainer: ElementRef;
-    @ViewChild('jumpmarksRef') jumpmarksRef: ElementRef;
+    @ViewChild('cardContainer', {static: true}) cardContainer: ElementRef;
+    @ViewChild('jumpmarksRef', {static: true}) jumpmarksRef: ElementRef;
     private static modalCards: CardComponent[] = [];
     /**
      * the title of the card. Should be pre-translated
