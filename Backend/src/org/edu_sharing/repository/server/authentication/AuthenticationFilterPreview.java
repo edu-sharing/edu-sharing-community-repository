@@ -212,7 +212,7 @@ public class AuthenticationFilterPreview implements javax.servlet.Filter {
 				localAuthInfo.put(CCConstants.AUTH_TICKET, ticket);
 				localAuthInfo.put(CCConstants.AUTH_USERNAME, authService.getCurrentUserName());
 				try{
-					AuthenticatorRemoteAppResult rai = new AuthenticatorRemoteRepository().getAuthInfoForApp(localAuthInfo, ApplicationInfoList.getRepositoryInfoById(repoId));
+					AuthenticatorRemoteAppResult rai = new AuthenticatorRemoteRepository().getAuthInfoForApp(localAuthInfo.get(CCConstants.AUTH_USERNAME), ApplicationInfoList.getRepositoryInfoById(repoId));
 					remotePreview(req, httpServletResponse, repoId, rai.getAuthenticationInfo().get(CCConstants.AUTH_TICKET));
 				}catch(Throwable e){
 					e.printStackTrace();

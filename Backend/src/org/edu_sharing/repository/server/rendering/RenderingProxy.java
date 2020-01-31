@@ -15,6 +15,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
+import com.benfante.jslideshare.App;
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.repo.security.authentication.AuthenticationUtil.RunAsWork;
 import org.apache.commons.codec.binary.Base64;
@@ -30,6 +31,7 @@ import org.edu_sharing.repository.server.tools.URLTool;
 import org.edu_sharing.repository.server.tools.security.Encryption;
 import org.edu_sharing.repository.server.tools.security.SignatureVerifier;
 import org.edu_sharing.repository.server.tools.security.Signing;
+import org.edu_sharing.restservices.admin.v1.Application;
 import org.edu_sharing.service.authentication.SSOAuthorityMapper;
 import org.edu_sharing.service.nodeservice.NodeServiceFactory;
 import org.edu_sharing.service.nodeservice.NodeServiceHelper;
@@ -234,13 +236,16 @@ public class RenderingProxy extends HttpServlet {
 						 */
 						if(RepoProxyFactory.getRepoProxy().myTurn(rep_id)) {
 							try {
-								RepoProxyFactory.getRepoProxy().remoteAuth(remoteRepo,false);
+								RepoProxyFactory.getRepoProxy().remoteAuth(remoteRepo, localUsername,false);
 							} catch (Throwable t) {
 								logger.error("Remote user auth failed",t);
 							}
 						}
-					
-						
+						String forcedUser = remoteRepo.getString(ApplicationInfo.FORCED_USER, null);
+						if(forcedUser != null && !forcedUser.isEmpty()){
+							logger.info(ApplicationInfo.FORCED_USER + "is set, will use forced user "+forcedUser);
+							return forcedUser;
+						}
 						return personData.get(CCConstants.PROP_USER_ESUID);
 					}
 				};
