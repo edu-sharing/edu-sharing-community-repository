@@ -1,322 +1,334 @@
-import {Component, Input, EventEmitter, Output, ElementRef, ViewChild, OnInit} from '@angular/core';
-import {Toast} from '../../core-ui-module/toast';
-import {Router, Route, Params, ActivatedRoute, UrlSerializer} from '@angular/router';
-import {OAuthResult, LoginResult, AccessScope, DialogButton} from '../../core-module/core.module';
-import {RouterComponent} from '../../router/router.component';
-import {TranslateService} from '@ngx-translate/core';
-import {Translation} from '../../core-ui-module/translation';
-import {RestConnectorService} from '../../core-module/core.module';
-import {RestConstants} from '../../core-module/core.module';
-import {ConfigurationService} from '../../core-module/core.module';
-import {FrameEventsService} from '../../core-module/core.module';
-import {Title} from '@angular/platform-browser';
-import {UIHelper} from '../../core-ui-module/ui-helper';
-import {SessionStorageService} from '../../core-module/core.module';
-import {Scope} from '@angular/core/src/profile/wtf_impl';
-import {OPEN_URL_MODE, UIConstants} from '../../core-module/ui/ui-constants';
-import {Helper} from '../../core-module/rest/helper';
-import {RestHelper} from '../../core-module/core.module';
-import {PlatformLocation} from '@angular/common';
+import { trigger } from '@angular/animations';
+import { PlatformLocation } from '@angular/common';
+import { HttpClient } from '@angular/common/http';
+import { Component, ElementRef, OnInit, ViewChild } from '@angular/core';
+import { FormControl } from '@angular/forms';
+import { Title } from '@angular/platform-browser';
+import { ActivatedRoute, Params, Router } from '@angular/router';
+import { TranslateService } from '@ngx-translate/core';
+import { map, startWith } from 'rxjs/operators';
+import { GlobalContainerComponent } from '../../common/ui/global-container/global-container.component';
+import { MainNavComponent } from '../../common/ui/main-nav/main-nav.component';
+import { BridgeService } from '../../core-bridge-module/bridge.service';
+import { AccessScope, ConfigurationService, DialogButton, LoginResult, RestConnectorService, RestConstants, RestHelper, SessionStorageService } from '../../core-module/core.module';
+import { Helper } from '../../core-module/rest/helper';
+import { UIAnimation } from '../../core-module/ui/ui-animation';
+import { OPEN_URL_MODE, UIConstants } from '../../core-module/ui/ui-constants';
+import { InputPasswordComponent } from '../../core-ui-module/components/input-password/input-password.component';
+import { RouterHelper } from '../../core-ui-module/router.helper';
+import { Toast } from '../../core-ui-module/toast';
+import { Translation } from '../../core-ui-module/translation';
+import { UIHelper } from '../../core-ui-module/ui-helper';
 
-import {CordovaService} from '../../common/services/cordova.service';
-import {trigger} from "@angular/animations";
-import {UIAnimation} from "../../core-module/ui/ui-animation";
-import {InputPasswordComponent} from "../../core-ui-module/components/input-password/input-password.component";
-import {RouterHelper} from '../../core-ui-module/router.helper';
-import {HttpClient} from "@angular/common/http";
-import {FormControl} from '@angular/forms';
-import {map, startWith} from "rxjs/operators";
-import {MainNavComponent} from '../../common/ui/main-nav/main-nav.component';
-import {BridgeService} from "../../core-bridge-module/bridge.service";
-import {GlobalContainerComponent} from "../../common/ui/global-container/global-container.component";
 
 @Component({
-  selector: 'workspace-login',
-  templateUrl: 'login.component.html',
-  styleUrls: ['login.component.scss'],
+    selector: 'workspace-login',
+    templateUrl: 'login.component.html',
+    styleUrls: ['login.component.scss'],
     animations: [
         trigger('dialog', UIAnimation.switchDialog(UIAnimation.ANIMATION_TIME_FAST)),
     ]
 })
-export class LoginComponent  implements OnInit{
-  loginUrl: any;
-  @ViewChild('mainNav') mainNavRef : MainNavComponent;
-  @ViewChild('passwordInput') passwordInput : InputPasswordComponent;
-  @ViewChild('usernameInput') usernameInput : ElementRef;
-  @ViewChild('loginForm') loginForm : ElementRef;
+export class LoginComponent implements OnInit {
+    @ViewChild('loginForm') loginForm: ElementRef;
+    @ViewChild('mainNav') mainNavRef: MainNavComponent;
+    @ViewChild('passwordInput') passwordInput: InputPasswordComponent;
+    @ViewChild('usernameInput') usernameInput: ElementRef;
 
-  public isLoading=true;
-  private disabled=false;
-  private showUsername=true;
-  private username='';
-  private password='';
-  private scope='';
-  private next='';
-  public mainnav=true;
-  public showProviders=false;
-  private caption='LOGIN.TITLE';
-  private config: any={};
-  private providers: any;
-  providerControl = new FormControl();
-  currentProvider:any;
-  private buttons: DialogButton[];
+    buttons: DialogButton[];
+    caption = 'LOGIN.TITLE';
+    config: any = {};
+    currentProvider: any;
+    disabled = false;
+    filteredProviders: any;
+    isLoading = true;
+    loginUrl: any;
+    mainnav = true;
+    password = '';
+    providerControl = new FormControl();
+    showProviders = false;
+    username = '';
 
-  currentProviderDisplay(provider:any){
-    return provider ? provider.name : '';
-  }
-  private filteredProviders: any;
-  private checkConditions(){
-    this.disabled=!this.username || this.currentProvider;// || !this.password;
-    this.updateButtons();
-  }
-  private recoverPassword(){
-      if(this.config.register.local){
-          this.router.navigate([UIConstants.ROUTER_PREFIX+'register','request']);
-      }
-      else {
-          window.location.href = this.config.register.recoverUrl;
-      }
-  }
-  private register(){
-      if(this.config.register.local){
-          this.router.navigate([UIConstants.ROUTER_PREFIX+'register']);
-      }
-      else {
-          window.location.href = this.config.register.registerUrl;
-      }
-  }
-  openLoginUrl(){
-      window.location.href=this.loginUrl;
-  }
-  constructor(private connector : RestConnectorService,
-              private toast:Toast,
-              private platformLocation: PlatformLocation,
-              private urlSerializer:UrlSerializer,
-              private router:Router,
-              private http:HttpClient,
-              private translate:TranslateService,
-              private configService:ConfigurationService,
-              private title:Title,
-              private storage : SessionStorageService,
-              private route : ActivatedRoute,
-              private bridge: BridgeService
-            ){
-    this.updateButtons();
-    Translation.initialize(translate,this.configService,this.storage,this.route).subscribe(()=>{
-      UIHelper.setTitle('LOGIN.TITLE',title,translate,configService);
-      this.configService.getAll().subscribe((data:any)=>{
-        this.config=data;
-        if(!this.config.register) {
-            // default register mode: allow local registration if not disabled
-            this.config.register = {local: true};
-        }
+    private next = '';
+    private providers: any;
+    private scope = '';
+
+    constructor(
+        private connector: RestConnectorService,
+        private toast: Toast,
+        private platformLocation: PlatformLocation,
+        private router: Router,
+        private http: HttpClient,
+        private translate: TranslateService,
+        private configService: ConfigurationService,
+        private title: Title,
+        private storage: SessionStorageService,
+        private route: ActivatedRoute,
+        private bridge: BridgeService
+    ) {
         this.updateButtons();
-        this.username=this.configService.instant('defaultUsername','');
-        this.password=this.configService.instant('defaultPassword','');
-        this.route.queryParams.forEach((params: Params) => {
-          if(params['username'])
-              this.username=params['username'];
+        Translation.initialize(translate, this.configService, this.storage, this.route).subscribe(() => {
+            UIHelper.setTitle('LOGIN.TITLE', title, translate, configService);
+            this.configService.getAll().subscribe((data: any) => {
+                this.config = data;
+                if (!this.config.register) {
+                    // default register mode: allow local registration if not disabled
+                    this.config.register = { local: true };
+                }
+                this.updateButtons();
+                this.username = this.configService.instant('defaultUsername', '');
+                this.password = this.configService.instant('defaultPassword', '');
+                this.route.queryParams.forEach((params: Params) => {
+                    if (params.username) {
+                        this.username = params.username;
+                    }
 
-          this.connector.onAllRequestsReady().subscribe(()=>{
-            this.isLoading=false;
-            GlobalContainerComponent.finishPreloading();
-              setTimeout(()=>{
-                  if (this.username && this.passwordInput)
-                      this.passwordInput.nativeInput.nativeElement.focus();
-                  else if(this.usernameInput){
-                      this.usernameInput.nativeElement.focus();
-                  }
-              },100);
-          });
-          this.scope=params['scope'];
-          if(!this.scope)
-            this.scope=null;
-          this.connector.isLoggedIn().subscribe((data:LoginResult)=>{
-            if(data.currentScope){
-              this.connector.logout().subscribe(()=>{}); // just to make sure there is no scope still set // NO: We need a valid session when login to scope!!!
-              data.statusCode=null;
-            }
-            else if(data.currentScope==this.scope){
-              if(data.statusCode==RestConstants.STATUS_CODE_OK && params['local']!='true'){
-                this.goToNext(data);
-              }
-            }
-            // when there is a request to go into safe mode, first, the user needs to login regular
-            else if(data.statusCode!=RestConstants.STATUS_CODE_OK && this.scope){
-                //RestHelper.goToLogin()
-            }
-            if(configService.instant('loginProvidersUrl')){
-              this.showProviders=true;
-              this.updateButtons();
-              this.http.get(configService.instant('loginProvidersUrl')).subscribe((providers)=>{
-                  this.processProviders(providers);
-              });
-            }
-              this.loginUrl=configService.instant('loginUrl');
-              const allowLocal=configService.instant('loginAllowLocal',false);
-              if(params['local']!='true' && !allowLocal && this.loginUrl && data.statusCode!=RestConstants.STATUS_CODE_OK){
-                this.openLoginUrl();
-                return;
-            }
-          });
-          this.showUsername=this.scope!=RestConstants.SAFE_SCOPE;
-          this.next=params['next'];
-          this.mainnav=params['mainnav'] != 'false';
-          if(this.scope==RestConstants.SAFE_SCOPE){
-            this.connector.isLoggedIn().subscribe((data:LoginResult)=>{
-              if(data.statusCode!=RestConstants.STATUS_CODE_OK){
-                RestHelper.goToLogin(this.router,this.configService);
-              }
-              else{
-                this.connector.hasAccessToScope(RestConstants.SAFE_SCOPE).subscribe((scope:AccessScope)=>{
-                  if(scope.hasAccess){
-                    this.username=data.authorityName;
-                  }
-                  else{
-                    this.toast.error(null,'LOGIN.NO_ACCESS');
-                    this.router.navigate([UIConstants.ROUTER_PREFIX+'workspace']);
-                    //window.history.back();
-                  }
-                },(error:any)=>{
-                  this.toast.error(error);
+                    this.connector.onAllRequestsReady().subscribe(() => {
+                        this.isLoading = false;
+                        GlobalContainerComponent.finishPreloading();
+                        setTimeout(() => {
+                            if (this.username && this.passwordInput) {
+                                this.passwordInput.nativeInput.nativeElement.focus();
+                            }
+                            else if (this.usernameInput) {
+                                this.usernameInput.nativeElement.focus();
+                            }
+                        }, 100);
+                    });
+                    this.scope = params.scope;
+                    if (!this.scope) {
+                        this.scope = null;
+                    }
+                    this.connector.isLoggedIn().subscribe((data: LoginResult) => {
+                        if (data.currentScope) {
+                            // just to make sure there is no scope still set // NO: We need a valid session when login to scope!!!
+                            this.connector.logout().subscribe(() => { });
+                            data.statusCode = null;
+                        }
+                        else if (data.currentScope === this.scope) {
+                            if (data.statusCode === RestConstants.STATUS_CODE_OK && params.local !== 'true') {
+                                this.goToNext(data);
+                            }
+                        }
+                        // when there is a request to go into safe mode, first, the user needs to login regular
+                        else if (data.statusCode !== RestConstants.STATUS_CODE_OK && this.scope) {
+                            // RestHelper.goToLogin()
+                        }
+                        if (configService.instant('loginProvidersUrl')) {
+                            this.showProviders = true;
+                            this.updateButtons();
+                            this.http.get(configService.instant('loginProvidersUrl')).subscribe((providers) => {
+                                this.processProviders(providers);
+                            });
+                        }
+                        this.loginUrl = configService.instant('loginUrl');
+                        const allowLocal = configService.instant('loginAllowLocal', false);
+                        if (params.local !== 'true' && !allowLocal && this.loginUrl && data.statusCode !== RestConstants.STATUS_CODE_OK) {
+                            this.openLoginUrl();
+                            return;
+                        }
+                    });
+                    this.next = params.next;
+                    this.mainnav = params.mainnav !== 'false';
+                    if (this.scope === RestConstants.SAFE_SCOPE) {
+                        this.connector.isLoggedIn().subscribe((data: LoginResult) => {
+                            if (data.statusCode !== RestConstants.STATUS_CODE_OK) {
+                                RestHelper.goToLogin(this.router, this.configService);
+                            }
+                            else {
+                                this.connector.hasAccessToScope(RestConstants.SAFE_SCOPE).subscribe((scope: AccessScope) => {
+                                    if (scope.hasAccess) {
+                                        this.username = data.authorityName;
+                                    }
+                                    else {
+                                        this.toast.error(null, 'LOGIN.NO_ACCESS');
+                                        this.router.navigate([UIConstants.ROUTER_PREFIX + 'workspace']);
+                                        // window.history.back();
+                                    }
+                                }, (error: any) => {
+                                    this.toast.error(error);
+                                });
+                            }
+                        }, (error: any) => RestHelper.goToLogin(this.router, this.configService));
+                    }
+
+
+                    if (this.scope === RestConstants.SAFE_SCOPE) {
+                        this.caption = 'LOGIN.TITLE_SAFE';
+                    }
+                    else {
+                        this.caption = 'LOGIN.TITLE';
+                    }
                 });
-              }
-            },(error:any)=>RestHelper.goToLogin(this.router,this.configService));
-          }
 
+            });
 
-          if(this.scope==RestConstants.SAFE_SCOPE){
-            this.caption='LOGIN.TITLE_SAFE';
-          }
-          else{
-            this.caption='LOGIN.TITLE';
-          }
         });
-
-      });
-
-    });
-    this.isLoading=true;
-  }
-  ngOnInit() {
-
-  }
-  private login(){
-
-    this.isLoading=true;
-
-      this.connector.login(this.username,this.password,this.scope).subscribe(
-        (data) => {
-          if(data.statusCode==RestConstants.STATUS_CODE_OK) {
-            this.goToNext(data);
-          }
-          else if(data.statusCode==RestConstants.STATUS_CODE_PREVIOUS_SESSION_REQUIRED || data.statusCode==RestConstants.STATUS_CODE_PREVIOUS_USER_WRONG){
-            this.toast.error(null,'LOGIN.SAFE_PREVIOUS');
-            this.password="";
-            this.isLoading=false;
-          }
-          else if(data.statusCode==RestConstants.STATUS_CODE_PASSWORD_EXPIRED){
-            this.toast.error(null,'LOGIN.PASSWORD_EXPIRED');
-          }
-          else{
-            this.toast.error(null,'LOGIN.ERROR');
-            this.password="";
-            this.isLoading=false;
-          }
-        },
-        (error:any)=>{
-          this.toast.error(error);
-          this.isLoading=false;
-        });
-
-  }
-
-  private goToNext(data:LoginResult) {
-    if(this.next){
-      this.next=Helper.addGetParameter('fromLogin','true',this.next);
-      RouterHelper.navigateToAbsoluteUrl(this.platformLocation,this.router,this.next);
-      //window.location.assign(this.next);
+        this.isLoading = true;
     }
-    else if(data.currentScope==RestConstants.SAFE_SCOPE){
-      this.router.navigate([UIConstants.ROUTER_PREFIX,"workspace","safe"]);
-    }
-    else {
-      UIHelper.goToDefaultLocation(this.router,this.platformLocation,this.configService);
-    }
-  }
 
-    updateButtons(): any {
-      this.buttons = [];
-      if(this.showProviders){
-        return;
-      }
-      if(this.config.register && (this.config.register.local || this.config.register.registerUrl)) {
-          this.buttons.push(new DialogButton('LOGIN.REGISTER_TEXT', DialogButton.TYPE_CANCEL, () => this.register()));
-      }
-      let login=new DialogButton('LOGIN.LOGIN',DialogButton.TYPE_PRIMARY,()=>this.login());
-      login.disabled=this.disabled;
-      this.buttons.push(login);
+    canRegister(): boolean {
+        return this.config.register && (this.config.register.local || this.config.register.registerUrl);
     }
-  private processProviders(providers: any) {
-    let data:any={};
-    for(let provider in providers.wayf_idps){
-      let object=providers.wayf_idps[provider];
-      object.url=provider;
-      let type=object.type;
-      if(!data[type]) {
-        data[type] = {
-          group: providers.wayf_categories[type],
-          providers: []
-        };
-      }
-      data[type].providers.push(object);
-    }
-    this.providers = [];
-    for(let key in data)
-      this.providers.push(data[key]);
 
-    // register observer for autocomplete
-    this.filteredProviders = this.providerControl.valueChanges
-        .pipe(
-            startWith(''),
-            map((value:string) => this.filterProviders(value))
-        );
-    console.log(this.filteredProviders);
-  }
+    checkConditions() {
+        this.disabled = !this.username || this.currentProvider; // || !this.password;
+        this.updateButtons();
+    }
 
-  private filterProviders(filter:any="") {
-    console.log(filter);
-    let filtered=[];
-    if(!this.providers)
-      return null;
-    // an object was detected, abort
-    if(filter.name){
-      return this.providers;
+    currentProviderDisplay(provider: any) {
+        return provider ? provider.name : '';
     }
-    this.currentProvider=null;
-    for(let p of Helper.deepCopy(this.providers)){
-      p.providers=p.providers.filter((p:any) => p.name.toLowerCase().includes(filter.toLowerCase()));
-      if(p.providers.length)
-        filtered.push(p);
+
+    goToProvider() {
+        console.log(this.currentProvider);
+        if (!this.currentProvider) {
+            this.toast.error(null, 'LOGIN.NO_PROVIDER_SELECTED');
+        }
+        let url = this.configService.instant('loginProviderTargetUrl');
+        if (!url) {
+            this.toast.error(null, 'No configuration for loginProviderTargetUrl found.');
+            return;
+        }
+        const target = this.connector.getAbsoluteServerUrl() + this.configService.instant('loginUrl');
+        url = url.
+            replace(':target', encodeURIComponent(target)).
+            replace(':entity', encodeURIComponent(this.currentProvider.url));
+        console.log('redirecting to: ' + url);
+        // @TODO: Redirect to shibboleth provider
+        UIHelper.openUrl(url, this.bridge, OPEN_URL_MODE.Current);
     }
-    return filtered;
-  }
-  goToProvider(){
-    console.log(this.currentProvider);
-    if(!this.currentProvider){
-      this.toast.error(null,'LOGIN.NO_PROVIDER_SELECTED');
+
+    login() {
+        this.isLoading = true;
+        this.connector.login(this.username, this.password, this.scope).subscribe(
+            (data) => {
+                if (data.statusCode === RestConstants.STATUS_CODE_OK) {
+                    this.goToNext(data);
+                }
+                else if (data.statusCode === RestConstants.STATUS_CODE_PREVIOUS_SESSION_REQUIRED
+                    || data.statusCode === RestConstants.STATUS_CODE_PREVIOUS_USER_WRONG
+                ) {
+                    this.toast.error(null, 'LOGIN.SAFE_PREVIOUS');
+                    this.password = '';
+                    this.isLoading = false;
+                }
+                else if (data.statusCode === RestConstants.STATUS_CODE_PASSWORD_EXPIRED) {
+                    this.toast.error(null, 'LOGIN.PASSWORD_EXPIRED');
+                }
+                else {
+                    this.toast.error(null, 'LOGIN.ERROR');
+                    this.password = '';
+                    this.isLoading = false;
+                }
+            },
+            (error: any) => {
+                this.toast.error(error);
+                this.isLoading = false;
+            });
     }
-    let url=this.configService.instant('loginProviderTargetUrl');
-    if(!url){
-      this.toast.error(null,'No configuration for loginProviderTargetUrl found.');
-      return;
+
+    ngOnInit() {
     }
-    let target=this.connector.getAbsoluteServerUrl()+this.configService.instant('loginUrl');
-    url=url.
-      replace(':target',encodeURIComponent(target)).
-      replace(':entity',encodeURIComponent(this.currentProvider.url));
-    console.log("redirecting to: "+url);
-    //@TODO: Redirect to shibboleth provider
-    UIHelper.openUrl(url,this.bridge,OPEN_URL_MODE.Current);
-  }
+
+    openLoginUrl() {
+        window.location.href = this.loginUrl;
+    }
+
+    recoverPassword() {
+        if (this.config.register.local) {
+            this.router.navigate([UIConstants.ROUTER_PREFIX + 'register', 'request']);
+        }
+        else {
+            window.location.href = this.config.register.recoverUrl;
+        }
+    }
+
+    register() {
+        if (this.config.register.local) {
+            this.router.navigate([UIConstants.ROUTER_PREFIX + 'register']);
+        }
+        else {
+            window.location.href = this.config.register.registerUrl;
+        }
+    }
+
+    private filterProviders(filter: any = '') {
+        console.log(filter);
+        const filtered = [];
+        if (!this.providers) {
+            return null;
+        }
+        // an object was detected, abort
+        if (filter.name) {
+            return this.providers;
+        }
+        this.currentProvider = null;
+        for (const p of Helper.deepCopy(this.providers)) {
+            p.providers = p.providers.filter((p: any) => p.name.toLowerCase().includes(filter.toLowerCase()));
+            if (p.providers.length) {
+                filtered.push(p);
+            }
+        }
+        return filtered;
+    }
+
+    private goToNext(data: LoginResult) {
+        if (this.next) {
+            this.next = Helper.addGetParameter('fromLogin', 'true', this.next);
+            RouterHelper.navigateToAbsoluteUrl(this.platformLocation, this.router, this.next);
+            // window.location.assign(this.next);
+        }
+        else if (data.currentScope === RestConstants.SAFE_SCOPE) {
+            this.router.navigate([UIConstants.ROUTER_PREFIX, 'workspace', 'safe']);
+        }
+        else {
+            UIHelper.goToDefaultLocation(this.router, this.platformLocation, this.configService);
+        }
+    }
+
+    private processProviders(providers: any) {
+        const data: any = {};
+        for (const provider in providers.wayf_idps) {
+            if (providers.hasOwnProperty(provider)) {
+                const object = providers.wayf_idps[provider];
+                object.url = provider;
+                const type = object.type;
+                if (!data[type]) {
+                    data[type] = {
+                        group: providers.wayf_categories[type],
+                        providers: []
+                    };
+                }
+                data[type].providers.push(object);
+            }
+        }
+        this.providers = [];
+        for (const element of data) {
+            this.providers.push(element);
+        }
+
+        // register observer for autocomplete
+        this.filteredProviders = this.providerControl.valueChanges
+            .pipe(
+                startWith(''),
+                map((value: string) => this.filterProviders(value))
+            );
+        console.log(this.filteredProviders);
+    }
+
+    private updateButtons(): any {
+        this.buttons = [];
+        if (this.showProviders) {
+            return;
+        }
+        if (this.canRegister()) {
+            this.buttons.push(new DialogButton('LOGIN.REGISTER_TEXT', DialogButton.TYPE_CANCEL, () => this.register()));
+        }
+        const login = new DialogButton('LOGIN.LOGIN', DialogButton.TYPE_PRIMARY, () => this.login());
+        login.disabled = this.disabled;
+        this.buttons.push(login);
+    }
+
+
 }

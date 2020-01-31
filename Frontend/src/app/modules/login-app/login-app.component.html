@@ -4,7 +4,7 @@
   <h1>{{'LOGIN_APP.LOGIN' | translate}}</h1>
   <div>{{'LOGIN_APP.LOGIN_INFO' | translate}}</div>
 </div>
-<card modal="never" title="{{'LOGIN_APP.LOGIN_TITLE' | translate}}" width="mlarge" height="large" avatar="assets/images/app-icon.svg" [isCancelable]="true" (onCancel)="buttonLoginBack()" [buttons]="buttons">
+<card modal="auto" title="{{'LOGIN_APP.LOGIN_TITLE' | translate}}" width="mlarge" height="large" avatar="assets/images/app-icon.svg" [isCancelable]="true" (onCancel)="buttonLoginBack()" [buttons]="buttons">
     <div class="card-content-padding">
       <form (ngSubmit)="login()" #loginForm>
         <mat-form-field>

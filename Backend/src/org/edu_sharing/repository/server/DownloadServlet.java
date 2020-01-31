@@ -2,6 +2,7 @@ package org.edu_sharing.repository.server;
 
 import java.io.*;
 import java.util.*;
+import java.util.stream.Collectors;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
@@ -26,6 +27,8 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.log4j.Logger;
 import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
+import org.edu_sharing.metadataset.v2.tools.MetadataHelper;
+import org.edu_sharing.metadataset.v2.tools.MetadataTemplateRenderer;
 import org.edu_sharing.repository.client.rpc.Share;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.server.tools.ApplicationInfo;
@@ -33,7 +36,6 @@ import org.edu_sharing.repository.server.tools.ApplicationInfoList;
 import org.edu_sharing.repository.server.tools.HttpQueryTool;
 import org.edu_sharing.repository.server.tools.URLTool;
 import org.edu_sharing.repository.server.tracking.TrackingTool;
-import org.edu_sharing.restservices.shared.Node;
 import org.edu_sharing.service.nodeservice.NodeService;
 import org.edu_sharing.service.nodeservice.NodeServiceFactory;
 import org.edu_sharing.service.nodeservice.NodeServiceHelper;
@@ -208,7 +210,12 @@ public class DownloadServlet extends HttpServlet{
 
 						TrackingTool.trackActivityOnNode(nodeId,null,TrackingService.EventType.DOWNLOAD_MATERIAL);
                         AuthenticationUtil.RunAsWork work= () ->{
-                            String filename = nodeService.getProperty(StoreRef.PROTOCOL_WORKSPACE,StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(),finalNodeId,CCConstants.CM_NAME);
+							try {
+								addMetadataFile(finalNodeId, zos);
+							} catch (Throwable t) {
+								logger.warn("Could not export metadata for node "+finalNodeId, t);
+							}
+							String filename = nodeService.getProperty(StoreRef.PROTOCOL_WORKSPACE,StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(),finalNodeId,CCConstants.CM_NAME);
                             String wwwurl = nodeService.getProperty(StoreRef.PROTOCOL_WORKSPACE,StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(),finalNodeId,CCConstants.CCM_PROP_IO_WWWURL);
                             if(wwwurl!=null){
                                 errors.add( filename+": Is a link and can not be downloaded" );
@@ -275,6 +282,24 @@ public class DownloadServlet extends HttpServlet{
 		catch(Throwable t){
 			t.printStackTrace();
 		}
+	}
+
+	private static void addMetadataFile(String nodeId,ZipOutputStream zos) throws Throwable {
+		NodeRef nodeRef = new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, nodeId);
+		String filename = NodeServiceHelper.getProperty(nodeRef, CCConstants.CM_NAME);
+		filename += ".txt";
+		MetadataTemplateRenderer render = new MetadataTemplateRenderer(
+				MetadataHelper.getMetadataset(nodeRef),
+				nodeRef
+				, AuthenticationUtil.getFullyAuthenticatedUser(),
+				MetadataTemplateRenderer.convertProps(
+						NodeServiceHelper.getProperties(nodeRef)
+				)
+		);
+		render.setRenderingMode(MetadataTemplateRenderer.RenderingMode.TEXT);
+		ZipEntry entry = new ZipEntry("metadata/" + filename);
+		zos.putNextEntry(entry);
+		zos.write(render.render("io_text").getBytes());
 	}
 
 	private static void outputData(HttpServletResponse resp, String filename, ByteArrayOutputStream bufferOut) throws IOException {

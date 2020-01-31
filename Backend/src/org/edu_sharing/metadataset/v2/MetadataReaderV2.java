@@ -280,7 +280,9 @@ public class MetadataReaderV2 {
 		if(inherit!=null)
 			mdsInherit=inherit.getTextContent();
 		Node i18n = (Node) xpath.evaluate("/metadataset/i18n", doc, XPathConstants.NODE);
-		
+		if(i18n==null){
+			throw new Exception("Mandatory xml attribute i18n is missing for the metadataset "+filename);
+		}
 		i18nPath=i18n.getTextContent();
 		String label;
 		try{

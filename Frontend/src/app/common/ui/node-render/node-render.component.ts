@@ -718,6 +718,7 @@ export class NodeRenderComponent implements EventListener{
             const data: any = {};
             data[id] = [value];
             params.mds = this.getMdsId();
+            params.sidenav = true;
             params.parameters = JSON.stringify(data);
             this.router.navigate([UIConstants.ROUTER_PREFIX + "search"], {queryParams: params});
         });

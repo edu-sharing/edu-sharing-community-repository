@@ -11,11 +11,12 @@
             [isCancelable]="false"
             modal="auto"
             [buttons]="buttons"
-            [width]="showProviders ? 'xxlarge' : 'mlarge'"
-            height="large">
+            [width]="showProviders ? 'xxlarge' : 'normal'"
+            [height]="showProviders ? '' : 'large'"
+            [attr.showProviders]="showProviders">
           <spinner *ngIf="isLoading" class="center"></spinner>
           <div class="login-content" *ngIf="!isLoading">
-          <div class="branding"><img src="assets/images/logo.svg" image-config alt=""></div>
+            <div class="branding"><img src="assets/images/logo.svg" image-config alt=""></div>
               <div class="groups">
                   <div class="providers-select" *ngIf="showProviders">
                       <div class="group-heading">{{'LOGIN.PROVIDER_SELECT_GROUP' | translate}}</div>
@@ -63,7 +64,7 @@
                           <mat-link (click)="openLoginUrl()" class="goto"><span>{{'LOGIN.USE_URL_LINK' | translate}}</span> <i class="material-icons">arrow_forward</i></mat-link>
                       </div>
                       <div class="group-actions" *ngIf="showProviders">
-                          <button mat-button color="primary" *ngIf="config.register.local || config.register.recoverUrl" (click)="recoverPassword()">{{'LOGIN.RECOVER_PASSWORD' | translate }}</button>
+                          <button mat-button color="primary" *ngIf="canRegister()" (click)="register()">{{'LOGIN.REGISTER_TEXT' | translate }}</button>
                           <button mat-raised-button color="primary" [class.disabled]="disabled" (click)="login()">{{'LOGIN.LOGIN' | translate }}</button>
                       </div>
                   </div>

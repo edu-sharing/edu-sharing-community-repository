@@ -45,16 +45,6 @@ import org.springframework.context.ApplicationContext;
 
 public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.NodeService {
 
-	private static final String[] LICENSE_PROPS = new String[]{
-			CCConstants.LOM_PROP_RIGHTS_RIGHTS_DESCRIPTION,
-			CCConstants.CCM_PROP_IO_COMMONLICENSE_KEY,
-			CCConstants.CCM_PROP_IO_COMMONLICENSE_CC_LOCALE,
-			CCConstants.CCM_PROP_IO_COMMONLICENSE_CC_VERSION,
-			CCConstants.CCM_PROP_IO_LICENSE_TITLE_OF_WORK,
-			CCConstants.CCM_PROP_IO_LICENSE_SOURCE_URL,
-			CCConstants.CCM_PROP_IO_LICENSE_PROFILE_URL,
-			CCConstants.CCM_PROP_IO_COMMONLICENSE_QUESTIONSALLOWED
-	};
 	private String appId;
 	private ContentService contentService;
 	private DictionaryService dictionaryService;
@@ -302,7 +292,7 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
 	private static Iterable<String> getAllSafeProps() {
 		List<String> safe=new ArrayList<>();
 		safe.addAll(Arrays.asList(NodeCustomizationPolicies.SAFE_PROPS));
-		safe.addAll(Arrays.asList(LICENSE_PROPS));
+		safe.addAll(Arrays.asList(NodeCustomizationPolicies.LICENSE_PROPS));
 		safe.addAll(CCConstants.getLifecycleContributerPropsMap().values());
 		safe.addAll(CCConstants.getMetadataContributerPropsMap().values());
 		return safe;

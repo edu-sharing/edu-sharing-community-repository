@@ -670,7 +670,7 @@ export class MdsComponent{
     // check if file extension changed and warn
     if(!force) {
         // for regular nodes
-        if(this.currentNodes[0] && this.currentNodes.length === 1 && this.currentNodes[0].type === RestConstants.CCM_TYPE_IO && !this.currentNodes[0].properties[RestConstants.CCM_PROP_IO_WWWURL] && !this.checkFileExtension(this.currentNodes[0].name,callback,values)){
+        if(this.currentNodes && this.currentNodes[0] && this.currentNodes.length === 1 && this.currentNodes[0].type === RestConstants.CCM_TYPE_IO && !this.currentNodes[0].properties[RestConstants.CCM_PROP_IO_WWWURL] && !this.checkFileExtension(this.currentNodes[0].name,callback,values)){
             return;
         }
         // for childobjects
