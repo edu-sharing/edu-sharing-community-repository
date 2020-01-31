@@ -12,6 +12,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import io.swagger.annotations.ApiModel;
 @ApiModel(description = "")
 public class WidgetV2 {
+
 	public static class Condition{
 		private String value,type;
 		private boolean negate;
@@ -68,9 +69,10 @@ public class WidgetV2 {
 		private boolean isRequired;
 		private boolean allowempty;
 		private String defaultvalue;
+		private boolean isSearchable;
 		private Condition condition;
 
-		public WidgetV2(){}
+	public WidgetV2(){}
 		public WidgetV2(MetadataWidget widget) {
 			this.id=widget.getId();		
 			this.caption=widget.getCaption();
@@ -89,6 +91,7 @@ public class WidgetV2 {
 			this.isExtended=widget.isExtended();
 			this.isRequired=widget.isRequired();
 			this.allowempty=widget.isAllowempty();
+			this.isSearchable=widget.isSearchable();
 			if(widget.getCondition()!=null) {
 				this.condition=new Condition();
 				this.condition.setValue(widget.getCondition().getValue());
@@ -116,6 +119,13 @@ public class WidgetV2 {
 		public void setCondition(Condition condition) {
 			this.condition = condition;
 		}
+		@JsonProperty("isSearchable")
+		public boolean isSearchable() {
+			return isSearchable;
+		}
+		public void setSearchable(boolean searchable) {
+		this.isSearchable = searchable;
+	}
 		@JsonProperty("bottomCaption")
 		public String getBottomCaption() {
 			return bottomCaption;

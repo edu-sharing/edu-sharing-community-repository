@@ -27,7 +27,7 @@ import {
     RestConnectorsService, Node, NodeList,
     RestConstants, RestHelper, RestMdsService, RestIamService, RestNodeService, RestSearchService,
     RestToolService, SessionStorageService,
-    TemporaryStorageService, RestUsageService, RestNetworkService
+    TemporaryStorageService, RestUsageService, RestNetworkService, Mds
 } from "../../../core-module/core.module";
 import {MdsHelper} from "../../../core-module/rest/mds-helper";
 import {ListTableComponent} from "../../../core-ui-module/components/list-table/list-table.component";
@@ -35,6 +35,8 @@ import {SpinnerComponent} from "../../../core-ui-module/components/spinner/spinn
 import {CommentsListComponent} from "../../../modules/management-dialogs/node-comments/comments-list/comments-list.component";
 import {GlobalContainerComponent} from "../global-container/global-container.component";
 import {VideoControlsComponent} from "../../../core-ui-module/components/video-controls/video-controls.component";
+import KeyCode = monaco.KeyCode;
+import {RouterHelper} from '../../../core-ui-module/router.helper';
 
 declare var jQuery:any;
 declare var window: any;
@@ -96,6 +98,7 @@ export class NodeRenderComponent implements EventListener{
   canScrollRight: boolean = false;
   private queryParams: Params;
   public similarNodes: Node[];
+  mds: any;
 
   @ViewChild('sequencediv') sequencediv : ElementRef;
   @ViewChild('mainNav') mainNavRef : MainNavComponent;
@@ -225,9 +228,6 @@ export class NodeRenderComponent implements EventListener{
       this.frame.addListener(this);
 
         Translation.initialize(translate,config,storage,route).subscribe(()=>{
-            this.mdsApi.getSet().subscribe((set)=>{
-                this.similarNodeColumns = MdsHelper.getColumns(set,'search');
-            });
         this.banner = ConfigurationHelper.getBanner(this.config);
         this.connector.setRoute(this.route);
         this.networkService.prepareCache();
@@ -349,14 +349,20 @@ export class NodeRenderComponent implements EventListener{
             else {
                 this._node=data.node;
                 this.getSequence(()=>{
-                    jQuery('#nodeRenderContent').html(data.detailsSnippet);
-                    this.postprocessHtml();
-                    this.addCollections();
-                    this.addVideoControls();
-                    this.addComments();
-                    this.loadNode();
-                    this.loadSimilarNodes();
-                    this.isLoading = false;
+                    this.mdsApi.getSet(this.getMdsId()).subscribe((set) => {
+                        this.similarNodeColumns = MdsHelper.getColumns(set,'search');
+                        this.mds = set;
+
+                        jQuery('#nodeRenderContent').html(data.detailsSnippet);
+                        this.postprocessHtml();
+                        this.addCollections();
+                        this.addVideoControls();
+                        this.linkSearchableWidgets();
+                        this.addComments();
+                        this.loadNode();
+                        this.loadSimilarNodes();
+                        this.isLoading = false;
+                    });
                 });
             }
             this.isLoading = false;
@@ -676,5 +682,48 @@ export class NodeRenderComponent implements EventListener{
     }
     getQRData() {
         return window.location.href;
+    }
+
+    private linkSearchableWidgets() {
+        try {
+            this.mds.widgets.filter((w: any) => w.isSearchable).forEach((w) => {
+                try {
+                    const values = document.querySelectorAll('#edusharing_rendering_metadata [data-widget-id=\'' + w.id + '\'] .mdsWidgetMultivalue .mdsValue');
+                    values.forEach((v: HTMLElement) => {
+                        v.classList.add('clickable', 'mdsValueClickable');
+                        v.tabIndex = 0;
+                        const key = v.getAttribute('data-value-key');
+                        v.onclick = () => {
+                            this.navigateToSearch(w.id, key);
+                        }
+                        v.onkeyup = (k) => {
+                            if (k.key === 'Enter') {
+                                this.navigateToSearch(w.id, key);
+                            }
+                        }
+                    });
+                    console.log(values);
+                } catch (e) {
+                    console.log(e);
+                }
+            });
+            //document.getElementsByClassName("edusharing_rendering_content_wrapper")[0].ge;
+        } catch (e) {
+            console.warn("Could not read the widget list from the metadataset", e);
+        }
+    }
+
+    private navigateToSearch(id: any, value: string) {
+        UIHelper.getCommonParameters(this.route).subscribe((params) => {
+            const data: any = {};
+            data[id] = [value];
+            params.mds = this.getMdsId();
+            params.parameters = JSON.stringify(data);
+            this.router.navigate([UIConstants.ROUTER_PREFIX + "search"], {queryParams: params});
+        });
+    }
+
+    private getMdsId() {
+        return this._node.metadataset ? this._node.metadataset : RestConstants.DEFAULT;
     }
 }

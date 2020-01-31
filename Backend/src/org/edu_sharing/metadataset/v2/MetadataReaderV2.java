@@ -392,6 +392,9 @@ public class MetadataReaderV2 {
 				if(name.equals("valuespaceClient")){
 					widget.setValuespaceClient(value.equalsIgnoreCase("true"));				
 				}
+				if(name.equals("searchable")){
+					widget.setSearchable(value.equalsIgnoreCase("true"));
+				}
 				if(name.equals("extended"))
 					widget.setExtended(value.equalsIgnoreCase("true"));				
 				if(name.equals("min"))

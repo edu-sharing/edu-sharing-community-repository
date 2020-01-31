@@ -48,6 +48,7 @@
 				<caption>lom_prop_general_keyword</caption>
 				<placeholder>lom_prop_general_keyword_placeholder</placeholder>
 				<hideIfEmpty>true</hideIfEmpty>
+				<searchable>true</searchable>
 			</widget>
 			<widget>
 				<id>cclom:general_keyword</id>

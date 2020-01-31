@@ -41,7 +41,7 @@ public class MetadataWidget extends MetadataTranslatable{
 	private boolean required,extended,allowempty,valuespaceClient=true,hideIfEmpty,inherit=true;
 	private List<MetadataKey> values;
 	private List<Subwidget> subwidgets;
-
+	private boolean searchable;
 	
 	private MetadataCondition condition;
 	private String link;
@@ -54,6 +54,14 @@ public class MetadataWidget extends MetadataTranslatable{
 		return link;
 	}
 
+
+
+	public void setSearchable(boolean searchable) {
+		this.searchable = searchable;
+	}
+	public boolean isSearchable() {
+		return searchable;
+	}
 	public String getSuggestionQuery() {
 		return suggestionQuery;
 	}
