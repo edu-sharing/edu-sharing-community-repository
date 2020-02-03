@@ -341,6 +341,7 @@
                 <app-custom-node-list-wrapper
                     *ngIf="customNodeList"
                     [nodes]="collectionContent.references"
+                    (clickRow)="onContentClick($event.node)"
                 ></app-custom-node-list-wrapper>
                 <listTable
                     *ngIf="!customNodeList"

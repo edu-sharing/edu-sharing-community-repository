@@ -1,5 +1,17 @@
-import { Component, ComponentFactoryResolver, ElementRef, OnInit, ViewContainerRef, Input } from '@angular/core';
-import { TemporaryStorageService, CollectionReference } from '../../../core-module/core.module';
+import {
+    Component,
+    ComponentFactoryResolver,
+    ElementRef,
+    EventEmitter,
+    Input,
+    OnInit,
+    Output,
+    ViewContainerRef,
+} from '@angular/core';
+import {
+    CollectionReference,
+    TemporaryStorageService,
+} from '../../../core-module/core.module';
 import { UIHelper } from '../../../core-ui-module/ui-helper';
 
 @Component({
@@ -8,6 +20,7 @@ import { UIHelper } from '../../../core-ui-module/ui-helper';
 })
 export class CustomNodeListWrapperComponent implements OnInit {
     @Input() nodes: CollectionReference[];
+    @Output() clickRow = new EventEmitter<{ node: CollectionReference }>();
 
     constructor(
         private temporaryStorageService: TemporaryStorageService,
@@ -31,6 +44,8 @@ export class CustomNodeListWrapperComponent implements OnInit {
             this.elementRef.nativeElement,
             {
                 nodes: this.nodes,
+                clickRow: (event: { node: CollectionReference }) =>
+                    this.clickRow.emit(event),
             },
         );
     }
