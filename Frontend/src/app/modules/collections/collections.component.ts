@@ -75,8 +75,8 @@ export class CollectionsMainComponent {
         sortAscending: [false, true, false],
     };
 
-    @ViewChild('mainNav', {static: true}) mainNavRef: MainNavComponent;
-    @ViewChild('listCollections', {static: true}) listCollections: ListTableComponent;
+    @ViewChild('mainNav', {static: false}) mainNavRef: MainNavComponent;
+    @ViewChild('listCollections', {static: false}) listCollections: ListTableComponent;
 
     dialogTitle: string;
     globalProgress = false;

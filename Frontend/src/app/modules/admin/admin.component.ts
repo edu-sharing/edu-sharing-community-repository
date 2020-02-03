@@ -93,12 +93,12 @@ export class AdminComponent {
   private parentCollectionType = 'root';
   public catalina : string;
   private oaiClasses: string[];
-  @ViewChild('mainNav', {static: true}) mainNavRef: MainNavComponent;
-  @ViewChild('catalinaRef', {static: true}) catalinaRef : ElementRef;
-  @ViewChild('xmlSelect', {static: true}) xmlSelect : ElementRef;
-  @ViewChild('excelSelect', {static: true}) excelSelect : ElementRef;
-  @ViewChild('templateSelect', {static: true}) templateSelect : ElementRef;
-  @ViewChild('dynamic', {static: true}) dynamicComponent : any;
+  @ViewChild('mainNav', {static: false}) mainNavRef: MainNavComponent;
+  @ViewChild('catalinaRef', {static: false}) catalinaRef : ElementRef;
+  @ViewChild('xmlSelect', {static: false}) xmlSelect : ElementRef;
+  @ViewChild('excelSelect', {static: false}) excelSelect : ElementRef;
+  @ViewChild('templateSelect', {static: false}) templateSelect : ElementRef;
+  @ViewChild('dynamic', {static: false}) dynamicComponent : any;
 
   buttons:any[]=[];
   private excelFile: File;

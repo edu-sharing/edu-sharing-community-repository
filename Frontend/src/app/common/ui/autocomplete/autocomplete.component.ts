@@ -10,10 +10,10 @@ import {TranslateService} from "@ngx-translate/core";
 
 
 export class AutocompleteComponent{
-  @ContentChild('icon', {static: true}) iconRef: TemplateRef<any>;
-  @ContentChild('suggest', {static: true}) suggestRef: TemplateRef<any>;
+  @ContentChild('icon', {static: false}) iconRef: TemplateRef<any>;
+  @ContentChild('suggest', {static: false}) suggestRef: TemplateRef<any>;
   // replaces the whole content with own data
-  @ContentChild('content', {static: true}) contentRef: TemplateRef<any>;
+  @ContentChild('content', {static: false}) contentRef: TemplateRef<any>;
 
   @Input() id: string;
   @Input() placeholder: string;

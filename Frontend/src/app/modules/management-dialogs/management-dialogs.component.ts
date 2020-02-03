@@ -31,7 +31,7 @@ import {Observable} from 'rxjs';
 })
 export class WorkspaceManagementDialogsComponent  {
   public globalProgress = false;
-  @ViewChild('mds', {static: true}) mdsRef : MdsComponent;
+  @ViewChild('mds', {static: false}) mdsRef : MdsComponent;
   @Input() showLtiTools = false;
   @Input() uploadShowPicker = false;
   @Input() uploadMultiple = true;

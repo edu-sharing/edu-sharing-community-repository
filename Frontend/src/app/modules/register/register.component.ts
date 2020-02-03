@@ -20,10 +20,10 @@ import { RegisterResetPasswordComponent } from './register-reset-password/regist
     changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class RegisterComponent {
-    @ViewChild('registerForm', {static: true}) registerForm: RegisterFormComponent;
-    @ViewChild('registerDone', {static: true}) registerDone: RegisterDoneComponent;
-    @ViewChild('request', {static: true}) request: RegisterRequestComponent;
-    @ViewChild('resetPassword', {static: true}) resetPassword: RegisterResetPasswordComponent;
+    @ViewChild('registerForm', {static: false}) registerForm: RegisterFormComponent;
+    @ViewChild('registerDone', {static: false}) registerDone: RegisterDoneComponent;
+    @ViewChild('request', {static: false}) request: RegisterRequestComponent;
+    @ViewChild('resetPassword', {static: false}) resetPassword: RegisterResetPasswordComponent;
     public isLoading = true;
     state: 'register' | 'request' | 'reset-password' | 'done' | 'done-reset' = 'register';
     buttons: DialogButton[];
