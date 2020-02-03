@@ -73,13 +73,13 @@ export class ListTableComponent implements EventListener {
     public static VIEW_TYPE_GRID = 1;
     public static VIEW_TYPE_GRID_SMALL = 2;
 
-    @ViewChild('addElementRef', {static: true}) addElementRef: ElementRef;
-    @ViewChild('drag', {static: true}) drag: ElementRef;
-    @ViewChild('menuTrigger', {static: true}) menuTrigger: MatMenuTrigger;
-    @ViewChild('dropdown', {static: true}) dropdownElement: ElementRef;
-    @ViewChild('dropdownContainer', {static: true}) dropdownContainerElement: ElementRef;
+    @ViewChild('addElementRef', {static: false}) addElementRef: ElementRef;
+    @ViewChild('drag', {static: false}) drag: ElementRef;
+    @ViewChild('menuTrigger', {static: false}) menuTrigger: MatMenuTrigger;
+    @ViewChild('dropdown', {static: false}) dropdownElement: ElementRef;
+    @ViewChild('dropdownContainer', {static: false}) dropdownContainerElement: ElementRef;
 
-    @ContentChild('itemContent', {static: true}) itemContentRef: TemplateRef<any>;
+    @ContentChild('itemContent', {static: false}) itemContentRef: TemplateRef<any>;
 
     /** Set the current list of nodes to render */
     @Input() set nodes(nodes: Node[]) {

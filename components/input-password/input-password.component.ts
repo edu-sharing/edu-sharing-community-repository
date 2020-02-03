@@ -22,7 +22,7 @@ export class InputPasswordComponent{
     @Output() keydown = new EventEmitter();
     @Output() keyup = new EventEmitter();
     @Output() ngModelChange = new EventEmitter();
-    @ViewChild('input', {static: true}) nativeInput : ElementRef;
+    @ViewChild('input', {static: false}) nativeInput : ElementRef;
     passwordStrength: string;
     _value:string;
     @Input() public set value(_value:string){
