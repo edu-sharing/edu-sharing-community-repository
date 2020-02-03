@@ -64,6 +64,7 @@ public class DownloadServlet extends HttpServlet{
 		Mode mode = req.getParameter("mode")!=null ? Mode.valueOf(req.getParameter("mode")) : Mode.redirect;
 		if(nodeIds!=null) {
 			downloadZip(resp, nodeIds.split(","), null, null, null, fileName);
+			return;
 		}
 		downloadNode(nodeId,req,resp,fileName,mode);
 
