@@ -7,7 +7,7 @@
   <card height="xlarge" width="large" title="{{(customTitle ? customTitle : 'MDS.TITLE') | translate}}" [jumpmarks]="jumpmarks" [node]="currentNodes" [priority]="priority" [buttons]="buttons" (onCancel)="cancel()">
     <div class="mdsCard">
       <spinner class="loading" *ngIf="isLoading"></spinner>
-      <div class="dialogMds" *ngIf="currentWidgetSuggestion" (click)="closeDialog()" [style.top]="mdsScrollContainer.scrollTop+'px'"></div>
+      <div class="dialogMds" *ngIf="currentWidgetSuggestion" (click)="closeDialog()"></div>
       <div [innerHTML]="rendered"></div>
     </div>
    </card>

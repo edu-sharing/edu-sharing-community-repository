@@ -2495,9 +2495,9 @@ export class MdsComponent{
       let properties: any = {};
       for (const key of Object.keys(this.currentNodes[0].properties)) {
         const identical = this.currentNodes.map((n) => n.properties[key]).reduce((a, b) =>
-          Helper.arrayEquals(a, b)
+          Helper.arrayEquals(a, b) ? a : false
         );
-        if (identical) {
+        if (identical !== false) {
           properties[key] = this.currentNodes[0].properties[key];
         }
         console.log(key, identical);
