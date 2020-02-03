@@ -494,11 +494,12 @@ public EduGroup getEduGroup(String authority){
 			if (!currentUser.equals(userName) && !AuthorityServiceFactory.getLocalService().isGlobalAdmin()) {
 				throw new NotAnAdminException();
 			}
-			
-			String personActiveStatus = LightbendConfigLoader.get().getString("repository.personActiveStatus");
-			//if configured initialize with active status
-			if(personActiveStatus != null) {
-				userInfo.put(CCConstants.CM_PROP_PERSON_ESPERSONSTATUS, personActiveStatus);
+			if(!LightbendConfigLoader.get().getIsNull("repository.personActiveStatus")) {
+				String personActiveStatus = LightbendConfigLoader.get().getString("repository.personActiveStatus");
+				//if configured initialize with active status
+				if (personActiveStatus != null) {
+					userInfo.put(CCConstants.CM_PROP_PERSON_ESPERSONSTATUS, personActiveStatus);
+				}
 			}
 
 			PersonService personService = serviceRegistry.getPersonService();
