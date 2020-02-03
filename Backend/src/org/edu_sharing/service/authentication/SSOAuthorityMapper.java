@@ -290,18 +290,20 @@ public class SSOAuthorityMapper {
 					logger.warn("no personproperties delivered by sso context for user " + userName);
 				}
 				
-				if(!authenticationService.authenticationExists(userName)){
+				
+				/**
+				 * get the existent username, this can be different to the parameter username 
+				 * when this has another case(lower/upper) than the person object username
+				 */
+				NodeRef personNodeRef = personService.getPersonOrNull(userName);
+				if(personNodeRef == null) {
+					logger.error("person " + userName + " does not exist. can not create authentication object in userstore." );
+					return null;
+				}
+				String existentUserName = (String)nodeService.getProperty(personNodeRef, ContentModel.PROP_USERNAME);
+				
+				if(!authenticationService.authenticationExists(existentUserName)){
 					logger.info("no authentication object for " +userName +" trying to create!");
-					/**
-					 * get the existent username, this can be different to the parameter username 
-					 * when this has another case(lower/upper) than the person object username
-					 */
-					NodeRef personNodeRef = personService.getPersonOrNull(userName);
-					if(personNodeRef == null) {
-						logger.error("person " + userName + " does not exist. can not create authentication object in userstore." );
-						return null;
-					}
-					String existentUserName = (String)nodeService.getProperty(personNodeRef, ContentModel.PROP_USERNAME);
 					authenticationService.createAuthentication(existentUserName, new KeyTool().getRandomPassword().toCharArray());
 				}
 
