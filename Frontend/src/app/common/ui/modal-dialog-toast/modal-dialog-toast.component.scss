@@ -6,7 +6,7 @@
 .modal-dialog-toast{
   z-index: $dialogZIndex + 11;
 }
-:host /deep/ .modal-dialog-toast{
+:host ::ng-deep .modal-dialog-toast{
   padding: $cardPadding;
   >mat-form-field{
     width: 100%;

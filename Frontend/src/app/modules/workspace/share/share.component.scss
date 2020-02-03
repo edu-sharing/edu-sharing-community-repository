@@ -53,7 +53,7 @@ $shareLinkHeight:40px;
 .invited,.advanced{
   padding:20px;
 }
-:host /deep/{
+:host ::ng-deep{
   .edusharing-autocomplete-wrapper{
     margin-bottom: 0!important;
     input{

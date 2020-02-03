@@ -3,7 +3,7 @@
 .mdsCard{
   padding: 0;
 }
-:host /deep/ {
+:host ::ng-deep {
   .suggestions {
     padding-top: 40px;
 

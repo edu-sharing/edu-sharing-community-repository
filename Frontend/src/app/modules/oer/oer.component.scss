@@ -1,6 +1,6 @@
 @import "../../core-ui-module/styles/variables";
 
-:host /deep/ {
+:host ::ng-deep {
   .topBar > div{
     background: transparent !important;
   }
@@ -159,7 +159,7 @@
   padding-top:20px;
 }
 @media (pointer: coarse) {
-  :host /deep/ .collections {
+  :host ::ng-deep .collections {
     width: 100%;
     overflow-x: auto;
     @include iosScrolling();
@@ -170,7 +170,7 @@
 }
 
 @media all and (max-width: $mobileWidth+$mobileStage*2) {
-  :host /deep/ .collections {
+  :host ::ng-deep .collections {
     .list {
       width: max-content;
     }

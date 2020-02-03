@@ -206,7 +206,7 @@ $path:'../../../assets/images/';
     }
   }
 }
-:host /deep/{
+:host ::ng-deep{
   input-password mat-form-field{
     width: 100%;
   }

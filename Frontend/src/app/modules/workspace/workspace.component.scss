@@ -188,7 +188,7 @@ user-quota{
     @include materialShadow();
   }
 }
-:host /deep/{
+:host ::ng-deep{
   .breadcrumbFrame .breadcrumb {
     position: relative;
     top: 5px;
@@ -238,7 +238,7 @@ user-quota{
     width:100%;
     height:calc(100% - #{$mainnavHeight+$secondaryBarHeight+$mobileTabNavHeight});
   }
-  :host /deep/{
+  :host ::ng-deep{
     workspace-explorer .list{
       padding-bottom:72px;
     }

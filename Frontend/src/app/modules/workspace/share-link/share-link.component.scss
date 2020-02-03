@@ -50,7 +50,7 @@ input-password{
 .link-activate{
   color: black;
 }
-:host /deep/{
+:host ::ng-deep{
   .datepickerShareLink .datepicker-calendar {
     margin-left: 50px;
   }

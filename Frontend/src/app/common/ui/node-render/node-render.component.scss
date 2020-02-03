@@ -29,7 +29,7 @@ a, a:hover, a:visited, a:active {
   font-size: 30px;
   color:#fff;
 }
-:host /deep/{
+:host ::ng-deep{
   card.qr{
     mat-card-content{
       display: flex;
@@ -228,7 +228,7 @@ a.edusharing_rendering_content{
   height: calc(100% - #{$mainnavHeight} - 130px) !important;
 }
 
-:host /deep/ {
+:host ::ng-deep {
   .mdsWidget .comment .avatarCircle{
     cursor:default!important;;
   }
@@ -296,7 +296,7 @@ div.download {
   .render-back{
     display: none;
   }
-  :host /deep/ .node-comments{
+  :host ::ng-deep .node-comments{
     min-width: unset;
     padding-right: 10px;
     > div > div > span{

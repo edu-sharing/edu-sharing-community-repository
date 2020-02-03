@@ -619,7 +619,7 @@ $sidenavWidthMobile:66px;
     flex-direction: column;
   }
 }
-:host /deep/{
+:host ::ng-deep{
   .preloader-wrapper.small{
     width:16px;
     height:16px;

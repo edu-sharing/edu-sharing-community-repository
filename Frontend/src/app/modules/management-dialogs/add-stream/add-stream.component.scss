@@ -1,6 +1,6 @@
 @import "../../../core-ui-module/styles/variables";
 
-:host /deep/{
+:host ::ng-deep{
   .edusharing-autocomplete-wrapper{
     margin-bottom: 0;
   }

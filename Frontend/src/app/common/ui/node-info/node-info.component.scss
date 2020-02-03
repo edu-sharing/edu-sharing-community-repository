@@ -3,7 +3,7 @@
 .debug-content{
   padding: $cardPadding;
 }
-:host /deep/{
+:host ::ng-deep{
   .breadcrumb{
     flex-wrap: wrap;
     max-height: unset!important;

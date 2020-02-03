@@ -4,7 +4,7 @@
 .login-content{
   padding:$cardPadding;
 }
-:host /deep/ .login-content {
+:host ::ng-deep .login-content {
   mat-form-field {
     width: calc(100% - .2rem);
   }

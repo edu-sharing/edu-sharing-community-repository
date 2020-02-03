@@ -53,7 +53,7 @@
     flex-grow: 1;
   }
 }
-:host /deep/{
+:host ::ng-deep{
   .group .mat-form-field-wrapper{
     width: 100%;
   }

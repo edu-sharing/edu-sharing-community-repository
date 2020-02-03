@@ -10,7 +10,7 @@
   width: 100%;
   margin:10px 0;
 }
-:host /deep/ {
+:host ::ng-deep {
   .license-content {
     .mat-tab-labels {
       background-color: #fff;

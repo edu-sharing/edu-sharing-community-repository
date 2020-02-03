@@ -314,7 +314,7 @@ $licenseInfoHeight:40px;
     background-color:$workspaceTreeSelectedBackground;
   }
 }
-:host /deep/ .sidenav .mat-button:hover .mat-button-focus-overlay{
+:host ::ng-deep .sidenav .mat-button:hover .mat-button-focus-overlay{
   opacity:0;
 }
 .userMenu,.helpMenu{

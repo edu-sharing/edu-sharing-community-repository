@@ -85,7 +85,7 @@ $imagePath: '../../../../assets/images/collections/';
   align-items: center;
   padding-top: $mainnavHeight;
 }
-:host /deep/{
+:host ::ng-deep{
   .createCollection{
     .collection-item{
       >.mat-button-wrapper{

@@ -119,7 +119,7 @@ mat-form-field{
     color:$textLight;
   }
 }
-:host /deep/ {
+:host ::ng-deep {
   .location .breadcrumb{
     max-height: unset!important;
     flex-wrap: wrap;

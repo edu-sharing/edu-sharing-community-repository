@@ -1,6 +1,6 @@
 @import "../../../core-ui-module/styles/variables";
 
-:host /deep/{
+:host ::ng-deep{
   .table .allowed #Mask{
     fill:$colorStatusPositive;
   }
@@ -97,7 +97,7 @@ $headingHeight:60px;
 .checkboxDiv,.result{
   text-align: center;
 }
-:host /deep/{
+:host ::ng-deep{
   .result spinner-small .preloader-wrapper.small{
     width:20px;
     height:20px;

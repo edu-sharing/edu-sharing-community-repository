@@ -1,5 +1,5 @@
 @import "../../../core-ui-module/styles/variables";
-:host /deep/{
+:host ::ng-deep{
   .mat-tab-body-wrapper{
     padding: 20px;
   }

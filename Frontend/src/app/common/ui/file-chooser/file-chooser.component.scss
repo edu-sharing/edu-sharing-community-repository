@@ -36,7 +36,7 @@
   display: flex;
   flex-direction: column;
 }
-:host /deep/{
+:host ::ng-deep{
   .fileChooserList{
     overflow: visible;
     width:100%;

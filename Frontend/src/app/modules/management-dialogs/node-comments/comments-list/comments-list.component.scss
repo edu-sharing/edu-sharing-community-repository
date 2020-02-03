@@ -5,7 +5,7 @@
     @include focusShadow();
   }
 }
-:host /deep/{
+:host ::ng-deep{
   actionbar{
     .action-always-caption{
       display: none;

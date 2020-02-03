@@ -52,7 +52,7 @@ input[type=search]{
 .memberInput{
   width:280px;
 }
-:host /deep/{
+:host ::ng-deep{
   .card-status{
     mat-checkbox{
       display: flex;

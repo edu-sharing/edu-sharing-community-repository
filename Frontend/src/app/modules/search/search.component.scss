@@ -589,7 +589,7 @@ listtable {
 div.dialog.darken {
   z-index: 1040;
 }
-:host /deep/{
+:host ::ng-deep{
   .sidenav .list > div{
     margin:0 -20px;
     margin-bottom: 20px;
@@ -639,7 +639,7 @@ div.dialog.darken {
   }
 }
 @media (pointer: coarse) {
-  :host /deep/ .collections{
+  :host ::ng-deep .collections{
     .list{
       width:max-content;
     }
@@ -656,7 +656,7 @@ div.dialog.darken {
   }
 }
 @media all and (max-width: $mobileWidth+$mobileStage*1) {
-    :host /deep/ .collections{
+    :host ::ng-deep .collections{
       .list{
         width:max-content;
       }

@@ -1,6 +1,6 @@
 @import "../../../core-ui-module/styles/variables";
 
-:host /deep/ {
+:host ::ng-deep {
   mat-form-field {
     width: 100%;
   }
@@ -37,7 +37,7 @@ mat-checkbox {
   display: flex;
   margin-top: 12px;
 }
-:host mat-checkbox /deep/ .mat-checkbox-layout {
+:host mat-checkbox ::ng-deep .mat-checkbox-layout {
   white-space: normal !important;
 }
 .accept {

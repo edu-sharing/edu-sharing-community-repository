@@ -301,7 +301,7 @@ mat-tab-group{
     margin-top: -5px;
   }
 }
-:host /deep/{
+:host ::ng-deep{
   footer{
     float:left;
     width:100%;
@@ -337,7 +337,7 @@ mat-tab-group{
     }
 }
 @media all and (max-width: ($cardWidth*3)) {
-  :host /deep/ .cardSmallList{
+  :host ::ng-deep .cardSmallList{
     width:calc(100% - 10px)!important;
   }
 }
@@ -348,7 +348,7 @@ mat-tab-group{
   }
 }
 @media only screen and (max-width: $mobileWidth) {
-    :host /deep/{
+    :host ::ng-deep{
       .collections-master-div-notabs {
         padding-top: 240px+$mainnavHeight;
       }

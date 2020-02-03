@@ -76,7 +76,7 @@
   }
 }
 @media all and (max-width: ($cardWidth*3)) {
-  :host /deep/ .cardSmallList{
+  :host ::ng-deep .cardSmallList{
     width:calc(100% - 10px)!important;
   }
 }
