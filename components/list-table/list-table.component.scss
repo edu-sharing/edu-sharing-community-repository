@@ -884,7 +884,7 @@ a.rowInner{
 .row input[type=checkbox]:checked + label:after{
   @include materialShadow();
 }
-:host /deep/ {
+:host ::ng-deep {
   .material-icons.collectionScope {
     font-size: 130%;
     left: -1px;

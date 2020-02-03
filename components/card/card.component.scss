@@ -57,7 +57,7 @@
   }
 }
 
-:host /deep/ .card-dialog{
+:host ::ng-deep .card-dialog{
   top: 0px;
   bottom: 0px;
   display: flex;
