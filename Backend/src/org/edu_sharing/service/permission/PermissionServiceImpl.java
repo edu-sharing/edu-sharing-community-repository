@@ -381,7 +381,7 @@ public class PermissionServiceImpl implements org.edu_sharing.service.permission
 					}
 				}
 				if(send) {
-					mail.sendMailHtml(context, senderName, emailaddress, MailTemplate.getSubject(template, currentLocale),
+					mail.sendMailHtml(context, senderName, senderInfo.get(CCConstants.CM_PROP_PERSON_EMAIL), emailaddress, MailTemplate.getSubject(template, currentLocale),
 							MailTemplate.getContent(template, currentLocale, true), replace);
 				}
 

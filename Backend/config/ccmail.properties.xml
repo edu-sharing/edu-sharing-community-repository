@@ -18,8 +18,11 @@
 	
 	<!-- the sender address used to send mails-->
     <entry key="mail.smtp.from">pleasechange@nodomain.com</entry>
-	
+
+    <!-- shall the original person (e.g. the inviter) be added as a reply-to address -->
+    <entry key="mail.addReplyTo">true</entry>
+
 	<!-- @deprecated -->
     <entry key="mail.admin">adminpleasechange@nodomain.com</entry>
-     
+
 </properties>

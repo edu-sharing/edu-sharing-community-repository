@@ -109,6 +109,16 @@
         "url_dynamic": "Wenn true, werden alle generierten Links (z.B. zu Previews) immer auf die anfragende Domain des Clients gemappt. Wenn false, wird der Wert immer fest anhand clientprotocol, clientport und domain generiert",
         "allow_origin": "Kommagetrennte Liste aller Origin-Adressen, für die CORS-Zugriffe erlaubt sind. Ein leerer Wert erlaubt CORS von jeder anfragenden Domain. Beispiel: \"https://example.com\"",
         "notify_fetch_limit": "Maximale Anzahl an Notify-Objekten, die beim Laden der \"Für mich freigegeben\" / \"Von mir freigegeben\" Ordner abgerufen wird. Empfohlene Werte zwischen 200-1000. 0 deaktiviert das Limit"
+      },
+      "CCMAIL":{
+        "mail.authtype": "Authentifikationstyp am Mail-Server. Aktuell entweder leer (= ohne Authentifizierung) oder \"tls\"",
+        "mail.smtp.server": "Adresse des Mailservers",
+        "mail.smtp.port": "Port des Mailservers",
+        "mail.smtp.username": "Nutzername für die Authentifizierung am Mailserver",
+        "mail.smtp.passwd": "Passwort für die AUthentifizierung am Mailserver",
+        "mail.smtp.from": "Angezeigte E-Mailadresse des Absenders. Empfohlen \"noreply@yourdomain.com\"",
+        "mail.admin": "Deprecated",
+        "mail.addReplyTo": "Wenn true (default), wird als Reply-To Adresse der jeweilige Nutzer, der das Event ausgelöst hat, angehangen"
       }
     },
     "UPDATE":{

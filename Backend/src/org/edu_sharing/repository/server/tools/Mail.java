@@ -32,12 +32,16 @@ import java.io.File;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.Map;
 import java.util.Properties;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import javax.mail.internet.InternetAddress;
 import javax.servlet.ServletContext;
+import javax.swing.table.TableCellRenderer;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.mail.EmailException;
@@ -132,7 +136,7 @@ public class Mail {
 		
 
 	}
-	private void sendMailHtml(ServletContext context, String sender, String senderName, String receiver, String subject, String message) throws EmailException {
+	private void sendMailHtml(ServletContext context, String sender, String senderName, String replyTo, String receiver, String subject, String message) throws EmailException {
 		logger.info("start mailing sender:" + sender + " receiver" + receiver + " message" + message);
 
 		
@@ -169,9 +173,9 @@ public class Mail {
 		try{
 			logger.info("start sending mail...");
 			logger.info("sender:" + sender);
-			logger.info("receiver:" + receiver);
-			logger.info("subject" + subject);
-			logger.info("message:" + message);
+			logger.debug("receiver:" + receiver);
+			logger.debug("subject" + subject);
+			logger.debug("message:" + message);
 			
 			if(senderName != null){
 				email.setFrom(sender, senderName);
@@ -181,7 +185,14 @@ public class Mail {
 			
 			email.addTo(receiver);
 			email.setSubject(subject);
-
+			if(replyTo != null &&
+					props.getOrDefault("mail.addReplyTo","true").toString().equalsIgnoreCase("true")) {
+				try {
+					email.setReplyTo(Arrays.asList(InternetAddress.parse(replyTo)));
+				}catch(Throwable t){
+					logger.info("Could not parse mail reply-to address: "+t.getMessage());
+				}
+			}
 			message = replaceImages(context,email,message);
 			
 			email.setHtmlMsg(message);
@@ -224,13 +235,13 @@ public class Mail {
 	public void sendMail(String senderName, String receiver, String subject, String message) throws EmailException {
 		sendMail(props.getProperty("mail.smtp.from", "no-reply@edu-sharing.com"),senderName, receiver, subject, message);
 	}
-	public void sendMailHtml(ServletContext context, String senderName, String receiver,String subject,String message,Map<String,String> replace) throws Exception {
+	public void sendMailHtml(ServletContext context, String senderName, String replyTo, String receiver,String subject,String message,Map<String,String> replace) throws Exception {
 		subject=replaceString(subject,replace);
 		message=replaceString(message,replace);
-		sendMailHtml(context,props.getProperty("mail.smtp.from", "no-reply@edu-sharing.com"),senderName, receiver, subject, message);
+		sendMailHtml(context,props.getProperty("mail.smtp.from", "no-reply@edu-sharing.com"),senderName, replyTo, receiver, subject, message);
 	}
 	public void sendMailHtml(ServletContext context,String receiver,String subject,String message,Map<String,String> replace) throws Exception {
-		sendMailHtml(context,props.getProperty("mail.smtp.from", "no-reply@edu-sharing.com"), receiver, subject, message,replace);
+		sendMailHtml(context,props.getProperty("mail.smtp.from", "no-reply@edu-sharing.com"), receiver, null, subject, message,replace);
 	}
 
 	private String replaceString(String string, Map<String, String> replace) throws Exception {
