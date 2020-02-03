@@ -46,7 +46,7 @@ import { DateHelper } from '../../core-ui-module/DateHelper';
 import { CordovaService } from '../../common/services/cordova.service';
 import { HttpClient } from '@angular/common/http';
 import { MainNavComponent } from '../../common/ui/main-nav/main-nav.component';
-import { MatMenuTrigger } from '@angular/material';
+import { MatMenuTrigger } from '@angular/material/menu';
 import { GlobalContainerComponent } from '../../common/ui/global-container/global-container.component';
 
 @Component({
@@ -62,7 +62,7 @@ import { GlobalContainerComponent } from '../../common/ui/global-container/globa
     ]
 })
 export class WorkspaceMainComponent implements EventListener {
-    @ViewChild('dropdownTrigger') dropdownTrigger: MatMenuTrigger;
+    @ViewChild('dropdownTrigger', {static: true}) dropdownTrigger: MatMenuTrigger;
     private static VALID_ROOTS = ['MY_FILES', 'SHARED_FILES', 'MY_SHARED_FILES', 'TO_ME_SHARED_FILES', 'WORKFLOW_RECEIVE', 'RECYCLE'];
     private static VALID_ROOTS_NODES = [RestConstants.USERHOME, '-shared_files-', '-my_shared_files-', '-to_me_shared_files-', '-workflow_receive-'];
     private isRootFolder: boolean;
@@ -103,7 +103,7 @@ export class WorkspaceMainComponent implements EventListener {
     public addNodesToCollection: Node[];
     public addNodesStream: Node[];
     public variantNode: Node;
-    @ViewChild('mainNav') mainNavRef: MainNavComponent;
+    @ViewChild('mainNav', {static: true}) mainNavRef: MainNavComponent;
     private connectorList: Connector[];
     private nodeOptions: OptionItem[] = [];
     private currentNode: Node;

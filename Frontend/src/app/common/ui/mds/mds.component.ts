@@ -22,7 +22,6 @@ import {
 import {CardJumpmark} from "../../../core-ui-module/components/card/card.component";
 import {MdsHelper} from "../../../core-module/rest/mds-helper";
 import {Observable} from 'rxjs';
-import {getClosureSafeProperty} from '@angular/core/src/util/property';
 declare var noUiSlider: any;
 
 @Component({
@@ -670,7 +669,7 @@ export class MdsComponent{
     // check if file extension changed and warn
     if(!force) {
         // for regular nodes
-        if(this.currentNodes[0] && this.currentNodes.length === 1 && this.currentNodes[0].type === RestConstants.CCM_TYPE_IO && !this.currentNodes[0].properties[RestConstants.CCM_PROP_IO_WWWURL] && !this.checkFileExtension(this.currentNodes[0].name,callback,values)){
+        if(this.currentNodes && this.currentNodes[0] && this.currentNodes.length === 1 && this.currentNodes[0].type === RestConstants.CCM_TYPE_IO && !this.currentNodes[0].properties[RestConstants.CCM_PROP_IO_WWWURL] && !this.checkFileExtension(this.currentNodes[0].name,callback,values)){
             return;
         }
         // for childobjects

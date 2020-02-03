@@ -1,6 +1,6 @@
 import {Component, Input, EventEmitter, Output, ViewChild, ElementRef, AfterViewInit} from '@angular/core';
 import {UIHelper} from "../../../../core-ui-module/ui-helper";
-import {MatSlideToggle} from "@angular/material";
+import { MatSlideToggle } from "@angular/material/slide-toggle";
 
 @Component({
   selector: 'workspace-share-choose-type',
@@ -14,7 +14,7 @@ export class WorkspaceShareChooseTypeComponent implements AfterViewInit {
     setTimeout(()=>UIHelper.setFocusOnDropdown(this.dropdownElement));
   }
   private _selected : string[];
-  @ViewChild('dropdown') dropdownElement : ElementRef;
+  @ViewChild('dropdown', {static: true}) dropdownElement : ElementRef;
   @Input() set selected (selected : string[]){
     this._selected=selected;
     setTimeout(()=>this.checkPublish(),10);

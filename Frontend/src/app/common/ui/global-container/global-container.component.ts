@@ -11,7 +11,7 @@ import {Component, ViewChild} from "@angular/core";
 export class GlobalContainerComponent{
   private static preloading=true;
   static instance:GlobalContainerComponent;
-  @ViewChild('rocketchat') rocketchat :any; // using any to bypass Circular Dependency issues
+  @ViewChild('rocketchat', {static: true}) rocketchat :any; // using any to bypass Circular Dependency issues
 
   constructor(){
     GlobalContainerComponent.instance=this;

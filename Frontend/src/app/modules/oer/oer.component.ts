@@ -33,7 +33,7 @@ import {GlobalContainerComponent} from "../../common/ui/global-container/global-
 
 
 export class OerComponent {
-  @ViewChild('mainNav') mainNavRef: MainNavComponent;
+  @ViewChild('mainNav', {static: true}) mainNavRef: MainNavComponent;
   public COLLECTIONS=0;
   public MATERIALS=1;
   public TOOLS=2;

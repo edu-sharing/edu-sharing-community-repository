@@ -1094,8 +1094,8 @@ public class MCAlfrescoAPIClient extends MCAlfrescoBaseClient {
 				HashMap<String, String> remoteAuthInfo = null;
 				if (remoteRepInfo.getAuthenticationwebservice() != null && !remoteRepInfo.getAuthenticationwebservice().equals("")) {
 					try {
-						AuthenticatorRemoteAppResult arar = arr.getAuthInfoForApp(authenticationInfo, remoteRepInfo);
-						remoteAuthInfo = arar.getAuthenticationInfo();
+                        AuthenticatorRemoteAppResult arar = arr.getAuthInfoForApp(authenticationInfo.get(CCConstants.AUTH_USERNAME), remoteRepInfo);
+                        remoteAuthInfo = arar.getAuthenticationInfo();
 					} catch (Throwable e) {
 						logger.error("It seems that repository id:" + remoteRepInfo.getAppId() + " is not reachable:" + e.getMessage()+". Check the configured value of "+ApplicationInfo.KEY_AUTHENTICATIONWEBSERVICE);
 						return null;
@@ -2318,7 +2318,7 @@ public class MCAlfrescoAPIClient extends MCAlfrescoBaseClient {
 	}
 	
 	/**
-	 * returns null when user not exsists
+	 * Throws NoSuchPersonException when user not exists
 	 */
 	public HashMap<String, String> getUserInfo(String userName) throws Exception {
 		

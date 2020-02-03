@@ -66,7 +66,7 @@ export class InfobarComponent{
    },10);
   }
 
-  @ViewChild('buttonElements') buttonElements : ElementRef;
+  @ViewChild('buttonElements', {static: true}) buttonElements : ElementRef;
 
   public click(btn : DialogButton){
     btn.callback();

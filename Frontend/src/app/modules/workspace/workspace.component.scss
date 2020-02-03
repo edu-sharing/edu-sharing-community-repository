@@ -119,11 +119,13 @@ user-quota{
   background-color: #fff;
 }
 .explorer{
-  position:absolute;
+  position:fixed;
   left:300px;
+  padding-top: 12px;
+  top: $mainnavHeight+$secondaryBarHeight;
   width:calc(100% - 300px);
-  height:100%;
-  padding-top:80px+$mainnavHeight;
+  height:calc(100% - #{$mainnavHeight+$secondaryBarHeight});
+  overflow-y: auto;
   transition: all $transitionNormal;
 }
 .explorerMetadata{
@@ -234,10 +236,11 @@ user-quota{
   .explorer{
     left:0;
     width:100%;
+    height:calc(100% - #{$mainnavHeight+$secondaryBarHeight+$mobileTabNavHeight});
   }
   :host /deep/{
     workspace-explorer .list{
-      padding-bottom:80px + $mobileTabNavHeight;
+      padding-bottom:72px;
     }
   }
 }

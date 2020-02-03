@@ -26,7 +26,7 @@ import {GlobalContainerComponent} from "../../common/ui/global-container/global-
   ]
 })
 export class PermissionsMainComponent {
-  @ViewChild('mainNav') mainNavRef: MainNavComponent;
+  @ViewChild('mainNav', {static: true}) mainNavRef: MainNavComponent;
   public tab : number;
   public searchQuery: string;
   private selected: Organization[];

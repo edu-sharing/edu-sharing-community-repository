@@ -12,14 +12,6 @@ import {FrameEventsService} from '../../core-module/core.module';
 import {Title} from '@angular/platform-browser';
 import {UIHelper} from '../../core-ui-module/ui-helper';
 import {SessionStorageService} from '../../core-module/core.module';
-import {Scope} from '@angular/core/src/profile/wtf_impl';
-import {UIConstants} from '../../core-module/ui/ui-constants';
-import {Helper} from '../../core-module/rest/helper';
-import {RestHelper} from '../../core-module/core.module';
-import {PlatformLocation} from '@angular/common';
-
-import {CordovaService} from "../../common/services/cordova.service";
-import {InputPasswordComponent} from "../../core-ui-module/components/input-password/input-password.component";
 import {RestNodeService} from '../../core-module/core.module';
 import {NodeHelper} from '../../core-ui-module/node-helper';
 import {TemporaryStorageService} from '../../core-module/core.module';

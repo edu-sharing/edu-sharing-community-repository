@@ -19,7 +19,7 @@ import {IamUser, RestConstants, RestHelper, RestIamService, User} from "../../..
 
 
 export class UserProfileComponent{
-  @ViewChild('form') form : ElementRef;
+  @ViewChild('form', {static: true}) form : ElementRef;
   public user: User;
   public changePassword = false;
   public oldPassword="";

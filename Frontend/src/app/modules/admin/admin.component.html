@@ -198,7 +198,12 @@
         <h6 class="mat-heading-6">
             {{type}} ({{getApplications(type).length}})
         </h6>
-            <button mat-icon-button color="primary"><i icon [iconId]="applicationsOpen[type] ? 'keyboard_arrow_up' : 'keyboard_arrow_down'" (click)="applicationsOpen[type]=!applicationsOpen[type]"></i></button>
+            <button mat-icon-button color="primary">
+                <i icon
+                   [iconId]="applicationsOpen[type] ? 'keyboard_arrow_up' : 'keyboard_arrow_down'"
+                   (click)="applicationsOpen[type]=!applicationsOpen[type]">
+                </i>
+            </button>
         </div>
         <div class="app-list" *ngIf="applicationsOpen[type]" [@openOverlay]="applicationsOpen[type]">
             <div class="header">

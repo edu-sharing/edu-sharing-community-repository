@@ -1,7 +1,5 @@
 import {Injectable, Injector} from '@angular/core';
-import {setTimeout} from 'core-js/library/web/timers';
 import {Observable, Observer} from 'rxjs';
-import {Headers, Http, Response} from '@angular/http';
 
 import {Location} from '@angular/common';
 import {Router} from '@angular/router';

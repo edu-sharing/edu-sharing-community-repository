@@ -130,7 +130,7 @@ public class MetadataTemplateRenderer {
 			}
 			StringBuffer widgetHtml=new StringBuffer("");
 			if(renderingMode.equals(RenderingMode.HTML)) {
-				widgetHtml.append("<div class='mdsWidget");
+				widgetHtml.append("<div data-widget-id='\"+widget.getId()+\"' class='mdsWidget");
 				if (widget.getType() != null) {
 					widgetHtml.append(" mdsWidget_").append(widget.getType());
 				}
@@ -161,6 +161,7 @@ public class MetadataTemplateRenderer {
 			}
 			else {
 				for(String value : values){
+					String rawValue = value;
 					if(widget.getId().equals("license")){
 						wasEmpty = false;
 						String licenseName=properties.containsKey(CCConstants.getValidLocalName(CCConstants.CCM_PROP_IO_COMMONLICENSE_KEY)) ?
@@ -250,7 +251,7 @@ public class MetadataTemplateRenderer {
 						}
 					}
 					if(renderingMode.equals(RenderingMode.HTML)){
-						widgetHtml.append("<div class='mdsValue'>");
+						widgetHtml.append("<div class='mdsValue' data-value-key='" + rawValue + "'>");
 						if(widget.getIcon()!=null){
 							widgetHtml.append(insertIcon(widget.getIcon()));
 						}
