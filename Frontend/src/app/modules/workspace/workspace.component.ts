@@ -130,6 +130,7 @@ export class WorkspaceMainComponent implements EventListener {
     private viewType = 0;
     private infoToggle: OptionItem;
     private reurlDirectories: boolean;
+    private reorderDialog: boolean;
     @HostListener('window:beforeunload', ['$event'])
     beforeunloadHandler(event: any) {
         if (this.isSafe) {
@@ -912,10 +913,13 @@ export class WorkspaceMainComponent implements EventListener {
                 (load: boolean) => this.globalProgress = load
             );
         }
-        if (!fromList && this.root !== 'RECYCLE') {
+        if (!fromList && this.root !== 'RECYCLE' && !(nodes && nodes.length)) {
             this.viewToggle = new OptionItem('', this.viewType === 0 ? 'view_module' : 'list', (node: Node) => this.toggleView());
             this.viewToggle.isToggle = true;
             options.push(this.viewToggle);
+            let reorder = new OptionItem('', 'settings', (node: Node) => this.reorderDialog = true);
+            reorder.isToggle = true;
+            options.push(reorder);
         }
         return options;
     }

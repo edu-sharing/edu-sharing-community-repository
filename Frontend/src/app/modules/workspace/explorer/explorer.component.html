@@ -13,6 +13,8 @@
   [reorderColumns]="true"
   [preventKeyevents]="preventKeyevents"
   [totalCount]="totalCount"
+  [reorderDialog]="reorderDialog"
+  (reorderDialogChange)="reorderDialogChange.emit($event)"
   [sortBy]="sortBy"
   [dragDrop]="true"
   [selectedNodes]="selection"

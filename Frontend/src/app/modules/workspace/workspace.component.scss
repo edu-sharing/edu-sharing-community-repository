@@ -119,7 +119,7 @@ user-quota{
   background-color: #fff;
 }
 .explorer{
-  position:fixed;
+  position:absolute;
   left:300px;
   top: $mainnavHeight+$secondaryBarHeight;
   width:calc(100% - 300px);
