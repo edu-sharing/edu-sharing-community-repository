@@ -49,9 +49,6 @@
         <div class="removeColumn" *ngIf="currentDragColumn && reorderColumns"
              (dragover)="allowDeleteColumn($event)" (drop)="deleteColumn($event)"
         ><i icon iconId="delete"></i></div>
-        <button mat-icon-button class="editColumns clickable" *ngIf="!currentDragColumn && reorderColumns && columnsVisible && columnsVisible.length"
-             (click)="reorderDialog=true"
-        ><i icon iconId="settings"></i></button>
         </div>
     </div>
     <div class="list-container" [class.cardContainer]="viewType==1 || viewType==2" *ngIf="!reorderDialog">

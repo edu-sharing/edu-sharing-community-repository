@@ -308,6 +308,11 @@ export class ListTableComponent implements EventListener {
     @Input() canDelete: () => boolean;
 
     /**
+     * control the visiblity of the reorder dialog (two-way binding)
+     */
+     @Input() reorderDialog = false;
+     @Output() reorderDialogChange = new EventEmitter<boolean>();
+    /**
      * Can an element be dropped on the element?
      *
      * Called with same parameters as onDrop event.
@@ -400,7 +405,6 @@ export class ListTableComponent implements EventListener {
     dropdownTop: string;
     id: number;
     reorderButtons: DialogButton[];
-    reorderDialog = false;
 
     private _hasCheckbox: boolean;
     private _nodes: any[];
@@ -623,6 +627,7 @@ export class ListTableComponent implements EventListener {
 
     private closeReorder(save: boolean): void {
         this.reorderDialog = false;
+        this.reorderDialogChange.emit(false);
         if (save) {
             this.columns = this.columnsAll;
             this.columnsChanged.emit(this.columnsAll);
