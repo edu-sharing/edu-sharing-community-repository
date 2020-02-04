@@ -130,7 +130,7 @@ $badgeWidth:250px;
 }
 .editColumns{
   position:absolute;
-  top:-10px;
+  top:0;
   right:30px;
   max-width:0;
   padding:0!important;
@@ -288,17 +288,22 @@ $badgeWidth:250px;
 .row .column,
 .heading > div
 {
-  padding:0px 5px;
+  padding:0 5px;
   vertical-align: middle;
+  align-self: flex-end;
   color:$textLight;
+}
+.heading .checkbox{
+  align-self: center;
 }
 .headingGroup {
   position: relative;
   display: flex;
+  background-color: $backgroundColor;
   .totalCount {
     position: absolute;
     left: 56px;
-    top: 0;
+    top: 6px + 6px;
     color:$textLight;
   }
   .sortMenu{
@@ -404,7 +409,8 @@ $badgeWidth:250px;
 .heading {
   display: flex;
   flex-direction: row;
-  height: 30px;
+  padding-top: 6px;
+  height: $listHeadingHeight;
 }
 .tableList {
 .row{

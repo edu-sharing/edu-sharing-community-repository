@@ -23,7 +23,8 @@
         </div>
     </div>
 </card>
-<div [className]="'list '+listClass" infinite-scroll [scrollWindow]="scrollWindow" (scrolled)="scroll(false)">
+<div [className]="listClass + ' list list-type-'+(viewType == 0 ? 'table' : 'card')"
+     infinite-scroll [scrollWindow]="scrollWindow" (scrolled)="scroll(false)">
     <div class="headingGroup" *ngIf="hasHeading && viewType==0">
         <div class="totalCount" *ngIf="totalCount && hasCheckbox && !isLoading">({{selectedNodes && selectedNodes.length ? selectedNodes.length+'/'+totalCount : totalCount}})</div>
 
@@ -53,7 +54,7 @@
         ><i icon iconId="settings"></i></button>
         </div>
     </div>
-    <div [class.cardContainer]="viewType==1 || viewType==2" *ngIf="!reorderDialog">
+    <div class="list-container" [class.cardContainer]="viewType==1 || viewType==2" *ngIf="!reorderDialog">
         <div *ngIf="addElement" class="addElement clickable" #addElementRef
              tabindex="0"
              (keyup.enter)="addElementClicked()"
