@@ -593,7 +593,7 @@ public class NodeDao {
 		try {
 			org.alfresco.service.cmr.repository.NodeRef newNode = nodeService.copyNode(sourceId, nodeId, withChildren);
 			permissionService.createNotifyObject(newNode.getId(), new AuthenticationToolAPI().getCurrentUser(), CCConstants.CCM_VALUE_NOTIFY_ACTION_PERMISSION_ADD);
-			return new NodeDao(repoDao, sourceId, Filter.createShowAllFilter());
+			return new NodeDao(repoDao, newNode.getId(), Filter.createShowAllFilter());
 			
 		} catch (Throwable t) {
 			
