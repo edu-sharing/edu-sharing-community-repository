@@ -1411,7 +1411,9 @@ export class CollectionsMainComponent {
             this.collectionContent,
         );
         this.setOptionsCollection();
-        this.mainNavRef.refreshBanner();
+        if(this.mainNavRef) {
+            this.mainNavRef.refreshBanner();
+        }
         if (
             this.getCollectionId() == RestConstants.ROOT &&
             this.isAllowedToEditCollection()

@@ -27,19 +27,19 @@
   z-index: 122;
 }
 
-$treeWidth:300px;
+
 $quotaHeight:60px;
 .tree{
-  min-width:$treeWidth;
-  max-width:$treeWidth;
+  min-width:$workspaceTreeWidth;
+  max-width:$workspaceTreeWidth;
   top:$workspaceBreadcrumbsHeight+$mainnavHeight;
   position:fixed;
   height:calc(100% - #{$workspaceBreadcrumbsHeight} - #{$mainnavHeight});
   z-index: 2;
   background: $workspaceTreeBackground;
   workspace-tree{
-    min-width:$treeWidth;
-    max-width:$treeWidth;
+    min-width:$workspaceTreeWidth;
+    max-width:$workspaceTreeWidth;
     top:$workspaceBreadcrumbsHeight+$mainnavHeight;
     position:fixed;
     height:calc(100% - #{$workspaceBreadcrumbsHeight} - #{$mainnavHeight});
@@ -52,7 +52,7 @@ $quotaHeight:60px;
 
 user-quota{
   position: absolute;
-  width: $treeWidth;
+  width: $workspaceTreeWidth;
   height: $quotaHeight;
   background: $workspaceTreeBackground;
   bottom: 0;
@@ -121,13 +121,12 @@ user-quota{
 .explorer{
   position:fixed;
   left:300px;
-  padding-top: 12px;
   top: $mainnavHeight+$secondaryBarHeight;
   width:calc(100% - 300px);
   height:calc(100% - #{$mainnavHeight+$secondaryBarHeight});
-  overflow-y: auto;
   transition: all $transitionNormal;
 }
+
 .explorerMetadata{
   width:calc(100% - 600px);
 }
@@ -189,6 +188,26 @@ user-quota{
   }
 }
 :host ::ng-deep{
+  listTable .list{
+    height:calc(100vh - #{$mainnavHeight+$secondaryBarHeight});
+    overflow-y: auto;
+    &.list-type-card{
+      padding: 20px 0;
+    }
+  }
+  @media not screen and (max-width: ($mobileTabSwitchWidth)) {
+    listTable .list-type-table{
+      position: relative;
+      top: $listHeadingHeight;
+      height:calc(100vh - #{$mainnavHeight+$secondaryBarHeight+$listHeadingHeight});
+      .headingGroup {
+        position: fixed !important;
+        z-index: 1;
+        top: $mainnavHeight + $workspaceBreadcrumbsHeight;
+        width: calc(100% - #{$workspaceTreeWidth});
+      }
+    }
+  }
   .breadcrumbFrame .breadcrumb {
     position: relative;
     top: 5px;
