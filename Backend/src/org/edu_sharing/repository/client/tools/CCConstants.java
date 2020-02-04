@@ -1655,7 +1655,7 @@ public class CCConstants {
 
 	public static ArrayList<String> getPermissionList(){
 		if(permission == null){
-			permission = new ArrayList();
+			permission = new ArrayList<>();
 			permission.add(PERMISSION_ALL);
 			permission.add(PERMISSION_READ);
 			permission.add(PERMISSION_WRITE);
@@ -1675,27 +1675,20 @@ public class CCConstants {
 		return permission;
 	}
 
-	private static ArrayList minimalPermissions = null;
-	public static ArrayList getMinimalPermissions(){
-		if(minimalPermissions == null){
-			minimalPermissions = new ArrayList();
-			minimalPermissions.add(PERMISSION_CONSUMER);
-			minimalPermissions.add(PERMISSION_COLLABORATOR);
-			minimalPermissions.add(PERMISSION_COORDINATOR);
+	/**
+	 * Permissions allowed if the node was opened via usage (lms) or signature
+	 * @return
+	 */
+	public static ArrayList<String> getUsagePermissions(){
+		if(permission == null){
+			permission = new ArrayList<>();
+			permission.add(PERMISSION_READ);
+			permission.add(PERMISSION_READ_PREVIEW);
+			permission.add(PERMISSION_READ_ALL);
+			permission.add(PERMISSION_CONSUMER);
 		}
-		return minimalPermissions;
+		return permission;
 	}
-
-	private static ArrayList licencePermissions = null;
-	public static ArrayList getLicencePermissions(){
-		if(licencePermissions == null){
-			licencePermissions = new ArrayList();
-			licencePermissions.add(PERMISSION_READ);
-			licencePermissions.add(PERMISSION_CC_PUBLISH);
-		}
-		return licencePermissions;
-	}
-
 
 	//AuthorityTypeKey
 	public static final String PERM_AUTHORITYTYPE_KEY = "AUTHORITYTYPE_KEY";
