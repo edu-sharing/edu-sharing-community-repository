@@ -1751,6 +1751,7 @@ public class CCConstants {
 			permission.add(PERMISSION_READ_PREVIEW);
 			permission.add(PERMISSION_READ_ALL);
 			permission.add(PERMISSION_CONSUMER);
+			permission.add(PERMISSION_COMMENT);
 		}
 		return permission;
 	}
