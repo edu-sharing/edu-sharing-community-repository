@@ -37,7 +37,7 @@ export class ModalDialogToastComponent{
       this.messageParameters=data.translation;
       this.isCancelable=data.isCancelable;
       this.isHigh=data.isHigh;
-      this.buttons=data.buttons;
+      this.buttons=data.buttons ? data.buttons.reverse() : null;
       this.onCancel=data.onCancel;
       this.visible=this.title!=null;
     });
