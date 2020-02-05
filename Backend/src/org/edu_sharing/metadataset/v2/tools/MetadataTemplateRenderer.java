@@ -160,6 +160,27 @@ public class MetadataTemplateRenderer {
 						else{
 							value+="<div class='licenseDescription'>" +getLicenseDescription(licenseName) +"</div>";
 						}
+						if(properties.get(CCConstants.getValidLocalName(CCConstants.CCM_PROP_IO_LICENSE_TITLE_OF_WORK))!=null){
+							value+="<div class='licenseTitleOfWork'>";
+							value+="<div class='mdsWidgetCaptionChild'>"+
+									I18nAngular.getTranslationAngular("common","LICENSE.TITLE_OF_WORK")
+									+"</div>";
+							boolean source = properties.get(CCConstants.getValidLocalName(CCConstants.CCM_PROP_IO_LICENSE_SOURCE_URL))!=null;
+							if(source){
+								value+="<a href='"+properties.get(CCConstants.getValidLocalName(CCConstants.CCM_PROP_IO_LICENSE_SOURCE_URL))[0]+"'>";
+							}
+							value+=properties.get(CCConstants.getValidLocalName(CCConstants.CCM_PROP_IO_LICENSE_TITLE_OF_WORK))[0];
+							if(source){
+								value+="</a>";
+							}
+							if(properties.get(CCConstants.getValidLocalName(CCConstants.CCM_PROP_IO_LICENSE_PROFILE_URL)) != null){
+								value+=" (<a href='"+
+										properties.get(CCConstants.getValidLocalName(CCConstants.CCM_PROP_IO_LICENSE_PROFILE_URL))+"'>"+
+										I18nAngular.getTranslationAngular("common","LICENSE.LINK_AUTHOR")
+										+"</a>)";
+							}
+							value+="</div>";
+						}
 
 					}
 					if(value==null || value.trim().isEmpty())

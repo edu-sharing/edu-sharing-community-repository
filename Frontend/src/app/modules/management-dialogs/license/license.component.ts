@@ -450,16 +450,26 @@ export class WorkspaceLicenseComponent  {
         if(!this.contactCheckbox.nativeElement.indeterminate)
             prop[RestConstants.CCM_PROP_QUESTIONSALLOWED]=[this.contact];
         if(this.type=='CC_BY'){
-            if(this.ccTitleOfWork)
-                prop[RestConstants.CCM_PROP_LICENSE_TITLE_OF_WORK]=[this.ccTitleOfWork];
-            if(this.ccSourceUrl)
-                prop[RestConstants.CCM_PROP_LICENSE_SOURCE_URL]=[this.ccSourceUrl];
-            if(this.ccProfileUrl)
-                prop[RestConstants.CCM_PROP_LICENSE_PROFILE_URL]=[this.ccProfileUrl];
-            if(this.ccVersion)
-                prop[RestConstants.CCM_PROP_LICENSE_CC_VERSION]=[this.ccVersion];
-            if(this.ccLocale)
-                prop[RestConstants.CCM_PROP_LICENSE_CC_LOCALE]=[this.ccLocale];
+            prop[RestConstants.CCM_PROP_LICENSE_TITLE_OF_WORK]=[];
+            prop[RestConstants.CCM_PROP_LICENSE_SOURCE_URL]=[];
+            prop[RestConstants.CCM_PROP_LICENSE_PROFILE_URL]=[];
+            prop[RestConstants.CCM_PROP_LICENSE_CC_VERSION]=[];
+            prop[RestConstants.CCM_PROP_LICENSE_CC_LOCALE]=[];
+            if (this.ccTitleOfWork) {
+                prop[RestConstants.CCM_PROP_LICENSE_TITLE_OF_WORK] = [this.ccTitleOfWork];
+            }
+            if (this.ccSourceUrl) {
+                prop[RestConstants.CCM_PROP_LICENSE_SOURCE_URL] = [this.ccSourceUrl];
+            }
+            if (this.ccProfileUrl) {
+                prop[RestConstants.CCM_PROP_LICENSE_PROFILE_URL] = [this.ccProfileUrl];
+            }
+            if (this.ccVersion) {
+                prop[RestConstants.CCM_PROP_LICENSE_CC_VERSION] = [this.ccVersion];
+            }
+            if (this.ccLocale) {
+                prop[RestConstants.CCM_PROP_LICENSE_CC_LOCALE] = [this.ccLocale];
+            }
         }
         prop[RestConstants.CCM_PROP_AUTHOR_FREETEXT]=[this.authorFreetext];
 
