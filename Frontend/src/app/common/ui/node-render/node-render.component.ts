@@ -490,7 +490,7 @@ export class NodeRenderComponent implements EventListener{
                 if (this._node.type != RestConstants.CCM_TYPE_REMOTEOBJECT && ConfigurationHelper.hasMenuButton(this.config, "workspace"))
                     options.push(openFolder);
             }
-            let edit = new OptionItem('WORKSPACE.OPTION.EDIT', 'info_outline', () => this.nodeMetadata = this._node);
+            let edit = new OptionItem('WORKSPACE.OPTION.EDIT', 'edit', () => this.nodeMetadata = this._node);
             edit.isEnabled = this._node.access.indexOf(RestConstants.ACCESS_WRITE) != -1 && this._node.type != RestConstants.CCM_TYPE_REMOTEOBJECT;
             if (this.version == RestConstants.NODE_VERSION_CURRENT)
                 options.push(edit);
