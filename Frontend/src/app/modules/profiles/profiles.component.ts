@@ -176,6 +176,7 @@ export class ProfilesComponent {
       this.iamService.setUserAvatar(this.avatarFile,this.userEdit.authorityName).subscribe(()=>{
         this.edit=false;
         this.editAbout=false;
+        this.toast.toast('PROFILE_UPDATED');
         this.loadUser(this.userEdit.authorityName);
       },(error)=>{
         this.toast.error(error);
@@ -185,6 +186,7 @@ export class ProfilesComponent {
       this.globalProgress=false;
       this.edit=false;
       this.editAbout=false;
+      this.toast.toast('PROFILE_UPDATED');
       this.loadUser(this.userEdit.authorityName);
     }
   }
