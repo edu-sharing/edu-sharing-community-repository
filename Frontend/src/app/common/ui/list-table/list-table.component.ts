@@ -289,7 +289,7 @@ export class ListTableComponent implements EventListener{
    *     }
    * @type {EventEmitter}
    */
-  @Output() clickRow = new EventEmitter();
+  @Output() clickRow = new EventEmitter<{node: any, source: string}>();
   /**
    * Called when the user double clicks on a row, emits an object from the list (usually a node, but depends how you filled it)
    * @type {EventEmitter}

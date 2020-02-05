@@ -101,7 +101,7 @@
                [hasHeading]="false"
                [hasIcon]="true"
                [isClickable]="true"
-               (clickRow)="displayCollection($event)"
+               (clickRow)="displayCollection($event.node)"
     ></listTable>
     <div class="description forkedParend" *ngIf="forkedParent">{{'WORKSPACE.METADATA.FORKED_PARENT' | translate}}</div>
     <listTable *ngIf="forkedParent"
@@ -111,7 +111,7 @@
                [hasHeading]="false"
                [hasIcon]="true"
                [isClickable]="true"
-               (clickRow)="displayNode($event)"
+               (clickRow)="displayNode($event.node)"
     ></listTable>
     <div class="description forkedParend" *ngIf="forkedChilds && forkedChilds.length">{{'WORKSPACE.METADATA.FORKED_CHILDS' | translate:{count:forkedChilds.length} }}</div>
     <listTable *ngIf="forkedChilds && forkedChilds.length"
@@ -121,7 +121,7 @@
                [hasHeading]="false"
                [hasIcon]="true"
                [isClickable]="true"
-               (clickRow)="displayNode($event)"
+               (clickRow)="displayNode($event.node)"
     ></listTable>
 
 
