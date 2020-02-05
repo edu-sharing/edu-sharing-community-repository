@@ -419,8 +419,7 @@ export class NodeRenderComponent implements EventListener{
     }
   private addComments(){
       let data={
-          node:this._node,
-          readOnly:false
+          node:this._node
       };
       UIHelper.injectAngularComponent(this.componentFactoryResolver,this.viewContainerRef,CommentsListComponent,document.getElementsByTagName("comments")[0],data);
   }
@@ -527,9 +526,6 @@ export class NodeRenderComponent implements EventListener{
             share.isSeperate = true;
             options.push(share);
         }
-        let shareLink = this.actionbar.createOptionIfPossible('SHARE_LINK',[this._node],(node: Node) => this.nodeShareLink=this._node);
-        if (shareLink && !this.isSafe)
-            options.push(shareLink);
         let workflow = this.actionbar.createOptionIfPossible('WORKFLOW', [this._node], (node: Node) => this.nodeWorkflow = this._node);
         if (workflow) {
             options.push(workflow);
