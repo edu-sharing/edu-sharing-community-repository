@@ -26,6 +26,7 @@ import {
     EventEmitter,
     Type,
     ViewContainerRef,
+    ComponentRef,
 } from '@angular/core';
 import { RestCollectionService } from '../core-module/rest/services/rest-collection.service';
 import { NodeHelper } from './node-helper';
@@ -827,12 +828,12 @@ export class UIHelper {
         targetElement: Element,
         bindings: any = null,
         delay = 0,
-    ) {
-        if (targetElement == null) return;
+    ): ComponentRef<T> {
+        if (targetElement == null) return null;
         let factory = componentFactoryResolver.resolveComponentFactory(
             componentName,
         );
-        let component = viewContainerRef.createComponent(factory);
+        let component: ComponentRef<T> = viewContainerRef.createComponent(factory);
         if (bindings) {
             for (let key in bindings) {
                 if (bindings[key] instanceof Function) {
@@ -856,6 +857,7 @@ export class UIHelper {
         setTimeout(() => {
             domElem.style.display = null;
         }, delay);
+        return component;
     }
 
     /**
