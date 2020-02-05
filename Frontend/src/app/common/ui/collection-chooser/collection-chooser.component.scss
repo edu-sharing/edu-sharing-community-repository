@@ -8,6 +8,7 @@
   font-size: 110%;
 }
 .close{
+  @include clickable();
   &:focus{
     @include focusShadow();
   }
