@@ -107,6 +107,9 @@
       height: $titleHeight;
       padding-top: 15px;
       position: relative;
+      .mat-card-header-text {
+        width: calc(100% - 32px);
+      }
       .cancel {
         position: absolute;
         right: 0;
