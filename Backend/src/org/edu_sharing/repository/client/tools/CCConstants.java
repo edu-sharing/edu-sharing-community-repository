@@ -318,15 +318,15 @@ public class CCConstants {
 	public final static String CCM_PROP_PERSON_NODE_LISTS = "{http://www.campuscontent.de/model/1.0}userNodeLists";
 
 	public final static String CCM_PROP_PH_MODIFIED = "{http://www.campuscontent.de/model/1.0}ph_modified";
-	
+
 	public final static String CCM_PROP_PH_HISTORY = "{http://www.campuscontent.de/model/1.0}ph_history";
 
 	public final static String CCM_PROP_PH_INVITED = "{http://www.campuscontent.de/model/1.0}ph_invited";
 
 	public final static String CCM_PROP_PH_USERS = "{http://www.campuscontent.de/model/1.0}ph_users";
-	
+
 	public final static String CCM_PROP_PH_ACTION = "{http://www.campuscontent.de/model/1.0}ph_action";
-	
+
 	/**
 	 * custom edu-sharing person attribute
 	 */
@@ -396,10 +396,10 @@ public class CCConstants {
 	public final static String CCM_ASPECT_TOOL_DEFINITION = "{http://www.campuscontent.de/model/1.0}tool_definition";
 
 	public final static String CCM_ASPECT_TOOL_OBJECT = "{http://www.campuscontent.de/model/1.0}tool_object";
-	
+
 	public final static String CCM_ASPECT_PERMISSION_HISTORY = "{http://www.campuscontent.de/model/1.0}permission_history";
-	
-	
+
+
 	public final static String CCM_PROP_TOOL_OBJECT_TOOLINSTANCEREF = "{http://www.campuscontent.de/model/1.0}tool_instance_ref";
 
 	public final static String CCM_PROP_IO_REF_TITLE = "{http://www.campuscontent.de/model/1.0}ref_title";
@@ -1740,27 +1740,20 @@ public class CCConstants {
 		return permission;
 	}
 
-	private static ArrayList minimalPermissions = null;
-	public static ArrayList getMinimalPermissions(){
-		if(minimalPermissions == null){
-			minimalPermissions = new ArrayList<>();
-			minimalPermissions.add(PERMISSION_CONSUMER);
-			minimalPermissions.add(PERMISSION_COLLABORATOR);
-			minimalPermissions.add(PERMISSION_COORDINATOR);
+	/**
+	 * Permissions allowed if the node was opened via usage (lms) or signature
+	 * @return
+	 */
+	public static ArrayList<String> getUsagePermissions(){
+		if(permission == null){
+			permission = new ArrayList<>();
+			permission.add(PERMISSION_READ);
+			permission.add(PERMISSION_READ_PREVIEW);
+			permission.add(PERMISSION_READ_ALL);
+			permission.add(PERMISSION_CONSUMER);
 		}
-		return minimalPermissions;
+		return permission;
 	}
-
-	private static ArrayList licencePermissions = null;
-	public static ArrayList getLicencePermissions(){
-		if(licencePermissions == null){
-			licencePermissions = new ArrayList();
-			licencePermissions.add(PERMISSION_READ);
-			licencePermissions.add(PERMISSION_CC_PUBLISH);
-		}
-		return licencePermissions;
-	}
-
 
 	//AuthorityTypeKey
 	public static final String PERM_AUTHORITYTYPE_KEY = "AUTHORITYTYPE_KEY";
