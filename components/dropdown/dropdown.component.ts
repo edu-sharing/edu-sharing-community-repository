@@ -16,7 +16,7 @@ import { MatMenu, MatMenuTrigger } from '@angular/material/menu';
  * The dropdown is one base component of the action bar (showing more actions), but can also be used standalone
  */
 export class DropdownComponent{
-  @ViewChild('dropdown', {static: false}) menu : MatMenu;
+  @ViewChild('dropdown', {static: true}) menu : MatMenu;
   _options: OptionItem[];
   @Input() position = 'left';
   @Input() set options(options:OptionItem[]) {
