@@ -37,6 +37,7 @@ import {
 } from '../../../core-module/core.module';
 import {BridgeService} from "../../../core-bridge-module/bridge.service";
 import {GlobalContainerComponent} from "../global-container/global-container.component";
+import {MatButton} from '@angular/material/button';
 
 @Component({
     selector: 'main-nav',
@@ -85,7 +86,7 @@ export class MainNavComponent implements AfterViewInit{
     @ViewChild('sidebar', {static: false}) sidebar:ElementRef;
     @ViewChild('topbar', {static: false}) topbar:ElementRef;
     @ViewChild('nodeStoreRef', {static: false}) nodeStoreRef:ElementRef;
-    @ViewChild('scrolltotop', {static: false}) scrolltotop:ElementRef;
+    @ViewChild('scrolltotop', {static: false}) scrolltotop:MatButton;
     @ViewChild('userRef', {static: false}) userRef:ElementRef;
     @ViewChild('tabNav', {static: false}) tabNav:ElementRef;
     dialogTitle : string;
@@ -263,11 +264,11 @@ export class MainNavComponent implements AfterViewInit{
                 element.style.top = Number.parseInt(this.scrollInitialPositions[element.getAttribute(MainNavComponent.ID_ATTRIBUTE_NAME)])+y + 'px';
             }
         }
-        if(this.scrolltotop && this.scrolltotop.nativeElement) {
+        if(this.scrolltotop && this.scrolltotop._elementRef.nativeElement) {
             if ((window.pageYOffset || document.documentElement.scrollTop) > 400) {
-                this.scrolltotop.nativeElement.style.display = 'flex';
+                this.scrolltotop._elementRef.nativeElement.style.display = 'flex';
             } else {
-                this.scrolltotop.nativeElement.style.display = 'none';
+                this.scrolltotop._elementRef.nativeElement.style.display = 'none';
             }
         }
     }

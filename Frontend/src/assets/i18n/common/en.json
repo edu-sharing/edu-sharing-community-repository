@@ -25,6 +25,7 @@
   "SHOW_MORE": "show",
   "MORE_SELECTBOX":"more elements",
   "HIDE_MORE": "hide",
+  "GO_TO_TOP": "top",
   "FIELD_REQUIRED" : "Required",
   "FIELD_VALIDATION_ERROR_INTEGER" : "Use integer numbers",
   "EXTENSION_NOT_MATCH":"Change file extension?",

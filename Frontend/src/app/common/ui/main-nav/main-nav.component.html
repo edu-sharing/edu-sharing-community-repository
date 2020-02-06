@@ -135,7 +135,8 @@
             </div>
         </div>
     </div>
-    <div #scrolltotop class="btn" id="scrollToTop" tabindex="0" (click)="scrollToTop()" (keyup.enter)="scrollToTop()"><i icon iconId="keyboard_arrow_up" aria="true"></i></div>
+    <button mat-raised-button color="primary" #scrolltotop id="scrollToTop" tabindex="0" (click)="scrollToTop()" (keyup.enter)="scrollToTop()">
+        <i icon iconId="arrow_upward"></i> {{'GO_TO_TOP' | translate}}</button>
     <div class="tab-nav" #tabNav *ngIf="canOpen && _currentScope!='render'" [style.bottom]="-navbarOffsetY+'px'">
         <div class="mobile-move-bottom">
             <div *ngFor="let button of sidebarButtons" [class.selected]="_currentScope==button.scope"

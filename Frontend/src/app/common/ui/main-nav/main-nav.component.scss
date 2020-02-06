@@ -356,14 +356,20 @@ $licenseInfoHeight:40px;
 
 #scrollToTop {
   position: fixed;
-  bottom: 20px;
-  right: 20px;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
   z-index: 5;
-  padding: 1px 10px;
+  padding: 0 17px;
+  border-radius: 50px 50px 0 0;
+  font-size: $fontSizeXSmall;
+  background-color: $primary;
+  color: $textOnPrimary;
+  text-transform: uppercase;
   display: none;
   i {
-    font-size: 25px;
-    margin-right: 0;
+    font-size: 16px;
+    margin: 0 -5px 0 -10px;
   }
 }
 .topBar{
@@ -393,13 +399,10 @@ $licenseInfoHeight:40px;
     width: calc(100% - 80px);
   }
 }
-@media screen and (max-width: ($mobileWidth+$mobileStage*2)) {
+@media screen and (max-width: ($mobileTabSwitchWidth)){
   #scrollToTop {
     display: none !important;
   }
-}
-@media screen and (max-width: ($mobileTabSwitchWidth)){
-
   .scopeNameMobile{
     display: flex;
     font-weight: bold;
@@ -495,9 +498,6 @@ $licenseInfoHeight:40px;
   }
 }
 @media screen and (max-width: ($mobileWidth+$mobileStage*1)){
-  #scrollToTop {
-    display: none!important;
-  }
   .topBar span,
   .topBar .user button{
     display:none;
