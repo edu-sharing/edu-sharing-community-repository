@@ -342,7 +342,7 @@ export class ListTableComponent implements EventListener {
      */
     @Output() clickRow = new EventEmitter<{
         /** Clicked object from list, depends on what you filled in. */
-        node: Node;
+        node: Node|any;
         /** Source click information, may null, e.g. 'preview', 'comments', 'dropdown' */
         source: string;
     }>();
