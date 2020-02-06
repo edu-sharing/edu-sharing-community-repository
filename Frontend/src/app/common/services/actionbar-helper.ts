@@ -88,7 +88,7 @@ export class ActionbarHelperService{
         };
     }
     if (type === 'QR_CODE'){
-        option = new OptionItem('WORKSPACE.OPTION.QR_CODE', 'code', callback);
+        option = new OptionItem('WORKSPACE.OPTION.QR_CODE', 'edu-qr_code', callback);
     }
     if(type=='ADD_TO_COLLECTION') {
       if (this.connector.getCurrentLogin() && !this.connector.getCurrentLogin().isGuest) {
