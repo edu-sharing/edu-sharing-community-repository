@@ -290,8 +290,10 @@ $badgeWidth:250px;
 {
   padding:0 5px;
   vertical-align: middle;
-  align-self: flex-end;
   color:$textLight;
+}
+.heading > div{
+  align-self: flex-end;
 }
 .heading .checkbox{
   align-self: center;
