@@ -826,27 +826,30 @@ export class UIHelper {
         viewContainerRef: ViewContainerRef,
         componentName: Type<T>,
         targetElement: Element,
-        bindings: any = null,
+        bindings: { [key: string]: any } = null,
         delay = 0,
     ): ComponentRef<T> {
-        if (targetElement == null) return null;
-        let factory = componentFactoryResolver.resolveComponentFactory(
+        if (targetElement == null) {
+            return null;
+        }
+        const factory = componentFactoryResolver.resolveComponentFactory(
             componentName,
         );
-        let component: ComponentRef<T> = viewContainerRef.createComponent(factory);
+        const component: ComponentRef<T> = viewContainerRef.createComponent(
+            factory,
+        );
         if (bindings) {
-            for (let key in bindings) {
-                if (bindings[key] instanceof Function) {
+            const instance: { [key: string]: any } = component.instance;
+            for (const key in bindings) {
+                const binding = bindings[key];
+                if (binding instanceof Function) {
                     // subscribe so callback can properly invoked
-                    (component.instance as any)[key].subscribe((o: any) =>
-                        bindings[key](o),
-                    );
+                    instance[key].subscribe((value: any) => binding(value));
                 } else {
-                    (component.instance as any)[key] = bindings[key];
+                    instance[key] = binding;
                 }
             }
         }
-        //component.changeDetectorRef.detectChanges();
 
         // 3. Get DOM element from component
         const domElem = (component.hostView as EmbeddedViewRef<any>)
