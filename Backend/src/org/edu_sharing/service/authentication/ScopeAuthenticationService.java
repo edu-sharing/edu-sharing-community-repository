@@ -2,7 +2,7 @@ package org.edu_sharing.service.authentication;
 
 public interface ScopeAuthenticationService {
 
-	public boolean authenticate(String username, String password, String scope);
+	public String authenticate(String username, String password, String scope);
 	
 	boolean checkScope(String username, String scope);
 	

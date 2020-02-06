@@ -52,7 +52,6 @@ export class CommentsListComponent  {
     this._node=node;
     this.refresh();
   }
-  @Input() readOnly=false;
   @Output() onCancel=new EventEmitter();
   @Output() onLoading=new EventEmitter();
     /**
@@ -102,10 +101,10 @@ export class CommentsListComponent  {
     if(isAuthor || this._node.access.indexOf(RestConstants.ACCESS_WRITE)!=-1){
       options.push(new OptionItem('NODE_COMMENTS.OPTION_DELETE','delete',()=>{
         this.toast.showModalDialog('NODE_COMMENTS.DELETE_COMMENT','NODE_COMMENTS.DELETE_COMMENT_MESSAGE',DialogButton.getYesNo(()=>{
-            this.toast.closeModalDialog()
+            this.toast.closeModalDialog();
           },()=>{
             this.onLoading.emit(true);
-            this.toast.closeModalDialog()
+            this.toast.closeModalDialog();
             this.commentsApi.deleteComment(comment.ref.id).subscribe(()=>{
               this.refresh();
               this.onChange.emit();
@@ -121,9 +120,9 @@ export class CommentsListComponent  {
     return options;
   }
   public canComment(){
-    if(this.isGuest || !this.user || this.readOnly)
+    if(this.isGuest || !this.user)
       return false;
-    return this._node.access.indexOf(RestConstants.ACCESS_COMMENT)!=-1;
+    return this._node.access.indexOf(RestConstants.ACCESS_COMMENT) !== -1;
   }
   public addComment(){
     if(!this.newComment.trim()){

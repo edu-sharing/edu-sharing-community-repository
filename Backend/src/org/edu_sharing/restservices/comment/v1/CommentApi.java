@@ -86,7 +86,7 @@ public class CommentApi {
 	    	new CommentDao(repoDao).editComment(commentId, comment);
 	    	return Response.status(Response.Status.OK).build();
     	} catch (Throwable t) {
-			return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(new ErrorResponse(t)).build();
+    		return ErrorResponse.createResponse(t);
 		}
     }
 	@DELETE
@@ -109,7 +109,7 @@ public class CommentApi {
 	    	new CommentDao(repoDao).deleteComment(commentId);
 	    	return Response.status(Response.Status.OK).build();
     	} catch (Throwable t) {
-			return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(new ErrorResponse(t)).build();
+			return ErrorResponse.createResponse(t);
 		}
     }
 	@GET
@@ -132,8 +132,7 @@ public class CommentApi {
 	    	Comments comments=new CommentDao(repoDao).getComments(node);
 	    	return Response.status(Response.Status.OK).entity(comments).build();
     	} catch (Throwable t) {
-			logger.error(t.getMessage(), t);			
-			return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(new ErrorResponse(t)).build();
+			return ErrorResponse.createResponse(t);
 		}
     }
 }

@@ -34,8 +34,8 @@ public class CommentServiceImpl implements CommentService{
 		}
 		props.put(CCConstants.CM_NAME,"childcomment");
 		props.put(CCConstants.CCM_PROP_COMMENT_CONTENT,comment);
-		List<String> permissions = permissionService.getPermissionsForAuthority(node, AuthenticationUtil.getFullyAuthenticatedUser());
-		if(!permissions.contains(CCConstants.PERMISSION_COMMENT)) {
+		boolean permission = permissionService.hasPermission(StoreRef.PROTOCOL_WORKSPACE,StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(),node,CCConstants.PERMISSION_COMMENT);
+		if(!permission) {
 			throw new InsufficientPermissionException("No permission '"+CCConstants.PERMISSION_COMMENT+"' to add comments to node "+node);
 		}
 		return AuthenticationUtil.runAsSystem(new RunAsWork<String>() {

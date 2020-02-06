@@ -358,6 +358,8 @@ public class PersonDao {
 			@Override
 			public UserStats doWork() throws Exception {
 				String luceneUser = "@cm\\:creator:\""+QueryParser.escape(getAuthorityName())+"\"";
+				luceneUser += " AND NOT ASPECT:"+QueryParser.escape(CCConstants.getValidLocalName(CCConstants.CCM_ASPECT_COLLECTION_IO_REFERENCE));
+				luceneUser += " AND NOT ASPECT:"+QueryParser.escape(CCConstants.getValidLocalName(CCConstants.CCM_ASPECT_IO_CHILDOBJECT));
 				SearchToken token=new SearchToken();
 				token.setMaxResult(0);
 				token.setLuceneString(luceneUser);

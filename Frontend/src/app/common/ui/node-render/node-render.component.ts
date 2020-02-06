@@ -434,8 +434,7 @@ export class NodeRenderComponent implements EventListener{
     }
   private addComments(){
       let data={
-          node:this._node,
-          readOnly:false
+          node:this._node
       };
       UIHelper.injectAngularComponent(this.componentFactoryResolver,this.viewContainerRef,CommentsListComponent,document.getElementsByTagName("comments")[0],data);
   }
@@ -507,7 +506,7 @@ export class NodeRenderComponent implements EventListener{
                 if (this._node.type != RestConstants.CCM_TYPE_REMOTEOBJECT && ConfigurationHelper.hasMenuButton(this.config, "workspace"))
                     options.push(openFolder);
             }
-            let edit = new OptionItem('WORKSPACE.OPTION.EDIT', 'info_outline', () => this.nodeMetadata = [this._node]);
+            let edit = new OptionItem('WORKSPACE.OPTION.EDIT', 'edit', () => this.nodeMetadata = [this._node]);
             edit.isEnabled = this._node.access.indexOf(RestConstants.ACCESS_WRITE) != -1 && this._node.type != RestConstants.CCM_TYPE_REMOTEOBJECT;
             if (this.version == RestConstants.NODE_VERSION_CURRENT)
                 options.push(edit);
@@ -544,9 +543,6 @@ export class NodeRenderComponent implements EventListener{
             share.isSeperate = true;
             options.push(share);
         }
-        let shareLink = this.actionbar.createOptionIfPossible('SHARE_LINK',[this._node],(node: Node) => this.nodeShareLink=this._node);
-        if (shareLink && !this.isSafe)
-            options.push(shareLink);
         let workflow = this.actionbar.createOptionIfPossible('WORKFLOW', [this._node], (node: Node) => this.nodeWorkflow = this._node);
         if (workflow) {
             options.push(workflow);

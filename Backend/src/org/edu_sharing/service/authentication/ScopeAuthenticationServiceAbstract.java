@@ -10,6 +10,7 @@ import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.server.AuthenticationToolAPI;
 import org.edu_sharing.repository.server.authentication.Context;
+import org.edu_sharing.restservices.login.v1.model.Login;
 import org.springframework.context.ApplicationContext;
 
 public abstract class ScopeAuthenticationServiceAbstract implements ScopeAuthenticationService{
@@ -17,8 +18,8 @@ public abstract class ScopeAuthenticationServiceAbstract implements ScopeAuthent
 	Logger logger = Logger.getLogger(ScopeAuthenticationServiceAbstract.class);
 	
 	@Override
-	public boolean authenticate(String username, String password, String scope) {
-		boolean result = false;
+	public String authenticate(String username, String password, String scope) {
+		String result = Login.STATUS_CODE_INVALID_CREDENTIALS;
 		
 		boolean scopeAllowed = checkScope(username, scope);
 		
@@ -37,7 +38,7 @@ public abstract class ScopeAuthenticationServiceAbstract implements ScopeAuthent
 				session.setAttribute(CCConstants.AUTH_SCOPE, scope);
 				
 				setScopeForCurrentThread();
-				result = true;
+				result = Login.STATUS_CODE_OK;
 				
 			}catch(Exception e){
 				logger.error(e.getMessage(),e);

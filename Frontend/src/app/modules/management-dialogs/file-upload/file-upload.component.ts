@@ -65,6 +65,7 @@ export class WorkspaceFileUploadComponent  {
             this.upload(number+1);
           },(error)=>{
                 this.error=true;
+                console.log(error);
                 this.progress[number].error=this.mapError(error,data.node);
                 this.progress[number].progress.progress=-1;
                 this.upload(number+1);
@@ -84,10 +85,11 @@ export class WorkspaceFileUploadComponent  {
               private translate:TranslateService){}
 
     private mapError(error: any, node: Node = null) {
+        // delete the now orphan node since it's empty
+        if(node) {
+            this.node.deleteNode(node.ref.id, false).subscribe(() => {});
+        }
       if(RestHelper.errorMatchesAny(error,RestConstants.CONTENT_QUOTA_EXCEPTION)) {
-          // delete the now orphan node since it's empty
-          if(node)
-            this.node.deleteNode(node.ref.id,false).subscribe(()=>{});
           return 'QUOTA';
       }
       return 'UNKNOWN';

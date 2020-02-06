@@ -240,6 +240,8 @@
     }
   },
   "LICENSE":{
+    "TITLE_OF_WORK": "Titel",
+    "LINK_AUTHOR": "Link zum Autor",
     "NAMES": {
       "NONE": "Keine oder unbekannte Lizenz",
       "MULTI": "Unterschiedliche Lizenzen",

@@ -119,7 +119,7 @@ public class LoginApi  {
        		String shibbolethSessionId = (String)req.getSession().getAttribute(CCConstants.AUTH_SSO_SESSIONID);
        		
        		
-       		boolean authenticated = service.authenticate(
+       		String loginStatus = service.authenticate(
        					credentials.getUserName(), 
        					credentials.getPassword(), 
        					credentials.getScope());
@@ -127,7 +127,7 @@ public class LoginApi  {
        		String userHome = null;
        		
        		String statusCode = Login.STATUS_CODE_OK;
-       		if(authenticated){
+       		if(Login.STATUS_CODE_OK.equals(loginStatus)){
        			
        			NodeRef ref  = ScopeUserHomeServiceFactory.getScopeUserHomeService().getUserHome(credentials.getUserName(), credentials.getScope(), true);
        			userHome = ref.getId();
@@ -139,9 +139,9 @@ public class LoginApi  {
     			}
                	
        		}else{
-       			statusCode = Login.STATUS_CODE_INVALID_CREDENTIALS;
+       			statusCode = loginStatus;
        		}
-       		return Response.ok(new Login(authenticated,authTool.getScope(), userHome,req.getSession(),statusCode)).build();
+       		return Response.ok(new Login(Login.STATUS_CODE_OK.equals(loginStatus) ? true : false,authTool.getScope(),userHome,req.getSession(),statusCode)).build();
        }
     
     @GET       

@@ -32,6 +32,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.alfresco.repo.cache.SimpleCache;
+import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
@@ -203,7 +204,11 @@ public class RepositoryCache implements Cache {
 
 	public void remove(String nodeId) {
 		CACHE.remove(nodeId);
-		PreviewCache.purgeCache(nodeId);
+		// run as system since it will access node service operations which could cause AccessDenied in usage contexts
+		AuthenticationUtil.runAsSystem(() -> {
+			PreviewCache.purgeCache(nodeId);
+			return null;
+		});
 	}
 	
 	public static void setCache(Map<String, Map<String, Object>> cache) {

@@ -825,7 +825,7 @@ export class WorkspaceMainComponent implements EventListener {
             options.push(view);
         }
         if (nodes && !savedSearch) {
-            const edit = new OptionItem('WORKSPACE.OPTION.EDIT', 'info_outline', (node: Node) => this.editNode(node));
+            const edit = new OptionItem('WORKSPACE.OPTION.EDIT', 'edit', (node: Node) => this.editNode(node));
             edit.isEnabled = NodeHelper.getNodesRight(nodes, RestConstants.ACCESS_WRITE);
             edit.isSeperateBottom = true;
             if (edit.isEnabled) {
