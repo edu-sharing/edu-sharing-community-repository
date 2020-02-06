@@ -71,7 +71,8 @@ public class RenderInfoSoapBindingImpl implements org.edu_sharing.webservices.re
     @Override
     public RenderInfoResult getRenderInfoLMS(String userName, String nodeId, String lmsId, String courseId, String resourceId, String version)
             throws RemoteException {
-
+        throw new RemoteException("getRenderInfoLMS() is not supported in 5.1. Please update the renderingservice");
+        /*
         AuthenticationToolAPI authTool = new AuthenticationToolAPI();
         ApplicationInfo homeAppInfo  = ApplicationInfoList.getHomeRepository();
         String ticket = null;
@@ -83,17 +84,6 @@ public class RenderInfoSoapBindingImpl implements org.edu_sharing.webservices.re
             RenderInfoResult result = getBaseData(userName, nodeId, version, client,homeAppInfo.getAppId().equals(lmsId) ? RenderingTool.DISPLAY_DYNAMIC : RenderingTool.DISPLAY_INLINE);
             // track inline rendering requests
             // now done when delegating to render @RenderProxy
-            /*
-            if(!homeAppInfo.getAppId().equals(lmsId)){
-                NodeTrackingDetails details=new NodeTrackingDetails(version);
-                NodeTrackingDetails.NodeTrackingLms lms = new NodeTrackingDetails.NodeTrackingLms();
-                lms.setAppId(lmsId);
-                lms.setCourseId(courseId);
-                lms.setResourceId(resourceId);
-                details.setLms(lms);
-				TrackingTool.trackActivityOnNode(nodeId,details,TrackingService.EventType.VIEW_MATERIAL_EMBEDDED);
-            }
-            */
             UsageDAO usageDao = new AlfServicesWrapper();
             if(lmsId!=null && courseId!=null) {
                 HashMap<String, Object> usageMap = usageDao.getUsageOnNodeOrParents(lmsId, courseId, nodeId, resourceId);
@@ -113,6 +103,7 @@ public class RenderInfoSoapBindingImpl implements org.edu_sharing.webservices.re
                 authTool.logout(ticket);
             }
         }
+        */
     }
 
     @Override
