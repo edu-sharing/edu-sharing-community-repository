@@ -346,6 +346,7 @@
                         collectionContent.referencesPagination.total
                     "
                     [isLoading]="collectionContent.referencesLoading"
+                    [options]="listOptions"
                     (clickRow)="onContentClick($event.node)"
                     (loadMore)="loadMoreReferences()"
                 ></app-custom-node-list-wrapper>

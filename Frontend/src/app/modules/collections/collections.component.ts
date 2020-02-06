@@ -110,6 +110,7 @@ export class CollectionsMainComponent {
     feedbackView: boolean;
     feedbackViewButtons: DialogButton[];
     customNodeList = false;
+    listOptions: OptionItem[];
     set collectionShare(collectionShare: Collection) {
         this._collectionShare = collectionShare;
         this.refreshAll();
@@ -192,7 +193,6 @@ export class CollectionsMainComponent {
     private hasMediacenter = false;
     private showCollection = true;
     private pinningAllowed = false;
-    private listOptions: OptionItem[];
     private _orderActive: boolean;
     private reurl: any;
     private _collectionShare: Collection;

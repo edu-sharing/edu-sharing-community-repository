@@ -15,11 +15,14 @@ import {
     TemporaryStorageService,
 } from '../../../core-module/core.module';
 import { UIHelper } from '../../../core-ui-module/ui-helper';
+import { OptionItem } from '../../../core-ui-module/option-item';
 
 export interface CustomNodeListWrapperInterface {
     // Inputs
     nodes: CollectionReference[];
     hasMore: boolean;
+    isLoading: boolean;
+    options: OptionItem[];
     // Outputs
     clickRow: EventEmitter<{ node: CollectionReference }>;
     loadMore: EventEmitter<null>;
@@ -32,8 +35,8 @@ export interface CustomNodeListWrapperInterface {
  * `TemporaryStorageService.CUSTOM_NODE_LIST_COMPONENT` to its class. The
  * configured component class must implement `CustomNodeListWrapperInterface`.
  *
- * Any new input / output parameters have to be added to both, this wrapper and
- * the configured component.
+ * Any new input / output parameters have to be added to 1) this wrapper, 2)
+ * `CustomNodeListWrapperInterface`, and 3) the configured component.
  */
 @Component({
     selector: 'app-custom-node-list-wrapper',
@@ -43,6 +46,7 @@ export class CustomNodeListWrapperComponent implements OnChanges {
     @Input() nodes: CollectionReference[];
     @Input() hasMore: boolean;
     @Input() isLoading: boolean;
+    @Input() options: OptionItem[];
     @Output() clickRow = new EventEmitter<{ node: CollectionReference }>();
     @Output() loadMore = new EventEmitter<null>();
 
