@@ -507,6 +507,7 @@ input[type="radio"] {
     width: auto;
     margin: auto;
     z-index: 1;
+    position: relative;
     @include materialShadowLarge();
   }
 }
