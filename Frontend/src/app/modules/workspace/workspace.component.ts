@@ -76,7 +76,6 @@ export class WorkspaceMainComponent implements EventListener {
     private explorerOptions: OptionItem[] = [];
     private actionOptions: OptionItem[] = [];
     private selection: Node[] = [];
-    public fileIsOver = false;
 
     private showSelectRoot = false;
     public showUploadSelect = false;
@@ -85,7 +84,6 @@ export class WorkspaceMainComponent implements EventListener {
     private addFolderName: string;
 
     public allowBinary = true;
-    private filesToUpload: FileList;
     public globalProgress = false;
     public editNodeMetadata: Node[];
     public editNodeTemplate: Node;
@@ -248,31 +246,8 @@ export class WorkspaceMainComponent implements EventListener {
         this.explorerOptions = this.getOptions(null, true);
         // this.nodeOptions.push(new OptionItem("DOWNLOAD", "cloud_download", (node:Node) => this.downloadNode(node)));
     }
-    private uploadCamera(event: any) {
-        this.filesToUpload = event.target.files;
-    }
     private hideDialog(): void {
         this.toast.closeModalDialog();
-    }
-    private openCamera() {
-        this.cordova.getPhotoFromCamera((data: any) => {
-            console.log(data);
-            const name = this.translate.instant('SHARE_APP.IMAGE')
-                + ' '
-                + DateHelper.formatDate(this.translate, new Date().getTime(), { showAlwaysTime: true, useRelativeLabels: false })
-                + '.jpg';
-            const blob: any = Helper.base64toBlob(data, 'image/jpeg');
-            blob.name = name;
-            const list: any = {};
-            list.item = (i: number) => {
-                return blob;
-            };
-            list.length = 1;
-            this.filesToUpload = list;
-        }, (error: any) => {
-            console.warn(error);
-            // this.toast.error(error);
-        });
     }
     showCreateConnector(connector: Connector) {
         this.createConnectorName = '';
@@ -285,27 +260,6 @@ export class WorkspaceMainComponent implements EventListener {
                 this.createConnectorName = null;
             }
         });
-    }
-    private createConnector(event: any) {
-        const name = event.name + '.' + event.type.filetype;
-        this.createConnectorName = null;
-        const prop = NodeHelper.propertiesFromConnector(event);
-        let win: any;
-        if (!this.cordova.isRunningCordova()) {
-            win = window.open('');
-        }
-        this.node.createNode(this.currentFolder.ref.id, RestConstants.CCM_TYPE_IO, [], prop, false).subscribe(
-            (data: NodeWrapper) => {
-                this.editConnector(data.node, event.type, win, this.createConnectorType);
-                this.refresh();
-            },
-            (error: any) => {
-                win.close();
-                if (NodeHelper.handleNodeError(this.toast, event.name, error) === RestConstants.DUPLICATE_NODE_RESPONSE) {
-                    this.createConnectorName = event.name;
-                }
-            }
-        );
     }
     private editConnector(node: Node = null, type: Filetype = null, win: any = null, connectorType: Connector = null) {
         UIHelper.openConnector(this.connectors, this.iam, this.event, this.toast, this.getNodeList(node)[0], type, win, connectorType);
@@ -543,58 +497,12 @@ export class WorkspaceMainComponent implements EventListener {
         const list = this.getNodeList(node);
         this.editNodeLicense = list;
     }
-    private addFolder(folder: any) {
-        this.addFolderName = null;
-        this.globalProgress = true;
-        const properties = RestHelper.createNameProperty(folder.name);
-        if (folder.metadataset) {
-            properties[RestConstants.CM_PROP_METADATASET_EDU_METADATASET] = [folder.metadataset];
-            properties[RestConstants.CM_PROP_METADATASET_EDU_FORCEMETADATASET] = ['true'];
-        }
-        this.node.createNode(this.currentFolder.ref.id, RestConstants.CM_TYPE_FOLDER, [], properties).subscribe(
-            (data: NodeWrapper) => {
-                this.globalProgress = false;
-                this.refreshWithVirtualNodes([data.node]);
-                // this.refresh();
-                this.toast.toast('WORKSPACE.TOAST.FOLDER_ADDED');
-            },
-            (error: any) => {
-                this.globalProgress = false;
-                if (NodeHelper.handleNodeError(this.toast, folder.name, error) === RestConstants.DUPLICATE_NODE_RESPONSE) {
-                    this.addFolderName = folder.name;
-                }
-            }
-        );
-    }
     private afterUpload(nodes: Node[]) {
         if (this.reurl) {
             NodeHelper.addNodeToLms(this.router, this.storage, nodes[0], this.reurl);
         }
         this.refreshWithVirtualNodes(nodes);
     }
-    private uploadFiles(files: FileList) {
-        this.onFileDrop(files);
-    }
-    public onFileDrop(files: FileList) {
-        if (!this.showUploadSelect && this.hasOpenWindows()) {
-            return;
-        }
-        if (this.searchQuery) {
-            this.toast.error(null, 'WORKSPACE.TOAST.NOT_POSSIBLE_IN_SEARCH');
-            return;
-        }
-        if (!this.createAllowed) {
-            this.toast.error(null, 'WORKSPACE.TOAST.NO_WRITE_PERMISSION');
-            return;
-        }
-        if (this.filesToUpload) {
-            this.toast.error(null, 'WORKSPACE.TOAST.ONGOING_UPLOAD');
-            return;
-        }
-        this.showUploadSelect = false;
-        this.filesToUpload = files;
-    }
-
 
     private deleteNodes(node: Node = null) {
         const list = this.getNodeList(node);

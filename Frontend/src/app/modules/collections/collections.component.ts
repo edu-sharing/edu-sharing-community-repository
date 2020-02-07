@@ -86,7 +86,7 @@ export class CollectionsMainComponent {
     tabSelected: string = RestConstants.COLLECTIONSCOPE_MY;
     isLoading = true;
     isReady = false;
-    collectionContent: any;
+    collectionContent: {collection: Collection, collections: Collection[], references: Node[]};
     mainnav = true;
     isGuest = true;
     addToOther: EduData.Node[];
@@ -612,8 +612,7 @@ export class CollectionsMainComponent {
     dropOnCollection(event: any) {
         const target = event.target;
         const source = event.source[0];
-        this.globalProgress = true;
-        console.log(source);
+        this.toast.showProgressDialog();
         if (source.hasOwnProperty('childCollectionsCount')) {
             if (event.type === 'copy') {
                 this.toast.error(null, 'INVALID_OPERATION');
@@ -639,7 +638,7 @@ export class CollectionsMainComponent {
                 event.source,
                 nodes => {
                     if (event.type === 'copy') {
-                        this.globalProgress = false;
+                        this.toast.closeModalDialog();
                         this.refreshContent();
                         return;
                     }
@@ -652,20 +651,33 @@ export class CollectionsMainComponent {
                         );
                         Observable.forkJoin(observables).subscribe(
                             () => {
-                                this.globalProgress = false;
+                                this.toast.closeModalDialog();
                                 this.refreshContent();
                             },
                             error => {
                                 this.handleError(error);
-                                this.globalProgress = false;
+                                this.toast.closeModalDialog();
                             },
                         );
                     } else {
-                        this.globalProgress = false;
+                        this.toast.closeModalDialog();
                     }
                 },
             );
         }
+    }
+    addNodesToCollection(nodes: Node[]) {
+        this.toast.showProgressDialog();
+        UIHelper.addToCollection(
+            this.collectionService,
+            this.router,
+            this.toast,
+            this.collectionContent.collection,
+            nodes,
+            refNodes => {
+                this.refreshContent();
+                this.toast.closeModalDialog();
+            });
     }
 
     canDropOnCollection = (event: any) => {

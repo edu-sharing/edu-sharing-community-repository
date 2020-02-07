@@ -99,24 +99,33 @@ mat-form-field{
 }
 .location{
   margin-top: 20px;
-  padding:20px;
+
   background-color: $backgroundColor;
+  display: flex;
+  flex-direction: column;
   .caption{
     float:left;
-    color:$primary;
     margin-bottom: 10px;
   }
-  .change{
-    float:right;
-    color:$primary;
-    text-transform: uppercase;
-    font-weight: bold;
-  }
-  .no-breadcrumbs{
+  .picker-group{
     display: flex;
-    width: 100%;
-    justify-content: center;
-    color:$textLight;
+    padding:10px 15px;
+    background-color: $buttonHoverBackground;
+    > breadcrumbs{
+      padding-top: 3px;
+    }
+    .no-breadcrumbs{
+      display: flex;
+      width: 100%;
+      justify-content: center;
+      color:$textLight;
+    }
+    .change{
+      flex-grow: 1;
+      font-weight: bold;
+      min-width: 20%;
+      text-align: right;
+    }
   }
 }
 :host ::ng-deep {

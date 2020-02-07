@@ -54,14 +54,20 @@
             </div>
             <div *ngIf="showPicker" class="location">
                 <div class="caption">{{'WORKSPACE.FILE_LOCATION' | translate}}</div>
-                <div class="change clickable" (click)="chooseParent=true">{{'CHANGE_STORAGE_LOCATION' | translate}}</div>
-                <div class="no-breadcrumbs" *ngIf="!_parent">
-                    {{'STORAGE_LOCATION_UNSET' | translate}}
+                <div class="picker-group">
+                    <div class="no-breadcrumbs" *ngIf="!_parent">
+                        {{'STORAGE_LOCATION_UNSET' | translate}}
+                    </div>
+                    <breadcrumbs *ngIf="_parent"
+                            short="always"
+                            [clickable]="false"
+                            [breadcrumbsAsNode]="breadcrumbs"
+                            [home]="'WORKSPACE.MY_FILES'"
+                    ></breadcrumbs>
+                    <div class="change">
+                        <button mat-button color="primary" (click)="chooseParent=true">{{'CHANGE_STORAGE_LOCATION' | translate}}</button>
+                    </div>
                 </div>
-                <breadcrumbs *ngIf="_parent"
-                        [breadcrumbsAsNode]="breadcrumbs"
-                        [home]="'WORKSPACE.MY_FILES'"
-                ></breadcrumbs>
             </div>
         </div>
     </div>

@@ -11,12 +11,12 @@
         <div class="breadcrumb-style">
             <div class="breadcrumb-info">{{'NODE_VARIANT.BREADCRUMB_INFO' | translate}}</div>
             <breadcrumbs
+                    short="always"
                     [breadcrumbsAsNode]="breadcrumbs"
                     [home]="'WORKSPACE.MY_FILES'"
                     [clickable]="false"
             ></breadcrumbs>
-            <button mat-raised-button class="btn-choose" (click)="chooseDirectory=true">{{'NODE_VARIANT.CHOOSE' | translate}}</button>
-        </div>
+            <div class="btn-choose"></div><button mat-raised-button (click)="chooseDirectory=true">{{'NODE_VARIANT.CHOOSE' | translate}}</button></div>
     </div>
 </card>
 <file-chooser

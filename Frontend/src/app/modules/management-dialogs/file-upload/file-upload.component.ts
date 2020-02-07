@@ -52,7 +52,7 @@ export class WorkspaceFileUploadComponent  {
       },50);
       return;
     }
-    this.node.createNode(this.current.ref.id,RestConstants.CCM_TYPE_IO,[],RestHelper.createNameProperty(this._files.item(number).name),true).subscribe(
+    this.node.createNode(this.current ? this.current.ref.id : RestConstants.INBOX,RestConstants.CCM_TYPE_IO,[],RestHelper.createNameProperty(this._files.item(number).name),true).subscribe(
       (data : NodeWrapper) => {
         this.node.uploadNodeContent(data.node.ref.id,this._files.item(number),RestConstants.COMMENT_MAIN_FILE_UPLOAD,"auto",(progress:any)=>{
           progress.progress=Math.round(progress.progress*100);

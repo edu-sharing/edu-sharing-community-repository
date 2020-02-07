@@ -75,6 +75,14 @@
         </div>
         <div class="license-info"><button mat-button class="mat-button-no-uppercase" (click)="showLicenses()">{{'LICENSE_INFORMATION' | translate}}</button></div>
     </div>
+    <app-create-menu #createMenu
+        [allowed]="isCreateAllowed()"
+        [searchQuery]="searchQuery"
+        [allowBinary]="create.allowBinary"
+        [parent]="create.parent"
+        [folder]="create.folder"
+        (onCreate)="onCreate.emit($event)"
+    ></app-create-menu>
     <div #topbar class="topBar {{ 'topBar-'+_currentScope}} scrollWithBanner" [class.noUser]="!_showUser">
         <div class="mobile-move-top2">
             <div class="menuButtonOuter">
@@ -88,6 +96,15 @@
             <div class="timeout" *ngIf="isSafe() && timeout">
                 <i icon iconId="av_timer"></i>
                 {{ timeout }}
+            </div>
+            <div class="add-material">
+                <button mat-button class="addDesktop"
+                        [disabled]="!isCreateAllowed()"
+                        #dropdownTrigger="matMenuTrigger"
+                        [matMenuTriggerFor]="createMenu.dropdown"
+                >
+                    <i icon iconId="add"></i> <span>{{ 'WORKSPACE.ADD' | translate }}</span>
+                </button>
             </div>
             <div class="topBarSearch" [class.noScope]="!showScope">
                 <div class="scopeNameMobile" *ngIf="!searchEnabled">{{title | translate}}</div>
@@ -105,13 +122,6 @@
                     <a tabindex="0" class="focus-underline" *ngIf="config.imprintUrl" (click)="openImprint()" (keyup.enter)="openImprint()">{{ 'IMPRINT' | translate }}</a>
                     <a tabindex="0" class="focus-underline" *ngIf="config.privacyInformationUrl" (click)="openPrivacy()" (keyup.enter)="openPrivacy()">{{ 'PRIVACY_INFORMATION' | translate }}</a>
                 </div>
-                <button mat-icon-button *ngIf="user && (_currentScope=='search' || _currentScope=='stream' || _currentScope=='collections')" #nodeStoreRef class="clickable nodeStore" tabindex="0" (click)="setNodeStore(true)" (keyup.enter)="setNodeStore(true)" title="{{'SEARCH.NODE_STORE.TITLE' | translate}}">
-                    <i icon iconId="bookmark_border" class="barIcon"></i>
-                    <div class="mat-button-badge nodeStoreCount">{{nodeStoreCount}}</div>
-                    <div *ngIf="nodeStoreAnimation>0" [@nodeStore]="nodeStoreAnimation>0" class="clickable nodeStoreAnimation" (click)="setNodeStore(true)">
-                        <div>+{{nodeStoreAnimation}}</div>
-                    </div>
-                </button>
                 <button mat-icon-button *ngIf="user && showChat()" class="rocketchat" (click)="openChat()" >
                     <i icon iconId="message"></i>
                     <div class="mat-button-badge" [class.rocketchat-count-none]="getChatCount()==0">{{getChatCount()}}</div>

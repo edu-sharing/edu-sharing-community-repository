@@ -383,6 +383,7 @@
       "DUPLICATE_NAME":"Der Name {{name}} existiert bereits.<br>Bitte verwenden Sie einen anderen, eindeutigen Namen",
       "CYCLIC_NODE":"Ein Ordner kann nicht in sich selbst eingefügt werden",
       "NOT_POSSIBLE_IN_SEARCH":"Dieser Vorgang ist während einer Suche leider nicht möglich",
+      "NOT_POSSIBLE_GENERAL":"In diesem Bereich ist ein Upload nicht möglich",
       "NO_WRITE_PERMISSION":"Sie haben unzureichende Rechte, um Dateien am aktuellen Ort abzulegen",
       "ONGOING_UPLOAD":"Ein Upload-Vorgang läuft bereits. Bitte warten Sie, bis der Vorgang abgeschlossen ist",
       "NOT_FOUND":"Die gewünschte Ordner-ID {{id}} wurde nicht gefunden. Eventuell wurde sie gelöscht.",

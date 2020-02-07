@@ -7,8 +7,10 @@
     [showUser]="mainnav"
     [searchPlaceholder]="'SEARCH.SEARCH_STUFF'"
     [canOpen]="true"
+    [create]="{allowed: true, allowBinary: true}"
     [(searchQuery)]="searchService.searchTerm"
     (onSearch)="routeAndClearSearch($event)"
+    (onCreate)="addVirtualNodes($event)"
   ></main-nav>
   <tutorial tabindex="0" [element]="tutorialElement" [heading]="'SEARCH.TUTORIAL_HEADING'" [description]="'SEARCH.TUTORIAL_DESCRIPTION'" [showSkip]="false"
   ></tutorial>

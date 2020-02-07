@@ -36,6 +36,7 @@
   import {InputsTestComponent} from './common/test/inputs/inputs-test.component';
   import { UserAvatarTestComponent } from './common/test/user-avatar/user-avatar-test.component';
   import { ModalTestComponent } from './common/test/modal/modal-test.component';
+  import {CreateMenuComponent} from './modules/create-menu/create-menu.component';
 
   export const DECLARATIONS = [
       MdsTestComponent,
@@ -66,6 +67,7 @@
       NodeRenderComponent,
       ApplyToLmsComponent,
       ModalDialogToastComponent,
+      CreateMenuComponent,
       ToolListComponent,
       UserQuotaComponent,
       ToucheventDirective,

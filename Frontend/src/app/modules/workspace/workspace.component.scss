@@ -130,20 +130,6 @@ user-quota{
 .explorerMetadata{
   width:calc(100% - 600px);
 }
-.dropZone{
-  text-align: center;
-}
-.dropZone div{
-  position: relative;
-  top:30%;
-  color:#fff;
-}
-.dropZone p{
-  font-size:150%;
-}
-.dropZone i{
-  font-size:120pt;
-}
 
 .actionbarFrame{
   width:auto;
@@ -180,7 +166,7 @@ user-quota{
   >div {
     height:$workspaceBreadcrumbsHeight;
     background-color: #fff;
-    padding-left:320px;
+    padding-left:36px;
     padding-top: 18px;
     padding-bottom: 20px;
     padding-right: 50px;

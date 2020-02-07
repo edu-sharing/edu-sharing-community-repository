@@ -16,6 +16,10 @@ export class FileDropDirective {
   @Output() public fileOver: EventEmitter<boolean> = new EventEmitter<boolean>();
   @Output() public onFileDrop: EventEmitter<File> = new EventEmitter<File>();
   @Input() public options: Options;
+  /**
+   * catch drag/drop of whole window
+   */
+  @Input() public window = false;
 
   private element: ElementRef;
 
@@ -31,21 +35,41 @@ export class FileDropDirective {
     '$event',
   ])
   public onDragOver(event: any): void {
-    let transfer = this.getDataTransfer(event);
-    if (!this.haveFiles(transfer.types)) {
+    if (this.window) {
       return;
     }
-    transfer.dropEffect = 'copy';
-    this.preventAndStop(event);
-    this.isFileOver=true;
-    this.emitFileOver(true);
+    this.handleEvent(event);
   }
-
+  @HostListener('window:dragover', [
+    '$event',
+  ])
+  public onDragOverWindow(event: any): void {
+    if (!this.window) {
+      return;
+    }
+    this.handleEvent(event);
+  }
 
   @HostListener('dragleave', [
     '$event',
   ])
   public onDragLeave(event: any): void {
+    if (this.window) {
+      return;
+    }
+    this.isFileOver=false;
+    // super hacky, but the only reliable way it seems. May someone will fix this later?
+    setTimeout(()=>{
+      if( !this.isFileOver || true ){ this.emitFileOver(false); }
+    },2000);
+  }
+  @HostListener('window:dragleave', [
+    '$event',
+  ])
+  public onDragLeaveWindow(event: any): void {
+    if (!this.window) {
+      return;
+    }
     this.isFileOver=false;
     // super hacky, but the only reliable way it seems. May someone will fix this later?
     setTimeout(()=>{
@@ -56,6 +80,9 @@ export class FileDropDirective {
     '$event',
   ])
   public onDragEnter(event: any): void {
+    if (this.window) {
+      return;
+    }
     let transfer = this.getDataTransfer(event);
     if (!this.haveFiles(transfer.types)) {
       return;
@@ -65,7 +92,22 @@ export class FileDropDirective {
     this.isFileOver=true;
     this.emitFileOver(true);
   }
+  @HostListener('window:dragenter', [
+    '$event',
+  ])
+  public onDragEnterWindow(event: any): void {
+    if (!this.window) {
+      return;
+    }
+    let transfer = this.getDataTransfer(event);
+    if (!this.haveFiles(transfer.types)) {
+      return;
+    }
 
+    this.preventAndStop(event);
+    this.isFileOver=true;
+    this.emitFileOver(true);
+  }
   checkLeave(event:any){
 
 
@@ -92,7 +134,26 @@ export class FileDropDirective {
     '$event',
   ])
   public onDrop(event: any): void {
-    console.log("onDrop");
+    if (this.window) {
+      return;
+    }
+    const transfer = this.getDataTransfer(event);
+
+    if (!transfer.files.length) {
+      return;
+    }
+
+    this.preventAndStop(event);
+    this.emitFileOver(false);
+    this.readFile(transfer.files);
+  }
+  @HostListener('window:drop', [
+    '$event',
+  ])
+  public onDropWindow(event: any): void {
+    if (!this.window) {
+      return;
+    }
     const transfer = this.getDataTransfer(event);
 
     if (!transfer.files.length) {
@@ -177,5 +238,16 @@ export class FileDropDirective {
     }
 
     return false;
+  }
+
+  private handleEvent(event: any) {
+    let transfer = this.getDataTransfer(event);
+    if (!this.haveFiles(transfer.types)) {
+      return;
+    }
+    transfer.dropEffect = 'copy';
+    this.preventAndStop(event);
+    this.isFileOver=true;
+    this.emitFileOver(true);
   }
 }

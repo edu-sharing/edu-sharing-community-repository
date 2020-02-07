@@ -3,9 +3,14 @@
 <main-nav
     *ngIf="mainnav"
     #mainNav
+    [create]="{
+        allowed: !isRootLevelCollection() && isAllowedToEditCollection(),
+        allowBinary: true
+    }"
     [title]="'COLLECTIONS.TITLE'"
     [currentScope]="'collections'"
     [searchEnabled]="false"
+    (onCreate)="addNodesToCollection($event)"
 ></main-nav>
 <tutorial
     tabindex="0"

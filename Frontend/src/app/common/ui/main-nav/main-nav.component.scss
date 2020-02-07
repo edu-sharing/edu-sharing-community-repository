@@ -73,7 +73,7 @@ user-profile{
 }
 
 .menuButton {
-  width: 300px;
+  width: 250px;
   display: flex;
   align-items: center;
   .barIcon{
@@ -390,6 +390,10 @@ $licenseInfoHeight:40px;
 }
 .scopeNameMobile{
   display:none;
+}
+.add-material{
+  display: flex;
+  align-items: center;
 }
 .topbar-search-right{
   display: flex;

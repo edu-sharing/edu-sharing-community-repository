@@ -1,23 +1,12 @@
-<div class="dialog darken dropZone" fileDrop
-     (onFileDrop)="onFileDrop($event)"
-     (fileOver)="fileIsOver=$event" *ngIf="fileIsOver && !hasOpenWindows()">
-  <div>
-    <i class="material-icons" *ngIf="!searchQuery && createAllowed && !filesToUpload">cloud_upload</i>
-    <i class="material-icons" *ngIf="!(!searchQuery && createAllowed && !filesToUpload)">cloud_off</i>
-    <p *ngIf="!searchQuery && createAllowed">{{'WORKSPACE.DROP_FILES' |translate}}</p>
-    <p *ngIf="!(!searchQuery  && createAllowed)">{{'WORKSPACE.DROP_FILES_DISABLED' |translate}}</p>
-  </div>
-</div>
-
-<div class="frame" fileDrop
-     (onFileDrop)="onFileDrop($event)"
-     (fileOver)="fileIsOver=$event">
+<div class="frame">
 
   <main-nav
     #mainNav
     [title]="isSafe ? 'WORKSPACE.TITLE_SAFE' : 'WORKSPACE.TITLE'"
     [currentScope]="isSafe ? 'safe' : 'workspace'"
     [searchEnabled]="!isBlocked"
+    [create]="{allowed: createAllowed, allowBinary: allowBinary, parent: currentFolder, folder: true}"
+    (onCreate)="refreshWithVirtualNodes($event)"
     [searchPlaceholder]="isSafe ? 'WORKSPACE.SAFE_SEARCH' : 'WORKSPACE.SEARCH' "
     [canOpen]="mainnav"
     [searchQuery]="searchQuery ? searchQuery.query : null"
@@ -28,43 +17,7 @@
 <div *ngIf="isBlocked" class="isBlocked">{{'NO_PERMISSIONS_FOR_SCOPE'|translate}}</div>
 <div *ngIf="!isBlocked" [class.hide]="globalProgress">
 
-  <div class="addMobile"
-       *ngIf="createAllowed">
-    <div class="mobile-move-bottom">
-        <button button mat-fab color="primary" [matMenuTriggerFor]="dropdown"><i icon iconId="add" aria="true"></i></button>
-    </div>
-    <!--
-  <ul>
-    <li><a class="btn-floating btn-floating-inverted" (click)="showUploadSelect=true"><i class="material-icons">cloud_upload</i></a></li>
-    <li><a class="btn-floating btn-floating-inverted" (click)="addFolderName=''"><i class="material-icons">create_new_folder</i></a></li>
-    <li *ngFor="let connector of connectorList ? connectorList.connectors : null">
-      <a class="btn-floating btn-floating-inverted" (click)="createConnectorName='';createConnectorType=connector"><i class="material-icons">{{connector.icon}}</i></a>
-    </li>
-    <li><a class="btn-floating btn-floating-inverted" (click)="listLTI()"><i class="material-icons">extension</i></a></li>
-  </ul>
-  -->
-  </div>
-  <button mat-raised-button color="primary" class="addDesktop"
-          [disabled]="!createAllowed"
-          #dropdownTrigger="matMenuTrigger"
-          [matMenuTriggerFor]="dropdown"
-    >
-    <i icon iconId="add"></i> <span>{{ 'WORKSPACE.ADD' | translate }}</span>
-  </button>
 
-  <mat-menu class="addDesktopMenu" #dropdown="matMenu">
-      <button mat-menu-item *ngIf="allowBinary" (click)="showUploadSelect=true"><i icon iconId="cloud_upload"></i> {{ 'WORKSPACE.ADD_OBJECT' | translate}}</button>
-      <button mat-menu-item *ngIf="allowBinary && cordova.isRunningCordova()" (click)="openCamera()"><i icon iconId="camera_alt"></i> {{ 'WORKSPACE.ADD_CAMERA' | translate}}</button>
-      <button mat-menu-item *ngIf="!allowBinary" (click)="createEmptyNode()"><i icon iconId="description"></i> {{ 'WORKSPACE.ADD_EMPTY_OBJECT' | translate}}</button>
-      <button mat-menu-item (click)="addFolderName=''"><i icon iconId="create_new_folder"></i> {{ 'WORKSPACE.ADD_FOLDER' | translate}}</button>
-      <button mat-menu-item *ngFor="let connector of (connectorList && allowBinary) ? connectorList : null;let i=index"
-       [class.mat-menu-item-seperate]="!i"
-       (click)="showCreateConnector(connector)">
-        <i icon iconId="{{connector.icon}}"></i>
-        {{ 'CONNECTOR.'+connector.id+'.NAME' | translate}}
-        <img style="padding-left:5px" src="assets/images/beta.svg" alt="">
-      </button>
-  </mat-menu>
   <div class="dialog" *ngIf="showSelectRoot" (click)="showSelectRoot=false"></div>
   <div class="selectRootMenu collection" [@overlay]="showSelectRoot" *ngIf="showSelectRoot">
     <a class="collection-item" [class.rootSelected]="root=='MY_FILES'" (click)="showSelectRoot=false;setRoot('MY_FILES')"><i icon iconId="person"></i> {{ 'WORKSPACE.MY_FILES' | translate}}</a>
@@ -74,20 +27,6 @@
     <a class="collection-item" [class.rootSelected]="root=='WORKFLOW_RECEIVE'" (click)="showSelectRoot=false;setRoot('WORKFLOW_RECEIVE')"><i icon iconId="inbox"></i> {{ 'WORKSPACE.WORKFLOW_RECEIVE' | translate}}</a>
     <a class="collection-item" [class.rootSelected]="root=='RECYCLE'" (click)="showSelectRoot=false;setRoot('RECYCLE')"><i icon iconId="delete"></i> {{ 'WORKSPACE.RECYCLE' | translate}}</a>
   </div>
-
-  <workspace-add-folder *ngIf="addFolderName!=null"
-                        [folder]="addFolderName"
-                        [parent]="currentFolder"
-                        (onCancel)="addFolderName=null"
-                        (onFolderAdded)="addFolder($event)"
-  ></workspace-add-folder>
-
-  <workspace-create-connector *ngIf="createConnectorName!=null"
-                        [name]="createConnectorName"
-                        [connector]="createConnectorType"
-                        (onCancel)="createConnectorName=null"
-                        (onCreate)="createConnector($event)"
-  ></workspace-create-connector>
 
   <div class="tree" *ngIf="isLoggedIn">
   <workspace-tree
@@ -163,7 +102,6 @@
 [(nodeDelete)]="deleteNode"
 [(nodeShareLink)]="shareLinkNode"
 [(filesToUpload)]="filesToUpload"
-[fileIsOver]="fileIsOver"
 [(showUploadSelect)]="showUploadSelect"
 [parent]="currentFolder"
 [nodeMetadataAllowReplace]="editNodeAllowReplace"

@@ -145,7 +145,6 @@ export class MainNavComponent implements AfterViewInit{
     @Input() searchPlaceholder : string;
     /**
      * When true, the sidebar can be clicked to open the menu
-     * @type {boolean}
      */
     @Input() canOpen = true;
     /**
@@ -153,8 +152,25 @@ export class MainNavComponent implements AfterViewInit{
      */
     @Input() title : string;
     /**
-     * The current scope identifier, to mark correct element in the menu as active
+     * "add material" options
      */
+    @Input() create:{
+        allowed?: boolean
+        allowBinary?: boolean
+        parent?: Node
+        folder?: boolean
+    } = {
+        // allowed / display new material button
+        allowed: false,
+        // refer to CreateMenuComponent
+        allowBinary: true,
+        parent: null,
+        folder: false
+    };
+    /**
+     * If create is allowed, this event will fire the new nodes
+     */
+    @Output() onCreate = new EventEmitter<Node[]>();
     /**
      * Called when a search event happened, emits the search string and additional event info
      * {query:string,cleared:boolean}
@@ -719,11 +735,8 @@ export class MainNavComponent implements AfterViewInit{
                 this.userMenuOptions.push(new OptionItem('SIDEBAR.LOGIN','person',()=>this.login(true)));
             }
         }
-        if(this._currentScope=='search') {
-            let option=new OptionItem('SEARCH.NODE_STORE.TITLE','bookmark_border',()=>this.setNodeStore(true));
-            option.mediaQueryType=UIConstants.MEDIA_QUERY_MAX_WIDTH;
-            option.mediaQueryValue=UIConstants.MOBILE_TAB_SWITCH_WIDTH;
-            option.isSeperateBottom=true;
+        if(this._currentScope === 'search' || this._currentScope === 'stream' || this._currentScope === 'collections') {
+            const option=new OptionItem('SEARCH.NODE_STORE.TITLE','bookmark_border',()=>this.setNodeStore(true));
             this.userMenuOptions.push(option);
         }for(let option of this.getConfigMenuHelpOptions()){
             option.mediaQueryType=UIConstants.MEDIA_QUERY_MAX_WIDTH;
@@ -920,5 +933,10 @@ export class MainNavComponent implements AfterViewInit{
 
     showAdminButton() {
         return this.isAdmin || this.toolpermissions.indexOf(RestConstants.TOOLPERMISSION_GLOBAL_STATISTICS)!=-1 || this.manageMediacenters;
+    }
+
+    isCreateAllowed() {
+        // @TODO: May Check for more constrains
+        return this.create.allowed && !this.isGuest;
     }
 }
