@@ -49,7 +49,7 @@
   *ngIf="addToCollection"
   [@fromRight]="addToCollection"
   [title]="'WORKSPACE.SELECT_COLLECTION'"
-  (onCancel)="closeAddToCollection()"
+  (onCancel)="cancelAddToCollection()"
   (onDrop)="addToCollectionList($event.target,$event.source,false)"
   (onCreateCollection)="addToCollectionCreate($event)"
   (onChoose)="addToCollectionList($event)"

@@ -177,10 +177,6 @@ export class WorkspaceManagementDialogsComponent  {
     private router:Router,
   ){
    }
-   private closeAddToCollection(){
-      this.addToCollection=null;
-      this.addToCollectionChange.emit(null);
-   }
  private closeLtiToolConfig(){
     this.ltiToolConfig=null;
     this.ltiToolRefresh=new Boolean();
