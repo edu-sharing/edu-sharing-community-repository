@@ -180,7 +180,9 @@ export class CardComponent implements OnDestroy {
     scrolled() {
         this.onScrolled.emit();
     }
-
+    static getNumberOfOpenCards(){
+        return CardComponent.modalCards.length;
+    }
 }
 export class CardJumpmark {
     /**

@@ -10,6 +10,7 @@ $textLight:     #585858;
 $textMediumLight:     #888;
 $textVeryLight:     #aaa;
 $textMain: #383838;
+$fontSizeSmall:90%;
 $fontSizeXSmall:85%;
 $backgroundColor: #fff;
 $workspaceSidebarWidth: 300px;
@@ -17,7 +18,7 @@ $workspaceInheritColor: #42CA8D;
 $editorialCollectionsBackground: #f5ec19;
 $itemSelectedBackground:     #F1F6FA;
 $buttonHoverBackground: rgba(red($primary), green($primary), blue($primary), 0.08);
-$workspaceNewBackground: $primaryLight;
+$workspaceNewBackground: $itemSelectedBackground;
 $secondaryBarHeight: 65px; // the white bar height in search and workspace
 $workspaceSelectedBackgroundEffect: linear-gradient(to right, $primary 0,$primary 5px,rgba(0,0,0,0) 5px,rgba(0,0,0,0) 5px) no-repeat;
 $workspaceTreeBackground: #f7f7f7;

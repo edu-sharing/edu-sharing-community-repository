@@ -31,7 +31,7 @@
     font-size: 15pt;
     color: $textLight;
   }
-  >a {
+  a {
     display: flex;
     align-items: center;
 
@@ -45,9 +45,23 @@
       min-width: 30px;
     }
   }
-}
-.breadrumbVisible{
-  display: flex;
+  &.breadcrumb-readonly{
+    display: inline;
+    font-size: $fontSizeSmall;
+    span{
+      line-height: 2;
+    }
+    i{
+      position: relative;
+      top: 5px;
+    }
+    &.breadcrumbShort{
+      @include limitLineCount(1);
+      span{
+        line-height: 1;
+      }
+    }
+  }
 }
 .selected{
   background-color: #fff;
