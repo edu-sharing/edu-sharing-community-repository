@@ -24,7 +24,10 @@
         "USE_URL_TEXT": "Login via external provider (e.g. Shibboleth)",
         "USE_URL_LINK": "Go to provider",
         "SAFE_PREVIOUS": "In order to login to the safe space, please login to the regular workspace first",
-        "NO_ACCESS": "No permissions to access this area"
+        "NO_ACCESS": "No permissions to access this area",
+        "APP_LOGO": "Logo",
+        "SHOW_PASSWORD": "Show password",
+        "HIDE_PASSWORD": "Hide password"
     },
     "LOGIN_APP": {
         "SERVERLIST_OWN": "set own server",

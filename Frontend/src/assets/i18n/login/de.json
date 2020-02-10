@@ -24,7 +24,10 @@
         "USE_URL_TEXT": "Login via externen Anbieter (z.B. Shibboleth)",
         "USE_URL_LINK": "Zum Anbieter",
         "SAFE_PREVIOUS": "Um sich im geschützten Bereich anzumelden, melden Sie sich bitte zuerst im Workspace an",
-        "NO_ACCESS": "Keine Berechtigungen für diesen Bereich"
+        "NO_ACCESS": "Keine Berechtigungen für diesen Bereich",
+        "APP_LOGO": "Logo",
+        "SHOW_PASSWORD": "Passwort anzeigen",
+        "HIDE_PASSWORD": "Passwort ausblenden"
     },
     "LOGIN_APP": {
         "SERVERLIST_OWN": "Eigenen Server angeben",

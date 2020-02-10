@@ -16,7 +16,7 @@
             [attr.showProviders]="showProviders">
           <spinner *ngIf="isLoading" class="center"></spinner>
           <div class="login-content" *ngIf="!isLoading">
-            <div class="branding"><img src="assets/images/logo.svg" image-config alt=""></div>
+            <div class="branding"><img src="assets/images/logo.svg" image-config alt="{{'LOGIN.APP_LOGO' | translate}}"></div>
               <div class="groups">
                   <div class="providers-select" *ngIf="showProviders">
                       <div class="group-heading">{{'LOGIN.PROVIDER_SELECT_GROUP' | translate}}</div>
