@@ -99,6 +99,7 @@
             </div>
             <div class="add-material">
                 <button mat-button class="addDesktop"
+                        *ngIf="!isGuest"
                         [disabled]="!isCreateAllowed()"
                         #dropdownTrigger="matMenuTrigger"
                         [matMenuTriggerFor]="createMenu.dropdown"
