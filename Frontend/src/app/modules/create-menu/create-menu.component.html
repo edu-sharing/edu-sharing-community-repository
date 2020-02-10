@@ -36,9 +36,9 @@
 <div *ngIf="!hasOpenWindows()" fileDrop [window]="true" (fileOver)="fileIsOver=$event" (onFileDrop)="onFileDrop($event)"></div>
 <div class="dialog darken drop-zone" *ngIf="fileIsOver">
     <div>
-        <i class="material-icons" *ngIf="!searchQuery && allowed && !filesToUpload">cloud_upload</i>
-        <i class="material-icons" *ngIf="!(!searchQuery && allowed && !filesToUpload)">cloud_off</i>
-        <p *ngIf="!searchQuery && allowed">{{'WORKSPACE.DROP_FILES' |translate}}</p>
-        <p *ngIf="!(!searchQuery  && allowed)">{{'WORKSPACE.DROP_FILES_DISABLED' |translate}}</p>
+        <i class="material-icons" *ngIf="allowed && !filesToUpload">cloud_upload</i>
+        <i class="material-icons" *ngIf="!(allowed && !filesToUpload)">cloud_off</i>
+        <p *ngIf="allowed">{{'WORKSPACE.DROP_FILES' |translate}}</p>
+        <p *ngIf="!allowed">{{'WORKSPACE.DROP_FILES_DISABLED' |translate}}</p>
     </div>
 </div>

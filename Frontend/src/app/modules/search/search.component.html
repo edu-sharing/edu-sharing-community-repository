@@ -7,7 +7,7 @@
     [showUser]="mainnav"
     [searchPlaceholder]="'SEARCH.SEARCH_STUFF'"
     [canOpen]="true"
-    [create]="{allowed: true, allowBinary: true}"
+    [create]="{allowed: isHomeRepository(), allowBinary: true}"
     [(searchQuery)]="searchService.searchTerm"
     (onSearch)="routeAndClearSearch($event)"
     (onCreate)="addVirtualNodes($event)"

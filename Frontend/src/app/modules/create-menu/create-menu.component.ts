@@ -157,11 +157,11 @@ export class CreateMenuComponent {
     }
     public onFileDrop(files: FileList) {
         if (!this.allowed) {
-            if (this.searchQuery) {
+            /*if (this.searchQuery) {
                 this.toast.error(null, 'WORKSPACE.TOAST.NOT_POSSIBLE_IN_SEARCH');
-            } else {
+            } else {*/
                 this.toast.error(null, 'WORKSPACE.TOAST.NOT_POSSIBLE_GENERAL');
-            }
+            // }
             return;
         }
         if (this.filesToUpload) {
