@@ -954,15 +954,15 @@ export class UIHelper {
         return url;
     }
     //http://stackoverflow.com/questions/25099409/copy-to-clipboard-as-plain-text
-    static copyElementToClipboard(input: HTMLInputElement) {
+    static copyElementToClipboard(input: HTMLTextAreaElement) {
         input.focus();
         document.execCommand('SelectAll');
         document.execCommand('Copy', false, null);
     }
     static copyToClipboard(text: string) {
-        let input: HTMLInputElement = document.createElement(
-            'textaera',
-        ) as HTMLInputElement;
+        let input = document.createElement(
+            'textarea',
+        ) as HTMLTextAreaElement;
         input.innerHTML = text;
         document.body.appendChild(input);
         UIHelper.copyElementToClipboard(input);
