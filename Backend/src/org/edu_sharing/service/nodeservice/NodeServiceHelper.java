@@ -42,7 +42,13 @@ public class NodeServiceHelper {
 	public static void setCreateVersion(String nodeId, boolean create) {
 		new MCAlfrescoAPIClient().setProperty(nodeId, CCConstants.CCM_PROP_IO_CREATE_VERSION, create);
 	}
-
+	public static Map<String, Serializable> transformLongToShortProperties(Map<String, Serializable> properties) {
+		HashMap<String, Serializable> result = new HashMap<>();
+		for(Map.Entry<String, Serializable> prop: properties.entrySet()){
+			result.put(CCConstants.getValidLocalName(prop.getKey()), prop.getValue());
+		}
+		return result;
+	}
 	public static HashMap<String, String[]> transformShortToLongProperties(HashMap<String, String[]> properties) {
 
 		/**
@@ -159,15 +165,13 @@ public class NodeServiceHelper {
     /**
      * Get all properties automatically splitted by multivalue
      * Each property is always returned as an array
-     * @param nodeRef
      * @return
      * @throws Throwable
      */
-    public static HashMap<String, String[]> getPropertiesMultivalue(NodeRef nodeRef) throws Throwable {
-        HashMap<String, Object> properties = getProperties(nodeRef);
+    public static HashMap<String, String[]> getPropertiesMultivalue(Map<String, ?> properties) {
         HashMap<String, String[]> propertiesMultivalue = new HashMap<>();
         if(properties!=null) {
-			properties.forEach((key, value) -> propertiesMultivalue.put(key, ValueTool.getMultivalue(value.toString())));
+			properties.forEach((key, value) -> propertiesMultivalue.put(key, value==null ? null : ValueTool.getMultivalue(value.toString())));
 			return propertiesMultivalue;
 		}
         return null;

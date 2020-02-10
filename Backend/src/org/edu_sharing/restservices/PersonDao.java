@@ -44,6 +44,7 @@ import javax.servlet.http.HttpSession;
 import java.io.InputStream;
 import java.io.Serializable;
 import java.util.*;
+import java.util.stream.Collectors;
 
 public class PersonDao {
 
@@ -313,8 +314,8 @@ public class PersonDao {
     	return data;
 	}
 
-	private Map<String,String[]> getProperties() throws DAOException {
-		return NodeDao.getNode(repoDao,getNodeId()).getAllProperties();
+	private Map<String,String[]> getProperties() {
+		return NodeServiceHelper.getPropertiesMultivalue(NodeServiceHelper.transformLongToShortProperties(userInfo));
 	}
 
 	private UserQuota getQuota() {
