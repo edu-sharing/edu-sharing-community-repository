@@ -152,7 +152,7 @@ $badgeWidth:250px;
   >div{
     min-width: 120px;
   }
-  .more-header{
+  .more-header,.more{
     min-width: 50px;
   }
   .collectionEditorial,.collectionPinned{
@@ -263,15 +263,7 @@ $badgeWidth:250px;
     word-break: break-all;
   }
   .more{
-    display: flex!important;
     align-items: center;
-    position: relative;
-    top: 9px;
-    right: 10px;
-    /* align single option icons */
-    a >i{
-      vertical-align: middle;
-    }
   }
 }
 .more{
