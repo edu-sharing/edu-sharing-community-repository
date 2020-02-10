@@ -1113,8 +1113,7 @@ export class WorkspaceMainComponent implements EventListener {
             || this.toast.isModalDialogOpen()
             || this.addFolderName
             || this.sharedNode
-            || this.workflowNode
-            || this.filesToUpload;
+            || this.workflowNode;
     }
     private recoverScrollposition() {
         console.log('recover scroll ' + this.storage.get('workspace_scroll', 0));

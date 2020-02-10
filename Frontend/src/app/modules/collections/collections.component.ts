@@ -75,8 +75,9 @@ export class CollectionsMainComponent {
         sortAscending: [false, true, false],
     };
 
-    @ViewChild('mainNav', {static: false}) mainNavRef: MainNavComponent;
-    @ViewChild('listCollections', {static: false}) listCollections: ListTableComponent;
+    @ViewChild('mainNav', { static: false }) mainNavRef: MainNavComponent;
+    @ViewChild('listCollections', { static: false })
+    listCollections: ListTableComponent;
 
     dialogTitle: string;
     globalProgress = false;
@@ -86,7 +87,15 @@ export class CollectionsMainComponent {
     tabSelected: string = RestConstants.COLLECTIONSCOPE_MY;
     isLoading = true;
     isReady = false;
-    collectionContent: {collection: Collection, collections: Collection[], references: Node[]};
+    collectionContent: {
+        collection: Collection;
+        collections: Collection[];
+        references: EduData.CollectionReference[];
+        collectionsPagination?: EduData.Pagination;
+        referencesPagination?: EduData.Pagination;
+        referencesLoading?: boolean;
+        collectionsLoading?: boolean;
+    };
     mainnav = true;
     isGuest = true;
     addToOther: EduData.Node[];
@@ -677,7 +686,8 @@ export class CollectionsMainComponent {
             refNodes => {
                 this.refreshContent();
                 this.toast.closeModalDialog();
-            });
+            },
+        );
     }
 
     canDropOnCollection = (event: any) => {
@@ -1208,26 +1218,23 @@ export class CollectionsMainComponent {
                             );
                     } else {
                         this.showCollection = id != '-root-';
-                        this.displayCollectionById(
-                            id,
-                            () => {
-                                if (params.content) {
-                                    console.log('search content');
-                                    for (const content of this.collectionContent
-                                        .references) {
-                                        console.log(content);
-                                        if (content.ref.id == params.content) {
-                                            console.log('match');
-                                            this.contentDetailObject = content;
-                                            break;
-                                        }
+                        this.displayCollectionById(id, () => {
+                            if (params.content) {
+                                console.log('search content');
+                                for (const content of this.collectionContent
+                                    .references) {
+                                    console.log(content);
+                                    if (content.ref.id == params.content) {
+                                        console.log('match');
+                                        this.contentDetailObject = content;
+                                        break;
                                     }
                                 }
-                                this.frame.broadcastEvent(
-                                    FrameEventsService.EVENT_INVALIDATE_HEIGHT,
-                                );
-                            },
-                        );
+                            }
+                            this.frame.broadcastEvent(
+                                FrameEventsService.EVENT_INVALIDATE_HEIGHT,
+                            );
+                        });
                     }
                 });
             },
@@ -1407,8 +1414,11 @@ export class CollectionsMainComponent {
     }
 
     private setCollectionId(id: string) {
-        this.collectionContent = { collections: [], references: [] };
-        this.collectionContent.collection = new Collection();
+        this.collectionContent = {
+            collections: [],
+            references: [],
+            collection: new Collection(),
+        };
         this.collectionContent.collection.ref = new NodeRef();
         this.collectionContent.collection.ref.id = id;
     }
@@ -1423,7 +1433,7 @@ export class CollectionsMainComponent {
             this.collectionContent,
         );
         this.setOptionsCollection();
-        if(this.mainNavRef) {
+        if (this.mainNavRef) {
             this.mainNavRef.refreshBanner();
         }
         if (

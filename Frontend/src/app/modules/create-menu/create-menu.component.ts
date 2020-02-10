@@ -10,7 +10,7 @@ import { map, startWith } from 'rxjs/operators';
 import { GlobalContainerComponent } from '../../common/ui/global-container/global-container.component';
 import { MainNavComponent } from '../../common/ui/main-nav/main-nav.component';
 import { BridgeService } from '../../core-bridge-module/bridge.service';
-import {AccessScope, ConfigurationService, Connector, DialogButton, Filetype, LoginResult, Node, NodeWrapper, RestConnectorService, RestConnectorsService, RestConstants, RestHelper, RestIamService, RestNodeService, SessionStorageService, TemporaryStorageService} from '../../core-module/core.module';
+import {AccessScope, ConfigurationService, Connector, DialogButton, Filetype, LoginResult, Node, NodeWrapper, RestConnectorService, RestConnectorsService, RestConstants, RestHelper, RestIamService, RestNodeService, SessionStorageService, TemporaryStorageService, FrameEventsService} from '../../core-module/core.module';
 import { Helper } from '../../core-module/rest/helper';
 import { UIAnimation } from '../../core-module/ui/ui-animation';
 import { OPEN_URL_MODE, UIConstants } from '../../core-module/ui/ui-constants';
@@ -74,33 +74,31 @@ export class CreateMenuComponent {
      * Fired when elements are created or uploaded
      */
     @Output() onCreate = new EventEmitter<Node[]>();
+
     _parent: Node = null;
     addFolderName: string = null;
     showUploadSelect = false;
     filesToUpload: FileList;
     connectorList: Connector[];
     fileIsOver = false;
-    private params: Params;
     showPicker: boolean;
     createConnectorName: string;
     createConnectorType: Connector;
 
+    private params: Params;
+
     constructor(
-        private connector: RestConnectorService,
         private connectors: RestConnectorsService,
         private iamService: RestIamService,
         private nodeService: RestNodeService,
         private toast: Toast,
-        private platformLocation: PlatformLocation,
         private router: Router,
-        private http: HttpClient,
         private translate: TranslateService,
-        private configService: ConfigurationService,
-        private title: Title,
-        private storage: SessionStorageService,
         private temporaryStorage: TemporaryStorageService,
         private route: ActivatedRoute,
-        private bridge: BridgeService
+        private bridge: BridgeService,
+        private iam: RestIamService,
+        private event: FrameEventsService,
     ) {
         this.route.queryParams.subscribe((params)=> {
             this.params = params;
