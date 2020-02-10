@@ -43,6 +43,7 @@ import { InfoMessageComponent } from './components/info-message/info-message.com
 import {InputPasswordComponent} from './components/input-password/input-password.component';
 import { LinkComponent } from './components/link/link.component';
 import { UserAvatarComponent } from './components/user-avatar/user-avatar.component';
+import { MatTooltipModule } from '@angular/material/tooltip';
 
 @NgModule({
     declarations: [
@@ -86,6 +87,7 @@ import { UserAvatarComponent } from './components/user-avatar/user-avatar.compon
         MatInputModule,
         MatCheckboxModule,
         MatProgressSpinnerModule,
+        MatTooltipModule,
         ToastyModule.forRoot(),
         TranslateModule.forRoot({
             loader: {
