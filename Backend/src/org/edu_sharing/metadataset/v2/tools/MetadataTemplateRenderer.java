@@ -79,6 +79,9 @@ public class MetadataTemplateRenderer {
     }
 
     public String render(String groupName) throws IllegalArgumentException {
+		if(userName == null){
+			throw new IllegalArgumentException("No username was given. Can't continue rendering metadata template-")
+		}
 		return AuthenticationUtil.runAs(()-> {
 			for (MetadataGroup group : mds.getGroups()) {
 				if (group.getId().equals(groupName))
