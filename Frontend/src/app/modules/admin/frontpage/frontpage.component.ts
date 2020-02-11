@@ -38,6 +38,7 @@ export class AdminFrontpageComponent {
   collectionName = '';
   chooseCollection = false;
   codeOptions={minimap:{enabled:false}, language: 'json'};
+  toolpermissions: any;
 
   /*
   totalCountFormControl = new FormControl('', [
@@ -70,6 +71,9 @@ export class AdminFrontpageComponent {
     this.mdsService.getSet().subscribe((set)=>{
       this.previewColumns=MdsHelper.getColumns(set,'search');
     });
+    this.adminService.getToolpermissions().subscribe(toolpermissions => 
+      this.toolpermissions = Object.keys(toolpermissions)
+    );
     this.update();
   }
 

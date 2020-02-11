@@ -61,11 +61,12 @@
                             <mat-option *ngFor="let type of conditionTypes" [value]="type">{{'ADMIN.FRONTPAGE.CONDITION_TYPE.'+type | translate}}</mat-option>
                         </mat-select>
                     </mat-form-field>
-                    <mat-form-field>
+                    <mat-form-field *ngIf="query.condition.type == 'TOOLPERMISSION'">
                         <mat-label>{{'ADMIN.FRONTPAGE.CUSTOM_QUERY_CONDITION_VALUE' | translate}}</mat-label>
                         <mat-hint>{{'ADMIN.FRONTPAGE.CUSTOM_QUERY_CONDITION_VALUE_HINT' | translate}}</mat-hint>
-                        <input matInput
-                                    id="conditionValue" [(ngModel)]="query.condition.value" [ngModelOptions]="{standalone: true}">
+                        <mat-select id="conditionValue" [(ngModel)]="query.condition.value" [ngModelOptions]="{standalone: true}">
+                            <mat-option *ngFor="let p of toolpermissions" [value]="p">{{p}}</mat-option>
+                        </mat-select>
                     </mat-form-field>
                     <mat-radio-group class="negate" [(ngModel)]="query.condition.negate" [ngModelOptions]="{standalone: true}">
                         <mat-label>{{'ADMIN.FRONTPAGE.CUSTOM_QUERY_CONDITION_NEGATE' | translate}}</mat-label>
