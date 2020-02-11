@@ -1,11 +1,14 @@
 package org.edu_sharing.repository.server.authentication;
 
 import java.io.IOException;
+import java.io.Serializable;
+import java.util.Map;
 
 import javax.servlet.*;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.service.ServiceRegistry;
 import org.alfresco.service.cmr.security.AuthenticationService;
 import org.apache.log4j.Logger;
@@ -14,11 +17,15 @@ import org.edu_sharing.alfresco.authentication.subsystems.SubsystemChainingAuthe
 import org.edu_sharing.alfresco.policy.NodeCustomizationPolicies;
 import org.edu_sharing.alfresco.workspace_administration.NodeServiceInterceptor;
 import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
+import org.edu_sharing.metadataset.v2.MetadataReaderV2;
+import org.edu_sharing.metadataset.v2.QueryUtils;
+import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.server.tools.ApplicationInfo;
 import org.edu_sharing.repository.server.tools.ApplicationInfoList;
 import org.edu_sharing.repository.server.tools.security.SignatureVerifier;
 import org.edu_sharing.restservices.RepositoryDao;
 import org.edu_sharing.service.authentication.ScopeAuthenticationServiceFactory;
+import org.edu_sharing.service.authority.AuthorityServiceFactory;
 import org.edu_sharing.service.config.ConfigServiceFactory;
 import org.edu_sharing.service.config.model.AvailableMds;
 import org.edu_sharing.webservices.util.AuthenticationUtils;
@@ -54,6 +61,18 @@ public class ContextManagementFilter implements javax.servlet.Filter {
 			
 			Context.newInstance((HttpServletRequest)req , (HttpServletResponse)res, context);
 			ScopeAuthenticationServiceFactory.getScopeAuthenticationService().setScopeForCurrentThread();
+
+			try{
+				// Run as System because there is yet no session opened
+				Map<String, Serializable> info = AuthenticationUtil.runAsSystem(() ->
+						AuthorityServiceFactory.getLocalService().getUserInfo(
+						(String) ((HttpServletRequest) req).getSession().getAttribute(CCConstants.AUTH_USERNAME))
+				);
+				QueryUtils.setUserInfo(info);
+			}catch(Exception e){
+				logger.info("Could not set user info: "+e.getMessage());
+			}
+
 			((HttpServletResponse)res).setHeader("Access-Control-Expose-Headers","X-Edu-Scope");
 			((HttpServletResponse)res).setHeader("X-Edu-Scope", NodeServiceInterceptor.getEduSharingScope());
 			
@@ -83,6 +102,7 @@ public class ContextManagementFilter implements javax.servlet.Filter {
 
 			NodeServiceInterceptor.setEduSharingScope((String)null);
 			NodeCustomizationPolicies.setEduSharingContext(null);
+			QueryUtils.setUserInfo(null);
 			SubsystemChainingAuthenticationService.setSuccessFullAuthenticationMethod((String)null);
 			
 			HttpContext.setCurrentMetadataSet(null);
@@ -94,7 +114,7 @@ public class ContextManagementFilter implements javax.servlet.Filter {
 			
 			
 			Context.getCurrentInstance().release();
-			
+
 			//clean up alfresco security context
 			
 			//for native API

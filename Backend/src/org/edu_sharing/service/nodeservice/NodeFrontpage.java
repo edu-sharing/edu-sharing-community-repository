@@ -17,6 +17,7 @@ import org.apache.log4j.Logger;
 import org.apache.lucene.search.Query;
 import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
 import org.edu_sharing.lightbend.LightbendConfigLoader;
+import org.edu_sharing.metadataset.v2.QueryUtils;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.server.jobs.helper.NodeRunner;
 import org.edu_sharing.repository.server.jobs.quartz.AbstractJob;
@@ -307,7 +308,7 @@ public class NodeFrontpage {
                 }
                 return false;
             }).forEach((q)-> {
-             query.must(QueryBuilders.wrapperQuery(q.query));
+             query.must(QueryBuilders.wrapperQuery(QueryUtils.replaceCommonQueryParams(q.query,QueryUtils.luceneReplacer)));
             });
         }
         SearchSourceBuilder searchSourceBuilder = new SearchSourceBuilder();

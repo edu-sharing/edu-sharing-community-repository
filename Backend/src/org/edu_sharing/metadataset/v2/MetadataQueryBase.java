@@ -1,24 +1,15 @@
 package org.edu_sharing.metadataset.v2;
 
-import org.alfresco.repo.security.authentication.AuthenticationUtil;
-import org.apache.lucene.queryParser.QueryParser;
-import org.edu_sharing.alfresco.policy.NodeCustomizationPolicies;
+import org.apache.log4j.Logger;
 
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
 public class MetadataQueryBase implements Serializable{
+    static Logger logger = Logger.getLogger(MetadataQueryBase.class);
     protected String basequery;
     private List<MetadataQueryCondition> conditions=new ArrayList<>();
-
-    public static String replaceCommonQueryParams(String query) {
-        if(query==null)
-            return query;
-        return query
-                .replace("${educontext}", QueryParser.escape(NodeCustomizationPolicies.getEduSharingContext()))
-                .replace("${authority}",QueryParser.escape(AuthenticationUtil.getFullyAuthenticatedUser()));
-    }
 
     public void addCondition(MetadataQueryCondition condition) {
         conditions.add(condition);
@@ -29,7 +20,7 @@ public class MetadataQueryBase implements Serializable{
     }
 
     public String getBasequery() {
-        return replaceCommonQueryParams(basequery);
+        return QueryUtils.replaceCommonQueryParams(basequery, QueryUtils.luceneReplacer);
     }
 
     public void setBasequery(String basequery) {

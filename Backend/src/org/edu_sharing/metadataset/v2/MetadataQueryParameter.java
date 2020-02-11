@@ -37,7 +37,7 @@ public class MetadataQueryParameter implements Serializable {
 		if(statement==null) {
 			statement = getDefaultStatement();
 		}
-		return MetadataQueryBase.replaceCommonQueryParams(statement);
+		return QueryUtils.replaceCommonQueryParams(statement, QueryUtils.luceneReplacer);
 	}
 	private String getDefaultStatement() {
 		return "@"+name.replace(":", "\\:")+":\"*${value}*\"";
