@@ -188,7 +188,7 @@ public class NodeFrontpage {
     }
     private void addNodeMetadata(NodeRef ref, XContentBuilder builder){
         try {
-            builder.field("type",NodeServiceHelper.getType(ref));
+            builder.field("type",CCConstants.getValidLocalName(NodeServiceHelper.getType(ref)));
             builder.startObject("properties");
             for(Map.Entry<QName, Serializable> prop : NodeServiceHelper.getPropertiesNative(ref).entrySet()){
                 builder.field(CCConstants.getValidLocalName(prop.getKey().toString()),prop.getValue());
