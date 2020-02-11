@@ -196,7 +196,7 @@ public class NodeFrontpage {
             builder.endObject();
             builder.startArray("aspects");
             for(String aspects : NodeServiceHelper.getAspects(ref)){
-                builder.value(aspects);
+                builder.value(CCConstants.getValidLocalName(aspects));
             }
             builder.endArray();
         } catch (Throwable t) {
