@@ -1,4 +1,10 @@
-import { animate, sequence, style, transition, trigger } from '@angular/animations';
+import {
+    animate,
+    sequence,
+    style,
+    transition,
+    trigger,
+} from '@angular/animations';
 import {
     ChangeDetectionStrategy,
     ChangeDetectorRef,
@@ -47,23 +53,35 @@ import { UIHelper } from '../../ui-helper';
     templateUrl: 'list-table.component.html',
     styleUrls: ['list-table.component.scss'],
     animations: [
-        trigger('openOverlay', UIAnimation.openOverlay(UIAnimation.ANIMATION_TIME_FAST)),
-        trigger('openOverlayBottom', UIAnimation.openOverlayBottom(UIAnimation.ANIMATION_TIME_FAST)),
+        trigger(
+            'openOverlay',
+            UIAnimation.openOverlay(UIAnimation.ANIMATION_TIME_FAST),
+        ),
+        trigger(
+            'openOverlayBottom',
+            UIAnimation.openOverlayBottom(UIAnimation.ANIMATION_TIME_FAST),
+        ),
         trigger('orderAnimation', [
             transition(':enter', [
                 sequence([
-                    animate(UIAnimation.ANIMATION_TIME_SLOW + 'ms ease', style({ opacity: 0 }))
-                ])
+                    animate(
+                        UIAnimation.ANIMATION_TIME_SLOW + 'ms ease',
+                        style({ opacity: 0 }),
+                    ),
+                ]),
             ]),
             transition(':leave', [
                 sequence([
-                    animate(UIAnimation.ANIMATION_TIME_SLOW + 'ms ease', style({ opacity: 1 }))
-                ])
-            ])
-        ])
+                    animate(
+                        UIAnimation.ANIMATION_TIME_SLOW + 'ms ease',
+                        style({ opacity: 1 }),
+                    ),
+                ]),
+            ]),
+        ]),
     ],
     // Causes action menu not to align properly
-    changeDetection: ChangeDetectionStrategy.OnPush
+    changeDetection: ChangeDetectionStrategy.OnPush,
 })
 /**
  * A provider to render multiple Nodes as a list
@@ -73,21 +91,26 @@ export class ListTableComponent implements EventListener {
     public static VIEW_TYPE_GRID = 1;
     public static VIEW_TYPE_GRID_SMALL = 2;
 
-    @ViewChild('addElementRef', {static: false}) addElementRef: ElementRef;
-    @ViewChild('drag', {static: false}) drag: ElementRef;
-    @ViewChild('menuTrigger', {static: false}) menuTrigger: MatMenuTrigger;
-    @ViewChild('dropdown', {static: false}) dropdownElement: ElementRef;
-    @ViewChild('dropdownContainer', {static: false}) dropdownContainerElement: ElementRef;
+    @ViewChild('addElementRef', { static: false }) addElementRef: ElementRef;
+    @ViewChild('drag', { static: false }) drag: ElementRef;
+    @ViewChild('menuTrigger', { static: false }) menuTrigger: MatMenuTrigger;
+    @ViewChild('dropdown', { static: false }) dropdownElement: ElementRef;
+    @ViewChild('dropdownContainer', { static: false })
+    dropdownContainerElement: ElementRef;
 
-    @ContentChild('itemContent', {static: false}) itemContentRef: TemplateRef<any>;
+    @ContentChild('itemContent', { static: false }) itemContentRef: TemplateRef<
+        any
+    >;
 
     /** Set the current list of nodes to render */
     @Input() set nodes(nodes: Node[]) {
         // remove all non-virtual nodes which are replaced by the virtual nodes (virtual have higher prio)
         // also validate that this is only enabled for regular nodes
         if (nodes && nodes.length && nodes[0].ref && nodes[0].ref.id) {
-            const virtual = nodes.filter((n) => n.virtual);
-            nodes = nodes.filter((n) => n.virtual || !virtual.find((v) => v.ref.id === n.ref.id));
+            const virtual = nodes.filter(n => n.virtual);
+            nodes = nodes.filter(
+                n => n.virtual || !virtual.find(v => v.ref.id === n.ref.id),
+            );
         }
         this._nodes = nodes;
     }
@@ -195,7 +218,9 @@ export class ListTableComponent implements EventListener {
     /**
      * A custom function to validate if a given node has permissions or should be displayed as "disabled".
      */
-    @Input() validatePermissions: (node: Node) => {
+    @Input() validatePermissions: (
+        node: Node,
+    ) => {
         status: boolean;
         message: string;
         button?: {
@@ -310,8 +335,8 @@ export class ListTableComponent implements EventListener {
     /**
      * control the visiblity of the reorder dialog (two-way binding)
      */
-     @Input() reorderDialog = false;
-     @Output() reorderDialogChange = new EventEmitter<boolean>();
+    @Input() reorderDialog = false;
+    @Output() reorderDialogChange = new EventEmitter<boolean>();
     /**
      * Can an element be dropped on the element?
      *
@@ -342,7 +367,7 @@ export class ListTableComponent implements EventListener {
      */
     @Output() clickRow = new EventEmitter<{
         /** Clicked object from list, depends on what you filled in. */
-        node: Node|any;
+        node: Node | any;
         /** Source click information, may null, e.g. 'preview', 'comments', 'dropdown' */
         source: string;
     }>();
@@ -432,9 +457,12 @@ export class ListTableComponent implements EventListener {
         private router: Router,
         private toast: Toast,
         private frame: FrameEventsService,
-        private sanitizer: DomSanitizer
+        private sanitizer: DomSanitizer,
     ) {
-        this.reorderButtons = DialogButton.getSaveCancel(() => this.closeReorder(false), () => this.closeReorder(true));
+        this.reorderButtons = DialogButton.getSaveCancel(
+            () => this.closeReorder(false),
+            () => this.closeReorder(true),
+        );
         this.id = Math.random();
         frame.addListener(this);
         setTimeout(() => this.loadRepos());
@@ -446,10 +474,12 @@ export class ListTableComponent implements EventListener {
         }
         this.locator.setRoute(this.route).subscribe(() => {
             this.locator.locateApi().subscribe(() => {
-                this.network.getRepositories().subscribe((data: NetworkRepositories) => {
-                    this.repositories = data.repositories;
-                    this.cd.detectChanges();
-                });
+                this.network
+                    .getRepositories()
+                    .subscribe((data: NetworkRepositories) => {
+                        this.repositories = data.repositories;
+                        this.cd.detectChanges();
+                    });
             });
         });
     }
@@ -462,10 +492,11 @@ export class ListTableComponent implements EventListener {
 
     // @HostListener('document:keydown', ['$event'])
     handleKeyboardEvent(event: KeyboardEvent): void {
-        if (event.code === 'KeyA'
-            && (event.ctrlKey || this.ui.isAppleCmd())
-            && !KeyEvents.eventFromInputField(event)
-            && !this.preventKeyevents
+        if (
+            event.code === 'KeyA' &&
+            (event.ctrlKey || this.ui.isAppleCmd()) &&
+            !KeyEvents.eventFromInputField(event) &&
+            !this.preventKeyevents
         ) {
             this.toggleAll();
             event.preventDefault();
@@ -481,7 +512,10 @@ export class ListTableComponent implements EventListener {
         if (!color) {
             return true;
         }
-        return ColorHelper.getColorBrightness(color) > ColorHelper.BRIGHTNESS_THRESHOLD_COLLECTIONS;
+        return (
+            ColorHelper.getColorBrightness(color) >
+            ColorHelper.BRIGHTNESS_THRESHOLD_COLLECTIONS
+        );
     }
 
     toggleAll(): void {
@@ -532,7 +566,10 @@ export class ListTableComponent implements EventListener {
         // When checking for aspects, we always detect a reference
         // BUT these references are regular nodes and DO NOT have the "originalId"
         // resulting that all references are detected as "deleted"
-        return node.reference != null/* || node.aspects && node.aspects.indexOf(RestConstants.CCM_ASPECT_IO_REFERENCE)!=-1*/;
+        return (
+            node.reference !=
+            null /* || node.aspects && node.aspects.indexOf(RestConstants.CCM_ASPECT_IO_REFERENCE)!=-1*/
+        );
     }
 
     isDeleted(node: any): boolean {
@@ -549,12 +586,18 @@ export class ListTableComponent implements EventListener {
     }
 
     getItemCssClass(item: ListItem): string {
-        return item.type.toLowerCase() + '_' + item.name.toLowerCase().replace(':', '_').replace('.', '_');
+        return (
+            item.type.toLowerCase() +
+            '_' +
+            item.name
+                .toLowerCase()
+                .replace(':', '_')
+                .replace('.', '_')
+        );
     }
 
     handleKeyboard(event: any): void {
         // Will break ng menu. May add a check whether menu is open
-
         // if (this.viewType == ListTableComponent.VIEW_TYPE_LIST && (event.key == "ArrowUp" || event.key == "ArrowDown")) {
         //     let next = event.key == "ArrowDown";
         //     let elements: any = document.getElementsByClassName("node-row");
@@ -581,7 +624,9 @@ export class ListTableComponent implements EventListener {
     }
 
     private filterCallbacks(options: OptionItem[], node: Node): OptionItem[] {
-        return options.filter((option) => !option.showCallback || option.showCallback(node));
+        return options.filter(
+            option => !option.showCallback || option.showCallback(node),
+        );
     }
 
     private selectAll(): void {
@@ -590,7 +635,6 @@ export class ListTableComponent implements EventListener {
             this.selectedNodes.push(node);
         }
         this.onSelectionChanged.emit(this.selectedNodes);
-
     }
 
     private move(array: any[], i1: number, i2: number): void {
@@ -603,8 +647,13 @@ export class ListTableComponent implements EventListener {
     private allowDrag(event: any, target: Node): void {
         if (this.orderElements) {
             event.preventDefault();
-            const source = this.storage.get(TemporaryStorageService.LIST_DRAG_DATA);
-            if (source.view === this.id && source.node.ref.id !== target.ref.id) {
+            const source = this.storage.get(
+                TemporaryStorageService.LIST_DRAG_DATA,
+            );
+            if (
+                source.view === this.id &&
+                source.node.ref.id !== target.ref.id
+            ) {
                 this.orderElementsActive = true;
                 this.orderElementsActiveChange.emit(true);
                 const targetPos = this._nodes.indexOf(target);
@@ -615,14 +664,25 @@ export class ListTableComponent implements EventListener {
                 return;
             }
         }
-        if (UIHelper.handleAllowDragEvent(this.storage, this.ui, event, target, this.canDrop)) {
+        if (
+            UIHelper.handleAllowDragEvent(
+                this.storage,
+                this.ui,
+                event,
+                target,
+                this.canDrop,
+            )
+        ) {
             event.preventDefault();
             this.dragHover = target;
         }
     }
 
     private noPermissions(node: Node): boolean {
-        return this.validatePermissions != null && this.validatePermissions(node).status === false;
+        return (
+            this.validatePermissions != null &&
+            this.validatePermissions(node).status === false
+        );
     }
 
     private closeReorder(save: boolean): void {
@@ -631,8 +691,7 @@ export class ListTableComponent implements EventListener {
         if (save) {
             this.columns = this.columnsAll;
             this.columnsChanged.emit(this.columnsAll);
-        }
-        else {
+        } else {
             this.columns = this.columnsOriginal;
         }
     }
@@ -676,7 +735,9 @@ export class ListTableComponent implements EventListener {
         }
         event.preventDefault();
         event.stopPropagation();
-        this.columnsAll[this.columnsAll.indexOf(this.currentDragColumn)].visible = false;
+        this.columnsAll[
+            this.columnsAll.indexOf(this.currentDragColumn)
+        ].visible = false;
         this.columns = this.columnsAll;
         this.currentDragColumn = null;
     }
@@ -684,7 +745,9 @@ export class ListTableComponent implements EventListener {
     private drop(event: any, target: Node): void {
         this.dragHover = null;
         if (this.orderElements) {
-            const source = this.storage.get(TemporaryStorageService.LIST_DRAG_DATA);
+            const source = this.storage.get(
+                TemporaryStorageService.LIST_DRAG_DATA,
+            );
             if (source.view === this.id && source.nodes.length === 1) {
                 this.onOrderElements.emit(this._nodes);
                 event.preventDefault();
@@ -692,7 +755,13 @@ export class ListTableComponent implements EventListener {
                 return;
             }
         }
-        UIHelper.handleDropEvent(this.storage, this.ui, event, target, this.onDrop);
+        UIHelper.handleDropEvent(
+            this.storage,
+            this.ui,
+            event,
+            target,
+            this.onDrop,
+        );
     }
 
     private animateIcon(node: Node, animate: boolean): void {
@@ -700,8 +769,7 @@ export class ListTableComponent implements EventListener {
             if (NodeHelper.hasAnimatedPreview(node)) {
                 this.animateNode = node;
             }
-        }
-        else {
+        } else {
             this.animateNode = null;
         }
     }
@@ -713,8 +781,7 @@ export class ListTableComponent implements EventListener {
         if (this.getSelectedPos(node) === -1) {
             if (this.hasCheckbox) {
                 this.selectedNodes.push(node);
-            }
-            else {
+            } else {
                 this.selectedNodes = [node];
             }
         }
@@ -730,7 +797,9 @@ export class ListTableComponent implements EventListener {
             name += RestHelper.getName(node);
         }
         this.currentDrag = name;
-        this.currentDragCount = this.selectedNodes.length ? this.selectedNodes.length : 1;
+        this.currentDragCount = this.selectedNodes.length
+            ? this.selectedNodes.length
+            : 1;
         try {
             event.dataTransfer.setDragImage(this.drag.nativeElement, 100, 20);
         } catch (e) {
@@ -741,7 +810,7 @@ export class ListTableComponent implements EventListener {
             offset: this._nodes.indexOf(node),
             node,
             nodes,
-            view: this.id
+            view: this.id,
         });
         this.onSelectionChanged.emit(this.selectedNodes);
     }
@@ -760,7 +829,11 @@ export class ListTableComponent implements EventListener {
     }
 
     private canBeSorted(sortBy: any): boolean {
-        return this.possibleSortByFields && this.possibleSortByFields.filter((p) => p.name === sortBy.name).length > 0;
+        return (
+            this.possibleSortByFields &&
+            this.possibleSortByFields.filter(p => p.name === sortBy.name)
+                .length > 0
+        );
     }
 
     private getSortableColumns(): ListItem[] {
@@ -776,8 +849,15 @@ export class ListTableComponent implements EventListener {
         return result;
     }
 
-    private setSortingIntern(sortBy: ListItem, isPrimaryElement: boolean): void {
-        if (isPrimaryElement && window.innerWidth < UIConstants.MOBILE_WIDTH + UIConstants.MOBILE_STAGE * 4) {
+    private setSortingIntern(
+        sortBy: ListItem,
+        isPrimaryElement: boolean,
+    ): void {
+        if (
+            isPrimaryElement &&
+            window.innerWidth <
+                UIConstants.MOBILE_WIDTH + UIConstants.MOBILE_STAGE * 4
+        ) {
             if (this.sortByMobile) {
                 this.sortMenu = true;
             }
@@ -795,7 +875,10 @@ export class ListTableComponent implements EventListener {
         if (!this.canBeSorted(sortBy)) {
             return;
         }
-        this.sortListener.emit({ sortBy: sortBy.name, sortAscending: sortBy.ascending });
+        this.sortListener.emit({
+            sortBy: sortBy.name,
+            sortAscending: sortBy.ascending,
+        });
     }
 
     private callOption(option: OptionItem, node: Node): void {
@@ -836,7 +919,11 @@ export class ListTableComponent implements EventListener {
         return node.reference ? node.reference : node;
     }
 
-    private showDropdown(node: Node, openMenu = false, event: any = null): void {
+    private showDropdown(
+        node: Node,
+        openMenu = false,
+        event: any = null,
+    ): void {
         // if (this._options == null || this._options.length < 1)
         //     return;
         this.select(node, 'dropdown', false, false);
@@ -847,8 +934,7 @@ export class ListTableComponent implements EventListener {
                 if (event.clientX + event.clientY) {
                     this.dropdownLeft = event.clientX + 'px';
                     this.dropdownTop = event.clientY + 'px';
-                }
-                else {
+                } else {
                     const rect = event.srcElement.getBoundingClientRect();
                     this.dropdownLeft = rect.left + rect.width / 2 + 'px';
                     this.dropdownTop = rect.top + rect.height / 2 + 'px';
@@ -864,7 +950,12 @@ export class ListTableComponent implements EventListener {
         this.doubleClickRow.emit(node);
     }
 
-    private select(node: Node, from: string = null, fireEvent = true, unselect = true): boolean {
+    private select(
+        node: Node,
+        from: string = null,
+        fireEvent = true,
+        unselect = true,
+    ): boolean {
         if (from !== 'checkbox' && !this.isClickable) {
             return false;
         }
@@ -873,11 +964,15 @@ export class ListTableComponent implements EventListener {
             return false;
         }
 
-        if (!this.hasCheckbox || from !== 'checkbox') { // Single value select
-            if (this.selectedNodes.length && this.selectedNodes[0] === node && unselect) {
+        if (!this.hasCheckbox || from !== 'checkbox') {
+            // Single value select
+            if (
+                this.selectedNodes.length &&
+                this.selectedNodes[0] === node &&
+                unselect
+            ) {
                 this.selectedNodes = [];
-            }
-            else {
+            } else {
                 this.selectedNodes = [node];
             }
             this.onSelectionChanged.emit(this.selectedNodes);
@@ -885,9 +980,20 @@ export class ListTableComponent implements EventListener {
         }
         const pos = this.getSelectedPos(node);
         // Select from-to range via shift key.
-        if (from === 'checkbox' && pos === -1 && this.ui.isShiftCmd() && this.selectedNodes.length === 1) {
-            const pos1 = RestHelper.getRestObjectPositionInArray(node, this._nodes);
-            const pos2 = RestHelper.getRestObjectPositionInArray(this.selectedNodes[0], this._nodes);
+        if (
+            from === 'checkbox' &&
+            pos === -1 &&
+            this.ui.isShiftCmd() &&
+            this.selectedNodes.length === 1
+        ) {
+            const pos1 = RestHelper.getRestObjectPositionInArray(
+                node,
+                this._nodes,
+            );
+            const pos2 = RestHelper.getRestObjectPositionInArray(
+                this.selectedNodes[0],
+                this._nodes,
+            );
             const start = pos1 < pos2 ? pos1 : pos2;
             const end = pos1 < pos2 ? pos2 : pos1;
             for (let i = start; i <= end; i++) {
@@ -895,8 +1001,7 @@ export class ListTableComponent implements EventListener {
                     this.selectedNodes.push(this._nodes[i]);
                 }
             }
-        }
-        else {
+        } else {
             if (pos !== -1 && unselect) {
                 this.selectedNodes.splice(pos, 1);
             }
@@ -910,7 +1015,12 @@ export class ListTableComponent implements EventListener {
     }
 
     private getAttribute(data: any, item: ListItem): SafeHtml {
-        const attribute = NodeHelper.getAttribute(this.translate, this.config, data, item);
+        const attribute = NodeHelper.getAttribute(
+            this.translate,
+            this.config,
+            data,
+            item,
+        );
         // sanitizer is much slower but required when attributes inject styles, so keep it in these cases
         if (attribute != null && attribute.indexOf('style=') !== -1) {
             return this.sanitizer.bypassSecurityTrustHtml(attribute);
@@ -923,7 +1033,12 @@ export class ListTableComponent implements EventListener {
     }
 
     private getLRMIAttribute(data: any, item: ListItem): string {
-        return NodeHelper.getLRMIAttribute(this.translate, this.config, data, item);
+        return NodeHelper.getLRMIAttribute(
+            this.translate,
+            this.config,
+            data,
+            item,
+        );
     }
 
     private getLRMIProperty(data: any, item: ListItem): string {
@@ -934,7 +1049,10 @@ export class ListTableComponent implements EventListener {
         if (!this.selectedNodes || !this.selectedNodes.length) {
             return -1;
         }
-        return RestHelper.getRestObjectPositionInArray(selected, this.selectedNodes);
+        return RestHelper.getRestObjectPositionInArray(
+            selected,
+            this.selectedNodes,
+        );
     }
 
     private optionIsValid(optionItem: OptionItem, node: Node): boolean {
@@ -950,5 +1068,4 @@ export class ListTableComponent implements EventListener {
         }
         return true;
     }
-
 }
