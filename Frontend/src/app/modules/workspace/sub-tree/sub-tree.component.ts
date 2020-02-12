@@ -138,15 +138,6 @@ export class WorkspaceSubTreeComponent  {
   }
   private dropEvent(event : any,target : Node){
     this.dragHover=null;
-    this.storage.remove(TemporaryStorageService.LIST_DRAG_DATA);
-    if(!event.dataTransfer.getData('text'))
-      return;
-    let data=(JSON.parse(event.dataTransfer.getData('text')) as Node[]);
-    event.preventDefault();
-    event.stopPropagation();
-    if(!data) {
-      return;
-    }
     UIHelper.handleDropEvent(this.storage,this.ui,event,target,this.onDrop);
   }
   private isSelected(node : Node){
