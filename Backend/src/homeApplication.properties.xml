@@ -61,9 +61,6 @@
 	https://github.com/rootzoll/web-screenshot -->
 	<!-- <entry key="websitepreviewrenderservice">http://${previewservice}</entry>-->
 	
-	<entry key="guest_username">esguest</entry>
-	<entry key="guest_password">esguest</entry>
-	
 	<entry key="property_validator_regex_cm_name">([\"\*\\\\\&gt;\&lt;\?\/\:\|'\r\n])</entry>
 	
 	<!--
