@@ -131,7 +131,7 @@ public class MetadataTemplateRenderer {
 				values=new String[]{"-"};
 				wasEmpty=true;
 			}
-			StringBuffer widgetHtml=new StringBuffer("");
+			StringBuffer widgetHtml=new StringBuffer("<div data-widget-id='"+widget.getId()+"' class='mdsWidget");
 			if(renderingMode.equals(RenderingMode.HTML)) {
 				widgetHtml.append("<div data-widget-id='\"+widget.getId()+\"' class='mdsWidget");
 				if (widget.getType() != null) {
