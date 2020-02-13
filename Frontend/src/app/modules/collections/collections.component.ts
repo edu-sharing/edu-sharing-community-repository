@@ -200,7 +200,7 @@ export class CollectionsMainComponent {
     private path: EduData.Node[];
     private hasEditorial = false;
     private hasMediacenter = false;
-    private showCollection = true;
+    private showCollection = false;
     private pinningAllowed = false;
     private _orderActive: boolean;
     private reurl: any;
