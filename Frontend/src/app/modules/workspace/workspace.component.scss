@@ -182,7 +182,7 @@ user-quota{
     }
   }
   @media not screen and (max-width: ($mobileTabSwitchWidth)) {
-    listTable .list-type-table{
+    workspace-explorer listTable .list-type-table{
       position: relative;
       top: $listHeadingHeight;
       height:calc(100vh - #{$mainnavHeight+$secondaryBarHeight+$listHeadingHeight});
