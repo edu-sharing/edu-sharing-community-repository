@@ -165,12 +165,21 @@
       margin: 0;
       position: relative;
       flex-grow: 1;
+
     }
     &:not(.card-tabbed) mat-card-content {
       @include content();
     }
-    &.card-tabbed .mat-tab-body-wrapper {
-      @include content();
+    &.card-tabbed mat-card-content {
+      display: flex;
+      flex-direction: column;
+      min-height: 0px;
+      mat-tab-group {
+        min-height: 0px;
+        .mat-tab-body-wrapper {
+          @include content();
+        }
+      }
     }
     .card-content-padding {
       padding: $cardPadding;
