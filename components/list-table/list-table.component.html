@@ -82,17 +82,20 @@
                  [style.border-color]="isCollection(node) ? getCollectionColor(node) : null"
                  [class.dark-color]="isCollection(node) && getCollection(node).preview.isIcon && isBrightColorCollection(getCollectionColor(node))"
                  [title]="viewType==0 ? '' : getTitle(node)"
-                 [draggable]="dragDrop"
                  (click)="select(node)"
                  (dblclick)="doubleClick(node)"
-                 (dragend)="dragHover=null"
-                 (dragexit)="dragHover=null"
-                 (dragleave)="dragHover=null"
                  (contextmenu)="contextMenu($event,node)"
-                 (dragover)="allowDrag($event,node)"
-                 (dragenter)="allowDrag($event,node)"
                  (keydown)="handleKeyboard($event)"
-                 (drop)="drop($event,node)" (dragstart)="dragStart($event,node)" tabindex="0" (keyup.enter)="doubleClick(node)">
+                 [appNodesDragSource]="dragDrop ? selectedNodes : null"
+                 (nodesDragStart)="onNodesDragStart($event, node)"
+                 (nodesDragEnd)="onNodesDragEnd()"
+                 [appNodesDropTarget]="canDropNodes.bind(this, node)"
+                 [nodesDragAllowedActions]="isNodesDragSource ? ['move'] : ['move', 'copy']"
+                 (nodesDragEnter)="onNodesDragEnter(node)"
+                 (nodesHoveringChange)="onNodesHoveringChange($event, node)"
+                 (nodesDrop)="onNodesDrop($event, node)"
+                 tabindex="0"
+                 (keyup.enter)="doubleClick(node)">
                 <!-- custom data binding from outside -->
                 <ng-container *ngTemplateOutlet="itemContentRef; context: { $implicit: node }"></ng-container>
                 <div *ngIf="viewType==1 && getReference(node).properties && getReference(node).properties['virtual:childobjectcount']>0" class="childobjectCount">

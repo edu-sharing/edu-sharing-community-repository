@@ -366,52 +366,6 @@ export class UIHelper {
         );
     }
 
-    static handleAllowDragEvent(
-        storage: TemporaryStorageService,
-        ui: UIService,
-        event: any,
-        target: Node,
-        canDrop: Function,
-    ) {
-        let source = storage.get(TemporaryStorageService.LIST_DRAG_DATA);
-        if (!source) return false;
-        if (!canDrop({ source: source.nodes, target: target, event: event }))
-            return false;
-        /*
-        if(event.altKey)
-          event.dataTransfer.dropEffect='link';
-          */
-        if (event.ctrlKey || ui.isShiftCmd())
-            event.dataTransfer.dropEffect = 'copy';
-        //if(event.dataTransfer.getData("text"))
-        event.preventDefault();
-        event.stopPropagation();
-        return true;
-    }
-
-    static handleDropEvent(
-        storage: TemporaryStorageService,
-        ui: UIService,
-        event: any,
-        target: Node,
-        onDrop: EventEmitter<any>,
-    ) {
-        storage.remove(TemporaryStorageService.LIST_DRAG_DATA);
-        if (!event.dataTransfer.getData('text')) return;
-        let data = JSON.parse(event.dataTransfer.getData('text')) as Node[];
-        event.preventDefault();
-        event.stopPropagation();
-        if (!data) {
-            return;
-        }
-        let type = 'default';
-        /*
-        if(event.altKey)
-          type='link';
-         */
-        if (event.ctrlKey || ui.isAppleCmd()) type = 'copy';
-        onDrop.emit({ target: target, source: data, event: event, type: type });
-    }
     static prepareMetadatasets(
         translate: TranslateService,
         mdsSets: MdsInfo[],

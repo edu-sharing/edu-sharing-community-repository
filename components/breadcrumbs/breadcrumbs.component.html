@@ -13,10 +13,9 @@
         <button
                 *ngIf="clickable"
                 mat-button color="primary"
-                (dragend)="dragHover=null"
-                (dragexit)="dragHover=null"
-                (dragleave)="dragHover=null"
-                (dragover)="allowDrag($event,node)" (drop)="drop($event,node)"
+                [appNodesDropTarget]="canDropNodes.bind(this, node)"
+                (nodesHoveringChange)="onNodesHoveringChange($event, node)"
+                (nodesDrop)="onNodesDrop($event, node)"
                 [class.homeIsIcon]="!home"
                 class="folder mat-button-no-uppercase"
                 [class.clickable]="clickable"

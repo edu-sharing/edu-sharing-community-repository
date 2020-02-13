@@ -47,6 +47,7 @@ import { NodeHelper } from '../../node-helper';
 import { OptionItem } from '../../option-item';
 import { Toast } from '../../toast';
 import { UIHelper } from '../../ui-helper';
+import { DragData, DropData } from '../../directives/drag-nodes/drag-nodes';
 
 @Component({
     selector: 'listTable',
@@ -192,7 +193,7 @@ export class ListTableComponent implements EventListener {
 
     @Input() set hasCheckbox(hasCheckbox: boolean) {
         this._hasCheckbox = hasCheckbox;
-        if (!hasCheckbox) {
+        if (!hasCheckbox && this.selectedNodes.length > 1) {
             // use a timeout to prevent a ExpressionChangedAfterItHasBeenCheckedError in the parent component
             setTimeout(() => {
                 this.selectedNodes = [];
@@ -333,7 +334,7 @@ export class ListTableComponent implements EventListener {
     @Input() canDelete: () => boolean;
 
     /**
-     * control the visiblity of the reorder dialog (two-way binding)
+     * control the visibility of the reorder dialog (two-way binding)
      */
     @Input() reorderDialog = false;
     @Output() reorderDialogChange = new EventEmitter<boolean>();
@@ -342,7 +343,11 @@ export class ListTableComponent implements EventListener {
      *
      * Called with same parameters as onDrop event.
      */
-    @Input() canDrop: () => boolean = () => true;
+    @Input() canDrop: (arg: {
+        source: Node[];
+        target: Node;
+        event: DragEvent;
+    }) => boolean = () => true;
 
     @Output() nodesChange = new EventEmitter();
 
@@ -400,7 +405,7 @@ export class ListTableComponent implements EventListener {
         target: Node;
         source: Node[];
         event: any;
-        type: 'default' | 'copy';
+        type: 'move' | 'copy';
     }>();
 
     /**
@@ -430,6 +435,11 @@ export class ListTableComponent implements EventListener {
     dropdownTop: string;
     id: number;
     reorderButtons: DialogButton[];
+    dragHover: Node;
+    /**
+     * Whether the user is currently dragging one or more nodes from this list.
+     */
+    isNodesDragSource = false;
 
     private _hasCheckbox: boolean;
     private _nodes: any[];
@@ -439,7 +449,6 @@ export class ListTableComponent implements EventListener {
     private columnsOriginal: ListItem[];
     private columnsVisible: ListItem[];
     private currentDragColumn: ListItem;
-    private dragHover: Node;
     private optionsAlways: OptionItem[] = [];
     private repositories: Repository[];
     private sortMenu = false;
@@ -623,6 +632,102 @@ export class ListTableComponent implements EventListener {
         return null;
     }
 
+    /**
+     * Called before a drag operation is executed.
+     *
+     * @param node - The node on which the drag operation was started.
+     */
+    onNodesDragStart(event: DragEvent, node: Node) {
+        this.addToSelectedNodes(node);
+
+        let name = '';
+        for (const node of this.selectedNodes) {
+            if (name) {
+                name += ', ';
+            }
+            name += RestHelper.getName(node);
+        }
+        this.currentDrag = name;
+        this.currentDragCount = this.selectedNodes.length
+            ? this.selectedNodes.length
+            : 1;
+        try {
+            event.dataTransfer.setDragImage(this.drag.nativeElement, 100, 20);
+        } catch (e) {
+            // Do nothing.
+        }
+        this.isNodesDragSource = true;
+    }
+
+    canDropNodes(target: Node, { event, nodes }: DragData) {
+        if (
+            this.orderElements &&
+            this.isNodesDragSource &&
+            this.selectedNodes.length === 1
+        ) {
+            return true;
+        }
+        return this.canDrop({ source: nodes, target, event });
+    }
+
+    onNodesDragEnter(target: Node) {
+        if (
+            this.orderElements &&
+            this.isNodesDragSource &&
+            this.selectedNodes.length === 1 &&
+            this.selectedNodes[0].ref.id !== target.ref.id
+        ) {
+            this.orderElementsActive = true;
+            this.orderElementsActiveChange.emit(true);
+            const targetPos = this._nodes.indexOf(target);
+            this.moveNode(this.selectedNodes[0], targetPos);
+            // Inform the outer component's variable about the new order
+            this.nodesChange.emit(this._nodes);
+        }
+    }
+
+    onNodesHoveringChange(nodesHovering: boolean, target: Node) {
+        if (nodesHovering) {
+            this.dragHover = target;
+        } else {
+            // The enter event of another node might have fired before this leave
+            // event and already updated `dragHover`. Only set it to null if that is
+            // not the case.
+            if (this.dragHover === target) {
+                this.dragHover = null;
+            }
+        }
+    }
+
+    onNodesDragEnd() {
+        this.isNodesDragSource = false;
+    }
+
+    onNodesDrop({ event, nodes, dropAction }: DropData, target: Node) {
+        if (dropAction === 'link') {
+            throw new Error('dropAction "link" is not allowed');
+        }
+        if (this.isNodesDragSource) {
+            this.onOrderElements.emit(this._nodes);
+        }
+        this.onDrop.emit({ target, source: nodes, event, type: dropAction });
+    }
+
+    private addToSelectedNodes(node: Node) {
+        if (this.getSelectedPos(node) >= 0) {
+            // The node under the cursor is already part of the selection.
+            return;
+        }
+        if (this.hasCheckbox) {
+            // Nodes are selectable, but the current node is not yet part of the selection.
+            this.selectedNodes.push(node);
+        } else {
+            // Multi-node selection is not supported by this list.
+            this.selectedNodes = [node];
+        }
+        this.onSelectionChanged.emit(this.selectedNodes);
+    }
+
     private filterCallbacks(options: OptionItem[], node: Node): OptionItem[] {
         return options.filter(
             option => !option.showCallback || option.showCallback(node),
@@ -637,45 +742,13 @@ export class ListTableComponent implements EventListener {
         this.onSelectionChanged.emit(this.selectedNodes);
     }
 
-    private move(array: any[], i1: number, i2: number): void {
-        const node1 = array[i1];
-        const node2 = array[i2];
-        array.splice(i1, 1);
-        array.splice(i2, 0, node1);
-    }
-
-    private allowDrag(event: any, target: Node): void {
-        if (this.orderElements) {
-            event.preventDefault();
-            const source = this.storage.get(
-                TemporaryStorageService.LIST_DRAG_DATA,
-            );
-            if (
-                source.view === this.id &&
-                source.node.ref.id !== target.ref.id
-            ) {
-                this.orderElementsActive = true;
-                this.orderElementsActiveChange.emit(true);
-                const targetPos = this._nodes.indexOf(target);
-                this._nodes = Helper.deepCopy(source.list);
-                this.move(this._nodes, source.offset, targetPos);
-                // Inform the outer component's variable about the new order
-                this.nodesChange.emit(this._nodes);
-                return;
-            }
+    private moveNode(node: Node, targetPos: number): void {
+        const sourcePos = this._nodes.indexOf(node);
+        if (sourcePos < 0) {
+            throw new Error('Cannot move node: node not in nodes list');
         }
-        if (
-            UIHelper.handleAllowDragEvent(
-                this.storage,
-                this.ui,
-                event,
-                target,
-                this.canDrop,
-            )
-        ) {
-            event.preventDefault();
-            this.dragHover = target;
-        }
+        this._nodes.splice(sourcePos, 1);
+        this._nodes.splice(targetPos, 0, node);
     }
 
     private noPermissions(node: Node): boolean {
@@ -742,28 +815,6 @@ export class ListTableComponent implements EventListener {
         this.currentDragColumn = null;
     }
 
-    private drop(event: any, target: Node): void {
-        this.dragHover = null;
-        if (this.orderElements) {
-            const source = this.storage.get(
-                TemporaryStorageService.LIST_DRAG_DATA,
-            );
-            if (source.view === this.id && source.nodes.length === 1) {
-                this.onOrderElements.emit(this._nodes);
-                event.preventDefault();
-                event.stopPropagation();
-                return;
-            }
-        }
-        UIHelper.handleDropEvent(
-            this.storage,
-            this.ui,
-            event,
-            target,
-            this.onDrop,
-        );
-    }
-
     private animateIcon(node: Node, animate: boolean): void {
         if (animate) {
             if (NodeHelper.hasAnimatedPreview(node)) {
@@ -772,47 +823,6 @@ export class ListTableComponent implements EventListener {
         } else {
             this.animateNode = null;
         }
-    }
-
-    private dragStart(event: any, node: Node): void {
-        if (!this.dragDrop) {
-            return;
-        }
-        if (this.getSelectedPos(node) === -1) {
-            if (this.hasCheckbox) {
-                this.selectedNodes.push(node);
-            } else {
-                this.selectedNodes = [node];
-            }
-        }
-        const nodes = this.selectedNodes.length ? this.selectedNodes : [node];
-
-        event.dataTransfer.setData('text', JSON.stringify(nodes));
-        event.dataTransfer.effectAllowed = 'all';
-        let name = '';
-        for (const node of nodes) {
-            if (name) {
-                name += ', ';
-            }
-            name += RestHelper.getName(node);
-        }
-        this.currentDrag = name;
-        this.currentDragCount = this.selectedNodes.length
-            ? this.selectedNodes.length
-            : 1;
-        try {
-            event.dataTransfer.setDragImage(this.drag.nativeElement, 100, 20);
-        } catch (e) {
-            // Do nothing.
-        }
-        this.storage.set(TemporaryStorageService.LIST_DRAG_DATA, {
-            list: Helper.deepCopy(this._nodes),
-            offset: this._nodes.indexOf(node),
-            node,
-            nodes,
-            view: this.id,
-        });
-        this.onSelectionChanged.emit(this.selectedNodes);
     }
 
     private dragStartColumn(event: any, index: number, column: ListItem): void {

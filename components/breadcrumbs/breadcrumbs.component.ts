@@ -8,6 +8,7 @@ import {
     UIService,
 } from '../../../core-module/core.module';
 import { Router } from '@angular/router';
+import { DragData, DropData } from '../../directives/drag-nodes/drag-nodes';
 
 /**
  * A module that provides breadcrumbs for nodes or collections
@@ -85,9 +86,9 @@ export class BreadcrumbsComponent {
 
     _breadcrumbsAsNode: Node[] = [];
     _breadcrumbsAsNodeShort: Node[] = [];
+    dragHover: Node;
 
     private _breadcrumbsAsId: string[];
-    private dragHover: Node;
     private _searchQuery: string;
     private isBuilding = false;
     private mainParents: Node[];
@@ -103,34 +104,38 @@ export class BreadcrumbsComponent {
         return UIHelper.createUrlToNode(this.router, node);
     }
 
-    private openBreadcrumb(position: number) {
-        this.onClick.emit(position);
-        return false;
+    canDropNodes(target: Node, { event, nodes }: DragData) {
+        return this.canDrop({ source: nodes, target, event });
     }
 
-    private allowDrag(event: any, target: Node) {
-        if (
-            UIHelper.handleAllowDragEvent(
-                this.storage,
-                this.ui,
-                event,
-                target,
-                this.canDrop,
-            )
-        ) {
+    onNodesHoveringChange(nodesHovering: boolean, target: Node) {
+        if (nodesHovering) {
             this.dragHover = target;
+        } else {
+            // The enter event of another node might have fired before this leave
+            // event and already updated `dragHover`. Only set it to null if that is
+            // not the case.
+            if (this.dragHover === target) {
+                this.dragHover = null;
+            }
         }
     }
 
-    private drop(event: any, target: Node) {
-        this.dragHover = null;
-        UIHelper.handleDropEvent(
-            this.storage,
-            this.ui,
-            event,
+    onNodesDrop({ event, nodes, dropAction }: DropData, target: Node) {
+        if (dropAction === 'link') {
+            throw new Error('dropAction "link" is not allowed');
+        }
+        this.onDrop.emit({
             target,
-            this.onDrop,
-        );
+            source: nodes,
+            event,
+            type: dropAction,
+        });
+    }
+
+    private openBreadcrumb(position: number) {
+        this.onClick.emit(position);
+        return false;
     }
 
     private generateShort() {

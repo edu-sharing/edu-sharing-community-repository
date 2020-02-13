@@ -4,7 +4,7 @@ import {TranslateLoader, TranslateModule, TranslatePipe, TranslateService} from 
 import {createTranslateLoader} from './translation';
 import {HttpClient} from '@angular/common/http';
 import {RestLocatorService} from '../core-module/rest/services/rest-locator.service';
-import {InfiniteScrollDirective} from './infinite-scroll.directive';
+import {InfiniteScrollDirective} from './directives/infinite-scroll.directive';
 import {ListTableComponent} from './components/list-table/list-table.component';
 import {FormsModule} from '@angular/forms';
 import {BrowserModule} from '@angular/platform-browser';
@@ -44,6 +44,8 @@ import {InputPasswordComponent} from './components/input-password/input-password
 import { LinkComponent } from './components/link/link.component';
 import { UserAvatarComponent } from './components/user-avatar/user-avatar.component';
 import { MatTooltipModule } from '@angular/material/tooltip';
+import { NodesDragSourceDirective } from './directives/drag-nodes/nodes-drag-source.directive';
+import { NodesDropTargetDirective } from './directives/drag-nodes/nodes-drop-target.directive';
 
 @NgModule({
     declarations: [
@@ -71,7 +73,9 @@ import { MatTooltipModule } from '@angular/material/tooltip';
         ReplaceCharsPipe,
         PermissionNamePipe,
         UrlPipe,
-        AuthorityAffiliationPipe
+        AuthorityAffiliationPipe,
+        NodesDragSourceDirective,
+        NodesDropTargetDirective,
     ],
     imports: [
         BrowserModule,
@@ -134,8 +138,10 @@ import { MatTooltipModule } from '@angular/material/tooltip';
         ReplaceCharsPipe,
         PermissionNamePipe,
         UrlPipe,
-        AuthorityAffiliationPipe
-    ]
+        AuthorityAffiliationPipe,
+        NodesDragSourceDirective,
+        NodesDropTargetDirective,
+    ],
 })
 export class CoreUiModule { }
 
