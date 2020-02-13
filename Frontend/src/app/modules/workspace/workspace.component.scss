@@ -174,7 +174,7 @@ user-quota{
   }
 }
 :host ::ng-deep{
-  listTable .list{
+  workspace-explorer listTable .list{
     height:calc(100vh - #{$mainnavHeight+$secondaryBarHeight});
     overflow-y: auto;
     &.list-type-card{
