@@ -64,9 +64,6 @@ $shareLinkHeight:40px;
       border-radius: 2px;
     }
   }
-  .mat-tab-body-wrapper {
-    max-height: calc(100vh - #{$titleHeight} - #{$actionMenuHeight} - #{$tabHeight} - #{$shareLinkHeight} )!important;
-  }
 }
 h2{
   color:$textLight;
