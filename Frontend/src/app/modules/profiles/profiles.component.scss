@@ -21,188 +21,235 @@ $path:'../../../assets/images/';
     background-size: cover;
   }
 }
-.profiles{
-  position: relative;
-  width: 480px;
-  margin: auto;
+.profiles-wrapper {
   display: flex;
-  flex-direction: column;
-  min-height: 100%;
   padding-top: $mainnavHeight;
-  padding-bottom: 20px;
-  background: white;
-  box-shadow: 0 0 5px rgba(0, 0, 0, 0.3);
-  .name{
-    font-size:140%;
-    font-weight: bold;
-    margin-top: 5px;
-  }
-  .profile{
-    white-space: pre-line;
-  }
-  .top{
+  height: calc(100% - #{$mainnavHeight});
+  align-items: center;
+  .profiles {
     position: relative;
-    padding-top: 40px;
+    width: 480px;
+    margin: auto;
+    display: flex;
+    flex-direction: column;
     padding-bottom: 20px;
-    padding-left: 20px;
-    padding-right: 20px;
-    text-align: center;
-    color: $textOnPrimary;
-    z-index: 2;
-    overflow: hidden;
-    a{
-      color: $textOnPrimary;
+    background: white;
+    box-shadow: 0 0 5px rgba(0, 0, 0, 0.3);
+
+    .name {
+      font-size: 140%;
+      font-weight: bold;
+      margin-top: 5px;
     }
-    a,.name,.mail,user-avatar,input,.editAvatar {
+
+    .profile {
+      white-space: pre-line;
+    }
+
+    .top {
       position: relative;
+      padding-top: 40px;
+      padding-bottom: 20px;
+      padding-left: 20px;
+      padding-right: 20px;
+      text-align: center;
+      color: $textOnPrimary;
       z-index: 2;
-    }
-    .mail{
-      opacity:0.75;
-    }
-    user-avatar{
-    }
-    mat-form-field{
-      width: auto;
-      margin:10px;
-      z-index: 2;
-      //background-color: rgba(255,255,255,0.1);
-    }
-    .edit{
-      position: absolute;
-      right:20px;
-      top:20px;
-      z-index: 1;
-    }
-    .editAvatar{
-      position: absolute;
-      left: calc(50% + 60px);
-      top: 82px;
-      user-select: none;
-      >button{
-        padding: 10px;
+      overflow: hidden;
+
+      a {
+        color: $textOnPrimary;
       }
 
-      .new-avatar-button{
-        left: -118px;
-        border-radius: 50%;
+      a, .name, .mail, user-avatar, input, .editAvatar {
+        position: relative;
+        z-index: 2;
+      }
+
+      .mail {
+        opacity: 0.75;
+      }
+
+      user-avatar {
+      }
+
+      mat-form-field {
+        width: auto;
+        margin: 10px;
+        z-index: 2;
+        //background-color: rgba(255,255,255,0.1);
+      }
+
+      .edit {
         position: absolute;
-        top: -45px;
-        height: 120px;
-        width: 116px;
-        cursor: pointer;
-        overflow: hidden;
-        span{
-          background: rgba(0, 0, 0, 0.7);
-          bottom: 0;
-          color: #fff;
-          font-size: 9pt;
-          left: 0;
+        right: 20px;
+        top: 20px;
+        z-index: 1;
+      }
+
+      .editAvatar {
+        position: absolute;
+        left: calc(50% + 60px);
+        top: 82px;
+        user-select: none;
+
+        > button {
+          padding: 10px;
+        }
+
+        .new-avatar-button {
+          left: -118px;
+          border-radius: 50%;
           position: absolute;
-          padding-top: 7px;
-          padding-bottom: 10px;
-          text-align: center;
-          width: 100%;
+          top: -45px;
+          height: 120px;
+          width: 116px;
+          cursor: pointer;
+          overflow: hidden;
+
+          span {
+            background: rgba(0, 0, 0, 0.7);
+            bottom: 0;
+            color: #fff;
+            font-size: 9pt;
+            left: 0;
+            position: absolute;
+            padding-top: 7px;
+            padding-bottom: 10px;
+            text-align: center;
+            width: 100%;
+          }
         }
       }
     }
-  }
-  .about,.stats,.authorityName,.changePassword{
-    max-width: 500px;
-    margin: auto;
-    padding:0 25px;
-  }
-  .changePassword{
-    padding-top: 40px;
-    .toggle {
-      color: $primary;
-      text-transform: uppercase;
-      float: left;
-      margin-bottom: 20px;
-      width: 100%;
-      div {
+
+    .about, .stats, .authorityName, .changePassword {
+      max-width: 500px;
+      margin: auto;
+      padding: 0 25px;
+    }
+
+    .changePassword {
+      padding-top: 40px;
+
+      .toggle {
+        color: $primary;
+        text-transform: uppercase;
         float: left;
-        display: flex;
-        align-items: center;
-      }
-      i {
-        margin-right: 10px;
+        margin-bottom: 20px;
+        width: 100%;
+
+        div {
+          float: left;
+          display: flex;
+          align-items: center;
+        }
+
+        i {
+          margin-right: 10px;
+        }
       }
     }
-  }
-  .change-buttons{
-    width: 100%;
-    text-align: right;
-  }
-  .about{
-    position: relative;
-    >div{
-      padding-top: 20px;
-    }
-    mat-form-field{
+
+    .change-buttons {
       width: 100%;
-    }
-    .about-buttons{
       text-align: right;
     }
-    .profiles,.empty{
-      white-space: pre-line;
+
+    .about {
+      position: relative;
+
+      .about-edit {
+        padding-top: 10px;
+      }
+      .about {
+        padding-top: 25px;
+        > div{
+          padding:0 15px;
+        }
+      }
+
+      mat-form-field {
+        width: 100%;
+      }
+
+      .about-buttons {
+        padding-top: 10px;
+        text-align: right;
+      }
+
+      .profiles, .empty {
+        white-space: pre-line;
+      }
+
+      .empty {
+        color: $textVeryLight;
+      }
+
+      /* background: url($path + 'quotes.svg') 10px 0 no-repeat; */
     }
-    .empty{
-      color:$textVeryLight;
+
+    .quotes {
+      position: absolute;
+      top: 20px;
+      left: 30px;
+      color: $textMain;
     }
-    /* background: url($path + 'quotes.svg') 10px 0 no-repeat; */
-  }
-  .quotes{
-    position: absolute;
-    top:20px;
-    left:30px;
-    color: $textMain;
-  }
-  .statsBackground{
-    background-color: #fff;
-    width:100%;
-    @include materialShadow();
-  }
-  .stats{
-    padding-top: 20px;
-    padding-bottom: 10px;
-    display:flex;
-    text-align: center;
-    flex-direction: row;
-    >div{
-      display:flex;
-      flex-direction: column;
-      flex-grow: 1;
-      align-items: center;
-      padding:0 10px;
-      >div{
+
+    .statsBackground {
+      background-color: #fff;
+      width: 100%;
+      @include materialShadow();
+    }
+
+    .stats {
+      padding-top: 20px;
+      padding-bottom: 10px;
+      display: flex;
+      text-align: center;
+      flex-direction: row;
+
+      > div {
         display: flex;
+        flex-direction: column;
+        flex-grow: 1;
+        align-items: center;
+        padding: 0 10px;
+
+        > div {
+          display: flex;
+        }
+      }
+
+      .stat {
+        color: $textLight;
+      }
+
+      .value {
+        font-size: 30pt;
       }
     }
-    .stat{
-      color: $textLight;
-    }
-    .value{
-      font-size:30pt;
-    }
-  }
-  .authorityName{
-    padding-top: 20px;
-  }
 
-  .main{
-    flex-grow: 1;
-  }
-  .save{
-    position: relative;
-    z-index: 2;
-    width:100%;
-    .btn-flat:hover{
-      background-color: #eee;
+    .authorityName {
+      padding-top: 20px;
     }
-    button {
-      float: right;
+
+    .main {
+      flex-grow: 1;
+    }
+
+    .save {
+      position: relative;
+      z-index: 2;
+      width: 100%;
+
+      .btn-flat:hover {
+        background-color: #eee;
+      }
+
+      button {
+        float: right;
+      }
     }
   }
 }
