@@ -53,8 +53,10 @@ mds .mdsGroup{
   float:left;
   padding:25px;
   padding-bottom:5px;
-  label{
+  > div > label{
     display: inline-flex;
+    padding-bottom: 4px;
+    font-weight: bold;
     .required{
       font-size: 75%;
       font-weight: bold;
@@ -95,7 +97,7 @@ mds .mdsGroup{
     padding-right:10px;
   }
   .multivalueBadges{
-    padding: 0 10px 0 10px;
+    padding: 10px 10px 0 10px;
   }
 
   .mdsWidget {
@@ -117,14 +119,6 @@ mds .mdsGroup{
       margin-bottom: 20px;
     }
   }
-  .hint{
-    color:$textLight;
-    font-size:80%;
-    margin-top:-5px;
-    margin-bottom:2px;
-    margin-left:0.75em;
-    margin-right:0.75em;
-  }
   .suggestionInput{
     position: relative;
     z-index: 130;
@@ -132,15 +126,6 @@ mds .mdsGroup{
   .suggestHighlight{
     font-weight:bold;
     color:$primary;
-  }
-  .widget_multivalueFixedBadges,
-  .widget_multivalueBadges,
-  .widget_multivalueSuggestBadges,
-  .widget_multivalueTree{
-    .input-hint-bottom{
-      margin-top: -5px;
-      margin-bottom: 5px;
-    }
   }
   .suggestionMoreItems{
     font-weight: bold;
