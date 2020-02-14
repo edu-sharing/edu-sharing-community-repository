@@ -122,7 +122,7 @@ export class WorkspaceMainComponent implements EventListener {
     private oldParams: Params;
     private selectedNodeTree: string;
     private nodeDebug: Node;
-    private sharedNode: Node;
+    private sharedNode: Node[];
     public contributorNode: Node;
     public shareLinkNode: Node;
     private viewType = 0;
@@ -486,7 +486,7 @@ export class WorkspaceMainComponent implements EventListener {
     }
     private shareNode(node: Node) {
         const list = this.getNodeList(node);
-        this.sharedNode = list[0];
+        this.sharedNode = list;
     }
     private editNode(node: Node) {
         const list = this.getNodeList(node);

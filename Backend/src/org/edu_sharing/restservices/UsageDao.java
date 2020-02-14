@@ -3,6 +3,7 @@ package org.edu_sharing.restservices;
 import java.io.ByteArrayInputStream;
 import java.io.StringReader;
 import java.util.*;
+import java.util.stream.Collectors;
 
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.repo.security.authentication.AuthenticationUtil.RunAsWork;
@@ -163,6 +164,13 @@ public class UsageDao {
 				Usage usageResult = convertUsage(usage, Usage.class);
 				result.add(usageResult);
 			}
+			// remove usages from internal collections, since they're returned in getUsagesByNodeCollection
+			/*
+			Set<Usages.CollectionUsage> collections = getUsagesByNodeCollection(nodeId);
+			result = result.stream().filter((r) ->
+				collections.stream().filter((c) -> c.getNodeId().equals(r.getNodeId())).count()==0
+			).collect(Collectors.toList());
+			*/
 			return result;
 
 		} catch (Throwable e) {

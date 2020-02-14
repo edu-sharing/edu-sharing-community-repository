@@ -14,7 +14,7 @@
   (onDone)="closeStream()"
 ></add-stream>
 <workspace-share *ngIf="nodeShare"
-                 [nodeId]="nodeShare.ref.id"
+                 [nodes]="nodeShare"
                  [sendMessages]="true"
                  (onLoading)="globalProgress=$event"
                  (onClose)="closeShare()"

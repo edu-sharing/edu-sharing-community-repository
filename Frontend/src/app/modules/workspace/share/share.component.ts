@@ -27,6 +27,7 @@ import {
     RestNodeService,
     RestUsageService, UsageList
 } from "../../../core-module/core.module";
+import {Observable} from 'rxjs';
 
 @Component({
   selector: 'workspace-share',
@@ -38,6 +39,7 @@ import {
   ]
 })
 export class WorkspaceShareComponent{
+  public BASIC_PERMISSIONS=["Consumer","Collaborator","Coordinator"];
   public ALL_PERMISSIONS=["All","Read","ReadPreview","ReadContent","ReadAll","Comment","Rate","Write","Delete",
     "DeleteChildren","DeleteNode","AddChildren","Consumer","ConsumerMetadata",
     "Editor","Contributor","Collaborator","Coordinator",
@@ -77,11 +79,12 @@ export class WorkspaceShareComponent{
   public permissionsGroup : Permission[];
   newPermissions : Permission[]=[];
   inheritAccessDenied = false;
+  bulkMode = 'extend';
   public owner : Permission;
   public linkEnabled : Permission;
   public linkDisabled : Permission;
   public link = false;
-  _node : Node;
+  _nodes : Node[];
   searchStr: string;
   inheritAllowed=false;
   globalSearch=false;
@@ -97,7 +100,7 @@ export class WorkspaceShareComponent{
   public publishActive: boolean;
   public doiActive: boolean;
   public doiDisabled: boolean;
-  private originalPermissions: LocalPermissions;
+  private originalPermissions: LocalPermissions[];
   isSafe = false;
   collectionColumns=UIHelper.getDefaultCollectionColumns();
   collections: CollectionUsage[];
@@ -109,12 +112,12 @@ export class WorkspaceShareComponent{
     buttons: DialogButton[];
 
     public isCollection(){
-    if(this._node==null)
+    if(this._nodes==null)
       return true;
-    return this._node.aspects.indexOf(RestConstants.CCM_ASPECT_COLLECTION)!=-1;
+    return this._nodes[0].aspects.indexOf(RestConstants.CCM_ASPECT_COLLECTION)!=-1;
   }
   public openLink(){
-    this.linkNode=this._node;
+    this.linkNode=this._nodes[0];
   }
   addSuggestion(data: any) {
     this.addAuthority(data);
@@ -123,20 +126,30 @@ export class WorkspaceShareComponent{
   @Input() sendToApi=true;
   @Input() disableInherition=false;
   @Input() currentPermissions:LocalPermissions=null;
+  @Input() set nodes (nodes: []){
+    this.setNodes(nodes);
+  }
   @Input() set nodeId (node : string){
     if(node)
       this.nodeApi.getNodeMetadata(node,[RestConstants.ALL]).subscribe((data:NodeWrapper)=>{
-        this.setNode(data.node);
+        this.setNodes([data.node]);
       });
   }
   @Input() set node (node : Node){
-    this.setNode(node);
+    this.setNodes([node]);
   }
-  setNode (node : Node){
-    this._node=node;
-    if(node==null)
+  setNodes (nodes : Node[]){
+    this._nodes = nodes;
+    if (nodes==null) {
       return;
-    if(this._node.isDirectory)
+    }
+    const isDirectory = new Set(nodes.map((n) => n.isDirectory));
+    if(isDirectory.size !== 1){
+      this.toast.error(null, 'WORKSPACE.SHARE.ERROR_INVALID_TYPE_COMBINATION');
+      this.cancel();
+      return;
+    }
+    if (isDirectory.values().next())
       this.currentType=[RestConstants.ACCESS_CONSUMER];
     if(this.currentPermissions) {
       this.originalPermissions=Helper.deepCopy(this.currentPermissions);
@@ -147,22 +160,22 @@ export class WorkspaceShareComponent{
     else {
       this.showLink=true;
       this.updateNodeLink();
-      this.nodeApi.getNodePermissions(node.ref.id).subscribe((data: NodePermissions) => {
-        //this.inherit=data.permissions.inheritedPermissions;
-        if(data.permissions) {
-          this.originalPermissions=Helper.deepCopy(data.permissions.localPermissions);
-          this.setPermissions(data.permissions.localPermissions.permissions)
-          this.inherited = data.permissions.localPermissions.inherited;
+      Observable.forkJoin(nodes.map((n) => this.nodeApi.getNodePermissions(n.ref.id))).subscribe((permissions) => {
+        this.originalPermissions = Helper.deepCopy(permissions.map((p) => p.permissions.localPermissions));
+        if(permissions.length === 1 && permissions[0].permissions) {
+          //this.originalPermissions=Helper.deepCopy(permissions[0].permissions.localPermissions);
+          this.setPermissions(permissions[0].permissions.localPermissions.permissions);
+          this.inherited = permissions[0].permissions.localPermissions.inherited;
           this.updatePublishState();
           this.initialState=this.getState();
-          this.doiActive = NodeHelper.isDOIActive(node,data.permissions);
+          this.doiActive = NodeHelper.isDOIActive(nodes[0],permissions[0].permissions);
           this.doiDisabled = this.doiActive;
         }
-      },(error:any)=>this.toast.error(error));
+      });
       this.reloadUsages();
     }
-    if(node.parent && node.parent.id) {
-      this.nodeApi.getNodePermissions(node.parent.id).subscribe((data: NodePermissions) => {
+    if(nodes.length === 1 && nodes[0].parent && nodes[0].parent.id) {
+      this.nodeApi.getNodePermissions(nodes[0].parent.id).subscribe((data: NodePermissions) => {
         if (data.permissions) {
           this.inherit = data.permissions.inheritedPermissions;
           this.removePermissions(this.inherit, 'OWNER');
@@ -175,7 +188,7 @@ export class WorkspaceShareComponent{
       }, (error: any) => {
           this.inheritAccessDenied=true;
       });
-      this.nodeApi.getNodeParents(node.ref.id).subscribe((data: NodeList) => {
+      this.nodeApi.getNodeParents(nodes[0].ref.id).subscribe((data: NodeList) => {
         //this.inheritAllowed = !this.isCollection() && data.nodes.length > 1;
         // changed in 4.1 to keep inherit state of collections
         this.inheritAllowed = data.nodes.length > 1;
@@ -183,28 +196,28 @@ export class WorkspaceShareComponent{
           // this can be caused if the node is somewhere at a location not fully visible to the user
           this.inheritAllowed=true;
       });
+      if(nodes[0].ref.id) {
+        this.nodeApi.getNodeMetadata(nodes[0].ref.id, [RestConstants.ALL]).subscribe((data: NodeWrapper) => {
+          let authority = data.node.properties[RestConstants.CM_CREATOR][0];
+          let user = data.node.createdBy;
+
+          if (data.node.properties[RestConstants.CM_OWNER]) {
+            authority = data.node.properties[RestConstants.CM_OWNER][0];
+            user = data.node.owner;
+          }
+          this.owner = new Permission();
+          this.owner.authority = {authorityName: authority, authorityType: "USER"};
+          (this.owner as any).user = user;
+          this.owner.permissions = ["Owner"];
+        });
+      }
+      else{
+        this.updatePublishState();
+      }
     }
     this.connector.isLoggedIn().subscribe((data:LoginResult)=>{
       this.isAdmin=data.isAdmin;
     });
-    if(node.ref.id) {
-      this.nodeApi.getNodeMetadata(node.ref.id, [RestConstants.ALL]).subscribe((data: NodeWrapper) => {
-        let authority = data.node.properties[RestConstants.CM_CREATOR][0];
-        let user = data.node.createdBy;
-
-        if (data.node.properties[RestConstants.CM_OWNER]) {
-          authority = data.node.properties[RestConstants.CM_OWNER][0];
-          user = data.node.owner;
-        }
-        this.owner = new Permission();
-        this.owner.authority = {authorityName: authority, authorityType: "USER"};
-        (this.owner as any).user = user;
-        this.owner.permissions = ["Owner"];
-      });
-    }
-    else{
-      this.updatePublishState();
-    }
   }
   @Output() onClose=new EventEmitter();
   @Output() onLoading=new EventEmitter();
@@ -260,7 +273,7 @@ export class WorkspaceShareComponent{
       return this.usages && Object.keys(this.usages).length;
   }
   public showHistory(){
-    this.history=this._node;
+    this.history=this._nodes[0];
   }
   private addAuthority(selected : any){
     if(selected==null)
@@ -291,10 +304,9 @@ export class WorkspaceShareComponent{
     this.searchStr="";
   }
   private isNewPermission(p : Permission){
-    if(!this.originalPermissions || !this.originalPermissions.permissions)
+    if(!this.originalPermissions || !this.originalPermissions[0].permissions)
       return true;
-    return !this.contains(this.originalPermissions.permissions,p,true);
-    //return this.contains(this.newPermissions,p);
+    return !this.contains(this.originalPermissions[0].permissions,p,true);
   }
   filterDisabledPermissions(permissions:Permission[]){
     let result:Permission[]=[];
@@ -306,25 +318,42 @@ export class WorkspaceShareComponent{
     }
     return result;
   }
-    private save(){
+    private save() {
     if(this.permissions!=null) {
+      console.log(this.permissions);
       this.onLoading.emit(true);
-      let inherit=this.inherited && this.inheritAllowed && !this.disableInherition;
-      let permissions=Helper.deepCopy(this.permissions);
-      permissions=permissions.filter((p:Permission)=>!this.isDeleted(p));
-      let permissionsCopy=RestHelper.copyAndCleanPermissions(permissions,inherit);
-        if(!this.sendToApi) {
-        this.onClose.emit(this.getEmitObject(RestHelper.copyPermissions(permissions,inherit)));
-        return;
-      }
-      this.nodeApi.setNodePermissions(this._node.ref.id,permissionsCopy,this.notifyUsers && this.sendMessages,this.notifyMessage,false,this.doiPermission && this.allowDOI() && this.doiActive && this.publishActive).subscribe(() => {
-          this.updateUsages(RestHelper.copyPermissions(permissions,inherit));
-        },
-        (error : any)=> {
-          this.toast.error(error);
-          this.onLoading.emit(false);
+      let inherit = this.inherited && this.inheritAllowed && !this.disableInherition;
+      const actions: Observable<Response>[] = this._nodes.map((n, i) => {
+        let permissions = Helper.deepCopy(this.permissions);
+        if(this.isBulk()) {
+          // keep inherit state of original node
+          inherit = this.originalPermissions[i].inherited;
+          if(this.bulkMode === 'extend') {
+            permissions = this.mergePermissionsWithHighestPermission(this.originalPermissions[i].permissions, permissions);
+          } else {
+            // we do nothing, because theo original ones are getting deleted
+          }
         }
-      );
+        permissions = permissions.filter((p: Permission) => !this.isDeleted(p));
+        const permissionsCopy = RestHelper.copyAndCleanPermissions(permissions, inherit);
+        if (!this.sendToApi) {
+          this.onClose.emit(this.getEmitObject(RestHelper.copyPermissions(permissions, inherit)));
+          return null;
+        }
+        return this.nodeApi.setNodePermissions(n.ref.id,
+            permissionsCopy,
+            this.notifyUsers && this.sendMessages,
+            this.notifyMessage,
+            false,
+            this.doiPermission && this.allowDOI() && this.doiActive && this.publishActive);
+      });
+      Observable.forkJoin(actions).subscribe(() => {
+            this.updateUsages(RestHelper.copyPermissions(Helper.deepCopy(this.permissions), inherit));
+          },
+          (error: any) => {
+            this.toast.error(error);
+            this.onLoading.emit(false);
+          });
     }
   }
   constructor(private nodeApi : RestNodeService,
@@ -433,14 +462,14 @@ export class WorkspaceShareComponent{
   }
 
   public updateNodeLink() {
-    this.nodeApi.getNodeShares(this._node.ref.id,RestConstants.SHARE_LINK).subscribe((data:NodeShare[])=>{
+    this.nodeApi.getNodeShares(this._nodes[0].ref.id,RestConstants.SHARE_LINK).subscribe((data:NodeShare[])=>{
       this.link=data.length>0 && data[0].expiryDate!=0;
     });
   }
   allowDOI(){
-    if(!this._node)
+    if(!this._nodes || !this._nodes[0])
       return false;
-    return !this._node.isDirectory && !this.publishInherit && this.publishActive && this.doiPermission;
+    return !this._nodes[0].isDirectory && !this.publishInherit && this.publishActive && this.doiPermission;
   }
   private updatePublishState() {
     this.publishInherit=this.inherited && this.getAuthorityPos(this.inherit,RestConstants.AUTHORITY_EVERYONE)!=-1;
@@ -493,13 +522,15 @@ export class WorkspaceShareComponent{
   }
 
     reloadUsages() {
-    this.usageApi.getNodeUsagesCollection(this._node.ref.id).subscribe((data)=>{
-        this.collections=data;
-    });
-    this.usageApi.getNodeUsages(this._node.ref.id).subscribe((data:UsageList)=>{
-        this.usages = RestUsageService.getNodeUsagesByRepositoryType(data);
-        console.log(this.usages);
-    });
+      this.usageApi.getNodeUsagesCollection(this._nodes[0].ref.id).subscribe((collections)=>{
+          this.collections=collections;
+          this.usageApi.getNodeUsages(this._nodes[0].ref.id).subscribe((usages: UsageList) => {
+            console.log(usages.usages, collections);
+            const filteredUsages = usages.usages.filter((u) => this.collections.filter((c) => c.nodeId === u.nodeId).length === 0);
+            this.usages = RestUsageService.getNodeUsagesByRepositoryType(filteredUsages);
+          });
+      });
+
   }
   openCollection(collection:Collection){
     window.open(UIConstants.ROUTER_PREFIX+"collections?id="+collection.ref.id);
@@ -519,9 +550,12 @@ export class WorkspaceShareComponent{
         }
         return 'PRIVATE';
   }
-
+    private isBulk() {
+      return this._nodes && this._nodes.length > 1;
+    }
     private updateUsages(permissions:LocalPermissions,pos=0,error=false) {
-      if(pos==this.deletedUsages.length){
+      // skip for bulk mode
+      if(pos === this.deletedUsages.length || this.isBulk()) {
           this.onLoading.emit(false);
           this.onClose.emit(this.getEmitObject(permissions));
           if(!error) {
@@ -541,7 +575,7 @@ export class WorkspaceShareComponent{
             });
         }
         else{
-            this.usageApi.deleteNodeUsage(this._node.ref.id,usage.nodeId).subscribe(()=>{
+            this.usageApi.deleteNodeUsage(this._nodes[0].ref.id,usage.nodeId).subscribe(()=>{
                 this.updateUsages(permissions,pos+1);
             },(error)=>{
                 this.toast.error(error);
@@ -551,16 +585,49 @@ export class WorkspaceShareComponent{
     }
 
     private mergePermissions(source: Permission[], add: Permission[]) {
-      let merge=source;
-      for(let p2 of add){
+      const merge = source;
+      for(const p2 of add) {
         // do only add new, unique permissions
-        if(merge.filter((p1)=> Helper.objectEquals(p1,p2)).length==0){
+        if(merge.filter((p1)=> Helper.objectEquals(p1,p2)).length === 0) {
             merge.push(p2);
         }
       }
       return merge;
     }
 
+  /**
+   * merge two permission sets
+   * If a user/group is duplicated, the one with the highest permission will win
+   * Consumer < Collaborator < Coordinator
+   * @param source
+   * @param add
+   */
+  private mergePermissionsWithHighestPermission(source: Permission[], add: Permission[]) {
+    const result = Helper.deepCopyArray(source);
+    for(const p2 of add) {
+      const map = source.filter((s) =>
+          s.authority.authorityName === p2.authority.authorityName && s.authority.authorityType === s.authority.authorityType
+      );
+      console.log(map , source, p2.authority);
+      if(map.length === 1) {
+        const perm1 = map[0].permissions.filter((p) => this.BASIC_PERMISSIONS.indexOf(p) !== -1);
+        const perm2 = p2.permissions.filter((p) => this.BASIC_PERMISSIONS.indexOf(p) !== -1);
+        console.log(perm2[0], perm1[0]);
+        if (this.permissionIsGreaterThan(perm2[0],perm1[0])) {
+          console.log(perm2[0], ' > ', perm1[0], p2);
+          result.splice(result.indexOf(map[0]),1);
+          result.push(p2);
+        }
+      } else {
+        // add new permission to list
+        result.push(p2);
+      }
+    }
+    return result;
+  }
+  private permissionIsGreaterThan(p1: string, p2:string) {
+    return this.BASIC_PERMISSIONS.indexOf(p1) > this.BASIC_PERMISSIONS.indexOf(p2);
+  }
   private getEmitObject(localPermissions: LocalPermissions) {
     return {
       permissions: localPermissions,

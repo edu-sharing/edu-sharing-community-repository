@@ -115,6 +115,7 @@
             "DOI_INFO": "DOI (Digital Object Identifier) is a standardized ID for unique global identification and retrieved material",
             "PUBLISHING_WARNING_TITLE": "Publish element?",
             "PUBLISHING_WARNING_MESSAGE": "If you continue, the current element will be shared with all users of the system and can be accessed by everyone.\n\nAre you sure you want to publish this element?",
+            "ERROR_INVALID_TYPE_COMBINATION": "elements of different types can't be shared in bulk",
             "STATE": {
                 "PRIVATE": "Private",
                 "SHARED": "Shared",
@@ -135,6 +136,13 @@
             "USAGE_SUBTYPE": {
                 "COURSE": "Course",
                 "PAGE": "Page"
+            },
+            "BULK_MODE": {
+                "TITLE" : "Update permissions",
+                "EXTEND" : "Extend permissions",
+                "EXTEND_DESCRIPTION" : "all current permissions remain on the elements. If one of the newly selected users/groups has currently no access, he/she will get access. If a user/group already has higher permissions on the element, the higher permissions will stay active.",
+                "REPLACE" : "Replace permissions",
+                "REPLACE_DESCRIPTION" : "The current permissions of all elements will be replaced with the selected users/groups."
             }
         },
         "INHERIT_DISABLED": "Inherition is currently disabled",

@@ -3,7 +3,7 @@
       [buttons]="buttons"
       (onCancel)="cancel()"
 >
-  <div *ngIf="!isCollection()" class="share-link">
+  <div *ngIf="!isCollection() && !isBulk()" class="share-link">
     <button mat-button color="primary" *ngIf="showShareLink()" (click)="openLink()">{{'WORKSPACE.OPTION.SHARE_LINK' | translate}} <i icon iconId="link"></i></button>
   </div>
   <mat-tab-group mat-stretch-tabs [(selectedIndex)]="tab">
@@ -48,7 +48,7 @@
 
             <workspace-share-choose-type *ngIf="showChooseType" class="typeAdd"
              [selected]="currentType"
-             [isDirectory]="_node.isDirectory"
+             [isDirectory]="_nodes[0].isDirectory"
              [canPublish]="!isSafe"
              (onCancel)="showChooseType=false"
              (onType)="setType($event)"
@@ -69,13 +69,13 @@
         <div [ngClass]="{'publish-grey': filterDisabledPermissions(newPermissions).length}" class="publish" *ngIf="!isSafe">
           <div class="publishElements">
             <mat-slide-toggle [disabled]="!publishPermission || publishInherit" [(ngModel)]="publishActive" (change)="setPublish(publishActive)">
-              {{ ('WORKSPACE.SHARE.PUBLISH_'+(isCollection() ? 'COLLECTION' : _node.isDirectory ? 'DIRECTORY' : 'DOCUMENT')) | translate}}
+              {{ ('WORKSPACE.SHARE.PUBLISH_'+(isCollection() ? 'COLLECTION' : _nodes[0].isDirectory ? 'DIRECTORY' : 'DOCUMENT')) | translate}}
             </mat-slide-toggle>
           <div *ngIf="!publishPermission && !publishInherit" class="publishInfo">{{ 'WORKSPACE.SHARE.PUBLISH_NO_PERMISSION' | translate}}</div>
           <div>
             <div *ngIf="publishInherit" class="publishInfo">{{ 'WORKSPACE.SHARE.PUBLISH_INHERIT' | translate}}</div>
             <div *ngIf="publishPermission && !publishInherit" class="publishInfo"
-                 innerHTML="{{('WORKSPACE.SHARE.PUBLISH_ACTIVE_'+(isCollection() ? 'COLLECTION' : _node.isDirectory ? 'DIRECTORY' : 'DOCUMENT')) | translate}}">
+                 innerHTML="{{('WORKSPACE.SHARE.PUBLISH_ACTIVE_'+(isCollection() ? 'COLLECTION' : _nodes[0].isDirectory ? 'DIRECTORY' : 'DOCUMENT')) | translate}}">
             </div>
             <div class="doi" *ngIf="allowDOI()">
               <mat-checkbox [disabled]="doiDisabled" [(ngModel)]="doiActive" id="doi">
@@ -88,14 +88,27 @@
           <div *ngIf="publishActive" class="type"><i class="material-icons align-icon">remove_red_eye</i> <span>{{'WORKSPACE.SHARE.TYPE_VIEWER' | translate}}</span></div>
         </div>
       </div>
+        <div class="bulk-config" *ngIf="isBulk()">
+          <mat-radio-group [(ngModel)]="bulkMode">
+            <h4 class="mat-heading-4 mat-heading-underline">{{'WORKSPACE.SHARE.BULK_MODE.TITLE' | translate}}</h4>
+            <mat-radio-button value="extend">
+              <div>{{'WORKSPACE.SHARE.BULK_MODE.EXTEND' | translate}}</div>
+              <div class="label-secondary">{{'WORKSPACE.SHARE.BULK_MODE.EXTEND_DESCRIPTION' | translate}}</div>
+            </mat-radio-button>
+            <mat-radio-button value="replace">
+              <div>{{'WORKSPACE.SHARE.BULK_MODE.REPLACE' | translate}}</div>
+              <div class="label-secondary">{{'WORKSPACE.SHARE.BULK_MODE.REPLACE_DESCRIPTION' | translate}}</div>
+            </mat-radio-button>
+          </mat-radio-group>
+        </div>
       </mat-tab>
-      <mat-tab label="{{'WORKSPACE.TAB_INVITED' | translate}}" class="tabContent">
+      <mat-tab label="{{'WORKSPACE.TAB_INVITED' | translate}}" *ngIf="_nodes && _nodes.length === 1" class="tabContent">
         <div class="invited">
-        <mat-link *ngIf="_node && _node.ref.id" class="history uppercase" (click)="showHistory()">{{ 'WORKSPACE.SHARE.SHOW_HISTORY' | translate}} <i icon iconId="arrow_forward"></i></mat-link>
+        <mat-link *ngIf="_nodes && _nodes[0].ref.id" class="history uppercase" (click)="showHistory()">{{ 'WORKSPACE.SHARE.SHOW_HISTORY' | translate}} <i icon iconId="arrow_forward"></i></mat-link>
         <div class="groupName" *ngIf="owner">{{'WORKSPACE.SHARE.GROUP_OWNER' | translate}}</div>
         <workspace-share-permission class="groupEntry owner" *ngIf="owner"
           [permission]="owner"
-          [isDirectory]="_node.isDirectory"
+          [isDirectory]="_nodes[0].isDirectory"
           [readOnly]="true"
           [showDelete]="false"
         ></workspace-share-permission>
@@ -110,7 +123,7 @@
             <div *ngFor="let permission of inherit" class="groupEntry">
               <workspace-share-permission
                 [permission]="permission"
-                [isDirectory]="_node.isDirectory"
+                [isDirectory]="_nodes[0].isDirectory"
                 [inherit]="true"
                 [readOnly]="true"
               ></workspace-share-permission>
@@ -137,7 +150,7 @@
                                         [readOnly]="!permission.editable && !isNewPermission(permission)"
                                         [showDelete]="permission.editable || isNewPermission(permission)"
                                         [isDeleted]="isDeleted(permission)"
-                                        [isDirectory]="_node.isDirectory"
+                                        [isDirectory]="_nodes[0].isDirectory"
                                         [canPublish]="!isSafe"
                                         [added]="isNewPermission(permission)"
                                         (onRemove)="removePermission(permission)"
@@ -154,7 +167,7 @@
               [readOnly]="!permission.editable && !isNewPermission(permission)"
               [showDelete]="permission.editable || isNewPermission(permission)"
               [isDeleted]="isDeleted(permission)"
-              [isDirectory]="_node.isDirectory"
+              [isDirectory]="_nodes[0].isDirectory"
               [canPublish]="!isSafe"
               [added]="isNewPermission(permission)"
               (onRemove)="removePermission(permission)"
@@ -170,7 +183,7 @@
         <workspace-share-permission *ngIf="showLink && link"
                                     class="groupEntry link"
                                     [permission]="linkEnabled"
-                                    [isDirectory]="_node.isDirectory"
+                                    [isDirectory]="_nodes[0].isDirectory"
                                     [readOnly]="true"
                                     [showDelete]="false"
         ></workspace-share-permission>

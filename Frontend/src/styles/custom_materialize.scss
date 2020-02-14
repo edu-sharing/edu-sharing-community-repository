@@ -126,7 +126,7 @@ input[type=search]{
     border-radius: 3px;
     background-color: #fff;
     &:disabled {
-      border-style: dashed;
+      border-style: solid;
     }
   }
 }

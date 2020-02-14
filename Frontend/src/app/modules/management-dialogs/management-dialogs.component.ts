@@ -67,8 +67,8 @@ export class WorkspaceManagementDialogsComponent  {
     }
     @Output() nodeDeleteChange = new EventEmitter();
     @Output() onDelete = new EventEmitter();
-  @Input() nodeShare : Node;
-  @Output() nodeShareChange = new EventEmitter();
+  @Input() nodeShare : Node[];
+  @Output() nodeShareChange = new EventEmitter<Node[]>();
     @Input() nodeShareLink : Node;
     @Output() nodeShareLinkChange = new EventEmitter();
     @Input() nodeWorkflow : Node;

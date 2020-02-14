@@ -139,7 +139,7 @@ export class ActionbarHelperService{
       }
     }
     if(type=='INVITE'){
-      if(nodes && nodes.length==1 && nodes[0].aspects.indexOf(RestConstants.CCM_ASPECT_IO_REFERENCE)==-1) {
+      if(nodes && nodes[0].aspects.indexOf(RestConstants.CCM_ASPECT_IO_REFERENCE)==-1) {
         option = new OptionItem("WORKSPACE.OPTION.INVITE", "group_add", callback);
         option.isSeperate = NodeHelper.allFiles(nodes);
         option.showAsAction = true;

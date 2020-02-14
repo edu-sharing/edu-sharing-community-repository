@@ -117,6 +117,7 @@
             "DOI_INFO": "Ein Handle ist eine standardisierte ID, mit der dieses Material global eindeutig identifiziert und wiedergefunden werden kann",
             "PUBLISHING_WARNING_TITLE": "Element wirklich veröffentlichen?",
             "PUBLISHING_WARNING_MESSAGE": "Wenn Sie fortfahren, wird das aktuelle Element für alle Nutzer des Systems freigegeben und kann von jedem aufgerufen werden.\n\nSind Sie sicher, dass Sie das Element öffentlich freigeben möchten?",
+            "ERROR_INVALID_TYPE_COMBINATION": "Elemente verschiedener Typen können nicht im Bulk freigegeben werden",
             "STATE": {
                 "PRIVATE": "Privat",
                 "SHARED": "Geteilt",
@@ -137,6 +138,13 @@
             "USAGE_SUBTYPE": {
                 "COURSE": "Kurs",
                 "PAGE": "Seite"
+            },
+            "BULK_MODE": {
+                "TITLE" : "Berechtigungen aktualisieren",
+                "EXTEND" : "Berechtigungen ergänzen",
+                "EXTEND_DESCRIPTION" : "Die aktuell bestehenden Berechtigungen aller gewählten Elemente bleiben erhalten. Sollte ein Nutzer/Gruppe aus der oben stehenden Auswahl keinen Zugriff besitzen, erhält er diesen. Sollte der Nutzer aktuell bereits über ein höherrangiges Recht verfügen, so bleibt dieses bestehen",
+                "REPLACE" : "Berechtigungen ersetzen",
+                "REPLACE_DESCRIPTION" : "Die aktuell bestehenden Berechtigungen aller gewählten Elemente werden mit der oben festgelegten Auswahl ersetzt."
             }
         },
         "INHERIT_DISABLED": "Rechtevererbung ist aktuell ausgeschaltet",
