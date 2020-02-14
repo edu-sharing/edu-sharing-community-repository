@@ -1323,7 +1323,7 @@ export class MdsComponent{
               ">...</a>`;
     html+=`</div>`;
     if(allowCustom && !openCallback && !widget.bottomCaption){
-      html+='<div class="hint">'+this.translate.instant('WORKSPACE.EDITOR.HINT_ENTER')+'</div>';
+      html+='<div class="input-hint-bottom">'+this.translate.instant('WORKSPACE.EDITOR.HINT_ENTER')+'</div>';
     }
     return html;
   }
