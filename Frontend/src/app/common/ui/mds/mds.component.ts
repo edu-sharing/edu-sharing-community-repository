@@ -931,9 +931,14 @@ export class MdsComponent{
         return '';
       }
       const id = this.getDomId(widget.id + '_bulk');
-      return `<div class="bulk-enable"><input type="checkbox" class="filled-in" id="` + id + `" 
-                onchange="` + this.getWindowComponent() + `.toggleBulk('` + widget.id + `', event)">
-               <label for="` + id + `">` + this.translate.instant('MDS.BULK_OVERRIDE') + `</label></div>`;
+      return `<div class="bulk-enable switch">
+                <label>
+                  ` + this.translate.instant('MDS.BULK_OVERRIDE') + `
+                  <input type="checkbox" id="` + id + `" 
+                    onchange="` + this.getWindowComponent() + `.toggleBulk('` + widget.id + `', event)">
+                  <span class="lever"></span>
+                 </label>
+               </div>`;
     }
   private addBulkMode(widget: any) {
     if (!this.isBulkMode()) {
