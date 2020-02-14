@@ -146,7 +146,7 @@
             </div>
         </div>
     </div>
-    <button mat-raised-button color="primary" #scrolltotop id="scrollToTop" tabindex="0" (click)="scrollToTop()" (keyup.enter)="scrollToTop()">
+    <button mat-raised-button color="primary" *ngIf="showScrollToTop" [@fade]="showScrollToTop" id="scrollToTop" tabindex="0" (click)="scrollToTop()">
         <i icon iconId="arrow_upward"></i> {{'GO_TO_TOP' | translate}}</button>
     <div class="tab-nav" #tabNav *ngIf="canOpen && _currentScope!='render'" [style.bottom]="-navbarOffsetY+'px'">
         <div class="mobile-move-bottom">

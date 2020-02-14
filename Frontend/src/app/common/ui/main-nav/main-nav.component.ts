@@ -46,6 +46,7 @@ import {MatButton} from '@angular/material/button';
     animations: [
         trigger('fromLeft', UIAnimation.fromLeft()),
         trigger('overlay', UIAnimation.openOverlay()),
+        trigger('overlayBottom', UIAnimation.openOverlayBottom()),
         trigger('cardAnimation', UIAnimation.cardAnimation()),
         trigger('fade', UIAnimation.fade()),
         trigger('nodeStore', [
@@ -86,7 +87,6 @@ export class MainNavComponent implements AfterViewInit{
     @ViewChild('sidebar', {static: false}) sidebar:ElementRef;
     @ViewChild('topbar', {static: false}) topbar:ElementRef;
     @ViewChild('nodeStoreRef', {static: false}) nodeStoreRef:ElementRef;
-    @ViewChild('scrolltotop', {static: false}) scrolltotop:MatButton;
     @ViewChild('userRef', {static: false}) userRef:ElementRef;
     @ViewChild('tabNav', {static: false}) tabNav:ElementRef;
     dialogTitle : string;
@@ -190,6 +190,7 @@ export class MainNavComponent implements AfterViewInit{
     licenseDialog: boolean;
     private licenseDetails: string;
     private manageMediacenters = false;
+    showScrollToTop = false;
     @HostListener('document:keydown', ['$event'])
     handleKeyboardEvent(event: KeyboardEvent) {
         if(event.code=="Escape" && this.canOpen && this.displaySidebar){
@@ -280,13 +281,7 @@ export class MainNavComponent implements AfterViewInit{
                 element.style.top = Number.parseInt(this.scrollInitialPositions[element.getAttribute(MainNavComponent.ID_ATTRIBUTE_NAME)])+y + 'px';
             }
         }
-        if(this.scrolltotop && this.scrolltotop._elementRef.nativeElement) {
-            if ((window.pageYOffset || document.documentElement.scrollTop) > 400) {
-                this.scrolltotop._elementRef.nativeElement.style.display = 'flex';
-            } else {
-                this.scrolltotop._elementRef.nativeElement.style.display = 'none';
-            }
-        }
+        this.showScrollToTop = (window.pageYOffset || document.documentElement.scrollTop) > 400;
     }
     @HostListener('document:touchstart',['$event']) onTouchStart(event:any) {
         this.touchStart=event;

@@ -355,6 +355,7 @@ $licenseInfoHeight:40px;
 }
 
 #scrollToTop {
+  transition: all $transitionNormal;
   position: fixed;
   bottom: 0;
   left: 50%;
@@ -366,7 +367,6 @@ $licenseInfoHeight:40px;
   background-color: $primary;
   color: $textOnPrimary;
   text-transform: uppercase;
-  display: none;
   i {
     font-size: 16px;
     margin: 0 -5px 0 -10px;
