@@ -73,6 +73,14 @@ a, a:hover, a:visited, a:active {
   .more{
     color: white !important;
   }
+  .edusharing_rendering_metadata_body{
+    .mdsWidgetMultivalue .mdsValueClickable {
+      background-color: $buttonHoverBackground;
+      border: 1px solid $primary;
+      color: $primary;
+      font-weight: 400;
+    }
+  }
 }
 .topBar{
   background:#383838;
