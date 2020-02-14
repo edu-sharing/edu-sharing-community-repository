@@ -105,9 +105,12 @@ mds .mdsGroup{
       justify-content: flex-end;
       width: 100%;
       position: absolute;
-      top: -26px;
+      top: -30px;
       label:not(:last-child){
         padding-right: 10px;
+      }
+      &.switch label{
+        align-items: center;
       }
     }
     select {
