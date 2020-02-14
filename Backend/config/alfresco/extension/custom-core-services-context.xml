@@ -199,6 +199,9 @@
          <property name="scheduler">
             <ref bean="schedulerFactory" />
         </property>
+        <property name="transactionService">
+            <ref bean="transactionService" />
+        </property>
    	 </bean>   	 
  	
  	<!-- inherit permissions to false for maps and folders -->

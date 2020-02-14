@@ -45,6 +45,7 @@ import org.alfresco.service.cmr.version.VersionService;
 import org.alfresco.service.cmr.version.VersionType;
 import org.alfresco.service.namespace.NamespaceService;
 import org.alfresco.service.namespace.QName;
+import org.alfresco.service.transaction.TransactionService;
 import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.HttpStatus;
 import org.apache.commons.httpclient.methods.GetMethod;
@@ -153,10 +154,10 @@ public class NodeCustomizationPolicies implements OnContentUpdatePolicy, OnCreat
 	
 	BehaviourFilter policyBehaviourFilter;
 
+	TransactionService transactionService;
+
 	private SearchService searchService;
 
-	private ResultSet result;
-	
 	Scheduler scheduler;
 
 	/**
@@ -264,6 +265,19 @@ public class NodeCustomizationPolicies implements OnContentUpdatePolicy, OnCreat
                 	versionService.createVersion(nodeRef,transformQNameKeyToString(nodeService.getProperties(nodeRef)));
             	}
 			}
+			// if may just the content gets updated, the refs still need to get a new modified date
+			AuthenticationUtil.runAsSystem(()-> {
+				ResultSet result = fetchCollectionReferences(nodeRef);
+				for (NodeRef ref : result.getNodeRefs()) {
+					transactionService.getRetryingTransactionHelper().doInTransaction(()-> {
+						policyBehaviourFilter.disableBehaviour(ref, ContentModel.ASPECT_AUDITABLE);
+						nodeService.setProperty(ref, QName.createQName(CCConstants.CM_PROP_C_MODIFIED), new Date());
+						policyBehaviourFilter.disableBehaviour(ref, ContentModel.ASPECT_AUDITABLE);
+						return null;
+					});
+				}
+				return null;
+			});
 		}
 		new RepositoryCache().remove(nodeRef.getId());
 	}
@@ -412,8 +426,7 @@ public class NodeCustomizationPolicies implements OnContentUpdatePolicy, OnCreat
 			// refresh all collection io's metadata
 			// run as admin to refresh all, see ESPUB-633
 			AuthenticationUtil.runAsSystem(()-> {
-				String query = "ASPECT:\"" + CCConstants.CCM_ASPECT_COLLECTION_IO_REFERENCE + "\" AND @ccm\\:original:\"" + nodeRef.getId() + "\"";
-				result = searchService.query(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, SearchService.LANGUAGE_LUCENE, query);
+				ResultSet result = fetchCollectionReferences(nodeRef);
 				for (NodeRef ref : result.getNodeRefs()) {
 					Map<QName, Serializable> originalProperties = nodeService.getProperties(ref);
 					// security check: make sure we have an object which really matches the solr query
@@ -460,6 +473,10 @@ public class NodeCustomizationPolicies implements OnContentUpdatePolicy, OnCreat
 
 	}
 
+	public ResultSet fetchCollectionReferences(NodeRef nodeRef) {
+		String query = "ASPECT:\"" + CCConstants.CCM_ASPECT_COLLECTION_IO_REFERENCE + "\" AND @ccm\\:original:\"" + nodeRef.getId() + "\"";
+		return searchService.query(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, SearchService.LANGUAGE_LUCENE, query);
+	}
 
 
 	private void writeBase64Image(NodeRef nodeRef, String previewImageBase64) {
@@ -554,7 +571,11 @@ public class NodeCustomizationPolicies implements OnContentUpdatePolicy, OnCreat
 	public void setThumbnailService(ThumbnailService thumbnailService) {
 		this.thumbnailService = thumbnailService;
 	}
-	
+
+	public void setTransactionService(TransactionService transactionService) {
+		this.transactionService = transactionService;
+	}
+
 	/*
 	 * handle NULL when not possible or deactivated
 	 */
