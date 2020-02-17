@@ -1584,6 +1584,9 @@ export class MdsComponent{
   }
   private renderWidget(widget: any,attr:string,template:any) : string{
     let id=widget.id;
+    if (widget.id === 'version') {
+      widget.caption = this.translate.instant('WORKSPACE.EDITOR.VERSION');
+    }
     let hasCaption=widget.caption;
     let html='';
     let caption='';
@@ -1962,7 +1965,6 @@ export class MdsComponent{
             document.getElementById('selectedFile').style.display=valid ? '' : 'none';
             document.getElementById('selectFileBtn').style.display=valid ? 'none' : '';
           " />
-            <label for="comment">`+this.translate.instant('WORKSPACE.EDITOR.VERSION')+`</label>
             <div class="version">`;
     if (this.isContentEditable() && !this.isBulkMode()) {
       html += `<div class="btn-flat btn-shadow" id="selectFileBtn" onclick="document.getElementById('fileSelect').click()">` + this.translate.instant('WORKSPACE.EDITOR.REPLACE_MATERIAL') + `</div>`;
