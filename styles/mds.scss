@@ -58,6 +58,7 @@ mds .mdsGroup{
     padding-bottom: 4px;
     font-weight: bold;
     .required{
+      padding-left: 3px;
       font-size: 75%;
       font-weight: bold;
       display: inline-flex;
@@ -113,6 +114,9 @@ mds .mdsGroup{
       }
       &.switch label{
         align-items: center;
+        .lever{
+          margin-right: 5px;
+        }
       }
     }
     select {
@@ -287,7 +291,7 @@ mds .mdsGroup{
   .version {
     width: 100%;
     float: left;
-    margin-top: 10px;
+    margin-top: 4px;
     display: flex;
     align-items: center;
     #selectFileBtn{
