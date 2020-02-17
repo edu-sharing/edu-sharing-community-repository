@@ -11,6 +11,7 @@ import { UIAnimation } from '../../../core-module/ui/ui-animation';
 import { trigger } from '@angular/animations';
 import { Helper } from '../../../core-module/rest/helper';
 import { UIHelper } from '../../../core-ui-module/ui-helper';
+import { DropData } from '../../../core-ui-module/directives/drag-nodes/drag-nodes';
 
 @Component({
     selector: 'workspace-sub-tree',
@@ -108,6 +109,23 @@ export class WorkspaceSubTreeComponent {
             });
     }
 
+    onNodesHoveringChange(nodesHovering: boolean, target: Node) {
+        if (nodesHovering) {
+            this.dragHover = target;
+        } else {
+            // The enter event of another node might have fired before this leave
+            // event and already updated `dragHover`. Only set it to null if that is
+            // not the case.
+            if (this.dragHover === target) {
+                this.dragHover = null;
+            }
+        }
+    }
+
+    onNodesDrop({ event, nodes, dropAction }: DropData, target: Node) {
+        this.onDrop.emit({ target, source: nodes, event, type: dropAction });
+    }
+
     private contextMenu(event: any, node: Node) {
         event.preventDefault();
         event.stopPropagation();
@@ -148,30 +166,8 @@ export class WorkspaceSubTreeComponent {
         }
     }
 
-    private allowDrop(event: any, target: Node) {
-        if (!this.storage.get(TemporaryStorageService.LIST_DRAG_DATA)) {
-            return;
-        }
-        if (event.altKey) event.dataTransfer.dropEffect = 'link';
-        if (event.ctrlKey) event.dataTransfer.dropEffect = 'copy';
-        event.preventDefault();
-        event.stopPropagation();
-        this.dragHover = target;
-    }
-
     private dropToParent(event: any) {
         this.onDrop.emit(event);
-    }
-
-    private dropEvent(event: any, target: Node) {
-        this.dragHover = null;
-        UIHelper.handleDropEvent(
-            this.storage,
-            this.ui,
-            event,
-            target,
-            this.onDrop,
-        );
     }
 
     private isSelected(node: Node) {

@@ -7,6 +7,7 @@ import {
 } from '../../../core-module/core.module';
 import { Helper } from '../../../core-module/rest/helper';
 import { OptionItem } from '../../../core-ui-module/option-item';
+import { DropData } from '../../../core-ui-module/directives/drag-nodes/drag-nodes';
 
 @Component({
     selector: 'workspace-tree',
@@ -89,10 +90,10 @@ export class WorkspaceTreeComponent {
                 i--;
             }
             /*
-      if(event.parent.length){
-        let pos=this._path[i].indexOf(event.parent[event.parent.length-1]);
-      }
-      */
+            if(event.parent.length){
+                let pos=this._path[i].indexOf(event.parent[event.parent.length-1]);
+            }
+            */
         }
         if (create) {
             let path = Helper.deepCopy(event.parent);
@@ -102,26 +103,22 @@ export class WorkspaceTreeComponent {
         console.log(this._path);
     }
 
-    allowDrop(event: any, target: string) {
-        if (!this.storage.get(TemporaryStorageService.LIST_DRAG_DATA)) {
-            return;
+    onNodesHoveringChange(nodesHovering: boolean, target: string) {
+        if (nodesHovering) {
+            this.dragHover = target;
+        } else {
+            // The enter event of another node might have fired before this leave
+            // event and already updated `dragHover`. Only set it to null if that is
+            // not the case.
+            if (this.dragHover === target) {
+                this.dragHover = null;
+            }
         }
-        event.preventDefault();
-        event.stopPropagation();
-        this.dragHover = target;
     }
 
-    dropEvent(event: any, target: string) {
-        if (!this.storage.get(TemporaryStorageService.LIST_DRAG_DATA)) {
-            return;
-        }
-        event.preventDefault();
-        event.stopPropagation();
-        this.dragHover = null;
+    onNodesDrop({ nodes }: DropData, target: string) {
         if (target == this.RECYCLE) {
-            this.onDeleteNodes.emit(
-                this.storage.get(TemporaryStorageService.LIST_DRAG_DATA).nodes,
-            );
+            this.onDeleteNodes.emit(nodes);
         }
     }
 

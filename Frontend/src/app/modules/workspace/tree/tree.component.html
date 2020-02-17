@@ -94,11 +94,10 @@
      [class.rootNodeSelected]="root==RECYCLE"
      [class.hover]="dragHover==RECYCLE"
      (click)="setRoot(RECYCLE)"
-     (dragend)="dragHover=null"
-     (dragexit)="dragHover=null"
-     (dragleave)="dragHover=null"
-     (dragover)="allowDrop($event,RECYCLE)"
-     (drop)="dropEvent($event,RECYCLE)"
+     [appNodesDropTarget]="true"
+     [nodesDragAllowedActions]="['move']"
+     (nodesHoveringChange)="onNodesHoveringChange($event, RECYCLE)"
+     (nodesDrop)="onNodesDrop($event, RECYCLE)"
 >
   <i class="material-icons typeIcon">delete</i>{{'WORKSPACE.RECYCLE' | translate}}
 </div>
