@@ -1,5 +1,6 @@
 <listTable
   [nodes]="_nodes"
+  [parent]="_node"
   [columns]="columns"
   [hasIcon]="true"
   [options]="options"
@@ -17,16 +18,19 @@
   (reorderDialogChange)="reorderDialogChange.emit($event)"
   [sortBy]="sortBy"
   [dragDrop]="true"
+  [selectOnClick]="true"
   [selectedNodes]="selection"
   [sortAscending]="sortAscending"
   (onDrop)="drop($event)"
   [canDrop]="canDrop"
+  [management]="management"
+  [actionbar]="actionbar"
   [createLink]="true"
   (onSelectionChanged)="onSelection($event)"
   (onUpdateOptions)="updateOptions($event)"
   (sortListener)="setSorting($event)"
-  (clickRow)="selectItem($event.node)"
   (doubleClickRow)="doubleClick($event)"
+  (openNode)="doubleClick($event)"
   (columnsChanged)="columnsChanged($event)"
   (loadMore)="load(false)"></listTable>
 <h5 class="noElementsInfo" *ngIf="!showLoading && !(_nodes && _nodes.length) && (_searchQuery==null || _searchQuery=='')">{{'WORKSPACE.NO_NODES_IN_FOLDER' | translate }}</h5>

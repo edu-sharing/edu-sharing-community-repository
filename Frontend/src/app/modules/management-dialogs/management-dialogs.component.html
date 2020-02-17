@@ -19,6 +19,21 @@
                  (onLoading)="globalProgress=$event"
                  (onClose)="closeShare()"
 ></workspace-share>
+<node-info *ngIf="nodeDebug"
+           [node]="nodeDebug"
+           (onClose)="closeDebug()"
+></node-info>
+<card
+        *ngIf="qr"
+        [node]="qr.node"
+        [isCancelable]="true"
+        title="{{ 'WORKSPACE.OPTION.QR_CODE' | translate }}"
+        (onCancel)="qr=null"
+        class="qr"
+        width="xlarge"
+        height="xxxlarge">
+    <qrcode [qrdata]="qr.data" elementType="img" margin="2" width="512" errorCorrectionLevel="M"></qrcode>
+</card>
 <workspace-workflow *ngIf="nodeWorkflow"
                     [nodeId]="nodeWorkflow.ref.id"
                     (onLoading)="globalProgress=$event"

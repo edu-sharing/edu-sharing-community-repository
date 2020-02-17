@@ -66,10 +66,9 @@
                               [titleLabel]="'SEARCH.ADD_INTO_COLLECTION'"
                               [titleLabelShort]="'SEARCH.ADD_INTO_COLLECTION_SHORT'"
             ></small-collection>
-            <actionbar class="actionbarFrame"
+            <actionbar class="actionbarFrame" #actionbarComponent
                        [backgroundType]="addToCollection ? 'primary' : 'bright'"
-                       *ngIf="actionOptions && actionOptions.length"
-                       [options]="actionOptions"></actionbar>
+            ></actionbar>
         </div>
     </div>
     <card
@@ -231,7 +230,6 @@
                                 [viewType]="2"
                                 [createLink]="true"
                                 [scrollWindow]="true"
-                                (onUpdateOptions)="refreshListOptions()"
                                 (clickRow)="render($event)"
                                 (doubleClickRow)="render($event)"
                                 [isLoading]="false"></listTable>
@@ -265,7 +263,6 @@
                             [columns]="searchService.columns"
                             [hasIcon]="true"
                             [selectedNodes]="selection"
-                            [options]="options"
                             [dragDrop]="false"
                             [canDrop]="canDrop"
                             [sortByMobile]="false"
@@ -282,7 +279,8 @@
                             [applyMode]="applyMode"
                             [scrollWindow]="true"
                             [createLink]="true"
-                            (onUpdateOptions)="refreshListOptions()"
+                            [management]="managementDialogs"
+                            [actionbar]="actionbarComponent"
                             (clickRow)="render($event)"
                             (doubleClickRow)="render($event)"
                             (loadMore)="getMoreResults()"
@@ -313,7 +311,8 @@
                                    [applyMode]="applyMode"
                                    [scrollWindow]="true"
                                    [createLink]="true"
-                                   (onUpdateOptions)="refreshListOptions()"
+                                   [management]="managementDialogs"
+                                   [actionbar]="actionbarComponent"
                                    (clickRow)="render($event)"
                                    (doubleClickRow)="render($event)"
                                    (onSelectionChanged)="updateSelection($event)"

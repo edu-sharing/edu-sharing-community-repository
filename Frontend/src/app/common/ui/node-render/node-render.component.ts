@@ -71,7 +71,6 @@ export class NodeRenderComponent implements EventListener{
    */
   @Input() metadata=true;
   private isRoute = false;
-  qrCode = false;
   private options: OptionItem[]=[];
   private list: Node[];
   private isSafe=false;
@@ -462,14 +461,14 @@ export class NodeRenderComponent implements EventListener{
   }
   private downloadSequence() {
       let nodes = [this.sequenceParent].concat(this.sequence.nodes);
-      NodeHelper.downloadNodes(this.toast,this.connector,nodes, this.sequenceParent.name+".zip");
+      NodeHelper.downloadNodes(this.connector,nodes, this.sequenceParent.name+".zip");
   }
 
   private downloadCurrentNode() {
       if(this.downloadUrl) {
-          NodeHelper.downloadUrl(this.toast, this.connector.getBridgeService(), this.downloadUrl);
+          NodeHelper.downloadUrl(this.connector.getBridgeService(), this.downloadUrl);
       } else {
-          NodeHelper.downloadNode(this.toast, this.connector.getBridgeService(), this._node, this.version);
+          NodeHelper.downloadNode(this.connector.getBridgeService(), this._node, this.version);
       }
   }
 
@@ -675,9 +674,6 @@ export class NodeRenderComponent implements EventListener{
         this.searchApi.searchFingerprint(this._nodeId).subscribe( (data: NodeList) => {
             this.similarNodes = data.nodes;
         });
-    }
-    getQRData() {
-        return window.location.href;
     }
 
     private linkSearchableWidgets() {

@@ -12,6 +12,9 @@ import {ConfigurationService} from "../../../core-module/core.module";
 import {TemporaryStorageService} from '../../../core-module/core.module';
 import {StateAwareComponent} from '../../../common/directives/StateAwareComponent';
 import {Helper} from "../../../core-module/rest/helper";
+import {WorkspaceManagementDialogsComponent} from '../../management-dialogs/management-dialogs.component';
+import {ActionbarComponent} from '../../../common/ui/actionbar/actionbar.component';
+import {MainNavComponent} from '../../../common/ui/main-nav/main-nav.component';
 
 @Component({
   selector: 'workspace-explorer',
@@ -34,6 +37,9 @@ export class WorkspaceExplorerComponent{
   @Input() reorderDialog = false;
   @Output() reorderDialogChange = new EventEmitter<boolean>();
   @Input() preventKeyevents:boolean;
+  @Input() mainNav:MainNavComponent;
+  @Input() management:WorkspaceManagementDialogsComponent;
+  @Input() actionbar:ActionbarComponent;
 
 
   private loading=false;

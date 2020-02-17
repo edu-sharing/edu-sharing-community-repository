@@ -54,6 +54,7 @@ import {HttpClient} from '@angular/common/http';
 import {MdsHelper} from "../../core-module/rest/mds-helper";
 import {BridgeService} from "../../core-bridge-module/bridge.service";
 import {GlobalContainerComponent} from "../../common/ui/global-container/global-container.component";
+import {ActionbarComponent} from '../../common/ui/actionbar/actionbar.component';
 
 
 @Component({
@@ -76,6 +77,7 @@ export class SearchComponent {
   @ViewChild('mainNav', {static: false}) mainNavRef: MainNavComponent;
   @ViewChild('managementDialogs', {static: false}) managementDialogs : WorkspaceManagementDialogsComponent;
   @ViewChild('extendedSearch', {static: false}) extendedSearch : ElementRef;
+  @ViewChild('actionbarComponent', {static: false}) actionbarComponent: ActionbarComponent;
   public mdsSuggestions:any={}
   public mdsExtended=false;
   public sidenavTab=0;
@@ -722,7 +724,7 @@ export class SearchComponent {
       };
       options.push(save);
 
-      let download = this.actionbar.createOptionIfPossible('DOWNLOAD', nodes, (node: Node) => NodeHelper.downloadNodes(this.toast, this.connector, ActionbarHelperService.getNodes(nodes, node)));
+      let download = this.actionbar.createOptionIfPossible('DOWNLOAD', nodes, (node: Node) => NodeHelper.downloadNodes(this.connector, ActionbarHelperService.getNodes(nodes, node)));
       options.push(download);
 
       if((fromList || nodes && nodes.length==1) && this.config.instant('nodeReport',false)){

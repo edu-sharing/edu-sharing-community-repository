@@ -555,7 +555,6 @@ export class CollectionsMainComponent {
                 nodes,
                 (node: Node) =>
                     NodeHelper.downloadNodes(
-                        this.toast,
                         this.connector,
                         ActionbarHelperService.getNodes(nodes, node),
                     ),

@@ -48,6 +48,7 @@ import { HttpClient } from '@angular/common/http';
 import { MainNavComponent } from '../../common/ui/main-nav/main-nav.component';
 import { MatMenuTrigger } from '@angular/material/menu';
 import { GlobalContainerComponent } from '../../common/ui/global-container/global-container.component';
+import {ActionbarComponent} from '../../common/ui/actionbar/actionbar.component';
 
 @Component({
     selector: 'workspace-main',
@@ -115,7 +116,6 @@ export class WorkspaceMainComponent implements EventListener {
     private currentNodes: Node[];
     private appleCmd = false;
     public workflowNode: Node;
-    public deleteNode: Node[];
     private reurl: string;
     private mdsParentNode: Node;
     public showLtiTools = false;
@@ -159,30 +159,7 @@ export class WorkspaceMainComponent implements EventListener {
         const clip = (this.storage.get('workspace_clipboard') as ClipboardObject);
         const fromInputField = KeyEvents.eventFromInputField(event);
         const hasOpenWindow = this.hasOpenWindows();
-        if (event.code === 'KeyX' && (event.ctrlKey || this.appleCmd) && this.selection.length && !hasOpenWindow && !fromInputField) {
-            this.cutCopyNode(null, false);
-            event.preventDefault();
-            event.stopPropagation();
-            return;
-        }
-        if (event.code === 'F2' && this.selection.length === 1 && !hasOpenWindow && !fromInputField) {
-            this.editNode(this.selection[0]);
-            event.preventDefault();
-            event.stopPropagation();
-            return;
-        }
-        if (event.code === 'KeyC' && (event.ctrlKey || this.appleCmd) && this.selection.length && !hasOpenWindow && !fromInputField) {
-            this.cutCopyNode(null, true);
-            event.preventDefault();
-            event.stopPropagation();
-            return;
-        }
-        if (event.code === 'KeyV' && (event.ctrlKey || this.appleCmd) && clip && !hasOpenWindow && !fromInputField) {
-            this.pasteNode();
-            event.preventDefault();
-            event.stopPropagation();
-            return;
-        }
+
         if (event.code === 'Delete' && !hasOpenWindow && !fromInputField && this.selection.length) {
             this.deleteNodes();
             event.preventDefault();
@@ -511,7 +488,7 @@ export class WorkspaceMainComponent implements EventListener {
         }
         this.deleteNode = list;
     }
-    private deleteDone(data: any) {
+    private deleteDone() {
         this.metadataNode = null;
         this.refresh();
     }
@@ -833,7 +810,8 @@ export class WorkspaceMainComponent implements EventListener {
     }
     private setSelection(nodes: Node[]) {
         this.selection = nodes;
-        this.actionOptions = this.getOptions(nodes, false);
+        //@TODO
+        //this.actionOptions = this.getOptions(nodes, false);
         this.setFixMobileNav();
     }
     private setFixMobileNav() {
@@ -912,7 +890,16 @@ export class WorkspaceMainComponent implements EventListener {
             if (id === RestConstants.USERHOME) {
                 this.createAllowed = true;
             }
-            this.updateNodeByParams(params, { ref: { id }, name: this.translate.instant('WORKSPACE.' + this.root) });
+            const node: Node|any = {
+                ref: {
+                    id
+                },
+                name: this.translate.instant('WORKSPACE.' + this.root)
+            };
+            if (this.root === 'MY_FILES') {
+                node.access = [RestConstants.ACCESS_ADD_CHILDREN];
+            }
+            this.updateNodeByParams(params, node);
         }
 
     }

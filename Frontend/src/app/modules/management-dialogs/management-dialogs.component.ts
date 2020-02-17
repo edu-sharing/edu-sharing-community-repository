@@ -69,6 +69,8 @@ export class WorkspaceManagementDialogsComponent  {
     @Output() onDelete = new EventEmitter();
   @Input() nodeShare : Node[];
   @Output() nodeShareChange = new EventEmitter<Node[]>();
+    @Input() nodeDebug : Node[];
+    @Output() nodeDebugChange = new EventEmitter<Node[]>();
     @Input() nodeShareLink : Node;
     @Output() nodeShareLinkChange = new EventEmitter();
     @Input() nodeWorkflow : Node;
@@ -114,6 +116,12 @@ export class WorkspaceManagementDialogsComponent  {
   @Output() nodeDeleteOnCancelChange = new EventEmitter();
   private nodeLicenseOnUpload = false;
   private wasUploaded: boolean;
+    /**
+     * QR Code object data to print
+     * @node: Reference to the node (for header title)
+     * @data: The string to display inside the qr code (e.g. an url)
+     */
+  @Input() qr: {node: Node, data: string};
 
   @HostListener('document:keydown', ['$event'])
   handleKeyboardEvent(event: KeyboardEvent) {
@@ -434,5 +442,10 @@ export class WorkspaceManagementDialogsComponent  {
     closeTemplate() {
         this.nodeTemplate = null;
         this.nodeTemplateChange.emit(null);
+    }
+
+    closeDebug() {
+      this.nodeDebug = null;
+      this.nodeDebugChange.emit(null);
     }
 }

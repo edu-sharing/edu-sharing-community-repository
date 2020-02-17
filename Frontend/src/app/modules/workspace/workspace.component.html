@@ -62,10 +62,7 @@
            [searchWorkspace]="searchQuery ? searchQuery.query : null"
            [isInsideWorkspace]="true"></recycle>
 <div class="actionbarFrame"><div class="mobile-move-top">
-  <actionbar class=""
-             *ngIf="actionOptions && actionOptions.length"
-             [@fadeFast]="actionOptions && actionOptions.length"
-             [options]="actionOptions"
+  <actionbar #actionbar
 ></actionbar>
 </div></div>
   <workspace-explorer class="explorer"  [class.explorerMetadata]="metadataNode" *ngIf="root!='RECYCLE'"
@@ -78,10 +75,12 @@
   [(reorderDialog)]="reorderDialog"
   [preventKeyevents]="hasOpenWindows()"
   [(nodes)]="currentNodes"
+  [mainNav]="mainNav"
+  [management]="management"
+  [actionbar]="actionbar"
   (onSearchGlobal)="searchGlobal($event)"
   (onDrop)="handleDrop($event)"
   (onSelectNode)="clickNode($event)"
-  (onListChange)="updateList($event)"
   (onSelectionChanged)="setSelection($event)"
   (onOpenNode)="openNode($event)"
   (onUpdateOptions)="updateOptions($event)"
@@ -89,27 +88,28 @@
 ></workspace-explorer>
 
 <workspace-management
-[(showLtiTools)]="showLtiTools"
-[(addToCollection)]="addNodesToCollection"
-[(addNodesStream)]="addNodesStream"
-[(nodeLicense)]="editNodeLicense"
-[(nodeMetadata)]="editNodeMetadata"
-[(nodeTemplate)]="editNodeTemplate"
-[(nodeDeleteOnCancel)]="editNodeDeleteOnCancel"
-[(nodeWorkflow)]="workflowNode"
-[(nodeVariant)]="variantNode"
-[(nodeShare)]="sharedNode"
-[(nodeDelete)]="deleteNode"
-[(nodeShareLink)]="shareLinkNode"
-[(showUploadSelect)]="showUploadSelect"
-[parent]="currentFolder"
-[nodeMetadataAllowReplace]="editNodeAllowReplace"
-[(nodeContributor)]="contributorNode"
-(onRefresh)="refresh(true,$event)"
-(onUploadFilesProcessed)="afterUpload($event)"
-(onUpdateLicense)="updateLicense()"
-(onCloseMetadata)="closeMetadata()"
-(onDelete)="deleteDone()"
+  #management
+  [(showLtiTools)]="showLtiTools"
+  [(addToCollection)]="addNodesToCollection"
+  [(addNodesStream)]="addNodesStream"
+  [(nodeLicense)]="editNodeLicense"
+  [(nodeMetadata)]="editNodeMetadata"
+  [(nodeTemplate)]="editNodeTemplate"
+  [(nodeDeleteOnCancel)]="editNodeDeleteOnCancel"
+  [(nodeWorkflow)]="workflowNode"
+  [(nodeVariant)]="variantNode"
+  [(nodeShare)]="sharedNode"
+  [(nodeDelete)]="deleteNode"
+  [(nodeShareLink)]="shareLinkNode"
+  [(showUploadSelect)]="showUploadSelect"
+  [parent]="currentFolder"
+  [nodeMetadataAllowReplace]="editNodeAllowReplace"
+  [(nodeContributor)]="contributorNode"
+  (onRefresh)="refresh(true,$event)"
+  (onUploadFilesProcessed)="afterUpload($event)"
+  (onUpdateLicense)="updateLicense()"
+  (onCloseMetadata)="closeMetadata()"
+  (onDelete)="deleteDone()"
 >
 </workspace-management>
 
@@ -123,11 +123,6 @@
                       (onEditMetadata)="editNode($event)"
                       (onClose)="closeMetadata()"
   ></workspace-metadata>
-
-<node-info *ngIf="nodeDebug"
-           [node]="nodeDebug"
-           (onClose)="nodeDebug=null"
-           ></node-info>
 
 </div>
   <global-progress *ngIf="globalProgress"></global-progress>

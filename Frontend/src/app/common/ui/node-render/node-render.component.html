@@ -1,16 +1,5 @@
 <!-- dummy for banner-->
 <main-nav #mainNav [currentScope]="'render'"></main-nav>
-<card
-  *ngIf="qrCode"
-  [node]="_node"
-  [isCancelable]="true"
-  title="{{ 'WORKSPACE.OPTION.QR_CODE' | translate }}"
-  (onCancel)="qrCode=false"
-  class="qr"
-  width="xlarge"
-  height="xxxlarge">
-  <qrcode [qrdata]="getQRData()" elementType="img" margin="2" width="512" errorCorrectionLevel="M"></qrcode>
-</card>
 <div class="topBar fixed scrollWithBanner" *ngIf="showTopBar">
   <div class="displayBar">
     <span class="clickable" title="{{'BACK' | translate}}" (click)="close()" (keypress)="($event.which === 13)?close():0" tabindex="0"><i icon iconId="keyboard_arrow_left"></i> <span class="render-back">{{'BACK' | translate}}</span></span>
