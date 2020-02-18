@@ -68,35 +68,36 @@
         </div>
         <div [ngClass]="{'publish-grey': filterDisabledPermissions(newPermissions).length}" class="publish" *ngIf="!isSafe">
           <div class="publishElements">
-            <mat-slide-toggle [disabled]="!publishPermission || publishInherit" [(ngModel)]="publishActive" (change)="setPublish(publishActive)">
-              {{ ('WORKSPACE.SHARE.PUBLISH_'+(isCollection() ? 'COLLECTION' : _nodes[0].isDirectory ? 'DIRECTORY' : 'DOCUMENT')) | translate}}
-            </mat-slide-toggle>
-          <div *ngIf="!publishPermission && !publishInherit" class="publishInfo">{{ 'WORKSPACE.SHARE.PUBLISH_NO_PERMISSION' | translate}}</div>
-          <div>
-            <div *ngIf="publishInherit" class="publishInfo">{{ 'WORKSPACE.SHARE.PUBLISH_INHERIT' | translate}}</div>
-            <div *ngIf="publishPermission && !publishInherit" class="publishInfo"
-                 innerHTML="{{('WORKSPACE.SHARE.PUBLISH_ACTIVE_'+(isCollection() ? 'COLLECTION' : _nodes[0].isDirectory ? 'DIRECTORY' : 'DOCUMENT')) | translate}}">
+            <div *ngIf="!publishPermission && !publishInherit" class="publishInfo">{{ 'WORKSPACE.SHARE.PUBLISH_NO_PERMISSION' | translate}}</div>
+            <div *ngIf="publishPermission || publishInherit" class="publish-labels">
+              <label>{{ ('WORKSPACE.SHARE.PUBLISH_'+(isCollection() ? 'COLLECTION' : _nodes[0].isDirectory ? 'DIRECTORY' : 'DOCUMENT')) | translate}}</label>
+              <div *ngIf="publishInherit" class="publishInfo">{{ 'WORKSPACE.SHARE.PUBLISH_INHERIT' | translate}}</div>
+              <div *ngIf="publishPermission && !publishInherit" class="publishInfo"
+                   innerHTML="{{('WORKSPACE.SHARE.PUBLISH_ACTIVE_'+(isCollection() ? 'COLLECTION' : _nodes[0].isDirectory ? 'DIRECTORY' : 'DOCUMENT')) | translate}}">
+              </div>
+              <div class="doi" *ngIf="allowDOI()">
+                <mat-checkbox [disabled]="doiDisabled" [(ngModel)]="doiActive" id="doi">
+                  <div class="strong">{{'WORKSPACE.SHARE.DOI' | translate}}</div>
+                  <div class="label-secondary">{{'WORKSPACE.SHARE.DOI_INFO' | translate}}</div>
+                </mat-checkbox>
+              </div>
             </div>
-            <div class="doi" *ngIf="allowDOI()">
-              <mat-checkbox [disabled]="doiDisabled" [(ngModel)]="doiActive" id="doi">
-                <div class="strong">{{'WORKSPACE.SHARE.DOI' | translate}}</div>
-                <div class="label-secondary">{{'WORKSPACE.SHARE.DOI_INFO' | translate}}</div>
-              </mat-checkbox>
+            <div class="publish-config">
+              <div *ngIf="publishActive" class="type"><i class="material-icons align-icon">remove_red_eye</i> <span class="uppercase">{{'WORKSPACE.SHARE.TYPE_VIEWER' | translate}}</span></div>
+              <mat-slide-toggle [disabled]="!publishPermission || publishInherit" [(ngModel)]="publishActive" (change)="setPublish(publishActive)"></mat-slide-toggle>
             </div>
           </div>
-          </div>
-          <div *ngIf="publishActive" class="type"><i class="material-icons align-icon">remove_red_eye</i> <span>{{'WORKSPACE.SHARE.TYPE_VIEWER' | translate}}</span></div>
         </div>
       </div>
         <div class="bulk-config" *ngIf="isBulk()">
           <mat-radio-group [(ngModel)]="bulkMode">
-            <h4 class="mat-heading-4 mat-heading-underline">{{'WORKSPACE.SHARE.BULK_MODE.TITLE' | translate}}</h4>
-            <mat-radio-button value="extend">
-              <div>{{'WORKSPACE.SHARE.BULK_MODE.EXTEND' | translate}}</div>
+            <h4 class="mat-heading-4">{{'WORKSPACE.SHARE.BULK_MODE.TITLE' | translate}}</h4>
+            <mat-radio-button class="mat-radio-multiline" value="extend">
+              <div class="label-primary">{{'WORKSPACE.SHARE.BULK_MODE.EXTEND' | translate}}</div>
               <div class="label-secondary">{{'WORKSPACE.SHARE.BULK_MODE.EXTEND_DESCRIPTION' | translate}}</div>
             </mat-radio-button>
-            <mat-radio-button value="replace">
-              <div>{{'WORKSPACE.SHARE.BULK_MODE.REPLACE' | translate}}</div>
+            <mat-radio-button class="mat-radio-multiline" value="replace">
+              <div class="label-primary">{{'WORKSPACE.SHARE.BULK_MODE.REPLACE' | translate}}</div>
               <div class="label-secondary">{{'WORKSPACE.SHARE.BULK_MODE.REPLACE_DESCRIPTION' | translate}}</div>
             </mat-radio-button>
           </mat-radio-group>
@@ -218,7 +219,7 @@
       </mat-tab>
       <mat-tab label="{{'WORKSPACE.TAB_ADVANCED' | translate}}" *ngIf="isAdmin && permissionsUser && permissionsGroup" class="tabContent">
         <div class="advanced">
-        <h4 *ngIf="permissionsUser.length+permissionsGroup.length==0">
+        <h4 class="mat-heading-4" *ngIf="permissionsUser.length+permissionsGroup.length==0">
           {{'WORKSPACE.SHARE.NO_PERMISSIONS' | translate}}
         </h4>
         <div *ngFor="let permission of permissionsGroup.concat(permissionsUser)">
@@ -235,7 +236,7 @@
         </div>
       </mat-tab>
   </mat-tab-group>
-  <div class="state" *ngIf="initialState">
+  <div class="state" *ngIf="initialState && buttons">
     <div *ngIf="getState()=='PRIVATE'" [class.state-changed]="isStateModified()" class="show-state"><i icon iconId="lock"></i><span> {{'WORKSPACE.SHARE.STATE.PRIVATE' | translate}}</span></div>
     <div *ngIf="getState()=='SHARED'" [class.state-changed]="isStateModified()" class="show-state"><i icon iconId="group"></i><span> {{'WORKSPACE.SHARE.STATE.SHARED' | translate}}</span></div>
     <div *ngIf="getState()=='PUBLIC'" [class.state-changed]="isStateModified()" class="show-state"><i class="material-icons" style="color: #42CA8D">public</i><span> {{'WORKSPACE.SHARE.STATE.PUBLIC' | translate}}</span></div>

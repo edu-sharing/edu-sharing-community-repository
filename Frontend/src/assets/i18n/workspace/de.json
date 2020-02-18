@@ -140,11 +140,11 @@
                 "PAGE": "Seite"
             },
             "BULK_MODE": {
-                "TITLE" : "Berechtigungen aktualisieren",
-                "EXTEND" : "Berechtigungen ergänzen",
-                "EXTEND_DESCRIPTION" : "Die aktuell bestehenden Berechtigungen aller gewählten Elemente bleiben erhalten. Sollte ein Nutzer/Gruppe aus der oben stehenden Auswahl keinen Zugriff besitzen, erhält er diesen. Sollte der Nutzer aktuell bereits über ein höherrangiges Recht verfügen, so bleibt dieses bestehen",
-                "REPLACE" : "Berechtigungen ersetzen",
-                "REPLACE_DESCRIPTION" : "Die aktuell bestehenden Berechtigungen aller gewählten Elemente werden mit der oben festgelegten Auswahl ersetzt."
+                "TITLE" : "Berechtigungen verwalten",
+                "EXTEND" : "Bestehende Berechtigungen aktualisieren",
+                "EXTEND_DESCRIPTION" : "Die aktuell bestehenden Berechtigungen aller gewählten Elemente bleiben erhalten. Gewählte Benutzer/Gruppen erhalten Zugriff. Höherrangige Berechtigungen bleiben erhalten.",
+                "REPLACE" : "Bestehende Berechtigungen ersetzen",
+                "REPLACE_DESCRIPTION" : "Die aktuell bestehenden Berechtigungen aller gewählten Elemente werden mit der oben festgelegten Auswahl überschrieben."
             }
         },
         "INHERIT_DISABLED": "Rechtevererbung ist aktuell ausgeschaltet",
