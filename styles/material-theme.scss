@@ -74,6 +74,16 @@ $candy-app-theme: mat-light-theme($candy-app-primary, $candy-app-accent, $candy-
     opacity: $mat-ripple-color-opacity;
   }
 }
+.mat-radio-multiline{
+  .mat-radio-label,.mat-checkbox-layout{
+    white-space: normal!important;
+    align-items: baseline !important;
+  }
+  .mat-radio-container{
+    position: relative;
+    top:6px;
+  }
+}
 .mat-tab-labels {
   background-color: $actionDialogBackground;
   .mat-tab-label {
