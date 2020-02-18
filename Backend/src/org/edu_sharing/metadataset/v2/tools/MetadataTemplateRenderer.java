@@ -313,35 +313,37 @@ public class MetadataTemplateRenderer {
 
 	private boolean renderTree(StringBuffer widgetHtml, MetadataWidget widget) {
 		Map<String, MetadataKey> valuesMap=widget.getValuesAsMap();
-		Map<Integer, List<String>> map=new HashMap<>();
+		String[] keys = properties.get(widget.getId());
 		boolean empty=true;
-		for(String value:valuesMap.keySet()) {
-			MetadataKey key=valuesMap.get(value);
-			if(key==null)
-				continue;
-			List<String> path=new ArrayList<String>();
-			int preventInfiniteLoop = 0;
-			while(key!=null) {
-				path.add(key.getCaption());
-				key=valuesMap.get(key.getParent());
-				if(preventInfiniteLoop++ > 100) {
-					logger.error("check valuespace for widget:" + widget.getId() + " key:" + key.getKey());
-					break;
+		if(keys!=null) {
+			for (String value : keys) {
+				MetadataKey key = valuesMap.get(value);
+				if (key == null)
+					continue;
+				List<String> path = new ArrayList<String>();
+				int preventInfiniteLoop = 0;
+				while (key != null) {
+					path.add(key.getCaption());
+					key = valuesMap.get(key.getParent());
+					if (preventInfiniteLoop++ > 100) {
+						logger.error("check valuespace for widget:" + widget.getId() + " key:" + key.getKey());
+						break;
+					}
 				}
-			}
-			path= Lists.reverse(path);
-			int i=0;
-			widgetHtml.append("<div class='mdsValue'>");
-			empty=path.size()==0;
-			for(String p : path) {
-				if(i>0) {
-					widgetHtml.append("<i class='material-icons'>keyboard_arrow_right</i>");
+				path = Lists.reverse(path);
+				int i = 0;
+				widgetHtml.append("<div class='mdsValue'>");
+				empty = path.size() == 0;
+				for (String p : path) {
+					if (i > 0) {
+						widgetHtml.append("<i class='material-icons'>keyboard_arrow_right</i>");
+					}
+					widgetHtml.append(p);
+					i++;
 				}
-				widgetHtml.append(p);
-				i++;
-			}
-			widgetHtml.append("</div>");
+				widgetHtml.append("</div>");
 
+			}
 		}
 		return empty;
 	}
