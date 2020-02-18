@@ -400,7 +400,7 @@ public class MetadataTemplateRenderer {
 			MetadataKey key=valuesMap.get(value);
 			if(key==null)
 				continue;
-			List<String> path=new ArrayList<String>();
+			List<String> path=new ArrayList<>();
 			int preventInfiniteLoop = 0;
 			while(key!=null) {
 				path.add(key.getCaption());

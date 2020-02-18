@@ -176,21 +176,26 @@ input[type=text],
 .materialize-textarea{
   overflow-y: auto!important;
 }
-[type="radio"]+label:before,
-[type="radio"]+label:after{
-  top: -2px;
-  width: 20px;
-  height: 20px;
-}
-[type="radio"]:not([disabled])+label:before,
-[type="radio"]:not([disabled])+label:after{
-  border: 2px solid $primary!important;
+[type="radio"] {
+  & + label {
+    padding-left: 30px !important;
+  }
+  & + label:before,
+  & + label:after {
+    top: -2px;
+    width: 20px;
+    height: 20px;
+  }
+
+  &:not([disabled]) + label:before,
+  &:not([disabled]) + label:after {
+    border: 2px solid $primary !important;
+  }
+  &:checked+label:after{
+    background: radial-gradient(ellipse at center, $primary 0, $primary 46%,#fff 52%);
+  }
 }
 
-
-[type="radio"]:checked+label:after{
-  background: radial-gradient(ellipse at center, $primary 0, $primary 46%,#fff 52%);
-}
 select {
   -webkit-appearance: none;
   -moz-appearance: none;
