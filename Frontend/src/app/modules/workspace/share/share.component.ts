@@ -550,7 +550,7 @@ export class WorkspaceShareComponent{
         }
         return 'PRIVATE';
   }
-    private isBulk() {
+    isBulk() {
       return this._nodes && this._nodes.length > 1;
     }
     private updateUsages(permissions:LocalPermissions,pos=0,error=false) {
