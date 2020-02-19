@@ -1,6 +1,8 @@
 @import "../../../core-ui-module/styles/variables";
 
 .noElementsInfo{
+  position: absolute;
+  top: 36px;
   >div.clickable{
     color: $primary;
     text-transform: uppercase;
