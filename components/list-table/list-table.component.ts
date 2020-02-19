@@ -29,7 +29,7 @@ import {
     ListItem,
     NetworkRepositories,
     Node,
-    Repository,
+    Repository, RestConnectorsService,
     RestConstants,
     RestHelper,
     RestLocatorService,
@@ -47,7 +47,11 @@ import { NodeHelper } from '../../node-helper';
 import { OptionItem } from '../../option-item';
 import { Toast } from '../../toast';
 import { UIHelper } from '../../ui-helper';
-import { DragData, DropData } from '../../directives/drag-nodes/drag-nodes';
+import {WorkspaceManagementDialogsComponent} from '../../../modules/management-dialogs/management-dialogs.component';
+import {ActionbarComponent} from '../../../common/ui/actionbar/actionbar.component';
+import {OptionsHelperService, Scope} from '../../../common/options-helper';
+import {BridgeService} from '../../../core-bridge-module/bridge.service';
+import {MainNavComponent} from '../../../common/ui/main-nav/main-nav.component';
 
 @Component({
     selector: 'listTable',
@@ -99,9 +103,7 @@ export class ListTableComponent implements EventListener {
     @ViewChild('dropdownContainer', { static: false })
     dropdownContainerElement: ElementRef;
 
-    @ContentChild('itemContent', { static: false }) itemContentRef: TemplateRef<
-        any
-    >;
+    @ContentChild('itemContent', { static: false }) itemContentRef: TemplateRef<any>;
 
     /** Set the current list of nodes to render */
     @Input() set nodes(nodes: Node[]) {
@@ -114,6 +116,8 @@ export class ListTableComponent implements EventListener {
             );
         }
         this._nodes = nodes;
+        console.log('update nodes', nodes);
+        this.refreshAvailableOptions();
     }
 
     /**
@@ -123,6 +127,12 @@ export class ListTableComponent implements EventListener {
      * Activate it for any kind of nodes list which is supposed to be clickable
      */
     @Input() createLink = false;
+
+    /**
+     * Info about the current parent node
+     * May be empty if it does not exists
+     */
+    @Input() parent: Node|any;
 
     @Input() set columns(columns: ListItem[]) {
         this.columnsOriginal = Helper.deepCopy(columns);
@@ -140,11 +150,6 @@ export class ListTableComponent implements EventListener {
      * Set the options which are valid for each node, similar to the action bar options, see @OptionItem.
      */
     @Input() set options(options: OptionItem[]) {
-        options = UIHelper.filterValidOptions(this.ui, options);
-        if (this.selectedNodes && this.selectedNodes.length === 1) {
-            options = this.filterCallbacks(options, this.selectedNodes[0]);
-        }
-        console.log(options);
         this._options = [];
         if (!options) {
             return;
@@ -161,6 +166,11 @@ export class ListTableComponent implements EventListener {
             }
         }
     }
+
+    /**
+     * all options displayed for the current dropdown
+     */
+    @Input() dropdownOptions: OptionItem[];
 
     /**
      * Shall an icon be shown?
@@ -197,6 +207,7 @@ export class ListTableComponent implements EventListener {
             // use a timeout to prevent a ExpressionChangedAfterItHasBeenCheckedError in the parent component
             setTimeout(() => {
                 this.selectedNodes = [];
+                this.refreshAvailableOptions();
                 this.onSelectionChanged.emit([]);
             });
         }
@@ -255,6 +266,26 @@ export class ListTableComponent implements EventListener {
      */
     @Input() viewType = ListTableComponent.VIEW_TYPE_LIST;
 
+    /**
+     * link to the managementDialogs component that is in use
+     * If null, no action handling is enabled
+     */
+    @Input() management:WorkspaceManagementDialogsComponent;
+
+    /**
+     * Link to the MainNavComponent
+     * Required to refresh particular events when triggered, e.g. a node was bookmarked
+     */
+    @Input() mainNav: MainNavComponent;
+    /**
+     * link to the actionbar component that is in use
+     */
+    @Input() actionbar: ActionbarComponent;
+
+    /**
+     * The current scope this list table is supposed to serve
+     */
+    @Input() scope: Scope;
     /**
      * Are drag and drop events allowed?
      */
@@ -386,6 +417,11 @@ export class ListTableComponent implements EventListener {
     @Output() doubleClickRow = new EventEmitter();
 
     /**
+     * Called when an explicit viewing event is received from the action menu
+     */
+    @Output() openNode = new EventEmitter();
+
+    /**
      * Called when the selection has changed.
      *
      * Emits an array of objects from the list (usually nodes, but depends how you filled it)
@@ -461,10 +497,13 @@ export class ListTableComponent implements EventListener {
         private changes: ChangeDetectorRef,
         private storage: TemporaryStorageService,
         private network: RestNetworkService,
+        private connectors: RestConnectorsService,
         private locator: RestLocatorService,
         private route: ActivatedRoute,
         private router: Router,
         private toast: Toast,
+        private optionsHelper: OptionsHelperService,
+        private bridge: BridgeService,
         private frame: FrameEventsService,
         private sanitizer: DomSanitizer,
     ) {
@@ -474,7 +513,11 @@ export class ListTableComponent implements EventListener {
         );
         this.id = Math.random();
         frame.addListener(this);
-        setTimeout(() => this.loadRepos());
+        // wait for all bindings to finish
+        setTimeout(() => {
+            this.refreshAvailableOptions();
+            this.loadRepos();
+        });
     }
 
     loadRepos(): void {
@@ -530,6 +573,7 @@ export class ListTableComponent implements EventListener {
     toggleAll(): void {
         if (this.selectedNodes.length === this._nodes.length) {
             this.selectedNodes = [];
+            this.refreshAvailableOptions();
             this.onSelectionChanged.emit(this.selectedNodes);
         } else {
             this.selectAll();
@@ -739,6 +783,7 @@ export class ListTableComponent implements EventListener {
         for (const node of this._nodes) {
             this.selectedNodes.push(node);
         }
+        this.refreshAvailableOptions();
         this.onSelectionChanged.emit(this.selectedNodes);
     }
 
@@ -937,7 +982,7 @@ export class ListTableComponent implements EventListener {
         // if (this._options == null || this._options.length < 1)
         //     return;
         this.select(node, 'dropdown', false, false);
-        this.onUpdateOptions.emit(node);
+        this.refreshAvailableOptions(node);
         if (openMenu) {
             if (event) {
                 console.log(event);
@@ -985,6 +1030,7 @@ export class ListTableComponent implements EventListener {
             } else {
                 this.selectedNodes = [node];
             }
+            this.refreshAvailableOptions();
             this.onSelectionChanged.emit(this.selectedNodes);
             return false;
         }
@@ -1019,6 +1065,7 @@ export class ListTableComponent implements EventListener {
                 this.selectedNodes.push(node);
             }
         }
+        this.refreshAvailableOptions();
         this.onSelectionChanged.emit(this.selectedNodes);
         this.changes.detectChanges();
         return false;
@@ -1077,5 +1124,25 @@ export class ListTableComponent implements EventListener {
             return optionItem.showCallback(node);
         }
         return true;
+    }
+
+    private refreshAvailableOptions(node: Node = null) {
+        if (this.management) {
+            this.optionsHelper.setParentObject(this.parent);
+            this.optionsHelper.setAllObjects(this._nodes);
+            this.optionsHelper.setActiveObject(node);
+            this.optionsHelper.setSelectedObjects(this.selectedNodes);
+            this.optionsHelper.setCurrentScope(this.scope);
+            this.optionsHelper.refreshComponents(this.management, this, this.actionbar, this.mainNav);
+        }
+    }
+
+    addVirtualNodes(objects: Node[]|any[]) {
+        console.log(objects);
+        this._nodes = objects.concat(this._nodes);
+        this.selectedNodes = objects;
+        this.nodesChange.emit(this._nodes);
+        this.onSelectionChanged.emit(objects);
+        this.refreshAvailableOptions();
     }
 }

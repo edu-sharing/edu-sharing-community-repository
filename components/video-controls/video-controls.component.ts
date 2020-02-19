@@ -8,6 +8,7 @@ import {UIAnimation} from '../../../core-module/ui/ui-animation';
 import {UIHelper} from '../../ui-helper';
 import {RestCollectionService, RestConnectorService} from '../../../core-module/core.module';
 import {Router} from '@angular/router';
+import {BridgeService} from '../../../core-bridge-module/bridge.service';
 
 @Component({
   selector: 'video-controls',
@@ -58,6 +59,7 @@ export class VideoControlsComponent {
               private collectionService: RestCollectionService,
               private connector: RestConnectorService,
               private router: Router,
+              private bridge: BridgeService,
               private toast: Toast) {
     this.isGuest = this.connector.getCurrentLogin().isGuest;
 
@@ -172,7 +174,7 @@ export class VideoControlsComponent {
   addToCollection(collection: Collection) {
     this.chooseCollection = false;
     this.loading = true;
-    UIHelper.addToCollection(this.collectionService, this.router, this.toast, collection, [this.node], (elements: Node[]) => {
+    UIHelper.addToCollection(this.collectionService, this.router, this.bridge, collection, [this.node], (elements: Node[]) => {
       console.log(elements);
       if (elements.length) {
         this.node = elements[0];

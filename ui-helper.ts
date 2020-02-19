@@ -1,49 +1,29 @@
-import { OPEN_URL_MODE, UIConstants } from '../core-module/ui/ui-constants';
-import { Title } from '@angular/platform-browser';
-import { ConfigurationService } from '../core-module/rest/services/configuration.service';
-import { TranslateService } from '@ngx-translate/core';
-import { ActivatedRoute, NavigationExtras, Router } from '@angular/router';
-import {
-    Collection,
-    Connector,
-    Filetype,
-    LoginResult,
-    MdsInfo,
-    Node,
-    NodeLock,
-    ParentList,
-} from '../core-module/rest/data-object';
-import { RestConstants } from '../core-module/rest/rest-constants';
-import { RestNodeService } from '../core-module/rest/services/rest-node.service';
-import { Toast } from './toast';
-import { RestHelper } from '../core-module/rest/rest-helper';
-import { TemporaryStorageService } from '../core-module/rest/services/temporary-storage.service';
-import { UIService } from '../core-module/rest/services/ui.service';
-import {
-    ComponentFactoryResolver,
-    ElementRef,
-    EmbeddedViewRef,
-    EventEmitter,
-    Type,
-    ViewContainerRef,
-    ComponentRef,
-} from '@angular/core';
-import { RestCollectionService } from '../core-module/rest/services/rest-collection.service';
-import { NodeHelper } from './node-helper';
-import { RestConnectorsService } from '../core-module/rest/services/rest-connectors.service';
-import { FrameEventsService } from '../core-module/rest/services/frame-events.service';
-import { ListItem } from '../core-module/ui/list-item';
-import { BridgeService } from '../core-bridge-module/bridge.service';
-import { OptionItem } from './option-item';
-import { RestConnectorService } from '../core-module/rest/services/rest-connector.service';
-import { Observable, Observer } from 'rxjs';
-import {
-    DialogButton,
-    RestIamService,
-    RestNetworkService,
-} from '../core-module/core.module';
-import { RouterHelper } from './router.helper';
-import { PlatformLocation } from '@angular/common';
+import {OPEN_URL_MODE, UIConstants} from '../core-module/ui/ui-constants';
+import {Title} from '@angular/platform-browser';
+import {ConfigurationService} from '../core-module/rest/services/configuration.service';
+import {TranslateService} from '@ngx-translate/core';
+import {ActivatedRoute, NavigationExtras, Router} from '@angular/router';
+import {Collection, Connector, Filetype, LoginResult, MdsInfo, Node, NodeLock, ParentList,} from '../core-module/rest/data-object';
+import {RestConstants} from '../core-module/rest/rest-constants';
+import {RestNodeService} from '../core-module/rest/services/rest-node.service';
+import {Toast} from './toast';
+import {RestHelper} from '../core-module/rest/rest-helper';
+import {TemporaryStorageService} from '../core-module/rest/services/temporary-storage.service';
+import {UIService} from '../core-module/rest/services/ui.service';
+import {ComponentFactoryResolver, ComponentRef, ElementRef, EmbeddedViewRef, EventEmitter, Type, ViewContainerRef,} from '@angular/core';
+import {RestCollectionService} from '../core-module/rest/services/rest-collection.service';
+import {NodeHelper} from './node-helper';
+import {RestConnectorsService} from '../core-module/rest/services/rest-connectors.service';
+import {FrameEventsService} from '../core-module/rest/services/frame-events.service';
+import {ListItem} from '../core-module/ui/list-item';
+import {BridgeService} from '../core-bridge-module/bridge.service';
+import {OptionItem} from './option-item';
+import {RestConnectorService} from '../core-module/rest/services/rest-connector.service';
+import {Observable, Observer} from 'rxjs';
+import {DialogButton, RestIamService, RestNetworkService,} from '../core-module/core.module';
+import {RouterHelper} from './router.helper';
+import {PlatformLocation} from '@angular/common';
+import {MessageType} from '../core-module/ui/message-type';
 
 export class UIHelper {
     public static evaluateMediaQuery(type: string, value: number) {
@@ -329,8 +309,8 @@ export class UIHelper {
         eval("$('select').css('display','none');$('select').material_select()");
     }
 
-    static showAddedToCollectionToast(
-        toast: Toast,
+    static showAddedToCollectionInfo(
+        bridge: BridgeService,
         router: Router,
         node: any,
         count: number,
@@ -352,11 +332,9 @@ export class UIHelper {
         } else if (type == RestConstants.COLLECTIONTYPE_EDITORIAL) {
             scope = 'PUBLIC';
         }
-        toast.toast(
+        bridge.showTemporaryMessage(MessageType.info,
             'WORKSPACE.TOAST.ADDED_TO_COLLECTION_' + scope,
             { count: count, collection: RestHelper.getTitle(node) },
-            null,
-            null,
             {
                 link: {
                     caption: 'WORKSPACE.TOAST.VIEW_COLLECTION',
@@ -380,7 +358,7 @@ export class UIHelper {
     static addToCollection(
         collectionService: RestCollectionService,
         router: Router,
-        toast: Toast,
+        bridge: BridgeService,
         collection: Node | Collection,
         nodes: Node[],
         callback: (nodes: Node[]) => void = null,
@@ -390,8 +368,8 @@ export class UIHelper {
     ) {
         if (position >= nodes.length) {
             if (!error)
-                UIHelper.showAddedToCollectionToast(
-                    toast,
+                UIHelper.showAddedToCollectionInfo(
+                    bridge,
                     router,
                     collection,
                     nodes.length,
@@ -412,7 +390,7 @@ export class UIHelper {
                     UIHelper.addToCollection(
                         collectionService,
                         router,
-                        toast,
+                        bridge,
                         collection,
                         nodes,
                         callback,
@@ -422,22 +400,21 @@ export class UIHelper {
                     );
                 },
                 (error: any) => {
-                    if (error.status == RestConstants.DUPLICATE_NODE_RESPONSE) {
-                        toast.error(
-                            null,
+                    if (error.status === RestConstants.DUPLICATE_NODE_RESPONSE) {
+                        bridge.showTemporaryMessage(MessageType.error,
                             'WORKSPACE.TOAST.NODE_EXISTS_IN_COLLECTION',
                             { name: RestHelper.getTitle(nodes[position]) },
                         );
                     } else
                         NodeHelper.handleNodeError(
-                            toast,
+                            bridge,
                             RestHelper.getTitle(nodes[position]),
                             error,
                         );
                     UIHelper.addToCollection(
                         collectionService,
                         router,
-                        toast,
+                        bridge,
                         collection,
                         nodes,
                         callback,

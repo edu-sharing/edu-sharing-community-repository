@@ -82,6 +82,6 @@ export class OptionItem {
    * @param icon A material icon name
    * @param callback A function callback when this option is choosen. Will get the current node passed as an argument
    */
-  constructor(public name: string, public icon: string, public callback: Function) {
+  constructor(public name: string, public icon: string, public callback: (object: Node|any) => void) {
   }
 }
