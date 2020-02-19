@@ -115,6 +115,9 @@ user-quota{
   right:0;
   z-index: 1;
   background-color: #fff;
+  @media screen and (max-width: ($mobileTabSwitchWidth)) {
+    height:calc(100% - #{$mainnavHeight+$workspaceBreadcrumbsHeight+$mobileTabNavHeight});
+  }
 }
 .explorer{
   position:absolute;
@@ -179,7 +182,7 @@ user-quota{
       padding: 20px 0;
     }
   }
-  @media not screen and (max-width: ($mobileTabSwitchWidth)) {
+  @media screen and (min-width: ($mobileTabSwitchWidth)) {
     workspace-explorer listTable .list-type-table{
       position: relative;
       top: $listHeadingHeight;
@@ -189,6 +192,11 @@ user-quota{
         z-index: 1;
         top: $mainnavHeight + $workspaceBreadcrumbsHeight;
         width: calc(100% - #{$workspaceTreeWidth});
+      }
+    }
+    workspace-explorer.explorerMetadata listTable .list-type-table .headingGroup {
+      @media screen and (min-width: ($mobileWidth+$mobileStage*6)) {
+        width: calc(100% - #{$workspaceTreeWidth} - 300px);
       }
     }
   }
