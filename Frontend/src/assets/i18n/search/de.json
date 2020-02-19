@@ -42,7 +42,6 @@
         "ADD_TO_COLLECTION": "In Sammlung hinzufügen",
         "ADD_TO_COLLECTION_SHORT": "In Sammlung",
         "SHOW_NODE_STORE": "Merkliste",
-        "ADD_NODE_STORE": "Auf Merkliste",
         "ADDED_TO_NODE_STORE": "{{count}} Element(e) wurden auf die Merkliste gesetzt",
         "ADDED_TO_NODE_STORE_EXISTS": "Element {{name}} ist bereits auf der Merkliste",
         "NODE_STORE": {

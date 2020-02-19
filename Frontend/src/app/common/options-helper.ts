@@ -3,12 +3,12 @@ import {RestConnectorsService} from '../core-module/rest/services/rest-connector
 import {RestConstants} from '../core-module/rest/rest-constants';
 import {ListTableComponent} from '../core-ui-module/components/list-table/list-table.component';
 import {ActionbarComponent} from './ui/actionbar/actionbar.component';
-import {OptionItem} from '../core-ui-module/option-item';
+import {Constrain, DefaultGroups, ElementType, HideMode, KeyCombination, OptionItem, Scope, Target} from '../core-ui-module/option-item';
 import {UIHelper} from '../core-ui-module/ui-helper';
 import {UIService} from '../core-module/rest/services/ui.service';
 import {WorkspaceManagementDialogsComponent} from '../modules/management-dialogs/management-dialogs.component';
-import {NodeHelper, NodesRightMode} from '../core-ui-module/node-helper';
-import {Connector, Filetype, Node, NodeWrapper} from '../core-module/rest/data-object';
+import {NodeHelper} from '../core-ui-module/node-helper';
+import {Connector, Filetype, Node, NodesRightMode, NodeWrapper} from '../core-module/rest/data-object';
 import {Helper} from '../core-module/rest/helper';
 import {ClipboardObject, TemporaryStorageService} from '../core-module/rest/services/temporary-storage.service';
 import {BridgeService} from '../core-bridge-module/bridge.service';
@@ -18,24 +18,20 @@ import {CardComponent} from '../core-ui-module/components/card/card.component';
 import {fromEvent} from 'rxjs';
 import {TranslateService} from '@ngx-translate/core';
 import {RestNodeService} from '../core-module/rest/services/rest-node.service';
-import {ActionbarHelperService} from './services/actionbar-helper';
 import {ConfigurationService, FrameEventsService, RestConnectorService, RestHelper, RestIamService} from '../core-module/core.module';
 import {MainNavComponent} from './ui/main-nav/main-nav.component';
 import {Toast} from '../core-ui-module/toast';
 import {HttpClient} from '@angular/common/http';
+import {ActivatedRoute, Params, Router} from '@angular/router';
 
 @Injectable()
 export class OptionsHelperService {
-    private allObjects: Node[] | any[];
-    private selectedObjects: Node[] | any[];
-    private activeObject: Node | any;
-    private options:Option[] = [];
-    private parent: Node|any;
     private appleCmd: boolean;
-    private globalOptions: Option[];
+    private globalOptions: OptionItem[];
     private list: ListTableComponent;
     private mainNav: MainNavComponent;
-    private currentScope: Scope;
+    private queryParams: Params;
+    private data: OptionData;
 
     handleKeyboardEventUp(event: any) {
         if (event.keyCode === 91 || event.keyCode === 93) {
@@ -54,7 +50,7 @@ export class OptionsHelperService {
             return;
         }
         if (this.globalOptions) {
-            const option = this.globalOptions.filter((o: Option) => {
+            const option = this.globalOptions.filter((o: OptionItem) => {
                 if (o.key !== event.code) {
                     return false;
                 }
@@ -81,6 +77,8 @@ export class OptionsHelperService {
         private connector: RestConnectorService,
         private connectors: RestConnectorsService,
         private iamService: RestIamService,
+        private router: Router,
+        private route: ActivatedRoute,
         private event: FrameEventsService,
         private http: HttpClient,
         private ui: UIService,
@@ -91,6 +89,7 @@ export class OptionsHelperService {
         private storage: TemporaryStorageService,
         private bridge: BridgeService,
     ) {
+        this.route.queryParams.subscribe((queryParams) => this.queryParams = queryParams);
         // @HostListener decorator unfortunately does not work in services
         fromEvent(document, 'keyup').subscribe((event) =>
             this.handleKeyboardEventUp(event)
@@ -100,12 +99,12 @@ export class OptionsHelperService {
         );
     }
     private cutCopyNode(node: Node, copy: boolean) {
-        let list = NodeHelper.getActionbarNodes(this.selectedObjects, node);
+        let list = this.getObjects(node);
         if (!list || !list.length) {
             return;
         }
         list = Helper.deepCopy(list);
-        const clip: ClipboardObject = { sourceNode: this.parent, nodes: list, copy };
+        const clip: ClipboardObject = { sourceNode: this.data.parent, nodes: list, copy };
         console.log(clip);
         this.storage.set('workspace_clipboard', clip);
         this.bridge.showTemporaryMessage(MessageType.info, 'WORKSPACE.TOAST.CUT_COPY', { count: list.length });
@@ -120,7 +119,7 @@ export class OptionsHelperService {
             this.storage.remove('workspace_clipboard');
             const info: any = {
                 from: clip.sourceNode ? clip.sourceNode.name : this.translate.instant('WORKSPACE.COPY_SEARCH'),
-                to: this.parent.name,
+                to: this.data.parent.name,
                 count: clip.nodes.length,
                 mode: this.translate.instant('WORKSPACE.' + (clip.copy ? 'PASTE_COPY' : 'PASTE_MOVE'))
             };
@@ -129,7 +128,7 @@ export class OptionsHelperService {
             return;
         }
         this.bridge.showProgressDialog();
-        const target = this.parent.ref.id;
+        const target = this.data.parent.ref.id;
         const source = clip.nodes[nodes.length].ref.id;
         if (clip.copy) {
             this.nodeService.copyNode(target, source).subscribe(
@@ -150,72 +149,100 @@ export class OptionsHelperService {
         }
 
     }
-    setAllObjects(allObjects: Node[]|any[]) {
-        this.allObjects = allObjects;
-    }
-    setSelectedObjects(selectedObjects: Node[] | any[]) {
-        this.selectedObjects = selectedObjects;
-    }
-
-    refreshComponents(management: WorkspaceManagementDialogsComponent,
-                      list: ListTableComponent,
+    /**
+     * shortcut to simply disable all options on the given compoennts
+     * @param mainNav
+     * @param actionbar
+     * @param list
+     */
+    clearComponents(mainNav: MainNavComponent,
                       actionbar: ActionbarComponent,
-                      mainNav: MainNavComponent) {
-        this.prepareOptions(management);
+                      list: ListTableComponent = null) {
+        if (list) {
+            list.options = [];
+            list.dropdownOptions = [];
+        }
+        if (actionbar) {
+            actionbar.options = [];
+        }
+    }
+    /**
+     * refresh all bound components with available menu options
+     */
+    refreshComponents(listener: OptionsListener,
+                      mainNav: MainNavComponent,
+                      actionbar: ActionbarComponent = null,
+                      list: ListTableComponent = null) {
+
+        mainNav.management.onRefresh.subscribe((nodes: void | Node[]) =>
+            listener.onRefresh(nodes)
+        );
+        mainNav.management.onDelete.subscribe(
+            (result: { error: boolean; count: number; }) => listener.onDelete(result)
+        );
+
         this.list = list;
         this.mainNav = mainNav;
-        this.globalOptions = this.getAvailableOptions(Target.Actionbar);
-        list.options = this.getAvailableOptions(Target.List);
-        list.dropdownOptions = this.getAvailableOptions(Target.ListDropdown);
+        this.globalOptions = this.getAvailableOptions(mainNav, Target.Actionbar);
+        if (list) {
+            list.options = this.getAvailableOptions(mainNav, Target.List);
+            list.dropdownOptions = this.getAvailableOptions(mainNav, Target.ListDropdown);
+        }
         if (actionbar) {
             actionbar.options = this.globalOptions;
         }
     }
-    private disableOptions(options: Option[], objects: Node[]|any) {
-        options.filter((o) =>
-            o.permissionsMode === HideMode.Disable &&
-            o.permissions &&
-            !this.validatePermissions(o, objects)
-        ).forEach((o) => {
-            console.log(o);
-            o.isEnabled = false;
-        });
+    private isOptionEnabled(option: OptionItem, objects: Node[]|any) {
+        if(option.permissionsMode === HideMode.Disable &&
+            option.permissions && !this.validatePermissions(option, objects)) {
+            return false;
+        }
+        if(option.customEnabledCallback) {
+            return option.customEnabledCallback(objects);
+        }
+        return true;
     }
 
-    private getAvailableOptions(target: Target) {
+    private getAvailableOptions(mainNav: MainNavComponent, target: Target) {
         let objects: Node[]|any[];
         if (target === Target.List) {
-            objects = this.allObjects && this.allObjects.length ? [this.allObjects[0]] : null;
+            objects = this.data.allObjects && this.data.allObjects.length ? [this.data.allObjects[0]] : null;
         } else if (target === Target.Actionbar) {
-            objects = this.selectedObjects;
+            objects = this.data.selectedObjects || [this.data.activeObject];
         } else if (target === Target.ListDropdown) {
-            if (this.activeObject) {
-                objects = [this.activeObject];
+            if (this.data.activeObject) {
+                objects = [this.data.activeObject];
+                console.log('active object', objects);
             } else {
                 return null;
             }
         }
-        const result = this.options.filter((o) => this.isAvailable(o, objects));
+        let options = this.prepareOptions(mainNav.management, objects);
+        options = this.applyExternalOptions(options);
+        this.handleCallbacks(options, objects);
         const custom = this.config.instant('customOptions');
-        NodeHelper.applyCustomNodeOptions(this.toast, this.http, this.connector, custom, this.allObjects, objects, result);
-
-
-        this.disableOptions(result, objects);
-        return (UIHelper.filterValidOptions(this.ui, result) as Option[]);
+        NodeHelper.applyCustomNodeOptions(this.toast, this.http, this.connector, custom, this.data.allObjects, objects, options);
+        // do pre-handle callback options for dropdown + actionbar
+        if (target === Target.Actionbar || target === Target.ListDropdown) {
+            options = options.filter((o) => o.showCallback());
+            options.filter((o) => !o.enabledCallback()).forEach((o) => o.isEnabled = false);
+        }
+        options = this.sortOptionsByGroup(options);
+        return (UIHelper.filterValidOptions(this.ui, options) as OptionItem[]);
     }
-    private isAvailable(option: Option, objects: Node[]|any[]) {
+    private isOptionAvailable(option: OptionItem, objects: Node[]|any[]) {
         if (this.getType(objects) !== option.elementType) {
-            // console.log('types not matching', this.getType(objects), option);
+            console.log('types not matching', this.getType(objects), option);
             return false;
         }
         if(option.scopes) {
-            if (option.scopes.indexOf(this.currentScope) === -1) {
+            if (option.scopes.indexOf(this.data.scope) === -1) {
                 return false;
             }
         }
-        if (option.showCallback) {
-           if (objects.filter((o) => option.showCallback(o) === false).length > 0) {
-               console.log('show callback was false', option);
+        if (option.customShowCallback) {
+           if (option.customShowCallback(objects) === false) {
+               console.log('customShowCallback  was false', option);
                return false;
            }
         }
@@ -285,6 +312,13 @@ export class OptionsHelperService {
            if (option.constrains.indexOf(Constrain.HomeRepository) !== -1) {
                 if(!RestNetworkService.allFromHomeRepo(objects)) {
                     console.log('not all from home repo', option);
+                    return false;
+                }
+           }
+           if (option.constrains.indexOf(Constrain.ReurlMode) !== -1) {
+                if(!this.queryParams.reurl) {
+                    console.log('no reurl', option);
+                    return false;
                 }
            }
         }
@@ -292,7 +326,7 @@ export class OptionsHelperService {
     }
 
     private hasSelection() {
-        return this.selectedObjects && this.selectedObjects.length;
+        return this.data.selectedObjects && this.data.selectedObjects.length;
     }
     private getType(objects: Node[] | any[]) {
         // @ TODO may combine for all
@@ -304,55 +338,119 @@ export class OptionsHelperService {
         return ElementType.Unknown;
     }
 
-    private validatePermissions(option: Option, objects: Node[] | any[]) {
+    private validatePermissions(option: OptionItem, objects: Node[] | any[]) {
         return option.permissions.filter((p) =>
             NodeHelper.getNodesRight(objects, p, option.permissionsRightMode) === false
         ).length === 0;
     }
 
-    setActiveObject(activeObject: Node|any) {
-        this.activeObject = activeObject;
-    }
+    private prepareOptions(management: WorkspaceManagementDialogsComponent, objects: Node[] | any[]) {
+        const options = [];
 
-    setParentObject(parent: Node|any) {
-        this.parent = parent;
-    }
+        /*
+        let apply=new OptionItem('APPLY', 'redo', (node: Node) => NodeHelper.addNodeToLms(this.router,this.temporaryStorageService,ActionbarHelperService.getNodes(this.selection,node)[0],this.searchService.reurl));
+      apply.enabledCallback=((node:Node)=> {
+        return NodeHelper.getNodesRight([node],RestConstants.ACCESS_CC_PUBLISH,NodesRightMode.Original);
+      });
+      if(fromList || (nodes && nodes.length==1))
+        options.push(apply);
+      return options;
+         */
 
-    private prepareOptions(management: WorkspaceManagementDialogsComponent) {
-        this.options = [];
+        const applyNode = new OptionItem('APPLY', 'redo', (object) =>
+            NodeHelper.addNodeToLms(this.router, this.storage, this.getObjects(object)[0], this.queryParams.reurl)
+        );
+
+        applyNode.permissions = [RestConstants.ACCESS_CC_PUBLISH];
+        applyNode.permissionsRightMode = NodesRightMode.Original;
+        applyNode.permissionsMode = HideMode.Disable;
+        applyNode.constrains = [Constrain.NoBulk, Constrain.ReurlMode];
+        applyNode.showAsAction = true;
+        applyNode.showAlways = true;
+        applyNode.group = DefaultGroups.Primary;
+        applyNode.priority = 10;
+        applyNode.customShowCallback = ((nodes) => {
+            return (this.queryParams.applyDirectories === 'true' ||
+                (nodes && !nodes[0].isDirectory));
+        });
+
         /*
        if(nodes && nodes[0].aspects.indexOf(RestConstants.CCM_ASPECT_IO_REFERENCE)==-1) {
-       option = new OptionItem("WORKSPACE.OPTION.INVITE", "group_add", callback);
+       option = new OptionItem("OPTIONS.INVITE", "group_add", callback);
        option.isSeperate = NodeHelper.allFiles(nodes);
        option.showAsAction = true;
        option.isEnabled = NodeHelper.getNodesRight(nodes, RestConstants.ACCESS_CHANGE_PERMISSIONS);
      }
         */
-        const debugNode = new Option('WORKSPACE.OPTION.DEBUG', 'build', (object) =>
-            management.nodeDebug = NodeHelper.getActionbarNodes(this.selectedObjects, object)[0],
+        const debugNode = new OptionItem('OPTIONS.DEBUG', 'build', (object) =>
+            management.nodeDebug = this.getObjects(object)[0],
         );
         debugNode.onlyDesktop = true;
         debugNode.constrains = [Constrain.AdminOrDebug, Constrain.NoBulk];
+        debugNode.group = DefaultGroups.View;
+        debugNode.priority = 10;
 
-        const openNode = new Option('WORKSPACE.OPTION.SHOW', 'remove_red_eye', (object) =>
-            this.list.openNode.emit(NodeHelper.getActionbarNodes(this.selectedObjects, object)[0])
+        /*
+         let openFolder = new OptionItem('SHOW_IN_FOLDER', 'folder', null);
+            openFolder.isEnabled = false;
+            this.nodeApi.getNodeMetadata(this._node.properties[RestConstants.CCM_PROP_IO_ORIGINAL]).subscribe((original: NodeWrapper) => {
+
+                this.nodeApi.getNodeParents(original.node.parent.id, false, [], original.node.parent.repo).subscribe(() => {
+                    openFolder.isEnabled = true;
+                    openFolder.callback=() => this.goToWorkspace(login, original.node);
+                    //.isEnabled = data.node.access.indexOf(RestConstants.ACCESS_WRITE) != -1;
+                });
+            }, (error: any) => {
+            });
+            options.push(openFolder);
+         */
+
+        const openParentNode = new OptionItem('OPTIONS.SHOW_IN_FOLDER', 'folder', (object) =>
+            this.goToWorkspace(this.getObjects(object)[0])
+        );
+        openParentNode.constrains = [Constrain.Files, Constrain.NoBulk, Constrain.HomeRepository, Constrain.User];
+        openParentNode.scopes = [Scope.Search, Scope.Render];
+        openParentNode.customEnabledCallback = (nodes) => {
+            if(nodes) {
+                openParentNode.customEnabledCallback = null;
+                let nodeId = nodes[0].ref.id;
+                if (nodes[0].aspects.indexOf(RestConstants.CCM_ASPECT_IO_REFERENCE) !== -1) {
+                    nodeId = nodes[0].properties[RestConstants.CCM_PROP_IO_ORIGINAL][0];
+                }
+                this.nodeService.getNodeParents(nodeId, false, []).subscribe(() => {
+                    openParentNode.isEnabled = true;
+                }, (error) => {
+                    openParentNode.isEnabled = false;
+                });
+            }
+            return true;
+        };
+        openParentNode.group = DefaultGroups.View;
+        openParentNode.priority = 15;
+
+        const openNode = new OptionItem('OPTIONS.SHOW', 'remove_red_eye', (object) =>
+            this.list.openNode.emit(this.getObjects(object)[0])
         );
         openNode.constrains = [Constrain.Files, Constrain.NoBulk];
+        openNode.scopes = [Scope.Workspace];
+        openNode.group = DefaultGroups.View;
+        openNode.priority = 30;
 
-        const editConnectorNode = new Option('WORKSPACE.OPTION.VIEW', 'launch', (node: Node) =>
+        const editConnectorNode = new OptionItem('OPTIONS.VIEW', 'launch', (node: Node) =>
             this.editConnector(node)
         );
-        editConnectorNode
-        editConnectorNode.showCallback = (node: Node) => {
-            return this.connectors.connectorSupportsEdit(node) != null;
+        editConnectorNode.customShowCallback = (nodes) => {
+            return this.connectors.connectorSupportsEdit(nodes ? nodes[0] : null) != null;
         }
+        editConnectorNode.group = DefaultGroups.View;
+        editConnectorNode.priority = 20;
 
         /**
          if (this.connector.getCurrentLogin() && !this.connector.getCurrentLogin().isGuest) {
-        option = new OptionItem("WORKSPACE.OPTION.COLLECTION", "layers", callback);
+        option = new OptionItem("OPTIONS.COLLECTION", "layers", callback);
         option.isEnabled = NodeHelper.getNodesRight(nodes, RestConstants.ACCESS_CC_PUBLISH,NodesRightMode.Original);
         option.showAsAction = true;
-        option.showCallback = (node: Node) => {
+        option.customShowCallback = (node: Node) => {
             let n=ActionbarHelperService.getNodes(nodes,node);
             if(n==null)
                 return false;
@@ -368,73 +466,90 @@ export class OptionsHelperService {
       }
          */
 
-        const addNodeToCollection = new Option('WORKSPACE.OPTION.COLLECTION', 'layers', (object) =>
-            management.addToCollection =  NodeHelper.getActionbarNodes(this.selectedObjects, object)
+        const addNodeToCollection = new OptionItem('OPTIONS.COLLECTION', 'layers', (object) =>
+            management.addToCollection =  this.getObjects(object)
         );
         addNodeToCollection.showAsAction = true;
         addNodeToCollection.constrains = [Constrain.Files, Constrain.User];
-        addNodeToCollection.showCallback = (node: Node) => {
-            return NodeHelper.referenceOriginalExists(node);
+        addNodeToCollection.customShowCallback = (nodes) => {
+            return NodeHelper.referenceOriginalExists(nodes ? nodes[0] : null);
         };
         addNodeToCollection.permissions = [RestConstants.ACCESS_CC_PUBLISH];
         addNodeToCollection.permissionsRightMode = NodesRightMode.Original;
         addNodeToCollection.permissionsMode = HideMode.Disable;
+        addNodeToCollection.group = DefaultGroups.Reuse;
+        addNodeToCollection.priority = 10;
 
-        const bookmarkNode=new Option('SEARCH.ADD_NODE_STORE', 'bookmark_border',(object) =>
-            this.bookmarkNodes(NodeHelper.getActionbarNodes(this.selectedObjects, object))
+        const bookmarkNode=new OptionItem('OPTIONS.ADD_NODE_STORE', 'bookmark_border',(object) =>
+            this.bookmarkNodes(this.getObjects(object))
         );
         bookmarkNode.constrains = [Constrain.Files, Constrain.HomeRepository];
+        bookmarkNode.group = DefaultGroups.Reuse;
+        bookmarkNode.priority = 20;
 
-        const createNodeVariant = new Option('WORKSPACE.OPTION.VARIANT', 'call_split', (object) =>
-            management.nodeVariant =  NodeHelper.getActionbarNodes(this.selectedObjects, object)[0]
+        const createNodeVariant = new OptionItem('OPTIONS.VARIANT', 'call_split', (object) =>
+            management.nodeVariant =  this.getObjects(object)[0]
         );
         createNodeVariant.constrains = [Constrain.Files, Constrain.NoBulk, Constrain.NoCollectionReference, Constrain.HomeRepository, Constrain.User];
-        createNodeVariant.showCallback = (node : Node) => {
-            if (node) {
-                createNodeVariant.name = 'WORKSPACE.OPTION.VARIANT' + (this.connectors.connectorSupportsEdit(node) ? '_OPEN' : '');
+        createNodeVariant.customShowCallback = (nodes) => {
+            if (nodes) {
+                createNodeVariant.name = 'OPTIONS.VARIANT' + (this.connectors.connectorSupportsEdit(nodes[0]) ? '_OPEN' : '');
+                return NodeHelper.referenceOriginalExists(nodes[0]);
             }
-            return true;
+            return false;
         };
+        createNodeVariant.group = DefaultGroups.Reuse;
+        createNodeVariant.priority = 30;
 
-        const inviteNode = new Option('WORKSPACE.OPTION.INVITE', 'group_add',(object) =>
-            management.nodeShare = NodeHelper.getActionbarNodes(this.selectedObjects, object)
+        const inviteNode = new OptionItem('OPTIONS.INVITE', 'group_add',(object) =>
+            management.nodeShare = this.getObjects(object)
         );
         inviteNode.showAsAction = true;
         inviteNode.permissions = [RestConstants.ACCESS_CHANGE_PERMISSIONS];
         inviteNode.permissionsMode = HideMode.Disable;
         inviteNode.constrains = [Constrain.NoCollectionReference, Constrain.HomeRepository, Constrain.User];
         inviteNode.toolpermissions = [RestConstants.TOOLPERMISSION_INVITE];
+        inviteNode.group = DefaultGroups.Edit;
+        inviteNode.priority = 10;
 
-        const licenseNode = new Option('WORKSPACE.OPTION.LICENSE', 'copyright', (object) =>
-            management.nodeLicense = NodeHelper.getActionbarNodes(this.selectedObjects, object)
+        const licenseNode = new OptionItem('OPTIONS.LICENSE', 'copyright', (object) =>
+            management.nodeLicense = this.getObjects(object)
         );
         licenseNode.constrains = [Constrain.Files, Constrain.NoCollectionReference, Constrain.HomeRepository, Constrain.User];
         licenseNode.permissions = [RestConstants.ACCESS_WRITE];
         licenseNode.permissionsMode = HideMode.Disable;
         licenseNode.toolpermissions = [RestConstants.TOOLPERMISSION_LICENSE];
+        licenseNode.group = DefaultGroups.Edit;
+        licenseNode.priority = 30;
 
-        const contributorNode = new Option('WORKSPACE.OPTION.CONTRIBUTOR', 'group', (object) =>
-            management.nodeContributor = NodeHelper.getActionbarNodes(this.selectedObjects, object)[0]
+        const contributorNode = new OptionItem('OPTIONS.CONTRIBUTOR', 'group', (object) =>
+            management.nodeContributor = this.getObjects(object)[0]
         );
         contributorNode.constrains = [Constrain.Files, Constrain.NoCollectionReference, Constrain.HomeRepository, Constrain.NoBulk, Constrain.User];
         contributorNode.permissions = [RestConstants.ACCESS_WRITE];
         contributorNode.permissionsMode = HideMode.Disable;
         contributorNode.onlyDesktop = true;
+        contributorNode.group = DefaultGroups.Edit;
+        contributorNode.priority = 40;
+
+
         /*
         if (nodes && nodes.length==1 && !nodes[0].isDirectory  && nodes[0].type!=RestConstants.CCM_TYPE_SAVED_SEARCH && nodes[0].aspects.indexOf(RestConstants.CCM_ASPECT_IO_REFERENCE)==-1) {
-            option = new OptionItem("WORKSPACE.OPTION.WORKFLOW", "swap_calls", callback);
+            option = new OptionItem("OPTIONS.WORKFLOW", "swap_calls", callback);
             option.isEnabled = NodeHelper.getNodesRight(nodes, RestConstants.ACCESS_CHANGE_PERMISSIONS);
         }
          */
-        const workflowNode = new Option('WORKSPACE.OPTION.WORKFLOW', 'swap_calls', (object) =>
-            management.nodeWorkflow =  NodeHelper.getActionbarNodes(this.selectedObjects, object)[0]
+        const workflowNode = new OptionItem('OPTIONS.WORKFLOW', 'swap_calls', (object) =>
+            management.nodeWorkflow =  this.getObjects(object)[0]
         );
         workflowNode.constrains = [Constrain.Files, Constrain.NoCollectionReference, Constrain.HomeRepository, Constrain.NoBulk, Constrain.User];
         workflowNode.permissions = [RestConstants.ACCESS_CHANGE_PERMISSIONS];
         workflowNode.permissionsMode = HideMode.Disable;
+        workflowNode.group = DefaultGroups.Edit;
+        workflowNode.priority = 50;
 
         /*
-        option = new OptionItem("WORKSPACE.OPTION.DOWNLOAD", "cloud_download", callback);
+        option = new OptionItem("OPTIONS.DOWNLOAD", "cloud_download", callback);
         option.enabledCallback = (node: Node) => {
           let list:any=ActionbarHelperService.getNodes(nodes, node);
           if(!list || !list.length)
@@ -448,82 +563,100 @@ export class OptionsHelperService {
             }
             return isAllowed;
          */
-        const downloadNode = new Option('WORKSPACE.OPTION.DOWNLOAD', 'cloud_download', (object) =>
-            NodeHelper.downloadNodes(this.connector, NodeHelper.getActionbarNodes(this.selectedObjects, object))
+        const downloadNode = new OptionItem('OPTIONS.DOWNLOAD', 'cloud_download', (object) =>
+            NodeHelper.downloadNodes(this.connector, this.getObjects(object))
         );
         downloadNode.constrains = [Constrain.Files];
-        downloadNode.enabledCallback = (node: Node) => {
-            let list = NodeHelper.getActionbarNodes(this.selectedObjects, node);
-            if (!list || !list.length)
+        downloadNode.group = DefaultGroups.View;
+        downloadNode.priority = 40;
+        downloadNode.customEnabledCallback = (nodes) => {
+            if (!nodes) {
                 return false;
-            let isAllowed = false;
-            for (let item of list) {
+            }
+            for (let item of nodes) {
+                console.log(item);
                 if (item.reference) {
                     item = item.reference;
                 }
                 // if at least one is allowed -> allow download (download servlet will later filter invalid files)
-                isAllowed = isAllowed || list && item.downloadUrl != null &&
-                            item.properties && !item.properties[RestConstants.CCM_PROP_IO_WWWURL];
+                if(item.downloadUrl != null && item.properties && !item.properties[RestConstants.CCM_PROP_IO_WWWURL]) {
+                    return true;
+                }
             }
-            return isAllowed;
+            return false;
         };
-        const editNode = new Option('WORKSPACE.OPTION.EDIT', 'edit', (object) =>
-            management.nodeMetadata = NodeHelper.getActionbarNodes(this.selectedObjects, object)
+        const editNode = new OptionItem('OPTIONS.EDIT', 'edit', (object) =>
+            management.nodeMetadata = this.getObjects(object)
         );
         editNode.constrains = [Constrain.NoCollectionReference, Constrain.HomeRepository, Constrain.User];
         editNode.permissions = [RestConstants.ACCESS_WRITE];
         editNode.permissionsMode = HideMode.Disable;
+        editNode.group = DefaultGroups.Edit;
+        editNode.priority = 20;
 
-        const templateNode = new Option('WORKSPACE.OPTION.TEMPLATE', 'assignment_turned_in', (object) =>
-            management.nodeTemplate = NodeHelper.getActionbarNodes(this.selectedObjects, object)[0]
+        const templateNode = new OptionItem('OPTIONS.TEMPLATE', 'assignment_turned_in', (object) =>
+            management.nodeTemplate = this.getObjects(object)[0]
         );
         templateNode.constrains = [Constrain.NoBulk, Constrain.Directory, Constrain.User];
         templateNode.permissions = [RestConstants.ACCESS_WRITE];
         templateNode.permissionsMode = HideMode.Disable;
         templateNode.onlyDesktop = true;
+        templateNode.group = DefaultGroups.Edit;
 
 
         /**
-         const cut = new OptionItem('WORKSPACE.OPTION.CUT', 'content_cut', (node: Node) => this.cutCopyNode(node, false));
+         const cut = new OptionItem('OPTIONS.CUT', 'content_cut', (node: Node) => this.cutCopyNode(node, false));
          cut.isSeperate = true;
          cut.isEnabled = NodeHelper.getNodesRight(nodes, RestConstants.ACCESS_WRITE)
          && (this.root === 'MY_FILES' || this.root === 'SHARED_FILES');
          options.push(cut);
-         options.push(new OptionItem('WORKSPACE.OPTION.COPY', 'content_copy', (node: Node) => this.cutCopyNode(node, true)));
+         options.push(new OptionItem('OPTIONS.COPY', 'content_copy', (node: Node) => this.cutCopyNode(node, true)));
          */
-        const cutNodes = new Option('WORKSPACE.OPTION.CUT', 'content_cut', (node) =>
+        const cutNodes = new OptionItem('OPTIONS.CUT', 'content_cut', (node) =>
             this.cutCopyNode(node, false)
         );
         cutNodes.constrains = [Constrain.HomeRepository, Constrain.User];
+        cutNodes.scopes = [Scope.Workspace];
         cutNodes.permissions = [RestConstants.ACCESS_WRITE];
         cutNodes.permissionsMode = HideMode.Disable;
         cutNodes.key = 'KeyX';
         cutNodes.keyCombination = [KeyCombination.CtrlOrAppleCmd];
-        const copyNodes = new Option('WORKSPACE.OPTION.COPY', 'content_copy', (node) =>
+        cutNodes.group = DefaultGroups.FileOperations;
+        cutNodes.priority = 10;
+
+        const copyNodes = new OptionItem('OPTIONS.COPY', 'content_copy', (node) =>
             this.cutCopyNode(node, true)
         );
         copyNodes.constrains = [Constrain.HomeRepository, Constrain.User];
+        copyNodes.scopes = [Scope.Workspace];
         copyNodes.key = 'KeyC';
         copyNodes.keyCombination = [KeyCombination.CtrlOrAppleCmd];
-        const pasteNodes = new Option('WORKSPACE.OPTION.PASTE', 'content_paste', (node) =>
+        copyNodes.group = DefaultGroups.FileOperations;
+        copyNodes.priority = 20;
+
+        const pasteNodes = new OptionItem('OPTIONS.PASTE', 'content_paste', (node) =>
             this.pasteNode()
         );
         pasteNodes.elementType = ElementType.Unknown;
         pasteNodes.constrains = [Constrain.NoSelection, Constrain.ClipboardContent, Constrain.AddObjects, Constrain.User];
+        pasteNodes.scopes = [Scope.Workspace];
         pasteNodes.key = 'KeyV';
         pasteNodes.keyCombination = [KeyCombination.CtrlOrAppleCmd];
+        pasteNodes.group = DefaultGroups.FileOperations;
 
-        const deleteNode = new Option('WORKSPACE.OPTION.DELETE', 'delete',(object) => {
-            management.nodeDelete = NodeHelper.getActionbarNodes(this.selectedObjects, object);
+        const deleteNode = new OptionItem('OPTIONS.DELETE', 'delete',(object) => {
+            management.nodeDelete = this.getObjects(object);
         });
         deleteNode.constrains = [Constrain.HomeRepository, Constrain.User];
         deleteNode.permissions = [RestConstants.PERMISSION_DELETE];
         deleteNode.permissionsMode = HideMode.Disable;
         deleteNode.key = 'Delete';
+        deleteNode.group = DefaultGroups.Delete;
+        deleteNode.priority = 10;
 
         /*
         let report = new OptionItem('NODE_REPORT.OPTION', 'flag', (node: Node) => this.nodeReport=this.getCurrentNode(node));
-        report.showCallback=(node:Node)=>{
+        report.customShowCallback=(node:Node)=>{
             let n=ActionbarHelperService.getNodes(nodes,node);
             if(n==null)
                 return false;
@@ -531,51 +664,57 @@ export class OptionsHelperService {
         }
         options.push(report);
          */
-        const reportNode = new Option('NODE_REPORT.OPTION', 'flag', (node) =>
-            management.nodeReport = NodeHelper.getActionbarNodes(this.selectedObjects, node)[0]
+        const reportNode = new OptionItem('OPTIONS.NODE_REPORT', 'flag', (node) =>
+            management.nodeReport = this.getObjects(node)[0]
         );
         reportNode.constrains = [Constrain.Files, Constrain.NoBulk, Constrain.HomeRepository];
-        reportNode.showCallback = (() => this.config.instant('nodeReport', false));
+        reportNode.scopes = [Scope.Search, Scope.CollectionsReferences, Scope.Render];
+        reportNode.customShowCallback = (() => this.config.instant('nodeReport', false));
+        reportNode.group = DefaultGroups.View;
+        reportNode.priority = 50;
 
-        const qrCodeNode = new Option('WORKSPACE.OPTION.QR_CODE', 'edu-qr_code', (node) =>
+        const qrCodeNode = new OptionItem('OPTIONS.QR_CODE', 'edu-qr_code', (node) =>
             management.qr = {
-                node: NodeHelper.getActionbarNodes(this.selectedObjects, node)[0],
+                node: this.getObjects(node)[0],
                 data: window.location.href
             }
         );
         qrCodeNode.constrains = [Constrain.Files, Constrain.NoBulk];
         qrCodeNode.scopes = [Scope.Render];
+        qrCodeNode.group = DefaultGroups.View;
+        qrCodeNode.priority = 60;
 
 
-        this.options.push(debugNode);
-        this.options.push(openNode);
-        this.options.push(bookmarkNode);
-        this.options.push(editNode);
+        options.push(applyNode);
+        options.push(debugNode);
+        options.push(openParentNode);
+        options.push(openNode);
+        options.push(bookmarkNode);
+        options.push(editNode);
         // add to collection
-        this.options.push(addNodeToCollection);
+        options.push(addNodeToCollection);
         // create variant
-        this.options.push(createNodeVariant);
-
-        this.options.push(templateNode);
-        this.options.push(inviteNode);
-        this.options.push(licenseNode);
-        this.options.push(contributorNode);
-        this.options.push(workflowNode);
-        this.options.push(downloadNode);
-        this.options.push(qrCodeNode);
-        this.options.push(cutNodes);
-        this.options.push(copyNodes);
-        this.options.push(pasteNodes);
-        this.options.push(deleteNode);
-        this.options.push(reportNode);
+        options.push(createNodeVariant);
+        options.push(templateNode);
+        options.push(inviteNode);
+        options.push(licenseNode);
+        options.push(contributorNode);
+        options.push(workflowNode);
+        options.push(downloadNode);
+        options.push(qrCodeNode);
+        options.push(cutNodes);
+        options.push(copyNodes);
+        options.push(pasteNodes);
+        options.push(deleteNode);
+        options.push(reportNode);
+        return options;
     }
 
     private editConnector(node: Node|any, type: Filetype = null, win: any = null, connectorType: Connector = null) {
         UIHelper.openConnector(this.connectors, this.iamService, this.event, this.toast, node, type, win, connectorType);
     }
     private canAddObjects() {
-        console.log(this.parent);
-        return this.parent && NodeHelper.getNodesRight([this.parent], RestConstants.ACCESS_ADD_CHILDREN);
+        return this.data.parent && NodeHelper.getNodesRight([this.data.parent], RestConstants.ACCESS_ADD_CHILDREN);
     }
 
     private addVirtualObjects(objects: any[]) {
@@ -594,55 +733,85 @@ export class OptionsHelperService {
         });
     }
 
-    setCurrentScope(currentScope: Scope) {
-        this.currentScope = currentScope;
+    /**
+     * overwrite all the show callbacks by using the internal constrains + permission handlers
+     * isOptionAvailable will check if customShowCallback exists and will also call it
+     */
+    private handleCallbacks(options: OptionItem[], objects: Node[]|any) {
+        options.forEach((o) => {
+            o.showCallback = ((object) => {
+                const list = NodeHelper.getActionbarNodes(objects, object);
+                if (list == null) {
+                    return false;
+                }
+                return this.isOptionAvailable(o, list);
+            });
+            o.enabledCallback = ((object) => {
+                const list = NodeHelper.getActionbarNodes(objects, object);
+                if (list == null) {
+                    return false;
+                }
+                return this.isOptionEnabled(o, list);
+            });
+        });
+    }
+
+    private goToWorkspace(node: Node | any) {
+        UIHelper.goToWorkspace(this.nodeService, this.router, this.connector.getCurrentLogin(), node);
+    }
+
+    private getObjects(object: Node | any) {
+        return NodeHelper.getActionbarNodes(this.data.selectedObjects || [this.data.activeObject], object);
+    }
+
+    applyExternalOptions(options: OptionItem[]) {
+        if(!this.data.customOptions) {
+            return options;
+        }
+        for (const option of this.data.customOptions) {
+            const existing = options.filter((o) => o.name === option.name);
+            if(existing.length === 1) {
+                // only replace changed values
+                for(const key of Object.keys(option)) {
+                    (existing[0] as any)[key] = (option as any)[key];
+                }
+            } else {
+                options.push(option);
+            }
+        }
+        return options;
+    }
+    setData(data: OptionData) {
+        this.data = data;
+    }
+    sortOptionsByGroup(options: OptionItem[]) {
+        if(!options) {
+            return null;
+        }
+        let result: OptionItem[] = [];
+        let groups=Array.from(new Set(options.map((o) => o.group)));
+        groups = groups.sort((o1, o2) => o1.priority > o2.priority ? 1 : -1);
+        console.log(groups);
+        for (const group of groups) {
+            const groupOptions = options.filter((o) => o.group === group);
+            if (group == null) {
+                console.warn('There are options not assigned to a group. All options should be assigned to a group', groupOptions);
+            }
+            groupOptions.sort((o1, o2) => o1.priority > o2.priority ? 1 : -1);
+            result = result.concat(groupOptions);
+        }
+        return result;
     }
 }
-class Option extends OptionItem {
-    public key: string;
-    public keyCombination: KeyCombination[];
-    public elementType = ElementType.Node;
-    public permissions: string[];
-    public constrains: Constrain[];
-    public permissionsMode = HideMode.Disable;
-    public permissionsRightMode = NodesRightMode.Local;
-    public toolpermissions: string[];
-    public scopes: Scope[];
+export interface OptionsListener {
+    onRefresh?: (nodes: Node[]|void) => void;
+    onDelete?: (result: {error: boolean, count: number}) => void;
 }
-enum HideMode {
-    Disable,
-    Hide
+export interface OptionData {
+    scope: Scope;
+    activeObject: Node|any;
+    selectedObjects?: Node[] | any[];
+    allObjects?: Node[] | any[];
+    parent?: Node|any;
+    customOptions?: OptionItem[];
 }
-export enum Scope {
-    Render,
-    Search,
-    CollectionsReferences,
-    Workspace
-}
-enum ElementType {
-    Node,
-    Person,
-    Group,
-    Unknown
-}
-enum Constrain {
-    NoCollectionReference, // option is only visible for non-collection references
-    Directory, // only visible for directories (ccm:map)
-    Files, // only visible for files (ccm:io)
-    AdminOrDebug, // only visible if user is admin or esDebug is enabled on window component
-    NoBulk, // No support for bulk (multiple objects)
-    NoSelection, // Only visible when currently no element is selected
-    ClipboardContent, // Only visible when the clipboard has content
-    AddObjects, // Only visible when it is possible to add objects into the current list
-    HomeRepository, // Only visible when the nodes are from the local (home) repository
-    User, // Only visible when a user is present and logged in
-}
-enum KeyCombination {
-    CtrlOrAppleCmd
-}
-export enum Target {
-    List, // Target is the ListTableComponent
-    ListDropdown,
-    Actionbar
-}
-

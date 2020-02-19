@@ -1,7 +1,7 @@
-import {NodeHelper, NodesRightMode} from "../../core-ui-module/node-helper";
+import {NodeHelper} from "../../core-ui-module/node-helper";
 import {Injectable} from "@angular/core";
 import {
-    Node,
+    Node, NodesRightMode,
     Repository,
     RestConnectorService,
     RestConnectorsService,
@@ -84,7 +84,7 @@ export class ActionbarHelperService{
             return NodeHelper.allFiles(n) && n && n.length==1  && n[0].aspects.indexOf(RestConstants.CCM_ASPECT_IO_REFERENCE)==-1 && RestNetworkService.allFromHomeRepo(n) && !this.connector.getCurrentLogin().isGuest;
         };
         option.enabledCallback = (node: Node) => {
-            return node.size > 0 && node.downloadUrl;
+            return node.size > 0 && node.downloadUrl !== null;
         };
     }
     if (type === 'QR_CODE'){

@@ -40,7 +40,7 @@
                   (onDrop)="handleDrop($event)"
                   (onSetRoot)="setRoot($event)"
                   (onOpenNode)="openNode($event)"
-                  (onDeleteNodes)="deleteNode=$event"
+                  (onDeleteNodes)="mainNav.management.nodeDelete=$event"
                   (onUpdateOptions)="updateOptions($event)"
   ></workspace-tree>
   <user-quota *ngIf="user.person.quota.enabled" [quota]="user.person.quota"></user-quota>
@@ -76,7 +76,6 @@
   [preventKeyevents]="hasOpenWindows()"
   [(nodes)]="currentNodes"
   [mainNav]="mainNav"
-  [management]="management"
   [actionbar]="actionbar"
   (onSearchGlobal)="searchGlobal($event)"
   (onDrop)="handleDrop($event)"
@@ -99,7 +98,6 @@
   [(nodeWorkflow)]="workflowNode"
   [(nodeVariant)]="variantNode"
   [(nodeShare)]="sharedNode"
-  [(nodeDelete)]="deleteNode"
   [(nodeShareLink)]="shareLinkNode"
   [(showUploadSelect)]="showUploadSelect"
   [parent]="currentFolder"

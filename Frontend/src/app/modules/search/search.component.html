@@ -279,7 +279,7 @@
                             [applyMode]="applyMode"
                             [scrollWindow]="true"
                             [createLink]="true"
-                            [management]="managementDialogs"
+                            [scope]="SCOPES.Search"
                             [actionbar]="actionbarComponent"
                             [mainNav]="mainNavRef"
                             (clickRow)="render($event)"
@@ -298,7 +298,7 @@
                         <div class="heading" *ngIf="searchService.searchResultRepositories[i]"><img [src]="getSourceIcon(repo)"><span>{{ repo.title }}</span></div>
                         <a tabindex="0" class="more clickable" *ngIf="searchService.searchResultRepositories[i]" (click)="setRepository(repo.id)" (keyup.enter)="setRepository(repo.id)">{{'SHOW_MORE' | translate}}</a>
                         <div class="noResults" *ngIf="searchService.searchResultRepositories[i] && !searchService.searchResultRepositories[i].length && !searchService.showspinner" title="{{'SEARCH.QUERY_NO_RESULT' | translate}}">{{'SEARCH.QUERY_NO_RESULT' | translate}}.</div>
-                        <listTable [class.list]="view==0" *ngIf="searchService.searchResultRepositories[i] && searchService.searchResultRepositories[i].length"
+                        <listTable *ngIf="searchService.searchResultRepositories[i] && searchService.searchResultRepositories[i].length"
                                    [nodes]="searchService.searchResultRepositories[i]"
                                    [columns]="searchService.columns"
                                    [hasIcon]="true"
@@ -312,8 +312,9 @@
                                    [applyMode]="applyMode"
                                    [scrollWindow]="true"
                                    [createLink]="true"
-                                   [management]="managementDialogs"
+                                   [scope]="SCOPES.Search"
                                    [actionbar]="actionbarComponent"
+                                   [mainNav]="mainNavRef"
                                    (clickRow)="render($event)"
                                    (doubleClickRow)="render($event)"
                                    (onSelectionChanged)="updateSelection($event)"
@@ -326,12 +327,6 @@
     </div>
 </div>
 </div>
-<workspace-management #managementDialogs
-  [(nodeReport)]="nodeReport"
-  [(nodeVariant)]="nodeVariant"
-  [(addToCollection)]="addNodesToCollection"
-  [(addNodesStream)]="addNodesStream"
-></workspace-management>
 <div tabindex="0" *ngIf="showMoreRepositories" class="dialog moreRepositories" (click)="showMoreRepositories=false" (keyup.enter)="showMoreRepositories=false">
   <div class="collection" [class.no-mainnav]="!mainnav">
     <a class="collection-item"

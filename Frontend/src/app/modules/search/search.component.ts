@@ -18,7 +18,7 @@ import {
     MdsMetadatasets,
     NetworkRepositories,
     Node,
-    NodeList,
+    NodeList, NodesRightMode,
     NodeWrapper,
     Repository,
     RestCollectionService,
@@ -37,14 +37,14 @@ import {
     UIService
 } from '../../core-module/core.module';
 import {ListTableComponent} from '../../core-ui-module/components/list-table/list-table.component';
-import {OptionItem} from '../../core-ui-module/option-item';
+import {OptionItem, Scope} from '../../core-ui-module/option-item';
 import {Helper} from '../../core-module/rest/helper';
 import {UIHelper} from '../../core-ui-module/ui-helper';
 import {Title} from '@angular/platform-browser';
 import {Toast} from '../../core-ui-module/toast';
 import {UIAnimation} from '../../core-module/ui/ui-animation';
 import {trigger} from '@angular/animations';
-import {NodeHelper, NodesRightMode} from '../../core-ui-module/node-helper';
+import {NodeHelper} from '../../core-ui-module/node-helper';
 import {UIConstants} from '../../core-module/ui/ui-constants';
 import {MdsComponent} from '../../common/ui/mds/mds.component';
 import {WorkspaceManagementDialogsComponent} from '../management-dialogs/management-dialogs.component';
@@ -70,12 +70,12 @@ import {ActionbarComponent} from '../../common/ui/actionbar/actionbar.component'
 
 
 export class SearchComponent {
+    readonly SCOPES = Scope;
     toolPermissions: string[];
     public initalized:boolean;
   public tutorialElement:ElementRef;
   @ViewChild('mds', {static: false}) mdsRef: MdsComponent;
   @ViewChild('mainNav', {static: false}) mainNavRef: MainNavComponent;
-  @ViewChild('managementDialogs', {static: false}) managementDialogs : WorkspaceManagementDialogsComponent;
   @ViewChild('extendedSearch', {static: false}) extendedSearch : ElementRef;
   @ViewChild('actionbarComponent', {static: false}) actionbarComponent: ActionbarComponent;
   public mdsSuggestions:any={}
@@ -98,7 +98,6 @@ export class SearchComponent {
 
   public options : OptionItem[]=[];
   public savedSearchOptions : OptionItem[]=[];
-  private render_options: OptionItem[]=[];
   private renderedNode: Node;
   public isGuest = false;
   public mainnav = true;
@@ -474,12 +473,10 @@ export class SearchComponent {
     }
     */
     this.renderedNode = node;
-    this.render_options=[];
     let queryParams={
       "repository" : RestNetworkService.isFromHomeRepo(node,this.allRepositories) ? null : node.ref.repo,
       "comments" : event.source=="comments" ? true : null
     };
-    this.temporaryStorageService.set(TemporaryStorageService.NODE_RENDER_PARAMETER_OPTIONS, this.render_options);
     this.temporaryStorageService.set(TemporaryStorageService.NODE_RENDER_PARAMETER_LIST, this.searchService.searchResult);
     this.temporaryStorageService.set(TemporaryStorageService.NODE_RENDER_PARAMETER_ORIGIN, "search");
     this.router.navigate([UIConstants.ROUTER_PREFIX+'render', node.ref.id],{queryParams:queryParams});
@@ -634,129 +631,16 @@ export class SearchComponent {
   }
 
   private getOptions(nodes:Node[]=this.selection,fromList:boolean) {
-    if(fromList && (!nodes || !nodes.length)){
-      //nodes=[new Node()];
-    }
-    let options=[];
-    if(this.searchService.reurl) {
-      let apply=new OptionItem('APPLY', 'redo', (node: Node) => NodeHelper.addNodeToLms(this.router,this.temporaryStorageService,ActionbarHelperService.getNodes(this.selection,node)[0],this.searchService.reurl));
-      apply.enabledCallback=((node:Node)=> {
-        return NodeHelper.getNodesRight([node],RestConstants.ACCESS_CC_PUBLISH,NodesRightMode.Original);
-      });
-      if(fromList || (nodes && nodes.length==1))
-        options.push(apply);
-      return options;
-    }
-    if (this.addToCollection) {
-      if (fromList || nodes && nodes.length) {
-        let addTo = new OptionItem(fromList ? 'SEARCH.ADD_TO_COLLECTION_SHORT' : 'SEARCH.ADD_TO_COLLECTION', 'layers', (node: Node) => {
-          this.addToCollectionList(this.addToCollection, ActionbarHelperService.getNodes(nodes,node), () => {
-            this.switchToCollections(this.addToCollection.ref.id);
-          });
-        });
-        addTo.isEnabled = NodeHelper.getNodesRight(nodes, RestConstants.ACCESS_CC_PUBLISH,NodesRightMode.Original) && RestNetworkService.allFromHomeRepo(nodes, this.repositories);
-        addTo.enabledCallback = (node:Node)=>{return NodeHelper.getNodesRight([node], RestConstants.ACCESS_CC_PUBLISH,NodesRightMode.Original) && RestNetworkService.isFromHomeRepo(node,this.repositories)};
-
-        options.push(addTo);
-      }
-      let cancel = new OptionItem('CANCEL', 'close', (node: Node) => {
-        this.switchToCollections(this.addToCollection.ref.id);
-      });
-      if(!fromList) {
-        options.push(cancel);
-      }
-      return options;
-    }
-    let collection = this.actionbar.createOptionIfPossible('ADD_TO_COLLECTION', nodes, (node: Node) => {
-        this.addNodesToCollection = ActionbarHelperService.getNodes(nodes, node);
-    });
-    if(collection) {
-        collection.showCallback = (node: Node) => {
-            let n=ActionbarHelperService.getNodes(nodes,node);
-            if(n==null)
-              return false;
-            return this.addToCollection == null && !this.isGuest;// && RestNetworkService.allFromHomeRepo(n,this.allRepositories);
-        };
-        options.push(collection);
-    }
-    let stream = this.actionbar.createOptionIfPossible('ADD_TO_STREAM', nodes, (node: Node) => this.addToStream(node));
-    if(stream) {
-      options.push(stream);
-    }
-    let variant = this.actionbar.createOptionIfPossible('CREATE_VARIANT', nodes, (node: Node) => this.nodeVariant = ActionbarHelperService.getNodes(nodes, node)[0]);
-    if (variant)
-        options.push(variant);
-    if(fromList || nodes && nodes.length) {
-      let nodeStore = new OptionItem('SEARCH.ADD_NODE_STORE', 'bookmark_border', (node: Node) => {
-        this.addToStore(ActionbarHelperService.getNodes(nodes,node));
-      });
-      nodeStore.showCallback=(node:Node)=>{
-          let n=ActionbarHelperService.getNodes(nodes,node);
-          if(n==null)
-              return false;
-        return RestNetworkService.allFromHomeRepo(n,this.allRepositories);
-      };
-      options.push(nodeStore);
-
-      if (!this.isGuest && this.isHomeRepository()) {
-
-        /*
-        let openFolder = new OptionItem('SHOW_IN_FOLDER', 'folder', (node: Node) => {
-          NodeHelper.goToWorkspace(this.nodeApi, this.router, this.connector.getCurrentLogin(), node);
-        });
-        openFolder.enabledCallback = (node: Node) => {
-          this.nodeApi.getNodeParents(ActionbarHelper.getNodes(nodes,node)[0].ref.id).subscribe(()=>{
-            openFolder.enabledCallback=()=>{return true};
-          },(error:any)=>openFolder.isEnabled=false);
-          return false;
-        };
-        options.push(openFolder);
-        */
-      }
-
-      let save = new OptionItem('SAVE', 'reply', (node: Node) => this.importNode(ActionbarHelperService.getNodes(nodes, node)));
-      save.showCallback=(node:Node)=>{
-          let n=ActionbarHelperService.getNodes(nodes,node);
-          if(n==null)
-              return false;
-          // only for logged in users when all nods are supported for import
-          return !this.isGuest && n.length && n.filter((node)=>RestNetworkService.supportsImport(node.ref.repo, this.allRepositories)).length==n.length;
-      };
-      options.push(save);
-
-      let download = this.actionbar.createOptionIfPossible('DOWNLOAD', nodes, (node: Node) => NodeHelper.downloadNodes(this.connector, ActionbarHelperService.getNodes(nodes, node)));
-      options.push(download);
-
-      if((fromList || nodes && nodes.length==1) && this.config.instant('nodeReport',false)){
-        let report = new OptionItem('NODE_REPORT.OPTION', 'flag', (node: Node) => this.nodeReport=this.getCurrentNode(node));
-        report.showCallback=(node:Node)=>{
-            let n=ActionbarHelperService.getNodes(nodes,node);
-            if(n==null)
-                return false;
-          return RestNetworkService.allFromHomeRepo(n,this.allRepositories);
-        }
-        options.push(report);
-      }
-    }
-    let custom=this.config.instant('searchNodeOptions');
-    NodeHelper.applyCustomNodeOptions(this.toast,this.http,this.connector,custom,this.searchService.searchResult, nodes, options,(load:boolean)=>this.globalProgress=load);
+    let options = [];
     this.viewToggle = new OptionItem('', '', (node: Node) => this.toggleView());
     this.viewToggle.isToggle = true;
     options.push(this.viewToggle);
     this.setViewType(this.searchService.viewType);
-
     return options;
   }
   private addToStream(node: Node) {
       let nodes=ActionbarHelperService.getNodes(this.selection,node);
       this.addNodesStream=nodes;
-  }
-
-  private addToCollectionList(collection:Collection,nodes=this.addNodesToCollection,callback:Function=null,position=0,error=false){
-    this.managementDialogs.addToCollectionList(collection,nodes,true,()=>{
-      if(this.addToCollection)
-        this.switchToCollections(this.addToCollection.ref.id);
-    });
   }
 
   private printListener() {

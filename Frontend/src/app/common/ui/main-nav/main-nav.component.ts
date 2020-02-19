@@ -38,6 +38,7 @@ import {
 import {BridgeService} from "../../../core-bridge-module/bridge.service";
 import {GlobalContainerComponent} from "../global-container/global-container.component";
 import {MatButton} from '@angular/material/button';
+import {WorkspaceManagementDialogsComponent} from '../../../modules/management-dialogs/management-dialogs.component';
 
 @Component({
     selector: 'main-nav',
@@ -83,6 +84,7 @@ export class MainNavComponent implements AfterViewInit{
     visible=false;
     private static ID_ATTRIBUTE_NAME='data-banner-id';
 
+    @ViewChild('management', {static: false}) management: WorkspaceManagementDialogsComponent;
     @ViewChild('search', {static: false}) search : ElementRef;
     @ViewChild('sidebar', {static: false}) sidebar:ElementRef;
     @ViewChild('topbar', {static: false}) topbar:ElementRef;

@@ -25,7 +25,7 @@ import {
     TemporaryStorageService,
     UIService,
     CollectionReference,
-    CollectionFeedback,
+    CollectionFeedback, NodesRightMode,
 } from '../../core-module/core.module';
 import { Toast } from '../../core-ui-module/toast';
 import { OptionItem } from '../../core-ui-module/option-item';
@@ -34,7 +34,7 @@ import { UIHelper } from '../../core-ui-module/ui-helper';
 import { Title } from '@angular/platform-browser';
 import { UIConstants } from '../../core-module/ui/ui-constants';
 import { ListTableComponent } from '../../core-ui-module/components/list-table/list-table.component';
-import { NodeHelper, NodesRightMode } from '../../core-ui-module/node-helper';
+import { NodeHelper } from '../../core-ui-module/node-helper';
 import { TranslateService } from '@ngx-translate/core';
 import { Location } from '@angular/common';
 import { Helper } from '../../core-module/rest/helper';
@@ -999,9 +999,6 @@ export class CollectionsMainComponent {
                 // remember the scroll Y before displaying content
                 this.lastScrollY = window.scrollY;
                 const nodeOptions = [];
-                /*if(data.node.downloadUrl)
-                    nodeOptions.push(new OptionItem("DOWNLOAD", "cloud_download", () => this.downloadMaterial()));
-                */
                 if (this.isAllowedToDeleteNodes([content])) {
                     nodeOptions.push(
                         new OptionItem(
@@ -1031,8 +1028,6 @@ export class CollectionsMainComponent {
                     UIConstants.ROUTER_PREFIX + 'render',
                     content.ref.id,
                 ]);
-                //this.navigate(this.collectionContent.collection.ref.id,content.ref.id);
-                // add breadcrumb
             });
     }
 

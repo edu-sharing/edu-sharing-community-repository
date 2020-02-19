@@ -4,7 +4,7 @@ import {Node, NodeList, NodeWrapper} from "../../../core-module/core.module";
 import {RestConstants} from "../../../core-module/core.module";
 import {TranslateService} from "@ngx-translate/core";
 import {RestConnectorService} from "../../../core-module/core.module";
-import {OptionItem} from "../../../core-ui-module/option-item";
+import {OptionItem, Scope} from "../../../core-ui-module/option-item";
 import {Toast} from "../../../core-ui-module/toast";
 import {SessionStorageService} from "../../../core-module/core.module";
 import {RestSearchService} from "../../../core-module/core.module";
@@ -15,7 +15,6 @@ import {Helper} from "../../../core-module/rest/helper";
 import {WorkspaceManagementDialogsComponent} from '../../management-dialogs/management-dialogs.component';
 import {ActionbarComponent} from '../../../common/ui/actionbar/actionbar.component';
 import {MainNavComponent} from '../../../common/ui/main-nav/main-nav.component';
-import {Scope} from '../../../common/options-helper';
 
 @Component({
   selector: 'workspace-explorer',
@@ -40,7 +39,6 @@ export class WorkspaceExplorerComponent {
   @Output() reorderDialogChange = new EventEmitter<boolean>();
   @Input() preventKeyevents:boolean;
   @Input() mainNav:MainNavComponent;
-  @Input() management:WorkspaceManagementDialogsComponent;
   @Input() actionbar:ActionbarComponent;
 
 

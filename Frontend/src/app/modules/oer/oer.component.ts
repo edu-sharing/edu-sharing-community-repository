@@ -47,7 +47,6 @@ export class OerComponent {
   public hasMore:boolean[]=[];
   private offsets:number[]=[];
   public nodes:Node[][]=[];
-  private render_options: OptionItem[];
   constructor(
     private router : Router,
     private route : ActivatedRoute,
@@ -214,8 +213,6 @@ export class OerComponent {
       this.router.navigate([UIConstants.ROUTER_PREFIX+"collections"],{queryParams:{id:node.ref.id,mainnav:true}});
     }
     else{
-      this.render_options=[];
-      this.storage.set(TemporaryStorageService.NODE_RENDER_PARAMETER_OPTIONS, this.render_options);
       this.storage.set(TemporaryStorageService.NODE_RENDER_PARAMETER_LIST, this.nodes[this.MATERIALS]);
         this.storage.set(TemporaryStorageService.NODE_RENDER_PARAMETER_ORIGIN,"oer");
         this.router.navigate([UIConstants.ROUTER_PREFIX+"render", node.ref.id]);
