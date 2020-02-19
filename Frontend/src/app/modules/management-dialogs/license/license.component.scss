@@ -15,7 +15,7 @@
     .mat-tab-labels {
       background-color: #fff;
     }
-    .mat-radio-label,.mat-checkbox-layout{
+    .mat-checkbox-layout{
       white-space: normal!important;
       align-items: baseline !important;
     }
@@ -34,15 +34,11 @@
       margin: 0;
       line-height: 1.5;
     }
-    .mat-radio-container{
-      position: relative;
-      top:6px;
-    }
   }
 }
 .ccAuthor {
   font-weight: bold;
-  margin-bottom: 10px;
+  margin: 10px 0;
   i {
     color: $textLight;
   }

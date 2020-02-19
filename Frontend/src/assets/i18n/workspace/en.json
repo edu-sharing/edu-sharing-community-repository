@@ -138,11 +138,11 @@
                 "PAGE": "Page"
             },
             "BULK_MODE": {
-                "TITLE" : "Update permissions",
-                "EXTEND" : "Extend permissions",
-                "EXTEND_DESCRIPTION" : "all current permissions remain on the elements. If one of the newly selected users/groups has currently no access, he/she will get access. If a user/group already has higher permissions on the element, the higher permissions will stay active.",
-                "REPLACE" : "Replace permissions",
-                "REPLACE_DESCRIPTION" : "The current permissions of all elements will be replaced with the selected users/groups."
+                "TITLE" : "Manage permissions",
+                "EXTEND" : "Update existing permissions",
+                "EXTEND_DESCRIPTION" : "Selected permissions of the user/groups will get added to the existing permissions. Access will be given to users with no access. Higher permissions will stay active.",
+                "REPLACE" : "Overwrite existing permissions",
+                "REPLACE_DESCRIPTION" : "Selected permissions of the user/groups will reset and overwrite the existing permissions."
             }
         },
         "INHERIT_DISABLED": "Inherition is currently disabled",
@@ -191,7 +191,8 @@
             "AUTHOR_FIRST": "Author: First name",
             "AUTHOR_LAST": "Last name",
             "KEYWORDS": "Add keywords",
-            "HINT_ENTER": "Press enter to add keywords.",
+            "HINT_FILTER": "Enter term to filter values",
+            "HINT_ENTER": "Press enter to add keywords",
             "AS_VERSION": "as Version",
             "VERSION": "Version",
             "VERSION_COMMENT": "Add version comment",

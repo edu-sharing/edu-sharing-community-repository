@@ -94,8 +94,8 @@ export class WorkspaceMainComponent implements EventListener {
     private editNodeLicense: Node[];
     private editNodeAllowReplace: Boolean;
     private nodeDisplayedVersion: string;
-    private createAllowed: boolean;
-    private currentFolder: any | Node;
+    createAllowed: boolean;
+    currentFolder: any | Node;
     private user: IamUser;
     public searchQuery: any;
     public isSafe = false;
@@ -1136,7 +1136,7 @@ export class WorkspaceMainComponent implements EventListener {
         }
     }
 
-    private refreshWithVirtualNodes(nodes: Node[]) {
+    refreshWithVirtualNodes(nodes: Node[]) {
         nodes = nodes.map((n) => {
             n.virtual = true;
             return n;

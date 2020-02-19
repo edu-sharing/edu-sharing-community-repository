@@ -100,14 +100,18 @@ a.active{
   display: flex;
   flex-direction: column;
 }
+.advanced{
+  h4{
+    justify-content: center;
+  }
+}
 .publish{
   margin-top: 20px;
   padding:20px $cardPadding;
   padding-right: 30px;
   background-color: $actionDialogBackground;
   .publishElements{
-    float: left;
-    max-width: 495px;
+    display: flex;
     margin-left: 10px;
   }
   .type{
@@ -122,13 +126,21 @@ a.active{
     font-size: 110%;
   }
   .publishInfo{
-    margin-left: 44px;
     color:$textLight;
-    font-size: 90%;
-    max-width:400px;
+    font-size: $fontSizeSmall;
+    padding-top: 8px;
+    padding-right: 30px;
+    flex-grow: 1;
+  }
+  .publish-labels{
+    flex-grow: 1;
+  }
+  .publish-config{
+    display: flex;
+    align-items: flex-start;
   }
   .doi{
-    margin:10px 0 10px 50px;
+    margin:10px 0 10px 20px;
     display: flex;
     flex-direction: column;
     span{
@@ -139,8 +151,18 @@ a.active{
 }
 .bulk-config{
   padding:20px $cardPadding;
+  .mat-heading-4{
+    padding-bottom: 15px;
+  }
   mat-radio-button {
+    .mat-radio-label{
+      align-items: baseline;
+    }
     padding: 5px 10px;
+    .label-primary{
+      font-weight: bold;
+      padding-bottom: 5px;
+    }
   }
 }
 :host ::ng-deep{
@@ -222,6 +244,7 @@ a.active{
 .groupHeading{
   display:flex;
   align-items:baseline;
+  padding-bottom: 10px;
 }
 .groupName{
   color:$textLight;
@@ -234,7 +257,7 @@ a.active{
 .inheritEmpty{
   font-size:90%;
   color:$textLight;
-  padding:20px 10px;
+  padding:0 10px 20px 10px;
   font-style: italic;
   width: 100%;
   text-align: center;

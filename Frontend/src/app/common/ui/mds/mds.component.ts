@@ -946,9 +946,9 @@ export class MdsComponent{
     }
     const id = this.getDomId(widget.id + '_bulk');
     return `<div class="bulk-enable">
-                <input type="radio" name="` + id + `" class="filled-in" id="` + id + `_append" value="append" onchange="` + this.getWindowComponent() + `.setBulkMode('` + widget.id + `', event)" checked>
+                <input type="radio" name="` + id + `" id="` + id + `_append" value="append" onchange="` + this.getWindowComponent() + `.setBulkMode('` + widget.id + `', event)" checked>
                 <label for="` + id + `_append">` + this.translate.instant('MDS.BULK_APPEND') + `</label>
-                <input type="radio" name="` + id + `" class="filled-in" id="` + id + `_replace" value="replace" onchange="` + this.getWindowComponent() + `.setBulkMode('` + widget.id + `', event)">
+                <input type="radio" name="` + id + `" id="` + id + `_replace" value="replace" onchange="` + this.getWindowComponent() + `.setBulkMode('` + widget.id + `', event)">
                 <label for="` + id + `_replace">` + this.translate.instant('MDS.BULK_REPLACE') + `</label>
             </div>`;
   }
@@ -1322,8 +1322,12 @@ export class MdsComponent{
               `+this.getWindowComponent()+`.openSuggestions('`+widget.id+`',null,false,`+(widget.values ? true : false)+`,true);
               ">...</a>`;
     html+=`</div>`;
-    if(allowCustom && !openCallback && !widget.bottomCaption){
-      html+='<div class="input-hint-bottom">'+this.translate.instant('WORKSPACE.EDITOR.HINT_ENTER')+'</div>';
+    if (!widget.bottomCaption) {
+      if (allowCustom && !openCallback) {
+        html += '<div class="input-hint-bottom">' + this.translate.instant('WORKSPACE.EDITOR.HINT_ENTER') + '</div>';
+      }else{
+        html += '<div class="input-hint-bottom">' + this.translate.instant('WORKSPACE.EDITOR.HINT_FILTER') + '</div>';
+      }
     }
     return html;
   }

@@ -11,14 +11,14 @@
           <div class="oerCC0">
             <h4>{{'LICENSE.GROUPS.CC_0' | translate}}</h4>
             <div *ngIf="isAllowedLicense('CC_0')">
-              <mat-radio-button value="CC_0">
+              <mat-radio-button class="mat-radio-multiline" value="CC_0">
                 <h4>{{'WORKSPACE.LICENSE.CC0.CC0' | translate}}</h4>
                 <h5 innerHTML="{{'WORKSPACE.LICENSE.CC0.CC0_INFO' | translate}}"></h5>
                 <h5><a class="focus-underline" [href]="getLicenseUrlVersion('CC_0')" target="_blank">{{'WORKSPACE.LICENSE.MORE' | translate}}</a></h5>
               </mat-radio-button>
             </div>
             <div *ngIf="isAllowedLicense('PDM')">
-              <mat-radio-button value="PDM">
+              <mat-radio-button class="mat-radio-multiline" value="PDM">
                 <h4>{{'WORKSPACE.LICENSE.CC0.PDM' | translate}}</h4>
                 <h5>{{'WORKSPACE.LICENSE.CC0.PDM_INFO' | translate}}</h5>
                 <h5><a class="focus-underline" [href]="getLicenseUrlVersion('PDM')" target="_blank">{{'WORKSPACE.LICENSE.MORE' | translate}}</a></h5>
@@ -28,14 +28,14 @@
           <div class="oerCCBY">
             <h4>{{'LICENSE.GROUPS.CC_BY' | translate}}</h4>
             <div *ngIf="isAllowedLicense('CC_BY')">
-              <mat-radio-button value="CC_BY" id="CC_BY">
+              <mat-radio-button class="mat-radio-multiline" value="CC_BY" id="CC_BY">
                 <h4>{{'WORKSPACE.LICENSE.CC.CC_BY_RADIO' | translate}}</h4>
                 <h5>{{'WORKSPACE.LICENSE.CC.CC_BY_INFO' | translate}}</h5>
                 <h5><a class="focus-underline" [href]="getLicenseUrlVersion('CC_BY')" target="_blank">{{'WORKSPACE.LICENSE.MORE' | translate}}</a></h5>
               </mat-radio-button>
             </div>
             <div *ngIf="isAllowedLicense('CC_BY_SA')">
-                <mat-radio-button value="CC_BY_SA" id="CC_BY_SA">
+                <mat-radio-button class="mat-radio-multiline" value="CC_BY_SA" id="CC_BY_SA">
                   <h4>{{'WORKSPACE.LICENSE.CC.CC_BY_SA_RADIO' | translate}}</h4>
                   <h5>{{'WORKSPACE.LICENSE.CC.CC_BY_SA_INFO' | translate}}</h5>
                   <h5><a class="focus-underline" [href]="getLicenseUrlVersion('CC_BY_SA')" target="_blank">{{'WORKSPACE.LICENSE.MORE' | translate}}</a></h5>
@@ -73,17 +73,19 @@
                 <mat-radio-button value="NC">{{'NO' | translate}}</mat-radio-button>
               </mat-radio-group>
             </div>
-            <div class="ccAuthor clickable" (click)="showCcAuthor=!showCcAuthor;"><i icon iconId="{{ showCcAuthor ? 'keyboard_arrow_down' : 'keyboard_arrow_right' }}"></i> {{ 'WORKSPACE.LICENSE.CC.NAME_AUTHOR' | translate}}</div>
+            <button mat-button color="primary" class="ccAuthor clickable" (click)="showCcAuthor=!showCcAuthor;">
+              <i icon iconId="{{ showCcAuthor ? 'keyboard_arrow_down' : 'keyboard_arrow_right' }}"></i> {{ 'WORKSPACE.LICENSE.CC.NAME_AUTHOR' | translate}}
+            </button>
           </div>
               <mat-radio-group [(ngModel)]="type" *ngIf="primaryType=='COPYRIGHT'" class="copyright">
                 <div *ngIf="isAllowedLicense('COPYRIGHT_FREE')">
-                  <mat-radio-button value="COPYRIGHT_FREE">
+                  <mat-radio-button class="mat-radio-multiline" value="COPYRIGHT_FREE">
                       <h4>{{'WORKSPACE.LICENSE.COPYRIGHT.FREE' | translate}}</h4>
                       <h5 innerHTML="{{'WORKSPACE.LICENSE.COPYRIGHT.FREE_INFO' | translate}}"></h5>
                   </mat-radio-button>
                 </div>
                 <div *ngIf="isAllowedLicense('COPYRIGHT_LICENSE')">
-                  <mat-radio-button value="COPYRIGHT_LICENSE">
+                  <mat-radio-button class="mat-radio-multiline" value="COPYRIGHT_LICENSE">
                     <h4>{{'WORKSPACE.LICENSE.COPYRIGHT.LICENSE' | translate}}</h4>
                     <h5>{{'WORKSPACE.LICENSE.COPYRIGHT.LICENSE_INFO' | translate}}</h5>
                   </mat-radio-button>
@@ -92,14 +94,14 @@
               </mat-radio-group>
               <mat-radio-group [(ngModel)]="type" *ngIf="primaryType=='CC_0'" class="cc">
                 <div *ngIf="isAllowedLicense('CC_0')">
-                  <mat-radio-button value="CC_0">
+                  <mat-radio-button class="mat-radio-multiline" value="CC_0">
                     <h4>{{'WORKSPACE.LICENSE.CC0.CC0' | translate}}</h4>
                     <h5 innerHTML="{{'WORKSPACE.LICENSE.CC0.CC0_INFO' | translate}}"></h5>
                     <h5><a class="focus-underline" [href]="getLicenseUrlVersion('CC_0')" target="_blank">{{'WORKSPACE.LICENSE.MORE' | translate}}</a></h5>
                   </mat-radio-button>
                 </div>
                 <div *ngIf="isAllowedLicense('PDM')">
-                  <mat-radio-button value="PDM">
+                  <mat-radio-button class="mat-radio-multiline" value="PDM">
                     <h4>{{'WORKSPACE.LICENSE.CC0.PDM' | translate}}</h4>
                     <h5>{{'WORKSPACE.LICENSE.CC0.PDM_INFO' | translate}}</h5>
                     <h5><a class="focus-underline" [href]="getLicenseUrlVersion('PDM')" target="_blank">{{'WORKSPACE.LICENSE.MORE' | translate}}</a></h5>

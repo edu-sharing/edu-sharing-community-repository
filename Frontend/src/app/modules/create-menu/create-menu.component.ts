@@ -88,6 +88,7 @@ export class CreateMenuComponent {
     private params: Params;
 
     constructor(
+        public bridge: BridgeService,
         private connectors: RestConnectorsService,
         private iamService: RestIamService,
         private nodeService: RestNodeService,
@@ -96,7 +97,6 @@ export class CreateMenuComponent {
         private translate: TranslateService,
         private temporaryStorage: TemporaryStorageService,
         private route: ActivatedRoute,
-        private bridge: BridgeService,
         private iam: RestIamService,
         private event: FrameEventsService,
     ) {
@@ -152,7 +152,7 @@ export class CreateMenuComponent {
             }
         );
     }
-    private uploadFiles(files: FileList) {
+    uploadFiles(files: FileList) {
         this.onFileDrop(files);
     }
     public onFileDrop(files: FileList) {
@@ -175,7 +175,7 @@ export class CreateMenuComponent {
     hasOpenWindows() {
         return CardComponent.getNumberOfOpenCards() !== 0;
     }
-    private afterUpload(nodes: Node[]) {
+    afterUpload(nodes: Node[]) {
         if (this.params.reurl) {
             NodeHelper.addNodeToLms(this.router, this.temporaryStorage, nodes[0], this.params.reurl);
         }
