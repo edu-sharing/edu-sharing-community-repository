@@ -176,8 +176,12 @@
       min-height: 0px;
       mat-tab-group {
         min-height: 0px;
+        flex-grow: 1;
         .mat-tab-body-wrapper {
-          @include content();
+          flex-grow: 1;
+          // mat-tab-body already defines some styling for content. Uncomment
+          // when encountering any problems.
+          // @include content();
         }
       }
     }
