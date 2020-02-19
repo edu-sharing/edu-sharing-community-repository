@@ -93,7 +93,7 @@ export class SearchNodeStoreComponent {
 
     }
     let custom=this.config.instant("nodeStoreOptions");
-    NodeHelper.applyCustomNodeOptions(this.toast,this.http,this.connector,custom,this.nodes, this.selected, this.actionOptions,(load:boolean)=>this.loading=load);
+    NodeHelper.applyCustomNodeOptions(this.toast,this.http,this.connector,custom,this.nodes, this.selected, this.actionOptions);
   }
 
   private deleteSelection(position=0) {

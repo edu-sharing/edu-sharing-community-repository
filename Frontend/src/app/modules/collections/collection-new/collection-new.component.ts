@@ -32,6 +32,7 @@ import {MainNavComponent} from '../../../common/ui/main-nav/main-nav.component';
 import {UIHelper} from "../../../core-ui-module/ui-helper";
 import {GlobalContainerComponent} from "../../../common/ui/global-container/global-container.component";
 import {AuthorityNamePipe} from "../../../core-ui-module/pipes/authority-name.pipe";
+import {BridgeService} from '../../../core-bridge-module/bridge.service';
 
 // component class
 @Component({
@@ -113,6 +114,7 @@ export class CollectionNewComponent {
         private route:ActivatedRoute,
         private router: Router,
         private toast : Toast,
+        private bridge : BridgeService,
         private temporaryStorage : TemporaryStorageService,
         private storage : SessionStorageService,
         private zone: NgZone,
@@ -217,7 +219,7 @@ export class CollectionNewComponent {
        this.collectionService.updateCollection(this.currentCollection).subscribe(()=>{
         this.navigateToCollectionId(this.currentCollection.ref.id);
       },(error:any)=> {
-         NodeHelper.handleNodeError(this.toast, this.currentCollection.title, error);
+         NodeHelper.handleNodeError(this.bridge, this.currentCollection.title, error);
          //this.toast.error(error)
        });
     }
@@ -577,7 +579,7 @@ export class CollectionNewComponent {
         return;
     }
     console.log("add nodes",nodes);
-    UIHelper.addToCollection(this.collectionService,this.router,this.toast,collection,nodes,()=>{
+    UIHelper.addToCollection(this.collectionService,this.router,this.bridge,collection,nodes,()=>{
         this.saveImage(collection);
         return;
     });

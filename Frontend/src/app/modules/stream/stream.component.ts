@@ -364,7 +364,7 @@ export class StreamComponent {
             },
             (error : any)=>{
                 win.close();
-                if(NodeHelper.handleNodeError(this.toast,event.name,error)==RestConstants.DUPLICATE_NODE_RESPONSE){
+                if(NodeHelper.handleNodeError(this.bridge,event.name,error)==RestConstants.DUPLICATE_NODE_RESPONSE){
                     this.createConnectorName=event.name;
                 }
             }

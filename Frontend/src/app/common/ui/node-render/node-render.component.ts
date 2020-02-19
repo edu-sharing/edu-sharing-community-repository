@@ -550,10 +550,6 @@ export class NodeRenderComponent implements EventListener{
         if(stream){
             options.push(stream);
         }
-        const qr = this.actionbar.createOptionIfPossible('QR_CODE',[this._node], (node: Node) => this.qrCode = true);
-        if (qr) {
-            options.push(qr);
-        }
         if (this.config.instant("nodeReport", false)) {
             let nodeReport = new OptionItem('NODE_REPORT.OPTION', 'flag', () => this.nodeReport = this._node);
             options.push(nodeReport);
@@ -573,7 +569,7 @@ export class NodeRenderComponent implements EventListener{
             }
         }
         let custom=this.config.instant('renderNodeOptions');
-        NodeHelper.applyCustomNodeOptions(this.toast,this.http,this.connector,custom,this.searchService.searchResult, this._node ? [this._node] : null, options,(load:boolean)=>this.isLoading=load);
+        NodeHelper.applyCustomNodeOptions(this.toast,this.http,this.connector,custom,this.searchService.searchResult, this._node ? [this._node] : null, options);
 
         this.options = Helper.deepCopyArray(options);
         this.postprocessHtml();

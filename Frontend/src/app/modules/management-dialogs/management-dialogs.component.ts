@@ -18,6 +18,7 @@ import {UIConstants} from "../../core-module/ui/ui-constants";
 import {ClipboardObject, TemporaryStorageService} from '../../core-module/core.module';
 import {RestUsageService} from "../../core-module/core.module";
 import {Observable} from 'rxjs';
+import {BridgeService} from '../../core-bridge-module/bridge.service';
 
 @Component({
   selector: 'workspace-management',
@@ -182,6 +183,7 @@ export class WorkspaceManagementDialogsComponent  {
     private config:ConfigurationService,
     private searchService:RestSearchService,
     private toast:Toast,
+    private bridge:BridgeService,
     private router:Router,
   ){
    }
@@ -423,7 +425,7 @@ export class WorkspaceManagementDialogsComponent  {
       this.dialogTitle=null;
     }
     this.globalProgress=true;
-    UIHelper.addToCollection(this.collectionService,this.router,this.toast,collection,list,()=>{
+    UIHelper.addToCollection(this.collectionService,this.router,this.bridge,collection,list,()=>{
       this.globalProgress=false;
        this.onStoredAddToCollection.emit(collection);
       if(callback)

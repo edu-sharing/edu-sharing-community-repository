@@ -16,6 +16,7 @@ import {RestConnectorsService} from "../../../core-module/core.module";
 import {FrameEventsService} from "../../../core-module/core.module";
 import {NodeHelper} from "../../../core-ui-module/node-helper";
 import {OPEN_URL_MODE} from "../../../core-module/ui/ui-constants";
+import {BridgeService} from '../../../core-bridge-module/bridge.service';
 
 @Component({
   selector: 'node-variant',
@@ -61,6 +62,7 @@ export class NodeVariantComponent  {
     private connectors : RestConnectorsService,
     private config : ConfigurationService,
     private toast : Toast,
+    private bridge : BridgeService,
     private events : FrameEventsService,
     private router : Router,
     private nodeApi : RestNodeService) {
@@ -100,13 +102,13 @@ export class NodeVariantComponent  {
               this.onDone.emit();
           },(error)=>{
               this.onLoading.emit(false);
-              NodeHelper.handleNodeError(this.toast,this.variantName,error);
+              NodeHelper.handleNodeError(this.bridge,this.variantName,error);
               if(win)
                   win.close();
           });
       },(error)=>{
           this.onLoading.emit(false);
-          NodeHelper.handleNodeError(this.toast,this.variantName,error);
+          NodeHelper.handleNodeError(this.bridge,this.variantName,error);
           if(win)
               win.close();
       });

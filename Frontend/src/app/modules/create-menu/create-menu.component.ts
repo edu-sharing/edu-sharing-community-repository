@@ -146,7 +146,7 @@ export class CreateMenuComponent {
             },
             (error: any) => {
                 this.toast.closeModalDialog();
-                if (NodeHelper.handleNodeError(this.toast, folder.name, error) === RestConstants.DUPLICATE_NODE_RESPONSE) {
+                if (NodeHelper.handleNodeError(this.bridge, folder.name, error) === RestConstants.DUPLICATE_NODE_RESPONSE) {
                     this.addFolderName = folder.name;
                 }
             }
@@ -211,7 +211,7 @@ export class CreateMenuComponent {
             },
             (error: any) => {
                 win.close();
-                if (NodeHelper.handleNodeError(this.toast, event.name, error) === RestConstants.DUPLICATE_NODE_RESPONSE) {
+                if (NodeHelper.handleNodeError(this.bridge, event.name, error) === RestConstants.DUPLICATE_NODE_RESPONSE) {
                     this.createConnectorName = event.name;
                 }
             }

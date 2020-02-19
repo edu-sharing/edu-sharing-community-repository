@@ -858,7 +858,7 @@ export class MainNavComponent implements AfterViewInit{
             this.timeIsValid=true;
         }
         else if(this.showTimeout()){
-            this.bridge.showModalDialog(
+            this.toast.showModalDialog(
                 'WORKSPACE.AUTOLOGOUT',
                 'WORKSPACE.AUTOLOGOUT_INFO',
                 [new DialogButton("WORKSPACE.RELOGIN",DialogButton.TYPE_PRIMARY,

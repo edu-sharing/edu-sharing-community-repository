@@ -610,8 +610,7 @@ export class CollectionsMainComponent {
             custom,
             this.collectionContent.references as any,
             nodes,
-            options,
-            (load: boolean) => (this.isLoading = load),
+            options
         );
 
         return options;
@@ -641,7 +640,7 @@ export class CollectionsMainComponent {
             UIHelper.addToCollection(
                 this.collectionService,
                 this.router,
-                this.toast,
+                this.bridge,
                 event.target,
                 event.source,
                 nodes => {
@@ -679,7 +678,7 @@ export class CollectionsMainComponent {
         UIHelper.addToCollection(
             this.collectionService,
             this.router,
-            this.toast,
+            this.bridge,
             this.collectionContent.collection,
             nodes,
             refNodes => {
@@ -690,10 +689,10 @@ export class CollectionsMainComponent {
     }
 
     canDropOnCollection = (event: any) => {
-        if (event.source[0].ref.id == event.target.ref.id) {
+        if (event.source[0].ref.id === event.target.ref.id) {
             return false;
         }
-        if (event.target.ref.id == this.collectionContent.collection.ref.id) {
+        if (event.target.ref.id === this.collectionContent.collection.ref.id) {
             return false;
         }
         // in case it's via breadcrums, unmarshall the collection item
@@ -704,13 +703,13 @@ export class CollectionsMainComponent {
         // do not allow to move anything else than editorial collections into editorial collections (if the source is a collection)
         if (event.source[0].hasOwnProperty('childCollectionsCount')) {
             if (
-                (event.source[0].type ==
+                (event.source[0].type ===
                     RestConstants.COLLECTIONTYPE_EDITORIAL &&
-                    event.target.type !=
+                    event.target.type !==
                         RestConstants.COLLECTIONTYPE_EDITORIAL) ||
-                (event.source[0].type !=
+                (event.source[0].type !==
                     RestConstants.COLLECTIONTYPE_EDITORIAL &&
-                    event.target.type == RestConstants.COLLECTIONTYPE_EDITORIAL)
+                    event.target.type === RestConstants.COLLECTIONTYPE_EDITORIAL)
             ) {
                 return false;
             }

@@ -32,7 +32,7 @@ export class ActionbarHelperService{
    * @param {Function} callback
    * @returns {any}
    */
-  public createOptionIfPossible(type: string, nodes: Node[], callback: Function){
+  public createOptionIfPossible(type: string, nodes: Node[], callback: (node: Node|any) => void){
     let option:OptionItem=null;
     if(type=='DOWNLOAD') {
       if (NodeHelper.allFiles(nodes)) {

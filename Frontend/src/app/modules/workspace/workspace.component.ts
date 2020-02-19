@@ -49,6 +49,7 @@ import { MainNavComponent } from '../../common/ui/main-nav/main-nav.component';
 import { MatMenuTrigger } from '@angular/material/menu';
 import { GlobalContainerComponent } from '../../common/ui/global-container/global-container.component';
 import {ActionbarComponent} from '../../common/ui/actionbar/actionbar.component';
+import {BridgeService} from '../../core-bridge-module/bridge.service';
 
 @Component({
     selector: 'workspace-main',
@@ -160,12 +161,6 @@ export class WorkspaceMainComponent implements EventListener {
         const fromInputField = KeyEvents.eventFromInputField(event);
         const hasOpenWindow = this.hasOpenWindows();
 
-        if (event.code === 'Delete' && !hasOpenWindow && !fromInputField && this.selection.length) {
-            this.deleteNodes();
-            event.preventDefault();
-            event.stopPropagation();
-            return;
-        }
         if (event.key === 'Escape') {
             if (this.addFolderName != null) {
                 this.addFolderName = null;
@@ -193,6 +188,7 @@ export class WorkspaceMainComponent implements EventListener {
     }
     constructor(
         private toast: Toast,
+        private bridge: BridgeService,
         private route: ActivatedRoute,
         private router: Router,
         private http: HttpClient,
@@ -285,7 +281,7 @@ export class WorkspaceMainComponent implements EventListener {
             this.moveNode(target, source, position + 1);
         },
             (error: any) => {
-                NodeHelper.handleNodeError(this.toast, source[position].name, error);
+                NodeHelper.handleNodeError(this.bridge, source[position].name, error);
                 source.splice(position, 1);
                 this.moveNode(target, source, position + 1);
             });
@@ -301,7 +297,7 @@ export class WorkspaceMainComponent implements EventListener {
             this.copyNode(target, source, position + 1);
         },
             (error: any) => {
-                NodeHelper.handleNodeError(this.toast, source[position].name, error);
+                NodeHelper.handleNodeError(this.bridge, source[position].name, error);
                 source.splice(position, 1);
                 this.copyNode(target, source, position + 1);
             });
@@ -481,13 +477,6 @@ export class WorkspaceMainComponent implements EventListener {
         this.refreshWithVirtualNodes(nodes);
     }
 
-    private deleteNodes(node: Node = null) {
-        const list = this.getNodeList(node);
-        if (list == null) {
-            return;
-        }
-        this.deleteNode = list;
-    }
     private deleteDone() {
         this.metadataNode = null;
         this.refresh();
@@ -519,7 +508,7 @@ export class WorkspaceMainComponent implements EventListener {
             this.node.copyNode(target, source).subscribe(
                 (data: NodeWrapper) => this.pasteNode(nodes.concat(data.node)),
                 (error: any) => {
-                    NodeHelper.handleNodeError(this.toast, clip.nodes[nodes.length].name, error);
+                    NodeHelper.handleNodeError(this.bridge, clip.nodes[nodes.length].name, error);
                     this.globalProgress = false;
                 });
         }
@@ -527,7 +516,7 @@ export class WorkspaceMainComponent implements EventListener {
             this.node.moveNode(target, source).subscribe(
                 (data: NodeWrapper) => this.pasteNode(nodes.concat(data.node)),
                 (error: any) => {
-                    NodeHelper.handleNodeError(this.toast, clip.nodes[nodes.length].name, error);
+                    NodeHelper.handleNodeError(this.bridge, clip.nodes[nodes.length].name, error);
                     this.globalProgress = false;
                 }
             );
@@ -546,7 +535,7 @@ export class WorkspaceMainComponent implements EventListener {
     }
     private downloadNode(node: Node) {
         const list = this.getNodeList(node);
-        NodeHelper.downloadNodes(this.toast, this.connector, list);
+        NodeHelper.downloadNodes(this.connector, list);
     }
     private displayNode(event: Node) {
         const list = this.getNodeList(event);
@@ -789,14 +778,7 @@ export class WorkspaceMainComponent implements EventListener {
                 && (this.root === 'MY_FILES' || this.root === 'SHARED_FILES');
             options.push(cut);
             options.push(new OptionItem('WORKSPACE.OPTION.COPY', 'content_copy', (node: Node) => this.cutCopyNode(node, true)));
-            const del = this.actionbar.createOptionIfPossible('DELETE', nodes, (node: Node) => this.deleteNodes(node));
-            if (del) {
-                options.push(del);
-            }
-            const custom = this.config.instant('nodeOptions');
-            NodeHelper.applyCustomNodeOptions(this.toast, this.http, this.connector, custom, this.currentNodes, nodes, options,
-                (load: boolean) => this.globalProgress = load
-            );
+
         }
         if (!fromList && this.root !== 'RECYCLE' && !(nodes && nodes.length)) {
             this.viewToggle = new OptionItem('', this.viewType === 0 ? 'view_module' : 'list', (node: Node) => this.toggleView());

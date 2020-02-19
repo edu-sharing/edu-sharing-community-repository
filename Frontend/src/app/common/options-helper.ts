@@ -8,7 +8,7 @@ import {UIHelper} from '../core-ui-module/ui-helper';
 import {UIService} from '../core-module/rest/services/ui.service';
 import {WorkspaceManagementDialogsComponent} from '../modules/management-dialogs/management-dialogs.component';
 import {NodeHelper, NodesRightMode} from '../core-ui-module/node-helper';
-import {Node, NodeWrapper} from '../core-module/rest/data-object';
+import {Connector, Filetype, Node, NodeWrapper} from '../core-module/rest/data-object';
 import {Helper} from '../core-module/rest/helper';
 import {ClipboardObject, TemporaryStorageService} from '../core-module/rest/services/temporary-storage.service';
 import {BridgeService} from '../core-bridge-module/bridge.service';
@@ -19,8 +19,10 @@ import {fromEvent} from 'rxjs';
 import {TranslateService} from '@ngx-translate/core';
 import {RestNodeService} from '../core-module/rest/services/rest-node.service';
 import {ActionbarHelperService} from './services/actionbar-helper';
-import {ConfigurationService, RestConnectorService, RestHelper, RestIamService} from '../core-module/core.module';
+import {ConfigurationService, FrameEventsService, RestConnectorService, RestHelper, RestIamService} from '../core-module/core.module';
 import {MainNavComponent} from './ui/main-nav/main-nav.component';
+import {Toast} from '../core-ui-module/toast';
+import {HttpClient} from '@angular/common/http';
 
 @Injectable()
 export class OptionsHelperService {
@@ -33,6 +35,7 @@ export class OptionsHelperService {
     private globalOptions: Option[];
     private list: ListTableComponent;
     private mainNav: MainNavComponent;
+    private currentScope: Scope;
 
     handleKeyboardEventUp(event: any) {
         if (event.keyCode === 91 || event.keyCode === 93) {
@@ -78,7 +81,10 @@ export class OptionsHelperService {
         private connector: RestConnectorService,
         private connectors: RestConnectorsService,
         private iamService: RestIamService,
+        private event: FrameEventsService,
+        private http: HttpClient,
         private ui: UIService,
+        private toast: Toast,
         private translate: TranslateService,
         private nodeService: RestNodeService,
         private config: ConfigurationService,
@@ -190,7 +196,10 @@ export class OptionsHelperService {
             }
         }
         const result = this.options.filter((o) => this.isAvailable(o, objects));
-        console.log(result, objects);
+        const custom = this.config.instant('customOptions');
+        NodeHelper.applyCustomNodeOptions(this.toast, this.http, this.connector, custom, this.allObjects, objects, result);
+
+
         this.disableOptions(result, objects);
         return (UIHelper.filterValidOptions(this.ui, result) as Option[]);
     }
@@ -198,6 +207,11 @@ export class OptionsHelperService {
         if (this.getType(objects) !== option.elementType) {
             // console.log('types not matching', this.getType(objects), option);
             return false;
+        }
+        if(option.scopes) {
+            if (option.scopes.indexOf(this.currentScope) === -1) {
+                return false;
+            }
         }
         if (option.showCallback) {
            if (objects.filter((o) => option.showCallback(o) === false).length > 0) {
@@ -325,6 +339,13 @@ export class OptionsHelperService {
         );
         openNode.constrains = [Constrain.Files, Constrain.NoBulk];
 
+        const editConnectorNode = new Option('WORKSPACE.OPTION.VIEW', 'launch', (node: Node) =>
+            this.editConnector(node)
+        );
+        editConnectorNode
+        editConnectorNode.showCallback = (node: Node) => {
+            return this.connectors.connectorSupportsEdit(node) != null;
+        }
 
         /**
          if (this.connector.getCurrentLogin() && !this.connector.getCurrentLogin().isGuest) {
@@ -367,7 +388,7 @@ export class OptionsHelperService {
         const createNodeVariant = new Option('WORKSPACE.OPTION.VARIANT', 'call_split', (object) =>
             management.nodeVariant =  NodeHelper.getActionbarNodes(this.selectedObjects, object)[0]
         );
-        createNodeVariant.constrains = [Constrain.Files, Constrain.NoBulk, Constrain.HomeRepository, Constrain.User];
+        createNodeVariant.constrains = [Constrain.Files, Constrain.NoBulk, Constrain.NoCollectionReference, Constrain.HomeRepository, Constrain.User];
         createNodeVariant.showCallback = (node : Node) => {
             if (node) {
                 createNodeVariant.name = 'WORKSPACE.OPTION.VARIANT' + (this.connectors.connectorSupportsEdit(node) ? '_OPEN' : '');
@@ -381,13 +402,13 @@ export class OptionsHelperService {
         inviteNode.showAsAction = true;
         inviteNode.permissions = [RestConstants.ACCESS_CHANGE_PERMISSIONS];
         inviteNode.permissionsMode = HideMode.Disable;
-        inviteNode.constrains = [Constrain.NoCollectionReference, Constrain.User];
+        inviteNode.constrains = [Constrain.NoCollectionReference, Constrain.HomeRepository, Constrain.User];
         inviteNode.toolpermissions = [RestConstants.TOOLPERMISSION_INVITE];
 
         const licenseNode = new Option('WORKSPACE.OPTION.LICENSE', 'copyright', (object) =>
             management.nodeLicense = NodeHelper.getActionbarNodes(this.selectedObjects, object)
         );
-        licenseNode.constrains = [Constrain.Files, Constrain.User];
+        licenseNode.constrains = [Constrain.Files, Constrain.NoCollectionReference, Constrain.HomeRepository, Constrain.User];
         licenseNode.permissions = [RestConstants.ACCESS_WRITE];
         licenseNode.permissionsMode = HideMode.Disable;
         licenseNode.toolpermissions = [RestConstants.TOOLPERMISSION_LICENSE];
@@ -395,7 +416,7 @@ export class OptionsHelperService {
         const contributorNode = new Option('WORKSPACE.OPTION.CONTRIBUTOR', 'group', (object) =>
             management.nodeContributor = NodeHelper.getActionbarNodes(this.selectedObjects, object)[0]
         );
-        contributorNode.constrains = [Constrain.Files, Constrain.NoBulk, Constrain.User];
+        contributorNode.constrains = [Constrain.Files, Constrain.NoCollectionReference, Constrain.HomeRepository, Constrain.NoBulk, Constrain.User];
         contributorNode.permissions = [RestConstants.ACCESS_WRITE];
         contributorNode.permissionsMode = HideMode.Disable;
         contributorNode.onlyDesktop = true;
@@ -408,7 +429,7 @@ export class OptionsHelperService {
         const workflowNode = new Option('WORKSPACE.OPTION.WORKFLOW', 'swap_calls', (object) =>
             management.nodeWorkflow =  NodeHelper.getActionbarNodes(this.selectedObjects, object)[0]
         );
-        workflowNode.constrains = [Constrain.Files, Constrain.NoBulk, Constrain.User];
+        workflowNode.constrains = [Constrain.Files, Constrain.NoCollectionReference, Constrain.HomeRepository, Constrain.NoBulk, Constrain.User];
         workflowNode.permissions = [RestConstants.ACCESS_CHANGE_PERMISSIONS];
         workflowNode.permissionsMode = HideMode.Disable;
 
@@ -449,6 +470,7 @@ export class OptionsHelperService {
         const editNode = new Option('WORKSPACE.OPTION.EDIT', 'edit', (object) =>
             management.nodeMetadata = NodeHelper.getActionbarNodes(this.selectedObjects, object)
         );
+        editNode.constrains = [Constrain.NoCollectionReference, Constrain.HomeRepository, Constrain.User];
         editNode.permissions = [RestConstants.ACCESS_WRITE];
         editNode.permissionsMode = HideMode.Disable;
 
@@ -472,7 +494,7 @@ export class OptionsHelperService {
         const cutNodes = new Option('WORKSPACE.OPTION.CUT', 'content_cut', (node) =>
             this.cutCopyNode(node, false)
         );
-        cutNodes.constrains = [Constrain.User];
+        cutNodes.constrains = [Constrain.HomeRepository, Constrain.User];
         cutNodes.permissions = [RestConstants.ACCESS_WRITE];
         cutNodes.permissionsMode = HideMode.Disable;
         cutNodes.key = 'KeyX';
@@ -480,7 +502,7 @@ export class OptionsHelperService {
         const copyNodes = new Option('WORKSPACE.OPTION.COPY', 'content_copy', (node) =>
             this.cutCopyNode(node, true)
         );
-        copyNodes.constrains = [Constrain.User];
+        copyNodes.constrains = [Constrain.HomeRepository, Constrain.User];
         copyNodes.key = 'KeyC';
         copyNodes.keyCombination = [KeyCombination.CtrlOrAppleCmd];
         const pasteNodes = new Option('WORKSPACE.OPTION.PASTE', 'content_paste', (node) =>
@@ -494,7 +516,7 @@ export class OptionsHelperService {
         const deleteNode = new Option('WORKSPACE.OPTION.DELETE', 'delete',(object) => {
             management.nodeDelete = NodeHelper.getActionbarNodes(this.selectedObjects, object);
         });
-        deleteNode.constrains = [Constrain.User];
+        deleteNode.constrains = [Constrain.HomeRepository, Constrain.User];
         deleteNode.permissions = [RestConstants.PERMISSION_DELETE];
         deleteNode.permissionsMode = HideMode.Disable;
         deleteNode.key = 'Delete';
@@ -522,7 +544,7 @@ export class OptionsHelperService {
             }
         );
         qrCodeNode.constrains = [Constrain.Files, Constrain.NoBulk];
-
+        qrCodeNode.scopes = [Scope.Render];
 
 
         this.options.push(debugNode);
@@ -548,6 +570,9 @@ export class OptionsHelperService {
         this.options.push(reportNode);
     }
 
+    private editConnector(node: Node|any, type: Filetype = null, win: any = null, connectorType: Connector = null) {
+        UIHelper.openConnector(this.connectors, this.iamService, this.event, this.toast, node, type, win, connectorType);
+    }
     private canAddObjects() {
         console.log(this.parent);
         return this.parent && NodeHelper.getNodesRight([this.parent], RestConstants.ACCESS_ADD_CHILDREN);
@@ -568,6 +593,10 @@ export class OptionsHelperService {
             this.mainNav.refreshNodeStore();
         });
     }
+
+    setCurrentScope(currentScope: Scope) {
+        this.currentScope = currentScope;
+    }
 }
 class Option extends OptionItem {
     public key: string;
@@ -578,10 +607,17 @@ class Option extends OptionItem {
     public permissionsMode = HideMode.Disable;
     public permissionsRightMode = NodesRightMode.Local;
     public toolpermissions: string[];
+    public scopes: Scope[];
 }
 enum HideMode {
     Disable,
     Hide
+}
+export enum Scope {
+    Render,
+    Search,
+    CollectionsReferences,
+    Workspace
 }
 enum ElementType {
     Node,

@@ -15,15 +15,17 @@ import {Helper} from "../../../core-module/rest/helper";
 import {WorkspaceManagementDialogsComponent} from '../../management-dialogs/management-dialogs.component';
 import {ActionbarComponent} from '../../../common/ui/actionbar/actionbar.component';
 import {MainNavComponent} from '../../../common/ui/main-nav/main-nav.component';
+import {Scope} from '../../../common/options-helper';
 
 @Component({
   selector: 'workspace-explorer',
   templateUrl: 'explorer.component.html',
   styleUrls: ['explorer.component.scss']
 })
-export class WorkspaceExplorerComponent{
+export class WorkspaceExplorerComponent {
+  public readonly SCOPES = Scope;
   public _nodes: Node[] = [];
-  @Input() set nodes(nodes: Node[]){
+  @Input() set nodes(nodes: Node[]) {
     this._nodes = nodes;
   }
   @Output() nodesChange = new EventEmitter<Node[]>();
