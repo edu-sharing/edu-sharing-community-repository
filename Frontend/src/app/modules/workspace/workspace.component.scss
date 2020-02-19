@@ -113,9 +113,7 @@ user-quota{
   height:calc(100% - #{$mainnavHeight+$workspaceBreadcrumbsHeight});
   top: $mainnavHeight+$workspaceBreadcrumbsHeight;
   right:0;
-  overflow-x: hidden;
-  overflow-y:auto;
-  z-index: 94;
+  z-index: 1;
   background-color: #fff;
 }
 .explorer{
