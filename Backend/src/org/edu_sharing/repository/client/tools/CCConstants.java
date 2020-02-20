@@ -834,6 +834,18 @@ public class CCConstants {
 
 	public final static String CCM_VALUE_TOOLPERMISSION_GLOBAL_STATISTICS = "TOOLPERMISSION_GLOBAL_STATISTICS";
 
+	public final static String CM_VALUE_PERSON_EDU_SCHOOL_PRIMARY_AFFILIATION_TEACHER = "teacher";
+	
+	public final static String CM_VALUE_PERSON_EDU_SCHOOL_PRIMARY_AFFILIATION_STUDENT = "student";
+	
+	public final static String CM_VALUE_PERSON_EDU_SCHOOL_PRIMARY_AFFILIATION_EMPLOYEE = "employee";
+	
+	public final static String CM_VALUE_PERSON_EDU_SCHOOL_PRIMARY_AFFILIATION_EXTERN = "extern";
+	
+	public final static String CM_VALUE_PERSON_EDU_SCHOOL_PRIMARY_AFFILIATION_SYSTEM = "system";
+	
+	public final static String CM_VALUE_PERSON_EDU_SCHOOL_PRIMARY_AFFILIATION_FUNCTION = "function";
+	
 	/**
 	 * dynamic generated properties
 	 */
