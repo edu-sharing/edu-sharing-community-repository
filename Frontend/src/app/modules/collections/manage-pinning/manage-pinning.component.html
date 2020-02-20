@@ -1,4 +1,9 @@
-<card title="{{'COLLECTIONS.PINNING.TITLE' | translate }}" subtitle="{{'CARD_SUBTITLE_MULTIPLE' | translate:{count:pinnedCollections.length} }}" [buttons]="buttons" (onCancel)="cancel()" width="small" height="xlarge">
+<card *ngIf="!loading"
+      title="{{'COLLECTIONS.PINNING.TITLE' | translate }}"
+      subtitle="{{'CARD_SUBTITLE_MULTIPLE' | translate:{count:pinnedCollections.length} }}"
+      [buttons]="buttons" (onCancel)="cancel()"
+      width="small"
+      height="xlarge">
   <div class="pinning-content">
     <div *ngFor="let collection of pinnedCollections;let i=index" class="entry"
          draggable="true"
@@ -14,4 +19,3 @@
     </div>
   </div>
 </card>
-<global-progress *ngIf="globalProgress"></global-progress>

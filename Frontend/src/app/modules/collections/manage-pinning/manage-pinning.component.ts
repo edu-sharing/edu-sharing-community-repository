@@ -19,27 +19,30 @@ export class CollectionManagePinningComponent {
   public pinnedCollections: Node[];
   public currentDragColumn:Node;
   public isMobile: boolean;
-  public globalProgress: boolean;
   public checked:string[]=[];
+  public loading = false;
   buttons: DialogButton[];
-  @Input() set addCollection (addCollection : string){
-    this.globalProgress=true;
+  @Input() set addCollection (addCollection : Node) {
+    this.loading = true;
+    this.toast.showProgressDialog();
     this.search.searchByProperties([RestConstants.CCM_PROP_COLLECTION_PINNED_STATUS],["true"],["="],
       RestConstants.COMBINE_MODE_AND,RestConstants.CONTENT_TYPE_COLLECTIONS,{sortBy:[RestConstants.CCM_PROP_COLLECTION_PINNED_ORDER],sortAscending:true,count:RestConstants.COUNT_UNLIMITED}).subscribe((data:NodeList)=>{
       this.pinnedCollections=data.nodes;
       console.log(data.nodes);
       for(let collection of this.pinnedCollections){
         // collection is already pinned, don't add it
-        if(collection.ref.id==addCollection){
+        if(collection.ref.id === addCollection.ref.id){
           this.setAllChecked();
-          this.globalProgress=false;
+          this.toast.closeModalDialog();
+          this.loading = false;
           return;
         }
       }
-      this.node.getNodeMetadata(addCollection).subscribe((add:NodeWrapper)=>{
+      this.node.getNodeMetadata(addCollection.ref.id).subscribe((add:NodeWrapper)=>{
         this.pinnedCollections.splice(0,0,add.node);
-        this.globalProgress=false;
+        this.toast.closeModalDialog();
         this.setAllChecked();
+        this.loading = false;
       });
     });
   }
@@ -93,19 +96,20 @@ export class CollectionManagePinningComponent {
   }
 
   public apply(){
-    this.globalProgress=true;
+    this.toast.showProgressDialog();
+    this.loading = true;
     let collections:string[]=[];
     for(let collection of this.pinnedCollections){
       if(this.isChecked(collection))
         collections.push(collection.ref.id);
-      this.toast.toast('COLLECTIONS.PINNING.UPDATED');
     }
     this.collection.setPinning(collections).subscribe(()=>{
       this.onClose.emit();
-      this.globalProgress=false;
-    },(error:any)=>{
+      this.toast.toast('COLLECTIONS.PINNING.UPDATED');
+      this.toast.closeModalDialog();
+    },(error)=>{
       this.toast.error(error);
-      this.globalProgress=false;
+      this.toast.closeModalDialog();
     });
   }
   public cancel(){

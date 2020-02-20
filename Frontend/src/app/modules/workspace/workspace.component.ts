@@ -75,8 +75,6 @@ export class WorkspaceMainComponent implements EventListener {
     private metadataNode: String;
     private root = 'MY_FILES';
 
-    private explorerOptions: OptionItem[] = [];
-    private actionOptions: OptionItem[] = [];
     private selection: Node[] = [];
 
     private showSelectRoot = false;
@@ -105,7 +103,6 @@ export class WorkspaceMainComponent implements EventListener {
     public variantNode: Node;
     @ViewChild('mainNav', {static: false}) mainNavRef: MainNavComponent;
     private connectorList: Connector[];
-    private nodeOptions: OptionItem[] = [];
     private currentNode: Node;
     public mainnav = true;
     private timeout: string;
@@ -216,8 +213,6 @@ export class WorkspaceMainComponent implements EventListener {
         });
         this.connector.setRoute(this.route);
         this.globalProgress = true;
-        this.explorerOptions = this.getOptions(null, true);
-        // this.nodeOptions.push(new OptionItem("DOWNLOAD", "cloud_download", (node:Node) => this.downloadNode(node)));
     }
     private hideDialog(): void {
         this.toast.closeModalDialog();
@@ -549,7 +544,6 @@ export class WorkspaceMainComponent implements EventListener {
             this.nodeDisplayedVersion = event.version;
             */
             this.currentNode = list[0];
-            this.storage.set(TemporaryStorageService.NODE_RENDER_PARAMETER_OPTIONS, this.nodeOptions);
             this.storage.set(TemporaryStorageService.NODE_RENDER_PARAMETER_LIST, this.currentNodes);
             this.storage.set(TemporaryStorageService.NODE_RENDER_PARAMETER_ORIGIN, 'workspace');
             this.router.navigate([UIConstants.ROUTER_PREFIX + 'render', list[0].ref.id, list[0].version ? list[0].version : '']);
@@ -631,11 +625,6 @@ export class WorkspaceMainComponent implements EventListener {
             this.closeMetadata();
         }
     }
-    public updateOptions(node: Node): void {
-        this.explorerOptions = this.getOptions(node ? [node] : null, true);
-    }
-
-
     public debugNode(node: Node) {
         this.nodeDebug = this.getNodeList(node)[0];
         /*
@@ -647,153 +636,8 @@ export class WorkspaceMainComponent implements EventListener {
         this.router.navigate([UIConstants.ROUTER_PREFIX,"admin"],{queryParams:{mode:'BROWSER'}});
         */
     }
-    public getOptions(nodes: Node[], fromList: boolean): OptionItem[] {
-        if (nodes && !nodes.length) {
-            nodes = null;
-        }
-        const options: OptionItem[] = [];
-
-        const allFiles = NodeHelper.allFiles(nodes);
-        const savedSearch = nodes && nodes.length && nodes.find((n)=> n.type === RestConstants.CCM_TYPE_SAVED_SEARCH);
-        if (!nodes && this.canPasteInCurrentLocation()) {
-            options.push(new OptionItem('WORKSPACE.OPTION.PASTE', 'content_paste', (node: Node) => this.pasteNode()));
-        }
-        if (fromList || nodes && nodes.length === 1) {
-            if (this.reurl) {
-                const apply = new OptionItem('APPLY', 'redo', (node: Node) => this.applyNode(this.getNodeList(node)[0]));
-                apply.showAsAction = true;
-                apply.showAlways = true;
-                apply.enabledCallback = ((node: Node) => {
-                    return node.access.indexOf(RestConstants.ACCESS_CC_PUBLISH) !== -1;
-                });
-                apply.showCallback = ((node: Node) => {
-                    const result = NodeHelper.getActionbarNodes(nodes, node);
-                    if (result == null || !result.length) {
-                        return false;
-                    }
-                    return (this.reurlDirectories || !result[0].isDirectory);
-                });
-                // if (fromList || apply.showCallback(nodes[0]))
-                options.push(apply);
-            }
-        }
-        if (nodes && nodes.length === 1) {
-            if (this.isAdmin || (window as any).esDebug === true) {
-                const debug = new OptionItem('WORKSPACE.OPTION.DEBUG', 'build', (node: Node) => this.debugNode(node));
-                debug.onlyDesktop = true;
-                options.push(debug);
-            }
-            const open = new OptionItem('WORKSPACE.OPTION.SHOW', 'remove_red_eye', (node: Node) => this.displayNode(node));
-            if (!nodes[0].isDirectory && !savedSearch) {
-                options.push(open);
-            }
-        }
-        const view = new OptionItem('WORKSPACE.OPTION.VIEW', 'launch', (node: Node) => this.editConnector(node));
-        if (fromList) {
-            view.showCallback = ((node: Node) => {
-                return this.connectors.connectorSupportsEdit(node) != null;
-            });
-            options.push(view);
-        }
-        else if (nodes && nodes.length === 1 && this.connectors.connectorSupportsEdit(nodes[0])) {
-            options.push(view);
-        }
-        if (nodes && !savedSearch) {
-            const edit = new OptionItem('WORKSPACE.OPTION.EDIT', 'edit', (node: Node) => this.editNode(node));
-            edit.isEnabled = NodeHelper.getNodesRight(nodes, RestConstants.ACCESS_WRITE);
-            edit.isSeperateBottom = true;
-            if (edit.isEnabled) {
-                options.push(edit);
-            }
-        }
-        const collection = this.actionbar.createOptionIfPossible('ADD_TO_COLLECTION', nodes, (node: Node) => this.addToCollection(node));
-        if (collection && !this.isSafe) {
-            options.push(collection);
-        }
-        const stream = this.actionbar.createOptionIfPossible('ADD_TO_STREAM', nodes, (node: Node) => this.addToStream(node));
-        if (stream && !this.isSafe) {
-            options.push(stream);
-        }
-        const variant = this.actionbar.createOptionIfPossible('CREATE_VARIANT', nodes, (node: Node) => this.createVariant(node));
-        if (variant && !this.isSafe) {
-            options.push(variant);
-        }
-
-        let share: OptionItem;
-        const template = this.actionbar.createOptionIfPossible('NODE_TEMPLATE', nodes, (node: Node) => this.nodeTemplate(node));
-        if (template) {
-            options.push(template);
-        }
-        share = this.actionbar.createOptionIfPossible('INVITE', nodes, (node: Node) => this.shareNode(node));
-        if (share) {
-            share.isEnabled = share.isEnabled && (
-                (this.connector.hasToolPermissionInstant(RestConstants.TOOLPERMISSION_INVITE) && !this.isSafe)
-                || (this.connector.hasToolPermissionInstant(RestConstants.TOOLPERMISSION_INVITE_SAFE) && this.isSafe)
-            );
-            options.push(share);
-        }
-        /*let shareLink = ActionbarHelper
-            .createOptionIfPossible('SHARE_LINK',nodes,this.connector,(node: Node) => this.setShareLinkNode(node));
-        if (shareLink && !this.isSafe)
-            options.push(shareLink);*/
-
-        if (nodes) {
-            const license = new OptionItem('WORKSPACE.OPTION.LICENSE', 'copyright', (node: Node) => this.editLicense(node));
-            license.isEnabled = !this.isSafe
-                && allFiles
-                && NodeHelper.getNodesRight(nodes, RestConstants.ACCESS_DELETE)
-                && this.connector.hasToolPermissionInstant(RestConstants.TOOLPERMISSION_LICENSE);
-            if (license.isEnabled) {
-                options.push(license);
-            }
-        }
-        if (nodes && nodes.length === 1 && !savedSearch) {
-            const contributor = new OptionItem('WORKSPACE.OPTION.CONTRIBUTOR', 'group', (node: Node) => this.manageContributorsNode(node));
-            contributor.isEnabled = NodeHelper.getNodesRight(nodes, RestConstants.ACCESS_WRITE);
-            contributor.onlyDesktop = true;
-            if (nodes && !nodes[0].isDirectory && !this.isSafe) {
-                options.push(contributor);
-            }
-            const workflow = this.actionbar.createOptionIfPossible('WORKFLOW', nodes, (node: Node) => this.manageWorkflowNode(node));
-            if (workflow) {
-                options.push(workflow);
-            }
-
-
-            this.infoToggle = new OptionItem('WORKSPACE.OPTION.METADATA', 'info_outline', (node: Node) => this.openMetadata(node));
-            this.infoToggle.isToggle = true;
-            options.push(this.infoToggle);
-
-        }
-        if (fromList || nodes && nodes.length) {
-            const download = this.actionbar.createOptionIfPossible('DOWNLOAD', nodes, (node: Node) => this.downloadNode(node));
-            if (download) {
-                options.push(download);
-            }
-        }
-        if (nodes && nodes.length) {
-            const cut = new OptionItem('WORKSPACE.OPTION.CUT', 'content_cut', (node: Node) => this.cutCopyNode(node, false));
-            cut.isSeperate = true;
-            cut.isEnabled = NodeHelper.getNodesRight(nodes, RestConstants.ACCESS_WRITE)
-                && (this.root === 'MY_FILES' || this.root === 'SHARED_FILES');
-            options.push(cut);
-            options.push(new OptionItem('WORKSPACE.OPTION.COPY', 'content_copy', (node: Node) => this.cutCopyNode(node, true)));
-
-        }
-        if (!fromList && this.root !== 'RECYCLE' && !(nodes && nodes.length)) {
-            this.viewToggle = new OptionItem('', this.viewType === 0 ? 'view_module' : 'list', (node: Node) => this.toggleView());
-            this.viewToggle.isToggle = true;
-            options.push(this.viewToggle);
-            let reorder = new OptionItem('', 'settings', (node: Node) => this.reorderDialog = true);
-            reorder.isToggle = true;
-            options.push(reorder);
-        }
-        return options;
-    }
     private setSelection(nodes: Node[]) {
         this.selection = nodes;
-        //@TODO
-        //this.actionOptions = this.getOptions(nodes, false);
         this.setFixMobileNav();
     }
     private setFixMobileNav() {
@@ -819,7 +663,6 @@ export class WorkspaceMainComponent implements EventListener {
         this.selection = [];
         this.closeMetadata();
         this.createAllowed = false;
-        this.actionOptions = this.getOptions(null, false);
         if (!id) {
             this.path = [];
             id = this.getRootFolderId();
@@ -860,7 +703,6 @@ export class WorkspaceMainComponent implements EventListener {
                 });
                 this.updateNodeByParams(params, data.node);
                 this.createAllowed = !this.searchQuery && NodeHelper.getNodesRight([data.node], RestConstants.ACCESS_ADD_CHILDREN);
-                this.actionOptions = this.getOptions(this.selection, false);
                 this.recoverScrollposition();
             }, (error: any) => {
                 this.updateNodeByParams(params, { ref: { id } });
@@ -948,7 +790,6 @@ export class WorkspaceMainComponent implements EventListener {
         this.currentFolder = null;
         this.searchQuery = null;
         this.selection = [];
-        this.actionOptions = this.getOptions(this.selection, false);
         const path = this.path;
         if (refreshPath) {
             this.path = [];
@@ -1143,6 +984,5 @@ export class WorkspaceMainComponent implements EventListener {
         });
         this.updateList(nodes.concat(this.currentNodes));
         this.selection = nodes;
-        this.actionOptions = this.getOptions(this.selection, false);
     }
 }

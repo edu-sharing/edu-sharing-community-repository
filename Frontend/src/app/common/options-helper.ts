@@ -15,10 +15,10 @@ import {BridgeService} from '../core-bridge-module/bridge.service';
 import {MessageType} from '../core-module/ui/message-type';
 import {Injectable} from '@angular/core';
 import {CardComponent} from '../core-ui-module/components/card/card.component';
-import {fromEvent} from 'rxjs';
+import {fromEvent, Observable} from 'rxjs';
 import {TranslateService} from '@ngx-translate/core';
 import {RestNodeService} from '../core-module/rest/services/rest-node.service';
-import {ConfigurationService, FrameEventsService, RestConnectorService, RestHelper, RestIamService} from '../core-module/core.module';
+import {ConfigurationService, FrameEventsService, RestCollectionService, RestConnectorService, RestHelper, RestIamService} from '../core-module/core.module';
 import {MainNavComponent} from './ui/main-nav/main-nav.component';
 import {Toast} from '../core-ui-module/toast';
 import {HttpClient} from '@angular/common/http';
@@ -32,6 +32,7 @@ export class OptionsHelperService {
     private mainNav: MainNavComponent;
     private queryParams: Params;
     private data: OptionData;
+    private listener: OptionsListener;
 
     handleKeyboardEventUp(event: any) {
         if (event.keyCode === 91 || event.keyCode === 93) {
@@ -85,6 +86,7 @@ export class OptionsHelperService {
         private toast: Toast,
         private translate: TranslateService,
         private nodeService: RestNodeService,
+        private collectionService: RestCollectionService,
         private config: ConfigurationService,
         private storage: TemporaryStorageService,
         private bridge: BridgeService,
@@ -105,7 +107,6 @@ export class OptionsHelperService {
         }
         list = Helper.deepCopy(list);
         const clip: ClipboardObject = { sourceNode: this.data.parent, nodes: list, copy };
-        console.log(clip);
         this.storage.set('workspace_clipboard', clip);
         this.bridge.showTemporaryMessage(MessageType.info, 'WORKSPACE.TOAST.CUT_COPY', { count: list.length });
     }
@@ -173,7 +174,7 @@ export class OptionsHelperService {
                       mainNav: MainNavComponent,
                       actionbar: ActionbarComponent = null,
                       list: ListTableComponent = null) {
-
+        console.log('refreshComponents');
         mainNav.management.onRefresh.subscribe((nodes: void | Node[]) =>
             listener.onRefresh(nodes)
         );
@@ -181,6 +182,7 @@ export class OptionsHelperService {
             (result: { error: boolean; count: number; }) => listener.onDelete(result)
         );
 
+        this.listener = listener;
         this.list = list;
         this.mainNav = mainNav;
         this.globalOptions = this.getAvailableOptions(mainNav, Target.Actionbar);
@@ -195,6 +197,7 @@ export class OptionsHelperService {
     private isOptionEnabled(option: OptionItem, objects: Node[]|any) {
         if(option.permissionsMode === HideMode.Disable &&
             option.permissions && !this.validatePermissions(option, objects)) {
+            console.log('permissions missing', option, objects);
             return false;
         }
         if(option.customEnabledCallback) {
@@ -242,85 +245,21 @@ export class OptionsHelperService {
         }
         if (option.customShowCallback) {
            if (option.customShowCallback(objects) === false) {
-               console.log('customShowCallback  was false', option);
+               console.log('customShowCallback  was false', option, objects);
                return false;
            }
         }
         if (option.permissions != null && option.permissionsMode === HideMode.Hide) {
            if (!this.validatePermissions(option, objects)) {
-               console.log('permissions missing', option.permissions);
+               console.log('permissions missing', option, objects);
                return false;
            }
         }
         if (option.constrains != null) {
-           if (option.constrains.indexOf(Constrain.NoCollectionReference) !== -1) {
-               if (objects.filter((o) => o.aspects.indexOf(RestConstants.CCM_ASPECT_IO_REFERENCE) !== -1).length > 0) {
-                   console.log('no collection reference', option);
-                   return false;
-               }
-           }
-           if (option.constrains.indexOf(Constrain.NoBulk) !== -1) {
-               if (objects.length > 1) {
-                   console.log('bulk', option);
-                   return false;
-               }
-           }
-           if (option.constrains.indexOf(Constrain.Directory) !== -1) {
-                if (objects.filter((o) => o.isDirectory === false).length > 0) {
-                    console.log('no directory', option);
-                    return false;
-                }
-           }
-           if (option.constrains.indexOf(Constrain.Files) !== -1) {
-                if (objects.filter((o) => o.isDirectory === true).length > 0) {
-                    console.log('no file', option);
-                    return false;
-                }
-           }
-           if (option.constrains.indexOf(Constrain.AdminOrDebug) !== -1) {
-                if (!this.connectors.getRestConnector().getCurrentLogin().isAdmin &&
-                    !(window as any).esDebug === true) {
-                    console.log('no admin', option);
-                    return false;
-                }
-           }
-           if (option.constrains.indexOf(Constrain.User) !== -1) {
-                if (this.connectors.getRestConnector().getCurrentLogin() &&
-                    this.connectors.getRestConnector().getCurrentLogin().statusCode !== RestConstants.STATUS_CODE_OK) {
-                    console.log('no user', option);
-                    return false;
-                }
-           }
-           if (option.constrains.indexOf(Constrain.NoSelection) !== -1) {
-                if (objects && objects.length) {
-                    console.log('selection', option);
-                    return false;
-                }
-           }
-           if (option.constrains.indexOf(Constrain.ClipboardContent) !== -1) {
-                if (this.storage.get('workspace_clipboard') == null) {
-                    console.log('no clipboard', option);
-                    return false;
-                }
-           }
-           if (option.constrains.indexOf(Constrain.AddObjects) !== -1) {
-                if (!this.canAddObjects()) {
-                    console.log('no add objects', option);
-                    return false;
-                }
-           }
-           if (option.constrains.indexOf(Constrain.HomeRepository) !== -1) {
-                if(!RestNetworkService.allFromHomeRepo(objects)) {
-                    console.log('not all from home repo', option);
-                    return false;
-                }
-           }
-           if (option.constrains.indexOf(Constrain.ReurlMode) !== -1) {
-                if(!this.queryParams.reurl) {
-                    console.log('no reurl', option);
-                    return false;
-                }
-           }
+            const matched=this.objectsMatchesConstrains(option.constrains, objects);
+            if(matched != null) {
+                return false;
+            }
         }
         return true;
     }
@@ -472,6 +411,8 @@ export class OptionsHelperService {
         addNodeToCollection.showAsAction = true;
         addNodeToCollection.constrains = [Constrain.Files, Constrain.User];
         addNodeToCollection.customShowCallback = (nodes) => {
+            addNodeToCollection.name = this.data.scope === Scope.CollectionsReferences ?
+                'OPTIONS.COLLECTION_OTHER' : 'OPTIONS.COLLECTION';
             return NodeHelper.referenceOriginalExists(nodes ? nodes[0] : null);
         };
         addNodeToCollection.permissions = [RestConstants.ACCESS_CC_PUBLISH];
@@ -506,11 +447,17 @@ export class OptionsHelperService {
         );
         inviteNode.showAsAction = true;
         inviteNode.permissions = [RestConstants.ACCESS_CHANGE_PERMISSIONS];
-        inviteNode.permissionsMode = HideMode.Disable;
+        inviteNode.permissionsMode = HideMode.Hide;
         inviteNode.constrains = [Constrain.NoCollectionReference, Constrain.HomeRepository, Constrain.User];
         inviteNode.toolpermissions = [RestConstants.TOOLPERMISSION_INVITE];
         inviteNode.group = DefaultGroups.Edit;
         inviteNode.priority = 10;
+        // invite is not allowed for collections of type editorial
+        inviteNode.customShowCallback = ((objects) =>
+            objects[0].collection ?
+                objects[0].collection.type !== RestConstants.COLLECTIONTYPE_EDITORIAL :
+                true
+        );
 
         const licenseNode = new OptionItem('OPTIONS.LICENSE', 'copyright', (object) =>
             management.nodeLicense = this.getObjects(object)
@@ -574,10 +521,6 @@ export class OptionsHelperService {
                 return false;
             }
             for (let item of nodes) {
-                console.log(item);
-                if (item.reference) {
-                    item = item.reference;
-                }
                 // if at least one is allowed -> allow download (download servlet will later filter invalid files)
                 if(item.downloadUrl != null && item.properties && !item.properties[RestConstants.CCM_PROP_IO_WWWURL]) {
                     return true;
@@ -588,7 +531,7 @@ export class OptionsHelperService {
         const editNode = new OptionItem('OPTIONS.EDIT', 'edit', (object) =>
             management.nodeMetadata = this.getObjects(object)
         );
-        editNode.constrains = [Constrain.NoCollectionReference, Constrain.HomeRepository, Constrain.User];
+        editNode.constrains = [Constrain.FilesAndFolders, Constrain.NoCollectionReference, Constrain.HomeRepository, Constrain.User];
         editNode.permissions = [RestConstants.ACCESS_WRITE];
         editNode.permissionsMode = HideMode.Disable;
         editNode.group = DefaultGroups.Edit;
@@ -647,12 +590,22 @@ export class OptionsHelperService {
         const deleteNode = new OptionItem('OPTIONS.DELETE', 'delete',(object) => {
             management.nodeDelete = this.getObjects(object);
         });
-        deleteNode.constrains = [Constrain.HomeRepository, Constrain.User];
+        deleteNode.constrains = [Constrain.HomeRepository, Constrain.NoCollectionReference, Constrain.User];
         deleteNode.permissions = [RestConstants.PERMISSION_DELETE];
-        deleteNode.permissionsMode = HideMode.Disable;
+        deleteNode.permissionsMode = HideMode.Hide;
         deleteNode.key = 'Delete';
         deleteNode.group = DefaultGroups.Delete;
         deleteNode.priority = 10;
+
+        const removeNodeRef =  new OptionItem('OPTIONS.REMOVE_REF','remove_circle_outline', (object) =>
+            this.removeFromCollection(this.getObjects(object))
+        );
+        removeNodeRef.constrains = [Constrain.HomeRepository, Constrain.CollectionReference, Constrain.User];
+        removeNodeRef.permissions = [RestConstants.PERMISSION_DELETE];
+        removeNodeRef.permissionsMode = HideMode.Disable;
+        removeNodeRef.scopes = [Scope.CollectionsReferences, Scope.Render];
+        removeNodeRef.group = DefaultGroups.Delete;
+        removeNodeRef.priority = 20;
 
         /*
         let report = new OptionItem('NODE_REPORT.OPTION', 'flag', (node: Node) => this.nodeReport=this.getCurrentNode(node));
@@ -684,12 +637,115 @@ export class OptionsHelperService {
         qrCodeNode.group = DefaultGroups.View;
         qrCodeNode.priority = 60;
 
+        /**
+         * if (this.isAllowedToEditCollection()) {
+            this.optionsCollection.push(
+                new OptionItem('COLLECTIONS.ACTIONBAR.EDIT', 'edit', () =>
+                    this.collectionEdit(),
+                ),
+            );
+        }*/
+        const editCollection = new OptionItem('OPTIONS.COLLECTION_EDIT', 'edit', (object) =>
+            this.editCollection(this.getObjects(object)[0])
+        );
+        editCollection.constrains = [Constrain.HomeRepository, Constrain.Collections, Constrain.NoBulk, Constrain.User];
+        editCollection.permissions = [RestConstants.ACCESS_WRITE];
+        editCollection.permissionsMode = HideMode.Hide;
+        editCollection.showAsAction = true;
+        editCollection.group = DefaultGroups.Edit;
+        editCollection.priority = 5;
+
+        /*
+         if (this.pinningAllowed && this.isAllowedToDeleteCollection()) {
+            this.optionsCollection.push(
+                new OptionItem('COLLECTIONS.ACTIONBAR.PIN', 'edu-pin', () =>
+                    this.pinCollection(),
+                ),
+            );
+        }
+        */
+        const pinCollection = new OptionItem('OPTIONS.COLLECTION_PIN', 'edu-pin', (object) =>
+            management.addPinnedCollection = this.getObjects(object)[0]
+        );
+        pinCollection.constrains = [Constrain.HomeRepository, Constrain.Collections, Constrain.NoBulk, Constrain.User];
+        pinCollection.permissions = [RestConstants.ACCESS_WRITE];
+        pinCollection.permissionsMode = HideMode.Hide;
+        pinCollection.toolpermissions = [RestConstants.TOOLPERMISSION_COLLECTION_PINNING];
+        pinCollection.group = DefaultGroups.Edit;
+        pinCollection.priority = 20;
+
+        const feedbackCollection = new OptionItem('OPTIONS.COLLECTION_FEEDBACK', 'chat_bubble', (object) =>
+            management.collectionWriteFeedback = this.getObjects(object)[0]
+        );
+        feedbackCollection.constrains = [Constrain.HomeRepository, Constrain.Collections, Constrain.NoBulk, Constrain.User];
+        feedbackCollection.permissions = [RestConstants.PERMISSION_FEEDBACK];
+        feedbackCollection.permissionsMode = HideMode.Hide;
+        feedbackCollection.toolpermissions = [RestConstants.TOOLPERMISSION_COLLECTION_FEEDBACK];
+        feedbackCollection.group = DefaultGroups.View;
+        feedbackCollection.priority = 10;
+        // feedback is only shown for non-managers
+        feedbackCollection.customShowCallback = ((objects) =>
+            objects[0].access.indexOf(RestConstants.ACCESS_WRITE) === -1
+        );
+        /*
+         if (
+         this.feedbackAllowed() &&
+         !this.isAllowedToDeleteCollection() &&
+         this.connector.hasToolPermissionInstant(
+         RestConstants.TOOLPERMISSION_COLLECTION_FEEDBACK,
+         )
+         ) {
+            this.optionsCollection.push(
+                new OptionItem(
+                    'COLLECTIONS.ACTIONBAR.FEEDBACK',
+                    'chat_bubble',
+                    () => this.collectionFeedback(true),
+                ),
+            );
+        }
+         */
+        const feedbackCollectionView = new OptionItem('OPTIONS.COLLECTION_FEEDBACK_VIEW', 'speaker_notes', (object) =>
+            management.collectionViewFeedback = this.getObjects(object)[0]
+        );
+        feedbackCollectionView.constrains = [Constrain.HomeRepository, Constrain.Collections, Constrain.NoBulk, Constrain.User];
+        feedbackCollectionView.permissions = [RestConstants.ACCESS_DELETE];
+        feedbackCollectionView.permissionsMode = HideMode.Hide;
+        feedbackCollectionView.toolpermissions = [RestConstants.TOOLPERMISSION_COLLECTION_FEEDBACK];
+        feedbackCollectionView.group = DefaultGroups.View;
+        feedbackCollectionView.priority = 20;
+
+        /*
+        const options = [];
+        this.viewToggle = new OptionItem('OPTIONS.TOGGLE_VIEWTYPE', this.viewType === 0 ? 'view_module' : 'list', (node: Node) => this.toggleView());
+        this.viewToggle.isToggle = true;
+        options.push(this.viewToggle);
+         */
+        const toggleViewType = new OptionItem('OPTIONS.TOGGLE_VIEWTYPE', this.list ? this.list.viewType === 0 ? 'view_module' : 'list' : '', (object) => {
+            console.log(this.list);
+            this.list.setViewType(this.list.viewType === 1 ? 0 : 1);
+            toggleViewType.icon = this.list ? this.list.viewType === 0 ? 'view_module' : 'list' : '';
+        });
+        toggleViewType.scopes = [Scope.Workspace, Scope.Search, Scope.CollectionsReferences];
+        /*
+        const reorder = new OptionItem('OPTIONS.LIST_SETTINGS', 'settings', (node: Node) => this.reorderDialog = true);
+        reorder.isToggle = true;
+        options.push(reorder);
+        return options;
+         */
+        toggleViewType.constrains = [Constrain.NoSelection];
+        toggleViewType.group = DefaultGroups.Toggles;
+        toggleViewType.elementType = ElementType.Unknown;
+        toggleViewType.isToggle = true;
 
         options.push(applyNode);
         options.push(debugNode);
         options.push(openParentNode);
         options.push(openNode);
         options.push(bookmarkNode);
+        options.push(editCollection);
+        options.push(pinCollection);
+        options.push(feedbackCollection);
+        options.push(feedbackCollectionView);
         options.push(editNode);
         // add to collection
         options.push(addNodeToCollection);
@@ -706,7 +762,10 @@ export class OptionsHelperService {
         options.push(copyNodes);
         options.push(pasteNodes);
         options.push(deleteNode);
+        options.push(removeNodeRef);
         options.push(reportNode);
+        options.push(toggleViewType);
+
         return options;
     }
 
@@ -741,16 +800,10 @@ export class OptionsHelperService {
         options.forEach((o) => {
             o.showCallback = ((object) => {
                 const list = NodeHelper.getActionbarNodes(objects, object);
-                if (list == null) {
-                    return false;
-                }
                 return this.isOptionAvailable(o, list);
             });
             o.enabledCallback = ((object) => {
                 const list = NodeHelper.getActionbarNodes(objects, object);
-                if (list == null) {
-                    return false;
-                }
                 return this.isOptionEnabled(o, list);
             });
         });
@@ -791,7 +844,6 @@ export class OptionsHelperService {
         let result: OptionItem[] = [];
         let groups=Array.from(new Set(options.map((o) => o.group)));
         groups = groups.sort((o1, o2) => o1.priority > o2.priority ? 1 : -1);
-        console.log(groups);
         for (const group of groups) {
             const groupOptions = options.filter((o) => o.group === group);
             if (group == null) {
@@ -801,6 +853,96 @@ export class OptionsHelperService {
             result = result.concat(groupOptions);
         }
         return result;
+    }
+
+    private objectsMatchesConstrains(constrains: Constrain[], objects: Node[]|any[]) {
+        if (constrains.indexOf(Constrain.NoCollectionReference) !== -1) {
+            if (objects.some((o) => o.aspects.indexOf(RestConstants.CCM_ASPECT_IO_REFERENCE) !== -1)) {
+                return Constrain.NoCollectionReference;
+            }
+        }
+        if (constrains.indexOf(Constrain.CollectionReference) !== -1) {
+            if (objects.some((o) => o.aspects.indexOf(RestConstants.CCM_ASPECT_IO_REFERENCE) === -1)) {
+                return Constrain.CollectionReference;
+            }
+        }
+        if (constrains.indexOf(Constrain.NoBulk) !== -1) {
+            if (objects.length > 1) {
+                return Constrain.NoBulk;
+            }
+        }
+        if (constrains.indexOf(Constrain.Directory) !== -1) {
+            if (objects.some((o) => !o.isDirectory || o.collection)) {
+                return Constrain.Directory;
+            }
+        }
+        if (constrains.indexOf(Constrain.Collections) !== -1) {
+            if (objects.some((o) => !o.isDirectory || !o.collection)) {
+                return Constrain.Collections;
+            }
+        }
+        if (constrains.indexOf(Constrain.Files) !== -1) {
+            if (objects.some((o) => o.isDirectory)) {
+                return Constrain.Files;
+            }
+        }
+        if (constrains.indexOf(Constrain.FilesAndFolders) !== -1) {
+            if (objects.some((o) => !o.collection || o.type !== RestConstants.CCM_TYPE_IO || o.type !== RestConstants.CCM_TYPE_MAP)) {
+                return Constrain.FilesAndFolders;
+            }
+        }
+        if (constrains.indexOf(Constrain.AdminOrDebug) !== -1) {
+            if (!this.connectors.getRestConnector().getCurrentLogin().isAdmin &&
+                !(window as any).esDebug) {
+                return Constrain.AdminOrDebug;
+            }
+        }
+        if (constrains.indexOf(Constrain.User) !== -1) {
+            if (this.connectors.getRestConnector().getCurrentLogin() &&
+                this.connectors.getRestConnector().getCurrentLogin().statusCode !== RestConstants.STATUS_CODE_OK) {
+                return Constrain.User;
+            }
+        }
+        if (constrains.indexOf(Constrain.NoSelection) !== -1) {
+            if (objects && objects.length) {
+                return Constrain.NoSelection;
+            }
+        }
+        if (constrains.indexOf(Constrain.ClipboardContent) !== -1) {
+            if (this.storage.get('workspace_clipboard') == null) {
+                return Constrain.ClipboardContent;
+            }
+        }
+        if (constrains.indexOf(Constrain.AddObjects) !== -1) {
+            if (!this.canAddObjects()) {
+                return Constrain.AddObjects;
+            }
+        }
+        if (constrains.indexOf(Constrain.HomeRepository) !== -1) {
+            if(!RestNetworkService.allFromHomeRepo(objects)) {
+                return Constrain.HomeRepository;
+            }
+        }
+        if (constrains.indexOf(Constrain.ReurlMode) !== -1) {
+            if(!this.queryParams.reurl) {
+                return Constrain.ReurlMode;
+            }
+        }
+        return null;
+    }
+
+    private removeFromCollection(objects: Node[] | any) {
+        Observable.forkJoin(objects.map((o: Node|any) =>
+            this.collectionService.removeFromCollection(o.ref.id, this.data.parent.ref.id)
+        )).subscribe(() =>
+            this.listener.onDelete({error: false, count: objects.length})
+        , (error) =>
+            this.listener.onDelete({error: true, count: objects.length})
+        );
+    }
+
+    private editCollection(object: Node|any) {
+        UIHelper.goToCollection(this.router, object, 'edit');
     }
 }
 export interface OptionsListener {

@@ -1,6 +1,7 @@
 package org.edu_sharing.restservices;
 
 import java.io.InputStream;
+import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -38,6 +39,7 @@ import org.edu_sharing.repository.server.tools.NameSpaceTool;
 import org.edu_sharing.repository.server.tools.XApiTool;
 import org.edu_sharing.repository.server.tools.cache.PreviewCache;
 import org.edu_sharing.restservices.collection.v1.model.Collection;
+import org.edu_sharing.restservices.collection.v1.model.CollectionReference;
 import org.edu_sharing.restservices.node.v1.model.NodeEntries;
 import org.edu_sharing.restservices.node.v1.model.NodeShare;
 import org.edu_sharing.restservices.node.v1.model.NotifyEntry;
@@ -136,7 +138,7 @@ public class NodeDao {
 
 		try {
 			if(filter == null) filter = new Filter();
-			return new NodeDao(repoDao, nodeId, filter);
+			return NodeDao.getNode(repoDao, null, null, nodeId, filter);
 		} catch (Throwable t) {
 			throw DAOException.mapping(t);
 		}
@@ -356,11 +358,15 @@ public class NodeDao {
 	}
 	private NodeDao(RepositoryDao repoDao, String nodeId, Filter filter) throws Throwable {
 
-		this(repoDao,defaultStoreProtocol,defaultStoreId,nodeId,filter);
+		this(repoDao,null,null,nodeId,filter);
 	}
 	
 	private NodeDao(RepositoryDao repoDao, String storeProtocol, String storeId, String nodeId, Filter filter) throws DAOException {
-		this(repoDao,new org.edu_sharing.service.model.NodeRefImpl(repoDao.getId(),storeProtocol,storeId,nodeId),filter);
+		this(repoDao,new org.edu_sharing.service.model.NodeRefImpl(repoDao.getId(),
+				storeProtocol!=null ? storeProtocol : defaultStoreProtocol,
+				storeId!=null ? storeId : defaultStoreId,
+				nodeId),
+				filter);
 	}
 
 	public static String mapNodeConstants(RepositoryDao repoDao,String node) throws DAOException {
@@ -490,7 +496,6 @@ public class NodeDao {
 			this.filter = filter;
 			
 		}catch(Throwable t){
-			logger.warn(t.getMessage(),t);
 			throw DAOException.mapping(t,nodeRef.getNodeId());
 		}
 	}
@@ -830,8 +835,41 @@ public class NodeDao {
 			return node;
 		}
 		Node data = new Node();
+		if (isCollectionReference()) {
+			data = new CollectionReference();
+			fillNodeReference((CollectionReference) data);
+		}
 		fillNodeObject(data);
 		return data;
+	}
+
+	private boolean isCollectionReference() {
+		return aspects.contains(CCConstants.CCM_ASPECT_COLLECTION_IO_REFERENCE);
+	}
+
+	private void fillNodeReference(CollectionReference reference) throws DAOException {
+		final String originalId = (String) getNativeProperties().get(CCConstants.CCM_PROP_IO_ORIGINAL);
+		reference.setOriginalId(originalId);
+		try {
+			reference.setAccessOriginal(NodeDao.getNode(repoDao, originalId).asNode().getAccess());
+		} catch (Throwable t) {
+			// user may has no access to the original or it is deleted, this is okay
+		}
+		AuthenticationUtil.runAsSystem(new RunAsWork<Void>() {
+
+			@Override
+			public Void doWork() throws Exception {
+				try {
+					NodeDao nodeDaoOriginal = NodeDao.getNode(repoDao, originalId);
+					reference.setCreatedBy(nodeDaoOriginal.asNode().getCreatedBy());
+				} catch (Throwable t) {
+					reference.setOriginalId(null);
+					// original maybe deleted
+				}
+				return null;
+			}
+
+		});
 	}
 
 	private void fillNodeObject(Node data) throws DAOException {
@@ -845,7 +883,6 @@ public class NodeDao {
 
 		data.setName(getName());
 		data.setTitle(getTitle());
-		data.setDescription(getDescription());
 
 		data.setCreatedAt(getCreatedAt());
 		data.setCreatedBy(getCreatedBy());
@@ -1163,13 +1200,9 @@ public class NodeDao {
 	}
 
 	private String getTitle() {
-
-		return (String) nodeProps.get(CCConstants.LOM_PROP_GENERAL_TITLE);
-	}
-
-	private String getDescription() {
-
-		return (String) nodeProps.get(CCConstants.LOM_PROP_GENERAL_DESCRIPTION);
+		return (String) (nodeProps.get(CCConstants.LOM_PROP_GENERAL_TITLE) != null ?
+						nodeProps.get(CCConstants.LOM_PROP_GENERAL_TITLE) :
+						nodeProps.get(CCConstants.CM_PROP_TITLE));
 	}
 
 	public Date getCreatedAt() {

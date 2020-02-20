@@ -1,5 +1,6 @@
 package org.edu_sharing.restservices.collection.v1.model;
 
+import org.edu_sharing.restservices.shared.Node;
 import org.edu_sharing.restservices.shared.Preview;
 import org.edu_sharing.restservices.shared.User;
 
@@ -9,7 +10,7 @@ import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 
 @ApiModel(description = "")
-public class Collection extends CollectionBase {
+public class Collection {
 
 	boolean level0;
 
@@ -32,8 +33,13 @@ public class Collection extends CollectionBase {
 	int childCollectionsCount;
 	
 	int childReferencesCount;
-	
-	
+
+
+	private String scope;
+	private String authorFreetext;
+
+
+
 	@ApiModelProperty(required = true, value = "false")
 	@JsonProperty("level0")
 	public boolean isLevel0() {
@@ -133,16 +139,6 @@ public class Collection extends CollectionBase {
 	}
 
 	@ApiModelProperty(required = false)
-	@JsonProperty("owner")
-	public User getOwner() {
-		return owner;
-	}
-	
-	public void setOwner(User owner) {
-		this.owner = owner;
-	}
-	
-	@ApiModelProperty(required = false)
 	@JsonProperty("childCollectionsCount")
 	public int getChildCollectionsCount() {
 		return childCollectionsCount;
@@ -181,8 +177,22 @@ public class Collection extends CollectionBase {
 	public void setOrderMode(String orderMode) {
 		this.orderMode = orderMode;
 	}
-	
-	
-	
 
+	@JsonProperty
+	public String getScope() {
+		return scope;
+	}
+
+	public void setScope(String scope) {
+		this.scope = scope;
+	}
+
+	@JsonProperty
+	public String getAuthorFreetext() {
+		return authorFreetext;
+	}
+
+	public void setAuthorFreetext(String authorFreetext) {
+		this.authorFreetext = authorFreetext;
+	}
 }

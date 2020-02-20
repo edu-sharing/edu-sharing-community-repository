@@ -32,7 +32,6 @@ public class Node {
 	private String name = null;
 	private String title = null;
 	private String metadataset = null;
-	private String description = null;
 	private String repositoryType = null;
 	private Date createdAt = null;
 	private Person createdBy = null;
@@ -152,18 +151,6 @@ public class Node {
 
 	public void setTitle(String title) {
 		this.title = title;
-	}
-
-	/**
-   **/
-	@ApiModelProperty(value = "")
-	@JsonProperty("description")
-	public String getDescription() {
-		return description;
-	}
-
-	public void setDescription(String description) {
-		this.description = description;
 	}
 
 	/**
@@ -352,7 +339,6 @@ public class Node {
 		sb.append("  aspects: ").append(aspects).append("\n");
 		sb.append("  name: ").append(name).append("\n");
 		sb.append("  title: ").append(title).append("\n");
-		sb.append("  description: ").append(description).append("\n");
 		sb.append("  createdAt: ").append(createdAt).append("\n");
 		sb.append("  createdBy: ").append(createdBy).append("\n");
 		sb.append("  modifiedAt: ").append(modifiedAt).append("\n");

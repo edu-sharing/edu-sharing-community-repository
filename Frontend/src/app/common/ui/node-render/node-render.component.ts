@@ -308,23 +308,22 @@ export class NodeRenderComponent implements EventListener {
         return;
     }
 
-    const options=this.temporaryStorageService.pop(TemporaryStorageService.NODE_RENDER_PARAMETER_OPTIONS) || [];
     const download=new OptionItem('OPTIONS.DOWNLOAD','cloud_download',()=>this.downloadCurrentNode());
     download.isEnabled=this._node.downloadUrl!=null;
     download.showAsAction=true;
     if(this.isCollectionRef()) {
       this.nodeApi.getNodeMetadata(this._node.properties[RestConstants.CCM_PROP_IO_ORIGINAL]).subscribe((node) => {
-        this.addDownloadButton(options,download);
+        this.addDownloadButton(download);
       },(error:any)=> {
         if(error.status==RestConstants.HTTP_NOT_FOUND) {
           console.log('original missing');
           download.isEnabled = false;
         }
-        this.addDownloadButton(options,download);
+        this.addDownloadButton(download);
       });
       return;
     }
-    this.addDownloadButton(options,download);
+    this.addDownloadButton(download);
   }
   private loadRenderData() {
       this.isLoading=true;
@@ -483,6 +482,7 @@ export class NodeRenderComponent implements EventListener {
         this.optionsHelper.setData({
             scope: Scope.Render,
             activeObject: this._node,
+            parent: new Node(this._node.parent.id),
             allObjects: this.list,
             customOptions: options,
         });
@@ -499,9 +499,10 @@ export class NodeRenderComponent implements EventListener {
     return this._node.aspects.indexOf(RestConstants.CCM_ASPECT_IO_REFERENCE)!=-1;
   }
 
-  private addDownloadButton(options:OptionItem[],download: OptionItem) {
+  private addDownloadButton(download: OptionItem) {
       this.nodeApi.getNodeChildobjects(this.sequenceParent.ref.id,this.repository).subscribe((data:NodeList)=> {
           this.downloadButton=download;
+          const options: OptionItem[] = [];
           options.splice(0,0,download);
           if(data.nodes.length > 0 || this._node.aspects.indexOf(RestConstants.CCM_ASPECT_IO_CHILDOBJECT) != -1) {
               const downloadAll = new OptionItem('OPTIONS.DOWNLOAD_ALL','archive',()=> {

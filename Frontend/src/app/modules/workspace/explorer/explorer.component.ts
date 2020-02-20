@@ -33,7 +33,6 @@ export class WorkspaceExplorerComponent {
 
 
   public columns : ListItem[]=[];
-  @Input() options : OptionItem[]=[];
   @Input() viewType = 0;
   @Input() reorderDialog = false;
   @Output() reorderDialogChange = new EventEmitter<boolean>();
@@ -68,14 +67,10 @@ export class WorkspaceExplorerComponent {
   @Output() onOpenNode=new EventEmitter();
   @Output() onSelectionChanged=new EventEmitter();
   @Output() onSelectNode=new EventEmitter();
-  @Output() onUpdateOptions=new EventEmitter();
   @Output() onSearchGlobal=new EventEmitter();
   @Output() onDrop=new EventEmitter();
   @Output() onReset=new EventEmitter();
   private path : Node[];
-  public updateOptions(node : Node){
-    this.onUpdateOptions.emit(node);
-  }
   public drop(event : any){
     this.onDrop.emit(event);
   }
@@ -93,7 +88,6 @@ export class WorkspaceExplorerComponent {
       this.hasMoreToLoad = true;
       this._nodes=[];
       this.onSelectionChanged.emit([]);
-      this.onUpdateOptions.emit();
       this.onReset.emit();
     }
     else if(!this.hasMoreToLoad){

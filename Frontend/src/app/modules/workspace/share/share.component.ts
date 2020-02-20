@@ -532,7 +532,7 @@ export class WorkspaceShareComponent{
       });
 
   }
-  openCollection(collection:Collection){
+  openCollection(collection: Node){
     window.open(UIConstants.ROUTER_PREFIX+"collections?id="+collection.ref.id);
   }
 

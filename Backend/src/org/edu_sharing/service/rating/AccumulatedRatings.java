@@ -1,7 +1,10 @@
 package org.edu_sharing.service.rating;
 
+import io.swagger.annotations.ApiModel;
+
 import java.util.HashMap;
 
+@ApiModel
 public class AccumulatedRatings {
     private RatingData overall;
     private double user;
@@ -31,10 +34,12 @@ public class AccumulatedRatings {
         return affiliation;
     }
 
+    @ApiModel
     public static class RatingData{
         private double sum;
         private long count;
 
+        public RatingData() {}
         public RatingData(double sum, long count) {
             this.sum=sum;
             this.count=count;

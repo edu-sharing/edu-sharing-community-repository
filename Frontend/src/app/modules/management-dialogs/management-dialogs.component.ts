@@ -39,29 +39,35 @@ export class WorkspaceManagementDialogsComponent  {
   @Input() fileIsOver = false;
   @Input() addToCollection:Node[];
   @Output() addToCollectionChange = new EventEmitter();
-  @Input() filesToUpload : Node[]
+  @Input() filesToUpload : Node[];
   @Output() filesToUploadChange = new EventEmitter();
   @Input() parent : Node;
   @Output() showLtiToolsChange = new EventEmitter();
   @Input() nodeLicense : Node[];
   @Output() nodeLicenseChange = new EventEmitter();
-    @Input() set nodeDelete (nodeDelete: Node[]){
+  @Input() addPinnedCollection: Node;
+  @Output() addPinnedCollectionChange = new EventEmitter();
+  @Input() set nodeDelete (nodeDelete: Node[]){
         if(nodeDelete==null)
             return;
-        this.dialogTitle="WORKSPACE.DELETE_TITLE"+(nodeDelete.length==1 ? "_SINGLE" : "");
-        this.dialogCancelable=true;
-        this.dialogMessage="WORKSPACE.DELETE_MESSAGE"+(nodeDelete.length==1 ? "_SINGLE" : "");
-        this.dialogMessageParameters={name:RestHelper.getName(nodeDelete[0])};
+        this.dialogTitle='WORKSPACE.DELETE_TITLE'+(nodeDelete.length === 1 ? '_SINGLE' : '');
+        this.dialogMessage='WORKSPACE.DELETE_MESSAGE'+(nodeDelete.length === 1 ? '_SINGLE' : '');
+        if(nodeDelete.length === 1 && nodeDelete[0].collection) {
+            this.dialogTitle='WORKSPACE.DELETE_TITLE_COLLECTION';
+            this.dialogMessage='WORKSPACE.DELETE_MESSAGE_COLLECTION';
+        }
+      this.dialogCancelable=true;
+        this.dialogMessageParameters = {name:RestHelper.getName(nodeDelete[0])};
         this.dialogNode=nodeDelete;
         this.dialogButtons=DialogButton.getCancel(()=> {this.dialogTitle = null});
         this.dialogButtons.push(new DialogButton('YES_DELETE',DialogButton.TYPE_PRIMARY,()=>{this.deleteConfirmed(nodeDelete)}));
 
         // check for usages and warn user
-        if(nodeDelete.length==1 && !nodeDelete[0].isDirectory){
+        if(nodeDelete.length === 1 && !nodeDelete[0].isDirectory) {
             this.usageService.getNodeUsages(nodeDelete[0].ref.id,nodeDelete[0].ref.repo).subscribe((usages)=>{
-                if(usages.usages.length>0){
-                    this.dialogMessage="WORKSPACE.DELETE_MESSAGE_SINGLE_USAGES";
-                    this.dialogMessageParameters={name:nodeDelete[0].name,usages:usages.usages.length};
+                if(usages.usages.length>0) {
+                    this.dialogMessage='WORKSPACE.DELETE_MESSAGE_SINGLE_USAGES';
+                    this.dialogMessageParameters = {name:nodeDelete[0].name,usages:usages.usages.length};
                 }
             });
         }
@@ -88,7 +94,11 @@ export class WorkspaceManagementDialogsComponent  {
     @Output() nodeTemplateChange = new EventEmitter();
     @Input() nodeContributor : Node;
     @Output() nodeContributorChange = new EventEmitter();
-  @Input() showUploadSelect=false;
+    @Input() collectionWriteFeedback: Node;
+    @Output() collectionWriteFeedbackChange = new EventEmitter<Node>();
+    @Input() collectionViewFeedback: Node;
+    @Output() collectionViewFeedbackChange = new EventEmitter<Node>();
+    @Input() showUploadSelect=false;
   @Output() showUploadSelectChange = new EventEmitter();
   @Input() nodeMetadataAllowReplace : Boolean;
   @Output() onClose=new EventEmitter();
@@ -401,15 +411,14 @@ export class WorkspaceManagementDialogsComponent  {
     this.addToCollectionChange.emit(null);
     this.onCloseAddToCollection.emit();
   }
-  public addToCollectionCreate(parent:Node|Collection=null){
+  public addToCollectionCreate(parent:Node=null){
       this.temporaryStorage.set(TemporaryStorageService.COLLECTION_ADD_NODES,this.addToCollection);
       this.router.navigate([UIConstants.ROUTER_PREFIX,"collections","collection","new",parent ? parent.ref.id : RestConstants.ROOT]);
       this.addToCollection=null;
       this.addToCollectionChange.emit(null);
   }
-  public addToCollectionList(collection:Collection,list:Node[]=this.addToCollection,close=true,callback:Function=null,force=false){
-    console.log(collection);
-    if(!force && (collection.scope!=RestConstants.COLLECTIONSCOPE_MY)){
+  public addToCollectionList(collection:Node,list:Node[]=this.addToCollection,close=true,callback:Function=null,force=false){
+    if(!force && (collection.collection.scope!=RestConstants.COLLECTIONSCOPE_MY)){
       this.dialogTitle='DIALOG.COLLECTION_SHARE_PUBLIC';
       this.dialogMessage='DIALOG.COLLECTION_SHARE_PUBLIC_INFO';
       this.dialogCancelable=true;
@@ -449,5 +458,42 @@ export class WorkspaceManagementDialogsComponent  {
     closeDebug() {
       this.nodeDebug = null;
       this.nodeDebugChange.emit(null);
+    }
+
+    closePinnedCollection() {
+        this.addPinnedCollection = null;
+        this.addPinnedCollectionChange.emit(null);
+    }
+
+    closeCollectionWriteFeedback() {
+        this.collectionWriteFeedback = null;
+        this.collectionWriteFeedbackChange.emit(null);
+    }
+
+    addCollectionFeedback(feedback: any) {
+        if (!feedback) {
+            return;
+        }
+        delete feedback[RestConstants.CM_NAME];
+        console.log(feedback);
+        this.toast.showProgressDialog();
+        this.collectionService
+            .addFeedback(this.collectionWriteFeedback.ref.id, feedback)
+            .subscribe(
+                () => {
+                    this.toast.closeModalDialog();
+                    this.closeCollectionWriteFeedback();
+                    this.toast.toast('COLLECTIONS.FEEDBACK_TOAST');
+                },
+                error => {
+                    this.toast.closeModalDialog();
+                    this.toast.error(error);
+                },
+            );
+    }
+
+    closeCollectionViewFeedback() {
+        this.collectionViewFeedback = null;
+        this.collectionViewFeedbackChange.emit(null);
     }
 }

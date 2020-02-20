@@ -3,24 +3,28 @@ package org.edu_sharing.restservices.collection.v1.model;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 
+import org.apache.commons.beanutils.PropertyUtils;
 import org.edu_sharing.restservices.shared.Node;
 import org.edu_sharing.restservices.shared.Preview;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+import java.lang.reflect.InvocationTargetException;
 import java.util.List;
 
 @ApiModel(description = "")
-public class CollectionReference extends CollectionBase {
+public class CollectionReference extends Node {
 
 	private String originalId;
 
-	private Node reference;
-
-
-	private Preview preview;
 	private List<String> accessOriginal;
-	private List<String> aspects;
+
+	public CollectionReference(){
+
+	}
+	public CollectionReference(Node node) throws IllegalAccessException, NoSuchMethodException, InvocationTargetException {
+		PropertyUtils.copyProperties(this, node);
+	}
 
 	@ApiModelProperty(required = false, value = "")
 	@JsonProperty("originalId")
@@ -32,27 +36,6 @@ public class CollectionReference extends CollectionBase {
 		this.originalId = originalId;
 	}
 
-	public void setReference(Node reference) {
-		this.reference = reference;
-	}
-
-	@ApiModelProperty(required = true, value = "")
-	@JsonProperty("reference")
-	public Node getReference() {
-		return reference;
-	}
-
-
-	public void setPreview(Preview preview) {
-		this.preview = preview;
-	}
-
-	@ApiModelProperty(required = true, value = "")
-	@JsonProperty("preview")
-	public Preview getPreview() {
-		return preview;
-	}
-
 	@JsonProperty
 	public void setAccessOriginal(List<String> accessOriginal) {
 		this.accessOriginal = accessOriginal;
@@ -60,14 +43,5 @@ public class CollectionReference extends CollectionBase {
 
 	public List<String> getAccessOriginal() {
 		return accessOriginal;
-	}
-
-	@JsonProperty
-	public List<String> getAspects() {
-		return aspects;
-	}
-
-	public void setAspects(List<String> aspects) {
-		this.aspects = aspects;
 	}
 }

@@ -48,7 +48,7 @@ export class CollectionNewComponent {
   public DEFAULT_COLORS:string[]=['#975B5D','#692426','#E6B247','#A89B39','#699761','#32662A','#60998F','#29685C','#759CB7','#537997','#976097','#692869'];
   public isLoading = true;
   public showPermissions = false;
-  private currentCollection:Collection;
+  private currentCollection: EduData.Node;
   public newCollectionType:string;
   public properties:any;
   public reloadMds:Boolean;
@@ -86,7 +86,7 @@ export class CollectionNewComponent {
   public newCollectionStep=this.STEP_NEW;
   public editPermissionsDummy: EduData.Node;
   private availableSteps: string[];
-  private parentCollection: Collection;
+  private parentCollection: EduData.Node;
   private originalPermissions: LocalPermissions;
   private permissionsInfo: any;
 
@@ -154,20 +154,22 @@ export class CollectionNewComponent {
               let mode = params['mode'];
               let id = params['id'];
               if (mode=="edit") {
-                this.collectionService.getCollection(id).subscribe((data:EduData.CollectionWrapper)=>{
+                this.collectionService.getCollection(id).subscribe((data)=>{
                   this.nodeService.getNodeMetadata(id,[RestConstants.ALL]).subscribe((node:EduData.NodeWrapper)=>{
                     this.nodeService.getNodePermissions(id).subscribe((perm:EduData.NodePermissions)=>{
                       this.editorialGroupsSelected=this.getEditoralGroups(perm.permissions.localPermissions.permissions);
                       this.editId=id;
-                      this.currentCollection=data.collection;
-                      this.authorFreetext=this.currentCollection.authorFreetext!=null;
+                      this.currentCollection = data.collection;
+                      // cleanup irrelevant data
+                      this.currentCollection.rating = null;
+                      this.authorFreetext=this.currentCollection.collection.authorFreetext!=null;
                       this.originalPermissions=perm.permissions.localPermissions;
                       this.properties=node.node.properties;
                       this.newCollectionType=this.getTypeForCollection(this.currentCollection);
                       this.hasCustomScope=false;
                       this.newCollectionStep = this.STEP_GENERAL;
-                      if(this.currentCollection.scope==RestConstants.COLLECTIONSCOPE_CUSTOM_PUBLIC){
-                          this.currentCollection.scope=RestConstants.COLLECTIONSCOPE_CUSTOM;
+                      if(this.currentCollection.collection.scope === RestConstants.COLLECTIONSCOPE_CUSTOM_PUBLIC) {
+                          this.currentCollection.collection.scope = RestConstants.COLLECTIONSCOPE_CUSTOM;
                       }
                       this.updateAvailableSteps();
                       this.isLoading=false;
@@ -230,7 +232,7 @@ export class CollectionNewComponent {
         this.permissions = permissions.permissions;
         this.permissions.inherited=false;
         if(this.permissions.permissions && this.permissions.permissions.length){
-          this.currentCollection.scope=RestConstants.COLLECTIONSCOPE_CUSTOM;
+          this.currentCollection.collection.scope=RestConstants.COLLECTIONSCOPE_CUSTOM;
           for(let permission of this.permissions.permissions){
             if(!permission.hasOwnProperty('editable')){
               permission.editable=true;
@@ -269,7 +271,7 @@ export class CollectionNewComponent {
         this.navigateToCollectionId(id);
     }
     setColor(color:string) : void {
-        this.currentCollection.color = color;
+        this.currentCollection.collection.color = color;
     }
 
     imageDataChanged(event:any) : void {
@@ -314,15 +316,16 @@ export class CollectionNewComponent {
     }
     save() : void {
         // input data optimize
-        if(!this.currentCollection.description)
-          this.currentCollection.description="";
+        if(!this.currentCollection.collection.description)
+          this.currentCollection.collection.description="";
         this.currentCollection.title = this.currentCollection.title.trim();
-        this.currentCollection.description = this.currentCollection.description.trim();
-        if(this.newCollectionType==RestConstants.COLLECTIONTYPE_EDITORIAL || this.newCollectionType==RestConstants.COLLECTIONTYPE_MEDIA_CENTER) {
-          this.currentCollection.type = this.newCollectionType;
+        this.currentCollection.collection.description = this.currentCollection.collection.description.trim();
+        if(this.newCollectionType === RestConstants.COLLECTIONTYPE_EDITORIAL ||
+            this.newCollectionType === RestConstants.COLLECTIONTYPE_MEDIA_CENTER) {
+          this.currentCollection.collection.type = this.newCollectionType;
         }
         else{
-          this.currentCollection.type=RestConstants.COLLECTIONTYPE_DEFAULT;
+          this.currentCollection.collection.type=RestConstants.COLLECTIONTYPE_DEFAULT;
         }
         if (this.isEditCollection()) {
 
@@ -334,7 +337,7 @@ export class CollectionNewComponent {
             this.collectionService.updateCollection(this.currentCollection).subscribe(()=>{
               this.save2(this.currentCollection);
             }
-            ,(error:any)=>{
+            ,(error)=>{
               this.isLoading=false;
               this.handleError(error);
             });
@@ -355,14 +358,14 @@ export class CollectionNewComponent {
           });
         }
     }
-    private saveImage(collection:EduData.Collection) : void {
+    private saveImage(collection: EduData.Node) : void {
 
        if (this.imageData!=null) {
            this.collectionService.uploadCollectionImage(collection.ref.id, this.imageFile, "image/png").subscribe(() => {
                this.navigateToCollectionId(collection.ref.id);
            });
        }
-       else if(collection.preview==null){
+       else if(collection.preview==null) {
            this.collectionService.deleteCollectionImage(collection.ref.id).subscribe(() => {
                this.navigateToCollectionId(collection.ref.id);
            });
@@ -371,24 +374,24 @@ export class CollectionNewComponent {
           this.navigateToCollectionId(collection.ref.id);
         }
     }
-    setCollectionType(type:string){
+    setCollectionType(type:string) {
       this.newCollectionType=type;
-      if(type==RestConstants.COLLECTIONSCOPE_MY){
-        this.currentCollection.scope=RestConstants.COLLECTIONSCOPE_MY;
+      if(type === RestConstants.COLLECTIONSCOPE_MY) {
+        this.currentCollection.collection.scope=RestConstants.COLLECTIONSCOPE_MY;
       }
-      if(type==RestConstants.COLLECTIONSCOPE_ALL){
-        this.currentCollection.scope=RestConstants.COLLECTIONSCOPE_ALL;
+      if(type === RestConstants.COLLECTIONSCOPE_ALL) {
+        this.currentCollection.collection.scope=RestConstants.COLLECTIONSCOPE_ALL;
       }
-      if(type==RestConstants.COLLECTIONSCOPE_CUSTOM || type==RestConstants.COLLECTIONTYPE_EDITORIAL){
-        this.currentCollection.scope=RestConstants.COLLECTIONSCOPE_CUSTOM;
+      if(type === RestConstants.COLLECTIONSCOPE_CUSTOM || type === RestConstants.COLLECTIONTYPE_EDITORIAL) {
+        this.currentCollection.collection.scope=RestConstants.COLLECTIONSCOPE_CUSTOM;
       }
-      if(type==RestConstants.COLLECTIONTYPE_MEDIA_CENTER){
+      if(type === RestConstants.COLLECTIONTYPE_MEDIA_CENTER) {
         this.switchToAuthorFreetext();
       }
       this.updateAvailableSteps();
       this.goToNextStep();
     }
-    public getAvailableSteps():string[]{
+    public getAvailableSteps():string[] {
       let steps:string[]=[];
       steps.push(this.STEP_GENERAL);
       if(this.newCollectionType==RestConstants.COLLECTIONTYPE_EDITORIAL || this.newCollectionType==RestConstants.COLLECTIONTYPE_MEDIA_CENTER){
@@ -449,7 +452,7 @@ export class CollectionNewComponent {
          if(this.editId) {
            this.navigateToCollectionId(this.editId);
          }
-         else if(this.parentCollection && this.parentCollection.type==RestConstants.COLLECTIONTYPE_EDITORIAL){
+         else if(this.parentCollection && this.parentCollection.collection.type === RestConstants.COLLECTIONTYPE_EDITORIAL){
            this.navigateToCollectionId(this.parentId);
          }
          else {
@@ -471,8 +474,9 @@ export class CollectionNewComponent {
         });
       });
     }
-  private save2(collection: Collection) {
-    if(this.newCollectionType==RestConstants.COLLECTIONTYPE_EDITORIAL || this.newCollectionType==RestConstants.COLLECTIONTYPE_MEDIA_CENTER){
+  private save2(collection: EduData.Node) {
+    if(this.newCollectionType === RestConstants.COLLECTIONTYPE_EDITORIAL ||
+        this.newCollectionType === RestConstants.COLLECTIONTYPE_MEDIA_CENTER) {
       this.nodeService.AddNodeAspects(collection.ref.id,[RestConstants.CCM_ASPECT_LOMREPLICATION,RestConstants.CCM_ASPECT_CCLOM_GENERAL]).subscribe(()=> {
         this.nodeService.editNodeMetadata(collection.ref.id, this.properties).subscribe(() => {
           this.save3(collection);
@@ -483,10 +487,10 @@ export class CollectionNewComponent {
       this.save3(collection);
     }
   }
-    public isBrightColor(){
-        return ColorHelper.getColorBrightness(this.currentCollection.color)>ColorHelper.BRIGHTNESS_THRESHOLD_COLLECTIONS;
+    public isBrightColor() {
+        return ColorHelper.getColorBrightness(this.currentCollection.collection.color)>ColorHelper.BRIGHTNESS_THRESHOLD_COLLECTIONS;
     }
-    private save3(collection:Collection){
+    private save3(collection:EduData.Node) {
     if(this.newCollectionType==RestConstants.GROUP_TYPE_EDITORIAL){
         // user has access to editorial group but can't invite (strange setting but may happens)
         if(!this.canInvite){
@@ -512,16 +516,21 @@ export class CollectionNewComponent {
     }
   }
 
-  private getTypeForCollection(collection: Collection) {
-    if(collection.type==RestConstants.COLLECTIONTYPE_EDITORIAL || collection.type==RestConstants.COLLECTIONTYPE_MEDIA_CENTER){
-      return collection.type;
+  private getTypeForCollection(collection: EduData.Node) {
+    if(collection.collection.type === RestConstants.COLLECTIONTYPE_EDITORIAL ||
+        collection.collection.type === RestConstants.COLLECTIONTYPE_MEDIA_CENTER) {
+      return collection.collection.type;
     }
-    if(collection.scope==RestConstants.COLLECTIONSCOPE_MY && !this.canInvite){
+    if(collection.collection.scope === RestConstants.COLLECTIONSCOPE_MY && !this.canInvite) {
       return RestConstants.COLLECTIONSCOPE_MY;
     }
-    if(collection.scope==RestConstants.COLLECTIONSCOPE_MY || collection.scope==RestConstants.COLLECTIONSCOPE_ORGA || collection.scope==RestConstants.COLLECTIONSCOPE_ALL || collection.scope==RestConstants.COLLECTIONSCOPE_CUSTOM_PUBLIC)
+    if(collection.collection.scope === RestConstants.COLLECTIONSCOPE_MY ||
+        collection.collection.scope === RestConstants.COLLECTIONSCOPE_ORGA ||
+        collection.collection.scope === RestConstants.COLLECTIONSCOPE_ALL ||
+        collection.collection.scope=== RestConstants.COLLECTIONSCOPE_CUSTOM_PUBLIC) {
       return RestConstants.COLLECTIONSCOPE_CUSTOM;
-    return collection.scope;
+    }
+    return collection.collection.scope;
   }
 
   private updateAvailableSteps() {
@@ -556,14 +565,15 @@ export class CollectionNewComponent {
     return list;
   }
 
-  private setParent(id:string,parent:Collection) {
+  private setParent(id:string,parent: EduData.Node) {
     this.parentId = id;
     this.parentCollection = parent;
-    this.currentCollection=new Collection();
-    this.currentCollection.title="";
-    this.currentCollection.description="";
-    this.currentCollection.color=this.COLORS[0];
-      if(this.parentCollection && this.parentCollection.type==RestConstants.COLLECTIONTYPE_EDITORIAL){
+    this.currentCollection=new EduData.Node();
+    this.currentCollection.title='';
+    this.currentCollection.collection.description='';
+    this.currentCollection.collection.color=this.COLORS[0];
+      if(this.parentCollection &&
+          this.parentCollection.collection.type === RestConstants.COLLECTIONTYPE_EDITORIAL) {
           this.setCollectionType(RestConstants.COLLECTIONTYPE_EDITORIAL);
       }
     this.updateAvailableSteps();
@@ -571,7 +581,7 @@ export class CollectionNewComponent {
     GlobalContainerComponent.finishPreloading();
   }
 
-  private save4(collection:Collection) {
+  private save4(collection: EduData.Node) {
     // check if there are any nodes that should be added to this collection
     let nodes=this.temporaryStorage.pop(TemporaryStorageService.COLLECTION_ADD_NODES);
     if(!nodes) {
@@ -608,13 +618,14 @@ export class CollectionNewComponent {
 
   switchToAuthorFreetext() {
     this.authorFreetext=true;
-    this.currentCollection.authorFreetext=new AuthorityNamePipe(this.translationService).transform(
-        this.newCollectionType==RestConstants.COLLECTIONTYPE_MEDIA_CENTER || this.currentCollection.type==RestConstants.COLLECTIONTYPE_MEDIA_CENTER ?
+    this.currentCollection.collection.authorFreetext=new AuthorityNamePipe(this.translationService).transform(
+        this.newCollectionType === RestConstants.COLLECTIONTYPE_MEDIA_CENTER ||
+        this.currentCollection.collection.type === RestConstants.COLLECTIONTYPE_MEDIA_CENTER ?
             this.mediacenter : this.user,null);
   }
 
   cancelAuthorFreetext() {
     this.authorFreetext=false;
-    this.currentCollection.authorFreetext=null;
+    this.currentCollection.collection.authorFreetext=null;
   }
 }
