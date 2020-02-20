@@ -2,6 +2,10 @@
 
 .mdsCard{
   padding: 0;
+  // We have to take care of height and overflow ourselves here, because we need
+  // `.dialogMds` to cover the area we are rendering on.
+  height: 100%;
+  overflow: auto;
 }
 :host ::ng-deep {
   .suggestions {
