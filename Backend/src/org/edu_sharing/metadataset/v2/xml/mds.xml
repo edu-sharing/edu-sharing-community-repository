@@ -543,7 +543,7 @@
 				<license>
                 <ccm:imported_object_appname>
                 <ccm:author_freetext>
-				<div class="mdsContributorGroup mdsWidgetCaption">
+				<div class="mdsContributorGroup">
 					<div id="mdsLifecyclecontributorsTitle" class="mdsContributorTitle">{{ cb_contr_material }}</div>
 					<div id="mdsLifecyclecontributors">
 	               		<ccm:lifecyclecontributer_author>

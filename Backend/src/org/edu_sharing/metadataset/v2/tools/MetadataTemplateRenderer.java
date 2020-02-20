@@ -286,7 +286,13 @@ public class MetadataTemplateRenderer {
 						}
 						empty = false;
 					}
+					if (renderingMode.equals(RenderingMode.HTML)) {
+						widgetHtml.append("<span>");
+					}
 					widgetHtml.append(value);
+					if (renderingMode.equals(RenderingMode.HTML)) {
+						widgetHtml.append("</span>");
+					}
 					if(renderingMode.equals(RenderingMode.HTML)) {
 						widgetHtml.append("</div>");
 						if (isLink) {

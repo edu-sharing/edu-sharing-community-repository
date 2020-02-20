@@ -53,11 +53,13 @@ a{
   margin: 0 auto;
 }
 .badge{
-  border-radius: 25px;
-  background: #eee;
-  padding: 5px 15px;
+  border-radius: 16px;
+  line-height: 32px;
+  color: $primary;
+  background-color: $buttonHoverBackground;
+  padding: 0px 13px;
   height:auto;
-  margin: 2px;
+  margin-right: 10px;
   display: inline-flex;
   align-items: center;
   &:focus{
@@ -69,7 +71,7 @@ a{
     word-break: break-all;
   }
   i{
-    color:$textLight;
+    font-size: 18px;
     position: relative;
     top: 0;
     left: 7px;
