@@ -34,7 +34,7 @@ import {CardComponent} from '../../core-ui-module/components/card/card.component
     ]
 })
 export class CreateMenuComponent {
-    @ViewChild('dropdown', {static: false}) dropdown : MatMenu;
+    @ViewChild('dropdown', {static: true}) dropdown : MatMenu;
     /**
      * Currently allowed to drop files?
      */
