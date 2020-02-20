@@ -282,7 +282,9 @@ export class MdsComponent{
             add=false;
           }
         }
-        badges.innerHTML+=this.getMultivalueBadge(searchField.value);
+        if (add) {
+          badges.innerHTML+=this.getMultivalueBadge(searchField.value);
+        }
         searchField.value=null;
       }
     }
