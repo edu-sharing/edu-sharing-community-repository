@@ -12,7 +12,7 @@
     (onSearch)="routeAndClearSearch($event)"
     (onCreate)="addVirtualNodes($event)"
   ></main-nav>
-  <tutorial tabindex="0" [element]="tutorialElement" [heading]="'SEARCH.TUTORIAL_HEADING'" [description]="'SEARCH.TUTORIAL_DESCRIPTION'" [showSkip]="false"
+  <tutorial [element]="tutorialElement" [heading]="'SEARCH.TUTORIAL_HEADING'" [description]="'SEARCH.TUTORIAL_DESCRIPTION'" [showSkip]="false"
   ></tutorial>
 
   <div class="rowRepositories scrollWithBanner" [class.no-mainnav]="!mainnav" *ngIf="repositories && repositories.length>2">

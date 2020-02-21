@@ -31,7 +31,7 @@
 
     <app-banner [scope]="_currentScope" (onUpdate)="refreshBanner()"></app-banner>
     <global-progress *ngIf="globalProgress"></global-progress>
-    <tutorial tabindex="0" [element]="tutorialElement" [heading]="'USER_TUTORIAL_HEADING'" [description]="'USER_TUTORIAL_DESCRIPTION'" [showSkip]="false"></tutorial>
+    <tutorial [element]="tutorialElement" [heading]="'USER_TUTORIAL_HEADING'" [description]="'USER_TUTORIAL_DESCRIPTION'" [showSkip]="false"></tutorial>
 
     <div class="dialog darken" *ngIf="licenseAgreement" [@fade]="licenseAgreement"></div>
     <div class="card card-agreement center-card card-scroll card-high card-wide card-action" *ngIf="licenseAgreement" [@cardAnimation]="licenseAgreement">
