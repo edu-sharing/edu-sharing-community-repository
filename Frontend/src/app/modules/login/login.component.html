@@ -69,14 +69,7 @@
                 autofocus
               />
             </mat-form-field>
-            <div>
-              <div class="password-label-container">
-                <span class="forgot-password" *ngIf="config.register.local || config.register.recoverUrl">
-                  <a (click)="recoverPassword()" (keyup.enter)="recoverPassword()" class="focus-underline" tabindex="1">
-                    {{ 'LOGIN.RECOVER_PASSWORD' | translate }}
-                  </a>
-                </span>
-              </div>
+            <div class="password-field">
               <input-password
                 #passwordInput
                 id="password"
@@ -86,6 +79,11 @@
                 (keydown.enter)="login()"
                 [(value)]="password"
               ></input-password>
+              <div class="forgot-password" *ngIf="config.register.local || config.register.recoverUrl">
+                <a (click)="recoverPassword()" (keyup.enter)="recoverPassword()" class="focus-underline" tabindex="0">
+                  {{ 'LOGIN.RECOVER_PASSWORD' | translate }}
+                </a>
+              </div>
             </div>
           </form>
           <div class="useUrl" *ngIf="config.loginUrl && !showProviders">

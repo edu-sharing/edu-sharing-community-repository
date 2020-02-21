@@ -29,11 +29,9 @@ powered-by{
     max-height: 100px;
   }
 }
-.password-label-container {
+.password-field {
   display: flex;
-  label {
-    flex: auto;
-  }
+  flex-direction: column-reverse;
   .forgot-password{
     display: flex;
     width: 100%;
