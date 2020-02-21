@@ -83,6 +83,9 @@ user-profile{
 .menuButtonOuter{
   height:100%;
   display: flex;
+  > button {
+    border-radius: 0px;
+  }
 }
 
 .topBarSearch {
@@ -397,6 +400,9 @@ $licenseInfoHeight:40px;
 }
 .topbar-search-right{
   display: flex;
+}
+:host .topBar ::ng-deep .mat-button-focus-overlay {
+  background-color: white;
 }
 @media screen and (max-width: ($mobileWidth+$mobileStage*5)) {
   .searchInputGroup{

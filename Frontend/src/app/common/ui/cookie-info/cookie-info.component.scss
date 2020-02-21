@@ -21,12 +21,7 @@
   .more{
     text-decoration: underline;
     flex-grow: 1;
-  }
-  .btn-flat{
-    background-color:#fff;
-  }
-  .btn-flat:hover{
-    background-color:#eee;
+    margin-right: 5px;
   }
 }
 @media screen and (max-width: ($mobileWidth+$mobileStage*3)) {
