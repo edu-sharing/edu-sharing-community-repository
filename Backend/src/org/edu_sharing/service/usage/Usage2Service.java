@@ -57,80 +57,51 @@ Logger logger = Logger.getLogger(Usage2Service.class);
 	}
 	
 	public Usage getUsage(String lmsId, String courseId, String parentNodeId, String resourceId) throws Usage2Exception{
-		
-		Usage result = null;
-		
-		ApplicationInfo homeRepository = ApplicationInfoList.getHomeRepository();
-		AuthenticationTool authTool = new AuthenticationToolAPI();
-		HashMap<String, String> currentAuthentication = null;
-		try {
-			currentAuthentication = authTool.validateAuthentication(Context.getCurrentInstance().getCurrentInstance().getRequest().getSession());
-		}catch(Exception e) {
-			//when run as
-		}
-		HashMap<String,String> adminAuthentication = null;
-		
-		
-		HashMap<String, Object> usage = null;
-		try{
-			adminAuthentication = authTool.createNewSession(homeRepository.getUsername(), homeRepository.getPassword());
-			usage = usageDao.getUsage(lmsId, courseId, parentNodeId, resourceId);
-		}catch(Throwable e){
-			logger.error(e.getMessage(), e);
-			throw new Usage2Exception(e);
-		}finally{
-		    //set authentication back to current user
-			if(adminAuthentication != null){
-				authTool.logout(adminAuthentication.get(CCConstants.AUTH_TICKET));
+
+		AuthenticationUtil.RunAsWork<Usage> runAs = new AuthenticationUtil.RunAsWork<Usage>(){
+			@Override
+			public Usage doWork() throws Exception {
+				Usage result = null;
+				HashMap<String, Object> usage = null;
+				try{
+					usage = usageDao.getUsage(lmsId, courseId, parentNodeId, resourceId);
+					if (usage != null) {
+						result = getUsageResult(usage);
+					}
+					return result;
+				}catch(Throwable e){
+					logger.error(e.getMessage(), e);
+					throw new Usage2Exception(e);
+				}
 			}
-		    if(currentAuthentication != null){
-		    	authTool.validateTicket(currentAuthentication.get(CCConstants.AUTH_TICKET));
-		    }
-		  }
-		
-		if (usage != null) {
-			result = getUsageResult(usage);
-		}
-		
+		};
+
 		logger.info("return");
-		return result;
-		
+		return AuthenticationUtil.runAsSystem(runAs);
 	}
 	
 	
 	public List<Usage> getUsagesByCourse(String appId, String courseId) throws UsageException{
-		List<Usage> result = new ArrayList<Usage>();
 		
-		AuthenticationTool authTool = new AuthenticationToolAPI();
-		HashMap<String, String> currentAuthentication = null;
-		try {
-			currentAuthentication = authTool.validateAuthentication(Context.getCurrentInstance().getCurrentInstance().getRequest().getSession());
-		}catch(Exception e) {
-			//when run as
-		}
-		HashMap<String,String> adminAuthentication = null;
-		ApplicationInfo homeRepository = ApplicationInfoList.getHomeRepository();
-		
-		try{
-			adminAuthentication = authTool.createNewSession(homeRepository.getUsername(), homeRepository.getPassword());
-			HashMap<String,HashMap<String,Object>> usages =  usageDao.getUsagesByCourse(appId, courseId);
-			for(Map.Entry<String, HashMap<String,Object>> entry : usages.entrySet()){
-				result.add(getUsageResult(entry.getValue()));
+		AuthenticationUtil.RunAsWork<List<Usage>> runAs = new AuthenticationUtil.RunAsWork<List<Usage>>(){
+			@Override
+			public List<Usage> doWork() throws Exception {
+				List<Usage> result = new ArrayList<Usage>();
+				try{
+					HashMap<String,HashMap<String,Object>> usages =  usageDao.getUsagesByCourse(appId, courseId);
+					for(Map.Entry<String, HashMap<String,Object>> entry : usages.entrySet()){
+						result.add(getUsageResult(entry.getValue()));
+					}
+				}catch(Exception e){
+					logger.error(e.getMessage(),e);
+					throw new UsageException(e.getMessage());
+				}
+				
+				return result;
 			}
-		}catch(Exception e){
-			logger.error(e.getMessage(),e);
-			throw new UsageException(e.getMessage());
-		}finally{
-		    //set authentication back to current user
-			if(adminAuthentication != null){
-				authTool.logout(adminAuthentication.get(CCConstants.AUTH_TICKET));
-			}
-		    if(currentAuthentication != null){
-		    	authTool.validateTicket(currentAuthentication.get(CCConstants.AUTH_TICKET));
-		    }
-		  }
+		};
 		
-		return result;
+		return AuthenticationUtil.runAsSystem(runAs);
 	}
 	
 	
@@ -138,8 +109,6 @@ Logger logger = Logger.getLogger(Usage2Service.class);
 		
 		List<Usage> result = new ArrayList<Usage>();
 
-		ApplicationInfo homeRepository = ApplicationInfoList.getHomeRepository();
-		
 		try{
 			AuthenticationUtil.runAsSystem(()->{
 				HashMap<String,HashMap<String,Object>> usages =  usageDao.getUsagesByAppId(appId);
@@ -344,40 +313,23 @@ Logger logger = Logger.getLogger(Usage2Service.class);
 	public boolean deleteUsage(String repoId, String user, String lmsId, String courseId, String parentNodeId, String resourceId) throws UsageException {
     	logger.info("starting");
 		
-		
-		//admin Authentication 
-		ApplicationInfo homeRepository = ApplicationInfoList.getHomeRepository();
-		
-		AuthenticationTool authTool = new AuthenticationToolAPI();
-		HashMap<String, String> currentAuthentication = null;
-		try {
-			currentAuthentication = authTool.validateAuthentication(Context.getCurrentInstance().getRequest().getSession());
-		}catch(Exception e) {
-			//when run as
-		}
-		HashMap<String,String> adminAuthentication = null;
-		
-		
-		try{
-			adminAuthentication = authTool.createNewSession(homeRepository.getUsername(), homeRepository.getPassword());
-			this.usageDao.removeUsage(lmsId, courseId, parentNodeId, resourceId);
-			
-			//remove IO from cache so that the gui gets the new usage count
-			new RepositoryCache().remove(parentNodeId);
-			
-			return true;
-		}catch(Exception e){
-			logger.error(e.getMessage(),e);
-			throw new UsageException(e.getMessage());
-		} finally{
-			  //set authentication back to current user
-			if(adminAuthentication != null){
-				authTool.logout(adminAuthentication.get(CCConstants.AUTH_TICKET));
-			}
-		    if(currentAuthentication != null){
-		    	authTool.validateTicket(currentAuthentication.get(CCConstants.AUTH_TICKET));
-		    }
-		}
+    	AuthenticationUtil.RunAsWork<Boolean> runAs = new AuthenticationUtil.RunAsWork<Boolean> () {
+    		@Override
+    		public Boolean doWork() throws Exception {
+    			try{
+    				usageDao.removeUsage(lmsId, courseId, parentNodeId, resourceId);
+    				
+    				//remove IO from cache so that the gui gets the new usage count
+    				new RepositoryCache().remove(parentNodeId);
+    				
+    				return true;
+    			}catch(Exception e){
+    				logger.error(e.getMessage(),e);
+    				throw new UsageException(e.getMessage());
+    			} 
+    		}
+    	};
+    	return AuthenticationUtil.runAsSystem(runAs);
     }
 	
 	
