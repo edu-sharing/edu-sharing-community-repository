@@ -181,7 +181,7 @@ export class WorkspaceMetadataComponent{
     data.title = node.title;
     data.isDirectory = node.isDirectory;
     data.isCollection = node.collection != null;
-    data.description = node.description;
+    data.description = node.properties[RestConstants.LOM_PROP_GENERAL_DESCRIPTION];
     data.preview = node.preview.url;
     data.keywords = node.properties[RestConstants.LOM_PROP_GENERAL_KEYWORD];
     if (data.keywords && data.keywords.length == 1 && !data.keywords[0])

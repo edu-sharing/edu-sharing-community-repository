@@ -726,16 +726,16 @@ export class OptionsHelperService {
             toggleViewType.icon = this.list ? this.list.viewType === 0 ? 'view_module' : 'list' : '';
         });
         toggleViewType.scopes = [Scope.Workspace, Scope.Search, Scope.CollectionsReferences];
+        toggleViewType.constrains = [Constrain.NoSelection];
+        toggleViewType.group = DefaultGroups.Toggles;
+        toggleViewType.elementType = ElementType.Unknown;
+        toggleViewType.isToggle = true;
         /*
         const reorder = new OptionItem('OPTIONS.LIST_SETTINGS', 'settings', (node: Node) => this.reorderDialog = true);
         reorder.isToggle = true;
         options.push(reorder);
         return options;
          */
-        toggleViewType.constrains = [Constrain.NoSelection];
-        toggleViewType.group = DefaultGroups.Toggles;
-        toggleViewType.elementType = ElementType.Unknown;
-        toggleViewType.isToggle = true;
 
         options.push(applyNode);
         options.push(debugNode);

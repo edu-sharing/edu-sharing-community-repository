@@ -40,7 +40,7 @@ export class ShareAppComponent {
     private inboxPath: Node[];
     private inbox: Node;
     private columns:ListItem[]=[];
-    private collections: Collection[];
+    private collections: Node[];
     private cordovaType: string;
     private mimetype: string;
     private editorType: string;

@@ -1,5 +1,6 @@
 import {Component, Input, OnInit} from '@angular/core';
 import {NodeHelper} from "../../../core-ui-module/node-helper";
+import {Node} from "../../../core-module/core.module";
 import {TranslateService} from "@ngx-translate/core";
 import {
     Collection,
@@ -19,7 +20,7 @@ import {
  * and can be used to display a collection at this position
  */
 export class SmallCollectionComponent{
-  public _collection : Collection;
+  public _collection : Node;
   /**
    * Custom title rendering. Use {{title}}in your string to replace it with the title
    * @type {string}
@@ -35,7 +36,7 @@ export class SmallCollectionComponent{
       this._collection=data.collection;
     });
   }
-  @Input() set collection(collection : Collection){
+  @Input() set collection(collection : Node){
     this._collection=collection;
   }
   constructor(

@@ -433,12 +433,6 @@ export class WorkspaceMainComponent implements EventListener {
         this.createAllowed = false;
         this.path = [];
         this.selection = [];
-        this.actionOptions = this.getOptions(null, false);
-
-        /*
-        if(this.root=='MY_SHARED_FILES' || this.root=='SHARED_FILES')
-            this.root='MY_FILES';
-        */
     }
     private manageContributorsNode(node: Node) {
         const list = this.getNodeList(node);
@@ -759,7 +753,6 @@ export class WorkspaceMainComponent implements EventListener {
         /*this.path=this.path.slice(0,position+1);
         */
         this.searchQuery = null;
-        this.actionOptions = null;
         let id = '';
         const length = this.path ? this.path.length : 0;
         if (position > 0) {
