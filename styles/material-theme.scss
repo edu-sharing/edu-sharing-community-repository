@@ -218,9 +218,6 @@ input.mat-input-element, mat-label, .mat-select-value{
     padding: 0!important;
   }
 }
-.mat-button-focus-overlay{
-  background: $primary;
-}
 .mat-menu-item{
   &:hover:not([disabled]){
     background: $itemSelectedBackground !important;
