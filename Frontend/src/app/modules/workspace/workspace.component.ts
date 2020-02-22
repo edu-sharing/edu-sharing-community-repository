@@ -72,7 +72,6 @@ export class WorkspaceMainComponent implements EventListener {
     private sharedFolders: Node[] = [];
     private path: Node[] = [];
     private parameterNode: Node;
-    private metadataNode: String;
     private root = 'MY_FILES';
 
     private selection: Node[] = [];
@@ -124,7 +123,6 @@ export class WorkspaceMainComponent implements EventListener {
     public contributorNode: Node;
     public shareLinkNode: Node;
     private viewType = 0;
-    private infoToggle: OptionItem;
     private reurlDirectories: boolean;
     private reorderDialog: boolean;
     @HostListener('window:beforeunload', ['$event'])
@@ -167,9 +165,6 @@ export class WorkspaceMainComponent implements EventListener {
             }
             else if (this.createConnectorName != null) {
                 this.createConnectorName = null;
-            }
-            else if (this.metadataNode != null) {
-                this.closeMetadata();
             }
             else {
                 return;
@@ -388,7 +383,7 @@ export class WorkspaceMainComponent implements EventListener {
                                     this.node.getNodeMetadata(params.file).subscribe((data: NodeWrapper) => {
                                         this.setSelection([data.node]);
                                         this.parameterNode = data.node;
-                                        this.metadataNode = params.file;
+                                        this.mainNavRef.management.nodeSidebar = params.file;
                                     });
                                 }
 
@@ -408,7 +403,7 @@ export class WorkspaceMainComponent implements EventListener {
         });
     }
     public resetWorkspace() {
-        if (this.metadataNode && this.parameterNode) {
+        if (this.mainNavRef.management.nodeSidebar && this.parameterNode) {
             this.setSelection([this.parameterNode]);
         }
     }
@@ -467,7 +462,7 @@ export class WorkspaceMainComponent implements EventListener {
     }
 
     private deleteDone() {
-        this.metadataNode = null;
+        this.closeMetadata();
         this.refresh();
     }
 
@@ -543,16 +538,6 @@ export class WorkspaceMainComponent implements EventListener {
             this.router.navigate([UIConstants.ROUTER_PREFIX + 'render', list[0].ref.id, list[0].version ? list[0].version : '']);
         }
     }
-    private restoreVersion(restore:{version: Version,node: Node}) {
-        this.toast.showConfigurableDialog({
-            title: 'WORKSPACE.METADATA.RESTORE_TITLE',
-            message: 'WORKSPACE.METADATA.RESTORE_MESSAGE',
-            buttons: DialogButton.getYesNo(() => this.hideDialog(), () => this.doRestoreVersion(restore.version)),
-            node: restore.node,
-            isCancelable: true,
-            onCancel: () => this.hideDialog(),
-        });
-    }
     // returns either the passed node as list, or the current selection if the passed node is invalid (actionbar)
     private getNodeList(node: Node): Node[] {
         if (Array.isArray(node)) {
@@ -587,36 +572,12 @@ export class WorkspaceMainComponent implements EventListener {
             if (this.ui.isMobile()) {
                 this.displayNode(node);
             }
-            else {
-                if (this.metadataNode) {
-                    this.openMetadata(node);
-                }
-            }
         }
         else {
             // this.closeMetadata();
             if (this.ui.isMobile()) {
                 this.openDirectory(node.ref.id);
             }
-            else if (this.metadataNode) {
-                this.openMetadata(node);
-            }
-        }
-    }
-    private openMetadata(node: Node | string) {
-        const old = this.metadataNode;
-        if (node == null) {
-            node = this.selection[0];
-        }
-        if (typeof node === 'string') {
-            this.metadataNode = new String((node as string));
-        }
-        else {
-            this.metadataNode = new String((node as Node).ref.id);
-        }
-        this.infoToggle.icon = 'info';
-        if (old && this.metadataNode.toString() === old.toString()) {
-            this.closeMetadata();
         }
     }
     public debugNode(node: Node) {
@@ -641,10 +602,7 @@ export class WorkspaceMainComponent implements EventListener {
         this.closeMetadata();
     }
     private closeMetadata() {
-        this.metadataNode = null;
-        if (this.infoToggle) {
-            this.infoToggle.icon = 'info_outline';
-        }
+        this.mainNavRef.management.closeSidebar();
     }
     private openDirectory(id: string) {
         this.routeTo(this.root, id);
@@ -792,21 +750,6 @@ export class WorkspaceMainComponent implements EventListener {
             this.currentFolder = folder;
             this.searchQuery = search;
         });
-    }
-
-    private doRestoreVersion(version: Version): void {
-        this.hideDialog();
-        this.globalProgress = true;
-        this.node.revertNodeToVersion(version.version.node.id, version.version.major, version.version.minor)
-            .subscribe(
-                (data: NodeVersions) => {
-                    this.globalProgress = false;
-                    this.refresh();
-                    this.closeMetadata();
-                    this.openMetadata(version.version.node.id);
-                    this.toast.toast('WORKSPACE.REVERTED_VERSION');
-                },
-                (error: any) => this.toast.error(error));
     }
 
     private refreshRoute() {

@@ -13,6 +13,17 @@
   (onCancel)="closeStream()"
   (onDone)="closeStream()"
 ></add-stream>
+
+<workspace-metadata *ngIf="nodeSidebar"
+                    [@fromRight]="nodeSidebar"
+                    class="metadata-sidebar"
+                    [node]="nodeSidebar"
+                    (onRestore)="restoreVersion($event)"
+                    (onDisplay)="displayNode($event)"
+                    (onEditMetadata)="nodeMetadata=[$event]"
+                    (onClose)="closeSidebar()"
+></workspace-metadata>
+
 <mds
         *ngIf="collectionWriteFeedback"
         customTitle="COLLECTIONS.FEEDBACK_TITLE"

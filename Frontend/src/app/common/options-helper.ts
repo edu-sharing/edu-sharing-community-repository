@@ -230,6 +230,9 @@ export class OptionsHelperService {
             options = options.filter((o) => o.showCallback());
             options.filter((o) => !o.enabledCallback()).forEach((o) => o.isEnabled = false);
         }
+        if (target !== Target.Actionbar) {
+            options = options.filter((o) => !o.isToggle);
+        }
         options = this.sortOptionsByGroup(options);
         return (UIHelper.filterValidOptions(this.ui, options) as OptionItem[]);
     }
@@ -736,6 +739,28 @@ export class OptionsHelperService {
         options.push(reorder);
         return options;
          */
+        const configureList = new OptionItem('OPTIONS.LIST_SETTINGS', 'settings', (node: Node) =>
+            this.list.showReorder()
+        );
+        configureList.scopes = [Scope.Workspace];
+        configureList.constrains = [Constrain.NoSelection, Constrain.User];
+        configureList.group = DefaultGroups.Toggles;
+        configureList.elementType = ElementType.Unknown;
+        configureList.isToggle = true;
+        /*
+
+            this.infoToggle = new OptionItem('WORKSPACE.OPTION.METADATA', 'info_outline', (node: Node) => this.openMetadata(node));
+            this.infoToggle.isToggle = true;
+            options.push(this.infoToggle);
+         */
+        const metadataSidebar = new OptionItem('OPTIONS.METADATA_SIDEBAR', 'info_outline', (object) => {
+            management.nodeSidebar = management.nodeSidebar ? null : this.getObjects(object)[0]
+            metadataSidebar.icon = management.nodeSidebar ? 'info' : 'info_outline'
+        });
+        metadataSidebar.scopes = [Scope.Workspace];
+        metadataSidebar.constrains = [Constrain.NoBulk];
+        metadataSidebar.group = DefaultGroups.Toggles;
+        metadataSidebar.isToggle = true;
 
         options.push(applyNode);
         options.push(debugNode);
@@ -765,6 +790,8 @@ export class OptionsHelperService {
         options.push(removeNodeRef);
         options.push(reportNode);
         options.push(toggleViewType);
+        options.push(configureList);
+        options.push(metadataSidebar);
 
         return options;
     }

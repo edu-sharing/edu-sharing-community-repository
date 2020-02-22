@@ -107,17 +107,6 @@
 >
 </workspace-management>
 
-  <workspace-metadata *ngIf="metadataNode"
-                      [@fromRight]="metadataNode"
-                      class="metadata"
-                      [node]="metadataNode"
-                      [isAdmin]="isAdmin"
-                      (onRestore)="restoreVersion($event)"
-                      (onDisplay)="openNode($event,false)"
-                      (onEditMetadata)="editNode($event)"
-                      (onClose)="closeMetadata()"
-  ></workspace-metadata>
-
 </div>
   <global-progress *ngIf="globalProgress"></global-progress>
 </div>

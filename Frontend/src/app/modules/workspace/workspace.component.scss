@@ -105,19 +105,6 @@ user-quota{
   background-color: #fff;
 
 }
-.metadata{
-  min-width:300px;
-  max-width:300px;
-  position:fixed;
-  @include iosScrolling();
-  height:calc(100% - #{$mainnavHeight+$workspaceBreadcrumbsHeight});
-  top: $mainnavHeight+$workspaceBreadcrumbsHeight;
-  right:0;
-  overflow-x: hidden;
-  overflow-y:auto;
-  z-index: 94;
-  background-color: #fff;
-}
 .explorer{
   position:absolute;
   left:300px;
@@ -202,7 +189,7 @@ user-quota{
     }
   }
 }
-.tree,.metadata{
+.tree{
   @include materialShadow();
 }
 

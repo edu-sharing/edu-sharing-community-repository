@@ -3,6 +3,20 @@
 workspace-lti-tools{
   display:inherit!important;
 }
+.metadata-sidebar{
+  min-width:300px;
+  max-width:300px;
+  position:fixed;
+  @include iosScrolling();
+  @include materialShadow();
+  height:calc(100% - #{$mainnavHeight+$workspaceBreadcrumbsHeight});
+  top: $mainnavHeight+$workspaceBreadcrumbsHeight;
+  right:0;
+  overflow-x: hidden;
+  overflow-y:auto;
+  z-index: 94;
+  background-color: #fff;
+}
 .card-title-actionbar{
   .material-icons{
     position: absolute;

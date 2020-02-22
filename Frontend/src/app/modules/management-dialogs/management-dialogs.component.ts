@@ -1,5 +1,5 @@
 import {Component, Input, EventEmitter, Output, ViewChild, ElementRef, HostListener} from '@angular/core';
-import {DialogButton, RestNodeService} from "../../core-module/core.module";
+import {DialogButton, NodeVersions, RestNodeService, Version} from "../../core-module/core.module";
 import {TranslateService} from "@ngx-translate/core";
 import {RestSearchService} from "../../core-module/core.module";
 import {Toast} from "../../core-ui-module/toast";
@@ -98,6 +98,8 @@ export class WorkspaceManagementDialogsComponent  {
     @Output() collectionWriteFeedbackChange = new EventEmitter<Node>();
     @Input() collectionViewFeedback: Node;
     @Output() collectionViewFeedbackChange = new EventEmitter<Node>();
+    @Input() nodeSidebar: Node;
+    @Output() nodeSidebarChange = new EventEmitter<Node>();
     @Input() showUploadSelect=false;
   @Output() showUploadSelectChange = new EventEmitter();
   @Input() nodeMetadataAllowReplace : Boolean;
@@ -136,11 +138,17 @@ export class WorkspaceManagementDialogsComponent  {
 
   @HostListener('document:keydown', ['$event'])
   handleKeyboardEvent(event: KeyboardEvent) {
-    if(event.key=="Escape"){
+    if(event.key === 'Escape') {
       if(this.nodeMetadata!=null || this.createMetadata){
         if(this.mdsRef.handleKeyboardEvent(event))
           return;
         this.closeEditor(false);
+        event.preventDefault();
+        event.stopPropagation();
+        return;
+      }
+      if(this.nodeSidebar!=null){
+        this.closeSidebar();
         event.preventDefault();
         event.stopPropagation();
         return;
@@ -491,9 +499,43 @@ export class WorkspaceManagementDialogsComponent  {
                 },
             );
     }
+    private restoreVersion(restore:{version: Version,node: Node}) {
+        this.toast.showConfigurableDialog({
+            title: 'WORKSPACE.METADATA.RESTORE_TITLE',
+            message: 'WORKSPACE.METADATA.RESTORE_MESSAGE',
+            buttons: DialogButton.getYesNo(() => this.toast.closeModalDialog(), () => this.doRestoreVersion(restore.version)),
+            node: restore.node,
+            isCancelable: true,
+            onCancel: () => this.toast.closeModalDialog(),
+        });
+    }
+    private doRestoreVersion(version: Version): void {
+        this.toast.showProgressDialog();
+        this.nodeService.revertNodeToVersion(version.version.node.id, version.version.major, version.version.minor)
+            .subscribe(
+                (data: NodeVersions) => {
+                    this.globalProgress = false;
+                    this.refresh();
+                    this.closeSidebar();
+                    // @TODO type is not compatible
+                    this.nodeService.getNodeMetadata(version.version.node.id, [RestConstants.ALL]).subscribe((node) => {
+                        this.nodeSidebar = node.node;
+                        this.nodeSidebarChange.emit(node.node);
+                        this.toast.toast('WORKSPACE.REVERTED_VERSION');
+                    },
+                (error: any) => this.toast.error(error));
+                },
+            (error: any) => this.toast.error(error));
+    }
+
 
     closeCollectionViewFeedback() {
         this.collectionViewFeedback = null;
         this.collectionViewFeedbackChange.emit(null);
+    }
+
+    closeSidebar() {
+        this.nodeSidebar = null;
+        this.nodeSidebarChange.emit(null);
     }
 }

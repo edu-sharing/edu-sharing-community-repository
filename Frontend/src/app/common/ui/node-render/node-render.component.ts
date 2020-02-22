@@ -47,6 +47,7 @@ declare var window: any;
   selector: 'node-render',
   templateUrl: 'node-render.component.html',
   styleUrls: ['node-render.component.scss'],
+  providers: [OptionsHelperService],
   animations: [
     trigger('fadeFast', UIAnimation.fade(UIAnimation.ANIMATION_TIME_FAST))
   ]
