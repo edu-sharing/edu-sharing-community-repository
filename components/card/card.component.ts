@@ -1,5 +1,6 @@
 import { trigger } from '@angular/animations';
 import {
+    AfterViewInit,
     Component,
     ElementRef,
     EventEmitter,
@@ -29,9 +30,13 @@ import { UIHelper } from '../../ui-helper';
     styleUrls: ['card.component.scss'],
     animations: [trigger('cardAnimation', UIAnimation.cardAnimation())],
 })
-export class CardComponent implements OnDestroy {
-    @ViewChild('cardContainer', { static: false }) cardContainer: ElementRef;
-    @ViewChild('jumpmarksRef', { static: false }) jumpmarksRef: ElementRef;
+export class CardComponent implements AfterViewInit, OnDestroy {
+    @ViewChild('cardContainer', { static: false })
+    cardContainer: ElementRef<HTMLElement>;
+    @ViewChild('jumpmarksRef', { static: false })
+    jumpmarksRef: ElementRef;
+    @ViewChild('cardActions', { static: false })
+    cardActions: ElementRef<HTMLElement>;
 
     /**
      * the title of the card. Should be pre-translated
@@ -158,24 +163,12 @@ export class CardComponent implements OnDestroy {
                 } catch (e) {}
             }, 1000 / 20); // 20 FPS
         });
-        // handle the autofocus event as soon as the card is displayed
-        UIHelper.waitForComponent(this, 'cardContainer').subscribe(
-            cardContainer => {
-                const inputs = cardContainer.nativeElement.getElementsByTagName(
-                    'input',
-                );
-                for (let i = 0; i < inputs.length; i++) {
-                    if (inputs.item(i).autofocus) {
-                        console.log(
-                            'card: setting autofocus on element',
-                            inputs.item(i),
-                        );
-                        inputs.item(i).focus();
-                        return;
-                    }
-                }
-            },
-        );
+    }
+
+    ngAfterViewInit() {
+        // Delay focus processing to not interfere with Angular's
+        // initialization.
+        setTimeout(() => this.setInitialFocus());
     }
 
     ngOnDestroy() {
@@ -236,7 +229,35 @@ export class CardComponent implements OnDestroy {
         const pos = document.getElementById(jumpmark.id).offsetTop;
         UIHelper.scrollSmoothElement(pos, this.cardContainer.nativeElement, 2);
     }
+
+    private setInitialFocus() {
+        const inputs = Array.from(
+            this.cardContainer.nativeElement.getElementsByTagName('input'),
+        );
+        if (inputs.some(el => el.autofocus)) {
+            // Focus the first input field that sets `autofocus`.
+            inputs.find(el => el.autofocus).focus();
+        } else if (inputs.length) {
+            // Else, focus the first input field.
+            inputs[0].focus();
+        } else {
+            // Else, focus the right-most action button that is not disabled.
+            const actionButtons = Array.from(
+                this.cardActions.nativeElement.children,
+            ).map(el => el.children[0] as HTMLButtonElement);
+            const lastButton = actionButtons.reverse().find(el => !el.disabled);
+            if (lastButton) {
+                lastButton.focus();
+            }
+        }
+        // Else, focus will default to the 'X' button on the header bar.
+        //
+        // If this happens although there are buttons or inputs on the dialog,
+        // make sure these are there from the beginning and not inserted later
+        // on.
+    }
 }
+
 export class CardJumpmark {
     /**
      *

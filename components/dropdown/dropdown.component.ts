@@ -39,7 +39,7 @@ export class DropdownComponent{
   click(option : OptionItem){
       if(!option.isEnabled)
           return;
-      option.callback(this.callbackObject);
+      setTimeout(() => option.callback(this.callbackObject));
   }
   constructor(private ui : UIService){
 
