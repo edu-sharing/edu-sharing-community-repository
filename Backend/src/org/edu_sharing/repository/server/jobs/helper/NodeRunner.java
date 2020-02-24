@@ -74,6 +74,17 @@ public class NodeRunner {
     ServiceRegistry serviceRegistry = (ServiceRegistry) applicationContext.getBean(ServiceRegistry.SERVICE_REGISTRY);
     private BehaviourFilter policyBehaviourFilter = (BehaviourFilter) applicationContext.getBean("policyBehaviourFilter");
 
+    
+    public NodeRunner() {
+		// TODO Auto-generated constructor stub
+	}
+    
+    public NodeRunner(boolean plainAlfrescoNodeService) {
+		if(plainAlfrescoNodeService) {
+			this.nodeService = NodeServiceFactory.getLocalServicePlainAlfrescoBacked();
+		}
+	}
+    
     public Consumer<NodeRef> getTask() {
         return task;
     }
