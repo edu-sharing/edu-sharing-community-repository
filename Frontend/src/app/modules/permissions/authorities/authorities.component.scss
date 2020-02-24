@@ -1,13 +1,5 @@
 @import "../../../core-ui-module/styles/variables";
 
-input[type=search]{
-  max-width: 400px;
-  width: calc(100% - 240px);
-  padding-left:43px;
-  border: 1px solid $searchInputBorderColor;
-  border-radius: 5pt;
-  margin-left:42px;
-}
 .topFrame{
   position:fixed;
   z-index:1;
@@ -105,13 +97,13 @@ $addToWidth:350px;
 }
 .searchEmbedded{
   padding:10px;
-  input{
-    width:calc(100% - 110px);
+  mat-form-field{
+    width:100%;
   }
 }
 .listEmbedded{
-  top: 230px;
-  height: calc(100% - 300px);
+  top: 250px;
+  height: calc(100% - 310px);
   width:350px;
 }
 .formEmbedded{
@@ -130,8 +122,8 @@ label.search{
   position: fixed;
   right: 0;
   width: $addToWidth;
-  top: 115px+$mainnavHeight;
-  height: calc(100% - 115px - #{$mainnavHeight});
+  top: 105px + $mainnavHeight;
+  height: calc(100% - 105px - #{$mainnavHeight});
   z-index: 2;
   padding-bottom: 20px;
   background-color: #fff;

@@ -14,7 +14,7 @@
       <spinner *ngIf="loading"></spinner>
       <div class="card-scroll" *ngIf="!loading">
         <listTable
-        [options]="explorerOptions"
+        [customOptions]="explorerOptions"
         [columns]="columns"
         [nodes]="configs"
         [hasIcon]="true"

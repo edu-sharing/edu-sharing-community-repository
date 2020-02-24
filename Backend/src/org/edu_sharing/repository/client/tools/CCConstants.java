@@ -834,6 +834,8 @@ public class CCConstants {
 
 	public final static String CCM_VALUE_TOOLPERMISSION_GLOBAL_STATISTICS = "TOOLPERMISSION_GLOBAL_STATISTICS";
 
+	public final static String CCM_VALUE_TOOLPERMISSION_RATE = "TOOLPERMISSION_RATE";
+
 	/**
 	 * dynamic generated properties
 	 */

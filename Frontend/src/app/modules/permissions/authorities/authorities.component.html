@@ -17,8 +17,7 @@
       </div>
     </div>
   </div>
-  <actionbar
-          [options]="optionsActionbar"
+  <actionbar #actionbar
   ></actionbar>
 </div>
 <toolpermission-manager *ngIf="toolpermissionAuthority"
@@ -151,8 +150,7 @@
           <form (ngSubmit)="searchMembers()">
             <input type="search" name="manageMemberSearch" [(ngModel)]="manageMemberSearch"  placeholder="{{(addMembers ? 'PERMISSIONS.SEARCH_USER' : editGroups ? 'PERMISSIONS.SEARCH_GROUPS' : 'PERMISSIONS.SEARCH_MEMBER') | translate}}">
           </form>
-          <actionbar class="memberItem memberActionBar" *ngIf="editMembers || editGroups"
-            [options]="memberOptions"
+          <actionbar class="memberItem memberActionBar" *ngIf="editMembers || editGroups" #actionbarMember
           ></actionbar>
         </div>
         <div class="currentMembers" *ngIf="editMembers">{{ 'PERMISSIONS.CURRENT_MEMBERS' |translate:{group:editMembers.profile ? editMembers.profile.displayName : org.profile.displayName} }}</div>
@@ -162,6 +160,8 @@
           [hasCheckbox]="true"
           [icon]="'person'"
           [hasIcon]="true"
+          [actionbar]="actionbarMember"
+          [customOptions]="memberOptions"
           [selectedNodes]="selectedMembers"
           [hasHeading]="true"
           [selectOnClick]="true"
@@ -186,13 +186,19 @@
   </div>
 </div>
 <div *ngIf="embedded" class="searchEmbedded">
-  <form (ngSubmit)="searchQuery=embeddedQuery"><input matInput type="search" [(ngModel)]="embeddedQuery" placeholder="{{'PERMISSIONS.SEARCH_USER' | translate}}" name="embeddedSearch"></form>
+  <form (ngSubmit)="searchQuery=embeddedQuery">
+    <mat-form-field>
+      <mat-label>{{'PERMISSIONS.SEARCH_USER' | translate}}</mat-label>
+      <input matInput type="search" [(ngModel)]="embeddedQuery" name="embeddedSearch">
+    </mat-form-field>
+  </form>
 </div>
 <listTable class="list" infinite-scroll (scrolled)="loadAuthorities()" [scrollWindow]="false" [class.listEmbedded]="embedded"
   [columns]="columns"
   [nodes]="list"
   [hasCheckbox]="_mode!='ORG'"
   [sortBy]="sortBy"
+  [actionbar]="actionbar"
   [isLoading]="loading"
   [isClickable]="true"
   (onSelectionChanged)="selection($event)"
@@ -200,7 +206,7 @@
   [hasHeading]="true"
   [selectOnClick]="true"
   [hasIcon]="true"
-  [options]="options"
+  [customOptions]="options"
   [icon]="_mode=='USER' ? 'person' : (_mode=='ORG' ? 'work' : 'group')"
   (sortListener)="changeSort($event)"
   ></listTable>

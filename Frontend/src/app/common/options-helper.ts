@@ -23,6 +23,7 @@ import {MainNavComponent} from './ui/main-nav/main-nav.component';
 import {Toast} from '../core-ui-module/toast';
 import {HttpClient} from '@angular/common/http';
 import {ActivatedRoute, Params, Router} from '@angular/router';
+import {DropdownComponent} from '../core-ui-module/components/dropdown/dropdown.component';
 
 @Injectable()
 export class OptionsHelperService {
@@ -173,22 +174,28 @@ export class OptionsHelperService {
     refreshComponents(listener: OptionsListener,
                       mainNav: MainNavComponent,
                       actionbar: ActionbarComponent = null,
-                      list: ListTableComponent = null) {
-        console.log('refreshComponents');
-        mainNav.management.onRefresh.subscribe((nodes: void | Node[]) =>
-            listener.onRefresh(nodes)
-        );
-        mainNav.management.onDelete.subscribe(
-            (result: { error: boolean; count: number; }) => listener.onDelete(result)
-        );
+                      list: ListTableComponent = null,
+                      dropdown: DropdownComponent = null) {
+        console.log('refreshComponents', actionbar);
+        if(mainNav) {
+            mainNav.management.onRefresh.subscribe((nodes: void | Node[]) =>
+                listener.onRefresh(nodes)
+            );
+            mainNav.management.onDelete.subscribe(
+                (result: { error: boolean; count: number; }) => listener.onDelete(result)
+            );
+        }
 
         this.listener = listener;
         this.list = list;
         this.mainNav = mainNav;
-        this.globalOptions = this.getAvailableOptions(mainNav, Target.Actionbar);
+        this.globalOptions = this.getAvailableOptions(Target.Actionbar);
         if (list) {
-            list.options = this.getAvailableOptions(mainNav, Target.List);
-            list.dropdownOptions = this.getAvailableOptions(mainNav, Target.ListDropdown);
+            list.options = this.getAvailableOptions(Target.List);
+            list.dropdownOptions = this.getAvailableOptions(Target.ListDropdown);
+        }
+        if(dropdown) {
+            dropdown.options = this.getAvailableOptions(Target.ListDropdown);
         }
         if (actionbar) {
             actionbar.options = this.globalOptions;
@@ -206,10 +213,11 @@ export class OptionsHelperService {
         return true;
     }
 
-    private getAvailableOptions(mainNav: MainNavComponent, target: Target) {
+    private getAvailableOptions(target: Target) {
         let objects: Node[]|any[];
         if (target === Target.List) {
             objects = this.data.allObjects && this.data.allObjects.length ? [this.data.allObjects[0]] : null;
+            console.log(objects);
         } else if (target === Target.Actionbar) {
             objects = this.data.selectedObjects || [this.data.activeObject];
         } else if (target === Target.ListDropdown) {
@@ -217,53 +225,65 @@ export class OptionsHelperService {
                 objects = [this.data.activeObject];
                 console.log('active object', objects);
             } else {
+                console.log('dropdown is empty');
                 return null;
             }
         }
-        let options = this.prepareOptions(mainNav.management, objects);
+        let options:OptionItem[] = [];
+        if(this.mainNav) {
+           options = this.prepareOptions(this.mainNav.management, objects);
+        }
         options = this.applyExternalOptions(options);
         this.handleCallbacks(options, objects);
         const custom = this.config.instant('customOptions');
         NodeHelper.applyCustomNodeOptions(this.toast, this.http, this.connector, custom, this.data.allObjects, objects, options);
         // do pre-handle callback options for dropdown + actionbar
-        if (target === Target.Actionbar || target === Target.ListDropdown) {
-            options = options.filter((o) => o.showCallback());
-            options.filter((o) => !o.enabledCallback()).forEach((o) => o.isEnabled = false);
-        }
+        options = options.filter((o) =>
+            o.showCallback(target === Target.List ? objects[0] : null)
+        );
+        options.filter((o) => !o.enabledCallback(target === Target.List ? objects[0] : null)).forEach((o) =>
+            o.isEnabled = false
+        );
         if (target !== Target.Actionbar) {
             options = options.filter((o) => !o.isToggle);
+            // do not show any actions in the dropdown for no selection, these are reserved for actionbar
+            options = options.filter((o) =>  !o.constrains || o.constrains.indexOf(Constrain.NoSelection) === -1);
         }
         options = this.sortOptionsByGroup(options);
+        console.log('getAvailableOptions', target, objects, options);
         return (UIHelper.filterValidOptions(this.ui, options) as OptionItem[]);
     }
     private isOptionAvailable(option: OptionItem, objects: Node[]|any[]) {
-        if (this.getType(objects) !== option.elementType) {
-            console.log('types not matching', this.getType(objects), option);
+        if (option.elementType.indexOf(this.getType(objects)) === -1) {
+            // console.log('types not matching', objects, this.getType(objects), option);
             return false;
         }
         if(option.scopes) {
             if (option.scopes.indexOf(this.data.scope) === -1) {
+                // console.log('scopes not matching', objects, option);
                 return false;
             }
         }
         if (option.customShowCallback) {
            if (option.customShowCallback(objects) === false) {
-               console.log('customShowCallback  was false', option, objects);
+               // console.log('customShowCallback  was false', option, objects);
                return false;
            }
         }
         if (option.permissions != null && option.permissionsMode === HideMode.Hide) {
            if (!this.validatePermissions(option, objects)) {
-               console.log('permissions missing', option, objects);
+               // console.log('permissions missing', option, objects);
                return false;
            }
         }
         if (option.constrains != null) {
             const matched=this.objectsMatchesConstrains(option.constrains, objects);
             if(matched != null) {
+                // console.log('Constrain failed: ' + matched, option, objects);
                 return false;
             }
         }
+        // console.log('display option', option, objects);
         return true;
     }
 
@@ -273,7 +293,11 @@ export class OptionsHelperService {
     private getType(objects: Node[] | any[]) {
         // @ TODO may combine for all
         if (objects && objects[0]) {
-            if (objects[0].ref) {
+            if(objects[0].authorityType === RestConstants.AUTHORITY_TYPE_GROUP) {
+                return ElementType.Group;
+            } else if(objects[0].authorityType === RestConstants.AUTHORITY_TYPE_USER) {
+                return ElementType.Person;
+            } else if (objects[0].ref) {
                 return ElementType.Node;
             }
         }
@@ -374,7 +398,7 @@ export class OptionsHelperService {
             this.list.openNode.emit(this.getObjects(object)[0])
         );
         openNode.constrains = [Constrain.Files, Constrain.NoBulk];
-        openNode.scopes = [Scope.Workspace];
+        openNode.scopes = [Scope.WorkspaceList];
         openNode.group = DefaultGroups.View;
         openNode.priority = 30;
 
@@ -562,7 +586,7 @@ export class OptionsHelperService {
             this.cutCopyNode(node, false)
         );
         cutNodes.constrains = [Constrain.HomeRepository, Constrain.User];
-        cutNodes.scopes = [Scope.Workspace];
+        cutNodes.scopes = [Scope.WorkspaceList, Scope.WorkspaceTree];
         cutNodes.permissions = [RestConstants.ACCESS_WRITE];
         cutNodes.permissionsMode = HideMode.Disable;
         cutNodes.key = 'KeyX';
@@ -574,7 +598,7 @@ export class OptionsHelperService {
             this.cutCopyNode(node, true)
         );
         copyNodes.constrains = [Constrain.HomeRepository, Constrain.User];
-        copyNodes.scopes = [Scope.Workspace];
+        copyNodes.scopes = [Scope.WorkspaceList, Scope.WorkspaceTree];
         copyNodes.key = 'KeyC';
         copyNodes.keyCombination = [KeyCombination.CtrlOrAppleCmd];
         copyNodes.group = DefaultGroups.FileOperations;
@@ -583,9 +607,9 @@ export class OptionsHelperService {
         const pasteNodes = new OptionItem('OPTIONS.PASTE', 'content_paste', (node) =>
             this.pasteNode()
         );
-        pasteNodes.elementType = ElementType.Unknown;
+        pasteNodes.elementType = [ElementType.Unknown];
         pasteNodes.constrains = [Constrain.NoSelection, Constrain.ClipboardContent, Constrain.AddObjects, Constrain.User];
-        pasteNodes.scopes = [Scope.Workspace];
+        pasteNodes.scopes = [Scope.WorkspaceList];
         pasteNodes.key = 'KeyV';
         pasteNodes.keyCombination = [KeyCombination.CtrlOrAppleCmd];
         pasteNodes.group = DefaultGroups.FileOperations;
@@ -728,10 +752,10 @@ export class OptionsHelperService {
             this.list.setViewType(this.list.viewType === 1 ? 0 : 1);
             toggleViewType.icon = this.list ? this.list.viewType === 0 ? 'view_module' : 'list' : '';
         });
-        toggleViewType.scopes = [Scope.Workspace, Scope.Search, Scope.CollectionsReferences];
+        toggleViewType.scopes = [Scope.WorkspaceList, Scope.Search, Scope.CollectionsReferences];
         toggleViewType.constrains = [Constrain.NoSelection];
         toggleViewType.group = DefaultGroups.Toggles;
-        toggleViewType.elementType = ElementType.Unknown;
+        toggleViewType.elementType = [ElementType.Unknown];
         toggleViewType.isToggle = true;
         /*
         const reorder = new OptionItem('OPTIONS.LIST_SETTINGS', 'settings', (node: Node) => this.reorderDialog = true);
@@ -742,10 +766,10 @@ export class OptionsHelperService {
         const configureList = new OptionItem('OPTIONS.LIST_SETTINGS', 'settings', (node: Node) =>
             this.list.showReorder()
         );
-        configureList.scopes = [Scope.Workspace];
+        configureList.scopes = [Scope.WorkspaceList];
         configureList.constrains = [Constrain.NoSelection, Constrain.User];
         configureList.group = DefaultGroups.Toggles;
-        configureList.elementType = ElementType.Unknown;
+        configureList.elementType = [ElementType.Unknown];
         configureList.isToggle = true;
         /*
 
@@ -754,10 +778,14 @@ export class OptionsHelperService {
             options.push(this.infoToggle);
          */
         const metadataSidebar = new OptionItem('OPTIONS.METADATA_SIDEBAR', 'info_outline', (object) => {
+            management.nodeSidebarChange.subscribe((change: Node) => {
+                metadataSidebar.icon = change ? 'info' : 'info_outline'
+            });
             management.nodeSidebar = management.nodeSidebar ? null : this.getObjects(object)[0]
-            metadataSidebar.icon = management.nodeSidebar ? 'info' : 'info_outline'
+            management.nodeSidebarChange.emit(management.nodeSidebar);
+
         });
-        metadataSidebar.scopes = [Scope.Workspace];
+        metadataSidebar.scopes = [Scope.WorkspaceList];
         metadataSidebar.constrains = [Constrain.NoBulk];
         metadataSidebar.group = DefaultGroups.Toggles;
         metadataSidebar.isToggle = true;
@@ -826,6 +854,7 @@ export class OptionsHelperService {
     private handleCallbacks(options: OptionItem[], objects: Node[]|any) {
         options.forEach((o) => {
             o.showCallback = ((object) => {
+                console.log(object);
                 const list = NodeHelper.getActionbarNodes(objects, object);
                 return this.isOptionAvailable(o, list);
             });
@@ -914,8 +943,13 @@ export class OptionsHelperService {
             }
         }
         if (constrains.indexOf(Constrain.FilesAndFolders) !== -1) {
-            if (objects.some((o) => !o.collection || o.type !== RestConstants.CCM_TYPE_IO || o.type !== RestConstants.CCM_TYPE_MAP)) {
+            if (objects.some((o) => o.collection || o.type !== RestConstants.CCM_TYPE_IO && o.type !== RestConstants.CCM_TYPE_MAP)) {
                 return Constrain.FilesAndFolders;
+            }
+        }
+        if (constrains.indexOf(Constrain.Admin) !== -1) {
+            if (!this.connectors.getRestConnector().getCurrentLogin().isAdmin) {
+                return Constrain.Admin;
             }
         }
         if (constrains.indexOf(Constrain.AdminOrDebug) !== -1) {

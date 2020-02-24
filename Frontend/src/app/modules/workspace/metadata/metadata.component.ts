@@ -128,8 +128,11 @@ export class WorkspaceMetadataComponent{
         this.usageApi.getNodeUsages(this.nodeObject.ref.id).subscribe((usages: UsageList) => {
             this.usages = usages.usages;
           this.usageApi.getNodeUsagesCollection(this.nodeObject.ref.id).subscribe((collection) => {
-              this.usagesCollection = collection;
-              this.getStats();
+              // @TODO: Activating this causes Cannot read property 'indexOf' of undefined
+              //        at ListTableComponent.push../src/app/core-ui-module/components/list-table/list-table.component.ts.ListTableComponent.isReference (list-table.component.ts:592)
+              // when switching elements while the metadata bar is open
+              // this.usagesCollection = collection;
+              // this.getStats();
           });
       });
 

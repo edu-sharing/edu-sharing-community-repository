@@ -8,6 +8,7 @@ import {
 import { Helper } from '../../../core-module/rest/helper';
 import { OptionItem } from '../../../core-ui-module/option-item';
 import { DropData } from '../../../core-ui-module/directives/drag-nodes/drag-nodes';
+import {MainNavComponent} from '../../../common/ui/main-nav/main-nav.component';
 
 @Component({
     selector: 'workspace-tree',
@@ -17,15 +18,16 @@ import { DropData } from '../../../core-ui-module/directives/drag-nodes/drag-nod
 export class WorkspaceTreeComponent {
     @Input() root: string;
     @Input() isSafe: boolean;
+    @Input() mainNav: MainNavComponent;
     @Input() selectedNode: string;
     @Input() set path(path: Node[]) {
-        if (path.length == 0) {
+        if (path.length === 0) {
             this.reload = new Boolean(true);
             return;
         }
         this._path[0] = [];
 
-        for (let node of path) {
+        for (const node of path) {
             if (node && node.ref) this._path[0].push(node.ref.id);
         }
         this._selectedPath = this._path[0];
