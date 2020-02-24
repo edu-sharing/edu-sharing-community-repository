@@ -107,6 +107,10 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
 	public NodeServiceImpl() {
 		this(ApplicationInfoList.getHomeRepository().getAppId(), false);
 	}
+	
+	public NodeServiceImpl(String appId) {
+		this(appId, false);
+	}
 
 	public NodeServiceImpl(String appId, boolean alfrescoNodeService) {
 		ApplicationContext applicationContext = AlfAppContextGate.getApplicationContext();
