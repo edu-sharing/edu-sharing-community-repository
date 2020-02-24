@@ -156,7 +156,16 @@ export class WorkspaceShareComponent {
     deletedUsages: any[] = [];
     usages: any;
     showCollections = false;
-    buttons: DialogButton[];
+    buttons: DialogButton[] = [
+        new DialogButton('CANCEL', DialogButton.TYPE_CANCEL, () =>
+            this.cancel(),
+        ),
+        new DialogButton(
+            'WORKSPACE.BTN_INVITE', // Can be changed in `updateButtons`.
+            DialogButton.TYPE_PRIMARY,
+            () => this.save(),
+        ),
+    ];
 
     private currentType = [
         RestConstants.ACCESS_CONSUMER,
@@ -203,7 +212,6 @@ export class WorkspaceShareComponent {
 
         this.connector.isLoggedIn().subscribe((data: LoginResult) => {
             this.isSafe = data.currentScope != null;
-            this.updateButtons();
             this.connector
                 .hasToolPermission(
                     this.isSafe
@@ -557,16 +565,8 @@ export class WorkspaceShareComponent {
     }
 
     updateButtons() {
-        this.buttons = [
-            new DialogButton('CANCEL', DialogButton.TYPE_CANCEL, () =>
-                this.cancel(),
-            ),
-            new DialogButton(
-                this.tab == 0 ? 'WORKSPACE.BTN_INVITE' : 'APPLY',
-                DialogButton.TYPE_PRIMARY,
-                () => this.save(),
-            ),
-        ];
+        const saveButton = this.buttons[1];
+        saveButton.name = this.tab == 0 ? 'WORKSPACE.BTN_INVITE' : 'APPLY';
     }
 
     private chooseType() {
@@ -738,7 +738,7 @@ export class WorkspaceShareComponent {
         }
         if (type) this.currentType = type;
     }
-    
+
     private removePermissions(permissions: Permission[], remove: string) {
         for (let i = 0; i < remove.length; i++) {
             if (

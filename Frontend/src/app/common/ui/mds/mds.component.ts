@@ -98,7 +98,6 @@ export class MdsComponent{
   private static GROUP_MULTIVALUE_DELIMITER='[+]';
   private mdsId = new Date().getTime();
   private childobjectDrag: number;
-  buttons: DialogButton[];
   @Input() set suggestions(suggestions:any){
     this._suggestions=suggestions;
     this.applySuggestions();
@@ -236,6 +235,10 @@ export class MdsComponent{
   private mds: any;
   private static MAX_SUGGESTIONS = 5;
   private suggestionsViaSearch = false;
+  private buttons = [
+    new DialogButton('CANCEL', DialogButton.TYPE_CANCEL, () => this.cancel()),
+    new DialogButton('SAVE', DialogButton.TYPE_PRIMARY, () => this.saveValues()),
+  ];
 
   private resetValues(){
       this._currentValues=null;
@@ -468,7 +471,6 @@ export class MdsComponent{
       if(group.id==id){
         let result=this.renderList(group,data);
         this.setRenderedHtml(result.main);
-        this.updateButtons();
         if(result.suggestions)
           this.renderedSuggestions=this.sanitizer.bypassSecurityTrustHtml(result.suggestions);
         this.renderJumpmarks(group,data);
@@ -479,7 +481,6 @@ export class MdsComponent{
     }
     let html='Group \''+id+'\' was not found in the mds';
     this.setRenderedHtml(html);
-    this.updateButtons();
   }
   public getValues(propertiesIn:any={},showError=true,widgets=this.currentWidgets){
     let properties:any={};
@@ -2488,13 +2489,6 @@ export class MdsComponent{
             this.renderGroup(nodeGroup, this.mds);
             this.isLoading = false;
         });
-    }
-
-    private updateButtons() {
-        this.buttons=[
-            new DialogButton('CANCEL',DialogButton.TYPE_CANCEL,()=>this.cancel()),
-            new DialogButton('SAVE',DialogButton.TYPE_PRIMARY,()=>this.saveValues())
-        ];
     }
 
   getCurrentProperties() {
