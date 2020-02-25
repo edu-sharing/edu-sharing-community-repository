@@ -743,9 +743,16 @@ a.rowInner{
   text-align: center;
 }
 .cardSmallList .row_1{
-  top: 25px;
+  top: 5px;
   font-size: 110%;
+  height: 60px;
   overflow: hidden;
+  > .row-group {
+    height: 100%; // center text when container is *not* filled
+    > a.rowInner {
+      max-height: 100%; // align top *when* container is filled
+    }
+  }
 }
 .cardSmallList .row_2{
   font-size: 80%;
