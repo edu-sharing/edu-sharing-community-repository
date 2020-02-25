@@ -9,6 +9,8 @@ import { UIHelper } from '../../ui-helper';
 import {
     RestCollectionService,
     RestConnectorService,
+    UIConstants,
+    TemporaryStorageService,
 } from '../../../core-module/core.module';
 import { Router } from '@angular/router';
 
@@ -66,6 +68,7 @@ export class VideoControlsComponent {
         private connector: RestConnectorService,
         private router: Router,
         private toast: Toast,
+        private temporaryStorage: TemporaryStorageService,
     ) {
         this.isGuest = this.connector.getCurrentLogin().isGuest;
     }
@@ -198,6 +201,20 @@ export class VideoControlsComponent {
                 }
             },
         );
+    }
+
+    createCollectionAndAdd(root?: Collection) {
+        this.temporaryStorage.set(
+            TemporaryStorageService.COLLECTION_ADD_NODES,
+            [this.node],
+        );
+        this.router.navigate([
+            UIConstants.ROUTER_PREFIX,
+            'collections',
+            'collection',
+            'new',
+            root ? root.ref.id : RestConstants.ROOT,
+        ]);
     }
 
     private isCollectionRef() {
