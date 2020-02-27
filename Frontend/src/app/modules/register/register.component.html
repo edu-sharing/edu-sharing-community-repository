@@ -1,5 +1,5 @@
 <global-progress *ngIf="isLoading"></global-progress>
-<card [class.display-none]="isLoading"
+<card *ngIf="!isLoading"
       avatar="assets/images/app-icon.svg"
       [buttons]="updateButtons()"
       modal="always"
