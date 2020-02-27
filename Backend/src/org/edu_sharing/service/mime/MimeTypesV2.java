@@ -6,12 +6,10 @@ import java.util.List;
 import java.util.Map;
 
 import org.edu_sharing.alfresco.action.RessourceInfoExecuter;
-import org.edu_sharing.alfresco.action.RessourceInfoTool;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.client.tools.Theme;
 import org.edu_sharing.repository.server.tools.ApplicationInfo;
 import org.edu_sharing.repository.server.tools.URLTool;
-import org.edu_sharing.restservices.RepositoryDao;
 
 public class MimeTypesV2 {
 	public static final String MIME_DIRECTORY="application/x-directory";
@@ -74,10 +72,12 @@ public class MimeTypesV2 {
 		return type.equals(CCConstants.CCM_TYPE_MAP) 
 			|| type.equals(CCConstants.CM_TYPE_FOLDER);
 	}
-	public static boolean isCollection(Map<String,Object> properties){
+	public static boolean isCollection(List<String> aspects, Map<String, Object> properties){
+		if(aspects!=null && aspects.contains(CCConstants.CCM_ASPECT_COLLECTION)){
+			return true;
+		}
 		String type=(String) properties.get(CCConstants.CCM_PROP_MAP_COLLECTIONTYPE);
-		if(type == null) return false;
-		return true;
+		return type != null;
 	}
 	/**
 	 * Gets the path where the repo stores mime type icons
@@ -155,7 +155,7 @@ public class MimeTypesV2 {
 	 * @return
 	 */
 	public static String getNodeType(String nodeType,Map<String,Object> properties,List<String> aspects){
-		if(isCollection(properties))
+		if(isCollection(aspects, properties))
 			return "collection";
 		if(isDirectory(properties))
 			return "folder";

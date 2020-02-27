@@ -313,7 +313,7 @@ public class CollectionDao {
 		}
 		
 		result.setTitle(node.getTitle());
-		result.setType(node.getType());
+		result.setType(node.getCollection().getType());
 		result.setViewtype(node.getCollection().getViewtype());
 		result.setX(node.getCollection().getX());
 		result.setY(node.getCollection().getY());

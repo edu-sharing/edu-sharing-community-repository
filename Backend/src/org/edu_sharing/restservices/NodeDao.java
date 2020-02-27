@@ -1,7 +1,6 @@
 package org.edu_sharing.restservices;
 
 import java.io.InputStream;
-import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -1153,7 +1152,7 @@ public class NodeDao {
 	}
 	
 	public boolean isCollection(){
-		return MimeTypesV2.isCollection(nodeProps);
+		return MimeTypesV2.isCollection(aspects, nodeProps);
 	}
 	
 	public NodeRef getRef() {
