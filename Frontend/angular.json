@@ -73,6 +73,7 @@
           "builder": "@angular-devkit/build-angular:karma",
           "options": {
             "main": "src/test.ts",
+            "tsConfig": "src/tsconfig.json",
             "karmaConfig": "./karma.conf.js",
             "scripts": [
               "src/assets/js/jquery-3.4.1.min.js",
