@@ -240,7 +240,7 @@ export class CardComponent implements AfterViewInit, OnDestroy {
         } else if (inputs.length) {
             // Else, focus the first input field.
             inputs[0].focus();
-        } else {
+        } else if (this.cardActions) {
             // Else, focus the right-most action button that is not disabled.
             const actionButtons = Array.from(
                 this.cardActions.nativeElement.children,
@@ -250,7 +250,8 @@ export class CardComponent implements AfterViewInit, OnDestroy {
                 lastButton.focus();
             }
         }
-        // Else, focus will default to the 'X' button on the header bar.
+        // Else, focus will default to the 'X' button on the header bar for
+        // dialogs that set `modal=always`.
         //
         // If this happens although there are buttons or inputs on the dialog,
         // make sure these are there from the beginning and not inserted later
