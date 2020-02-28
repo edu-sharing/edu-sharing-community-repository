@@ -14,6 +14,8 @@ import {CardComponent} from '../../core-ui-module/components/card/card.component
 import {Constrain, DefaultGroups, ElementType, KeyCombination, OptionItem, Scope, Target} from '../../core-ui-module/option-item';
 import {OPTIONS_HELPER_CONFIG, OptionsHelperService} from '../../common/options-helper';
 import {DropdownComponent} from '../../core-ui-module/components/dropdown/dropdown.component';
+import {MainNavComponent} from '../../common/ui/main-nav/main-nav.component';
+import {WorkspaceManagementDialogsComponent} from '../management-dialogs/management-dialogs.component';
 
 
 @Component({
@@ -31,6 +33,7 @@ import {DropdownComponent} from '../../core-ui-module/components/dropdown/dropdo
 })
 export class CreateMenuComponent {
     @ViewChild('dropdown', {static: false}) dropdown : DropdownComponent;
+    @ViewChild('management', {static: false}) management : WorkspaceManagementDialogsComponent;
     /**
      * Currently allowed to drop files?
      */
@@ -78,6 +81,9 @@ export class CreateMenuComponent {
     onDataPaste(event: ClipboardEvent) {
         console.log(JSON.stringify(event.clipboardData.items.length));
         if(event.type === 'paste') {
+            if(CardComponent.getNumberOfOpenCards() > 0){
+                return;
+            }
             if (event.clipboardData.items.length > 0) {
                 const item = event.clipboardData.items[0];
                 console.log(item.type);
@@ -85,7 +91,7 @@ export class CreateMenuComponent {
                     item.getAsString((data) => {
                         console.log(data);
                         if(data.toLowerCase().startsWith('http')) {
-                            this.createLink(data);
+                            this.management.createUrlLink(new LinkData(data));
                         } else {
                             this.toast.error(null, 'CLIPBOARD_DATA_UNSUPPORTED');
                         }
@@ -310,18 +316,5 @@ export class CreateMenuComponent {
                 }
             }
         );
-    }
-
-    private createLink(link: string) {
-        const urlData = NodeHelper.createUrlLink(new LinkData(link));
-        this.toast.showProgressDialog();
-        this.nodeService.createNode(this.getParent().ref.id, RestConstants.CCM_TYPE_IO, urlData.aspects, urlData.properties, true, RestConstants.COMMENT_MAIN_FILE_UPLOAD).subscribe((node) => {
-                this.onCreate.emit([node.node]);
-                this.toast.closeModalDialog();
-            }
-            , error => {
-                this.toast.error(error);
-                this.toast.closeModalDialog();
-            });
     }
 }

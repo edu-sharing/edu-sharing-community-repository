@@ -9,7 +9,7 @@
                       (onCancel)="addFolderName=null"
                       (onFolderAdded)="addFolder($event)"
 ></workspace-add-folder>
-<workspace-management
+<workspace-management #management
         [parent]="getParent()"
         [(showUploadSelect)]="showUploadSelect"
         [uploadShowPicker]="showPicker"

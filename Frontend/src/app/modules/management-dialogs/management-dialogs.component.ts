@@ -276,7 +276,7 @@ export class WorkspaceManagementDialogsComponent  {
  public uploadFile(event:any){
    this.onUploadFileSelected.emit(event);
  }
-  private createUrlLink(link : LinkData) {
+  createUrlLink(link : LinkData) {
     const urlData = NodeHelper.createUrlLink(link);
     this.closeUploadSelect();
     this.globalProgress=true;
