@@ -1,5 +1,5 @@
 import {trigger} from '@angular/animations';
-import {Component, EventEmitter, Input, Output, ViewChild} from '@angular/core';
+import {Component, EventEmitter, HostListener, Input, Output, ViewChild} from '@angular/core';
 import {ActivatedRoute, Params, Router} from '@angular/router';
 import {TranslateService} from '@ngx-translate/core';
 import {BridgeService} from '../../core-bridge-module/bridge.service';
@@ -9,7 +9,7 @@ import {UIAnimation} from '../../core-module/ui/ui-animation';
 import {Toast} from '../../core-ui-module/toast';
 import {UIHelper} from '../../core-ui-module/ui-helper';
 import {DateHelper} from '../../core-ui-module/DateHelper';
-import {NodeHelper} from '../../core-ui-module/node-helper';
+import {LinkData, NodeHelper} from '../../core-ui-module/node-helper';
 import {CardComponent} from '../../core-ui-module/components/card/card.component';
 import {Constrain, DefaultGroups, ElementType, KeyCombination, OptionItem, Scope, Target} from '../../core-ui-module/option-item';
 import {OPTIONS_HELPER_CONFIG, OptionsHelperService} from '../../common/options-helper';
@@ -74,6 +74,30 @@ export class CreateMenuComponent {
     private params: Params;
     options: OptionItem[];
 
+    @HostListener('document:paste', ['$event'])
+    onDataPaste(event: ClipboardEvent) {
+        console.log(JSON.stringify(event.clipboardData.items.length));
+        if(event.type === 'paste') {
+            if (event.clipboardData.items.length > 0) {
+                const item = event.clipboardData.items[0];
+                console.log(item.type);
+                if (item.type === 'text/plain') {
+                    item.getAsString((data) => {
+                        console.log(data);
+                        if(data.toLowerCase().startsWith('http')) {
+                            this.createLink(data);
+                        } else {
+                            this.toast.error(null, 'CLIPBOARD_DATA_UNSUPPORTED');
+                        }
+                    });
+                } else {
+                    this.toast.error(null, 'CLIPBOARD_DATA_UNSUPPORTED');
+                }
+                event.preventDefault();
+                event.stopPropagation();
+            }
+        }
+    }
     constructor(
         public bridge: BridgeService,
         private connectors: RestConnectorsService,
@@ -286,5 +310,18 @@ export class CreateMenuComponent {
                 }
             }
         );
+    }
+
+    private createLink(link: string) {
+        const urlData = NodeHelper.createUrlLink(new LinkData(link));
+        this.toast.showProgressDialog();
+        this.nodeService.createNode(this.getParent().ref.id, RestConstants.CCM_TYPE_IO, urlData.aspects, urlData.properties, true, RestConstants.COMMENT_MAIN_FILE_UPLOAD).subscribe((node) => {
+                this.onCreate.emit([node.node]);
+                this.toast.closeModalDialog();
+            }
+            , error => {
+                this.toast.error(error);
+                this.toast.closeModalDialog();
+            });
     }
 }

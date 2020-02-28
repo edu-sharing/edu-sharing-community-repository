@@ -7,6 +7,7 @@ import {UIAnimation} from '../../../core-module/ui/ui-animation';
 import {RestSearchService} from '../../../core-module/core.module';
 import {Toast} from '../../../core-ui-module/toast';
 import {RestIamService} from '../../../core-module/core.module';
+import {LinkData} from '../../../core-ui-module/node-helper';
 
 @Component({
   selector: 'workspace-file-upload-select',
@@ -69,7 +70,7 @@ export class WorkspaceFileUploadSelectComponent  {
   @Output() parentChange = new EventEmitter();
   @Output() onCancel= new EventEmitter();
   @Output() onFileSelected= new EventEmitter();
-  @Output() onLinkSelected= new EventEmitter();
+  @Output() onLinkSelected= new EventEmitter<LinkData>();
 
   public cancel(){
     this.onCancel.emit();
@@ -130,7 +131,7 @@ export class WorkspaceFileUploadSelectComponent  {
     }
     */
   }
-  public parentChoosed(event: Node[]){
+  public parentChoosed(event: Node[]) {
     this._parent = event[0];
     this.parentChange.emit(this._parent);
     this.chooseParent = false;
@@ -146,7 +147,7 @@ export class WorkspaceFileUploadSelectComponent  {
       this.user = user;
     });
   }
-  updateButtons(){
+  updateButtons() {
     const ok = new DialogButton('OK', DialogButton.TYPE_PRIMARY, () => this.setLink());
     ok.disabled = this.disabled || (this.showPicker && !this._parent);
     this.buttons = [

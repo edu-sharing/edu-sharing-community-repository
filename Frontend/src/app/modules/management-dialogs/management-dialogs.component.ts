@@ -19,6 +19,8 @@ import {ClipboardObject, TemporaryStorageService} from '../../core-module/core.m
 import {RestUsageService} from "../../core-module/core.module";
 import {Observable} from 'rxjs';
 import {BridgeService} from '../../core-bridge-module/bridge.service';
+import {NodeHelper} from '../../core-ui-module/node-helper';
+import {LinkData} from './file-upload-select/file-upload-select.component';
 
 @Component({
   selector: 'workspace-management',
@@ -274,21 +276,12 @@ export class WorkspaceManagementDialogsComponent  {
  public uploadFile(event:any){
    this.onUploadFileSelected.emit(event);
  }
-  private createUrlLink(link : any){
-    let prop:any={};
-    let aspects:string[]=[];
-    let url=UIHelper.addHttpIfRequired(link.link);
-    prop[RestConstants.CCM_PROP_IO_WWWURL]=[url];
-    if(link.lti){
-        aspects.push(RestConstants.CCM_ASPECT_TOOL_INSTANCE_LINK);
-        prop[RestConstants.CCM_PROP_TOOL_INSTANCE_KEY]=[link.consumerKey];
-        prop[RestConstants.CCM_PROP_TOOL_INSTANCE_SECRET]=[link.sharedSecret];
-    }
-    prop[RestConstants.CCM_PROP_LINKTYPE]=[RestConstants.LINKTYPE_USER_GENERATED];
+  private createUrlLink(link : LinkData) {
+    const urlData = NodeHelper.createUrlLink(link);
     this.closeUploadSelect();
     this.globalProgress=true;
-    this.nodeService.createNode(this.parent.ref.id,RestConstants.CCM_TYPE_IO,aspects,prop,true,RestConstants.COMMENT_MAIN_FILE_UPLOAD).subscribe(
-      (data:NodeWrapper) => {
+    this.nodeService.createNode(this.parent.ref.id,RestConstants.CCM_TYPE_IO,urlData.aspects,urlData.properties,true,RestConstants.COMMENT_MAIN_FILE_UPLOAD).subscribe(
+      (data) => {
         this.wasUploaded = true;
         this.globalProgress=false;
         this.nodeDeleteOnCancel=true;
