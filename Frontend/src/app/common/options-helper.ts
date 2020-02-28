@@ -13,9 +13,9 @@ import {Helper} from '../core-module/rest/helper';
 import {ClipboardObject, TemporaryStorageService} from '../core-module/rest/services/temporary-storage.service';
 import {BridgeService} from '../core-bridge-module/bridge.service';
 import {MessageType} from '../core-module/ui/message-type';
-import {Injectable} from '@angular/core';
+import {Inject, Injectable, InjectionToken, Optional} from '@angular/core';
 import {CardComponent} from '../core-ui-module/components/card/card.component';
-import {fromEvent, Observable} from 'rxjs';
+import {fromEvent, Observable, Subscription} from 'rxjs';
 import {TranslateService} from '@ngx-translate/core';
 import {RestNodeService} from '../core-module/rest/services/rest-node.service';
 import {ConfigurationService, FrameEventsService, RestCollectionService, RestConnectorService, RestHelper, RestIamService} from '../core-module/core.module';
@@ -27,6 +27,8 @@ import {DropdownComponent} from '../core-ui-module/components/dropdown/dropdown.
 
 @Injectable()
 export class OptionsHelperService {
+    private static subscriptionUp: Subscription;
+    private static subscriptionDown: Subscription;
     private appleCmd: boolean;
     private globalOptions: OptionItem[];
     private list: ListTableComponent;
@@ -83,25 +85,35 @@ export class OptionsHelperService {
         private iamService: RestIamService,
         private router: Router,
         private route: ActivatedRoute,
-        private event: FrameEventsService,
+        private eventService: FrameEventsService,
         private http: HttpClient,
         private ui: UIService,
         private toast: Toast,
         private translate: TranslateService,
         private nodeService: RestNodeService,
         private collectionService: RestCollectionService,
-        private config: ConfigurationService,
+        private configService: ConfigurationService,
         private storage: TemporaryStorageService,
         private bridge: BridgeService,
+        @Optional() @Inject(OPTIONS_HELPER_CONFIG) config: OptionsHelperConfig,
     ) {
+        if(config == null) {
+            config = new OptionsHelperConfig();
+        }
         this.route.queryParams.subscribe((queryParams) => this.queryParams = queryParams);
         // @HostListener decorator unfortunately does not work in services
-        fromEvent(document, 'keyup').subscribe((event) =>
-            this.handleKeyboardEventUp(event)
-        );
-        fromEvent(document, 'keydown').subscribe((event) =>
-            this.handleKeyboardEvent(event)
-        );
+        if(config.subscribeEvents) {
+            if (OptionsHelperService.subscriptionDown) {
+                OptionsHelperService.subscriptionDown.unsubscribe();
+                OptionsHelperService.subscriptionUp.unsubscribe();
+            }
+            OptionsHelperService.subscriptionUp = fromEvent(document, 'keyup').subscribe((event) =>
+                this.handleKeyboardEventUp(event)
+            );
+            OptionsHelperService.subscriptionDown = fromEvent(document, 'keydown').subscribe((event) =>
+                this.handleKeyboardEvent(event)
+            );
+        }
     }
     private cutCopyNode(node: Node, copy: boolean) {
         let list = this.getObjects(node);
@@ -239,7 +251,7 @@ export class OptionsHelperService {
            options = this.prepareOptions(this.mainNav.management, objects);
         }
         options = this.applyExternalOptions(options);
-        const custom = this.config.instant('customOptions');
+        const custom = this.configService.instant('customOptions');
         NodeHelper.applyCustomNodeOptions(this.toast, this.http, this.connector, custom, this.data.allObjects, objects, options);
         // do pre-handle callback options for dropdown + actionbar
         options = this.filterOptions(options, target, objects);
@@ -665,7 +677,7 @@ export class OptionsHelperService {
         );
         reportNode.constrains = [Constrain.Files, Constrain.NoBulk, Constrain.HomeRepository];
         reportNode.scopes = [Scope.Search, Scope.CollectionsReferences, Scope.Render];
-        reportNode.customShowCallback = (() => this.config.instant('nodeReport', false));
+        reportNode.customShowCallback = (() => this.configService.instant('nodeReport', false));
         reportNode.group = DefaultGroups.View;
         reportNode.priority = 50;
 
@@ -843,7 +855,7 @@ export class OptionsHelperService {
     }
 
     private editConnector(node: Node|any, type: Filetype = null, win: any = null, connectorType: Connector = null) {
-        UIHelper.openConnector(this.connectors, this.iamService, this.event, this.toast, node, type, win, connectorType);
+        UIHelper.openConnector(this.connectors, this.iamService, this.eventsService, this.toast, node, type, win, connectorType);
     }
     private canAddObjects() {
         return this.data.parent && NodeHelper.getNodesRight([this.data.parent], RestConstants.ACCESS_ADD_CHILDREN);
@@ -1054,3 +1066,9 @@ export interface OptionData {
     parent?: Node|any;
     customOptions?: OptionItem[];
 }
+
+export class OptionsHelperConfig {
+    subscribeEvents? = true;
+}
+
+export const OPTIONS_HELPER_CONFIG = new InjectionToken<OptionsHelperConfig>('OptionsHelperConfig');

@@ -14,7 +14,7 @@ import { UIHelper } from '../../../core-ui-module/ui-helper';
 import { DropData } from '../../../core-ui-module/directives/drag-nodes/drag-nodes';
 import {MatMenuTrigger} from '@angular/material/menu';
 import {DropdownComponent} from '../../../core-ui-module/components/dropdown/dropdown.component';
-import {OptionsHelperService} from '../../../common/options-helper';
+import {OPTIONS_HELPER_CONFIG, OptionsHelperService} from '../../../common/options-helper';
 import {MainNavComponent} from '../../../common/ui/main-nav/main-nav.component';
 
 @Component({
@@ -28,7 +28,9 @@ import {MainNavComponent} from '../../../common/ui/main-nav/main-nav.component';
         ),
         trigger('open', UIAnimation.openOverlay()),
     ],
-    providers: [OptionsHelperService]
+    providers: [OptionsHelperService, {provide: OPTIONS_HELPER_CONFIG, useValue: {
+            subscribeEvents: false
+        }}]
 })
 export class WorkspaceSubTreeComponent {
     private static MAX_FOLDER_COUNT = 100;

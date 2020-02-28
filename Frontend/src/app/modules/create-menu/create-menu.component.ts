@@ -12,7 +12,7 @@ import {DateHelper} from '../../core-ui-module/DateHelper';
 import {NodeHelper} from '../../core-ui-module/node-helper';
 import {CardComponent} from '../../core-ui-module/components/card/card.component';
 import {Constrain, DefaultGroups, ElementType, KeyCombination, OptionItem, Scope, Target} from '../../core-ui-module/option-item';
-import {OptionsHelperService} from '../../common/options-helper';
+import {OPTIONS_HELPER_CONFIG, OptionsHelperService} from '../../common/options-helper';
 import {DropdownComponent} from '../../core-ui-module/components/dropdown/dropdown.component';
 
 
@@ -24,7 +24,9 @@ import {DropdownComponent} from '../../core-ui-module/components/dropdown/dropdo
         trigger('dialog', UIAnimation.switchDialog(UIAnimation.ANIMATION_TIME_FAST)),
     ],
     providers: [
-        OptionsHelperService
+        OptionsHelperService, {provide: OPTIONS_HELPER_CONFIG, useValue: {
+                subscribeEvents: false
+            }}
     ]
 })
 export class CreateMenuComponent {
