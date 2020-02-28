@@ -81,6 +81,9 @@ export class CreateMenuComponent {
     onDataPaste(event: ClipboardEvent) {
         console.log(JSON.stringify(event.clipboardData.items.length));
         if(event.type === 'paste') {
+            if(!this.allowed || !this.allowBinary){
+                return;
+            }
             if(CardComponent.getNumberOfOpenCards() > 0){
                 return;
             }
