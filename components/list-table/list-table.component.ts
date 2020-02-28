@@ -11,7 +11,7 @@ import {
     Component,
     ContentChild,
     ElementRef,
-    EventEmitter,
+    EventEmitter, HostListener,
     Input,
     Output,
     TemplateRef,
@@ -534,7 +534,7 @@ export class ListTableComponent implements EventListener {
         }
     }
 
-    // @HostListener('document:keydown', ['$event'])
+    @HostListener('document:keydown', ['$event'])
     handleKeyboardEvent(event: KeyboardEvent): void {
         if (
             event.code === 'KeyA' &&
