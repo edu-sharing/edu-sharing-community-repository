@@ -19,8 +19,7 @@ import {ClipboardObject, TemporaryStorageService} from '../../core-module/core.m
 import {RestUsageService} from "../../core-module/core.module";
 import {Observable} from 'rxjs';
 import {BridgeService} from '../../core-bridge-module/bridge.service';
-import {NodeHelper} from '../../core-ui-module/node-helper';
-import {LinkData} from './file-upload-select/file-upload-select.component';
+import {LinkData, NodeHelper} from '../../core-ui-module/node-helper';
 
 @Component({
   selector: 'workspace-management',
