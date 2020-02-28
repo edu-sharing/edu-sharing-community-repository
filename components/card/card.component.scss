@@ -203,11 +203,18 @@
       button {
         border-radius: 0;
         margin: 0;
-        padding: 5px;
+        padding: 10px 5px;
         width: 100%;
         transition: all $transitionNormal;
+        white-space: normal;
         .mat-button-wrapper{
           justify-content: flex-start;
+          text-align: start;
+          line-height: 1.5;
+          > i {
+            text-align: center;
+            flex-shrink: 0;
+          }
         }
       }
       button.active {

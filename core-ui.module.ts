@@ -46,6 +46,7 @@ import { UserAvatarComponent } from './components/user-avatar/user-avatar.compon
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { NodesDragSourceDirective } from './directives/drag-nodes/nodes-drag-source.directive';
 import { NodesDropTargetDirective } from './directives/drag-nodes/nodes-drop-target.directive';
+import { A11yModule } from '@angular/cdk/a11y';
 
 @NgModule({
     declarations: [
@@ -78,6 +79,7 @@ import { NodesDropTargetDirective } from './directives/drag-nodes/nodes-drop-tar
         NodesDropTargetDirective,
     ],
     imports: [
+        A11yModule,
         BrowserModule,
         BrowserAnimationsModule,
         FormsModule,
@@ -97,13 +99,11 @@ import { NodesDropTargetDirective } from './directives/drag-nodes/nodes-drop-tar
             loader: {
                 provide: TranslateLoader,
                 useFactory: createTranslateLoader,
-                deps: [HttpClient, RestLocatorService]
-            }
+                deps: [HttpClient, RestLocatorService],
+            },
         }),
     ],
-    providers: [
-        Toast
-    ],
+    providers: [Toast],
     entryComponents: [
         SpinnerComponent,
         ListTableComponent,
@@ -143,5 +143,5 @@ import { NodesDropTargetDirective } from './directives/drag-nodes/nodes-drop-tar
         NodesDropTargetDirective,
     ],
 })
-export class CoreUiModule { }
+export class CoreUiModule {}
 

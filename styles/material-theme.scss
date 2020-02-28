@@ -159,8 +159,20 @@ input.mat-input-element, mat-label, .mat-select-value{
   line-height: normal;
 }
 // will better align the border label for the outlined input
-.mat-form-field-appearance-outline .mat-form-field-label{
-  margin-top: -6px;
+.mat-form-field-appearance-outline {
+  $mat-form-field-floating-label-offset: 0.3em;
+  // Add the offset value defined above to all relevant default values
+  .mat-form-field-label-wrapper {
+    top: calc(-0.9375em - #{$mat-form-field-floating-label-offset});
+    padding-top: calc(0.9375em + #{$mat-form-field-floating-label-offset});
+  }
+  .mat-form-field-label {
+    top: calc(1.9375em + #{$mat-form-field-floating-label-offset});
+  }
+  &.mat-form-field-can-float.mat-form-field-should-float .mat-form-field-label,
+  &.mat-form-field-can-float .mat-input-server:focus + .mat-form-field-label-wrapper .mat-form-field-label {
+    transform: translateY(calc(-1.68748em - #{$mat-form-field-floating-label-offset})) scale(0.75);  
+  }
 }
 .mat-autocomplete-high{
   max-height: 350px;
@@ -222,9 +234,6 @@ input.mat-input-element, mat-label, .mat-select-value{
   &:not(:empty){
     padding: 0!important;
   }
-}
-.mat-button-focus-overlay{
-  background: $primary;
 }
 .mat-menu-item{
   &:hover:not([disabled]){

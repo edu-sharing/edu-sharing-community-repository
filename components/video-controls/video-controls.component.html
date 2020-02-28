@@ -5,6 +5,7 @@
   title="WORKSPACE.SELECT_COLLECTION"
   (onCancel)="chooseCollection=false"
   (onChoose)="addToCollection($event)"
+  (onCreateCollection)="createCollectionAndAdd($event)"
 ></collection-chooser>
 <div *ngIf="_video && node && !isGuest">
 
