@@ -1,7 +1,7 @@
 <div *ngIf="data" class="main">
   <div class="header">
     <div class="name">{{ data.name }}</div>
-    <button mat-icon-button class="close" (click)="close()"><i class="material-icons">close</i></button>
+    <div class="close"><button mat-icon-button (click)="close()"><i class="material-icons">close</i></button></div>
   </div>
   <div class="row" *ngIf="!data.isDirectory">
       <div class="col s12">
