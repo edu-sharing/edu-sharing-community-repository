@@ -19,6 +19,7 @@ import {UIHelper} from '../../../core-ui-module/ui-helper';
 import {UIConstants} from '../../../core-module/ui/ui-constants';
 import {ConfigurationHelper} from '../../../core-module/core.module';
 import {RestSearchService} from '../../../core-module/core.module';
+import {Helper} from '../../../core-module/rest/helper';
 
 // Charts.js
 declare var Chart: any;
@@ -29,8 +30,6 @@ declare var Chart: any;
   styleUrls: ['metadata.component.scss']
 })
 export class WorkspaceMetadataComponent{
-  private _node: string;
-  public loading= true;
   public data: any;
   private INFO= 'INFO';
   private PROPERTIES= 'PROPERTIES';
@@ -58,8 +57,8 @@ export class WorkspaceMetadataComponent{
   @Input() isAdmin: boolean;
   forkedParent: Node;
   forkedChilds: Node[];
-  @Input() set node(node: string){
-    this._node = node;
+  @Input() set node(node: Node) {
+    this.nodeObject = Helper.deepCopy(node);
     this.load();
   }
   @Output() onEditMetadata= new EventEmitter();
@@ -67,82 +66,76 @@ export class WorkspaceMetadataComponent{
   @Output() onDisplay= new EventEmitter();
   @Output() onClose= new EventEmitter();
   @Output() onRestore= new EventEmitter();
-  private load(){
-    this.versions = null;
-    this.loading = true;
-    this.versionsLoading = true;
-    this.data = null;
-    this.resetStats();
-    const currentNode = this._node;
-    this.nodeApi.getNodeMetadata(this._node, [RestConstants.ALL]).subscribe((data: NodeWrapper) => {
-      if (currentNode != this._node)
-        return;
-      console.log(data);
-      this.nodeObject = data.node;
-      if (this.nodeObject.isDirectory)
-        this.tab = this.INFO;
-
-
-      this.data = this.format(data.node);
-      this.loading = false;
-      this.nodeApi.getNodeVersions(this._node).subscribe((data: NodeVersions) => {
-            if (currentNode != this._node)
-                return;
-            this.versions = data.versions.reverse();
-            for (const version of this.versions) {
-                if (version.comment){
-                    if (version.comment == RestConstants.COMMENT_MAIN_FILE_UPLOAD
-                        || version.comment == RestConstants.COMMENT_METADATA_UPDATE
-                        || version.comment == RestConstants.COMMENT_CONTENT_UPDATE
-                        || version.comment == RestConstants.COMMENT_LICENSE_UPDATE
-                        || version.comment == RestConstants.COMMENT_NODE_PUBLISHED
-                        || version.comment==RestConstants.COMMENT_PREVIEW_CHANGED
-                        || version.comment.startsWith(RestConstants.COMMENT_EDITOR_UPLOAD)) {
-                        const parameters = version.comment.split(',');
-                        let editor = '';
-                        if (parameters.length > 1)
-                            editor = this.translate.instant('CONNECTOR.' + parameters[1] + '.NAME');
-                        version.comment = this.translate.instant('WORKSPACE.METADATA.COMMENT.' + parameters[0], {editor});
-                    }
-                }
-            }
-            let i = 0;
-            for (const version of this.versions){
-                if (this.isCurrentVersion(version)){
-                    this.versions.splice(i, 1);
-                    this.versions.splice(0, 0, version);
-                    break;
-                }
-                i++;
-            }
-            this.versionsLoading = false;
-        });
+    private load() {
+        this.versions = null;
+        this.versionsLoading = true;
+        this.resetStats();
+        if (this.nodeObject.isDirectory) {
+            this.tab = this.INFO;
+        }
+      this.data = this.format(this.nodeObject);
+      const currentNode = this.nodeObject;
+      this.nodeApi.getNodeVersions(this.nodeObject.ref.id).subscribe((data: NodeVersions) => {
+          if (currentNode !== this.nodeObject)
+              return;
+          this.versions = data.versions.reverse();
+          for (const version of this.versions) {
+              if (version.comment) {
+                  if (version.comment === RestConstants.COMMENT_MAIN_FILE_UPLOAD
+                      || version.comment === RestConstants.COMMENT_METADATA_UPDATE
+                      || version.comment === RestConstants.COMMENT_CONTENT_UPDATE
+                      || version.comment === RestConstants.COMMENT_LICENSE_UPDATE
+                      || version.comment === RestConstants.COMMENT_NODE_PUBLISHED
+                      || version.comment === RestConstants.COMMENT_PREVIEW_CHANGED
+                      || version.comment.startsWith(RestConstants.COMMENT_EDITOR_UPLOAD)) {
+                      const parameters = version.comment.split(',');
+                      let editor = '';
+                      if (parameters.length > 1)
+                          editor = this.translate.instant('CONNECTOR.' + parameters[1] + '.NAME');
+                      version.comment = this.translate.instant('WORKSPACE.METADATA.COMMENT.' + parameters[0], {editor});
+                  }
+              }
+          }
+          let i = 0;
+          for (const version of this.versions) {
+              if (this.isCurrentVersion(version)) {
+                  this.versions.splice(i, 1);
+                  this.versions.splice(0, 0, version);
+                  break;
+              }
+              i++;
+          }
+          this.versionsLoading = false;
+      });
       this.iamApi.getUser().subscribe((login: IamUser) => {
-            this.nodeApi.getNodePermissions(this._node).subscribe((data: NodePermissions) => {
-                this.permissions = this.formatPermissions(login, data);
-            });
-        });
+          this.nodeApi.getNodePermissions(this.nodeObject.ref.id).subscribe((data: NodePermissions) => {
+              this.permissions = this.formatPermissions(login, data);
+          });
+      });
       this.usages = null;
       this.forkedParent = null;
       this.forkedChilds = null;
-      if (data.node.properties[RestConstants.CCM_PROP_FORKED_ORIGIN]){
-           this.nodeApi.getNodeMetadata(RestHelper.removeSpacesStoreRef(data.node.properties[RestConstants.CCM_PROP_FORKED_ORIGIN][0])).subscribe((parent) => {
+      if (this.nodeObject.properties[RestConstants.CCM_PROP_FORKED_ORIGIN]) {
+          this.nodeApi.getNodeMetadata(RestHelper.removeSpacesStoreRef(this.nodeObject.properties[RestConstants.CCM_PROP_FORKED_ORIGIN][0])).subscribe((parent) => {
               this.forkedParent = parent.node;
-           }, (error) => {
+          }, (error) => {
 
-           });
-        }
-      this.searchApi.searchByProperties([RestConstants.CCM_PROP_FORKED_ORIGIN], [RestHelper.createSpacesStoreRef(data.node)], ['=']).subscribe((childs) => {
-            this.forkedChilds = childs.nodes;
-        });
-      this.usageApi.getNodeUsages(this._node).subscribe((usages: UsageList) => {
+          });
+      }
+      this.searchApi.searchByProperties([RestConstants.CCM_PROP_FORKED_ORIGIN], [RestHelper.createSpacesStoreRef(this.nodeObject)], ['=']).subscribe((childs) => {
+          this.forkedChilds = childs.nodes;
+      });
+        this.usageApi.getNodeUsages(this.nodeObject.ref.id).subscribe((usages: UsageList) => {
             this.usages = usages.usages;
-            this.usageApi.getNodeUsagesCollection(this._node).subscribe((collection) => {
-                this.usagesCollection = collection;
-                this.getStats();
-            });
-        });
-    });
+          this.usageApi.getNodeUsagesCollection(this.nodeObject.ref.id).subscribe((collection) => {
+              // @TODO: Activating this causes Cannot read property 'indexOf' of undefined
+              //        at ListTableComponent.push../src/app/core-ui-module/components/list-table/list-table.component.ts.ListTableComponent.isReference (list-table.component.ts:592)
+              // when switching elements while the metadata bar is open
+              // this.usagesCollection = collection;
+              // this.getStats();
+          });
+      });
+
   }
   private isCurrentVersion(version: Version): boolean{
     if (!this.nodeObject)
@@ -156,7 +149,7 @@ export class WorkspaceMetadataComponent{
   private setTab(tab: string){
     this.tab = tab;
   }
-  private display(version: string= null){
+  private display(version: string= null) {
     this.nodeObject.version = version;
     this.onDisplay.emit(this.nodeObject);
   }
@@ -181,7 +174,7 @@ export class WorkspaceMetadataComponent{
     data.title = node.title;
     data.isDirectory = node.isDirectory;
     data.isCollection = node.collection != null;
-    data.description = node.description;
+    data.description = node.properties[RestConstants.LOM_PROP_GENERAL_DESCRIPTION];
     data.preview = node.preview.url;
     data.keywords = node.properties[RestConstants.LOM_PROP_GENERAL_KEYWORD];
     if (data.keywords && data.keywords.length == 1 && !data.keywords[0])

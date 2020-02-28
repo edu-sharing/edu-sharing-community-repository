@@ -33,6 +33,7 @@ import org.edu_sharing.restservices.node.v1.model.NodeEntries;
 import org.edu_sharing.restservices.node.v1.model.NodeEntry;
 import org.edu_sharing.restservices.shared.ErrorResponse;
 import org.edu_sharing.restservices.shared.Filter;
+import org.edu_sharing.restservices.shared.Node;
 import org.edu_sharing.service.search.SearchService;
 import org.edu_sharing.service.search.SearchService.ContentType;
 import org.edu_sharing.service.search.SearchServiceFactory;
@@ -85,17 +86,17 @@ public class CollectionApi {
 					return Response.status(Response.Status.NOT_FOUND).build();
 				}
 
-				CollectionDao collectionDao = CollectionDao.getCollection(repoDao,
-						collectionId);
+				NodeDao nodeDao = NodeDao.getNode(repoDao,
+						collectionId, Filter.createShowAllFilter());
 
-				if (collectionDao == null) {
+				if (nodeDao == null) {
 
 					return Response.status(Response.Status.NOT_FOUND).build();
 				}
 
 				CollectionEntry response = new CollectionEntry();
 				
-				Collection collection = collectionDao.asCollection();
+				Node collection = nodeDao.asNode();
 				
 				response.setCollection(collection);
 
@@ -198,9 +199,9 @@ public class CollectionApi {
 				token.setLuceneString("@cm\\:name:\"*" + QueryParser.escape(query)+"*\"");
         		SearchResultNodeRef result = searchService.search(token);
         		CollectionEntries response = new CollectionEntries();
-				List<Collection> collections=new ArrayList<>();
+				List<Node> collections=new ArrayList<>();
 				for(NodeRef entry : AlfrescoDaoHelper.marshall(result.getData())){
-					Collection collection = CollectionDao.getCollection(repoDao, entry.getId()).asCollection();
+					Node collection = NodeDao.getNode(repoDao, entry.getId(), Filter.createShowAllFilter()).asNode();
 					collections.add(collection);
 				}
 				
@@ -228,7 +229,7 @@ public class CollectionApi {
 	})
 	public Response updateCollection(
 			@ApiParam(value = "ID of repository (or \"-home-\" for home repository)", required = true, defaultValue = "-home-") @PathParam("repository") String repository,
-			@ApiParam(value = "collection", required = true) Collection collection,
+			@ApiParam(value = "collection", required = true) Node node,
 			@Context HttpServletRequest req) {
 
 			try {
@@ -240,14 +241,14 @@ public class CollectionApi {
 					return Response.status(Response.Status.NOT_FOUND).build();
 				}
 
-				CollectionDao collectionDao = CollectionDao.getCollection(repoDao, collection.getRef().getId());
+				CollectionDao collectionDao = CollectionDao.getCollection(repoDao, node.getRef().getId());
 
 				if (collectionDao == null) {
 
 					return Response.status(Response.Status.NOT_FOUND).build();
 				}
 
-				collectionDao.update(collection);
+				collectionDao.update(node);
 
 				return Response.status(Response.Status.OK).build();
 		
@@ -343,7 +344,7 @@ public class CollectionApi {
 			Filter filter = new Filter();
 			filter.setProperties(propertyFilter);
 			CollectionBaseEntries base = CollectionDao.getCollectionsReferences(repoDao, parentId, filter, sortDefinition, skipCount == null ? 0 : skipCount, maxItems == null ? 500 : maxItems);
-			for(CollectionBase item : base.getEntries()) {
+			for(Node item : base.getEntries()) {
 					references.add((CollectionReference) item);
 			}
 			response.setReferences(references);
@@ -382,12 +383,12 @@ public class CollectionApi {
 			RepositoryDao repoDao = RepositoryDao.getRepository(repository);
 			SortDefinition sortDefinition = new SortDefinition(sortProperties,sortAscending);
 			CollectionEntries response = new CollectionEntries();
-			List<Collection> collections = new ArrayList<>();
+			List<Node> collections = new ArrayList<>();
 			Filter filter = new Filter();
 			filter.setProperties(propertyFilter);
 			CollectionBaseEntries base = CollectionDao.getCollectionsSubcollections(repoDao, parentId, scope, filter, sortDefinition, skipCount == null ? 0 : skipCount, maxItems == null ? 500 : maxItems);
-			for(CollectionBase item : base.getEntries()) {
-				collections.add((Collection) item);
+			for(Node item : base.getEntries()) {
+				collections.add(item);
 			}
 			response.setCollections(collections);
 			response.setPagination(base.getPagination());
@@ -416,7 +417,7 @@ public class CollectionApi {
 	public Response createCollection(
 			@ApiParam(value = "ID of repository (or \"-home-\" for home repository)", required = true, defaultValue = "-home-") @PathParam("repository") String repository,
 			@ApiParam(value = "ID of parent collection (or \"-root-\" for level0 collections)", required = true) @PathParam("collection") String parentId,
-			@ApiParam(value = "collection", required = true) Collection collection,
+			@ApiParam(value = "collection", required = true) Node collection,
 			@Context HttpServletRequest req) {
 
 		try {
@@ -428,7 +429,7 @@ public class CollectionApi {
 				return Response.status(Response.Status.NOT_FOUND).build();
 			}
 
-			CollectionDao result = null;
+			NodeDao result = null;
 			
 			if (CollectionDao.ROOT.equals(parentId)) {
 				
@@ -447,7 +448,7 @@ public class CollectionApi {
 			}
 			
 			CollectionEntry response = new CollectionEntry();
-			response.setCollection(result.asCollection());
+			response.setCollection(result.asNode());
 
 			return Response.status(Response.Status.OK).entity(response).build();
 
@@ -629,7 +630,7 @@ public class CollectionApi {
 				
 				CollectionEntry response = new CollectionEntry();
 				
-				Collection collection = collectionDao.asCollection();
+				Node collection = collectionDao.asNode();
 				
 				response.setCollection(collection);
 

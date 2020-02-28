@@ -1,12 +1,12 @@
 import {Component, Input, Output, EventEmitter, OnInit, ViewChild, ElementRef, HostListener} from '@angular/core';
-import {TranslateService} from "@ngx-translate/core";
-import {UIAnimation} from "../../../core-module/ui/ui-animation";
-import {trigger} from "@angular/animations";
-import {UIHelper} from "../../../core-ui-module/ui-helper"
-import {OptionItem} from "../../../core-ui-module/option-item";
+import {TranslateService} from '@ngx-translate/core';
+import {UIAnimation} from '../../../core-module/ui/ui-animation';
+import {trigger} from '@angular/animations';
+import {UIHelper} from '../../../core-ui-module/ui-helper'
+import {OptionItem} from '../../../core-ui-module/option-item';
 import {Helper} from '../../../core-module/rest/helper';
-import {UIConstants} from "../../../core-module/ui/ui-constants";
-import {UIService} from "../../../core-module/core.module";
+import {UIConstants} from '../../../core-module/ui/ui-constants';
+import {UIService} from '../../../core-module/core.module';
 
 @Component({
   selector: 'actionbar',
@@ -19,7 +19,7 @@ import {UIService} from "../../../core-module/core.module";
 /**
  * The action bar provides several icons, usually at the top right, with actions for a current context
  */
-export class ActionbarComponent{
+export class ActionbarComponent {
   /**
    * The amount of options which are not hidden inside an overflow menu
    * @type {number} (default: depending on mobile (1) or not (2))
@@ -37,7 +37,7 @@ export class ActionbarComponent{
      * dropdownPosition is for position of dropdown (default = left)
      * Values 'left' or 'right'
      */
-  @Input() dropdownPosition="left";
+  @Input() dropdownPosition='left';
   public optionsAlways : OptionItem[] = [];
   public optionsMenu : OptionItem[] = [];
   public optionsToggle : OptionItem[] = [];
@@ -56,7 +56,6 @@ export class ActionbarComponent{
    * @type {string}
    */
   @Input() style = 'default';
-  @Input() node:Node = null;
   /**
    * Should disabled ("greyed out") options be shown or hidden?
    * @type {boolean}
@@ -66,30 +65,27 @@ export class ActionbarComponent{
    * Set the options, see @OptionItem
    * @param options
    */
-  @Input() set options(options : OptionItem[]){
+  @Input() set options(options : OptionItem[]) {
     options=UIHelper.filterValidOptions(this.ui,Helper.deepCopyArray(options));
-    // this will fail if an option is altered after it was added (e.g. node-render show in folder)
-    //options=this.filterDisabled(options);
-    if(options==null){
+    if(options==null) {
       this.optionsAlways=[];
       this.optionsMenu=[];
       return;
     }
     this.optionsToggle=UIHelper.filterToggleOptions(options,true);
-    options = this.filterCallbacks(options);
     this.optionsAlways=this.getActionOptions(UIHelper.filterToggleOptions(options,false)).slice(0,this.getNumberOptions());
-    if(!this.optionsAlways.length){
+    if(!this.optionsAlways.length) {
       this.optionsAlways=UIHelper.filterToggleOptions(options,false).slice(0,this.getNumberOptions());
     }
     this.optionsMenu=this.hideActionOptions(UIHelper.filterToggleOptions(options,false),this.optionsAlways);
-    if(this.optionsMenu.length<2){
+    if(this.optionsMenu.length<2) {
       this.optionsAlways=this.optionsAlways.concat(this.optionsMenu);
       this.optionsMenu=[];
     }
   }
 
-  public getNumberOptions(){
-    if(window.innerWidth<UIConstants.MOBILE_WIDTH){
+  public getNumberOptions() {
+    if(window.innerWidth<UIConstants.MOBILE_WIDTH) {
       return this.numberOfAlwaysVisibleOptionsMobile;
     }
     return this.numberOfAlwaysVisibleOptions;
@@ -97,18 +93,18 @@ export class ActionbarComponent{
   constructor(private ui : UIService, private translate : TranslateService) {
 
   }
-  private click(option : OptionItem){
+  private click(option : OptionItem) {
     if(!option.isEnabled) {
       if(option.disabledCallback) {
-          option.disabledCallback(this.node);
+          option.disabledCallback();
       }
       return;
     }
-    option.callback(this.node);
+    option.callback();
   }
   private getActionOptions(options: OptionItem[]) {
-    let result:OptionItem[]=[];
-    for(let option of options){
+    const result:OptionItem[]=[];
+    for(const option of options) {
       if(option.showAsAction)
         result.push(option);
     }
@@ -116,8 +112,8 @@ export class ActionbarComponent{
   }
 
   private hideActionOptions(options: OptionItem[], optionsAlways: OptionItem[]) {
-    let result:OptionItem[]=[];
-    for(let option of options){
+    const result:OptionItem[]=[];
+    for(const option of options) {
       if(optionsAlways.indexOf(option)==-1)
         result.push(option);
     }
@@ -127,8 +123,8 @@ export class ActionbarComponent{
     private filterDisabled(options: OptionItem[]) {
       if(options==null)
           return null;
-      let filtered=[];
-      for(let option of options){
+      const filtered=[];
+      for(const option of options) {
           if(option.isEnabled || this.showDisabled)
               filtered.push(option);
       }
@@ -136,16 +132,10 @@ export class ActionbarComponent{
     }
 
     canShowDropdown() {
-        if(!this.optionsMenu.length)
+        if (!this.optionsMenu.length) {
           return false;
-        for(let option of this.optionsMenu){
-          if(option.isEnabled || this.node && option.enabledCallback && option.enabledCallback(this.node))
-            return true;
         }
-        return false;
-    }
-
-    private filterCallbacks(options: OptionItem[]) {
-      return options.filter((option)=>!option.showCallback || option.showCallback(null));
+        return this.optionsMenu.filter((o) =>
+          o.isEnabled).length > 0;
     }
 }

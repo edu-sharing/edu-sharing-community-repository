@@ -18,6 +18,9 @@ import org.edu_sharing.service.nodeservice.NodeServiceFactory;
 import org.edu_sharing.service.nodeservice.NodeServiceHelper;
 import org.edu_sharing.service.permission.PermissionService;
 import org.edu_sharing.service.permission.PermissionServiceFactory;
+import org.edu_sharing.service.permission.PermissionServiceHelper;
+import org.edu_sharing.service.toolpermission.ToolPermissionHelper;
+import org.edu_sharing.service.toolpermission.ToolPermissionService;
 import org.springframework.context.ApplicationContext;
 
 import java.util.*;
@@ -153,6 +156,7 @@ public class RatingServiceImpl implements RatingService {
         if(authorityService.isGuest()){
             throw new GuestCagePolicy.GuestPermissionDeniedException("guests can not use ratings");
         }
+        ToolPermissionHelper.throwIfToolpermissionMissing(CCConstants.CCM_VALUE_TOOLPERMISSION_RATE);
         if(!NodeServiceHelper.getType(new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE,nodeId)).equals(CCConstants.CCM_TYPE_IO)){
             throw new IllegalArgumentException("Ratings only supported for nodes of type "+CCConstants.CCM_TYPE_IO);
         }

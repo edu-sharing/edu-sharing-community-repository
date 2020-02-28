@@ -1,10 +1,10 @@
-import {Component, Input, EventEmitter, Output, OnDestroy, AfterViewInit} from '@angular/core';
+import {Component, Input, EventEmitter, Output, OnDestroy, AfterViewInit, ViewChild} from '@angular/core';
 import {ListItem, RestNodeService} from "../../../core-module/core.module";
 import {Node, NodeList, NodeWrapper} from "../../../core-module/core.module";
 import {RestConstants} from "../../../core-module/core.module";
 import {TranslateService} from "@ngx-translate/core";
 import {RestConnectorService} from "../../../core-module/core.module";
-import {OptionItem} from "../../../core-ui-module/option-item";
+import {OptionItem, Scope} from "../../../core-ui-module/option-item";
 import {Toast} from "../../../core-ui-module/toast";
 import {SessionStorageService} from "../../../core-module/core.module";
 import {RestSearchService} from "../../../core-module/core.module";
@@ -12,15 +12,21 @@ import {ConfigurationService} from "../../../core-module/core.module";
 import {TemporaryStorageService} from '../../../core-module/core.module';
 import {StateAwareComponent} from '../../../common/directives/StateAwareComponent';
 import {Helper} from "../../../core-module/rest/helper";
+import {WorkspaceManagementDialogsComponent} from '../../management-dialogs/management-dialogs.component';
+import {ActionbarComponent} from '../../../common/ui/actionbar/actionbar.component';
+import {MainNavComponent} from '../../../common/ui/main-nav/main-nav.component';
+import {ListTableComponent} from '../../../core-ui-module/components/list-table/list-table.component';
 
 @Component({
   selector: 'workspace-explorer',
   templateUrl: 'explorer.component.html',
   styleUrls: ['explorer.component.scss']
 })
-export class WorkspaceExplorerComponent{
+export class WorkspaceExplorerComponent {
+  public readonly SCOPES = Scope;
+  @ViewChild('list', {static: false}) list: ListTableComponent;
   public _nodes: Node[] = [];
-  @Input() set nodes(nodes: Node[]){
+  @Input() set nodes(nodes: Node[]) {
     this._nodes = nodes;
   }
   @Output() nodesChange = new EventEmitter<Node[]>();
@@ -29,11 +35,12 @@ export class WorkspaceExplorerComponent{
 
 
   public columns : ListItem[]=[];
-  @Input() options : OptionItem[]=[];
   @Input() viewType = 0;
   @Input() reorderDialog = false;
   @Output() reorderDialogChange = new EventEmitter<boolean>();
   @Input() preventKeyevents:boolean;
+  @Input() mainNav:MainNavComponent;
+  @Input() actionbar:ActionbarComponent;
 
 
   private loading=false;
@@ -62,14 +69,10 @@ export class WorkspaceExplorerComponent{
   @Output() onOpenNode=new EventEmitter();
   @Output() onSelectionChanged=new EventEmitter();
   @Output() onSelectNode=new EventEmitter();
-  @Output() onUpdateOptions=new EventEmitter();
   @Output() onSearchGlobal=new EventEmitter();
   @Output() onDrop=new EventEmitter();
   @Output() onReset=new EventEmitter();
   private path : Node[];
-  public updateOptions(node : Node){
-    this.onUpdateOptions.emit(node);
-  }
   public drop(event : any){
     this.onDrop.emit(event);
   }
@@ -87,7 +90,6 @@ export class WorkspaceExplorerComponent{
       this.hasMoreToLoad = true;
       this._nodes=[];
       this.onSelectionChanged.emit([]);
-      this.onUpdateOptions.emit();
       this.onReset.emit();
     }
     else if(!this.hasMoreToLoad){

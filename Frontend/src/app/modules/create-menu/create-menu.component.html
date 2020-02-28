@@ -1,25 +1,16 @@
-
-<mat-menu class="addDesktopMenu" #dropdown="matMenu">
-    <button mat-menu-item *ngIf="allowBinary" (click)="showUploadSelect=true"><i icon iconId="cloud_upload"></i> {{ 'WORKSPACE.ADD_OBJECT' | translate}}</button>
-    <button mat-menu-item *ngIf="allowBinary && bridge.isRunningCordova()" (click)="openCamera()"><i icon iconId="camera_alt"></i> {{ 'WORKSPACE.ADD_CAMERA' | translate}}</button>
-    <button mat-menu-item *ngIf="!allowBinary" (click)="createEmptyNode()"><i icon iconId="description"></i> {{ 'WORKSPACE.ADD_EMPTY_OBJECT' | translate}}</button>
-    <button mat-menu-item *ngIf="folder" (click)="addFolderName=''"><i icon iconId="create_new_folder"></i> {{ 'WORKSPACE.ADD_FOLDER' | translate}}</button>
-    <button mat-menu-item *ngFor="let connector of (connectorList && allowBinary) ? connectorList : null;let i=index"
-            [class.mat-menu-item-seperate]="!i"
-            (click)="showCreateConnector(connector)">
-        <i icon iconId="{{connector.icon}}"></i>
-        {{ 'CONNECTOR.'+connector.id+'.NAME' | translate}}
-        <img style="padding-left:5px" src="assets/images/beta.svg" alt="">
-    </button>
-</mat-menu>
+<dropdown
+    #dropdown
+    class="addDesktopMenu"
+    [options]="options"
+    ></dropdown>
 <workspace-add-folder *ngIf="addFolderName!=null"
                       [folder]="addFolderName"
-                      [parent]="_parent"
+                      [parent]="getParent()"
                       (onCancel)="addFolderName=null"
                       (onFolderAdded)="addFolder($event)"
 ></workspace-add-folder>
 <workspace-management
-        [parent]="_parent"
+        [parent]="getParent()"
         [(showUploadSelect)]="showUploadSelect"
         [uploadShowPicker]="showPicker"
         [(filesToUpload)]="filesToUpload"

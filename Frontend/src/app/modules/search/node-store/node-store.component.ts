@@ -80,7 +80,7 @@ export class SearchNodeStoreComponent {
   private updateActionOptions() {
     this.actionOptions=[];
     if(this.selected && this.selected.length){
-      let download = this.actionbar.createOptionIfPossible('DOWNLOAD', this.selected, (node: Node) => NodeHelper.downloadNodes(this.toast, this.connector, node ? [node] : this.selected));
+      let download = this.actionbar.createOptionIfPossible('DOWNLOAD', this.selected, (node: Node) => NodeHelper.downloadNodes(this.connector, node ? [node] : this.selected));
       /*let download=new OptionItem("WORKSPACE.OPTION.DOWNLOAD", "cloud_download",
         (node: Node) => NodeHelper.downloadNodes(this.toast,this.connector,node ? [node] : this.selected));
         */
@@ -93,7 +93,7 @@ export class SearchNodeStoreComponent {
 
     }
     let custom=this.config.instant("nodeStoreOptions");
-    NodeHelper.applyCustomNodeOptions(this.toast,this.http,this.connector,custom,this.nodes, this.selected, this.actionOptions,(load:boolean)=>this.loading=load);
+    NodeHelper.applyCustomNodeOptions(this.toast,this.http,this.connector,custom,this.nodes, this.selected, this.actionOptions);
   }
 
   private deleteSelection(position=0) {

@@ -1,27 +1,38 @@
-
-import {Component, Input, Output, EventEmitter, HostListener, ChangeDetectorRef, ApplicationRef} from '@angular/core';
+import {Component, EventEmitter, HostListener, Input, Output, ViewChild} from '@angular/core';
 import {
-  Node, Group, IamGroups, IamUsers, NodeList, IamUser, IamAuthorities,
-  Authority, OrganizationOrganizations, Organization, Person, User, HomeFolder, SharedFolder, ListItem, DialogButton, UserSimple
+  Authority,
+  ConfigurationService,
+  DialogButton,
+  Group,
+  IamAuthorities,
+  IamGroups,
+  IamUsers,
+  ListItem,
+  NodeList,
+  Organization,
+  OrganizationOrganizations,
+  RestConnectorService,
+  RestConstants,
+  RestIamService,
+  RestNodeService,
+  RestOrganizationService,
+  SharedFolder,
+  User,
+  UserSimple
 } from '../../../core-module/core.module';
 import {Toast} from '../../../core-ui-module/toast';
-import {ActivatedRoute, Router} from '@angular/router';
-import {RestIamService} from '../../../core-module/core.module';
+import {Router} from '@angular/router';
 import {TranslateService} from '@ngx-translate/core';
-import {RestConnectorService} from '../../../core-module/core.module';
-import {OptionItem} from '../../../core-ui-module/option-item';
+import {Constrain, DefaultGroups, ElementType, OptionItem} from '../../../core-ui-module/option-item';
 import {UIAnimation} from '../../../core-module/ui/ui-animation';
 import {SuggestItem} from '../../../common/ui/autocomplete/autocomplete.component';
 import {NodeHelper} from '../../../core-ui-module/node-helper';
-import {RestConstants} from '../../../core-module/core.module';
-import {RestOrganizationService} from '../../../core-module/core.module';
-import {RestNodeService} from '../../../core-module/core.module';
-import {ConfigurationService} from '../../../core-module/core.module';
 import {Helper} from '../../../core-module/rest/helper';
 import {trigger} from '@angular/animations';
 import {UIHelper} from '../../../core-ui-module/ui-helper';
-import {ActionbarHelperService} from '../../../common/services/actionbar-helper';
 import {ModalDialogOptions} from '../../../common/ui/modal-dialog-toast/modal-dialog-toast.component';
+import {ActionbarComponent} from '../../../common/ui/actionbar/actionbar.component';
+
 @Component({
   selector: 'permissions-authorities',
   templateUrl: 'authorities.component.html',
@@ -33,6 +44,8 @@ import {ModalDialogOptions} from '../../../common/ui/modal-dialog-toast/modal-di
   ]
 })
 export class PermissionsAuthoritiesComponent {
+  @ViewChild('actionbar', { static: false }) actionbar: ActionbarComponent;
+  @ViewChild('actionbarMember', { static: false }) actionbarMember: ActionbarComponent;
   public GROUP_TYPES= RestConstants.VALID_GROUP_TYPES;
   public STATUS_TYPES= RestConstants.VALID_PERSON_STATUS_TYPES;
   public SCOPE_TYPES= RestConstants.VALID_SCOPE_TYPES;
@@ -155,18 +168,22 @@ export class PermissionsAuthoritiesComponent {
    this.editGroupColumns = this.getColumns('GROUP', true);
    this.loadAuthorities();
   }
-  private getMemberOptions(): OptionItem[]{
+  private getMemberOptions(): OptionItem[] {
     const options: OptionItem[] = [];
-    if (this.editGroups){
-        if (this.selectedMembers.length) {
-            options.push(new OptionItem('PERMISSIONS.MENU_REMOVE_MEMBERSHIP', 'delete', (data: any) => this.deleteMembership()));
-        }
-    }
-    else {
-        if (this.selectedMembers.length) {
-            options.push(new OptionItem('PERMISSIONS.MENU_REMOVE_MEMBER', 'delete', (data: any) => this.deleteMember()));
-        }
-    }
+    const removeMembership = new OptionItem('PERMISSIONS.MENU_REMOVE_MEMBERSHIP', 'delete', (data) =>
+        this.deleteMembership(NodeHelper.getActionbarNodes(this.selectedMembers, data))
+    );
+    removeMembership.constrains = [Constrain.User];
+    removeMembership.group = DefaultGroups.Delete;
+    removeMembership.elementType = [ElementType.Group];
+    options.push(removeMembership);
+    const removeFromGroup = new OptionItem('PERMISSIONS.MENU_REMOVE_MEMBER', 'delete', (data) =>
+        this.deleteMember(NodeHelper.getActionbarNodes(this.selectedMembers, data))
+    );
+    removeFromGroup.constrains = [Constrain.User];
+    removeFromGroup.group = DefaultGroups.Delete;
+    removeFromGroup.elementType = [ElementType.Person];
+    options.push(removeFromGroup);
     return options;
   }
 
@@ -199,7 +216,6 @@ export class PermissionsAuthoritiesComponent {
               private organization: RestOrganizationService,
               private connector: RestConnectorService,
               private iam: RestIamService) {
-    this.updateButtons();
     this.organization.getOrganizations().subscribe((data: OrganizationOrganizations) => {
       this.isAdmin = data.canCreate;
     });
@@ -217,83 +233,142 @@ export class PermissionsAuthoritiesComponent {
     this.list = [];
     this.loadAuthorities();
   }
-  public selection(data: any){
-    if(data && !data.length){
+  public selection(data: any) {
+    if(data && !data.length) {
       data = null;
     }
     this.selected = data;
     this.onSelection.emit(data);
-    this.updateOptions(false);
   }
   private getList<T>(data: T): T[] {
     return NodeHelper.getActionbarNodes((this.selected as any), data);
   }
-  private updateOptions(all: boolean) {
-    if (this.embedded)
+  private updateOptions() {
+    if (this.embedded) {
+      this.options = [];
       return;
+    }
     const options: OptionItem[] = [];
-    const list = this.getList(null);
-    if (!all && this.isAdmin && this._mode == 'ORG' && !list){
-      options.push(new OptionItem('PERMISSIONS.MENU_TOOLPERMISSIONS_GLOBAL', 'playlist_add_check', (data: any) => {this.toolpermissionAuthority = RestConstants.getAuthorityEveryone(); }));
+    if (this._mode === 'ORG') {
+      const global = new OptionItem('PERMISSIONS.MENU_TOOLPERMISSIONS_GLOBAL', 'playlist_add_check', (data: any) =>
+          this.toolpermissionAuthority = RestConstants.getAuthorityEveryone()
+      );
+      global.elementType = [ElementType.Unknown];
+      global.group = DefaultGroups.Primary;
+      global.priority = 10;
+      global.constrains = [Constrain.Admin, Constrain.NoSelection];
+      options.push(global);
     }
-    if (!all && !list){
-      if (this._mode == 'GROUP') {
-        options.push(new OptionItem('PERMISSIONS.MENU_CREATE_GROUP', 'add', (data: any) => this.createGroup()));
-      }
-      if (this._mode == 'USER'){
-        if (this.org)
-          options.push(new OptionItem('PERMISSIONS.MENU_ADD_GROUP_MEMBERS', 'person_add', (data: any) => this.addMembersFunction(this.org)));
-        if (this.orgs && this.orgs.canCreate){
-          options.push(new OptionItem('PERMISSIONS.MENU_CREATE_USER', 'add', (data: any) => this.createAuthority()));
-        }
-        const download = new OptionItem('PERMISSIONS.EXPORT_MEMBER', 'cloud_download', (data: any) => this.downloadMembers());
-        download.onlyDesktop = true;
-        options.push(download);
-      }
+    if (this._mode === 'GROUP') {
+      const createGroup = new OptionItem('PERMISSIONS.MENU_CREATE_GROUP', 'add', (data) =>
+          this.createGroup()
+      );
+      createGroup.elementType = [ElementType.Unknown];
+      createGroup.group = DefaultGroups.Primary;
+      createGroup.constrains = [Constrain.Admin, Constrain.NoSelection];
+      options.push(createGroup);
     }
-    if (!all && this._mode == 'ORG' && this.orgs && this.orgs.canCreate && !list){
-      options.push(new OptionItem('PERMISSIONS.ADD_ORG', 'add', (data: any) => this.createOrg()));
+    if (this._mode === 'USER') {
+      if (this.org)
+        options.push(new OptionItem('PERMISSIONS.MENU_ADD_GROUP_MEMBERS', 'person_add', (data: any) => this.addMembersFunction(this.org)));
+      if (this.orgs && this.orgs.canCreate) {
+        options.push(new OptionItem('PERMISSIONS.MENU_CREATE_USER', 'add', (data: any) => this.createAuthority()));
+      }
+      const download = new OptionItem('PERMISSIONS.EXPORT_MEMBER', 'cloud_download', (data: any) => this.downloadMembers());
+      download.onlyDesktop = true;
+      options.push(download);
     }
 
-    if (all || list){
-      if (this._mode === 'USER' && !all){
-        options.push(new OptionItem('PERMISSIONS.MENU_ADD_TO_GROUP', 'group_add', (data: any) => this.addToGroup(data)));
-        options.push(new OptionItem('PERMISSIONS.MENU_EDIT_GROUPS', 'group', (data: any) => this.openEditGroups(data)));
-      }
-      if (list && list.length === 1 || all) {
-        if (this._mode === 'GROUP') {
-          options.push(new OptionItem('PERMISSIONS.MENU_ADD_GROUP_MEMBERS', 'group_add', (data: any) => this.addMembersFunction(data)));
-          options.push(new OptionItem('PERMISSIONS.MENU_MANAGE_GROUP', 'group', (data: any) => this.manageMembers(data)));
-        }
-        if (this._mode === 'GROUP' || this.orgs && this.orgs.canCreate) {
-          options.push(new OptionItem('PERMISSIONS.MENU_EDIT', 'edit', (data: any) => this.editAuthority(data)));
-        }
+    if (this._mode === 'ORG' && this.orgs && this.orgs.canCreate) {
+      const newOrg = new OptionItem('PERMISSIONS.ADD_ORG', 'add', (data) =>
+          this.createOrg()
+      );
+      newOrg.elementType = [ElementType.Unknown];
+      newOrg.group = DefaultGroups.Primary;
+      newOrg.priority = 20;
+      newOrg.constrains = [Constrain.Admin, Constrain.NoSelection];
+      options.push(newOrg);
+    }
+    const addToGroup = new OptionItem('PERMISSIONS.MENU_ADD_TO_GROUP', 'group_add', (data) =>
+        this.addToGroup(data)
+    );
+    addToGroup.elementType = [ElementType.Person];
+    addToGroup.group = DefaultGroups.Primary;
+    addToGroup.priority = 10;
+    addToGroup.constrains = [Constrain.User];
+    options.push(addToGroup);
+    const manageMemberships = new OptionItem('PERMISSIONS.MENU_EDIT_GROUPS', 'group', (data) =>
+        this.openEditGroups(data)
+    );
+    manageMemberships.elementType = [ElementType.Person];
+    manageMemberships.group = DefaultGroups.Primary;
+    manageMemberships.priority = 20;
+    manageMemberships.constrains = [Constrain.User, Constrain.NoBulk];
+    options.push(manageMemberships);
 
-        if (this.isAdmin) {
-          options.push(new OptionItem('PERMISSIONS.MENU_TOOLPERMISSIONS', 'playlist_add_check', (data: any) => {
-            this.toolpermissionAuthority = this.getList(data)[0];
-          }));
-        }
-      }
-      if (this._mode === 'GROUP') {
-        options.push(new OptionItem('PERMISSIONS.MENU_DELETE', 'delete', (data: any) => this.deleteAuthority(data, (list: any) => this.startDelete(list))));
-      }
-      if (this._mode === 'USER' && this.isAdmin && (list && list.length === 1 || all)){
-        options.push(new OptionItem('PERMISSIONS.MENU_STATUS', 'check', (data: any) => this.setPersonStatus(NodeHelper.getActionbarNodes(list, data)[0])));
-      }
-      if (this._mode === 'USER' && this.org) {
-        options.push(new OptionItem('PERMISSIONS.MENU_EXCLUDE', 'delete', (data: any) => this.startExclude(list)));
-      }
-      if (this._mode === 'ORG' && this.orgs && this.orgs.canCreate) {
-        options.push(new OptionItem('PERMISSIONS.MENU_DELETE', 'delete', (data: any) => this.deleteAuthority(data, (list: any) => this.deleteOrg(list))));
-      }
+    if (this._mode === 'GROUP') {
+      const addMembers = new OptionItem('PERMISSIONS.MENU_ADD_GROUP_MEMBERS', 'group_add', (data: any) =>
+          this.addMembersFunction(data)
+      );
+      addMembers.elementType = [ElementType.Group];
+      addMembers.group = DefaultGroups.Primary;
+      addMembers.constrains = [Constrain.NoBulk, Constrain.User];
+      options.push(addMembers);
+      const manageMembers = new OptionItem('PERMISSIONS.MENU_MANAGE_GROUP', 'group', (data: any) => this.manageMembers(data));
+      manageMembers.elementType = [ElementType.Group];
+      manageMembers.group = DefaultGroups.Primary;
+      manageMembers.constrains = [Constrain.NoBulk, Constrain.User];
+      options.push(manageMembers);
     }
-    if (all){
-      this.options = options;
+    if (this._mode === 'GROUP' || this.orgs && this.orgs.canCreate) {
+      const edit = new OptionItem('PERMISSIONS.MENU_EDIT', 'edit', (data: any) => this.editAuthority(data));
+      edit.constrains = [Constrain.Admin, Constrain.NoBulk];
+      edit.elementType = [ElementType.Group];
+      edit.group = DefaultGroups.Edit;
+      edit.priority = 10;
+      options.push(edit);
     }
-    else {
-      this.optionsActionbar = options;
+
+    const manage = new OptionItem('PERMISSIONS.MENU_TOOLPERMISSIONS', 'playlist_add_check', (data: any) => {
+      this.toolpermissionAuthority = this.getList(data)[0];
+    });
+    manage.constrains = [Constrain.Admin, Constrain.NoBulk];
+    manage.elementType = [ElementType.Group, ElementType.Person];
+    manage.group = DefaultGroups.Reuse;
+    options.push(manage);
+
+    if (this._mode === 'GROUP') {
+      const removeGroup = new OptionItem('PERMISSIONS.MENU_DELETE', 'delete', (data: any) =>
+          this.deleteAuthority(data, (list: any) => this.startDelete(list))
+      );
+      removeGroup.constrains = [Constrain.Admin];
+      removeGroup.elementType = [ElementType.Group];
+      removeGroup.group = DefaultGroups.Delete;
+      options.push(removeGroup);
     }
+    const personStatus = new OptionItem('PERMISSIONS.MENU_STATUS', 'check', (data: any) =>
+        this.setPersonStatus(this.getList(data)[0])
+    );
+    personStatus.constrains = [Constrain.NoBulk, Constrain.Admin];
+    personStatus.elementType = [ElementType.Person];
+    personStatus.group = DefaultGroups.Edit;
+    options.push(personStatus);
+    if (this.org) {
+      const excludePerson = new OptionItem('PERMISSIONS.MENU_EXCLUDE', 'delete', (data: any) => this.startExclude(this.getList(data)));
+      excludePerson.constrains=[Constrain.User];
+      excludePerson.elementType = [ElementType.Person];
+      excludePerson.group = DefaultGroups.Delete;
+      options.push(excludePerson);
+    }
+    if (this._mode === 'ORG' && this.orgs && this.orgs.canCreate) {
+      const remove = new OptionItem('PERMISSIONS.MENU_DELETE', 'delete', (data: any) => this.deleteAuthority(data, (list: any) => this.deleteOrg(list)));
+      remove.group = DefaultGroups.Delete;
+      remove.elementType = [ElementType.Group];
+      remove.constrains = [Constrain.Admin];
+      options.push(remove);
+    }
+
+    this.options = options;
   }
   private cancelEdit(){
     this.edit = null;
@@ -434,21 +509,21 @@ export class PermissionsAuthoritiesComponent {
 
     const request = {sortBy: [sort], sortAscending: this.sortAscending, offset: this.offset};
     const query = this._searchQuery ? this._searchQuery : '';
-    this.updateOptions(false);
-    this.updateOptions(true);
+    this.updateOptions();
     this.organization.getOrganizations(query, false).subscribe((orgs: OrganizationOrganizations) => {
       this.orgs = orgs;
-      this.updateOptions(false);
-      this.updateOptions(true);
+      this.updateOptions();
     });
-    if (this._mode == 'ORG') {
+    if (this._mode === 'ORG') {
       this.organization.getOrganizations(query, false, request).subscribe((orgs: OrganizationOrganizations) => {
         this.offset += this.connector.numberPerRequest;
         for (const org of orgs.organizations) {
-          if (org.administrationAccess)
+          if (org.administrationAccess) {
             this.list.push(org);
+          }
         }
         this.loading = false;
+        this.updateOptions();
       });
     }/*
     else if(this._mode=='USER'){
@@ -541,7 +616,7 @@ export class PermissionsAuthoritiesComponent {
       this.memberListOffset = 0;
       this.searchMembers();
   }
-  private addToSelect(){
+  private addToSelect() {
     this.addToList = this.selected;
     this.addToSingle();
   }
@@ -679,7 +754,7 @@ export class PermissionsAuthoritiesComponent {
   }
 
   private addMembersFunction(data: any) {
-    if (data == 'ALL')
+    if (data === 'ALL')
       this.addMembers = this.org;
     else {
       const list = this.getList(data);
@@ -688,13 +763,12 @@ export class PermissionsAuthoritiesComponent {
     this.manageMemberSearch = '';
     this.searchMembers();
   }
-  private updateSelectedMembers(data: Authority[]){
+  private updateSelectedMembers(data: Authority[]) {
     this.selectedMembers = data;
-    this.memberOptions = this.getMemberOptions();
     this.updateButtons();
   }
   private manageMembers(data: any) {
-    if (data == 'ALL')
+    if (data === 'ALL')
       this.editMembers = this.org;
     else {
       const list = this.getList(data);
@@ -704,8 +778,8 @@ export class PermissionsAuthoritiesComponent {
     this.searchMembers();
   }
 
-  private deleteMember(position= 0) {
-    if (this.selectedMembers.length == position){
+  private deleteMember(list: any[], position= 0) {
+    if (list.length === position){
       this.toast.toast('PERMISSIONS.MEMBER_REMOVED');
       this.selectedMembers = [];
       this.memberOptions = this.getMemberOptions();
@@ -716,12 +790,12 @@ export class PermissionsAuthoritiesComponent {
       return;
     }
     this.globalProgress = true;
-    this.iam.deleteGroupMember(this.editMembers == 'ALL' ? this.org.authorityName : (this.editMembers as Group).authorityName, this.selectedMembers[position].authorityName).subscribe(() => {
-      this.deleteMember(position + 1);
+    this.iam.deleteGroupMember(this.editMembers === 'ALL' ? this.org.authorityName : (this.editMembers as Group).authorityName, list[position].authorityName).subscribe(() => {
+      this.deleteMember(list, position + 1);
     }, (error: any) => this.toast.error(error));
   }
-    private deleteMembership(position= 0) {
-        if (this.selectedMembers.length == position){
+    private deleteMembership(list: any[], position= 0) {
+        if (list.length === position) {
             this.toast.toast('PERMISSIONS.MEMBERSHIP_REMOVED');
             this.selectedMembers = [];
             this.memberOptions = this.getMemberOptions();
@@ -732,8 +806,8 @@ export class PermissionsAuthoritiesComponent {
             return;
         }
         this.globalProgress = true;
-        this.iam.deleteGroupMember(this.selectedMembers[position].authorityName, this.editGroups.authorityName).subscribe(() => {
-            this.deleteMembership(position + 1);
+        this.iam.deleteGroupMember(list[position].authorityName, this.editGroups.authorityName).subscribe(() => {
+            this.deleteMembership(list,position + 1);
         }, (error: any) => this.toast.error(error));
     }
   private searchMembers(){
@@ -789,6 +863,7 @@ export class PermissionsAuthoritiesComponent {
           this.memberList = Helper.deepCopy(this.memberList);
       });
     }
+    this.updateButtons();
   }
 
   private handleError(error: any) {
@@ -859,14 +934,14 @@ export class PermissionsAuthoritiesComponent {
     }
     Helper.downloadContent(this.translate.instant('PERMISSIONS.DOWNLOAD_MEMBER_FILENAME'), data);
   }
-  openFolder(folder: SharedFolder){
+  openFolder(folder: SharedFolder) {
       UIHelper.goToWorkspaceFolder(this.node, this.router, this.connector.getCurrentLogin(), folder.id);
   }
 
     private updateButtons() {
         this.editButtons = [
             new DialogButton('CANCEL', DialogButton.TYPE_CANCEL, () => this.cancelEdit()),
-            new DialogButton('SAVE', DialogButton.TYPE_PRIMARY, () => this.saveEdits()),
+            new DialogButton('SAVE', DialogButton.TYPE_PRIMARY, () => this.saveEdits())
         ];
         /**
          *
@@ -880,11 +955,13 @@ export class PermissionsAuthoritiesComponent {
          </div>
          */
         const add = new DialogButton('ADD', DialogButton.TYPE_PRIMARY, () => this.addMembersToGroup());
-        add.disabled = this.selectedMembers.length == 0;
+        add.disabled = this.selectedMembers.length === 0;
         this.memberButtons = [
             new DialogButton('CLOSE', DialogButton.TYPE_CANCEL, () => this.cancelEditMembers()),
-            add
         ];
+        if (this.addMembers) {
+            this.memberButtons.push(add);
+        }
         this.editStatusButtons = [
         new DialogButton('CANCEL', DialogButton.TYPE_CANCEL, () => {this.editStatus = null; }),
         new DialogButton('SAVE', DialogButton.TYPE_PRIMARY, () => this.savePersonStatus())

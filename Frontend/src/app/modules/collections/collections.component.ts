@@ -25,16 +25,16 @@ import {
     TemporaryStorageService,
     UIService,
     CollectionReference,
-    CollectionFeedback,
+    CollectionFeedback, NodesRightMode,
 } from '../../core-module/core.module';
 import { Toast } from '../../core-ui-module/toast';
-import { OptionItem } from '../../core-ui-module/option-item';
+import {DefaultGroups, OptionItem, Scope} from '../../core-ui-module/option-item';
 import { NodeRenderComponent } from '../../common/ui/node-render/node-render.component';
 import { UIHelper } from '../../core-ui-module/ui-helper';
 import { Title } from '@angular/platform-browser';
 import { UIConstants } from '../../core-module/ui/ui-constants';
 import { ListTableComponent } from '../../core-ui-module/components/list-table/list-table.component';
-import { NodeHelper, NodesRightMode } from '../../core-ui-module/node-helper';
+import { NodeHelper } from '../../core-ui-module/node-helper';
 import { TranslateService } from '@ngx-translate/core';
 import { Location } from '@angular/common';
 import { Helper } from '../../core-module/rest/helper';
@@ -48,12 +48,16 @@ import { MatSlideToggle } from '@angular/material/slide-toggle';
 import { HttpClient } from '@angular/common/http';
 import { GlobalContainerComponent } from '../../common/ui/global-container/global-container.component';
 import { Observable } from 'rxjs';
+import {OptionsHelperService} from '../../common/options-helper';
+import {ActionbarComponent} from '../../common/ui/actionbar/actionbar.component';
 
 // component class
 @Component({
     selector: 'app-collections',
     templateUrl: 'collections.component.html',
     styleUrls: ['collections.component.scss'],
+    // provide a new instance so to not get conflicts with other service instances
+    providers: [ OptionsHelperService ]
 })
 export class CollectionsMainComponent {
     static INDEX_MAPPING = [
@@ -74,8 +78,11 @@ export class CollectionsMainComponent {
         ],
         sortAscending: [false, true, false],
     };
+    readonly SCOPES = Scope;
 
     @ViewChild('mainNav', { static: false }) mainNavRef: MainNavComponent;
+    @ViewChild('actionbarCollection', { static: false }) actionbarCollection: ActionbarComponent;
+    @ViewChild('actionbarReferences', { static: false }) actionbarReferences: ActionbarComponent;
     @ViewChild('listCollections', { static: false })
     listCollections: ListTableComponent;
 
@@ -88,8 +95,8 @@ export class CollectionsMainComponent {
     isLoading = true;
     isReady = false;
     collectionContent: {
-        collection: Collection;
-        collections: Collection[];
+        node: Node;
+        collections: Node[];
         references: EduData.CollectionReference[];
         collectionsPagination?: EduData.Pagination;
         referencesPagination?: EduData.Pagination;
@@ -114,13 +121,8 @@ export class CollectionsMainComponent {
     );
     optionsMaterials: OptionItem[];
     tutorialElement: ElementRef;
-    optionsCollection: OptionItem[] = [];
-    feedback: boolean;
-    feedbackView: boolean;
-    feedbackViewButtons: DialogButton[];
     customNodeList = false;
-    listOptions: OptionItem[];
-    set collectionShare(collectionShare: Collection) {
+    set collectionShare(collectionShare: Node) {
         this._collectionShare = collectionShare;
         this.refreshAll();
     }
@@ -156,7 +158,7 @@ export class CollectionsMainComponent {
     }
     set orderActive(orderActive: boolean) {
         this._orderActive = orderActive;
-        this.collectionContent.collection.orderMode = orderActive
+        this.collectionContent.node.collection.orderMode = orderActive
             ? RestConstants.COLLECTION_ORDER_MODE_CUSTOM
             : null;
 
@@ -201,10 +203,9 @@ export class CollectionsMainComponent {
     private hasEditorial = false;
     private hasMediacenter = false;
     private showCollection = false;
-    private pinningAllowed = false;
     private _orderActive: boolean;
     private reurl: any;
-    private _collectionShare: Collection;
+    private _collectionShare: Node;
     private feedbacks: CollectionFeedback[];
     private params: Params;
 
@@ -226,17 +227,13 @@ export class CollectionsMainComponent {
         private uiService: UIService,
         private router: Router,
         private tempStorage: TemporaryStorageService,
+        private optionsService: OptionsHelperService,
         private toast: Toast,
         private bridge: BridgeService,
         private title: Title,
         private config: ConfigurationService,
         private translationService: TranslateService,
     ) {
-        this.feedbackViewButtons = DialogButton.getSingleButton(
-            'CLOSE',
-            () => (this.feedbackView = false),
-            DialogButton.TYPE_CANCEL,
-        );
         this.collectionsColumns.push(new ListItem('COLLECTION', 'title'));
         this.collectionsColumns.push(new ListItem('COLLECTION', 'info'));
         this.collectionsColumns.push(new ListItem('COLLECTION', 'scope'));
@@ -263,9 +260,6 @@ export class CollectionsMainComponent {
             this.connector.isLoggedIn().subscribe(
                 (data: LoginResult) => {
                     if (data.isValidLogin && data.currentScope == null) {
-                        this.pinningAllowed = this.connector.hasToolPermissionInstant(
-                            RestConstants.TOOLPERMISSION_COLLECTION_PINNING,
-                        );
                         this.isGuest = data.isGuest;
                         this.collectionService
                             .getCollectionSubcollections(
@@ -305,7 +299,7 @@ export class CollectionsMainComponent {
 
     setCustomOrder(event: MatSlideToggle) {
         const checked = event.checked;
-        this.collectionContent.collection.orderMode = checked
+        this.collectionContent.node.collection.orderMode = checked
             ? RestConstants.COLLECTION_ORDER_MODE_CUSTOM
             : null;
         if (checked) {
@@ -313,7 +307,7 @@ export class CollectionsMainComponent {
         } else {
             this.globalProgress = true;
             this.collectionService
-                .setOrder(this.collectionContent.collection.ref.id)
+                .setOrder(this.collectionContent.node.ref.id)
                 .subscribe(() => {
                     this.globalProgress = false;
                     this.orderActive = false;
@@ -339,7 +333,7 @@ export class CollectionsMainComponent {
     }
 
     closeAddToOther() {
-        this.navigate(this.collectionContent.collection.ref.id);
+        this.navigate(this.collectionContent.node.ref.id);
     }
 
     selectTab(tab: string) {
@@ -379,17 +373,12 @@ export class CollectionsMainComponent {
     }
 
     isAllowedToEditCollection(): boolean {
-        // This seems to be wrong: He may has created a public collection and wants to edit it
-        if (
-            this.isRootLevelCollection() &&
-            this.tabSelected != RestConstants.COLLECTIONSCOPE_MY
-        ) {
-            return false;
+        if (this.isRootLevelCollection()) {
+            return this.tabSelected === RestConstants.COLLECTIONSCOPE_MY
         }
-
         if (
             RestHelper.hasAccessPermission(
-                this.collectionContent.collection,
+                this.collectionContent.node,
                 RestConstants.PERMISSION_DELETE,
             )
         ) {
@@ -401,7 +390,7 @@ export class CollectionsMainComponent {
         return (
             !this.isGuest &&
             RestHelper.hasAccessPermission(
-                this.collectionContent.collection,
+                this.collectionContent.node,
                 RestConstants.PERMISSION_FEEDBACK,
             )
         );
@@ -412,7 +401,7 @@ export class CollectionsMainComponent {
         }
         if (
             RestHelper.hasAccessPermission(
-                this.collectionContent.collection,
+                this.collectionContent.node,
                 RestConstants.PERMISSION_DELETE,
             )
         ) {
@@ -421,12 +410,12 @@ export class CollectionsMainComponent {
         return false;
     }
 
-    isUserAllowedToEdit(collection: EduData.Collection): boolean {
+    isUserAllowedToEdit(collection: Node): boolean {
         return RestHelper.isUserAllowedToEdit(collection, this.person);
     }
 
     pinCollection() {
-        this.addPinning = this.collectionContent.collection.ref.id;
+        this.addPinning = this.collectionContent.node.ref.id;
     }
 
     getPrivacyScope(collection: EduData.Collection): string {
@@ -444,7 +433,7 @@ export class CollectionsMainComponent {
 
     switchToSearch(): void {
         UIHelper.getCommonParameters(this.route).subscribe(params => {
-            params.addToCollection = this.collectionContent.collection.ref.id;
+            params.addToCollection = this.collectionContent.node.ref.id;
             this.router.navigate([UIConstants.ROUTER_PREFIX + 'search'], {
                 queryParams: params,
             });
@@ -454,170 +443,16 @@ export class CollectionsMainComponent {
     isBrightColor() {
         return (
             ColorHelper.getColorBrightness(
-                this.collectionContent.collection.color,
+                this.collectionContent.node.collection.color,
             ) > ColorHelper.BRIGHTNESS_THRESHOLD_COLLECTIONS
         );
     }
 
     getScopeInfo() {
         return NodeHelper.getCollectionScopeInfo(
-            this.collectionContent.collection,
+            this.collectionContent.node,
         );
     }
-
-    onSelection(nodes: EduData.Node[]) {
-        this.optionsMaterials = this.getOptions(nodes, false);
-    }
-
-    getOptions(nodes: Node[] = null, fromList: boolean) {
-        const originalDeleted =
-            nodes &&
-            nodes.filter((node: any) => node.originalId == null).length > 0;
-        if (this.reurl) {
-            // no action bar in apply mode
-            if (!fromList) {
-                return [];
-            }
-            const apply = new OptionItem('APPLY', 'redo', (node: Node) =>
-                NodeHelper.addNodeToLms(
-                    this.router,
-                    this.tempStorage,
-                    ActionbarHelperService.getNodes(nodes, node)[0],
-                    this.reurl,
-                ),
-            );
-            apply.enabledCallback = (node: CollectionReference) => {
-                return (
-                    node.originalId != null &&
-                    NodeHelper.getNodesRight(
-                        ActionbarHelperService.getNodes(nodes, node as any),
-                        RestConstants.ACCESS_CC_PUBLISH,
-                        NodesRightMode.Original,
-                    )
-                );
-            };
-            return [apply];
-        }
-
-        const options: OptionItem[] = [];
-        if (!fromList) {
-            if (nodes && nodes.length) {
-                if (
-                    !originalDeleted &&
-                    NodeHelper.getNodesRight(
-                        nodes,
-                        RestConstants.ACCESS_CC_PUBLISH,
-                        NodesRightMode.Original,
-                    )
-                ) {
-                    const collection = this.actionbar.createOptionIfPossible(
-                        'ADD_TO_COLLECTION',
-                        nodes,
-                        (node: Node) =>
-                            (this.addToOther = ActionbarHelperService.getNodes(
-                                nodes,
-                                node,
-                            )),
-                    );
-                    if (collection) {
-                        collection.name = 'WORKSPACE.OPTION.COLLECTION_OTHER';
-                        options.push(collection);
-                    }
-                }
-                if (this.isAllowedToDeleteNodes(nodes)) {
-                    const remove = new OptionItem(
-                        'COLLECTIONS.DETAIL.REMOVE',
-                        'remove_circle_outline',
-                        (node: Node) => {
-                            this.deleteMultiple(
-                                ActionbarHelperService.getNodes(nodes, node),
-                            );
-                        },
-                    );
-                    if (remove) options.push(remove);
-                }
-            }
-        }
-        if (fromList) {
-            const collection = this.actionbar.createOptionIfPossible(
-                'ADD_TO_COLLECTION',
-                nodes,
-                (node: Node) => this.addToOtherCollection(node),
-            );
-            if (collection) {
-                collection.name = 'WORKSPACE.OPTION.COLLECTION_OTHER';
-                options.push(collection);
-            }
-        }
-        if ((!originalDeleted && fromList) || (nodes && nodes.length)) {
-            const download = this.actionbar.createOptionIfPossible(
-                'DOWNLOAD',
-                nodes,
-                (node: Node) =>
-                    NodeHelper.downloadNodes(
-                        this.toast,
-                        this.connector,
-                        ActionbarHelperService.getNodes(nodes, node),
-                    ),
-            );
-            options.push(download);
-            const nodeStore = this.actionbar.createOptionIfPossible(
-                'ADD_NODE_STORE',
-                nodes,
-                (node: Node) => {
-                    this.addToStore(
-                        ActionbarHelperService.getNodes(nodes, node),
-                    );
-                },
-            );
-            options.push(nodeStore);
-        }
-        if (fromList) {
-            const remove = new OptionItem(
-                'COLLECTIONS.DETAIL.REMOVE',
-                'remove_circle_outline',
-                (node: Node) =>
-                    this.deleteReference(
-                        ActionbarHelperService.getNodes(nodes, node)[0],
-                    ),
-            );
-            remove.showCallback = (node: Node) => {
-                return this.isAllowedToDeleteNodes(
-                    ActionbarHelperService.getNodes(nodes, node),
-                );
-            };
-            options.push(remove);
-        }
-        if (fromList || (nodes && nodes.length == 1)) {
-            if (this.config.instant('nodeReport', false)) {
-                const report = new OptionItem(
-                    'NODE_REPORT.OPTION',
-                    'flag',
-                    (node: Node) =>
-                        (this.nodeReport = ActionbarHelperService.getNodes(
-                            nodes,
-                            node,
-                        )[0]),
-                );
-                options.push(report);
-            }
-        }
-
-        const custom = this.config.instant('collectionNodeOptions');
-        NodeHelper.applyCustomNodeOptions(
-            this.toast,
-            this.http,
-            this.connector,
-            custom,
-            this.collectionContent.references as any,
-            nodes,
-            options,
-            (load: boolean) => (this.isLoading = load),
-        );
-
-        return options;
-    }
-
     dropOnCollection(event: any) {
         const target = event.target;
         const source = event.source[0];
@@ -642,7 +477,7 @@ export class CollectionsMainComponent {
             UIHelper.addToCollection(
                 this.collectionService,
                 this.router,
-                this.toast,
+                this.bridge,
                 event.target,
                 event.source,
                 nodes => {
@@ -655,7 +490,7 @@ export class CollectionsMainComponent {
                         const observables = event.source.map((n: any) =>
                             this.collectionService.removeFromCollection(
                                 n.ref.id,
-                                this.collectionContent.collection.ref.id,
+                                this.collectionContent.node.ref.id,
                             ),
                         );
                         Observable.forkJoin(observables).subscribe(
@@ -680,8 +515,8 @@ export class CollectionsMainComponent {
         UIHelper.addToCollection(
             this.collectionService,
             this.router,
-            this.toast,
-            this.collectionContent.collection,
+            this.bridge,
+            this.collectionContent.node,
             nodes,
             refNodes => {
                 this.refreshContent();
@@ -691,10 +526,10 @@ export class CollectionsMainComponent {
     }
 
     canDropOnCollection = (event: any) => {
-        if (event.source[0].ref.id == event.target.ref.id) {
+        if (event.source[0].ref.id === event.target.ref.id) {
             return false;
         }
-        if (event.target.ref.id == this.collectionContent.collection.ref.id) {
+        if (event.target.ref.id === this.collectionContent.node.ref.id) {
             return false;
         }
         // in case it's via breadcrums, unmarshall the collection item
@@ -705,20 +540,19 @@ export class CollectionsMainComponent {
         // do not allow to move anything else than editorial collections into editorial collections (if the source is a collection)
         if (event.source[0].hasOwnProperty('childCollectionsCount')) {
             if (
-                (event.source[0].type ==
+                (event.source[0].type ===
                     RestConstants.COLLECTIONTYPE_EDITORIAL &&
-                    event.target.type !=
+                    event.target.type !==
                         RestConstants.COLLECTIONTYPE_EDITORIAL) ||
-                (event.source[0].type !=
+                (event.source[0].type !==
                     RestConstants.COLLECTIONTYPE_EDITORIAL &&
-                    event.target.type == RestConstants.COLLECTIONTYPE_EDITORIAL)
+                    event.target.type === RestConstants.COLLECTIONTYPE_EDITORIAL)
             ) {
                 return false;
             }
         }
 
         if (
-            event.source[0].reference &&
             !NodeHelper.getNodesRight(
                 event.source[0],
                 RestConstants.ACCESS_CC_PUBLISH,
@@ -757,8 +591,8 @@ export class CollectionsMainComponent {
                 this.closeDialog();
                 this.collectionService
                     .deleteCollection(
-                        this.collectionContent.collection.ref.id,
-                        this.collectionContent.collection.ref.repo,
+                        this.collectionContent.node.ref.id,
+                        this.collectionContent.node.ref.repo,
                     )
                     .subscribe(
                         result => {
@@ -780,7 +614,7 @@ export class CollectionsMainComponent {
                 [
                     UIConstants.ROUTER_PREFIX + 'collections/collection',
                     'edit',
-                    this.collectionContent.collection.ref.id,
+                    this.collectionContent.node.ref.id,
                 ],
                 { queryParams: { mainnav: this.mainnav } },
             );
@@ -800,7 +634,6 @@ export class CollectionsMainComponent {
         if (!this.isReady) {
             return;
         }
-        this.onSelection([]);
         this.isLoading = true;
         GlobalContainerComponent.finishPreloading();
 
@@ -814,11 +647,11 @@ export class CollectionsMainComponent {
         }
         this.collectionService
             .getCollectionSubcollections(
-                this.collectionContent.collection.ref.id,
+                this.collectionContent.node.ref.id,
                 this.getScope(),
                 [],
                 request,
-                this.collectionContent.collection.ref.repo,
+                this.collectionContent.node.ref.repo,
             )
             .subscribe(
                 collection => {
@@ -834,10 +667,10 @@ export class CollectionsMainComponent {
                     request.count = null;
                     this.collectionService
                         .getCollectionReferences(
-                            this.collectionContent.collection.ref.id,
+                            this.collectionContent.node.ref.id,
                             CollectionsMainComponent.PROPERTY_FILTER,
                             request,
-                            this.collectionContent.collection.ref.repo,
+                            this.collectionContent.node.ref.repo,
                         )
                         .subscribe(refs => {
                             this.collectionContent.references = refs.references;
@@ -850,18 +683,6 @@ export class CollectionsMainComponent {
                     this.toast.error(error);
                 },
             );
-
-        if (
-            this.getCollectionId() != RestConstants.ROOT &&
-            this.collectionContent.collection.permission == null
-        ) {
-            this.nodeService
-                .getNodePermissions(this.getCollectionId())
-                .subscribe(permission => {
-                    this.collectionContent.collection.permission =
-                        permission.permissions;
-                });
-        }
     }
 
     loadMoreReferences(loadAll = false) {
@@ -884,10 +705,10 @@ export class CollectionsMainComponent {
         this.collectionContent.referencesLoading = true;
         this.collectionService
             .getCollectionReferences(
-                this.collectionContent.collection.ref.id,
+                this.collectionContent.node.ref.id,
                 CollectionsMainComponent.PROPERTY_FILTER,
                 request,
-                this.collectionContent.collection.ref.repo,
+                this.collectionContent.node.ref.repo,
             )
             .subscribe(refs => {
                 this.collectionContent.references = this.collectionContent.references.concat(
@@ -915,11 +736,11 @@ export class CollectionsMainComponent {
         this.collectionContent.collectionsLoading = true;
         this.collectionService
             .getCollectionSubcollections(
-                this.collectionContent.collection.ref.id,
+                this.collectionContent.node.ref.id,
                 this.getScope(),
                 [],
                 request,
-                this.collectionContent.collection.ref.repo,
+                this.collectionContent.node.ref.repo,
             )
             .subscribe(refs => {
                 this.collectionContent.collections = this.collectionContent.collections.concat(
@@ -941,17 +762,17 @@ export class CollectionsMainComponent {
                 [
                     UIConstants.ROUTER_PREFIX + 'collections/collection',
                     'new',
-                    this.collectionContent.collection.ref.id,
+                    this.collectionContent.node.ref.id,
                 ],
                 { queryParams: params },
             );
         });
     }
 
-    onCollectionsClick(collection: EduData.Collection): void {
+    onCollectionsClick(collection: Node): void {
         // remember actual collection as breadcrumb
         if (!this.isRootLevelCollection()) {
-            this.parentCollectionId = this.collectionContent.collection.ref;
+            this.parentCollectionId = this.collectionContent.node.ref;
         }
 
         // set thru router so that browser back button can work
@@ -977,7 +798,7 @@ export class CollectionsMainComponent {
             if (this.isAllowedToDeleteNodes([content])) {
                 this.dialogButtons.push(
                     new DialogButton(
-                        'COLLECTIONS.DETAIL.REMOVE',
+                        'OPTIONS.REMOVE_REF',
                         DialogButton.TYPE_CANCEL,
                         () =>
                             this.deleteFromCollection(() => this.closeDialog()),
@@ -1000,27 +821,6 @@ export class CollectionsMainComponent {
 
                 // remember the scroll Y before displaying content
                 this.lastScrollY = window.scrollY;
-                const nodeOptions = [];
-                /*if(data.node.downloadUrl)
-                    nodeOptions.push(new OptionItem("DOWNLOAD", "cloud_download", () => this.downloadMaterial()));
-                */
-                if (this.isAllowedToDeleteNodes([content])) {
-                    nodeOptions.push(
-                        new OptionItem(
-                            'COLLECTIONS.DETAIL.REMOVE',
-                            'remove_circle_outline',
-                            () =>
-                                this.deleteFromCollection(() => {
-                                    NodeRenderComponent.close(this.location);
-                                }),
-                        ),
-                    );
-                }
-                // set content for being displayed in detail
-                this.temporaryStorageService.set(
-                    TemporaryStorageService.NODE_RENDER_PARAMETER_OPTIONS,
-                    nodeOptions,
-                );
                 this.temporaryStorageService.set(
                     TemporaryStorageService.NODE_RENDER_PARAMETER_LIST,
                     this.collectionContent.references,
@@ -1033,8 +833,6 @@ export class CollectionsMainComponent {
                     UIConstants.ROUTER_PREFIX + 'render',
                     content.ref.id,
                 ]);
-                //this.navigate(this.collectionContent.collection.ref.id,content.ref.id);
-                // add breadcrumb
             });
     }
 
@@ -1042,7 +840,7 @@ export class CollectionsMainComponent {
         // scroll to last Y
         window.scrollTo(0, this.lastScrollY);
 
-        this.navigate(this.collectionContent.collection.ref.id);
+        this.navigate(this.collectionContent.node.ref.id);
         // refresh content if signaled
         if (event.refresh) {
             this.refreshContent();
@@ -1050,7 +848,7 @@ export class CollectionsMainComponent {
     }
 
     refreshAll() {
-        this.displayCollectionById(this.collectionContent.collection.ref.id);
+        this.displayCollectionById(this.collectionContent.node.ref.id);
     }
 
     displayCollectionById(id: string, callback: () => void = null): void {
@@ -1069,7 +867,8 @@ export class CollectionsMainComponent {
                 collection => {
                     // set the collection and load content data by refresh
                     this.setCollectionId(null);
-                    this.collectionContent.collection = collection.collection;
+                    console.log(collection.collection);
+                    this.collectionContent.node = collection.collection;
 
                     this.renderBreadcrumbs();
 
@@ -1116,32 +915,10 @@ export class CollectionsMainComponent {
             : ListTableComponent.VIEW_TYPE_GRID_SMALL;
     }
 
-    addFeedback(data: any) {
-        if (!data) {
-            return;
-        }
-        delete data[RestConstants.CM_NAME];
-        console.log(data);
-        this.globalProgress = true;
-        this.collectionService
-            .addFeedback(this.collectionContent.collection.ref.id, data)
-            .subscribe(
-                () => {
-                    this.globalProgress = false;
-                    this.collectionFeedback(false);
-                    this.toast.toast('COLLECTIONS.FEEDBACK_TOAST');
-                },
-                error => {
-                    this.globalProgress = false;
-                    this.toast.error(error);
-                },
-            );
-    }
-
     private renderBreadcrumbs() {
         this.path = [];
         this.nodeService
-            .getNodeParents(this.collectionContent.collection.ref.id, false)
+            .getNodeParents(this.collectionContent.node.ref.id, false)
             .subscribe((data: EduData.NodeList) => {
                 this.path = data.nodes.reverse();
             });
@@ -1156,7 +933,7 @@ export class CollectionsMainComponent {
     }
 
     private initialize() {
-        this.listOptions = this.getOptions(null, true);
+        this.optionsService.clearComponents(this.mainNavRef, this.actionbarReferences);
 
         // load user profile
         this.iamService.getUser().subscribe(
@@ -1182,9 +959,8 @@ export class CollectionsMainComponent {
                     if (params.mainnav) {
                         this.mainnav = params.mainnav !== 'false';
                     }
-                    this.feedback = params.feedback === 'true';
-
-                    this.listOptions = this.getOptions(null, true);
+                    // @TODO handle the feedback param, maybe in management-dialogs
+                    // this.feedback = params.feedback === 'true';
 
                     this._orderActive = false;
                     this.infoTitle = null;
@@ -1220,10 +996,8 @@ export class CollectionsMainComponent {
                         this.showCollection = id != '-root-';
                         this.displayCollectionById(id, () => {
                             if (params.content) {
-                                console.log('search content');
                                 for (const content of this.collectionContent
                                     .references) {
-                                    console.log(content);
                                     if (content.ref.id == params.content) {
                                         console.log('match');
                                         this.contentDetailObject = content;
@@ -1251,7 +1025,7 @@ export class CollectionsMainComponent {
         this.collectionService
             .removeFromCollection(
                 this.contentDetailObject.ref.id,
-                this.collectionContent.collection.ref.id,
+                this.collectionContent.node.ref.id,
             )
             .subscribe(
                 () => {
@@ -1282,7 +1056,7 @@ export class CollectionsMainComponent {
         this.collectionService
             .removeFromCollection(
                 nodes[position].ref.id,
-                this.collectionContent.collection.ref.id,
+                this.collectionContent.node.ref.id,
             )
             .subscribe(
                 () => {
@@ -1301,7 +1075,7 @@ export class CollectionsMainComponent {
 
     private addToOtherCollection(node: EduData.Node) {
         console.log('add to other');
-        this.navigate(this.collectionContent.collection.ref.id, node.ref.id);
+        this.navigate(this.collectionContent.node.ref.id, node.ref.id);
     }
 
     private handleError(error: any) {
@@ -1316,7 +1090,7 @@ export class CollectionsMainComponent {
         this.globalProgress = true;
         this.collectionService
             .setOrder(
-                this.collectionContent.collection.ref.id,
+                this.collectionContent.node.ref.id,
                 RestHelper.getNodeIds(this.collectionContent.references),
             )
             .subscribe(
@@ -1344,87 +1118,31 @@ export class CollectionsMainComponent {
     }
 
     private collectionPermissions() {
-        this._collectionShare = this.collectionContent.collection;
+        this._collectionShare = this.collectionContent.node;
     }
 
     private setOptionsCollection() {
-        this.optionsCollection = [];
-        if (this.isAllowedToEditCollection()) {
-            this.optionsCollection.push(
-                new OptionItem('COLLECTIONS.ACTIONBAR.EDIT', 'edit', () =>
-                    this.collectionEdit(),
-                ),
-            );
-        }
-        if (this.pinningAllowed && this.isAllowedToDeleteCollection()) {
-            this.optionsCollection.push(
-                new OptionItem('COLLECTIONS.ACTIONBAR.PIN', 'edu-pin', () =>
-                    this.pinCollection(),
-                ),
-            );
-        }
-        if (
-            this.isAllowedToDeleteCollection() &&
-            this.connector.hasToolPermissionInstant(
-                RestConstants.TOOLPERMISSION_COLLECTION_FEEDBACK,
-            )
-        ) {
-            this.optionsCollection.push(
-                new OptionItem(
-                    'COLLECTIONS.ACTIONBAR.FEEDBACK_VIEW',
-                    'speaker_notes',
-                    () => this.collectionFeedbackView(),
-                ),
-            );
-        }
-        if (
-            this.isAllowedToEditCollection() &&
-            this.collectionContent.collection.type !=
-                RestConstants.COLLECTIONTYPE_EDITORIAL
-        ) {
-            this.optionsCollection.push(
-                new OptionItem('WORKSPACE.OPTION.INVITE', 'group_add', () =>
-                    this.collectionPermissions(),
-                ),
-            );
-        }
-        if (this.isAllowedToDeleteCollection()) {
-            this.optionsCollection.push(
-                new OptionItem('COLLECTIONS.ACTIONBAR.DELETE', 'delete', () =>
-                    this.collectionDelete(),
-                ),
-            );
-        }
-
-        if (
-            this.feedbackAllowed() &&
-            !this.isAllowedToDeleteCollection() &&
-            this.connector.hasToolPermissionInstant(
-                RestConstants.TOOLPERMISSION_COLLECTION_FEEDBACK,
-            )
-        ) {
-            this.optionsCollection.push(
-                new OptionItem(
-                    'COLLECTIONS.ACTIONBAR.FEEDBACK',
-                    'chat_bubble',
-                    () => this.collectionFeedback(true),
-                ),
-            );
-        }
+        this.optionsService.setData({
+            scope: Scope.CollectionsCollection,
+            activeObject: this.collectionContent.node
+        });
+        this.optionsService.initComponents(this.mainNavRef, this.actionbarCollection);
+        this.optionsService.refreshComponents();
     }
 
     private setCollectionId(id: string) {
         this.collectionContent = {
             collections: [],
             references: [],
-            collection: new Collection(),
+            node: new Node(),
         };
-        this.collectionContent.collection.ref = new NodeRef();
-        this.collectionContent.collection.ref.id = id;
+        this.collectionContent.node.ref = new NodeRef();
+        this.collectionContent.node.ref.id = id;
+        this.collectionContent.node.aspects = [RestConstants.CCM_ASPECT_COLLECTION];
     }
 
     private getCollectionId() {
-        const c = this.collectionContent.collection;
+        const c = this.collectionContent.node;
         return c != null && c.ref != null ? c.ref.id : null;
     }
 
@@ -1432,7 +1150,6 @@ export class CollectionsMainComponent {
         this.collectionContentOriginal = Helper.deepCopy(
             this.collectionContent,
         );
-        this.setOptionsCollection();
         if (this.mainNavRef) {
             this.mainNavRef.refreshBanner();
         }
@@ -1448,6 +1165,7 @@ export class CollectionsMainComponent {
         if (callback) {
             callback();
         }
+        setTimeout(() => this.setOptionsCollection());
     }
 
     private addToStore(nodes: Node[]) {
@@ -1456,30 +1174,6 @@ export class CollectionsMainComponent {
             this.globalProgress = false;
             this.mainNavRef.refreshNodeStore();
         });
-    }
-
-    private collectionFeedbackView() {
-        this.globalProgress = true;
-        this.collectionService
-            .getFeedbacks(this.collectionContent.collection.ref.id)
-            .subscribe(
-                data => {
-                    this.feedbacks = data.reverse();
-                    this.feedbackView = true;
-                    this.globalProgress = false;
-                },
-                error => {
-                    this.globalProgress = false;
-                    this.toast.error(error);
-                },
-            );
-    }
-
-    private collectionFeedback(status: boolean) {
-        this.navigate(this.collectionContent.collection.ref.id, '', status);
-        if (!status && this.params.feedbackClose === 'true') {
-            window.close();
-        }
     }
 
     private initCustomNodeList(): void {

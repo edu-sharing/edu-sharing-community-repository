@@ -277,13 +277,13 @@ public class Usages {
 		}
 	}
 	public static class CollectionUsage extends Usage {
-		private Collection collection;
+		private Node collection;
 
-		public Collection getCollection() {
+		public Node getCollection() {
 			return collection;
 		}
 
-		public void setCollection(Collection collection) {
+		public void setCollection(Node collection) {
 			this.collection = collection;
 		}
 

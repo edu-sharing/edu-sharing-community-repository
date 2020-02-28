@@ -42,7 +42,6 @@
         "ADD_TO_COLLECTION": "Add to collection",
         "ADD_TO_COLLECTION_SHORT": "Add",
         "SHOW_NODE_STORE": "memo list",
-        "ADD_NODE_STORE": "Add to memo list",
         "ADDED_TO_NODE_STORE": "{{count}} Element(s) have been added to the list.",
         "ADDED_TO_NODE_STORE_EXISTS": "Element {{name}} is already on the memo list.",
         "NODE_STORE": {

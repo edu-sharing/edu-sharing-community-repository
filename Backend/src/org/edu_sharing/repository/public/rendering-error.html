@@ -4,19 +4,17 @@
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
     <title>Error {{statusCode}}</title>
         <style>
-        body{
+        div.es-rendering-error {
             font-family:arial,sans-serif;
-        }
-        div.error {
             margin:30px;
             padding: 40px 10px;
             text-align: center;
         }
-        div.message_wrapper {
+        div.es-rendering-message-wrapper {
             display: inline-block;
             max-width: 800px;
         }
-        div.message{
+        div.es-rendering-message{
             position:relative;
             background-color: #eee;
             color: #383838;
@@ -24,15 +22,15 @@
             border-radius: 5px;
             margin-bottom:20px;
         }
-        div.message >span {
+        div.es-rendering-message >span {
             white-space:pre-line;
         }
-        div.technicalMessage{
+        div.es-rendering-technical-message{
             color:#999;
             font-size:70%;
             word-break: break-all;
        }
-       .warning{
+       .es-rendering-warning{
             position:absolute;
             width:25px;
             height:25px;
@@ -42,13 +40,13 @@
         </style>
     </head>
 <body>
-<div class="error">
-    <div class="message_wrapper"
+<div class="es-rendering-error">
+    <div class="es-rendering-message-wrapper"
          data-error-statusCode="{{statusCode}}"
          data-error-message="{{technicalMessage}}"
          data-error-exception="{{exception}}">
-        <div class="message">
-            <svg class="warning">
+        <div class="es-rendering-message">
+            <svg class="es-rendering-warning">
                 <path id="warning" d="M1,21l22,0l-11,-19l-11,19Zm3.47,-2l7.53,-13.01l7.53,13.01l-15.06,0Zm6.53,-3l2,0l0,2l-2,0l0,-2Zm0,-6l2,0l0,4l-2,0l0,-4Z" style="fill-rule:nonzero;"/>
             </svg>
             <span>{{message}}</span></div>

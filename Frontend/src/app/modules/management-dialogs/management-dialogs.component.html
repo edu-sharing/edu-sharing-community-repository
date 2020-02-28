@@ -13,12 +13,59 @@
   (onCancel)="closeStream()"
   (onDone)="closeStream()"
 ></add-stream>
+
+<workspace-metadata *ngIf="nodeSidebar"
+                    [@fromRight]="nodeSidebar"
+                    class="metadata-sidebar"
+                    [node]="nodeSidebar"
+                    (onRestore)="restoreVersion($event)"
+                    (onDisplay)="displayNode($event)"
+                    (onEditMetadata)="nodeMetadata=[$event]"
+                    (onClose)="closeSidebar()"
+></workspace-metadata>
+
+<mds
+        *ngIf="collectionWriteFeedback"
+        customTitle="COLLECTIONS.FEEDBACK_TITLE"
+        [embedded]="false"
+        [invalidate]="true"
+        [currentValues]="{}"
+        groupId="collection_feedback"
+        labelPositive="COLLECTIONS.FEEDBACK_SAVE"
+        (onCancel)="closeCollectionWriteFeedback()"
+        (onDone)="addCollectionFeedback($event)"
+></mds>
+<app-view-collection-feedback
+    *ngIf="collectionViewFeedback"
+    [collection]="collectionViewFeedback"
+    (onClose)="closeCollectionViewFeedback()"
+    ></app-view-collection-feedback>
+<collections-manage-pinning
+        *ngIf="addPinnedCollection"
+        [addCollection]="addPinnedCollection"
+        (onClose)="closePinnedCollection()"
+></collections-manage-pinning>
 <workspace-share *ngIf="nodeShare"
                  [nodes]="nodeShare"
                  [sendMessages]="true"
                  (onLoading)="globalProgress=$event"
                  (onClose)="closeShare()"
 ></workspace-share>
+<node-info *ngIf="nodeDebug"
+           [node]="nodeDebug"
+           (onClose)="closeDebug()"
+></node-info>
+<card
+        *ngIf="qr"
+        [node]="qr.node"
+        [isCancelable]="true"
+        title="{{ 'WORKSPACE.OPTION.QR_CODE' | translate }}"
+        (onCancel)="qr=null"
+        class="qr"
+        width="xlarge"
+        height="xxxlarge">
+    <qrcode [qrdata]="qr.data" elementType="img" margin="2" width="512" errorCorrectionLevel="M"></qrcode>
+</card>
 <workspace-workflow *ngIf="nodeWorkflow"
                     [nodeId]="nodeWorkflow.ref.id"
                     (onLoading)="globalProgress=$event"

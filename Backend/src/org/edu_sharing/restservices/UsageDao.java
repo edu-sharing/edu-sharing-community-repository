@@ -188,7 +188,7 @@ public class UsageDao {
 				try {
 					Usages.CollectionUsage collectionUsage = convertUsage(usage, Usages.CollectionUsage.class);
 					collectionUsage
-							.setCollection(CollectionDao.getCollection(repoDao, usage.getCourseId()).asCollection());
+							.setCollection(CollectionDao.getCollection(repoDao, usage.getCourseId()).asNode());
 					collections.add(collectionUsage);
 				} catch (Throwable t) {
 				}

@@ -27,6 +27,8 @@ public class RenderingTool {
 	public static String DISPLAY_PRERENDER = "prerender";
 	public static String DISPLAY_DYNAMIC = "dynamic";
 	public static String DISPLAY_EMBED = "embed";
+	// only content (e.g. video player), no license data
+	public static String DISPLAY_CONTENT = "content";
 	public static String DISPLAY_INLINE = "inline";
 	
 	public static String COM_INTERNAL = "internal";

@@ -1,19 +1,5 @@
 @import "../../../core-ui-module/styles/variables";
 
-
-$top:16px;
-$side:20px;
-.valign-wrapper{
-  height:100%;
-}
-.loading{
-  margin:auto;
-}
-.close{
-  position: absolute;
-  right: $side;
-  padding-top:$top;
-}
 .main {
   height: 100%;
   display: flex;
@@ -23,13 +9,19 @@ $side:20px;
   word-break: break-all;
   padding-left: 5px;
 }
-.name{
-  padding-top:$top;
-  padding-left:$side;
-  font-size:110%;
+.header{
+  display: flex;
   background-color: $workspaceMetadataBackground;
-  word-break: break-all;
-  padding-bottom: 15px;
+  align-items: center;
+  .name{
+    flex-grow: 1;
+    font-size:110%;
+    padding:10px 15px;
+    word-break: break-all;
+  }
+  .close{
+    padding-right:10px;
+  }
 }
 
 .row{

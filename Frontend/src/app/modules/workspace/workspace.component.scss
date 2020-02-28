@@ -72,23 +72,6 @@ user-quota{
   bottom:25px+$mobileTabNavHeight;
   display:none;
 }
-.addDesktop{
-  padding: 0 40px;
-  height: 43px;
-}
-.addDesktop,.addDesktopMenu{
-  position: fixed;
-  left: 38px;
-  top: 10px+$mainnavHeight;
-}
-.dialogAddDesktop{
-  z-index:66;
-}
-.addDesktopMenu{
-  top:45px+$mainnavHeight;
-  width: 200px;
-  z-index:105;
-}
 .selectRootMenu{
   position: fixed;
   width: 250px;
@@ -104,20 +87,6 @@ user-quota{
   background:$workspaceTreeSelectedBackgroundEffect;
   background-color: #fff;
 
-}
-.metadata{
-  min-width:300px;
-  max-width:300px;
-  position:fixed;
-  @include iosScrolling();
-  height:calc(100% - #{$mainnavHeight+$workspaceBreadcrumbsHeight});
-  top: $mainnavHeight+$workspaceBreadcrumbsHeight;
-  right:0;
-  z-index: 1;
-  background-color: #fff;
-  @media screen and (max-width: ($mobileTabSwitchWidth)) {
-    height:calc(100% - #{$mainnavHeight+$workspaceBreadcrumbsHeight+$mobileTabNavHeight});
-  }
 }
 .explorer{
   position:absolute;
@@ -208,7 +177,7 @@ user-quota{
     }
   }
 }
-.tree,.metadata{
+.tree{
   @include materialShadow();
 }
 
@@ -226,8 +195,7 @@ user-quota{
 }
 
 @media screen and (max-width: ($mobileTabSwitchWidth)){
-  .tree,
-  .addDesktop{
+  .tree{
     display:none;
   }
   .selectRootMenu{
@@ -239,10 +207,6 @@ user-quota{
   .breadcrumbFrame >div{
     padding-left:20px;
     padding-top:20px;
-  }
-  .addDesktopMenu{
-    right:53px;
-    bottom:38px+$mobileTabNavHeight;
   }
   .explorer{
     left:0;

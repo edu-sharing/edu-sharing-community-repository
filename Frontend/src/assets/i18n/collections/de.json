@@ -12,10 +12,6 @@
         "ORDER_ELEMENTS_INFO": "Betrachter der Sammlung sehen die enthaltenen Materialien in einer bestimmten Reihenfolge.",
         "ORDER_SAVED": "Reihenfolge erfolgreich festgelegt",
         "CUSTOM_ORDER": "Reihenfolge festlegen",
-        "DETAIL": {
-            "REMOVE": "Entfernen",
-            "ADD_TO_OTHER": "In Sammlung"
-        },
         "STEP": {
             "GENERAL": "Titel, Bild, Beschreibung und Farbe",
             "METADATA": "Weitere Informationen",
@@ -74,8 +70,6 @@
         "OPEN_MISSING": "Öffnen",
         "ORIGINAL_MISSING": "Das Orginal wurde gelöscht",
         "ORIGINAL_MISSING_INFO": "Das Orginal wurde gelöscht und steht nicht mehr zur Verfügung. Sie können die Referenz öffnen, um die Metadaten anzuzeigen.",
-        "CONFIRM_DELETE": "Sammlung wirklich löschen?",
-        "CONFIRM_DELETE_INFO": "Sammlung wirklich löschen? Bei vielen Untersammlungen kann dies einige Zeit dauern.",
         "REMOVED_FROM_COLLECTION": "Element(e) wurde von Sammlung entfernt",
         "EXTENDED_PERMISSIONS": "einzelne Personen oder Gruppen (sehen, mitarbeiten oder koordinieren)",
         "EXTENDED_PERMISSIONS_BUTTON": "Einladen",
@@ -83,13 +77,6 @@
             "DUPLICATE_NAME": "Eine Sammlung mit diesen Namen existiert bereits",
             "CREATED": "Sammlung wurde erstellt",
             "INVALID_NAME": "Der Name ist unzulässig. Bitte keine Sonderzeichen verwenden"
-        },
-        "ACTIONBAR": {
-            "EDIT": "Bearbeiten",
-            "PIN": "Sammlung pinnen",
-            "DELETE": "Sammlung löschen",
-            "FEEDBACK": "Feedback...",
-            "FEEDBACK_VIEW": "Feedback ansehen"
         },
         "NEW": {
             "AUTHOR_FREETEXT": "Bezeichnung des Autors"

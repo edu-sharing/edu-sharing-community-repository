@@ -1,5 +1,7 @@
 @import "../../../core-ui-module/styles/variables";
-
+.dropdown-dummy{
+  position: fixed;
+}
 .node{
   @include clickable();
   padding-top:10px;

@@ -1,17 +1,21 @@
-import { Component, Input, EventEmitter, Output } from '@angular/core';
+import {Component, Input, EventEmitter, Output, ViewChild} from '@angular/core';
 import { RestNodeService } from '../../../core-module/core.module';
 import { TranslateService } from '@ngx-translate/core';
 import { Translation } from '../../../core-ui-module/translation';
 import { RestConstants } from '../../../core-module/core.module';
 import { Node, NodeList } from '../../../core-module/core.module';
 import { TemporaryStorageService } from '../../../core-module/core.module';
-import { OptionItem } from '../../../core-ui-module/option-item';
+import {OptionItem, Scope} from '../../../core-ui-module/option-item';
 import { UIService } from '../../../core-module/core.module';
 import { UIAnimation } from '../../../core-module/ui/ui-animation';
 import { trigger } from '@angular/animations';
 import { Helper } from '../../../core-module/rest/helper';
 import { UIHelper } from '../../../core-ui-module/ui-helper';
 import { DropData } from '../../../core-ui-module/directives/drag-nodes/drag-nodes';
+import {MatMenuTrigger} from '@angular/material/menu';
+import {DropdownComponent} from '../../../core-ui-module/components/dropdown/dropdown.component';
+import {OptionsHelperService} from '../../../common/options-helper';
+import {MainNavComponent} from '../../../common/ui/main-nav/main-nav.component';
 
 @Component({
     selector: 'workspace-sub-tree',
@@ -24,20 +28,18 @@ import { DropData } from '../../../core-ui-module/directives/drag-nodes/drag-nod
         ),
         trigger('open', UIAnimation.openOverlay()),
     ],
+    providers: [OptionsHelperService]
 })
 export class WorkspaceSubTreeComponent {
     private static MAX_FOLDER_COUNT = 100;
 
-    /**
-     * Set the options which are valid for each node, similar to the action bar options, see @OptionItem
-     * @param options
-     */
-    @Input() set options(options: OptionItem[]) {
-        options = UIHelper.filterValidOptions(this.ui, options);
-        options = UIHelper.filterToggleOptions(options, false);
-        this._options = options;
-    }
+    @ViewChild('dropdown', {static: false}) dropdown: DropdownComponent;
+    @ViewChild('dropdownTrigger', { static: false }) dropdownTrigger: MatMenuTrigger;
+    dropdownLeft: string;
+    dropdownTop: string;
+
     @Input() openPath: string[][] = [];
+    @Input() mainNav: MainNavComponent;
     @Input() set reload(reload: Boolean) {
         if (reload) {
             this.refresh();
@@ -70,18 +72,13 @@ export class WorkspaceSubTreeComponent {
     moreItems: number;
     loadingMore: boolean;
 
-    private _options: OptionItem[];
     private loadingStates: boolean[] = [];
-    private dropdownPosition: string;
-    private dropdownLeft: string;
-    private dropdownBottom: string;
-    private dropdownTop: string;
-    private dropdown: Node;
 
     constructor(
         private ui: UIService,
         private nodeApi: RestNodeService,
         private storage: TemporaryStorageService,
+        private optionsService: OptionsHelperService,
     ) {}
 
     setLoadingState(state: boolean, pos: number) {
@@ -130,16 +127,7 @@ export class WorkspaceSubTreeComponent {
         event.preventDefault();
         event.stopPropagation();
 
-        if (!this._options.length) return;
-        this.showDropdown(node);
-        this.dropdownPosition = 'fixed';
-        //this.dropdownLeft=Math.min(100,event.clientX)+"px";
-        if (event.clientY > window.innerHeight / 2) {
-            this.dropdownBottom = window.innerHeight - event.clientY + 'px';
-            this.dropdownTop = 'auto';
-        } else {
-            this.dropdownTop = event.clientY + 'px';
-        }
+        this.showDropdown(event, node);
     }
 
     private callOption(option: OptionItem, node: Node) {
@@ -152,18 +140,22 @@ export class WorkspaceSubTreeComponent {
         this.onUpdateOptions.emit(event);
     }
 
-    private showDropdown(node: Node) {
+    private showDropdown(event: any, node: Node) {
         //if(this._options==null || this._options.length<1)
         //  return;
-        this.dropdownPosition = '';
-        this.dropdownLeft = null;
-        this.dropdownTop = null;
-        this.dropdownBottom = null;
-        if (this.dropdown == node) this.dropdown = null;
-        else {
-            this.dropdown = node;
-            this.onUpdateOptions.emit(node);
-        }
+        this.dropdownLeft = event.clientX + 'px';
+        this.dropdownTop = event.clientY + 'px';
+        this.optionsService.setData({
+            activeObject: node,
+            scope: Scope.WorkspaceTree
+        });
+        this.optionsService.initComponents(this.mainNav, null, null, this.dropdown);
+        this.optionsService.setListener({
+            onRefresh: () => this.refresh(),
+            onDelete: () => this.refresh()
+        });
+        this.optionsService.refreshComponents();
+        this.dropdownTrigger.openMenu();
     }
 
     private dropToParent(event: any) {

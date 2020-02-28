@@ -4,22 +4,23 @@ import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import org.edu_sharing.restservices.shared.Node;
 
 
 @ApiModel(description = "")
 public class CollectionEntry  {
   
-  private Collection collection = null;
+  private Node collection = null;
 
   
   /**
    **/
   @ApiModelProperty(required = true, value = "")
   @JsonProperty("collection")
-  public Collection getCollection() {
+  public Node getCollection() {
     return collection;
   }
-  public void setCollection(Collection collection) {
+  public void setCollection(Node collection) {
     this.collection = collection;
   }
 

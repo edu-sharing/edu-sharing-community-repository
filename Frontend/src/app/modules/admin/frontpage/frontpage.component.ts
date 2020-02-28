@@ -123,7 +123,7 @@ export class AdminFrontpageComponent {
     this.onOpenNode.emit(node.node);
   }
 
-  setCollection(collection : Collection){
+  setCollection(collection : Node){
     this.config.frontpage.collection=collection.ref.id;
     this.collectionName=collection.title;
     this.chooseCollection=false;

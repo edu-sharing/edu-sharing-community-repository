@@ -1,5 +1,5 @@
 import {Component, Input, EventEmitter, Output, ViewChild, ElementRef, HostListener} from '@angular/core';
-import {DialogButton, RestNodeService} from "../../core-module/core.module";
+import {DialogButton, NodeVersions, RestNodeService, Version} from "../../core-module/core.module";
 import {TranslateService} from "@ngx-translate/core";
 import {RestSearchService} from "../../core-module/core.module";
 import {Toast} from "../../core-ui-module/toast";
@@ -18,6 +18,7 @@ import {UIConstants} from "../../core-module/ui/ui-constants";
 import {ClipboardObject, TemporaryStorageService} from '../../core-module/core.module';
 import {RestUsageService} from "../../core-module/core.module";
 import {Observable} from 'rxjs';
+import {BridgeService} from '../../core-bridge-module/bridge.service';
 
 @Component({
   selector: 'workspace-management',
@@ -38,37 +39,45 @@ export class WorkspaceManagementDialogsComponent  {
   @Input() fileIsOver = false;
   @Input() addToCollection:Node[];
   @Output() addToCollectionChange = new EventEmitter();
-  @Input() filesToUpload : Node[]
+  @Input() filesToUpload : Node[];
   @Output() filesToUploadChange = new EventEmitter();
   @Input() parent : Node;
   @Output() showLtiToolsChange = new EventEmitter();
   @Input() nodeLicense : Node[];
   @Output() nodeLicenseChange = new EventEmitter();
-    @Input() set nodeDelete (nodeDelete: Node[]){
+  @Input() addPinnedCollection: Node;
+  @Output() addPinnedCollectionChange = new EventEmitter();
+  @Input() set nodeDelete (nodeDelete: Node[]){
         if(nodeDelete==null)
             return;
-        this.dialogTitle="WORKSPACE.DELETE_TITLE"+(nodeDelete.length==1 ? "_SINGLE" : "");
-        this.dialogCancelable=true;
-        this.dialogMessage="WORKSPACE.DELETE_MESSAGE"+(nodeDelete.length==1 ? "_SINGLE" : "");
-        this.dialogMessageParameters={name:RestHelper.getName(nodeDelete[0])};
+        this.dialogTitle='WORKSPACE.DELETE_TITLE'+(nodeDelete.length === 1 ? '_SINGLE' : '');
+        this.dialogMessage='WORKSPACE.DELETE_MESSAGE'+(nodeDelete.length === 1 ? '_SINGLE' : '');
+        if(nodeDelete.length === 1 && nodeDelete[0].collection) {
+            this.dialogTitle='WORKSPACE.DELETE_TITLE_COLLECTION';
+            this.dialogMessage='WORKSPACE.DELETE_MESSAGE_COLLECTION';
+        }
+      this.dialogCancelable=true;
+        this.dialogMessageParameters = {name:RestHelper.getName(nodeDelete[0])};
         this.dialogNode=nodeDelete;
         this.dialogButtons=DialogButton.getCancel(()=> {this.dialogTitle = null});
         this.dialogButtons.push(new DialogButton('YES_DELETE',DialogButton.TYPE_PRIMARY,()=>{this.deleteConfirmed(nodeDelete)}));
 
         // check for usages and warn user
-        if(nodeDelete.length==1 && !nodeDelete[0].isDirectory){
+        if(nodeDelete.length === 1 && !nodeDelete[0].isDirectory) {
             this.usageService.getNodeUsages(nodeDelete[0].ref.id,nodeDelete[0].ref.repo).subscribe((usages)=>{
-                if(usages.usages.length>0){
-                    this.dialogMessage="WORKSPACE.DELETE_MESSAGE_SINGLE_USAGES";
-                    this.dialogMessageParameters={name:nodeDelete[0].name,usages:usages.usages.length};
+                if(usages.usages.length>0) {
+                    this.dialogMessage='WORKSPACE.DELETE_MESSAGE_SINGLE_USAGES';
+                    this.dialogMessageParameters = {name:nodeDelete[0].name,usages:usages.usages.length};
                 }
             });
         }
     }
     @Output() nodeDeleteChange = new EventEmitter();
-    @Output() onDelete = new EventEmitter();
+    @Output() onDelete = new EventEmitter<{objects: Node[]|any,error: boolean, count: number}>();
   @Input() nodeShare : Node[];
   @Output() nodeShareChange = new EventEmitter<Node[]>();
+    @Input() nodeDebug : Node[];
+    @Output() nodeDebugChange = new EventEmitter<Node[]>();
     @Input() nodeShareLink : Node;
     @Output() nodeShareLinkChange = new EventEmitter();
     @Input() nodeWorkflow : Node;
@@ -85,7 +94,13 @@ export class WorkspaceManagementDialogsComponent  {
     @Output() nodeTemplateChange = new EventEmitter();
     @Input() nodeContributor : Node;
     @Output() nodeContributorChange = new EventEmitter();
-  @Input() showUploadSelect=false;
+    @Input() collectionWriteFeedback: Node;
+    @Output() collectionWriteFeedbackChange = new EventEmitter<Node>();
+    @Input() collectionViewFeedback: Node;
+    @Output() collectionViewFeedbackChange = new EventEmitter<Node>();
+    @Input() nodeSidebar: Node;
+    @Output() nodeSidebarChange = new EventEmitter<Node>();
+    @Input() showUploadSelect=false;
   @Output() showUploadSelectChange = new EventEmitter();
   @Input() nodeMetadataAllowReplace : Boolean;
   @Output() onClose=new EventEmitter();
@@ -114,14 +129,26 @@ export class WorkspaceManagementDialogsComponent  {
   @Output() nodeDeleteOnCancelChange = new EventEmitter();
   private nodeLicenseOnUpload = false;
   private wasUploaded: boolean;
+    /**
+     * QR Code object data to print
+     * @node: Reference to the node (for header title)
+     * @data: The string to display inside the qr code (e.g. an url)
+     */
+  @Input() qr: {node: Node, data: string};
 
   @HostListener('document:keydown', ['$event'])
   handleKeyboardEvent(event: KeyboardEvent) {
-    if(event.key=="Escape"){
+    if(event.key === 'Escape') {
       if(this.nodeMetadata!=null || this.createMetadata){
         if(this.mdsRef.handleKeyboardEvent(event))
           return;
         this.closeEditor(false);
+        event.preventDefault();
+        event.stopPropagation();
+        return;
+      }
+      if(this.nodeSidebar!=null){
+        this.closeSidebar();
         event.preventDefault();
         event.stopPropagation();
         return;
@@ -174,6 +201,7 @@ export class WorkspaceManagementDialogsComponent  {
     private config:ConfigurationService,
     private searchService:RestSearchService,
     private toast:Toast,
+    private bridge:BridgeService,
     private router:Router,
   ){
    }
@@ -201,7 +229,7 @@ export class WorkspaceManagementDialogsComponent  {
             this.globalProgress = false;
             if (!error)
                 this.toast.toast("WORKSPACE.TOAST.DELETE_FINISHED");
-            this.onDelete.emit({error:error,count:position});
+            this.onDelete.emit({objects: nodes,error:error,count:position});
             return;
         }
         this.dialogTitle=null;
@@ -233,10 +261,8 @@ export class WorkspaceManagementDialogsComponent  {
     if (this.config.instant('licenseDialogOnUpload', false)) {
          this.nodeLicense = event;
          this.nodeLicenseOnUpload = true;
-    }else if (this.filesToUpload.length === 1) {
+    } else {
         this.showMetadataAfterUpload(event);
-    }else {
-        this.onUploadFilesProcessed.emit(event);
     }
     this.wasUploaded = true;
     this.filesToUpload = null;
@@ -391,15 +417,14 @@ export class WorkspaceManagementDialogsComponent  {
     this.addToCollectionChange.emit(null);
     this.onCloseAddToCollection.emit();
   }
-  public addToCollectionCreate(parent:Node|Collection=null){
+  public addToCollectionCreate(parent:Node=null){
       this.temporaryStorage.set(TemporaryStorageService.COLLECTION_ADD_NODES,this.addToCollection);
       this.router.navigate([UIConstants.ROUTER_PREFIX,"collections","collection","new",parent ? parent.ref.id : RestConstants.ROOT]);
       this.addToCollection=null;
       this.addToCollectionChange.emit(null);
   }
-  public addToCollectionList(collection:Collection,list:Node[]=this.addToCollection,close=true,callback:Function=null,force=false){
-    console.log(collection);
-    if(!force && (collection.scope!=RestConstants.COLLECTIONSCOPE_MY)){
+  public addToCollectionList(collection:Node,list:Node[]=this.addToCollection,close=true,callback:Function=null,force=false){
+    if(!force && (collection.collection.scope!=RestConstants.COLLECTIONSCOPE_MY)){
       this.dialogTitle='DIALOG.COLLECTION_SHARE_PUBLIC';
       this.dialogMessage='DIALOG.COLLECTION_SHARE_PUBLIC_INFO';
       this.dialogCancelable=true;
@@ -415,7 +440,7 @@ export class WorkspaceManagementDialogsComponent  {
       this.dialogTitle=null;
     }
     this.globalProgress=true;
-    UIHelper.addToCollection(this.collectionService,this.router,this.toast,collection,list,()=>{
+    UIHelper.addToCollection(this.collectionService,this.router,this.bridge,collection,list,()=>{
       this.globalProgress=false;
        this.onStoredAddToCollection.emit(collection);
       if(callback)
@@ -434,5 +459,87 @@ export class WorkspaceManagementDialogsComponent  {
     closeTemplate() {
         this.nodeTemplate = null;
         this.nodeTemplateChange.emit(null);
+    }
+
+    closeDebug() {
+      this.nodeDebug = null;
+      this.nodeDebugChange.emit(null);
+    }
+
+    closePinnedCollection() {
+        this.addPinnedCollection = null;
+        this.addPinnedCollectionChange.emit(null);
+    }
+
+    closeCollectionWriteFeedback() {
+        this.collectionWriteFeedback = null;
+        this.collectionWriteFeedbackChange.emit(null);
+    }
+
+    addCollectionFeedback(feedback: any) {
+        if (!feedback) {
+            return;
+        }
+        delete feedback[RestConstants.CM_NAME];
+        console.log(feedback);
+        this.toast.showProgressDialog();
+        this.collectionService
+            .addFeedback(this.collectionWriteFeedback.ref.id, feedback)
+            .subscribe(
+                () => {
+                    this.toast.closeModalDialog();
+                    this.closeCollectionWriteFeedback();
+                    this.toast.toast('COLLECTIONS.FEEDBACK_TOAST');
+                },
+                error => {
+                    this.toast.closeModalDialog();
+                    this.toast.error(error);
+                },
+            );
+    }
+    private restoreVersion(restore:{version: Version,node: Node}) {
+        this.toast.showConfigurableDialog({
+            title: 'WORKSPACE.METADATA.RESTORE_TITLE',
+            message: 'WORKSPACE.METADATA.RESTORE_MESSAGE',
+            buttons: DialogButton.getYesNo(() => this.toast.closeModalDialog(), () => this.doRestoreVersion(restore.version)),
+            node: restore.node,
+            isCancelable: true,
+            onCancel: () => this.toast.closeModalDialog(),
+        });
+    }
+    private doRestoreVersion(version: Version): void {
+        this.toast.showProgressDialog();
+        this.nodeService.revertNodeToVersion(version.version.node.id, version.version.major, version.version.minor)
+            .subscribe(
+                (data: NodeVersions) => {
+                    this.toast.closeModalDialog();
+                    this.refresh();
+                    this.closeSidebar();
+                    // @TODO type is not compatible
+                    this.nodeService.getNodeMetadata(version.version.node.id, [RestConstants.ALL]).subscribe((node) => {
+                        this.nodeSidebar = node.node;
+                        this.nodeSidebarChange.emit(node.node);
+                        this.toast.toast('WORKSPACE.REVERTED_VERSION');
+                    },
+                (error: any) => this.toast.error(error));
+                },
+            (error: any) => this.toast.error(error));
+    }
+
+
+    closeCollectionViewFeedback() {
+        this.collectionViewFeedback = null;
+        this.collectionViewFeedbackChange.emit(null);
+    }
+
+    closeSidebar() {
+        this.nodeSidebar = null;
+        this.nodeSidebarChange.emit(null);
+    }
+
+    displayNode(node: Node) {
+      console.log(node);
+        this.router.navigate([UIConstants.ROUTER_PREFIX + 'render', node.ref.id, node.version]);
+
     }
 }

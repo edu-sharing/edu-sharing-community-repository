@@ -12,7 +12,6 @@ import org.alfresco.service.cmr.security.PermissionService;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.server.MCAlfrescoBaseClient;
 import org.edu_sharing.restservices.collection.v1.model.Collection;
-import org.edu_sharing.restservices.collection.v1.model.CollectionBase;
 import org.edu_sharing.restservices.collection.v1.model.CollectionBaseEntries;
 import org.edu_sharing.restservices.collection.v1.model.CollectionReference;
 import org.edu_sharing.restservices.node.v1.model.NodeEntries;
@@ -65,19 +64,18 @@ public class CollectionDao {
 	private Preview preview;
 
 	private NodeDao nodeDao;
-	
 
-	public static CollectionDao getCollection(RepositoryDao repoDao, String collectionId) 
+	public static CollectionDao getCollection(RepositoryDao repoDao, String collectionId)
 			throws DAOException {
 
 		try {
-			
+
 			return new CollectionDao(repoDao, collectionId);
-			
+
 		} catch (Exception e) {
 
 			throw DAOException.mapping(e);
-		}			
+		}
 	}
 
 	public static CollectionBaseEntries getCollectionsReferences(RepositoryDao repoDao, String parentId, Filter filter, SortDefinition sortDefinition, int skipCount, int maxItems)	throws DAOException {
@@ -99,88 +97,45 @@ public class CollectionDao {
 		}
 	}
 	private static CollectionBaseEntries getCollectionsChildren(RepositoryDao repoDao, String parentId, SearchScope scope, Filter propFilter, List<String> filter, SortDefinition sortDefinition, int skipCount, int maxItems) throws DAOException {
-		List<CollectionBase> result = new ArrayList<CollectionBase>();
-		// if this collection is ordered by user, use the position of the elements as primary order criteria
-		if(!ROOT.equals(parentId) && CCConstants.COLLECTION_ORDER_MODE_CUSTOM.equals(getCollection(repoDao, parentId).getOrderMode())) {
-			sortDefinition.addSortDefinitionEntry(
-					new SortDefinition.SortDefinitionEntry(CCConstants.getValidLocalName(CCConstants.CCM_PROP_COLLECTION_ORDERED_POSITION),true),0);
-		}
-
-		List<org.alfresco.service.cmr.repository.NodeRef> children =
-				repoDao.getCollectionClient().getChildren(
-						ROOT.equals(parentId) ? null : parentId,
-						scope!=null ? scope.toString() : null,sortDefinition,filter);
-
-
-		//NodeDao.convertAlfrescoNodeRef(repoDao,children)
-		NodeEntries sorted = NodeDao.convertToRest(repoDao,Filter.createShowAllFilter(),NodeDao.convertAlfrescoNodeRef(repoDao,children),skipCount,maxItems);
-		Pagination pagination = sorted.getPagination();
-		for (Node child : sorted.getNodes()) {
-
-			String nodeType = child.getType();
-
-			if (CCConstants.getValidLocalName(CCConstants.CCM_TYPE_MAP).equals(nodeType)) {
-
-				// it's a collection
-
-				//Collection collection = getCollection(repoDao, nodeId).asCollection();
-				Collection collection = child.getCollection();
-
-				result.add(collection);
-
-			} else if (CCConstants.getValidLocalName(CCConstants.CCM_TYPE_IO).equals(nodeType)){
-
-				// it's a references
-
-				CollectionReference collRef = new CollectionReference();
-
-				NodeRef ref=child.getRef();
-				collRef.setRef(ref);
-
-				String shortproporiginal = CCConstants.getValidLocalName(CCConstants.CCM_PROP_IO_ORIGINAL);
-				if(!propFilter.getProperties().contains(shortproporiginal)){
-					propFilter.getProperties().add(shortproporiginal);
-				}
-
-				final Node node=child;
-				collRef.setReference(node);
-                collRef.setAccess(node.getAccess());
-                collRef.setAspects(node.getAspects());
-				HashMap<String,String[]> props = collRef.getReference().getProperties();
-				String[] prop=props.get(shortproporiginal);
-				final String originalId=prop!=null && prop.length>0 ? prop[0] : null;
-				collRef.setOriginalId(originalId);
-				try{
-					collRef.setAccessOriginal(NodeDao.getNode(repoDao,originalId).asNode().getAccess());
-				}catch(Throwable t){
-					// user may has no access to the original, this is okay
-				}
-				AuthenticationUtil.runAsSystem(new RunAsWork<Void>() {
-
-					@Override
-					public Void doWork() throws Exception {
-						try{
-							NodeDao nodeDaoOriginal = NodeDao.getNode(repoDao,originalId);
-							node.setCreatedBy(nodeDaoOriginal.asNode().getCreatedBy());
-						}catch(Throwable t){
-							collRef.setOriginalId(null);
-							// original maybe deleted
-						}
-						return null;
-					}
-
-				});
-
-				Preview preview = collRef.getReference().getPreview();
-				collRef.setPreview(preview);
-
-				result.add(collRef);
+		try {
+			List<Node> result = new ArrayList<>();
+			// if this collection is ordered by user, use the position of the elements as primary order criteria
+			if (!ROOT.equals(parentId) && CCConstants.COLLECTION_ORDER_MODE_CUSTOM.equals(NodeDao.getNode(repoDao, parentId).asNode().getCollection().getOrderMode())) {
+				sortDefinition.addSortDefinitionEntry(
+						new SortDefinition.SortDefinitionEntry(CCConstants.getValidLocalName(CCConstants.CCM_PROP_COLLECTION_ORDERED_POSITION), true), 0);
 			}
+
+			List<org.alfresco.service.cmr.repository.NodeRef> children =
+					repoDao.getCollectionClient().getChildren(
+							ROOT.equals(parentId) ? null : parentId,
+							scope != null ? scope.toString() : null, sortDefinition, filter);
+
+
+			//NodeDao.convertAlfrescoNodeRef(repoDao,children)
+			NodeEntries sorted = NodeDao.convertToRest(repoDao, Filter.createShowAllFilter(), NodeDao.convertAlfrescoNodeRef(repoDao, children), skipCount, maxItems);
+			Pagination pagination = sorted.getPagination();
+			for (Node child : sorted.getNodes()) {
+
+				String nodeType = child.getType();
+
+				if (CCConstants.getValidLocalName(CCConstants.CCM_TYPE_MAP).equals(nodeType)) {
+
+					// it's a collection
+					result.add(child);
+
+				} else if (CCConstants.getValidLocalName(CCConstants.CCM_TYPE_IO).equals(nodeType)) {
+
+					// it's a reference
+					result.add((CollectionReference)child);
+				}
+			}
+			CollectionBaseEntries obj = new CollectionBaseEntries();
+			obj.setEntries(result);
+			obj.setPagination(pagination);
+			return obj;
+		}catch(Exception e){
+			throw DAOException.mapping(e);
 		}
-		CollectionBaseEntries obj=new CollectionBaseEntries();
-		obj.setEntries(result);
-		obj.setPagination(pagination);
-		return obj;
 	}
 
 	private String getOrderMode() {
@@ -199,8 +154,6 @@ public class CollectionDao {
 
 			this.collection = unmarshalling(repoDao.getId(), collectionClient.get(nodeDao.getStoreIdentifier(),nodeDao.getStoreProtocol(),collectionId));
 			this.baseClient = repoDao.getBaseClient();
-			this.access = nodeDao.getAccessAsString();//baseClient.hasAllPermissions(collectionId, PERMISSIONS);
-			this.preview= nodeDao.asNode().getPreview();
 
 		} catch (Exception e) {
 
@@ -230,13 +183,13 @@ public class CollectionDao {
 		return collection.getScope();
 	}
 
-	public static CollectionDao createRoot(RepositoryDao repoDao, Collection collection) throws DAOException {
+	public static NodeDao createRoot(RepositoryDao repoDao, Node collection) throws DAOException {
 
 		try {
 
 			org.edu_sharing.service.collection.Collection child = 
 					repoDao.getCollectionClient().createAndSetScope(null,marshalling(collection));
-			return new CollectionDao(repoDao, child.getNodeId());
+			return NodeDao.getNode(repoDao, child.getNodeId(), Filter.createShowAllFilter());
 
 		} catch (Throwable t) {
 
@@ -245,13 +198,11 @@ public class CollectionDao {
 			
 	}
 
-	public CollectionDao createChild(Collection collection) throws DAOException {
+	public NodeDao createChild(Node collection) throws DAOException {
 
 		try {
-
 			org.edu_sharing.service.collection.Collection child = collectionClient.createAndSetScope(collectionId, marshalling(collection));
-			
-			return new CollectionDao(repoDao, child.getNodeId());
+			return NodeDao.getNode(repoDao, child.getNodeId(),Filter.createShowAllFilter());
 
 		} catch (Throwable t) {
 
@@ -260,7 +211,7 @@ public class CollectionDao {
 			
 	}
 
-	public void update(Collection collection) throws DAOException {
+	public void update(Node collection) throws DAOException {
 
 		try {
 		
@@ -277,7 +228,7 @@ public class CollectionDao {
 
 		try {
 		
-			collectionClient.remove(collection.getRef().getId());
+			collectionClient.remove(nodeDao.getRef().getId());
 			
 		} catch (Exception e) {
 
@@ -313,7 +264,7 @@ public class CollectionDao {
 		
 		try {
 		
-			collectionClient.addToCollection(collection.getRef().getId(), node.getRef().getId());
+			collectionClient.addToCollection(nodeDao.getRef().getId(), node.getRef().getId());
 			
 		} catch (Throwable t) {
 
@@ -326,7 +277,7 @@ public class CollectionDao {
 		
 		try {
 		
-			collectionClient.removeFromCollection(collection.getRef().getId(), node.getRef().getId());
+			collectionClient.removeFromCollection(nodeDao.getRef().getId(), node.getRef().getId());
 			
 		} catch (Exception e) {
 
@@ -336,60 +287,44 @@ public class CollectionDao {
 	}
 
 	public Collection asCollection() throws DAOException {
-
-		this.collection.setAccess(getAccess());
-		this.collection.setPreview(preview);
 		return this.collection;
 	}
-	
-	
+
 	private List<String> getAccess() {
 		return access;
 	}
 
 	
-	private static org.edu_sharing.service.collection.Collection marshalling(Collection collection) {
+	private static org.edu_sharing.service.collection.Collection marshalling(Node node) {
 		
-		if (collection == null) {
+		if (node == null) {
 			return null;
 		}
 		
 		org.edu_sharing.service.collection.Collection result = new org.edu_sharing.service.collection.Collection();
 		
-		result.setColor(collection.getColor());
-		result.setDescription(collection.getDescription());
-		result.setLevel0(collection.isLevel0());
+		result.setColor(node.getCollection().getColor());
+		result.setDescription(node.getCollection().getDescription());
+		result.setLevel0(node.getCollection().isLevel0());
 		
-		if (collection.getRef() != null) {
+		if (node.getRef() != null) {
 			
-			result.setNodeId(collection.getRef().getId());
+			result.setNodeId(node.getRef().getId());
 		}
 		
-		result.setTitle(collection.getTitle());
-		result.setType(collection.getType());
-		result.setViewtype(collection.getViewtype());
-		result.setX(collection.getX());
-		result.setY(collection.getY());
-		result.setZ(collection.getZ());
-		result.setPinned(collection.isPinned());
-		result.setAuthorFreetext(collection.getAuthorFreetext());
+		result.setTitle(node.getTitle());
+		result.setType(node.getCollection().getType());
+		result.setViewtype(node.getCollection().getViewtype());
+		result.setX(node.getCollection().getX());
+		result.setY(node.getCollection().getY());
+		result.setZ(node.getCollection().getZ());
+		result.setPinned(node.getCollection().isPinned());
+		result.setAuthorFreetext(node.getCollection().getAuthorFreetext());
 		
-		if (collection.getRef() != null) {
-			
-			result.setNodeId(collection.getRef().getId());
+		if (node.getRef() != null) {
+			result.setNodeId(node.getRef().getId());
 		}
-		
-		if (collection.getOwner() != null){
-			
-			org.edu_sharing.repository.client.rpc.User user = new org.edu_sharing.repository.client.rpc.User();
-			user.setAuthorityName(collection.getOwner().getUserName());
-			user.setEmail(collection.getOwner().getProfile().getEmail());
-			user.setGivenName(collection.getOwner().getProfile().getFirstName());
-			user.setSurname(collection.getOwner().getProfile().getLastName());
-			user.setUsername(collection.getOwner().getUserName());
-		}
-		
-		result.setScope(collection.getScope());
+		result.setScope(node.getCollection().getScope());
 		
 		return result;
 	}
@@ -407,34 +342,8 @@ public class CollectionDao {
 		result.setLevel0(collection.isLevel0());
 		result.setFromUser(collection.isFromUser());
 		
-		if (collection.getOwner() != null) {
-		
-		User user = new User();
-		user.setProfile(new UserProfile());
-		user.getProfile().setEmail(collection.getOwner().getEmail());
-		user.getProfile().setFirstName(collection.getOwner().getGivenName());
-		user.getProfile().setLastName(collection.getOwner().getSurname());
-		
-		NodeRef userNodeRef = new NodeRef();
-		userNodeRef.setId(collection.getOwner().getNodeId());
-		userNodeRef.setRepo(repoId);
-		//user.setRef(userNodeRef);
-		user.setUserName(collection.getOwner().getUsername());
-
-		result.setOwner(user);
-		}
-		
 		result.setChildCollectionsCount(collection.getChildCollectionsCount());
 		result.setChildReferencesCount(collection.getChildReferencesCount());
-		
-		if (collection.getNodeId() != null) {
-			
-			NodeRef ref = new NodeRef();
-			ref.setRepo(repoId);
-			ref.setId(collection.getNodeId());
-			
-			result.setRef(ref);
-		}
 		
 		result.setTitle(collection.getTitle());
 		result.setType(collection.getType());
@@ -484,16 +393,20 @@ public class CollectionDao {
 		collectionClient.setOrder(collectionId,nodes);
 	}
 
+	public Node asNode() throws DAOException {
+		return nodeDao.asNode();
+	}
+
 	public void addFeedback(HashMap<String, String[]> feedbackData) throws DAOException {
 		try {
-			collectionClient.addFeedback(collection.getRef().getId(), feedbackData);
+			collectionClient.addFeedback(nodeDao.getRef().getId(), feedbackData);
 		}catch(Throwable t){
 			throw new DAOException(t,collectionId);
 		}
 	}
 	public List<CollectionFeedback> getFeedbacks() throws DAOException {
 		try {
-			return collectionClient.getFeedbacks(collection.getRef().getId()).stream().map((id)->{
+			return collectionClient.getFeedbacks(nodeDao.getRef().getId()).stream().map((id)->{
 				try {
 					NodeDao node=NodeDao.getNode(repoDao,id);
 					String data = NodeServiceHelper.getProperty(new org.alfresco.service.cmr.repository.NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, id), CCConstants.CCM_PROP_COLLECTION_FEEDBACK_DATA);

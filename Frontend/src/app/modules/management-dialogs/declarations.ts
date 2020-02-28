@@ -11,6 +11,7 @@ import {AddStreamComponent} from "./add-stream/add-stream.component";
 import {NodeTemplateComponent} from "./node-template/node-template.component";
 import {NodeVariantComponent} from './node-variant/node-variant.component';
 import {CommentsListComponent} from "./node-comments/comments-list/comments-list.component";
+import {ViewCollectionFeedbackComponent} from './view-collection-feedback/view-collection-feedback.component';
 
 export const DECLARATIONS_MANAGEMENT_DIALOGS = [
   WorkspaceLicenseComponent,
@@ -25,5 +26,6 @@ export const DECLARATIONS_MANAGEMENT_DIALOGS = [
   CommentsListComponent,
   AddStreamComponent,
   NodeVariantComponent,
-  NodeTemplateComponent
+  NodeTemplateComponent,
+  ViewCollectionFeedbackComponent
 ];

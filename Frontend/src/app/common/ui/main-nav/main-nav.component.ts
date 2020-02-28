@@ -38,6 +38,9 @@ import {
 import {BridgeService} from "../../../core-bridge-module/bridge.service";
 import {GlobalContainerComponent} from "../global-container/global-container.component";
 import {MatButton} from '@angular/material/button';
+import {WorkspaceManagementDialogsComponent} from '../../../modules/management-dialogs/management-dialogs.component';
+import {CreateMenuComponent} from '../../../modules/create-menu/create-menu.component';
+import {MatMenuTrigger} from '@angular/material/menu';
 
 @Component({
     selector: 'main-nav',
@@ -83,12 +86,17 @@ export class MainNavComponent implements AfterViewInit{
     visible=false;
     private static ID_ATTRIBUTE_NAME='data-banner-id';
 
+    @ViewChild('management', {static: false}) management: WorkspaceManagementDialogsComponent;
     @ViewChild('search', {static: false}) search : ElementRef;
     @ViewChild('sidebar', {static: false}) sidebar:ElementRef;
     @ViewChild('topbar', {static: false}) topbar:ElementRef;
     @ViewChild('nodeStoreRef', {static: false}) nodeStoreRef:ElementRef;
     @ViewChild('userRef', {static: false}) userRef:ElementRef;
     @ViewChild('tabNav', {static: false}) tabNav:ElementRef;
+    @ViewChild('createMenu', {static: false}) createMenu:CreateMenuComponent;
+    @ViewChild('dropdownTriggerDummy', {static: false}) createMenuTrigger: MatMenuTrigger;
+    createMenuX: number;
+    createMenuY: number;
     dialogTitle : string;
     dialogCancelable = false;
     dialogMessage : string;
@@ -858,7 +866,7 @@ export class MainNavComponent implements AfterViewInit{
             this.timeIsValid=true;
         }
         else if(this.showTimeout()){
-            this.bridge.showModalDialog(
+            this.toast.showModalDialog(
                 'WORKSPACE.AUTOLOGOUT',
                 'WORKSPACE.AUTOLOGOUT_INFO',
                 [new DialogButton("WORKSPACE.RELOGIN",DialogButton.TYPE_PRIMARY,
@@ -933,5 +941,13 @@ export class MainNavComponent implements AfterViewInit{
     isCreateAllowed() {
         // @TODO: May Check for more constrains
         return this.create.allowed && !this.isGuest;
+    }
+    openCreateMenu(x: number, y: number){
+        this.createMenuX = x;
+        this.createMenuY = y;
+
+        this.createMenu.updateOptions();
+        this.createMenuTrigger.openMenu();
+        this.createMenuTrigger.onMenuClose
     }
 }
