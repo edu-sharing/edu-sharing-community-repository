@@ -18,7 +18,7 @@ import { MatMenu, MatMenuTrigger } from '@angular/material/menu';
 export class DropdownComponent {
   @ViewChild('dropdown', {static: true}) menu : MatMenu;
   _options: OptionItem[];
-  @Input() position = 'left';
+  @Input() position : 'left' | 'right' = 'left';
   @Input() set options(options:OptionItem[]) {
     this._options = UIHelper.filterValidOptions(this.ui,Helper.deepCopyArray(options));
   }
