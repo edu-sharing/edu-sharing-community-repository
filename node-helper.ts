@@ -1,5 +1,5 @@
 import {TranslateService} from '@ngx-translate/core';
-import {AuthorityProfile, CollectionReference, ConfigurationService, ListItem, Node, NodesRightMode, Permissions, Repository, RestConnectorService, RestConstants, RestHelper, TemporaryStorageService, User, WorkflowDefinition} from '../core-module/core.module';
+import {AuthorityProfile, CollectionReference, ConfigurationService, ListItem, Node, NodesRightMode, NodeWrapper, Permissions, Repository, RestConnectorService, RestConstants, RestHelper, TemporaryStorageService, User, WorkflowDefinition} from '../core-module/core.module';
 import {FormatSizePipe} from './pipes/file-size.pipe';
 import {Observable, Observer} from 'rxjs';
 import {Router} from '@angular/router';
@@ -13,6 +13,7 @@ import {ConfigurationHelper} from '../core-module/rest/configuration-helper';
 import {BridgeService} from '../core-bridge-module/bridge.service';
 import {MessageType} from '../core-module/ui/message-type';
 import {Toast} from './toast';
+import {UIHelper} from './ui-helper';
 
 export class NodeHelper {
   /**
@@ -674,4 +675,24 @@ export class NodeHelper {
   static isNodeCollection(node: Node | any) {
     return node.aspects.indexOf(RestConstants.CCM_ASPECT_COLLECTION) !==-1 || node.collection;
   }
+
+  static createUrlLink(link : LinkData) {
+    const properties: any = {};
+    const aspects: string[] = [];
+    const url = UIHelper.addHttpIfRequired(link.link);
+    properties[RestConstants.CCM_PROP_IO_WWWURL]=[url];
+    if(link.lti){
+      aspects.push(RestConstants.CCM_ASPECT_TOOL_INSTANCE_LINK);
+      properties[RestConstants.CCM_PROP_TOOL_INSTANCE_KEY]=[link.consumerKey];
+      properties[RestConstants.CCM_PROP_TOOL_INSTANCE_SECRET]=[link.sharedSecret];
+    }
+    properties[RestConstants.CCM_PROP_LINKTYPE]=[RestConstants.LINKTYPE_USER_GENERATED];
+    return { properties, aspects, url };
+  }
+}
+export class LinkData {
+  constructor(public link: string) {}
+  lti: boolean;
+  consumerKey: string;
+  sharedSecret: string;
 }
