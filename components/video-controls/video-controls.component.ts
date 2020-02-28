@@ -171,7 +171,7 @@ export class VideoControlsComponent {
     return result;
   }
 
-  addToCollection(collection: Collection) {
+  addToCollection(collection: Node) {
     this.chooseCollection = false;
     this.loading = true;
     UIHelper.addToCollection(this.collectionService, this.router, this.bridge, collection, [this.node], (elements: Node[]) => {

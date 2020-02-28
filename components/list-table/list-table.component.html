@@ -80,7 +80,7 @@
                  [class.selected]="getSelectedPos(node)!=-1"
                  [style.backgroundColor]="isCollection(node) ? (viewType==2 ? node.preview.isIcon ? getCollectionColor(node) : '#000' : getCollectionColor(node)) : null"
                  [style.border-color]="isCollection(node) ? getCollectionColor(node) : null"
-                 [class.dark-color]="isCollection(node) && getCollection(node).preview.isIcon && isBrightColorCollection(getCollectionColor(node))"
+                 [class.dark-color]="isCollection(node) && node.preview.isIcon && isBrightColorCollection(getCollectionColor(node))"
                  [title]="viewType==0 ? '' : getTitle(node)"
                  (click)="select(node)"
                  (dblclick)="doubleClick(node)"
@@ -106,10 +106,10 @@
                 </div>
                 <div *ngIf="viewType==1 && !isCollection(node) && !node.isDirectory" class="nodeRatingComments">
                     <div class="nodeRating"></div>
-                    <div class="nodeComments" (click)="select(node,'comments');$event.stopPropagation();"><i icon iconId="comment"></i> <div>{{getOriginalNode(node).commentCount}}</div></div>
+                    <div class="nodeComments" (click)="select(node,'comments');$event.stopPropagation();"><i icon iconId="comment"></i> <div>{{node.commentCount}}</div></div>
                 </div>
-                <div *ngIf="isCollection(node) && getCollection(node).type=='EDITORIAL'" class="collectionEditorial"><i class="material-icons">star</i></div>
-                <div *ngIf="isCollection(node) && getCollection(node).pinned" class="collectionPinned"><i icon iconId="edu-pin"></i></div>
+                <div *ngIf="isCollection(node) && node.collection.type=='EDITORIAL'" class="collectionEditorial"><i class="material-icons">star</i></div>
+                <div *ngIf="isCollection(node) && node.collection.pinned" class="collectionPinned"><i icon iconId="edu-pin"></i></div>
                 <div class="checkbox column" *ngIf="hasCheckbox">
                     <mat-checkbox [ngModel]="getSelectedPos(node)!=-1" (change)="select(node,'checkbox')" (click)="$event.stopPropagation();"></mat-checkbox>
                 </div>
@@ -127,9 +127,10 @@
                     <div>
                         <i icon iconId="security"></i>
                         <div>{{validatePermissions(node).message | translate }}</div>
-                        <a *ngIf="validatePermissions(node).button"
-                           (click)="validatePermissions(node).button.click();$event.stopPropagation();"
-                        ><i class="material-icons">{{validatePermissions(node).button.icon}}</i> {{ validatePermissions(node).button.caption | translate}}</a>
+                        <button mat-button color="primary"
+                            *ngIf="validatePermissions(node).button"
+                            (click)="validatePermissions(node).button.click();$event.stopPropagation();"
+                        ><i class="material-icons">{{validatePermissions(node).button.icon}}</i> {{ validatePermissions(node).button.caption | translate}}</button>
                     </div>
                 </div>
                 <div class="preview column" *ngIf="viewType==1 || viewType==2" [class.clickable]="isClickable" (click)="select(node,'preview');$event.stopPropagation();">
@@ -147,14 +148,14 @@
                     </div>
                 </div>
 
-                <div class="nodeDeleted" *ngIf="isDeleted(node)" (click)="select(node)">
+                <div class="nodeDeleted clickable" *ngIf="isDeleted(node)" (click)="select(node)">
                     <div>
                         <i icon iconId="delete"></i>
                         <div class="headline">{{'ORIGINAL_DELETED' | translate }}</div>
                         <div class="subline">{{'ORIGINAL_DELETED_INFO' | translate }}</div>
-                        <a
+                        <button mat-button color="primary"
                                 (click)="delete(node); $event.stopPropagation();" *ngIf="canDelete ? canDelete(node) : false"
-                        >{{ 'ORIGINAL_DELETE' | translate}}</a>
+                        >{{ 'ORIGINAL_DELETE' | translate}}</button>
                     </div>
                 </div>
 
@@ -183,12 +184,17 @@
                 <div *ngFor="let option of optionsAlways"
                      class="more moreAlways column"
                      [style.opacity]="optionIsShown(option,node) ? 1 : 0">
-                    <button mat-icon-button (click)="optionIsShown(option,node) ? callOption(option,node) : null">
+                    <button mat-icon-button
+                            [disabled]="!optionIsValid(option, node)"
+                            (click)="optionIsShown(option, node) ? callOption(option,node) : null">
                         <i icon iconId="{{option.icon}}"></i>
                     </button>
                 </div>
                 <div class="more column" *ngIf="_options && _options.length>1" ><button mat-icon-button (click)="showDropdown(node,true,$event);$event.stopPropagation();"><i icon iconId="more_vert" aria="true"></i></button></div>
-                <div class="more moreSingle column" *ngIf="_options && _options.length==1 && optionIsShown(_options[0],node)"><button mat-icon-button (click)="callOption(_options[0],node);$event.stopPropagation();"><a [class.disabled]="!optionIsValid(_options[0],node)"><i icon iconId="{{_options[0].icon}}"></i> <span class="actionText">{{_options[0].name | translate}}</span></a></button></div>
+                <div class="more moreSingle column" *ngIf="_options && _options.length==1 && optionIsShown(_options[0],node)">
+                    <button mat-icon-button [class.disabled]="!optionIsValid(_options[0],node)" (click)="callOption(_options[0],node);$event.stopPropagation();">
+                        <i icon iconId="{{_options[0].icon}}"></i> <span class="actionText">{{_options[0].name | translate}}</span>
+                    </button></div>
             </div>
         </div>
         <div *ngIf="_nodes && _nodes.length && hasMore && !isLoading" class="clickable loadMore" (click)="scroll(true)">

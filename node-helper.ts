@@ -1,5 +1,5 @@
 import {TranslateService} from '@ngx-translate/core';
-import {AuthorityProfile, CollectionReference, ConfigurationService, ListItem, Node, Permissions, Repository, RestConnectorService, RestConstants, RestHelper, TemporaryStorageService, User, WorkflowDefinition} from '../core-module/core.module';
+import {AuthorityProfile, CollectionReference, ConfigurationService, ListItem, Node, NodesRightMode, Permissions, Repository, RestConnectorService, RestConstants, RestHelper, TemporaryStorageService, User, WorkflowDefinition} from '../core-module/core.module';
 import {FormatSizePipe} from './pipes/file-size.pipe';
 import {Observable, Observer} from 'rxjs';
 import {Router} from '@angular/router';
@@ -132,18 +132,16 @@ export class NodeHelper {
         currentMode=NodesRightMode.Local;
       }
       if(currentMode === NodesRightMode.Original || currentMode === NodesRightMode.Both) {
-        if(node.accessOriginal && node.accessOriginal.indexOf(right) !== -1)
+        if(node.accessOriginal && node.accessOriginal.indexOf(right) !== -1) {
           continue;
-        // only original, but not found -> return false
-        if(currentMode === NodesRightMode.Original)
-          return false;
+        }
+        // return false because either on original not found, or both (because both is then also false)
+        return false;
       }
-      if(node.accessOriginal && node.accessOriginal.indexOf(right) !== -1)
-          continue;
-      if(!node.access)
+      // check regular node rights
+      if(!node.access || node.access.indexOf(right) === -1) {
         return false;
-      if(node.access.indexOf(right) === -1)
-        return false;
+      }
     }
     return true;
   }
@@ -168,27 +166,27 @@ export class NodeHelper {
     return error.status;
   }
 
-  public static getCollectionScopeInfo(collection : any) : any {
-    const scope=collection.scope;
+  public static getCollectionScopeInfo(node : Node) : any {
+    const scope=node.collection ? node.collection.scope : null;
     let icon='help';
-    let scopeName='help';
-    if(scope==RestConstants.COLLECTIONSCOPE_MY) {
+    let scopeName='UNKNOWN';
+    if(scope === RestConstants.COLLECTIONSCOPE_MY) {
       icon='lock';
       scopeName='MY';
     }
-    if(scope==RestConstants.COLLECTIONSCOPE_ORGA || scope==RestConstants.COLLECTIONSCOPE_CUSTOM) {
+    if(scope === RestConstants.COLLECTIONSCOPE_ORGA || scope === RestConstants.COLLECTIONSCOPE_CUSTOM) {
       icon='group';
       scopeName='SHARED';
     }
-    if(scope==RestConstants.COLLECTIONSCOPE_ALL || scope==RestConstants.COLLECTIONSCOPE_CUSTOM_PUBLIC) {
+    if(scope === RestConstants.COLLECTIONSCOPE_ALL || scope === RestConstants.COLLECTIONSCOPE_CUSTOM_PUBLIC) {
       icon='language';
       scopeName='PUBLIC';
     }
-    if(collection.type==RestConstants.COLLECTIONTYPE_EDITORIAL) {
+    if(node.type === RestConstants.COLLECTIONTYPE_EDITORIAL) {
       icon='star';
       scopeName='TYPE_EDITORIAL';
     }
-    if(collection.type==RestConstants.COLLECTIONTYPE_MEDIA_CENTER) {
+    if(node.type === RestConstants.COLLECTIONTYPE_MEDIA_CENTER) {
       icon='business';
       scopeName='TYPE_MEDIA_CENTER';
     }
@@ -197,14 +195,14 @@ export class NodeHelper {
   /**
    * Get a formatted attribute from a collection
    * @param translate
-   * @param collection
+   * @param node
    * @param item
    * @returns {any}
    */
-  public static getCollectionAttribute(translate : TranslateService,collection : any,item : string) : string {
-    if(item=='info') {
-      const childs=collection.childReferencesCount;
-      const coll=collection.childCollectionsCount;
+  public static getCollectionAttribute(translate : TranslateService,node : Node,item : string) : string {
+    if(item === 'info') {
+      const childs=node.collection.childReferencesCount;
+      const coll=node.collection.childCollectionsCount;
 
       return '<i class="material-icons">layers</i> '+coll+' <i class="material-icons">insert_drive_file</i> '+childs;
       /*
@@ -224,10 +222,10 @@ export class NodeHelper {
           */
     }
     if(item=='scope') {
-      const info=NodeHelper.getCollectionScopeInfo(collection);
+      const info=NodeHelper.getCollectionScopeInfo(node);
       return '<i class="material-icons collectionScope">'+info.icon+'</i> '+translate.instant('COLLECTION.SCOPE.'+info.scopeName);
     }
-    return collection[item];
+    return (node.collection as any)[item];
   }
 
   public static downloadUrl(bridge:BridgeService,url:string,fileName='download') {
@@ -258,8 +256,6 @@ export class NodeHelper {
    * @param node
    */
   public static downloadNode(bridge:BridgeService,node:any,version=RestConstants.NODE_VERSION_CURRENT) {
-    if(node.reference)
-      node=node.reference;
     this.downloadUrl(bridge,node.downloadUrl+(version && version!=RestConstants.NODE_VERSION_CURRENT ? '&version='+version : ''),node.name);
   }
 
@@ -416,7 +412,7 @@ export class NodeHelper {
       return NodeHelper.getNodeAttribute(translate,config, data, item);
     }
     if(item.type=='COLLECTION') {
-      return NodeHelper.getCollectionAttribute(translate,data.collection ? data.collection : data,item.name);
+      return NodeHelper.getCollectionAttribute(translate,data,item.name);
     }
     if(item.type=='GROUP' || item.type=='ORG') {
       if(item.name=='displayName')
@@ -676,12 +672,6 @@ export class NodeHelper {
     }
 
   static isNodeCollection(node: Node | any) {
-    return node.collection || node.hasOwnProperty('childCollectionsCount');
+    return node.aspects.indexOf(RestConstants.CCM_ASPECT_COLLECTION) !==-1 || node.collection;
   }
-}
-
-export enum NodesRightMode {
-  Local,
-  Original,
-  Both
 }

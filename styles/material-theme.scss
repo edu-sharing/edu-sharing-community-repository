@@ -74,6 +74,11 @@ $candy-app-theme: mat-light-theme($candy-app-primary, $candy-app-accent, $candy-
     opacity: $mat-ripple-color-opacity;
   }
 }
+.mat-tooltip{
+  background-color: $primaryLight;
+  color: $textMain !important;
+  font-weight: bold;
+}
 .mat-radio-multiline{
   .mat-radio-label,.mat-checkbox-layout{
     white-space: normal!important;

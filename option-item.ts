@@ -5,6 +5,7 @@
  this.options.push(new OptionItem("DELETE_SINGLE","archiveDelete", (node) => this.deleteSingle(node)));
 
  */
+import {NodesRightMode} from '../core-module/rest/data-object';
 
 export class OptionItem {
   /**
@@ -60,28 +61,130 @@ export class OptionItem {
   public isEnabled = true;
 
   /**
-   * A function called with the node in content which should return true or false if the option should be shown for this node
+   * A function called with the node as param which should return true or false if the option should be shown for this node
+   * Is handled by optionsHelper and may not be used otherwise
+   * Please use @customShowCallback instead
    */
-  public showCallback : Function;
+  public showCallback : (node?: Node|any) => boolean;
   /**
-   * A function called with the node in content which should return true or false if the option should be enabled or not
+   * A function called with the node as parm which should return true or false if the option should be shown for this node
+   * Will be called by the optionsHelper
    */
-  public enabledCallback : Function;
+  public customShowCallback : (nodes?: Node[]|any[]) => boolean;
+  /**
+   * A function called with the node as param which should return true or false if the option should be enabled or not
+   * Is handled by optionsHelper and may not be used otherwise
+   * Please use @customEnabledCallback instead
+   */
+  public enabledCallback : (node?: Node|any) => boolean;
+  /**
+   * A function called with the node as param which should return true or false if the option should be enabled or not
+   * Will be called by the optionsHelper
+   */
+  public customEnabledCallback : (nodes?: Node[]|any[]) => boolean;
 
   /**
    *   Optional: A callback that is called when the user clicks on the option when it's currently disabled (greyed out)
    */
-  public disabledCallback : Function;
+  public disabledCallback : (node?: Node|any) => void;
   /**
    *   Show the given name (if false, only icon will show)
    */
   public showName = true;
+
+  /**
+   * element with 0 has highest priority in it's group, higher values mean lower priority
+   */
+  public priority: number;
+  /**
+   * the group this option belongs to
+   */
+  public group: OptionGroup;
+
+  public key: string;
+  public keyCombination: KeyCombination[];
+  /**
+   * Or concat of supported element types for the action
+   */
+  public elementType = [ElementType.Node];
+  public permissions: string[];
+  public constrains: Constrain[];
+  public permissionsMode = HideMode.Disable;
+  public permissionsRightMode = NodesRightMode.Local;
+  public toolpermissions: string[];
+  public scopes: Scope[];
+
   /**
    *
    * @param name the option name, which is used for the translation
    * @param icon A material icon name
    * @param callback A function callback when this option is choosen. Will get the current node passed as an argument
    */
-  constructor(public name: string, public icon: string, public callback: (object: Node|any) => void) {
+  constructor(public name: string, public icon: string, public callback: (object?: Node|any) => void) {
   }
+}
+export enum HideMode {
+  Disable,
+  Hide
+}
+export enum Scope {
+  Render,
+  Search,
+  CollectionsReferences,
+  CollectionsCollection,
+  WorkspaceList,
+  WorkspaceTree,
+  Oer,
+  CreateMenu,
+}
+export enum ElementType {
+  Node,
+  Person,
+  Group,
+  Unknown
+}
+export class OptionGroup {
+  /**
+   * @param id The group identifier. Used to seperate elements based on the group
+   * @param priority Group with 0 has highest priority, higher values mean lower priority
+   */
+  constructor(public id: string, public priority: number) {
+  }
+}
+export class DefaultGroups {
+  static Primary = new OptionGroup('Primary', 10);
+  static Create = new OptionGroup('Create', 15);
+  static View = new OptionGroup('View', 20);
+  static CreateConnector = new OptionGroup('CreateConnector', 25);
+  static Reuse = new OptionGroup('Reuse', 30);
+  static Edit = new OptionGroup('Edit', 40);
+  static FileOperations = new OptionGroup('FileOperations', 50);
+  static Delete = new OptionGroup('Delete', 60);
+  static Toggles = new OptionGroup('Toggles', 70);
+}
+export enum Constrain {
+  CollectionReference, // option is only visible for collection references
+  NoCollectionReference, // option is only visible for non-collection references
+  Directory, // only visible for directories (ccm:map)
+  Collections, // only visible for collections
+  Files, // only visible for files (ccm:io)
+  FilesAndFolders, // only visible for files and directories (ccm:io / ccm:map) - no collections!
+  Admin, // only visible if user is admin or esDebug is enabled on window component
+  AdminOrDebug, // only visible if user is admin or esDebug is enabled on window component
+  NoBulk, // No support for bulk (multiple objects)
+  NoSelection, // Only visible when currently no element is selected
+  ClipboardContent, // Only visible when the clipboard has content
+  AddObjects, // Only visible when it is possible to add objects into the current list
+  HomeRepository, // Only visible when the nodes are from the local (home) repository
+  User, // Only visible when a user is present and logged in
+  ReurlMode, // Only visible when a reurl is present (called to pick object from lms)
+}
+export enum KeyCombination {
+  CtrlOrAppleCmd
+}
+export enum Target {
+  List, // Target is the ListTableComponent
+  ListDropdown,
+  Actionbar,
+  CreateMenu
 }

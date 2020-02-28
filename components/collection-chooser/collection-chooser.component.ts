@@ -32,15 +32,15 @@ export class CollectionChooserComponent implements OnInit{
   private sortAscending = false;
   isLoadingLatest=true;
   isLoadingMy=true;
-  currentRoot: Collection;
+  currentRoot: Node;
   breadcrumbs: Node[];
 
   ngOnInit(): void {
     this.loadLatest(true);
     this.loadMy();
   }
-  public listLatest : Collection[];
-  public listMy : Collection[];
+  public listLatest : Node[];
+  public listMy : Node[];
   /**
    * The caption of the dialog, will be translated automatically
    */
@@ -69,7 +69,7 @@ export class CollectionChooserComponent implements OnInit{
     this.onDrop.emit(event);
   }
 
-  private checkPermissions(node:Collection) {
+  private checkPermissions(node: Node) {
     if(node.access.indexOf(RestConstants.ACCESS_WRITE)==-1){
       this.toast.error(null,"NO_WRITE_PERMISSIONS");
       return false;
@@ -85,12 +85,12 @@ export class CollectionChooserComponent implements OnInit{
       }
       return {status:true};
   }
-  private goIntoCollection(node:Collection){
+  private goIntoCollection(node: Node){
     this.currentRoot=node;
     this.loadMy();
 
   }
-  private clickCollection(node:Collection){
+  private clickCollection(node: Node){
     if(!this.checkPermissions(node)){
       return;
     }

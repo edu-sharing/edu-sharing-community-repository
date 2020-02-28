@@ -1,10 +1,10 @@
 import {Component, Input, Output, EventEmitter, OnInit, ViewChild, ElementRef, HostListener} from '@angular/core';
-import {UIAnimation} from "../../../core-module/ui/ui-animation";
-import {trigger} from "@angular/animations";
-import {UIHelper} from "../../ui-helper"
+import {UIAnimation} from '../../../core-module/ui/ui-animation';
+import {trigger} from '@angular/animations';
+import {UIHelper} from '../../ui-helper'
 import {Helper} from '../../../core-module/rest/helper';
-import {OptionItem} from "../../option-item";
-import {UIService} from "../../../core-module/core.module";
+import {OptionItem} from '../../option-item';
+import {UIService} from '../../../core-module/core.module';
 import { MatMenu, MatMenuTrigger } from '@angular/material/menu';
 
 @Component({
@@ -15,7 +15,7 @@ import { MatMenu, MatMenuTrigger } from '@angular/material/menu';
 /**
  * The dropdown is one base component of the action bar (showing more actions), but can also be used standalone
  */
-export class DropdownComponent{
+export class DropdownComponent {
   @ViewChild('dropdown', {static: true}) menu : MatMenu;
   _options: OptionItem[];
   @Input() position = 'left';
@@ -36,12 +36,19 @@ export class DropdownComponent{
     @Input() showDisabled = true;
 
 
-  click(option : OptionItem){
+  click(option : OptionItem) {
       if(!option.isEnabled)
           return;
       option.callback(this.callbackObject);
   }
-  constructor(private ui : UIService){
+  constructor(private ui : UIService) {
 
+  }
+
+  isNewGroup(i: number) {
+    if (i>0) {
+      return this._options[i].group !== this._options[i-1].group;
+    }
+    return false;
   }
 }

@@ -44,19 +44,21 @@ import { UIAnimation } from '../../../core-module/ui/ui-animation';
 import { UIConstants } from '../../../core-module/ui/ui-constants';
 import { AddElement } from '../../add-element';
 import { NodeHelper } from '../../node-helper';
-import { OptionItem } from '../../option-item';
+import {OptionItem, Scope} from '../../option-item';
 import { Toast } from '../../toast';
 import { UIHelper } from '../../ui-helper';
 import {WorkspaceManagementDialogsComponent} from '../../../modules/management-dialogs/management-dialogs.component';
 import {ActionbarComponent} from '../../../common/ui/actionbar/actionbar.component';
-import {OptionsHelperService, Scope} from '../../../common/options-helper';
+import {OptionsHelperService} from '../../../common/options-helper';
 import {BridgeService} from '../../../core-bridge-module/bridge.service';
 import {MainNavComponent} from '../../../common/ui/main-nav/main-nav.component';
+import {DragData, DropData} from '../../directives/drag-nodes/drag-nodes';
 
 @Component({
     selector: 'listTable',
     templateUrl: 'list-table.component.html',
     styleUrls: ['list-table.component.scss'],
+    providers: [ OptionsHelperService ],
     animations: [
         trigger(
             'openOverlay',
@@ -116,7 +118,6 @@ export class ListTableComponent implements EventListener {
             );
         }
         this._nodes = nodes;
-        console.log('update nodes', nodes);
         this.refreshAvailableOptions();
     }
 
@@ -146,31 +147,25 @@ export class ListTableComponent implements EventListener {
         this.changes.detectChanges();
     }
 
+    _customOptions: OptionItem[];
     /**
-     * Set the options which are valid for each node, similar to the action bar options, see @OptionItem.
+     * Set additional action options. They will be added as customOptions to the options-service
      */
-    @Input() set options(options: OptionItem[]) {
-        this._options = [];
-        if (!options) {
-            return;
-        }
-        for (const o of options) {
-            if (!o.isToggle) {
-                this._options.push(o);
-            }
-        }
-        this.optionsAlways = [];
-        for (const option of options) {
-            if (option.showAlways) {
-                this.optionsAlways.push(option);
-            }
-        }
+    @Input() set customOptions (customOptions: OptionItem[]){
+        this._customOptions = customOptions;
+        this.refreshAvailableOptions();
     }
 
     /**
      * all options displayed for the current dropdown
      */
-    @Input() dropdownOptions: OptionItem[];
+    dropdownOptions: OptionItem[];
+
+    _options: OptionItem[];
+    set options(options: OptionItem[]) {
+        this._options = options;
+        console.log(options);
+    }
 
     /**
      * Shall an icon be shown?
@@ -267,12 +262,6 @@ export class ListTableComponent implements EventListener {
     @Input() viewType = ListTableComponent.VIEW_TYPE_LIST;
 
     /**
-     * link to the managementDialogs component that is in use
-     * If null, no action handling is enabled
-     */
-    @Input() management:WorkspaceManagementDialogsComponent;
-
-    /**
      * Link to the MainNavComponent
      * Required to refresh particular events when triggered, e.g. a node was bookmarked
      */
@@ -362,7 +351,7 @@ export class ListTableComponent implements EventListener {
     /**
      * For collection elements only, tells if the current user can delete the given item.
      */
-    @Input() canDelete: () => boolean;
+    @Input() canDelete: (node: Node|any) => boolean;
 
     /**
      * control the visibility of the reorder dialog (two-way binding)
@@ -464,7 +453,6 @@ export class ListTableComponent implements EventListener {
      */
     @Output() onOrderElements = new EventEmitter();
 
-    _options: OptionItem[];
     currentDrag: string;
     currentDragCount = 0;
     dropdownLeft: string;
@@ -518,6 +506,10 @@ export class ListTableComponent implements EventListener {
             this.refreshAvailableOptions();
             this.loadRepos();
         });
+    }
+    setViewType(viewType: number){
+        this.viewType = viewType;
+        this.changes.detectChanges();
     }
 
     loadRepos(): void {
@@ -585,11 +577,7 @@ export class ListTableComponent implements EventListener {
     }
 
     getCollectionColor(node: any) {
-        return node.collection ? node.collection.color : node.color;
-    }
-
-    getCollection(node: any) {
-        return node.collection ? node.collection : node;
+        return node.collection ? node.collection.color : null;
     }
 
     isHomeNode(node: any): boolean {
@@ -600,13 +588,6 @@ export class ListTableComponent implements EventListener {
         return RestNetworkService.isFromHomeRepo(node, this.repositories);
     }
 
-    getOriginalNode(node: any) {
-        if (node.reference) {
-            return node.reference;
-        }
-        return node;
-    }
-
     getIconUrl(node: any) {
         return this.getReference(node).iconURL;
     }
@@ -615,14 +596,8 @@ export class ListTableComponent implements EventListener {
         return NodeHelper.isNodeCollection(node);
     }
 
-    isReference(node: any): boolean {
-        // When checking for aspects, we always detect a reference
-        // BUT these references are regular nodes and DO NOT have the "originalId"
-        // resulting that all references are detected as "deleted"
-        return (
-            node.reference !=
-            null /* || node.aspects && node.aspects.indexOf(RestConstants.CCM_ASPECT_IO_REFERENCE)!=-1*/
-        );
+    isReference(node: Node): boolean {
+        return  node.aspects && node.aspects.indexOf(RestConstants.CCM_ASPECT_IO_REFERENCE) !==-1;
     }
 
     isDeleted(node: any): boolean {
@@ -979,10 +954,7 @@ export class ListTableComponent implements EventListener {
         openMenu = false,
         event: any = null,
     ): void {
-        // if (this._options == null || this._options.length < 1)
-        //     return;
         this.select(node, 'dropdown', false, false);
-        this.refreshAvailableOptions(node);
         if (openMenu) {
             if (event) {
                 console.log(event);
@@ -996,8 +968,7 @@ export class ListTableComponent implements EventListener {
                 }
             }
         }
-        // Short delay to let onUpdateOptions handler run and angular menu get the correct data from
-        // start.
+        // Short delay to let onUpdateOptions handler run and angular menu get the correct data from start.
         setTimeout(() => this.menuTrigger.openMenu());
     }
 
@@ -1016,6 +987,7 @@ export class ListTableComponent implements EventListener {
         }
         if (from !== 'checkbox' && !this.selectOnClick && fireEvent) {
             this.clickRowSender(node, from);
+            this.refreshAvailableOptions(node);
             return false;
         }
 
@@ -1030,8 +1002,11 @@ export class ListTableComponent implements EventListener {
             } else {
                 this.selectedNodes = [node];
             }
-            this.refreshAvailableOptions();
+            if (this.mainNav && this.mainNav.management.nodeSidebar) {
+                this.mainNav.management.nodeSidebar = node;
+            }
             this.onSelectionChanged.emit(this.selectedNodes);
+            this.refreshAvailableOptions(node);
             return false;
         }
         const pos = this.getSelectedPos(node);
@@ -1065,7 +1040,7 @@ export class ListTableComponent implements EventListener {
                 this.selectedNodes.push(node);
             }
         }
-        this.refreshAvailableOptions();
+        this.refreshAvailableOptions(node);
         this.onSelectionChanged.emit(this.selectedNodes);
         this.changes.detectChanges();
         return false;
@@ -1127,16 +1102,37 @@ export class ListTableComponent implements EventListener {
     }
 
     private refreshAvailableOptions(node: Node = null) {
-        if (this.management) {
-            this.optionsHelper.setParentObject(this.parent);
-            this.optionsHelper.setAllObjects(this._nodes);
-            this.optionsHelper.setActiveObject(node);
-            this.optionsHelper.setSelectedObjects(this.selectedNodes);
-            this.optionsHelper.setCurrentScope(this.scope);
-            this.optionsHelper.refreshComponents(this.management, this, this.actionbar, this.mainNav);
-        }
+        console.log('refreshAvailableOptions', node, this._nodes);
+        this.optionsHelper.setData({
+            scope: this.scope,
+            activeObject: node,
+            selectedObjects: this.selectedNodes,
+            allObjects: this._nodes,
+            parent: this.parent,
+            customOptions: this._customOptions
+        });
+        this.optionsHelper.setListener({
+            onDelete: (nodes) => this.removeNodes(nodes.error, nodes.objects)
+        });
+        this.optionsHelper.initComponents(this.mainNav,  this.actionbar, this);
+        this.optionsHelper.refreshComponents();
     }
 
+    removeNodes(error: boolean, objects: Node[] | any[]) {
+        if (error) {
+            return;
+        }
+        for (const object of objects) {
+            const p = RestHelper.getRestObjectPositionInArray(object, this._nodes);
+            if (p !== -1) {
+                this._nodes.splice(p, 1);
+            }
+        }
+        this.selectedNodes = [];
+        this.onSelectionChanged.emit([]);
+        this.nodesChange.emit(this._nodes);
+        this.refreshAvailableOptions();
+    }
     addVirtualNodes(objects: Node[]|any[]) {
         console.log(objects);
         this._nodes = objects.concat(this._nodes);
@@ -1144,5 +1140,10 @@ export class ListTableComponent implements EventListener {
         this.nodesChange.emit(this._nodes);
         this.onSelectionChanged.emit(objects);
         this.refreshAvailableOptions();
+    }
+
+    showReorder() {
+        this.reorderDialog = true;
+        this.changes.detectChanges();
     }
 }

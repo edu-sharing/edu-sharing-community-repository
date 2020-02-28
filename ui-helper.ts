@@ -225,10 +225,15 @@ export class UIHelper {
     public static goToCollection(
         router: Router,
         node: Node,
+        mode: null | 'new' | 'edit' = null,
         extras: NavigationExtras = {},
     ) {
-        extras.queryParams = { id: node.ref.id };
-        router.navigate([UIConstants.ROUTER_PREFIX + 'collections'], extras);
+        if(mode === 'new' || mode === 'edit') {
+            router.navigate([UIConstants.ROUTER_PREFIX, 'collections', 'collection', mode, node.ref.id], extras);
+        } else {
+            extras.queryParams = { id: node.ref.id };
+            router.navigate([UIConstants.ROUTER_PREFIX, 'collections'], extras);
+        }
     }
     /**
      * Navigate to the workspace
@@ -359,7 +364,7 @@ export class UIHelper {
         collectionService: RestCollectionService,
         router: Router,
         bridge: BridgeService,
-        collection: Node | Collection,
+        collection: Node,
         nodes: Node[],
         callback: (nodes: Node[]) => void = null,
         position = 0,
