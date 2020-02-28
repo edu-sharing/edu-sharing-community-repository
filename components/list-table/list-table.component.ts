@@ -1133,11 +1133,15 @@ export class ListTableComponent implements EventListener {
         this.nodesChange.emit(this._nodes);
         this.refreshAvailableOptions();
     }
-    addVirtualNodes(objects: Node[]|any[]) {
+    addVirtualNodes(objects: Node[]|any) {
+        objects = objects.map((o: any) => {
+            o.virtual = true;
+            return o;
+        });
         console.log(objects);
         this._nodes = objects.concat(this._nodes);
-        this.selectedNodes = objects;
         this.nodesChange.emit(this._nodes);
+        this.selectedNodes = objects;
         this.onSelectionChanged.emit(objects);
         this.refreshAvailableOptions();
     }
