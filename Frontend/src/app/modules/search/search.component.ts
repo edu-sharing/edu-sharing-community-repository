@@ -75,6 +75,7 @@ export class SearchComponent {
     public initalized:boolean;
   public tutorialElement:ElementRef;
   @ViewChild('mds', {static: false}) mdsRef: MdsComponent;
+  @ViewChild('list', {static: false}) list: ListTableComponent;
   @ViewChild('mainNav', {static: false}) mainNavRef: MainNavComponent;
   @ViewChild('extendedSearch', {static: false}) extendedSearch : ElementRef;
   @ViewChild('actionbarComponent', {static: false}) actionbarComponent: ActionbarComponent;
@@ -1103,16 +1104,5 @@ export class SearchComponent {
 
     private setFixMobileNav() {
         this.mainNavRef.setFixMobileElements(this.searchService.sidenavOpened || this.selection && this.selection.length>0);
-    }
-
-    addVirtualNodes(nodes: Node[]) {
-        nodes = nodes.map((n) => {
-            n.virtual = true;
-            return n;
-        });
-        this.searchService.searchResult=(nodes.concat(this.searchService.searchResult));
-        this.selection = nodes;
-        this.refreshListOptions();
-        this.updateActionbar(nodes);
     }
 }

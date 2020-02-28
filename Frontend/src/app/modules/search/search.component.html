@@ -10,7 +10,7 @@
     [create]="{allowed: isHomeRepository(), allowBinary: true}"
     [(searchQuery)]="searchService.searchTerm"
     (onSearch)="routeAndClearSearch($event)"
-    (onCreate)="addVirtualNodes($event)"
+    (onCreate)="list.addVirtualNodes($event)"
   ></main-nav>
   <tutorial [element]="tutorialElement" [heading]="'SEARCH.TUTORIAL_HEADING'" [description]="'SEARCH.TUTORIAL_DESCRIPTION'" [showSkip]="false"
   ></tutorial>
@@ -259,6 +259,7 @@
                     </div>
                     <div class="heading" *ngIf="searchService.searchResult.length && searchService.ignored && searchService.ignored.length">{{ 'SEARCH.IGNORED_PARAMETERS' | translate}}</div>
                     <listTable
+                            #list
                             [nodes]="searchService.searchResult"
                             [columns]="searchService.columns"
                             [hasIcon]="true"

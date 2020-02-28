@@ -455,73 +455,12 @@ export class WorkspaceMainComponent implements EventListener {
         const list = this.getNodeList(node);
         this.editNodeLicense = list;
     }
-    private afterUpload(nodes: Node[]) {
-        if (this.reurl) {
-            NodeHelper.addNodeToLms(this.router, this.storage, nodes[0], this.reurl);
-        }
-        this.refreshWithVirtualNodes(nodes);
-    }
 
     private deleteDone() {
         this.closeMetadata();
         this.refresh();
     }
 
-    private pasteNode(nodes: Node[] = []) {
-        const clip = (this.storage.get('workspace_clipboard') as ClipboardObject);
-        if (!this.canPasteInCurrentLocation()) {
-            return;
-        }
-        if (nodes.length === clip.nodes.length) {
-            this.globalProgress = false;
-            this.storage.remove('workspace_clipboard');
-            const info: any = {
-                from: clip.sourceNode ? clip.sourceNode.name : this.translate.instant('WORKSPACE.COPY_SEARCH'),
-                to: this.currentFolder.name,
-                count: clip.nodes.length,
-                mode: this.translate.instant('WORKSPACE.' + (clip.copy ? 'PASTE_COPY' : 'PASTE_MOVE'))
-            };
-            this.toast.toast('WORKSPACE.TOAST.PASTE', info);
-            this.refreshWithVirtualNodes(nodes);
-            return;
-        }
-        this.globalProgress = true;
-        const target = this.currentFolder.ref.id;
-        console.log(this.currentFolder);
-        const source = clip.nodes[nodes.length].ref.id;
-        if (clip.copy) {
-            this.node.copyNode(target, source).subscribe(
-                (data: NodeWrapper) => this.pasteNode(nodes.concat(data.node)),
-                (error: any) => {
-                    NodeHelper.handleNodeError(this.bridge, clip.nodes[nodes.length].name, error);
-                    this.globalProgress = false;
-                });
-        }
-        else {
-            this.node.moveNode(target, source).subscribe(
-                (data: NodeWrapper) => this.pasteNode(nodes.concat(data.node)),
-                (error: any) => {
-                    NodeHelper.handleNodeError(this.bridge, clip.nodes[nodes.length].name, error);
-                    this.globalProgress = false;
-                }
-            );
-        }
-
-    }
-    private cutCopyNode(node: Node, copy: boolean) {
-        let list = this.getNodeList(node);
-        if (!list || !list.length) {
-            return;
-        }
-        list = Helper.deepCopy(list);
-        const clip: ClipboardObject = { sourceNode: this.currentFolder, nodes: list, copy };
-        this.storage.set('workspace_clipboard', clip);
-        this.toast.toast('WORKSPACE.TOAST.CUT_COPY', { count: list.length });
-    }
-    private downloadNode(node: Node) {
-        const list = this.getNodeList(node);
-        NodeHelper.downloadNodes(this.connector, list);
-    }
     private displayNode(event: Node) {
         const list = this.getNodeList(event);
         this.closeMetadata();
@@ -901,13 +840,5 @@ export class WorkspaceMainComponent implements EventListener {
                 Helper.copyObjectProperties(node, hit[0]);
             }
         }
-    }
-
-    refreshWithVirtualNodes(nodes: Node[]) {
-        nodes = nodes.map((n) => {
-            n.virtual = true;
-            return n;
-        });
-        this.explorer.list.addVirtualNodes(nodes);
     }
 }

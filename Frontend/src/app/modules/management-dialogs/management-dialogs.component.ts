@@ -288,7 +288,8 @@ export class WorkspaceManagementDialogsComponent  {
     this.closeUploadSelect();
     this.globalProgress=true;
     this.nodeService.createNode(this.parent.ref.id,RestConstants.CCM_TYPE_IO,aspects,prop,true,RestConstants.COMMENT_MAIN_FILE_UPLOAD).subscribe(
-      (data:NodeWrapper)=>{
+      (data:NodeWrapper) => {
+        this.wasUploaded = true;
         this.globalProgress=false;
         this.nodeDeleteOnCancel=true;
         this.nodeDeleteOnCancelChange.emit(true);

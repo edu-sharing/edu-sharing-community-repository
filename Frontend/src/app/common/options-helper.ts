@@ -854,7 +854,9 @@ export class OptionsHelperService {
             o.virtual = true;
             return o;
         });
-        this.listener.onVirtualNodes(objects);
+        if(this.listener && this.listener.onVirtualNodes) {
+            this.listener.onVirtualNodes(objects);
+        }
         if(this.list) {
             this.list.addVirtualNodes(objects);
         }
