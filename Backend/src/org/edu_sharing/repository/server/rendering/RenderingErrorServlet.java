@@ -3,6 +3,7 @@ package org.edu_sharing.repository.server.rendering;
 import org.apache.commons.io.FileUtils;
 import org.apache.log4j.Logger;
 import org.edu_sharing.repository.server.authentication.Context;
+import org.edu_sharing.repository.server.tools.HttpException;
 import org.edu_sharing.repository.server.tools.I18nServer;
 import org.springframework.extensions.webscripts.Runtime;
 
@@ -48,7 +49,10 @@ public class RenderingErrorServlet extends HttpServlet {
                 }
                 html = html.replace("{{statusCode}}", exception.getStatusCode() + "");
                 html = html.replace("{{message}}", I18nServer.getTranslationDefaultResourcebundleNoException("rendering_error_" + exception.getI18nName()));
-                html = html.replace("{{technicalMessage}}", exception.getTechnicalDetail());
+                html = html.replace("{{technicalMessage}}",
+                        (exception.getNested()!=null && exception.getNested() instanceof HttpException) ?
+                                exception.getTechnicalDetail() :
+                                "");
                 html = html.replace("{{exception}}", exceptionName);
             }
             else{
