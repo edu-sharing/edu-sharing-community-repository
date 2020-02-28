@@ -101,7 +101,7 @@
             </div>
             <div class="add-material">
                 <button mat-button class="addDesktop"
-                        *ngIf="!isGuest"
+                        *ngIf="!isGuest && isCreateAllowed()"
                         [disabled]="!isCreateAllowed()"
                         #dropdownTrigger="matMenuTrigger"
                         (menuOpened)="createMenu.updateOptions()"
@@ -110,6 +110,7 @@
                     <i icon iconId="add"></i> <span>{{ 'WORKSPACE.ADD' | translate }}</span>
                 </button>
                 <button class="create-dummy"
+                        *ngIf="isCreateAllowed()"
                         [style.left]="createMenuX+'px'"
                         [style.top]="createMenuY+'px'"
                         #dropdownTriggerDummy="matMenuTrigger"
