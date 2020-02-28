@@ -50,6 +50,7 @@ import { MatMenuTrigger } from '@angular/material/menu';
 import { GlobalContainerComponent } from '../../common/ui/global-container/global-container.component';
 import {ActionbarComponent} from '../../common/ui/actionbar/actionbar.component';
 import {BridgeService} from '../../core-bridge-module/bridge.service';
+import {WorkspaceExplorerComponent} from './explorer/explorer.component';
 
 @Component({
     selector: 'workspace-main',
@@ -64,7 +65,7 @@ import {BridgeService} from '../../core-bridge-module/bridge.service';
     ]
 })
 export class WorkspaceMainComponent implements EventListener {
-    @ViewChild('dropdownTrigger', {static: false}) dropdownTrigger: MatMenuTrigger;
+    @ViewChild('explorer', {static: false}) explorer: WorkspaceExplorerComponent;
     private static VALID_ROOTS = ['MY_FILES', 'SHARED_FILES', 'MY_SHARED_FILES', 'TO_ME_SHARED_FILES', 'WORKFLOW_RECEIVE', 'RECYCLE'];
     private static VALID_ROOTS_NODES = [RestConstants.USERHOME, '-shared_files-', '-my_shared_files-', '-to_me_shared_files-', '-workflow_receive-'];
     private isRootFolder: boolean;
@@ -798,17 +799,6 @@ export class WorkspaceMainComponent implements EventListener {
         const nodes = this.getNodeList(node);
         this.variantNode = nodes[0];
     }
-    private createContext(event: any = null) {
-        if (!this.createAllowed) {
-            return;
-        }
-        console.log(this.dropdownTrigger);
-        this.dropdownTrigger.openMenu();
-        if (event) {
-            event.preventDefault();
-            event.stopPropagation();
-        }
-    }
 
     private goToLogin() {
         RestHelper.goToLogin(this.router, this.config, this.isSafe ? RestConstants.SAFE_SCOPE : '');
@@ -918,7 +908,6 @@ export class WorkspaceMainComponent implements EventListener {
             n.virtual = true;
             return n;
         });
-        this.updateList(nodes.concat(this.currentNodes));
-        this.selection = nodes;
+        this.explorer.list.addVirtualNodes(nodes);
     }
 }

@@ -464,7 +464,8 @@
         "TEMPLATE": "Metadata Template",
         "VARIANT": "Create variant",
         "VARIANT_OPEN": "Open as variant",
-        "QR_CODE": "QR-Code Link"
+        "QR_CODE": "QR-Code Link",
+        "NEW_COLLECTION": "Add collection"
     },
     "NO_SIZE": "-",
     "VERSION_COMMENT": "Version comment",

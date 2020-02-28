@@ -317,7 +317,7 @@ export class CollectionNewComponent {
     save() : void {
         // input data optimize
         if(!this.currentCollection.collection.description)
-          this.currentCollection.collection.description="";
+          this.currentCollection.collection.description='';
         this.currentCollection.title = this.currentCollection.title.trim();
         this.currentCollection.collection.description = this.currentCollection.collection.description.trim();
         if(this.newCollectionType === RestConstants.COLLECTIONTYPE_EDITORIAL ||
@@ -347,6 +347,7 @@ export class CollectionNewComponent {
          *  CREATE
          */
           this.isLoading = true;
+          console.log('create', this.currentCollection);
           this.collectionService.createCollection(
             this.currentCollection,
             this.parentId
@@ -570,14 +571,17 @@ export class CollectionNewComponent {
     this.parentCollection = parent;
     this.currentCollection=new EduData.Node();
     this.currentCollection.title='';
-    this.currentCollection.collection.description='';
-    this.currentCollection.collection.color=this.COLORS[0];
+    this.currentCollection.collection = ({
+      description: '',
+      color: this.COLORS[0]
+    } as any);
       if(this.parentCollection &&
           this.parentCollection.collection.type === RestConstants.COLLECTIONTYPE_EDITORIAL) {
           this.setCollectionType(RestConstants.COLLECTIONTYPE_EDITORIAL);
       }
     this.updateAvailableSteps();
     this.isLoading=false;
+    console.log(this.currentCollection);
     GlobalContainerComponent.finishPreloading();
   }
 

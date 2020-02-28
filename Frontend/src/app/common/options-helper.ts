@@ -31,6 +31,8 @@ export class OptionsHelperService {
     private globalOptions: OptionItem[];
     private list: ListTableComponent;
     private mainNav: MainNavComponent;
+    private actionbar: ActionbarComponent;
+    private dropdown: DropdownComponent;
     private queryParams: Params;
     private data: OptionData;
     private listener: OptionsListener;
@@ -111,7 +113,7 @@ export class OptionsHelperService {
         this.storage.set('workspace_clipboard', clip);
         this.bridge.showTemporaryMessage(MessageType.info, 'WORKSPACE.TOAST.CUT_COPY', { count: list.length });
     }
-    private pasteNode(nodes: Node[] = []) {
+    pasteNode(nodes: Node[] = []) {
         const clip = (this.storage.get('workspace_clipboard') as ClipboardObject);
         if (!this.canAddObjects()) {
             return;
@@ -168,37 +170,41 @@ export class OptionsHelperService {
             actionbar.options = [];
         }
     }
+    initComponents(mainNav: MainNavComponent,
+         actionbar: ActionbarComponent = null,
+         list: ListTableComponent = null,
+         dropdown: DropdownComponent = null) {
+        this.mainNav = mainNav;
+        this.actionbar = actionbar;
+        this.list = list;
+        this.dropdown = dropdown;
+    }
+    setListener(listener: OptionsListener) {
+        this.listener = listener;
+    }
     /**
      * refresh all bound components with available menu options
      */
-    refreshComponents(listener: OptionsListener,
-                      mainNav: MainNavComponent,
-                      actionbar: ActionbarComponent = null,
-                      list: ListTableComponent = null,
-                      dropdown: DropdownComponent = null) {
-        console.log('refreshComponents', actionbar);
-        if(mainNav) {
-            mainNav.management.onRefresh.subscribe((nodes: void | Node[]) =>
-                listener.onRefresh(nodes)
+    refreshComponents() {
+        if(this.mainNav) {
+            this.mainNav.management.onRefresh.subscribe((nodes: void | Node[]) =>
+               this.listener.onRefresh(nodes)
             );
-            mainNav.management.onDelete.subscribe(
-                (result: { error: boolean; count: number; }) => listener.onDelete(result)
+            this.mainNav.management.onDelete.subscribe(
+                (result: { objects: any; count: number; error: boolean; }) => this.listener.onDelete(result)
             );
         }
 
-        this.listener = listener;
-        this.list = list;
-        this.mainNav = mainNav;
         this.globalOptions = this.getAvailableOptions(Target.Actionbar);
-        if (list) {
-            list.options = this.getAvailableOptions(Target.List);
-            list.dropdownOptions = this.getAvailableOptions(Target.ListDropdown);
+        if (this.list) {
+            this.list.options = this.getAvailableOptions(Target.List);
+            this.list.dropdownOptions = this.getAvailableOptions(Target.ListDropdown);
         }
-        if(dropdown) {
-            dropdown.options = this.getAvailableOptions(Target.ListDropdown);
+        if(this.dropdown) {
+            this.dropdown.options = this.getAvailableOptions(Target.ListDropdown);
         }
-        if (actionbar) {
-            actionbar.options = this.globalOptions;
+        if (this.actionbar) {
+            this.actionbar.options = this.globalOptions;
         }
     }
     private isOptionEnabled(option: OptionItem, objects: Node[]|any) {
@@ -217,7 +223,6 @@ export class OptionsHelperService {
         let objects: Node[]|any[];
         if (target === Target.List) {
             objects = this.data.allObjects && this.data.allObjects.length ? [this.data.allObjects[0]] : null;
-            console.log(objects);
         } else if (target === Target.Actionbar) {
             objects = this.data.selectedObjects || [this.data.activeObject];
         } else if (target === Target.ListDropdown) {
@@ -234,31 +239,42 @@ export class OptionsHelperService {
            options = this.prepareOptions(this.mainNav.management, objects);
         }
         options = this.applyExternalOptions(options);
-        this.handleCallbacks(options, objects);
         const custom = this.config.instant('customOptions');
         NodeHelper.applyCustomNodeOptions(this.toast, this.http, this.connector, custom, this.data.allObjects, objects, options);
         // do pre-handle callback options for dropdown + actionbar
-        options = options.filter((o) =>
-            o.showCallback(target === Target.List ? objects[0] : null)
-        );
-        options.filter((o) => !o.enabledCallback(target === Target.List ? objects[0] : null)).forEach((o) =>
-            o.isEnabled = false
-        );
+        options = this.filterOptions(options, target, objects);
         if (target !== Target.Actionbar) {
             options = options.filter((o) => !o.isToggle);
             // do not show any actions in the dropdown for no selection, these are reserved for actionbar
             options = options.filter((o) =>  !o.constrains || o.constrains.indexOf(Constrain.NoSelection) === -1);
         }
-        options = this.sortOptionsByGroup(options);
         console.log('getAvailableOptions', target, objects, options);
         return (UIHelper.filterValidOptions(this.ui, options) as OptionItem[]);
     }
+
+    private handleCallbackStates(options: OptionItem[],
+                                 target: Target,
+                                 objects: Node[] | any[] = null) {
+        this.handleCallbacks(options, objects);
+        options = options.filter((o) =>
+            o.showCallback(target === Target.List && objects && objects[0] ? objects[0] : null)
+        );
+        options.filter((o) => !o.enabledCallback(target === Target.List && objects && objects[0] ? objects[0] : null)).forEach((o) =>
+            o.isEnabled = false
+        );
+        return options;
+    }
+
     private isOptionAvailable(option: OptionItem, objects: Node[]|any[]) {
         if (option.elementType.indexOf(this.getType(objects)) === -1) {
             // console.log('types not matching', objects, this.getType(objects), option);
             return false;
         }
         if(option.scopes) {
+            if (this.data.scope == null) {
+                console.warn('Scope for options was not set, some may missing');
+                return false;
+            }
             if (option.scopes.indexOf(this.data.scope) === -1) {
                 // console.log('scopes not matching', objects, option);
                 return false;
@@ -330,7 +346,7 @@ export class OptionsHelperService {
         applyNode.permissions = [RestConstants.ACCESS_CC_PUBLISH];
         applyNode.permissionsRightMode = NodesRightMode.Original;
         applyNode.permissionsMode = HideMode.Disable;
-        applyNode.constrains = [Constrain.NoBulk, Constrain.ReurlMode];
+        applyNode.constrains = [Constrain.NoBulk, Constrain.ReurlMode, Constrain.User];
         applyNode.showAsAction = true;
         applyNode.showAlways = true;
         applyNode.group = DefaultGroups.Primary;
@@ -712,7 +728,7 @@ export class OptionsHelperService {
         feedbackCollection.priority = 10;
         // feedback is only shown for non-managers
         feedbackCollection.customShowCallback = ((objects) =>
-            objects[0].access.indexOf(RestConstants.ACCESS_WRITE) === -1
+            objects && objects[0].access.indexOf(RestConstants.ACCESS_WRITE) === -1
         );
         /*
          if (
@@ -756,6 +772,7 @@ export class OptionsHelperService {
         toggleViewType.constrains = [Constrain.NoSelection];
         toggleViewType.group = DefaultGroups.Toggles;
         toggleViewType.elementType = [ElementType.Unknown];
+        toggleViewType.priority = 10;
         toggleViewType.isToggle = true;
         /*
         const reorder = new OptionItem('OPTIONS.LIST_SETTINGS', 'settings', (node: Node) => this.reorderDialog = true);
@@ -770,6 +787,7 @@ export class OptionsHelperService {
         configureList.constrains = [Constrain.NoSelection, Constrain.User];
         configureList.group = DefaultGroups.Toggles;
         configureList.elementType = [ElementType.Unknown];
+        configureList.priority = 20;
         configureList.isToggle = true;
         /*
 
@@ -836,7 +854,10 @@ export class OptionsHelperService {
             o.virtual = true;
             return o;
         });
-        this.list.addVirtualNodes(objects);
+        this.listener.onVirtualNodes(objects);
+        if(this.list) {
+            this.list.addVirtualNodes(objects);
+        }
     }
 
     private bookmarkNodes(nodes: Node[]) {
@@ -893,7 +914,7 @@ export class OptionsHelperService {
     setData(data: OptionData) {
         this.data = data;
     }
-    sortOptionsByGroup(options: OptionItem[]) {
+    private sortOptionsByGroup(options: OptionItem[]) {
         if(!options) {
             return null;
         }
@@ -938,7 +959,7 @@ export class OptionsHelperService {
             }
         }
         if (constrains.indexOf(Constrain.Files) !== -1) {
-            if (objects.some((o) => o.isDirectory)) {
+            if (objects.some((o) => o.isDirectory || o.type !== RestConstants.CCM_TYPE_IO)) {
                 return Constrain.Files;
             }
         }
@@ -996,23 +1017,36 @@ export class OptionsHelperService {
         Observable.forkJoin(objects.map((o: Node|any) =>
             this.collectionService.removeFromCollection(o.ref.id, this.data.parent.ref.id)
         )).subscribe(() =>
-            this.listener.onDelete({error: false, count: objects.length})
+            this.listener.onDelete({objects, error: false, count: objects.length})
         , (error) =>
-            this.listener.onDelete({error: true, count: objects.length})
+            this.listener.onDelete({objects, error: true, count: objects.length})
         );
     }
 
     private editCollection(object: Node|any) {
         UIHelper.goToCollection(this.router, object, 'edit');
     }
+
+    /**
+     * Filter options, can be also used externally
+     * @param options
+     * @param target
+     * @param objects
+     */
+    public filterOptions(options: OptionItem[], target: Target, objects: Node[]|any = null) {
+        options = this.handleCallbackStates(options, target, objects);
+        options = this.sortOptionsByGroup(options);
+        return options;
+    }
 }
 export interface OptionsListener {
+    onVirtualNodes?: (nodes: Node[]) => void;
     onRefresh?: (nodes: Node[]|void) => void;
-    onDelete?: (result: {error: boolean, count: number}) => void;
+    onDelete?: (result: { objects: Node[] | any; count: number; error: boolean }) => void;
 }
 export interface OptionData {
     scope: Scope;
-    activeObject: Node|any;
+    activeObject?: Node|any;
     selectedObjects?: Node[] | any[];
     allObjects?: Node[] | any[];
     parent?: Node|any;

@@ -4,8 +4,9 @@
     *ngIf="mainnav"
     #mainNav
     [create]="{
-        allowed: !isRootLevelCollection() && isAllowedToEditCollection(),
-        allowBinary: true
+        allowed: !isGuest && isAllowedToEditCollection(),
+        allowBinary: !isRootLevelCollection() && isAllowedToEditCollection(),
+        parent: collectionContent ? collectionContent.node : null
     }"
     [title]="'COLLECTIONS.TITLE'"
     [currentScope]="'collections'"

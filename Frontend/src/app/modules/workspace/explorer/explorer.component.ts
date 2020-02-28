@@ -1,4 +1,4 @@
-import {Component, Input, EventEmitter, Output, OnDestroy, AfterViewInit} from '@angular/core';
+import {Component, Input, EventEmitter, Output, OnDestroy, AfterViewInit, ViewChild} from '@angular/core';
 import {ListItem, RestNodeService} from "../../../core-module/core.module";
 import {Node, NodeList, NodeWrapper} from "../../../core-module/core.module";
 import {RestConstants} from "../../../core-module/core.module";
@@ -15,6 +15,7 @@ import {Helper} from "../../../core-module/rest/helper";
 import {WorkspaceManagementDialogsComponent} from '../../management-dialogs/management-dialogs.component';
 import {ActionbarComponent} from '../../../common/ui/actionbar/actionbar.component';
 import {MainNavComponent} from '../../../common/ui/main-nav/main-nav.component';
+import {ListTableComponent} from '../../../core-ui-module/components/list-table/list-table.component';
 
 @Component({
   selector: 'workspace-explorer',
@@ -23,6 +24,7 @@ import {MainNavComponent} from '../../../common/ui/main-nav/main-nav.component';
 })
 export class WorkspaceExplorerComponent {
   public readonly SCOPES = Scope;
+  @ViewChild('list', {static: false}) list: ListTableComponent;
   public _nodes: Node[] = [];
   @Input() set nodes(nodes: Node[]) {
     this._nodes = nodes;

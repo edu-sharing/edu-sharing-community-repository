@@ -73,7 +73,7 @@ export class WorkspaceManagementDialogsComponent  {
         }
     }
     @Output() nodeDeleteChange = new EventEmitter();
-    @Output() onDelete = new EventEmitter<{error: boolean, count: number}>();
+    @Output() onDelete = new EventEmitter<{objects: Node[]|any,error: boolean, count: number}>();
   @Input() nodeShare : Node[];
   @Output() nodeShareChange = new EventEmitter<Node[]>();
     @Input() nodeDebug : Node[];
@@ -229,7 +229,7 @@ export class WorkspaceManagementDialogsComponent  {
             this.globalProgress = false;
             if (!error)
                 this.toast.toast("WORKSPACE.TOAST.DELETE_FINISHED");
-            this.onDelete.emit({error:error,count:position});
+            this.onDelete.emit({objects: nodes,error:error,count:position});
             return;
         }
         this.dialogTitle=null;
@@ -261,10 +261,8 @@ export class WorkspaceManagementDialogsComponent  {
     if (this.config.instant('licenseDialogOnUpload', false)) {
          this.nodeLicense = event;
          this.nodeLicenseOnUpload = true;
-    }else if (this.filesToUpload.length === 1) {
+    } else {
         this.showMetadataAfterUpload(event);
-    }else {
-        this.onUploadFilesProcessed.emit(event);
     }
     this.wasUploaded = true;
     this.filesToUpload = null;
@@ -514,7 +512,7 @@ export class WorkspaceManagementDialogsComponent  {
         this.nodeService.revertNodeToVersion(version.version.node.id, version.version.major, version.version.minor)
             .subscribe(
                 (data: NodeVersions) => {
-                    this.globalProgress = false;
+                    this.toast.closeModalDialog();
                     this.refresh();
                     this.closeSidebar();
                     // @TODO type is not compatible
@@ -537,5 +535,11 @@ export class WorkspaceManagementDialogsComponent  {
     closeSidebar() {
         this.nodeSidebar = null;
         this.nodeSidebarChange.emit(null);
+    }
+
+    displayNode(node: Node) {
+      console.log(node);
+        this.router.navigate([UIConstants.ROUTER_PREFIX + 'render', node.ref.id, node.version]);
+
     }
 }

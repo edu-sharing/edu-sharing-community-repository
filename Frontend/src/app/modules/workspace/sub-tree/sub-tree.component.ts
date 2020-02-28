@@ -149,10 +149,12 @@ export class WorkspaceSubTreeComponent {
             activeObject: node,
             scope: Scope.WorkspaceTree
         });
-        this.optionsService.refreshComponents({
+        this.optionsService.initComponents(this.mainNav, null, null, this.dropdown);
+        this.optionsService.setListener({
             onRefresh: () => this.refresh(),
             onDelete: () => this.refresh()
-        },this.mainNav, null, null, this.dropdown);
+        });
+        this.optionsService.refreshComponents();
         this.dropdownTrigger.openMenu();
     }
 

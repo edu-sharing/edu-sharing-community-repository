@@ -39,6 +39,8 @@ import {BridgeService} from "../../../core-bridge-module/bridge.service";
 import {GlobalContainerComponent} from "../global-container/global-container.component";
 import {MatButton} from '@angular/material/button';
 import {WorkspaceManagementDialogsComponent} from '../../../modules/management-dialogs/management-dialogs.component';
+import {CreateMenuComponent} from '../../../modules/create-menu/create-menu.component';
+import {MatMenuTrigger} from '@angular/material/menu';
 
 @Component({
     selector: 'main-nav',
@@ -91,6 +93,10 @@ export class MainNavComponent implements AfterViewInit{
     @ViewChild('nodeStoreRef', {static: false}) nodeStoreRef:ElementRef;
     @ViewChild('userRef', {static: false}) userRef:ElementRef;
     @ViewChild('tabNav', {static: false}) tabNav:ElementRef;
+    @ViewChild('createMenu', {static: false}) createMenu:CreateMenuComponent;
+    @ViewChild('dropdownTriggerDummy', {static: false}) createMenuTrigger: MatMenuTrigger;
+    createMenuX: number;
+    createMenuY: number;
     dialogTitle : string;
     dialogCancelable = false;
     dialogMessage : string;
@@ -935,5 +941,13 @@ export class MainNavComponent implements AfterViewInit{
     isCreateAllowed() {
         // @TODO: May Check for more constrains
         return this.create.allowed && !this.isGuest;
+    }
+    openCreateMenu(x: number, y: number){
+        this.createMenuX = x;
+        this.createMenuY = y;
+
+        this.createMenu.updateOptions();
+        this.createMenuTrigger.openMenu();
+        this.createMenuTrigger.onMenuClose
     }
 }

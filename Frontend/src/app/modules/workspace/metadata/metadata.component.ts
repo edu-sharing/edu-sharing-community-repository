@@ -57,7 +57,7 @@ export class WorkspaceMetadataComponent{
   @Input() isAdmin: boolean;
   forkedParent: Node;
   forkedChilds: Node[];
-  @Input() set node(node: Node){
+  @Input() set node(node: Node) {
     this.nodeObject = Helper.deepCopy(node);
     this.load();
   }
@@ -149,7 +149,7 @@ export class WorkspaceMetadataComponent{
   private setTab(tab: string){
     this.tab = tab;
   }
-  private display(version: string= null){
+  private display(version: string= null) {
     this.nodeObject.version = version;
     this.onDisplay.emit(this.nodeObject);
   }

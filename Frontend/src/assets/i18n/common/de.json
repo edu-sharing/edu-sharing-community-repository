@@ -513,7 +513,8 @@
         "TEMPLATE": "Metadaten Vorlage",
         "VARIANT": "Variante anlegen",
         "VARIANT_OPEN": "Als Variante öffnen",
-        "QR_CODE": "QR-Code Link"
+        "QR_CODE": "QR-Code Link",
+        "NEW_COLLECTION": "Neue Sammlung"
     },
     "NO_SIZE": "-",
     "VERSION_COMMENT": "Versionskommentar",

@@ -487,11 +487,12 @@ export class NodeRenderComponent implements EventListener {
             allObjects: this.list,
             customOptions: options,
         });
-        this.optionsHelper.refreshComponents({
+        this.optionsHelper.initComponents(this.mainNavRef, this.actionbar);
+        this.optionsHelper.setListener({
             onRefresh: () => this.refresh(),
             onDelete: (result) => this.onDelete(result),
-            },
-            this.mainNavRef, this.actionbar);
+        });
+        this.optionsHelper.refreshComponents();
         this.postprocessHtml();
         this.isBuildingPage=false;
     }

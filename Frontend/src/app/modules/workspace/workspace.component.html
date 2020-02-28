@@ -64,23 +64,26 @@
   <actionbar #actionbar
 ></actionbar>
 </div></div>
-  <workspace-explorer class="explorer"  [class.explorerMetadata]="metadataNode" *ngIf="root!='RECYCLE'"
-  (contextmenu)="createContext($event)"
-  [current]="currentFolder"
-  [selection]="selection"
-  [searchQuery]="searchQuery"
-  [viewType]="viewType"
-  [(reorderDialog)]="reorderDialog"
-  [preventKeyevents]="hasOpenWindows()"
-  [(nodes)]="currentNodes"
-  [mainNav]="mainNav"
-  [actionbar]="actionbar"
-  (onSearchGlobal)="searchGlobal($event)"
-  (onDrop)="handleDrop($event)"
-  (onSelectNode)="clickNode($event)"
-  (onSelectionChanged)="setSelection($event)"
-  (onOpenNode)="openNode($event)"
-  (onReset)="resetWorkspace()"
+  <workspace-explorer class="explorer"
+                      #explorer
+                      appCreateContextMenu
+                      [class.explorerMetadata]="metadataNode"
+                      *ngIf="root!='RECYCLE'"
+                      [current]="currentFolder"
+                      [selection]="selection"
+                      [searchQuery]="searchQuery"
+                      [viewType]="viewType"
+                      [(reorderDialog)]="reorderDialog"
+                      [preventKeyevents]="hasOpenWindows()"
+                      [(nodes)]="currentNodes"
+                      [mainNav]="mainNav"
+                      [actionbar]="actionbar"
+                      (onSearchGlobal)="searchGlobal($event)"
+                      (onDrop)="handleDrop($event)"
+                      (onSelectNode)="clickNode($event)"
+                      (onSelectionChanged)="setSelection($event)"
+                      (onOpenNode)="openNode($event)"
+                      (onReset)="resetWorkspace()"
 ></workspace-explorer>
 
 <workspace-management

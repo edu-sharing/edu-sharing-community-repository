@@ -373,14 +373,9 @@ export class CollectionsMainComponent {
     }
 
     isAllowedToEditCollection(): boolean {
-        // This seems to be wrong: He may has created a public collection and wants to edit it
-        if (
-            this.isRootLevelCollection() &&
-            this.tabSelected != RestConstants.COLLECTIONSCOPE_MY
-        ) {
-            return false;
+        if (this.isRootLevelCollection()) {
+            return this.tabSelected === RestConstants.COLLECTIONSCOPE_MY
         }
-
         if (
             RestHelper.hasAccessPermission(
                 this.collectionContent.node,
@@ -872,6 +867,7 @@ export class CollectionsMainComponent {
                 collection => {
                     // set the collection and load content data by refresh
                     this.setCollectionId(null);
+                    console.log(collection.collection);
                     this.collectionContent.node = collection.collection;
 
                     this.renderBreadcrumbs();
@@ -1000,10 +996,8 @@ export class CollectionsMainComponent {
                         this.showCollection = id != '-root-';
                         this.displayCollectionById(id, () => {
                             if (params.content) {
-                                console.log('search content');
                                 for (const content of this.collectionContent
                                     .references) {
-                                    console.log(content);
                                     if (content.ref.id == params.content) {
                                         console.log('match');
                                         this.contentDetailObject = content;
@@ -1132,7 +1126,8 @@ export class CollectionsMainComponent {
             scope: Scope.CollectionsCollection,
             activeObject: this.collectionContent.node
         });
-        this.optionsService.refreshComponents({}, this.mainNavRef, this.actionbarCollection);
+        this.optionsService.initComponents(this.mainNavRef, this.actionbarCollection);
+        this.optionsService.refreshComponents();
     }
 
     private setCollectionId(id: string) {
@@ -1143,6 +1138,7 @@ export class CollectionsMainComponent {
         };
         this.collectionContent.node.ref = new NodeRef();
         this.collectionContent.node.ref.id = id;
+        this.collectionContent.node.aspects = [RestConstants.CCM_ASPECT_COLLECTION];
     }
 
     private getCollectionId() {

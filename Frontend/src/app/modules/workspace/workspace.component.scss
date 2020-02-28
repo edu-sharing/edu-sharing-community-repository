@@ -72,23 +72,6 @@ user-quota{
   bottom:25px+$mobileTabNavHeight;
   display:none;
 }
-.addDesktop{
-  padding: 0 40px;
-  height: 43px;
-}
-.addDesktop,.addDesktopMenu{
-  position: fixed;
-  left: 38px;
-  top: 10px+$mainnavHeight;
-}
-.dialogAddDesktop{
-  z-index:66;
-}
-.addDesktopMenu{
-  top:45px+$mainnavHeight;
-  width: 200px;
-  z-index:105;
-}
 .selectRootMenu{
   position: fixed;
   width: 250px;
@@ -207,8 +190,7 @@ user-quota{
 }
 
 @media screen and (max-width: ($mobileTabSwitchWidth)){
-  .tree,
-  .addDesktop{
+  .tree{
     display:none;
   }
   .selectRootMenu{
@@ -220,10 +202,6 @@ user-quota{
   .breadcrumbFrame >div{
     padding-left:20px;
     padding-top:20px;
-  }
-  .addDesktopMenu{
-    right:53px;
-    bottom:38px+$mobileTabNavHeight;
   }
   .explorer{
     left:0;

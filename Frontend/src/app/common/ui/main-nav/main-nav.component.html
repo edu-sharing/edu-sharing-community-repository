@@ -104,10 +104,17 @@
                         *ngIf="!isGuest"
                         [disabled]="!isCreateAllowed()"
                         #dropdownTrigger="matMenuTrigger"
-                        [matMenuTriggerFor]="createMenu.dropdown"
+                        (menuOpened)="createMenu.updateOptions()"
+                        [matMenuTriggerFor]="createMenu.dropdown ? createMenu.dropdown.menu : null"
                 >
                     <i icon iconId="add"></i> <span>{{ 'WORKSPACE.ADD' | translate }}</span>
                 </button>
+                <button class="create-dummy"
+                        [style.left]="createMenuX+'px'"
+                        [style.top]="createMenuY+'px'"
+                        #dropdownTriggerDummy="matMenuTrigger"
+                        [matMenuTriggerFor]="createMenu.dropdown ? createMenu.dropdown.menu : null"
+                ></button>
             </div>
             <div class="topBarSearch" [class.noScope]="!showScope">
                 <div class="scopeNameMobile" *ngIf="!searchEnabled">{{title | translate}}</div>
