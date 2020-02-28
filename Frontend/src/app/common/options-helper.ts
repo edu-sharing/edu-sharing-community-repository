@@ -855,7 +855,7 @@ export class OptionsHelperService {
     }
 
     private editConnector(node: Node|any, type: Filetype = null, win: any = null, connectorType: Connector = null) {
-        UIHelper.openConnector(this.connectors, this.iamService, this.eventsService, this.toast, node, type, win, connectorType);
+        UIHelper.openConnector(this.connectors, this.iamService, this.eventService, this.toast, node, type, win, connectorType);
     }
     private canAddObjects() {
         return this.data.parent && NodeHelper.getNodesRight([this.data.parent], RestConstants.ACCESS_ADD_CHILDREN);
