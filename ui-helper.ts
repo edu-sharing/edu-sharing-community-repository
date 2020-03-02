@@ -667,13 +667,6 @@ export class UIHelper {
         return columns;
     }
 
-    static addHttpIfRequired(link: string) {
-        if (link.indexOf('://') == -1) {
-            return 'http://' + link;
-        }
-        return link;
-    }
-
     static goToDefaultLocation(
         router: Router,
         platformLocation: PlatformLocation,
