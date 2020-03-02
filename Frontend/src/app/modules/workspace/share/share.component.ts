@@ -49,7 +49,6 @@ import { UIHelper } from '../../../core-ui-module/ui-helper';
 export class WorkspaceShareComponent {
     @Input() sendMessages = true;
     @Input() sendToApi = true;
-    @Input() disableInherition = false;
     @Input() currentPermissions: LocalPermissions = null;
     @Input() set nodes(nodes: []) {
         this.setNodes(nodes);
@@ -668,7 +667,7 @@ export class WorkspaceShareComponent {
             let inherit =
                 this.inherited &&
                 this.inheritAllowed &&
-                !this.disableInherition;
+                !this.isCollection();
             const actions: Observable<Response>[] = this._nodes.map((n, i) => {
                 let permissions = Helper.deepCopy(this.permissions);
                 if (this.isBulk()) {

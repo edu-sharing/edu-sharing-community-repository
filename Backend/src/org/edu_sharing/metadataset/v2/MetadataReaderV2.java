@@ -8,6 +8,8 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
 import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
 import org.edu_sharing.metadataset.v2.MetadataCondition.CONDITION_TYPE;
+import org.edu_sharing.metadataset.v2.valuespace_reader.OpenSALTReader;
+import org.edu_sharing.metadataset.v2.valuespace_reader.ValuespaceReader;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.server.tools.ApplicationInfo;
 import org.edu_sharing.repository.server.tools.ApplicationInfoList;
@@ -470,18 +472,10 @@ public class MetadataReaderV2 {
 	}
 
 	private List<MetadataKey> getValuespaceExternal(String value) throws Exception {
-		// e.g. http://localhost:3000/uri/8a2a94f0-36bd-11e9-bdc4-0242ac1a0003
-		String openSaltRegex="(https?:\\/\\/.*\\/)uri\\/(.*)";
-		Pattern pattern = Pattern.compile(openSaltRegex);
-		Matcher matched = pattern.matcher(value);
-		if(matched.matches()){
-			String baseUrl=matched.group(1);
-			String uuid=matched.group(2);
-			logger.info("matched openSALT at "+baseUrl+" with uuid "+uuid);
-			return new OpenSALTReader(baseUrl).getValuespace(uuid);
+		ValuespaceReader reader = ValuespaceReader.getSupportedReader(value);
+		if(reader != null) {
+			return reader.getValuespace();
 		}
-
-		logger.error("The given valuespace uri "+value+" can not be resolved for a supported provider");
 		return null;
 	}
 

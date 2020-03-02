@@ -820,6 +820,25 @@ public class CollectionServiceImpl implements CollectionService{
 			return Arrays.asList(client.getAspects(parent)).contains(CCConstants.CCM_ASPECT_COLLECTION);
 		});
 	}
+	@Override
+	public void updateScope(NodeRef ref, List<ACE> permissions){
+		Scope result = Scope.MY;
+		String creator = serviceRegistry.getOwnableService().getOwner(ref);
+		for(ACE ace : permissions){
+			if(ace.getAuthority().equals(creator)) {
+				// nothing is done
+			} else if(ace.getAuthority().equals(CCConstants.AUTHORITY_GROUP_EVERYONE)){
+				result = Scope.CUSTOM_PUBLIC;
+			} else if(result.equals(Scope.MY)){
+				result = Scope.CUSTOM;
+			}
+		}
+		nodeService.setProperty(ref.getStoreRef().getProtocol(),
+				ref.getStoreRef().getIdentifier(),
+				ref.getId(),
+				CCConstants.CCM_PROP_MAP_COLLECTIONSCOPE,
+				result.toString());
+	}
 
 	public void setScope(Collection collection) throws Exception {
 		String collectionId = collection.getNodeId();

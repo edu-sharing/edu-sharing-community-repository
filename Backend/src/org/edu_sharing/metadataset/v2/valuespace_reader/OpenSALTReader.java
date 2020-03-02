@@ -1,4 +1,4 @@
-package org.edu_sharing.metadataset.v2;
+package org.edu_sharing.metadataset.v2.valuespace_reader;
 
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
@@ -6,6 +6,7 @@ import org.apache.http.client.methods.HttpUriRequest;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.log4j.Logger;
+import org.edu_sharing.metadataset.v2.MetadataKey;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -16,18 +17,29 @@ import java.net.URLEncoder;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
-public class OpenSALTReader {
+public class OpenSALTReader extends ValuespaceReader{
     private static final String ASSOCIATION_IS_CHILD_OF = "isChildOf";
     private static final String ASSOCIATION_PRECEDES = "precedes";
-    private final String baseUrl;
+    private String baseUrl;
+    private String uuid;
     private static Logger logger = Logger.getLogger(OpenSALTReader.class);
 
-    public OpenSALTReader(String baseUrl) {
-        this.baseUrl=baseUrl;
+    public OpenSALTReader(String valuespaceUrl) {
+        // e.g. http://localhost:3000/uri/8a2a94f0-36bd-11e9-bdc4-0242ac1a0003
+        String openSaltRegex="(https?:\\/\\/.*\\/)uri\\/(.*)";
+        Pattern pattern = Pattern.compile(openSaltRegex);
+        Matcher matched = pattern.matcher(valuespaceUrl);
+        if(matched.matches()){
+            this.baseUrl=matched.group(1);
+            this.uuid=matched.group(2);
+            logger.info("matched openSALT at "+baseUrl+" with uuid "+uuid);
+        }
     }
 
-    public List<MetadataKey> getValuespace(String uuid) throws Exception{
+    public List<MetadataKey> getValuespace() throws Exception{
         List<MetadataKey> result=new ArrayList<>();
         JSONObject list = getApi("CFPackages", uuid);
         JSONArray array = list.getJSONArray("CFItems");
@@ -78,5 +90,10 @@ public class OpenSALTReader {
     }
     private String getApiUrl(String method, String uuid) {
         return baseUrl+"/ims/case/v1p0/"+ URLEncoder.encode(method)+"/"+ URLEncoder.encode(uuid);
+    }
+
+    @Override
+    protected boolean supportsUrl() {
+        return baseUrl != null;
     }
 }

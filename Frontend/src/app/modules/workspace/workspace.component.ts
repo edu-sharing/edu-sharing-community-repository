@@ -384,7 +384,7 @@ export class WorkspaceMainComponent implements EventListener {
                                     this.node.getNodeMetadata(params.file).subscribe((data: NodeWrapper) => {
                                         this.setSelection([data.node]);
                                         this.parameterNode = data.node;
-                                        this.mainNavRef.management.nodeSidebar = params.file;
+                                        this.mainNavRef.management.nodeSidebar = data.node;
                                     });
                                 }
 

@@ -343,7 +343,13 @@ public class MetadataTemplateRenderer {
 			 */
 			logger.info(ToolPermissionServiceFactory.getInstance().hasToolPermission(CCConstants.CCM_VALUE_TOOLPERMISSION_COLLECTION_FEEDBACK)+" "+PermissionServiceFactory.getLocalService().hasPermission(StoreRef.PROTOCOL_WORKSPACE,StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(),parent,CCConstants.PERMISSION_FEEDBACK)
 					+" "+PermissionServiceFactory.getLocalService().hasPermission(StoreRef.PROTOCOL_WORKSPACE,StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(),parent,CCConstants.PERMISSION_DELETE));
-			if(NodeServiceHelper.hasAspect(new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE,parent),CCConstants.CCM_ASPECT_COLLECTION) &&
+			boolean isInsideCollection = false;
+			try{
+				isInsideCollection = NodeServiceHelper.hasAspect(new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE,parent),CCConstants.CCM_ASPECT_COLLECTION);
+			}catch(Throwable ignored){
+
+			}
+			if( isInsideCollection &&
 				ToolPermissionServiceFactory.getInstance().hasToolPermission(CCConstants.CCM_VALUE_TOOLPERMISSION_COLLECTION_FEEDBACK) &&
 				!Objects.equals(ApplicationInfoList.getHomeRepository().getGuest_username(),userName) &&
 				PermissionServiceFactory.getLocalService().hasPermission(StoreRef.PROTOCOL_WORKSPACE,StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(),parent,CCConstants.PERMISSION_FEEDBACK) &&
@@ -400,11 +406,11 @@ public class MetadataTemplateRenderer {
 
 	private boolean renderTree(StringBuffer widgetHtml, MetadataWidget widget) {
 		Map<String, MetadataKey> valuesMap=widget.getValuesAsMap();
-		Map<Integer, List<String>> map=new HashMap<>();
+		String[] keys = properties.get(widget.getId());
 		boolean empty=true;
-		for(String value:valuesMap.keySet()) {
-			MetadataKey key=valuesMap.get(value);
-			if(key==null)
+		for (String value : keys) {
+			MetadataKey key = valuesMap.get(value);
+			if (key == null)
 				continue;
 			List<String> path=new ArrayList<>();
 			int preventInfiniteLoop = 0;
@@ -416,14 +422,14 @@ public class MetadataTemplateRenderer {
 					break;
 				}
 			}
-			path= Lists.reverse(path);
-			int i=0;
+			path = Lists.reverse(path);
+			int i = 0;
 			if(renderingMode.equals(RenderingMode.HTML)) {
 				widgetHtml.append("<div class='mdsValue'>");
 			}
-			empty=path.size()==0;
-			for(String p : path) {
-				if(i>0) {
+			empty = path.size() == 0;
+			for (String p : path) {
+				if ( i > 0) {
 					if(renderingMode.equals(RenderingMode.HTML)){
 						widgetHtml.append("<i class='material-icons'>keyboard_arrow_right</i>");
 					}else if(renderingMode.equals(RenderingMode.TEXT)){
@@ -436,7 +442,6 @@ public class MetadataTemplateRenderer {
 			if(renderingMode.equals(RenderingMode.HTML)) {
 				widgetHtml.append("</div>");
 			}
-
 		}
 		return empty;
 	}

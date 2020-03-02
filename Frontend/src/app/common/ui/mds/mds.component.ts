@@ -1902,7 +1902,7 @@ export class MdsComponent{
     this.refreshChildobjects();
   }
   private addChildobjectLink(event:any){
-      let link=UIHelper.addHttpIfRequired(event.link);
+      let link=NodeHelper.addHttpIfRequired(event.link);
       this.addChildobject=false;
       let properties=RestHelper.createNameProperty(link);
       properties[RestConstants.CCM_PROP_IO_WWWURL] = [link];
