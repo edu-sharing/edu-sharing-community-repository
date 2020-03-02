@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.List;
 
 import org.alfresco.service.cmr.repository.NodeRef;
+import org.edu_sharing.repository.client.rpc.ACE;
 import org.edu_sharing.service.search.model.SortDefinition;
 
 public interface CollectionService {
@@ -66,6 +67,8 @@ public interface CollectionService {
 	void updateAndSetScope(Collection collection) throws Exception;
 
 	Collection createAndSetScope(String parentId, Collection collection) throws Throwable;
+
+    void updateScope(NodeRef ref, List<ACE> permissions);
 
     public void setPinned(String[] collections);
 

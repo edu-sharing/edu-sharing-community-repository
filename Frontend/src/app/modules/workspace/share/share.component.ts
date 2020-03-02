@@ -120,7 +120,6 @@ export class WorkspaceShareComponent implements AfterViewInit{
   }
   @Input() sendMessages=true;
   @Input() sendToApi=true;
-  @Input() disableInherition=false;
   @Input() currentPermissions:LocalPermissions=null;
   @Input() set nodeId (node : string){
     if(node)
@@ -331,7 +330,7 @@ export class WorkspaceShareComponent implements AfterViewInit{
     private save(){
     if(this.permissions!=null) {
       this.onLoading.emit(true);
-      let inherit=this.inherited && this.inheritAllowed && !this.disableInherition;
+      let inherit=this.inherited && this.inheritAllowed && !this.isCollection();
       let permissions=Helper.deepCopy(this.permissions);
       permissions=permissions.filter((p:Permission)=>!this.isDeleted(p));
       let permissionsCopy=RestHelper.copyAndCleanPermissions(permissions,inherit);

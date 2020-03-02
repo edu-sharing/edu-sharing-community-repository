@@ -54,8 +54,10 @@ import org.edu_sharing.repository.server.tools.Mail;
 import org.edu_sharing.repository.server.tools.StringTool;
 import org.edu_sharing.repository.server.tools.URLTool;
 import org.edu_sharing.repository.server.tools.mailtemplates.MailTemplate;
+import org.edu_sharing.restservices.shared.Node;
 import org.edu_sharing.service.Constants;
 import org.edu_sharing.service.InsufficientPermissionException;
+import org.edu_sharing.service.collection.CollectionServiceFactory;
 import org.edu_sharing.service.nodeservice.NodeServiceFactory;
 import org.edu_sharing.service.oai.OAIExporterService;
 import org.edu_sharing.service.toolpermission.ToolPermissionException;
@@ -119,6 +121,7 @@ public class PermissionServiceImpl implements org.edu_sharing.service.permission
 	public void setPermissions(String nodeId, List<ACE> aces, Boolean inheritPermissions, String mailText, Boolean sendMail,
 			Boolean sendCopy, Boolean createHandle) throws Throwable {
 
+		NodeRef nodeRef = new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, nodeId);
 		ACL currentACL = repoClient.getPermissions(nodeId);
 
 		/**
@@ -230,6 +233,9 @@ public class PermissionServiceImpl implements org.edu_sharing.service.permission
 			 * problem is when handle service fails
 			 */
 			createHandle(AuthorityType.EVERYONE,nodeId);
+		}
+		if(nodeService.hasAspect(nodeRef,QName.createQName(CCConstants.CCM_ASPECT_COLLECTION))){
+			CollectionServiceFactory.getCollectionService(appInfo.getAppId()).updateScope(nodeRef, aces);
 		}
 
 
