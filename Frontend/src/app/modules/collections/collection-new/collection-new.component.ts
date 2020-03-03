@@ -41,8 +41,8 @@ import {BridgeService} from '../../../core-bridge-module/bridge.service';
   styleUrls: ['collection-new.component.scss']
 })
 export class CollectionNewComponent {
-  @ViewChild('mainNav', {static: false}) mainNavRef: MainNavComponent;
-  @ViewChild('mds', {static: false}) mds : MdsComponent;
+  @ViewChild('mainNav') mainNavRef: MainNavComponent;
+  @ViewChild('mds') mds : MdsComponent;
   public hasCustomScope: boolean;
   public COLORS:string[];
   public DEFAULT_COLORS:string[]=['#975B5D','#692426','#E6B247','#A89B39','#699761','#32662A','#60998F','#29685C','#759CB7','#537997','#976097','#692869'];
@@ -90,7 +90,7 @@ export class CollectionNewComponent {
   private originalPermissions: LocalPermissions;
   private permissionsInfo: any;
 
-  @ViewChild('file', {static: false}) imageFileRef : ElementRef;
+  @ViewChild('file') imageFileRef : ElementRef;
   buttons: DialogButton[];
   authorFreetext=false;
   authorFreetextAllowed=false;

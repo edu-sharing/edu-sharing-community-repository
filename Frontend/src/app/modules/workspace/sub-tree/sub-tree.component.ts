@@ -35,8 +35,8 @@ import {MainNavComponent} from '../../../common/ui/main-nav/main-nav.component';
 export class WorkspaceSubTreeComponent {
     private static MAX_FOLDER_COUNT = 100;
 
-    @ViewChild('dropdown', {static: false}) dropdown: DropdownComponent;
-    @ViewChild('dropdownTrigger', { static: false }) dropdownTrigger: MatMenuTrigger;
+    @ViewChild('dropdown') dropdown: DropdownComponent;
+    @ViewChild('dropdownTrigger') dropdownTrigger: MatMenuTrigger;
     dropdownLeft: string;
     dropdownTop: string;
 

@@ -15,7 +15,7 @@ import {KeyEvents} from '../../../core-module/ui/key-events';
 export class TutorialComponent implements OnInit {
   private static activeTutorial:ElementRef=null;
   private static PADDING_TOLERANCE=50;
-  @ViewChild('tutoral', {static: false}) tutorial : ElementRef;
+  @ViewChild('tutoral') tutorial : ElementRef;
   background: SafeStyle;
   show = false;
   private interval: any;

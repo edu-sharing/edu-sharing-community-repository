@@ -27,7 +27,7 @@ import {GlobalContainerComponent} from "../../common/ui/global-container/global-
     styleUrls: ['services.component.scss'],
 })
 export class ServicesComponent {
-    @ViewChild('mainNav', {static: false}) mainNavRef: MainNavComponent;
+    @ViewChild('mainNav') mainNavRef: MainNavComponent;
     serviceUrl:string;
     registeredServices:Service[] = [];
     stats: any = {};

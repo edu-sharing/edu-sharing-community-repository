@@ -11,7 +11,7 @@ import {RestNodeService} from "../../../core-module/core.module";
   styleUrls: ['create-lti.component.scss']
 })
 export class WorkspaceCreateLtiComponent  {
-  @ViewChild('input', {static: false}) input : ElementRef;
+  @ViewChild('input') input : ElementRef;
   public disabled=true;
   public _name="";
   public _parent: Node;

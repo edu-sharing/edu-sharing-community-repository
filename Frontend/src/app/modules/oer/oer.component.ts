@@ -35,7 +35,7 @@ import {Helper} from '../../core-module/rest/helper';
 
 export class OerComponent {
   readonly SCOPES = Scope;
-  @ViewChild('mainNav', {static: false}) mainNavRef: MainNavComponent;
+  @ViewChild('mainNav') mainNavRef: MainNavComponent;
   public COLLECTIONS=0;
   public MATERIALS=1;
   public TOOLS=2;

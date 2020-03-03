@@ -44,8 +44,8 @@ import {ActionbarComponent} from '../../../common/ui/actionbar/actionbar.compone
   ]
 })
 export class PermissionsAuthoritiesComponent {
-  @ViewChild('actionbar', { static: false }) actionbar: ActionbarComponent;
-  @ViewChild('actionbarMember', { static: false }) actionbarMember: ActionbarComponent;
+  @ViewChild('actionbar') actionbar: ActionbarComponent;
+  @ViewChild('actionbarMember') actionbarMember: ActionbarComponent;
   public GROUP_TYPES= RestConstants.VALID_GROUP_TYPES;
   public STATUS_TYPES= RestConstants.VALID_PERSON_STATUS_TYPES;
   public SCOPE_TYPES= RestConstants.VALID_SCOPE_TYPES;

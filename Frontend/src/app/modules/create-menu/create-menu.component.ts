@@ -32,8 +32,8 @@ import {WorkspaceManagementDialogsComponent} from '../management-dialogs/managem
     ]
 })
 export class CreateMenuComponent {
-    @ViewChild('dropdown', {static: false}) dropdown : DropdownComponent;
-    @ViewChild('management', {static: false}) management : WorkspaceManagementDialogsComponent;
+    @ViewChild('dropdown') dropdown : DropdownComponent;
+    @ViewChild('management') management : WorkspaceManagementDialogsComponent;
     /**
      * Currently allowed to drop files?
      */

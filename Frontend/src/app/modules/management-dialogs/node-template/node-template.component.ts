@@ -21,7 +21,7 @@ import {MdsComponent} from "../../../common/ui/mds/mds.component";
   ]
 })
 export class NodeTemplateComponent  {
-    @ViewChild('mds', {static: false}) mdsRef : MdsComponent;
+    @ViewChild('mds') mdsRef : MdsComponent;
     loading : boolean;
     _nodeId: string;
     node: Node;

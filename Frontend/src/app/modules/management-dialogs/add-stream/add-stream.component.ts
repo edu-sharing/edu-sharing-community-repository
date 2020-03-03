@@ -29,7 +29,7 @@ import {Helper} from "../../../core-module/rest/helper";
   ]
 })
 export class AddStreamComponent  {
-  @ViewChild('mds', {static: false}) mdsRef : MdsComponent;
+  @ViewChild('mds') mdsRef : MdsComponent;
   private streamEntry:any={};
   reloadMds = new Boolean(true);
   AUDIENCE_MODE_EVERYONE="0";

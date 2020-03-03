@@ -80,10 +80,10 @@ export class CollectionsMainComponent {
     };
     readonly SCOPES = Scope;
 
-    @ViewChild('mainNav', { static: false }) mainNavRef: MainNavComponent;
-    @ViewChild('actionbarCollection', { static: false }) actionbarCollection: ActionbarComponent;
-    @ViewChild('actionbarReferences', { static: false }) actionbarReferences: ActionbarComponent;
-    @ViewChild('listCollections', { static: false })
+    @ViewChild('mainNav') mainNavRef: MainNavComponent;
+    @ViewChild('actionbarCollection') actionbarCollection: ActionbarComponent;
+    @ViewChild('actionbarReferences') actionbarReferences: ActionbarComponent;
+    @ViewChild('listCollections')
     listCollections: ListTableComponent;
 
     dialogTitle: string;

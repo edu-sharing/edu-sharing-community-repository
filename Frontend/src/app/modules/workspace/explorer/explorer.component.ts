@@ -24,7 +24,7 @@ import {ListTableComponent} from '../../../core-ui-module/components/list-table/
 })
 export class WorkspaceExplorerComponent {
   public readonly SCOPES = Scope;
-  @ViewChild('list', {static: false}) list: ListTableComponent;
+  @ViewChild('list') list: ListTableComponent;
   public _nodes: Node[] = [];
   @Input() set nodes(nodes: Node[]) {
     this._nodes = nodes;

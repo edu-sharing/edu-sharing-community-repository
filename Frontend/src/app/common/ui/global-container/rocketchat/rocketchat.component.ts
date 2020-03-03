@@ -23,7 +23,7 @@ export class RocketchatComponent implements EventListener{
         if(event==FrameEventsService.EVENT_USER_LOGGED_IN || event==FrameEventsService.EVENT_USER_LOGGED_OUT)
             this.initalize(true)
     }
-    @ViewChild('frame', {static: false}) frame:ElementRef;
+    @ViewChild('frame') frame:ElementRef;
     @HostListener('document:keydown', ['$event'])
     handleKeyboardEvent(event: KeyboardEvent) {
         if(event.code=="Escape" && this.fullscreen){

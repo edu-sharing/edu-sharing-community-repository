@@ -26,7 +26,7 @@ import {Helper} from "../../../core-module/rest/helper";
   ]
 })
 export class WorkspaceLicenseComponent  {
-  @ViewChild('selectLicense', {static: false}) selectLicense : ElementRef;
+  @ViewChild('selectLicense') selectLicense : ElementRef;
 
   /**
    * priority, useful if the dialog seems not to be in the foreground

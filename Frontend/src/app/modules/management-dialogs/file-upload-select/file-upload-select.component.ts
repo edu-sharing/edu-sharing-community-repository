@@ -21,8 +21,8 @@ import {LinkData} from '../../../core-ui-module/node-helper';
 export class WorkspaceFileUploadSelectComponent  {
   public disabled= true;
   public chooseParent= false;
-  @ViewChild('fileSelect', {static: false}) file: ElementRef;
-  @ViewChild('link', {static: false}) linkRef: ElementRef;
+  @ViewChild('fileSelect') file: ElementRef;
+  @ViewChild('link') linkRef: ElementRef;
   /**
    * priority, useful if the dialog seems not to be in the foreground
    * Values greater 0 will raise the z-index

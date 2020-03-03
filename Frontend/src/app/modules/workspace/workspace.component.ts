@@ -65,7 +65,7 @@ import {WorkspaceExplorerComponent} from './explorer/explorer.component';
     ]
 })
 export class WorkspaceMainComponent implements EventListener {
-    @ViewChild('explorer', {static: false}) explorer: WorkspaceExplorerComponent;
+    @ViewChild('explorer') explorer: WorkspaceExplorerComponent;
     private static VALID_ROOTS = ['MY_FILES', 'SHARED_FILES', 'MY_SHARED_FILES', 'TO_ME_SHARED_FILES', 'WORKFLOW_RECEIVE', 'RECYCLE'];
     private static VALID_ROOTS_NODES = [RestConstants.USERHOME, '-shared_files-', '-my_shared_files-', '-to_me_shared_files-', '-workflow_receive-'];
     private isRootFolder: boolean;
@@ -101,7 +101,7 @@ export class WorkspaceMainComponent implements EventListener {
     public addNodesToCollection: Node[];
     public addNodesStream: Node[];
     public variantNode: Node;
-    @ViewChild('mainNav', {static: false}) mainNavRef: MainNavComponent;
+    @ViewChild('mainNav') mainNavRef: MainNavComponent;
     private connectorList: Connector[];
     private currentNode: Node;
     public mainnav = true;

@@ -14,7 +14,7 @@ export class WorkspaceShareChooseTypeComponent implements AfterViewInit {
     setTimeout(()=>UIHelper.setFocusOnDropdown(this.dropdownElement));
   }
   private _selected : string[];
-  @ViewChild('dropdown', {static: false}) dropdownElement : ElementRef;
+  @ViewChild('dropdown') dropdownElement : ElementRef;
   @Input() set selected (selected : string[]){
     this._selected=selected;
     setTimeout(()=>this.checkPublish(),10);

@@ -33,7 +33,7 @@ import {LinkData, NodeHelper} from '../../core-ui-module/node-helper';
 })
 export class WorkspaceManagementDialogsComponent  {
   public globalProgress = false;
-  @ViewChild('mds', {static: false}) mdsRef : MdsComponent;
+  @ViewChild('mds') mdsRef : MdsComponent;
   @Input() showLtiTools = false;
   @Input() uploadShowPicker = false;
   @Input() uploadMultiple = true;

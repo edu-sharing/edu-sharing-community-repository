@@ -175,9 +175,9 @@ export class NodeRenderComponent implements EventListener {
   public similarNodes: Node[];
   mds: any;
 
-  @ViewChild('sequencediv', {static: false}) sequencediv : ElementRef;
-  @ViewChild('mainNav', {static: false}) mainNavRef : MainNavComponent;
-  @ViewChild('actionbar', {static: false}) actionbar: ActionbarComponent;
+  @ViewChild('sequencediv') sequencediv : ElementRef;
+  @ViewChild('mainNav') mainNavRef : MainNavComponent;
+  @ViewChild('actionbar') actionbar: ActionbarComponent;
   isChildobject = false;
     _node : Node;
     private _nodeId : string;

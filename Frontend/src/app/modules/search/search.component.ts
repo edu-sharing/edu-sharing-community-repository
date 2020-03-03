@@ -74,11 +74,11 @@ export class SearchComponent {
     toolPermissions: string[];
     public initalized:boolean;
   public tutorialElement:ElementRef;
-  @ViewChild('mds', {static: false}) mdsRef: MdsComponent;
-  @ViewChild('list', {static: false}) list: ListTableComponent;
-  @ViewChild('mainNav', {static: false}) mainNavRef: MainNavComponent;
-  @ViewChild('extendedSearch', {static: false}) extendedSearch : ElementRef;
-  @ViewChild('actionbarComponent', {static: false}) actionbarComponent: ActionbarComponent;
+  @ViewChild('mds') mdsRef: MdsComponent;
+  @ViewChild('list') list: ListTableComponent;
+  @ViewChild('mainNav') mainNavRef: MainNavComponent;
+  @ViewChild('extendedSearch') extendedSearch : ElementRef;
+  @ViewChild('actionbarComponent') actionbarComponent: ActionbarComponent;
   public mdsSuggestions:any={}
   public mdsExtended=false;
   public sidenavTab=0;
@@ -95,7 +95,7 @@ export class SearchComponent {
   innerWidth: number = 0;
   breakpoint: number = 800;
 
-  @ViewChild('toolbar', {static: false}) toolbar: any;
+  @ViewChild('toolbar') toolbar: any;
 
   public options : OptionItem[]=[];
   public savedSearchOptions : OptionItem[]=[];

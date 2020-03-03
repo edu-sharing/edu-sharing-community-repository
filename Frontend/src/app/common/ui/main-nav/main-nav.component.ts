@@ -86,15 +86,15 @@ export class MainNavComponent implements AfterViewInit{
     visible=false;
     private static ID_ATTRIBUTE_NAME='data-banner-id';
 
-    @ViewChild('management', {static: false}) management: WorkspaceManagementDialogsComponent;
-    @ViewChild('search', {static: false}) search : ElementRef;
-    @ViewChild('sidebar', {static: false}) sidebar:ElementRef;
-    @ViewChild('topbar', {static: false}) topbar:ElementRef;
-    @ViewChild('nodeStoreRef', {static: false}) nodeStoreRef:ElementRef;
-    @ViewChild('userRef', {static: false}) userRef:ElementRef;
-    @ViewChild('tabNav', {static: false}) tabNav:ElementRef;
-    @ViewChild('createMenu', {static: false}) createMenu:CreateMenuComponent;
-    @ViewChild('dropdownTriggerDummy', {static: false}) createMenuTrigger: MatMenuTrigger;
+    @ViewChild('management') management: WorkspaceManagementDialogsComponent;
+    @ViewChild('search') search : ElementRef;
+    @ViewChild('sidebar') sidebar:ElementRef;
+    @ViewChild('topbar') topbar:ElementRef;
+    @ViewChild('nodeStoreRef') nodeStoreRef:ElementRef;
+    @ViewChild('userRef') userRef:ElementRef;
+    @ViewChild('tabNav') tabNav:ElementRef;
+    @ViewChild('createMenu') createMenu:CreateMenuComponent;
+    @ViewChild('dropdownTriggerDummy') createMenuTrigger: MatMenuTrigger;
     createMenuX: number;
     createMenuY: number;
     dialogTitle : string;

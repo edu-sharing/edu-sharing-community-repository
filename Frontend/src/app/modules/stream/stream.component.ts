@@ -52,7 +52,7 @@ import {GlobalContainerComponent} from "../../common/ui/global-container/global-
 
 
 export class StreamComponent {
-  @ViewChild('mainNav', {static: false}) mainNavRef: MainNavComponent;
+  @ViewChild('mainNav') mainNavRef: MainNavComponent;
   connectorList: ConnectorList;
   createConnectorName: string;
   createConnectorType: Connector;
