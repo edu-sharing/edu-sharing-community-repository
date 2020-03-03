@@ -94,7 +94,9 @@ export class CreateMenuComponent {
                         if(data.toLowerCase().startsWith('http')) {
                             this.management.createUrlLink(new LinkData(data));
                         } else {
-                            this.toast.error(null, 'CLIPBOARD_DATA_UNSUPPORTED');
+                            // this.toast.error(null, 'CLIPBOARD_DATA_UNSUPPORTED');
+                            // it is normal text, ignore it
+                            return;
                         }
                     });
                 } else {
