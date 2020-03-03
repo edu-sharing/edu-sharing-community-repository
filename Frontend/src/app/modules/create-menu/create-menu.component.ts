@@ -1,5 +1,5 @@
 import {trigger} from '@angular/animations';
-import {Component, EventEmitter, HostListener, Input, Output, ViewChild} from '@angular/core';
+import {Component, EventEmitter, HostListener, Input, Output, ViewChild, OnDestroy} from '@angular/core';
 import {ActivatedRoute, Params, Router} from '@angular/router';
 import {TranslateService} from '@ngx-translate/core';
 import {BridgeService} from '../../core-bridge-module/bridge.service';
@@ -17,6 +17,7 @@ import {DropdownComponent} from '../../core-ui-module/components/dropdown/dropdo
 import {MainNavComponent} from '../../common/ui/main-nav/main-nav.component';
 import {WorkspaceManagementDialogsComponent} from '../management-dialogs/management-dialogs.component';
 import { CardService } from '../../core-ui-module/card.service';
+import { Subscription } from 'rxjs';
 
 
 @Component({
@@ -32,7 +33,7 @@ import { CardService } from '../../core-ui-module/card.service';
             }}
     ]
 })
-export class CreateMenuComponent {
+export class CreateMenuComponent implements OnDestroy {
     @ViewChild('dropdown') dropdown : DropdownComponent;
     @ViewChild('management') management : WorkspaceManagementDialogsComponent;
     /**
@@ -77,6 +78,8 @@ export class CreateMenuComponent {
     hasOpenWindows: boolean;
     private params: Params;
     options: OptionItem[];
+
+    private numberModalCardsSubscription: Subscription;
 
     @HostListener('document:paste', ['$event'])
     onDataPaste(event: ClipboardEvent) {
@@ -133,10 +136,13 @@ export class CreateMenuComponent {
         this.nodeService.getNodeMetadata(RestConstants.INBOX).subscribe((node) => {
             this.inbox = node.node;
         });
-        this.hasOpenWindows = CardComponent.getNumberOfOpenCards() > 0;
-        cardService.numberModalCards.subscribe(n => {
+        this.numberModalCardsSubscription = cardService.numberModalCards.subscribe(n => {
             setTimeout(() => this.hasOpenWindows = n > 0);
         });
+    }
+
+    ngOnDestroy() {
+        this.numberModalCardsSubscription.unsubscribe();
     }
 
     updateOptions() {
