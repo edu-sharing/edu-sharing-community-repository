@@ -213,7 +213,7 @@
     <div class="content-with-footer">
         <div class="content_wrapper" [class.content_wrapper_grouped]="currentRepository=='-all-' && groupResults" [class.contentSidenav]="searchService.sidenavOpened">
             <div class="results alignWithBanner" [class.no-mainnav]="!mainnav" [class.resultsNoRepositories]="!repositories || repositories.length<=2" vocab="http://schema.org/" typeof="WebPage">
-                <div *ngIf="!searchService.reurl && searchService.searchResultCollections.length>0 && !addToCollection">
+                <div *ngIf="searchService.searchResultCollections.length>0 && !addToCollection">
                     <div class="collectionsHeading">
                         <div class="heading">{{ 'SEARCH.COLLECTIONS' | translate}} ({{searchService.resultCount.collections}})<a tabindex="0" *ngIf="hasMoreCollections" class="toggle clickable" (click)="collectionsMore=!collectionsMore" (keyup.enter)="collectionsMore=!collectionsMore">{{(collectionsMore ? 'HIDE_MORE' : 'SHOW_MORE') | translate}}</a></div>
                     </div>
