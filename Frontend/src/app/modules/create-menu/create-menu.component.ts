@@ -173,7 +173,11 @@ export class CreateMenuComponent implements OnDestroy {
                 if (item.type === 'text/plain') {
                     item.getAsString(data => {
                         if (data.toLowerCase().startsWith('http')) {
+                            // @TODO: Later we should find a way to prevent the event from propagating
+                            // this currently fails because getAsString is called async!
                             this.management.createUrlLink(new LinkData(data));
+                            event.preventDefault();
+                            event.stopPropagation();
                         } else {
                             // this.toast.error(null, 'CLIPBOARD_DATA_UNSUPPORTED');
                             // it is normal text, ignore it
@@ -183,8 +187,7 @@ export class CreateMenuComponent implements OnDestroy {
                 } else {
                     this.toast.error(null, 'CLIPBOARD_DATA_UNSUPPORTED');
                 }
-                event.preventDefault();
-                event.stopPropagation();
+
             }
         }
     }
