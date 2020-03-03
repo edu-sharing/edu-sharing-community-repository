@@ -35,7 +35,6 @@ import {SpinnerComponent} from '../../../core-ui-module/components/spinner/spinn
 import {CommentsListComponent} from '../../../modules/management-dialogs/node-comments/comments-list/comments-list.component';
 import {GlobalContainerComponent} from '../global-container/global-container.component';
 import {VideoControlsComponent} from '../../../core-ui-module/components/video-controls/video-controls.component';
-import KeyCode = monaco.KeyCode;
 import {RouterHelper} from '../../../core-ui-module/router.helper';
 import {ActionbarComponent} from '../actionbar/actionbar.component';
 import {OptionsHelperService} from '../../options-helper';
