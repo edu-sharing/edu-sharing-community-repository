@@ -161,7 +161,6 @@ export class CollectionChooserComponent implements OnInit{
       this.currentRoot=(this.breadcrumbs[this.breadcrumbs.length-2] as any);
     else
       this.currentRoot=null;
-    console.log(this.currentRoot);
     this.loadMy();
   }
 }

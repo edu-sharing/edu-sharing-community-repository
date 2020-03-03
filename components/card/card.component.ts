@@ -132,7 +132,6 @@ export class CardComponent implements AfterViewInit, OnDestroy {
         CardComponent.modalCards.splice(0, 0, this);
         document.body.style.overflow = 'hidden';
         UIHelper.waitForComponent(this, 'jumpmarksRef').subscribe(() => {
-            console.log('jumpmarks ready');
             setInterval(() => {
                 try {
                     const jump = this.jumpmarksRef;

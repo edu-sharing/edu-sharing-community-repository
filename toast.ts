@@ -104,7 +104,6 @@ export class Toast {
         date: DateHelper.formatDate(this.injector.get(TranslateService), new Date().getTime(),
             {useRelativeLabels: false, showAlwaysTime: true, showSeconds: true})
       };
-      console.log(errorObject);
       try {
         if (json.error.stacktraceArray) {
           errorInfo = json.stacktraceArray.join('\n');
@@ -198,7 +197,6 @@ export class Toast {
     }
     this.lastToastError = message + JSON.stringify(parameters);
     this.lastToastErrorTime = Date.now();
-    console.log(message);
     this.injector.get(TranslateService).get(message, parameters).subscribe((text: any) => {
       if (this.dialogTitle) {
         text += '<br /><a onclick="window[\'toastComponent\'].openDetails()">' + this.injector.get(TranslateService).instant('DETAILS') + '</a>';

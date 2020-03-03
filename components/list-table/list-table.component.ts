@@ -164,7 +164,6 @@ export class ListTableComponent implements EventListener {
     _options: OptionItem[];
     set options(options: OptionItem[]) {
         this._options = options;
-        console.log(options);
     }
 
     /**
@@ -925,7 +924,6 @@ export class ListTableComponent implements EventListener {
         if (!fromUser) {
             // check if there is a footer
             const elements = document.getElementsByTagName('footer');
-            console.log(elements);
             if (elements.length && elements.item(0).innerHTML.trim()) {
                 return;
             }
@@ -957,7 +955,6 @@ export class ListTableComponent implements EventListener {
         this.select(node, 'dropdown', false, false);
         if (openMenu) {
             if (event) {
-                console.log(event);
                 if (event.clientX + event.clientY) {
                     this.dropdownLeft = event.clientX + 'px';
                     this.dropdownTop = event.clientY + 'px';
@@ -1102,7 +1099,6 @@ export class ListTableComponent implements EventListener {
     }
 
     private refreshAvailableOptions(node: Node = null) {
-        console.log('refreshAvailableOptions', node, this._nodes);
         this.optionsHelper.setData({
             scope: this.scope,
             activeObject: node,
@@ -1138,7 +1134,6 @@ export class ListTableComponent implements EventListener {
             o.virtual = true;
             return o;
         });
-        console.log(objects);
         this._nodes = objects.concat(this._nodes);
         this.nodesChange.emit(this._nodes);
         this.selectedNodes = objects;

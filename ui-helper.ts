@@ -304,7 +304,6 @@ export class UIHelper {
                 result.query = parameter.values[0];
                 continue;
             }
-            console.log(parameter);
             result.parameters[parameter.property] = parameter.values;
         }
         return result;
@@ -483,7 +482,6 @@ export class UIHelper {
                                 (url: string) => {
                                     if (win) {
                                         win.location.href = url;
-                                        console.log(win);
                                     } else if (isCordova) {
                                         UIHelper.openUrl(
                                             url,
@@ -525,9 +523,6 @@ export class UIHelper {
      */
     static scrollSmooth(y: number = 0, smoothness = 1) {
         let mode = window.scrollY >= y;
-        console.log(mode);
-        console.log(y);
-        console.log(window.scrollY);
         let divider = 3 * smoothness;
         let minSpeed = 7 / smoothness;
         let lastY = y;
@@ -564,10 +559,8 @@ export class UIHelper {
             let currentPos =
                 axis == 'x' ? element.scrollLeft : element.scrollTop;
             if (element.getAttribute('data-is-scrolling') == 'true') {
-                console.log('is scrolling, skip');
                 return;
             }
-            console.log(currentPos, pos);
             let mode = currentPos > pos;
             let divider = 3 * smoothness;
             let minSpeed = 7 / smoothness;

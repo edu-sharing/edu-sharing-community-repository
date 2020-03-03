@@ -51,7 +51,6 @@ export class Translation  {
             let useStored=false;
             if (data.indexOf(params.locale) != -1) {
               language = params.locale;
-              console.log("language: locale parameter is used");
             }
             else if(params.locale){
                 console.warn("Url requested language "+params.locale+", but it was not found or is not configured in the allowed languages: "+data);
@@ -59,11 +58,9 @@ export class Translation  {
             else if (data.indexOf(storageLanguage) != -1) {
               language = storageLanguage;
               useStored=true;
-                console.log("language: stored user profile parameter is used");
             }
             else if (data.indexOf(browserLang) != -1) {
               language = browserLang;
-              console.log("language: browser setting is used");
             }
             if(!useStored)
               storage.set("language", language);
@@ -97,7 +94,6 @@ export class Translation  {
           translate.use(language);
           Translation.setLanguage(language);
           bridge.getCordova().getLanguage().subscribe((data: string) => {
-              console.log("language from phone: "+data);
               if (supportedLanguages.indexOf(data) != -1) {
                   language=data;
               }
@@ -195,7 +191,6 @@ export class TranslationLoader implements TranslateLoader {
             this.initializing=null;
             observer.next({});
             observer.complete();
-            console.log("initalized without translation");
         });
     }
     let translations : any =[];
@@ -203,14 +198,11 @@ export class TranslationLoader implements TranslateLoader {
     let maxCount=TRANSLATION_LIST.length;
     if(environment.production && Translation.getSource()==TranslationSource.Auto || Translation.getSource()==TranslationSource.Repository){
       maxCount=1;
-      console.log(Translation.LANGUAGES[lang]);
       this.locator.getLanguageDefaults(Translation.LANGUAGES[lang]).subscribe((data: any) =>{
-        console.log(data);
         translations.push(data);
       });
     }
     else {
-      console.log("loading translations locally");
         for (let translation of TRANSLATION_LIST) {
             this.http.get(`${this.prefix}/${translation}/${lang}${this.suffix}`)
                 .subscribe((data: any) => translations.push(data));

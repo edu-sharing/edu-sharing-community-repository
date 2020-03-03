@@ -146,7 +146,6 @@ export class NodeHelper {
     return true;
   }
   public static handleNodeError(bridge:BridgeService,name: string, error: any) : number {
-    console.log(error);
 
     if(error.status === RestConstants.DUPLICATE_NODE_RESPONSE) {
       bridge.showTemporaryMessage(MessageType.error, 'WORKSPACE.TOAST.DUPLICATE_NAME',{name});

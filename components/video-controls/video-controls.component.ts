@@ -39,7 +39,6 @@ export class VideoControlsComponent {
             ];
             if (vtt && vtt.length === 1) {
                 vtt = JSON.parse(vtt[0]);
-                console.log(vtt);
                 this.objectToCues(vtt, this.track);
                 const c = vtt[vtt.length - 1];
                 if (c) {
@@ -152,7 +151,6 @@ export class VideoControlsComponent {
         );
         this.render();
         const props: any = {};
-        console.log(this.track.cues);
         props[RestConstants.CCM_PROP_IO_REF_VIDEO_VTT] = [
             JSON.stringify(this.cuesToObject(this.track.cues)),
         ];
@@ -189,7 +187,6 @@ export class VideoControlsComponent {
             collection,
             [this.node],
             (elements: Node[]) => {
-                console.log(elements);
                 if (elements.length) {
                     this.node = elements[0];
                     this.updateChapters();
