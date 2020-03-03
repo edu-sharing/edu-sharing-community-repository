@@ -197,7 +197,7 @@ export class ListTableComponent implements EventListener {
 
     @Input() set hasCheckbox(hasCheckbox: boolean) {
         this._hasCheckbox = hasCheckbox;
-        if (!hasCheckbox && this.selectedNodes.length > 1) {
+        if (!hasCheckbox && this.selectedNodes && this.selectedNodes.length > 1) {
             // use a timeout to prevent a ExpressionChangedAfterItHasBeenCheckedError in the parent component
             setTimeout(() => {
                 this.selectedNodes = [];
