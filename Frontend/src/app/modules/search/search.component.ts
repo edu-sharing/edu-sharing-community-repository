@@ -1296,7 +1296,9 @@ export class SearchComponent {
         this.queryParamsSubscription = this.activatedRoute.queryParams.subscribe(
             (param: any) => {
                 this.searchService.init();
-                this.mainNavRef.refreshBanner();
+                if (this.mainNavRef) {
+                    this.mainNavRef.refreshBanner();
+                }
                 GlobalContainerComponent.finishPreloading();
                 this.hasCheckbox = true;
                 this.searchService.reurl = null;
