@@ -142,7 +142,6 @@ export class AdminComponent {
     });
   }
   public debugNode(node:Node){
-    console.log(node);
     this.nodeInfo=node;
   }
   public getModeButton(mode=this.mode) : any{
@@ -176,7 +175,6 @@ export class AdminComponent {
     this.globalProgress=true;
     this.admin.searchLucene(this.lucene.query,authorities,request).subscribe((data:NodeList)=>{
       this.globalProgress=false;
-      console.log(data);
       this.luceneNodes=data.nodes;
       this.luceneCount=data.pagination.total;
     },(error:any)=>{
@@ -455,7 +453,6 @@ export class AdminComponent {
     let key=this.xmlAppKeys[pos];
     this.xmlAppKeys.splice(pos,1);
     delete this.xmlAppProperties[key];
-    console.log(this.xmlAppProperties);
   }
   public oaiImport(){
     if(!this.oaiPreconditions())
@@ -629,7 +626,6 @@ export class AdminComponent {
     }
 
     public uploadTemplate(event:any){
-        console.log(event);
         let file=event.target.files[0];
         if(!file)
             return;
@@ -738,7 +734,6 @@ export class AdminComponent {
       if(v.length<3)
         return v;
       v.splice(2,v.length-2);
-      console.log(v);
       return v.join(".");
     }
     private runChecks() {
@@ -892,7 +887,6 @@ export class AdminComponent {
               this.jobsLogData.push(this.getJobLog(job, i));
               i++;
           }
-          console.log(this.jobsLogData);
       }
     }
 
@@ -924,8 +918,6 @@ export class AdminComponent {
   updateJobSuggestions(event: any) {
     let name=event ? event.input.toString().toLowerCase() : '';
     this.jobClassesSuggested=this.jobClasses.filter((j)=>j.title.toLowerCase().indexOf(name)!=-1 || j.secondaryTitle.toLowerCase().indexOf(name)!=-1);
-    console.log(name);
-    console.log(this.jobClassesSuggested);
   }
 
   refreshUpdateList() {
@@ -965,7 +957,6 @@ export class AdminComponent {
   }
 
     private addCustomComponents(customComponents: any[]) {
-      console.log(customComponents);
       for(let c of customComponents){
           if(c.targetType=="BUTTON"){
               let item=c.payload;
@@ -1044,7 +1035,6 @@ export class AdminComponent {
             if(data['mode']) {
                 this.mode = data['mode'];
                 if(this.getModeButton().factory){
-                    console.log("init dynamic");
                     setTimeout(()=> {
                         let ref = this.dynamicComponent.createComponent(this.getModeButton().factory);
                     });

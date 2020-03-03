@@ -16,6 +16,7 @@ import {OPTIONS_HELPER_CONFIG, OptionsHelperService} from '../../common/options-
 import {DropdownComponent} from '../../core-ui-module/components/dropdown/dropdown.component';
 import {MainNavComponent} from '../../common/ui/main-nav/main-nav.component';
 import {WorkspaceManagementDialogsComponent} from '../management-dialogs/management-dialogs.component';
+import { CardService } from '../../core-ui-module/card.service';
 
 
 @Component({
@@ -73,13 +74,12 @@ export class CreateMenuComponent {
     showPicker: boolean;
     createConnectorName: string;
     createConnectorType: Connector;
-
+    hasOpenWindows: boolean;
     private params: Params;
     options: OptionItem[];
 
     @HostListener('document:paste', ['$event'])
     onDataPaste(event: ClipboardEvent) {
-        console.log(JSON.stringify(event.clipboardData.items.length));
         if(event.type === 'paste') {
             if(!this.allowed || !this.allowBinary){
                 return;
@@ -89,10 +89,8 @@ export class CreateMenuComponent {
             }
             if (event.clipboardData.items.length > 0) {
                 const item = event.clipboardData.items[0];
-                console.log(item.type);
                 if (item.type === 'text/plain') {
                     item.getAsString((data) => {
-                        console.log(data);
                         if(data.toLowerCase().startsWith('http')) {
                             this.management.createUrlLink(new LinkData(data));
                         } else {
@@ -120,6 +118,7 @@ export class CreateMenuComponent {
         private optionsService: OptionsHelperService,
         private iam: RestIamService,
         private event: FrameEventsService,
+        private cardService: CardService,
     ) {
         this.route.queryParams.subscribe((params)=> {
             this.params = params;
@@ -131,6 +130,10 @@ export class CreateMenuComponent {
         });
         this.nodeService.getNodeMetadata(RestConstants.INBOX).subscribe((node) => {
             this.inbox = node.node;
+        });
+        this.hasOpenWindows = CardComponent.getNumberOfOpenCards() > 0;
+        cardService.numberModalCards.subscribe(n => {
+            setTimeout(() => this.hasOpenWindows = n > 0);
         });
     }
 
@@ -147,7 +150,6 @@ export class CreateMenuComponent {
             pasteNodes.group = DefaultGroups.Primary;
             this.options.push(pasteNodes);
         }
-        console.log(this._parent);
         if (this._parent && NodeHelper.isNodeCollection(this._parent)) {
             const newCollection = new OptionItem('OPTIONS.NEW_COLLECTION', 'layers', (node) =>
                 UIHelper.goToCollection(this.router,this._parent, 'new')
@@ -273,10 +275,6 @@ export class CreateMenuComponent {
         }
         this.showUploadSelect = false;
         this.filesToUpload = files;
-    }
-
-    hasOpenWindows() {
-        return CardComponent.getNumberOfOpenCards() !== 0;
     }
     afterUpload(nodes: Node[]) {
         if (this.params.reurl) {

@@ -60,7 +60,6 @@ export class LoginAppComponent  implements OnInit {
 
         // WHEN RUNNING ON DESKTOP --> FORWARD TO BASIC LOGIN PAGE
         if (!this.cordova.isRunningCordova()) {
-            console.log("Not Cordova -> Forward to normal LOGIN");
             this.router.navigate([UIConstants.ROUTER_PREFIX + 'login']);
             return;
         }
@@ -72,12 +71,9 @@ export class LoginAppComponent  implements OnInit {
         // 1. Wait until Cordova is Ready
         this.cordova.subscribeServiceReady().subscribe(()=>{
 
-            console.log("Cordova: Service is READY");
-
             // app startup, cordova has valid data ?
             // -> go to default location (this will check oauth)
             if (this.cordova.hasValidConfig()) {
-                console.log("VALID Configuration --> directly go to default");
                 this.goToDefaultLocation();
                 return;
             }
@@ -85,7 +81,6 @@ export class LoginAppComponent  implements OnInit {
             // set the self set server url if available from persistence
             // for this value its no problem that result is async
             // init translation service
-            console.log("INIT TranslationService .. START");
             this.init();
         });
 
@@ -123,10 +118,8 @@ export class LoginAppComponent  implements OnInit {
         // test camera
         this.cordova.getPhotoFromCamera(
         (win:any)=>{
-            console.log("CAMERA WIN",win);
         },
         (error:any, info:any)=>{
-            console.log("CAMERA FAIL", error);
             console.dir(info);
         });
         if (1==1) return;
@@ -139,7 +132,6 @@ export class LoginAppComponent  implements OnInit {
             this.cordova.openContentNative(win,()=>{
                 alert("OK Open");
             }, (text:string, error:any) => {
-                console.log(text, error);
                 alert("FAIL open");
             });
         }, (text:string,error:any) => {
@@ -188,7 +180,6 @@ export class LoginAppComponent  implements OnInit {
     }
     private init() {
         Translation.initialize(this.translation,this.configService,this.storage,this.route).subscribe(()=>{
-            console.log("INIT TranslationService .. OK");
             this.locator.locateApi().subscribe(()=>{
                 this.serverurl=this.locator.endpointUrl;
                 this.configService.getAll().subscribe((config)=>{

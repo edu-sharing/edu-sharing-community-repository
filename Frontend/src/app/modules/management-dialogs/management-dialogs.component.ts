@@ -253,7 +253,6 @@ export class WorkspaceManagementDialogsComponent  {
                 clip.nodes.splice(clip.nodes.indexOf(n),1);
             }
             if(clip.nodes.length==0){
-                console.log("all items in clipboard removed");
                 this.temporaryStorage.remove("workspace_clipboard");
             }
         }
@@ -474,7 +473,6 @@ export class WorkspaceManagementDialogsComponent  {
             return;
         }
         delete feedback[RestConstants.CM_NAME];
-        console.log(feedback);
         this.toast.showProgressDialog();
         this.collectionService
             .addFeedback(this.collectionWriteFeedback.ref.id, feedback)
@@ -531,7 +529,6 @@ export class WorkspaceManagementDialogsComponent  {
     }
 
     displayNode(node: Node) {
-      console.log(node);
         this.router.navigate([UIConstants.ROUTER_PREFIX + 'render', node.ref.id, node.version]);
 
     }

@@ -54,7 +54,6 @@ export class ActionbarHelperService{
             return NodeHelper.referenceOriginalExists(node);
         }
         option.isEnabled=option.enabledCallback(null);
-        console.log(option,option.enabledCallback(null));
       }
     }
     if(type=='ADD_NODE_STORE'){
@@ -79,7 +78,6 @@ export class ActionbarHelperService{
             let n=ActionbarHelperService.getNodes(nodes,node);
             if(n==null)
                 return false;
-            console.log(n);
             option.name="WORKSPACE.OPTION.VARIANT" + (this.connectors.connectorSupportsEdit(n[0]) ? "_OPEN" : "");
             return NodeHelper.allFiles(n) && n && n.length==1  && n[0].aspects.indexOf(RestConstants.CCM_ASPECT_IO_REFERENCE)==-1 && RestNetworkService.allFromHomeRepo(n) && !this.connector.getCurrentLogin().isGuest;
         };

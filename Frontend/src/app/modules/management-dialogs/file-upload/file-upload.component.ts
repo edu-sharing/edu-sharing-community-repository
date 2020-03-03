@@ -20,7 +20,6 @@ export class WorkspaceFileUploadComponent  {
   public showClose = false;
   processed = 0;
   @Input() set files(files : FileList){
-    console.log(files);
     this._files=files;
     this.progress=[];
     this.error=false;
@@ -65,7 +64,6 @@ export class WorkspaceFileUploadComponent  {
             this.upload(number+1);
           },(error)=>{
                 this.error=true;
-                console.log(error);
                 this.progress[number].error=this.mapError(error,data.node);
                 this.progress[number].progress.progress=-1;
                 this.upload(number+1);

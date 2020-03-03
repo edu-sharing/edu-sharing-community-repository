@@ -135,7 +135,6 @@ export class WorkspaceExplorerComponent {
 	}
 	else{
     this.lastRequestSearch=false;
-    console.log(this._node);
     this.nodeApi.getChildren(this._node.ref.id,[],request).subscribe((data : NodeList) => this.addNodes(data,false),
       (error:any) => {
         this.totalCount=0;
@@ -274,7 +273,6 @@ export class WorkspaceExplorerComponent {
       this.onOpenNode.emit(node);
       return;
     }
-    console.log("searching parents..."+" parent id: "+node.parent.id+", root "+path[0]);
     this.nodeApi.getNodeMetadata(node.parent.id).subscribe((data: NodeWrapper)=> {
       this.addParentToPath(data.node, path);
     });
@@ -282,7 +280,6 @@ export class WorkspaceExplorerComponent {
   }
    */
   public doubleClick(node : Node){
-    console.log("doubleclick");
     this.onOpenNode.emit(node);
   }
 

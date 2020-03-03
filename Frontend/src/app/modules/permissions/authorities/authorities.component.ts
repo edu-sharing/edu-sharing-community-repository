@@ -404,7 +404,6 @@ export class PermissionsAuthoritiesComponent {
 
   }
   private saveEdits(){
-    console.log(this._mode + ' save');
     if (this._mode == 'GROUP' || this._mode == 'ORG'){
       if (this.editId == null){
         const name = this.edit.profile.displayName;
@@ -429,7 +428,6 @@ export class PermissionsAuthoritiesComponent {
         }
         else {
           this.globalProgress = true;
-          console.log('groupescope:' , this.edit.profile);
           this.iam.createGroup(name, this.edit.profile, this.org ? this.org.groupName : '').subscribe(() => {
             this.edit = null;
             this.globalProgress = false;
@@ -528,7 +526,6 @@ export class PermissionsAuthoritiesComponent {
     }/*
     else if(this._mode=='USER'){
       this.iam.searchUsers(this.query,request).subscribe((users : IamUsers) => {
-        console.log(users);
         this.offset+=this.connector.numberPerRequest;
         for(let user of users.users)
           this.list.push(user);
@@ -573,7 +570,6 @@ export class PermissionsAuthoritiesComponent {
 
   private editAuthority(data: any) {
     const list = this.getList(data);
-    console.log(data,this.selected);
 
     if (this._mode == 'ORG'){
       this.node.getNodeParents(list[0].sharedFolder.id, true).subscribe((data: NodeList) => {
@@ -602,8 +598,6 @@ export class PermissionsAuthoritiesComponent {
   }
   private addToGroup(data: any) {
     const list = this.getList(data);
-    console.log('addToGroup');
-    console.log(list);
 
     this.addTo = list;
     this.addToSelection = null;

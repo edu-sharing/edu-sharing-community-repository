@@ -56,7 +56,6 @@ export class WorkspaceLtiToolConfigsComponent  {
   public search(){
     this.loading=true;
     this.toolsApi.getToolInstances(this._tool.ref.id).subscribe((data:NodeList)=>{
-      console.log(data);
       this.configs=data.nodes;
       this.loading=false;
     });

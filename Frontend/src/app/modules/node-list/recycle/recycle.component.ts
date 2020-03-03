@@ -42,7 +42,6 @@ export class RecycleMainComponent {
   }
   private restoreFinished(list: Node[], restoreResult: any){
     this.fullscreenLoading=false;
-    console.log(restoreResult);
 
     RecycleRestoreComponent.prepareResults(this.translate,restoreResult);
     if(restoreResult.hasDuplicateNames || restoreResult.hasParentFolderMissing)
@@ -57,7 +56,6 @@ export class RecycleMainComponent {
 
   }
   private delete() : void{
-    console.log(this.selected);
     this.deleteNodes(this.selected);
   }
   private deleteSingle(node : Node) : void{

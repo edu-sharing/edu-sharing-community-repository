@@ -30,7 +30,6 @@ export class RecycleRestoreComponent {
     this.showFileChooser = false;
   }
   private folderSelected(event: Node[]){
-    console.log(event);
     const nodes: any[] = [];
     for (const result of this.results.results){
       if ((result.restoreStatus as any) === 1) {

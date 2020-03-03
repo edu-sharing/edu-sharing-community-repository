@@ -91,7 +91,6 @@ export class ApplyToLmsComponent{
         if(!wrapper.remote)
             wrapper.remote=wrapper.node;
         let reurl = this.reurl;
-        console.log(reurl);
         // the ccrep should always point to the local object (relevant if it's from a remote repo)
         let ccrepUrl = 'ccrep://' + encodeURIComponent(wrapper.remote.ref.repo) + '/' + encodeURIComponent(wrapper.remote.ref.id);
         if (reurl == "IFRAME" || reurl=="WINDOW") {
@@ -130,7 +129,6 @@ export class ApplyToLmsComponent{
         // reurl + params
         //let contentParams = node.contentUrl.indexOf("?") == -1 ? '?' : '&';
         //contentParams += "LMS_URL=" + encodeURIComponent(reurl);
-        console.log(reurl+params);
         //console.log(node.contentUrl + contentParams);
         window.location.replace(reurl + params);// + params;
     }

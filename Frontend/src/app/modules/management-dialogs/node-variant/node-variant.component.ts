@@ -40,7 +40,6 @@ export class NodeVariantComponent  {
     this.variantName=this.translate.instant('NODE_VARIANT.DEFAULT_NAME',{name:this._node.name});
     this.openViaConnector=this.connectors.connectorSupportsEdit(node);
     let license=node.properties[RestConstants.CCM_PROP_LICENSE] ? node.properties[RestConstants.CCM_PROP_LICENSE][0] : "";
-    console.log(license);
     if(license.startsWith('CC_BY') && license.indexOf('ND')!=-1){
       this.licenseWarning='ND';
     }

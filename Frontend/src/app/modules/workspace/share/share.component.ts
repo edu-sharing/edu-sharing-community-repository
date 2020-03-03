@@ -391,7 +391,6 @@ export class WorkspaceShareComponent {
     }
 
     setPermission(permission: Permission, name: string, status: any) {
-        console.log('set ' + name + ' ' + status, status);
         if (status.checked) {
             if (permission.permissions.indexOf(name) == -1)
                 permission.permissions.push(name);
@@ -513,7 +512,6 @@ export class WorkspaceShareComponent {
                 this.usageApi
                     .getNodeUsages(this._nodes[0].ref.id)
                     .subscribe((usages: UsageList) => {
-                        console.log(usages.usages, collections);
                         const filteredUsages = usages.usages.filter(
                             u =>
                                 this.collections.filter(
@@ -662,7 +660,6 @@ export class WorkspaceShareComponent {
 
     private save() {
         if (this.permissions != null) {
-            console.log(this.permissions);
             this.onLoading.emit(true);
             let inherit =
                 this.inherited &&
@@ -810,7 +807,6 @@ export class WorkspaceShareComponent {
             }
             return;
         }
-        console.log(this.deletedUsages);
         let usage = this.deletedUsages[pos];
         // collection
         if (usage.collection) {
@@ -869,7 +865,6 @@ export class WorkspaceShareComponent {
                     s.authority.authorityName === p2.authority.authorityName &&
                     s.authority.authorityType === s.authority.authorityType,
             );
-            console.log(map, source, p2.authority);
             if (map.length === 1) {
                 const perm1 = map[0].permissions.filter(
                     p => this.BASIC_PERMISSIONS.indexOf(p) !== -1,
@@ -877,9 +872,7 @@ export class WorkspaceShareComponent {
                 const perm2 = p2.permissions.filter(
                     p => this.BASIC_PERMISSIONS.indexOf(p) !== -1,
                 );
-                console.log(perm2[0], perm1[0]);
                 if (this.permissionIsGreaterThan(perm2[0], perm1[0])) {
-                    console.log(perm2[0], ' > ', perm1[0], p2);
                     result.splice(result.indexOf(map[0]), 1);
                     result.push(p2);
                 }
@@ -912,7 +905,6 @@ class SearchData extends Subject<CompleterItem[]> implements CompleterData {
   }
 
   public search(term: string): void {
-    console.log("search "+term);
     this.iam.searchUsers(term).subscribe((data : IamUsers)=>{
       let matches:CompleterItem[]=[];
       for(let user of data.users){

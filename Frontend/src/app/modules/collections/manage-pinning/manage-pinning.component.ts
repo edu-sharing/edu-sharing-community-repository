@@ -28,7 +28,6 @@ export class CollectionManagePinningComponent {
     this.search.searchByProperties([RestConstants.CCM_PROP_COLLECTION_PINNED_STATUS],["true"],["="],
       RestConstants.COMBINE_MODE_AND,RestConstants.CONTENT_TYPE_COLLECTIONS,{sortBy:[RestConstants.CCM_PROP_COLLECTION_PINNED_ORDER],sortAscending:true,count:RestConstants.COUNT_UNLIMITED}).subscribe((data:NodeList)=>{
       this.pinnedCollections=data.nodes;
-      console.log(data.nodes);
       for(let collection of this.pinnedCollections){
         // collection is already pinned, don't add it
         if(collection.ref.id === addCollection.ref.id){
@@ -78,7 +77,6 @@ export class CollectionManagePinningComponent {
     this.currentDragColumn=node;
   }
   private allowDragColumn(event:any,index:number,target:Node){
-    console.log(event);
     if(!this.currentDragColumn)
       return;
     event.preventDefault();
@@ -122,7 +120,6 @@ export class CollectionManagePinningComponent {
     else{
       this.checked.push(collection.ref.id);
     }
-    console.log(this.checked);
   }
   private setAllChecked() {
     for(let collection of this.pinnedCollections){

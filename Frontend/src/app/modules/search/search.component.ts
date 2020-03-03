@@ -259,8 +259,6 @@ export class SearchComponent {
                     this.repositories=ConfigurationHelper.filterValidRepositories(data.repositories,this.config,!unchecked);
                     if(this.repositories.length<1){
                         console.warn('After filtering repositories via config, none left. Will use the home repository as default');
-                        console.log(this.allRepositories);
-                        console.log(this.config.instant('availableRepositories'));
                         this.repositories = this.getHomeRepoList();
                     }
                     if (this.repositories.length < 2) {
@@ -350,7 +348,6 @@ export class SearchComponent {
     }
     if(this.searchService.sidenavSet)
       return false;
-    console.log('update sidenav');
     this.searchService.sidenavSet=true;
     if(this.innerWidth < this.breakpoint) {
       this.searchService.sidenavOpened = false;
@@ -452,14 +449,12 @@ export class SearchComponent {
         if(repo.enabled)
           continue;
         let repoFound=RestNetworkService.getRepositoryById(repo.id,list);
-        console.log(repoFound);
         if(repoFound)
             list.splice(list.indexOf(repoFound),1);
       }
       this.groupedRepositories=list;
   }
   render(event: any) {
-    console.log(event);
     let node=event.node;
     if(node.collection){
       this.switchToCollections(node.ref.id);
@@ -563,7 +558,6 @@ export class SearchComponent {
         if(this.currentMdsSet==null)
             return;
         let sort=MdsHelper.getSortInfo(this.currentMdsSet,'search');
-        console.log(sort);
         if(sort && sort.columns && sort.columns.length) {
             this.searchService.sort.materialsColumns = [];
             for (let column of sort.columns) {
@@ -571,7 +565,6 @@ export class SearchComponent {
                 item.mode = column.mode;
                 this.searchService.sort.materialsColumns.push(item);
             }
-            console.log(this.searchService.sort,sort,sort.columns.length);
         }else{
           this.searchService.sort.materialsColumns = null;
         }
@@ -579,9 +572,7 @@ export class SearchComponent {
     }
     private updateSort() {
         let state=this.currentRepository+":"+this.mdsId;
-        console.log(state);
         let sort=this.updateSortMds();
-        console.log(sort);
         // do not update state if current state is valid (otherwise sort info is lost when comming back from rendering)
         // exception: if there is no state at all, refresh it with the default
         if(state==this.searchService.sort.state && !(sort && !this.searchService.sort.materialsSortBy))
@@ -596,7 +587,6 @@ export class SearchComponent {
       this.searchService.columns=MdsHelper.getColumns(this.currentMdsSet,'search');
   }
   sortMaterials(sort:any){
-    console.log(sort);
       this.searchService.sort.materialsSortBy=sort.name || sort.sortBy;
       this.searchService.sort.materialsSortAscending=sort.ascending || sort.sortAscending;
       this.routeSearch();
@@ -670,7 +660,6 @@ export class SearchComponent {
     });
   }
   private onMdsReady(mds:any=null){
-    console.log('mds ready');
     this.currentMdsSet=mds;
     this.updateColumns();
     this.updateSort();
@@ -967,11 +956,9 @@ export class SearchComponent {
 
   private invalidateMds() {
     if(this.currentRepository==RestConstants.ALL){
-      console.log('all repositories, invalidate manually');
         this.onMdsReady();
     }
     else{
-      console.log('invalidate mds');
       this.mdsRef.loadMds();
     }
   }
@@ -1003,7 +990,6 @@ export class SearchComponent {
           this.applyMode = true;
           this.hasCheckbox = false;
         }else if (param.savedSearch) {
-            console.log(param);
             this.nodeApi.getNodeMetadata(param.savedSearch, [RestConstants.ALL]).subscribe((node) => {
                 this.loadSavedSearchNode(node.node);
             });
@@ -1034,12 +1020,9 @@ export class SearchComponent {
         this.currentRepository=paramRepo;
         this.updateRepositoryOrder();
         this.updateCurrentRepositoryId();
-
-        console.log(this.repositories);
         if(this.config.instant('availableRepositories') && this.repositories.length && this.currentRepository!=RestConstants.ALL && RestNetworkService.getRepositoryById(this.currentRepository,this.repositories)==null){
           let use=this.config.instant('availableRepositories');
           console.info('current repository '+this.currentRepository+' is restricted by context, switching to primary '+use);
-          console.log(this.repositories);
           this.routeSearch(this.searchService.searchTerm,use,RestConstants.DEFAULT);
         }
         if(this.currentRepository!=previousRepository){
@@ -1055,8 +1038,6 @@ export class SearchComponent {
           if(this.mdsSets){
             UIHelper.prepareMetadatasets(this.translate,this.mdsSets);
             try {
-              console.log('mds for current repo ' +this.currentRepository);
-              console.log(this.mdsSets);
               this.mdsId = this.mdsSets[0].id;
               if (param['mds'] && Helper.indexOfObjectArray(this.mdsSets,'id',param['mds'])!=-1)
                 this.mdsId = param['mds'];
@@ -1088,7 +1069,6 @@ export class SearchComponent {
       if(this.repositoryIds && this.repositoryIds.length){
           let result=[];
           for(let repo of this.repositoryIds){
-              console.log(repo);
               if(repo.enabled) result.push(repo.id);
           }
           return result;

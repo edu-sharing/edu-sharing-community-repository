@@ -96,7 +96,6 @@ export class StreamComponent {
   isLoading=true;
   doSearch(query:string){
     this.searchQuery=query;
-    console.log(query);
     // TODO: Search for the given query doch nicht erledigt
   }
   constructor(
@@ -139,7 +138,6 @@ export class StreamComponent {
         document.cookie = "scroll="+"noScroll";
         if (/components\/render/.test(e[0].urlAfterRedirects)) {
           this.route.queryParams.subscribe((params: Params) => {
-            console.log("params.mode", params.mode);
             if (params.mode === 'seen') {
               document.cookie = "scroll="+"seen";
             }
@@ -171,12 +169,10 @@ export class StreamComponent {
   }
 
   onScroll() {
-    console.log("scrolled!!");
     //this.updateDataFromJSON(STREAM_STATUS.OPEN);
     let curStat = this.menuOption === 'new' ? STREAM_STATUS.OPEN : this.menuOption=='marked'? STREAM_STATUS.PROGRESS : STREAM_STATUS.READ;
     let sortWay = this.menuOption === 'new' ? false : false;
     this.getJSON(curStat, sortWay).subscribe(data => {
-      console.log("r, data: ",data['stream']);
       this.streams = this.streams.concat(data['stream']);
     }, error => console.log(error));
   }
@@ -201,13 +197,10 @@ export class StreamComponent {
   }
 
   scrollToDown() {
-    console.log(this.getCookie("jumpToScrollPosition"));
     let pos = Number(this.getCookie("jumpToScrollPosition"));
     let whichScroll = this.getCookie("scroll");
-    console.log("which: ", whichScroll);
     if (whichScroll !== "noScroll"){
       setTimeout(function() {
-        console.log("scroll to: ",pos);
         window.scrollTo(0,pos);
       }, 2900);
     }
@@ -273,11 +266,9 @@ export class StreamComponent {
         openStreams = data['stream'].filter( (n : any) => n.nodes.length !== 0);
         this.getSimpleJSON(STREAM_STATUS.PROGRESS, false).subscribe(data => {
           progressStreams = data['stream'].filter( (n : any) => n.nodes.length !== 0);
-          console.log("streams received: ",  progressStreams.concat(openStreams));
           unSortedStream = progressStreams.concat(openStreams);
           //unSortedStream.length >= this.amountToRandomize ? this.randomizeTop(unSortedStream,this.amountToRandomize) : console.log('not big enough to randomize');
           this.streams = unSortedStream;
-          console.log("objs: ",this.streams);
           this.imagesToLoad = this.streams.length;
           this.scrollToDown();
         });
@@ -306,7 +297,6 @@ export class StreamComponent {
 
   onStreamObjectClick(node: any) {
     if(node.nodes) {
-      console.log(node.nodes[0].ref.id);
       this.seen(node.id);
       document.cookie = "jumpToScrollPosition="+window.pageYOffset;
       this.router.navigate([UIConstants.ROUTER_PREFIX+"render", node.nodes[0].ref.id])
@@ -333,7 +323,6 @@ export class StreamComponent {
     });
   }
   public getJSON(streamStatus: any, sortAscendingCreated: boolean = false): Observable<any> {
-    console.log(this.streams.length);
     let request:any={offset: (this.streams ? this.streams.length : 0), sortBy:["priority","created"],sortAscending:[false,sortAscendingCreated]};
     return this.streamService.getStream(streamStatus,this.searchQuery,{},request);
   }
@@ -381,7 +370,6 @@ export class StreamComponent {
     };
     this.isLoading=true;
     this.searchService.getRelevant(request).subscribe((relevant)=>{
-      console.log(relevant);
       this.streams=relevant.nodes;
       this.imagesToLoad=this.streams.length;
       this.isLoading=false;
