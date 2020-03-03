@@ -96,21 +96,24 @@ public class EduAuthenticationComponent{
 		else{
 			
 			String fUserName = username;
-			AuthenticationUtil.RunAsWork<NodeRef> runAs = new AuthenticationUtil.RunAsWork<NodeRef>() {
+			AuthenticationUtil.RunAsWork<String> runAs = new AuthenticationUtil.RunAsWork<String>() {
 				
 				@Override
-				public NodeRef doWork() throws Exception {
+				public String doWork() throws Exception {
 					// TODO Auto-generated method stub
-					return personService.getPersonOrNull(fUserName);
+					NodeRef personNodeRef = personService.getPersonOrNull(fUserName);
+					if(personNodeRef == null) {
+						logger.error("person does not exist:" + fUserName);
+						throw new AuthenticationException(AuthenticationExceptionMessages.USERNOTFOUND);
+					}
+					
+					String repoUsername = (String)nodeService.getProperty(personNodeRef, ContentModel.PROP_USERNAME);
+					return repoUsername;
 				}
 			};
-			NodeRef personNodeRef = AuthenticationUtil.runAsSystem(runAs);
-			if(personNodeRef == null) {
-				logger.error("person does not exist:" + username);
-				throw new AuthenticationException(AuthenticationExceptionMessages.USERNOTFOUND);
-			}
 			
-			String repoUsername = (String)nodeService.getProperty(personNodeRef, ContentModel.PROP_USERNAME);
+			String repoUsername = AuthenticationUtil.runAsSystem(runAs);
+			
 			//inform Alfresco that the following user authenticated successfully
 			authenticationComponent.setCurrentUser(repoUsername);
 		}
