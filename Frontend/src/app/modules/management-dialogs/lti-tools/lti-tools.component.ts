@@ -97,7 +97,6 @@ export class WorkspaceLtiToolsComponent  {
     this.searchService.search(criterias,[],{maxItems:100},
       RestConstants.CONTENT_TYPE_FILES,RestConstants.HOME_REPOSITORY,
       RestConstants.DEFAULT,[RestConstants.ALL],"tools").subscribe((data:NodeList)=>{
-      console.log(data);
       this.nodes=data.nodes;
       this.loading=false;
     });

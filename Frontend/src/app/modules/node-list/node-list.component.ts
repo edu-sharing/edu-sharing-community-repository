@@ -84,7 +84,6 @@ export class NodeListComponent {
       this.doReload();
     }
     private loadMore() : void{
-      console.log("scrolled");
       if(this.isLoading) {
           return;
         }
@@ -129,7 +128,6 @@ export class NodeListComponent {
 	  return;
     }
     this.isLoading=true;
-    console.log('search '+this.currentQuery);
 
     this.parent.loadData(this.currentQuery,this.list ? this.list.length : 0,this.sortBy,this.sortAscending)
             .subscribe(
@@ -142,7 +140,6 @@ export class NodeListComponent {
     }
 
     private display(data : ArchiveSearch,searched : boolean){
-      console.log(data);
       let list=data.nodes;
         if(this.list){
           this.list=this.list.concat(list);

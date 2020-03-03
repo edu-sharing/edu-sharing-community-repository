@@ -10,11 +10,9 @@ export class ToucheventDirective {
     this.element = e;
   }
   @HostListener('touchstart',['$event']) onTouchStart(event:any) {
-    console.log(event);
     this.touchStart=event;
   }
   @HostListener('touchend',['$event']) onTouchEnd(event:any) {
-    console.log(event);
     let horizontal=event.changedTouches[0].clientX-this.touchStart.changedTouches[0].clientX;
     let vertical=event.changedTouches[0].clientY-this.touchStart.changedTouches[0].clientY;
     let horizontalRelative=horizontal/window.innerWidth;
@@ -23,7 +21,6 @@ export class ToucheventDirective {
     // Vertical touches currently not supported
     if(Math.abs(horizontal)/Math.abs(vertical)<5)
       return;
-    console.log(horizontalRelative);
     if(horizontal<0)
       this.ngSwipeLeft.emit(horizontalRelative);
     else

@@ -48,7 +48,6 @@ export class RocketchatComponent implements EventListener{
         this.initalize(false);
         window.addEventListener('message', (event:any)=>{
             if(event.source!==window.self) {
-                console.log(event);
                 if(event.data.eventName=='startup') {
                     this.loaded=true;
                     this.frame.nativeElement.contentWindow.postMessage({
@@ -80,7 +79,6 @@ export class RocketchatComponent implements EventListener{
             if(login.remoteAuthentications && login.remoteAuthentications.ROCKETCHAT){
                 this._data=login.remoteAuthentications.ROCKETCHAT;
                 this.src=this.getFrameUrl();
-                console.log("initalizing rocketchat "+this.src);
 
             }
         });

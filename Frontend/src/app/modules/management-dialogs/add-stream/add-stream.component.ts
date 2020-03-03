@@ -87,10 +87,8 @@ export class AddStreamComponent  {
     this.streamEntry.description=values['add_to_stream_description'] ? values['add_to_stream_description'][0] : null;
     this.streamEntry.properties=values;
     this.streamEntry.nodes=RestHelper.getNodeIds(this._nodes);
-    console.log(this.streamEntry);
     this.streamApi.addEntry(this.streamEntry).subscribe((data:any)=>{
       let id=data.id;
-      console.log(data);
       if(this.audienceMode==this.AUDIENCE_MODE_EVERYONE) {
         this.streamApi.updateStatus(id,RestConstants.AUTHORITY_EVERYONE,STREAM_STATUS.OPEN).subscribe(()=>{
           this.onLoading.emit(false);

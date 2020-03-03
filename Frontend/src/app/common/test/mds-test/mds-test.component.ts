@@ -10,7 +10,6 @@ export class MdsTestComponent {
   constructor(private collectionsService:RestCollectionService,private connector:RestConnectorService){
     connector.login("admin","admin").subscribe(()=>{
       collectionsService.search("*").subscribe((list)=>{
-        console.log(list);
         this.collections=list.collections;
       });
     });

@@ -226,7 +226,6 @@ export class CollectionNewComponent {
        });
     }
     private setPermissions(permissions : any){
-      console.log(permissions);
       if(permissions) {
         this.permissionsInfo = permissions;
         this.permissions = permissions.permissions;
@@ -278,11 +277,9 @@ export class CollectionNewComponent {
         // get files and check if available
         let files = event.target.files;
         if (typeof files == "undefined") {
-            console.log("files = undefined -> ignoring");
             return;
         }
         if (files.length<=0) {
-           console.log("files.length = 0 -> ignoring");
             return;
         }
 
@@ -347,7 +344,6 @@ export class CollectionNewComponent {
          *  CREATE
          */
           this.isLoading = true;
-          console.log('create', this.currentCollection);
           this.collectionService.createCollection(
             this.currentCollection,
             this.parentId
@@ -502,7 +498,6 @@ export class CollectionNewComponent {
     }
     if((this.newCollectionType==RestConstants.COLLECTIONSCOPE_CUSTOM || this.newCollectionType==RestConstants.GROUP_TYPE_EDITORIAL) && this.permissions && this.permissions.permissions){
       if(this.originalPermissions && this.originalPermissions.inherited){
-        console.log("current collection had inherited permissions set. Will keep these setting");
       }
       let permissions=RestHelper.copyAndCleanPermissions(this.permissions.permissions,this.originalPermissions ? this.originalPermissions.inherited : false);
       this.nodeService.setNodePermissions(collection.ref.id,permissions,this.permissionsInfo ? this.permissionsInfo.notify : false,this.permissionsInfo ? this.permissionsInfo.notifyMessage : null).subscribe(()=>{
@@ -581,7 +576,6 @@ export class CollectionNewComponent {
       }
     this.updateAvailableSteps();
     this.isLoading=false;
-    console.log(this.currentCollection);
     GlobalContainerComponent.finishPreloading();
   }
 
@@ -592,7 +586,6 @@ export class CollectionNewComponent {
         this.saveImage(collection);
         return;
     }
-    console.log("add nodes",nodes);
     UIHelper.addToCollection(this.collectionService,this.router,this.bridge,collection,nodes,()=>{
         this.saveImage(collection);
         return;

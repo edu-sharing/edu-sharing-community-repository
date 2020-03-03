@@ -29,7 +29,6 @@ export class FileUploadComponent{
     set showUploadSelect(showUploadSelect: boolean){
         if(!showUploadSelect){
             //@TODO: Tell the LMS to close?
-            console.log("Close requested");
             window.close();
         }
         this._showUploadSelect=showUploadSelect;

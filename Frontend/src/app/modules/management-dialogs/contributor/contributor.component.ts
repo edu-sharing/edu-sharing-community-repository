@@ -71,7 +71,6 @@ export class WorkspaceContributorComponent  {
         }
       }
       this.loading=false;
-      console.log(this.contributorMetadata);
     });
 
   }
@@ -112,7 +111,6 @@ export class WorkspaceContributorComponent  {
     this.editType=vcard.givenname||vcard.surname ? WorkspaceContributorComponent.TYPE_PERSON : WorkspaceContributorComponent.TYPE_ORG;
     this.date=null;
     let contributeDate=vcard.contributeDate;
-    console.log(contributeDate);
     if(contributeDate) {
       //this.date.formatted=contributeDate;
       //this.dateOptions.initialDate=new Date(contributeDate);
@@ -120,7 +118,6 @@ export class WorkspaceContributorComponent  {
       /*
       let split=contributeDate.split("-");
       if(split.length==3){
-        console.log(split);
         this.dateOptions.initialDate=new Date(parseInt(split[0]),parseInt(split[1]),parseInt(split[2]),0,0,0,0);
       }
       */
@@ -155,7 +152,6 @@ export class WorkspaceContributorComponent  {
     else{
       array[this.editScopeNew].push(this.edit);
     }
-    console.log(array);
     this.edit=null;
   }
   public saveContributor(){
@@ -175,8 +171,6 @@ export class WorkspaceContributorComponent  {
       }
       properties["ccm:metadatacontributer_"+role]=prop;
     }
-
-    console.log(properties);
     this.nodeService.editNodeMetadata(this._nodeId,properties).subscribe(()=>{
       this.toast.toast('WORKSPACE.TOAST.CONTRIBUTOR_UPDATED');
       this.onClose.emit();

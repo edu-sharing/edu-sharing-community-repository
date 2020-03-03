@@ -13,8 +13,6 @@ import {Router} from '@angular/router';
 export class StartupComponent {
     constructor(private cordova : CordovaService,private router:Router) {
 
-        console.log("CONSTRUCTOR StartupComponent");
-
         if (this.cordova.isRunningCordova()){
 
             // wait until cordova device init is ready

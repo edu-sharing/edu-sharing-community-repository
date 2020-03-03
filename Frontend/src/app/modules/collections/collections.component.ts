@@ -536,7 +536,6 @@ export class CollectionsMainComponent {
         if (event.target.collection) {
             event.target = event.target.collection;
         }
-        console.log(event.source, event.target);
         // do not allow to move anything else than editorial collections into editorial collections (if the source is a collection)
         if (event.source[0].hasOwnProperty('childCollectionsCount')) {
             if (
@@ -655,7 +654,6 @@ export class CollectionsMainComponent {
             )
             .subscribe(
                 collection => {
-                    console.log(collection);
                     // transfere sub collections and content
                     this.collectionContent.collections = collection.collections;
                     this.collectionContent.collectionsPagination =
@@ -732,7 +730,6 @@ export class CollectionsMainComponent {
             CollectionsMainComponent.DEFAULT_REQUEST,
         );
         request.offset = this.collectionContent.collections.length;
-        console.log(request);
         this.collectionContent.collectionsLoading = true;
         this.collectionService
             .getCollectionSubcollections(
@@ -867,7 +864,6 @@ export class CollectionsMainComponent {
                 collection => {
                     // set the collection and load content data by refresh
                     this.setCollectionId(null);
-                    console.log(collection.collection);
                     this.collectionContent.node = collection.collection;
 
                     this.renderBreadcrumbs();
@@ -999,7 +995,6 @@ export class CollectionsMainComponent {
                                 for (const content of this.collectionContent
                                     .references) {
                                     if (content.ref.id == params.content) {
-                                        console.log('match');
                                         this.contentDetailObject = content;
                                         break;
                                     }
@@ -1074,7 +1069,6 @@ export class CollectionsMainComponent {
     }
 
     private addToOtherCollection(node: EduData.Node) {
-        console.log('add to other');
         this.navigate(this.collectionContent.node.ref.id, node.ref.id);
     }
 

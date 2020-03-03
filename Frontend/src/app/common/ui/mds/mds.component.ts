@@ -448,7 +448,6 @@ export class MdsComponent{
         }
       }
     }
-    console.log(this.jumpmarks);
   }
 
   private renderGroup(id:string,data:any){
@@ -723,7 +722,6 @@ export class MdsComponent{
       Observable.forkJoin(this.currentNodes.map((n) => this.node.editNodeMetadataNewVersion(n.ref.id,version,this.getValues(n.properties))))
           .subscribe((nodes) => {
             this.currentNodes = nodes.map((n) => n.node);
-            console.log(this.currentNodes);
             this.onUpdatePreview(callback);
           },(error) => {
             this.toast.error(error);
@@ -1908,7 +1906,6 @@ export class MdsComponent{
       properties[RestConstants.CCM_PROP_IO_WWWURL] = [link];
       properties[RestConstants.LOM_PROP_TITLE] = [link];
       let process=()=>{
-        console.log(properties);
         let data:any= {
           icon: this.connector.getThemeMimeIconSvg('link.svg'),
           name: RestHelper.getTitleFromProperties(properties),
@@ -2071,7 +2068,6 @@ export class MdsComponent{
         html+='Widget '+subwidget.id+' is a multivalue widget. This is not supported for groups';
       }
       else {
-        console.log(subwidget);
         let render=this.renderWidget(subwidget, null, template);
         html += render ? render : '';
       }
@@ -2375,7 +2371,6 @@ export class MdsComponent{
           return;
       }
       let child=this.getRemovedChildobjects()[pos];
-      console.log('remove child',child);
       this.node.deleteNode(child.ref.id,false).subscribe(()=>{
         this.onRemoveChildobject(callback,pos+1);
       });
@@ -2384,11 +2379,9 @@ export class MdsComponent{
     let edit=this.editChildobject || this.editChildobjectLicense;
     // keep any existing license data
     if(this.editChildobject && edit.child.properties){
-      console.log(props);
       for(let key in props){
         edit.child.properties[key]=props[key];
       }
-      console.log(edit.child.properties);
     }
     else {
       edit.child.properties = props;
@@ -2443,7 +2436,6 @@ export class MdsComponent{
         });
       }
       else{
-          console.log('child exists, update it');
           this.node.editNodeMetadata(child.node.ref.id,this.getChildobjectProperties(child,pos)).subscribe(()=>{
             this.onAddChildobject(callback,pos+1);
           });
@@ -2507,9 +2499,7 @@ export class MdsComponent{
         if (identical !== false) {
           properties[key] = this.currentNodes[0].properties[key];
         }
-        console.log(key, identical);
       }
-      console.log(properties);
       return properties;
   }
 }

@@ -18,7 +18,6 @@ export class FooterComponent {
         this._scope=scope;
         this.config.getAll().subscribe(()=>{
             this.banner = ConfigurationHelper.getBanner(this.config);
-            console.log(this.banner);
             this.show=this.banner && this.banner.components.indexOf(this._scope)!=-1
         });
     }

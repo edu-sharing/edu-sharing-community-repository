@@ -158,9 +158,7 @@ export class ShareAppComponent {
     }
     private init() {
         Translation.initialize(this.translate, this.config, this.storage, this.route).subscribe(() => {
-            console.log("translate");
             this.route.queryParams.subscribe((params:any)=>{
-                console.log("share app query params",params);
                 this.uri=params['uri'];
                 this.mimetype=params['mimetype'];
                 if(this.mimetype=='public.image') // ios
@@ -169,8 +167,6 @@ export class ShareAppComponent {
                 this.fileName=params['file'];
                 this.text=params['text']; // ios only: custom description
                 this.description=null;
-                console.log(this.uri);
-                console.log("detected type: "+(this.isLink() ? "link" : this.isTextSnippet() ? "text" : "generic-file") + " - "+this.getType());
                 this.collectionApi.search("",{
                     sortBy:[RestConstants.CM_MODIFIED_DATE],
                     offset:0,
@@ -232,9 +228,7 @@ export class ShareAppComponent {
                     }
                     /*
                     this.cordova.getFileAsBlob(this.getUri(),this.mimetype).subscribe((data:any)=>{
-                        console.log(this.fileName);
                         let split=this.fileName ? this.fileName.split("/") : this.getUri().split("/");
-                        console.log(data);
                         this.title=split[split.length-1];
                         this.file=data;
                         if(this.mimetype.startsWith("image/"))
@@ -243,7 +237,6 @@ export class ShareAppComponent {
                         let result=request.open('GET', data.localURL, true);
                         request.responseType = 'blob';
                         request.onload = ()=> {
-                            console.log(request.response);
                             if(request.response.size<=0){
                                 this.router.navigate([UIConstants.ROUTER_PREFIX,'messages','CONTENT_NOT_READABLE']);
                             }

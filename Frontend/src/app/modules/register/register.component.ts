@@ -76,7 +76,6 @@ export class RegisterComponent {
             this.isLoading = false;
             this.changes.detectChanges();
             if (!this.configService.instant('register.local', true)) {
-                console.log('no register.local set, will go to login');
                 RestHelper.goToLogin(this.router, this.configService, null, null);
             }
             setTimeout(() => this.setParams());

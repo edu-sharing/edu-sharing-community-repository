@@ -257,7 +257,6 @@ export class WorkspaceMainComponent implements EventListener {
           new DialogButton("WORKSPACE.DRAG_DROP_COPY",DialogButton.TYPE_PRIMARY,()=>this.copyNode(event.target,event.source)),
           new DialogButton("WORKSPACE.DRAG_DROP_MOVE",DialogButton.TYPE_PRIMARY,()=>this.moveNode(event.target,event.source)),
         ]
-        console.log(event);
         */
     }
     canDropBreadcrumbs = (event: any) => event.target.ref.id !== this.currentFolder.ref.id;
@@ -345,7 +344,6 @@ export class WorkspaceMainComponent implements EventListener {
 
                                 this.connectors.list().subscribe(() => {
                                     this.connectorList = this.connectors.getConnectors();
-                                    console.log(params);
                                     if (params.connector) {
                                         this.showCreateConnector(this.connectorList.filter((c) => c.id === params.connector)[0]);
                                     }
@@ -355,7 +353,6 @@ export class WorkspaceMainComponent implements EventListener {
                                 if (this.oldParams) {
                                     for (const key of Object.keys(this.oldParams).concat(Object.keys(params))) {
                                         if (params[key] !== this.oldParams[key] && key !== 'viewType') {
-                                            console.log('changed ' + key);
                                             needsUpdate = true;
                                         }
                                     }
@@ -583,13 +580,11 @@ export class WorkspaceMainComponent implements EventListener {
         const root = !id || WorkspaceMainComponent.VALID_ROOTS_NODES.indexOf(id) !== -1;
         if (!root) {
             this.isRootFolder = false;
-            console.log('open path: ' + id);
             this.node.getNodeMetadata(id).subscribe((data: NodeWrapper) => {
                 this.mds.getSet(data.node.metadataset ? data.node.metadataset : RestConstants.DEFAULT).subscribe((mds: any) => {
                     if (mds.create) {
                         this.allowBinary = !mds.create.onlyMetadata;
                         if (!this.allowBinary) {
-                            console.log('mds does not allow binary files, will switch mode');
                         }
                     }
                 });
@@ -602,7 +597,6 @@ export class WorkspaceMainComponent implements EventListener {
         }
         else {
             this.isRootFolder = true;
-            console.log('open root path ' + id);
             if (id === RestConstants.USERHOME) {
                 this.createAllowed = true;
             }
@@ -665,14 +659,12 @@ export class WorkspaceMainComponent implements EventListener {
             }
             return;
         }
-        console.log('breadcrumb ' + position + ' ' + id);
 
         this.openDirectory(id);
     }
     private refresh(refreshPath = true,nodes: Node[] = null) {
         // only refresh properties in this case
         if(nodes && nodes.length){
-            console.log(nodes);
             this.updateNodes(nodes);
             return;
         }
@@ -791,7 +783,6 @@ export class WorkspaceMainComponent implements EventListener {
             || this.workflowNode;
     }
     private recoverScrollposition() {
-        console.log('recover scroll ' + this.storage.get('workspace_scroll', 0));
         window.scrollTo(0, this.storage.get('workspace_scroll', 0));
     }
 

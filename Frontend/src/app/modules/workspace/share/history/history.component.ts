@@ -55,7 +55,6 @@ export class WorkspaceHistoryComponent {
     this.onClose.emit();
   }
   private processHistory(history: NodePermissionsHistory[]) {
-    console.log(history);
     this.history = [];
     let i = 0;
     for (const entry of history){

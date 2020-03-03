@@ -80,7 +80,6 @@ export class AdminFrontpageComponent {
   save() {
     this.config.frontpage.displayCount=this.form.get('displayCount').value;
     this.config.frontpage.totalCount=this.form.get('totalCount').value;
-    console.log(this.config);
     this.loading=true;
     this.adminService.updateRepositoryConfig(this.config).subscribe(()=>{
       this.update();

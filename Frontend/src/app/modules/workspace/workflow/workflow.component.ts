@@ -211,7 +211,6 @@ export class WorkspaceWorkflowComponent{
     },(error:any)=>this.toast.error(error));
   }
     private updateButtons() {
-        console.log("update");
         let save = new DialogButton('SAVE', DialogButton.TYPE_PRIMARY, () => this.saveWorkflow());
         save.disabled=this.loading || !this.hasChanges();
         this.buttons = [

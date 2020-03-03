@@ -70,7 +70,6 @@ export class OptionsHelperService {
                 return true;
             });
             if (option.length === 1) {
-                console.log('key', event.code, option);
                 option[0].callback(null);
                 event.preventDefault();
                 event.stopPropagation();
@@ -222,7 +221,6 @@ export class OptionsHelperService {
     private isOptionEnabled(option: OptionItem, objects: Node[]|any) {
         if(option.permissionsMode === HideMode.Disable &&
             option.permissions && !this.validatePermissions(option, objects)) {
-            console.log('permissions missing', option, objects);
             return false;
         }
         if(option.customEnabledCallback) {
@@ -240,9 +238,7 @@ export class OptionsHelperService {
         } else if (target === Target.ListDropdown) {
             if (this.data.activeObject) {
                 objects = [this.data.activeObject];
-                console.log('active object', objects);
             } else {
-                console.log('dropdown is empty');
                 return null;
             }
         }
@@ -260,7 +256,6 @@ export class OptionsHelperService {
             // do not show any actions in the dropdown for no selection, these are reserved for actionbar
             options = options.filter((o) =>  !o.constrains || o.constrains.indexOf(Constrain.NoSelection) === -1);
         }
-        console.log('getAvailableOptions', target, objects, options);
         return (UIHelper.filterValidOptions(this.ui, options) as OptionItem[]);
     }
 
@@ -776,7 +771,6 @@ export class OptionsHelperService {
         options.push(this.viewToggle);
          */
         const toggleViewType = new OptionItem('OPTIONS.TOGGLE_VIEWTYPE', this.list ? this.list.viewType === 0 ? 'view_module' : 'list' : '', (object) => {
-            console.log(this.list);
             this.list.setViewType(this.list.viewType === 1 ? 0 : 1);
             toggleViewType.icon = this.list ? this.list.viewType === 0 ? 'view_module' : 'list' : '';
         });
@@ -889,7 +883,6 @@ export class OptionsHelperService {
     private handleCallbacks(options: OptionItem[], objects: Node[]|any) {
         options.forEach((o) => {
             o.showCallback = ((object) => {
-                console.log(object);
                 const list = NodeHelper.getActionbarNodes(objects, object);
                 return this.isOptionAvailable(o, list);
             });

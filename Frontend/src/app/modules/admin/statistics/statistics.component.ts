@@ -254,8 +254,6 @@ export class AdminStatisticsComponent {
             stat.counts.DOWNLOAD_MATERIAL || 0)).
         reduce((a, b) => Math.max(a, b));
     max = Math.max(max, dataUser.map((stat) => stat.counts.LOGIN_USER_SESSION || 0).reduce((a, b, ) => Math.max(a, b)));
-    console.log(dataNode);
-    console.log(max);
     const chartGroupedData = {
       labels: dataNode.map((stat) => stat.date),
       datasets: [{
@@ -431,7 +429,6 @@ export class AdminStatisticsComponent {
           }
           return result;
         }).reduce((a, b) => a.concat(b));
-        console.log(this.customGroupData);
       }
       this.customGroupLoading = false;
     };

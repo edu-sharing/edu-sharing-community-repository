@@ -123,7 +123,6 @@ export class WorkspaceFileUploadSelectComponent  {
                 this.ltiAllowed = result.nodes.length > 0 || true;
                 if(result.nodes.length){
                   this.nodeService.getNodeMetadata(result.nodes[0].parent.id,[],result.nodes[0].parent.repo).subscribe((data:NodeWrapper)=>{
-                    console.log(data.node);
                     this.ltiTool=data.node;
                   })
                 }

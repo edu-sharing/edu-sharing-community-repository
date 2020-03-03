@@ -26,7 +26,6 @@ export class TutorialComponent implements OnInit {
   @Input() heading : string;
   @Input() description : string
   @Input() set element(element : ElementRef){
-    console.log(element);
     this.setElement(element);
   }
   @Output() onNext = new EventEmitter();

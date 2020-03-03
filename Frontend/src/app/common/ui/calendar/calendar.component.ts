@@ -27,7 +27,6 @@ export class CalendarComponent{
     @Input() maxDate : Date;
 
     setDate(date:Date){
-      console.log(date);
       this.date=date;
       this.dateChange.emit(date);
       this.showDatepicker=false;

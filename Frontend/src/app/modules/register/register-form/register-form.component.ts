@@ -40,7 +40,6 @@ export class RegisterFormComponent{
 
     public register(){
         this.info.email=this.emailFormControl.value;
-        console.log(this.info,this.emailFormControl);
         this.onLoading.emit(true);
         this.registerService.register(this.info).subscribe(()=>{
             this.onRegisterDone.emit();

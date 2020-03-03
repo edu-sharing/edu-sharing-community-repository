@@ -21,7 +21,6 @@ export class ImageConfigDirective{
                 for(let img of images){
                     // src contains the absolute url, so we need to verify via endsWith
                     if(this.element.nativeElement.src.endsWith(img.src)){
-                        console.log("replace image "+img.src);
                         this.element.nativeElement.src=img.replace;
                     }
                 }

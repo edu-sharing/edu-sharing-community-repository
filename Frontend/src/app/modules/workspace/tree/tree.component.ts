@@ -78,16 +78,13 @@ export class WorkspaceTreeComponent {
     }
 
     toggleTree(event: any) {
-        console.log(this._path);
         let id = event.node.ref.id;
-        console.log(id);
         let create = true;
         for (let i = 0; i < this._path.length; i++) {
             let pos = this._path[i].indexOf(id);
             if (pos != -1) {
                 //this._path[i].splice(pos,this._path[i].length-pos);
                 this._path.splice(i, 1);
-                console.log('close path id ' + i);
                 create = false;
                 i--;
             }
@@ -102,7 +99,6 @@ export class WorkspaceTreeComponent {
             path.push(id);
             this._path.push(path);
         }
-        console.log(this._path);
     }
 
     onNodesHoveringChange(nodesHovering: boolean, target: string) {

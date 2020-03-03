@@ -181,7 +181,6 @@ export class LoginComponent implements OnInit {
     }
 
     goToProvider() {
-        console.log(this.currentProvider);
         if (!this.currentProvider) {
             this.toast.error(null, 'LOGIN.NO_PROVIDER_SELECTED');
         }
@@ -194,7 +193,6 @@ export class LoginComponent implements OnInit {
         url = url.
             replace(':target', encodeURIComponent(target)).
             replace(':entity', encodeURIComponent(this.currentProvider.url));
-        console.log('redirecting to: ' + url);
         // @TODO: Redirect to shibboleth provider
         UIHelper.openUrl(url, this.bridge, OPEN_URL_MODE.Current);
     }
@@ -254,7 +252,6 @@ export class LoginComponent implements OnInit {
     }
 
     private filterProviders(filter: any = '') {
-        console.log(filter);
         const filtered = [];
         if (!this.providers) {
             return null;
@@ -314,7 +311,6 @@ export class LoginComponent implements OnInit {
                 startWith(''),
                 map((value: string) => this.filterProviders(value))
             );
-        console.log(this.filteredProviders);
     }
 
     private updateButtons(): any {

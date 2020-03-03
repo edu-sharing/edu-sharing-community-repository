@@ -245,7 +245,6 @@ export class MainNavComponent implements AfterViewInit{
                     this.scrollInitialPositions[element.getAttribute(MainNavComponent.ID_ATTRIBUTE_NAME)] = window.getComputedStyle(element).getPropertyValue('top');
                     //this.scrollInitialPositions[element.getAttribute(ATTRIBUTE_NAME)]=element.getBoundingClientRect().top;
                 }
-                console.log(this.scrollInitialPositions);
                 this.posScrollElements(event,elements);
             });
         }
@@ -645,7 +644,6 @@ export class MainNavComponent implements AfterViewInit{
             button.isCustom=true;
             this.sidebarButtons.splice(pos,0,button);
         }
-        console.log(this.sidebarButtons);
     }
 
     private finishLogout() {
@@ -679,7 +677,6 @@ export class MainNavComponent implements AfterViewInit{
             return;
         }
         this.session.get('licenseAgreement',false).subscribe((version:string)=>{
-            console.log("user accepted agreement at version "+version);
             this.licenseAgreementHTML=null;
             let nodeId:string=null;
             for(let node of this.config.licenseAgreement.nodeId) {
@@ -692,7 +689,6 @@ export class MainNavComponent implements AfterViewInit{
             }
             this.nodeService.getNodeMetadata(nodeId).subscribe((data:NodeWrapper)=>{
                 this.licenseAgreementNode=data.node;
-                console.log(data.node);
                 if(version==data.node.contentVersion) {
                     this.startTutorial();
                     return;
@@ -883,7 +879,6 @@ export class MainNavComponent implements AfterViewInit{
     }
 
     private filterButtons() {
-        console.log(this.sidebarButtons);
         for (let i=0;i<this.sidebarButtons.length;i++) {
             if (this.sidebarButtons[i].onlyDesktop && this.ui.isMobile()) {
                 this.sidebarButtons.splice(i,1);
@@ -906,7 +901,6 @@ export class MainNavComponent implements AfterViewInit{
             console.info("Could not load license data for "+Translation.getLanguage()+", using default en");
             */
         this.http.get('assets/licenses/en.html',{responseType:'text'}).subscribe((text)=>{
-            console.log(text);
             this.licenseDetails=(text as any);
         },(error)=> {
             console.error(error);

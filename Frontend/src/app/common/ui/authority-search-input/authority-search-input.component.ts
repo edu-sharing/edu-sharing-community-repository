@@ -70,7 +70,6 @@ export class AuthoritySearchInputComponent{
     }
 
     public updateSuggestions(event : any){
-    console.log(event);
     if(event instanceof SuggestItem){
       this.addSuggestion(event);
       this.inputValue='';

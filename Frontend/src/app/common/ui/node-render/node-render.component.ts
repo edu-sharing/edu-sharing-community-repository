@@ -286,7 +286,6 @@ export class NodeRenderComponent implements EventListener {
     this.nodeMetadata=null;
   }
   public refresh() {
-    console.log('refresh');
     if(this.isLoading) {
         return;
     }
@@ -317,7 +316,6 @@ export class NodeRenderComponent implements EventListener {
         this.addDownloadButton(download);
       },(error:any)=> {
         if(error.status==RestConstants.HTTP_NOT_FOUND) {
-          console.log('original missing');
           download.isEnabled = false;
         }
         this.addDownloadButton(download);
@@ -368,7 +366,6 @@ export class NodeRenderComponent implements EventListener {
             this.isLoading = false;
             GlobalContainerComponent.finishPreloading();
         },(error:any)=> {
-            console.log(error);
             this.toast.error(error);
             this.isLoading = false;
             GlobalContainerComponent.finishPreloading();
@@ -408,7 +405,6 @@ export class NodeRenderComponent implements EventListener {
             domContainer = document.getElementsByClassName('node_collections_render')[0].parentElement;
             domCollections = document.getElementsByTagName('collections')[0];
         } catch(e) {
-            console.log('did not find collections rendering template, will not display in collections widget',e);
             return;
         }
         UIHelper.injectAngularComponent(this.componentFactoryResolver,this.viewContainerRef,SpinnerComponent,domCollections);
@@ -447,11 +443,9 @@ export class NodeRenderComponent implements EventListener {
       jQuery('#edusharing_downloadadvice').hide();
     }
       const element=jQuery('#edusharing_rendering_content_href');
-      console.log(element);
       element.click((event:any)=> {
           if(this.connector.getBridgeService().isRunningCordova()) {
               const href=element.attr('href');
-              console.log(href);
               this.connector.getBridgeService().getCordova().openBrowser(href);
               event.preventDefault();
           }
@@ -605,9 +599,7 @@ export class NodeRenderComponent implements EventListener {
                             }
                         }
                     });
-                    console.log(values);
                 } catch (e) {
-                    console.log(e);
                 }
             });
             // document.getElementsByClassName("edusharing_rendering_content_wrapper")[0].ge;

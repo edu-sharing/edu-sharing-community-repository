@@ -406,7 +406,6 @@ export class WorkspaceLicenseComponent  {
   }
   private readPermissions(last:boolean) {
     this.release=false;
-    console.log(this.permissions);
     if(this)
     for(let perm of this.permissions.permissions){
       if(perm.authority.authorityType==RestConstants.AUTHORITY_TYPE_EVERYONE && perm.permissions.indexOf(RestConstants.ACCESS_CC_PUBLISH)!=-1){
@@ -504,7 +503,6 @@ export class WorkspaceLicenseComponent  {
     openContributorDialog() {
         let nodes=this._nodes;
         this.saveLicense(()=>{
-          console.log("open contr");
             this.openContributor.emit(nodes);
         });
     }
