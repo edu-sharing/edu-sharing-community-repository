@@ -275,6 +275,7 @@ export class WorkspaceShareComponent {
         } else {
             this.showLink = true;
             this.updateNodeLink();
+            this.toast.showProgressDialog();
             Observable.forkJoin(
                 nodes.map(n => this.nodeApi.getNodePermissions(n.ref.id)),
             ).subscribe(permissions => {
@@ -296,6 +297,7 @@ export class WorkspaceShareComponent {
                     );
                     this.doiDisabled = this.doiActive;
                 }
+                this.toast.closeModalDialog();
             });
             this.reloadUsages();
         }
