@@ -21,46 +21,44 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-public class OpenSALTReader extends ValuespaceReader{
+public class CurriculumReader extends ValuespaceReader{
     private static final String ASSOCIATION_IS_CHILD_OF = "isChildOf";
     private static final String ASSOCIATION_PRECEDES = "precedes";
-    private String baseUrl;
-    private String uuid;
-    private static Logger logger = Logger.getLogger(OpenSALTReader.class);
+    private String url;
+    private static Logger logger = Logger.getLogger(CurriculumReader.class);
 
-    public OpenSALTReader(String valuespaceUrl) {
-        // e.g. http://localhost:3000/uri/8a2a94f0-36bd-11e9-bdc4-0242ac1a0003
-        String openSaltRegex="(https?:\\/\\/.*\\/)uri\\/(.*)";
+    public CurriculumReader(String valuespaceUrl) {
+        // e.g. http://localhost:8000/api/v1/curricula/metadatasets
+        String openSaltRegex="(https?:\\/\\/.*\\/)api\\/v1\\/curricula\\/metadatasets";
         Pattern pattern = Pattern.compile(openSaltRegex);
         Matcher matched = pattern.matcher(valuespaceUrl);
         if(matched.matches()){
-            this.baseUrl=matched.group(1);
-            this.uuid=matched.group(2);
-            logger.info("matched openSALT at "+baseUrl+" with uuid "+uuid);
+            url = valuespaceUrl;
+            logger.info("matched Curriculum at "+matched.group(1));
         }
     }
 
-    public List<MetadataKey> getValuespace() throws Exception{
-        List<MetadataKey> result=new ArrayList<>();
-        JSONObject list = getApi("CFPackages", uuid);
-        JSONArray array = list.getJSONArray("CFItems");
-        JSONArray associations = list.getJSONArray("CFAssociations");
-        for(int i=0;i<array.length();i++){
-            JSONObject entry=array.getJSONObject(i);
-
-            String key = entry.getString("identifier");
-            String caption = entry.getString("fullStatement");
-            String parentId = getParentId(key,uuid,associations);
-
-            MetadataKey metadataKey=new MetadataKey();
-            metadataKey.setKey(key);
-            metadataKey.setCaption(caption);
-            metadataKey.setParent(parentId);
-            metadataKey.setPreceds(getAssocs(key,ASSOCIATION_PRECEDES,associations));
-            result.add(metadataKey);
+    public List<MetadataKey> getValuespace() throws Exception {
+        List<MetadataKey> result = new ArrayList<>();
+        JSONArray list = getApi();
+        for (int i = 0; i < list.length(); i++) {
+            JSONArray subList = list.getJSONArray(i);
+            for (int j = 0; j < subList.length(); j++) {
+                JSONObject entry = subList.getJSONObject(j);
+                result.add(convertEntry(entry));
+            }
         }
         return result;
     }
+
+    private MetadataKey convertEntry(JSONObject entry) throws JSONException {
+        MetadataKey key = new MetadataKey();
+        key.setCaption(entry.getString("title"));
+        key.setKey(entry.getString("id"));
+        key.setParent(entry.isNull("parent_id") ? null : entry.getString("parent_id"));
+        return key;
+    }
+
     private List<String> getAssocs(String key, String assocName, JSONArray associations) throws IOException, JSONException {
         List<String> assocs=new ArrayList<>();
         for(int i=0;i<associations.length();i++){
@@ -81,20 +79,20 @@ public class OpenSALTReader extends ValuespaceReader{
         return null;
     }
 
-    private JSONObject getApi(String method, String uuid) throws IOException, JSONException {
+    private JSONArray getApi() throws IOException, JSONException {
         CloseableHttpClient httpclient = HttpClients.createDefault();
-        HttpUriRequest request=new HttpGet(getApiUrl(method,uuid));
+        HttpUriRequest request=new HttpGet(getApiUrl());
         CloseableHttpResponse result = httpclient.execute(request);
         String data=StreamUtils.copyToString(result.getEntity().getContent(), StandardCharsets.UTF_8);
         result.close();
-        return new JSONObject(data);
+        return new JSONArray(data);
     }
-    private String getApiUrl(String method, String uuid) {
-        return baseUrl+"/ims/case/v1p0/"+ URLEncoder.encode(method)+"/"+ URLEncoder.encode(uuid);
+    private String getApiUrl() {
+        return url;
     }
 
     @Override
     protected boolean supportsUrl() {
-        return baseUrl != null;
+        return url != null;
     }
 }
