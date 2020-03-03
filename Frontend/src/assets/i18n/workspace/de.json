@@ -144,9 +144,9 @@
             "BULK_MODE": {
                 "TITLE" : "Berechtigungen verwalten",
                 "EXTEND" : "Bestehende Berechtigungen aktualisieren",
-                "EXTEND_DESCRIPTION" : "Die aktuell bestehenden Berechtigungen aller gewählten Elemente bleiben erhalten. Gewählte Benutzer/Gruppen erhalten Zugriff. Höherrangige Berechtigungen bleiben erhalten.",
+                "EXTEND_DESCRIPTION" : "Die eingestellten Berechtigungen werden zu den bestehenden Berechtigungen der ausgewählten Nutzer/Gruppen hinzugefügt.",
                 "REPLACE" : "Bestehende Berechtigungen ersetzen",
-                "REPLACE_DESCRIPTION" : "Die aktuell bestehenden Berechtigungen aller gewählten Elemente werden mit der oben festgelegten Auswahl überschrieben."
+                "REPLACE_DESCRIPTION" : "Die eingestellten Berechtigungen ersetzen die bisherigen Berechtigungen der ausgewählten Nutzer/Gruppen."
             }
         },
         "INHERIT_DISABLED": "Rechtevererbung ist aktuell ausgeschaltet",

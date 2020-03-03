@@ -142,9 +142,9 @@
             "BULK_MODE": {
                 "TITLE" : "Manage permissions",
                 "EXTEND" : "Update existing permissions",
-                "EXTEND_DESCRIPTION" : "Selected permissions of the user/groups will get added to the existing permissions. Access will be given to users with no access. Higher permissions will stay active.",
+                "EXTEND_DESCRIPTION" : "The selected permissions will be added to the existing permissions of the user(s)/group(s). ",
                 "REPLACE" : "Overwrite existing permissions",
-                "REPLACE_DESCRIPTION" : "Selected permissions of the user/groups will reset and overwrite the existing permissions."
+                "REPLACE_DESCRIPTION" : "The selected permissions will replace the existing permissions of the user(s)/group(s)."
             }
         },
         "INHERIT_DISABLED": "Inherition is currently disabled",
