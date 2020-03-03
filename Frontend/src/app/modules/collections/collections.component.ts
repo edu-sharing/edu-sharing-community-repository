@@ -374,7 +374,7 @@ export class CollectionsMainComponent {
 
     isAllowedToEditCollection(): boolean {
         if (this.isRootLevelCollection()) {
-            return true;//this.tabSelected === RestConstants.COLLECTIONSCOPE_MY
+            return !this.isGuest;//this.tabSelected === RestConstants.COLLECTIONSCOPE_MY
         }
         if (
             RestHelper.hasAccessPermission(
