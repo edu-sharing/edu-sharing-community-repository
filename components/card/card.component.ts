@@ -31,11 +31,11 @@ import { UIHelper } from '../../ui-helper';
     animations: [trigger('cardAnimation', UIAnimation.cardAnimation())],
 })
 export class CardComponent implements AfterViewInit, OnDestroy {
-    @ViewChild('cardContainer', { static: false })
+    @ViewChild('cardContainer')
     cardContainer: ElementRef<HTMLElement>;
-    @ViewChild('jumpmarksRef', { static: false })
+    @ViewChild('jumpmarksRef')
     jumpmarksRef: ElementRef;
-    @ViewChild('cardActions', { static: false })
+    @ViewChild('cardActions')
     cardActions: ElementRef<HTMLElement>;
 
     /**

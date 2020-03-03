@@ -98,14 +98,14 @@ export class ListTableComponent implements EventListener {
     public static VIEW_TYPE_GRID = 1;
     public static VIEW_TYPE_GRID_SMALL = 2;
 
-    @ViewChild('addElementRef', { static: false }) addElementRef: ElementRef;
-    @ViewChild('drag', { static: false }) drag: ElementRef;
-    @ViewChild('menuTrigger', { static: false }) menuTrigger: MatMenuTrigger;
-    @ViewChild('dropdown', { static: false }) dropdownElement: ElementRef;
-    @ViewChild('dropdownContainer', { static: false })
+    @ViewChild('addElementRef') addElementRef: ElementRef;
+    @ViewChild('drag') drag: ElementRef;
+    @ViewChild('menuTrigger') menuTrigger: MatMenuTrigger;
+    @ViewChild('dropdown') dropdownElement: ElementRef;
+    @ViewChild('dropdownContainer')
     dropdownContainerElement: ElementRef;
 
-    @ContentChild('itemContent', { static: false }) itemContentRef: TemplateRef<any>;
+    @ContentChild('itemContent') itemContentRef: TemplateRef<any>;
 
     /** Set the current list of nodes to render */
     @Input() set nodes(nodes: Node[]) {
