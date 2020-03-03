@@ -71,7 +71,7 @@ export class SearchComponent {
     public tutorialElement: ElementRef;
     @ViewChild('mds') mdsRef: MdsComponent;
     @ViewChild('list') list: ListTableComponent;
-    @ViewChild('mainNav') mainNavRef: MainNavComponent;
+    @ViewChild('mainNav', {static: true}) mainNavRef: MainNavComponent;
     @ViewChild('extendedSearch') extendedSearch: ElementRef;
     @ViewChild('actionbarComponent') actionbarComponent: ActionbarComponent;
     public mdsSuggestions: any = {};
@@ -1285,7 +1285,7 @@ export class SearchComponent {
         }
     }
 
-    private isHomeRepository() {
+    isHomeRepository() {
         return RestNetworkService.isHomeRepo(
             this.currentRepository,
             this.allRepositories,

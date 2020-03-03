@@ -71,7 +71,7 @@ import { WorkspaceManagementDialogsComponent } from '../management-dialogs/manag
     ],
 })
 export class CreateMenuComponent implements OnDestroy {
-    @ViewChild('dropdown') dropdown: DropdownComponent;
+    @ViewChild('dropdown', { static: true }) dropdown: DropdownComponent;
     @ViewChild('management') management: WorkspaceManagementDialogsComponent;
 
     /**
