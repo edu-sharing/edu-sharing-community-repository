@@ -33,6 +33,7 @@ import java.util.List;
 import org.alfresco.model.ContentModel;
 import org.alfresco.repo.security.authentication.AuthenticationComponent;
 import org.alfresco.repo.security.authentication.AuthenticationException;
+import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.service.ServiceRegistry;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.repository.NodeService;
@@ -94,7 +95,16 @@ public class EduAuthenticationComponent{
 		}
 		else{
 			
-			NodeRef personNodeRef = personService.getPersonOrNull(username);
+			String fUserName = username;
+			AuthenticationUtil.RunAsWork<NodeRef> runAs = new AuthenticationUtil.RunAsWork<NodeRef>() {
+				
+				@Override
+				public NodeRef doWork() throws Exception {
+					// TODO Auto-generated method stub
+					return personService.getPersonOrNull(fUserName);
+				}
+			};
+			NodeRef personNodeRef = AuthenticationUtil.runAsSystem(runAs);
 			if(personNodeRef == null) {
 				logger.error("person does not exist:" + username);
 				throw new AuthenticationException(AuthenticationExceptionMessages.USERNOTFOUND);
