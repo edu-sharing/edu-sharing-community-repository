@@ -20,6 +20,7 @@ import {
 import { Helper } from '../../../core-module/rest/helper';
 import { UIAnimation } from '../../../core-module/ui/ui-animation';
 import { UIHelper } from '../../ui-helper';
+import { CardService } from '../../card.service';
 
 /**
  * A common edu-sharing modal card
@@ -128,8 +129,10 @@ export class CardComponent implements AfterViewInit, OnDestroy {
     constructor(
         private uiService: UIService,
         private translate: TranslateService,
+        private cardService: CardService,
     ) {
         CardComponent.modalCards.splice(0, 0, this);
+        cardService.setNumberModalCards(CardComponent.modalCards.length);
         document.body.style.overflow = 'hidden';
         UIHelper.waitForComponent(this, 'jumpmarksRef').subscribe(() => {
             setInterval(() => {
@@ -178,6 +181,7 @@ export class CardComponent implements AfterViewInit, OnDestroy {
         if (CardComponent.modalCards.length === 0) {
             document.body.style.overflow = null;
         }
+        this.cardService.setNumberModalCards(CardComponent.modalCards.length);
     }
 
     @HostListener('window:resize')
