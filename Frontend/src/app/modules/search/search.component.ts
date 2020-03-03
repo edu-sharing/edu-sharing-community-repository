@@ -71,7 +71,7 @@ export class SearchComponent {
     public tutorialElement: ElementRef;
     @ViewChild('mds') mdsRef: MdsComponent;
     @ViewChild('list') list: ListTableComponent;
-    @ViewChild('mainNav', {static: true}) mainNavRef: MainNavComponent;
+    @ViewChild('mainNav') mainNavRef: MainNavComponent;
     @ViewChild('extendedSearch') extendedSearch: ElementRef;
     @ViewChild('actionbarComponent') actionbarComponent: ActionbarComponent;
     public mdsSuggestions: any = {};
@@ -1296,9 +1296,7 @@ export class SearchComponent {
         this.queryParamsSubscription = this.activatedRoute.queryParams.subscribe(
             (param: any) => {
                 this.searchService.init();
-                if (this.mainNavRef) {
-                    this.mainNavRef.refreshBanner();
-                }
+                this.mainNavRef.refreshBanner();
                 GlobalContainerComponent.finishPreloading();
                 this.hasCheckbox = true;
                 this.searchService.reurl = null;
