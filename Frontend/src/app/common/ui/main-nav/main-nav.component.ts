@@ -856,7 +856,6 @@ export class MainNavComponent implements AfterViewInit{
         let min=Math.floor(time/60);
         let sec=time%60;
         this.event.broadcastEvent(FrameEventsService.EVENT_SESSION_TIMEOUT,time);
-        console.log(time);
         if(time>=0) {
             this.timeout = this.formatTimeout(min, 2) + ":" + this.formatTimeout(sec, 2);
             this.timeIsValid=true;
