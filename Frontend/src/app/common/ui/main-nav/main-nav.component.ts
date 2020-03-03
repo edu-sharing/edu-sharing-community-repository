@@ -97,11 +97,6 @@ export class MainNavComponent implements AfterViewInit{
     @ViewChild('dropdownTriggerDummy') createMenuTrigger: MatMenuTrigger;
     createMenuX: number;
     createMenuY: number;
-    dialogTitle : string;
-    dialogCancelable = false;
-    dialogMessage : string;
-    dialogMessageParameters : any;
-    dialogButtons : DialogButton[];
     timeout: string;
     timeIsValid = false;
     public config: any={};
@@ -853,7 +848,7 @@ export class MainNavComponent implements AfterViewInit{
         this.handleScrollHide();
     }
     private showTimeout(){
-        return !this.bridge.isRunningCordova() && !this.isGuest && this.timeIsValid && this.dialogTitle!='WORKSPACE.AUTOLOGOUT' &&
+        return !this.bridge.isRunningCordova() && !this.isGuest && this.timeIsValid && this.timeout !== '' &&
             (this.isSafe() || !this.isSafe() && this.configService.instant('sessionExpiredDialog',{show:true}).show);
     }
     private updateTimeout(){
@@ -861,11 +856,12 @@ export class MainNavComponent implements AfterViewInit{
         let min=Math.floor(time/60);
         let sec=time%60;
         this.event.broadcastEvent(FrameEventsService.EVENT_SESSION_TIMEOUT,time);
+        console.log(time);
         if(time>=0) {
             this.timeout = this.formatTimeout(min, 2) + ":" + this.formatTimeout(sec, 2);
             this.timeIsValid=true;
         }
-        else if(this.showTimeout()){
+        else if(this.showTimeout()) {
             this.toast.showModalDialog(
                 'WORKSPACE.AUTOLOGOUT',
                 'WORKSPACE.AUTOLOGOUT_INFO',
@@ -875,17 +871,16 @@ export class MainNavComponent implements AfterViewInit{
                 null,
                 {minutes:Math.round(this.connector.logoutTimeout/60)}
             );
+            this.timeout = '';
         }
-        else
-            this.timeout="";
+        else {
+            this.timeout = '';
+        }
     }
     private formatTimeout(num:number, size:number) {
         let s = num+"";
         while (s.length < size) s = "0" + s;
         return s;
-    }
-    hideDialog() : void{
-        this.dialogTitle=null;
     }
 
     private filterButtons() {
