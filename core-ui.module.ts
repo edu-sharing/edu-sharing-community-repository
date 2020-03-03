@@ -104,13 +104,6 @@ import { A11yModule } from '@angular/cdk/a11y';
         }),
     ],
     providers: [Toast],
-    entryComponents: [
-        SpinnerComponent,
-        ListTableComponent,
-        VideoControlsComponent,
-        CardComponent,
-        InputPasswordComponent,
-    ],
     exports: [
         TranslateModule,
         ListTableComponent,
