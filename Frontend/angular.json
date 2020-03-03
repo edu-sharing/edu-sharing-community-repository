@@ -15,7 +15,8 @@
             "outputPath": "dist",
             "index": "src/index.html",
             "main": "src/main.ts",
-            "tsConfig": "src/tsconfig.json",
+            "polyfills": "src/polyfills.ts",
+            "tsConfig": "tsconfig.app.json",
             "showCircularDependencies": true,
             "assets": [
               { "glob": "**/*", "input": "src/assets/", "output": "/assets/" },
@@ -80,7 +81,7 @@
           "builder": "@angular-devkit/build-angular:karma",
           "options": {
             "main": "src/test.ts",
-            "tsConfig": "src/tsconfig.json",
+            "tsConfig": "src/tsconfig.spec.json",
             "karmaConfig": "./karma.conf.js",
             "scripts": [
               "src/assets/js/jquery-3.4.1.min.js",
@@ -99,7 +100,7 @@
           "builder": "@angular-devkit/build-angular:tslint",
           "options": {
             "tsConfig": [
-              "src/tsconfig.json"
+              "tsconfig.app.json"
             ],
             "exclude": [
               "**/node_modules/**"

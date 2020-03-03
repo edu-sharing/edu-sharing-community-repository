@@ -54,7 +54,7 @@ export class WorkspaceExplorerComponent {
     }
   }
   public _searchQuery : string = null;
-  private _node : Node;
+  _node : Node;
   public hasMoreToLoad :boolean ;
   private lastRequestSearch : boolean;
 
