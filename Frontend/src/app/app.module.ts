@@ -63,14 +63,6 @@ import {ModalTestComponent} from './common/test/modal/modal-test.component';
         DECLARATIONS_SHARE_APP,
         DECLARATIONS_SERVICES
     ],
-    entryComponents: [
-        MdsWidgetComponent,
-        CommentsListComponent,
-        ButtonsTestComponent,
-        InputsTestComponent,
-        UserAvatarTestComponent,
-        ModalTestComponent
-    ],
     imports: IMPORTS,
     providers: [
         PROVIDERS,
