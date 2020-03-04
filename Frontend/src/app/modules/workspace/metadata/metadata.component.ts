@@ -37,7 +37,7 @@ export class WorkspaceMetadataComponent{
   private tab= this.INFO;
   private permissions: any;
   private usages: Usage[];
-  private usagesCollection: CollectionUsage[];
+  private usagesCollection: Node[];
   private nodeObject: Node;
   private versions: Version[];
   private versionsLoading= false;
@@ -128,11 +128,8 @@ export class WorkspaceMetadataComponent{
         this.usageApi.getNodeUsages(this.nodeObject.ref.id).subscribe((usages: UsageList) => {
             this.usages = usages.usages;
           this.usageApi.getNodeUsagesCollection(this.nodeObject.ref.id).subscribe((collection) => {
-              // @TODO: Activating this causes Cannot read property 'indexOf' of undefined
-              //        at ListTableComponent.push../src/app/core-ui-module/components/list-table/list-table.component.ts.ListTableComponent.isReference (list-table.component.ts:592)
-              // when switching elements while the metadata bar is open
-              // this.usagesCollection = collection;
-              // this.getStats();
+               this.usagesCollection = collection.map((c) => c.collection);
+               this.getStats();
           });
       });
 
@@ -156,8 +153,8 @@ export class WorkspaceMetadataComponent{
   private displayNode(node: Node){
       this.router.navigate([UIConstants.ROUTER_PREFIX + 'render', node.ref.id]);
   }
-  private displayCollection(collection: CollectionUsage){
-      UIHelper.goToCollection(this.router, (collection.collection as any));
+  private displayCollection(collection: Node){
+      UIHelper.goToCollection(this.router, collection);
   }
   private openPermalink(){
       this.displayNode(this.nodeObject);
