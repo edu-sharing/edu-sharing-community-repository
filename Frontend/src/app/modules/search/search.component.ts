@@ -40,7 +40,6 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
     @ViewChild('list') list: ListTableComponent;
     @ViewChild('mainNav') mainNavRef: MainNavComponent;
     @ViewChild('extendedSearch') extendedSearch: ElementRef;
-    @ViewChild('actionbarComponent') actionbarComponent: ActionbarComponent;
     @ViewChild('toolbar') toolbar: any;
 
     toolPermissions: string[];

@@ -1,5 +1,6 @@
 <div id="eduSearchWrapper" (window:resize)="onResize()">
-  <main-nav *ngIf="mainnav" #mainNav
+  <main-nav #mainNav
+    [hidden]="!mainnav"
     [title]="'SEARCH.TITLE'"
     [currentScope]="'search'"
     [searchEnabled]="true"
@@ -50,7 +51,7 @@
           </div>
       </div>
   </div>
-    <div class="top scrollWithBanner" [class.topNoRepositories]="!(repositories && repositories.length>2)" [class.no-mainnav]="!mainnav" *ngIf="initalized">
+    <div class="top scrollWithBanner" [class.topNoRepositories]="!(repositories && repositories.length>2)" [class.no-mainnav]="!mainnav" [hidden]="!initalized">
         <div class="mobile-move-top">
             <div class="extendedSearch" #extendedSearch>
                 <a tabindex="0" title="{{'SEARCH.TOGGLE_EXPANDED_SEARCH' | translate}}" (keyup.enter)="toggleSidenav()" (click)="toggleSidenav()" class="pointed filtertoggler">
@@ -282,7 +283,7 @@
                             [createLink]="true"
                             [scope]="SCOPES.Search"
                             [actionbar]="actionbarComponent"
-                            [mainNav]="mainNavRef"
+                            [mainNav]="mainNav"
                             (clickRow)="render($event)"
                             (doubleClickRow)="render($event)"
                             (loadMore)="getMoreResults()"
