@@ -12,6 +12,9 @@ import {NodeTemplateComponent} from "./node-template/node-template.component";
 import {NodeVariantComponent} from './node-variant/node-variant.component';
 import {CommentsListComponent} from "./node-comments/comments-list/comments-list.component";
 import {ViewCollectionFeedbackComponent} from './view-collection-feedback/view-collection-feedback.component';
+import {SimpleEditDialogComponent} from './simple-edit-dialog/simple-edit-dialog.component';
+import {SimpleEditMetadataComponent} from './simple-edit-dialog/simple-edit-metadata/simple-edit-metadata.component';
+import {SimpleEditInviteComponent} from './simple-edit-dialog/simple-edit-invite/simple-edit-invite.component';
 
 export const DECLARATIONS_MANAGEMENT_DIALOGS = [
   WorkspaceLicenseComponent,
@@ -27,5 +30,8 @@ export const DECLARATIONS_MANAGEMENT_DIALOGS = [
   AddStreamComponent,
   NodeVariantComponent,
   NodeTemplateComponent,
-  ViewCollectionFeedbackComponent
+  ViewCollectionFeedbackComponent,
+  SimpleEditDialogComponent,
+  SimpleEditMetadataComponent,
+  SimpleEditInviteComponent,
 ];

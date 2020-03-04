@@ -1,0 +1,25 @@
+<card title="{{'SIMPLE_EDIT.TITLE' | translate}}" [node]="_nodes" width="normal" height="xxlarge"
+      [buttons]="buttons"
+      (onCancel)="cancel()"
+>
+   <div class="card-content-padding">
+        <div class="block">
+            <h3 class="mat-heading-3 mat-heading-underline">
+                {{'SIMPLE_EDIT.METADATA.TITLE' | translate}}
+            </h3>
+            <app-simple-edit-metadata #metadata
+                    [nodes]="_nodes"
+                    [fromUpload]="fromUpload"
+            ></app-simple-edit-metadata>
+        </div>
+       <div class="block">
+           <h3 class="mat-heading-3 mat-heading-underline">
+               {{'SIMPLE_EDIT.INVITE.TITLE' | translate}}
+           </h3>
+           <app-simple-edit-invite #invite
+               [nodes]="_nodes"
+               [fromUpload]="fromUpload"
+           ></app-simple-edit-invite>
+       </div>
+   </div>
+</card>

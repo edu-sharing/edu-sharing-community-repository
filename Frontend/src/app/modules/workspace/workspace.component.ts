@@ -90,7 +90,6 @@ export class WorkspaceMainComponent implements EventListener {
     public editNodeDeleteOnCancel = false;
     private createMds: string;
     private editNodeLicense: Node[];
-    private editNodeAllowReplace: Boolean;
     private nodeDisplayedVersion: string;
     createAllowed: boolean;
     currentFolder: any | Node;
@@ -427,32 +426,6 @@ export class WorkspaceMainComponent implements EventListener {
         this.path = [];
         this.selection = [];
     }
-    private manageContributorsNode(node: Node) {
-        const list = this.getNodeList(node);
-        this.contributorNode = list[0];
-    }
-    private manageWorkflowNode(node: Node) {
-        const list = this.getNodeList(node);
-        this.workflowNode = list[0];
-    }
-    private setShareLinkNode(node: Node) {
-        const list = this.getNodeList(node);
-        this.shareLinkNode = list[0];
-    }
-    private shareNode(node: Node) {
-        const list = this.getNodeList(node);
-        this.sharedNode = list;
-    }
-    private editNode(node: Node) {
-        const list = this.getNodeList(node);
-        this.editNodeMetadata = list;
-        this.editNodeAllowReplace = new Boolean(true);
-    }
-    private editLicense(node: Node) {
-        const list = this.getNodeList(node);
-        this.editNodeLicense = list;
-    }
-
     private deleteDone() {
         this.closeMetadata();
         this.refresh();
@@ -612,16 +585,6 @@ export class WorkspaceMainComponent implements EventListener {
             this.updateNodeByParams(params, node);
         }
 
-    }
-    public createEmptyNode() {
-        this.globalProgress = true;
-        const prop = RestHelper.createNameProperty(DateHelper.formatDateByPattern(new Date().getTime(), 'y-M-d'));
-        this.node.createNode(this.currentFolder.ref.id, RestConstants.CCM_TYPE_IO, [], prop, true, RestConstants.COMMENT_MAIN_FILE_UPLOAD)
-            .subscribe((data) => {
-                this.editNodeMetadata = [data.node];
-                this.editNodeDeleteOnCancel = true;
-                this.globalProgress = false;
-            });
     }
     private openNode(node: Node, useConnector = true) {
         if (!node.isDirectory) {

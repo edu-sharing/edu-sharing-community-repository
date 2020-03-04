@@ -578,6 +578,15 @@ export class OptionsHelperService {
             }
             return false;
         };
+        const simpleEditNode = new OptionItem('OPTIONS.EDIT_SIMPLE', 'edit', (object) =>
+            management.nodeSimpleEdit = this.getObjects(object)
+        );
+        simpleEditNode.constrains = [Constrain.Files, Constrain.NoCollectionReference, Constrain.HomeRepository, Constrain.User];
+        simpleEditNode.permissions = [RestConstants.ACCESS_WRITE];
+        simpleEditNode.permissionsMode = HideMode.Disable;
+        simpleEditNode.group = DefaultGroups.Edit;
+        simpleEditNode.priority = 15;
+
         const editNode = new OptionItem('OPTIONS.EDIT', 'edit', (object) =>
             management.nodeMetadata = this.getObjects(object)
         );
@@ -823,6 +832,7 @@ export class OptionsHelperService {
         options.push(pinCollection);
         options.push(feedbackCollection);
         options.push(feedbackCollectionView);
+        options.push(simpleEditNode);
         options.push(editNode);
         // add to collection
         options.push(addNodeToCollection);

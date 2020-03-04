@@ -35,6 +35,13 @@
         (onCancel)="closeCollectionWriteFeedback()"
         (onDone)="addCollectionFeedback($event)"
 ></mds>
+<app-simple-edit-dialog
+    *ngIf="_nodeSimpleEdit"
+    [nodes]="_nodeSimpleEdit"
+    [fromUpload]="_nodeSimpleFromUpload"
+    (onCancel)="closeSimpleEdit(false)"
+    (onDone)="closeSimpleEdit(true)"
+    ></app-simple-edit-dialog>
 <app-view-collection-feedback
     *ngIf="collectionViewFeedback"
     [collection]="collectionViewFeedback"
@@ -125,7 +132,6 @@
 ></workspace-create-lti>
 <mds #mds *ngIf="nodeMetadata || createMetadata"
      [nodes]="nodeMetadata"
-     [allowReplacing]="nodeMetadataAllowReplace"
      [create]="createMetadata"
      [parentNode]="metadataParent"
      (onCancel)="closeEditor(false)"

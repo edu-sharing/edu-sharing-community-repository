@@ -1,0 +1,14 @@
+@import "../../../../core-ui-module/styles/variables";
+
+.authorities{
+  &:not(:last-child):after{
+    content: ', ';
+  }
+}
+.toggles{
+  display: flex;
+  flex-direction: column;
+  > div {
+    padding:2px 10px;
+  }
+}

@@ -545,6 +545,19 @@
         "ADD_CHILD_OBJECT_DESCRIPTION": "Erzeugen Sie eine neue Serie, indem Sie dazugehörige Materialien ergänzen",
         "ADD_CHILD_OBJECT_QUOTA_REACHED": "Fehler beim Hochladen des Objekts \"{{ name }}\": Speicherplatz-Quota überschritten"
     },
+    "SIMPLE_EDIT": {
+        "METADATA": {
+            "TITLE": "Metadaten angeben"
+        },
+        "INVITE": {
+            "TITLE": "Freigeben",
+            "ERROR_INHERIT": "Das Festlegen von Berechtigungen ist nicht möglich, da die Objekte bereits Einladungen vom übergeordneten Ordner erhalten:\n",
+            "UNSET": "Nicht festgelegt",
+            "GROUP_TYPES": {
+                "ORG_ADMINISTRATORS": "Nur Administratoren"
+            }
+        }
+    },
     "SHARE_APP": {
         "TEXT_SNIPPET": "Notiz",
         "IMAGE": "Bild",

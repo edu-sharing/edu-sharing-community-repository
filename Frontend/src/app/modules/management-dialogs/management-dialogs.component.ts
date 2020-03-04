@@ -95,6 +95,11 @@ export class WorkspaceManagementDialogsComponent  {
     @Output() nodeTemplateChange = new EventEmitter();
     @Input() nodeContributor : Node;
     @Output() nodeContributorChange = new EventEmitter();
+    @Input() set nodeSimpleEdit (nodeSimpleEdit: Node[]) {
+        this._nodeSimpleEdit = nodeSimpleEdit;
+        this._nodeSimpleFromUpload = false;
+    }
+    @Input() nodeSimpleEditChange = new EventEmitter<Node[]>();
     @Input() collectionWriteFeedback: Node;
     @Output() collectionWriteFeedbackChange = new EventEmitter<Node>();
     @Input() collectionViewFeedback: Node;
@@ -103,16 +108,17 @@ export class WorkspaceManagementDialogsComponent  {
     @Output() nodeSidebarChange = new EventEmitter<Node>();
     @Input() showUploadSelect=false;
   @Output() showUploadSelectChange = new EventEmitter();
-  @Input() nodeMetadataAllowReplace : Boolean;
   @Output() onClose=new EventEmitter();
   @Output() onCreate=new EventEmitter();
   @Output() onRefresh=new EventEmitter<Node[]|void>();
-  @Output() onUploadFilesProcessed=new EventEmitter();
+  @Output() onUploadFilesProcessed=new EventEmitter<Node[]>();
   @Output() onCloseMetadata=new EventEmitter();
   @Output() onUploadFileSelected=new EventEmitter();
   @Output() onUpdateLicense=new EventEmitter();
   @Output() onCloseAddToCollection=new EventEmitter();
   @Output() onStoredAddToCollection=new EventEmitter();
+  _nodeSimpleEdit: Node[];
+  _nodeSimpleFromUpload = false;
   public createMetadata: string;
   public editorPending = false;
   public metadataParent: Node;
@@ -285,7 +291,6 @@ export class WorkspaceManagementDialogsComponent  {
         this.nodeDeleteOnCancel=true;
         this.nodeDeleteOnCancelChange.emit(true);
         this.nodeMetadata=[data.node];
-        this.nodeMetadataAllowReplace=true;
         this.onRefresh.emit();
       });
   }
@@ -330,20 +335,23 @@ export class WorkspaceManagementDialogsComponent  {
     this.onUpdateLicense.emit();
     this.onRefresh.emit(nodes);
   }
+  deleteNodes(nodes: Node[]) {
+      this.toast.showProgressDialog();
+      Observable.forkJoin(nodes.map((n) => this.nodeService.deleteNode(n.ref.id, false)))
+          .subscribe(() => {
+              this.nodeDeleteOnCancel = false;
+              this.nodeDeleteOnCancelChange.emit(false);
+              this.toast.closeModalDialog();
+              this.closeEditor(true);
+          });
+  }
   private closeEditor(refresh:boolean,node: Node[]=null){
       if(node!=null && this.wasUploaded) {
           this.onUploadFilesProcessed.emit(node);
       }
       this.wasUploaded=false;
       if (this.nodeDeleteOnCancel && node == null) {
-          this.globalProgress = true;
-          Observable.forkJoin(this.nodeMetadata.map((n) => this.nodeService.deleteNode(n.ref.id, false)))
-              .subscribe(() => {
-                  this.nodeDeleteOnCancel = false;
-                  this.nodeDeleteOnCancelChange.emit(false);
-                  this.globalProgress = false;
-                  this.closeEditor(true);
-              });
+          this.deleteNodes(this.nodeMetadata);
           return;
       }
     this.nodeDeleteOnCancel=false;
@@ -441,9 +449,10 @@ export class WorkspaceManagementDialogsComponent  {
   }
 
     private showMetadataAfterUpload(event: Node[]) {
-        this.nodeMetadata = event;
-        this.nodeMetadataChange.emit(event);
-        this.nodeMetadataAllowReplace = false;
+        this._nodeSimpleEdit = event;
+        this.nodeSimpleEditChange.emit(event);
+        this._nodeSimpleFromUpload = true;
+
         this.nodeDeleteOnCancel=true;
         this.nodeDeleteOnCancelChange.emit(true);
     }
@@ -531,5 +540,15 @@ export class WorkspaceManagementDialogsComponent  {
     displayNode(node: Node) {
         this.router.navigate([UIConstants.ROUTER_PREFIX + 'render', node.ref.id, node.version]);
 
+    }
+
+    closeSimpleEdit(saved: boolean) {
+        if (saved && this._nodeSimpleFromUpload) {
+            this.onUploadFilesProcessed.emit(this._nodeSimpleEdit);
+        } else if(!saved && this._nodeSimpleFromUpload) {
+            this.deleteNodes(this._nodeSimpleEdit);
+        }
+        this._nodeSimpleEdit = null;
+        this.nodeSimpleEditChange.emit(null);
     }
 }

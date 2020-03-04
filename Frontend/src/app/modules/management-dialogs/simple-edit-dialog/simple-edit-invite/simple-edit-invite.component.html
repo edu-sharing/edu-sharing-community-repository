@@ -1,0 +1,36 @@
+<info-message message="SIMPLE_EDIT.INVITE.ERROR_MULTIPLE_PARENTS" *ngIf="multipleParents"></info-message>
+<info-message message="SIMPLE_EDIT.INVITE.ERROR_INHERIT" *ngIf="parentAuthorities.length > 0">
+    <span *ngFor="let authority of parentAuthorities" class="authorities">{{authority | authorityName}}</span>
+</info-message>
+
+<div *ngIf="!multipleParents && parentAuthorities.length === 0" class="toggles">
+    <div>
+        <mat-button-toggle-group #orgGroup="matButtonToggleGroup"
+                                 (change)="updateValue('org')">
+            <mat-button-toggle [value]="'unset'">
+                {{ "SIMPLE_EDIT.INVITE.UNSET" | translate }}
+            </mat-button-toggle>
+            <ng-container *ngIf="organization">
+                <mat-button-toggle
+                        [value]="group"
+                        *ngFor="let group of organizationGroups"
+                >
+                    {{ "SIMPLE_EDIT.INVITE.GROUP_TYPES."+group | translate}}
+                </mat-button-toggle>
+                <mat-button-toggle [value]="'org'">
+                    {{ organization.organization | authorityName}}
+                </mat-button-toggle>
+            </ng-container>
+        </mat-button-toggle-group>
+    </div>
+    <div *ngIf="globalGroups.length > 0">
+        <mat-button-toggle-group #globalGroup="matButtonToggleGroup"
+                                 (change)="updateValue('global')">
+            <mat-button-toggle
+                    *ngFor="let group of globalGroups"
+                    [value]="group.authorityName">
+                {{ group | authorityName }}
+            </mat-button-toggle>
+        </mat-button-toggle-group>
+    </div>
+</div>
