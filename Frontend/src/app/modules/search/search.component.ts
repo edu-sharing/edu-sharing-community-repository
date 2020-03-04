@@ -1,61 +1,30 @@
-import { Component, ElementRef, HostListener, ViewChild } from '@angular/core';
-import 'rxjs/add/operator/map';
-import { SearchService } from './search.service';
-import { WindowRefService } from './window-ref.service';
-import { Subscription } from 'rxjs/Subscription';
+import { trigger } from '@angular/animations';
+import { HttpClient } from '@angular/common/http';
+import { AfterViewInit, Component, ElementRef, HostListener, OnDestroy, OnInit, ViewChild } from '@angular/core';
+import { Title } from '@angular/platform-browser';
 import { ActivatedRoute, Router } from '@angular/router';
 import { TranslateService } from '@ngx-translate/core';
-import { Translation } from '../../core-ui-module/translation';
-import {
-    Collection,
-    CollectionWrapper,
-    ConfigurationHelper,
-    ConfigurationService,
-    DialogButton,
-    ListItem,
-    LoginResult,
-    MdsInfo,
-    MdsMetadatasets,
-    NetworkRepositories,
-    Node,
-    NodeList,
-    NodesRightMode,
-    NodeWrapper,
-    Repository,
-    RestCollectionService,
-    RestConnectorService,
-    RestConstants,
-    RestHelper,
-    RestIamService,
-    RestMdsService,
-    RestNetworkService,
-    RestNodeService,
-    RestSearchService,
-    SearchList,
-    SessionStorageService,
-    SortItem,
-    TemporaryStorageService,
-    UIService,
-} from '../../core-module/core.module';
-import { ListTableComponent } from '../../core-ui-module/components/list-table/list-table.component';
-import { OptionItem, Scope } from '../../core-ui-module/option-item';
-import { Helper } from '../../core-module/rest/helper';
-import { UIHelper } from '../../core-ui-module/ui-helper';
-import { Title } from '@angular/platform-browser';
-import { Toast } from '../../core-ui-module/toast';
-import { UIAnimation } from '../../core-module/ui/ui-animation';
-import { trigger } from '@angular/animations';
-import { NodeHelper } from '../../core-ui-module/node-helper';
-import { UIConstants } from '../../core-module/ui/ui-constants';
-import { MdsComponent } from '../../common/ui/mds/mds.component';
-import { WorkspaceManagementDialogsComponent } from '../management-dialogs/management-dialogs.component';
-import { MainNavComponent } from '../../common/ui/main-nav/main-nav.component';
+import 'rxjs/add/operator/map';
+import { Subscription } from 'rxjs/Subscription';
 import { ActionbarHelperService } from '../../common/services/actionbar-helper';
-import { HttpClient } from '@angular/common/http';
-import { MdsHelper } from '../../core-module/rest/mds-helper';
-import { BridgeService } from '../../core-bridge-module/bridge.service';
-import { GlobalContainerComponent } from '../../common/ui/global-container/global-container.component';
 import { ActionbarComponent } from '../../common/ui/actionbar/actionbar.component';
+import { GlobalContainerComponent } from '../../common/ui/global-container/global-container.component';
+import { MainNavComponent } from '../../common/ui/main-nav/main-nav.component';
+import { MdsComponent } from '../../common/ui/mds/mds.component';
+import { BridgeService } from '../../core-bridge-module/bridge.service';
+import { CollectionWrapper, ConfigurationHelper, ConfigurationService, DialogButton, ListItem, LoginResult, MdsInfo, MdsMetadatasets, NetworkRepositories, Node, NodeList, NodeWrapper, Repository, RestCollectionService, RestConnectorService, RestConstants, RestHelper, RestIamService, RestMdsService, RestNetworkService, RestNodeService, RestSearchService, SearchList, SessionStorageService, SortItem, TemporaryStorageService, UIService } from '../../core-module/core.module';
+import { Helper } from '../../core-module/rest/helper';
+import { MdsHelper } from '../../core-module/rest/mds-helper';
+import { UIAnimation } from '../../core-module/ui/ui-animation';
+import { UIConstants } from '../../core-module/ui/ui-constants';
+import { ListTableComponent } from '../../core-ui-module/components/list-table/list-table.component';
+import { NodeHelper } from '../../core-ui-module/node-helper';
+import { OptionItem, Scope } from '../../core-ui-module/option-item';
+import { Toast } from '../../core-ui-module/toast';
+import { Translation } from '../../core-ui-module/translation';
+import { UIHelper } from '../../core-ui-module/ui-helper';
+import { SearchService } from './search.service';
+import { WindowRefService } from './window-ref.service';
 
 @Component({
     selector: 'app-search',
@@ -64,53 +33,67 @@ import { ActionbarComponent } from '../../common/ui/actionbar/actionbar.componen
     providers: [WindowRefService],
     animations: [trigger('fromLeft', UIAnimation.fromLeft())],
 })
-export class SearchComponent {
+export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
     readonly SCOPES = Scope;
-    toolPermissions: string[];
-    public initalized: boolean;
-    public tutorialElement: ElementRef;
+
     @ViewChild('mds') mdsRef: MdsComponent;
     @ViewChild('list') list: ListTableComponent;
     @ViewChild('mainNav') mainNavRef: MainNavComponent;
     @ViewChild('extendedSearch') extendedSearch: ElementRef;
     @ViewChild('actionbarComponent') actionbarComponent: ActionbarComponent;
-    public mdsSuggestions: any = {};
-    public mdsExtended = false;
-    public sidenavTab = 0;
-    public collectionsMore = false;
-    searchFail: boolean = false;
-    public nodeReport: Node;
-    public nodeVariant: Node;
-    public currentRepository: string = RestConstants.HOME_REPOSITORY;
-    public currentRepositoryObject: Repository;
-
-    public applyMode = false;
-    public hasCheckbox = false;
-    public showMoreRepositories = false;
-    innerWidth: number = 0;
-    breakpoint: number = 800;
-
     @ViewChild('toolbar') toolbar: any;
 
-    public options: OptionItem[] = [];
-    public savedSearchOptions: OptionItem[] = [];
+    toolPermissions: string[];
+    searchFail: boolean = false;
+    innerWidth: number = 0;
+    breakpoint: number = 800;
+    initalized: boolean;
+    tutorialElement: ElementRef;
+    mdsSuggestions: any = {};
+    mdsExtended = false;
+    sidenavTab = 0;
+    collectionsMore = false;
+    nodeReport: Node;
+    nodeVariant: Node;
+    currentRepository: string = RestConstants.HOME_REPOSITORY;
+    currentRepositoryObject: Repository;
+    applyMode = false;
+    hasCheckbox = false;
+    showMoreRepositories = false;
+    options: OptionItem[] = [];
+    savedSearchOptions: OptionItem[] = [];
+    isGuest = false;
+    mainnav = true;
+    hasMoreCollections = false;
+    queryId = RestConstants.DEFAULT_QUERY_NAME;
+    groupResults = false;
+    actionOptions: OptionItem[] = [];
+    allRepositories: Repository[];
+    repositories: Repository[];
+    globalProgress = false;
+    addNodesToCollection: Node[];
+    addNodesStream: Node[];
+    get mdsId() {
+        return this._mdsId;
+    }
+    set mdsId(mdsId: string) {
+        this._mdsId = mdsId;
+    }
+    selection: Node[];
+    extendedRepositorySelected = false;
+    savedSearch: Node[] = [];
+    savedSearchColumns: ListItem[] = [];
+    saveSearchDialog = false;
+    savedSearchLoading = false;
+    savedSearchQuery: string = null;
+    savedSearchQueryModel: string = null;
+    addToCollection: Node;
+
     private renderedNode: Node;
-    public isGuest = false;
-    public mainnav = true;
-    public hasMoreCollections = false;
-    public queryId = RestConstants.DEFAULT_QUERY_NAME;
     private viewToggle: OptionItem;
-    public groupResults = false;
-    public actionOptions: OptionItem[] = [];
-    public allRepositories: Repository[];
-    public repositories: Repository[];
-    public globalProgress = false;
     // Max items to fetch at all (afterwards no more infinite scroll)
     private static MAX_ITEMS_COUNT = 500;
     private repositoryIds: any[] = [];
-
-    public addNodesToCollection: Node[];
-    public addNodesStream: Node[];
     private mdsSets: MdsInfo[];
     private _mdsId: string;
     private isSearching = false;
@@ -118,35 +101,13 @@ export class SearchComponent {
     private enabledRepositories: string[];
     // we only initalize the banner once to prevent flickering
     private bannerInitalized = false;
-    public get mdsId() {
-        return this._mdsId;
-    }
-    public set mdsId(mdsId: string) {
-        this._mdsId = mdsId;
-    }
-    public selection: Node[];
     private currentValues: any;
     private currentMdsSet: any;
-    public extendedRepositorySelected = false;
-    public savedSearch: Node[] = [];
-    public savedSearchColumns: ListItem[] = [];
     private mdsActions: OptionItem[];
     private mdsButtons: DialogButton[];
-    public saveSearchDialog = false;
     private currentSavedSearch: Node;
     private login: LoginResult;
     private savedSearchOwn = true;
-    public savedSearchLoading = false;
-    public savedSearchQuery: string = null;
-    public savedSearchQueryModel: string = null;
-    public addToCollection: Node;
-
-    @HostListener('window:scroll', ['$event'])
-    handleScroll(event: Event) {
-        this.searchService.offset =
-            window.pageYOffset || document.documentElement.scrollTop;
-    }
-
     private queryParamsSubscription: Subscription;
     private nodeDisplayed: Node;
 
@@ -174,48 +135,7 @@ export class SearchComponent {
         private network: RestNetworkService,
         private temporaryStorageService: TemporaryStorageService,
     ) {}
-    public getValuesForMds() {
-        // add the primary search word to the currentValuesAll so that the mds is aware of it
-        let values = Helper.deepCopy(this.currentValues);
-        if (!values) {
-            values = [];
-        }
-        if (this.searchService.searchTerm) {
-            values[RestConstants.PRIMARY_SEARCH_CRITERIA] = [
-                this.searchService.searchTerm,
-            ];
-        }
-        return values;
-    }
-    public setRepository(repository: string) {
-        this.routeSearch(this.searchService.searchTerm, repository, null, null);
-        //this.currentRepository=repository;
-        //this.getSearch(null,true);
-    }
 
-    applyParameters(props: any = null) {
-        this.searchService.reinit = true;
-        this.currentValues = props;
-        this.updateGroupedRepositories();
-        this.routeSearchParameters(props);
-        if (
-            UIHelper.evaluateMediaQuery(
-                UIConstants.MEDIA_QUERY_MAX_WIDTH,
-                UIConstants.MOBILE_WIDTH,
-            )
-        ) {
-            this.searchService.sidenavOpened = false;
-        }
-        //this.getSearch(null,true,props);
-    }
-    downloadNode() {
-        window.open(this.renderedNode.downloadUrl);
-    }
-    updateSelection(selection: Node[]) {
-        this.selection = selection;
-        this.updateActionbar(selection);
-        this.setFixMobileNav();
-    }
     ngOnInit() {
         setTimeout(() => {
             this.tutorialElement = this.mainNavRef.search;
@@ -344,44 +264,105 @@ export class SearchComponent {
             });
         });
     }
-    getHomeRepoList() {
-        return [{ id: 'local', isHomeRepo: true } as any];
-    }
-    public refresh() {
-        this.getSearch(null, true);
-    }
-
-    ngOnDestroy() {
-        if (this.queryParamsSubscription)
-            this.queryParamsSubscription.unsubscribe();
-    }
-
-    scrollTo(y = 0) {
-        this.winRef.getNativeWindow().scrollTo(0, y);
-    }
-    handleFocus(event: Event) {
-        if (this.innerWidth < this.breakpoint) {
-            this.scrollTo();
-        }
-    }
 
     ngAfterViewInit() {
         this.scrollTo(this.searchService.offset);
         this.innerWidth = this.winRef.getNativeWindow().innerWidth;
         //this.autocompletesArray = this.autocompletes.toArray();
     }
-    public isMobileHeight() {
+
+    ngOnDestroy() {
+        if (this.queryParamsSubscription) {
+            this.queryParamsSubscription.unsubscribe();
+        }
+    }
+
+    @HostListener('window:scroll', ['$event'])
+    handleScroll(event: Event) {
+        this.searchService.offset =
+            window.pageYOffset || document.documentElement.scrollTop;
+    }
+
+    getValuesForMds() {
+        // add the primary search word to the currentValuesAll so that the mds is aware of it
+        let values = Helper.deepCopy(this.currentValues);
+        if (!values) {
+            values = [];
+        }
+        if (this.searchService.searchTerm) {
+            values[RestConstants.PRIMARY_SEARCH_CRITERIA] = [
+                this.searchService.searchTerm,
+            ];
+        }
+        return values;
+    }
+
+    setRepository(repository: string) {
+        this.routeSearch(this.searchService.searchTerm, repository, null, null);
+        //this.currentRepository=repository;
+        //this.getSearch(null,true);
+    }
+
+    applyParameters(props: any = null) {
+        this.searchService.reinit = true;
+        this.currentValues = props;
+        this.updateGroupedRepositories();
+        this.routeSearchParameters(props);
+        if (
+            UIHelper.evaluateMediaQuery(
+                UIConstants.MEDIA_QUERY_MAX_WIDTH,
+                UIConstants.MOBILE_WIDTH,
+            )
+        ) {
+            this.searchService.sidenavOpened = false;
+        }
+        //this.getSearch(null,true,props);
+    }
+
+    downloadNode() {
+        window.open(this.renderedNode.downloadUrl);
+    }
+
+    updateSelection(selection: Node[]) {
+        this.selection = selection;
+        this.updateActionbar(selection);
+        this.setFixMobileNav();
+    }
+
+    getHomeRepoList() {
+        return [{ id: 'local', isHomeRepo: true } as any];
+    }
+
+    refresh() {
+        this.getSearch(null, true);
+    }
+
+    scrollTo(y = 0) {
+        this.winRef.getNativeWindow().scrollTo(0, y);
+    }
+
+    handleFocus(event: Event) {
+        if (this.innerWidth < this.breakpoint) {
+            this.scrollTo();
+        }
+    }
+
+    isMobileHeight() {
         return window.innerHeight < UIConstants.MOBILE_HEIGHT;
     }
-    public isMobileWidth() {
+
+    isMobileWidth() {
         return window.innerWidth < UIConstants.MOBILE_WIDTH;
     }
+
     isMdsLoading() {
         return !this.mdsRef || this.mdsRef.isLoading;
     }
+
     canDrop() {
         return false;
     }
+
     getMoreResults() {
         if (this.searchService.complete == false) {
             //this.searchService.skipcount = this.searchService.searchResult.length;
@@ -408,7 +389,8 @@ export class SearchComponent {
         }
         return true;
     }
-    public routeSearchParameters(parameters: any) {
+
+    routeSearchParameters(parameters: any) {
         this.routeSearch(
             this.searchService.searchTerm,
             this.currentRepository,
@@ -416,11 +398,13 @@ export class SearchComponent {
             parameters,
         );
     }
-    public getMdsValues() {
+
+    getMdsValues() {
         if (this.currentRepository == RestConstants.ALL) return {};
         return this.mdsRef.getValues();
     }
-    public routeAndClearSearch(query: any) {
+
+    routeAndClearSearch(query: any) {
         let parameters: any = null;
         if (this.mdsRef) {
             parameters = this.getMdsValues();
@@ -435,7 +419,8 @@ export class SearchComponent {
             parameters,
         );
     }
-    public routeSearch(
+
+    routeSearch(
         query = this.searchService.searchTerm,
         repository = this.currentRepository,
         mds = this.mdsId,
@@ -465,6 +450,7 @@ export class SearchComponent {
             },
         });
     }
+
     getSearch(
         searchString: string = null,
         init = false,
@@ -545,6 +531,7 @@ export class SearchComponent {
             }
         }
     }
+
     updateGroupedRepositories() {
         let list = this.repositories.slice(1);
         for (let repo of this.repositoryIds) {
@@ -554,6 +541,7 @@ export class SearchComponent {
         }
         this.groupedRepositories = list;
     }
+
     render(event: any) {
         let node = event.node;
         if (node.collection) {
@@ -591,6 +579,7 @@ export class SearchComponent {
             { queryParams: queryParams },
         );
     }
+
     switchToCollections(id = '') {
         UIHelper.getCommonParameters(this.activatedRoute).subscribe(params => {
             params.id = id;
@@ -599,6 +588,7 @@ export class SearchComponent {
             });
         });
     }
+
     setViewType(type: number) {
         this.searchService.viewType = type;
         this.temporaryStorageService.set('view', type);
@@ -608,6 +598,7 @@ export class SearchComponent {
                     ? 'list'
                     : 'view_module';
     }
+
     toggleView() {
         if (this.searchService.viewType == ListTableComponent.VIEW_TYPE_LIST) {
             this.setViewType(ListTableComponent.VIEW_TYPE_GRID);
@@ -687,13 +678,8 @@ export class SearchComponent {
         )
             this.searchService.complete = true;
     }
-    private updateHasMore() {
-        try {
-            this.hasMoreCollections =
-                document.getElementById('collections').scrollHeight > 90 + 40;
-        } catch (e) {}
-    }
-    public updateMds() {
+
+    updateMds() {
         this.currentValues = null;
         this.routeSearch(
             this.searchService.searchTerm,
@@ -703,11 +689,69 @@ export class SearchComponent {
         );
     }
 
+    sortMaterials(sort: any) {
+        this.searchService.sort.materialsSortBy = sort.name || sort.sortBy;
+        this.searchService.sort.materialsSortAscending =
+            sort.ascending || sort.sortAscending;
+        this.routeSearch();
+    }
+
+    permissionAddToCollection(node: Node) {
+        if (node.access.indexOf(RestConstants.ACCESS_CC_PUBLISH) == -1) {
+            let button: any = null;
+            if (
+                node.properties[RestConstants.CCM_PROP_QUESTIONSALLOWED] &&
+                node.properties[RestConstants.CCM_PROP_QUESTIONSALLOWED][0] ==
+                    'true'
+            ) {
+                button = {
+                    icon: 'message',
+                    caption: 'ASK_CC_PUBLISH',
+                    click: () => {
+                        NodeHelper.askCCPublish(this.translate, node);
+                    },
+                };
+            }
+            return { status: false, message: 'NO_CC_PUBLISH', button: button };
+        }
+        return { status: true };
+    }
+
+    isWorkspaceEnabled() {
+        return ConfigurationHelper.hasMenuButton(this.config, 'workspace');
+    }
+
+    setSavedSearchQuery(query: string) {
+        this.savedSearchQuery = query;
+        this.loadSavedSearch();
+    }
+
+    isHomeRepository() {
+        return RestNetworkService.isHomeRepo(
+            this.currentRepository,
+            this.allRepositories,
+        );
+    }
+
+    toggleSidenav() {
+        this.searchService.sidenavOpened = !this.searchService.sidenavOpened;
+        this.setFixMobileNav();
+        //this.routeSearch();
+    }
+
+    private updateHasMore() {
+        try {
+            this.hasMoreCollections =
+                document.getElementById('collections').scrollHeight > 90 + 40;
+        } catch (e) {}
+    }
+
     private checkFail() {
         this.searchFail =
             this.searchService.searchResult.length < 1 &&
             this.searchService.searchResultCollections.length < 1;
     }
+
     private updateSortMds() {
         // when mds is not ready, we can't update just now
         if (this.currentMdsSet == null) return;
@@ -724,6 +768,7 @@ export class SearchComponent {
         }
         return sort;
     }
+
     private updateSort() {
         let state = this.currentRepository + ':' + this.mdsId;
         let sort = this.updateSortMds();
@@ -741,18 +786,14 @@ export class SearchComponent {
                 sort.default.sortAscending;
         }
     }
+
     private updateColumns() {
         this.searchService.columns = MdsHelper.getColumns(
             this.currentMdsSet,
             'search',
         );
     }
-    sortMaterials(sort: any) {
-        this.searchService.sort.materialsSortBy = sort.name || sort.sortBy;
-        this.searchService.sort.materialsSortAscending =
-            sort.ascending || sort.sortAscending;
-        this.routeSearch();
-    }
+
     private importNode(
         nodes: Node[],
         pos = 0,
@@ -825,6 +866,7 @@ export class SearchComponent {
         this.setViewType(this.searchService.viewType);
         return options;
     }
+
     private addToStream(node: Node) {
         let nodes = ActionbarHelperService.getNodes(this.selection, node);
         this.addNodesStream = nodes;
@@ -855,6 +897,7 @@ export class SearchComponent {
             this.mainNavRef.refreshNodeStore();
         });
     }
+
     private onMdsReady(mds: any = null) {
         this.currentMdsSet = mds;
         this.updateColumns();
@@ -877,6 +920,7 @@ export class SearchComponent {
         }
         this.searchService.reinit = true;
     }
+
     private prepare(param: any) {
         if (this.setSidenavSettings()) {
             // auto, never, always
@@ -928,6 +972,7 @@ export class SearchComponent {
             this.refreshListOptions();
         });
     }
+
     private getSourceIcon(repo: Repository) {
         return NodeHelper.getSourceIconRepoPath(repo);
     }
@@ -935,26 +980,7 @@ export class SearchComponent {
     private getCurrentNode(node: Node) {
         return node ? node : this.selection[0];
     }
-    permissionAddToCollection(node: Node) {
-        if (node.access.indexOf(RestConstants.ACCESS_CC_PUBLISH) == -1) {
-            let button: any = null;
-            if (
-                node.properties[RestConstants.CCM_PROP_QUESTIONSALLOWED] &&
-                node.properties[RestConstants.CCM_PROP_QUESTIONSALLOWED][0] ==
-                    'true'
-            ) {
-                button = {
-                    icon: 'message',
-                    caption: 'ASK_CC_PUBLISH',
-                    click: () => {
-                        NodeHelper.askCCPublish(this.translate, node);
-                    },
-                };
-            }
-            return { status: false, message: 'NO_CC_PUBLISH', button: button };
-        }
-        return { status: true };
-    }
+
     private searchRepository(
         repos: any[],
         criterias: any,
@@ -1057,9 +1083,11 @@ export class SearchComponent {
                 },
             );
     }
+
     private getSourceIconPath(path: string) {
         return NodeHelper.getSourceIconPath(path);
     }
+
     private updateRepositoryOrder() {
         if (!this.repositories) return;
         if (this.repositories.length > 4) {
@@ -1087,6 +1115,7 @@ export class SearchComponent {
             this.updateGroupedRepositories();
         }
     }
+
     private updateMdsActions() {
         this.savedSearchOptions = [];
 
@@ -1125,9 +1154,11 @@ export class SearchComponent {
             1,
         );
     }
+
     private closeSaveSearchDialog() {
         this.saveSearchDialog = false;
     }
+
     private saveSearch(name: string, replace = false) {
         this.search
             .saveSearch(
@@ -1205,11 +1236,13 @@ export class SearchComponent {
         }
         return criterias;
     }
+
     private loadSavedSearchNode(node: Node) {
         this.sidenavTab = 0;
         UIHelper.routeToSearchNode(this.router, this.searchService.reurl, node);
         this.currentSavedSearch = node;
     }
+
     private goToSaveSearchWorkspace() {
         this.nodeApi
             .getNodeMetadata(RestConstants.SAVED_SEARCH)
@@ -1222,9 +1255,7 @@ export class SearchComponent {
                 );
             });
     }
-    isWorkspaceEnabled() {
-        return ConfigurationHelper.hasMenuButton(this.config, 'workspace');
-    }
+
     private loadSavedSearch() {
         if (!this.isGuest) {
             this.savedSearch = [];
@@ -1264,10 +1295,6 @@ export class SearchComponent {
             }
         }
     }
-    public setSavedSearchQuery(query: string) {
-        this.savedSearchQuery = query;
-        this.loadSavedSearch();
-    }
 
     private updateActionbar(list: Node[]) {
         this.actionOptions = this.getOptions(list, false);
@@ -1283,13 +1310,6 @@ export class SearchComponent {
         } else {
             this.mdsRef.loadMds();
         }
-    }
-
-    isHomeRepository() {
-        return RestNetworkService.isHomeRepo(
-            this.currentRepository,
-            this.allRepositories,
-        );
     }
 
     private initParams() {
@@ -1454,12 +1474,6 @@ export class SearchComponent {
             return result;
         }
         return null;
-    }
-
-    toggleSidenav() {
-        this.searchService.sidenavOpened = !this.searchService.sidenavOpened;
-        this.setFixMobileNav();
-        //this.routeSearch();
     }
 
     private setFixMobileNav() {
