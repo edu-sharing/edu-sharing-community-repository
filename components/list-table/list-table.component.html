@@ -140,7 +140,7 @@
                          (mouseenter)="animateIcon(node,true)"
                          (mouseleave)="animateIcon(node,false)"
                          [class.blurred]="isDeleted(node) || noPermissions(node) || applyMode && node.access.indexOf('CCPublish')==-1"
-                         alt="{{'SEARCH.PREVIEWIMAGE_FOR' | translate}} {{getAttributeText(node,columnsVisible[0])}}"/>
+                         alt="{{'SEARCH.PREVIEWIMAGE_FOR' | translate}} {{getAttribute(node,columnsVisible[0])}}"/>
                     <div class="previewCollectionContainer" *ngIf="isCollection(node) && node.preview.isIcon && viewType!=2">
                         <div class="previewCollection" [style.backgroundColor]="getCollectionColor(node)">
                             <i icon iconId="layers"></i>
@@ -174,8 +174,8 @@
                            tabindex="-1"
                            (click)="false"
                            class="rowInner"
-                           [innerHTML]="getAttribute(node,item)"></a>
-                        <div *ngIf="i!=0" class="rowInner" [innerHTML]="getAttribute(node,item)"></div>
+                           [innerHTML]="getAttribute(node,item) | safeHtml"></a>
+                        <div *ngIf="i!=0" class="rowInner" [innerHTML]="getAttribute(node,item) | safeHtml"></div>
                         <div *ngIf="i==0 && viewType==0 && getReference(node).properties && getReference(node).properties['virtual:childobjectcount']>0" class="childobjectCount">
                             <span>{{getReference(node).properties['virtual:childobjectcount']*1+1}}</span><i icon iconId="filter_none"></i>
                         </div>

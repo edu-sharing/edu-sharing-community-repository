@@ -47,6 +47,7 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 import { NodesDragSourceDirective } from './directives/drag-nodes/nodes-drag-source.directive';
 import { NodesDropTargetDirective } from './directives/drag-nodes/nodes-drop-target.directive';
 import { A11yModule } from '@angular/cdk/a11y';
+import { SafeHtmlPipe } from './pipes/safe-html.pipe';
 
 @NgModule({
     declarations: [
@@ -77,6 +78,7 @@ import { A11yModule } from '@angular/cdk/a11y';
         AuthorityAffiliationPipe,
         NodesDragSourceDirective,
         NodesDropTargetDirective,
+        SafeHtmlPipe,
     ],
     imports: [
         A11yModule,
