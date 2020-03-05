@@ -676,7 +676,6 @@ a.rowInner {
     display: inherit;
 }
 .cardList {
-    display: block;
     width: $cardWidth;
     height: $cardHeight;
     @include materialShadow();
@@ -723,14 +722,15 @@ a.rowInner {
 }
 
 .cardSmallList {
-    display: block;
     width: $cardWidth;
     height: $listCardSmallHeight;
     @include materialShadow();
     float: left;
     margin: 6px !important;
     border-radius: 2pt;
-    border-bottom: 5px solid $primary;
+    &:not(.option-item) {
+        border-bottom: 5px solid $primary;
+    }
 }
 .cardSmallList img {
     position: absolute;
@@ -1047,16 +1047,15 @@ a.rowInner {
         width: 100%;
         height: 160px;
         box-shadow: none;
-        border-top: 1px solid $cardSeperatorLineColor;
         .typeicon {
             display: none !important;
         }
         .more a {
             left: 0;
         }
-    }
-    .cardList:first-child:not(.option-item) {
-        border-top: none;
+        &:not(.option-item):not(:first-of-type) {
+            border-top: 1px solid $cardSeperatorLineColor;
+        }
     }
     .cardList .row {
         padding: 0 10px;

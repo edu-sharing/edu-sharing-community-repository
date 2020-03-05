@@ -1,7 +1,6 @@
 @import '../../styles/variables';
 
-:host(.cardList),
-:host(.cardSmallList) {
+:host {
     border: 2px dashed $primary;
     display: table;
     background-color: #fff;
@@ -17,6 +16,7 @@
         }
     }
 }
+
 :host(.cardList) {
     .label {
         white-space: pre-wrap;
@@ -26,12 +26,32 @@
         margin-bottom: 30px;
     }
 }
+
 :host(.cardSmallList) {
     .label {
         white-space: normal;
     }
     i {
         font-size: 30px;
+    }
+}
+
+:host(.tableList) {
+    width: 100%;
+    height: #{$listItemHeight - 20px};
+    margin: 10px 0px;
+    > div > div {
+        display: flex; // Render icon and label side-by-side
+        // Align with item rows
+        > i {
+            width: 50px;
+            margin-left: 68px; // 70px of checkbox minus 2px border
+            padding-right: 5px; // Better align with icons (not completely centerd)
+        }
+        > .label {
+            padding: 0px 5px; // Align with item labels
+            line-height: 24px; // Vertically align with icon
+        }
     }
 }
 
