@@ -1675,19 +1675,20 @@ public class CCConstants {
 		return permission;
 	}
 
+	private static ArrayList<String> usagePermissions = null;
 	/**
 	 * Permissions allowed if the node was opened via usage (lms) or signature
 	 * @return
 	 */
 	public static ArrayList<String> getUsagePermissions(){
-		if(permission == null){
-			permission = new ArrayList<>();
-			permission.add(PERMISSION_READ);
-			permission.add(PERMISSION_READ_PREVIEW);
-			permission.add(PERMISSION_READ_ALL);
-			permission.add(PERMISSION_CONSUMER);
+		if(usagePermissions == null){
+			usagePermissions = new ArrayList<>();
+			usagePermissions.add(PERMISSION_READ);
+			usagePermissions.add(PERMISSION_READ_PREVIEW);
+			usagePermissions.add(PERMISSION_READ_ALL);
+			usagePermissions.add(PERMISSION_CONSUMER);
 		}
-		return permission;
+		return usagePermissions;
 	}
 
 	//AuthorityTypeKey
