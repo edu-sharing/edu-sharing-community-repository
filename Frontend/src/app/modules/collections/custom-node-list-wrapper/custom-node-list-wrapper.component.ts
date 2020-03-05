@@ -11,20 +11,20 @@ import {
     ViewContainerRef,
 } from '@angular/core';
 import {
-    CollectionReference,
+    Node,
     TemporaryStorageService,
 } from '../../../core-module/core.module';
-import { UIHelper } from '../../../core-ui-module/ui-helper';
 import { OptionItem } from '../../../core-ui-module/option-item';
+import { UIHelper } from '../../../core-ui-module/ui-helper';
 
 export interface CustomNodeListWrapperInterface {
     // Inputs
-    nodes: CollectionReference[];
+    nodes: Node[];
     hasMore: boolean;
     isLoading: boolean;
     options: OptionItem[];
     // Outputs
-    clickRow: EventEmitter<{ node: CollectionReference }>;
+    clickRow: EventEmitter<{ node: Node }>;
     loadMore: EventEmitter<null>;
 }
 
@@ -43,11 +43,11 @@ export interface CustomNodeListWrapperInterface {
     template: '',
 })
 export class CustomNodeListWrapperComponent implements OnChanges {
-    @Input() nodes: CollectionReference[];
+    @Input() nodes: Node[];
     @Input() hasMore: boolean;
     @Input() isLoading: boolean;
     @Input() options: OptionItem[];
-    @Output() clickRow = new EventEmitter<{ node: CollectionReference }>();
+    @Output() clickRow = new EventEmitter<{ node: Node }>();
     @Output() loadMore = new EventEmitter<null>();
 
     /**
