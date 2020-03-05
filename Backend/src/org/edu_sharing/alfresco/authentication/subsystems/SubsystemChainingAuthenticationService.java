@@ -3,15 +3,12 @@ package org.edu_sharing.alfresco.authentication.subsystems;
 import java.util.Date;
 import java.util.List;
 
-import javax.transaction.UserTransaction;
-
 import org.alfresco.repo.security.authentication.AuthenticationException;
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.repo.security.authentication.AuthenticationUtil.RunAsWork;
 import org.alfresco.repo.transaction.AlfrescoTransactionSupport;
 import org.alfresco.repo.transaction.AlfrescoTransactionSupport.TxnReadState;
 import org.alfresco.repo.transaction.RetryingTransactionHelper.RetryingTransactionCallback;
-import org.alfresco.repo.transaction.RetryingTransactionHelper;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.repository.NodeService;
 import org.alfresco.service.cmr.security.AuthenticationService;
@@ -20,8 +17,8 @@ import org.alfresco.service.namespace.QName;
 import org.alfresco.service.transaction.TransactionService;
 import org.apache.log4j.Logger;
 import org.edu_sharing.repository.client.tools.CCConstants;
-import org.edu_sharing.repository.server.tools.ApplicationInfo;
 import org.edu_sharing.repository.server.tools.ApplicationInfoList;
+import org.springframework.dao.ConcurrencyFailureException;
 
 public class SubsystemChainingAuthenticationService extends org.alfresco.repo.security.authentication.subsystems.SubsystemChainingAuthenticationService {
 
@@ -84,7 +81,11 @@ public class SubsystemChainingAuthenticationService extends org.alfresco.repo.se
         			
         			RetryingTransactionCallback<Void> txnWork = new RetryingTransactionCallback<Void>() {
 						public Void execute() throws Exception {
-							nodeService.setProperty(nodeRefPerson, QName.createQName(CCConstants.PROP_USER_ESLASTLOGIN), new Date());
+							try {
+								nodeService.setProperty(nodeRefPerson, QName.createQName(CCConstants.PROP_USER_ESLASTLOGIN), new Date());
+							}catch(ConcurrencyFailureException e) {
+								logger.info("failed to set EsLastLogin for user " + userName + " cause of " + e.getClass().getSimpleName());
+							}
 							return null;
 						}
 					};
