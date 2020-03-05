@@ -22,14 +22,13 @@ import org.edu_sharing.restservices.GroupDao;
 import org.edu_sharing.restservices.MediacenterDao;
 import org.edu_sharing.restservices.RepositoryDao;
 import org.edu_sharing.restservices.RestConstants;
-import org.edu_sharing.restservices.admin.v1.model.ExcelResult;
 import org.edu_sharing.restservices.mediacenter.v1.model.McOrgConnectResult;
 import org.edu_sharing.restservices.mediacenter.v1.model.MediacentersImportResult;
 import org.edu_sharing.restservices.mediacenter.v1.model.OrganisationsImportResult;
 import org.edu_sharing.restservices.shared.ErrorResponse;
 import org.edu_sharing.restservices.shared.Group;
 import org.edu_sharing.restservices.shared.Mediacenter;
-import org.edu_sharing.service.admin.AdminServiceFactory;
+import org.edu_sharing.restservices.shared.Node;
 import org.edu_sharing.service.authority.AuthorityServiceFactory;
 import org.edu_sharing.service.mediacenter.MediacenterServiceFactory;
 import org.glassfish.jersey.media.multipart.FormDataParam;
@@ -188,6 +187,42 @@ public class MediacenterApi {
 		}
 
 	}
+	
+	
+	@GET
+	@Path("/mediacenter/{repository}/{mediacenter}/licenses")
+
+	@ApiOperation(
+			value = "get nodes that are licensed by the given mediacenter"
+	)
+
+	@ApiResponses(
+			value = {
+					@ApiResponse(code = 200, message = RestConstants.HTTP_200, response = Group[].class),
+					@ApiResponse(code = 400, message = RestConstants.HTTP_400, response = ErrorResponse.class),
+					@ApiResponse(code = 401, message = RestConstants.HTTP_401, response = ErrorResponse.class),
+					@ApiResponse(code = 403, message = RestConstants.HTTP_403, response = ErrorResponse.class),
+					@ApiResponse(code = 404, message = RestConstants.HTTP_404, response = ErrorResponse.class),
+					@ApiResponse(code = 409, message = RestConstants.HTTP_409, response = ErrorResponse.class),
+					@ApiResponse(code = 500, message = RestConstants.HTTP_500, response = ErrorResponse.class)
+			})
+
+	public Response getMediacenterLicensedNodes(
+			@ApiParam(value = RestConstants.MESSAGE_REPOSITORY_ID,required=true, defaultValue="-home-" ) @PathParam("repository") String repository,
+			@ApiParam(value = "authorityName of the mediacenter that licenses nodes",required=true) @PathParam("mediacenter") String mediacenter,
+			@Context HttpServletRequest req) {
+
+		try {
+			RepositoryDao repoDao = RepositoryDao.getRepository(repository);
+			MediacenterDao dao = MediacenterDao.get(repoDao, mediacenter);
+			List<Node> result = dao.getLicensedNodes();
+			return Response.status(Response.Status.OK).entity(result).build();
+		} catch (Throwable t) {
+			return ErrorResponse.createResponse(t);
+		}
+
+	}
+	
 	@PUT
 	@Path("/mediacenter/{repository}/{mediacenter}/manages/{group}")
 
