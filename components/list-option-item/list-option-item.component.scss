@@ -1,0 +1,49 @@
+@import '../../styles/variables';
+
+:host(.cardList),
+:host(.cardSmallList) {
+    border: 2px dashed $primary;
+    display: table;
+    background-color: #fff;
+    @include clickable();
+    > div {
+        color: $primary;
+        display: table-cell;
+        vertical-align: middle;
+        text-align: center;
+        .label {
+            font-weight: bold;
+            text-transform: uppercase;
+        }
+    }
+}
+:host(.cardList) {
+    .label {
+        white-space: pre-wrap;
+    }
+    i {
+        font-size: 40px;
+        margin-bottom: 30px;
+    }
+}
+:host(.cardSmallList) {
+    .label {
+        white-space: normal;
+    }
+    i {
+        font-size: 30px;
+    }
+}
+
+@media all and (max-width: ($mobileWidth)) {
+    :host(.cardList) {
+        height: 90px;
+        margin-bottom: 20px;
+        i {
+            margin-bottom: 0;
+        }
+        .label {
+            white-space: normal;
+        }
+    }
+}

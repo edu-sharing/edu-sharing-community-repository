@@ -684,37 +684,7 @@ a.rowInner{
     }
   }
 }
-.cardList.addElement,
-.cardSmallList.addElement{
-  border:2px dashed $primary;
-  display:table;
-  background-color: #fff;
-  @include clickable();
-  >div{
-    color:$primary;
-    display:table-cell;
-    vertical-align: middle;
-    text-align: center;
-    .label{
-      font-weight: bold;
-      text-transform: uppercase;
-    }
 
-  }
-}
-.cardList.addElement .label {
-  white-space: pre-wrap;
-}
-.cardSmallList.addElement .label {
-  white-space: normal;
-}
-.cardList.addElement i{
-  font-size:40px;
-  margin-bottom: 30px;
-}
-.cardSmallList.addElement i{
-  font-size:30px;
-}
 .cardSmallList{
   display:block;
   width:$cardWidth;
@@ -1044,17 +1014,7 @@ a.rowInner{
         left:0;
       }
   }
-  .cardList.addElement{
-    height:90px;
-    margin-bottom: 20px;
-    i{
-      margin-bottom: 0;
-    }
-    .label{
-      white-space: normal;
-    }
-  }
-  .cardList:first-child:not(.addElement){
+  .cardList:first-child:not(.option-item) {
     border-top:none;
   }
   .cardList .row{

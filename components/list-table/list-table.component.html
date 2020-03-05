@@ -52,19 +52,14 @@
         </div>
     </div>
     <div class="list-container" [class.cardContainer]="viewType==1 || viewType==2" *ngIf="!reorderDialog">
-        <div *ngIf="addElement" class="addElement clickable" #addElementRef
-             tabindex="0"
-             (keyup.enter)="addElementClicked()"
-             (click)="addElementClicked()"
-             [class.tableList]="viewType==0"
-             [class.cardList]="viewType==1"
-             [class.cardSmallList]="viewType==2"
-        >
-            <div>
-                <i icon iconId="{{addElement.icon}}"></i>
-                <div class="label">{{addElement.label | translate}}</div>
-            </div>
-        </div>
+        <app-list-option-item
+            *ngFor="let option of optionItems"
+            [option]="option"
+            class="clickable option-item"
+            [class.tableList]="viewType == 0"
+            [class.cardList]="viewType == 1"
+            [class.cardSmallList]="viewType == 2"
+        ></app-list-option-item>
         <div matRipple matRippleColor="primary" *ngFor="let node of _nodes; let i = index" class="rowFrame"
              [class.order-animation]="orderElementsActive"
              [class.nodeCollection]="isCollection(node)"

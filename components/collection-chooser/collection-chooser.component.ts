@@ -18,6 +18,7 @@ import {
     RestNodeService,
 } from '../../../core-module/core.module';
 import { Toast } from '../../toast';
+import { OptionItem } from '../../option-item';
 
 /**
  * An edu-sharing sidebar dialog for adding data to a collection
@@ -35,22 +36,18 @@ export class CollectionChooserComponent implements OnInit {
 
     /**
      * Fired when an element is choosen, a (collection) Node will be send as a result
-     * @type {EventEmitter}
      */
     @Output() onChoose = new EventEmitter();
     @Output() onCreateCollection = new EventEmitter();
     /**
      * Fired when a list of nodes is dropped on a collection item
-     * @type {EventEmitter}
      */
     @Output() onDrop = new EventEmitter();
     /**
      * Fired when the dialog should be closed
-     * @type {EventEmitter}
      */
     @Output() onCancel = new EventEmitter();
 
-    createCollectionElement = new AddElement('COLLECTIONS.CREATE_COLLECTION');
     searchQuery = '';
     lastSearchQuery = '';
     isLoadingLatest = true;
@@ -59,6 +56,11 @@ export class CollectionChooserComponent implements OnInit {
     breadcrumbs: Node[];
     listLatest: Node[];
     listMy: Node[];
+    createCollectionOptionItem = new OptionItem(
+        'COLLECTIONS.CREATE_COLLECTION',
+        'add',
+        () => this.createCollection(),
+    );
 
     private hasMoreToLoad: boolean;
     private columns: ListItem[] = ListItem.getCollectionDefaults();

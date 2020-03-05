@@ -19,7 +19,6 @@ import {
     ViewChild,
 } from '@angular/core';
 import { MatMenuTrigger } from '@angular/material/menu';
-import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
 import { ActivatedRoute, Router } from '@angular/router';
 import { TranslateService } from '@ngx-translate/core';
 import {
@@ -44,7 +43,6 @@ import { ColorHelper } from '../../../core-module/ui/color-helper';
 import { KeyEvents } from '../../../core-module/ui/key-events';
 import { UIAnimation } from '../../../core-module/ui/ui-animation';
 import { UIConstants } from '../../../core-module/ui/ui-constants';
-import { AddElement } from '../../add-element';
 import { NodeHelper } from '../../node-helper';
 import { OptionItem, Scope } from '../../option-item';
 import { Toast } from '../../toast';
@@ -100,12 +98,10 @@ export class ListTableComponent implements EventListener {
     public static VIEW_TYPE_GRID = 1;
     public static VIEW_TYPE_GRID_SMALL = 2;
 
-    @ViewChild('addElementRef') addElementRef: ElementRef;
     @ViewChild('drag') drag: ElementRef;
     @ViewChild('menuTrigger') menuTrigger: MatMenuTrigger;
     @ViewChild('dropdown') dropdownElement: ElementRef;
-    @ViewChild('dropdownContainer')
-    dropdownContainerElement: ElementRef;
+    @ViewChild('dropdownContainer') dropdownContainerElement: ElementRef;
 
     @ContentChild('itemContent') itemContentRef: TemplateRef<any>;
 
@@ -187,15 +183,6 @@ export class ListTableComponent implements EventListener {
      * Use this material icon. (Only applicable if it's not a node but a group or user.)
      */
     @Input() icon: string;
-
-    /**
-     * Are checkboxes visible? (If disabled, only single select.)
-     *
-     * If not null, shows a "Add Element" option as a first element (used for collections)
-     * The AddElement defines label, icon and other details
-     * The event onAddElement will be called when the user selects this element
-     */
-    @Input() addElement: AddElement;
 
     @Input() set hasCheckbox(hasCheckbox: boolean) {
         this._hasCheckbox = hasCheckbox;
@@ -362,7 +349,7 @@ export class ListTableComponent implements EventListener {
      * control the visibility of the reorder dialog (two-way binding)
      */
     @Input() reorderDialog = false;
-    @Output() reorderDialogChange = new EventEmitter<boolean>();
+
     /**
      * Can an element be dropped on the element?
      *
@@ -373,6 +360,10 @@ export class ListTableComponent implements EventListener {
         target: Node;
         event: DragEvent;
     }) => boolean = () => true;
+
+    @Input() optionItems: OptionItem[] = [];
+
+    @Output() reorderDialogChange = new EventEmitter<boolean>();
 
     @Output() nodesChange = new EventEmitter();
 
@@ -444,11 +435,6 @@ export class ListTableComponent implements EventListener {
     @Output() columnsChanged = new EventEmitter<ListItem[]>();
 
     /**
-     * Called when the user clicked the "addElement" item.
-     */
-    @Output() onAddElement = new EventEmitter();
-
-    /**
      * Called when the user clicked the delete for a missing reference object.
      */
     @Output() onDelete = new EventEmitter();
@@ -498,7 +484,6 @@ export class ListTableComponent implements EventListener {
         private optionsHelper: OptionsHelperService,
         private bridge: BridgeService,
         private frame: FrameEventsService,
-        private sanitizer: DomSanitizer,
     ) {
         this.reorderButtons = DialogButton.getSaveCancel(
             () => this.closeReorder(false),
@@ -611,10 +596,6 @@ export class ListTableComponent implements EventListener {
 
     isDeleted(node: any): boolean {
         return this.isReference(node) && !node.originalId;
-    }
-
-    addElementClicked(): void {
-        this.onAddElement.emit();
     }
 
     askCCPublish(event: any, node: Node): void {

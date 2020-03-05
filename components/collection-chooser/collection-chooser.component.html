@@ -11,8 +11,7 @@
   <listTable
           [viewType]="2"
           [hasHeading]="false"
-          [addElement]="createCollectionElement"
-          (onAddElement)="createCollection()"
+          [optionItems]="[createCollectionOptionItem]"
   ></listTable>
   <div class="list-my">
     <listTable *ngIf="isLoadingMy || listMy.length"
