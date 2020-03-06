@@ -1,16 +1,20 @@
 package org.edu_sharing.restservices;
 
-import com.google.gson.Gson;
-
-import org.alfresco.service.cmr.repository.StoreRef;
-import org.alfresco.service.cmr.security.PermissionService;
-import org.edu_sharing.alfresco.service.AuthorityService;
-import org.edu_sharing.repository.client.tools.CCConstants;
-import org.edu_sharing.restservices.shared.*;
-
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
+
+import org.alfresco.service.cmr.security.PermissionService;
+import org.edu_sharing.alfresco.service.AuthorityService;
+import org.edu_sharing.repository.client.tools.CCConstants;
+import org.edu_sharing.repository.server.SearchResultNodeRef;
+import org.edu_sharing.restservices.shared.Mediacenter;
+import org.edu_sharing.restservices.shared.Node;
+import org.edu_sharing.service.model.NodeRef;
+import org.edu_sharing.service.search.model.SearchToken;
+
+import com.google.gson.Gson;
 
 public class MediacenterDao extends AbstractDao{
 
@@ -120,6 +124,22 @@ public class MediacenterDao extends AbstractDao{
 				filter((group)->!AuthorityService.MEDIACENTER_ADMINISTRATORS_GROUP_TYPE.equals(group.getGroupType())).
 				collect(Collectors.toList());
 	}
+	
+	public List<Node> getLicensedNodes() throws DAOException{
+		SearchToken searchToken = new SearchToken();
+		searchToken.setAuthorityScope(Arrays.asList(new String[] {this.authorityName}));
+		searchToken.setLuceneString("TYPE:\"" + "ccm:io\"");
+		searchToken.setFrom(0);
+		searchToken.setMaxResult(Integer.MAX_VALUE);
+		
+		List<org.edu_sharing.restservices.shared.NodeRef> search = NodeDao.search(repoDao, searchToken).getResult();
+		List<Node> data = new ArrayList<Node>();
+    	for (org.edu_sharing.restservices.shared.NodeRef ref : search) {
+    		data.add(NodeDao.getNode(repoDao, ref.getId()).asNode());
+    	}
+		return data;
+	}
+	
 	public void changeProfile(Mediacenter.Profile profile) throws DAOException {
 		// always force the group type to media center
 		profile.setGroupType(CCConstants.MEDIA_CENTER_GROUP_TYPE);

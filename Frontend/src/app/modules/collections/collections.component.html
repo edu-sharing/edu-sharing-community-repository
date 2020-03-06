@@ -214,7 +214,11 @@
                 <listTable
                     #listCollections
                     [listClass]="'subcollections'"
-                    [addElement]="isAllowedToEditCollection() ? createCollectionElement : null"
+                    [optionItems]="
+                        isAllowedToEditCollection()
+                        ? [createSubCollectionOptionItem]
+                        : []
+                    "
                     [hasHeading]="false"
                     [isLoading]="isLoading"
                     [viewType]="getCollectionViewType()"
@@ -225,7 +229,6 @@
                     [isClickable]="true"
                     (clickRow)="onCollectionsClick($event.node)"
                     (doubleClickRow)="onCollectionsClick($event)"
-                    (onAddElement)="onCreateCollection()"
                     [nodes]="collectionContent.collections"
                     [isLoading]="collectionContent.collectionsLoading"
                     [hasMore]="
@@ -294,10 +297,10 @@
                 ></app-custom-node-list-wrapper>
                 <listTable
                     *ngIf="!customNodeList"
-                    [addElement]="
+                    [optionItems]="
                         isUserAllowedToEdit(collectionContent.node)
-                            ? createCollectionReference
-                            : null
+                            ? [addMaterialOptionItem]
+                            : []
                     "
                     [hasHeading]="false"
                     [viewType]="1"
@@ -313,7 +316,6 @@
                     [hasCheckbox]="!orderActive && !reurl"
                     [canDrop]="canDropOnRef"
                     (clickRow)="onContentClick($event.node)"
-                    (onAddElement)="switchToSearch()"
                     [canDelete]="canDelete"
                     (onDelete)="deleteReference($event)"
                     [createLink]="true"

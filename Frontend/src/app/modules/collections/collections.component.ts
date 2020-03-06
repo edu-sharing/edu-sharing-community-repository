@@ -43,7 +43,6 @@ import { ColorHelper } from '../../core-module/ui/color-helper';
 import { ActionbarHelperService } from '../../common/services/actionbar-helper';
 import { MdsHelper } from '../../core-module/rest/mds-helper';
 import { BridgeService } from '../../core-bridge-module/bridge.service';
-import { AddElement } from '../../core-ui-module/add-element';
 import { MatSlideToggle } from '@angular/material/slide-toggle';
 import { HttpClient } from '@angular/common/http';
 import { GlobalContainerComponent } from '../../common/ui/global-container/global-container.component';
@@ -57,7 +56,7 @@ import {ActionbarComponent} from '../../common/ui/actionbar/actionbar.component'
     templateUrl: 'collections.component.html',
     styleUrls: ['collections.component.scss'],
     // provide a new instance so to not get conflicts with other service instances
-    providers: [ OptionsHelperService ]
+    providers: [OptionsHelperService],
 })
 export class CollectionsMainComponent {
     static INDEX_MAPPING = [
@@ -114,10 +113,15 @@ export class CollectionsMainComponent {
     nodeReport: Node;
     collectionsColumns: ListItem[] = [];
     referencesColumns: ListItem[] = [];
-    createCollectionElement = new AddElement('COLLECTIONS.CREATE_COLLECTION');
-    createCollectionReference = new AddElement(
+    createSubCollectionOptionItem = new OptionItem(
+        'COLLECTIONS.CREATE_COLLECTION',
+        'add',
+        () => this.onCreateCollection(),
+    );
+    addMaterialOptionItem = new OptionItem(
         'COLLECTIONS.ADD_MATERIAL',
         'redo',
+        () => this.switchToSearch(),
     );
     optionsMaterials: OptionItem[];
     tutorialElement: ElementRef;
@@ -374,7 +378,7 @@ export class CollectionsMainComponent {
 
     isAllowedToEditCollection(): boolean {
         if (this.isRootLevelCollection()) {
-            return !this.isGuest;//this.tabSelected === RestConstants.COLLECTIONSCOPE_MY
+            return !this.isGuest; //this.tabSelected === RestConstants.COLLECTIONSCOPE_MY
         }
         if (
             RestHelper.hasAccessPermission(
@@ -449,9 +453,7 @@ export class CollectionsMainComponent {
     }
 
     getScopeInfo() {
-        return NodeHelper.getCollectionScopeInfo(
-            this.collectionContent.node,
-        );
+        return NodeHelper.getCollectionScopeInfo(this.collectionContent.node);
     }
     dropOnCollection(event: any) {
         const target = event.target;
@@ -545,7 +547,8 @@ export class CollectionsMainComponent {
                         RestConstants.COLLECTIONTYPE_EDITORIAL) ||
                 (event.source[0].type !==
                     RestConstants.COLLECTIONTYPE_EDITORIAL &&
-                    event.target.type === RestConstants.COLLECTIONTYPE_EDITORIAL)
+                    event.target.type ===
+                        RestConstants.COLLECTIONTYPE_EDITORIAL)
             ) {
                 return false;
             }
@@ -929,7 +932,10 @@ export class CollectionsMainComponent {
     }
 
     private initialize() {
-        this.optionsService.clearComponents(this.mainNavRef, this.actionbarReferences);
+        this.optionsService.clearComponents(
+            this.mainNavRef,
+            this.actionbarReferences,
+        );
 
         // load user profile
         this.iamService.getUser().subscribe(
@@ -1118,9 +1124,12 @@ export class CollectionsMainComponent {
     private setOptionsCollection() {
         this.optionsService.setData({
             scope: Scope.CollectionsCollection,
-            activeObject: this.collectionContent.node
+            activeObject: this.collectionContent.node,
         });
-        this.optionsService.initComponents(this.mainNavRef, this.actionbarCollection);
+        this.optionsService.initComponents(
+            this.mainNavRef,
+            this.actionbarCollection,
+        );
         this.optionsService.refreshComponents();
     }
 
@@ -1132,7 +1141,9 @@ export class CollectionsMainComponent {
         };
         this.collectionContent.node.ref = new NodeRef();
         this.collectionContent.node.ref.id = id;
-        this.collectionContent.node.aspects = [RestConstants.CCM_ASPECT_COLLECTION];
+        this.collectionContent.node.aspects = [
+            RestConstants.CCM_ASPECT_COLLECTION,
+        ];
     }
 
     private getCollectionId() {
@@ -1147,14 +1158,21 @@ export class CollectionsMainComponent {
         if (this.mainNavRef) {
             this.mainNavRef.refreshBanner();
         }
-        if (
-            this.getCollectionId() == RestConstants.ROOT &&
-            this.isAllowedToEditCollection()
-        ) {
-            setTimeout(() => {
-                this.tutorialElement = this.listCollections.addElementRef;
-            });
-        }
+        
+        // Cannot trivially reference the add button for the tutorial with
+        // current implementation of generic options.
+        //
+        // TODO: Decide whether to keep the tutorial as it was and implement a
+        // way to reference the option button if necessary.
+
+        // if (
+        //     this.getCollectionId() == RestConstants.ROOT &&
+        //     this.isAllowedToEditCollection()
+        // ) {
+        //     setTimeout(() => {
+        //         this.tutorialElement = this.listCollections.addElementRef;
+        //     });
+        // }
         this.isLoading = false;
         if (callback) {
             callback();
