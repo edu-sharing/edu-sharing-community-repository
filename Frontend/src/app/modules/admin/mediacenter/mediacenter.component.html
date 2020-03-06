@@ -78,6 +78,17 @@
                 ></listTable>
                 </div>
             </mat-tab>
+            <mat-tab label="{{'ADMIN.MEDIACENTER.NODES.TITLE' | translate}}">
+                <div class="nodes">
+                    <h6 class="mat-heading-6">{{'ADMIN.MEDIACENTER.NODES.DESCRIPTION' | translate}}</h6>
+                    <listTable *ngIf="mediacenterNodes"
+                               [nodes]="mediacenterNodes"
+                               [hasIcon]="true"
+                               icon="node"
+                               [columns]="nodeColumns"
+                    ></listTable>
+                </div>
+            </mat-tab>
             <mat-tab label="{{'ADMIN.MEDIACENTER.STATISTICS.TITLE' | translate}}">
                 <!-- workaround for https://github.com/angular/components/issues/7274 -->
                 <app-admin-statistics *ngIf="currentTab==2 && currentMediacenter"
