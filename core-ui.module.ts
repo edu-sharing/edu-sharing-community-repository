@@ -47,6 +47,8 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 import { NodesDragSourceDirective } from './directives/drag-nodes/nodes-drag-source.directive';
 import { NodesDropTargetDirective } from './directives/drag-nodes/nodes-drop-target.directive';
 import { A11yModule } from '@angular/cdk/a11y';
+import { SafeHtmlPipe } from './pipes/safe-html.pipe';
+import { ListOptionItemComponent } from './components/list-option-item/list-option-item.component';
 
 @NgModule({
     declarations: [
@@ -77,6 +79,8 @@ import { A11yModule } from '@angular/cdk/a11y';
         AuthorityAffiliationPipe,
         NodesDragSourceDirective,
         NodesDropTargetDirective,
+        SafeHtmlPipe,
+        ListOptionItemComponent,
     ],
     imports: [
         A11yModule,

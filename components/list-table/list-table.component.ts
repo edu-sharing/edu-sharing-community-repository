@@ -11,14 +11,14 @@ import {
     Component,
     ContentChild,
     ElementRef,
-    EventEmitter, HostListener,
+    EventEmitter,
+    HostListener,
     Input,
     Output,
     TemplateRef,
     ViewChild,
 } from '@angular/core';
 import { MatMenuTrigger } from '@angular/material/menu';
-import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
 import { ActivatedRoute, Router } from '@angular/router';
 import { TranslateService } from '@ngx-translate/core';
 import {
@@ -29,7 +29,8 @@ import {
     ListItem,
     NetworkRepositories,
     Node,
-    Repository, RestConnectorsService,
+    Repository,
+    RestConnectorsService,
     RestConstants,
     RestHelper,
     RestLocatorService,
@@ -42,23 +43,22 @@ import { ColorHelper } from '../../../core-module/ui/color-helper';
 import { KeyEvents } from '../../../core-module/ui/key-events';
 import { UIAnimation } from '../../../core-module/ui/ui-animation';
 import { UIConstants } from '../../../core-module/ui/ui-constants';
-import { AddElement } from '../../add-element';
 import { NodeHelper } from '../../node-helper';
-import {OptionItem, Scope} from '../../option-item';
+import { OptionItem, Scope } from '../../option-item';
 import { Toast } from '../../toast';
 import { UIHelper } from '../../ui-helper';
-import {WorkspaceManagementDialogsComponent} from '../../../modules/management-dialogs/management-dialogs.component';
-import {ActionbarComponent} from '../../../common/ui/actionbar/actionbar.component';
-import {OptionsHelperService} from '../../../common/options-helper';
-import {BridgeService} from '../../../core-bridge-module/bridge.service';
-import {MainNavComponent} from '../../../common/ui/main-nav/main-nav.component';
-import {DragData, DropData} from '../../directives/drag-nodes/drag-nodes';
+import { WorkspaceManagementDialogsComponent } from '../../../modules/management-dialogs/management-dialogs.component';
+import { ActionbarComponent } from '../../../common/ui/actionbar/actionbar.component';
+import { OptionsHelperService } from '../../../common/options-helper';
+import { BridgeService } from '../../../core-bridge-module/bridge.service';
+import { MainNavComponent } from '../../../common/ui/main-nav/main-nav.component';
+import { DragData, DropData } from '../../directives/drag-nodes/drag-nodes';
 
 @Component({
     selector: 'listTable',
     templateUrl: 'list-table.component.html',
     styleUrls: ['list-table.component.scss'],
-    providers: [ OptionsHelperService ],
+    providers: [OptionsHelperService],
     animations: [
         trigger(
             'openOverlay',
@@ -98,12 +98,10 @@ export class ListTableComponent implements EventListener {
     public static VIEW_TYPE_GRID = 1;
     public static VIEW_TYPE_GRID_SMALL = 2;
 
-    @ViewChild('addElementRef') addElementRef: ElementRef;
     @ViewChild('drag') drag: ElementRef;
     @ViewChild('menuTrigger') menuTrigger: MatMenuTrigger;
     @ViewChild('dropdown') dropdownElement: ElementRef;
-    @ViewChild('dropdownContainer')
-    dropdownContainerElement: ElementRef;
+    @ViewChild('dropdownContainer') dropdownContainerElement: ElementRef;
 
     @ContentChild('itemContent') itemContentRef: TemplateRef<any>;
 
@@ -133,7 +131,7 @@ export class ListTableComponent implements EventListener {
      * Info about the current parent node
      * May be empty if it does not exists
      */
-    @Input() parent: Node|any;
+    @Input() parent: Node | any;
 
     @Input() set columns(columns: ListItem[]) {
         this.columnsOriginal = Helper.deepCopy(columns);
@@ -151,7 +149,7 @@ export class ListTableComponent implements EventListener {
     /**
      * Set additional action options. They will be added as customOptions to the options-service
      */
-    @Input() set customOptions (customOptions: OptionItem[]){
+    @Input() set customOptions(customOptions: OptionItem[]) {
         this._customOptions = customOptions;
         this.refreshAvailableOptions();
     }
@@ -186,18 +184,13 @@ export class ListTableComponent implements EventListener {
      */
     @Input() icon: string;
 
-    /**
-     * Are checkboxes visible? (If disabled, only single select.)
-     *
-     * If not null, shows a "Add Element" option as a first element (used for collections)
-     * The AddElement defines label, icon and other details
-     * The event onAddElement will be called when the user selects this element
-     */
-    @Input() addElement: AddElement;
-
     @Input() set hasCheckbox(hasCheckbox: boolean) {
         this._hasCheckbox = hasCheckbox;
-        if (!hasCheckbox && this.selectedNodes && this.selectedNodes.length > 1) {
+        if (
+            !hasCheckbox &&
+            this.selectedNodes &&
+            this.selectedNodes.length > 1
+        ) {
             // use a timeout to prevent a ExpressionChangedAfterItHasBeenCheckedError in the parent component
             setTimeout(() => {
                 this.selectedNodes = [];
@@ -350,13 +343,13 @@ export class ListTableComponent implements EventListener {
     /**
      * For collection elements only, tells if the current user can delete the given item.
      */
-    @Input() canDelete: (node: Node|any) => boolean;
+    @Input() canDelete: (node: Node | any) => boolean;
 
     /**
      * control the visibility of the reorder dialog (two-way binding)
      */
     @Input() reorderDialog = false;
-    @Output() reorderDialogChange = new EventEmitter<boolean>();
+
     /**
      * Can an element be dropped on the element?
      *
@@ -367,6 +360,10 @@ export class ListTableComponent implements EventListener {
         target: Node;
         event: DragEvent;
     }) => boolean = () => true;
+
+    @Input() optionItems: OptionItem[] = [];
+
+    @Output() reorderDialogChange = new EventEmitter<boolean>();
 
     @Output() nodesChange = new EventEmitter();
 
@@ -438,11 +435,6 @@ export class ListTableComponent implements EventListener {
     @Output() columnsChanged = new EventEmitter<ListItem[]>();
 
     /**
-     * Called when the user clicked the "addElement" item.
-     */
-    @Output() onAddElement = new EventEmitter();
-
-    /**
      * Called when the user clicked the delete for a missing reference object.
      */
     @Output() onDelete = new EventEmitter();
@@ -492,7 +484,6 @@ export class ListTableComponent implements EventListener {
         private optionsHelper: OptionsHelperService,
         private bridge: BridgeService,
         private frame: FrameEventsService,
-        private sanitizer: DomSanitizer,
     ) {
         this.reorderButtons = DialogButton.getSaveCancel(
             () => this.closeReorder(false),
@@ -506,7 +497,8 @@ export class ListTableComponent implements EventListener {
             this.loadRepos();
         });
     }
-    setViewType(viewType: number){
+
+    setViewType(viewType: number) {
         this.viewType = viewType;
         this.changes.detectChanges();
     }
@@ -596,15 +588,14 @@ export class ListTableComponent implements EventListener {
     }
 
     isReference(node: Node): boolean {
-        return  node.aspects && node.aspects.indexOf(RestConstants.CCM_ASPECT_IO_REFERENCE) !==-1;
+        return (
+            node.aspects &&
+            node.aspects.indexOf(RestConstants.CCM_ASPECT_IO_REFERENCE) !== -1
+        );
     }
 
     isDeleted(node: any): boolean {
         return this.isReference(node) && !node.originalId;
-    }
-
-    addElementClicked(): void {
-        this.onAddElement.emit();
     }
 
     askCCPublish(event: any, node: Node): void {
@@ -729,6 +720,10 @@ export class ListTableComponent implements EventListener {
             this.onOrderElements.emit(this._nodes);
         }
         this.onDrop.emit({ target, source: nodes, event, type: dropAction });
+    }
+
+    getAttribute(data: any, item: ListItem): string {
+        return NodeHelper.getAttribute(this.translate, this.config, data, item);
     }
 
     private addToSelectedNodes(node: Node) {
@@ -1043,24 +1038,6 @@ export class ListTableComponent implements EventListener {
         return false;
     }
 
-    private getAttribute(data: any, item: ListItem): SafeHtml {
-        const attribute = NodeHelper.getAttribute(
-            this.translate,
-            this.config,
-            data,
-            item,
-        );
-        // sanitizer is much slower but required when attributes inject styles, so keep it in these cases
-        if (attribute != null && attribute.indexOf('style=') !== -1) {
-            return this.sanitizer.bypassSecurityTrustHtml(attribute);
-        }
-        return attribute;
-    }
-
-    private getAttributeText(data: any, item: ListItem): string {
-        return NodeHelper.getAttribute(this.translate, this.config, data, item);
-    }
-
     private getLRMIAttribute(data: any, item: ListItem): string {
         return NodeHelper.getLRMIAttribute(
             this.translate,
@@ -1105,12 +1082,12 @@ export class ListTableComponent implements EventListener {
             selectedObjects: this.selectedNodes,
             allObjects: this._nodes,
             parent: this.parent,
-            customOptions: this._customOptions
+            customOptions: this._customOptions,
         });
         this.optionsHelper.setListener({
-            onDelete: (nodes) => this.removeNodes(nodes.error, nodes.objects)
+            onDelete: nodes => this.removeNodes(nodes.error, nodes.objects),
         });
-        this.optionsHelper.initComponents(this.mainNav,  this.actionbar, this);
+        this.optionsHelper.initComponents(this.mainNav, this.actionbar, this);
         this.optionsHelper.refreshComponents();
     }
 
@@ -1119,7 +1096,10 @@ export class ListTableComponent implements EventListener {
             return;
         }
         for (const object of objects) {
-            const p = RestHelper.getRestObjectPositionInArray(object, this._nodes);
+            const p = RestHelper.getRestObjectPositionInArray(
+                object,
+                this._nodes,
+            );
             if (p !== -1) {
                 this._nodes.splice(p, 1);
             }
@@ -1140,7 +1120,7 @@ export class ListTableComponent implements EventListener {
         });
         this.nodesChange.emit(this._nodes);
     }
-    addVirtualNodes(objects: Node[]|any) {
+    addVirtualNodes(objects: Node[] | any) {
         objects = objects.map((o: any) => {
             o.virtual = true;
             return o;
