@@ -674,6 +674,30 @@ export class NodeHelper {
     return node.aspects && node.aspects.indexOf(RestConstants.CCM_ASPECT_COLLECTION) !==-1 || node.collection;
   }
 
+  /**
+   * get the value for all nodes, if it is identical. Otherwise, the fallback is returned
+   * @param prop
+   * @param fallbackNotIdentical Fallback when they're not equaling
+   * @param fallbackIsEmpty Fallback when all are empty
+   * @param asArray If false, only the first element of the property array will be returned
+   */
+  static getValueForAll(nodes: Node[], prop:string,fallbackNotIdentical:any='',fallbackIsEmpty=fallbackNotIdentical,asArray=true) {
+    let found=null;
+    let foundAny=false;
+
+    for (let node of nodes) {
+      const v = node.properties[prop];
+      const value = v ? asArray ? v : v[0] : fallbackIsEmpty;
+      if(foundAny && found !== value)
+        return fallbackNotIdentical;
+      found = value;
+      foundAny = true;
+    }
+    if(!foundAny)
+      return fallbackIsEmpty;
+    return found;
+  }
+
   static createUrlLink(link : LinkData) {
     const properties: any = {};
     const aspects: string[] = [];

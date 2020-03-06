@@ -6,6 +6,11 @@
   border-radius: 2px;
   padding: 15px 20px;
   color: #674E04;
+  .message-container{
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+  }
   &.warning{
     background-color: lighten($warningMedium,50%);
     border: 1px solid $warningMedium;

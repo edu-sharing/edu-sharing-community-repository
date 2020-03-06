@@ -1129,6 +1129,17 @@ export class ListTableComponent implements EventListener {
         this.nodesChange.emit(this._nodes);
         this.refreshAvailableOptions();
     }
+    updateNodes(objects: Node[]|any) {
+        objects.forEach((o: any) => {
+            const index = this._nodes.findIndex((n) => n.ref.id === o.ref.id);
+            if (index === -1) {
+                console.warn('tried to update node which not exist inside the list', o);
+                return;
+            }
+            this._nodes.splice(index, 1, o);
+        });
+        this.nodesChange.emit(this._nodes);
+    }
     addVirtualNodes(objects: Node[]|any) {
         objects = objects.map((o: any) => {
             o.virtual = true;
