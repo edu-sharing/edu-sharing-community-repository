@@ -301,6 +301,7 @@
                 ></app-custom-node-list-wrapper>
                 <listTable
                     *ngIf="!customNodeList"
+                    [parent]="collectionContent.node"
                     [optionItems]="
                         isUserAllowedToEdit(collectionContent.node)
                             ? [addMaterialSearchOptionItem, addMaterialBinaryOptionItem]
