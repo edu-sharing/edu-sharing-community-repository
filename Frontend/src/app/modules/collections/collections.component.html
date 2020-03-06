@@ -286,14 +286,18 @@
 
                 <app-custom-node-list-wrapper
                     *ngIf="customNodeList"
+                    [parent]="collectionContent.node"
                     [nodes]="collectionContent.references"
                     [hasMore]="
                         collectionContent.references.length <
                         collectionContent.referencesPagination.total
                     "
                     [isLoading]="collectionContent.referencesLoading"
+                    [mainNav]="mainNavRef"
+                    [actionbar]="actionbarReferences"
                     (clickRow)="onContentClick($event.node)"
                     (loadMore)="loadMoreReferences()"
+                    (requestRefresh)="refreshContent()"
                 ></app-custom-node-list-wrapper>
                 <listTable
                     *ngIf="!customNodeList"

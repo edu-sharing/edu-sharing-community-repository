@@ -10,22 +10,26 @@ import {
     SimpleChange,
     ViewContainerRef,
 } from '@angular/core';
+import { ActionbarComponent } from '../../../common/ui/actionbar/actionbar.component';
+import { MainNavComponent } from '../../../common/ui/main-nav/main-nav.component';
 import {
     Node,
     TemporaryStorageService,
 } from '../../../core-module/core.module';
-import { OptionItem } from '../../../core-ui-module/option-item';
 import { UIHelper } from '../../../core-ui-module/ui-helper';
 
 export interface CustomNodeListWrapperInterface {
     // Inputs
+    parent: Node;
     nodes: Node[];
     hasMore: boolean;
     isLoading: boolean;
-    options: OptionItem[];
+    mainNav: MainNavComponent;
+    actionbar: ActionbarComponent;
     // Outputs
     clickRow: EventEmitter<{ node: Node }>;
     loadMore: EventEmitter<null>;
+    requestRefresh: EventEmitter<null>;
 }
 
 /**
@@ -43,12 +47,16 @@ export interface CustomNodeListWrapperInterface {
     template: '',
 })
 export class CustomNodeListWrapperComponent implements OnChanges {
+    @Input() parent: Node;
     @Input() nodes: Node[];
     @Input() hasMore: boolean;
     @Input() isLoading: boolean;
-    @Input() options: OptionItem[];
+    @Input() mainNav: MainNavComponent;
+    @Input() actionbar: ActionbarComponent;
+
     @Output() clickRow = new EventEmitter<{ node: Node }>();
     @Output() loadMore = new EventEmitter<null>();
+    @Output() requestRefresh = new EventEmitter<null>();
 
     /**
      * The wrapped custom-node-list component.
@@ -73,7 +81,9 @@ export class CustomNodeListWrapperComponent implements OnChanges {
         for (const key in changes) {
             this.componentRef.instance[key] = changes[key].currentValue;
         }
-        this.componentRef.instance.ngOnChanges(changes);
+        if (this.componentRef.instance.ngOnChanges) {
+            this.componentRef.instance.ngOnChanges(changes);
+        }
     }
 
     /**
