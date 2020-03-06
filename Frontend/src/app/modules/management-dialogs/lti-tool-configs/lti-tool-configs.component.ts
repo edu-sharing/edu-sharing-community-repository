@@ -6,7 +6,7 @@ import {Toast} from "../../../core-ui-module/toast";
 import {TranslateService} from "@ngx-translate/core";
 import {MdsComponent} from "../../../common/ui/mds/mds.component";
 import {RestToolService} from "../../../core-module/core.module";
-import {OptionItem} from "../../../core-ui-module/option-item";
+import {CustomOptions, OptionItem} from "../../../core-ui-module/option-item";
 
 @Component({
   selector: 'workspace-lti-tool-configs',
@@ -30,7 +30,9 @@ export class WorkspaceLtiToolConfigsComponent  {
   public dialogButtons : DialogButton[];
   public configs: Node[];
   public actionOptions:OptionItem[]=[];
-  public explorerOptions:OptionItem[]=[];
+  public explorerOptions: CustomOptions={
+    useDefaultOptions: false
+  };
   public columns : ListItem[]=[];
 
   public cancel(){
@@ -46,11 +48,11 @@ export class WorkspaceLtiToolConfigsComponent  {
       this.onClose.emit();
       this.onCreate.emit({type:MdsComponent.TYPE_TOOLINSTANCE,node:this._tool});
     }));
-    this.explorerOptions.push(new OptionItem('WORKSPACE.LTI_TOOLS.EDIT_CONFIG','edit',(node:Node)=>{
+    this.explorerOptions.addOptions.push(new OptionItem('WORKSPACE.LTI_TOOLS.EDIT_CONFIG','edit',(node:Node)=>{
       this.onEdit.emit(node);
       this.onClose.emit();
     }));
-    this.explorerOptions.push(new OptionItem('WORKSPACE.LTI_TOOLS.DELETE_CONFIG','delete',(node:Node)=>this.deleteInfo(node)));
+    this.explorerOptions.addOptions.push(new OptionItem('WORKSPACE.LTI_TOOLS.DELETE_CONFIG','delete',(node:Node)=>this.deleteInfo(node)));
     this.columns.push(new ListItem("NODE",RestConstants.CM_NAME));
   }
   public search(){

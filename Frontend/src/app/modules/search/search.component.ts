@@ -19,7 +19,7 @@ import { UIAnimation } from '../../core-module/ui/ui-animation';
 import { UIConstants } from '../../core-module/ui/ui-constants';
 import { ListTableComponent } from '../../core-ui-module/components/list-table/list-table.component';
 import { NodeHelper } from '../../core-ui-module/node-helper';
-import { OptionItem, Scope } from '../../core-ui-module/option-item';
+import {CustomOptions, OptionItem, Scope} from '../../core-ui-module/option-item';
 import { Toast } from '../../core-ui-module/toast';
 import { Translation } from '../../core-ui-module/translation';
 import { UIHelper } from '../../core-ui-module/ui-helper';
@@ -59,8 +59,9 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
     applyMode = false;
     hasCheckbox = false;
     showMoreRepositories = false;
-    options: OptionItem[] = [];
-    savedSearchOptions: OptionItem[] = [];
+    savedSearchOptions: CustomOptions = {
+        useDefaultOptions: false
+    };
     isGuest = false;
     mainnav = true;
     hasMoreCollections = false;
@@ -109,6 +110,9 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
     private savedSearchOwn = true;
     private queryParamsSubscription: Subscription;
     private nodeDisplayed: Node;
+    customOptions: CustomOptions = {
+        useDefaultOptions: true
+    };
 
     constructor(
         private router: Router,
@@ -200,7 +204,6 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
                 this.searchService.collectionsColumns.push(
                     new ListItem('COLLECTION', 'scope'),
                 );
-                this.updateActionbar(null);
                 setInterval(() => this.updateHasMore(), 1000);
                 this.connector
                     .hasToolPermission(
@@ -324,7 +327,6 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
 
     updateSelection(selection: Node[]) {
         this.selection = selection;
-        this.updateActionbar(selection);
         this.setFixMobileNav();
     }
 
@@ -617,7 +619,6 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
         }
         this.searchService.ignored = data.ignored;
         this.checkFail();
-        this.updateActionbar(this.selection);
         if (
             data.nodes.length < 1 &&
             this.currentRepository != RestConstants.ALL
@@ -855,17 +856,6 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
         );
     }
 
-    private getOptions(nodes: Node[] = this.selection, fromList: boolean) {
-        let options = [];
-        this.viewToggle = new OptionItem('', '', (node: Node) =>
-            this.toggleView(),
-        );
-        this.viewToggle.isToggle = true;
-        options.push(this.viewToggle);
-        this.setViewType(this.searchService.viewType);
-        return options;
-    }
-
     private addToStream(node: Node) {
         let nodes = ActionbarHelperService.getNodes(this.selection, node);
         this.addNodesStream = nodes;
@@ -940,7 +930,6 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
             this.login = data;
             this.isGuest = data.isGuest;
             this.updateMdsActions();
-            this.options = [];
             this.mdsExtended = false;
             this.loadSavedSearch();
             if (param['mdsExtended'])
@@ -968,7 +957,6 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
                 this.invalidateMds();
             }
             this.searchService.init();
-            this.refreshListOptions();
         });
     }
 
@@ -1116,7 +1104,7 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
     }
 
     private updateMdsActions() {
-        this.savedSearchOptions = [];
+        this.savedSearchOptions.addOptions = [];
 
         this.mdsActions = [];
         this.mdsActions.push(
@@ -1133,7 +1121,7 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
                     this.searchService.reurl,
                 );
             });
-            this.savedSearchOptions.push(apply);
+            this.savedSearchOptions.addOptions.push(apply);
         } else {
         }
         let save = new OptionItem(
@@ -1295,14 +1283,6 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
         }
     }
 
-    private updateActionbar(list: Node[]) {
-        this.actionOptions = this.getOptions(list, false);
-    }
-
-    private refreshListOptions() {
-        this.options = this.getOptions(this.selection, true);
-    }
-
     private invalidateMds() {
         if (this.currentRepository == RestConstants.ALL) {
             this.onMdsReady();
@@ -1329,8 +1309,16 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
                                 this.setViewType(
                                     ListTableComponent.VIEW_TYPE_GRID,
                                 );
-                                this.refreshListOptions();
-                                this.updateActionbar(null);
+                                this.customOptions = {
+                                    useDefaultOptions: false,
+                                    addOptions: [
+                                        new OptionItem('SEARCH.ADD_INTO_COLLECTION_SHORT','layers', (node) => {
+                                            this.mainNavRef.management.addToCollectionList(this.addToCollection, ActionbarHelperService.getNodes(this.selection,node), true, () => {
+                                                this.switchToCollections(this.addToCollection.ref.id);
+                                            });
+                                        })
+                                    ]
+                                };
                             },
                             error => {
                                 this.toast.error(error);

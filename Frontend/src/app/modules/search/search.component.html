@@ -176,8 +176,7 @@
           [selectedNodes]="currentSavedSearch ? [currentSavedSearch] : null"
           [columns]="savedSearchColumns"
           (onUpdateOptions)="refreshListOptions()"
-          (clickRow)="loadSavedSearchNode($event.node)"
-        ></listTable>
+          (clickRow)="loadSavedSearchNode($event.node)"></listTable>
          <div class="manageSavedSearch" *ngIf="savedSearch.length && savedSearchOwn && isWorkspaceEnabled()">
            <a (click)="goToSaveSearchWorkspace()" class="clickable">{{'SEARCH.MANAGE_SAVED_SEARCH' | translate}}</a>
          </div>
@@ -264,6 +263,7 @@
                             [nodes]="searchService.searchResult"
                             [columns]="searchService.columns"
                             [hasIcon]="true"
+                            [customOptions]="customOptions"
                             [selectedNodes]="selection"
                             [dragDrop]="false"
                             [canDrop]="canDrop"
@@ -304,7 +304,7 @@
                                    [nodes]="searchService.searchResultRepositories[i]"
                                    [columns]="searchService.columns"
                                    [hasIcon]="true"
-                                   [customOptions]="options"
+                                   [customOptions]="customOptions"
                                    [dragDrop]="false"
                                    [hasCheckbox]="false"
                                    [hasHeading]="false"

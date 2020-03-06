@@ -6,14 +6,16 @@
   [isCancelable]="true" (onCancel)="cancel()">
       <spinner *ngIf="loading"></spinner>
       <div *ngIf="!loading">
-        <actionbar class="actions" #actionbar
-        ></actionbar>
+          <div class="actions">
+            <actionbar #actionbar
+            ></actionbar>
+          </div>
         <div class="noElementsInfo noElements" *ngIf="!nodes.length">{{'SEARCH.NODE_STORE.LIST_EMPTY' | translate}}</div>
         <listTable *ngIf="nodes.length"
           [nodes]="nodes"
           [columns]="columns"
           [hasIcon]="true"
-                   [actionbar]="actionbar"
+          [actionbar]="actionbar"
           [customOptions]="options"
           [hasCheckbox]="true"
           [isClickable]="true"

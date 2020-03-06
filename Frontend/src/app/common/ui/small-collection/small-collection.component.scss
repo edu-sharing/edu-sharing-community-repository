@@ -16,8 +16,13 @@
       font-size: 120%;
     }
     .scope{
+      display: flex;
+      align-items: center;
       color:#eee;
-      font-size: 80%;
+      font-size: $fontSizeXSmall;
+      >span{
+        padding-left: 5px;
+      }
     }
   }
 
@@ -43,8 +48,18 @@
     }
   }
 }
-.titleMobile{
+.titleMobile {
   display:none;
+}
+:host ::ng-deep {
+  .scope {
+    > i {
+      font-size: 18px;
+    }
+    > span {
+      padding-left: 5px;
+    }
+  }
 }
 @media screen and (max-width: ($mobileWidth)) {
   .title{

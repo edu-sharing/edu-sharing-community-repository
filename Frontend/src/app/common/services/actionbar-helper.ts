@@ -36,7 +36,7 @@ export class ActionbarHelperService{
     let option:OptionItem=null;
     if(type=='DOWNLOAD') {
       if (NodeHelper.allFiles(nodes)) {
-        option = new OptionItem("WORKSPACE.OPTION.DOWNLOAD", "cloud_download", callback);
+        option = new OptionItem("OPTIONS.DOWNLOAD", "cloud_download", callback);
         option.enabledCallback = (node: Node) => {
           let list:any=ActionbarHelperService.getNodes(nodes, node);
           if(!list || !list.length)
