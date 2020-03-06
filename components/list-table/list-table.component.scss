@@ -844,6 +844,7 @@ a.rowInner {
     margin-bottom: 15px;
     opacity: 1 !important;
     border-radius: $borderRadius $borderRadius 0 0;
+    @include clickable();
 }
 .cardList .preview img,
 .cardList .preview .previewCollectionContainer {
@@ -866,15 +867,6 @@ a.rowInner {
         right: 40px;
         z-index: 1;
     }
-}
-.cardList .moreSingle {
-    right: 10px;
-    text-transform: uppercase;
-}
-.cardList .moreSingle i {
-    position: relative;
-    top: 4px;
-    left: -3px;
 }
 .cardList .actionText {
     position: relative;

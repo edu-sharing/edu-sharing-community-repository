@@ -123,6 +123,22 @@ export class OptionItem {
   constructor(public name: string, public icon: string, public callback: (object?: Node|any) => void) {
   }
 }
+export class CustomOptions {
+  /**
+   * If true, all existing or available options for the object stay
+   * If false, no options will be set, only the options in "addOptions" are used
+   */
+  public useDefaultOptions? = true;
+
+  /**
+   * List of ids of options to explicitly remove
+   */
+  public removeOptions?: string[] = [];
+  /**
+   * Options to add/insert into the menu
+   */
+  public addOptions?: OptionItem[] = [];
+}
 export enum HideMode {
   Disable,
   Hide
