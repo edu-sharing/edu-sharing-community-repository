@@ -62,9 +62,19 @@ export class SimpleEditLicenseComponent {
     private toast : Toast,
   ) {
     // just for init
-    this.iamApi.getUser().subscribe(() => {});
+    this.iamApi.getUser().subscribe(() => {
+      if(!this.getESUID()){
+        console.warn('Current user has no esuid, detecting owner of license is impossible');
+      }
+    });
     this.configService.get('simpleEdit.licenses',['NONE', 'COPYRIGHT_FREE', 'CC_BY', 'CC_0'])
         .subscribe((licenses) => this.allowedLicenses = licenses);
+  }
+  getESUID() {
+    return this.iamApi.getCurrentUser().properties &&
+    this.iamApi.getCurrentUser().properties[RestConstants.CM_PROP_ESUID] ?
+        this.iamApi.getCurrentUser().properties[RestConstants.CM_PROP_ESUID][0] : null;
+
   }
   isDirty() {
     // state is untouched -> so not dirty
@@ -99,6 +109,7 @@ export class SimpleEditLicenseComponent {
           this._nodes = nodes.map((n) => n.node);
           const license = NodeHelper.getValueForAll(this._nodes, RestConstants.CCM_PROP_LICENSE, null, 'NONE',false);
           this.authorFreetext = NodeHelper.getValueForAll(this._nodes, RestConstants.CCM_PROP_AUTHOR_FREETEXT, '', '',false);
+          const vcard = new VCard(NodeHelper.getValueForAll(this._nodes, RestConstants.CCM_PROP_LIFECYCLECONTRIBUTER_AUTHOR, '', '',false));
           console.log(license);
           let isValid = true;
           if(license) {
@@ -122,7 +133,11 @@ export class SimpleEditLicenseComponent {
             if (this.fromUpload) {
               this.modeGroup.value = 'own';
             } else {
-              this.modeGroup.value = 'foreign';
+              if (this.getESUID() && this.getESUID() === vcard.uid) {
+                this.modeGroup.value = 'own';
+              } else {
+                this.modeGroup.value = 'foreign';
+              }
             }
             this.initialMode = this.modeGroup.value;
             if (isValid) {
@@ -142,6 +157,11 @@ export class SimpleEditLicenseComponent {
       const vcard = new VCard();
       vcard.givenname = this.iamApi.getCurrentUser().profile.firstName;
       vcard.surname = this.iamApi.getCurrentUser().profile.lastName;
+      vcard.email = this.iamApi.getCurrentUser().profile.email;
+      if (this.getESUID()) {
+        vcard.uid = this.getESUID();
+      }
+      console.log(vcard);
       properties[RestConstants.CCM_PROP_LIFECYCLECONTRIBUTER_AUTHOR] = [vcard.toVCardString()];
       properties[RestConstants.CCM_PROP_AUTHOR_FREETEXT] = null;
     } else {
