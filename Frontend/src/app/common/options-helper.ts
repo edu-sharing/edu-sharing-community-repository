@@ -583,7 +583,7 @@ export class OptionsHelperService {
             }
             return false;
         };
-        const simpleEditNode = new OptionItem('OPTIONS.EDIT_SIMPLE', 'edit', (object) =>
+        const simpleEditNode = new OptionItem('OPTIONS.EDIT_SIMPLE', 'playlist_add_check', (object) =>
             management.nodeSimpleEdit = this.getObjects(object)
         );
         simpleEditNode.constrains = [Constrain.Files, Constrain.NoCollectionReference, Constrain.HomeRepository, Constrain.User];

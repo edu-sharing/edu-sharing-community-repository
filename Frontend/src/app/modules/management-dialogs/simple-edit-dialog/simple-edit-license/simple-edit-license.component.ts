@@ -39,6 +39,8 @@ export class SimpleEditLicenseComponent {
   @ViewChild('licenseGroup') licenseGroup: MatButtonToggleGroup;
   @Input() fromUpload : boolean;
   @Output() onInitFinished = new EventEmitter<void>();
+  @Output() onError = new EventEmitter<any>();
+
   _nodes: Node[];
   private allowedLicenses: string[];
   authorFreetext: string;
@@ -77,62 +79,61 @@ export class SimpleEditLicenseComponent {
            this.initalAuthorFreetext !== this.authorFreetext ||
            this.initialMode !== this.modeGroup.value;
   }
-  save() {
-    return new Observable<void>((observer) => {
-      if (!this.isDirty()) {
+  save() : Observable<any> {
+    if (!this.isDirty()) {
+      return new Observable<void>((observer) => {
         observer.next();
         observer.complete();
         return;
-      }
-      const properties = this.getProperties();
-        Observable.forkJoin(this._nodes.map((n, i) => {
-          return this.nodeApi.editNodeMetadataNewVersion(n.ref.id, RestConstants.COMMENT_LICENSE_UPDATE, properties);
-        })).subscribe(() => {
-          observer.next();
-          observer.complete();
-        }, error => {
-          observer.error(error);
-          observer.complete();
-        });
-    });
+      });
+    }
+    const properties = this.getProperties();
+    return Observable.forkJoin(this._nodes.map((n, i) => {
+      return this.nodeApi.editNodeMetadataNewVersion(n.ref.id, RestConstants.COMMENT_LICENSE_UPDATE, properties);
+    }));
   }
 
   private prepare(updateInvalid = false) {
-      const license = NodeHelper.getValueForAll(this._nodes, RestConstants.CCM_PROP_LICENSE, null, 'NONE',false);
-      this.authorFreetext = NodeHelper.getValueForAll(this._nodes, RestConstants.CCM_PROP_AUTHOR_FREETEXT, '', '',false);
-      console.log(license);
-      let isValid = true;
-      if(license) {
-        if (license.startsWith('CC_BY')) {
-          const version = NodeHelper.getValueForAll(this._nodes, RestConstants.CCM_PROP_LICENSE_CC_VERSION, null, null, false);
-          isValid = version === '4.0';
-        }
-        if(this.allowedLicenses.indexOf(license) === -1) {
-          isValid = false;
-        }
-      } else {
-        isValid = false;
-      }
-      this.initialLicense = license;
-      this.initalAuthorFreetext = this.authorFreetext;
-      setTimeout(()=> {
-        if(updateInvalid) {
-          this.invalid = !this.fromUpload && !isValid;
-          this.wasInvalid = this.invalid;
-        }
-        if (this.fromUpload) {
-          this.modeGroup.value = 'own';
-        } else {
-          this.modeGroup.value = 'foreign';
-        }
-        this.initialMode = this.modeGroup.value;
-        if (isValid) {
-          this.licenseGroup.value = license;
-        } else {
-          this.licenseGroup.value = 'NONE';
-        }
-        this.onInitFinished.emit();
-      });
+    Observable.forkJoin(this._nodes.map((n) => this.nodeApi.getNodeMetadata(n.ref.id,[RestConstants.ALL])))
+        .subscribe((nodes) => {
+          this._nodes = nodes.map((n) => n.node);
+          const license = NodeHelper.getValueForAll(this._nodes, RestConstants.CCM_PROP_LICENSE, null, 'NONE',false);
+          this.authorFreetext = NodeHelper.getValueForAll(this._nodes, RestConstants.CCM_PROP_AUTHOR_FREETEXT, '', '',false);
+          console.log(license);
+          let isValid = true;
+          if(license) {
+            if (license.startsWith('CC_BY')) {
+              const version = NodeHelper.getValueForAll(this._nodes, RestConstants.CCM_PROP_LICENSE_CC_VERSION, null, null, false);
+              isValid = version === '4.0';
+            }
+            if(this.allowedLicenses.indexOf(license) === -1) {
+              isValid = false;
+            }
+          } else {
+            isValid = false;
+          }
+          this.initialLicense = license;
+          this.initalAuthorFreetext = this.authorFreetext;
+          setTimeout(()=> {
+            if(updateInvalid) {
+              this.invalid = !this.fromUpload && !isValid;
+              this.wasInvalid = this.invalid;
+            }
+            if (this.fromUpload) {
+              this.modeGroup.value = 'own';
+            } else {
+              this.modeGroup.value = 'foreign';
+            }
+            this.initialMode = this.modeGroup.value;
+            if (isValid) {
+              this.licenseGroup.value = license;
+            } else {
+              this.licenseGroup.value = 'NONE';
+            }
+            this.onInitFinished.emit();
+          });
+        }, error => this.onError.emit(error));
+
   }
 
   private getProperties() {

@@ -9,6 +9,7 @@ import {DialogButton} from '../../../core-module/core.module';
 import {UIAnimation} from '../../../core-module/ui/ui-animation';
 import {trigger} from '@angular/animations';
 import {ProgressType} from '../modal-dialog/modal-dialog.component';
+import {CardType} from '../../../core-ui-module/components/card/card.component';
 
 @Component({
   selector: 'modal-dialog-toast',
@@ -31,6 +32,7 @@ export class ModalDialogToastComponent {
       this.input = data.input;
       this.toast.dialogInputValue = '';
       this.progressType = data.progressType;
+      this.dialogType = data.dialogType;
       this.node = data.node;
       this.messageParameters = data.messageParameters;
       this.isCancelable = data.isCancelable;
@@ -65,6 +67,7 @@ export class ModalDialogToastComponent {
    * type of the progress to display. Null if this is not an progress dialog
    */
   private progressType: ProgressType;
+  private dialogType: CardType;
   /* value stored in the input, if enabled */
   inputValue: string;
 
@@ -83,6 +86,7 @@ export class ModalDialogOptions {
   buttons?: DialogButton[];
   input?: string;
   progressType?: ProgressType;
+  dialogType?: CardType;
   messageParameters?: any;
   node?: Node|Node[];
   isCancelable? = true;

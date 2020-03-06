@@ -8,7 +8,7 @@
         <mat-button-toggle [value]="'foreign'">{{'SIMPLE_EDIT.LICENSE.SOURCE_FOREIGN' | translate}}</mat-button-toggle>
     </mat-button-toggle-group>
     </div>
-    <mat-form-field class="authorFreetext" *ngIf="modeGroup.value === 'foreign'">
+    <mat-form-field class="authorFreetext" *ngIf="modeGroup.value === 'foreign' && licenseGroup.value !== 'NONE'">
         <mat-label>{{'MDS.AUTHOR_FREETEXT_PLACEHOLDER' | translate}}</mat-label>
         <textarea matInput
                   cdkTextareaAutosize

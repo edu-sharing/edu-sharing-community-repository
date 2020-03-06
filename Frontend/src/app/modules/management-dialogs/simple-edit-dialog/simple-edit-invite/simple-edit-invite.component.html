@@ -1,6 +1,9 @@
-<info-message message="SIMPLE_EDIT.INVITE.ERROR_MULTIPLE_PARENTS" *ngIf="multipleParents"></info-message>
+<info-message message="SIMPLE_EDIT.INVITE.ERROR_MULTIPLE_PARENTS" *ngIf="multipleParents">
+    <div>{{'SIMPLE_EDIT.INVITE.ERROR_HELP' | translate}}</div>
+</info-message>
 <info-message message="SIMPLE_EDIT.INVITE.ERROR_INHERIT" *ngIf="parentAuthorities.length > 0">
-    <span *ngFor="let authority of parentAuthorities" class="authorities">{{authority | authorityName}}</span>
+    <div class="parent-authorities"><span *ngFor="let authority of parentAuthorities" class="authorities">{{authority | authorityName}}</span></div>
+    <div>{{'SIMPLE_EDIT.INVITE.ERROR_HELP' | translate}}</div>
 </info-message>
 
 <div *ngIf="!multipleParents && parentAuthorities.length === 0" class="toggles">

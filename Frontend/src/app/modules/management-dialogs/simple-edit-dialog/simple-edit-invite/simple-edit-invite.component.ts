@@ -54,7 +54,8 @@ export class SimpleEditInviteComponent {
     this.prepare();
   }
   @Input() fromUpload : boolean;
-  @Output() onInitFinished = new EventEmitter<void>();
+  @Output() onInitFinished = new EventEmitter<boolean>();
+  @Output() onError = new EventEmitter<any>();
 
   orgValue = 'unset';
   globalValue: any = null;
@@ -74,7 +75,7 @@ export class SimpleEditInviteComponent {
     });
   }
   isDirty() {
-    if(this.multipleParents || this.parentAuthorities.length > 0) {
+    if(this.hasInvalidState()) {
       return false;
     }
     console.log(this.initialState, this.getSelectedAuthority());
@@ -122,6 +123,9 @@ export class SimpleEditInviteComponent {
   }
 
   private getSelectedAuthority() {
+    if (this.hasInvalidState()) {
+      return null;
+    }
     let authority: Group = null;
     if (this.orgGroup.value) {
       if (this.orgGroup.value === 'unset') {
@@ -145,6 +149,7 @@ export class SimpleEditInviteComponent {
     this.multipleParents = parents.length > 1;
     console.log(parents);
     if(this.multipleParents) {
+      this.setInitialState();
       return;
     }
     this.nodeApi.getNodePermissions(parents[0]).subscribe((parent) => {
@@ -158,29 +163,30 @@ export class SimpleEditInviteComponent {
       this.parentAuthorities = authorities.map((a) =>
         this.parentPermissions.find((p) => p.authority.authorityName === a).authority
       );
-      console.log(this.parentAuthorities);
-    });
+    }, error => this.onError.emit(error));
     Observable.forkJoin((this._nodes.map((n) => this.nodeApi.getNodePermissions(n.ref.id)))).
       subscribe((permissions) => {
         this.nodesPermissions = permissions.map((p) => p.permissions);
-      this.organizationApi.getOrganizations().subscribe((orgs) => {
-        if(orgs.organizations.length === 1 || true) {
-          this.organization = {
-            organization: orgs.organizations[0],
-            groups: {}
-          };
-          this.iamApi.getGroupMembers(this.organization.organization.authorityName,'', RestConstants.AUTHORITY_TYPE_GROUP)
-              .subscribe((group) => {
-                for (const auth of group.authorities) {
-                  this.organization.groups[auth.profile.groupType] = auth;
-                }
-                console.log(this.organization);
-                this.detectPermissionState();
-              });
-        }
-      });
+        this.organizationApi.getOrganizations().subscribe((orgs) => {
+          // @TODO: Only allow for one org
+          if(orgs.organizations.length === 1 || true) {
+            this.organization = {
+              organization: orgs.organizations[0],
+              groups: {}
+            };
+            this.iamApi.getGroupMembers(this.organization.organization.authorityName,'', RestConstants.AUTHORITY_TYPE_GROUP)
+                .subscribe((group) => {
+                  for (const auth of group.authorities) {
+                    this.organization.groups[auth.profile.groupType] = auth;
+                  }
+                  this.detectPermissionState();
+                }, error => this.onError.emit(error));
+          } else {
+            this.detectPermissionState();
+          }
+        });
     }, error => {
-        this.toast.error(error);
+        this.onError.emit(error);
     });
   }
 
@@ -209,6 +215,10 @@ export class SimpleEditInviteComponent {
   }
 
   private detectPermissionState() {
+    if(this.hasInvalidState()) {
+      this.setInitialState();
+      return;
+    }
     let group: Authority = null;
     let unset = false;
     let invalid = false;
@@ -263,8 +273,12 @@ export class SimpleEditInviteComponent {
     this.setInitialState();
   }
 
+  private hasInvalidState() {
+    return this.multipleParents || this.parentPermissions.length > 0;
+  }
+
   private setInitialState() {
     this.initialState = this.getSelectedAuthority();
-    this.onInitFinished.emit();
+    this.onInitFinished.emit(true);
   }
 }

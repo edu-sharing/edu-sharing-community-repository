@@ -1,25 +1,16 @@
 import {Component, EventEmitter, Input, Output, ViewChild} from '@angular/core';
-import {DialogButton, RestConnectorService} from '../../../core-module/core.module';
+import {ConfigurationService, DialogButton, FrameEventsService, Node, RestConnectorService, RestConnectorsService, RestConstants, RestIamService, RestNodeService} from '../../../core-module/core.module';
 import {Toast} from '../../../core-ui-module/toast';
-import {RestNodeService} from '../../../core-module/core.module';
-import {Connector, Node} from '../../../core-module/core.module';
-import {ConfigurationService} from '../../../core-module/core.module';
-import {UIHelper} from '../../../core-ui-module/ui-helper';
-import {RestIamService} from '../../../core-module/core.module';
 import {TranslateService} from '@ngx-translate/core';
 import {trigger} from '@angular/animations';
 import {UIAnimation} from '../../../core-module/ui/ui-animation';
-import {RestConstants} from '../../../core-module/core.module';
 import {Router} from '@angular/router';
-import {RestHelper} from '../../../core-module/core.module';
-import {RestConnectorsService} from '../../../core-module/core.module';
-import {FrameEventsService} from '../../../core-module/core.module';
 import {BridgeService} from '../../../core-bridge-module/bridge.service';
-import {MdsComponent} from '../../../common/ui/mds/mds.component';
 import {SimpleEditMetadataComponent} from './simple-edit-metadata/simple-edit-metadata.component';
 import {SimpleEditInviteComponent} from './simple-edit-invite/simple-edit-invite.component';
 import {SimpleEditLicenseComponent} from './simple-edit-license/simple-edit-license.component';
 import {Observable} from 'rxjs';
+import {CardType} from '../../../core-ui-module/components/card/card.component';
 
 @Component({
   selector: 'app-simple-edit-dialog',
@@ -116,7 +107,6 @@ export class SimpleEditDialogComponent  {
       return;
     }
     callback();
-    this.onDone.emit();
   }
   openMetadata(force = false) {
     this.openDialog(() => this.onOpenMetadata.emit(this._nodes));
@@ -133,6 +123,7 @@ export class SimpleEditDialogComponent  {
       title: 'SIMPLE_EDIT.DIRTY.TITLE',
       message: 'SIMPLE_EDIT.DIRTY.MESSAGE',
       isCancelable: true,
+      dialogType: CardType.Question,
       buttons: [
           new DialogButton('DISCARD',DialogButton.TYPE_CANCEL, () => {
             this.toast.closeModalDialog();
@@ -145,10 +136,19 @@ export class SimpleEditDialogComponent  {
       ],
     })
   }
-  updateInitState() {
-    console.log(this.initState);
+  updateInitState(type: string) {
+    console.log('init ' + type);
+    (this.initState as any)[type] = true;
     if(this.initState.metadata && this.initState.invite && this.initState.license) {
       this.toast.closeModalDialog();
     }
+  }
+
+  handleError(error: any) {
+    if(error) {
+      this.toast.error(error);
+    }
+    this.toast.closeModalDialog();
+    this.onCancel.emit();
   }
 }

@@ -17,7 +17,8 @@
             <app-simple-edit-metadata #metadata
                                       [nodes]="_nodes"
                                       [fromUpload]="fromUpload"
-                                      (onInitFinished)="initState.metadata = true; updateInitState()"
+                                      (onError)="handleError($event)"
+                                      (onInitFinished)="updateInitState('metadata')"
             ></app-simple-edit-metadata>
         </div>
         <div class="block">
@@ -34,7 +35,8 @@
             <app-simple-edit-invite #invite
                                     [nodes]="_nodes"
                                     [fromUpload]="fromUpload"
-                                    (onInitFinished)="initState.invite = true; updateInitState()"
+                                    (onError)="handleError($event)"
+                                    (onInitFinished)="updateInitState('invite')"
             ></app-simple-edit-invite>
         </div>
         <div class="block">
@@ -51,7 +53,8 @@
             <app-simple-edit-license #license
                                     [nodes]="_nodes"
                                     [fromUpload]="fromUpload"
-                                    (onInitFinished)="initState.license = true; updateInitState()"
+                                     (onError)="handleError($event)"
+                                     (onInitFinished)="updateInitState('license')"
             ></app-simple-edit-license>
         </div>
     </div>

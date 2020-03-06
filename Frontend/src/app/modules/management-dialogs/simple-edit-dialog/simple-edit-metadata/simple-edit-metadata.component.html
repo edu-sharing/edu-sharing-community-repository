@@ -5,4 +5,5 @@
     groupId="io_simple"
     [nodes]="nodes"
     (onMdsLoaded)="onInitFinished.emit()"
+    (onCancel)="onError.emit()"
 ></mds>
