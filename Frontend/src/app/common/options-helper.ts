@@ -198,9 +198,14 @@ export class OptionsHelperService {
      */
     refreshComponents() {
         if(this.mainNav) {
-            this.mainNav.management.onRefresh.subscribe((nodes: void | Node[]) =>
-               this.listener.onRefresh(nodes)
-            );
+            this.mainNav.management.onRefresh.subscribe((nodes: void | Node[]) => {
+                if(this.listener && this.listener.onRefresh) {
+                    this.listener.onRefresh(nodes);
+                }
+                if(this.list) {
+                    this.list.updateNodes(nodes);
+                }
+            });
             this.mainNav.management.onDelete.subscribe(
                 (result: { objects: any; count: number; error: boolean; }) => this.listener.onDelete(result)
             );
