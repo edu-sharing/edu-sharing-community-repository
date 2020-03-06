@@ -48,11 +48,14 @@ export class SimpleEditInviteComponent {
   private organizationGroups: string[];
   private globalGroups: Group[]|any = [];
   private nodesPermissions: Permissions[];
+  private initialState: Group;
   @Input() set nodes (nodes : Node[]) {
     this._nodes = nodes;
     this.prepare();
   }
   @Input() fromUpload : boolean;
+  @Output() onInitFinished = new EventEmitter<void>();
+
   orgValue = 'unset';
   globalValue: any = null;
   constructor(
@@ -70,23 +73,21 @@ export class SimpleEditInviteComponent {
           this.loadGlobalGroups(data);
     });
   }
+  isDirty() {
+    if(this.multipleParents || this.parentAuthorities.length > 0) {
+      return false;
+    }
+    console.log(this.initialState, this.getSelectedAuthority());
+    return this.getSelectedAuthority()!=null && !Helper.objectEquals(this.initialState, this.getSelectedAuthority());
+  }
   save() {
     return new Observable<void>((observer) => {
-      let authority:Group = null;
-      if (this.orgGroup.value) {
-        if (this.orgGroup.value === 'unset') {
-          console.log('unset');
-          // do nothing
-        } else if(this.orgGroup.value === 'org') {
-          authority = this.organization.organization;
-        } else {
-          authority = this.organization.groups[this.orgGroup.value];
-        }
-      } else if(this.globalGroup.value) {
-        authority = this.globalGroups.find((g: Group) => g.authorityName === this.globalGroup.value);
-      } else {
-        console.warn('invalid value for button toggle in simple invite dialog');
+      if(!this.isDirty()) {
+        observer.next();
+        observer.complete();
+        return;
       }
+      let authority = this.getSelectedAuthority();
       // auth not to set, we can skip tasks
       console.log(authority);
       if (authority == null) {
@@ -118,6 +119,25 @@ export class SimpleEditInviteComponent {
         });
       }
     });
+  }
+
+  private getSelectedAuthority() {
+    let authority: Group = null;
+    if (this.orgGroup.value) {
+      if (this.orgGroup.value === 'unset') {
+        console.log('unset');
+        // do nothing
+      } else if (this.orgGroup.value === 'org') {
+        authority = this.organization.organization;
+      } else {
+        authority = this.organization.groups[this.orgGroup.value];
+      }
+    } else if (this.globalGroup.value) {
+      authority = this.globalGroups.find((g: Group) => g.authorityName === this.globalGroup.value);
+    } else {
+      console.warn('invalid value for button toggle in simple invite dialog');
+    }
+    return authority;
   }
 
   private prepare() {
@@ -218,11 +238,13 @@ export class SimpleEditInviteComponent {
           if (group.authorityName === this.organization.organization.authorityName) {
             console.log('set org active');
             this.orgGroup.value = 'org';
+            this.setInitialState();
             return;
           }
           for (const key of Object.keys(this.organization.groups)) {
             if(group.authorityName === this.organization.groups[key].authorityName) {
               this.orgGroup.value = key;
+              this.setInitialState();
               return;
             }
           }
@@ -231,11 +253,18 @@ export class SimpleEditInviteComponent {
         for (const globalGroup of this.globalGroups) {
           if (group.authorityName === globalGroup.authorityName) {
             this.globalGroup.value = group.authorityName;
+            this.setInitialState();
             return;
           }
         }
       }
       this.orgGroup.value = 'unset';
     }
+    this.setInitialState();
+  }
+
+  private setInitialState() {
+    this.initialState = this.getSelectedAuthority();
+    this.onInitFinished.emit();
   }
 }

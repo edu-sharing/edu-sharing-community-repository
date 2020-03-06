@@ -10,6 +10,7 @@
     "NEXT": "continue",
     "SKIP": "skip",
     "SAVE": "save",
+    "DISCARD": "discard",
     "APPLY": "apply",
     "CANCEL": "cancel",
     "YES_DELETE": "Yes, delete",

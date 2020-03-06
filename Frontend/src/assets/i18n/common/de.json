@@ -10,6 +10,7 @@
     "NEXT": "Weiter",
     "SKIP": "Überspringen",
     "SAVE": "Speichern",
+    "DISCARD": "Verwerfen",
     "APPLY": "Übernehmen",
     "CANCEL": "Abbrechen",
     "YES_DELETE": "Ja, löschen",
@@ -547,14 +548,32 @@
     },
     "SIMPLE_EDIT": {
         "METADATA": {
-            "TITLE": "Metadaten angeben"
+            "TITLE": "Metadaten angeben",
+            "MORE": "Weitere Metadaten"
         },
         "INVITE": {
             "TITLE": "Freigeben",
+            "MORE": "Weitere Freigaben",
             "ERROR_INHERIT": "Das Festlegen von Berechtigungen ist nicht möglich, da die Objekte bereits Einladungen vom übergeordneten Ordner erhalten:\n",
             "UNSET": "Nicht festgelegt",
             "GROUP_TYPES": {
                 "ORG_ADMINISTRATORS": "Nur Administratoren"
+            }
+        },
+        "LICENSE": {
+            "TITLE": "Lizenzieren",
+            "MORE": "Weitere Lizenzen",
+            "REPLACE": "Lizenz ersetzen",
+            "SOURCE_TYPE": "Quelle des Materials",
+            "SOURCE_OWN": "Eigenes Material",
+            "SOURCE_FOREIGN": "Fremdes Material",
+            "SET_LICENSE": "Lizenz festlegen",
+            "INVALID_STATE": "Für die gewählten Elemente kann keine passenden Lizenz in diesem Dialog gefunden werden. Wählen Sie \"Lizenz ersetzen\", wenn Sie die Lizenz neu festlegen wollen.",
+            "LICENSES": {
+                "NONE": "Unlizenziert",
+                "COPYRIGHT_FREE": "Copyright",
+                "CC_BY": "CC-BY (4.0)",
+                "CC_0": "CC-0"
             }
         }
     },

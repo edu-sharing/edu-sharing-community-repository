@@ -330,7 +330,8 @@ export class WorkspaceManagementDialogsComponent  {
     this.nodeLicenseOnUpload=false;
     this.nodeLicenseChange.emit(null);
   }
-  private updateLicense(nodes:Node[]){
+  private updateLicense(nodes:Node[]) {
+      console.log(nodes);
     this.closeLicense();
     this.onUpdateLicense.emit();
     this.onRefresh.emit(nodes);
@@ -542,11 +543,14 @@ export class WorkspaceManagementDialogsComponent  {
 
     }
 
-    closeSimpleEdit(saved: boolean) {
+    closeSimpleEdit(saved: boolean, nodes: Node[] = null) {
         if (saved && this._nodeSimpleFromUpload) {
             this.onUploadFilesProcessed.emit(this._nodeSimpleEdit);
         } else if(!saved && this._nodeSimpleFromUpload) {
             this.deleteNodes(this._nodeSimpleEdit);
+        }
+        if (nodes) {
+            this.onRefresh.emit(nodes);
         }
         this._nodeSimpleEdit = null;
         this.nodeSimpleEditChange.emit(null);

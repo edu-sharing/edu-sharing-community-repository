@@ -6,7 +6,9 @@
         <label for="variantName">{{'NODE_VARIANT.NEW_VARIANT' | translate}}</label>
         <input type="text" id="variantName" [(ngModel)]="variantName">
         <info-message *ngIf="licenseWarning" mode="warning" message="{{'NODE_VARIANT.WARNING.'+licenseWarning | translate}}">
-            <div class="clickable link" *ngIf="getLicenseUrl()" (click)="openLicense()">{{'NODE_VARIANT.WARNING.LINK' | translate}}</div>
+            <div>
+                <button mat-button color="primary" *ngIf="getLicenseUrl()" (click)="openLicense()">{{'NODE_VARIANT.WARNING.LINK' | translate}}</button>
+            </div>
         </info-message>
         <div class="breadcrumb-style">
             <div class="breadcrumb-info">{{'NODE_VARIANT.BREADCRUMB_INFO' | translate}}</div>

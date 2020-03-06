@@ -104,6 +104,7 @@ export class MdsComponent {
   private static GROUP_MULTIVALUE_DELIMITER='[+]';
   private mdsId = new Date().getTime();
   private childobjectDrag: number;
+  private initialValues: any;
   @Input() set suggestions(suggestions:any){
     this._suggestions=suggestions;
     this.applySuggestions();
@@ -196,6 +197,7 @@ export class MdsComponent {
           }
           this.mdsService.getSet(this._setId).subscribe((data: any) => {
             this.mds = data;
+            this.onMdsLoaded.emit(data);
             this.currentNodes = nodesConverted;
             if(nodesConverted[0].type === RestConstants.CCM_TYPE_IO && nodesConverted.length === 1) {
               this.node.getNodeChildobjects(nodesConverted[0].ref.id).subscribe((childs: NodeList) => {
@@ -486,6 +488,13 @@ export class MdsComponent {
     }
     let html='Group \''+id+'\' was not found in the mds';
     this.setRenderedHtml(html);
+  }
+
+  /**
+   * checks if the user has made modifications to the original/initial state
+   */
+  public isDirty() {
+    return !Helper.objectEquals(this.initialValues, this.getValues());
   }
   public getValues(propertiesIn:any={},showError=true,widgets=this.currentWidgets){
     let properties:any={};
@@ -2493,6 +2502,9 @@ export class MdsComponent {
               }
             }
             this.renderGroup(nodeGroup, this.mds);
+            setTimeout(() => {
+              this.initialValues = this.getValues();
+            },15);
             this.isLoading = false;
         });
     }

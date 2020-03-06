@@ -15,6 +15,7 @@ import {ViewCollectionFeedbackComponent} from './view-collection-feedback/view-c
 import {SimpleEditDialogComponent} from './simple-edit-dialog/simple-edit-dialog.component';
 import {SimpleEditMetadataComponent} from './simple-edit-dialog/simple-edit-metadata/simple-edit-metadata.component';
 import {SimpleEditInviteComponent} from './simple-edit-dialog/simple-edit-invite/simple-edit-invite.component';
+import {SimpleEditLicenseComponent} from './simple-edit-dialog/simple-edit-license/simple-edit-license.component';
 
 export const DECLARATIONS_MANAGEMENT_DIALOGS = [
   WorkspaceLicenseComponent,
@@ -33,5 +34,6 @@ export const DECLARATIONS_MANAGEMENT_DIALOGS = [
   ViewCollectionFeedbackComponent,
   SimpleEditDialogComponent,
   SimpleEditMetadataComponent,
+  SimpleEditLicenseComponent,
   SimpleEditInviteComponent,
 ];

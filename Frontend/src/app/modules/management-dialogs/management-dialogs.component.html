@@ -39,8 +39,11 @@
     *ngIf="_nodeSimpleEdit"
     [nodes]="_nodeSimpleEdit"
     [fromUpload]="_nodeSimpleFromUpload"
+    (onOpenMetadata)="nodeMetadata = $event"
+    (onOpenInvite)="nodeShare = $event"
+    (onOpenLicense)="nodeLicense = $event"
     (onCancel)="closeSimpleEdit(false)"
-    (onDone)="closeSimpleEdit(true)"
+    (onDone)="closeSimpleEdit(true, $event)"
     ></app-simple-edit-dialog>
 <app-view-collection-feedback
     *ngIf="collectionViewFeedback"

@@ -100,7 +100,7 @@ export class WorkspaceLicenseComponent  {
                      "in","it","ca","hr","mt","mk","nl",
                      "no","pl","pt","ro","es","th",
                      "uk","hu"];
-  public ALL_LICENSEprimaryTypeS=["NONE","CC_0","CC_BY","SCHULFUNK","UNTERRICHTS_UND_LEHRMEDIEN","COPYRIGHT","CUSTOM"];
+  public ALL_LICENSE_TYPES=["NONE","CC_0","CC_BY","SCHULFUNK","UNTERRICHTS_UND_LEHRMEDIEN","COPYRIGHT","CUSTOM"];
   public licenseMainTypes:string[];
   _nodes:Node[];
   private permissions: LocalPermissionsResult;
@@ -164,7 +164,7 @@ export class WorkspaceLicenseComponent  {
     private loadConfig() {
         this.config.get("allowedLicenses").subscribe((data: string[]) => {
             if (!data) {
-                this.licenseMainTypes = this.ALL_LICENSEprimaryTypeS;
+                this.licenseMainTypes = this.ALL_LICENSE_TYPES;
                 this.allowedLicenses = null;
             }
             else {
@@ -184,7 +184,7 @@ export class WorkspaceLicenseComponent  {
                         if (data.indexOf(this.copyrightType) == -1)
                             this.copyrightType = entry;
                     }
-                    else if (this.ALL_LICENSEprimaryTypeS.indexOf(entry) != -1) {
+                    else if (this.ALL_LICENSE_TYPES.indexOf(entry) != -1) {
                         this.licenseMainTypes.push(entry);
                     }
                 }
@@ -239,7 +239,7 @@ export class WorkspaceLicenseComponent  {
       this.nodeApi.editNodeMetadataNewVersion(node.ref.id,RestConstants.COMMENT_LICENSE_UPDATE, prop).subscribe((result) => {
         updatedNodes.push(result.node);
         this.savePermissions(node);
-        if(updatedNodes.length === this._nodes.length){
+        if(updatedNodes.length === this._nodes.length) {
           this.toast.toast('WORKSPACE.TOAST.LICENSE_UPDATED');
           this.onLoading.emit(false);
           this.onDone.emit(updatedNodes);
@@ -259,17 +259,7 @@ export class WorkspaceLicenseComponent  {
     if(this._properties){
       return this._properties[prop] ? this._properties[prop][0] : fallbackIsEmpty;
     }
-    for(let node of this._nodes){
-      let v=node.properties[prop];
-      let value=v ? asArray ? v : v[0] : fallbackIsEmpty;
-      if(foundAny && found!=value)
-        return fallbackNotIdentical;
-      found=value;
-      foundAny=true;
-    }
-    if(!foundAny)
-      return fallbackIsEmpty;
-    return found;
+    return NodeHelper.getValueForAll(this._nodes, prop, fallbackNotIdentical, fallbackIsEmpty, asArray);
   }
   private readLicense() {
     let license=this.getValueForAll(RestConstants.CCM_PROP_LICENSE,"MULTI","NONE");

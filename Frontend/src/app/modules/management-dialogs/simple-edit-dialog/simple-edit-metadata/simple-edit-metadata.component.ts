@@ -34,13 +34,23 @@ export class SimpleEditMetadataComponent  {
   @ViewChild('mds') mds : MdsComponent;
   @Input() nodes : Node[];
   @Input() fromUpload : boolean;
+  @Output() onInitFinished = new EventEmitter<void>();
+
   constructor(
     private nodeApi : RestNodeService,
     private toast : Toast,
   ) {
   }
+  isDirty(){
+    return this.mds.isDirty();
+  }
   save() {
     return new Observable<void>((observer) => {
+      if (!this.isDirty()) {
+        observer.next();
+        observer.complete();
+        return;
+      }
       const props = this.mds.getValues();
       delete props[RestConstants.CM_NAME];
       Observable.forkJoin(this.nodes.map((n) => this.nodeApi.editNodeMetadataNewVersion(n.ref.id, RestConstants.COMMENT_METADATA_UPDATE, props))).subscribe(() => {

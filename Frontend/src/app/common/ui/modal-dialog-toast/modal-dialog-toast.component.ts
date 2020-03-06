@@ -23,15 +23,6 @@ export class ModalDialogToastComponent {
   private buttons: DialogButton[];
   private onCancel: () => void;
   node: Node | Node[];
-  @HostListener('document:keydown', ['$event'])
-  handleKeyboardEvent(event: KeyboardEvent) {
-    if (event.code === 'Escape' && this.isCancelable){
-      event.preventDefault();
-      event.stopPropagation();
-      this.cancel();
-      return;
-    }
-  }
 
   constructor(private toast: Toast) {
     this.toast.onShowModalDialog((data: ModalDialogOptions) => {
