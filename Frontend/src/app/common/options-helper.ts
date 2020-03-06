@@ -735,7 +735,7 @@ export class OptionsHelperService {
         feedbackCollection.priority = 10;
         // feedback is only shown for non-managers
         feedbackCollection.customShowCallback = ((objects) =>
-            objects && objects[0].access.indexOf(RestConstants.ACCESS_WRITE) === -1
+            objects && objects[0].access && objects[0].access.indexOf(RestConstants.ACCESS_WRITE) === -1
         );
         /*
          if (

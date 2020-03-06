@@ -299,7 +299,7 @@
                     *ngIf="!customNodeList"
                     [optionItems]="
                         isUserAllowedToEdit(collectionContent.node)
-                            ? [addMaterialOptionItem]
+                            ? [addMaterialSearchOptionItem, addMaterialBinaryOptionItem]
                             : []
                     "
                     [hasHeading]="false"

@@ -114,14 +114,21 @@ export class CollectionsMainComponent {
     collectionsColumns: ListItem[] = [];
     referencesColumns: ListItem[] = [];
     createSubCollectionOptionItem = new OptionItem(
-        'COLLECTIONS.CREATE_COLLECTION',
-        'add',
+        'OPTIONS.NEW_COLLECTION',
+        'layers',
         () => this.onCreateCollection(),
     );
-    addMaterialOptionItem = new OptionItem(
-        'COLLECTIONS.ADD_MATERIAL',
+    addMaterialSearchOptionItem = new OptionItem(
+        'OPTIONS.SEARCH_OBJECT',
         'redo',
-        () => this.switchToSearch(),
+        () => this.mainNavRef.createMenu.pickMaterialFromSearch(),
+    );
+    addMaterialBinaryOptionItem = new OptionItem(
+        'OPTIONS.ADD_OBJECT',
+        'cloud_upload',
+        () => {
+            this.mainNavRef.createMenu.showUploadSelect = true
+        },
     );
     optionsMaterials: OptionItem[];
     tutorialElement: ElementRef;
@@ -429,15 +436,6 @@ export class CollectionsMainComponent {
 
     navigateToSearch() {
         UIHelper.getCommonParameters(this.route).subscribe(params => {
-            this.router.navigate([UIConstants.ROUTER_PREFIX + 'search'], {
-                queryParams: params,
-            });
-        });
-    }
-
-    switchToSearch(): void {
-        UIHelper.getCommonParameters(this.route).subscribe(params => {
-            params.addToCollection = this.collectionContent.node.ref.id;
             this.router.navigate([UIConstants.ROUTER_PREFIX + 'search'], {
                 queryParams: params,
             });

@@ -515,6 +515,8 @@
         "VARIANT": "Variante anlegen",
         "VARIANT_OPEN": "Als Variante öffnen",
         "QR_CODE": "QR-Code Link",
+        "ADD_OBJECT": "Neues Material",
+        "SEARCH_OBJECT": "Material suchen",
         "NEW_COLLECTION": "Neue Sammlung"
     },
     "NO_SIZE": "-",

@@ -28,7 +28,7 @@ import {
     RestHelper,
     RestIamService,
     RestNodeService,
-    TemporaryStorageService,
+    TemporaryStorageService, UIConstants,
 } from '../../core-module/core.module';
 import { Helper } from '../../core-module/rest/helper';
 import { UIAnimation } from '../../core-module/ui/ui-animation';
@@ -107,6 +107,7 @@ export class CreateMenuComponent implements OnDestroy {
     _parent: Node = null;
     inbox: Node = null;
     addFolderName: string = null;
+
     showUploadSelect = false;
     filesToUpload: FileList;
     connectorList: Connector[];
@@ -226,10 +227,21 @@ export class CreateMenuComponent implements OnDestroy {
             this.options.push(newCollection);
         }
         if (this.allowBinary) {
+            if(this._parent && NodeHelper.isNodeCollection(this._parent)){
+                const search = new OptionItem(
+                    'OPTIONS.SEARCH_OBJECT',
+                    'redo',
+                    () => this.pickMaterialFromSearch(),
+                );
+                search.elementType = [ElementType.Unknown];
+                search.group = DefaultGroups.Create;
+                search.priority = 7.5;
+                this.options.push(search);
+            }
             const upload = new OptionItem(
-                'WORKSPACE.ADD_OBJECT',
+                'OPTIONS.ADD_OBJECT',
                 'cloud_upload',
-                () => (this.showUploadSelect = true),
+                () => this.showUploadSelect = true,
             );
             upload.elementType = [ElementType.Unknown];
             upload.group = DefaultGroups.Create;
@@ -433,7 +445,14 @@ export class CreateMenuComponent implements OnDestroy {
             connectorType,
         );
     }
-
+    pickMaterialFromSearch() {
+        UIHelper.getCommonParameters(this.route).subscribe(params => {
+            params.addToCollection = this._parent.ref.id;
+            this.router.navigate([UIConstants.ROUTER_PREFIX + 'search'], {
+                queryParams: params,
+            });
+        });
+    }
     private createConnector(event: any) {
         const name = event.name + '.' + event.type.filetype;
         this.createConnectorName = null;
