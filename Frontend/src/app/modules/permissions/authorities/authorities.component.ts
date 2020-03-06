@@ -23,7 +23,7 @@ import {
 import {Toast} from '../../../core-ui-module/toast';
 import {Router} from '@angular/router';
 import {TranslateService} from '@ngx-translate/core';
-import {Constrain, DefaultGroups, ElementType, OptionItem} from '../../../core-ui-module/option-item';
+import {Constrain, CustomOptions, DefaultGroups, ElementType, OptionItem} from '../../../core-ui-module/option-item';
 import {UIAnimation} from '../../../core-module/ui/ui-animation';
 import {SuggestItem} from '../../../common/ui/autocomplete/autocomplete.component';
 import {NodeHelper} from '../../../core-ui-module/node-helper';
@@ -64,13 +64,17 @@ export class PermissionsAuthoritiesComponent {
   public loading = true;
   public _searchQuery: string;
   private manageMemberSearch: string;
-  public options: OptionItem[]= [];
+  public options: CustomOptions= {
+    useDefaultOptions: false
+  };
   public toolpermissionAuthority: any;
   public optionsActionbar: OptionItem[];
   private orgs: OrganizationOrganizations;
   public addMembers: any;
   public editGroups: User;
-  private memberOptions: OptionItem[];
+  private memberOptions: CustomOptions = {
+    useDefaultOptions: false
+  };
   private addToList: any[];
   private isAdmin = false;
   private embeddedQuery: string;
@@ -245,7 +249,7 @@ export class PermissionsAuthoritiesComponent {
   }
   private updateOptions() {
     if (this.embedded) {
-      this.options = [];
+      this.options.addOptions = [];
       return;
     }
     const options: OptionItem[] = [];
@@ -368,7 +372,7 @@ export class PermissionsAuthoritiesComponent {
       options.push(remove);
     }
 
-    this.options = options;
+    this.options.addOptions = options;
   }
   private cancelEdit(){
     this.edit = null;
@@ -776,7 +780,7 @@ export class PermissionsAuthoritiesComponent {
     if (list.length === position){
       this.toast.toast('PERMISSIONS.MEMBER_REMOVED');
       this.selectedMembers = [];
-      this.memberOptions = this.getMemberOptions();
+      this.memberOptions.addOptions = this.getMemberOptions();
       this.memberList = [];
       this.memberListOffset = 0;
       this.searchMembers();
@@ -792,7 +796,7 @@ export class PermissionsAuthoritiesComponent {
         if (list.length === position) {
             this.toast.toast('PERMISSIONS.MEMBERSHIP_REMOVED');
             this.selectedMembers = [];
-            this.memberOptions = this.getMemberOptions();
+            this.memberOptions.addOptions = this.getMemberOptions();
             this.memberList = [];
             this.memberListOffset = 0;
             this.searchMembers();
@@ -806,7 +810,7 @@ export class PermissionsAuthoritiesComponent {
     }
   private searchMembers(){
     this.selectedMembers = [];
-    this.memberOptions = this.getMemberOptions();
+    this.memberOptions.addOptions = this.getMemberOptions();
     this.memberList = [];
     this.memberListOffset = 0;
     this.refreshMemberList();

@@ -39,7 +39,6 @@ export class NodeListComponent {
     if(this._columns && this._columns.length)
       this.sortBy=this._columns[0].name;
   };
-  @Input() options : OptionItem[];
   @Input() sortBy : string;
   @Input() sortAscending=true;
   @Input() set reload(reload:Boolean){

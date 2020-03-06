@@ -3,7 +3,7 @@ import {RestConnectorsService} from '../core-module/rest/services/rest-connector
 import {RestConstants} from '../core-module/rest/rest-constants';
 import {ListTableComponent} from '../core-ui-module/components/list-table/list-table.component';
 import {ActionbarComponent} from './ui/actionbar/actionbar.component';
-import {Constrain, DefaultGroups, ElementType, HideMode, KeyCombination, OptionItem, Scope, Target} from '../core-ui-module/option-item';
+import {Constrain, CustomOptions, DefaultGroups, ElementType, HideMode, KeyCombination, OptionItem, Scope, Target} from '../core-ui-module/option-item';
 import {UIHelper} from '../core-ui-module/ui-helper';
 import {UIService} from '../core-module/rest/services/ui.service';
 import {WorkspaceManagementDialogsComponent} from '../modules/management-dialogs/management-dialogs.component';
@@ -749,7 +749,7 @@ export class OptionsHelperService {
         feedbackCollection.priority = 10;
         // feedback is only shown for non-managers
         feedbackCollection.customShowCallback = ((objects) =>
-            objects && objects[0].access.indexOf(RestConstants.ACCESS_WRITE) === -1
+            objects && objects[0].access && objects[0].access.indexOf(RestConstants.ACCESS_WRITE) === -1
         );
         /*
          if (
@@ -917,18 +917,31 @@ export class OptionsHelperService {
     }
 
     applyExternalOptions(options: OptionItem[]) {
-        if(!this.data.customOptions) {
+        if (!this.data.customOptions) {
             return options;
         }
-        for (const option of this.data.customOptions) {
-            const existing = options.filter((o) => o.name === option.name);
-            if(existing.length === 1) {
-                // only replace changed values
-                for(const key of Object.keys(option)) {
-                    (existing[0] as any)[key] = (option as any)[key];
+        if (!this.data.customOptions.useDefaultOptions) {
+            options = [];
+        }
+        if (this.data.customOptions.addOptions) {
+            for (const option of this.data.customOptions.addOptions) {
+                const existing = options.filter((o) => o.name === option.name);
+                if (existing.length === 1) {
+                    // only replace changed values
+                    for (const key of Object.keys(option)) {
+                        (existing[0] as any)[key] = (option as any)[key];
+                    }
+                } else {
+                    options.push(option);
                 }
-            } else {
-                options.push(option);
+            }
+        }
+        if (this.data.customOptions.removeOptions) {
+            for (const option of this.data.customOptions.removeOptions) {
+                const index = options.findIndex((o) => o.name === option);
+                if (index !== -1) {
+                    options.splice(index, 1);
+                }
             }
         }
         return options;
@@ -1072,7 +1085,7 @@ export interface OptionData {
     selectedObjects?: Node[] | any[];
     allObjects?: Node[] | any[];
     parent?: Node|any;
-    customOptions?: OptionItem[];
+    customOptions?: CustomOptions;
 }
 
 export class OptionsHelperConfig {

@@ -478,7 +478,10 @@ export class NodeRenderComponent implements EventListener {
             activeObject: this._node,
             parent: new Node(this._node.parent.id),
             allObjects: this.list,
-            customOptions: options,
+            customOptions: {
+                useDefaultOptions: true,
+                addOptions: options
+            },
         });
         this.optionsHelper.initComponents(this.mainNavRef, this.actionbar);
         this.optionsHelper.setListener({

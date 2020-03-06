@@ -9,7 +9,7 @@ import {RestNodeService} from '../../core-module/core.module';
 import {RestConstants} from '../../core-module/core.module';
 import {RestConnectorService} from "../../core-module/core.module";
 import {Node, NodeList, LoginResult, SharingInfo, Person} from "../../core-module/core.module";
-import {OptionItem} from "../../core-ui-module/option-item";
+import {CustomOptions, OptionItem} from "../../core-ui-module/option-item";
 import {TemporaryStorageService} from "../../core-module/core.module";
 import {UIHelper} from "../../core-ui-module/ui-helper";
 import {Title} from "@angular/platform-browser";
@@ -45,7 +45,9 @@ export class SharingComponent {
       sortBy: RestConstants.CM_NAME,
       sortAscending: true
   };
-  options:OptionItem[]=[];
+  options:CustomOptions={
+      useDefaultOptions: false
+  };
   constructor(
     private router : Router,
     private route : ActivatedRoute,
@@ -60,7 +62,7 @@ export class SharingComponent {
     private translate : TranslateService) {
       this.columns.push(new ListItem('NODE',RestConstants.CM_NAME));
       this.columns.push(new ListItem('NODE',RestConstants.SIZE));
-      this.options.push(new OptionItem('SHARING.DOWNLOAD','cloud_download',(node:Node)=>this.download(node)));
+      this.options.addOptions.push(new OptionItem('SHARING.DOWNLOAD','cloud_download',(node:Node)=>this.download(node)));
       Translation.initialize(translate,this.config,this.session,this.route).subscribe(()=> {
           UIHelper.setTitle('SHARING.TITLE', title, translate, config);
           this.route.queryParams.subscribe((params)=>{

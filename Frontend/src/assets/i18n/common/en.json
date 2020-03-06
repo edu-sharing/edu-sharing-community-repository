@@ -469,6 +469,7 @@
         "VARIANT": "Create variant",
         "VARIANT_OPEN": "Open as variant",
         "QR_CODE": "QR-Code Link",
+        "ADD_OBJECT": "Add Material",
         "NEW_COLLECTION": "Add collection"
     },
     "NO_SIZE": "-",
