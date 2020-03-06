@@ -222,7 +222,8 @@ export class NodeHelper {
     }
     if(item=='scope') {
       const info=NodeHelper.getCollectionScopeInfo(node);
-      return '<i class="material-icons collectionScope">'+info.icon+'</i> '+translate.instant('COLLECTION.SCOPE.'+info.scopeName);
+      return '<i class="material-icons collectionScope">'+info.icon+'</i> <span>'+
+          translate.instant('COLLECTION.SCOPE.'+info.scopeName)+'</span>';
     }
     return (node.collection as any)[item];
   }

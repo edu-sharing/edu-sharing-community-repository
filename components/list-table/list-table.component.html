@@ -76,7 +76,6 @@
                  [style.backgroundColor]="isCollection(node) ? (viewType==2 ? node.preview.isIcon ? getCollectionColor(node) : '#000' : getCollectionColor(node)) : null"
                  [style.border-color]="isCollection(node) ? getCollectionColor(node) : null"
                  [class.dark-color]="isCollection(node) && node.preview.isIcon && isBrightColorCollection(getCollectionColor(node))"
-                 [title]="viewType==0 ? '' : getTitle(node)"
                  (click)="select(node)"
                  (dblclick)="doubleClick(node)"
                  (contextmenu)="contextMenu($event,node)"
@@ -131,6 +130,7 @@
                 <div class="preview column" *ngIf="viewType==1 || viewType==2" [class.clickable]="isClickable" (click)="select(node,'preview');$event.stopPropagation();">
                     <img *ngIf="node.preview.url && !(isCollection(node) && node.preview.isIcon) || (viewType==2 && !node.preview.isIcon)"
                          src="{{(!isCollection(node) || !node.preview.isIcon) ? node.preview.url+(isHomeNode(node) && animateNode!=node ? '&crop=true&maxWidth=300&maxHeight=300' : '') : null}}"
+                         [title]="viewType==0 ? '' : getTitle(node)"
                          [attr.role]="'presentation'"
                          (mouseenter)="animateIcon(node,true)"
                          (mouseleave)="animateIcon(node,false)"
@@ -187,8 +187,11 @@
                 </div>
                 <div class="more column" *ngIf="_options && _options.length>1" ><button mat-icon-button (click)="showDropdown(node,true,$event);$event.stopPropagation();"><i icon iconId="more_vert" aria="true"></i></button></div>
                 <div class="more moreSingle column" *ngIf="_options && _options.length==1 && optionIsShown(_options[0],node)">
-                    <button mat-icon-button [class.disabled]="!optionIsValid(_options[0],node)" (click)="callOption(_options[0],node);$event.stopPropagation();">
-                        <i icon iconId="{{_options[0].icon}}"></i> <span class="actionText">{{_options[0].name | translate}}</span>
+                    <button mat-icon-button
+                            [class.disabled]="!optionIsValid(_options[0],node)"
+                            matTooltip="{{_options[0].name | translate}}"
+                            (click)="callOption(_options[0],node);$event.stopPropagation();">
+                        <i icon iconId="{{_options[0].icon}}"></i>
                     </button></div>
             </div>
         </div>
