@@ -194,6 +194,7 @@
   </form>
 </div>
 <listTable class="list" infinite-scroll (scrolled)="loadAuthorities()" [scrollWindow]="false" [class.listEmbedded]="embedded"
+  #listRef
   [columns]="columns"
   [nodes]="list"
   [hasCheckbox]="_mode!='ORG'"
