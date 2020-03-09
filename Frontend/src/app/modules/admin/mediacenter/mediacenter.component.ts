@@ -1,7 +1,8 @@
 import {RestAdminService} from "../../../core-module/rest/services/rest-admin.service";
 import {Component, EventEmitter, Output} from "@angular/core";
 import {TranslateService} from "@ngx-translate/core";
-import {NodeStatistics, Node, Statistics, IamGroup, Group} from "../../../core-module/rest/data-object";
+import {NodeStatistics, Node, Statistics, IamGroup, Group, NodeList} from '../../../core-module/rest/data-object';
+//import {NodeList} from "../../../core-module/core.module";
 import {ListItem} from "../../../core-module/ui/list-item";
 import {RestConstants} from "../../../core-module/rest/rest-constants";
 import {RestHelper} from "../../../core-module/rest/rest-helper";
@@ -30,7 +31,9 @@ export class AdminMediacenterComponent {
 
   addGroup: Group;
   mediacenterGroups: IamGroup[];
+  mediacenterNodes: Node[];
   groupColumns:ListItem[];
+  nodeColumns:ListItem[];
   groupActions:OptionItem[];
   currentTab=0;
   private isAdmin: boolean;
@@ -40,6 +43,7 @@ export class AdminMediacenterComponent {
   public globalProgress=false;
 
   public removeSchoolsFromMC=false;
+
 
 
 
@@ -56,6 +60,10 @@ export class AdminMediacenterComponent {
       new ListItem('GROUP', RestConstants.AUTHORITY_DISPLAYNAME),
       new ListItem('GROUP', RestConstants.AUTHORITY_GROUPTYPE)
     ];
+    this.nodeColumns=[
+        new ListItem('FILE', "name")
+    ];
+
     this.groupActions=[
         new OptionItem('ADMIN.MEDIACENTER.GROUPS.REMOVE','delete',(authority:Group)=>{
           this.toast.showModalDialog('ADMIN.MEDIACENTER.GROUPS.REMOVE_TITLE','ADMIN.MEDIACENTER.GROUPS.REMOVE_MESSAGE',
@@ -72,9 +80,20 @@ export class AdminMediacenterComponent {
     this.currentMediacenter=mediacenter;
     this.currentMediacenterCopy=Helper.deepCopy(mediacenter);
     this.mediacenterGroups=null;
+    this.mediacenterNodes=null;
     if(mediacenter){
       this.mediacenterService.getManagedGroups(mediacenter.authorityName).subscribe((groups)=> {
         this.mediacenterGroups=groups;
+      });
+
+      let licensedNodeReq={
+            offset:0,
+            count:20,
+            propertyFilter:[RestConstants.ALL]
+      };
+
+      this.mediacenterService.getLicensedNodes(mediacenter.authorityName, RestConstants.HOME_REPOSITORY,null, licensedNodeReq).subscribe((data) => {
+          this.mediacenterNodes = data.nodes;
       });
     }
   }

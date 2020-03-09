@@ -339,7 +339,7 @@ export class OptionsHelperService {
     }
 
     private prepareOptions(management: WorkspaceManagementDialogsComponent, objects: Node[] | any[]) {
-        const options = [];
+        const options: OptionItem[] = [];
 
         /*
         let apply=new OptionItem('APPLY', 'redo', (node: Node) => NodeHelper.addNodeToLms(this.router,this.temporaryStorageService,ActionbarHelperService.getNodes(this.selection,node)[0],this.searchService.reurl));
