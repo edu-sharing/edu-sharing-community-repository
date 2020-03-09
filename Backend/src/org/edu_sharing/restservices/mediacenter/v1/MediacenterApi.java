@@ -1,6 +1,8 @@
 package org.edu_sharing.restservices.mediacenter.v1;
 
 import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -20,17 +22,25 @@ import org.edu_sharing.repository.server.tools.ApplicationInfoList;
 import org.edu_sharing.restservices.ApiService;
 import org.edu_sharing.restservices.GroupDao;
 import org.edu_sharing.restservices.MediacenterDao;
+import org.edu_sharing.restservices.NodeDao;
 import org.edu_sharing.restservices.RepositoryDao;
 import org.edu_sharing.restservices.RestConstants;
 import org.edu_sharing.restservices.mediacenter.v1.model.McOrgConnectResult;
 import org.edu_sharing.restservices.mediacenter.v1.model.MediacentersImportResult;
 import org.edu_sharing.restservices.mediacenter.v1.model.OrganisationsImportResult;
+import org.edu_sharing.restservices.node.v1.model.SearchResult;
 import org.edu_sharing.restservices.shared.ErrorResponse;
+import org.edu_sharing.restservices.shared.Filter;
 import org.edu_sharing.restservices.shared.Group;
 import org.edu_sharing.restservices.shared.Mediacenter;
 import org.edu_sharing.restservices.shared.Node;
+import org.edu_sharing.restservices.shared.NodeRef;
+import org.edu_sharing.restservices.shared.NodeSearch;
+import org.edu_sharing.restservices.shared.Pagination;
 import org.edu_sharing.service.authority.AuthorityServiceFactory;
 import org.edu_sharing.service.mediacenter.MediacenterServiceFactory;
+import org.edu_sharing.service.search.model.SearchToken;
+import org.edu_sharing.service.search.model.SortDefinition;
 import org.glassfish.jersey.media.multipart.FormDataParam;
 
 import io.swagger.annotations.Api;
@@ -189,7 +199,7 @@ public class MediacenterApi {
 	}
 	
 	
-	@GET
+	@POST
 	@Path("/mediacenter/{repository}/{mediacenter}/licenses")
 
 	@ApiOperation(
@@ -209,14 +219,44 @@ public class MediacenterApi {
 
 	public Response getMediacenterLicensedNodes(
 			@ApiParam(value = RestConstants.MESSAGE_REPOSITORY_ID,required=true, defaultValue="-home-" ) @PathParam("repository") String repository,
+		    @ApiParam(value = RestConstants.MESSAGE_MAX_ITEMS, defaultValue="10") @QueryParam("maxItems") Integer maxItems,
+		    @ApiParam(value = RestConstants.MESSAGE_SKIP_COUNT, defaultValue="0") @QueryParam("skipCount") Integer skipCount,
+		    @ApiParam(value = RestConstants.MESSAGE_SORT_PROPERTIES) @QueryParam("sortProperties") List<String> sortProperties,
+		    @ApiParam(value = RestConstants.MESSAGE_SORT_ASCENDING) @QueryParam("sortAscending") List<Boolean> sortAscending,
+		    @ApiParam(value = "property filter for result nodes (or \"-all-\" for all properties)", defaultValue="-all-" ) @QueryParam("propertyFilter") List<String> propertyFilter,
 			@ApiParam(value = "authorityName of the mediacenter that licenses nodes",required=true) @PathParam("mediacenter") String mediacenter,
 			@Context HttpServletRequest req) {
 
 		try {
+			
 			RepositoryDao repoDao = RepositoryDao.getRepository(repository);
-			MediacenterDao dao = MediacenterDao.get(repoDao, mediacenter);
-			List<Node> result = dao.getLicensedNodes();
-			return Response.status(Response.Status.OK).entity(result).build();
+			Filter filter= new Filter(propertyFilter);
+			SearchToken searchToken=new SearchToken();
+			searchToken.setFrom(skipCount != null ? skipCount : 0);
+			searchToken.setMaxResult(maxItems!= null ? maxItems : 10);
+			searchToken.setSortDefinition(new SortDefinition(sortProperties, sortAscending));
+			searchToken.setLuceneString("TYPE:\"" + "ccm:io\"");
+			searchToken.setAuthorityScope(Arrays.asList(new String[] {mediacenter}));
+			
+    		NodeSearch search = NodeDao.search(repoDao,searchToken);
+    		List<Node> data = new ArrayList<Node>();
+	    	for (NodeRef ref : search.getResult()) {
+	    		data.add(NodeDao.getNode(repoDao, ref.getId(),filter).asNode());
+	    	}
+	    	Pagination pagination = new Pagination();
+	    	pagination.setFrom(search.getSkip());
+	    	pagination.setCount(data.size());
+	    	pagination.setTotal(search.getCount());
+	    	
+	    	
+	    	SearchResult response = new SearchResult();
+	    	response.setNodes(data);
+	    	response.setPagination(pagination);	    	
+	    	response.setFacettes(search.getFacettes());
+	    	return Response.status(Response.Status.OK).entity(response).build();
+			//MediacenterDao dao = MediacenterDao.get(repoDao, mediacenter);
+	    	//List<Node> result = dao.getLicensedNodes();
+	    	//return Response.status(Response.Status.OK).entity(result).build();
 		} catch (Throwable t) {
 			return ErrorResponse.createResponse(t);
 		}

@@ -125,20 +125,6 @@ public class MediacenterDao extends AbstractDao{
 				collect(Collectors.toList());
 	}
 	
-	public List<Node> getLicensedNodes() throws DAOException{
-		SearchToken searchToken = new SearchToken();
-		searchToken.setAuthorityScope(Arrays.asList(new String[] {this.authorityName}));
-		searchToken.setLuceneString("TYPE:\"" + "ccm:io\"");
-		searchToken.setFrom(0);
-		searchToken.setMaxResult(Integer.MAX_VALUE);
-		
-		List<org.edu_sharing.restservices.shared.NodeRef> search = NodeDao.search(repoDao, searchToken).getResult();
-		List<Node> data = new ArrayList<Node>();
-    	for (org.edu_sharing.restservices.shared.NodeRef ref : search) {
-    		data.add(NodeDao.getNode(repoDao, ref.getId()).asNode());
-    	}
-		return data;
-	}
 	
 	public void changeProfile(Mediacenter.Profile profile) throws DAOException {
 		// always force the group type to media center
