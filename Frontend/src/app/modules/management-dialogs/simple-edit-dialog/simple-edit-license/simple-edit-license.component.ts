@@ -71,10 +71,7 @@ export class SimpleEditLicenseComponent {
         .subscribe((licenses) => this.allowedLicenses = licenses);
   }
   getESUID() {
-    return this.iamApi.getCurrentUser().properties &&
-    this.iamApi.getCurrentUser().properties[RestConstants.CM_PROP_ESUID] ?
-        this.iamApi.getCurrentUser().properties[RestConstants.CM_PROP_ESUID][0] : null;
-
+    return this.iamApi.getCurrentUserVCard().uid;
   }
   isDirty() {
     // state is untouched -> so not dirty
@@ -154,14 +151,7 @@ export class SimpleEditLicenseComponent {
   private getProperties() {
     const properties:any = {};
     if (this.modeGroup.value === 'own') {
-      const vcard = new VCard();
-      vcard.givenname = this.iamApi.getCurrentUser().profile.firstName;
-      vcard.surname = this.iamApi.getCurrentUser().profile.lastName;
-      vcard.email = this.iamApi.getCurrentUser().profile.email;
-      if (this.getESUID()) {
-        vcard.uid = this.getESUID();
-      }
-      console.log(vcard);
+      const vcard = this.iamApi.getCurrentUserVCard();
       properties[RestConstants.CCM_PROP_LIFECYCLECONTRIBUTER_AUTHOR] = [vcard.toVCardString()];
       properties[RestConstants.CCM_PROP_AUTHOR_FREETEXT] = null;
     } else {

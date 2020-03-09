@@ -3,6 +3,7 @@ package org.edu_sharing.service.permission;
 import java.io.Serializable;
 import java.sql.SQLException;
 import java.util.*;
+import java.util.stream.Collectors;
 
 import javax.servlet.ServletContext;
 
@@ -54,7 +55,6 @@ import org.edu_sharing.repository.server.tools.Mail;
 import org.edu_sharing.repository.server.tools.StringTool;
 import org.edu_sharing.repository.server.tools.URLTool;
 import org.edu_sharing.repository.server.tools.mailtemplates.MailTemplate;
-import org.edu_sharing.restservices.shared.Node;
 import org.edu_sharing.service.Constants;
 import org.edu_sharing.service.InsufficientPermissionException;
 import org.edu_sharing.service.collection.CollectionServiceFactory;
@@ -320,13 +320,16 @@ public class PermissionServiceImpl implements org.edu_sharing.service.permission
 					receiverLastName = personInfo.get(CCConstants.CM_PROP_PERSON_LASTNAME);
 					emailaddress = personInfo.get(CCConstants.CM_PROP_PERSON_EMAIL);
 				}
+				addToRecent(personService.getPerson(authority));
 			}
 			// send group email notifications
 			if(AuthorityType.GROUP.equals(authorityType)){
 				receiverLastName="";
 				receiverFirstName= (String) nodeService.getProperty(authorityService.getAuthorityNodeRef(authority),QName.createQName(CCConstants.CM_PROP_AUTHORITY_AUTHORITYDISPLAYNAME));
 				emailaddress= (String) nodeService.getProperty(authorityService.getAuthorityNodeRef(authority),QName.createQName(CCConstants.CCM_PROP_GROUPEXTENSION_GROUPEMAIL));
+				addToRecent(authorityService.getAuthorityNodeRef(authority));
 			}
+
 
 			if (mailValidator.isValid(emailaddress) && _sendMail) {
 				Mail mail = new Mail();
@@ -401,6 +404,42 @@ public class PermissionServiceImpl implements org.edu_sharing.service.permission
 				.getPermissionService(ApplicationInfoList.getHomeRepository().getAppId());
 
 		permissionService.createNotifyObject(_nodeId, user, CCConstants.CCM_VALUE_NOTIFY_ACTION_PERMISSION_ADD);
+	}
+
+
+	/**
+	 * Add the authority into the recent list of the users authorities
+	 * @param authority
+	 */
+	private void addToRecent(NodeRef authority) {
+		ArrayList<NodeRef> current = getRecentlyInvitedInternal();
+		current.remove(authority);
+		current.add(0, authority);
+		while(current.size()>10){
+			current.remove(9);
+		}
+		nodeService.setProperty(personService.getPerson(AuthenticationUtil.getFullyAuthenticatedUser()),
+				QName.createQName(CCConstants.CCM_PROP_PERSON_RECENTLY_INVITED),
+				current);
+	}
+	@Override
+	public List<String> getRecentlyInvited() {
+		return getRecentlyInvitedInternal().stream().map((n) -> {
+			if(nodeService.getType(n).equals(QName.createQName(CCConstants.CM_TYPE_PERSON))) {
+				return (String)nodeService.getProperty(n, QName.createQName(CCConstants.CM_PROP_PERSON_USERNAME));
+			} else {
+				return (String)nodeService.getProperty(n, QName.createQName(CCConstants.CM_PROP_AUTHORITY_NAME));
+			}
+		}).collect(Collectors.toList());
+	}
+	public ArrayList<NodeRef> getRecentlyInvitedInternal() {
+		List<NodeRef> data= (List<NodeRef>) nodeService.getProperty(personService.getPerson(AuthenticationUtil.getFullyAuthenticatedUser()),
+				QName.createQName(CCConstants.CCM_PROP_PERSON_RECENTLY_INVITED));
+		if(data == null){
+			return new ArrayList<>();
+		}
+		return new ArrayList<>(data);
+
 	}
 
 	public void createHandle(AuthorityType authorityType, String _nodeId) throws Exception {

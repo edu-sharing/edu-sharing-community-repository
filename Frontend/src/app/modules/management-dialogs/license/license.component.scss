@@ -39,12 +39,10 @@
 .ccAuthor {
   font-weight: bold;
   margin: 10px 0;
-  i {
-    color: $textLight;
-  }
 }
 .contributors{
-  margin-bottom: 30px;
+  display: flex;
+  justify-content: center;
 }
 .ccAuthorGroup{
   padding:10px;
@@ -76,6 +74,12 @@
   h4,div{
     display: table-cell;
   }
+}
+.author-checkbox{
+  margin:20px 0 10px 10%;
+}
+.author-tabs{
+  margin-top: 15px;
 }
 .oerStatus{
   padding-left: 10px;

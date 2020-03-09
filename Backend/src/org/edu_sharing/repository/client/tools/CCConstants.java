@@ -305,6 +305,8 @@ public class CCConstants {
 
 	public final static String CM_PROP_PERSON_USERNAME = "{http://www.alfresco.org/model/content/1.0}userName";
 
+	public final static String CM_PROP_AUTHORITY_NAME = "{http://www.alfresco.org/model/content/1.0}authorityName";
+
 	public final static String CM_PROP_PERSON_SIZE_CURRENT = "{http://www.alfresco.org/model/content/1.0}sizeCurrent";
 
 	public final static String CM_PROP_PERSON_SIZE_QUOTA = "{http://www.alfresco.org/model/content/1.0}sizeQuota";
@@ -317,6 +319,8 @@ public class CCConstants {
 	public final static String CM_PROP_PERSON_EDU_SCHOOL_PRIMARY_AFFILIATION = "{http://www.alfresco.org/model/content/1.0}eduSchoolPrimaryAffiliation";
 
 	public final static String CCM_PROP_PERSON_PREFERENCES = "{http://www.campuscontent.de/model/1.0}userPreferences";
+
+	public final static String CCM_PROP_PERSON_RECENTLY_INVITED = "{http://www.campuscontent.de/model/1.0}userRecentlyInvited";
 
 	public final static String CCM_PROP_PERSON_NODE_LISTS = "{http://www.campuscontent.de/model/1.0}userNodeLists";
 

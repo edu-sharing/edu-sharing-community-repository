@@ -7,8 +7,10 @@
 </info-message>
 
 <div *ngIf="!multipleParents && parentAuthorities.length === 0" class="toggles">
+    <h5 class="mat-heading-5 default-groups">{{'SIMPLE_EDIT.INVITE.DEFAULT_GROUPS' | translate}}</h5>
     <div>
         <mat-button-toggle-group #orgGroup="matButtonToggleGroup"
+                                 class="toggle-full-size"
                                  (change)="updateValue('org')">
             <mat-button-toggle [value]="'unset'">
                 {{ "SIMPLE_EDIT.INVITE.UNSET" | translate }}
@@ -28,6 +30,7 @@
     </div>
     <div *ngIf="globalGroups.length > 0">
         <mat-button-toggle-group #globalGroup="matButtonToggleGroup"
+                                 class="toggle-full-size"
                                  (change)="updateValue('global')">
             <mat-button-toggle
                     *ngFor="let group of globalGroups"
@@ -36,4 +39,14 @@
             </mat-button-toggle>
         </mat-button-toggle-group>
     </div>
+    <div *ngIf="recentAuthorities && recentAuthorities.length" >
+        <h5 class="mat-heading-5">{{'SIMPLE_EDIT.INVITE.RECENT_AUTHORITIES' | translate}}</h5>
+        <div class="tiles">
+            <app-user-tile *ngFor="let authority of recentAuthorities"
+                           [user]="authority"
+                           (click)="toggleInvitation(authority)"
+                           [active]="isInvited(authority)" ></app-user-tile>
+        </div>
+    </div>
+    <div class="info">{{'SIMPLE_EDIT.INVITE.INFO' | translate}}</div>
 </div>

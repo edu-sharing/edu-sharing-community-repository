@@ -78,6 +78,8 @@ export class SimpleEditDialogComponent  {
         this.license.save().subscribe(() => {
           Observable.forkJoin(this._nodes.map((n) => this.nodeApi.getNodeMetadata(n.ref.id, [RestConstants.ALL])))
               .subscribe((nodes) => {
+                this.toast.toast('SIMPLE_EDIT.SAVED' + (nodes.length === 1 ? '' : '_MULTIPLE'),
+                      {name: nodes[0].node.name, count: nodes.length});
                 this.onDone.emit(nodes.map((n) => n.node));
                 if (callback) {
                   callback();

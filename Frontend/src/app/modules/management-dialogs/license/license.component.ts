@@ -1,5 +1,5 @@
 import {Component, Input, EventEmitter, Output, ViewChild, ElementRef} from '@angular/core';
-import {DialogButton, RestConnectorService} from "../../../core-module/core.module";
+import {DialogButton, RestConnectorService, RestIamService} from "../../../core-module/core.module";
 import {Toast} from "../../../core-ui-module/toast";
 import {RestNodeService} from "../../../core-module/core.module";
 import {RestConstants} from "../../../core-module/core.module";
@@ -111,6 +111,8 @@ export class WorkspaceLicenseComponent  {
   public authorVCard:VCard;
   public authorFreetext:string;
   private allowRelease = true;
+  userAuthor = false;
+
   public isAllowedLicense(license:string){
     return this.allowedLicenses==null || this.allowedLicenses.indexOf(license)!=-1;
   }
@@ -203,10 +205,12 @@ export class WorkspaceLicenseComponent  {
     private translate : TranslateService,
     private config : ConfigurationService,
     private ui : UIService,
+    private iamApi : RestIamService,
     private toast : Toast,
     private nodeApi : RestNodeService) {
       this.connector.hasToolPermission(RestConstants.TOOLPERMISSION_HANDLESERVICE).subscribe((has:boolean)=>this.doiPermission=has);
       this.updateButtons();
+      this.iamApi.getUser().subscribe(() => {});
   }
   public cancel(){
     this.onCancel.emit();
@@ -310,6 +314,11 @@ export class WorkspaceLicenseComponent  {
     this.contact=contactState=='true' || contactState==true;
     this.oerMode=this.isOerLicense() || this.type=='NONE';
     this.authorVCard=new VCard(this.getValueForAll(RestConstants.CCM_PROP_LIFECYCLECONTRIBUTER_AUTHOR));
+    this.userAuthor = false;
+    if (this.authorVCard.uid &&
+        this.authorVCard.uid === this.iamApi.getCurrentUserVCard().uid) {
+        this.userAuthor = true;
+    }
     this.authorFreetext=this.getValueForAll(RestConstants.CCM_PROP_AUTHOR_FREETEXT);
     UIHelper.invalidateMaterializeTextarea('authorFreetext');
     UIHelper.invalidateMaterializeTextarea('licenseRights');
@@ -526,5 +535,17 @@ export class WorkspaceLicenseComponent  {
             new DialogButton('CANCEL',DialogButton.TYPE_CANCEL,()=>this.cancel()),
             save
         ];
+    }
+
+    isCCAttributableLicense() {
+        return this.getLicenseProperty().startsWith('CC_BY');
+    }
+
+    setVCardAuthor(author: boolean) {
+      if(author) {
+          this.authorVCard = this.iamApi.getCurrentUserVCard();
+      } else {
+          this.authorVCard = new VCard();
+      }
     }
 }

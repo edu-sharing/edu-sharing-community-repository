@@ -1,5 +1,5 @@
 import {Component, EventEmitter, Input, Output, ViewChild} from '@angular/core';
-import {Authority, DialogButton, Group, LocalPermissions, Permission, Permissions, RestConnectorService, RestOrganizationService} from '../../../../core-module/core.module';
+import {Authority, AuthorityProfile, DialogButton, Group, LocalPermissions, Permission, Permissions, RestConnectorService, RestOrganizationService} from '../../../../core-module/core.module';
 import {Toast} from '../../../../core-ui-module/toast';
 import {RestNodeService} from '../../../../core-module/core.module';
 import {Connector, Node} from '../../../../core-module/core.module';
@@ -37,6 +37,7 @@ export class SimpleEditInviteComponent {
   @ViewChild('globalGroup') globalGroup: MatButtonToggleGroup;
   _nodes: Node[];
   multipleParents: boolean;
+  dirty = false;
   parentPermissions: Permission[];
   parentAuthorities: Authority[] = [];
   organization: {organization: Group, groups?: any};
@@ -49,6 +50,8 @@ export class SimpleEditInviteComponent {
   private globalGroups: Group[]|any = [];
   private nodesPermissions: Permissions[];
   private initialState: Group;
+  private recentAuthorities: AuthorityProfile[];
+  private currentPermissions: Permission[];
   @Input() set nodes (nodes : Node[]) {
     this._nodes = nodes;
     this.prepare();
@@ -69,6 +72,7 @@ export class SimpleEditInviteComponent {
   ) {
     this.configService.get('simpleEdit.organization.groupTypes',
         [RestConstants.GROUP_TYPE_ADMINISTRATORS]).subscribe((data) => this.organizationGroups = data);
+    // @TODO: Remove dummy value
     this.configService.get('simpleEdit.globalGroups',
         ['GROUP_ORG_baum',RestConstants.AUTHORITY_EVERYONE]).subscribe((data) => {
           this.loadGlobalGroups(data);
@@ -77,6 +81,9 @@ export class SimpleEditInviteComponent {
   isDirty() {
     if(this.hasInvalidState()) {
       return false;
+    }
+    if (this.dirty) {
+      return true;
     }
     console.log(this.initialState, this.getSelectedAuthority());
     return this.getSelectedAuthority()!=null && !Helper.objectEquals(this.initialState, this.getSelectedAuthority());
@@ -91,34 +98,43 @@ export class SimpleEditInviteComponent {
       let authority = this.getSelectedAuthority();
       // auth not to set, we can skip tasks
       console.log(authority);
-      if (authority == null) {
-        observer.next(null);
-        observer.complete();
-      } else {
-        const addPermission = new Permission();
+      let addPermission: Permission = null;
+      if (authority != null) {
+        addPermission = new Permission();
         addPermission.authority = {
           authorityName: authority.authorityName,
           authorityType: authority.authorityType,
         };
         addPermission.permissions = [RestConstants.PERMISSION_CONSUMER];
-        Observable.forkJoin(this._nodes.map((n, i) => {
-          const permissions = RestHelper.copyAndCleanPermissions(this.nodesPermissions[i].localPermissions.permissions,
-              this.nodesPermissions[i].localPermissions.inherited);
-          if(this.stablePermissionState) {
+      }
+      Observable.forkJoin(this._nodes.map((n, i) => {
+        let permissions = this.nodesPermissions[i].localPermissions;
+        // if currentPermissions available (single node mode), we will check the state and override if possible
+        if (this.currentPermissions && this.currentPermissions.length) {
+          permissions.permissions = [];
+        }
+        if (addPermission) {
+          if (this.stablePermissionState) {
             permissions.permissions = [addPermission];
-           } else {
+          } else {
             permissions.permissions =
                 WorkspaceShareComponent.mergePermissionsWithHighestPermission(permissions.permissions, [addPermission]);
           }
-          return this.nodeApi.setNodePermissions(n.ref.id, permissions, false);
-        })).subscribe(() => {
-          observer.next(null);
-          observer.complete();
-        }, error => {
-          observer.error(error);
-          observer.complete();
-        });
-      }
+        }
+        if (this.currentPermissions && this.currentPermissions.length) {
+          permissions.permissions =
+              WorkspaceShareComponent.mergePermissionsWithHighestPermission(permissions.permissions,this.currentPermissions);
+        }
+        permissions = RestHelper.copyAndCleanPermissions(permissions.permissions, this.nodesPermissions[i].localPermissions.inherited);
+        return this.nodeApi.setNodePermissions(n.ref.id, permissions, false);
+      })).subscribe(() => {
+        observer.next(null);
+        observer.complete();
+      }, error => {
+        observer.error(error);
+        observer.complete();
+      });
+
     });
   }
 
@@ -147,7 +163,6 @@ export class SimpleEditInviteComponent {
   private prepare() {
     const parents=Array.from(new Set(this._nodes.map((n) => n.parent.id)));
     this.multipleParents = parents.length > 1;
-    console.log(parents);
     if(this.multipleParents) {
       this.setInitialState();
       return;
@@ -219,50 +234,53 @@ export class SimpleEditInviteComponent {
       this.setInitialState();
       return;
     }
-    let group: Authority = null;
+    const availableToggleGroups = this.getAvailableGlobalGroups();
     let unset = false;
     let invalid = false;
+    let activeToggle: string;
     for (const perm of this.nodesPermissions) {
-      const list = perm.localPermissions.permissions.
-                filter((p) => p.authority.authorityName !== this.connector.getCurrentLogin().authorityName);
-      if(list.length === 1) {
-        if(Helper.arrayEquals(list[0].permissions, [RestConstants.PERMISSION_CONSUMER]) &&
-            (group==null || list[0].authority.authorityName === group.authorityName)) {
-          group = list[0].authority;
-        } else {
+      const list = perm.localPermissions.permissions;
+                // filter((p) => p.authority.authorityName !== this.connector.getCurrentLogin().authorityName);
+      if(this._nodes.length===1) {
+        this.currentPermissions = list;
+      } else {
+        this.currentPermissions = [];
+      }
+      if(list.length > 0) {
+        const consumers = list.filter((p) => Helper.arrayEquals(p.permissions, [RestConstants.PERMISSION_CONSUMER]));
+        const toggle = consumers.filter((c)=> availableToggleGroups.indexOf(c.authority.authorityName) !== -1);
+        console.log(toggle);
+        if(toggle.length===1 && (!activeToggle || activeToggle === toggle[0].authority.authorityName)) {
+          activeToggle = toggle[0].authority.authorityName;
+        }
+        else {
           invalid = true;
         }
-      } else if(list.length > 0) {
-        console.log('node has unmatching permissions for simple invite', list);
-        invalid = true;
       } else {
         unset = true;
       }
     }
     this.stablePermissionState = !invalid;
-    console.log(unset, invalid, group);
+    console.log(activeToggle, unset, invalid);
     if (unset || invalid) {
       this.orgGroup.value = 'unset';
     } else {
-      if (this.organization) {
-          if (group.authorityName === this.organization.organization.authorityName) {
-            console.log('set org active');
-            this.orgGroup.value = 'org';
-            this.setInitialState();
-            return;
-          }
-          for (const key of Object.keys(this.organization.groups)) {
-            if(group.authorityName === this.organization.groups[key].authorityName) {
-              this.orgGroup.value = key;
-              this.setInitialState();
-              return;
-            }
-          }
+      if(this.organization && activeToggle === this.organization.organization.authorityName) {
+        this.orgGroup.value = 'org';
+        this.setInitialState();
+        return;
+      }
+      for (const key of Object.keys(this.organization.groups)) {
+        if(activeToggle === this.organization.groups[key].authorityName) {
+          this.orgGroup.value = key;
+          this.setInitialState();
+          return;
+        }
       }
       if (this.globalGroups) {
         for (const globalGroup of this.globalGroups) {
-          if (group.authorityName === globalGroup.authorityName) {
-            this.globalGroup.value = group.authorityName;
+          if (activeToggle === globalGroup.authorityName) {
+            this.globalGroup.value = activeToggle;
             this.setInitialState();
             return;
           }
@@ -273,12 +291,55 @@ export class SimpleEditInviteComponent {
     this.setInitialState();
   }
 
+  private getAvailableGlobalGroups() {
+    const availableToggleGroups: string[] = [];
+    if (this.organization) {
+      availableToggleGroups.push(this.organization.organization.authorityName);
+      for (const key of Object.keys(this.organization.groups)) {
+        availableToggleGroups.push(this.organization.groups[key].authorityName);
+      }
+    }
+    if (this.globalGroups) {
+      for (const globalGroup of this.globalGroups) {
+        availableToggleGroups.push(globalGroup.authorityName);
+      }
+    }
+    return availableToggleGroups;
+  }
+
   private hasInvalidState() {
     return this.multipleParents || this.parentPermissions.length > 0;
   }
 
   private setInitialState() {
-    this.initialState = this.getSelectedAuthority();
-    this.onInitFinished.emit(true);
+    this.iamApi.getRecentlyInvited().subscribe((recent) => {
+      this.recentAuthorities = recent.authorities.filter(
+          (a) => this.getAvailableGlobalGroups().indexOf(a.authorityName) === -1
+      ).slice(0,6);
+      this.initialState = this.getSelectedAuthority();
+      this.onInitFinished.emit(true);
+    }, error => this.onError.emit(error));
+  }
+
+  isInvited(authority: AuthorityProfile) {
+    return this.currentPermissions ?
+        this.currentPermissions.find((p) => p.authority.authorityName === authority.authorityName) :
+        false;
+  }
+
+  toggleInvitation(authority: AuthorityProfile) {
+    this.dirty = true;
+    if (this.isInvited(authority)) {
+      this.currentPermissions = this.currentPermissions.filter((p) => p.authority.authorityName !== authority.authorityName);
+      console.log(this.currentPermissions);
+    } else {
+      const permission =new Permission();
+      permission.authority = {
+        authorityName: authority.authorityName,
+        authorityType: authority.authorityType
+      };
+      permission.permissions = [RestConstants.PERMISSION_CONSUMER];
+      this.currentPermissions.push(permission);
+    }
   }
 }

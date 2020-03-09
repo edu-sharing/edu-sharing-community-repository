@@ -41,10 +41,6 @@
                   <h5><a class="focus-underline" [href]="getLicenseUrlVersion('CC_BY_SA')" target="_blank">{{'WORKSPACE.LICENSE.MORE' | translate}}</a></h5>
                 </mat-radio-button>
             </div>
-            <button mat-button color="primary" class="ccAuthor clickable" (click)="showCcAuthor=!showCcAuthor;">
-              <i icon iconId="{{ showCcAuthor ? 'keyboard_arrow_down' : 'keyboard_arrow_right' }}"></i>
-              {{ 'WORKSPACE.LICENSE.CC.NAME_AUTHOR' | translate}}
-            </button>
           </div>
         </mat-radio-group>
         <div class="allLicenses" *ngIf="!oerMode">
@@ -73,9 +69,6 @@
                 <mat-radio-button value="NC">{{'NO' | translate}}</mat-radio-button>
               </mat-radio-group>
             </div>
-            <button mat-button color="primary" class="ccAuthor clickable" (click)="showCcAuthor=!showCcAuthor;">
-              <i icon iconId="{{ showCcAuthor ? 'keyboard_arrow_down' : 'keyboard_arrow_right' }}"></i> {{ 'WORKSPACE.LICENSE.CC.NAME_AUTHOR' | translate}}
-            </button>
           </div>
               <mat-radio-group [(ngModel)]="type" *ngIf="primaryType=='COPYRIGHT'" class="copyright">
                 <div *ngIf="isAllowedLicense('COPYRIGHT_FREE')">
@@ -134,23 +127,7 @@
                            cdkAutosizeMaxRows="5"></textarea>
               </div>
           </div>
-        <div *ngIf="showCcAuthor">
-          <div class="ccAuthorGroup" [class.ccAuthorGroupOer]="oerMode">
-            <mat-form-field>
-              <mat-label>{{'WORKSPACE.LICENSE.CC.TITLE_OF_WORK' | translate}}</mat-label>
-              <input matInput id="CC_TITLE" [(ngModel)]="ccTitleOfWork">
-            </mat-form-field>
-            <mat-form-field>
-              <mat-label>{{'WORKSPACE.LICENSE.CC.SOURCE_URL' | translate}}</mat-label>
-              <input matInput id="CC_URL" [(ngModel)]="ccSourceUrl">
-            </mat-form-field>
-            <mat-form-field>
-              <mat-label>{{'WORKSPACE.LICENSE.CC.PROFILE_URL' | translate}}</mat-label>
-              <input matInput id="CC_PROFILE" [(ngModel)]="ccProfileUrl">
-            </mat-form-field>
-          </div>
-        </div>
-        <mat-tab-group mat-stretch-tabs [(selectedIndex)]="authorTab">
+        <mat-tab-group mat-stretch-tabs [(selectedIndex)]="authorTab" class="author-tabs">
           <mat-tab label="{{'MDS.AUTHOR_FREETEXT' | translate}}">
             <mat-form-field class="authorFreetext">
               <mat-label>{{'MDS.AUTHOR_FREETEXT_PLACEHOLDER' | translate}}</mat-label>
@@ -162,26 +139,53 @@
             </mat-form-field>
           </mat-tab>
           <mat-tab label="{{'MDS.AUTHOR_PERSON' | translate}}">
+            <div class="author-checkbox">
+              <mat-checkbox [(ngModel)]="userAuthor" (ngModelChange)="setVCardAuthor($event)">{{'WORKSPACE.LICENSE.CHECKBOX_AUTHOR' | translate}}</mat-checkbox>
+            </div>
             <div class="vcard authorPerson">
               <div class="vcardGroup">
                 <!-- <i icon iconId="person"></i> -->
-                <mat-form-field>
+                <mat-form-field class="mat-form-field-no-padding">
                   <mat-label>{{'VCARD.Givenname' | translate}}</mat-label>
-                  <input matInput class="vcard_Givenname vcardFirstInput" id="firstName" [(ngModel)]="authorVCard.givenname">
+                  <input matInput class="vcard_Givenname vcardFirstInput" id="firstName" [(ngModel)]="authorVCard.givenname" [disabled]="userAuthor">
                 </mat-form-field>
               </div>
               <div class="vcardGroup">
-                <mat-form-field>
+                <mat-form-field class="mat-form-field-no-padding">
                   <mat-label>{{'VCARD.Surname' | translate}}</mat-label>
-                  <input matInput class="vcard_Surname" id="lastName" [(ngModel)]="authorVCard.surname">
+                  <input matInput class="vcard_Surname" id="lastName" [(ngModel)]="authorVCard.surname" [disabled]="userAuthor">
                 </mat-form-field>
               </div>
             </div>
-            <button class="contributors" mat-button color="primary" (click)="openContributorDialog()" class="contributors" *ngIf="_nodes && _nodes.length==1 && !ui.isMobile()">
-              {{'MDS.CONTRIBUTOR_LINK' | translate}} <i icon iconId="arrow_forward"></i>
-            </button>
+            <div class="contributors">
+              <button mat-button color="primary" (click)="openContributorDialog()" *ngIf="_nodes && _nodes.length==1 && !ui.isMobile()">
+                {{'MDS.CONTRIBUTOR_LINK' | translate}} <i icon iconId="arrow_forward"></i>
+              </button>
+            </div>
           </mat-tab>
         </mat-tab-group>
+        <div class="cc-additional" *ngIf="isCCAttributableLicense()">
+          <button mat-button color="primary" class="ccAuthor clickable" (click)="showCcAuthor=!showCcAuthor;">
+            <i icon iconId="{{ showCcAuthor ? 'keyboard_arrow_down' : 'keyboard_arrow_right' }}"></i>
+            {{ 'WORKSPACE.LICENSE.CC.NAME_AUTHOR' | translate}}
+          </button>
+          <div *ngIf="showCcAuthor" [@cardAnimation]="showCcAuthor">
+            <div class="ccAuthorGroup" [class.ccAuthorGroupOer]="oerMode">
+              <mat-form-field>
+                <mat-label>{{'WORKSPACE.LICENSE.CC.TITLE_OF_WORK' | translate}}</mat-label>
+                <input matInput id="CC_TITLE" [(ngModel)]="ccTitleOfWork">
+              </mat-form-field>
+              <mat-form-field>
+                <mat-label>{{'WORKSPACE.LICENSE.CC.SOURCE_URL' | translate}}</mat-label>
+                <input matInput id="CC_URL" [(ngModel)]="ccSourceUrl">
+              </mat-form-field>
+              <mat-form-field>
+                <mat-label>{{'WORKSPACE.LICENSE.CC.PROFILE_URL' | translate}}</mat-label>
+                <input matInput id="CC_PROFILE" [(ngModel)]="ccProfileUrl">
+              </mat-form-field>
+            </div>
+          </div>
+        </div>
           <div class="currentLicense">
           <h4  *ngIf="type!='MULTI'">{{'WORKSPACE.LICENSE.CURRENT' | translate}}</h4>
           <img *ngIf="type!='MULTI'" class="currentLicenseIcon" src="{{getLicenseIcon()}}">

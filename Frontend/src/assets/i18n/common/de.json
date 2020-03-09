@@ -551,6 +551,8 @@
     },
     "SIMPLE_EDIT": {
         "TITLE": "Schnelle Bearbeitung",
+        "SAVED": "Element {{name}} wurde bearbeitet",
+        "SAVED_MULTIPLE": "{{count}} Elemente wurden bearbeitet",
         "METADATA": {
             "TITLE": "Metadaten angeben",
             "MORE": "Weitere Metadaten"
@@ -558,6 +560,9 @@
         "INVITE": {
             "TITLE": "Freigeben",
             "MORE": "Weitere Freigaben",
+            "DEFAULT_GROUPS": "Allgemeine Gruppen",
+            "RECENT_AUTHORITIES": "Zuletzt eingeladen",
+            "INFO": "Die ausgewählten Nutzer & Gruppen werden als Betrachter eingeladen",
             "ERROR_MULTIPLE_PARENTS": "Das Festlegen von Berechtigungen ist nicht möglich, da die Elemente verschiedene Elternelemente besitzen",
             "ERROR_INHERIT": "Das Festlegen von Berechtigungen ist nicht möglich, da die Elemente bereits Einladungen vom übergeordneten Ordner erhalten:",
             "ERROR_HELP": "Bitte benutzen Sie die Option \"Weitere Freigaben\" zum Konfigurieren der Rechte",
