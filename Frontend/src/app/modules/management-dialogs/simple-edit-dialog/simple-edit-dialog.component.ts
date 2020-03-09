@@ -109,6 +109,7 @@ export class SimpleEditDialogComponent  {
       return;
     }
     callback();
+    this.onCancel.emit();
   }
   openMetadata(force = false) {
     this.openDialog(() => this.onOpenMetadata.emit(this._nodes));
@@ -129,6 +130,7 @@ export class SimpleEditDialogComponent  {
       buttons: [
           new DialogButton('DISCARD',DialogButton.TYPE_CANCEL, () => {
             this.toast.closeModalDialog();
+            this.onCancel.emit();
             callback();
           }),
           new DialogButton('SAVE',DialogButton.TYPE_PRIMARY, () => {
