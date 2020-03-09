@@ -32,6 +32,7 @@ import {trigger} from '@angular/animations';
 import {UIHelper} from '../../../core-ui-module/ui-helper';
 import {ModalDialogOptions} from '../../../common/ui/modal-dialog-toast/modal-dialog-toast.component';
 import {ActionbarComponent} from '../../../common/ui/actionbar/actionbar.component';
+import {ListTableComponent} from '../../../core-ui-module/components/list-table/list-table.component';
 
 @Component({
   selector: 'permissions-authorities',
@@ -46,6 +47,7 @@ import {ActionbarComponent} from '../../../common/ui/actionbar/actionbar.compone
 export class PermissionsAuthoritiesComponent {
   @ViewChild('actionbar') actionbar: ActionbarComponent;
   @ViewChild('actionbarMember') actionbarMember: ActionbarComponent;
+  @ViewChild('listRef') listRef: ListTableComponent;
   public GROUP_TYPES= RestConstants.VALID_GROUP_TYPES;
   public STATUS_TYPES= RestConstants.VALID_PERSON_STATUS_TYPES;
   public SCOPE_TYPES= RestConstants.VALID_SCOPE_TYPES;
@@ -65,7 +67,8 @@ export class PermissionsAuthoritiesComponent {
   public _searchQuery: string;
   private manageMemberSearch: string;
   public options: CustomOptions= {
-    useDefaultOptions: false
+    useDefaultOptions: false,
+    addOptions: []
   };
   public toolpermissionAuthority: any;
   public optionsActionbar: OptionItem[];
@@ -73,7 +76,8 @@ export class PermissionsAuthoritiesComponent {
   public addMembers: any;
   public editGroups: User;
   private memberOptions: CustomOptions = {
-    useDefaultOptions: false
+    useDefaultOptions: false,
+    addOptions: []
   };
   private addToList: any[];
   private isAdmin = false;
@@ -221,7 +225,10 @@ export class PermissionsAuthoritiesComponent {
               private connector: RestConnectorService,
               private iam: RestIamService) {
     this.organization.getOrganizations().subscribe((data: OrganizationOrganizations) => {
-      this.isAdmin = data.canCreate;
+      this.connector.isLoggedIn().subscribe(() => {
+        this.isAdmin = data.canCreate;
+        this.updateOptions();
+      });
     });
   }
   private search(){
@@ -373,6 +380,9 @@ export class PermissionsAuthoritiesComponent {
     }
 
     this.options.addOptions = options;
+    if (this.listRef) {
+      this.listRef.refreshAvailableOptions();
+    }
   }
   private cancelEdit(){
     this.edit = null;
@@ -511,7 +521,6 @@ export class PermissionsAuthoritiesComponent {
 
     const request = {sortBy: [sort], sortAscending: this.sortAscending, offset: this.offset};
     const query = this._searchQuery ? this._searchQuery : '';
-    this.updateOptions();
     this.organization.getOrganizations(query, false).subscribe((orgs: OrganizationOrganizations) => {
       this.orgs = orgs;
       this.updateOptions();
@@ -741,6 +750,7 @@ export class PermissionsAuthoritiesComponent {
     this.edit = {profile: {}};
     this.editDetails = {};
     this.editId = null;
+    this.updateButtons();
   }
   private createGroup(){
       this.createAuthority();
