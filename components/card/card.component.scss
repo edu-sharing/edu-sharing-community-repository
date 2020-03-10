@@ -109,6 +109,11 @@
       position: relative;
       .mat-card-header-text {
         width: calc(100% - 32px);
+        mat-card-title{
+          &.no-subtitle{
+            margin-bottom: 5px;
+          }
+        }
       }
       .cancel {
         position: absolute;

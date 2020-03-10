@@ -111,6 +111,21 @@ export class CardComponent implements AfterViewInit, OnDestroy {
         this._buttons = buttons;
     }
 
+    /**
+     * Set the type of the card
+     * this will automatically set the card icon
+     */
+    @Input() set type (type: CardType) {
+        switch (type) {
+            case CardType.Question:
+                this.icon = 'help_outline';
+                break;
+            case CardType.Info:
+                this.icon = 'info_outline';
+                break;
+        }
+    }
+
     @Output() onCancel = new EventEmitter();
     @Output() onScrolled = new EventEmitter();
 
@@ -261,7 +276,12 @@ export class CardComponent implements AfterViewInit, OnDestroy {
         // on.
     }
 }
-
+export enum CardType {
+    Info = 'Info',
+    Question = 'Question',
+    Warning = 'Warning',
+    Error = 'Error'
+}
 export class CardJumpmark {
     /**
      *

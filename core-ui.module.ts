@@ -49,6 +49,7 @@ import { NodesDropTargetDirective } from './directives/drag-nodes/nodes-drop-tar
 import { A11yModule } from '@angular/cdk/a11y';
 import { SafeHtmlPipe } from './pipes/safe-html.pipe';
 import { ListOptionItemComponent } from './components/list-option-item/list-option-item.component';
+import {UserTileComponent} from './components/user-tile/user-tile.component';
 
 @NgModule({
     declarations: [
@@ -59,6 +60,7 @@ import { ListOptionItemComponent } from './components/list-option-item/list-opti
         IconComponent,
         CardComponent,
         UserAvatarComponent,
+        UserTileComponent,
         LinkComponent,
         SpinnerComponent,
         BreadcrumbsComponent,
@@ -120,6 +122,7 @@ import { ListOptionItemComponent } from './components/list-option-item/list-opti
         IconComponent,
         CardComponent,
         UserAvatarComponent,
+        UserTileComponent,
         LinkComponent,
         CollectionChooserComponent,
         DropdownComponent,

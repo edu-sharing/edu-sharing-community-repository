@@ -44,7 +44,7 @@ import { KeyEvents } from '../../../core-module/ui/key-events';
 import { UIAnimation } from '../../../core-module/ui/ui-animation';
 import { UIConstants } from '../../../core-module/ui/ui-constants';
 import { NodeHelper } from '../../node-helper';
-import { OptionItem, Scope } from '../../option-item';
+import {CustomOptions, OptionItem, Scope} from '../../option-item';
 import { Toast } from '../../toast';
 import { UIHelper } from '../../ui-helper';
 import { WorkspaceManagementDialogsComponent } from '../../../modules/management-dialogs/management-dialogs.component';
@@ -145,11 +145,11 @@ export class ListTableComponent implements EventListener {
         this.changes.detectChanges();
     }
 
-    _customOptions: OptionItem[];
+    _customOptions: CustomOptions;
     /**
      * Set additional action options. They will be added as customOptions to the options-service
      */
-    @Input() set customOptions(customOptions: OptionItem[]) {
+    @Input() set customOptions(customOptions: CustomOptions) {
         this._customOptions = customOptions;
         this.refreshAvailableOptions();
     }
@@ -402,9 +402,13 @@ export class ListTableComponent implements EventListener {
     @Output() doubleClickRow = new EventEmitter();
 
     /**
-     * Called when an explicit viewing event is received from the action menu
+     * Called when an open node event is received from the action menu
      */
     @Output() openNode = new EventEmitter();
+    /**
+     * Called when an explicit viewing event is received from the action menu
+     */
+    @Output() onViewNode = new EventEmitter();
 
     /**
      * Called when the selection has changed.
@@ -1075,7 +1079,7 @@ export class ListTableComponent implements EventListener {
         return true;
     }
 
-    private refreshAvailableOptions(node: Node = null) {
+    public refreshAvailableOptions(node: Node = null) {
         this.optionsHelper.setData({
             scope: this.scope,
             activeObject: node,

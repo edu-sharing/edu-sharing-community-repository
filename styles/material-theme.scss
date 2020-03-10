@@ -74,6 +74,30 @@ $candy-app-theme: mat-light-theme($candy-app-primary, $candy-app-accent, $candy-
     opacity: $mat-ripple-color-opacity;
   }
 }
+/*
+  material toggle buttons
+ */
+mat-button-toggle-group{
+  .mat-button-toggle-checked.mat-button-toggle-appearance-standard{
+    color: $textOnPrimary;
+    background-color: $primary;
+  }
+  .mat-button-toggle-appearance-standard .mat-button-toggle-focus-overlay{
+    background-color: $primary;
+  }
+  /*
+    bugfix: overlay is not big enough
+   */
+  .mat-button-toggle-checked .mat-button-toggle-focus-overlay{
+    border-bottom-width: 100px;
+  }
+  &.toggle-full-size{
+    width: 100%;
+    mat-button-toggle{
+      flex-grow: 1;
+    }
+  }
+}
 .mat-tooltip{
   background-color: $primaryLight;
   color: $textMain !important;
@@ -265,6 +289,9 @@ input.mat-input-element, mat-label, .mat-select-value{
     font-size: 75%;
     line-height: initial;
     color: $textLight;
+  }
+  &:hover:not(.mat-option-disabled), .mat-option:focus:not(.mat-option-disabled){
+    background-color: $buttonHoverBackground;
   }
 }
 
