@@ -3,7 +3,6 @@ import {ToastyModule} from "ngx-toasty";
 import {TranslateModule, TranslateLoader} from "@ngx-translate/core";
 import {FormsModule, ReactiveFormsModule} from "@angular/forms";
 import {BrowserModule} from "@angular/platform-browser";
-import {createTranslateLoader} from "./core-ui-module/translation";
 import {ROUTES} from "./router/router.component";
 import {BrowserAnimationsModule} from "@angular/platform-browser/animations";
 import {HttpClient, HttpClientModule} from "@angular/common/http";
