@@ -418,7 +418,7 @@ export class OptionsHelperService {
         openParentNode.priority = 15;
 
         const openNode = new OptionItem('OPTIONS.SHOW', 'remove_red_eye', (object) =>
-            this.list.openNode.emit(this.getObjects(object)[0])
+            this.list.onViewNode.emit(this.getObjects(object)[0])
         );
         openNode.constrains = [Constrain.Files, Constrain.NoBulk];
         openNode.scopes = [Scope.WorkspaceList];

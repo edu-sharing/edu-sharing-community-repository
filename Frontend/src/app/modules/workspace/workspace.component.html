@@ -82,7 +82,8 @@
                       (onDrop)="handleDrop($event)"
                       (onSelectNode)="clickNode($event)"
                       (onSelectionChanged)="setSelection($event)"
-                      (onOpenNode)="openNode($event)"
+                      (onViewNode)="openNode($event, false)"
+                      (onOpenNode)="openNode($event, true)"
                       (onReset)="resetWorkspace()"
 ></workspace-explorer>
 

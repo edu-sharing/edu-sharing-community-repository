@@ -67,6 +67,7 @@ export class WorkspaceExplorerComponent {
     this.setSearchQuery(query);
   }
   @Output() onOpenNode=new EventEmitter();
+  @Output() onViewNode=new EventEmitter();
   @Output() onSelectionChanged=new EventEmitter();
   @Output() onSelectNode=new EventEmitter();
   @Output() onSearchGlobal=new EventEmitter();
