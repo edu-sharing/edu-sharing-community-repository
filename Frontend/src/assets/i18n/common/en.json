@@ -443,6 +443,7 @@
         "DEBUG": "Debug",
         "INVITE": "Invite",
         "EDIT": "Edit info",
+        "EDIT_SIMPLE": "Quick-Edit",
         "COLLECTION_EDIT": "Edit",
         "COLLECTION_PIN": "Pin collection",
         "COLLECTION_FEEDBACK": "Feedback...",
