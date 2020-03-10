@@ -141,5 +141,8 @@ public class PermissionServiceAdapter implements PermissionService {
 		// TODO Auto-generated method stub
 		return null;
 	}
-
+	@Override
+	public List<String> getRecentlyInvited() {
+		return null;
+	}
 }
