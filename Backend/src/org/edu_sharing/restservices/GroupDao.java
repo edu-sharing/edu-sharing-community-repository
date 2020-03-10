@@ -2,11 +2,13 @@ package org.edu_sharing.restservices;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.repo.security.authentication.AuthenticationUtil.RunAsWork;
 import org.alfresco.repo.security.permissions.AccessDeniedException;
 import org.alfresco.service.cmr.repository.NodeRef;
+import org.alfresco.service.cmr.security.AuthorityType;
 import org.alfresco.service.cmr.security.PermissionService;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.server.MCAlfrescoAPIClient;
@@ -17,10 +19,12 @@ import org.edu_sharing.restservices.shared.Group;
 import org.edu_sharing.restservices.shared.GroupProfile;
 import org.edu_sharing.service.authority.AuthorityService;
 import org.edu_sharing.service.authority.AuthorityServiceFactory;
-import org.edu_sharing.service.organization.OrganizationService;
-import org.edu_sharing.service.organization.OrganizationServiceFactory;
+import org.edu_sharing.service.search.SearchService;
+import org.edu_sharing.service.search.SearchServiceFactory;
+import org.edu_sharing.service.search.model.SortDefinition;
 
 public class GroupDao {
+
 
 	public static GroupDao getGroup(RepositoryDao repoDao, String groupName) throws DAOException {
 		
@@ -82,6 +86,7 @@ public class GroupDao {
 	private final String displayName;
 
 	private AuthorityService authorityService;
+	private SearchService searchService;
 
 	private String groupType;
 	private String scopeType;
@@ -96,7 +101,8 @@ public class GroupDao {
 			
 			this.baseClient = repoDao.getBaseClient();
 			this.authorityService = AuthorityServiceFactory.getAuthorityService(repoDao.getApplicationInfo().getAppId());
-			this.repoDao = repoDao;					
+			this.searchService = SearchServiceFactory.getSearchService(repoDao.getApplicationInfo().getAppId());
+			this.repoDao = repoDao;
 
 			this.authorityName = 
 					  groupName.startsWith(PermissionService.GROUP_PREFIX) 
@@ -284,5 +290,20 @@ public class GroupDao {
 		
 		return this.displayName;
 	}
-	
+
+	public GroupDao getSubgroupByType(String type) throws DAOException {
+		Optional<String> authority = searchService.searchGroupMembers(authorityName, "", AuthorityType.GROUP.name(), 0, Integer.MAX_VALUE, new SortDefinition())
+				.getData().stream().filter((a) -> {
+					try {
+						return type.equals(new GroupDao(repoDao, a).groupType);
+					} catch (DAOException e) {
+						e.printStackTrace();
+						return false;
+					}
+				}).findFirst();
+		if(authority.isPresent()){
+			return new GroupDao(repoDao, authority.get());
+		}
+		throw new IllegalArgumentException("Group does not contain sub group of type " + type);
+	}
 }

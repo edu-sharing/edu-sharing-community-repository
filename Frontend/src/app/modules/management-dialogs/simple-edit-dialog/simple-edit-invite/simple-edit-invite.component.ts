@@ -122,6 +122,10 @@ export class SimpleEditInviteComponent {
           }
         }
         if (this.currentPermissions && this.currentPermissions.length) {
+          // all global group will get removed
+          this.currentPermissions = this.currentPermissions.filter((p) =>
+              this.getAvailableGlobalGroups().indexOf(p.authority.authorityName) === -1
+          );
           permissions.permissions =
               WorkspaceShareComponent.mergePermissionsWithHighestPermission(permissions.permissions,this.currentPermissions);
         }
@@ -188,14 +192,14 @@ export class SimpleEditInviteComponent {
             this.organization = {
               organization: orgs.organizations[0],
               groups: {}
-            };
-            this.iamApi.getGroupMembers(this.organization.organization.authorityName,'', RestConstants.AUTHORITY_TYPE_GROUP)
-                .subscribe((group) => {
-                  for (const auth of group.authorities) {
-                    this.organization.groups[auth.profile.groupType] = auth;
-                  }
-                  this.detectPermissionState();
-                }, error => this.onError.emit(error));
+            }
+            Observable.forkJoin(
+                this.organizationGroups.map((g) =>
+                    this.iamApi.getSubgroupByType(this.organization.organization.authorityName, g)
+                )).subscribe((groups) => {
+                    groups.forEach((g) => this.organization.groups[g.group.profile.groupType] = g.group);
+                    this.detectPermissionState();
+                }, error => console.warn(error));
           } else {
             this.detectPermissionState();
           }

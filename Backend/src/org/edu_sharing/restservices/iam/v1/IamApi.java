@@ -1000,17 +1000,47 @@ public class IamApi  {
     	}
     }
 
-    @OPTIONS        
-    @Path("/groups/{repository}/{group}/members")
-    @ApiOperation(hidden = true, value = "")
 
-    public Response options08() {
-    	
-    	return Response.status(Response.Status.OK).header("Allow", "OPTIONS, GET").build();
-    }
+	@GET
 
+	@Path("/groups/{repository}/{group}/type/{type}")
 
-    @PUT
+	@ApiOperation(
+			value = "Get a subgroup by the specified type",
+			notes = "Get a subgroup by the specified type")
+
+	@ApiResponses(
+			value = {
+					@ApiResponse(code = 200, message = "OK.", response = AuthorityEntries.class),
+					@ApiResponse(code = 400, message = "Preconditions are not present.", response = ErrorResponse.class),
+					@ApiResponse(code = 401, message = "Authorization failed.", response = ErrorResponse.class),
+					@ApiResponse(code = 403, message = "Session user has insufficient rights to perform this operation.", response = ErrorResponse.class),
+					@ApiResponse(code = 404, message = "Ressources are not found.", response = ErrorResponse.class),
+					@ApiResponse(code = 500, message = "Fatal error occured.", response = ErrorResponse.class)
+			})
+
+	public Response getSubgroupByType(
+			@ApiParam(value = "ID of repository (or \"-home-\" for home repository)",required=true, defaultValue="-home-" ) @PathParam("repository") String repository,
+			@ApiParam(value = "authority name of the parent/primary group (begins with GROUP_)",required=true ) @PathParam("group") String group,
+			@ApiParam(value = "authorityType either GROUP or USER, empty to show all",required=true) @PathParam("type") String type,
+
+			@Context HttpServletRequest req) {
+
+		try {
+
+			RepositoryDao repoDao = RepositoryDao.getRepository(repository);
+
+			GroupEntry response = new GroupEntry();
+			response.setGroup( GroupDao.getGroup(repoDao, group).getSubgroupByType(type).asGroup());
+
+			return Response.status(Response.Status.OK).entity(response).build();
+
+		} catch (Throwable t) {
+			return ErrorResponse.createResponse(t);
+		}
+	}
+
+	@PUT
 
     @Path("/groups/{repository}/{group}/members/{member}")    
     
