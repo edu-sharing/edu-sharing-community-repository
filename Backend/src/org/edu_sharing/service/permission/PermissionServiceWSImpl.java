@@ -53,6 +53,11 @@ public class PermissionServiceWSImpl implements PermissionService {
 	}
 
 	@Override
+	public List<String> getRecentlyInvited() {
+		return null;
+	}
+
+	@Override
 	public boolean hasPermission(String storeProtocol, String storeId, String nodeId, String permission) {
 		return hasAllPermissions(storeProtocol,storeId,nodeId,new String[]{permission}).get(permission);
 	}
