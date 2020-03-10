@@ -15,6 +15,7 @@ import {
     SessionStorageService,
 } from '../core-module/core.module';
 import { TranslationSource } from './translation-source';
+import { tap, map, switchMap, delay } from 'rxjs/operators';
 
 export let TRANSLATION_LIST = [
     'common',
@@ -55,74 +56,127 @@ export class Translation {
         storage: SessionStorageService,
         route: ActivatedRoute,
     ): Observable<string> {
-        return new Observable<string>((observer: Observer<string>) => {
+        const supportedLanguages$: Observable<string[]> = config.get(
+            'supportedLanguages',
+            Translation.DEFAULT_SUPPORTED_LANGUAGES,
+        );
+        if (
             config
-                .get(
-                    'supportedLanguages',
-                    Translation.DEFAULT_SUPPORTED_LANGUAGES,
-                )
-                .subscribe((data: string[]) => {
-                    if (
-                        config
-                            .getLocator()
-                            .getBridge()
-                            .isRunningCordova()
-                    ) {
-                        Translation.initializeCordova(
-                            translate,
-                            config.getLocator().getBridge(),
-                            data,
-                        ).subscribe((language: string) => {
-                            observer.next(language);
-                            observer.complete();
-                        });
-                        return;
+                .getLocator()
+                .getBridge()
+                .isRunningCordova()
+        ) {
+            return supportedLanguages$.switchMap(
+                (supportedLanguages: string[]) =>
+                    Translation.initializeCordova(
+                        translate,
+                        config.getLocator().getBridge(),
+                        supportedLanguages,
+                    ),
+            );
+        }
+        return supportedLanguages$.pipe(
+            tap((supportedLanguages: string[]) =>
+                translate.addLangs(supportedLanguages),
+            ),
+            // Select queryParams.locale if set meaningfully
+            switchMap((supportedLanguages: string[]) =>
+                //
+                route.queryParams.first().map(params => {
+                    let selectedLanguage: string = null;
+                    if (supportedLanguages.indexOf(params.locale) !== -1) {
+                        selectedLanguage = params.locale;
+                    } else if (params.locale) {
+                        console.warn(
+                            `Url requested language ${params.locale}, ` +
+                                'but it was not found or is not configured in the allowed languages: ' +
+                                supportedLanguages,
+                        );
                     }
-                    translate.addLangs(data);
-                    //translate.setDefaultLang(data[0]);
-                    //translate.use(data[0]);
-                    //Translation.setLanguage(data[0]);
-                    storage.get('language').subscribe(storageLanguage => {
-                        route.queryParams.first().subscribe((params: any) => {
-                            let browserLang = translate.getBrowserLang();
-                            let language = data[0];
-                            let useStored = false;
-                            if (data.indexOf(params.locale) != -1) {
-                                language = params.locale;
-                            } else if (params.locale) {
-                                console.warn(
-                                    'Url requested language ' +
-                                        params.locale +
-                                        ', but it was not found or is not configured in the allowed languages: ' +
-                                        data,
-                                );
-                            } else if (data.indexOf(storageLanguage) != -1) {
-                                language = storageLanguage;
-                                useStored = true;
-                            } else if (data.indexOf(browserLang) != -1) {
-                                language = browserLang;
-                            }
-                            if (!useStored) storage.set('language', language);
-                            if (language == 'none') {
-                                translate.setDefaultLang(language);
-                            } else {
-                                translate.setDefaultLang(data[0]);
-                            }
-                            console.log('language used: ' + language);
-                            translate.use(language);
-                            Translation.setLanguage(language);
-                            translate.getTranslation(language).subscribe(() => {
-                                // strangley, the translation service seems to need some time to fully init
-                                setTimeout(() => {
-                                    Translation.languageLoaded = true;
-                                    observer.next(language);
-                                    observer.complete();
-                                }, 100);
-                            });
-                        });
+                    return {
+                        supportedLanguages,
+                        selectedLanguage,
+                    };
+                }),
+            ),
+            // Select storage.get('language') if set meaningfully
+            switchMap(({ supportedLanguages, selectedLanguage }) => {
+                if (selectedLanguage) {
+                    return Observable.of({
+                        supportedLanguages,
+                        selectedLanguage,
+                        useStored: false,
                     });
-                });
-        });
+                } else {
+                    return storage.get('language').map(storageLanguage => {
+                        let useStored = false;
+                        if (
+                            supportedLanguages.indexOf(storageLanguage) !== -1
+                        ) {
+                            selectedLanguage = storageLanguage;
+                            useStored = true;
+                        }
+                        return {
+                            supportedLanguages,
+                            selectedLanguage,
+                            useStored,
+                        };
+                    });
+                }
+            }),
+            map(({ supportedLanguages, selectedLanguage, useStored }) => {
+                if (selectedLanguage) {
+                    return {
+                        supportedLanguages,
+                        selectedLanguage,
+                        useStored,
+                    };
+                } else if (
+                    // Select browser language if set meaningfully
+                    supportedLanguages.indexOf(translate.getBrowserLang()) !==
+                    -1
+                ) {
+                    return {
+                        supportedLanguages,
+                        selectedLanguage: translate.getBrowserLang(),
+                        useStored,
+                    };
+                } else {
+                    // Select first supported language
+                    return {
+                        supportedLanguages,
+                        selectedLanguage: supportedLanguages[0],
+                        useStored,
+                    };
+                }
+            }),
+            // Set fallback language
+            tap(({ supportedLanguages, selectedLanguage, useStored }) => {
+                if (!useStored) {
+                    storage.set('language', selectedLanguage);
+                }
+                if (selectedLanguage === 'none') {
+                    translate.setDefaultLang('none');
+                } else {
+                    translate.setDefaultLang(supportedLanguages[0]);
+                }
+            }),
+            switchMap(({ supportedLanguages, selectedLanguage, useStored }) =>
+                translate.getTranslation(selectedLanguage).map(translation => {
+                    return selectedLanguage;
+                }),
+            ),
+            switchMap(selectedLanguage => {
+                console.log('language used: ' + selectedLanguage);
+                Translation.setLanguage(selectedLanguage);
+                return translate
+                    .use(selectedLanguage)
+                    .map(() => selectedLanguage);
+            }),
+            tap(selectedLanguage => {
+                Translation.languageLoaded = true;
+            }),
+        );
     }
 
     static initializeCordova(

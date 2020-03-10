@@ -53,6 +53,9 @@ describe('Translation', () => {
             translateServiceSpy.getTranslation.and.callFake(() =>
                 Observable.of(null),
             );
+            translateServiceSpy.use.and.callFake(() =>
+                Observable.of(null),
+            );
             configurationStubService = new ConfigurationStubService();
             sessionStorageStubService = new SessionStorageStubService();
             activatedRouteStub = new ActivatedRouteStub();
@@ -69,7 +72,6 @@ describe('Translation', () => {
                     ).subscribe(result => {
                         resolve(result);
                     }, fail);
-                    tick(100);
                 })();
             });
         }
