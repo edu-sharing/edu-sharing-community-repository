@@ -31,7 +31,7 @@
     "@angular/platform-browser": "~9.0.4",
     "@angular/platform-browser-dynamic": "~9.0.4",
     "@angular/router": "~9.0.4",
-    "@ngx-translate/core": "~11.0.1",
+    "@ngx-translate/core": "~12.1.2",
     "@storybook/addon-actions": "^5.3.9",
     "@storybook/addon-knobs": "^5.3.9",
     "angularx-qrcode": "^2.1.0",
