@@ -1,7 +1,6 @@
 import { NgModule } from '@angular/core';
 import {CollectionChooserComponent} from './components/collection-chooser/collection-chooser.component';
 import {TranslateLoader, TranslateModule, TranslatePipe, TranslateService} from '@ngx-translate/core';
-import {createTranslateLoader} from './translation';
 import {HttpClient} from '@angular/common/http';
 import {RestLocatorService} from '../core-module/rest/services/rest-locator.service';
 import {InfiniteScrollDirective} from './directives/infinite-scroll.directive';
@@ -50,6 +49,7 @@ import { A11yModule } from '@angular/cdk/a11y';
 import { SafeHtmlPipe } from './pipes/safe-html.pipe';
 import { ListOptionItemComponent } from './components/list-option-item/list-option-item.component';
 import {UserTileComponent} from './components/user-tile/user-tile.component';
+import { TranslationLoader } from './translation-loader';
 
 @NgModule({
     declarations: [
@@ -104,7 +104,7 @@ import {UserTileComponent} from './components/user-tile/user-tile.component';
         TranslateModule.forRoot({
             loader: {
                 provide: TranslateLoader,
-                useFactory: createTranslateLoader,
+                useFactory: TranslationLoader.create,
                 deps: [HttpClient, RestLocatorService],
             },
         }),

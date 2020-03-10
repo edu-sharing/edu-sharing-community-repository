@@ -1,39 +1,18 @@
-import { HttpClient } from '@angular/common/http';
 import { ActivatedRoute } from '@angular/router';
-import { TranslateLoader, TranslateService } from '@ngx-translate/core';
+import { TranslateService } from '@ngx-translate/core';
 import { Observer } from 'rxjs';
 import 'rxjs/add/observable/concat';
 import 'rxjs/add/observable/forkJoin';
 import 'rxjs/add/operator/first';
 import { Observable } from 'rxjs/Observable';
+import { map, switchMap, tap } from 'rxjs/operators';
 import 'rxjs/Rx';
-import { environment } from '../../environments/environment';
 import { BridgeService } from '../core-bridge-module/bridge.service';
 import {
     ConfigurationService,
-    RestLocatorService,
     SessionStorageService,
 } from '../core-module/core.module';
 import { TranslationSource } from './translation-source';
-import { tap, map, switchMap, delay } from 'rxjs/operators';
-
-export let TRANSLATION_LIST = [
-    'common',
-    'admin',
-    'recycle',
-    'workspace',
-    'search',
-    'collections',
-    'login',
-    'permissions',
-    'oer',
-    'messages',
-    'register',
-    'profiles',
-    'services',
-    'stream',
-    'override',
-];
 
 export class Translation {
     /**
@@ -243,162 +222,5 @@ export class Translation {
 
     private static setLanguage(language: string) {
         Translation.language = language;
-    }
-}
-
-export function createTranslateLoader(
-    http: HttpClient,
-    locator: RestLocatorService,
-) {
-    return new TranslationLoader(http, locator);
-}
-
-export function createTranslateLoaderDummy() {
-    return new TranslationLoaderDummy();
-}
-
-export class TranslationLoaderDummy implements TranslateLoader {
-    constructor() {}
-
-    getTranslation(lang: string): Observable<any> {
-        return new Observable<any>((observer: Observer<any>) => {
-            observer.next(null);
-            observer.complete();
-        });
-    }
-}
-
-export class TranslationLoader implements TranslateLoader {
-    private initializing: string = null;
-    private initializedLanguage: any;
-
-    constructor(
-        private http: HttpClient,
-        private locator: RestLocatorService,
-        private prefix: string = 'assets/i18n',
-        private suffix: string = '.json',
-    ) {}
-
-    /**
-     * Gets the translations from the server
-     * @param lang
-     * @returns {any}
-     */
-    getTranslation(lang: string): Observable<any> {
-        if (this.initializing == lang || this.initializedLanguage) {
-            return new Observable<any>((observer: Observer<any>) => {
-                let callback = () => {
-                    if (!this.initializedLanguage) {
-                        setTimeout(callback, 10);
-                        return;
-                    }
-                    observer.next(this.initializedLanguage);
-                    observer.complete();
-                };
-                setTimeout(callback);
-            });
-        }
-        this.initializing = lang;
-        //return this.http.get(`${this.prefix}/common/${lang}${this.suffix}`)
-        //  .map((res: Response) => res.json());
-        if (lang == 'none') {
-            return new Observable<any>((observer: Observer<any>) => {
-                this.initializedLanguage = {};
-                this.initializing = null;
-                observer.next({});
-                observer.complete();
-            });
-        }
-        let translations: any = [];
-        let results = 0;
-        let maxCount = TRANSLATION_LIST.length;
-        if (
-            (environment.production &&
-                Translation.getSource() == TranslationSource.Auto) ||
-            Translation.getSource() == TranslationSource.Repository
-        ) {
-            maxCount = 1;
-            this.locator
-                .getLanguageDefaults(Translation.LANGUAGES[lang])
-                .subscribe((data: any) => {
-                    translations.push(data);
-                });
-        } else {
-            for (let translation of TRANSLATION_LIST) {
-                this.http
-                    .get(`${this.prefix}/${translation}/${lang}${this.suffix}`)
-                    .subscribe((data: any) => translations.push(data));
-            }
-        }
-        return new Observable<any>((observer: Observer<any>) => {
-            let callback = () => {
-                if (translations.length < maxCount) {
-                    setTimeout(callback, 10);
-                    return;
-                }
-                this.locator
-                    .getConfigLanguage(Translation.LANGUAGES[lang])
-                    .subscribe((data: any) => {
-                        translations.push(data);
-                        let final: any = {};
-                        for (const obj of translations) {
-                            for (const key in obj) {
-                                //copy all the fields
-
-                                let path = key.split('.');
-                                if (path.length == 1) {
-                                    final[key] = obj[key];
-                                }
-                            }
-                        }
-                        for (const obj of translations) {
-                            for (const key in obj) {
-                                try {
-                                    let path = key.split('.');
-
-                                    // init non-existing objects first
-                                    if (path.length >= 2 && !final[path[0]])
-                                        final[path[0]] = {};
-                                    if (
-                                        path.length >= 3 &&
-                                        !final[path[0]][path[1]]
-                                    )
-                                        final[path[0]][path[1]] = {};
-                                    if (
-                                        path.length >= 4 &&
-                                        !final[path[0]][path[1]][path[2]]
-                                    )
-                                        final[path[0]][path[1]][path[2]] = {};
-
-                                    if (path.length == 1) {
-                                        continue;
-                                    } else if (path.length == 2) {
-                                        final[path[0]][path[1]] = obj[key];
-                                    } else if (path.length == 3) {
-                                        final[path[0]][path[1]][path[2]] =
-                                            obj[key];
-                                    } else if (path.length == 4) {
-                                        final[path[0]][path[1]][path[2]][
-                                            path[3]
-                                        ] = obj[key];
-                                    }
-                                } catch (e) {
-                                    console.error(
-                                        'error while language override of ' +
-                                            key,
-                                        e,
-                                    );
-                                }
-                            }
-                        }
-                        this.initializedLanguage = final;
-                        this.initializing = null;
-                        observer.next(final);
-                        observer.complete();
-                    });
-            };
-
-            setTimeout(callback, 10);
-        });
     }
 }
