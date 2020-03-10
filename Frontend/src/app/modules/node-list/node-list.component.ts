@@ -6,7 +6,7 @@ import {Translation} from "../../core-ui-module/translation";
 import {Toast} from "../../core-ui-module/toast";
 import {ArchiveRestore, RestoreResult, ArchiveSearch, Node, ListItem} from "../../core-module/core.module";
 import {RestConnectorService} from "../../core-module/core.module";
-import {OptionItem} from "../../core-ui-module/option-item";
+import {CustomOptions, OptionItem} from "../../core-ui-module/option-item";
 import {ConfigurationService} from "../../core-module/core.module";
 import {SessionStorageService} from "../../core-module/core.module";
 import {ActivatedRoute} from "@angular/router";
@@ -22,6 +22,7 @@ export class NodeListComponent {
   @Input() isInsideWorkspace = false;
   @Input() searchLabel : string;
   @Input() parent : any;
+  @Input() customOptions : CustomOptions;
   @Input() set searchWorkspace(query : string){
     if(query && query.trim()) {
       this.currentQuery = query;

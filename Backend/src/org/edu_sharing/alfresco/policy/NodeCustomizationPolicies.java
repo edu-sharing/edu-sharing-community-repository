@@ -501,7 +501,8 @@ public class NodeCustomizationPolicies implements OnContentUpdatePolicy, OnCreat
 		}else if(p instanceof List){
 			return ((List) p).isEmpty() || ((List) p).size()==1 && propertyToString(((List) p).get(0)).isEmpty();
 		}else{
-			return propertyToString(p).isEmpty();
+			String s=propertyToString(p);
+			return s==null || s.isEmpty();
 		}
 	}
 	private static boolean propertyEquals(Serializable p1, Serializable p2) {

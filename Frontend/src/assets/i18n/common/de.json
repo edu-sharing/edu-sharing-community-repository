@@ -10,6 +10,7 @@
     "NEXT": "Weiter",
     "SKIP": "Überspringen",
     "SAVE": "Speichern",
+    "DISCARD": "Verwerfen",
     "APPLY": "Übernehmen",
     "CANCEL": "Abbrechen",
     "YES_DELETE": "Ja, löschen",
@@ -489,6 +490,7 @@
         "DEBUG": "Debug",
         "INVITE": "Freigeben",
         "EDIT": "Infos bearbeiten",
+        "EDIT_SIMPLE": "Schnelle Bearbeitung",
         "COLLECTION_EDIT": "Bearbeiten",
         "COLLECTION_PIN": "Sammlung pinnen",
         "COLLECTION_FEEDBACK": "Feedback...",
@@ -546,6 +548,49 @@
         "ADD_CHILD_OBJECT": "Weitere Materialien hinzufügen",
         "ADD_CHILD_OBJECT_DESCRIPTION": "Erzeugen Sie eine neue Serie, indem Sie dazugehörige Materialien ergänzen",
         "ADD_CHILD_OBJECT_QUOTA_REACHED": "Fehler beim Hochladen des Objekts \"{{ name }}\": Speicherplatz-Quota überschritten"
+    },
+    "SIMPLE_EDIT": {
+        "TITLE": "Schnelle Bearbeitung",
+        "SAVED": "Element {{name}} wurde bearbeitet",
+        "SAVED_MULTIPLE": "{{count}} Elemente wurden bearbeitet",
+        "METADATA": {
+            "TITLE": "Metadaten angeben",
+            "MORE": "Weitere Metadaten"
+        },
+        "INVITE": {
+            "TITLE": "Freigeben",
+            "MORE": "Weitere Freigaben",
+            "DEFAULT_GROUPS": "Allgemeine Gruppen",
+            "RECENT_AUTHORITIES": "Zuletzt eingeladen",
+            "INFO": "Die ausgewählten Nutzer & Gruppen werden als Betrachter eingeladen",
+            "ERROR_MULTIPLE_PARENTS": "Das Festlegen von Berechtigungen ist nicht möglich, da die Elemente verschiedene Elternelemente besitzen",
+            "ERROR_INHERIT": "Das Festlegen von Berechtigungen ist nicht möglich, da die Elemente bereits Einladungen vom übergeordneten Ordner erhalten:",
+            "ERROR_HELP": "Bitte benutzen Sie die Option \"Weitere Freigaben\" zum Konfigurieren der Rechte",
+            "UNSET": "Nicht festgelegt",
+            "GROUP_TYPES": {
+                "ORG_ADMINISTRATORS": "Nur Administratoren"
+            }
+        },
+        "LICENSE": {
+            "TITLE": "Lizenzieren",
+            "MORE": "Weitere Lizenzen",
+            "REPLACE": "Lizenz ersetzen",
+            "SOURCE_TYPE": "Quelle des Materials",
+            "SOURCE_OWN": "Eigenes Material",
+            "SOURCE_FOREIGN": "Fremdes Material",
+            "SET_LICENSE": "Lizenz des Materials",
+            "INVALID_STATE": "Für die gewählten Elemente kann keine passenden Lizenz in diesem Dialog gefunden werden. Wählen Sie \"Lizenz ersetzen\", wenn Sie die Lizenz neu festlegen wollen.",
+            "LICENSES": {
+                "NONE": "Unlizenziert",
+                "COPYRIGHT_FREE": "Copyright",
+                "CC_BY": "CC-BY (4.0)",
+                "CC_0": "CC-0"
+            }
+        },
+        "DIRTY":{
+            "TITLE":"Am Dialog wurden Änderungen vorgenommen",
+            "MESSAGE":"Es wurden bereits Änderungen am Dialog vorgenommen. Diese müssen vor dem Dialogwechsel gespeichert werden.\n\nMöchten Sie die bereits vorgenommen Änderungen jetzt speichern oder verwerfen?"
+        }
     },
     "SHARE_APP": {
         "TEXT_SNIPPET": "Notiz",

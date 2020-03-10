@@ -20,15 +20,6 @@ import {DialogButton} from "../../../core-module/core.module";
  * An common edu-sharing modal dialog
  */
 export class ModalDialogComponent{
-  @HostListener('document:keydown', ['$event'])
-  handleKeyboardEvent(event: KeyboardEvent) {
-    if(event.code=="Escape" && this.isCancelable){
-      event.preventDefault();
-      event.stopPropagation();
-      this.cancel();
-      return;
-    }
-  }
   /**
    * priority, useful if the dialog seems not to be in the foreground
    * Values greater 0 will raise the z-index

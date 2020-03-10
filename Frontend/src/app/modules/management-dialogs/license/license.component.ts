@@ -1,5 +1,5 @@
 import {Component, Input, EventEmitter, Output, ViewChild, ElementRef} from '@angular/core';
-import {DialogButton, RestConnectorService} from "../../../core-module/core.module";
+import {DialogButton, RestConnectorService, RestIamService} from "../../../core-module/core.module";
 import {Toast} from "../../../core-ui-module/toast";
 import {RestNodeService} from "../../../core-module/core.module";
 import {RestConstants} from "../../../core-module/core.module";
@@ -100,7 +100,7 @@ export class WorkspaceLicenseComponent  {
                      "in","it","ca","hr","mt","mk","nl",
                      "no","pl","pt","ro","es","th",
                      "uk","hu"];
-  public ALL_LICENSEprimaryTypeS=["NONE","CC_0","CC_BY","SCHULFUNK","UNTERRICHTS_UND_LEHRMEDIEN","COPYRIGHT","CUSTOM"];
+  public ALL_LICENSE_TYPES=["NONE","CC_0","CC_BY","SCHULFUNK","UNTERRICHTS_UND_LEHRMEDIEN","COPYRIGHT","CUSTOM"];
   public licenseMainTypes:string[];
   _nodes:Node[];
   private permissions: LocalPermissionsResult;
@@ -111,6 +111,8 @@ export class WorkspaceLicenseComponent  {
   public authorVCard:VCard;
   public authorFreetext:string;
   private allowRelease = true;
+  userAuthor = false;
+
   public isAllowedLicense(license:string){
     return this.allowedLicenses==null || this.allowedLicenses.indexOf(license)!=-1;
   }
@@ -164,7 +166,7 @@ export class WorkspaceLicenseComponent  {
     private loadConfig() {
         this.config.get("allowedLicenses").subscribe((data: string[]) => {
             if (!data) {
-                this.licenseMainTypes = this.ALL_LICENSEprimaryTypeS;
+                this.licenseMainTypes = this.ALL_LICENSE_TYPES;
                 this.allowedLicenses = null;
             }
             else {
@@ -184,7 +186,7 @@ export class WorkspaceLicenseComponent  {
                         if (data.indexOf(this.copyrightType) == -1)
                             this.copyrightType = entry;
                     }
-                    else if (this.ALL_LICENSEprimaryTypeS.indexOf(entry) != -1) {
+                    else if (this.ALL_LICENSE_TYPES.indexOf(entry) != -1) {
                         this.licenseMainTypes.push(entry);
                     }
                 }
@@ -203,10 +205,12 @@ export class WorkspaceLicenseComponent  {
     private translate : TranslateService,
     private config : ConfigurationService,
     private ui : UIService,
+    private iamApi : RestIamService,
     private toast : Toast,
     private nodeApi : RestNodeService) {
       this.connector.hasToolPermission(RestConstants.TOOLPERMISSION_HANDLESERVICE).subscribe((has:boolean)=>this.doiPermission=has);
       this.updateButtons();
+      this.iamApi.getUser().subscribe(() => {});
   }
   public cancel(){
     this.onCancel.emit();
@@ -239,7 +243,7 @@ export class WorkspaceLicenseComponent  {
       this.nodeApi.editNodeMetadataNewVersion(node.ref.id,RestConstants.COMMENT_LICENSE_UPDATE, prop).subscribe((result) => {
         updatedNodes.push(result.node);
         this.savePermissions(node);
-        if(updatedNodes.length === this._nodes.length){
+        if(updatedNodes.length === this._nodes.length) {
           this.toast.toast('WORKSPACE.TOAST.LICENSE_UPDATED');
           this.onLoading.emit(false);
           this.onDone.emit(updatedNodes);
@@ -259,17 +263,7 @@ export class WorkspaceLicenseComponent  {
     if(this._properties){
       return this._properties[prop] ? this._properties[prop][0] : fallbackIsEmpty;
     }
-    for(let node of this._nodes){
-      let v=node.properties[prop];
-      let value=v ? asArray ? v : v[0] : fallbackIsEmpty;
-      if(foundAny && found!=value)
-        return fallbackNotIdentical;
-      found=value;
-      foundAny=true;
-    }
-    if(!foundAny)
-      return fallbackIsEmpty;
-    return found;
+    return NodeHelper.getValueForAll(this._nodes, prop, fallbackNotIdentical, fallbackIsEmpty, asArray);
   }
   private readLicense() {
     let license=this.getValueForAll(RestConstants.CCM_PROP_LICENSE,"MULTI","NONE");
@@ -320,6 +314,11 @@ export class WorkspaceLicenseComponent  {
     this.contact=contactState=='true' || contactState==true;
     this.oerMode=this.isOerLicense() || this.type=='NONE';
     this.authorVCard=new VCard(this.getValueForAll(RestConstants.CCM_PROP_LIFECYCLECONTRIBUTER_AUTHOR));
+    this.userAuthor = false;
+    if (this.authorVCard.uid &&
+        this.authorVCard.uid === this.iamApi.getCurrentUserVCard().uid) {
+        this.userAuthor = true;
+    }
     this.authorFreetext=this.getValueForAll(RestConstants.CCM_PROP_AUTHOR_FREETEXT);
     UIHelper.invalidateMaterializeTextarea('authorFreetext');
     UIHelper.invalidateMaterializeTextarea('licenseRights');
@@ -536,5 +535,17 @@ export class WorkspaceLicenseComponent  {
             new DialogButton('CANCEL',DialogButton.TYPE_CANCEL,()=>this.cancel()),
             save
         ];
+    }
+
+    isCCAttributableLicense() {
+        return this.getLicenseProperty().startsWith('CC_BY');
+    }
+
+    setVCardAuthor(author: boolean) {
+      if(author) {
+          this.authorVCard = this.iamApi.getCurrentUserVCard();
+      } else {
+          this.authorVCard = new VCard();
+      }
     }
 }

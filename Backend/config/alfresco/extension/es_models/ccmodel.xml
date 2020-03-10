@@ -553,19 +553,26 @@
 				</property>
 			</properties>
 		</aspect>
-		
+
 		<aspect name="ccm:userExtension">
 			<title>Aspect for additional user information like profile, node lists etc.
 				Version</title>
 			<properties>
+				<!-- edu-sharing customization: client stored config as json -->
 				<property name="ccm:userPreferences">
-               <type>d:text</type>
-               <mandatory>true</mandatory>
-	            </property>
-	            <property name="ccm:userNodeLists">
-	               <type>d:text</type>
-	               <mandatory>true</mandatory>
-	            </property>
+					<type>d:text</type>
+					<mandatory>true</mandatory>
+				</property>
+				<!-- edu-sharing customization: list of recently invited persons / groups -->
+				<property name="ccm:userRecentlyInvited">
+					<type>d:noderef</type>
+					<multiple>true</multiple>
+				</property>
+				<!-- edu-sharing customization: list of node refs the user has on his bookmarks list as json  -->
+				<property name="ccm:userNodeLists">
+					<type>d:text</type>
+					<mandatory>true</mandatory>
+				</property>
 			</properties>
 		</aspect>
 

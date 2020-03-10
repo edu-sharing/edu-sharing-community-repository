@@ -1,0 +1,13 @@
+@import "../../../core-ui-module/styles/variables";
+
+.block{
+  display: flex;
+  flex-direction: column;
+  .top{
+    display: flex;
+    align-items: center;
+    >h3{
+      flex-grow: 1;
+    }
+  }
+}

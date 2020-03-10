@@ -16,9 +16,13 @@
     <mat-form-field class="authority-search-input" floatLabel="always">
         <i matPrefix icon [iconId]="inputIcon" *ngIf="inputIcon"></i>
         <mat-label>{{placeholder | translate}}</mat-label>
-        <input type="text" matInput [matAutocomplete]="autoGroup" placeholder="{{placeholder | translate}}" name="authoritySearch" [(ngModel)]="inputValue" (ngModelChange)="updateSuggestions($event)">
+        <input type="text" matInput [matAutocomplete]="autoGroup" placeholder="{{placeholder | translate}}"
+               (focusin)="showSuggestions()"
+               name="authoritySearch"
+               [(ngModel)]="inputValue"
+               (keyup)="updateSuggestions()">
         <mat-hint *ngIf="hint">{{hint}}</mat-hint>
-            <mat-autocomplete #autoGroup="matAutocomplete" class="mat-autocomplete-high">
+            <mat-autocomplete #autoGroup="matAutocomplete" class="mat-autocomplete-high" (optionSelected)="setOption($event)">
                 <mat-optgroup *ngFor="let group of suggestionGroups" label="{{ group.label | translate}}">
                     <mat-option class="authority-search-input-option" *ngFor="let suggestion of group.values" [value]="suggestion">
                         <div class="suggestion-content">

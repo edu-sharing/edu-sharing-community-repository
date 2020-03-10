@@ -1,0 +1,25 @@
+<info-message message="SIMPLE_EDIT.LICENSE.INVALID_STATE" *ngIf="invalid">
+    <button mat-raised-button color="white" (click)="invalid = false; prepare()">{{'SIMPLE_EDIT.LICENSE.REPLACE' | translate}}</button>
+</info-message>
+<div class="license" *ngIf="!invalid">
+    <h5 class="mat-heading-5">{{'SIMPLE_EDIT.LICENSE.SOURCE_TYPE' | translate}}</h5>
+    <div><mat-button-toggle-group #modeGroup="matButtonToggleGroup" class="mode">
+        <mat-button-toggle [value]="'own'">{{'SIMPLE_EDIT.LICENSE.SOURCE_OWN' | translate}}</mat-button-toggle>
+        <mat-button-toggle [value]="'foreign'">{{'SIMPLE_EDIT.LICENSE.SOURCE_FOREIGN' | translate}}</mat-button-toggle>
+    </mat-button-toggle-group>
+    </div>
+    <mat-form-field class="authorFreetext" *ngIf="modeGroup.value === 'foreign' && licenseGroup.value !== 'NONE'">
+        <mat-label>{{'MDS.AUTHOR_FREETEXT_PLACEHOLDER' | translate}}</mat-label>
+        <textarea matInput
+                  cdkTextareaAutosize
+                  id="authorFreetext" [(ngModel)]="authorFreetext"
+                  cdkAutosizeMinRows="2"
+                  cdkAutosizeMaxRows="5"></textarea>
+    </mat-form-field>
+    <h5 class="mat-heading-5">{{'SIMPLE_EDIT.LICENSE.SET_LICENSE' | translate}}</h5>
+    <div>
+        <mat-button-toggle-group #licenseGroup="matButtonToggleGroup">
+            <mat-button-toggle *ngFor="let license of allowedLicenses" [value]="license">{{'SIMPLE_EDIT.LICENSE.LICENSES.'+license | translate}}</mat-button-toggle>
+        </mat-button-toggle-group>
+    </div>
+</div>

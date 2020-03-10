@@ -1,7 +1,7 @@
 import {Component, Input, ViewChild} from "@angular/core";
 import {ListItem, RestArchiveService} from "../../../core-module/core.module";
 import {RestConstants} from "../../../core-module/core.module";
-import {OptionItem} from "../../../core-ui-module/option-item";
+import {CustomOptions, OptionItem} from "../../../core-ui-module/option-item";
 import {RecycleRestoreComponent} from "./restore/restore.component";
 import {TranslateService} from "@ngx-translate/core";
 import {Toast} from "../../../core-ui-module/toast";
@@ -25,7 +25,10 @@ export class RecycleMainComponent {
   private selected:Node[] = [];
 
   public columns : ListItem[]=[];
-  public options : OptionItem[]=[];
+  public options : CustomOptions = {
+    useDefaultOptions: false,
+    addOptions: []
+  };
   public fullscreenLoading:boolean;
   loadData(currentQuery :string,offset : number,sortBy : string,sortAscending : boolean){
     return this.archive.search(currentQuery,"",{propertyFilter:[RestConstants.CM_ARCHIVED_DATE],offset:offset,sortBy:[sortBy],sortAscending:sortAscending})
@@ -33,8 +36,8 @@ export class RecycleMainComponent {
   constructor(private archive : RestArchiveService,private toast : Toast,private translate : TranslateService,private service : TemporaryStorageService){
     this.columns.push(new ListItem("NODE",RestConstants.CM_NAME));
     this.columns.push(new ListItem("NODE",RestConstants.CM_ARCHIVED_DATE));
-    this.options.push(new OptionItem("RECYCLE.OPTION.RESTORE_SINGLE","undo", (node : Node) => this.restoreSingle(node)));
-    this.options.push(new OptionItem("RECYCLE.OPTION.DELETE_SINGLE","delete", (node : Node) => this.deleteSingle(node)));
+    this.options.addOptions.push(new OptionItem("RECYCLE.OPTION.RESTORE_SINGLE","undo", (node : Node) => this.restoreSingle(node)));
+    this.options.addOptions.push(new OptionItem("RECYCLE.OPTION.DELETE_SINGLE","delete", (node : Node) => this.deleteSingle(node)));
 
   }
   public onSelection(data:Node[]){

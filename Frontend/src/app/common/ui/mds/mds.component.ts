@@ -33,7 +33,7 @@ declare var noUiSlider: any;
     trigger('cardAnimation', UIAnimation.cardAnimation())
   ]
 })
-export class MdsComponent{
+export class MdsComponent {
   /**
    * priority, useful if the dialog seems not to be in the foreground
    * Values greater 0 will raise the z-index
@@ -42,6 +42,12 @@ export class MdsComponent{
   @Input() priority = 1;
   @Input() addWidget=false;
   @Input() embedded=false;
+
+  /**
+   * bulk behaviour: this controls how the bulk feature shall behave
+   */
+  @Input() bulkBehaviour = BulkBehaviour.Default;
+
   private activeAuthorType: number;
   public static TYPE_IO = 'io';
   public static TYPE_IO_BULK = 'io_bulk';
@@ -98,6 +104,7 @@ export class MdsComponent{
   private static GROUP_MULTIVALUE_DELIMITER='[+]';
   private mdsId = new Date().getTime();
   private childobjectDrag: number;
+  private initialValues: any;
   @Input() set suggestions(suggestions:any){
     this._suggestions=suggestions;
     this.applySuggestions();
@@ -190,6 +197,7 @@ export class MdsComponent{
           }
           this.mdsService.getSet(this._setId).subscribe((data: any) => {
             this.mds = data;
+            this.onMdsLoaded.emit(data);
             this.currentNodes = nodesConverted;
             if(nodesConverted[0].type === RestConstants.CCM_TYPE_IO && nodesConverted.length === 1) {
               this.node.getNodeChildobjects(nodesConverted[0].ref.id).subscribe((childs: NodeList) => {
@@ -481,6 +489,13 @@ export class MdsComponent{
     let html='Group \''+id+'\' was not found in the mds';
     this.setRenderedHtml(html);
   }
+
+  /**
+   * checks if the user has made modifications to the original/initial state
+   */
+  public isDirty() {
+    return !Helper.objectEquals(this.initialValues, this.getValues());
+  }
   public getValues(propertiesIn:any={},showError=true,widgets=this.currentWidgets){
     let properties:any={};
     // add author data
@@ -625,7 +640,7 @@ export class MdsComponent{
     }
     return properties;
   }
-  private checkFileExtension(name:string,callback:Function=null,values:any){
+  private checkFileExtension(name:string,callback: () => void = null,values:any) {
     if (values == null) {
       return true;
     }
@@ -662,7 +677,7 @@ export class MdsComponent{
     }
     return true;
   }
-  public saveValues(callback: Function=null,force = false){
+  public saveValues(callback: () => void = null,force = false){
       let properties: any = {};
       if (this.currentNodes) {
         properties = this.currentNodes[0].properties;
@@ -932,11 +947,12 @@ export class MdsComponent{
         return '';
       }
       const id = this.getDomId(widget.id + '_bulk');
-      return `<div class="bulk-enable switch">
+      return `<div class="bulk-enable switch" `+(this.bulkBehaviour === BulkBehaviour.Replace ? 'style="display:none"' : '')+`>
                 <label>
                   ` + this.translate.instant('MDS.BULK_OVERRIDE') + `
                   <input type="checkbox" id="` + id + `" 
-                    onchange="` + this.getWindowComponent() + `.toggleBulk('` + widget.id + `', event)">
+                    onchange="` + this.getWindowComponent() + `.toggleBulk('` + widget.id + `', event)"
+                    `+(this.bulkBehaviour === BulkBehaviour.Replace ? 'checked' : '')+`>
                   <span class="lever"></span>
                  </label>
                </div>`;
@@ -946,10 +962,12 @@ export class MdsComponent{
       return '';
     }
     const id = this.getDomId(widget.id + '_bulk');
-    return `<div class="bulk-enable">
-                <input type="radio" name="` + id + `" id="` + id + `_append" value="append" onchange="` + this.getWindowComponent() + `.setBulkMode('` + widget.id + `', event)" checked>
+    return `<div class="bulk-enable" `+(this.bulkBehaviour === BulkBehaviour.Replace ? 'style="display:none"' : '')+`>
+                <input type="radio" name="` + id + `" id="` + id + `_append" value="append" onchange="` + this.getWindowComponent() + `.setBulkMode('` + widget.id + `', event)"`+
+                (this.bulkBehaviour === BulkBehaviour.Default ? 'checked' : '')+`>
                 <label for="` + id + `_append">` + this.translate.instant('MDS.BULK_APPEND') + `</label>
-                <input type="radio" name="` + id + `" id="` + id + `_replace" value="replace" onchange="` + this.getWindowComponent() + `.setBulkMode('` + widget.id + `', event)">
+                <input type="radio" name="` + id + `" id="` + id + `_replace" value="replace" onchange="` + this.getWindowComponent() + `.setBulkMode('` + widget.id + `', event)"`+
+                (this.bulkBehaviour === BulkBehaviour.Replace ? 'checked' : '')+`>
                 <label for="` + id + `_replace">` + this.translate.instant('MDS.BULK_REPLACE') + `</label>
             </div>`;
   }
@@ -976,8 +994,8 @@ export class MdsComponent{
       html+='<i class="inputIcon material-icons">'+widget.icon+'</i>';
     }
     html+='<input type="'+type+'" id="'+this.getWidgetDomId(widget)+'" placeholder="'+(widget.placeholder ? widget.placeholder : '')+'" class="'+css+'"';
-    if(this.isBulkMode()){
-      html+=" disabled";
+    if(this.isBulkMode() && this.bulkBehaviour !== BulkBehaviour.Replace) {
+      html+=' disabled';
     }
     html+='>';
     if(widget.type=='checkbox'){
@@ -1416,7 +1434,7 @@ export class MdsComponent{
     let html = '';
     html += this.addBulkCheckbox(widget);
     html += '<textarea class="materialize-textarea" id="'+this.getWidgetDomId(widget)+'"';
-    if(this.isBulkMode()){
+    if (this.isBulkMode() && this.bulkBehaviour !== BulkBehaviour.Replace) {
       html += ' disabled';
     }
     if(widget.placeholder){
@@ -1513,7 +1531,7 @@ export class MdsComponent{
          max: widget.max
        },
       });
-      if (this.isBulkMode()) {
+      if (this.isBulkMode() && this.bulkBehaviour !== BulkBehaviour.Replace) {
         slider.setAttribute('disabled', 'true');
       }
     }, 5);
@@ -1527,14 +1545,14 @@ export class MdsComponent{
       return 'Error at ' + widget.id + ': No values for a singleoption widget is not possible';
     }
     html += '<select id="'+this.getWidgetDomId(widget)+'"';
-    if(this.isBulkMode()){
+    if(this.isBulkMode() && this.bulkBehaviour !== BulkBehaviour.Replace) {
       html += ' disabled';
     }
     html += '>';
-    if(widget.allowempty==true){
+    if(widget.allowempty == true) {
       html+='<option value=""></option>';
     }
-    for(let option of widget.values){
+    for(let option of widget.values) {
       html+='<option value="'+option.id+'"';
       if(widget.defaultvalue && option.id==widget.defaultvalue){
        html+=' selected';
@@ -2170,7 +2188,7 @@ export class MdsComponent{
     },10);
   }
 
-  private onUpdatePreview(callback:Function=null) {
+  private onUpdatePreview(callback: () => void = null) {
     let preview=null;
     let remove=false;
     try{
@@ -2363,7 +2381,7 @@ export class MdsComponent{
       }
       return list;
   }
-  private onRemoveChildobject(callback: Function = null,pos = 0) {
+  private onRemoveChildobject(callback: () => void = null,pos = 0) {
       if(pos>=this.getRemovedChildobjects().length) {
           if (callback)
               callback();
@@ -2407,7 +2425,7 @@ export class MdsComponent{
     props[RestConstants.CCM_PROP_CHILDOBJECT_ORDER]=[pos];
     return props;
   }
-  private onAddChildobject(callback: Function = null,pos = 0) {
+  private onAddChildobject(callback: () => void = null,pos = 0) {
     if(pos>=this.childobjects.length) {
         this.onRemoveChildobject(callback);
         return;
@@ -2457,28 +2475,36 @@ export class MdsComponent{
                 this.properties.push(property);
             }
             this.properties.sort();
-            let nodeGroup = node.isDirectory ? MdsComponent.TYPE_MAP : MdsComponent.TYPE_IO;
-            if (node.aspects.indexOf(RestConstants.CCM_ASPECT_IO_CHILDOBJECT) !== -1) {
+            let nodeGroup: string;
+            if(this._groupId) {
+              nodeGroup = this._groupId;
+            } else {
+              nodeGroup = node.isDirectory ? MdsComponent.TYPE_MAP : MdsComponent.TYPE_IO;
+              if (node.aspects.indexOf(RestConstants.CCM_ASPECT_IO_CHILDOBJECT) !== -1) {
                 nodeGroup = MdsComponent.TYPE_CHILDOBJECT;
-            }
-            if (node.aspects.indexOf(RestConstants.CCM_ASPECT_TOOL_DEFINITION) !== -1) {
+              }
+              if (node.aspects.indexOf(RestConstants.CCM_ASPECT_TOOL_DEFINITION) !== -1) {
                 nodeGroup = MdsComponent.TYPE_TOOLDEFINITION;
-            }
-            if (node.type === RestConstants.CCM_TYPE_TOOL_INSTANCE) {
+              }
+              if (node.type === RestConstants.CCM_TYPE_TOOL_INSTANCE) {
                 nodeGroup = MdsComponent.TYPE_TOOLINSTANCE;
-            }
-            if (node.type === RestConstants.CCM_TYPE_SAVED_SEARCH) {
+              }
+              if (node.type === RestConstants.CCM_TYPE_SAVED_SEARCH) {
                 nodeGroup = MdsComponent.TYPE_SAVED_SEARCH;
-            }
-            if (this.currentNodes.length > 1) {
+              }
+              if (this.currentNodes.length > 1) {
                 if (nodeGroup !== MdsComponent.TYPE_IO) {
                   this.toast.error(null, 'MDS.ERROR_INVALID_TYPE_BULK');
                   this.cancel();
                   return;
                 }
                 nodeGroup = MdsComponent.TYPE_IO_BULK;
+              }
             }
             this.renderGroup(nodeGroup, this.mds);
+            setTimeout(() => {
+              this.initialValues = this.getValues();
+            },15);
             this.isLoading = false;
         });
     }
@@ -2502,4 +2528,8 @@ export class MdsComponent{
       }
       return properties;
   }
+}
+export enum BulkBehaviour {
+  Default, // default equals no replace on choose, but show options
+  Replace // Don't display settings, simply replace for all (usefull after uploads)
 }

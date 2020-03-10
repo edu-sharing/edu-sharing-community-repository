@@ -32,9 +32,12 @@ import java.io.File;
 import javax.servlet.ServletContextEvent;
 import javax.servlet.ServletContextListener;
 
+import org.alfresco.service.ServiceRegistry;
+import org.alfresco.service.cmr.repository.NodeRef;
 import org.apache.chemistry.opencmis.server.impl.CmisRepositoryContextListener;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.edu_sharing.alfresco.policy.OnUpdatePersonPropertiesPolicy;
 import org.edu_sharing.alfresco.workspace_administration.NodeServiceInterceptor;
 import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
 import org.edu_sharing.metadataset.v2.MetadataReaderV2;
@@ -64,12 +67,15 @@ import org.springframework.context.ApplicationContext;
 public class MCAlfrescoManager implements ServletContextListener {
 
 	Log logger = LogFactory.getLog(MCAlfrescoManager.class);
-	
+	private ApplicationContext applicationContext;
+	private ServiceRegistry serviceRegistry;
+
 	// -- startup ---
 	
 	public void contextInitialized(ServletContextEvent servletContextEvent) {
 		try{
-			
+			applicationContext = AlfAppContextGate.getApplicationContext();
+			serviceRegistry = (ServiceRegistry) applicationContext.getBean(ServiceRegistry.SERVICE_REGISTRY);
 			//generate security keys if not there
 			new KeyGenerator(null).execute();
 			ApplicationInfoList.refresh();
@@ -121,10 +127,13 @@ public class MCAlfrescoManager implements ServletContextListener {
 			//init the system folders so that are created with a admin
 			UserEnvironmentTool uet = new UserEnvironmentTool(appInfo.getUsername());
 			uet.getEdu_SharingTemplateFolder();
+
+			// init the esuid for admin
+			createESUIDAdmin();
 			
 			//init ToolPermisssions
 			ToolPermissionServiceFactory.getInstance().init();
-			
+
 			if (appInfo.getTrackingBufferSize() > 0) {
 				
 				int size = appInfo.getTrackingBufferSize();
@@ -151,17 +160,27 @@ public class MCAlfrescoManager implements ServletContextListener {
 			JobHandler.getInstance();
 			
 			//test setting cmis factory to use cmis in edu-sharing
-			ApplicationContext applicationContext = AlfAppContextGate.getApplicationContext();
 			//ServiceRegistry serviceRegistry = (ServiceRegistry) applicationContext.getBean(ServiceRegistry.SERVICE_REGISTRY);
 			Object factory = applicationContext.getBean("CMISServiceFactory");
-			
+
 			servletContextEvent.getServletContext().setAttribute(CmisRepositoryContextListener.SERVICES_FACTORY, factory);
 			
 		} catch(Throwable e) {
 			e.printStackTrace();
 		}
 	}
-	
+
+	private void createESUIDAdmin() {
+		NodeRef admin = serviceRegistry.getPersonService().getPersonOrNull(ApplicationInfoList.getHomeRepository().getUsername());
+		if (admin==null) {
+			logger.warn("Creating an esuid for admin failed. Check that the username property in your homeapp is correct: " + ApplicationInfoList.getHomeRepository().getUsername());
+		} else {
+			if(OnUpdatePersonPropertiesPolicy.createESUIDIfNotExists(serviceRegistry.getNodeService(),admin)) {
+				logger.info("Successfully created an esuid for the admin user");
+			}
+		}
+	}
+
 	// -- shutdown ---
 	@Override
 	public void contextDestroyed(ServletContextEvent arg0) {

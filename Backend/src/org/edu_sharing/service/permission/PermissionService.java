@@ -1,8 +1,10 @@
 package org.edu_sharing.service.permission;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
+import org.alfresco.service.cmr.repository.NodeRef;
 import org.edu_sharing.repository.client.rpc.ACE;
 import org.edu_sharing.repository.client.rpc.ACL;
 import org.edu_sharing.repository.client.rpc.Authority;
@@ -45,8 +47,10 @@ public interface PermissionService {
 
 
 	public void createNotifyObject(final String nodeId, final String user, final String action);
-	
-	List<Notify> getNotifyList(String nodeId) throws Throwable;
+
+    List<String> getRecentlyInvited();
+
+    List<Notify> getNotifyList(String nodeId) throws Throwable;
 		
 	
 	public void setPermissions(String nodeId, List<ACE> aces, Boolean inheritPermission) throws Exception;

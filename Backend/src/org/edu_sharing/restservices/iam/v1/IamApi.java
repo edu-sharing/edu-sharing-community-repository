@@ -18,25 +18,13 @@ import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;
 
-import org.alfresco.repo.security.authentication.AuthenticationUtil;
-import org.alfresco.repo.security.permissions.AccessDeniedException;
-import org.alfresco.repo.transaction.RetryingTransactionHelper;
 import org.alfresco.service.cmr.security.AuthorityType;
 import org.alfresco.service.cmr.security.PermissionService;
 import org.apache.log4j.Logger;
-import org.apache.poi.ss.formula.ptg.ErrPtg;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.server.MCAlfrescoAPIClient;
 import org.edu_sharing.repository.server.tools.ApplicationInfoList;
-import org.edu_sharing.restservices.ApiService;
-import org.edu_sharing.restservices.DAOMissingException;
-import org.edu_sharing.restservices.DAOSecurityException;
-import org.edu_sharing.restservices.DAOValidationException;
-import org.edu_sharing.restservices.GroupDao;
-import org.edu_sharing.restservices.NodeDao;
-import org.edu_sharing.restservices.PersonDao;
-import org.edu_sharing.restservices.RepositoryDao;
-import org.edu_sharing.restservices.RestConstants;
+import org.edu_sharing.restservices.*;
 import org.edu_sharing.restservices.iam.v1.model.AuthorityEntries;
 import org.edu_sharing.restservices.iam.v1.model.GroupEntries;
 import org.edu_sharing.restservices.iam.v1.model.GroupEntry;
@@ -47,6 +35,7 @@ import org.edu_sharing.restservices.node.v1.model.NodeEntries;
 import org.edu_sharing.restservices.shared.*;
 import org.edu_sharing.service.authority.AuthorityServiceFactory;
 import org.edu_sharing.service.lifecycle.PersonLifecycleService;
+import org.edu_sharing.service.permission.PermissionServiceFactory;
 import org.edu_sharing.service.search.SearchServiceFactory;
 import org.edu_sharing.service.search.model.SearchResult;
 import org.edu_sharing.service.search.model.SortDefinition;
@@ -1153,13 +1142,7 @@ public class IamApi  {
 
 	    	List<Authority> result = new ArrayList<Authority>();
 	    	for (String user: search.getData()) {
-	    		
-	    		if(user.startsWith(AuthorityType.GROUP.getPrefixString())){
-	    			result.add(new GroupDao(repoDao,user).asGroup());
-	    		}else{
-	    			result.add(new PersonDao(repoDao,user).asPersonSimple());
-	    		}
-	    	
+	    		result.add(getUserOrGroup(repoDao, user));
 	    	}	
 	    	AuthorityEntries response = new AuthorityEntries();
 	    	response.setList(result);
@@ -1173,5 +1156,51 @@ public class IamApi  {
     		return ErrorResponse.createResponse(t);
     	}
   }
+	@GET
+
+	@Path("/authorities/{repository}/recent")
+
+	@ApiOperation(
+			value = "Get recently invited authorities.",
+			notes = "Get the authorities the current user has recently invited.")
+
+	@ApiResponses(
+			value = {
+					@ApiResponse(code = 200, message = RestConstants.HTTP_200, response = AuthorityEntries.class),
+					@ApiResponse(code = 400, message = RestConstants.HTTP_400, response = ErrorResponse.class),
+					@ApiResponse(code = 401, message = RestConstants.HTTP_401, response = ErrorResponse.class),
+					@ApiResponse(code = 403, message = RestConstants.HTTP_403, response = ErrorResponse.class),
+					@ApiResponse(code = 404, message = RestConstants.HTTP_404, response = ErrorResponse.class),
+					@ApiResponse(code = 500, message = RestConstants.HTTP_500, response = ErrorResponse.class)
+			})
+
+	public Response getRecentlyInvited(
+			@ApiParam(value = "ID of repository (or \"-home-\" for home repository)",required=true, defaultValue="-home-" ) @PathParam("repository") String repository,
+			@Context HttpServletRequest req) {
+
+		try {
+			RepositoryDao repoDao = RepositoryDao.getRepository(repository);
+			List<String> recent = PermissionServiceFactory.getPermissionService(repoDao.getId()).getRecentlyInvited();
+			List<Authority> result = new ArrayList<Authority>();
+			for (String user: recent) {
+				result.add(getUserOrGroup(repoDao, user));
+			}
+			AuthorityEntries response = new AuthorityEntries();
+			response.setList(result);
+			return Response.status(Response.Status.OK).entity(response).build();
+
+
+		} catch (Throwable t) {
+			return ErrorResponse.createResponse(t);
+		}
+	}
+	private Authority getUserOrGroup(RepositoryDao repoDao, String authority) throws DAOException {
+
+		if(authority.startsWith(AuthorityType.GROUP.getPrefixString())){
+			return new GroupDao(repoDao,authority).asGroup();
+		}else{
+			return new PersonDao(repoDao,authority).asPersonSimple();
+		}
+	}
 }
 

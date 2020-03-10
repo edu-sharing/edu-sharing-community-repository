@@ -1,0 +1,38 @@
+@import "../../../../core-ui-module/styles/variables";
+@import "../../../../core-ui-module/components/card/variables";
+
+.authorities{
+  &:not(:last-child):after{
+    content: ', ';
+  }
+}
+.parent-authorities{
+  font-style: italic;
+  padding:5px 10px;
+}
+.toggles{
+  display: flex;
+  flex-direction: column;
+  padding-bottom: 10px;
+  .mat-heading-5{
+    padding:6px 0;
+    &.default-groups{
+      padding-top: 0;
+    }
+  }
+  .tiles{
+    display: flex;
+    flex-wrap: wrap;
+  }
+  .info{
+    display: flex;
+    justify-content: center;
+    font-size: $fontSizeSmall;
+    padding: 10px 0;
+  }
+}
+@media screen and (max-width: (map-get($widths,"normal"))) {
+  .tiles{
+    justify-content: center;
+  }
+}

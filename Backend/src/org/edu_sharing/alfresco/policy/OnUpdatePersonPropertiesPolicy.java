@@ -91,17 +91,22 @@ public class OnUpdatePersonPropertiesPolicy implements OnCreateNodePolicy, OnUpd
 			nodeService.setProperty(homeFolderNodeRef, QName.createQName(CCConstants.CM_PROP_METADATASET_EDU_METADATASET), HttpContext.getCurrentMetadataSet());
 		}
 		//create esuid that will be used for user creation in remote repositories
-		
+
+		createESUIDIfNotExists(nodeService, nodeRef);
+
+	}
+
+	public static boolean createESUIDIfNotExists(NodeService nodeService, NodeRef nodeRef) {
 		UUID uuid = UUID.randomUUID();
 		QName esUidQName =  QName.createQName(CCConstants.PROP_USER_ESUID);
 		if(nodeService.getProperty(nodeRef, esUidQName) == null){
 			nodeService.setProperty(nodeRef, esUidQName, uuid.toString());
+			return true;
 		}
-		
+		return false;
 	}
-	
-	
-	
+
+
 	public void setPolicyComponent(PolicyComponent policyComponent) {
 		this.policyComponent = policyComponent;
 	}

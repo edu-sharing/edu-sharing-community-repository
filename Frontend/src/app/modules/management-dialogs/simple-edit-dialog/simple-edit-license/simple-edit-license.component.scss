@@ -1,0 +1,14 @@
+@import "../../../../core-ui-module/styles/variables";
+
+info-message{
+  button{
+    margin: 10px auto 0 auto;
+  }
+}
+.license{
+  display: flex;
+  flex-direction: column;
+  .mode{
+    margin-bottom: 10px;
+  }
+}

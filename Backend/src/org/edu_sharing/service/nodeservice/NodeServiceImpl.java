@@ -254,7 +254,8 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
 					toSafe.put(property, arr[0]);
 			}
 		}
-
+		// removed in 5.1
+		/*
 		if (isSubOf(nodeType, CCConstants.CM_TYPE_OBJECT)) {
 			// only when there is an title
 			String[] cmNameReadableNameArr = (String[])props.get(CCConstants.CM_NAME);
@@ -284,7 +285,7 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
 				toSafe.put(CCConstants.CM_NAME, cmNameReadableName);	
 			}
 		}
-		
+		*/
 		return toSafe;
 	}
 	//transient Logger logger = Logger.getLogger(MetadataWidget.class);

@@ -68,7 +68,7 @@ export class WorkspaceShareComponent {
     @Output() onClose = new EventEmitter();
     @Output() onLoading = new EventEmitter();
 
-    readonly BASIC_PERMISSIONS = ['Consumer', 'Collaborator', 'Coordinator'];
+    static BASIC_PERMISSIONS = ['Consumer', 'Collaborator', 'Coordinator'];
     readonly ALL_PERMISSIONS = [
         'All',
         'Read',
@@ -311,7 +311,7 @@ export class WorkspaceShareComponent {
                             data.permissions.localPermissions.permissions,
                             'OWNER',
                         );
-                        this.inherit = this.mergePermissions(
+                        this.inherit = WorkspaceShareComponent.mergePermissions(
                             this.inherit,
                             data.permissions.localPermissions.permissions,
                         );
@@ -673,7 +673,7 @@ export class WorkspaceShareComponent {
                     // keep inherit state of original node
                     inherit = this.originalPermissions[i].inherited;
                     if (this.bulkMode === 'extend') {
-                        permissions = this.mergePermissionsWithHighestPermission(
+                        permissions = WorkspaceShareComponent.mergePermissionsWithHighestPermission(
                             this.originalPermissions[i].permissions,
                             permissions,
                         );
@@ -838,7 +838,7 @@ export class WorkspaceShareComponent {
         }
     }
 
-    private mergePermissions(source: Permission[], add: Permission[]) {
+    static mergePermissions(source: Permission[], add: Permission[]) {
         const merge = source;
         for (const p2 of add) {
             // do only add new, unique permissions
@@ -856,7 +856,7 @@ export class WorkspaceShareComponent {
      * @param source
      * @param add
      */
-    private mergePermissionsWithHighestPermission(
+    static mergePermissionsWithHighestPermission(
         source: Permission[],
         add: Permission[],
     ) {
@@ -874,7 +874,7 @@ export class WorkspaceShareComponent {
                 const perm2 = p2.permissions.filter(
                     p => this.BASIC_PERMISSIONS.indexOf(p) !== -1,
                 );
-                if (this.permissionIsGreaterThan(perm2[0], perm1[0])) {
+                if (WorkspaceShareComponent.permissionIsGreaterThan(perm2[0], perm1[0])) {
                     result.splice(result.indexOf(map[0]), 1);
                     result.push(p2);
                 }
@@ -885,10 +885,10 @@ export class WorkspaceShareComponent {
         }
         return result;
     }
-    private permissionIsGreaterThan(p1: string, p2: string) {
+    static permissionIsGreaterThan(p1: string, p2: string) {
         return (
-            this.BASIC_PERMISSIONS.indexOf(p1) >
-            this.BASIC_PERMISSIONS.indexOf(p2)
+            WorkspaceShareComponent.BASIC_PERMISSIONS.indexOf(p1) >
+            WorkspaceShareComponent.BASIC_PERMISSIONS.indexOf(p2)
         );
     }
 

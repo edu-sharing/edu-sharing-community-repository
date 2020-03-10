@@ -403,6 +403,15 @@
 				]]></html>
 			</template>
 			<template>
+				<id>node_general_simple</id>
+				<caption>dialog_upload_tab_basic</caption>
+				<icon>description</icon>
+				<html><![CDATA[
+              <ccm:educationallearningresourcetype>
+              <cclom:general_keyword>
+				]]></html>
+			</template>
+			<template>
 				<id>node_general_bulk</id>
 				<icon>description</icon>
 				<html><![CDATA[
@@ -668,6 +677,12 @@
 				<id>io</id>
 				<views>
 					<view>node_general</view>
+				</views>
+			</group>
+			<group>
+				<id>io_simple</id>
+				<views>
+					<view>node_general_simple</view>
 				</views>
 			</group>
 			<group>
