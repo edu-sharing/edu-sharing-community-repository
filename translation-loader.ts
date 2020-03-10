@@ -1,7 +1,7 @@
 import { HttpClient } from '@angular/common/http';
 import { TranslateLoader } from '@ngx-translate/core';
 import { Observable, Observer } from 'rxjs';
-import { tap } from 'rxjs/operators';
+import { tap, switchMap, map } from 'rxjs/operators';
 import { environment } from '../../environments/environment';
 import { RestLocatorService } from '../core-module/core.module';
 import { Translation } from './translation';
@@ -25,18 +25,9 @@ export const TRANSLATION_LIST = [
     'override',
 ];
 
-    getTranslation(lang: string): Observable<any> {
-        return new Observable<any>((observer: Observer<any>) => {
-            observer.next(null);
-            observer.complete();
-        });
-    }
-}
+type Dictionary = { [key: string]: string | Dictionary };
 
 export class TranslationLoader implements TranslateLoader {
-    private initializing: string = null;
-    private initializedLanguage: any;
-
     static create(http: HttpClient, locator: RestLocatorService) {
         return new TranslationLoader(http, locator);
     }
@@ -51,124 +42,115 @@ export class TranslationLoader implements TranslateLoader {
     /**
      * Gets the translations from the server
      */
-    getTranslation(lang: string): Observable<any> {
-        if (this.initializing === lang || this.initializedLanguage) {
-            return new Observable<any>((observer: Observer<any>) => {
-                const callback = () => {
-                    if (!this.initializedLanguage) {
-                        setTimeout(callback, 10);
-                        return;
-                    }
-                    observer.next(this.initializedLanguage);
-                    observer.complete();
-                };
-                setTimeout(callback);
-            });
-        }
-        this.initializing = lang;
+    getTranslation(lang: string): Observable<Dictionary> {
         if (lang === 'none') {
-            return new Observable<any>((observer: Observer<any>) => {
-                this.initializedLanguage = {};
-                this.initializing = null;
-                observer.next({});
-                observer.complete();
-            });
+            return Observable.of({});
         }
-        const translations: any = [];
-        let maxCount = TRANSLATION_LIST.length;
+        return this.getOriginalTranslations(lang).pipe(
+            // Default to empty dictionary if we got nothing
+            map(translations => translations || {}),
+            // Fetch and apply overrides
+            switchMap(translations => {
+                return this.locator
+                    .getConfigLanguage(lang)
+                    .map(overrides =>
+                        this.applyOverrides(translations, overrides),
+                    );
+            }),
+        );
+    }
+
+    private getOriginalTranslations(lang: string): Observable<Dictionary> {
+        switch (this.getSource()) {
+            case 'repository':
+                return this.locator.getLanguageDefaults(
+                    Translation.LANGUAGES[lang],
+                );
+            case 'local':
+                return this.mergeTranslations(this.fetchTranslations(lang));
+        }
+    }
+
+    private getSource(): 'repository' | 'local' {
         if (
             (environment.production &&
                 Translation.getSource() === TranslationSource.Auto) ||
             Translation.getSource() === TranslationSource.Repository
         ) {
-            maxCount = 1;
-            this.locator
-                .getLanguageDefaults(Translation.LANGUAGES[lang])
-                .subscribe((data: any) => {
-                    translations.push(data);
-                });
+            return 'repository';
         } else {
-            for (const translation of TRANSLATION_LIST) {
-                this.http
-                    .get(`${this.prefix}/${translation}/${lang}${this.suffix}`)
-                    .subscribe((data: any) => translations.push(data));
+            return 'local';
+        }
+    }
+
+    /**
+     * Returns an array of Observables that will each fetch a translations json
+     * file.
+     */
+    private fetchTranslations(lang: string): Observable<Dictionary>[] {
+        return TRANSLATION_LIST.map(
+            translation =>
+                `${this.prefix}/${translation}/${lang}${this.suffix}`,
+        ).map(url => this.http.get(url) as Observable<Dictionary>);
+    }
+
+    /**
+     * Takes an array as returned by `fetchTranslations` and converts it to an
+     * Observable that yields a single Dictionary object.
+     */
+    private mergeTranslations(
+        translations: Observable<Dictionary>[],
+    ): Observable<Dictionary> {
+        return Observable.concat(...translations).reduce(
+            (acc: Dictionary, value: Dictionary) => {
+                for (const prop in value) {
+                    if (value.hasOwnProperty(prop)) {
+                        acc[prop] = value[prop];
+                    }
+                }
+                return acc;
+            },
+            {},
+        );
+    }
+
+    /**
+     * Applies `overrides` to `translations` and returns `translations`.
+     *
+     * Example:
+     *  translations = { foo: { bar: 'bar' } }
+     *  overrides = { 'foo.bar': 'baz' }
+     * results in
+     *  translations = { foo: {bar: 'baz' } }
+     *
+     * @param translations Nested translations object.
+     * @param overrides Flat object with dots (.) in keys interpreted as
+     * separators.
+     */
+    private applyOverrides(
+        translations: Dictionary,
+        overrides: { [key: string]: string },
+    ): Dictionary {
+        if (overrides) {
+            for (const [key, value] of Object.entries<string>(overrides)) {
+                let ref = translations;
+                const path = key.split('.');
+                const pathLast = path.pop();
+                for (const item of path) {
+                    if (!ref[item]) {
+                        ref[item] = {};
+                    }
+                    const refItem = ref[item];
+                    if (typeof refItem === 'string') {
+                        throw new Error(
+                            'Trying to override leave with sub tree: ' + path,
+                        );
+                    }
+                    ref = refItem;
+                }
+                ref[pathLast] = value;
             }
         }
-        return new Observable<any>((observer: Observer<any>) => {
-            const callback = () => {
-                if (translations.length < maxCount) {
-                    setTimeout(callback, 10);
-                    return;
-                }
-                this.locator
-                    .getConfigLanguage(Translation.LANGUAGES[lang])
-                    .subscribe((data: any) => {
-                        translations.push(data);
-                        const final: any = {};
-                        for (const obj of translations) {
-                            for (const key in obj) {
-                                if (!obj.hasOwnProperty(key)) {
-                                    continue;
-                                }
-                                // copy all the fields
-
-                                const path = key.split('.');
-                                if (path.length === 1) {
-                                    final[key] = obj[key];
-                                }
-                            }
-                        }
-                        for (const obj of translations) {
-                            for (const key in obj) {
-                                if (!obj.hasOwnProperty(key)) {
-                                    continue;
-                                }
-                                try {
-                                    const path = key.split('.');
-
-                                    // init non-existing objects first
-                                    if (path.length >= 2 && !final[path[0]])
-                                        final[path[0]] = {};
-                                    if (
-                                        path.length >= 3 &&
-                                        !final[path[0]][path[1]]
-                                    )
-                                        final[path[0]][path[1]] = {};
-                                    if (
-                                        path.length >= 4 &&
-                                        !final[path[0]][path[1]][path[2]]
-                                    )
-                                        final[path[0]][path[1]][path[2]] = {};
-
-                                    if (path.length === 1) {
-                                        continue;
-                                    } else if (path.length === 2) {
-                                        final[path[0]][path[1]] = obj[key];
-                                    } else if (path.length === 3) {
-                                        final[path[0]][path[1]][path[2]] =
-                                            obj[key];
-                                    } else if (path.length === 4) {
-                                        final[path[0]][path[1]][path[2]][
-                                            path[3]
-                                        ] = obj[key];
-                                    }
-                                } catch (e) {
-                                    console.error(
-                                        'error while language override of ' +
-                                            key,
-                                        e,
-                                    );
-                                }
-                            }
-                        }
-                        this.initializedLanguage = final;
-                        this.initializing = null;
-                        observer.next(final);
-                        observer.complete();
-                    });
-            };
-
-            setTimeout(callback, 10);
-        });
+        return translations;
     }
 }
