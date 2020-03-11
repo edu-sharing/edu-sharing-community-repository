@@ -241,7 +241,7 @@ public class MetadataTemplateRenderer {
 							}
 							if(properties.get(CCConstants.getValidLocalName(CCConstants.CCM_PROP_IO_LICENSE_PROFILE_URL)) != null){
 								value+=" (<a href='"+
-										properties.get(CCConstants.getValidLocalName(CCConstants.CCM_PROP_IO_LICENSE_PROFILE_URL))+"'>"+
+										properties.get(CCConstants.getValidLocalName(CCConstants.CCM_PROP_IO_LICENSE_PROFILE_URL))[0]+"'>"+
 										I18nAngular.getTranslationAngular("common","LICENSE.LINK_AUTHOR")
 										+"</a>)";
 							}
