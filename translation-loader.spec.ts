@@ -148,6 +148,20 @@ describe('TranslationLoader', () => {
                 expect(result).toEqual({ foo: 'bar' });
             });
 
+            it('should override translations via getConfigLanguage', async () => {
+                httpClient.get = url => {
+                    if (url === 'assets/i18n/common/de.json') {
+                        return Observable.of({ foo: 'bar' });
+                    }
+                    return Observable.of(null);
+                };
+                locator.getConfigLanguage = lang => {
+                    return Observable.of({ foo: 'baz' });
+                };
+                const result = await callGetTranslation('de');
+                expect(result).toEqual({ foo: 'baz' });
+            });
+
             it('should merge translations via getConfigLanguage', async () => {
                 httpClient.get = url => {
                     if (url === 'assets/i18n/common/de.json') {
