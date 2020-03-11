@@ -176,7 +176,7 @@ export class SimpleEditInviteComponent {
       // filter and distinct them first
       const authorities = Array.from(new Set(this.parentPermissions.
           map((p) => p.authority.authorityName).
-          filter((a) => a !== this.connector.getCurrentLogin().authorityName)
+          filter((a) => a !== this.connector.getCurrentLogin().authorityName && a !== RestConstants.AUTHORITY_ROLE_OWNER)
       ));
       // now, conver them back to objects
       this.parentAuthorities = authorities.map((a) =>
@@ -188,7 +188,7 @@ export class SimpleEditInviteComponent {
         this.nodesPermissions = permissions.map((p) => p.permissions);
         this.organizationApi.getOrganizations().subscribe((orgs) => {
           // @TODO: Only allow for one org
-          if(orgs.organizations.length === 1 || true) {
+          if(orgs.organizations.length >= 1) {
             this.organization = {
               organization: orgs.organizations[0],
               groups: {}
@@ -274,11 +274,13 @@ export class SimpleEditInviteComponent {
         this.setInitialState();
         return;
       }
-      for (const key of Object.keys(this.organization.groups)) {
-        if(activeToggle === this.organization.groups[key].authorityName) {
-          this.orgGroup.value = key;
-          this.setInitialState();
-          return;
+      if(this.organization) {
+        for (const key of Object.keys(this.organization.groups)) {
+          if (activeToggle === this.organization.groups[key].authorityName) {
+            this.orgGroup.value = key;
+            this.setInitialState();
+            return;
+          }
         }
       }
       if (this.globalGroups) {
@@ -312,7 +314,7 @@ export class SimpleEditInviteComponent {
   }
 
   private hasInvalidState() {
-    return this.multipleParents || this.parentPermissions.length > 0;
+    return this.multipleParents || this.parentAuthorities.length > 0;
   }
 
   private setInitialState() {
