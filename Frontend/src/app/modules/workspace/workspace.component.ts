@@ -1,4 +1,4 @@
-import { Component, ElementRef, HostListener, ViewChild } from '@angular/core';
+import { Component, ElementRef, HostListener, ViewChild, OnInit } from '@angular/core';
 import { TranslateService } from '@ngx-translate/core';
 import { Translation } from '../../core-ui-module/translation';
 import {
@@ -64,10 +64,12 @@ import {WorkspaceExplorerComponent} from './explorer/explorer.component';
         trigger('fromRight', UIAnimation.fromRight())
     ]
 })
-export class WorkspaceMainComponent implements EventListener {
+export class WorkspaceMainComponent implements EventListener, OnInit {
     @ViewChild('explorer') explorer: WorkspaceExplorerComponent;
     private static VALID_ROOTS = ['MY_FILES', 'SHARED_FILES', 'MY_SHARED_FILES', 'TO_ME_SHARED_FILES', 'WORKFLOW_RECEIVE', 'RECYCLE'];
     private static VALID_ROOTS_NODES = [RestConstants.USERHOME, '-shared_files-', '-my_shared_files-', '-to_me_shared_files-', '-workflow_receive-'];
+
+    isToastModalOpen: boolean;
     private isRootFolder: boolean;
     private homeDirectory: string;
     private sharedFolders: Node[] = [];
@@ -78,18 +80,13 @@ export class WorkspaceMainComponent implements EventListener {
     private selection: Node[] = [];
 
     private showSelectRoot = false;
-    public showUploadSelect = false;
     createConnectorName: string;
     createConnectorType: Connector;
-    private addFolderName: string;
 
     public allowBinary = true;
     public globalProgress = false;
-    public editNodeMetadata: Node[];
-    public editNodeTemplate: Node;
     public editNodeDeleteOnCancel = false;
     private createMds: string;
-    private editNodeLicense: Node[];
     private nodeDisplayedVersion: string;
     createAllowed: boolean;
     currentFolder: any | Node;
@@ -112,14 +109,11 @@ export class WorkspaceMainComponent implements EventListener {
     private isGuest: boolean;
     private currentNodes: Node[];
     private appleCmd = false;
-    public workflowNode: Node;
     private reurl: string;
     private mdsParentNode: Node;
     public showLtiTools = false;
     private oldParams: Params;
     private selectedNodeTree: string;
-    private nodeDebug: Node;
-    private sharedNode: Node[];
     public contributorNode: Node;
     public shareLinkNode: Node;
     private viewType = 0;
@@ -154,16 +148,9 @@ export class WorkspaceMainComponent implements EventListener {
         }
         const clip = (this.storage.get('workspace_clipboard') as ClipboardObject);
         const fromInputField = KeyEvents.eventFromInputField(event);
-        const hasOpenWindow = this.hasOpenWindows();
 
         if (event.key === 'Escape') {
-            if (this.addFolderName != null) {
-                this.addFolderName = null;
-            }
-            else if (this.showUploadSelect) {
-                this.showUploadSelect = false;
-            }
-            else if (this.createConnectorName != null) {
+            if (this.createConnectorName != null) {
                 this.createConnectorName = null;
             }
             else {
@@ -209,9 +196,17 @@ export class WorkspaceMainComponent implements EventListener {
         this.connector.setRoute(this.route);
         this.globalProgress = true;
     }
+
+    ngOnInit() {
+        this.toast.isModalDialogOpen.subscribe((value) => {
+            setTimeout(() => this.isToastModalOpen = value);
+        });
+    }
+
     private hideDialog(): void {
         this.toast.closeModalDialog();
     }
+    // @ TODO: Move to create menu (probably)
     showCreateConnector(connector: Connector) {
         this.createConnectorName = '';
         this.createConnectorType = connector;
@@ -490,17 +485,7 @@ export class WorkspaceMainComponent implements EventListener {
             }
         }
     }
-    public debugNode(node: Node) {
-        this.nodeDebug = this.getNodeList(node)[0];
-        /*
-        this.session.set("admin_lucene",{
-            query:'@sys\:node-uuid:"'+node.ref.id+'"',
-            offset:0,
-            count:10,
-        });
-        this.router.navigate([UIConstants.ROUTER_PREFIX,"admin"],{queryParams:{mode:'BROWSER'}});
-        */
-    }
+
     private setSelection(nodes: Node[]) {
         this.selection = nodes;
         this.setFixMobileNav();
@@ -678,9 +663,6 @@ export class WorkspaceMainComponent implements EventListener {
         );
     }
 
-    private nodeTemplate(node: Node) {
-        this.editNodeTemplate = this.getNodeList(node)[0];
-    }
     private addToCollection(node: Node) {
         const nodes = this.getNodeList(node);
         this.addNodesToCollection = nodes;
@@ -733,18 +715,6 @@ export class WorkspaceMainComponent implements EventListener {
         this.showLtiTools = true;
     }
 
-    hasOpenWindows() {
-        return this.editNodeLicense
-            || this.nodeDebug
-            || this.editNodeTemplate
-            || this.editNodeMetadata
-            || this.createConnectorName
-            || this.showUploadSelect
-            || this.toast.isModalDialogOpen()
-            || this.addFolderName
-            || this.sharedNode
-            || this.workflowNode;
-    }
     private recoverScrollposition() {
         window.scrollTo(0, this.storage.get('workspace_scroll', 0));
     }
