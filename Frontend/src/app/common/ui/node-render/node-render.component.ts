@@ -37,7 +37,7 @@ import {GlobalContainerComponent} from '../global-container/global-container.com
 import {VideoControlsComponent} from '../../../core-ui-module/components/video-controls/video-controls.component';
 import {RouterHelper} from '../../../core-ui-module/router.helper';
 import {ActionbarComponent} from '../actionbar/actionbar.component';
-import {OptionsHelperService} from '../../options-helper';
+import {OPTIONS_HELPER_CONFIG, OptionsHelperService} from '../../options-helper';
 
 declare var jQuery:any;
 declare var window: any;
@@ -46,8 +46,10 @@ declare var window: any;
   selector: 'node-render',
   templateUrl: 'node-render.component.html',
   styleUrls: ['node-render.component.scss'],
-  providers: [OptionsHelperService],
-  animations: [
+    providers: [OptionsHelperService, {provide: OPTIONS_HELPER_CONFIG, useValue: {
+        subscribeEvents: true
+    }}],
+    animations: [
     trigger('fadeFast', UIAnimation.fade(UIAnimation.ANIMATION_TIME_FAST))
   ]
 })

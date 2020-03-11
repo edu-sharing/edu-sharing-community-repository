@@ -47,7 +47,7 @@ import { MatSlideToggle } from '@angular/material/slide-toggle';
 import { HttpClient } from '@angular/common/http';
 import { GlobalContainerComponent } from '../../common/ui/global-container/global-container.component';
 import { Observable } from 'rxjs';
-import {OptionsHelperService} from '../../common/options-helper';
+import {OPTIONS_HELPER_CONFIG, OptionsHelperService} from '../../common/options-helper';
 import {ActionbarComponent} from '../../common/ui/actionbar/actionbar.component';
 
 // component class
@@ -56,8 +56,9 @@ import {ActionbarComponent} from '../../common/ui/actionbar/actionbar.component'
     templateUrl: 'collections.component.html',
     styleUrls: ['collections.component.scss'],
     // provide a new instance so to not get conflicts with other service instances
-    providers: [OptionsHelperService],
-})
+    providers: [OptionsHelperService, {provide: OPTIONS_HELPER_CONFIG, useValue: {
+        subscribeEvents: false
+    }}]})
 export class CollectionsMainComponent {
     static INDEX_MAPPING = [
         RestConstants.COLLECTIONSCOPE_MY,

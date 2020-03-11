@@ -25,6 +25,12 @@ import {HttpClient} from '@angular/common/http';
 import {ActivatedRoute, Params, Router} from '@angular/router';
 import {DropdownComponent} from '../core-ui-module/components/dropdown/dropdown.component';
 
+
+export class OptionsHelperConfig {
+    subscribeEvents? = true;
+}
+export const OPTIONS_HELPER_CONFIG = new InjectionToken<OptionsHelperConfig>('OptionsHelperConfig');
+
 @Injectable()
 export class OptionsHelperService {
     private static subscriptionUp: Subscription;
@@ -1088,8 +1094,3 @@ export interface OptionData {
     customOptions?: CustomOptions;
 }
 
-export class OptionsHelperConfig {
-    subscribeEvents? = true;
-}
-
-export const OPTIONS_HELPER_CONFIG = new InjectionToken<OptionsHelperConfig>('OptionsHelperConfig');

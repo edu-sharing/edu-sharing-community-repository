@@ -13,7 +13,7 @@ module.exports = async ({ config, mode }) => {
         include: path.resolve(__dirname, '/'),
     });
     */
-
+    console.log(config);
     // Return the altered config
     return config;
 }
