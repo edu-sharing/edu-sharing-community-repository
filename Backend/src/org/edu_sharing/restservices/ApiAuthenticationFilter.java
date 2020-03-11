@@ -24,6 +24,7 @@ import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.server.AuthenticationToolAPI;
 import org.edu_sharing.repository.server.AuthenticationToolAbstract;
+import org.edu_sharing.repository.server.authentication.AuthenticationFilter;
 import org.edu_sharing.repository.server.authentication.Context;
 import org.edu_sharing.repository.server.tools.ApplicationInfo;
 import org.edu_sharing.repository.server.tools.ApplicationInfoList;
@@ -70,10 +71,9 @@ public class ApiAuthenticationFilter implements javax.servlet.Filter {
 		//session.setMaxInactiveInterval(30);
 		AuthenticationToolAPI authTool = new AuthenticationToolAPI();
 		HashMap<String, String> validatedAuth = authTool.validateAuthentication(session);
-		
-		String locale = httpReq.getHeader("locale");
-		if(locale==null && httpReq.getLocale()!=null)
-			locale=httpReq.getLocale().toString();
+
+		AuthenticationFilter.handleLocale(httpReq.getHeader("locale"), httpReq, httpResp);
+
 		String authHdr = httpReq.getHeader("Authorization");
 
 		// always take the header so we can auth when a guest is activated
@@ -154,11 +154,7 @@ public class ApiAuthenticationFilter implements javax.servlet.Filter {
 				}
 			
 		}
-		
-		if(LocaleValidator.validate(locale)){
-	    	httpReq.getSession().setAttribute(CCConstants.AUTH_LOCALE,locale);
-	    }
-		
+
 		List<String> AUTHLESS_ENDPOINTS=Arrays.asList(new String[]{"/authentication","/_about","/config","/register","/sharing"});
 		List<String> ADMIN_ENDPOINTS=Arrays.asList(new String[]{"/admin"});
 		List<String> DISABLED_ENDPOINTS=new ArrayList<>();

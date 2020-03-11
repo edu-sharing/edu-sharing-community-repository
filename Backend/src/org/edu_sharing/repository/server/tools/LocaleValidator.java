@@ -12,10 +12,14 @@ public class LocaleValidator {
 	public static boolean validate(String locale){
 		//set the locale
 	   
-	    if(locale != null && locale.matches("[a-z][a-z]_[A-Z][A-Z]")){
-			// if the locale requested is found in config -> allow it
-			return Arrays.stream(ConfigServiceFactory.getSupportedLanguages()).
-				anyMatch(locale::startsWith);
+	    if(locale != null){
+	    	 if(locale.matches("[a-z][a-z]_[A-Z][A-Z]")) {
+				 // if the locale requested is found in config -> allow it
+				 return Arrays.stream(ConfigServiceFactory.getSupportedLanguages()).
+						 anyMatch(locale::startsWith);
+			 } else {
+	    	 	throw new IllegalArgumentException("HTTP Header parameter locale is of invalid format: Please use xx_XX");
+			 }
 		}
 	    
 	    return false;

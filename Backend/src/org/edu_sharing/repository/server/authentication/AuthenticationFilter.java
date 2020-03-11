@@ -69,18 +69,11 @@ public class AuthenticationFilter implements javax.servlet.Filter {
 	    	log.info("webdav auth redirecting to /webdav/");
 	    	httpRes.sendRedirect(httpReq.getContextPath() + "/webdav/");
 	    	return;
-	    } 
-	    
-	    //set the locale
-	    String locale = httpReq.getParameter("locale");
-	    if(locale==null && httpReq.getLocale()!=null)
-	    	locale=httpReq.getLocale().toString();
-	    if(LocaleValidator.validate(locale)){
-	    	log.info("current locale:"+locale);
-	    	httpReq.getSession().setAttribute(CCConstants.AUTH_LOCALE,locale);
 	    }
-	    
-	    //find out if we have to do the guest login
+
+		AuthenticationFilter.handleLocale(httpReq.getParameter("locale"), httpReq, httpRes);
+
+		//find out if we have to do the guest login
 	  	String user = httpReq.getParameter("user");
 	  	if(user != null && user.equals("guest")){
 	  		boolean guestAuthenticated = authenticateByGuest(httpReq);
@@ -172,7 +165,20 @@ public class AuthenticationFilter implements javax.servlet.Filter {
 		//redirect to login page
 		this.redirectToLoginpage(httpReq, httpRes, chain);
 	}
-	
+
+	public static void handleLocale(String locale,  HttpServletRequest httpReq, HttpServletResponse httpRes) throws IOException {
+		//set the locale
+		try {
+			if (locale == null && httpReq.getLocale() != null)
+				locale = httpReq.getLocale().toString();
+			if (LocaleValidator.validate(locale)) {
+				httpReq.getSession().setAttribute(CCConstants.AUTH_LOCALE, locale);
+			}
+		}catch(Throwable t){
+			httpRes.sendError(HttpServletResponse.SC_BAD_REQUEST, t.getMessage());
+		}
+	}
+
 	private void redirectToLoginpage(HttpServletRequest req, HttpServletResponse resp, FilterChain chain) throws IOException,ServletException{
 		
 		//remember the URL the user wants to get
