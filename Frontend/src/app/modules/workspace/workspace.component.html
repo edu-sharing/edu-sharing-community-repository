@@ -73,7 +73,7 @@
                       [searchQuery]="searchQuery"
                       [viewType]="viewType"
                       [(reorderDialog)]="reorderDialog"
-                      [preventKeyevents]="hasOpenWindows()"
+                      [preventKeyevents]="isToastModalOpen"
                       [(nodes)]="currentNodes"
                       [mainNav]="mainNav"
                       [actionbar]="actionbar"
@@ -85,29 +85,6 @@
                       (onOpenNode)="openNode($event, true)"
                       (onReset)="resetWorkspace()"
 ></workspace-explorer>
-
-<workspace-management
-  #management
-  [(showLtiTools)]="showLtiTools"
-  [(addToCollection)]="addNodesToCollection"
-  [(addNodesStream)]="addNodesStream"
-  [(nodeLicense)]="editNodeLicense"
-  [(nodeMetadata)]="editNodeMetadata"
-  [(nodeTemplate)]="editNodeTemplate"
-  [(nodeDeleteOnCancel)]="editNodeDeleteOnCancel"
-  [(nodeWorkflow)]="workflowNode"
-  [(nodeVariant)]="variantNode"
-  [(nodeShare)]="sharedNode"
-  [(nodeShareLink)]="shareLinkNode"
-  [(showUploadSelect)]="showUploadSelect"
-  [parent]="currentFolder"
-  [(nodeContributor)]="contributorNode"
-  (onRefresh)="refresh(true,$event)"
-  (onUpdateLicense)="updateLicense()"
-  (onCloseMetadata)="closeMetadata()"
-  (onDelete)="deleteDone()"
->
-</workspace-management>
 
 </div>
   <global-progress *ngIf="globalProgress"></global-progress>
