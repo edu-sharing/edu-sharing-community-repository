@@ -48,6 +48,7 @@ import org.edu_sharing.service.clientutils.WebsiteInformation;
 import org.edu_sharing.service.editlock.EditLockServiceFactory;
 import org.edu_sharing.service.editlock.LockedException;
 import org.edu_sharing.service.nodeservice.AssocInfo;
+import org.edu_sharing.service.nodeservice.NodeServiceHelper;
 import org.edu_sharing.service.repoproxy.RepoProxyFactory;
 import org.edu_sharing.service.search.model.SearchToken;
 import org.edu_sharing.service.search.model.SortDefinition;
@@ -1165,16 +1166,16 @@ public class NodeApi  {
 			return;
 		 WebsiteInformation info=ClientUtilsService.getWebsiteInformation(url[0]);
 		 if(info==null){
-		     properties.put(CCConstants.getValidLocalName(CCConstants.CM_NAME),url);
+		     properties.put(CCConstants.getValidLocalName(CCConstants.CM_NAME), new String[]{NodeServiceHelper.cleanupCmName(url[0])});
 		     properties.put(CCConstants.getValidLocalName(CCConstants.LOM_PROP_GENERAL_TITLE),url);
 			 return;
 		 }
 		 String title=info.getTitle();
-		 if(info.getTitle()==null)
-			 title=info.getPage();
-    	String[] name = new String[]{title};
-	    properties.put(CCConstants.getValidLocalName(CCConstants.CM_NAME),name);
-	    properties.put(CCConstants.getValidLocalName(CCConstants.LOM_PROP_GENERAL_TITLE),name);
+		 if(info.getTitle()==null) {
+			 title = info.getPage();
+		 }
+	    properties.put(CCConstants.getValidLocalName(CCConstants.CM_NAME), new String[]{NodeServiceHelper.cleanupCmName(title)});
+	    properties.put(CCConstants.getValidLocalName(CCConstants.LOM_PROP_GENERAL_TITLE),new String[]{title});
 	    if(info.getDescription()!=null)
 	    	properties.put(CCConstants.getValidLocalName(CCConstants.LOM_PROP_GENERAL_DESCRIPTION),new String[]{info.getDescription()});
 	    if(info.getKeywords()!=null)

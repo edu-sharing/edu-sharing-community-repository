@@ -135,7 +135,6 @@ export class WorkspaceManagementDialogsComponent  {
   @Input() nodeDeleteOnCancel: boolean;
   @Output() nodeDeleteOnCancelChange = new EventEmitter();
   private nodeLicenseOnUpload = false;
-  private wasUploaded: boolean;
     /**
      * QR Code object data to print
      * @node: Reference to the node (for header title)
@@ -270,7 +269,6 @@ export class WorkspaceManagementDialogsComponent  {
     } else {
         this.showMetadataAfterUpload(event);
     }
-    this.wasUploaded = true;
     this.filesToUpload = null;
     this.filesToUploadChange.emit(null);
   }
@@ -283,15 +281,11 @@ export class WorkspaceManagementDialogsComponent  {
   createUrlLink(link : LinkData) {
     const urlData = NodeHelper.createUrlLink(link);
     this.closeUploadSelect();
-    this.globalProgress=true;
+    this.toast.showProgressDialog();
     this.nodeService.createNode(this.parent.ref.id,RestConstants.CCM_TYPE_IO,urlData.aspects,urlData.properties,true,RestConstants.COMMENT_MAIN_FILE_UPLOAD).subscribe(
       (data) => {
-        this.wasUploaded = true;
-        this.globalProgress=false;
-        this.nodeDeleteOnCancel=true;
-        this.nodeDeleteOnCancelChange.emit(true);
-        this.nodeMetadata=[data.node];
-        this.onRefresh.emit();
+        this.showMetadataAfterUpload([data.node]);
+        this.toast.closeModalDialog();
       });
   }
  private openLtiConfig(event:Node){
@@ -318,9 +312,9 @@ export class WorkspaceManagementDialogsComponent  {
       this.showMetadataAfterUpload(this.nodeLicense);
     }
     else {
-        if(this.wasUploaded)
+        if(this._nodeSimpleFromUpload)
             this.onUploadFilesProcessed.emit(this.nodeLicense);
-        this.wasUploaded = false;
+        this._nodeSimpleFromUpload = false;
     }
       if(this.editorPending){
           this.editorPending=false;
@@ -347,10 +341,6 @@ export class WorkspaceManagementDialogsComponent  {
           });
   }
   private closeEditor(refresh:boolean,node: Node[]=null){
-      if(node!=null && this.wasUploaded) {
-          this.onUploadFilesProcessed.emit(node);
-      }
-      this.wasUploaded=false;
       if (this.nodeDeleteOnCancel && node == null) {
           this.deleteNodes(this.nodeMetadata);
           return;
