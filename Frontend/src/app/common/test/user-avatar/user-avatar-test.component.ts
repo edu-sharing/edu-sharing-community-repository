@@ -10,7 +10,8 @@ export class UserAvatarTestComponent {
   sizes = ['xsmall', 'small', 'medium', 'large'];
   users = [
       {authorityName: 'Bernd'},
-      {authorityName: 'GROUP_SCHOOL', authorityType: 'GROUP', profile: {displayName: 'Group School XYZ'}},
+      {authorityName: 'GROUP_SCHOOL', authorityType: 'GROUP', profile: {displayName: 'School Group XYZ'}},
+      {authorityName: 'GROUP_EDITORIAL', authorityType: 'GROUP', profile: {displayName: 'Editorial Group XYZ', groupType: RestConstants.GROUP_TYPE_EDITORIAL}},
       {authorityName: 'Max'},
       {authorityName: 'Jon'},
       {authorityName: 'Jack Editorial', profile: {firstName: 'Jack', lastName: 'Editorial', types: [RestConstants.GROUP_TYPE_EDITORIAL]} },
