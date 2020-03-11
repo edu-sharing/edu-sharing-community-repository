@@ -280,13 +280,28 @@ export class PermissionsAuthoritiesComponent {
       options.push(createGroup);
     }
     if (this._mode === 'USER') {
-      if (this.org)
-        options.push(new OptionItem('PERMISSIONS.MENU_ADD_GROUP_MEMBERS', 'person_add', (data: any) => this.addMembersFunction(this.org)));
-      if (this.orgs && this.orgs.canCreate) {
-        options.push(new OptionItem('PERMISSIONS.MENU_CREATE_USER', 'add', (data: any) => this.createAuthority()));
+      if (this.org) {
+        const addUser = new OptionItem('PERMISSIONS.MENU_ADD_GROUP_MEMBERS', 'person_add', (data: any) => this.addMembersFunction(this.org));
+        addUser.elementType = [ElementType.Unknown];
+        addUser.group = DefaultGroups.Primary;
+        addUser.priority = 10;
+        addUser.constrains = [Constrain.NoSelection];
+        options.push(addUser);
+      }
+      if (this.orgs) {
+        const createAuthority = new OptionItem('PERMISSIONS.MENU_CREATE_USER', 'add', (data: any) => this.createAuthority());
+        createAuthority.elementType = [ElementType.Unknown];
+        createAuthority.group = DefaultGroups.Primary;
+        createAuthority.priority = 10;
+        createAuthority.constrains = [Constrain.Admin, Constrain.NoSelection];
+        options.push(createAuthority);
       }
       const download = new OptionItem('PERMISSIONS.EXPORT_MEMBER', 'cloud_download', (data: any) => this.downloadMembers());
       download.onlyDesktop = true;
+      download.elementType = [ElementType.Unknown];
+      download.group = DefaultGroups.Primary;
+      download.priority = 10;
+      download.constrains = [Constrain.NoSelection];
       options.push(download);
     }
 
