@@ -490,7 +490,7 @@
         "DEBUG": "Debug",
         "INVITE": "Freigeben",
         "EDIT": "Infos bearbeiten",
-        "EDIT_SIMPLE": "Schnelle Bearbeitung",
+        "EDIT_SIMPLE": "Schnell-Bearbeitung",
         "COLLECTION_EDIT": "Bearbeiten",
         "COLLECTION_PIN": "Sammlung pinnen",
         "COLLECTION_FEEDBACK": "Feedback...",
@@ -550,7 +550,7 @@
         "ADD_CHILD_OBJECT_QUOTA_REACHED": "Fehler beim Hochladen des Objekts \"{{ name }}\": Speicherplatz-Quota überschritten"
     },
     "SIMPLE_EDIT": {
-        "TITLE": "Schnelle Bearbeitung",
+        "TITLE": "Schnell-Bearbeitung",
         "SAVED": "Element {{name}} wurde bearbeitet",
         "SAVED_MULTIPLE": "{{count}} Elemente wurden bearbeitet",
         "METADATA": {
@@ -564,7 +564,7 @@
             "RECENT_AUTHORITIES": "Zuletzt eingeladen",
             "INFO": "Die ausgewählten Nutzer & Gruppen werden als Betrachter eingeladen",
             "ERROR_MULTIPLE_PARENTS": "Das Festlegen von Berechtigungen ist nicht möglich, da die Elemente verschiedene Elternelemente besitzen",
-            "ERROR_INHERIT": "Das Festlegen von Berechtigungen ist nicht möglich, da die Elemente bereits Einladungen vom übergeordneten Ordner erhalten:",
+            "ERROR_INHERIT": "Das Festlegen von Berechtigungen ist in dieser Ansicht nicht möglich, da die Elemente bereits Einladungen vom übergeordneten Ordner erhalten:",
             "ERROR_HELP": "Bitte benutzen Sie die Option \"Weitere Freigaben\" zum Konfigurieren der Rechte",
             "UNSET": "Nicht festgelegt",
             "GROUP_TYPES": {
