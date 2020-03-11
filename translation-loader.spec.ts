@@ -94,6 +94,17 @@ describe('TranslationLoader', () => {
                 expect(getConfigLanguageSpy.calls.count()).toBe(1);
             });
 
+            it('should call getConfigLanguage with correct locale', async () => {
+                const getConfigLanguageSpy = spyOn(
+                    locator,
+                    'getConfigLanguage',
+                ).and.callThrough();
+                await callGetTranslation('de');
+                expect(getConfigLanguageSpy.calls.mostRecent().args).toEqual([
+                    'de_DE',
+                ]);
+            });
+
             it('should not call getLanguageDefaults', async () => {
                 const getLanguageDefaultsSpy = spyOn(
                     locator,
@@ -282,6 +293,17 @@ describe('TranslationLoader', () => {
                 ).and.callThrough();
                 await callGetTranslation('de');
                 expect(getLanguageDefaultsSpy.calls.count()).toBe(1);
+            });
+
+            it('should call getLanguageDefaults with correct locale', async () => {
+                const getLanguageDefaultsSpy = spyOn(
+                    locator,
+                    'getLanguageDefaults',
+                ).and.callThrough();
+                await callGetTranslation('de');
+                expect(getLanguageDefaultsSpy.calls.mostRecent().args).toEqual([
+                    'de_DE',
+                ]);
             });
 
             it('should include translations via getLanguageDefaults', async () => {

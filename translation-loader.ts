@@ -49,14 +49,9 @@ export class TranslationLoader implements TranslateLoader {
         return this.getOriginalTranslations(lang).pipe(
             // Default to empty dictionary if we got nothing
             map(translations => translations || {}),
-            // Fetch and apply overrides
-            switchMap(translations => {
-                return this.locator
-                    .getConfigLanguage(lang)
-                    .map(overrides =>
-                        this.applyOverrides(translations, overrides),
-                    );
-            }),
+            switchMap(translations =>
+                this.fetchAndApplyOverrides(translations, lang),
+            ),
         );
     }
 
@@ -112,6 +107,15 @@ export class TranslationLoader implements TranslateLoader {
             },
             {},
         );
+    }
+
+    private fetchAndApplyOverrides(
+        translations: Dictionary,
+        lang: string,
+    ): Observable<Dictionary> {
+        return this.locator
+            .getConfigLanguage(Translation.LANGUAGES[lang])
+            .map(overrides => this.applyOverrides(translations, overrides));
     }
 
     /**
