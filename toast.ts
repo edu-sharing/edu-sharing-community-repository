@@ -2,6 +2,7 @@ import { Injectable, Injector } from '@angular/core';
 import { Router } from '@angular/router';
 import { TranslateService } from '@ngx-translate/core';
 import { ToastData, ToastyService } from 'ngx-toasty';
+import { BehaviorSubject, Observable } from 'rxjs';
 import { ModalDialogOptions } from '../common/ui/modal-dialog-toast/modal-dialog-toast.component';
 import { ProgressType } from '../common/ui/modal-dialog/modal-dialog.component';
 import { RestConstants } from '../core-module/rest/rest-constants';
@@ -16,9 +17,9 @@ export class Toast {
     private static MIN_TIME_BETWEEN_TOAST = 2000;
 
     dialogInputValue: string;
+    isModalDialogOpen: Observable<boolean>;
 
     private onShowModal: (params: ModalDialogOptions) => void;
-    private modalDialogOpen = false;
     private dialogTitle: string;
     private dialogMessage: string;
     private dialogParameters: any;
@@ -27,6 +28,7 @@ export class Toast {
     private lastToastError: string;
     private lastToastErrorTime: number;
     private linkCallback: () => void;
+    private isModalDialogOpenSubject = new BehaviorSubject<boolean>(false);
 
     constructor(
         private toasty: ToastyService,
@@ -35,6 +37,7 @@ export class Toast {
         private injector: Injector,
     ) {
         (window as any).toastComponent = this;
+        this.isModalDialogOpen = this.isModalDialogOpenSubject.asObservable();
     }
 
     /**
@@ -264,22 +267,18 @@ export class Toast {
         });
     }
 
-    isModalDialogOpen() {
-        return this.modalDialogOpen;
-    }
-
     onShowModalDialog(param: (params: any) => void) {
         this.onShowModal = param;
     }
 
     closeModalDialog() {
         this.onShowModal({ title: null, message: null });
-        this.modalDialogOpen = false;
+        this.isModalDialogOpenSubject.next(false);
     }
 
     showConfigurableDialog(options: ModalDialogOptions) {
         this.onShowModal(options);
-        this.modalDialogOpen = true;
+        this.isModalDialogOpenSubject.next(true);
     }
 
     showModalDialog(
@@ -336,7 +335,7 @@ export class Toast {
             buttons,
             isCancelable: true,
         });
-        this.modalDialogOpen = true;
+        this.isModalDialogOpenSubject.next(true);
     }
 
     private getToastOptions(text: string) {
