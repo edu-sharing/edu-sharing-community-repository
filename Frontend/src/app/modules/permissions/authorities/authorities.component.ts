@@ -607,7 +607,7 @@ export class PermissionsAuthoritiesComponent {
       this.edit = Helper.deepCopy(list[0]);
       this.editId = this.edit.authorityName;
     }
-
+    this.updateButtons();
   }
   private addToGroup(data: any) {
     const list = this.getList(data);
