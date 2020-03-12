@@ -225,6 +225,7 @@ public class MediacenterApi {
 		    @ApiParam(value = RestConstants.MESSAGE_SORT_ASCENDING) @QueryParam("sortAscending") List<Boolean> sortAscending,
 		    @ApiParam(value = "property filter for result nodes (or \"-all-\" for all properties)", defaultValue="-all-" ) @QueryParam("propertyFilter") List<String> propertyFilter,
 			@ApiParam(value = "authorityName of the mediacenter that licenses nodes",required=true) @PathParam("mediacenter") String mediacenter,
+			@ApiParam(value = "searchword of licensed nodes",required=true) @PathParam("searchword") String searchword,
 			@Context HttpServletRequest req) {
 
 		try {
@@ -235,7 +236,12 @@ public class MediacenterApi {
 			searchToken.setFrom(skipCount != null ? skipCount : 0);
 			searchToken.setMaxResult(maxItems!= null ? maxItems : 10);
 			searchToken.setSortDefinition(new SortDefinition(sortProperties, sortAscending));
-			searchToken.setLuceneString("TYPE:\"" + "ccm:io\"");
+			
+			String query = "TYPE:\"" + "ccm:io\"";
+			if(searchword != null && searchword.trim().length() > 0) {
+				query += " AND @cm\\:name:\""+searchword+"\"";
+			}
+			searchToken.setLuceneString(query);
 			searchToken.setAuthorityScope(Arrays.asList(new String[] {mediacenter}));
 			
     		NodeSearch search = NodeDao.search(repoDao,searchToken);
