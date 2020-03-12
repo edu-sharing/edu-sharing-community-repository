@@ -1,7 +1,6 @@
 import { TestBed } from '@angular/core/testing';
-import { TestScheduler } from 'rxjs/Rx';
+import { TestScheduler } from 'rxjs/testing';
 import { CardService } from './card.service';
-
 
 describe('CardService', () => {
     let service: CardService;
@@ -19,10 +18,10 @@ describe('CardService', () => {
         expect(service).toBeTruthy();
     });
 
-    describe('number modal cards', () => {
-        it('should default to 0', () => {
+    describe('hasOpenModals', () => {
+        it('should default to false', () => {
             scheduler.run(({ expectObservable }) => {
-                expectObservable(service.numberModalCards).toBe('a', { a: 0 });
+                expectObservable(service.hasOpenModals).toBe('a', { a: false });
             });
         });
 
@@ -30,8 +29,8 @@ describe('CardService', () => {
             service.setNumberModalCards(23);
             service.setNumberModalCards(42);
             scheduler.run(({ expectObservable }) => {
-                expectObservable(service.numberModalCards).toBe('a', {
-                    a: 42,
+                expectObservable(service.hasOpenModals).toBe('a', {
+                    a: true,
                 });
             });
         });

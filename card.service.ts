@@ -5,15 +5,15 @@ import { BehaviorSubject, Observable } from 'rxjs';
     providedIn: 'root',
 })
 export class CardService {
-    numberModalCards: Observable<number>;
+    hasOpenModals: Observable<boolean>;
 
-    private numberModalCardsSubject = new BehaviorSubject<number>(0);
+    private hasOpenModalsSubject = new BehaviorSubject<boolean>(false);
 
     constructor() {
-        this.numberModalCards = this.numberModalCardsSubject.asObservable();
+        this.hasOpenModals = this.hasOpenModalsSubject.asObservable();
     }
 
     public setNumberModalCards(n: number) {
-        this.numberModalCardsSubject.next(n);
+        this.hasOpenModalsSubject.next(n > 0);
     }
 }
