@@ -253,10 +253,10 @@ export class NodeHelper {
   }
   /**
    * Download (a single) node
-   * @param node
    */
-  public static downloadNode(bridge:BridgeService,node:any,version=RestConstants.NODE_VERSION_CURRENT) {
-    this.downloadUrl(bridge,node.downloadUrl+(version && version!=RestConstants.NODE_VERSION_CURRENT ? '&version='+version : ''),node.name);
+  public static downloadNode(bridge:BridgeService,node:any,version=RestConstants.NODE_VERSION_CURRENT, metadata = false) {
+    this.downloadUrl(bridge,node.downloadUrl+
+        (version && version!=RestConstants.NODE_VERSION_CURRENT ? '&version='+version : '') + '&metadata='+metadata,node.name);
   }
 
 
