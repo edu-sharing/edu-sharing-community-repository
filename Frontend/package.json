@@ -15,7 +15,8 @@
     "docs": "typedoc --mode file --experimentalDecorators --excludePrivate --ignoreCompilerErrors --target 'ES6' --module 'commonjs' --out docs src",
     "gitlog": "..\\Edu-Sharing-Internal\\Frontend\\gitlog.sh",
     "start-storybook": "start-storybook -p 4300 -s ./src/assets",
-    "build-storybook": "build-storybook -s ./src/assets"
+    "build-storybook": "build-storybook -s ./src/assets",
+    "postinstall": "ngcc --properties es2015 browser module main --first-only --create-ivy-entry-points"
   },
   "private": true,
   "dependencies": {
