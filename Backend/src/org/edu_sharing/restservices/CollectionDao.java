@@ -9,6 +9,7 @@ import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.repo.security.authentication.AuthenticationUtil.RunAsWork;
 import org.alfresco.service.cmr.repository.StoreRef;
 import org.alfresco.service.cmr.security.PermissionService;
+import org.apache.log4j.Logger;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.server.MCAlfrescoBaseClient;
 import org.edu_sharing.restservices.collection.v1.model.Collection;
@@ -27,6 +28,7 @@ import com.google.gwt.i18n.server.testing.Child;
 
 public class CollectionDao {
 
+	public static Logger logger = Logger.getLogger(CollectionDao.class);
 	public static final String ROOT = "-root-";
 
 	public enum Scope {
@@ -126,7 +128,11 @@ public class CollectionDao {
 				} else if (CCConstants.getValidLocalName(CCConstants.CCM_TYPE_IO).equals(nodeType)) {
 
 					// it's a reference
-					result.add((CollectionReference)child);
+					try {
+						result.add((CollectionReference) child);
+					}catch(ClassCastException e) {
+						logger.error("Collection "+parentId+" contains a non-ref object: "+child.getRef().getId()+". Please clean up the collection", e);
+					}
 				}
 			}
 			CollectionBaseEntries obj = new CollectionBaseEntries();

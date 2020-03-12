@@ -463,7 +463,7 @@ export class CreateMenuComponent implements OnDestroy {
         }
         this.nodeService
             .createNode(
-                this._parent.ref.id,
+                this.getParent().ref.id,
                 RestConstants.CCM_TYPE_IO,
                 [],
                 prop,
