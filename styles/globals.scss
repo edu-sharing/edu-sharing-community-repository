@@ -72,7 +72,7 @@
   top:-$blurStrength;
   width:calc(100% + #{$blurStrength*2});
   height:calc(100% + #{$blurStrength*2});
-  z-index: 1;
+  z-index: 0;
   overflow: hidden;
   filter: blur($blurStrength);
   object-fit: cover;
