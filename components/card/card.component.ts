@@ -126,6 +126,21 @@ export class CardComponent implements AfterContentInit, OnDestroy {
         }
     }
 
+    /**
+     * Whether focus should be moved to the card upon creation and restored
+     * after destruction.
+     *
+     * This should be `true` in most cases to set a sensible starting point for
+     * keyboard navigation and prevent the focus from falling on elements that
+     * are covered by the card.
+     *
+     * Exceptions are dialogs that the user cannot interact with and that are
+     * shown out of order, e.g., show dialog A, show dialog B, hide dialog A. In
+     * this example, focus cannot be restored correctly to dialog B, so dialog A
+     * should not capture focus if possible.
+     */
+    @Input() captureFocus = true;
+
     @Output() onCancel = new EventEmitter();
     @Output() onScrolled = new EventEmitter();
 
