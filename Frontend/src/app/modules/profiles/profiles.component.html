@@ -1,4 +1,4 @@
-<main-nav
+this.editProfile<main-nav
   #mainNav
   [title]="'PROFILES.TITLE_NAV'"
   [currentScope]="'profiles'"
@@ -22,7 +22,7 @@
     <img *ngIf="!edit && user.profile.avatar" class="blurred-image" [src]="user.profile.avatar+'&crop=true&width=400&height=400'" alt="">
     <img *ngIf="edit && !avatarFile && userEdit.profile.avatar" class="blurred-image" [src]="user.profile.avatar+'&crop=true&width=400&height=400'" alt="">
     <img *ngIf="edit && avatarFile" class="blurred-image" [src]="avatarImage" alt="">
-    <a class="edit clickable" *ngIf="isMe && !edit && !editAbout && editProfile" (click)="beginEdit()"><i class="material-icons">edit</i><span>{{'PROFILES.EDIT' | translate}}</span></a>
+    <a class="edit clickable" *ngIf="isMe && !edit && !editAbout && editProfile && userEditProfile" (click)="beginEdit()"><i class="material-icons">edit</i><span>{{'PROFILES.EDIT' | translate}}</span></a>
     <a class="edit clickable" *ngIf="isMe && edit" (click)="edit=false"><i icon iconId="close"></i><span>{{'PROFILES.CANCEL_EDIT' | translate}}</span></a>
     <user-avatar *ngIf="!edit"
      [user]="user"
@@ -104,7 +104,7 @@
       <div *ngIf="!user.profile.about" class="empty">{{'PROFILES.NO_ABOUT'+(isMe ? "_ME" : "") | translate}}</div>
     </div>
   </div>
-  <div *ngIf="isMe && editProfile" class="changePassword">
+  <div *ngIf="isMe && editProfile && userEditProfile" class="changePassword">
     <div class="toggle">
       <div tabindex="0" class="clickable" (click)="editPassword()" (keyup.enter)="changePassword=!changePassword">
         <i *ngIf="!changePassword" class="material-icons">lock</i>
