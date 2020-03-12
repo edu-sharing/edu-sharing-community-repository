@@ -27,7 +27,7 @@
                     {{'SIMPLE_EDIT.INVITE.TITLE' | translate}}
                 </h3>
                 <div>
-                    <button mat-raised-button color="white" (click)="openInvite()">
+                    <button mat-raised-button color="white" [disabled]="!tpInvite || !hasPermission('ChangePermissions')" (click)="openInvite()">
                         <i icon iconId="group_add"></i> {{'SIMPLE_EDIT.INVITE.MORE' | translate}}
                     </button>
                 </div>
@@ -45,7 +45,7 @@
                     {{'SIMPLE_EDIT.LICENSE.TITLE' | translate}}
                 </h3>
                 <div>
-                    <button mat-raised-button color="white" (click)="openLicense()">
+                    <button mat-raised-button color="white" [disabled]="!tpLicense" (click)="openLicense()">
                         <i icon iconId="copyright"></i> {{'SIMPLE_EDIT.LICENSE.MORE' | translate}}
                     </button>
                 </div>

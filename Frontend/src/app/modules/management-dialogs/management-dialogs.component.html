@@ -43,6 +43,7 @@
     (onOpenInvite)="nodeShare = $event"
     (onOpenLicense)="nodeLicense = $event"
     (onCancel)="closeSimpleEdit(false)"
+    (onClose)="closeSimpleEdit(true, $event)"
     (onDone)="closeSimpleEdit(true, $event)"
     ></app-simple-edit-dialog>
 <app-view-collection-feedback

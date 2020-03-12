@@ -1,5 +1,5 @@
 import {Component, EventEmitter, Input, Output, ViewChild} from '@angular/core';
-import {ConfigurationService, DialogButton, FrameEventsService, Node, RestConnectorService, RestConnectorsService, RestConstants, RestIamService, RestNodeService} from '../../../core-module/core.module';
+import {ConfigurationService, DialogButton, FrameEventsService, Node, RestConnectorService, RestConnectorsService, RestConstants, RestHelper, RestIamService, RestNodeService} from '../../../core-module/core.module';
 import {Toast} from '../../../core-ui-module/toast';
 import {TranslateService} from '@ngx-translate/core';
 import {trigger} from '@angular/animations';
@@ -11,6 +11,7 @@ import {SimpleEditInviteComponent} from './simple-edit-invite/simple-edit-invite
 import {SimpleEditLicenseComponent} from './simple-edit-license/simple-edit-license.component';
 import {Observable} from 'rxjs';
 import {CardType} from '../../../core-ui-module/components/card/card.component';
+import {NodeHelper} from '../../../core-ui-module/node-helper';
 
 @Component({
   selector: 'app-simple-edit-dialog',
@@ -33,6 +34,8 @@ export class SimpleEditDialogComponent  {
    */
   @Input() fromUpload = false;
   initState: { license: boolean; metadata: boolean; invite: boolean };
+  private tpInvite: boolean;
+  private tpLicense: boolean;
   @Input() set nodes(nodes : Node[]) {
     this._nodes = nodes;
     this.initState = {
@@ -44,6 +47,7 @@ export class SimpleEditDialogComponent  {
     this.updateButtons();
   }
   @Output() onCancel=new EventEmitter<void>();
+  @Output() onClose=new EventEmitter<Node[]>();
   @Output() onDone=new EventEmitter<Node[]>();
   @Output() onOpenMetadata=new EventEmitter<Node[]>();
   @Output() onOpenInvite=new EventEmitter<Node[]>();
@@ -59,7 +63,9 @@ export class SimpleEditDialogComponent  {
     private events : FrameEventsService,
     private router : Router,
     private nodeApi : RestNodeService) {
-      this.updateButtons();
+    this.connector.hasToolPermission(RestConstants.TOOLPERMISSION_INVITE).subscribe((tp) => this.tpInvite = tp);
+    this.connector.hasToolPermission(RestConstants.TOOLPERMISSION_LICENSE).subscribe((tp) => this.tpLicense = tp);
+    this.updateButtons();
   }
   public cancel() {
     this.onCancel.emit();
@@ -109,7 +115,7 @@ export class SimpleEditDialogComponent  {
       return;
     }
     callback();
-    this.onCancel.emit();
+    this.onClose.emit(this._nodes);
   }
   openMetadata(force = false) {
     this.openDialog(() => this.onOpenMetadata.emit(this._nodes));
@@ -130,7 +136,7 @@ export class SimpleEditDialogComponent  {
       buttons: [
           new DialogButton('DISCARD',DialogButton.TYPE_CANCEL, () => {
             this.toast.closeModalDialog();
-            this.onCancel.emit();
+            this.onClose.emit(this._nodes);
             callback();
           }),
           new DialogButton('SAVE',DialogButton.TYPE_PRIMARY, () => {
@@ -154,5 +160,9 @@ export class SimpleEditDialogComponent  {
     }
     this.toast.closeModalDialog();
     this.onCancel.emit();
+  }
+
+  hasPermission(permission: string) {
+    return this._nodes.find((n) => n.access.indexOf(permission) === -1) == null;
   }
 }

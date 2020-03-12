@@ -49,6 +49,7 @@ export class SimpleEditLicenseComponent {
   private initialLicense: string;
   private initalAuthorFreetext: string;
   private initialMode: string;
+  private tpLicense: boolean;
   @Input() set nodes (nodes : Node[]) {
     this._nodes = nodes;
     this.prepare(true);
@@ -69,13 +70,14 @@ export class SimpleEditLicenseComponent {
     });
     this.configService.get('simpleEdit.licenses',['NONE', 'COPYRIGHT_FREE', 'CC_BY', 'CC_0'])
         .subscribe((licenses) => this.allowedLicenses = licenses);
+    this.connector.hasToolPermission(RestConstants.TOOLPERMISSION_LICENSE).subscribe((tp) => this.tpLicense = tp);
   }
   getESUID() {
     return this.iamApi.getCurrentUserVCard().uid;
   }
   isDirty() {
     // state is untouched -> so not dirty
-    if (this.invalid) {
+    if (this.invalid || !this.tpLicense) {
       return false;
     }
     // when was initialy invalid -> the invalid was changed, so it is touched
@@ -127,20 +129,22 @@ export class SimpleEditLicenseComponent {
               this.invalid = !this.fromUpload && !isValid;
               this.wasInvalid = this.invalid;
             }
-            if (this.fromUpload) {
-              this.modeGroup.value = 'own';
-            } else {
-              if (this.getESUID() && this.getESUID() === vcard.uid) {
+            if(this.tpLicense) {
+              if (this.fromUpload) {
                 this.modeGroup.value = 'own';
               } else {
-                this.modeGroup.value = 'foreign';
+                if (this.getESUID() && this.getESUID() === vcard.uid) {
+                  this.modeGroup.value = 'own';
+                } else {
+                  this.modeGroup.value = 'foreign';
+                }
               }
-            }
-            this.initialMode = this.modeGroup.value;
-            if (isValid) {
-              this.licenseGroup.value = license;
-            } else {
-              this.licenseGroup.value = 'NONE';
+              this.initialMode = this.modeGroup.value;
+              if (isValid) {
+                this.licenseGroup.value = license;
+              } else {
+                this.licenseGroup.value = 'NONE';
+              }
             }
             this.onInitFinished.emit();
           });

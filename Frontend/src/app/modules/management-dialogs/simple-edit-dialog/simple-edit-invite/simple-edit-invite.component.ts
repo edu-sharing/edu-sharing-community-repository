@@ -52,6 +52,9 @@ export class SimpleEditInviteComponent {
   private initialState: Group;
   private recentAuthorities: AuthorityProfile[];
   private currentPermissions: Permission[];
+  private tpInvite: boolean;
+  private tpInviteEveryone: boolean;
+  private missingNodePermissions: boolean;
   @Input() set nodes (nodes : Node[]) {
     this._nodes = nodes;
     this.prepare();
@@ -77,6 +80,8 @@ export class SimpleEditInviteComponent {
         ['GROUP_ORG_Redaktion',RestConstants.AUTHORITY_EVERYONE]).subscribe((data) => {
           this.loadGlobalGroups(data);
     });
+    this.connector.hasToolPermission(RestConstants.TOOLPERMISSION_INVITE).subscribe((tp) => this.tpInvite = tp);
+    this.connector.hasToolPermission(RestConstants.TOOLPERMISSION_INVITE_ALLAUTHORITIES).subscribe((tp) => this.tpInviteEveryone = tp);
   }
   isDirty() {
     if(this.hasInvalidState()) {
@@ -95,7 +100,7 @@ export class SimpleEditInviteComponent {
         observer.complete();
         return;
       }
-      let authority = this.getSelectedAuthority();
+      const authority = this.getSelectedAuthority();
       // auth not to set, we can skip tasks
       console.log(authority);
       let addPermission: Permission = null;
@@ -171,6 +176,11 @@ export class SimpleEditInviteComponent {
       this.setInitialState();
       return;
     }
+    if(this._nodes.find((n) => n.access.indexOf(RestConstants.ACCESS_CHANGE_PERMISSIONS) === -1)){
+      this.missingNodePermissions = true;
+      this.setInitialState();
+      return;
+    }
     this.nodeApi.getNodePermissions(parents[0]).subscribe((parent) => {
       this.parentPermissions = parent.permissions.localPermissions.permissions.concat(parent.permissions.inheritedPermissions);
       // filter and distinct them first
@@ -182,7 +192,13 @@ export class SimpleEditInviteComponent {
       this.parentAuthorities = authorities.map((a) =>
         this.parentPermissions.find((p) => p.authority.authorityName === a).authority
       );
-    }, error => this.onError.emit(error));
+    }, error => {
+      if(error.status === RestConstants.HTTP_FORBIDDEN) {
+        this.missingNodePermissions = true;
+      } else {
+        this.onError.emit(error)
+      }
+    });
     Observable.forkJoin((this._nodes.map((n) => this.nodeApi.getNodePermissions(n.ref.id)))).
       subscribe((permissions) => {
         this.nodesPermissions = permissions.map((p) => p.permissions);
@@ -313,8 +329,9 @@ export class SimpleEditInviteComponent {
     return availableToggleGroups;
   }
 
-  private hasInvalidState() {
-    return this.multipleParents || this.parentAuthorities.length > 0;
+  hasInvalidState() {
+    return this.multipleParents || this.parentAuthorities.length > 0 ||
+           !this.tpInvite || this.missingNodePermissions;
   }
 
   private setInitialState() {
