@@ -5,7 +5,9 @@
       [buttons]="buttons"
       [type]="dialogType"
       [node]="node"
-      height="auto">
+      height="auto"
+      [captureFocus]="!!input"
+>
   <div class="modal-dialog-toast">
     <span class="modal-dialog-toast-message">{{message | translate:messageParameters }}</span>
     <mat-form-field *ngIf="input">
