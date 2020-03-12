@@ -54,7 +54,7 @@ export class SimpleEditInviteComponent {
   private currentPermissions: Permission[];
   tpInvite: boolean;
   tpInviteEveryone: boolean;
-  private missingNodePermissions: boolean;
+  missingNodePermissions: boolean;
   @Input() set nodes (nodes : Node[]) {
     this._nodes = nodes;
     this.prepare();

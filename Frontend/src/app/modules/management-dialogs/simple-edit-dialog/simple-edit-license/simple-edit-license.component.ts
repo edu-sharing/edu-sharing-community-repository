@@ -49,7 +49,7 @@ export class SimpleEditLicenseComponent {
   private initialLicense: string;
   private initalAuthorFreetext: string;
   private initialMode: string;
-  private tpLicense: boolean;
+  tpLicense: boolean;
   @Input() set nodes (nodes : Node[]) {
     this._nodes = nodes;
     this.prepare(true);
