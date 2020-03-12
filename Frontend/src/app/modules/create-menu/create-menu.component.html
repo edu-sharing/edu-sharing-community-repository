@@ -24,7 +24,7 @@
                             (onCreate)="createConnector($event)"
 ></workspace-create-connector>
 
-<div *ngIf="!hasOpenWindows" fileDrop [window]="true" (fileOver)="fileIsOver=$event" (onFileDrop)="onFileDrop($event)"></div>
+<div *ngIf="!(cardHasOpenModals$ | async)" fileDrop [window]="true" (fileOver)="fileIsOver=$event" (onFileDrop)="onFileDrop($event)"></div>
 <div class="dialog darken drop-zone" *ngIf="fileIsOver">
     <div>
         <i class="material-icons" *ngIf="allowed && !filesToUpload">cloud_upload</i>

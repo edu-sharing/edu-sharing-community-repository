@@ -10,7 +10,7 @@ import {
 } from '@angular/core';
 import { ActivatedRoute, Params, Router } from '@angular/router';
 import { TranslateService } from '@ngx-translate/core';
-import { Subscription } from 'rxjs';
+import { Observable } from 'rxjs';
 import {
     OptionsHelperService,
     OPTIONS_HELPER_CONFIG,
@@ -70,7 +70,7 @@ import { WorkspaceManagementDialogsComponent } from '../management-dialogs/manag
         },
     ],
 })
-export class CreateMenuComponent implements OnDestroy {
+export class CreateMenuComponent {
     @ViewChild('dropdown', { static: true }) dropdown: DropdownComponent;
     @ViewChild('management') management: WorkspaceManagementDialogsComponent;
 
@@ -115,11 +115,10 @@ export class CreateMenuComponent implements OnDestroy {
     showPicker: boolean;
     createConnectorName: string;
     createConnectorType: Connector;
-    hasOpenWindows: boolean;
+    cardHasOpenModals$: Observable<boolean>;
     options: OptionItem[];
 
     private params: Params;
-    private numberModalCardsSubscription: Subscription;
 
     constructor(
         public bridge: BridgeService,
@@ -149,15 +148,7 @@ export class CreateMenuComponent implements OnDestroy {
             .subscribe(node => {
                 this.inbox = node.node;
             });
-        this.numberModalCardsSubscription = cardService.numberModalCards.subscribe(
-            n => {
-                setTimeout(() => (this.hasOpenWindows = n > 0));
-            },
-        );
-    }
-
-    ngOnDestroy() {
-        this.numberModalCardsSubscription.unsubscribe();
+        this.cardHasOpenModals$ = cardService.hasOpenModals.delay(0);
     }
 
     @HostListener('document:paste', ['$event'])

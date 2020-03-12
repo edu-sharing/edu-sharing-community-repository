@@ -73,7 +73,7 @@
                       [searchQuery]="searchQuery"
                       [viewType]="viewType"
                       [(reorderDialog)]="reorderDialog"
-                      [preventKeyevents]="isToastModalOpen"
+                      [preventKeyevents]="cardHasOpenModals$ | async"
                       [(nodes)]="currentNodes"
                       [mainNav]="mainNav"
                       [actionbar]="actionbar"

@@ -51,6 +51,8 @@ import { GlobalContainerComponent } from '../../common/ui/global-container/globa
 import {ActionbarComponent} from '../../common/ui/actionbar/actionbar.component';
 import {BridgeService} from '../../core-bridge-module/bridge.service';
 import {WorkspaceExplorerComponent} from './explorer/explorer.component';
+import { CardService } from '../../core-ui-module/card.service';
+import { Observable } from 'rxjs';
 
 @Component({
     selector: 'workspace-main',
@@ -64,12 +66,12 @@ import {WorkspaceExplorerComponent} from './explorer/explorer.component';
         trigger('fromRight', UIAnimation.fromRight())
     ]
 })
-export class WorkspaceMainComponent implements EventListener, OnInit {
+export class WorkspaceMainComponent implements EventListener {
     @ViewChild('explorer') explorer: WorkspaceExplorerComponent;
     private static VALID_ROOTS = ['MY_FILES', 'SHARED_FILES', 'MY_SHARED_FILES', 'TO_ME_SHARED_FILES', 'WORKFLOW_RECEIVE', 'RECYCLE'];
     private static VALID_ROOTS_NODES = [RestConstants.USERHOME, '-shared_files-', '-my_shared_files-', '-to_me_shared_files-', '-workflow_receive-'];
 
-    isToastModalOpen: boolean;
+    cardHasOpenModals$: Observable<boolean>;
     private isRootFolder: boolean;
     private homeDirectory: string;
     private sharedFolders: Node[] = [];
@@ -186,7 +188,8 @@ export class WorkspaceMainComponent implements EventListener, OnInit {
         private title: Title,
         private event: FrameEventsService,
         private connector: RestConnectorService,
-        private cordova: CordovaService
+        private cordova: CordovaService,
+        private card: CardService,
     ) {
         this.event.addListener(this);
         Translation.initialize(translate, this.config, this.session, this.route).subscribe(() => {
@@ -195,12 +198,7 @@ export class WorkspaceMainComponent implements EventListener, OnInit {
         });
         this.connector.setRoute(this.route);
         this.globalProgress = true;
-    }
-
-    ngOnInit() {
-        this.toast.isModalDialogOpen.subscribe((value) => {
-            setTimeout(() => this.isToastModalOpen = value);
-        });
+        this.cardHasOpenModals$ = card.hasOpenModals.delay(0);
     }
 
     private hideDialog(): void {
