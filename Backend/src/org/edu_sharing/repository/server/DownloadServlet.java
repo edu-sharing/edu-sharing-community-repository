@@ -81,6 +81,14 @@ public class DownloadServlet extends HttpServlet{
 			    version=null;
 			NodeService nodeService = NodeServiceFactory.getLocalService();
 			OutputStream bufferOut = resp.getOutputStream();
+			NodeRef nodeRef = new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE,nodeId);
+			String name = fileName!=null ? fileName : NodeServiceHelper.getProperty(nodeRef, CCConstants.CM_NAME);
+			if("true".equalsIgnoreCase(req.getParameter("metadata"))){
+				String metadata = getMetadataRenderer(nodeRef).render("io_text");
+				ByteArrayOutputStream out = new ByteArrayOutputStream();
+				out.write(metadata.getBytes());
+				outputData(resp,name + ".txt", out);
+			}
 			TrackingServiceFactory.getTrackingService().trackActivityOnNode(new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE,nodeId),null,TrackingService.EventType.DOWNLOAD_MATERIAL);
 			InputStream is=null;
 			try {
@@ -93,16 +101,13 @@ public class DownloadServlet extends HttpServlet{
 					is = getStreamFromLocation(nodeId);
 				}
 				else if(mode.equals(Mode.redirect)){
-					resp.sendRedirect(NodeServiceHelper.getProperty(new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE,nodeId),CCConstants.LOM_PROP_TECHNICAL_LOCATION));
+					resp.sendRedirect(NodeServiceHelper.getProperty(nodeRef,CCConstants.LOM_PROP_TECHNICAL_LOCATION));
 					return;
 				}
 			}
-			setHeaders(resp,
-					fileName!=null ? fileName : NodeServiceHelper.getProperty(new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, nodeId)
-					, CCConstants.CM_NAME));
+			setHeaders(resp, name);
 			//resp.setHeader("Content-Length",""+is.available());
-			StreamUtils.copy(is,
-					bufferOut);
+			StreamUtils.copy(is, bufferOut);
 
 		}catch(Throwable t){
 			logger.error(t);
@@ -289,6 +294,13 @@ public class DownloadServlet extends HttpServlet{
 		NodeRef nodeRef = new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, nodeId);
 		String filename = NodeServiceHelper.getProperty(nodeRef, CCConstants.CM_NAME);
 		filename += ".txt";
+		MetadataTemplateRenderer render = getMetadataRenderer(nodeRef);
+		ZipEntry entry = new ZipEntry("metadata/" + filename);
+		zos.putNextEntry(entry);
+		zos.write(render.render("io_text").getBytes());
+	}
+
+	private static MetadataTemplateRenderer getMetadataRenderer(NodeRef nodeRef) throws Throwable {
 		MetadataTemplateRenderer render = new MetadataTemplateRenderer(
 				MetadataHelper.getMetadataset(nodeRef),
 				nodeRef
@@ -298,9 +310,7 @@ public class DownloadServlet extends HttpServlet{
 				)
 		);
 		render.setRenderingMode(MetadataTemplateRenderer.RenderingMode.TEXT);
-		ZipEntry entry = new ZipEntry("metadata/" + filename);
-		zos.putNextEntry(entry);
-		zos.write(render.render("io_text").getBytes());
+		return render;
 	}
 
 	private static void outputData(HttpServletResponse resp, String filename, ByteArrayOutputStream bufferOut) throws IOException {

@@ -451,6 +451,7 @@
         "VIEW": "View",
         "DOWNLOAD": "Download",
         "DOWNLOAD_ALL": "download zip",
+        "DOWNLOAD_METADATA": "download metadata",
         "NODE_REPORT": "Report problem",
         "ADD_NODE_STORE": "Add to memo list",
         "DELETE": "Delete",

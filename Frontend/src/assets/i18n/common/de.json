@@ -498,6 +498,7 @@
         "VIEW": "Öffnen",
         "DOWNLOAD": "Herunterladen",
         "DOWNLOAD_ALL": "Zip herunterladen",
+        "DOWNLOAD_METADATA": "Metadaten herunterladen",
         "NODE_REPORT": "Problem melden",
         "ADD_NODE_STORE": "Auf Merkliste",
         "DELETE": "Löschen",

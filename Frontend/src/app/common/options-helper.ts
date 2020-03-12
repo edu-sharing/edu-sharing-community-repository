@@ -581,13 +581,26 @@ export class OptionsHelperService {
             if (!nodes) {
                 return false;
             }
-            for (let item of nodes) {
+            for (const item of nodes) {
                 // if at least one is allowed -> allow download (download servlet will later filter invalid files)
                 if(item.downloadUrl != null && item.properties && !item.properties[RestConstants.CCM_PROP_IO_WWWURL]) {
                     return true;
                 }
             }
             return false;
+        };
+        const downloadMetadataNode = new OptionItem('OPTIONS.DOWNLOAD_METADATA', 'format_align_left', (object) =>
+            NodeHelper.downloadNode(this.connector.getBridgeService(), this.getObjects(object)[0], RestConstants.NODE_VERSION_CURRENT, true)
+        );
+        downloadMetadataNode.constrains = [Constrain.Files, Constrain.NoBulk];
+        downloadMetadataNode.scopes = [Scope.Render];
+        downloadMetadataNode.group = DefaultGroups.View;
+        downloadMetadataNode.priority = 50;
+        downloadMetadataNode.customShowCallback = (nodes) => {
+            if (!nodes) {
+                return false;
+            }
+            return nodes[0].downloadUrl != null;
         };
         const simpleEditNode = new OptionItem('OPTIONS.EDIT_SIMPLE', 'edu-quick_edit', (object) =>
             management.nodeSimpleEdit = this.getObjects(object)
@@ -694,7 +707,7 @@ export class OptionsHelperService {
         reportNode.scopes = [Scope.Search, Scope.CollectionsReferences, Scope.Render];
         reportNode.customShowCallback = (() => this.configService.instant('nodeReport', false));
         reportNode.group = DefaultGroups.View;
-        reportNode.priority = 50;
+        reportNode.priority = 60;
 
         const qrCodeNode = new OptionItem('OPTIONS.QR_CODE', 'edu-qr_code', (node) =>
             management.qr = {
@@ -705,7 +718,7 @@ export class OptionsHelperService {
         qrCodeNode.constrains = [Constrain.Files, Constrain.NoBulk];
         qrCodeNode.scopes = [Scope.Render];
         qrCodeNode.group = DefaultGroups.View;
-        qrCodeNode.priority = 60;
+        qrCodeNode.priority = 70;
 
         /**
          * if (this.isAllowedToEditCollection()) {
@@ -855,6 +868,7 @@ export class OptionsHelperService {
         options.push(contributorNode);
         options.push(workflowNode);
         options.push(downloadNode);
+        options.push(downloadMetadataNode);
         options.push(qrCodeNode);
         options.push(cutNodes);
         options.push(copyNodes);
