@@ -34,8 +34,8 @@ export class SimpleEditDialogComponent  {
    */
   @Input() fromUpload = false;
   initState: { license: boolean; metadata: boolean; invite: boolean };
-  private tpInvite: boolean;
-  private tpLicense: boolean;
+  tpInvite: boolean;
+  tpLicense: boolean;
   @Input() set nodes(nodes : Node[]) {
     this._nodes = nodes;
     this.initState = {
