@@ -1,6 +1,6 @@
 import { trigger } from '@angular/animations';
 import {
-    AfterViewInit,
+    AfterContentInit,
     Component,
     ElementRef,
     EventEmitter,
@@ -19,8 +19,8 @@ import {
 } from '../../../core-module/core.module';
 import { Helper } from '../../../core-module/rest/helper';
 import { UIAnimation } from '../../../core-module/ui/ui-animation';
-import { UIHelper } from '../../ui-helper';
 import { CardService } from '../../card.service';
+import { UIHelper } from '../../ui-helper';
 
 /**
  * A common edu-sharing modal card
@@ -31,7 +31,7 @@ import { CardService } from '../../card.service';
     styleUrls: ['card.component.scss'],
     animations: [trigger('cardAnimation', UIAnimation.cardAnimation())],
 })
-export class CardComponent implements AfterViewInit, OnDestroy {
+export class CardComponent implements AfterContentInit, OnDestroy {
     @ViewChild('cardContainer')
     cardContainer: ElementRef<HTMLElement>;
     @ViewChild('jumpmarksRef')
@@ -115,7 +115,7 @@ export class CardComponent implements AfterViewInit, OnDestroy {
      * Set the type of the card
      * this will automatically set the card icon
      */
-    @Input() set type (type: CardType) {
+    @Input() set type(type: CardType) {
         switch (type) {
             case CardType.Question:
                 this.icon = 'help_outline';
@@ -182,7 +182,7 @@ export class CardComponent implements AfterViewInit, OnDestroy {
         });
     }
 
-    ngAfterViewInit() {
+    ngAfterContentInit() {
         // Delay focus processing to not interfere with Angular's
         // initialization.
         setTimeout(() => this.setInitialFocus());
@@ -255,9 +255,11 @@ export class CardComponent implements AfterViewInit, OnDestroy {
         if (inputs.some(el => el.autofocus)) {
             // Focus the first input field that sets `autofocus`.
             inputs.find(el => el.autofocus).focus();
+            return;
         } else if (inputs.length) {
             // Else, focus the first input field.
             inputs[0].focus();
+            return;
         } else if (this.cardActions) {
             // Else, focus the right-most action button that is not disabled.
             const actionButtons = Array.from(
@@ -266,6 +268,7 @@ export class CardComponent implements AfterViewInit, OnDestroy {
             const lastButton = actionButtons.reverse().find(el => !el.disabled);
             if (lastButton) {
                 lastButton.focus();
+                return;
             }
         }
         // Else, focus will default to the 'X' button on the header bar for
@@ -280,7 +283,7 @@ export enum CardType {
     Info = 'Info',
     Question = 'Question',
     Warning = 'Warning',
-    Error = 'Error'
+    Error = 'Error',
 }
 export class CardJumpmark {
     /**
