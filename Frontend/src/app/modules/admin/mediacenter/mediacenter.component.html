@@ -80,12 +80,14 @@
             </mat-tab>
             <mat-tab label="{{'ADMIN.MEDIACENTER.NODES.TITLE' | translate}}">
                 <div class="nodes">
-                    <h6 class="mat-heading-6">{{'ADMIN.MEDIACENTER.NODES.DESCRIPTION' | translate}}</h6>
+                    <!--h6 class="mat-heading-6">{{'ADMIN.MEDIACENTER.NODES.DESCRIPTION' | translate}}</h6-->
                     <listTable *ngIf="mediacenterNodes"
                                [nodes]="mediacenterNodes"
                                [hasIcon]="true"
                                icon="node"
                                [columns]="nodeColumns"
+                               (loadMore)="loadMediacenterLicensedNodes()"
+                               [hasMore]="hasMoreMediacenterLicensedNodes()"
                     ></listTable>
                 </div>
             </mat-tab>
