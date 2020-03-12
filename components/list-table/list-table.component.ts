@@ -49,7 +49,7 @@ import { Toast } from '../../toast';
 import { UIHelper } from '../../ui-helper';
 import { WorkspaceManagementDialogsComponent } from '../../../modules/management-dialogs/management-dialogs.component';
 import { ActionbarComponent } from '../../../common/ui/actionbar/actionbar.component';
-import { OptionsHelperService } from '../../../common/options-helper';
+import {OPTIONS_HELPER_CONFIG, OptionsHelperService} from '../../../common/options-helper';
 import { BridgeService } from '../../../core-bridge-module/bridge.service';
 import { MainNavComponent } from '../../../common/ui/main-nav/main-nav.component';
 import { DragData, DropData } from '../../directives/drag-nodes/drag-nodes';
@@ -58,7 +58,9 @@ import { DragData, DropData } from '../../directives/drag-nodes/drag-nodes';
     selector: 'listTable',
     templateUrl: 'list-table.component.html',
     styleUrls: ['list-table.component.scss'],
-    providers: [OptionsHelperService],
+    providers: [OptionsHelperService, {provide: OPTIONS_HELPER_CONFIG, useValue: {
+        subscribeEvents: true
+    }}],
     animations: [
         trigger(
             'openOverlay',
