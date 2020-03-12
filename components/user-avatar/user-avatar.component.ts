@@ -7,7 +7,7 @@ import {Router} from '@angular/router';
 import {UIConstants} from '../../../core-module/ui/ui-constants';
 import {DomSanitizer} from "@angular/platform-browser";
 import {RestConstants} from "../../../core-module/rest/rest-constants";
-import {UserSimple} from "../../../core-module/core.module";
+import {Group, UserSimple} from "../../../core-module/core.module";
 import {TranslateService} from "@ngx-translate/core";
 import {AuthorityNamePipe} from "../../pipes/authority-name.pipe";
 
@@ -22,7 +22,7 @@ export class UserAvatarComponent {
      * @type {boolean}
      */
     @Input() link=false;
-    @Input() user : UserSimple;
+    @Input() user : UserSimple|Group|any;
     /**
      * when a regular material icon should be used instead of an avatar
      */
@@ -47,8 +47,10 @@ export class UserAvatarComponent {
                 private sanitizer : DomSanitizer) {
     }
     isEditorialUser(){
-        return this.user && this.user.profile && this.user.profile.types &&
-            this.user.profile.types.indexOf(RestConstants.GROUP_TYPE_EDITORIAL)!=-1;
+        return this.user && this.user.profile && (
+            (this.user.profile.types && this.user.profile.types.indexOf(RestConstants.GROUP_TYPE_EDITORIAL) !== -1) ||
+            (this.user.profile.groupType === RestConstants.GROUP_TYPE_EDITORIAL)
+        );
     }
     openProfile(){
         this.router.navigate([UIConstants.ROUTER_PREFIX+"profiles",this.user.authorityName]);

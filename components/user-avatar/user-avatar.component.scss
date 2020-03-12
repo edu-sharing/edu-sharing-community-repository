@@ -22,11 +22,23 @@
     position: relative;
   }
 }
+.avatarCircleGroup{
+  position: absolute;
+  border-width: 2px;
+  border-style: solid;
+}
+@for $i from 1 through 3{
+  .avatarCircleGroup:nth-child(#{$i}){
+    left: $i*3px;
+    opacity: percentage((4 - $i)*0.2);
+  }
+}
 .avatarOuter{
   display: inline;
   position: relative;
   .editorial-badge{
     position: absolute;
+    z-index: 2;
     bottom:5px;
     right:5px;
     width:25px;
@@ -44,7 +56,7 @@
   .user-icon{
     font-size: 60px;
   }
-  .avatarCircle,.userImage, svg {
+  .sizable {
     width: 120px;
     height: 120px;
   }
@@ -59,7 +71,7 @@
   .user-icon{
     font-size: 36px;
   }
-  .avatarCircle, .userImage, svg {
+  .sizable {
     width: 70px;
     height: 70px;
   }
@@ -73,13 +85,21 @@
   .avatarCircle {
     //@include materialShadow();
   }
+  .avatarCircleGroup{
+    border-width: 1px;
+  }
+  @for $i from 1 through 3{
+    .avatarCircleGroup:nth-child(#{$i}){
+      left: $i*2px;
+    }
+  }
   .user-letter {
     font-size: 18px;
   }
   .user-icon{
     font-size: 22px;
   }
-  .avatarCircle,.userImage, svg {
+  .sizable {
     width: 40px;
     height: 40px;
   }
@@ -91,9 +111,17 @@
 }
 
 .size_xsmall{
-  .avatarCircle,.userImage,svg{
+  .sizable{
       width:24px;
       height:24px;
+  }
+  .avatarCircleGroup{
+    border-width: 1px;
+  }
+  @for $i from 1 through 3{
+    .avatarCircleGroup:nth-child(#{$i}){
+      left: $i*2px;
+    }
   }
   .user-letter {
     font-size: 11px;
