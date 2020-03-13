@@ -31,4 +31,8 @@ public class NodeServiceFactory {
 	public static NodeService getLocalService() {
 		return (NodeService)ApplicationContextFactory.getApplicationContext().getBean("nodeService");
 	}
+	
+	public static NodeService getLocalServicePlainAlfrescoBacked() {
+		return new NodeServiceImpl(ApplicationInfoList.getHomeRepository().getAppId(),true);
+	}
 }

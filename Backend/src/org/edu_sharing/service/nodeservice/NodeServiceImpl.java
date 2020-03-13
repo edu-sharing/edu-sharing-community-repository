@@ -100,16 +100,20 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
 	MCAlfrescoAPIClient apiClient;
 
 	public NodeServiceImpl() {
-		this(ApplicationInfoList.getHomeRepository().getAppId());
+		this(ApplicationInfoList.getHomeRepository().getAppId(), false);
 	}
 
 	public ApplicationInfo getApplication(){
 		return ApplicationInfoList.getRepositoryInfoById(appId);
 	}
 	public NodeServiceImpl(String appId) {
+		this(appId, false);
+	}
+
+	public NodeServiceImpl(String appId, boolean alfrescoNodeService) {
 		ApplicationContext applicationContext = AlfAppContextGate.getApplicationContext();
 		serviceRegistry = (ServiceRegistry) applicationContext.getBean(ServiceRegistry.SERVICE_REGISTRY);
-		nodeService = serviceRegistry.getNodeService();
+		nodeService = (alfrescoNodeService) ? (NodeService)applicationContext.getBean("alfrescoDefaultDbNodeService") : serviceRegistry.getNodeService();
 		versionService = serviceRegistry.getVersionService();
 		dictionaryService = serviceRegistry.getDictionaryService();
 		repositoryHelper = (Repository) applicationContext.getBean("repositoryHelper");

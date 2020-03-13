@@ -329,18 +329,18 @@ export class NodeRenderComponent implements EventListener{
     download.isEnabled=this._node.downloadUrl!=null;
     download.showAsAction=true;
     if(this.isCollectionRef()){
-      this.nodeApi.getNodeMetadata(this._node.properties[RestConstants.CCM_PROP_IO_ORIGINAL]).subscribe((node:NodeWrapper)=>{
-        this.addDownloadButton(opt,download);
+      this.nodeApi.getNodeMetadata(this._node.properties[RestConstants.CCM_PROP_IO_ORIGINAL], [RestConstants.ALL]).subscribe((node:NodeWrapper)=>{
+        this.addDownloadButton(opt, node.node, download);
       },(error:any)=>{
         if(error.status==RestConstants.HTTP_NOT_FOUND) {
           console.log("original missing");
           download.isEnabled = false;
         }
-        this.addDownloadButton(opt,download);
+        this.addDownloadButton(opt, this._node, download);
       });
       return;
     }
-    this.addDownloadButton(opt,download);
+    this.addDownloadButton(opt, this._node, download);
   }
   private loadRenderData(){
       this.isLoading=true;
@@ -458,26 +458,26 @@ export class NodeRenderComponent implements EventListener{
       }
   }
 
-  private openConnector(newWindow=true) {
-    if(RestToolService.isLtiObject(this._node)){
-      this.toolService.openLtiObject(this._node);
+  private openConnector(node: Node, newWindow=true) {
+    if(RestToolService.isLtiObject(node)){
+      this.toolService.openLtiObject(node);
     }
     else {
-      UIHelper.openConnector(this.connectors,this.iam,this.frame,this.toast, this._node,null,null,null,newWindow);
+      UIHelper.openConnector(this.connectors,this.iam,this.frame,this.toast, node,null,null,null,newWindow);
     }
   }
 
-  private checkConnector(options:OptionItem[]) {
+  private checkConnector(options:OptionItem[], originalNode: Node) {
     this.connector.isLoggedIn().subscribe((login:LoginResult)=>{
         this.connectors.list().subscribe((data:ConnectorList)=>{
-            this.initAfterConnector(options,login);
+            this.initAfterConnector(options, originalNode, login);
         },(error:any)=>{
-            this.initAfterConnector(options,login);
+            this.initAfterConnector(options, originalNode, login);
         });
     });
   }
 
-    private initAfterConnector(options:OptionItem[],login: LoginResult) {
+    private initAfterConnector(options:OptionItem[], originalNode: Node,login: LoginResult) {
         if (!this.isCollectionRef()) {
             if(!this.connector.getCurrentLogin().isGuest) {
                 let openFolder = new OptionItem('SHOW_IN_FOLDER', 'folder', () => this.goToWorkspace(login, this._node));
@@ -498,16 +498,22 @@ export class NodeRenderComponent implements EventListener{
         else {
             let openFolder = new OptionItem('SHOW_IN_FOLDER', 'folder', null);
             openFolder.isEnabled = false;
-            this.nodeApi.getNodeMetadata(this._node.properties[RestConstants.CCM_PROP_IO_ORIGINAL]).subscribe((original: NodeWrapper) => {
 
-                this.nodeApi.getNodeParents(original.node.parent.id, false, [], original.node.parent.repo).subscribe(() => {
-                    openFolder.isEnabled = true;
-                    openFolder.callback=() => this.goToWorkspace(login, original.node);
-                    //.isEnabled = data.node.access.indexOf(RestConstants.ACCESS_WRITE) != -1;
-                });
-            }, (error: any) => {
+            this.nodeApi.getNodeParents(originalNode.parent.id, false, [], originalNode.parent.repo).subscribe(() => {
+                openFolder.isEnabled = true;
+                openFolder.callback=() => this.goToWorkspace(login, originalNode);
+                //.isEnabled = data.node.access.indexOf(RestConstants.ACCESS_WRITE) != -1;
             });
+
             options.push(openFolder);
+        }
+        if (this.version == RestConstants.NODE_VERSION_CURRENT && this.connectors.connectorSupportsEdit(originalNode) || RestToolService.isLtiObject(originalNode)) {
+            let view = new OptionItem("WORKSPACE.OPTION.VIEW", "launch", () => this.openConnector(originalNode, true));
+            options.splice(0, 0, view);
+            this.isOpenable = true;
+            if (this.editor && this.connectors.connectorSupportsEdit(originalNode).id == this.editor) {
+                this.openConnector(originalNode, false);
+            }
         }
         let addCollection = this.actionbar.createOptionIfPossible('ADD_TO_COLLECTION', [this._node], () => this.addToCollection = [this._node]);
         if (addCollection) {
@@ -543,15 +549,6 @@ export class NodeRenderComponent implements EventListener{
             options.push(del);
         }
         this.isOpenable = false;
-        if (this.version == RestConstants.NODE_VERSION_CURRENT && this.connectors.connectorSupportsEdit(this._node) || RestToolService.isLtiObject(this._node)) {
-            let view = new OptionItem("WORKSPACE.OPTION.VIEW", "launch", () => this.openConnector( true));
-            //view.isEnabled = this._node.access.indexOf(RestConstants.ACCESS_WRITE)!=-1;
-            options.splice(0, 0, view);
-            this.isOpenable = true;
-            if (this.editor && this.connectors.connectorSupportsEdit(this._node).id == this.editor) {
-                this.openConnector(false);
-            }
-        }
         let custom=this.config.instant('renderNodeOptions');
         NodeHelper.applyCustomNodeOptions(this.toast,this.http,this.connector,custom,this.searchService.searchResult, this._node ? [this._node] : null, options,(load:boolean)=>this.isLoading=load);
 
@@ -568,7 +565,7 @@ export class NodeRenderComponent implements EventListener{
     return this._node.aspects.indexOf(RestConstants.CCM_ASPECT_IO_REFERENCE)!=-1;
   }
 
-  private addDownloadButton(options:OptionItem[],download: OptionItem) {
+  private addDownloadButton(options:OptionItem[], originalNode: Node,download: OptionItem) {
       this.nodeApi.getNodeChildobjects(this.sequenceParent.ref.id,this.repository).subscribe((data:NodeList)=>{
           this.downloadButton=download;
           options.splice(0,0,download);
@@ -583,8 +580,7 @@ export class NodeRenderComponent implements EventListener{
               apply.isEnabled = this._node.access.indexOf(RestConstants.ACCESS_CC_PUBLISH) != -1;
               options.splice(0, 0, apply);
           }
-          this.checkConnector(options);
-
+          this.checkConnector(options, originalNode);
       });
     UIHelper.setTitleNoTranslation(this._node.name,this.title,this.config);
   }

@@ -282,15 +282,15 @@ a, a:hover, a:visited, a:active, button {
   top: $mainnavHeight+48px;
   z-index: 12;
   width:100%;
+  &.no-mainnav{
+    top: 48px;
+  }
   >div {
     height: $secondaryBarHeight;
     background-color: #fff;
     display: flex;
     padding: 20px;
     @include materialShadow();
-    &.no-mainnav {
-      top: 48px;
-    }
   }
 }
 small-collection{
