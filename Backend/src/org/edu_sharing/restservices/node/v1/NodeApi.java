@@ -29,14 +29,7 @@ import org.apache.log4j.Logger;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.server.MCAlfrescoAPIClient;
 import org.edu_sharing.repository.server.tools.ApplicationInfoList;
-import org.edu_sharing.restservices.ApiService;
-import org.edu_sharing.restservices.DAOMissingException;
-import org.edu_sharing.restservices.DAOSecurityException;
-import org.edu_sharing.restservices.DAOValidationException;
-import org.edu_sharing.restservices.NodeDao;
-import org.edu_sharing.restservices.PersonDao;
-import org.edu_sharing.restservices.RepositoryDao;
-import org.edu_sharing.restservices.RestConstants;
+import org.edu_sharing.restservices.*;
 import org.edu_sharing.restservices.node.v1.model.*;
 import org.edu_sharing.restservices.shared.ACL;
 import org.edu_sharing.restservices.shared.ErrorResponse;
@@ -315,12 +308,15 @@ public class NodeApi  {
     	@ApiParam(value = RestConstants.MESSAGE_REPOSITORY_ID,required=true, defaultValue="-home-" ) @PathParam("repository") String repository,
     	@ApiParam(value = RestConstants.MESSAGE_NODE_ID,required=true ) @PathParam("node") String node,
     	@Context HttpServletRequest req) {
-    	
-    	boolean isLocked = EditLockServiceFactory.getEditLockService().isLockedByAnotherUser(new org.alfresco.service.cmr.repository.NodeRef(Constants.storeRef,node));
-    	NodeLocked response = new NodeLocked();
-    	response.setLocked(isLocked);
-    	
-    	return Response.ok().entity(response).build();
+		try {
+			boolean isLocked = EditLockServiceFactory.getEditLockService().isLockedByAnotherUser(new org.alfresco.service.cmr.repository.NodeRef(Constants.storeRef, node));
+			NodeLocked response = new NodeLocked();
+			response.setLocked(isLocked);
+
+			return Response.ok().entity(response).build();
+		}catch(Throwable t){
+			return ErrorResponse.createResponse(t);
+		}
     }
     
     
