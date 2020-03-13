@@ -55,6 +55,7 @@ button{
   }
   button{
     border-radius: 50%;
+    @include materialShadow();
   }
   &.actionbar-all-flat button{
     background: white !important;
@@ -68,7 +69,6 @@ button{
     height:45px;
     line-height:45px;
     text-align: center;
-    @include materialShadow();
     .edu-icons,.material-icons{
       position: relative;
       font-size: 24px;
