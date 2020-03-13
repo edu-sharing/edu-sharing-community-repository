@@ -35,6 +35,7 @@ export class AdminMediacenterComponent {
     mediacenterNodesMax = 20;
     mediacenterNodesOffset = 0;
     mediacenterNodesTotal = 0;
+    mediacenterNodesSearchWord='';
     hasMoreMediacenterNodes = true;
 
 
@@ -65,8 +66,8 @@ export class AdminMediacenterComponent {
             new ListItem('GROUP', RestConstants.AUTHORITY_GROUPTYPE)
         ];
         this.nodeColumns = [
-            new ListItem("NODE", RestConstants.CM_NAME),
-            new ListItem("NODE", 'ccm:replicationsourceid')
+            new ListItem('NODE', RestConstants.CM_NAME),
+            new ListItem('NODE', 'ccm:replicationsourceid')
 
         ];
 
@@ -100,13 +101,13 @@ export class AdminMediacenterComponent {
             this.mediacenterNodesOffset = 0;
             this.mediacenterNodesTotal = 0;
 
-            this.loadMediacenterLicensedNodes();
+            this.loadMediacenterNodes();
 
         }
     }
 
-    loadMediacenterLicensedNodes() {
-        if (!this.hasMoreMediacenterLicensedNodes()) {
+    loadMediacenterNodes() {
+        if (!this.hasMoreMediacenterNodes) {
             return;
         }
         if (this.currentMediacenter) {
@@ -116,8 +117,9 @@ export class AdminMediacenterComponent {
                 propertyFilter: [RestConstants.ALL]
             };
 
-            this.mediacenterService.getLicensedNodes(this.currentMediacenter.authorityName, RestConstants.HOME_REPOSITORY, null, licensedNodeReq).subscribe((data) => {
+            this.mediacenterService.getLicensedNodes(this.currentMediacenter.authorityName,this.mediacenterNodesSearchWord, RestConstants.HOME_REPOSITORY, null, licensedNodeReq).subscribe((data) => {
                 this.mediacenterNodesTotal = data.pagination.total;
+                console.log('this.mediacenterNodesTotal:' +this.mediacenterNodesTotal +' this.mediacenterNodesOffset:' +this.mediacenterNodesOffset + ' this.mediacenterNodesMax:'+this.mediacenterNodesMax);
 
                 if (this.mediacenterNodesTotal < (this.mediacenterNodesOffset + this.mediacenterNodesMax)) {
                     this.hasMoreMediacenterNodes = false;
@@ -125,17 +127,24 @@ export class AdminMediacenterComponent {
                     this.mediacenterNodesOffset = data.pagination.from + this.mediacenterNodesMax;
                 }
 
-                if (this.mediacenterNodes == null) this.mediacenterNodes = data.nodes;
-                else this.mediacenterNodes = this.mediacenterNodes.concat(data.nodes);
+                if (this.mediacenterNodes == null
+                    || (this.mediacenterNodesSearchWord != null && this.mediacenterNodesSearchWord.trim().length > 0)) {
+                    this.mediacenterNodes = data.nodes;
+                } else {
+
+                    this.mediacenterNodes = this.mediacenterNodes.concat(data.nodes);
+                }
             });
 
         }
     }
 
-    hasMoreMediacenterLicensedNodes() {
-       return this.hasMoreMediacenterNodes;
-    }
+    searchMediaCenterNodes() {
+        if(this.mediacenterNodesSearchWord != null && this.mediacenterNodesSearchWord.trim().length > 2) {
+            this.loadMediacenterNodes();
+        }
 
+    }
 
     removeCatalog(catalog: any) {
         this.currentMediacenterCopy.profile.mediacenter.catalogs.splice(this.currentMediacenterCopy.profile.mediacenter.catalogs.indexOf(catalog), 1);

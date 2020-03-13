@@ -225,7 +225,7 @@ public class MediacenterApi {
 		    @ApiParam(value = RestConstants.MESSAGE_SORT_ASCENDING) @QueryParam("sortAscending") List<Boolean> sortAscending,
 		    @ApiParam(value = "property filter for result nodes (or \"-all-\" for all properties)", defaultValue="-all-" ) @QueryParam("propertyFilter") List<String> propertyFilter,
 			@ApiParam(value = "authorityName of the mediacenter that licenses nodes",required=true) @PathParam("mediacenter") String mediacenter,
-			@ApiParam(value = "searchword of licensed nodes",required=true) @PathParam("searchword") String searchword,
+			@ApiParam(value = "searchword of licensed nodes",required=true) @QueryParam("searchword") String searchword,
 			@Context HttpServletRequest req) {
 
 		try {
@@ -239,8 +239,9 @@ public class MediacenterApi {
 			
 			String query = "TYPE:\"" + "ccm:io\"";
 			if(searchword != null && searchword.trim().length() > 0) {
-				query += " AND @cm\\:name:\""+searchword+"\"";
+				query += " AND (@cm\\:name:\""+searchword+"\"" +" OR @ccm\\:replicationsourceid:\""+searchword+"\")";
 			}
+			System.out.println(query);
 			searchToken.setLuceneString(query);
 			searchToken.setAuthorityScope(Arrays.asList(new String[] {mediacenter}));
 			

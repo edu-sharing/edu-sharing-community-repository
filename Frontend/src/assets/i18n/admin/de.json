@@ -408,7 +408,9 @@
                 "DESCRIPTION": "Alle Mitglieder der folgenden Gruppen können auf die Medien dieses Medienzentrums zugreifen"
             },
             "NODES":{
-                "TITLE":"Verwaltete Medien"
+                "TITLE":"Verwaltete Medien",
+                "SEARCHWORD": "Name/Id des Mediums",
+                "FILTER":"Verwaltete Medien filtern"
             },
             "STATISTICS": {
                 "TITLE": "Statistiken"
