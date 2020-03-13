@@ -51,24 +51,29 @@
         ><i icon iconId="delete"></i></div>
         </div>
     </div>
-    <div class="list-container" [class.cardContainer]="viewType==1 || viewType==2" *ngIf="!reorderDialog">
-        <app-list-option-item
-            *ngFor="let option of optionItems"
-            [option]="option"
-            class="clickable option-item"
-            [class.tableList]="viewType == 0"
-            [class.cardList]="viewType == 1"
-            [class.cardSmallList]="viewType == 2"
-        ></app-list-option-item>
-        <div matRipple matRippleColor="primary" *ngFor="let node of _nodes; let i = index" class="rowFrame"
-             [class.order-animation]="orderElementsActive"
-             [class.nodeCollection]="isCollection(node)"
-             [class.node-virtual]="node.virtual"
-             [style.border-color]="isCollection(node) ? getCollectionColor(node) : null"
-             [class.tableList]="viewType==0"
-             [class.cardList]="viewType==1"
-             [class.cardSmallList]="viewType==2"
-             [class.hover]="dragHover==node">
+    <div
+        *ngIf="!reorderDialog"
+        class="list-container"
+        [class.cardContainer]="viewType==1 || viewType==2"
+        [class.tableList]="viewType == 0"
+        [class.cardList]="viewType == 1"
+        [class.cardSmallList]="viewType == 2"
+    >
+        <div *ngIf="optionItems" class="item-container option-item-container">
+          <app-list-option-item
+              *ngFor="let option of optionItems"
+              [option]="option"
+              class="clickable option-item item"
+          ></app-list-option-item>
+        </div>
+        <div matRipple matRippleColor="primary" *ngFor="let node of _nodes; let i = index"
+            class="rowFrame item-container item"
+            [class.order-animation]="orderElementsActive"
+            [class.nodeCollection]="isCollection(node)"
+            [class.node-virtual]="node.virtual"
+            [style.border-color]="isCollection(node) ? getCollectionColor(node) : null"
+            [class.hover]="dragHover==node"
+        >
             <div class="row node-row"
                  [class.noCCPublish]="applyMode && node.access.indexOf('CCPublish')==-1"
                  [class.noPermissions]="noPermissions(node)"

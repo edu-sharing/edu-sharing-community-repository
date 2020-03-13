@@ -363,7 +363,7 @@ export class ListTableComponent implements EventListener {
         event: DragEvent;
     }) => boolean = () => true;
 
-    @Input() optionItems: OptionItem[] = [];
+    @Input() optionItems: OptionItem[];
 
     @Output() reorderDialogChange = new EventEmitter<boolean>();
 

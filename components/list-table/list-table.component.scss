@@ -476,8 +476,8 @@ $badgeWidth: 250px;
         }
     }
 }
-.list .cardSmallList.dark-color,
-.list .cardList.dark-color {
+.list .cardSmallList .dark-color,
+.list .cardList .dark-color {
     .row_1,
     .row_2,
     .row_3,
@@ -675,14 +675,18 @@ a.rowInner {
 .cardList .actionText {
     display: inherit;
 }
-.cardList {
+.cardList > .item-container {
     width: $cardWidth;
     height: $cardHeight;
-    @include materialShadow();
     float: left;
     margin: 6px;
     position: relative;
+
+}
+.cardList .item {
+    @include materialShadow();
     border-radius: $borderRadius;
+
     .nodeDeleted {
         width: 100%;
         height: 100%;
@@ -721,17 +725,47 @@ a.rowInner {
     }
 }
 
-.cardSmallList {
+.cardList > .option-item-container,
+.cardSmallList > .option-item-container {
+    display: flex;
+    flex-direction: column;
+    .item {
+        width: 100%;
+        flex-grow: 1;
+        &:not(:last-child) {
+            margin-bottom: 10px;
+        }
+    }
+}
+
+.tableList > .option-item-container {
+    display: flex;
+    flex-direction: row;
+    height: #{$listItemHeight - 20px};
+    margin: 10px 0px;
+    .item {
+        flex-grow: 1;
+        &:not(:last-child) {
+            margin-right: 10px;
+        }
+    }
+}
+
+.cardSmallList > .item-container {
     width: $cardWidth;
     height: $listCardSmallHeight;
-    @include materialShadow();
     float: left;
     margin: 6px !important;
+}
+
+.cardSmallList .item {
+    @include materialShadow();
     border-radius: 2pt;
     &:not(.option-item) {
         border-bottom: 5px solid $primary;
     }
 }
+
 .cardSmallList img {
     position: absolute;
     left: 0;
@@ -1032,10 +1066,10 @@ a.rowInner {
     }
 }
 @media all and (max-width: ($mobileWidth)) {
-    .cardList.nodeCollection .collectionEditorial {
+    .cardList .nodeCollection .collectionEditorial {
         top: 20px;
     }
-    .cardList {
+    .cardList > .item-container {
         width: 100%;
         height: 160px;
         box-shadow: none;
@@ -1045,9 +1079,18 @@ a.rowInner {
         .more a {
             left: 0;
         }
-        &:not(.option-item):not(:first-of-type) {
-            border-top: 1px solid $cardSeperatorLineColor;
+        &:not(.option-item-container):not(:last-child) {
+            border-bottom: 1px solid $cardSeperatorLineColor;
         }
+    }
+    .cardList > .option-item-container {
+        padding: 10px 0px;
+        flex-direction: row;
+        .option-item:not(:last-child) {
+            margin-bottom: unset;
+            margin-right: 10px;
+        }
+        
     }
     .cardList .row {
         padding: 0 10px;
@@ -1057,8 +1100,6 @@ a.rowInner {
     .cardList .row:focus {
         @include setGlobalInsetFocus();
     }
-    .cardList .row .column {
-    }
     .cardContainer {
         padding: 0;
         display: flex;
@@ -1066,7 +1107,7 @@ a.rowInner {
         flex-wrap: wrap;
         justify-content: center;
     }
-    .cardList {
+    .cardList > .item-container {
         margin: 0;
     }
     .cardList .row .preview {
