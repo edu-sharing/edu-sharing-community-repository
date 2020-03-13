@@ -43,7 +43,7 @@
       <form (ngSubmit)="loadLatest(true)" autocomplete="off">
         <mat-form-field floatLabel="always">
           <mat-label>{{ 'COLLECTION_CHOOSER.SEARCH_COLLECTIONS' | translate}}</mat-label>
-          <i icon iconId="search" matPrefix>search</i>
+          <i icon iconId="search" matPrefix></i>
           <input matInput type="search" name="search" [(ngModel)]="searchQuery"
                  placeholder="{{'COLLECTION_CHOOSER.SEARCH_COLLECTIONS' | translate}}" />
         </mat-form-field>
