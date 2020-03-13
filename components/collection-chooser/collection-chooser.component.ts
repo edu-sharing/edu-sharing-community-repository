@@ -57,7 +57,7 @@ export class CollectionChooserComponent implements OnInit {
     listLatest: Node[];
     listMy: Node[];
     createCollectionOptionItem = new OptionItem(
-        'COLLECTIONS.CREATE_COLLECTION',
+        'OPTIONS.NEW_COLLECTION',
         'add',
         () => this.createCollection(),
     );
