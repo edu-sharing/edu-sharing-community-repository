@@ -89,11 +89,14 @@
                     <listTable *ngIf="mediacenterNodes"
                                [nodes]="mediacenterNodes"
                                [hasIcon]="true"
+                               [hasHeading]="true"
+                               [hasCheckbox]="true"
                                icon="node"
                                [columns]="nodeColumns"
                                (loadMore)="loadMediacenterNodes()"
                                [isLoading]="isLoadingMediacenterNodes"
                                [hasMore]="hasMoreMediacenterNodes"
+                               [totalCount]="mediacenterNodesTotal"
                     ></listTable>
                 </div>
             </mat-tab>
