@@ -97,7 +97,7 @@
         </div>
       </div>
       <div class="about">
-        <i icon iconId="edu-quotes" class="quotes">quotes</i>
+        <i icon iconId="edu-quotes" class="quotes"></i>
         <div class="about-buttons" *ngIf="isMe && editProfile">
           <button mat-button color="primary" class="edit" *ngIf="!editAbout && !edit" (click)="aboutEdit()">{{'PROFILES.EDIT' | translate}}</button>
           <button mat-button color="primary" class="edit" *ngIf="editAbout" (click)="editAbout=false">{{'PROFILES.CANCEL_EDIT' | translate}}</button>
