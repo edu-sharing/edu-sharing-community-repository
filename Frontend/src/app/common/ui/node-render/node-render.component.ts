@@ -507,12 +507,17 @@ export class NodeRenderComponent implements EventListener{
 
             options.push(openFolder);
         }
-        if (this.version == RestConstants.NODE_VERSION_CURRENT && this.connectors.connectorSupportsEdit(originalNode) || RestToolService.isLtiObject(originalNode)) {
-            let view = new OptionItem("WORKSPACE.OPTION.VIEW", "launch", () => this.openConnector(originalNode, true));
+        // if the node is still a reference, it will have no access for the connector
+        const connectorNode = originalNode;
+        if(originalNode.aspects.indexOf(RestConstants.CCM_ASPECT_IO_REFERENCE) !== -1){
+            connectorNode.access = []
+        }
+        if (this.version == RestConstants.NODE_VERSION_CURRENT && this.connectors.connectorSupportsEdit(connectorNode) || RestToolService.isLtiObject(connectorNode)) {
+            let view = new OptionItem("WORKSPACE.OPTION.VIEW", "launch", () => this.openConnector(connectorNode, true));
             options.splice(0, 0, view);
             this.isOpenable = true;
-            if (this.editor && this.connectors.connectorSupportsEdit(originalNode).id == this.editor) {
-                this.openConnector(originalNode, false);
+            if (this.editor && this.connectors.connectorSupportsEdit(connectorNode).id == this.editor) {
+                this.openConnector(connectorNode, false);
             }
         }
         let addCollection = this.actionbar.createOptionIfPossible('ADD_TO_COLLECTION', [this._node], () => this.addToCollection = [this._node]);
