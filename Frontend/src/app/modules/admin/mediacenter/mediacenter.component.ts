@@ -37,6 +37,7 @@ export class AdminMediacenterComponent {
     mediacenterNodesTotal = 0;
     mediacenterNodesSearchWord='';
     hasMoreMediacenterNodes = true;
+    isLoadingMediacenterNodes=false;
 
 
     groupColumns: ListItem[];
@@ -116,7 +117,7 @@ export class AdminMediacenterComponent {
                 count: this.mediacenterNodesMax,
                 propertyFilter: [RestConstants.ALL]
             };
-
+            this.isLoadingMediacenterNodes = true;
             this.mediacenterService.getLicensedNodes(this.currentMediacenter.authorityName,this.mediacenterNodesSearchWord, RestConstants.HOME_REPOSITORY, null, licensedNodeReq).subscribe((data) => {
                 this.mediacenterNodesTotal = data.pagination.total;
                 console.log('this.mediacenterNodesTotal:' +this.mediacenterNodesTotal +' this.mediacenterNodesOffset:' +this.mediacenterNodesOffset + ' this.mediacenterNodesMax:'+this.mediacenterNodesMax);
@@ -134,6 +135,7 @@ export class AdminMediacenterComponent {
 
                     this.mediacenterNodes = this.mediacenterNodes.concat(data.nodes);
                 }
+                this.isLoadingMediacenterNodes=false;
             });
 
         }
