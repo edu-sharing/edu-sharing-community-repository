@@ -59,7 +59,7 @@
         [class.cardList]="viewType == 1"
         [class.cardSmallList]="viewType == 2"
     >
-        <div *ngIf="optionItems" class="item-container option-item-container">
+        <div *ngIf="optionItems && optionItems.length > 0" class="item-container option-item-container">
           <app-list-option-item
               *ngFor="let option of optionItems"
               [option]="option"
