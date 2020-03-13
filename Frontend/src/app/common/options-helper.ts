@@ -436,7 +436,7 @@ export class OptionsHelperService {
         openNode.group = DefaultGroups.View;
         openNode.priority = 30;
 
-        const editConnectorNode = new OptionItem('OPTIONS.VIEW', 'launch', (node: Node) =>
+        const editConnectorNode = new OptionItem('OPTIONS.OPEN', 'launch', (node: Node) =>
             this.editConnector(node)
         );
         editConnectorNode.customShowCallback = (nodes) => {
@@ -444,6 +444,7 @@ export class OptionsHelperService {
         }
         editConnectorNode.group = DefaultGroups.View;
         editConnectorNode.priority = 20;
+        editConnectorNode.constrains = [Constrain.Files, Constrain.NoBulk];
 
         /**
          if (this.connector.getCurrentLogin() && !this.connector.getCurrentLogin().isGuest) {
@@ -851,6 +852,7 @@ export class OptionsHelperService {
         options.push(debugNode);
         options.push(openParentNode);
         options.push(openNode);
+        options.push(editConnectorNode);
         options.push(bookmarkNode);
         options.push(editCollection);
         options.push(pinCollection);
