@@ -144,15 +144,15 @@ user-quota{
   }
 }
 :host ::ng-deep{
-  workspace-explorer listTable .list{
-    height:calc(100vh - #{$mainnavHeight+$secondaryBarHeight});
-    overflow-y: auto;
-    &.list-type-card{
-      padding: 20px 0;
+  @media screen and (min-width: ($mobileWidth)) {
+    workspace-explorer listTable .list.list-type-card > .list-container {
+      padding-top: 20px;
+      padding-bottom: 20px;
     }
   }
   @media screen and (min-width: ($mobileTabSwitchWidth)) {
     workspace-explorer listTable .list-type-table{
+      overflow-y: auto;
       position: relative;
       top: $listHeadingHeight;
       height:calc(100vh - #{$mainnavHeight+$secondaryBarHeight+$listHeadingHeight});
@@ -163,10 +163,10 @@ user-quota{
         width: calc(100% - #{$workspaceTreeWidth});
       }
     }
+  }
+  @media screen and (min-width: ($mobileWidth+$mobileStage*6)) {
     workspace-explorer.explorerMetadata listTable .list-type-table .headingGroup {
-      @media screen and (min-width: ($mobileWidth+$mobileStage*6)) {
         width: calc(100% - #{$workspaceTreeWidth} - 300px);
-      }
     }
   }
   .breadcrumbFrame .breadcrumb {
@@ -215,7 +215,7 @@ user-quota{
   }
   :host ::ng-deep{
     workspace-explorer .list{
-      padding-bottom:72px;
+      margin-bottom: 62px;
     }
   }
 }
