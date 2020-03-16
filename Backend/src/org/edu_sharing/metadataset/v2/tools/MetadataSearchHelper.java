@@ -43,8 +43,9 @@ public class MetadataSearchHelper {
 				// We need to add the basequery, it's currently still getting the base query from the old mds -> added at other stage
 				//String queryString="("+queries.getBasequery()+")";
 				String queryString="";
-				if(query.getBasequery()!=null && !query.getBasequery().trim().isEmpty()){
-					queryString+="("+query.getBasequery()+")";
+				String basequery = query.findBasequery(parameters.keySet());
+				if(basequery!=null && !basequery.trim().isEmpty()){
+					queryString+="("+basequery+")";
 				}
 				for(String name : parameters.keySet()){
 					MetadataQueryParameter parameter = query.findParameterByName(name);
@@ -317,8 +318,8 @@ public class MetadataSearchHelper {
 			String andQuery="";
 			if(lucene!=null && !lucene.trim().isEmpty())
 				andQuery=" AND (" + lucene + ")";
-			if(queries.getBasequery()!=null && !queries.getBasequery().isEmpty())
-				lucene=queries.getBasequery()+andQuery;
+			if(queries.findBasequery(parameters.keySet())!=null && !queries.findBasequery(parameters.keySet()).isEmpty())
+				lucene=queries.findBasequery(parameters.keySet())+andQuery;
 			lucene = applyCondition(queries, lucene);
 		}
 		lucene = applyCondition(query, lucene);

@@ -158,8 +158,11 @@ public class MetadataReaderV2 {
 			Node data=list.item(i);
 			String name=data.getNodeName();
 			String value=data.getTextContent();
-			if(name.equals("basequery"))
-				result.setBasequery(value);
+			if(name.equals("basequery")) {
+				Map<String, String> basequery=new HashMap<>();
+				basequery.put(null, value);
+				result.setBasequery(basequery);
+			}
 			if(name.equals("allowSearchWithoutCriteria"))
 				result.setAllowSearchWithoutCriteria(value.equalsIgnoreCase("true"));
 			if(name.equals("condition")){
@@ -170,6 +173,7 @@ public class MetadataReaderV2 {
 		List<MetadataQuery> queries=new ArrayList<>();
 		for(int i=0;i<queriesNode.getLength();i++){
 			MetadataQuery query=new MetadataQuery();
+			Map<String, String> basequeries = new HashMap<>();
 			Node node=queriesNode.item(i);
 			NamedNodeMap nodeMap = node.getAttributes();
 			query.setId(nodeMap.getNamedItem("id").getTextContent());
@@ -188,7 +192,11 @@ public class MetadataReaderV2 {
 			for(int j=0;j<list2.getLength();j++){
 				Node parameterNode=list2.item(j);
 				if(parameterNode.getNodeName().equals("basequery")){
-					query.setBasequery(parameterNode.getTextContent());
+					basequeries.put(
+							parameterNode.getAttributes()==null ? null :
+							parameterNode.getAttributes().getNamedItem("propertyNull")==null ? null :
+							parameterNode.getAttributes().getNamedItem("propertyNull").getTextContent(),
+							parameterNode.getTextContent());
 				}
 				if(parameterNode.getNodeName().equals("condition")){
 					handleQueryCondition(parameterNode,query);
@@ -236,6 +244,7 @@ public class MetadataReaderV2 {
 				parameter.setStatements(statements);
 				parameters.add(parameter);
 			}
+			query.setBasequery(basequeries);
 			query.setParameters(parameters);
 			queries.add(query);
 		}

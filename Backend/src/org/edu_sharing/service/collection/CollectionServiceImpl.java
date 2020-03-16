@@ -774,7 +774,7 @@ public class CollectionServiceImpl implements CollectionService{
 						queryId="collections_scope_media_center";
 						break;
 				}
-				String queryString=mds.findQuery(queryId).getBasequery();
+				String queryString=mds.findQuery(queryId).findBasequery(null);
 				/**
 				 * @TODO owner + inherit off -> node will be found even if search is done in edu-group context 
 				 */

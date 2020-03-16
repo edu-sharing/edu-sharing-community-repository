@@ -6,6 +6,9 @@ import org.edu_sharing.alfresco.policy.NodeCustomizationPolicies;
 
 import java.io.Serializable;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 public class MetadataQueries extends MetadataQueryBase implements Serializable {
 	private boolean allowSearchWithoutCriteria;

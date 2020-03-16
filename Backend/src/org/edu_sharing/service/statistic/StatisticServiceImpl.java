@@ -104,8 +104,8 @@ public class StatisticServiceImpl implements StatisticService {
 	}
 	private String getLucene(String mdsId, String queryId, String type, String customLucene) throws Exception {
 		MetadataSetV2 set = MetadataHelper.getMetadataset(appInfo, mdsId);
-		String lucene=set.getQueries().getBasequery();
-		String basequery=set.getQueries().findQuery(queryId).getBasequery();
+		String lucene=set.getQueries().findBasequery(null);
+		String basequery=set.getQueries().findQuery(queryId).findBasequery(null);
 		if(basequery!=null && !basequery.trim().isEmpty()) {
 			lucene+=" AND ("+basequery+")";
 		}
