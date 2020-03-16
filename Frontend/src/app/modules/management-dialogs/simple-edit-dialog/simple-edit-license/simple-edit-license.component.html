@@ -18,6 +18,11 @@
                   cdkAutosizeMinRows="2"
                   cdkAutosizeMaxRows="5"></textarea>
     </mat-form-field>
+    <app-license-source *ngIf="isCCAttributableLicense()"
+                        [(ccTitleOfWork)]="ccTitleOfWork"
+                        [(ccSourceUrl)]="ccSourceUrl"
+                        [(ccProfileUrl)]="ccProfileUrl"
+    ></app-license-source>
     <h5 class="mat-heading-5">{{'SIMPLE_EDIT.LICENSE.SET_LICENSE' | translate}}</h5>
     <div>
         <mat-button-toggle-group #licenseGroup="matButtonToggleGroup">

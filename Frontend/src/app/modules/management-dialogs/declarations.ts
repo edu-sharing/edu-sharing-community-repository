@@ -16,9 +16,11 @@ import {SimpleEditDialogComponent} from './simple-edit-dialog/simple-edit-dialog
 import {SimpleEditMetadataComponent} from './simple-edit-dialog/simple-edit-metadata/simple-edit-metadata.component';
 import {SimpleEditInviteComponent} from './simple-edit-dialog/simple-edit-invite/simple-edit-invite.component';
 import {SimpleEditLicenseComponent} from './simple-edit-dialog/simple-edit-license/simple-edit-license.component';
+import {LicenseSourceComponent} from "./license/license-source/license-source.component";
 
 export const DECLARATIONS_MANAGEMENT_DIALOGS = [
   WorkspaceLicenseComponent,
+  LicenseSourceComponent,
   WorkspaceLtiToolsComponent,
   WorkspaceLtiToolConfigsComponent,
   WorkspaceManagementDialogsComponent,

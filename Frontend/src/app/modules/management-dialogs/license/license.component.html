@@ -164,28 +164,11 @@
             </div>
           </mat-tab>
         </mat-tab-group>
-        <div class="cc-additional" *ngIf="isCCAttributableLicense()">
-          <button mat-button color="primary" class="ccAuthor clickable" (click)="showCcAuthor=!showCcAuthor;">
-            <i icon iconId="{{ showCcAuthor ? 'keyboard_arrow_down' : 'keyboard_arrow_right' }}"></i>
-            {{ 'WORKSPACE.LICENSE.CC.NAME_AUTHOR' | translate}}
-          </button>
-          <div *ngIf="showCcAuthor" [@cardAnimation]="showCcAuthor">
-            <div class="ccAuthorGroup" [class.ccAuthorGroupOer]="oerMode">
-              <mat-form-field>
-                <mat-label>{{'WORKSPACE.LICENSE.CC.TITLE_OF_WORK' | translate}}</mat-label>
-                <input matInput id="CC_TITLE" [(ngModel)]="ccTitleOfWork">
-              </mat-form-field>
-              <mat-form-field>
-                <mat-label>{{'WORKSPACE.LICENSE.CC.SOURCE_URL' | translate}}</mat-label>
-                <input matInput id="CC_URL" [(ngModel)]="ccSourceUrl">
-              </mat-form-field>
-              <mat-form-field>
-                <mat-label>{{'WORKSPACE.LICENSE.CC.PROFILE_URL' | translate}}</mat-label>
-                <input matInput id="CC_PROFILE" [(ngModel)]="ccProfileUrl">
-              </mat-form-field>
-            </div>
-          </div>
-        </div>
+        <app-license-source class="cc-additional" *ngIf="isCCAttributableLicense()"
+          [(ccTitleOfWork)]="ccTitleOfWork"
+          [(ccSourceUrl)]="ccSourceUrl"
+          [(ccProfileUrl)]="ccProfileUrl"
+        ></app-license-source>
           <div class="currentLicense">
           <h4  *ngIf="type!='MULTI'">{{'WORKSPACE.LICENSE.CURRENT' | translate}}</h4>
           <img *ngIf="type!='MULTI'" class="currentLicenseIcon" src="{{getLicenseIcon()}}">

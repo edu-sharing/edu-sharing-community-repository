@@ -50,6 +50,9 @@ export class SimpleEditLicenseComponent {
   private initalAuthorFreetext: string;
   private initialMode: string;
   tpLicense: boolean;
+  ccTitleOfWork: string;
+  ccSourceUrl: string;
+  ccProfileUrl: string;
   @Input() set nodes (nodes : Node[]) {
     this._nodes = nodes;
     this.prepare(true);
@@ -108,6 +111,9 @@ export class SimpleEditLicenseComponent {
           this._nodes = nodes.map((n) => n.node);
           const license = NodeHelper.getValueForAll(this._nodes, RestConstants.CCM_PROP_LICENSE, null, 'NONE',false);
           this.authorFreetext = NodeHelper.getValueForAll(this._nodes, RestConstants.CCM_PROP_AUTHOR_FREETEXT, '', '',false);
+          this.ccTitleOfWork = NodeHelper.getValueForAll(this._nodes, RestConstants.CCM_PROP_LICENSE_TITLE_OF_WORK, '');
+          this.ccProfileUrl = NodeHelper.getValueForAll(this._nodes, RestConstants.CCM_PROP_LICENSE_PROFILE_URL, '');
+          this.ccSourceUrl = NodeHelper.getValueForAll(this._nodes, RestConstants.CCM_PROP_LICENSE_SOURCE_URL, '');
           const vcard = new VCard(NodeHelper.getValueForAll(this._nodes, RestConstants.CCM_PROP_LIFECYCLECONTRIBUTER_AUTHOR, '', '',false));
           console.log(license);
           let isValid = true;
@@ -162,8 +168,29 @@ export class SimpleEditLicenseComponent {
       properties[RestConstants.CCM_PROP_LIFECYCLECONTRIBUTER_AUTHOR] = null;
       properties[RestConstants.CCM_PROP_AUTHOR_FREETEXT] = [this.authorFreetext];
     }
+    if(this.isCCAttributableLicense()){
+      if (this.ccTitleOfWork) {
+        properties[RestConstants.CCM_PROP_LICENSE_TITLE_OF_WORK] = [this.ccTitleOfWork];
+      } else {
+        properties[RestConstants.CCM_PROP_LICENSE_TITLE_OF_WORK] = null;
+      }
+      if (this.ccSourceUrl) {
+        properties[RestConstants.CCM_PROP_LICENSE_SOURCE_URL] = [this.ccSourceUrl];
+      } else {
+        properties[RestConstants.CCM_PROP_LICENSE_SOURCE_URL] = null;
+      }
+      if (this.ccProfileUrl) {
+        properties[RestConstants.CCM_PROP_LICENSE_PROFILE_URL] = [this.ccProfileUrl];
+      } else {
+        properties[RestConstants.CCM_PROP_LICENSE_PROFILE_URL] = null;
+      }
+    }
     properties[RestConstants.CCM_PROP_LICENSE] = [this.licenseGroup.value];
     properties[RestConstants.CCM_PROP_LICENSE_CC_VERSION]  = this.licenseGroup.value === 'CC_BY' ? ['4.0'] : null;
     return properties;
   }
+
+    isCCAttributableLicense() {
+        return this.licenseGroup && this.licenseGroup.value.startsWith('CC_BY');
+    }
 }
