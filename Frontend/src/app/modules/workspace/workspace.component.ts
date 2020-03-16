@@ -468,18 +468,13 @@ export class WorkspaceMainComponent implements EventListener {
     }
 
     private clickNode(node: Node) {
-        // if(!this.selection || this.selection.length<2)
         this.setSelection([node]);
 
-        if (!node.isDirectory) {
-            if (this.ui.isMobile()) {
-                this.displayNode(node);
-            }
-        }
-        else {
-            // this.closeMetadata();
-            if (this.ui.isMobile()) {
+        if (this.ui.isMobile()) {
+            if (node.isDirectory) {
                 this.openDirectory(node.ref.id);
+            } else {
+                this.displayNode(node);
             }
         }
     }

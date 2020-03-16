@@ -287,7 +287,7 @@
                             (clickRow)="render($event)"
                             (doubleClickRow)="render($event)"
                             (loadMore)="getMoreResults()"
-                            (onSelectionChanged)="updateSelection($event)"
+                            (selectionChanged)="updateSelection($event)"
                             [isLoading]="searchService.showspinner"></listTable>
 
                     <div class="noResults" *ngIf="searchFail && !searchService.showspinner" title="{{'SEARCH.QUERY_NO_RESULT' | translate}}">
@@ -319,7 +319,7 @@
                                    [mainNav]="mainNavRef"
                                    (clickRow)="render($event)"
                                    (doubleClickRow)="render($event)"
-                                   (onSelectionChanged)="updateSelection($event)"
+                                   (selectionChanged)="updateSelection($event)"
                                    [isLoading]="searchService.showspinner"></listTable>
                     </div>
                 </div>
