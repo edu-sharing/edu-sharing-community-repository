@@ -226,7 +226,7 @@ public class MetadataTemplateRenderer {
 								value += getLicenseDescription(licenseName).replace("\n",TEXT_LICENSE_SEPERATOR);
 							}
 						}
-						if(properties.get(CCConstants.getValidLocalName(CCConstants.CCM_PROP_IO_LICENSE_TITLE_OF_WORK))!=null){
+						if(renderingMode.equals(RenderingMode.HTML) && properties.get(CCConstants.getValidLocalName(CCConstants.CCM_PROP_IO_LICENSE_TITLE_OF_WORK))!=null){
 							value+="<div class='licenseTitleOfWork'>";
 							value+="<div class='mdsWidgetCaptionChild'>"+
 									I18nAngular.getTranslationAngular("common","LICENSE.TITLE_OF_WORK")
