@@ -166,13 +166,14 @@ public class AuthenticationFilter implements javax.servlet.Filter {
 		this.redirectToLoginpage(httpReq, httpRes, chain);
 	}
 
-	public static void handleLocale(boolean validate, String locale,  HttpServletRequest httpReq, HttpServletResponse httpRes) throws IOException {
+	public static void handleLocale(boolean throwOnError, String locale,  HttpServletRequest httpReq, HttpServletResponse httpRes) throws IOException {
 		//set the locale
 		try {
 			if (locale == null && httpReq.getLocale() != null) {
 				locale = httpReq.getLocale().toString();
+				throwOnError = false;
 			}
-			if (validate && LocaleValidator.validate(locale)) {
+			if(LocaleValidator.validate(locale, throwOnError)) {
 				httpReq.getSession().setAttribute(CCConstants.AUTH_LOCALE, locale);
 			}
 		}catch(Throwable t){

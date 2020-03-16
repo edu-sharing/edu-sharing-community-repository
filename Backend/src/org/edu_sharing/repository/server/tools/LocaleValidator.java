@@ -9,7 +9,7 @@ public class LocaleValidator {
 
 	private static Logger logger=Logger.getLogger(LocaleValidator.class);
 
-	public static boolean validate(String locale){
+	public static boolean validate(String locale, boolean throwOnError){
 		//set the locale
 	   
 	    if(locale != null){
@@ -17,7 +17,7 @@ public class LocaleValidator {
 				 // if the locale requested is found in config -> allow it
 				 return Arrays.stream(ConfigServiceFactory.getSupportedLanguages()).
 						 anyMatch(locale::startsWith);
-			 } else {
+			 } else if(throwOnError){
 	    	 	throw new IllegalArgumentException("HTTP Header parameter locale is of invalid format: Please use xx_XX");
 			 }
 		}
