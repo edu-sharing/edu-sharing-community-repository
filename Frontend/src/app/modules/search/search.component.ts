@@ -974,6 +974,7 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
         init: boolean,
         position = 0,
         count = 0,
+        tryFrontpage = true
     ) {
         if (position > 0 && position >= repos.length) {
             this.searchService.numberofresults = count;
@@ -1016,32 +1017,39 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
             }
         }
         let properties = [RestConstants.ALL];
+        const request = {
+            sortBy: sortBy,
+            sortAscending: sortAscending,
+            count:
+                this.currentRepository == RestConstants.ALL &&
+                !this.groupResults
+                    ? Math.max(
+                    5,
+                    Math.round(
+                        this.connector.numberPerRequest /
+                        (this.repositories.length - 1),
+                    ),
+                    )
+                    : null,
+            offset: this.searchService.skipcount[position],
+            propertyFilter: [properties],
+        };
+        let queryRequest =
         this.search
             .search(
                 criterias,
                 [RestConstants.LOM_PROP_GENERAL_KEYWORD],
-                {
-                    sortBy: sortBy,
-                    sortAscending: sortAscending,
-                    count:
-                        this.currentRepository == RestConstants.ALL &&
-                        !this.groupResults
-                            ? Math.max(
-                                  5,
-                                  Math.round(
-                                      this.connector.numberPerRequest /
-                                          (this.repositories.length - 1),
-                                  ),
-                              )
-                            : null,
-                    offset: this.searchService.skipcount[position],
-                    propertyFilter: [properties],
-                },
+                request,
                 RestConstants.CONTENT_TYPE_FILES,
                 repo ? repo.id : RestConstants.HOME_REPOSITORY,
                 mdsId,
-            )
-            .subscribe(
+            );
+            console.log(criterias);
+            const useFrontpage = !criterias || !criterias.length;
+            if(useFrontpage && tryFrontpage) {
+                queryRequest = this.nodeApi.getChildren(RestConstants.NODES_FRONTPAGE, [RestConstants.ALL], request);
+            }
+            queryRequest.subscribe(
                 (data: SearchList) => {
                     if (!this.searchService.skipcount[position])
                         this.searchService.skipcount[position] = 0;
@@ -1057,8 +1065,19 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
                         position + 1,
                         count + data.pagination.total,
                     );
-                },
-                (error: any) => {
+                }, error => {
+                    if(useFrontpage && count === 0){
+                        console.warn("Could not fetch frontpage data, will fallback to a regular search", error);
+                        this.searchRepository(
+                            repos,
+                            criterias,
+                            init,
+                            position,
+                            count,
+                            false
+                        );
+                        return;
+                    }
                     this.toast.error(error);
                     this.searchRepository(
                         repos,
