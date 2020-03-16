@@ -48,11 +48,11 @@
     }
   }
 }
-:host ::ng-deep{
-  .cardSmallList{
-    width:$dialogRightWidth - 60px!important;
+:host ::ng-deep {
+  .cardSmallList > .item-container {
+    width: $dialogRightWidth - 60px !important;
   }
-  .cardContainer{
-    padding:0 15px !important;
+  .cardContainer {
+    padding: 0 15px !important;
   }
 }
