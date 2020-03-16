@@ -71,7 +71,7 @@ public class AuthenticationFilter implements javax.servlet.Filter {
 	    	return;
 	    }
 
-		AuthenticationFilter.handleLocale(httpReq.getParameter("locale"), httpReq, httpRes);
+		AuthenticationFilter.handleLocale(false, httpReq.getParameter("locale"), httpReq, httpRes);
 
 		//find out if we have to do the guest login
 	  	String user = httpReq.getParameter("user");
@@ -166,12 +166,13 @@ public class AuthenticationFilter implements javax.servlet.Filter {
 		this.redirectToLoginpage(httpReq, httpRes, chain);
 	}
 
-	public static void handleLocale(String locale,  HttpServletRequest httpReq, HttpServletResponse httpRes) throws IOException {
+	public static void handleLocale(boolean validate, String locale,  HttpServletRequest httpReq, HttpServletResponse httpRes) throws IOException {
 		//set the locale
 		try {
-			if (locale == null && httpReq.getLocale() != null)
+			if (locale == null && httpReq.getLocale() != null) {
 				locale = httpReq.getLocale().toString();
-			if (LocaleValidator.validate(locale)) {
+			}
+			if (validate && LocaleValidator.validate(locale)) {
 				httpReq.getSession().setAttribute(CCConstants.AUTH_LOCALE, locale);
 			}
 		}catch(Throwable t){

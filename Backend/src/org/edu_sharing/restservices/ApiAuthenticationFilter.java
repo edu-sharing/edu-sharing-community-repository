@@ -72,7 +72,7 @@ public class ApiAuthenticationFilter implements javax.servlet.Filter {
 		AuthenticationToolAPI authTool = new AuthenticationToolAPI();
 		HashMap<String, String> validatedAuth = authTool.validateAuthentication(session);
 
-		AuthenticationFilter.handleLocale(httpReq.getHeader("locale"), httpReq, httpResp);
+		AuthenticationFilter.handleLocale(true, httpReq.getHeader("locale"), httpReq, httpResp);
 
 		String authHdr = httpReq.getHeader("Authorization");
 
