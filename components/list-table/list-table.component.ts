@@ -44,12 +44,15 @@ import { KeyEvents } from '../../../core-module/ui/key-events';
 import { UIAnimation } from '../../../core-module/ui/ui-animation';
 import { UIConstants } from '../../../core-module/ui/ui-constants';
 import { NodeHelper } from '../../node-helper';
-import {CustomOptions, OptionItem, Scope} from '../../option-item';
+import { CustomOptions, OptionItem, Scope } from '../../option-item';
 import { Toast } from '../../toast';
 import { UIHelper } from '../../ui-helper';
 import { WorkspaceManagementDialogsComponent } from '../../../modules/management-dialogs/management-dialogs.component';
 import { ActionbarComponent } from '../../../common/ui/actionbar/actionbar.component';
-import {OPTIONS_HELPER_CONFIG, OptionsHelperService} from '../../../common/options-helper';
+import {
+    OPTIONS_HELPER_CONFIG,
+    OptionsHelperService,
+} from '../../../common/options-helper';
 import { BridgeService } from '../../../core-bridge-module/bridge.service';
 import { MainNavComponent } from '../../../common/ui/main-nav/main-nav.component';
 import { DragData, DropData } from '../../directives/drag-nodes/drag-nodes';
@@ -58,9 +61,15 @@ import { DragData, DropData } from '../../directives/drag-nodes/drag-nodes';
     selector: 'listTable',
     templateUrl: 'list-table.component.html',
     styleUrls: ['list-table.component.scss'],
-    providers: [OptionsHelperService, {provide: OPTIONS_HELPER_CONFIG, useValue: {
-        subscribeEvents: true
-    }}],
+    providers: [
+        OptionsHelperService,
+        {
+            provide: OPTIONS_HELPER_CONFIG,
+            useValue: {
+                subscribeEvents: true,
+            },
+        },
+    ],
     animations: [
         trigger(
             'openOverlay',
@@ -197,7 +206,7 @@ export class ListTableComponent implements EventListener {
             setTimeout(() => {
                 this.selectedNodes = [];
                 this.refreshAvailableOptions();
-                this.onSelectionChanged.emit([]);
+                this.selectionChanged.emit([]);
             });
         }
     }
@@ -417,7 +426,7 @@ export class ListTableComponent implements EventListener {
      *
      * Emits an array of objects from the list (usually nodes, but depends how you filled it)
      */
-    @Output() onSelectionChanged = new EventEmitter();
+    @Output() selectionChanged = new EventEmitter();
 
     /**
      * Called when the user opens an overflow menu (right side of the node) and the parent
@@ -563,7 +572,7 @@ export class ListTableComponent implements EventListener {
         if (this.selectedNodes.length === this._nodes.length) {
             this.selectedNodes = [];
             this.refreshAvailableOptions();
-            this.onSelectionChanged.emit(this.selectedNodes);
+            this.selectionChanged.emit(this.selectedNodes);
         } else {
             this.selectAll();
         }
@@ -732,6 +741,63 @@ export class ListTableComponent implements EventListener {
         return NodeHelper.getAttribute(this.translate, this.config, data, item);
     }
 
+    // onTap(event: HammerInput, node: Node) {
+    //     if (event.pointerType === 'touch') {
+    //         this.doubleClick(node);
+    //         event.preventDefault();
+    //     }
+    // }
+
+    onClick(
+        event: Event | null,
+        node: Node,
+        clickedRegion?: string,
+    ) {
+        if (!this.isClickable) {
+            // Do nothing
+        } else if (!this.selectOnClick) {
+            // Propagate event
+            this.clickRowSender(node, clickedRegion);
+            this.refreshAvailableOptions(node);
+        } else if (
+            this.hasCheckbox &&
+            this.ui.isShiftCmd() &&
+            this.selectedNodes.length > 0
+        ) {
+            // Select from-to range via shift key.
+            this.expandNodeSelection(node);
+        } else {
+            // Single value select
+            const clickedNodeWasSelected = this.getSelectedPos(node) !== -1;
+            if (
+                this.selectedNodes.length === 1 &&
+                clickedNodeWasSelected
+            ) {
+                this.clearSelection();
+            } else {
+                this.setSelectionToSingleNode(node);
+            }
+            if (this.mainNav && this.mainNav.management.nodeSidebar) {
+                this.mainNav.management.nodeSidebar = node;
+            }
+        }
+        if (event) {
+            event.stopPropagation();
+        }
+    }
+
+    onCheckboxClick(node: Node) {
+        if (this.ui.isShiftCmd()) {
+            return this.onClick(null, node);
+        }
+        const clickedNodeWasSelected = this.getSelectedPos(node) !== -1;
+        if (clickedNodeWasSelected) {
+            this.unselectNode(node);
+        } else {
+            this.addNodeToSelection(node);
+        }
+    }
+
     private addToSelectedNodes(node: Node) {
         if (this.getSelectedPos(node) >= 0) {
             // The node under the cursor is already part of the selection.
@@ -744,7 +810,7 @@ export class ListTableComponent implements EventListener {
             // Multi-node selection is not supported by this list.
             this.selectedNodes = [node];
         }
-        this.onSelectionChanged.emit(this.selectedNodes);
+        this.selectionChanged.emit(this.selectedNodes);
     }
 
     private filterCallbacks(options: OptionItem[], node: Node): OptionItem[] {
@@ -759,7 +825,7 @@ export class ListTableComponent implements EventListener {
             this.selectedNodes.push(node);
         }
         this.refreshAvailableOptions();
-        this.onSelectionChanged.emit(this.selectedNodes);
+        this.selectionChanged.emit(this.selectedNodes);
     }
 
     private moveNode(node: Node, targetPos: number): void {
@@ -953,7 +1019,7 @@ export class ListTableComponent implements EventListener {
         openMenu = false,
         event: any = null,
     ): void {
-        this.select(node, 'dropdown', false, false);
+        this.setSelectionToSingleNode(node);
         if (openMenu) {
             if (event) {
                 if (event.clientX + event.clientY) {
@@ -974,74 +1040,48 @@ export class ListTableComponent implements EventListener {
         this.doubleClickRow.emit(node);
     }
 
-    private select(
-        node: Node,
-        from: string = null,
-        fireEvent = true,
-        unselect = true,
-    ): boolean {
-        if (from !== 'checkbox' && !this.isClickable) {
-            return false;
-        }
-        if (from !== 'checkbox' && !this.selectOnClick && fireEvent) {
-            this.clickRowSender(node, from);
-            this.refreshAvailableOptions(node);
-            return false;
-        }
+    private addNodeToSelection(node: Node) {
+        this.selectedNodes.push(node);
+        this.onSelectionChanged(node);
+    }
 
-        if (!this.hasCheckbox || from !== 'checkbox') {
-            // Single value select
-            if (
-                this.selectedNodes.length &&
-                this.selectedNodes[0] === node &&
-                unselect
-            ) {
-                this.selectedNodes = [];
-            } else {
-                this.selectedNodes = [node];
-            }
-            if (this.mainNav && this.mainNav.management.nodeSidebar) {
-                this.mainNav.management.nodeSidebar = node;
-            }
-            this.onSelectionChanged.emit(this.selectedNodes);
-            this.refreshAvailableOptions(node);
-            return false;
-        }
+    private unselectNode(node: Node) {
         const pos = this.getSelectedPos(node);
-        // Select from-to range via shift key.
-        if (
-            from === 'checkbox' &&
-            pos === -1 &&
-            this.ui.isShiftCmd() &&
-            this.selectedNodes.length === 1
-        ) {
-            const pos1 = RestHelper.getRestObjectPositionInArray(
-                node,
-                this._nodes,
-            );
-            const pos2 = RestHelper.getRestObjectPositionInArray(
-                this.selectedNodes[0],
-                this._nodes,
-            );
-            const start = pos1 < pos2 ? pos1 : pos2;
-            const end = pos1 < pos2 ? pos2 : pos1;
-            for (let i = start; i <= end; i++) {
-                if (this.getSelectedPos(this._nodes[i]) === -1) {
-                    this.selectedNodes.push(this._nodes[i]);
-                }
-            }
-        } else {
-            if (pos !== -1 && unselect) {
-                this.selectedNodes.splice(pos, 1);
-            }
-            if (pos === -1) {
-                this.selectedNodes.push(node);
+        this.selectedNodes.splice(pos, 1);
+        this.onSelectionChanged(node);
+    }
+
+    private setSelectionToSingleNode(node: Node) {
+        this.selectedNodes = [node];
+        this.onSelectionChanged(node);
+    }
+
+    private clearSelection() {
+        this.selectedNodes = [];
+        this.onSelectionChanged();
+    }
+
+    private expandNodeSelection(to: Node) {
+        const from = this.selectedNodes[this.selectedNodes.length - 1];
+        const pos1 = RestHelper.getRestObjectPositionInArray(from, this._nodes);
+        const pos2 = RestHelper.getRestObjectPositionInArray(to, this._nodes);
+        const start = pos1 < pos2 ? pos1 : pos2;
+        const end = pos1 < pos2 ? pos2 : pos1;
+        for (let i = start; i <= end; i++) {
+            if (this.getSelectedPos(this._nodes[i]) === -1) {
+                this.selectedNodes.push(this._nodes[i]);
             }
         }
-        this.refreshAvailableOptions(node);
-        this.onSelectionChanged.emit(this.selectedNodes);
-        this.changes.detectChanges();
-        return false;
+        this.onSelectionChanged();
+    }
+
+    private onSelectionChanged(activeNode?: Node) {
+        this.refreshAvailableOptions(activeNode);
+        this.selectionChanged.emit(this.selectedNodes);
+        // This was done under some conditions before. Comment back in when
+        // facing problems.
+        //
+        // this.changes.detectChanges();
     }
 
     private getLRMIAttribute(data: any, item: ListItem): string {
@@ -1111,15 +1151,18 @@ export class ListTableComponent implements EventListener {
             }
         }
         this.selectedNodes = [];
-        this.onSelectionChanged.emit([]);
+        this.selectionChanged.emit([]);
         this.nodesChange.emit(this._nodes);
         this.refreshAvailableOptions();
     }
-    updateNodes(objects: Node[]|any) {
+    updateNodes(objects: Node[] | any) {
         objects.forEach((o: any) => {
-            const index = this._nodes.findIndex((n) => n.ref.id === o.ref.id);
+            const index = this._nodes.findIndex(n => n.ref.id === o.ref.id);
             if (index === -1) {
-                console.warn('tried to update node which not exist inside the list', o);
+                console.warn(
+                    'tried to update node which not exist inside the list',
+                    o,
+                );
                 return;
             }
             this._nodes.splice(index, 1, o);
@@ -1134,7 +1177,7 @@ export class ListTableComponent implements EventListener {
         this._nodes = objects.concat(this._nodes);
         this.nodesChange.emit(this._nodes);
         this.selectedNodes = objects;
-        this.onSelectionChanged.emit(objects);
+        this.selectionChanged.emit(objects);
         this.refreshAvailableOptions();
     }
 
