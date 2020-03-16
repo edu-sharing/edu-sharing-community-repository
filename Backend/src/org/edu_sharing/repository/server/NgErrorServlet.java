@@ -27,6 +27,7 @@ public class NgErrorServlet extends HttpServlet {
 		try {
 			Object errorMessage=req.getAttribute("javax.servlet.error.message");
 			Object errorCode=req.getAttribute("javax.servlet.error.status_code");
+			logger.info("Redirect to error page: "+errorCode+" "+errorMessage);
 			if("application/json".equals(req.getHeader("accept"))){
 				ErrorResponse response = new ErrorResponse();
 				response.setError(errorMessage.toString());
@@ -37,7 +38,7 @@ public class NgErrorServlet extends HttpServlet {
 				resp.sendRedirect(URLTool.getNgErrorUrl(errorCode.toString()));
 			}
 		}catch(Throwable t) {
-			t.printStackTrace();
+			logger.error(t);
 			resp.sendError(500, "Fatal error preparing error.html: "+t.getMessage());
 		}
 	}
