@@ -1066,7 +1066,7 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
                         count + data.pagination.total,
                     );
                 }, error => {
-                    if(useFrontpage && count === 0){
+                    if(useFrontpage && tryFrontpage && count === 0){
                         console.warn("Could not fetch frontpage data, will fallback to a regular search", error);
                         this.searchRepository(
                             repos,
