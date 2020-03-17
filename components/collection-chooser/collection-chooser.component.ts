@@ -10,7 +10,7 @@ import { Router } from '@angular/router';
 import { TranslateService } from '@ngx-translate/core';
 import {
     ListItem,
-    Node,
+    Node, RequestObject,
     RestCollectionService,
     RestConnectorService,
     RestConstants,
@@ -109,13 +109,20 @@ export class CollectionChooserComponent implements OnInit {
             return;
         }
         this.isLoadingLatest = true;
-        this.collectionApi
-            .search(this.lastSearchQuery, {
-                sortBy: this.sortBy,
-                offset: this.listLatest.length,
-                sortAscending: false,
-            })
-            .subscribe(data => {
+        const request = {
+            sortBy: this.sortBy,
+            offset: this.listLatest.length,
+            sortAscending: false,
+            propertyFilter: [RestConstants.ALL]
+        };
+        let requestCall;
+        if(this.lastSearchQuery) {
+            requestCall = this.collectionApi.search(this.lastSearchQuery, request);
+        } else {
+            requestCall = this.collectionApi.getCollectionSubcollections(RestConstants.ROOT,
+                RestConstants.COLLECTIONSCOPE_RECENT, [], request);
+        }
+        requestCall.subscribe(data => {
                 this.isLoadingLatest = false;
                 this.hasMoreToLoad = data.collections.length > 0;
                 this.listLatest = this.listLatest.concat(data.collections);
