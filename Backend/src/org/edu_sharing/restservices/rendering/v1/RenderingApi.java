@@ -68,6 +68,7 @@ public class RenderingApi {
 			@ApiParam(value = "ID of repository (or \"-home-\" for home repository)",required=true, defaultValue="-home-" ) @PathParam("repository") String repository,
 	    	@ApiParam(value = "ID of node",required=true ) @PathParam("node") String node,
 	    	@ApiParam(value = "version of node",required=false) @QueryParam("version") String nodeVersion,
+	    	@ApiParam(value = "Rendering displayMode", required=false) @QueryParam("displayMode") String displayMode,
 			@Context HttpServletRequest req){
 
 		try{
@@ -75,7 +76,7 @@ public class RenderingApi {
 			if (repoDao == null) {
 				return Response.status(Response.Status.NOT_FOUND).build();
 			}
-			String detailsSnippet = new RenderingDao(repoDao).getDetails(node,nodeVersion,null);
+			String detailsSnippet = new RenderingDao(repoDao).getDetails(node,nodeVersion,displayMode,null);
 
 			Node nodeJson = NodeDao.getNode(repoDao, node, Filter.createShowAllFilter()).asNode();
 			String mimeType = nodeJson.getMimetype();
@@ -118,20 +119,21 @@ public class RenderingApi {
 			@ApiParam(value = "ID of repository (or \"-home-\" for home repository)",required=true, defaultValue="-home-" ) @PathParam("repository") String repository,
 	    	@ApiParam(value = "ID of node",required=true ) @PathParam("node") String node,
 	    	@ApiParam(value = "version of node",required=false) @QueryParam("version") String nodeVersion,
-	    	@ApiParam(value = "additional parameters to send to the rendering service",required=false) Map<String,String> parameters,
+			@ApiParam(value = "Rendering displayMode", required=false) @QueryParam("displayMode") String displayMode,
+			@ApiParam(value = "additional parameters to send to the rendering service",required=false) Map<String,String> parameters,
 			@Context HttpServletRequest req){
 
 		try {
 			
 			if(RepoProxyFactory.getRepoProxy().myTurn(repository)) {
-				return RepoProxyFactory.getRepoProxy().getDetailsSnippetWithParameters(repository, node, nodeVersion, parameters, req);
+				return RepoProxyFactory.getRepoProxy().getDetailsSnippetWithParameters(repository, node, nodeVersion, displayMode, parameters, req);
 			}
 			
 			RepositoryDao repoDao = RepositoryDao.getRepository(repository);
 			if (repoDao == null) {
 				return Response.status(Response.Status.NOT_FOUND).build();
 			}
-			String detailsSnippet = new RenderingDao(repoDao).getDetails(node,nodeVersion,parameters);
+			String detailsSnippet = new RenderingDao(repoDao).getDetails(node,nodeVersion, displayMode,parameters);
 
 			NodeDao nodeDao = NodeDao.getNode(repoDao, node, Filter.createShowAllFilter());
 			Node nodeJson = nodeDao.asNode();

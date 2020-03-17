@@ -20,7 +20,7 @@ public interface RepoProxy {
 			SearchParameters parameters, List<String> propertyFilter, HttpServletRequest req) throws Throwable;
 
 	Response getDetailsSnippetWithParameters(String repository, String node, String nodeVersion,
-			Map<String, String> parameters, HttpServletRequest req) throws Throwable;
+			String displayMode, Map<String, String> parameters, HttpServletRequest req) throws Throwable;
 
 	Response getChildren(String repository, String node, Integer maxItems, Integer skipCount, List<String> filter,
 			List<String> sortProperties, List<Boolean> sortAscending, String assocName, List<String> propertyFilter,

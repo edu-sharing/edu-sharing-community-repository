@@ -13,9 +13,11 @@ public class RenderingDao {
 		this.repoDao = repoDao;
 	}
 	
-	public String getDetails(String nodeId,String nodeVersion,Map<String,String> parameters) throws DAOException{
+	public String getDetails(String nodeId,String nodeVersion, String displayMode,Map<String,String> parameters) throws DAOException{
 		try{
-			return repoDao.getRenderingServiceClient().getDetails(nodeId,nodeVersion,RenderingTool.DISPLAY_DYNAMIC,parameters);
+			return repoDao.getRenderingServiceClient().getDetails(nodeId,nodeVersion,
+					displayMode==null || displayMode.isEmpty() ? RenderingTool.DISPLAY_DYNAMIC : displayMode,
+					parameters);
 		}catch(Exception e){
 			throw DAOException.mapping(e);
 		}

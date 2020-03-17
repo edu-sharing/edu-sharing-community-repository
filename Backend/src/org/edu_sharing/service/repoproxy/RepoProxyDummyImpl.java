@@ -25,7 +25,7 @@ public class RepoProxyDummyImpl extends RepoProxyAbstract {
 
 	@Override
 	public Response getDetailsSnippetWithParameters(String repository, String node, String nodeVersion,
-			Map<String, String> parameters, HttpServletRequest req) {
+			String displayMode, Map<String, String> parameters, HttpServletRequest req) {
 		// TODO Auto-generated method stub
 		return ErrorResponse.createResponse(e);
 	}
