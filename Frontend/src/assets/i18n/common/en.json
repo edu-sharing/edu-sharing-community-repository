@@ -74,6 +74,15 @@
     "DEFAULT_METADATASET": "Default-Metadataset ({{name}})",
     "NO_MATCHES": "No matches found",
     "NO_CC_PUBLISH": "no publishing permissions for object",
+    "COLLECTION_CHOOSER": {
+        "ADD_TO_RECENT_COLLECTION": "Add to recently used collections",
+        "SEARCH_COLLECTIONS": "Find collection...",
+        "NO_SUB_COLLECTIONS": "No further collections",
+        "NO_PERSONAL_COLLECTIONS": "No personal collections yet",
+        "ADD_TO_MY_COLLECTION": "Add to my collections",
+        "ADD_TO_SELECTED_COLLECTION": "Add here",
+        "NO_RECENT_COLLECTIONS": "No recently used collections available"
+    },
     "ADD_TO_RECENT_COLLECTION": "Add to recent collection",
     "SEARCH_COLLECTIONS": "Search collection...",
     "ASK_CC_PUBLISH": "Ask",
