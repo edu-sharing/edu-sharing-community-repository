@@ -25,7 +25,7 @@
                    [scrollWindow]="false"
                    [sortBy]="sortBy"
                    [sortAscending]="sortAscending"
-                   (onSelectionChanged)="onSelection($event)"
+                   (selectionChanged)="onSelection($event)"
                    [listClass]="'fileChooserList'"
                    (sortListener)="setSorting($event)"
                    (clickRow)="selectItem($event.node)"

@@ -25,7 +25,7 @@
   [actionbar]="actionbar"
   [scope]="SCOPES.WorkspaceList"
   [createLink]="true"
-  (onSelectionChanged)="onSelection($event)"
+  (selectionChanged)="onSelection($event)"
   (sortListener)="setSorting($event)"
   (doubleClickRow)="doubleClick($event)"
   (openNode)="doubleClick($event)"

@@ -166,7 +166,7 @@
           [hasHeading]="true"
           [selectOnClick]="true"
           [isClickable]="true"
-          (onSelectionChanged)="updateSelectedMembers($event)"
+          (selectionChanged)="updateSelectedMembers($event)"
        ></listTable>
     </div>
 </card>
@@ -202,7 +202,7 @@
   [actionbar]="actionbar"
   [isLoading]="loading"
   [isClickable]="true"
-  (onSelectionChanged)="selection($event)"
+  (selectionChanged)="selection($event)"
   [sortAscending]="sortAscending"
   [hasHeading]="true"
   [selectOnClick]="true"
