@@ -568,6 +568,11 @@
 					<type>d:noderef</type>
 					<multiple>true</multiple>
 				</property>
+				<!-- edu-sharing customization: list of recently used collection -->
+				<property name="ccm:userRecentCollection">
+					<type>d:noderef</type>
+					<multiple>true</multiple>
+				</property>
 				<!-- edu-sharing customization: list of node refs the user has on his bookmarks list as json  -->
 				<property name="ccm:userNodeLists">
 					<type>d:text</type>

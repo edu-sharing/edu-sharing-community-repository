@@ -45,11 +45,7 @@ import org.edu_sharing.repository.server.MCAlfrescoAPIClient;
 import org.edu_sharing.repository.server.MCAlfrescoBaseClient;
 import org.edu_sharing.repository.server.RepoFactory;
 import org.edu_sharing.repository.server.authentication.Context;
-import org.edu_sharing.repository.server.tools.ApplicationInfo;
-import org.edu_sharing.repository.server.tools.ApplicationInfoList;
-import org.edu_sharing.repository.server.tools.I18nServer;
-import org.edu_sharing.repository.server.tools.ImageTool;
-import org.edu_sharing.repository.server.tools.NodeTool;
+import org.edu_sharing.repository.server.tools.*;
 import org.edu_sharing.repository.server.tools.cache.PreviewCache;
 import org.edu_sharing.repository.server.tools.cache.RepositoryCache;
 import org.edu_sharing.repository.server.tools.forms.DuplicateFinder;
@@ -177,10 +173,10 @@ public class CollectionServiceImpl implements CollectionService{
 				String message = I18nServer.getTranslationDefaultResourcebundle("collection_no_publish_permission", locale);
 				throw new Exception(message);
 			}
-			
+			NodeRef collectionRef = new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE,collectionId);
 			boolean collectionIsPublic = false;
 			PermissionService alfPermissionService = serviceRegistry.getPermissionService();
-			Set<AccessPermission> permissions = alfPermissionService.getAllSetPermissions(new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE,collectionId));
+			Set<AccessPermission> permissions = alfPermissionService.getAllSetPermissions(collectionRef);
 			for(AccessPermission accessPermission : permissions) {
 				if(PermissionService.ALL_AUTHORITIES.equals(accessPermission.getAuthority())) {
 					if(PermissionService.READ.equals(accessPermission.getPermission())
@@ -236,6 +232,8 @@ public class CollectionServiceImpl implements CollectionService{
             });
             String versLabel = (String)props.get(CCConstants.CM_PROP_VERSIONABLELABEL);
 
+			permissionService.addToRecentProperty(CCConstants.CCM_PROP_PERSON_RECENT_COLLECTIONS, collectionRef);
+
             return AuthenticationUtil.runAsSystem(() -> {
                 /**
                  * make a copy of the original.
@@ -270,11 +268,10 @@ public class CollectionServiceImpl implements CollectionService{
 						appInfo.getAppId(),
 						collectionId,
 						originalNodeId, null, null, null, -1, versLabel, refId, null);
+
 				return refId;
             });
-			
 
-		
 		}catch(Throwable e){
 			throw e;
 		}
@@ -773,6 +770,8 @@ public class CollectionServiceImpl implements CollectionService{
 					case TYPE_MEDIA_CENTER:
 						queryId="collections_scope_media_center";
 						break;
+					case RECENT:
+						return permissionService.getRecentProperty(CCConstants.CCM_PROP_PERSON_RECENT_COLLECTIONS);
 				}
 				String queryString=mds.findQuery(queryId).findBasequery(null);
 				/**

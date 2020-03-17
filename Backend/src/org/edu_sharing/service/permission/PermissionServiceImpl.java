@@ -48,12 +48,7 @@ import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.server.AuthenticationToolAPI;
 import org.edu_sharing.repository.server.MCAlfrescoAPIClient;
 import org.edu_sharing.repository.server.authentication.Context;
-import org.edu_sharing.repository.server.tools.ApplicationInfo;
-import org.edu_sharing.repository.server.tools.ApplicationInfoList;
-import org.edu_sharing.repository.server.tools.I18nServer;
-import org.edu_sharing.repository.server.tools.Mail;
-import org.edu_sharing.repository.server.tools.StringTool;
-import org.edu_sharing.repository.server.tools.URLTool;
+import org.edu_sharing.repository.server.tools.*;
 import org.edu_sharing.repository.server.tools.mailtemplates.MailTemplate;
 import org.edu_sharing.service.Constants;
 import org.edu_sharing.service.InsufficientPermissionException;
@@ -412,19 +407,25 @@ public class PermissionServiceImpl implements org.edu_sharing.service.permission
 	 * @param authority
 	 */
 	private void addToRecent(NodeRef authority) {
-		ArrayList<NodeRef> current = getRecentlyInvitedInternal();
-		current.remove(authority);
-		current.add(0, authority);
-		while(current.size()>10){
-			current.remove(9);
-		}
-		nodeService.setProperty(personService.getPerson(AuthenticationUtil.getFullyAuthenticatedUser()),
-				QName.createQName(CCConstants.CCM_PROP_PERSON_RECENTLY_INVITED),
-				current);
+		addToRecentProperty(CCConstants.CCM_PROP_PERSON_RECENTLY_INVITED, authority);
 	}
+
+	/**
+	 * add nodeRef to recent elements list for a property with "NodeRef" list type
+	 * Use also @getRecentProperty to get the current list
+	 * @param property
+	 * @param elementAdd
+	 */
+	@Override
+	public void addToRecentProperty(String property, NodeRef elementAdd){
+		nodeService.setProperty(personService.getPerson(AuthenticationUtil.getFullyAuthenticatedUser()),
+				QName.createQName(property),
+				PropertiesHelper.addToRecentProperty(elementAdd, getRecentProperty(property), 10));
+	}
+
 	@Override
 	public List<String> getRecentlyInvited() {
-		return getRecentlyInvitedInternal().stream().map((n) -> {
+		return getRecentProperty(CCConstants.CCM_PROP_PERSON_RECENTLY_INVITED).stream().map((n) -> {
 			if(nodeService.getType(n).equals(QName.createQName(CCConstants.CM_TYPE_PERSON))) {
 				return (String)nodeService.getProperty(n, QName.createQName(CCConstants.CM_PROP_PERSON_USERNAME));
 			} else {
@@ -432,9 +433,10 @@ public class PermissionServiceImpl implements org.edu_sharing.service.permission
 			}
 		}).collect(Collectors.toList());
 	}
-	public ArrayList<NodeRef> getRecentlyInvitedInternal() {
+	@Override
+	public ArrayList<NodeRef> getRecentProperty(String property) {
 		List<NodeRef> data= (List<NodeRef>) nodeService.getProperty(personService.getPerson(AuthenticationUtil.getFullyAuthenticatedUser()),
-				QName.createQName(CCConstants.CCM_PROP_PERSON_RECENTLY_INVITED));
+				QName.createQName(property));
 		if(data == null){
 			return new ArrayList<>();
 		}

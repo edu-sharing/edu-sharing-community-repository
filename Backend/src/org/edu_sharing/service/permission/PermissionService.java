@@ -48,7 +48,11 @@ public interface PermissionService {
 
 	public void createNotifyObject(final String nodeId, final String user, final String action);
 
-    List<String> getRecentlyInvited();
+	void addToRecentProperty(String property, NodeRef elementAdd);
+
+	List<String> getRecentlyInvited();
+
+    ArrayList<NodeRef> getRecentProperty(String property);
 
     List<Notify> getNotifyList(String nodeId) throws Throwable;
 		

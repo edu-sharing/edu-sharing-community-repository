@@ -31,6 +31,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.InvalidPropertiesFormatException;
 import java.util.Properties;
 import java.util.logging.Logger;
@@ -124,6 +125,15 @@ public class PropertiesHelper {
 			}
 		}
 		return success;
+	}
+
+	public static <T> ArrayList<T> addToRecentProperty(T element, ArrayList<T> list, int limit) {
+		list.remove(element);
+		list.add(0, element);
+		while(list.size()>limit){
+			list.remove(limit-1);
+		}
+		return list;
 	}
 
 	public static boolean validatePropertyFile(String _propFile) {

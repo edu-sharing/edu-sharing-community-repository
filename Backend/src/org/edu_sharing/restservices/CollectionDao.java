@@ -43,7 +43,8 @@ public class CollectionDao {
 		EDU_GROUPS,
 		TYPE_EDITORIAL,
 		TYPE_MEDIA_CENTER,
-		MY
+		MY,
+		RECENT
 	}
 	
 	private final static String[] PERMISSIONS = new String[] {

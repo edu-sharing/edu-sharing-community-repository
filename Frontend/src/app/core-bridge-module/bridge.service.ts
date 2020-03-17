@@ -16,7 +16,7 @@ export class BridgeService{
        if (type === MessageType.info) {
            this.toast.toast(message, messageParameters, null, null, additional);
        } else if (type === MessageType.error) {
-           this.toast.error(error, message, messageParameters, null, null, additional);
+           this.toast.error(error, message ? message : 'COMMON_API_ERROR', messageParameters, null, null, additional);
        }
     }
     closeModalDialog() {

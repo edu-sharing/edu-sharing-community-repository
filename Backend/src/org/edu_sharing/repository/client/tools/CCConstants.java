@@ -322,6 +322,8 @@ public class CCConstants {
 
 	public final static String CCM_PROP_PERSON_RECENTLY_INVITED = "{http://www.campuscontent.de/model/1.0}userRecentlyInvited";
 
+	public final static String CCM_PROP_PERSON_RECENT_COLLECTIONS = "{http://www.campuscontent.de/model/1.0}userRecentCollections";
+
 	public final static String CCM_PROP_PERSON_NODE_LISTS = "{http://www.campuscontent.de/model/1.0}userNodeLists";
 
 	public final static String CCM_PROP_PH_MODIFIED = "{http://www.campuscontent.de/model/1.0}ph_modified";
