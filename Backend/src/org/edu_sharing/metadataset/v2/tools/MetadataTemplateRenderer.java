@@ -223,7 +223,7 @@ public class MetadataTemplateRenderer {
 								if(!value.isEmpty()){
 									value += TEXT_LICENSE_SEPERATOR;
 								}
-								value += getLicenseDescription(licenseName).replace("\n",TEXT_LICENSE_SEPERATOR);
+								value += getLicenseDescription(licenseName).replaceAll("((<br \\/>)|(\\n))",TEXT_LICENSE_SEPERATOR);
 							}
 						}
 						if(renderingMode.equals(RenderingMode.HTML) && properties.get(CCConstants.getValidLocalName(CCConstants.CCM_PROP_IO_LICENSE_TITLE_OF_WORK))!=null){
