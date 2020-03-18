@@ -22,6 +22,13 @@ import { MatMenuTrigger } from '@angular/material/menu';
 import { ActivatedRoute, Router } from '@angular/router';
 import { TranslateService } from '@ngx-translate/core';
 import {
+    OptionsHelperService,
+    OPTIONS_HELPER_CONFIG,
+} from '../../../common/options-helper';
+import { ActionbarComponent } from '../../../common/ui/actionbar/actionbar.component';
+import { MainNavComponent } from '../../../common/ui/main-nav/main-nav.component';
+import { BridgeService } from '../../../core-bridge-module/bridge.service';
+import {
     ConfigurationService,
     DialogButton,
     EventListener,
@@ -43,19 +50,12 @@ import { ColorHelper } from '../../../core-module/ui/color-helper';
 import { KeyEvents } from '../../../core-module/ui/key-events';
 import { UIAnimation } from '../../../core-module/ui/ui-animation';
 import { UIConstants } from '../../../core-module/ui/ui-constants';
+import { DistinctClickEvent } from '../../directives/distinct-click.directive';
+import { DragData, DropData } from '../../directives/drag-nodes/drag-nodes';
 import { NodeHelper } from '../../node-helper';
 import { CustomOptions, OptionItem, Scope } from '../../option-item';
 import { Toast } from '../../toast';
 import { UIHelper } from '../../ui-helper';
-import { WorkspaceManagementDialogsComponent } from '../../../modules/management-dialogs/management-dialogs.component';
-import { ActionbarComponent } from '../../../common/ui/actionbar/actionbar.component';
-import {
-    OPTIONS_HELPER_CONFIG,
-    OptionsHelperService,
-} from '../../../common/options-helper';
-import { BridgeService } from '../../../core-bridge-module/bridge.service';
-import { MainNavComponent } from '../../../common/ui/main-nav/main-nav.component';
-import { DragData, DropData } from '../../directives/drag-nodes/drag-nodes';
 
 @Component({
     selector: 'listTable',
@@ -741,27 +741,20 @@ export class ListTableComponent implements EventListener {
         return NodeHelper.getAttribute(this.translate, this.config, data, item);
     }
 
-    // onTap(event: HammerInput, node: Node) {
-    //     if (event.pointerType === 'touch') {
-    //         this.doubleClick(node);
-    //         event.preventDefault();
-    //     }
-    // }
-
-    onClick(
-        event: Event | null,
-        node: Node,
-        clickedRegion?: string,
-    ) {
-        if (!this.isClickable) {
+    onDistinctClick(event: DistinctClickEvent, node: Node, region?: string) {
+        if (event.pointerType === 'touch' || event.pointerType === 'pen') {
+            this.doubleClickRow.emit(node);
+        } else if (!this.isClickable) {
             // Do nothing
         } else if (!this.selectOnClick) {
             // Propagate event
-            this.clickRowSender(node, clickedRegion);
+            this.clickRowSender(node, region);
             this.refreshAvailableOptions(node);
+        } else if (this.hasCheckbox && event.ctrlKey) {
+            this.toggleSelection(node);
         } else if (
             this.hasCheckbox &&
-            this.ui.isShiftCmd() &&
+            event.shiftKey &&
             this.selectedNodes.length > 0
         ) {
             // Select from-to range via shift key.
@@ -769,10 +762,7 @@ export class ListTableComponent implements EventListener {
         } else {
             // Single value select
             const clickedNodeWasSelected = this.getSelectedPos(node) !== -1;
-            if (
-                this.selectedNodes.length === 1 &&
-                clickedNodeWasSelected
-            ) {
+            if (this.selectedNodes.length === 1 && clickedNodeWasSelected) {
                 this.clearSelection();
             } else {
                 this.setSelectionToSingleNode(node);
@@ -781,20 +771,18 @@ export class ListTableComponent implements EventListener {
                 this.mainNav.management.nodeSidebar = node;
             }
         }
-        if (event) {
-            event.stopPropagation();
-        }
+        event.stopPropagation();
     }
 
     onCheckboxClick(node: Node) {
-        if (this.ui.isShiftCmd()) {
-            return this.onClick(null, node);
-        }
-        const clickedNodeWasSelected = this.getSelectedPos(node) !== -1;
-        if (clickedNodeWasSelected) {
-            this.unselectNode(node);
+        if (
+            this.ui.isShiftCmd() &&
+            this.selectedNodes.length > 0 &&
+            !this.isSelected(node)
+        ) {
+            this.expandNodeSelection(node);
         } else {
-            this.addNodeToSelection(node);
+            this.toggleSelection(node);
         }
     }
 
@@ -1038,6 +1026,18 @@ export class ListTableComponent implements EventListener {
 
     private doubleClick(node: Node): void {
         this.doubleClickRow.emit(node);
+    }
+
+    private isSelected(node: Node) {
+        return this.getSelectedPos(node) !== -1;
+    }
+
+    private toggleSelection(node: Node) {
+        if (this.isSelected(node)) {
+            this.unselectNode(node);
+        } else {
+            this.addNodeToSelection(node);
+        }
     }
 
     private addNodeToSelection(node: Node) {

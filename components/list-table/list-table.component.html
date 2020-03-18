@@ -81,7 +81,7 @@
                  [style.backgroundColor]="isCollection(node) ? (viewType==2 ? node.preview.isIcon ? getCollectionColor(node) : '#000' : getCollectionColor(node)) : null"
                  [style.border-color]="isCollection(node) ? getCollectionColor(node) : null"
                  [class.dark-color]="isCollection(node) && node.preview.isIcon && isBrightColorCollection(getCollectionColor(node))"
-                 (click)="onClick($event, node);"
+                 (appDistinctClick)="onDistinctClick($event, node)"
                  (dblclick)="doubleClick(node)"
                  (contextmenu)="contextMenu($event,node)"
                  (keydown)="handleKeyboard($event)"
@@ -105,12 +105,12 @@
                 </div>
                 <div *ngIf="viewType==1 && !isCollection(node) && !node.isDirectory" class="nodeRatingComments">
                     <div class="nodeRating"></div>
-                    <div class="nodeComments" (click)="onClick($event, node,'comments')"><i icon iconId="comment"></i> <div>{{node.commentCount}}</div></div>
+                    <div class="nodeComments" (appDistinctClick)="onDistinctClick($event, node, 'comments')"><i icon iconId="comment"></i> <div>{{node.commentCount}}</div></div>
                 </div>
                 <div *ngIf="isCollection(node) && node.collection.type=='EDITORIAL'" class="collectionEditorial"><i class="material-icons">star</i></div>
                 <div *ngIf="isCollection(node) && node.collection.pinned" class="collectionPinned"><i icon iconId="edu-pin"></i></div>
                 <div class="checkbox column" *ngIf="hasCheckbox">
-                    <mat-checkbox [ngModel]="getSelectedPos(node)!=-1" (change)="onCheckboxClick(node)" (click)="$event.stopPropagation();"></mat-checkbox>
+                    <mat-checkbox [ngModel]="getSelectedPos(node)!=-1" (change)="onCheckboxClick(node)" (click)="$event.stopPropagation()"></mat-checkbox>
                 </div>
                 <div class="checkboxDummy column" *ngIf="!hasCheckbox"></div>
                 <div class="ccPublishMissing" *ngIf="applyMode && node.access.indexOf('CCPublish')==-1">
@@ -132,7 +132,12 @@
                         ><i class="material-icons">{{validatePermissions(node).button.icon}}</i> {{ validatePermissions(node).button.caption | translate}}</button>
                     </div>
                 </div>
-                <div class="preview column" *ngIf="viewType==1 || viewType==2" [class.clickable]="isClickable" (click)="onClick($event, node, 'preview')">
+                <div
+                  class="preview column"
+                  *ngIf="viewType==1 || viewType==2"
+                  [class.clickable]="isClickable"
+                  (appDistinctClick)="onDistinctClick($event, node, 'preview')"
+                >
                     <img *ngIf="node.preview.url && !(isCollection(node) && node.preview.isIcon) || (viewType==2 && !node.preview.isIcon)"
                          src="{{(!isCollection(node) || !node.preview.isIcon) ? node.preview.url+(isHomeNode(node) && animateNode!=node ? '&crop=true&maxWidth=300&maxHeight=300' : '') : null}}"
                          [title]="viewType==0 ? '' : getTitle(node)"
@@ -148,7 +153,7 @@
                     </div>
                 </div>
 
-                <div class="nodeDeleted clickable" *ngIf="isDeleted(node)" (click)="onClick($event, node)">
+                <div class="nodeDeleted clickable" *ngIf="isDeleted(node)">
                     <div>
                         <i icon iconId="delete"></i>
                         <div class="headline">{{'ORIGINAL_DELETED' | translate }}</div>
