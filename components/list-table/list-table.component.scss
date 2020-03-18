@@ -351,11 +351,8 @@ $badgeWidth: 250px;
     box-shadow: none !important;
 }
 
-.selected div,
-.selected .more a {
-}
-.row_1 {
-    color: $textMain !important;
+.row .column.row_1 {
+    color: $textMain;
 }
 .list .row:hover {
     background-color: $itemSelectedBackground;
@@ -423,16 +420,18 @@ $badgeWidth: 250px;
         }
     }
 }
+.list .nodeCollection .row {
+    color: #fff;
+    .column, a {
+        color: unset;
+    }
+}
 .list .nodeCollection .row .column,
 .nodeCollection .more a {
-    color: #fff;
     opacity: 0.75;
 }
 .list .nodeCollection .row_1 {
     opacity: 1 !important;
-    .row-group a {
-        color: #fff !important;
-    }
 }
 .node-virtual {
     .row {
