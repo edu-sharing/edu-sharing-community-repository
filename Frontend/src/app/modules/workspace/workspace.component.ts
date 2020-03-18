@@ -467,18 +467,6 @@ export class WorkspaceMainComponent implements EventListener {
         this.currentNodes = nodes;
     }
 
-    private clickNode(node: Node) {
-        this.setSelection([node]);
-
-        if (this.ui.isMobile()) {
-            if (node.isDirectory) {
-                this.openDirectory(node.ref.id);
-            } else {
-                this.displayNode(node);
-            }
-        }
-    }
-
     private setSelection(nodes: Node[]) {
         this.selection = nodes;
         this.setFixMobileNav();

@@ -284,25 +284,6 @@ export class WorkspaceExplorerComponent {
     this.onOpenNode.emit(node);
   }
 
-  public selectItem(node : Node){
-    if(node.isDirectory){
-      /*let path=this._parentPath.slice();
-      if(path.length==1)
-        this.addParentToPath(node,path);
-      else {
-        path.push(node.ref.id);
-        this.onOpenPath.emit(path);
-      }*/
-      //this.onOpenNode.emit(node);
-      this.onSelectNode.emit(node);
-
-    }
-    else{
-      this.onSelectNode.emit(node);
-    }
-  }
-
-
   private setNode(current: Node) {
     setTimeout(()=>{
       this._searchQuery=null;
