@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
+import org.alfresco.service.cmr.repository.NodeRef;
 import org.edu_sharing.repository.client.rpc.ACE;
 import org.edu_sharing.repository.client.rpc.ACL;
 import org.edu_sharing.repository.client.rpc.Authority;
@@ -94,6 +95,11 @@ public class PermissionServiceAdapter implements PermissionService {
 	}
 
 	@Override
+	public void addToRecentProperty(String property, NodeRef elementAdd) {
+
+	}
+
+	@Override
 	public boolean hasPermission(String storeProtocol, String storeId, String nodeId, String permission) {
 		return 	ALLOWED_PERMISSIONS.contains(permission);
 	}
@@ -143,6 +149,11 @@ public class PermissionServiceAdapter implements PermissionService {
 	}
 	@Override
 	public List<String> getRecentlyInvited() {
+		return null;
+	}
+
+	@Override
+	public ArrayList<NodeRef> getRecentProperty(String property) {
 		return null;
 	}
 }

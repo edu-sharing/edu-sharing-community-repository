@@ -3,6 +3,7 @@ package org.edu_sharing.service.permission;
 import java.rmi.RemoteException;
 import java.util.*;
 
+import org.alfresco.service.cmr.repository.NodeRef;
 import org.apache.log4j.Logger;
 import org.edu_sharing.repository.client.rpc.ACE;
 import org.edu_sharing.repository.client.rpc.ACL;
@@ -53,7 +54,17 @@ public class PermissionServiceWSImpl implements PermissionService {
 	}
 
 	@Override
+	public void addToRecentProperty(String property, NodeRef elementAdd) {
+
+	}
+
+	@Override
 	public List<String> getRecentlyInvited() {
+		return null;
+	}
+
+	@Override
+	public ArrayList<NodeRef> getRecentProperty(String property) {
 		return null;
 	}
 
