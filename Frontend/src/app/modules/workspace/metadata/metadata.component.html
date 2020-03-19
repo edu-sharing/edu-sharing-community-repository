@@ -23,7 +23,7 @@
 
   <div *ngIf="tab==INFO" class="content">
     <img class="preview clickable" (click)="display()" [src]="isAnimated() ? data.preview : data.preview+'&crop=true&width=600&height=450'" />
-    <div class="edit clickable" (click)="edit()"><i class="material-icons">edit</i></div>
+    <div class="edit clickable" (click)="edit()" *ngIf="canEdit()"><i class="material-icons">edit</i></div>
     <div class="description">{{'NODE.cm:name' | translate}}</div>
     <div class="value">{{data.name}}</div>
     <div class="description" *ngIf="data.title">{{'NODE.cclom:title' | translate}}</div>
