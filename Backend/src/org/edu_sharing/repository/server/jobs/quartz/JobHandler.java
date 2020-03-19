@@ -27,27 +27,22 @@
  */
 package org.edu_sharing.repository.server.jobs.quartz;
 
-import java.net.URL;
+import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.xpath.XPath;
-import javax.xml.xpath.XPathConstants;
-import javax.xml.xpath.XPathFactory;
-
+import com.typesafe.config.Config;
+import com.typesafe.config.ConfigValue;
 import net.sf.acegisecurity.AuthenticationCredentialsNotFoundException;
 
-import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.service.ServiceRegistry;
 import org.apache.log4j.Logger;
 import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
-import org.edu_sharing.repository.client.tools.CCConstants;
-import org.edu_sharing.repository.server.tools.CheckAuthentication;
+import org.edu_sharing.lightbend.LightbendConfigLoader;
+import org.edu_sharing.repository.server.tools.cache.FacetteCache;
 import org.quartz.CronTrigger;
 import org.quartz.Job;
 import org.quartz.JobDataMap;
@@ -61,11 +56,10 @@ import org.quartz.SchedulerFactory;
 import org.quartz.Trigger;
 import org.quartz.TriggerListener;
 import org.quartz.TriggerUtils;
-import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
-import freemarker.ext.servlet.AllHttpScopesHashModel;
+import javax.xml.xpath.XPathConstants;
 
 /**
  * @author rudi start jobs, start scheduling of an job, stop scheduling of a job
@@ -115,18 +109,16 @@ public class JobHandler {
 		
 		Class jobClass = null;
 		Trigger trigger = null;
-		String triggerType = null;
 		HashMap<String, Object> params = null;
 		String jobname = null;
 
 		public JobConfig() {
 		}
 
-		public JobConfig(Class jobClass, Trigger trigger, HashMap<String, Object> params, String triggerType, String name) {
+		public JobConfig(Class jobClass, Trigger trigger, HashMap<String, Object> params, String name) {
 			this.jobClass = jobClass;
 			this.trigger = trigger;
 			this.params = params;
-			this.triggerType = triggerType;
 			this.jobname = name;
 		}
 
@@ -154,14 +146,6 @@ public class JobHandler {
 			this.params = params;
 		}
 
-		public String getTriggerType() {
-			return triggerType;
-		}
-
-		public void setTriggerType(String triggerType) {
-			this.triggerType = triggerType;
-		}
-
 		public String getJobname() {
 			return jobname;
 		}
@@ -176,7 +160,7 @@ public class JobHandler {
 
 	static JobHandler instance = null;
 
-	List<JobConfig> jobConfigList = new ArrayList<JobConfig>();
+	List<JobConfig> jobConfigList = new ArrayList<>();
 
 	public static final String TRIGGER_TYPE_DAILY = "Daily";
 	public static final String TRIGGER_TYPE_CRON = "Cron";
@@ -315,108 +299,89 @@ public class JobHandler {
 
 		quartzScheduler.start();
 
-		// load config from xml
-		ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
-		URL url = classLoader.getResource("/org/edu_sharing/repository/server/jobs/quartz/jobs.xml");
-		XPathFactory pfactory = XPathFactory.newInstance();
-		XPath xpath = pfactory.newXPath();
-		DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
-		DocumentBuilder builder = factory.newDocumentBuilder();
+		refresh();
 
-		Document jobsConfig = builder.parse(url.openStream());
+	}
 
-		NodeList nodeList = (NodeList) xpath.evaluate("/jobs/job", jobsConfig, XPathConstants.NODESET);
-		for (int i = 0; i < nodeList.getLength(); i++) {
-			Node jobNode = nodeList.item(i);
-			String jobClass = (String) xpath.evaluate("class", jobNode, XPathConstants.STRING);
-			Class clazz = classLoader.loadClass(jobClass);
-			Node nodeTrigger = (Node) xpath.evaluate("trigger", jobNode, XPathConstants.NODE);
-			
-			
-			String jobName = (String) xpath.evaluate("name", jobNode, XPathConstants.STRING);
-			
-			if(jobName == null || jobName.trim().equals("")){
-				jobName = clazz.getSimpleName() + "_JobName_"+ i +"_" + System.currentTimeMillis();
-			}
-			
-			String triggerName = (String) xpath.evaluate("trigger-name", jobNode, XPathConstants.STRING);
-
-			String triggerConfig = (String) xpath.evaluate(".", nodeTrigger, XPathConstants.STRING);
-
-			Trigger trigger = null;
-			String triggerType = null;
-			if (triggerConfig.contains(TRIGGER_TYPE_DAILY)) {
-				triggerType = TRIGGER_TYPE_DAILY;
-				// default fire at midnight
-				String dailyConfig = triggerConfig.replace("Daily", "").trim();
-				int hour = 0;
-				int minute = 0;
-				if (!dailyConfig.equals("")) {
-					dailyConfig = dailyConfig.replaceAll("[", "").replaceAll("]", "");
-					String[] splittedConfig = dailyConfig.split(",");
-					if (splittedConfig.length == 2) {
-						hour = new Integer(splittedConfig[0]);
-						minute = new Integer(splittedConfig[1]);
+	public synchronized void refresh() {
+		try {
+			ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
+			List<? extends Config> list = LightbendConfigLoader.get().getConfigList("jobs.entries");
+			jobConfigList.clear();
+			for (String groupName : quartzScheduler.getJobGroupNames()) {
+				for (String jobName : quartzScheduler.getJobNames(groupName)) {
+					if (!quartzScheduler.deleteJob(jobName, groupName)) {
+						logger.warn("Unable to delete previously scheduled job " + jobName);
 					}
 				}
-				logger.info("Daily Trigger fires at " + hour + ":" + minute + " for job:" + clazz.getName());
-				trigger = TriggerUtils.makeDailyTrigger(hour, minute);
-				trigger.setName(jobName + "DailyTrigger"+ System.currentTimeMillis());
 			}
-			if (triggerConfig.contains(TRIGGER_TYPE_CRON)) {
-				triggerType = TRIGGER_TYPE_CRON;
-				
-				if(triggerName == null || triggerName.trim().equals("")){
-					triggerName = clazz.getSimpleName()+ jobName + "CronTrigger_" + i+ "_"+System.currentTimeMillis();
+			for (Config job : list) {
+				String jobClass = job.getString("class");
+				Class clazz = classLoader.loadClass(jobClass);
+				String jobName = job.getString("name");
+				if (jobName == null || jobName.trim().equals("")) {
+					jobName = clazz.getSimpleName() + "_JobName_" + System.currentTimeMillis();
 				}
-				
-				trigger = new CronTrigger(triggerName, null);
-
-				String cronConfig = triggerConfig.replace("Cron", "");
-				String cronexpression = "0 0 12 * * ?"; // Fire at 12pm (noon)
-														// every day
-				if (!cronConfig.equals("")) {
-					cronConfig = cronConfig.replaceAll("\\[", "").replaceAll("\\]", "");
-					if (!cronConfig.equals("")) {
-						cronexpression = cronConfig;
+				HashMap<String, Object> params = new HashMap<>();
+				if(job.hasPath("params")) {
+					for (Map.Entry<String, ConfigValue> configParams : job.getConfig("params").entrySet()) {
+						params.put(configParams.getKey(), configParams.getValue().unwrapped());
 					}
 				}
-
-				((CronTrigger) trigger).setCronExpression(cronexpression);
-				logger.info("Cron Trigger fires at " + cronexpression + " for job:" + clazz.getName());
-			}
-			if (triggerConfig.contains(TRIGGER_TYPE_IMMEDIATE)) {
-				triggerType = TRIGGER_TYPE_IMMEDIATE;
-				trigger = TriggerUtils.makeImmediateTrigger(0, 1);
-
-				logger.info("ImmediateTrigger for job:" + clazz.getName());
-
-				triggerName = (triggerName == null || triggerName.trim().equals("")) ? clazz.getSimpleName() + "ImmediateTrigger"+System.currentTimeMillis() : triggerName;
-				trigger.setName(triggerName);
+				String triggerConfig = job.getString("trigger");
+				Trigger trigger = getTriggerFromString(jobName, triggerConfig);
+				if (trigger != null) {
+					jobConfigList.add(new JobConfig(clazz, trigger, params, jobName));
+				} else {
+					logger.warn("Job "+jobName+" has no trigger and will not be scheduled");
+				}
 			}
 
-			HashMap<String, Object> params = new HashMap<String, Object>();
-			NodeList paramList = (NodeList) xpath.evaluate("params/param", jobNode, XPathConstants.NODESET);
-			for (int pCount = 0; pCount < paramList.getLength(); pCount++) {
-				Node nodeParam = paramList.item(pCount);
-				String key = (String) xpath.evaluate("key", nodeParam, XPathConstants.STRING);
-				String value = (String) xpath.evaluate("value", nodeParam, XPathConstants.STRING);
-				params.put(key, value);
-			}
-
-			if (trigger != null) {
-				jobConfigList.add(new JobConfig(clazz, trigger, params, triggerType, jobName));
-			}
-		}
-
-		// init the jobs
-		for (JobConfig jc : jobConfigList) {
-			logger.debug("JobListEntry:" + jc.getJobClass().getSimpleName() + " Trigger:" + jc.getTriggerType() + " " + jc.getTrigger().getClass().getName());
-			// all except those to start now
-			if (!jc.getTriggerType().equals(TRIGGER_TYPE_IMMEDIATE)) {
+			for (JobConfig jc : jobConfigList) {
 				this.scheduleJob(jc);
 			}
+		}catch (Exception e){
+			logger.warn("Could not init scheduled jobs",e);
 		}
+	}
+
+	private Trigger getTriggerFromString(String jobName, String triggerConfig) throws ParseException {
+		Trigger trigger = null;
+		if (triggerConfig.contains(TRIGGER_TYPE_DAILY)) {
+			// default fire at midnight
+			String dailyConfig = triggerConfig.replace("Daily", "").trim();
+			int hour = 0;
+			int minute = 0;
+			if (!dailyConfig.equals("")) {
+				dailyConfig = dailyConfig.replaceAll("\\[", "").replaceAll("\\]", "");
+				String[] splittedConfig = dailyConfig.split(",");
+				if (splittedConfig.length == 2) {
+					hour = new Integer(splittedConfig[0]);
+					minute = new Integer(splittedConfig[1]);
+				}
+			}
+			trigger = TriggerUtils.makeDailyTrigger(hour, minute);
+			trigger.setName(jobName + "_DailyTrigger"+ System.currentTimeMillis());
+		}else if (triggerConfig.contains(TRIGGER_TYPE_CRON)) {
+			String triggerName = jobName + "_CronTrigger_"+System.currentTimeMillis();
+			trigger = new CronTrigger(triggerName, null);
+			String cronConfig = triggerConfig.replace("Cron", "");
+			String cronexpression = "0 0 12 * * ?"; // Fire at 12pm (noon)
+			// every day
+			if (!cronConfig.equals("")) {
+				cronConfig = cronConfig.replaceAll("\\[", "").replaceAll("\\]", "");
+				if (!cronConfig.equals("")) {
+					cronexpression = cronConfig;
+				}
+			}
+			((CronTrigger) trigger).setCronExpression(cronexpression);
+		} else if (triggerConfig.contains(TRIGGER_TYPE_IMMEDIATE)) {
+			trigger = TriggerUtils.makeImmediateTrigger(0, 1);
+
+			String triggerName = jobName+"_ImmediateTrigger"+System.currentTimeMillis();
+			trigger.setName(triggerName);
+		}
+		return trigger;
 
 	}
 
@@ -535,10 +500,9 @@ public class JobHandler {
 	 * @param jobConfig
 	 */
 	private void scheduleJob(JobConfig jobConfig) throws SchedulerException {
-		//String jobName = 
 		JobDataMap jdm = createJobDataMap(jobConfig.getParams());
-
 		if (jobConfig.getTrigger() != null) {
+			logger.info("Schedule job "+jobConfig.getJobname()+" "+jobConfig.getJobClass().getSimpleName()+" "+jobConfig.getTrigger().toString());
 			JobDetail jobDetail = new JobDetail(jobConfig.getJobname(), null, jobConfig.getJobClass());
 			jobDetail.setJobDataMap(jdm);
 			quartzScheduler.scheduleJob(jobDetail, jobConfig.getTrigger());

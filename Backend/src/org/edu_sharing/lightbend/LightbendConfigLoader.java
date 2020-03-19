@@ -12,8 +12,9 @@ public class LightbendConfigLoader {
     public static String CUSTOM_FILE="edu-sharing.conf";
     public static Config get(){
         ClassLoader loader = Thread.currentThread().getContextClassLoader();
-        Config base = ConfigFactory.load(loader,PATH_PREFIX+BASE_FILE);
-        return ConfigFactory.load(loader,PATH_PREFIX+CUSTOM_FILE).withFallback(base);
+        String base = PATH_PREFIX+BASE_FILE;
+        String custom = PATH_PREFIX+CUSTOM_FILE;
+        return ConfigFactory.parseResourcesAnySyntax(custom).withFallback(ConfigFactory.parseResourcesAnySyntax(base)).resolve();
         //ConfigBeanFactory.create()
     }
 

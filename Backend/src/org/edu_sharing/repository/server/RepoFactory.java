@@ -44,6 +44,7 @@ import org.edu_sharing.metadataset.v2.MetadataSetInfo;
 import org.edu_sharing.metadataset.v2.MetadataSetV2;
 import org.edu_sharing.metadataset.v2.tools.MetadataHelper;
 import org.edu_sharing.repository.client.tools.CCConstants;
+import org.edu_sharing.repository.server.jobs.quartz.JobHandler;
 import org.edu_sharing.repository.server.tools.ApplicationInfo;
 import org.edu_sharing.repository.server.tools.ApplicationInfoList;
 import org.edu_sharing.repository.server.tools.AuthenticatorRemoteAppResult;
@@ -229,6 +230,9 @@ public class RepoFactory {
 		appClassCache.clear();
 		MetadataReaderV2.refresh();
 		ConfigServiceFactory.refresh();
+		try {
+			JobHandler.getInstance().refresh();
+		} catch (Exception ignored) {}
 		eduSharingProps = null;
 	}
 

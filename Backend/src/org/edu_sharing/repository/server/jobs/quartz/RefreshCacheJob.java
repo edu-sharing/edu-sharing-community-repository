@@ -31,6 +31,7 @@ import java.util.HashMap;
 
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.repo.security.authentication.AuthenticationUtil.RunAsWork;
+import org.apache.axis2.databinding.types.xsd._boolean;
 import org.apache.commons.logging.LogFactory;
 import org.quartz.JobDataMap;
 import org.quartz.JobExecutionContext;
@@ -51,7 +52,16 @@ public class RefreshCacheJob extends AbstractJob{
 		JobDataMap jobDataMap = context.getJobDetail().getJobDataMap();
 		
 		String rootFolderId = (String)jobDataMap.get("rootFolderId");
-		boolean sticky = new Boolean((String)jobDataMap.get("sticky"));
+		final boolean sticky;
+		if(jobDataMap.get("sticky") != null) {
+			if (jobDataMap.get("sticky") instanceof Boolean) {
+				sticky = (boolean) jobDataMap.get("sticky");
+			} else {
+				sticky = new Boolean((String) jobDataMap.get("sticky"));
+			}
+		} else {
+			sticky = true;
+		}
 		
 		HashMap authInfo = (HashMap)jobDataMap.get("authInfo");
 		

@@ -39,9 +39,7 @@ import org.quartz.JobExecutionException;
  * This TrackingJobs is responsible to collect tracking events
  * storing in the tracking buffer and transmit this events
  * to an <code>TrackingEventHandler</code>.    
- * 
- * To activate this job, please config jobs.xml.
- * 
+ *
  * @author thomschke
  *
  */
