@@ -102,6 +102,10 @@ public class PreviewServlet extends HttpServlet implements SingleThreadModel {
 		String nodeId=null;
 
 		NodeService nodeService = NodeServiceFactory.getLocalService();
+		MimeTypesV2 mime=new MimeTypesV2(ApplicationInfoList.getHomeRepository());
+		mime.setPreferredFormat(
+				"png".equals(req.getParameter("format")) ?
+				MimeTypesV2.Format.Png : MimeTypesV2.Format.Svg);
 		boolean isCollection=false;
 
 		final StoreRef storeRef;
@@ -296,11 +300,9 @@ public class PreviewServlet extends HttpServlet implements SingleThreadModel {
 			}
 
 		} catch (org.alfresco.repo.security.permissions.AccessDeniedException e) {
-			MimeTypesV2 mime=new MimeTypesV2(ApplicationInfoList.getHomeRepository());
 			resp.sendRedirect(mime.getNoPermissionsPreview());
 			return;
 		}  catch (InvalidNodeRefException e) {
-			MimeTypesV2 mime=new MimeTypesV2(ApplicationInfoList.getHomeRepository());
 			resp.sendRedirect(mime.getNodeDeletedPreview());
 			return;
 		}
@@ -316,7 +318,6 @@ public class PreviewServlet extends HttpServlet implements SingleThreadModel {
 		/**
 		 * fallback to mime first, then default
 		 */
-		MimeTypesV2 mime=new MimeTypesV2(ApplicationInfoList.getHomeRepository());
 		try{
 			HashMap<String,Object> props;
 			String[] aspects=new String[]{};

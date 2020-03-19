@@ -17,6 +17,24 @@ public class MimeTypesV2 {
 	private static HashMap<String, String> extensionMimeMap;
 	private final ApplicationInfo appInfo;
 	private String theme;
+	public enum Format {
+		Svg("svg"),
+		Png("png");
+		private final String suffix;
+		public String getSuffix(){
+			return this.suffix;
+		}
+		Format(String suffix) {
+			this.suffix = suffix;
+		}
+	}
+	private Format preferredFormat = Format.Svg;
+	public void setPreferredFormat(Format preferredFormat) {
+		this.preferredFormat = preferredFormat;
+	}
+	public Format getPreferredFormat() {
+		return preferredFormat;
+	}
 
 	public static List<String> WORD=Arrays.asList(new String[]{	
 			"application/msword",
@@ -119,35 +137,35 @@ public class MimeTypesV2 {
 	 * @return
 	 */
 	public String getIcon(String nodeType,Map<String,Object> properties,List<String> aspects){
-		return getIconPath()+getNodeType(nodeType,properties,aspects)+".svg";
+		return getIconPath()+getNodeType(nodeType,properties,aspects)+"."+preferredFormat.getSuffix();
 	}
 	/**
 	 * Gets a full preview path for a large mime image with background for the given node properties
 	 * @return
 	 */
 	public String getPreview(String nodeType,Map<String,Object> properties,List<String> aspects){
-		return getPreviewPath()+getNodeType(nodeType,properties,aspects)+".svg";
+		return getPreviewPath()+getNodeType(nodeType,properties,aspects)+"."+preferredFormat.getSuffix();
 	}
 	/**
 	 * Gets a default "unknown" preview
 	 * @return
 	 */
 	public String getDefaultPreview(){
-		return getPreviewPath()+"file.svg";
+		return getPreviewPath()+"file."+preferredFormat.getSuffix();
 	}
 	/**
 	 * Gets a "Insufficient permissions" preview image
 	 * @return
 	 */
 	public String getNoPermissionsPreview() {
-		return getPreviewPath()+"no-permissions.svg";
+		return getPreviewPath()+"no-permissions."+preferredFormat.getSuffix();
 	}
 	/**
 	 * Gets a "Element deleted" preview image
 	 * @return
 	 */
 	public String getNodeDeletedPreview() {
-		return getPreviewPath()+"node-deleted.svg";
+		return getPreviewPath()+"node-deleted."+preferredFormat.getSuffix();
 	}
 	/**
 	 * Returns the guessed node-type (used for the preview files), e.g. file-folder, file-word or file-image
