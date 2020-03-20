@@ -67,6 +67,7 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
 	public ApplicationInfo getApplication(){
 		return ApplicationInfoList.getRepositoryInfoById(appId);
 	}
+
 	public NodeServiceImpl(String appId) {
 		ApplicationContext applicationContext = AlfAppContextGate.getApplicationContext();
 		serviceRegistry = (ServiceRegistry) applicationContext.getBean(ServiceRegistry.SERVICE_REGISTRY);

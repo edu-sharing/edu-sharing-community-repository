@@ -15,6 +15,7 @@ import org.alfresco.model.ContentModel;
 import org.alfresco.repo.security.authentication.AuthenticationException;
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.repo.security.authentication.AuthenticationUtil.RunAsWork;
+import org.alfresco.repo.transaction.RetryingTransactionHelper.RetryingTransactionCallback;
 import org.alfresco.service.ServiceRegistry;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.repository.NodeService;
@@ -168,6 +169,22 @@ public class SSOAuthorityMapper {
 	 *         user does not exist and can not be created
 	 */
 	public String mapAuthority(final HashMap<String, String> ssoAttributes) {
+		RunAsWork<String> runAs = new RunAsWork<String>() {
+			@Override
+			public String doWork() throws Exception {
+				RetryingTransactionCallback<String> txnWork = new RetryingTransactionCallback<String>() {
+					public String execute() throws Exception {
+						return mapAuthorityInternal(ssoAttributes);
+					}
+				};
+				return transactionService.getRetryingTransactionHelper().doInTransaction(txnWork, false);
+			}
+		};
+		return AuthenticationUtil.runAs(runAs, ApplicationInfoList.getHomeRepository().getUsername());
+	}
+	
+	
+	private String mapAuthorityInternal(final HashMap<String, String> ssoAttributes) {
 		
 		if(isDebug()){
 			for(Map.Entry<String,String> ssoAttribute : ssoAttributes.entrySet()){
@@ -202,377 +219,369 @@ public class SSOAuthorityMapper {
 		final String userName = (hashUserName && !ssoType.equals(SSO_TYPE_AuthByApp)) ? digest(tmpUserName) : tmpUserName;
 
 		
-		RunAsWork<String> runAs = new RunAsWork<String>() {
-			@Override
-			public String doWork() throws Exception {
-				try {
-				boolean createUser = isCreateUser();
-				boolean updateUser = isUpdateUser();
+		try {
+			boolean createUser = isCreateUser();
+			boolean updateUser = isUpdateUser();
 
-				boolean createGroups = isCreateGroups();
-				boolean hashGroupNames = isHashGroupNames();
-				boolean updateMemberships = isUpdateMemberships();
+			boolean createGroups = isCreateGroups();
+			boolean hashGroupNames = isHashGroupNames();
+			boolean updateMemberships = isUpdateMemberships();
+
+			
+
+			String appId = ssoAttributes.get(PARAM_APP_ID);
+			ApplicationInfo appInfo = (appId != null) ? ApplicationInfoList.getRepositoryInfoById(appId) : null;
+			
+			/**
+			 * SSO_TYPE_AuthByApp: need the Application type to
+			 * decide if Crud Operations on user and group are
+			 * allowed
+			 */
+			if (ssoType.equals(SSO_TYPE_AuthByApp)) {
+				
+				if (appId == null || appId.trim().equals("")) {
+					logErrorParams(PARAM_APP_ID, ssoAttributes);
+					throw new AuthenticationException(AuthenticationExceptionMessages.MISSING_PARAM);
+				}
 
 				
-
-				String appId = ssoAttributes.get(PARAM_APP_ID);
-				ApplicationInfo appInfo = (appId != null) ? ApplicationInfoList.getRepositoryInfoById(appId) : null;
-				
-				/**
-				 * SSO_TYPE_AuthByApp: need the Application type to
-				 * decide if Crud Operations on user and group are
-				 * allowed
-				 */
-				if (ssoType.equals(SSO_TYPE_AuthByApp)) {
-					
-					if (appId == null || appId.trim().equals("")) {
-						logErrorParams(PARAM_APP_ID, ssoAttributes);
-						throw new AuthenticationException(AuthenticationExceptionMessages.MISSING_PARAM);
-					}
-
-					
-					if (appInfo == null) {
-						throw new AuthenticationException(AuthenticationExceptionMessages.INVALID_APPLICATION);
-					}
-					
-					if (ApplicationInfo.TYPE_RENDERSERVICE.equals(appInfo.getType())) {
-						createUser = false;
-						updateUser = false;
-						createGroups = false;
-						hashGroupNames = false;
-						updateMemberships = false;
-					}
+				if (appInfo == null) {
+					throw new AuthenticationException(AuthenticationExceptionMessages.INVALID_APPLICATION);
 				}
 				
-				boolean personExsists = false;
-				
-				personExsists = personService.personExists(userName);
+				if (ApplicationInfo.TYPE_RENDERSERVICE.equals(appInfo.getType())) {
+					createUser = false;
+					updateUser = false;
+					createGroups = false;
+					hashGroupNames = false;
+					updateMemberships = false;
+				}
+			}
+			
+			boolean personExsists = false;
+			
+			personExsists = personService.personExists(userName);
 
-				logger.debug("ut status:" + transactionService.getUserTransaction().getStatus());
+			logger.debug("ut status:" + transactionService.getUserTransaction().getStatus());
+			
+			if (personExsists == false && !createUser) {
+				logger.info("personExsists == null && !createUser -> returning null");
+				return null;
+			}
+
+			// person
+			HashMap<String, String> personMapping = mappingConfig.getPersonMapping();
+			HashMap<QName, Serializable> personProperties = new HashMap<QName, Serializable>();
+
+			for (Map.Entry<String, String> ssoAttribute : ssoAttributes.entrySet()) {
+
+				if (!personMapping.containsKey(ssoAttribute.getKey()) || personMapping.get(ssoAttribute.getKey()) == null
+						|| personMapping.get(ssoAttribute.getKey()).trim().equals("")) {
+					logger.debug("missing mapping entry for sso person attribute " + ssoAttribute.getKey());
+					continue;
+				}
+
+				QName alfrescoProperty = QName.createQName(personMapping.get(ssoAttribute.getKey()));
+				personProperties.put(alfrescoProperty, ssoAttribute.getValue());
+			}
+
+			if (personProperties.size() > 0) {
 				
-				if (personExsists == false && !createUser) {
-					logger.info("personExsists == null && !createUser -> returning null");
+				if(mappingConfig.getPersonMappingCondition() != null && !mappingConfig.getPersonMappingCondition().isTrue(ssoAttributes)){
+					logger.info("PersonMappingCondition is false for user:"+userName+". will not create.");
 					return null;
 				}
+				if (personExsists == false) {
+					authenticationService.createAuthentication(userName, new KeyTool().getRandomPassword().toCharArray());
+					//authenticationDao.createUser(userName, new KeyTool().getRandomPassword().toCharArray());
 
-				// person
-				HashMap<String, String> personMapping = mappingConfig.getPersonMapping();
-				HashMap<QName, Serializable> personProperties = new HashMap<QName, Serializable>();
+					// set username to the same we get from sso
+					// context
+					personProperties.put(ContentModel.PROP_USERNAME, userName);
+					
+					//so we can find out where the user comes from
+					if(appInfo != null && ApplicationInfo.TYPE_REPOSITORY.equals(appInfo.getType())){
+						personProperties.put(QName.createQName(CCConstants.PROP_USER_REPOSITORYID), appInfo.getAppId());
+					}
+					
+					personProperties.put(QName.createQName(CCConstants.PROP_USER_ESSSOTYPE), ssoType);
+					
+					if(isHashUserName()) {
+						personProperties.put(QName.createQName(CCConstants.CM_PROP_PERSON_ESORIGINALUID), originalUsername);
+					}
 
-				for (Map.Entry<String, String> ssoAttribute : ssoAttributes.entrySet()) {
+					personService.createPerson(personProperties);
+				} else if (updateUser) {
 
-					if (!personMapping.containsKey(ssoAttribute.getKey()) || personMapping.get(ssoAttribute.getKey()) == null
-							|| personMapping.get(ssoAttribute.getKey()).trim().equals("")) {
-						logger.debug("missing mapping entry for sso person attribute " + ssoAttribute.getKey());
+					//don't update the username (this lead to lowercase username when lowercase username comes with sso data
+					personProperties.remove(ContentModel.PROP_USERNAME);
+					personService.setPersonProperties(userName, personProperties);
+				}
+				
+				if(!authenticationService.authenticationExists(userName)){
+					authenticationService.createAuthentication(userName, new KeyTool().getRandomPassword().toCharArray());
+				}
+				
+			} else {
+				logger.warn("no personproperties delivered by sso context for user " + userName);
+			}
+
+			// group memberships
+			List<MappingGroup> mappingGroups = new ArrayList<MappingGroup>(mappingConfig.getGroupMapping());
+			
+			/**
+			 * add moodle global groups
+			 */
+			String lmsGlobalGroups = (globalGroupsParam != null) ? ssoAttributes.get(globalGroupsParam) : null;
+			
+			//only if organisationparam is configured
+			String organisationName = (organisationParam  != null) ? ssoAttributes.get(organisationParam) : null;
+			String organisationDisplayName = null;
+			
+			String existingOrganisationName = null;
+
+			MappingGroupBuilder mappingGroupBuilder = null;
+			if(mappingGroupBuilderClass != null && !mappingGroupBuilderClass.trim().equals("")) {
+				mappingGroupBuilder = MappingGroupBuilderFactory.instance(ssoAttributes, mappingGroupBuilderClass);
+				if(mappingGroupBuilder.getOrganisation() != null) {
+					organisationName = mappingGroupBuilder.getOrganisation().getMapTo();
+					if(organisationName != null) {
+						organisationDisplayName = mappingGroupBuilder.getOrganisation().getMapToDisplayName();
+						mappingGroups.addAll(mappingGroupBuilder.getMapTo());
+					}
+				}
+			}
+
+			if(customGroupMapping != null) {
+				customGroupMapping.setSSOAuthorityMapper(SSOAuthorityMapper.this);
+				customGroupMapping.map(ssoAttributes);
+			}
+
+			/**
+			 * create eduGroup for affiliation
+			 */
+			if(organisationName != null && !organisationName.trim().equals("")) {
+				
+				if(organisationDisplayName == null) {
+					organisationDisplayName = ssoAttributes.get(organisationParam + "name");
+				}
+
+				if(organisationDisplayName == null) {
+					organisationDisplayName = organisationName;
+				}
+				
+				Map<QName, Serializable> orgProps = organisationService.getOrganisation(organisationName);
+				if(orgProps != null) {
+					existingOrganisationName = (String)orgProps.get(ContentModel.PROP_AUTHORITY_NAME);
+				}
+				
+				if(existingOrganisationName == null) {
+
+					String metadataSetId = ssoType.equals(SSO_TYPE_Shibboleth) ? HttpContext.getCurrentMetadataSet() : null;
+
+					existingOrganisationName = organisationService.createOrganization(organisationName, organisationDisplayName, metadataSetId,null);
+					existingOrganisationName = AuthorityType.GROUP.getPrefixString() + existingOrganisationName;
+				}
+				
+				if (updateMemberships) {
+					Set<String> userAuthorities = authorityService.getAuthoritiesForUser(userName);
+					if(!userAuthorities.contains(existingOrganisationName)) {
+						authorityService.addAuthority(existingOrganisationName, userName);
+					}
+				}
+				
+			}
+			
+			/**
+			 * create LMS globalGroups
+			 */
+			organisationName = (organisationName == null) ? "" : organisationName;
+			if(lmsGlobalGroups != null && !organisationName.trim().equals("")){
+				JSONArray globalGroupsJA = new JSONArray(lmsGlobalGroups);
+				
+				HashMap<String,String> alfrescoNameLmsIdMap = new HashMap<String,String>();
+				
+				List<MappingGroup> lmsGlobalGroupsList = new ArrayList<MappingGroup>();
+				
+				for(int i = 0; i < globalGroupsJA.length(); i++){
+					JSONObject globalGroupJO = (JSONObject)globalGroupsJA.get(i);
+					String id = globalGroupJO.getString("id");
+					
+					String name = globalGroupJO.getString("name");
+					
+					String groupName = organisationName + "_" + name;
+					String groupDisplayName = name + " (" + organisationDisplayName + ")";
+					
+					alfrescoNameLmsIdMap.put(groupName,id);
+					
+					MappingGroup mappingGroup = new MappingGroup();
+					mappingGroup.setCondition(new Condition() {
+						@Override
+						public boolean isTrue(Map<String, String> ssoAttributes) {
+							return true;
+						}
+					});
+					
+					mappingGroup.setMapTo(groupName);
+					mappingGroup.setMapToDisplayName(groupDisplayName);
+					
+					lmsGlobalGroupsList.add(mappingGroup);
+				}
+				
+
+				mappingGroups.addAll(lmsGlobalGroupsList);
+			}
+			
+			
+			if (mappingGroups != null) {
+
+				List<String> currentGroupsForUser = new ArrayList<String>();
+				for (MappingGroup mappingGroup : mappingGroups) {
+					
+					String groupName = mappingGroup.getMapTo();
+					String alfrescoGroupName = AuthorityType.GROUP.getPrefixString() + groupName;
+					if (hashGroupNames) {
+						groupName = digest(groupName);
+					}
+
+					if (groupName == null || groupName.trim().equals("")) {
+						logger.error("alfresco groupName is null or length 0");
 						continue;
 					}
-
-					QName alfrescoProperty = QName.createQName(personMapping.get(ssoAttribute.getKey()));
-					personProperties.put(alfrescoProperty, ssoAttribute.getValue());
-				}
-
-				if (personProperties.size() > 0) {
 					
-					if(mappingConfig.getPersonMappingCondition() != null && !mappingConfig.getPersonMappingCondition().isTrue(ssoAttributes)){
-						logger.info("PersonMappingCondition is false for user:"+userName+". will not create.");
-						return null;
-					}
-					if (personExsists == false) {
-						authenticationService.createAuthentication(userName, new KeyTool().getRandomPassword().toCharArray());
-						//authenticationDao.createUser(userName, new KeyTool().getRandomPassword().toCharArray());
+					if (mappingGroup.getCondition().isTrue(ssoAttributes)) {
 
-						// set username to the same we get from sso
-						// context
-						personProperties.put(ContentModel.PROP_USERNAME, userName);
-						
-						//so we can find out where the user comes from
-						if(appInfo != null && ApplicationInfo.TYPE_REPOSITORY.equals(appInfo.getType())){
-							personProperties.put(QName.createQName(CCConstants.PROP_USER_REPOSITORYID), appInfo.getAppId());
-						}
-						
-						personProperties.put(QName.createQName(CCConstants.PROP_USER_ESSSOTYPE), ssoType);
-						
-						if(isHashUserName()) {
-							personProperties.put(QName.createQName(CCConstants.CM_PROP_PERSON_ESORIGINALUID), originalUsername);
+						currentGroupsForUser.add(alfrescoGroupName);
+
+						if (createGroups && !authorityService.authorityExists(AuthorityType.GROUP.getPrefixString() + groupName)) {
+							String newGroupName = authorityService.createAuthority(AuthorityType.GROUP, mappingGroup.getMapTo(), mappingGroup.getMapToDisplayName(), authorityService.getDefaultZones());
+							NodeRef nodeRef = authorityService.getAuthorityNodeRef(newGroupName);
+							
+							Map<QName,Serializable> aspectProperties = new HashMap<QName,Serializable>();
+							aspectProperties.put(QName.createQName(CCConstants.CCM_PROP_GROUPEXTENSION_GROUPSOURCE), appId);
+							nodeService.addAspect(nodeRef, QName.createQName(CCConstants.CCM_ASPECT_GROUPEXTENSION), aspectProperties);
 						}
 
-						personService.createPerson(personProperties);
-					} else if (updateUser) {
+						if (updateMemberships) {
+							
+							if (authorityService.authorityExists(alfrescoGroupName)) {
 
-						//don't update the username (this lead to lowercase username when lowercase username comes with sso data
-						personProperties.remove(ContentModel.PROP_USERNAME);
-						personService.setPersonProperties(userName, personProperties);
-					}
-					
-					if(!authenticationService.authenticationExists(userName)){
-						authenticationService.createAuthentication(userName, new KeyTool().getRandomPassword().toCharArray());
-					}
-					
-				} else {
-					logger.warn("no personproperties delivered by sso context for user " + userName);
-				}
-
-				// group memberships
-				List<MappingGroup> mappingGroups = new ArrayList<MappingGroup>(mappingConfig.getGroupMapping());
-				
-				/**
-				 * add moodle global groups
-				 */
-				String lmsGlobalGroups = (globalGroupsParam != null) ? ssoAttributes.get(globalGroupsParam) : null;
-				
-				//only if organisationparam is configured
-				String organisationName = (organisationParam  != null) ? ssoAttributes.get(organisationParam) : null;
-				String organisationDisplayName = null;
-				
-				String existingOrganisationName = null;
-
-				MappingGroupBuilder mappingGroupBuilder = null;
-				if(mappingGroupBuilderClass != null && !mappingGroupBuilderClass.trim().equals("")) {
-					mappingGroupBuilder = MappingGroupBuilderFactory.instance(ssoAttributes, mappingGroupBuilderClass);
-					if(mappingGroupBuilder.getOrganisation() != null) {
-						organisationName = mappingGroupBuilder.getOrganisation().getMapTo();
-						if(organisationName != null) {
-							organisationDisplayName = mappingGroupBuilder.getOrganisation().getMapToDisplayName();
-							mappingGroups.addAll(mappingGroupBuilder.getMapTo());
-						}
-					}
-				}
-
-				if(customGroupMapping != null) {
-					customGroupMapping.setSSOAuthorityMapper(SSOAuthorityMapper.this);
-					customGroupMapping.map(ssoAttributes);
-				}
-
-				/**
-				 * create eduGroup for affiliation
-				 */
-				if(organisationName != null && !organisationName.trim().equals("")) {
-					
-					if(organisationDisplayName == null) {
-						organisationDisplayName = ssoAttributes.get(organisationParam + "name");
-					}
-
-					if(organisationDisplayName == null) {
-						organisationDisplayName = organisationName;
-					}
-					
-					Map<QName, Serializable> orgProps = organisationService.getOrganisation(organisationName);
-					if(orgProps != null) {
-						existingOrganisationName = (String)orgProps.get(ContentModel.PROP_AUTHORITY_NAME);
-					}
-					
-					if(existingOrganisationName == null) {
-
-						String metadataSetId = ssoType.equals(SSO_TYPE_Shibboleth) ? HttpContext.getCurrentMetadataSet() : null;
-
-						existingOrganisationName = organisationService.createOrganization(organisationName, organisationDisplayName, metadataSetId,null);
-						existingOrganisationName = AuthorityType.GROUP.getPrefixString() + existingOrganisationName;
-					}
-					
-					if (updateMemberships) {
-						Set<String> userAuthorities = authorityService.getAuthoritiesForUser(userName);
-						if(!userAuthorities.contains(existingOrganisationName)) {
-							authorityService.addAuthority(existingOrganisationName, userName);
-						}
-					}
-					
-				}
-				
-				/**
-				 * create LMS globalGroups
-				 */
-				organisationName = (organisationName == null) ? "" : organisationName;
-				if(lmsGlobalGroups != null && !organisationName.trim().equals("")){
-					JSONArray globalGroupsJA = new JSONArray(lmsGlobalGroups);
-					
-					HashMap<String,String> alfrescoNameLmsIdMap = new HashMap<String,String>();
-					
-					List<MappingGroup> lmsGlobalGroupsList = new ArrayList<MappingGroup>();
-					
-					for(int i = 0; i < globalGroupsJA.length(); i++){
-						JSONObject globalGroupJO = (JSONObject)globalGroupsJA.get(i);
-						String id = globalGroupJO.getString("id");
-						
-						String name = globalGroupJO.getString("name");
-						
-						String groupName = organisationName + "_" + name;
-						String groupDisplayName = name + " (" + organisationDisplayName + ")";
-						
-						alfrescoNameLmsIdMap.put(groupName,id);
-						
-						MappingGroup mappingGroup = new MappingGroup();
-						mappingGroup.setCondition(new Condition() {
-							@Override
-							public boolean isTrue(Map<String, String> ssoAttributes) {
-								return true;
+								Set<String> authoritiesForUser = authorityService.getAuthoritiesForUser(userName);
+								if (!authoritiesForUser.contains(alfrescoGroupName)) {
+									logger.debug("will add "+userName +" in "+alfrescoGroupName);
+									authorityService.addAuthority(alfrescoGroupName, userName);
+								}
+							} else {
+								logger.error("Authority " + groupName + " does not exist!");
 							}
-						});
-						
-						mappingGroup.setMapTo(groupName);
-						mappingGroup.setMapToDisplayName(groupDisplayName);
-						
-						lmsGlobalGroupsList.add(mappingGroup);
-					}
-					
-
-					mappingGroups.addAll(lmsGlobalGroupsList);
-				}
-				
-				
-				if (mappingGroups != null) {
-
-					List<String> currentGroupsForUser = new ArrayList<String>();
-					for (MappingGroup mappingGroup : mappingGroups) {
-						
-						String groupName = mappingGroup.getMapTo();
-						String alfrescoGroupName = AuthorityType.GROUP.getPrefixString() + groupName;
-						if (hashGroupNames) {
-							groupName = digest(groupName);
 						}
 
-						if (groupName == null || groupName.trim().equals("")) {
-							logger.error("alfresco groupName is null or length 0");
+					}  else {
+						
+						/**
+						 * remove memberships for group mapping defined in edu-sharing-sso-context.xml
+						 */
+						if (updateMemberships) {
+							logger.debug("condition for alfresco group " + mappingGroup.getMapTo() + " does not match will remove membership if exists");
+							Set<String> authoritiesForUser = authorityService.getAuthoritiesForUser(userName);
+							if (authoritiesForUser.contains(alfrescoGroupName)) {
+								logger.debug("will remove "+userName +" from "+alfrescoGroupName);
+								authorityService.removeAuthority(alfrescoGroupName, userName);
+							}
+						}
+					}
+				}
+				
+				/**
+				 * removeuser from groups that came from the lms or other application but the user is no longer in
+				 */
+				if(updateMemberships) {
+					Set<String> authoritiesForUser = authorityService.getAuthoritiesForUser(userName);
+					for(String authorityForUser : authoritiesForUser) {
+						NodeRef groupNodeRef = authorityService.getAuthorityNodeRef(authorityForUser);
+						if(appId == null || groupNodeRef == null) {
 							continue;
 						}
+						String groupSource = (String)nodeService.getProperty(groupNodeRef, QName.createQName(CCConstants.CCM_PROP_GROUPEXTENSION_GROUPSOURCE));
 						
-						if (mappingGroup.getCondition().isTrue(ssoAttributes)) {
-
-							currentGroupsForUser.add(alfrescoGroupName);
-
-							if (createGroups && !authorityService.authorityExists(AuthorityType.GROUP.getPrefixString() + groupName)) {
-								String newGroupName = authorityService.createAuthority(AuthorityType.GROUP, mappingGroup.getMapTo(), mappingGroup.getMapToDisplayName(), authorityService.getDefaultZones());
-								NodeRef nodeRef = authorityService.getAuthorityNodeRef(newGroupName);
-								
-								Map<QName,Serializable> aspectProperties = new HashMap<QName,Serializable>();
-								aspectProperties.put(QName.createQName(CCConstants.CCM_PROP_GROUPEXTENSION_GROUPSOURCE), appId);
-								nodeService.addAspect(nodeRef, QName.createQName(CCConstants.CCM_ASPECT_GROUPEXTENSION), aspectProperties);
-							}
-
-							if (updateMemberships) {
-								
-								if (authorityService.authorityExists(alfrescoGroupName)) {
-
-									Set<String> authoritiesForUser = authorityService.getAuthoritiesForUser(userName);
-									if (!authoritiesForUser.contains(alfrescoGroupName)) {
-										logger.debug("will add "+userName +" in "+alfrescoGroupName);
-										authorityService.addAuthority(alfrescoGroupName, userName);
-									}
-								} else {
-									logger.error("Authority " + groupName + " does not exist!");
-								}
-							}
-
-						}  else {
-							
-							/**
-							 * remove memberships for group mapping defined in edu-sharing-sso-context.xml
-							 */
-							if (updateMemberships) {
-								logger.debug("condition for alfresco group " + mappingGroup.getMapTo() + " does not match will remove membership if exists");
-								Set<String> authoritiesForUser = authorityService.getAuthoritiesForUser(userName);
-								if (authoritiesForUser.contains(alfrescoGroupName)) {
-									logger.debug("will remove "+userName +" from "+alfrescoGroupName);
-									authorityService.removeAuthority(alfrescoGroupName, userName);
-								}
+						if(groupSource != null && !groupSource.trim().isEmpty() && appId.equals(groupSource)) {
+							if(!currentGroupsForUser.contains(authorityForUser)) {
+								authorityService.removeAuthority(authorityForUser, userName);
 							}
 						}
+						
 					}
-					
-					/**
-					 * removeuser from groups that came from the lms or other application but the user is no longer in
-					 */
-					if(updateMemberships) {
-						Set<String> authoritiesForUser = authorityService.getAuthoritiesForUser(userName);
-						for(String authorityForUser : authoritiesForUser) {
-							NodeRef groupNodeRef = authorityService.getAuthorityNodeRef(authorityForUser);
-							if(appId == null || groupNodeRef == null) {
-								continue;
-							}
-							String groupSource = (String)nodeService.getProperty(groupNodeRef, QName.createQName(CCConstants.CCM_PROP_GROUPEXTENSION_GROUPSOURCE));
-							
-							if(groupSource != null && !groupSource.trim().isEmpty() && appId.equals(groupSource)) {
-								if(!currentGroupsForUser.contains(authorityForUser)) {
-									authorityService.removeAuthority(authorityForUser, userName);
-								}
-							}
-							
-						}
-					}
-					
-					//handle parent group
-					for (MappingGroup mappingGroup : mappingGroups) {
-						if(mappingGroup.getCondition().isTrue(ssoAttributes)) {
-							if(mappingGroup.getParentGroup() != null && !mappingGroup.getParentGroup().trim().equals("")){
-								logger.debug("checking if " + mappingGroup.getMapTo() +  " is in " + mappingGroup.getParentGroup());
-								Set<String> containedAuthorities = authorityService.getContainedAuthorities(AuthorityType.GROUP, AuthorityType.GROUP.getPrefixString() + mappingGroup.getParentGroup() , false);
-								if(!containedAuthorities.contains(AuthorityType.GROUP.getPrefixString() + mappingGroup.getMapTo())){
-									logger.info("adding:" + mappingGroup.getMapTo()  + " to:" +   mappingGroup.getParentGroup());
-									authorityService.addAuthority(AuthorityType.GROUP.getPrefixString() + mappingGroup.getParentGroup(), AuthorityType.GROUP.getPrefixString() + mappingGroup.getMapTo());
-								}
-							}else {
-								/**
-								 * add to organization
-								 */
-								if(existingOrganisationName != null) {
-									logger.debug("checking if: " + mappingGroup.getMapTo() +  " is in org: " + existingOrganisationName);
-									Set<String> containedAuthorities = authorityService.getContainedAuthorities(AuthorityType.GROUP, existingOrganisationName , false);
-									if(containedAuthorities != null && !containedAuthorities.contains(AuthorityType.GROUP.getPrefixString() + mappingGroup.getMapTo())) {
-										logger.info("adding:" + mappingGroup.getMapTo() + " to:" + existingOrganisationName );
-										authorityService.addAuthority(existingOrganisationName, AuthorityType.GROUP.getPrefixString() +  mappingGroup.getMapTo());
-									}
-								}
-							}
-						}
-					}
-
 				}
 				
-				if (ssoType.equals(SSO_TYPE_AuthByApp) 
-						&& appInfo.getType().equals(ApplicationInfo.TYPE_REPOSITORY) 
-						&& !ApplicationInfoList.getHomeRepository().getAppId().equals(appInfo.getAppId())) {
+				//handle parent group
+				for (MappingGroup mappingGroup : mappingGroups) {
+					if(mappingGroup.getCondition().isTrue(ssoAttributes)) {
+						if(mappingGroup.getParentGroup() != null && !mappingGroup.getParentGroup().trim().equals("")){
+							logger.debug("checking if " + mappingGroup.getMapTo() +  " is in " + mappingGroup.getParentGroup());
+							Set<String> containedAuthorities = authorityService.getContainedAuthorities(AuthorityType.GROUP, AuthorityType.GROUP.getPrefixString() + mappingGroup.getParentGroup() , false);
+							if(!containedAuthorities.contains(AuthorityType.GROUP.getPrefixString() + mappingGroup.getMapTo())){
+								logger.info("adding:" + mappingGroup.getMapTo()  + " to:" +   mappingGroup.getParentGroup());
+								authorityService.addAuthority(AuthorityType.GROUP.getPrefixString() + mappingGroup.getParentGroup(), AuthorityType.GROUP.getPrefixString() + mappingGroup.getMapTo());
+							}
+						}else {
+							/**
+							 * add to organization
+							 */
+							if(existingOrganisationName != null) {
+								logger.debug("checking if: " + mappingGroup.getMapTo() +  " is in org: " + existingOrganisationName);
+								Set<String> containedAuthorities = authorityService.getContainedAuthorities(AuthorityType.GROUP, existingOrganisationName , false);
+								if(containedAuthorities != null && !containedAuthorities.contains(AuthorityType.GROUP.getPrefixString() + mappingGroup.getMapTo())) {
+									logger.info("adding:" + mappingGroup.getMapTo() + " to:" + existingOrganisationName );
+									authorityService.addAuthority(existingOrganisationName, AuthorityType.GROUP.getPrefixString() +  mappingGroup.getMapTo());
+								}
+							}
+						}
+					}
+				}
+
+			}
+			
+			if (ssoType.equals(SSO_TYPE_AuthByApp) 
+					&& appInfo.getType().equals(ApplicationInfo.TYPE_REPOSITORY) 
+					&& !ApplicationInfoList.getHomeRepository().getAppId().equals(appInfo.getAppId())) {
+			
+				//edu-sharing federated global groups
+				String gg = ssoAttributes.get(CCConstants.EDU_SHARING_GLOBAL_GROUPS);
+				List<String> globalGroupsMembership = (gg != null && !gg.trim().equals("")) ? Arrays.asList(gg.split(";")) : new ArrayList<String>();
 				
-					//edu-sharing federated global groups
-					String gg = ssoAttributes.get(CCConstants.EDU_SHARING_GLOBAL_GROUPS);
-					List<String> globalGroupsMembership = (gg != null && !gg.trim().equals("")) ? Arrays.asList(gg.split(";")) : new ArrayList<String>();
-					
-					//remove user from global group
-					Set<String> authoritiesForUser = authorityService.getAuthoritiesForUser(userName);
-					for (String authority : authoritiesForUser) {
-						NodeRef authorityNodeRef = authorityService.getAuthorityNodeRef(authority);
-						//i.e. EVERYONE is null
+				//remove user from global group
+				Set<String> authoritiesForUser = authorityService.getAuthoritiesForUser(userName);
+				for (String authority : authoritiesForUser) {
+					NodeRef authorityNodeRef = authorityService.getAuthorityNodeRef(authority);
+					//i.e. EVERYONE is null
+					if(authorityNodeRef == null) continue;
+					String scopeType = (String)nodeService.getProperty(authorityNodeRef, QName.createQName(CCConstants.CCM_PROP_SCOPE_TYPE));
+				
+					if(CCConstants.CCM_VALUE_SCOPETYPE_GLOBAL.equals(scopeType) && !globalGroupsMembership.contains(authority)){
+						authorityService.removeAuthority(authority, userName);
+					}
+				}
+				
+				//add user to edu-sharing global groups
+				for (String globalGroup : globalGroupsMembership) {
+					if(authorityService.authorityExists(globalGroup)){
+						NodeRef authorityNodeRef = authorityService.getAuthorityNodeRef(globalGroup);
 						if(authorityNodeRef == null) continue;
 						String scopeType = (String)nodeService.getProperty(authorityNodeRef, QName.createQName(CCConstants.CCM_PROP_SCOPE_TYPE));
-					
-						if(CCConstants.CCM_VALUE_SCOPETYPE_GLOBAL.equals(scopeType) && !globalGroupsMembership.contains(authority)){
-							authorityService.removeAuthority(authority, userName);
-						}
-					}
-					
-					//add user to edu-sharing global groups
-					for (String globalGroup : globalGroupsMembership) {
-						if(authorityService.authorityExists(globalGroup)){
-							NodeRef authorityNodeRef = authorityService.getAuthorityNodeRef(globalGroup);
-							if(authorityNodeRef == null) continue;
-							String scopeType = (String)nodeService.getProperty(authorityNodeRef, QName.createQName(CCConstants.CCM_PROP_SCOPE_TYPE));
-					
-							if(CCConstants.CCM_VALUE_SCOPETYPE_GLOBAL.equals(scopeType) && !authoritiesForUser.contains(globalGroup)){
-								authorityService.addAuthority(globalGroup, userName);
-							}
-						}
-					}
-					
-				}
-				return userName;
 				
-				} catch(Throwable e) {
-					logger.error(e.getMessage(), e);
-					return null;
+						if(CCConstants.CCM_VALUE_SCOPETYPE_GLOBAL.equals(scopeType) && !authoritiesForUser.contains(globalGroup)){
+							authorityService.addAuthority(globalGroup, userName);
+						}
+					}
 				}
-			
+				
 			}
-		};
-
-		return AuthenticationUtil.runAs(runAs, ApplicationInfoList.getHomeRepository().getUsername());
+			return userName;
+			
+			} catch(Throwable e) {
+				logger.error(e.getMessage(), e);
+				return null;
+			}
 	}
 
 	public void setMappingConfig(MappingRoot mappingConfig) {

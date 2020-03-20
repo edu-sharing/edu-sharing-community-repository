@@ -312,12 +312,15 @@ public class NodeApi  {
     	@ApiParam(value = RestConstants.MESSAGE_REPOSITORY_ID,required=true, defaultValue="-home-" ) @PathParam("repository") String repository,
     	@ApiParam(value = RestConstants.MESSAGE_NODE_ID,required=true ) @PathParam("node") String node,
     	@Context HttpServletRequest req) {
-    	
-    	boolean isLocked = EditLockServiceFactory.getEditLockService().isLockedByAnotherUser(new org.alfresco.service.cmr.repository.NodeRef(Constants.storeRef,node));
-    	NodeLocked response = new NodeLocked();
-    	response.setLocked(isLocked);
-    	
-    	return Response.ok().entity(response).build();
+		try {
+			boolean isLocked = EditLockServiceFactory.getEditLockService().isLockedByAnotherUser(new org.alfresco.service.cmr.repository.NodeRef(Constants.storeRef, node));
+			NodeLocked response = new NodeLocked();
+			response.setLocked(isLocked);
+
+			return Response.ok().entity(response).build();
+		}catch(Throwable t){
+			return ErrorResponse.createResponse(t);
+		}
     }
     
     

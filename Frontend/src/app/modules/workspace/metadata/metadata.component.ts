@@ -342,4 +342,7 @@ export class WorkspaceMetadataComponent{
         });
     }
 
+    canEdit() {
+        return this.nodeObject && this.nodeObject.access.indexOf(RestConstants.ACCESS_WRITE) !== -1;
+    }
 }

@@ -3673,7 +3673,7 @@ public class MCAlfrescoAPIClient extends MCAlfrescoBaseClient {
 				
 			} catch (Throwable e) {
 				
-				logger.error(e.getMessage()+" rolling back");
+				logger.error(e.getMessage()+" rolling back",e);
 				userTransaction.rollback();
 				throw new Exception("revert version failed cause of" + e.getMessage());			}
 

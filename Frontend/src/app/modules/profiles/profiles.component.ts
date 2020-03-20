@@ -46,6 +46,7 @@ export class ProfilesComponent {
   private avatarImage: any;
   @ViewChild('mainNav') mainNavRef: MainNavComponent;
   @ViewChild('avatar') avatarElement : ElementRef;
+  private userEditProfile: boolean;
   constructor(private toast: Toast,
               private route: ActivatedRoute,
               private title: Title,
@@ -69,6 +70,7 @@ export class ProfilesComponent {
     this.connector.isLoggedIn().subscribe((login)=> {
         this.iamService.getUser(authority).subscribe((profile: IamUser) => {
             this.user = profile.person;
+            this.userEditProfile = profile.editProfile;
             let name = new AuthorityNamePipe(this.translate).transform(this.user, null);
             UIHelper.setTitle('PROFILES.TITLE', this.title, this.translate, this.config, {name: name});
             this.globalProgress = false;

@@ -270,7 +270,14 @@ public class NodeCustomizationPolicies implements OnContentUpdatePolicy, OnCreat
                 	transFormedProps.put(VersionModel.PROP_VERSION_TYPE, VersionType.MAJOR);
         			versionService.createVersion(nodeRef,transFormedProps);
                 }else{
-                	versionService.createVersion(nodeRef,transformQNameKeyToString(nodeService.getProperties(nodeRef)));
+                	
+                	//prevent version will be created on revert
+                	if(!this.policyBehaviourFilter.isEnabled(nodeRef, ContentModel.ASPECT_VERSIONABLE)) {
+                		logger.debug(ContentModel.ASPECT_VERSIONABLE +" is not enabled on " + nodeRef );
+                	}else{
+                		versionService.createVersion(nodeRef,transformQNameKeyToString(nodeService.getProperties(nodeRef)));
+                	}
+                	
             	}
 			}
 			// if may just the content gets updated, the refs still need to get a new modified date

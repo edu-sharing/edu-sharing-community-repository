@@ -465,12 +465,12 @@ export class NodeRenderComponent implements EventListener {
       }
   }
 
-  private openConnector(newWindow=true) {
-    if(RestToolService.isLtiObject(this._node)) {
-      this.toolService.openLtiObject(this._node);
+  private openConnector(node: Node, newWindow=true) {
+    if(RestToolService.isLtiObject(node)){
+      this.toolService.openLtiObject(node);
     }
     else {
-      UIHelper.openConnector(this.connectors,this.iam,this.frame,this.toast, this._node,null,null,null,newWindow);
+      UIHelper.openConnector(this.connectors,this.iam,this.frame,this.toast, node,null,null,null,newWindow);
     }
   }
 

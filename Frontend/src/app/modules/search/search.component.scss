@@ -282,6 +282,9 @@ a, a:hover, a:visited, a:active, button {
   top: $mainnavHeight+48px;
   z-index: 12;
   width:100%;
+  &.no-mainnav{
+    top: 48px;
+  }
   actionbar{
     position: relative;
     top: -4px;
@@ -292,9 +295,6 @@ a, a:hover, a:visited, a:active, button {
     display: flex;
     padding: 20px;
     @include materialShadow();
-    &.no-mainnav {
-      top: 48px;
-    }
   }
 }
 small-collection{
