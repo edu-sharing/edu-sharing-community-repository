@@ -25,9 +25,10 @@ public class Monitoring {
 	ServiceRegistry serviceRegistry;
 	Repository repositoryHelper;
 	
-	public static final String MODE_SEARCH = "search";
-
-	public static final String MODE_SERVICE = "service";
+	public static enum Modes{
+		SEARCH,
+		SERVICE
+	};
 	
 	public Monitoring() {
 		ApplicationContext applicationContext = AlfAppContextGate.getApplicationContext();

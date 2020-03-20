@@ -45,11 +45,11 @@ public class MonitoringServlet extends HttpServlet {
 		
 		String paramMode = req.getParameter("mode");
 		if(paramMode == null || 
-				(!paramMode.equals(Monitoring.MODE_SEARCH) && !paramMode.equals(Monitoring.MODE_SERVICE))) {
-			paramMode = Monitoring.MODE_SERVICE;
+				(!paramMode.equals(Monitoring.Modes.SEARCH.name()) && !paramMode.equals(Monitoring.Modes.SERVICE.name()))) {
+			paramMode = Monitoring.Modes.SERVICE.name();
 		}
 		try {
-			if(Monitoring.MODE_SERVICE.equals(paramMode)) {
+			if(Monitoring.Modes.SERVICE.name().equals(paramMode)) {
 				new Monitoring().alfrescoServicesCheckTimeout(timeout);
 			}else {
 				new Monitoring().alfrescoSearchEngineCheckTimeout(timeout);

@@ -132,13 +132,13 @@ public class AboutApi  {
 			@ApiResponse(code = 403, message = RestConstants.HTTP_403, response = ErrorResponse.class),
 			@ApiResponse(code = 404, message = RestConstants.HTTP_404, response = ErrorResponse.class),
 			@ApiResponse(code = 500, message = RestConstants.HTTP_500, response = ErrorResponse.class) })
-	public Response status(@PathParam("mode") @DefaultValue(Monitoring.MODE_SERVICE) String mode, 
+	public Response status(@PathParam("mode") Monitoring.Modes mode, 
 			@QueryParam("timeoutSeconds") @DefaultValue("10") int timeout,
 			@Context HttpServletRequest req) {
     	
     	try {
     		String result = null;
-	    	if(Monitoring.MODE_SERVICE.equals(mode)) {
+	    	if(Monitoring.Modes.SERVICE.equals(mode)) {
 	    		result = new Monitoring().alfrescoServicesCheckTimeout(timeout);
 			}else {
 				result = new Monitoring().alfrescoSearchEngineCheckTimeout(timeout);
