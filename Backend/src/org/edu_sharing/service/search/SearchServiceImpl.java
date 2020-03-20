@@ -54,7 +54,6 @@ import java.util.stream.Collectors;
 
 public class SearchServiceImpl implements SearchService {
 
-	private final org.edu_sharing.service.authority.AuthorityService authorityService;
 	MCAlfrescoAPIClient apiClient = new MCAlfrescoAPIClient();
 
 	ApplicationContext alfApplicationContext = AlfAppContextGate.getApplicationContext();
@@ -76,7 +75,6 @@ public class SearchServiceImpl implements SearchService {
 		this.applicationId = applicationId;
 		this.baseClient = new MCAlfrescoAPIClient();
 		this.toolPermissionService = ToolPermissionServiceFactory.getInstance();
-		this.authorityService = AuthorityServiceFactory.getAuthorityService(applicationId);
 	}
 
 	@Override
