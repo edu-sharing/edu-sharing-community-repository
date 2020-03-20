@@ -81,7 +81,7 @@ public class HttpQueryTool {
 	private void init(){
 		if(!initFinished){
 			try{
-				Config config = LightbendConfigLoader.get().getConfig("repository.config");
+				Config config = LightbendConfigLoader.get().getConfig("repository.proxy");
 				host = config.getString("host");
 				proxyhost = config.getString("proxyhost");
 				proxyUsername = config.getString("proxyuser");
