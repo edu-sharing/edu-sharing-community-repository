@@ -239,7 +239,7 @@ export class WorkspaceShareComponent {
         return (
             this._nodes[0].aspects.indexOf(
                 RestConstants.CCM_ASPECT_COLLECTION,
-            ) != -1
+            ) !== -1
         );
     }
 
@@ -253,7 +253,7 @@ export class WorkspaceShareComponent {
 
     setNodes(nodes: Node[]) {
         this._nodes = nodes;
-        if (nodes == null) {
+        if (nodes == null || nodes.length === 1 && !nodes[0].ref.id) {
             return;
         }
         const isDirectory = new Set(nodes.map(n => n.isDirectory));
@@ -708,6 +708,9 @@ export class WorkspaceShareComponent {
                         this.publishActive,
                 );
             });
+            if(!this.sendToApi) {
+                return;
+            }
             Observable.forkJoin(actions).subscribe(
                 () => {
                     this.updateUsages(
