@@ -26,6 +26,7 @@ import org.edu_sharing.restservices.admin.v1.Application;
 import org.edu_sharing.restservices.shared.ErrorResponse;
 import org.edu_sharing.service.mime.MimeTypesV2;
 import org.edu_sharing.service.monitoring.Monitoring;
+import org.edu_sharing.service.nodeservice.NodeServiceFactory;
 import org.edu_sharing.service.version.VersionService;
 
 import io.swagger.annotations.Api;
@@ -142,8 +143,11 @@ public class AboutApi  {
 			}else {
 				result = new Monitoring().alfrescoSearchEngineCheckTimeout(timeout);
 			}
-	    	Response resp = Response.ok().entity(result).build();
-	    	return resp;
+	    	logger.debug("result:" + result);
+	    	//check if it is a node id?
+	    	//NodeServiceFactory.getLocalService().exists(protocol, store, result)
+	    	
+	    	return Response.ok().build();
 	    	
     	}catch(Throwable t) {
     		logger.error(t.getMessage(), t);			
