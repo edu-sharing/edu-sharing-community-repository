@@ -36,9 +36,11 @@ import {CoreBridgeModule} from "./core-bridge-module/core.bridge.module";
 import {CoreUiModule} from "./core-ui-module/core-ui.module";
 import {MonacoEditorModule} from "ngx-monaco-editor";
 import {QRCodeModule} from 'angularx-qrcode';
+import { A11yModule } from "@angular/cdk/a11y";
 
 
 export const IMPORTS=[
+  A11yModule,
   BrowserModule,
   FormsModule,
   ReactiveFormsModule,

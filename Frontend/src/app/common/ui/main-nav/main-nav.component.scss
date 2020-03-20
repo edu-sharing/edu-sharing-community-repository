@@ -1,535 +1,413 @@
-@import "../../../core-ui-module/styles/variables";
-@import "../../../core-ui-module/styles/toast";
-.topBar{
-  position: fixed;
-  top:0;
-  left:0;
-  width:100%;
-  max-width:100%;
-  z-index:$topBarZIndex;
-  .user div{
-    max-width: 160px;
-  }
-  >div{
-    width:100%;
-    height: $mainnavHeight;
-    background: $workspaceTopBarBackground;
-    color:$workspaceTopBarFontColor;
+@import '../../../core-ui-module/styles/variables';
+@import '../../../core-ui-module/styles/toast';
+.topBar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    max-width: 100%;
+    z-index: $topBarZIndex;
+    .user div {
+        max-width: 160px;
+    }
+    > div {
+        width: 100%;
+        height: $mainnavHeight;
+        background: $workspaceTopBarBackground;
+        color: $workspaceTopBarFontColor;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+}
+.preload {
+    position: fixed;
+    z-index: 140;
+    width: 100%;
+    height: 100%;
+    left: 0;
+    top: 0;
     display: flex;
-    justify-content: space-between;
-    align-items: center;
-  }
-}
-.preload{
-  position: fixed;
-  z-index: 140;
-  width: 100%;
-  height: 100%;
-  left:0;
-  top:0;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  background-color: #444;
-  >img{
-    width:50%;
-    max-width: 300px;
-  }
-}
-.tab-nav{
-  display: none;
-}
-.dialog{
-  z-index:$dialogZIndex+5;
-}
-.card-agreement{
-  z-index:$dialogZIndex+6;
-  .card-content{
-    display:flex;
     flex-direction: column;
-  }
-  .card-scroll{
-    height:calc(100% - 68px);
-  }
+    align-items: center;
+    justify-content: center;
+    background-color: #444;
+    > img {
+        width: 50%;
+        max-width: 300px;
+    }
 }
-user-profile{
-  display:inherit!important;
+.dialog {
+    z-index: $dialogZIndex + 5;
 }
-.imprint{
-  position: absolute;
-  right: 10px;
-  top: 5px;
-  font-size:7pt;
-  a{
-    color:rgba(red($workspaceTopBarFontColor),green($workspaceTopBarFontColor),blue($workspaceTopBarFontColor),0.7)!important;
-  }
-  a:hover{
-    color:$workspaceTopBarFontColor!important;
-  }
-  a:nth-child(2){
-    margin-left: 5px;
-  }
+.card-agreement {
+    z-index: $dialogZIndex + 6;
+    .card-content {
+        display: flex;
+        flex-direction: column;
+    }
+    .card-scroll {
+        height: calc(100% - 68px);
+    }
+}
+user-profile {
+    display: inherit !important;
+}
+.imprint {
+    position: absolute;
+    right: 10px;
+    top: 5px;
+    font-size: 7pt;
+    a {
+        color: rgba(
+            red($workspaceTopBarFontColor),
+            green($workspaceTopBarFontColor),
+            blue($workspaceTopBarFontColor),
+            0.7
+        ) !important;
+    }
+    a:hover {
+        color: $workspaceTopBarFontColor !important;
+    }
+    a:nth-child(2) {
+        margin-left: 5px;
+    }
 }
 
 .menuButton {
-  width: 250px;
-  display: flex;
-  align-items: center;
-  .barIcon{
-    margin-top: 2px;
-  }
+    width: 250px;
+    display: flex;
+    align-items: center;
+    .barIcon {
+        margin-top: 2px;
+    }
+    &[disabled] .barIcon {
+        display: none;
+    }
 }
-.menuButtonOuter{
-  height:100%;
-  display: flex;
-  > button {
-    border-radius: 0px;
-  }
+.menuButtonOuter {
+    height: 100%;
+    display: flex;
+    > button {
+        border-radius: 0px;
+    }
 }
 
 .topBarSearch {
-  flex: auto;
-  padding: 19px 20px 0 10px;
+    flex: auto;
+    padding: 19px 20px 0 10px;
 }
 
-.menuButton .barIcon, .menuButton img {
-}
-.menuButton img{
-  /*
-  margin-left: 16px;
-  width: 24px;
-  */
-  margin-left: 0;
-  width: 35px;
-}
-
-.sidenavClose{
-  @include clickable();
-  position: absolute;
-  right: 2px;
-  top: 2px;
-  padding: 10px;
-  z-index: 2;
-  color: #fff;
-  border-radius: 50%;
-  height: 66px;
-}
-.sidenavImage > .sidenavProfile{
-  position: absolute;
-  z-index: 2;
-  left:0;
-  top:60px;
-  width:100%;
-  text-align: center;
-  color:#fff;
-}
-.sidenavImage .sidenavProfile i{
-  font-size:50pt;
-}
-.sidenavImage .sidenavProfile > div{
-  font-size: 120%;
-  overflow: hidden;
-  margin-top: 5px;
-}
-.sidenavImage .sidenavProfile > div,.sidenavClose{
-  text-shadow: 0 0 30px rgba(0,0,0,.5);
-}
-.sidenavImage{
-  position: relative;
-  height:200px;
-  overflow: hidden;
-  @include unselectableText();
-}
-
-.topBar{
-  span {
-    font-size: 130%;
-    position: relative;
-    margin-left: 6px;
-  }
-  .rocketchat{
-    display: none;
-    position: relative;
-    top: 3px;
-    .rocketchat-count-none{
-      background-color: $colorStatusNeutral;
-    }
-  }
-
-  .nodeStore{
-    margin-right: 4px;
-    position: relative;
-    top: 6px;
-    >i{
-      color:$primaryMediumLight;
-    }
-  }
-  .nodeStoreCount{
-    background-color: #fff;
-    color: $primary;
-    right:5px;
-  }
-  .nodeStoreAnimation{
-    position:absolute;
-    left:-5px;
-    top:10px;
-    /*
-    position:fixed;
-    transform:scale(4);
-    top:50%;
-    left:50%;
-    */
-    background-color: $toastLeft;
-    border-radius: 50%;
-    color:$workspaceTopBarFontColor;
-    font-weight: bold;
-    font-size:11pt;
-    text-align: center;
+.menuButton img {
+    margin-left: 0;
     width: 35px;
-    height: 35px;
-    padding-top: 7px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-  }
-  .timeout{
-    background-color: $toastLeftError;
-    color: white;
-    border-radius: 20pt;
-    position: fixed;
-    top: 15px;
-    left: 200px;
-    font-size: 1rem;
-    padding: 10px 15px;
-    padding-left: 40px;
-    z-index: 105;
+}
 
-    i{
-      position: absolute;
-      top: 7px;
-      left: 10px;
+.topBar {
+    span {
+        font-size: 130%;
+        position: relative;
+        margin-left: 6px;
     }
-  }
+    .rocketchat {
+        display: none;
+        position: relative;
+        top: 3px;
+        .rocketchat-count-none {
+            background-color: $colorStatusNeutral;
+        }
+    }
+
+    .nodeStore {
+        margin-right: 4px;
+        position: relative;
+        top: 6px;
+        > i {
+            color: $primaryMediumLight;
+        }
+    }
+    .nodeStoreCount {
+        background-color: #fff;
+        color: $primary;
+        right: 5px;
+    }
+    .nodeStoreAnimation {
+        position: absolute;
+        left: -5px;
+        background-color: $toastLeft;
+        border-radius: 50%;
+        color: $workspaceTopBarFontColor;
+        font-weight: bold;
+        font-size: 11pt;
+        text-align: center;
+        width: 35px;
+        height: 35px;
+        padding-top: 7px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    .timeout {
+        background-color: $toastLeftError;
+        color: white;
+        border-radius: 20pt;
+        position: fixed;
+        top: 15px;
+        left: 200px;
+        font-size: 1rem;
+        padding: 10px 15px;
+        padding-left: 40px;
+        z-index: 105;
+
+        i {
+            position: absolute;
+            top: 7px;
+            left: 10px;
+        }
+    }
 }
 
-.noScope{
-  margin-left:60px;
+.noScope {
+    margin-left: 60px;
 }
-.topBar{
-  @include placeholder{
-    color: mix($workspaceTopBarFontColor,$workspaceTopBarBackground,50%); //rgba(255,255,255,0.165);/* => #595959;*/
-  }
+.topBar {
+    @include placeholder {
+        color: mix(
+            $workspaceTopBarFontColor,
+            $workspaceTopBarBackground,
+            50%
+        ); //rgba(255,255,255,0.165);/* => #595959;*/
+    }
 }
-.topBar input,.topBar input:focus{
-  padding: 0 40px;
-  border-radius: 2px;
-  width:100%;
-  background: mix($workspaceTopBarFontColor,$workspaceTopBarBackground,12%); //rgba(255,255,255,0.165);/* => #595959;*/
-  border:none!important;
-  height:40px;
-  box-shadow:none!important;
-  -webkit-appearance: none;
+.topBar input,
+.topBar input:focus {
+    padding: 0 40px;
+    border-radius: 2px;
+    width: 100%;
+    background: mix(
+        $workspaceTopBarFontColor,
+        $workspaceTopBarBackground,
+        12%
+    ); //rgba(255,255,255,0.165);/* => #595959;*/
+    border: none !important;
+    height: 40px;
+    box-shadow: none !important;
+    -webkit-appearance: none;
 }
-.searchInputGroup{
-  position: relative;
-  width:100%;
-  max-width:500px;
+.searchInputGroup {
+    position: relative;
+    width: 100%;
+    max-width: 500px;
 }
-.noUser .searchInputGroup{
-  width:calc(100% - 150px);
+.noUser .searchInputGroup {
+    width: calc(100% - 150px);
 }
 
 .topBar .topBarSearch form {
-  position: relative;
+    position: relative;
 }
 
 .topBar .topBarSearch input:focus {
-  @include setGlobalInsetFocus();
+    @include setGlobalInsetFocus();
 }
-.searchIcon,.searchClearIcon{
-  font-size: 22px !important;
-  position: absolute;
-  top: 10px;
+.searchIcon,
+.searchClearIcon {
+    font-size: 22px !important;
+    position: absolute;
+    top: 10px;
 }
-.searchIcon{
-  left: 8px;
+.searchIcon {
+    left: 8px;
 }
-.searchClearIcon{
-  right:-70px;
-  @include clickable();
+.searchClearIcon {
+    right: -70px;
+    @include clickable();
 }
-.topBar .user{
-  position: relative;
-  // space for links like imprint
-  top:3px;
-  display: flex;
-  padding-left: 7px;
-  padding-right: 0;
-  div{
-    overflow: hidden;
-    margin-top: 1px;
-    word-break: break-all;
-    display: inline-block;
-    text-transform: none;
-  }
+.topBar .user {
+    position: relative;
+    // space for links like imprint
+    top: 3px;
+    display: flex;
+    padding-left: 7px;
+    padding-right: 0;
+    div {
+        overflow: hidden;
+        margin-top: 1px;
+        word-break: break-all;
+        display: inline-block;
+        text-transform: none;
+    }
 }
 
-.topBar .help{
-  margin-top: 6px;
-  margin-right: 15px;
+.topBar .help {
+    margin-top: 6px;
+    margin-right: 15px;
 }
-.topBar .user span{
-  font-size:100%;
+.topBar .user span {
+    font-size: 100%;
 }
-.topBar .user i{
-  font-size:25px;
-  margin-right: 5px;
-  margin-left: 5px;
-  margin-top: 3px;
+.topBar .user i {
+    font-size: 25px;
+    margin-right: 5px;
+    margin-left: 5px;
+    margin-top: 3px;
 }
-$licenseInfoHeight:40px;
-.sidenav{
-  .sidenav-main{
-    min-height:calc(100% - #{$licenseInfoHeight});
-  }
-  .license-info{
-    display: flex;
-    justify-content: flex-end;
-    align-items: center;
-    padding:0 20px;
-    width: 100%;
-    height: $licenseInfoHeight;
-    color: $textLight;
-    font-size: 90%;
-    @include clickable();
-  }
+.userMenu,
+.helpMenu {
+    position: absolute;
+    right: 0;
+    top: $mainnavHeight - 10px;
+    width: 200px;
 }
-.sidenav .button{
-  padding:20px 30px;
-  width:100%;
-  display: flex;
-  align-items: center;
-  border-radius: 0;
-  color: $textMain;
-  transition: all $transitionNormal;
-  &:hover{
-    background-color:$workspaceTreeSelectedBackground;
-  }
-}
-:host ::ng-deep .sidenav .mat-button:hover .mat-button-focus-overlay{
-  opacity:0;
-}
-.userMenu,.helpMenu{
-  position: absolute;
-  right:0;
-  top: $mainnavHeight - 10px;
-  width:200px;
-}
-.userMenu{
-  top: $mainnavHeight - 20px;
-  right:40px;
-}
-.sidenav .button i{
-  padding-right:10px;
-}
-.sidenav .button.disabled{
-  cursor:default;
-  color:$textVeryLight;
-}
-.sidenav .selected{
-  color: $primary;
-  font-weight: bold;
-  background:$workspaceTreeSelectedBackgroundEffect!important;
-}
-.sidenav{
-  position: fixed;
-  top:0;
-  left:0;
-  height:100%;
-  z-index: 300;
-  overflow-y: auto;
-  background: $workspaceTreeBackground;
-  width:$workspaceSidebarWidth;
-  @include materialShadow();
-  &:focus{
-    @include removeDefaultFocus();
-  }
+.userMenu {
+    top: $mainnavHeight - 20px;
+    right: 40px;
 }
 
 #scrollToTop {
-  transition: all $transitionNormal;
-  position: fixed;
-  bottom: 0;
-  left: 50%;
-  transform: translateX(-50%);
-  z-index: 5;
-  padding: 0 17px;
-  border-radius: 50px 50px 0 0;
-  font-size: $fontSizeXSmall;
-  background-color: $primary;
-  color: $textOnPrimary;
-  text-transform: uppercase;
-  i {
-    font-size: 16px;
-    margin: 0 -5px 0 -10px;
-  }
+    transition: all $transitionNormal;
+    position: fixed;
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 5;
+    padding: 0 17px;
+    border-radius: 50px 50px 0 0;
+    font-size: $fontSizeXSmall;
+    background-color: $primary;
+    color: $textOnPrimary;
+    text-transform: uppercase;
+    i {
+        font-size: 16px;
+        margin: 0 -5px 0 -10px;
+    }
 }
-.topBar{
-  .scopeIcon{
-    margin-left: 13px;
-    position: relative;
-    top: 1px;
-    display:none;
-  }
-  .iconPerson{
-    display:none;
-  }
-  user-avatar{
-    position: relative;
-    top: 8px;
-    margin-right: 7px;
-  }
+.topBar {
+    .scopeIcon {
+        margin-left: 13px;
+        position: relative;
+        top: 1px;
+        display: none;
+    }
+    .iconPerson {
+        display: none;
+    }
+    user-avatar {
+        position: relative;
+        top: 8px;
+        margin-right: 7px;
+    }
 }
-.scopeNameMobile{
-  display:none;
+.scopeNameMobile {
+    display: none;
 }
-.add-material{
-  display: flex;
-  align-items: center;
+.add-material {
+    display: flex;
+    align-items: center;
 }
 .create-dummy {
-  width: 0;
-  height: 0;
-  opacity: 0;
-  pointer-events: none;
-  position: fixed;
+    width: 0;
+    height: 0;
+    opacity: 0;
+    pointer-events: none;
+    position: fixed;
 }
-.topbar-search-right{
-  display: flex;
+.topbar-search-right {
+    display: flex;
 }
-:host .topBar ::ng-deep .mat-button-focus-overlay {
-  background-color: white;
+:host .topBar ::ng-deep button.mat-button {
+    &:not([disabled]) .mat-button-focus-overlay {
+        background-color: white;
+    }
+    &[disabled] {
+        color: unset;
+    }
 }
 @media screen and (max-width: ($mobileWidth+$mobileStage*5)) {
-  .searchInputGroup{
-    width: calc(100% - 80px);
-  }
+    .searchInputGroup {
+        width: calc(100% - 80px);
+    }
 }
-@media screen and (max-width: ($mobileTabSwitchWidth)){
-  #scrollToTop {
-    display: none !important;
-  }
-  .scopeNameMobile{
-    display: flex;
-    font-weight: bold;
-    font-size: 130%;
-    margin-top: -20px;
-  }
-  .menuButton {
-    width: auto;
-    min-width: 65px;
-    margin-bottom: 3px;
-    cursor:default!important;
-    display: none;
-    .barIcon{
-      display:none;
+@media screen and (max-width: ($mobileTabSwitchWidth)) {
+    #scrollToTop {
+        display: none !important;
     }
-  }
-  .sidenav,.dialog-sidenav{
-    display: none;
-  }
-  .topBar{
-    .user {
-      top: 0;
+    .scopeNameMobile {
+        display: flex;
+        font-weight: bold;
+        font-size: 130%;
+        margin-top: -20px;
     }
-    .rocketchat {
-      display: flex;
-    }
-    .nodeStore, .help, .imprint{
-      display: none;
-    }
-    .user{
-      /*top:0;*/
-    }
-    .topBarSearch{
-      padding-left: 20px;
-      padding-right: 12px;
-    }
-    .timeout{
-      display: none;
-    }
-  }
-
-  .tab-nav{
-    position:fixed;
-    z-index: $mobileTabsZIndex;
-    width:100%;
-    bottom:0;
-    display:flex;
-    >div{
-      display:flex;
-      width:100%;
-      background-color: #fff;
-      overflow-x: auto;
-      height:$mobileTabNavHeight;
-      @include materialShadow();
-    }
-    .button{
-      color:$textLight;
-      border-top: 4px solid transparent;
-      &.selected{
-        color:$primary;
-        border-color: $primary;
-        >div >span{
-          font-weight:bold;
+    .menuButton {
+        width: auto;
+        min-width: 65px;
+        margin-bottom: 3px;
+        cursor: default !important;
+        display: none;
+        .barIcon {
+            display: none;
         }
-      }
-      display:flex;
-      width:0;
-      min-width:85px;
-      flex-grow: 1;
-      flex-direction: column;
-      align-items: center;
-      padding:9px 10px;
-      >span{
-        padding-top:1px;
-        font-size:9pt;
-      }
     }
-  }
+    .topBar {
+        .user {
+            top: 0;
+        }
+        .rocketchat {
+            display: flex;
+        }
+        .nodeStore,
+        .help,
+        .imprint {
+            display: none;
+        }
+        .topBarSearch {
+            padding-left: 20px;
+            padding-right: 12px;
+        }
+        .timeout {
+            display: none;
+        }
+    }
+
+    .tab-nav {
+        position: fixed;
+        z-index: $mobileTabsZIndex;
+        width: 100%;
+        bottom: 0;
+        display: flex;
+    }
 }
-@media screen and (max-width: ($mobileWidth - $mobileStage*1)){
-  .topBar .user{
-    padding: 0;
-    justify-content: center;
-    .material-icons{
-      margin-left: 0;
+@media screen and (max-width: ($mobileWidth - $mobileStage*1)) {
+    .topBar .user {
+        padding: 0;
+        justify-content: center;
+        .material-icons {
+            margin-left: 0;
+        }
+        div {
+            display: none;
+        }
+        .iconArrow {
+            display: none;
+        }
     }
-    div {
-      display: none;
-    }
-    .iconArrow {
-      display:none;
-    }
-  }
 }
-@media screen and (max-width: ($mobileWidth+$mobileStage*1)){
-  .topBar span,
-  .topBar .user button{
-    display:none;
-  }
-  .topBar {
-    .eduImage{
-      display:none;
+@media screen and (max-width: ($mobileWidth+$mobileStage*1)) {
+    .topBar span,
+    .topBar .user button {
+        display: none;
     }
-    .scopeIcon{
-      display: flex;
+    .topBar {
+        .eduImage {
+            display: none;
+        }
+        .scopeIcon {
+            display: flex;
+        }
     }
-  }
 }
-@media print{
-  .topBar {
-    position: absolute;
-  }
+@media print {
+    .topBar {
+        position: absolute;
+    }
 }

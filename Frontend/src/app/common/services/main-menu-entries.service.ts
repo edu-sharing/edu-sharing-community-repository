@@ -1,0 +1,329 @@
+import { Injectable } from '@angular/core';
+import { ActivatedRoute, Params, Router } from '@angular/router';
+import { AsyncSubject, Observable } from 'rxjs';
+import { BridgeService } from '../../core-bridge-module/bridge.service';
+import {
+    ConfigurationService,
+    FrameEventsService,
+    LoginResult,
+    RestConnectorService,
+    RestConstants,
+    UIConstants,
+    UIService,
+    AccessScope,
+    RestOrganizationService,
+    OrganizationOrganizations,
+    RestMediacenterService,
+} from '../../core-module/core.module';
+import { OPEN_URL_MODE } from '../../core-module/ui/ui-constants';
+import { UIHelper } from '../../core-ui-module/ui-helper';
+
+type Target = { type: 'path'; path: string } | { type: 'url'; url: string };
+
+export interface Entry {
+    name: string;
+    icon: string;
+    scope?: string;
+    isDisabled: boolean;
+    isSeparate: boolean;
+    isCustom: boolean;
+    open: () => void;
+}
+
+interface CustomEntryDefinition {
+    name: string;
+    icon: string;
+    position: number;
+    path?: string;
+    url?: string;
+    scope?: string;
+    isDisabled?: boolean;
+    isSeperate?: boolean;
+    onlyDesktop?: boolean;
+}
+
+interface EntryDefinition {
+    name: string;
+    icon: string;
+    target: Target;
+    scope: string;
+    isSeparate?: boolean;
+    isVisible: (() => boolean) | true;
+}
+
+@Injectable()
+export class MainMenuEntriesService {
+    entries$: Observable<Entry[]>;
+
+    private entries = new AsyncSubject<Entry[]>();
+
+    // Initialized on construction.
+    private config: {
+        menuEntries?: CustomEntryDefinition[];
+        hideMainMenu?: string[];
+        stream?: { enabled: boolean };
+    };
+    private loginInfo: LoginResult;
+
+    // Conditionally initialized on construction.
+    private safeScope: AccessScope;
+    private organizations: OrganizationOrganizations;
+    private mediaCenters: { administrationAccess: boolean }[];
+
+    private readonly defaultEntryDefinitions: EntryDefinition[] = [
+        {
+            name: 'SIDEBAR.WORKSPACE',
+            icon: 'cloud',
+            target: { type: 'path', path: 'workspace/files' },
+            scope: 'workspace',
+            isVisible: () =>
+                !this.loginInfo.isGuest && this.canAccessWorkspace(),
+        },
+        {
+            name: 'SIDEBAR.SEARCH',
+            icon: 'search',
+            target: { type: 'path', path: 'search' },
+            scope: 'search',
+            isVisible: true,
+        },
+        {
+            name: 'SIDEBAR.COLLECTIONS',
+            icon: 'layers',
+            target: { type: 'path', path: 'collections' },
+            scope: 'collections',
+            isVisible: true,
+        },
+        {
+            name: 'SIDEBAR.STREAM',
+            icon: 'event',
+            target: { type: 'path', path: 'stream' },
+            scope: 'stream',
+            isVisible: () => this.config.stream?.enabled,
+        },
+        {
+            name: 'SIDEBAR.LOGIN',
+            icon: 'person',
+            target: { type: 'path', path: 'login' },
+            scope: 'login',
+            isVisible: () => this.loginInfo.isGuest,
+        },
+        {
+            name: 'SIDEBAR.SECURE',
+            icon: 'lock',
+            target: { type: 'path', path: 'workspace/safe' },
+            scope: 'safe',
+            isVisible: () => !this.ui.isMobile() && this.safeScope.hasAccess,
+        },
+        {
+            name: 'SIDEBAR.PERMISSIONS',
+            icon: 'group_add',
+            target: { type: 'path', path: 'permissions' },
+            scope: 'permissions',
+            isVisible: () =>
+                !this.ui.isMobile() &&
+                (this.organizations.canCreate ||
+                    this.organizations.organizations.filter(
+                        group => group.administrationAccess,
+                    ).length > 0),
+        },
+        {
+            name: 'SIDEBAR.ADMIN',
+            icon: 'settings',
+            scope: 'admin',
+            target: { type: 'path', path: 'admin' },
+            isVisible: () => !this.ui.isMobile() && this.showAdminEntry(),
+        },
+    ];
+
+    constructor(
+        private bridge: BridgeService,
+        private configuration: ConfigurationService,
+        private frameEvents: FrameEventsService,
+        private restConnector: RestConnectorService,
+        private restMediacenter: RestMediacenterService,
+        private restOrganization: RestOrganizationService,
+        private route: ActivatedRoute,
+        private router: Router,
+        private ui: UIService,
+    ) {
+        this.entries$ = this.entries.asObservable();
+        this.init();
+    }
+
+    private async init() {
+        await this.initInformation();
+        this.initEntries();
+    }
+
+    private async initInformation() {
+        // Fetch information in parallel as far as possible.
+        await Promise.all([
+            this.configuration
+                .getAll()
+                .toPromise()
+                .then(config => (this.config = config)),
+            this.restConnector
+                .isLoggedIn()
+                .toPromise()
+                .then(loginInfo => (this.loginInfo = loginInfo)),
+        ]);
+        // The backend will throw some errors when making unauthorized calls, so we only initialize
+        // these variables when we will need them.
+        if (this.loginInfo.isValidLogin && !this.ui.isMobile()) {
+            await Promise.all([
+                this.restConnector
+                    .hasAccessToScope(RestConstants.SAFE_SCOPE)
+                    .toPromise()
+                    .then(safeScope => (this.safeScope = safeScope)),
+                this.restOrganization
+                    .getOrganizations()
+                    .toPromise()
+                    .then(
+                        organizations => (this.organizations = organizations),
+                    ),
+                this.restMediacenter
+                    .getMediacenters()
+                    .toPromise()
+                    .then(mediaCenters => (this.mediaCenters = mediaCenters)),
+            ]);
+        }
+    }
+
+    private initEntries() {
+        let entries: Entry[] = [];
+        if (this.loginInfo.isValidLogin) {
+            entries = this.generateEntries();
+            entries = this.filterHiddenEntries(entries);
+        }
+        entries = this.insertCustomEntries(entries);
+        this.entries.next(entries);
+        this.entries.complete();
+    }
+
+    private generateEntries(): Entry[] {
+        const entries: Entry[] = [];
+        for (const entryDefinition of this.defaultEntryDefinitions) {
+            const isVisible =
+                typeof entryDefinition.isVisible === 'function'
+                    ? entryDefinition.isVisible()
+                    : entryDefinition.isVisible;
+            if (isVisible) {
+                entries.push(this.generateEntry(entryDefinition));
+            }
+        }
+        return entries;
+    }
+
+    private filterHiddenEntries(entries: Entry[]): Entry[] {
+        if (this.config.hideMainMenu) {
+            return entries.filter(
+                entry => !this.config.hideMainMenu.includes(entry.scope),
+            );
+        } else {
+            return entries;
+        }
+    }
+
+    private insertCustomEntries(entries: Entry[]): Entry[] {
+        if (this.config.menuEntries) {
+            for (const customEntryDefinition of this.config.menuEntries) {
+                if (customEntryDefinition.onlyDesktop && this.ui.isMobile()) {
+                    continue;
+                }
+                let pos = customEntryDefinition.position;
+                if (pos < 0) {
+                    pos = entries.length - pos;
+                }
+                entries.splice(
+                    pos,
+                    0,
+                    this.generateCustomEntry(customEntryDefinition),
+                );
+            }
+        }
+        return entries;
+    }
+
+    private generateEntry(entryDefinition: EntryDefinition): Entry {
+        const entry = {
+            name: entryDefinition.name,
+            icon: entryDefinition.icon,
+            scope: entryDefinition.scope,
+            isDisabled: false,
+            isSeparate: !!entryDefinition.isSeparate,
+            isCustom: false,
+            open: () => this.openEntry(entry, entryDefinition.target),
+        };
+        return entry;
+    }
+
+    private generateCustomEntry(
+        customEntryDefinition: CustomEntryDefinition,
+    ): Entry {
+        const target: Target = customEntryDefinition.path
+            ? { type: 'path', path: customEntryDefinition.path }
+            : { type: 'url', url: customEntryDefinition.url };
+        const entry = {
+            name: customEntryDefinition.name,
+            icon: customEntryDefinition.icon,
+            scope: customEntryDefinition.scope,
+            isDisabled: !!customEntryDefinition.isDisabled,
+            isSeparate: !!customEntryDefinition.isSeperate,
+            isCustom: true,
+            open: () => this.openEntry(entry, target),
+        };
+        return entry;
+    }
+
+    private canAccessWorkspace(): boolean {
+        return (
+            this.loginInfo.toolPermissions &&
+            this.loginInfo.toolPermissions.indexOf(
+                RestConstants.TOOLPERMISSION_WORKSPACE,
+            ) !== -1
+        );
+    }
+
+    private showAdminEntry(): boolean {
+        return (
+            this.loginInfo.isAdmin ||
+            this.loginInfo.toolPermissions.indexOf(
+                RestConstants.TOOLPERMISSION_GLOBAL_STATISTICS,
+            ) !== -1 ||
+            this.mediaCenters.filter(mc => mc.administrationAccess).length > 0
+        );
+    }
+
+    private async openEntry(entry: Entry, target: Target) {
+        this.frameEvents.broadcastEvent(
+            FrameEventsService.EVENT_VIEW_SWITCHED,
+            entry.scope,
+        );
+        switch (target.type) {
+            case 'path':
+                const currentParams = await this.route.queryParams
+                    .first()
+                    .toPromise();
+                const params: Params = {};
+                for (const key of ['reurl', 'applyDirectories']) {
+                    if (currentParams.hasOwnProperty(key)) {
+                        params[key] = currentParams[key];
+                    }
+                }
+                this.router.navigate(
+                    [UIConstants.ROUTER_PREFIX + target.path],
+                    {
+                        queryParams: params,
+                    },
+                );
+                break;
+            case 'url':
+                UIHelper.openUrl(
+                    target.url,
+                    this.bridge,
+                    OPEN_URL_MODE.BlankSystemBrowser,
+                );
+                break;
+        }
+    }
+}

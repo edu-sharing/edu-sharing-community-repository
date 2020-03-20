@@ -138,12 +138,11 @@
          *ngIf="showCreate && connectorList">
         <a *ngFor="let connector of connectorList.connectors;let i=index"
            class="collection-item"
-           [class.collection-item-seperate]="!i"
+           [class.collection-item-separate]="!i"
            tabindex="0"
            (keyup.enter)="showCreate=false;createConnectorName='';createConnectorType=connector"
            (click)="showCreate=false;createConnectorName='';createConnectorType=connector">
             <i class="material-icons">{{connector.icon}}</i> {{ 'CONNECTOR.'+connector.id+'.NAME' | translate}}<img class="connectorBeta" src="assets/images/beta.svg"></a>
-        <!-- <a class="collection-item collection-item-seperate" (click)="listLTI()"><i class="material-icons">extension</i> {{ 'WORKSPACE.ADD_LTI' | translate}}</a> -->
     </div>
     <workspace-create-connector *ngIf="createConnectorName!=null"
                                 [name]="createConnectorName"

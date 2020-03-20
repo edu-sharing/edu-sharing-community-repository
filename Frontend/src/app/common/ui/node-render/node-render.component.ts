@@ -235,7 +235,7 @@ export class NodeRenderComponent implements EventListener {
             }
             NodeRenderComponent.close(this.location);
             // use a timeout to let the browser try to go back in history first
-            setTimeout(()=>this.mainNavRef.openSidenav(),250);
+            setTimeout(()=>this.mainNavRef.toggleMenuSidebar(),250);
           }
         }
       }

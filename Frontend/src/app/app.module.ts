@@ -33,6 +33,8 @@ import {ButtonsTestComponent} from './common/test/buttons/buttons-test.component
 import {InputsTestComponent} from './common/test/inputs/inputs-test.component';
 import {UserAvatarTestComponent} from './common/test/user-avatar/user-avatar-test.component';
 import {ModalTestComponent} from './common/test/modal/modal-test.component';
+import { MainMenuSidebarComponent } from './common/ui/main-menu-sidebar/main-menu-sidebar.component';
+import { MainMenuBottomComponent } from './common/ui/main-menu-bottom/main-menu-bottom.component';
 
 
 // http://blog.angular-university.io/angular2-ngmodule/
@@ -61,7 +63,9 @@ import {ModalTestComponent} from './common/test/modal/modal-test.component';
         DECLARATIONS_MESSAGES,
         DECLARATIONS_SHARING,
         DECLARATIONS_SHARE_APP,
-        DECLARATIONS_SERVICES
+        DECLARATIONS_SERVICES,
+        MainMenuSidebarComponent,
+        MainMenuBottomComponent
     ],
     imports: IMPORTS,
     providers: [
