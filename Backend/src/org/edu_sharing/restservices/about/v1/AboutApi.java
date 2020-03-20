@@ -123,7 +123,7 @@ public class AboutApi  {
     }
     
     @GET
-	@Path("/status/repo/{mode}")
+	@Path("/status/{mode}")
 	@ApiOperation(value = "status of repo services", notes = "returns http status 200 when ok")
 
 	@ApiResponses(value = { @ApiResponse(code = 200, message = RestConstants.HTTP_200, response = String.class),
