@@ -23,14 +23,7 @@ import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.restservices.*;
 import org.edu_sharing.restservices.node.v1.model.NodeEntry;
 import org.edu_sharing.restservices.search.v1.model.SearchParameters;
-import org.edu_sharing.restservices.shared.ErrorResponse;
-import org.edu_sharing.restservices.shared.Filter;
-import org.edu_sharing.restservices.shared.MdsQueryCriteria;
-import org.edu_sharing.restservices.shared.Node;
-import org.edu_sharing.restservices.shared.NodeRef;
-import org.edu_sharing.restservices.shared.NodeSearch;
-import org.edu_sharing.restservices.shared.Pagination;
-import org.edu_sharing.restservices.shared.SearchResult;
+import org.edu_sharing.restservices.shared.*;
 import org.edu_sharing.service.repoproxy.RepoProxyFactory;
 import org.edu_sharing.service.search.SearchService;
 import org.edu_sharing.service.search.SearchService.CombineMode;
@@ -58,7 +51,7 @@ public class SearchApi {
 
 	@ApiOperation(value = "Perform queries based on metadata sets V2.", notes = "Perform queries based on metadata sets V2.")
 
-	@ApiResponses(value = { @ApiResponse(code = 200, message = RestConstants.HTTP_200, response = SearchResult.class),
+	@ApiResponses(value = { @ApiResponse(code = 200, message = RestConstants.HTTP_200, response = SearchResultNode.class),
 			@ApiResponse(code = 400, message = RestConstants.HTTP_400, response = ErrorResponse.class),
 			@ApiResponse(code = 401, message = RestConstants.HTTP_401, response = ErrorResponse.class),
 			@ApiResponse(code = 403, message = RestConstants.HTTP_403, response = ErrorResponse.class),
@@ -117,7 +110,7 @@ public class SearchApi {
 		    	pagination.setTotal(search.getCount());
 		    	
 		    	
-		    	SearchResult<Node> response = new SearchResult<>();
+		    	SearchResultNode response = new SearchResultNode();
 		    	response.setNodes(data);
 		    	response.setIgnored(search.getIgnored());
 		    	response.setPagination(pagination);	    	
@@ -219,7 +212,7 @@ public class SearchApi {
 
 	@ApiOperation(value = "Perform queries based on metadata sets.", notes = "Perform queries based on metadata sets.")
 
-	@ApiResponses(value = { @ApiResponse(code = 200, message = RestConstants.HTTP_200, response = SearchResult.class),
+	@ApiResponses(value = { @ApiResponse(code = 200, message = RestConstants.HTTP_200, response = SearchResultNode.class),
 			@ApiResponse(code = 400, message = RestConstants.HTTP_400, response = ErrorResponse.class),
 			@ApiResponse(code = 401, message = RestConstants.HTTP_401, response = ErrorResponse.class),
 			@ApiResponse(code = 403, message = RestConstants.HTTP_403, response = ErrorResponse.class),
@@ -241,7 +234,7 @@ public class SearchApi {
 				
 				Filter filter = new Filter(propertyFilter);
 				NodeSearch nodeSearch = NodeDao.searchFingerprint(repoDao, nodeId, filter);
-				SearchResult response = new SearchResult();
+				SearchResultNode response = new SearchResultNode();
 				
 				List<Node> data = new ArrayList<Node>();
 				for (org.edu_sharing.restservices.shared.NodeRef ref : nodeSearch.getResult()) {
@@ -274,7 +267,7 @@ public class SearchApi {
 
 	@ApiOperation(value = "Search for custom properties with custom values", notes = "e.g. property=cm:name, value:*Test*")
 
-	@ApiResponses(value = { @ApiResponse(code = 200, message = RestConstants.HTTP_200, response = SearchResult.class),
+	@ApiResponses(value = { @ApiResponse(code = 200, message = RestConstants.HTTP_200, response = SearchResultNode.class),
 			@ApiResponse(code = 400, message = RestConstants.HTTP_400, response = ErrorResponse.class),
 			@ApiResponse(code = 401, message = RestConstants.HTTP_401, response = ErrorResponse.class),
 			@ApiResponse(code = 403, message = RestConstants.HTTP_403, response = ErrorResponse.class),
@@ -353,9 +346,9 @@ public class SearchApi {
 	    	pagination.setFrom(search.getSkip());
 	    	pagination.setCount(data.size());
 	    	pagination.setTotal(search.getCount());
-	    	
-	    	
-	    	SearchResult<Node> response = new SearchResult<>();
+
+
+			SearchResultNode response = new SearchResultNode();
 	    	response.setNodes(data);
 	    	response.setPagination(pagination);	    	
 	    	response.setFacettes(search.getFacettes());
@@ -371,7 +364,7 @@ public class SearchApi {
 	@Path("/relevant/{repository}")
 	@Consumes({ "application/json" })
 	@ApiOperation(value = "Get relevant nodes for the current user")
-	@ApiResponses(value = { @ApiResponse(code = 200, message = RestConstants.HTTP_200, response = SearchResult.class),
+	@ApiResponses(value = { @ApiResponse(code = 200, message = RestConstants.HTTP_200, response = SearchResultNode.class),
 			@ApiResponse(code = 400, message = RestConstants.HTTP_400, response = ErrorResponse.class),
 			@ApiResponse(code = 401, message = RestConstants.HTTP_401, response = ErrorResponse.class),
 			@ApiResponse(code = 403, message = RestConstants.HTTP_403, response = ErrorResponse.class),
@@ -387,7 +380,7 @@ public class SearchApi {
 			RepositoryDao repoDao = RepositoryDao.getRepository(repository);
 			Filter filter = new Filter(propertyFilter);
 			NodeSearch nodeSearch = NodeDao.getRelevantNodes(repoDao,skipCount!=null ? skipCount : 0,maxItems!=null ? maxItems : RestConstants.DEFAULT_MAX_ITEMS);
-			SearchResult response = new SearchResult();
+			SearchResultNode response = new SearchResultNode();
 
 			List<Node> data = new ArrayList<>();
 			for (org.edu_sharing.restservices.shared.NodeRef ref : nodeSearch.getResult()) {
