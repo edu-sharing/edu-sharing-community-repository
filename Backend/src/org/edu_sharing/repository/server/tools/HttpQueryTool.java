@@ -82,12 +82,12 @@ public class HttpQueryTool {
 		if(!initFinished){
 			try{
 				Config config = LightbendConfigLoader.get().getConfig("repository.proxy");
-				host = config.getString("host");
 				proxyhost = config.getString("proxyhost");
-				proxyUsername = config.getString("proxyuser");
-				proxyPass = config.getString("proxypass");
 				proxyport = config.getInt("proxyport");
-				nonProxyHosts = config.getString("nonproxyhosts");
+				host = config.hasPath("host") ? config.getString("host") : null;
+				proxyUsername = config.hasPath("proxyuser") ? config.getString("proxyuser") : null;
+				proxyPass = config.hasPath("proxypass") ? config.getString("proxypass") : null;
+				nonProxyHosts = config.hasPath("nonproxyhosts") ? config.getString("nonproxyhosts") : null;
 			}catch(Exception e){
 				logger.info("No proxy to use found or invalid proxy config: "+e.getMessage());
 				logger.info("If no proxy should be used, you can ignore this message");
