@@ -408,39 +408,41 @@ public class MetadataTemplateRenderer {
 		Map<String, MetadataKey> valuesMap=widget.getValuesAsMap();
 		String[] keys = properties.get(widget.getId());
 		boolean empty=true;
-		for (String value : keys) {
-			MetadataKey key = valuesMap.get(value);
-			if (key == null)
-				continue;
-			List<String> path=new ArrayList<>();
-			int preventInfiniteLoop = 0;
-			while(key!=null) {
-				path.add(key.getCaption());
-				key=valuesMap.get(key.getParent());
-				if(preventInfiniteLoop++ > 100) {
-					logger.error("check valuespace for widget:" + widget.getId() + " key:" + key.getKey());
-					break;
-				}
-			}
-			path = Lists.reverse(path);
-			int i = 0;
-			if(renderingMode.equals(RenderingMode.HTML)) {
-				widgetHtml.append("<div class='mdsValue'>");
-			}
-			empty = path.size() == 0;
-			for (String p : path) {
-				if ( i > 0) {
-					if(renderingMode.equals(RenderingMode.HTML)){
-						widgetHtml.append("<i class='material-icons'>keyboard_arrow_right</i>");
-					}else if(renderingMode.equals(RenderingMode.TEXT)){
-						widgetHtml.append(" -> ");
+		if(keys != null) {
+			for (String value : keys) {
+				MetadataKey key = valuesMap.get(value);
+				if (key == null)
+					continue;
+				List<String> path = new ArrayList<>();
+				int preventInfiniteLoop = 0;
+				while (key != null) {
+					path.add(key.getCaption());
+					key = valuesMap.get(key.getParent());
+					if (preventInfiniteLoop++ > 100) {
+						logger.error("check valuespace for widget:" + widget.getId() + " key:" + key.getKey());
+						break;
 					}
 				}
-				widgetHtml.append(p);
-				i++;
-			}
-			if(renderingMode.equals(RenderingMode.HTML)) {
-				widgetHtml.append("</div>");
+				path = Lists.reverse(path);
+				int i = 0;
+				if (renderingMode.equals(RenderingMode.HTML)) {
+					widgetHtml.append("<div class='mdsValue'>");
+				}
+				empty = path.size() == 0;
+				for (String p : path) {
+					if (i > 0) {
+						if (renderingMode.equals(RenderingMode.HTML)) {
+							widgetHtml.append("<i class='material-icons'>keyboard_arrow_right</i>");
+						} else if (renderingMode.equals(RenderingMode.TEXT)) {
+							widgetHtml.append(" -> ");
+						}
+					}
+					widgetHtml.append(p);
+					i++;
+				}
+				if (renderingMode.equals(RenderingMode.HTML)) {
+					widgetHtml.append("</div>");
+				}
 			}
 		}
 		return empty;
