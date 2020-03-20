@@ -1234,13 +1234,15 @@ export class MainNavComponent implements AfterViewInit {
                     new DialogButton(
                         'WORKSPACE.RELOGIN',
                         DialogButton.TYPE_PRIMARY,
-                        () =>
+                        () => {
                             RestHelper.goToLogin(
                                 this.router,
                                 this.configService,
                                 this.isSafe() ? RestConstants.SAFE_SCOPE : null,
                                 null,
-                            ),
+                            );
+                            this.toast.closeModalDialog();
+                        }
                     ),
                 ],
                 false,
