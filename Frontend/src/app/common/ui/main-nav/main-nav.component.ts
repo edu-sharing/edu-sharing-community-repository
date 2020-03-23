@@ -451,16 +451,6 @@ export class MainNavComponent implements AfterViewInit {
         ]);
     }
 
-    getCurrentScopeIcon() {
-        if (this._currentScope == 'login' || this._currentScope == 'profiles')
-            return 'person';
-        if (this._currentScope == 'oer') return 'public';
-        for (const button of this.sidebarButtons) {
-            if (button.scope == this._currentScope) return button.icon;
-        }
-        return null;
-    }
-
     refreshBanner() {
         setTimeout(() => this.handleScroll(null));
     }
