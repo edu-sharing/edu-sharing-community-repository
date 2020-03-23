@@ -16,7 +16,7 @@ import { CollectionWrapper, ConfigurationHelper, ConfigurationService, DialogBut
 import { Helper } from '../../core-module/rest/helper';
 import { MdsHelper } from '../../core-module/rest/mds-helper';
 import { UIAnimation } from '../../core-module/ui/ui-animation';
-import { UIConstants } from '../../core-module/ui/ui-constants';
+import {OPEN_URL_MODE, UIConstants} from '../../core-module/ui/ui-constants';
 import { ListTableComponent } from '../../core-ui-module/components/list-table/list-table.component';
 import { NodeHelper } from '../../core-ui-module/node-helper';
 import {CustomOptions, OptionItem, Scope} from '../../core-ui-module/option-item';
@@ -544,21 +544,21 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
     }
 
     render(event: any) {
-        let node = event.node;
+        const node: Node = event.node;
         if (node.collection) {
             this.switchToCollections(node.ref.id);
             return;
         }
-        /*
-    let useRender=RestNetworkService.isFromHomeRepo(node,this.allRepositories) ||
-      RestNetworkService.getRepositoryById(node.ref.repo,this.allRepositories) && RestNetworkService.getRepositoryById(node.ref.repo,this.allRepositories).repositoryType==RestConstants.REPOSITORY_TYPE_ALFRESCO;
-    if(!useRender){
-      UIHelper.openUrl(node.contentUrl,this.connector.getCordovaService(),OPEN_URL_MODE.Blank);
-      return;
-    }
-    */
+
+        const useRender=RestNetworkService.isHomeRepo(node.ref.repo, this.allRepositories) ||
+                    RestNetworkService.getRepositoryById(node.ref.repo,this.allRepositories).renderingSupported;
+        if(!useRender) {
+          UIHelper.openUrl(node.content.url,this.connector.getBridgeService(),OPEN_URL_MODE.Blank);
+          return;
+        }
+
         this.renderedNode = node;
-        let queryParams = {
+        const queryParams = {
             repository: RestNetworkService.isFromHomeRepo(
                 node,
                 this.allRepositories,
@@ -1044,8 +1044,8 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
                 repo ? repo.id : RestConstants.HOME_REPOSITORY,
                 mdsId,
             );
-            console.log(criterias);
-            const useFrontpage = !criterias || !criterias.length;
+            const useFrontpage = !criterias || !criterias.length && this.isHomeRepository();
+            console.log('useFrontpage: ' + useFrontpage, repo);
             if(useFrontpage && tryFrontpage) {
                 queryRequest = this.nodeApi.getChildren(RestConstants.NODES_FRONTPAGE, [RestConstants.ALL], request);
             }
@@ -1067,7 +1067,7 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
                     );
                 }, error => {
                     if(useFrontpage && tryFrontpage && count === 0){
-                        console.warn("Could not fetch frontpage data, will fallback to a regular search", error);
+                        console.warn('Could not fetch frontpage data, will fallback to a regular search', error);
                         this.searchRepository(
                             repos,
                             criterias,

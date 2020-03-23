@@ -654,7 +654,7 @@ export class MainNavComponent implements AfterViewInit {
         if (this.licenseAgreementNode)
             this.session.set(
                 'licenseAgreement',
-                this.licenseAgreementNode.contentVersion,
+                this.licenseAgreementNode.content.version,
             );
         else this.session.set('licenseAgreement', '0.0');
         this.startTutorial();
@@ -980,7 +980,7 @@ export class MainNavComponent implements AfterViewInit {
                 this.nodeService.getNodeMetadata(nodeId).subscribe(
                     (data: NodeWrapper) => {
                         this.licenseAgreementNode = data.node;
-                        if (version == data.node.contentVersion) {
+                        if (version == data.node.content.version) {
                             this.startTutorial();
                             return;
                         }
