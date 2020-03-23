@@ -348,7 +348,7 @@ export class NodeRenderComponent implements EventListener {
             else {
                 this._node=data.node;
                 this.getSequence(()=> {
-                    this.mdsApi.getSet(this.getMdsId()).subscribe((set) => {
+                    this.mdsApi.getSet(this.getMdsId(), this.repository).subscribe((set) => {
                         this.similarNodeColumns = MdsHelper.getColumns(set,'search');
                         this.mds = set;
 
@@ -618,6 +618,7 @@ export class NodeRenderComponent implements EventListener {
             data[id] = [value];
             params.mds = this.getMdsId();
             params.sidenav = true;
+            params.repository = this.repository;
             params.parameters = JSON.stringify(data);
             this.router.navigate([UIConstants.ROUTER_PREFIX + 'search'], {queryParams: params});
         });
