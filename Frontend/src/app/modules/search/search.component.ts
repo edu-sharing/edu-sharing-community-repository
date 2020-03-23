@@ -576,7 +576,7 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
             'search',
         );
         this.router.navigate(
-            [UIConstants.ROUTER_PREFIX + 'render', node.ref.id],
+            [UIConstants.ROUTER_PREFIX + 'render', encodeURIComponent(node.ref.id)],
             { queryParams: queryParams },
         );
     }
