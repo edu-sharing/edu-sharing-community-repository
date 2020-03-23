@@ -9,6 +9,7 @@ import org.edu_sharing.alfresco.action.RessourceInfoExecuter;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.client.tools.Theme;
 import org.edu_sharing.repository.server.tools.ApplicationInfo;
+import org.edu_sharing.repository.server.tools.ApplicationInfoList;
 import org.edu_sharing.repository.server.tools.URLTool;
 
 public class MimeTypesV2 {
@@ -75,7 +76,9 @@ public class MimeTypesV2 {
 			"text/html",
 			"text/x-java-source"
 			});
-	
+	public MimeTypesV2() {
+		this(ApplicationInfoList.getHomeRepository());
+	}
 	public MimeTypesV2(ApplicationInfo appInfo){
 		this.appInfo=appInfo;
 		this.theme=Theme.getThemeId();

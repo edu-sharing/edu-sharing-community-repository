@@ -89,7 +89,9 @@ public class ApplicationInfo implements Comparable<ApplicationInfo>{
 	public static final String KEY_ALFRESCOCONTEXT = "alfrescocontext";
 	
 	public static final String KEY_SEARCHCLASS = "searchclass";
-	
+
+	public static final String KEY_REMOTE_PROVIDER = "remote_provider";
+
 	public static final String KEY_AUTHENTICATIONTOOLCLASS = "authenticationtoolclass";
 	
 	public static final String KEY_CONTENTURL = "contenturl";
@@ -238,16 +240,6 @@ public class ApplicationInfo implements Comparable<ApplicationInfo>{
 	
 	private String subtype = null;
 
-	private String searchclass = null;
-	
-	private String searchService = null;
-	
-	private String permissionService = null;
-	
-	private String nodeService = null;
-	
-	private String authenticationtoolclass = null;
-	
 	private String repositoryType = null;
 	
 	/**
@@ -410,16 +402,6 @@ public class ApplicationInfo implements Comparable<ApplicationInfo>{
 		permissionwebservice = properties.getProperty("permissionwebservice");
 
 		subtype  = properties.getProperty("subtype");
-
-		searchclass = properties.getProperty(KEY_SEARCHCLASS);
-		
-		searchService = properties.getProperty("searchService");
-		
-		permissionService = properties.getProperty("permissionService");
-		
-		nodeService = properties.getProperty("nodeService");
-		
-		authenticationtoolclass = properties.getProperty("authenticationtoolclass");
 		
 		repositoryType = properties.getProperty(KEY_REPOSITORY_TYPE);
 		
@@ -644,29 +626,6 @@ public class ApplicationInfo implements Comparable<ApplicationInfo>{
 
 	public String getSubtype() {
 		return subtype;
-	}
-
-	/**
-	 * @return the searchclass
-	 */
-	public String getSearchclass() {
-		return searchclass;
-	}
-	
-	public String getSearchService() {
-		return searchService;
-	}
-	
-	public String getPermissionService() {
-		return permissionService;
-	}
-	
-	public String getNodeService() {
-		return nodeService;
-	}
-	
-	public String getAuthenticationtoolclass() {
-		return authenticationtoolclass;
 	}
 
 	/**

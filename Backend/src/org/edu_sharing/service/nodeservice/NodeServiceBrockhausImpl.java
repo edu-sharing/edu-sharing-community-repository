@@ -37,6 +37,9 @@ public class NodeServiceBrockhausImpl extends NodeServiceAdapter{
 		properties.put(CCConstants.LOM_PROP_TECHNICAL_LOCATION,url);
 		return properties;
 	}
-	
 
+	@Override
+	public InputStream getContent(String nodeId) throws Throwable{
+		return null;
+	}
 }

@@ -156,7 +156,7 @@ public interface NodeService {
 
 	void setProperty(String protocol, String storeId, String nodeId, String property, Serializable value);
 
-    GetPreviewResult getPreview(String storeProtocol, String storeIdentifier, String nodeId, String version);
+    GetPreviewResult getPreview(String storeProtocol, String storeIdentifier, String nodeId, HashMap<String, Object> nodeProps, String version);
 
     Collection<NodeRef> getFrontpageNodes() throws Throwable;
 

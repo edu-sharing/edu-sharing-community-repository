@@ -32,7 +32,7 @@ public class Preview  {
 	  
   }
   public Preview(NodeService nodeService,String storeProtocol,String storeIdentifier,String nodeId, String version, HashMap<String, Object> nodeProps) {
-    GetPreviewResult preview = nodeService.getPreview(storeProtocol, storeIdentifier, nodeId, version);
+    GetPreviewResult preview = nodeService.getPreview(storeProtocol, storeIdentifier, nodeId ,nodeProps, version);
     setUrl(preview.getUrl());
     setIsIcon(preview.isIcon());
 

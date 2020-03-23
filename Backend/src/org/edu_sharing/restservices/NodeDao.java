@@ -965,7 +965,7 @@ public class NodeDao {
 	}
 
 	private String getIconURL() {
-		return new MimeTypesV2(repoDao.getApplicationInfo()).getIcon(type,nodeProps,aspects);
+		return new MimeTypesV2().getIcon(type,nodeProps,aspects);
 	}
 	public List<String> getPermissions(String authority) throws DAOException {
 		try{

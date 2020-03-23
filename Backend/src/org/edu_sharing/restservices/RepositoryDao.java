@@ -200,8 +200,13 @@ public class RepositoryDao {
 		repo.setLogo(getLogo());
 		repo.setHomeRepo(isHomeRepo());
 		repo.setRepositoryType(getRepositoryType());
+		repo.setRenderingSupported(getRenderingSupported());
 
 		return repo;
+	}
+
+	private boolean getRenderingSupported() {
+		return RenderingServiceFactory.getRenderingService(getId()).renderingSupported();
 	}
 
 	AuthorityService getAuthorityService(){

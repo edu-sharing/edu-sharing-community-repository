@@ -15,8 +15,9 @@ public class Repo  {
   private String repositoryType = null;
   private String icon = null;
   private String logo = null;
+  private boolean renderingSupported;
 
-  
+
   @JsonProperty("id")
   public String getId() {
     return id;
@@ -63,5 +64,13 @@ public class Repo  {
   }
   public void setRepositoryType(String repositoryType) {
 		this.repositoryType = repositoryType;
+  }
+
+  @JsonProperty
+  public boolean getRenderingSupported() {
+    return renderingSupported;
+  }
+  public void setRenderingSupported(boolean renderingSupported) {
+    this.renderingSupported = renderingSupported;
   }
 }

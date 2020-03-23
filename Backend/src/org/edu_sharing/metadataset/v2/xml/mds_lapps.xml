@@ -3,14 +3,21 @@
 		<inherit>mds</inherit>
 		<i18n>mds</i18n>
 	<widgets>
-      <widget>
-                <id>lappcategorie</id>
-                <caption>Kategegorie</caption>
-                <placeholder>z.B. Astronomie</placeholder>
-                <type>singlevalueTree</type>
-                <valuespace>lappcategories.xml</valuespace>
-            </widget>
-
+      	<widget>
+			<id>lappcategorie</id>
+			<caption>Kategorie</caption>
+			<placeholder>z.B. Astronomie</placeholder>
+			<type>singlevalueTree</type>
+			<valuespace>lappcategories.xml</valuespace>
+		</widget>
+		<widget>
+			<id>cclom:general_keyword</id>
+			<type>multivalueBadges</type>
+			<caption>lom_prop_general_keyword</caption>
+			<placeholder>lom_prop_general_keyword_placeholder</placeholder>
+			<hideIfEmpty>true</hideIfEmpty>
+			<searchable>false</searchable>
+		</widget>
  	<widget>
                 <id>educationsector</id>
                 <caption>Bildungsbereich/-sektor</caption>

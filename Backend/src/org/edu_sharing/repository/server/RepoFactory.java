@@ -51,6 +51,8 @@ import org.edu_sharing.repository.server.tools.AuthenticatorRemoteAppResult;
 import org.edu_sharing.repository.server.tools.AuthenticatorRemoteRepository;
 import org.edu_sharing.repository.server.tools.PropertiesHelper;
 import org.edu_sharing.service.config.ConfigServiceFactory;
+import org.edu_sharing.service.provider.Provider;
+import org.edu_sharing.service.provider.ProviderHelper;
 
 public class RepoFactory {
 
@@ -184,11 +186,7 @@ public class RepoFactory {
 			}
 			else {
 				logger.debug("getting MCBaseClient by REFLECTION for " + repositoryId);
-				String classname = repInfo.getSearchclass();
-				Class clazz = Class.forName(classname);
-				Object obj = clazz.getConstructor(new Class[]{String.class, HashMap.class}).newInstance(new Object[]{repInfo.getAppFile(), authInfo});
-
-				mcBaseClient = (MCBaseClient) obj;
+				mcBaseClient = ProviderHelper.getProviderByApp(repInfo).getApiClient(authInfo);
 			}
 			appClassCache.put(repositoryId, mcBaseClient);
 			logger.debug("returning " + mcBaseClient.getClass().getSimpleName());
@@ -207,12 +205,11 @@ public class RepoFactory {
 		if(result == null){
 			ApplicationInfo appInfo = ApplicationInfoList.getRepositoryInfoById(applicationId);
 			//allow homeapplication and ws client
-			if(appInfo.getAuthenticationtoolclass() == null && appInfo.ishomeNode()){
+			if(!ProviderHelper.hasProvider(appInfo) && appInfo.ishomeNode()){
 				result = new AuthenticationToolAPI();
 				appAuthToolCache.put(applicationId, result);
-			}else if(appInfo.getAuthenticationtoolclass() != null ){
-				Class clazz = Class.forName(appInfo.getAuthenticationtoolclass());
-				result = (AuthenticationTool)clazz.getConstructor(new Class[] { String.class}).newInstance(	new Object[] { appInfo.getAppId()});
+			}else if(ProviderHelper.hasProvider(appInfo)){
+				result = ProviderHelper.getProviderByApp(appInfo).getAuthenticationTool();
 			}else if(appInfo.ishomeNode()){
 				result = new AuthenticationToolAPI();
 				appAuthToolCache.put(applicationId, result);

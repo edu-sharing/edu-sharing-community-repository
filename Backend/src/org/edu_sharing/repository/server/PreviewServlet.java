@@ -34,14 +34,12 @@ import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.repository.StoreRef;
 import org.alfresco.service.cmr.version.VersionService;
 import org.alfresco.service.namespace.QName;
-import org.apache.james.mime4j.io.MaxHeaderLengthLimitException;
 import org.apache.log4j.Logger;
 import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
 import org.edu_sharing.repository.server.tools.ActionObserver;
 import org.edu_sharing.repository.server.tools.ApplicationInfoList;
 import org.edu_sharing.repository.server.tools.URLTool;
 import org.edu_sharing.service.nodeservice.NodeServiceHelper;
-import org.edu_sharing.service.nodeservice.model.GetPreviewResult;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.client.tools.MimeTypes;
 import org.edu_sharing.repository.server.tools.cache.PreviewCache;
@@ -665,7 +663,7 @@ public class PreviewServlet extends HttpServlet implements SingleThreadModel {
 			 */
 			crUserDefinedPreview=nodeService.getContent(storeProtocol,storeIdentifier,nodeId,null,CCConstants.CCM_PROP_IO_USERDEFINED_PREVIEW);
 			if (crUserDefinedPreview != null && crUserDefinedPreview.available() > 0) {
-				String url = nodeService.getPreview(storeProtocol,storeIdentifier,nodeId,null).getUrl();
+				String url = nodeService.getPreview(storeProtocol,storeIdentifier,nodeId, null, null).getUrl();
 				return new PreviewDetail(url, PreviewDetail.TYPE_USERDEFINED, false);
 			}
 

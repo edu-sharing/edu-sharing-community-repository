@@ -323,9 +323,11 @@ public class NodeServiceAdapter implements NodeService {
 	}
 
 	@Override
-	public GetPreviewResult getPreview(String storeProtocol, String storeIdentifier, String nodeId,String version) {
+	public GetPreviewResult getPreview(String storeProtocol, String storeIdentifier, String nodeId, HashMap<String, Object> nodeProps, String version) {
 	    try {
-            return new GetPreviewResult(getProperty(storeProtocol, storeIdentifier, nodeId, CCConstants.CM_ASSOC_THUMBNAILS), false);
+			String prop = nodeProps!=null && nodeProps.containsKey(CCConstants.CM_ASSOC_THUMBNAILS) ? (String) nodeProps.get(CCConstants.CM_ASSOC_THUMBNAILS) :
+					getProperty(storeProtocol, storeIdentifier, nodeId, CCConstants.CM_ASSOC_THUMBNAILS);
+            return new GetPreviewResult(prop, false);
         }catch(Throwable t){
 	        return null;
         }

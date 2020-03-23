@@ -21,11 +21,7 @@ public class CommentDao {
 	private CommentService commentService;
 	public CommentDao(RepositoryDao repoDao) {
 		this.repoDao = repoDao;
-		try {
-			this.commentService = CommentServiceFactory.getCommentService(repoDao.getId());
-		}catch(NotImplementedException e){
-			// ignore and accept that for remote repos there are currently no comments
-		}
+		this.commentService = CommentServiceFactory.getCommentService(repoDao.getId());
 	}
 	public void addComment(String nodeId,String commentReference,String comment) throws DAOException{
 		try{
@@ -36,9 +32,10 @@ public class CommentDao {
 	}
 	public Comments getComments(String nodeId) throws DAOException {
 		try{
-			if(this.commentService==null)
-				return null;
 			List<ChildAssociationRef> refs = this.commentService.getComments(nodeId);
+			if(refs == null){
+				return null;
+			}
 			List<Comment> comments=new ArrayList<>();
 			for(ChildAssociationRef ref : refs) {
 				NodeDao node=NodeDao.getNode(repoDao, ref.getChildRef().getId());

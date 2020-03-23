@@ -195,10 +195,10 @@ public class NodeServiceHelper {
 
 
 	public static GetPreviewResult getPreview(NodeRef ref) {
-		return NodeServiceFactory.getLocalService().getPreview(ref.getStoreRef().getProtocol(),ref.getStoreRef().getIdentifier(),ref.getId(),null);
+		return NodeServiceFactory.getLocalService().getPreview(ref.getStoreRef().getProtocol(),ref.getStoreRef().getIdentifier(),ref.getId(), null, null);
 	}
 	public static GetPreviewResult getPreview(org.edu_sharing.service.model.NodeRef ref) {
-		return NodeServiceFactory.getNodeService(ref.getRepositoryId()).getPreview(ref.getStoreProtocol(),ref.getStoreId(),ref.getNodeId(),null);
+		return NodeServiceFactory.getNodeService(ref.getRepositoryId()).getPreview(ref.getStoreProtocol(),ref.getStoreId(),ref.getNodeId(), null, null);
 	}
 	public static NodeRef getCompanyHome() {
 		ApplicationContext applicationContext = AlfAppContextGate.getApplicationContext();

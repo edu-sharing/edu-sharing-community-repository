@@ -5,17 +5,18 @@ import org.edu_sharing.repository.server.tools.ApplicationInfo;
 import org.edu_sharing.repository.server.tools.ApplicationInfoList;
 import org.edu_sharing.service.comment.CommentService;
 import org.edu_sharing.service.comment.CommentServiceImpl;
+import org.edu_sharing.service.provider.ProviderHelper;
 
 public class RatingServiceFactory {
 	public static RatingService getRatingService(String appId){
 
 		ApplicationInfo appInfo = (appId == null) ? ApplicationInfoList.getHomeRepository() : ApplicationInfoList.getRepositoryInfoById(appId);
 
-		if(appInfo.getNodeService() == null || appInfo.getNodeService().trim().equals("")){
+		if(!ProviderHelper.hasProvider(appInfo)){
 			return getLocalService();
 
 		}else{
-			throw new NotImplementedException("No rating service for remote repos yet");
+			return ProviderHelper.getProviderByApp(appInfo).getRatingService();
 		}
 	}
 

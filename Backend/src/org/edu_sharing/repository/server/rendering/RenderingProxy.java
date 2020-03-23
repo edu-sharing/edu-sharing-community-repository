@@ -11,7 +11,6 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import com.benfante.jslideshare.App;
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.repo.security.authentication.AuthenticationUtil.RunAsWork;
 import org.alfresco.service.cmr.repository.InvalidNodeRefException;
@@ -29,9 +28,6 @@ import org.edu_sharing.repository.server.tools.HttpException;
 import org.edu_sharing.repository.server.tools.URLTool;
 import org.edu_sharing.repository.server.tools.security.Encryption;
 import org.edu_sharing.repository.server.tools.security.SignatureVerifier;
-import org.edu_sharing.repository.server.tools.security.Signing;
-import org.edu_sharing.restservices.admin.v1.Application;
-import org.edu_sharing.service.authentication.SSOAuthorityMapper;
 import org.edu_sharing.service.nodeservice.NodeServiceFactory;
 import org.edu_sharing.service.nodeservice.NodeServiceHelper;
 import org.edu_sharing.service.permission.PermissionServiceFactory;
@@ -318,7 +314,7 @@ public class RenderingProxy extends HttpServlet {
 		RenderingService service = RenderingServiceFactory.getRenderingService(homeRep.getAppId());
 		// @todo 5.1 should version inline be transfered?
 		try {
-			RenderingServiceData renderData = service.getData(nodeId, null, usernameDecrypted, options);
+			RenderingServiceData renderData = service.getData(homeRep, nodeId, null, usernameDecrypted, options);
 			resp.getOutputStream().write(service.getDetails(finalContentUrl, renderData).getBytes("UTF-8"));
 			// track inline / lms
 			if (options.displayMode.equals(RenderingTool.DISPLAY_INLINE)) {

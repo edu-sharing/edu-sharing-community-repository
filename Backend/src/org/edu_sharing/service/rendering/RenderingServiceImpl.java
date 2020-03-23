@@ -7,10 +7,6 @@ import java.util.HashMap;
 import java.util.Map;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.ObjectWriter;
-import com.fasterxml.jackson.databind.SerializationFeature;
-import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.service.cmr.repository.NodeRef;
@@ -34,14 +30,15 @@ import org.edu_sharing.restservices.shared.Node;
 import org.edu_sharing.restservices.shared.SearchResult;
 import org.edu_sharing.service.InsufficientPermissionException;
 import org.edu_sharing.service.config.ConfigServiceFactory;
+import org.edu_sharing.service.nodeservice.NodeService;
 import org.edu_sharing.service.nodeservice.NodeServiceFactory;
 import org.edu_sharing.service.nodeservice.NodeServiceHelper;
 import org.edu_sharing.service.permission.PermissionService;
 import org.edu_sharing.service.permission.PermissionServiceFactory;
+import org.edu_sharing.service.provider.ProviderHelper;
 import org.edu_sharing.service.search.SearchService;
 import org.edu_sharing.service.search.model.SortDefinition;
 
-import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 public class RenderingServiceImpl implements RenderingService{
@@ -93,7 +90,7 @@ public class RenderingServiceImpl implements RenderingService{
 			logger.debug(renderingServiceUrl);
 			RenderingServiceOptions options = new RenderingServiceOptions();
 			options.displayMode = displayMode;
-			RenderingServiceData data = getData(nodeId, nodeVersion, AuthenticationUtil.getFullyAuthenticatedUser(), options);
+			RenderingServiceData data = getData(appInfo, nodeId, nodeVersion, AuthenticationUtil.getFullyAuthenticatedUser(), options);
 			return getDetails(renderingServiceUrl, data);
 		}catch(Throwable t) {
 			logger.warn(t.getMessage(),t);
@@ -144,16 +141,17 @@ public class RenderingServiceImpl implements RenderingService{
 		}
 	}
 	@Override
-	public RenderingServiceData getData(String nodeId, String nodeVersion, String user, RenderingServiceOptions options) throws Exception {
+	public RenderingServiceData getData(ApplicationInfo appInfo, String nodeId, String nodeVersion, String user, RenderingServiceOptions options) throws Exception {
 		long time=System.currentTimeMillis();
+		NodeService nodeService = NodeServiceFactory.getNodeService(appInfo.getAppId());
 		RenderingServiceData data=new RenderingServiceData();
-		RepositoryDao repoDao = RepositoryDao.getRepository(appInfo.getAppId());
+		RepositoryDao repoDao = RepositoryDao.getRepository(this.appInfo.getAppId());
 		NodeDao nodeDao = NodeDao.getNodeWithVersion(repoDao, nodeId, nodeVersion);
 		Node node = nodeDao.asNode();
 		// remove any javascript (important for title)
 		node.setProperties(MetadataTemplateRenderer.cleanupHTMLMultivalueProperties(node.getProperties()));
 		data.setNode(node);
-		if(NodeServiceHelper.getType(new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE,nodeId)).equals(CCConstants.CCM_TYPE_SAVED_SEARCH)){
+		if(CCConstants.CCM_TYPE_SAVED_SEARCH.equals(nodeService.getType(nodeId))){
 			SearchResult<Node> search = nodeDao.runSavedSearch(0,
 					options.savedSearch.getMaxItems(),
 					SearchService.ContentType.FILES,
@@ -186,5 +184,10 @@ public class RenderingServiceImpl implements RenderingService{
 
 		logger.info("Preparing rendering data took "+(System.currentTimeMillis()-time)+" ms");
 		return data;
+	}
+
+	@Override
+	public boolean renderingSupported() {
+		return true;
 	}
 }

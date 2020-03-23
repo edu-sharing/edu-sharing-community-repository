@@ -116,8 +116,8 @@ export class ApplyToLmsComponent{
         params += '&mediatype=' + encodeURIComponent(node.mediatype);
         params += '&h=' + ApplyToLmsComponent.roundNumber(node.properties[RestConstants.CCM_PROP_HEIGHT]);
         params += '&w=' + ApplyToLmsComponent.roundNumber(node.properties[RestConstants.CCM_PROP_WIDTH]);
-        if(node.contentVersion)
-            params += '&v=' + node.contentVersion;
+        if(node.content.version)
+            params += '&v=' + node.content.version;
         if(node.properties[RestConstants.CCM_PROP_CCRESSOURCETYPE])
             params += '&resourceType=' + encodeURIComponent(node.properties[RestConstants.CCM_PROP_CCRESSOURCETYPE]);
         if(node.properties[RestConstants.CCM_PROP_CCRESSOURCEVERSION])

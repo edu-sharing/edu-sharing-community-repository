@@ -60,6 +60,7 @@ import org.edu_sharing.service.mime.MimeTypesV2;
 import org.edu_sharing.service.nodeservice.NodeService;
 import org.edu_sharing.service.nodeservice.NodeServiceFactory;
 import org.edu_sharing.service.remote.RemoteObjectService;
+import org.edu_sharing.service.rendering.RenderingServiceFactory;
 import org.edu_sharing.service.rendering.RenderingTool;
 import org.edu_sharing.service.tracking.NodeTrackingDetails;
 import org.edu_sharing.service.tracking.TrackingService;
@@ -71,8 +72,20 @@ public class RedirectServlet extends HttpServlet implements SingleThreadModel {
 
 	@Override
 	protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-		// todo: check how we add remote repo + other checks in new rs implementation 5.1!
-		String url=URLTool.getNgRenderNodeUrl(req.getParameter("NODE_ID"),req.getParameter("version"));
+		String appId = req.getParameter("APP_ID");
+		String nodeId = req.getParameter("NODE_ID");
+		if(!RenderingServiceFactory.getRenderingService(appId).renderingSupported()){
+			String wwwurl = NodeServiceFactory.getNodeService(appId).getProperty(StoreRef.PROTOCOL_WORKSPACE,
+					StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(),
+					nodeId,
+					CCConstants.LOM_PROP_TECHNICAL_LOCATION);
+			if(wwwurl != null) {
+				resp.sendRedirect(wwwurl);
+				return;
+			}
+			throw new ServletException("Repository "+appId+" does not support rendering and didn't provide a "+CCConstants.LOM_PROP_TECHNICAL_LOCATION+" property! Please make sure that a property is provided");
+		}
+		String url=URLTool.getNgRenderNodeUrl(nodeId,req.getParameter("version"));
 		String params = req.getParameter("params");
 		if (params != null && !params.trim().equals("")) {
 			url=UrlTool.setParamEncode(url,"params",params);

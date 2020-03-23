@@ -1,24 +1,22 @@
 package org.edu_sharing.service.provider;
 
 import org.edu_sharing.service.nodeservice.NodeService;
-import org.edu_sharing.service.nodeservice.NodeServiceBrockhausImpl;
 import org.edu_sharing.service.nodeservice.NodeServiceDDBImpl;
+import org.edu_sharing.service.nodeservice.NodeServiceYouTube;
 import org.edu_sharing.service.permission.PermissionService;
 import org.edu_sharing.service.permission.PermissionServiceCCPublish;
-import org.edu_sharing.service.rendering.RenderingService;
-import org.edu_sharing.service.rendering.RenderingServiceNotSupported;
 import org.edu_sharing.service.search.SearchService;
-import org.edu_sharing.service.search.SearchServiceBrockhausImpl;
 import org.edu_sharing.service.search.SearchServiceDDBImpl;
+import org.edu_sharing.service.search.SearchServiceYouTubeImpl;
 
-public class BrockhausProvider extends Provider{
+public class DDBProvider extends Provider{
 
-    public BrockhausProvider(String appId){
+    public DDBProvider(String appId){
         super(appId);
     }
     @Override
     public NodeService getNodeService(){
-        return new NodeServiceBrockhausImpl(appId);
+        return new NodeServiceDDBImpl(appId);
     }
     @Override
     public PermissionService getPermissionService(){
@@ -26,11 +24,6 @@ public class BrockhausProvider extends Provider{
     }
     @Override
     public SearchService getSearchService(){
-        return new SearchServiceBrockhausImpl(appId);
-    }
-
-    @Override
-    public RenderingService getRenderingService() {
-        return new RenderingServiceNotSupported(appId);
+        return new SearchServiceDDBImpl(appId);
     }
 }

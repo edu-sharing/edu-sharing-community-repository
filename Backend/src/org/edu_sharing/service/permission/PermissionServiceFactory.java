@@ -3,6 +3,7 @@ package org.edu_sharing.service.permission;
 import org.edu_sharing.repository.server.tools.ApplicationInfo;
 import org.edu_sharing.repository.server.tools.ApplicationInfoList;
 import org.edu_sharing.service.nodeservice.NodeServiceImpl;
+import org.edu_sharing.service.provider.ProviderHelper;
 import org.edu_sharing.spring.ApplicationContextFactory;
 
 public class PermissionServiceFactory {
@@ -12,17 +13,11 @@ public class PermissionServiceFactory {
 		
 		PermissionService permissionService = null;
 		ApplicationInfo appInfo = (appId == null) ? ApplicationInfoList.getHomeRepository() : ApplicationInfoList.getRepositoryInfoById(appId);
-		
-		if(appInfo.getPermissionService() == null || appInfo.getPermissionService().trim().equals("")){
+
+		if(!ProviderHelper.hasProvider(appInfo)){
 			permissionService = getLocalService();
 		}else{
-			try{
-				Class clazz = Class.forName(appInfo.getPermissionService());
-				Object obj = clazz.getConstructor(new Class[] { String.class}).newInstance(new Object[] { appId });
-				permissionService = (PermissionService)obj;
-			}catch(Exception e){
-				throw new RuntimeException(e.getMessage());
-			}
+			return ProviderHelper.getProviderByApp(appInfo).getPermissionService();
 		}
 		
 		return permissionService;

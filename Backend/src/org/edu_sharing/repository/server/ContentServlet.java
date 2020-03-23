@@ -94,10 +94,14 @@ public class ContentServlet extends HttpServlet{
 				InputStream is = NodeServiceFactory.getNodeService(repId).getContent(null, null, nodeId, null, ContentModel.PROP_CONTENT.toString());
 				resp.setContentType((mimetype != null) ? mimetype : "application/octet-stream");
 				ByteArrayOutputStream bos = new ByteArrayOutputStream();
-				StreamUtils.copy(is,bos);
+				if(is!=null) {
+					StreamUtils.copy(is, bos);
+				}
 				resp.setContentLength(bos.size());
 				StreamUtils.copy(bos.toByteArray(),resp.getOutputStream());
-				is.close();
+				if(is!=null) {
+					is.close();
+				}
 			}
 			else {
 				/**

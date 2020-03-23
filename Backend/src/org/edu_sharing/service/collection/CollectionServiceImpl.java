@@ -284,8 +284,7 @@ public class CollectionServiceImpl implements CollectionService{
 		String containerId = getContainerId(client, "/app:company_home/ccm:remote_ios");
 		
 		ApplicationInfo appInfo = ApplicationInfoList.getRepositoryInfoById(sourceRepositoryId);
-		appInfo.getNodeService();
-		
+
 		NodeService nsSourceRepo = NodeServiceFactory.getNodeService(sourceRepositoryId);
 		if(nsSourceRepo == null) {
 			logger.error("no nodeservice found for sourceRepositoryId:" + sourceRepositoryId);

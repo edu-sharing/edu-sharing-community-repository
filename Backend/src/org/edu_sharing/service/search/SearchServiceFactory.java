@@ -3,6 +3,7 @@ package org.edu_sharing.service.search;
 import org.apache.log4j.Logger;
 import org.edu_sharing.repository.server.tools.ApplicationInfo;
 import org.edu_sharing.repository.server.tools.ApplicationInfoList;
+import org.edu_sharing.service.provider.ProviderHelper;
 
 public class SearchServiceFactory {
 	
@@ -12,18 +13,11 @@ public class SearchServiceFactory {
 		
 		SearchService searchService = null;
 		ApplicationInfo appInfo = (appLicationId == null) ? ApplicationInfoList.getHomeRepository() : ApplicationInfoList.getRepositoryInfoById(appLicationId);
-		
-		if(appInfo.getSearchService() == null || appInfo.getSearchService().trim().equals("")){
+
+		if(!ProviderHelper.hasProvider(appInfo)){
 			searchService = new SearchServiceImpl(appLicationId);
 		}else{
-			try{
-				Class clazz = Class.forName(appInfo.getSearchService());
-				Object obj = clazz.getConstructor(new Class[] { String.class}).newInstance(new Object[] { appLicationId });
-				searchService = (SearchService)obj;
-			}catch(Exception e){
-				logger.error(e.getMessage(),e);
-				throw new RuntimeException(e);
-			}
+			return ProviderHelper.getProviderByApp(appInfo).getSearchService();
 		}
 		
 		return searchService;
