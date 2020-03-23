@@ -42,7 +42,7 @@ export class CommentsListComponent  {
   private edit: Comment[];
   options: OptionItem[];
 
-  public newComment="";
+  public newComment='';
   public editComment:Comment=null;
   public editCommentText:string;
   loading: boolean;
@@ -135,7 +135,7 @@ export class CommentsListComponent  {
       this.sending=false;
       this.onLoading.emit(false);
       this.onChange.emit();
-      this.newComment="";
+      this.newComment='';
       this.refresh();
     },(error:any)=>{
       this.sending=false;
@@ -156,10 +156,10 @@ export class CommentsListComponent  {
       return;
     }
     this.loading=true;
-      this.commentsApi.getComments(this._node.ref.id,this._node.ref.repo).subscribe((data:Comments)=>{
+      this.commentsApi.getComments(this._node.ref.id,this._node.ref.repo).subscribe((data:Comments) => {
         this.loading=false;
-        this.comments=data.comments.reverse();
-    },(error:any)=>{
+        this.comments=data && data.comments ? data.comments.reverse() : [];
+    },(error:any) => {
       this.loading=false;
       this.toast.error(error);
     });

@@ -17,19 +17,19 @@
   height:100%;
   flex-direction: column;
 }
-.noComments{
+.no-comments,.no-permission{
   font-size: 120%;
   text-align: center;
   color: $textLight;
   padding-top: 30px;
+  width: 100%;
 }
-.new{
+.new, .new-no-permission{
   display:flex;
   background-color: #fff;
   flex-direction: row;
   margin-top: 20px;
   padding:10px 20px;
-  @include materialShadow();
   .left,.right{
     display:flex;
   }
@@ -40,6 +40,9 @@
   .right{
     flex-grow: 1;
   }
+}
+.new{
+  @include materialShadow();
 }
 .new .right,.comments .right{
   form{

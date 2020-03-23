@@ -271,6 +271,7 @@
         "NEW_COMMENT_PLACEHOLDER": "New comment...",
         "COMMENT_EMPTY": "Please enter a comment",
         "NO_COMMENTS": "No comments yet",
+        "NO_PERMISSION": "Commenting is disabled for this element",
         "OPTION_EDIT": "edit",
         "OPTION_DELETE": "delete",
         "DELETE_COMMENT": "Delete comment?",
