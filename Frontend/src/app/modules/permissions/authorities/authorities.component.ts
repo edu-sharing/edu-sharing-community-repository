@@ -354,6 +354,14 @@ export class PermissionsAuthoritiesComponent {
       edit.priority = 10;
       options.push(edit);
     }
+    if(this.orgs && this.orgs.canCreate) {
+      const edit = new OptionItem('PERMISSIONS.MENU_EDIT', 'edit', (data: any) => this.editAuthority(data));
+      edit.constrains = [Constrain.Admin, Constrain.NoBulk];
+      edit.elementType = [ElementType.Person];
+      edit.group = DefaultGroups.Edit;
+      edit.priority = 10;
+      options.push(edit);
+    }
 
     const manage = new OptionItem('PERMISSIONS.MENU_TOOLPERMISSIONS', 'playlist_add_check', (data: any) => {
       this.toolpermissionAuthority = this.getList(data)[0];
