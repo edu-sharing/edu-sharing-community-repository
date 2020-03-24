@@ -123,7 +123,7 @@ mat-button-toggle-group{
   .mat-tab-labels {
     background-color: $workspaceTopBarBackground;
     .mat-tab-label {
-      color: $textOnPrimary;
+      color: $workspaceTopBarFontColor;
     }
   }
   .mat-ink-bar{
