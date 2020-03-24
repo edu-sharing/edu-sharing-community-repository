@@ -1182,7 +1182,7 @@ export class MdsComponent {
     list.style.display='none';
     let values=this.getValues([],false);
     let group=this._groupId;
-    if(!group){
+    if(!group || group === 'io_simple') {
       group=RestConstants.DEFAULT_QUERY_NAME;
     }
     this.lastMdsQuery=element.value;
@@ -1192,7 +1192,7 @@ export class MdsComponent {
             property: id,
             pattern: element.value,
         },
-        criterias:RestSearchService.convertCritierias(Helper.arrayJoin(this._currentValues,this.getValues()),this)
+        criterias:RestSearchService.convertCritierias(Helper.arrayJoin(this._currentValues,this.getValues()),this.mds.widgets)
     },this._setId,this._repository).subscribe((data:MdsValueList)=>{
       if(this.lastMdsQuery!=element.value)
         return;

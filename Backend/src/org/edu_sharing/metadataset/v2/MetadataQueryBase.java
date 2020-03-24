@@ -30,6 +30,8 @@ public class MetadataQueryBase implements Serializable{
         this.basequery = basequery;
     }
     public String findBasequery(Set<String> existingParameters) {
+        if(basequery == null)
+            return null;
         List<Map.Entry<String, String>> filter = basequery.entrySet().stream().filter((e) -> {
             if (e.getKey() == null) {
                 return false;

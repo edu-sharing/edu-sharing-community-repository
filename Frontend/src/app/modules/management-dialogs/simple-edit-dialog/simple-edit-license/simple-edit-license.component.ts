@@ -191,6 +191,6 @@ export class SimpleEditLicenseComponent {
   }
 
     isCCAttributableLicense() {
-        return this.licenseGroup && this.licenseGroup.value.startsWith('CC_BY');
+        return this.licenseGroup && this.licenseGroup.value && this.licenseGroup.value.startsWith('CC_BY');
     }
 }
