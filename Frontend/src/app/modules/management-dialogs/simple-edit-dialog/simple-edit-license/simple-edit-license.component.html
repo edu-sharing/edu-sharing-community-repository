@@ -18,7 +18,7 @@
                   cdkAutosizeMinRows="2"
                   cdkAutosizeMaxRows="5"></textarea>
     </mat-form-field>
-    <app-license-source *ngIf="isCCAttributableLicense()"
+    <app-license-source *ngIf="isCCAttributableLicense() && modeGroup.value === 'foreign'"
                         [(ccTitleOfWork)]="ccTitleOfWork"
                         [(ccSourceUrl)]="ccSourceUrl"
                         [(ccProfileUrl)]="ccProfileUrl"
