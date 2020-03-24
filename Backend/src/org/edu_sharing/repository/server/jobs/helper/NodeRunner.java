@@ -92,7 +92,6 @@ public class NodeRunner {
 
     
     public NodeRunner() {
-		// TODO Auto-generated constructor stub
 	}
     
     public Consumer<NodeRef> getTask() {
