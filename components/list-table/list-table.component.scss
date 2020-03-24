@@ -829,6 +829,7 @@ a.rowInner {
 
 .cardList .row_1 {
     width: 100%;
+    flex-shrink: 0;
     padding-bottom: 5px !important;
     font-size: 110% !important;
     overflow: hidden;
@@ -872,6 +873,7 @@ a.rowInner {
 }
 .cardList .preview {
     height: $previewHeight;
+    flex-shrink: 0;
     padding: 0 !important;
     margin-top: -10px;
     margin-bottom: 15px;
