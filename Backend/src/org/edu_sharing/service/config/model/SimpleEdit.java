@@ -9,7 +9,7 @@ public class SimpleEdit implements Serializable {
     @XmlElement
     public Organization organization;
 
-    private class Organization implements Serializable{
+    private static class Organization implements Serializable{
         @XmlElement
         public String[] groupTypes;
     }
