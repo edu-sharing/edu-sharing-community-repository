@@ -58,4 +58,5 @@ public class Values implements Serializable {
 	@XmlElement	public Image[] images;
 	@XmlElement	public Stream stream;
 	@XmlElement	public Admin admin;
+	@XmlElement	public SimpleEdit simpleEdit;
 }

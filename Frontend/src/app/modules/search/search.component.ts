@@ -1045,7 +1045,7 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
                 mdsId,
             );
             const useFrontpage = !criterias || !criterias.length && this.isHomeRepository();
-            console.log('useFrontpage: ' + useFrontpage, repo);
+            console.log('useFrontpage: ' + useFrontpage, criterias, this.isHomeRepository());
             if(useFrontpage && tryFrontpage) {
                 queryRequest = this.nodeApi.getChildren(RestConstants.NODES_FRONTPAGE, [RestConstants.ALL], request);
             }
