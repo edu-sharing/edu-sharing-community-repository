@@ -1174,6 +1174,8 @@ export class ListTableComponent implements EventListener {
             o.virtual = true;
             return o;
         });
+        // remove the elements which will get added so they will replace the current state
+        this._nodes = this._nodes.filter((n) => objects.find((o: Node) => o.ref.id !== n.ref.id));
         this._nodes = objects.concat(this._nodes);
         this.nodesChange.emit(this._nodes);
         this.selectedNodes = objects;
