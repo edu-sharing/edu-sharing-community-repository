@@ -538,7 +538,7 @@ export class WorkspaceLicenseComponent  {
     }
 
     isCCAttributableLicense() {
-        return this.getLicenseProperty().startsWith('CC_BY');
+        return this.getLicenseProperty() && this.getLicenseProperty().startsWith('CC_BY');
     }
 
     setVCardAuthor(author: boolean) {
