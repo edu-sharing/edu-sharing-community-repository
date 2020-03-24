@@ -157,7 +157,8 @@ public class SearchServicePixabayImpl extends SearchServiceAdapter{
 			properties.put(CCConstants.VIRT_PROP_PERMALINK,json.getString("pageURL"));
 			//properties.put(CCConstants.CM_ASSOC_THUMBNAILS, json.getString("previewURL"));
 			properties.put(CCConstants.CM_ASSOC_THUMBNAILS,json.getString("webformatURL").replace("_640", "_340"));
-			properties.put(CCConstants.DOWNLOADURL,json.getString("webformatURL").replace("_640", "_960"));
+			// download is currently broken
+			//properties.put(CCConstants.DOWNLOADURL,json.getString("webformatURL").replace("_640", "_960"));
 			org.edu_sharing.service.model.NodeRef ref = new org.edu_sharing.service.model.NodeRefImpl(repositoryId, 
 					Constants.storeRef.getProtocol(),
 					Constants.storeRef.getIdentifier(),properties);
