@@ -24,8 +24,10 @@ export class SearchService {
     sidenavSet = false;
     sidenavOpened = false;
     showspinner: boolean;
+    ex: boolean;
     viewType = -1;
     sort: any = {};
+    extendedSearchUsed = false;
 
     constructor() {}
 

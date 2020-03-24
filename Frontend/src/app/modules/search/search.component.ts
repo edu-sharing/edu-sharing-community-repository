@@ -2,7 +2,7 @@ import { trigger } from '@angular/animations';
 import { HttpClient } from '@angular/common/http';
 import { AfterViewInit, Component, ElementRef, HostListener, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { Title } from '@angular/platform-browser';
-import { ActivatedRoute, Router } from '@angular/router';
+import {ActivatedRoute, Params, Router} from '@angular/router';
 import { TranslateService } from '@ngx-translate/core';
 import 'rxjs/add/operator/map';
 import { Subscription } from 'rxjs/Subscription';
@@ -307,6 +307,7 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
 
     applyParameters(props: any = null) {
         this.searchService.reinit = true;
+        this.searchService.extendedSearchUsed = true;
         this.currentValues = props;
         this.updateGroupedRepositories();
         this.routeSearchParameters(props);
@@ -428,7 +429,6 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
         parameters: any = this.getMdsValues(),
     ) {
         this.scrollTo();
-        //this.searchService.init();
         this.router.navigate([UIConstants.ROUTER_PREFIX + 'search'], {
             queryParams: {
                 addToCollection: this.addToCollection
@@ -455,11 +455,10 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
     getSearch(
         searchString: string = null,
         init = false,
-        properties: any = this.currentValues,
     ) {
         if ((this.isSearching && init) || this.repositoryIds.length == 0) {
             setTimeout(
-                () => this.getSearch(searchString, init, properties),
+                () => this.getSearch(searchString, init),
                 100,
             );
             return;
@@ -483,7 +482,7 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
             return;
         }
 
-        let criterias: any[] = this.getCriterias(properties, searchString);
+        let criterias: any[] = this.getCriterias(this.currentValues, searchString);
 
         let repos =
             this.currentRepository == RestConstants.ALL
@@ -499,7 +498,7 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
             ) {
                 this.search
                     .search(
-                        this.getCriterias(properties, searchString, false),
+                        this.getCriterias(this.currentValues, searchString, false),
                         [],
                         {
                             sortBy: [
@@ -899,9 +898,7 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
             if (this.searchService.reinit)
                 this.getSearch(
                     this.searchService.searchTerm,
-                    true,
-                    this.currentValues,
-                );
+                    true);
         }
         if (this.mainNavRef && !this.bannerInitalized) {
             this.mainNavRef.refreshBanner();
@@ -910,7 +907,7 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
         this.searchService.reinit = true;
     }
 
-    private prepare(param: any) {
+    private prepare(param: Params) {
         if (this.setSidenavSettings()) {
             // auto, never, always
             let sidenavMode = this.config.instant('searchSidenavMode', 'never');
@@ -942,7 +939,8 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
                 this.searchService.sort.materialsSortAscending =
                     param['materialsSortAscending'] == 'true';
             }
-            if (param['parameters']) {
+            if (param.parameters) {
+                this.searchService.extendedSearchUsed = true;
                 this.currentValues = JSON.parse(param['parameters']);
             } else if (this.currentValues) {
                 this.currentValues = null;
@@ -1044,8 +1042,8 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
                 repo ? repo.id : RestConstants.HOME_REPOSITORY,
                 mdsId,
             );
-            const useFrontpage = !criterias || !criterias.length && this.isHomeRepository();
-            console.log('useFrontpage: ' + useFrontpage, criterias, this.isHomeRepository());
+            const useFrontpage = !this.searchService.searchTerm && !this.searchService.extendedSearchUsed && this.isHomeRepository();
+            console.log('useFrontpage: ' + useFrontpage, !this.searchService.searchTerm, !this.searchService.extendedSearchUsed, this.isHomeRepository());
             if(useFrontpage && tryFrontpage) {
                 queryRequest = this.nodeApi.getChildren(RestConstants.NODES_FRONTPAGE, [RestConstants.ALL], request);
             }
@@ -1312,7 +1310,7 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
 
     private initParams() {
         this.queryParamsSubscription = this.activatedRoute.queryParams.subscribe(
-            (param: any) => {
+            (param) => {
                 this.searchService.init();
                 this.mainNavRef.refreshBanner();
                 GlobalContainerComponent.finishPreloading();
@@ -1371,7 +1369,7 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
                     this.repositoryIds = [];
                 }
 
-                let paramRepo = param['repository'];
+                let paramRepo = param.repository;
                 if (!paramRepo) {
                     paramRepo = RestConstants.HOME_REPOSITORY;
                 }
@@ -1430,14 +1428,14 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
                             try {
                                 this.mdsId = this.mdsSets[0].id;
                                 if (
-                                    param['mds'] &&
+                                    param.mds &&
                                     Helper.indexOfObjectArray(
                                         this.mdsSets,
                                         'id',
-                                        param['mds'],
+                                        param.mds,
                                     ) != -1
                                 )
-                                    this.mdsId = param['mds'];
+                                    this.mdsId = param.mds;
                             } catch (e) {
                                 console.warn(
                                     'got invalid mds list from repository:',
