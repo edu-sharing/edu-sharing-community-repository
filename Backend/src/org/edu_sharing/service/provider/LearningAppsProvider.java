@@ -19,6 +19,10 @@ public class LearningAppsProvider extends Provider{
         return new NodeServiceLAppsImpl(appId);
     }
     @Override
+    public PermissionService getPermissionService(){
+        return new PermissionServiceCCPublish(appId);
+    }
+    @Override
     public SearchService getSearchService(){
         return new SearchServiceLAppsImpl(appId);
     }
