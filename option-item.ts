@@ -24,15 +24,19 @@ export class OptionItem {
    */
   public isToggle = false;
   /**
-   * If true, shows a line at the top
-   * @type {boolean}
+   * If true, shows a line at the top.
+   *
+   * This feature is usually handled now by associating an entry to a `group`
+   * now. However `isSeparate` is kept as fallback for now.
    */
-  public isSeperate = false;
+  public isSeparate = false;
   /**
-   * Like @isSeperate, but shows a line at bottom
-   * @type {boolean}
+   * The item will be indicated with an accent color in the menu.
+   *
+   * Used by the dropdown variant of the main menu to indicate the currently
+   * active scope.
    */
-  public isSeperateBottom = false;
+  public isSelected = false;
   /**
    * If true, only displayed on a mobile device (based on the navigator agent)
    * @type {boolean}

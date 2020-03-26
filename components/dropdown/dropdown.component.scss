@@ -6,7 +6,10 @@
 ::ng-deep .mat-dropdown-menu {
     .mat-menu-item {
         &:hover:not([disabled]) {
-            background: $itemSelectedBackground;
+            background-color: $itemSelectedBackground;
+        }
+        &.mat-menu-item-selected {
+            background: $workspaceSelectedBackgroundEffect;
         }
     }
 

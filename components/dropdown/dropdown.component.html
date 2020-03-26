@@ -1,13 +1,21 @@
 <mat-menu
-     backdropClass="mat-dropdown-menu"
-     class="mat-dropdown-menu"
-     #dropdown="matMenu" [xPosition]="position=='right' ? 'after' : 'before'" >
-      <button mat-menu-item
-         *ngFor="let option of _options;let i=index;"
-         class="mat-menu-item collection-item-{{option.name | replaceChars:{search:'.',replace:'-'} }}"
-         [class.mat-menu-item-seperate]="isNewGroup(i)"
-         [disabled]="!option.isEnabled"
-         [class.display-none]="!option.isEnabled && !showDisabled"
-         (click)="click(option)"
-      ><i icon [iconId]="option.icon"></i> {{option.name | translate}}</button>
+  backdropClass="mat-dropdown-menu"
+  class="mat-dropdown-menu"
+  #dropdown="matMenu"
+  [xPosition]="position == 'right' ? 'after' : 'before'"
+>
+  <button
+    *ngFor="let option of _options; let i = index"
+    mat-menu-item
+    class="mat-menu-item collection-item-{{
+      option.name | replaceChars: { search: '.', replace: '-' }
+    }}"
+    [class.mat-menu-item-separate]="option.isSeparate || isNewGroup(i)"
+    [class.mat-menu-item-selected]="option.isSelected"
+    [disabled]="!option.isEnabled"
+    [class.display-none]="!option.isEnabled && !showDisabled"
+    (click)="click(option)"
+  >
+    <i icon [iconId]="option.icon"></i> {{ option.name | translate }}
+  </button>
 </mat-menu>

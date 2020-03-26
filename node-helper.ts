@@ -480,7 +480,7 @@ export class NodeHelper {
             toast.closeModalDialog();
           });
         });
-        item.isSeperate = c.isSeperate;
+        item.isSeparate = c.isSeperate;
         item.enabledCallback=(node:Node)=> {
             if (c.permission) {
                 return NodeHelper.getNodesRight(NodeHelper.getActionbarNodes(selectedNodes, node), c.permission);
