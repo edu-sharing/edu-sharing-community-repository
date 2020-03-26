@@ -347,15 +347,15 @@ export class PermissionsAuthoritiesComponent {
       options.push(manageMembers);
     }
     if (this._mode === 'GROUP' || this.orgs && this.orgs.canCreate) {
-      const edit = new OptionItem('PERMISSIONS.MENU_EDIT', 'edit', (data: any) => this.editAuthority(data));
-      edit.constrains = [Constrain.Admin, Constrain.NoBulk];
-      edit.elementType = [ElementType.Group];
-      edit.group = DefaultGroups.Edit;
-      edit.priority = 10;
-      options.push(edit);
+      const editGroup = new OptionItem('PERMISSIONS.MENU_EDIT_GROUP', 'edit', (data: any) => this.editAuthority(data));
+      editGroup.constrains = [Constrain.Admin, Constrain.NoBulk];
+      editGroup.elementType = [ElementType.Group];
+      editGroup.group = DefaultGroups.Edit;
+      editGroup.priority = 10;
+      options.push(editGroup);
     }
     if(this.orgs && this.orgs.canCreate) {
-      const edit = new OptionItem('PERMISSIONS.MENU_EDIT', 'edit', (data: any) => this.editAuthority(data));
+      const edit = new OptionItem('PERMISSIONS.MENU_EDIT_PERSON', 'edit', (data: any) => this.editAuthority(data));
       edit.constrains = [Constrain.Admin, Constrain.NoBulk];
       edit.elementType = [ElementType.Person];
       edit.group = DefaultGroups.Edit;
