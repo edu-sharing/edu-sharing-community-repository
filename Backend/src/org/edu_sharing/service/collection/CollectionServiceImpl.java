@@ -252,9 +252,13 @@ public class CollectionServiceImpl implements CollectionService{
 				 * the overwritten NodeContentGet class checks if it' s an collection ref object
 				 * and switches the nodeId to original node, which is used for indexing
 				 * Do a transaction and disable all policy filters to prevent quota exceptions to kick in
+				 * 
+				 * Alfresco 5.2 Set mimetype 5.2 to prevent thumbnail transformation to crash with different mimetype warning
+				 * "Transformation has not taken place because the declared mimetype (image/jpeg) does not match the detected mimetype (text/plain)"
 				 */
 				NodeServiceInterceptor.ignoreQuota(()-> {
-					client.writeContent(refId, new String("1").getBytes(), (String) props.get(CCConstants.ALFRESCO_MIMETYPE), "utf-8", CCConstants.CM_PROP_CONTENT);
+					//client.writeContent(refId, new String("1").getBytes(), (String) props.get(CCConstants.ALFRESCO_MIMETYPE), "utf-8", CCConstants.CM_PROP_CONTENT);
+					client.writeContent(refId, "1".getBytes(), "text/plain", "utf-8", CCConstants.CM_PROP_CONTENT);
 					return null;
 				});
 
