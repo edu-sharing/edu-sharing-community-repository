@@ -204,6 +204,7 @@ export class MainNavComponent implements AfterViewInit {
     licenseDialog: boolean;
     showScrollToTop = false;
     licenseDetails: string;
+    mainMenuStyle: 'sidebar' | 'dropdown' = 'sidebar';
 
     private editUrl: string;
     private nodeStoreCount = 0;
@@ -662,7 +663,23 @@ export class MainNavComponent implements AfterViewInit {
             this.showLicenseAgreement();
             this.updateUserOptions();
             this.updateHelpOptions();
+            this.setMenuStyle();
         });
+    }
+
+    private setMenuStyle() {
+        switch (this.config.mainMenuStyle) {
+            case 'sidebar':
+            case 'dropdown':
+                this.mainMenuStyle = this.config.mainMenuStyle;
+                break;
+            case undefined:
+                break;
+            default:
+                console.error(
+                    `Unsupported value for config 'mainMenuStyle: ${this.config.mainMenuStyle}`,
+                );
+        }
     }
 
     private finishLogout() {
@@ -779,7 +796,8 @@ export class MainNavComponent implements AfterViewInit {
             );
             option.mediaQueryType = UIConstants.MEDIA_QUERY_MAX_WIDTH;
             option.mediaQueryValue = UIConstants.MOBILE_TAB_SWITCH_WIDTH;
-            option.isSeperateBottom = !this.config.privacyInformationUrl;
+            // The option isSeperateBottom was deprecated in favor of groups.
+            // option.isSeperateBottom = !this.config.privacyInformationUrl;
             this.userMenuOptions.push(option);
         }
         if (this.config.privacyInformationUrl) {
@@ -790,7 +808,7 @@ export class MainNavComponent implements AfterViewInit {
             );
             option.mediaQueryType = UIConstants.MEDIA_QUERY_MAX_WIDTH;
             option.mediaQueryValue = UIConstants.MOBILE_TAB_SWITCH_WIDTH;
-            option.isSeperateBottom = true;
+            // option.isSeperateBottom = true;
             this.userMenuOptions.push(option);
         }
         const option = new OptionItem(
@@ -800,7 +818,7 @@ export class MainNavComponent implements AfterViewInit {
         );
         option.mediaQueryType = UIConstants.MEDIA_QUERY_MAX_WIDTH;
         option.mediaQueryValue = UIConstants.MOBILE_TAB_SWITCH_WIDTH;
-        option.isSeperateBottom = true;
+        // option.isSeperateBottom = true;
         this.userMenuOptions.push(option);
 
         if (!this.isGuest) {

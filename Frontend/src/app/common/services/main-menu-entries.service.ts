@@ -47,7 +47,6 @@ interface EntryDefinition {
     icon: string;
     target: Target;
     scope: string;
-    isSeparate?: boolean;
     isVisible: (() => boolean) | true;
 }
 
@@ -250,7 +249,7 @@ export class MainMenuEntriesService {
             icon: entryDefinition.icon,
             scope: entryDefinition.scope,
             isDisabled: false,
-            isSeparate: !!entryDefinition.isSeparate,
+            isSeparate: false,
             isCustom: false,
             open: () => this.openEntry(entry, entryDefinition.target),
         };

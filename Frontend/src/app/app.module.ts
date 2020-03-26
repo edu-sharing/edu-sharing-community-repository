@@ -35,6 +35,7 @@ import {UserAvatarTestComponent} from './common/test/user-avatar/user-avatar-tes
 import {ModalTestComponent} from './common/test/modal/modal-test.component';
 import { MainMenuSidebarComponent } from './common/ui/main-menu-sidebar/main-menu-sidebar.component';
 import { MainMenuBottomComponent } from './common/ui/main-menu-bottom/main-menu-bottom.component';
+import { MainMenuDropdownComponent } from './common/ui/main-menu-dropdown/main-menu-dropdown.component';
 
 
 // http://blog.angular-university.io/angular2-ngmodule/
@@ -65,7 +66,8 @@ import { MainMenuBottomComponent } from './common/ui/main-menu-bottom/main-menu-
         DECLARATIONS_SHARE_APP,
         DECLARATIONS_SERVICES,
         MainMenuSidebarComponent,
-        MainMenuBottomComponent
+        MainMenuBottomComponent,
+        MainMenuDropdownComponent
     ],
     imports: IMPORTS,
     providers: [
