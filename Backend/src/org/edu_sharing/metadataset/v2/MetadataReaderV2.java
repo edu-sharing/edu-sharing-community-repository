@@ -3,6 +3,7 @@ package org.edu_sharing.metadataset.v2;
 import org.alfresco.service.ServiceRegistry;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.namespace.QName;
+import org.apache.axis2.databinding.types.soapencoding.Array;
 import org.apache.commons.lang3.SerializationUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
@@ -31,6 +32,7 @@ import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class MetadataReaderV2 {
 	
@@ -78,12 +80,14 @@ public class MetadataReaderV2 {
         }
         String mdsName = mdsNameDefault;
         if (!mdsSet.equals("-default-") && !mdsSet.equals(CCConstants.metadatasetdefault_id)) {
-            if (appId.getMetadatsetsV2() != null && Arrays.asList(appId.getMetadatsetsV2()).contains(mdsSet)) {
+
+            if (ApplicationInfoList.getApplicationInfos().values().stream().map((a) -> a.getMetadatsetsV2()).
+					anyMatch((a) -> Arrays.asList(a).contains(mdsSet))) {
                 mdsName = mdsSet;
                 if (mdsName.toLowerCase().endsWith(".xml"))
                     mdsName = mdsName.substring(0, mdsName.length() - 4);
             } else {
-                throw new IllegalArgumentException("Invalid mds set " + mdsSet + ", was not found in the list of mds sets of appid " + appId.getAppId());
+                throw new IllegalArgumentException("Invalid mds set " + mdsSet + ", was not found in any app");
             }
         }
 	    try {

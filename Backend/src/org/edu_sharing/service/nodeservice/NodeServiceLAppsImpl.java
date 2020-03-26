@@ -84,7 +84,7 @@ public class NodeServiceLAppsImpl extends NodeServiceAdapter{
 		
 		properties.put(CCConstants.LOM_PROP_GENERAL_KEYWORD,map.getNamedItem("tags").getNodeValue().replace(" ",CCConstants.MULTIVALUE_SEPARATOR));
 
-		properties.put(CCConstants.CM_ASSOC_THUMBNAILS, map.getNamedItem("image").getNodeValue());
+		properties.put(CCConstants.CCM_PROP_IO_THUMBNAILURL, map.getNamedItem("image").getNodeValue());
 		properties.put(CCConstants.CONTENTURL,map.getNamedItem("url").getNodeValue());
 		properties.put(CCConstants.LOM_PROP_TECHNICAL_FORMAT, "application/xhtml+xml");
 		properties.put(CCConstants.CCM_PROP_IO_WWWURL,map.getNamedItem("url").getNodeValue());

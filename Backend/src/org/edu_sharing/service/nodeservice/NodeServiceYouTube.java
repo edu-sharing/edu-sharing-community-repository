@@ -2,6 +2,7 @@ package org.edu_sharing.service.nodeservice;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 
@@ -141,8 +142,8 @@ public class NodeServiceYouTube extends NodeServiceAdapter{
 			properties.put(CCConstants.VIRT_PROP_PERMALINK,esrTechLoc);
 			properties.put(CCConstants.LOM_PROP_TECHNICAL_LOCATION, esrTechLoc);
 			properties.put(CCConstants.LOM_PROP_TECHNICAL_DURATION, esrDuration);
-			properties.put(CCConstants.CM_PROP_C_MODIFIED, esrModified);
-			properties.put(CCConstants.CM_PROP_C_CREATED, esrModified);
+			properties.put(CCConstants.CM_PROP_C_MODIFIED, new Date(esrModified));
+			properties.put(CCConstants.CM_PROP_C_CREATED, new Date(esrModified));
 			properties.put(CCConstants.CM_PROP_C_CREATOR, esrAuthor);
 			properties.put(CCConstants.CCM_PROP_IO_REPL_LIFECYCLECONTRIBUTER_AUTHOR, VCardTool.nameToVCard(esrAuthor));
 			
@@ -159,7 +160,7 @@ public class NodeServiceYouTube extends NodeServiceAdapter{
 			properties.put(CCConstants.LOM_PROP_TECHNICAL_FORMAT, "video/x-flash");
 			properties.put(CCConstants.NODETYPE, CCConstants.CCM_TYPE_IO);
 
-			properties.put(CCConstants.CM_ASSOC_THUMBNAILS, thumbnail);
+			properties.put(CCConstants.CCM_PROP_IO_THUMBNAILURL, thumbnail);
 			properties.put(CCConstants.REPOSITORY_ID, repositoryId );
 			properties.put(CCConstants.CCM_PROP_IO_COMMONLICENSE_KEY, CCConstants.COMMON_LICENSE_CC_BY);
 			properties.put(CCConstants.CCM_PROP_IO_REPLICATIONSOURCE,"youtube");

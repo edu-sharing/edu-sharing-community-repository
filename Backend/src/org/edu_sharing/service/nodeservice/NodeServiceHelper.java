@@ -3,10 +3,12 @@ package org.edu_sharing.service.nodeservice;
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.*;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
+import java.util.stream.Collectors;
 
 import org.alfresco.model.ContentModel;
 import org.alfresco.repo.model.Repository;
@@ -15,17 +17,26 @@ import org.alfresco.service.cmr.repository.ChildAssociationRef;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.repository.StoreRef;
 import org.alfresco.service.namespace.QName;
+import org.apache.log4j.Logger;
 import org.edu_sharing.alfresco.tools.EduSharingNodeHelper;
 import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.client.tools.metadata.ValueTool;
 import org.edu_sharing.repository.server.MCAlfrescoAPIClient;
+import org.edu_sharing.repository.server.MCAlfrescoBaseClient;
 import org.edu_sharing.repository.server.tools.NameSpaceTool;
+import org.edu_sharing.repository.server.tools.NodeTool;
+import org.edu_sharing.service.foldertemplates.LoggingErrorHandler;
 import org.edu_sharing.service.nodeservice.model.GetPreviewResult;
 import org.edu_sharing.service.search.model.SortDefinition;
 import org.springframework.context.ApplicationContext;
 
 public class NodeServiceHelper {
+	private static final String SEPARATOR = "/";
+	private static final Lock lock = new ReentrantLock();
+	private static final Map<String, String> cache = new HashMap<>();
+	private static Logger logger=Logger.getLogger(NodeServiceHelper.class);
+
 	/**
 	 * Clean the CM_NAME property so it does not cause an org.alfresco.repo.node.integrity.IntegrityException
 	 * @param cmNameReadableName
@@ -193,6 +204,21 @@ public class NodeServiceHelper {
 		return String.join(".",split);
 	}
 
+	/**
+	 * Find all nodes that are having the properties set in the properties match
+	 * @param parent The start folder
+	 * @param types The node type to filter
+	 * @param properties The properties that must match
+	 * @return
+	 */
+	public static List<NodeRef> findNodeByPropertiesRecursive(NodeRef parent, List<String> types, Map<String, Object> properties){
+		NodeService nodeService = NodeServiceFactory.getLocalService();
+		List<NodeRef> list = nodeService.getChildrenRecursive(parent.getStoreRef(), parent.getId(), types, RecurseMode.Folders);
+		return list.stream().filter((ref) ->
+				properties.entrySet().stream().allMatch((e) ->
+						NodeServiceHelper.getProperty(ref, e.getKey()).equals(e.getValue()))
+		).collect(Collectors.toList());
+	}
 
 	public static GetPreviewResult getPreview(NodeRef ref) {
 		return NodeServiceFactory.getLocalService().getPreview(ref.getStoreRef().getProtocol(),ref.getStoreRef().getIdentifier(),ref.getId(), null, null);
@@ -204,5 +230,85 @@ public class NodeServiceHelper {
 		ApplicationContext applicationContext = AlfAppContextGate.getApplicationContext();
 		Repository repositoryHelper = (Repository) applicationContext.getBean("repositoryHelper");
 		return repositoryHelper.getCompanyHome();
+	}
+
+
+	/**
+	 * Find the path to a container based on a pattern
+	 * @param rootPath
+	 * @param pattern Splitted by "/" - a date like pattern, e.g. yyyy/MM/dd/HH/mm/ss/SS
+	 * @return the node id of the target folder
+	 */
+	public static String getContainerId(String rootPath, String pattern){
+			String result = null;
+			try{
+				MCAlfrescoAPIClient client = new MCAlfrescoAPIClient();
+				// request node
+				String rootId = getContainerRootPath(rootPath);
+
+
+				String[] patterns = pattern.split(SEPARATOR);
+
+				DateFormat[] formatter = new DateFormat[patterns.length];
+				for (int i = 0, c = patterns.length; i<c; ++i) {
+					formatter[i] = new SimpleDateFormat(patterns[i]);
+				}
+
+				String[] items = new String[formatter.length];
+				StringBuilder path = new StringBuilder();
+
+				Date date = new Date();
+
+				for (int i = 0, c = formatter.length; i < c; ++i) {
+					items[i] = formatter[i].format(date);
+
+					if (i > 0) {
+						path.append(SEPARATOR);
+					}
+					path.append(items[i]);
+				}
+
+				try{
+					lock.lock();
+					String key = path.toString();
+					result = cache.get(key);
+					if(result == null){
+						result = new NodeTool().createOrGetNodeByName(client, rootId, items);
+						cache.put(key, result);
+					}
+				}finally{
+					lock.unlock();
+				}
+
+			}catch (Throwable e) {
+				logger.error(e.getMessage(), e);
+				e.printStackTrace();
+			}
+			return result;
+		}
+
+	public static String getContainerRootPath(String rootPath) throws Throwable {
+		MCAlfrescoAPIClient client = new MCAlfrescoAPIClient();
+		HashMap<String, HashMap<String, Object>> search = client.search("PATH:\"" + rootPath + "\"", CCConstants.CM_TYPE_FOLDER);
+		String rootId = null;
+		if (search.size() != 1) {
+			if(search.size() > 1) throw new IllegalArgumentException("The path must reference a unique node.");
+
+
+			String startAt = client.getCompanyHomeNodeId();
+			String collectionPath = rootPath;
+			String pathCompanyHome = "/app:company_home/";
+
+			if(collectionPath.startsWith(pathCompanyHome)){
+				collectionPath = collectionPath.replace(pathCompanyHome, "");
+			}
+
+			collectionPath = collectionPath.replaceAll("[a-zA-Z]*:", "");
+			collectionPath = (collectionPath.startsWith("/"))? collectionPath.replaceFirst("/", "") : collectionPath;
+			rootId = new NodeTool().createOrGetNodeByName(client,startAt , collectionPath.split("/"));
+		}else{
+			rootId = search.keySet().iterator().next();
+		}
+		return rootId;
 	}
 }

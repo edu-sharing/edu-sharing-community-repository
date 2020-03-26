@@ -1,10 +1,14 @@
 package org.edu_sharing.service.remote;
 
 import java.io.InputStream;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.repo.security.authentication.AuthenticationUtil.RunAsWork;
+import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.repository.StoreRef;
 import org.apache.log4j.Logger;
 import org.edu_sharing.repository.client.tools.CCConstants;
@@ -13,10 +17,14 @@ import org.edu_sharing.repository.server.MCAlfrescoBaseClient;
 import org.edu_sharing.repository.server.authentication.Context;
 import org.edu_sharing.repository.server.tools.ApplicationInfo;
 import org.edu_sharing.repository.server.tools.ApplicationInfoList;
+import org.edu_sharing.restservices.shared.Node;
 import org.edu_sharing.service.nodeservice.NodeService;
 import org.edu_sharing.service.nodeservice.NodeServiceFactory;
+import org.edu_sharing.service.nodeservice.NodeServiceHelper;
 import org.edu_sharing.service.nodeservice.NodeServiceImpl;
 import org.edu_sharing.service.permission.PermissionServiceFactory;
+import org.edu_sharing.service.permission.PermissionServiceHelper;
+import org.reflections.Store;
 
 public class RemoteObjectService {
 
@@ -152,4 +160,73 @@ public class RemoteObjectService {
 		return !repInfo.ishomeNode() && !repInfo.isRemoteAlfresco();
 	}
 
+	public String getOrCreateRemoteMetadataObject(String sourceRepositoryId, String originalNodeId) throws Throwable {
+		String ROOT_PATH = "/app:company_home/ccm:remote_ios";
+		ApplicationInfo repInfo = ApplicationInfoList.getRepositoryInfoById(sourceRepositoryId);
+		NodeService nsSourceRepo = NodeServiceFactory.getNodeService(sourceRepositoryId);
+		HashMap<String, Object> propsIn = nsSourceRepo.getProperties(null, null, originalNodeId);
+		if(propsIn == null || propsIn.size() == 0) {
+			throw new Exception("no properties found for source nodeId:" + originalNodeId + ", appId: " + sourceRepositoryId);
+		}
+		if(propsIn.containsKey(CCConstants.CM_NAME)) {
+			propsIn.put(CCConstants.CM_NAME, NodeServiceHelper.cleanupCmName((String) propsIn.get(CCConstants.CM_NAME)));
+		}
+		// set the wwwurl so that the rendering will redirect to the source
+		// @TODO: Check behaviour for each connected repository type
+		// propsIn.put(CCConstants.CCM_PROP_IO_WWWURL, propsIn.get(CCConstants.LOM_PROP_TECHNICAL_LOCATION));
+
+		// set the metadataset to keep the rendering of metadata consistent
+		propsIn.put(CCConstants.CM_PROP_METADATASET_EDU_METADATASET, repInfo.getMetadatsetsV2()[0]);
+		// We also need to store repository information for remote edu-sharing objects
+		propsIn.put(CCConstants.CCM_PROP_REMOTEOBJECT_NODEID, originalNodeId);
+		propsIn.put(CCConstants.CCM_PROP_REMOTEOBJECT_REPOSITORY_TYPE, repInfo.getRepositoryType());
+		propsIn.put(CCConstants.CCM_PROP_REMOTEOBJECT_REPOSITORYID, repInfo.getAppId());
+		// remove illegal data
+		HashMap<String, Object> props=new HashMap<>(propsIn);
+		props.remove(CCConstants.SYS_PROP_NODE_UID);
+		props.remove(CCConstants.NODECREATOR_EMAIL);
+		props.remove(CCConstants.NODECREATOR_FIRSTNAME);
+		props.remove(CCConstants.NODECREATOR_LASTNAME);
+		props.remove(CCConstants.NODEMODIFIER_EMAIL);
+		props.remove(CCConstants.NODEMODIFIER_FIRSTNAME);
+		props.remove(CCConstants.NODEMODIFIER_LASTNAME);
+		props.remove(CCConstants.CONTENTURL);
+		for(Map.Entry<String, Object> prop: propsIn.entrySet()){
+			if(prop.getKey().startsWith("{virtualproperty}")) {
+				props.remove(prop.getKey());
+			}
+		}
+		return AuthenticationUtil.runAsSystem(() -> {
+			try {
+				Map<String, Object> searchProps = new HashMap<>();
+				searchProps.put(CCConstants.CCM_PROP_REMOTEOBJECT_NODEID, originalNodeId);
+				searchProps.put(CCConstants.CCM_PROP_REMOTEOBJECT_REPOSITORYID, repInfo.getAppId());
+				NodeService nodeService = NodeServiceFactory.getLocalService();
+				String root = NodeServiceHelper.getContainerRootPath(ROOT_PATH);
+				// allow everyone to cc publish from this folder
+				PermissionServiceFactory.getLocalService().setPermissions(root, CCConstants.AUTHORITY_GROUP_EVERYONE,
+						new String[]{CCConstants.PERMISSION_CONSUMER, CCConstants.PERMISSION_CC_PUBLISH}, false);
+				List<NodeRef> nodes = NodeServiceHelper.findNodeByPropertiesRecursive(
+								new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE,
+								root),
+								Collections.singletonList(CCConstants.CCM_TYPE_IO),
+								searchProps);
+				if(nodes.size()>1){
+					throw new Exception("For remote node "+originalNodeId+" where found "+nodes.size()+" local objects, invalid state!");
+				}
+				if(nodes.size()==0) {
+					// create
+					String containerId = NodeServiceHelper.getContainerId(ROOT_PATH, "yyyy/MM/dd");
+					return nodeService.createNodeBasic(containerId, CCConstants.CCM_TYPE_IO, props);
+				}
+				else{
+					// update in case metadata of remote source have changed
+					nodeService.updateNodeNative(nodes.get(0).getId(), props);
+					return nodes.get(0).getId();
+				}
+			}catch(Throwable t){
+				throw new RuntimeException(t);
+			}
+		});
+	}
 }

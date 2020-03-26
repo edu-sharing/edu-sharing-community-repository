@@ -99,7 +99,6 @@ public class PreviewServlet extends HttpServlet implements SingleThreadModel {
 		ServletOutputStream op = resp.getOutputStream();
 		String nodeId=null;
 
-		NodeService nodeService = NodeServiceFactory.getLocalService();
 		MimeTypesV2 mime=new MimeTypesV2(ApplicationInfoList.getHomeRepository());
 		mime.setPreferredFormat(
 				"png".equals(req.getParameter("format")) ?
@@ -115,13 +114,19 @@ public class PreviewServlet extends HttpServlet implements SingleThreadModel {
 		else{
 			storeRef = StoreRef.STORE_REF_WORKSPACE_SPACESSTORE;
 		}
-
+		final NodeService nodeService;
+		String repository = req.getParameter("repository");
+		boolean remoteNode = false;
+		if(repository!=null){
+			nodeService = NodeServiceFactory.getNodeService(repository);
+			remoteNode = true;
+		} else {
+			nodeService = NodeServiceFactory.getLocalService();
+		}
 		try {
-			
 			nodeId = req.getParameter("nodeId");
 			String type = req.getParameter("type");
 			String version = req.getParameter("version");
-
 			NodeRef nodeRef = new NodeRef(storeRef, nodeId);
 			String nodeType = nodeService.getType(nodeId);
 			
@@ -132,6 +137,29 @@ public class PreviewServlet extends HttpServlet implements SingleThreadModel {
 				try {
 					props = nodeService.getProperties(storeRef.getProtocol(),storeRef.getIdentifier(),nodeId);
                     String[] aspects = nodeService.getAspects(storeRef.getProtocol(), storeRef.getIdentifier(), nodeId);
+
+
+					if (remoteNode || nodeType.equals(CCConstants.CCM_TYPE_REMOTEOBJECT) || Arrays.asList(aspects).contains(CCConstants.CCM_ASPECT_REMOTEREPOSITORY)) {
+						// if its local stored, load the url directly
+						String thumbnail = (String)props.get(CCConstants.CCM_PROP_IO_THUMBNAILURL);
+						if(thumbnail != null && !thumbnail.trim().equals("")){
+							resp.sendRedirect(thumbnail);
+							return;
+						}
+						props=NodeServiceFactory.getNodeService((String) props.get(CCConstants.CCM_PROP_REMOTEOBJECT_REPOSITORYID))
+								.getProperties(storeProtocol, storeId, (String) props.get(CCConstants.CCM_PROP_REMOTEOBJECT_NODEID));
+						if(props != null){
+							thumbnail = (String)props.get(CCConstants.CCM_PROP_IO_THUMBNAILURL);
+							if(thumbnail != null && !thumbnail.trim().equals("")){
+								resp.sendRedirect(thumbnail);
+								return;
+							}
+						}
+						deliverContentAsSystem(nodeRef, CCConstants.CM_PROP_CONTENT, req, resp);
+						return;
+						//resp.sendRedirect(defaultImage);
+						//throw new Exception();
+					}
 
                     // For collections: Fetch the original object for preview
 					if(Arrays.asList(aspects).contains(CCConstants.CCM_ASPECT_COLLECTION_IO_REFERENCE) && props.containsKey(CCConstants.CCM_PROP_IO_ORIGINAL)){
@@ -147,23 +175,6 @@ public class PreviewServlet extends HttpServlet implements SingleThreadModel {
 					validateScope(req, props);
 					// we need to check permissions and allow or deny access by using the READ_PREVIEW permission
 					validatePermissions(storeRef,inNodeId);
-					
-					if (nodeType.equals(CCConstants.CCM_TYPE_REMOTEOBJECT)) {
-						
-						props=NodeServiceFactory.getNodeService((String) props.get(CCConstants.CCM_PROP_REMOTEOBJECT_REPOSITORYID))
-							.getProperties(storeProtocol, storeId, (String) props.get(CCConstants.CCM_PROP_REMOTEOBJECT_NODEID));
-						if(props != null){
-							String thumbnail = (String)props.get(CCConstants.CM_ASSOC_THUMBNAILS);
-							if(thumbnail != null && !thumbnail.trim().equals("")){
-								resp.sendRedirect(thumbnail);
-								return;
-							}
-						}
-						deliverContentAsSystem(nodeRef, CCConstants.CM_PROP_CONTENT, req, resp);
-						return;
-						//resp.sendRedirect(defaultImage);
-						//throw new Exception();
-					}
 					
 					if (!nodeType.equals(CCConstants.CCM_TYPE_IO)
 							&& !nodeType.equals(CCConstants.CCM_TYPE_MAP)
@@ -326,7 +337,7 @@ public class PreviewServlet extends HttpServlet implements SingleThreadModel {
 					@Override
 					public HashMap<String, Object> doWork() throws Exception {
 						try{
-							return nodeService.getProperties(storeRef.getProtocol(), storeRef.getIdentifier(),nodeIdFinal);
+							return NodeServiceFactory.getLocalService().getProperties(storeRef.getProtocol(), storeRef.getIdentifier(),nodeIdFinal);
 						}catch(Throwable t){
 							throw new Exception(t);
 						}

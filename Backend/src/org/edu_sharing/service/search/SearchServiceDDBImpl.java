@@ -317,8 +317,6 @@ public class SearchServiceDDBImpl extends SearchServiceAdapter{
 
 			if(imageUrl != null) {
 				properties.put(CCConstants.CCM_PROP_IO_THUMBNAILURL, imageUrl);
-				//for the gwt gui no persistent
-				properties.put(CCConstants.CM_ASSOC_THUMBNAILS, imageUrl);
 			}
 			JSONObject item = allJson.getJSONObject("view").getJSONObject("item");				
 			try {

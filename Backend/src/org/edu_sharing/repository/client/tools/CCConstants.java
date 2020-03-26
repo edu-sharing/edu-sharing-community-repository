@@ -438,6 +438,9 @@ public class CCConstants {
 
 	public final static String CCM_ASPECT_ADDRESS = "{http://www.campuscontent.de/model/1.0}address";
 
+	// describes that the node points onto a remote node, e.g. youtube
+	public final static String CCM_ASPECT_REMOTEREPOSITORY = "{http://www.campuscontent.de/model/1.0}remoterepository";
+
 	public final static String CCM_PROP_GROUPEXTENSION_GROUPTYPE = "{http://www.campuscontent.de/model/1.0}groupType";
 
 	public final static String CCM_PROP_GROUPEXTENSION_GROUPEMAIL = "{http://www.campuscontent.de/model/1.0}groupEmail";

@@ -1837,6 +1837,8 @@
       <!--                      -->
       <!--  DEPRECATED (end of) -->
       <!--                      -->
+
+
       <!-- campuscontent metadataset aspect for persons, organisations, folder, io's -->
       <aspect name="cm:metadataset">
       		<title>The metadataset for maps, ios, organisations</title>

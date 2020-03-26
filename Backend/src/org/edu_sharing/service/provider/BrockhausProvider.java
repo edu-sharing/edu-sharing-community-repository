@@ -28,9 +28,4 @@ public class BrockhausProvider extends Provider{
     public SearchService getSearchService(){
         return new SearchServiceBrockhausImpl(appId);
     }
-
-    @Override
-    public RenderingService getRenderingService() {
-        return new RenderingServiceNotSupported(appId);
-    }
 }

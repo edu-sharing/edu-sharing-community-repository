@@ -889,29 +889,13 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
 	}
 
 	private String getPreviewUrl(String storeProtocol, String storeId, String nodeId, String version) {
-		if(getType(storeProtocol,storeId,nodeId).equals(CCConstants.CCM_TYPE_REMOTEOBJECT)) {
-			// @TODO: Basically, when the method getPreviewResult is overriden by the service, we don't need to do that!
-			NodeRef nodeRef=new NodeRef(new StoreRef(storeProtocol,storeId),nodeId);
-			String repoId = (String)nodeService.getProperty(nodeRef, QName.createQName(CCConstants.CCM_PROP_REMOTEOBJECT_REPOSITORYID));
-			String remoteNodeId = (String)nodeService.getProperty(nodeRef, QName.createQName(CCConstants.CCM_PROP_REMOTEOBJECT_NODEID));
-			try {
-				HashMap<String, Object> props = NodeServiceFactory.getNodeService(repoId).getProperties(null,null,remoteNodeId);
-				return  (String)props.get(CCConstants.CM_ASSOC_THUMBNAILS);
-			} catch (Throwable e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-				return null;
-			}
-
-		}else {
-			String previewURL = URLTool.getBaseUrl(true);
-			previewURL += "/preview?nodeId="+nodeId+"&storeProtocol="+storeProtocol+"&storeId="+storeId+"&dontcache="+System.currentTimeMillis();
-			if(version!=null){
-				previewURL +="&version="+version;
-			}
-			previewURL =  URLTool.addOAuthAccessToken(previewURL);
-			return previewURL;
+		String previewURL = URLTool.getBaseUrl(true);
+		previewURL += "/preview?nodeId="+nodeId+"&storeProtocol="+storeProtocol+"&storeId="+storeId+"&dontcache="+System.currentTimeMillis();
+		if(version!=null){
+			previewURL +="&version="+version;
 		}
+		previewURL =  URLTool.addOAuthAccessToken(previewURL);
+		return previewURL;
 	}
 
 	@Override

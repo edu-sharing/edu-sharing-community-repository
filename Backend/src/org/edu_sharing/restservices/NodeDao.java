@@ -480,6 +480,11 @@ public class NodeDao {
 			else{
 				this.type = CCConstants.CCM_TYPE_IO;
 			}
+
+			String[] aspects = nodeService.getAspects(this.storeProtocol,this.storeId, nodeId);
+
+			this.aspects = (aspects != null) ? Arrays.asList(aspects) : new ArrayList<String>();
+
 			if(this.type.equals(CCConstants.CCM_TYPE_REMOTEOBJECT)){
 				this.remoteId=(String)this.nodeProps.get(CCConstants.CCM_PROP_REMOTEOBJECT_NODEID);
 				this.remoteRepository=RepositoryDao.getRepository((String)this.nodeProps.get(CCConstants.CCM_PROP_REMOTEOBJECT_REPOSITORYID));
@@ -488,10 +493,6 @@ public class NodeDao {
 				this.nodeProps = this.nodeService.getProperties(null,null, this.remoteId);
 			}
 
-			String[] aspects = nodeService.getAspects(this.storeProtocol,this.storeId, nodeId);
-			
-			this.aspects = (aspects != null) ? Arrays.asList(aspects) : new ArrayList<String>();
-			
 			this.filter = filter;
 			
 		}catch(Throwable t){
@@ -499,7 +500,7 @@ public class NodeDao {
 		}
 	}
 	public boolean isFromRemoteRepository(){
-		return remoteId!=null || !this.repoDao.isHomeRepo();
+		return remoteId!=null || !this.repoDao.isHomeRepo() || this.aspects.contains(CCConstants.CCM_ASPECT_REMOTEREPOSITORY);
 	}
 	public void refreshPermissions() {
         this.hasPermissions = permissionService.hasAllPermissions(storeProtocol, storeId, nodeId,DAO_PERMISSIONS);
@@ -926,11 +927,13 @@ public class NodeDao {
 		if(!isFromRemoteRepository())
 			return null;
 		Remote remote=new Remote();
-		if(remoteId!=null){
+		if(aspects.contains(CCConstants.CCM_ASPECT_REMOTEREPOSITORY)){
+			remote.setId((String)this.nodeProps.get(CCConstants.CCM_PROP_REMOTEOBJECT_NODEID));
+			remote.setRepository(RepositoryDao.getRepository((String)this.nodeProps.get(CCConstants.CCM_PROP_REMOTEOBJECT_REPOSITORYID)).asRepo());
+		} else if(remoteId!=null){
 			remote.setId(remoteId);
 			remote.setRepository(remoteRepository.asRepo());
-		}
-		else {
+		} else {
 			// this is the case if NodeDao was already called via a remote ref (and not a shadow object)
 			remote.setId(getId());
 			remote.setRepository(repoDao.asRepo());
@@ -1490,6 +1493,10 @@ public class NodeDao {
 	private List<String> getPropertyValues(Object value) {
 		List<String> values = new ArrayList<String>();
 		if (value != null ){
+			if(value instanceof Date){
+				values.add(String.valueOf(((Date) value).getTime()));
+				return values;
+			}
 			for (String mv : ValueTool.getMultivalue(value.toString())) {
 				values.add(mv);
 			}

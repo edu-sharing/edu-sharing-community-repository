@@ -505,7 +505,7 @@ public class CollectionApi {
             NodeEntry entry=new NodeEntry();
 
             if(sourceRepo != null && !sourceRepo.equals(RepositoryDao.getHomeRepository().getId())){
-                CollectionDao.addToCollection(repoDao,collectionId,nodeId,sourceRepo);
+				entry.setNode(CollectionDao.addToCollection(repoDao,collectionId,nodeId,sourceRepo).asNode());
             }else {
                 entry.setNode(CollectionDao.addToCollection(repoDao,collectionId,nodeId).asNode());
             }

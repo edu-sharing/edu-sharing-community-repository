@@ -17,11 +17,10 @@ import org.edu_sharing.service.search.SearchServicePixabayImpl;
 
 import com.google.common.collect.MapMaker;
 
-public class NodeServicePixabayImpl extends NodeServiceAdapter{
+public class NodeServicePixabayImpl extends NodeServiceAdapterCached{
 
 	private String repositoryId;
 	private String APIKey;
-	private static LRUMap propertyCache=new LRUMap(1000);
 	private Logger logger= Logger.getLogger(NodeServicePixabayImpl.class);
 
 	public NodeServicePixabayImpl(String appId) {
@@ -46,13 +45,12 @@ public class NodeServicePixabayImpl extends NodeServiceAdapter{
 			return null;
 		}
 	}
-	public static void updateCache(String id,HashMap<String,Object> properties) {
-		propertyCache.put(id, properties);
-	}
 	@Override
 	public HashMap<String, Object> getProperties(String storeProtocol, String storeId, String nodeId) throws Throwable {
-		if(propertyCache.containsKey(nodeId))
-			return (HashMap<String, Object>) propertyCache.get(nodeId);
+		HashMap<String, Object> props = super.getProperties(storeProtocol, storeId, nodeId);
+		if(props != null) {
+			return props;
+		}
 		
 		// Querying by "id" is no longer supported.
 		// some api keys still have it, we can still try it
@@ -60,7 +58,7 @@ public class NodeServicePixabayImpl extends NodeServiceAdapter{
 		try{
 			SearchResultNodeRef list = SearchServicePixabayImpl.searchPixabay(repositoryId, APIKey, "&id="+nodeId);
 			if(list.getData()!=null && list.getData().size()>0){
-				propertyCache.put(nodeId, list.getData().get(0).getProperties());
+				updateCache(list.getData().get(0).getProperties());
 				return list.getData().get(0).getProperties();
 			}
 		}

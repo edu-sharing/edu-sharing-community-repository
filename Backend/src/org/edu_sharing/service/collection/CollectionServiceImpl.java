@@ -63,6 +63,7 @@ import org.edu_sharing.service.nodeservice.NodeServiceHelper;
 import org.edu_sharing.service.nodeservice.NodeServiceInterceptor;
 import org.edu_sharing.service.permission.PermissionServiceFactory;
 import org.edu_sharing.service.permission.PermissionServiceHelper;
+import org.edu_sharing.service.remote.RemoteObjectService;
 import org.edu_sharing.service.search.SearchService;
 import org.edu_sharing.service.search.SearchService.ContentType;
 import org.edu_sharing.service.search.SearchServiceFactory;
@@ -84,13 +85,8 @@ public class CollectionServiceImpl implements CollectionService{
 	String pattern;
 	
 	String path;
-	
-	final Lock lock = new ReentrantLock();
-	
-	Map<String, String> cache = new HashMap<String, String>();
-	
-	private final String SEPARATOR = "/";
-	
+
+
 	ApplicationInfo appInfo = null;
 	
 	MCAlfrescoAPIClient client = null;
@@ -164,13 +160,11 @@ public class CollectionServiceImpl implements CollectionService{
 			else{
                 originalNodeId = refNodeId;
             }
-			
-			String locale = (Context.getCurrentInstance() != null) ? Context.getCurrentInstance().getLocale() : "de_DE";
 
 			// user must have CC_PUBLISH on either the original or a reference object
 			if(!client.hasPermissions(originalNodeId, new String[]{CCConstants.PERMISSION_CC_PUBLISH})
 					&& !client.hasPermissions(nodeId, new String[]{CCConstants.PERMISSION_CC_PUBLISH})){
-				String message = I18nServer.getTranslationDefaultResourcebundle("collection_no_publish_permission", locale);
+				String message = I18nServer.getTranslationDefaultResourcebundleNoException("collection_no_publish_permission");
 				throw new Exception(message);
 			}
 			NodeRef collectionRef = new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE,collectionId);
@@ -280,44 +274,9 @@ public class CollectionServiceImpl implements CollectionService{
 	@Override
 	public String addToCollection(String collectionId, String originalNodeId, String sourceRepositoryId)
 			throws DuplicateNodeException, Throwable {
-		//@TODO: create folder remote_ios and make it customizable
-		String containerId = getContainerId(client, "/app:company_home/ccm:remote_ios");
-		
-		ApplicationInfo appInfo = ApplicationInfoList.getRepositoryInfoById(sourceRepositoryId);
 
-		NodeService nsSourceRepo = NodeServiceFactory.getNodeService(sourceRepositoryId);
-		if(nsSourceRepo == null) {
-			logger.error("no nodeservice found for sourceRepositoryId:" + sourceRepositoryId);
-		}
-		HashMap<String, Object> props = nsSourceRepo.getProperties(null, null, originalNodeId);
-		if(props == null || props.size() == 0) {
-			logger.error("no properties found for source nodeId:" + originalNodeId);
-		}
-		
-		HashMap<String, Object> toSafe = new HashMap<String, Object>();
-		
-		String name = (String)props.get(CCConstants.CM_NAME);
-		name = NodeServiceHelper.cleanupCmName(name);
-		toSafe.put(CCConstants.CM_NAME, name);
-		toSafe.put(CCConstants.LOM_PROP_GENERAL_TITLE, props.get(CCConstants.LOM_PROP_GENERAL_TITLE));
-		toSafe.put(CCConstants.CCM_PROP_IO_REPL_LIFECYCLECONTRIBUTER_AUTOR, props.get(CCConstants.CCM_PROP_IO_REPL_LIFECYCLECONTRIBUTER_AUTOR));
-		toSafe.put(CCConstants.LOM_PROP_TECHNICAL_FORMAT, props.get(CCConstants.LOM_PROP_TECHNICAL_FORMAT));
-		toSafe.put(CCConstants.LOM_PROP_GENERAL_KEYWORD, props.get(CCConstants.LOM_PROP_GENERAL_KEYWORD));
-		toSafe.put(CCConstants.LOM_PROP_TECHNICAL_LOCATION, props.get(CCConstants.LOM_PROP_TECHNICAL_LOCATION));
-		toSafe.put(CCConstants.CCM_PROP_IO_REPLICATIONSOURCE, props.get(CCConstants.CCM_PROP_IO_REPLICATIONSOURCE));
-		toSafe.put(CCConstants.CCM_PROP_IO_REPLICATIONSOURCEID, props.get(CCConstants.CCM_PROP_IO_REPLICATIONSOURCEID));
-		toSafe.put(CCConstants.LOM_PROP_GENERAL_DESCRIPTION, props.get(CCConstants.LOM_PROP_GENERAL_DESCRIPTION));
-		toSafe.put(CCConstants.CCM_PROP_IO_COMMONLICENSE_KEY, props.get(CCConstants.CCM_PROP_IO_COMMONLICENSE_KEY));
-		toSafe.put(CCConstants.CCM_PROP_IO_THUMBNAILURL, props.get(CCConstants.CM_ASSOC_THUMBNAILS));
-		
-		// set the wwwurl so that the rendering will redirect to the source
-		// @TODO: We also need to store repository information for remote edu-sharing objects
-		// @TODO: Check behaviour for each connected repository type
-		toSafe.put(CCConstants.CCM_PROP_IO_WWWURL, props.get(CCConstants.LOM_PROP_TECHNICAL_LOCATION));
-
-		String nodeId = client.createNode(containerId, CCConstants.CCM_TYPE_IO,toSafe);
-		this.addToCollection(collectionId, nodeId);
-		return null;
+		String nodeId = new RemoteObjectService().getOrCreateRemoteMetadataObject(sourceRepositoryId, originalNodeId);
+		return this.addToCollection(collectionId, nodeId);
 	}
 	
 	@Override
@@ -354,7 +313,7 @@ public class CollectionServiceImpl implements CollectionService{
 						
 						collection.setLevel0(true);
 						
-						parentIdLocal = getContainerId(client,path);
+						parentIdLocal = NodeServiceHelper.getContainerId(path, pattern);
 					}
 					
 					HashMap<String,Object> props = asProps(collection);
@@ -385,74 +344,6 @@ public class CollectionServiceImpl implements CollectionService{
 	    setScope(col);
 		return col;
 	}
-	
-	private String getContainerId(MCAlfrescoBaseClient client, String rootPath){
-		String result = null;
-		try{
-			
-			// request node	
-			HashMap<String, HashMap<String, Object>> search = client.search("PATH:\"" + rootPath + "\"", CCConstants.CM_TYPE_FOLDER);
-			String rootId = null;
-			if (search.size() != 1) {
-				if(search.size() > 1) throw new IllegalArgumentException("The path must reference a unique node.");
-				
-				
-				String startAt = client.getCompanyHomeNodeId();
-				String collectionPath = new String(rootPath);
-				String pathCompanyHome = "/app:company_home/";
-				
-				if(collectionPath.startsWith(pathCompanyHome)){
-					collectionPath = collectionPath.replace(pathCompanyHome, "");
-				}
-				
-				collectionPath = collectionPath.replaceAll("[a-zA-Z]*:", "");
-				collectionPath = (collectionPath.startsWith("/"))? collectionPath.replaceFirst("/", "") : collectionPath;
-				rootId = new NodeTool().createOrGetNodeByName(client,startAt , collectionPath.split("/"));
-			}else{
-				rootId = search.keySet().iterator().next();	
-			}
-			
-			
-			String[] patterns = pattern.split(SEPARATOR); 
-			
-			DateFormat[] formatter = new DateFormat[patterns.length];
-			for (int i = 0, c = patterns.length; i<c; ++i) {
-				formatter[i] = new SimpleDateFormat(patterns[i]);
-			}
-			
-			String[] items = new String[formatter.length];
-			StringBuilder path = new StringBuilder();
-			
-			Date date = new Date();
-			
-			for (int i = 0, c = formatter.length; i < c; ++i) {
-				items[i] = formatter[i].format(date);
-				
-				if (i > 0) {
-					path.append(SEPARATOR);
-				}
-				path.append(items[i]);
-			}
-			
-			try{
-				lock.lock();
-				String key = path.toString();
-				result = cache.get(key);
-				if(result == null){
-					result = new NodeTool().createOrGetNodeByName(client, rootId, items);
-					cache.put(key, result);
-				}
-			}finally{
-				lock.unlock();
-			}
-			
-		}catch (Throwable e) {
-			logger.error(e.getMessage(), e);
-			e.printStackTrace();
-		}
-		return result;
-	}
-	
 	
 	/**
 	 * @TODO 

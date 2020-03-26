@@ -11,12 +11,16 @@ import org.alfresco.service.cmr.repository.AssociationRef;
 import org.alfresco.service.cmr.repository.ChildAssociationRef;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.repository.StoreRef;
+import org.alfresco.service.namespace.QName;
 import org.edu_sharing.repository.client.rpc.User;
 import org.edu_sharing.repository.client.tools.CCConstants;
+import org.edu_sharing.repository.client.tools.UrlTool;
 import org.edu_sharing.repository.client.tools.metadata.ValueTool;
 import org.edu_sharing.repository.server.tools.ApplicationInfoList;
+import org.edu_sharing.repository.server.tools.URLTool;
 import org.edu_sharing.service.nodeservice.model.GetPreviewResult;
 import org.edu_sharing.service.search.model.SortDefinition;
+import org.springframework.extensions.surf.util.URLEncoder;
 
 public class NodeServiceAdapter implements NodeService {
 	
@@ -325,9 +329,15 @@ public class NodeServiceAdapter implements NodeService {
 	@Override
 	public GetPreviewResult getPreview(String storeProtocol, String storeIdentifier, String nodeId, HashMap<String, Object> nodeProps, String version) {
 	    try {
-			String prop = nodeProps!=null && nodeProps.containsKey(CCConstants.CM_ASSOC_THUMBNAILS) ? (String) nodeProps.get(CCConstants.CM_ASSOC_THUMBNAILS) :
-					getProperty(storeProtocol, storeIdentifier, nodeId, CCConstants.CM_ASSOC_THUMBNAILS);
-            return new GetPreviewResult(prop, false);
+			String previewURL = URLTool.getBaseUrl(true);
+			previewURL += "/preview?nodeId="+URLEncoder.encodeUriComponent(nodeId)+"&repository="+
+					URLEncoder.encodeUriComponent(appId)+
+					"&storeProtocol="+storeProtocol+"&storeId="+storeIdentifier+"&dontcache="+System.currentTimeMillis();
+			if(version!=null){
+				previewURL +="&version="+version;
+			}
+			previewURL =  URLTool.addOAuthAccessToken(previewURL);
+            return new GetPreviewResult(previewURL, false);
         }catch(Throwable t){
 	        return null;
         }

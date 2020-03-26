@@ -139,7 +139,6 @@ public class SearchServicePixabayImpl extends SearchServiceAdapter{
 				properties.put(CCConstants.LOM_PROP_TECHNICAL_FORMAT, "image/png");
 			if(json.getString("type").equals("film"))
 				properties.put(CCConstants.LOM_PROP_TECHNICAL_FORMAT, "video/*");
-			properties.put(CCConstants.ALFRESCO_MIMETYPE,properties.get(CCConstants.LOM_PROP_TECHNICAL_FORMAT));
 			properties.put(CCConstants.CM_NAME,json.getString("tags")+"."+extension);
 			properties.put(CCConstants.CCM_PROP_IO_COMMONLICENSE_KEY,CCConstants.COMMON_LICENSE_CC_ZERO);
 			properties.put(CCConstants.CM_PROP_C_CREATOR,json.getString("user"));
@@ -156,14 +155,14 @@ public class SearchServicePixabayImpl extends SearchServiceAdapter{
 			properties.put(CCConstants.CONTENTURL,URLTool.getRedirectServletLink(repositoryId, json.getString("id")));
 			properties.put(CCConstants.VIRT_PROP_PERMALINK,json.getString("pageURL"));
 			//properties.put(CCConstants.CM_ASSOC_THUMBNAILS, json.getString("previewURL"));
-			properties.put(CCConstants.CM_ASSOC_THUMBNAILS,json.getString("webformatURL").replace("_640", "_340"));
+			properties.put(CCConstants.CCM_PROP_IO_THUMBNAILURL,json.getString("webformatURL"));//.replace("_640", "_960"));
 			// download is currently broken
 			//properties.put(CCConstants.DOWNLOADURL,json.getString("webformatURL").replace("_640", "_960"));
 			org.edu_sharing.service.model.NodeRef ref = new org.edu_sharing.service.model.NodeRefImpl(repositoryId, 
 					Constants.storeRef.getProtocol(),
 					Constants.storeRef.getIdentifier(),properties);
 			data.add(ref);
-			NodeServicePixabayImpl.updateCache(json.getString("id"), properties);
+			NodeServicePixabayImpl.updateCache(properties);
 		}
 		return searchResultNodeRef;
 

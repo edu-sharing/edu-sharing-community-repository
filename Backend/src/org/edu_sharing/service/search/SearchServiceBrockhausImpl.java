@@ -16,6 +16,7 @@ import org.edu_sharing.repository.server.tools.URLTool;
 import org.edu_sharing.service.Constants;
 import org.edu_sharing.service.mime.MimeTypesV2;
 import org.edu_sharing.service.model.NodeRef;
+import org.edu_sharing.service.nodeservice.NodeServiceBrockhausImpl;
 import org.edu_sharing.service.nodeservice.NodeServicePixabayImpl;
 import org.edu_sharing.service.search.model.SearchToken;
 import org.json.JSONArray;
@@ -73,14 +74,8 @@ public class SearchServiceBrockhausImpl extends SearchServiceAdapter{
 			JSONObject document=documents.getJSONObject(i);
 
 			HashMap<String,Object> properties=new HashMap<>();
-			properties.put(CCConstants.SYS_PROP_NODE_UID,document.getString("url"));
-
-			NodeRef ref = new org.edu_sharing.service.model.NodeRefImpl(repositoryId,
-					Constants.storeRef.getProtocol(),
-					Constants.storeRef.getIdentifier(),properties);
-			data.add(ref);
-
-
+			// swagger doesn't like / as %2F encoded, so we try to prevent issues by mapping the data
+			properties.put(CCConstants.SYS_PROP_NODE_UID,document.getString("url").replace("/","-"));
 			properties.put(CCConstants.CM_PROP_C_MODIFIED,System.currentTimeMillis());
 
 			properties.put(CCConstants.CM_NAME,document.getString("title"));
@@ -89,14 +84,22 @@ public class SearchServiceBrockhausImpl extends SearchServiceAdapter{
 			properties.put(CCConstants.LOM_PROP_TECHNICAL_FORMAT, "application/xhtml+xml");
 
 			if(document.has("thumbnail")) {
-				properties.put(CCConstants.CM_ASSOC_THUMBNAILS, document.getString("thumbnail"));
+				properties.put(CCConstants.CCM_PROP_IO_THUMBNAILURL, document.getString("thumbnail"));
 			}else {
-				properties.put(CCConstants.CM_ASSOC_THUMBNAILS, new MimeTypesV2(ApplicationInfoList.getHomeRepository()).getPreviewPath() + "link.svg");
+				properties.put(CCConstants.CCM_PROP_IO_THUMBNAILURL, new MimeTypesV2(ApplicationInfoList.getHomeRepository()).getPreviewPath() + "link.svg");
 			}
 			properties.put(CCConstants.CCM_PROP_IO_REPLICATIONSOURCE,"brockhaus");
 			//String contentUrl=buildUrl(apiKey,document.getString("url"));
 			properties.put(CCConstants.CONTENTURL,URLTool.getRedirectServletLink(repositoryId, document.getString("url")));
 			properties.put(CCConstants.CCM_PROP_IO_WWWURL,properties.get(CCConstants.CONTENTURL));
+
+			NodeRef ref = new org.edu_sharing.service.model.NodeRefImpl(repositoryId,
+					Constants.storeRef.getProtocol(),
+					Constants.storeRef.getIdentifier(),properties);
+			data.add(ref);
+
+			NodeServiceBrockhausImpl.updateCache(properties);
+
 		}
 		return searchResultNodeRef;
 	}

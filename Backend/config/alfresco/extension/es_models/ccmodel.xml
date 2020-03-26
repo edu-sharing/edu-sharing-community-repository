@@ -94,18 +94,8 @@
 		<type name="ccm:remoteobject">
 			<title>Campus Content foreign repository object</title>
 			<parent>cm:content</parent>
-			<properties>
-				<property name="ccm:remoterepositoryid">
-					<type>d:text</type>
-				</property>
-				<property name="ccm:remotenodeid">
-					<type>d:text</type>
-				</property>
-				<property name="ccm:remoterepositorytype">
-					<type>d:text</type>
-				</property>
-			</properties>
 			<mandatory-aspects>
+				<aspect>ccm:remoterepository</aspect>
 				<aspect>ccm:usageaspect</aspect>
 			</mandatory-aspects>
 		</type>
@@ -657,6 +647,21 @@
                 </property>
             </properties>
         </aspect>
+
+		<aspect name="ccm:remoterepository">
+			<title>Metadata for an element which was originally imported or pointing to a remote source (youtube, ddb, ...)</title>
+			<properties>
+				<property name="ccm:remoterepositoryid">
+					<type>d:text</type>
+				</property>
+				<property name="ccm:remotenodeid">
+					<type>d:text</type>
+				</property>
+				<property name="ccm:remoterepositorytype">
+					<type>d:text</type>
+				</property>
+			</properties>
+		</aspect>
 
         <aspect name="ccm:iometadata">
 			<title>Metadata for an information object</title>

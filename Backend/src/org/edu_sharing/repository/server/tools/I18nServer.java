@@ -34,7 +34,7 @@ import java.util.ResourceBundle;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.edu_sharing.repository.client.tools.CCConstants;
-
+import org.edu_sharing.repository.server.authentication.Context;
 
 
 public class I18nServer {
@@ -51,7 +51,8 @@ public class I18nServer {
 	 * @return
 	 */
 	public static String getTranslationDefaultResourcebundle(String key){
-		String language = System.getProperty("user.language");
+		String locale = (Context.getCurrentInstance() != null) ? Context.getCurrentInstance().getLocale() : "de_DE";
+		/*String language = System.getProperty("user.language");
 		String country = System.getProperty("user.country");
 		
 		if(language == null || language.trim().equals("")){
@@ -60,13 +61,15 @@ public class I18nServer {
 		if(country == null || country.trim().equals("")){
 			country = language.toUpperCase();
 		}
+	    */
 		
-		return I18nServer.getTranslationDefaultResourcebundle(key, language+"_"+country);
+		return I18nServer.getTranslationDefaultResourcebundle(key, locale);
 	}
 	public static String getTranslationDefaultResourcebundleNoException(String key){
 		try{
 			return getTranslationDefaultResourcebundle(key);
 		}catch(Throwable t){
+			logger.warn("I18nServer missing translation for key "+key+" in bundle "+defaultResourceBundle);
 			return key;
 		}
 	}
@@ -169,7 +172,7 @@ public class I18nServer {
         
         messages = ResourceBundle.getBundle(resourceBoundle, currentLocale);
         String result =messages.getString(key);
-        
+
         logger.debug("I18nServer result:"+result);
         return result;
 	}

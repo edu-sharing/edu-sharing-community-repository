@@ -16,8 +16,9 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.HashMap;
 
-public class NodeServiceBrockhausImpl extends NodeServiceAdapter{
+public class NodeServiceBrockhausImpl extends NodeServiceAdapterCached{
 
+	private static LRUMap propertyCache=new LRUMap(1000);
 	private String repositoryId;
 	private Logger logger= Logger.getLogger(NodeServiceBrockhausImpl.class);
 	private String apiKey;
@@ -31,11 +32,14 @@ public class NodeServiceBrockhausImpl extends NodeServiceAdapter{
 
 	@Override
 	public HashMap<String, Object> getProperties(String storeProtocol, String storeId, String nodeId) throws Throwable {
-		//throw new Exception("Node "+nodeId+" was not found (api call not supported)");
-		HashMap<String, Object> properties = new HashMap<>();
+		HashMap<String, Object> props = super.getProperties(storeProtocol, storeId, nodeId);
+		if(props != null) {
+			return props;
+		}
+		props = new HashMap<>();
 		String url=SearchServiceBrockhausImpl.buildUrl(apiKey,nodeId);
-		properties.put(CCConstants.LOM_PROP_TECHNICAL_LOCATION,url);
-		return properties;
+		props.put(CCConstants.LOM_PROP_TECHNICAL_LOCATION,url);
+		return props;
 	}
 
 	@Override
