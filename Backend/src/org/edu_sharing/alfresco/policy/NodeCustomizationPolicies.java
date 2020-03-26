@@ -348,17 +348,21 @@ public class NodeCustomizationPolicies implements OnContentUpdatePolicy, OnCreat
 				if(nodeService.getProperty(eduNodeRef,QName.createQName(CCConstants.CCM_PROP_IO_ORIGINAL))==null)
 	        		nodeService.setProperty(eduNodeRef, QName.createQName(CCConstants.CCM_PROP_IO_ORIGINAL),eduNodeRef.getId());
 	        	
-				NodeRef personRef = personService.getPerson((String) props.get(ContentModel.PROP_CREATOR));
-				Map<QName, Serializable> userInfo = nodeService.getProperties(personRef);
-				
-				String givenName = (String)userInfo.get(ContentModel.PROP_FIRSTNAME);
-				String surename = (String)userInfo.get(ContentModel.PROP_LASTNAME);
-				String email = (String)userInfo.get(CCConstants.PROP_USER_EMAIL);
-				
-				if (surename == null || surename.isEmpty()) {
-					surename = (String)userInfo.get(CCConstants.PROP_USERNAME);
+				NodeRef personRef = personService.getPersonOrNull((String) props.get(ContentModel.PROP_CREATOR));
+				String givenName = null;
+				String surename = null;
+				String email = null;
+				if(personRef!=null) {
+					Map<QName, Serializable> userInfo = nodeService.getProperties(personRef);
+
+					givenName = (String) userInfo.get(ContentModel.PROP_FIRSTNAME);
+					surename = (String) userInfo.get(ContentModel.PROP_LASTNAME);
+					email = (String) userInfo.get(CCConstants.PROP_USER_EMAIL);
+
+					if (surename == null || surename.isEmpty()) {
+						surename = (String) userInfo.get(CCConstants.PROP_USERNAME);
+					}
 				}
-				
 				String replicationSourceId = (String)nodeService.getProperty(eduNodeRef, QName.createQName(CCConstants.CCM_PROP_IO_REPLICATIONSOURCEID));
 				
 				/**
@@ -366,9 +370,11 @@ public class NodeCustomizationPolicies implements OnContentUpdatePolicy, OnCreat
 				 */
 				if(replicationSourceId == null || replicationSourceId.trim().equals("")){
 					HashMap<String,String> vcardMap = new HashMap<String,String>();
-					vcardMap.put(CCConstants.VCARD_GIVENNAME, givenName);
-					vcardMap.put(CCConstants.VCARD_SURNAME, surename);
-					vcardMap.put(CCConstants.VCARD_EMAIL, email);
+					if(personRef!=null) {
+						vcardMap.put(CCConstants.VCARD_GIVENNAME, givenName);
+						vcardMap.put(CCConstants.VCARD_SURNAME, surename);
+						vcardMap.put(CCConstants.VCARD_EMAIL, email);
+					}
 					String vcardString = VCardTool.hashMap2VCard(vcardMap);
 					
 					//sometimes when this method is called the prop is already set so check if null i.e. lom importer
