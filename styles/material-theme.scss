@@ -245,31 +245,6 @@ input.mat-input-element, mat-label, .mat-select-value{
 .mat-button-no-uppercase .mat-button-wrapper{
   text-transform: none;
 }
-.mat-menu-content{
-  min-width: 200px;
-  >button{
-    color:$primary;
-    display: flex;
-    align-items: center;
-    > i {
-      width: 35px;
-    }
-  }
-  &:not(:empty){
-    padding: 0!important;
-  }
-}
-.mat-menu-item{
-  &:hover:not([disabled]){
-    background: $itemSelectedBackground !important;
-  }
-}
-.mat-menu-item-seperate {
-  border-top:1px solid #ccc!important;
-}
-.mat-menu-item-seperate-bottom {
-  border-bottom:1px solid #ccc!important;
-}
 .mat-calendar-table-header-divider{
   display: none;
 }
@@ -347,19 +322,5 @@ label .label-secondary{
   >mat-label{
     color:$textLight;
     padding:0 8px;
-  }
-}
-// Mobile Menus at bottom
-@media screen and (max-width:  ($mobileWidth - $mobileStage*1)) {
-  .cdk-overlay-backdrop.mat-dropdown-menu{
-    background: rgba(0, 0, 0, 0.8);
-  }
-  .mat-menu-panel.mat-dropdown-menu{
-    position: fixed;
-    bottom:0;
-    left:0;
-    max-width: 100%;
-    width: 100%;
-    border-radius: 0;
   }
 }
