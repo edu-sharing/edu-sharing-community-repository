@@ -573,7 +573,8 @@
             "ERROR_HELP": "Bitte benutzen Sie die Option \"Weitere Freigaben\" zum Konfigurieren der Rechte",
             "UNSET": "Nicht festgelegt",
             "GROUP_TYPES": {
-                "ORG_ADMINISTRATORS": "Nur Administratoren"
+                "ORG_ADMINISTRATORS": "Nur Administratoren",
+                "TEACHER": "Nur Lehrkräfte"
             }
         },
         "LICENSE": {

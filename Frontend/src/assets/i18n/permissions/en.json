@@ -9,7 +9,8 @@
         "SELECT_ORGANIZATION": "Please select an organization first",
         "MENU_CREATE_USER": "Create user",
         "MENU_CREATE_GROUP": "Create group",
-        "MENU_EDIT": "Edit",
+        "MENU_EDIT_GROUP": "Edit",
+        "MENU_EDIT_PERSON": "Edit",
         "MENU_DELETE": "Delete",
         "MENU_TOOLPERMISSIONS": "Permissions",
         "MENU_TOOLPERMISSIONS_GLOBAL": "Global Permissions",
@@ -83,6 +84,7 @@
         "GROUP_TYPE": {
             "null": "none / regular group",
             "EDITORIAL": "editorial group",
+            "TEACHER": "teachers group",
             "ORG_ADMINISTRATORS": "administrators"
         },
         "SCOPE_TYPE": {
