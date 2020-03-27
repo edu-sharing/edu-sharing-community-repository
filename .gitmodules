@@ -1,6 +1,6 @@
 [submodule "Frontend/src/app/core-ui-module"]
 	path = Frontend/src/app/core-ui-module
-	url = ssh://git@scm.edu-sharing.com:2222/Angular/core-ui-module.git
+	url = https://scm.edu-sharing.com/Angular/core-ui-module.git
 [submodule "Frontend/src/app/core-module"]
 	path = Frontend/src/app/core-module
-	url = ssh://git@scm.edu-sharing.com:2222/Angular/core-module.git
+	url = https://scm.edu-sharing.com/Angular/core-module.git
