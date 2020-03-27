@@ -215,7 +215,10 @@ export class SimpleEditInviteComponent {
                 )).subscribe((groups) => {
                     groups.forEach((g) => this.organization.groups[g.group.profile.groupType] = g.group);
                     this.detectPermissionState();
-                }, error => console.warn(error));
+                }, error => {
+                    console.warn(error);
+                    this.detectPermissionState();
+            });
           } else {
             this.detectPermissionState();
           }
