@@ -23,8 +23,8 @@ $mainMenuSelectedBackground: linear-gradient(
         }
         .mat-menu-item {
             @if variable-exists(mainMenuForegroundColor) {
-                color: $mainMenuForegroundColor;
-            }
+                    color: $mainMenuForegroundColor;
+                }
             &.mat-menu-item-selected {
                background: $mainMenuSelectedBackground;
             }
