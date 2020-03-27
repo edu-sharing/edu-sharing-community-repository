@@ -279,12 +279,6 @@
          <property name="nodeService">
             <ref bean="nodeService" />
         </property>
-         <property name="authenticationService">
-            <ref bean="authenticationService" />
-        </property>
-        <property name="authorityService">
-        	<ref bean="authorityService" />
-        </property>
    	 </bean>
    	 
    	 <bean id="onAddRemoveEduGroupAspectPolicy" class="org.edu_sharing.alfresco.policy.OnAddRemoveEduGroupAspectPolicy" init-method="init">
