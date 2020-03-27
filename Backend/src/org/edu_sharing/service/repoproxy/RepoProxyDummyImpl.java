@@ -19,14 +19,12 @@ public class RepoProxyDummyImpl extends RepoProxyAbstract {
 	public Response searchV2(String repository, String mdsId, String query, ContentType contentType, Integer maxItems,
 			Integer skipCount, List<String> sortProperties, List<Boolean> sortAscending, SearchParameters parameters,
 			List<String> propertyFilter, HttpServletRequest req) {
-		// TODO Auto-generated method stub
 		return ErrorResponse.createResponse(e);
 	}
 
 	@Override
 	public Response getDetailsSnippetWithParameters(String repository, String node, String nodeVersion,
 			String displayMode, Map<String, String> parameters, HttpServletRequest req) {
-		// TODO Auto-generated method stub
 		return ErrorResponse.createResponse(e);
 	}
 
@@ -34,33 +32,32 @@ public class RepoProxyDummyImpl extends RepoProxyAbstract {
 	public Response getChildren(String repository, String node, Integer maxItems, Integer skipCount,
 			List<String> filter, List<String> sortProperties, List<Boolean> sortAscending, String assocName,
 			List<String> propertyFilter, HttpServletRequest req) {
-		// TODO Auto-generated method stub
 		return ErrorResponse.createResponse(e);
 	}
 
 	@Override
 	public Response getMetadataSetsV2(String repository, HttpServletRequest req) {
-		// TODO Auto-generated method stub
 		return ErrorResponse.createResponse(e);
 	}
 
 	@Override
 	public Response getMetadataSetV2(String repository, String mdsId, HttpServletRequest req) {
-		// TODO Auto-generated method stub
 		return ErrorResponse.createResponse(e);
 	}
 
 	@Override
 	public Response getValuesV2(String repository, String mdsId, SuggestionParam suggestionParam,
 			HttpServletRequest req) {
-		// TODO Auto-generated method stub
 		return ErrorResponse.createResponse(e);
 	}
 	
 	@Override
 	public Response prepareUsage(String repository, String node, HttpServletRequest req) {
-		// TODO Auto-generated method stub
 		return ErrorResponse.createResponse(e);
 	}
-	
+
+	@Override
+	public Response getMetadata(String repository, String node, List<String> propertyFilter, HttpServletRequest req) {
+		return ErrorResponse.createResponse(e);
+	}
 }

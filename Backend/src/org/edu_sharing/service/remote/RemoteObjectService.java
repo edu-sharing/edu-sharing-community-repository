@@ -182,20 +182,7 @@ public class RemoteObjectService {
 		propsIn.put(CCConstants.CCM_PROP_REMOTEOBJECT_REPOSITORY_TYPE, repInfo.getRepositoryType());
 		propsIn.put(CCConstants.CCM_PROP_REMOTEOBJECT_REPOSITORYID, repInfo.getAppId());
 		// remove illegal data
-		HashMap<String, Object> props=new HashMap<>(propsIn);
-		props.remove(CCConstants.SYS_PROP_NODE_UID);
-		props.remove(CCConstants.NODECREATOR_EMAIL);
-		props.remove(CCConstants.NODECREATOR_FIRSTNAME);
-		props.remove(CCConstants.NODECREATOR_LASTNAME);
-		props.remove(CCConstants.NODEMODIFIER_EMAIL);
-		props.remove(CCConstants.NODEMODIFIER_FIRSTNAME);
-		props.remove(CCConstants.NODEMODIFIER_LASTNAME);
-		props.remove(CCConstants.CONTENTURL);
-		for(Map.Entry<String, Object> prop: propsIn.entrySet()){
-			if(prop.getKey().startsWith("{virtualproperty}")) {
-				props.remove(prop.getKey());
-			}
-		}
+		HashMap<String, Object> props = cleanupRemoteProperties(propsIn);
 		return AuthenticationUtil.runAsSystem(() -> {
 			try {
 				Map<String, Object> searchProps = new HashMap<>();
@@ -228,5 +215,23 @@ public class RemoteObjectService {
 				throw new RuntimeException(t);
 			}
 		});
+	}
+
+	public static HashMap<String, Object> cleanupRemoteProperties(HashMap<String, Object> propsIn) {
+		HashMap<String, Object> props=new HashMap<>(propsIn);
+		props.remove(CCConstants.SYS_PROP_NODE_UID);
+		props.remove(CCConstants.NODECREATOR_EMAIL);
+		props.remove(CCConstants.NODECREATOR_FIRSTNAME);
+		props.remove(CCConstants.NODECREATOR_LASTNAME);
+		props.remove(CCConstants.NODEMODIFIER_EMAIL);
+		props.remove(CCConstants.NODEMODIFIER_FIRSTNAME);
+		props.remove(CCConstants.NODEMODIFIER_LASTNAME);
+		props.remove(CCConstants.CONTENTURL);
+		for(Map.Entry<String, Object> prop: propsIn.entrySet()){
+			if(prop.getKey().startsWith("{virtualproperty}")) {
+				props.remove(prop.getKey());
+			}
+		}
+		return props;
 	}
 }

@@ -78,8 +78,14 @@ public interface NodeService {
 			final String property) throws Exception;
 	
 	public void removeNode(String nodeID, String fromID);
-	
+
 	public HashMap<String, Object> getProperties(String storeProtocol, String storeId, String nodeId) throws Throwable;
+
+	/**
+	 * this method is called when a local object has ccm:remoterepositry aspect, and all local properties will get
+	 * updated on the fly with the properties provided by this method
+	 */
+	public HashMap<String, Object> getPropertiesDynamic(String storeProtocol, String storeId, String nodeId) throws Throwable;
 
 	public default boolean hasAspect(String storeProtocol, String storeId, String nodeId, String aspect){
 		return Arrays.asList(getAspects(storeProtocol,storeId,nodeId)).contains(aspect);

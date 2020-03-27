@@ -485,12 +485,20 @@ public class NodeDao {
 
 			this.aspects = (aspects != null) ? Arrays.asList(aspects) : new ArrayList<String>();
 
+			// replace all data if its an remote object
 			if(this.type.equals(CCConstants.CCM_TYPE_REMOTEOBJECT)){
 				this.remoteId=(String)this.nodeProps.get(CCConstants.CCM_PROP_REMOTEOBJECT_NODEID);
 				this.remoteRepository=RepositoryDao.getRepository((String)this.nodeProps.get(CCConstants.CCM_PROP_REMOTEOBJECT_REPOSITORYID));
 				this.nodeService=NodeServiceFactory.getNodeService(this.remoteRepository.getId());
 				this.permissionService=PermissionServiceFactory.getPermissionService(this.remoteRepository.getId());
 				this.nodeProps = this.nodeService.getProperties(null,null, this.remoteId);
+			} else if (this.aspects.contains(CCConstants.CCM_ASPECT_REMOTEREPOSITORY)){
+				// just fetch dynamic data which needs to be fetched, because the local io already has metadata
+				NodeService nodeServiceRemote=NodeServiceFactory.getNodeService((String)this.nodeProps.get(CCConstants.CCM_PROP_REMOTEOBJECT_REPOSITORYID));
+				HashMap<String, Object> nodePropsReplace = nodeServiceRemote.getPropertiesDynamic(
+						null, null, (String)this.nodeProps.get(CCConstants.CCM_PROP_REMOTEOBJECT_NODEID));
+				nodePropsReplace.remove(CCConstants.SYS_PROP_NODE_UID);
+				this.nodeProps.putAll(nodePropsReplace);
 			}
 
 			this.filter = filter;

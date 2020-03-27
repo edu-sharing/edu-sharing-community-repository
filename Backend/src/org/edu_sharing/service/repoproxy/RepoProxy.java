@@ -37,5 +37,6 @@ public interface RepoProxy {
 	public HashMap<String, String> remoteAuth(ApplicationInfo repoInfo, String username, boolean validate) throws Throwable;
 
 	Response prepareUsage(String repository, String node, HttpServletRequest req) throws Throwable;
-	
+
+	Response getMetadata(String repository, String node, List<String> propertyFilter, HttpServletRequest req) throws Throwable;
 }

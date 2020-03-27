@@ -241,7 +241,9 @@ public class NodeApi  {
 		@Context HttpServletRequest req) {
     	
     	try {
-    		
+			if(RepoProxyFactory.getRepoProxy().myTurn(repository)) {
+				return RepoProxyFactory.getRepoProxy().getMetadata(repository, node, propertyFilter, req);
+			}
     		Filter filter = new Filter(propertyFilter);
     		
 	    	RepositoryDao repoDao = RepositoryDao.getRepository(repository);

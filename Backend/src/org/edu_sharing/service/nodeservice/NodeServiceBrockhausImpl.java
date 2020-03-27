@@ -41,6 +41,10 @@ public class NodeServiceBrockhausImpl extends NodeServiceAdapterCached{
 		props.put(CCConstants.LOM_PROP_TECHNICAL_LOCATION,url);
 		return props;
 	}
+	@Override
+	public HashMap<String, Object> getPropertiesDynamic(String storeProtocol, String storeId, String nodeId) throws Throwable {
+		return getProperties(storeProtocol, storeId, nodeId);
+	}
 
 	@Override
 	public InputStream getContent(String nodeId) throws Throwable{

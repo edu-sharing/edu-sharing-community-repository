@@ -138,8 +138,13 @@ public class PreviewServlet extends HttpServlet implements SingleThreadModel {
 					props = nodeService.getProperties(storeRef.getProtocol(),storeRef.getIdentifier(),nodeId);
                     String[] aspects = nodeService.getAspects(storeRef.getProtocol(), storeRef.getIdentifier(), nodeId);
 
-
 					if (remoteNode || nodeType.equals(CCConstants.CCM_TYPE_REMOTEOBJECT) || Arrays.asList(aspects).contains(CCConstants.CCM_ASPECT_REMOTEREPOSITORY)) {
+						if(Arrays.asList(aspects).contains(CCConstants.CCM_ASPECT_REMOTEREPOSITORY)){
+							// just fetch dynamic data which needs to be fetched, because the local io already has metadata
+							props.putAll(NodeServiceFactory.getNodeService(
+									(String) props.get(CCConstants.CCM_PROP_REMOTEOBJECT_REPOSITORYID)
+							).getPropertiesDynamic(storeProtocol, storeId, (String) props.get(CCConstants.CCM_PROP_REMOTEOBJECT_NODEID)));
+						}
 						// if its local stored, load the url directly
 						String thumbnail = (String)props.get(CCConstants.CCM_PROP_IO_THUMBNAILURL);
 						if(thumbnail != null && !thumbnail.trim().equals("")){

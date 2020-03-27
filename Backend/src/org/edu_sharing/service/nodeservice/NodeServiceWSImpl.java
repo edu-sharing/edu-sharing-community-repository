@@ -3,8 +3,10 @@ package org.edu_sharing.service.nodeservice;
 import java.io.InputStream;
 import java.net.URLEncoder;
 import java.rmi.RemoteException;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.alfresco.service.cmr.repository.ChildAssociationRef;
 import org.alfresco.service.cmr.repository.NodeRef;
@@ -12,9 +14,15 @@ import org.alfresco.service.cmr.repository.StoreRef;
 import org.apache.log4j.Logger;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.client.tools.UrlTool;
+import org.edu_sharing.repository.client.tools.metadata.ValueTool;
 import org.edu_sharing.repository.server.authentication.Context;
 import org.edu_sharing.repository.server.tools.ApplicationInfo;
 import org.edu_sharing.repository.server.tools.ApplicationInfoList;
+import org.edu_sharing.restservices.RestConstants;
+import io.swagger.client.model.NodeEntry;
+import org.edu_sharing.restservices.shared.Filter;
+import org.edu_sharing.service.remote.RemoteObjectService;
+import org.edu_sharing.service.repoproxy.RepoProxyFactory;
 import org.edu_sharing.webservices.alfresco.extension.KeyValue;
 import org.edu_sharing.webservices.alfresco.extension.NativeAlfrescoWrapper;
 import org.edu_sharing.webservices.alfresco.extension.RepositoryNode;
@@ -99,15 +107,21 @@ public class NodeServiceWSImpl extends NodeServiceAdapter {
 	
 	@Override
 	public HashMap<String, Object> getProperties(String storeProtocol, String storeId, String nodeId) throws Throwable {
-		try{
-			NativeAlfrescoWrapper stub = EduWebServiceFactory.getNativeAlfrescoWrapper(appInfo.getWebServiceHotUrl());
-			return stub.getPropertiesExt(storeProtocol, storeId, nodeId);
-		}catch(RemoteException e){
-			logger.error(e.getMessage(), e);
-			return null;
+		NodeEntry entry = (NodeEntry) RepoProxyFactory.getRepoProxy().getMetadata(appId, nodeId, Collections.singletonList(Filter.ALL), null).getEntity();
+		HashMap<String, Object> result = new HashMap<>();
+		for(Map.Entry<String, List<String>> e : entry.getNode().getProperties().entrySet()){
+			if(e.getKey().startsWith("virtual:"))
+			result.put(CCConstants.getValidGlobalName(e.getKey()), ValueTool.toMultivalue(e.getValue().toArray(new String[0])));
 		}
+		result.put(CCConstants.CCM_PROP_IO_THUMBNAILURL, entry.getNode().getPreview().getUrl());
+		return result;
 	}
-	
+
+	@Override
+	public HashMap<String, Object> getPropertiesDynamic(String storeProtocol, String storeId, String nodeId) throws Throwable {
+		return RemoteObjectService.cleanupRemoteProperties(getProperties(storeProtocol, storeId, nodeId));
+	}
+
 	@Override
 	public String[] getAspects(String storeProtocol, String storeId, String nodeId)  {
 		try{

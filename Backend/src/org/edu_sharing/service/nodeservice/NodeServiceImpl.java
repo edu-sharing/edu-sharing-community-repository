@@ -20,6 +20,7 @@ import org.alfresco.service.cmr.version.VersionService;
 import org.alfresco.service.namespace.QName;
 import org.alfresco.service.namespace.RegexQNamePattern;
 import org.apache.commons.lang.ArrayUtils;
+import org.apache.commons.lang.NotImplementedException;
 import org.apache.log4j.Logger;
 import org.edu_sharing.alfresco.authentication.HttpContext;
 import org.edu_sharing.alfresco.policy.NodeCustomizationPolicies;
@@ -878,7 +879,12 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
 	public HashMap<String, Object> getProperties(String storeProtocol, String storeId, String nodeId) throws Throwable{
 		return apiClient.getProperties(storeProtocol, storeId, nodeId);
 	}
-	
+
+	@Override
+	public HashMap<String, Object> getPropertiesDynamic(String storeProtocol, String storeId, String nodeId) throws Throwable{
+		throw new NotImplementedException("getPropertiesDynamic may not be called for the local repository");
+	}
+
 	@Override
 	public String getProperty(String storeProtocol, String storeId, String nodeId, String property){
 		return apiClient.getProperty(new StoreRef(storeProtocol,storeId), nodeId, property);

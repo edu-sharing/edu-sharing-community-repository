@@ -90,8 +90,9 @@ public class SearchServiceBrockhausImpl extends SearchServiceAdapter{
 			}
 			properties.put(CCConstants.CCM_PROP_IO_REPLICATIONSOURCE,"brockhaus");
 			//String contentUrl=buildUrl(apiKey,document.getString("url"));
-			properties.put(CCConstants.CONTENTURL,URLTool.getRedirectServletLink(repositoryId, document.getString("url")));
-			properties.put(CCConstants.CCM_PROP_IO_WWWURL,properties.get(CCConstants.CONTENTURL));
+			//properties.put(CCConstants.CONTENTURL,URLTool.getRedirectServletLink(repositoryId, document.getString("url")));
+			properties.put(CCConstants.CONTENTURL,buildUrl(apiKey,document.getString("url")));
+			properties.put(CCConstants.CCM_PROP_IO_WWWURL,buildUrl(apiKey,document.getString("url")));
 
 			NodeRef ref = new org.edu_sharing.service.model.NodeRefImpl(repositoryId,
 					Constants.storeRef.getProtocol(),

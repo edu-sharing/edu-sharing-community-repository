@@ -115,6 +115,12 @@ public class NodeServiceAdapter implements NodeService {
 	public HashMap<String, Object> getProperties(String storeProtocol, String storeId, String nodeId) throws Throwable {
 		return new HashMap<String,Object>();
 	}
+
+	@Override
+	public HashMap<String, Object> getPropertiesDynamic(String storeProtocol, String storeId, String nodeId) throws Throwable {
+		return new HashMap<String,Object>();
+	}
+
 	
 	@Override
 	public void addAspect(String nodeId, String aspect) {

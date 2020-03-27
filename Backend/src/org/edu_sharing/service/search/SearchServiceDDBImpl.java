@@ -216,7 +216,7 @@ public class SearchServiceDDBImpl extends SearchServiceAdapter{
 		String url = "https://www.deutsche-digitale-bibliothek.de/item/"+nodeId;
 		properties.put(CCConstants.LOM_PROP_TECHNICAL_LOCATION, url);
 		properties.put(CCConstants.CCM_PROP_IO_WWWURL, url);
-        properties.put(CCConstants.CONTENTURL,URLTool.getRedirectServletLink(this.repositoryId, nodeId));
+        //properties.put(CCConstants.CONTENTURL,URLTool.getRedirectServletLink(this.repositoryId, nodeId));
 		properties.put(CCConstants.CCM_PROP_IO_REPLICATIONSOURCE,"ddb");
 		try{
 			// fetch binary info
