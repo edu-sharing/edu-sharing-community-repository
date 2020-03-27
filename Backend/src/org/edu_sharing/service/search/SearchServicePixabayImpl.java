@@ -152,6 +152,7 @@ public class SearchServicePixabayImpl extends SearchServiceAdapter{
 			properties.put(CCConstants.CCM_PROP_IO_REPLICATIONSOURCE,"pixabay");
 			//properties.put(CCConstants.CONTENTURL,json.getString("pageURL"));
 			properties.put(CCConstants.LOM_PROP_TECHNICAL_LOCATION,json.getString("pageURL"));
+			properties.put(CCConstants.CCM_PROP_IO_WWWURL,json.getString("pageURL"));
 			properties.put(CCConstants.CONTENTURL,URLTool.getRedirectServletLink(repositoryId, json.getString("id")));
 			properties.put(CCConstants.VIRT_PROP_PERMALINK,json.getString("pageURL"));
 			//properties.put(CCConstants.CM_ASSOC_THUMBNAILS, json.getString("previewURL"));
