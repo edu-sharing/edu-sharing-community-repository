@@ -38,6 +38,14 @@ export class DropdownComponent {
      */
     @Input() showDisabled = true;
 
+    /**
+     * An additional class to add to the `mat-menu` instance.
+     *
+     * This is needed to customize the menu styling since the menu contents are
+     * taken out of the host container by angular.
+     */
+    @Input() menuClass: string;
+
     _options: OptionItem[];
 
     constructor(private ui: UIService) {}

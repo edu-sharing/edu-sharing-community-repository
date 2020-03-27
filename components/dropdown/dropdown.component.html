@@ -1,7 +1,8 @@
 <mat-menu
-  backdropClass="mat-dropdown-menu"
-  class="mat-dropdown-menu"
   #dropdown="matMenu"
+  class="mat-dropdown-menu"
+  [class]="menuClass"
+  backdropClass="mat-dropdown-menu"
   [xPosition]="position == 'right' ? 'after' : 'before'"
 >
   <button
