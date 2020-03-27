@@ -234,6 +234,7 @@ export class MainNavComponent implements AfterViewInit {
             TemporaryStorageService.OPTION_HIDE_MAINNAV,
             false,
         );
+        this.setMenuStyle();
         this.connector.setRoute(this.route).subscribe(() => {
             this.connector.getAbout().subscribe(about => {
                 this.about = about;
@@ -658,28 +659,31 @@ export class MainNavComponent implements AfterViewInit {
         this.configService.getAll().subscribe((data: any) => {
             this.config = data;
             this.updateHelpOptions();
-            this.editUrl = data['editProfileUrl'];
-            this.showEditProfile = data['editProfile'];
+            this.editUrl = data.editProfileUrl;
+            this.showEditProfile = data.editProfile;
             this.showLicenseAgreement();
             this.updateUserOptions();
             this.updateHelpOptions();
-            this.setMenuStyle();
         });
     }
 
     private setMenuStyle() {
-        switch (this.config.mainMenuStyle) {
-            case 'sidebar':
-            case 'dropdown':
-                this.mainMenuStyle = this.config.mainMenuStyle;
-                break;
-            case undefined:
-                break;
-            default:
-                console.error(
-                    `Unsupported value for config 'mainMenuStyle: ${this.config.mainMenuStyle}`,
-                );
-        }
+        this.configService.get('mainMenuStyle').subscribe({
+            next: (mainMenuStyle?: string) => {
+                switch (mainMenuStyle) {
+                    case 'sidebar':
+                    case 'dropdown':
+                        this.mainMenuStyle = mainMenuStyle;
+                        break;
+                    case undefined:
+                        break;
+                    default:
+                        console.error(
+                            `Unsupported value for config mainMenuStyle: ${mainMenuStyle}`,
+                        );
+                }
+            },
+        });
     }
 
     private finishLogout() {

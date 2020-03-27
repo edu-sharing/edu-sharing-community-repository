@@ -5,7 +5,12 @@
     <button mat-button class="close" (click)="hide()">
       <i icon iconId="close" aria="true"></i>
     </button>
-    <div class="top" style.background-color="{{ (user ? user.person : null) | authorityColor }}">
+    <!-- We should get loginInfo in any case, but it might not be ready from the start. -->
+    <div
+      *ngIf="loginInfo"
+      class="top"
+      style.background-color="{{ (user ? user.person : null) | authorityColor }}"
+    >
       <div class="profile-gradient"></div>
       <img
         *ngIf="user && user.person.profile.avatar"
