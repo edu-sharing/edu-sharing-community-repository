@@ -257,6 +257,18 @@
         
    	 </bean>
    	 
+   	  <bean id="beforeDeleteEduGroupHomeDir" class="org.edu_sharing.alfresco.policy.BeforeDeleteEduGroupHomeDir" init-method="init">
+   	 	<property name="policyComponent">
+            <ref bean="policyComponent"/>
+        </property>
+        <property name="authenticationService">
+            <ref bean="authenticationService" />
+        </property>
+        <property name="authorityService">
+        	<ref bean="authorityService" />
+        </property>
+   	 </bean>
+   	 	 
    	 <bean id="beforeMoveSharedFolderPolicy" class="org.edu_sharing.alfresco.policy.BeforeMoveSharedFolderPolicy" init-method="init">
    	 	<property name="policyComponent">
             <ref bean="policyComponent"/>
