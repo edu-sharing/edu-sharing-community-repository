@@ -91,8 +91,10 @@ export class PermissionsAuthoritiesComponent {
   @Output() onDeselectOrg = new EventEmitter();
   @Input() set searchQuery(searchQuery: string){
     this._searchQuery = searchQuery;
-    if (this._mode)
-      this.search();
+    // wait for other data to be initalized
+    setTimeout(()=>
+      this.search()
+    );
   }
   @Input() private selected: Organization[]|Group[]|UserSimple[] = null;
 
@@ -102,7 +104,7 @@ export class PermissionsAuthoritiesComponent {
   public globalProgress= false;
   @Input() set org(org: Organization){
     this._org = org;
-    this.refresh();
+    // this.refresh();
   }
   get org(){
     return this._org;
@@ -174,7 +176,8 @@ export class PermissionsAuthoritiesComponent {
    this.columns = this.getColumns(mode, this.embedded);
    this.addMemberColumns = this.getColumns('USER', true);
    this.editGroupColumns = this.getColumns('GROUP', true);
-   this.loadAuthorities();
+   // will be called by searchQuery
+   // this.loadAuthorities();
   }
   private getMemberOptions(): OptionItem[] {
     const options: OptionItem[] = [];
@@ -731,6 +734,7 @@ export class PermissionsAuthoritiesComponent {
     this.list = [];
     this.selected = [];
     this.loadAuthorities();
+    console.log('refresh');
   }
 
   private closeDialog() {
