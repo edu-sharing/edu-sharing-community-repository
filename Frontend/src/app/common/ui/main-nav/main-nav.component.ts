@@ -44,7 +44,7 @@ import {
     OPEN_URL_MODE,
     UIConstants,
 } from '../../../core-module/ui/ui-constants';
-import { OptionItem } from '../../../core-ui-module/option-item';
+import { OptionItem, OptionGroup } from '../../../core-ui-module/option-item';
 import { Toast } from '../../../core-ui-module/toast';
 import { Translation } from '../../../core-ui-module/translation';
 import { UIHelper } from '../../../core-ui-module/ui-helper';
@@ -191,7 +191,6 @@ export class MainNavComponent implements AfterViewInit {
     licenseAgreementHTML: string;
     canEditProfile: boolean;
     userMenuOptions: OptionItem[];
-    helpOptions: OptionItem[] = [];
     tutorialElement: ElementRef;
     globalProgress = false;
     showEditProfile: boolean;
@@ -658,12 +657,10 @@ export class MainNavComponent implements AfterViewInit {
     private checkConfig() {
         this.configService.getAll().subscribe((data: any) => {
             this.config = data;
-            this.updateHelpOptions();
             this.editUrl = data.editProfileUrl;
             this.showEditProfile = data.editProfile;
             this.showLicenseAgreement();
             this.updateUserOptions();
-            this.updateHelpOptions();
         });
     }
 
@@ -791,18 +788,16 @@ export class MainNavComponent implements AfterViewInit {
             this.userMenuOptions.push(option);
         }
         for (const option of this.getConfigMenuHelpOptions()) {
-            option.mediaQueryType = UIConstants.MEDIA_QUERY_MAX_WIDTH;
-            option.mediaQueryValue = UIConstants.MOBILE_TAB_SWITCH_WIDTH;
             this.userMenuOptions.push(option);
         }
+        const infoGroup = new OptionGroup('info', 20);
         if (this.config.imprintUrl) {
             const option = new OptionItem('IMPRINT', 'info_outline', () =>
                 this.openImprint(),
             );
+            option.group = infoGroup;
             option.mediaQueryType = UIConstants.MEDIA_QUERY_MAX_WIDTH;
             option.mediaQueryValue = UIConstants.MOBILE_TAB_SWITCH_WIDTH;
-            // The option isSeperateBottom was deprecated in favor of groups.
-            // option.isSeperateBottom = !this.config.privacyInformationUrl;
             this.userMenuOptions.push(option);
         }
         if (this.config.privacyInformationUrl) {
@@ -811,9 +806,9 @@ export class MainNavComponent implements AfterViewInit {
                 'verified_user',
                 () => this.openPrivacy(),
             );
+            option.group = infoGroup;
             option.mediaQueryType = UIConstants.MEDIA_QUERY_MAX_WIDTH;
             option.mediaQueryValue = UIConstants.MOBILE_TAB_SWITCH_WIDTH;
-            // option.isSeperateBottom = true;
             this.userMenuOptions.push(option);
         }
         const option = new OptionItem(
@@ -821,9 +816,11 @@ export class MainNavComponent implements AfterViewInit {
             'lightbulb_outline',
             () => this.showLicenses(),
         );
-        option.mediaQueryType = UIConstants.MEDIA_QUERY_MAX_WIDTH;
-        option.mediaQueryValue = UIConstants.MOBILE_TAB_SWITCH_WIDTH;
-        // option.isSeperateBottom = true;
+        option.group = infoGroup;
+        if (this.mainMenuStyle === 'sidebar') {
+            option.mediaQueryType = UIConstants.MEDIA_QUERY_MAX_WIDTH;
+            option.mediaQueryValue = UIConstants.MOBILE_TAB_SWITCH_WIDTH;
+        }
         this.userMenuOptions.push(option);
 
         if (!this.isGuest) {
@@ -833,10 +830,6 @@ export class MainNavComponent implements AfterViewInit {
         }
     }
 
-    private updateHelpOptions() {
-        this.helpOptions = this.getConfigMenuHelpOptions();
-    }
-
     private getConfigMenuHelpOptions() {
         if (!this.config.helpMenuOptions) {
             console.warn(
@@ -844,19 +837,18 @@ export class MainNavComponent implements AfterViewInit {
             );
             return [];
         }
-        const options: OptionItem[] = [];
-        let version: string[] | string = this.about.version.repository.split(
-            '.',
-        );
-        version = version[0] + version[1];
-        for (const entry of this.config.helpMenuOptions) {
-            options.push(
-                new OptionItem(entry.key, entry.icon, () =>
+        const versionParts = this.about.version.repository.split('.');
+        const version = versionParts[0] + versionParts[1];
+        const group = new OptionGroup('help', 10);
+        return this.config.helpMenuOptions.map(
+            (entry: { key: string; icon: string; url: string }) => {
+                const option = new OptionItem(entry.key, entry.icon, () =>
                     window.open(entry.url.replace(':version', version)),
-                ),
-            );
-        }
-        return options;
+                );
+                option.group = group;
+                return option;
+            },
+        );
     }
 
     /**

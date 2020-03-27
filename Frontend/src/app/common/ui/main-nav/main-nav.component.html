@@ -213,15 +213,6 @@
           <!-- <i class="material-icons barIcon iconPerson">account_circle</i>-->
         </button>
         <dropdown #userDropdown class="userMenu" [options]="userMenuOptions"></dropdown>
-        <button
-          mat-icon-button
-          *ngIf="helpOptions.length"
-          class="help clickable"
-          [matMenuTriggerFor]="helpDropdown.menu"
-        >
-          <i icon iconId="help_outline" aria="true"></i>
-        </button>
-        <dropdown #helpDropdown class="helpMenu" [options]="helpOptions"></dropdown>
       </div>
     </div>
   </div>
