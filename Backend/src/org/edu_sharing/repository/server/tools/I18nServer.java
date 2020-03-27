@@ -63,7 +63,7 @@ public class I18nServer {
 			country = language.toUpperCase();
 		}
 		
-		return I18nServer.getTranslationDefaultResourcebundle(key, locale);
+		return I18nServer.getTranslationDefaultResourcebundle(key, language+"_"+country);
 	}
 	public static String getTranslationDefaultResourcebundleNoException(String key){
 		try{
