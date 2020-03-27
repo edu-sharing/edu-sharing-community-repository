@@ -14,6 +14,7 @@ import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.stream.Collectors;
 
+import com.benfante.jslideshare.App;
 import com.google.gson.Gson;
 import org.alfresco.repo.policy.BehaviourFilter;
 import org.alfresco.repo.search.impl.solr.ESSearchParameters;
@@ -278,7 +279,10 @@ public class CollectionServiceImpl implements CollectionService{
 	@Override
 	public String addToCollection(String collectionId, String originalNodeId, String sourceRepositoryId)
 			throws DuplicateNodeException, Throwable {
-
+		ApplicationInfo rep = ApplicationInfoList.getRepositoryInfoById(sourceRepositoryId);
+		if(rep.ishomeNode() || ApplicationInfo.REPOSITORY_TYPE_LOCAL.equals(rep.getRepositoryType())){
+			return addToCollection(collectionId, originalNodeId);
+		}
 		String nodeId = new RemoteObjectService().getOrCreateRemoteMetadataObject(sourceRepositoryId, originalNodeId);
 		return this.addToCollection(collectionId, nodeId);
 	}
