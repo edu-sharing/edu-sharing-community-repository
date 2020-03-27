@@ -22,6 +22,7 @@
             <ng-container *ngIf="organization">
                 <mat-button-toggle
                         [value]="group"
+                        [disabled]="!organization.groups[group]"
                         *ngFor="let group of organizationGroups"
                 >
                     {{ "SIMPLE_EDIT.INVITE.GROUP_TYPES."+group | translate}}
