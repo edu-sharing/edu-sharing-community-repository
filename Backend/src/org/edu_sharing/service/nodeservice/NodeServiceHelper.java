@@ -216,7 +216,7 @@ public class NodeServiceHelper {
 		List<NodeRef> list = nodeService.getChildrenRecursive(parent.getStoreRef(), parent.getId(), types, RecurseMode.Folders);
 		return list.stream().filter((ref) ->
 				properties.entrySet().stream().allMatch((e) ->
-						NodeServiceHelper.getProperty(ref, e.getKey()).equals(e.getValue()))
+						Objects.equals(NodeServiceHelper.getProperty(ref, e.getKey()),e.getValue()))
 		).collect(Collectors.toList());
 	}
 
