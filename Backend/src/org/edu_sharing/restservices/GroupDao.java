@@ -157,11 +157,10 @@ public class GroupDao {
 	}
 	
 	protected void setGroupType(GroupProfile profile) {
-		if(profile.getGroupType()!=null){
-			authorityService.addAuthorityAspect(PermissionService.GROUP_PREFIX+groupName, CCConstants.CCM_ASPECT_GROUPEXTENSION);
-			authorityService.setAuthorityProperty(PermissionService.GROUP_PREFIX+groupName, CCConstants.CCM_PROP_GROUPEXTENSION_GROUPTYPE,profile.getGroupType());
+		if(profile.getGroupType()!=null) {
+			authorityService.addAuthorityAspect(PermissionService.GROUP_PREFIX + groupName, CCConstants.CCM_ASPECT_GROUPEXTENSION);
 		}
-
+		authorityService.setAuthorityProperty(PermissionService.GROUP_PREFIX+groupName, CCConstants.CCM_PROP_GROUPEXTENSION_GROUPTYPE,profile.getGroupType());
 	}
 	protected void setGroupEmail(GroupProfile profile) {
 		authorityService.setAuthorityProperty(PermissionService.GROUP_PREFIX+groupName,CCConstants.CCM_PROP_GROUPEXTENSION_GROUPEMAIL,profile.getGroupEmail());
@@ -170,9 +169,8 @@ public class GroupDao {
 	protected void setScopeType(GroupProfile profile) {
 		if(profile.getScopeType()!=null){
 			authorityService.addAuthorityAspect(PermissionService.GROUP_PREFIX+groupName, CCConstants.CCM_ASPECT_SCOPE);
-			authorityService.setAuthorityProperty(PermissionService.GROUP_PREFIX+groupName, CCConstants.CCM_PROP_SCOPE_TYPE,profile.getScopeType());
 		}
-
+		authorityService.setAuthorityProperty(PermissionService.GROUP_PREFIX+groupName, CCConstants.CCM_PROP_SCOPE_TYPE,profile.getScopeType());
 	}
 
 	public void delete() throws DAOException {

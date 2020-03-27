@@ -79,7 +79,11 @@ public class AuthorityServiceImpl implements AuthorityService {
 	}
 	@Override
 	public void setAuthorityProperty(String authority,String property,Serializable value){
-		nodeService.setProperty(authorityService.getAuthorityNodeRef(authority),QName.createQName(property),value);
+		if(value==null){
+			nodeService.removeProperty(authorityService.getAuthorityNodeRef(authority),QName.createQName(property));
+		}else {
+			nodeService.setProperty(authorityService.getAuthorityNodeRef(authority),QName.createQName(property),value);
+		}
 	}
 	@Override
 	public void addAuthorityAspect(String authority,String aspect){
