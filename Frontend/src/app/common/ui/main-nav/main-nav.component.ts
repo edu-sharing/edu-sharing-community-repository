@@ -668,7 +668,7 @@ export class MainNavComponent implements AfterViewInit {
     }
 
     private setMenuStyle() {
-        this.configService.get('mainMenuStyle').subscribe({
+        this.configService.get('mainnav.mainMenuStyle').subscribe({
             next: (mainMenuStyle?: string) => {
                 switch (mainMenuStyle) {
                     case 'sidebar':
