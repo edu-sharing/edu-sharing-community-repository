@@ -1,6 +1,8 @@
 package org.edu_sharing.service.rendering;
 
 import java.net.URLEncoder;
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.security.GeneralSecurityException;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -92,7 +94,7 @@ public class RenderingTool {
 			logger.error("no privateKey available");
 			throw new GeneralSecurityException("no privateKey available");
 		}
-		byte[] signature = sig.sign(sig.getPemPrivateKey(privateKey, CCConstants.SECURITY_KEY_ALGORITHM), data, CCConstants.SECURITY_SIGN_ALGORITHM);
+		byte[] signature = sig.sign(sig.getPemPrivateKey(privateKey, CCConstants.SECURITY_KEY_ALGORITHM), data.getBytes(StandardCharsets.UTF_8), CCConstants.SECURITY_SIGN_ALGORITHM);
 		return URLEncoder.encode(java.util.Base64.getEncoder().encodeToString(signature));
 
 	}

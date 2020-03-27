@@ -23,12 +23,16 @@ public class Signing {
 	static String filePubKey = "C:/Users/rudi/Desktop/hell/generated/pub.key";
 	
 	public byte[] sign(PrivateKey privateKey, String data, String algorithm) {
+		return sign(privateKey, data.getBytes(), algorithm);
+	}
+
+	public byte[] sign(PrivateKey privateKey, byte[] data, String algorithm) {
 		try {
 
 			Signature dsa = Signature.getInstance(algorithm);
 			dsa.initSign(privateKey);
 
-			dsa.update(data.getBytes());
+			dsa.update(data);
 			byte[] realSig = dsa.sign();
 			return realSig;
 
