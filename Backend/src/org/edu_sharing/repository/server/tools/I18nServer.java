@@ -51,8 +51,9 @@ public class I18nServer {
 	 * @return
 	 */
 	public static String getTranslationDefaultResourcebundle(String key){
-		String locale = (Context.getCurrentInstance() != null) ? Context.getCurrentInstance().getLocale() : "de_DE";
-		/*String language = System.getProperty("user.language");
+		// Context is not available here
+		//String locale = (Context.getCurrentInstance() != null) ? Context.getCurrentInstance().getLocale() : "de_DE";
+		String language = System.getProperty("user.language");
 		String country = System.getProperty("user.country");
 		
 		if(language == null || language.trim().equals("")){
@@ -61,7 +62,6 @@ public class I18nServer {
 		if(country == null || country.trim().equals("")){
 			country = language.toUpperCase();
 		}
-	    */
 		
 		return I18nServer.getTranslationDefaultResourcebundle(key, locale);
 	}
