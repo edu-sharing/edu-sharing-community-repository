@@ -5,4 +5,5 @@ import java.io.Serializable;
 
 public class Mainnav implements Serializable {
 	@XmlElement	public Icon icon;
+	@XmlElement	public String mainMenuStyle;
 }
