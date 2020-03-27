@@ -4,9 +4,7 @@ import java.awt.Graphics;
 import java.awt.Image;
 import java.awt.image.BufferedImage;
 import java.io.*;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 import javax.imageio.IIOImage;
 import javax.imageio.ImageIO;
@@ -136,10 +134,15 @@ public class PreviewServlet extends HttpServlet implements SingleThreadModel {
 			if (nodeId != null) {
 				try {
 					props = nodeService.getProperties(storeRef.getProtocol(),storeRef.getIdentifier(),nodeId);
-                    String[] aspects = nodeService.getAspects(storeRef.getProtocol(), storeRef.getIdentifier(), nodeId);
-
-					if (remoteNode || nodeType.equals(CCConstants.CCM_TYPE_REMOTEOBJECT) || Arrays.asList(aspects).contains(CCConstants.CCM_ASPECT_REMOTEREPOSITORY)) {
-						if(Arrays.asList(aspects).contains(CCConstants.CCM_ASPECT_REMOTEREPOSITORY)){
+					String[] aspectsArray = nodeService.getAspects(storeRef.getProtocol(), storeRef.getIdentifier(), nodeId);
+                    List<String> aspects;
+					if(aspectsArray == null){
+						aspects = new ArrayList<>();
+					} else {
+						 aspects = Arrays.asList(aspectsArray);
+					}
+					if (remoteNode || nodeType.equals(CCConstants.CCM_TYPE_REMOTEOBJECT) || aspects.contains(CCConstants.CCM_ASPECT_REMOTEREPOSITORY)) {
+						if(aspects.contains(CCConstants.CCM_ASPECT_REMOTEREPOSITORY)){
 							// just fetch dynamic data which needs to be fetched, because the local io already has metadata
 							props.putAll(NodeServiceFactory.getNodeService(
 									(String) props.get(CCConstants.CCM_PROP_REMOTEOBJECT_REPOSITORYID)
@@ -167,7 +170,7 @@ public class PreviewServlet extends HttpServlet implements SingleThreadModel {
 					}
 
                     // For collections: Fetch the original object for preview
-					if(Arrays.asList(aspects).contains(CCConstants.CCM_ASPECT_COLLECTION_IO_REFERENCE) && props.containsKey(CCConstants.CCM_PROP_IO_ORIGINAL)){
+					if(aspects.contains(CCConstants.CCM_ASPECT_COLLECTION_IO_REFERENCE) && props.containsKey(CCConstants.CCM_PROP_IO_ORIGINAL)){
 						
 						String original = (String) props.get(CCConstants.CCM_PROP_IO_ORIGINAL);
 						
