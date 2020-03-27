@@ -676,6 +676,7 @@ export class MainNavComponent implements AfterViewInit {
                         this.mainMenuStyle = mainMenuStyle;
                         break;
                     case undefined:
+                    case null:
                         break;
                     default:
                         console.error(
