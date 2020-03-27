@@ -20,7 +20,9 @@
     .mat-menu-content {
         min-width: 200px;
         > button {
-            color: $primary;
+            &:not(:disabled) {
+                color: $primary;
+            }
             display: flex;
             align-items: center;
             > i {
