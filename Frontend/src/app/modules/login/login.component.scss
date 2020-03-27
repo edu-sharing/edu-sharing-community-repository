@@ -110,7 +110,11 @@ powered-by{
     }
   }
 }
-
+@media screen and (max-height: $mobileHeight) {
+  powered-by{
+    display: none;
+  }
+}
 @media screen and (max-width: $mobileWidth+$mobileStage*1) {
   .groups{
     flex-direction: column;

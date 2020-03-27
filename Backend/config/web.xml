@@ -570,6 +570,16 @@
     	<servlet-name>Connector</servlet-name>
     	<servlet-class>org.edu_sharing.repository.server.connector.ConnectorServlet</servlet-class>
     </servlet>
+    
+    <servlet>
+    	<servlet-name>Monitoring</servlet-name>
+    	<servlet-class>org.edu_sharing.service.monitoring.MonitoringServlet</servlet-class>
+    </servlet>
+
+    <servlet-mapping>
+       <servlet-name>Monitoring</servlet-name>
+       <url-pattern>/monitoring</url-pattern>
+    </servlet-mapping>
         
     <!-- servlet mapping -->
  <servlet-mapping> 
