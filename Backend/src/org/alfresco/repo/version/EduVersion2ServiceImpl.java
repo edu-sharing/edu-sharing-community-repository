@@ -188,7 +188,7 @@ public class EduVersion2ServiceImpl extends org.alfresco.repo.version.Version2Se
         	propsToLeaveAlone.add(QName.createQName(CCConstants.CCM_PROP_TRACKING_VIEWS));
         	propsToLeaveAlone.add(QName.createQName(CCConstants.CCM_PROP_TRACKING_DOWNLOADS));
 
-        	
+
 		    for(QName prop : propsToLeaveAlone)
 		    {
 			    if(oldProps.containsKey(prop))

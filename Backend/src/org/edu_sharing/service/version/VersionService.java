@@ -4,6 +4,8 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -12,10 +14,13 @@ import org.apache.commons.io.FileUtils;
 import org.edu_sharing.repository.server.authentication.Context;
 import org.edu_sharing.repository.server.tools.ApplicationInfo;
 import org.edu_sharing.repository.server.tools.ApplicationInfoList;
+import org.edu_sharing.repository.server.tools.HttpQueryTool;
 import org.json.JSONObject;
 
 
 public class VersionService {
+
+	public static Map<Type, String> versionCache = new HashMap<>();
 	public static enum Type{
 		REPOSITORY,
 		RENDERSERVICE
@@ -29,20 +34,28 @@ public class VersionService {
 		}
 	}
 	public static String getVersion(Type type) throws Exception{
+		if(versionCache.containsKey(type)){
+			return versionCache.get(type);
+		}
+		String value;
 		if(type.equals(Type.REPOSITORY)) {
-			return getRepositoryVersion();
+			value=getRepositoryVersion();
+		}else if(type.equals(Type.RENDERSERVICE)) {
+			value=getRenderserviceVersion();
+		}else {
+			throw new IllegalArgumentException("Unknown type "+type);
 		}
-		if(type.equals(Type.RENDERSERVICE)) {
-			return getRenderserviceVersion();
-		}
-		throw new IllegalArgumentException("Unknown type "+type);
+		versionCache.put(type,value);
+		return value;
+	}
+	public static void invalidateCache(){
+		versionCache.clear();
 	}
 	private static String getRenderserviceVersion() throws Exception{
 		ApplicationInfo homeRepo=ApplicationInfoList.getHomeRepository();
 		String url=homeRepo.getContentUrlBackend()!=null ? homeRepo.getContentUrlBackend() : homeRepo.getContentUrl();
 		url=url.replace("index.php", "version.php");
-		InputStream is = new URL(url).openStream();
-		String data=IOUtils.readAllLines(is);
+		String data = new HttpQueryTool().query(url);
 		return new JSONObject(data).getString("version");
 	}
 	private static String getRepositoryVersion() throws Exception{
