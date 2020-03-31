@@ -28,13 +28,7 @@
 package org.alfresco.repo.version;
 
 import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 import org.alfresco.model.ContentModel;
 import org.alfresco.model.ForumModel;
@@ -66,9 +60,12 @@ import org.springframework.extensions.surf.util.ParameterCheck;
 public class EduVersion2ServiceImpl extends org.alfresco.repo.version.Version2ServiceImpl {
 
 	private static Log logger = LogFactory.getLog(Version2ServiceImpl.class);
-	
-	
-	ActionService actionService;
+
+    private static Collection<String> typesToKeep = Arrays.asList(
+            CCConstants.CCM_TYPE_USAGE,
+            CCConstants.CCM_TYPE_COMMENT,
+            CCConstants.CCM_TYPE_ASSIGNED_LICENSE);
+    ActionService actionService;
 
 	
 	/**
@@ -349,18 +346,15 @@ public class EduVersion2ServiceImpl extends org.alfresco.repo.version.Version2Se
             	if (!assocsToLeaveAlone.contains(ref.getTypeQName()))
             	{
                     //this.nodeService.removeChild(nodeRef, ref.getChildRef());
-                    
-                    
+
+
                     /**
                 	 * edu-sharing FIX don't remove edu-sharing children
                 	 */
-                	if(!this.nodeService.getType(ref.getChildRef()).equals(QName.createQName(CCConstants.CCM_TYPE_USAGE))
-                        && !this.nodeService.hasAspect(ref.getChildRef(),QName.createQName(CCConstants.CCM_ASPECT_IO_CHILDOBJECT)) // childobjects in >= 4.2
-                        && !this.nodeService.getType(ref.getChildRef()).equals(QName.createQName(CCConstants.CCM_TYPE_ASSIGNED_LICENSE))){
-                		
+                	if(!typesToKeep.contains(this.nodeService.getType(ref.getChildRef()).toString())
+                    && !this.nodeService.hasAspect(ref.getChildRef(),QName.createQName(CCConstants.CCM_ASPECT_IO_CHILDOBJECT))){ // childobjects in >= 4.2
                 		this.nodeService.removeChild(nodeRef, ref.getChildRef());
                 	}
-                    
             	}
             }
             
