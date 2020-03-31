@@ -428,7 +428,11 @@ export class WorkspaceMainComponent implements EventListener {
         const list = this.getNodeList(event);
         this.closeMetadata();
         if (list[0].isDirectory) {
-            this.openDirectory(list[0].ref.id);
+            if(list[0].collection) {
+                UIHelper.goToCollection(this.router,list[0]);
+            } else {
+                this.openDirectory(list[0].ref.id);
+            }
         }
         else {
             /*
@@ -553,22 +557,18 @@ export class WorkspaceMainComponent implements EventListener {
 
     }
     private openNode(node: Node, useConnector = true) {
-        if (!node.isDirectory) {
-            if (NodeHelper.isSavedSearchObject(node)) {
-                UIHelper.routeToSearchNode(this.router, null, node);
-            }
-            else if (RestToolService.isLtiObject(node)) {
-                this.toolService.openLtiObject(node);
-            }
-            else if (useConnector && this.connectors.connectorSupportsEdit(node)) {
-                this.editConnector(node);
-            }
-            else {
-                this.displayNode(node);
-            }
-            return;
+        if (NodeHelper.isSavedSearchObject(node)) {
+            UIHelper.routeToSearchNode(this.router, null, node);
         }
-        this.openDirectory(node.ref.id);
+        else if (RestToolService.isLtiObject(node)) {
+            this.toolService.openLtiObject(node);
+        }
+        else if (useConnector && this.connectors.connectorSupportsEdit(node)) {
+            this.editConnector(node);
+        }
+        else {
+            this.displayNode(node);
+        }
     }
     private openBreadcrumb(position: number) {
         /*this.path=this.path.slice(0,position+1);
