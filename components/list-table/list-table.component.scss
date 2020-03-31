@@ -291,6 +291,12 @@ $badgeWidth: 250px;
     padding: 0 5px;
     vertical-align: middle;
     color: $textLight;
+    &.more {
+        color: $primary;
+        > button {
+            color: unset;
+        }
+    }
 }
 .heading > div {
     align-self: flex-end;
@@ -320,9 +326,6 @@ $badgeWidth: 250px;
 }
 .list .row {
     margin: 0 0 !important;
-}
-.more {
-    color: $primary !important;
 }
 .tableList {
     @for $i from 2 through 10 {
@@ -439,7 +442,6 @@ $badgeWidth: 250px;
     }
 }
 .nodeCollection {
-    overflow: visible;
     .selected {
         background-color: transparent;
     }
@@ -475,14 +477,14 @@ $badgeWidth: 250px;
         }
     }
 }
-.list .cardSmallList .dark-color,
-.list .cardList .dark-color {
+.list .dark-color {
     .row_1,
     .row_2,
     .row_3,
     .row_4,
     .row_5,
-    .row_6 {
+    .row_6,
+    .more {
         color: #000 !important;
     }
 }
