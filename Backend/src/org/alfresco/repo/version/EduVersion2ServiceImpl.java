@@ -178,6 +178,14 @@ public class EduVersion2ServiceImpl extends org.alfresco.repo.version.Version2Se
         		}
         	}
         	
+        	/**
+        	 * edu-sharing: keep PermissionHistory
+        	 */
+        	newAspectQNames.add(QName.createQName(CCConstants.CCM_ASPECT_TRACKING));
+        	propsToLeaveAlone.add(QName.createQName(CCConstants.CCM_PROP_TRACKING_VIEWS));
+        	propsToLeaveAlone.add(QName.createQName(CCConstants.CCM_PROP_TRACKING_DOWNLOADS));
+
+        	
 		    for(QName prop : propsToLeaveAlone)
 		    {
 			    if(oldProps.containsKey(prop))
