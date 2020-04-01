@@ -120,6 +120,8 @@ public class ApplicationInfo implements Comparable<ApplicationInfo>{
 	public static final String KEY_ORDER = "order";
 
 	public static final String KEY_ALLOW_ORIGIN = "allow_origin";
+	
+	public static final String KEY_COOKIE_ATTRIBUTES = "cookie_attributes";
 
 	/**
 	 * property file vals
@@ -334,6 +336,7 @@ public class ApplicationInfo implements Comparable<ApplicationInfo>{
 
 	private String xml;
 
+	private String cookieAttributes;
 	
 	public ApplicationInfo(String _appFile) throws Exception{
 		if(_appFile == null) throw new Exception("Application Filename was null!");
@@ -479,6 +482,8 @@ public class ApplicationInfo implements Comparable<ApplicationInfo>{
 
 		String orderString = properties.getProperty(KEY_ORDER);
 		order = orderString==null ? (ishomeNode() ? 0 : 1) : Integer.parseInt(orderString);
+		
+		cookieAttributes = properties.getProperty(KEY_COOKIE_ATTRIBUTES);
 
 		getWebServiceUrl();
 		getWebServerUrl();
@@ -947,5 +952,9 @@ public class ApplicationInfo implements Comparable<ApplicationInfo>{
 	 */
 	public boolean isRemoteAlfresco() {
 		return REPOSITORY_TYPE_ALFRESCO.equals(getRepositoryType()) && TYPE_REPOSITORY.equals(getType());
+	}
+	
+	public String getCookieAttributes() {
+		return cookieAttributes;
 	}
 }
