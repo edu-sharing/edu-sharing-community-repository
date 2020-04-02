@@ -1,4 +1,4 @@
-@import "../../core-ui-module/styles/variables";
+@import '../../core-ui-module/styles/variables';
 
 /*
 table, div {
@@ -6,41 +6,36 @@ table, div {
    font-size: 14px;
 }
 */
-mat-tab-group{
-  margin-bottom:0;
-  position:fixed;
-  top:$mainnavHeight;
-  width:100%;
-  z-index: 15;
-}
-.collectionsContainer{
-  width:100%;
-  position:absolute;
-  top: $mainnavHeight;
-}
-.collectionsContainerTabs{
-  top: $mainnavHeight+48px;
-}
-.collection-new-preview-headline{
-  word-break: normal;
-  overflow-wrap: break-word;
-}
-.switchToSearch{
-  position: relative;
-  display: inline-block;
-  font-weight: bold;
-  text-transform: uppercase;
-  padding: 12px;
-}
-
-.switchToSearch i{
-  position: relative;
-  top:6px;
-}
-
-.collections-cards-div {
+mat-tab-group {
+    margin-bottom: 0;
+    position: fixed;
+    top: $mainnavHeight;
     width: 100%;
-    margin-top: 8px;
+    z-index: 15;
+}
+.collectionsContainer {
+    width: 100%;
+    position: absolute;
+    top: $mainnavHeight;
+}
+.collectionsContainerTabs {
+    top: $mainnavHeight + 48px;
+}
+.collection-new-preview-headline {
+    word-break: normal;
+    overflow-wrap: break-word;
+}
+.switchToSearch {
+    position: relative;
+    display: inline-block;
+    font-weight: bold;
+    text-transform: uppercase;
+    padding: 12px;
+}
+
+.switchToSearch i {
+    position: relative;
+    top: 6px;
 }
 
 .table-tab {
@@ -65,9 +60,8 @@ mat-tab-group{
     border-bottom-color: $primary;
 }
 
-.section-headline {
-    color: #5F5F5F;
-    padding: 20px 15px 20px;
+section {
+    padding: 20px 0px;
 }
 
 .collections-breadcrumb {
@@ -86,77 +80,77 @@ mat-tab-group{
 }
 
 .collections-master-div {
-    padding:0 10% 20px 15%;
+    padding: 0 10% 20px 15%;
     width: 100%;
 }
 
 .collections-header-textarea {
-  position: relative;
-  padding: 20px;
+    position: relative;
+    padding: 20px;
 }
 
 .collections-header-texttop {
     text-align: left;
 }
-.noAddPermissions{
-  color: $textLight;
-  padding-top: 10px;
+.noAddPermissions {
+    color: $textLight;
+    padding-top: 10px;
 }
 .collection-new-preview-infoarea {
     min-height: 120px;
     padding: 16px;
     color: white;
 }
-.card-image-icon-circle{
-  width: 120px;
-  height: 120px;
-  border-radius: 50%;
-  background-color: #fff;
-  @include unselectableText();
-  >i{
-    font-size: 75px;
-    margin-top: 25px;
-  }
+.card-image-icon-circle {
+    width: 120px;
+    height: 120px;
+    border-radius: 50%;
+    background-color: #fff;
+    @include unselectableText();
+    > i {
+        font-size: 75px;
+        margin-top: 25px;
+    }
 }
-.collection-header-image{
-  position: relative;
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
+.collection-header-image {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
 }
 .collection-new-preview-headline {
-  font-size: 180%;
-  padding-bottom: 15px;
+    font-size: 180%;
+    padding-bottom: 15px;
 }
 
 .collection-new-preview-subline {
-  //font-size: 120%;
-  opacity: 0.85;
+    //font-size: 120%;
+    opacity: 0.85;
 }
 
 .collection-new-preview-infoline {
-  opacity: 0.85;
-  margin-top: 16px;
-  margin-left: -2px;
-  margin-bottom: 4px;
+    opacity: 0.85;
+    margin-top: 16px;
+    margin-left: -2px;
+    margin-bottom: 4px;
 }
 
 .collection-nocontent-container {
-  text-align: left;
-  float:left;
-  width: 100%;
+    text-align: left;
+    float: left;
+    width: 100%;
 }
 
 .collection-nocontent-big {
     font-size: 150%;
-    padding:16px;
+    padding: 16px;
     padding-top: 8px;
     padding-left: 0px;
-    width:100%;
+    width: 100%;
 }
 
 .collection-nocontent-small {
-    padding:16px;
+    padding: 16px;
     padding-top: 0px;
     padding-left: 0px;
 }
@@ -166,14 +160,14 @@ mat-tab-group{
 }
 
 .dialog-basic-area {
-    padding:16px;
-    padding-bottom:8px;
+    padding: 16px;
+    padding-bottom: 8px;
 }
 
 .dialog-dark-area {
-    padding:16px;
-    padding-bottom:8px;
-    background: #EFEFEF;
+    padding: 16px;
+    padding-bottom: 8px;
+    background: #efefef;
 }
 
 .button-area {
@@ -205,24 +199,24 @@ mat-tab-group{
     align-items: center;
     justify-content: center;
 }
-.big-edit-button{
-  position: absolute;
-  top: 0;
-  left: 0;
-  height: 100%;
-  width: 100%;
-  cursor: pointer;
-  border-radius: 50%;
-  //background: #ff000042;
+.big-edit-button {
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: 100%;
+    width: 100%;
+    cursor: pointer;
+    border-radius: 50%;
+    //background: #ff000042;
 }
-.collection-option{
-  position: absolute;
-  top: -40px;
-  right: 10px;
-  z-index: 1;
+.collection-option {
+    position: absolute;
+    top: -40px;
+    right: 10px;
+    z-index: 1;
 }
 
-.collections-header  {
+.collections-header {
     background-color: $primary;
     color: #fff;
     left: 0;
@@ -230,131 +224,129 @@ mat-tab-group{
     width: 250px;
     position: fixed;
     //overflow-y: auto;
-    top:$mainnavHeight;
+    top: $mainnavHeight;
     float: left;
     z-index: 1;
 }
-.dark-color{
-  color: #000;
+.dark-color {
+    color: #000;
 }
 .collections-master-div-notabs {
-    padding-left:285px;
-    padding-right: 16px;
+    padding-left: 285px; // 250px sidebar + 35px
+    padding-right: 35px;
 }
 
 .table-tab-title-short {
     display: none;
 }
-.collections-cards-div{
-  display: flex;
-  flex-direction: column;
-  >* {
-    width: 100%;
-  }
+.collections-cards-div {
+    display: flex;
+    flex-direction: column;
 }
-.section-headline {
-  float:left;
-  width:100%;
-  > div {
-    float: left;
-  }
-  .custom-order {
-    padding-left: 10px;
-  }
-  .actionbarMaterials{
-    position: absolute;
-    right:20px;
-    margin-top: -5px;
-  }
+.content-header {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+    margin-top: 1.46rem; // Same as mat-heading-3
+    > h3.mat-heading-3 {
+        flex-grow: 1;
+        margin-top: 0;
+        margin-right: 10px;
+    }
+    > .actionbarMaterials {
+        margin-top: -5px;
+        margin-right: -5px;
+    }
 }
-:host ::ng-deep{
-  footer{
-    float:left;
-    width:100%;
-  }
+:host ::ng-deep {
+    footer {
+        float: left;
+        width: 100%;
+    }
 }
-.breadcrumb-space{
-  padding: 15px 30px;
-  background: #fff;
-  margin-left: -35px;
-  margin-right: -16px;
-  @include materialShadow();
+.breadcrumb-space {
+    padding: 15px 30px;
+    background: #fff;
+    margin-left: -35px;
+    margin-right: -35px;
+    @include materialShadow();
 }
 @media only screen and (max-width: $mobileWidth+$mobileStage*3) {
     .table-tab-title-long {
-        display: none!important;
+        display: none !important;
     }
-    .tabs > li{
-      width:auto;
+    .tabs > li {
+        width: auto;
     }
     .table-tab-title-short {
-      display: flex!important;
-      align-items: center;
-      justify-content: center;
-        >span{
-          display:none;
+        display: flex !important;
+        align-items: center;
+        justify-content: center;
+        > span {
+            display: none;
         }
-      &.active > span{
-        display:flex;
-      }
-      >i{
-        display: flex;
-      }
+        &.active > span {
+            display: flex;
+        }
+        > i {
+            display: flex;
+        }
     }
 }
 @media all and (max-width: ($cardWidth*3)) {
-  :host ::ng-deep .cardSmallList{
-    width:calc(100% - 10px)!important;
-  }
+    :host ::ng-deep .cardSmallList {
+        width: calc(100% - 10px) !important;
+    }
 }
 
-@media screen and (max-width: ($mobileTabSwitchWidth)){
-  .switchToSearch{
-    display: none;
-  }
+@media screen and (max-width: ($mobileTabSwitchWidth)) {
+    .switchToSearch {
+        display: none;
+    }
 }
 @media only screen and (max-width: $mobileWidth) {
-    :host ::ng-deep{
-      .collections-master-div-notabs {
-        padding-top: 240px+$mainnavHeight;
-      }
+    :host ::ng-deep {
+        .collections-master-div-notabs {
+            padding-top: 240px + $mainnavHeight;
+        }
     }
-  .collection-new-preview-headline{
-    overflow-wrap: break-word;
-    display: -webkit-box;
-    -webkit-box-orient: vertical;
-    -webkit-line-clamp: 1;
-    /*line-height: 1em;*/
-    //max-height: 1.5em;
-    text-align: center;
-    overflow: hidden;
-  }
-  .card-image-icon-container{
-    margin-top: $mainnavHeight;
-  }
-  .breadcrumb-space{
-    background: transparent;
-    padding:0;
-    margin-top: 0;
-  }
-    .collections-breadcrumb{
-      position: absolute;
-      top: -10px;
-      left: 0;
-      width: 100%;
-      z-index: 1;
-      background: rgba(255, 255, 255, .7);
-      box-shadow: 0px 0px 5px rgba(0, 0, 0, 0.3);
-      height: 65px;
-      padding-top: 22px;
-      padding-bottom: 20px;
-      padding-right: 50px;
+    .collection-new-preview-headline {
+        overflow-wrap: break-word;
+        display: -webkit-box;
+        -webkit-box-orient: vertical;
+        -webkit-line-clamp: 1;
+        /*line-height: 1em;*/
+        //max-height: 1.5em;
+        text-align: center;
+        overflow: hidden;
     }
-    .collection-new-preview-infoline,.collection-description{
-      display: none;
+    .card-image-icon-container {
+        margin-top: $mainnavHeight;
     }
-    .collections-master-div-notabs{
-      margin-top:0;
+    .breadcrumb-space {
+        background: transparent;
+        padding: 0;
+        margin-top: 0;
+    }
+    .collections-breadcrumb {
+        position: absolute;
+        top: -10px;
+        left: 0;
+        width: 100%;
+        z-index: 1;
+        background: rgba(255, 255, 255, 0.7);
+        box-shadow: 0px 0px 5px rgba(0, 0, 0, 0.3);
+        height: 65px;
+        padding-top: 22px;
+        padding-bottom: 20px;
+        padding-right: 50px;
+    }
+    .collection-new-preview-infoline,
+    .collection-description {
+        display: none;
+    }
+    .collections-master-div-notabs {
+        margin-top: 0;
     }
 
     .collections-header {
@@ -391,12 +383,12 @@ mat-tab-group{
     .collections-header-detailview {
         display: none;
     }
-    .tab-group{
-      max-width:1000px;
+    .tab-group {
+        max-width: 1000px;
     }
 }
 @media only screen and (max-width: $mobileTabSwitchWidth) {
-  .collectionsContainer{
-    margin-bottom: $mobileTabNavHeight;
-  }
+    .collectionsContainer {
+        margin-bottom: $mobileTabNavHeight;
+    }
 }

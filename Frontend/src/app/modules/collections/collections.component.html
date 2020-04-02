@@ -198,17 +198,17 @@
             <!-- content (collection cards) if not error -->
 
             <section class="collections-cards-div" *ngIf="!isLoading">
-                <div
-                    class="section-headline"
+                <h3
+                    class="mat-heading-3"
                     *ngIf="isAllowedToEditCollection() || collectionContent.collections.length"
                 >
-                    <span *ngIf="isRootLevelCollection()">{{
-                        'COLLECTIONS.TAB.' + tabSelected + '_LONG' | translate
-                    }}</span>
-                    <span *ngIf="!isRootLevelCollection()">{{
-                        'COLLECTION.INFO_REFERENCES_MULTI' | translate
-                    }}</span>
-                </div>
+                    <ng-container *ngIf="isRootLevelCollection()">{{
+                        'COLLECTIONS.TAB.' + tabSelected + '_LONG' | translate | titlecase
+                    }}</ng-container>
+                    <ng-container *ngIf="!isRootLevelCollection()">{{
+                        'COLLECTION.INFO_REFERENCES_MULTI' | translate | titlecase
+                    }}</ng-container>
+                </h3>
 
                 <!-- COLLECTION CARDS -->
                 <listTable
@@ -237,19 +237,20 @@
                     "
                     [createLink]="true"
                     (loadMore)="isRootLevelCollection() ? loadMoreCollections() : null"
+                    class="no-padding"
                 ></listTable>
 
                 <!-- when empty at root level -->
                 <div
                     *ngIf="collectionContent.collections.length == 0 && isRootLevelCollection()"
-                    class="section-headline collection-nocontent-container"
+                    class="collection-nocontent-container collection-nocontent-big"
                 >
-                    <div *ngIf="tabSelected == 'EDU_GROUPS'" class="collection-nocontent-big">
+                    <ng-container *ngIf="tabSelected == 'EDU_GROUPS'">
                         {{ 'collections_noOrgaCollections' | translate }}
-                    </div>
-                    <div *ngIf="tabSelected == 'EDU_ALL'" class="collection-nocontent-big">
+                    </ng-container>
+                    <ng-container *ngIf="tabSelected == 'EDU_ALL'" >
                         {{ 'collections_noCollections' | translate }}
-                    </div>
+                    </ng-container>
                 </div>
             </section>
 
@@ -258,30 +259,32 @@
                 class="collections-cards-div"
                 *ngIf="!isLoading && isReady && !isRootLevelCollection()"
             >
-                <div class="section-headline">
-                    <div>{{ 'collections_content' | translate }}</div>
-                    <div
-                        class="custom-order"
-                        *ngIf="
-                            !isMobile() &&
-                            collectionContent.references &&
-                            collectionContent.references.length > 1 &&
-                            isUserAllowedToEdit(collectionContent.node)
-                        "
-                    >
-                        <mat-slide-toggle
-                            [ngModel]="collectionContent.node.collection.orderMode == 'custom'"
-                            (change)="setCustomOrder($event)"
-                        >
-                            {{ 'COLLECTIONS.CUSTOM_ORDER' | translate }}
-                        </mat-slide-toggle>
-                    </div>
-                    <actionbar
-                        #actionbarReferences
-                        class="actionbarMaterials"
-                        [options]="optionsMaterials"
-                        [numberOfAlwaysVisibleOptions]="1"
-                    ></actionbar>
+                <div class="content-header">
+                  <h3 class="mat-heading-3">
+                      {{ 'collections_content' | translate | titlecase }}
+                  </h3>
+                  <div
+                      class="custom-order"
+                      *ngIf="
+                          !isMobile() &&
+                          collectionContent.references &&
+                          collectionContent.references.length > 1 &&
+                          isUserAllowedToEdit(collectionContent.node)
+                      "
+                  >
+                      <mat-slide-toggle
+                          [ngModel]="collectionContent.node.collection.orderMode == 'custom'"
+                          (change)="setCustomOrder($event)"
+                      >
+                          {{ 'COLLECTIONS.CUSTOM_ORDER' | translate }}
+                      </mat-slide-toggle>
+                  </div>
+                  <actionbar
+                      #actionbarReferences
+                      class="actionbarMaterials"
+                      [options]="optionsMaterials"
+                      [numberOfAlwaysVisibleOptions]="1"
+                  ></actionbar>
                 </div>
 
                 <app-custom-node-list-wrapper
@@ -331,6 +334,7 @@
                         collectionContent.referencesPagination.total
                     "
                     (loadMore)="loadMoreReferences()"
+                    class="no-padding"
                 ></listTable>
 
                 <!-- NO CONTENT NOTICE -->
