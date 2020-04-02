@@ -1,11 +1,16 @@
-@import "../../../../core-ui-module/styles/variables";
+@import '../../../../core-ui-module/styles/variables';
 
-.ccAuthorGroup{
-  display: flex;
-  flex-direction: column;
-  padding:10px;
-  margin:0 20px;
-  mat-form-field{
-    width: 100%;
-  }
+#reference-info-expander {
+    display: inline-flex;
+    vertical-align: middle;
+    padding-right: 5px;
+    font-weight: bold;
+    line-height: 24px;
+}
+.ccAuthorGroup {
+    display: flex;
+    flex-direction: column;
+    mat-form-field {
+        width: 100%;
+    }
 }

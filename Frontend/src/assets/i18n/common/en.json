@@ -526,7 +526,7 @@
             "MORE": "Advanced invitations",
             "DEFAULT_GROUPS": "General groups",
             "RECENT_AUTHORITIES": "Last invitations",
-            "INFO": "The selected users & groups are invited as viewers",
+            "INFO": "The selected users & groups are invited as viewers.",
             "ERROR_MULTIPLE_PARENTS": "It is not possible to set permissions because the elements have different parent elements",
             "ERROR_PERMISSION_MISSING": "It is not possible to set permissions because you have insufficient permissions on the element",
             "ERROR_TOOLPERMISSION_MISSING": "It is not possible to set permissions because your profile has no permissions to do so",

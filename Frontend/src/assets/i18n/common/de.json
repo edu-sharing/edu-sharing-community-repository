@@ -565,7 +565,7 @@
             "MORE": "Weitere Freigaben",
             "DEFAULT_GROUPS": "Allgemeine Gruppen",
             "RECENT_AUTHORITIES": "Zuletzt eingeladen",
-            "INFO": "Die ausgewählten Nutzer & Gruppen werden als Betrachter eingeladen",
+            "INFO": "Die ausgewählten Nutzer & Gruppen werden als Betrachter eingeladen.",
             "ERROR_MULTIPLE_PARENTS": "Das Festlegen von Berechtigungen ist nicht möglich, da die Elemente verschiedene Elternelemente besitzen",
             "ERROR_PERMISSION_MISSING": "Das Festlegen von Berechtigungen ist nicht möglich, da Sie unzureichende Rechte am Element besitzen",
             "ERROR_TOOLPERMISSION_MISSING": "Das Festlegen von Berechtigungen ist nicht möglich, da ihr Profil die dafür notwendigen Rechte nicht besitzt",

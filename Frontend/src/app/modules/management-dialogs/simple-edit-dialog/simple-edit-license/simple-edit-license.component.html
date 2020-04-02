@@ -20,6 +20,17 @@
       }}</mat-button-toggle>
     </mat-button-toggle-group>
   </div>
+  <label id="material-license-label">{{ 'SIMPLE_EDIT.LICENSE.SET_LICENSE' | translate }}</label>
+  <div class="field-group">
+    <mat-button-toggle-group
+      #licenseGroup="matButtonToggleGroup"
+      aria-labelledby="material-license-label"
+    >
+      <mat-button-toggle *ngFor="let license of allowedLicenses" [value]="license">{{
+        'SIMPLE_EDIT.LICENSE.LICENSES.' + license | translate
+      }}</mat-button-toggle>
+    </mat-button-toggle-group>
+  </div>
   <ng-container *ngIf="modeGroup.value === 'foreign' && licenseGroup.value !== 'NONE'">
     <label for="authorFreetext">{{ 'MDS.AUTHOR_FREETEXT_PLACEHOLDER' | translate }}</label>
     <mat-form-field class="authorFreetext">
@@ -40,15 +51,4 @@
     [(ccProfileUrl)]="ccProfileUrl"
     class="field-group"
   ></app-license-source>
-  <label id="material-license-label">{{ 'SIMPLE_EDIT.LICENSE.SET_LICENSE' | translate }}</label>
-  <div>
-    <mat-button-toggle-group
-      #licenseGroup="matButtonToggleGroup"
-      aria-labelledby="material-license-label"
-    >
-      <mat-button-toggle *ngFor="let license of allowedLicenses" [value]="license">{{
-        'SIMPLE_EDIT.LICENSE.LICENSES.' + license | translate
-      }}</mat-button-toggle>
-    </mat-button-toggle-group>
-  </div>
 </div>

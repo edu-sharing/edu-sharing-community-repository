@@ -1,9 +1,9 @@
-<button mat-button color="primary" class="ccAuthor clickable" (click)="showCcAuthor=!showCcAuthor;">
+<a href="javascript:" id="reference-info-expander" class="clickable" (click)="showCcAuthor=!showCcAuthor;">
   <i icon iconId="{{ showCcAuthor ? 'keyboard_arrow_down' : 'keyboard_arrow_right' }}"></i>
   {{ 'WORKSPACE.LICENSE.CC.NAME_AUTHOR' | translate}}
-</button>
+</a>
 <div *ngIf="showCcAuthor" [@cardAnimation]="showCcAuthor">
-  <div class="ccAuthorGroup">
+  <div class="ccAuthorGroup" role="group" aria-labelledby="reference-info-expander">
     <mat-form-field>
       <mat-label>{{'WORKSPACE.LICENSE.CC.TITLE_OF_WORK' | translate}}</mat-label>
       <input matInput id="CC_TITLE" [ngModel]="ccTitleOfWork" (ngModelChange)="ccTitleOfWorkChange.emit($event)">
