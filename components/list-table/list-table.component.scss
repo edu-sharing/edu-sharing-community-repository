@@ -841,8 +841,24 @@ a.rowInner {
         @include limitLineCount(2, 1.5);
     }
 }
-.cardContainer {
+
+// In the workspace, the user can toggle between list and cards view. When list
+// view is selected, the list spans the entire container with no padding.
+// However, cards need some padding, so we add some padding when cards view is
+// selected here.
+//
+// In collections, however, both, list and cards view are padded. In this case,
+// we want to align the cards borders with other elements (same as the list
+// borders). To achieve this, we provide the option to set the class
+// `no-padding` for the `listtable` component, which will align cards' borders
+// with the component's borders.
+:host:not(.no-padding) .cardContainer {
     padding: 0 10px;
+}
+@media all and (min-width: ($mobileWidth)) {
+    :host.no-padding .cardContainer {
+        margin: -6px; // Compensate cards margins
+    }
 }
 
 .cardList .row_2,
