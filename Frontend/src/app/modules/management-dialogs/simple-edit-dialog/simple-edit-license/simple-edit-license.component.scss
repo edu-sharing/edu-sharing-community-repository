@@ -1,14 +1,18 @@
-@import "../../../../core-ui-module/styles/variables";
+@import '../../../../core-ui-module/styles/variables';
 
-info-message{
-  button{
-    margin: 10px auto 0 auto;
-  }
+info-message {
+    button {
+        margin: 10px auto 0 auto;
+    }
 }
-.license{
-  display: flex;
-  flex-direction: column;
-  .mode{
-    margin-bottom: 10px;
-  }
+.license {
+    display: flex;
+    flex-direction: column;
+    .field-group {
+        padding-bottom: 20px;
+    }
+    label {
+        padding-bottom: 7px;
+        font-weight: bold;
+    }
 }

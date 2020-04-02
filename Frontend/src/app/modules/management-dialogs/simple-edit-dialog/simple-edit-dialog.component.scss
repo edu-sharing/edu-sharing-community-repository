@@ -1,13 +1,14 @@
-@import "../../../core-ui-module/styles/variables";
+@import '../../../core-ui-module/styles/variables';
 
-.block{
-  display: flex;
-  flex-direction: column;
-  .top{
+.block {
     display: flex;
-    align-items: center;
-    >h3{
-      flex-grow: 1;
+    flex-direction: column;
+    .top {
+        display: flex;
+        align-items: center;
+        > h3 {
+            flex-grow: 1;
+            font-size: 125%;
+        }
     }
-  }
 }
