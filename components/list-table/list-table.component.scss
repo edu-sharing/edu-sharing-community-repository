@@ -495,58 +495,53 @@ $badgeWidth: 250px;
     min-width: 50px;
     opacity: 1 !important;
 }
-$strength: 0.75deg;
 
-@keyframes OrderAnimation {
+@keyframes OrderAnimationCards {
     0% {
-        transform: rotate(-$strength * random(1));
-    }
-    10% {
-        transform: rotate($strength * random(1));
-    }
-    20% {
-        transform: rotate(-$strength * random(1));
-    }
-    30% {
-        transform: rotate($strength * random(1));
-    }
-    40% {
-        transform: rotate(-$strength * random(1));
+        transform: rotate(-0.75deg);
     }
     50% {
-        transform: rotate($strength * random(1));
-    }
-    60% {
-        transform: rotate(-$strength * random(1));
-    }
-    70% {
-        transform: rotate($strength * random(1));
-    }
-    80% {
-        transform: rotate(-$strength * random(1));
-    }
-    90% {
-        transform: rotate($strength * random(1));
+        transform: rotate(0.75deg);
     }
     100% {
-        transform: rotate(-$strength * random(1));
+        transform: rotate(-0.75deg);
     }
 }
-$orderAnimationTime: $transitionNormal * 5;
+
+@keyframes OrderAnimationList {
+    0% {
+        transform: translate(0, -.1em);
+    }
+    50% {
+        transform: translate(0, .1em);
+    }
+    100% {
+        transform: translate(0, -.1em);
+    }
+}
+
 .order-animation {
-    animation: OrderAnimation $orderAnimationTime infinite;
-}
-.order-animation:nth-of-type(2n) {
-    animation-delay: 0s;
-}
-.order-animation:nth-of-type(2n + 1) {
-    animation-delay: -$orderAnimationTime/2;
-}
-.order-animation:nth-of-type(3n) {
-    animation-delay: -$orderAnimationTime/4;
-}
-.order-animation:nth-of-type(5n) {
-    animation-delay: -$orderAnimationTime/8;
+    $orderAnimationTime: $transitionNormal;
+    animation-iteration-count: infinite;
+    animation-duration: $orderAnimationTime;
+    .cardList & {
+        animation-name: OrderAnimationCards;
+    }
+    .tableList & {
+        animation-name: OrderAnimationList;
+    }
+    &:nth-of-type(2n) {
+        animation-delay: 0s;
+    }
+    &:nth-of-type(2n + 1) {
+        animation-delay: -$orderAnimationTime/2;
+    }
+    &:nth-of-type(3n) {
+        animation-delay: -$orderAnimationTime/4;
+    }
+    &:nth-of-type(5n) {
+        animation-delay: -$orderAnimationTime/8;
+    }
 }
 .rowFrame {
     padding: 0px;
