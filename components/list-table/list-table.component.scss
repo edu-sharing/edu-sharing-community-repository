@@ -744,6 +744,9 @@ a.rowInner {
         height: #{$listItemHeight - 20px};
         flex-grow: 1;
         margin: 5px 10px;
+        @media screen and (min-width: $mobileWidth) {
+            max-width: 300px;
+        }
     }
 }
 
