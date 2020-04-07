@@ -736,14 +736,14 @@ a.rowInner {
 
 .tableList > .option-item-container {
     display: flex;
-    flex-direction: row;
-    height: #{$listItemHeight - 20px};
-    margin: 10px 0px;
+    @media screen and (max-width: $mobileWidthPortrait) {
+        flex-direction: column;
+    }
+    margin: 5px -10px;
     .item {
+        height: #{$listItemHeight - 20px};
         flex-grow: 1;
-        &:not(:last-child) {
-            margin-right: 10px;
-        }
+        margin: 5px 10px;
     }
 }
 
