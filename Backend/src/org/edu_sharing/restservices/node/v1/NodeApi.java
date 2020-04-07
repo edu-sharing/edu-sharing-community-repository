@@ -1167,8 +1167,11 @@ public class NodeApi  {
 		if(url==null)
 			return;
 		// Don't resolve url if name is already given by client
-		if(properties.get(CCConstants.getValidLocalName(CCConstants.CM_NAME))!=null)
+		if(properties.get(CCConstants.getValidLocalName(CCConstants.CM_NAME))!=null) {
+			properties.put(CCConstants.getValidLocalName(CCConstants.CM_NAME),
+					new String[]{NodeServiceHelper.cleanupCmName(properties.get(CCConstants.getValidLocalName(CCConstants.CM_NAME))[0])});
 			return;
+		}
 		 WebsiteInformation info=ClientUtilsService.getWebsiteInformation(url[0]);
 		 if(info==null){
 		     properties.put(CCConstants.getValidLocalName(CCConstants.CM_NAME), new String[]{NodeServiceHelper.cleanupCmName(url[0])});
