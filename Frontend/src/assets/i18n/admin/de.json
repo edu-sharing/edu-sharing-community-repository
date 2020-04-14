@@ -22,9 +22,9 @@
         "GLOBAL_CONFIG": {
             "CLIENT_CONFIG_TITLE": "Client-Konfiguration (Konfiguration von anzeigerelevanten Funktionen)",
             "CLIENT_CONFIG_HINT": "Sie können hier Werte eintragen, um Labels zu überschreiben, Kontexte zu konfigurieren, Authentifizierungsmethoden einzurichten und mehr. Nach dem Speichern müssen Sie möglicherweise die gesamte Seite im Browser neu laden",
-            "BASE_CONFIG_TITLE": "Globale Konfigurationsdatei (Defaultvalues)",
+            "BASE_CONFIG_TITLE": "Globale Konfigurationsdatei (Standard-Werte)",
             "BASE_CONFIG_HINT": "Diese Datei dient lediglich als Vorlage und darf nicht verändert werden. Geänderte Werte bitte in die spezifische Konfiguration eintragen",
-            "CONFIG_TITLE": "Spezifische Konfigurationsdatei (Override)",
+            "CONFIG_TITLE": "Spezifische Konfigurationsdatei (Überschreiben)",
             "CONFIG_HINT": "Sie können hier Werte der Standard-Konfiguration überschreiben.",
             "SIZE": "Editor-Größe",
             "SIZE_MEDIUM": "Normal",
@@ -37,8 +37,8 @@
             "TEST_MAIL": "E-Mail-Versand testen",
             "TEST_MAIL_RECEIVER": "Empfänger Test-E-Mail:",
             "TEST_MAIL_RECEIVER_LABEL": "E-Mail-Adresse",
-            "TEST_MAIL_TEMPLATE": "Template für E-Mail:",
-            "TEST_MAIL_TEMPLATE_LABEL": "Template wählen",
+            "TEST_MAIL_TEMPLATE": "Vorlage für E-Mail:",
+            "TEST_MAIL_TEMPLATE_LABEL": "Vorlage wählen",
             "TEST_MAIL_SEND": "Senden",
             "MAIL_SENT": "Test-E-Mail an {{receiver}} gesendet"
         },
@@ -75,15 +75,15 @@
             "APP_SAVED": "Änderungen an der Datei {{xml}} wurden gespeichert",
             "APP_XML_WARNING": "Achtung! Ungültige Werte können edu-sharing ggf. nicht mehr aufrufbar machen!",
             "ADD_PROPERTY": "Property anlegen",
-            "PROPERTY_NAME_PLACEHOLDER": "Key eingeben",
-            "PROPERTY_VALUE_PLACEHOLDER": "Value eingeben",
+            "PROPERTY_NAME_PLACEHOLDER": "Schlüssel eingeben",
+            "PROPERTY_VALUE_PLACEHOLDER": "Wert eingeben",
             "HOMEAPP": {
                 "public_key": "Der öffentliche Schlüssel. Muss dem private_key entsprechen und sollte nur in Kombination aktualisiert werden",
                 "searchclass": "Klasse für Suchanfragen Aufrufe",
                 "devmode": "Entwicklermodus aktivieren. Dadurch werden Caches, u.a. für Applikationen und Metadaten deaktiviert. Im Produktivbetrieb auf false setzen, um Performance zu erhöhen",
-                "username": "Benutzername des primären Administratoraccounts des Systems (normalerweise admin)",
-                "guest_password": "Passwort des gewählten Nutzers für den Gastaccount (siehe auch guest_username)",
-                "guest_username": "Benutzername für den Gastaccount (muss existierender Alfresco Nutzer sein, siehe auch guest_password)",
+                "username": "Benutzername des primären Administrator-Kontos des Systems (normalerweise admin)",
+                "guest_password": "Passwort des gewählten Nutzers für das Gast-Konto (siehe auch guest_username)",
+                "guest_username": "Benutzername für das Gast-Konto (muss existierender Alfresco Nutzer sein, siehe auch guest_password)",
                 "trustedclient": "Ist das System vertrauenswürdig? Muss für die homeappplication immer true sein",
                 "type": "Art des Systems, muss REPOSITORY sein",
                 "host": "Öffentliche IP-Adresse des Hosts",
@@ -118,7 +118,7 @@
                 "mail.smtp.passwd": "Passwort für die AUthentifizierung am Mailserver",
                 "mail.smtp.from": "Angezeigte E-Mailadresse des Absenders. Empfohlen \"noreply@yourdomain.com\"",
                 "mail.admin": "Deprecated",
-                "mail.addReplyTo": "Wenn true (default), wird als Reply-To Adresse der jeweilige Nutzer, der das Event ausgelöst hat, angehangen"
+                "mail.addReplyTo": "Wenn true (Standard), wird als Reply-To Adresse der jeweilige Nutzer, der das Event ausgelöst hat, angehangen"
             }
         },
         "UPDATE": {
