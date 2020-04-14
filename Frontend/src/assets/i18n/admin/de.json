@@ -230,7 +230,7 @@
             "OAI_FORCE_UPDATE": "Alle bestehenden Nodes neu importieren/überschreiben",
             "OAI_START": "OAI Import",
             "OAI_SAVE": "Werte für nächsten Import speichern",
-            "REMOVE_IMPORTS": "Remove Deleted Imports",
+            "REMOVE_IMPORTS": "Gelöschte Importe entfernen",
             "IMPORTS_REMOVED": "Gelöschte OAI-Elemente werden entfernt.\nÜberprüfen Sie die Aufgabenliste, um den Status einzusehen",
             "EXCEL_IMPORTED": "Excel-Datei importiert ({{ rows }} Zeilen importiert)",
             "COLLECTIONS_IMPORTED": "{{ count }} Sammlungen importiert"
@@ -238,9 +238,9 @@
         "TOOLKIT": {
             "REFRESH_APP": "App Info neu laden",
             "REFRESH_APP_INFO": "Metadaten und Application-Info neu laden",
-            "REFRESH_EDU_GROUP_CACHE": "Refresh Edu Group Cache",
-            "EDU_GROUP_CACHE_REFRESHED": "Refresh Edu Group Cache done",
-            "APP_INFO_REFRESHED": "Refresh Application Info done",
+            "REFRESH_EDU_GROUP_CACHE": "Edu-Gruppen-Cache aktualisieren",
+            "EDU_GROUP_CACHE_REFRESHED": "Edu-Gruppen-Cache aktualisiert",
+            "APP_INFO_REFRESHED": "Aktualisieren der Anwendungsinformationen abgeschlossen",
             "CACHE": "Cache Verwaltung",
             "CACHE_INFO": "Cache Info abrufen",
             "CACHE_NAME": "Cache Name (ID/Bean Name)",
