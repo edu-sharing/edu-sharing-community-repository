@@ -983,30 +983,31 @@ public class PermissionServiceImpl implements org.edu_sharing.service.permission
 
 		if (fuzzyUserSearch) {
 				if (query != null) {
-					for (String token : StringTool.getPhrases(query)) {
+					for (String token : query.split(" ")) {
 
-						boolean isPhrase = token.startsWith("\"") && token.endsWith("\"");
+						boolean isPhrase = token.startsWith("\"") && token.endsWith("\"") && token.length() > 2;
 
 						if (isPhrase) {
-
-							token = (token.length() > 2) ? token.substring(1, token.length() - 1) : "";
-
-						} else {
-
-							if (!(token.startsWith("*") || token.startsWith("?"))) {
-								token = "*" + token;
-							}
-
-							if (!(token.endsWith("*") || token.endsWith("?"))) {
-								token = token + "*";
-							}
+							token = token.substring(1, token.length() - 1);
 						}
+
+						if (!(token.startsWith("*") || token.startsWith("?"))) {
+							token = "*" + token;
+						}
+
+						if (!(token.endsWith("*") || token.endsWith("?"))) {
+							token = token + "*";
+						}
+
 						StringBuffer fieldQuery=new StringBuffer();
 						for(String field : searchFields) {
 							if(fieldQuery.length()>0) {
 								fieldQuery.append(" OR ");
 							}
-							fieldQuery.append("@cm\\:").append(field).append(":").append("\"").append(token).append("\"");
+							if(isPhrase){
+								fieldQuery.append("=");  // use exact term matching
+							}
+							fieldQuery.append("@cm\\:").append(field).append(":").append(QueryParser.escape(token));
 						}
 						subQuery.append(subQuery.length() > 0 ? " AND " : "").append("(").append(fieldQuery).append(")");
 					}
@@ -1122,23 +1123,21 @@ public class PermissionServiceImpl implements org.edu_sharing.service.permission
 			if (searchWord.length() > 0) {
 	
 	
-				for (String token : StringTool.getPhrases(searchWord)) {
+				for (String token : searchWord.split(" ")) {
 	
 					boolean isPhrase = token.startsWith("\"") && token.endsWith("\"");
-	
+
+
 					if (isPhrase) {
-	
-						token = (token.length() > 2) ? token.substring(1, token.length() - 1) : "";
-	
-					} else {
-	
-						if (!(token.startsWith("*") || token.startsWith("?"))) {
-							token = "*" + token;
-						}
-	
-						if (!(token.endsWith("*") || token.endsWith("?"))) {
-							token = token + "*";
-						}
+						token = token.substring(1, token.length() - 1);
+					}
+
+					if (!(token.startsWith("*") || token.startsWith("?"))) {
+						token = "*" + token;
+					}
+
+					if (!(token.endsWith("*") || token.endsWith("?"))) {
+						token = token + "*";
 					}
 	
 					if (token.length() > 0) {
@@ -1146,8 +1145,11 @@ public class PermissionServiceImpl implements org.edu_sharing.service.permission
 						boolean furtherToken = (subQuery.length() > 0);
 						//subQuery.append((furtherToken ? " AND( " : "(")).append("@cm\\:authorityName:").append("\"")
 						//		.append(token).append("\"").append(" OR @cm\\:authorityDisplayName:").append("\"")
-						subQuery.append((furtherToken ? " AND( " : "(")).append("@cm\\:authorityDisplayName:").append("\"")
-								.append(token).append("\"");
+						subQuery.append((furtherToken ? " AND( " : "("));
+						if(isPhrase){
+							subQuery.append("="); // use exact term matching
+						}
+						subQuery.append("@cm\\:authorityDisplayName:").append(QueryParser.escape(token));
 						subQuery.append(")");
 	
 					}
@@ -1163,10 +1165,10 @@ public class PermissionServiceImpl implements org.edu_sharing.service.permission
 			
 			for (String token : StringTool.getPhrases(searchWord)) {
 
-				boolean isPhrase = token.startsWith("\"") && token.endsWith("\"");
+				boolean isPhrase = token.startsWith("\"") && token.endsWith("\"") && token.length()>2;
 
 				if (isPhrase) {
-					token = (token.length() > 2) ? token.substring(1, token.length() - 1) : "";
+					token = token.substring(1, token.length() - 1);
 				}
 
 				if (token.length() > 0) {
