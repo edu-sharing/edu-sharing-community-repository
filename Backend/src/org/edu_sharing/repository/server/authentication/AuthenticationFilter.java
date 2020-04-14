@@ -169,7 +169,7 @@ public class AuthenticationFilter implements javax.servlet.Filter {
 	public static void handleLocale(boolean throwOnError, String locale,  HttpServletRequest httpReq, HttpServletResponse httpRes) throws IOException {
 		//set the locale
 		try {
-			if (locale == null && httpReq.getLocale() != null) {
+			if (locale == null && httpReq.getSession().getAttribute(CCConstants.AUTH_LOCALE) == null && httpReq.getLocale() != null) {
 				locale = httpReq.getLocale().toString();
 				throwOnError = false;
 			}
