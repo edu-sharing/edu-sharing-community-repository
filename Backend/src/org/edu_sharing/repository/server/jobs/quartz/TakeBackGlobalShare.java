@@ -93,7 +93,7 @@ public class TakeBackGlobalShare extends AbstractJob {
 	@Override
 	public Class[] getJobClasses() {
 		this.addJobClass(TakeBackGlobalShare.class);
-		return this.getJobClasses();
+		return this.allJobs;
 	}
 
 }
