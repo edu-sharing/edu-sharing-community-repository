@@ -1,6 +1,7 @@
 import { Directive, EventEmitter, Output, HostListener } from '@angular/core';
 
-export class DistinctClickEvent extends MouseEvent {
+export interface DistinctClickEvent {
+    event: MouseEvent;
     pointerType?: 'mouse' | 'touch' | 'pen';
 }
 
@@ -38,7 +39,7 @@ export class DistinctClickDirective {
 
     @HostListener('click', ['$event'])
     onClick(event: MouseEvent) {
-        const distinctClickEvent = event as DistinctClickEvent;
+        const distinctClickEvent: DistinctClickEvent = { event };
         if (this.clickMatchesPointerup(event)) {
             distinctClickEvent.pointerType = this.pointerType;
         }

@@ -750,11 +750,11 @@ export class ListTableComponent implements EventListener {
             // Propagate event
             this.clickRowSender(node, region);
             this.refreshAvailableOptions(node);
-        } else if (this.hasCheckbox && event.ctrlKey) {
+        } else if (this.hasCheckbox && event.event.ctrlKey) {
             this.toggleSelection(node);
         } else if (
             this.hasCheckbox &&
-            event.shiftKey &&
+            event.event.shiftKey &&
             this.selectedNodes.length > 0
         ) {
             // Select from-to range via shift key.
@@ -771,7 +771,7 @@ export class ListTableComponent implements EventListener {
                 this.mainNav.management.nodeSidebar = node;
             }
         }
-        event.stopPropagation();
+        event.event.stopPropagation();
     }
 
     onCheckboxClick(node: Node) {
