@@ -419,7 +419,7 @@
                 "TITLE": "Media Center Import",
                 "CHOOSE_MEDIACENTERS": "Select CSV-file",
                 "MEDIACENTERS_START": "Perform import",
-                "IMPORTED": "{{ rows }} "Media Center imported"
+                "IMPORTED": "{{ rows }} Media Center imported"
             },
             "ORGIMPORT": {
                 "TITLE": "Organisation Import",
