@@ -241,7 +241,7 @@ public class Mail {
 		sendMailHtml(context,props.getProperty("mail.smtp.from", "no-reply@edu-sharing.com"),senderName, replyTo, receiver, subject, message);
 	}
 	public void sendMailHtml(ServletContext context,String receiver,String subject,String message,Map<String,String> replace) throws Exception {
-		sendMailHtml(context,props.getProperty("mail.smtp.from", "no-reply@edu-sharing.com"), receiver, null, subject, message,replace);
+		sendMailHtml(context,props.getProperty("mail.smtp.from", "no-reply@edu-sharing.com"), null, receiver, subject, message,replace);
 	}
 
 	private String replaceString(String string, Map<String, String> replace) throws Exception {

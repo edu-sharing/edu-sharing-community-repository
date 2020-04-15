@@ -116,7 +116,7 @@
     </div>
     <div class="heading"><i class="material-icons">mail</i><span>{{'ADMIN.CONFIG.TEST_MAIL' | translate}}</span></div>
     <div class="group">
-        <form (ngSubmit)="testMail()">
+        <form (ngSubmit)="testMail()" #mailForm>
             <div class="inputGroupGrow">
                 <div class="info">{{'ADMIN.CONFIG.TEST_MAIL_RECEIVER' | translate }}</div>
                 <mat-form-field>
@@ -133,7 +133,7 @@
                     </mat-select>
                 </mat-form-field>
             </div>
-            <button mat-raised-button color="primary" [class.disabled]="!mailReceiver || !mailTemplate" (click)="testMail()">{{'ADMIN.CONFIG.TEST_MAIL_SEND' | translate }}</button>
+            <button mat-raised-button color="primary" [class.disabled]="!mailReceiver || !mailTemplate" (click)="mailForm.submit()">{{'ADMIN.CONFIG.TEST_MAIL_SEND' | translate }}</button>
         </form>
     </div>
 </div>
