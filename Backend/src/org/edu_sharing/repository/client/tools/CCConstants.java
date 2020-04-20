@@ -411,6 +411,7 @@ public class CCConstants {
 
 	public final static String CCM_ASPECT_PERMISSION_HISTORY = "{http://www.campuscontent.de/model/1.0}permission_history";
 
+	public final static String CCM_ASPECT_TRACKING = "{http://www.campuscontent.de/model/1.0}tracking";
 
 	public final static String CCM_PROP_TOOL_OBJECT_TOOLINSTANCEREF = "{http://www.campuscontent.de/model/1.0}tool_instance_ref";
 

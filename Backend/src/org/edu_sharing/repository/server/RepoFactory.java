@@ -53,6 +53,7 @@ import org.edu_sharing.repository.server.tools.PropertiesHelper;
 import org.edu_sharing.service.config.ConfigServiceFactory;
 import org.edu_sharing.service.provider.Provider;
 import org.edu_sharing.service.provider.ProviderHelper;
+import org.edu_sharing.service.version.VersionService;
 
 public class RepoFactory {
 
@@ -227,6 +228,7 @@ public class RepoFactory {
 		appClassCache.clear();
 		MetadataReaderV2.refresh();
 		ConfigServiceFactory.refresh();
+		VersionService.invalidateCache();
 		try {
 			JobHandler.getInstance().refresh();
 		} catch (Exception ignored) {}
