@@ -22,7 +22,19 @@ export class UserAvatarComponent {
      * @type {boolean}
      */
     @Input() link=false;
-    @Input() user : UserSimple|Group|any;
+    @Input() _user : UserSimple|Group|any;
+    @Input() set user (data: UserSimple|Group|any) {
+        let result: UserSimple|Group|any = {};
+        // map elements comming from the permissions api to generic iam user/group
+        if(data?.authority) {
+            result.authorityName = data.authority.authorityName;
+            result.authorityType = data.authority.authorityType;
+            result.profile = data.user || data.group;
+        } else {
+            result = data;
+        }
+        this._user = result;
+    }
     /**
      * when a regular material icon should be used instead of an avatar
      */
@@ -47,13 +59,13 @@ export class UserAvatarComponent {
                 private sanitizer : DomSanitizer) {
     }
     isEditorialUser(){
-        return this.user && this.user.profile && (
-            (this.user.profile.types && this.user.profile.types.indexOf(RestConstants.GROUP_TYPE_EDITORIAL) !== -1) ||
-            (this.user.profile.groupType === RestConstants.GROUP_TYPE_EDITORIAL)
+        return this._user && this._user.profile && (
+            (this._user.profile.types && this._user.profile.types.indexOf(RestConstants.GROUP_TYPE_EDITORIAL) !== -1) ||
+            (this._user.profile.groupType === RestConstants.GROUP_TYPE_EDITORIAL)
         );
     }
     openProfile(){
-        this.router.navigate([UIConstants.ROUTER_PREFIX+"profiles",this.user.authorityName]);
+        this.router.navigate([UIConstants.ROUTER_PREFIX+"profiles",this._user.authorityName]);
     }
 
     getLetter(user: UserSimple) {
