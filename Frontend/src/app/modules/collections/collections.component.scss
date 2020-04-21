@@ -129,6 +129,8 @@ section {
 }
 
 .collection-new-preview-infoline {
+    display: flex;
+    align-items: center;
     opacity: 0.85;
     margin-top: 16px;
     margin-left: -2px;

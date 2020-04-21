@@ -97,6 +97,11 @@ user-profile {
     flex: auto;
     padding: 19px 20px 0 10px;
 }
+.addDesktop{
+    height: $mainnavHeight;
+    background-color: rgba(red($workspaceTopBarFontColor),green($workspaceTopBarFontColor),blue($workspaceTopBarFontColor),.1);
+    border-radius: 0;
+}
 
 .menuButton img {
     margin-left: 0;
