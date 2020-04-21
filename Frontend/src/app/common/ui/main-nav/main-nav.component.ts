@@ -775,18 +775,19 @@ export class MainNavComponent implements AfterViewInit {
                 );
             }
         }
-        if (
+        /*if (
+            this._currentScope === 'workspace' ||
             this._currentScope === 'search' ||
             this._currentScope === 'stream' ||
             this._currentScope === 'collections'
-        ) {
-            const option = new OptionItem(
+        ) {*/
+            const boomarkOption = new OptionItem(
                 'SEARCH.NODE_STORE.TITLE',
                 'bookmark_border',
                 () => this.setNodeStore(true),
             );
-            this.userMenuOptions.push(option);
-        }
+            this.userMenuOptions.push(boomarkOption);
+        // }
         for (const option of this.getConfigMenuHelpOptions()) {
             this.userMenuOptions.push(option);
         }
