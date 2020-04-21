@@ -1,4 +1,4 @@
-import { Component, ElementRef, HostListener, ViewChild, OnInit } from '@angular/core';
+import {Component, ElementRef, HostListener, ViewChild, OnInit, OnDestroy} from '@angular/core';
 import { TranslateService } from '@ngx-translate/core';
 import { Translation } from '../../core-ui-module/translation';
 import {
@@ -66,7 +66,7 @@ import { Observable } from 'rxjs';
         trigger('fromRight', UIAnimation.fromRight())
     ]
 })
-export class WorkspaceMainComponent implements EventListener {
+export class WorkspaceMainComponent implements EventListener, OnDestroy {
     @ViewChild('explorer') explorer: WorkspaceExplorerComponent;
     private static VALID_ROOTS = ['MY_FILES', 'SHARED_FILES', 'MY_SHARED_FILES', 'TO_ME_SHARED_FILES', 'WORKFLOW_RECEIVE', 'RECYCLE'];
     private static VALID_ROOTS_NODES = [RestConstants.USERHOME, '-shared_files-', '-my_shared_files-', '-to_me_shared_files-', '-workflow_receive-'];
@@ -91,7 +91,7 @@ export class WorkspaceMainComponent implements EventListener {
     private createMds: string;
     private nodeDisplayedVersion: string;
     createAllowed: boolean;
-    currentFolder: any | Node;
+    currentFolder: Node;
     private user: IamUser;
     public searchQuery: any;
     public isSafe = false;
@@ -166,6 +166,9 @@ export class WorkspaceMainComponent implements EventListener {
         if (event === FrameEventsService.EVENT_REFRESH) {
             this.refresh();
         }
+    }
+    ngOnDestroy(): void {
+        this.storage.set(TemporaryStorageService.WORKSPACE_LAST_LOCATION, this.currentFolder.ref.id);
     }
     constructor(
         private toast: Toast,
@@ -380,8 +383,12 @@ export class WorkspaceMainComponent implements EventListener {
                                 if (!needsUpdate) {
                                     return;
                                 }
-
-                                this.openDirectoryFromRoute(params);
+                                const lastLocation = this.storage.pop(TemporaryStorageService.WORKSPACE_LAST_LOCATION, null);
+                                if(lastLocation) {
+                                    this.openDirectory(lastLocation);
+                                } else {
+                                    this.openDirectoryFromRoute(params);
+                                }
                                 if (params.showAlpha) {
                                     this.showAlpha();
                                 }
