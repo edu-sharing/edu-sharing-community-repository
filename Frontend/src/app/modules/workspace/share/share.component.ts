@@ -353,6 +353,13 @@ export class WorkspaceShareComponent {
                             authorityType: 'USER',
                         };
                         (this.owner as any).user = user;
+                        this.iam.getUser(authority).subscribe((apiUser) => {
+                            (this.owner as any).user = apiUser.person.profile;
+                            // force a refresh of the data for ui update
+                            this.owner = Helper.deepCopy(this.owner);
+                        }, (error) => {
+                            // ignore, only relevant for the avatar of the owner
+                        });
                         this.owner.permissions = ['Owner'];
                     });
             } else {

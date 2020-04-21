@@ -8,6 +8,11 @@
     padding: 3px 0;
     align-items: center;
   }
+  >.icon {
+    width: 32px;
+    position: relative;
+    top: 2px;
+  }
   >.permissionName{
     display: flex;
     flex-direction: column;
