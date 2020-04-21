@@ -1,8 +1,12 @@
 @import '../../../core-ui-module/styles/variables';
+@import '../../../core-ui-module/components/card/variables';
 
 .block {
     display: flex;
     flex-direction: column;
+    margin: 0 $cardPadding;
+    padding: 6px 0;
+    border-bottom: 1px solid #ccc;
     .top {
         display: flex;
         align-items: center;
