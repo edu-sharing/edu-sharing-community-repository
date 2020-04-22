@@ -9,6 +9,7 @@ import org.alfresco.service.ServiceRegistry;
 import org.alfresco.service.cmr.repository.ChildAssociationRef;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.repository.NodeService;
+import org.alfresco.service.cmr.repository.StoreRef;
 import org.alfresco.service.cmr.security.PermissionService;
 import org.alfresco.service.namespace.QName;
 import org.apache.log4j.Logger;
@@ -31,25 +32,31 @@ public class TakeBackGlobalShareNodeService extends AbstractJob {
 	
 	public static String PARAM_EXECUTE = "EXECUTE";
 	
+	public static String PARAM_START_FOLDER = "START_FOLDER";
+	
 	TakeBackGlobalShareWorker worker;
 	
 	@Override
 	public void execute(JobExecutionContext context) throws JobExecutionException {
 		boolean execute = new Boolean((String)context.getJobDetail().getJobDataMap().get(PARAM_EXECUTE));
+		String startFolder = (String)context.getJobDetail().getJobDataMap().get(PARAM_START_FOLDER);
 		worker = new TakeBackGlobalShareWorker(nodeService, permissionService, execute);
 		AuthenticationUtil.RunAsWork<Void> runAs = new AuthenticationUtil.RunAsWork<Void>() {
 			@Override
 			public Void doWork() throws Exception {
-				run(execute);
+				run(execute, startFolder);
 				return null;
 			}
 		};
 		AuthenticationUtil.runAsSystem(runAs);
 	}
 	
-	public void run(boolean execute) {
-		NodeRef companyHome = repositoryHelper.getCompanyHome();
-		work(companyHome);
+	public void run(boolean execute, String startFolder) {
+		NodeRef nodeRefStartFolder = 
+				(startFolder != null && !startFolder.trim().equals("")) 
+				? new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE,startFolder) 
+						: repositoryHelper.getCompanyHome(); 
+		work(nodeRefStartFolder);
 	}
 	
 	private void work(NodeRef nodeRef) {
