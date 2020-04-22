@@ -62,8 +62,8 @@ public class TakeBackGlobalShareNodeService extends AbstractJob {
 			if(CCConstants.CCM_VALUE_MAP_TYPE_EDUGROUP.equals(mapType)) {
 				return;
 			}
-			
-			logger.info("opening folder:" + nodeService.getPath(nodeRef).toDisplayPath(nodeService, permissionService));
+			String name = (String)nodeService.getProperty(nodeRef, ContentModel.PROP_NAME);
+			logger.info("opening folder:" + nodeService.getPath(nodeRef).toDisplayPath(nodeService, permissionService) + " /" + name);
 			
 			List<ChildAssociationRef> childRefs = nodeService.getChildAssocs(nodeRef);
 			for(ChildAssociationRef childRef : childRefs) {
