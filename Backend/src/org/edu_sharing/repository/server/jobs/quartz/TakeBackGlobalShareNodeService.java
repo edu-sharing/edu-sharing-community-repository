@@ -63,7 +63,7 @@ public class TakeBackGlobalShareNodeService extends AbstractJob {
 				return;
 			}
 			
-			logger.info("opening folder:" + nodeService.getPath(nodeRef));
+			logger.info("opening folder:" + nodeService.getPath(nodeRef).toDisplayPath(nodeService, permissionService));
 			
 			List<ChildAssociationRef> childRefs = nodeService.getChildAssocs(nodeRef);
 			for(ChildAssociationRef childRef : childRefs) {
