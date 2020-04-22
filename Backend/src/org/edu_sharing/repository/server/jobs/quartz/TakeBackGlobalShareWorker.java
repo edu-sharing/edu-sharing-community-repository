@@ -33,6 +33,12 @@ public class TakeBackGlobalShareWorker {
 			return;
 		}
 		
+		//leave out notifies...
+		if(!(type.equals(QName.createQName(CCConstants.CCM_TYPE_IO)) 
+				|| type.equals(QName.createQName(CCConstants.CCM_TYPE_MAP)) )) {
+			return;
+		}
+		
 		Set<AccessPermission> setPermissions = permissionService.getAllSetPermissions(nodeRef);
 		for(AccessPermission ap : setPermissions) {
 			String authority = ap.getAuthority();
