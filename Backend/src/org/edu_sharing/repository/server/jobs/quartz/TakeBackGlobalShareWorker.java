@@ -33,9 +33,11 @@ public class TakeBackGlobalShareWorker {
 			return;
 		}
 		
-		//leave out notifies...
+		//leave out schoolcontext objects
 		if(!(type.equals(QName.createQName(CCConstants.CCM_TYPE_IO)) 
-				|| type.equals(QName.createQName(CCConstants.CCM_TYPE_MAP)) )) {
+				|| type.equals(QName.createQName(CCConstants.CCM_TYPE_MAP))
+				|| type.equals(QName.createQName(CCConstants.CM_TYPE_FOLDER))
+				|| type.equals(QName.createQName(CCConstants.CCM_TYPE_NOTIFY)))) {
 			return;
 		}
 		
