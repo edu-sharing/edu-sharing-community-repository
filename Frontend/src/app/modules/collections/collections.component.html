@@ -203,10 +203,10 @@
                     *ngIf="isAllowedToEditCollection() || collectionContent.collections.length"
                 >
                     <ng-container *ngIf="isRootLevelCollection()">{{
-                        'COLLECTIONS.TAB.' + tabSelected + '_LONG' | translate | titlecase
+                        'COLLECTIONS.TAB.' + tabSelected + '_LONG' | translate
                     }}</ng-container>
                     <ng-container *ngIf="!isRootLevelCollection()">{{
-                        'COLLECTION.INFO_REFERENCES_MULTI' | translate | titlecase
+                        'COLLECTION.INFO_REFERENCES_MULTI' | translate
                     }}</ng-container>
                 </h3>
 
@@ -261,7 +261,7 @@
             >
                 <div class="content-header">
                   <h3 class="mat-heading-3">
-                      {{ 'collections_content' | translate | titlecase }}
+                      {{ 'collections_content' | translate }}
                   </h3>
                   <div
                       class="custom-order"
