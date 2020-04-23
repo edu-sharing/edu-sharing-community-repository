@@ -127,6 +127,7 @@ public class SearchServiceBrockhausImpl extends SearchServiceAdapter{
 		try {
 			String uri="?q="+URLEncoder.encodeUriComponent(searchWord)+
 					"&src="+URLEncoder.encodeUriComponent(src)+
+					"&grouped=1"+
 					"&offset="+searchToken.getFrom()+
 					"&size="+searchToken.getMaxResult();
 
