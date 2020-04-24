@@ -529,8 +529,11 @@ export class WorkspaceManagementDialogsComponent  {
     }
 
     displayNode(node: Node) {
-        this.router.navigate([UIConstants.ROUTER_PREFIX + 'render', node.ref.id, node.version]);
-
+      if(node.version) {
+          this.router.navigate([UIConstants.ROUTER_PREFIX + 'render', node.ref.id, node.version]);
+      } else {
+          this.router.navigate([UIConstants.ROUTER_PREFIX + 'render', node.ref.id]);
+      }
     }
 
     closeSimpleEdit(saved: boolean, nodes: Node[] = null) {
