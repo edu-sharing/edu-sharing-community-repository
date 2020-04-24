@@ -7,9 +7,11 @@ import java.util.Map;
 import org.alfresco.model.ContentModel;
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.service.ServiceRegistry;
+import org.alfresco.service.cmr.repository.ChildAssociationRef;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.repository.NodeService;
 import org.alfresco.service.cmr.repository.StoreRef;
+import org.alfresco.service.cmr.security.PermissionService;
 import org.alfresco.service.namespace.QName;
 import org.apache.log4j.Logger;
 import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
@@ -29,6 +31,8 @@ public class FixScopeForNodeJob extends AbstractJob {
 	ServiceRegistry serviceRegistry = (ServiceRegistry) applicationContext.getBean(ServiceRegistry.SERVICE_REGISTRY);
 	
 	NodeService nodeService = serviceRegistry.getNodeService();
+	
+	PermissionService permissionService = serviceRegistry.getPermissionService();
 	
 	Logger logger = Logger.getLogger(FixScopeForNodeJob.class);
 	
@@ -64,7 +68,9 @@ public class FixScopeForNodeJob extends AbstractJob {
 			return;	
 		}
 		
+		String path = nodeService.getPath(nodeRef).toDisplayPath(nodeService, permissionService);
 		String name = (String)nodeService.getProperty(nodeRef, ContentModel.PROP_NAME);
+		logger.info("path:" + path + " name:" + name);
 		
 		
 		if(!nodeService.hasAspect(nodeRef,aspectEduScope)) {
@@ -86,6 +92,14 @@ public class FixScopeForNodeJob extends AbstractJob {
 			}
 		}else {
 			logger.info("found scope " + scope + " for " + nodeRef);
+		}
+		
+		QName type = nodeService.getType(nodeRef);
+		if(QName.createQName(CCConstants.CCM_TYPE_MAP).equals(type) 
+				|| ContentModel.TYPE_FOLDER.equals(type)) {
+			for(ChildAssociationRef childAssoc : nodeService.getChildAssocs(nodeRef)) {
+				execute(childAssoc.getChildRef().getId(),execute);
+			}
 		}
 	}
 
