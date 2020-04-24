@@ -411,7 +411,7 @@ export class OptionsHelperService {
         openParentNode.constrains = [Constrain.Files, Constrain.NoBulk, Constrain.HomeRepository, Constrain.User];
         openParentNode.scopes = [Scope.Search, Scope.Render];
         openParentNode.customEnabledCallback = (nodes) => {
-            if(nodes) {
+            if(nodes && nodes.length === 1) {
                 openParentNode.customEnabledCallback = null;
                 let nodeId = nodes[0].ref.id;
                 if (nodes[0].aspects.indexOf(RestConstants.CCM_ASPECT_IO_REFERENCE) !== -1) {
@@ -423,7 +423,7 @@ export class OptionsHelperService {
                     openParentNode.isEnabled = false;
                 });
             }
-            return true;
+            return false;
         };
         openParentNode.group = DefaultGroups.View;
         openParentNode.priority = 15;
