@@ -98,7 +98,10 @@ user-profile {
     padding: 19px 20px 0 10px;
 }
 .addDesktop{
-    height: $mainnavHeight;
+    margin-left: 50px;
+    margin-right: 10px;
+    padding-right: 25px;
+    height: 39px;
     background-color: rgba(red($workspaceTopBarFontColor),green($workspaceTopBarFontColor),blue($workspaceTopBarFontColor),.1);
     border-radius: 0;
 }
