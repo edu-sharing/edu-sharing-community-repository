@@ -2,29 +2,21 @@ package org.edu_sharing.repository.server;
 
 import java.io.*;
 import java.util.*;
-import java.util.stream.Collectors;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
-import javax.mail.Store;
 import javax.servlet.ServletException;
 import javax.servlet.ServletOutputStream;
-import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import net.cnri.util.StreamUtil;
 import org.alfresco.model.ContentModel;
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
-import org.alfresco.service.ServiceRegistry;
-import org.alfresco.service.cmr.repository.ContentReader;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.repository.StoreRef;
-import org.alfresco.service.namespace.QName;
 import org.apache.commons.httpclient.methods.GetMethod;
 import org.apache.commons.lang.StringUtils;
-import org.apache.http.client.methods.HttpGet;
 import org.apache.log4j.Logger;
 import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
 import org.edu_sharing.metadataset.v2.tools.MetadataHelper;
@@ -51,7 +43,7 @@ import org.springframework.util.StreamUtils;
 
 public class DownloadServlet extends HttpServlet{
 
-	
+
 	static Logger logger = Logger.getLogger(DownloadServlet.class);
 	
 	@Override
@@ -81,19 +73,42 @@ public class DownloadServlet extends HttpServlet{
 			    version=null;
 			NodeService nodeService = NodeServiceFactory.getLocalService();
 			OutputStream bufferOut = resp.getOutputStream();
-			NodeRef nodeRef = new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE,nodeId);
+			NodeRef nodeRef = new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, nodeId);
 			String name = fileName!=null ? fileName : NodeServiceHelper.getProperty(nodeRef, CCConstants.CM_NAME);
 			if("true".equalsIgnoreCase(req.getParameter("metadata"))){
 				String metadata = getMetadataRenderer(nodeRef).render("io_text");
 				ByteArrayOutputStream out = new ByteArrayOutputStream();
 				out.write(metadata.getBytes());
 				outputData(resp,name + ".txt", out);
+				return;
 			}
 			TrackingServiceFactory.getTrackingService().trackActivityOnNode(new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE,nodeId),null,TrackingService.EventType.DOWNLOAD_MATERIAL);
 			InputStream is=null;
+			String originalNodeId = checkAndGetCollectionRef(nodeId);
 			try {
-				is = nodeService.getContent(StoreRef.PROTOCOL_WORKSPACE, StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(), nodeId, version, ContentModel.PROP_CONTENT.toString());
-			}catch(Throwable t){
+				if(originalNodeId != null){
+					String finalVersion = version;
+					is = AuthenticationUtil.runAsSystem(() -> {
+						try {
+							return nodeService.getContent(
+									StoreRef.PROTOCOL_WORKSPACE,
+									StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(),
+									originalNodeId,
+									finalVersion,
+									ContentModel.PROP_CONTENT.toString());
+						} catch (Throwable ignored) {
+						}
+						return null;
+					});
+				} else {
+					is = nodeService.getContent(
+							StoreRef.PROTOCOL_WORKSPACE,
+							StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(),
+							nodeId,
+							version,
+							ContentModel.PROP_CONTENT.toString());
+				}
+			} catch(Throwable ignored){
 
 			}
 			if(is==null || is.available()==0){
@@ -127,7 +142,15 @@ public class DownloadServlet extends HttpServlet{
 		Map<String, String> headers=new HashMap<>();
 		return new HttpQueryTool().getStream(new GetMethod(location));
 	}
+	private static String checkAndGetCollectionRef(String nodeId){
+		NodeRef ref = new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, nodeId);
+		if(NodeServiceHelper.hasAspect(ref,CCConstants.CCM_ASPECT_COLLECTION_IO_REFERENCE)){
+			String refNodeId = NodeServiceHelper.getProperty(ref, CCConstants.CCM_PROP_IO_ORIGINAL);
 
+			return refNodeId;
+		}
+		return null;
+	}
 	public static void downloadZip(HttpServletResponse resp, String[] nodeIds, String parentNodeId, String token, String password, String zipName) throws IOException {
 		if(zipName==null || zipName.isEmpty())
 			zipName="Download.zip";
@@ -202,14 +225,9 @@ public class DownloadServlet extends HttpServlet{
 						 * Collection change nodeRef to original
 						 */
 						boolean isCollectionRef=false;
-						if(nodeService.hasAspect(StoreRef.PROTOCOL_WORKSPACE,StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(),nodeId,CCConstants.CCM_ASPECT_COLLECTION_IO_REFERENCE)){
-							String refNodeId = (String)nodeService.getProperty(StoreRef.PROTOCOL_WORKSPACE,StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(),nodeId, CCConstants.CCM_PROP_IO_ORIGINAL);
-							nodeId = refNodeId;
-
-							// check if PERMISSION_READ_ALL (read content) is present
-							if(!permissionService.hasPermission(StoreRef.PROTOCOL_WORKSPACE,StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(),nodeId,CCConstants.PERMISSION_READ_ALL)){
-								throw new SecurityException();
-							}
+						String originalNodeId = checkAndGetCollectionRef(nodeId);
+						if(originalNodeId != null){
+							nodeId = originalNodeId;
 							isCollectionRef = true;
 						}
 						String finalNodeId = nodeId;
