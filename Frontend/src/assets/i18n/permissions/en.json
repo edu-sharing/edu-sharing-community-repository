@@ -129,5 +129,75 @@
                 "ADD_LABEL": "Toolpermission name"
             }
         }
+   "DELETE": {
+            "MAIN_HEADING": "Delete users & data",
+            "USER_LIST": "Perform process for the following users & their data",
+            "FOLDER_STRUCTURE_DISINTEGRATE": "break down (transfer all files into one folder)",
+            "FOLDER_STRUCTURE_KEEP": "keep",
+            "MOVE_SHARED_FILES": "Move files to a new directory",
+            "RECEIVER_CAPTION": "The selected user will be displayed as the creator of the data & collections in the future",
+            "RECEIVER": "Search user...",
+            "RECEIVER_GROUP_CAPTION": "The following organisation will be given administrative rights to the data",
+            "RECEIVER_GROUP_HINT": "The organization will be the coordinator of all folders, materials & collections. Exceptions are collection references in third-party collections",
+            "RECEIVER_GROUP": "Search organization...",
+            "START": "Start process",
+            "RESULTS": "Deletion results",
+            "RESULTS_HINT": "Please copy and archive the results in order to provide evidence of the deletion at a later date",
+            "CONFIRM": {
+                "CAPTION": "Confirm process",
+                "USERS": "The action will be applied to the following users and their stored data:",
+                "RECEIVER": "The following user will become the owner of all data: {{user}}",
+                "RECEIVER_GROUP": "The following organization receives the administrative rights for all data: {{group}}",
+                "FINAL": "By pressing \"Start process\" the selected actions will be executed irreversibly. Please check all options before continuing."
+            },
+            "HOME_FOLDER": {
+                "CAPTION": "Root directories of users & contained data",
+                "FOLDERS_CAPTION": "Folders",
+                "PRIVATE_FILES_CAPTION": "Private files without or with non-open licenses",
+                "CC_FILES_CAPTION": "Files with open (CC) licenses",
+                "FOLDER_STRUCTURE_CAPTION": "Folder structure of the directory..."
+            },
+            "SHARED_FOLDERS": {
+                "CAPTION": "User files & folders in shared & third party directories",
+                "FOLDERS_CAPTION": "Folders",
+                "PRIVATE_FILES_CAPTION": "Files without or with non-open licenses",
+                "CC_FILES_CAPTION": "Files with open (CC) licenses"
+            },
+            "COLLECTIONS": {
+                "CAPTION": "Collections of the user",
+                "PRIVATE_COLLECTIONS_CAPTION": "Private or shared collections",
+                "PUBLIC_COLLECTIONS_CAPTION": "Public collections"
+            },
+            "METADATA": {
+                "CAPTION": "Handling of metadata & data for contributing persons",
+                "DELETE": "Remove metadata entries",
+                "HINT": "Note that only the last known first and last name of the user can be found & removed from the metadata"
+            },
+            "USER_INTERACTIONS": {
+                "CAPTION": "User interactions and statistical data",
+                "STREAM": "Delete entries added to the stream",
+                "STREAM_HINT": "If selected, all stream entries that this user has added to the stream will be removed. This does not affect the elements to which the respective stream entries refer",
+                "COMMENTS": "Delete comments on elements",
+                "COMMENTS_HINT": "If set, all comments including the contents of these will be removed by the affected users",
+                "RATINGS": "Delete ratings on elements",
+                "RATINGS_HINT": "If enabled, user ratings are removed from items. This can change the overall ratings of the elements",
+                "COLLECTION_FEEDBACK": "Delete feedback from collections",
+                "COLLECTION_FEEDBACK_HINT": "If enabled, any feedback that this user has provided to collections will be removed",
+                "STATISTICS": "Delete tracking and statistics data",
+                "STATISTICS_HINT": "If enabled, all user interactions (logins, access to elements) are removed. This can cause statistics to change (even retroactively)"
+            },
+            "STATE": {
+                "NO_USERS": "So far, no accounts have been enabled for deletion. Users can be enabled by setting the status of the user to the appropriate value",
+                "NO_RECEIVER": "It was specified that one or more elements should be assigned to another user, but no target user or organization was selected. Please define a target user and the responsible organization",
+                "DELETE_COLLECTIONS": "It was specified that collections created by this user should be removed. If there are collections or materials of other users in subordinate collections, these will also be removed",
+                "NON_CONFORM": "It was specified that one or more elements remain unchanged. The user ID of the user will be retained on these elements. If necessary, check whether this is possible under data protection law, or assign the files to another user",
+                "ASSIGNING_DELETED_USER": "For all items that are not deleted, the user name \"deleted user\" will be displayed in the future"
+            },
+            "DELETE_MODE": {
+                "none": "do nothing",
+                "assign": "Assign to new user",
+                "delete": "Delete irreversibly"
+            }
+        }
     }
 }
