@@ -15,7 +15,7 @@ import {NodeHelper} from "../../../core-ui-module/node-helper";
 import {Router} from "@angular/router";
 import {UIConstants} from "../../../core-module/ui/ui-constants";
 import {TranslateService} from "@ngx-translate/core";
-import {CustomOptions, OptionItem} from "../../../core-ui-module/option-item";
+import {CustomOptions, DefaultGroups, OptionItem} from "../../../core-ui-module/option-item";
 import {trigger} from "@angular/animations";
 import {UIAnimation} from "../../../core-module/ui/ui-animation";
 import {ActionbarHelperService} from "../../../common/services/actionbar-helper";
@@ -80,16 +80,17 @@ export class SearchNodeStoreComponent {
   }
   private updateActionOptions() {
     this.options.addOptions=[];
-    if (this.selected && this.selected.length) {
-      let download = this.actionbar.createOptionIfPossible('DOWNLOAD', this.selected, (node: Node) => NodeHelper.downloadNodes(this.connector, node ? [node] : this.selected));
-      /*let download=new OptionItem("WORKSPACE.OPTION.DOWNLOAD", "cloud_download",
-        (node: Node) => NodeHelper.downloadNodes(this.toast,this.connector,node ? [node] : this.selected));
-        */
-      this.options.addOptions.push(download);
-      this.options.addOptions.push(new OptionItem("SEARCH.NODE_STORE.REMOVE_ITEM", "delete", () => {
-        this.deleteSelection();
-      }));
-    }
+    const download = this.actionbar.createOptionIfPossible('DOWNLOAD', this.selected, (node: Node) => NodeHelper.downloadNodes(this.connector, node ? [node] : this.selected));
+    /*let download=new OptionItem("WORKSPACE.OPTION.DOWNLOAD", "cloud_download",
+      (node: Node) => NodeHelper.downloadNodes(this.toast,this.connector,node ? [node] : this.selected));
+      */
+    download.group = DefaultGroups.FileOperations;
+    this.options.addOptions.push(download);
+    const remove = new OptionItem('SEARCH.NODE_STORE.REMOVE_ITEM', 'delete', () => {
+      this.deleteSelection();
+    });
+    remove.group = DefaultGroups.FileOperations;
+    this.options.addOptions.push(remove);
   }
 
   private deleteSelection(position=0) {
@@ -108,7 +109,7 @@ export class SearchNodeStoreComponent {
   private refresh() {
     this.loading=true;
     this.onSelection([]);
-    this.iam.getNodeList(RestConstants.NODE_STORE_LIST,{sortBy:[this.sortBy],sortAscending:this.sortAscending}).subscribe((data:NodeList)=>{
+    this.iam.getNodeList(RestConstants.NODE_STORE_LIST,{propertyFilter: [RestConstants.ALL], sortBy:[this.sortBy],sortAscending:this.sortAscending}).subscribe((data:NodeList)=>{
       this.nodes=data.nodes;
       this.loading=false;
       this.updateActionOptions();

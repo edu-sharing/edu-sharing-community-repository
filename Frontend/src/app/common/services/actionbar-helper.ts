@@ -37,8 +37,7 @@ export class ActionbarHelperService{
     if(type=='DOWNLOAD') {
       if (NodeHelper.allFiles(nodes)) {
         option = new OptionItem("OPTIONS.DOWNLOAD", "cloud_download", callback);
-        option.enabledCallback = (node: Node) => {
-          let list:any=ActionbarHelperService.getNodes(nodes, node);
+        option.customEnabledCallback = (list: Node[]|any[]) => {
           if(!list || !list.length)
             return false;
             let isAllowed=false;
@@ -46,14 +45,15 @@ export class ActionbarHelperService{
                 if(item.reference)
                     item = item.reference;
                 // if at least one is allowed -> allow download (download servlet will later filter invalid files)
-                isAllowed=isAllowed || list && item.downloadUrl!=null && item.properties && !item.properties[RestConstants.CCM_PROP_IO_WWWURL];
+                isAllowed=isAllowed || nodes && item.downloadUrl!=null && item.properties && !item.properties[RestConstants.CCM_PROP_IO_WWWURL];
             }
+            console.log(list, isAllowed);
             return isAllowed;
         }
         option.showCallback=(node: Node) => {
             return NodeHelper.referenceOriginalExists(node);
         }
-        option.isEnabled=option.enabledCallback(null);
+        // option.isEnabled=option.customEnabledCallback(null);
       }
     }
     if(type=='ADD_NODE_STORE'){
