@@ -7,6 +7,9 @@
     margin: 0 $cardPadding;
     padding: 20px 0;
     border-bottom: 1px solid #ccc;
+    app-simple-edit-metadata{
+        margin-top: -15px;
+    }
     .top {
         display: flex;
         align-items: center;
