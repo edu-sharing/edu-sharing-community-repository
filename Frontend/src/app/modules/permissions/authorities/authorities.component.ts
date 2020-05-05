@@ -1004,6 +1004,7 @@ export class PermissionsAuthoritiesComponent {
     }
   private setPersonStatus(data: UserSimple) {
     this.editStatus = data;
+    this.updateButtons();
   }
 
   private savePersonStatus() {
