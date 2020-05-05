@@ -168,7 +168,9 @@ export class WorkspaceMainComponent implements EventListener, OnDestroy {
         }
     }
     ngOnDestroy(): void {
-        this.storage.set(TemporaryStorageService.WORKSPACE_LAST_LOCATION, this.currentFolder.ref.id);
+        if(this.currentFolder) {
+            this.storage.set(TemporaryStorageService.WORKSPACE_LAST_LOCATION, this.currentFolder.ref.id);
+        }
     }
     constructor(
         private toast: Toast,
