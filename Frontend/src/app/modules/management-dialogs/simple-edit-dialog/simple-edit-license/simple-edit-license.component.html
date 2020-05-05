@@ -31,7 +31,7 @@
       }}</mat-button-toggle>
     </mat-button-toggle-group>
   </div>
-  <ng-container *ngIf="modeGroup.value === 'foreign' && licenseGroup.value !== 'NONE'">
+  <ng-container *ngIf="modeGroup.value === 'foreign'">
     <label for="authorFreetext">{{ 'MDS.AUTHOR_FREETEXT_PLACEHOLDER' | translate }}</label>
     <mat-form-field class="authorFreetext">
       <textarea
