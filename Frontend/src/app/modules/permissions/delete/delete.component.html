@@ -112,6 +112,7 @@
         <!-- @TODO: The component does currently not support searching ONLY for users -->
         <authority-search-input
                 (onChooseAuthority)="receiver=$event"
+                [showRecent]="false"
                 placeholder="{{'PERMISSIONS.DELETE.RECEIVER' | translate}}"
         ></authority-search-input>
         <mat-chip-list>
@@ -124,6 +125,7 @@
         <authority-search-input
                 mode="Organizations"
                 hint="{{'PERMISSIONS.DELETE.RECEIVER_GROUP_HINT' | translate}}"
+                [showRecent]="false"
                 (onChooseAuthority)="receiverGroup=$event"
                 placeholder="{{'PERMISSIONS.DELETE.RECEIVER_GROUP' | translate}}"
         ></authority-search-input>

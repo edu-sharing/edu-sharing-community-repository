@@ -33,6 +33,10 @@ export class AuthoritySearchInputComponent {
      * maximum number of authorities to fetch in total
      */
     @Input() authorityCount = 50;
+    /**
+     * Show recent invited users
+     */
+    @Input() showRecent = true;
     @Input() mode = AuthoritySearchMode.UsersAndGroups;
     @Input() disabled = false;
     @Input() maxSuggestions = 10;
@@ -81,18 +85,20 @@ export class AuthoritySearchInputComponent {
         console.log('new event', JSON.stringify(this.inputValue));
         this.suggestionGroups = null;
         if (value.length < 2) {
-            this.iam.getRecentlyInvited().subscribe(authorities => {
-                this.suggestionGroups = [
-                    {
-                        label: 'WORKSPACE.INVITE_RECENT_AUTHORITIES',
-                        values: [],
-                    },
-                ];
-                this.convertData(
-                    this.suggestionGroups[0].values,
-                    authorities.authorities,
-                );
-            });
+            if (this.showRecent) {
+                this.iam.getRecentlyInvited().subscribe(authorities => {
+                    this.suggestionGroups = [
+                        {
+                            label: 'WORKSPACE.INVITE_RECENT_AUTHORITIES',
+                            values: [],
+                        },
+                    ];
+                    this.convertData(
+                        this.suggestionGroups[0].values,
+                        authorities.authorities,
+                    );
+                });
+            }
             return;
         }
         this.suggestionGroups = [
