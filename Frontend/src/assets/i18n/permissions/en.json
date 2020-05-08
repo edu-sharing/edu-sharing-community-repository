@@ -128,8 +128,8 @@
                 "ADD": "Creating custom Authorizations",
                 "ADD_LABEL": "Toolpermission name"
             }
-        }
-   "DELETE": {
+        },
+        "DELETE": {
             "MAIN_HEADING": "Delete users & data",
             "USER_LIST": "Perform process for the following users & their data",
             "FOLDER_STRUCTURE_DISINTEGRATE": "break down (transfer all files into one folder)",
