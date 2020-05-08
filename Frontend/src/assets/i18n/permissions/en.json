@@ -4,6 +4,7 @@
             "ORG": "Organizations",
             "GROUP": "Groups",
             "USER": "Users"
+            "DELETE": "User deletion management"
         },
         "TITLE": "User management",
         "SELECT_ORGANIZATION": "Please select an organization first",
