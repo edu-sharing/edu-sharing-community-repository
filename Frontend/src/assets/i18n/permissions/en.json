@@ -3,7 +3,7 @@
         "TAB": {
             "ORG": "Organizations",
             "GROUP": "Groups",
-            "USER": "Users"
+            "USER": "Users",
             "DELETE": "User deletion management"
         },
         "TITLE": "User management",
