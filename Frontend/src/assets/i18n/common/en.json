@@ -519,11 +519,11 @@
         "SAVED": "Element {{name}} was changed",
         "SAVED_MULTIPLE": "{{count}} Elemente were changed",
         "METADATA": {
-            "TITLE": "Enter meta data",
+            "TITLE": "Metadata",
             "MORE": "Additional meta data"
         },
         "INVITE": {
-            "TITLE": "Invite",
+            "TITLE": "Invitations",
             "MORE": "Advanced invitations",
             "DEFAULT_GROUPS": "General groups",
             "RECENT_AUTHORITIES": "Last invitations",
