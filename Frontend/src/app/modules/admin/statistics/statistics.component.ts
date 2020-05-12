@@ -415,7 +415,7 @@ export class AdminStatisticsComponent {
             return key;
           });
         }
-        this.customGroupRows = this.customGroupRows.concat(set);
+        this.customGroupRows = this.customGroupRows.concat(set as any);
       }
       if (result.length) {
         this.customGroupData = result.map((entry) => {
