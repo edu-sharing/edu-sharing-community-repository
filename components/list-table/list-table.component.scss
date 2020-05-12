@@ -679,6 +679,11 @@ a.rowInner {
     position: relative;
 
 }
+.tableList{
+    .nodeDeleted{
+        display: none;
+    }
+}
 .cardList .item {
     @include materialShadow();
     border-radius: $borderRadius;
