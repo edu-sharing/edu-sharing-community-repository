@@ -10,7 +10,7 @@ import java.util.Objects;
 public class StatisticEntry implements Comparable<StatisticEntry>{
     protected String date;
     protected Map<String,Serializable> fields=new HashMap<>();
-    protected Map<String,Map<String,Long>> groups=new HashMap<>();
+    protected Map<TrackingService.EventType,Map<String,Map<String,Long>>> groups=new HashMap<>();
 
     protected Map<TrackingService.EventType,Integer> counts=new HashMap<>();
     private final AuthorityInfo authorityInfo = new AuthorityInfo();
@@ -34,7 +34,7 @@ public class StatisticEntry implements Comparable<StatisticEntry>{
         return fields;
     }
 
-    public Map<String, Map<String, Long>> getGroups() {
+    public Map<TrackingService.EventType, Map<String, Map<String, Long>>> getGroups() {
         return groups;
     }
 

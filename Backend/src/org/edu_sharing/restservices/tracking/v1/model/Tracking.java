@@ -3,7 +3,6 @@ package org.edu_sharing.restservices.tracking.v1.model;
 import org.edu_sharing.restservices.shared.Group;
 import org.edu_sharing.restservices.shared.Organization;
 import org.edu_sharing.service.tracking.TrackingService;
-import org.edu_sharing.service.tracking.model.StatisticEntry;
 
 import java.io.Serializable;
 import java.util.List;
@@ -14,9 +13,9 @@ public class Tracking {
     private final String date;
     private final Authority authority;
     private final Map<String, Serializable> fields;
-    private final Map<String, Map<String, Long>> groups;
+    private final Map<TrackingService.EventType, Map<String, Map<String, Long>>> groups;
 
-    public Tracking(String date, Authority authority, Map<TrackingService.EventType,Integer> counts, Map<String,Serializable> fields,Map<String,Map<String,Long>> groups){
+    public Tracking(String date, Authority authority, Map<TrackingService.EventType,Integer> counts, Map<String,Serializable> fields, Map<TrackingService.EventType, Map<String, Map<String, Long>>> groups){
         this.date=date;
         this.authority=authority;
         this.counts=counts;
@@ -37,7 +36,7 @@ public class Tracking {
         return fields;
     }
 
-    public Map<String, Map<String, Long>> getGroups() {
+    public Map<TrackingService.EventType, Map<String, Map<String, Long>>> getGroups() {
         return groups;
     }
 

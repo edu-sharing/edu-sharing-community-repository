@@ -388,15 +388,25 @@ export class AdminStatisticsComponent {
       this.customGroupRows = ['action'].concat(this.customGroup).concat('count');
       if (this.customUnfold){
         // add all found values as a matrix
+        /*
         let set = Array.from(new Set( result.map((entry) => Object.keys(entry.groups[this.customUnfold])).
             reduce((a, b) => a.concat(b)).
             filter((a) => a != '')
         ));
+         */
+        let set = Array.from(new Set( result.map((entry) =>
+            Object.keys(entry.groups).map((type) =>
+            Object.keys(entry.groups[type][this.customUnfold])).
+            reduce((a, b) => a.concat(b)).
+            filter((a: string) => a != ''))
+        ));
+        // flatten [['test'],...] to a string array
+        set = [].concat(...set);
         // container for storing the display (transformed authorities names) data for the table view
         this.customGroupLabels = [];
         if (this.customUnfold == 'authority_organization' || this.customUnfold == 'authority_mediacenter'){
           // transform the value for the horizontal list data if it's org/group
-          set = set.map((key) => {
+          set = set.map((key: any) => {
             const authority = result.map((entry) => ((this.customUnfold == 'authority_organization' ? entry.authority.organization : entry.authority.mediacenter as any[])))
             .reduce((a, b) => a.concat(b))
             .filter((a) => a.authorityName == key);

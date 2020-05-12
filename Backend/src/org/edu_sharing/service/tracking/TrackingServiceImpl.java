@@ -11,18 +11,15 @@ import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
 import org.edu_sharing.repository.client.rpc.EduGroup;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.server.tools.ApplicationInfoList;
-import org.edu_sharing.repository.server.tools.cache.PersonCache;
 import org.edu_sharing.service.nodeservice.NodeServiceHelper;
 import org.edu_sharing.service.search.SearchServiceFactory;
 import org.edu_sharing.service.tracking.model.StatisticEntry;
 import org.edu_sharing.service.tracking.model.StatisticEntryNode;
-import org.json.JSONException;
 import org.json.JSONObject;
 import org.postgresql.util.PGobject;
 import org.postgresql.util.PSQLException;
 import org.springframework.context.ApplicationContext;
 
-import java.io.Serializable;
 import java.sql.*;
 import java.sql.Date;
 import java.text.SimpleDateFormat;
@@ -213,7 +210,7 @@ public class TrackingServiceImpl extends TrackingServiceDefault{
             while (resultSet.next()) {
                 StatisticEntry entry = new StatisticEntry();
                 boolean grouping=!type.equals(GroupingType.None);
-                mapResult(additionalFields, groupFields, resultSet, entry);
+                mapResult(EventType.valueOf(resultSet.getString("type")), additionalFields, groupFields, resultSet, entry);
 
                 if (result.contains(entry) && grouping) {
                     entry = result.get(result.indexOf(entry));
@@ -233,16 +230,21 @@ public class TrackingServiceImpl extends TrackingServiceDefault{
         }
     }
 
-    private void mapResult(List<String> additionalFields, List<String> groupFields, ResultSet resultSet, StatisticEntry entry) throws SQLException {
+    private void mapResult(EventType type, List<String> additionalFields, List<String> groupFields, ResultSet resultSet, StatisticEntry entry) throws SQLException {
         setAuthorityFromResult(resultSet, entry);
         if (additionalFields != null && additionalFields.size() > 0) {
             for (String field : additionalFields) {
+                Map<String, Map<String, Long>> current = entry.getGroups().get(type);
+                if(current==null) {
+                    current = new HashMap<>();
+                }
                 // the sql field will add each property to an array like 1,2,1,3
                 // we will map it to {1:2,2:1,3:1}
                 String[] array = (String[]) resultSet.getArray(field).getArray();
                 HashMap<String, Long> counted = new HashMap<>(Arrays.stream(array).map((a)->a==null ? "" : a)
                         .collect(Collectors.groupingBy(Function.identity(), Collectors.counting())));
-                entry.getGroups().put(field,counted);
+                current.put(field,counted);
+                entry.getGroups().put(type, current);
             }
         }
         try{
@@ -291,7 +293,7 @@ public class TrackingServiceImpl extends TrackingServiceDefault{
                     }
                 }
 
-                mapResult(additionalFields, groupFields, resultSet, entry);
+                mapResult(EventType.valueOf(resultSet.getString("type")), additionalFields, groupFields, resultSet, entry);
 
                 if (result.contains(entry) && grouping) {
                     entry = result.get(result.indexOf(entry));

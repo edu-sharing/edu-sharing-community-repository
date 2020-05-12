@@ -74,7 +74,7 @@
                         <span *ngIf="key=='action'">{{'ADMIN.STATISTICS.ACTIONS.'+element[key] | translate}}</span>
                         <span *ngIf="key=='count'">{{element[key]}}</span>
                         <span *ngIf="key==customGroup">{{element.displayValue}}</span>
-                        <span *ngIf="!(key=='action' || key=='count' || key==customGroup)">{{element.entry.groups[customUnfold][key]}}</span>
+                        <span *ngIf="!(key=='action' || key=='count' || key==customGroup)">{{element.entry.groups[element['action']] ? element.entry.groups[element['action']][customUnfold][key] : 0}}</span>
                     </mat-cell>
                 </ng-container>
                 <mat-header-row *matHeaderRowDef="customGroupRows; sticky: true"></mat-header-row>
