@@ -151,14 +151,6 @@ $badgeWidth: 250px;
     font-weight: normal;
     word-break: break-all;
 }
-.tableList {
-    /* fix safari wrong rendering of selected row */
-    .rowFrame:not(.nodeCollection) .selected {
-        > div:not(.checkbox) {
-            background-color: $itemSelectedBackground;
-        }
-    }
-}
 .headingGroup .heading,
 .tableList .node-row {
     /* fallback for unset/unknown fields */
