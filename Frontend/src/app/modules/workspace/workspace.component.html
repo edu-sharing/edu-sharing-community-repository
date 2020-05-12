@@ -58,6 +58,7 @@
     </div>
 </div>
   <recycle *ngIf="root=='RECYCLE'" class="explorer"
+           [actionbar]="actionbar"
            [searchWorkspace]="searchQuery ? searchQuery.query : null"
            [isInsideWorkspace]="true"></recycle>
 <div class="actionbarFrame"><div class="mobile-move-top">

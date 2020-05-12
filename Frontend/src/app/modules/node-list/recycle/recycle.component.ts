@@ -7,6 +7,7 @@ import {TranslateService} from "@ngx-translate/core";
 import {Toast} from "../../../core-ui-module/toast";
 import {ArchiveRestore,Node} from "../../../core-module/core.module";
 import {TemporaryStorageService} from "../../../core-module/core.module";
+import {ActionbarComponent} from "../../../common/ui/actionbar/actionbar.component";
 
 @Component({
   selector: 'recycle',
@@ -19,6 +20,7 @@ export class RecycleMainComponent {
 
   @Input() isInsideWorkspace = false;
   @Input() searchWorkspace:string;
+  @Input() actionbar:ActionbarComponent;
   public reload : Boolean;
   public sortBy = RestConstants.CM_ARCHIVED_DATE;
   public sortAscending = false;

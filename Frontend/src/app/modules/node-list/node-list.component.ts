@@ -11,6 +11,7 @@ import {ConfigurationService} from "../../core-module/core.module";
 import {SessionStorageService} from "../../core-module/core.module";
 import {ActivatedRoute} from "@angular/router";
 import {TranslateService} from "@ngx-translate/core";
+import {ActionbarComponent} from "../../common/ui/actionbar/actionbar.component";
 
 @Component({
   selector: 'node-list',
@@ -22,6 +23,7 @@ export class NodeListComponent {
   @Input() isInsideWorkspace = false;
   @Input() searchLabel : string;
   @Input() parent : any;
+  @Input() actionbar:ActionbarComponent;
   @Input() customOptions : CustomOptions;
   @Input() set searchWorkspace(query : string){
     if(query && query.trim()) {
