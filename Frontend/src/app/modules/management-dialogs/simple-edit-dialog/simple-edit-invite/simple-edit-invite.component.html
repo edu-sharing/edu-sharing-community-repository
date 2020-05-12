@@ -18,6 +18,7 @@
 </info-message>
 
 <div *ngIf="!hasInvalidState()" class="toggles">
+  <div class="info field-group">{{ 'SIMPLE_EDIT.INVITE.INFO' | translate }}</div>
   <div class="field-group">
     <label id="global-groups-label">
       {{ 'SIMPLE_EDIT.INVITE.DEFAULT_GROUPS' | translate }}
@@ -76,5 +77,4 @@
       ></app-user-tile>
     </div>
   </div>
-  <div class="info field-group">{{ 'SIMPLE_EDIT.INVITE.INFO' | translate }}</div>
 </div>
