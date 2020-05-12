@@ -31,7 +31,7 @@ export class WorkspaceFileUploadComponent  {
     this.upload(0);
   }
   @Output() onDone=new EventEmitter();
-  private close(){
+  close(){
     this.onDone.emit(this.error ? null : this.resultList);
   }
   private upload(number: number) {
