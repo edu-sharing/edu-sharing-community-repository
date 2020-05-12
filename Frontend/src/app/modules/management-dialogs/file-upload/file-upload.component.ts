@@ -32,7 +32,7 @@ export class WorkspaceFileUploadComponent  {
   }
   @Output() onDone=new EventEmitter();
   private close(){
-    this.onDone.emit(this.resultList);
+    this.onDone.emit(this.error ? null : this.resultList);
   }
   private upload(number: number) {
     if(number>=this._files.length){
