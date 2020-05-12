@@ -334,13 +334,12 @@ $badgeWidth: 250px;
         }
     }
 }
-.tableList .row.selected,
-.cardList .row.selected {
+.tableList .rowFrame.selected{
     background: $workspaceSelectedBackgroundEffect;
     background-color: $itemSelectedBackground;
 }
 
-.cardList .row.selected {
+.cardList .rowFrame.selected {
     background: $backgroundColor;
     background-color: $backgroundColor;
     outline: 2px solid $primary;
@@ -357,7 +356,7 @@ $badgeWidth: 250px;
 .row .column.row_1 {
     color: $textMain;
 }
-.list .row:hover {
+.list .rowFrame:hover {
     background-color: $itemSelectedBackground;
 }
 
@@ -374,7 +373,6 @@ $badgeWidth: 250px;
     border-bottom: 1px solid $textOnPrimary;
     height: $listItemHeight;
     margin-bottom: 0;
-    background-color: #fff;
 }
 .list .nodeCollection .row {
     background-color: transparent;
