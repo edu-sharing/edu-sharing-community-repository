@@ -726,14 +726,14 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
 			type1= (String) cache.get(keyType1);
 		}
 		else{
-			type1=nodeService.getType(n1).toString();
+			type1=nodeServiceAlfresco.getType(n1).toString();
 			cache.put(keyType1,type1);
 		}
 		if(cache.containsKey(keyType2)){
 			type2= (String) cache.get(keyType2);
 		}
 		else{
-			type2=nodeService.getType(n2).toString();
+			type2=nodeServiceAlfresco.getType(n2).toString();
 			cache.put(keyType2,type2);
 		}
         if(EduSharingNodeHelper.typeIsDirectory(type1)!=EduSharingNodeHelper.typeIsDirectory(type2)){
@@ -750,14 +750,14 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
                 prop1=cache.get(key1);
             }
             else{
-                prop1 = nodeService.getProperty(n1, prop);
+                prop1 = nodeServiceAlfresco.getProperty(n1, prop);
                 cache.put(key1,prop1);
             }
             if(cache.containsKey(key2)){
                 prop2=cache.get(key2);
             }
             else{
-                prop2 = nodeService.getProperty(n2, prop);
+                prop2 = nodeServiceAlfresco.getProperty(n2, prop);
                 cache.put(key2,prop2);
             }
             int compare=0;
