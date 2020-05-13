@@ -27,10 +27,10 @@ public interface NodeService {
 	
 	public String createNode(String parentId, String nodeType, HashMap<String, String[]> props, String childAssociation) throws Throwable;
 	
-	public String createNodeBasic(String parentID, String nodeTypeString, HashMap<String, Object> _props);
+	public String createNodeBasic(String parentID, String nodeTypeString, HashMap<String, ?> _props);
 
 	public String createNodeBasic(StoreRef store, String parentID, String nodeTypeString, String childAssociation,
-			HashMap<String, Object> _props);
+			HashMap<String, ?> _props);
 
 	public String findNodeByName(String parentId, String name );
 

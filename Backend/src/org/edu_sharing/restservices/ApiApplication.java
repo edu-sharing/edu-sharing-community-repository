@@ -19,6 +19,7 @@ public class ApiApplication extends ResourceConfig {
 	public static final Class<?>[] SERVICES = new Class<?>[] {
 		org.edu_sharing.restservices.about.v1.AboutApi.class,
 		org.edu_sharing.restservices.admin.v1.AdminApi.class,
+		org.edu_sharing.restservices.bulk.v1.BulkApi.class,
 		org.edu_sharing.restservices.collection.v1.CollectionApi.class,
 		org.edu_sharing.restservices.comment.v1.CommentApi.class,
 		org.edu_sharing.restservices.rating.v1.RatingApi.class,

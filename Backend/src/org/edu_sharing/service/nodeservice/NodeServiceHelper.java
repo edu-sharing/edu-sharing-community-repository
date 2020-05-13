@@ -187,6 +187,20 @@ public class NodeServiceHelper {
 		}
         return null;
     }
+	/**
+	 * Get all properties automatically concated from multivalue to singlevalue
+	 * Each property is always returned as an array
+	 * @return
+	 * @throws Throwable
+	 */
+	public static HashMap<String, String> getPropertiesSinglevalue(Map<String, String[]> properties) {
+		HashMap<String, String> propertiesMultivalue = new HashMap<>();
+		if(properties!=null) {
+			properties.forEach((key, value) -> propertiesMultivalue.put(key, value==null ? null : ValueTool.toMultivalue(value)));
+			return propertiesMultivalue;
+		}
+		return null;
+	}
     public static boolean downloadAllowed(String nodeId){
 		NodeRef ref=new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE,nodeId);
 		return new MCAlfrescoAPIClient().downloadAllowed(

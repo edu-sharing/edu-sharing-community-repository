@@ -140,11 +140,11 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
 		return this.createNodeBasic(Constants.storeRef, parentId, nodeType,childAssociation, toSafeProps);
 	}
 	@Override
-	public String createNodeBasic(String parentID, String nodeTypeString, HashMap<String, Object> _props) {
+	public String createNodeBasic(String parentID, String nodeTypeString, HashMap<String, ?> _props) {
 		return this.createNodeBasic(Constants.storeRef, parentID, nodeTypeString,CCConstants.CM_ASSOC_FOLDER_CONTAINS, _props);
 	}
 	@Override
-	public String createNodeBasic(StoreRef store, String parentID, String nodeTypeString, String childAssociation, HashMap<String, Object> _props) {
+	public String createNodeBasic(StoreRef store, String parentID, String nodeTypeString, String childAssociation, HashMap<String, ?> _props) {
 		childAssociation = (childAssociation == null) ? CCConstants.CM_ASSOC_FOLDER_CONTAINS : childAssociation;
 		Map<QName, Serializable> properties = transformPropMap(_props);
 
