@@ -79,7 +79,7 @@ public class BulkApi {
 			entry.setNode(nodeDao.asNode());
 			return Response.ok().entity(entry).build();
 		} catch (Throwable t) {
-			return ErrorResponse.createResponse(t);
+			return ErrorResponse.createResponse(t, ErrorResponse.ErrorResponseLogging.relaxed);
 		}
 	}
 }
