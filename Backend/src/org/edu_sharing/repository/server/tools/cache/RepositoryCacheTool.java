@@ -1,13 +1,11 @@
 package org.edu_sharing.repository.server.tools.cache;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.stream.Collectors;
 
 import org.alfresco.model.ContentModel;
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
@@ -16,6 +14,7 @@ import org.alfresco.service.ServiceRegistry;
 import org.alfresco.service.cmr.repository.ChildAssociationRef;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.repository.NodeService;
+import org.alfresco.service.cmr.repository.StoreRef;
 import org.apache.log4j.Logger;
 import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
 import org.edu_sharing.repository.client.tools.CCConstants;
@@ -24,6 +23,8 @@ import org.edu_sharing.repository.server.MCBaseClient;
 import org.edu_sharing.repository.server.RepoFactory;
 import org.edu_sharing.repository.server.tools.ApplicationInfoList;
 import org.edu_sharing.service.Constants;
+import org.edu_sharing.service.nodeservice.NodeServiceFactory;
+import org.edu_sharing.service.nodeservice.RecurseMode;
 import org.springframework.context.ApplicationContext;
 
 public class RepositoryCacheTool {
@@ -34,6 +35,8 @@ public class RepositoryCacheTool {
 
 	ServiceRegistry sr = (ServiceRegistry) applicationContext.getBean(ServiceRegistry.SERVICE_REGISTRY);
 	NodeService nodeService = sr.getNodeService();
+	NodeService nodeServiceAlfresco = (NodeService) AlfAppContextGate.getApplicationContext().getBean("alfrescoDefaultDbNodeService");
+	MCAlfrescoAPIClient apiClient = new MCAlfrescoAPIClient();
 
 	/**
 	 * creates a new cache object and puts all subobjects of rootfolderId. when it's
@@ -54,11 +57,10 @@ public class RepositoryCacheTool {
 			MCAlfrescoAPIClient apiClient = (MCAlfrescoAPIClient) mcBaseClient;
 			long startMillies = System.currentTimeMillis();
 			logger.info("starting getChildrenRecursive");
-			HashMap<String, HashMap<String, Object>> childRecursive = apiClient.getChildrenRecursive(
-					MCAlfrescoAPIClient.storeRef, rootfolderId, CCConstants.CCM_TYPE_IO, null, false);
+			Map<NodeRef, HashMap<String, Object>> childRecursive = buildCache(rootfolderId, CCConstants.CCM_TYPE_IO);
 			logger.info("getChildrenRecursive returned.starting to copy to cachemap. size:" + childRecursive.size());
-			for (Map.Entry<String, HashMap<String, Object>> entry : childRecursive.entrySet()) {
-				newCache.put(entry.getKey(), entry.getValue());
+			for (Map.Entry<NodeRef, HashMap<String, Object>> entry : childRecursive.entrySet()) {
+				newCache.put(entry.getKey().getId(), entry.getValue());
 			}
 
 			long endMillies = System.currentTimeMillis();
@@ -148,7 +150,6 @@ public class RepositoryCacheTool {
 
 						List<String> childRefPage = new ArrayList<>(threadData);
 						logger.info("thread nr:" + nr + " got's " + childRefPage.size());
-						MCAlfrescoAPIClient apiClient = new MCAlfrescoAPIClient();
 						for (String cr : childRefPage) {
 							long startMillies = System.currentTimeMillis();
 
@@ -156,8 +157,8 @@ public class RepositoryCacheTool {
 									.getProperty(new NodeRef(Constants.storeRef, cr), ContentModel.PROP_NAME));
 
 							try {
-								apiClient.getChildrenRecursive(MCAlfrescoAPIClient.storeRef, cr,
-										CCConstants.CCM_TYPE_IO, null, true);
+								buildCache(cr, CCConstants.CCM_TYPE_IO);
+
 							} catch (Throwable e) {
 								logger.error("thread nr:" + nr + e.getMessage(), e);
 							}
@@ -205,6 +206,19 @@ public class RepositoryCacheTool {
 		 * logger.info("Facettes cleared");
 		 */
 
+	}
+
+	private Map<NodeRef, HashMap<String, Object>> buildCache(String parent, String type) {
+		List<NodeRef> refs = NodeServiceFactory.getLocalService().getChildrenRecursive(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, parent, Collections.singletonList(type), RecurseMode.Folders);
+		return refs.stream().collect(Collectors.toMap(ref -> ref,
+				ref -> {
+					try {
+						return apiClient.getPropertiesCached(ref, true, true, false, nodeServiceAlfresco);
+					} catch (Exception e) {
+						logger.debug(e.getMessage());
+						return null;
+					}
+				}));
 	}
 
 }
