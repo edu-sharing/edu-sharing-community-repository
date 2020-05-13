@@ -84,7 +84,7 @@ public class NodeDao {
 			CCConstants.PERMISSION_CC_PUBLISH,
 			CCConstants.PERMISSION_READ_ALL
 	};
-	private final List<String> access;
+	final List<String> access;
 	// id of the object by the remote repository (null if not a remote object)
 	private String remoteId;
 	private RepositoryDao remoteRepository;
