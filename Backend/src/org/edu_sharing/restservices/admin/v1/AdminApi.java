@@ -10,6 +10,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.Consumes;
@@ -815,7 +816,9 @@ public class AdminApi {
 			@ApiResponse(code = 500, message = RestConstants.HTTP_500, response = ErrorResponse.class) })
 	public Response getOaiClasses(@Context HttpServletRequest req) {
 		try {
-			List<String> result = AdminServiceFactory.getInstance().getImporterClasses();
+			List<String> result =
+					AdminServiceFactory.getInstance().getImporterClasses().stream().
+							map(Class::getName).collect(Collectors.toList());
 			return Response.ok().entity(result).build();
 		} catch (Throwable t) {
 			return ErrorResponse.createResponse(t);

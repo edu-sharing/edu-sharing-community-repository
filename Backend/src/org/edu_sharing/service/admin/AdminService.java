@@ -49,7 +49,7 @@ public interface AdminService {
 	void importOai(String set, String fileUrl, String oaiBaseUrl, String metadataSetId, String metadataPrefix,
                    String importerJobClassName, String importerClassName, String recordHandlerClassName, String binaryHandlerClassName, String oaiIds, boolean forceUpdate) throws Exception;
 
-	List<String> getImporterClasses() throws Exception;
+	List<Class> getImporterClasses() throws Exception;
 
 	void startCacheRefreshingJob(String folderId, boolean sticky) throws Exception;
 

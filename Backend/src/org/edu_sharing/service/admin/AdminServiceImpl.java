@@ -2,7 +2,6 @@ package org.edu_sharing.service.admin;
 
 import java.io.*;
 import java.lang.management.ManagementFactory;
-import java.nio.charset.Charset;
 import java.text.Collator;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -31,14 +30,11 @@ import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 
-import com.google.gson.Gson;
 import org.alfresco.repo.cache.SimpleCache;
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.service.ServiceRegistry;
 import org.alfresco.service.cmr.repository.NodeRef;
-import org.alfresco.service.cmr.repository.StoreRef;
 import org.alfresco.service.cmr.security.AuthorityType;
-import org.apache.batik.ext.awt.image.Light;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.input.ReversedLinesFileReader;
 import org.apache.commons.lang.StringUtils;
@@ -58,7 +54,6 @@ import org.edu_sharing.repository.server.importer.ExcelLOMImporter;
 import org.edu_sharing.repository.server.importer.OAIPMHLOMImporter;
 import org.edu_sharing.repository.server.importer.collections.CollectionImporter;
 import org.edu_sharing.repository.server.jobs.quartz.*;
-import org.edu_sharing.repository.server.jobs.quartz.JobHandler.JobConfig;
 import org.edu_sharing.repository.server.tools.*;
 import org.edu_sharing.repository.server.tools.cache.CacheManagerFactory;
 import org.edu_sharing.repository.server.tools.cache.EduGroupCache;
@@ -76,9 +71,7 @@ import org.edu_sharing.service.authority.AuthorityServiceFactory;
 import org.edu_sharing.service.config.ConfigServiceFactory;
 import org.edu_sharing.service.editlock.EditLockServiceFactory;
 import org.edu_sharing.service.foldertemplates.FolderTemplatesImpl;
-import org.edu_sharing.service.nodeservice.NodeService;
 import org.edu_sharing.service.nodeservice.NodeServiceFactory;
-import org.edu_sharing.service.nodeservice.NodeServiceHelper;
 import org.edu_sharing.service.permission.PermissionService;
 import org.edu_sharing.service.permission.PermissionServiceFactory;
 import org.edu_sharing.service.toolpermission.ToolPermissionService;
@@ -724,16 +717,13 @@ public class AdminServiceImpl implements AdminService  {
 	}
 	
 	@Override
-	public List<String> getImporterClasses() throws Exception {
-		ArrayList<String> result = new ArrayList<String>();
-		List<JobConfig> jcl = JobHandler.getInstance().getJobConfigList();
-		Class importerBaseClass = org.edu_sharing.repository.server.jobs.quartz.ImporterJob.class;
-		for (JobConfig jc: jcl){
-			if(jc.getJobClass().equals(importerBaseClass) || jc.getJobClass().getSuperclass().equals(importerBaseClass)){
-				if(!result.contains(jc.getJobClass().getName())) result.add(jc.getJobClass().getName());
-			}
-		}
-		return result;
+	public List<Class> getImporterClasses() throws Exception {
+		Class[] importerBaseClass = new Class[]{
+				org.edu_sharing.repository.server.jobs.quartz.ImporterJob.class,
+				org.edu_sharing.repository.server.jobs.quartz.OAIXMLValidatorJob.class,
+				org.edu_sharing.repository.server.jobs.quartz.ImporterJobSAX.class
+		};
+		return Arrays.asList(importerBaseClass);
 	}
 	
 	/**
@@ -831,9 +821,10 @@ public class AdminServiceImpl implements AdminService  {
 		paramsMap.put(OAIConst.PARAM_USERNAME, AuthenticationUtil.getFullyAuthenticatedUser());
 		
 		Class importerClass = null;
-		for(JobConfig jobConfig : JobHandler.getInstance().getJobConfigList()){
-			if(jobConfig.getJobClass().getName().equals(importerJobClassName)){
-				importerClass = jobConfig.getJobClass();
+		for(Class c : AdminServiceFactory.getInstance().getImporterClasses()){
+			if(c.getName().equals(importerJobClassName)){
+				importerClass = c;
+				break;
 			}
 		}
 		
