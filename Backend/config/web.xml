@@ -13,7 +13,13 @@
          <param-name>rootPath</param-name>
          <param-value>/app:company_home</param-value>
    </context-param>
-   
+    <context-param>
+        <param-name>contextConfigLocation</param-name>
+        <param-value>
+            /WEB-INF/securityContext.xml
+        </param-value>
+    </context-param>
+
    
    <filter>
       
@@ -119,15 +125,19 @@
         <filter-name>DisableCacheFilter</filter-name>
         <filter-class>org.edu_sharing.repository.server.DisableCacheFilter</filter-class>
     </filter>
-    
+
     <filter>
-        <filter-name>SameSiteCookieFilter</filter-name>
-        <filter-class>org.edu_sharing.repository.server.authentication.SameSiteCookieFilter</filter-class>
+        <filter-name>springSecurityFilterChain</filter-name>
+        <filter-class>org.springframework.web.filter.DelegatingFilterProxy</filter-class>
     </filter>
-    
-     <filter-mapping>
-        <filter-name>SameSiteCookieFilter</filter-name>
-        <url-pattern>/*</url-pattern>
+
+    <filter-mapping>
+        <filter-name>springSecurityFilterChain</filter-name>
+        <url-pattern>/saml/*</url-pattern>
+    </filter-mapping>
+    <filter-mapping>
+        <filter-name>springSecurityFilterChain</filter-name>
+        <url-pattern>/shibboleth</url-pattern>
     </filter-mapping>
 
     <filter-mapping>
@@ -572,15 +582,10 @@
     
     
     <servlet>
-    	<servlet-name>Monitoring</servlet-name>
-    	<servlet-class>org.edu_sharing.repository.server.monitoring.Monitoring</servlet-class>
-    </servlet>
-    
-    <servlet>
     	<servlet-name>Connector</servlet-name>
     	<servlet-class>org.edu_sharing.repository.server.connector.ConnectorServlet</servlet-class>
     </servlet>
-    
+
     <servlet>
     	<servlet-name>Monitoring</servlet-name>
     	<servlet-class>org.edu_sharing.service.monitoring.MonitoringServlet</servlet-class>
@@ -590,7 +595,7 @@
        <servlet-name>Monitoring</servlet-name>
        <url-pattern>/monitoring</url-pattern>
     </servlet-mapping>
-        
+
     <!-- servlet mapping -->
  <servlet-mapping> 
         <servlet-name>FolderTemplateServlet</servlet-name>
@@ -778,8 +783,11 @@
 	<listener>
 	 	<listener-class>org.edu_sharing.repository.server.authentication.SessionListener</listener-class>
 	 </listener>
-	 
-      <!-- Angular Dynamic routing, added by Torsten 2016-11-02 --> 
+    <listener>
+        <listener-class>org.springframework.web.context.ContextLoaderListener</listener-class>
+    </listener>
+
+      <!-- Angular Dynamic routing, added by Torsten 2016-11-02 -->
 	<servlet>
       <servlet-name>ng-index</servlet-name>
       <servlet-class>org.edu_sharing.repository.server.NgServlet</servlet-class>

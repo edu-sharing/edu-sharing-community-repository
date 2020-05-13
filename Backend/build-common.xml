@@ -121,6 +121,7 @@
 			</fileset>
 		</copy>
 		<copy file="${config.dir}/web.xml" tofile="${app.server.deploy.dir}/${webapp.name}/WEB-INF/web.xml" />
+		<copy file="${config.dir}/securityContext.xml" tofile="${app.server.deploy.dir}/${webapp.name}/WEB-INF/securityContext.xml" />
 		<copy file="${config.dir}/context.xml" tofile="${app.server.deploy.dir}/${webapp.name}/META-INF/context.xml" />
 		<copy file="${output.dir}/ddc.properties" tofile="${app.server.deploy.dir}/${webapp.name}/WEB-INF/classes/ddc.properties" />
 	
