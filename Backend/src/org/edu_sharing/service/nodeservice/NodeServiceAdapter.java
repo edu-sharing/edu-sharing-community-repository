@@ -45,7 +45,7 @@ public class NodeServiceAdapter implements NodeService {
 	}
 
 	@Override
-	public String createNodeBasic(String parentID, String nodeTypeString, HashMap<String, Object> _props) {
+	public String createNodeBasic(String parentID, String nodeTypeString, HashMap<String, ?> _props) {
 		return null;
 	}
 
@@ -256,7 +256,7 @@ public class NodeServiceAdapter implements NodeService {
 	}
 
 	@Override
-	public void updateNodeNative(String nodeId, HashMap<String, Object> _props) {
+	public void updateNodeNative(String nodeId, HashMap<String, ?> _props) {
 		// TODO Auto-generated method stub
 		
 	}
@@ -269,7 +269,7 @@ public class NodeServiceAdapter implements NodeService {
 
 	@Override
 	public String createNodeBasic(StoreRef store, String parentID, String nodeTypeString, String childAssociation,
-			HashMap<String, Object> _props) {
+			HashMap<String, ?> _props) {
 		// TODO Auto-generated method stub
 		return null;
 	}

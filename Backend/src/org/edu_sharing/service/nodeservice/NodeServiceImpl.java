@@ -521,11 +521,11 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
 	}
 	
 	@Override
-	public void updateNodeNative(String nodeId, HashMap<String, Object> _props) {
+	public void updateNodeNative(String nodeId, HashMap<String, ?> _props) {
 		this.updateNodeNative(Constants.storeRef, nodeId, _props);
 	}
 
-	public void updateNodeNative(StoreRef store, String nodeId, HashMap<String, Object> _props) {
+	public void updateNodeNative(StoreRef store, String nodeId, HashMap<String, ?> _props) {
 
 		try {
 			NodeRef nodeRef = new NodeRef(store, nodeId);

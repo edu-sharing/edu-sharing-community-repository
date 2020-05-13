@@ -121,7 +121,7 @@ public interface NodeService {
 
 	public void removeAspect(String nodeId, String aspect);
 
-    public void updateNodeNative(String nodeId, HashMap<String, Object> _props);
+    public void updateNodeNative(String nodeId, HashMap<String, ?> _props);
 
 	public void removeProperty(String storeProtocol, String storeId, String nodeId, String property);
 

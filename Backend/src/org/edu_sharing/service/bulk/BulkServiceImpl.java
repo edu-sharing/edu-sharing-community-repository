@@ -61,17 +61,17 @@ public class BulkServiceImpl implements BulkService {
 		}
 		properties = NodeServiceHelper.transformShortToLongProperties(properties);
 		NodeRef existing = find(propertiesFiltered);
+		HashMap<String, String> propertiesNative = NodeServiceHelper.getPropertiesSinglevalue(properties);
+		propertiesNative.put(CCConstants.CM_NAME, NodeServiceHelper.cleanupCmName(propertiesNative.get(CCConstants.CM_NAME)) + "_" + System.currentTimeMillis());
 		if(existing == null) {
-			HashMap<String, String> propertiesNative = NodeServiceHelper.getPropertiesSinglevalue(properties);
-			propertiesNative.put(CCConstants.CM_NAME, propertiesNative.get(CCConstants.CM_NAME) + "_" + System.currentTimeMillis());
-			existing = new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE,
+				existing = new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE,
 					NodeServiceFactory.getLocalService().createNodeBasic(
 							groupFolder.getId(),
 							CCConstants.getValidGlobalName(type),
 							propertiesNative
 					));
 		}else{
-			NodeServiceFactory.getLocalService().updateNode(existing.getId(), properties);
+			NodeServiceFactory.getLocalService().updateNodeNative(existing.getId(), propertiesNative);
 		}
 		if(aspects != null) {
 			NodeRef finalExisting = existing;

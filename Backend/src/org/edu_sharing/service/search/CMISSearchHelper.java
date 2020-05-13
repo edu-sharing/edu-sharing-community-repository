@@ -16,6 +16,8 @@ import org.edu_sharing.repository.client.tools.CCConstants;
 import org.springframework.context.ApplicationContext;
 import org.springframework.jdbc.core.SqlParameterValue;
 
+import java.lang.reflect.Array;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -37,6 +39,7 @@ public class CMISSearchHelper {
         StringBuilder join= new StringBuilder();
         StringBuilder where= new StringBuilder();
         if(filters!=null && filters.size()>0){
+            List<String> joinedTable = new ArrayList<>();
             for(Map.Entry<String,String> filter : filters.entrySet()){
                 if(filter.getKey().startsWith("cmis")){
                     if(where.length() > 0) {
@@ -50,9 +53,12 @@ public class CMISSearchHelper {
                     // join the needed aspect, and access this ones value
                     PropertyDefinition property = serviceRegistry.getDictionaryService().getProperty(QName.createQName(filter.getKey()));
                     String aspectTable=CCConstants.getValidLocalName(property.getContainerClass().getName().toString());
-                    String aspectTableAlias=property.getContainerClass().getName().getLocalName();
-                    join.append("JOIN ").append(aspectTable).append(" AS ").append(aspectTableAlias)
-                        .append(" ON ").append(aspectTableAlias).append(".cmis:objectId = ").append(tableNameAlias).append(".cmis:objectId ");
+                    String aspectTableAlias = property.getContainerClass().getName().getLocalName();
+                    if(!joinedTable.contains(aspectTable)) {
+                        join.append("JOIN ").append(aspectTable).append(" AS ").append(aspectTableAlias)
+                                .append(" ON ").append(aspectTableAlias).append(".cmis:objectId = ").append(tableNameAlias).append(".cmis:objectId ");
+                        joinedTable.add(aspectTable);
+                    }
                     if(where.length() > 0) {
                         where.append(" AND ");
                     }else {
