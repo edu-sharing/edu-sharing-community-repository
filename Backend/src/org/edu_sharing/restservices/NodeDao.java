@@ -84,6 +84,7 @@ public class NodeDao {
 			CCConstants.PERMISSION_CC_PUBLISH,
 			CCConstants.PERMISSION_READ_ALL
 	};
+	private final List<String> access;
 	// id of the object by the remote repository (null if not a remote object)
 	private String remoteId;
 	private RepositoryDao remoteRepository;
@@ -484,7 +485,7 @@ public class NodeDao {
 			String[] aspects = nodeService.getAspects(this.storeProtocol,this.storeId, nodeId);
 
 			this.aspects = (aspects != null) ? Arrays.asList(aspects) : new ArrayList<String>();
-
+			this.access = PermissionServiceHelper.getPermissionsAsString(hasPermissions);
 			// replace all data if its an remote object
 			if(this.type.equals(CCConstants.CCM_TYPE_REMOTEOBJECT)){
 				this.remoteId=(String)this.nodeProps.get(CCConstants.CCM_PROP_REMOTEOBJECT_NODEID);
@@ -910,7 +911,7 @@ public class NodeDao {
 
 		data.setProperties(getProperties());
 
-		data.setAccess(getAccessAsString());
+		data.setAccess(access);
 
 		data.setMimetype(getMimetype());
 		data.setMediatype(getMediatype());
@@ -1296,7 +1297,7 @@ public class NodeDao {
 		//	return null;
 
 		// no download url if user can not access the content
-		if(!getAccessAsString().contains(CCConstants.PERMISSION_READ_ALL))
+		if(!access.contains(CCConstants.PERMISSION_READ_ALL))
 			return null;
 		return (String) nodeProps.get(CCConstants.DOWNLOADURL);
 	}
@@ -1357,11 +1358,7 @@ public class NodeDao {
 
 		return version;
 	}
-	
-	public List<String> getAccessAsString() {
-		return PermissionServiceHelper.getPermissionsAsString(hasPermissions);
-	}
-	
+
 	public HashMap<String,Object> getNativeProperties() throws DAOException {
 		return nodeProps;
 	}
