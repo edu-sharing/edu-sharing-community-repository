@@ -19,6 +19,7 @@ import org.alfresco.service.cmr.security.*;
 import org.alfresco.service.namespace.QName;
 import org.alfresco.service.transaction.TransactionService;
 import org.apache.log4j.Logger;
+import org.edu_sharing.alfresco.service.OrganisationService;
 import org.edu_sharing.alfresco.workspace_administration.NodeServiceInterceptor;
 import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
 import org.edu_sharing.repository.client.tools.CCConstants;
@@ -680,9 +681,16 @@ public class PersonLifecycleService {
 
 
 	private NodeRef getDeletedFolderForOrg(String orgName, String scope) {
-		NodeRef orgRef = authorityService.getAuthorityNodeRef(scope==null ? orgName : orgName+"_safe");
-		if(orgRef == null){
-			throw new IllegalArgumentException("Given org "+orgName+" could not be found");
+		NodeRef orgRef = authorityService.getAuthorityNodeRef(scope==null ? orgName : orgName + "_" + scope);
+		if(orgRef == null) {
+			if(scope!=null) {
+				orgRef = authorityService.getAuthorityNodeRef(
+							ScopeUserHomeServiceFactory.getScopeUserHomeService().getOrCreateScopedEduGroup(orgName, scope).getGroupId()
+  						 );
+			}
+			if(orgRef == null) {
+				throw new IllegalArgumentException("Given org " + orgName + " (" + scope + ") could not be found");
+			}
 		}
 		NodeRef orgHome = (NodeRef) nodeService.getProperty(orgRef,
 				QName.createQName(CCConstants.CCM_PROP_EDUGROUP_EDU_HOMEDIR));

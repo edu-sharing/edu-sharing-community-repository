@@ -181,7 +181,24 @@ public class ScopeUserHomeServiceImpl implements ScopeUserHomeService{
 		}
 		return nodeRef;
 	}
-	
+
+	@Override
+	public EduGroup getOrCreateScopedEduGroup(String authority, String scope){
+		AuthorityService authorityService = AuthorityServiceFactory.getAuthorityService(ApplicationInfoList.getHomeRepository().getAppId());
+		EduGroup check = authorityService.getEduGroup(authority + "_" + scope);
+		if(check == null) {
+			EduGroup eduGroup = authorityService.getEduGroup(authority);
+			EduGroup tmEduGroup = new EduGroup();
+			tmEduGroup.setGroupname(eduGroup.getGroupname() + "_" + scope);
+			tmEduGroup.setGroupDisplayName(eduGroup.getGroupDisplayName() + "_" + scope);
+			tmEduGroup.setFolderName(tmEduGroup.getGroupDisplayName().replaceAll("GROUP_",""));
+			tmEduGroup.setScope(scope);
+			//try to get root folder of edugroups
+			ChildAssociationRef primaryParent = nodeService.getPrimaryParent(new NodeRef(Constants.storeRef,eduGroup.getFolderId()));
+			return authorityService.getOrCreateEduGroup(tmEduGroup,eduGroup, primaryParent.getParentRef().getId());
+		}
+		return check;
+	}
 	
 	public void manageEduGroupFolders(String userName, String scope, NodeRef userHome ){
 		
