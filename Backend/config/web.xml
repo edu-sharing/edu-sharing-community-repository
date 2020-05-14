@@ -616,11 +616,6 @@
         <servlet-name>ExcelImport</servlet-name>
         <url-pattern>/eduservlet/excelimport</url-pattern>
     </servlet-mapping>
-    
-    <servlet-mapping>
-    	<servlet-name>Monitoring</servlet-name>
-    	<url-pattern>/eduservlet/monitoring</url-pattern>
-    </servlet-mapping>
     <servlet-mapping>
      	<servlet-name>DownloadServlet</servlet-name>
      	<url-pattern>/eduservlet/download</url-pattern>   
