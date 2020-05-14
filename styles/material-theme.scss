@@ -117,7 +117,11 @@ mat-button-toggle-group{
   background-color: $actionDialogBackground;
   .mat-tab-label {
     text-transform: uppercase;
+    &.mat-tab-label-active{
+      opacity: 0.9;
+    }
   }
+
 }
 .mat-tab-group.mat-dark{
   .mat-tab-labels {
