@@ -32,20 +32,37 @@
     [(selectedIndex)]="tabSelectedIndex"
     *ngIf="showTabs()"
 >
-    <mat-tab *ngIf="!isGuest" label="{{ 'COLLECTIONS.TAB.MY' | translate }}"></mat-tab>
-    <mat-tab *ngIf="!isGuest" label="{{ 'COLLECTIONS.TAB.EDU_GROUPS' | translate }}"></mat-tab>
+    <mat-tab *ngIf="!isGuest">
+        <ng-template mat-tab-label>
+            <i icon iconId="person" class="tab-icon"></i>
+            <span class="tab-label">{{ 'COLLECTIONS.TAB.MY' | translate }}</span>
+        </ng-template>
+    </mat-tab>
+    <mat-tab *ngIf="!isGuest" label="{{ 'COLLECTIONS.TAB.EDU_GROUPS' | translate }}">
+        <ng-template mat-tab-label>
+            <i icon iconId="group" class="tab-icon"></i>
+            <span class="tab-label">{{ 'COLLECTIONS.TAB.EDU_GROUPS' | translate }}</span>
+        </ng-template>
+    </mat-tab>
     <mat-tab
-        *ngIf="hasEditorial"
-        label="{{ 'COLLECTIONS.TAB.TYPE_EDITORIAL' | translate }}"
-    ></mat-tab>
-    <mat-tab
-        *ngIf="hasMediacenter"
-        label="{{ 'COLLECTIONS.TAB.TYPE_MEDIA_CENTER' | translate }}"
-    ></mat-tab>
-    <mat-tab
-        label="{{ 'COLLECTIONS.TAB.EDU_ALL' | translate }}"
-        (click)="tabSelected = 'EDU_ALL'"
-    ></mat-tab>
+        *ngIf="hasEditorial">
+        <ng-template mat-tab-label>
+            <i icon iconId="star" class="tab-icon"></i>
+            <span class="tab-label">{{ 'COLLECTIONS.TAB.TYPE_EDITORIAL' | translate }}</span>
+        </ng-template>
+    </mat-tab>
+    <mat-tab *ngIf="hasMediacenter">
+        <ng-template mat-tab-label>
+            <i icon iconId="business" class="tab-icon"></i>
+            <span class="tab-label">{{ 'COLLECTIONS.TAB.TYPE_MEDIA_CENTER' | translate }}</span>
+        </ng-template>
+    </mat-tab>
+    <mat-tab>
+        <ng-template mat-tab-label>
+            <i icon iconId="language" class="tab-icon"></i>
+            <span class="tab-label">{{ 'COLLECTIONS.TAB.EDU_ALL' | translate }}</span>
+        </ng-template>
+    </mat-tab>
 </mat-tab-group>
 
 <div class="alignWithBanner">

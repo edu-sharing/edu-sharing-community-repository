@@ -273,24 +273,15 @@ section {
     margin-right: -35px;
     @include materialShadow();
 }
+.tab-icon{
+    margin-right: 5px;
+}
 @media only screen and (max-width: $mobileWidth+$mobileStage*3) {
-    .table-tab-title-long {
-        display: none !important;
-    }
-    .tabs > li {
-        width: auto;
-    }
-    .table-tab-title-short {
-        display: flex !important;
-        align-items: center;
-        justify-content: center;
-        > span {
+    :host ::ng-deep {
+        .tab-label {
             display: none;
         }
-        &.active > span {
-            display: flex;
-        }
-        > i {
+        .mat-tab-label-active .tab-label{
             display: flex;
         }
     }
