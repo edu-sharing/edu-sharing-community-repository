@@ -3,7 +3,7 @@ import {RestConstants} from '../../core-module/core.module';
 import {TranslateService} from '@ngx-translate/core';
 @Pipe({name: 'authorityName'})
 export class AuthorityNamePipe implements PipeTransform {
-  constructor(private translate: TranslateService){}
+  constructor(private translate: TranslateService) {}
   transform(authority: any, args: string[]= null): string {
     if (!authority)
       return 'invalid';
@@ -21,8 +21,12 @@ export class AuthorityNamePipe implements PipeTransform {
       }
       return authority.authorityName;
     }
-    if (authority.firstName || authority.lastName)
+    if (authority.displayName) {
+      return authority.displayName;
+    }
+    if (authority.firstName || authority.lastName) {
       return authority.firstName + ' ' + authority.lastName;
+    }
     return 'invalid';
   }
 }
