@@ -66,7 +66,7 @@ export class ModalDialogToastComponent {
   /**
    * type of the progress to display. Null if this is not an progress dialog
    */
-  private progressType: ProgressType;
+  progressType: ProgressType;
   private dialogType: CardType;
   /* value stored in the input, if enabled */
   inputValue: string;

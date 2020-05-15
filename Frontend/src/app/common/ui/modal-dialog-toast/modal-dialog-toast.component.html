@@ -1,4 +1,5 @@
-<card *ngIf="visible"
+<global-progress *ngIf="visible && progressType"></global-progress>
+<card *ngIf="visible && !progressType"
       title="{{title | translate:messageParameters }}"
       (onCancel)="cancel()"
       [isCancelable]="isCancelable"
