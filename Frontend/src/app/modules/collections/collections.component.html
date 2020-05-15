@@ -161,11 +161,11 @@
                 >&nbsp;{{ 'COLLECTION.SCOPE.' + getScopeInfo().scopeName | translate }}
             </div>
 
-            <div class="collection-description" style="margin-top:16px;opacity:0.85;">
+            <div class="collection-description collection-label">
                 {{ 'collections_description' | translate }}
             </div>
 
-            <div class="collection-description" style="margin-top:5px;">
+            <div class="collection-description collection-content">
                 {{ collectionContent.node.collection.description }}
                 <span
                     *ngIf="
@@ -177,6 +177,18 @@
                     -
                 </span>
             </div>
+
+            <ng-container *ngIf="collectionContent.node.access.indexOf('ChangePermissions') !== -1">
+                <div class="collection-label">
+                    {{ 'COLLECTIONS.PERMISSIONS' | translate }}
+                </div>
+                <div class="collection-permissions collection-content">
+                    <div *ngFor="let permission of permissions">
+                        <user-avatar [user]="permission" size="xsmall"></user-avatar>
+                        <span>{{(permission.authority.authorityType === 'GROUP' ? permission.group : permission.user) | authorityName }}</span>
+                    </div>
+                </div>
+            </ng-container>
         </div>
     </div>
 

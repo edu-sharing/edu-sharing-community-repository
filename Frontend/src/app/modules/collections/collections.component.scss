@@ -1,4 +1,5 @@
 @import '../../core-ui-module/styles/variables';
+@import '../../core-ui-module/styles/mixins';
 
 /*
 table, div {
@@ -222,10 +223,11 @@ section {
     background-color: $primary;
     color: #fff;
     left: 0;
-    height: 110%;
+    height: calc(100vh - #{$mainnavHeight});
     width: 250px;
     position: fixed;
-    //overflow-y: auto;
+    overflow-x: hidden;
+    overflow-y: auto;
     top: $mainnavHeight;
     float: left;
     z-index: 1;
@@ -272,6 +274,31 @@ section {
     margin-left: -35px;
     margin-right: -35px;
     @include materialShadow();
+}
+.collections-header-textarea{
+    .collection-label{
+        margin-top:16px;
+        opacity:0.85;
+    }
+    .collection-content{
+        margin-top:5px;
+    }
+    .collection-permissions{
+        display: flex;
+        flex-direction: column;
+        > div{
+            display: flex;
+            align-items: center;
+            padding:3px 0;
+            >user-avatar{
+                height: 24px;
+                margin-right: 7px;
+            }
+            >span{
+                @include limitLineCount(2, 1.25);
+            }
+        }
+    }
 }
 .tab-icon{
     margin-right: 5px;

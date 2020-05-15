@@ -10,6 +10,7 @@
         "ORDER_ELEMENTS_INFO": "Viewers of the collection see the contained materials in a certain order.",
         "ORDER_SAVED": "The object order has been changed.",
         "CUSTOM_ORDER":"change element order",
+        "PERMISSIONS": "Invited",
         "STEP": {
             "GENERAL": "Title, Image, Description and Color",
             "METADATA": "Additional information",
