@@ -86,12 +86,7 @@
                         [style.cursor]="isAllowedToEditCollection() ? 'pointer' : 'auto'"
                         (click)="collectionEdit()"
                     >
-                        <i
-                            class="material-icons"
-                            [style.color]="collectionContent.node.collection.color"
-                        >
-                            layers
-                        </i>
+                        <i icon iconId="layers"></i>
                     </div>
                 </div>
             </div>
@@ -115,15 +110,16 @@
             ></div>
         </div>
         <div class="collections-header-textarea">
-            <actionbar
-                #actionbarCollection
-                class="collection-option"
-                [numberOfAlwaysVisibleOptions]="1"
-                [numberOfAlwaysVisibleOptionsMobile]="1"
-                appearance="round"
-                [style]="'flat'"
-                [dropdownPosition]="'right'"
-            ></actionbar>
+            <div class="collection-option">
+                <actionbar
+                    #actionbarCollection
+                    [numberOfAlwaysVisibleOptions]="1"
+                    [numberOfAlwaysVisibleOptionsMobile]="1"
+                    appearance="round"
+                    [style]="'flat'"
+                    [dropdownPosition]="'right'"
+                ></actionbar>
+            </div>
             <div
                 class="collection-new-preview-headline collections-header-texttop"
                 style="overflow:hidden;"
