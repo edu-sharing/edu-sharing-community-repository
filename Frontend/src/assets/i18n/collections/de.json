@@ -10,7 +10,7 @@
         "ORDER_ELEMENTS_INFO": "Betrachter der Sammlung sehen die enthaltenen Materialien in einer bestimmten Reihenfolge.",
         "ORDER_SAVED": "Reihenfolge erfolgreich festgelegt",
         "CUSTOM_ORDER": "Festgelegte Reihenfolge",
-        "PERMISSIONS": "Eingeladen",
+        "PERMISSIONS": "Eingeladen:",
         "STEP": {
             "GENERAL": "Titel, Bild, Beschreibung und Farbe",
             "METADATA": "Weitere Informationen",
@@ -88,7 +88,7 @@
         "FEEDBACK_TOAST": "Feedback gesendet. Vielen Dank!"
     },
 
-    "collections_description": "Beschreibung",
+    "collections_description": "Beschreibung:",
     "collections_noOrgaCollections": "Sie wurden bisher zu keiner Sammlung eingeladen.",
     "collections_noCollections": "Es sind keine öffentlichen Sammlungen verfügbar.",
 
