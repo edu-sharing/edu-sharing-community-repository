@@ -194,7 +194,7 @@ section {
 
 .card-image-icon-container {
     position: relative;
-    height: 210px;
+    height: 200px;
     width: 100%;
     overflow: hidden;
     margin: auto;
@@ -299,7 +299,7 @@ section {
             padding:3px 0;
             >user-avatar{
                 height: 24px;
-                margin-right: 7px;
+                margin-right: 9px;
             }
             >span{
                 @include limitLineCount(2, 1.25);
