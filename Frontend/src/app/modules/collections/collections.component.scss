@@ -283,7 +283,7 @@ section {
     .collection-content{
         margin-top:5px;
     }
-    .collection-permissions{
+    .collection-permissions.collection-content{
         display: flex;
         flex-direction: column;
         > div{
@@ -362,8 +362,9 @@ section {
         padding-right: 50px;
     }
     .collection-new-preview-infoline,
-    .collection-description {
-        display: none;
+    .collection-description,
+    .collection-permissions {
+        display: none !important;
     }
     .collections-master-div-notabs {
         margin-top: 0;
