@@ -2,10 +2,11 @@ package org.edu_sharing.service.rating;
 
 import io.swagger.annotations.ApiModel;
 
+import java.io.Serializable;
 import java.util.HashMap;
 
 @ApiModel
-public class AccumulatedRatings {
+public class AccumulatedRatings implements Serializable {
     private RatingData overall;
     private double user;
     private HashMap<String, RatingData> affiliation;
@@ -35,7 +36,7 @@ public class AccumulatedRatings {
     }
 
     @ApiModel
-    public static class RatingData{
+    public static class RatingData implements Serializable {
         private double sum;
         private long count;
 
