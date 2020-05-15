@@ -180,8 +180,10 @@
                 </div>
                 <div class="collection-permissions collection-content">
                     <div *ngFor="let permission of permissions">
-                        <user-avatar [user]="permission" size="xsmall"></user-avatar>
-                        <span>{{(permission.authority.authorityType === 'GROUP' ? permission.group : permission.user) | authorityName }}</span>
+                        <ng-container *ngIf="permission.authority.authorityType !== 'EVERYONE'">
+                            <user-avatar [user]="permission" size="xsmall"></user-avatar>
+                            <span>{{(permission.authority.authorityType === 'GROUP' ? permission.group : permission.user) | authorityName }}</span>
+                        </ng-container>
                     </div>
                 </div>
             </ng-container>
