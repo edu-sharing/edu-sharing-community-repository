@@ -24,6 +24,8 @@
             "CLIENT_CONFIG_HINT": "Sie können hier Werte eintragen, um Labels zu überschreiben, Kontexte zu konfigurieren, Authentifizierungsmethoden einzurichten und mehr. Nach dem Speichern müssen Sie möglicherweise die gesamte Seite im Browser neu laden",
             "BASE_CONFIG_TITLE": "Globale Konfigurationsdatei (Standard-Werte)",
             "BASE_CONFIG_HINT": "Diese Datei dient lediglich als Vorlage und darf nicht verändert werden. Geänderte Werte bitte in die spezifische Konfiguration eintragen",
+            "DEPLOYMENT_CONFIG_TITLE": "Deployment Konfigurationsdatei",
+            "DEPLOYMENT_CONFIG_HINT": "Diese Datei wurde durch das Deployment festgelegt und ändert ggf. Daten abweichend der Vorlage. Diese Datei kann nur durch das Deployment verändert werden.",
             "CONFIG_TITLE": "Spezifische Konfigurationsdatei (Überschreiben)",
             "CONFIG_HINT": "Sie können hier Werte der Standard-Konfiguration überschreiben.",
             "SIZE": "Editor-Größe",
