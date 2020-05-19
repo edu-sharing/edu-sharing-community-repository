@@ -28,6 +28,7 @@
         "MENU_EDIT_GROUPS": "Manage memberships",
         "MENU_EXCLUDE": "Exclude",
         "MENU_REMOVE_MEMBERSHIP": "Remove from group(s)",
+        "MENU_STATUS": "Set status",
         "SEARCH_GROUP": "Search for groups...",
         "SEARCH_USER": "Search for users..",
         "SEARCH_GROUPS": "Search for groups...",
