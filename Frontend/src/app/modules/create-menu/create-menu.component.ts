@@ -22,7 +22,7 @@ import {
     Filetype,
     FrameEventsService,
     Node,
-    NodeWrapper,
+    NodeWrapper, RestConnectorService,
     RestConnectorsService,
     RestConstants,
     RestHelper,
@@ -122,6 +122,7 @@ export class CreateMenuComponent {
 
     constructor(
         public bridge: BridgeService,
+        private connector: RestConnectorService,
         private connectors: RestConnectorsService,
         private iamService: RestIamService,
         private nodeService: RestNodeService,
@@ -143,11 +144,15 @@ export class CreateMenuComponent {
             this.connectorList = this.connectors.getConnectors();
             this.updateOptions();
         });
-        this.nodeService
-            .getNodeMetadata(RestConstants.INBOX)
-            .subscribe(node => {
-                this.inbox = node.node;
-            });
+        this.connector.isLoggedIn(false).subscribe((login) => {
+            if(login.statusCode == RestConstants.STATUS_CODE_OK){
+                this.nodeService
+                    .getNodeMetadata(RestConstants.INBOX)
+                    .subscribe(node => {
+                        this.inbox = node.node;
+                    });
+            }
+        });
         this.cardHasOpenModals$ = cardService.hasOpenModals.delay(0);
     }
 
