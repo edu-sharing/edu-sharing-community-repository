@@ -96,7 +96,7 @@
         "USER_STATUS": {
             "null": "Not set (equals activated)",
             "active": "Activated",
-            "blocked": "Blocked (No access, not discoverable)",
+            "blocked": "Blocked (No access, not found in search)",
             "todelete": "Marked for deletion"
         },
         "TOOLPERMISSIONS": {
