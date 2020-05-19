@@ -124,6 +124,12 @@ mat-button-toggle-group{
 
 }
 .mat-tab-group.mat-dark{
+  .mat-tab-header{
+    background-color: $workspaceTopBarBackground;
+  }
+  .mat-tab-header-pagination .mat-tab-header-pagination-chevron{
+    border-color: $workspaceTopBarFontColor;
+  }
   .mat-tab-labels {
     background-color: $workspaceTopBarBackground;
     .mat-tab-label {
