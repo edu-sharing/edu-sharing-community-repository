@@ -37,7 +37,7 @@ public class BulkServiceImpl implements BulkService {
 			Map<QName, Serializable> props=new HashMap<>();
 			props.put(ContentModel.PROP_NAME, name);
 			return serviceRegistry.getNodeService().createNode(parent, ContentModel.ASSOC_CONTAINS,
-					ContentModel.ASSOC_CHILDREN,
+					QName.createQName(name),
 					QName.createQName(CCConstants.CCM_TYPE_MAP),
 					props).getChildRef();
 		}
