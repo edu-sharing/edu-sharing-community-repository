@@ -32,20 +32,37 @@
     [(selectedIndex)]="tabSelectedIndex"
     *ngIf="showTabs()"
 >
-    <mat-tab *ngIf="!isGuest" label="{{ 'COLLECTIONS.TAB.MY' | translate }}"></mat-tab>
-    <mat-tab *ngIf="!isGuest" label="{{ 'COLLECTIONS.TAB.EDU_GROUPS' | translate }}"></mat-tab>
+    <mat-tab *ngIf="!isGuest">
+        <ng-template mat-tab-label>
+            <i icon iconId="person" class="tab-icon"></i>
+            <span class="tab-label">{{ 'COLLECTIONS.TAB.MY' | translate }}</span>
+        </ng-template>
+    </mat-tab>
+    <mat-tab *ngIf="!isGuest" label="{{ 'COLLECTIONS.TAB.EDU_GROUPS' | translate }}">
+        <ng-template mat-tab-label>
+            <i icon iconId="group" class="tab-icon"></i>
+            <span class="tab-label">{{ 'COLLECTIONS.TAB.EDU_GROUPS' | translate }}</span>
+        </ng-template>
+    </mat-tab>
     <mat-tab
-        *ngIf="hasEditorial"
-        label="{{ 'COLLECTIONS.TAB.TYPE_EDITORIAL' | translate }}"
-    ></mat-tab>
-    <mat-tab
-        *ngIf="hasMediacenter"
-        label="{{ 'COLLECTIONS.TAB.TYPE_MEDIA_CENTER' | translate }}"
-    ></mat-tab>
-    <mat-tab
-        label="{{ 'COLLECTIONS.TAB.EDU_ALL' | translate }}"
-        (click)="tabSelected = 'EDU_ALL'"
-    ></mat-tab>
+        *ngIf="hasEditorial">
+        <ng-template mat-tab-label>
+            <i icon iconId="star" class="tab-icon"></i>
+            <span class="tab-label">{{ 'COLLECTIONS.TAB.TYPE_EDITORIAL' | translate }}</span>
+        </ng-template>
+    </mat-tab>
+    <mat-tab *ngIf="hasMediacenter">
+        <ng-template mat-tab-label>
+            <i icon iconId="business" class="tab-icon"></i>
+            <span class="tab-label">{{ 'COLLECTIONS.TAB.TYPE_MEDIA_CENTER' | translate }}</span>
+        </ng-template>
+    </mat-tab>
+    <mat-tab>
+        <ng-template mat-tab-label>
+            <i icon iconId="language" class="tab-icon"></i>
+            <span class="tab-label">{{ 'COLLECTIONS.TAB.EDU_ALL' | translate }}</span>
+        </ng-template>
+    </mat-tab>
 </mat-tab-group>
 
 <div class="alignWithBanner">
@@ -69,12 +86,7 @@
                         [style.cursor]="isAllowedToEditCollection() ? 'pointer' : 'auto'"
                         (click)="collectionEdit()"
                     >
-                        <i
-                            class="material-icons"
-                            [style.color]="collectionContent.node.collection.color"
-                        >
-                            layers
-                        </i>
+                        <i icon iconId="layers"></i>
                     </div>
                 </div>
             </div>
@@ -98,15 +110,16 @@
             ></div>
         </div>
         <div class="collections-header-textarea">
-            <actionbar
-                #actionbarCollection
-                class="collection-option"
-                [numberOfAlwaysVisibleOptions]="1"
-                [numberOfAlwaysVisibleOptionsMobile]="1"
-                appearance="round"
-                [style]="'flat'"
-                [dropdownPosition]="'right'"
-            ></actionbar>
+            <div class="collection-option">
+                <actionbar
+                    #actionbarCollection
+                    [numberOfAlwaysVisibleOptions]="1"
+                    [numberOfAlwaysVisibleOptionsMobile]="1"
+                    appearance="round"
+                    [style]="'flat'"
+                    [dropdownPosition]="'right'"
+                ></actionbar>
+            </div>
             <div
                 class="collection-new-preview-headline collections-header-texttop"
                 style="overflow:hidden;"
@@ -144,11 +157,11 @@
                 >&nbsp;{{ 'COLLECTION.SCOPE.' + getScopeInfo().scopeName | translate }}
             </div>
 
-            <div class="collection-description" style="margin-top:16px;opacity:0.85;">
+            <div class="collection-description collection-label">
                 {{ 'collections_description' | translate }}
             </div>
 
-            <div class="collection-description" style="margin-top:5px;">
+            <div class="collection-description collection-content">
                 {{ collectionContent.node.collection.description }}
                 <span
                     *ngIf="
@@ -160,6 +173,20 @@
                     -
                 </span>
             </div>
+
+            <ng-container *ngIf="collectionContent.node.access.indexOf('ChangePermissions') !== -1">
+                <div class="collection-permissions collection-label">
+                    {{ 'COLLECTIONS.PERMISSIONS' | translate }}
+                </div>
+                <div class="collection-permissions collection-content">
+                    <div *ngFor="let permission of permissions">
+                        <ng-container *ngIf="permission.authority.authorityType !== 'EVERYONE'">
+                            <user-avatar [user]="permission" size="xsmall"></user-avatar>
+                            <span>{{(permission.authority.authorityType === 'GROUP' ? permission.group : permission.user) | authorityName }}</span>
+                        </ng-container>
+                    </div>
+                </div>
+            </ng-container>
         </div>
     </div>
 

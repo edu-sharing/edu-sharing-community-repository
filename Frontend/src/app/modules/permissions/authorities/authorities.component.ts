@@ -48,6 +48,7 @@ export class PermissionsAuthoritiesComponent {
   @ViewChild('actionbar') actionbar: ActionbarComponent;
   @ViewChild('actionbarMember') actionbarMember: ActionbarComponent;
   @ViewChild('listRef') listRef: ListTableComponent;
+  @ViewChild('addToComponent') addToComponent: PermissionsAuthoritiesComponent;
   public GROUP_TYPES= RestConstants.VALID_GROUP_TYPES;
   public STATUS_TYPES= RestConstants.VALID_PERSON_STATUS_TYPES;
   public SCOPE_TYPES= RestConstants.VALID_SCOPE_TYPES;
@@ -640,6 +641,7 @@ export class PermissionsAuthoritiesComponent {
 
     this.addTo = list;
     this.addToSelection = null;
+    UIHelper.waitForComponent(this,'addToComponent').subscribe(()=> this.addToComponent.loadAuthorities());
   }
   private openEditGroups(data: User) {
       const list = this.getList(data);

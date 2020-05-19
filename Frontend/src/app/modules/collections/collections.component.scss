@@ -1,4 +1,6 @@
 @import '../../core-ui-module/styles/variables';
+@import '../../core-ui-module/styles/mixins';
+$sidenavWidth: 250px;
 
 /*
 table, div {
@@ -86,7 +88,7 @@ section {
 
 .collections-header-textarea {
     position: relative;
-    padding: 20px;
+    padding: 50px 20px 30px 20px;
 }
 
 .collections-header-texttop {
@@ -102,13 +104,14 @@ section {
     color: white;
 }
 .card-image-icon-circle {
-    width: 120px;
-    height: 120px;
+    width: 90px;
+    height: 90px;
     border-radius: 50%;
-    background-color: #fff;
+    background-color: rgba(0,0,0,.1);
     @include unselectableText();
     > i {
-        font-size: 75px;
+        color:#fff;
+        font-size: 45px;
         margin-top: 25px;
     }
 }
@@ -119,7 +122,7 @@ section {
     object-fit: cover;
 }
 .collection-new-preview-headline {
-    font-size: 180%;
+    font-size: 150%;
     padding-bottom: 15px;
 }
 
@@ -187,12 +190,11 @@ section {
     text-align: center;
     vertical-align: middle;
     height: 200px;
-    color: white;
 }
 
 .card-image-icon-container {
     position: relative;
-    height: 210px;
+    height: 200px;
     width: 100%;
     overflow: hidden;
     margin: auto;
@@ -213,8 +215,11 @@ section {
 }
 .collection-option {
     position: absolute;
-    top: -40px;
-    right: 10px;
+    top: -23px;
+    left:0;
+    right:0;
+    display: flex;
+    justify-content: center;
     z-index: 1;
 }
 
@@ -222,10 +227,11 @@ section {
     background-color: $primary;
     color: #fff;
     left: 0;
-    height: 110%;
-    width: 250px;
+    height: calc(100vh - #{$mainnavHeight});
+    width: $sidenavWidth;
     position: fixed;
-    //overflow-y: auto;
+    overflow-x: hidden;
+    overflow-y: auto;
     top: $mainnavHeight;
     float: left;
     z-index: 1;
@@ -273,24 +279,43 @@ section {
     margin-right: -35px;
     @include materialShadow();
 }
+.collections-header-textarea{
+    background-color: rgba(0,0,0,0.1);
+    .collection-label{
+        margin-top:18px;
+        padding-top: 18px;
+        border-top: 1px solid rgba(0,0,0,.25);
+        opacity:0.85;
+    }
+    .collection-content{
+        margin-top:5px;
+    }
+    .collection-permissions.collection-content{
+        display: flex;
+        flex-direction: column;
+        > div{
+            display: flex;
+            align-items: center;
+            padding:3px 0;
+            >user-avatar{
+                height: 24px;
+                margin-right: 9px;
+            }
+            >span{
+                @include limitLineCount(2, 1.25);
+            }
+        }
+    }
+}
+.tab-icon{
+    margin-right: 5px;
+}
 @media only screen and (max-width: $mobileWidth+$mobileStage*3) {
-    .table-tab-title-long {
-        display: none !important;
-    }
-    .tabs > li {
-        width: auto;
-    }
-    .table-tab-title-short {
-        display: flex !important;
-        align-items: center;
-        justify-content: center;
-        > span {
+    :host ::ng-deep {
+        .tab-label {
             display: none;
         }
-        &.active > span {
-            display: flex;
-        }
-        > i {
+        .mat-tab-label-active .tab-label{
             display: flex;
         }
     }
@@ -344,8 +369,9 @@ section {
         padding-right: 50px;
     }
     .collection-new-preview-infoline,
-    .collection-description {
-        display: none;
+    .collection-description,
+    .collection-permissions {
+        display: none !important;
     }
     .collections-master-div-notabs {
         margin-top: 0;

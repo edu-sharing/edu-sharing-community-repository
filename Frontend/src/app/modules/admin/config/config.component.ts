@@ -26,12 +26,14 @@ declare var Chart:any;
 export class AdminConfigComponent {
   public static CONFIG_FILE_BASE="edu-sharing.base.conf";
   public static CONFIG_FILE="edu-sharing.conf";
+  public static CONFIG_DEPLOYMENT_FILE="edu-sharing.deployment.conf";
   public static CLIENT_CONFIG_FILE="client.config.xml";
   codeOptionsGlobal = {minimap: {enabled: false}, language: 'json', readOnly: true, automaticLayout: true};
   codeOptions = {minimap: {enabled: false}, language: 'json', automaticLayout: true};
   clientCodeOptions = {minimap: {enabled: false}, language: 'xml', automaticLayout: true};
   configClient = '';
   configGlobal = '';
+  configDeployment = '';
   config = '';
   size = 'medium';
 
@@ -45,6 +47,9 @@ export class AdminConfigComponent {
         this.configGlobal = data;
         this.adminService.getConfigFile(AdminConfigComponent.CONFIG_FILE).subscribe((data) => {
           this.config = data;
+          this.adminService.getConfigFile(AdminConfigComponent.CONFIG_DEPLOYMENT_FILE).subscribe((data) => {
+            this.configDeployment = data;
+          });
         });
       });
     });

@@ -25,7 +25,7 @@ import {
     TemporaryStorageService,
     UIService,
     CollectionReference,
-    CollectionFeedback, NodesRightMode,
+    CollectionFeedback, NodesRightMode, Permission,
 } from '../../core-module/core.module';
 import { Toast } from '../../core-ui-module/toast';
 import {DefaultGroups, OptionItem, Scope} from '../../core-ui-module/option-item';
@@ -134,6 +134,7 @@ export class CollectionsMainComponent {
     optionsMaterials: OptionItem[];
     tutorialElement: ElementRef;
     customNodeList = false;
+    permissions: Permission[];
     set collectionShare(collectionShare: Node) {
         this._collectionShare = collectionShare;
         this.refreshAll();
@@ -871,6 +872,12 @@ export class CollectionsMainComponent {
                     this.renderBreadcrumbs();
 
                     this.refreshContent(callback);
+                    if(this.collectionContent.node.access.indexOf(RestConstants.ACCESS_CHANGE_PERMISSIONS) !== -1) {
+                        this.nodeService.getNodePermissions(id).subscribe((permissions) => {
+                            this.permissions = permissions.permissions.localPermissions.permissions.
+                                                            concat(permissions.permissions.inheritedPermissions);
+                        });
+                    }
                 },
                 error => {
                     if (id != '-root-') {

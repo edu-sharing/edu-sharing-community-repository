@@ -348,7 +348,7 @@ small-collection{
   overflow-y: auto;
   width: $sidenavWidth;
   top:$mainnavHeight+$sidenavTopBaseOffset;
-  height: calc(100% - #{$mainnavHeight} - #{$sidenavTopBaseOffset} - 40px);
+  height: calc(100% - #{$mainnavHeight} - #{$sidenavTopBaseOffset} - 75px);
   transition: $transitionNormal all ease;
   @include iosScrolling();
   &.no-mainnav{

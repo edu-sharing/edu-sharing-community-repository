@@ -14,7 +14,6 @@ import javax.servlet.http.HttpServletRequestWrapper;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
-import org.apache.catalina.connector.ResponseFacade;
 import org.apache.log4j.Logger;
 import org.edu_sharing.repository.server.tools.ApplicationInfoList;
 
@@ -57,13 +56,8 @@ public class SameSiteCookieFilter implements javax.servlet.Filter {
             if(create) {
                 HttpSession session = super.getSession(create);
                 
-                if(response instanceof ResponseFacade) {
-                	ResponseFacade respF = (ResponseFacade)response;
-                	updateCookie(respF.getHeaders("Set-Cookie"));
-                }else {
-                	logger.error("response " +response.getClass().getName() + " not instanceof ResponseFacade");
-                }
-                
+                updateCookie(response.getHeaders("Set-Cookie"));
+
                 return session;
             }
             return super.getSession(create);
@@ -73,12 +67,7 @@ public class SameSiteCookieFilter implements javax.servlet.Filter {
         public HttpSession getSession() {
             HttpSession session = super.getSession();
             if(session != null) {
-            	if(response instanceof ResponseFacade) {
-                	ResponseFacade respF = (ResponseFacade)response;
-                	updateCookie(respF.getHeaders("Set-Cookie"));
-                }else {
-                	logger.error("response " +response.getClass().getName() + " not instanceof ResponseFacade");
-                }
+            	updateCookie(response.getHeaders("Set-Cookie"));
             }
 
             return session;

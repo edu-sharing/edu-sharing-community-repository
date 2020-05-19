@@ -33,7 +33,7 @@ export class NodeTemplateComponent  {
     this.updateButtons();
     this.nodeService.getNodeMetadata(nodeId).subscribe((parent)=>{
         this.nodeService.getNodeTemplate(nodeId).subscribe((data)=>{
-            this.node=parent.node;
+            this.node=data.node;
             this.enabled=data.enabled;
             if(!data.enabled){
               // check if this is the first time opening -> activate it

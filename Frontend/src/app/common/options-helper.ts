@@ -931,7 +931,13 @@ export class OptionsHelperService {
     }
 
     private goToWorkspace(node: Node | any) {
-        UIHelper.goToWorkspace(this.nodeService, this.router, this.connector.getCurrentLogin(), node);
+        if(node.aspects.indexOf(RestConstants.CCM_ASPECT_IO_REFERENCE) !== -1){
+            this.nodeService.getNodeMetadata(node.properties[RestConstants.CCM_PROP_IO_ORIGINAL][0]).subscribe((org) =>
+                UIHelper.goToWorkspace(this.nodeService, this.router, this.connector.getCurrentLogin(), org.node)
+            );
+        } else {
+            UIHelper.goToWorkspace(this.nodeService, this.router, this.connector.getCurrentLogin(), node);
+        }
     }
 
     private getObjects(object: Node | any) {

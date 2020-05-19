@@ -527,8 +527,8 @@
     "NO_SIZE": "-",
     "VERSION_COMMENT": "Versionskommentar",
     "MDS": {
-        "TITLE": "Metadaten bearbeiten",
-        "SHOW_EXTENDED": "Erweitere Metadaten anzeigen",
+        "TITLE": "Infos bearbeiten",
+        "SHOW_EXTENDED": "Erweitere Infos anzeigen",
         "SHOW_EXTENDED_SEARCH": "Weitere Filter anzeigen",
         "AUTHOR_LABEL": "Urheber-Angaben",
         "AUTHOR_FREETEXT": "Freie Urheber-Angabe",
