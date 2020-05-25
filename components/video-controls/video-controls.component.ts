@@ -24,6 +24,7 @@ export class VideoControlsComponent {
     loading = false;
     chooseCollection = false;
     isGuest: boolean;
+    hasPermission: boolean;
 
     @Input() set video(video: HTMLVideoElement) {
         // timeout to make sure node is already bound
@@ -66,7 +67,7 @@ export class VideoControlsComponent {
               private toast: Toast,
               private temporaryStorage: TemporaryStorageService) {
     this.isGuest = this.connector.getCurrentLogin().isGuest;
-
+    this.hasPermission = this.connector.hasToolPermissionInstant(RestConstants.TOOLPERMISSION_VIDEO_AUDIO_CUT);
   }
 
   render() {

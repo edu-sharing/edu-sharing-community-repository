@@ -7,7 +7,7 @@
   (onChoose)="addToCollection($event)"
   (onCreateCollection)="createCollectionAndAdd($event)"
 ></collection-chooser>
-<div *ngIf="_video && node && !isGuest">
+<div *ngIf="_video && node && !isGuest && hasPermission">
 
   <div id="bar" style.background-image="linear-gradient(to right, transparent {{getProgress()}}%, #555 {{getProgress()}}%)">
     <span class="chapter" *ngFor="let marker of markers"
