@@ -10,6 +10,7 @@ import org.alfresco.repo.security.permissions.AccessDeniedException;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.security.AuthorityType;
 import org.alfresco.service.cmr.security.PermissionService;
+import org.apache.log4j.Logger;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.server.MCAlfrescoAPIClient;
 import org.edu_sharing.repository.server.MCAlfrescoBaseClient;
@@ -25,6 +26,7 @@ import org.edu_sharing.service.search.model.SortDefinition;
 
 public class GroupDao {
 
+	static Logger logger=Logger.getLogger(GroupDao.class);
 
 	public static GroupDao getGroup(RepositoryDao repoDao, String groupName) throws DAOException {
 		
@@ -137,16 +139,16 @@ public class GroupDao {
 		
 		try {
 			checkModifyAccess();
-			AuthenticationUtil.runAsSystem(new RunAsWork<Void>() {
+			AuthenticationUtil.runAsSystem(() -> {
+				((MCAlfrescoAPIClient)repoDao.getBaseClient()).createOrUpdateGroup(groupName, profile.getDisplayName());
+				setGroupType(profile);
+				setGroupEmail(profile);
+				setScopeType(profile);
 
-				@Override
-				public Void doWork() throws Exception {
-					((MCAlfrescoAPIClient)repoDao.getBaseClient()).createOrUpdateGroup(groupName, profile.getDisplayName());
-					setGroupType(profile);
-					setGroupEmail(profile);
-					setScopeType(profile);
-					return null;
-				}
+				// rename admin group
+				renameSubGroup(profile, org.edu_sharing.alfresco.service.AuthorityService.ADMINISTRATORS_GROUP , org.edu_sharing.alfresco.service.AuthorityService.ADMINISTRATORS_GROUP_DISPLAY_POSTFIX);
+				renameSubGroup(profile, org.edu_sharing.alfresco.service.AuthorityService.MEDIACENTER_ADMINISTRATORS_GROUP , org.edu_sharing.alfresco.service.AuthorityService.ADMINISTRATORS_GROUP_DISPLAY_POSTFIX);
+				return null;
 			});
 			
 		} catch (Throwable t) {
@@ -155,7 +157,21 @@ public class GroupDao {
 		}
 
 	}
-	
+
+	private void renameSubGroup(GroupProfile profile, String subgroup, String postfix) {
+		try {
+			String adminDisplayName = profile.getDisplayName() + postfix;
+			authorityService.setAuthorityProperty(
+					PermissionService.GROUP_PREFIX + org.edu_sharing.alfresco.service.AuthorityService.getGroupName(
+							subgroup,
+							PermissionService.GROUP_PREFIX + groupName),
+					CCConstants.CM_PROP_AUTHORITY_AUTHORITYDISPLAYNAME,
+					adminDisplayName);
+		}catch(Throwable t){
+			logger.info("Renaming of " + subgroup + " from " + groupName + " failed: " + t.getMessage());
+		}
+	}
+
 	protected void setGroupType(GroupProfile profile) {
 		if(profile.getGroupType()!=null) {
 			authorityService.addAuthorityAspect(PermissionService.GROUP_PREFIX + groupName, CCConstants.CCM_ASPECT_GROUPEXTENSION);
