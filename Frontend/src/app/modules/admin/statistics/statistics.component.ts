@@ -14,6 +14,7 @@ import {Toast} from '../../../core-ui-module/toast';
 import {Helper} from '../../../core-module/rest/helper';
 import {CsvHelper} from '../../../core-module/csv.helper';
 import {SessionStorageService} from '../../../core-module/rest/services/session-storage.service';
+import {RestConnectorService} from "../../../core-module/rest/services/rest-connector.service";
 
 // Charts.js
 declare var Chart: any;
@@ -25,8 +26,10 @@ declare var Chart: any;
 })
 export class AdminStatisticsComponent {
   @ViewChild('groupedChart') groupedChartRef: ElementRef;
-  private _mediacenter: any;
+  _mediacenter: any;
   private groupedChartData: { node: NodeStatistics[]; user: Statistics[] };
+  nodesPermission: boolean;
+  userPermission: boolean;
   @Input() set mediacenter(mediacenter: any){
     this._mediacenter = mediacenter;
     this.refresh();
@@ -58,8 +61,8 @@ export class AdminStatisticsComponent {
   customGroupLoading: boolean;
   groupedNoData: boolean;
   nodesNoData: boolean;
-  _singleMode = 'NODES';
-  _customGroupMode = 'NODES';
+  _singleMode: 'NODES' | 'USERS' = 'NODES' ;
+  _customGroupMode: 'NODES' | 'USERS' = 'NODES';
   singleData: any;
   singleDataRows: string[];
   groupedChart: any;
@@ -117,7 +120,7 @@ export class AdminStatisticsComponent {
   get customGroup(){
     return this._customGroup;
   }
-  set customGroupMode(customGroupMode: string){
+  set customGroupMode(customGroupMode){
     this._customGroupMode = customGroupMode;
     this.refreshCustomGroups();
   }
@@ -147,7 +150,7 @@ export class AdminStatisticsComponent {
   get singleEnd(){
     return this._singleEnd;
   }
-  set singleMode(singleMode: string){
+  set singleMode(singleMode) {
     this._singleMode = singleMode;
     this.refreshSingle();
   }
@@ -175,6 +178,7 @@ export class AdminStatisticsComponent {
         private statistics: RestStatisticsService,
         private toast: Toast,
         private storage: SessionStorageService,
+        private connector: RestConnectorService,
         private translate: TranslateService,
         private config: ConfigurationService,
       ) {
@@ -201,6 +205,8 @@ export class AdminStatisticsComponent {
           this.customGroup = this.customGroups[0];
         }
       });
+      this.nodesPermission = this.connector.hasToolPermissionInstant(RestConstants.TOOLPERMISSION_GLOBAL_STATISTICS_NODES);
+      this.userPermission = this.connector.hasToolPermissionInstant(RestConstants.TOOLPERMISSION_GLOBAL_STATISTICS_USER);
       this.storage.get('admin_statistics_properties', 'cm:name\ncclom:general_title\ncclom:general_keyword').subscribe((p) => this.exportProperties = p);
       this.refresh();
     }
@@ -217,10 +223,16 @@ export class AdminStatisticsComponent {
       if (this._groupedMode !== 'None') {
         this.statistics.getStatisticsUser(this._groupedStart, new Date(this._groupedEnd.getTime() + AdminStatisticsComponent.DAY_OFFSET), this._groupedMode, this.getMediacenter()).subscribe((dataUser) => {
           this.processGroupData(dataNode, dataUser);
+        }, error => {
+          this.processGroupData(dataNode, null);
         });
       } else {
         this.processGroupData(dataNode, null);
       }
+    }, error => {
+      this.statistics.getStatisticsUser(this._groupedStart, new Date(this._groupedEnd.getTime() + AdminStatisticsComponent.DAY_OFFSET), this._groupedMode, this.getMediacenter()).subscribe((dataUser) => {
+        this.processGroupData(null, dataUser);
+      });
     });
   }
 
@@ -230,7 +242,7 @@ export class AdminStatisticsComponent {
 
   processGroupData(dataNode: NodeStatistics[], dataUser: Statistics[]){
     this.groupedLoading = false;
-    if (!dataNode.length){
+    if (!dataNode || !dataNode.length) {
       this.groupedNoData = true;
       return;
     }
@@ -247,16 +259,20 @@ export class AdminStatisticsComponent {
   }
 
   private initGroupedChart(dataNode: NodeStatistics[], dataUser: Statistics[], ctx: any) {
-    let max = dataNode.map((stat) =>
+    let max = dataNode ? dataNode.map((stat) =>
         Math.max(
             stat.counts.VIEW_MATERIAL || 0,
             stat.counts.VIEW_MATERIAL_EMBEDDED || 0,
             stat.counts.DOWNLOAD_MATERIAL || 0)).
-        reduce((a, b) => Math.max(a, b));
-    max = Math.max(max, dataUser.map((stat) => stat.counts.LOGIN_USER_SESSION || 0).reduce((a, b, ) => Math.max(a, b)));
-    const chartGroupedData = {
-      labels: dataNode.map((stat) => stat.date),
-      datasets: [{
+        reduce((a, b) => Math.max(a, b)) : 0;
+    if(dataUser) {
+      max = Math.max(max, dataUser.map((stat) => stat.counts.LOGIN_USER_SESSION || 0).reduce((a, b,) => Math.max(a, b)));
+    }
+    let chartGroupedData;
+    if(dataNode) {
+      chartGroupedData = {
+        labels: dataNode.map((stat) => stat.date),
+        datasets: [{
           label: this.translate.instant('ADMIN.STATISTICS.VIEWS'),
           yAxisID: 'y-axis-view',
           backgroundColor: 'rgb(30,52,192)',
@@ -271,8 +287,14 @@ export class AdminStatisticsComponent {
           yAxisID: 'y-axis-download',
           backgroundColor: 'rgb(40,146,192)',
           data: dataNode.map((stat) => stat.counts.DOWNLOAD_MATERIAL ? stat.counts.DOWNLOAD_MATERIAL : 0)
-      }],
-    };
+        }],
+      };
+    } else {
+      chartGroupedData = {
+        labels: [],
+        datasets: [],
+      };
+    }
     const axes = [{
       type: 'linear',
       display: true,
@@ -354,11 +376,21 @@ export class AdminStatisticsComponent {
   openNode(entry: any){
     this.onOpenNode.emit(entry.node);
   }
-
+  getValidMode(mode: 'NODES' | 'USERS'){
+    if (!this._mediacenter) {
+      if(!this.nodesPermission) {
+        mode = 'USERS';
+      } else if(!this.userPermission) {
+        mode = 'NODES';
+      }
+    }
+    return mode;
+  }
   private refreshSingle() {
     this.singleDataRows = null;
     this.singleLoading = true;
-    if (this._singleMode === 'NODES'){
+    const mode = this.getValidMode(this._singleMode);
+    if (mode === 'NODES') {
       this.singleDataRows = ['date', 'action', 'node', 'authority', 'authority_organization', 'authority_mediacenter'].concat(this.additionalGroups || []);
       this.statistics.getStatisticsNode(this._singleStart, new Date(this._singleEnd.getTime() + AdminStatisticsComponent.DAY_OFFSET), 'None', this.getMediacenter(), this.additionalGroups).subscribe((result) => {
         this.singleData = result.map((entry) => {
@@ -367,7 +399,7 @@ export class AdminStatisticsComponent {
         this.singleLoading = false;
       });
     }
-    if (this._singleMode == 'USERS'){
+    if (mode === 'USERS') {
       this.singleDataRows = ['date', 'action', 'authority', 'authority_organization', 'authority_mediacenter'].concat(this.additionalGroups || []);
       this.statistics.getStatisticsUser(this._singleStart, new Date(this._singleEnd.getTime() + AdminStatisticsComponent.DAY_OFFSET), 'None', this.getMediacenter(), this.additionalGroups).subscribe((result) => {
         this.singleData = result.map((entry) => {
@@ -442,12 +474,13 @@ export class AdminStatisticsComponent {
       }
       this.customGroupLoading = false;
     };
-    if (this._customGroupMode == 'NODES'){
+    const mode = this.getValidMode(this._customGroupMode);
+    if (mode === 'NODES') {
       this.statistics.getStatisticsNode(this._customGroupStart, new Date(this._customGroupEnd.getTime() + AdminStatisticsComponent.DAY_OFFSET), 'None', this.getMediacenter(), this.customUnfold ? [this.customUnfold] : null, [this.customGroup]).subscribe((result) => {
         handleResult(result);
       });
     }
-    if (this._customGroupMode == 'USERS'){
+    if (mode === 'USERS') {
       this.statistics.getStatisticsUser(this._customGroupStart, new Date(this._customGroupEnd.getTime() + AdminStatisticsComponent.DAY_OFFSET), 'None', this.getMediacenter(), this.customUnfold ? [this.customUnfold] : null, [this.customGroup]).subscribe((result) => {
         handleResult(result);
       });

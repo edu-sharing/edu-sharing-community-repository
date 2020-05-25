@@ -22,6 +22,7 @@ import org.edu_sharing.restservices.statistic.v1.model.Filter;
 import org.edu_sharing.restservices.statistic.v1.model.Statistics;
 import org.edu_sharing.restservices.tracking.v1.model.Tracking;
 import org.edu_sharing.restservices.tracking.v1.model.TrackingNode;
+import org.edu_sharing.service.InsufficientPermissionException;
 import org.edu_sharing.service.statistic.StatisticsGlobal;
 
 import io.swagger.annotations.Api;
@@ -91,7 +92,7 @@ public class StatisticApi {
 	@Path("/statistics/nodes")
 
 	@ApiOperation(value = "get statistics for node actions",
-			      notes = "requires either toolpermission "+CCConstants.CCM_VALUE_TOOLPERMISSION_GLOBAL_STATISTICS+" for global stats or to be admin of the requested mediacenter"
+			      notes = "requires either toolpermission "+CCConstants.CCM_VALUE_TOOLPERMISSION_GLOBAL_STATISTICS_NODES+" for global stats or to be admin of the requested mediacenter"
 	)
 
 	@ApiResponses(value = {
@@ -111,8 +112,7 @@ public class StatisticApi {
 									  @ApiParam(value = "filters for the custom json object stored in each entry", required = false) Map<String,String> filters
 	) {
 		try {
-			// load instance to validate session
-			ToolPermissionHelper.throwIfToolpermissionMissing(CCConstants.CCM_VALUE_TOOLPERMISSION_GLOBAL_STATISTICS);
+			validatePermissions(CCConstants.CCM_VALUE_TOOLPERMISSION_GLOBAL_STATISTICS_NODES, mediacenter);
 			List<TrackingNode> tracks=AuthenticationUtil.runAsSystem(()->
 					TrackingDAO.getNodeStatistics(grouping,new Date(dateFrom),new Date(dateTo),mediacenter,additionalFields,groupField,filters)
 			);
@@ -122,11 +122,19 @@ public class StatisticApi {
 		}
 	}
 
+	private void validatePermissions(String toolpermission, String mediacenter) throws DAOException {
+		if(mediacenter==null || mediacenter.isEmpty()) {
+			ToolPermissionHelper.throwIfToolpermissionMissing(toolpermission);
+		}else {
+			MediacenterDao.get(RepositoryDao.getHomeRepository(), mediacenter).checkAdminAccess();
+		}
+	}
+
 	@POST
 	@Path("/statistics/users")
 
 	@ApiOperation(value = "get statistics for user actions (login, logout)",
-				  notes = "requires either toolpermission "+CCConstants.CCM_VALUE_TOOLPERMISSION_GLOBAL_STATISTICS+" for global stats or to be admin of the requested mediacenter"
+				  notes = "requires either toolpermission "+CCConstants.CCM_VALUE_TOOLPERMISSION_GLOBAL_STATISTICS_USER+" for global stats or to be admin of the requested mediacenter"
 	)
 			@ApiResponses(value = {
 			@ApiResponse(code = 200, message = RestConstants.HTTP_200, response = Tracking[].class),
@@ -145,8 +153,7 @@ public class StatisticApi {
 									  @ApiParam(value = "filters for the custom json object stored in each entry", required = false) Map<String,String> filters
 	) {
 		try {
-			// load instance to validate session
-			ToolPermissionHelper.throwIfToolpermissionMissing(CCConstants.CCM_VALUE_TOOLPERMISSION_GLOBAL_STATISTICS);
+			validatePermissions(CCConstants.CCM_VALUE_TOOLPERMISSION_GLOBAL_STATISTICS_USER, mediacenter);
 			List<Tracking> tracks=AuthenticationUtil.runAsSystem(()->
 					TrackingDAO.getUserStatistics(grouping,new Date(dateFrom),new Date(dateTo),mediacenter,additionalFields,groupField,filters)
 			);

@@ -76,7 +76,7 @@
 <div class="main-content main-content-{{mode ? mode.toLowerCase() : 'default'}}">
 <!-- for dynamically added components from extensions -->
 <ng-template *ngIf="getModeButton() && getModeButton().factory" #dynamic></ng-template>
-<div *ngIf="mode=='INFO'" class="content info">
+<div *ngIf="modeIsActive('INFO')" class="content info">
   <div class="heading">{{'ADMIN.INFO.REPOSITORY' | translate}}</div>
   <div class="version">{{ repositoryVersion }}</div>
   <div class="heading">{{'ADMIN.INFO.NG' | translate}}</div>
@@ -106,7 +106,7 @@
         </div>
     </div>
 </div>
-<div *ngIf="mode=='CONFIG'" class="content config">
+<div *ngIf="modeIsActive('CONFIG')" class="content config">
     <div class="heading"><i class="material-icons">build</i><span>{{'ADMIN.CONFIG.XML_CONFIG' | translate}}</span></div>
     <div class="group xml">
         <div *ngFor="let xml of editableXmls">
@@ -137,24 +137,24 @@
         </form>
     </div>
 </div>
-<div *ngIf="mode=='STATISTICS'" class="content statistics">
+<div *ngIf="modeIsActive('STATISTICS')" class="content statistics">
     <app-admin-statistics
         (onOpenNode)="debugNode($event)"
     ></app-admin-statistics>
 </div>
-<div *ngIf="mode=='MEDIACENTER'" class="content mediacenter">
+<div *ngIf="modeIsActive('MEDIACENTER')" class="content mediacenter">
     <app-admin-mediacenter
     ></app-admin-mediacenter>
 </div>
-<div *ngIf="mode=='FRONTPAGE'" class="content frontpage">
+<div *ngIf="modeIsActive('FRONTPAGE')" class="content frontpage">
     <app-admin-frontpage
         (onOpenNode)="debugNode($event)"
     ></app-admin-frontpage>
 </div>
-<div *ngIf="mode=='GLOBAL_CONFIG'" class="content global-config">
+<div *ngIf="modeIsActive('GLOBAL_CONFIG')" class="content global-config">
     <app-admin-config></app-admin-config>
 </div>
-<div *ngIf="mode=='APPLICATIONS'" class="content applications">
+<div *ngIf="modeIsActive('APPLICATIONS')" class="content applications">
   <input #xmlSelect type="file" style="display:none" id="xmlSelect" accept="application/xml" (change)="registerAppXml($event)" />
   <form class="register-app">
     <h4 class="mat-heading-4 mat-heading-underline">
@@ -232,7 +232,7 @@
         </div>
     </div>
 </div>
-<div *ngIf="mode=='UPDATE'" class="content update">
+<div *ngIf="modeIsActive('UPDATE')" class="content update">
   <div class="hint">
     {{'ADMIN.UPDATE.HINT' | translate}}
   </div>
@@ -254,7 +254,7 @@
     </div>
   </div>
 </div>
-<div *ngIf="mode=='IMPORT'" class="content import">
+<div *ngIf="modeIsActive('IMPORT')" class="content import">
   <div class="heading"><i class="material-icons">layers</i><span>{{'ADMIN.IMPORT.COLLECTION' | translate}}</span></div>
   <div class="collections">
     <input #xmlCollectionsSelect type="file" style="display:none" id="xmlCollectionsSelect" accept=".xml, .zip" (change)="updateCollectionsFile($event)">
@@ -382,7 +382,7 @@
     </div>
   </div>
 </div>
-<div *ngIf="mode=='JOBS'" class="content jobs">
+<div *ngIf="modeIsActive('JOBS')" class="content jobs">
     <div class="heading"><i class="material-icons">done</i><span>{{'ADMIN.TOOLKIT.START_JOB' | translate}}</span></div>
     <div class="group">
         <form>
@@ -480,7 +480,7 @@
         </div>
     </div>
 </div>
-<div *ngIf="mode=='TOOLKIT'" class="content toolkit">
+<div *ngIf="modeIsActive('TOOLKIT')" class="content toolkit">
   <div class="heading"><i class="material-icons">refresh</i><span>{{'ADMIN.TOOLKIT.REFRESH_APP' | translate}}</span></div>
   <div class="group">
     <div class="info">{{'ADMIN.TOOLKIT.REFRESH_APP_INFO' | translate }}</div>
@@ -528,7 +528,7 @@
     <textarea id="catalina" #catalinaRef [ngModel]="catalina" readonly></textarea>
   </div>
 </div>
-<div *ngIf="mode=='BROWSER'" class="content browser">
+<div *ngIf="modeIsActive('BROWSER')" class="content browser">
   <div class="heading"><i class="material-icons">search</i><span>{{'ADMIN.BROWSER.NODE_BROWSER' | translate}}</span></div>
     <div class="inputGroupGrow">
         <div class="info">{{'ADMIN.BROWSER.MODE' | translate }}</div>

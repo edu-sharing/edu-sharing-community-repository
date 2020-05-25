@@ -5,6 +5,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import org.alfresco.repo.security.permissions.AccessDeniedException;
 import org.alfresco.service.cmr.security.PermissionService;
 import org.edu_sharing.alfresco.service.AuthorityService;
 import org.edu_sharing.repository.client.tools.CCConstants;
@@ -55,6 +56,12 @@ public class MediacenterDao extends AbstractDao{
 			throw DAOException.mapping(e);
 		}
 
+	}
+
+	public void checkAdminAccess() {
+		if(!authorityService.hasAdminAccessToMediacenter(this.authorityName)){
+			throw new AccessDeniedException("User does not have permissions to manage this group");
+		}
 	}
 
 	public void addManagedGroup(String group) throws DAOException {

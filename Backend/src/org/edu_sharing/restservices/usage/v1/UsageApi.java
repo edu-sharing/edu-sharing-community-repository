@@ -209,7 +209,7 @@ public class UsageApi {
 			if("-all-".equals(nodeId)) {
 				nodeId = null;
 			}
-			ToolPermissionHelper.throwIfToolpermissionMissing(CCConstants.CCM_VALUE_TOOLPERMISSION_GLOBAL_STATISTICS);
+			ToolPermissionHelper.throwIfToolpermissionMissing(CCConstants.CCM_VALUE_TOOLPERMISSION_USAGE_STATISTIC);
 			
 			List<Usages.NodeUsage> usages = new UsageDao(homeRepo).
 					getUsages(repositoryId, nodeId, from, to);
