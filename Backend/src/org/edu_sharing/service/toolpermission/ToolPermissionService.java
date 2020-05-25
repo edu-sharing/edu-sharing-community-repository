@@ -351,6 +351,7 @@ public class ToolPermissionService {
 		toInit.add(CCConstants.CCM_VALUE_TOOLPERMISSION_USAGE_STATISTIC);
 		toInit.add(CCConstants.CCM_VALUE_TOOLPERMISSION_GLOBAL_STATISTICS);
 		toInit.add(CCConstants.CCM_VALUE_TOOLPERMISSION_RATE);
+		toInit.add(CCConstants.CCM_VALUE_TOOLPERMISSION_VIDEO_AUDIO_CUT);
 
 		addConnectorToolpermissions(toInit);
 		return toInit;
