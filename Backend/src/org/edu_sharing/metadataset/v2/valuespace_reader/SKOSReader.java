@@ -18,52 +18,53 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Matcher;
 
-public class CurriculumReader extends ValuespaceReader{
+public class SKOSReader extends ValuespaceReader{
     private static final String ASSOCIATION_IS_CHILD_OF = "isChildOf";
     private String url;
-    private static Logger logger = Logger.getLogger(CurriculumReader.class);
+    private static Logger logger = Logger.getLogger(SKOSReader.class);
 
-    public CurriculumReader(String valuespaceUrl) {
+    public SKOSReader(String valuespaceUrl) {
         super(valuespaceUrl);
         // e.g. http://localhost:8000/api/v1/curricula/metadatasets
-        Matcher matched = matches("(https?:\\/\\/.*\\/)api\\/v1\\/curricula\\/metadatasets");
+        Matcher matched = matches("(https?:\\/\\/.*\\/)w3id.org\\/.*\\.json");
         if(matched.matches()){
             url = valuespaceUrl;
-            logger.info("matched Curriculum at "+matched.group(1));
+            logger.info("matched SKOS at "+matched.group(1));
         }
     }
 
     public List<MetadataKey> getValuespace(String locale) throws Exception {
         List<MetadataKey> result = new ArrayList<>();
-        JSONArray list = getApi();
+        JSONArray list = fetch();
         for (int i = 0; i < list.length(); i++) {
-            JSONArray subList = list.getJSONArray(i);
-            for (int j = 0; j < subList.length(); j++) {
-                JSONObject entry = subList.getJSONObject(j);
-                result.add(convertEntry(entry));
-            }
+            JSONObject entry = list.getJSONObject(i);
+            result.add(convertEntry(entry, locale));
         }
         return result;
     }
 
-    private MetadataKey convertEntry(JSONObject entry) throws JSONException {
+    private MetadataKey convertEntry(JSONObject entry, String locale) throws JSONException {
         MetadataKey key = new MetadataKey();
-        key.setCaption(entry.getString("title"));
         key.setKey(entry.getString("id"));
-        key.setParent(entry.isNull("parent_id") ? null : entry.getString("parent_id"));
+        String de = entry.getJSONObject("prefLabel").getString("de");
+        key.setCaption(de);
+        if("en_US".equals(locale)) {
+            try {
+                key.setCaption(entry.getJSONObject("prefLabel").getString("en"));
+            }catch(JSONException ignored) { }
+        }
+        // @TODO handle tree structures
+        //key.setParent(entry.isNull("parent_id") ? null : entry.getString("parent_id"));
         return key;
     }
 
-    private JSONArray getApi() throws IOException, JSONException {
+    private JSONArray fetch() throws IOException, JSONException {
         CloseableHttpClient httpclient = HttpClients.createDefault();
-        HttpUriRequest request=new HttpGet(getApiUrl());
+        HttpUriRequest request=new HttpGet(url);
         CloseableHttpResponse result = httpclient.execute(request);
         String data=StreamUtils.copyToString(result.getEntity().getContent(), StandardCharsets.UTF_8);
         result.close();
-        return new JSONArray(data);
-    }
-    private String getApiUrl() {
-        return url;
+        return new JSONObject(data).getJSONArray("hasTopConcept");
     }
 
     @Override

@@ -487,7 +487,7 @@ public class MetadataReaderV2 {
 	private List<MetadataKey> getValuespaceExternal(String value) throws Exception {
 		ValuespaceReader reader = ValuespaceReader.getSupportedReader(value);
 		if(reader != null) {
-			return reader.getValuespace();
+			return reader.getValuespace(locale);
 		}
 		return null;
 	}

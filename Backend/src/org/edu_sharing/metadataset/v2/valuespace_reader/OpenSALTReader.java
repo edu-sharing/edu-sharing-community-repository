@@ -14,12 +14,10 @@ import org.springframework.util.StreamUtils;
 
 import java.io.IOException;
 import java.net.URLEncoder;
-import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 public class OpenSALTReader extends ValuespaceReader{
     private static final String ASSOCIATION_IS_CHILD_OF = "isChildOf";
@@ -29,10 +27,9 @@ public class OpenSALTReader extends ValuespaceReader{
     private static Logger logger = Logger.getLogger(OpenSALTReader.class);
 
     public OpenSALTReader(String valuespaceUrl) {
+        super(valuespaceUrl);
         // e.g. http://localhost:3000/uri/8a2a94f0-36bd-11e9-bdc4-0242ac1a0003
-        String openSaltRegex="(https?:\\/\\/.*\\/)uri\\/(.*)";
-        Pattern pattern = Pattern.compile(openSaltRegex);
-        Matcher matched = pattern.matcher(valuespaceUrl);
+        Matcher matched = matches("(https?:\\/\\/.*\\/)uri\\/(.*)");
         if(matched.matches()){
             this.baseUrl=matched.group(1);
             this.uuid=matched.group(2);
@@ -40,7 +37,7 @@ public class OpenSALTReader extends ValuespaceReader{
         }
     }
 
-    public List<MetadataKey> getValuespace() throws Exception{
+    public List<MetadataKey> getValuespace(String locale) throws Exception{
         List<MetadataKey> result=new ArrayList<>();
         JSONObject list = getApi("CFPackages", uuid);
         JSONArray array = list.getJSONArray("CFItems");
