@@ -123,6 +123,11 @@
         "TOOLPERMISSION_WORKSPACE": "Zugriff auf den Workspace",
         "TOOLPERMISSION_HANDLESERVICE": "Eindeutige Ids für Materialien beim Handleservice anfordern",
         "TOOLPERMISSION_USAGE_STATISTIC": "Informationen über die Verwendung aller Objekte dieses Repositories abfragen",
+        "TOOLPERMISSION_GLOBAL_STATISTICS_NODES": "Statistiken zur Verwendung von Materialien dieses Repositories anzeigen",
+        "TOOLPERMISSION_GLOBAL_STATISTICS_USER": "Statistiken zu Nutzer-Logins (Login, Logout) dieses Repositories anzeigen",
+        "TOOLPERMISSION_VIDEO_AUDIO_CUT": "Video- & Audiodateien dürfen in Sammlungen beliebig zugeschnitten gespeichert werden",
+        "TOOLPERMISSION_COLLECTION_CHANGE_OWNER": "Erlaubnis zum Ändern des Ersteller-Namens einer Sammlung (gilt nur für Medienzentren-Sammlungen)",
+        "TOOLPERMISSION_RATE": "Die Berechtigung zum Bewerten von Materialien",
         "TOOLPERMISSION_CONNECTOR": "Editor \"{{connector}}\" darf benutzt werden",
         "TOOLPERMISSION_CONNECTOR_SAFE": "Editor \"{{connector}}\" darf im gesicherten Bereich benutzt werden",
         "TOOLPERMISSION_REPOSITORY": "Repository \"{{repository}}\" darf angezeigt und durchsucht werden"
