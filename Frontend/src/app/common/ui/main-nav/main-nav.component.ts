@@ -109,7 +109,6 @@ export class MainNavComponent implements AfterViewInit {
     @ViewChild('management') management: WorkspaceManagementDialogsComponent;
     @ViewChild('search') search: ElementRef;
     @ViewChild('topbar') topbar: ElementRef;
-    @ViewChild('nodeStoreRef') nodeStoreRef: ElementRef;
     @ViewChild('userRef') userRef: ElementRef;
     @ViewChild('tabNav') tabNav: ElementRef;
     @ViewChild('createMenu') createMenu: CreateMenuComponent;
@@ -252,7 +251,7 @@ export class MainNavComponent implements AfterViewInit {
                         this.showNodeStore = params.nodeStore === 'true';
                         this.isGuest = data.isGuest;
                         this._showUser =
-                            this.currentScope !== 'login' && this.showUser;
+                            this._currentScope !== 'login' && this.showUser;
                         this.iam.getUser().subscribe((user: IamUser) => {
                             this.user = user;
                             this.canEditProfile = user.editProfile;
