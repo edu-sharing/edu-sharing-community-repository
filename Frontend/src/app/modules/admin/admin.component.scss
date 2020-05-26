@@ -6,7 +6,7 @@ $sidenavWidthMobile:66px;
 .main{
   display: flex;
   width: 100%;
-  height: 100%;
+  min-height: 100%;
   .main-nav{
     position: fixed;
     display: flex;
@@ -101,8 +101,16 @@ $sidenavWidthMobile:66px;
     white-space: pre-line;
     padding:0 20px;
   }
-  .checks{
+  .checks, .checks-toolpermissions{
     position: relative;
+    .info{
+      padding:5px 20px 25px 20px;
+    }
+    .tp-name{
+      font-size: $fontSizeSmall;
+      color: $textLight;
+      padding-bottom: 10px;
+    }
     .check {
       display: flex;
       flex-direction: row;

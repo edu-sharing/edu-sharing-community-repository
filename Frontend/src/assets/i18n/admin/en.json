@@ -192,6 +192,12 @@
                     "SOLUTION": "Repository and rendering service should be located on different (sub-)domains for security reasons. For more information, see the documentation",
                     "SOLUTION_LINK": "Open documentation"
                 }
+            },
+            "SYSTEM_TP_CHECKS": "Permission checks",
+            "TP_CHECK": {
+                "INFO": "Every data sensitive permission gets checked for a correct configuration. This means that this permission is not available for anyone.",
+                "AUTO_FIX": "If there's no known reason, this permission should not be allowed for everyone. By clicking \"Fix now\", the permission will get revoked for everyone. You can later configure individual users/groups to use this permission. Admins will still have this permission.",
+                "AUTO_FIX_LINK": "Fix now"
             }
         },
         "IMPORT": {

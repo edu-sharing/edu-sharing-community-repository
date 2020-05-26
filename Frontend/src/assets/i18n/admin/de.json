@@ -194,6 +194,12 @@
                     "SOLUTION": "Repository und Renderingservice sollten aus Sicherheitsgründen auf unterschiedlichen (Sub-)Domains liegen. Weitere Informationen finden Sie in der Dokumentation",
                     "SOLUTION_LINK": "Dokumentation öffnen"
                 }
+            },
+            "SYSTEM_TP_CHECKS": "Berechtigungsprüfung",
+            "TP_CHECK": {
+                "INFO": "Für jede datenkritische Berechtigung wird geprüft, ob diese korrekt gesetzt ist, d.h. nicht für alle Nutzer des Systems zur Verfügung steht",
+                "AUTO_FIX": "Sofern es keinen bekannten Grund gibt, sollte die Berechtigungen nicht für Alle erlaubt sein. Mit Klick auf \"Jetzt beheben\" wird diese Berechtigung allen entzogen. Sie kann später nach Bedarf pro Gruppe/Nutzer aktiviert werden. Admins haben weiterhin die Erlaubnis.",
+                "AUTO_FIX_LINK": "Jetzt beheben"
             }
         },
         "IMPORT": {

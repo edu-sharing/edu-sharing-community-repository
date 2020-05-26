@@ -84,7 +84,7 @@
   <div class="heading">{{'ADMIN.INFO.SYSTEM_CHECKS' | translate}}</div>
   <div class="checks">
       <div class="reload"><i class="material-icons clickable" (click)="runChecks()">refresh</i></div>
-      <div *ngFor="let check of getSystemChecks();let ok=false;" class="check"
+      <div *ngFor="let check of getChecks(systemChecks);let ok=false;" class="check"
            [class.check-fail]="check.status=='FAIL'"
            [class.check-ok]="check.status=='OK'"
            [class.check-info]="check.status=='INFO'"
@@ -96,9 +96,37 @@
                     <i class="material-icons">forward</i>
                     <div>
                     {{('ADMIN.INFO.CHECK.'+check.name+'.SOLUTION') | translate:check.translate }}
-                    <a *ngIf="check.status!='OK' && check.callback" class="solution-link clickable" (click)="check.callback()">
-                        {{('ADMIN.INFO.CHECK.'+check.name+'.SOLUTION_LINK') | translate:check.translate }}
-                    </a>
+                        <div>
+                            <button mat-button color="primary" *ngIf="check.status!='OK' && check.callback" class="solution-link clickable" (click)="check.callback()">
+                                {{('ADMIN.INFO.CHECK.'+check.name+'.SOLUTION_LINK') | translate:check.translate }}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <i class="material-icons">{{check.status=='OK' ? 'check' : 'error_outline'}}</i>
+        </div>
+    </div>
+    <div class="heading">{{'ADMIN.INFO.SYSTEM_TP_CHECKS' | translate}}</div>
+    <div class="checks-toolpermissions">
+        <div class="reload"><i class="material-icons clickable" (click)="runTpChecks()">refresh</i></div>
+        <div class="info">{{('ADMIN.INFO.TP_CHECK.INFO') | translate }}</div>
+        <div *ngFor="let check of getChecks(tpChecks);let ok=false;" class="check"
+             [class.check-fail]="check.status=='FAIL'"
+             [class.check-ok]="check.status=='OK'"
+             [class.check-info]="check.status=='INFO'"
+             [class.check-warn]="check.status=='WARN'">
+            <div class="data">
+                <div class="title">{{ 'TOOLPERMISSION.' + check.name | translate }}</div>
+                <div class="tp-name">{{ check.name | translate }}</div>
+                <div *ngIf="check.status!='OK' && check.status!='INFO'" class="solution">
+                    <div>
+                        {{('ADMIN.INFO.TP_CHECK.AUTO_FIX') | translate }}
+                        <div>
+                            <button mat-button color="primary" class="solution-link clickable" (click)="fixTp(check)">
+                                {{('ADMIN.INFO.TP_CHECK.AUTO_FIX_LINK') | translate }}
+                            </button>
+                        </div>
                     </div>
                 </div>
             </div>

@@ -2,7 +2,13 @@ import {Translation} from '../../core-ui-module/translation';
 import {UIHelper} from '../../core-ui-module/ui-helper';
 import {ActivatedRoute, Router} from '@angular/router';
 import {Toast} from '../../core-ui-module/toast';
-import {ConfigurationService, DialogButton, ListItem, RestMediacenterService} from '../../core-module/core.module';
+import {
+  ConfigurationService,
+  DialogButton,
+  ListItem,
+  RestIamService,
+  RestMediacenterService
+} from '../../core-module/core.module';
 import {Title} from '@angular/platform-browser';
 import {TranslateService} from '@ngx-translate/core';
 import {SessionStorageService} from '../../core-module/core.module';
@@ -53,6 +59,7 @@ export class AdminComponent {
               private config: ConfigurationService,
               private title: Title,
               private translate: TranslateService,
+              private iamService: RestIamService,
               private storage : SessionStorageService,
               private networkService : RestNetworkService,
               private mediacenterService : RestMediacenterService,
@@ -168,6 +175,7 @@ export class AdminComponent {
   public eduGroupSuggestions:SuggestItem[];
   public eduGroupsSelected:SuggestItem[] = [];
   systemChecks : any = [];
+  tpChecks : any = [];
   mailReceiver: string;
   mailTemplate: string;
   private loginResult: LoginResult;
@@ -736,7 +744,25 @@ export class AdminComponent {
       v.splice(2,v.length-2);
       return v.join('.');
     }
-    private runChecks() {
+  private runTpChecks() {
+    const checks = [
+        RestConstants.TOOLPERMISSION_USAGE_STATISTIC,
+        RestConstants.TOOLPERMISSION_INVITE_ALLAUTHORITIES,
+        RestConstants.TOOLPERMISSION_GLOBAL_STATISTICS_USER,
+        RestConstants.TOOLPERMISSION_GLOBAL_STATISTICS_NODES,
+    ];
+    this.tpChecks = [];
+    this.admin.getToolpermissions(RestConstants.AUTHORITY_EVERYONE).subscribe((tp) => {
+      checks.forEach((c) => {
+        this.tpChecks.push({
+          name: c,
+          status: tp[c].explicit === 'ALLOWED' ? 'FAIL' : 'OK'
+        });
+      });
+    });
+
+  }
+  private runChecks() {
         this.systemChecks=[];
 
         // check versions render service
@@ -856,8 +882,8 @@ export class AdminComponent {
         }
         return check;
     }
-    getSystemChecks() {
-      this.systemChecks.sort((a:any,b:any)=> {
+    getChecks(checks: any) {
+      checks.sort((a:any,b:any)=> {
           const status:any= {FAIL:0,WARN:1,INFO:2,OK:3};
           const statusA=status[a.status];
           const statusB=status[b.status];
@@ -865,7 +891,7 @@ export class AdminComponent {
               return statusA<statusB ? -1 : 1;
           return a.name.localeCompare(b.name);
       });
-      return this.systemChecks;
+      return checks;
     }
 
     testMail() {
@@ -1061,6 +1087,7 @@ export class AdminComponent {
                 this.lucene = data;
             });
             this.reloadJobStatus();
+            this.runTpChecks();
             this.runChecks();
             setInterval(() => {
                 if (this.mode == 'JOBS')
@@ -1121,6 +1148,17 @@ export class AdminComponent {
       this.router.navigate([UIConstants.ROUTER_PREFIX, 'login']);
     }
     return false;
+  }
+
+  fixTp(check: any) {
+    this.tpChecks=[];
+    this.admin.getToolpermissions(RestConstants.AUTHORITY_EVERYONE).subscribe((tpIn) => {
+      const tp: any = {};
+      Object.keys(tpIn).forEach((k) => tp[k] = tpIn[k].explicit);
+      tp[check.name] = 'UNDEFINED';
+      this.admin.setToolpermissions(RestConstants.AUTHORITY_EVERYONE, tp).subscribe(() => this.runTpChecks());
+    });
+
   }
 }
 
