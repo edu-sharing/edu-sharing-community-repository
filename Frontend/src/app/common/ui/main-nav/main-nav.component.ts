@@ -37,7 +37,7 @@ import {
     RestIamService,
     RestNodeService,
     SessionStorageService,
-    TemporaryStorageService,
+    TemporaryStorageService, UIService,
 } from '../../../core-module/core.module';
 import { UIAnimation } from '../../../core-module/ui/ui-animation';
 import {
@@ -222,6 +222,7 @@ export class MainNavComponent implements AfterViewInit {
         private event: FrameEventsService,
         private nodeService: RestNodeService,
         private configService: ConfigurationService,
+        private uiService: UIService,
         private storage: TemporaryStorageService,
         private session: SessionStorageService,
         private http: HttpClient,
@@ -566,54 +567,7 @@ export class MainNavComponent implements AfterViewInit {
 
     private logout() {
         this.globalProgress = true;
-        if (this.bridge.isRunningCordova()) {
-            this.connector.logout().subscribe(() => {
-                this.bridge.getCordova().restartCordova();
-            });
-            return;
-        }
-        if (this.config.logout) {
-            const sessionData = this.connector.getCurrentLogin();
-            if (this.config.logout.ajax) {
-                this.http.get(this.config.logout.url).subscribe(
-                    () => {
-                        if (this.config.logout.destroySession) {
-                            this.connector.logout().subscribe(response => {
-                                this.finishLogout();
-                            });
-                            return;
-                        }
-                        this.finishLogout();
-                    },
-                    (error: any) => {
-                        this.toast.error(error);
-                    },
-                );
-            } else {
-                if (this.config.logout.destroySession) {
-                    this.connector.logout().subscribe(response => {
-                        if (
-                            sessionData.currentScope ===
-                            RestConstants.SAFE_SCOPE
-                        ) {
-                            this.finishLogout();
-                        } else {
-                            window.location.href = this.config.logout.url;
-                        }
-                    });
-                } else {
-                    if (sessionData.currentScope === RestConstants.SAFE_SCOPE) {
-                        this.finishLogout();
-                    } else {
-                        window.location.href = this.config.logout.url;
-                    }
-                }
-            }
-        } else {
-            this.connector.logout().subscribe(response => {
-                this.finishLogout();
-            });
-        }
+        this.uiService.handleLogout().subscribe(() => this.finishLogout());
     }
 
     private login(reurl = false) {
