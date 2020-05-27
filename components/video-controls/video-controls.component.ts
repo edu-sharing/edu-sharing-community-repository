@@ -40,19 +40,6 @@ export class VideoControlsComponent {
         this.display_endTime = this.toHHMMSS(this._endTime);
     }
 
-    display_startTime = this.toHHMMSS(this._startTime);
-    display_endTime = this.toHHMMSS(this._endTime);
-
-    options: Options = {
-        floor: 0,
-        ceil: 100,
-    };
-
-    onUserChangeEnd(changeContext: ChangeContext): void {
-        this.display_startTime = this.toHHMMSS(this._startTime);
-        this.display_endTime = this.toHHMMSS(this._endTime);
-    }
-
     @Input() set video(video: HTMLVideoElement) {
         // timeout to make sure node is already bound
         setTimeout(() => {
