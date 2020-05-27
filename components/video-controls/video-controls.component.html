@@ -17,15 +17,13 @@
       <div class="time">
         <mat-form-field>
           <mat-label>{{'START' | translate}}</mat-label>
-          <input matInput type="text" name="startTime" id="startTime" [(ngModel)]="display_startTime"
-                 (click)="display_startTime=toHHMMSS(_video.currentTime)" (keyup)="onStartKey($event)">
+          <input matInput type="text" name="startTime" id="startTime" [ngModel]="display_startTime" readonly>
         </mat-form-field>
       </div>
       <div class="time">
         <mat-form-field>
           <mat-label>{{'STOP' | translate}}</mat-label>
-          <input matInput type="text" name="endTime" id="endTime" [(ngModel)]="display_endTime"
-                 (click)="display_endTime=toHHMMSS(_video.currentTime)"  (keyup)="onEndKey($event)">
+          <input matInput type="text" name="endTime" id="endTime" [ngModel]="display_endTime" readonly>
         </mat-form-field>
       </div>
       <div class="title">

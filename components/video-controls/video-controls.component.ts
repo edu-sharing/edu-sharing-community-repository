@@ -72,6 +72,8 @@ export class VideoControlsComponent {
                 if (c) {
                     this._startTime = c.startTime;
                     this._endTime = c.endTime;
+                    this.display_startTime = this.toHHMMSS(this._startTime);
+                    this.display_endTime = this.toHHMMSS(this._endTime);
                 }
             }
             this.render();
@@ -157,9 +159,9 @@ export class VideoControlsComponent {
 
     toHHMMSS(sec: any) {
         const sec_num: number = parseInt(sec, 10); // don't forget the second param
-        let hours: number = Math.floor(sec_num / 3600);
-        let minutes: number = Math.floor((sec_num - hours * 3600) / 60);
-        let seconds: number = sec_num - hours * 3600 - minutes * 60;
+        let hours: number|string = Math.floor(sec_num / 3600);
+        let minutes: number|string = Math.floor((sec_num - hours * 3600) / 60);
+        let seconds: number|string = sec_num - hours * 3600 - minutes * 60;
 
         if (minutes < 10) {
             minutes = '0' + minutes;
