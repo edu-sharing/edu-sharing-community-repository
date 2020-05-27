@@ -9,6 +9,7 @@ import {UIHelper} from '../../ui-helper';
 import {RestCollectionService, RestConnectorService, TemporaryStorageService, UIConstants} from '../../../core-module/core.module';
 import {Router} from '@angular/router';
 import {BridgeService} from '../../../core-bridge-module/bridge.service';
+import { Options, ChangeContext } from 'ng5-slider';
 
 @Component({
     selector: 'video-controls',
@@ -18,13 +19,39 @@ import {BridgeService} from '../../../core-bridge-module/bridge.service';
 })
 export class VideoControlsComponent {
     _video: HTMLVideoElement;
-    _startTime = '00:00:00';
-    _endTime = '00:00:00';
+    _startTime: number = this.secs('00:00:00');
+    _endTime: number = this.secs('00:00:00');
     _title = 'Title';
     loading = false;
     chooseCollection = false;
     isGuest: boolean;
     hasPermission: boolean;
+
+    display_startTime = this.toHHMMSS(this._startTime);
+    display_endTime = this.toHHMMSS(this._endTime);
+
+    options: Options = {
+        floor: 0,
+        ceil: 100,
+    };
+
+    onUserChangeEnd(changeContext: ChangeContext): void {
+        this.display_startTime = this.toHHMMSS(this._startTime);
+        this.display_endTime = this.toHHMMSS(this._endTime);
+    }
+
+    display_startTime = this.toHHMMSS(this._startTime);
+    display_endTime = this.toHHMMSS(this._endTime);
+
+    options: Options = {
+        floor: 0,
+        ceil: 100,
+    };
+
+    onUserChangeEnd(changeContext: ChangeContext): void {
+        this.display_startTime = this.toHHMMSS(this._startTime);
+        this.display_endTime = this.toHHMMSS(this._endTime);
+    }
 
     @Input() set video(video: HTMLVideoElement) {
         // timeout to make sure node is already bound
@@ -43,8 +70,8 @@ export class VideoControlsComponent {
                 this.objectToCues(vtt, this.track);
                 const c = vtt[vtt.length - 1];
                 if (c) {
-                    this._startTime = this.toHHMMSS(c.startTime);
-                    this._endTime = this.toHHMMSS(c.endTime);
+                    this._startTime = c.startTime;
+                    this._endTime = c.endTime;
                 }
             }
             this.render();
@@ -72,12 +99,32 @@ export class VideoControlsComponent {
 
   render() {
         this.markers = [];
+        this._video.onloadedmetadata = () => {
+          this.options.ceil = this._video.duration;
+          if( this._endTime == 0){
+            this._endTime = this._video.duration;
+          }
+          this.options = {
+                floor: 0,
+                ceil: this._video.duration,
+                animate: true,
+                draggableRange: true,
+                minRange: 1,
+                translate: (value: number): string => {
+                      return this.toHHMMSS(value);
+                    }
+              };
+
+        };
+
         for (const t of this._video.textTracks as any) {
             if (t.kind === 'chapters') {
                 for (const c of t.cues) {
                     this.markers = []; // only use the last cue
                     this.markers.push(c);
                     this._video.currentTime = c.startTime;
+                    this._startTime = c.startTime;
+                    this._endTime = c.endTime;
                 }
             }
         }
@@ -109,26 +156,37 @@ export class VideoControlsComponent {
     }
 
     toHHMMSS(sec: any) {
-        const sec_num: any = parseInt(sec, 10); // don't forget the second param
-        let hours: any = Math.floor(sec_num / 3600);
-        let minutes: any = Math.floor((sec_num - hours * 3600) / 60);
-        let seconds: any = sec_num - hours * 3600 - minutes * 60;
-        if (hours < 10) {
-            hours = '0' + hours;
-        }
+        const sec_num: number = parseInt(sec, 10); // don't forget the second param
+        let hours: number = Math.floor(sec_num / 3600);
+        let minutes: number = Math.floor((sec_num - hours * 3600) / 60);
+        let seconds: number = sec_num - hours * 3600 - minutes * 60;
+
         if (minutes < 10) {
             minutes = '0' + minutes;
         }
         if (seconds < 10) {
             seconds = '0' + seconds;
         }
+        if (hours == 0) {
+            return minutes + ':' + seconds;
+        }else if (hours < 10) {
+            hours = '0' + hours;
+        }
         return hours + ':' + minutes + ':' + seconds;
     }
 
     secs(hhmmss: any) {
         const a = hhmmss.split(':');
-        const seconds = +a[0] * 60 * 60 + +a[1] * 60 + +a[2];
+        const seconds:number =  +a[0] * 60 * 60 + +a[1] * 60 + +a[2];
         return seconds;
+    }
+
+    onStartKey(){
+        this._startTime = this.secs(this.display_startTime);
+    }
+
+    onEndKey(){
+        this._endTime = this.secs(this.display_endTime);
     }
 
     updateChapters() {
@@ -145,8 +203,8 @@ export class VideoControlsComponent {
         }
         this.track.addCue(
             new VTTCue(
-                this.secs(this._startTime),
-                this.secs(this._endTime),
+                this._startTime,
+                this._endTime,
                 '',
             ),
         );
@@ -161,8 +219,8 @@ export class VideoControlsComponent {
                 // no feedback at the moment
                 this.save.emit({
                     node: node.node,
-                    startTime: this.secs(this._startTime),
-                    endTime: this.secs(this._endTime),
+                    startTime: this._startTime,
+                    endTime: this._endTime,
                 });
                 this.loading = false;
                 this.toast.toast('VIDEO_CONTROLS.SAVED');

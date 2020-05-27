@@ -51,6 +51,7 @@ import { SafeHtmlPipe } from './pipes/safe-html.pipe';
 import { UrlPipe } from './pipes/url.pipe';
 import { Toast } from './toast';
 import { TranslationLoader } from './translation-loader';
+import { Ng5SliderModule } from 'ng5-slider';
 
 @NgModule({
     declarations: [
@@ -102,6 +103,7 @@ import { TranslationLoader } from './translation-loader';
         MatCheckboxModule,
         MatProgressSpinnerModule,
         MatTooltipModule,
+        Ng5SliderModule,
         ToastyModule.forRoot(),
         TranslateModule.forRoot({
             loader: {

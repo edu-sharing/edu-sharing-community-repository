@@ -1,7 +1,46 @@
 @import "../../styles/variables";
-
-
 $height: 10px;
+
+.ng5-slider{
+    width: 90%;
+}
+
+::ng-deep {
+  .selectionSlider .ng5-slider .ng5-slider-bar {
+    background: #E1E1E1;
+    border-radius: 2px;
+  }
+  .selectionSlider .ng5-slider .ng5-slider-selection {
+    background-color: $primary;
+  }
+
+  .selectionSlider .ng5-slider .ng5-slider-pointer {
+    background-color: $primary;
+  }
+
+  .selectionSlider .ng5-slider .ng5-slider-pointer.ng5-slider-active:after{
+    background-color: $primaryDark;
+  }
+
+  .selectionSlider .ng5-slider .ng5-slider-tick.ng5-slider-selected {
+    background-color: $primaryMediumLight;
+  }
+
+  .selectionSlider .ng5-slider .ng5-slider-bubble{
+    color: $primaryDark;
+  }
+
+  .selectionSlider .ng5-slider .ng5-slider-bubble.ng5-slider-limit{
+    display: none;
+    color: $primaryDark;
+  }
+}
+
+.selection{
+    background: #fff;
+    margin-top: -2px;
+}
+
 #bar {
   width: 90%;
   margin: 0 auto;
@@ -70,7 +109,7 @@ $height: 10px;
 }
 
 .addChapter input[type=text]{
-  color: #fff;
+  color: $textMain;
   margin-bottom: 0;
 }
 
