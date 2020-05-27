@@ -410,5 +410,6 @@
 	<classpathentry kind="lib" path="lib/config-1.4.0.jar"/>
 	<classpathentry kind="lib" path="lib/swagger-annotations-1.5.15.jar"/>
 	<classpathentry kind="lib" path="lib/swagger-java-client-1.0.1.jar"/>
+	<classpathentry kind="lib" path="lib/spring-security-saml2-core-1.0.3.RELEASE.jar"/>
 	<classpathentry kind="output" path="war/WEB-INF/classes"/>
 </classpath>

@@ -258,8 +258,12 @@ public class ShibbolethServlet extends HttpServlet {
 
             Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
             if (authentication.isAuthenticated()) {
-                SAMLCredential credential = (SAMLCredential) authentication.getCredentials();
-                return credential.getAttributeAsString(attName);
+            	Object credential = authentication.getCredentials();
+            	if(credential instanceof SAMLCredential) {
+            		 SAMLCredential samlCredential = (SAMLCredential) credential;
+            	     return samlCredential.getAttributeAsString(attName);
+            	}
+               
             }
 
 	    	String attValue = null;
