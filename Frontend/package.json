@@ -41,6 +41,7 @@
     "materialize-css": "^1.0.0",
     "moment": "^2.24.0",
     "ng-lazyload-image": "^7.0.1",
+    "ng5-slider": "^1.2.4",
     "ngx-monaco-editor": "^8.1.1",
     "ngx-slimscroll": "~8.1.0",
     "ngx-toasty": "~1.0.0",
