@@ -283,7 +283,8 @@
             "OUTPUT_MODE_EXPORT": "Als Datei herunterladen",
             "EXPORT_FORMAT_CSV": "CSV (Tabellenstruktur)",
             "EXPORT_FORMAT_JSON": "JSON (Objektstruktur)",
-            "LUCENE_EXPORT_PROPERTIES_HINT": "Im Export einzubindende Properties (1 pro Zeile). Referenzierung auf Properties des Parents mittels \"parent::<property>\"",
+            "LUCENE_EXPORT_PROPERTIES": "Im Export einzubindende Properties (1 pro Zeile)",
+            "LUCENE_EXPORT_PROPERTIES_HINT": "Referenzierung auf Properties des Parents mittels \"parent::<property>\"",
             "LUCENE_EXPORT_START": "Exportieren & Herunterladen",
             "LUCENE_PROPERTIES_REQUIRED": "Bitte gewünschte properties festlegen"
         },

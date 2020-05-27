@@ -281,7 +281,8 @@
             "OUTPUT_MODE_EXPORT": "Download as file",
             "EXPORT_FORMAT_CSV": "CSV (Table structure)",
             "EXPORT_FORMAT_JSON": "JSON (Object structure)",
-            "LUCENE_EXPORT_PROPERTIES_HINT": "Properties to be included in the export (1 per line). Reference to properties of the parent using \"parent::<property>\"",
+            "LUCENE_EXPORT_PROPERTIES": "Properties to be included in the export (1 per line)",
+            "LUCENE_EXPORT_PROPERTIES_HINT": "Reference to properties of the parent using \"parent::<property>\"",
             "LUCENE_EXPORT_START": "Export & Download",
             "LUCENE_PROPERTIES_REQUIRED": "Please specify desired properties"
         },

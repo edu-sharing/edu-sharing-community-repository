@@ -587,7 +587,7 @@ export class AdminComponent {
           this.node.getChildren(id).subscribe((data) => {
               const templates = [];
               for(const node of data.nodes) {
-                  if(node.name.split('.').pop() == 'xml') {
+                  if(node.mimetype == 'text/xml') {
                       templates.push(node.name);
                   }
               }

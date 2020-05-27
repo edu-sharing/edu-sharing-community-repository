@@ -512,70 +512,86 @@
   <div class="heading"><i class="material-icons">refresh</i><span>{{'ADMIN.TOOLKIT.REFRESH_APP' | translate}}</span></div>
   <div class="group">
     <div class="info">{{'ADMIN.TOOLKIT.REFRESH_APP_INFO' | translate }}</div>
-    <div class="btn-flat btn-shadow" (click)="refreshAppInfo()">{{'ADMIN.TOOLKIT.REFRESH_APP' | translate }}</div>
+    <button mat-raised-button (click)="refreshAppInfo()">{{'ADMIN.TOOLKIT.REFRESH_APP' | translate }}</button>
   </div>
   <div class="group">
     <div class="info">{{'ADMIN.TOOLKIT.REFRESH_EDU_GROUP_CACHE' | translate }}</div>
-    <div class="btn-flat btn-shadow" (click)="refreshEduGroupCache()">{{'ADMIN.TOOLKIT.REFRESH_EDU_GROUP_CACHE' | translate }}</div>
+    <button mat-raised-button (click)="refreshEduGroupCache()">{{'ADMIN.TOOLKIT.REFRESH_EDU_GROUP_CACHE' | translate }}</button>
   </div>
   <div class="heading"><i class="material-icons">cached</i><span>{{'ADMIN.TOOLKIT.CACHE' | translate}}</span></div>
     <div class="group">
         <form (ngSubmit)="getCacheInfo()">
             <input type="text" name="cacheInfo" class="cacheInfo" [(ngModel)]="cacheInfo" placeholder="{{'ADMIN.TOOLKIT.CACHE_NAME' | translate }}">
-            <div class="btn-flat btn-shadow" (click)="getCacheInfo()">{{'ADMIN.TOOLKIT.CACHE_INFO' | translate }}</div>
+            <button mat-raised-button (click)="getCacheInfo()">{{'ADMIN.TOOLKIT.CACHE_INFO' | translate }}</button>
         </form>
     </div>
     <div class="group caches">
         <div class="inputGroup">
-            <a class="btn-flat btn-shadow" (click)="chooseDirectory=true">{{'ADMIN.TOOLKIT.CACHE_ROOT_FOLDER' | translate}}</a>
+            <button mat-raised-button (click)="chooseDirectory=true">{{'ADMIN.TOOLKIT.CACHE_ROOT_FOLDER' | translate}}</button>
             <div class="directory"><div *ngIf="parentNode">{{ parentNode.name}} ({{parentNode.ref.id}})</div></div>
         </div>
         <div class="group">
             <div class="inputGroup">
-                <a class="btn-flat btn-shadow" (click)="refreshCache(false)">{{'ADMIN.TOOLKIT.REFRESH_CACHE' | translate}}</a>
-                <a class="btn-flat btn-shadow" (click)="refreshCache(true)">{{'ADMIN.TOOLKIT.STICKY_REFRESH_CACHE' | translate}}</a>
+                <button mat-raised-button (click)="refreshCache(false)">{{'ADMIN.TOOLKIT.REFRESH_CACHE' | translate}}</button>
+                <button mat-raised-button (click)="refreshCache(true)">{{'ADMIN.TOOLKIT.STICKY_REFRESH_CACHE' | translate}}</button>
             </div>
         </div>
         <div class="propertyGroup">
             <input type="text" [(ngModel)]="propertyName" placeholder="{{'ADMIN.TOOLKIT.PROPERTY_NAME' | translate}}">
-            <a class="btn-flat btn-shadow" (click)="getPropertyValues()">{{'ADMIN.TOOLKIT.PROPERTY_VALUESPACE' | translate}}</a>
+            <button mat-raised-button (click)="getPropertyValues()">{{'ADMIN.TOOLKIT.PROPERTY_VALUESPACE' | translate}}</button>
         </div>
     </div>
     <div class="heading"><i class="material-icons">file_upload</i><span>{{'ADMIN.TOOLKIT.UPLOAD_TEMP' | translate}}</span></div>
   <div class="group">
     <input #uploadTempSelect type="file" style="display:none" id="uploadTempSelect" (change)="updateUploadTempFile($event)">
     <div class="inputGroup">
-      <a class="btn-flat btn-shadow" (click)="uploadTempSelect.click()">{{'ADMIN.TOOLKIT.CHOOSE_UPLOAD_TEMP' | translate}}</a>
+      <button mat-raised-button (click)="uploadTempSelect.click()">{{'ADMIN.TOOLKIT.CHOOSE_UPLOAD_TEMP' | translate}}</button>
       <div class="file">{{ (uploadTempFile ? uploadTempFile.name : '') }}</div>
     </div>
-    <a class="btn waves-effect waves-light" (click)="startUploadTempFile()">{{'ADMIN.TOOLKIT.UPLOAD_TEMP_START' | translate}}</a>
+    <button mat-flat-button color="primary" (click)="startUploadTempFile()">{{'ADMIN.TOOLKIT.UPLOAD_TEMP_START' | translate}}</button>
   </div>
   <div class="heading"><i class="material-icons">textsms</i><span>{{'ADMIN.TOOLKIT.CATALINA' | translate}}</span></div>
   <div class="group catalina">
-    <div class="btn-flat btn-shadow" (click)="refreshCatalina()"><i class="material-icons">refresh</i></div>
-    <textarea id="catalina" #catalinaRef [ngModel]="catalina" readonly></textarea>
+     <button mat-raised-button (click)="refreshCatalina()"><i class="material-icons">refresh</i></button>
+      <mat-form-field>
+        <textarea matInput
+                  cdkTextareaAutosize
+                  cdkAutosizeMinRows="2"
+                  cdkAutosizeMaxRows="15"
+                  id="catalina" #catalinaRef [ngModel]="catalina" readonly></textarea>
+      </mat-form-field>
   </div>
 </div>
 <div *ngIf="modeIsActive('BROWSER')" class="content browser">
   <div class="heading"><i class="material-icons">search</i><span>{{'ADMIN.BROWSER.NODE_BROWSER' | translate}}</span></div>
     <div class="inputGroupGrow">
         <div class="info">{{'ADMIN.BROWSER.MODE' | translate }}</div>
-        <select [(ngModel)]="lucene.mode">
-            <option value="NODEREF">Node-Ref / Node-Id</option>
-            <option value="SOLR">Solr / Lucene Query</option>
-        </select>
+        <mat-form-field>
+            <mat-select [(ngModel)]="lucene.mode">
+                <mat-option value="NODEREF">Node-Ref / Node-Id</mat-option>
+                <mat-option value="SOLR">Solr / Lucene Query</mat-option>
+            </mat-select>
+        </mat-form-field>
     </div>
     <div *ngIf="lucene.mode=='NODEREF'" class="group">
         <div class="inputGroupGrow">
-            <div class="info">{{'ADMIN.BROWSER.NODEREF' | translate }}</div>
-            <input type="text" name="noderef" [(ngModel)]="lucene.noderef" placeholder='aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee"'>
+            <mat-form-field>
+                <mat-label>{{'ADMIN.BROWSER.NODEREF' | translate }}</mat-label>
+                <input matInput type="text" name="noderef" [(ngModel)]="lucene.noderef" placeholder='aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee"'>
+            </mat-form-field>
         </div>
-        <a class="btn waves-effect waves-light" (click)="searchNoderef()">{{'ADMIN.BROWSER.LUCENE_START' | translate}}</a>
+        <button mat-flat-button color="primary" (click)="searchNoderef()">{{'ADMIN.BROWSER.LUCENE_START' | translate}}</button>
     </div>
   <div *ngIf="lucene.mode=='SOLR'" class="group">
     <div class="inputGroupGrow">
-      <div class="info">{{'ADMIN.BROWSER.LUCENE_QUERY' | translate }}</div>
-      <textarea name="luceneQuery" class="materialize-textarea" [(ngModel)]="lucene.query" placeholder='@cm\:name:"*"'></textarea>
+        <mat-form-field>
+            <mat-label>{{'ADMIN.BROWSER.LUCENE_QUERY' | translate }}</mat-label>
+            <textarea matInput
+                      cdkTextareaAutosize
+                      cdkAutosizeMinRows="2"
+                      cdkAutosizeMaxRows="5"
+                      name="luceneQuery" [(ngModel)]="lucene.query" placeholder='@cm\:name:"*"'></textarea>
+        </mat-form-field>
     </div>
       <div class="inputGroupGrow">
           <div class="info">{{'ADMIN.BROWSER.OUTPUT_MODE' | translate }}</div>
@@ -585,19 +601,27 @@
             </mat-radio-group>
       </div>
       <div class="inputGroupGrow" *ngIf="lucene.outputMode=='export'">
-          <div class="info">{{'ADMIN.BROWSER.LUCENE_EXPORT_PROPERTIES_HINT' | translate }}</div>
-          <textarea class="materialize-textarea export-properties" [(ngModel)]="lucene.properties"></textarea>
+          <mat-form-field>
+              <mat-label>{{'ADMIN.BROWSER.LUCENE_EXPORT_PROPERTIES' | translate }}</mat-label>
+              <textarea matInput
+                        cdkTextareaAutosize
+                        cdkAutosizeMinRows="2"
+                        cdkAutosizeMaxRows="5"
+                        class="export-properties" [(ngModel)]="lucene.properties"></textarea>
+              <mat-hint>{{'ADMIN.BROWSER.LUCENE_EXPORT_PROPERTIES_HINT' | translate }}</mat-hint>
+          </mat-form-field>
       </div>
       <div class="inputGroupGrow" *ngIf="lucene.outputMode=='export'">
           <div class="info">{{'ADMIN.BROWSER.OUTPUT_MODE' | translate }}</div>
           <div>
-              <input type="radio" name="exportFormat" id="exportFormatCSV" [(ngModel)]="lucene.exportFormat" value="csv"><label for="exportFormatCSV">{{'ADMIN.BROWSER.EXPORT_FORMAT_CSV' | translate}}</label>
-              <input type="radio" name="exportFormat" id="exportFormatJSON" [(ngModel)]="lucene.exportFormat" value="json"><label for="exportFormatJSON">{{'ADMIN.BROWSER.EXPORT_FORMAT_JSON' | translate}}</label>
+              <mat-radio-group [(ngModel)]="lucene.exportFormat">
+                <mat-radio-button name="exportFormat" value="csv">{{'ADMIN.BROWSER.EXPORT_FORMAT_CSV' | translate}}</mat-radio-button>
+                <mat-radio-button name="exportFormat" value="json">{{'ADMIN.BROWSER.EXPORT_FORMAT_JSON' | translate}}</mat-radio-button>
+              </mat-radio-group>
           </div>
       </div>
       <div class="inputGroupGrow" *ngIf="lucene.outputMode=='export'">
-          <div></div>
-          <div><a class="btn waves-effect waves-light" (click)="exportLucene()">{{'ADMIN.BROWSER.LUCENE_EXPORT_START' | translate}}</a></div>
+          <div><button mat-flat-button color="primary" (click)="exportLucene()">{{'ADMIN.BROWSER.LUCENE_EXPORT_START' | translate}}</button></div>
       </div>
     <div class="inputGroupGrow" *ngIf="lucene.outputMode=='view'">
       <div class="info">{{'ADMIN.BROWSER.LUCENE_AUTHORITIES' | translate }}</div>
@@ -613,11 +637,17 @@
         </mat-chip-list>
     </div>
   <div class="inputGroupGrow lucenePaging" *ngIf="lucene.outputMode=='view'">
-      <div class="info">{{'ADMIN.BROWSER.LUCENE_OFFSET' | translate }}</div>
-      <input type="number" name="luceneOffset" [(ngModel)]="lucene.offset">
-      <div class="info">{{'ADMIN.BROWSER.LUCENE_COUNT' | translate }}</div>
-      <input type="number" name="luceneCount" [(ngModel)]="lucene.count">
-      <a class="btn waves-effect waves-light" (click)="searchLucene()">{{'ADMIN.BROWSER.LUCENE_START' | translate}}</a>
+      <mat-form-field>
+          <mat-label>{{'ADMIN.BROWSER.LUCENE_OFFSET' | translate }}</mat-label>
+          <input matInput type="number" name="luceneOffset" [(ngModel)]="lucene.offset">
+      </mat-form-field>
+      <mat-form-field>
+          <mat-label>{{'ADMIN.BROWSER.LUCENE_COUNT' | translate }}</mat-label>
+          <input matInput type="number" name="luceneCount" [(ngModel)]="lucene.count">
+      </mat-form-field>
+      <div>
+          <button mat-flat-button color="primary" (click)="searchLucene()">{{'ADMIN.BROWSER.LUCENE_START' | translate}}</button>
+      </div>
   </div>
   </div>
     <div *ngIf="lucene.mode=='NODEREF' || lucene.outputMode=='view'" class="search-list">
@@ -635,9 +665,8 @@
     </div>
 </div>
 <div *ngIf="mode=='FOLDERTEMPLATES'" class="content foldertemplates">
-  <form (ngSubmit)="applyTemplate()">
+  <form>
     <autocomplete
-            [id]="eduGroup"
             [inputMinLength]="2"
             (addItem)="addEduGroup($event)"
             [placeholder]="'ADMIN.FOLDERTEMPLATES.EDUGROUP'"
@@ -650,15 +679,27 @@
         <i class="material-icons clickable" (click)="removeEduGroup(eduGroup)">cancel</i>
       </div>
     </div>
-    <select [(ngModel)]="selectedTemplate" name="template">
-      <option *ngFor="let option of templates">{{ option }}</option>
-    </select>
-    <a class="goto-folder clickable" (click)="gotoFoldertemplateFolder()">{{'ADMIN.FOLDERTEMPLATES.GOTO_FOLDERTEMPLATES' | translate }}</a>
-    <div class="btn btn-shadow" (click)="applyTemplate()">{{'ADMIN.FOLDERTEMPLATES.APPLYTEMPLATE' | translate }}</div>
+      <div class="inputGroupGrow">
+          <mat-form-field>
+              <mat-select [(ngModel)]="selectedTemplate" name="template">
+                  <mat-option *ngFor="let option of templates" [value]="option">{{ option }}</mat-option>
+              </mat-select>
+          </mat-form-field>
+          <div>
+              <button mat-raised-button class="btnXml" (click)="templateSelect.click()">{{'ADMIN.FOLDERTEMPLATES.UPLOAD_TEMPLATE' | translate}}</button>
+          </div>
+      </div>
+      <div class="inputGroupGrow">
+          <div>
+            <button mat-button color="primary" class="goto-folder" (click)="gotoFoldertemplateFolder()">{{'ADMIN.FOLDERTEMPLATES.GOTO_FOLDERTEMPLATES' | translate }}</button>
+          </div>
+          <div>
+            <button mat-raised-button (click)="applyTemplate()">{{'ADMIN.FOLDERTEMPLATES.APPLYTEMPLATE' | translate }}</button>
+          </div>
+      </div>
   </form>
   <div class="group">
     <input #templateSelect type="file" style="display:none" id="templateSelect" accept="application/xml" (change)="uploadTemplate($event)" />
-    <div class="btn-flat btn-shadow btnXml" (click)="templateSelect.click()">{{'ADMIN.FOLDERTEMPLATES.UPLOAD_TEMPLATE' | translate}}</div>
     <div class="upload-hint">{{'ADMIN.FOLDERTEMPLATES.UPLOAD_HINT' | translate}}</div>
   </div>
 </div>

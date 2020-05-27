@@ -268,7 +268,7 @@ $sidenavWidthMobile:66px;
   padding:20px 0;
   display: flex;
   align-items: center;
-  >a,>div{
+  >a,>div,>button{
     display: flex;
   }
   .file,.directory{
@@ -350,7 +350,7 @@ $sidenavWidthMobile:66px;
 }
 .toolkit{
   max-width: 1200px;
-  a.btn{
+  a.btn, button{
     float:right;
   }
   .group .inputGroup{
@@ -440,20 +440,12 @@ $sidenavWidthMobile:66px;
 .foldertemplates {
   max-width: 900px;
   margin: auto;
-  .btn {
-    float:right;
-    margin-top: 40px;
-  }
-  .goto-folder {
-    display: inline-block;
-    margin-top: 20px;
-  }
   .eduGroupsSelected{
     margin: 20px 10px;
   }
   .group {
     float: left;
-    margin-top: 60px;
+    margin-top: 20px;
     .upload-hint{
       display:inline-block;
       margin-top: 10px;
