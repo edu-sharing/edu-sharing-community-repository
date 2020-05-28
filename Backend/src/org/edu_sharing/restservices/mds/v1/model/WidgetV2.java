@@ -56,6 +56,7 @@ public class WidgetV2 {
 
     }
 		private String id,caption,bottomCaption,icon,type,template;
+		private boolean hasValues;
 		private List<ValueV2> values;
 		private List<Subwidget> subwidgets;
 		private String placeholder;
@@ -98,11 +99,14 @@ public class WidgetV2 {
 				this.condition.setType(widget.getCondition().getType().name());
 				this.condition.setNegate(widget.getCondition().isNegate());
 			}
-			if(widget.getValues()!=null && widget.isValuespaceClient()){
-				values=new ArrayList<ValueV2>();
-				for(MetadataKey key : widget.getValues()){
-					values.add(new ValueV2(key));
-				}
+			if(widget.getValues()!=null){
+				this.hasValues = true;
+				if(widget.isValuespaceClient()) {
+					 values = new ArrayList<ValueV2>();
+					 for (MetadataKey key : widget.getValues()) {
+						 values.add(new ValueV2(key));
+					 }
+				 }
 			}
 			if(widget.getSubwidgets()!=null){
 				subwidgets=new ArrayList<Subwidget>();
@@ -224,6 +228,16 @@ public class WidgetV2 {
 		public void setValues(List<ValueV2> values) {
 			this.values = values;
 		}
+
+		@JsonProperty("hasValues")
+		public boolean isHasValues() {
+			return hasValues;
+		}
+
+		public void setHasValues(boolean hasValues) {
+			this.hasValues = hasValues;
+		}
+
 		@JsonProperty("caption")
 		public String getCaption() {
 			return caption;
