@@ -14,6 +14,7 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;
 
 import org.apache.log4j.Logger;
+import org.edu_sharing.repository.server.RepoFactory;
 import org.edu_sharing.repository.server.tools.ApplicationInfoList;
 import org.edu_sharing.restservices.ApiApplication;
 import org.edu_sharing.restservices.ApiService;
@@ -68,6 +69,8 @@ public class AboutApi  {
 	    	logger.debug("Request via domain "+org.edu_sharing.repository.server.authentication.Context.getCurrentInstance().getRequest().getServerName());
 	
 	    	about.setVersion(version);
+
+	    	about.setLastCacheUpdate(RepoFactory.getLastRefreshed());
 	    	
 	    	about.setThemesUrl(new MimeTypesV2(ApplicationInfoList.getHomeRepository()).getThemePath());
 	    	

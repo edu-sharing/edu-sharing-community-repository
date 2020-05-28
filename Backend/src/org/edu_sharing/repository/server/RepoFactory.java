@@ -71,7 +71,8 @@ public class RepoFactory {
 	private static Log logger = LogFactory.getLog(RepoFactory.class);
 
 	static Properties eduSharingProps = null;
-	
+	private static long lastRefreshed = System.currentTimeMillis();
+
 	/**
 	 * get an MCBaseClient instance that can access the repository with repositoryId.
 	 * for remote repositories: the remote authinfo is saved in session
@@ -224,7 +225,14 @@ public class RepoFactory {
 		return result;
 	}
 
+	public static long getLastRefreshed() {
+		return lastRefreshed;
+	}
+
 	public static void refresh() {
+		lastRefreshed = System.currentTimeMillis();
+		ApplicationInfoList.refresh();
+		LightbendConfigLoader.refresh();
 		appClassCache.clear();
 		MetadataReaderV2.refresh();
 		ConfigServiceFactory.refresh();
