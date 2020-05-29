@@ -318,6 +318,11 @@
                     *ngIf="customNodeList"
                     [parent]="collectionContent.node"
                     [nodes]="collectionContent.references"
+                    [optionItems]="
+                        isUserAllowedToEdit(collectionContent.node)
+                            ? [addMaterialSearchOptionItem, addMaterialBinaryOptionItem]
+                            : []
+                    "
                     [hasMore]="
                         collectionContent.references.length <
                         collectionContent.referencesPagination.total

@@ -964,7 +964,9 @@ export class OptionsHelperService {
                 }
             }
         }
-        if (this.data.customOptions.removeOptions) {
+        if (this.data.customOptions.supportedOptions && this.data.customOptions.supportedOptions.length > 0) {
+            options = options.filter((o) => this.data.customOptions.supportedOptions.indexOf(o.name) !== -1);
+        }else if (this.data.customOptions.removeOptions) {
             for (const option of this.data.customOptions.removeOptions) {
                 const index = options.findIndex((o) => o.name === option);
                 if (index !== -1) {
