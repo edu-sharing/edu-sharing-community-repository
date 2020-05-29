@@ -76,7 +76,7 @@
 <div class="main-content main-content-{{mode ? mode.toLowerCase() : 'default'}}">
 <!-- for dynamically added components from extensions -->
 <ng-template *ngIf="getModeButton() && getModeButton().factory" #dynamic></ng-template>
-<div *ngIf="mode=='INFO'" class="content info">
+<div *ngIf="modeIsActive('INFO')" class="content info">
   <div class="heading">{{'ADMIN.INFO.REPOSITORY' | translate}}</div>
   <div class="version">{{ repositoryVersion }}</div>
   <div class="heading">{{'ADMIN.INFO.NG' | translate}}</div>
@@ -84,7 +84,7 @@
   <div class="heading">{{'ADMIN.INFO.SYSTEM_CHECKS' | translate}}</div>
   <div class="checks">
       <div class="reload"><i class="material-icons clickable" (click)="runChecks()">refresh</i></div>
-      <div *ngFor="let check of getSystemChecks();let ok=false;" class="check"
+      <div *ngFor="let check of getChecks(systemChecks);let ok=false;" class="check"
            [class.check-fail]="check.status=='FAIL'"
            [class.check-ok]="check.status=='OK'"
            [class.check-info]="check.status=='INFO'"
@@ -96,9 +96,37 @@
                     <i class="material-icons">forward</i>
                     <div>
                     {{('ADMIN.INFO.CHECK.'+check.name+'.SOLUTION') | translate:check.translate }}
-                    <a *ngIf="check.status!='OK' && check.callback" class="solution-link clickable" (click)="check.callback()">
-                        {{('ADMIN.INFO.CHECK.'+check.name+'.SOLUTION_LINK') | translate:check.translate }}
-                    </a>
+                        <div>
+                            <button mat-button color="primary" *ngIf="check.status!='OK' && check.callback" class="solution-link clickable" (click)="check.callback()">
+                                {{('ADMIN.INFO.CHECK.'+check.name+'.SOLUTION_LINK') | translate:check.translate }}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <i class="material-icons">{{check.status=='OK' ? 'check' : 'error_outline'}}</i>
+        </div>
+    </div>
+    <div class="heading">{{'ADMIN.INFO.SYSTEM_TP_CHECKS' | translate}}</div>
+    <div class="checks-toolpermissions">
+        <div class="reload"><i class="material-icons clickable" (click)="runTpChecks()">refresh</i></div>
+        <div class="info">{{('ADMIN.INFO.TP_CHECK.INFO') | translate }}</div>
+        <div *ngFor="let check of getChecks(tpChecks);let ok=false;" class="check"
+             [class.check-fail]="check.status=='FAIL'"
+             [class.check-ok]="check.status=='OK'"
+             [class.check-info]="check.status=='INFO'"
+             [class.check-warn]="check.status=='WARN'">
+            <div class="data">
+                <div class="title">{{ 'TOOLPERMISSION.' + check.name | translate }}</div>
+                <div class="tp-name">{{ check.name | translate }}</div>
+                <div *ngIf="check.status!='OK' && check.status!='INFO'" class="solution">
+                    <div>
+                        {{('ADMIN.INFO.TP_CHECK.AUTO_FIX') | translate }}
+                        <div>
+                            <button mat-button color="primary" class="solution-link clickable" (click)="fixTp(check)">
+                                {{('ADMIN.INFO.TP_CHECK.AUTO_FIX_LINK') | translate }}
+                            </button>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -106,7 +134,7 @@
         </div>
     </div>
 </div>
-<div *ngIf="mode=='CONFIG'" class="content config">
+<div *ngIf="modeIsActive('CONFIG')" class="content config">
     <div class="heading"><i class="material-icons">build</i><span>{{'ADMIN.CONFIG.XML_CONFIG' | translate}}</span></div>
     <div class="group xml">
         <div *ngFor="let xml of editableXmls">
@@ -137,24 +165,24 @@
         </form>
     </div>
 </div>
-<div *ngIf="mode=='STATISTICS'" class="content statistics">
+<div *ngIf="modeIsActive('STATISTICS')" class="content statistics">
     <app-admin-statistics
         (onOpenNode)="debugNode($event)"
     ></app-admin-statistics>
 </div>
-<div *ngIf="mode=='MEDIACENTER'" class="content mediacenter">
+<div *ngIf="modeIsActive('MEDIACENTER')" class="content mediacenter">
     <app-admin-mediacenter
     ></app-admin-mediacenter>
 </div>
-<div *ngIf="mode=='FRONTPAGE'" class="content frontpage">
+<div *ngIf="modeIsActive('FRONTPAGE')" class="content frontpage">
     <app-admin-frontpage
         (onOpenNode)="debugNode($event)"
     ></app-admin-frontpage>
 </div>
-<div *ngIf="mode=='GLOBAL_CONFIG'" class="content global-config">
+<div *ngIf="modeIsActive('GLOBAL_CONFIG')" class="content global-config">
     <app-admin-config></app-admin-config>
 </div>
-<div *ngIf="mode=='APPLICATIONS'" class="content applications">
+<div *ngIf="modeIsActive('APPLICATIONS')" class="content applications">
   <input #xmlSelect type="file" style="display:none" id="xmlSelect" accept="application/xml" (change)="registerAppXml($event)" />
   <form class="register-app">
     <h4 class="mat-heading-4 mat-heading-underline">
@@ -232,7 +260,7 @@
         </div>
     </div>
 </div>
-<div *ngIf="mode=='UPDATE'" class="content update">
+<div *ngIf="modeIsActive('UPDATE')" class="content update">
   <div class="hint">
     {{'ADMIN.UPDATE.HINT' | translate}}
   </div>
@@ -254,7 +282,7 @@
     </div>
   </div>
 </div>
-<div *ngIf="mode=='IMPORT'" class="content import">
+<div *ngIf="modeIsActive('IMPORT')" class="content import">
   <div class="heading"><i class="material-icons">layers</i><span>{{'ADMIN.IMPORT.COLLECTION' | translate}}</span></div>
   <div class="collections">
     <input #xmlCollectionsSelect type="file" style="display:none" id="xmlCollectionsSelect" accept=".xml, .zip" (change)="updateCollectionsFile($event)">
@@ -382,7 +410,7 @@
     </div>
   </div>
 </div>
-<div *ngIf="mode=='JOBS'" class="content jobs">
+<div *ngIf="modeIsActive('JOBS')" class="content jobs">
     <div class="heading"><i class="material-icons">done</i><span>{{'ADMIN.TOOLKIT.START_JOB' | translate}}</span></div>
     <div class="group">
         <form>
@@ -480,74 +508,90 @@
         </div>
     </div>
 </div>
-<div *ngIf="mode=='TOOLKIT'" class="content toolkit">
+<div *ngIf="modeIsActive('TOOLKIT')" class="content toolkit">
   <div class="heading"><i class="material-icons">refresh</i><span>{{'ADMIN.TOOLKIT.REFRESH_APP' | translate}}</span></div>
   <div class="group">
     <div class="info">{{'ADMIN.TOOLKIT.REFRESH_APP_INFO' | translate }}</div>
-    <div class="btn-flat btn-shadow" (click)="refreshAppInfo()">{{'ADMIN.TOOLKIT.REFRESH_APP' | translate }}</div>
+    <button mat-raised-button (click)="refreshAppInfo()">{{'ADMIN.TOOLKIT.REFRESH_APP' | translate }}</button>
   </div>
   <div class="group">
     <div class="info">{{'ADMIN.TOOLKIT.REFRESH_EDU_GROUP_CACHE' | translate }}</div>
-    <div class="btn-flat btn-shadow" (click)="refreshEduGroupCache()">{{'ADMIN.TOOLKIT.REFRESH_EDU_GROUP_CACHE' | translate }}</div>
+    <button mat-raised-button (click)="refreshEduGroupCache()">{{'ADMIN.TOOLKIT.REFRESH_EDU_GROUP_CACHE' | translate }}</button>
   </div>
   <div class="heading"><i class="material-icons">cached</i><span>{{'ADMIN.TOOLKIT.CACHE' | translate}}</span></div>
     <div class="group">
         <form (ngSubmit)="getCacheInfo()">
             <input type="text" name="cacheInfo" class="cacheInfo" [(ngModel)]="cacheInfo" placeholder="{{'ADMIN.TOOLKIT.CACHE_NAME' | translate }}">
-            <div class="btn-flat btn-shadow" (click)="getCacheInfo()">{{'ADMIN.TOOLKIT.CACHE_INFO' | translate }}</div>
+            <button mat-raised-button (click)="getCacheInfo()">{{'ADMIN.TOOLKIT.CACHE_INFO' | translate }}</button>
         </form>
     </div>
     <div class="group caches">
         <div class="inputGroup">
-            <a class="btn-flat btn-shadow" (click)="chooseDirectory=true">{{'ADMIN.TOOLKIT.CACHE_ROOT_FOLDER' | translate}}</a>
+            <button mat-raised-button (click)="chooseDirectory=true">{{'ADMIN.TOOLKIT.CACHE_ROOT_FOLDER' | translate}}</button>
             <div class="directory"><div *ngIf="parentNode">{{ parentNode.name}} ({{parentNode.ref.id}})</div></div>
         </div>
         <div class="group">
             <div class="inputGroup">
-                <a class="btn-flat btn-shadow" (click)="refreshCache(false)">{{'ADMIN.TOOLKIT.REFRESH_CACHE' | translate}}</a>
-                <a class="btn-flat btn-shadow" (click)="refreshCache(true)">{{'ADMIN.TOOLKIT.STICKY_REFRESH_CACHE' | translate}}</a>
+                <button mat-raised-button (click)="refreshCache(false)">{{'ADMIN.TOOLKIT.REFRESH_CACHE' | translate}}</button>
+                <button mat-raised-button (click)="refreshCache(true)">{{'ADMIN.TOOLKIT.STICKY_REFRESH_CACHE' | translate}}</button>
             </div>
         </div>
         <div class="propertyGroup">
             <input type="text" [(ngModel)]="propertyName" placeholder="{{'ADMIN.TOOLKIT.PROPERTY_NAME' | translate}}">
-            <a class="btn-flat btn-shadow" (click)="getPropertyValues()">{{'ADMIN.TOOLKIT.PROPERTY_VALUESPACE' | translate}}</a>
+            <button mat-raised-button (click)="getPropertyValues()">{{'ADMIN.TOOLKIT.PROPERTY_VALUESPACE' | translate}}</button>
         </div>
     </div>
     <div class="heading"><i class="material-icons">file_upload</i><span>{{'ADMIN.TOOLKIT.UPLOAD_TEMP' | translate}}</span></div>
   <div class="group">
     <input #uploadTempSelect type="file" style="display:none" id="uploadTempSelect" (change)="updateUploadTempFile($event)">
     <div class="inputGroup">
-      <a class="btn-flat btn-shadow" (click)="uploadTempSelect.click()">{{'ADMIN.TOOLKIT.CHOOSE_UPLOAD_TEMP' | translate}}</a>
+      <button mat-raised-button (click)="uploadTempSelect.click()">{{'ADMIN.TOOLKIT.CHOOSE_UPLOAD_TEMP' | translate}}</button>
       <div class="file">{{ (uploadTempFile ? uploadTempFile.name : '') }}</div>
     </div>
-    <a class="btn waves-effect waves-light" (click)="startUploadTempFile()">{{'ADMIN.TOOLKIT.UPLOAD_TEMP_START' | translate}}</a>
+    <button mat-flat-button color="primary" (click)="startUploadTempFile()">{{'ADMIN.TOOLKIT.UPLOAD_TEMP_START' | translate}}</button>
   </div>
   <div class="heading"><i class="material-icons">textsms</i><span>{{'ADMIN.TOOLKIT.CATALINA' | translate}}</span></div>
   <div class="group catalina">
-    <div class="btn-flat btn-shadow" (click)="refreshCatalina()"><i class="material-icons">refresh</i></div>
-    <textarea id="catalina" #catalinaRef [ngModel]="catalina" readonly></textarea>
+     <button mat-raised-button (click)="refreshCatalina()"><i class="material-icons">refresh</i></button>
+      <mat-form-field>
+        <textarea matInput
+                  cdkTextareaAutosize
+                  cdkAutosizeMinRows="2"
+                  cdkAutosizeMaxRows="15"
+                  id="catalina" #catalinaRef [ngModel]="catalina" readonly></textarea>
+      </mat-form-field>
   </div>
 </div>
-<div *ngIf="mode=='BROWSER'" class="content browser">
+<div *ngIf="modeIsActive('BROWSER')" class="content browser">
   <div class="heading"><i class="material-icons">search</i><span>{{'ADMIN.BROWSER.NODE_BROWSER' | translate}}</span></div>
     <div class="inputGroupGrow">
         <div class="info">{{'ADMIN.BROWSER.MODE' | translate }}</div>
-        <select [(ngModel)]="lucene.mode">
-            <option value="NODEREF">Node-Ref / Node-Id</option>
-            <option value="SOLR">Solr / Lucene Query</option>
-        </select>
+        <mat-form-field>
+            <mat-select [(ngModel)]="lucene.mode">
+                <mat-option value="NODEREF">Node-Ref / Node-Id</mat-option>
+                <mat-option value="SOLR">Solr / Lucene Query</mat-option>
+            </mat-select>
+        </mat-form-field>
     </div>
     <div *ngIf="lucene.mode=='NODEREF'" class="group">
         <div class="inputGroupGrow">
-            <div class="info">{{'ADMIN.BROWSER.NODEREF' | translate }}</div>
-            <input type="text" name="noderef" [(ngModel)]="lucene.noderef" placeholder='aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee"'>
+            <mat-form-field>
+                <mat-label>{{'ADMIN.BROWSER.NODEREF' | translate }}</mat-label>
+                <input matInput type="text" name="noderef" [(ngModel)]="lucene.noderef" placeholder='aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee"'>
+            </mat-form-field>
         </div>
-        <a class="btn waves-effect waves-light" (click)="searchNoderef()">{{'ADMIN.BROWSER.LUCENE_START' | translate}}</a>
+        <button mat-flat-button color="primary" (click)="searchNoderef()">{{'ADMIN.BROWSER.LUCENE_START' | translate}}</button>
     </div>
   <div *ngIf="lucene.mode=='SOLR'" class="group">
     <div class="inputGroupGrow">
-      <div class="info">{{'ADMIN.BROWSER.LUCENE_QUERY' | translate }}</div>
-      <textarea name="luceneQuery" class="materialize-textarea" [(ngModel)]="lucene.query" placeholder='@cm\:name:"*"'></textarea>
+        <mat-form-field>
+            <mat-label>{{'ADMIN.BROWSER.LUCENE_QUERY' | translate }}</mat-label>
+            <textarea matInput
+                      cdkTextareaAutosize
+                      cdkAutosizeMinRows="2"
+                      cdkAutosizeMaxRows="5"
+                      name="luceneQuery" [(ngModel)]="lucene.query" placeholder='@cm\:name:"*"'></textarea>
+        </mat-form-field>
     </div>
       <div class="inputGroupGrow">
           <div class="info">{{'ADMIN.BROWSER.OUTPUT_MODE' | translate }}</div>
@@ -557,19 +601,27 @@
             </mat-radio-group>
       </div>
       <div class="inputGroupGrow" *ngIf="lucene.outputMode=='export'">
-          <div class="info">{{'ADMIN.BROWSER.LUCENE_EXPORT_PROPERTIES_HINT' | translate }}</div>
-          <textarea class="materialize-textarea export-properties" [(ngModel)]="lucene.properties"></textarea>
+          <mat-form-field>
+              <mat-label>{{'ADMIN.BROWSER.LUCENE_EXPORT_PROPERTIES' | translate }}</mat-label>
+              <textarea matInput
+                        cdkTextareaAutosize
+                        cdkAutosizeMinRows="2"
+                        cdkAutosizeMaxRows="5"
+                        class="export-properties" [(ngModel)]="lucene.properties"></textarea>
+              <mat-hint>{{'ADMIN.BROWSER.LUCENE_EXPORT_PROPERTIES_HINT' | translate }}</mat-hint>
+          </mat-form-field>
       </div>
       <div class="inputGroupGrow" *ngIf="lucene.outputMode=='export'">
           <div class="info">{{'ADMIN.BROWSER.OUTPUT_MODE' | translate }}</div>
           <div>
-              <input type="radio" name="exportFormat" id="exportFormatCSV" [(ngModel)]="lucene.exportFormat" value="csv"><label for="exportFormatCSV">{{'ADMIN.BROWSER.EXPORT_FORMAT_CSV' | translate}}</label>
-              <input type="radio" name="exportFormat" id="exportFormatJSON" [(ngModel)]="lucene.exportFormat" value="json"><label for="exportFormatJSON">{{'ADMIN.BROWSER.EXPORT_FORMAT_JSON' | translate}}</label>
+              <mat-radio-group [(ngModel)]="lucene.exportFormat">
+                <mat-radio-button name="exportFormat" value="csv">{{'ADMIN.BROWSER.EXPORT_FORMAT_CSV' | translate}}</mat-radio-button>
+                <mat-radio-button name="exportFormat" value="json">{{'ADMIN.BROWSER.EXPORT_FORMAT_JSON' | translate}}</mat-radio-button>
+              </mat-radio-group>
           </div>
       </div>
       <div class="inputGroupGrow" *ngIf="lucene.outputMode=='export'">
-          <div></div>
-          <div><a class="btn waves-effect waves-light" (click)="exportLucene()">{{'ADMIN.BROWSER.LUCENE_EXPORT_START' | translate}}</a></div>
+          <div><button mat-flat-button color="primary" (click)="exportLucene()">{{'ADMIN.BROWSER.LUCENE_EXPORT_START' | translate}}</button></div>
       </div>
     <div class="inputGroupGrow" *ngIf="lucene.outputMode=='view'">
       <div class="info">{{'ADMIN.BROWSER.LUCENE_AUTHORITIES' | translate }}</div>
@@ -585,11 +637,17 @@
         </mat-chip-list>
     </div>
   <div class="inputGroupGrow lucenePaging" *ngIf="lucene.outputMode=='view'">
-      <div class="info">{{'ADMIN.BROWSER.LUCENE_OFFSET' | translate }}</div>
-      <input type="number" name="luceneOffset" [(ngModel)]="lucene.offset">
-      <div class="info">{{'ADMIN.BROWSER.LUCENE_COUNT' | translate }}</div>
-      <input type="number" name="luceneCount" [(ngModel)]="lucene.count">
-      <a class="btn waves-effect waves-light" (click)="searchLucene()">{{'ADMIN.BROWSER.LUCENE_START' | translate}}</a>
+      <mat-form-field>
+          <mat-label>{{'ADMIN.BROWSER.LUCENE_OFFSET' | translate }}</mat-label>
+          <input matInput type="number" name="luceneOffset" [(ngModel)]="lucene.offset">
+      </mat-form-field>
+      <mat-form-field>
+          <mat-label>{{'ADMIN.BROWSER.LUCENE_COUNT' | translate }}</mat-label>
+          <input matInput type="number" name="luceneCount" [(ngModel)]="lucene.count">
+      </mat-form-field>
+      <div>
+          <button mat-flat-button color="primary" (click)="searchLucene()">{{'ADMIN.BROWSER.LUCENE_START' | translate}}</button>
+      </div>
   </div>
   </div>
     <div *ngIf="lucene.mode=='NODEREF' || lucene.outputMode=='view'" class="search-list">
@@ -607,9 +665,8 @@
     </div>
 </div>
 <div *ngIf="mode=='FOLDERTEMPLATES'" class="content foldertemplates">
-  <form (ngSubmit)="applyTemplate()">
+  <form>
     <autocomplete
-            [id]="eduGroup"
             [inputMinLength]="2"
             (addItem)="addEduGroup($event)"
             [placeholder]="'ADMIN.FOLDERTEMPLATES.EDUGROUP'"
@@ -622,15 +679,27 @@
         <i class="material-icons clickable" (click)="removeEduGroup(eduGroup)">cancel</i>
       </div>
     </div>
-    <select [(ngModel)]="selectedTemplate" name="template">
-      <option *ngFor="let option of templates">{{ option }}</option>
-    </select>
-    <a class="goto-folder clickable" (click)="gotoFoldertemplateFolder()">{{'ADMIN.FOLDERTEMPLATES.GOTO_FOLDERTEMPLATES' | translate }}</a>
-    <div class="btn btn-shadow" (click)="applyTemplate()">{{'ADMIN.FOLDERTEMPLATES.APPLYTEMPLATE' | translate }}</div>
+      <div class="inputGroupGrow">
+          <mat-form-field>
+              <mat-select [(ngModel)]="selectedTemplate" name="template">
+                  <mat-option *ngFor="let option of templates" [value]="option">{{ option }}</mat-option>
+              </mat-select>
+          </mat-form-field>
+          <div>
+              <button mat-raised-button class="btnXml" (click)="templateSelect.click()">{{'ADMIN.FOLDERTEMPLATES.UPLOAD_TEMPLATE' | translate}}</button>
+          </div>
+      </div>
+      <div class="inputGroupGrow">
+          <div>
+            <button mat-button color="primary" class="goto-folder" (click)="gotoFoldertemplateFolder()">{{'ADMIN.FOLDERTEMPLATES.GOTO_FOLDERTEMPLATES' | translate }}</button>
+          </div>
+          <div>
+            <button mat-raised-button (click)="applyTemplate()">{{'ADMIN.FOLDERTEMPLATES.APPLYTEMPLATE' | translate }}</button>
+          </div>
+      </div>
   </form>
   <div class="group">
     <input #templateSelect type="file" style="display:none" id="templateSelect" accept="application/xml" (change)="uploadTemplate($event)" />
-    <div class="btn-flat btn-shadow btnXml" (click)="templateSelect.click()">{{'ADMIN.FOLDERTEMPLATES.UPLOAD_TEMPLATE' | translate}}</div>
     <div class="upload-hint">{{'ADMIN.FOLDERTEMPLATES.UPLOAD_HINT' | translate}}</div>
   </div>
 </div>

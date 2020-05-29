@@ -15,6 +15,7 @@ public class About  {
   private ServiceVersion version = null;
   private List<Service> services = new ArrayList<Service>();
   private String themesUrl;
+  private long lastCacheUpdate;
 
   
   /**
@@ -38,6 +39,15 @@ public class About  {
   }
   public void setServices(List<Service> services) {
     this.services = services;
+  }
+
+  @JsonProperty
+  public long getLastCacheUpdate() {
+    return lastCacheUpdate;
+  }
+
+  public void setLastCacheUpdate(long lastCacheUpdate) {
+    this.lastCacheUpdate = lastCacheUpdate;
   }
 
   @JsonProperty

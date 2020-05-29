@@ -6,7 +6,7 @@ $sidenavWidthMobile:66px;
 .main{
   display: flex;
   width: 100%;
-  height: 100%;
+  min-height: 100%;
   .main-nav{
     position: fixed;
     display: flex;
@@ -101,8 +101,16 @@ $sidenavWidthMobile:66px;
     white-space: pre-line;
     padding:0 20px;
   }
-  .checks{
+  .checks, .checks-toolpermissions{
     position: relative;
+    .info{
+      padding:5px 20px 25px 20px;
+    }
+    .tp-name{
+      font-size: $fontSizeSmall;
+      color: $textLight;
+      padding-bottom: 10px;
+    }
     .check {
       display: flex;
       flex-direction: row;
@@ -260,7 +268,7 @@ $sidenavWidthMobile:66px;
   padding:20px 0;
   display: flex;
   align-items: center;
-  >a,>div{
+  >a,>div,>button{
     display: flex;
   }
   .file,.directory{
@@ -342,7 +350,7 @@ $sidenavWidthMobile:66px;
 }
 .toolkit{
   max-width: 1200px;
-  a.btn{
+  a.btn, button{
     float:right;
   }
   .group .inputGroup{
@@ -432,20 +440,12 @@ $sidenavWidthMobile:66px;
 .foldertemplates {
   max-width: 900px;
   margin: auto;
-  .btn {
-    float:right;
-    margin-top: 40px;
-  }
-  .goto-folder {
-    display: inline-block;
-    margin-top: 20px;
-  }
   .eduGroupsSelected{
     margin: 20px 10px;
   }
   .group {
     float: left;
-    margin-top: 60px;
+    margin-top: 20px;
     .upload-hint{
       display:inline-block;
       margin-top: 10px;

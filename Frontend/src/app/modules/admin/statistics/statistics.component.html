@@ -45,7 +45,7 @@
             </div>
             <div class="group">
                 <mat-label>{{'ADMIN.STATISTICS.SINGLE_MODE' | translate}}</mat-label>
-                <mat-radio-group [(ngModel)]="customGroupMode">
+                <mat-radio-group [(ngModel)]="customGroupMode" *ngIf="_mediacenter || (nodesPermission && userPermission)">
                     <mat-radio-button value="NODES">{{'ADMIN.STATISTICS.MODE_NODES' | translate}}</mat-radio-button>
                     <mat-radio-button value="USERS">{{'ADMIN.STATISTICS.MODE_USERS' | translate}}</mat-radio-button>
                 </mat-radio-group>
@@ -82,7 +82,7 @@
             </mat-table>
         </div>
     </mat-tab>
-    <mat-tab label="{{'ADMIN.STATISTICS.NODES' | translate}}" class="stats-nodes">
+    <mat-tab label="{{'ADMIN.STATISTICS.NODES' | translate}}" class="stats-nodes" *ngIf="_mediacenter || nodesPermission">
         <h4 class="mat-heading-4 mat-heading-underline"><i icon iconId="assessment"></i> {{'ADMIN.STATISTICS.NODES' | translate}}</h4>
         <div class="modes">
             <div class="calendars">
@@ -111,7 +111,7 @@
     <mat-tab label="{{'ADMIN.STATISTICS.SINGLE' | translate}}" class="stats-single">
         <h4 class="mat-heading-4 mat-heading-underline"><i icon iconId="view_headline"></i> {{'ADMIN.STATISTICS.SINGLE' | translate}}</h4>
         <div class="modes">
-            <div class="group">
+            <div class="group" *ngIf="_mediacenter || (nodesPermission && userPermission)">
                 <mat-label>{{'ADMIN.STATISTICS.SINGLE_MODE' | translate}}</mat-label>
                 <mat-radio-group [(ngModel)]="singleMode">
                     <mat-radio-button value="NODES">{{'ADMIN.STATISTICS.MODE_NODES' | translate}}</mat-radio-button>

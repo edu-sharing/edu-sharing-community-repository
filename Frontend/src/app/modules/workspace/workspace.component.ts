@@ -386,7 +386,7 @@ export class WorkspaceMainComponent implements EventListener, OnDestroy {
                                     return;
                                 }
                                 const lastLocation = this.storage.pop(TemporaryStorageService.WORKSPACE_LAST_LOCATION, null);
-                                if(lastLocation) {
+                                if(!params.id && lastLocation) {
                                     this.openDirectory(lastLocation);
                                 } else {
                                     this.openDirectoryFromRoute(params);

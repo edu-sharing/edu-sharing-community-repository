@@ -14,9 +14,10 @@ import java.util.Map;
 
 public class JobLogger extends ConsoleAppender {
 
-    public static final List<Class> IGNORABLE_JOBS = new ArrayList<Class>();
+    public static final List<String> IGNORABLE_JOBS = new ArrayList<>();
     static{
-        IGNORABLE_JOBS.add(SystemStatisticJob.class);
+        IGNORABLE_JOBS.add(SystemStatisticJob.class.getName());
+        IGNORABLE_JOBS.add("org.edu_sharing.repository.server.jobs.quartz.ClusterInfoJob");
     }
 
     public static String getLogsForJob(String className){

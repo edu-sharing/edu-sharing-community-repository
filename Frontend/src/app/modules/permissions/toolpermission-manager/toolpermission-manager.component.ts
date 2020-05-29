@@ -48,7 +48,8 @@ export class ToolpermissionManagerComponent {
     ]},
     {name:"DATA_MANAGEMENT",icon:"folder",permissions:[
         RestConstants.TOOLPERMISSION_WORKSPACE,
-        RestConstants.TOOLPERMISSION_UNCHECKEDCONTENT
+        RestConstants.TOOLPERMISSION_UNCHECKEDCONTENT,
+        RestConstants.TOOLPERMISSION_RATE
     ]},
     {name:"SAFE",icon:"lock",permissions:[
         RestConstants.TOOLPERMISSION_CONFIDENTAL,
@@ -62,9 +63,13 @@ export class ToolpermissionManagerComponent {
         RestConstants.TOOLPERMISSION_COLLECTION_CURRICULUM,
         RestConstants.TOOLPERMISSION_COLLECTION_PINNING,
         RestConstants.TOOLPERMISSION_COLLECTION_FEEDBACK,
-    ]},
+        RestConstants.TOOLPERMISSION_VIDEO_AUDIO_CUT,
+        RestConstants.TOOLPERMISSION_COLLECTION_CHANGE_OWNER,
+        ]},
     {name:"MANAGEMENT",icon:"settings",permissions:[
         RestConstants.TOOLPERMISSION_USAGE_STATISTIC,
+        RestConstants.TOOLPERMISSION_GLOBAL_STATISTICS_NODES,
+        RestConstants.TOOLPERMISSION_GLOBAL_STATISTICS_USER,
     ]},
     {name:"CONNECTORS",icon:"edit"},
     {name:"REPOSITORIES",icon:"cloud"},

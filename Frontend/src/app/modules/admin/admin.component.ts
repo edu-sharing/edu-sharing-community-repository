@@ -2,7 +2,13 @@ import {Translation} from '../../core-ui-module/translation';
 import {UIHelper} from '../../core-ui-module/ui-helper';
 import {ActivatedRoute, Router} from '@angular/router';
 import {Toast} from '../../core-ui-module/toast';
-import {ConfigurationService, DialogButton, ListItem, RestMediacenterService} from '../../core-module/core.module';
+import {
+  ConfigurationService,
+  DialogButton,
+  ListItem,
+  RestIamService,
+  RestMediacenterService
+} from '../../core-module/core.module';
 import {Title} from '@angular/platform-browser';
 import {TranslateService} from '@ngx-translate/core';
 import {SessionStorageService} from '../../core-module/core.module';
@@ -30,9 +36,9 @@ import {RestHelper} from '../../core-module/core.module';
 import {Observable, Observer} from 'rxjs/index';
 import {RestNetworkService} from '../../core-module/core.module';
 import {MainNavComponent} from '../../common/ui/main-nav/main-nav.component';
-import {CustomHelper} from "../../common/custom-helper";
-import {GlobalContainerComponent} from "../../common/ui/global-container/global-container.component";
-import {DateHelper} from "../../core-ui-module/DateHelper";
+import {CustomHelper} from '../../common/custom-helper';
+import {GlobalContainerComponent} from '../../common/ui/global-container/global-container.component';
+import {DateHelper} from '../../core-ui-module/DateHelper';
 import {CsvHelper} from '../../core-module/csv.helper';
 import {trigger} from '@angular/animations';
 import {UIAnimation} from '../../core-module/ui/ui-animation';
@@ -47,12 +53,60 @@ import {UIAnimation} from '../../core-module/ui/ui-animation';
   ]
 })
 export class AdminComponent {
+  constructor(private toast: Toast,
+              private route: ActivatedRoute,
+              private router: Router,
+              private config: ConfigurationService,
+              private title: Title,
+              private translate: TranslateService,
+              private iamService: RestIamService,
+              private storage : SessionStorageService,
+              private networkService : RestNetworkService,
+              private mediacenterService : RestMediacenterService,
+              private componentFactoryResolver : ComponentFactoryResolver,
+              private viewContainerRef : ViewContainerRef,
+              private admin : RestAdminService,
+              private connector: RestConnectorService,
+              private node: RestNodeService,
+              private searchApi: RestSearchService,
+              private organization: RestOrganizationService) {
+      this.addCustomComponents(CustomHelper.getCustomComponents('AdminComponent',this.componentFactoryResolver));
+      this.searchColumns.push(new ListItem('NODE', RestConstants.CM_NAME));
+      this.searchColumns.push(new ListItem('NODE', RestConstants.NODE_ID));
+      this.searchColumns.push(new ListItem('NODE', RestConstants.CM_MODIFIED_DATE));
+      Translation.initialize(translate, this.config, this.storage, this.route).subscribe(() => {
+          this.prepareJobClasses();
+          this.storage.refresh();
+      UIHelper.setTitle('ADMIN.TITLE', this.title, this.translate, this.config);
+      GlobalContainerComponent.finishPreloading();
+      this.warningButtons=[
+        new DialogButton('CANCEL',DialogButton.TYPE_CANCEL,()=> {window.history.back()}),
+        new DialogButton('ADMIN.UNDERSTAND',DialogButton.TYPE_PRIMARY,()=> {this.showWarning=false})
+      ];
+      this.xmlCardButtons=[
+          new DialogButton('CANCEL',DialogButton.TYPE_CANCEL,()=> {this.xmlAppProperties=null}),
+          new DialogButton('APPLY',DialogButton.TYPE_PRIMARY,()=> {this.saveApp()})
+      ];
+      this.getTemplates();
+      this.connector.isLoggedIn().subscribe((data: LoginResult) => {
+          this.loginResult=data;
+          this.mediacenterService.getMediacenters().subscribe((mediacenters)=> {
+              this.mediacenters=mediacenters;
+              this.init();
+          });
+      });
+    });
+  }
+  private static MULTILINE_PROPERTIES = [
+    'custom_html_headers','public_key'
+  ];
+  static RS_CONFIG_HELP='https://docs.edu-sharing.com/confluence/edp/de/installation-en/installation-of-the-edu-sharing-rendering-service';
   mailTemplates=[
-      "invited",
-      "nodeIssue",
-      "userRegister",
-      "passwordRequest",
-      "userRegisterInformation"
+      'invited',
+      'nodeIssue',
+      'userRegister',
+      'passwordRequest',
+      'userRegisterInformation'
   ];
   public mode : string;
   public globalProgress=true;
@@ -112,360 +166,314 @@ export class AdminComponent {
     {name:'HOMEAPP',file:RestConstants.HOME_APPLICATION_XML},
     {name:'CCMAIL',file:RestConstants.CCMAIL_APPLICATION_XML},
   ]
-  private static MULTILINE_PROPERTIES = [
-    'custom_html_headers','public_key'
-  ];
   luceneNodes: Node[];
   luceneCount: number;
   searchColumns: ListItem[]=[];
   nodeInfo: Node;
-  public selectedTemplate:string = '';
+  public selectedTemplate = '';
   public templates:string[];
   public eduGroupSuggestions:SuggestItem[];
   public eduGroupsSelected:SuggestItem[] = [];
   systemChecks : any = [];
+  tpChecks : any = [];
   mailReceiver: string;
   mailTemplate: string;
   private loginResult: LoginResult;
   private mediacenters: any[];
-  ownAppMode="repository";
-  static RS_CONFIG_HELP='https://docs.edu-sharing.com/confluence/edp/de/installation-en/installation-of-the-edu-sharing-rendering-service';
-  public startJob(){
+  ownAppMode='repository';
+  public startJob() {
     this.storage.set('admin_job',this.job);
     this.globalProgress=true;
-    this.admin.startJob(this.job.class,this.job.params).subscribe(()=>{
+    this.admin.startJob(this.job.class,this.job.params).subscribe(()=> {
         this.globalProgress=false;
         this.toast.toast('ADMIN.TOOLKIT.JOB_STARTED');
-    },(error:any)=>{
+    },(error:any)=> {
         this.globalProgress=false;
         this.toast.error(error);
     });
   }
-  public debugNode(node:Node){
+  public debugNode(node:Node) {
     this.nodeInfo=node;
   }
-  public getModeButton(mode=this.mode) : any{
+  public getModeButton(mode=this.mode) : any {
       return this.buttons[Helper.indexOfObjectArray(this.buttons,'id',mode)];
   }
     public searchNoderef() {
         this.storage.set('admin_lucene', this.lucene);
         this.globalProgress=true;
-        this.node.getNodeMetadata(this.lucene.noderef,[RestConstants.ALL]).subscribe((node)=>{
+        this.node.getNodeMetadata(this.lucene.noderef,[RestConstants.ALL]).subscribe((node)=> {
             this.globalProgress=false;
             this.luceneNodes=[node.node];
             this.luceneCount=1;
-        },(error)=>{
+        },(error)=> {
             this.globalProgress=false;
             this.toast.error(error);
         });
     }
-  public searchLucene(){
+  public searchLucene() {
     this.storage.set('admin_lucene',this.lucene);
-    let authorities=[];
-    if(this.lucene.authorities){
-      for(let auth of this.lucene.authorities){
+    const authorities=[];
+    if(this.lucene.authorities) {
+      for(const auth of this.lucene.authorities) {
         authorities.push(auth.authorityName);
       }
     }
-    let request={
+    const request= {
       offset:this.lucene.offset ? this.lucene.offset : 0,
       count:this.lucene.count,
       propertyFilter:[RestConstants.ALL]
     };
     this.globalProgress=true;
-    this.admin.searchLucene(this.lucene.query,authorities,request).subscribe((data:NodeList)=>{
+    this.admin.searchLucene(this.lucene.query,authorities,request).subscribe((data:NodeList)=> {
       this.globalProgress=false;
       this.luceneNodes=data.nodes;
       this.luceneCount=data.pagination.total;
-    },(error:any)=>{
+    },(error:any)=> {
       this.globalProgress=false;
       this.toast.error(error);
     });
   }
-  public addLuceneAuthority(authority:Authority){
+  public addLuceneAuthority(authority:Authority) {
     if(!this.lucene.authorities)
       this.lucene.authorities=[];
     this.lucene.authorities.push(authority);
   }
-  public removeLuceneAuthority(authority:Authority){
+  public removeLuceneAuthority(authority:Authority) {
     this.lucene.authorities.splice(this.lucene.authorities.indexOf(authority),1);
   }
-  constructor(private toast: Toast,
-              private route: ActivatedRoute,
-              private router: Router,
-              private config: ConfigurationService,
-              private title: Title,
-              private translate: TranslateService,
-              private storage : SessionStorageService,
-              private networkService : RestNetworkService,
-              private mediacenterService : RestMediacenterService,
-              private componentFactoryResolver : ComponentFactoryResolver,
-              private viewContainerRef : ViewContainerRef,
-              private admin : RestAdminService,
-              private connector: RestConnectorService,
-              private node: RestNodeService,
-              private searchApi: RestSearchService,
-              private organization: RestOrganizationService) {
-      this.addCustomComponents(CustomHelper.getCustomComponents("AdminComponent",this.componentFactoryResolver));
-      this.searchColumns.push(new ListItem('NODE', RestConstants.CM_NAME));
-      this.searchColumns.push(new ListItem('NODE', RestConstants.NODE_ID));
-      this.searchColumns.push(new ListItem('NODE', RestConstants.CM_MODIFIED_DATE));
-      Translation.initialize(translate, this.config, this.storage, this.route).subscribe(() => {
-          this.prepareJobClasses();
-          this.storage.refresh();
-      UIHelper.setTitle('ADMIN.TITLE', this.title, this.translate, this.config);
-      GlobalContainerComponent.finishPreloading();
-      this.warningButtons=[
-        new DialogButton('CANCEL',DialogButton.TYPE_CANCEL,()=>{window.history.back()}),
-        new DialogButton('ADMIN.UNDERSTAND',DialogButton.TYPE_PRIMARY,()=>{this.showWarning=false})
-      ];
-      this.xmlCardButtons=[
-          new DialogButton('CANCEL',DialogButton.TYPE_CANCEL,()=>{this.xmlAppProperties=null}),
-          new DialogButton('APPLY',DialogButton.TYPE_PRIMARY,()=>{this.saveApp()})
-      ];
-      this.getTemplates();
-      this.connector.isLoggedIn().subscribe((data: LoginResult) => {
-          this.loginResult=data;
-          this.mediacenterService.getMediacenters().subscribe((mediacenters)=>{
-              this.mediacenters=mediacenters;
-              this.init();
-          });
-      });
-    });
-  }
-  public isMultilineProperty(key:string){
+  public isMultilineProperty(key:string) {
     if(AdminComponent.MULTILINE_PROPERTIES.indexOf(key)!=-1)
       return true;
     return this.xmlAppProperties[key].indexOf('\n')!=-1;
   }
-  public downloadApp(app:Application){
+  public downloadApp(app:Application) {
     Helper.downloadContent(app.file,app.xml);
   }
-  public updateExcelFile(event:any){
+  public updateExcelFile(event:any) {
     this.excelFile=event.target.files[0];
   }
-  public updateUploadTempFile(event:any){
+  public updateUploadTempFile(event:any) {
     this.uploadTempFile=event.target.files[0];
   }
-    public updateUploadOaiFile(event:any){
+    public updateUploadOaiFile(event:any) {
         this.uploadOaiFile=event.target.files[0];
     }
-  public updateCollectionsFile(event:any){
+  public updateCollectionsFile(event:any) {
     this.collectionsFile=event.target.files[0];
   }
-  public importCollections(){
-    if(!this.collectionsFile){
+  public importCollections() {
+    if(!this.collectionsFile) {
       this.toast.error(null,'ADMIN.IMPORT.CHOOSE_COLLECTIONS_XML');
       return;
     }
-    if(!this.parentCollection && this.parentCollectionType=='choose'){
+    if(!this.parentCollection && this.parentCollectionType=='choose') {
       this.toast.error(null,'ADMIN.IMPORT.CHOOSE_COLLECTION');
       return;
     }
     this.globalProgress=true;
-    this.admin.importCollections(this.collectionsFile,this.parentCollectionType=='root' ? RestConstants.ROOT : this.parentCollection.ref.id).subscribe((data:any)=>{
+    this.admin.importCollections(this.collectionsFile,this.parentCollectionType=='root' ? RestConstants.ROOT : this.parentCollection.ref.id).subscribe((data:any)=> {
       this.toast.toast('ADMIN.IMPORT.COLLECTIONS_IMPORTED',{count:data.count});
       this.globalProgress=false;
       this.collectionsFile=null;
-    },(error:any)=>{
+    },(error:any)=> {
       this.toast.error(error);
       this.globalProgress=false;
     });
   }
-  public startUploadTempFile(){
-    if(!this.uploadTempFile){
+  public startUploadTempFile() {
+    if(!this.uploadTempFile) {
       this.toast.error(null,'ADMIN.TOOLKIT.CHOOSE_UPLOAD_TEMP');
       return;
     }
     this.globalProgress=true;
-    this.admin.uploadTempFile(this.uploadTempFile).subscribe((data:any)=>{
+    this.admin.uploadTempFile(this.uploadTempFile).subscribe((data:any)=> {
       this.toast.toast('ADMIN.TOOLKIT.UPLOAD_TEMP_DONE',{filename:data.file});
       this.globalProgress=false;
       this.uploadTempFile=null;
-    },(error:any)=>{
+    },(error:any)=> {
       this.toast.error(error);
       this.globalProgress=false;
     });
   }
-  public importExcel(){
-    if(!this.excelFile){
+  public importExcel() {
+    if(!this.excelFile) {
       this.toast.error(null,'ADMIN.IMPORT.CHOOSE_EXCEL');
       return;
     }
-    if(!this.parentNode){
+    if(!this.parentNode) {
       this.toast.error(null,'ADMIN.IMPORT.CHOOSE_DIRECTORY');
       return;
     }
     this.globalProgress=true;
-    this.admin.importExcel(this.excelFile,this.parentNode.ref.id).subscribe((data:any)=>{
+    this.admin.importExcel(this.excelFile,this.parentNode.ref.id).subscribe((data:any)=> {
       this.toast.toast('ADMIN.IMPORT.EXCEL_IMPORTED',{rows:data.rows});
       this.globalProgress=false;
       this.excelFile=null;
-    },(error:any)=>{
+    },(error:any)=> {
       this.toast.error(error);
       this.globalProgress=false;
     });
   }
-  public closeAppEditor(){
+  public closeAppEditor() {
     this.xmlAppProperties=null;
     this.xmlAppAdditionalPropertyName=null;
     this.xmlAppAdditionalPropertyValue=null;
   }
-  public saveApp(){
+  public saveApp() {
     this.globalProgress=true;
-    if(this.xmlAppAdditionalPropertyName && this.xmlAppAdditionalPropertyName.trim()){
+    if(this.xmlAppAdditionalPropertyName && this.xmlAppAdditionalPropertyName.trim()) {
       this.xmlAppProperties[this.xmlAppAdditionalPropertyName.trim()]=this.xmlAppAdditionalPropertyValue;
     }
-    this.admin.updateApplicationXML(this.currentAppXml,this.xmlAppProperties).subscribe(()=>{
+    this.admin.updateApplicationXML(this.currentAppXml,this.xmlAppProperties).subscribe(()=> {
       this.toast.toast('ADMIN.APPLICATIONS.APP_SAVED',{xml:this.currentAppXml});
         this.globalProgress=false;
         this.closeAppEditor();
         this.refreshAppList();
-    },(error:any)=>{
+    },(error:any)=> {
       this.globalProgress=false;
       this.toast.error(error);
     })
   }
-  public configApp(app:Application){
+  public configApp(app:Application) {
     window.open(app.configUrl);
   }
-  public editApp(app:any){
+  public editApp(app:any) {
     this.currentApp=app.name;
     this.currentAppXml=app.file;
     this.globalProgress=true;
-    this.admin.getApplicationXML(app.file).subscribe((data:any[])=>{
+    this.admin.getApplicationXML(app.file).subscribe((data:any[])=> {
       this.globalProgress=false;
       this.xmlAppKeys=Object.keys(data);
       this.xmlAppProperties=data;
-    },(error:any)=>{
+    },(error:any)=> {
       this.globalProgress=false;
       this.toast.error(error);
     });
   }
-  public removeApp(app:Application){
+  public removeApp(app:Application) {
     this.dialogTitle='ADMIN.APPLICATIONS.REMOVE_TITLE';
     this.dialogMessage='ADMIN.APPLICATIONS.REMOVE_MESSAGE';
     let info='';
-    for (let key in app) {
+    for (const key in app) {
       if(key=='xml')
         continue;
       info+=key+': '+(app as any)[key]+'\n';
     }
 
-    this.dialogParameters={info:info};
+    this.dialogParameters= {info};
     this.dialogButtons=[
-      new DialogButton('CANCEL',DialogButton.TYPE_CANCEL,()=>{this.dialogTitle=null}),
-      new DialogButton('ADMIN.APPLICATIONS.REMOVE',DialogButton.TYPE_PRIMARY,()=>{
+      new DialogButton('CANCEL',DialogButton.TYPE_CANCEL,()=> {this.dialogTitle=null}),
+      new DialogButton('ADMIN.APPLICATIONS.REMOVE',DialogButton.TYPE_PRIMARY,()=> {
         this.dialogTitle=null;
         this.globalProgress=true;
-        this.admin.removeApplication(app.id).subscribe(()=>{
+        this.admin.removeApplication(app.id).subscribe(()=> {
           this.globalProgress=false;
           this.refreshAppList();
-        },(error:any)=>{
+        },(error:any)=> {
           this.toast.error(error);
           this.globalProgress=false;
         })
       }),
     ];
   }
-  public setMode(mode:string){
-    this.router.navigate(['./'],{queryParams:{mode:mode},relativeTo:this.route});
+  public setMode(mode:string) {
+    this.router.navigate(['./'],{queryParams:{mode},relativeTo:this.route});
   }
-  public pickDirectory(event : Node[]){
+  public pickDirectory(event : Node[]) {
     this.parentNode=event[0];
     this.chooseDirectory=false;
   }
-  public pickCollection(event : Node[]){
+  public pickCollection(event : Node[]) {
     this.parentCollection=event[0];
     this.chooseCollection=false;
   }
-  public registerAppXml(event:any){
-    let file=event.target.files[0];
+  public registerAppXml(event:any) {
+    const file=event.target.files[0];
     if(!file)
       return;
     this.globalProgress=true;
-    this.admin.addApplicationXml(file).subscribe((data:any)=>{
+    this.admin.addApplicationXml(file).subscribe((data:any)=> {
       this.toast.toast('ADMIN.APPLICATIONS.APP_REGISTERED');
       this.refreshAppList();
       this.globalProgress=false;
       this.xmlSelect.nativeElement.value=null;
-    },(error:any)=>{
+    },(error:any)=> {
       this.globalProgress=false;
       this.xmlSelect.nativeElement.value=null;
       this.toast.error(error);
     });
   }
-  public registerApp(){
+  public registerApp() {
     this.globalProgress=true;
-    this.admin.addApplication(this.appUrl).subscribe((data:any)=>{
+    this.admin.addApplication(this.appUrl).subscribe((data:any)=> {
       this.toast.toast('ADMIN.APPLICATIONS.APP_REGISTERED');
       this.refreshAppList();
       this.globalProgress=false;
       this.appUrl='';
-    },(error:any)=>{
+    },(error:any)=> {
       this.globalProgress=false;
       this.toast.error(error);
     });
   }
-  public getCacheInfo(){
+  public getCacheInfo() {
     this.globalProgress=true;
-    this.admin.getCacheInfo(this.cacheInfo).subscribe((data:CacheInfo)=>{
+    this.admin.getCacheInfo(this.cacheInfo).subscribe((data:CacheInfo)=> {
       this.globalProgress=false;
       this.dialogTitle=this.cacheInfo;
       this.dialogMessage='size: '+data.size+'\nstatistic hits: '+data.statisticHits;
-      this.dialogButtons=DialogButton.getOk(()=>{this.dialogTitle=null;});
-    },(error:any)=>{
+      this.dialogButtons=DialogButton.getOk(()=> {this.dialogTitle=null;});
+    },(error:any)=> {
       this.globalProgress=false;
       this.toast.error(error);
     });
   }
-  public refreshAppInfo(){
+  public refreshAppInfo() {
     this.globalProgress=true;
-    this.admin.refreshAppInfo().subscribe(()=>{
+    this.admin.refreshAppInfo().subscribe(()=> {
       this.globalProgress=false;
       this.toast.toast('ADMIN.TOOLKIT.APP_INFO_REFRESHED');
-    },(error:any)=>{
+    },(error:any)=> {
       this.globalProgress=false;
       this.toast.error(error);
     });
   }
-  public refreshEduGroupCache(){
+  public refreshEduGroupCache() {
       this.globalProgress=true;
-      this.admin.refreshEduGroupCache().subscribe(()=>{
+      this.admin.refreshEduGroupCache().subscribe(()=> {
           this.globalProgress=false;
           this.toast.toast('ADMIN.TOOLKIT.EDU_GROUP_CACHE_REFRESHED');
-      },(error:any)=>{
+      },(error:any)=> {
           this.globalProgress=false;
           this.toast.error(error);
       });
   }
-  public refreshCache(sticky:boolean){
+  public refreshCache(sticky:boolean) {
     this.globalProgress=true;
-    this.admin.refreshCache(this.parentNode ? this.parentNode.ref.id : RestConstants.USERHOME,sticky).subscribe(()=>{
+    this.admin.refreshCache(this.parentNode ? this.parentNode.ref.id : RestConstants.USERHOME,sticky).subscribe(()=> {
       this.globalProgress=false;
       this.toast.toast('ADMIN.TOOLKIT.CACHE_REFRESHED');
-    },(error:any)=>{
+    },(error:any)=> {
       this.globalProgress=false;
       this.toast.error(error);
     })
   }
-  public removeAppProperty(pos:number){
-    let key=this.xmlAppKeys[pos];
+  public removeAppProperty(pos:number) {
+    const key=this.xmlAppKeys[pos];
     this.xmlAppKeys.splice(pos,1);
     delete this.xmlAppProperties[key];
   }
-  public oaiImport(){
+  public oaiImport() {
     if(!this.oaiPreconditions())
       return;
     this.globalProgress=true;
-    if(this.oaiSave){
+    if(this.oaiSave) {
       this.storage.set('admin_oai',this.oai);
     }
-    if(this.uploadOaiFile){
-        this.admin.importOAIXML(this.uploadOaiFile,this.oai.recordHandlerClassName, this.oai.binaryHandlerClassName).subscribe((node)=>{
+    if(this.uploadOaiFile) {
+        this.admin.importOAIXML(this.uploadOaiFile,this.oai.recordHandlerClassName, this.oai.binaryHandlerClassName).subscribe((node)=> {
           this.debugNode(node);
           this.globalProgress=false;
-        },(error)=>{
+        },(error)=> {
           this.toast.error(error);
             this.globalProgress=false;
         })
@@ -475,9 +483,9 @@ export class AdminComponent {
             this.oai.recordHandlerClassName, this.oai.binaryHandlerClassName, this.oai.metadata,
             this.oai.file, this.oai.ids, this.oai.forceUpdate).subscribe(() => {
             this.globalProgress = false;
-            let additional: any = {
+            const additional: any = {
                 link: {
-                    caption: "ADMIN.IMPORT.OPEN_JOBS",
+                    caption: 'ADMIN.IMPORT.OPEN_JOBS',
                     callback: () => this.setMode('JOBS')
                 },
             };
@@ -506,48 +514,48 @@ export class AdminComponent {
     }
     return true;
   }
-  public removeImports(){
+  public removeImports() {
     if(!this.oaiPreconditions())
       return;
     this.globalProgress=true;
-    this.admin.removeDeletedImports(this.oai.url,this.oai.set,this.oai.prefix).subscribe((data:any)=>{
+    this.admin.removeDeletedImports(this.oai.url,this.oai.set,this.oai.prefix).subscribe((data:any)=> {
       this.globalProgress=false;
       this.toast.toast('ADMIN.IMPORT.IMPORTS_REMOVED');
       this.appUrl='';
-    },(error:any)=>{
+    },(error:any)=> {
       this.globalProgress=false;
       this.toast.error(error);
     });
   }
-  public getPropertyValues(){
+  public getPropertyValues() {
     this.globalProgress=true;
-    this.admin.getPropertyValuespace(this.propertyName).subscribe((data:any)=>{
+    this.admin.getPropertyValuespace(this.propertyName).subscribe((data:any)=> {
       this.globalProgress=false;
       this.dialogTitle='ADMIN.IMPORT.PROPERTY_VALUESPACE';
       this.dialogMessage=data.xml;
-      this.dialogButtons=DialogButton.getOk(()=>{this.dialogTitle=null;});
+      this.dialogButtons=DialogButton.getOk(()=> {this.dialogTitle=null;});
       this.appUrl='';
-    },(error:any)=>{
+    },(error:any)=> {
       this.globalProgress=false;
       this.toast.error(error);
     });
   }
-  public runUpdate(update:ServerUpdate,execute=false){
+  public runUpdate(update:ServerUpdate,execute=false) {
     this.globalProgress=true;
-    this.admin.runServerUpdate(update.id,execute).subscribe((data:any)=>{
+    this.admin.runServerUpdate(update.id,execute).subscribe((data:any)=> {
       this.globalProgress=false;
       this.dialogTitle='ADMIN.UPDATE.RESULT';
       this.dialogMessage=data.result;
-      this.dialogButtons=DialogButton.getOk(()=>{this.dialogTitle=null;});
+      this.dialogButtons=DialogButton.getOk(()=> {this.dialogTitle=null;});
       this.refreshUpdateList();
-    },(error:any)=>{
+    },(error:any)=> {
       this.globalProgress=false;
       this.toast.error(error);
     });
   }
 
   private refreshAppList() {
-    this.admin.getApplications().subscribe((data:Application[])=>{
+    this.admin.getApplications().subscribe((data:Application[])=> {
       this.applications = data;
       this.applicationsOpen = {};
       if (this.applications && this.applications.length) {
@@ -557,18 +565,18 @@ export class AdminComponent {
   }
 
   private refreshCatalina() {
-    this.admin.getCatalina().subscribe((data:string[])=>{
+    this.admin.getCatalina().subscribe((data:string[])=> {
       this.catalina=data.reverse().join('\n');
       this.setCatalinaPosition();
     });
   }
 
   private setCatalinaPosition() {
-    setTimeout(()=>{
-      if(this.catalinaRef){
+    setTimeout(()=> {
+      if(this.catalinaRef) {
       this.catalinaRef.nativeElement.scrollTop = this.catalinaRef.nativeElement.scrollHeight;
       }
-      else{
+      else {
         this.setCatalinaPosition();
     }
   },50);
@@ -577,9 +585,9 @@ export class AdminComponent {
   public getTemplates() {
       this.getTemplateFolderId().subscribe((id) => {
           this.node.getChildren(id).subscribe((data) => {
-              let templates = [];
-              for(let node of data.nodes) {
-                  if(node.name.split('.').pop() == 'xml') {
+              const templates = [];
+              for(const node of data.nodes) {
+                  if(node.mimetype == 'text/xml') {
                       templates.push(node.name);
                   }
               }
@@ -592,7 +600,7 @@ export class AdminComponent {
     public getTemplateFolderId() {
         return new Observable<string>((observer: Observer<string>) => {
         this.searchApi.searchByProperties([RestConstants.CM_NAME], ['Edu_Sharing_Sys_Template'], ['='], '', RestConstants.CONTENT_TYPE_FILES_AND_FOLDERS).subscribe((data)=> {
-            for(let node of data.nodes) {
+            for(const node of data.nodes) {
                 if (node.isDirectory) {
                    observer.next(node.ref.id);
                    observer.complete();
@@ -605,10 +613,10 @@ export class AdminComponent {
 
     public updateEduGroupSuggestions(event : any) {
         this.organization.getOrganizations(event.input,false).subscribe(
-            (data:any)=>{
-                let ret:SuggestItem[] = [];
-                for (let orga of data.organizations) {
-                    let item = new SuggestItem(orga.authorityName, orga.profile.displayName, 'group', '');
+            (data:any)=> {
+                const ret:SuggestItem[] = [];
+                for (const orga of data.organizations) {
+                    const item = new SuggestItem(orga.authorityName, orga.profile.displayName, 'group', '');
                     item.originalObject = orga;
                     ret.push(item);
                 }
@@ -625,11 +633,11 @@ export class AdminComponent {
         this.eduGroupsSelected.splice(Helper.indexOfObjectArray(this.eduGroupsSelected, 'id', data.id), 1);
     }
 
-    public uploadTemplate(event:any){
-        let file=event.target.files[0];
+    public uploadTemplate(event:any) {
+        const file=event.target.files[0];
         if(!file)
             return;
-        let id = '';
+        const id = '';
         this.globalProgress=true;
         this.getTemplateFolderId().subscribe((id) => {
             this.node.createNode(id,RestConstants.CCM_TYPE_IO,[],RestHelper.createNameProperty(file.name),true).subscribe(
@@ -642,7 +650,7 @@ export class AdminComponent {
                             this.templateSelect.nativeElement.value=null;
                         }
                     );
-                },(error:any)=>{
+                },(error:any)=> {
                     this.globalProgress=false;
                     this.templateSelect.nativeElement.value=null;
                     this.toast.error(error);
@@ -678,24 +686,24 @@ export class AdminComponent {
 
     public gotoFoldertemplateFolder() {
         this.getTemplateFolderId().subscribe((id) => {
-            this.router.navigate([UIConstants.ROUTER_PREFIX+'workspace'],{queryParams:{id:id}});
+            this.router.navigate([UIConstants.ROUTER_PREFIX+'workspace'],{queryParams:{id}});
         });
     }
-    getJobLog(job:any,pos:number){
+    getJobLog(job:any,pos:number) {
         let log=Helper.deepCopy(job.log).reverse();
 
-        if(this.jobsLogLevel[pos]){
-          let result:any=[];
-          for(let l of log){
+        if(this.jobsLogLevel[pos]) {
+          const result:any=[];
+          for(const l of log) {
             if(l.level.syslogEquivalent>this.jobsLogLevel[pos])
               continue;
             result.push(l);
           }
           log=result;
         }
-        if(this.jobsLogFilter[pos]){
-            let result:any=[];
-            for(let l of log){
+        if(this.jobsLogFilter[pos]) {
+            const result:any=[];
+            for(const l of log) {
                 if(l.message.indexOf(this.jobsLogFilter[pos])==-1 && l.className.indexOf(this.jobsLogFilter[pos])==-1)
                     continue;
                 result.push(l);
@@ -706,10 +714,10 @@ export class AdminComponent {
             return log;
         return log.slice(0,200);
     }
-    private cancelJob(job:any){
+    private cancelJob(job:any) {
       this.dialogTitle='ADMIN.JOBS.CANCEL_TITLE';
       this.dialogMessage='ADMIN.JOBS.CANCEL_MESSAGE';
-      this.dialogButtons=DialogButton.getYesNo(()=>{
+      this.dialogButtons=DialogButton.getYesNo(()=> {
           this.dialogTitle=null;
       },()=> {
           this.dialogTitle=null;
@@ -724,117 +732,135 @@ export class AdminComponent {
       });
     }
     private reloadJobStatus() {
-        this.admin.getJobs().subscribe((jobs)=>{
+        this.admin.getJobs().subscribe((jobs)=> {
             this.jobs=jobs;
             this.updateJobLogs();
         })
     }
-    getMajorVersion(version:string){
-      let v=version.split(".");
+    getMajorVersion(version:string) {
+      const v=version.split('.');
       if(v.length<3)
         return v;
       v.splice(2,v.length-2);
-      return v.join(".");
+      return v.join('.');
     }
-    private runChecks() {
+  private runTpChecks() {
+    const checks = [
+        RestConstants.TOOLPERMISSION_USAGE_STATISTIC,
+        RestConstants.TOOLPERMISSION_INVITE_ALLAUTHORITIES,
+        RestConstants.TOOLPERMISSION_GLOBAL_STATISTICS_USER,
+        RestConstants.TOOLPERMISSION_GLOBAL_STATISTICS_NODES,
+    ];
+    this.tpChecks = [];
+    this.admin.getToolpermissions(RestConstants.AUTHORITY_EVERYONE).subscribe((tp) => {
+      checks.forEach((c) => {
+        this.tpChecks.push({
+          name: c,
+          status: tp[c].explicit === 'ALLOWED' ? 'FAIL' : 'OK'
+        });
+      });
+    });
+
+  }
+  private runChecks() {
         this.systemChecks=[];
 
         // check versions render service
-        this.connector.getAbout().subscribe((about:any)=>{
+        this.connector.getAbout().subscribe((about:any)=> {
             about.version.repository=this.getMajorVersion(about.version.repository);
             about.version.renderservice=this.getMajorVersion(about.version.renderservice);
             this.systemChecks.push({
-              name:"RENDERING",
+              name:'RENDERING',
                 status:about.version.repository=='unknown' ? 'WARN' : about.version.repository==about.version.renderservice ? 'OK' : 'FAIL',
                 translate:about.version,
-              callback:()=>{
+              callback:()=> {
                   this.setMode('APPLICATIONS');
               }
             });
-        },(error)=>{
+        },(error)=> {
             this.systemChecks.push({
-                name:"RENDERING",
-                status:"FAIL",
-                error:error,
-                callback:()=>{
+                name:'RENDERING',
+                status:'FAIL',
+                error,
+                callback:()=> {
                     this.setMode('APPLICATIONS');
                 }
             });
         });
         // check if appid is changed
-        this.networkService.getRepositories().subscribe((repos)=>{
-            let id=repos.repositories.filter((repo)=>repo.isHomeRepo)[0].id;
+        this.networkService.getRepositories().subscribe((repos)=> {
+            const id=repos.repositories.filter((repo)=>repo.isHomeRepo)[0].id;
             this.systemChecks.push({
-                name:"APPID",
+                name:'APPID',
                 status:id=='local' ? 'WARN' : 'OK',
-                translate:{id:id},
-                callback:()=>{
+                translate:{id},
+                callback:()=> {
                     this.setMode('APPLICATIONS');
                     this.editApp(this.editableXmls.filter((xml)=>xml.name=='HOMEAPP')[0]);
                 }
             });
         });
-        this.node.getNodePermissions(RestConstants.USERHOME).subscribe((data)=>{
+        this.node.getNodePermissions(RestConstants.USERHOME).subscribe((data)=> {
           let status='OK';
-          for(let perm of data.permissions.localPermissions.permissions){
-            if(perm.authority.authorityName==RestConstants.AUTHORITY_EVERYONE){
+          for(const perm of data.permissions.localPermissions.permissions) {
+            if(perm.authority.authorityName==RestConstants.AUTHORITY_EVERYONE) {
               status='FAIL';
             }
           }
-          this.systemChecks.push(this.createSystemCheck("COMPANY_HOME",status));
-        },(error)=>{
-            this.systemChecks.push(this.createSystemCheck("COMPANY_HOME","FAIL",error));
+          this.systemChecks.push(this.createSystemCheck('COMPANY_HOME',status));
+        },(error)=> {
+            this.systemChecks.push(this.createSystemCheck('COMPANY_HOME','FAIL',error));
         });
-        this.admin.getJobs().subscribe((jobs)=>{
+        this.admin.getJobs().subscribe((jobs)=> {
             let count=0;
-            for(let job of jobs){
-              if(job.status=='Running'){
+            for(const job of jobs) {
+              if(job.status=='Running') {
                 count++;
               }
             }
             this.systemChecks.push({
-                name:"JOBS_RUNNING",
+                name:'JOBS_RUNNING',
                 status:count==0 ? 'OK' : 'WARN',
-                translate:{count:count}
+                translate:{count}
             });
         });
         // check status of nodeReport + mail server
-        this.admin.getApplicationXML(RestConstants.CCMAIL_APPLICATION_XML).subscribe((mail)=>{
-            if(this.config.instant("nodeReport",false)){
+        this.admin.getApplicationXML(RestConstants.CCMAIL_APPLICATION_XML).subscribe((mail)=> {
+            if(this.config.instant('nodeReport',false)) {
                 this.systemChecks.push({
-                    name:"MAIL_REPORT",
+                    name:'MAIL_REPORT',
                     status:mail['mail.report.receiver'] && mail['mail.smtp.server'] ? 'OK' : 'FAIL',
                     translate:mail
                 });
             }
             this.systemChecks.push({
-                name:"MAIL_SETUP",
+                name:'MAIL_SETUP',
                 status:mail['mail.smtp.server'] ? 'OK' : 'FAIL',
                 translate:mail
             });
         });
-      this.admin.getApplicationXML(RestConstants.HOME_APPLICATION_XML).subscribe((home)=>{
+      this.admin.getApplicationXML(RestConstants.HOME_APPLICATION_XML).subscribe((home)=> {
         this.systemChecks.push({
-          name:"CORS",
-          status:home['allow_origin'] ? home['allow_origin'].indexOf('http://localhost:54361')!=-1 ? 'OK' : 'INFO' : 'FAIL',
+          name:'CORS',
+          status:home.allow_origin ? home.allow_origin.indexOf('http://localhost:54361')!=-1 ? 'OK' : 'INFO' : 'FAIL',
           translate:home,
-          callback:()=>{
+          callback:()=> {
             this.setMode('APPLICATIONS');
             this.editApp(this.editableXmls.filter((xml)=>xml.name=='HOMEAPP')[0]);
           }
         });
-        let domainRepo = home['domain'];
+        const domainRepo = home.domain;
         let domainRender:string;
         try {
-          domainRender = new URL(home['contenturl']).host;
-        }catch(e){
+          domainRender = new URL(home.contenturl).host;
+        } catch(e) {
           console.warn(e);
         }
         this.systemChecks.push({
-          name:"RS_XSS",
-          status:domainRepo==domainRender ? 'FAIL' : home['allow_origin'] ? 'OK' : 'INFO',
+          name:'RS_XSS',
+          status:domainRepo==domainRender ? 'FAIL' : home.allow_origin ? 'OK' : 'INFO',
           translate:{repo:domainRepo,render:domainRender},
-          callback:()=>{
+          callback:()=> {
             window.open(AdminComponent.RS_CONFIG_HELP);
           }
         });
@@ -842,38 +868,38 @@ export class AdminComponent {
 
     }
     private createSystemCheck(name: string, status: string,error: any = null) {
-        let check:any={
-            name:name,
-            status:status,
-            error:error
+        const check:any= {
+            name,
+            status,
+            error
         };
-        if(name=="COMPANY_HOME"){
-          check.callback=()=>{
-              this.node.getNodeMetadata(RestConstants.USERHOME).subscribe((node)=>{
+        if(name=='COMPANY_HOME') {
+          check.callback=()=> {
+              this.node.getNodeMetadata(RestConstants.USERHOME).subscribe((node)=> {
               UIHelper.goToWorkspaceFolder(this.node,this.router,null,node.node.parent.id);
             });
           }
         }
         return check;
     }
-    getSystemChecks(){
-      this.systemChecks.sort((a:any,b:any)=>{
-          let status:any={'FAIL':0,'WARN':1,'INFO':2,'OK':3};
-          let statusA=status[a.status];
-          let statusB=status[b.status];
+    getChecks(checks: any) {
+      checks.sort((a:any,b:any)=> {
+          const status:any= {FAIL:0,WARN:1,INFO:2,OK:3};
+          const statusA=status[a.status];
+          const statusB=status[b.status];
           if(statusA!=statusB)
               return statusA<statusB ? -1 : 1;
           return a.name.localeCompare(b.name);
       });
-      return this.systemChecks;
+      return checks;
     }
 
     testMail() {
         this.globalProgress=true;
-        this.admin.testMail(this.mailReceiver,this.mailTemplate).subscribe(()=>{
+        this.admin.testMail(this.mailReceiver,this.mailTemplate).subscribe(()=> {
           this.toast.toast('ADMIN.CONFIG.MAIL_SENT',{receiver:this.mailReceiver});
             this.globalProgress=false;
-        },(error)=>{
+        },(error)=> {
           this.toast.error(error);
             this.globalProgress=false;
         });
@@ -883,7 +909,7 @@ export class AdminComponent {
       this.jobsLogData=[];
       let i=0;
       if(this.jobs) {
-          for (let job of this.jobs) {
+          for (const job of this.jobs) {
               this.jobsLogData.push(this.getJobLog(job, i));
               i++;
           }
@@ -891,24 +917,24 @@ export class AdminComponent {
     }
 
     private prepareJobClasses() {
-        let jobs=[
-            new SuggestItem("org.edu_sharing.repository.server.jobs.quartz.RemoveImportedObjectsJob",null),
-            new SuggestItem("org.edu_sharing.repository.server.jobs.quartz.RemoveOrphanCollectionReferencesJob",null),
-            new SuggestItem("org.edu_sharing.repository.server.jobs.quartz.RemoveNodeJob",null),
-            new SuggestItem("org.edu_sharing.repository.server.jobs.quartz.ConvertMultivalueToSinglevalueJob",null),
-            new SuggestItem("org.edu_sharing.repository.server.jobs.quartz.BulkEditNodesJob",null),
-            new SuggestItem("org.edu_sharing.repository.server.jobs.quartz.UpdateFrontpageCacheJob",null)
+        const jobs=[
+            new SuggestItem('org.edu_sharing.repository.server.jobs.quartz.RemoveImportedObjectsJob',null),
+            new SuggestItem('org.edu_sharing.repository.server.jobs.quartz.RemoveOrphanCollectionReferencesJob',null),
+            new SuggestItem('org.edu_sharing.repository.server.jobs.quartz.RemoveNodeJob',null),
+            new SuggestItem('org.edu_sharing.repository.server.jobs.quartz.ConvertMultivalueToSinglevalueJob',null),
+            new SuggestItem('org.edu_sharing.repository.server.jobs.quartz.BulkEditNodesJob',null),
+            new SuggestItem('org.edu_sharing.repository.server.jobs.quartz.UpdateFrontpageCacheJob',null)
         ];
-        this.jobClasses=jobs.map((job)=>{
-          let id=job.id.split(".");
+        this.jobClasses=jobs.map((job)=> {
+          const id=job.id.split('.');
           job.title=this.translate.instant('ADMIN.JOBS.NAMES.'+id[id.length-1]);
           job.secondaryTitle=id[id.length-1];
           return job;
         });
     }
-    getJobName(job:any){
+    getJobName(job:any) {
       if(job && job.class) {
-        let name = job.class.split(".");
+        let name = job.class.split('.');
         name = name[name.length - 1];
         return name;
       }
@@ -916,12 +942,12 @@ export class AdminComponent {
     }
 
   updateJobSuggestions(event: any) {
-    let name=event ? event.input.toString().toLowerCase() : '';
+    const name=event ? event.input.toString().toLowerCase() : '';
     this.jobClassesSuggested=this.jobClasses.filter((j)=>j.title.toLowerCase().indexOf(name)!=-1 || j.secondaryTitle.toLowerCase().indexOf(name)!=-1);
   }
 
   refreshUpdateList() {
-    this.admin.getServerUpdates().subscribe((data:ServerUpdate[])=>{
+    this.admin.getServerUpdates().subscribe((data:ServerUpdate[])=> {
       this.updates=data;
     });
   }
@@ -933,22 +959,22 @@ export class AdminComponent {
     }
     this.storage.set('admin_lucene',this.lucene);
     this.globalProgress=true;
-    let props=this.lucene.properties.split("\n");
-    this.admin.exportLucene(this.lucene.query,props).subscribe((data)=>{
-      const filename="Export-"+DateHelper.formatDate(this.translate,new Date().getTime(),{useRelativeLabels:false});
+    const props=this.lucene.properties.split('\n');
+    this.admin.exportLucene(this.lucene.query,props).subscribe((data)=> {
+      const filename='Export-'+DateHelper.formatDate(this.translate,new Date().getTime(),{useRelativeLabels:false});
       this.globalProgress=false;
-      if(this.lucene.exportFormat=='json'){
+      if(this.lucene.exportFormat=='json') {
         // reformat data, move all parent:: props to a seperate child
         data.forEach((d:any) => {
-          Object.keys(d).filter((k)=>k.startsWith("parent::")).forEach((key)=>{
-            if(!d.parent){
-              d.parent={};
+          Object.keys(d).filter((k)=>k.startsWith('parent::')).forEach((key)=> {
+            if(!d.parent) {
+              d.parent= {};
             }
-            d.parent[key.substring("parent::".length)] = d[key];
+            d.parent[key.substring('parent::'.length)] = d[key];
             delete d[key];
           });
         });
-        Helper.downloadContent(filename + ".json",JSON.stringify(data,null,2));
+        Helper.downloadContent(filename + '.json',JSON.stringify(data,null,2));
       }
       else {
         CsvHelper.download(filename, props, data);
@@ -957,9 +983,9 @@ export class AdminComponent {
   }
 
     private addCustomComponents(customComponents: any[]) {
-      for(let c of customComponents){
-          if(c.targetType=="BUTTON"){
-              let item=c.payload;
+      for(const c of customComponents) {
+          if(c.targetType=='BUTTON') {
+              const item=c.payload;
               item.factory=c.factory;
               this.buttons.splice(c.payload.position>=0 ? c.payload.position : this.buttons.length+c.payload.position,0,item);
           }
@@ -970,60 +996,63 @@ export class AdminComponent {
         if(this.loginResult.isAdmin) {
             this.buttons = [
                 {
-                    id: "INFO",
-                    icon: "info_outline"
+                    id: 'INFO',
+                    icon: 'info_outline'
                 },
                 {
-                  id: "FRONTPAGE",
-                  icon: "home"
+                  id: 'FRONTPAGE',
+                  icon: 'home'
                 },
                 {
-                  id: "GLOBAL_CONFIG",
-                  icon: "edit"
+                  id: 'GLOBAL_CONFIG',
+                  icon: 'edit'
                 },
                 {
-                    id: "CONFIG",
-                    icon: "build"
+                    id: 'CONFIG',
+                    icon: 'build'
                 },
                 {
-                    id: "APPLICATIONS",
-                    icon: "apps"
+                    id: 'APPLICATIONS',
+                    icon: 'apps'
                 },
                 {
-                    id: "UPDATE",
-                    icon: "update"
+                    id: 'UPDATE',
+                    icon: 'update'
                 },
                 {
-                    id: "IMPORT",
-                    icon: "cloud_download"
+                    id: 'IMPORT',
+                    icon: 'cloud_download'
                 },
                 {
-                    id: "JOBS",
-                    icon: "check"
+                    id: 'JOBS',
+                    icon: 'check'
                 },
                 {
-                    id: "TOOLKIT",
-                    icon: "settings"
+                    id: 'TOOLKIT',
+                    icon: 'settings'
                 },
                 {
-                    id: "BROWSER",
-                    icon: "search"
+                    id: 'BROWSER',
+                    icon: 'search'
                 },
                 {
-                    id: "FOLDERTEMPLATES",
-                    icon: "create_new_folder"
+                    id: 'FOLDERTEMPLATES',
+                    icon: 'create_new_folder'
                 }];
         }
-        if(this.loginResult.isAdmin || this.loginResult.toolPermissions.indexOf(RestConstants.TOOLPERMISSION_GLOBAL_STATISTICS)!=-1){
+        if(this.loginResult.isAdmin ||
+            this.loginResult.toolPermissions.indexOf(RestConstants.TOOLPERMISSION_GLOBAL_STATISTICS_NODES)!==-1 ||
+            this.loginResult.toolPermissions.indexOf(RestConstants.TOOLPERMISSION_GLOBAL_STATISTICS_USER)!==-1
+        ) {
             this.buttons.splice(1,0,{
-                id: "STATISTICS",
-                icon: "assessment"
+                id: 'STATISTICS',
+                icon: 'assessment'
             });
         }
-        if(this.loginResult.isAdmin || this.mediacenters.filter((mc)=>mc.administrationAccess).length){
+        if(this.loginResult.isAdmin || this.mediacenters.filter((mc)=>mc.administrationAccess).length) {
             this.buttons.splice(3,0,{
-                id: "MEDIACENTER",
-                icon: "business"
+                id: 'MEDIACENTER',
+                icon: 'business'
             });
         }
     }
@@ -1031,12 +1060,12 @@ export class AdminComponent {
     private init() {
         this.initButtons();
         this.globalProgress=false;
-        this.route.queryParams.subscribe((data:any)=>{
-            if(data['mode']) {
-                this.mode = data['mode'];
-                if(this.getModeButton().factory){
+        this.route.queryParams.subscribe((data:any)=> {
+            if(data.mode) {
+                this.mode = data.mode;
+                if(this.getModeButton().factory) {
                     setTimeout(()=> {
-                        let ref = this.dynamicComponent.createComponent(this.getModeButton().factory);
+                        const ref = this.dynamicComponent.createComponent(this.getModeButton().factory);
                     });
                 }
             }
@@ -1058,6 +1087,7 @@ export class AdminComponent {
                 this.lucene = data;
             });
             this.reloadJobStatus();
+            this.runTpChecks();
             this.runChecks();
             setInterval(() => {
                 if (this.mode == 'JOBS')
@@ -1083,19 +1113,19 @@ export class AdminComponent {
                 this.repositoryVersion = data;
             }, (error: any) => {
                 console.info(error);
-                this.repositoryVersion = "Error accessing version information. Are you in dev mode?";
+                this.repositoryVersion = 'Error accessing version information. Are you in dev mode?';
             });
             this.admin.getNgVersion().subscribe((data: string) => {
                 this.ngVersion = data;
             }, (error: any) => {
                 console.info(error);
-                this.ngVersion = "Error accessing version information. Are you in dev mode?";
+                this.ngVersion = 'Error accessing version information. Are you in dev mode?';
             });
         }
     }
 
   getOwnAppUrl() {
-    return this.connector.getAbsoluteEdusharingUrl()+"metadata?format="+this.ownAppMode;
+    return this.connector.getAbsoluteEdusharingUrl()+'metadata?format='+this.ownAppMode;
   }
 
   copyOwnApp() {
@@ -1108,6 +1138,27 @@ export class AdminComponent {
   }
   getApplications(type: string) {
     return this.applications.filter((a) => a.type === type);
+  }
+
+  modeIsActive(mode: string) {
+    if(this.mode === mode){
+      if(this.buttons.filter((b) => b.id === mode).length === 1){
+        return true;
+      }
+      this.router.navigate([UIConstants.ROUTER_PREFIX, 'workspace']);
+    }
+    return false;
+  }
+
+  fixTp(check: any) {
+    this.tpChecks=[];
+    this.admin.getToolpermissions(RestConstants.AUTHORITY_EVERYONE).subscribe((tpIn) => {
+      const tp: any = {};
+      Object.keys(tpIn).forEach((k) => tp[k] = tpIn[k].explicit);
+      tp[check.name] = 'UNDEFINED';
+      this.admin.setToolpermissions(RestConstants.AUTHORITY_EVERYONE, tp).subscribe(() => this.runTpChecks());
+    });
+
   }
 }
 

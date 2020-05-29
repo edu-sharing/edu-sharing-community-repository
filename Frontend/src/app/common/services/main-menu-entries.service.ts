@@ -287,7 +287,10 @@ export class MainMenuEntriesService {
         return (
             this.loginInfo.isAdmin ||
             this.loginInfo.toolPermissions.indexOf(
-                RestConstants.TOOLPERMISSION_GLOBAL_STATISTICS,
+                RestConstants.TOOLPERMISSION_GLOBAL_STATISTICS_NODES,
+            ) !== -1 ||
+            this.loginInfo.toolPermissions.indexOf(
+                RestConstants.TOOLPERMISSION_GLOBAL_STATISTICS_USER,
             ) !== -1 ||
             this.mediaCenters.filter(mc => mc.administrationAccess).length > 0
         );

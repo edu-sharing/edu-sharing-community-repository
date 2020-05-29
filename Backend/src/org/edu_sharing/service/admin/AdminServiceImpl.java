@@ -355,9 +355,7 @@ public class AdminServiceImpl implements AdminService  {
 	
 	@Override
 	public void refreshApplicationInfo() {
-				ApplicationInfoList.refresh();
 				RepoFactory.refresh();
-				LightbendConfigLoader.refresh();
 	}
 	
 	private String getAppPropertiesApplications() throws Exception{

@@ -88,7 +88,7 @@ public class JobHandler {
 				return;
 			}
 		}
-		if(JobLogger.IGNORABLE_JOBS.contains(jobDetail.getJobClass()))
+		if(JobLogger.IGNORABLE_JOBS.contains(jobDetail.getJobClass().getName()))
 			return;
 		throw new IllegalArgumentException("Job "+jobDetail.getFullName()+" was not found");
 	}
@@ -386,7 +386,7 @@ public class JobHandler {
 	}
 
 	private void registerJob(JobDetail jobDetail) {
-		if(JobLogger.IGNORABLE_JOBS.contains(jobDetail.getJobClass()))
+		if(JobLogger.IGNORABLE_JOBS.contains(jobDetail.getJobClass().getName()))
 			return;
 		JobInfo info=new JobInfo(jobDetail);
 		jobs.add(info);
