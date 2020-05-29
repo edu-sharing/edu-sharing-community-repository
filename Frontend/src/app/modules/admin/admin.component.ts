@@ -1145,7 +1145,7 @@ export class AdminComponent {
       if(this.buttons.filter((b) => b.id === mode).length === 1){
         return true;
       }
-      this.router.navigate([UIConstants.ROUTER_PREFIX, 'login']);
+      this.router.navigate([UIConstants.ROUTER_PREFIX, 'workspace']);
     }
     return false;
   }
