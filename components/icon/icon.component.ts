@@ -3,35 +3,37 @@
  */
 
 import {AfterViewInit, Component, ContentChildren, Directive, ElementRef, Input, Type, ViewChild} from '@angular/core';
-import {TranslateService} from "@ngx-translate/core";
+import {TranslateService} from '@ngx-translate/core';
 
 @Directive({
   selector: '[icon]',
 })
-export class IconComponent{
+export class IconComponent {
     private element: ElementRef;
     private _id: string;
     private _aria: boolean;
-    @Input() set aria(aria:boolean){
+    @Input() set aria(aria:boolean) {
         this._aria=aria;
         this.updateAria();
     }
-    @Input() set iconId(id: string){
+    @Input() set iconId(id: string) {
       this.element.nativeElement.classList.add('edu-icon-base');
       this._id=id;
       let css:string;
       this.updateAria();
-        if(id.startsWith("edu-")){
-            css="edu-icons";
+        if(id.startsWith('edu-')) {
+            css='edu-icons';
             id=id.substr(4);
-        }
-        else{
-            css="material-icons";
+        } else if(id.startsWith('custom-')) {
+            css='custom-icons';
+            id=id.substr(7);
+        } else {
+            css='material-icons';
         }
         this.element.nativeElement.classList.add(css);
         this.element.nativeElement.innerText=id;
     };
-    @Input() set id(id:string){
+    @Input() set id(id:string) {
 
     }
     constructor(element:ElementRef,private translate:TranslateService) {
@@ -42,12 +44,12 @@ export class IconComponent{
     private updateAria() {
         this.element.nativeElement.removeAttribute('aria-label');
         this.element.nativeElement.removeAttribute('aria-hidden');
-        if(this._aria){
+        if(this._aria) {
             this.translate.get('ICON_LABELS.'+this._id).subscribe((lang)=> {
                 this.element.nativeElement.setAttribute('aria-label',lang);
             });
         }
-        else{
+        else {
             this.element.nativeElement.setAttribute('aria-hidden',true);
         }
     }
