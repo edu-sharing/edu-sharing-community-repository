@@ -120,6 +120,7 @@ import { Ng5SliderModule } from 'ng5-slider';
         SpinnerComponent,
         BreadcrumbsComponent,
         SpinnerSmallComponent,
+        ListOptionItemComponent,
         InputPasswordComponent,
         GlobalProgressComponent,
         VideoControlsComponent,

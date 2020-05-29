@@ -128,20 +128,24 @@ export class OptionItem {
   }
 }
 export class CustomOptions {
-  /**
-   * If true, all existing or available options for the object stay
-   * If false, no options will be set, only the options in "addOptions" are used
-   */
-  public useDefaultOptions? = true;
-
-  /**
-   * List of ids of options to explicitly remove
-   */
-  public removeOptions?: string[] = [];
-  /**
-   * Options to add/insert into the menu
-   */
-  public addOptions?: OptionItem[] = [];
+    /**
+     * If true, all existing or available options for the object stay
+     * If false, no options will be set, only the options in "addOptions" are used
+     */
+    public useDefaultOptions? = true;
+    /**
+     * List of ids of options to explicitly support
+     */
+    public supportedOptions?: string[] = [];
+    /**
+     * List of ids of options to explicitly remove
+     * Only supported if supportedOptions is empty
+     */
+    public removeOptions?: string[] = [];
+    /**
+     * Options to add/insert into the menu
+     */
+    public addOptions?: OptionItem[] = [];
 }
 export enum HideMode {
   Disable,
