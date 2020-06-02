@@ -1,6 +1,7 @@
 package org.edu_sharing.restservices;
 
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -84,7 +85,7 @@ public class ApiAuthenticationFilter implements javax.servlet.Filter {
 					logger.info("auth is BASIC");
 					// Basic authentication details present
 	
-					String basicAuth = new String(java.util.Base64.getDecoder().decode(authHdr.substring(6).getBytes()));
+					String basicAuth = new String(java.util.Base64.getDecoder().decode(authHdr.substring(6)), StandardCharsets.ISO_8859_1);
 	
 					// Split the username and password
 	
