@@ -1,5 +1,6 @@
 package org.edu_sharing.metadataset.v2.tools;
 
+import java.io.Serializable;
 import java.security.InvalidParameterException;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -10,6 +11,8 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
+import org.alfresco.repo.security.authentication.AuthenticationUtil;
+import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.repository.StoreRef;
 import org.alfresco.service.cmr.search.ResultSet;
 import org.alfresco.service.cmr.search.SearchParameters;
@@ -25,6 +28,9 @@ import org.edu_sharing.metadataset.v2.*;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.server.tools.ApplicationInfoList;
 import org.edu_sharing.restservices.shared.MdsQueryCriteria;
+import org.edu_sharing.service.authority.AuthorityServiceFactory;
+import org.edu_sharing.service.authority.AuthorityServiceHelper;
+import org.edu_sharing.service.nodeservice.NodeServiceHelper;
 import org.edu_sharing.service.search.SearchServiceFactory;
 import org.edu_sharing.service.search.Suggestion;
 import org.springframework.context.ApplicationContext;
@@ -45,7 +51,7 @@ public class MetadataSearchHelper {
 				String queryString="";
 				String basequery = query.findBasequery(parameters.keySet());
 				if(basequery!=null && !basequery.trim().isEmpty()){
-					queryString+="("+basequery+")";
+					queryString+="("+replaceCommonQueryVariables(basequery)+")";
 				}
 				for(String name : parameters.keySet()){
 					MetadataQueryParameter parameter = query.findParameterByName(name);
@@ -70,7 +76,7 @@ public class MetadataSearchHelper {
 						for(String value : values){
 							if(i>0)
 								queryString+=" "+parameter.getMultiplejoin()+" ";
-							queryString+="("+getStatmentForValue(parameter,value)+")";
+							queryString+="("+replaceCommonQueryVariables(getStatmentForValue(parameter,value))+")";
 							i++;
 						}
 					}
@@ -78,13 +84,30 @@ public class MetadataSearchHelper {
 						throw new InvalidParameterException("Trying to search for multiple values of a non-multivalue field "+parameter.getName());
 					}
 					else{
-						queryString+=getStatmentForValue(parameter, values[0]);
+						queryString+=replaceCommonQueryVariables(getStatmentForValue(parameter, values[0]));
 					}
 					queryString+=")";
 				}
 				return queryString;
 			
 	}
+
+	/**
+	 * replaces globally supported variables for queries (like ${user.<property>} )
+	 */
+	private static String replaceCommonQueryVariables(String statement) {
+		NodeRef ref = AuthorityServiceFactory.getLocalService().getAuthorityNodeRef(AuthenticationUtil.getFullyAuthenticatedUser());
+		try {
+			Map<String, Object> props = NodeServiceHelper.transformLongToShortProperties(NodeServiceHelper.getProperties(ref));
+			for(Map.Entry<String, Object> prop : props.entrySet()){
+				statement = statement.replace("${user."+prop.getKey() + "}", prop.getValue().toString());
+			}
+		} catch (Throwable t) {
+			logger.warn("replaceCommonQueryVariables failed: " + t.getMessage());
+		}
+		return statement;
+	}
+
 	/**
 	 * If string is enclosed in "", search for the whole string
 	 * otherwise, search for every single word (concat with AND)
