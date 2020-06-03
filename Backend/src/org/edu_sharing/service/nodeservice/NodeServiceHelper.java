@@ -193,10 +193,10 @@ public class NodeServiceHelper {
 	 * @return
 	 * @throws Throwable
 	 */
-	public static HashMap<String, String> getPropertiesSinglevalue(Map<String, String[]> properties) {
-		HashMap<String, String> propertiesMultivalue = new HashMap<>();
+	public static HashMap<String, Object> getPropertiesSinglevalue(Map<String, String[]> properties) {
+		HashMap<String, Object> propertiesMultivalue = new HashMap<>();
 		if(properties!=null) {
-			properties.forEach((key, value) -> propertiesMultivalue.put(key, value==null ? null : ValueTool.toMultivalue(value)));
+			properties.forEach((key, value) -> convertMutlivaluePropToGeneric(value, propertiesMultivalue, key));
 			return propertiesMultivalue;
 		}
 		return null;
@@ -324,5 +324,16 @@ public class NodeServiceHelper {
 			rootId = search.keySet().iterator().next();
 		}
 		return rootId;
+	}
+
+	public static void convertMutlivaluePropToGeneric(String[] arr, HashMap<String, Object> target, String property) {
+		if(arr != null){
+			if(arr.length==0)
+				target.put(property,null);
+			else if(arr.length > 1)
+				target.put(property,new ArrayList<String>(Arrays.asList(arr)));
+			else
+				target.put(property, arr[0]);
+		}
 	}
 }

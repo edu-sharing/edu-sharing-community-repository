@@ -25,7 +25,7 @@ public class CMISSearchHelper {
 
     private static Logger logger= Logger.getLogger(CMISSearchHelper.class);
 
-    public static List<NodeRef> fetchNodesByTypeAndFilters(String nodeType, Map<String,String> filters){
+    public static List<NodeRef> fetchNodesByTypeAndFilters(String nodeType, Map<String,Object> filters){
         ApplicationContext applicationContext = AlfAppContextGate.getApplicationContext();
         ServiceRegistry serviceRegistry = (ServiceRegistry) applicationContext.getBean(ServiceRegistry.SERVICE_REGISTRY);
 
@@ -40,14 +40,14 @@ public class CMISSearchHelper {
         StringBuilder where= new StringBuilder();
         if(filters!=null && filters.size()>0){
             List<String> joinedTable = new ArrayList<>();
-            for(Map.Entry<String,String> filter : filters.entrySet()){
+            for(Map.Entry<String,Object> filter : filters.entrySet()){
                 if(filter.getKey().startsWith("cmis")){
                     if(where.length() > 0) {
                         where.append(" AND ");
                     }else {
                         where.append(" WHERE ");
                     }
-                    where.append(tableNameAlias).append(".").append(filter.getKey()).append(" = ").append(escape(filter.getValue()));
+                    where.append(tableNameAlias).append(".").append(filter.getKey()).append(" = ").append(escape(filter.getValue().toString()));
                 }
                 else{
                     // join the needed aspect, and access this ones value
@@ -68,7 +68,7 @@ public class CMISSearchHelper {
                     if(filter.getValue()==null) {
                         where.append(" IS NULL");
                     }else{
-                        where.append(" = ").append(escape(filter.getValue()));
+                        where.append(" = ").append(escape(filter.getValue().toString()));
                     }
                 }
             }

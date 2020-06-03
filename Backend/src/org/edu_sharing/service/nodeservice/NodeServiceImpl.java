@@ -245,16 +245,8 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
 
 		for(String property : getAllSafeProps()){
 			if(!props.containsKey(property)) continue;
-			
-			String[] arr = props.get(property);
-			if(arr != null){
-				if(arr.length==0)
-					toSafe.put(property,null);
-				else if(arr.length > 1)
-					toSafe.put(property,new ArrayList<String>(Arrays.asList(arr)));
-				else
-					toSafe.put(property, arr[0]);
-			}
+
+			NodeServiceHelper.convertMutlivaluePropToGeneric(props.get(property), toSafe, property);
 		}
 		// removed in 5.1
 		/*
