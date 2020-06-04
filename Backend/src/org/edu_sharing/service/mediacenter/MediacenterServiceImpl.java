@@ -19,11 +19,11 @@ import org.alfresco.service.cmr.repository.StoreRef;
 import org.alfresco.service.cmr.search.ResultSet;
 import org.alfresco.service.cmr.search.SearchParameters;
 import org.alfresco.service.cmr.search.SearchService;
-import org.alfresco.service.cmr.security.AuthorityService;
 import org.alfresco.service.cmr.security.AuthorityType;
 import org.alfresco.service.cmr.security.PermissionService;
 import org.alfresco.service.namespace.QName;
 import org.apache.log4j.Logger;
+import org.edu_sharing.alfresco.service.AuthorityService;
 import org.edu_sharing.alfresco.service.OrganisationService;
 import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
 import org.edu_sharing.repository.client.tools.CCConstants;
@@ -38,9 +38,9 @@ public class MediacenterServiceImpl implements MediacenterService{
 	
 	ApplicationContext  applicationContext = AlfAppContextGate.getApplicationContext();
 	ServiceRegistry serviceregistry = (ServiceRegistry)applicationContext.getBean(ServiceRegistry.SERVICE_REGISTRY);
-	AuthorityService authorityService = serviceregistry.getAuthorityService();
+	org.alfresco.service.cmr.security.AuthorityService authorityService = serviceregistry.getAuthorityService();
 	NodeService nodeService = serviceregistry.getNodeService();
-	org.edu_sharing.alfresco.service.AuthorityService eduAuthorityService = (org.edu_sharing.alfresco.service.AuthorityService)applicationContext.getBean("eduAuthorityService");
+	AuthorityService eduAuthorityService = (AuthorityService)applicationContext.getBean("eduAuthorityService");
 	OrganisationService organisationService = (OrganisationService) applicationContext
 			.getBean("eduOrganisationService");
 	org.edu_sharing.service.authority.AuthorityService eduAuthorityService2 = AuthorityServiceFactory.getLocalService();
@@ -65,7 +65,7 @@ public class MediacenterServiceImpl implements MediacenterService{
 
 					try {
 						
-						String authorityName = org.edu_sharing.alfresco.service.AuthorityService.MEDIA_CENTER_GROUP_PREFIX + mzId;
+						String authorityName = AuthorityService.MEDIA_CENTER_GROUP_PREFIX + mzId;
 						logger.info("creating:" + authorityName);
 						
 						if(authorityService.authorityExists("GROUP_" + authorityName)) {
@@ -81,7 +81,7 @@ public class MediacenterServiceImpl implements MediacenterService{
 								authorityService.setAuthorityDisplayName(alfAuthorityName, mz);
 								String mcAdminGroup = getMediacenterAdminGroup(alfAuthorityName);
 								if(mcAdminGroup != null) {
-									authorityService.setAuthorityDisplayName(mcAdminGroup, mz + org.edu_sharing.alfresco.service.AuthorityService.ADMINISTRATORS_GROUP_DISPLAY_POSTFIX);
+									authorityService.setAuthorityDisplayName(mcAdminGroup, mz + AuthorityService.ADMINISTRATORS_GROUP_DISPLAY_POSTFIX);
 								}
 							}
 							
@@ -101,15 +101,15 @@ public class MediacenterServiceImpl implements MediacenterService{
 						//admin group
 						//authorityService.createGroupWithType(AuthorityService.ADMINISTRATORS_GROUP, profile.getDisplayName() + AuthorityService.ADMINISTRATORS_GROUP_DISPLAY_POSTFIX, group, AuthorityService.MEDIACENTER_ADMINISTRATORS_GROUP_TYPE);
 						AuthorityServiceFactory.getLocalService().createGroupWithType(
-								org.edu_sharing.alfresco.service.AuthorityService.MEDIACENTER_ADMINISTRATORS_GROUP, 
-								mz + org.edu_sharing.alfresco.service.AuthorityService.ADMINISTRATORS_GROUP_DISPLAY_POSTFIX, 
+								AuthorityService.MEDIACENTER_ADMINISTRATORS_GROUP, 
+								mz + AuthorityService.ADMINISTRATORS_GROUP_DISPLAY_POSTFIX, 
 								authorityName, 
-								org.edu_sharing.alfresco.service.AuthorityService.MEDIACENTER_ADMINISTRATORS_GROUP_TYPE);
+								AuthorityService.MEDIACENTER_ADMINISTRATORS_GROUP_TYPE);
 						
 						NodeRef authorityNodeRef = authorityService.getAuthorityNodeRef(alfAuthorityName);
 						
 						Map<QName, Serializable> groupExtProps = new HashMap<QName, Serializable>();
-						groupExtProps.put(QName.createQName(CCConstants.CCM_PROP_GROUPEXTENSION_GROUPTYPE), org.edu_sharing.alfresco.service.AuthorityService.MEDIA_CENTER_GROUP_TYPE);
+						groupExtProps.put(QName.createQName(CCConstants.CCM_PROP_GROUPEXTENSION_GROUPTYPE), AuthorityService.MEDIA_CENTER_GROUP_TYPE);
 						nodeService.addAspect(authorityNodeRef, QName.createQName(CCConstants.CCM_ASPECT_GROUPEXTENSION), groupExtProps);
 						
 						Map<QName, Serializable> groupAddressProps = new HashMap<QName, Serializable>();
@@ -167,7 +167,7 @@ public class MediacenterServiceImpl implements MediacenterService{
 								authorityService.setAuthorityDisplayName(alfAuthorityName, schoolName);
 								String authorityNameOrgAdmin = organisationService.getOrganisationAdminGroup(alfAuthorityName);
 								if(authorityNameOrgAdmin != null) {
-									authorityService.setAuthorityDisplayName(authorityNameOrgAdmin, schoolName + org.edu_sharing.alfresco.service.AuthorityService.ADMINISTRATORS_GROUP_DISPLAY_POSTFIX);
+									authorityService.setAuthorityDisplayName(authorityNameOrgAdmin, schoolName + AuthorityService.ADMINISTRATORS_GROUP_DISPLAY_POSTFIX);
 								}
 							}
 							
@@ -386,7 +386,7 @@ public class MediacenterServiceImpl implements MediacenterService{
 		List<ChildAssociationRef> childGroups = nodeService.getChildAssocs(eduGroupNodeRef);
 		for(ChildAssociationRef childGroup : childGroups){
 			String grouptype = (String)nodeService.getProperty(childGroup.getChildRef(), QName.createQName(CCConstants.CCM_PROP_GROUPEXTENSION_GROUPTYPE));
-			if(org.edu_sharing.alfresco.service.AuthorityService.MEDIACENTER_ADMINISTRATORS_GROUP_TYPE.equals(grouptype)){
+			if(AuthorityService.MEDIACENTER_ADMINISTRATORS_GROUP_TYPE.equals(grouptype)){
 				return (String)nodeService.getProperty(childGroup.getChildRef(), QName.createQName(CCConstants.CM_PROP_AUTHORITY_AUTHORITYNAME));
 			}
 		}
