@@ -65,7 +65,7 @@ public class MediacenterServiceImpl implements MediacenterService{
 
 					try {
 						
-						String authorityName = CCConstants.MEDIA_CENTER_GROUP_PREFIX + mzId;
+						String authorityName = org.edu_sharing.alfresco.service.AuthorityService.MEDIA_CENTER_GROUP_PREFIX + mzId;
 						logger.info("creating:" + authorityName);
 						
 						if(authorityService.authorityExists("GROUP_" + authorityName)) {
@@ -109,7 +109,7 @@ public class MediacenterServiceImpl implements MediacenterService{
 						NodeRef authorityNodeRef = authorityService.getAuthorityNodeRef(alfAuthorityName);
 						
 						Map<QName, Serializable> groupExtProps = new HashMap<QName, Serializable>();
-						groupExtProps.put(QName.createQName(CCConstants.CCM_PROP_GROUPEXTENSION_GROUPTYPE), CCConstants.MEDIA_CENTER_GROUP_TYPE);
+						groupExtProps.put(QName.createQName(CCConstants.CCM_PROP_GROUPEXTENSION_GROUPTYPE), org.edu_sharing.alfresco.service.AuthorityService.MEDIA_CENTER_GROUP_TYPE);
 						nodeService.addAspect(authorityNodeRef, QName.createQName(CCConstants.CCM_ASPECT_GROUPEXTENSION), groupExtProps);
 						
 						Map<QName, Serializable> groupAddressProps = new HashMap<QName, Serializable>();

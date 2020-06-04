@@ -111,8 +111,8 @@ public class MediacenterDao extends AbstractDao{
 			if(ref==null)
 				throw new DAOMissingException(new Exception("Authority not found: "+group));
 			String property = nodeService.getProperty(ref.getStoreRef().getProtocol(), ref.getStoreRef().getIdentifier(), ref.getId(), CCConstants.CCM_PROP_GROUPEXTENSION_GROUPTYPE);
-			if(property==null || !property.equals(CCConstants.MEDIA_CENTER_GROUP_TYPE))
-				throw new java.lang.IllegalArgumentException("The given authority is not of type "+CCConstants.MEDIA_CENTER_GROUP_TYPE);
+			if(property==null || !property.equals(AuthorityService.MEDIA_CENTER_GROUP_TYPE))
+				throw new java.lang.IllegalArgumentException("The given authority is not of type "+AuthorityService.MEDIA_CENTER_GROUP_TYPE);
 
 			this.authorityName=group;
 			return this;
@@ -135,7 +135,7 @@ public class MediacenterDao extends AbstractDao{
 	
 	public void changeProfile(Mediacenter.Profile profile) throws DAOException {
 		// always force the group type to media center
-		profile.setGroupType(CCConstants.MEDIA_CENTER_GROUP_TYPE);
+		profile.setGroupType(AuthorityService.MEDIA_CENTER_GROUP_TYPE);
 		// first, change the basic profile (admin access is checked there)
 		GroupDao.getGroup(repoDao,authorityName).changeProfile(profile);
 		// then, change the mediacenter releated data
@@ -155,8 +155,8 @@ public class MediacenterDao extends AbstractDao{
 	}
 	private MediacenterDao create(String name,Mediacenter.Profile profile) throws DAOException {
 		try {
-			profile.setGroupType(CCConstants.MEDIA_CENTER_GROUP_TYPE);
-			String group = GroupDao.createGroup(repoDao, CCConstants.MEDIA_CENTER_GROUP_PREFIX + name, profile, null).getAuthorityName();
+			profile.setGroupType(AuthorityService.MEDIA_CENTER_GROUP_TYPE);
+			String group = GroupDao.createGroup(repoDao, AuthorityService.MEDIA_CENTER_GROUP_PREFIX + name, profile, null).getAuthorityName();
 			this.authorityName = group;
 			changeProfile(profile);
 

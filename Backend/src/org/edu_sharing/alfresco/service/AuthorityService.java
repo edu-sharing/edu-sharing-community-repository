@@ -7,6 +7,11 @@ import org.apache.log4j.Logger;
 
 public class AuthorityService {
 
+	public static final String MEDIA_CENTER_GROUP_TYPE = "MEDIA_CENTER";
+	public static final String MEDIA_CENTER_PROXY_GROUP_TYPE = "MEDIA_CENTER_PROXY";
+	public static final String MEDIA_CENTER_GROUP_PREFIX = "MEDIA_CENTER_";
+	
+	
 	public static String MEDIACENTER_ADMINISTRATORS_GROUP = "MEDIACENTER_ADMINISTRATORS";
 	public static String ADMINISTRATORS_GROUP_TYPE = "ORG_ADMINISTRATORS";
 	public static String MEDIACENTER_ADMINISTRATORS_GROUP_TYPE = "MEDIACENTER_ADMINISTRATORS";
