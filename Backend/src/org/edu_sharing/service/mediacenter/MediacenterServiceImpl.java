@@ -30,6 +30,7 @@ import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.server.tools.ApplicationInfoList;
 import org.edu_sharing.restservices.shared.Mediacenter.MediacenterProfileExtension;
 import org.edu_sharing.service.authority.AuthorityServiceFactory;
+import org.edu_sharing.service.search.CMISSearchHelper;
 import org.edu_sharing.service.util.CSVTool;
 import org.springframework.context.ApplicationContext;
 
@@ -84,6 +85,11 @@ public class MediacenterServiceImpl implements MediacenterService{
 								if(mcAdminGroup != null) {
 									authorityService.setAuthorityDisplayName(mcAdminGroup, mz + AuthorityService.ADMINISTRATORS_GROUP_DISPLAY_POSTFIX);
 								}
+								
+								String mcProxyGroup = getMediacenterProxyGroup(mzId);
+								if(mcProxyGroup != null) {
+									authorityService.setAuthorityDisplayName(mcProxyGroup, mz + AuthorityService.MEDIA_CENTER_PROXY_DISPLAY_POSTFIX);
+								}
 							}
 							
 							if(ort != null && !ort.equals(currentCity)) {
@@ -117,7 +123,7 @@ public class MediacenterServiceImpl implements MediacenterService{
 						String mediacenterProxyName = AuthorityService.MEDIA_CENTER_PROXY_GROUP_TYPE + "_" + mzId;
 						AuthorityServiceFactory.getLocalService().createGroupWithType(
 								mediacenterProxyName,
-								mediacenterProxyName, 
+								mz + AuthorityService.MEDIA_CENTER_PROXY_DISPLAY_POSTFIX, 
 								null, 
 								AuthorityService.MEDIA_CENTER_PROXY_GROUP_TYPE);
 						authorityService.addAuthority("GROUP_" + mediacenterProxyName, alfAuthorityName);
@@ -399,9 +405,13 @@ public class MediacenterServiceImpl implements MediacenterService{
 		return sp;
 	}
 	
-	
-	public String getMediacenterAdminGroup(String alfAuthorityName) {
-		String authorityName = alfAuthorityName;
+	/**
+	 * 
+	 * @param alfAuthorityName
+	 * @return
+	 */
+	public String getMediacenterAdminGroup(String alfMediacenterName) {
+		String authorityName = alfMediacenterName;
 
 		NodeRef eduGroupNodeRef =authorityService.getAuthorityNodeRef(authorityName);
 		List<ChildAssociationRef> childGroups = nodeService.getChildAssocs(eduGroupNodeRef);
@@ -413,6 +423,20 @@ public class MediacenterServiceImpl implements MediacenterService{
 		}
 
 		return null;
+	}
+	
+	public String getMediacenterProxyGroup(String mzId) {
+		Map<String,String> filter = new HashMap<>();
+		filter.put(CCConstants.CM_PROP_AUTHORITY_NAME, "GROUP_"+AuthorityService.MEDIA_CENTER_PROXY_GROUP_TYPE+"_"+mzId);
+		filter.put(CCConstants.CCM_PROP_GROUPEXTENSION_GROUPTYPE, AuthorityService.MEDIA_CENTER_PROXY_GROUP_TYPE);
+		
+		
+		List<NodeRef> nodeRefs = CMISSearchHelper.fetchNodesByTypeAndFilters(CCConstants.CM_TYPE_AUTHORITY_CONTAINER, filter);
+		if(nodeRefs != null && nodeRefs.size() > 0) {
+			return (String)nodeService.getProperty(nodeRefs.get(0), ContentModel.PROP_AUTHORITY_NAME);
+		}else {
+			return null;
+		}
 	}
 
 
