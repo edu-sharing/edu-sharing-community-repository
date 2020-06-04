@@ -28,6 +28,7 @@ import org.edu_sharing.alfresco.service.OrganisationService;
 import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.server.tools.ApplicationInfoList;
+import org.edu_sharing.restservices.shared.Mediacenter.MediacenterProfileExtension;
 import org.edu_sharing.service.authority.AuthorityServiceFactory;
 import org.edu_sharing.service.util.CSVTool;
 import org.springframework.context.ApplicationContext;
@@ -65,7 +66,7 @@ public class MediacenterServiceImpl implements MediacenterService{
 
 					try {
 						
-						String authorityName = AuthorityService.MEDIA_CENTER_GROUP_PREFIX + mzId;
+						String authorityName = AuthorityService.MEDIA_CENTER_GROUP_TYPE + "_" + mzId;
 						logger.info("creating:" + authorityName);
 						
 						if(authorityService.authorityExists("GROUP_" + authorityName)) {
@@ -95,17 +96,35 @@ public class MediacenterServiceImpl implements MediacenterService{
 							continue;
 						}
 						
+						/**
+						 * create mediacenter group
+						 */
 						String alfAuthorityName = authorityService.createAuthority(AuthorityType.GROUP, authorityName);
 						authorityService.setAuthorityDisplayName(alfAuthorityName, mz);
 						
-						//admin group
-						//authorityService.createGroupWithType(AuthorityService.ADMINISTRATORS_GROUP, profile.getDisplayName() + AuthorityService.ADMINISTRATORS_GROUP_DISPLAY_POSTFIX, group, AuthorityService.MEDIACENTER_ADMINISTRATORS_GROUP_TYPE);
+						/**
+						 * create mediacenter admin group
+						 */
 						AuthorityServiceFactory.getLocalService().createGroupWithType(
 								AuthorityService.MEDIACENTER_ADMINISTRATORS_GROUP, 
 								mz + AuthorityService.ADMINISTRATORS_GROUP_DISPLAY_POSTFIX, 
 								authorityName, 
 								AuthorityService.MEDIACENTER_ADMINISTRATORS_GROUP_TYPE);
 						
+						/**
+						 * create mediacenter proxy group and add mediacenter group to proxy group
+						 */
+						String mediacenterProxyName = AuthorityService.MEDIA_CENTER_PROXY_GROUP_TYPE + "_" + mzId;
+						AuthorityServiceFactory.getLocalService().createGroupWithType(
+								mediacenterProxyName,
+								mediacenterProxyName, 
+								null, 
+								AuthorityService.MEDIA_CENTER_PROXY_GROUP_TYPE);
+						authorityService.addAuthority("GROUP_" + mediacenterProxyName, alfAuthorityName);
+						
+						/**
+						 * add mediacenter metadata
+						 */
 						NodeRef authorityNodeRef = authorityService.getAuthorityNodeRef(alfAuthorityName);
 						
 						Map<QName, Serializable> groupExtProps = new HashMap<QName, Serializable>();
@@ -121,6 +140,8 @@ public class MediacenterServiceImpl implements MediacenterService{
 						groupMZProps.put(QName.createQName(CCConstants.CCM_PROP_MEDIACENTER_ID), mzId);
 						groupMZProps.put(QName.createQName(CCConstants.CCM_PROP_ADDRESS_CITY), ort);
 						nodeService.addAspect(authorityNodeRef, QName.createQName(CCConstants.CCM_ASPECT_MEDIACENTER), groupMZProps);
+											
+						
 						
 						counter++;
 					} catch (Exception e) {
