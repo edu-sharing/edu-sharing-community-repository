@@ -27,7 +27,9 @@
  */
 package org.edu_sharing.repository.client.rpc;
 
-public class ServerUpdateInfo implements com.google.gwt.user.client.rpc.IsSerializable {
+import java.io.Serializable;
+
+public class ServerUpdateInfo implements Serializable {
 	
 	String id;
 	

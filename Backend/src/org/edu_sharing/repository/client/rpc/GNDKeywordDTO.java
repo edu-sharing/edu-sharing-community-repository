@@ -3,10 +3,9 @@ package org.edu_sharing.repository.client.rpc;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.client.tools.StringTool;
 
-import com.google.gwt.user.client.rpc.IsSerializable;
-import com.google.gwt.user.client.ui.SuggestOracle;
+import java.io.Serializable;
 
-public class GNDKeywordDTO implements IsSerializable, SuggestOracle.Suggestion,  HasKey {
+public class GNDKeywordDTO implements Serializable, HasKey {
 
 	String id;
 	
@@ -46,15 +45,13 @@ public class GNDKeywordDTO implements IsSerializable, SuggestOracle.Suggestion, 
 	public void setValue(String value) {
 		this.value = value;
 	}
-	
-	@Override
+
 	public String getDisplayString() {
 		String cat = getCategory().replaceAll(StringTool.escape(CCConstants.MULTIVALUE_SEPARATOR), " ; ");
 		String result = getValue() +"<span style=\"font-size:10px\"> ("+cat+")<span>";
 		return result;
 	}
-	
-	@Override
+
 	public String getReplacementString() {
 		String cat = getCategory().replaceAll(StringTool.escape(CCConstants.MULTIVALUE_SEPARATOR), " ; ");
 		return getValue() + " ("+ cat + ")";

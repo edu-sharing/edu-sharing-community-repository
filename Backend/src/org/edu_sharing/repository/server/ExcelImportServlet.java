@@ -92,11 +92,7 @@ public class ExcelImportServlet extends HttpServlet implements SingleThreadModel
 			}catch(Exception e){
 				e.printStackTrace();
 			}
-			
-			//new ExcelSchroedelImporter(parentId, dfi.getInputStream());
-			
-					
-			
+
 		} catch (FileUploadException e) {
 			logger.error(e.getMessage(), e);
 			out.print(e.getMessage());

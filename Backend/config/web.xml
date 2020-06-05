@@ -425,12 +425,6 @@
 	
 
     <servlet>
-        <servlet-name>SchoolContextService</servlet-name>
-        <servlet-class>
-            org.edu_sharing.repository.server.SchoolContextServiceImpl
-        </servlet-class> 
-    </servlet> 
-    <servlet>
         <servlet-name>SuggestService</servlet-name>
         <servlet-class>
             org.edu_sharing.repository.server.SuggestServiceImpl

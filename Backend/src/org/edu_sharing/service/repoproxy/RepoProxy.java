@@ -7,7 +7,6 @@ import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.core.Response;
 
-import io.swagger.client.ApiException;
 import org.edu_sharing.repository.server.tools.ApplicationInfo;
 import org.edu_sharing.restservices.mds.v1.model.SuggestionParam;
 import org.edu_sharing.restservices.search.v1.model.SearchParameters;

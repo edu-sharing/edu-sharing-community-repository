@@ -27,11 +27,10 @@
  */
 package org.edu_sharing.repository.client.exception;
 
+import java.io.Serializable;
 import java.util.HashMap;
 
-import com.google.gwt.user.client.rpc.IsSerializable;
-
-public class CCException extends Exception implements IsSerializable{ 
+public class CCException extends Exception implements Serializable {
 
 	private static final long serialVersionUID = 1L;
 

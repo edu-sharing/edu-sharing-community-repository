@@ -27,7 +27,9 @@
  */
 package org.edu_sharing.repository.client.rpc;
 
-public class CheckForDuplicatesResult implements com.google.gwt.user.client.rpc.IsSerializable {
+import java.io.Serializable;
+
+public class CheckForDuplicatesResult implements Serializable {
 
 	boolean nodeExists = false;
 	

@@ -27,12 +27,13 @@
  */
 package org.edu_sharing.repository.client.rpc;
 
+import java.io.Serializable;
 import java.util.HashMap;
 
 /**
  * @author rudolph
  */
-public class RepositoryInfo implements com.google.gwt.user.client.rpc.IsSerializable {
+public class RepositoryInfo implements Serializable {
 
 	/**
 	 * repositoryId, repository Properties

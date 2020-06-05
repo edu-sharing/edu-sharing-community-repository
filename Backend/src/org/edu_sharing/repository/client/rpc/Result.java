@@ -1,8 +1,8 @@
 package org.edu_sharing.repository.client.rpc;
 
-import com.google.gwt.user.client.rpc.IsSerializable;
+import java.io.Serializable;
 
-public class Result<E> implements IsSerializable {
+public class Result<E> implements Serializable {
 
 	
 	private int nodeCount = 0;

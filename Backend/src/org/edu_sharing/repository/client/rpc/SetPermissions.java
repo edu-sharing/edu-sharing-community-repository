@@ -27,9 +27,10 @@
  */
 package org.edu_sharing.repository.client.rpc;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 
-public class SetPermissions implements com.google.gwt.user.client.rpc.IsSerializable {
+public class SetPermissions implements Serializable {
 
 	ArrayList<PermissionContainer> permissionContainers = null;
 	

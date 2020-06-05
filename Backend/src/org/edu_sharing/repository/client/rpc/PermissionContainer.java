@@ -27,9 +27,10 @@
  */
 package org.edu_sharing.repository.client.rpc;
 
+import java.io.Serializable;
 import java.util.HashMap;
 
-public class PermissionContainer implements com.google.gwt.user.client.rpc.IsSerializable {
+public class PermissionContainer implements Serializable {
 	
 	
 	
