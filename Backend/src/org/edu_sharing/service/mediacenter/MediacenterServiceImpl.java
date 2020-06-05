@@ -519,7 +519,8 @@ public class MediacenterServiceImpl implements MediacenterService{
 				logger.info("leave out mediacenter " + mediacenterId +" cause no licensed nodes found");
 				continue;
 			}
-			String mediacenterName = "GROUP_MEDIA_CENTER_" + mediacenterId;
+			String mediacenterName = "GROUP_" + AuthorityService.MEDIA_CENTER_PROXY_GROUP_TYPE + "_" + mediacenterId;
+
 
 			for (Map.Entry<String, NodeRef> entry : importedNodes.entrySet()) {
 
