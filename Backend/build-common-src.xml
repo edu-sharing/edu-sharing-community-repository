@@ -13,63 +13,15 @@
 	<path id="java.classpath">
 		<fileset dir="${app.server.tomcat.shared.lib}" includes="*.jar" />
 		<fileset dir="${app.server.tomcat.webapps.alfresco.lib}" includes="*.jar" />
-		<fileset dir="${gwt.lib.path}" includes="gwt-servlet.jar,gwt-user.jar" />
 		<fileset dir="${project.lib.path}" includes="*.jar" />
 	</path>
 		
 	
 	<path id="project.classpath" >
-		<fileset dir="${gwt.lib.path}" includes="*.jar" />
 		<fileset dir="${app.server.tomcat.shared.lib}" includes="*.jar" />
 		<fileset dir="${app.server.tomcat.webapps.alfresco.lib}" includes="*.jar" />
 		<fileset dir="${project.lib.path}" includes="*.jar" />
 	</path>
-		
-	
-	
-	<target name="compile-gwt" description="GWT compile to JavaScript">
-		<echo message="source folders: ${src-gwt.path}"/>
-		<java failonerror="true" fork="true" classname="com.google.gwt.dev.Compiler">
-			<classpath>
-				<!--<pathelement location="${src.dir}"  />-->
-				<pathelement path="${src-gwt.path}"/>
-				<path refid="project.classpath" />
-			</classpath>
-			<!-- add jvmarg -Xss16M or similar if you see a StackOverflowError -->
-			<jvmarg value="-Xmx1024M" />
-			<!-- Additional arguments like -style PRETTY or -logLevel DEBUG -->
-			<arg value="${module.gwt}" />
-			<arg line="-logLevel INFO" />
-			<!--for development 
-			<arg line="-draftCompile"/>
-			<arg line="-style DETAILED"/>
-			-->
-			<!-- for production -->
-			
-			
-			<arg line="-style OBFUSCATED"/>
-			<!--
-				
-			
-			<arg line="-style DETAILED"/>-->
-			<arg line="-localWorkers ${gwt.local.workers}"/>
-			<!--arg line="-compileReport"/-->
-			
-			<arg line="-war ${gwt-war.dir}"/>
-			<!--generate gwt uibinder i18n-->
-			<arg line="-extra gwt-extras"/>
-			
-			<!-- IOS 6/gwt 2.4/2.5 Bug 
-				http://deploythoughts.blogspot.de/2012/11/gwt-webapp-and-ios-6-safari.html 
-				knallt auf ipad beim workspace öffnen 
-				-->
-				<!--<arg line="-XdisableCastChecking"/>-->
-			
-			
-			
-			
-		</java>
-	</target>
 	
 	<target name="src-java-path">
 		<condition property="src-java.path" value="${src.dir}:${src-webservices.dir}:${extensions.path}${extension-name}/src" else="${src.dir}:${src-webservices.dir}">
@@ -401,18 +353,6 @@
 		<copy todir="${webserver.home}/webapps/${webapp.name}/">
 			<fileset dir="ng" includes="**"></fileset>
 		</copy>
-	</target>
-	<target name="deploy-compiled-gwt" depends="compile-gwt, deploy-gwt">
-
-	</target>
-	
-	<target name="deploy-compiled-gwt-dev" depends="compile-gwt-dev, deploy-gwt">
-	</target>
-	
-	<target name="deploy-compiled-gwt-dev-reload" depends="deploy-compiled-gwt-dev, reload">
-	</target>
-	
-	<target name="deploy-compiled-gwt-dev-ie-reload" depends="compile-gwt-dev-ie8, deploy-gwt, reload">
 	</target>
 
 	<!-- check which targets the build.xml of the current extension supports -->
