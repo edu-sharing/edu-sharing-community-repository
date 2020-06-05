@@ -128,7 +128,9 @@ public class MediacenterServiceImpl implements MediacenterService{
 								null, 
 								AuthorityService.MEDIA_CENTER_PROXY_GROUP_TYPE);
 						authorityService.addAuthority("GROUP_" + mediacenterProxyName, alfAuthorityName);
-						
+						String mediacenterAdminGroup = getMediacenterAdminGroup(alfAuthorityName);
+						authorityService.addAuthority("GROUP_" + mediacenterProxyName, mediacenterAdminGroup);
+
 						/**
 						 * add mediacenter metadata
 						 */
