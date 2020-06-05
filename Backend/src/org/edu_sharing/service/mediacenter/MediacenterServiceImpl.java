@@ -2,13 +2,11 @@ package org.edu_sharing.service.mediacenter;
 
 import java.io.InputStream;
 import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 import org.alfresco.model.ContentModel;
+import org.alfresco.repo.model.Repository;
+import org.alfresco.repo.policy.BehaviourFilter;
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.repo.security.authentication.AuthenticationUtil.RunAsWork;
 import org.alfresco.service.ServiceRegistry;
@@ -19,6 +17,7 @@ import org.alfresco.service.cmr.repository.StoreRef;
 import org.alfresco.service.cmr.search.ResultSet;
 import org.alfresco.service.cmr.search.SearchParameters;
 import org.alfresco.service.cmr.search.SearchService;
+import org.alfresco.service.cmr.security.AccessStatus;
 import org.alfresco.service.cmr.security.AuthorityType;
 import org.alfresco.service.cmr.security.PermissionService;
 import org.alfresco.service.namespace.QName;
@@ -27,6 +26,7 @@ import org.edu_sharing.alfresco.service.AuthorityService;
 import org.edu_sharing.alfresco.service.OrganisationService;
 import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
 import org.edu_sharing.repository.client.tools.CCConstants;
+import org.edu_sharing.repository.server.jobs.helper.NodeRunner;
 import org.edu_sharing.repository.server.tools.ApplicationInfoList;
 import org.edu_sharing.restservices.shared.Mediacenter.MediacenterProfileExtension;
 import org.edu_sharing.service.authority.AuthorityServiceFactory;
@@ -47,9 +47,10 @@ public class MediacenterServiceImpl implements MediacenterService{
 			.getBean("eduOrganisationService");
 	org.edu_sharing.service.authority.AuthorityService eduAuthorityService2 = AuthorityServiceFactory.getLocalService();
 	SearchService searchService = serviceregistry.getSearchService();
+	PermissionService permissionService = serviceregistry.getPermissionService();
+	BehaviourFilter policyBehaviourFilter = (BehaviourFilter)applicationContext.getBean("policyBehaviourFilter");
 
 
-	
 	@Override
 	public int importMediacenters(InputStream csv) {
 		RunAsWork<Integer> runAs = new RunAsWork<Integer>() {
@@ -407,7 +408,7 @@ public class MediacenterServiceImpl implements MediacenterService{
 	
 	/**
 	 * 
-	 * @param alfAuthorityName
+	 *
 	 * @return
 	 */
 	public String getMediacenterAdminGroup(String alfMediacenterName) {
@@ -437,6 +438,137 @@ public class MediacenterServiceImpl implements MediacenterService{
 		}else {
 			return null;
 		}
+	}
+
+
+	private HashMap<String,NodeRef> getImportedNodes(String startFolder){
+
+		HashMap<String,NodeRef> result = new HashMap<String,NodeRef>();
+		NodeRunner runner = new NodeRunner();
+		runner.setTask((ref)->{
+			String replicationSourceId = (String) nodeService.getProperty(ref, QName.createQName(CCConstants.CCM_PROP_IO_REPLICATIONSOURCEID));
+			if(replicationSourceId != null) {
+				result.put(replicationSourceId,ref);
+			}
+		});
+
+		runner.setTypes(Collections.singletonList(CCConstants.CCM_TYPE_IO));
+		runner.setStartFolder(startFolder);
+		runner.setRunAsSystem(true);
+		runner.setTransaction(NodeRunner.TransactionMode.Local);
+		runner.setThreaded(false);
+
+		int processNodes = runner.run();
+		logger.info("processed nodes:" + processNodes +" size:" +result.size());
+		return result;
+	}
+
+	List<String> getAllMediacenterIds(){
+		Set<String> allGroups = authorityService.getAllAuthoritiesInZone(org.alfresco.service.cmr.security.AuthorityService.ZONE_APP_DEFAULT, AuthorityType.GROUP);
+
+		List<String> result = new ArrayList<>();
+
+		for(String group : allGroups) {
+			NodeRef authorityNodeRef = authorityService.getAuthorityNodeRef(group);
+			if(nodeService.hasAspect(authorityNodeRef, QName.createQName(CCConstants.CCM_ASPECT_MEDIACENTER))) {
+				String mediacenterId = (String)nodeService.getProperty(authorityNodeRef, QName.createQName(CCConstants.CCM_PROP_MEDIACENTER_ID));
+				result.add(mediacenterId);
+			}
+		}
+		return result;
+	}
+
+
+	boolean hasPermission(NodeRef nodeRef, String authority, String permission) {
+		AuthenticationUtil.RunAsWork<Boolean> runAs = () -> {
+			if(permissionService.hasPermission(nodeRef, permission) == AccessStatus.ALLOWED) {
+				return true;
+			}else {
+				return false;
+			}
+		};
+		return AuthenticationUtil.runAs(runAs, authority);
+	}
+
+	public void manageNodeLicenses(){
+		logger.info("cache mediacenterids");
+		List<String> allMediacenterIds = getAllMediacenterIds();
+		logger.info("cache mediacenter nodes");
+
+		Repository repositoryHelper = (Repository) applicationContext.getBean("repositoryHelper");
+		HashMap<String, NodeRef> importedNodes = getImportedNodes(repositoryHelper.getCompanyHome().getId());
+
+
+		HashMap<String,List<String>> sodisMediacenterIdNodes = new HashMap<>();
+		for(String mediacenterId : allMediacenterIds) {
+			logger.info("cache sodis mediacenter nodes mediacenterId:" + mediacenterId);
+			List<String> nodes = MediacenterLicenseProviderFactory.getMediacenterLicenseProvider().getNodes(mediacenterId);
+			sodisMediacenterIdNodes.put(mediacenterId, nodes);
+		}
+
+
+		HashMap<String,List<NodeRef>> addToMediacenterList = new HashMap<>();
+		HashMap<String,List<NodeRef>> removeFromMediacenterList = new HashMap<>();
+
+		for(String mediacenterId : allMediacenterIds){
+			logger.info("collect differences for "+ mediacenterId);
+			List<String> sodisLicensedNodes = sodisMediacenterIdNodes.get(mediacenterId);
+			if(sodisLicensedNodes == null || sodisLicensedNodes.size() == 0) {
+				logger.info("leave out mediacenter " + mediacenterId +" cause no licensed nodes found");
+				continue;
+			}
+			String mediacenterName = "GROUP_MEDIA_CENTER_" + mediacenterId;
+
+			for (Map.Entry<String, NodeRef> entry : importedNodes.entrySet()) {
+
+				boolean hasPublishPermission = hasPermission(entry.getValue(), mediacenterName,
+						CCConstants.PERMISSION_CC_PUBLISH);
+				boolean hasConsumerPermission = hasPermission(entry.getValue(), mediacenterName,
+						CCConstants.PERMISSION_CONSUMER);
+
+				if (sodisLicensedNodes.contains(entry.getKey()) && (!hasConsumerPermission || !hasPublishPermission)) {
+					List<NodeRef> nodeRefs = addToMediacenterList.get(mediacenterName);
+					if (nodeRefs == null) {
+						nodeRefs = new ArrayList<NodeRef>();
+						addToMediacenterList.put(mediacenterName, nodeRefs);
+					}
+					nodeRefs.add(entry.getValue());
+				} else if (!sodisLicensedNodes.contains(entry.getKey())
+						&& (hasConsumerPermission || hasPublishPermission)) {
+					List<NodeRef> nodeRefs = removeFromMediacenterList.get(mediacenterName);
+					if (nodeRefs == null) {
+						nodeRefs = new ArrayList<NodeRef>();
+						removeFromMediacenterList.put(mediacenterName, nodeRefs);
+					}
+					nodeRefs.add(entry.getValue());
+				}
+			}
+		}
+
+
+		for(Map.Entry<String, List<NodeRef>> entry : addToMediacenterList.entrySet()) {
+			String mediacenter = entry.getKey();
+			logger.info("process add changes for " + mediacenter);
+			for(NodeRef nodeRef : entry.getValue()) {
+				policyBehaviourFilter.disableBehaviour(nodeRef);
+				permissionService.setPermission(nodeRef, mediacenter, CCConstants.PERMISSION_CONSUMER , true);
+				permissionService.setPermission(nodeRef, mediacenter, CCConstants.PERMISSION_CC_PUBLISH , true);
+				policyBehaviourFilter.enableBehaviour(nodeRef);
+
+			}
+		}
+
+		for(Map.Entry<String, List<NodeRef>> entry : removeFromMediacenterList.entrySet()) {
+			String mediacenter = entry.getKey();
+			logger.info("process remove changes for " + mediacenter);
+			for(NodeRef nodeRef : entry.getValue()) {
+				policyBehaviourFilter.disableBehaviour(nodeRef);
+				permissionService.deletePermission(nodeRef, mediacenter, CCConstants.PERMISSION_CONSUMER);
+				permissionService.deletePermission(nodeRef, mediacenter, CCConstants.PERMISSION_CC_PUBLISH);
+				policyBehaviourFilter.enableBehaviour(nodeRef);
+			}
+		}
+
 	}
 
 

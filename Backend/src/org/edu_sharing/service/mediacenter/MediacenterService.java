@@ -10,5 +10,8 @@ public interface MediacenterService {
 
 	public int importOrgMcConnections(InputStream csv, boolean removeSchoolsFromMC);
 
-
+	/**
+	 * adjustment of licenses for mediacenters on nodes given by an {@link MediacenterLicenseProvider}
+	 */
+	public void manageNodeLicenses();
 }
