@@ -69,7 +69,7 @@ public class MediacenterServiceImpl implements MediacenterService{
 					try {
 						
 						String authorityName = AuthorityService.MEDIA_CENTER_GROUP_TYPE + "_" + mzId;
-						logger.info("creating:" + authorityName);
+						logger.info("managing:" + authorityName);
 						
 						if(authorityService.authorityExists("GROUP_" + authorityName)) {
 							logger.info("authority already exists:" + authorityName);
@@ -87,7 +87,7 @@ public class MediacenterServiceImpl implements MediacenterService{
 									authorityService.setAuthorityDisplayName(mcAdminGroup, mz + AuthorityService.ADMINISTRATORS_GROUP_DISPLAY_POSTFIX);
 								}
 								
-								String mcProxyGroup = getMediacenterProxyGroup(mzId);
+								String mcProxyGroup = getMediacenterProxyGroup(alfAuthorityName);
 								if(mcProxyGroup != null) {
 									authorityService.setAuthorityDisplayName(mcProxyGroup, mz + AuthorityService.MEDIA_CENTER_PROXY_DISPLAY_POSTFIX);
 								}
@@ -428,9 +428,13 @@ public class MediacenterServiceImpl implements MediacenterService{
 		return null;
 	}
 	
-	public String getMediacenterProxyGroup(String mzId) {
+	public String getMediacenterProxyGroup(String authorityName) {
 		Map<String,String> filter = new HashMap<>();
-		filter.put(CCConstants.CM_PROP_AUTHORITY_NAME, "GROUP_"+AuthorityService.MEDIA_CENTER_PROXY_GROUP_TYPE+"_"+mzId);
+
+		String proxyAuthorityName = PermissionService.GROUP_PREFIX + AuthorityService.MEDIA_CENTER_PROXY_GROUP_TYPE
+				+ "_"
+				+ authorityName.replace(PermissionService.GROUP_PREFIX + AuthorityService.MEDIA_CENTER_GROUP_TYPE +"_","");
+		filter.put(CCConstants.CM_PROP_AUTHORITY_NAME, proxyAuthorityName);
 		filter.put(CCConstants.CCM_PROP_GROUPEXTENSION_GROUPTYPE, AuthorityService.MEDIA_CENTER_PROXY_GROUP_TYPE);
 		
 		
@@ -439,6 +443,45 @@ public class MediacenterServiceImpl implements MediacenterService{
 			return (String)nodeService.getProperty(nodeRefs.get(0), ContentModel.PROP_AUTHORITY_NAME);
 		}else {
 			return null;
+		}
+	}
+
+
+	public boolean isActive(String authorityName){
+		String proxyGroup = getMediacenterProxyGroup(authorityName);
+		if(proxyGroup == null){
+			return false;
+		}
+
+		Set<String> containedAuthorities = authorityService.getContainedAuthorities(AuthorityType.GROUP, proxyGroup, false);
+		if(containedAuthorities == null){
+			return false;
+		}
+
+		if(containedAuthorities.contains(authorityName)){
+			return true;
+		}else{
+			return false;
+		}
+
+	}
+
+	public void setActive(boolean active, String authorityName){
+		if(active){
+			if(isActive(authorityName)){
+				return;
+			}
+
+			String proxyGroup = getMediacenterProxyGroup(authorityName);
+			if(proxyGroup == null){
+				logger.error("no proxy group found for " + authorityName);
+				return;
+			}
+
+			authorityService.addAuthority(proxyGroup, authorityName);
+		}else{
+			String proxyGroup = getMediacenterProxyGroup(authorityName);
+			authorityService.removeAuthority(proxyGroup,authorityName);
 		}
 	}
 

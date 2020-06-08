@@ -14,4 +14,8 @@ public interface MediacenterService {
 	 * adjustment of licenses for mediacenters on nodes given by an {@link MediacenterLicenseProvider}
 	 */
 	public void manageNodeLicenses();
+
+	public boolean isActive(String authorityName);
+
+	public void setActive(boolean active, String authorityName);
 }
