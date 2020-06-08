@@ -104,7 +104,8 @@ public class MediacenterDao extends AbstractDao{
 			}catch(NullPointerException e){}
 			profile.setMediacenter(mProfile);
 			mediacenter.setProfile(profile);
-			mediacenter.setAdministrationAccess(authorityService.hasAdminAccessToMediacenter(authorityName));
+			
+			mediacenter.setAdministrationAccess(authorityService.hasAdminAccessToMediacenter(groupDao.getGroupName()));
 			return mediacenter;
 		}catch(DAOException e){
 			throw new RuntimeException(e);
