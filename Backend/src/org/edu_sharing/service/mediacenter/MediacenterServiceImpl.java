@@ -31,6 +31,7 @@ import org.edu_sharing.repository.server.tools.ApplicationInfoList;
 import org.edu_sharing.restservices.shared.Mediacenter.MediacenterProfileExtension;
 import org.edu_sharing.service.authority.AuthorityServiceFactory;
 import org.edu_sharing.service.search.CMISSearchHelper;
+import org.edu_sharing.service.toolpermission.ToolPermissionHelper;
 import org.edu_sharing.service.util.CSVTool;
 import org.springframework.context.ApplicationContext;
 
@@ -413,8 +414,7 @@ public class MediacenterServiceImpl implements MediacenterService{
 	 *
 	 * @return
 	 */
-	public String getMediacenterAdminGroup(String alfMediacenterName) {
-		String authorityName = alfMediacenterName;
+	public String getMediacenterAdminGroup(String authorityName) {
 
 		NodeRef eduGroupNodeRef =authorityService.getAuthorityNodeRef(authorityName);
 		List<ChildAssociationRef> childGroups = nodeService.getChildAssocs(eduGroupNodeRef);
@@ -426,6 +426,20 @@ public class MediacenterServiceImpl implements MediacenterService{
 		}
 
 		return null;
+	}
+
+	public void isAllowedToManage(String authorityName){
+
+		if(org.edu_sharing.service.authority.AuthorityServiceFactory.getLocalService().isGlobalAdmin()){
+			return;
+		}
+
+		ToolPermissionHelper.throwIfToolpermissionMissing(CCConstants.CCM_VALUE_TOOLPERMISSION_MEDIACENTER_MANAGE);
+		String mediacenterAdminGroup = getMediacenterAdminGroup(authorityName);
+		Set<String> mediacenterAdmins = authorityService.getContainedAuthorities(AuthorityType.USER, mediacenterAdminGroup,false);
+		if(!mediacenterAdmins.contains(serviceregistry.getAuthenticationService().getCurrentUserName())){
+			throw new RuntimeException("current user is not part of mediacenter admin group");
+		}
 	}
 	
 	public String getMediacenterProxyGroup(String authorityName) {

@@ -17,6 +17,7 @@ import org.edu_sharing.service.model.NodeRef;
 import org.edu_sharing.service.search.model.SearchToken;
 
 import com.google.gson.Gson;
+import org.edu_sharing.service.toolpermission.ToolPermissionHelper;
 
 public class MediacenterDao extends AbstractDao{
 
@@ -139,6 +140,10 @@ public class MediacenterDao extends AbstractDao{
 	
 	
 	public void changeProfile(Mediacenter.Profile profile) throws DAOException {
+
+		//check and throw if not allowed
+		mediacenterService.isAllowedToManage(authorityName);
+
 		// always force the group type to media center
 		profile.setGroupType(AuthorityService.MEDIA_CENTER_GROUP_TYPE);
 		// first, change the basic profile (admin access is checked there)

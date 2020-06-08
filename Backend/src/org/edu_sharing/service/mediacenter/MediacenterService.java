@@ -18,4 +18,8 @@ public interface MediacenterService {
 	public boolean isActive(String authorityName);
 
 	public void setActive(boolean active, String authorityName);
+
+	public String getMediacenterAdminGroup(String authorityName);
+
+	public void isAllowedToManage(String authorityName);
 }
