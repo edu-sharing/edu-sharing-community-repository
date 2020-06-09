@@ -45,11 +45,11 @@ export class AdminConfigComponent {
       this.configClient = data;
       this.adminService.getConfigFile(AdminConfigComponent.CONFIG_FILE_BASE).subscribe((data) => {
         this.configGlobal = data;
+        this.adminService.getConfigFile(AdminConfigComponent.CONFIG_DEPLOYMENT_FILE).subscribe((data) => {
+            this.configDeployment = data;
+        });
         this.adminService.getConfigFile(AdminConfigComponent.CONFIG_FILE).subscribe((data) => {
           this.config = data;
-          this.adminService.getConfigFile(AdminConfigComponent.CONFIG_DEPLOYMENT_FILE).subscribe((data) => {
-            this.configDeployment = data;
-          });
         });
       });
     });
