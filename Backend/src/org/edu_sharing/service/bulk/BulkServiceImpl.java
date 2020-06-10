@@ -4,7 +4,6 @@ package org.edu_sharing.service.bulk;
 import org.alfresco.model.ContentModel;
 import org.alfresco.repo.model.Repository;
 import org.alfresco.service.ServiceRegistry;
-import org.alfresco.service.cmr.repository.InvalidNodeRefException;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.repository.NodeService;
 import org.alfresco.service.cmr.repository.StoreRef;
@@ -31,11 +30,22 @@ public class BulkServiceImpl implements BulkService {
 	private static Logger logger = Logger.getLogger(BulkServiceImpl.class);
 	private NodeRef primaryFolder;
 
-	public NodeRef getOrCreate(NodeRef parent, String name){
+	/**
+	 * get or create the folder
+	 * @param parent
+	 * @param name
+	 * @param propertiesNative Provide the properties of the created child. This will be taken into account when setting the metadataset id of the folder
+	 * @return
+	 */
+	public NodeRef getOrCreate(NodeRef parent, String name, HashMap<String, Object> propertiesNative){
 		NodeRef node = nodeServiceAlfresco.getChildByName(parent, ContentModel.ASSOC_CONTAINS, name);
 		if(node == null){
 			Map<QName, Serializable> props=new HashMap<>();
 			props.put(ContentModel.PROP_NAME, name);
+			if(propertiesNative!=null){
+				props.put(QName.createQName(CCConstants.CM_PROP_METADATASET_EDU_METADATASET),
+						(Serializable)propertiesNative.get(CCConstants.CM_PROP_METADATASET_EDU_METADATASET));
+			}
 			return serviceRegistry.getNodeService().createNode(parent, ContentModel.ASSOC_CONTAINS,
 					QName.createQName(name),
 					QName.createQName(CCConstants.CCM_TYPE_MAP),
@@ -45,11 +55,10 @@ public class BulkServiceImpl implements BulkService {
 	}
 
 	public BulkServiceImpl(){
-		primaryFolder = getOrCreate(repositoryHelper.getCompanyHome(), PRIMARY_FOLDER_NAME);
+		primaryFolder = getOrCreate(repositoryHelper.getCompanyHome(), PRIMARY_FOLDER_NAME, null);
 	}
 	@Override
 	public NodeRef sync(String group, List<String> match, String type, List<String> aspects, HashMap<String, String[]> properties) throws Throwable {
-		NodeRef groupFolder = getOrCreate(primaryFolder, group);
 		if(match == null || match.size() == 0){
 			throw new IllegalArgumentException("match should contain at last 1 property");
 		}
@@ -64,7 +73,8 @@ public class BulkServiceImpl implements BulkService {
 		HashMap<String, Object> propertiesNative = NodeServiceHelper.getPropertiesSinglevalue(properties);
 		propertiesNative.put(CCConstants.CM_NAME, NodeServiceHelper.cleanupCmName((String)(propertiesNative.get(CCConstants.CM_NAME))) + "_" + System.currentTimeMillis());
 		if(existing == null) {
-				existing = new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE,
+			NodeRef groupFolder = getOrCreate(primaryFolder, group, propertiesNative);
+			existing = new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE,
 					NodeServiceFactory.getLocalService().createNodeBasic(
 							groupFolder.getId(),
 							CCConstants.getValidGlobalName(type),
