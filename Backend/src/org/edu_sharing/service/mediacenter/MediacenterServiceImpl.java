@@ -482,7 +482,7 @@ public class MediacenterServiceImpl implements MediacenterService{
 	}
 	
 	public String getMediacenterProxyGroup(String authorityName) {
-		Map<String,String> filter = new HashMap<>();
+		Map<String,Object> filter = new HashMap<>();
 
 		String proxyAuthorityName = PermissionService.GROUP_PREFIX + AuthorityService.MEDIA_CENTER_PROXY_GROUP_TYPE
 				+ "_"

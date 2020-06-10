@@ -242,7 +242,7 @@ public class PersonLifecycleService {
 		}
 	}
 	public List<NodeRef> getAllNodeRefs(String username, String type, String scope){
-		Map<String, String> filters=new HashMap<>();
+		Map<String, Object> filters=new HashMap<>();
 		filters.put("cmis:createdBy",username);
 		filters.put(CCConstants.CCM_PROP_EDUSCOPE_NAME,scope);
 		return CMISSearchHelper.fetchNodesByTypeAndFilters(type,filters);
