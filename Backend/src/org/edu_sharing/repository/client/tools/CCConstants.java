@@ -449,7 +449,6 @@ public class CCConstants {
 	public final static String CCM_PROP_GROUPEXTENSION_GROUPSOURCE = "{http://www.campuscontent.de/model/1.0}groupSource";
 
 	public final static String CCM_PROP_MEDIACENTER_ID = "{http://www.campuscontent.de/model/1.0}mediacenterId";
-	public final static String CCM_PROP_MEDIACENTER_CONTENT_STATUS = "{http://www.campuscontent.de/model/1.0}mediacenterContentStatus";
 	public final static String CCM_PROP_MEDIACENTER_DISTRICT_ABBREVIATION = "{http://www.campuscontent.de/model/1.0}mediacenterDistrictAbbreviation";
 	public final static String CCM_PROP_MEDIACENTER_MAIN_URL = "{http://www.campuscontent.de/model/1.0}mediacenterMainUrl";
 	public final static String CCM_PROP_MEDIACENTER_CATALOGS = "{http://www.campuscontent.de/model/1.0}mediacenterCatalogs";
@@ -849,6 +848,8 @@ public class CCConstants {
 	public final static String CCM_VALUE_TOOLPERMISSION_RATE = "TOOLPERMISSION_RATE";
 
 	public final static String CCM_VALUE_TOOLPERMISSION_VIDEO_AUDIO_CUT = "TOOLPERMISSION_VIDEO_AUDIO_CUT";
+
+	public final static String CCM_VALUE_TOOLPERMISSION_MEDIACENTER_MANAGE = "TOOLPERMISSION_MEDIACENTER_MANAGE";
 
 	public final static String CM_VALUE_PERSON_EDU_SCHOOL_PRIMARY_AFFILIATION_TEACHER = "teacher";
 
@@ -2042,8 +2043,7 @@ public class CCConstants {
 	public static final String EDU_SHARING_GLOBAL_GROUPS = "EDU_SHARING_GLOBAL_GROUPS";
 
 	public static final String ADMINISTRATORS_GROUP_TYPE = "ORG_ADMINISTRATORS";
-	public static final String MEDIA_CENTER_GROUP_TYPE = "MEDIA_CENTER";
-	public static final String MEDIA_CENTER_GROUP_PREFIX = "MEDIA_CENTER_";
+	
 	public static final String EDITORIAL_GROUP_TYPE = "EDITORIAL";
 	public static final String COLLECTIONTYPE_DEFAULT = "default";
 	public static final String COLLECTIONTYPE_EDITORIAL = "EDITORIAL";

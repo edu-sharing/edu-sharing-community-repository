@@ -343,6 +343,14 @@
             <property name="cm:eduSchoolPrimaryAffiliation">
                <type>d:text</type>
             </property>
+            <!-- edu-sharing customization -->
+            <property name="cm:espersonTypicalAgeRangeFrom">
+               <type>d:text</type>
+            </property>
+            <!-- edu-sharing customization -->
+            <property name="cm:espersonTypicalAgeRangeTo">
+               <type>d:text</type>
+            </property>
             <!-- edu-sharing customization: non hashed username, when it was hashed by sso auth-->
             <property name="cm:esoriginaluid">
                <type>d:text</type>

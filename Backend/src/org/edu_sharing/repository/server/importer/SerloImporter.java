@@ -12,12 +12,8 @@ import java.util.Map;
 import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.methods.GetMethod;
 import org.apache.log4j.Logger;
-import org.edu_sharing.repository.client.rpc.SchoolContextValues;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.client.tools.forms.VCardTool;
-import org.edu_sharing.repository.server.MCAlfrescoAPIClient;
-import org.edu_sharing.repository.server.RepoFactory;
-import org.edu_sharing.repository.server.SchoolContextServiceImpl;
 import org.edu_sharing.repository.server.jobs.quartz.ImporterJob;
 import org.edu_sharing.repository.server.tools.ApplicationInfoList;
 import org.edu_sharing.repository.server.tools.HttpQueryTool;
@@ -183,8 +179,7 @@ public class SerloImporter implements Importer{
 				JSONArray categories = (JSONArray)jo.get("categories");
 				
 				
-				SchoolContextServiceImpl scs = new SchoolContextServiceImpl( new MCAlfrescoAPIClient());
-				
+
 				
 				
 				String schoolContextChain = "";
@@ -216,42 +211,12 @@ public class SerloImporter implements Importer{
 						Map.Entry<String, String> eduKlassenStufe = null;
 						Map.Entry<String, String> eduBundesland = null;
 						Map.Entry<String, String> eduSchulart = null;
-						SchoolContextValues scv= scs.getSchoolContextValues();
-						for(Map.Entry<String,String> entry : scv.getSchoolSubject().entrySet()){
-							if(entry.getValue().contains(fach)){
-								eduFach = entry;
-							}
-						}
-						
-						for(Map.Entry<String,String> entry : scv.getAgeGroup().entrySet()){
-							if(entry.getValue().equals(klassenStufe)){
-								eduKlassenStufe = entry;
-							}
-						}
-						
-						for(Map.Entry<String,String> entry : scv.getFederalState().entrySet()){
-							if(entry.getValue().equals(bundesLand)){
-								eduBundesland = entry;
-							}
-						}
-						
+
 						
 						Map.Entry<String,String> sekundarStufe1 = null;
 						Map.Entry<String,String> sekundarStufe2 = null;
 						
-						for(Map.Entry<String,String> entry : scv.getTypeOfSchool().entrySet()){
-							
-							
-							if(entry.getValue().equals("Sekundarstufe 1")){
-								sekundarStufe1 = entry;
-							}
-							
-							if(entry.getValue().equals("Sekundarstufe 2")){
-								sekundarStufe2 = entry;
-							}
-				
-						}
-						
+
 						if(schulart.equals("Gymnasium")){
 							if(eduKlassenStufe != null){
 								int klassenstufe = new Integer(eduKlassenStufe.getValue());

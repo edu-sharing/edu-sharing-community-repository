@@ -1,9 +1,9 @@
 package org.edu_sharing.repository.client.rpc;
 
-import com.google.gwt.user.client.rpc.IsSerializable;
-import com.google.gwt.user.client.ui.SuggestOracle;
 
-public class SuggestFacetDTO implements IsSerializable, SuggestOracle.Suggestion,  HasKey {
+import java.io.Serializable;
+
+public class SuggestFacetDTO implements Serializable, HasKey {
 
 	String facet;
 	String displayString;
@@ -25,7 +25,6 @@ public class SuggestFacetDTO implements IsSerializable, SuggestOracle.Suggestion
 		return facet;
 	}
 
-	@Override
 	public String getDisplayString() {
 		if(displayString!=null)
 			return displayString;
@@ -36,7 +35,6 @@ public class SuggestFacetDTO implements IsSerializable, SuggestOracle.Suggestion
 		this.displayString = displayString;
 	}
 
-	@Override
 	public String getReplacementString() {
 		return facet;
 	}

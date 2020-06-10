@@ -1,35 +1,14 @@
 package org.edu_sharing.restservices.collection.v1;
 
-import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
-import javax.servlet.http.HttpServletRequest;
-import javax.ws.rs.Consumes;
-import javax.ws.rs.DELETE;
-import javax.ws.rs.DefaultValue;
-import javax.ws.rs.GET;
-import javax.ws.rs.OPTIONS;
-import javax.ws.rs.POST;
-import javax.ws.rs.PUT;
-import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
-import javax.ws.rs.QueryParam;
-import javax.ws.rs.core.Context;
-import javax.ws.rs.core.Response;
-
+import io.swagger.annotations.*;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.apache.log4j.Logger;
 import org.apache.lucene.queryParser.QueryParser;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.server.SearchResultNodeRef;
 import org.edu_sharing.restservices.*;
-import org.edu_sharing.restservices.CollectionDao.Scope;
 import org.edu_sharing.restservices.CollectionDao.SearchScope;
 import org.edu_sharing.restservices.collection.v1.model.*;
-import org.edu_sharing.restservices.node.v1.model.NodeEntries;
 import org.edu_sharing.restservices.node.v1.model.NodeEntry;
 import org.edu_sharing.restservices.shared.ErrorResponse;
 import org.edu_sharing.restservices.shared.Filter;
@@ -42,14 +21,14 @@ import org.edu_sharing.service.search.model.SortDefinition;
 import org.edu_sharing.service.util.AlfrescoDaoHelper;
 import org.glassfish.jersey.media.multipart.FormDataParam;
 
-import com.google.gdata.client.GDataProtocol.Error;
-import com.google.gwt.user.client.rpc.core.java.util.Collections;
-
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.ApiParam;
-import io.swagger.annotations.ApiResponse;
-import io.swagger.annotations.ApiResponses;
+import javax.servlet.http.HttpServletRequest;
+import javax.ws.rs.*;
+import javax.ws.rs.core.Context;
+import javax.ws.rs.core.Response;
+import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
 
 @Path("/collection/v1")
 @Api(tags = { "COLLECTION v1" })

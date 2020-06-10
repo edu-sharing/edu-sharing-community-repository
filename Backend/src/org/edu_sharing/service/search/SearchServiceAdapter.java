@@ -1,20 +1,18 @@
 package org.edu_sharing.service.search;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
-import com.google.gwt.user.client.ui.SuggestOracle;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.security.AuthorityType;
 import org.edu_sharing.metadataset.v2.MetadataSetV2;
 import org.edu_sharing.repository.client.rpc.EduGroup;
 import org.edu_sharing.repository.server.SearchResultNodeRef;
-import org.edu_sharing.restservices.shared.MdsQueryCriteria;
 import org.edu_sharing.service.InsufficientPermissionException;
 import org.edu_sharing.service.search.model.SearchResult;
 import org.edu_sharing.service.search.model.SearchToken;
 import org.edu_sharing.service.search.model.SortDefinition;
+
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 public class SearchServiceAdapter implements SearchService {
 

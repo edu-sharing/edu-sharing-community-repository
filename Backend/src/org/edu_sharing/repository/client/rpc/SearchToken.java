@@ -27,13 +27,13 @@
  */
 package org.edu_sharing.repository.client.rpc;
 
+import org.edu_sharing.metadataset.v2.SearchCriterias;
+
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
 
-import com.google.gwt.user.client.rpc.IsSerializable;
-import org.edu_sharing.metadataset.v2.SearchCriterias;
-
-public class SearchToken implements IsSerializable {
+public class SearchToken implements Serializable {
 	//private String query = "";
 	private int startIDX = 0;
 	private int nrOfResults = 0;

@@ -178,9 +178,9 @@ public class SearchServiceImpl implements SearchService {
 			SearchParameters parameters = new SearchParameters();
 			parameters.addStore(Constants.storeRef);
 			parameters.setLanguage(org.alfresco.service.cmr.search.SearchService.LANGUAGE_LUCENE);
-			parameters.addAllAttribute(CCConstants.MEDIA_CENTER_GROUP_TYPE);
+			parameters.addAllAttribute(org.edu_sharing.alfresco.service.AuthorityService.MEDIA_CENTER_GROUP_TYPE);
 			parameters.addSort(CCConstants.CM_PROP_AUTHORITY_AUTHORITYDISPLAYNAME,true);
-			parameters.setQuery("@ccm\\:groupType:\"" + CCConstants.MEDIA_CENTER_GROUP_TYPE + "\"");
+			parameters.setQuery("@ccm\\:groupType:\"" + org.edu_sharing.alfresco.service.AuthorityService.MEDIA_CENTER_GROUP_TYPE + "\"");
 			return SearchServiceHelper.queryAll(parameters,0).stream().map((ref) ->
 					NodeServiceFactory.getNodeService(applicationId).getProperty(ref.getStoreRef().getProtocol(), ref.getStoreRef().getIdentifier(), ref.getId(), CCConstants.CM_PROP_AUTHORITY_AUTHORITYNAME)
 			).collect(Collectors.toList());

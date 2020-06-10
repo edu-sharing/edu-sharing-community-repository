@@ -17,6 +17,7 @@ import {
     TemporaryStorageService,
 } from '../../../core-module/core.module';
 import { UIHelper } from '../../../core-ui-module/ui-helper';
+import {OptionItem} from "../../../core-ui-module/option-item";
 
 export interface CustomNodeListWrapperInterface {
     // Inputs
@@ -53,6 +54,7 @@ export class CustomNodeListWrapperComponent implements OnChanges {
     @Input() isLoading: boolean;
     @Input() mainNav: MainNavComponent;
     @Input() actionbar: ActionbarComponent;
+    @Input() optionItems: OptionItem[];
 
     @Output() clickRow = new EventEmitter<{ node: Node }>();
     @Output() loadMore = new EventEmitter<null>();

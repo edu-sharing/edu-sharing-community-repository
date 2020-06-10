@@ -53,9 +53,9 @@ public class NodeServiceHelper {
 	public static void setCreateVersion(String nodeId, boolean create) {
 		new MCAlfrescoAPIClient().setProperty(nodeId, CCConstants.CCM_PROP_IO_CREATE_VERSION, create);
 	}
-	public static Map<String, Serializable> transformLongToShortProperties(Map<String, Serializable> properties) {
-		HashMap<String, Serializable> result = new HashMap<>();
-		for(Map.Entry<String, Serializable> prop: properties.entrySet()){
+	public static <T> Map<String, T> transformLongToShortProperties(Map<String, T> properties) {
+		HashMap<String, T> result = new HashMap<>();
+		for(Map.Entry<String, T> prop: properties.entrySet()){
 			result.put(CCConstants.getValidLocalName(prop.getKey()), prop.getValue());
 		}
 		return result;

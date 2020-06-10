@@ -425,12 +425,6 @@
 	
 
     <servlet>
-        <servlet-name>SchoolContextService</servlet-name>
-        <servlet-class>
-            org.edu_sharing.repository.server.SchoolContextServiceImpl
-        </servlet-class> 
-    </servlet> 
-    <servlet>
         <servlet-name>SuggestService</servlet-name>
         <servlet-class>
             org.edu_sharing.repository.server.SuggestServiceImpl
@@ -644,10 +638,6 @@
     <servlet-mapping>
         <servlet-name>oEmbedServlet</servlet-name>
         <url-pattern>/eduservlet/oembed</url-pattern>
-    </servlet-mapping>
-    <servlet-mapping>
-        <servlet-name>SchoolContextService</servlet-name>
-        <url-pattern>/eduservlet/schoolcontextservice</url-pattern>
     </servlet-mapping>
     <servlet-mapping> 
         <servlet-name>SuggestService</servlet-name>

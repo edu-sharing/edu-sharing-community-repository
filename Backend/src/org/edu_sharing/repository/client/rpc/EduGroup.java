@@ -1,6 +1,8 @@
 package org.edu_sharing.repository.client.rpc;
 
-public class EduGroup implements com.google.gwt.user.client.rpc.IsSerializable {
+import java.io.Serializable;
+
+public class EduGroup implements Serializable {
 	
 	public EduGroup() {
 	}

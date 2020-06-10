@@ -73,4 +73,6 @@
 	
 	<bean id="repoProxy" class="org.edu_sharing.service.repoproxy.RepoProxyDummyImpl">
 	</bean>
+
+	<bean id="mediacenterLicenseProvider" class="org.edu_sharing.service.mediacenter.MediacenterLicenseProviderImpl"/>
 </beans>

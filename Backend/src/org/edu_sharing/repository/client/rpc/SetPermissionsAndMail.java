@@ -27,9 +27,10 @@
  */
 package org.edu_sharing.repository.client.rpc;
 
+import java.io.Serializable;
 import java.util.HashMap;
 
-public class SetPermissionsAndMail implements com.google.gwt.user.client.rpc.IsSerializable {
+public class SetPermissionsAndMail implements Serializable {
 	
 	String nodeId = null;
 	

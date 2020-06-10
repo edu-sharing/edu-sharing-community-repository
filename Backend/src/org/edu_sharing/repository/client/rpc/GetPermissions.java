@@ -28,7 +28,9 @@
 package org.edu_sharing.repository.client.rpc;
 
 
-public class GetPermissions implements com.google.gwt.user.client.rpc.IsSerializable {
+import java.io.Serializable;
+
+public class GetPermissions implements Serializable {
 	
 	
 	ACL permissions = null;

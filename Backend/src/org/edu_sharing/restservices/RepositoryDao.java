@@ -19,6 +19,8 @@ import org.edu_sharing.service.authority.AuthorityService;
 import org.edu_sharing.service.authority.AuthorityServiceFactory;
 import org.edu_sharing.service.collection.CollectionService;
 import org.edu_sharing.service.collection.CollectionServiceFactory;
+import org.edu_sharing.service.mediacenter.MediacenterService;
+import org.edu_sharing.service.mediacenter.MediacenterServiceFactory;
 import org.edu_sharing.service.nodeservice.NodeService;
 import org.edu_sharing.service.nodeservice.NodeServiceFactory;
 import org.edu_sharing.service.rendering.RenderingService;
@@ -218,4 +220,8 @@ public class RepositoryDao {
 	SearchService getSearchService() {
 		return SearchServiceFactory.getSearchService(getId());
 	}
+	MediacenterService getMediacenterService(){
+		return MediacenterServiceFactory.getMediacenterService(getId());
+	}
+
 }

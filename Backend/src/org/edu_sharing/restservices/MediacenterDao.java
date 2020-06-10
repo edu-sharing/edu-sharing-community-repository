@@ -12,17 +12,22 @@ import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.server.SearchResultNodeRef;
 import org.edu_sharing.restservices.shared.Mediacenter;
 import org.edu_sharing.restservices.shared.Node;
+import org.edu_sharing.service.mediacenter.MediacenterService;
 import org.edu_sharing.service.model.NodeRef;
 import org.edu_sharing.service.search.model.SearchToken;
 
 import com.google.gson.Gson;
+import org.edu_sharing.service.toolpermission.ToolPermissionHelper;
 
 public class MediacenterDao extends AbstractDao{
 
 	private String authorityName;
 
+	MediacenterService mediacenterService;
+
 	public MediacenterDao(RepositoryDao repoDao){
 		super(repoDao);
+		mediacenterService = this.repoDao.getMediacenterService();
 	}
 	public static MediacenterDao create(RepositoryDao repoDao,String name,Mediacenter.Profile profile) throws DAOException {
 		try {
@@ -87,7 +92,8 @@ public class MediacenterDao extends AbstractDao{
 			Mediacenter.MediacenterProfileExtension mProfile=new Mediacenter.MediacenterProfileExtension();
 			mProfile.setId(authorityService.getProperty(mediacenter.getAuthorityName(), CCConstants.CCM_PROP_MEDIACENTER_ID));
 			try {
-				mProfile.setContentStatus(Mediacenter.MediacenterProfileExtension.ContentStatus.valueOf(authorityService.getProperty(mediacenter.getAuthorityName(), CCConstants.CCM_PROP_MEDIACENTER_CONTENT_STATUS)));
+				boolean isActive = mediacenterService.isActive(mediacenter.getAuthorityName());
+				mProfile.setContentStatus((isActive) ? Mediacenter.MediacenterProfileExtension.ContentStatus.Activated : Mediacenter.MediacenterProfileExtension.ContentStatus.Deactivated);
 			}catch(NullPointerException t){}
 			mProfile.setLocation(authorityService.getProperty(mediacenter.getAuthorityName(), CCConstants.CCM_PROP_ADDRESS_CITY));
 			mProfile.setDistrictAbbreviation(authorityService.getProperty(mediacenter.getAuthorityName(), CCConstants.CCM_PROP_MEDIACENTER_DISTRICT_ABBREVIATION));
@@ -98,7 +104,8 @@ public class MediacenterDao extends AbstractDao{
 			}catch(NullPointerException e){}
 			profile.setMediacenter(mProfile);
 			mediacenter.setProfile(profile);
-			mediacenter.setAdministrationAccess(authorityService.hasAdminAccessToMediacenter(authorityName));
+			
+			mediacenter.setAdministrationAccess(authorityService.hasAdminAccessToMediacenter(groupDao.getGroupName()));
 			return mediacenter;
 		}catch(DAOException e){
 			throw new RuntimeException(e);
@@ -111,8 +118,8 @@ public class MediacenterDao extends AbstractDao{
 			if(ref==null)
 				throw new DAOMissingException(new Exception("Authority not found: "+group));
 			String property = nodeService.getProperty(ref.getStoreRef().getProtocol(), ref.getStoreRef().getIdentifier(), ref.getId(), CCConstants.CCM_PROP_GROUPEXTENSION_GROUPTYPE);
-			if(property==null || !property.equals(CCConstants.MEDIA_CENTER_GROUP_TYPE))
-				throw new java.lang.IllegalArgumentException("The given authority is not of type "+CCConstants.MEDIA_CENTER_GROUP_TYPE);
+			if(property==null || !property.equals(AuthorityService.MEDIA_CENTER_GROUP_TYPE))
+				throw new java.lang.IllegalArgumentException("The given authority is not of type "+AuthorityService.MEDIA_CENTER_GROUP_TYPE);
 
 			this.authorityName=group;
 			return this;
@@ -134,8 +141,12 @@ public class MediacenterDao extends AbstractDao{
 	
 	
 	public void changeProfile(Mediacenter.Profile profile) throws DAOException {
+
+		//check and throw if not allowed
+		mediacenterService.isAllowedToManage(authorityName);
+
 		// always force the group type to media center
-		profile.setGroupType(CCConstants.MEDIA_CENTER_GROUP_TYPE);
+		profile.setGroupType(AuthorityService.MEDIA_CENTER_GROUP_TYPE);
 		// first, change the basic profile (admin access is checked there)
 		GroupDao.getGroup(repoDao,authorityName).changeProfile(profile);
 		// then, change the mediacenter releated data
@@ -144,9 +155,15 @@ public class MediacenterDao extends AbstractDao{
 		authorityService.addAuthorityAspect(authorityName, CCConstants.CCM_ASPECT_ADDRESS);
 		if(profile.getMediacenter()!=null) {
 			authorityService.setAuthorityProperty(authorityName, CCConstants.CCM_PROP_MEDIACENTER_ID, profile.getMediacenter().getId());
-			authorityService.setAuthorityProperty(authorityName, CCConstants.CCM_PROP_MEDIACENTER_CONTENT_STATUS,
-					profile.getMediacenter().getContentStatus()==null ? Mediacenter.MediacenterProfileExtension.ContentStatus.Deactivated.toString() : profile.getMediacenter().getContentStatus().toString()
-			);
+
+			//contentstatus
+			if(profile.getMediacenter().getContentStatus()==null
+					|| profile.getMediacenter().getContentStatus().equals(Mediacenter.MediacenterProfileExtension.ContentStatus.Deactivated)){
+				mediacenterService.setActive(false, authorityName );
+			}else if(profile.getMediacenter().getContentStatus().equals(Mediacenter.MediacenterProfileExtension.ContentStatus.Activated)){
+				mediacenterService.setActive(true, authorityName );
+			}
+
 			authorityService.setAuthorityProperty(authorityName, CCConstants.CCM_PROP_ADDRESS_CITY, profile.getMediacenter().getLocation());
 			authorityService.setAuthorityProperty(authorityName, CCConstants.CCM_PROP_MEDIACENTER_DISTRICT_ABBREVIATION, profile.getMediacenter().getDistrictAbbreviation());
 			authorityService.setAuthorityProperty(authorityName, CCConstants.CCM_PROP_MEDIACENTER_MAIN_URL, profile.getMediacenter().getMainUrl());
@@ -155,8 +172,8 @@ public class MediacenterDao extends AbstractDao{
 	}
 	private MediacenterDao create(String name,Mediacenter.Profile profile) throws DAOException {
 		try {
-			profile.setGroupType(CCConstants.MEDIA_CENTER_GROUP_TYPE);
-			String group = GroupDao.createGroup(repoDao, CCConstants.MEDIA_CENTER_GROUP_PREFIX + name, profile, null).getAuthorityName();
+			profile.setGroupType(AuthorityService.MEDIA_CENTER_GROUP_TYPE);
+			String group = GroupDao.createGroup(repoDao, AuthorityService.MEDIA_CENTER_GROUP_TYPE + "_" + name, profile, null).getAuthorityName();
 			this.authorityName = group;
 			changeProfile(profile);
 

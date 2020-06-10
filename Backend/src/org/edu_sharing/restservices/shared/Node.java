@@ -1,25 +1,16 @@
 package org.edu_sharing.restservices.shared;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import io.swagger.annotations.ApiModel;
+import io.swagger.annotations.ApiModelProperty;
+import org.edu_sharing.restservices.collection.v1.model.Collection;
+import org.edu_sharing.service.rating.AccumulatedRatings;
+
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
-
-import org.edu_sharing.repository.client.tools.CCConstants;
-import org.edu_sharing.repository.client.tools.MimeTypes;
-import org.edu_sharing.repository.client.tools.Theme;
-import org.edu_sharing.repository.server.tools.ApplicationInfo;
-import org.edu_sharing.repository.server.tools.ApplicationInfoList;
-import org.edu_sharing.restservices.RepositoryDao;
-import org.edu_sharing.restservices.collection.v1.model.Collection;
-
-import com.fasterxml.jackson.annotation.JsonFormat;
-import com.fasterxml.jackson.annotation.JsonProperty;
-import com.google.gwt.core.client.GWT;
-
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
-import org.edu_sharing.service.rating.AccumulatedRatings;
 
 @ApiModel(description = "")
 public class Node {
