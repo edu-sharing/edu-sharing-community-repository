@@ -2520,11 +2520,20 @@ export class MdsComponent {
       }
       let properties: any = {};
       for (const key of Object.keys(this.currentNodes[0].properties)) {
-        const identical = this.currentNodes.map((n) => n.properties[key]).reduce((a, b) =>
-          Helper.arrayEquals(a, b) ? a : false
-        );
-        if (identical !== false) {
-          properties[key] = this.currentNodes[0].properties[key];
+        const values = this.currentNodes.map((n) => n.properties[key]).reduce((a, b) => {
+          if (Helper.arrayEquals(a, b)) {
+            return a;
+          }
+          const result = [];
+          for (const v of a) {
+            if (b.indexOf(v) !== -1) {
+              result.push(v);
+            }
+          }
+          return result;
+        });
+        if (values !== []) {
+          properties[key] = values;
         }
       }
       return properties;
