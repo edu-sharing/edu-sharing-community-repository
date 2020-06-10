@@ -71,6 +71,8 @@ $path:'../../../assets/images/';
       }
 
       user-avatar {
+        display: flex;
+        justify-content: center;
       }
 
       mat-form-field {
