@@ -28,6 +28,7 @@ import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.server.jobs.helper.NodeRunner;
 import org.edu_sharing.repository.server.tools.ApplicationInfoList;
+import org.edu_sharing.restservices.shared.Mediacenter;
 import org.edu_sharing.restservices.shared.Mediacenter.MediacenterProfileExtension;
 import org.edu_sharing.service.authority.AuthorityServiceFactory;
 import org.edu_sharing.service.search.CMISSearchHelper;
@@ -74,83 +75,11 @@ public class MediacenterServiceImpl implements MediacenterService{
 						
 						if(authorityService.authorityExists("GROUP_" + authorityName)) {
 							logger.info("authority already exists:" + authorityName);
-							NodeRef authorityNodeRef = authorityService.getAuthorityNodeRef("GROUP_" + authorityName);
-							
-							String alfAuthorityName = (String)nodeService.getProperty(authorityNodeRef,QName.createQName(CCConstants.CM_PROP_AUTHORITY_AUTHORITYNAME));
-							String currentDisplayName = (String)nodeService.getProperty(authorityNodeRef,QName.createQName(CCConstants.CM_PROP_AUTHORITY_AUTHORITYDISPLAYNAME));
-							String currentCity = (String)nodeService.getProperty(authorityNodeRef,QName.createQName(CCConstants.CCM_PROP_ADDRESS_CITY));
-							String currentPLZ = (String)nodeService.getProperty(authorityNodeRef,QName.createQName(CCConstants.CCM_PROP_ADDRESS_POSTALCODE));
-							
-							if(mz != null && !mz.equals(currentDisplayName)) {
-								authorityService.setAuthorityDisplayName(alfAuthorityName, mz);
-								String mcAdminGroup = getMediacenterAdminGroup(alfAuthorityName);
-								if(mcAdminGroup != null) {
-									authorityService.setAuthorityDisplayName(mcAdminGroup, mz + AuthorityService.ADMINISTRATORS_GROUP_DISPLAY_POSTFIX);
-								}
-								
-								String mcProxyGroup = getMediacenterProxyGroup(alfAuthorityName);
-								if(mcProxyGroup != null) {
-									authorityService.setAuthorityDisplayName(mcProxyGroup, mz + AuthorityService.MEDIA_CENTER_PROXY_DISPLAY_POSTFIX);
-								}
-							}
-							
-							if(ort != null && !ort.equals(currentCity)) {
-								nodeService.setProperty(authorityNodeRef, QName.createQName(CCConstants.CCM_PROP_ADDRESS_CITY), currentCity);
-							}
-							
-							if(plz != null && !plz.equals(currentPLZ)) {
-								nodeService.setProperty(authorityNodeRef, QName.createQName(CCConstants.CCM_PROP_ADDRESS_POSTALCODE), plz);
-							}
+							updateMediacenter(authorityName,mz,plz,ort,null,null,null,true);
 							continue;
 						}
 						
-						/**
-						 * create mediacenter group
-						 */
-						String alfAuthorityName = authorityService.createAuthority(AuthorityType.GROUP, authorityName);
-						authorityService.setAuthorityDisplayName(alfAuthorityName, mz);
-						
-						/**
-						 * create mediacenter admin group
-						 */
-						AuthorityServiceFactory.getLocalService().createGroupWithType(
-								AuthorityService.MEDIACENTER_ADMINISTRATORS_GROUP, 
-								mz + AuthorityService.ADMINISTRATORS_GROUP_DISPLAY_POSTFIX, 
-								authorityName, 
-								AuthorityService.MEDIACENTER_ADMINISTRATORS_GROUP_TYPE);
-						
-						/**
-						 * create mediacenter proxy group and add mediacenter group to proxy group
-						 */
-						String mediacenterProxyName = AuthorityService.MEDIA_CENTER_PROXY_GROUP_TYPE + "_" + mzId;
-						AuthorityServiceFactory.getLocalService().createGroupWithType(
-								mediacenterProxyName,
-								mz + AuthorityService.MEDIA_CENTER_PROXY_DISPLAY_POSTFIX, 
-								null, 
-								AuthorityService.MEDIA_CENTER_PROXY_GROUP_TYPE);
-						authorityService.addAuthority("GROUP_" + mediacenterProxyName, alfAuthorityName);
-						String mediacenterAdminGroup = getMediacenterAdminGroup(alfAuthorityName);
-						authorityService.addAuthority("GROUP_" + mediacenterProxyName, mediacenterAdminGroup);
-
-						/**
-						 * add mediacenter metadata
-						 */
-						NodeRef authorityNodeRef = authorityService.getAuthorityNodeRef(alfAuthorityName);
-						
-						Map<QName, Serializable> groupExtProps = new HashMap<QName, Serializable>();
-						groupExtProps.put(QName.createQName(CCConstants.CCM_PROP_GROUPEXTENSION_GROUPTYPE), AuthorityService.MEDIA_CENTER_GROUP_TYPE);
-						nodeService.addAspect(authorityNodeRef, QName.createQName(CCConstants.CCM_ASPECT_GROUPEXTENSION), groupExtProps);
-						
-						Map<QName, Serializable> groupAddressProps = new HashMap<QName, Serializable>();
-						groupAddressProps.put(QName.createQName(CCConstants.CCM_PROP_ADDRESS_POSTALCODE), plz);
-						groupAddressProps.put(QName.createQName(CCConstants.CCM_PROP_ADDRESS_CITY), ort);
-						nodeService.addAspect(authorityNodeRef, QName.createQName(CCConstants.CCM_ASPECT_ADDRESS), groupAddressProps);
-						
-						Map<QName, Serializable> groupMZProps = new HashMap<QName, Serializable>();
-						groupMZProps.put(QName.createQName(CCConstants.CCM_PROP_MEDIACENTER_ID), mzId);
-						groupMZProps.put(QName.createQName(CCConstants.CCM_PROP_ADDRESS_CITY), ort);
-						nodeService.addAspect(authorityNodeRef, QName.createQName(CCConstants.CCM_ASPECT_MEDIACENTER), groupMZProps);
-											
+						createMediacenter(mzId,mz,plz,ort);
 						
 						
 						counter++;
@@ -165,6 +94,91 @@ public class MediacenterServiceImpl implements MediacenterService{
 
 		return AuthenticationUtil.runAs(runAs, ApplicationInfoList.getHomeRepository().getUsername());
 	}
+
+	public void updateMediacenter(String authorityName, String displayName, String postalCode, String city,
+								  String districtAbbreviation, String mainUrl, String mediacenterCatalogs, boolean active) throws Exception {
+
+		NodeRef authorityNodeRef = authorityService.getAuthorityNodeRef( authorityName);
+		String alfAuthorityName = (String)nodeService.getProperty(authorityNodeRef,QName.createQName(CCConstants.CM_PROP_AUTHORITY_AUTHORITYNAME));
+		String currentDisplayName = (String)nodeService.getProperty(authorityNodeRef,QName.createQName(CCConstants.CM_PROP_AUTHORITY_AUTHORITYDISPLAYNAME));
+
+		if(displayName != null && !displayName.equals(currentDisplayName)) {
+			authorityService.setAuthorityDisplayName(alfAuthorityName, displayName);
+			String mcAdminGroup = getMediacenterAdminGroup(alfAuthorityName);
+			if(mcAdminGroup != null) {
+				authorityService.setAuthorityDisplayName(mcAdminGroup, displayName + AuthorityService.ADMINISTRATORS_GROUP_DISPLAY_POSTFIX);
+			}
+
+			String mcProxyGroup = getMediacenterProxyGroup(alfAuthorityName);
+			if(mcProxyGroup != null) {
+				authorityService.setAuthorityDisplayName(mcProxyGroup, displayName + AuthorityService.MEDIA_CENTER_PROXY_DISPLAY_POSTFIX);
+			}
+		}
+
+		updateProperty(authorityNodeRef,CCConstants.CCM_PROP_ADDRESS_POSTALCODE, postalCode);
+		updateProperty(authorityNodeRef,CCConstants.CCM_PROP_ADDRESS_CITY, city);
+		updateProperty(authorityNodeRef,CCConstants.CCM_PROP_MEDIACENTER_DISTRICT_ABBREVIATION, districtAbbreviation);
+		updateProperty(authorityNodeRef,CCConstants.CCM_PROP_MEDIACENTER_MAIN_URL, mainUrl);
+		updateProperty(authorityNodeRef,CCConstants.CCM_PROP_MEDIACENTER_CATALOGS, mediacenterCatalogs);
+
+		if(active){
+			this.setActive(true, authorityName );
+		}else{
+			this.setActive(false, authorityName );
+		}
+	}
+
+	private void updateProperty(NodeRef authorityNodeRef, String property, String newValue){
+		String oldValue = (String)nodeService.getProperty(authorityNodeRef,QName.createQName(property));
+		if(newValue != null && !newValue.equals(oldValue)) {
+			nodeService.setProperty(authorityNodeRef, QName.createQName(property), newValue);
+		}
+	}
+
+	public String createMediacenter(String id, String displayName, String postalCode, String city) throws Exception {
+
+		String authorityName = AuthorityService.MEDIA_CENTER_GROUP_TYPE + "_" + id;
+
+		/**
+		 * create mediacenter group
+		 */
+		String alfAuthorityName = authorityService.createAuthority(AuthorityType.GROUP, authorityName);
+		authorityService.setAuthorityDisplayName(alfAuthorityName, displayName);
+
+		/**
+		 * create mediacenter admin group
+		 */
+		createMediacenterAdminGroup(alfAuthorityName, displayName);
+
+		/**
+		 * create mediacenter proxy group
+		 */
+		createMediacenterProxyGroup(alfAuthorityName,displayName);
+
+		/**
+		 * add mediacenter metadata
+		 */
+		NodeRef authorityNodeRef = authorityService.getAuthorityNodeRef(alfAuthorityName);
+
+		Map<QName, Serializable> groupExtProps = new HashMap<QName, Serializable>();
+		groupExtProps.put(QName.createQName(CCConstants.CCM_PROP_GROUPEXTENSION_GROUPTYPE), AuthorityService.MEDIA_CENTER_GROUP_TYPE);
+		nodeService.addAspect(authorityNodeRef, QName.createQName(CCConstants.CCM_ASPECT_GROUPEXTENSION), groupExtProps);
+
+		Map<QName, Serializable> groupAddressProps = new HashMap<QName, Serializable>();
+		if(postalCode != null) groupAddressProps.put(QName.createQName(CCConstants.CCM_PROP_ADDRESS_POSTALCODE), postalCode);
+		if(city != null) groupAddressProps.put(QName.createQName(CCConstants.CCM_PROP_ADDRESS_CITY), city);
+		nodeService.addAspect(authorityNodeRef, QName.createQName(CCConstants.CCM_ASPECT_ADDRESS), groupAddressProps);
+
+		Map<QName, Serializable> groupMZProps = new HashMap<QName, Serializable>();
+		groupMZProps.put(QName.createQName(CCConstants.CCM_PROP_MEDIACENTER_ID), id);
+		if(city != null) groupMZProps.put(QName.createQName(CCConstants.CCM_PROP_ADDRESS_CITY), city);
+		nodeService.addAspect(authorityNodeRef, QName.createQName(CCConstants.CCM_ASPECT_MEDIACENTER), groupMZProps);
+
+		return alfAuthorityName;
+	}
+
+
+
 
 	@Override
 	public int importOrganisations(InputStream csv) {
@@ -441,13 +455,38 @@ public class MediacenterServiceImpl implements MediacenterService{
 			throw new RuntimeException("current user is not part of mediacenter admin group");
 		}
 	}
+
+	/**
+	 * create mediacenter proxy group and add mediacenter group to proxy group
+	 */
+	public void createMediacenterProxyGroup(String alfAuthorityName, String displayName) throws Exception{
+
+		String mediacenterId = getMediacenterId(alfAuthorityName);
+		String mediacenterProxyName = AuthorityService.MEDIA_CENTER_PROXY_GROUP_TYPE + "_" + mediacenterId;
+		AuthorityServiceFactory.getLocalService().createGroupWithType(
+				mediacenterProxyName,
+				displayName + AuthorityService.MEDIA_CENTER_PROXY_DISPLAY_POSTFIX,
+				null,
+				AuthorityService.MEDIA_CENTER_PROXY_GROUP_TYPE);
+		authorityService.addAuthority("GROUP_" + mediacenterProxyName, alfAuthorityName);
+		String mediacenterAdminGroup = getMediacenterAdminGroup(alfAuthorityName);
+		authorityService.addAuthority("GROUP_" + mediacenterProxyName, mediacenterAdminGroup);
+	}
+
+	public void createMediacenterAdminGroup(String alfAuthorityName, String displayName) throws Exception {
+		AuthorityServiceFactory.getLocalService().createGroupWithType(
+				AuthorityService.MEDIACENTER_ADMINISTRATORS_GROUP,
+				displayName + AuthorityService.ADMINISTRATORS_GROUP_DISPLAY_POSTFIX,
+				alfAuthorityName.replace("GROUP_",""),
+				AuthorityService.MEDIACENTER_ADMINISTRATORS_GROUP_TYPE);
+	}
 	
 	public String getMediacenterProxyGroup(String authorityName) {
 		Map<String,String> filter = new HashMap<>();
 
 		String proxyAuthorityName = PermissionService.GROUP_PREFIX + AuthorityService.MEDIA_CENTER_PROXY_GROUP_TYPE
 				+ "_"
-				+ authorityName.replace(PermissionService.GROUP_PREFIX + AuthorityService.MEDIA_CENTER_GROUP_TYPE +"_","");
+				+ getMediacenterId(authorityName);
 		filter.put(CCConstants.CM_PROP_AUTHORITY_NAME, proxyAuthorityName);
 		filter.put(CCConstants.CCM_PROP_GROUPEXTENSION_GROUPTYPE, AuthorityService.MEDIA_CENTER_PROXY_GROUP_TYPE);
 		
@@ -458,6 +497,10 @@ public class MediacenterServiceImpl implements MediacenterService{
 		}else {
 			return null;
 		}
+	}
+
+	private String getMediacenterId(String authorityName){
+		return authorityName.replace(PermissionService.GROUP_PREFIX + AuthorityService.MEDIA_CENTER_GROUP_TYPE +"_","");
 	}
 
 
@@ -495,7 +538,9 @@ public class MediacenterServiceImpl implements MediacenterService{
 			authorityService.addAuthority(proxyGroup, authorityName);
 		}else{
 			String proxyGroup = getMediacenterProxyGroup(authorityName);
-			authorityService.removeAuthority(proxyGroup,authorityName);
+			if(proxyGroup != null && authorityService.authorityExists(proxyGroup)) {
+				authorityService.removeAuthority(proxyGroup, authorityName);
+			}
 		}
 	}
 
