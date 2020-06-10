@@ -46,7 +46,6 @@ public class CMISSearchHelper {
         StringBuilder where= new StringBuilder();
         if(filters!=null && filters.size()>0){
             List<String> joinedTable = new ArrayList<>();
-            int filterCount= 0;
             for(Map.Entry<String,Object> filter : filters.entrySet()){
                 if(filter.getKey().startsWith("cmis")){
                     if(where.length() > 0) {
@@ -61,7 +60,6 @@ public class CMISSearchHelper {
                     PropertyDefinition property = serviceRegistry.getDictionaryService().getProperty(QName.createQName(filter.getKey()));
                     String aspectTable=CCConstants.getValidLocalName(property.getContainerClass().getName().toString());
                     String aspectTableAlias = property.getContainerClass().getName().getLocalName();
-                    aspectTableAlias +=filterCount;
                     if(!joinedTable.contains(aspectTable)) {
                         join.append("JOIN ").append(aspectTable).append(" AS ").append(aspectTableAlias)
                                 .append(" ON ").append(aspectTableAlias).append(".cmis:objectId = ").append(tableNameAlias).append(".cmis:objectId ");
@@ -79,7 +77,6 @@ public class CMISSearchHelper {
                         where.append(" = ").append(escape(filter.getValue().toString()));
                     }
                 }
-                filterCount++;
             }
         }
         String query="SELECT "+tableNameAlias+".cmis:name FROM "+ tableName + " AS " + tableNameAlias + " " + join + where;
