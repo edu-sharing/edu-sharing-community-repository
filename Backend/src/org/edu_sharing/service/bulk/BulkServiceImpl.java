@@ -45,6 +45,8 @@ public class BulkServiceImpl implements BulkService {
 			if(propertiesNative!=null){
 				props.put(QName.createQName(CCConstants.CM_PROP_METADATASET_EDU_METADATASET),
 						(Serializable)propertiesNative.get(CCConstants.CM_PROP_METADATASET_EDU_METADATASET));
+				props.put(QName.createQName(CCConstants.CM_PROP_METADATASET_EDU_FORCEMETADATASET),
+						(Serializable)propertiesNative.get(CCConstants.CM_PROP_METADATASET_EDU_FORCEMETADATASET));
 			}
 			return serviceRegistry.getNodeService().createNode(parent, ContentModel.ASSOC_CONTAINS,
 					QName.createQName(name),
