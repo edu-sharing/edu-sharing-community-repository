@@ -195,7 +195,9 @@ export class MdsComponent {
             this.toast.error(null, 'MDS.ERROR_INVALID_MDS_COMBINATION');
             this.cancel();
           }
+          this._setId = mds.values().next().value;
           this.mdsService.getSet(this._setId).subscribe((data: any) => {
+            console.log(this._setId, mds[0], data);
             this.mds = data;
             this.onMdsLoaded.emit(data);
             this.currentNodes = nodesConverted;
