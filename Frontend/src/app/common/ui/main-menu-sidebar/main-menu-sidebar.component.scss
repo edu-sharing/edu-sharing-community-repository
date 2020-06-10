@@ -41,6 +41,10 @@ $licenseInfoHeight: 40px;
                 width: 100%;
                 text-align: center;
                 color: #fff;
+                > user-avatar{
+                    display: flex;
+                    justify-content: center;
+                }
                 i {
                     font-size: 50pt;
                 }
