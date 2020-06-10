@@ -2526,13 +2526,13 @@ export class MdsComponent {
           }
           const result = [];
           for (const v of a) {
-            if (b.indexOf(v) !== -1) {
+            if (b && b.indexOf(v) !== -1) {
               result.push(v);
             }
           }
           return result;
         });
-        if (values !== []) {
+        if (values.length>0) {
           properties[key] = values;
         }
       }
