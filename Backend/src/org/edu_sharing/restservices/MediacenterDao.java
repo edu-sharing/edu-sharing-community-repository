@@ -145,40 +145,25 @@ public class MediacenterDao extends AbstractDao{
 		//check and throw if not allowed
 		mediacenterService.isAllowedToManage(authorityName);
 
-		// always force the group type to media center
-		profile.setGroupType(AuthorityService.MEDIA_CENTER_GROUP_TYPE);
-		// first, change the basic profile (admin access is checked there)
-		GroupDao.getGroup(repoDao,authorityName).changeProfile(profile);
-		// then, change the mediacenter releated data
-		
-		authorityService.addAuthorityAspect(authorityName,CCConstants.CCM_ASPECT_MEDIACENTER);
-		authorityService.addAuthorityAspect(authorityName, CCConstants.CCM_ASPECT_ADDRESS);
-		if(profile.getMediacenter()!=null) {
-			authorityService.setAuthorityProperty(authorityName, CCConstants.CCM_PROP_MEDIACENTER_ID, profile.getMediacenter().getId());
-
-			//contentstatus
+		boolean active = (profile.getMediacenter().getContentStatus()==null
+				|| profile.getMediacenter().getContentStatus().equals(Mediacenter.MediacenterProfileExtension.ContentStatus.Deactivated)) ? false : true;
+		try {
+			mediacenterService.updateMediacenter(authorityName,profile.getDisplayName(), null,
+					profile.getMediacenter().getLocation(),profile.getMediacenter().getDistrictAbbreviation(),
+					profile.getMediacenter().getMainUrl(),new Gson().toJson(profile.getMediacenter().getCatalogs()), active );
+		}catch(Throwable t){
+			throw DAOException.mapping(t);
+		}
+	}
+	private MediacenterDao create(String name,Mediacenter.Profile profile) throws DAOException {
+		try {
+			this.authorityName = mediacenterService.createMediacenter(name,profile.getDisplayName(),null,null);
 			if(profile.getMediacenter().getContentStatus()==null
 					|| profile.getMediacenter().getContentStatus().equals(Mediacenter.MediacenterProfileExtension.ContentStatus.Deactivated)){
 				mediacenterService.setActive(false, authorityName );
 			}else if(profile.getMediacenter().getContentStatus().equals(Mediacenter.MediacenterProfileExtension.ContentStatus.Activated)){
 				mediacenterService.setActive(true, authorityName );
 			}
-
-			authorityService.setAuthorityProperty(authorityName, CCConstants.CCM_PROP_ADDRESS_CITY, profile.getMediacenter().getLocation());
-			authorityService.setAuthorityProperty(authorityName, CCConstants.CCM_PROP_MEDIACENTER_DISTRICT_ABBREVIATION, profile.getMediacenter().getDistrictAbbreviation());
-			authorityService.setAuthorityProperty(authorityName, CCConstants.CCM_PROP_MEDIACENTER_MAIN_URL, profile.getMediacenter().getMainUrl());
-			authorityService.setAuthorityProperty(authorityName, CCConstants.CCM_PROP_MEDIACENTER_CATALOGS, new Gson().toJson(profile.getMediacenter().getCatalogs()));
-		}
-	}
-	private MediacenterDao create(String name,Mediacenter.Profile profile) throws DAOException {
-		try {
-			profile.setGroupType(AuthorityService.MEDIA_CENTER_GROUP_TYPE);
-			String group = GroupDao.createGroup(repoDao, AuthorityService.MEDIA_CENTER_GROUP_TYPE + "_" + name, profile, null).getAuthorityName();
-			this.authorityName = group;
-			changeProfile(profile);
-
-			// create the admin group
-			authorityService.createGroupWithType(AuthorityService.MEDIACENTER_ADMINISTRATORS_GROUP, profile.getDisplayName() + AuthorityService.ADMINISTRATORS_GROUP_DISPLAY_POSTFIX, group, AuthorityService.MEDIACENTER_ADMINISTRATORS_GROUP_TYPE);
 			return this;
 		}catch(Throwable t){
 			throw DAOException.mapping(t);
