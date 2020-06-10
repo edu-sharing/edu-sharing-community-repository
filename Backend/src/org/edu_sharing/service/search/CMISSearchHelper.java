@@ -90,7 +90,7 @@ public class CMISSearchHelper {
         return result;
     }
 
-    public static List<NodeRef> fetchNodesByTypeAndFilters(String nodeType, Map<String,String> filters, int maxPermissionChecks){
+    public static List<NodeRef> fetchNodesByTypeAndFilters(String nodeType, Map<String,Object> filters, int maxPermissionChecks){
     	List<NodeRef> result = new ArrayList<NodeRef>();
 
         int from = 0;
@@ -108,7 +108,7 @@ public class CMISSearchHelper {
         return result;
     }
 
-    public static List<NodeRef> fetchNodesByTypeAndFilters(String nodeType, Map<String,String> filters){
+    public static List<NodeRef> fetchNodesByTypeAndFilters(String nodeType, Map<String,Object> filters){
        return fetchNodesByTypeAndFilters(nodeType,filters,1000);
     }
 
