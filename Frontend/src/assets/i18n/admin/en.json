@@ -351,7 +351,7 @@
             "EXPORT": "Download",
             "EXPORT_LABEL": "Export displayed data",
             "EXPORT_PROPERTIES": "Properties to be exported",
-            "EXPORT_PROPERTIES_HINT": "eg cm:name, cclom:general_title",
+            "EXPORT_PROPERTIES_HINT": "eg cm:name, cclom:title, cclom:general_keyword",
             "HEADERS": {
                 "action": "Action",
                 "count": "Number",
