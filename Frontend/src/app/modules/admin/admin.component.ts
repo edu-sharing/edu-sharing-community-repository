@@ -376,8 +376,8 @@ export class AdminComponent {
       }),
     ];
   }
-  public setMode(mode:string) {
-    this.router.navigate(['./'],{queryParams:{mode},relativeTo:this.route});
+  public setMode(mode:string, skipLocationChange = false) {
+    this.router.navigate(['./'],{queryParams:{mode},relativeTo:this.route, skipLocationChange:skipLocationChange});
   }
   public pickDirectory(event : Node[]) {
     this.parentNode=event[0];
@@ -1070,7 +1070,7 @@ export class AdminComponent {
                 }
             }
             else
-                this.setMode(this.buttons[0].id);
+                this.setMode(this.buttons[0].id, true);
         });
         if(this.loginResult.isAdmin) {
             this.showWarning = true;

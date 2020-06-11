@@ -212,7 +212,7 @@ export class CollectionsMainComponent {
     private temp: string;
     private lastScrollY: number;
     private person: EduData.User;
-    private path: EduData.Node[];
+    path: EduData.Node[];
     private hasEditorial = false;
     private hasMediacenter = false;
     private showCollection = false;
