@@ -169,12 +169,15 @@ export class MdsComponent {
    */
   @Input() set create(type:string){
     this.createType=type;
+    //@TODO: This causes a race condition! But it's not used at the moment anyway
+    /*
     this.isLoading=true;
     this.mdsService.getSet().subscribe((data:any)=> {
       this.mds=data;
       this.renderGroup(this.createType, this.mds);
       this.isLoading=false;
     });
+    */
   }
 
     @Input() set nodes(nodes: Node[]){
