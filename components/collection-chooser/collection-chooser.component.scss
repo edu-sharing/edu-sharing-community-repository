@@ -2,6 +2,7 @@
 .content{
   display: flex;
   flex-direction: column;
+  overscroll-behavior: contain;
 }
 .breadcrumbs{
   display: flex;
