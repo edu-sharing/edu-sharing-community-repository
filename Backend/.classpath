@@ -175,7 +175,6 @@
 	<classpathentry exported="true" kind="var" path="ALFRESCO_52_WEBAPPS_LIB/commons-codec-1.10.jar"/>
 	<classpathentry exported="true" kind="var" path="ALFRESCO_52_WEBAPPS_LIB/commons-collections-3.2.2.jar"/>
 	<classpathentry exported="true" kind="var" path="ALFRESCO_52_WEBAPPS_LIB/commons-compress-1.12.jar"/>
-	<classpathentry exported="true" kind="var" path="ALFRESCO_52_WEBAPPS_LIB/commons-csv-20110211.jar"/>
 	<classpathentry exported="true" kind="var" path="ALFRESCO_52_WEBAPPS_LIB/commons-dbcp-1.4-DBCP330.jar"/>
 	<classpathentry exported="true" kind="var" path="ALFRESCO_52_WEBAPPS_LIB/commons-digester-2.1.jar"/>
 	<classpathentry exported="true" kind="var" path="ALFRESCO_52_WEBAPPS_LIB/commons-discovery-0.5.jar"/>
@@ -255,12 +254,9 @@
 	<classpathentry exported="true" kind="var" path="ALFRESCO_52_WEBAPPS_LIB/icu4j-3.6.1.jar"/>
 	<classpathentry exported="true" kind="var" path="ALFRESCO_52_WEBAPPS_LIB/isoparser-1.1.21.jar"/>
 	<classpathentry exported="true" kind="var" path="ALFRESCO_52_WEBAPPS_LIB/jackson-annotations-2.4.5.jar"/>
-	<classpathentry exported="true" kind="var" path="ALFRESCO_52_WEBAPPS_LIB/jackson-annotations-2.8.3.jar"/>
 	<classpathentry exported="true" kind="var" path="ALFRESCO_52_WEBAPPS_LIB/jackson-core-2.4.5.jar"/>
-	<classpathentry exported="true" kind="var" path="ALFRESCO_52_WEBAPPS_LIB/jackson-core-2.8.3.jar"/>
 	<classpathentry exported="true" kind="var" path="ALFRESCO_52_WEBAPPS_LIB/jackson-core-asl-1.9.13.jar"/>
 	<classpathentry exported="true" kind="var" path="ALFRESCO_52_WEBAPPS_LIB/jackson-databind-2.4.5.jar"/>
-	<classpathentry exported="true" kind="var" path="ALFRESCO_52_WEBAPPS_LIB/jackson-databind-2.8.3.jar"/>
 	<classpathentry exported="true" kind="var" path="ALFRESCO_52_WEBAPPS_LIB/jackson-dataformat-xml-2.4.5.jar"/>
 	<classpathentry exported="true" kind="var" path="ALFRESCO_52_WEBAPPS_LIB/jackson-dataformat-yaml-2.4.5.jar"/>
 	<classpathentry exported="true" kind="var" path="ALFRESCO_52_WEBAPPS_LIB/jackson-datatype-joda-2.4.5.jar"/>
@@ -405,11 +401,12 @@
 	<classpathentry exported="true" kind="var" path="ALFRESCO_52_WEBAPPS_LIB/xstream-1.3.1.jar"/>
 	<classpathentry exported="true" kind="var" path="ALFRESCO_52_TOMCAT_LIB/servlet-api.jar"/>
 	<classpathentry kind="var" path="ALFRESCO_52_TOMCAT_LIB"/>
-	<classpathentry kind="var" path="ALFRESCO_52_WEBAPPS_LIB"/>
+	<classpathentry exported="true" kind="var" path="ALFRESCO_52_WEBAPPS_LIB/commons-csv-20110211.jar"/>
 	<classpathentry kind="lib" path="lib/cardme-0.4.0.jar"/>
 	<classpathentry kind="lib" path="lib/config-1.4.0.jar"/>
 	<classpathentry kind="lib" path="lib/swagger-annotations-1.5.15.jar"/>
 	<classpathentry kind="lib" path="lib/swagger-java-client-1.0.1.jar"/>
 	<classpathentry kind="lib" path="lib/spring-security-saml2-core-1.0.3.RELEASE.jar"/>
+	<classpathentry kind="lib" path="lib/edu_sharing-xoai-1.0.jar"/>
 	<classpathentry kind="output" path="war/WEB-INF/classes"/>
 </classpath>
