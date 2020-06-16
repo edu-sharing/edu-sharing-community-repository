@@ -27,6 +27,9 @@ import org.elasticsearch.index.query.QueryStringQueryBuilder;
 import org.elasticsearch.search.SearchHit;
 import org.elasticsearch.search.SearchHits;
 import org.elasticsearch.search.builder.SearchSourceBuilder;
+import org.elasticsearch.search.sort.FieldSortBuilder;
+import org.elasticsearch.search.sort.ScoreSortBuilder;
+import org.elasticsearch.search.sort.SortOrder;
 import org.springframework.context.ApplicationContext;
 
 import java.io.IOException;
@@ -75,7 +78,8 @@ public class SearchServiceElastic extends SearchServiceImpl {
 
             QueryBuilder ioQuery = QueryBuilders.termQuery("type", "ccm:io");
             QueryBuilder metadataQueryBuilder = (ngsearchword != null) ? QueryBuilders.boolQuery().must(ioQuery)
-                    .must(QueryBuilders.wildcardQuery("properties.cm:name", ngsearchword))
+                    .must(QueryBuilders.wildcardQuery("properties.cm:name",
+                            (ngsearchword.contains("*") ? ngsearchword.toLowerCase() : "*"+ngsearchword.toLowerCase()+"*")))
                     : ioQuery;
             BoolQueryBuilder audienceQueryBuilder = QueryBuilders.boolQuery();
             audienceQueryBuilder.minimumShouldMatch(1);
@@ -85,11 +89,15 @@ public class SearchServiceElastic extends SearchServiceImpl {
             audienceQueryBuilder.should(QueryBuilders.matchQuery("owner", serviceRegistry.getAuthenticationService().getCurrentUserName()));
             QueryBuilder queryBuilder = QueryBuilders.boolQuery().must(metadataQueryBuilder).must(audienceQueryBuilder);
 
-
             searchSourceBuilder.query(queryBuilder);
             searchSourceBuilder.from(searchToken.getFrom());
-            searchSourceBuilder.size(20);
+            searchSourceBuilder.size(searchToken.getMaxResult());
+            searchSourceBuilder.trackTotalHits(true);
+            searchSourceBuilder.sort(new ScoreSortBuilder().order(SortOrder.DESC));
+
             searchRequest.source(searchSourceBuilder);
+
+
 
             RestHighLevelClient client = getClient();
             SearchResponse searchResponse = client.search(searchRequest);
@@ -125,7 +133,7 @@ public class SearchServiceElastic extends SearchServiceImpl {
                 data.add(eduNodeRef);
             }
             sr.setStartIDX(searchToken.getFrom());
-            sr.setNodeCount(searchToken.getMaxResult());
+            sr.setNodeCount((int)hits.totalHits);
             client.close();
         } catch (IOException e) {
             logger.error(e.getMessage(),e);
