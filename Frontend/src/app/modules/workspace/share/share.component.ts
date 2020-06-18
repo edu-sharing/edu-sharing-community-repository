@@ -476,35 +476,34 @@ export class WorkspaceShareComponent implements AfterViewInit{
     return -1;
   }
   public setPublish(status:boolean,force=false){
-    if(status && !force){
-      if(this.config.instant('publishingNotice',false)){
-        this.dialogTitle='WORKSPACE.SHARE.PUBLISHING_WARNING_TITLE';
-        this.dialogMessage='WORKSPACE.SHARE.PUBLISHING_WARNING_MESSAGE';
-        this.dialogCancel=()=>{
-            this.dialogTitle=null;
-            this.publishActive=false;
+    if(status && !force) {
+      if (this.config.instant('publishingNotice', false)) {
+        this.dialogTitle = 'WORKSPACE.SHARE.PUBLISHING_WARNING_TITLE';
+        this.dialogMessage = 'WORKSPACE.SHARE.PUBLISHING_WARNING_MESSAGE';
+        this.dialogCancel = () => {
+          this.dialogTitle = null;
+          this.publishActive = false;
         };
-        this.dialogButtons=DialogButton.getYesNo(()=>{
-            this.dialogCancel();
-        }, ()=>{
-            this.publishActive=true;
-            this.dialogTitle=null;
-            this.setPublish(status,true);
+        this.dialogButtons = DialogButton.getYesNo(() => {
+          this.dialogCancel();
+        }, () => {
+          this.publishActive = true;
+          this.dialogTitle = null;
+          this.setPublish(status, true);
         });
         return;
       }
-      if(this.deletedPermissions.indexOf(RestConstants.AUTHORITY_EVERYONE)!=-1){
-          this.deletedPermissions.splice(this.deletedPermissions.indexOf(RestConstants.AUTHORITY_EVERYONE),1);
-          return;
-      }
-      let perm=RestHelper.getAllAuthoritiesPermission();
-      perm.permissions=[RestConstants.PERMISSION_CONSUMER];
-      this.permissions.push(perm);
-      if(this.doiPermission){
-        this.doiActive=true;
-      }
     }
-    else{
+    if(this.deletedPermissions.indexOf(RestConstants.AUTHORITY_EVERYONE)!=-1){
+        this.deletedPermissions.splice(this.deletedPermissions.indexOf(RestConstants.AUTHORITY_EVERYONE),1);
+        return;
+    }
+    let perm=RestHelper.getAllAuthoritiesPermission();
+    perm.permissions=[RestConstants.PERMISSION_CONSUMER];
+    this.permissions.push(perm);
+    if(this.doiPermission){
+      this.doiActive=true;
+    } else {
       let i=this.getAuthorityPos(this.permissions,RestConstants.AUTHORITY_EVERYONE);
       if(i!=-1)
         this.permissions.splice(i,1);
@@ -513,7 +512,7 @@ export class WorkspaceShareComponent implements AfterViewInit{
     this.updatePublishState();
   }
 
-    reloadUsages() {
+  reloadUsages() {
     this.usageApi.getNodeUsagesCollection(this._node.ref.id).subscribe((data)=>{
         this.collections=data;
     });
