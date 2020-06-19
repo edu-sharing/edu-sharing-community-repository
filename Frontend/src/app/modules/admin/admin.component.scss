@@ -361,16 +361,16 @@ $sidenavWidthMobile:66px;
   }
   .catalina{
     margin-bottom: 40px;
-    label{
-      position: relative;
-      top:10px;
-    }
-    textarea {
-      min-height: 600px;
-    }
-    .btn-flat{
+    button {
       margin-bottom: 10px;
     }
+    mat-form-field {
+      width: 100%;
+      textarea {
+        min-height: 600px;
+      }
+    }
+
   }
   .caches{
     input{

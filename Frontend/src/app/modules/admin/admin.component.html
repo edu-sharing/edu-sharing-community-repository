@@ -554,11 +554,7 @@
   <div class="group catalina">
      <button mat-raised-button (click)="refreshCatalina()"><i class="material-icons">refresh</i></button>
       <mat-form-field>
-        <textarea matInput
-                  cdkTextareaAutosize
-                  cdkAutosizeMinRows="2"
-                  cdkAutosizeMaxRows="15"
-                  id="catalina" #catalinaRef [ngModel]="catalina" readonly></textarea>
+        <textarea matInput id="catalina" #catalinaRef [ngModel]="catalina" readonly></textarea>
       </mat-form-field>
   </div>
 </div>

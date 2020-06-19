@@ -12,4 +12,6 @@ public interface RecordHandlerInterfaceBase {
 		return new ArrayList<>();
 	};
 
+	default String getSet(){return null;};
+
 }

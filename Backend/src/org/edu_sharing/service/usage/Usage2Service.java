@@ -15,6 +15,8 @@ import org.alfresco.service.ServiceRegistry;
 import org.alfresco.service.cmr.repository.MLText;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.repository.StoreRef;
+import org.alfresco.service.cmr.security.AccessStatus;
+import org.alfresco.service.cmr.security.PermissionService;
 import org.alfresco.service.namespace.QName;
 import org.alfresco.util.ISO8601DateFormat;
 import org.apache.log4j.Logger;
@@ -276,6 +278,13 @@ Logger logger = Logger.getLogger(Usage2Service.class);
 
 	public List<Usage> getUsageByParentNodeId(String repoId, String user, String parentNodeId) throws UsageException {
 		logger.info("starting");
+
+		if(!this.serviceRegistry.getPermissionService().
+				hasPermission(new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE,parentNodeId),
+						PermissionService.READ).equals(AccessStatus.ALLOWED)){
+			return new ArrayList<Usage>();
+		}
+
 		try{
 			return AuthenticationUtil.runAsSystem(()->{
 				HashMap<String, HashMap<String, Object>> usages = usageDao.getUsages(parentNodeId);

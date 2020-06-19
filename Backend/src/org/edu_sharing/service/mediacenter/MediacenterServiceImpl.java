@@ -482,21 +482,20 @@ public class MediacenterServiceImpl implements MediacenterService{
 	}
 	
 	public String getMediacenterProxyGroup(String authorityName) {
-		Map<String,Object> filter = new HashMap<>();
 
 		String proxyAuthorityName = PermissionService.GROUP_PREFIX + AuthorityService.MEDIA_CENTER_PROXY_GROUP_TYPE
 				+ "_"
 				+ getMediacenterId(authorityName);
-		filter.put(CCConstants.CM_PROP_AUTHORITY_NAME, proxyAuthorityName);
-		filter.put(CCConstants.CCM_PROP_GROUPEXTENSION_GROUPTYPE, AuthorityService.MEDIA_CENTER_PROXY_GROUP_TYPE);
-		
-		
-		List<NodeRef> nodeRefs = CMISSearchHelper.fetchNodesByTypeAndFilters(CCConstants.CM_TYPE_AUTHORITY_CONTAINER, filter);
-		if(nodeRefs != null && nodeRefs.size() > 0) {
-			return (String)nodeService.getProperty(nodeRefs.get(0), ContentModel.PROP_AUTHORITY_NAME);
-		}else {
-			return null;
+
+		if(authorityService.authorityExists(proxyAuthorityName)){
+			NodeRef nodeRef = authorityService.getAuthorityNodeRef(proxyAuthorityName);
+			String groupType = (String)nodeService.getProperty(nodeRef, QName.createQName(CCConstants.CCM_PROP_GROUPEXTENSION_GROUPTYPE));
+			if(AuthorityService.MEDIA_CENTER_PROXY_GROUP_TYPE.equals(groupType)){
+				return proxyAuthorityName;
+			}
 		}
+
+		return null;
 	}
 
 	private String getMediacenterId(String authorityName){
