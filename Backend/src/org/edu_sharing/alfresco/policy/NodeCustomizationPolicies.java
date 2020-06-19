@@ -385,7 +385,7 @@ public class NodeCustomizationPolicies implements OnContentUpdatePolicy, OnCreat
 						continue;
 					}
 					for (QName prop : after.keySet()) {
-						if (Arrays.asList(IO_REFERENCE_COPY_PROPERTIES).contains(prop.toString())) {
+						if (IO_REFERENCE_COPY_PROPERTIES.contains(prop.toString())) {
 							originalProperties.put(prop, after.get(prop));
 						}
 					}
