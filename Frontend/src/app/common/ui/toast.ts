@@ -186,6 +186,11 @@ export class Toast{
           parameters = {};
         parameters["error"] = error;
       }
+    } else if (message == 'TOOLPERMISSION_ERROR') {
+      this.dialogTitle = 'TOOLPERMISSION_ERROR_TITLE';
+      this.dialogMessage = this.translate.instant('TOOLPERMISSION_ERROR_HEADER') + "\n- " +
+          this.translate.instant('TOOLPERMISSION.' + errorObject) + "\n\n" +
+          this.translate.instant('TOOLPERMISSION_ERROR_FOOTER', {permission: errorObject});
     }
     if(error && error.status==0 && this.cordova.isRunningCordova()){
         message='TOAST.NO_CONNECTION';
