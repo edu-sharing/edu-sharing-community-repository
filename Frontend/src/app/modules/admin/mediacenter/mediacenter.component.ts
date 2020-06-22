@@ -172,7 +172,7 @@ export class AdminMediacenterComponent {
                 this.toast.showProgressDialog();
                 this.mediacenterService.addMediacenter(id, profile).subscribe((result) => {
                     RestHelper.waitForResult(() => this.mediacenterService.getMediacenters(), (list: any[]) => {
-                        return list.filter((r) => Helper.objectEquals(r, result)).length == 1;
+                        return list.filter((r) => r.authorityName === result.authorityName).length === 1;
                     }, () => {
                         this.toast.closeModalDialog();
                         this.toast.toast('ADMIN.MEDIACENTER.CREATED', {name: id});
