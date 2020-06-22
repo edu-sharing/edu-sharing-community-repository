@@ -41,7 +41,7 @@
           <div class="group-heading" *ngIf="showProviders">{{'LOGIN.LOGIN_GROUP' | translate}}</div>
           <div class="group-description" *ngIf="showProviders">{{'LOGIN.LOGIN_GROUP_DESCRIPTION' | translate}}</div>
           <form (ngSubmit)="login()" #loginForm>
-            <div *ngIf="showUsername">
+            <div *ngIf="!isSafeLogin">
               <label for="username">{{'LOGIN.USERNAME' | translate}}</label>
               <input #usernameInput type="text" required name="username" id="username" (keydown.enter)="login()" (keyup)="checkConditions()" [(ngModel)]="username" autofocus/>
             </div>
@@ -50,7 +50,7 @@
                 <input-password #passwordInput id="password" required="true" (keydown.enter)="login()" [(value)]="password"></input-password>
             </div>
           </form>
-      <div class="useUrl" *ngIf="config.loginUrl && !showProviders">
+      <div class="useUrl" *ngIf="config.loginUrl && !showProviders && !isSafeLogin">
           <div>{{'LOGIN.USE_URL_TEXT' | translate}}</div>
           <a (click)="openLoginUrl()" class="clickable goto"><span>{{'LOGIN.USE_URL_LINK' | translate}}</span> <i class="material-icons">arrow_forward</i></a>
       </div>
