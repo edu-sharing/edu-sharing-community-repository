@@ -1,7 +1,15 @@
 import {RestAdminService} from '../../../core-module/rest/services/rest-admin.service';
 import {Component, EventEmitter, Output} from '@angular/core';
 import {TranslateService} from '@ngx-translate/core';
-import {NodeStatistics, Node, Statistics, IamGroup, Group, NodeList} from '../../../core-module/rest/data-object';
+import {
+    NodeStatistics,
+    Node,
+    Statistics,
+    IamGroup,
+    Group,
+    NodeList,
+    Mediacenter
+} from '../../../core-module/rest/data-object';
 // import {NodeList} from "../../../core-module/core.module";
 import {ListItem} from '../../../core-module/ui/list-item';
 import {RestConstants} from '../../../core-module/rest/rest-constants';
@@ -25,9 +33,9 @@ export class AdminMediacenterComponent {
     // @TODO: declare the mediacenter type when it is finalized in backend
     mediacenters: any[];
     // original link to mediacenter object (contained in mediacenters[])
-    currentMediacenter: any;
+    currentMediacenter: Mediacenter;
     // copy of the current mediacenter for (temporary) edits
-    currentMediacenterCopy: any;
+    currentMediacenterCopy: Mediacenter;
 
     addGroup: Group;
     mediacenterGroups: IamGroup[];
@@ -171,7 +179,7 @@ export class AdminMediacenterComponent {
                 };
                 this.toast.showProgressDialog();
                 this.mediacenterService.addMediacenter(id, profile).subscribe((result) => {
-                    RestHelper.waitForResult(() => this.mediacenterService.getMediacenters(), (list: any[]) => {
+                    RestHelper.waitForResult(() => this.mediacenterService.getMediacenters(), (list: Mediacenter[]) => {
                         return list.filter((r) => r.authorityName === result.authorityName).length === 1;
                     }, () => {
                         this.toast.closeModalDialog();
