@@ -52,6 +52,7 @@ import { UrlPipe } from './pipes/url.pipe';
 import { Toast } from './toast';
 import { TranslationLoader } from './translation-loader';
 import { Ng5SliderModule } from 'ng5-slider';
+import {NodeUrlPipe} from './pipes/node-url.pipe';
 
 @NgModule({
     declarations: [
@@ -75,6 +76,7 @@ import { Ng5SliderModule } from 'ng5-slider';
         AuthorityNamePipe,
         AuthorityColorPipe,
         NodeDatePipe,
+        NodeUrlPipe,
         FormatSizePipe,
         KeysPipe,
         ReplaceCharsPipe,
@@ -138,6 +140,7 @@ import { Ng5SliderModule } from 'ng5-slider';
         AuthorityNamePipe,
         AuthorityColorPipe,
         NodeDatePipe,
+        NodeUrlPipe,
         FormatSizePipe,
         KeysPipe,
         ReplaceCharsPipe,

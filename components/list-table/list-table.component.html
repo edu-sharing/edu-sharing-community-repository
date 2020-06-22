@@ -174,8 +174,8 @@
                 <div *ngFor="let item of columnsVisible;let i = index" class="column {{getItemCssClass(item)}} row_{{i+1}}" [class.clickable]="isClickable">
                     <div class="display-none" [attr.property]="getLRMIProperty(node,item)">{{getLRMIAttribute(node,item)}}</div>
                     <div class="row-group">
-                        <a *ngIf="i==0"
-                           [href]="generateRoute(node)"
+                        <a *ngIf="i==0 && createLink"
+                           href="{{ node | nodeUrl }}"
                            tabindex="-1"
                            (click)="false"
                            class="rowInner"

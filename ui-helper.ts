@@ -839,42 +839,6 @@ export class UIHelper {
         });
     }
 
-    /**
-     * create a route to a given node
-     * The method currently supports folders (workspace), files (render) and collections
-     */
-    static createUrlToNode(router: Router, item: Node | any) {
-        let data: any;
-        if (NodeHelper.isNodeCollection(item)) {
-            data = {
-                routerLink: [UIConstants.ROUTER_PREFIX + 'collections'],
-                queryParams: { id: item.ref.id },
-            };
-        } else {
-            if (item.isDirectory) {
-                data = {
-                    routerLink: [UIConstants.ROUTER_PREFIX + 'workspace'],
-                    queryParams: { id: item.ref.id },
-                };
-            } else {
-                let fromeHome = RestNetworkService.isFromHomeRepo(item);
-                data = {
-                    routerLink: [
-                        UIConstants.ROUTER_PREFIX + 'render/' + item.ref.id,
-                    ],
-                    queryParams: {
-                        repository: fromeHome ? null : item.ref.repo,
-                    },
-                };
-            }
-        }
-        let url = router
-            .createUrlTree(data.routerLink, { queryParams: data.queryParams })
-            .toString();
-        // use relative url to make base-href work properly
-        if (url.startsWith('/')) url = url.substring(1);
-        return url;
-    }
     //http://stackoverflow.com/questions/25099409/copy-to-clipboard-as-plain-text
     static copyElementToClipboard(input: HTMLTextAreaElement) {
         input.focus();

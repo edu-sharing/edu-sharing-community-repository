@@ -112,7 +112,6 @@ export class ListTableComponent implements EventListener {
     @ViewChild('drag') drag: ElementRef;
     @ViewChild('menuTrigger') menuTrigger: MatMenuTrigger;
     @ViewChild('dropdown') dropdownElement: ElementRef;
-    @ViewChild('dropdownContainer') dropdownContainerElement: ElementRef;
 
     @ContentChild('itemContent') itemContentRef: TemplateRef<any>;
 
@@ -647,13 +646,6 @@ export class ListTableComponent implements EventListener {
         //     event.preventDefault();
         //     event.stopPropagation();
         // }
-    }
-
-    generateRoute(item: Node | any): string | null {
-        if (this.createLink) {
-            return UIHelper.createUrlToNode(this.router, item);
-        }
-        return null;
     }
 
     /**

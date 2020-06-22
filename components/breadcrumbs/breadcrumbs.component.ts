@@ -100,10 +100,6 @@ export class BreadcrumbsComponent {
         private ui: UIService,
     ) {}
 
-    generateUrl(node: Node) {
-        return UIHelper.createUrlToNode(this.router, node);
-    }
-
     canDropNodes(target: Node, { event, nodes }: DragData) {
         return this.canDrop({ source: nodes, target, event });
     }
