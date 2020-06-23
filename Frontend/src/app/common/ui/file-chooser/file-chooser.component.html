@@ -4,6 +4,7 @@
 >
     <div class="fileChooser">
         <breadcrumbs class="breadcrumbFrame" *ngIf="!searchMode"
+                     [createLink]="false"
                      [breadcrumbsAsNode]="path"
                      (onClick)="selectBreadcrumb($event)"
         ></breadcrumbs>

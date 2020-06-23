@@ -91,7 +91,8 @@ public class MimeTypesV2 {
 		String type=(String) properties.get(CCConstants.NODETYPE);
 		if(type == null) return false;
 		return type.equals(CCConstants.CCM_TYPE_MAP) 
-			|| type.equals(CCConstants.CM_TYPE_FOLDER);
+			|| type.equals(CCConstants.CM_TYPE_FOLDER)
+			|| type.equals(CCConstants.SYS_STORE_ROOT);
 	}
 	public static boolean isCollection(List<String> aspects, Map<String, Object> properties){
 		if(aspects!=null && aspects.contains(CCConstants.CCM_ASPECT_COLLECTION)){

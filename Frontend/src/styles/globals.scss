@@ -25,6 +25,9 @@ a{
 .action-title{
   background-color: $actionDialogBackground;
 }
+.unclickable{
+  pointer-events: none;
+}
 .blue-label{
   color:$primary;
   font-weight: bold;
