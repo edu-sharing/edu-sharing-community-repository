@@ -601,7 +601,7 @@ public class MediacenterServiceImpl implements MediacenterService {
 
         HashMap<String, List<String>> sodisMediacenterIdNodes = new HashMap<>();
         for (String mediacenterId : allMediacenterIds) {
-            logger.info("cache sodis mediacenter nodes mediacenterId:" + mediacenterId + " already cached:" + sodisMediacenterIdNodes);
+            logger.info("cache sodis mediacenter nodes mediacenterId:" + mediacenterId + " already cached:" + sodisMediacenterIdNodes.size());
             List<String> nodes = MediacenterLicenseProviderFactory.getMediacenterLicenseProvider().getNodes(mediacenterId);
             sodisMediacenterIdNodes.put(mediacenterId, nodes);
         }
