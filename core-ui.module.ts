@@ -52,7 +52,8 @@ import { UrlPipe } from './pipes/url.pipe';
 import { Toast } from './toast';
 import { TranslationLoader } from './translation-loader';
 import { Ng5SliderModule } from 'ng5-slider';
-import {NodeUrlPipe} from './pipes/node-url.pipe';
+import {RouterLink, RouterModule} from "@angular/router";
+import {NodeUrlComponent} from "./components/node-url/node-url.component";
 
 @NgModule({
     declarations: [
@@ -76,7 +77,7 @@ import {NodeUrlPipe} from './pipes/node-url.pipe';
         AuthorityNamePipe,
         AuthorityColorPipe,
         NodeDatePipe,
-        NodeUrlPipe,
+        NodeUrlComponent,
         FormatSizePipe,
         KeysPipe,
         ReplaceCharsPipe,
@@ -106,6 +107,7 @@ import {NodeUrlPipe} from './pipes/node-url.pipe';
         MatProgressSpinnerModule,
         MatTooltipModule,
         Ng5SliderModule,
+        RouterModule,
         ToastyModule.forRoot(),
         TranslateModule.forRoot({
             loader: {
@@ -140,7 +142,7 @@ import {NodeUrlPipe} from './pipes/node-url.pipe';
         AuthorityNamePipe,
         AuthorityColorPipe,
         NodeDatePipe,
-        NodeUrlPipe,
+        NodeUrlComponent,
         FormatSizePipe,
         KeysPipe,
         ReplaceCharsPipe,

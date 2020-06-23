@@ -33,6 +33,12 @@ export class BreadcrumbsComponent {
      * Also possible: never, always
      */
     @Input() short = 'auto';
+
+    /**
+     * should automatically be linked via angular routing
+     * If set true, the onClick emitter will only be fired for the "root" element
+     */
+    @Input() createLink = true;
     /**
      * Allow Dropping of other items (nodes) on to the breadcrumb items
      * A function that should return true or false and gets the same argument object as the onDrop callback
@@ -131,7 +137,6 @@ export class BreadcrumbsComponent {
 
     private openBreadcrumb(position: number) {
         this.onClick.emit(position);
-        return false;
     }
 
     private generateShort() {

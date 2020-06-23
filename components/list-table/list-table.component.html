@@ -96,96 +96,92 @@
                  tabindex="0"
                  (keyup.enter)="doubleClick(node)">
                 <!-- custom data binding from outside -->
-                <ng-container *ngTemplateOutlet="itemContentRef; context: { $implicit: node }"></ng-container>
-                <div *ngIf="viewType==1 && getReference(node).properties && getReference(node).properties['virtual:childobjectcount']>0" class="childobjectCount">
-                    <span>{{getReference(node).properties['virtual:childobjectcount']*1+1}}</span><i icon iconId="filter_none"></i>
-                </div>
-                <div *ngIf="viewType==1 && !isCollection(node)" class="typeicon column">
-                    <img src="{{getIconUrl(node)}}" [attr.role]="presentation" alt="presentation">
-                </div>
-                <div *ngIf="viewType==1 && !isCollection(node) && !node.isDirectory" class="nodeRatingComments">
-                    <div class="nodeRating"></div>
-                    <div class="nodeComments" (appDistinctClick)="onDistinctClick($event, node, 'comments')"><i icon iconId="comment"></i> <div>{{node.commentCount}}</div></div>
-                </div>
-                <div *ngIf="isCollection(node) && node.collection.type=='EDITORIAL'" class="collectionEditorial"><i class="material-icons">star</i></div>
-                <div *ngIf="isCollection(node) && node.collection.pinned" class="collectionPinned"><i icon iconId="edu-pin"></i></div>
-                <div class="checkbox column" *ngIf="hasCheckbox">
-                    <mat-checkbox [ngModel]="getSelectedPos(node)!=-1" (change)="onCheckboxClick(node)" (click)="$event.stopPropagation()"></mat-checkbox>
-                </div>
-                <div class="checkboxDummy column" *ngIf="!hasCheckbox"></div>
-                <div class="ccPublishMissing" *ngIf="applyMode && node.access.indexOf('CCPublish')==-1">
-                    <div>
-                        <i icon iconId="security"></i>
-                        <div>{{'NO_CC_PUBLISH' | translate }}</div>
-                        <a *ngIf="node.properties['ccm:questionsallowed'] && node.properties['ccm:questionsallowed'][0]=='true'"
-                           (click)="askCCPublish($event,node)"
-                        ><i icon iconId="message"></i> {{ 'ASK_CC_PUBLISH' | translate}}</a>
+                <app-node-url [node]="node" [unclickable]="!createLink">
+                    <ng-container *ngTemplateOutlet="itemContentRef; context: { $implicit: node }"></ng-container>
+                    <div *ngIf="viewType==1 && getReference(node).properties && getReference(node).properties['virtual:childobjectcount']>0" class="childobjectCount">
+                        <span>{{getReference(node).properties['virtual:childobjectcount']*1+1}}</span><i icon iconId="filter_none"></i>
                     </div>
-                </div>
-                <div class="permissionsMissing" *ngIf="noPermissions(node)">
-                    <div>
-                        <i icon iconId="security"></i>
-                        <div>{{validatePermissions(node).message | translate }}</div>
-                        <button mat-button color="primary"
-                            *ngIf="validatePermissions(node).button"
-                            (click)="validatePermissions(node).button.click();$event.stopPropagation();"
-                        ><i class="material-icons">{{validatePermissions(node).button.icon}}</i> {{ validatePermissions(node).button.caption | translate}}</button>
+                    <div *ngIf="viewType==1 && !isCollection(node)" class="typeicon column">
+                        <img src="{{getIconUrl(node)}}" [attr.role]="presentation" alt="presentation">
                     </div>
-                </div>
-                <div
-                  class="preview column"
-                  *ngIf="viewType==1 || viewType==2"
-                  [class.clickable]="isClickable"
-                  (appDistinctClick)="onDistinctClick($event, node, 'preview')"
-                >
-                    <img *ngIf="node.preview.url && !(isCollection(node) && node.preview.isIcon) || (viewType==2 && !node.preview.isIcon)"
-                         src="{{(!isCollection(node) || !node.preview.isIcon) ? node.preview.url+(isHomeNode(node) && animateNode!=node ? '&crop=true&maxWidth=300&maxHeight=300' : '') : null}}"
-                         [title]="viewType==0 ? '' : getTitle(node)"
-                         [attr.role]="'presentation'"
-                         (mouseenter)="animateIcon(node,true)"
-                         (mouseleave)="animateIcon(node,false)"
-                         [class.blurred]="isDeleted(node) || noPermissions(node) || applyMode && node.access.indexOf('CCPublish')==-1"
-                         alt="{{'SEARCH.PREVIEWIMAGE_FOR' | translate}} {{getAttribute(node,columnsVisible[0])}}"/>
-                    <div class="previewCollectionContainer" *ngIf="isCollection(node) && node.preview.isIcon && viewType!=2">
-                        <div class="previewCollection" [style.backgroundColor]="getCollectionColor(node)">
-                            <i icon iconId="layers"></i>
+                    <div *ngIf="viewType==1 && !isCollection(node) && !node.isDirectory" class="nodeRatingComments">
+                        <div class="nodeRating"></div>
+                        <div class="nodeComments" (appDistinctClick)="onDistinctClick($event, node, 'comments')"><i icon iconId="comment"></i> <div>{{node.commentCount}}</div></div>
+                    </div>
+                    <div *ngIf="isCollection(node) && node.collection.type=='EDITORIAL'" class="collectionEditorial"><i class="material-icons">star</i></div>
+                    <div *ngIf="isCollection(node) && node.collection.pinned" class="collectionPinned"><i icon iconId="edu-pin"></i></div>
+                    <div class="checkbox column" *ngIf="hasCheckbox">
+                        <mat-checkbox [ngModel]="getSelectedPos(node)!=-1" (change)="onCheckboxClick(node)" (click)="$event.stopPropagation()"></mat-checkbox>
+                    </div>
+                    <div class="checkboxDummy column" *ngIf="!hasCheckbox"></div>
+                    <div class="ccPublishMissing" *ngIf="applyMode && node.access.indexOf('CCPublish')==-1">
+                        <div>
+                            <i icon iconId="security"></i>
+                            <div>{{'NO_CC_PUBLISH' | translate }}</div>
+                            <a *ngIf="node.properties['ccm:questionsallowed'] && node.properties['ccm:questionsallowed'][0]=='true'"
+                               (click)="askCCPublish($event,node)"
+                            ><i icon iconId="message"></i> {{ 'ASK_CC_PUBLISH' | translate}}</a>
                         </div>
                     </div>
-                </div>
-
-                <div class="nodeDeleted clickable" *ngIf="isDeleted(node)">
-                    <div>
-                        <i icon iconId="delete"></i>
-                        <div class="headline">{{'ORIGINAL_DELETED' | translate }}</div>
-                        <div class="subline">{{'ORIGINAL_DELETED_INFO' | translate }}</div>
-                        <button mat-button color="primary"
-                                (click)="delete(node); $event.stopPropagation();" *ngIf="canDelete ? canDelete(node) : false"
-                        >{{ 'ORIGINAL_DELETE' | translate}}</button>
-                    </div>
-                </div>
-
-                <div class="icon column" *ngIf="hasIcon && viewType==0" [class.clickable]="isClickable">
-                    <div class="icon-bg">
-                        <img *ngIf="getIconUrl(node) && !isCollection(node)" src="{{getIconUrl(node)}}" [attr.role]="presentation" alt=""/>
-                        <i *ngIf="!isCollection(node) && icon" icon iconId="{{icon}}"></i>
-                        <i *ngIf="isCollection(node)" class="material-icons" [style.color]="getCollectionColor(node)">layers</i>
-                    </div>
-                </div>
-                <div *ngFor="let item of columnsVisible;let i = index" class="column {{getItemCssClass(item)}} row_{{i+1}}" [class.clickable]="isClickable">
-                    <div class="display-none" [attr.property]="getLRMIProperty(node,item)">{{getLRMIAttribute(node,item)}}</div>
-                    <div class="row-group">
-                        <a *ngIf="i==0 && createLink"
-                           href="{{ node | nodeUrl }}"
-                           tabindex="-1"
-                           (click)="false"
-                           class="rowInner"
-                           [innerHTML]="getAttribute(node,item) | safeHtml"></a>
-                        <div *ngIf="i!=0" class="rowInner" [innerHTML]="getAttribute(node,item) | safeHtml"></div>
-                        <div *ngIf="i==0 && viewType==0 && getReference(node).properties && getReference(node).properties['virtual:childobjectcount']>0" class="childobjectCount">
-                            <span>{{getReference(node).properties['virtual:childobjectcount']*1+1}}</span><i icon iconId="filter_none"></i>
+                    <div class="permissionsMissing" *ngIf="noPermissions(node)">
+                        <div>
+                            <i icon iconId="security"></i>
+                            <div>{{validatePermissions(node).message | translate }}</div>
+                            <button mat-button color="primary"
+                                    *ngIf="validatePermissions(node).button"
+                                    (click)="validatePermissions(node).button.click();$event.stopPropagation();"
+                            ><i class="material-icons">{{validatePermissions(node).button.icon}}</i> {{ validatePermissions(node).button.caption | translate}}</button>
                         </div>
                     </div>
-                </div>
+                    <div
+                            class="preview column"
+                            *ngIf="viewType==1 || viewType==2"
+                            [class.clickable]="isClickable"
+                            (appDistinctClick)="onDistinctClick($event, node, 'preview')"
+                    >
+                        <img *ngIf="node.preview.url && !(isCollection(node) && node.preview.isIcon) || (viewType==2 && !node.preview.isIcon)"
+                             src="{{(!isCollection(node) || !node.preview.isIcon) ? node.preview.url+(isHomeNode(node) && animateNode!=node ? '&crop=true&maxWidth=300&maxHeight=300' : '') : null}}"
+                             [title]="viewType==0 ? '' : getTitle(node)"
+                             [attr.role]="'presentation'"
+                             (mouseenter)="animateIcon(node,true)"
+                             (mouseleave)="animateIcon(node,false)"
+                             [class.blurred]="isDeleted(node) || noPermissions(node) || applyMode && node.access.indexOf('CCPublish')==-1"
+                             alt="{{'SEARCH.PREVIEWIMAGE_FOR' | translate}} {{getAttribute(node,columnsVisible[0])}}"/>
+                        <div class="previewCollectionContainer" *ngIf="isCollection(node) && node.preview.isIcon && viewType!=2">
+                            <div class="previewCollection" [style.backgroundColor]="getCollectionColor(node)">
+                                <i icon iconId="layers"></i>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="nodeDeleted clickable" *ngIf="isDeleted(node)">
+                        <div>
+                            <i icon iconId="delete"></i>
+                            <div class="headline">{{'ORIGINAL_DELETED' | translate }}</div>
+                            <div class="subline">{{'ORIGINAL_DELETED_INFO' | translate }}</div>
+                            <button mat-button color="primary"
+                                    (click)="delete(node); $event.stopPropagation();" *ngIf="canDelete ? canDelete(node) : false"
+                            >{{ 'ORIGINAL_DELETE' | translate}}</button>
+                        </div>
+                    </div>
+
+                    <div class="icon column" *ngIf="hasIcon && viewType==0" [class.clickable]="isClickable">
+                        <div class="icon-bg">
+                            <img *ngIf="getIconUrl(node) && !isCollection(node)" src="{{getIconUrl(node)}}" [attr.role]="presentation" alt=""/>
+                            <i *ngIf="!isCollection(node) && icon" icon iconId="{{icon}}"></i>
+                            <i *ngIf="isCollection(node)" class="material-icons" [style.color]="getCollectionColor(node)">layers</i>
+                        </div>
+                    </div>
+                    <div *ngFor="let item of columnsVisible;let i = index" class="column {{getItemCssClass(item)}} row_{{i+1}}" [class.clickable]="isClickable">
+                        <div class="display-none" [attr.property]="getLRMIProperty(node,item)">{{getLRMIAttribute(node,item)}}</div>
+                        <div class="row-group">
+                            <div class="rowInner" [innerHTML]="getAttribute(node,item) | safeHtml"></div>
+                            <div *ngIf="i==0 && viewType==0 && getReference(node).properties && getReference(node).properties['virtual:childobjectcount']>0" class="childobjectCount">
+                                <span>{{getReference(node).properties['virtual:childobjectcount']*1+1}}</span><i icon iconId="filter_none"></i>
+                            </div>
+                        </div>
+                    </div>
+                </app-node-url>
                 <div *ngFor="let option of optionsAlways"
                      class="more moreAlways column"
                      [style.opacity]="optionIsShown(option,node) ? 1 : 0">

@@ -368,12 +368,13 @@ $badgeWidth: 250px;
     border-right-color: $textOnPrimary;
     border-bottom-color: $textOnPrimary;
 }
-.list .row {
+:host ::ng-deep .list .row > app-node-url > a {
     width: 100%;
     border-bottom: 1px solid $textOnPrimary;
     height: $listItemHeight;
     margin-bottom: 0;
 }
+
 .list .nodeCollection .row {
     background-color: transparent;
     &:focus {
@@ -403,6 +404,9 @@ $badgeWidth: 250px;
 .cardList .row {
     display: flex;
     flex-direction: column;
+    > a{
+        flex-grow: 1;
+    }
 }
 
 .heading {
@@ -411,20 +415,44 @@ $badgeWidth: 250px;
     padding-top: 6px;
     height: $listHeadingHeight;
 }
-.tableList {
-    .row {
-        display: table-row;
-        .column {
-            display: table-cell;
-            flex-direction: column;
-            justify-content: center;
+:host ::ng-deep {
+    .list {
+        .row {
+            @include clickable();
+        }
+    }
+    .tableList {
+        .row {
+            position: relative;
+            app-node-url > a {
+                display: table;
+                // keep spacing for more options item
+                width: calc(100% - 34px);
+
+                .column {
+                    display: table-cell;
+                    flex-direction: column;
+                    justify-content: center;
+                }
+            }
+
+            .more {
+                position: absolute;
+                top: 15px;
+                right: 0;
+            }
         }
     }
 }
-.list .nodeCollection .row {
-    color: #fff;
-    .column, a {
-        color: unset;
+:host ::ng-deep {
+    .list .nodeCollection .row {
+        app-node-url > a .column{
+            color: #fff !important;
+        }
+
+        &.dark-color app-node-url > a .column{
+            color: #000 !important;
+        }
     }
 }
 .list .nodeCollection .row .column,
@@ -473,17 +501,6 @@ $badgeWidth: 250px;
         > i {
             font-size: 12px;
         }
-    }
-}
-.list .dark-color {
-    .row_1,
-    .row_2,
-    .row_3,
-    .row_4,
-    .row_5,
-    .row_6,
-    .more {
-        color: #000 !important;
     }
 }
 .checkboxDummy {
@@ -591,6 +608,7 @@ $badgeWidth: 250px;
     display: flex;
     align-items: flex-end;
     padding-bottom: 10px;
+    @include clickable();
     background: linear-gradient(
         to bottom,
         rgba(0, 0, 0, 0.001) 0,
@@ -838,7 +856,7 @@ a.rowInner {
     overflow: hidden;
     word-break: normal;
     overflow-wrap: break-word;
-    a {
+    .rowInner {
         @include limitLineCount(2, 1.5);
     }
 }

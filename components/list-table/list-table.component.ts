@@ -134,6 +134,7 @@ export class ListTableComponent implements EventListener {
      *
      * This is important for crawlers
      * Activate it for any kind of nodes list which is supposed to be clickable
+     * Please note that when enabled, any click / dblclick callbacks won't have any effect!
      */
     @Input() createLink = false;
 
@@ -734,6 +735,10 @@ export class ListTableComponent implements EventListener {
     }
 
     onDistinctClick(event: DistinctClickEvent, node: Node, region?: string) {
+        // in link mode, we will not emit any events
+        if(this.createLink) {
+            return;
+        }
         if (event.pointerType === 'touch' || event.pointerType === 'pen') {
             this.doubleClickRow.emit(node);
         } else if (!this.isClickable) {
@@ -1017,6 +1022,10 @@ export class ListTableComponent implements EventListener {
     }
 
     private doubleClick(node: Node): void {
+        // click events are not supported if createLink = true
+        if(this.createLink) {
+            return;
+        }
         this.doubleClickRow.emit(node);
     }
 
