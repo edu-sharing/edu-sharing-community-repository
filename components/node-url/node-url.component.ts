@@ -18,7 +18,6 @@ export class NodeUrlComponent {
   private _node: Node;
   @Input() set node (node: Node) {
     this._node = node;
-    console.log('set node', this.get('routerLink'))
   }
   @Input() unclickable: boolean;
   constructor() {
