@@ -18,6 +18,7 @@ import org.edu_sharing.service.search.model.SearchToken;
 import org.edu_sharing.service.util.AlfrescoDaoHelper;
 import org.elasticsearch.action.search.SearchRequest;
 import org.elasticsearch.action.search.SearchResponse;
+import org.elasticsearch.client.RequestOptions;
 import org.elasticsearch.client.RestClient;
 import org.elasticsearch.client.RestHighLevelClient;
 import org.elasticsearch.index.query.BoolQueryBuilder;
@@ -100,7 +101,7 @@ public class SearchServiceElastic extends SearchServiceImpl {
 
 
             RestHighLevelClient client = getClient();
-            SearchResponse searchResponse = client.search(searchRequest);
+            SearchResponse searchResponse = client.search(searchRequest, RequestOptions.DEFAULT);
 
 
             SearchHits hits = searchResponse.getHits();
@@ -133,7 +134,7 @@ public class SearchServiceElastic extends SearchServiceImpl {
                 data.add(eduNodeRef);
             }
             sr.setStartIDX(searchToken.getFrom());
-            sr.setNodeCount((int)hits.totalHits);
+            sr.setNodeCount((int)hits.getTotalHits().value);
             client.close();
         } catch (IOException e) {
             logger.error(e.getMessage(),e);
