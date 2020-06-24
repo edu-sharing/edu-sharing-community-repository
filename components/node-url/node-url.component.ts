@@ -26,7 +26,7 @@ export class NodeUrlComponent {
     if (!this._node) {
       return null;
     }
-    let data: { routerLink: string, queryParams: Params };
+    let data: { routerLink: string, queryParams: Params } = null;
     if (NodeHelper.isNodeCollection(this._node)) {
       data = {
         routerLink: UIConstants.ROUTER_PREFIX + 'collections',
@@ -38,7 +38,7 @@ export class NodeUrlComponent {
           routerLink: UIConstants.ROUTER_PREFIX + 'workspace',
           queryParams: { id: this._node.ref.id },
         };
-      } else {
+      } else if(this._node.ref) {
         const fromeHome = RestNetworkService.isFromHomeRepo(this._node);
         data = {
           routerLink: UIConstants.ROUTER_PREFIX + 'render/' + this._node.ref.id,
@@ -47,6 +47,9 @@ export class NodeUrlComponent {
           },
         };
       }
+    }
+    if(data === null){
+      return '';
     }
     if(mode === 'routerLink') {
       return '/' + data.routerLink;
