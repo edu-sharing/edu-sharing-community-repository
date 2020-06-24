@@ -930,11 +930,11 @@ export class CollectionsMainComponent {
     }
 
     private openBreadcrumb(position: number) {
-        if (position == 0) {
+        if (position === 0) {
             this.selectTab(this.tabSelected);
             return;
         }
-        this.navigate(this.path[position - 1].ref.id);
+        // other navigation is handled via breadcrumbs angular routing
     }
 
     private initialize() {

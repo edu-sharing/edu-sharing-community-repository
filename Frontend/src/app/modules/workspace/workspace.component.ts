@@ -586,7 +586,8 @@ export class WorkspaceMainComponent implements EventListener, OnDestroy {
         let id = '';
         const length = this.path ? this.path.length : 0;
         if (position > 0) {
-            id = this.path[position - 1].ref.id;
+            // handled automatically via routing
+            return;
         }
         else if (length > 0) {
             id = null;

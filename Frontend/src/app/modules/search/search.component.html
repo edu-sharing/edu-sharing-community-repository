@@ -229,7 +229,6 @@
                                 [viewType]="2"
                                 [createLink]="true"
                                 [scrollWindow]="true"
-                                (clickRow)="render($event)"
                                 (doubleClickRow)="render($event)"
                                 [isLoading]="false"></listTable>
                     </div>
@@ -283,8 +282,6 @@
                             [scope]="SCOPES.Search"
                             [actionbar]="actionbarComponent"
                             [mainNav]="mainNav"
-                            (clickRow)="render($event)"
-                            (doubleClickRow)="render($event)"
                             (loadMore)="getMoreResults()"
                             (selectionChanged)="updateSelection($event)"
                             [isLoading]="searchService.showspinner"></listTable>
@@ -316,8 +313,6 @@
                                    [scope]="SCOPES.Search"
                                    [actionbar]="actionbarComponent"
                                    [mainNav]="mainNavRef"
-                                   (clickRow)="render($event)"
-                                   (doubleClickRow)="render($event)"
                                    (selectionChanged)="updateSelection($event)"
                                    [isLoading]="searchService.showspinner"></listTable>
                     </div>

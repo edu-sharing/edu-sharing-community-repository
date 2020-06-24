@@ -277,6 +277,17 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
         if (this.queryParamsSubscription) {
             this.queryParamsSubscription.unsubscribe();
         }
+        // when switching to single view -> safe view state
+        if(this.router.routerState.snapshot.url.indexOf(UIConstants.ROUTER_PREFIX + 'render') !== -1) {
+            this.temporaryStorageService.set(
+                TemporaryStorageService.NODE_RENDER_PARAMETER_LIST,
+                this.searchService.searchResult,
+            );
+            this.temporaryStorageService.set(
+                TemporaryStorageService.NODE_RENDER_PARAMETER_ORIGIN,
+                'search',
+            );
+        }
     }
 
     @HostListener('window:scroll', ['$event'])
@@ -541,7 +552,6 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
         }
         this.groupedRepositories = list;
     }
-
     render(event: any) {
         const node: Node = event.node;
         if (node.collection) {
