@@ -494,20 +494,23 @@ export class WorkspaceShareComponent implements AfterViewInit{
         return;
       }
     }
-    if(this.deletedPermissions.indexOf(RestConstants.AUTHORITY_EVERYONE)!=-1){
-        this.deletedPermissions.splice(this.deletedPermissions.indexOf(RestConstants.AUTHORITY_EVERYONE),1);
-        return;
-    }
-    let perm=RestHelper.getAllAuthoritiesPermission();
-    perm.permissions=[RestConstants.PERMISSION_CONSUMER];
-    this.permissions.push(perm);
-    if(this.doiPermission){
+    if(status && this.doiPermission){
       this.doiActive=true;
+    }
+    if (this.deletedPermissions.indexOf(RestConstants.AUTHORITY_EVERYONE)!=-1) {
+        this.deletedPermissions.splice(this.deletedPermissions.indexOf(RestConstants.AUTHORITY_EVERYONE),1);
     } else {
       let i=this.getAuthorityPos(this.permissions,RestConstants.AUTHORITY_EVERYONE);
-      if(i!=-1)
-        this.permissions.splice(i,1);
+      if (i!=-1) {
+        this.deletedPermissions.push(RestConstants.AUTHORITY_EVERYONE);
+      } else {
+        let perm = RestHelper.getAllAuthoritiesPermission();
+        perm.permissions = [RestConstants.PERMISSION_CONSUMER];
+        this.permissions.push(perm);
+      }
     }
+
+
     this.setPermissions(this.permissions);
     this.updatePublishState();
   }
