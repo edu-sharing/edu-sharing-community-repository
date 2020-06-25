@@ -7,12 +7,16 @@ import {RestNetworkService} from "../../../core-module/rest/services/rest-networ
 
 @Component({
   selector: 'app-node-url',
-  template: `<a 
-                [routerLink]="get('routerLink')" 
-                [queryParams]="get('queryParams')" 
-                [class.unclickable]="unclickable">
-              <ng-content></ng-content>
-              </a>`,
+  template: `
+    <ng-template #content><ng-content></ng-content></ng-template>
+    <a *ngIf="unclickable">
+      <ng-container *ngTemplateOutlet="content"></ng-container>
+    </a>
+    <a *ngIf="!unclickable"
+      [routerLink]="get('routerLink')"
+      [queryParams]="get('queryParams')">
+      <ng-container *ngTemplateOutlet="content"></ng-container>
+    </a>`,
 })
 export class NodeUrlComponent {
   private _node: Node;
