@@ -10,10 +10,7 @@ import org.alfresco.repo.policy.BehaviourFilter;
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.repo.security.authentication.AuthenticationUtil.RunAsWork;
 import org.alfresco.service.ServiceRegistry;
-import org.alfresco.service.cmr.repository.ChildAssociationRef;
-import org.alfresco.service.cmr.repository.NodeRef;
-import org.alfresco.service.cmr.repository.NodeService;
-import org.alfresco.service.cmr.repository.StoreRef;
+import org.alfresco.service.cmr.repository.*;
 import org.alfresco.service.cmr.search.ResultSet;
 import org.alfresco.service.cmr.search.SearchParameters;
 import org.alfresco.service.cmr.search.SearchService;
@@ -83,7 +80,7 @@ public class MediacenterServiceImpl implements MediacenterService {
 
 
                         counter++;
-                    } catch (Exception e) {
+                    }catch (Exception e) {
                         logger.error("error in record: " + ((record == null || record.size() < 1) ? null : record.get(0)), e);
                         throw e;
                     }
@@ -238,7 +235,9 @@ public class MediacenterServiceImpl implements MediacenterService {
 
 
                         counter++;
-                    } catch (Exception e) {
+                    }catch(DuplicateChildNodeNameException e){
+                        logger.error("error in record: " + ((record == null || record.size() < 1) ? null : record.get(0)) +" Folder already exists", e);
+                    }  catch (Exception e) {
                         logger.error("error in record: " + ((record == null || record.size() < 1) ? null : record.get(0)), e);
                         throw e;
                     }
