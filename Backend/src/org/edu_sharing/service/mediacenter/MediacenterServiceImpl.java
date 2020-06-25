@@ -682,12 +682,18 @@ public class MediacenterServiceImpl implements MediacenterService {
                 throw new RuntimeException(authorityName + " is no mediacenter.");
             }
             serviceregistry.getRetryingTransactionHelper().doInTransaction(() -> {
-                String authorityNameProxy = getMediacenterProxyGroup(authorityName);
-                String authorityNameAdmin = getMediacenterAdminGroup(authorityName);
 
-                authorityService.deleteAuthority(authorityNameAdmin);
+                String authorityNameAdmin = getMediacenterAdminGroup(authorityName);
+                if(authorityNameAdmin != null) {
+                    authorityService.deleteAuthority(authorityNameAdmin);
+                }
+
                 authorityService.deleteAuthority(authorityName);
-                authorityService.deleteAuthority(authorityNameProxy);
+
+                String authorityNameProxy = getMediacenterProxyGroup(authorityName);
+                if(authorityNameProxy != null) {
+                    authorityService.deleteAuthority(authorityNameProxy);
+                }
                 return null;
             });
         }else{
