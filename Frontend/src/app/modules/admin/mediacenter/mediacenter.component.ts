@@ -232,7 +232,7 @@ export class AdminMediacenterComponent {
         this.toast.showModalDialog('ADMIN.MEDIACENTER.DELETE_TITLE', 'ADMIN.MEDIACENTER.DELETE_MESSAGE',
             DialogButton.getYesNo(() => this.toast.closeModalDialog(), () => {
                 this.toast.showProgressDialog();
-                this.iamService.deleteGroup(this.currentMediacenter.authorityName).subscribe(() => {
+                this.mediacenterService.deleteMediacenter(this.currentMediacenter.authorityName).subscribe(() => {
                     this.toast.closeModalDialog();
                     this.toast.toast('ADMIN.MEDIACENTER.DELETED', {name: this.currentMediacenterCopy.profile.displayName});
                     this.setMediacenter(null);

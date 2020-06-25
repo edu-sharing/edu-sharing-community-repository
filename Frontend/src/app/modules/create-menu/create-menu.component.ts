@@ -264,7 +264,7 @@ export class CreateMenuComponent {
                 const camera = new OptionItem(
                     'WORKSPACE.ADD_CAMERA',
                     'camera_alt',
-                    () => (this.showUploadSelect = true),
+                    () => (this.openCamera()),
                 );
                 camera.elementType = [ElementType.Unknown];
                 camera.group = DefaultGroups.Create;

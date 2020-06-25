@@ -44,6 +44,22 @@ public class MediacenterDao extends AbstractDao{
 		}
 	}
 
+	public static void delete(RepositoryDao repoDao, String authorityName) throws DAOException {
+		try {
+			new MediacenterDao(repoDao).delete(authorityName);
+		} catch (Exception e) {
+			throw DAOException.mapping(e);
+		}
+	}
+
+	private void delete(String authorityName){
+		//check and throw if not allowed
+		if (!org.edu_sharing.service.authority.AuthorityServiceFactory.getLocalService().isGlobalAdmin()) {
+			throw new RuntimeException("You need global admin rights.");
+		}
+		mediacenterService.deleteMediacenter(authorityName);
+	}
+
 	public static List<MediacenterDao> getAll(RepositoryDao repoDao) throws DAOException {
 		return new MediacenterDao(repoDao).getAll();
 	}
