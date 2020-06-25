@@ -674,5 +674,24 @@ public class MediacenterServiceImpl implements MediacenterService {
 
     }
 
+    @Override
+    public void deleteMediacenter(String authorityName) {
+        if(authorityService.authorityExists(authorityName)){
+            NodeRef nodeRef = authorityService.getAuthorityNodeRef(authorityName);
+            if(!nodeService.hasAspect(nodeRef, QName.createQName(CCConstants.CCM_ASPECT_MEDIACENTER))){
+                throw new RuntimeException(authorityName + " is no mediacenter.");
+            }
+            serviceregistry.getRetryingTransactionHelper().doInTransaction(() -> {
+                String authorityNameProxy = getMediacenterProxyGroup(authorityName);
+                String authorityNameAdmin = getMediacenterAdminGroup(authorityName);
 
+                authorityService.deleteAuthority(authorityNameAdmin);
+                authorityService.deleteAuthority(authorityName);
+                authorityService.deleteAuthority(authorityNameProxy);
+                return null;
+            });
+        }else{
+            throw new RuntimeException(authorityName + " does not exist.");
+        }
+    }
 }

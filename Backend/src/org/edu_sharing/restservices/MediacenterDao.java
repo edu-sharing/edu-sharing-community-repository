@@ -44,6 +44,21 @@ public class MediacenterDao extends AbstractDao{
 		}
 	}
 
+	public static void delete(RepositoryDao repoDao, String authorityName) throws DAOException {
+		try {
+			new MediacenterDao(repoDao).delete(authorityName);
+		} catch (Exception e) {
+			throw DAOException.mapping(e);
+		}
+	}
+
+	private void delete(String authorityName){
+		//check and throw if not allowed
+		mediacenterService.isAllowedToManage(authorityName);
+		//@TODO maybe run in runAsSystem block if mediacenter admin is allowed to remove
+		mediacenterService.deleteMediacenter(authorityName);
+	}
+
 	public static List<MediacenterDao> getAll(RepositoryDao repoDao) throws DAOException {
 		return new MediacenterDao(repoDao).getAll();
 	}
