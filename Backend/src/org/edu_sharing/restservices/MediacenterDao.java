@@ -54,8 +54,9 @@ public class MediacenterDao extends AbstractDao{
 
 	private void delete(String authorityName){
 		//check and throw if not allowed
-		mediacenterService.isAllowedToManage(authorityName);
-		//@TODO maybe run in runAsSystem block if mediacenter admin is allowed to remove
+		if (!org.edu_sharing.service.authority.AuthorityServiceFactory.getLocalService().isGlobalAdmin()) {
+			throw new RuntimeException("You need global admin rights.");
+		}
 		mediacenterService.deleteMediacenter(authorityName);
 	}
 
