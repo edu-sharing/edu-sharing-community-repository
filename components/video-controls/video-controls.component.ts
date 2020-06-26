@@ -6,10 +6,17 @@ import {Toast} from '../../toast';
 import {trigger} from '@angular/animations';
 import {UIAnimation} from '../../../core-module/ui/ui-animation';
 import {UIHelper} from '../../ui-helper';
-import {RestCollectionService, RestConnectorService, TemporaryStorageService, UIConstants} from '../../../core-module/core.module';
+import {
+    RestCollectionService,
+    RestConnectorService,
+    RestHelper,
+    TemporaryStorageService,
+    UIConstants
+} from '../../../core-module/core.module';
 import {Router} from '@angular/router';
 import {BridgeService} from '../../../core-bridge-module/bridge.service';
 import { Options, ChangeContext } from 'ng5-slider';
+import {NodeHelper} from "../../node-helper";
 
 @Component({
     selector: 'video-controls',
@@ -43,6 +50,10 @@ export class VideoControlsComponent {
     @Input() set video(video: HTMLVideoElement) {
         // timeout to make sure node is already bound
         setTimeout(() => {
+            this.hasPermission = this.connector.hasToolPermissionInstant(RestConstants.TOOLPERMISSION_VIDEO_AUDIO_CUT) &&
+                (this.isCollectionRef() && this.hasPermissions(RestConstants.ACCESS_WRITE)) ||
+                (!this.isCollectionRef() && this.hasPermissions(RestConstants.ACCESS_CC_PUBLISH));
+
             this._video = video;
             this.track = video.addTextTrack('chapters', 'English', 'en');
             this.track.mode = 'showing';
@@ -83,7 +94,6 @@ export class VideoControlsComponent {
               private toast: Toast,
               private temporaryStorage: TemporaryStorageService) {
     this.isGuest = this.connector.getCurrentLogin().isGuest;
-    this.hasPermission = this.connector.hasToolPermissionInstant(RestConstants.TOOLPERMISSION_VIDEO_AUDIO_CUT);
   }
 
   render() {
@@ -258,7 +268,9 @@ export class VideoControlsComponent {
             root ? root.ref.id : RestConstants.ROOT,
         ]);
     }
-
+    private hasPermissions(permission: string) {
+      return RestHelper.hasAccessPermission(this.node, permission);
+    }
     private isCollectionRef() {
         return (
             this.node.aspects.indexOf(RestConstants.CCM_ASPECT_IO_REFERENCE) !==
