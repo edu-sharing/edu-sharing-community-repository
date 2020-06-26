@@ -11,10 +11,10 @@
       [isCancelable]="false"
 >
     <div class="register-content card-content-padding">
-        <app-register-form [class.display-none]="!(state=='register')" (onLoading)="isLoading=$event" (onRegisterDone)="onRegisterDone()" #registerForm></app-register-form>
+        <app-register-form [class.display-none]="!(state=='register')" (onRegisterDone)="onRegisterDone()" #registerForm></app-register-form>
         <app-register-done *ngIf="state=='done' || state=='done-reset'" (onModify)="modifyData()" [inputState]="state" #registerDone></app-register-done>
-        <app-register-request *ngIf="state=='request'" (onDone)="onPasswordRequested()" (onLoading)="isLoading=$event" #request></app-register-request>
-        <app-register-reset-password *ngIf="state=='reset-password'" (onLoading)="isLoading=$event" #resetPassword></app-register-reset-password>
+        <app-register-request *ngIf="state=='request'" (onDone)="onPasswordRequested()" #request></app-register-request>
+        <app-register-reset-password *ngIf="state=='reset-password'" #resetPassword></app-register-reset-password>
         <div *ngIf="state != 'register' && state != 'done' && state != 'done-reset' && state != 'request'" class="register">
             {{'LOGIN.REGISTER_TEXT' | translate}}
             <button mat-button color="primary" (click)="linkRegister()">{{'LOGIN.REGISTER_LINK' | translate}} <i icon iconId="arrow_forward"></i></button>

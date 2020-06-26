@@ -19,7 +19,6 @@ import {FormControl, Validators} from '@angular/forms';
   styleUrls: ['register-request.component.scss']
 })
 export class RegisterRequestComponent {
-    @Output() onLoading=new EventEmitter();
     @Output() onDone=new EventEmitter();
     emailFormControl = new FormControl('', [
         Validators.required,
@@ -35,13 +34,13 @@ export class RegisterRequestComponent {
     submit() {
         if(!this.emailFormControl.valid)
             return;
-        this.onLoading.emit(true);
+        this.toast.showProgressDialog();
         this.register.recoverPassword(this.emailFormControl.value).subscribe(()=>{
-            this.onLoading.emit(false);
+            this.toast.closeModalDialog();
             this.toast.toast("REGISTER.TOAST");
             this.onDone.emit();
         },(error)=>{
-            this.onLoading.emit(false);
+            this.toast.closeModalDialog();
             if(UIHelper.errorContains(error,"Invalid mail address")){
                 this.toast.error(null,"REGISTER.TOAST_INVALID_MAIL");
             }
