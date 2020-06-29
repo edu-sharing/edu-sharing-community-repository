@@ -23,15 +23,15 @@
                         </mat-form-field>
                         <mat-form-field>
                             <mat-label>{{'ADMIN.MEDIACENTER.DATA.location' | translate}}</mat-label>
-                            <input matInput [disabled]="!isAdmin" [(ngModel)]="currentMediacenterCopy.profile.mediacenter.location">
+                            <input matInput [disabled]="!hasManagePermissions" [(ngModel)]="currentMediacenterCopy.profile.mediacenter.location">
                         </mat-form-field>
                         <mat-form-field>
                             <mat-label>{{'ADMIN.MEDIACENTER.DATA.districtAbbreviation' | translate}}</mat-label>
-                            <input matInput [disabled]="!isAdmin" [(ngModel)]="currentMediacenterCopy.profile.mediacenter.districtAbbreviation">
+                            <input matInput [disabled]="!hasManagePermissions" [(ngModel)]="currentMediacenterCopy.profile.mediacenter.districtAbbreviation">
                         </mat-form-field>
                         <mat-form-field>
                             <mat-label>{{'ADMIN.MEDIACENTER.DATA.shortName' | translate}}</mat-label>
-                            <input matInput [(ngModel)]="currentMediacenterCopy.profile.displayName">
+                            <input matInput [disabled]="!hasManagePermissions" [(ngModel)]="currentMediacenterCopy.profile.displayName">
                         </mat-form-field>
                         <mat-form-field>
                             <mat-label>{{'ADMIN.MEDIACENTER.DATA.mainUrl' | translate}}</mat-label>
@@ -47,19 +47,19 @@
                             <div class="catalog-fields">
                                 <mat-form-field>
                                     <mat-label>{{'ADMIN.MEDIACENTER.DATA.CATALOG.name' | translate}}</mat-label>
-                                    <input matInput [disabled]="!isAdmin" [(ngModel)]="catalog.name">
+                                    <input matInput [disabled]="!hasManagePermissions" [(ngModel)]="catalog.name">
                                 </mat-form-field>
                                 <mat-form-field>
                                     <mat-label>{{'ADMIN.MEDIACENTER.DATA.CATALOG.url' | translate}}</mat-label>
-                                    <input matInput [disabled]="!isAdmin" [(ngModel)]="catalog.url">
+                                    <input matInput [disabled]="!hasManagePermissions" [(ngModel)]="catalog.url">
                                 </mat-form-field>
                             </div>
                         </div>
-                        <button mat-button color="primary" (click)="addCatalog()" [disabled]="!isAdmin"><i icon iconId="add"></i>{{'ADMIN.MEDIACENTER.DATA.ADD_CATALOG' | translate}}</button>
+                        <button mat-button color="primary" (click)="addCatalog()" [disabled]="!hasManagePermissions"><i icon iconId="add"></i>{{'ADMIN.MEDIACENTER.DATA.ADD_CATALOG' | translate}}</button>
                     </div>
-                    <h6 class="mat-heading-6 edit-not-allowed" *ngIf="!isAdmin">{{'ADMIN.MEDIACENTER.DATA.EDIT_NOT_ALLOWED' | translate}}</h6>
+                    <h6 class="mat-heading-6 edit-not-allowed" *ngIf="!hasManagePermissions">{{'ADMIN.MEDIACENTER.DATA.EDIT_NOT_ALLOWED' | translate}}</h6>
                     <div class="actions">
-                        <button mat-raised-button color="primary" (click)="saveChanges()">{{'ADMIN.MEDIACENTER.SAVE' | translate}}</button>
+                        <button mat-raised-button color="primary" (click)="saveChanges()" *ngIf="hasManagePermissions">{{'ADMIN.MEDIACENTER.SAVE' | translate}}</button>
                         <button mat-raised-button color="warn" (click)="deleteMediacenter()" *ngIf="isAdmin">{{'ADMIN.MEDIACENTER.DELETE' | translate}}</button>
                     </div>
                 </div>
@@ -67,8 +67,10 @@
             <mat-tab label="{{'ADMIN.MEDIACENTER.GROUPS.TITLE' | translate}}">
                 <div class="groups">
                     <h6 class="mat-heading-6">{{'ADMIN.MEDIACENTER.GROUPS.DESCRIPTION' | translate}}</h6>
-                    <authority-search-input placeholder="ADMIN.MEDIACENTER.GROUPS.ADD_LABEL" mode="Organizations" [showRecent]="false" (onChooseAuthority)="addGroup=$event"></authority-search-input>
-                    <button *ngIf="addGroup" mat-raised-button color="primary" (click)="addCurrentGroup()"><i icon iconId="add"></i>{{'ADMIN.MEDIACENTER.GROUPS.ADD' | translate:{name:addGroup.profile.displayName} }}</button>
+                    <ng-container *ngIf="hasManagePermissions">
+                        <authority-search-input placeholder="ADMIN.MEDIACENTER.GROUPS.ADD_LABEL" mode="Organizations" [showRecent]="false" (onChooseAuthority)="addGroup=$event"></authority-search-input>
+                        <button *ngIf="addGroup" mat-raised-button color="primary" (click)="addCurrentGroup()"><i icon iconId="add"></i>{{'ADMIN.MEDIACENTER.GROUPS.ADD' | translate:{name:addGroup.profile.displayName} }}</button>
+                    </ng-container>
                     <listTable *ngIf="mediacenterGroups"
                         [nodes]="mediacenterGroups"
                         [hasIcon]="true"

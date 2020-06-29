@@ -36,6 +36,7 @@ import org.edu_sharing.repository.server.authentication.Context;
 import org.edu_sharing.repository.server.tools.ApplicationInfo;
 import org.edu_sharing.repository.server.tools.ApplicationInfoList;
 import org.edu_sharing.restservices.DAOException;
+import org.edu_sharing.restservices.RestConstants;
 import org.edu_sharing.service.Constants;
 import org.edu_sharing.service.nodeservice.NodeServiceFactory;
 import org.edu_sharing.service.NotAnAdminException;
@@ -152,6 +153,10 @@ public class AuthorityServiceImpl implements AuthorityService {
 	}
     private synchronized boolean hasAdminAccessToGroup(String groupName,String postfix){
 		try {
+			// strip the group prefix, if present
+			if(groupName.startsWith(PermissionService.GROUP_PREFIX)){
+				groupName = groupName.substring(PermissionService.GROUP_PREFIX.length());
+			}
 			Set<String> memberships=serviceRegistry.getAuthorityService().getAuthorities();
 			if(memberships.contains(CCConstants.AUTHORITY_GROUP_ALFRESCO_ADMINISTRATORS))
 				return true;

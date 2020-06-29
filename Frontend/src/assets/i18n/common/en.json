@@ -128,6 +128,7 @@
         "TOOLPERMISSION_USAGE_STATISTIC": "Fetch information about the usage of all nodes of the repository",
         "TOOLPERMISSION_GLOBAL_STATISTICS_NODES": "View stats of material access of the repository",
         "TOOLPERMISSION_GLOBAL_STATISTICS_USER": "View stats of user interaction (login, logout) access of the repository",
+        "TOOLPERMISSION_MEDIACENTER_MANAGE": "Change basic data (Address, Catalogs) from media centers where the given user is admin of",
         "TOOLPERMISSION_VIDEO_AUDIO_CUT": "Video- and audio-files can be cutted when added into collections",
         "TOOLPERMISSION_COLLECTION_CHANGE_OWNER": "Permission to change the ownername of a collection (only applies to mediacenter collections)",
         "TOOLPERMISSION_RATE": "The permission to rate materials",
