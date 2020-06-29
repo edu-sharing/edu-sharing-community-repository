@@ -20,6 +20,7 @@ import {FormControl, ValidationErrors, Validators} from '@angular/forms';
 })
 export class RegisterFormComponent{
     @Output() onRegisterDone=new EventEmitter();
+    @Output() onLoading=new EventEmitter();
     public info : RegisterInformation = {
         firstName: '',
         lastName: '',
