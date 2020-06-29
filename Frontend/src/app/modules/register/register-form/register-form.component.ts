@@ -51,7 +51,7 @@ export class RegisterFormComponent{
             }else {
                 this.toast.error(error);
             }
-            this.onLoading.emit(false);
+            this.toast.closeModalDialog();
         });
     }
 
