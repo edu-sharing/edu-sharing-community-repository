@@ -9,6 +9,7 @@ import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
 import org.edu_sharing.metadataset.v2.MetadataQueries;
 import org.edu_sharing.metadataset.v2.MetadataSetV2;
 import org.edu_sharing.metadataset.v2.SearchCriterias;
+import org.edu_sharing.metadataset.v2.tools.MetadataElasticSearchHelper;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.server.SearchResultNodeRef;
 import org.edu_sharing.repository.server.tools.ApplicationInfoList;
@@ -76,12 +77,16 @@ public class SearchServiceElastic extends SearchServiceImpl {
             SearchRequest searchRequest = new SearchRequest("workspace");
             SearchSourceBuilder searchSourceBuilder = new SearchSourceBuilder();
 
+            /**
+             * TEst
 
             QueryBuilder ioQuery = QueryBuilders.termQuery("type", "ccm:io");
             QueryBuilder metadataQueryBuilder = (ngsearchword != null) ? QueryBuilders.boolQuery().must(ioQuery)
                     .must(QueryBuilders.wildcardQuery("properties.cm:name",
                             (ngsearchword.contains("*") ? ngsearchword.toLowerCase() : "*"+ngsearchword.toLowerCase()+"*")))
                     : ioQuery;
+             */
+            QueryBuilder metadataQueryBuilder = MetadataElasticSearchHelper.getElasticSearchQuery(mds.getQueries().findQuery(query),criterias);
             BoolQueryBuilder audienceQueryBuilder = QueryBuilders.boolQuery();
             audienceQueryBuilder.minimumShouldMatch(1);
             for (String a : authorities) {

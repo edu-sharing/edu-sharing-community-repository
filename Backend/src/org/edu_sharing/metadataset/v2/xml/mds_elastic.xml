@@ -1,0 +1,132 @@
+<metadataset id="default" label="default" hidden="false">
+		<name>ElasticSearch</name>
+		<i18n>mds</i18n>
+
+	<templates>
+		<template>
+			<id>search</id>
+			<html><![CDATA[
+			  <ccm:educationallearningresourcetype>
+			  <license>
+			  <cclom:general_keyword>
+				]]></html>
+		</template>
+	</templates>
+	<!--<cclom:general_keyword>-->
+	<queries>
+		<basequery>-TYPE:"ccm:toolpermission" AND NOT ASPECT:"ccm:metadataPresettingTemplate" AND NOT @cm\:name:"._*" AND NOT @cm\:name:".DS_Store*" AND NOT PATH:"/sys\:system/sys\:people//*" AND -ASPECT:"ccm:io_childobject"</basequery>
+		<allowSearchWithoutCriteria>true</allowSearchWithoutCriteria>
+
+		<query join="AND" id="ngsearch">
+			<basequery>ISNULL:@ccm\:tool_category</basequery>
+			<property name="ngsearchword">
+				<statement>{"bool":{"should":[{"wildcard":{"properties.cm:name":{"value":"*${value}*"}}},{"wildcard":{"properties.cclom:title":{"value":"*${value}*"}}},{"wildcard":{"properties.cclom:general_description":{"value":"*${value}*"}}},{"wildcard":{"properties.cclom:general_keyword":{"value":"*${value}*"}}},{"wildcard":{"content.fulltext":{"value":"*${value}*"}}},{"term":{"properties.sys:node-uuid":{"value":"*${value}*"}}}]}}</statement>
+				<exactMatching>false</exactMatching>
+				<multiple>true</multiple>
+				<multiplejoin>AND</multiplejoin>
+			</property>
+			<property name="cclom:general_keyword">
+				<statement>{"query":{"wildcard":{"properties.cclom:general_keyword":{"value":"${value}"}}}}</statement>
+				<multiple>true</multiple>
+				<multiplejoin>AND</multiplejoin>
+			</property>
+			<property name="ccm:classification_purpose" />
+			<property name="ccm:commonlicense_key" />
+			<property name="ccm:educationallearningresourcetype">
+				<statement>{"query":{"wildcard":{"properties.ccm:educationallearningresourcetype":{"value":"${value}"}}}}</statement>
+				<multiple>true</multiple>
+				<multiplejoin>OR</multiplejoin>
+			</property>
+			<property name="license">
+				<statement>{"query":{"wildcard":{"properties.ccm:commonlicense_key":{"value":"${value}"}}}}</statement>
+				<statement value="OPEN">{"query":{"bool":{"should":[{"wildcard":{"properties.ccm:commonlicense_key":{"value":"CC_0"}}},{"wildcard":{"properties.ccm:commonlicense_key":{"value":"PDM"}}}]}}}</statement>
+				<statement value="OER">{"query":{"bool":{"should":[{"wildcard":{"properties.ccm:commonlicense_key":{"value":"CC_0"}}},{"wildcard":{"properties.ccm:commonlicense_key":{"value":"PDM"}}},{"wildcard":{"properties.ccm:commonlicense_key":{"value":"CC_BY"}}},{"wildcard":{"properties.ccm:commonlicense_key":{"value":"CC_BY_SA"}}}]}}}</statement>
+				<statement value="CC_BY_OPEN">{"query":{"bool":{"should":[{"wildcard":{"properties.ccm:commonlicense_key":{"value":"CC_BY"}}},{"wildcard":{"properties.ccm:commonlicense_key":{"value":"CC_BY_SA"}}}]}}}</statement>
+				<statement value="CC_BY_RESTRICTED">{"query":{"bool":{"should":[{"wildcard":{"properties.ccm:commonlicense_key":{"value":"CC_BY_ND"}}},{"wildcard":{"properties.ccm:commonlicense_key":{"value":"CC_BY_NC"}}},{"wildcard":{"properties.ccm:commonlicense_key":{"value":"CC_BY_NC_SA"}}},{"wildcard":{"properties.ccm:commonlicense_key":{"value":"CC_BY_NC_ND"}}}]}}}</statement>
+				<statement value="CC_BY_ALL">{"query":{"bool":{"should":[{"wildcard":{"properties.ccm:commonlicense_key":{"value":"CC_0"}}},{"wildcard":{"properties.ccm:commonlicense_key":{"value":"CC_BY*"}}}]}}}</statement>
+				<statement value="COPYRIGHT_OTHERS">{"query":{"bool":{"should":[{"wildcard":{"properties.ccm:commonlicense_key":{"value":"COPYRIGHT*"}}},{"wildcard":{"properties.ccm:commonlicense_key":{"value":"SCHULFUNK"}}}]}}}</statement>
+				<multiple>true</multiple>
+				<multiplejoin>OR</multiplejoin>
+			</property>
+			<property name="workflow">
+				<statement>@ccm\:wf_status:"${value}"</statement>
+				<statement value="100_unchecked">@ccm\:wf_status:"${value}" or ISNULL:@ccm\:wf_status</statement>
+				<multiple>true</multiple>
+				<multiplejoin>OR</multiplejoin>
+			</property>
+		</query>
+		<query join="AND" id="oai">
+			<basequery>ISNULL:@ccm\:tool_category</basequery>
+			<property name="from">
+				<statement>@cm\:modified:[${value} TO MAX]</statement>
+			</property>
+			<property name="until">
+				<statement>@cm\:modified:[MIN TO ${value}]</statement>
+			</property>
+		</query>
+		<query join="AND"  id="collections">
+			<basequery propertyNull="ngsearchword">@ccm\:collectionlevel0:true OR @ccm\:collection_pinned_status:true</basequery>
+			<property name="ngsearchword">
+				<statement>(@sys\:node-uuid:"${value}" OR @cm\:name:"*${value}*" OR @cclom\:title:"*${value}*" OR @cclom\:general_description:"*${value}*" OR @cclom\:general_keyword:"*${value}*" OR @ccm\:taxonentry:"*${value}*" OR @ccm\:classification_keyword:"*${value}*" OR @ccm\:educationallearningresourcetype:"*${value}*" OR @ccm\:educationalcontext:"*${value}*" OR @ccm\:learninggoal:"*${value}*" OR @ccm\:guidanceteachers:"*${value}*" OR @ccm\:guidancestudents:"*${value}*")</statement>
+				<exactMatching>false</exactMatching>
+				<multiple>true</multiple>
+				<multiplejoin>AND</multiplejoin>
+			</property>
+		</query>
+		<query join="AND"  id="collections_scope_my">
+			<basequery>ASPECT:"ccm:collection" AND @ccm\:collectionlevel0:true AND OWNER:"${authority}"</basequery>
+		</query>
+		<query join="AND"  id="collections_scope_shared">
+			<basequery>ASPECT:"ccm:collection" AND @ccm\:collectionlevel0:true AND NOT OWNER:"${authority}" AND NOT @ccm\:collectiontype:"EDITORIAL" AND NOT @ccm\:collectiontype:"MEDIA_CENTER"</basequery>
+		</query>
+		<query join="AND"  id="collections_scope_editorial">
+			<basequery>ASPECT:"ccm:collection" AND @ccm\:collectionlevel0:true AND @ccm\:collectiontype:"EDITORIAL"</basequery>
+		</query>
+		<query join="AND"  id="collections_scope_media_center">
+			<basequery>ASPECT:"ccm:collection" AND @ccm\:collectionlevel0:true AND @ccm\:collectiontype:"MEDIA_CENTER"</basequery>
+		</query>
+		<query join="AND"  id="collections_scope_public">
+			<basequery>ASPECT:"ccm:collection" AND @ccm\:collectionlevel0:true AND NOT @ccm\:collectiontype:"EDITORIAL" AND NOT @ccm\:collectiontype:"MEDIA_CENTER"</basequery>
+		</query>
+		<query join="AND" id="archive" applyBasequery="false">
+			<property name="ngsearchword">
+				<statement>@cm\:name:"${value}"</statement>
+			</property>
+			<property name="user">
+				<statement>@sys\:archivedBy:"${value}"</statement>
+			</property>
+		</query>
+		<query join="AND" id="saved_search" applyBasequery="false">
+			<basequery>TYPE:"ccm:saved_search"</basequery>
+			<property name="ngsearchword">
+				<statement>(@cm\:name:"*${value}*" OR @cclom\:title:"*${value}*")</statement>
+			</property>
+		</query>
+		<query join="AND"  id="tools">
+			<basequery>ASPECT:"{http://www.campuscontent.de/model/1.0}tool_definition"</basequery>
+			<property name="toolname">
+				<statement>(@sys\:node-uuid:"${value}" OR TEXT:"${value}" OR @cm\:name:"*${value}*" OR @cclom\:title:"*${value}*" OR @cclom\:general_description:"*${value}*" OR @cclom\:general_keyword:"*${value}*" OR @ccm\:taxonentry:"*${value}*" OR @ccm\:classification_keyword:"*${value}*" OR @ccm\:educationallearningresourcetype:"*${value}*" OR @ccm\:educationalcontext:"*${value}*" OR @ccm\:learninggoal:"*${value}*" OR @ccm\:guidanceteachers:"*${value}*" OR @ccm\:guidancestudents:"*${value}*")</statement>
+				<multiple>true</multiple>
+				<multiplejoin>AND</multiplejoin>
+			</property>
+		</query>
+		<query join="AND"  id="tool_instances">
+			<basequery>TYPE:"ccm:tool_instance"</basequery>
+			<property name="url">
+				<statement>@ccm\:tool_instance_provider_url:"*${value}*"</statement>
+			</property>
+		</query>
+		<query join="AND"  id="workspace">
+			<property name="ngsearchword">
+				<statement>NOT TYPE:"ccm:notify" AND NOT ASPECT:"ccm:collection_io_reference" AND (@sys\:node-uuid:"${value}" OR TEXT:"${value}" OR @cm\:name:"*${value}*" OR @cclom\:title:"*${value}*" OR @cclom\:general_description:"*${value}*" OR @cclom\:general_keyword:"*${value}*" OR @ccm\:taxonentry:"*${value}*" OR @ccm\:classification_keyword:"*${value}*" OR @ccm\:educationallearningresourcetype:"*${value}*" OR @ccm\:educationalcontext:"*${value}*" OR @ccm\:learninggoal:"*${value}*" OR @ccm\:guidanceteachers:"*${value}*" OR @ccm\:guidancestudents:"*${value}*")</statement>
+				<multiple>true</multiple>
+				<multiplejoin>AND</multiplejoin>
+			</property>
+			<property name="parent">
+				<statement>PATH:"${value}//*"</statement>
+				<preprocessor>node_path</preprocessor>
+				<mandatory>false</mandatory>
+			</property>
+		</query>
+	</queries>
+</metadataset>
