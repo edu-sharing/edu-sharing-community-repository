@@ -220,7 +220,7 @@
         "ccm:author_freetext": "General Author information",
         "ccm:lifecyclecontributer_authorFN": "author",
         "ccm:wf_status": "status",
-        "ccm:eaf_productionyear": "Production year"
+        "ccm:eaf_productionyear": "Production year",
         "counts": {
             "VIEW_MATERIAL": "Access",
             "VIEW_MATERIAL_EMBEDDED": "Access (Remote)",
