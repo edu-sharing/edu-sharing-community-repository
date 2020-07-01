@@ -20,7 +20,6 @@ import {FormControl, ValidationErrors, Validators} from '@angular/forms';
 })
 export class RegisterFormComponent{
     @Output() onRegisterDone=new EventEmitter();
-    @Output() onLoading=new EventEmitter();
     public info : RegisterInformation = {
         firstName: '',
         lastName: '',
@@ -40,11 +39,11 @@ export class RegisterFormComponent{
 
     public register(){
         this.info.email=this.emailFormControl.value;
-        this.onLoading.emit(true);
+        this.toast.showProgressDialog();
         this.registerService.register(this.info).subscribe(()=>{
+            this.toast.closeModalDialog();
             this.onRegisterDone.emit();
-            this.onLoading.emit(false);
-            this.toast.toast("REGISTER.TOAST");
+            //this.toast.toast("REGISTER.TOAST");
         },(error)=>{
             if(UIHelper.errorContains(error,"DuplicateAuthorityException")){
                 this.emailFormControl.setErrors({'incorrect': true});
@@ -52,7 +51,7 @@ export class RegisterFormComponent{
             }else {
                 this.toast.error(error);
             }
-            this.onLoading.emit(false);
+            this.toast.closeModalDialog();
         });
     }
 

@@ -126,6 +126,7 @@
                 "CONNECTORS": "Connectors & Editors",
                 "REPOSITORIES": "Repositories & Remote-Sources",
                 "MANAGEMENT": "Management, Statistics & Administration",
+                "MEDIACENTER": "Mediacenters",
                 "OTHER": "Other  / Not categorized",
                 "ADD": "Creating custom Authorizations",
                 "ADD_LABEL": "Toolpermission name"

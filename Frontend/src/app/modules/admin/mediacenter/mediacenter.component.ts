@@ -53,6 +53,7 @@ export class AdminMediacenterComponent {
     groupActions: OptionItem[];
     currentTab = 0;
     private isAdmin: boolean;
+    private hasManagePermissions: boolean;
     public mediacentersFile: File;
     public organisationsFile: File;
     public orgMcFile: File;
@@ -69,6 +70,7 @@ export class AdminMediacenterComponent {
         private toast: Toast,
     ) {
         this.isAdmin = this.connector.getCurrentLogin().isAdmin;
+        this.hasManagePermissions = this.connector.hasToolPermissionInstant(RestConstants.TOOLPERMISSION_MEDIACENTER_MANAGE);
         this.refresh();
         this.groupColumns = [
             new ListItem('GROUP', RestConstants.AUTHORITY_DISPLAYNAME),
