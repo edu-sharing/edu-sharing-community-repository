@@ -460,7 +460,7 @@ export class AdminStatisticsComponent {
               if (obj) {
                 displayValue = obj.map((group: any) => {
                   return new AuthorityNamePipe(this.translate).transform(group, null);
-                }).join(' ');
+                }).join(', ');
               }
               else{
                 displayValue = '';
