@@ -159,16 +159,13 @@ public class GroupDao {
 	}
 
 	private void renameSubGroup(GroupProfile profile, String subgroup, String postfix) {
-		try {
-			String adminDisplayName = profile.getDisplayName() + postfix;
-			authorityService.setAuthorityProperty(
-					PermissionService.GROUP_PREFIX + org.edu_sharing.alfresco.service.AuthorityService.getGroupName(
-							subgroup,
-							PermissionService.GROUP_PREFIX + groupName),
+		String authorityName = PermissionService.GROUP_PREFIX + org.edu_sharing.alfresco.service.AuthorityService.getGroupName(
+			subgroup, groupName);
+		if(authorityService.authorityExists(authorityName)) {
+			String newDisplayName = profile.getDisplayName() + postfix;
+			authorityService.setAuthorityProperty(authorityName,
 					CCConstants.CM_PROP_AUTHORITY_AUTHORITYDISPLAYNAME,
-					adminDisplayName);
-		}catch(Throwable t){
-			logger.info("Renaming of " + subgroup + " from " + groupName + " failed: " + t.getMessage());
+					newDisplayName);
 		}
 	}
 
