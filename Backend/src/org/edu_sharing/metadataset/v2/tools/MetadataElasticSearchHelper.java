@@ -100,7 +100,8 @@ public class MetadataElasticSearchHelper {
         }
 
         if (value.startsWith("\"") && value.endsWith("\"") || parameter.isExactMatching()) {
-            return parameter.getStatement(value).replace("${value}", QueryParser.escape(value));
+            String statement = parameter.getStatement(value).replace("${value}", QueryParser.escape(value));
+            return statement;
         }
 
         String[] words = value.split(" ");
