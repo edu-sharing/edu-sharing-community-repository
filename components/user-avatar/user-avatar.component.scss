@@ -1,5 +1,8 @@
 @import "../../styles/variables";
-
+.avatar{
+  display: flex;
+  align-items: center;
+}
 .avatarCircle{
   border-radius: 50%;
   //border:3px solid #fff;
@@ -34,7 +37,7 @@
   }
 }
 .avatarOuter{
-  display: inline;
+  display: inline-flex;
   position: relative;
   .editorial-badge{
     position: absolute;
