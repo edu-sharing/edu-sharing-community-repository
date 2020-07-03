@@ -442,12 +442,13 @@ export class AdminStatisticsComponent {
             const authority = result.map((entry) => ((this.customUnfold == 'authority_organization' ? entry.authority.organization : entry.authority.mediacenter as any[])))
             .reduce((a, b) => a.concat(b))
             .filter((a) => a.authorityName == key);
-            if (authority.length)
+            if (authority.length) {
               this.customGroupLabels[key] = new AuthorityNamePipe(this.translate).transform(authority[0], null);
+            }
             return key;
           });
         }
-        this.customGroupRows = this.customGroupRows.concat(set as any);
+        this.customGroupRows = Array.from(new Set(this.customGroupRows.concat(set as any)));
       }
       if (result.length) {
         this.customGroupData = result.map((entry) => {
