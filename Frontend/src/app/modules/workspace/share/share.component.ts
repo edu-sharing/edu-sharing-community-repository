@@ -256,7 +256,10 @@ export class WorkspaceShareComponent {
         if (nodes == null || nodes.length === 1 && !nodes[0].ref.id) {
             return;
         }
-        const isDirectory = new Set(nodes.map(n => n.isDirectory));
+        this.refresh();
+    }
+    refresh() {
+        const isDirectory = new Set(this._nodes.map(n => n.isDirectory));
         if (isDirectory.size !== 1) {
             this.toast.error(
                 null,
@@ -265,8 +268,9 @@ export class WorkspaceShareComponent {
             this.cancel();
             return;
         }
-        if (isDirectory.values().next())
+        if (isDirectory.values().next()) {
             this.currentType = [RestConstants.ACCESS_CONSUMER];
+        }
         if (this.currentPermissions) {
             this.originalPermissions = Helper.deepCopy(this.currentPermissions);
             this.setPermissions(this.currentPermissions.permissions);
@@ -277,7 +281,7 @@ export class WorkspaceShareComponent {
             this.updateNodeLink();
             this.toast.showProgressDialog();
             Observable.forkJoin(
-                nodes.map(n => this.nodeApi.getNodePermissions(n.ref.id)),
+                this._nodes.map(n => this.nodeApi.getNodePermissions(n.ref.id)),
             ).subscribe(permissions => {
                 this.originalPermissions = Helper.deepCopy(
                     permissions.map(p => p.permissions.localPermissions),
@@ -292,7 +296,7 @@ export class WorkspaceShareComponent {
                     this.updatePublishState();
                     this.initialState = this.getState();
                     this.doiActive = NodeHelper.isDOIActive(
-                        nodes[0],
+                        this._nodes[0],
                         permissions[0].permissions,
                     );
                     this.doiDisabled = this.doiActive;
@@ -301,7 +305,7 @@ export class WorkspaceShareComponent {
             });
             this.reloadUsages();
         }
-        if (nodes.length === 1 && nodes[0].parent && nodes[0].parent.id) {
+        if (this._nodes.length === 1 && this._nodes[0].parent && this._nodes[0].parent.id) {
             this.nodeApi.getNodePermissions(nodes[0].parent.id).subscribe(
                 (data: NodePermissions) => {
                     if (data.permissions) {
@@ -323,7 +327,7 @@ export class WorkspaceShareComponent {
                     this.inheritAccessDenied = true;
                 },
             );
-            this.nodeApi.getNodeParents(nodes[0].ref.id).subscribe(
+            this.nodeApi.getNodeParents(this._nodes[0].ref.id).subscribe(
                 (data: NodeList) => {
                     //this.inheritAllowed = !this.isCollection() && data.nodes.length > 1;
                     // changed in 4.1 to keep inherit state of collections
@@ -334,9 +338,9 @@ export class WorkspaceShareComponent {
                     this.inheritAllowed = true;
                 },
             );
-            if (nodes[0].ref.id) {
+            if (this._nodes[0].ref.id) {
                 this.nodeApi
-                    .getNodeMetadata(nodes[0].ref.id, [RestConstants.ALL])
+                    .getNodeMetadata(this._nodes[0].ref.id, [RestConstants.ALL])
                     .subscribe((data: NodeWrapper) => {
                         let authority =
                             data.node.properties[RestConstants.CM_CREATOR][0];
@@ -660,7 +664,7 @@ export class WorkspaceShareComponent {
 
     private isNewPermission(p: Permission) {
         if (
-            !this.originalPermissions ||
+            !this.originalPermissions?.length ||
             !this.originalPermissions[0].permissions
         )
             return true;
