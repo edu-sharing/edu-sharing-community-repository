@@ -28,7 +28,8 @@
                [sortAscending]="sortAscending"
                [listClass]=""
                (onDrop)="drop($event)"
-               (clickRow)="goIntoCollection($event.node)">
+               (clickRow)="goIntoCollection($event.node)"
+               (doubleClickRow)="goIntoCollection($event)">
       <ng-template #itemContent>
         <div class="go-into"><button mat-mini-fab color="white"><i icon iconId="arrow_forward"></i></button></div>
       </ng-template>
