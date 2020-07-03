@@ -36,7 +36,8 @@ import { WindowRefService } from './window-ref.service';
 export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
     readonly SCOPES = Scope;
 
-    @ViewChild('mds') mdsRef: MdsComponent;
+    @ViewChild('mdsMobile') mdsMobileRef: MdsComponent;
+    @ViewChild('mdsDesktop') mdsDesktopRef: MdsComponent;
     @ViewChild('list') list: ListTableComponent;
     @ViewChild('mainNav') mainNavRef: MainNavComponent;
     @ViewChild('extendedSearch') extendedSearch: ElementRef;
@@ -361,7 +362,7 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
     }
 
     isMobileHeight() {
-        return window.innerHeight < UIConstants.MOBILE_HEIGHT;
+        return window.innerHeight < UIConstants.MOBILE_HEIGHT + UIConstants.MOBILE_STAGE * 2;
     }
 
     isMobileWidth() {
@@ -369,7 +370,7 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
     }
 
     isMdsLoading() {
-        return !this.mdsRef || this.mdsRef.isLoading;
+        return !this.mdsDesktopRef || this.mdsDesktopRef.isLoading;
     }
 
     canDrop() {
@@ -413,13 +414,15 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
     }
 
     getMdsValues() {
-        if (this.currentRepository == RestConstants.ALL) return {};
-        return this.mdsRef.getValues();
+        if (this.currentRepository === RestConstants.ALL) {
+            return {};
+        }
+        return this.mdsMobileRef ? this.mdsMobileRef.getValues() : this.mdsDesktopRef.getValues();
     }
 
     routeAndClearSearch(query: any) {
         let parameters: any = null;
-        if (this.mdsRef) {
+        if (this.mdsDesktopRef) {
             parameters = this.getMdsValues();
         }
         if (!query.cleared) {
@@ -741,10 +744,18 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
             this.allRepositories,
         );
     }
-
+    hasMobileMds() {
+        return this.searchService.sidenavOpened && this.isMobileWidth() && this.isMobileHeight();
+    }
     toggleSidenav() {
         this.searchService.sidenavOpened = !this.searchService.sidenavOpened;
         this.setFixMobileNav();
+        // init mobile mds
+        if(this.hasMobileMds()) {
+            UIHelper.waitForComponent(this, 'mdsMobileRef').subscribe(() => {
+                this.mdsMobileRef.loadMds();
+            });
+        }
         //this.routeSearch();
     }
 
@@ -1129,14 +1140,16 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
             this.updateGroupedRepositories();
         }
     }
-
+    private getActiveMds() {
+        return this.hasMobileMds() ? this.mdsMobileRef : this.mdsDesktopRef;
+    }
     private updateMdsActions() {
         this.savedSearchOptions.addOptions = [];
 
         this.mdsActions = [];
         this.mdsActions.push(
             new OptionItem('SEARCH.APPLY_FILTER', 'search', () => {
-                this.applyParameters(this.mdsRef.saveValues());
+                this.applyParameters(this.getActiveMds().saveValues());
             }),
         );
         if (this.applyMode) {
@@ -1244,7 +1257,7 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
             criterias = criterias.concat(
                 RestSearchService.convertCritierias(
                     properties,
-                    this.mdsRef.currentWidgets,
+                    this.getActiveMds().currentWidgets,
                 ),
             );
         }
@@ -1314,7 +1327,7 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
         if (this.currentRepository == RestConstants.ALL) {
             this.onMdsReady();
         } else {
-            this.mdsRef.loadMds();
+            this.getActiveMds().loadMds();
         }
     }
 
