@@ -97,7 +97,7 @@ export class PermissionsAuthoritiesComponent {
       this.search()
     );
   }
-  @Input() private selected: Organization[]|Group[]|UserSimple[] = null;
+  @Input() private selected: Organization[]|Group[]|UserSimple[] = [];
 
   public _mode: string;
   public addTo: any;
@@ -249,9 +249,6 @@ export class PermissionsAuthoritiesComponent {
     this.loadAuthorities();
   }
   public selection(data: any) {
-    if(data && !data.length) {
-      data = null;
-    }
     this.selected = data;
     this.onSelection.emit(data);
   }
@@ -735,8 +732,8 @@ export class PermissionsAuthoritiesComponent {
     this.offset = 0;
     this.list = [];
     this.selected = [];
+    this.listRef.refreshAvailableOptions();
     this.loadAuthorities();
-    console.log('refresh');
   }
 
   private closeDialog() {

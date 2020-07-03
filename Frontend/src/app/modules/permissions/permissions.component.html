@@ -18,7 +18,7 @@
         ></permissions-authorities>
       </ng-template>
     </mat-tab>
-    <mat-tab label="{{'PERMISSIONS.TAB.GROUP' | translate}}{{selected ? ' ('+selected[0].profile.displayName+')' : ''}}" *ngIf="selected || isAdmin">
+    <mat-tab label="{{'PERMISSIONS.TAB.GROUP' | translate}}{{selected?.length ? ' ('+selected[0].profile.displayName+')' : ''}}" *ngIf="selected || isAdmin">
       <ng-template matTabContent>
         <permissions-authorities
                 [mode]="'GROUP'"
@@ -29,7 +29,7 @@
         ></permissions-authorities>
       </ng-template>
     </mat-tab>
-    <mat-tab label="{{'PERMISSIONS.TAB.USER' | translate}}{{selected ? ' ('+selected[0].profile.displayName+')' : ''}}" *ngIf="selected || isAdmin">
+    <mat-tab label="{{'PERMISSIONS.TAB.USER' | translate}}{{selected?.length ? ' ('+selected[0].profile.displayName+')' : ''}}" *ngIf="selected || isAdmin">
       <ng-template matTabContent>
         <permissions-authorities
                 [mode]="'USER'"
@@ -40,7 +40,7 @@
         ></permissions-authorities>
       </ng-template>
     </mat-tab>
-    <mat-tab label="{{'PERMISSIONS.TAB.DELETE' | translate}}" *ngIf="!selected && isAdmin">
+    <mat-tab label="{{'PERMISSIONS.TAB.DELETE' | translate}}" *ngIf="!selected?.length && isAdmin">
       <permissions-delete></permissions-delete>
     </mat-tab>
   </mat-tab-group>
