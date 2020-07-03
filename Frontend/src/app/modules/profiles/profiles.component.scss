@@ -261,9 +261,10 @@ $path:'../../../assets/images/';
   }
 }
 @media screen and (max-width: ($mobileTabSwitchWidth)) {
-  .profiles {
+  .profiles-wrapper .profiles {
     width: 100%;
     left: 0;
+    padding-bottom: 20px + $mobileTabNavHeight;
   }
 }
 @media only screen and (max-width: $mobileWidth - $mobileStage*2) {
