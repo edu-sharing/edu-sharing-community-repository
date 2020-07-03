@@ -739,14 +739,16 @@ export class ListTableComponent implements EventListener {
         if(this.createLink) {
             return;
         }
-        if (event.pointerType === 'touch' || event.pointerType === 'pen') {
-            this.doubleClickRow.emit(node);
-        } else if (!this.isClickable) {
+        if (!this.isClickable) {
             // Do nothing
         } else if (!this.selectOnClick) {
             // Propagate event
-            this.clickRowSender(node, region);
-            this.refreshAvailableOptions(node);
+            if (event.pointerType === 'touch' || event.pointerType === 'pen') {
+                this.doubleClickRow.emit(node);
+            } else {
+                this.clickRowSender(node, region);
+                this.refreshAvailableOptions(node);
+            }
         } else if (this.hasCheckbox && event.event.ctrlKey) {
             this.toggleSelection(node);
         } else if (
