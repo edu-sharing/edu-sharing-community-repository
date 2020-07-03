@@ -623,6 +623,11 @@ public class MediacenterServiceImpl implements MediacenterService {
         for (String mediacenterId : allMediacenterIds) {
             logger.info("collect differences for " + mediacenterId);
             List<String> sodisLicensedNodes = sodisMediacenterIdNodes.get(mediacenterId);
+            /**
+             * @TODO check if correct:
+             *  when LicenseProvider api does not deliver any datasets prevent
+             *  all permissions will be removed
+             */
             if (sodisLicensedNodes == null || sodisLicensedNodes.size() == 0) {
                 logger.info("leave out mediacenter " + mediacenterId + " cause no licensed nodes found");
                 continue;
