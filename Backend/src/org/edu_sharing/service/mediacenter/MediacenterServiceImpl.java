@@ -72,7 +72,7 @@ public class MediacenterServiceImpl implements MediacenterService {
 
                         if (authorityService.authorityExists("GROUP_" + authorityName)) {
                             logger.info("authority already exists:" + authorityName);
-                            updateMediacenter(authorityName, mz, plz, ort, null, null, null, true);
+                            updateMediacenter("GROUP_" + authorityName, mz, plz, ort, null, null, null, true);
                             continue;
                         }
 
