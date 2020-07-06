@@ -306,7 +306,7 @@ export class WorkspaceShareComponent {
             this.reloadUsages();
         }
         if (this._nodes.length === 1 && this._nodes[0].parent && this._nodes[0].parent.id) {
-            this.nodeApi.getNodePermissions(nodes[0].parent.id).subscribe(
+            this.nodeApi.getNodePermissions(this._nodes[0].parent.id).subscribe(
                 (data: NodePermissions) => {
                     if (data.permissions) {
                         this.inherit = data.permissions.inheritedPermissions;
