@@ -97,7 +97,7 @@ export class PermissionsAuthoritiesComponent {
       this.search()
     );
   }
-  @Input() private selected: Organization[]|Group[]|UserSimple[] = [];
+  @Input() selected: Organization[]|Group[]|UserSimple[] = [];
 
   public _mode: string;
   public addTo: any;

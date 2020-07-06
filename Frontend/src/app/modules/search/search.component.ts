@@ -913,7 +913,7 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
         this.updateSort();
         if (this.searchService.searchResult.length < 1) {
             this.initalized = true;
-            if (!this.currentValues && this.mdsRef) {
+            if (!this.currentValues && this.getActiveMds()) {
                 this.currentValues = this.getMdsValues();
             }
             if (this.searchService.reinit)
