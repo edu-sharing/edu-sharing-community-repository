@@ -1,6 +1,11 @@
 @import "../../core-ui-module/styles/variables";
 
-
+:host ::ng-deep {
+  // fix that cards are over the main nav
+  .mat-tab-body.mat-tab-body-active {
+    z-index: 100;
+  }
+}
 mat-tab-group {
   position: absolute;
   top: $mainnavHeight;
