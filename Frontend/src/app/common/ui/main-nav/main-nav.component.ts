@@ -528,11 +528,11 @@ export class MainNavComponent implements AfterViewInit {
     }
 
     showChat() {
-        return GlobalContainerComponent.instance.rocketchat._data;
+        return GlobalContainerComponent.instance?.rocketchat?._data;
     }
 
     getChatCount() {
-        return GlobalContainerComponent.instance.rocketchat.unread;
+        return GlobalContainerComponent.instance?.rocketchat?.unread;
     }
 
     openChat() {
