@@ -21,6 +21,8 @@ public interface MediacenterService {
 
 	public String getMediacenterAdminGroup(String authorityName);
 
+	public String getMediacenterProxyGroup(String authorityName);
+
 	public void isAllowedToManage(String authorityName);
 
 	public String createMediacenter(String id, String displayName, String postalCode, String city) throws Exception;
