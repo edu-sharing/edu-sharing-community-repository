@@ -117,3 +117,19 @@ $height: 10px;
   font-size: 100%;
   margin: auto 8px;
 }
+
+.selection.small{
+    .ng5-slider {
+        width: 100%;
+    }
+    .addChapter {
+        margin: 10px 0;
+        flex-direction: column;
+        > div{
+            width: 100%;
+        }
+        .startTime, .endTime {
+            display: none;
+        }
+    }
+}

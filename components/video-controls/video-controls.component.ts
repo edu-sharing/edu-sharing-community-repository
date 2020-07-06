@@ -46,7 +46,6 @@ export class VideoControlsComponent {
         this.display_startTime = this.toHHMMSS(this._startTime);
         this.display_endTime = this.toHHMMSS(this._endTime);
     }
-
     @Input() set video(video: HTMLVideoElement) {
         // timeout to make sure node is already bound
         setTimeout(() => {
@@ -78,6 +77,7 @@ export class VideoControlsComponent {
         });
     }
     @Input() node: Node;
+    @Input() size: 'small' | 'large' = 'large';
     @Output() save = new EventEmitter<VideoData>();
 
     markers: any[] = [];

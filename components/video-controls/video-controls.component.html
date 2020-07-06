@@ -7,7 +7,7 @@
   (onChoose)="addToCollection($event)"
   (onCreateCollection)="createCollectionAndAdd($event)"
 ></collection-chooser>
-<div *ngIf="_video && node && !isGuest && hasPermission" class="selection">
+<div *ngIf="_video && node && !isGuest && hasPermission" class="selection" [class.small]="size === 'small'">
   <div class="selectionSlider">
     <ng5-slider [(value)]="_startTime" [(highValue)]="_endTime" [options]="options" (userChangeEnd)="onUserChangeEnd($event)"></ng5-slider>
   </div>
@@ -15,13 +15,13 @@
   <div>
     <form class="addChapter">
       <div class="time">
-        <mat-form-field>
+        <mat-form-field class="startTime">
           <mat-label>{{'START' | translate}}</mat-label>
           <input matInput type="text" name="startTime" id="startTime" [ngModel]="display_startTime" readonly>
         </mat-form-field>
       </div>
       <div class="time">
-        <mat-form-field>
+        <mat-form-field class="endTime">
           <mat-label>{{'STOP' | translate}}</mat-label>
           <input matInput type="text" name="endTime" id="endTime" [ngModel]="display_endTime" readonly>
         </mat-form-field>
