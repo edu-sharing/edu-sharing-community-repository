@@ -57,8 +57,26 @@
 </div>
 -->
 <div class="breadcrumb" [class.breadcrumbMobile]="short=='auto'" [class.breadrumbVisible]="short=='always'" *ngIf="_breadcrumbsAsNodeShort">
-    <button style="margin-left: 20px" mat-button color="primary" *ngIf="home && _breadcrumbsAsNode.length<1" tabindex="0" class="home mat-button-no-uppercase" [class.clickable]="clickable" (click)="openBreadcrumb(0)" (keyup.enter)="openBreadcrumb(0)">{{home | translate}} <i icon iconId="keyboard_arrow_down" class="dropdown-icon"></i></button>
-    <button mat-button color="primary" *ngIf="!home && _breadcrumbsAsNode.length<1" tabindex="0" class="home homeIcon mat-button-no-uppercase" [class.clickable]="clickable" (click)="openBreadcrumb(0)" (keyup.enter)="openBreadcrumb(0)"><i icon iconId="home"></i></button>
-    <button mat-button (click)="openBreadcrumb(_breadcrumbsAsNode.length-1)" *ngIf="_breadcrumbsAsNodeShort.length"><i icon iconId="keyboard_arrow_left" class="breadcrumb-arrow"></i></button>
-    <button mat-button color="primary" *ngIf="_breadcrumbsAsNodeShort.length" class="folder mat-button-no-uppercase" [class.clickable]="clickable" (click)="openBreadcrumb(_breadcrumbsAsNode.length)">{{_breadcrumbsAsNodeShort[_breadcrumbsAsNodeShort.length-1] ? _breadcrumbsAsNodeShort[_breadcrumbsAsNodeShort.length-1].name : ''}}</button>
+    <button style="margin-left: 20px" mat-button color="primary" *ngIf="home && _breadcrumbsAsNode.length<2" tabindex="0" class="home mat-button-no-uppercase" [class.clickable]="clickable" (click)="openBreadcrumb(0)" (keyup.enter)="openBreadcrumb(0)">
+        {{home | translate}}
+        <i *ngIf="_breadcrumbsAsNode.length < 1" icon iconId="keyboard_arrow_down" class="dropdown-icon"></i>
+        <i *ngIf="_breadcrumbsAsNode.length >= 1" icon iconId="keyboard_arrow_right" class="breadcrumb-arrow"></i>
+    </button>
+    <button mat-button color="primary" *ngIf="!home && _breadcrumbsAsNode.length < 2" tabindex="0" class="home homeIcon mat-button-no-uppercase" [class.clickable]="clickable" (click)="openBreadcrumb(0)" (keyup.enter)="openBreadcrumb(0)"><i icon iconId="home"></i></button>
+    <app-node-url
+            *ngIf="_breadcrumbsAsNodeShort.length > 1"
+            [node]="_breadcrumbsAsNodeShort[_breadcrumbsAsNodeShort.length-2]"
+            [unclickable]="!createLink"
+            class="mat-button-no-uppercase"
+            (click)="openBreadcrumb(_breadcrumbsAsNode.length-1)"
+    ><button mat-button><i icon iconId="keyboard_arrow_left" class="breadcrumb-arrow"></i></button></app-node-url>
+    <app-node-url
+            *ngIf="_breadcrumbsAsNodeShort.length"
+            [node]="_breadcrumbsAsNodeShort[_breadcrumbsAsNodeShort.length-1]"
+            [unclickable]="!createLink"
+            (click)="openBreadcrumb(_breadcrumbsAsNode.length)">
+        <button mat-button color="primary" class="mat-button-no-uppercase">
+            {{_breadcrumbsAsNodeShort[_breadcrumbsAsNodeShort.length-1] ? _breadcrumbsAsNodeShort[_breadcrumbsAsNodeShort.length-1].name : ''}}
+        </button>
+    </app-node-url>
 </div>
