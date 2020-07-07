@@ -36,32 +36,35 @@ export class NodeUrlComponent {
     };
   }
   get(mode: 'routerLink' | 'queryParams'): any {
-    if (!this._node) {
+    return NodeUrlComponent.getInfo(mode, this._node);
+  }
+  static getInfo(mode: 'routerLink' | 'queryParams', node: Node){
+    if (!node) {
       return null;
     }
     let data: { routerLink: string, queryParams: Params } = null;
-    if (NodeHelper.isNodeCollection(this._node)) {
+    if (NodeHelper.isNodeCollection(node)) {
       data = {
         routerLink: UIConstants.ROUTER_PREFIX + 'collections',
-        queryParams: { id: this._node.ref.id },
+        queryParams: { id: node.ref.id },
       };
     } else {
-      if (this._node.isDirectory) {
+      if (node.isDirectory) {
         data = {
           routerLink: UIConstants.ROUTER_PREFIX + 'workspace',
-          queryParams: { id: this._node.ref.id },
+          queryParams: { id: node.ref.id },
         };
-      } else if(this._node.ref) {
-        const fromeHome = RestNetworkService.isFromHomeRepo(this._node);
+      } else if(node.ref) {
+        const fromeHome = RestNetworkService.isFromHomeRepo(node);
         data = {
-          routerLink: UIConstants.ROUTER_PREFIX + 'render/' + this._node.ref.id,
+          routerLink: UIConstants.ROUTER_PREFIX + 'render/' + node.ref.id,
           queryParams: {
-            repository: fromeHome ? null : this._node.ref.repo,
+            repository: fromeHome ? null : node.ref.repo,
           },
         };
       }
     }
-    if(data === null){
+    if(data === null) {
       return '';
     }
     if(mode === 'routerLink') {
