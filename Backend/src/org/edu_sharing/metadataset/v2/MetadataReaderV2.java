@@ -305,6 +305,9 @@ public class MetadataReaderV2 {
 					//widget.setPlaceholder(value);
 					widget.setPlaceholder(getTranslation(widget,value));
 				}
+				if(name.equals("maxlength")){
+					widget.setMaxlength(Integer.parseInt(value));
+				}
 				if(name.equals("bottomCaption")){
 					widget.setBottomCaption(getTranslation(widget,value));
 				}
