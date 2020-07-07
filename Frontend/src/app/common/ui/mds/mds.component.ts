@@ -1384,6 +1384,9 @@ export class MdsComponent{
     if(widget.placeholder){
       html+=' placeholder="'+widget.placeholder+'"';
     }
+    if(widget.maxlength){
+      html+=' maxlength="'+widget.maxlength+'"';
+    }
     html += '></textarea>';
     return html;
   }
