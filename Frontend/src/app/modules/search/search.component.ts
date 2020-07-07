@@ -568,14 +568,6 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
                 : node.ref.repo,
             comments: event.source == 'comments' ? true : null,
         };
-        this.temporaryStorageService.set(
-            TemporaryStorageService.NODE_RENDER_PARAMETER_LIST,
-            this.searchService.searchResult,
-        );
-        this.temporaryStorageService.set(
-            TemporaryStorageService.NODE_RENDER_PARAMETER_ORIGIN,
-            'search',
-        );
         this.router.navigate(
             [UIConstants.ROUTER_PREFIX + 'render', node.ref.id],
             { queryParams: queryParams, state: {
