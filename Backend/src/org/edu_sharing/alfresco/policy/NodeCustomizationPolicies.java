@@ -3,11 +3,7 @@ package org.edu_sharing.alfresco.policy;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.Serializable;
-import java.util.Arrays;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.Map;
+import java.util.*;
 
 import javax.imageio.ImageIO;
 import javax.imageio.ImageReader;
