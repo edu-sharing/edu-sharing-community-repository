@@ -34,6 +34,7 @@
     [hasCheckbox]="false"
     [hasHeading]="false"
     [isClickable]="true"
+    [createLink]="true"
     [mainNav]="mainNavRef"
     [scope]="SCOPES.Oer"
     [viewType]="2"
@@ -59,11 +60,10 @@
       [hasCheckbox]="false"
       [hasHeading]="false"
       [isClickable]="true"
+      [createLink]="true"
       [viewType]="1"
       [scrollWindow]="true"
-      (clickRow)="click($event.node)"
       (onUpdateOptions)="updateOptions(MATERIALS,$event)"
-      (doubleClickRow)="click($event.node)"
       (loadMore)="loadMore(MATERIALS)"
       [isLoading]="loading[MATERIALS]"></listTable>
   </div>
@@ -84,10 +84,9 @@
                [hasCheckbox]="false"
                [hasHeading]="false"
                [isClickable]="true"
+               [createLink]="true"
                [viewType]="1"
                [scrollWindow]="true"
-               (clickRow)="click($event.node)"
-               (doubleClickRow)="click($event.node)"
                (loadMore)="loadMore(TOOLS)"
                [isLoading]="loading[TOOLS]"></listTable>
   </div>
