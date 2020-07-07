@@ -354,7 +354,7 @@ export class MainNavComponent implements AfterViewInit {
     }
 
     toggleMenuSidebar() {
-        if (this.canOpen) {
+        if (this.canOpen && this.mainMenuSidebar) {
             this.mainMenuSidebar.toggle();
         }
     }

@@ -449,9 +449,14 @@ export class WorkspaceMainComponent implements EventListener, OnDestroy {
             this.nodeDisplayedVersion = event.version;
             */
             this.currentNode = list[0];
-            this.storage.set(TemporaryStorageService.NODE_RENDER_PARAMETER_LIST, this.currentNodes);
-            this.storage.set(TemporaryStorageService.NODE_RENDER_PARAMETER_ORIGIN, 'workspace');
-            this.router.navigate([UIConstants.ROUTER_PREFIX + 'render', list[0].ref.id, list[0].version ? list[0].version : '']);
+            this.router.navigate([UIConstants.ROUTER_PREFIX + 'render', list[0].ref.id, list[0].version ? list[0].version : ''],
+            {
+                    state: {
+                        nodes: this.currentNodes,
+                        scope: 'workspace'
+                    }
+                }
+            );
         }
     }
     // returns either the passed node as list, or the current selection if the passed node is invalid (actionbar)

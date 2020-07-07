@@ -821,14 +821,6 @@ export class CollectionsMainComponent {
 
                 // remember the scroll Y before displaying content
                 this.lastScrollY = window.scrollY;
-                this.temporaryStorageService.set(
-                    TemporaryStorageService.NODE_RENDER_PARAMETER_LIST,
-                    this.collectionContent.references,
-                );
-                this.temporaryStorageService.set(
-                    TemporaryStorageService.NODE_RENDER_PARAMETER_ORIGIN,
-                    'collections',
-                );
                 this.router.navigate([
                     UIConstants.ROUTER_PREFIX + 'render',
                     content.ref.id,

@@ -212,17 +212,6 @@ export class OerComponent {
        this.options[mode].push(download);
      }
    }
-   private click(node:Node) {
-    this.displayedNode=node;
-    if(node.collection) {
-      this.router.navigate([UIConstants.ROUTER_PREFIX+'collections'],{queryParams:{id:node.ref.id,mainnav:true}});
-    }
-    else {
-      this.storage.set(TemporaryStorageService.NODE_RENDER_PARAMETER_LIST, this.nodes[this.MATERIALS]);
-        this.storage.set(TemporaryStorageService.NODE_RENDER_PARAMETER_ORIGIN,'oer');
-        this.router.navigate([UIConstants.ROUTER_PREFIX+'render', node.ref.id]);
-    }
-   }
   private downloadNode(node:Node=this.displayedNode) {
     window.open(node.downloadUrl);
   }

@@ -133,7 +133,8 @@ export class NodeRenderComponent implements EventListener {
           this.route.params.subscribe((params: Params) => {
             if(params.node) {
               this.isRoute=true;
-              this.list = this.temporaryStorageService.get(TemporaryStorageService.NODE_RENDER_PARAMETER_LIST);
+              console.log('state', window.history.state);
+              this.list = window.history.state?.nodes;
               this.connector.isLoggedIn().subscribe((data:LoginResult)=> {
                 this.isSafe=data.currentScope==RestConstants.SAFE_SCOPE;
                 if(params.version) {
@@ -253,7 +254,7 @@ export class NodeRenderComponent implements EventListener {
             this.router.navigate([UIConstants.ROUTER_PREFIX+'workspace']);
           }
           else {
-            if(this.temporaryStorageService.get(TemporaryStorageService.NODE_RENDER_PARAMETER_ORIGIN)=='search') {
+            if(window.history.state?.scope === 'search') {
                 this.searchService.reinit = false;
             }
             NodeRenderComponent.close(this.location);
