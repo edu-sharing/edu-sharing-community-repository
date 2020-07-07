@@ -1,6 +1,15 @@
 import {
-    Component, OnInit, OnDestroy, Input, EventEmitter, Output, ViewChild, ElementRef,
-    HostListener, ChangeDetectorRef, ApplicationRef, NgZone, ComponentFactoryResolver, ViewContainerRef, EmbeddedViewRef
+    ChangeDetectorRef,
+    Component,
+    ComponentFactoryResolver,
+    ElementRef,
+    EventEmitter,
+    HostListener,
+    Input,
+    NgZone,
+    Output,
+    ViewChild,
+    ViewContainerRef
 } from '@angular/core';
 import {Toast} from '../../../core-ui-module/toast';
 import {ActivatedRoute, Params, Router} from '@angular/router';
@@ -15,19 +24,32 @@ import {Location} from '@angular/common';
 import {NodeHelper} from '../../../core-ui-module/node-helper';
 import {UIConstants} from '../../../core-module/ui/ui-constants';
 import {SearchService} from '../../../modules/search/search.service';
-import {Helper} from '../../../core-module/rest/helper';
 import {ActionbarHelperService} from '../../services/actionbar-helper';
 import {MainNavComponent} from '../main-nav/main-nav.component';
 import {HttpClient} from '@angular/common/http';
 import {
-    ConfigurationHelper, ConfigurationService,
+    ConfigurationHelper,
+    ConfigurationService,
     EventListener,
-    ConnectorList, FrameEventsService, ListItem,
-    LoginResult, NodeWrapper, RestConnectorService,
-    RestConnectorsService, Node, NodeList,
-    RestConstants, RestHelper, RestMdsService, RestIamService, RestNodeService, RestSearchService,
-    RestToolService, SessionStorageService,
-    TemporaryStorageService, RestUsageService, RestNetworkService, Mds
+    EventType,
+    FrameEventsService,
+    ListItem,
+    LoginResult,
+    Node,
+    NodeList,
+    RestConnectorService,
+    RestConnectorsService,
+    RestConstants,
+    RestHelper,
+    RestIamService,
+    RestMdsService,
+    RestNetworkService,
+    RestNodeService,
+    RestSearchService,
+    RestToolService,
+    RestUsageService,
+    SessionStorageService,
+    TemporaryStorageService
 } from '../../../core-module/core.module';
 import {MdsHelper} from '../../../core-module/rest/mds-helper';
 import {ListTableComponent} from '../../../core-ui-module/components/list-table/list-table.component';
@@ -35,9 +57,9 @@ import {SpinnerComponent} from '../../../core-ui-module/components/spinner/spinn
 import {CommentsListComponent} from '../../../modules/management-dialogs/node-comments/comments-list/comments-list.component';
 import {GlobalContainerComponent} from '../global-container/global-container.component';
 import {VideoControlsComponent} from '../../../core-ui-module/components/video-controls/video-controls.component';
-import {RouterHelper} from '../../../core-ui-module/router.helper';
 import {ActionbarComponent} from '../actionbar/actionbar.component';
 import {OPTIONS_HELPER_CONFIG, OptionsHelperService} from '../../options-helper';
+import {RestTrackingService} from "../../../core-module/rest/services/rest-tracking.service";
 
 declare var jQuery:any;
 declare var window: any;
@@ -64,6 +86,7 @@ export class NodeRenderComponent implements EventListener {
     }
     constructor(
       private translate : TranslateService,
+      private tracking : RestTrackingService,
       private location: Location,
       private searchService : SearchService,
       private connector : RestConnectorService,
@@ -384,7 +407,15 @@ export class NodeRenderComponent implements EventListener {
             return;
         }
         try {
-            videoElement = document.getElementsByClassName('edusharing_rendering_content_wrapper')[0].getElementsByTagName('video')[0];
+            videoElement = document.querySelector('.edusharing_rendering_content_wrapper video');
+            if(!videoElement){
+                throw new Error();
+            }
+            const listener = () => {
+                this.tracking.trackEvent(EventType.VIEW_MATERIAL_PLAY_MEDIA, this._node.ref.id).subscribe(() => {})
+                videoElement.removeEventListener('play', listener);
+            };
+            videoElement.addEventListener('play', listener);
             target = document.createElement('div');
             videoElement.parentElement.appendChild(target);
         } catch (e) {
