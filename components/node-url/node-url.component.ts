@@ -14,6 +14,7 @@ import {RestNetworkService} from "../../../core-module/rest/services/rest-networ
     </a>
     <a *ngIf="!unclickable"
       [routerLink]="get('routerLink')"
+      [state]="getState()"
       [queryParams]="get('queryParams')">
       <ng-container *ngTemplateOutlet="content"></ng-container>
     </a>`,
@@ -23,8 +24,16 @@ export class NodeUrlComponent {
   @Input() set node (node: Node) {
     this._node = node;
   }
+  @Input() nodes: Node[];
+  @Input() scope: string;
   @Input() unclickable: boolean;
   constructor() {
+  }
+  getState() {
+    return {
+      nodes: this.nodes,
+      scope: this.scope
+    };
   }
   get(mode: 'routerLink' | 'queryParams'): any {
     if (!this._node) {
