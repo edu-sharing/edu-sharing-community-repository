@@ -263,7 +263,8 @@ export class AdminStatisticsComponent {
         Math.max(
             stat.counts.VIEW_MATERIAL || 0,
             stat.counts.VIEW_MATERIAL_EMBEDDED || 0,
-            stat.counts.DOWNLOAD_MATERIAL || 0)).
+            stat.counts.DOWNLOAD_MATERIAL || 0,
+            stat.counts.VIEW_MATERIAL_PLAY_MEDIA || 0)).
         reduce((a, b) => Math.max(a, b)) : 0;
     if(dataUser) {
       max = Math.max(max, dataUser.map((stat) => stat.counts.LOGIN_USER_SESSION || 0).reduce((a, b,) => Math.max(a, b)));
@@ -287,6 +288,11 @@ export class AdminStatisticsComponent {
           yAxisID: 'y-axis-download',
           backgroundColor: 'rgb(40,146,192)',
           data: dataNode.map((stat) => stat.counts.DOWNLOAD_MATERIAL ? stat.counts.DOWNLOAD_MATERIAL : 0)
+        }, {
+            label: this.translate.instant('ADMIN.STATISTICS.VIEWS_PLAY_MEDIA'),
+            yAxisID: 'y-axis-download',
+            backgroundColor: 'rgb(192,173,40)',
+            data: dataNode.map((stat) => stat.counts.VIEW_MATERIAL_PLAY_MEDIA ? stat.counts.VIEW_MATERIAL_PLAY_MEDIA : 0)
         }],
       };
     } else {
