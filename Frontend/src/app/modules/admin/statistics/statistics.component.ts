@@ -30,6 +30,7 @@ export class AdminStatisticsComponent {
   private groupedChartData: { node: NodeStatistics[]; user: Statistics[] };
   nodesPermission: boolean;
   userPermission: boolean;
+  finishedPreload = false;
   @Input() set mediacenter(mediacenter: any){
     this._mediacenter = mediacenter;
     this.refresh();
@@ -208,6 +209,7 @@ export class AdminStatisticsComponent {
       this.nodesPermission = this.connector.hasToolPermissionInstant(RestConstants.TOOLPERMISSION_GLOBAL_STATISTICS_NODES);
       this.userPermission = this.connector.hasToolPermissionInstant(RestConstants.TOOLPERMISSION_GLOBAL_STATISTICS_USER);
       this.storage.get('admin_statistics_properties', 'cm:name\ncclom:general_title\ncclom:general_keyword').subscribe((p) => this.exportProperties = p);
+      this.finishedPreload = true;
       this.refresh();
     }
   refresh() {
@@ -218,6 +220,9 @@ export class AdminStatisticsComponent {
   }
 
   private refreshGroups() {
+    if(!this.finishedPreload) {
+      return;
+    }
     this.groupedLoading = true;
     this.statistics.getStatisticsNode(this._groupedStart, new Date(this._groupedEnd.getTime() + AdminStatisticsComponent.DAY_OFFSET), this._groupedMode, this.getMediacenter()).subscribe((dataNode) => {
       if (this._groupedMode !== 'None') {
@@ -368,6 +373,9 @@ export class AdminStatisticsComponent {
   }
 
   private refreshNodes() {
+    if(!this.finishedPreload) {
+      return;
+    }
     this.nodes = [];
     this.nodesLoading = true;
     this.statistics.getStatisticsNode(this._nodesStart, new Date(this._nodesEnd.getTime() + AdminStatisticsComponent.DAY_OFFSET), 'Node', this.getMediacenter()).subscribe((data) => {
@@ -393,6 +401,9 @@ export class AdminStatisticsComponent {
     return mode;
   }
   private refreshSingle() {
+    if(!this.finishedPreload) {
+      return;
+    }
     this.singleDataRows = null;
     this.singleLoading = true;
     const mode = this.getValidMode(this._singleMode);
@@ -417,8 +428,12 @@ export class AdminStatisticsComponent {
   }
 
   private refreshCustomGroups() {
-    if (!this.customGroups)
+    if(!this.finishedPreload) {
       return;
+    }
+    if (!this.customGroups) {
+      return;
+    }
     this.customGroupData = null;
     this.customGroupLoading = true;
     this.customGroupRows = [];
