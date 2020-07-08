@@ -80,7 +80,7 @@
                  [class.noPermissions]="noPermissions(node)"
                  [style.backgroundColor]="isCollection(node) ? (viewType==2 ? node.preview.isIcon ? getCollectionColor(node) : '#000' : getCollectionColor(node)) : null"
                  [style.border-color]="isCollection(node) ? getCollectionColor(node) : null"
-                 [class.dark-color]="isCollection(node) && node.preview.isIcon && isBrightColorCollection(getCollectionColor(node))"
+                 [class.dark-color]="isCollection(node) && isBrightColorCollection(getCollectionColor(node))"
                  (appDistinctClick)="onDistinctClick($event, node)"
                  (dblclick)="doubleClick(node)"
                  (contextmenu)="contextMenu($event,node)"
