@@ -154,9 +154,18 @@ export class OerComponent {
 
 
      this.searchService.search(criterias,[], {sortBy:[
-            RestConstants.CCM_PROP_COLLECTION_PINNED_STATUS,
-             RestConstants.CCM_PROP_COLLECTION_PINNED_ORDER,
-             RestConstants.CM_MODIFIED_DATE],sortAscending:[false,true,false],offset:this.offsets[this.COLLECTIONS],propertyFilter:[RestConstants.ALL]},RestConstants.CONTENT_TYPE_COLLECTIONS).subscribe(
+                RestConstants.CCM_PROP_COLLECTION_PINNED_STATUS,
+                RestConstants.CCM_PROP_COLLECTION_PINNED_ORDER,
+                RestConstants.CM_MODIFIED_DATE],
+                sortAscending:[false,true,false],
+                offset:this.offsets[this.COLLECTIONS],
+                propertyFilter:[RestConstants.ALL]},
+        RestConstants.CONTENT_TYPE_COLLECTIONS,
+        RestConstants.HOME_REPOSITORY,
+        RestConstants.DEFAULT,
+        [RestConstants.ALL],
+         'collections'
+     ).subscribe(
        (data : NodeList) => {
          if(this.currentQuery !== originalQuery)
            return;
