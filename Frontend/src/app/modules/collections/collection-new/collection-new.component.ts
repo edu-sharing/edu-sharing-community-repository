@@ -33,6 +33,7 @@ import {UIHelper} from "../../../core-ui-module/ui-helper";
 import {GlobalContainerComponent} from "../../../common/ui/global-container/global-container.component";
 import {AuthorityNamePipe} from "../../../core-ui-module/pipes/authority-name.pipe";
 import {BridgeService} from '../../../core-bridge-module/bridge.service';
+import {WorkspaceShareComponent} from "../../workspace/share/share.component";
 
 // component class
 @Component({
@@ -43,6 +44,7 @@ import {BridgeService} from '../../../core-bridge-module/bridge.service';
 export class CollectionNewComponent {
   @ViewChild('mainNav') mainNavRef: MainNavComponent;
   @ViewChild('mds') mds : MdsComponent;
+  @ViewChild('share') shareRef : WorkspaceShareComponent;
   public hasCustomScope: boolean;
   public COLORS:string[];
   public DEFAULT_COLORS:string[]=['#975B5D','#692426','#E6B247','#A89B39','#699761','#32662A','#60998F','#29685C','#759CB7','#537997','#976097','#692869'];
@@ -254,7 +256,10 @@ export class CollectionNewComponent {
         this.editPermissionsDummy.aspects=[RestConstants.CCM_ASPECT_COLLECTION];
         this.editPermissionsDummy.isDirectory=true;
       }
+      console.log(this.permissions);
       this.showPermissions=true;
+      // update state after changing different bindings
+      UIHelper.waitForComponent(this, 'shareRef').subscribe(()=> this.shareRef.refresh());
     }
     isNewCollection() : boolean {
         return this.editId==null;

@@ -22,6 +22,7 @@ import {MainNavComponent} from '../../common/ui/main-nav/main-nav.component';
 import {MdsHelper} from '../../core-module/rest/mds-helper';
 import {GlobalContainerComponent} from '../../common/ui/global-container/global-container.component';
 import {Helper} from '../../core-module/rest/helper';
+import {NodeUrlComponent} from "../../core-ui-module/components/node-url/node-url.component";
 
 
 
@@ -153,9 +154,18 @@ export class OerComponent {
 
 
      this.searchService.search(criterias,[], {sortBy:[
-            RestConstants.CCM_PROP_COLLECTION_PINNED_STATUS,
-             RestConstants.CCM_PROP_COLLECTION_PINNED_ORDER,
-             RestConstants.CM_MODIFIED_DATE],sortAscending:[false,true,false],offset:this.offsets[this.COLLECTIONS],propertyFilter:[RestConstants.ALL]},RestConstants.CONTENT_TYPE_COLLECTIONS).subscribe(
+                RestConstants.CCM_PROP_COLLECTION_PINNED_STATUS,
+                RestConstants.CCM_PROP_COLLECTION_PINNED_ORDER,
+                RestConstants.CM_MODIFIED_DATE],
+                sortAscending:[false,true,false],
+                offset:this.offsets[this.COLLECTIONS],
+                propertyFilter:[RestConstants.ALL]},
+        RestConstants.CONTENT_TYPE_COLLECTIONS,
+        RestConstants.HOME_REPOSITORY,
+        RestConstants.DEFAULT,
+        [RestConstants.ALL],
+         'collections'
+     ).subscribe(
        (data : NodeList) => {
          if(this.currentQuery !== originalQuery)
            return;
@@ -202,26 +212,21 @@ export class OerComponent {
    private loadMore(mode:number) {
 
    }
+   private openNode(node: Node){
+      NodeUrlComponent.getInfo('routerLink', node)
+      this.router.navigate([NodeUrlComponent.getInfo('routerLink', node)],
+          {queryParams: (NodeUrlComponent.getInfo('queryParams', node) as any)}
+      );
+   }
    private updateOptions(mode:number,node:Node=null) {
      this.options[mode]=[];
      if(mode==this.MATERIALS) {
-       this.options[mode].push(new OptionItem('INFORMATION', 'info_outline', (node: Node) => this.click(node)));
+       this.options[mode].push(new OptionItem('INFORMATION', 'info_outline', (node: Node) => this.openNode(node)));
        const download = new OptionItem('DOWNLOAD', 'cloud_download', (node: Node) => this.downloadNode(node));
        if (node && node.mediatype == 'link')
          download.isEnabled = false;
        this.options[mode].push(download);
      }
-   }
-   private click(node:Node) {
-    this.displayedNode=node;
-    if(node.collection) {
-      this.router.navigate([UIConstants.ROUTER_PREFIX+'collections'],{queryParams:{id:node.ref.id,mainnav:true}});
-    }
-    else {
-      this.storage.set(TemporaryStorageService.NODE_RENDER_PARAMETER_LIST, this.nodes[this.MATERIALS]);
-        this.storage.set(TemporaryStorageService.NODE_RENDER_PARAMETER_ORIGIN,'oer');
-        this.router.navigate([UIConstants.ROUTER_PREFIX+'render', node.ref.id]);
-    }
    }
   private downloadNode(node:Node=this.displayedNode) {
     window.open(node.downloadUrl);

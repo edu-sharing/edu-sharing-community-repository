@@ -30,6 +30,7 @@ export class AdminStatisticsComponent {
   private groupedChartData: { node: NodeStatistics[]; user: Statistics[] };
   nodesPermission: boolean;
   userPermission: boolean;
+  finishedPreload = false;
   @Input() set mediacenter(mediacenter: any){
     this._mediacenter = mediacenter;
     this.refresh();
@@ -208,6 +209,7 @@ export class AdminStatisticsComponent {
       this.nodesPermission = this.connector.hasToolPermissionInstant(RestConstants.TOOLPERMISSION_GLOBAL_STATISTICS_NODES);
       this.userPermission = this.connector.hasToolPermissionInstant(RestConstants.TOOLPERMISSION_GLOBAL_STATISTICS_USER);
       this.storage.get('admin_statistics_properties', 'cm:name\ncclom:general_title\ncclom:general_keyword').subscribe((p) => this.exportProperties = p);
+      this.finishedPreload = true;
       this.refresh();
     }
   refresh() {
@@ -218,6 +220,9 @@ export class AdminStatisticsComponent {
   }
 
   private refreshGroups() {
+    if(!this.finishedPreload) {
+      return;
+    }
     this.groupedLoading = true;
     this.statistics.getStatisticsNode(this._groupedStart, new Date(this._groupedEnd.getTime() + AdminStatisticsComponent.DAY_OFFSET), this._groupedMode, this.getMediacenter()).subscribe((dataNode) => {
       if (this._groupedMode !== 'None') {
@@ -263,7 +268,8 @@ export class AdminStatisticsComponent {
         Math.max(
             stat.counts.VIEW_MATERIAL || 0,
             stat.counts.VIEW_MATERIAL_EMBEDDED || 0,
-            stat.counts.DOWNLOAD_MATERIAL || 0)).
+            stat.counts.DOWNLOAD_MATERIAL || 0,
+            stat.counts.VIEW_MATERIAL_PLAY_MEDIA || 0)).
         reduce((a, b) => Math.max(a, b)) : 0;
     if(dataUser) {
       max = Math.max(max, dataUser.map((stat) => stat.counts.LOGIN_USER_SESSION || 0).reduce((a, b,) => Math.max(a, b)));
@@ -287,6 +293,11 @@ export class AdminStatisticsComponent {
           yAxisID: 'y-axis-download',
           backgroundColor: 'rgb(40,146,192)',
           data: dataNode.map((stat) => stat.counts.DOWNLOAD_MATERIAL ? stat.counts.DOWNLOAD_MATERIAL : 0)
+        }, {
+            label: this.translate.instant('ADMIN.STATISTICS.VIEWS_PLAY_MEDIA'),
+            yAxisID: 'y-axis-download',
+            backgroundColor: 'rgb(192,173,40)',
+            data: dataNode.map((stat) => stat.counts.VIEW_MATERIAL_PLAY_MEDIA ? stat.counts.VIEW_MATERIAL_PLAY_MEDIA : 0)
         }],
       };
     } else {
@@ -362,6 +373,9 @@ export class AdminStatisticsComponent {
   }
 
   private refreshNodes() {
+    if(!this.finishedPreload) {
+      return;
+    }
     this.nodes = [];
     this.nodesLoading = true;
     this.statistics.getStatisticsNode(this._nodesStart, new Date(this._nodesEnd.getTime() + AdminStatisticsComponent.DAY_OFFSET), 'Node', this.getMediacenter()).subscribe((data) => {
@@ -387,6 +401,9 @@ export class AdminStatisticsComponent {
     return mode;
   }
   private refreshSingle() {
+    if(!this.finishedPreload) {
+      return;
+    }
     this.singleDataRows = null;
     this.singleLoading = true;
     const mode = this.getValidMode(this._singleMode);
@@ -411,8 +428,12 @@ export class AdminStatisticsComponent {
   }
 
   private refreshCustomGroups() {
-    if (!this.customGroups)
+    if(!this.finishedPreload) {
       return;
+    }
+    if (!this.customGroups) {
+      return;
+    }
     this.customGroupData = null;
     this.customGroupLoading = true;
     this.customGroupRows = [];
@@ -442,12 +463,13 @@ export class AdminStatisticsComponent {
             const authority = result.map((entry) => ((this.customUnfold == 'authority_organization' ? entry.authority.organization : entry.authority.mediacenter as any[])))
             .reduce((a, b) => a.concat(b))
             .filter((a) => a.authorityName == key);
-            if (authority.length)
+            if (authority.length) {
               this.customGroupLabels[key] = new AuthorityNamePipe(this.translate).transform(authority[0], null);
+            }
             return key;
           });
         }
-        this.customGroupRows = this.customGroupRows.concat(set as any);
+        this.customGroupRows = Array.from(new Set(this.customGroupRows.concat(set as any)));
       }
       if (result.length) {
         this.customGroupData = result.map((entry) => {
@@ -460,7 +482,7 @@ export class AdminStatisticsComponent {
               if (obj) {
                 displayValue = obj.map((group: any) => {
                   return new AuthorityNamePipe(this.translate).transform(group, null);
-                }).join(' ');
+                }).join(', ');
               }
               else{
                 displayValue = '';

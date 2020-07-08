@@ -1564,6 +1564,7 @@ export class MdsComponent {
       html+='>'+option.caption+'</option>';
     }
     html+='</select>';
+    html+=this.addBottomCaption(widget);
     return html;
   }
   private renderMultioptionWidget(widget:any,attr:string){

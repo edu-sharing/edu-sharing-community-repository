@@ -87,6 +87,9 @@
             "null": "Kein / Normale Gruppe",
             "EDITORIAL": "Redaktionsgruppe",
             "TEACHER": "Lehrer-Gruppe",
+            "MEDIA_CENTER": "Medienzentrum",
+            "MEDIA_CENTER_PROXY": "Proxy-Gruppe (Medienzentrum)",
+            "MEDIACENTER_ADMINISTRATORS": "Administrationsgruppe (Medienzentrum)",
             "ORG_ADMINISTRATORS": "Administrationsgruppe"
         },
         "SCOPE_TYPE": {

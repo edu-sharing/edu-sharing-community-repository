@@ -335,6 +335,7 @@
             "VIEWS": "Object accesses",
             "VIEWS_EMBEDDED": "Object Views (Remote)",
             "DOWNLOADS": "Object downloads",
+            "VIEWS_PLAY_MEDIA": "media playbacks",
             "USER_LOGINS": "User logins",
             "GROUP_BY": "Group by",
             "FROM": "Start time",
@@ -368,6 +369,7 @@
                 "LOGOUT_USER_REGULAR": "Logout",
                 "LOGOUT_USER_TIMEOUT": "Logout (Timeout)",
                 "VIEW_MATERIAL": "Material viewed",
+                "VIEW_MATERIAL_PLAY_MEDIA": "Material played",
                 "VIEW_MATERIAL_EMBEDDED": "Material viewed (Remote)",
                 "DOWNLOAD_MATERIAL": "Material downloaded"
             }

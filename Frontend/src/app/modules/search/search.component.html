@@ -80,7 +80,7 @@
         height="xxlarge"
         [isCancelable]="true"
         (onCancel)="toggleSidenav()">
-        <mds #mds
+        <mds #mdsMobile
              [class.display-none]="currentRepository=='-all-'"
              [groupId]="queryId"
              [repository]="currentRepository"
@@ -122,7 +122,7 @@
      </div>
 
 
-      <mds #mds
+      <mds #mdsDesktop
        [class.display-none]="currentRepository=='-all-'"
         [groupId]="queryId"
         [repository]="currentRepository"

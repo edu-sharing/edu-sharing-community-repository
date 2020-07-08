@@ -238,7 +238,13 @@ public class MediacenterApi {
 			}
 			System.out.println(query);
 			searchToken.setLuceneString(query);
-			searchToken.setAuthorityScope(Arrays.asList(new String[] {mediacenter}));
+
+			String authorityScope = MediacenterServiceFactory.getLocalService().getMediacenterProxyGroup(mediacenter);
+			if(authorityScope == null){
+				throw new Exception("No mediacenter proxy group found.");
+			}
+
+			searchToken.setAuthorityScope(Arrays.asList(new String[] {authorityScope}));
 			
     		NodeSearch search = NodeDao.search(repoDao,searchToken);
     		List<Node> data = new ArrayList<Node>();

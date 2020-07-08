@@ -23,6 +23,7 @@ import org.edu_sharing.alfresco.service.AuthorityService;
 import org.edu_sharing.alfresco.service.OrganisationService;
 import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
 import org.edu_sharing.repository.client.tools.CCConstants;
+import org.edu_sharing.repository.server.importer.OAIPMHLOMImporter;
 import org.edu_sharing.repository.server.jobs.helper.NodeRunner;
 import org.edu_sharing.repository.server.tools.ApplicationInfoList;
 import org.edu_sharing.restservices.shared.Mediacenter;
@@ -72,7 +73,7 @@ public class MediacenterServiceImpl implements MediacenterService {
 
                         if (authorityService.authorityExists("GROUP_" + authorityName)) {
                             logger.info("authority already exists:" + authorityName);
-                            updateMediacenter(authorityName, mz, plz, ort, null, null, null, true);
+                            updateMediacenter("GROUP_" + authorityName, mz, plz, ort, null, null, null, true);
                             continue;
                         }
 
@@ -595,7 +596,17 @@ public class MediacenterServiceImpl implements MediacenterService {
         logger.info("cache mediacenter nodes");
 
         Repository repositoryHelper = (Repository) applicationContext.getBean("repositoryHelper");
-        HashMap<String, NodeRef> importedNodes = getImportedNodes(repositoryHelper.getCompanyHome().getId());
+        String impFolderId = null;
+        for(ChildAssociationRef ref : nodeService.getChildAssocs(repositoryHelper.getCompanyHome())){
+            if(OAIPMHLOMImporter.FOLDER_NAME_IMPORTED_OBJECTS.equals(nodeService.getProperty(ref.getChildRef(),ContentModel.PROP_NAME))){
+                impFolderId = ref.getChildRef().getId();
+            }
+        }
+        if(impFolderId == null){
+            logger.error("no imported objects folder found");
+            return;
+        }
+        HashMap<String, NodeRef> importedNodes = getImportedNodes(impFolderId);
 
 
         HashMap<String, List<String>> sodisMediacenterIdNodes = new HashMap<>();
@@ -612,6 +623,11 @@ public class MediacenterServiceImpl implements MediacenterService {
         for (String mediacenterId : allMediacenterIds) {
             logger.info("collect differences for " + mediacenterId);
             List<String> sodisLicensedNodes = sodisMediacenterIdNodes.get(mediacenterId);
+            /**
+             * @TODO check if correct:
+             *  when LicenseProvider api does not deliver any datasets prevent
+             *  all permissions will be removed
+             */
             if (sodisLicensedNodes == null || sodisLicensedNodes.size() == 0) {
                 logger.info("leave out mediacenter " + mediacenterId + " cause no licensed nodes found");
                 continue;
