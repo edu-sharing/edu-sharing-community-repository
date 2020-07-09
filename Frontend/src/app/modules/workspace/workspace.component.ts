@@ -636,7 +636,8 @@ export class WorkspaceMainComponent implements EventListener, OnDestroy {
         );
     }
     private routeTo(root: string, node: string = null, search: string = null) {
-        const params: any = { root, id: node, viewType: this.viewType, query: search, mainnav: this.mainnav };
+        const params: any = { root, id: node, query: search, mainnav: this.mainnav };
+        params[UIConstants.QUERY_PARAM_LIST_VIEW_TYPE] = this.viewType;
         if (this.reurl) {
             params.reurl = this.reurl;
         }

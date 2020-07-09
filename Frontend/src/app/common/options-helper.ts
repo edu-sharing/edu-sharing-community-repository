@@ -332,7 +332,11 @@ export class OptionsHelperService {
             } else if(objects[0].authorityType === RestConstants.AUTHORITY_TYPE_USER) {
                 return ElementType.Person;
             } else if (objects[0].ref) {
-                return ElementType.Node;
+                if(objects[0].type === RestConstants.CCM_TYPE_SAVED_SEARCH) {
+                    return ElementType.SavedSearch;
+                } else {
+                    return ElementType.Node;
+                }
             }
         }
         return ElementType.Unknown;
@@ -385,6 +389,7 @@ export class OptionsHelperService {
         const debugNode = new OptionItem('OPTIONS.DEBUG', 'build', (object) =>
             management.nodeDebug = this.getObjects(object)[0],
         );
+        debugNode.elementType = [ElementType.Node, ElementType.SavedSearch];
         debugNode.onlyDesktop = true;
         debugNode.constrains = [Constrain.AdminOrDebug, Constrain.NoBulk];
         debugNode.group = DefaultGroups.View;
@@ -674,6 +679,7 @@ export class OptionsHelperService {
         const deleteNode = new OptionItem('OPTIONS.DELETE', 'delete',(object) => {
             management.nodeDelete = this.getObjects(object);
         });
+        deleteNode.elementType = [ElementType.Node, ElementType.SavedSearch];
         deleteNode.constrains = [Constrain.HomeRepository, Constrain.NoCollectionReference, Constrain.User];
         deleteNode.permissions = [RestConstants.PERMISSION_DELETE];
         deleteNode.permissionsMode = HideMode.Hide;

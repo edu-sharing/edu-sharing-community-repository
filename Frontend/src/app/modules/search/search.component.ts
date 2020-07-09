@@ -74,6 +74,7 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
     globalProgress = false;
     addNodesToCollection: Node[];
     addNodesStream: Node[];
+    oldParams: Params;
     get mdsId() {
         return this._mdsId;
     }
@@ -1319,6 +1320,26 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
     private initParams() {
         this.queryParamsSubscription = this.activatedRoute.queryParams.subscribe(
             (param) => {
+                if(this.oldParams) {
+                    // check if reinit can be skipped (e.g. if only view relevant params changed)
+                    let reinit = false;
+                    for (const key of Object.keys(param || {}).concat(Object.keys(this.oldParams))) {
+                        if (this.oldParams[key] === param[key]) {
+                            continue;
+                        }
+                        if (key === UIConstants.QUERY_PARAM_LIST_VIEW_TYPE) {
+                            continue;
+                        }
+                        reinit = true;
+                    }
+                    this.oldParams = param;
+                    if (!reinit) {
+                        return;
+                    }
+                } else {
+                    this.oldParams = param;
+                }
+
                 this.searchService.init();
                 this.mainNavRef.refreshBanner();
                 GlobalContainerComponent.finishPreloading();
