@@ -810,9 +810,12 @@ export class OptionsHelperService {
         this.viewToggle.isToggle = true;
         options.push(this.viewToggle);
          */
-        const toggleViewType = new OptionItem('OPTIONS.TOGGLE_VIEWTYPE', this.list ? this.list.viewType === 0 ? 'view_module' : 'list' : '', (object) => {
-            this.list.setViewType(this.list.viewType === 1 ? 0 : 1);
-            toggleViewType.icon = this.list ? this.list.viewType === 0 ? 'view_module' : 'list' : '';
+        // tslint:disable-next-line:triple-equals
+        const toggleViewType = new OptionItem('OPTIONS.TOGGLE_VIEWTYPE', this.list ? this.list.viewType == 0 ? 'view_module' : 'list' : '', (object) => {
+            // tslint:disable-next-line:triple-equals
+            this.list.setViewType(this.list.viewType == 1 ? 0 : 1);
+            // tslint:disable-next-line:triple-equals
+            toggleViewType.icon = this.list ? this.list.viewType == 0 ? 'view_module' : 'list' : '';
         });
         toggleViewType.scopes = [Scope.WorkspaceList, Scope.Search, Scope.CollectionsReferences];
         toggleViewType.constrains = [Constrain.NoSelection];
