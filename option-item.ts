@@ -165,6 +165,7 @@ export enum ElementType {
   Node,
   Person,
   Group,
+  SavedSearch,
   Unknown
 }
 export class OptionGroup {

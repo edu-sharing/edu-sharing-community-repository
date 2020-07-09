@@ -1191,4 +1191,8 @@ export class ListTableComponent implements EventListener {
         this.reorderDialog = true;
         this.changes.detectChanges();
     }
+
+    isSavedSearch(node: Node) {
+        return node?.type === RestConstants.CCM_TYPE_SAVED_SEARCH;
+    }
 }

@@ -106,7 +106,7 @@
                     </div>
                     <div *ngIf="viewType==1 && !isCollection(node) && !node.isDirectory" class="nodeRatingComments">
                         <div class="nodeRating"></div>
-                        <div class="nodeComments" (appDistinctClick)="onDistinctClick($event, node, 'comments')"><i icon iconId="comment"></i> <div>{{node.commentCount}}</div></div>
+                        <div class="nodeComments" *ngIf="!isSavedSearch(node)" (appDistinctClick)="onDistinctClick($event, node, 'comments')"><i icon iconId="comment"></i> <div>{{node.commentCount}}</div></div>
                     </div>
                     <div *ngIf="isCollection(node) && node.collection.type=='EDITORIAL'" class="collectionEditorial"><i class="material-icons">star</i></div>
                     <div *ngIf="isCollection(node) && node.collection.pinned" class="collectionPinned"><i icon iconId="edu-pin"></i></div>
