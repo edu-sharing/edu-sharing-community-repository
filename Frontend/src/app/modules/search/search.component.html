@@ -113,7 +113,7 @@
          </ul>
        </div>
      </div>
-     <div *ngIf="sidenavTab==0">
+     <div [class.display-none]="sidenavTab !== 0">
      <div *ngIf="currentRepository=='-all-'" class="repositoryList">
        <label>{{'SEARCH.REPOSITORY_FILTER' | translate}}</label>
        <div *ngFor="let repo of repositoryIds">
@@ -149,7 +149,7 @@
          </div>
        </div>
      </div>
-     <div *ngIf="sidenavTab==1">
+     <div *ngIf="sidenavTab === 1">
        <div class="saved-search-toggle">
            <mat-slide-toggle class="toggle-reverse" [(ngModel)]="savedSearchOwn" (change)="loadSavedSearch()">{{ 'SEARCH.SAVED_SEARCH_ONLY_OWN' | translate}}</mat-slide-toggle>
        </div>

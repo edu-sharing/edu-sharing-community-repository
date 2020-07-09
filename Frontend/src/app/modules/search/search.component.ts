@@ -892,7 +892,7 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
         });
     }
 
-    private onMdsReady(mds: any = null) {
+    onMdsReady(mds: any = null) {
         this.currentMdsSet = mds;
         this.updateColumns();
         this.updateSort();
