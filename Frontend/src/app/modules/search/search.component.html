@@ -176,9 +176,9 @@
           [columns]="savedSearchColumns"
           (onUpdateOptions)="refreshListOptions()"
           (clickRow)="loadSavedSearchNode($event.node)"></listTable>
-         <div class="manageSavedSearch" *ngIf="savedSearch.length && savedSearchOwn && isWorkspaceEnabled()">
-           <a (click)="goToSaveSearchWorkspace()" class="clickable">{{'SEARCH.MANAGE_SAVED_SEARCH' | translate}}</a>
-         </div>
+           <div class="manageSavedSearch" *ngIf="savedSearch.length && savedSearchOwn && isWorkspaceEnabled()">
+             <button mat-button (click)="goToSaveSearchWorkspace()">{{'SEARCH.MANAGE_SAVED_SEARCH' | translate}}</button>
+           </div>
        </div>
      </div>
      <!--
