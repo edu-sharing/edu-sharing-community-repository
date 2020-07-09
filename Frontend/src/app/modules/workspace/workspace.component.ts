@@ -358,7 +358,7 @@ export class WorkspaceMainComponent implements EventListener, OnDestroy {
                                     needsUpdate = true;
                                 }
                                 this.oldParams = params;
-                                if (params.viewType) {
+                                if (params.viewType != null) {
                                     this.viewType = params.viewType;
                                 }
                                 if (params.root && WorkspaceMainComponent.VALID_ROOTS.indexOf(params.root) !== -1) {

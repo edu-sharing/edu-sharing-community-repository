@@ -1345,6 +1345,9 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
                 GlobalContainerComponent.finishPreloading();
                 this.hasCheckbox = true;
                 this.searchService.reurl = null;
+                if (param.viewType != null) {
+                    this.setViewType(param.viewType);
+                }
                 if (param.addToCollection) {
                     this.collectionApi
                         .getCollection(param.addToCollection)
