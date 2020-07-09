@@ -373,6 +373,9 @@ export class NodeHelper {
    * @returns {any}
    */
   public static getAttribute(translate:TranslateService,config:ConfigurationService,data : any,item : ListItem) : string {
+      if(!item){
+        return '';
+      }
       if((data as any).propertiesConverted && (data as any).propertiesConverted[item.name]) {
           return (data as any).propertiesConverted[item.name];
       }
