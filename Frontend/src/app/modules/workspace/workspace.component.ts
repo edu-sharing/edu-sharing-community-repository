@@ -349,9 +349,13 @@ export class WorkspaceMainComponent implements EventListener, OnDestroy {
                                 let needsUpdate = false;
                                 if (this.oldParams) {
                                     for (const key of Object.keys(this.oldParams).concat(Object.keys(params))) {
-                                        if (params[key] !== this.oldParams[key] && key !== 'viewType') {
-                                            needsUpdate = true;
+                                        if (params[key] === this.oldParams[key]) {
+                                            continue;
                                         }
+                                        if (key === UIConstants.QUERY_PARAM_LIST_VIEW_TYPE) {
+                                            continue;
+                                        }
+                                        needsUpdate = true;
                                     }
                                 }
                                 else {
