@@ -350,6 +350,7 @@ public class ToolPermissionService {
 		toInit.add(CCConstants.CCM_VALUE_TOOLPERMISSION_HANDLESERVICE);
 		toInit.add(CCConstants.CCM_VALUE_TOOLPERMISSION_COLLECTION_FEEDBACK);
 		toInit.add(CCConstants.CCM_VALUE_TOOLPERMISSION_USAGE_STATISTIC);
+		toInit.add(CCConstants.CCM_VALUE_TOOLPERMISSION_COMMENT_WRITE);
 
 		addConnectorToolpermissions(toInit);
 		return toInit;

@@ -110,6 +110,7 @@
     "TOOLPERMISSION_WORKSPACE":"Zugriff auf den Workspace",
     "TOOLPERMISSION_HANDLESERVICE":"Eindeutige Ids für Materialien beim Handleservice anfordern",
     "TOOLPERMISSION_USAGE_STATISTIC":"Informationen über die Verwendung aller Objekte dieses Repositories abfragen",
+    "TOOLPERMISSION_COMMENT_WRITE":"Kommentare an Objekten verfassen",
     "TOOLPERMISSION_CONNECTOR":"Editor \"{{connector}}\" darf benutzt werden",
     "TOOLPERMISSION_CONNECTOR_SAFE":"Editor \"{{connector}}\" darf im gesicherten Bereich benutzt werden",
     "TOOLPERMISSION_REPOSITORY":"Repository \"{{repository}}\" darf angezeigt und durchsucht werden"

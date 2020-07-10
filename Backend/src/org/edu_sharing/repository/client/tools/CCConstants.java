@@ -806,6 +806,8 @@ public class CCConstants {
 
 	public final static String CCM_VALUE_TOOLPERMISSION_USAGE_STATISTIC = "TOOLPERMISSION_USAGE_STATISTIC";
 
+	public final static String CCM_VALUE_TOOLPERMISSION_COMMENT_WRITE = "TOOLPERMISSION_COMMENT_WRITE";
+
 	/**
 	 * dynamic generated properties
 	 */

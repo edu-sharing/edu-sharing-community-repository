@@ -111,6 +111,7 @@
     "TOOLPERMISSION_WORKSPACE":"Access to the workspace",
     "TOOLPERMISSION_HANDLESERVICE":"Resolve unique ids from a handle service for materials",
     "TOOLPERMISSION_USAGE_STATISTIC":"Fetch information about the usage of all nodes of the repository",
+    "TOOLPERMISSION_COMMENT_WRITE":"Creating comments on objects",
     "TOOLPERMISSION_CONNECTOR":"Editor \"{{connector}}\" can be used",
     "TOOLPERMISSION_CONNECTOR_SAFE":"Editor \"{{connector}}\" can be used in safe",
     "TOOLPERMISSION_REPOSITORY":"Repository \"{{repository}}\" can be viewed & browsed"

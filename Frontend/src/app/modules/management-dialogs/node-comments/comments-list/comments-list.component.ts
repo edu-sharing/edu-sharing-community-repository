@@ -33,6 +33,7 @@ export class CommentsListComponent  {
   public editCommentText:string;
   loading: boolean;
   sending: boolean;
+  hasPermission: boolean;
 
   @Input() set node(node : Node){
     this._node=node;
@@ -59,6 +60,7 @@ export class CommentsListComponent  {
       if(!data.isGuest){
         this.iam.getUser().subscribe((data)=>{
           this.user=data.person;
+          this.hasPermission = this.connector.hasToolPermissionInstant(RestConstants.TOOLPERMISSION_COMMENT_WRITE);
         });
       }
     });
@@ -106,7 +108,7 @@ export class CommentsListComponent  {
     return options;
   }
   public canComment(){
-    if(this.isGuest || !this.user)
+    if(this.isGuest || !this.user || !this.hasPermission)
       return false;
     return this._node.access.indexOf(RestConstants.ACCESS_COMMENT) !== -1;
   }
