@@ -962,7 +962,11 @@ export class MdsComponent{
     if(widget.icon){
       html+='<i class="inputIcon material-icons">'+widget.icon+'</i>';
     }
-    html+='<input type="'+type+'" id="'+this.getWidgetDomId(widget)+'" placeholder="'+(widget.placeholder ? widget.placeholder : '')+'" class="'+css+'">';
+    html+='<input type="'+type+'" ' +
+        'id="'+this.getWidgetDomId(widget)+'" ' +
+        'placeholder="'+(widget.placeholder ? widget.placeholder : '')+'" ' +
+        'value="'+(widget.defaultvalue ? widget.defaultvalue : '')+'" ' +
+        'class="'+css+'">';
     if(widget.type=='checkbox'){
       html+=this.getCaption(widget);
     }
