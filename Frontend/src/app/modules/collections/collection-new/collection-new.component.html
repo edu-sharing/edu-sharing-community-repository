@@ -181,6 +181,7 @@
       <div class="card-content">
         <mds #mds
           [groupId]="'collection_'+newCollectionType.toLowerCase()"
+          [setId]="mdsSet"
           [embedded]="true"
           [currentValues]="properties"
           [invalidate]="reloadMds"
