@@ -27,14 +27,14 @@
 				<multiplejoin>AND</multiplejoin>
 			</property>
 			<property name="cclom:general_keyword">
-				<statement>{"query":{"wildcard":{"properties.cclom:general_keyword":{"value":"${value}"}}}}</statement>
+				<statement>{"wildcard":{"properties.cclom:general_keyword":{"value":"${value}"}}}</statement>
 				<multiple>true</multiple>
 				<multiplejoin>AND</multiplejoin>
 			</property>
 			<property name="ccm:classification_purpose" />
 			<property name="ccm:commonlicense_key" />
 			<property name="ccm:educationallearningresourcetype">
-				<statement>{"query":{"wildcard":{"properties.ccm:educationallearningresourcetype":{"value":"${value}"}}}}</statement>
+				<statement>{"wildcard":{"properties.ccm:educationallearningresourcetype":{"value":"${value}"}}}</statement>
 				<multiple>true</multiple>
 				<multiplejoin>OR</multiplejoin>
 			</property>
