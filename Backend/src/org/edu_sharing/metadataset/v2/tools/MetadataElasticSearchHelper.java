@@ -8,6 +8,7 @@ import org.edu_sharing.metadataset.v2.MetadataQueryPreprocessor;
 import org.elasticsearch.index.query.BoolQueryBuilder;
 import org.elasticsearch.index.query.QueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
+import org.elasticsearch.index.query.WrapperQueryBuilder;
 
 import java.security.InvalidParameterException;
 import java.util.ArrayList;
@@ -20,16 +21,16 @@ public class MetadataElasticSearchHelper {
     public static QueryBuilder getElasticSearchQuery(MetadataQuery query, Map<String, String[]> parameters) throws IllegalArgumentException {
 
         /**
-         * @TODO Basequery stuff
+         * @TODO basequery
+         * quickfix: take the basequery of the query instead of the global basequery,
+         * cause collection request needs solr basequery
          */
-        String queryString = "";
-        String basequery = query.findBasequery(parameters.keySet());
-        if (basequery != null && !basequery.trim().isEmpty()) {
-            queryString += "(" + MetadataSearchHelper.replaceCommonQueryVariables(basequery) + ")";
-        }
+        String baseQuery = query.getBasequery().get(null);
+        WrapperQueryBuilder baseQueryBuilder = QueryBuilders.wrapperQuery(baseQuery);
 
 
         BoolQueryBuilder result = QueryBuilders.boolQuery();
+        result.must(baseQueryBuilder);
         for (String name : parameters.keySet()) {
             MetadataQueryParameter parameter = query.findParameterByName(name);
             if (parameter == null)
@@ -44,8 +45,6 @@ public class MetadataElasticSearchHelper {
                 continue;
             }
 
-            if (!queryString.isEmpty())
-                queryString += ", ";
 
             QueryBuilder queryBuilderParam = null;
 

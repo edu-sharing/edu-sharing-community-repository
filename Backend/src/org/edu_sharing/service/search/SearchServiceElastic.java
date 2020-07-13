@@ -22,10 +22,7 @@ import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.client.RequestOptions;
 import org.elasticsearch.client.RestClient;
 import org.elasticsearch.client.RestHighLevelClient;
-import org.elasticsearch.index.query.BoolQueryBuilder;
-import org.elasticsearch.index.query.QueryBuilder;
-import org.elasticsearch.index.query.QueryBuilders;
-import org.elasticsearch.index.query.QueryStringQueryBuilder;
+import org.elasticsearch.index.query.*;
 import org.elasticsearch.search.SearchHit;
 import org.elasticsearch.search.SearchHits;
 import org.elasticsearch.search.builder.SearchSourceBuilder;
@@ -77,15 +74,6 @@ public class SearchServiceElastic extends SearchServiceImpl {
             SearchRequest searchRequest = new SearchRequest("workspace");
             SearchSourceBuilder searchSourceBuilder = new SearchSourceBuilder();
 
-            /**
-             * TEst
-
-            QueryBuilder ioQuery = QueryBuilders.termQuery("type", "ccm:io");
-            QueryBuilder metadataQueryBuilder = (ngsearchword != null) ? QueryBuilders.boolQuery().must(ioQuery)
-                    .must(QueryBuilders.wildcardQuery("properties.cm:name",
-                            (ngsearchword.contains("*") ? ngsearchword.toLowerCase() : "*"+ngsearchword.toLowerCase()+"*")))
-                    : ioQuery;
-             */
             QueryBuilder metadataQueryBuilder = MetadataElasticSearchHelper.getElasticSearchQuery(mds.getQueries().findQuery(query),criterias);
             BoolQueryBuilder audienceQueryBuilder = QueryBuilders.boolQuery();
             audienceQueryBuilder.minimumShouldMatch(1);

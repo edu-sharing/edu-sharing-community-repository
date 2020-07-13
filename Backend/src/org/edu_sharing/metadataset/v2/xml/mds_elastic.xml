@@ -19,7 +19,9 @@
 		<allowSearchWithoutCriteria>true</allowSearchWithoutCriteria>
 
 		<query join="AND" id="ngsearch">
-			<basequery>ISNULL:@ccm\:tool_category</basequery>
+			<!--TODO basequery-->
+			<!--basequery>ISNULL:@ccm\:tool_category</basequery-->
+			<basequery>{"bool":{"must":[{"term":{"type":"ccm:io"}},{"term":{"nodeRef.storeRef.protocol":"workspace"}}],"must_not":[{"term":{"aspects":"ccm:metadataPresettingTemplate"}},{"term":{"aspects":"ccm:io_childobject"}},{"wildcard":{"properties.cm:name.keyword":"._*"}},{"wildcard":{"properties.cm:name.keyword":".DS_Store*"}}]}}</basequery>
 			<property name="ngsearchword">
 				<statement>{"bool":{"should":[{"wildcard":{"properties.cm:name":{"value":"*${value}*"}}},{"wildcard":{"properties.cclom:title":{"value":"*${value}*"}}},{"wildcard":{"properties.cclom:general_description":{"value":"*${value}*"}}},{"wildcard":{"properties.cclom:general_keyword":{"value":"*${value}*"}}},{"wildcard":{"content.fulltext":{"value":"*${value}*"}}},{"term":{"properties.sys:node-uuid":{"value":"*${value}*"}}}]}}</statement>
 				<exactMatching>false</exactMatching>
