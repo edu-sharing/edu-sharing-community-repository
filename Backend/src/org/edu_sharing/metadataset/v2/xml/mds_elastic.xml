@@ -1,6 +1,7 @@
 <metadataset id="default" label="default" hidden="false">
 		<name>ElasticSearch</name>
 		<i18n>mds</i18n>
+		<inherit>mds</inherit>
 
 	<templates>
 		<template>
