@@ -11,6 +11,7 @@ import org.alfresco.service.namespace.QName;
 import org.apache.log4j.Logger;
 import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
 import org.edu_sharing.repository.client.tools.CCConstants;
+import org.edu_sharing.restservices.RestConstants;
 import org.edu_sharing.service.nodeservice.NodeServiceFactory;
 import org.edu_sharing.service.nodeservice.NodeServiceHelper;
 import org.edu_sharing.service.search.CMISSearchHelper;
@@ -62,7 +63,7 @@ public class BulkServiceImpl implements BulkService {
 	@Override
 	public NodeRef sync(String group, List<String> match, String type, List<String> aspects, HashMap<String, String[]> properties) throws Throwable {
 		if(match == null || match.size() == 0){
-			throw new IllegalArgumentException("match should contain at last 1 property");
+			throw new IllegalArgumentException("match should contain at least 1 property");
 		}
 		HashMap<String, String[]> propertiesFiltered = properties.entrySet().stream().filter((e) -> match.contains(e.getKey())).
 				collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue,
@@ -74,8 +75,10 @@ public class BulkServiceImpl implements BulkService {
 		NodeRef existing = find(propertiesFiltered);
 		HashMap<String, Object> propertiesNative = NodeServiceHelper.getPropertiesSinglevalue(properties);
 		propertiesNative.put(CCConstants.CM_NAME, NodeServiceHelper.cleanupCmName((String)(propertiesNative.get(CCConstants.CM_NAME))) + "_" + System.currentTimeMillis());
+		propertiesNative.remove(CCConstants.CCM_PROP_IO_VERSION_COMMENT);
 		if(existing == null) {
 			NodeRef groupFolder = getOrCreate(primaryFolder, group, propertiesNative);
+			propertiesNative.put(CCConstants.CCM_PROP_IO_VERSION_COMMENT, CCConstants.VERSION_COMMENT_BULK_CREATE);
 			existing = new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE,
 					NodeServiceFactory.getLocalService().createNodeBasic(
 							groupFolder.getId(),
@@ -83,8 +86,12 @@ public class BulkServiceImpl implements BulkService {
 							propertiesNative
 					));
 		}else{
+			propertiesNative.put(CCConstants.CCM_PROP_IO_VERSION_COMMENT, CCConstants.VERSION_COMMENT_BULK_UPDATE);
 			NodeServiceFactory.getLocalService().updateNodeNative(existing.getId(), propertiesNative);
 		}
+		// 2. versioning
+		NodeServiceFactory.getLocalService().createVersion(existing.getId(),
+				propertiesNative);
 		if(aspects != null) {
 			NodeRef finalExisting = existing;
 			aspects.forEach((a) -> NodeServiceFactory.getLocalService().addAspect(finalExisting.getId(), CCConstants.getValidGlobalName(a)));
