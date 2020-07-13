@@ -22,6 +22,7 @@ import org.springframework.context.ApplicationContext;
 
 import java.io.IOException;
 import java.util.Collections;
+import java.util.List;
 
 public class CheckLinkJob extends AbstractJob {
 
@@ -61,7 +62,16 @@ public class CheckLinkJob extends AbstractJob {
         runner.setTask((ref)->{
 
             String replicationSourceId = (String) nodeService.getProperty(ref, QName.createQName(CCConstants.CCM_PROP_IO_REPLICATIONSOURCEID));
-            String location = (String) nodeService.getProperty(ref,QName.createQName(property));
+            Object value = nodeService.getProperty(ref,QName.createQName(property));
+            if(value == null){
+                return;
+            }
+            String location = null;
+            if(value instanceof List){
+                location = (String) ((List)value).get(0);
+            }else{
+                location = value.toString();
+            }
             if(location != null && location.startsWith("http")){
 
                 try {
