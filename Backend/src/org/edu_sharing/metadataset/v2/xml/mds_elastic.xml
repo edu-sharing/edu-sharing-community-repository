@@ -39,13 +39,13 @@
 				<multiplejoin>OR</multiplejoin>
 			</property>
 			<property name="license">
-				<statement>{"query":{"wildcard":{"properties.ccm:commonlicense_key":{"value":"${value}"}}}}</statement>
-				<statement value="OPEN">{"query":{"bool":{"should":[{"wildcard":{"properties.ccm:commonlicense_key":{"value":"CC_0"}}},{"wildcard":{"properties.ccm:commonlicense_key":{"value":"PDM"}}}]}}}</statement>
-				<statement value="OER">{"query":{"bool":{"should":[{"wildcard":{"properties.ccm:commonlicense_key":{"value":"CC_0"}}},{"wildcard":{"properties.ccm:commonlicense_key":{"value":"PDM"}}},{"wildcard":{"properties.ccm:commonlicense_key":{"value":"CC_BY"}}},{"wildcard":{"properties.ccm:commonlicense_key":{"value":"CC_BY_SA"}}}]}}}</statement>
-				<statement value="CC_BY_OPEN">{"query":{"bool":{"should":[{"wildcard":{"properties.ccm:commonlicense_key":{"value":"CC_BY"}}},{"wildcard":{"properties.ccm:commonlicense_key":{"value":"CC_BY_SA"}}}]}}}</statement>
-				<statement value="CC_BY_RESTRICTED">{"query":{"bool":{"should":[{"wildcard":{"properties.ccm:commonlicense_key":{"value":"CC_BY_ND"}}},{"wildcard":{"properties.ccm:commonlicense_key":{"value":"CC_BY_NC"}}},{"wildcard":{"properties.ccm:commonlicense_key":{"value":"CC_BY_NC_SA"}}},{"wildcard":{"properties.ccm:commonlicense_key":{"value":"CC_BY_NC_ND"}}}]}}}</statement>
-				<statement value="CC_BY_ALL">{"query":{"bool":{"should":[{"wildcard":{"properties.ccm:commonlicense_key":{"value":"CC_0"}}},{"wildcard":{"properties.ccm:commonlicense_key":{"value":"CC_BY*"}}}]}}}</statement>
-				<statement value="COPYRIGHT_OTHERS">{"query":{"bool":{"should":[{"wildcard":{"properties.ccm:commonlicense_key":{"value":"COPYRIGHT*"}}},{"wildcard":{"properties.ccm:commonlicense_key":{"value":"SCHULFUNK"}}}]}}}</statement>
+				<statement>{"wildcard":{"properties.ccm:commonlicense_key":{"value":"${value}"}}}</statement>
+				<statement value="OPEN">{"bool":{"should":[{"wildcard":{"properties.ccm:commonlicense_key":{"value":"CC_0"}}},{"wildcard":{"properties.ccm:commonlicense_key":{"value":"PDM"}}}]}}</statement>
+				<statement value="OER">{"bool":{"should":[{"wildcard":{"properties.ccm:commonlicense_key":{"value":"CC_0"}}},{"wildcard":{"properties.ccm:commonlicense_key":{"value":"PDM"}}},{"wildcard":{"properties.ccm:commonlicense_key":{"value":"CC_BY"}}},{"wildcard":{"properties.ccm:commonlicense_key":{"value":"CC_BY_SA"}}}]}}</statement>
+				<statement value="CC_BY_OPEN">{"bool":{"should":[{"wildcard":{"properties.ccm:commonlicense_key":{"value":"CC_BY"}}},{"wildcard":{"properties.ccm:commonlicense_key":{"value":"CC_BY_SA"}}}]}}</statement>
+				<statement value="CC_BY_RESTRICTED">{"bool":{"should":[{"wildcard":{"properties.ccm:commonlicense_key":{"value":"CC_BY_ND"}}},{"wildcard":{"properties.ccm:commonlicense_key":{"value":"CC_BY_NC"}}},{"wildcard":{"properties.ccm:commonlicense_key":{"value":"CC_BY_NC_SA"}}},{"wildcard":{"properties.ccm:commonlicense_key":{"value":"CC_BY_NC_ND"}}}]}}</statement>
+				<statement value="CC_BY_ALL">{"bool":{"should":[{"wildcard":{"properties.ccm:commonlicense_key":{"value":"CC_0"}}},{"wildcard":{"properties.ccm:commonlicense_key":{"value":"CC_BY*"}}}]}}</statement>
+				<statement value="COPYRIGHT_OTHERS">{"bool":{"should":[{"wildcard":{"properties.ccm:commonlicense_key":{"value":"COPYRIGHT*"}}},{"wildcard":{"properties.ccm:commonlicense_key":{"value":"SCHULFUNK"}}}]}}</statement>
 				<multiple>true</multiple>
 				<multiplejoin>OR</multiplejoin>
 			</property>
