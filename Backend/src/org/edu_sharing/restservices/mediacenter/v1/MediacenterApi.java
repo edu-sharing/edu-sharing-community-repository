@@ -19,12 +19,7 @@ import javax.ws.rs.core.Response;
 
 import org.apache.log4j.Logger;
 import org.edu_sharing.repository.server.tools.ApplicationInfoList;
-import org.edu_sharing.restservices.ApiService;
-import org.edu_sharing.restservices.GroupDao;
-import org.edu_sharing.restservices.MediacenterDao;
-import org.edu_sharing.restservices.NodeDao;
-import org.edu_sharing.restservices.RepositoryDao;
-import org.edu_sharing.restservices.RestConstants;
+import org.edu_sharing.restservices.*;
 import org.edu_sharing.restservices.mediacenter.v1.model.McOrgConnectResult;
 import org.edu_sharing.restservices.mediacenter.v1.model.MediacentersImportResult;
 import org.edu_sharing.restservices.mediacenter.v1.model.OrganisationsImportResult;
@@ -243,7 +238,13 @@ public class MediacenterApi {
 			}
 			System.out.println(query);
 			searchToken.setLuceneString(query);
-			searchToken.setAuthorityScope(Arrays.asList(new String[] {mediacenter}));
+
+			String authorityScope = MediacenterServiceFactory.getLocalService().getMediacenterProxyGroup(mediacenter);
+			if(authorityScope == null){
+				throw new Exception("No mediacenter proxy group found.");
+			}
+
+			searchToken.setAuthorityScope(Arrays.asList(new String[] {authorityScope}));
 			
     		NodeSearch search = NodeDao.search(repoDao,searchToken);
     		List<Node> data = new ArrayList<Node>();
@@ -307,6 +308,37 @@ public class MediacenterApi {
 		}
 
 	}
+
+	@DELETE
+	@Path("/mediacenter/{repository}/{mediacenter}")
+	@ApiOperation(
+			value = "delete a mediacenter group and it's admin group and proxy group",
+			notes = "admin rights are required."
+	)
+	@ApiResponses(
+			value = {
+					@ApiResponse(code = 200, message = RestConstants.HTTP_200, response = Void.class),
+					@ApiResponse(code = 400, message = RestConstants.HTTP_400, response = ErrorResponse.class),
+					@ApiResponse(code = 401, message = RestConstants.HTTP_401, response = ErrorResponse.class),
+					@ApiResponse(code = 403, message = RestConstants.HTTP_403, response = ErrorResponse.class),
+					@ApiResponse(code = 404, message = RestConstants.HTTP_404, response = ErrorResponse.class),
+					@ApiResponse(code = 409, message = RestConstants.HTTP_409, response = ErrorResponse.class),
+					@ApiResponse(code = 500, message = RestConstants.HTTP_500, response = ErrorResponse.class)
+			})
+	public Response deleteMediacenter(
+			@ApiParam(value = RestConstants.MESSAGE_REPOSITORY_ID,required=true, defaultValue="-home-" ) @PathParam("repository") String repository,
+			@ApiParam(value = "authorityName of the mediacenter that should manage the group",required=true) @PathParam("mediacenter") String authorityName,
+			@Context HttpServletRequest req
+			){
+		try {
+			RepositoryDao repoDao  = RepositoryDao.getRepository(repository);
+			MediacenterDao.delete(repoDao,authorityName);
+			return Response.status(Response.Status.OK).build();
+		} catch (DAOException e) {
+			return ErrorResponse.createResponse(e);
+		}
+	}
+
 	@DELETE
 	@Path("/mediacenter/{repository}/{mediacenter}/manages/{group}")
 

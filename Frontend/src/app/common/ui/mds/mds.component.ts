@@ -1561,6 +1561,7 @@ export class MdsComponent {
       html+='>'+option.caption+'</option>';
     }
     html+='</select>';
+    html+=this.addBottomCaption(widget);
     return html;
   }
   private renderMultioptionWidget(widget:any,attr:string){
@@ -1817,7 +1818,7 @@ export class MdsComponent {
     }
     private handleWidgetConstrains(widget: any, options: {requiresNode?: boolean, supportsBulk?: boolean}) {
         const name = widget.type || widget.id;
-        if (options.requiresNode && !(this.currentNodes || this.currentNodes.length)) {
+        if (options.requiresNode && !this.currentNodes?.length) {
           return 'Widget \'' + name + '\' is only supported if a node object is available';
         }else if (!options.supportsBulk && this.isBulkMode()) {
           return 'Widget \'' + name + '\' is not supported in bulk mode';
@@ -2123,6 +2124,10 @@ export class MdsComponent {
       return html;
     }
     else {
+        const constrain = this.handleWidgetConstrains(widget, {requiresNode: true, supportsBulk: false});
+        if (constrain) {
+          return constrain;
+        }
         let html=`<div class="mdsLicense">`
         let isSafe=this.connector.getCurrentLogin() && this.connector.getCurrentLogin().currentScope!=null;
         let canDelete=(this.currentNodes[0] && this.currentNodes[0].access.indexOf(RestConstants.ACCESS_DELETE)!=-1);

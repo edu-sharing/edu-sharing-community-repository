@@ -22,6 +22,7 @@ import org.alfresco.service.cmr.repository.DuplicateChildNodeNameException;
 import org.alfresco.service.cmr.repository.StoreRef;
 import org.alfresco.service.cmr.security.PermissionService;
 import org.apache.log4j.Logger;
+import org.edu_sharing.alfresco.tools.EduSharingNodeHelper;
 import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
 import org.edu_sharing.metadataset.v2.MetadataQuery;
 import org.edu_sharing.metadataset.v2.MetadataQueryParameter;
@@ -556,9 +557,12 @@ public class NodeDao {
 			
 			String originalNameArr[] = props.get(CCConstants.CM_NAME);
 			String originalName= (originalNameArr != null && originalNameArr.length > 0) ? originalNameArr[0] : null;
-			
 			if(originalName == null) throw new Exception("missing name");
-			
+
+			// escape invalid characters of the name
+			originalName = EduSharingNodeHelper.cleanupCmName(originalName);
+			props.put(CCConstants.CM_NAME, new String[]{originalName});
+
 			int i=2;
 			while(true){
 				try{
@@ -1763,7 +1767,7 @@ public class NodeDao {
     		String parent = RepositoryDao.getHomeRepository().getUserSavedSearch();
     		NodeDao parentDao = new NodeDao(RepositoryDao.getHomeRepository(), parent);
     		HashMap<String, String[]> props=new HashMap();
-    		props.put(CCConstants.CM_NAME, new String[]{name});
+    		props.put(CCConstants.CM_NAME, new String[]{NodeServiceHelper.cleanupCmName(name)});
     		props.put(CCConstants.LOM_PROP_GENERAL_TITLE, new String[]{name});
     		props.put(CCConstants.CCM_PROP_SAVED_SEARCH_REPOSITORY, new String[]{repoId});
     		props.put(CCConstants.CCM_PROP_SAVED_SEARCH_MDS, new String[]{mdsId});

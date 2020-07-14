@@ -1,7 +1,15 @@
 import {RestAdminService} from '../../../core-module/rest/services/rest-admin.service';
 import {Component, EventEmitter, Output} from '@angular/core';
 import {TranslateService} from '@ngx-translate/core';
-import {NodeStatistics, Node, Statistics, IamGroup, Group, NodeList} from '../../../core-module/rest/data-object';
+import {
+    NodeStatistics,
+    Node,
+    Statistics,
+    IamGroup,
+    Group,
+    NodeList,
+    Mediacenter
+} from '../../../core-module/rest/data-object';
 // import {NodeList} from "../../../core-module/core.module";
 import {ListItem} from '../../../core-module/ui/list-item';
 import {RestConstants} from '../../../core-module/rest/rest-constants';
@@ -25,9 +33,9 @@ export class AdminMediacenterComponent {
     // @TODO: declare the mediacenter type when it is finalized in backend
     mediacenters: any[];
     // original link to mediacenter object (contained in mediacenters[])
-    currentMediacenter: any;
+    currentMediacenter: Mediacenter;
     // copy of the current mediacenter for (temporary) edits
-    currentMediacenterCopy: any;
+    currentMediacenterCopy: Mediacenter;
 
     addGroup: Group;
     mediacenterGroups: IamGroup[];
@@ -45,6 +53,7 @@ export class AdminMediacenterComponent {
     groupActions: OptionItem[];
     currentTab = 0;
     private isAdmin: boolean;
+    private hasManagePermissions: boolean;
     public mediacentersFile: File;
     public organisationsFile: File;
     public orgMcFile: File;
@@ -61,6 +70,7 @@ export class AdminMediacenterComponent {
         private toast: Toast,
     ) {
         this.isAdmin = this.connector.getCurrentLogin().isAdmin;
+        this.hasManagePermissions = this.connector.hasToolPermissionInstant(RestConstants.TOOLPERMISSION_MEDIACENTER_MANAGE);
         this.refresh();
         this.groupColumns = [
             new ListItem('GROUP', RestConstants.AUTHORITY_DISPLAYNAME),
@@ -171,8 +181,8 @@ export class AdminMediacenterComponent {
                 };
                 this.toast.showProgressDialog();
                 this.mediacenterService.addMediacenter(id, profile).subscribe((result) => {
-                    RestHelper.waitForResult(() => this.mediacenterService.getMediacenters(), (list: any[]) => {
-                        return list.filter((r) => Helper.objectEquals(r, result)).length == 1;
+                    RestHelper.waitForResult(() => this.mediacenterService.getMediacenters(), (list: Mediacenter[]) => {
+                        return list.filter((r) => r.authorityName === result.authorityName).length === 1;
                     }, () => {
                         this.toast.closeModalDialog();
                         this.toast.toast('ADMIN.MEDIACENTER.CREATED', {name: id});
@@ -224,7 +234,7 @@ export class AdminMediacenterComponent {
         this.toast.showModalDialog('ADMIN.MEDIACENTER.DELETE_TITLE', 'ADMIN.MEDIACENTER.DELETE_MESSAGE',
             DialogButton.getYesNo(() => this.toast.closeModalDialog(), () => {
                 this.toast.showProgressDialog();
-                this.iamService.deleteGroup(this.currentMediacenter.authorityName).subscribe(() => {
+                this.mediacenterService.deleteMediacenter(this.currentMediacenter.authorityName).subscribe(() => {
                     this.toast.closeModalDialog();
                     this.toast.toast('ADMIN.MEDIACENTER.DELETED', {name: this.currentMediacenterCopy.profile.displayName});
                     this.setMediacenter(null);

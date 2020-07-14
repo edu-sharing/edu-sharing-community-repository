@@ -285,6 +285,8 @@ public class CCConstants {
 
 	public final static String CM_TYPE_FOLDER = "{http://www.alfresco.org/model/content/1.0}folder";
 
+	public final static String SYS_STORE_ROOT = "{http://www.alfresco.org/model/system/1.0}store_root";
+
 	public final static String CM_TYPE_PERSON = "{http://www.alfresco.org/model/content/1.0}person";
 
 	public final static String CM_TYPE_CONTENT = "{http://www.alfresco.org/model/content/1.0}content";
@@ -834,6 +836,8 @@ public class CCConstants {
 	public final static String CCM_VALUE_TOOLPERMISSION_COLLECTION_PINNING = "TOOLPERMISSION_COLLECTION_PINNING";
 
 	public final static String CCM_VALUE_TOOLPERMISSION_CONFIDENTAL = "TOOLPERMISSION_CONFIDENTAL";
+
+	public final static String CCM_VALUE_TOOLPERMISSION_MEDIACENTER_EDIT = "TOOLPERMISSION_MEDIACENTER_EDIT";
 
 	public final static String CCM_VALUE_TOOLPERMISSION_HANDLESERVICE = "TOOLPERMISSION_HANDLESERVICE";
 

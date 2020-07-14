@@ -228,7 +228,9 @@ public class OAIPMHLOMImporter implements Importer{
 			return;
 		}
 		logger.info("url:"+url);
+		long currentTime = System.currentTimeMillis();
 		String queryResult = new HttpQueryTool().query(url);
+		logger.info("ListIdentifiers;"+url+";" + (System.currentTimeMillis() - currentTime));
 		if(queryResult != null){
 			DocumentBuilder builder = factory.newDocumentBuilder();
 			Document doc = builder.parse(new InputSource(new StringReader(queryResult)));
@@ -340,8 +342,10 @@ public class OAIPMHLOMImporter implements Importer{
 
 	private String getRecordAsString(String identifier) {
 		String url = getRecordUrl(identifier);
-		
+
+		long currentTime = System.currentTimeMillis();
 		String result = new HttpQueryTool().query(url);
+		logger.info("GetRecord;"+url+";" + (System.currentTimeMillis() - currentTime));
 		return result;
 	}
 

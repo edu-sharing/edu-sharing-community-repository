@@ -297,6 +297,9 @@ user-profile {
 .topbar-search-right {
     display: flex;
 }
+.tab-nav {
+    display: none;
+}
 :host .topBar ::ng-deep button.mat-button {
     &:not([disabled]) .mat-button-focus-overlay {
         background-color: white;
@@ -305,7 +308,7 @@ user-profile {
         color: unset;
     }
 }
-@media screen and (max-width: ($mobileWidth+$mobileStage*5)) {
+@media screen and (max-width: ($mobileWidth+$mobileStage*6)) {
     .searchInputGroup {
         width: calc(100% - 80px);
     }

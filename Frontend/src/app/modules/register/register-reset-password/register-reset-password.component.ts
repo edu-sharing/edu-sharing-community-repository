@@ -26,7 +26,6 @@ import {RestRegisterService} from "../../../core-module/core.module";
   styleUrls: ['register-reset-password.component.scss']
 })
 export class RegisterResetPasswordComponent{
-    @Output() onLoading=new EventEmitter();
     public new_password ="";
     public key: string;
 
@@ -38,13 +37,13 @@ export class RegisterResetPasswordComponent{
         }
     }
     public newPassword(){
-        this.onLoading.emit(true);
+        this.toast.showProgressDialog();
         this.register.resetPassword(this.key,this.new_password).subscribe(()=>{
-            this.onLoading.emit(false);
+            this.toast.closeModalDialog();
             this.toast.toast("REGISTER.RESET.TOAST");
             this.router.navigate([UIConstants.ROUTER_PREFIX,"login"]);
         },(error)=>{
-            this.onLoading.emit(false);
+            this.toast.closeModalDialog();
             if(UIHelper.errorContains(error,"InvalidKeyException")) {
                 this.toast.error(null,"REGISTER.TOAST_INVALID_RESET_KEY");
                 this.router.navigate([UIConstants.ROUTER_PREFIX,"register","request"]);

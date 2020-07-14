@@ -62,9 +62,10 @@ export class SearchNodeStoreComponent {
 
 }
   public onDoubleClick(node:Node){
-    this.temporaryStorageService.set(TemporaryStorageService.NODE_RENDER_PARAMETER_LIST, this.nodes);
-    this.temporaryStorageService.set(TemporaryStorageService.NODE_RENDER_PARAMETER_ORIGIN, "node-store");
-    this.router.navigate([UIConstants.ROUTER_PREFIX+"render", node.ref.id]);
+    this.router.navigate([UIConstants.ROUTER_PREFIX+"render", node.ref.id],{state:{
+        nodes: this.nodes,
+        scope: 'node-store'
+      }});
   }
   public onSelection(data:Node[]){
     this.selected=data;

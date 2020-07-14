@@ -95,8 +95,8 @@ export class ProfilesComponent {
       this.avatarImage=this.sanitizer.bypassSecurityTrustUrl(URL.createObjectURL(this.avatarFile));
     }
   }
-  public beginEdit(){
-    if(this.editProfileUrl){
+  public beginEdit() {
+    if(!this.userEditProfile && this.editProfileUrl) {
       window.location.href=this.editProfileUrl;
       return;
     }

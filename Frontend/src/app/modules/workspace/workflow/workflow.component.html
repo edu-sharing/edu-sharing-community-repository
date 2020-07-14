@@ -9,6 +9,7 @@
           [disabled]="!status.hasReceiver"
           [globalSearchAllowed]="globalAllowed"
           [groupType]="TYPE_EDITORIAL"
+          [showRecent]="false"
           (onChooseAuthority)="addSuggestion($event)"
           [placeholder]="'WORKSPACE.WORKFLOW.RECEIVERS'"
           hint="{{'WORKSPACE.WORKFLOW.RECEIVERS_HINT' | translate}}"

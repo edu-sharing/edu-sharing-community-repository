@@ -80,7 +80,7 @@
         height="xxlarge"
         [isCancelable]="true"
         (onCancel)="toggleSidenav()">
-        <mds #mds
+        <mds #mdsMobile
              [class.display-none]="currentRepository=='-all-'"
              [groupId]="queryId"
              [repository]="currentRepository"
@@ -113,7 +113,7 @@
          </ul>
        </div>
      </div>
-     <div *ngIf="sidenavTab==0">
+     <div [class.display-none]="sidenavTab !== 0">
      <div *ngIf="currentRepository=='-all-'" class="repositoryList">
        <label>{{'SEARCH.REPOSITORY_FILTER' | translate}}</label>
        <div *ngFor="let repo of repositoryIds">
@@ -122,7 +122,7 @@
      </div>
 
 
-      <mds #mds
+      <mds #mdsDesktop
        [class.display-none]="currentRepository=='-all-'"
         [groupId]="queryId"
         [repository]="currentRepository"
@@ -149,7 +149,7 @@
          </div>
        </div>
      </div>
-     <div *ngIf="sidenavTab==1">
+     <div *ngIf="sidenavTab === 1">
        <div class="saved-search-toggle">
            <mat-slide-toggle class="toggle-reverse" [(ngModel)]="savedSearchOwn" (change)="loadSavedSearch()">{{ 'SEARCH.SAVED_SEARCH_ONLY_OWN' | translate}}</mat-slide-toggle>
        </div>
@@ -176,9 +176,9 @@
           [columns]="savedSearchColumns"
           (onUpdateOptions)="refreshListOptions()"
           (clickRow)="loadSavedSearchNode($event.node)"></listTable>
-         <div class="manageSavedSearch" *ngIf="savedSearch.length && savedSearchOwn && isWorkspaceEnabled()">
-           <a (click)="goToSaveSearchWorkspace()" class="clickable">{{'SEARCH.MANAGE_SAVED_SEARCH' | translate}}</a>
-         </div>
+           <div class="manageSavedSearch" *ngIf="savedSearch.length && savedSearchOwn && isWorkspaceEnabled()">
+             <button mat-button (click)="goToSaveSearchWorkspace()">{{'SEARCH.MANAGE_SAVED_SEARCH' | translate}}</button>
+           </div>
        </div>
      </div>
      <!--
@@ -229,7 +229,6 @@
                                 [viewType]="2"
                                 [createLink]="true"
                                 [scrollWindow]="true"
-                                (clickRow)="render($event)"
                                 (doubleClickRow)="render($event)"
                                 [isLoading]="false"></listTable>
                     </div>
@@ -283,8 +282,6 @@
                             [scope]="SCOPES.Search"
                             [actionbar]="actionbarComponent"
                             [mainNav]="mainNav"
-                            (clickRow)="render($event)"
-                            (doubleClickRow)="render($event)"
                             (loadMore)="getMoreResults()"
                             (selectionChanged)="updateSelection($event)"
                             [isLoading]="searchService.showspinner"></listTable>
@@ -316,8 +313,6 @@
                                    [scope]="SCOPES.Search"
                                    [actionbar]="actionbarComponent"
                                    [mainNav]="mainNavRef"
-                                   (clickRow)="render($event)"
-                                   (doubleClickRow)="render($event)"
                                    (selectionChanged)="updateSelection($event)"
                                    [isLoading]="searchService.showspinner"></listTable>
                     </div>

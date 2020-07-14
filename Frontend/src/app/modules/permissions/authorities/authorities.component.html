@@ -148,7 +148,10 @@
     <div class="card-content-padding">
         <div class="memberActions">
           <form (ngSubmit)="searchMembers()">
-            <input type="search" name="manageMemberSearch" [(ngModel)]="manageMemberSearch"  placeholder="{{(addMembers ? 'PERMISSIONS.SEARCH_USER' : editGroups ? 'PERMISSIONS.SEARCH_GROUPS' : 'PERMISSIONS.SEARCH_MEMBER') | translate}}">
+            <mat-form-field>
+                <mat-label>{{(addMembers ? 'PERMISSIONS.SEARCH_USER' : editGroups ? 'PERMISSIONS.SEARCH_GROUPS' : 'PERMISSIONS.SEARCH_MEMBER') | translate}}</mat-label>
+                <input matInput type="search" name="manageMemberSearch" [(ngModel)]="manageMemberSearch">
+            </mat-form-field>
           </form>
           <actionbar class="memberItem memberActionBar" *ngIf="editMembers || editGroups" #actionbarMember
           ></actionbar>
@@ -203,6 +206,7 @@
   [actionbar]="actionbar"
   [isLoading]="loading"
   [isClickable]="true"
+  [selectedNodes]="selected"
   (selectionChanged)="selection($event)"
   [sortAscending]="sortAscending"
   [hasHeading]="true"

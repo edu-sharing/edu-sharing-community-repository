@@ -354,7 +354,7 @@ export class MainNavComponent implements AfterViewInit {
     }
 
     toggleMenuSidebar() {
-        if (this.canOpen) {
+        if (this.canOpen && this.mainMenuSidebar) {
             this.mainMenuSidebar.toggle();
         }
     }
@@ -528,11 +528,11 @@ export class MainNavComponent implements AfterViewInit {
     }
 
     showChat() {
-        return GlobalContainerComponent.instance.rocketchat._data;
+        return GlobalContainerComponent.instance?.rocketchat?._data;
     }
 
     getChatCount() {
-        return GlobalContainerComponent.instance.rocketchat.unread;
+        return GlobalContainerComponent.instance?.rocketchat?.unread;
     }
 
     openChat() {

@@ -230,7 +230,8 @@
 </div>
 
 </div>
-<workspace-share *ngIf="showPermissions"
+<workspace-share #share
+                 *ngIf="showPermissions"
                  [nodeId]="editPermissionsId"
                  [node]="editPermissionsDummy"
                  [sendMessages]="true"

@@ -349,16 +349,20 @@ export class WorkspaceMainComponent implements EventListener, OnDestroy {
                                 let needsUpdate = false;
                                 if (this.oldParams) {
                                     for (const key of Object.keys(this.oldParams).concat(Object.keys(params))) {
-                                        if (params[key] !== this.oldParams[key] && key !== 'viewType') {
-                                            needsUpdate = true;
+                                        if (params[key] === this.oldParams[key]) {
+                                            continue;
                                         }
+                                        if (key === UIConstants.QUERY_PARAM_LIST_VIEW_TYPE) {
+                                            continue;
+                                        }
+                                        needsUpdate = true;
                                     }
                                 }
                                 else {
                                     needsUpdate = true;
                                 }
                                 this.oldParams = params;
-                                if (params.viewType) {
+                                if (params.viewType != null) {
                                     this.viewType = params.viewType;
                                 }
                                 if (params.root && WorkspaceMainComponent.VALID_ROOTS.indexOf(params.root) !== -1) {
@@ -449,9 +453,14 @@ export class WorkspaceMainComponent implements EventListener, OnDestroy {
             this.nodeDisplayedVersion = event.version;
             */
             this.currentNode = list[0];
-            this.storage.set(TemporaryStorageService.NODE_RENDER_PARAMETER_LIST, this.currentNodes);
-            this.storage.set(TemporaryStorageService.NODE_RENDER_PARAMETER_ORIGIN, 'workspace');
-            this.router.navigate([UIConstants.ROUTER_PREFIX + 'render', list[0].ref.id, list[0].version ? list[0].version : '']);
+            this.router.navigate([UIConstants.ROUTER_PREFIX + 'render', list[0].ref.id, list[0].version ? list[0].version : ''],
+            {
+                    state: {
+                        nodes: this.currentNodes,
+                        scope: 'workspace'
+                    }
+                }
+            );
         }
     }
     // returns either the passed node as list, or the current selection if the passed node is invalid (actionbar)
@@ -586,7 +595,8 @@ export class WorkspaceMainComponent implements EventListener, OnDestroy {
         let id = '';
         const length = this.path ? this.path.length : 0;
         if (position > 0) {
-            id = this.path[position - 1].ref.id;
+            // handled automatically via routing
+            return;
         }
         else if (length > 0) {
             id = null;
@@ -630,7 +640,8 @@ export class WorkspaceMainComponent implements EventListener, OnDestroy {
         );
     }
     private routeTo(root: string, node: string = null, search: string = null) {
-        const params: any = { root, id: node, viewType: this.viewType, query: search, mainnav: this.mainnav };
+        const params: any = { root, id: node, query: search, mainnav: this.mainnav };
+        params[UIConstants.QUERY_PARAM_LIST_VIEW_TYPE] = this.viewType;
         if (this.reurl) {
             params.reurl = this.reurl;
         }

@@ -71,6 +71,9 @@ export class ToolpermissionManagerComponent {
         RestConstants.TOOLPERMISSION_GLOBAL_STATISTICS_NODES,
         RestConstants.TOOLPERMISSION_GLOBAL_STATISTICS_USER,
     ]},
+    {name:"MEDIACENTER",icon:"business",permissions:[
+          RestConstants.TOOLPERMISSION_MEDIACENTER_MANAGE,
+    ]},
     {name:"CONNECTORS",icon:"edit"},
     {name:"REPOSITORIES",icon:"cloud"},
     {name:"OTHER",icon:"help"}

@@ -134,7 +134,10 @@ export class RegisterComponent {
     updateButtons() {
         const primaryButton = this.getPrimaryButton();
         const cancelButton = new DialogButton('CANCEL', DialogButton.TYPE_CANCEL, () => this.cancel());
-        this.buttons = [cancelButton, primaryButton];
+        this.buttons = [cancelButton];
+        if (primaryButton) {
+            this.buttons.push(primaryButton);
+        }
         return this.buttons;
     }
 

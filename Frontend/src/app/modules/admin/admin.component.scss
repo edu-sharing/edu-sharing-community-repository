@@ -3,6 +3,10 @@
 
 $sidenavWidth:250px;
 $sidenavWidthMobile:66px;
+main-nav{
+  display: flex;
+  height: $mainnavHeight;
+}
 .main{
   display: flex;
   width: 100%;

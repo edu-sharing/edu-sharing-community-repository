@@ -1,18 +1,9 @@
-import {Component, Input, EventEmitter, Output, OnDestroy, AfterViewInit, ViewChild} from '@angular/core';
-import {ListItem, RestNodeService} from "../../../core-module/core.module";
-import {Node, NodeList, NodeWrapper} from "../../../core-module/core.module";
-import {RestConstants} from "../../../core-module/core.module";
+import {Component, EventEmitter, Input, Output, ViewChild} from '@angular/core';
+import {ConfigurationService, ListItem, Node, NodeList, RestConnectorService, RestConstants, RestNodeService, RestSearchService, SessionStorageService, Store, TemporaryStorageService} from "../../../core-module/core.module";
 import {TranslateService} from "@ngx-translate/core";
-import {RestConnectorService} from "../../../core-module/core.module";
-import {OptionItem, Scope} from "../../../core-ui-module/option-item";
+import {Scope} from "../../../core-ui-module/option-item";
 import {Toast} from "../../../core-ui-module/toast";
-import {SessionStorageService} from "../../../core-module/core.module";
-import {RestSearchService} from "../../../core-module/core.module";
-import {ConfigurationService} from "../../../core-module/core.module";
-import {TemporaryStorageService} from '../../../core-module/core.module';
-import {StateAwareComponent} from '../../../common/directives/StateAwareComponent';
 import {Helper} from "../../../core-module/rest/helper";
-import {WorkspaceManagementDialogsComponent} from '../../management-dialogs/management-dialogs.component';
 import {ActionbarComponent} from '../../../common/ui/actionbar/actionbar.component';
 import {MainNavComponent} from '../../../common/ui/main-nav/main-nav.component';
 import {ListTableComponent} from '../../../core-ui-module/components/list-table/list-table.component';
@@ -181,11 +172,18 @@ export class WorkspaceExplorerComponent {
     private toast : Toast,
     private nodeApi : RestNodeService) {
     //super(temporaryStorage,['_node','_nodes','sortBy','sortAscending','columns','totalCount','hasMoreToLoad']);
-    this.config.get("workspaceColumns").subscribe((data:string[])=> {
-      this.storage.get("workspaceColumns").subscribe((columns:any[])=>{
+    this.config.get('workspaceColumns').subscribe((data:string[])=> {
+      this.storage.get('workspaceColumns').subscribe((columns:any[])=> {
         this.columns = this.getColumns(columns, data);
       });
     });
+    this.storage.get(SessionStorageService.KEY_WORKSPACE_SORT, null).subscribe((sort) => {
+      console.log(sort);
+      if(sort?.sortBy != null) {
+        this.setSorting(sort);
+      }
+    });
+
   }
   public getColumns(customColumns:any[],configColumns:string[]){
     let defaultColumns:ListItem[]=[];
@@ -261,6 +259,7 @@ export class WorkspaceExplorerComponent {
   public setSorting(data:any){
     this.sortBy=data.sortBy;
     this.sortAscending=data.sortAscending;
+    this.storage.set(SessionStorageService.KEY_WORKSPACE_SORT, data);
     this.load(true);
   }
   public onSelection(event : Node[]){
