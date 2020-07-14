@@ -17,7 +17,7 @@ webserver.home=path/to/alfresco/tomcat
 
 Deploy & Release
 ----------------
-Use the Ant-Tasks provided in "build.xml" and run `` (to build all files and automatically transfer them to your local alfresco tomcat) and `release` (to create a release zip file).
+Use the Ant-Tasks provided in "build.xml" and run `deploy` (to build all files and automatically transfer them to your local alfresco tomcat) and `release` (to create a release zip file).
 
 You may also use the task `reload`. This will cause a touch-event on the web.xml inside the edu-sharing webapp and will let tomcat reload the webapp while it's running.
 

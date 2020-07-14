@@ -349,16 +349,20 @@ export class WorkspaceMainComponent implements EventListener, OnDestroy {
                                 let needsUpdate = false;
                                 if (this.oldParams) {
                                     for (const key of Object.keys(this.oldParams).concat(Object.keys(params))) {
-                                        if (params[key] !== this.oldParams[key] && key !== 'viewType') {
-                                            needsUpdate = true;
+                                        if (params[key] === this.oldParams[key]) {
+                                            continue;
                                         }
+                                        if (key === UIConstants.QUERY_PARAM_LIST_VIEW_TYPE) {
+                                            continue;
+                                        }
+                                        needsUpdate = true;
                                     }
                                 }
                                 else {
                                     needsUpdate = true;
                                 }
                                 this.oldParams = params;
-                                if (params.viewType) {
+                                if (params.viewType != null) {
                                     this.viewType = params.viewType;
                                 }
                                 if (params.root && WorkspaceMainComponent.VALID_ROOTS.indexOf(params.root) !== -1) {
@@ -636,7 +640,8 @@ export class WorkspaceMainComponent implements EventListener, OnDestroy {
         );
     }
     private routeTo(root: string, node: string = null, search: string = null) {
-        const params: any = { root, id: node, viewType: this.viewType, query: search, mainnav: this.mainnav };
+        const params: any = { root, id: node, query: search, mainnav: this.mainnav };
+        params[UIConstants.QUERY_PARAM_LIST_VIEW_TYPE] = this.viewType;
         if (this.reurl) {
             params.reurl = this.reurl;
         }

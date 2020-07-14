@@ -95,7 +95,7 @@ public class MetadataSearchHelper {
 	/**
 	 * replaces globally supported variables for queries (like ${user.<property>} )
 	 */
-	private static String replaceCommonQueryVariables(String statement) {
+	public static String replaceCommonQueryVariables(String statement) {
 		NodeRef ref = AuthorityServiceFactory.getLocalService().getAuthorityNodeRef(AuthenticationUtil.getFullyAuthenticatedUser());
 		try {
 			Map<String, Object> props = NodeServiceHelper.transformLongToShortProperties(NodeServiceHelper.getProperties(ref));

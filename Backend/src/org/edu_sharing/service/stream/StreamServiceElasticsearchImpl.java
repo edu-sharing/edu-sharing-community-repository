@@ -1,26 +1,15 @@
 package org.edu_sharing.service.stream;
 
-import static org.elasticsearch.common.xcontent.XContentFactory.jsonBuilder;
-
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
 import org.apache.commons.lang3.NotImplementedException;
 import org.apache.http.HttpHost;
 import org.apache.lucene.search.join.ScoreMode;
 import org.edu_sharing.lightbend.LightbendConfigLoader;
-import org.edu_sharing.repository.server.tools.PropertiesHelper;
 import org.edu_sharing.service.search.model.SortDefinition;
 import org.edu_sharing.service.stream.model.ContentEntry;
 import org.edu_sharing.service.stream.model.ContentEntry.Audience.STATUS;
 import org.edu_sharing.service.stream.model.ScoreResult;
 import org.edu_sharing.service.stream.model.StreamSearchRequest;
 import org.edu_sharing.service.stream.model.StreamSearchResult;
-import org.elasticsearch.action.admin.indices.create.CreateIndexRequest;
 import org.elasticsearch.action.delete.DeleteRequest;
 import org.elasticsearch.action.get.GetRequest;
 import org.elasticsearch.action.get.GetResponse;
@@ -30,15 +19,16 @@ import org.elasticsearch.action.search.SearchRequest;
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.action.search.SearchScrollRequest;
 import org.elasticsearch.action.update.UpdateRequest;
+import org.elasticsearch.client.RequestOptions;
 import org.elasticsearch.client.RestClient;
 import org.elasticsearch.client.RestClientBuilder;
 import org.elasticsearch.client.RestHighLevelClient;
+import org.elasticsearch.client.indices.CreateIndexRequest;
 import org.elasticsearch.common.unit.TimeValue;
 import org.elasticsearch.common.xcontent.XContentBuilder;
 import org.elasticsearch.index.query.BoolQueryBuilder;
 import org.elasticsearch.index.query.QueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
-import org.elasticsearch.index.reindex.DeleteByQueryRequest;
 import org.elasticsearch.script.Script;
 import org.elasticsearch.script.ScriptType;
 import org.elasticsearch.search.SearchHit;
@@ -46,11 +36,16 @@ import org.elasticsearch.search.aggregations.AggregationBuilders;
 import org.elasticsearch.search.aggregations.bucket.terms.ParsedTerms;
 import org.elasticsearch.search.aggregations.bucket.terms.Terms.Bucket;
 import org.elasticsearch.search.aggregations.bucket.terms.TermsAggregationBuilder;
-import org.elasticsearch.search.aggregations.metrics.sum.ParsedSum;
-import org.elasticsearch.search.aggregations.metrics.sum.SumAggregationBuilder;
+import org.elasticsearch.search.aggregations.metrics.ParsedSum;
+import org.elasticsearch.search.aggregations.metrics.SumAggregationBuilder;
 import org.elasticsearch.search.aggregations.support.ValueType;
 import org.elasticsearch.search.builder.SearchSourceBuilder;
 import org.elasticsearch.search.sort.SortOrder;
+
+import java.io.IOException;
+import java.util.*;
+
+import static org.elasticsearch.common.xcontent.XContentFactory.jsonBuilder;
 
 public class StreamServiceElasticsearchImpl implements StreamService {
 	public static class ContentEntryConverter{
@@ -111,7 +106,7 @@ public class StreamServiceElasticsearchImpl implements StreamService {
 		client=new RestHighLevelClient(restClient);
 		try {
 			CreateIndexRequest  indexRequest = new CreateIndexRequest(INDEX_NAME);
-			indexRequest.mapping(TYPE_NAME, jsonBuilder().
+			indexRequest.mapping(jsonBuilder().
 					startObject().
 					startObject(TYPE_NAME).
 					startObject("properties").
@@ -130,7 +125,8 @@ public class StreamServiceElasticsearchImpl implements StreamService {
 					endObject().
 					endObject()
 			);
-			client.indices().create(indexRequest);
+			client.indices().create(indexRequest, RequestOptions.DEFAULT);
+
 		}catch(Exception e) {
 			// index already exists
 			// throw new RuntimeException("Elastic search init failed",e);
@@ -158,7 +154,7 @@ public class StreamServiceElasticsearchImpl implements StreamService {
 		indexRequest.type(TYPE_NAME);
 		
 		indexRequest.source(ContentEntryConverter.toContentBuilder(entry));
-		IndexResponse result = client.index(indexRequest);
+		IndexResponse result = client.index(indexRequest,RequestOptions.DEFAULT);
 		return result.getId();
 	}
 	@Override
@@ -168,12 +164,12 @@ public class StreamServiceElasticsearchImpl implements StreamService {
 		updateRequest.type(TYPE_NAME);
 
 		updateRequest.doc(ContentEntryConverter.toContentBuilder(entry));
-		client.update(updateRequest);
+		client.update(updateRequest,RequestOptions.DEFAULT);
 	}
 	public StreamSearchResult searchScroll(String scrollId) throws Exception {
 		SearchScrollRequest searchScrollRequest = new SearchScrollRequest(scrollId);
 		searchScrollRequest.scroll(SCROLL_TIME);
-		SearchResponse searchResult = client.searchScroll(searchScrollRequest);
+		SearchResponse searchResult = client.scroll(searchScrollRequest,RequestOptions.DEFAULT);
 		return responseToStreamResult(searchResult);
 	}
 	@Override
@@ -185,8 +181,8 @@ public class StreamServiceElasticsearchImpl implements StreamService {
 		searchSourceBuilder.size(0);
 		SearchRequest request = new SearchRequest().source(searchSourceBuilder);
         request.indices(INDEX_NAME);
-		SearchResponse searchResult = client.search(request);
-		return searchResult.getHits().totalHits>0; 
+		SearchResponse searchResult = client.search(request,RequestOptions.DEFAULT);
+		return searchResult.getHits().getTotalHits().value > 0;
 	}
 	private BoolQueryBuilder getAuthorityQuery(List<String> authorities,ContentEntry.Audience.STATUS status) {
 		BoolQueryBuilder query = QueryBuilders.boolQuery();
@@ -237,7 +233,7 @@ public class StreamServiceElasticsearchImpl implements StreamService {
 	}
 	private GetResponse getEntryRequest(String entryId) throws IOException {
 		GetRequest request=new GetRequest(INDEX_NAME, TYPE_NAME, entryId);
-		return client.get(request);
+		return client.get(request,RequestOptions.DEFAULT);
 	}
 	@Override
 	public ScoreResult getScoreByAuthority(String authority,ContentEntry.Audience.STATUS status) throws Exception {
@@ -249,7 +245,7 @@ public class StreamServiceElasticsearchImpl implements StreamService {
 		searchSourceBuilder.size(0);
 		SearchRequest request = new SearchRequest().source(searchSourceBuilder);
         request.indices(INDEX_NAME);
-		SearchResponse searchResult = client.search(request);
+		SearchResponse searchResult = client.search(request,RequestOptions.DEFAULT);
 		ScoreResult result=new ScoreResult();
 		result.score=(long) ((ParsedSum)searchResult.getAggregations().get("score")).getValue();
 		return result;
@@ -260,7 +256,7 @@ public class StreamServiceElasticsearchImpl implements StreamService {
 		request.index(INDEX_NAME);
 		request.type(TYPE_NAME);
 		request.id(id);
-		client.delete(request);
+		client.delete(request,RequestOptions.DEFAULT);
 	}
 
 	@Override
@@ -289,7 +285,7 @@ public class StreamServiceElasticsearchImpl implements StreamService {
 		Script scriptObj = new Script(ScriptType.INLINE,Script.DEFAULT_SCRIPT_LANG,script,scriptParams);
 		updateRequest.script(scriptObj);
 
-		client.update(updateRequest);
+		client.update(updateRequest,RequestOptions.DEFAULT);
 	}
 	@Override
 	public StreamSearchResult search(StreamSearchRequest request) throws Exception {
@@ -330,7 +326,7 @@ public class StreamServiceElasticsearchImpl implements StreamService {
         SearchRequest searchRequest = new SearchRequest().source(searchSourceBuilder);
         //searchRequest.scroll(SCROLL_TIME);
         searchRequest.indices(INDEX_NAME);
-		SearchResponse searchResult = client.search(searchRequest);
+		SearchResponse searchResult = client.search(searchRequest,RequestOptions.DEFAULT);
 		return responseToStreamResult(searchResult);
 	}
 	private static StreamSearchResult responseToStreamResult(SearchResponse searchResult) {
@@ -341,18 +337,18 @@ public class StreamServiceElasticsearchImpl implements StreamService {
 		StreamSearchResult result=new StreamSearchResult();
 		result.scrollId=searchResult.getScrollId();
 		result.results=list;
-		result.total=searchResult.getHits().totalHits;
+		result.total=searchResult.getHits().getTotalHits().value;
 		return result;
 	}
 	@Override
 	public Map<String, Number> getTopValues(String property) throws Exception {
 		SearchSourceBuilder searchSourceBuilder = new SearchSourceBuilder();
 		searchSourceBuilder.size(0);
-		TermsAggregationBuilder aggregation = AggregationBuilders.terms("agg").field("properties."+property+".keyword").valueType(ValueType.STRING);
+		TermsAggregationBuilder aggregation = AggregationBuilders.terms("agg").field("properties."+property+".keyword").userValueTypeHint(ValueType.STRING);
 		searchSourceBuilder.aggregation(aggregation);
         SearchRequest request = new SearchRequest().source(searchSourceBuilder);
         request.indices(INDEX_NAME);
-        List<? extends Bucket> buckets = ((ParsedTerms) client.search(request).getAggregations().get("agg")).getBuckets();
+        List<? extends Bucket> buckets = ((ParsedTerms) client.search(request,RequestOptions.DEFAULT).getAggregations().get("agg")).getBuckets();
         Map<String, Number> result = new HashMap<>(buckets.size());
         for(Bucket bucket : buckets) {
         	result.put(bucket.getKeyAsString(), bucket.getDocCount());

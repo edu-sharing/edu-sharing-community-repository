@@ -308,7 +308,7 @@ user-profile {
         color: unset;
     }
 }
-@media screen and (max-width: ($mobileWidth+$mobileStage*5)) {
+@media screen and (max-width: ($mobileWidth+$mobileStage*6)) {
     .searchInputGroup {
         width: calc(100% - 80px);
     }
