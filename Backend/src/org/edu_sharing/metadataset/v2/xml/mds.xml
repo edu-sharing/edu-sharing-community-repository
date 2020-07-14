@@ -43,6 +43,12 @@
 				<hideIfEmpty>true</hideIfEmpty>
 			</widget>
 			<widget>
+				<id>cm:description</id>
+				<type>text</type>
+				<caption>lom_prop_educational_description</caption>
+				<placeholder>lom_prop_educational_description_placeholder</placeholder>
+			</widget>
+			<widget>
 				<id>cclom:general_keyword</id>
 				<type>multivalueBadges</type>
 				<caption>lom_prop_general_keyword</caption>
@@ -671,6 +677,12 @@
 					<cclom:general_keyword>
 				]]></html>
 			</template>
+			<template>
+				<id>collection_sidebar</id>
+				<html><![CDATA[
+					<cm:description>
+				]]></html>
+			</template>
 		</templates>
 		<groups>
 			<group>
@@ -781,6 +793,12 @@
 				<id>collection_feedback</id>
 				<views>
 					<view>collection_feedback</view>
+				</views>
+			</group>
+			<group>
+				<id>collection_sidebar</id>
+				<views>
+					<view>collection_sidebar</view>
 				</views>
 			</group>
 		</groups>

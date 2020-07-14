@@ -55,7 +55,7 @@ public class WidgetV2 {
     			}
 
     }
-		private String id,caption,bottomCaption,icon,type,template;
+		private String id,caption,bottomCaption,icon,type,link,template;
 		private boolean hasValues;
 		private List<ValueV2> values;
 		private List<Subwidget> subwidgets;
@@ -80,6 +80,7 @@ public class WidgetV2 {
 			this.bottomCaption=widget.getBottomCaption();
 			this.icon=widget.getIcon();
 			this.type=widget.getType();
+			this.link=widget.getLink();
 			this.defaultvalue=widget.getDefaultvalue();
 			this.placeholder=widget.getPlaceholder();
 			this.unit=widget.getUnit();
@@ -251,6 +252,14 @@ public class WidgetV2 {
 		}
 		public void setType(String type) {
 			this.type = type;
+		}
+		@JsonProperty
+		public String getLink() {
+			return link;
+		}
+
+		public void setLink(String link) {
+			this.link = link;
 		}
 		@JsonProperty("id")
 		public String getId() {

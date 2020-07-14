@@ -156,22 +156,12 @@
                 <i class="material-icons icon-bottom">{{ getScopeInfo().icon }}</i
                 >&nbsp;{{ 'COLLECTION.SCOPE.' + getScopeInfo().scopeName | translate }}
             </div>
-
-            <div class="collection-description collection-label">
-                {{ 'collections_description' | translate }}
-            </div>
-
-            <div class="collection-description collection-content">
-                {{ collectionContent.node.collection.description }}
-                <span
-                    *ngIf="
-                        collectionContent.node.collection.description == null ||
-                        collectionContent.node.collection.description.length == 0
-                    "
-                    style="padding:2px;"
-                >
-                    -
-                </span>
+            <div class="collection-permissions collection-label"></div>
+            <div class="collections-metadata">
+                <mds-viewer
+                    [data]="collectionContent.node.properties"
+                    groupId="collection_sidebar"
+                ></mds-viewer>
             </div>
 
             <ng-container *ngIf="collectionContent.node.access.indexOf('ChangePermissions') !== -1">
