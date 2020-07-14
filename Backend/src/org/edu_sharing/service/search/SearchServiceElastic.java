@@ -54,7 +54,7 @@ public class SearchServiceElastic extends SearchServiceImpl {
 
 
         if(query.equals("collections")) return super.searchV2(mds,query,criterias,searchToken);
-
+        logger.info("starting");
 
         String[] searchword = criterias.get("ngsearchword");
         String ngsearchword = (searchword != null) ? searchword[0] : null;
@@ -94,8 +94,9 @@ public class SearchServiceElastic extends SearchServiceImpl {
 
 
             RestHighLevelClient client = getClient();
+            logger.info("starting search elastic");
             SearchResponse searchResponse = client.search(searchRequest, RequestOptions.DEFAULT);
-
+            logger.info("finished search elastic");
 
             SearchHits hits = searchResponse.getHits();
 
@@ -134,7 +135,7 @@ public class SearchServiceElastic extends SearchServiceImpl {
         }
 
 
-
+        logger.info("returning");
         return sr;
     }
 
