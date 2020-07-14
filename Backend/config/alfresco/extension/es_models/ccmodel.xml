@@ -722,6 +722,22 @@
 						<tokenised>both</tokenised>
 					</index>
 				</property>
+				<!-- used by the scrapy etl to store custom uuid + hash for detecting changes -->
+				<property name="ccm:replicationsourceuuid">
+					<type>d:text</type>
+					<index enabled="true">
+						<atomic>true</atomic>
+						<tokenised>false</tokenised>
+					</index>
+				</property>
+				<!-- used by the scrapy etl to store custom uuid + hash for detecting changes -->
+				<property name="ccm:replicationsourcehash">
+					<type>d:text</type>
+					<index enabled="true">
+						<atomic>true</atomic>
+						<tokenised>false</tokenised>
+					</index>
+				</property>
 				<property name="ccm:replicationsourcetimestamp">
 					<type>d:text</type>
 				</property>
