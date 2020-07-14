@@ -99,14 +99,16 @@ public class MetadataElasticSearchHelper {
         }
 
         if (value.startsWith("\"") && value.endsWith("\"") || parameter.isExactMatching()) {
-            String statement = parameter.getStatement(value).replace("${value}", QueryParser.escape(value));
+            //String statement = parameter.getStatement(value).replace("${value}", QueryParser.escape(value));
+            String statement = parameter.getStatement(value).replace("${value}", value);
             return statement;
         }
 
         String[] words = value.split(" ");
         BoolQueryBuilder boolQuery = QueryBuilders.boolQuery();
         for (String word : words) {
-            String statement = parameter.getStatement(value).replace("${value}", QueryParser.escape(word));
+            //String statement = parameter.getStatement(value).replace("${value}", QueryParser.escape(word));
+            String statement = parameter.getStatement(value).replace("${value}", word);
             boolQuery = boolQuery.must(QueryBuilders.wrapperQuery(statement));
 
         }
