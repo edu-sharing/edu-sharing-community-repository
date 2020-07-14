@@ -15,6 +15,7 @@
 	</templates>
 	<!--<cclom:general_keyword>-->
 	<queries>
+        <!-- basequery used for collection search which is still solr-->
 		<basequery>-TYPE:"ccm:toolpermission" AND NOT ASPECT:"ccm:metadataPresettingTemplate" AND NOT @cm\:name:"._*" AND NOT @cm\:name:".DS_Store*" AND NOT PATH:"/sys\:system/sys\:people//*" AND -ASPECT:"ccm:io_childobject"</basequery>
 		<allowSearchWithoutCriteria>true</allowSearchWithoutCriteria>
 
