@@ -132,7 +132,7 @@
 			<properties>
 				<!--0 = IO (Informationsobject), 1 = LS (Lernszenario) -->
 				<property name="ccm:objecttype">
-					<type>d:int</type>
+					<type>d:text</type>
 				</property>
 			</properties>
 			<associations>
