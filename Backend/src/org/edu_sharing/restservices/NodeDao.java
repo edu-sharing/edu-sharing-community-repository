@@ -1767,7 +1767,7 @@ public class NodeDao {
     		String parent = RepositoryDao.getHomeRepository().getUserSavedSearch();
     		NodeDao parentDao = new NodeDao(RepositoryDao.getHomeRepository(), parent);
     		HashMap<String, String[]> props=new HashMap();
-    		props.put(CCConstants.CM_NAME, new String[]{name});
+    		props.put(CCConstants.CM_NAME, new String[]{NodeServiceHelper.cleanupCmName(name)});
     		props.put(CCConstants.LOM_PROP_GENERAL_TITLE, new String[]{name});
     		props.put(CCConstants.CCM_PROP_SAVED_SEARCH_REPOSITORY, new String[]{repoId});
     		props.put(CCConstants.CCM_PROP_SAVED_SEARCH_MDS, new String[]{mdsId});
