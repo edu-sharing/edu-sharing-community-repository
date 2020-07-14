@@ -40,6 +40,8 @@
 }
 
 @mixin no-modal {
+  // force lower priority, otherwise sidenav will be "below" the non-modal dialog
+  z-index: 90 !important;
   padding: #{$nonModalPadding};
   top: #{$mainnavHeight};
   height: unset;
