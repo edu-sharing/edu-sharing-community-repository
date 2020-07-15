@@ -310,6 +310,7 @@
                 "RemoveOrphanCollectionReferencesJob": "Delete all collection references with missing original item",
                 "RemoveNodeJob": "Delete a node/folder completely (specify parameter \"id\")",
                 "ConvertMultivalueToSinglevalueJob": "Convert a property from multivalue to singlevalue",
+                "BulkDeleteNodesJob": "Bulk deleting of multiple nodes (e.g. large folders)",
                 "BulkEditNodesJob": "Bulk processing of a property for multiple nodes",
                 "UpdateFrontpageCacheJob": "Rebuilds the cache for the start page"
             }

@@ -313,6 +313,7 @@
                 "RemoveNodeJob": "Einen Node/Ordner vollständig löschen (Parameter \"id\" angeben)",
                 "ConvertMultivalueToSinglevalueJob": "Eine Property von Multivalue in Singlevalue konvertieren",
                 "BulkEditNodesJob": "Bulk-Bearbeitung von einer Property für mehrere Nodes",
+                "BulkDeleteNodesJob": "Bulk-Löschen für mehrere Nodes (z.B. für größe Ordner)",
                 "UpdateFrontpageCacheJob": "Baut den Cache für die Startseite neu auf"
             }
         },
