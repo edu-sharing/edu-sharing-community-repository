@@ -87,7 +87,6 @@ export class CollectionsMainComponent {
     listCollections: ListTableComponent;
 
     dialogTitle: string;
-    globalProgress = false;
     dialogCancelable = false;
     dialogMessage: string;
     dialogButtons: DialogButton[];
@@ -318,11 +317,11 @@ export class CollectionsMainComponent {
         if (checked) {
             this.orderActive = true;
         } else {
-            this.globalProgress = true;
+            this.toast.showProgressDialog();
             this.collectionService
                 .setOrder(this.collectionContent.node.ref.id)
                 .subscribe(() => {
-                    this.globalProgress = false;
+                    this.toast.closeModalDialog();
                     this.orderActive = false;
                 });
         }
@@ -459,20 +458,20 @@ export class CollectionsMainComponent {
         const target = event.target;
         const source = event.source[0];
         this.toast.showProgressDialog();
-        if (source.hasOwnProperty('childCollectionsCount')) {
+        if (source.mediatype === 'collection') {
             if (event.type === 'copy') {
                 this.toast.error(null, 'INVALID_OPERATION');
-                this.globalProgress = false;
+                this.toast.closeModalDialog();
                 return;
             }
             this.nodeService.moveNode(target.ref.id, source.ref.id).subscribe(
                 () => {
-                    this.globalProgress = false;
+                    this.toast.closeModalDialog();
                     this.refreshContent();
                 },
                 error => {
                     this.handleError(error);
-                    this.globalProgress = false;
+                    this.toast.closeModalDialog();
                 },
             );
         } else {
@@ -1020,7 +1019,7 @@ export class CollectionsMainComponent {
     }
 
     private deleteFromCollection(callback: Function = null) {
-        this.globalProgress = true;
+        this.toast.showProgressDialog();
         this.collectionService
             .removeFromCollection(
                 this.contentDetailObject.ref.id,
@@ -1029,14 +1028,14 @@ export class CollectionsMainComponent {
             .subscribe(
                 () => {
                     this.toast.toast('COLLECTIONS.REMOVED_FROM_COLLECTION');
-                    this.globalProgress = false;
+                    this.toast.closeModalDialog();
                     this.refreshContent();
                     if (callback) {
                         callback();
                     }
                 },
                 (error: any) => {
-                    this.globalProgress = false;
+                    this.toast.closeModalDialog();
                     this.toast.error(error);
                 },
             );
@@ -1047,11 +1046,11 @@ export class CollectionsMainComponent {
             if (!error) {
                 this.toast.toast('COLLECTIONS.REMOVED_FROM_COLLECTION');
             }
-            this.globalProgress = false;
+            this.toast.closeModalDialog();
             this.refreshContent();
             return;
         }
-        this.globalProgress = true;
+        this.toast.showProgressDialog();
         this.collectionService
             .removeFromCollection(
                 nodes[position].ref.id,
@@ -1085,8 +1084,7 @@ export class CollectionsMainComponent {
     }
 
     private changeOrder() {
-        this.globalProgress = true;
-        this.collectionService
+        this.toast.showProgressDialog();        this.collectionService
             .setOrder(
                 this.collectionContent.node.ref.id,
                 RestHelper.getNodeIds(this.collectionContent.references),
@@ -1099,10 +1097,10 @@ export class CollectionsMainComponent {
                     this._orderActive = false;
                     this.infoTitle = null;
                     this.toast.toast('COLLECTIONS.ORDER_SAVED');
-                    this.globalProgress = false;
+                    this.toast.closeModalDialog();
                 },
                 (error: any) => {
-                    this.globalProgress = false;
+                    this.toast.closeModalDialog();
                     this.toast.error(error);
                 },
             );
@@ -1179,9 +1177,9 @@ export class CollectionsMainComponent {
     }
 
     private addToStore(nodes: Node[]) {
-        this.globalProgress = true;
+        this.toast.showProgressDialog();
         RestHelper.addToStore(nodes, this.bridge, this.iamService, () => {
-            this.globalProgress = false;
+            this.toast.closeModalDialog();
             this.mainNavRef.refreshNodeStore();
         });
     }
