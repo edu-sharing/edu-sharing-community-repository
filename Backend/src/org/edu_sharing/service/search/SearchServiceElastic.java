@@ -53,7 +53,7 @@ public class SearchServiceElastic extends SearchServiceImpl {
                                         SearchToken searchToken) throws Throwable {
 
 
-        if(query.equals("collections")) return super.searchV2(mds,query,criterias,searchToken);
+        if(query.equals("collections") || query.equals("workspace")) return super.searchV2(mds,query,criterias,searchToken);
         logger.info("starting");
 
         String[] searchword = criterias.get("ngsearchword");
