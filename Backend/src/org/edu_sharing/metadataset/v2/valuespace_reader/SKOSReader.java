@@ -1,5 +1,6 @@
 package org.edu_sharing.metadataset.v2.valuespace_reader;
 
+import com.google.gson.JsonObject;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpUriRequest;
@@ -33,12 +34,24 @@ public class SKOSReader extends ValuespaceReader{
         }
     }
 
+    @Override
     public List<MetadataKey> getValuespace(String locale) throws Exception {
+        return getValuespace(fetch(), null, locale);
+    }
+
+    public List<MetadataKey> getValuespace(JSONArray list, MetadataKey parent, String locale) throws Exception {
         List<MetadataKey> result = new ArrayList<>();
-        JSONArray list = fetch();
         for (int i = 0; i < list.length(); i++) {
             JSONObject entry = list.getJSONObject(i);
-            result.add(convertEntry(entry, locale));
+            MetadataKey converted = convertEntry(entry, locale);
+            if(parent != null){
+                converted.setParent(parent.getKey());
+            }
+            result.add(converted);
+            if(entry.has("narrower")){
+                List<MetadataKey> subList = getValuespace(entry.getJSONArray("narrower"), converted, locale);
+                result.addAll(subList);
+            }
         }
         return result;
     }
