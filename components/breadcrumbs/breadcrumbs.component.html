@@ -41,7 +41,7 @@
         <i aria-hidden="true" icon iconId="keyboard_arrow_right" class="breadcrumb-arrow"></i>
         <span class="folder">...</span>
     </span>
-    <span *ngFor="let node of (short==='always' && _breadcrumbsAsNode.length > 1 ? _breadcrumbsAsNode.reverse().slice(0,1) : _breadcrumbsAsNode)">
+    <span *ngFor="let node of (short==='always' && _breadcrumbsAsNode.length > 1 ? [_breadcrumbsAsNode[_breadcrumbsAsNode.length - 1]] : _breadcrumbsAsNode)">
         <i aria-hidden="true" icon iconId="keyboard_arrow_right" class="breadcrumb-arrow"></i>
         <span class="folder">{{node ? node.name : ''}}</span>
     </span>
