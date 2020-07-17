@@ -26,6 +26,7 @@ import org.edu_sharing.alfresco.tools.EduSharingNodeHelper;
 import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
 import org.edu_sharing.metadataset.v2.MetadataQuery;
 import org.edu_sharing.metadataset.v2.MetadataQueryParameter;
+import org.edu_sharing.metadataset.v2.MetadataReaderV2;
 import org.edu_sharing.repository.client.rpc.Notify;
 import org.edu_sharing.repository.client.rpc.Share;
 import org.edu_sharing.repository.client.rpc.User;
@@ -180,7 +181,7 @@ public class NodeDao {
 			NodeSearch result = transform(repoDao,searchService.searchV2(mdsDao.getMds(),query,criteriasMap,token),filter);
 			if(result.getCount()==0) {
 				// try to search for ignorable properties to be null
-				List<String> removed=slackCriteriasMap(criteriasMap,mdsDao.getMds().findQuery(query));
+				List<String> removed=slackCriteriasMap(criteriasMap,mdsDao.getMds().findQuery(query, MetadataReaderV2.QUERY_SYNTAX_LUCENE));
 				result=transform(repoDao,searchService.searchV2(mdsDao.getMds(),query,criteriasMap,token),filter);
 				result.setIgnored(removed);
 				return result;

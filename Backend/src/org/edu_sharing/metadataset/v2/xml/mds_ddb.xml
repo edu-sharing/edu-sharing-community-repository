@@ -12,7 +12,7 @@
       <widget>
                 <id>place</id>
                 <type>multivalueFixedBadges</type>
-                <suggestionSource>Solr</suggestionSource>
+                <suggestionSource>Search</suggestionSource>
                 <caption>Ort</caption>
                 <placeholder>z.B. Frankfurt</placeholder>
       </widget>

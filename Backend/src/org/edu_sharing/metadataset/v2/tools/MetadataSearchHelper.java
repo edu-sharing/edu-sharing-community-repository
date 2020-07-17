@@ -40,10 +40,7 @@ import com.sun.star.lang.IllegalArgumentException;
 public class MetadataSearchHelper {
 	
 	static Logger logger = Logger.getLogger(MetadataSearchHelper.class);
-	
-	public static String getLuceneSearchQuery(MetadataQueries queries, String queryId, Map<String,String[]> parameters) throws IllegalArgumentException{
-		return getLuceneSearchQuery(queries.findQuery(queryId), parameters);
-	}
+
 	public static String getLuceneSearchQuery(MetadataQuery query, Map<String,String[]> parameters) throws IllegalArgumentException{
 
 				// We need to add the basequery, it's currently still getting the base query from the old mds -> added at other stage
@@ -154,94 +151,12 @@ public class MetadataSearchHelper {
 		}
 		throw new InvalidParameterException("Query "+queryId+" was not found");
 	}
-	private static String getLuceneSuggestionQuery(MetadataQueryParameter parameter,String value){
-		//return "("+queries.getBasequery()+") AND ("+parameter.getStatement().replace("${value}","*"+QueryParser.escape(value)+"*")+")";
-		return parameter.getStatement(value).replace("${value}","*"+QueryParser.escape(value)+"*");		
-	}
-	private static List<? extends  Suggestion> getSuggestionsSolr(MetadataQueryParameter parameter, MetadataWidget widget, String value, List<MdsQueryCriteria> criterias, MetadataSetV2 mds, String query)  {
-
-		List<Suggestion> result = new ArrayList<>();
-		ApplicationContext applicationContext = AlfAppContextGate.getApplicationContext();
-		SearchService searchService = (SearchService)applicationContext.getBean("scopedSearchService");
-
-		SearchParameters searchParameters = new SearchParameters();
-		searchParameters.addStore(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE);	
-		searchParameters.setLanguage(SearchService.LANGUAGE_LUCENE);
-
-		searchParameters.setSkipCount(0);
-		searchParameters.setMaxItems(1);
-
-		String luceneQuery = "(TYPE:\"" + CCConstants.CCM_TYPE_IO + "\"" +") AND ("+getLuceneSuggestionQuery(parameter, value)+")";
-		if(criterias != null && criterias.size() > 0 ) {
-			
-			Map<String,String[]> criteriasMap=new HashMap<>();
-			for(MdsQueryCriteria criteria : criterias){
-				criteriasMap.put(criteria.getProperty(),criteria.getValues().toArray(new String[0]));
-			}
-			
-			MetadataQueries queries = mds.getQueries();
-			MetadataQuery queryObj = queries.findQuery(query);
-			queryObj.setApplyBasequery(false);
-			queryObj.setBasequery(null);
-			
-			SearchCriterias scParam = new SearchCriterias();
-			scParam.setRepositoryId(mds.getRepositoryId());
-			scParam.setMetadataSetId(mds.getId());
-			scParam.setMetadataSetQuery(query);
-			try {
-				luceneQuery = "(" + luceneQuery + ") AND " +  MetadataSearchHelper.getLuceneString(queries,queryObj,scParam, criteriasMap);
-				//System.out.println("MetadataSearchHelper lucenequery suggest:" +luceneQuery);
-			} catch (IllegalArgumentException e) {
-				logger.error(e.getMessage(), e);
-			} 
-			
-		}
-		searchParameters.setQuery(luceneQuery);
-
-		String facetName = "@" + parameter.getName();
-		List<String> facets = parameter.getFacets() == null ? Arrays.asList(new String[]{facetName}) : parameter.getFacets();
-		for(String facet : facets){
-			FieldFacet fieldFacet = new FieldFacet(facet);
-			fieldFacet.setLimit(100);
-			fieldFacet.setMinCount(1);
-			searchParameters.addFieldFacet(fieldFacet);
-		}
-
-		ResultSet rs = searchService.query(searchParameters);
-		Map<String, MetadataKey> captions = widget.getValuesAsMap();
-
-		for(String facet : facets) {
-			List<Pair<String, Integer>> facettPairs = rs.getFieldFacet(facet);
-
-			for (Pair<String, Integer> pair : facettPairs) {
-
-				//solr 4 bug: leave out zero values
-				if (pair.getSecond() == 0) {
-					continue;
-				}
-
-				String hit = pair.getFirst(); // new String(pair.getFirst().getBytes(), "UTF-8");
-
-				if (hit.toLowerCase().contains(value.toLowerCase())) {
-
-					Suggestion dto = new Suggestion();
-					dto.setKey(hit);
-					dto.setDisplayString(captions.containsKey(hit) ? captions.get(hit).getCaption() : null);
-
-					result.add(dto);
-				}
-			}
-		}
-		return result;
-		
-	}
-
 	public static List<? extends Suggestion> getSuggestions(String repoId, MetadataSetV2 mds, String queryId, String parameterId, String value, List<MdsQueryCriteria> criterias) throws IllegalArgumentException  {
 		MetadataWidget widget=mds.findWidget(parameterId);
 		
 		String source=widget.getSuggestionSource();
 		if(source==null){
-			source=widget.getValues()!=null ? MetadataReaderV2.SUGGESTION_SOURCE_MDS : MetadataReaderV2.SUGGESTION_SOURCE_SOLR;
+			source=widget.getValues()!=null ? MetadataReaderV2.SUGGESTION_SOURCE_MDS : MetadataReaderV2.SUGGESTION_SOURCE_SEARCH;
 		}
 		
 		/**
@@ -254,9 +169,8 @@ public class MetadataSearchHelper {
 		/**
 		 * local repo
 		 */
-		if(source.equals(MetadataReaderV2.SUGGESTION_SOURCE_SOLR)){
-			MetadataQueryParameter parameter = getParameter(mds.getQueries(),queryId,parameterId);
-			return getSuggestionsSolr(parameter, widget, value, criterias, mds, queryId);
+		if(source.equals(MetadataReaderV2.SUGGESTION_SOURCE_SEARCH)){
+			return SearchServiceFactory.getSearchService(repoId).getSuggestions(mds, queryId, parameterId, value, criterias);
 		}
 		if(source.equals(MetadataReaderV2.SUGGESTION_SOURCE_MDS)){
 			return getSuggestionsMds(widget, value);
@@ -266,7 +180,7 @@ public class MetadataSearchHelper {
 		}
 		throw new IllegalArgumentException("Unknow suggestionSource "+source+" for widget "+parameterId+
 				", use "+MetadataReaderV2.SUGGESTION_SOURCE_MDS+", "+
-				MetadataReaderV2.SUGGESTION_SOURCE_SOLR+" or "+
+				MetadataReaderV2.SUGGESTION_SOURCE_SEARCH+" or "+
 				MetadataReaderV2.SUGGESTION_SOURCE_SQL
 		);
 	}

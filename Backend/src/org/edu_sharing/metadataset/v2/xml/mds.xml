@@ -958,4 +958,47 @@
 				</property>
 		   </query>
 		</queries>
+		<queries syntax="dsl">
+			<basequery></basequery>
+			<allowSearchWithoutCriteria>true</allowSearchWithoutCriteria>
+
+			<query join="AND" id="ngsearch">
+				<!--TODO basequery-->
+				<!--basequery>ISNULL:@ccm\:tool_category</basequery-->
+				<basequery>{"bool":{"must":[{"term":{"type":"ccm:io"}},{"term":{"nodeRef.storeRef.protocol":"workspace"}}],"must_not":[{"term":{"aspects":"ccm:metadataPresettingTemplate"}},{"term":{"aspects":"ccm:io_childobject"}},{"wildcard":{"properties.cm:name.keyword":"._*"}},{"wildcard":{"properties.cm:name.keyword":".DS_Store*"}}]}}</basequery>
+				<property name="ngsearchword">
+					<statement>{"bool":{"should":[{"wildcard":{"properties.cm:name":{"value":"*${value}*"}}},{"wildcard":{"properties.cclom:title":{"value":"*${value}*"}}},{"wildcard":{"properties.cclom:general_description":{"value":"*${value}*"}}},{"wildcard":{"properties.cclom:general_keyword":{"value":"*${value}*"}}},{"wildcard":{"content.fulltext":{"value":"*${value}*"}}},{"term":{"properties.sys:node-uuid":{"value":"*${value}*"}}}]}}</statement>
+					<exactMatching>false</exactMatching>
+					<multiple>true</multiple>
+					<multiplejoin>AND</multiplejoin>
+				</property>
+				<property name="cclom:general_keyword">
+					<multiple>true</multiple>
+					<multiplejoin>AND</multiplejoin>
+				</property>
+				<property name="ccm:classification_purpose" />
+				<property name="ccm:commonlicense_key" />
+				<property name="ccm:educationallearningresourcetype">
+					<multiple>true</multiple>
+					<multiplejoin>OR</multiplejoin>
+				</property>
+				<property name="license">
+					<statement>{"wildcard":{"properties.ccm:commonlicense_key":{"value":"${value}"}}}</statement>
+					<statement value="OPEN">{"bool":{"should":[{"wildcard":{"properties.ccm:commonlicense_key":{"value":"CC_0"}}},{"wildcard":{"properties.ccm:commonlicense_key":{"value":"PDM"}}}]}}</statement>
+					<statement value="OER">{"bool":{"should":[{"wildcard":{"properties.ccm:commonlicense_key":{"value":"CC_0"}}},{"wildcard":{"properties.ccm:commonlicense_key":{"value":"PDM"}}},{"wildcard":{"properties.ccm:commonlicense_key":{"value":"CC_BY"}}},{"wildcard":{"properties.ccm:commonlicense_key":{"value":"CC_BY_SA"}}}]}}</statement>
+					<statement value="CC_BY_OPEN">{"bool":{"should":[{"wildcard":{"properties.ccm:commonlicense_key":{"value":"CC_BY"}}},{"wildcard":{"properties.ccm:commonlicense_key":{"value":"CC_BY_SA"}}}]}}</statement>
+					<statement value="CC_BY_RESTRICTED">{"bool":{"should":[{"wildcard":{"properties.ccm:commonlicense_key":{"value":"CC_BY_ND"}}},{"wildcard":{"properties.ccm:commonlicense_key":{"value":"CC_BY_NC"}}},{"wildcard":{"properties.ccm:commonlicense_key":{"value":"CC_BY_NC_SA"}}},{"wildcard":{"properties.ccm:commonlicense_key":{"value":"CC_BY_NC_ND"}}}]}}</statement>
+					<statement value="CC_BY_ALL">{"bool":{"should":[{"wildcard":{"properties.ccm:commonlicense_key":{"value":"CC_0"}}},{"wildcard":{"properties.ccm:commonlicense_key":{"value":"CC_BY*"}}}]}}</statement>
+					<statement value="COPYRIGHT_OTHERS">{"bool":{"should":[{"wildcard":{"properties.ccm:commonlicense_key":{"value":"COPYRIGHT*"}}},{"wildcard":{"properties.ccm:commonlicense_key":{"value":"SCHULFUNK"}}}]}}</statement>
+					<multiple>true</multiple>
+					<multiplejoin>OR</multiplejoin>
+				</property>
+				<property name="workflow">
+					<statement>@ccm\:wf_status:"${value}"</statement>
+					<statement value="100_unchecked">@ccm\:wf_status:"${value}" or ISNULL:@ccm\:wf_status</statement>
+					<multiple>true</multiple>
+					<multiplejoin>OR</multiplejoin>
+				</property>
+			</query>
+		</queries>
 </metadataset>

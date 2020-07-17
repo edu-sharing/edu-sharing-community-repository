@@ -1,14 +1,11 @@
 package org.edu_sharing.service.search;
 
-import com.sun.star.lang.IllegalArgumentException;
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.service.ServiceRegistry;
 import org.apache.http.HttpHost;
 import org.apache.log4j.Logger;
 import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
-import org.edu_sharing.metadataset.v2.MetadataQueries;
-import org.edu_sharing.metadataset.v2.MetadataSetV2;
-import org.edu_sharing.metadataset.v2.SearchCriterias;
+import org.edu_sharing.metadataset.v2.*;
 import org.edu_sharing.metadataset.v2.tools.MetadataElasticSearchHelper;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.server.SearchResultNodeRef;
@@ -52,9 +49,13 @@ public class SearchServiceElastic extends SearchServiceImpl {
     public SearchResultNodeRef searchV2(MetadataSetV2 mds, String query, Map<String,String[]> criterias,
                                         SearchToken searchToken) throws Throwable {
 
-
-        if(query.equals("collections")) return super.searchV2(mds,query,criterias,searchToken);
-        logger.info("starting");
+        MetadataQuery queryData;
+        try{
+            queryData = mds.findQuery(query, MetadataReaderV2.QUERY_SYNTAX_DSL);
+        } catch(IllegalArgumentException e){
+            logger.info("Query " + query + " is not defined within dsl language, switching to lucene...");
+            return super.searchV2(mds,query,criterias,searchToken);
+        }
 
         String[] searchword = criterias.get("ngsearchword");
         String ngsearchword = (searchword != null) ? searchword[0] : null;
@@ -74,7 +75,7 @@ public class SearchServiceElastic extends SearchServiceImpl {
             SearchRequest searchRequest = new SearchRequest("workspace");
             SearchSourceBuilder searchSourceBuilder = new SearchSourceBuilder();
 
-            QueryBuilder metadataQueryBuilder = MetadataElasticSearchHelper.getElasticSearchQuery(mds.getQueries().findQuery(query),criterias);
+            QueryBuilder metadataQueryBuilder = MetadataElasticSearchHelper.getElasticSearchQuery(queryData,criterias);
             BoolQueryBuilder audienceQueryBuilder = QueryBuilders.boolQuery();
             audienceQueryBuilder.minimumShouldMatch(1);
             for (String a : authorities) {

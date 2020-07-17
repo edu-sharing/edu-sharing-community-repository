@@ -68,7 +68,7 @@ public interface SearchService {
       * @return
  	 * @throws InsufficientPermissionException 
       */
-	SearchResult<String> findAuthorities(AuthorityType user, String searchWord, boolean globalContext, int from, int nrOfResults, SortDefinition sort, Map<String, String> customProperties) throws InsufficientPermissionException;
+	SearchResult<String> findAuthorities(AuthorityType user, String searchWord, boolean globalContext, int from, int nrOfResults, SortDefinition sort, Map<String, String> customProperties) throws Exception;
 
 	SearchResult<String> searchUsers(String _pattern, boolean globalSearch, int _skipCount, int _maxValues,
 			SortDefinition sort, Map<String, String> customProperties) throws Exception;

@@ -15,7 +15,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-public class MetadataElasticSearchHelper {
+public class MetadataElasticSearchHelper extends MetadataSearchHelper {
 
 
     public static QueryBuilder getElasticSearchQuery(MetadataQuery query, Map<String, String[]> parameters) throws IllegalArgumentException {
@@ -57,11 +57,11 @@ public class MetadataElasticSearchHelper {
                 if (multipleJoin.equals("AND")) {
 
                     for(String value : values){
-                        boolQueryBuilder = boolQueryBuilder.must(QueryBuilders.wrapperQuery(getStatmentForValue(parameter,value)));
+                        boolQueryBuilder = boolQueryBuilder.must(QueryBuilders.wrapperQuery(replaceCommonQueryVariables(getStatmentForValue(parameter,value))));
                     }
                 } else {
                     for(String value : values){
-                        boolQueryBuilder = boolQueryBuilder.should(QueryBuilders.wrapperQuery(getStatmentForValue(parameter,value)));
+                        boolQueryBuilder = boolQueryBuilder.should(QueryBuilders.wrapperQuery(replaceCommonQueryVariables(getStatmentForValue(parameter,value))));
                     }
                 }
 
@@ -71,7 +71,7 @@ public class MetadataElasticSearchHelper {
                     throw new InvalidParameterException("Trying to search for multiple values of a non-multivalue field "+parameter.getName());
                 }
 
-                queryBuilderParam = QueryBuilders.wrapperQuery(getStatmentForValue(parameter,values[0]));
+                queryBuilderParam = QueryBuilders.wrapperQuery(replaceCommonQueryVariables(getStatmentForValue(parameter,values[0])));
             }
 
             if(query.getJoin().equals("AND")){

@@ -23,6 +23,7 @@ import javax.net.ssl.TrustManager;
 import javax.net.ssl.X509TrustManager;
 
 import org.apache.log4j.Logger;
+import org.edu_sharing.metadataset.v2.MetadataReaderV2;
 import org.edu_sharing.metadataset.v2.MetadataSetV2;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.client.tools.forms.VCardTool;
@@ -420,7 +421,7 @@ public class SearchServiceDDBImpl extends SearchServiceAdapter{
 		
 		List<Suggestion> result = new ArrayList<Suggestion>();
 		
-		List<String> facets = mds.getQueries().findQuery(queryId).findParameterByName(parameterId).getFacets();
+		List<String> facets = mds.findQuery(queryId, MetadataReaderV2.QUERY_SYNTAX_LUCENE).findParameterByName(parameterId).getFacets();
 		//String url = getUrl("/search",parameterId +":("+value+")",facets, 0, 0);
 		String url = getUrl("/search","*",facets, 0, 0);
 		System.out.println("url:" + url);

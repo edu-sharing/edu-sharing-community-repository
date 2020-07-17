@@ -1,10 +1,14 @@
 package org.edu_sharing.metadataset.v2;
 
+import org.springframework.extensions.webscripts.Runtime;
+
 import java.io.Serializable;
 import java.util.List;
 import java.util.Map;
 
 public class MetadataQueryParameter implements Serializable {
+	// the used syntax, inherited by the group of queries
+	private final String syntax;
 	private String name;
 	private Map<String,String> statements;
 	private boolean multiple;
@@ -14,7 +18,9 @@ public class MetadataQueryParameter implements Serializable {
 	private List<String> facets;
 	private String preprocessor;
 	private boolean mandatory = true;
-
+	MetadataQueryParameter(String syntax){
+		this.syntax = syntax;
+	}
 	public String getName() {
 		return name;
 	}
@@ -40,7 +46,12 @@ public class MetadataQueryParameter implements Serializable {
 		return QueryUtils.replaceCommonQueryParams(statement, QueryUtils.luceneReplacer);
 	}
 	private String getDefaultStatement() {
-		return "@"+name.replace(":", "\\:")+":\"*${value}*\"";
+		if(syntax.equals(MetadataReaderV2.QUERY_SYNTAX_DSL)){
+			return "{\"wildcard\":{\"properties." + name  +"\":{\"value\":\"${value}\"}}}";
+		} else if(syntax.equals(MetadataReaderV2.QUERY_SYNTAX_LUCENE)) {
+			return "@" + name.replace(":", "\\:") + ":\"*${value}*\"";
+		}
+		throw new RuntimeException("Unsupported syntax for query language: " + syntax);
 	}
 	@Override
 	public boolean equals(Object obj) {

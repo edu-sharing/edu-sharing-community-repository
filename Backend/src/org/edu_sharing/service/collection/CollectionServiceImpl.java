@@ -34,6 +34,7 @@ import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.log4j.Logger;
 import org.apache.lucene.queryParser.QueryParser;
 import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
+import org.edu_sharing.metadataset.v2.MetadataReaderV2;
 import org.edu_sharing.metadataset.v2.MetadataSetV2;
 import org.edu_sharing.metadataset.v2.tools.MetadataHelper;
 import org.edu_sharing.repository.client.rpc.ACE;
@@ -671,7 +672,7 @@ public class CollectionServiceImpl implements CollectionService{
 					case RECENT:
 						return permissionService.getRecentProperty(CCConstants.CCM_PROP_PERSON_RECENT_COLLECTIONS);
 				}
-				String queryString=mds.findQuery(queryId).findBasequery(null);
+				String queryString=mds.findQuery(queryId, MetadataReaderV2.QUERY_SYNTAX_LUCENE).findBasequery(null);
 				/**
 				 * @TODO owner + inherit off -> node will be found even if search is done in edu-group context 
 				 */
