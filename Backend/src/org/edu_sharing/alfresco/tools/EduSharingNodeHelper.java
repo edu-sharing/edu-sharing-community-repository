@@ -1,5 +1,6 @@
 package org.edu_sharing.alfresco.tools;
 
+import com.google.common.base.CharMatcher;
 import org.alfresco.service.ServiceRegistry;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.repository.NodeService;
@@ -108,6 +109,8 @@ public class EduSharingNodeHelper {
 		//replace ending dot with nothing
 		//cmNameReadableName = cmNameReadableName.replaceAll("\\.$", "");
 		cmNameReadableName = cmNameReadableName.replaceAll("[\\.]*$", "").trim();
+        cmNameReadableName = CharMatcher.JAVA_ISO_CONTROL.removeFrom(cmNameReadableName);
+
 		return cmNameReadableName;
 	}
 }
