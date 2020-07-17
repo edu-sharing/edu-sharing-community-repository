@@ -666,11 +666,14 @@ export class UIHelper {
         configService: ConfigurationService,
         replaceUrl = false,
     ) {
+        let defaultLocation = configService.instant('loginDefaultLocation', 'workspace');
+        if(!defaultLocation.match(/https?:\/\/*/)) {
+            defaultLocation = UIConstants.ROUTER_PREFIX + defaultLocation;
+        }
         RouterHelper.navigateToAbsoluteUrl(
             platformLocation,
             router,
-            UIConstants.ROUTER_PREFIX +
-                configService.instant('loginDefaultLocation', 'workspace'),
+            defaultLocation,
             replaceUrl,
         );
     }
