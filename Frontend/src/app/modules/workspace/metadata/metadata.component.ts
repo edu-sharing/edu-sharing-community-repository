@@ -58,18 +58,18 @@ export class WorkspaceMetadataComponent{
   forkedParent: Node;
   forkedChilds: Node[];
   @Input() set node(node: Node) {
-    this.nodeObject = Helper.deepCopy(node);
-    this.load();
+    this.load(node);
   }
   @Output() onEditMetadata= new EventEmitter();
   @Output() onDownload= new EventEmitter();
   @Output() onDisplay= new EventEmitter();
   @Output() onClose= new EventEmitter();
   @Output() onRestore= new EventEmitter();
-    private load() {
+    private async load(node: Node) {
         this.versions = null;
         this.versionsLoading = true;
         this.resetStats();
+        this.nodeObject = (await this.nodeApi.getNodeMetadata(node.ref.id, [RestConstants.ALL]).toPromise()).node;
         if (this.nodeObject.isDirectory) {
             this.tab = this.INFO;
         }
