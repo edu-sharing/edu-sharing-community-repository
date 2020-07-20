@@ -126,6 +126,9 @@ export class CollectionChooserComponent implements OnInit {
                 this.isLoadingLatest = false;
                 this.hasMoreToLoad = data.collections.length > 0;
                 this.listLatest = this.listLatest.concat(data.collections);
+            }, (error) => {
+                this.isLoadingLatest = false;
+                this.hasMoreToLoad = false;
             });
     }
 
