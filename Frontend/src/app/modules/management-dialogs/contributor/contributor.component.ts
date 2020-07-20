@@ -171,7 +171,7 @@ export class WorkspaceContributorComponent  {
       }
       properties["ccm:metadatacontributer_"+role]=prop;
     }
-    this.nodeService.editNodeMetadata(this._nodeId,properties).subscribe(()=>{
+    this.nodeService.editNodeMetadataNewVersion(this._nodeId,RestConstants.COMMENT_CONTRIBUTOR_UPDATE,properties).subscribe(()=>{
       this.toast.toast('WORKSPACE.TOAST.CONTRIBUTOR_UPDATED');
       this.onClose.emit();
       this.onLoading.emit(false);
