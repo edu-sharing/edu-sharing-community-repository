@@ -703,19 +703,21 @@ export class MdsComponent {
     let version='';
     let files:File[]=[];
     try {
-      let comment=(document.getElementById('comment') as any);
+      const comment=(document.getElementById('comment') as any);
       version = comment.value;
       files = (document.getElementById('fileSelect') as any).files;
-      let display = document.getElementById('versionGroup').style.display;
-      if(!version.trim()){
-          if(files.length){
-            version=RestConstants.COMMENT_CONTENT_UPDATE;
-          }
-          else{
-            version=RestConstants.COMMENT_METADATA_UPDATE;
-          }
+      const display = document.getElementById('versionGroup').style.display;
+      if(!version.trim()) {
+         throw new Error();
       }
-    }catch (ignored){}
+    } catch (e) {
+      if(files.length) {
+        version=RestConstants.COMMENT_CONTENT_UPDATE;
+      }
+      else {
+        version=RestConstants.COMMENT_METADATA_UPDATE;
+      }
+    }
 
     this.globalProgress=true;
     // can only happen for single element
