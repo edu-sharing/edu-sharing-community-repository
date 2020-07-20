@@ -2,6 +2,12 @@ import { Injectable } from '@angular/core';
 import { Node } from '../../core-module/core.module';
 import { ListItem } from '../../core-module/core.module';
 
+/**
+ * Session state for search.component.
+ *
+ * The service is provided by app.module. Member variables are almost exclusively used by
+ * search.component with the exception of `reinit`, which is set by node-render.component.
+ */
 @Injectable()
 export class SearchService {
     searchTerm: string = '';
@@ -19,6 +25,7 @@ export class SearchService {
     offset: number = 0;
     complete: boolean = false;
     showchosenfilters: boolean = false;
+    // Used by node-render.component
     reinit = true;
     resultCount: any = {};
     sidenavSet = false;
@@ -36,7 +43,9 @@ export class SearchService {
     }
 
     init() {
-        if (!this.reinit) return;
+        if (!this.reinit) {
+            return;
+        }
         this.skipcount = [];
         this.offset = 0;
         this.searchResult = [];
