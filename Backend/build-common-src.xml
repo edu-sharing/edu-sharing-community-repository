@@ -342,7 +342,8 @@
 	
 	<target name="deploy-java" depends="compile-java,deploy-classes">
 	</target>
-	
+	<target name="deploy-java-reload" depends="compile-java,deploy-classes,reload">
+	</target>
 	<target name="check-ng">
 		<echo>check ng ${user.dir}</echo>
 	    <available file="ng" property="ng.present"/>
