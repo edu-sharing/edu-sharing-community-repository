@@ -184,7 +184,10 @@
                 "LICENSE_UPDATE": "Lizenz aktualisiert",
                 "EDITOR_UPLOAD": "Datei wurde durch Editor {{editor}} aktualisiert",
                 "NODE_PUBLISHED": "Datei wurde veröffentlicht",
-                "PREVIEW_CHANGED": "Vorschaubild aktualisiert"
+                "PREVIEW_CHANGED": "Vorschaubild aktualisiert",
+                "BULK_CREATE": "Node via Bulk importiert",
+                "BULK_UPDATE": "Node via Bulk aktualisiert",
+                "BULK_UPDATE_RESYNC": "Lokale Änderungen auf Bulk-Änderungen angewendet"
             }
         },
         "LTI_TOOLS": {

@@ -73,67 +73,70 @@ export class WorkspaceMetadataComponent{
         if (this.nodeObject.isDirectory) {
             this.tab = this.INFO;
         }
-      this.data = this.format(this.nodeObject);
-      const currentNode = this.nodeObject;
-      this.nodeApi.getNodeVersions(this.nodeObject.ref.id).subscribe((data: NodeVersions) => {
-          if (currentNode !== this.nodeObject)
-              return;
-          this.versions = data.versions.reverse();
-          for (const version of this.versions) {
-              if (version.comment) {
-                  if (version.comment === RestConstants.COMMENT_MAIN_FILE_UPLOAD
-                      || version.comment === RestConstants.COMMENT_METADATA_UPDATE
-                      || version.comment === RestConstants.COMMENT_CONTENT_UPDATE
-                      || version.comment === RestConstants.COMMENT_LICENSE_UPDATE
-                      || version.comment === RestConstants.COMMENT_NODE_PUBLISHED
-                      || version.comment === RestConstants.COMMENT_PREVIEW_CHANGED
-                      || version.comment.startsWith(RestConstants.COMMENT_EDITOR_UPLOAD)) {
-                      const parameters = version.comment.split(',');
-                      let editor = '';
-                      if (parameters.length > 1)
-                          editor = this.translate.instant('CONNECTOR.' + parameters[1] + '.NAME');
-                      version.comment = this.translate.instant('WORKSPACE.METADATA.COMMENT.' + parameters[0], {editor});
-                  }
-              }
-          }
-          let i = 0;
-          for (const version of this.versions) {
-              if (this.isCurrentVersion(version)) {
-                  this.versions.splice(i, 1);
-                  this.versions.splice(0, 0, version);
-                  break;
-              }
-              i++;
-          }
-          this.versionsLoading = false;
-      });
-      this.iamApi.getUser().subscribe((login: IamUser) => {
-          this.nodeApi.getNodePermissions(this.nodeObject.ref.id).subscribe((data: NodePermissions) => {
-              this.permissions = this.formatPermissions(login, data);
-          });
-      });
-      this.usages = null;
-      this.forkedParent = null;
-      this.forkedChilds = null;
-      if (this.nodeObject.properties[RestConstants.CCM_PROP_FORKED_ORIGIN]) {
-          this.nodeApi.getNodeMetadata(RestHelper.removeSpacesStoreRef(this.nodeObject.properties[RestConstants.CCM_PROP_FORKED_ORIGIN][0])).subscribe((parent) => {
-              this.forkedParent = parent.node;
-          }, (error) => {
+        this.data = this.format(this.nodeObject);
+        const currentNode = this.nodeObject;
+        this.nodeApi.getNodeVersions(this.nodeObject.ref.id).subscribe((data: NodeVersions) => {
+            if (currentNode !== this.nodeObject)
+                return;
+            this.versions = data.versions.reverse();
+            for (const version of this.versions) {
+                if (version.comment) {
+                    if (version.comment === RestConstants.COMMENT_MAIN_FILE_UPLOAD
+                        || version.comment === RestConstants.COMMENT_METADATA_UPDATE
+                        || version.comment === RestConstants.COMMENT_CONTENT_UPDATE
+                        || version.comment === RestConstants.COMMENT_LICENSE_UPDATE
+                        || version.comment === RestConstants.COMMENT_NODE_PUBLISHED
+                        || version.comment === RestConstants.COMMENT_PREVIEW_CHANGED
+                        || version.comment === RestConstants.COMMENT_BULK_CREATE
+                        || version.comment === RestConstants.COMMENT_BULK_UPDATE
+                        || version.comment === RestConstants.COMMENT_BULK_UPDATE_RESYNC
+                        || version.comment.startsWith(RestConstants.COMMENT_EDITOR_UPLOAD)) {
+                        const parameters = version.comment.split(',');
+                        let editor = '';
+                        if (parameters.length > 1)
+                            editor = this.translate.instant('CONNECTOR.' + parameters[1] + '.NAME');
+                        version.comment = this.translate.instant('WORKSPACE.METADATA.COMMENT.' + parameters[0], {editor});
+                    }
+                }
+            }
+            let i = 0;
+            for (const version of this.versions) {
+                if (this.isCurrentVersion(version)) {
+                    this.versions.splice(i, 1);
+                    this.versions.splice(0, 0, version);
+                    break;
+                }
+                i++;
+            }
+            this.versionsLoading = false;
+        });
+        this.iamApi.getUser().subscribe((login: IamUser) => {
+            this.nodeApi.getNodePermissions(this.nodeObject.ref.id).subscribe((data: NodePermissions) => {
+                this.permissions = this.formatPermissions(login, data);
+            });
+        });
+        this.usages = null;
+        this.forkedParent = null;
+        this.forkedChilds = null;
+        if (this.nodeObject.properties[RestConstants.CCM_PROP_FORKED_ORIGIN]) {
+            this.nodeApi.getNodeMetadata(RestHelper.removeSpacesStoreRef(this.nodeObject.properties[RestConstants.CCM_PROP_FORKED_ORIGIN][0])).subscribe((parent) => {
+                this.forkedParent = parent.node;
+            }, (error) => {
 
-          });
-      }
-      this.searchApi.searchByProperties([RestConstants.CCM_PROP_FORKED_ORIGIN], [RestHelper.createSpacesStoreRef(this.nodeObject)], ['=']).subscribe((childs) => {
-          this.forkedChilds = childs.nodes;
-      });
+            });
+        }
+        this.searchApi.searchByProperties([RestConstants.CCM_PROP_FORKED_ORIGIN], [RestHelper.createSpacesStoreRef(this.nodeObject)], ['=']).subscribe((childs) => {
+            this.forkedChilds = childs.nodes;
+        });
         this.usageApi.getNodeUsages(this.nodeObject.ref.id).subscribe((usages: UsageList) => {
             this.usages = usages.usages;
-          this.usageApi.getNodeUsagesCollection(this.nodeObject.ref.id).subscribe((collection) => {
-               this.usagesCollection = collection.map((c) => c.collection);
-               this.getStats();
-          });
-      });
+            this.usageApi.getNodeUsagesCollection(this.nodeObject.ref.id).subscribe((collection) => {
+                this.usagesCollection = collection.map((c) => c.collection);
+                this.getStats();
+            });
+        });
 
-  }
+    }
   private isCurrentVersion(version: Version): boolean{
     if (!this.nodeObject)
       return false;

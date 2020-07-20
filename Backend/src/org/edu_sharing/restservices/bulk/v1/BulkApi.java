@@ -42,10 +42,12 @@ public class BulkApi {
 		   @ApiParam(value = "The properties that must match to identify if this node exists. Multiple properties will be and combined and compared", required = true) @QueryParam("match") List<String> match,
 		   @ApiParam(value = "type of node. If the node already exists, this will not change the type afterwards",required=true ) @QueryParam("type") String type,
 		   @ApiParam(value = "aspects of node" ) @QueryParam("aspects") List<String> aspects,
-		   @ApiParam(value = "properties, they'll not get filtered via mds, so be careful what you add here" , required=true ) HashMap<String, String[]> properties
+		   @ApiParam(value = "properties, they'll not get filtered via mds, so be careful what you add here" , required=true) HashMap<String, String[]> properties,
+		   @ApiParam(value = "Force update of all data, regardless if they were changed manually inside edu-sharing" , required=false) @QueryParam("forceUpdate") Boolean forceUpdate
+
 	) {
 		try {
-			NodeDao nodeDao = NodeDao.getNode(RepositoryDao.getHomeRepository(), BulkServiceFactory.getInstance().sync(group, match, type, aspects, properties).getId(), Filter.createShowAllFilter());
+			NodeDao nodeDao = NodeDao.getNode(RepositoryDao.getHomeRepository(), BulkServiceFactory.getInstance().sync(group, match, type, aspects, properties, forceUpdate==null ? false : forceUpdate).getId(), Filter.createShowAllFilter());
 			NodeEntry entry = new NodeEntry();
 			entry.setNode(nodeDao.asNode());
 			return Response.ok().entity(entry).build();

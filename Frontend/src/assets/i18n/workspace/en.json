@@ -184,7 +184,10 @@
                 "LICENSE_UPDATE": "Updated license",
                 "EDITOR_UPLOAD": "File updated by editor",
                 "NODE_PUBLISHED": "File published",
-                "PREVIEW_CHANGED": "Preview image updated"
+                "PREVIEW_CHANGED": "Preview image updated",
+                "BULK_CREATE": "Node imported via bulk",
+                "BULK_UPDATE": "Node updated via bulk",
+                "BULK_UPDATE_RESYNC": "Applied local changes onto bulk-changes"
             }
         },
         "EDITOR": {

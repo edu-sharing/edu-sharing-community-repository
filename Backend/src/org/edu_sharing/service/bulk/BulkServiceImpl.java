@@ -7,29 +7,36 @@ import org.alfresco.service.ServiceRegistry;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.repository.NodeService;
 import org.alfresco.service.cmr.repository.StoreRef;
+import org.alfresco.service.cmr.version.Version;
+import org.alfresco.service.cmr.version.VersionHistory;
+import org.alfresco.service.cmr.version.VersionService;
 import org.alfresco.service.namespace.QName;
 import org.apache.log4j.Logger;
+import org.edu_sharing.alfresco.policy.NodeCustomizationPolicies;
 import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
+import org.edu_sharing.metadataset.v2.tools.MetadataHelper;
 import org.edu_sharing.repository.client.tools.CCConstants;
-import org.edu_sharing.restservices.RestConstants;
 import org.edu_sharing.service.nodeservice.NodeServiceFactory;
 import org.edu_sharing.service.nodeservice.NodeServiceHelper;
 import org.edu_sharing.service.search.CMISSearchHelper;
 
 import java.io.Serializable;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class BulkServiceImpl implements BulkService {
 	private static final String PRIMARY_FOLDER_NAME = "SYNC_OBJ";
 	static NodeService nodeServiceAlfresco = (NodeService) AlfAppContextGate.getApplicationContext().getBean("alfrescoDefaultDbNodeService");
 	static ServiceRegistry serviceRegistry = (ServiceRegistry) AlfAppContextGate.getApplicationContext().getBean(ServiceRegistry.SERVICE_REGISTRY);
+	static VersionService versionServiceAlfresco = serviceRegistry.getVersionService();
 	static Repository repositoryHelper = (Repository) AlfAppContextGate.getApplicationContext().getBean("repositoryHelper");
 
 	private static Logger logger = Logger.getLogger(BulkServiceImpl.class);
+	private final List<String> propsToClean;
 	private NodeRef primaryFolder;
+
+
 
 	/**
 	 * get or create the folder
@@ -38,6 +45,7 @@ public class BulkServiceImpl implements BulkService {
 	 * @param propertiesNative Provide the properties of the created child. This will be taken into account when setting the metadataset id of the folder
 	 * @return
 	 */
+
 	public NodeRef getOrCreate(NodeRef parent, String name, HashMap<String, Object> propertiesNative){
 		NodeRef node = nodeServiceAlfresco.getChildByName(parent, ContentModel.ASSOC_CONTAINS, name);
 		if(node == null){
@@ -59,9 +67,24 @@ public class BulkServiceImpl implements BulkService {
 
 	public BulkServiceImpl(){
 		primaryFolder = getOrCreate(repositoryHelper.getCompanyHome(), PRIMARY_FOLDER_NAME, null);
+
+
+		// all props which might be overriden through the user, reset them and clean them
+		propsToClean = new ArrayList<>();
+		propsToClean.addAll(Arrays.asList(NodeCustomizationPolicies.SAFE_PROPS));
+		propsToClean.addAll(Arrays.asList(NodeCustomizationPolicies.LICENSE_PROPS));
+		propsToClean.addAll(CCConstants.getLifecycleContributerPropsMap().values());
+		propsToClean.addAll(CCConstants.getMetadataContributerPropsMap().values());
+		/*
+		for(QName aspect : dictionaryService.getAllAspects()){
+			propsToClean.addAll(
+					dictionaryService.getAspect(aspect).getProperties().keySet().stream()
+							.map(QName::toString).collect(Collectors.toList())
+			);
+		}*/
 	}
 	@Override
-	public NodeRef sync(String group, List<String> match, String type, List<String> aspects, HashMap<String, String[]> properties) throws Throwable {
+	public NodeRef sync(String group, List<String> match, String type, List<String> aspects, HashMap<String, String[]> properties, boolean forceUpdate) throws Throwable {
 		if(match == null || match.size() == 0){
 			throw new IllegalArgumentException("match should contain at least 1 property");
 		}
@@ -85,13 +108,26 @@ public class BulkServiceImpl implements BulkService {
 							CCConstants.getValidGlobalName(type),
 							propertiesNative
 					));
+			// 2. versioning (use the regular service for proper versioning)
+			NodeServiceFactory.getLocalService().createVersion(existing.getId(), propertiesNative);
 		}else{
+			HashMap<String, Object> propertiesKeep = null;
+			if(!forceUpdate){
+				propertiesKeep = checkInternalOverrides(propertiesNative, existing);
+			}
+			propertiesNative = getCleanProps(existing, propertiesNative);
 			propertiesNative.put(CCConstants.CCM_PROP_IO_VERSION_COMMENT, CCConstants.VERSION_COMMENT_BULK_UPDATE);
 			NodeServiceFactory.getLocalService().updateNodeNative(existing.getId(), propertiesNative);
+			// version the previous state
+			NodeServiceFactory.getLocalService().createVersion(existing.getId(), propertiesNative);
+			if(propertiesKeep != null){
+				propertiesKeep = getCleanProps(existing, propertiesKeep);
+				propertiesKeep.put(CCConstants.CCM_PROP_IO_VERSION_COMMENT, CCConstants.VERSION_COMMENT_BULK_UPDATE_RESYNC);
+				NodeServiceFactory.getLocalService().updateNodeNative(existing.getId(), propertiesKeep);
+				// 2. versioning
+				NodeServiceFactory.getLocalService().createVersion(existing.getId(), propertiesKeep);
+			}
 		}
-		// 2. versioning
-		NodeServiceFactory.getLocalService().createVersion(existing.getId(),
-				propertiesNative);
 		if(aspects != null) {
 			NodeRef finalExisting = existing;
 			aspects.forEach((a) -> NodeServiceFactory.getLocalService().addAspect(finalExisting.getId(), CCConstants.getValidGlobalName(a)));
@@ -99,6 +135,101 @@ public class BulkServiceImpl implements BulkService {
 		return existing;
 
 	}
+	private List<String> getAllAvailableProperties(NodeRef nodeRef) throws Exception {
+
+		/*HashMap<String, Serializable> cleanProps = new HashMap<>();
+		propsToClean.forEach((k) -> cleanProps.put(k, null));
+		return cleanProps;*/
+		return Stream.concat(MetadataHelper.getWidgetsByNode(nodeRef).stream().map((w) -> CCConstants.getValidGlobalName(w.getId())).
+				filter(Objects::nonNull),
+				propsToClean.stream())
+				.collect(Collectors.toList());
+	}
+	/**
+	 * alfresco will not override "removed" props, so we try to clean up via the mds
+	 * @return
+	 */
+	private HashMap<String, Object> getCleanProps(NodeRef nodeRef, HashMap<String, Object> props) throws Exception {
+		HashMap<String, Object> mergedProps = new HashMap<>();
+		getAllAvailableProperties(nodeRef).forEach((k) -> mergedProps.put(k, null));
+		mergedProps.putAll(props);
+		mergedProps.put(CCConstants.CCM_PROP_IO_CREATE_VERSION, true);
+		return mergedProps;
+	}
+	/**
+	 * This method takes new properties as an input, and checks which properties might be already "touched" internally
+	 * (meaning not by the bulk import itself) and will always keep the latest version of the internal ones
+	 * @param propertiesIn
+	 * @param nodeRef
+	 * @return
+	 */
+	private HashMap<String, Object> checkInternalOverrides(HashMap<String, Object> propertiesIn, NodeRef nodeRef) throws Exception {
+		VersionHistory history = versionServiceAlfresco.getVersionHistory(nodeRef);
+		if(history == null){
+			return null;
+		}
+		List<Version> versions = new ArrayList<>(history.getAllVersions());
+		Collections.reverse(versions);
+		logger.debug(propertiesIn.get(CCConstants.CM_NAME));
+		Map<String, Serializable> importerProps = null;
+		HashMap<String, Object> modifiedProps = new HashMap<>();
+		boolean changed = false;
+		for(Version version : versions){
+			Map<String, Serializable> currentProps = version.getVersionProperties();
+			String vname = (String) currentProps.get(CCConstants.CCM_PROP_IO_VERSION_COMMENT);
+			if(vname.equals(CCConstants.VERSION_COMMENT_BULK_CREATE)){
+				importerProps = version.getVersionProperties();
+				continue;
+			}
+			if(importerProps != null){
+				if(vname.equals(CCConstants.VERSION_COMMENT_BULK_UPDATE)){
+					Map<String, Object> diffs = getPropDiffs(importerProps, currentProps);
+					for (String diff : diffs.keySet()) {
+						importerProps.put(diff, currentProps.get(diff));
+					}
+				} else if(vname.equals(CCConstants.VERSION_COMMENT_BULK_UPDATE_RESYNC)){
+					// we do nothing for these, these are just resynced once from previous changes
+				} else {
+					modifiedProps.putAll(getPropDiffs(importerProps, currentProps));
+				}
+			}
+		}
+		HashMap<String, Object> returnProps = new HashMap<>(propertiesIn);
+		if(importerProps!=null) {
+			Collection<String> widgets = getAllAvailableProperties(nodeRef);
+			// copy all new props which are untouched
+			for (Map.Entry<String, Object> entry : modifiedProps.entrySet()) {
+				if(!widgets.contains(entry.getKey())){
+					continue;
+				}
+				logger.info("Property " + entry.getKey() + " ignored since it was modified outside of the bulk api");
+				returnProps.put(entry.getKey(), entry.getValue());
+				changed = true;
+			}
+		}
+		if(changed) {
+			return returnProps;
+		}
+		return null;
+	}
+
+	/**
+	 * Return all props that have a different value inside the "diff" map
+	 */
+	private HashMap<String, Object> getPropDiffs(Map<String, Serializable> base, Map<String, Serializable> diff) {
+		HashMap<String, Object> diffs = new HashMap<>();
+		//diffs.putAll(getPropDiffsOneWay(base,diff));
+		//diffs.putAll(getPropDiffsOneWay(diff,base));
+		for(Map.Entry<String, Serializable> entry : diff.entrySet()){
+			Serializable entryDiff = base.get(entry.getKey());
+			if(Objects.equals(entryDiff,entry.getValue())){
+				continue;
+			}
+			diffs.put(entry.getKey(),entry.getValue());
+		}
+		return diffs;
+	}
+
 	@Override
 	public NodeRef find(HashMap<String, String[]> properties) throws Exception {
 		List<NodeRef> result = CMISSearchHelper.fetchNodesByTypeAndFilters(CCConstants.CCM_TYPE_IO,

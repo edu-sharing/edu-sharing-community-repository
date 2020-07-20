@@ -2067,5 +2067,6 @@ public class CCConstants {
 
 	public static final String VERSION_COMMENT_BULK_CREATE = "BULK_CREATE";
 	public static final String VERSION_COMMENT_BULK_UPDATE = "BULK_UPDATE";
+	public static final String VERSION_COMMENT_BULK_UPDATE_RESYNC = "BULK_UPDATE_RESYNC";
 
 }
