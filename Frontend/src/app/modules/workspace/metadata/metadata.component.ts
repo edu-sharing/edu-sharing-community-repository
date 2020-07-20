@@ -83,6 +83,7 @@ export class WorkspaceMetadataComponent{
                 if (version.comment) {
                     if (version.comment === RestConstants.COMMENT_MAIN_FILE_UPLOAD
                         || version.comment === RestConstants.COMMENT_METADATA_UPDATE
+                        || version.comment === RestConstants.COMMENT_CONTRIBUTOR_UPDATE
                         || version.comment === RestConstants.COMMENT_CONTENT_UPDATE
                         || version.comment === RestConstants.COMMENT_LICENSE_UPDATE
                         || version.comment === RestConstants.COMMENT_NODE_PUBLISHED
