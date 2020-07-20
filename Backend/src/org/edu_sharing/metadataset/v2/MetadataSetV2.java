@@ -239,7 +239,7 @@ public class MetadataSetV2 implements Serializable {
 		for(String view : findGroup(template).getViews()) {
 			String html = findTemplate(view).getHtml();
 			for(MetadataWidget widget : getWidgets()) {
-				if(html.indexOf("<"+widget.getId())>-1) {
+				if(html.contains("<" + widget.getId())) {
 					usedWidgets.add(widget);
 					// handle group (sub) widgets
 					if(widget.getSubwidgets()!=null && widget.getSubwidgets().size()>0) {
@@ -249,9 +249,7 @@ public class MetadataSetV2 implements Serializable {
 					}
 				}
 			}
-
 		}
-		logger.info("Template "+template+" uses "+usedWidgets.size()+" from a total of "+getWidgets().size()+" widgets");
 		return usedWidgets;
 	}
 
