@@ -153,7 +153,7 @@ public class BulkServiceImpl implements BulkService {
 		HashMap<String, Object> mergedProps = new HashMap<>();
 		getAllAvailableProperties(nodeRef).forEach((k) -> mergedProps.put(k, null));
 		mergedProps.putAll(props);
-		mergedProps.put(CCConstants.CCM_PROP_IO_CREATE_VERSION, true);
+		mergedProps.put(CCConstants.CCM_PROP_IO_CREATE_VERSION, false);
 		return mergedProps;
 	}
 	/**
@@ -232,14 +232,21 @@ public class BulkServiceImpl implements BulkService {
 
 	@Override
 	public NodeRef find(HashMap<String, String[]> properties) throws Exception {
+		CMISSearchHelper.CMISSearchData data = new CMISSearchHelper.CMISSearchData();
+		data.inTree = primaryFolder.getId();
+
 		List<NodeRef> result = CMISSearchHelper.fetchNodesByTypeAndFilters(CCConstants.CCM_TYPE_IO,
 				NodeServiceHelper.getPropertiesSinglevalue(
 						NodeServiceHelper.transformShortToLongProperties(properties)
-				));
+				),data);
 		if(result.size()==1){
 			return result.get(0);
 		}else if(result.size()>1){
-			throw new Exception("The given properties matched more than 1 node (" + result.size() + "). Please check your criterias and make sure they match unique data");
+			StringBuilder props = new StringBuilder();
+			for (Map.Entry<String, String[]> entry : properties.entrySet()) {
+				props.append(entry.getKey()).append(":").append(entry.getValue()[0]).append(" ");
+			}
+			throw new Exception("The given properties ("+props+") matched more than 1 node (" + result.size() + "). Please check your criterias and make sure they match unique data");
 		}
 		return null;
 	}
