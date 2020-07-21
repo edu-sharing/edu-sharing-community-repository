@@ -84,7 +84,7 @@ public class BulkServiceImpl implements BulkService {
 		}*/
 	}
 	@Override
-	public NodeRef sync(String group, List<String> match, String type, List<String> aspects, HashMap<String, String[]> properties, boolean forceUpdate) throws Throwable {
+	public NodeRef sync(String group, List<String> match, String type, List<String> aspects, HashMap<String, String[]> properties, boolean resetVersion) throws Throwable {
 		if(match == null || match.size() == 0){
 			throw new IllegalArgumentException("match should contain at least 1 property");
 		}
@@ -111,12 +111,12 @@ public class BulkServiceImpl implements BulkService {
 			// 2. versioning (use the regular service for proper versioning)
 			NodeServiceFactory.getLocalService().createVersion(existing.getId(), propertiesNative);
 		}else{
-			HashMap<String, Object> propertiesKeep = null;
-			if(!forceUpdate){
-				propertiesKeep = checkInternalOverrides(propertiesNative, existing);
+			HashMap<String, Object> propertiesKeep = checkInternalOverrides(propertiesNative, existing);
+			if(resetVersion){
+				versionServiceAlfresco.deleteVersionHistory(existing);
 			}
 			propertiesNative = getCleanProps(existing, propertiesNative);
-			propertiesNative.put(CCConstants.CCM_PROP_IO_VERSION_COMMENT, CCConstants.VERSION_COMMENT_BULK_UPDATE);
+			propertiesNative.put(CCConstants.CCM_PROP_IO_VERSION_COMMENT, resetVersion ? CCConstants.VERSION_COMMENT_BULK_CREATE : CCConstants.VERSION_COMMENT_BULK_UPDATE);
 			NodeServiceFactory.getLocalService().updateNodeNative(existing.getId(), propertiesNative);
 			// version the previous state
 			NodeServiceFactory.getLocalService().createVersion(existing.getId(), propertiesNative);
