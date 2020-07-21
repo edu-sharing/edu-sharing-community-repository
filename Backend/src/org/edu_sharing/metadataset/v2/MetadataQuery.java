@@ -60,6 +60,8 @@ public class MetadataQuery extends MetadataQueryBase implements Serializable {
 			this.applyBasequery=query.applyBasequery;
 		if(query.basequery!=null)
 			this.basequery=query.basequery;
+		if(query.conditions!=null)
+			this.conditions=query.conditions;
 		if(query.join!=null)
 			this.join=query.join;
 		for(MetadataQueryParameter param : query.parameters) {

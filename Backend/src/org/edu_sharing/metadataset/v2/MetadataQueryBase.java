@@ -12,7 +12,7 @@ import java.util.stream.Collectors;
 public class MetadataQueryBase implements Serializable{
     static Logger logger = Logger.getLogger(MetadataQueryBase.class);
     protected Map<String, String> basequery;
-    private List<MetadataQueryCondition> conditions=new ArrayList<>();
+    protected List<MetadataQueryCondition> conditions=new ArrayList<>();
 
     public void addCondition(MetadataQueryCondition condition) {
         conditions.add(condition);
