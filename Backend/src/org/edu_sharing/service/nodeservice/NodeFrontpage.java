@@ -13,7 +13,7 @@ import org.alfresco.service.namespace.QName;
 import org.apache.http.HttpHost;
 import org.apache.log4j.Logger;
 import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
-import org.edu_sharing.lightbend.LightbendConfigLoader;
+import org.edu_sharing.alfresco.lightbend.LightbendConfigLoader;
 import org.edu_sharing.metadataset.v2.QueryUtils;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.server.jobs.helper.NodeRunner;
@@ -265,7 +265,7 @@ public class NodeFrontpage {
         //@TODO make elastic server configurable
         List<HttpHost> hosts=null;
         try {
-            List<String> servers=LightbendConfigLoader.get().getStringList("elasticsearch.servers");
+            List<String> servers= LightbendConfigLoader.get().getStringList("elasticsearch.servers");
             hosts=new ArrayList<>();
             for(String server : servers) {
                 hosts.add(new HttpHost(server.split(":")[0],Integer.parseInt(server.split(":")[1])));

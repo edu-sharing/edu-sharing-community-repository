@@ -38,7 +38,8 @@ import org.alfresco.repo.node.MLPropertyInterceptor;
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.edu_sharing.lightbend.LightbendConfigLoader;
+import org.edu_sharing.alfresco.lightbend.LightbendConfigLoader;
+import org.edu_sharing.lightbend.LightbendConfigHelper;
 import org.edu_sharing.metadataset.v2.MetadataReaderV2;
 import org.edu_sharing.metadataset.v2.MetadataSetInfo;
 import org.edu_sharing.metadataset.v2.MetadataSetV2;
@@ -51,7 +52,6 @@ import org.edu_sharing.repository.server.tools.AuthenticatorRemoteAppResult;
 import org.edu_sharing.repository.server.tools.AuthenticatorRemoteRepository;
 import org.edu_sharing.repository.server.tools.PropertiesHelper;
 import org.edu_sharing.service.config.ConfigServiceFactory;
-import org.edu_sharing.service.provider.Provider;
 import org.edu_sharing.service.provider.ProviderHelper;
 import org.edu_sharing.service.version.VersionService;
 
@@ -232,7 +232,7 @@ public class RepoFactory {
 	public static void refresh() {
 		lastRefreshed = System.currentTimeMillis();
 		ApplicationInfoList.refresh();
-		LightbendConfigLoader.refresh();
+		LightbendConfigHelper.refresh();
 		appClassCache.clear();
 		MetadataReaderV2.refresh();
 		ConfigServiceFactory.refresh();

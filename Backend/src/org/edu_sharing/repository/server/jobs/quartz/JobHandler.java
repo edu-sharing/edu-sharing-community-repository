@@ -41,8 +41,7 @@ import net.sf.acegisecurity.AuthenticationCredentialsNotFoundException;
 import org.alfresco.service.ServiceRegistry;
 import org.apache.log4j.Logger;
 import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
-import org.edu_sharing.lightbend.LightbendConfigLoader;
-import org.edu_sharing.repository.server.tools.cache.FacetteCache;
+import org.edu_sharing.alfresco.lightbend.LightbendConfigLoader;
 import org.quartz.CronTrigger;
 import org.quartz.Job;
 import org.quartz.JobDataMap;
@@ -56,10 +55,6 @@ import org.quartz.SchedulerFactory;
 import org.quartz.Trigger;
 import org.quartz.TriggerListener;
 import org.quartz.TriggerUtils;
-import org.w3c.dom.Node;
-import org.w3c.dom.NodeList;
-
-import javax.xml.xpath.XPathConstants;
 
 /**
  * @author rudi start jobs, start scheduling of an job, stop scheduling of a job

@@ -3,7 +3,7 @@ package org.edu_sharing.service.stream;
 import org.apache.commons.lang3.NotImplementedException;
 import org.apache.http.HttpHost;
 import org.apache.lucene.search.join.ScoreMode;
-import org.edu_sharing.lightbend.LightbendConfigLoader;
+import org.edu_sharing.alfresco.lightbend.LightbendConfigLoader;
 import org.edu_sharing.service.search.model.SortDefinition;
 import org.edu_sharing.service.stream.model.ContentEntry;
 import org.edu_sharing.service.stream.model.ContentEntry.Audience.STATUS;

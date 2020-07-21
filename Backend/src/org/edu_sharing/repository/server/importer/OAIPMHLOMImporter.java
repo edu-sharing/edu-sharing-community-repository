@@ -31,7 +31,6 @@ import java.io.IOException;
 import java.io.StringReader;
 import java.io.StringWriter;
 import java.lang.reflect.Constructor;
-import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.*;
@@ -51,7 +50,7 @@ import com.typesafe.config.Config;
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.apache.commons.httpclient.util.URIUtil;
 import org.apache.log4j.Logger;
-import org.edu_sharing.lightbend.LightbendConfigLoader;
+import org.edu_sharing.alfresco.lightbend.LightbendConfigLoader;
 import org.edu_sharing.repository.server.MCAlfrescoAPIClient;
 import org.edu_sharing.repository.server.jobs.quartz.ImporterJob;
 import org.edu_sharing.repository.server.jobs.quartz.OAIConst;
@@ -67,7 +66,7 @@ public class OAIPMHLOMImporter implements Importer{
 
 	// best thread scaling seems to be at a max at 4-8 threads
 	public static int getThreadCount(){
-		Config config=LightbendConfigLoader.get().getConfig("importer.threads");
+		Config config= LightbendConfigLoader.get().getConfig("importer.threads");
 		return Math.max(config.getInt("min")
 				,Math.min(config.getInt("max"),
 				Runtime.getRuntime().availableProcessors()-config.getInt("minSpare")));
