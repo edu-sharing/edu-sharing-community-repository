@@ -299,9 +299,9 @@ a, a:hover, a:visited, a:active, button {
 }
 small-collection{
   position: absolute;
-  left: 0;
   top: 0;
-  width: 100%;
+  left: $sidenavWidth;
+  width: calc(100% - #{$sidenavWidth});
 }
 .topNoRepositories{
   top: $mainnavHeight;
@@ -659,6 +659,10 @@ div.dialog.darken {
       .list{
         width:max-content;
       }
+    }
+    small-collection {
+      left: 0;
+      width: 100%;
     }
     .tabsRepositories,.moreRepositories{
       .repositoryTitle{
