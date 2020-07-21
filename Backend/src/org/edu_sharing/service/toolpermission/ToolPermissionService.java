@@ -320,6 +320,7 @@ public class ToolPermissionService {
 		toInit.remove(CCConstants.CCM_VALUE_TOOLPERMISSION_GLOBAL_STATISTICS_USER);
 		toInit.remove(CCConstants.CCM_VALUE_TOOLPERMISSION_GLOBAL_STATISTICS_NODES);
 		toInit.remove(CCConstants.CCM_VALUE_TOOLPERMISSION_MEDIACENTER_MANAGE);
+		toInit.remove(CCConstants.CCM_VALUE_TOOLPERMISSION_TEACHER);
 		return toInit;
 	}
 	public List<String> getAllPredefinedToolPermissions(){
@@ -356,6 +357,7 @@ public class ToolPermissionService {
 		toInit.add(CCConstants.CCM_VALUE_TOOLPERMISSION_RATE);
 		toInit.add(CCConstants.CCM_VALUE_TOOLPERMISSION_VIDEO_AUDIO_CUT);
 		toInit.add(CCConstants.CCM_VALUE_TOOLPERMISSION_MEDIACENTER_MANAGE);
+		toInit.add(CCConstants.CCM_VALUE_TOOLPERMISSION_TEACHER);
 
 		addConnectorToolpermissions(toInit);
 		return toInit;
