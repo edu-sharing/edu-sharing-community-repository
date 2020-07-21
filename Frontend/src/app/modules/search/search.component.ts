@@ -1043,7 +1043,7 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
         };
         let facettes;
         try {
-            facettes = MdsHelper.getUsedWidgets(this.currentMdsSet, 'search_suggestions').map((w) => w.id);
+            facettes = MdsHelper.getUsedWidgets(this.currentMdsSet, 'search_suggestions').map((w: any) => w.id);
         } catch(e) {
             console.warn('Could not load used facettes from search_suggestions', e);
             facettes = [RestConstants.LOM_PROP_GENERAL_KEYWORD];
