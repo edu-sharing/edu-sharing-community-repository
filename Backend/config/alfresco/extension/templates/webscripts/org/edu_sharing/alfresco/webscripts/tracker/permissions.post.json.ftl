@@ -1,30 +1,31 @@
-<#macro accessControlListJSON acl>
-      {
-         "aclId": ${acl.aclId?c},
-         "entries" :
+<#macro accessControlListJSON acl indent="">
+     {
+     "aclId": ${acl.aclId?c},
+     "inherits": ${acl.inherits?c},
+     "entries" :
          [
-            <#list acl.aces as ace>
-               <@accessControlEntryJSON ace=ace/>
-               <#if ace_has_next>,</#if>
-            </#list>
-         ]
-      }
+        <#list acl.aces as ace>
+            <@accessControlEntryJSON ace=ace indent="    "/>
+            <#if ace_has_next>,</#if>
+        </#list>
+        ]
+    }
 </#macro>
 
-<#macro accessControlEntryJSON ace>
-    {
+<#macro accessControlEntryJSON ace indent="">
+    ${indent} {
         "authority": ${ace.authority},
         "permission": ${ace.permission}
-    }
+    ${indent} }
 </#macro>
 
 
 {
-   "accessControlLists" :
-   [
-      <#list accessControlLists as acl>
-         <@accessControlListJSON acl=acl/>
-         <#if acl_has_next>,</#if>
-      </#list>
-   ]
+    "accessControlLists" :
+    [
+        <#list accessControlLists as acl>
+            <@accessControlListJSON acl=acl indent="    "/>
+            <#if acl_has_next>,</#if>
+        </#list>
+    ]
 }
