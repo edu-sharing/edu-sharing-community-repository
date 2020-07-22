@@ -2,7 +2,7 @@
      {
      "aclId": ${acl.aclId?c},
      "inherits": ${acl.inherits?c},
-     "entries" :
+     "aces" :
          [
         <#list acl.aces as ace>
             <@accessControlEntryJSON ace=ace indent="    "/>
