@@ -48,11 +48,7 @@ public class CMISSearchHelper {
             List<String> joinedTable = new ArrayList<>();
             for(Map.Entry<String,Object> filter : filters.entrySet()){
                 if(filter.getKey().startsWith("cmis")){
-                    if(where.length() > 0) {
-                        where.append(" AND ");
-                    }else {
-                        where.append(" WHERE ");
-                    }
+                    prepareWhere(where);
                     where.append(tableNameAlias).append(".").append(filter.getKey()).append(" = ").append(escape(filter.getValue().toString()));
                 }
                 else{
@@ -65,11 +61,7 @@ public class CMISSearchHelper {
                                 .append(" ON ").append(aspectTableAlias).append(".cmis:objectId = ").append(tableNameAlias).append(".cmis:objectId ");
                         joinedTable.add(aspectTable);
                     }
-                    if(where.length() > 0) {
-                        where.append(" AND ");
-                    }else {
-                        where.append(" WHERE ");
-                    }
+                    prepareWhere(where);
                     where.append(aspectTableAlias).append(".").append(CCConstants.getValidLocalName(filter.getKey()));
                     if(filter.getValue()==null) {
                         where.append(" IS NULL");
@@ -81,19 +73,11 @@ public class CMISSearchHelper {
         }
         if(data!=null){
             if(data.inFolder != null){
-                if(where.length() > 0) {
-                    where.append(" AND ");
-                }else {
-                    where.append(" WHERE ");
-                }
+                prepareWhere(where);
                 where.append("IN_FOLDER(").append(tableNameAlias).append(", ").append(data.inFolder).append(")");
             }
             if(data.inTree != null){
-                if(where.length() > 0) {
-                    where.append(" AND ");
-                }else {
-                    where.append(" WHERE ");
-                }
+                prepareWhere(where);
                 where.append("IN_TREE(").append(tableNameAlias).append(", ").append(escape(data.inTree)).append(")");
             }
         }
@@ -103,6 +87,14 @@ public class CMISSearchHelper {
 
         logger.info(query+": "+result.getNumberFound() +" "+ result.length() +" "+ result.getClass().getName() +" getBulkFetchSize: "+ result.getBulkFetchSize()+" "+result);
         return result;
+    }
+
+    private static void prepareWhere(StringBuilder where) {
+        if(where.length() > 0) {
+            where.append(" AND ");
+        }else {
+            where.append(" WHERE ");
+        }
     }
 
     public static List<NodeRef> fetchNodesByTypeAndFilters(String nodeType, Map<String,Object> filters, CMISSearchData data, int maxPermissionChecks){
