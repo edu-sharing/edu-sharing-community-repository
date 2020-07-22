@@ -79,8 +79,10 @@ public class PermissionsGet extends DeclarativeWebScript {
         List<Acl> accessControlLists = new ArrayList<>();
         for(long aclId : aclIds){
             AccessControlList accessControlList = aclDAO.getAccessControlList(aclId);
+
             Acl acl = new Acl();
             acl.setAclId(aclId);
+            acl.setInherits(accessControlList.getProperties().getInherits());
             List<Ace> aces = new ArrayList<>();
             acl.setAces(aces);
             for(AccessControlEntry entry : accessControlList.getEntries()){

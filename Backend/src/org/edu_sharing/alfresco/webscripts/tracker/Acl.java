@@ -4,6 +4,7 @@ import java.util.List;
 
 public class Acl {
     long aclId;
+    boolean inherits;
 
     List<Ace> aces;
 
@@ -21,5 +22,13 @@ public class Acl {
 
     public void setAces(List<Ace> aces) {
         this.aces = aces;
+    }
+
+    public boolean isInherits() {
+        return inherits;
+    }
+
+    public void setInherits(boolean inherits) {
+        this.inherits = inherits;
     }
 }
