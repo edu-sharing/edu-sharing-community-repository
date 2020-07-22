@@ -1,7 +1,7 @@
 <#macro accessControlListJSON acl indent="">
      {
-     "aclId": ${acl.aclId?c},
-     "inherits": ${acl.inherits?c},
+     "aclId": "${acl.aclId?c}",
+     "inherits": "${acl.inherits?c}",
      "aces" :
          [
         <#list acl.aces as ace>
@@ -14,8 +14,8 @@
 
 <#macro accessControlEntryJSON ace indent="">
     ${indent} {
-        "authority": ${ace.authority},
-        "permission": ${ace.permission}
+        "authority": "${ace.authority}",
+        "permission": "${ace.permission}"
     ${indent} }
 </#macro>
 
