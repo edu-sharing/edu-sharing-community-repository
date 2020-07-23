@@ -178,7 +178,7 @@
                   <mat-label>{{'WORKSPACE.LICENSE.LOCALE' | translate}}</mat-label>
                   <mat-select id="localeCountry" [(ngModel)]="ccCountry">
                     <mat-option value="">{{'COUNTRY_CODE.INTERNATIONAL' | translate}}</mat-option>
-                    <mat-option *ngFor="let country of ccCountries" value="{{country.key}}">{{country.name}}</mat-option>
+                    <mat-option *ngFor="let country of _ccCountries" value="{{country.key}}">{{country.name}}</mat-option>
                   </mat-select>
                 </mat-form-field>
               </div>

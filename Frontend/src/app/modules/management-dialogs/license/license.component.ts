@@ -75,7 +75,7 @@ export class WorkspaceLicenseComponent  {
   private ccTitleOfWork="";
   private ccSourceUrl="";
   private ccVersion="4.0";
-  private ccLocale="";
+  private ccCountry="";
   private cc0Type="CC_0";
   private ccProfileUrl="";
   private copyrightType="COPYRIGHT_FREE";
@@ -291,7 +291,7 @@ export class WorkspaceLicenseComponent  {
       this.ccSourceUrl=this.getValueForAll(RestConstants.CCM_PROP_LICENSE_SOURCE_URL);
       this.ccProfileUrl=this.getValueForAll(RestConstants.CCM_PROP_LICENSE_PROFILE_URL);
       this.ccVersion=this.getValueForAll(RestConstants.CCM_PROP_LICENSE_CC_VERSION,this.ccVersion);
-      this.ccLocale=this.getValueForAll(RestConstants.CCM_PROP_LICENSE_CC_LOCALE);
+      this.ccCountry=this.getValueForAll(RestConstants.CCM_PROP_LICENSE_CC_LOCALE);
     }
     if(license=='CC_0'){
       this.type='CC_0';
@@ -495,8 +495,8 @@ export class WorkspaceLicenseComponent  {
             if (this.ccVersion) {
                 prop[RestConstants.CCM_PROP_LICENSE_CC_VERSION] = [this.ccVersion];
             }
-            if (this.ccLocale) {
-                prop[RestConstants.CCM_PROP_LICENSE_CC_LOCALE] = [this.ccLocale];
+            if (this.ccCountry) {
+                prop[RestConstants.CCM_PROP_LICENSE_CC_LOCALE] = [this.ccCountry];
             }
         }
         prop[RestConstants.CCM_PROP_AUTHOR_FREETEXT]=[this.authorFreetext];
