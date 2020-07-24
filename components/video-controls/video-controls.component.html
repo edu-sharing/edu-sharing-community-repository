@@ -3,38 +3,65 @@
   *ngIf="chooseCollection"
   [@fromRight]="chooseCollection"
   title="WORKSPACE.SELECT_COLLECTION"
-  (onCancel)="chooseCollection=false"
+  (onCancel)="chooseCollection = false"
   (onChoose)="addToCollection($event)"
   (onCreateCollection)="createCollectionAndAdd($event)"
 ></collection-chooser>
-<div *ngIf="_video && node && !isGuest && hasPermission" class="selection" [class.small]="size === 'small'">
+<div
+  *ngIf="_video && node && !isGuest && hasPermission"
+  class="selection"
+  [class.small]="size === 'small'"
+>
   <div class="selectionSlider">
-    <ng5-slider [(value)]="_startTime" [(highValue)]="_endTime" [options]="options" (userChangeEnd)="onUserChangeEnd($event)"></ng5-slider>
+    <ng5-slider
+      [(value)]="_startTime"
+      [(highValue)]="_endTime"
+      [options]="options"
+      (userChangeEnd)="onUserChangeEnd($event)"
+    ></ng5-slider>
   </div>
 
   <div>
     <form class="addChapter">
       <div class="time">
         <mat-form-field class="startTime">
-          <mat-label>{{'START' | translate}}</mat-label>
-          <input matInput type="text" name="startTime" id="startTime" [ngModel]="display_startTime" readonly>
+          <mat-label>{{ 'START' | translate }}</mat-label>
+          <input
+            matInput
+            type="text"
+            name="startTime"
+            id="startTime"
+            [ngModel]="display_startTime"
+            readonly
+            disabled
+          />
         </mat-form-field>
       </div>
       <div class="time">
         <mat-form-field class="endTime">
-          <mat-label>{{'STOP' | translate}}</mat-label>
-          <input matInput type="text" name="endTime" id="endTime" [ngModel]="display_endTime" readonly>
+          <mat-label>{{ 'STOP' | translate }}</mat-label>
+          <input
+            matInput
+            type="text"
+            name="endTime"
+            id="endTime"
+            [ngModel]="display_endTime"
+            readonly
+            disabled
+          />
         </mat-form-field>
       </div>
       <div class="title">
         <mat-form-field>
-          <mat-label>{{'NODE.cm:title' | translate}}</mat-label>
-          <input matInput type="text" name="chapterName" id="chapterName" [(ngModel)]="_title">
+          <mat-label>{{ 'NODE.cm:title' | translate }}</mat-label>
+          <input matInput type="text" name="chapterName" id="chapterName" [(ngModel)]="_title" />
         </mat-form-field>
       </div>
       <div class="save">
-        <button mat-raised-button color="primary" (click)="updateChapters()" *ngIf="!loading">{{'SAVE' | translate}}</button>
-        <spinner-small *ngIf="loading">{{'SAVE' | translate}}</spinner-small>
+        <button mat-raised-button color="primary" (click)="updateChapters()" *ngIf="!loading">
+          {{ 'SAVE' | translate }}
+        </button>
+        <spinner-small *ngIf="loading">{{ 'SAVE' | translate }}</spinner-small>
       </div>
     </form>
   </div>
