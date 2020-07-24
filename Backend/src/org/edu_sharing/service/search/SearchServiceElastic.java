@@ -26,7 +26,9 @@ import org.elasticsearch.search.aggregations.Aggregation;
 import org.elasticsearch.search.aggregations.AggregationBuilders;
 import org.elasticsearch.search.aggregations.bucket.terms.ParsedStringTerms;
 import org.elasticsearch.search.aggregations.bucket.terms.Terms;
+import org.elasticsearch.search.aggregations.metrics.ParsedCardinality;
 import org.elasticsearch.search.builder.SearchSourceBuilder;
+import org.elasticsearch.search.collapse.CollapseBuilder;
 import org.elasticsearch.search.sort.FieldSortBuilder;
 import org.elasticsearch.search.sort.ScoreSortBuilder;
 import org.elasticsearch.search.sort.SortOrder;
@@ -91,11 +93,29 @@ public class SearchServiceElastic extends SearchServiceImpl {
             for(String facette : searchToken.getFacettes()){
                 searchSourceBuilder.aggregation(AggregationBuilders.terms(facette).field("properties." + facette + ".keyword"));
             }
+
+            /**
+             * add collapse builder
+             */
+            CollapseBuilder collapseBuilder = new CollapseBuilder("properties.ccm:original");
+            searchSourceBuilder.collapse(collapseBuilder);
+            /**
+             * cardinality aggregation to get correct total count
+             *
+             * https://github.com/elastic/elasticsearch/issues/24130
+             */
+            searchSourceBuilder.aggregation(AggregationBuilders.cardinality("original_count").field("properties.ccm:original"));
+
+
+
             searchSourceBuilder.query(queryBuilder);
             searchSourceBuilder.from(searchToken.getFrom());
             searchSourceBuilder.size(searchToken.getMaxResult());
             searchSourceBuilder.trackTotalHits(true);
             searchSourceBuilder.sort(new ScoreSortBuilder().order(SortOrder.DESC));
+
+
+
 
             searchRequest.source(searchSourceBuilder);
 
@@ -137,19 +157,38 @@ public class SearchServiceElastic extends SearchServiceImpl {
             }
 
             Map<String,Map<String,Integer>> facettesResult = new HashMap<String,Map<String,Integer>>();
+
+            Long total = null;
            for(Aggregation a : searchResponse.getAggregations()){
-               ParsedStringTerms pst = (ParsedStringTerms)a;
-               Map<String,Integer> f = new HashMap<>();
-               facettesResult.put(a.getName(),f);
-               for(Terms.Bucket b : pst.getBuckets()){
-                   String key = b.getKeyAsString();
-                   long count = b.getDocCount();
-                   f.put(key,(int)count);
+               if(a instanceof  ParsedStringTerms) {
+                   ParsedStringTerms pst = (ParsedStringTerms) a;
+                   Map<String, Integer> f = new HashMap<>();
+                   facettesResult.put(a.getName(), f);
+                   for (Terms.Bucket b : pst.getBuckets()) {
+                       String key = b.getKeyAsString();
+                       long count = b.getDocCount();
+                       f.put(key, (int) count);
+
+
+                   }
+               }else if (a instanceof ParsedCardinality){
+                   ParsedCardinality pc = (ParsedCardinality)a;
+                   if (a.getName().equals("original_count")) {
+                       total = pc.getValue();
+                   }else{
+                       logger.error("unknown cardinality aggregation");
+                   }
+
+               }else{
+                   logger.error("non supported aggreagtion "+a.getName());
                }
+           }
+           if(total == null){
+               total = hits.getTotalHits().value;
            }
             sr.setCountedProps(facettesResult);
             sr.setStartIDX(searchToken.getFrom());
-            sr.setNodeCount((int)hits.getTotalHits().value);
+            sr.setNodeCount((int)total.longValue());
             client.close();
         } catch (IOException e) {
             logger.error(e.getMessage(),e);
