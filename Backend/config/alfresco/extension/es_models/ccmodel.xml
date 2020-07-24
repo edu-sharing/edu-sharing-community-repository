@@ -962,10 +962,10 @@
 				<!-- typicalagerange replikation nur einwertig. kann man from und to 
 					in jeweils eigenes feld tun -->
 				<property name="ccm:educationaltypicalagerange_from">
-					<type>d:text</type>
+					<type>d:int</type>
 				</property>
 				<property name="ccm:educationaltypicalagerange_to">
-					<type>d:text</type>
+					<type>d:int</type>
 				</property>
 				<property name="ccm:educationaltypicallearningtime">
 					<type>d:long</type>
