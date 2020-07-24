@@ -87,6 +87,7 @@ public class SearchServiceElastic extends SearchServiceImpl {
             for (String a : authorities) {
                 audienceQueryBuilder.should(QueryBuilders.matchQuery("permissions.read", a));
             }
+            audienceQueryBuilder.should(QueryBuilders.matchQuery("permissions.read", serviceRegistry.getAuthenticationService().getCurrentUserName()));
             audienceQueryBuilder.should(QueryBuilders.matchQuery("owner", serviceRegistry.getAuthenticationService().getCurrentUserName()));
             QueryBuilder queryBuilder = QueryBuilders.boolQuery().must(metadataQueryBuilder).must(audienceQueryBuilder);
 
