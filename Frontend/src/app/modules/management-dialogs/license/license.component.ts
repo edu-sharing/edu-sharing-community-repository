@@ -556,7 +556,7 @@ export class WorkspaceLicenseComponent  {
           this.authorVCard = new VCard();
       }
     }
-        /**
+    /**
      * Get all the key from countries and return the array with key and name (Translated) 
      * @param {string[]} countries array with all Countries Key 
      */
@@ -565,10 +565,10 @@ export class WorkspaceLicenseComponent  {
       countries.forEach(country => {
         this._ccCountries.push({ key: country, name: this.translate.instant("COUNTRY_CODE." + country) })
       });
-      this._ccCountries.sort((a, b) => this.sortCounties({ a: a.name, b: b.name }));
+      this._ccCountries.sort((a, b) => this.sortCountries({ a: a.name, b: b.name }));
     }
 
-  /**
+    /**
      * Function wich compare 2 string and return one of those numbers -1,0,1 
      *  
      *   -1 if a<b  
@@ -579,7 +579,7 @@ export class WorkspaceLicenseComponent  {
      * @param {string} b second string
      * @returns {number}   -1 | 0 | 1
      */
-    private sortCounties({ a, b }: { a: string; b: string; }):number {
+    private sortCountries({ a, b }: { a: string; b: string; }):number {
       if (a.toLowerCase() < b.toLowerCase()) return -1;
       if (a.toLowerCase() > b.toLowerCase()) return 1;
       return 0;
