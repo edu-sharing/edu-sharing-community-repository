@@ -403,6 +403,10 @@ export class ListTableComponent implements EventListener {
         /** Source click information, may null, e.g. 'preview', 'comments', 'dropdown' */
         source: string;
     }>();
+    /**
+     * Hint to the caller that he should invalidate / refresh the current content since it was probably modified
+     */
+    @Output() onRequestRefresh = new EventEmitter<void>();
 
     /**
      * Called when the user double clicks on a row.
@@ -1168,9 +1172,10 @@ export class ListTableComponent implements EventListener {
             const index = this._nodes.findIndex(n => n.ref.id === o.ref.id);
             if (index === -1) {
                 console.warn(
-                    'tried to update node which not exist inside the list',
+                    'tried to update node which not exist inside the list -> falling back to full reload',
                     o,
                 );
+                this.onRequestRefresh.emit();
                 return;
             }
             this._nodes.splice(index, 1, o);
