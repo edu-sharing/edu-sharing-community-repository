@@ -1410,7 +1410,11 @@
 					<type>d:text</type>
 					<multiple>true</multiple>
 				</property>			
-				<property name="ccm:educational_use">
+				<property name="ccm:sourceContentType">
+					<type>d:text</type>
+					<multiple>true</multiple>
+				</property>
+				<property name="ccm:toolCategory">
 					<type>d:text</type>
 					<multiple>true</multiple>
 				</property>

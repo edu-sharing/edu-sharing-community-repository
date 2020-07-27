@@ -32,13 +32,21 @@
 			<valuespace>https://vocabs.openeduhub.de/w3id.org/openeduhub/vocabs/learningResourceType/index.json</valuespace>
 		</widget>
 		<widget>
-			<caption>Art der Seite (nur für Quellen)</caption>
+			<caption>Art der Seite</caption>
+			<bottomCaption>Für Quellen</bottomCaption>
 			<id>ccm:sourceContentType</id>
 			<type>multivalueFixedBadges</type>
 			<hideIfEmpty>true</hideIfEmpty>
 			<valuespace>https://vocabs.openeduhub.de/w3id.org/openeduhub/vocabs/sourceContentType/index.json</valuespace>
 		</widget>
-
+		<widget>
+			<caption>Art des Tools</caption>
+			<bottomCaption>Für Tools/Werkzeuge</bottomCaption>
+			<id>ccm:toolCategory</id>
+			<type>multivalueFixedBadges</type>
+			<hideIfEmpty>true</hideIfEmpty>
+			<valuespace>https://vocabs.openeduhub.de/w3id.org/openeduhub/vocabs/toolCategory/index.json</valuespace>
+		</widget>
 		<widget>
 			<caption>Typ des Objekts</caption>
 			<id>ccm:objecttype</id>
@@ -50,7 +58,6 @@
 					<value cap="Unterrichtsplanung">LESSONPLANNING</value>
 			</values>
 		</widget>
-
 		<widget>
 			<id>ccm:replicationsource</id>
 			<type>multivalueFixedBadges</type>
@@ -120,6 +127,7 @@
 			  <ccm:educationalcontext>
 			  <ccm:educationallearningresourcetype>
 			  <ccm:sourceContentType>
+			  <ccm:toolCategory>
               <license>
 				]]></html>
 		</template>
@@ -136,6 +144,7 @@
 			  <ccm:educationalcontext>
 			  <ccm:educationallearningresourcetype>
 			  <ccm:sourceContentType>
+			  <ccm:toolCategory>
 				]]></html>
 		</template>
 		<template>
@@ -212,7 +221,7 @@
 					<ccm:taxonid>
 					<ccm:educationalintendedenduserrole>
 					<ccm:educationalcontext>
-					<cclom:general_keyword>
+					<cclom:general_keyword hideIfEmpty="true">
 					<cclom:location>
 				]]></html>
 		</template>
@@ -256,6 +265,10 @@
 				<multiplejoin>OR</multiplejoin>
 			</property>
 			<property name="ccm:sourceContentType">
+				<multiple>true</multiple>
+				<multiplejoin>OR</multiplejoin>
+			</property>
+			<property name="ccm:toolCategory">
 				<multiple>true</multiple>
 				<multiplejoin>OR</multiplejoin>
 			</property>
