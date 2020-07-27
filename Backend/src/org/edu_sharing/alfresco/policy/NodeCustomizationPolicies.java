@@ -528,6 +528,12 @@ public class NodeCustomizationPolicies implements OnContentUpdatePolicy, OnCreat
 		}
 	}
 	private static boolean propertyEquals(Serializable p1, Serializable p2) {
+		if(p1 instanceof MLText){
+			p1 = ((MLText) p1).getDefaultValue();
+		}
+		if(p2 instanceof MLText){
+			p2 = ((MLText) p2).getDefaultValue();
+		}
 		if(Objects.equals(p1,p2)) {
 			return true;
 		}
