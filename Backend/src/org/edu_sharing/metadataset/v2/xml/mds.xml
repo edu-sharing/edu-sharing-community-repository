@@ -819,6 +819,13 @@
 					<!-- <column>ccm:replicationsource</column> -->
 				</columns>
 			</sort>
+			<sort>
+				<id>collections</id>
+				<default>
+					<sortBy>cm:modified</sortBy>
+					<sortAscending>false</sortAscending>
+				</default>
+			</sort>
 		</sorts>
 		<lists>
 			<list>

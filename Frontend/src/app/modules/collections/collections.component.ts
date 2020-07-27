@@ -25,7 +25,7 @@ import {
     TemporaryStorageService,
     UIService,
     CollectionReference,
-    CollectionFeedback, NodesRightMode, Permission,
+    CollectionFeedback, NodesRightMode, Permission, MdsMetadatasets, ConfigurationHelper, RestNetworkService, SortDefault, RequestObject,
 } from '../../core-module/core.module';
 import { Toast } from '../../core-ui-module/toast';
 import {DefaultGroups, OptionItem, Scope} from '../../core-ui-module/option-item';
@@ -134,6 +134,7 @@ export class CollectionsMainComponent {
     tutorialElement: ElementRef;
     customNodeList = false;
     permissions: Permission[];
+    private sortCollections: SortDefault;
     set collectionShare(collectionShare: Node) {
         this._collectionShare = collectionShare;
         this.refreshAll();
@@ -229,6 +230,7 @@ export class CollectionsMainComponent {
         private location: Location,
         private collectionService: RestCollectionService,
         private nodeService: RestNodeService,
+        private networkService: RestNetworkService,
         private organizationService: RestOrganizationService,
         private iamService: RestIamService,
         private mdsService: RestMdsService,
@@ -262,12 +264,21 @@ export class CollectionsMainComponent {
                 translationService,
                 config,
             );
-            this.mdsService.getSet().subscribe((data: MdsMetadataset) => {
-                this.referencesColumns = MdsHelper.getColumns(
-                    data,
-                    'collectionReferences',
-                );
-            });
+            this.mdsService.getSets().subscribe(
+                (data: MdsMetadatasets) => {
+                    const mdsSets = ConfigurationHelper.filterValidMds(RestConstants.HOME_REPOSITORY,
+                        data.metadatasets,
+                        this.config,
+                    );
+                    this.mdsService.getSet(mdsSets[0].id).subscribe((mds) => {
+                        this.referencesColumns = MdsHelper.getColumns(
+                            mds,
+                            'collectionReferences',
+                        );
+                        const info = MdsHelper.getSortInfo(mds, 'collections');
+                        this.sortCollections = info.default;
+                    });s
+                });
 
             this.connector.isLoggedIn().subscribe(
                 (data: LoginResult) => {
@@ -639,9 +650,15 @@ export class CollectionsMainComponent {
         GlobalContainerComponent.finishPreloading();
 
         // set correct scope
-        const request: any = Helper.deepCopy(
+        const request: RequestObject = Helper.deepCopy(
             CollectionsMainComponent.DEFAULT_REQUEST,
         );
+        if(this.sortCollections) {
+            request.sortBy = [this.sortCollections.sortBy];
+            request.sortAscending = [this.sortCollections.sortAscending];
+        } else {
+            console.warn('Sort for collections is not defined in the mds!');
+        }
         // when loading child collections, we load all of them
         if (!this.isRootLevelCollection()) {
             request.count = RestConstants.COUNT_UNLIMITED;
