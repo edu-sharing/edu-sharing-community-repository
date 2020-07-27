@@ -589,6 +589,13 @@ public class RecordHandlerLOM implements RecordHandlerInterface {
 
 		if(lomReplicationTypicalAgeRangeList != null && lomReplicationTypicalAgeRangeList.size() > 0) {
 			toSafeMap.put(CCConstants.CCM_PROP_IO_REPL_EDUCATIONAL_TYPICALAGERANGE, lomReplicationTypicalAgeRangeList);
+			String tar = (String)lomReplicationTypicalAgeRangeList.get(0);
+			if(tar != null && tar.matches("[0-9]?[0-9]-[0-9][0-9]?")){
+				String[] splitted = tar.split("-");
+				toSafeMap.put(CCConstants.CCM_PROP_IO_REPL_EDUCATIONAL_TYPICALAGERANGEFROM,splitted[0]);
+				toSafeMap.put(CCConstants.CCM_PROP_IO_REPL_EDUCATIONAL_TYPICALAGERANGETO,splitted[1]);
+			}
+
 		}else {
 			toRemoveList.add(CCConstants.CCM_PROP_IO_REPL_EDUCATIONAL_TYPICALAGERANGE);
 		}

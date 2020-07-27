@@ -475,8 +475,17 @@ public class NodeCustomizationPolicies implements OnContentUpdatePolicy, OnCreat
 		
 		// refresh Titel for Maps changed in webdav
 		if(type.equals(QName.createQName(CCConstants.CCM_TYPE_MAP))){
-			if(nameAfter != null && !nameAfter.equals(nameBefore)){
-				nodeService.setProperty(nodeRef, ContentModel.PROP_TITLE, nameAfter);
+			/**
+			 * only do this when it's not a collection to keep special signs in title,
+			 * we have to check for property instead of aspect here,
+			 * cause aspect ccm:collection would not be present onCreate
+			 */
+			String collectionType = (String)after.get(QName.createQName(CCConstants.CCM_PROP_MAP_COLLECTIONTYPE));
+			logger.info("collectionType:" +collectionType);
+			if(collectionType == null){
+				if(nameAfter != null && !nameAfter.equals(nameBefore)){
+					nodeService.setProperty(nodeRef, ContentModel.PROP_TITLE, nameAfter);
+				}
 			}
 		}
 		
