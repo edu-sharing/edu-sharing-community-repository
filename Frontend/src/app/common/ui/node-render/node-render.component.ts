@@ -97,7 +97,6 @@ export class NodeRenderComponent implements EventListener {
       private nodeApi : RestNodeService,
       private searchApi : RestSearchService,
       private usageApi : RestUsageService,
-      private searchStorage : SearchService,
       private toolService: RestToolService,
       private componentFactoryResolver: ComponentFactoryResolver,
       private viewContainerRef: ViewContainerRef,

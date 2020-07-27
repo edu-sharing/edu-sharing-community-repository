@@ -93,6 +93,9 @@ public class BulkDeleteNodesJob extends AbstractJob{
 			throw new IllegalArgumentException("Missing required parameter 'startFolder'");
 		}
 		Object recycleStr = context.getJobDetail().getJobDataMap().get("recycle");
+		if(recycleStr==null){
+			throw new IllegalArgumentException("Missing required boolean parameter 'recycle'");
+		}
 		boolean recycle = Boolean.parseBoolean(recycleStr.toString());
 
 		try {

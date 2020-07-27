@@ -327,6 +327,7 @@ user-profile {
         display: none;
     }
     .topBar {
+        z-index: $topBarMobileZIndex;
         .rocketchat {
             display: flex;
         }
