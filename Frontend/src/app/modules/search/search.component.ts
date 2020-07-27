@@ -762,7 +762,9 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
 
     private updateSortMds() {
         // when mds is not ready, we can't update just now
-        if (this.currentMdsSet == null) return;
+        if (this.currentMdsSet == null) {
+            return null;
+        }
         let sort = MdsHelper.getSortInfo(this.currentMdsSet, 'search');
         if (sort && sort.columns && sort.columns.length) {
             this.searchService.sort.materialsColumns = [];

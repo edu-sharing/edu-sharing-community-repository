@@ -277,7 +277,7 @@ export class CollectionsMainComponent {
                         );
                         const info = MdsHelper.getSortInfo(mds, 'collections');
                         this.sortCollections = info.default;
-                    });s
+                    });
                 });
 
             this.connector.isLoggedIn().subscribe(
