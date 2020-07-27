@@ -38,6 +38,7 @@ export class OptionsHelperService {
     private appleCmd: boolean;
     private globalOptions: OptionItem[];
     private list: ListTableComponent;
+    private subscriptions: Subscription[] = [];
     private mainNav: MainNavComponent;
     private actionbar: ActionbarComponent;
     private dropdown: DropdownComponent;
@@ -203,18 +204,22 @@ export class OptionsHelperService {
      * refresh all bound components with available menu options
      */
     refreshComponents() {
+        if(this.subscriptions?.length){
+            this.subscriptions.forEach((s) => s.unsubscribe());
+            this.subscriptions = [];
+        }
         if(this.mainNav) {
-            this.mainNav.management.onRefresh.subscribe((nodes: void | Node[]) => {
+            this.subscriptions.push(this.mainNav.management.onRefresh.subscribe((nodes: void | Node[]) => {
                 if(this.listener && this.listener.onRefresh) {
                     this.listener.onRefresh(nodes);
                 }
                 if(this.list) {
                     this.list.updateNodes(nodes);
                 }
-            });
-            this.mainNav.management.onDelete.subscribe(
+            }));
+            this.subscriptions.push(this.mainNav.management.onDelete.subscribe(
                 (result: { objects: any; count: number; error: boolean; }) => this.listener.onDelete(result)
-            );
+            ));
         }
 
         this.globalOptions = this.getAvailableOptions(Target.Actionbar);
