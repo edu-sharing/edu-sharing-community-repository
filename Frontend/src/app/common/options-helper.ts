@@ -631,6 +631,20 @@ export class OptionsHelperService {
         editNode.group = DefaultGroups.Edit;
         editNode.priority = 20;
 
+
+        const editNodeOriginal = new OptionItem('OPTIONS.EDIT_ORIGINAL', 'edit', (object) => {
+            this.nodeService.getNodeMetadata(this.getObjects(object)[0].properties[RestConstants.CCM_PROP_IO_ORIGINAL][0]).subscribe((node) => {
+                management.nodeMetadata = [node.node];
+            });
+        });
+        editNodeOriginal.constrains = [Constrain.CollectionReference, Constrain.HomeRepository, Constrain.User];
+        editNodeOriginal.permissions = [RestConstants.ACCESS_WRITE];
+        editNodeOriginal.permissionsRightMode = NodesRightMode.Original;
+        editNodeOriginal.permissionsMode = HideMode.Disable;
+        editNodeOriginal.group = DefaultGroups.Edit;
+        editNodeOriginal.priority = 20;
+
+
         const templateNode = new OptionItem('OPTIONS.TEMPLATE', 'assignment_turned_in', (object) =>
             management.nodeTemplate = this.getObjects(object)[0]
         );
@@ -874,6 +888,7 @@ export class OptionsHelperService {
         options.push(feedbackCollectionView);
         options.push(simpleEditNode);
         options.push(editNode);
+        options.push(editNodeOriginal);
         // add to collection
         options.push(addNodeToCollection);
         // create variant

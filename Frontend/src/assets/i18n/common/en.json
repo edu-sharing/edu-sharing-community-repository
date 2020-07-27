@@ -465,6 +465,7 @@
         "DEBUG": "Debug",
         "INVITE": "Invite",
         "EDIT": "Edit info",
+        "EDIT_ORIGINAL": "Edit source",
         "EDIT_SIMPLE": "Quick-Edit",
         "COLLECTION_EDIT": "Edit",
         "COLLECTION_PIN": "Pin collection",

@@ -498,6 +498,7 @@
         "DEBUG": "Debug",
         "INVITE": "Freigeben",
         "EDIT": "Infos bearbeiten",
+        "EDIT_ORIGINAL": "Quelle bearbeiten",
         "EDIT_SIMPLE": "Schnell-Bearbeitung",
         "COLLECTION_EDIT": "Bearbeiten",
         "COLLECTION_PIN": "Sammlung pinnen",

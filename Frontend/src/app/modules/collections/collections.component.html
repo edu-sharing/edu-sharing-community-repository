@@ -344,6 +344,7 @@
                     [hasCheckbox]="!orderActive && !reurl"
                     [canDrop]="canDropOnRef"
                     (clickRow)="onContentClick($event.node)"
+                    (onRequestRefresh)="refreshContent()"
                     [canDelete]="canDelete"
                     (onDelete)="deleteReference($event)"
                     [createLink]="true"
