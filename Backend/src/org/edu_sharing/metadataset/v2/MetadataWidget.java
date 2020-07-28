@@ -41,6 +41,10 @@ public class MetadataWidget extends MetadataTranslatable{
 	private boolean required,extended,allowempty,valuespaceClient=true,hideIfEmpty,inherit=true;
 	private List<MetadataKey> values;
 	private List<Subwidget> subwidgets;
+	/**
+	 * hint for the client if this widget creates a link to the search
+	 * so e.g. if you click a keyword, you can be directed to the search with this keyword as filter
+	 */
 	private boolean searchable;
 	
 	private MetadataCondition condition;
