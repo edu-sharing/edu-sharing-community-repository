@@ -10,6 +10,7 @@ import org.edu_sharing.metadataset.v2.tools.MetadataElasticSearchHelper;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.server.SearchResultNodeRef;
 import org.edu_sharing.repository.server.tools.ApplicationInfoList;
+import org.edu_sharing.repository.server.tools.LogTime;
 import org.edu_sharing.service.model.NodeRef;
 import org.edu_sharing.service.model.NodeRefImpl;
 import org.edu_sharing.service.search.model.SearchToken;
@@ -37,9 +38,10 @@ import org.springframework.context.ApplicationContext;
 import java.io.IOException;
 import java.io.Serializable;
 import java.util.*;
+import java.util.stream.Collectors;
 
 public class SearchServiceElastic extends SearchServiceImpl {
-
+    static RestHighLevelClient client;
     public SearchServiceElastic(String applicationId) {
         super(applicationId);
     }
@@ -54,7 +56,13 @@ public class SearchServiceElastic extends SearchServiceImpl {
     @Override
     public SearchResultNodeRef searchV2(MetadataSetV2 mds, String query, Map<String,String[]> criterias,
                                         SearchToken searchToken) throws Throwable {
-
+        if(client == null || !client.ping(RequestOptions.DEFAULT)){
+             client = new RestHighLevelClient(
+                    RestClient.builder(
+                            new HttpHost("localhost", 9200, "http")
+                            //,new HttpHost("localhost", 9201, "http")
+                    ));
+        }
         MetadataQuery queryData;
         try{
             queryData = mds.findQuery(query, MetadataReaderV2.QUERY_SYNTAX_DSL);
@@ -122,10 +130,8 @@ public class SearchServiceElastic extends SearchServiceImpl {
 
 
 
-            RestHighLevelClient client = getClient();
-            logger.info("starting search elastic");
-            SearchResponse searchResponse = client.search(searchRequest, RequestOptions.DEFAULT);
-            logger.info("finished search elastic");
+
+            SearchResponse searchResponse = LogTime.log("Searching elastic", () -> client.search(searchRequest, RequestOptions.DEFAULT));
 
             SearchHits hits = searchResponse.getHits();
 
@@ -154,6 +160,12 @@ public class SearchServiceElastic extends SearchServiceImpl {
                         identifier,
                         nodeId);
                 eduNodeRef.setProperties(props);
+                eduNodeRef.setAspects(((List<String>)sourceAsMap.get("aspects")).
+                        stream().map(CCConstants::getValidGlobalName).collect(Collectors.toList()));
+                // @TODO: Resolve completely via elastic
+                HashMap<String, Boolean> permissions = new HashMap<>();
+                permissions.put(CCConstants.PERMISSION_READ, true);
+                eduNodeRef.setPermissions(permissions);
                 data.add(eduNodeRef);
             }
 
@@ -190,7 +202,7 @@ public class SearchServiceElastic extends SearchServiceImpl {
             sr.setCountedProps(facettesResult);
             sr.setStartIDX(searchToken.getFrom());
             sr.setNodeCount((int)total.longValue());
-            client.close();
+            //client.close();
         } catch (IOException e) {
             logger.error(e.getMessage(),e);
         }
@@ -200,13 +212,6 @@ public class SearchServiceElastic extends SearchServiceImpl {
         return sr;
     }
 
-    RestHighLevelClient getClient(){
-        return new RestHighLevelClient(
-                RestClient.builder(
-                        new HttpHost("localhost", 9200, "http")
-                        //,new HttpHost("localhost", 9201, "http")
-                ));
-    };
 
 
 
