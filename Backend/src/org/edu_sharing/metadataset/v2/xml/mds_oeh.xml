@@ -106,7 +106,7 @@
 		<group>
 			<id>io_render</id>
 			<views>
-				<view>node_general</view>
+				<view>node_general_render</view>
 			</views>
 		</group>
 	</groups>
@@ -117,6 +117,26 @@
 				<icon>description</icon>
 				<html><![CDATA[
               <ccm:wwwurl>			
+              <cm:name>
+              <cclom:title>
+              <cclom:general_keyword>
+              <cclom:general_description type="textarea">
+              <ccm:objecttype>
+			  <ccm:taxonid>
+			  <ccm:educationalintendedenduserrole>
+			  <ccm:educationalcontext>
+			  <ccm:educationallearningresourcetype>
+			  <ccm:sourceContentType>
+			  <ccm:toolCategory>
+              <license>
+				]]></html>
+		</template>
+		<template>
+			<id>node_general_render</id>
+			<caption>dialog_upload_tab_basic</caption>
+			<icon>description</icon>
+			<html><![CDATA[
+              <ccm:wwwurl>
               <cm:name>
               <cclom:title>
               <cclom:general_keyword>
