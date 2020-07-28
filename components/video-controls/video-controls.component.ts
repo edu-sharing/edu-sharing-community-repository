@@ -1,7 +1,9 @@
 import { trigger } from '@angular/animations';
-import { Component, EventEmitter, Input, Output } from '@angular/core';
+import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
 import { Router } from '@angular/router';
-import { ChangeContext, Options } from 'ng5-slider';
+import { Options } from 'ng5-slider';
+import { of } from 'rxjs';
+import { catchError, map, tap } from 'rxjs/operators';
 import { BridgeService } from '../../../core-bridge-module/bridge.service';
 import {
     RestCollectionService,
@@ -16,6 +18,13 @@ import { RestNodeService } from '../../../core-module/rest/services/rest-node.se
 import { UIAnimation } from '../../../core-module/ui/ui-animation';
 import { Toast } from '../../toast';
 import { UIHelper } from '../../ui-helper';
+import { DurationPipe } from './duration.pipe';
+
+interface VideoControlsValues {
+    startTime: number;
+    endTime: number;
+    title: string;
+}
 
 @Component({
     selector: 'video-controls',
@@ -23,213 +32,65 @@ import { UIHelper } from '../../ui-helper';
     styleUrls: ['video-controls.component.scss'],
     animations: [trigger('fromRight', UIAnimation.fromRight())],
 })
-export class VideoControlsComponent {
-    @Input() set video(video: HTMLVideoElement) {
-        // timeout to make sure node is already bound
-        setTimeout(() => {
-            this.hasPermission =
-                (this.connector.hasToolPermissionInstant(
-                    RestConstants.TOOLPERMISSION_VIDEO_AUDIO_CUT,
-                ) &&
-                    this.isCollectionRef() &&
-                    this.hasPermissions(RestConstants.ACCESS_WRITE)) ||
-                (!this.isCollectionRef() && this.hasPermissions(RestConstants.ACCESS_CC_PUBLISH));
-
-            this._video = video;
-            this.track = video.addTextTrack('chapters', 'English', 'en');
-            this.track.mode = 'showing';
-            this._title = this.node.properties[RestConstants.LOM_PROP_TITLE]
-                ? this.node.properties[RestConstants.LOM_PROP_TITLE][0]
-                : '';
-            let vtt = this.node.properties[RestConstants.CCM_PROP_IO_REF_VIDEO_VTT];
-            if (vtt && vtt.length === 1) {
-                vtt = JSON.parse(vtt[0]);
-                this.objectToCues(vtt, this.track);
-                const c = vtt[vtt.length - 1];
-                if (c) {
-                    this._startTime = c.startTime;
-                    this._endTime = c.endTime;
-                    this.display_startTime = this.toHHMMSS(this._startTime);
-                    this.display_endTime = this.toHHMMSS(this._endTime);
-                }
-            }
-            this.render();
-        });
-    }
+export class VideoControlsComponent implements OnInit {
     @Input() node: Node;
+    @Input() video: HTMLVideoElement;
     @Input() size: 'small' | 'large' = 'large';
-    @Output() save = new EventEmitter<VideoData>();
+    @Output() updateCurrentNode = new EventEmitter<Node>();
 
-    _video: HTMLVideoElement;
-    _startTime: number = this.secs('00:00:00');
-    _endTime: number = this.secs('00:00:00');
-    _title = 'Title';
-    loading = false;
-    chooseCollection = false;
-    isGuest: boolean;
-    hasPermission: boolean;
-
-    display_startTime = this.toHHMMSS(this._startTime);
-    display_endTime = this.toHHMMSS(this._endTime);
-
-    options: Options = {
-        floor: 0,
-        ceil: 100,
-    };
-
-    markers: any[] = [];
-
-    private track: TextTrack;
-    private b = document.querySelector('#bar');
+    /** Data chosen by the user and saved with the video */
+    values: VideoControlsValues;
+    /** Whether the user has all required permissions to use this tool on the given node */
+    hasRequiredPermissions: boolean;
+    isLoading = false;
+    isCollectionChooserVisible = false;
+    sliderOptions: Options;
 
     constructor(
-        private nodeService: RestNodeService,
+        private bridge: BridgeService,
         private collectionService: RestCollectionService,
         private connector: RestConnectorService,
+        private nodeService: RestNodeService,
         private router: Router,
-        private bridge: BridgeService,
-        private toast: Toast,
         private temporaryStorage: TemporaryStorageService,
-    ) {
-        this.isGuest = this.connector.getCurrentLogin().isGuest;
-    }
+        private toast: Toast,
+    ) {}
 
-    onUserChangeEnd(changeContext: ChangeContext): void {
-        this.display_startTime = this.toHHMMSS(this._startTime);
-        this.display_endTime = this.toHHMMSS(this._endTime);
-    }
-
-    render() {
-        this.markers = [];
-        this._video.onloadedmetadata = () => {
-            this.options.ceil = this._video.duration;
-            if (this._endTime == 0) {
-                this._endTime = this._video.duration;
-            }
-            this.options = {
-                floor: 0,
-                ceil: this._video.duration,
-                animate: true,
-                draggableRange: true,
-                minRange: 1,
-                translate: (value: number): string => {
-                    return this.toHHMMSS(value);
-                },
+    ngOnInit(): void {
+        // This component is injected programmatically without calling ngOnChanges. Therefore, we
+        // require that critical inputs are available after init and don't support updates on these
+        // values.
+        if (!this.node) {
+            throw new Error('Missing required input `node`');
+        }
+        if (!this.video) {
+            throw new Error('Missing required input `video`');
+        }
+        this.hasRequiredPermissions = this.getHasRequiredPermissions(this.node);
+        if (this.video.duration) {
+            this.onVideoLoaded();
+        } else {
+            this.video.onloadedmetadata = () => {
+                this.onVideoLoaded();
             };
-        };
+        }
+    }
 
-        for (const t of this._video.textTracks as any) {
-            if (t.kind === 'chapters') {
-                for (const c of t.cues) {
-                    this.markers = []; // only use the last cue
-                    this.markers.push(c);
-                    this._video.currentTime = c.startTime;
-                    this._startTime = c.startTime;
-                    this._endTime = c.endTime;
-                }
+    async save(): Promise<void> {
+        if (this.isCollectionRef(this.node)) {
+            const node = await this.writeVideoControlsValues(this.node, this.values);
+            if (node) {
+                this.updateCurrentNode.emit(node);
             }
+        } else {
+            // Not an individual object, choose new location first.
+            this.isCollectionChooserVisible = true;
         }
-        if (this.markers.length) {
-            this._video.currentTime = this.markers[0].startTime;
-        }
-        const that = this;
-        this._video.addEventListener('timeupdate', function pausing_function() {
-            if (this.currentTime >= that.markers[0].endTime) {
-                this.pause();
-
-                if (this.paused) {
-                    this.removeEventListener('timeupdate', pausing_function, false);
-                }
-                // remove the event listener after you paused the playback
-            }
-        });
-    }
-
-    seek(startTime: number) {
-        this._video.currentTime = startTime;
-        if (this._video.paused) {
-            this._video.play();
-        }
-    }
-
-    toHHMMSS(sec: any) {
-        const sec_num: number = parseInt(sec, 10); // don't forget the second param
-        let hours: number | string = Math.floor(sec_num / 3600);
-        let minutes: number | string = Math.floor((sec_num - hours * 3600) / 60);
-        let seconds: number | string = sec_num - hours * 3600 - minutes * 60;
-
-        if (minutes < 10) {
-            minutes = '0' + minutes;
-        }
-        if (seconds < 10) {
-            seconds = '0' + seconds;
-        }
-        if (hours == 0) {
-            return minutes + ':' + seconds;
-        } else if (hours < 10) {
-            hours = '0' + hours;
-        }
-        return hours + ':' + minutes + ':' + seconds;
-    }
-
-    secs(hhmmss: any) {
-        const a = hhmmss.split(':');
-        const seconds: number = +a[0] * 60 * 60 + +a[1] * 60 + +a[2];
-        return seconds;
-    }
-
-    onStartKey() {
-        this._startTime = this.secs(this.display_startTime);
-    }
-
-    onEndKey() {
-        this._endTime = this.secs(this.display_endTime);
-    }
-
-    updateChapters() {
-        if (!this.isCollectionRef()) {
-            // not an individual object, choose new location first
-            this.chooseCollection = true;
-            return;
-        }
-        this.loading = true;
-        if (this.track.cues) {
-            while (this.track.cues.length) {
-                this.track.removeCue(this.track.cues[0]);
-            }
-        }
-        this.track.addCue(new VTTCue(this._startTime, this._endTime, ''));
-        this.render();
-        const props: any = {};
-        props[RestConstants.CCM_PROP_IO_REF_VIDEO_VTT] = [
-            JSON.stringify(this.cuesToObject(this.track.cues)),
-        ];
-        props[RestConstants.LOM_PROP_TITLE] = [this._title];
-        this.nodeService.editNodeMetadata(this.node.ref.id, props).subscribe(
-            (node) => {
-                // no feedback at the moment
-                this.save.emit({
-                    node: node.node,
-                    startTime: this._startTime,
-                    endTime: this._endTime,
-                });
-                this.loading = false;
-                this.toast.toast('VIDEO_CONTROLS.SAVED');
-            },
-            (error) => {
-                this.toast.error(error);
-                this.loading = false;
-            },
-        );
-    }
-
-    getProgress() {
-        return (this._video.currentTime / this._video.duration) * 100;
     }
 
     addToCollection(collection: Node) {
-        this.chooseCollection = false;
-        this.loading = true;
+        this.isCollectionChooserVisible = false;
+        this.isLoading = true;
         UIHelper.addToCollection(
             this.collectionService,
             this.router,
@@ -238,10 +99,10 @@ export class VideoControlsComponent {
             [this.node],
             (elements: Node[]) => {
                 if (elements.length) {
-                    this.node = elements[0];
-                    this.updateChapters();
+                    const node = elements[0];
+                    this.writeVideoControlsValues(node, this.values);
                 } else {
-                    this.loading = false;
+                    this.isLoading = false;
                 }
             },
         );
@@ -258,36 +119,115 @@ export class VideoControlsComponent {
         ]);
     }
 
-    private hasPermissions(permission: string) {
-        return RestHelper.hasAccessPermission(this.node, permission);
+    private onVideoLoaded(): void {
+        this.sliderOptions = this.getSliderOptions(this.video);
+        this.values = this.readVideoControlsValues(this.node, this.video);
+        this.applyVideoStartAndEnd(this.video, this.values);
     }
 
-    private isCollectionRef() {
-        return this.node.aspects.indexOf(RestConstants.CCM_ASPECT_IO_REFERENCE) !== -1;
+    private getHasRequiredPermissions(node: Node): boolean {
+        if (this.connector.getCurrentLogin().isGuest) {
+            return false;
+        } else if (
+            !this.connector.hasToolPermissionInstant(RestConstants.TOOLPERMISSION_VIDEO_AUDIO_CUT)
+        ) {
+            return false;
+        } else {
+            if (this.isCollectionRef(node)) {
+                return RestHelper.hasAccessPermission(node, RestConstants.ACCESS_WRITE);
+            } else {
+                return RestHelper.hasAccessPermission(node, RestConstants.ACCESS_CC_PUBLISH);
+            }
+        }
     }
 
-    private objectToCues(obj: any[], track: TextTrack) {
-        obj.forEach((o) => {
-            track.addCue(new VTTCue(o.startTime, o.endTime, o.text));
+    /**
+     * Reads video-control values from `node`.
+     *
+     * Uses `video` to set meaningful fallback values in case node doesn't define video-control
+     * values. `video` has to have loaded metadata.
+     */
+    private readVideoControlsValues(node: Node, video: HTMLVideoElement): VideoControlsValues {
+        const values: VideoControlsValues = {
+            title: node.properties[RestConstants.LOM_PROP_TITLE]?.[0] ?? '',
+            startTime: 0,
+            endTime: video.duration,
+        };
+        const vttCuesJson: string[] = node.properties[RestConstants.CCM_PROP_IO_REF_VIDEO_VTT];
+        if (vttCuesJson && vttCuesJson.length === 1) {
+            const vttCues = JSON.parse(vttCuesJson[0]);
+            const vttCue = vttCues[vttCues.length - 1];
+            if (vttCue) {
+                values.startTime = vttCue.startTime;
+                values.endTime = vttCue.endTime;
+            }
+        }
+        return values;
+    }
+
+    private writeVideoControlsValues(
+        node: Node,
+        values: VideoControlsValues,
+    ): Promise<Node | null> {
+        this.isLoading = true;
+        const props = {
+            [RestConstants.CCM_PROP_IO_REF_VIDEO_VTT]: [
+                JSON.stringify([
+                    {
+                        startTime: values.startTime,
+                        endTime: values.endTime,
+                        text: '',
+                    },
+                ]),
+            ],
+            [RestConstants.LOM_PROP_TITLE]: [values.title],
+        };
+        return this.nodeService
+            .editNodeMetadata(node.ref.id, props)
+            .pipe(
+                tap({
+                    next: () => {
+                        this.toast.toast('VIDEO_CONTROLS.SAVED');
+                    },
+                    error: (error) => {
+                        this.toast.error(error);
+                    },
+                    complete: () => {
+                        this.isLoading = false;
+                    },
+                }),
+                map((nodeWrapper) => nodeWrapper.node),
+                // Don't propagate errors any further.
+                catchError((error) => of(null)),
+            )
+            .toPromise();
+    }
+
+    private getSliderOptions(video: HTMLVideoElement): Options {
+        const durationPipe = new DurationPipe();
+        return {
+            floor: 0,
+            ceil: video.duration,
+            animate: true,
+            draggableRange: true,
+            minRange: 1,
+            translate: (value: number): string => durationPipe.transform(value, video.duration),
+        };
+    }
+
+    private applyVideoStartAndEnd(video: HTMLVideoElement, values: VideoControlsValues) {
+        video.currentTime = values.startTime;
+        video.addEventListener('timeupdate', function pauseOnEndTime() {
+            if (this.currentTime >= values.endTime) {
+                this.pause();
+                if (this.paused) {
+                    this.removeEventListener('timeupdate', pauseOnEndTime, false);
+                }
+            }
         });
     }
 
-    private cuesToObject(cues: TextTrackCueList) {
-        const result = [];
-        for (let i = 0; i < cues.length; i++) {
-            const c = cues[i];
-            result.push({
-                startTime: c.startTime,
-                endTime: c.endTime,
-                text: c.text,
-            });
-        }
-        return result;
+    private isCollectionRef(node: Node) {
+        return node.aspects.indexOf(RestConstants.CCM_ASPECT_IO_REFERENCE) !== -1;
     }
-}
-
-export class VideoData {
-    node: Node;
-    startTime: number;
-    endTime: number;
 }

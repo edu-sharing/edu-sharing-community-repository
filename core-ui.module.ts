@@ -54,6 +54,7 @@ import { TranslationLoader } from './translation-loader';
 import { Ng5SliderModule } from 'ng5-slider';
 import {RouterLink, RouterModule} from "@angular/router";
 import {NodeUrlComponent} from "./components/node-url/node-url.component";
+import { DurationPipe } from './components/video-controls/duration.pipe';
 
 @NgModule({
     declarations: [
@@ -89,6 +90,7 @@ import {NodeUrlComponent} from "./components/node-url/node-url.component";
         SafeHtmlPipe,
         ListOptionItemComponent,
         DistinctClickDirective,
+        DurationPipe,
     ],
     imports: [
         A11yModule,

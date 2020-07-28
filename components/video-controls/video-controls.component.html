@@ -1,23 +1,22 @@
 <collection-chooser
   class="dialog-right scrollWithBanner"
-  *ngIf="chooseCollection"
-  [@fromRight]="chooseCollection"
+  *ngIf="isCollectionChooserVisible"
+  [@fromRight]="isCollectionChooserVisible"
   title="WORKSPACE.SELECT_COLLECTION"
-  (onCancel)="chooseCollection = false"
+  (onCancel)="isCollectionChooserVisible = false"
   (onChoose)="addToCollection($event)"
   (onCreateCollection)="createCollectionAndAdd($event)"
 ></collection-chooser>
 <div
-  *ngIf="_video && node && !isGuest && hasPermission"
+  *ngIf="sliderOptions && hasRequiredPermissions"
   class="selection"
   [class.small]="size === 'small'"
 >
   <div class="selectionSlider">
     <ng5-slider
-      [(value)]="_startTime"
-      [(highValue)]="_endTime"
-      [options]="options"
-      (userChangeEnd)="onUserChangeEnd($event)"
+      [(value)]="values.startTime"
+      [(highValue)]="values.endTime"
+      [options]="sliderOptions"
     ></ng5-slider>
   </div>
 
@@ -31,7 +30,7 @@
             type="text"
             name="startTime"
             id="startTime"
-            [ngModel]="display_startTime"
+            [ngModel]="values.startTime | duration: video.duration"
             readonly
             disabled
           />
@@ -45,7 +44,7 @@
             type="text"
             name="endTime"
             id="endTime"
-            [ngModel]="display_endTime"
+            [ngModel]="values.endTime | duration: video.duration"
             readonly
             disabled
           />
@@ -54,14 +53,20 @@
       <div class="title">
         <mat-form-field>
           <mat-label>{{ 'NODE.cm:title' | translate }}</mat-label>
-          <input matInput type="text" name="chapterName" id="chapterName" [(ngModel)]="_title" />
+          <input
+            matInput
+            type="text"
+            name="chapterName"
+            id="chapterName"
+            [(ngModel)]="values.title"
+          />
         </mat-form-field>
       </div>
       <div class="save">
-        <button mat-raised-button color="primary" (click)="updateChapters()" *ngIf="!loading">
+        <button mat-raised-button color="primary" (click)="save()" *ngIf="!isLoading">
           {{ 'SAVE' | translate }}
         </button>
-        <spinner-small *ngIf="loading">{{ 'SAVE' | translate }}</spinner-small>
+        <spinner-small *ngIf="isLoading">{{ 'SAVE' | translate }}</spinner-small>
       </div>
     </form>
   </div>
