@@ -46,7 +46,7 @@ public class PermissionServiceHelper {
 		public HashMap<String, Boolean> hasAllPermissions(String nodeId){
 			return hasAllPermissions(StoreRef.PROTOCOL_WORKSPACE,StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(), nodeId);
 		}
-		public static List<String> getPermissionsAsString(HashMap<String,Boolean> hasPermissions){
+		public static List<String> getPermissionsAsString(Map<String,Boolean> hasPermissions){
 			List<String> result = new ArrayList<String>();
 
 			for (String permission : PERMISSIONS) {

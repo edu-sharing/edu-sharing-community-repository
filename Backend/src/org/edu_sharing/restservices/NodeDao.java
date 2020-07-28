@@ -319,7 +319,7 @@ public class NodeDao {
 	private HashMap<String, Object> nodeProps;
 	private HashMap<String, HashMap<String, Object>> nodeHistory;
 
-	private HashMap<String, Boolean> hasPermissions;
+	private Map<String, Boolean> hasPermissions;
 
 	private final String type;
 	private final List<String> aspects;
@@ -475,7 +475,7 @@ public class NodeDao {
 			}else{
 				this.nodeProps = nodeRef.getProperties();
 			}
-			refreshPermissions();
+			refreshPermissions(nodeRef);
 			
 			if(nodeProps.containsKey(CCConstants.NODETYPE)){
 				this.type = (String) nodeProps.get(CCConstants.NODETYPE);
@@ -483,10 +483,12 @@ public class NodeDao {
 			else{
 				this.type = CCConstants.CCM_TYPE_IO;
 			}
-
-			String[] aspects = nodeService.getAspects(this.storeProtocol,this.storeId, nodeId);
-
-			this.aspects = (aspects != null) ? Arrays.asList(aspects) : new ArrayList<String>();
+			if(nodeRef.getAspects() == null) {
+				String[] aspects = nodeService.getAspects(this.storeProtocol, this.storeId, nodeId);
+				this.aspects = (aspects != null) ? Arrays.asList(aspects) : new ArrayList<String>();
+			} else {
+				this.aspects = nodeRef.getAspects();
+			}
 			this.access = PermissionServiceHelper.getPermissionsAsString(hasPermissions);
 			// replace all data if its an remote object
 			if(this.type.equals(CCConstants.CCM_TYPE_REMOTEOBJECT)){
@@ -517,8 +519,12 @@ public class NodeDao {
 	public boolean isFromRemoteRepository(){
 		return remoteId!=null || !this.repoDao.isHomeRepo() || this.aspects.contains(CCConstants.CCM_ASPECT_REMOTEREPOSITORY);
 	}
-	public void refreshPermissions() {
-        this.hasPermissions = permissionService.hasAllPermissions(storeProtocol, storeId, nodeId,DAO_PERMISSIONS);
+	public void refreshPermissions(org.edu_sharing.service.model.NodeRef nodeRef) {
+		if(nodeRef!=null && nodeRef.getPermissions()!=null && nodeRef.getPermissions().size() > 0){
+			this.hasPermissions = nodeRef.getPermissions();
+		} else {
+			this.hasPermissions = permissionService.hasAllPermissions(storeProtocol, storeId, nodeId, DAO_PERMISSIONS);
+		}
 	}
     public static NodeEntries convertToRest(RepositoryDao repoDao,Filter propFilter,List<NodeRef> children, Integer skipCount, Integer maxItems) throws DAOException {
         NodeEntries result=new NodeEntries();
