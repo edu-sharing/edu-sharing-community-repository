@@ -72,6 +72,14 @@
 			<link>_BLANK</link>
 		</widget>
 		<widget>
+			<id>cclom:general_keyword</id>
+			<type>multivalueBadges</type>
+			<caption>Freie Schlagworte / Stichworte</caption>
+			<placeholder>Stichwort ergänzen...</placeholder>
+			<hideIfEmpty>true</hideIfEmpty>
+			<searchable>true</searchable>
+		</widget>
+		<widget>
 			<id>ccm:editorial_state</id>
 			<caption>Redaktionsstatus / Sichtbarkeit</caption>
 			<bottomCaption>für Wordpress</bottomCaption>
