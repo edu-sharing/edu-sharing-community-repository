@@ -568,6 +568,12 @@
 					<type>d:text</type>
 					<mandatory>true</mandatory>
 				</property>
+                <property name="ccm:userEducationalAgeRangeFrom">
+                    <type>d:int</type>
+                </property>
+                <property name="ccm:userEducationalAgeRangeTo">
+                    <type>d:int</type>
+                </property>
 			</properties>
 		</aspect>
 

@@ -328,6 +328,10 @@ public class CCConstants {
 
 	public final static String CCM_PROP_PERSON_NODE_LISTS = "{http://www.campuscontent.de/model/1.0}userNodeLists";
 
+	public final static String CCM_PROP_PERSON_EDUCATIONAL_AGERANGE_FROM = "{http://www.campuscontent.de/model/1.0}userEducationalAgeRangeFrom";
+
+	public final static String CCM_PROP_PERSON_EDUCATIONAL_AGERANGE_TO = "{http://www.campuscontent.de/model/1.0}userEducationalAgeRangeTo";
+
 	public final static String CCM_PROP_PH_MODIFIED = "{http://www.campuscontent.de/model/1.0}ph_modified";
 
 	public final static String CCM_PROP_PH_HISTORY = "{http://www.campuscontent.de/model/1.0}ph_history";
