@@ -302,6 +302,48 @@
 			</property>
 		</query>
 	</queries>
+	<queries syntax="dsl">
+		<basequery></basequery>
+		<allowSearchWithoutCriteria>true</allowSearchWithoutCriteria>
+
+		<query join="AND" id="ngsearch">
+			<!--TODO basequery-->
+			<!--basequery>ISNULL:@ccm\:tool_category</basequery-->
+			<basequery>{"bool":{"must":[{"term":{"type":"ccm:io"}},{"term":{"nodeRef.storeRef.protocol":"workspace"}},{"term":{"properties.cm:edu_metadataset.keyword":"mds_oeh"}}],"must_not":[{"term":{"aspects":"ccm:metadataPresettingTemplate"}},{"term":{"aspects":"ccm:io_childobject"}},{"wildcard":{"properties.cm:name.keyword":"._*"}},{"wildcard":{"properties.cm:name.keyword":".DS_Store*"}},{"exists":{"field":"ccm:tool_category"}}]}}</basequery>
+			<property name="ccm:replicationsource">
+				<multiple>true</multiple>
+				<multiplejoin>OR</multiplejoin>
+			</property>
+			<property name="ccm:taxonid">
+				<multiple>true</multiple>
+				<multiplejoin>OR</multiplejoin>
+			</property>
+			<property name="ccm:educationalintendedenduserrole">
+				<multiple>true</multiple>
+				<multiplejoin>OR</multiplejoin>
+			</property>
+			<property name="ccm:objecttype">
+				<multiple>true</multiple>
+				<multiplejoin>OR</multiplejoin>
+			</property>
+			<property name="ccm:educationalcontext">
+				<multiple>true</multiple>
+				<multiplejoin>OR</multiplejoin>
+			</property>
+			<property name="ccm:educationallearningresourcetype">
+				<multiple>true</multiple>
+				<multiplejoin>OR</multiplejoin>
+			</property>
+			<property name="ccm:sourceContentType">
+				<multiple>true</multiple>
+				<multiplejoin>OR</multiplejoin>
+			</property>
+			<property name="ccm:toolCategory">
+				<multiple>true</multiple>
+				<multiplejoin>OR</multiplejoin>
+			</property>
+		</query>
+	</queries>
 	<sorts>
 		<sort>
 			<id>collections</id>
