@@ -47,7 +47,8 @@ public class MetadataQueryParameter implements Serializable {
 	}
 	private String getDefaultStatement() {
 		if(syntax.equals(MetadataReaderV2.QUERY_SYNTAX_DSL)){
-			return "{\"wildcard\":{\"properties." + name  +"\":{\"value\":\"${value}\"}}}";
+			//return "{\"wildcard\":{\"properties." + name  +"\":{\"value\":\"${value}\"}}}";
+			return "{\"term\":{\"properties." + name +".keyword" +"\":{\"value\":\"${value}\"}}}";
 		} else if(syntax.equals(MetadataReaderV2.QUERY_SYNTAX_LUCENE)) {
 			return "@" + name.replace(":", "\\:") + ":\"*${value}*\"";
 		}
