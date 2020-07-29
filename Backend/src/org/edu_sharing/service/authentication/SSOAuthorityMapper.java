@@ -203,13 +203,17 @@ public class SSOAuthorityMapper {
 			return tmpUserName;
 		}
 
-		tmpUserName=mapAdminAuthority(tmpUserName,ssoAttributes.get(PARAM_APP_ID));
-		
 		String ssoType = ssoAttributes.get(PARAM_SSO_TYPE);
 		if (ssoType == null) {
 			logErrorParams(PARAM_SSO_TYPE, ssoAttributes);
 			throw new AuthenticationException(AuthenticationExceptionMessages.MISSING_PARAM);
 		}
+
+		if(SSO_TYPE_AuthByApp.equals(ssoType)) {
+			tmpUserName = mapAdminAuthority(tmpUserName, ssoAttributes.get(PARAM_APP_ID));
+		}
+		
+
 		
 		final String originalUsername = tmpUserName;
 		
