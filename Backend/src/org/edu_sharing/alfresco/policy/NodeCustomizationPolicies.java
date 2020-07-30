@@ -509,10 +509,11 @@ public class NodeCustomizationPolicies implements OnContentUpdatePolicy, OnCreat
 
 	}
 	private static String propertyToString(Object p){
-		if(p instanceof MLText){
+		if(p == null){
+			return "";
+		} else if(p instanceof MLText){
 			return ((MLText) p).getDefaultValue();
-		}
-		if(p instanceof String) {
+		} else if(p instanceof String) {
 			return (String)p;
 		}
 		return p.toString();
