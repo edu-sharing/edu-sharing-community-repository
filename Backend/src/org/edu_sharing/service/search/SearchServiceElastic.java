@@ -158,10 +158,17 @@ public class SearchServiceElastic extends SearchServiceImpl {
                 HashMap<String, Object> props = new HashMap<>();
                 for (Map.Entry<String, Serializable> entry : properties.entrySet()) {
 
-                    //String value = null;
-
-
-                    props.put(CCConstants.getValidGlobalName(entry.getKey()), entry.getValue().toString());
+                    Serializable value = null;
+                    if(entry.getValue() instanceof ArrayList){
+                        if(((ArrayList) entry.getValue()).size() != 1) {
+                            value = entry.getValue();
+                        } else {
+                            value = (Serializable) ((ArrayList) entry.getValue()).get(0);
+                        }
+                    } else {
+                        value = entry.getValue();
+                    }
+                    props.put(CCConstants.getValidGlobalName(entry.getKey()), value);
                 }
 
                 NodeRef eduNodeRef = new NodeRefImpl(ApplicationInfoList.getHomeRepository().getAppId(),
@@ -170,7 +177,7 @@ public class SearchServiceElastic extends SearchServiceImpl {
                         nodeId);
                 eduNodeRef.setProperties(props);
                 eduNodeRef.setAspects(((List<String>)sourceAsMap.get("aspects")).
-                        stream().map(CCConstants::getValidGlobalName).collect(Collectors.toList()));
+                        stream().map(CCConstants::getValidGlobalName).filter(Objects::nonNull).collect(Collectors.toList()));
                 // @TODO: Resolve completely via elastic
                 HashMap<String, Boolean> permissions = new HashMap<>();
                 permissions.put(CCConstants.PERMISSION_READ, true);
