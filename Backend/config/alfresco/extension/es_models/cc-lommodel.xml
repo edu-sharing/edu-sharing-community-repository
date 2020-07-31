@@ -387,8 +387,9 @@
 					<multiple>false</multiple>
 				</property>
 				<!-- Kata Value: 1, 2, 3, 4-->
+				<!-- we may get external catalog values as strings here -->
 				<property name="cclom:aggregationlevel">
-					<type>d:int</type>
+					<type>d:text</type>
 					<!-- if we don't fill that we get an incomplete aspect at the node 
 					  so we don't make it mandatory
 					<mandatory>true</mandatory>
