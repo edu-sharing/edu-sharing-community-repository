@@ -45,6 +45,8 @@ export class VideoControlsComponent implements OnInit {
     isLoading = false;
     isCollectionChooserVisible = false;
     sliderOptions: Options;
+    private playbackStartedTime: Date;
+    private previousValues: VideoControlsValues;
 
     constructor(
         private bridge: BridgeService,
@@ -119,10 +121,20 @@ export class VideoControlsComponent implements OnInit {
         ]);
     }
 
+    onValueChange() {
+        if (this.values.startTime !== this.previousValues?.startTime) {
+            this.video.currentTime = this.values.startTime;
+        } else if (this.values.endTime !== this.previousValues?.endTime) {
+            this.video.currentTime = this.values.endTime;
+        }
+        this.previousValues = { ...this.values };
+    }
+
     private onVideoLoaded(): void {
         this.sliderOptions = this.getSliderOptions(this.video);
         this.values = this.readVideoControlsValues(this.node, this.video);
-        this.applyVideoStartAndEnd(this.video, this.values);
+        this.registerVideoHooks(this.video);
+        this.video.currentTime = this.values.startTime;
     }
 
     private getHasRequiredPermissions(node: Node): boolean {
@@ -215,15 +227,22 @@ export class VideoControlsComponent implements OnInit {
         };
     }
 
-    private applyVideoStartAndEnd(video: HTMLVideoElement, values: VideoControlsValues) {
-        video.currentTime = values.startTime;
+    private registerVideoHooks(video: HTMLVideoElement): void {
+        const videoControlsComponent = this;
         video.addEventListener('timeupdate', function pauseOnEndTime() {
-            if (this.currentTime >= values.endTime) {
+            // Pause each time endTime is reached, but allow to resume playback.
+            if (
+                this.currentTime >= videoControlsComponent.values.endTime &&
+                // Pause only up to one second after exceeding endTime.
+                Math.abs(this.currentTime - videoControlsComponent.values.endTime) < 1 &&
+                // Do not pause if playback was started less than 2 seconds ago.
+                new Date().getTime() - videoControlsComponent.playbackStartedTime?.getTime() > 2000
+            ) {
                 this.pause();
-                if (this.paused) {
-                    this.removeEventListener('timeupdate', pauseOnEndTime, false);
-                }
             }
+        });
+        video.addEventListener('play', function onPlay() {
+            videoControlsComponent.playbackStartedTime = new Date();
         });
     }
 

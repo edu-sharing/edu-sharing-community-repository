@@ -1,134 +1,112 @@
-@import "../../styles/variables";
-$height: 10px;
+@import '../../styles/variables';
 
-.ng5-slider{
+.time {
+    .mat-form-field, input {
+        cursor: pointer;
+    }
+}
+
+.ng5-slider {
     width: 90%;
 }
 
 ::ng-deep {
-  .selectionSlider .ng5-slider .ng5-slider-bar {
-    background: #E1E1E1;
-    border-radius: 2px;
-  }
-  .selectionSlider .ng5-slider .ng5-slider-selection {
-    background-color: $primary;
-  }
+    .selectionSlider .ng5-slider .ng5-slider-bar {
+        background: #e1e1e1;
+        border-radius: 2px;
+    }
+    .selectionSlider .ng5-slider .ng5-slider-selection {
+        background-color: $primary;
+    }
 
-  .selectionSlider .ng5-slider .ng5-slider-pointer {
-    background-color: $primary;
-  }
+    .selectionSlider .ng5-slider .ng5-slider-pointer {
+        background-color: $primary;
+    }
 
-  .selectionSlider .ng5-slider .ng5-slider-pointer.ng5-slider-active:after{
-    background-color: $primaryDark;
-  }
+    .selectionSlider .ng5-slider .ng5-slider-pointer.ng5-slider-active:after {
+        background-color: $primaryDark;
+    }
 
-  .selectionSlider .ng5-slider .ng5-slider-tick.ng5-slider-selected {
-    background-color: $primaryMediumLight;
-  }
+    .selectionSlider .ng5-slider .ng5-slider-tick.ng5-slider-selected {
+        background-color: $primaryMediumLight;
+    }
 
-  .selectionSlider .ng5-slider .ng5-slider-bubble{
-    color: $primaryDark;
-  }
+    .selectionSlider .ng5-slider .ng5-slider-bubble {
+        color: $primaryDark;
+    }
 
-  .selectionSlider .ng5-slider .ng5-slider-bubble.ng5-slider-limit{
-    display: none;
-    color: $primaryDark;
-  }
+    .selectionSlider .ng5-slider .ng5-slider-bubble.ng5-slider-limit {
+        display: none;
+        color: $primaryDark;
+    }
 }
 
-.selection{
+.selection {
     background: #fff;
     margin-top: -2px;
 }
 
-#bar {
-  width: 90%;
-  margin: 0 auto;
-  position: relative;
-  top: 10px;
-  cursor: pointer;
-  background-color: $primaryMediumLight;
-  color: #fff;
-  height:$height;
-  border-radius: $height/2;
-  opacity: 1;
+.chapterTitle {
+    text-align: left;
+    visibility: hidden;
+    transition: 0.2s ease-in-out;
+    z-index: 5000;
 }
 
-#bar span {
-  display: inline-flex;
-  align-items: center;
-  position: absolute;
-  border-left: 2px solid #fff;
-  border-right: 2px solid #fff;
-  height: $height;
-  text-shadow: -1px -1px 1px rgba(255,255,255,.1), 1px 1px 1px rgba(0,0,0,.5);
-  padding-left: 3px;
-  line-height: 12px;
-}
-
-.chapterTitle{
-  text-align: left;
-  visibility: hidden;
-  transition: 0.2s ease-in-out;
-  z-index: 5000;
-}
-/*
-#bar span:hover .chapterTitle{
-  visibility: visible;
-}
-*/
-
-.addChapter{
-  display: flex;
-  justify-content: space-evenly;
-  margin: 25px 40px 0 40px;
-  .time,.title,.save{
-    margin: 0 5px;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    width: 0;
-    >mat-form-field{
-      width: 100%;
+.addChapter {
+    display: flex;
+    justify-content: space-evenly;
+    margin: 25px 40px 0 40px;
+    .time,
+    .title,
+    .save {
+        margin: 0 5px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 0;
+        > mat-form-field {
+            width: 100%;
+        }
     }
-  }
-  .save{
-    flex-grow: 1;
-    min-width: 100px;
-    >*{
-      position: relative;
-      top: -9px;
+    .save {
+        flex-grow: 1;
+        min-width: 100px;
+        > * {
+            position: relative;
+            top: -9px;
+        }
     }
-  }
-  .time{
-    flex-grow: 2;
-  }
-  .title{
-    flex-grow: 4;
-  }
+    .time {
+        flex-grow: 2;
+    }
+    .title {
+        flex-grow: 4;
+    }
 }
 
-.addChapter input[type=text]{
-  color: $textMain;
-  margin-bottom: 0;
+.addChapter input[type='text'] {
+    color: $textMain;
+    margin-bottom: 0;
 }
 
-.addChapter h3{
-  font-size: 100%;
-  margin: auto 8px;
+.addChapter h3 {
+    font-size: 100%;
+    margin: auto 8px;
 }
 
-.selection.small{
+.selection.small {
     .ng5-slider {
         width: 100%;
     }
     .addChapter {
         margin: 10px 0;
         flex-direction: column;
-        > div{
+        > div {
             width: 100%;
         }
-        .startTime, .endTime {
+        .startTime,
+        .endTime {
             display: none;
         }
     }
