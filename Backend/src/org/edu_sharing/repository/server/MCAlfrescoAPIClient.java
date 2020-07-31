@@ -945,7 +945,7 @@ public class MCAlfrescoAPIClient extends MCAlfrescoBaseClient {
 			if (renderServiceUrlPreview != null) {
 				propsCopy.put(CCConstants.CM_ASSOC_THUMBNAILS, renderServiceUrlPreview);
 			} else {
-				propsCopy.put(CCConstants.CM_ASSOC_THUMBNAILS, NodeServiceHelper.getPreview((nodeRef)).getUrl());
+				propsCopy.put(CCConstants.CM_ASSOC_THUMBNAILS, NodeServiceHelper.getPreview(nodeRef, propsCopy).getUrl());
 			}
 		}
 

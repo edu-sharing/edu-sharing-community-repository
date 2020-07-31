@@ -37,6 +37,7 @@ public class Preview  {
     setIsIcon(preview.isIcon());
 
     //if(repositoryType.equals(ApplicationInfo.REPOSITORY_TYPE_ALFRESCO) || repositoryType.equals(ApplicationInfo.REPOSITORY_TYPE_LOCAL)){
+    //@TODO: Elastic data will not have CM_ASSOC_THUMBNAILS (dummy property). Transfer preview detail from elastic
 		  setIsIcon(!(nodeProps.containsKey(CCConstants.CCM_PROP_MAP_ICON) || nodeProps.containsKey(CCConstants.CM_ASSOC_THUMBNAILS)));
           setIsGenerated(!PreviewServlet.PreviewDetail.TYPE_USERDEFINED.equals(nodeProps.get(CCConstants.KEY_PREVIEWTYPE)));
 	/*  }

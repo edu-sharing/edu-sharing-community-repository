@@ -1049,8 +1049,13 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
 
 	@Override
 	public GetPreviewResult getPreview(String storeProtocol, String storeIdentifier, String nodeId, HashMap<String, Object> nodeProps, String version){
-		NodeRef nodeRef = new NodeRef(new StoreRef(storeProtocol, storeIdentifier), nodeId);
-		boolean isIcon=NodeServiceHelper.getProperty(nodeRef,CCConstants.CCM_PROP_MAP_ICON)!=null && NodeServiceHelper.getProperty(nodeRef,CCConstants.CM_ASSOC_THUMBNAILS)!=null;
+		boolean isIcon;
+		if(nodeProps == null) {
+			NodeRef nodeRef = new NodeRef(new StoreRef(storeProtocol, storeIdentifier), nodeId);
+			isIcon = NodeServiceHelper.getProperty(nodeRef,CCConstants.CCM_PROP_MAP_ICON) != null && NodeServiceHelper.getProperty(nodeRef,CCConstants.CM_ASSOC_THUMBNAILS) != null;
+		} else {
+			isIcon = nodeProps.get(CCConstants.CCM_PROP_MAP_ICON) != null && nodeProps.get(CCConstants.CM_ASSOC_THUMBNAILS) != null;
+		}
 		return new GetPreviewResult(getPreviewUrl(storeProtocol,storeIdentifier,nodeId,version),isIcon);
 	}
 
