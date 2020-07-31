@@ -4,6 +4,7 @@ import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.service.ServiceRegistry;
 import org.apache.http.HttpHost;
 import org.apache.log4j.Logger;
+import org.edu_sharing.alfresco.lightbend.LightbendConfigLoader;
 import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
 import org.edu_sharing.metadataset.v2.*;
 import org.edu_sharing.metadataset.v2.tools.MetadataElasticSearchHelper;
@@ -52,16 +53,24 @@ public class SearchServiceElastic extends SearchServiceImpl {
 
     ServiceRegistry serviceRegistry = (ServiceRegistry) alfApplicationContext.getBean(ServiceRegistry.SERVICE_REGISTRY);
 
+    public static HttpHost[] getConfiguredHosts() {
+        List<HttpHost> hosts=null;
+        try {
+            List<String> servers= LightbendConfigLoader.get().getStringList("elasticsearch.servers");
+            hosts=new ArrayList<>();
+            for(String server : servers) {
+                hosts.add(new HttpHost(server.split(":")[0],Integer.parseInt(server.split(":")[1])));
+            }
+        }catch(Throwable t) {
+        }
+        return hosts.toArray(new HttpHost[0]);
+    }
 
     @Override
     public SearchResultNodeRef searchV2(MetadataSetV2 mds, String query, Map<String,String[]> criterias,
                                         SearchToken searchToken) throws Throwable {
         if(client == null || !client.ping(RequestOptions.DEFAULT)){
-             client = new RestHighLevelClient(
-                    RestClient.builder(
-                            new HttpHost("localhost", 9200, "http")
-                            //,new HttpHost("localhost", 9201, "http")
-                    ));
+             client = new RestHighLevelClient(RestClient.builder(getConfiguredHosts()));
         }
         MetadataQuery queryData;
         try{

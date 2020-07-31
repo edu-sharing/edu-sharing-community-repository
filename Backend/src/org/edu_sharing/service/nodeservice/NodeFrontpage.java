@@ -27,6 +27,7 @@ import org.edu_sharing.service.rating.AccumulatedRatings;
 import org.edu_sharing.service.rating.RatingService;
 import org.edu_sharing.service.rating.RatingServiceFactory;
 import org.edu_sharing.service.search.SearchService;
+import org.edu_sharing.service.search.SearchServiceElastic;
 import org.edu_sharing.service.search.SearchServiceFactory;
 import org.edu_sharing.service.search.model.SortDefinition;
 import org.edu_sharing.service.stream.StreamServiceHelper;
@@ -229,16 +230,14 @@ public class NodeFrontpage {
         initElastic();
     }
     private void initElastic() {
-        List<HttpHost> hosts = getConfiguredHosts();
-        RestClientBuilder restClient = RestClient.builder(
-                hosts.toArray(new HttpHost[0]));
+        RestClientBuilder restClient = RestClient.builder(SearchServiceElastic.getConfiguredHosts());
         client = new RestHighLevelClient(restClient);
         try {
             if(!client.ping(RequestOptions.DEFAULT)){
                 throw new Exception();
             }
         } catch (Exception e) {
-            throw new RuntimeException("No Elasticsearch instance was found at "+hosts.get(0));
+            throw new RuntimeException("No Elasticsearch instance was found at "+SearchServiceElastic.getConfiguredHosts()[0]);
         }
         try {
             CreateIndexRequest  indexRequest = new CreateIndexRequest(INDEX_NAME);
@@ -260,19 +259,6 @@ public class NodeFrontpage {
         } catch (Exception e) {
             logger.info("Error while creating the frontpage index (ignore): "+e.getMessage());
         }
-    }
-    private List<HttpHost> getConfiguredHosts() {
-        //@TODO make elastic server configurable
-        List<HttpHost> hosts=null;
-        try {
-            List<String> servers= LightbendConfigLoader.get().getStringList("elasticsearch.servers");
-            hosts=new ArrayList<>();
-            for(String server : servers) {
-                hosts.add(new HttpHost(server.split(":")[0],Integer.parseInt(server.split(":")[1])));
-            }
-        }catch(Throwable t) {
-        }
-        return hosts;
     }
 
     public Collection<NodeRef> getNodesForCurrentUserAndConfig() throws Throwable {

@@ -4,6 +4,7 @@ import org.apache.commons.lang3.NotImplementedException;
 import org.apache.http.HttpHost;
 import org.apache.lucene.search.join.ScoreMode;
 import org.edu_sharing.alfresco.lightbend.LightbendConfigLoader;
+import org.edu_sharing.service.search.SearchServiceElastic;
 import org.edu_sharing.service.search.model.SortDefinition;
 import org.edu_sharing.service.stream.model.ContentEntry;
 import org.edu_sharing.service.stream.model.ContentEntry.Audience.STATUS;
@@ -100,9 +101,7 @@ public class StreamServiceElasticsearchImpl implements StreamService {
 	public StreamServiceElasticsearchImpl() {
 		if(client!=null)
 			return;
-		List<HttpHost> hosts = getConfiguredHosts();
-		RestClientBuilder restClient = RestClient.builder(
-				hosts.toArray(new HttpHost[0]));
+		RestClientBuilder restClient = RestClient.builder(SearchServiceElastic.getConfiguredHosts());
 		client=new RestHighLevelClient(restClient);
 		try {
 			CreateIndexRequest  indexRequest = new CreateIndexRequest(INDEX_NAME);
@@ -131,16 +130,6 @@ public class StreamServiceElasticsearchImpl implements StreamService {
 			// index already exists
 			// throw new RuntimeException("Elastic search init failed",e);
 		}
-	}
-
-	private List<HttpHost> getConfiguredHosts() {
-		List<HttpHost> hosts=null;
-		List<String> servers= LightbendConfigLoader.get().getStringList("elasticsearch.servers");
-		hosts=new ArrayList<>();
-		for(String server : servers) {
-			hosts.add(new HttpHost(server.split(":")[0],Integer.parseInt(server.split(":")[1])));
-		}
-		return hosts;
 	}
 	private static String INDEX_NAME="entry_index22";
 	private static String TYPE_NAME="entry";
