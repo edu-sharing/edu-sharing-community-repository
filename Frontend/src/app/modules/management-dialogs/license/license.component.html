@@ -176,9 +176,9 @@
               <div *ngIf="ccVersion!='4.0'" class="licenseLocale">
                 <mat-form-field>
                   <mat-label>{{'WORKSPACE.LICENSE.LOCALE' | translate}}</mat-label>
-                  <mat-select id="localeLanguage" [(ngModel)]="ccLocale">
-                    <mat-option value="">{{'LANGUAGE.INTERNATIONAL' | translate}}</mat-option>
-                    <mat-option *ngFor="let option of ccLocales" value="{{option}}">{{'LANGUAGE.'+option | translate}}</mat-option>
+                  <mat-select id="localeCountry" [(ngModel)]="ccCountry">
+                    <mat-option value="">{{'COUNTRY_CODE.INTERNATIONAL' | translate}}</mat-option>
+                    <mat-option *ngFor="let country of _ccCountries" value="{{country.key}}">{{country.name}}</mat-option>
                   </mat-select>
                 </mat-form-field>
               </div>
@@ -215,7 +215,7 @@
                 {{ 'LICENSE.DESCRIPTION.CC_COMMERCIAL_'+ccCommercial | translate}}
               </div>
               <div *ngIf="ccVersion!='4.0'">
-                {{ 'WORKSPACE.LICENSE.LOCALE' | translate:{locale:ccLocale} }} {{'LANGUAGE.'+(ccLocale ? ccLocale : 'INTERNATIONAL') | translate}}.
+                {{ 'WORKSPACE.LICENSE.LOCALE' | translate:{locale:ccCountry} }} {{'COUNTRY_CODE.'+(ccCountry ? ccCountry : 'INTERNATIONAL') | uppercase | translate}}.
               </div>
             </div>
             <div *ngIf="primaryType=='CC_BY' || primaryType=='CC_0'" class="licenseUrl">
