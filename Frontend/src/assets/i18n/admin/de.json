@@ -286,7 +286,24 @@
             "LUCENE_EXPORT_PROPERTIES": "Im Export einzubindende Properties (1 pro Zeile)",
             "LUCENE_EXPORT_PROPERTIES_HINT": "Referenzierung auf Properties des Parents mittels \"parent::<property>\"",
             "LUCENE_EXPORT_START": "Exportieren & Herunterladen",
-            "LUCENE_PROPERTIES_REQUIRED": "Bitte gewünschte properties festlegen"
+            "LUCENE_PROPERTIES_REQUIRED": "Bitte gewünschte properties festlegen",
+            "LUCENE_TEMPLATE_MEMORY": {
+                "GROUP_LABEL": "Abfrage-Vorlagen",
+                "HINT": "Speichern und laden Sie den Inhalt der Felder \"Lucene-Query\" und \"Im Export einzubindende Properties\" in benannten Vorlagen.",
+                "LOAD_BUTTON": "Vorlage laden",
+                "NEW_BUTTON": "Neue Vorlage",
+                "UPDATE_BUTTON": "\"{{ template }}\" überschreiben",
+                "CONFIRM_UPDATE_BUTTON": "Überschreiben",
+                "CONFIRM_UPDATE_TITLE": "\"{{ template }}\" überschreiben?",
+                "CONFIRM_UPDATE_MESSAGE": "Möchten Sie die Vorlage mit den aktuellen Werten überschreiben?",
+                "CONFIRM_DELETE_BUTTON": "Löschen",
+                "CONFIRM_DELETE_TITLE": "\"{{ template }}\" löschen?",
+                "CONFIRM_DELETE_MESSAGE": "Möchten Sie die Vorlage löschen?",
+                "DELETE_BUTTON": "\"{{ template }}\" löschen",
+                "CREATE_BUTTON": "Erstellen",
+                "CHOOSE_NAME_TEXT": "Wählen Sie einen Namen für die neue Vorlage.",
+                "CHOOSE_NAME_INPUT_LABEL": "Name"
+            }
         },
         "JOBS": {
             "LOG": "Log-Einträge",
