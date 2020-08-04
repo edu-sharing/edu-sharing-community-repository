@@ -1,7 +1,13 @@
 package org.edu_sharing.service.search;
 
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
+import org.alfresco.repo.security.permissions.PermissionReference;
+import org.alfresco.repo.security.permissions.impl.RequiredPermission;
+import org.alfresco.repo.security.permissions.impl.model.PermissionModel;
+import org.alfresco.repo.security.permissions.impl.model.PermissionSet;
 import org.alfresco.service.ServiceRegistry;
+import org.alfresco.service.cmr.security.AccessStatus;
+import org.alfresco.service.namespace.QName;
 import org.apache.http.HttpHost;
 import org.apache.log4j.Logger;
 import org.edu_sharing.alfresco.lightbend.LightbendConfigLoader;
@@ -14,6 +20,7 @@ import org.edu_sharing.repository.server.tools.ApplicationInfoList;
 import org.edu_sharing.repository.server.tools.LogTime;
 import org.edu_sharing.service.model.NodeRef;
 import org.edu_sharing.service.model.NodeRefImpl;
+import org.edu_sharing.service.permission.PermissionServiceHelper;
 import org.edu_sharing.service.search.model.SearchToken;
 import org.edu_sharing.service.util.AlfrescoDaoHelper;
 import org.elasticsearch.action.search.SearchRequest;
@@ -52,6 +59,8 @@ public class SearchServiceElastic extends SearchServiceImpl {
     ApplicationContext alfApplicationContext = AlfAppContextGate.getApplicationContext();
 
     ServiceRegistry serviceRegistry = (ServiceRegistry) alfApplicationContext.getBean(ServiceRegistry.SERVICE_REGISTRY);
+
+    PermissionModel permissionModel = (PermissionModel)alfApplicationContext.getBean("permissionsModelDAO");
 
     public static HttpHost[] getConfiguredHosts() {
         List<HttpHost> hosts=null;
@@ -104,8 +113,9 @@ public class SearchServiceElastic extends SearchServiceImpl {
             for (String a : authorities) {
                 audienceQueryBuilder.should(QueryBuilders.matchQuery("permissions.read", a));
             }
-            audienceQueryBuilder.should(QueryBuilders.matchQuery("permissions.read", serviceRegistry.getAuthenticationService().getCurrentUserName()));
-            audienceQueryBuilder.should(QueryBuilders.matchQuery("owner", serviceRegistry.getAuthenticationService().getCurrentUserName()));
+            String user = serviceRegistry.getAuthenticationService().getCurrentUserName();
+            audienceQueryBuilder.should(QueryBuilders.matchQuery("permissions.read", user));
+            audienceQueryBuilder.should(QueryBuilders.matchQuery("owner", user));
             QueryBuilder queryBuilder = QueryBuilders.boolQuery().must(metadataQueryBuilder).must(audienceQueryBuilder);
 
             for(String facette : searchToken.getFacettes()){
@@ -144,7 +154,7 @@ public class SearchServiceElastic extends SearchServiceImpl {
 
             SearchHits hits = searchResponse.getHits();
 
-
+            long millisPerm = 0;
             for (SearchHit hit : hits) {
                 Map<String, Object> sourceAsMap = hit.getSourceAsMap();
                 Map<String, Serializable> properties = (Map) sourceAsMap.get("properties");
@@ -181,9 +191,55 @@ public class SearchServiceElastic extends SearchServiceImpl {
                 // @TODO: Resolve completely via elastic
                 HashMap<String, Boolean> permissions = new HashMap<>();
                 permissions.put(CCConstants.PERMISSION_READ, true);
+
+                long millis = System.currentTimeMillis();
+
+                Map<String,List<String>> permissionsElastic = (Map) sourceAsMap.get("permissions");
+                String owner = (String)sourceAsMap.get("owner");
+                for(Map.Entry<String,List<String>> entry : permissionsElastic.entrySet()){
+                    if("read".equals(entry.getKey())){
+                        continue;
+                    }
+
+                    if(authorities.stream().anyMatch(s -> entry.getValue().contains(s))
+                            || entry.getValue().contains(user) ){
+                        //get fine grained permissions
+                        PermissionReference pr = permissionModel.getPermissionReference(null,entry.getKey());
+                        Set<PermissionReference> granteePermissions = permissionModel.getGranteePermissions(pr);
+                        for(String perm : PermissionServiceHelper.PERMISSIONS){
+                            for(PermissionReference pRef : granteePermissions){
+                                if(pRef.getName().equals(perm)){
+                                    permissions.put(perm, true);
+                                }
+                            }
+                        }
+                    }
+                }
+                if(user.equals(owner)){
+                    permissions.put(CCConstants.PERMISSION_CC_PUBLISH,true);
+                    PermissionReference pr = permissionModel.getPermissionReference(null,"FullControl");
+                    Set<PermissionReference> granteePermissions = permissionModel.getGranteePermissions(pr);
+                    for(String perm : PermissionServiceHelper.PERMISSIONS){
+                        for(PermissionReference pRef : granteePermissions){
+                            if(pRef.getName().equals(perm)){
+                                permissions.put(perm, true);
+                            }
+                        }
+                    }
+
+                    //Set<PermissionReference> granteePermissions = permissionModel.getGranteePermissions(pr);
+                    //Set<PermissionReference> immediateGranteePermissions = permissionModel.getImmediateGranteePermissions(pr);
+
+                }
+
+
                 eduNodeRef.setPermissions(permissions);
+                long permMillisSingle = (System.currentTimeMillis() - millis);
+                logger.info("finished permission stuff in "+permMillisSingle);
+                millisPerm+=permMillisSingle;
                 data.add(eduNodeRef);
             }
+            logger.info("permission stuff took:"+millisPerm);
 
             Map<String,Map<String,Integer>> facettesResult = new HashMap<String,Map<String,Integer>>();
 
