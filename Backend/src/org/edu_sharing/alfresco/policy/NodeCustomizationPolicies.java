@@ -5,11 +5,7 @@ import java.io.IOException;
 import java.io.Serializable;
 import java.nio.channels.Channels;
 import java.nio.channels.ReadableByteChannel;
-import java.util.Arrays;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.Map;
+import java.util.*;
 
 import javax.imageio.ImageIO;
 import javax.imageio.ImageReader;
@@ -99,31 +95,40 @@ public class NodeCustomizationPolicies implements OnContentUpdatePolicy, OnCreat
 	 * These are the properties that will be copied to all io_reference nodes inside collections
 	 * if the original node gets changed
 	 */
-	private static final String[] IO_REFERENCE_COPY_PROPERTIES = new String[]{
-			CCConstants.CCM_PROP_IO_COMMONLICENSE_KEY,
-			CCConstants.CCM_PROP_IO_COMMONLICENSE_CC_LOCALE,
-			CCConstants.CCM_PROP_IO_COMMONLICENSE_CC_VERSION,
-			CCConstants.CCM_PROP_IO_COMMONLICENSE_QUESTIONSALLOWED,
-			CCConstants.CCM_PROP_IO_LICENSE,
-			CCConstants.CCM_PROP_IO_LICENSE_DESCRIPTION,
-			CCConstants.CCM_PROP_IO_LICENSE_FROM,
-			CCConstants.CCM_PROP_IO_LICENSE_PROFILE_URL,
-			CCConstants.CCM_PROP_IO_LICENSE_SOURCE_URL,
-			CCConstants.CCM_PROP_IO_LICENSE_TITLE_OF_WORK,
-			CCConstants.CCM_PROP_IO_LICENSE_TO,
-			CCConstants.CCM_PROP_IO_LICENSE_VALID,
+	private static final Collection<String> IO_REFERENCE_COPY_PROPERTIES = new ArrayList<>(
+			Arrays.asList(
+				CCConstants.CCM_PROP_IO_COMMONLICENSE_KEY,
+				CCConstants.CCM_PROP_IO_COMMONLICENSE_CC_LOCALE,
+				CCConstants.CCM_PROP_IO_COMMONLICENSE_CC_VERSION,
+				CCConstants.CCM_PROP_IO_COMMONLICENSE_QUESTIONSALLOWED,
+				CCConstants.CCM_PROP_IO_LICENSE,
+				CCConstants.CCM_PROP_IO_LICENSE_DESCRIPTION,
+				CCConstants.CCM_PROP_IO_LICENSE_FROM,
+				CCConstants.CCM_PROP_IO_LICENSE_PROFILE_URL,
+				CCConstants.CCM_PROP_IO_LICENSE_SOURCE_URL,
+				CCConstants.CCM_PROP_IO_LICENSE_TITLE_OF_WORK,
+				CCConstants.CCM_PROP_IO_LICENSE_TO,
+				CCConstants.CCM_PROP_IO_LICENSE_VALID,
 
-			// fix for 4.2, override changed content resource props
-			CCConstants.CCM_PROP_CCRESSOURCETYPE,
-			CCConstants.CCM_PROP_CCRESSOURCESUBTYPE,
-			CCConstants.CCM_PROP_CCRESSOURCEVERSION,
+				// fix for 4.2, override changed content resource props
+				CCConstants.CCM_PROP_CCRESSOURCETYPE,
+				CCConstants.CCM_PROP_CCRESSOURCESUBTYPE,
+				CCConstants.CCM_PROP_CCRESSOURCEVERSION,
 
-			// fix for 4.2, override all relevant metadata when changed on original
-			CCConstants.LOM_PROP_GENERAL_TITLE,
-			CCConstants.LOM_PROP_GENERAL_KEYWORD,
-			CCConstants.LOM_PROP_GENERAL_DESCRIPTION,
-			CCConstants.LOM_PROP_EDUCATIONAL_LEARNINGRESOURCETYPE,
-	};
+				// fix for 4.2, override all relevant metadata when changed on original
+				CCConstants.LOM_PROP_GENERAL_TITLE,
+				CCConstants.LOM_PROP_GENERAL_KEYWORD,
+				CCConstants.LOM_PROP_GENERAL_DESCRIPTION,
+				CCConstants.LOM_PROP_EDUCATIONAL_LEARNINGRESOURCETYPE
+			)
+	);
+
+	static{
+		// add all contributor array maps (e.g. author) to be copied to collection refs
+		IO_REFERENCE_COPY_PROPERTIES.addAll(CCConstants.getLifecycleContributerPropsMap().values());
+		IO_REFERENCE_COPY_PROPERTIES.addAll(CCConstants.getMetadataContributerPropsMap().values());
+	}
+
 
 	static Logger logger = Logger.getLogger(NodeCustomizationPolicies.class);
 
@@ -380,7 +385,7 @@ public class NodeCustomizationPolicies implements OnContentUpdatePolicy, OnCreat
 						continue;
 					}
 					for (QName prop : after.keySet()) {
-						if (Arrays.asList(IO_REFERENCE_COPY_PROPERTIES).contains(prop.toString())) {
+						if (IO_REFERENCE_COPY_PROPERTIES.contains(prop.toString())) {
 							originalProperties.put(prop, after.get(prop));
 						}
 					}

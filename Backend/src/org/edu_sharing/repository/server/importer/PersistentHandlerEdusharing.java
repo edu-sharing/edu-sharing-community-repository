@@ -433,6 +433,10 @@ public class PersistentHandlerEdusharing implements PersistentHandlerInterface {
 
 		return newNodeId;
 	}
+	
+	public HashMap<String, NodeRef> getReplIdMap() {
+		return replIdMap;
+	}
 
 	public HashMap<String, String> getReplicationIdTimestampMap() {
 		if(!hasTimestampMap) {

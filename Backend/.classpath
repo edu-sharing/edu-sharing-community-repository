@@ -367,5 +367,6 @@
 	<classpathentry kind="lib" path="lib/logging-interceptor-2.7.5.jar"/>
 	<classpathentry kind="lib" path="lib/okhttp-2.7.5.jar"/>
 	<classpathentry kind="lib" path="lib/okio-1.6.0.jar"/>
+	<classpathentry kind="lib" path="lib/owasp-java-html-sanitizer-20180219.1.jar"/>
 	<classpathentry kind="output" path="war/WEB-INF/classes"/>
 </classpath>
