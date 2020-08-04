@@ -395,7 +395,6 @@
             "DATA": {
                 "TITLE": "Basisdaten",
                 "EDIT_NOT_ALLOWED": "Um weitere Änderungen an den Daten durchzuführen, kontaktieren Sie bitte den zuständigen Administrator des Systems",
-                "contentStatus": "Medienzentrum ist angebunden",
                 "id": "Interne ID",
                 "location": "Standort",
                 "districtAbbreviation": "Kreiskürzel",
@@ -403,6 +402,14 @@
                 "mainUrl": "URL/Link zur Seite",
                 "CATALOGS": "Katalog {{id}}",
                 "ADD_CATALOG": "Katalog hinzufügen",
+                "ACTIVATE": {
+                    "STATUS_PREFIX": "Status:",
+                    "STATUS_ACTIVE": "Medienzentrum ist angebunden",
+                    "STATUS_INACTIVE": "Medienzentrum ist nicht angebunden",
+                    "LABEL": "Anbindung des Medienzentrums",
+                    "OPTION_ACTIVATE": "aktivieren",
+                    "OPTION_DEACTIVATE": "deaktivieren"
+                },
                 "CATALOG": {
                     "name": "Bezeichnung",
                     "url": "URL/Link"

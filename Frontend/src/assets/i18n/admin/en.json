@@ -393,7 +393,6 @@
             "DATA": {
                 "TITLE": "Basic data",
                 "EDIT_NOT_ALLOWED": "To make further changes to the data, please contact the responsible administrator of the system",
-                "contentStatus": "Media centre is connected",
                 "id": "Internal ID",
                 "location": "Location",
                 "districtAbbreviation": "District abbreviation",
@@ -401,6 +400,14 @@
                 "mainUrl": "URL/Link to page",
                 "CATALOGS": "Catalog {{id}}",
                 "ADD_CATALOG": "Add Catalog",
+                "ACTIVATE": {
+                    "STATUS_PREFIX": "Status:",
+                    "STATUS_ACTIVE": "Media center is connected",
+                    "STATUS_INACTIVE": "Media center is not connected",
+                    "LABEL": "Connect the media center",
+                    "OPTION_ACTIVATE": "connect",
+                    "OPTION_DEACTIVATE": "don't connect"
+                },
                 "CATALOG": {
                     "name": "Description",
                     "url": "URL/Link"
