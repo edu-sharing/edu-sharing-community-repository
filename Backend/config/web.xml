@@ -258,7 +258,11 @@
        <filter-name>Edu-Sharing Authentication Filter</filter-name>
        <url-pattern>/node/*</url-pattern>
    </filter-mapping>
-   
+
+   <filter-mapping>
+       <filter-name>Edu-Sharing Guest Filter</filter-name>
+       <url-pattern>/eduservlet/render</url-pattern>
+   </filter-mapping>
    <filter-mapping>
        <filter-name>Edu-Sharing Guest Filter</filter-name>
        <url-pattern>/search</url-pattern>
