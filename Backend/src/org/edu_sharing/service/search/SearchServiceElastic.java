@@ -188,7 +188,7 @@ public class SearchServiceElastic extends SearchServiceImpl {
                 eduNodeRef.setProperties(props);
                 eduNodeRef.setAspects(((List<String>)sourceAsMap.get("aspects")).
                         stream().map(CCConstants::getValidGlobalName).filter(Objects::nonNull).collect(Collectors.toList()));
-                // @TODO: Resolve completely via elastic
+               
                 HashMap<String, Boolean> permissions = new HashMap<>();
                 permissions.put(CCConstants.PERMISSION_READ, true);
 
