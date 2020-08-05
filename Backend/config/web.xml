@@ -261,7 +261,7 @@
 
    <filter-mapping>
        <filter-name>Edu-Sharing Guest Filter</filter-name>
-       <url-pattern>/eduservlet/render</url-pattern>
+       <url-pattern>/eduservlet/download</url-pattern>
    </filter-mapping>
    <filter-mapping>
        <filter-name>Edu-Sharing Guest Filter</filter-name>
