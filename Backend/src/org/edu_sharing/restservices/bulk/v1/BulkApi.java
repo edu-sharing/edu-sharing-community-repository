@@ -40,6 +40,7 @@ public class BulkApi {
 	public Response sync(@Context HttpServletRequest req,
 		   @ApiParam(value = "The group to which this node belongs to. Used for internal structuring. Please use simple names only", required = true) @PathParam("group") String group,
 		   @ApiParam(value = "The properties that must match to identify if this node exists. Multiple properties will be and combined and compared", required = true) @QueryParam("match") List<String> match,
+		   @ApiParam(value = "The properties on which the imported nodes should be grouped (for each value, a folder with the corresponding data is created)", required = false) @QueryParam("groupBy") List<String> groupBy,
 		   @ApiParam(value = "type of node. If the node already exists, this will not change the type afterwards",required=true ) @QueryParam("type") String type,
 		   @ApiParam(value = "aspects of node" ) @QueryParam("aspects") List<String> aspects,
 		   @ApiParam(value = "properties, they'll not get filtered via mds, so be careful what you add here" , required=true) HashMap<String, String[]> properties,
@@ -47,7 +48,7 @@ public class BulkApi {
 
 	) {
 		try {
-			NodeDao nodeDao = NodeDao.getNode(RepositoryDao.getHomeRepository(), BulkServiceFactory.getInstance().sync(group, match, type, aspects, properties, resetVersion==null ? false : resetVersion).getId(), Filter.createShowAllFilter());
+			NodeDao nodeDao = NodeDao.getNode(RepositoryDao.getHomeRepository(), BulkServiceFactory.getInstance().sync(group, match, groupBy, type, aspects, properties, resetVersion==null ? false : resetVersion).getId(), Filter.createShowAllFilter());
 			NodeEntry entry = new NodeEntry();
 			entry.setNode(nodeDao.asNode());
 			return Response.ok().entity(entry).build();
