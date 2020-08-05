@@ -84,7 +84,7 @@ public class BulkServiceImpl implements BulkService {
 		}*/
 	}
 	@Override
-	public NodeRef sync(String group, List<String> match, String type, List<String> aspects, HashMap<String, String[]> properties, boolean resetVersion) throws Throwable {
+	public NodeRef sync(String group, List<String> match, List<String> groupBy, String type, List<String> aspects, HashMap<String, String[]> properties, boolean resetVersion) throws Throwable {
 		if(match == null || match.size() == 0){
 			throw new IllegalArgumentException("match should contain at least 1 property");
 		}
@@ -101,6 +101,13 @@ public class BulkServiceImpl implements BulkService {
 		propertiesNative.remove(CCConstants.CCM_PROP_IO_VERSION_COMMENT);
 		if(existing == null) {
 			NodeRef groupFolder = getOrCreate(primaryFolder, group, propertiesNative);
+			if(groupBy != null && groupBy.size()>0){
+				if(groupBy.size() == 1){
+					groupFolder = getOrCreate(groupFolder, propertiesNative.get(CCConstants.getValidGlobalName(groupBy.get(0))).toString(), propertiesNative);
+				} else {
+					throw new IllegalArgumentException("groupBy currently only supports exactly one value");
+				}
+			}
 			propertiesNative.put(CCConstants.CCM_PROP_IO_VERSION_COMMENT, CCConstants.VERSION_COMMENT_BULK_CREATE);
 			existing = new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE,
 					NodeServiceFactory.getLocalService().createNodeBasic(
