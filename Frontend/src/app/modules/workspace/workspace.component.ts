@@ -407,8 +407,15 @@ export class WorkspaceMainComponent implements EventListener{
                     this.isAdmin=data.isAdmin;
                     if(this.isSafe && data.currentScope!=RestConstants.SAFE_SCOPE)
                         valid=false;
-                    if(!this.isSafe && data.currentScope!=null)
-                        valid=false;
+                    if(!this.isSafe && data.currentScope!=null) {
+                        this.connector.logout().subscribe(() => {
+                            this.goToLogin();
+                        }, (error: any) => {
+                            this.toast.error(error);
+                            this.goToLogin();
+                        })
+                        return;
+                    }
                     if(!valid){
                         this.goToLogin();
                         return;

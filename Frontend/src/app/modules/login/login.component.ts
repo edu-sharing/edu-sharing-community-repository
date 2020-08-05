@@ -43,7 +43,7 @@ export class LoginComponent  implements OnInit{
 
   public isLoading=true;
   private disabled=false;
-  private showUsername=true;
+  private isSafeLogin=false;
   private username='';
   private password='';
   private scope='';
@@ -151,7 +151,7 @@ export class LoginComponent  implements OnInit{
                 return;
             }
           });
-          this.showUsername=this.scope!=RestConstants.SAFE_SCOPE;
+          this.isSafeLogin=this.scope==RestConstants.SAFE_SCOPE;
           this.next=params['next'];
           this.mainnav=params['mainnav'] != 'false';
           if(this.scope==RestConstants.SAFE_SCOPE){
