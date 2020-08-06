@@ -65,18 +65,8 @@ public class BulkDeleteNodesJob extends AbstractJob{
 
 	protected Logger logger = Logger.getLogger(BulkDeleteNodesJob.class);
 	private org.alfresco.service.cmr.repository.NodeService nodeService;
-	private String property;
-	private Serializable value;
-	private String copy;
-	private Mode mode;
 	private List<String> types;
 	private NodeService nodeServiceEdu;
-
-	private enum Mode{
-		Replace,
-		Append,
-		Remove
-	};
 
 	@Override
 	public void execute(JobExecutionContext context) throws JobExecutionException {
