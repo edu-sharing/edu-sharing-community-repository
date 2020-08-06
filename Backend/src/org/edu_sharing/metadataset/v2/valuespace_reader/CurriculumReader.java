@@ -26,7 +26,7 @@ public class CurriculumReader extends ValuespaceReader{
     public CurriculumReader(String valuespaceUrl) {
         super(valuespaceUrl);
         // e.g. http://localhost:8000/api/v1/curricula/metadatasets
-        Matcher matched = matches("(https?:\\/\\/.*\\/)api\\/v1\\/curricula\\/metadatasets");
+        Matcher matched = matches("(https?:\\/\\/.*\\/)api\\/v1\\/curricula\\/metadatasets.*");
         if(matched.matches()){
             url = valuespaceUrl;
             logger.info("matched Curriculum at "+matched.group(1));
