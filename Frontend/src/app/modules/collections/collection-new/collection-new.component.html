@@ -53,7 +53,7 @@
         </div>
         <i class="material-icons next">keyboard_arrow_right</i>
       </button>
-      <div class="group" *ngIf="createEditorial">
+      <div class="group" *ngIf="createEditorial && shareToAll">
         <button mat-button class="collection-item clickable" *ngIf="createEditorial" (click)="setCollectionType('EDITORIAL')">
           <div class="iconLeft"><i class="material-icons" style="color:#E9B42A;">star</i></div>
           <div class="content">

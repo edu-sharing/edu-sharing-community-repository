@@ -778,6 +778,12 @@
 				</views>
 			</group>
 			<group>
+				<id>collection_feedback_view</id>
+				<views>
+					<view>collection_feedback</view>
+				</views>
+			</group>
+			<group>
 				<id>collection_feedback</id>
 				<views>
 					<view>collection_feedback</view>

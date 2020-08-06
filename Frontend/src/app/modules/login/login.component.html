@@ -56,7 +56,7 @@
           <div class="group-heading" *ngIf="showProviders">{{ 'LOGIN.LOGIN_GROUP' | translate }}</div>
           <div class="group-description" *ngIf="showProviders">{{ 'LOGIN.LOGIN_GROUP_DESCRIPTION' | translate }}</div>
           <form (ngSubmit)="login()" #loginForm>
-            <mat-form-field floatLabel="always">
+            <mat-form-field floatLabel="always" *ngIf="!isSafeLogin">
               <mat-label>{{ 'LOGIN.USERNAME' | translate }}</mat-label>
               <input
                 matInput
@@ -88,7 +88,7 @@
               </div>
             </div>
           </form>
-          <div class="useUrl" *ngIf="config.loginUrl && !showProviders">
+      <div class="useUrl" *ngIf="config.loginUrl && !showProviders && !isSafeLogin">
             <div>{{ 'LOGIN.USE_URL_TEXT' | translate }}</div>
             <mat-link (click)="openLoginUrl()" class="goto">
               <span>{{ 'LOGIN.USE_URL_LINK' | translate }}</span> <i class="material-icons">arrow_forward</i>

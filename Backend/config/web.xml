@@ -268,7 +268,11 @@
        <filter-name>Edu-Sharing Authentication Filter</filter-name>
        <url-pattern>/node/*</url-pattern>
    </filter-mapping>
-   
+
+   <filter-mapping>
+       <filter-name>Edu-Sharing Guest Filter</filter-name>
+       <url-pattern>/eduservlet/download</url-pattern>
+   </filter-mapping>
    <filter-mapping>
        <filter-name>Edu-Sharing Guest Filter</filter-name>
        <url-pattern>/search</url-pattern>
@@ -281,6 +285,10 @@
        <filter-name>Edu-Sharing Guest Filter</filter-name>
        <url-pattern>/rest/*</url-pattern>
    </filter-mapping>
+    <filter-mapping>
+        <filter-name>Edu-Sharing Guest Filter</filter-name>
+        <url-pattern>/eduservlet/redirect</url-pattern>
+    </filter-mapping>
    <filter-mapping>
        <filter-name>Edu-Sharing Guest Filter</filter-name>
        <url-pattern>/eduservlet/sitemap</url-pattern>
@@ -573,8 +581,7 @@
             <param-value>org.edu_sharing.restservices.ApiApplication</param-value>
         </init-param>
     </servlet>
-    
-    
+
     <servlet>
     	<servlet-name>Connector</servlet-name>
     	<servlet-class>org.edu_sharing.repository.server.connector.ConnectorServlet</servlet-class>

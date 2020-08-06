@@ -126,6 +126,7 @@
         "TOOLPERMISSION_WORKSPACE": "Access to the workspace",
         "TOOLPERMISSION_HANDLESERVICE": "Resolve unique ids from a handle service for materials",
         "TOOLPERMISSION_USAGE_STATISTIC": "Fetch information about the usage of all nodes of the repository",
+        "TOOLPERMISSION_COMMENT_WRITE":"Creating comments on objects",
         "TOOLPERMISSION_GLOBAL_STATISTICS_NODES": "View stats of material access of the repository",
         "TOOLPERMISSION_GLOBAL_STATISTICS_USER": "View stats of user interaction (login, logout) access of the repository",
         "TOOLPERMISSION_MEDIACENTER_MANAGE": "Change basic data (Address, Catalogs) from media centers where the given user is admin of",
@@ -525,7 +526,7 @@
         "ADD_CHILD_OBJECT_DESCRIPTION": "Create a series by attaching more materials to this object",
         "ADD_CHILD_OBJECT_QUOTA_REACHED": "Error while uploading \"{{ name }}\": Upload quota reached"
     },
-    
+
      "SIMPLE_EDIT": {
         "TITLE": "Quick Edit",
         "SAVED": "Element {{name}} was changed",
@@ -834,7 +835,7 @@
       "ID": "Indonesia",
       "IE": "Ireland",
       "IL": "Israel",
-      "IN": "India",   
+      "IN": "India",
       "IQ": "Iraq",
       "IS": "Iceland",
       "IT": "Italy",
