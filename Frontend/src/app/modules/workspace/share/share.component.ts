@@ -468,8 +468,8 @@ export class WorkspaceShareComponent {
     }
 
     setPublish(status: boolean, force = false) {
-        if (status) {
-            if (!force && this.config.instant('publishingNotice', false)) {
+        if(status && !force) {
+            if (this.config.instant('publishingNotice', false)) {
                 let cancel = () => {
                     this.publishActive = false;
                     this.toast.closeModalDialog();
@@ -487,31 +487,21 @@ export class WorkspaceShareComponent {
                 );
                 return;
             }
-            if (
-                this.deletedPermissions.indexOf(
-                    RestConstants.AUTHORITY_EVERYONE,
-                ) != -1
-            ) {
-                this.deletedPermissions.splice(
-                    this.deletedPermissions.indexOf(
-                        RestConstants.AUTHORITY_EVERYONE,
-                    ),
-                    1,
-                );
-                return;
-            }
-            let perm = RestHelper.getAllAuthoritiesPermission();
-            perm.permissions = [RestConstants.PERMISSION_CONSUMER];
-            this.permissions.push(perm);
-            if (this.doiPermission) {
-                this.doiActive = true;
-            }
+        }
+        if(status && this.doiPermission) {
+            this.doiActive=true;
+        }
+        if (this.deletedPermissions.indexOf(RestConstants.AUTHORITY_EVERYONE) !== -1) {
+            this.deletedPermissions.splice(this.deletedPermissions.indexOf(RestConstants.AUTHORITY_EVERYONE),1);
         } else {
-            let i = this.getAuthorityPos(
-                this.permissions,
-                RestConstants.AUTHORITY_EVERYONE,
-            );
-            if (i != -1) this.permissions.splice(i, 1);
+            let i = this.getAuthorityPos(this.permissions,RestConstants.AUTHORITY_EVERYONE);
+            if (i !== -1) {
+                this.deletedPermissions.push(RestConstants.AUTHORITY_EVERYONE);
+            } else {
+                const perm = RestHelper.getAllAuthoritiesPermission();
+                perm.permissions = [RestConstants.PERMISSION_CONSUMER];
+                this.permissions.push(perm);
+            }
         }
         this.setPermissions(this.permissions);
         this.updatePublishState();

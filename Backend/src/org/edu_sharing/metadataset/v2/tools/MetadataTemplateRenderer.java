@@ -533,7 +533,10 @@ public class MetadataTemplateRenderer {
 						if(Double.parseDouble(version[0])<4.0){
 							String[] locale=properties.get(CCConstants.getValidLocalName(CCConstants.CCM_PROP_IO_COMMONLICENSE_CC_LOCALE));
 							if(locale!=null && locale.length>0 && locale[0]!=null && !locale[0].isEmpty()) {
-								name += " - " + I18nAngular.getTranslationAngular("common","LANGUAGE."+locale[0]);
+								if (locale[0].equals(locale[0].toUpperCase()))
+								  name += " - " + I18nAngular.getTranslationAngular("common","COUNTRY_CODE."+locale[0]);
+								else
+								  name += " - " + I18nAngular.getTranslationAngular("common","LANGUAGE."+locale[0]);
 							}
 						}
 					}catch(Throwable t){}

@@ -34,19 +34,20 @@ public class MetadataWidget extends MetadataTranslatable{
 	};
 
 	private String id,type,caption,bottomCaption,icon,
-					placeholder,defaultvalue,template,
-					suggestionSource,suggestionQuery,unit,format,
-					valuespaceSort="default";
+	placeholder,defaultvalue,template,
+	suggestionSource,suggestionQuery,unit,format,
+	valuespaceSort="default";
 	private Integer min,max,defaultMin,defaultMax,step;
 	private boolean required,extended,allowempty,valuespaceClient=true,hideIfEmpty,inherit=true;
 	private List<MetadataKey> values;
 	private List<Subwidget> subwidgets;
+	private int maxlength;
 	/**
 	 * hint for the client if this widget creates a link to the search
 	 * so e.g. if you click a keyword, you can be directed to the search with this keyword as filter
 	 */
 	private boolean searchable;
-	
+
 	private MetadataCondition condition;
 	private String link;
 
@@ -239,6 +240,16 @@ public class MetadataWidget extends MetadataTranslatable{
 	public void setInherit(boolean inherit) {
 		this.inherit = inherit;
 	}
+
+
+	public void setMaxlength(int maxlength) {
+		this.maxlength = maxlength;
+	}
+
+	public int getMaxlength() {
+		return maxlength;
+	}
+
 
 	@Override
 	public boolean equals(Object obj) {

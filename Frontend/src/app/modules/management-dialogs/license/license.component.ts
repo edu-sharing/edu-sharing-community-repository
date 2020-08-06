@@ -75,7 +75,7 @@ export class WorkspaceLicenseComponent  {
   private ccTitleOfWork="";
   private ccSourceUrl="";
   private ccVersion="4.0";
-  private ccLocale="";
+  private ccCountry="";
   private cc0Type="CC_0";
   private ccProfileUrl="";
   private copyrightType="COPYRIGHT_FREE";
@@ -87,6 +87,10 @@ export class WorkspaceLicenseComponent  {
   private release=false;
   private releaseIndeterminate=false;
   private eduDownload=true;
+  private _ccCountries: Array<{ key: string, name: string }> = [];
+  public get getccCountries() {
+    return this._ccCountries;
+  }
 
   private _oerMode=true;
   public set oerMode(oerMode:boolean){
@@ -96,10 +100,13 @@ export class WorkspaceLicenseComponent  {
   public get oerMode(){
     return this._oerMode;
   }
-  private ccLocales=["ar","be","bg","de","fi","fr",
-                     "in","it","ca","hr","mt","mk","nl",
-                     "no","pl","pt","ro","es","th",
-                     "uk","hu"];
+  private constantCountries = [
+    "AE","AL","AR","AT","AU","BA","BG","BH","BO","BR","BY","CA","CH","CL","CN","CO","CR","CY","CZ","DE","DK",
+    "DO","DZ","EC","EE","EG","ES","FI","FR","GB","GR","GT","HK","HN","HR","HU","ID","IE","IL","IN","IQ","IS",
+    "IT","JO","JP","KR","KW","LB","LT","LU","LV","LY","MA","ME","MK","MT","MX","MY","NI","NL","NO","NZ","OM",
+    "PA","PE","PH","PL","PR","PT","PY","QA","RO","RS","RU","SA","SD","SE","SG","SI","SK","SY","TH","TN","TR","TW",
+    "UA","US","UY","VE","VN","YE","ZA"
+  ];
   public ALL_LICENSE_TYPES=["NONE","CC_0","CC_BY","SCHULFUNK","UNTERRICHTS_UND_LEHRMEDIEN","COPYRIGHT","CUSTOM"];
   public licenseMainTypes:string[];
   _nodes:Node[];
@@ -209,6 +216,7 @@ export class WorkspaceLicenseComponent  {
     private toast : Toast,
     private nodeApi : RestNodeService) {
       this.connector.hasToolPermission(RestConstants.TOOLPERMISSION_HANDLESERVICE).subscribe((has:boolean)=>this.doiPermission=has);
+      this.translateLicenceCountries(this.constantCountries);
       this.updateButtons();
       this.iamApi.getUser().subscribe(() => {});
   }
@@ -283,7 +291,7 @@ export class WorkspaceLicenseComponent  {
       this.ccSourceUrl=this.getValueForAll(RestConstants.CCM_PROP_LICENSE_SOURCE_URL);
       this.ccProfileUrl=this.getValueForAll(RestConstants.CCM_PROP_LICENSE_PROFILE_URL);
       this.ccVersion=this.getValueForAll(RestConstants.CCM_PROP_LICENSE_CC_VERSION,this.ccVersion);
-      this.ccLocale=this.getValueForAll(RestConstants.CCM_PROP_LICENSE_CC_LOCALE);
+      this.ccCountry=this.getValueForAll(RestConstants.CCM_PROP_LICENSE_CC_LOCALE);
     }
     if(license=='CC_0'){
       this.type='CC_0';
@@ -487,8 +495,8 @@ export class WorkspaceLicenseComponent  {
             if (this.ccVersion) {
                 prop[RestConstants.CCM_PROP_LICENSE_CC_VERSION] = [this.ccVersion];
             }
-            if (this.ccLocale) {
-                prop[RestConstants.CCM_PROP_LICENSE_CC_LOCALE] = [this.ccLocale];
+            if (this.ccCountry) {
+                prop[RestConstants.CCM_PROP_LICENSE_CC_LOCALE] = [this.ccCountry];
             }
         }
         prop[RestConstants.CCM_PROP_AUTHOR_FREETEXT]=[this.authorFreetext];
@@ -547,5 +555,33 @@ export class WorkspaceLicenseComponent  {
       } else {
           this.authorVCard = new VCard();
       }
+    }
+    /**
+     * Get all the key from countries and return the array with key and name (Translated) 
+     * @param {string[]} countries array with all Countries Key 
+     */
+    translateLicenceCountries(countries: string[]) {
+      this._ccCountries=[];
+      countries.forEach(country => {
+        this._ccCountries.push({ key: country, name: this.translate.instant("COUNTRY_CODE." + country) })
+      });
+      this._ccCountries.sort((a, b) => this.sortCountries({ a: a.name, b: b.name }));
+    }
+
+    /**
+     * Function wich compare 2 string and return one of those numbers -1,0,1 
+     *  
+     *   -1 if a<b  
+     *    1 if a>b  
+     *    0 if a=b
+     * 
+     * @param {string} a first string
+     * @param {string} b second string
+     * @returns {number}   -1 | 0 | 1
+     */
+    private sortCountries({ a, b }: { a: string; b: string; }):number {
+      if (a.toLowerCase() < b.toLowerCase()) return -1;
+      if (a.toLowerCase() > b.toLowerCase()) return 1;
+      return 0;
     }
 }

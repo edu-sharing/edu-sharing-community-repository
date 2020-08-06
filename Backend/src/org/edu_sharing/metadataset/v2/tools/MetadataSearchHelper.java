@@ -267,11 +267,18 @@ public class MetadataSearchHelper {
 	private static String applyCondition(MetadataQueryBase query, String lucene) {
 		for(MetadataQueryCondition condition : query.getConditions()){
 			boolean conditionState= MetadataHelper.checkConditionTrue(condition.getCondition());
-			if(conditionState && condition.getQueryTrue()!=null)
-				lucene += " AND ("+condition.getQueryTrue()+")";
-			if(!conditionState && condition.getQueryFalse()!=null)
-				lucene += " AND ("+condition.getQueryFalse()+")";
+			if(conditionState && condition.getQueryTrue()!=null) {
+				String conditionString = condition.getQueryTrue();
+				conditionString = replaceCommonQueryVariables(conditionString);
+				lucene += " AND (" + conditionString + ")";
+			}
+			if(!conditionState && condition.getQueryFalse()!=null) {
+				String conditionString =condition.getQueryFalse();
+				conditionString = replaceCommonQueryVariables(conditionString);
+				lucene += " AND (" + conditionString + ")";
+			}
 		}
+
 		return lucene;
 	}
 

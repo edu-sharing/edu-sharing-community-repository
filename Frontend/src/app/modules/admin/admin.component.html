@@ -596,29 +596,35 @@
                 <mat-radio-button name="solrMode" value="export">{{'ADMIN.BROWSER.OUTPUT_MODE_EXPORT' | translate}}</mat-radio-button>
             </mat-radio-group>
       </div>
-      <div class="inputGroupGrow" *ngIf="lucene.outputMode=='export'">
-          <mat-form-field>
-              <mat-label>{{'ADMIN.BROWSER.LUCENE_EXPORT_PROPERTIES' | translate }}</mat-label>
-              <textarea matInput
-                        cdkTextareaAutosize
-                        cdkAutosizeMinRows="2"
-                        cdkAutosizeMaxRows="5"
-                        class="export-properties" [(ngModel)]="lucene.properties"></textarea>
-              <mat-hint>{{'ADMIN.BROWSER.LUCENE_EXPORT_PROPERTIES_HINT' | translate }}</mat-hint>
-          </mat-form-field>
-      </div>
-      <div class="inputGroupGrow" *ngIf="lucene.outputMode=='export'">
-          <div class="info">{{'ADMIN.BROWSER.OUTPUT_MODE' | translate }}</div>
-          <div>
-              <mat-radio-group [(ngModel)]="lucene.exportFormat">
-                <mat-radio-button name="exportFormat" value="csv">{{'ADMIN.BROWSER.EXPORT_FORMAT_CSV' | translate}}</mat-radio-button>
-                <mat-radio-button name="exportFormat" value="json">{{'ADMIN.BROWSER.EXPORT_FORMAT_JSON' | translate}}</mat-radio-button>
-              </mat-radio-group>
-          </div>
-      </div>
-      <div class="inputGroupGrow" *ngIf="lucene.outputMode=='export'">
-          <div><button mat-flat-button color="primary" (click)="exportLucene()">{{'ADMIN.BROWSER.LUCENE_EXPORT_START' | translate}}</button></div>
-      </div>
+      <ng-container *ngIf="lucene.outputMode=='export'">
+        <div class="inputGroupGrow">
+            <mat-form-field>
+                <mat-label>{{'ADMIN.BROWSER.LUCENE_EXPORT_PROPERTIES' | translate }}</mat-label>
+                <textarea matInput
+                            cdkTextareaAutosize
+                            cdkAutosizeMinRows="2"
+                            cdkAutosizeMaxRows="5"
+                            class="export-properties" [(ngModel)]="lucene.properties"></textarea>
+                <mat-hint>{{'ADMIN.BROWSER.LUCENE_EXPORT_PROPERTIES_HINT' | translate }}</mat-hint>
+            </mat-form-field>
+        </div>
+        <app-lucene-template-memory 
+            [(query)]="lucene.query"
+            [(properties)]="lucene.properties"
+        ></app-lucene-template-memory>
+        <div class="inputGroupGrow">
+            <div class="info">{{'ADMIN.BROWSER.OUTPUT_MODE' | translate }}</div>
+            <div>
+                <mat-radio-group [(ngModel)]="lucene.exportFormat">
+                    <mat-radio-button name="exportFormat" value="csv">{{'ADMIN.BROWSER.EXPORT_FORMAT_CSV' | translate}}</mat-radio-button>
+                    <mat-radio-button name="exportFormat" value="json">{{'ADMIN.BROWSER.EXPORT_FORMAT_JSON' | translate}}</mat-radio-button>
+                </mat-radio-group>
+            </div>
+        </div>
+        <div class="inputGroupGrow">
+            <div><button mat-flat-button color="primary" (click)="exportLucene()">{{'ADMIN.BROWSER.LUCENE_EXPORT_START' | translate}}</button></div>
+        </div>
+      </ng-container>
     <div class="inputGroupGrow" *ngIf="lucene.outputMode=='view'">
       <div class="info">{{'ADMIN.BROWSER.LUCENE_AUTHORITIES' | translate }}</div>
       <authority-search-input [globalSearchAllowed]="true" [placeholder]="'ADMIN.BROWSER.ADD_AUTHORITY'" [allowAny]="true" (onChooseAuthority)="addLuceneAuthority($event)"></authority-search-input>

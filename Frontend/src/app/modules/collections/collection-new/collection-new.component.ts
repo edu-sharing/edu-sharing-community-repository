@@ -584,6 +584,15 @@ export class CollectionNewComponent {
     } as any);
       if(this.parentCollection &&
           this.parentCollection.collection.type === RestConstants.COLLECTIONTYPE_EDITORIAL) {
+          if(!this.createEditorial || !this.shareToAll){
+            this.toast.error(
+                this.createEditorial ? RestConstants.TOOLPERMISSION_INVITE_ALLAUTHORITIES : RestConstants.TOOLPERMISSION_COLLECTION_EDITORIAL,
+                'TOOLPERMISSION_ERROR'
+            );
+            window.history.back();
+            this.isLoading = false;
+            return;
+          }
           this.setCollectionType(RestConstants.COLLECTIONTYPE_EDITORIAL);
       }
     this.updateAvailableSteps();

@@ -284,7 +284,24 @@
             "LUCENE_EXPORT_PROPERTIES": "Properties to be included in the export (1 per line)",
             "LUCENE_EXPORT_PROPERTIES_HINT": "Reference to properties of the parent using \"parent::<property>\"",
             "LUCENE_EXPORT_START": "Export & Download",
-            "LUCENE_PROPERTIES_REQUIRED": "Please specify desired properties"
+            "LUCENE_PROPERTIES_REQUIRED": "Please specify desired properties",
+            "LUCENE_TEMPLATE_MEMORY": {
+                "GROUP_LABEL": "Query Templates",
+                "HINT": "Save and load the content of the fields \"Lucene-Query\" and \"Properties to be included in the export\" in named templates.",
+                "LOAD_BUTTON": "Load template",
+                "NEW_BUTTON": "New template",
+                "UPDATE_BUTTON": "Overwrite \"{{ template }}\"",
+                "CONFIRM_UPDATE_BUTTON": "Overwrite",
+                "CONFIRM_UPDATE_TITLE": "Overwrite \"{{ template }}\"?",
+                "CONFIRM_UPDATE_MESSAGE": "Do you want to overwrite the template with the current values?",
+                "CONFIRM_DELETE_BUTTON": "Delete",
+                "CONFIRM_DELETE_TITLE": "Delete \"{{ template }}\"?",
+                "CONFIRM_DELETE_MESSAGE": "Do you want to delete the template?",
+                "DELETE_BUTTON": "Delete \"{{ template }}\"",
+                "CREATE_BUTTON": "Create",
+                "CHOOSE_NAME_TEXT": "Choose a name for the new template.",
+                "CHOOSE_NAME_INPUT_LABEL": "Name"
+            }
         },
         "JOBS": {
             "LOG": "Log entries",
@@ -393,7 +410,6 @@
             "DATA": {
                 "TITLE": "Basic data",
                 "EDIT_NOT_ALLOWED": "To make further changes to the data, please contact the responsible administrator of the system",
-                "contentStatus": "Media centre is connected",
                 "id": "Internal ID",
                 "location": "Location",
                 "districtAbbreviation": "District abbreviation",
@@ -401,6 +417,14 @@
                 "mainUrl": "URL/Link to page",
                 "CATALOGS": "Catalog {{id}}",
                 "ADD_CATALOG": "Add Catalog",
+                "ACTIVATE": {
+                    "STATUS_PREFIX": "Status:",
+                    "STATUS_ACTIVE": "Media center is connected",
+                    "STATUS_INACTIVE": "Media center is not connected",
+                    "LABEL": "Connect the media center",
+                    "OPTION_ACTIVATE": "connect",
+                    "OPTION_DEACTIVATE": "don't connect"
+                },
                 "CATALOG": {
                     "name": "Description",
                     "url": "URL/Link"

@@ -15,7 +15,29 @@
         <mat-tab-group mat-stretch-tabs [(selectedIndex)]="currentTab">
             <mat-tab label="{{'ADMIN.MEDIACENTER.DATA.TITLE' | translate}}">
                 <div class="base-data">
-                    <mat-checkbox [disabled]="!isAdmin" [ngModel]="currentMediacenterCopy.profile.mediacenter.contentStatus=='Activated'" (ngModelChange)="currentMediacenterCopy.profile.mediacenter.contentStatus=$event ? 'Activated' : 'Deactivated'">{{'ADMIN.MEDIACENTER.DATA.contentStatus' | translate}}</mat-checkbox>
+                    <p class="status">
+                        {{ 'ADMIN.MEDIACENTER.DATA.ACTIVATE.STATUS_PREFIX' | translate }}
+                        <ng-container *ngIf="currentMediacenter.profile.mediacenter.contentStatus === 'Activated'">
+                            {{ 'ADMIN.MEDIACENTER.DATA.ACTIVATE.STATUS_ACTIVE' | translate }}
+                        </ng-container>
+                        <ng-container *ngIf="currentMediacenter.profile.mediacenter.contentStatus === 'Deactivated'">
+                            {{ 'ADMIN.MEDIACENTER.DATA.ACTIVATE.STATUS_INACTIVE' | translate }}
+                        </ng-container>
+                    </p>
+                    <label id="activate-label">{{ 'ADMIN.MEDIACENTER.DATA.ACTIVATE.LABEL' | translate }}</label>
+                    <mat-radio-group
+                        aria-labelledby="activate-label"
+                        [(ngModel)]="currentMediacenterCopy.profile.mediacenter.contentStatus"
+                        class="activate-group"
+                        [disabled]="!isAdmin"
+                    >
+                        <mat-radio-button value="Activated">
+                            {{ 'ADMIN.MEDIACENTER.DATA.ACTIVATE.OPTION_ACTIVATE' | translate }}
+                        </mat-radio-button>
+                        <mat-radio-button value="Deactivated">
+                            {{ 'ADMIN.MEDIACENTER.DATA.ACTIVATE.OPTION_DEACTIVATE' | translate }}
+                        </mat-radio-button>
+                    </mat-radio-group>
                     <div class="base-fields">
                         <mat-form-field>
                             <mat-label>{{'ADMIN.MEDIACENTER.DATA.id' | translate}}</mat-label>

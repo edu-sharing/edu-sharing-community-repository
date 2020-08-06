@@ -999,7 +999,11 @@ export class MdsComponent {
     if(widget.icon){
       html+='<i class="inputIcon material-icons">'+widget.icon+'</i>';
     }
-    html+='<input type="'+type+'" id="'+this.getWidgetDomId(widget)+'" placeholder="'+(widget.placeholder ? widget.placeholder : '')+'" class="'+css+'"';
+    html+='<input type="'+type+'" ' +
+        'id="'+this.getWidgetDomId(widget)+'" ' +
+        'placeholder="'+(widget.placeholder ? widget.placeholder : '')+'" ' +
+        'value="'+(widget.defaultvalue ? widget.defaultvalue : '')+'" ' +
+        'class="'+css+'">';
     if(this.isBulkMode() && this.bulkBehaviour !== BulkBehaviour.Replace) {
       html+=' disabled';
     }
@@ -1445,6 +1449,9 @@ export class MdsComponent {
     }
     if(widget.placeholder){
       html += ' placeholder="'+widget.placeholder+'"';
+    }
+    if(widget.maxlength){
+      html+=' maxlength="'+widget.maxlength+'"';
     }
     html += '></textarea>';
     return html;

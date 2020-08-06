@@ -76,17 +76,34 @@ public class SameSiteCookieFilter implements javax.servlet.Filter {
         protected void updateCookie(Collection<String> cookiesAfterCreateSession) {
         	
         	String cookieAttributes = ApplicationInfoList.getHomeRepository().getCookieAttributes();
+        	
+        	boolean forcedByConfig = false;
         	//default handling
         	if(cookieAttributes == null) {
         		cookieAttributes = "SameSite=None";
         	}//plain tomcat JSESSIONID
-        	else if(cookieAttributes != null && cookieAttributes.trim().equals("")) {
+        	else if(cookieAttributes.trim().equals("")) {
         		logger.debug("default JSESSIONID. No cookie attribute set.");
         		return;
+        	}else {
+        		forcedByConfig = true;
+        		logger.debug("using cookieAttributes definition of config:" + cookieAttributes);
         	}
             if(cookiesAfterCreateSession != null && !response.isCommitted()) {
                 // search if a cookie JSESSIONID Secure exists
             	final String fCookieAttributes = cookieAttributes;
+            	
+            	//dont send on when Secure is off
+            	if(!forcedByConfig) {
+            		Optional<String> cookieJSessionId = cookiesAfterCreateSession.stream()
+                            .filter(cookie -> cookie.startsWith("JSESSIONID") && !cookie.contains("Secure"))
+							.findAny();
+            		if(cookieJSessionId.isPresent()) {
+            			logger.debug("no Secure Attribut found. will not set SameSite cookie");
+            			return;
+            		}
+            	}
+            	
                 Optional<String> cookieJSessionId = cookiesAfterCreateSession.stream()
                                                         .filter(cookie -> cookie.startsWith("JSESSIONID") && !cookie.contains(fCookieAttributes))
                 										.findAny();

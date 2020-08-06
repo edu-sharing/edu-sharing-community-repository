@@ -15,6 +15,7 @@ import org.edu_sharing.service.nodeservice.NodeService;
 import org.edu_sharing.service.nodeservice.NodeServiceFactory;
 import org.edu_sharing.service.permission.PermissionService;
 import org.edu_sharing.service.permission.PermissionServiceFactory;
+import org.edu_sharing.service.toolpermission.ToolPermissionHelper;
 
 public class CommentServiceImpl implements CommentService{
 
@@ -28,6 +29,7 @@ public class CommentServiceImpl implements CommentService{
 	
 	@Override
 	public String addComment(String node,String commentReference, String comment) throws Exception {
+		ToolPermissionHelper.throwIfToolpermissionMissing(CCConstants.CCM_VALUE_TOOLPERMISSION_COMMENT_WRITE);
 		HashMap<String, Object> props = new HashMap<String,Object>();
 		if(commentReference!=null && !commentReference.trim().isEmpty()) {
 			props.put(CCConstants.CCM_PROP_COMMENT_REPLY,new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, commentReference));

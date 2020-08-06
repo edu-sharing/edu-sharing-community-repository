@@ -36,6 +36,7 @@ import {ModalTestComponent} from './common/test/modal/modal-test.component';
 import { MainMenuSidebarComponent } from './common/ui/main-menu-sidebar/main-menu-sidebar.component';
 import { MainMenuBottomComponent } from './common/ui/main-menu-bottom/main-menu-bottom.component';
 import { MainMenuDropdownComponent } from './common/ui/main-menu-dropdown/main-menu-dropdown.component';
+import { LuceneTemplateMemoryComponent } from './modules/admin/lucene-template-memory/lucene-template-memory.component';
 
 
 // http://blog.angular-university.io/angular2-ngmodule/
@@ -67,7 +68,8 @@ import { MainMenuDropdownComponent } from './common/ui/main-menu-dropdown/main-m
         DECLARATIONS_SERVICES,
         MainMenuSidebarComponent,
         MainMenuBottomComponent,
-        MainMenuDropdownComponent
+        MainMenuDropdownComponent,
+        LuceneTemplateMemoryComponent
     ],
     imports: IMPORTS,
     providers: [
