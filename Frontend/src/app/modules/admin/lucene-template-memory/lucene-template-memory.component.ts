@@ -36,7 +36,8 @@ export class LuceneTemplateMemoryComponent implements OnInit {
         },
         CREATED_CONTENTS_BY_PERSON: {
             query: '@cm\\:creator:"user" OR @cm\\:modifier:"user"',
-            properties: ['sys:node-uuid', 'cm:name', 'cclom:title', 'cm:creator', 'cm:created', 'cm:modifier', 'cm:modified', 'cclom:general_keyword', 'ccm:comment_content'].join('\n')
+            properties: ['sys:node-uuid', 'cm:name', 'cclom:title', 'cm:creator', 'cm:created', 'cm:modifier', 'cm:modified', 'cclom:general_keyword', 'ccm:comment_content'].join('\n'),
+            isDefault: true
         }
     }
 
@@ -96,13 +97,7 @@ export class LuceneTemplateMemoryComponent implements OnInit {
                 query: this.query,
                 properties: this.properties,
             };
-            const storeTemplates: LuceneTemplates = {};
-            Object.keys(this.templates).filter((t) =>
-                !this.templates[t].isDefault
-            ).forEach((t) =>
-                storeTemplates[t] = this.templates[t]
-            );
-            this.storage.set(LuceneTemplateMemoryComponent.STORAGE_KEY, storeTemplates);
+            this.updateStorage();
             this.selectedTemplate = this.newTemplateName;
             this.closeNewTemplateDialog();
         }
@@ -178,12 +173,22 @@ export class LuceneTemplateMemoryComponent implements OnInit {
             query: this.query,
             properties: this.properties,
         };
-        this.storage.set(LuceneTemplateMemoryComponent.STORAGE_KEY, this.templates);
+        this.updateStorage();
     }
 
     private deleteTemplate(template: string): void {
         this.selectedTemplate = null;
         delete this.templates[template];
-        this.storage.set(LuceneTemplateMemoryComponent.STORAGE_KEY, this.templates);
+        this.updateStorage();
+    }
+
+    private updateStorage() {
+        const storeTemplates: LuceneTemplates = {};
+        Object.keys(this.templates).filter((t) =>
+            !this.templates[t].isDefault
+        ).forEach((t) =>
+            storeTemplates[t] = this.templates[t]
+        );
+        this.storage.set(LuceneTemplateMemoryComponent.STORAGE_KEY, storeTemplates);
     }
 }

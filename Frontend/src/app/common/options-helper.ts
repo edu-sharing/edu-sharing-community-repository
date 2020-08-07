@@ -441,8 +441,8 @@ export class OptionsHelperService {
         openNode.group = DefaultGroups.View;
         openNode.priority = 30;
 
-        const editConnectorNode = new OptionItem('OPTIONS.OPEN', 'launch', (node: Node) =>
-            this.editConnector(node)
+        const editConnectorNode = new OptionItem('OPTIONS.OPEN', 'launch', (node) =>
+            this.editConnector(this.getObjects(node)[0])
         );
         editConnectorNode.customShowCallback = (nodes) => {
             return this.connectors.connectorSupportsEdit(nodes ? nodes[0] : null) != null;
@@ -895,6 +895,7 @@ export class OptionsHelperService {
     }
 
     private editConnector(node: Node|any, type: Filetype = null, win: any = null, connectorType: Connector = null) {
+        console.log(node);
         UIHelper.openConnector(this.connectors, this.iamService, this.eventService, this.toast, node, type, win, connectorType);
     }
     private canAddObjects() {
