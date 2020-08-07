@@ -1,10 +1,12 @@
 import { Component, OnInit, Input, Output, EventEmitter } from '@angular/core';
 import { DialogButton, SessionStorageService } from '../../../core-module/core.module';
 import { Toast } from '../../../core-ui-module/toast';
+import {TranslateService} from '@ngx-translate/core';
 
 interface LuceneTemplate {
     query: string;
     properties: string;
+    isDefault?: boolean;
 }
 
 type LuceneTemplates = { [key: string]: LuceneTemplate };
@@ -16,6 +18,18 @@ type LuceneTemplates = { [key: string]: LuceneTemplate };
 })
 export class LuceneTemplateMemoryComponent implements OnInit {
     private static readonly STORAGE_KEY = 'admin_lucene_templates';
+    private static readonly DEFAULT_TEMPLATES: LuceneTemplates = {
+        GROUPS: {
+            query: 'TYPE:"cm:authorityContainer"',
+            properties: ['cm:authorityDisplayName', 'cm:authorityName', 'ccm:groupType', 'ccm:groupEmail', 'ccm:groupScope', 'ccm:groupSource'].join('\n'),
+            isDefault: true
+        },
+        ORGS: {
+            query: 'TYPE:"cm:authorityContainer"',
+            properties: ['cm:authorityDisplayName', 'cm:authorityName','ccm:edu_homedir' ,'ccm:groupType', 'ccm:groupEmail', 'ccm:groupScope', 'ccm:groupSource'].join('\n'),
+            isDefault: true
+        }
+    }
 
     @Input() query: string;
     @Input() properties: string;
@@ -39,11 +53,17 @@ export class LuceneTemplateMemoryComponent implements OnInit {
         ),
     ];
 
-    constructor(private storage: SessionStorageService, private toast: Toast) {
+    constructor(private storage: SessionStorageService,
+                private translate: TranslateService,
+                private toast: Toast) {
         this.storage
             .get(LuceneTemplateMemoryComponent.STORAGE_KEY)
             .subscribe((templates: LuceneTemplates) => {
                 this.templates = templates ?? {};
+                for(const key of Object.keys(LuceneTemplateMemoryComponent.DEFAULT_TEMPLATES)) {
+                    this.templates[this.translate.instant('ADMIN.BROWSER.LUCENE_DEFAULT_TEMPLATES.' + key)] =
+                        LuceneTemplateMemoryComponent.DEFAULT_TEMPLATES[key];
+                }
             });
     }
 
@@ -53,6 +73,10 @@ export class LuceneTemplateMemoryComponent implements OnInit {
         if (!this.newTemplateName) {
             // Do nothing
         } else if (this.newTemplateName in this.templates) {
+            if(this.templates[this.newTemplateName].isDefault) {
+                this.toast.error(null, 'ADMIN.BROWSER.LUCENE_TEMPLATE_MEMORY.DEFAULT_TEMPLATE_OVERRIDE');
+                return;
+            }
             this.confirmUpdateTemplate(this.newTemplateName).then((isUpdated) => {
                 if (isUpdated) {
                     this.closeNewTemplateDialog();
@@ -63,7 +87,13 @@ export class LuceneTemplateMemoryComponent implements OnInit {
                 query: this.query,
                 properties: this.properties,
             };
-            this.storage.set(LuceneTemplateMemoryComponent.STORAGE_KEY, this.templates);
+            const storeTemplates: LuceneTemplates = {};
+            Object.keys(this.templates).filter((t) =>
+                !this.templates[t].isDefault
+            ).forEach((t) =>
+                storeTemplates[t] = this.templates[t]
+            );
+            this.storage.set(LuceneTemplateMemoryComponent.STORAGE_KEY, storeTemplates);
             this.selectedTemplate = this.newTemplateName;
             this.closeNewTemplateDialog();
         }
