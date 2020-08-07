@@ -28,6 +28,15 @@ export class LuceneTemplateMemoryComponent implements OnInit {
             query: 'TYPE:"cm:authorityContainer"',
             properties: ['cm:authorityDisplayName', 'cm:authorityName','ccm:edu_homedir' ,'ccm:groupType', 'ccm:groupEmail', 'ccm:groupScope', 'ccm:groupSource'].join('\n'),
             isDefault: true
+        },
+        PERSONS: {
+            query: 'TYPE:"cm:person"',
+            properties: ['cm:userName', 'cm:firstName', 'cm:lastName', 'cm:email', 'cm:esuid', 'cm:homeFolder', 'cm:esLastLogin'].join('\n'),
+            isDefault: true
+        },
+        CREATED_CONTENTS_BY_PERSON: {
+            query: '@cm\\:creator:"user" OR @cm\\:modifier:"user"',
+            properties: ['sys:node-uuid', 'cm:name', 'cclom:title', 'cm:creator', 'cm:created', 'cm:modifier', 'cm:modified', 'cclom:general_keyword', 'ccm:comment_content'].join('\n')
         }
     }
 

@@ -307,7 +307,9 @@
             },
             "LUCENE_DEFAULT_TEMPLATES": {
                 "GROUPS": "Alle Gruppen & Organisationen",
-                "ORGS": "Alle Organisationen"
+                "ORGS": "Alle Organisationen",
+                "PERSONS": "Alle Personen",
+                "CREATED_CONTENTS_BY_PERSON": "Alle erstellten Objekte eines Nutzers"
             }
         },
         "JOBS": {
