@@ -9,7 +9,9 @@ public class AbstractEntry implements Serializable {
 	@XmlElement public String name;
 	@XmlElement	public String url;
 	@XmlElement	public Boolean isDisabled;
+	@XmlElement public Boolean openInNew;
 	@XmlElement public Boolean isSeperate;
 	@XmlElement public Boolean isSeperateBottom;
 	@XmlElement public Boolean onlyDesktop;
+	@XmlElement public Boolean onlyWeb;
 }
