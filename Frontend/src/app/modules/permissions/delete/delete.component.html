@@ -112,6 +112,7 @@
         <!-- @TODO: The component does currently not support searching ONLY for users -->
         <authority-search-input
                 (onChooseAuthority)="receiver=$event"
+                [globalSearchAllowed]="true"
                 [showRecent]="false"
                 placeholder="{{'PERMISSIONS.DELETE.RECEIVER' | translate}}"
         ></authority-search-input>

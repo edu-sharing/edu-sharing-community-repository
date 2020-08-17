@@ -301,6 +301,12 @@
                 "CREATE_BUTTON": "Create",
                 "CHOOSE_NAME_TEXT": "Choose a name for the new template.",
                 "CHOOSE_NAME_INPUT_LABEL": "Name"
+            },
+            "LUCENE_DEFAULT_TEMPLATES": {
+                "GROUPS": "All groups & orgs",
+                "ORGS": "All orgs",
+                "PERSONS": "All persons",
+                "CREATED_CONTENTS_BY_PERSON": "All elements created by a specific user"
             }
         },
         "JOBS": {

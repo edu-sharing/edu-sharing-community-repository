@@ -47,7 +47,7 @@
     </button>
     <button
       mat-raised-button
-      *ngIf="selectedTemplate"
+      *ngIf="selectedTemplate && !templates[selectedTemplate].isDefault"
       (click)="confirmUpdateTemplate(selectedTemplate)"
       [disabled]="
         query === templates[selectedTemplate].query &&
@@ -62,7 +62,7 @@
     <button
       mat-raised-button
       color="warn"
-      *ngIf="selectedTemplate"
+      *ngIf="selectedTemplate && !templates[selectedTemplate].isDefault"
       (click)="confirmDeleteTemplate(selectedTemplate)"
     >
       {{

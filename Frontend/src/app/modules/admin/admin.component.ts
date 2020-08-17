@@ -964,7 +964,16 @@ export class AdminComponent {
     this.admin.exportLucene(this.lucene.query,props).subscribe((data)=> {
       const filename='Export-'+DateHelper.formatDate(this.translate,new Date().getTime(),{useRelativeLabels:false});
       this.globalProgress=false;
-      if(this.lucene.exportFormat=='json') {
+
+      // transform store refs to ids
+      data.forEach((d:any) => {
+        Object.keys(d).forEach((k) => {
+          if(d[k]?.id) {
+            d[k] = d[k].id;
+          }
+        });
+      });
+      if(this.lucene.exportFormat === 'json') {
         // reformat data, move all parent:: props to a seperate child
         data.forEach((d:any) => {
           Object.keys(d).filter((k)=>k.startsWith('parent::')).forEach((key)=> {
@@ -976,8 +985,7 @@ export class AdminComponent {
           });
         });
         Helper.downloadContent(filename + '.json',JSON.stringify(data,null,2));
-      }
-      else {
+      } else {
         CsvHelper.download(filename, props, data);
       }
     });
