@@ -264,22 +264,6 @@ export class CollectionsMainComponent {
                 translationService,
                 config,
             );
-            this.mdsService.getSets().subscribe(
-                (data: MdsMetadatasets) => {
-                    const mdsSets = ConfigurationHelper.filterValidMds(RestConstants.HOME_REPOSITORY,
-                        data.metadatasets,
-                        this.config,
-                    );
-                    this.mdsService.getSet(mdsSets[0].id).subscribe((mds) => {
-                        this.referencesColumns = MdsHelper.getColumns(
-                            mds,
-                            'collectionReferences',
-                        );
-                        const info = MdsHelper.getSortInfo(mds, 'collections');
-                        this.sortCollections = info.default;
-                    });
-                });
-
             this.connector.isLoggedIn().subscribe(
                 (data: LoginResult) => {
                     if (data.isValidLogin && data.currentScope == null) {
@@ -301,7 +285,25 @@ export class CollectionsMainComponent {
                                 this.hasMediacenter =
                                     data.collections.length > 0;
                             });
-                        this.initialize();
+                        this.mdsService.getSets().subscribe(
+                            (data: MdsMetadatasets) => {
+                                const mdsSets = ConfigurationHelper.filterValidMds(RestConstants.HOME_REPOSITORY,
+                                    data.metadatasets,
+                                    this.config,
+                                );
+                                this.mdsService.getSet(mdsSets[0].id).subscribe((mds) => {
+                                    this.referencesColumns = MdsHelper.getColumns(
+                                        mds,
+                                        'collectionReferences',
+                                    );
+                                    const info = MdsHelper.getSortInfo(mds, 'collections');
+                                    this.sortCollections = info.default;
+                                    this.initialize();
+                                });
+                            },(e) => {
+                                console.warn(e);
+                                this.initialize();
+                            });
                     } else {
                         RestHelper.goToLogin(this.router, this.config);
                     }
@@ -681,12 +683,13 @@ export class CollectionsMainComponent {
                         this.finishCollectionLoading(callback);
                         return;
                     }
-                    request.count = null;
+                    const requestRefs = Helper.deepCopy(CollectionsMainComponent.DEFAULT_REQUEST);
+                    requestRefs.count = null;
                     this.collectionService
                         .getCollectionReferences(
                             this.collectionContent.node.ref.id,
                             CollectionsMainComponent.PROPERTY_FILTER,
-                            request,
+                            requestRefs,
                             this.collectionContent.node.ref.repo,
                         )
                         .subscribe(refs => {
