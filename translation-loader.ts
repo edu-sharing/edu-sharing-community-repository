@@ -1,7 +1,7 @@
 import { HttpClient } from '@angular/common/http';
 import { TranslateLoader } from '@ngx-translate/core';
-import { Observable, Observer } from 'rxjs';
-import { tap, switchMap, map } from 'rxjs/operators';
+import {Observable, Observer, of} from 'rxjs';
+import {tap, switchMap, map, catchError} from 'rxjs/operators';
 import { environment } from '../../environments/environment';
 import { RestLocatorService } from '../core-module/core.module';
 import { Translation } from './translation';
@@ -50,7 +50,12 @@ export class TranslationLoader implements TranslateLoader {
             // Default to empty dictionary if we got nothing
             map(translations => translations || {}),
             switchMap(translations =>
-                this.fetchAndApplyOverrides(translations, lang),
+                this.fetchAndApplyOverrides(translations, lang).pipe(
+                    catchError((error, obs) => {
+                        console.error(error);
+                        return of(error);
+                    })
+                )
             ),
         );
     }
