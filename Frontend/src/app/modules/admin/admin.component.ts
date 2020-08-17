@@ -42,6 +42,8 @@ import {DateHelper} from '../../core-ui-module/DateHelper';
 import {CsvHelper} from '../../core-module/csv.helper';
 import {trigger} from '@angular/animations';
 import {UIAnimation} from '../../core-module/ui/ui-animation';
+import IEditorOptions = monaco.editor.IEditorOptions;
+import {NgxEditorModel} from 'ngx-monaco-editor';
 
 
 @Component({
@@ -123,6 +125,7 @@ export class AdminComponent {
   public jobsLogFilter:any = [];
   public jobsLogLevel:any = [];
   public jobsLogData:any = [];
+  public jobCodeOptions = {minimap: {enabled: false}, language: 'json', autoIndent: true, automaticLayout: true };
   public jobClasses:SuggestItem[]=[];
   public jobClassesSuggested:SuggestItem[]=[];
   public lucene:any={mode:'NODEREF',offset:0,count:100,outputMode:'view'};
@@ -158,6 +161,7 @@ export class AdminComponent {
   private excelFile: File;
   private collectionsFile: File;
   private uploadTempFile: File;
+  private uploadJobsFile: File;
   private uploadOaiFile: File;
   public xmlAppKeys: string[];
   public currentApp: string;
@@ -184,9 +188,10 @@ export class AdminComponent {
   public startJob() {
     this.storage.set('admin_job',this.job);
     this.globalProgress=true;
-    this.admin.startJob(this.job.class,this.job.params).subscribe(()=> {
+    this.admin.startJob(this.job.class,JSON.parse(this.job.params), this.uploadJobsFile).subscribe(()=> {
         this.globalProgress=false;
-        this.toast.toast('ADMIN.TOOLKIT.JOB_STARTED');
+        this.uploadJobsFile = null;
+        this.toast.toast('ADMIN.JOBS.JOB_STARTED');
     },(error:any)=> {
         this.globalProgress=false;
         this.toast.error(error);
@@ -252,8 +257,8 @@ export class AdminComponent {
   public updateExcelFile(event:any) {
     this.excelFile=event.target.files[0];
   }
-  public updateUploadTempFile(event:any) {
-    this.uploadTempFile=event.target.files[0];
+  public updateUploadFile(event:any, file: string) {
+    (this as any)[file]=event.target.files[0];
   }
     public updateUploadOaiFile(event:any) {
         this.uploadOaiFile=event.target.files[0];
@@ -918,14 +923,17 @@ export class AdminComponent {
 
     private prepareJobClasses() {
         const jobs=[
-            new SuggestItem('org.edu_sharing.repository.server.jobs.quartz.RemoveImportedObjectsJob',null),
-            new SuggestItem('org.edu_sharing.repository.server.jobs.quartz.RemoveOrphanCollectionReferencesJob',null),
-            new SuggestItem('org.edu_sharing.repository.server.jobs.quartz.RemoveNodeJob',null),
-            new SuggestItem('org.edu_sharing.repository.server.jobs.quartz.ConvertMultivalueToSinglevalueJob',null),
-            new SuggestItem('org.edu_sharing.repository.server.jobs.quartz.BulkEditNodesJob',null),
-            new SuggestItem('org.edu_sharing.repository.server.jobs.quartz.BulkDeleteNodesJob',null),
-            new SuggestItem('org.edu_sharing.repository.server.jobs.quartz.UpdateFrontpageCacheJob',null)
+            new SuggestItem('org.edu_sharing.repository.server.jobs.quartz.RemoveImportedObjectsJob'),
+            new SuggestItem('org.edu_sharing.repository.server.jobs.quartz.RemoveOrphanCollectionReferencesJob'),
+            new SuggestItem('org.edu_sharing.repository.server.jobs.quartz.RemoveNodeJob'),
+            new SuggestItem('org.edu_sharing.repository.server.jobs.quartz.ConvertMultivalueToSinglevalueJob'),
+            new SuggestItem('org.edu_sharing.repository.server.jobs.quartz.BulkEditNodesJob'),
+            new SuggestItem('org.edu_sharing.repository.server.jobs.quartz.BulkDeleteNodesJob'),
+            new SuggestItem('org.edu_sharing.repository.server.jobs.quartz.UpdateFrontpageCacheJob')
         ];
+        const deleteAuthorities = new SuggestItem('org.edu_sharing.repository.server.jobs.quartz.BulkDeleteAuthoritiesJob')
+        deleteAuthorities.originalObject = {upload: true};
+        jobs.push(deleteAuthorities);
         this.jobClasses=jobs.map((job)=> {
           const id=job.id.split('.');
           job.title=this.translate.instant('ADMIN.JOBS.NAMES.'+id[id.length-1]);
