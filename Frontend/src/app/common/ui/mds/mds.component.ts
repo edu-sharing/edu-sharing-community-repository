@@ -1000,7 +1000,7 @@ export class MdsComponent {
         'id="'+this.getWidgetDomId(widget)+'" ' +
         'placeholder="'+(widget.placeholder ? widget.placeholder : '')+'" ' +
         'value="'+(widget.defaultvalue ? widget.defaultvalue : '')+'" ' +
-        'class="'+css+'">';
+        'class="'+css+'"';
     if(this.isBulkMode() && this.bulkBehaviour !== BulkBehaviour.Replace) {
       html+=' disabled';
     }
