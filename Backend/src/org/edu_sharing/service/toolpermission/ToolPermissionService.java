@@ -67,9 +67,12 @@ public class ToolPermissionService {
 		return hasToolPermission(CCConstants.CCM_VALUE_TOOLPERMISSION_CONNECTOR_PREFIX + connectorId+scope);
 	}
 	public List<String> getAllAvailableToolPermissions(){
+		return getAllAvailableToolPermissions(false);
+	}
+	public List<String> getAllAvailableToolPermissions(boolean renew){
 		List<String> allowed=new ArrayList<>();
 		for(String permission : this.getAllToolPermissions()){
-			if(hasToolPermission(permission))
+			if(hasToolPermission(permission, renew))
 				allowed.add(permission);
 		}
 		return allowed;
@@ -98,9 +101,18 @@ public class ToolPermissionService {
 		
 		return AuthenticationUtil.runAsSystem(runas);
 	}
-	
-	
+
 	public boolean hasToolPermission(String toolPermission) {
+		return hasToolPermission(toolPermission, false);
+	}
+
+	/**
+	 *
+	 * @param toolPermission
+	 * @param renew should the cache be skipped / renewed
+	 * @return
+	 */
+	public boolean hasToolPermission(String toolPermission, boolean renew) {
 		
 		
 		try{
@@ -116,7 +128,7 @@ public class ToolPermissionService {
 		 */
 		HttpSession session = Context.getCurrentInstance().getRequest().getSession();
 		Boolean hasToolPerm = (Boolean)session.getAttribute(toolPermission);
-		if(hasToolPerm == null){
+		if(hasToolPerm == null || renew){
 			hasToolPerm = hasToolPermissionWithoutCache(toolPermission);
 			session.setAttribute(toolPermission, hasToolPerm);
 		}
