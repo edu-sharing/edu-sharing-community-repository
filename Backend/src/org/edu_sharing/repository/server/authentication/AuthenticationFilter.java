@@ -28,6 +28,7 @@ import org.edu_sharing.repository.server.tools.LocaleValidator;
 import org.edu_sharing.repository.server.tools.URLTool;
 import org.edu_sharing.service.authentication.oauth2.TokenService;
 import org.edu_sharing.service.authentication.oauth2.TokenService.Token;
+import org.edu_sharing.service.toolpermission.ToolPermissionServiceFactory;
 import org.springframework.context.ApplicationContext;
 
 public class AuthenticationFilter implements javax.servlet.Filter {
@@ -99,7 +100,9 @@ public class AuthenticationFilter implements javax.servlet.Filter {
   				
   				if(authTool.validateTicket(ticket)){
   					//if its APIClient user name is ignored and is figured out with authentication service
-  					
+
+					// Force a renew of all toolpermissions since they might have now changed!
+					ToolPermissionServiceFactory.getInstance().getAllAvailableToolPermissions(true);
   					/**
   					 * auth type ticket means no profile editing allowed, 
   					 * authenticated by an lms or other connected system that
