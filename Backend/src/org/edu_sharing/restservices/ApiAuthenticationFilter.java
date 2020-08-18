@@ -38,6 +38,7 @@ import org.edu_sharing.service.authentication.oauth2.TokenService.Token;
 import org.edu_sharing.service.authority.AuthorityServiceFactory;
 import org.edu_sharing.service.authority.AuthorityServiceImpl;
 import org.edu_sharing.service.config.ConfigServiceFactory;
+import org.edu_sharing.service.toolpermission.ToolPermissionServiceFactory;
 import org.glassfish.jersey.client.ClientConfig;
 import org.springframework.context.ApplicationContext;
 
@@ -147,6 +148,8 @@ public class ApiAuthenticationFilter implements javax.servlet.Filter {
 					String ticket = authHdr.substring(10).trim();
 					if(ticket != null){
 						if(authTool.validateTicket(ticket)){
+							// Force a renew of all toolpermissions since they might have now changed!
+							ToolPermissionServiceFactory.getInstance().getAllAvailableToolPermissions(true);
 		  					//if its APIClient username is ignored and is figured out with authentication service
 		  					authTool.storeAuthInfoInSession(authTool.getCurrentUser(), ticket, CCConstants.AUTH_TYPE_TICKET, httpReq.getSession());
 		  					validatedAuth = authTool.validateAuthentication(session);
