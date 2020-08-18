@@ -30,7 +30,10 @@
             "SIZE_MEDIUM": "normal",
             "SIZE_LARGE": "big",
             "WARNING": " Please note that invalid values/syntax may make the system unreachable. Please check all changes carefully before you continue.",
-            "PARSE_ERROR": "Error when taking over the Config! Check the syntax and the configuration and repeat the procedure.<br><b>Das Repository befindet sich aktuell in einem ungültigen Zustand!</b><br>Für weitere Details prüfen Sie bitte die Logdateien"
+            "SAVED": "Configuration saved. Maybe the site needs to be reloaded",
+            "CHECK": "Check",
+            "ERROR": "Configuration error",
+            "PARSE_ERROR": "Error when taking over the Config! Check the syntax and the configuration and repeat the procedure.<br><b>The repository now has an invalid state!</b><br>Please consult the log files for more information<br><br>{{error}}"
         },
         "CONFIG": {
             "XML_CONFIG": "XML configuration files",
@@ -260,10 +263,7 @@
             "UPLOAD_TEMP": "Upload files to temporary directory",
             "CHOOSE_UPLOAD_TEMP": "Select file",
             "UPLOAD_TEMP_START": "Upload",
-            "UPLOAD_TEMP_DONE": "File was stored on the server as {{filename}}",
-            "JOB_CLASS": "Class name of the job class:",
-            "JOB_STARTED": "The task was started. Check the task list to see the status",
-            "START_JOB": "Perform task"
+            "UPLOAD_TEMP_DONE": "File was stored on the server as {{filename}}"
         },
         "BROWSER": {
             "NODE_BROWSER": "Node-Browser",
@@ -310,6 +310,9 @@
             }
         },
         "JOBS": {
+            "JOB_CLASS": "Class name of the job class:",
+            "JOB_STARTED": "The task was started. Check the task list to see the status",
+            "START_JOB": "Perform task",
             "LOG": "Log entries",
             "LOG_FILTER": "Filtering by content:",
             "LOG_LEVEL": "Filtering by level of severity:",
@@ -328,6 +331,8 @@
             "LOG_LEVEL_4": "Warning",
             "LOG_LEVEL_3": "Error",
             "LOG_LEVEL_0": "Fatal",
+            "UPLOAD_FILE_LABEL": "Select file for job",
+            "CHOOSE_UPLOAD_FILE": "Choose file",
             "NAMES": {
                 "RemoveImportedObjectsJob": "Delete all imported nodes",
                 "RemoveOrphanCollectionReferencesJob": "Delete all collection references with missing original item",
@@ -335,7 +340,8 @@
                 "ConvertMultivalueToSinglevalueJob": "Convert a property from multivalue to singlevalue",
                 "BulkDeleteNodesJob": "Bulk deleting of multiple nodes (e.g. large folders)",
                 "BulkEditNodesJob": "Bulk processing of a property for multiple nodes",
-                "UpdateFrontpageCacheJob": "Rebuilds the cache for the start page"
+                "UpdateFrontpageCacheJob": "Rebuilds the cache for the start page",
+                "BulkDeleteAuthoritiesJob": "Delete users & orgs via bulk"
             }
         },
         "FOLDERTEMPLATES": {
