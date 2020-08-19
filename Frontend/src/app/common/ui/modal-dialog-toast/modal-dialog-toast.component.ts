@@ -36,7 +36,7 @@ export class ModalDialogToastComponent {
       this.dialogType = data.dialogType;
       this.node = data.node;
       this.messageParameters = data.messageParameters;
-      this.messageType = data.messageType;
+      this.messageType = data.messageType || ModalMessageType.Text;
       this.isCancelable = data.isCancelable;
       this.buttons = data.buttons;
       this.onCancel = data.onCancel;
