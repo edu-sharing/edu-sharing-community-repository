@@ -88,6 +88,8 @@ user-profile {
 .menuButtonOuter {
     height: 100%;
     display: flex;
+    // fix button move to background if sidemenu is open
+    z-index: 1;
     > button {
         border-radius: 0px;
     }
