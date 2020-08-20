@@ -10,7 +10,7 @@ export class FormatSizePipe implements PipeTransform {
       return value;
     if(value==null)
       value=0;
-    while(value>1024 && i<names.length){
+    while(value>=1024 && i<names.length){
       value/=1024;
       i++;
     }
