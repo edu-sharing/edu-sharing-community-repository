@@ -1,9 +1,9 @@
 /**
  *
- *
- *
- *
- *
+ *  
+ * 
+ * 
+ *	
  *
  *
  *
@@ -265,7 +265,7 @@ public class ShibbolethServlet extends HttpServlet {
             		 SAMLCredential samlCredential = (SAMLCredential) credential;
             	     return samlCredential.getAttributeAsString(attName);
             	}
-               
+
             }
 
 	    	String attValue = null;
