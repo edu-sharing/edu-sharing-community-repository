@@ -46,6 +46,7 @@ import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.client.tools.UrlTool;
 import org.edu_sharing.repository.server.AuthenticationToolAPI;
+import org.edu_sharing.repository.server.NgServlet;
 import org.edu_sharing.repository.server.tools.ApplicationInfo;
 import org.edu_sharing.repository.server.tools.ApplicationInfoList;
 import org.edu_sharing.repository.server.tools.security.ShibbolethSessions;
@@ -63,6 +64,7 @@ public class ShibbolethServlet extends HttpServlet {
 	Logger logger = Logger.getLogger(ShibbolethServlet.class);
 
 	Boolean useHeaders = null;
+	private String redirectUrl;
 
 	@Override
 	public void init() throws ServletException {
@@ -94,6 +96,8 @@ public class ShibbolethServlet extends HttpServlet {
 
 		AuthenticationToolAPI authTool = new AuthenticationToolAPI();
 		HashMap<String,String> validAuthInfo = authTool.validateAuthentication(req.getSession());
+
+		redirectUrl = (String)req.getSession().getAttribute(NgServlet.PREVIOUS_ANGULAR_URL);
 
 		if (validAuthInfo != null ) {
 			if (validAuthInfo.get(CCConstants.AUTH_USERNAME).equals(headerUserName)) {
@@ -223,8 +227,6 @@ public class ShibbolethServlet extends HttpServlet {
 	}
 
 	private void redirect(HttpServletResponse resp, HttpServletRequest req) throws IOException{
-
-		String redirectUrl = (String)req.getSession().getAttribute(AuthenticationFilter.LOGIN_SUCCESS_REDIRECT_URL);
 
 		if (redirectUrl != null) {
 			redirectUrl = resp.encodeURL(redirectUrl);
