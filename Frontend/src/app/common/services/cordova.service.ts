@@ -3,14 +3,14 @@ import {Observable, Observer} from 'rxjs';
 
 import {Location} from '@angular/common';
 import {Router} from '@angular/router';
-import {TranslateService} from "@ngx-translate/core";
+import {TranslateService} from '@ngx-translate/core';
 import {HttpClient} from '@angular/common/http';
-import {UIConstants} from "../../core-module/ui/ui-constants";
-import {FrameEventsService} from "../../core-module/rest/services/frame-events.service"
+import {UIConstants} from '../../core-module/ui/ui-constants';
+import {FrameEventsService} from '../../core-module/rest/services/frame-events.service'
 
-import {DateHelper} from "../../core-ui-module/DateHelper";
-import {OAuthResult} from "../../core-module/rest/data-object";
-import {RestConstants} from "../../core-module/rest/rest-constants";
+import {DateHelper} from '../../core-ui-module/DateHelper';
+import {OAuthResult} from '../../core-module/rest/data-object';
+import {RestConstants} from '../../core-module/rest/rest-constants';
 
 declare var cordova : any;
 
@@ -20,27 +20,11 @@ declare var cordova : any;
 @Injectable()
 export class CordovaService {
 
-  // change this during development for testing true, but false is default
-  private forceCordovaMode = false;
-
-  private deviceIsReady = false;
-
-  private deviceResumeCallback : Function = null;
-
-  private observerShareContent : Observer<any> = null;
-
-  private appGoneBackgroundTS : number = null;
-
-  private _oauth:OAuthResult;
-  private serviceIsReady = false;
-
-  private lastIntent: any;
-
-  get oauth(){
+  get oauth() {
     return this._oauth;
   }
 
-  set oauth(oauth: OAuthResult){
+  set oauth(oauth: OAuthResult) {
     this._oauth=oauth;
     if(oauth) {
         this._oauth.expires_ts = Date.now() + (oauth.expires_in * 1000);
@@ -48,8 +32,6 @@ export class CordovaService {
     }
 
   }
-
-  initialHref:string;
 
   /**
    * CONSTRUCTOR
@@ -65,12 +47,12 @@ export class CordovaService {
     this.initialHref = window.location.href;
 
     // CORDOVA EVENT: Pause (App is put into Background)
-    let whenDeviceGoesBackground = () => {
+    const whenDeviceGoesBackground = () => {
       // rember time when app went into background
       this.appGoneBackgroundTS = Date.now();
     };
     // CORDOVA EVENT: Resume (App comes back from Background)
-    let whenDeviceGoesForeground = () => {
+    const whenDeviceGoesForeground = () => {
 
       /*
        * ignore pauses under 1 minute that appear when going into
@@ -89,7 +71,7 @@ export class CordovaService {
         // deviceready may not work, because cordova is already loaded, so try to set it ready after some time
         setTimeout(() => this.deviceIsReady = true, 1000);
     }
-    //adding listener for cordova events
+    // adding listener for cordova events
     document.addEventListener('deviceready', () => {
       this.deviceIsReady = true;
     }, false);
@@ -105,14 +87,72 @@ export class CordovaService {
 
   }
 
+  /**********************************************************
+   * Sync with iOS Share Screen thru NSUserdefaults Plugin
+   **********************************************************
+   * Server and oAuth Token need to be synced with the iOS share
+   * screen thru the NSUserdefaults storage ny using the following plugin:
+   * https://github.com/rootzoll/cordova-plugin-nsuserdefaults-for-app-groups.git
+   */
+
+   // keys used to exchange data with ios share extension
+   public static IOSSHARE_ACCESS = 'access_token';
+   public static IOSSHARE_REFRESH = 'refresh_token';
+   public static IOSSHARE_EXPIRES = 'expires_in';
+   public static IOSSHARE_SERVER = 'eduserver';
+
+  /**********************************************************
+   * OAUTH Server Communication
+   **********************************************************
+   * The REST-Services depend on Configuration Service that already need config from a fixed server.
+   * To seperate the app login from those dependencies .. the cordova service provides all the HTTP
+   * tools to select a server, make oAuth logins/management, get JSession .. from there on the
+   * regular REST-Services can handle all the communication.
+   */
+
+  // errors results that can result when testing a server url
+  public static TEST_ERROR_NOTFOUND = 'APINOTFOUND';
+  public static TEST_ERROR_NOINTERNET = 'NOINTERNET';
+  public static TEST_ERROR_INCORRECTVERSION = 'INCORRECTVERSION';
+  public static TEST_ERROR_UNKNOWN = 'UNKOWN';
+
+  // success results that can result when testing a server url
+  public static TEST_WARNING_NOHTTPS = 'NOHTTPS';
+  public static TEST_TESTSKIPPED = 'TESTSKIPPED';
+  public static TEST_OK = 'OK';
+
+  // change this during development for testing true, but false is default
+  private forceCordovaMode = false;
+
+  private deviceIsReady = false;
+
+  private deviceResumeCallback : Function = null;
+
+  private observerShareContent : Observer<any> = null;
+
+  private appGoneBackgroundTS : number = null;
+
+  private _oauth:OAuthResult;
+  private serviceIsReady = false;
+
+  private lastIntent: any;
+
+  initialHref:string;
+
+  /**
+   * Called when the current status is logged out
+   * Cordova needs to refresh tokens
+   */
+  private reiniting=false;
+
     /**
      * get the last android/ios intent
      */
-    public getLastIntent(){
+    public getLastIntent() {
       return this.lastIntent;
     }
   private deviceReadyLoop(counter:number) : void {
-    setTimeout(()=>{
+    setTimeout(()=> {
       if (this.deviceIsReady) {
         this.whenDeviceIsReady();
       } else {
@@ -124,15 +164,15 @@ export class CordovaService {
   // CORDOVA EVENT: Device is Ready (on App StartUp)
   private whenDeviceIsReady = () => {
 
-      //window.open = cordova.InAppBrowser.open;
+      // window.open = cordova.InAppBrowser.open;
 
       // load basic data from storage
       this.loadStorage();
 
       // --> navigation issues exist anyway, need to check that later
-      document.addEventListener("backbutton", ()=>this.onBackKeyDown(), false);
+      document.addEventListener('backbutton', ()=>this.onBackKeyDown(), false);
       // when new share contet - go to share screen
-      let shareInterval=setInterval(()=>{
+      const shareInterval=setInterval(()=> {
           if(this.hasValidConfig()) {
               clearInterval(shareInterval);
               this.onNewShareContent().subscribe(
@@ -145,7 +185,7 @@ export class CordovaService {
 
 
       // hide the splashscreen (if still showing)
-      setTimeout(()=>{
+      setTimeout(()=> {
         try {
           (navigator as any).splashscreen.hide();
         } catch (e) {
@@ -174,17 +214,17 @@ export class CordovaService {
       // if device is already ready -> register now, otherwise wait
       if (this.deviceIsReady) this.registerOnShareContent();
 
-    });  
+    });
    }
-   public getFileAsBlob(file:string,mimetype:string){
+   public getFileAsBlob(file:string,mimetype:string) {
        return new Observable<Blob>((observer: Observer<Blob>) => {
-           (window as any).resolveLocalFileSystemURL(file, (data:any)=>{
-             data.file((data2:File)=>{
+           (window as any).resolveLocalFileSystemURL(file, (data:any)=> {
+             data.file((data2:File)=> {
                  observer.next(data2);
                  observer.complete();
              })
 
-           },(error:any)=>{
+           },(error:any)=> {
                observer.error(error);
                observer.complete();
            });
@@ -193,43 +233,43 @@ export class CordovaService {
    private registerOnShareContent() : void {
        if (this.isAndroid()) {
 
-           let handleIntentBase=(intent:any)=>{
-                if(intent && intent.extras){
-                   let uri=intent.extras["android.intent.extra.TEXT"];
-                   if(uri){
+           const handleIntentBase=(intent:any)=> {
+                if(intent && intent.extras) {
+                   let uri=intent.extras['android.intent.extra.TEXT'];
+                   if(uri) {
                        this.lastIntent=intent;
-                       this.observerShareContent.next({uri:uri,mimetype:intent.type});
+                       this.observerShareContent.next({uri,mimetype:intent.type});
                        // clear handler to just fire it on first app opening
                        return;
                    }
-                   uri = intent.extras["android.intent.extra.STREAM"];
+                   uri = intent.extras['android.intent.extra.STREAM'];
                    // it's a file
-                   if(uri){
+                   if(uri) {
                        this.lastIntent=intent;
-                       (window as any).plugins.intent.getRealPathFromContentUrl(uri,(file:string)=>{
-                           this.observerShareContent.next({uri:uri,file:file,mimetype:intent.type});
-                       },(error:any)=>{
-                           this.observerShareContent.next({uri:uri,mimetype:intent.type});
+                       (window as any).plugins.intent.getRealPathFromContentUrl(uri,(file:string)=> {
+                           this.observerShareContent.next({uri,file,mimetype:intent.type});
+                       },(error:any)=> {
+                           this.observerShareContent.next({uri,mimetype:intent.type});
                        });
 
                    }
                }
            };
            // only run once. Will loop otherwise if no auth is found and intent was send
-           let handleIntent=(intent:any)=> {
+           const handleIntent=(intent:any)=> {
                // Do things
-               if (intent && intent.action=="android.intent.action.VIEW") {
-                   let hit="/edu-sharing";
-                   let target=intent.data.substr(0,intent.data.indexOf(hit));
-                   let current=window.location.href.substr(0,window.location.href.indexOf(hit));
-                   if(target==current){
+               if (intent && intent.action=='android.intent.action.VIEW') {
+                   const hit='/edu-sharing';
+                   const target=intent.data.substr(0,intent.data.indexOf(hit));
+                   const current=window.location.href.substr(0,window.location.href.indexOf(hit));
+                   if(target==current) {
                        window.location.href=intent.data;
                    }
-                   else{
+                   else {
                        this.resetAndGoToServerlist('url='+intent.data);
                    }
                }
-               else{
+               else {
                    handleIntentBase(intent);
                }
                (window as any).plugins.intent.getCordovaIntent(null);
@@ -251,25 +291,25 @@ export class CordovaService {
 
            });*/
        }
-       if(this.isIOS()){
+       if(this.isIOS()) {
            // Initialize the plugin
-           cordova.openwith.init(()=>{}, ()=>{
-               console.warn("failed to init openWith ios");
+           cordova.openwith.init(()=> {}, ()=> {
+               console.warn('failed to init openWith ios');
            });
 
            // Define your file handler
-           cordova.openwith.addHandler((intent:any)=>{
+           cordova.openwith.addHandler((intent:any)=> {
 
-               let item = intent.items[0];
-               //console.log('  image base64 string: ', item.base64)
+               const item = intent.items[0];
+               // console.log('  image base64 string: ', item.base64)
 
                // some optional additional info
                item.stream=item.base64; // convert it so it's like on android
-               //alert(item.type+" : "+item.name+" : "+item.path+" : "+item.uri);
-               item.uri=DateHelper.getDateForNewFile()+".jpg";
+               // alert(item.type+" : "+item.name+" : "+item.path+" : "+item.uri);
+               item.uri=DateHelper.getDateForNewFile()+'.jpg';
 
                this.lastIntent=item;
-               let data={uri:item.uri,mimetype:item.type,file:item.name,text:item.text};
+               const data= {uri:item.uri,mimetype:item.type,file:item.name,text:item.text};
                this.observerShareContent.next(data);
            });
        }
@@ -337,7 +377,7 @@ export class CordovaService {
 
   // just for internal use
   private isReallyRunningCordova() : boolean {
-    return (typeof (window as any).cordova != "undefined");
+    return (typeof (window as any).cordova != 'undefined');
   }
 
   /**
@@ -346,8 +386,8 @@ export class CordovaService {
    */
   isIOS() : boolean {
     try {
-      let device:any = (window as any).device;
-      return device.platform=="iOS";
+      const device:any = (window as any).device;
+      return device.platform=='iOS';
     } catch (e) {
       return false;
     }
@@ -359,8 +399,8 @@ export class CordovaService {
    */
   isAndroid() : boolean {
     try {
-      let device:any = (window as any).device;
-      return device.platform=="Android";
+      const device:any = (window as any).device;
+      return device.platform=='Android';
     } catch (e) {
       return true;
     }
@@ -374,7 +414,7 @@ export class CordovaService {
     return this.deviceIsReady;
   }
 
-  /*  
+  /*
     * Set a callback function to be called then device is ready for cordova service action.
     */
   subscribeServiceReady() : Observable<void> {
@@ -385,10 +425,10 @@ export class CordovaService {
         // cordova already signaled that it is ready - call on the spot
         observer.next(null);
         observer.complete();
-  
+
       } else {
 
-        let waitLoop = () => {
+        const waitLoop = () => {
           if (this.serviceIsReady) {
             observer.next(null);
             observer.complete();
@@ -397,8 +437,8 @@ export class CordovaService {
           }
         };
         waitLoop();
-  
-      } 
+
+      }
 
     });
   }
@@ -411,27 +451,27 @@ export class CordovaService {
   setDeviceResumeCallback(callback:Function) {
     this.deviceResumeCallback = callback;
   }
-  
+
   /**
    * Closes the App when running as real app.
    */
   exitApp() {
-    try{
-      (navigator as any)['app'].exitApp();
+    try {
+      (navigator as any).app.exitApp();
     } catch(e) {
     }
   }
 
-  restartCordova(parameters=""):void {
+  restartCordova(parameters=''):void {
     this.setPermanentStorage(RestConstants.CORDOVA_STORAGE_OAUTHTOKENS,null);
     if(parameters)
-        parameters="&"+parameters;
-    if(navigator.userAgent.indexOf("ionic / edu-sharing-app")!=-1) {
+        parameters='&'+parameters;
+    if(navigator.userAgent.indexOf('ionic / edu-sharing-app')!=-1) {
         // go to ionic local server
-        window.location.replace("http://localhost:54361/?reset=true" + parameters);
+        window.location.replace('http://localhost:54361/?reset=true' + parameters);
     }
-    else{
-        window.location.replace("http://app-registry.edu-sharing.com/ng/?reset=true" + parameters);
+    else {
+        window.location.replace('http://app-registry.edu-sharing.com/ng/?reset=true' + parameters);
     }
     /*
     try {
@@ -443,7 +483,7 @@ export class CordovaService {
 
 
   /**********************************************************
-   * APP PRESISTENCE 
+   * APP PRESISTENCE
    **********************************************************
    * Uses HTML5 storage as a base, but also backups thru the following plugin-in ...
    * https://www.npmjs.com/package/cordova-plugin-nativestorage
@@ -454,14 +494,14 @@ export class CordovaService {
 
 
   /**
-   * load permanent key/value 
+   * load permanent key/value
    * @param key the key to request value
    * @param callback function callback with value as parameter - null if not available
    */
   getPermanentStorage(key:string, callback:Function) : void {
 
     // callback - to sync with ios sharescreen
-    let callbackWrapper:Function = (val:any) => {
+    const callbackWrapper:Function = (val:any) => {
         /*
       if (this.isReallyRunningCordova() & this.isIOS()) {
         if (key==CordovaService.STORAGE_OAUTHTOKENS) {
@@ -480,7 +520,7 @@ export class CordovaService {
                 if (val!=null) oAuthLocal = JSON.parse(val);
                 if ((oAuthLocal==null) || (+shareExpire>oAuthLocal.expires_ts)) {
 
-                  // OK share has more up to date oauth 
+                  // OK share has more up to date oauth
                   // --> update local from share
                   oAuthLocal.expires_ts = +shareExpire;
                   this.iosShareScreenLoadValue(CordovaService.IOSSHARE_ACCESS,(shareAccess:string)=>{
@@ -492,7 +532,7 @@ export class CordovaService {
                       callback(oAuthLocalJSON);
                     });
                   });
-                
+
                 } else {
                   callback(val);
                 }
@@ -511,26 +551,26 @@ export class CordovaService {
         }
       } else {*/
         callback(val);
-      //}
-    } 
+      // }
+    }
 
     // get value from HTML5 local storage
-    let value = window.localStorage.getItem(key);
+    const value = window.localStorage.getItem(key);
 
-    //just iun case - check if backup is available from nativestorage plugin
+    // just iun case - check if backup is available from nativestorage plugin
     if (((typeof value == 'undefined') || (value==null)) && (this.isIOS()) && ((window as any).NativeStorage)) {
       try {
         // window['NativeStorage'].getItem("reference_to_value",<success-callback>, <error-callback>);
-        (window as any).NativeStorage.getItem(key,(valueNative:any)=>{
-          // WIN 
-          if (typeof valueNative == "undefined") valueNative = null;
+        (window as any).NativeStorage.getItem(key,(valueNative:any)=> {
+          // WIN
+          if (typeof valueNative == 'undefined') valueNative = null;
           callbackWrapper(valueNative);
-        },(error:any)=>{
+        },(error:any)=> {
           // FAIL (also when key not available)
           callbackWrapper(null);
         });
       } catch (e) {
-        console.error("Plugin Fail",e);
+        console.error('Plugin Fail',e);
         callbackWrapper(null);
       }
     } else {
@@ -541,8 +581,8 @@ export class CordovaService {
 
   /**
    * save permament key/value
-   * @param key 
-   * @param value 
+   * @param key
+   * @param value
    */
   setPermanentStorage(key:string, value:string) {
 
@@ -552,26 +592,26 @@ export class CordovaService {
     // as backup set on native storage
     if (this.isIOS()) {
       try {
-        (window as any).NativeStorage.setItem(key, value, ()=>{
+        (window as any).NativeStorage.setItem(key, value, ()=> {
           // WIN - thats OK
-        }, (error:any)=>{
+        }, (error:any)=> {
           // FAIL
-          console.error("Fail NativeStorage.setItem",error);
+          console.error('Fail NativeStorage.setItem',error);
         });
       } catch (e) {
-        console.error("Plugin Fail",e);
+        console.error('Plugin Fail',e);
       }
     }
 
     // if a oauth relevant key - sync with sharescreen
     if (key==RestConstants.CORDOVA_STORAGE_OAUTHTOKENS) {
       try {
-        let oauthData:any = JSON.parse(value);
+        const oauthData:any = JSON.parse(value);
         this.iosShareScreenStoreValue(CordovaService.IOSSHARE_ACCESS,oauthData.access_token);
         this.iosShareScreenStoreValue(CordovaService.IOSSHARE_REFRESH,oauthData.refresh_token);
         this.iosShareScreenStoreValue(CordovaService.IOSSHARE_EXPIRES,oauthData.expires_ts);
       } catch (e) {
-        console.error("EXCEPTION on storing oauth data for ios sharescreen ",e);
+        console.error('EXCEPTION on storing oauth data for ios sharescreen ',e);
       }
     }
 
@@ -580,7 +620,7 @@ export class CordovaService {
       try {
         this.iosShareScreenStoreValue(CordovaService.IOSSHARE_SERVER,value);
       } catch (e) {
-        console.error("EXCEPTION on storing server data for ios sharescreen ",e);
+        console.error('EXCEPTION on storing server data for ios sharescreen ',e);
       }
     }
 
@@ -594,26 +634,26 @@ export class CordovaService {
     // clear HTML5 local storage
     window.localStorage.clear();
 
-    // clear native storage 
+    // clear native storage
     if (this.isIOS()) {
       try {
         (window as any).NativeStorage.clear(() => {
         }, (error: any) => {
           // FAIL
-          console.error("Fail NativeStorage.clear", error);
+          console.error('Fail NativeStorage.clear', error);
         });
       } catch (e) {
-        console.error("Plugin Fail", e);
+        console.error('Plugin Fail', e);
       }
     }
 
     // clear oauth sync with ios share screen
     try {
-        this.iosShareScreenStoreValue(CordovaService.IOSSHARE_ACCESS,"");
-        this.iosShareScreenStoreValue(CordovaService.IOSSHARE_REFRESH,"");
-        this.iosShareScreenStoreValue(CordovaService.IOSSHARE_EXPIRES, (new Date).getTime()+"");
+        this.iosShareScreenStoreValue(CordovaService.IOSSHARE_ACCESS,'');
+        this.iosShareScreenStoreValue(CordovaService.IOSSHARE_REFRESH,'');
+        this.iosShareScreenStoreValue(CordovaService.IOSSHARE_EXPIRES, (new Date).getTime()+'');
     } catch (e) {
-        console.error("EXCEPTION on storing oauth data for ios sharescreen ",e);
+        console.error('EXCEPTION on storing oauth data for ios sharescreen ',e);
     }
 
   }
@@ -621,82 +661,68 @@ export class CordovaService {
   /**
    * after init, load the stored info from the cordova storage and save it as class members for access of other services
    */
-  loadStorage(){
-    this.getPermanentStorage(RestConstants.CORDOVA_STORAGE_OAUTHTOKENS,(data:string)=>{
+  loadStorage() {
+    this.getPermanentStorage(RestConstants.CORDOVA_STORAGE_OAUTHTOKENS,(data:string)=> {
         this._oauth = (data!=null) ? JSON.parse(data) : null;
         this.serviceIsReady=true;
     });
   }
 
   clearAllCookies() : void {
-    let cookies = document.cookie.split(";");
+    const cookies = document.cookie.split(';');
     for (let i = 0; i < cookies.length; i++) {
-        let cookie = cookies[i];
-        let eqPos = cookie.indexOf("=");
-        let name = eqPos > -1 ? cookie.substr(0, eqPos) : cookie;
-        document.cookie = name + "=;expires=Thu, 01 Jan 1970 00:00:00 GMT";
+        const cookie = cookies[i];
+        const eqPos = cookie.indexOf('=');
+        const name = eqPos > -1 ? cookie.substr(0, eqPos) : cookie;
+        document.cookie = name + '=;expires=Thu, 01 Jan 1970 00:00:00 GMT';
     }
   }
-
-  /**********************************************************
-   * Sync with iOS Share Screen thru NSUserdefaults Plugin
-   **********************************************************
-   * Server and oAuth Token need to be synced with the iOS share
-   * screen thru the NSUserdefaults storage ny using the following plugin:
-   * https://github.com/rootzoll/cordova-plugin-nsuserdefaults-for-app-groups.git
-   */
-
-   // keys used to exchange data with ios share extension
-   public static IOSSHARE_ACCESS:string = "access_token";
-   public static IOSSHARE_REFRESH:string = "refresh_token";
-   public static IOSSHARE_EXPIRES:string = "expires_in";
-   public static IOSSHARE_SERVER:string = "eduserver";
 
    /**
     * Use internally every time a value gets loaded from local storage
     * that also needs to be in sync with the iOS share screen.
-    * @param key 
+    * @param key
     * @param callback returns with string value or null
     */
    private iosShareScreenLoadValue(key:string, callback:Function) : void {
     try {
       if (this.isReallyRunningCordova() && this.isIOS) {
         (window as any).AppGroupsUserDefaults.save({
-            suite: "group.edusharing",
-            key: key
+            suite: 'group.edusharing',
+            key
           }, function(value:any) {
-            if (typeof value == "undefined") value = null;
+            if (typeof value == 'undefined') value = null;
             callback(value);
           }, function(fail:any) {
-            console.error("PLUGIN FAIL info.protonet.appgroupsuserdefaults LOAD: ",fail);
+            console.error('PLUGIN FAIL info.protonet.appgroupsuserdefaults LOAD: ',fail);
             callback(null);
           });
       }
     } catch (e) {
-      console.error("PLUGIN EXCEPTION info.protonet.appgroupsuserdefaults LOAD: ",e);
-    }    
-   } 
+      console.error('PLUGIN EXCEPTION info.protonet.appgroupsuserdefaults LOAD: ',e);
+    }
+   }
 
    /**
     * Use internally every time a value gets stored to local storage
     * that also needs to be in sync with the iOS share screen.
-    * @param key 
-    * @param value 
+    * @param key
+    * @param value
     */
    private iosShareScreenStoreValue(key:string, value:string) :void {
     try {
       if (this.isReallyRunningCordova() && this.isIOS) {
         (window as any).AppGroupsUserDefaults.save({
-            suite: "group.edusharing",
-            key: key,
-            value: value
+            suite: 'group.edusharing',
+            key,
+            value
           }, function(win:any) {
           }, function(fail:any) {
-            console.error("PLUGIN FAIL info.protonet.appgroupsuserdefaults SAVE: ",fail);
+            console.error('PLUGIN FAIL info.protonet.appgroupsuserdefaults SAVE: ',fail);
           });
       }
     } catch (e) {
-      console.error("PLUGIN EXCEPTION info.protonet.appgroupsuserdefaults SAVE: ",e);
+      console.error('PLUGIN EXCEPTION info.protonet.appgroupsuserdefaults SAVE: ',e);
     }
    }
 
@@ -708,10 +734,10 @@ export class CordovaService {
    * https://github.com/NeoLSN/cordova-plugin-android-permissions
    */
 
-  // for 'permission' user values like in this side 
+  // for 'permission' user values like in this side
   // https://developer.android.com/reference/android/Manifest.permission.html
   private makeSurePermission(permission:string, successCallback:Function, errorCallback:Function): void {
-        
+
     if (this.isIOS()) {
       successCallback();
       return;
@@ -719,8 +745,8 @@ export class CordovaService {
 
     try {
 
-      let permissions = (window as any).cordova.plugins.permissions;
-      let permissionString:string = permissions[permission] as string;
+      const permissions = (window as any).cordova.plugins.permissions;
+      const permissionString:string = permissions[permission] as string;
 
       // console.log("permissions",permissions);
       // console.log("permissionString",permissionString);
@@ -731,7 +757,7 @@ export class CordovaService {
 
           // permission is available
           successCallback();
-      
+
         } else {
 
           // try to get permission by request
@@ -745,23 +771,23 @@ export class CordovaService {
             } else {
 
               // permission denied
-              errorCallback("FAIL-PERMISSION-1","permission not granted by user or not part of config.xml");
-            
+              errorCallback('FAIL-PERMISSION-1','permission not granted by user or not part of config.xml');
+
             }
 
           }, (error:any) => {
-            errorCallback("FAIL-PERMISSION-2",error);
+            errorCallback('FAIL-PERMISSION-2',error);
           });
 
         }
 
       }, (error:any) => {
-        errorCallback("FAIL-PERMISSION-3",error);
+        errorCallback('FAIL-PERMISSION-3',error);
       });
 
     } catch(error) {
         console.error(error);
-      errorCallback("FAIL-EXCEPTION",error);
+      errorCallback('FAIL-EXCEPTION',error);
     }
 
   }
@@ -778,42 +804,42 @@ export class CordovaService {
       // Default Options
       if (options==null) options = {
         correctOrientation: true,
-        destinationType: 0, //Camera.DestinationType.DATA_URL
+        destinationType: 0, // Camera.DestinationType.DATA_URL
         sourceType: 1, // Camera.PictureSourceType.CAMERA
-        encodingType: 0, //Camera.EncodingType.JPEG
+        encodingType: 0, // Camera.EncodingType.JPEG
         quality: 70
       };
 
       // Camera PlugIn
       // https://github.com/apache/cordova-plugin-camera
-      let runPlugIn:Function = () => {
-        (navigator as any).camera.getPicture((result:any)=>{
+      const runPlugIn:Function = () => {
+        (navigator as any).camera.getPicture((result:any)=> {
           successCallback(result);
-        },(error:any)=>{
-          errorCallback("FAIL-PLUGIN",error);
+        },(error:any)=> {
+          errorCallback('FAIL-PLUGIN',error);
         }, options);
       }
 
       // Permissions PlugIn
       // https://github.com/NeoLSN/cordova-plugin-android-permissions
       // TODO: check that the app just asks for photo permission
-      this.makeSurePermission("CAMERA",runPlugIn, errorCallback);
+      this.makeSurePermission('CAMERA',runPlugIn, errorCallback);
 
     } catch(error) {
     }
 
   }
 
-  public uploadLocalContent(uri:string,endpointUrl:string,headers:any) : Observable<any>{
+  public uploadLocalContent(uri:string,endpointUrl:string,headers:any) : Observable<any> {
       return new Observable<string>((observer: Observer<any>) => {
-          let fileTransfer: any = new (window as any).FileTransfer();
+          const fileTransfer: any = new (window as any).FileTransfer();
           fileTransfer.upload(uri, endpointUrl, (result: any) => {
               observer.next(result);
               observer.complete();
-          },(error:any)=>{
+          },(error:any)=> {
               observer.error(error);
               observer.complete();
-          },{headers:headers});
+          },{headers});
       });
   }
 
@@ -828,23 +854,23 @@ export class CordovaService {
 
    downloadContent(downloadURL:string, fileName:string, winCallback:Function=null, failCallback:Function=null) : void {
      let status=0;
-     let resultPath="";
+     let resultPath='';
      try {
-       this.makeSurePermission("WRITE_EXTERNAL_STORAGE", (win: any) => {
+       this.makeSurePermission('WRITE_EXTERNAL_STORAGE', (win: any) => {
 
          // add oauth token if not alreafy in URL
          if ((downloadURL.indexOf('accessToken=') < 0) && (this._oauth != null)) {
            if (downloadURL.indexOf('?') < 0) {
-             downloadURL = downloadURL + "?accessToken=" + this._oauth.access_token;
+             downloadURL = downloadURL + '?accessToken=' + this._oauth.access_token;
            } else {
-             downloadURL = downloadURL + "&accessToken=" + this._oauth.access_token;
+             downloadURL = downloadURL + '&accessToken=' + this._oauth.access_token;
            }
          }
 
          if (this.isIOS()) {
 
            // iOS: following redirects works automatically - so go direct
-           this.startContentDownload(downloadURL, fileName, (filePath:string)=>{status=1;resultPath=filePath;}, ()=>status=-1);
+           this.startContentDownload(downloadURL, fileName, (filePath:string)=> {status=1;resultPath=filePath;}, ()=>status=-1);
 
          } else {
 
@@ -875,7 +901,7 @@ export class CordovaService {
        console.warn(e);
        status=-1;
      }
-     let interval=setInterval(()=>{
+     const interval=setInterval(()=> {
        if(status==0)
          return;
        clearInterval(interval);
@@ -889,33 +915,33 @@ export class CordovaService {
        if(status==-1 && failCallback)
          failCallback();
      },100);
-   } 
+   }
 
    private startContentDownload(downloadURL:string, fileName:string, winCallback:Function, failCallback:Function) : void {
      // set path to store on device
-     let targetPath = (window as any).cordova.file.externalRootDirectory + "Download/";
+     let targetPath = (window as any).cordova.file.externalRootDirectory + 'Download/';
      if (this.isIOS()) targetPath = (window as any).cordova.file.documentsDirectory;
-       let localPath = targetPath + fileName;
-       let filePath = encodeURI(localPath);
+       const localPath = targetPath + fileName;
+       const filePath = encodeURI(localPath);
      // iOS
-     let fileTransfer:any = new (window as any).FileTransfer();
-     fileTransfer.download(downloadURL, filePath, (result:any)=>{
+     const fileTransfer:any = new (window as any).FileTransfer();
+     fileTransfer.download(downloadURL, filePath, (result:any)=> {
          winCallback(localPath);
      }, (err:any) => {
-         failCallback("FAIL startContentDownload", err);
+         failCallback('FAIL startContentDownload', err);
      }, true, {});
    }
 
-   openInAppBrowser(url:string){
+   openInAppBrowser(url:string) {
        let params:string;
-       if(this.isAndroid()){
-           params="location=no,zoom=no";
+       if(this.isAndroid()) {
+           params='location=no,zoom=no';
        }
-       else if(this.isIOS()){
-           params="toolbar=yes,hideurlbar=yes,hidenavigationbuttons=yes,closebuttoncolor=#ffffff,closebuttoncaption="+this.injector.get(TranslateService).instant("CANCEL");
+       else if(this.isIOS()) {
+           params='toolbar=yes,hideurlbar=yes,hidenavigationbuttons=yes,closebuttoncolor=#ffffff,closebuttoncaption='+this.injector.get(TranslateService).instant('CANCEL');
        }
-       let win:any=cordova.InAppBrowser.open(url,"_blank",params);
-       win.addEventListener( "loadstop", ()=> {
+       const win:any=cordova.InAppBrowser.open(url,'_blank',params);
+       win.addEventListener( 'loadstop', ()=> {
            // register iframe handling
            win.executeScript({code:`
                 var cordovaIframeList=document.getElementsByTagName('iframe');
@@ -930,9 +956,9 @@ export class CordovaService {
                         cordovaIframeList[i].contentWindow.postMessage(event.detail,'*');
                     }
                 }
-                window.addEventListener("message", cordovaReceiveMessage, false);        
+                window.addEventListener("message", cordovaReceiveMessage, false);
            `});
-           win.postMessage=(data:any)=>{
+           win.postMessage=(data:any)=> {
                // Redirect post messages to new window
                win.executeScript({
                    code:`
@@ -941,7 +967,7 @@ export class CordovaService {
                },null);
            };
            this.events.addWindow(win);
-           let loop = setInterval(()=>{
+           const loop = setInterval(()=> {
 
                // Execute JavaScript to fetch message chain
                win.executeScript(
@@ -959,18 +985,18 @@ export class CordovaService {
                         window.messages=[];
                         JSON.stringify(msg);`
                    },
-                   (values:string[])=>{
-                       let events = JSON.parse(values[0]);
-                       for(let e of events) {
-                           let event={source:win, data:e};
+                   (values:string[])=> {
+                       const events = JSON.parse(values[0]);
+                       for(const e of events) {
+                           const event= {source:win, data:e};
                            this.events.onEvent(event);
-                           if(e.event==FrameEventsService.EVENT_CLOSE){
+                           if(e.event==FrameEventsService.EVENT_CLOSE) {
                                clearInterval(loop);
                            }
-                           if(e.event==FrameEventsService.EVENT_CORDOVA_CAMERA){
-                               this.getPhotoFromCamera((data:any)=>{
+                           if(e.event==FrameEventsService.EVENT_CORDOVA_CAMERA) {
+                               this.getPhotoFromCamera((data:any)=> {
                                    this.events.broadcastEvent(FrameEventsService.EVENT_CORDOVA_CAMERA_RESPONSE,data);
-                               },()=>{
+                               },()=> {
                                    this.events.broadcastEvent(FrameEventsService.EVENT_CORDOVA_CAMERA_RESPONSE,null);
                                });
                            }
@@ -981,7 +1007,7 @@ export class CordovaService {
        });
        return win;
    }
-   openBrowser(url:string){
+   openBrowser(url:string) {
        window.open(url,'_system');
    }
    /**********************************************************
@@ -1004,52 +1030,33 @@ export class CordovaService {
           },
           (error:any) => {
             // FAIL
-            if(failCallback) failCallback("FAIL on openContentNative",error);
+            if(failCallback) failCallback('FAIL on openContentNative',error);
           }
       );
     } catch (e) {
-        if(failCallback) failCallback("EXCEPTION on openContentNative",e);
+        if(failCallback) failCallback('EXCEPTION on openContentNative',e);
     }
    }
 
-  /**********************************************************
-   * OAUTH Server Communication
-   **********************************************************
-   * The REST-Services depend on Configuration Service that already need config from a fixed server.
-   * To seperate the app login from those dependencies .. the cordova service provides all the HTTP
-   * tools to select a server, make oAuth logins/management, get JSession .. from there on the
-   * regular REST-Services can handle all the communication. 
-   */
-
-  // errors results that can result when testing a server url
-  public static TEST_ERROR_NOTFOUND:string = "APINOTFOUND";
-  public static TEST_ERROR_NOINTERNET:string = "NOINTERNET";
-  public static TEST_ERROR_INCORRECTVERSION:string = "INCORRECTVERSION";
-  public static TEST_ERROR_UNKNOWN:string = "UNKOWN";
-
-  // success results that can result when testing a server url
-  public static TEST_WARNING_NOHTTPS:string = "NOHTTPS";
-  public static TEST_TESTSKIPPED:string = "TESTSKIPPED";
-  public static TEST_OK:string = "OK";
-
   // oAuth login that is used when running as mobile app
-  public loginOAuth(endpointUrl:string, username: string = "", password: string = "",grantType = "password"): Observable<OAuthResult> {
+  public loginOAuth(endpointUrl:string, username: string = '', password: string = '',grantType : 'password' | 'client_credentials' = 'password' ): Observable<OAuthResult> {
 
-    let url = endpointUrl + "../oauth2/token";
-    let headers = {'Content-Type':'application/x-www-form-urlencoded','Accept': '*/*'};
-    let options = { headers: headers, withCredentials: true };
+    const url = endpointUrl + '../oauth2/token';
+    const headers = {'Content-Type':'application/x-www-form-urlencoded',Accept: '*/*'};
+    const options = { headers, withCredentials: true };
 
-    let data = "client_id=eduApp&client_secret=secret" +
-      "&grant_type=" + encodeURIComponent(grantType) +
-      "&username=" + encodeURIComponent(username) +
-      "&password=" + encodeURIComponent(password);
-
+    let data = 'client_id=eduApp&client_secret=secret&grant_type=' + encodeURIComponent(grantType);
+    if(grantType === 'password') {
+        data += '&username=' + encodeURIComponent(username) + '&password=' + encodeURIComponent(password);
+    } else if (grantType === 'client_credentials') {
+        // nothing is needed, session will be sent automatically
+    }
     return new Observable<OAuthResult>((observer: Observer<OAuthResult>) => {
       this.http.post<OAuthResult>(url, data, options).subscribe(
         (oauth: OAuthResult) => {
 
           if (oauth == null) {
-            observer.error("INVALID_CREDENTIALS");
+            observer.error('INVALID_CREDENTIALS');
             observer.complete();
             return;
           }
@@ -1063,7 +1070,7 @@ export class CordovaService {
         (error: any) => {
 
           if (error.status == 401) {
-            observer.error("LOGIN.ERROR");
+            observer.error('LOGIN.ERROR');
             observer.complete();
             return;
           }
@@ -1073,20 +1080,14 @@ export class CordovaService {
         });
     });
   }
-
-  /**
-   * Called when the current status is logged out
-   * Cordova needs to refresh tokens
-   */
-  private reiniting=false;
-  public reinitStatus(endpointUrl:string,goToLogin=true,loginNext=window.location.href):Observable<void>{
+  public reinitStatus(endpointUrl:string,goToLogin=true,loginNext=window.location.href):Observable<void> {
       return new Observable<void>((observer: Observer<void>) => {
 
-          console.info("cordova: reinit");
+          console.info('cordova: reinit');
 
           if(this.reiniting) {
-              let interval=setInterval(()=>{
-                  if(!this.reiniting){
+              const interval=setInterval(()=> {
+                  if(!this.reiniting) {
                       clearInterval(interval);
                       observer.next(null);
                       observer.complete();
@@ -1094,7 +1095,7 @@ export class CordovaService {
               },50);
               return;
           }
-          if(!this.oauth){
+          if(!this.oauth) {
               if(goToLogin) {
                   this.goToLogin(loginNext);
               }
@@ -1104,13 +1105,13 @@ export class CordovaService {
           }
           this.reiniting = true;
           this.refreshOAuth(endpointUrl,this.oauth).subscribe(() => {
-              console.info("cordova: oauth OK");
+              console.info('cordova: oauth OK');
               this.reiniting = false;
               observer.next(null);
               observer.complete();
           }, (error: any) => {
               console.warn(error);
-              console.warn("cordova: invalid oauth, go back to server selection");
+              console.warn('cordova: invalid oauth, go back to server selection');
               this.reiniting = false;
               this.resetAndGoToServerlist();
               observer.error(null);
@@ -1119,7 +1120,7 @@ export class CordovaService {
       });
   }
 
-    private resetAndGoToServerlist(parameters="") {
+    private resetAndGoToServerlist(parameters='') {
         this.setPermanentStorage(RestConstants.CORDOVA_STORAGE_OAUTHTOKENS, null);
         this.clearAllCookies();
         this.restartCordova(parameters);
@@ -1128,12 +1129,12 @@ export class CordovaService {
 // oAuth refresh tokens
   private refreshOAuth(endpointUrl:string,oauth: OAuthResult): Observable<OAuthResult> {
 
-    let url = endpointUrl + "../oauth2/token";
-    let headers = {'Content-Type': 'application/x-www-form-urlencoded','Accept': '*/*'};
-    let options = { headers: headers, withCredentials: false }
+    const url = endpointUrl + '../oauth2/token';
+    const headers = {'Content-Type': 'application/x-www-form-urlencoded',Accept: '*/*'};
+    const options = { headers, withCredentials: false }
 
-    let data = "grant_type=refresh_token&client_id=eduApp&client_secret=secret" +
-      "&refresh_token=" + encodeURIComponent(oauth.refresh_token);
+    const data = 'grant_type=refresh_token&client_id=eduApp&client_secret=secret' +
+      '&refresh_token=' + encodeURIComponent(oauth.refresh_token);
 
     return new Observable<OAuthResult>((observer: Observer<OAuthResult>) => {
       this.http.post<OAuthResult>(url, data, options).subscribe(
@@ -1156,7 +1157,7 @@ export class CordovaService {
   /**
   * If the user has a set of oAuth tokens (after login or when starting the app again)
   * then use this method to get a cookie/session and subscribe on refreshes on oAuth tokens.
-  * When the Observable an error mit "INVALID" - oAuth tokens are outdated and new login is needed. 
+  * When the Observable an error mit "INVALID" - oAuth tokens are outdated and new login is needed.
   */
   /*
   public initOAuthSession(oauth: OAuthResult): Observable<OAuthResult> {
@@ -1201,7 +1202,7 @@ export class CordovaService {
 
     getLanguage() {
       return new Observable<string>((observer: Observer<string>) => {
-          observer.next(navigator.language.split("-")[0]);
+          observer.next(navigator.language.split('-')[0]);
           observer.complete();
         /*try {
           (navigator as any).globalization.getPreferredLanguage(
@@ -1225,14 +1226,14 @@ export class CordovaService {
     }
 
     private onBackKeyDown() {
-        let eventDown = new KeyboardEvent('keydown', {key: 'Escape',view: window,bubbles: true,cancelable: true});
-        let eventUp = new KeyboardEvent('keyup', {key: 'Escape',view: window,bubbles: true,cancelable: true});
-        let down = !window.document.dispatchEvent(eventDown);
-        let up = !window.document.dispatchEvent(eventUp);
-        if(down || up){
+        const eventDown = new KeyboardEvent('keydown', {key: 'Escape',view: window,bubbles: true,cancelable: true});
+        const eventUp = new KeyboardEvent('keyup', {key: 'Escape',view: window,bubbles: true,cancelable: true});
+        const down = !window.document.dispatchEvent(eventDown);
+        const up = !window.document.dispatchEvent(eventUp);
+        if(down || up) {
 
         } else// if(window.history.length>2) {
-            //(navigator as any).app.backHistory();
+            // (navigator as any).app.backHistory();
             this.location.back();
         /*}
         else{
@@ -1244,6 +1245,6 @@ export class CordovaService {
     }
 
     private goToLogin(next:string) {
-        this.router.navigate([UIConstants.ROUTER_PREFIX,"app"],{queryParams:{next:next}});
+        this.router.navigate([UIConstants.ROUTER_PREFIX,'app'],{queryParams:{next}});
     }
 }
