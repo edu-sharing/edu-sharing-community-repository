@@ -66,13 +66,6 @@ public class ConnectorServlet extends HttpServlet  {
 			return;
 		}
 		
-		
-		
-		if(!ToolPermissionServiceFactory.getInstance().hasToolPermissionForConnector(connectorId)){
-			resp.sendError(HttpServletResponse.SC_FORBIDDEN);
-			return;
-		}
-		
 		ApplicationInfo homeRepo = ApplicationInfoList.getHomeRepository();
 		
 		boolean readOnly=true;
