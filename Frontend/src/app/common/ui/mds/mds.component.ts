@@ -1235,53 +1235,59 @@ export class MdsComponent {
       console.warn('invalid suggestions result for '+this._groupId+' '+id);
     });
   }
+  handleListKeyDown(event: any, element: HTMLElement, id: string) {
+    if(event.keyCode === 13) {
+      element.click();
+    }
+    const suggestions=document.getElementById(id + '_suggestions');
+    const elements=(suggestions.childNodes as any);
+    if(event.keyCode === 40 || event.keyCode === 38){
+      const direction=event.keyCode === 40 ? 1 : -1;
+      for(let i=0;i<elements.length;i++){
+        if(elements[i] === element){
+          let pos=(i+direction);
+          while(pos>0 && pos<elements.length && elements[pos].style.display === 'none')
+            pos+=direction;
+          if(pos === 0) pos=elements.length-1;
+          if(pos === elements.length) pos=1;
+          elements[pos].focus();
+          event.preventDefault();
+          event.stopPropagation();
+          return;
+        }
+      }
+    }
+
+  }
+  handleListClick(element: HTMLElement, id: string, singleValue: boolean) {
+    document.getElementById(id + '_suggestions').style.display='none';
+    this.currentWidgetSuggestion=null;
+    (document.getElementById(id + '_suggestionsInput') as HTMLInputElement).value='';
+
+    if(!this.uiService.isMobile()) {
+      document.getElementById(id + '_suggestionsInput').focus();
+    }
+    const badges=document.getElementById(id);
+    const elements=(badges.childNodes as any);
+    for(let i=0;i<elements.length;i++) {
+        if(elements[i].getAttribute('data-value') === element.getAttribute('data-value')){
+            return;
+        }
+    }
+    const data = this.getMultivalueBadge(element.getAttribute('data-value'), element.getAttribute('data-caption'));
+    if(singleValue) {
+      badges.innerHTML = data;
+    } else {
+      badges.innerHTML += data;
+    }
+
+  }
   private getListEntry(id:string,key:string,caption:string,singleValue=false,searchString:string=null){
-    let html=`<a class="collection-item" tabindex="0" data-value="` + key + `" data-caption="` + this.htmlEscape(caption) + `" onkeydown="
-                if(event.keyCode==13){ 
-                    this.click();
-                }
-                var suggestions=document.getElementById('` + id + `_suggestions');
-                var elements=suggestions.childNodes;
-                if(event.keyCode==40 || event.keyCode==38){
-                  var direction=event.keyCode==40 ? 1 : -1;
-                  for(var i=0;i<elements.length;i++){
-                      if(elements[i]==this){
-                          var pos=(i+direction);
-                          while(pos>0 && pos<elements.length && elements[pos].style.display=='none')
-                            pos+=direction;
-                          if(pos==0) pos=elements.length-1;
-                          if(pos==elements.length) pos=1;
-                          elements[pos].focus();
-                          event.preventDefault();
-                          event.stopPropagation();
-                          return;
-                      }
-                  }
-                }
-                " onclick="
-                document.getElementById('` + id + `_suggestions').style.display='none';
-                `+this.getWindowComponent()+`.currentWidgetSuggestion=null;`;
+    let html=`<a class="collection-item" tabindex="0" data-value="` + key + `" data-caption="` + this.htmlEscape(caption) + `"
+                onkeydown="`+ this.getWindowComponent() +`.handleListKeyDown(event, this, '` + id + `')"
+                onclick="`+ this.getWindowComponent() +`.handleListClick(this, '` + id + `', ` + singleValue + `)"`;
 
-    /*
-    if(singleValue){
-      html+=`   document.getElementById('` + id + `').value=this.getAttribute('data-caption');
-                document.getElementById('` + id + `').setAttribute('data-value',this.getAttribute('data-value'));`;
-    }*/
-
-      html += `
-                document.getElementById('` + id + `_suggestionsInput').value='';`;
-      if(!this.uiService.isMobile())
-        html += `document.getElementById('` + id + `_suggestionsInput').focus();`;
-      html += `var badges=document.getElementById('` + id + `');
-                var elements=badges.childNodes;
-                for(var i=0;i<elements.length;i++){
-                    if(elements[i].getAttribute('data-value')==this.getAttribute('data-value')){
-                        return;
-                    }
-                }
-                badges.innerHTML`+(singleValue ? '=' : '+=')+`'` + this.getMultivalueBadgeEmbedded('this.getAttribute(\'data-caption\')', 'this.getAttribute(\'data-value\')') + `';`;
-
-    html+=`">` + (searchString ? this.highlightSearch(caption,searchString) : caption) + `</a>`;
+    html+=`>` + (searchString ? this.highlightSearch(caption,searchString) : caption) + `</a>`;
     return html;
   }
   private autoSuggestField(widget:any,css='',allowCustom=false,openCallback:string,openIcon='arrow_drop_down',singleValue=false){
@@ -1362,18 +1368,23 @@ export class MdsComponent {
   }
   openTree(widget:string){
       let id=this.getDomId(widget);
-      let tree=document.getElementById(id+'_tree');
+      let tree=document.getElementById(id + '_tree');
       tree.style.display='';
       let childs=document.getElementById(id).childNodes;
       let elements=tree.getElementsByTagName('input');
-      for(let i=0;i<elements.length;i++){
-          elements[i].checked=false;
-          document.getElementById(elements[i].id+'_bg').className='';
+      let selectedBg=tree.getElementsByClassName('treeSelected');
+      // reset old data
+      for(let i=0;i<elements.length;i++) {
+        elements[i].checked=false;
       }
-      for(let i=0;i<childs.length;i++){
+      while(selectedBg.length > 0) {
+          selectedBg[0].className='';
+      }
+
+      // mark current values
+      for(let i=0;i<childs.length;i++) {
           let child:any=childs[i];
           let element:any=document.getElementById(id+'_'+child.getAttribute('data-value'));
-          let elementBg=document.getElementById(element.id+'_bg');
           if(element){
               element.checked=true;
               this.changeTreeItem(element,widget);
