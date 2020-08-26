@@ -58,7 +58,7 @@ public class ImportCleanerIdentifiersList {
 			readAllNodesInRepository(set);
 			
 			
-			String url = oaiBaseUrl + "?verb=listIdentifiers&set=" + set + "&metadataPrefix=" + metadataPrefix;
+			String url = oaiBaseUrl + "?verb=ListIdentifiers&set=" + set + "&metadataPrefix=" + metadataPrefix;
 			readAllNodesAtOaiService(url);
 			
 			logger.info("found:" + allNodesInSet.size() +" in repository for set " + set);
@@ -66,7 +66,10 @@ public class ImportCleanerIdentifiersList {
 			if(allNodesInSet.size()<nodeAtOaiService.size()){
 				logger.warn("It seems that you have not yet imported the whole oai set");
 			}
-			
+			if(nodeAtOaiService.size() == 0){
+				throw new RuntimeException("Got no nodes from oai, will cancel the delete job");
+			}
+
 			for(Map.Entry<String, String> entry : allNodesInSet.entrySet()) {
 				if(!nodeAtOaiService.contains(entry.getValue())){
 					toDeleteList.add(entry.getKey());
