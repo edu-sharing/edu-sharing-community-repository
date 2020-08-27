@@ -56,7 +56,7 @@ export class MdsComponent {
   public static TYPE_TOOLDEFINITION = 'tool_definition';
   public static TYPE_TOOLINSTANCE = 'tool_instance';
   public static TYPE_SAVED_SEARCH = 'saved_search';
-  private static VCARD_FIELDS=['Surname','Givenname'];
+  private static VCARD_FIELDS=["Title","Surname","Givenname"];
   /**
    * Can the node content be replaced?
    */
@@ -1039,7 +1039,7 @@ export class MdsComponent {
   private renderVCardWidget(widget: any, attr: string) {
     let html='<div class="vcard">';
     let i=0;
-    for(let field of [MdsComponent.VCARD_FIELDS[1],MdsComponent.VCARD_FIELDS[0]]) {
+    for(let field of MdsComponent.VCARD_FIELDS) {
       let id = this.getWidgetDomId(widget) + '_' + field;
       let caption = this.translate.instant('VCARD.' + field);
       html += `<div class="vcardGroup">`;
