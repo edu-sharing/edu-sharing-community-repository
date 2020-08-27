@@ -1,0 +1,17 @@
+@import "../../../../core-ui-module/styles/variables";
+
+info-message{
+  display: flex;
+  padding: 10px 20px;
+}
+.group-padding{
+  padding: 5px $cardPadding;
+  h5{
+    white-space: pre-line;
+  }
+}
+.doi{
+  background-color: $cardLightBackground;
+  margin:20px  0;
+  padding:10px $cardPadding + 20px;
+}

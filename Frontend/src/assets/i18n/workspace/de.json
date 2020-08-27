@@ -120,6 +120,18 @@
             "PUBLISHING_WARNING_TITLE": "Element wirklich veröffentlichen?",
             "PUBLISHING_WARNING_MESSAGE": "Wenn Sie fortfahren, wird das aktuelle Element für alle Nutzer des Systems freigegeben und kann von jedem aufgerufen werden.\n\nSind Sie sicher, dass Sie das Element öffentlich freigeben möchten?",
             "ERROR_INVALID_TYPE_COMBINATION": "Elemente verschiedener Typen können nicht im Bulk freigegeben werden",
+            "PUBLISH": {
+                "NO_LICENSE": "Das aktuelle Material hat keine zugewiesene Lizenz. Freigebenene Materialien sollten eine eindeutige Lizenz besitzen, damit festgelegt ist, ob und wie das Material weiterverwendet werden darf",
+                "SET_LICENSE": "Lizenzdialog öffnen",
+                "INHERITED": "Das übergeordnete Element/Ordner ist bereits öffentlich. Bitte deaktivieren Sie die Vererbung oder ändern Sie die Berechtigungen am übergeordneten Element",
+                "DISABLE_INHERIT": "Vererbung deaktivieren",
+                "MODE_OFF": "Unveröffentlicht",
+                "MODE_OFF_INFO": "Das Material ist nicht öffentlich zugänglich und kann nur von eingelandenen Benutzern abgerufen werden",
+                "MODE_DIRECT": "Veröffentlicht",
+                "MODE_DIRECT_INFO": "Das Material wird direkt veröffentlicht. Das aktuelle Element darf nicht gelöscht werden.\nBei Veränderungen des Elements wirken sich diese direkt auf die Veröffentlichung aus",
+                "MODE_COPY": "Kopie veröffentlichen",
+                "MODE_COPY_INFO": "Vom Material wird eine Kopie erzeugt, und diese wird veröffentlicht.\nÄnderungen oder eine Löschung des Originals hat keinen Einfluss auf die Veröffentlichung.\nNur die Redaktion kann die Veröffentlichung nachträglich steuern.\nEs können mehrere Versionen parallel veröffentlicht werden"
+            },
             "STATE": {
                 "PRIVATE": "Privat",
                 "SHARED": "Geteilt",

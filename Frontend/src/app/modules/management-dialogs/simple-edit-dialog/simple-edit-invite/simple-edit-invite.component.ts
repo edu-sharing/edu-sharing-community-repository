@@ -20,7 +20,6 @@ import {BridgeService} from '../../../../core-bridge-module/bridge.service';
 import {BulkBehaviour, MdsComponent} from '../../../../common/ui/mds/mds.component';
 import {Observable, Observer} from 'rxjs';
 import {MatButtonToggleGroup} from '@angular/material/button-toggle';
-import {WorkspaceShareComponent} from '../../../workspace/share/share.component';
 import {Helper} from '../../../../core-module/rest/helper';
 
 @Component({
@@ -123,7 +122,7 @@ export class SimpleEditInviteComponent {
             permissions.permissions = [addPermission];
           } else {
             permissions.permissions =
-                WorkspaceShareComponent.mergePermissionsWithHighestPermission(permissions.permissions, [addPermission]);
+                UIHelper.mergePermissionsWithHighestPermission(permissions.permissions, [addPermission]);
           }
         }
         if (this.currentPermissions && this.currentPermissions.length) {
@@ -132,7 +131,7 @@ export class SimpleEditInviteComponent {
               this.getAvailableGlobalGroups().indexOf(p.authority.authorityName) === -1
           );
           permissions.permissions =
-              WorkspaceShareComponent.mergePermissionsWithHighestPermission(permissions.permissions,this.currentPermissions);
+              UIHelper.mergePermissionsWithHighestPermission(permissions.permissions,this.currentPermissions);
         }
         permissions = RestHelper.copyAndCleanPermissions(permissions.permissions, this.nodesPermissions[i].localPermissions.inherited);
         return this.nodeApi.setNodePermissions(n.ref.id, permissions, false);

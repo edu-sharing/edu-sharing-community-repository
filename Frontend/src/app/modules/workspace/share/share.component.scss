@@ -51,7 +51,7 @@ $shareLinkHeight:40px;
   top:30px;
 }
 .invited,.advanced{
-  padding:20px;
+  padding:20px $cardPadding;
 }
 :host ::ng-deep{
   .edusharing-autocomplete-wrapper{

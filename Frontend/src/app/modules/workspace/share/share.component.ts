@@ -4,7 +4,7 @@ import {
     Component,
     EventEmitter,
     Input,
-    Output,
+    Output, ViewChild,
 } from '@angular/core';
 import { TranslateService } from '@ngx-translate/core';
 import { Observable } from 'rxjs';
@@ -36,6 +36,7 @@ import { UIConstants } from '../../../core-module/ui/ui-constants';
 import { NodeHelper } from '../../../core-ui-module/node-helper';
 import { Toast } from '../../../core-ui-module/toast';
 import { UIHelper } from '../../../core-ui-module/ui-helper';
+import {SharePublishComponent} from './share-publish/share-publish.component';
 
 @Component({
     selector: 'workspace-share',
@@ -47,6 +48,7 @@ import { UIHelper } from '../../../core-ui-module/ui-helper';
     ],
 })
 export class WorkspaceShareComponent {
+    @ViewChild('publish') publishComponent: SharePublishComponent;
     @Input() sendMessages = true;
     @Input() sendToApi = true;
     @Input() currentPermissions: LocalPermissions = null;
@@ -68,7 +70,6 @@ export class WorkspaceShareComponent {
     @Output() onClose = new EventEmitter();
     @Output() onLoading = new EventEmitter();
 
-    static BASIC_PERMISSIONS = ['Consumer', 'Collaborator', 'Coordinator'];
     readonly ALL_PERMISSIONS = [
         'All',
         'Read',
@@ -142,11 +143,6 @@ export class WorkspaceShareComponent {
     showLink: boolean;
     isAdmin: boolean;
     publishPermission: boolean;
-    doiPermission: boolean;
-    publishInherit: boolean;
-    publishActive: boolean;
-    doiActive: boolean;
-    doiDisabled: boolean;
     isSafe = false;
     collectionColumns = UIHelper.getDefaultCollectionColumns();
     collections: CollectionUsage[];
@@ -170,11 +166,11 @@ export class WorkspaceShareComponent {
         RestConstants.ACCESS_CONSUMER,
         RestConstants.ACCESS_CC_PUBLISH,
     ];
-    private inherited: boolean;
+    inherited: boolean;
     private notifyUsers = true;
     private notifyMessage: string;
     private inherit: Permission[] = [];
-    private permissions: Permission[] = [];
+    permissions: Permission[] = [];
     private originalPermissions: LocalPermissions[];
     private showChooseType = false;
     private showChooseTypeList: Permission;
@@ -228,9 +224,6 @@ export class WorkspaceShareComponent {
                     RestConstants.TOOLPERMISSION_INVITE_ALLAUTHORITIES,
                 )
                 .subscribe((has: boolean) => (this.publishPermission = has));
-            this.connector
-                .hasToolPermission(RestConstants.TOOLPERMISSION_HANDLESERVICE)
-                .subscribe((has: boolean) => (this.doiPermission = has));
         });
     }
 
@@ -293,13 +286,7 @@ export class WorkspaceShareComponent {
                     );
                     this.inherited =
                         permissions[0].permissions.localPermissions.inherited;
-                    this.updatePublishState();
                     this.initialState = this.getState();
-                    this.doiActive = NodeHelper.isDOIActive(
-                        this._nodes[0],
-                        permissions[0].permissions,
-                    );
-                    this.doiDisabled = this.doiActive;
                 }
                 this.toast.closeModalDialog();
             });
@@ -315,11 +302,10 @@ export class WorkspaceShareComponent {
                             data.permissions.localPermissions.permissions,
                             'OWNER',
                         );
-                        this.inherit = WorkspaceShareComponent.mergePermissions(
+                        this.inherit = UIHelper.mergePermissions(
                             this.inherit,
                             data.permissions.localPermissions.permissions,
                         );
-                        this.updatePublishState();
                         this.initialState = this.getState();
                     }
                 },
@@ -366,8 +352,6 @@ export class WorkspaceShareComponent {
                         });
                         this.owner.permissions = ['Owner'];
                     });
-            } else {
-                this.updatePublishState();
             }
         }
         this.connector.isLoggedIn().subscribe((data: LoginResult) => {
@@ -457,28 +441,16 @@ export class WorkspaceShareComponent {
             });
     }
 
-    allowDOI() {
-        if (!this._nodes || !this._nodes[0]) return false;
-        return (
-            !this._nodes[0].isDirectory &&
-            !this.publishInherit &&
-            this.publishActive &&
-            this.doiPermission
-        );
-    }
-
     setPublish(status: boolean, force = false) {
         if(status && !force) {
             if (this.config.instant('publishingNotice', false)) {
                 let cancel = () => {
-                    this.publishActive = false;
                     this.toast.closeModalDialog();
                 };
                 this.toast.showModalDialog(
                     'WORKSPACE.SHARE.PUBLISHING_WARNING_TITLE',
                     'WORKSPACE.SHARE.PUBLISHING_WARNING_MESSAGE',
                     DialogButton.getYesNo(cancel, () => {
-                        this.publishActive = true;
                         this.setPublish(status, true);
                         this.toast.closeModalDialog();
                     }),
@@ -487,9 +459,6 @@ export class WorkspaceShareComponent {
                 );
                 return;
             }
-        }
-        if(status && this.doiPermission) {
-            this.doiActive=true;
         }
         if (this.deletedPermissions.indexOf(RestConstants.AUTHORITY_EVERYONE) !== -1) {
             this.deletedPermissions.splice(this.deletedPermissions.indexOf(RestConstants.AUTHORITY_EVERYONE),1);
@@ -504,7 +473,6 @@ export class WorkspaceShareComponent {
             }
         }
         this.setPermissions(this.permissions);
-        this.updatePublishState();
     }
 
     reloadUsages() {
@@ -539,7 +507,7 @@ export class WorkspaceShareComponent {
     }
 
     getState() {
-        if (this.publishActive || this.publishInherit) {
+        if (this.getPublishActive() || this.getPublishInherit()) {
             return 'PUBLIC';
         }
         for (let perm of this.permissions.concat(this.inherit)) {
@@ -584,13 +552,11 @@ export class WorkspaceShareComponent {
                 1,
             );
         else this.deletedPermissions.push(p.authority.authorityName);
-        this.updatePublishState();
         /*
       if(this.newPermissions.indexOf(p)!=-1)
       this.newPermissions.splice(this.newPermissions.indexOf(p),1);
     this.permissions.splice(this.permissions.indexOf(p),1);
     this.setPermissions(this.permissions);
-    this.updatePublishState();
     */
     }
 
@@ -669,12 +635,12 @@ export class WorkspaceShareComponent {
                 this.inheritAllowed &&
                 !this.isCollection();
             const actions: Observable<Response>[] = this._nodes.map((n, i) => {
-                let permissions = Helper.deepCopy(this.permissions);
+                let permissions: Permission[] = Helper.deepCopy(this.permissions);
                 if (this.isBulk()) {
                     // keep inherit state of original node
                     inherit = this.originalPermissions[i].inherited;
                     if (this.bulkMode === 'extend') {
-                        permissions = WorkspaceShareComponent.mergePermissionsWithHighestPermission(
+                        permissions = UIHelper.mergePermissionsWithHighestPermission(
                             this.originalPermissions[i].permissions,
                             permissions,
                         );
@@ -685,6 +651,10 @@ export class WorkspaceShareComponent {
                 permissions = permissions.filter(
                     (p: Permission) => !this.isDeleted(p),
                 );
+                // handle the invitation of group everyone
+                if(this.publishComponent) {
+                    permissions = this.publishComponent.updatePermissions(permissions);
+                }
                 const permissionsCopy = RestHelper.copyAndCleanPermissions(
                     permissions,
                     inherit,
@@ -703,10 +673,9 @@ export class WorkspaceShareComponent {
                     this.notifyUsers && this.sendMessages,
                     this.notifyMessage,
                     false,
-                    this.doiPermission &&
-                        this.allowDOI() &&
-                        this.doiActive &&
-                        this.publishActive,
+                    this.publishComponent.doiPermission &&
+                        this.publishComponent.doiActive &&
+                        this.getPublishActive(),
                 );
             });
             if(!this.sendToApi) {
@@ -771,23 +740,16 @@ export class WorkspaceShareComponent {
             RestConstants.AUTHORITY_TYPE_USER,
         );
     }
-
-    private updatePublishState() {
-        this.publishInherit =
-            this.inherited &&
+    getPublishInherit() {
+        return this.inherited &&
             this.getAuthorityPos(
                 this.inherit,
                 RestConstants.AUTHORITY_EVERYONE,
-            ) != -1;
-        this.publishActive =
-            this.publishInherit ||
-            (this.getAuthorityPos(
-                this.permissions,
-                RestConstants.AUTHORITY_EVERYONE,
-            ) != -1 &&
-                this.deletedPermissions.indexOf(
-                    RestConstants.AUTHORITY_EVERYONE,
-                ) == -1);
+            ) !== -1;
+    }
+    getPublishActive() {
+        return this.getPublishInherit() ||
+            this.publishComponent?.shareMode != null;
     }
 
     private getAuthorityPos(permissions: Permission[], authority: string) {
@@ -840,60 +802,6 @@ export class WorkspaceShareComponent {
                     },
                 );
         }
-    }
-
-    static mergePermissions(source: Permission[], add: Permission[]) {
-        const merge = source;
-        for (const p2 of add) {
-            // do only add new, unique permissions
-            if (merge.filter(p1 => Helper.objectEquals(p1, p2)).length === 0) {
-                merge.push(p2);
-            }
-        }
-        return merge;
-    }
-
-    /**
-     * merge two permission sets
-     * If a user/group is duplicated, the one with the highest permission will win
-     * Consumer < Collaborator < Coordinator
-     * @param source
-     * @param add
-     */
-    static mergePermissionsWithHighestPermission(
-        source: Permission[],
-        add: Permission[],
-    ) {
-        const result = Helper.deepCopyArray(source);
-        for (const p2 of add) {
-            const map = source.filter(
-                s =>
-                    s.authority.authorityName === p2.authority.authorityName &&
-                    s.authority.authorityType === s.authority.authorityType,
-            );
-            if (map.length === 1) {
-                const perm1 = map[0].permissions.filter(
-                    p => this.BASIC_PERMISSIONS.indexOf(p) !== -1,
-                );
-                const perm2 = p2.permissions.filter(
-                    p => this.BASIC_PERMISSIONS.indexOf(p) !== -1,
-                );
-                if (WorkspaceShareComponent.permissionIsGreaterThan(perm2[0], perm1[0])) {
-                    result.splice(result.indexOf(map[0]), 1);
-                    result.push(p2);
-                }
-            } else {
-                // add new permission to list
-                result.push(p2);
-            }
-        }
-        return result;
-    }
-    static permissionIsGreaterThan(p1: string, p2: string) {
-        return (
-            WorkspaceShareComponent.BASIC_PERMISSIONS.indexOf(p1) >
-            WorkspaceShareComponent.BASIC_PERMISSIONS.indexOf(p2)
-        );
     }
 
     private getEmitObject(localPermissions: LocalPermissions) {

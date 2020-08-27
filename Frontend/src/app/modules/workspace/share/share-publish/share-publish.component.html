@@ -1,0 +1,42 @@
+<div class="group-padding">
+  <h4 class="mat-heading-4">
+    <!--<i icon iconId="public"></i>-->
+    {{ 'WORKSPACE.SHARE.PUBLISH_DOCUMENT' | translate }}
+  </h4>
+  <info-message mode="warning" *ngIf="!getLicense()">
+    {{'WORKSPACE.SHARE.PUBLISH.NO_LICENSE' | translate}}
+    <div>
+      <button mat-button color="primary" (click)="openLicense()">
+        <i icon iconId="arrow_forward"></i> {{'WORKSPACE.SHARE.PUBLISH.SET_LICENSE' | translate}}
+      </button>
+    </div>
+  </info-message>
+  <info-message mode="warning" *ngIf="inherited">
+    {{'WORKSPACE.SHARE.PUBLISH.INHERITED' | translate}}
+    <div>
+      <button mat-button color="primary" (click)="onDisableInherit.emit()">
+        <i icon iconId="arrow_forward"></i> {{'WORKSPACE.SHARE.PUBLISH.DISABLE_INHERIT' | translate}}
+      </button>
+    </div>
+  </info-message>
+  <mat-radio-group [(ngModel)]="shareMode" (ngModelChange)="updateShareMode()" *ngIf="!inherited">
+    <mat-radio-button class="mat-radio-multiline" [value]="null" [disabled]="isCopy">
+      <h4>{{'WORKSPACE.SHARE.PUBLISH.MODE_OFF' | translate}}</h4>
+      <h5>{{'WORKSPACE.SHARE.PUBLISH.MODE_OFF_INFO' | translate}}</h5>
+    </mat-radio-button>
+    <mat-radio-button class="mat-radio-multiline" value="direct" [disabled]="isCopy">
+      <h4>{{'WORKSPACE.SHARE.PUBLISH.MODE_DIRECT' | translate}}</h4>
+      <h5>{{'WORKSPACE.SHARE.PUBLISH.MODE_DIRECT_INFO' | translate}}</h5>
+    </mat-radio-button>
+    <mat-radio-button class="mat-radio-multiline" value="copy" [disabled]="!publishCopyPermission">
+      <h4>{{'WORKSPACE.SHARE.PUBLISH.MODE_COPY' | translate}}</h4>
+      <h5>{{'WORKSPACE.SHARE.PUBLISH.MODE_COPY_INFO' | translate}}</h5>
+    </mat-radio-button>
+  </mat-radio-group>
+</div>
+<div class="doi" *ngIf="doiPermission && !inherited">
+  <mat-checkbox [disabled]="doiDisabled || !shareMode" [(ngModel)]="doiActive" id="doi">
+    <div class="strong">{{'WORKSPACE.SHARE.DOI' | translate}}</div>
+    <div class="label-secondary">{{'WORKSPACE.SHARE.DOI_INFO' | translate}}</div>
+  </mat-checkbox>
+</div>

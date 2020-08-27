@@ -163,7 +163,7 @@ export class WorkspaceLicenseComponent  {
                   this.permissions = permissions.permissions.localPermissions;
                   this.readPermissions(i==this._nodes.length);
                   if(this._nodes.length==1) {
-                      this.doiActive = NodeHelper.isDOIActive(node, permissions.permissions);
+                      this.doiActive = NodeHelper.isDOIActive(node, permissions.permissions.localPermissions.permissions);
                       this.doiDisabled = this.doiActive;
                   }
               });
