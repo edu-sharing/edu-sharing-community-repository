@@ -107,6 +107,18 @@ mat-button-toggle-group{
   .mat-radio-label,.mat-checkbox-layout{
     white-space: normal!important;
     align-items: baseline !important;
+    h4 {
+      font-weight: bold;
+      font-size: 100%;
+      margin: 1.6rem 0 1rem 0;
+    }
+    h5 {
+      font-weight: normal;
+      font-size: 90%;
+      color: $textLight;
+      margin: 0;
+      line-height: 1.5;
+    }
   }
   .mat-radio-container{
     position: relative;

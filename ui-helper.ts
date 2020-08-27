@@ -3,7 +3,7 @@ import {Title} from '@angular/platform-browser';
 import {ConfigurationService} from '../core-module/rest/services/configuration.service';
 import {TranslateService} from '@ngx-translate/core';
 import {ActivatedRoute, NavigationExtras, Router} from '@angular/router';
-import {Collection, Connector, Filetype, LoginResult, MdsInfo, Node, NodeLock, ParentList,} from '../core-module/rest/data-object';
+import {Collection, Connector, Filetype, LoginResult, MdsInfo, Node, NodeLock, ParentList, Permission,} from '../core-module/rest/data-object';
 import {RestConstants} from '../core-module/rest/rest-constants';
 import {RestNodeService} from '../core-module/rest/services/rest-node.service';
 import {Toast} from './toast';
@@ -24,6 +24,7 @@ import {DialogButton, RestIamService, RestNetworkService,} from '../core-module/
 import {RouterHelper} from './router.helper';
 import {PlatformLocation} from '@angular/common';
 import {MessageType} from '../core-module/ui/message-type';
+import {Helper} from '../core-module/rest/helper';
 
 export class UIHelper {
     public static evaluateMediaQuery(type: string, value: number) {
@@ -857,5 +858,59 @@ export class UIHelper {
         document.body.appendChild(input);
         UIHelper.copyElementToClipboard(input);
         document.body.removeChild(input);
+    }
+
+
+    static mergePermissions(source: Permission[], add: Permission[]) {
+        const merge = source;
+        for (const p2 of add) {
+            // do only add new, unique permissions
+            if (merge.filter(p1 => Helper.objectEquals(p1, p2)).length === 0) {
+                merge.push(p2);
+            }
+        }
+        return merge;
+    }
+    /**
+     * merge two permission sets
+     * If a user/group is duplicated, the one with the highest permission will win
+     * Consumer < Collaborator < Coordinator
+     * @param source
+     * @param add
+     */
+    static mergePermissionsWithHighestPermission(
+        source: Permission[],
+        add: Permission[],
+    ) {
+        const result = Helper.deepCopyArray(source);
+        for (const p2 of add) {
+            const map = source.filter(
+                s =>
+                    s.authority.authorityName === p2.authority.authorityName &&
+                    s.authority.authorityType === s.authority.authorityType,
+            );
+            if (map.length === 1) {
+                const perm1 = map[0].permissions.filter(
+                    p => RestConstants.BASIC_PERMISSIONS.indexOf(p) !== -1,
+                );
+                const perm2 = p2.permissions.filter(
+                    p => RestConstants.BASIC_PERMISSIONS.indexOf(p) !== -1,
+                );
+                if (UIHelper.permissionIsGreaterThan(perm2[0], perm1[0])) {
+                    result.splice(result.indexOf(map[0]), 1);
+                    result.push(p2);
+                }
+            } else {
+                // add new permission to list
+                result.push(p2);
+            }
+        }
+        return result;
+    }
+    static permissionIsGreaterThan(p1: string, p2: string) {
+        return (
+            RestConstants.BASIC_PERMISSIONS.indexOf(p1) >
+            RestConstants.BASIC_PERMISSIONS.indexOf(p2)
+        );
     }
 }

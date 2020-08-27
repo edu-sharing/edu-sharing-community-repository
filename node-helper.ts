@@ -1,5 +1,23 @@
 import {TranslateService} from '@ngx-translate/core';
-import {AuthorityProfile, CollectionReference, ConfigurationService, ListItem, Node, NodesRightMode, NodeWrapper, Permissions, Repository, RestConnectorService, RestConstants, RestHelper, TemporaryStorageService, User, WorkflowDefinition} from '../core-module/core.module';
+import {
+  AuthorityProfile,
+  CollectionReference,
+  ConfigurationService,
+  ListItem,
+  LocalPermissions,
+  Node,
+  NodesRightMode,
+  NodeWrapper,
+  Permission,
+  Permissions,
+  Repository,
+  RestConnectorService,
+  RestConstants,
+  RestHelper,
+  TemporaryStorageService,
+  User,
+  WorkflowDefinition
+} from '../core-module/core.module';
 import {FormatSizePipe} from './pipes/file-size.pipe';
 import {Observable, Observer} from 'rxjs';
 import {Router} from '@angular/router';
@@ -640,10 +658,10 @@ export class NodeHelper {
      * @param {Permissions} permissions
      * @returns {boolean}
      */
-  static isDOIActive(node: Node, permissions: Permissions) {
+  static isDOIActive(node: Node, permissions: Permission[]) {
     if(node.aspects.indexOf(RestConstants.CCM_ASPECT_PUBLISHED)!=-1 && node.properties[RestConstants.CCM_PROP_PUBLISHED_HANDLE_ID]) {
-        for (const permission of permissions.localPermissions.permissions) {
-            if (permission.authority.authorityName == RestConstants.AUTHORITY_EVERYONE)
+        for (const permission of permissions) {
+            if (permission.authority.authorityName === RestConstants.AUTHORITY_EVERYONE)
                 return true;
         }
     }
