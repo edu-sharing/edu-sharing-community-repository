@@ -38,7 +38,7 @@ export class SimpleEditInviteComponent {
   multipleParents: boolean;
   dirty = false;
   parentPermissions: Permission[];
-  parentAuthorities: Authority[] = [];
+  parentAuthorities: Permission[] = [];
   organization: {organization: Group, groups?: any};
   /**
    * When true, we know that we only handling with simple permissions
@@ -187,9 +187,9 @@ export class SimpleEditInviteComponent {
           map((p) => p.authority.authorityName).
           filter((a) => a !== this.connector.getCurrentLogin().authorityName && a !== RestConstants.AUTHORITY_ROLE_OWNER)
       ));
-      // now, conver them back to objects
+      // now, convert them back to objects
       this.parentAuthorities = authorities.map((a) =>
-        this.parentPermissions.find((p) => p.authority.authorityName === a).authority
+        this.parentPermissions.find((p) => p.authority.authorityName === a)
       );
     }, error => {
       if(error.status === RestConstants.HTTP_FORBIDDEN) {

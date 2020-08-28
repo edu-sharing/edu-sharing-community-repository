@@ -1003,7 +1003,7 @@ export class MdsComponent {
         'id="'+this.getWidgetDomId(widget)+'" ' +
         'placeholder="'+(widget.placeholder ? widget.placeholder : '')+'" ' +
         'value="'+(widget.defaultvalue ? widget.defaultvalue : '')+'" ' +
-        'class="'+css+'">';
+        'class="'+css+'"';
     if(this.isBulkMode() && this.bulkBehaviour !== BulkBehaviour.Replace) {
       html+=' disabled';
     }
@@ -1084,46 +1084,45 @@ export class MdsComponent {
         )+`<div id="`+this.getWidgetDomId(widget)+`" class="multivalueBadges"></div>`;
     return html;
   }
-  private renderSubTree(widget:any,parent:string=null){
+  toggleTreeItem(from: HTMLElement, widgetId: string, id: string){
+    const element=document.getElementById(this.getDomId(widgetId) + '_group_' + id );
+    const enable=element.style.display === 'none';
+    element.style.display=enable ? '' : 'none';
+    from.innerHTML=enable ? 'keyboard_arrow_down' : 'keyboard_arrow_right';
+  }
+  private renderSubTree(widget:any,parent:string=null) {
+    const values = widget.valuesTree?.[parent];
+    if(!values) {
+      return null;
+    }
     let html='<div id="'+this.getWidgetDomId(widget)+'_group_'+parent+'" class="treeGroup"';
-    if(parent!=null){
+    if(parent!=null) {
       html+=' style="display:none;"';
     }
     html+='>';
-    let count=0;
-    if(widget.values) {
-      for (let value of widget.values) {
-        if (value.parent != parent)
-          continue;
-        let id = this.getWidgetDomId(widget) + '_' + value.id;
-        let sub = this.renderSubTree(widget, value.id);
-        html += '<div><div id="'+id+'_bg"><div class="treeIcon">';
-        if (sub) {
-          html += `<i class="material-icons clickable" onclick="
-                  var element=document.getElementById('` +this.getWidgetDomId(widget) + `_group_` + value.id + `');
-                  var enable=element.style.display=='none';
-                  element.style.display=enable ? '' : 'none';
-                  this.innerHTML=enable ? 'keyboard_arrow_down' : 'keyboard_arrow_right';
-                  ">keyboard_arrow_right</i>`;
-        }
-        else
-          html += '&nbsp;';
-        html += '</div>'
-        html += `<input type="checkbox" id="` + id + `" class="filled-in" onchange="`+this.getWindowComponent()+`.changeTreeItem(this,'`+widget.id+`')"`;
-        if (value.disabled) {
-          html += ' disabled="true"';
-        }
-        html += ' value="' + value.id + '"><label for="' + id + '">' + value.caption + '</label></div>';
-        if (sub) {
-          html += sub;
-        }
-        html += '</div>'
-        count++;
+    for (let value of values) {
+      let id = this.getWidgetDomId(widget) + '_' + value.id;
+      let sub = null;
+      if(widget.valuesTree?.[value.id]) {
+        sub = this.renderSubTree(widget, value.id);
       }
+      html += '<div><div id="'+id+'_bg"><div class="treeIcon">';
+      if (sub) {
+        html += `<i class="material-icons clickable" onclick="`+ this.getWindowComponent() + `.toggleTreeItem(this,'` + widget.id + `','` + value.id + `')">keyboard_arrow_right</i>`;
+      }
+      else {
+        html += '&nbsp;';
+      }
+      html += `</div><input type="checkbox" id="` + id + `" class="filled-in" onchange="`+this.getWindowComponent()+`.changeTreeItem(this,'`+widget.id+`')"`;
+      if (value.disabled) {
+        html += ' disabled="true"';
+      }
+      html += ' value="' + value.id + '"><label for="' + id + '">' + value.caption + '</label></div>';
+      if (sub) {
+        html += sub;
+      }
+      html += '</div>'
     }
-    if(!count)
-      return null;
-
     html+='</div>';
     return html;
   }
@@ -1239,53 +1238,59 @@ export class MdsComponent {
       console.warn('invalid suggestions result for '+this._groupId+' '+id);
     });
   }
+  handleListKeyDown(event: any, element: HTMLElement, id: string) {
+    if(event.keyCode === 13) {
+      element.click();
+    }
+    const suggestions=document.getElementById(id + '_suggestions');
+    const elements=(suggestions.childNodes as any);
+    if(event.keyCode === 40 || event.keyCode === 38){
+      const direction=event.keyCode === 40 ? 1 : -1;
+      for(let i=0;i<elements.length;i++){
+        if(elements[i] === element){
+          let pos=(i+direction);
+          while(pos>0 && pos<elements.length && elements[pos].style.display === 'none')
+            pos+=direction;
+          if(pos === 0) pos=elements.length-1;
+          if(pos === elements.length) pos=1;
+          elements[pos].focus();
+          event.preventDefault();
+          event.stopPropagation();
+          return;
+        }
+      }
+    }
+
+  }
+  handleListClick(element: HTMLElement, id: string, singleValue: boolean) {
+    document.getElementById(id + '_suggestions').style.display='none';
+    this.currentWidgetSuggestion=null;
+    (document.getElementById(id + '_suggestionsInput') as HTMLInputElement).value='';
+
+    if(!this.uiService.isMobile()) {
+      document.getElementById(id + '_suggestionsInput').focus();
+    }
+    const badges=document.getElementById(id);
+    const elements=(badges.childNodes as any);
+    for(let i=0;i<elements.length;i++) {
+        if(elements[i].getAttribute('data-value') === element.getAttribute('data-value')){
+            return;
+        }
+    }
+    const data = this.getMultivalueBadge(element.getAttribute('data-value'), element.getAttribute('data-caption'));
+    if(singleValue) {
+      badges.innerHTML = data;
+    } else {
+      badges.innerHTML += data;
+    }
+
+  }
   private getListEntry(id:string,key:string,caption:string,singleValue=false,searchString:string=null){
-    let html=`<a class="collection-item" tabindex="0" data-value="` + key + `" data-caption="` + this.htmlEscape(caption) + `" onkeydown="
-                if(event.keyCode==13){ 
-                    this.click();
-                }
-                var suggestions=document.getElementById('` + id + `_suggestions');
-                var elements=suggestions.childNodes;
-                if(event.keyCode==40 || event.keyCode==38){
-                  var direction=event.keyCode==40 ? 1 : -1;
-                  for(var i=0;i<elements.length;i++){
-                      if(elements[i]==this){
-                          var pos=(i+direction);
-                          while(pos>0 && pos<elements.length && elements[pos].style.display=='none')
-                            pos+=direction;
-                          if(pos==0) pos=elements.length-1;
-                          if(pos==elements.length) pos=1;
-                          elements[pos].focus();
-                          event.preventDefault();
-                          event.stopPropagation();
-                          return;
-                      }
-                  }
-                }
-                " onclick="
-                document.getElementById('` + id + `_suggestions').style.display='none';
-                `+this.getWindowComponent()+`.currentWidgetSuggestion=null;`;
+    let html=`<a class="collection-item" tabindex="0" data-value="` + key + `" data-caption="` + this.htmlEscape(caption) + `"
+                onkeydown="`+ this.getWindowComponent() +`.handleListKeyDown(event, this, '` + id + `')"
+                onclick="`+ this.getWindowComponent() +`.handleListClick(this, '` + id + `', ` + singleValue + `)"`;
 
-    /*
-    if(singleValue){
-      html+=`   document.getElementById('` + id + `').value=this.getAttribute('data-caption');
-                document.getElementById('` + id + `').setAttribute('data-value',this.getAttribute('data-value'));`;
-    }*/
-
-      html += `
-                document.getElementById('` + id + `_suggestionsInput').value='';`;
-      if(!this.uiService.isMobile())
-        html += `document.getElementById('` + id + `_suggestionsInput').focus();`;
-      html += `var badges=document.getElementById('` + id + `');
-                var elements=badges.childNodes;
-                for(var i=0;i<elements.length;i++){
-                    if(elements[i].getAttribute('data-value')==this.getAttribute('data-value')){
-                        return;
-                    }
-                }
-                badges.innerHTML`+(singleValue ? '=' : '+=')+`'` + this.getMultivalueBadgeEmbedded('this.getAttribute(\'data-caption\')', 'this.getAttribute(\'data-value\')') + `';`;
-
-    html+=`">` + (searchString ? this.highlightSearch(caption,searchString) : caption) + `</a>`;
+    html+=`>` + (searchString ? this.highlightSearch(caption,searchString) : caption) + `</a>`;
     return html;
   }
   private autoSuggestField(widget:any,css='',allowCustom=false,openCallback:string,openIcon='arrow_drop_down',singleValue=false){
@@ -1366,18 +1371,23 @@ export class MdsComponent {
   }
   openTree(widget:string){
       let id=this.getDomId(widget);
-      let tree=document.getElementById(id+'_tree');
+      let tree=document.getElementById(id + '_tree');
       tree.style.display='';
       let childs=document.getElementById(id).childNodes;
       let elements=tree.getElementsByTagName('input');
-      for(let i=0;i<elements.length;i++){
-          elements[i].checked=false;
-          document.getElementById(elements[i].id+'_bg').className='';
+      let selectedBg=tree.getElementsByClassName('treeSelected');
+      // reset old data
+      for(let i=0;i<elements.length;i++) {
+        elements[i].checked=false;
       }
-      for(let i=0;i<childs.length;i++){
+      while(selectedBg.length > 0) {
+          selectedBg[0].className='';
+      }
+
+      // mark current values
+      for(let i=0;i<childs.length;i++) {
           let child:any=childs[i];
           let element:any=document.getElementById(id+'_'+child.getAttribute('data-value'));
-          let elementBg=document.getElementById(element.id+'_bg');
           if(element){
               element.checked=true;
               this.changeTreeItem(element,widget);
@@ -1393,6 +1403,16 @@ export class MdsComponent {
       return constrain;
     }
     let domId=this.getWidgetDomId(widget);
+    // transform tree for faster access (about 4x speedup for large trees)
+    if(widget.values) {
+      widget.valuesTree = {};
+      for (const value of widget.values) {
+          if(!widget.valuesTree[value.parent]) {
+            widget.valuesTree[value.parent] = [];
+          }
+          widget.valuesTree[value.parent].push(value);
+      }
+    }
     let html=this.autoSuggestField(widget,'',false,
                 this.getWindowComponent()+`.openTree('`+widget.id+`')`,'arrow_forward',widget.type=='singlevalueTree')
         +`     <div class="dialog darken" style="display:none;z-index:`+(122 + this.priority)+`;" id="`+domId+`_tree">

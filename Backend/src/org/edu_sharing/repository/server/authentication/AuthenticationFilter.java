@@ -202,7 +202,10 @@ public class AuthenticationFilter implements javax.servlet.Filter {
 		
 		String allowedAuthTypes = ApplicationInfoList.getHomeRepository().getAllowedAuthenticationTypes();
 
+		// changed in 5.1: We always allow the webapp to load for mobile apps & angular routing
+		boolean allowSSO = false;
 		// if true, redirect to shib
+		/*
 		boolean allowSSO = true;
 		try {
 			Config config=ConfigServiceFactory.getCurrentConfig(req);
@@ -224,6 +227,8 @@ public class AuthenticationFilter implements javax.servlet.Filter {
 		}catch(Throwable e) {
 			log.error(e.getMessage());
 		}
+
+		 */
 		
 		if(allowedAuthTypes != null && !allowedAuthTypes.trim().equals("") && allowSSO){
 			String shibbUrl = URLTool.addSSOPathWhenConfigured(URLTool.getBaseUrl(true)) + ( req.getQueryString() != null ? "?"+req.getQueryString() : "");

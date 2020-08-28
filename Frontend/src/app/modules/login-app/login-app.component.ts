@@ -6,7 +6,7 @@ import {
 
 import { Toast } from "../../core-ui-module/toast";
 import {Router, Route, ActivatedRoute} from "@angular/router";
-import {OAuthResult, LoginResult, AccessScope, RestConstants, DialogButton} from "../../core-module/core.module";
+import {OAuthResult, LoginResult, AccessScope, RestConstants, DialogButton, RestConnectorService} from "../../core-module/core.module";
 import {OPEN_URL_MODE, UIConstants} from "../../core-module/ui/ui-constants";
 import { CordovaService } from "../../common/services/cordova.service";
 import { ConfigurationService } from '../../core-module/core.module';
@@ -51,6 +51,7 @@ export class LoginAppComponent  implements OnInit {
         private storage: SessionStorageService,
         private platformLocation: PlatformLocation,
         private cordova: CordovaService,
+        private connector: RestConnectorService,
         private bridge: BridgeService,
         private configService: ConfigurationService,
         private locator: RestLocatorService,
@@ -83,7 +84,6 @@ export class LoginAppComponent  implements OnInit {
             // init translation service
             this.init();
         });
-
     }
     private recoverPassword(){
         if(this.config.register.local){
@@ -189,6 +189,9 @@ export class LoginAppComponent  implements OnInit {
                         this.config.register={local:true};
 
                     this.isLoading=false;
+
+                    this.handleCurrentState();
+
                 });
             });
 
@@ -211,6 +214,30 @@ export class LoginAppComponent  implements OnInit {
         }
         else{
             this.buttons=[login];
+        }
+    }
+
+    private handleCurrentState() {
+        // a external login, e.g. via shibboleth, may occured. get oauth for the session, and store it
+        this.connector.isLoggedIn(true).subscribe((data) => {
+            console.log('app login status', data);
+            if(data.statusCode === RestConstants.STATUS_CODE_OK) {
+                this.cordova.loginOAuth(this.locator.endpointUrl,null, null, 'client_credentials').subscribe((oauthTokens: OAuthResult) => {
+                    this.cordova.setPermanentStorage(RestConstants.CORDOVA_STORAGE_OAUTHTOKENS, JSON.stringify(oauthTokens));
+                    // continue to within the app
+                    this.goToDefaultLocation();
+                });
+            } else {
+               this.checkLoginUrl();
+            }
+        }, error => {
+            this.checkLoginUrl();
+        });
+    }
+
+    private checkLoginUrl() {
+        if(this.configService.instant('loginUrl')) {
+            window.location.href = this.configService.instant('loginUrl');
         }
     }
 }
