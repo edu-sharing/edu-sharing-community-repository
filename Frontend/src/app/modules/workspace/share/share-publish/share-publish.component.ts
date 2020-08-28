@@ -8,6 +8,7 @@ import {NodeHelper} from '../../../../core-ui-module/node-helper';
 import {RestHelper} from '../../../../core-module/rest/rest-helper';
 import {MainNavService} from '../../../../common/services/main-nav.service';
 import {RestNodeService} from '../../../../core-module/rest/services/rest-node.service';
+import {Observable, Observer} from 'rxjs';
 
 @Component({
   selector: 'app-share-publish',
@@ -91,6 +92,30 @@ export class SharePublishComponent implements OnChanges {
     }
     console.log(permissions)
     return permissions;
+  }
+
+  save() {
+    return new Observable((observer: Observer<Node|void>) => {
+      if (this.shareMode === ShareMode.Copy) {
+        this.nodeService.publishCopy(this.node.ref.id).subscribe(({node}) => {
+          if (this.doiPermission && !this.doiDisabled && this.doiActive) {
+            console.log('create handle');
+            this.nodeService.setNodePermissions(node.ref.id,
+                null, false, '', false, true
+            ).subscribe(() => {
+              observer.next(node);
+              observer.complete();
+            });
+          } else {
+            observer.next(node);
+            observer.complete();
+          }
+        });
+      } else {
+        observer.next(null);
+        observer.complete();
+      }
+    });
   }
 }
 export enum ShareMode {

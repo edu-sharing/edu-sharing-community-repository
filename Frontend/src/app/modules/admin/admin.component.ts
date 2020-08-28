@@ -753,6 +753,7 @@ export class AdminComponent {
     const checks = [
         RestConstants.TOOLPERMISSION_USAGE_STATISTIC,
         RestConstants.TOOLPERMISSION_INVITE_ALLAUTHORITIES,
+        RestConstants.TOOLPERMISSION_PUBLISH_COPY,
         RestConstants.TOOLPERMISSION_GLOBAL_STATISTICS_USER,
         RestConstants.TOOLPERMISSION_GLOBAL_STATISTICS_NODES,
     ];

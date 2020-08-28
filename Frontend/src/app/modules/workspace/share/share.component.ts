@@ -627,7 +627,7 @@ export class WorkspaceShareComponent {
         return !this.contains(this.originalPermissions[0].permissions, p, true);
     }
 
-    private save() {
+    async save() {
         if (this.permissions != null) {
             this.onLoading.emit(true);
             let inherit =
@@ -654,29 +654,15 @@ export class WorkspaceShareComponent {
                 // handle the invitation of group everyone
                 if(this.publishComponent) {
                     permissions = this.publishComponent.updatePermissions(permissions);
+                    this.publishComponent.save().subscribe((nodeCopy) => {
+                        this.handlePermissionsPerNode(n, permissions, inherit);
+                    },error => {
+                        this.toast.error(error)
+                        this.onLoading.emit(false);
+                    });
+                } else {
+                    this.handlePermissionsPerNode(n, permissions, inherit);
                 }
-                const permissionsCopy = RestHelper.copyAndCleanPermissions(
-                    permissions,
-                    inherit,
-                );
-                if (!this.sendToApi) {
-                    this.onClose.emit(
-                        this.getEmitObject(
-                            RestHelper.copyPermissions(permissions, inherit),
-                        ),
-                    );
-                    return null;
-                }
-                return this.nodeApi.setNodePermissions(
-                    n.ref.id,
-                    permissionsCopy,
-                    this.notifyUsers && this.sendMessages,
-                    this.notifyMessage,
-                    false,
-                    this.publishComponent.doiPermission &&
-                        this.publishComponent.doiActive &&
-                        this.getPublishActive(),
-                );
             });
             if(!this.sendToApi) {
                 return;
@@ -810,6 +796,29 @@ export class WorkspaceShareComponent {
             notify: this.notifyUsers,
             notifyMessage: this.notifyMessage,
         };
+    }
+
+    private handlePermissionsPerNode(n: Node, permissions: Permission[], inherit: boolean) {
+        const permissionsCopy = RestHelper.copyAndCleanPermissions(
+            permissions,
+            inherit,
+        );
+        if (!this.sendToApi) {
+            this.onClose.emit(
+                this.getEmitObject(
+                    RestHelper.copyPermissions(permissions, inherit),
+                ),
+            );
+            return null;
+        }
+        return this.nodeApi.setNodePermissions(
+            n.ref.id,
+            permissionsCopy,
+            this.notifyUsers && this.sendMessages,
+            this.notifyMessage,
+            false,
+            false, // handle will always be created via publish component
+        );
     }
 }
 /*
