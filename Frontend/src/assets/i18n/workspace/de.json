@@ -121,16 +121,22 @@
             "PUBLISHING_WARNING_MESSAGE": "Wenn Sie fortfahren, wird das aktuelle Element für alle Nutzer des Systems freigegeben und kann von jedem aufgerufen werden.\n\nSind Sie sicher, dass Sie das Element öffentlich freigeben möchten?",
             "ERROR_INVALID_TYPE_COMBINATION": "Elemente verschiedener Typen können nicht im Bulk freigegeben werden",
             "PUBLISH": {
-                "NO_LICENSE": "Das aktuelle Material hat keine zugewiesene Lizenz. Freigebenene Materialien sollten eine eindeutige Lizenz besitzen, damit festgelegt ist, ob und wie das Material weiterverwendet werden darf",
+                "OPEN_VERSION": "Version anzeigen",
+                "HAS_HANDLE": "Mit Handle verbunden",
+                "NO_LICENSE": "Das aktuelle Material hat keine zugewiesene Lizenz. Freigegebene Materialien sollten eine eindeutige Lizenz besitzen, damit festgelegt ist, ob und wie das Material weiterverwendet werden darf",
                 "SET_LICENSE": "Lizenzdialog öffnen",
                 "INHERITED": "Das übergeordnete Element/Ordner ist bereits öffentlich. Bitte deaktivieren Sie die Vererbung oder ändern Sie die Berechtigungen am übergeordneten Element",
+                "VERSIONS_PUBLISHED": "Aktuell veröffentlichte Versionen",
                 "DISABLE_INHERIT": "Vererbung deaktivieren",
+                "COPY_ACTIVE": "Das Element ist bereits als Kopie veröffentlicht wurden. Der Modus kann nicht mehr gewechselt werden",
+                "CURRENT_VERSION": "Aktuelle Materialversion",
+                "REPUBLISH": "Aktuelle Materialversion veröffentlichen",
                 "MODE_OFF": "Unveröffentlicht",
                 "MODE_OFF_INFO": "Das Material ist nicht öffentlich zugänglich und kann nur von eingelandenen Benutzern abgerufen werden",
                 "MODE_DIRECT": "Veröffentlicht",
                 "MODE_DIRECT_INFO": "Das Material wird direkt veröffentlicht. Wird das aktuelle Element gelöscht, ist die Veröffentlichung ungültig.\nBei Veränderungen des Elements wirken sich diese direkt auf die Veröffentlichung aus",
                 "MODE_COPY": "Kopie veröffentlichen",
-                "MODE_COPY_INFO": "Vom Material wird eine Kopie erzeugt, und diese wird veröffentlicht.\nÄnderungen oder eine Löschung des Originals hat keinen Einfluss auf die Veröffentlichung.\nNur die Redaktion kann die Veröffentlichung nachträglich steuern.\nEs können mehrere Versionen parallel veröffentlicht werden"
+                "MODE_COPY_INFO": "Vom Material wird eine Kopie erzeugt und diese wird veröffentlicht.\nÄnderungen oder eine Löschung des Originals hat keinen Einfluss auf die Veröffentlichung.\nNur die Redaktion kann die Veröffentlichung nachträglich steuern.\nEs können mehrere Versionen parallel veröffentlicht werden"
             },
             "STATE": {
                 "PRIVATE": "Privat",
@@ -190,6 +196,7 @@
                 "VIEW": "Aufrufe"
             },
             "COMMENT": {
+                "NONE": "[Nicht angegeben]",
                 "MAIN_FILE_UPLOAD": "Datei wurde erstellt",
                 "METADATA_UPDATE": "Metadaten aktualisiert",
                 "CONTENT_UPDATE": "Inhalt aktualisiert",

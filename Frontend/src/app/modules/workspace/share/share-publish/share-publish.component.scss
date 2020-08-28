@@ -9,9 +9,66 @@ info-message{
   h5{
     white-space: pre-line;
   }
+  .published-versions-container {
+    padding: 5px 28px;
+    h6.published-versions{
+      padding-top: 10px;
+    }
+    .version-comment {
+      padding-right: 5px;
+    }
+    .published-versions {
+      display: flex;
+      flex-direction: column;
+      mat-checkbox {
+        display: flex;
+        margin: 10px 0;
+      }
+      .version {
+        display: flex;
+        align-items: center;
+        width: 100%;
+        background-color: $cardLightBackground;
+        padding: 5px 20px;
+        margin: 5px 0;
+        border-radius: 50px;
+
+        .version-group {
+          display: flex;
+          flex-direction: column;
+          flex-grow: 1;
+
+          > div {
+            display: flex;
+          }
+        }
+        .version-handle{
+          color: $textLight;
+        }
+        .version-date {
+          font-size: 90%;
+        }
+
+        .version-actions {
+          align-self: flex-end;
+          > button{
+            height: 40px;
+            margin: 5px;
+          }
+        }
+      }
+    }
+  }
 }
 .doi{
   background-color: $cardLightBackground;
   margin:20px  0;
   padding:10px $cardPadding + 20px;
+  .label{
+    display: flex;
+    align-items: center;
+    > i {
+      margin: 0 5px;
+    }
+  }
 }

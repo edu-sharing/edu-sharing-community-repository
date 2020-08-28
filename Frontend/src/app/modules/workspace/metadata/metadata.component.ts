@@ -20,6 +20,7 @@ import {UIConstants} from '../../../core-module/ui/ui-constants';
 import {ConfigurationHelper} from '../../../core-module/core.module';
 import {RestSearchService} from '../../../core-module/core.module';
 import {Helper} from '../../../core-module/rest/helper';
+import {VersionLabelPipe} from '../../../common/ui/version-label.pipe';
 
 // Charts.js
 declare var Chart: any;
@@ -79,27 +80,6 @@ export class WorkspaceMetadataComponent{
             if (currentNode !== this.nodeObject)
                 return;
             this.versions = data.versions.reverse();
-            for (const version of this.versions) {
-                if (version.comment) {
-                    if (version.comment === RestConstants.COMMENT_MAIN_FILE_UPLOAD
-                        || version.comment === RestConstants.COMMENT_METADATA_UPDATE
-                        || version.comment === RestConstants.COMMENT_CONTRIBUTOR_UPDATE
-                        || version.comment === RestConstants.COMMENT_CONTENT_UPDATE
-                        || version.comment === RestConstants.COMMENT_LICENSE_UPDATE
-                        || version.comment === RestConstants.COMMENT_NODE_PUBLISHED
-                        || version.comment === RestConstants.COMMENT_PREVIEW_CHANGED
-                        || version.comment === RestConstants.COMMENT_BULK_CREATE
-                        || version.comment === RestConstants.COMMENT_BULK_UPDATE
-                        || version.comment === RestConstants.COMMENT_BULK_UPDATE_RESYNC
-                        || version.comment.startsWith(RestConstants.COMMENT_EDITOR_UPLOAD)) {
-                        const parameters = version.comment.split(',');
-                        let editor = '';
-                        if (parameters.length > 1)
-                            editor = this.translate.instant('CONNECTOR.' + parameters[1] + '.NAME');
-                        version.comment = this.translate.instant('WORKSPACE.METADATA.COMMENT.' + parameters[0], {editor});
-                    }
-                }
-            }
             let i = 0;
             for (const version of this.versions) {
                 if (this.isCurrentVersion(version)) {

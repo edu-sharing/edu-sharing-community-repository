@@ -37,6 +37,7 @@
   import { UserAvatarTestComponent } from './common/test/user-avatar/user-avatar-test.component';
   import { ModalTestComponent } from './common/test/modal/modal-test.component';
   import {CreateMenuComponent} from './modules/create-menu/create-menu.component';
+  import {VersionLabelPipe} from './common/ui/version-label.pipe';
 
   export const DECLARATIONS = [
       MdsTestComponent,
@@ -48,6 +49,7 @@
       AutocompleteComponent,
       AuthoritySearchInputComponent,
       NodeTitlePipe,
+      VersionLabelPipe,
       TimePipe,
       FileChooserComponent,
       ActionbarComponent,

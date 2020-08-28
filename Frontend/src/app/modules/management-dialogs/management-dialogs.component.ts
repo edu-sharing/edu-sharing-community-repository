@@ -32,7 +32,6 @@ import {LinkData, NodeHelper} from '../../core-ui-module/node-helper';
   ]
 })
 export class WorkspaceManagementDialogsComponent  {
-  public globalProgress = false;
   @ViewChild('mds') mdsRef : MdsComponent;
   @Input() showLtiTools = false;
   @Input() uploadShowPicker = false;
@@ -142,6 +141,17 @@ export class WorkspaceManagementDialogsComponent  {
      */
   @Input() qr: {node: Node, data: string};
 
+    /**
+     * @Deprecated, the components should use toast service directly
+     */
+  set globalProgress (globalProgress: boolean) {
+      if(globalProgress) {
+          this.toast.showProgressDialog();
+      } else {
+          this.toast.closeModalDialog();
+      }
+  }
+
   @HostListener('document:keydown', ['$event'])
   handleKeyboardEvent(event: KeyboardEvent) {
     if(event.key === 'Escape') {
@@ -220,8 +230,18 @@ export class WorkspaceManagementDialogsComponent  {
         this.nodeShareLinkChange.emit(null);
     }
  closeShare() {
-     this.nodeShare = null
-     this.nodeShareChange.emit(null);
+      // reload node metadata
+     this.toast.showProgressDialog();
+     Observable.forkJoin(this.nodeShare.map((n) => this.nodeService.getNodeMetadata(n.ref.id, [RestConstants.ALL])))
+         .subscribe((nodes: NodeWrapper[]) => {
+             console.log(nodes);
+             this.onRefresh.emit(nodes.map(n => n.node));
+             this.nodeShare = null
+             this.nodeShareChange.emit(null);
+             this.toast.closeModalDialog();
+         }, error => {
+             this.toast.closeModalDialog();
+         });
  }
     public closeWorkflow(node: Node = null){
         this.nodeWorkflow = null;
@@ -232,14 +252,14 @@ export class WorkspaceManagementDialogsComponent  {
     }
     private deleteConfirmed(nodes : Node[],position=0,error=false) : void {
         if (position >= nodes.length) {
-            this.globalProgress = false;
+            this.toast.closeModalDialog();
             if (!error)
                 this.toast.toast("WORKSPACE.TOAST.DELETE_FINISHED");
             this.onDelete.emit({objects: nodes,error:error,count:position});
             return;
         }
         this.dialogTitle=null;
-        this.globalProgress = true;
+        this.toast.showProgressDialog();
         this.nodeService.deleteNode(nodes[position].ref.id).subscribe(data => {
             this.removeNodeFromClipboard(nodes[position]);
             this.deleteConfirmed(nodes, position + 1, error);
@@ -430,9 +450,9 @@ export class WorkspaceManagementDialogsComponent  {
     else{
       this.dialogTitle=null;
     }
-    this.globalProgress=true;
+    this.toast.showProgressDialog();
     UIHelper.addToCollection(this.collectionService,this.router,this.bridge,collection,list,()=>{
-      this.globalProgress=false;
+        this.toast.closeModalDialog();
        this.onStoredAddToCollection.emit(collection);
       if(callback)
         callback();

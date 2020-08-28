@@ -178,6 +178,7 @@
                 "VIEW": "Views"
             },
             "COMMENT": {
+                "NONE": "[Unset]",
                 "MAIN_FILE_UPLOAD": "File created",
                 "METADATA_UPDATE": "Updated metadata",
                 "CONTENT_UPDATE": "Updated content",

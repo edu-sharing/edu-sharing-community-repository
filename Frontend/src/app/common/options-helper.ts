@@ -340,6 +340,9 @@ export class OptionsHelperService {
                 if(objects[0].type === RestConstants.CCM_TYPE_SAVED_SEARCH) {
                     return ElementType.SavedSearch;
                 } else {
+                    if(NodeHelper.isNodePublishedCopy(objects[0])){
+                        return ElementType.NodePublishedCopy;
+                    }
                     return ElementType.Node;
                 }
             }
@@ -394,7 +397,7 @@ export class OptionsHelperService {
         const debugNode = new OptionItem('OPTIONS.DEBUG', 'build', (object) =>
             management.nodeDebug = this.getObjects(object)[0],
         );
-        debugNode.elementType = [ElementType.Node, ElementType.SavedSearch];
+        debugNode.elementType = [ElementType.Node, ElementType.NodePublishedCopy, ElementType.SavedSearch];
         debugNode.onlyDesktop = true;
         debugNode.constrains = [Constrain.AdminOrDebug, Constrain.NoBulk];
         debugNode.group = DefaultGroups.View;
@@ -706,6 +709,18 @@ export class OptionsHelperService {
         deleteNode.group = DefaultGroups.Delete;
         deleteNode.priority = 10;
 
+        const unpublishNode = new OptionItem('OPTIONS.UNPUBLISH', 'cloud_off',(object) => {
+            management.nodeDelete = this.getObjects(object);
+        });
+        unpublishNode.elementType = [ElementType.NodePublishedCopy];
+        unpublishNode.constrains = [Constrain.HomeRepository, Constrain.User];
+        unpublishNode.permissions = [RestConstants.PERMISSION_DELETE];
+        unpublishNode.permissionsMode = HideMode.Hide;
+        unpublishNode.key = 'Delete';
+        unpublishNode.group = DefaultGroups.Delete;
+        unpublishNode.priority = 10;
+
+
         const removeNodeRef =  new OptionItem('OPTIONS.REMOVE_REF','remove_circle_outline', (object) =>
             this.removeFromCollection(this.getObjects(object))
         );
@@ -905,6 +920,7 @@ export class OptionsHelperService {
         options.push(copyNodes);
         options.push(pasteNodes);
         options.push(deleteNode);
+        options.push(unpublishNode);
         options.push(removeNodeRef);
         options.push(reportNode);
         options.push(toggleViewType);

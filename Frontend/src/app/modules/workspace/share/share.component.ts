@@ -7,7 +7,7 @@ import {
     Output, ViewChild,
 } from '@angular/core';
 import { TranslateService } from '@ngx-translate/core';
-import { Observable } from 'rxjs';
+import {Observable, Observer} from 'rxjs';
 import {
     Collection,
     CollectionUsage,
@@ -634,35 +634,37 @@ export class WorkspaceShareComponent {
                 this.inherited &&
                 this.inheritAllowed &&
                 !this.isCollection();
-            const actions: Observable<Response>[] = this._nodes.map((n, i) => {
-                let permissions: Permission[] = Helper.deepCopy(this.permissions);
-                if (this.isBulk()) {
-                    // keep inherit state of original node
-                    inherit = this.originalPermissions[i].inherited;
-                    if (this.bulkMode === 'extend') {
-                        permissions = UIHelper.mergePermissionsWithHighestPermission(
-                            this.originalPermissions[i].permissions,
-                            permissions,
-                        );
-                    } else {
-                        // we do nothing, because theo original ones are getting deleted
+            const actions: Observable<void>[] = this._nodes.map((n, i) => {
+                return new Observable((observer: Observer<void>) => {
+                    let permissions: Permission[] = Helper.deepCopy(this.permissions);
+                    if (this.isBulk()) {
+                        // keep inherit state of original node
+                        inherit = this.originalPermissions[i].inherited;
+                        if (this.bulkMode === 'extend') {
+                            permissions = UIHelper.mergePermissionsWithHighestPermission(
+                                this.originalPermissions[i].permissions,
+                                permissions,
+                            );
+                        } else {
+                            // we do nothing, because theo original ones are getting deleted
+                        }
                     }
-                }
-                permissions = permissions.filter(
-                    (p: Permission) => !this.isDeleted(p),
-                );
-                // handle the invitation of group everyone
-                if(this.publishComponent) {
-                    permissions = this.publishComponent.updatePermissions(permissions);
-                    this.publishComponent.save().subscribe((nodeCopy) => {
-                        this.handlePermissionsPerNode(n, permissions, inherit);
-                    },error => {
-                        this.toast.error(error)
-                        this.onLoading.emit(false);
-                    });
-                } else {
-                    this.handlePermissionsPerNode(n, permissions, inherit);
-                }
+                    permissions = permissions.filter(
+                        (p: Permission) => !this.isDeleted(p),
+                    );
+                    // handle the invitation of group everyone
+                    if (this.publishComponent) {
+                        permissions = this.publishComponent.updatePermissions(permissions);
+                        this.publishComponent.save().subscribe((nodeCopy) => {
+                            this.handlePermissionsPerNode(observer, n, permissions, inherit);
+                        }, error => {
+                            this.toast.error(error)
+                            this.onLoading.emit(false);
+                        });
+                    } else {
+                        this.handlePermissionsPerNode(observer, n, permissions, inherit);
+                    }
+                })
             });
             if(!this.sendToApi) {
                 return;
@@ -798,7 +800,7 @@ export class WorkspaceShareComponent {
         };
     }
 
-    private handlePermissionsPerNode(n: Node, permissions: Permission[], inherit: boolean) {
+    private handlePermissionsPerNode(observer: Observer<void>, n: Node, permissions: Permission[], inherit: boolean): void {
         const permissionsCopy = RestHelper.copyAndCleanPermissions(
             permissions,
             inherit,
@@ -811,14 +813,20 @@ export class WorkspaceShareComponent {
             );
             return null;
         }
-        return this.nodeApi.setNodePermissions(
+        this.nodeApi.setNodePermissions(
             n.ref.id,
             permissionsCopy,
             this.notifyUsers && this.sendMessages,
             this.notifyMessage,
             false,
             false, // handle will always be created via publish component
-        );
+        ).subscribe(() => {
+            observer.next();
+            observer.complete();
+        }, error => {
+            observer.error(error);
+            observer.complete();
+        });
     }
 }
 /*
