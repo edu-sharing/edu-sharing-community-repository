@@ -12,6 +12,7 @@ import org.alfresco.service.cmr.repository.ChildAssociationRef;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.repository.StoreRef;
 import org.alfresco.service.namespace.QName;
+import org.apache.commons.lang3.NotImplementedException;
 import org.edu_sharing.repository.client.rpc.User;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.client.tools.UrlTool;
@@ -357,6 +358,16 @@ public class NodeServiceAdapter implements NodeService {
 	@Override
 	public Serializable getPropertyNative(String storeProtocol, String storeId, String nodeId, String property) throws Throwable {
 		return null;
+	}
+
+	@Override
+	public String publishCopy(String nodeId) throws Throwable {
+		throw new NotImplementedException("publishCopy");
+	}
+
+	@Override
+	public List<String> getPublishedCopies(String nodeId) {
+		throw new NotImplementedException("getPublishedCopies");
 	}
 
 	@Override

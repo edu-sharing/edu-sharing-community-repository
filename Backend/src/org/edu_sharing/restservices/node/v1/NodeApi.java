@@ -179,8 +179,87 @@ public class NodeApi  {
 	    	}
 
 	    }
-	
-	  	@PUT
+
+	@POST
+	@Path("/nodes/{repository}/{node}/publish")
+
+	@ApiOperation(
+			value = "Publish",
+			notes = "Create a published copy of the current node ")
+
+	@ApiResponses(
+			value = {
+					@ApiResponse(code = 200, message = RestConstants.HTTP_200, response = NodeEntry.class),
+					@ApiResponse(code = 400, message = RestConstants.HTTP_400, response = ErrorResponse.class),
+					@ApiResponse(code = 401, message = RestConstants.HTTP_401, response = ErrorResponse.class),
+					@ApiResponse(code = 403, message = RestConstants.HTTP_403, response = ErrorResponse.class),
+					@ApiResponse(code = 404, message = RestConstants.HTTP_404, response = ErrorResponse.class),
+					@ApiResponse(code = 500, message = RestConstants.HTTP_500, response = ErrorResponse.class)
+			})
+
+	public Response publishCopy(
+			@ApiParam(value = RestConstants.MESSAGE_REPOSITORY_ID,required=true, defaultValue="-home-" ) @PathParam("repository") String repository,
+			@ApiParam(value = RestConstants.MESSAGE_NODE_ID,required=true ) @PathParam("node") String node,
+			@Context HttpServletRequest req) {
+
+		try {
+			RepositoryDao repoDao = RepositoryDao.getRepository(repository);
+			NodeDao nodeDao = NodeDao.getNode(repoDao, node);
+			NodeDao published = nodeDao.publishCopy();
+			NodeEntry response = new NodeEntry();
+			response.setNode(published.asNode());
+
+			return Response.status(Response.Status.OK).entity(response).build();
+
+		} catch (Throwable t) {
+			return ErrorResponse.createResponse(t);
+		}
+
+	}
+	@GET
+	@Path("/nodes/{repository}/{node}/publish")
+
+	@ApiOperation(
+			value = "Publish",
+			notes = "Get all published copies of the current node")
+
+	@ApiResponses(
+			value = {
+					@ApiResponse(code = 200, message = RestConstants.HTTP_200, response = NodeEntries.class),
+					@ApiResponse(code = 400, message = RestConstants.HTTP_400, response = ErrorResponse.class),
+					@ApiResponse(code = 401, message = RestConstants.HTTP_401, response = ErrorResponse.class),
+					@ApiResponse(code = 403, message = RestConstants.HTTP_403, response = ErrorResponse.class),
+					@ApiResponse(code = 404, message = RestConstants.HTTP_404, response = ErrorResponse.class),
+					@ApiResponse(code = 500, message = RestConstants.HTTP_500, response = ErrorResponse.class)
+			})
+
+	public Response getPublishedCopies(
+			@ApiParam(value = RestConstants.MESSAGE_REPOSITORY_ID,required=true, defaultValue="-home-" ) @PathParam("repository") String repository,
+			@ApiParam(value = RestConstants.MESSAGE_NODE_ID,required=true ) @PathParam("node") String node,
+			@Context HttpServletRequest req) {
+
+		try {
+			RepositoryDao repoDao = RepositoryDao.getRepository(repository);
+			NodeDao originalDao = NodeDao.getNode(repoDao, node);
+			List<NodeDao> published = originalDao.getPublishedCopies();
+			NodeEntries response = new NodeEntries();
+			response.setNodes(published.stream().map(dao -> {
+				try {
+					return dao.asNode();
+				} catch (DAOException e) {
+					throw new RuntimeException(e);
+				}
+			}).collect(Collectors.toList()));
+
+			return Response.status(Response.Status.OK).entity(response).build();
+
+		} catch (Throwable t) {
+			return ErrorResponse.createResponse(t);
+		}
+
+	}
+
+	@PUT
 	    @Path("/nodes/{repository}/{node}/aspects")
 	        
 	    @ApiOperation(

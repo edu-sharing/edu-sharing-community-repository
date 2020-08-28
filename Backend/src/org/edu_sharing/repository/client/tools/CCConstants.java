@@ -757,6 +757,10 @@ public class CCConstants {
 
 	public final static String CCM_PROP_IO_PUBLISHED_DATE = "{http://www.campuscontent.de/model/1.0}published_date";
 
+	public final static String CCM_PROP_IO_PUBLISHED_MODE = "{http://www.campuscontent.de/model/1.0}published_mode";
+
+	public final static String CCM_PROP_IO_PUBLISHED_ORIGINAL = "{http://www.campuscontent.de/model/1.0}published_original";
+
 	/**
 	 * published
 	 */
@@ -862,6 +866,8 @@ public class CCConstants {
 	public final static String CCM_VALUE_TOOLPERMISSION_MEDIACENTER_MANAGE = "TOOLPERMISSION_MEDIACENTER_MANAGE";
 
 	public final static String CCM_VALUE_TOOLPERMISSION_TEACHER = "TOOLPERMISSION_TEACHER";
+
+	public final static String CCM_VALUE_TOOLPERMISSION_PUBLISH_COPY = "TOOLPERMISSION_PUBLISH_COPY";
 
 	public final static String CM_VALUE_PERSON_EDU_SCHOOL_PRIMARY_AFFILIATION_TEACHER = "teacher";
 

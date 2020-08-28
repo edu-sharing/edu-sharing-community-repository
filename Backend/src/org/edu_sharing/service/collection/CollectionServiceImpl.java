@@ -1,20 +1,13 @@
 package org.edu_sharing.service.collection;
 
 import java.io.InputStream;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReentrantLock;
 import java.util.stream.Collectors;
 
-import com.benfante.jslideshare.App;
 import com.google.gson.Gson;
 import org.alfresco.repo.policy.BehaviourFilter;
 import org.alfresco.repo.search.impl.solr.ESSearchParameters;
@@ -44,7 +37,6 @@ import org.edu_sharing.repository.client.rpc.User;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.server.AuthenticationTool;
 import org.edu_sharing.repository.server.MCAlfrescoAPIClient;
-import org.edu_sharing.repository.server.MCAlfrescoBaseClient;
 import org.edu_sharing.repository.server.RepoFactory;
 import org.edu_sharing.repository.server.authentication.Context;
 import org.edu_sharing.repository.server.tools.*;
@@ -58,7 +50,6 @@ import org.edu_sharing.restservices.shared.Authority;
 import org.edu_sharing.service.Constants;
 import org.edu_sharing.service.authority.AuthorityService;
 import org.edu_sharing.service.authority.AuthorityServiceFactory;
-import org.edu_sharing.service.mediacenter.MediacenterServiceFactory;
 import org.edu_sharing.service.nodeservice.NodeService;
 import org.edu_sharing.service.nodeservice.NodeServiceFactory;
 import org.edu_sharing.service.nodeservice.NodeServiceHelper;
@@ -322,7 +313,7 @@ public class CollectionServiceImpl implements CollectionService{
 						
 						collection.setLevel0(true);
 						
-						parentIdLocal = NodeServiceHelper.getContainerId(path, pattern);
+						parentIdLocal = NodeServiceHelper.getContainerIdByPath(path, pattern);
 					}
 					
 					HashMap<String,Object> props = asProps(collection);

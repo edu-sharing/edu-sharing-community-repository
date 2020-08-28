@@ -112,6 +112,9 @@ public class NodeServiceHelper {
     public static String getProperty(NodeRef nodeRef,String key){
 		return NodeServiceFactory.getLocalService().getProperty(nodeRef.getStoreRef().getProtocol(),nodeRef.getStoreRef().getIdentifier(),nodeRef.getId(),key);
 	}
+	public static void setProperty(NodeRef nodeRef,String key, Serializable value){
+		NodeServiceFactory.getLocalService().setProperty(nodeRef.getStoreRef().getProtocol(),nodeRef.getStoreRef().getIdentifier(),nodeRef.getId(),key,value);
+	}
 	public static Serializable getPropertyNative(NodeRef nodeRef, String key){
 		ApplicationContext applicationContext = AlfAppContextGate.getApplicationContext();
 		ServiceRegistry serviceRegistry = (ServiceRegistry) applicationContext.getBean(ServiceRegistry.SERVICE_REGISTRY);
@@ -250,59 +253,66 @@ public class NodeServiceHelper {
 	}
 
 
+	public static String getContainerId(String rootId, String pattern) {
+		String result = null;
+		try{
+			MCAlfrescoAPIClient client = new MCAlfrescoAPIClient();
+			// request node
+
+
+			String[] patterns = pattern.split(SEPARATOR);
+
+			DateFormat[] formatter = new DateFormat[patterns.length];
+			for (int i = 0, c = patterns.length; i<c; ++i) {
+				formatter[i] = new SimpleDateFormat(patterns[i]);
+			}
+
+			String[] items = new String[formatter.length];
+			StringBuilder path = new StringBuilder();
+
+			Date date = new Date();
+
+			for (int i = 0, c = formatter.length; i < c; ++i) {
+				items[i] = formatter[i].format(date);
+
+				if (i > 0) {
+					path.append(SEPARATOR);
+				}
+				path.append(items[i]);
+			}
+
+			try{
+				lock.lock();
+				String key = path.toString();
+				result = cache.get(key);
+				if(result == null){
+					result = new NodeTool().createOrGetNodeByName(client, rootId, items);
+					cache.put(key, result);
+				}
+			}finally{
+				lock.unlock();
+			}
+
+		}catch (Throwable e) {
+			logger.error(e.getMessage(), e);
+		}
+		return result;
+	}
 	/**
 	 * Find the path to a container based on a pattern
 	 * @param rootPath
 	 * @param pattern Splitted by "/" - a date like pattern, e.g. yyyy/MM/dd/HH/mm/ss/SS
 	 * @return the node id of the target folder
 	 */
-	public static String getContainerId(String rootPath, String pattern){
-			String result = null;
-			try{
-				MCAlfrescoAPIClient client = new MCAlfrescoAPIClient();
-				// request node
-				String rootId = getContainerRootPath(rootPath);
-
-
-				String[] patterns = pattern.split(SEPARATOR);
-
-				DateFormat[] formatter = new DateFormat[patterns.length];
-				for (int i = 0, c = patterns.length; i<c; ++i) {
-					formatter[i] = new SimpleDateFormat(patterns[i]);
-				}
-
-				String[] items = new String[formatter.length];
-				StringBuilder path = new StringBuilder();
-
-				Date date = new Date();
-
-				for (int i = 0, c = formatter.length; i < c; ++i) {
-					items[i] = formatter[i].format(date);
-
-					if (i > 0) {
-						path.append(SEPARATOR);
-					}
-					path.append(items[i]);
-				}
-
-				try{
-					lock.lock();
-					String key = path.toString();
-					result = cache.get(key);
-					if(result == null){
-						result = new NodeTool().createOrGetNodeByName(client, rootId, items);
-						cache.put(key, result);
-					}
-				}finally{
-					lock.unlock();
-				}
-
-			}catch (Throwable e) {
-				logger.error(e.getMessage(), e);
-				e.printStackTrace();
-			}
-			return result;
+	public static String getContainerIdByPath(String rootPath, String pattern){
+		try {
+			String rootId = getContainerRootPath(rootPath);
+			return getContainerId(rootId, pattern);
+		}catch(Throwable t){
+			logger.error(t.getMessage(), t);
 		}
+		return null;
+	}
 
 	public static String getContainerRootPath(String rootPath) throws Throwable {
 		MCAlfrescoAPIClient client = new MCAlfrescoAPIClient();
@@ -338,5 +348,9 @@ public class NodeServiceHelper {
 			else
 				target.put(property, arr[0]);
 		}
+	}
+
+	public static void copyProperty(NodeRef sourceNode, NodeRef targetNode, String property) {
+		NodeServiceHelper.setProperty(targetNode, property, NodeServiceHelper.getProperty(sourceNode, property));
 	}
 }

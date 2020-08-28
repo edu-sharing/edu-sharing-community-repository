@@ -5,6 +5,7 @@ import java.io.Serializable;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import com.typesafe.config.Config;
 import org.alfresco.model.ContentModel;
 import org.alfresco.repo.model.Repository;
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
@@ -23,6 +24,7 @@ import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.lang.NotImplementedException;
 import org.apache.log4j.Logger;
 import org.edu_sharing.alfresco.authentication.HttpContext;
+import org.edu_sharing.alfresco.lightbend.LightbendConfigLoader;
 import org.edu_sharing.alfresco.policy.NodeCustomizationPolicies;
 import org.edu_sharing.alfresco.tools.EduSharingNodeHelper;
 import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
@@ -41,7 +43,9 @@ import org.edu_sharing.service.Constants;
 import org.edu_sharing.service.nodeservice.model.GetPreviewResult;
 import org.edu_sharing.service.permission.PermissionServiceFactory;
 import org.edu_sharing.service.rendering.RenderingTool;
+import org.edu_sharing.service.search.CMISSearchHelper;
 import org.edu_sharing.service.search.model.SortDefinition;
+import org.edu_sharing.service.toolpermission.ToolPermissionHelper;
 import org.springframework.context.ApplicationContext;
 
 public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.NodeService {
@@ -884,6 +888,45 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
 	@Override
 	public Serializable getPropertyNative(String storeProtocol, String storeId, String nodeId, String property){
 		return nodeService.getProperty(new NodeRef(new StoreRef(storeProtocol,storeId), nodeId), QName.createQName(property));
+	}
+
+	@Override
+	public String publishCopy(String nodeId) throws Throwable {
+		ToolPermissionHelper.throwIfToolpermissionMissing(CCConstants.CCM_VALUE_TOOLPERMISSION_PUBLISH_COPY);
+		String parent, pattern,owner;
+		try {
+			Config config = LightbendConfigLoader.get();
+			parent = config.getString("publish.node");
+			pattern = config.getString("publish.nodePattern");
+			owner = config.getString("publish.owner");
+		} catch(Throwable t){
+			throw new RuntimeException("Invalid configuration for publishing. Please check the repository config", t);
+		}
+		return serviceRegistry.getRetryingTransactionHelper().doInTransaction(() -> {
+			String container = NodeServiceHelper.getContainerId(parent, pattern);
+			NodeRef newNode = copyNode(nodeId, container, false);
+			setOwner(newNode.getId(), owner);
+			setProperty(StoreRef.PROTOCOL_WORKSPACE, StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(), nodeId, CCConstants.CCM_PROP_IO_PUBLISHED_MODE, "copy");
+			setProperty(newNode.getStoreRef().getProtocol(), newNode.getStoreRef().getIdentifier(), newNode.getId(), CCConstants.CCM_PROP_IO_PUBLISHED_DATE, new Date());
+			setProperty(newNode.getStoreRef().getProtocol(), newNode.getStoreRef().getIdentifier(), newNode.getId(), CCConstants.CCM_PROP_IO_PUBLISHED_ORIGINAL,
+					new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, nodeId));
+			NodeServiceHelper.copyProperty(new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, nodeId), newNode, CCConstants.LOM_PROP_LIFECYCLE_VERSION);
+			NodeServiceHelper.copyProperty(new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, nodeId), newNode, CCConstants.CCM_PROP_IO_VERSION_COMMENT);
+
+			setPermissions(newNode.getId(), CCConstants.AUTHORITY_GROUP_EVERYONE,
+					new String[]{CCConstants.PERMISSION_CONSUMER, CCConstants.PERMISSION_CC_PUBLISH},
+					true);
+			return newNode.getId();
+		});
+
+	}
+
+	@Override
+	public List<String> getPublishedCopies(String nodeId) {
+		Map<String, Object> filters = new HashMap<>();
+		filters.put(CCConstants.CCM_PROP_IO_PUBLISHED_ORIGINAL, new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, nodeId));
+		List<NodeRef> nodes = CMISSearchHelper.fetchNodesByTypeAndFilters(CCConstants.CCM_TYPE_IO, filters);
+		return nodes.stream().map(NodeRef::getId).collect(Collectors.toList());
 	}
 
 	private String getPreviewUrl(String storeProtocol, String storeId, String nodeId, String version) {

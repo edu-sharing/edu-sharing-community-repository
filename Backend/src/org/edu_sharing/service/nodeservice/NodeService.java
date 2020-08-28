@@ -167,4 +167,15 @@ public interface NodeService {
     Collection<NodeRef> getFrontpageNodes() throws Throwable;
 
     Serializable getPropertyNative(String storeProtocol, String storeId, String nodeId, String property) throws Throwable;
+
+	/**
+	 * create a published copy of the node
+	 */
+	String publishCopy(String nodeId) throws Throwable;
+
+	/**
+	 * Get all published copies of this node
+	 * @return
+	 */
+	List<String> getPublishedCopies(String nodeId);
 }

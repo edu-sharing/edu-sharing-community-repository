@@ -1,14 +1,7 @@
 package org.edu_sharing.restservices;
 
 import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.Map.Entry;
 import java.util.stream.Collectors;
 
@@ -331,7 +324,7 @@ public class NodeDao {
 	NodeService nodeService;
 	CommentService commentService;
 
-	Filter filter;
+	final Filter filter;
 
 	private org.edu_sharing.service.permission.PermissionService permissionService;
 	
@@ -1887,6 +1880,40 @@ public class NodeDao {
 					getFrontpageNodes().stream().map((ref)->new NodeRef(repoDao,ref.getId())).collect(Collectors.toList());
 		}catch(Throwable t){
 			throw DAOException.mapping(t);
+		}
+	}
+
+	public NodeDao publishCopy() throws DAOException {
+		try {
+			return NodeDao.getNode(repoDao, nodeService.publishCopy(nodeId), Filter.createShowAllFilter());
+		}catch(Throwable t){
+			throw DAOException.mapping(t);
+		}
+
+	}
+
+	public List<NodeDao> getPublishedCopies() throws DAOException {
+		try {
+			return nodeService.getPublishedCopies(nodeId).stream().map(
+					(id) -> {
+						try {
+							return NodeDao.getNode(repoDao, id, Filter.createShowAllFilter());
+						} catch (DAOException e) {
+							throw new RuntimeException(e);
+						}
+					}
+			).sorted((a,b) -> {
+				try {
+					return Double.compare(
+							Double.parseDouble((String) a.getNativeProperties().get(CCConstants.LOM_PROP_LIFECYCLE_VERSION)),
+							Double.parseDouble((String) b.getNativeProperties().get(CCConstants.LOM_PROP_LIFECYCLE_VERSION))
+					);
+				} catch (Throwable ignored) {
+					return 0;
+				}
+			}).collect(Collectors.toList());
+		}catch(RuntimeException e){
+			throw DAOException.mapping(e.getCause());
 		}
 	}
 }
