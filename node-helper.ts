@@ -741,6 +741,12 @@ export class NodeHelper {
     return link;
   }
 
+  /**
+   * returns true if this node is a copy of an other node, just used as a publish target
+   */
+  static isNodePublishedCopy(o: Node) {
+    return o.properties[RestConstants.CCM_PROP_PUBLISHED_ORIGINAL]?.[0] != null;
+  }
 }
 export class LinkData {
   constructor(public link: string) {}

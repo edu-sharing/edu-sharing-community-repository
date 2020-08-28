@@ -12,7 +12,7 @@ export class InfoMessageComponent {
      * the message to display
      */
     @Input() message:string;
-    @Input() mode = 'info';
+    @Input() mode: 'info' | 'warning' = 'info';
 
     ICONS:any={
         info:'info_outline',

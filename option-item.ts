@@ -163,6 +163,7 @@ export enum Scope {
 }
 export enum ElementType {
   Node,
+  NodePublishedCopy,
   Person,
   Group,
   SavedSearch,
