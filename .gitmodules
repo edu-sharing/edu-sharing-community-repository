@@ -1,8 +1,8 @@
 [submodule "Frontend/src/app/core-module"]
 	path = Frontend/src/app/core-module
 	url = https://scm.edu-sharing.com/Angular/core-module
-	branch = .
+	branch = feature/6_0
 [submodule "Frontend/src/app/core-ui-module"]
 	path = Frontend/src/app/core-ui-module
 	url = https://scm.edu-sharing.com/Angular/core-ui-module
-	branch = .
+	branch = feature/6_0
