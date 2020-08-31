@@ -735,8 +735,15 @@ export class WorkspaceShareComponent {
                 RestConstants.AUTHORITY_EVERYONE,
             ) !== -1;
     }
+    localInherit() {
+        return this.currentPermissions?.permissions.filter(
+            (p) => p.authority.authorityName === RestConstants.AUTHORITY_EVERYONE
+        ).length !== 0 &&
+        this.deletedPermissions?.indexOf(RestConstants.AUTHORITY_EVERYONE) === -1;
+    }
     getPublishActive() {
         return this.getPublishInherit() ||
+            this.localInherit() ||
             this.publishComponent?.shareMode != null;
     }
 
