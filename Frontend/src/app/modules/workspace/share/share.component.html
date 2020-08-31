@@ -23,9 +23,9 @@
           <!-- <input type="text" id="inviteName" /> -->
         </div>
 
-        <div class="group groupToInvite" *ngIf="filterDisabledPermissions(newPermissions).length">
+        <div class="group groupToInvite" *ngIf="getNewInvitedAuthorities().length">
           <mat-chip-list class="toInvite">
-            <mat-chip *ngFor="let permission of filterDisabledPermissions(newPermissions)" (removed)="removePermission(permission)">
+            <mat-chip *ngFor="let permission of getNewInvitedAuthorities()" (removed)="removePermission(permission)">
               <div class="mat-chip-group">
                 <span class="primary">{{permission | permissionName}}</span>
                 <span class="secondary">{{permission | permissionName:{field:'secondary'} }}</span>
@@ -33,7 +33,7 @@
               <i matChipRemove icon iconId="cancel"></i>
             </mat-chip>
           </mat-chip-list>
-          <div class="typeButton" *ngIf="filterDisabledPermissions(newPermissions).length">
+          <div class="typeButton" *ngIf="getNewInvitedAuthorities().length">
             <button mat-raised-button *ngIf="currentType.length==0" (click)="chooseType()"><i icon iconId="help_outline"></i> <span>{{'WORKSPACE.SHARE.TYPE_UNKNOWN' | translate}}</span>
               <i aria-hidden="true" icon iconId="keyboard_arrow_down"></i></button>
             <button mat-raised-button *ngIf="currentType.indexOf('Consumer')>-1" (click)="chooseType()"><i icon iconId="remove_red_eye"></i> <span>{{'WORKSPACE.SHARE.TYPE_VIEWER' | translate}}</span>
@@ -60,7 +60,7 @@
 
         </div>
 
-        <div *ngIf="sendMessages && filterDisabledPermissions(newPermissions).length" class="groupMessage">
+        <div *ngIf="sendMessages && getNewInvitedAuthorities().length" class="groupMessage">
           <mat-form-field>
             <mat-label>{{'WORKSPACE.SHARE.MESSAGE' | translate}}</mat-label>
             <input matInput id="message" name="message" [(ngModel)]="notifyMessage" placeholder="{{'WORKSPACE.SHARE.MESSAGE_PLACEHOLDER' | translate}}"/>
@@ -70,7 +70,7 @@
             <div class="notify-info">{{'WORKSPACE.NOTIFY_INFO' | translate}}</div>
           </mat-checkbox>
         </div>
-        <div [ngClass]="{'publish-grey': filterDisabledPermissions(newPermissions).length}" class="publish" *ngIf="!isSafe && _nodes[0].isDirectory">
+        <div [ngClass]="{'publish-grey': getNewInvitedAuthorities().length}" class="publish" *ngIf="!isSafe && _nodes[0].isDirectory">
           <div class="publishElements">
             <div *ngIf="!publishPermission && !getPublishInherit()" class="publishInfo">{{ 'WORKSPACE.SHARE.PUBLISH_NO_PERMISSION' | translate}}</div>
             <div *ngIf="publishPermission || getPublishInherit()" class="publish-labels">
@@ -82,7 +82,7 @@
             </div>
             <div class="publish-config">
               <div *ngIf="getPublishActive()" class="type"><i class="material-icons align-icon">remove_red_eye</i> <span class="uppercase">{{'WORKSPACE.SHARE.TYPE_VIEWER' | translate}}</span></div>
-              <mat-slide-toggle [disabled]="!publishPermission || getPublishInherit()" [ngModel]="getPublishActive()" (change)="setPublish(getPublishActive())"></mat-slide-toggle>
+              <mat-slide-toggle [disabled]="!publishPermission || getPublishInherit()" [ngModel]="getPublishActive()" (ngModelChange)="setPublish($event)"></mat-slide-toggle>
             </div>
           </div>
         </div>
@@ -230,7 +230,7 @@
                 [node]="_nodes[0]"
                 [permissions]="permissions"
                 [inherited]="getPublishInherit()"
-                 (onInitCompleted)="setInitialState()"
+                (onInitCompleted)="setInitialState()"
                 (onDisableInherit)="inherited = false"
         ></app-share-publish>
       </div>

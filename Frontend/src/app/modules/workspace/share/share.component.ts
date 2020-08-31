@@ -463,13 +463,22 @@ export class WorkspaceShareComponent {
         if (this.deletedPermissions.indexOf(RestConstants.AUTHORITY_EVERYONE) !== -1) {
             this.deletedPermissions.splice(this.deletedPermissions.indexOf(RestConstants.AUTHORITY_EVERYONE),1);
         } else {
-            let i = this.getAuthorityPos(this.permissions,RestConstants.AUTHORITY_EVERYONE);
-            if (i !== -1) {
-                this.deletedPermissions.push(RestConstants.AUTHORITY_EVERYONE);
+            const newPos = this.getAuthorityPos(this.newPermissions, RestConstants.AUTHORITY_EVERYONE);
+            console.log(status, newPos);
+            if(!status && newPos !== -1) {
+                this.newPermissions.splice(newPos, 1)
+                this.permissions.splice(this.getAuthorityPos(this.permissions, RestConstants.AUTHORITY_EVERYONE), 1);
+                console.log(this.permissions);
             } else {
-                const perm = RestHelper.getAllAuthoritiesPermission();
-                perm.permissions = [RestConstants.PERMISSION_CONSUMER];
-                this.permissions.push(perm);
+                const regularPos = this.getAuthorityPos(this.permissions, RestConstants.AUTHORITY_EVERYONE);
+                if (regularPos !== -1) {
+                    this.deletedPermissions.push(RestConstants.AUTHORITY_EVERYONE);
+                } else {
+                    const perm = RestHelper.getAllAuthoritiesPermission();
+                    perm.permissions = [RestConstants.PERMISSION_CONSUMER];
+                    this.newPermissions.push(perm);
+                    this.permissions.push(perm);
+                }
             }
         }
         this.setPermissions(this.permissions);
@@ -735,15 +744,13 @@ export class WorkspaceShareComponent {
                 RestConstants.AUTHORITY_EVERYONE,
             ) !== -1;
     }
-    localInherit() {
-        return this.currentPermissions?.permissions.filter(
-            (p) => p.authority.authorityName === RestConstants.AUTHORITY_EVERYONE
-        ).length !== 0 &&
+    localPublish() {
+        return this.getAuthorityPos(this.permissions,RestConstants.AUTHORITY_EVERYONE) !== -1 &&
         this.deletedPermissions?.indexOf(RestConstants.AUTHORITY_EVERYONE) === -1;
     }
     getPublishActive() {
         return this.getPublishInherit() ||
-            this.localInherit() ||
+            this.localPublish() ||
             this.publishComponent?.shareMode != null;
     }
 
@@ -838,6 +845,12 @@ export class WorkspaceShareComponent {
 
     private setInitialState() {
         this.initialState = this.getState();
+    }
+
+    getNewInvitedAuthorities() {
+        return this.filterDisabledPermissions(this.newPermissions).filter(
+            (p) => p.authority.authorityName !== RestConstants.AUTHORITY_EVERYONE
+        );
     }
 }
 /*
