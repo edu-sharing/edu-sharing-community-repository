@@ -139,6 +139,9 @@ mat-button-toggle-group{
     &.mat-tab-label-active{
       opacity: 0.9;
     }
+    .tab-icon{
+      margin-right: 5px;
+    }
   }
 
 }
