@@ -307,9 +307,6 @@ section {
         }
     }
 }
-.tab-icon{
-    margin-right: 5px;
-}
 @media only screen and (max-width: $mobileWidth+$mobileStage*3) {
     :host ::ng-deep {
         .tab-label {

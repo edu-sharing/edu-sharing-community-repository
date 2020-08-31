@@ -1,4 +1,4 @@
-<card title="{{'WORKSPACE.SHARE.TITLE' | translate }}" [node]="_nodes" tabbed="true" width="normal" height="xlarge"
+<card title="{{'WORKSPACE.SHARE.TITLE' | translate }}" [node]="_nodes" tabbed="true" width="large" height="xxlarge"
       [isCancelable]="true"
       [buttons]="buttons"
       (onCancel)="cancel()"
@@ -7,7 +7,11 @@
     <button mat-button color="primary" *ngIf="showShareLink()" (click)="openLink()">{{'OPTIONS.SHARE_LINK' | translate}} <i icon iconId="link"></i></button>
   </div>
   <mat-tab-group mat-stretch-tabs [(selectedIndex)]="tab">
-    <mat-tab label="{{'WORKSPACE.TAB_INVITE' | translate}}" class="tabContent tabContentInvite">
+    <mat-tab class="tabContent tabContentInvite">
+      <ng-template mat-tab-label>
+        <i icon iconId="group_add" class="tab-icon"></i>
+        <span class="tab-label">{{'WORKSPACE.TAB_INVITE' | translate}}</span>
+      </ng-template>
       <div class="invite-group">
         <div class="group groupInvite">
           <authority-search-input
@@ -97,7 +101,11 @@
         </mat-radio-group>
       </div>
     </mat-tab>
-    <mat-tab label="{{'WORKSPACE.TAB_INVITED' | translate}}" *ngIf="_nodes && _nodes.length === 1" class="tabContent">
+    <mat-tab *ngIf="_nodes && _nodes.length === 1" class="tabContent">
+      <ng-template mat-tab-label>
+        <i icon iconId="group" class="tab-icon"></i>
+        <span class="tab-label">{{'WORKSPACE.TAB_INVITED' | translate}}</span>
+      </ng-template>
       <div class="invited">
         <mat-link *ngIf="_nodes && _nodes[0].ref.id" class="history uppercase" (click)="showHistory()">{{ 'WORKSPACE.SHARE.SHOW_HISTORY' | translate}} <i icon iconId="arrow_forward"></i></mat-link>
         <div class="groupName" *ngIf="owner">{{'WORKSPACE.SHARE.GROUP_OWNER' | translate}}</div>
@@ -211,19 +219,27 @@
         -->
       </div>
     </mat-tab>
-    <mat-tab label="{{'WORKSPACE.TAB_PUBLISH' | translate}}"
-             *ngIf="publishPermission && !isBulk() && !_nodes[0].isDirectory"
+    <mat-tab *ngIf="publishPermission && !isBulk() && !_nodes[0].isDirectory"
              class="tabContent">
+      <ng-template mat-tab-label>
+        <i icon iconId="public" class="tab-icon"></i>
+        <span class="tab-label">{{'WORKSPACE.TAB_PUBLISH' | translate}}</span>
+      </ng-template>
       <div class="publish-tab">
         <app-share-publish #publish
                 [node]="_nodes[0]"
                 [permissions]="permissions"
                 [inherited]="getPublishInherit()"
+                 (onInitCompleted)="setInitialState()"
                 (onDisableInherit)="inherited = false"
         ></app-share-publish>
       </div>
     </mat-tab>
-    <mat-tab label="{{'WORKSPACE.TAB_ADVANCED' | translate}}" *ngIf="isAdmin && permissionsUser && permissionsGroup" class="tabContent">
+    <mat-tab *ngIf="isAdmin && permissionsUser && permissionsGroup" class="tabContent">
+      <ng-template mat-tab-label>
+        <i icon iconId="settings" class="tab-icon"></i>
+        <span class="tab-label">{{'WORKSPACE.TAB_ADVANCED' | translate}}</span>
+      </ng-template>
       <div class="advanced">
         <h4 class="mat-heading-4" *ngIf="permissionsUser.length+permissionsGroup.length==0">
           {{'WORKSPACE.SHARE.NO_PERMISSIONS' | translate}}

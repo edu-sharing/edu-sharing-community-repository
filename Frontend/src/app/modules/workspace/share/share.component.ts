@@ -286,7 +286,7 @@ export class WorkspaceShareComponent {
                     );
                     this.inherited =
                         permissions[0].permissions.localPermissions.inherited;
-                    this.initialState = this.getState();
+                    this.setInitialState();
                 }
                 this.toast.closeModalDialog();
             });
@@ -510,9 +510,9 @@ export class WorkspaceShareComponent {
         if (this.getPublishActive() || this.getPublishInherit()) {
             return 'PUBLIC';
         }
-        for (let perm of this.permissions.concat(this.inherit)) {
+        for (const perm of this.permissions.concat(this.inherited ? this.inherit : [])) {
             if (
-                perm.authority.authorityName != RestConstants.AUTHORITY_EVERYONE
+                perm.authority.authorityName !== RestConstants.AUTHORITY_EVERYONE
             )
                 return 'SHARED';
         }
@@ -827,6 +827,10 @@ export class WorkspaceShareComponent {
             observer.error(error);
             observer.complete();
         });
+    }
+
+    private setInitialState() {
+        this.initialState = this.getState();
     }
 }
 /*

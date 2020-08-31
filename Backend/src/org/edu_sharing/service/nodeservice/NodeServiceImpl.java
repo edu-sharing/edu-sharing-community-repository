@@ -8,6 +8,7 @@ import java.util.stream.Collectors;
 import com.typesafe.config.Config;
 import org.alfresco.model.ContentModel;
 import org.alfresco.repo.model.Repository;
+import org.alfresco.repo.policy.BehaviourFilter;
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.repo.security.permissions.AccessDeniedException;
 import org.alfresco.service.ServiceRegistry;
@@ -42,6 +43,7 @@ import org.edu_sharing.repository.server.tools.cache.RepositoryCache;
 import org.edu_sharing.service.Constants;
 import org.edu_sharing.service.nodeservice.model.GetPreviewResult;
 import org.edu_sharing.service.permission.PermissionServiceFactory;
+import org.edu_sharing.service.permission.PermissionServiceHelper;
 import org.edu_sharing.service.rendering.RenderingTool;
 import org.edu_sharing.service.search.CMISSearchHelper;
 import org.edu_sharing.service.search.model.SortDefinition;
@@ -53,6 +55,7 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
 	private String appId;
 	private ContentService contentService;
 	private DictionaryService dictionaryService;
+	private final BehaviourFilter policyBehaviourFilter;
 	String repositoryId = ApplicationInfoList.getHomeRepository().getAppId();
 	private ServiceRegistry serviceRegistry = null;
 	private NodeService nodeService = null;
@@ -78,6 +81,7 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
 		serviceRegistry = (ServiceRegistry) applicationContext.getBean(ServiceRegistry.SERVICE_REGISTRY);
 		nodeService = serviceRegistry.getNodeService();
 		nodeServiceAlfresco = (NodeService) applicationContext.getBean("alfrescoDefaultDbNodeService");
+		policyBehaviourFilter = (BehaviourFilter)applicationContext.getBean("policyBehaviourFilter");
 		contentService = serviceRegistry.getContentService();
 		versionService = serviceRegistry.getVersionService();
 		dictionaryService = serviceRegistry.getDictionaryService();
@@ -893,6 +897,12 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
 	@Override
 	public String publishCopy(String nodeId) throws Throwable {
 		ToolPermissionHelper.throwIfToolpermissionMissing(CCConstants.CCM_VALUE_TOOLPERMISSION_PUBLISH_COPY);
+		if(!PermissionServiceFactory.getLocalService().hasPermission(StoreRef.PROTOCOL_WORKSPACE,
+				StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(),
+				nodeId,
+				CCConstants.PERMISSION_CHANGEPERMISSIONS)){
+			throw new SecurityException("No " + CCConstants.PERMISSION_CHANGEPERMISSIONS + " on node " + nodeId);
+		}
 		String parent, pattern,owner;
 		try {
 			Config config = LightbendConfigLoader.get();
@@ -904,8 +914,14 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
 		}
 		return serviceRegistry.getRetryingTransactionHelper().doInTransaction(() -> {
 			String container = NodeServiceHelper.getContainerId(parent, pattern);
+			NodeRef oldNodeRef = new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, nodeId);
 			NodeRef newNode = copyNode(nodeId, container, false);
+			policyBehaviourFilter.disableBehaviour(newNode);
+
+			// replace owner, creator & modifier
 			setOwner(newNode.getId(), owner);
+			NodeServiceHelper.copyProperty(oldNodeRef, newNode, CCConstants.CM_PROP_C_CREATOR);
+			NodeServiceHelper.copyProperty(oldNodeRef, newNode, CCConstants.CM_PROP_C_MODIFIER);
 			setProperty(StoreRef.PROTOCOL_WORKSPACE, StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(), nodeId, CCConstants.CCM_PROP_IO_PUBLISHED_MODE, "copy");
 			setProperty(newNode.getStoreRef().getProtocol(), newNode.getStoreRef().getIdentifier(), newNode.getId(), CCConstants.CCM_PROP_IO_PUBLISHED_DATE, new Date());
 			setProperty(newNode.getStoreRef().getProtocol(), newNode.getStoreRef().getIdentifier(), newNode.getId(), CCConstants.CCM_PROP_IO_PUBLISHED_ORIGINAL,
@@ -913,9 +929,11 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
 			NodeServiceHelper.copyProperty(new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, nodeId), newNode, CCConstants.LOM_PROP_LIFECYCLE_VERSION);
 			NodeServiceHelper.copyProperty(new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, nodeId), newNode, CCConstants.CCM_PROP_IO_VERSION_COMMENT);
 
+			serviceRegistry.getPermissionService().deletePermissions(newNode);
 			setPermissions(newNode.getId(), CCConstants.AUTHORITY_GROUP_EVERYONE,
 					new String[]{CCConstants.PERMISSION_CONSUMER, CCConstants.PERMISSION_CC_PUBLISH},
 					true);
+			policyBehaviourFilter.enableBehaviour(newNode);
 			return newNode.getId();
 		});
 

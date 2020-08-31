@@ -588,6 +588,7 @@ export class OptionsHelperService {
         const downloadNode = new OptionItem('OPTIONS.DOWNLOAD', 'cloud_download', (object) =>
             NodeHelper.downloadNodes(this.connector, this.getObjects(object))
         );
+        downloadNode.elementType = [ElementType.Node, ElementType.NodePublishedCopy];
         downloadNode.constrains = [Constrain.Files];
         downloadNode.group = DefaultGroups.View;
         downloadNode.priority = 40;
@@ -606,6 +607,7 @@ export class OptionsHelperService {
         const downloadMetadataNode = new OptionItem('OPTIONS.DOWNLOAD_METADATA', 'format_align_left', (object) =>
             NodeHelper.downloadNode(this.connector.getBridgeService(), this.getObjects(object)[0], RestConstants.NODE_VERSION_CURRENT, true)
         );
+        downloadMetadataNode.elementType = [ElementType.Node, ElementType.NodePublishedCopy];
         downloadMetadataNode.constrains = [Constrain.Files, Constrain.NoBulk];
         downloadMetadataNode.scopes = [Scope.Render];
         downloadMetadataNode.group = DefaultGroups.View;

@@ -23,6 +23,7 @@ export class SharePublishComponent implements OnChanges {
   @Input() permissions: Permission[];
   @Input() inherited: boolean;
   @Output() onDisableInherit = new EventEmitter<void>();
+  @Output() onInitCompleted = new EventEmitter<void>();
   doiPermission: boolean;
   shareMode: ShareMode;
   publishCopyPermission: boolean;
@@ -46,6 +47,8 @@ export class SharePublishComponent implements OnChanges {
     if (this.node && this.permissions) {
       this.node = (await this.nodeService.getNodeMetadata(this.node.ref.id, [RestConstants.ALL]).toPromise()).node;
       this.refresh();
+      this.onInitCompleted.emit();
+      this.onInitCompleted.complete();
     }
   }
 

@@ -7,7 +7,6 @@ import {Version} from '../../core-module/rest/data-object';
 
 /**
  * Format the version label and checking constants if required
- * e.g. 2m 5s
  */
 @Pipe({name: 'versionComment'})
 export class VersionLabelPipe implements PipeTransform {
@@ -41,5 +40,5 @@ export class VersionLabelPipe implements PipeTransform {
     }
     return comment;
   }
-  constructor(private translate : TranslateService){}
+  constructor(private translate : TranslateService) {}
 }

@@ -479,6 +479,7 @@
         "NODE_REPORT": "Report problem",
         "ADD_NODE_STORE": "Add to memo list",
         "DELETE": "Delete",
+        "UNPUBLISH": "Unpublish",
         "REMOVE_REF": "Remove from collection",
         "CUT": "Cut",
         "COPY": "Copy",

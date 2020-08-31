@@ -52,19 +52,21 @@ export class WorkspaceManagementDialogsComponent  {
             return;
         this.dialogTitle='WORKSPACE.DELETE_TITLE'+(nodeDelete.length === 1 ? '_SINGLE' : '');
         this.dialogMessage='WORKSPACE.DELETE_MESSAGE'+(nodeDelete.length === 1 ? '_SINGLE' : '');
-        if(nodeDelete.length === 1 && nodeDelete[0].collection) {
-            this.dialogTitle='WORKSPACE.DELETE_TITLE_COLLECTION';
-            this.dialogMessage='WORKSPACE.DELETE_MESSAGE_COLLECTION';
-        }
       this.dialogCancelable=true;
         this.dialogMessageParameters = {name:RestHelper.getName(nodeDelete[0])};
         this.dialogNode=nodeDelete;
         this.dialogButtons=DialogButton.getCancel(()=> {this.dialogTitle = null});
         this.dialogButtons.push(new DialogButton('YES_DELETE',DialogButton.TYPE_PRIMARY,()=>{this.deleteConfirmed(nodeDelete)}));
 
-        // check for usages and warn user
-        if(nodeDelete.length === 1 && !nodeDelete[0].isDirectory) {
-            this.usageService.getNodeUsages(nodeDelete[0].ref.id,nodeDelete[0].ref.repo).subscribe((usages)=>{
+      if(nodeDelete.length === 1 && nodeDelete[0].collection) {
+          this.dialogTitle='WORKSPACE.DELETE_TITLE_COLLECTION';
+          this.dialogMessage='WORKSPACE.DELETE_MESSAGE_COLLECTION';
+      } else if(nodeDelete.length === 1 && NodeHelper.isNodePublishedCopy(nodeDelete[0])) {
+          this.dialogTitle='WORKSPACE.DELETE_TITLE_PUBLISHED_COPY';
+          this.dialogMessage='WORKSPACE.DELETE_MESSAGE_PUBLISHED_COPY';
+      }else if(nodeDelete.length === 1 && !nodeDelete[0].isDirectory) {
+          // check for usages and warn user
+          this.usageService.getNodeUsages(nodeDelete[0].ref.id,nodeDelete[0].ref.repo).subscribe((usages)=>{
                 if(usages.usages.length>0) {
                     this.dialogMessage='WORKSPACE.DELETE_MESSAGE_SINGLE_USAGES';
                     this.dialogMessageParameters = {name:nodeDelete[0].name,usages:usages.usages.length};
