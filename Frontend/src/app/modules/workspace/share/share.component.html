@@ -70,6 +70,7 @@
             <div class="notify-info">{{'WORKSPACE.NOTIFY_INFO' | translate}}</div>
           </mat-checkbox>
         </div>
+        <!--
         <div [ngClass]="{'publish-grey': getNewInvitedAuthorities().length}" class="publish" *ngIf="!isSafe && _nodes[0].isDirectory">
           <div class="publishElements">
             <div *ngIf="!publishPermission && !getPublishInherit()" class="publishInfo">{{ 'WORKSPACE.SHARE.PUBLISH_NO_PERMISSION' | translate}}</div>
@@ -86,6 +87,7 @@
             </div>
           </div>
         </div>
+        -->
       </div>
       <div class="bulk-config" *ngIf="isBulk()">
         <mat-radio-group [(ngModel)]="bulkMode">
@@ -219,7 +221,7 @@
         -->
       </div>
     </mat-tab>
-    <mat-tab *ngIf="publishPermission && !isBulk() && !_nodes[0].isDirectory"
+    <mat-tab *ngIf="publishPermission && !isBulk() && !isSafe"
              class="tabContent">
       <ng-template mat-tab-label>
         <i icon iconId="public" class="tab-icon"></i>

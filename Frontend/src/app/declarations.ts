@@ -38,6 +38,7 @@
   import { ModalTestComponent } from './common/test/modal/modal-test.component';
   import {CreateMenuComponent} from './modules/create-menu/create-menu.component';
   import {VersionLabelPipe} from './common/ui/version-label.pipe';
+  import {ToolpermissionCheckDirective} from './common/directives/toolpermission-check.directive';
 
   export const DECLARATIONS = [
       MdsTestComponent,
@@ -80,4 +81,5 @@
       TutorialComponent,
       ImageConfigDirective,
       EmbedComponent,
+      ToolpermissionCheckDirective,
     ];

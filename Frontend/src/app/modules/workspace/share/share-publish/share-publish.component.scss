@@ -15,9 +15,6 @@ info-message{
   h6.published-versions{
     padding-top: 10px;
   }
-  .version-comment {
-    padding-right: 5px;
-  }
   .no-versions{
     font-size:90%;
     color:$textLight;
@@ -28,9 +25,11 @@ info-message{
   .published-versions {
     display: flex;
     flex-direction: column;
-    mat-checkbox {
+    mat-radio-group {
       display: flex;
-      margin: 10px 0;
+      margin: 5px 10px;
+      width: 100%;
+      justify-content: space-between;
     }
     info-message{
       display: block;
@@ -51,17 +50,36 @@ info-message{
 
         > div {
           display: flex;
+          justify-content: space-between;
+          > div{
+            display: flex;
+            flex-direction: column;
+            padding:4px 6px;
+            &.version-number{
+              align-items: flex-end;
+            }
+            > label{
+              color: $textLight;
+              text-transform: uppercase;
+              font-size: $fontSizeXSmall;
+            }
+          }
         }
       }
       .version-handle{
         color: $textLight;
+        width: 40px;
+        display: flex;
+        justify-content: flex-end;
       }
       .version-date {
-        font-size: 90%;
+        font-size: $fontSizeSmall;
       }
-
+      &.version-virtual{
+        border:2px dashed $workspaceInheritColor;
+      }
       .version-actions {
-        align-self: flex-end;
+        align-self: center;
         > button{
           height: 40px;
           margin: 5px;

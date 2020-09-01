@@ -441,49 +441,6 @@ export class WorkspaceShareComponent {
             });
     }
 
-    setPublish(status: boolean, force = false) {
-        if(status && !force) {
-            if (this.config.instant('publishingNotice', false)) {
-                let cancel = () => {
-                    this.toast.closeModalDialog();
-                };
-                this.toast.showModalDialog(
-                    'WORKSPACE.SHARE.PUBLISHING_WARNING_TITLE',
-                    'WORKSPACE.SHARE.PUBLISHING_WARNING_MESSAGE',
-                    DialogButton.getYesNo(cancel, () => {
-                        this.setPublish(status, true);
-                        this.toast.closeModalDialog();
-                    }),
-                    true,
-                    cancel,
-                );
-                return;
-            }
-        }
-        if (this.deletedPermissions.indexOf(RestConstants.AUTHORITY_EVERYONE) !== -1) {
-            this.deletedPermissions.splice(this.deletedPermissions.indexOf(RestConstants.AUTHORITY_EVERYONE),1);
-        } else {
-            const newPos = this.getAuthorityPos(this.newPermissions, RestConstants.AUTHORITY_EVERYONE);
-            console.log(status, newPos);
-            if(!status && newPos !== -1) {
-                this.newPermissions.splice(newPos, 1)
-                this.permissions.splice(this.getAuthorityPos(this.permissions, RestConstants.AUTHORITY_EVERYONE), 1);
-                console.log(this.permissions);
-            } else {
-                const regularPos = this.getAuthorityPos(this.permissions, RestConstants.AUTHORITY_EVERYONE);
-                if (regularPos !== -1) {
-                    this.deletedPermissions.push(RestConstants.AUTHORITY_EVERYONE);
-                } else {
-                    const perm = RestHelper.getAllAuthoritiesPermission();
-                    perm.permissions = [RestConstants.PERMISSION_CONSUMER];
-                    this.newPermissions.push(perm);
-                    this.permissions.push(perm);
-                }
-            }
-        }
-        this.setPermissions(this.permissions);
-    }
-
     reloadUsages() {
         this.usageApi
             .getNodeUsagesCollection(this._nodes[0].ref.id)
@@ -736,6 +693,11 @@ export class WorkspaceShareComponent {
             this.permissionsGroup,
             RestConstants.AUTHORITY_TYPE_USER,
         );
+        // do not show GROUP_EVERYONE permission, is displayed in the share-publish dialog
+        this.removePermissions(
+            this.permissionsGroup,
+            RestConstants.AUTHORITY_TYPE_EVERYONE,
+        );
     }
     getPublishInherit() {
         return this.inherited &&
@@ -750,7 +712,7 @@ export class WorkspaceShareComponent {
     }
     getPublishActive() {
         return this.getPublishInherit() ||
-            this.localPublish() ||
+            // this.localPublish() ||
             this.publishComponent?.shareMode != null;
     }
 
