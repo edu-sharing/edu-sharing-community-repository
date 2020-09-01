@@ -181,17 +181,30 @@
           </div>
         </div>
 
-
-        <div class="groupName" *ngIf="showLink && link">{{'WORKSPACE.SHARE.LINK' | translate}}</div>
-        <mat-link class="manageLink uppercase" (click)="openLink()" *ngIf="showLink && link">{{'WORKSPACE.SHARE.MANAGE_LINK' | translate}}</mat-link>
-
-        <workspace-share-permission *ngIf="showLink && link"
-                                    class="groupEntry link"
-                                    [permission]="linkEnabled"
-                                    [isDirectory]="_nodes[0].isDirectory"
-                                    [readOnly]="true"
-                                    [showDelete]="false"
-        ></workspace-share-permission>
+        <ng-container *ngIf="showLink && link">
+          <div class="groupName">{{'WORKSPACE.SHARE.LINK' | translate}}</div>
+          <mat-link class="manageLink uppercase" (click)="openLink()">{{'WORKSPACE.SHARE.MANAGE_LINK' | translate}}</mat-link>
+          <workspace-share-permission class="groupEntry link"
+                                      [permission]="linkEnabled"
+                                      [isDirectory]="_nodes[0].isDirectory"
+                                      [readOnly]="true"
+                                      [showDelete]="false"
+          ></workspace-share-permission>
+        </ng-container>
+        <ng-container *ngIf="publishComponent?.shareMode != null">
+          <div class="groupName">{{'WORKSPACE.SHARE.PUBLISH_LABEL' | translate}}</div>
+          <mat-link class="manageLink uppercase"
+                    *ngIf="publishPermission && !isBulk() && !isSafe"
+                    (click)="tab = 2">
+            {{'WORKSPACE.SHARE.MANAGE_PUBLISH' | translate}}</mat-link>
+          <workspace-share-permission class="groupEntry link"
+                                      [permission]="publishEnabled"
+                                      [isDirectory]="_nodes[0].isDirectory"
+                                      [added]="publishComponent.initialShareMode != publishComponent.shareMode"
+                                      [readOnly]="true"
+                                      [showDelete]="false"
+          ></workspace-share-permission>
+        </ng-container>
         <div class="groupName" *ngIf="hasUsages()">{{'WORKSPACE.SHARE.USAGES' | translate}}</div>
         <div *ngIf="collections && collections.length" class="usage">
           <workspace-share-usages

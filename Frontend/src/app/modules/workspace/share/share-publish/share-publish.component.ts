@@ -27,6 +27,7 @@ export class SharePublishComponent implements OnChanges {
   @Output() onDisableInherit = new EventEmitter<void>();
   @Output() onInitCompleted = new EventEmitter<void>();
   doiPermission: boolean;
+  initialShareMode: ShareMode;
   shareMode: ShareMode;
   publishCopyPermission: boolean;
   doiActive: boolean;
@@ -94,6 +95,7 @@ export class SharePublishComponent implements OnChanges {
         this.shareMode = null;
       }
     }
+    this.initialShareMode = this.shareMode;
     this.updatePublishedVersions();
   }
 

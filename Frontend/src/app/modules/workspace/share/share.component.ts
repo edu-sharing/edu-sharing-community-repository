@@ -129,6 +129,7 @@ export class WorkspaceShareComponent {
     inheritAccessDenied = false;
     bulkMode = 'extend';
     owner: Permission;
+    publishEnabled: Permission;
     linkEnabled: Permission;
     linkDisabled: Permission;
     link = false;
@@ -204,6 +205,14 @@ export class WorkspaceShareComponent {
             authorityType: 'LINK',
         };
         this.linkDisabled.permissions = [];
+        this.publishEnabled = new Permission();
+        this.publishEnabled.authority = {
+            authorityName: this.translate.instant(
+                'WORKSPACE.SHARE.PUBLISH_ENABLED',
+            ),
+            authorityType: 'EVERYONE',
+        };
+        this.publishEnabled.permissions = [RestConstants.PERMISSION_CONSUMER, RestConstants.ACCESS_CC_PUBLISH];
 
         this.connector.isLoggedIn().subscribe((data: LoginResult) => {
             this.isSafe = data.currentScope != null;

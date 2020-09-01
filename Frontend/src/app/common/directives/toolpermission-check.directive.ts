@@ -21,7 +21,6 @@ export class ToolpermissionCheckDirective implements OnChanges{
         this.handlePermission();
     }
     async handlePermission() {
-        console.log(this.element)
         const hasPermission = await this.connector.hasToolPermission(this.toolpermission).toPromise();
         if(hasPermission) {
 
