@@ -234,6 +234,11 @@ export class OptionsHelperService {
             option.permissions && !this.validatePermissions(option, objects)) {
             return false;
         }
+        if (option.toolpermissions != null) {
+            if (!this.validateToolpermissions(option)) {
+                return false;
+            }
+        }
         if(option.customEnabledCallback) {
             return option.customEnabledCallback(objects);
         }
@@ -342,6 +347,11 @@ export class OptionsHelperService {
         return ElementType.Unknown;
     }
 
+    private validateToolpermissions(option: OptionItem) {
+        return option.toolpermissions.filter((p) =>
+            !this.connector.hasToolPermissionInstant(p)
+        ).length === 0;
+    }
     private validatePermissions(option: OptionItem, objects: Node[] | any[]) {
         return option.permissions.filter((p) =>
             NodeHelper.getNodesRight(objects, p, option.permissionsRightMode) === false
