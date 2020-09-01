@@ -2,6 +2,7 @@ package org.edu_sharing.alfresco.store;
 
 import java.util.ArrayList;
 
+import de.acosix.alfresco.simplecontentstores.repo.store.routing.SelectorPropertyContentStore;
 import org.alfresco.repo.content.ContentStore;
 import org.alfresco.repo.content.filestore.FileContentStore;
 import org.alfresco.repo.dictionary.constraint.ListOfValuesConstraint;
@@ -18,7 +19,6 @@ import org.alfresco.util.PropertyCheck;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import de.axelfaust.alfresco.simplecontentstores.repo.store.routing.SelectorPropertyContentStore;
 
 public class Edu_SharingSelectorPropertyContentStore extends SelectorPropertyContentStore {
 
