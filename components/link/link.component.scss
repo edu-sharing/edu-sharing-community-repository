@@ -1,6 +1,6 @@
 @import "../../styles/variables";
 :host ::ng-deep  {
-  div {
+  a {
     display: inline-flex;
     align-items: center;
     color: $primary;
@@ -14,7 +14,6 @@
     &:focus {
       box-shadow: none !important;
       @include removeDefaultFocus();
-      padding-bottom: 2px;
       border-bottom: 1px solid $focusColor;
     }
   }
