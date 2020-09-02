@@ -54,6 +54,7 @@ export class SimpleEditInviteComponent {
   tpInvite: boolean;
   tpInviteEveryone: boolean;
   missingNodePermissions: boolean;
+  inherited: boolean;
   @Input() set nodes (nodes : Node[]) {
     this._nodes = nodes;
     this.prepare();
@@ -200,6 +201,7 @@ export class SimpleEditInviteComponent {
     Observable.forkJoin((this._nodes.map((n) => this.nodeApi.getNodePermissions(n.ref.id)))).
       subscribe((permissions) => {
         this.nodesPermissions = permissions.map((p) => p.permissions);
+        this.inherited = permissions.some((p) => p.permissions.localPermissions.inherited);
         this.organizationApi.getOrganizations().subscribe((orgs) => {
           // @TODO: Only allow for one org
           if(orgs.organizations.length >= 1) {
@@ -331,7 +333,7 @@ export class SimpleEditInviteComponent {
   }
 
   hasInvalidState() {
-    return this.multipleParents || this.parentAuthorities.length > 0 ||
+    return this.multipleParents || (this.inherited && this.parentAuthorities.length > 0) ||
            !this.tpInvite || this.missingNodePermissions;
   }
 

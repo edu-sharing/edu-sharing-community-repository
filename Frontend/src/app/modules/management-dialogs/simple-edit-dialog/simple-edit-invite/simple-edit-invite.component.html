@@ -8,7 +8,7 @@
 <info-message message="SIMPLE_EDIT.INVITE.ERROR_MULTIPLE_PARENTS" *ngIf="multipleParents">
   <div>{{ 'SIMPLE_EDIT.INVITE.ERROR_HELP' | translate }}</div>
 </info-message>
-<info-message message="SIMPLE_EDIT.INVITE.ERROR_INHERIT" *ngIf="parentAuthorities.length > 0">
+<info-message message="SIMPLE_EDIT.INVITE.ERROR_INHERIT" *ngIf="inherited && parentAuthorities.length > 0">
   <div class="parent-authorities">
     <span *ngFor="let authority of parentAuthorities" class="authorities">{{
       authority | authorityName
