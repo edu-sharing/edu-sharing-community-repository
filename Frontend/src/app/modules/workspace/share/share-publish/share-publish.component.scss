@@ -76,6 +76,7 @@ info-message{
         font-size: $fontSizeSmall;
       }
       &.version-virtual{
+        background: transparent;
         border:2px dashed $workspaceInheritColor;
       }
       .version-actions {

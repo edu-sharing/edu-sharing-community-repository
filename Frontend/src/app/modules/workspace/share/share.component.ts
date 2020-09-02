@@ -369,7 +369,7 @@ export class WorkspaceShareComponent {
     }
 
     isDeleted(p: Permission) {
-        return this.deletedPermissions.indexOf(p.authority.authorityName) != -1;
+        return this.deletedPermissions.indexOf(p.authority.authorityName) !== -1;
     }
 
     cancel() {
@@ -389,7 +389,7 @@ export class WorkspaceShareComponent {
         if (!permissions) return result;
         for (let p of permissions) {
             if (
-                this.deletedPermissions.indexOf(p.authority.authorityName) == -1
+                this.deletedPermissions.indexOf(p.authority.authorityName) === -1
             )
                 result.push(p);
         }
@@ -621,7 +621,7 @@ export class WorkspaceShareComponent {
                                 permissions,
                             );
                         } else {
-                            // we do nothing, because theo original ones are getting deleted
+                            // we do nothing, because the original ones are getting deleted
                         }
                     }
                     permissions = permissions.filter(

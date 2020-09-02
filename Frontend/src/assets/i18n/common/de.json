@@ -583,6 +583,7 @@
             "ERROR_INHERIT": "Das Festlegen von Berechtigungen ist in dieser Ansicht nicht möglich, da die Elemente bereits Einladungen vom übergeordneten Ordner erhalten:",
             "ERROR_HELP": "Bitte benutzen Sie die Option \"Weitere Freigaben\" zum Konfigurieren der Rechte",
             "UNSET": "Nicht festgelegt",
+            "PUBLISH": "Alle (Veröffentlichen)",
             "GROUP_TYPES": {
                 "ORG_ADMINISTRATORS": "Nur Administratoren",
                 "TEACHER": "Nur Lehrkräfte"

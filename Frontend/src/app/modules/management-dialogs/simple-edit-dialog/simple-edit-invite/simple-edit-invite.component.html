@@ -58,7 +58,8 @@
             [disabled]="group.authorityName === 'GROUP_EVERYONE' && !tpInviteEveryone"
             [value]="group.authorityName"
           >
-            {{ group | authorityName }}
+            <ng-container *ngIf="group.authorityName === 'GROUP_EVERYONE'">{{ 'SIMPLE_EDIT.INVITE.PUBLISH' | translate }}</ng-container>
+            <ng-container *ngIf="group.authorityName !== 'GROUP_EVERYONE'">{{ group | authorityName }}</ng-container>
           </mat-button-toggle>
         </mat-button-toggle-group>
       </div>

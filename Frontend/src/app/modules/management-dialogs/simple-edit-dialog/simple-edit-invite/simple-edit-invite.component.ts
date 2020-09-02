@@ -21,6 +21,7 @@ import {BulkBehaviour, MdsComponent} from '../../../../common/ui/mds/mds.compone
 import {Observable, Observer} from 'rxjs';
 import {MatButtonToggleGroup} from '@angular/material/button-toggle';
 import {Helper} from '../../../../core-module/rest/helper';
+import {ShareMode, SharePublishComponent} from '../../../workspace/share/share-publish/share-publish.component';
 
 @Component({
   selector: 'app-simple-edit-invite',
@@ -100,16 +101,20 @@ export class SimpleEditInviteComponent {
         return;
       }
       const authority = this.getSelectedAuthority();
-      // auth not to set, we can skip tasks
-      console.log(authority);
       let addPermission: Permission = null;
+      const publish = authority?.authorityName === RestConstants.AUTHORITY_EVERYONE
       if (authority != null) {
         addPermission = new Permission();
         addPermission.authority = {
           authorityName: authority.authorityName,
           authorityType: authority.authorityType,
         };
-        addPermission.permissions = [RestConstants.PERMISSION_CONSUMER];
+        // if EVERYONE, we do a "publishing"
+        if(publish) {
+          addPermission.permissions = [RestConstants.PERMISSION_CONSUMER, RestConstants.ACCESS_CC_PUBLISH];
+        } else {
+          addPermission.permissions = [RestConstants.PERMISSION_CONSUMER];
+        }
       }
       Observable.forkJoin(this._nodes.map((n, i) => {
         let permissions = this.nodesPermissions[i].localPermissions;
@@ -118,7 +123,9 @@ export class SimpleEditInviteComponent {
           permissions.permissions = [];
         }
         if (addPermission) {
-          if (this.stablePermissionState) {
+          if(publish && n.properties?.[RestConstants.CCM_PROP_PUBLISHED_MODE]?.[0] === ShareMode.Copy) {
+              console.warn('Node ' + n.ref.id + ' shall be published, but is already published via copy. No permissions will be added');
+          } else if (this.stablePermissionState) {
             permissions.permissions = [addPermission];
           } else {
             permissions.permissions =
@@ -126,7 +133,7 @@ export class SimpleEditInviteComponent {
           }
         }
         if (this.currentPermissions && this.currentPermissions.length) {
-          // all global group will get removed
+          // all global groups will get removed
           this.currentPermissions = this.currentPermissions.filter((p) =>
               this.getAvailableGlobalGroups().indexOf(p.authority.authorityName) === -1
           );
@@ -270,7 +277,7 @@ export class SimpleEditInviteComponent {
         this.currentPermissions = [];
       }
       if(list.length > 0) {
-        const consumers = list.filter((p) => Helper.arrayEquals(p.permissions, [RestConstants.PERMISSION_CONSUMER]));
+        const consumers = list.filter((p) => p.permissions.indexOf(RestConstants.PERMISSION_CONSUMER) !== -1);
         const toggle = consumers.filter((c)=> availableToggleGroups.indexOf(c.authority.authorityName) !== -1);
         console.log(toggle);
         if(toggle.length===1 && (!activeToggle || activeToggle === toggle[0].authority.authorityName)) {

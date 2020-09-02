@@ -549,8 +549,9 @@
             "ERROR_PERMISSION_MISSING": "It is not possible to set permissions because you have insufficient permissions on the element",
             "ERROR_TOOLPERMISSION_MISSING": "It is not possible to set permissions because your profile has no permissions to do so",
             "ERROR_INHERIT": "It is not possible to set permissions in this view because the item(s) already receive(s) invitations from the parent folder:",
-            "ERROR_HELP": "Please use the option \"Adavanced invitations\" to configure the permissions",
+            "ERROR_HELP": "Please use the option \"Advanced invitations\" to configure the permissions",
             "UNSET": "Not set",
+            "PUBLISH": "All (Publish)",
             "GROUP_TYPES": {
                 "ORG_ADMINISTRATORS": "Administrators only",
                 "TEACHER": "Teachers only"

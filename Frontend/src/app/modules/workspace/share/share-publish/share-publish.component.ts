@@ -129,7 +129,7 @@ export class SharePublishComponent implements OnChanges {
   }
 
   updatePermissions(permissions: Permission[]) {
-    permissions = this.permissions.filter(
+    permissions = permissions.filter(
         (p: Permission) => p.authority.authorityName !== RestConstants.AUTHORITY_EVERYONE
     );
     if(this.shareMode === ShareMode.Direct) {

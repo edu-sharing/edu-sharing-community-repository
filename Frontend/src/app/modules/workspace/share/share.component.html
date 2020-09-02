@@ -157,7 +157,6 @@
                                         [isDeleted]="isDeleted(permission)"
                                         [isDirectory]="_nodes[0].isDirectory"
                                         [canPublish]="!isSafe"
-                                        [added]="isNewPermission(permission)"
                                         (onRemove)="removePermission(permission)"
                                         (onType)="permission.permissions=$event.permissions;updatePermissionInfo()"
             ></workspace-share-permission>
@@ -174,7 +173,6 @@
                                         [isDeleted]="isDeleted(permission)"
                                         [isDirectory]="_nodes[0].isDirectory"
                                         [canPublish]="!isSafe"
-                                        [added]="isNewPermission(permission)"
                                         (onRemove)="removePermission(permission)"
                                         (onType)="permission.permissions=$event.permissions;updatePermissionInfo()"
             ></workspace-share-permission>
@@ -191,18 +189,19 @@
                                       [showDelete]="false"
           ></workspace-share-permission>
         </ng-container>
-        <ng-container *ngIf="publishComponent?.shareMode != null">
+        <ng-container *ngIf="publishComponent?.shareMode != null || publishComponent?.initialShareMode != null">
           <div class="groupName">{{'WORKSPACE.SHARE.PUBLISH_LABEL' | translate}}</div>
           <mat-link class="manageLink uppercase"
                     *ngIf="publishPermission && !isBulk() && !isSafe"
                     (click)="tab = 2">
             {{'WORKSPACE.SHARE.MANAGE_PUBLISH' | translate}}</mat-link>
           <workspace-share-permission class="groupEntry link"
+                                      [class.added]="publishComponent.initialShareMode == null && publishComponent.shareMode != null"
                                       [permission]="publishEnabled"
                                       [isDirectory]="_nodes[0].isDirectory"
-                                      [added]="publishComponent.initialShareMode != publishComponent.shareMode"
                                       [readOnly]="true"
                                       [showDelete]="false"
+                                      [isDeleted]="publishComponent.initialShareMode != null && publishComponent.shareMode == null"
           ></workspace-share-permission>
         </ng-container>
         <div class="groupName" *ngIf="hasUsages()">{{'WORKSPACE.SHARE.USAGES' | translate}}</div>
