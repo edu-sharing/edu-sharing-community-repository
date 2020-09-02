@@ -106,6 +106,8 @@ public class AuthenticationToolAPI extends AuthenticationToolAbstract {
 	 * @return
 	 */
 	public String getScope(){
+		if(Context.getCurrentInstance() == null) return null;
+		if(Context.getCurrentInstance().getRequest() == null) return null;
 		HttpSession session = Context.getCurrentInstance().getRequest().getSession();
 		if (session==null) return null;
 		return (String)session.getAttribute(CCConstants.AUTH_SCOPE);
