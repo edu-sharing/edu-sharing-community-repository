@@ -1,5 +1,6 @@
 @import "../../core-ui-module/styles/variables";
 .drop-zone{
+  z-index: 100;
   text-align: center;
   div{
     position: relative;
