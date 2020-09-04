@@ -105,11 +105,22 @@
             <mat-tab label="{{'ADMIN.MEDIACENTER.NODES.TITLE' | translate}}">
                 <div class="nodes">
                     <!--h6 class="mat-heading-6">{{'ADMIN.MEDIACENTER.NODES.DESCRIPTION' | translate}}</h6-->
+                    <mds
+                        #mediacenterMds
+                        [embedded]="true"
+                        mode="search"
+                        [invalidate]="mediacenterMdsReload"
+                        (onMdsLoaded)="searchMediaCenterNodes()"
+                        groupId="mediacenter_filter"
+                        ></mds>
                     <mat-form-field class="searchword">
                         <mat-label>{{'ADMIN.MEDIACENTER.NODES.SEARCHWORD' | translate}}</mat-label>
                         <input matInput [disabled]="!isAdmin" [(ngModel)]="mediacenterNodesSearchWord">
                     </mat-form-field>
-                    <button mat-raised-button color="primary" (click)="hasMoreMediacenterNodes = true;mediacenterNodesOffset = 0;loadMediacenterNodes()"><i icon iconId="search"></i>{{'ADMIN.MEDIACENTER.NODES.FILTER' | translate}}</button>
+                    <button mat-raised-button color="primary"
+                            (click)="searchMediaCenterNodes()">
+                        <i icon iconId="search"></i>{{'ADMIN.MEDIACENTER.NODES.FILTER' | translate}}
+                    </button>
                     <listTable *ngIf="mediacenterNodes"
                                [nodes]="mediacenterNodes"
                                [hasIcon]="true"

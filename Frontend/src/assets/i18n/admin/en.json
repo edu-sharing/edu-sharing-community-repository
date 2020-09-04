@@ -454,9 +454,9 @@
                 "DESCRIPTION": "All members of the following groups can access the media of this media centre"
             },
             "NODES":{
-                "TITLE":"Managed media",
+                "TITLE":"Media",
                 "SEARCHWORD": "Name/Id of the media",
-                "FILTER":"Filter managed media"
+                "FILTER":"Filter media"
             },
             "STATISTICS": {
                 "TITLE": "Statistics"

@@ -18,12 +18,17 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;
 
 import org.apache.log4j.Logger;
+import org.edu_sharing.metadataset.v2.MetadataSetV2;
+import org.edu_sharing.metadataset.v2.tools.MetadataHelper;
+import org.edu_sharing.metadataset.v2.tools.MetadataSearchHelper;
+import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.server.tools.ApplicationInfoList;
 import org.edu_sharing.restservices.*;
 import org.edu_sharing.restservices.mediacenter.v1.model.McOrgConnectResult;
 import org.edu_sharing.restservices.mediacenter.v1.model.MediacentersImportResult;
 import org.edu_sharing.restservices.mediacenter.v1.model.OrganisationsImportResult;
 import org.edu_sharing.restservices.node.v1.model.SearchResult;
+import org.edu_sharing.restservices.search.v1.model.SearchParameters;
 import org.edu_sharing.restservices.shared.ErrorResponse;
 import org.edu_sharing.restservices.shared.Filter;
 import org.edu_sharing.restservices.shared.Group;
@@ -221,6 +226,7 @@ public class MediacenterApi {
 		    @ApiParam(value = "property filter for result nodes (or \"-all-\" for all properties)", defaultValue="-all-" ) @QueryParam("propertyFilter") List<String> propertyFilter,
 			@ApiParam(value = "authorityName of the mediacenter that licenses nodes",required=true) @PathParam("mediacenter") String mediacenter,
 			@ApiParam(value = "searchword of licensed nodes",required=true) @QueryParam("searchword") String searchword,
+			@ApiParam(value = "search parameters", required = true) SearchParameters parameters,
 			@Context HttpServletRequest req) {
 
 		try {
@@ -231,11 +237,9 @@ public class MediacenterApi {
 			searchToken.setFrom(skipCount != null ? skipCount : 0);
 			searchToken.setMaxResult(maxItems!= null ? maxItems : 10);
 			searchToken.setSortDefinition(new SortDefinition(sortProperties, sortAscending));
-			
-			String query = "TYPE:\"" + "ccm:io\"";
-			if(searchword != null && searchword.trim().length() > 0) {
-				query += " AND (@cm\\:name:\""+searchword+"\"" +" OR @ccm\\:replicationsourceid:\""+searchword+"\")";
-			}
+			MetadataSetV2 mds = MetadataHelper.getMetadataset(ApplicationInfoList.getRepositoryInfoById(repoDao.getId()),
+					CCConstants.metadatasetdefault_id);
+			String query = MetadataSearchHelper.getLuceneSearchQuery(mds.getQueries(), "mediacenter_filter", MetadataSearchHelper.convertCriterias(parameters.getCriterias()));
 			System.out.println(query);
 			searchToken.setLuceneString(query);
 
