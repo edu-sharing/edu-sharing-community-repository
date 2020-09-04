@@ -39,6 +39,7 @@
   import {CreateMenuComponent} from './modules/create-menu/create-menu.component';
   import {VersionLabelPipe} from './common/ui/version-label.pipe';
   import {ToolpermissionCheckDirective} from './common/directives/toolpermission-check.directive';
+  import {InputFillProgressComponent} from './common/ui/input-fill-progress/input-fill-progress.component';
 
   export const DECLARATIONS = [
       MdsTestComponent,
@@ -77,6 +78,7 @@
       PoweredByComponent,
       BannerComponent,
       FooterComponent,
+      InputFillProgressComponent,
       CookieInfoComponent,
       TutorialComponent,
       ImageConfigDirective,

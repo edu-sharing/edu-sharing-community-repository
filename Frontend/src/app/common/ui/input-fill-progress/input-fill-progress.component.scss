@@ -1,0 +1,34 @@
+@import "../../../core-ui-module/styles/variables";
+.wrapper {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  height: 100%;
+
+  .status {
+    width: 100%;
+    flex-grow: 1;
+    background-color: #eee;
+    position: relative;
+    .current-bar {
+      position: absolute;
+      height: 100%;
+    }
+    .minimum-line{
+      position: absolute;
+      width: 2px;
+      height: 100%;
+      background-color: #aaa;
+    }
+    &.status-required .current-bar {
+      background-color: $colorStatusNegative;
+    }
+    &.status-requiredPublish .current-bar {
+      background-color: $colorStatusPositive;
+    }
+  }
+  > label{
+    padding: 10px 15%;
+    font-size: $fontSizeSmall;
+  }
+}
