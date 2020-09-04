@@ -691,6 +691,10 @@
         "delete": "Löschen",
         "add": "Neu"
     },
+    "FILL_STATUS": {
+        "REQUIRED": "erforderliche Felder",
+        "REQUIREDPUBLISH": "für Veröffentlichung erforderliche Felder"
+    },
     "LANGUAGE": {
         "INTERNATIONAL": "International",
         "ar": "Arabisch",

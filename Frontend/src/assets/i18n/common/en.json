@@ -644,6 +644,10 @@
         "delete": "delete",
         "add": "New"
     },
+    "FILL_STATUS": {
+        "REQUIRED": "required fields",
+        "REQUIREDPUBLISH": "for publishing required fields"
+    },
     "LANGUAGE": {
         "INTERNATIONAL": "international",
         "ar": "Arabic",
