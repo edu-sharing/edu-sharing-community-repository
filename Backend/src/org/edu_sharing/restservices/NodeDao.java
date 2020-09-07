@@ -1904,10 +1904,15 @@ public class NodeDao {
 					}
 			).sorted((a,b) -> {
 				try {
-					return Double.compare(
-							Double.parseDouble((String) a.getNativeProperties().get(CCConstants.LOM_PROP_LIFECYCLE_VERSION)),
-							Double.parseDouble((String) b.getNativeProperties().get(CCConstants.LOM_PROP_LIFECYCLE_VERSION))
-					);
+					String[] va=((String) a.getNativeProperties().get(CCConstants.LOM_PROP_LIFECYCLE_VERSION)).split("\\.");
+					String[] vb=((String) b.getNativeProperties().get(CCConstants.LOM_PROP_LIFECYCLE_VERSION)).split("\\.");
+					for(int i=0;i<va.length;i++){
+						int c = Integer.compare(Integer.parseInt(va[i]), Integer.parseInt(vb[i]));
+						if(c!=0) {
+							return c;
+						}
+					}
+					return 0;
 				} catch (Throwable ignored) {
 					return 0;
 				}
