@@ -14,6 +14,7 @@ import {OPEN_URL_MODE} from '../../../../core-module/ui/ui-constants';
 import {BridgeService} from '../../../../core-bridge-module/bridge.service';
 import {Helper} from '../../../../core-module/rest/helper';
 import {Toast} from '../../../../core-ui-module/toast';
+import {TranslateService} from '@ngx-translate/core';
 
 @Component({
   selector: 'app-share-publish',
@@ -38,6 +39,7 @@ export class SharePublishComponent implements OnChanges {
   allPublishedVersions: Node[];
   constructor(
       private connector: RestConnectorService,
+      private translate: TranslateService,
       private nodeService: RestNodeService,
       private config: ConfigurationService,
       private toast: Toast,
@@ -59,7 +61,10 @@ export class SharePublishComponent implements OnChanges {
   }
 
   getLicense() {
-    return this. node.properties[RestConstants.CCM_PROP_LICENSE]?.[0];
+    return this.node.properties[RestConstants.CCM_PROP_LICENSE]?.[0];
+  }
+  getLicenseText() {
+    return this.translate.instant('LICENSE.NAMES.' + this.getLicense());
   }
 
   openLicense() {
@@ -80,7 +85,9 @@ export class SharePublishComponent implements OnChanges {
       this.nodeService.getPublishedCopies(this.node.ref.id).subscribe((nodes) => {
         this.publishedVersions = nodes.nodes.reverse();
         this.updatePublishedVersions();
-      })
+      }, error => {
+        this.toast.error(error);
+      });
     } else if(prop === ShareMode.Direct || !prop) {
       this.shareMode = ShareMode.Direct;
     }
@@ -173,7 +180,8 @@ export class SharePublishComponent implements OnChanges {
   }
 
   openVersion(node: Node) {
-    const url = '/' + this.router.serializeUrl(this.router.createUrlTree([UIConstants.ROUTER_PREFIX, 'render' ,node.ref.id] ));
+    const url = this.connector.getAbsoluteEdusharingUrl() +
+        this.router.serializeUrl(this.router.createUrlTree([UIConstants.ROUTER_PREFIX, 'render' ,node.ref.id] ));
     UIHelper.openUrl(url, this.bridge, OPEN_URL_MODE.Blank);
   }
 
@@ -187,7 +195,6 @@ export class SharePublishComponent implements OnChanges {
   updatePublishedVersions() {
     if(!this.isCopy && this.shareMode === ShareMode.Copy
         || this.republish) {
-      console.log('update true')
       const virtual = Helper.deepCopy(this.node);
       virtual.properties[RestConstants.CCM_PROP_PUBLISHED_DATE + '_LONG'] = [new Date().getTime()];
       if(this.doiActive) {
@@ -196,7 +203,6 @@ export class SharePublishComponent implements OnChanges {
       virtual.virtual = true;
       this.allPublishedVersions = [virtual].concat(this.publishedVersions);
     } else {
-      console.log('update false')
       this.allPublishedVersions = this.publishedVersions;
     }
   }

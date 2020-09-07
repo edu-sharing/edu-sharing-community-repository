@@ -54,6 +54,9 @@ public class CMISSearchHelper {
                 else{
                     // join the needed aspect, and access this ones value
                     PropertyDefinition property = serviceRegistry.getDictionaryService().getProperty(QName.createQName(filter.getKey()));
+                    if(property == null){
+                        throw new RuntimeException("Property " + filter.getKey() +" was not found in the alfresco dicitionary. Please check the spelling");
+                    }
                     String aspectTable=CCConstants.getValidLocalName(property.getContainerClass().getName().toString());
                     String aspectTableAlias = property.getContainerClass().getName().getLocalName();
                     if(!joinedTable.contains(aspectTable)) {

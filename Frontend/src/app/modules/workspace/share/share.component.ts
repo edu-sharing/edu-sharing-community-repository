@@ -157,7 +157,7 @@ export class WorkspaceShareComponent {
             this.cancel(),
         ),
         new DialogButton(
-            'WORKSPACE.BTN_INVITE', // Can be changed in `updateButtons`.
+            'SAVE', // Can be changed in `updateButtons`.
             DialogButton.TYPE_PRIMARY,
             () => this.save(),
         ),
@@ -509,7 +509,7 @@ export class WorkspaceShareComponent {
 
     updateButtons() {
         const saveButton = this.buttons[1];
-        saveButton.name = this.tab == 0 ? 'WORKSPACE.BTN_INVITE' : 'APPLY';
+        saveButton.name = 'SAVE';// this.tab == 0 ? 'WORKSPACE.BTN_INVITE' : 'APPLY';
     }
 
     private chooseType() {

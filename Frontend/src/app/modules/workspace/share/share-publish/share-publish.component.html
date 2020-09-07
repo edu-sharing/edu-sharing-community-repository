@@ -3,17 +3,34 @@
     <!--<i icon iconId="public"></i>-->
     {{ 'WORKSPACE.SHARE.PUBLISH_' + getType() | translate }}
   </h4>
-  <info-message mode="warning" *ngIf="!getLicense() && !node?.isDirectory">
-    {{'WORKSPACE.SHARE.PUBLISH.NO_LICENSE' | translate}}
-    <div>
-      <button mat-button color="primary"
-              (click)="openLicense()"
-              appToolpermissionCheck
-              toolpermission="TOOLPERMISSION_LICENSE">
-        <i icon iconId="arrow_forward"></i> {{'WORKSPACE.SHARE.PUBLISH.SET_LICENSE' | translate}}
-      </button>
-    </div>
-  </info-message>
+  <ng-container *ngIf="!node?.isDirectory">
+    <info-message mode="info" *ngIf="getLicense()">
+      {{ 'WORKSPACE.SHARE.PUBLISH.LICENSE_INFO' | translate:{license: getLicenseText()} }}
+      <ng-container *ngIf="shareMode === 'copy'">
+        <br /><br />
+        {{ 'WORKSPACE.SHARE.PUBLISH.LICENSE_INFO_COPY' | translate }}
+      </ng-container>
+      <div>
+        <button mat-button color="primary"
+                (click)="openLicense()"
+                appToolpermissionCheck
+                toolpermission="TOOLPERMISSION_LICENSE">
+          <i icon iconId="arrow_forward"></i> {{'WORKSPACE.SHARE.PUBLISH.SET_LICENSE' | translate}}
+        </button>
+      </div>
+    </info-message>
+    <info-message mode="warning" *ngIf="!getLicense()">
+      {{'WORKSPACE.SHARE.PUBLISH.NO_LICENSE' | translate}}
+      <div>
+        <button mat-button color="primary"
+                (click)="openLicense()"
+                appToolpermissionCheck
+                toolpermission="TOOLPERMISSION_LICENSE">
+          <i icon iconId="arrow_forward"></i> {{'WORKSPACE.SHARE.PUBLISH.SET_LICENSE' | translate}}
+        </button>
+      </div>
+    </info-message>
+  </ng-container>
   <info-message mode="warning" *ngIf="inherited">
     {{'WORKSPACE.SHARE.PUBLISH.INHERITED' | translate}}
     <div>
@@ -86,11 +103,10 @@
 <div class="published-versions-container" *ngIf="shareMode === 'copy'">
   <div class="published-versions">
     <h6 class="published-versions mat-heading-6">{{'WORKSPACE.SHARE.PUBLISH.VERSIONS_PUBLISHED' | translate}}</h6>
-    <!--
-    <div class="no-versions" *ngIf="!publishedVersions?.length">
-      {{'WORKSPACE.SHARE.PUBLISH.NO_VERSIONS_PUBLISHED' | translate}}
+
+    <div class="no-versions" *ngIf="!allPublishedVersions?.length">
+      <spinner-small></spinner-small>
     </div>
-    -->
     <div *ngFor="let v of allPublishedVersions" class="version" [class.version-virtual]="v.virtual">
       <div class="version-group" >
         <div>
@@ -111,7 +127,7 @@
       </div>
       <div class="version-handle">
         <i icon iconId="vpn_key"
-           matTooltip="{{'WORKSPACE.SHARE.DOI_INFO' | translate}}"
+           matTooltip="{{'WORKSPACE.SHARE.DOI' | translate}}"
            *ngIf="v.properties['ccm:published_handle_id']"></i>
       </div>
       <div class="version-actions">

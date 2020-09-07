@@ -3,6 +3,9 @@
 info-message{
   display: flex;
   padding: 10px 20px;
+  button{
+    margin-top: 10px;
+  }
 }
 .group-padding{
   padding: 5px $cardPadding;
@@ -16,6 +19,8 @@ info-message{
     padding-top: 10px;
   }
   .no-versions{
+    display: flex;
+    justify-content: center;
     font-size:90%;
     color:$textLight;
     font-style: italic;
