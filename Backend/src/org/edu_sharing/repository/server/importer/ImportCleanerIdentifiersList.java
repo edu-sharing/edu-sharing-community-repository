@@ -13,6 +13,7 @@ import javax.xml.xpath.XPathFactory;
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.repository.StoreRef;
+import org.apache.commons.httpclient.util.URIUtil;
 import org.apache.log4j.Logger;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.server.MCAlfrescoAPIClient;
@@ -50,7 +51,7 @@ public class ImportCleanerIdentifiersList {
 	MCAlfrescoAPIClient mcAlfrescoBaseClient = new MCAlfrescoAPIClient();
 	
 	List<String> toDeleteList = new ArrayList<String>();
-	
+
 	public ImportCleanerIdentifiersList(String baseUrl, String set, String metadataPrefix, boolean testMode) {
 		try {
 			
@@ -117,32 +118,40 @@ public class ImportCleanerIdentifiersList {
 	private void readAllNodesAtOaiService(String url) throws Throwable{
 		
 		logger.info("url:"+url);
-		
+		Integer completeListSize = null;
+
 		String queryResult = new HttpQueryTool().query(url);
 		if(queryResult != null){
 			DocumentBuilder builder = factory.newDocumentBuilder();
 			Document doc = builder.parse(new InputSource(new StringReader(queryResult)));
 			
 			String cursor = (String)xpath.evaluate("/OAI-PMH/ListIdentifiers/resumptionToken/@cursor", doc, XPathConstants.STRING);
-			String completeListSize = (String)xpath.evaluate("/OAI-PMH/ListRecords/resumptionToken/@completeListSize", doc, XPathConstants.STRING);
-			String token = (String)xpath.evaluate("/OAI-PMH/ListIdentifiers/resumptionToken", doc, XPathConstants.STRING);
-			
-			token = URLEncoder.encode(token);
-			
-			handleIdentifierList(doc);
-			//&& completeListSize != null && cursor != null &&  (new Integer(completeListSize) > new Integer(cursor))
-		
-			if(token != null && token.trim().length() > 0 ){
-				try{
-					String urlNext = this.oaiBaseUrl+"?verb=ListIdentifiers&resumptionToken="+token;
-					readAllNodesAtOaiService(urlNext);
-					
-				}catch(NumberFormatException e){
-					logger.error(e.getMessage(),e);
-				}
-			}else{
-				logger.info("no more resumption. oai querying finished!");
+			String size = (String)xpath.evaluate("/OAI-PMH/ListRecords/resumptionToken/@completeListSize", doc, XPathConstants.STRING);
+			if(size!=null){
+				completeListSize = Integer.parseInt(size);
 			}
+			String token = (String)xpath.evaluate("/OAI-PMH/ListIdentifiers/resumptionToken", doc, XPathConstants.STRING);
+			if(token!=null) {
+				token = URIUtil.encodeQuery(token);
+
+				handleIdentifierList(doc);
+				//&& completeListSize != null && cursor != null &&  (new Integer(completeListSize) > new Integer(cursor))
+
+				if (token.trim().length() > 0) {
+					try {
+						String urlNext = this.oaiBaseUrl + "?verb=ListIdentifiers&resumptionToken=" + token;
+						readAllNodesAtOaiService(urlNext);
+
+					} catch (NumberFormatException e) {
+						logger.error(e.getMessage(), e);
+					}
+				} else {
+					logger.info("no more resumption. oai querying finished!");
+				}
+			}
+		}
+		if(completeListSize != null && nodeAtOaiService.size() != completeListSize){
+			throw new IllegalStateException("Count of completeListSize (" + completeListSize+") does not match with fetched oai count (" + nodeAtOaiService.size()+")");
 		}
 	}
 	
