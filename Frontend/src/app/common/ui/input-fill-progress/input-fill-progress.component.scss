@@ -14,10 +14,14 @@
       position: absolute;
       height: 100%;
     }
-    .minimum-line{
+    .minimum-bar,.publish-bar{
       position: absolute;
-      width: 2px;
       height: 100%;
+    }
+    .minimum-bar{
+      background-color: #777;
+    }
+    .publish-bar{
       background-color: #aaa;
     }
     &.status-required .current-bar {
