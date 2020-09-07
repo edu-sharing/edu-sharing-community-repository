@@ -1,7 +1,3 @@
-/**
- * Created by Torsten on 13.01.2017.
- */
-
 import {Component, EventEmitter, Input, OnChanges, Output, SimpleChanges} from '@angular/core';
 import {ConfigurationHelper, ConfigurationService} from '../../../core-module/core.module';
 
@@ -14,13 +10,7 @@ export class InputFillProgressComponent {
 
     @Input() current: FillTypeStatus;
     @Input() maximum: FillTypeStatus;
-
-
-    /**
-    ngOnChanges(changes: SimpleChanges): void {
-        if (this.minimum && this.maximum) {
-        }
-    }*/
+    
     getStatus() {
         for(const type of Object.keys(FillType)) {
             if((this.current as any)[type] !== (this.maximum as any)[type]){
