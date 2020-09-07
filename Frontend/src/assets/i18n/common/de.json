@@ -692,6 +692,7 @@
         "add": "Neu"
     },
     "FILL_STATUS": {
+        "MESSAGE": "Felder ausgefüllt",
         "REQUIRED": "erforderliche Felder",
         "REQUIREDPUBLISH": "für Veröffentlichung erforderliche Felder"
     },
