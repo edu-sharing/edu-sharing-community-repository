@@ -87,7 +87,6 @@ public class CMISSearchHelper {
         String query="SELECT "+tableNameAlias+".cmis:name FROM "+ tableName + " AS " + tableNameAlias + " " + join + where;
         params.setQuery(query);
         ResultSet result = serviceRegistry.getSearchService().query(params);
-
         logger.info(query+": "+result.getNumberFound() +" "+ result.length() +" "+ result.getClass().getName() +" getBulkFetchSize: "+ result.getBulkFetchSize()+" "+result);
         return result;
     }
@@ -153,6 +152,8 @@ public class CMISSearchHelper {
         public String inFolder;
         /**
          * One folder of the tree in which the elements are located
+         * WARNING: When active, SOLR instead of the database will be used!
+         * https://docs.alfresco.com/5.2/concepts/query-lang-support.html
          */
         public String inTree;
     }

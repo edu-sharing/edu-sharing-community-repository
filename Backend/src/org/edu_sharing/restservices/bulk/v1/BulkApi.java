@@ -48,7 +48,9 @@ public class BulkApi {
 
 	) {
 		try {
-			NodeDao nodeDao = NodeDao.getNode(RepositoryDao.getHomeRepository(), BulkServiceFactory.getInstance().sync(group, match, groupBy, type, aspects, properties, resetVersion==null ? false : resetVersion).getId(), Filter.createShowAllFilter());
+			NodeDao nodeDao = NodeDao.getNode(RepositoryDao.getHomeRepository(),
+					BulkServiceFactory.getInstance().sync(group, match, groupBy, type, aspects, properties, resetVersion==null ? false : resetVersion).getId(),
+					Filter.createShowAllFilter());
 			NodeEntry entry = new NodeEntry();
 			entry.setNode(nodeDao.asNode());
 			return Response.ok().entity(entry).build();

@@ -4,9 +4,7 @@ package org.edu_sharing.service.bulk;
 import org.alfresco.model.ContentModel;
 import org.alfresco.repo.model.Repository;
 import org.alfresco.service.ServiceRegistry;
-import org.alfresco.service.cmr.repository.NodeRef;
-import org.alfresco.service.cmr.repository.NodeService;
-import org.alfresco.service.cmr.repository.StoreRef;
+import org.alfresco.service.cmr.repository.*;
 import org.alfresco.service.cmr.version.Version;
 import org.alfresco.service.cmr.version.VersionHistory;
 import org.alfresco.service.cmr.version.VersionService;
@@ -16,6 +14,7 @@ import org.edu_sharing.alfresco.policy.NodeCustomizationPolicies;
 import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
 import org.edu_sharing.metadataset.v2.tools.MetadataHelper;
 import org.edu_sharing.repository.client.tools.CCConstants;
+import org.edu_sharing.repository.server.tools.LogTime;
 import org.edu_sharing.service.nodeservice.NodeServiceFactory;
 import org.edu_sharing.service.nodeservice.NodeServiceHelper;
 import org.edu_sharing.service.search.CMISSearchHelper;
@@ -31,6 +30,7 @@ public class BulkServiceImpl implements BulkService {
 	static ServiceRegistry serviceRegistry = (ServiceRegistry) AlfAppContextGate.getApplicationContext().getBean(ServiceRegistry.SERVICE_REGISTRY);
 	static VersionService versionServiceAlfresco = serviceRegistry.getVersionService();
 	static Repository repositoryHelper = (Repository) AlfAppContextGate.getApplicationContext().getBean("repositoryHelper");
+	NodeService dbNodeService = (NodeService)AlfAppContextGate.getApplicationContext().getBean("alfrescoDefaultDbNodeService");
 
 	private static Logger logger = Logger.getLogger(BulkServiceImpl.class);
 	private final List<String> propsToClean;
@@ -240,12 +240,26 @@ public class BulkServiceImpl implements BulkService {
 	@Override
 	public NodeRef find(HashMap<String, String[]> properties) throws Exception {
 		CMISSearchHelper.CMISSearchData data = new CMISSearchHelper.CMISSearchData();
-		data.inTree = primaryFolder.getId();
+		// this uses SOLR and is not synchronized!
+		// data.inTree = primaryFolder.getId();
 
 		List<NodeRef> result = CMISSearchHelper.fetchNodesByTypeAndFilters(CCConstants.CCM_TYPE_IO,
 				NodeServiceHelper.getPropertiesSinglevalue(
 						NodeServiceHelper.transformShortToLongProperties(properties)
 				),data);
+
+		result = result.stream().filter((r) -> {
+			Path path = dbNodeService.getPath(r);
+			for (Path.Element p : path) {
+				if (p instanceof Path.ChildAssocElement) {
+					NodeRef ref = ((Path.ChildAssocElement) p).getRef().getParentRef();
+					if (primaryFolder.equals(ref)) {
+						return true;
+					}
+				}
+			}
+			return false;
+		}).collect(Collectors.toList());
 		if(result.size()==1){
 			return result.get(0);
 		}else if(result.size()>1){
