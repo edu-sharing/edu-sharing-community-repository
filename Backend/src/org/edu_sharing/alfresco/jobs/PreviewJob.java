@@ -22,10 +22,7 @@ import org.alfresco.service.ServiceRegistry;
 import org.alfresco.service.cmr.action.Action;
 import org.alfresco.service.cmr.action.ActionService;
 import org.alfresco.service.cmr.action.ActionStatus;
-import org.alfresco.service.cmr.repository.ContentReader;
-import org.alfresco.service.cmr.repository.ContentService;
-import org.alfresco.service.cmr.repository.NodeRef;
-import org.alfresco.service.cmr.repository.NodeService;
+import org.alfresco.service.cmr.repository.*;
 import org.alfresco.service.namespace.QName;
 import org.apache.log4j.Logger;
 import org.apache.tika.io.TikaInputStream;
@@ -50,6 +47,7 @@ public class PreviewJob implements Job {
 	ActionService actionService = serviceRegistry.getActionService();
 	ContentService contentService = serviceRegistry.getContentService();
 	NodeService nodeService = serviceRegistry.getNodeService();
+	MimetypeService mimetypeService = serviceRegistry.getMimetypeService();
 
 	int maxRunning = 5;
 
@@ -66,6 +64,20 @@ public class PreviewJob implements Job {
 			@Override
 			public Void doWork() throws Exception {
 				ContentReader reader = contentService.getReader(nodeRef, ContentModel.PROP_CONTENT);
+
+				try{
+					String notMatchesMimetype = mimetypeService.getMimetypeIfNotMatches(reader);
+					if(notMatchesMimetype != null){
+						logger.error("mimetype does not match, maybe file was renamed " + nodeRef +" guessed: "+ reader.getMimetype() +" heuristic: " + notMatchesMimetype);
+						return null;
+					}
+				}
+				catch (ContentIOException cioe)
+				{
+					logger.error(cioe);
+					return null;
+				}
+
 				if(reader.getMimetype().contains("video")){
 
 					MovieBox moov =null;
