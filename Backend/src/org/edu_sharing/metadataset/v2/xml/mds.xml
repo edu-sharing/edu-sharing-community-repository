@@ -683,6 +683,11 @@
 					<cm:description>
 				]]></html>
 			</template>
+			<template>
+				<id>mediacenter_filter</id>
+				<html><![CDATA[
+				]]></html>
+			</template>
 		</templates>
 		<groups>
 			<group>
@@ -807,6 +812,12 @@
 					<view>collection_sidebar</view>
 				</views>
 			</group>
+			<group>
+				<id>mediacenter_filter</id>
+				<views>
+					<view>mediacenter_filter</view>
+				</views>
+			</group>
 		</groups>
 		<sorts>
 			<sort>
@@ -843,14 +854,20 @@
 					<column>ccm:replicationsource</column>
 				</columns>
 			</list>
-		</lists>
-		<lists>
 			<list>
 				<id>collectionReferences</id>
 				<columns>
 					<column>cclom:title</column>
 					<column>cm:modified</column>
 					<column>ccm:commonlicense_key</column>
+					<column>ccm:replicationsource</column>
+				</columns>
+			</list>
+			<list>
+				<id>mediacenterManaged</id>
+				<columns>
+					<column>cclom:title</column>
+					<column>ccm:replicationsourceid</column>
 					<column>ccm:replicationsource</column>
 				</columns>
 			</list>
@@ -895,6 +912,15 @@
 					<statement value="100_unchecked">@ccm\:wf_status:"${value}" or ISNULL:@ccm\:wf_status</statement>
 					<multiple>true</multiple>
 					<multiplejoin>OR</multiplejoin>
+				</property>
+			</query>
+			<query join="AND" id="mediacenter_filter">
+				<basequery>TYPE:"ccm:io"</basequery>
+				<property name="ngsearchword">
+					<statement>(@cm\:name:"*${value}*" OR @ccm\:replicationsourceid:"*${value}*")</statement>
+					<exactMatching>false</exactMatching>
+					<multiple>true</multiple>
+					<multiplejoin>AND</multiplejoin>
 				</property>
 			</query>
 			<query join="AND" id="oai">

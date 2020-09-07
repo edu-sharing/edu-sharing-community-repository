@@ -19,6 +19,7 @@ import org.edu_sharing.alfresco.tools.EduSharingNodeHelper;
 import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
 import org.edu_sharing.metadataset.v2.MetadataQuery;
 import org.edu_sharing.metadataset.v2.MetadataQueryParameter;
+import org.edu_sharing.metadataset.v2.tools.MetadataSearchHelper;
 import org.edu_sharing.metadataset.v2.MetadataReaderV2;
 import org.edu_sharing.repository.client.rpc.Notify;
 import org.edu_sharing.repository.client.rpc.Share;
@@ -166,10 +167,7 @@ public class NodeDao {
 	public static NodeSearch searchV2(RepositoryDao repoDao,MdsDaoV2 mdsDao,
 			String query, List<MdsQueryCriteria> criterias,SearchToken token, Filter filter) throws DAOException {
 		SearchService searchService=SearchServiceFactory.getSearchService(repoDao.getId());
-		Map<String,String[]> criteriasMap=new HashMap<>();
-		for(MdsQueryCriteria criteria : criterias){
-			criteriasMap.put(criteria.getProperty(),criteria.getValues().toArray(new String[0]));
-		}
+		Map<String,String[]> criteriasMap = MetadataSearchHelper.convertCriterias(criterias);
 		try {
 			NodeSearch result = transform(repoDao,searchService.searchV2(mdsDao.getMds(),query,criteriasMap,token),filter);
 			if(result.getCount()==0) {

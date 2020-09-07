@@ -344,6 +344,8 @@ export class OptionsHelperService {
             } else if (objects[0].ref) {
                 if(objects[0].type === RestConstants.CCM_TYPE_SAVED_SEARCH) {
                     return ElementType.SavedSearch;
+                } else if(objects[0].aspects.indexOf(RestConstants.CCM_ASPECT_IO_CHILDOBJECT)){
+                    return ElementType.NodeChild;
                 } else {
                     if(NodeHelper.isNodePublishedCopy(objects[0])){
                         return ElementType.NodePublishedCopy;
@@ -407,7 +409,7 @@ export class OptionsHelperService {
         const debugNode = new OptionItem('OPTIONS.DEBUG', 'build', (object) =>
             management.nodeDebug = this.getObjects(object)[0],
         );
-        debugNode.elementType = [ElementType.Node, ElementType.NodePublishedCopy, ElementType.SavedSearch];
+        debugNode.elementType = [ElementType.Node, ElementType.NodePublishedCopy, ElementType.SavedSearch, ElementType.NodeChild];
         debugNode.onlyDesktop = true;
         debugNode.constrains = [Constrain.AdminOrDebug, Constrain.NoBulk];
         debugNode.group = DefaultGroups.View;
@@ -547,6 +549,7 @@ export class OptionsHelperService {
         const licenseNode = new OptionItem('OPTIONS.LICENSE', 'copyright', (object) =>
             management.nodeLicense = this.getObjects(object)
         );
+        licenseNode.elementType = [ElementType.Node, ElementType.NodeChild];
         licenseNode.constrains = [Constrain.Files, Constrain.NoCollectionReference, Constrain.HomeRepository, Constrain.User];
         licenseNode.permissions = [RestConstants.ACCESS_WRITE];
         licenseNode.permissionsMode = HideMode.Disable;
@@ -598,7 +601,7 @@ export class OptionsHelperService {
         const downloadNode = new OptionItem('OPTIONS.DOWNLOAD', 'cloud_download', (object) =>
             NodeHelper.downloadNodes(this.connector, this.getObjects(object))
         );
-        downloadNode.elementType = [ElementType.Node, ElementType.NodePublishedCopy];
+        downloadNode.elementType = [ElementType.Node, ElementType.NodeChild, ElementType.NodePublishedCopy];
         downloadNode.constrains = [Constrain.Files];
         downloadNode.group = DefaultGroups.View;
         downloadNode.priority = 40;
@@ -617,7 +620,7 @@ export class OptionsHelperService {
         const downloadMetadataNode = new OptionItem('OPTIONS.DOWNLOAD_METADATA', 'format_align_left', (object) =>
             NodeHelper.downloadNode(this.connector.getBridgeService(), this.getObjects(object)[0], RestConstants.NODE_VERSION_CURRENT, true)
         );
-        downloadMetadataNode.elementType = [ElementType.Node, ElementType.NodePublishedCopy];
+        downloadMetadataNode.elementType = [ElementType.Node, ElementType.NodeChild, ElementType.NodePublishedCopy];
         downloadMetadataNode.constrains = [Constrain.Files, Constrain.NoBulk];
         downloadMetadataNode.scopes = [Scope.Render];
         downloadMetadataNode.group = DefaultGroups.View;
@@ -640,6 +643,7 @@ export class OptionsHelperService {
         const editNode = new OptionItem('OPTIONS.EDIT', 'edit', (object) =>
             management.nodeMetadata = this.getObjects(object)
         );
+        editNode.elementType = [ElementType.Node, ElementType.NodeChild];
         editNode.constrains = [Constrain.FilesAndFolders, Constrain.NoCollectionReference, Constrain.HomeRepository, Constrain.User];
         editNode.permissions = [RestConstants.ACCESS_WRITE];
         editNode.permissionsMode = HideMode.Disable;

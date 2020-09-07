@@ -56,6 +56,7 @@ export class AdminFrontpageComponent {
       private formBuilder: FormBuilder,
       private adminService: RestAdminService,
       private iamService: RestIamService,
+      private translate: TranslateService,
       private nodeService: RestNodeService,
       private collectionService: RestCollectionService,
       private toast: Toast,
@@ -69,7 +70,7 @@ export class AdminFrontpageComponent {
       ]
     });
     this.mdsService.getSet().subscribe((set)=>{
-      this.previewColumns=MdsHelper.getColumns(set,'search');
+      this.previewColumns=MdsHelper.getColumns(this.translate, set,'search');
     });
     this.adminService.getToolpermissions().subscribe(toolpermissions => 
       this.toolpermissions = Object.keys(toolpermissions)

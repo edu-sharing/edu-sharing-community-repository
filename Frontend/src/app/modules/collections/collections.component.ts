@@ -293,6 +293,7 @@ export class CollectionsMainComponent {
                                 );
                                 this.mdsService.getSet(mdsSets[0].id).subscribe((mds) => {
                                     this.referencesColumns = MdsHelper.getColumns(
+                                        this.translationService,
                                         mds,
                                         'collectionReferences',
                                     );

@@ -372,7 +372,7 @@ export class NodeRenderComponent implements EventListener {
                 this._node=data.node;
                 this.getSequence(()=> {
                     this.mdsApi.getSet(this.getMdsId(), this.repository).subscribe((set) => {
-                        this.similarNodeColumns = MdsHelper.getColumns(set,'search');
+                        this.similarNodeColumns = MdsHelper.getColumns(this.translate, set, 'search');
                         this.mds = set;
 
                         jQuery('#nodeRenderContent').html(data.detailsSnippet);

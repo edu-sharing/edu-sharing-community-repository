@@ -799,6 +799,7 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
 
     private updateColumns() {
         this.searchService.columns = MdsHelper.getColumns(
+            this.translate,
             this.currentMdsSet,
             'search',
         );
