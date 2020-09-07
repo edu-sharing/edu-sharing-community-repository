@@ -19,7 +19,8 @@
              (dragend)="currentDragColumn=null"
              (dragover)="allowDragColumn($event,i,item)" (drop)="dropColumn($event,i,item)"
              (dragstart)="dragStartColumn($event,i,item)">
-                <mat-checkbox [disabled]="i==0" [(ngModel)]="item.visible">{{item.type+"."+item.name | translate}}</mat-checkbox>
+                <mat-checkbox [disabled]="i==0" [(ngModel)]="item.visible" *ngIf="!item.label">{{item.type+"."+item.name | translate}}</mat-checkbox>
+                <mat-checkbox [disabled]="i==0" [(ngModel)]="item.visible" *ngIf="item.label">{{item.label}}</mat-checkbox>
         </div>
     </div>
 </card>
@@ -38,7 +39,10 @@
         <div class="icon" *ngIf="hasIcon">&nbsp;</div>
             <div *ngFor="let item of columnsVisible;let i = index"
              class="{{getItemCssClass(item)}} row_{{i+1}}">
-            <a class="text" [class.clickable]="canBeSorted(item)" (click)="setSortingIntern(item,i==0)">{{item.type+"."+item.name | translate}}</a>
+            <a class="text" [class.clickable]="canBeSorted(item)" (click)="setSortingIntern(item,i==0)">
+                <ng-container *ngIf="!item.label">{{item.type+"."+item.name | translate}}</ng-container>
+                <ng-container *ngIf="item.label">{{item.label}}</ng-container>
+            </a>
             <div *ngIf="sortBy" class="sorting" (click)="setSortingIntern(item,i==0)">
                 <a class="" *ngIf="sortBy==item.name && sortAscending"><i icon iconId="arrow_drop_up"></i></a>
                 <a class="" *ngIf="sortBy==item.name && !sortAscending"><i icon iconId="arrow_drop_down"></i></a>

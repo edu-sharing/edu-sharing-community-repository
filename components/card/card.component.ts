@@ -152,6 +152,8 @@ export class CardComponent implements AfterContentInit, OnDestroy {
 
     private static modalCards: CardComponent[] = [];
 
+    private shouldUpdateJumpmarkOnScroll = true;
+
     static getNumberOfOpenCards() {
         return CardComponent.modalCards.length;
     }
@@ -165,35 +167,7 @@ export class CardComponent implements AfterContentInit, OnDestroy {
         cardService.setNumberModalCards(CardComponent.modalCards.length);
         document.body.style.overflow = 'hidden';
         UIHelper.waitForComponent(this, 'jumpmarksRef').subscribe(() => {
-            setInterval(() => {
-                try {
-                    const jump = this.jumpmarksRef;
-                    const height =
-                        this.cardContainer.nativeElement.getBoundingClientRect()
-                            .bottom -
-                        this.cardContainer.nativeElement.getBoundingClientRect()
-                            .top;
-                    const pos =
-                        this.cardContainer.nativeElement.scrollTop -
-                        height -
-                        200;
-                    let closest = 999999;
-                    for (const jumpmark of this.jumpmarks) {
-                        const element = document.getElementById(jumpmark.id);
-                        const top = element.getBoundingClientRect().top;
-                        if (Math.abs(top - pos) < closest) {
-                            closest = Math.abs(top - pos);
-                            this.jumpmarkActive = this.jumpmarks[
-                                Helper.indexOfObjectArray(
-                                    this.jumpmarks,
-                                    'id',
-                                    element.id,
-                                )
-                            ];
-                        }
-                    }
-                } catch (e) {}
-            }, 1000 / 20); // 20 FPS
+            this.updateActiveJumpmark();
         });
     }
 
@@ -258,9 +232,19 @@ export class CardComponent implements AfterContentInit, OnDestroy {
         this.onScrolled.emit();
     }
 
-    private scrollSmooth(jumpmark: CardJumpmark) {
+    onScroll() {
+        if (this.shouldUpdateJumpmarkOnScroll) {
+            this.updateActiveJumpmark();
+        }
+    }
+
+    async scrollSmooth(jumpmark: CardJumpmark): Promise<void> {
         const pos = document.getElementById(jumpmark.id).offsetTop;
-        UIHelper.scrollSmoothElement(pos, this.cardContainer.nativeElement, 2);
+        this.jumpmarkActive = jumpmark;
+        this.shouldUpdateJumpmarkOnScroll = false;
+        await UIHelper.scrollSmoothElement(pos, this.cardContainer.nativeElement, 2);
+        // Leave a little time for the last scroll event to propagate before enabling updates again.
+        window.setTimeout(() => (this.shouldUpdateJumpmarkOnScroll = true), 20);
     }
 
     private setInitialFocus() {
@@ -292,6 +276,48 @@ export class CardComponent implements AfterContentInit, OnDestroy {
         // If this happens although there are buttons or inputs on the dialog,
         // make sure these are there from the beginning and not inserted later
         // on.
+    }
+
+    private updateActiveJumpmark(): void {
+        try {
+            this.jumpmarkActive = this.getActiveJumpmark();
+        } catch (e) {
+            console.warn('getActiveJumpmark failed:', e);
+        }
+    }
+
+    /**
+     * Returns the jumpmark that should be highlighted as active based on current scroll position.
+     *
+     * Returns `null` if no active jumpmark could be found.
+     */
+    private getActiveJumpmark(): CardJumpmark | null {
+        // Check how much of any jumpmark section is visible on screen. Return either the first
+        // (topmost) section that is visible completely or, if there is none, the one with that
+        // covers most of the card's pixels.
+        const cardTop = this.cardContainer.nativeElement.getBoundingClientRect().top
+        const cardBottom = this.cardContainer.nativeElement.getBoundingClientRect().bottom
+        let activeJumpmark: CardJumpmark = null;
+        let maxPixelsVisible = 0;
+        for (const jumpmark of this.jumpmarks) {
+            const headingElement = document.getElementById(jumpmark.id);
+            const sectionTop = headingElement.getBoundingClientRect().top;
+            const sectionBottom = headingElement.nextElementSibling.getBoundingClientRect().bottom;
+            if (sectionTop >= cardTop && sectionBottom < cardBottom) {
+                // The section is completely visible.
+                return jumpmark;
+            }
+            const pixelsVisible = Math.min(sectionBottom, cardBottom)
+                - Math.max(sectionTop, cardTop);
+            if (pixelsVisible > maxPixelsVisible) {
+                maxPixelsVisible = pixelsVisible;
+                activeJumpmark = jumpmark;
+            } else if (maxPixelsVisible > 0 && pixelsVisible <= 0) {
+                // We are past the visible sections, no point in continuing.
+                break;
+            }
+        }
+        return activeJumpmark;
     }
 }
 export enum CardType {

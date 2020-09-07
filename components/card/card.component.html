@@ -27,7 +27,15 @@
               (click)="scrollSmooth(jumpmark)"
       ><i icon [iconId]="jumpmark.icon"></i> {{jumpmark.label}}</button>
     </div>
-    <mat-card-content #cardContainer infinite-scroll [class.card-content-header]="header" [scrollWindow]="false" (scrolled)="scrolled()"><ng-content></ng-content></mat-card-content>
+    <mat-card-content
+      #cardContainer
+      infinite-scroll
+      [class.card-content-header]="header"
+      [scrollWindow]="false"
+      (scrolled)="scrolled()"
+      (scroll)="onScroll()"
+      ><ng-content></ng-content>
+    </mat-card-content>
     <mat-card-actions #cardActions *ngIf="_buttons && _buttons.length">
       <div *ngFor="let button of _buttons">
         <button *ngIf="button.type==1" mat-flat-button color="primary" [disabled]="button.disabled" (click)="button.callback()">{{button.name | translate}}</button>

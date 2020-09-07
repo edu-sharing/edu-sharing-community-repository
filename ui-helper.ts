@@ -598,13 +598,13 @@ export class UIHelper {
                     );
                     finished = currentPos >= pos;
                 }
+                if (axis == 'x') element.scrollLeft = currentPos;
+                else element.scrollTop = currentPos;
                 if (finished) {
                     clearInterval(interval);
                     element.removeAttribute('data-is-scrolling');
                     resolve();
                 }
-                if (axis == 'x') element.scrollLeft = currentPos;
-                else element.scrollTop = currentPos;
             }, 16);
             element.setAttribute('data-is-scrolling', 'true');
         });
