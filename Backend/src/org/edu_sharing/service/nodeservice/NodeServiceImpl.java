@@ -920,22 +920,24 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
 				NodeRef oldNodeRef = new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, nodeId);
 				NodeRef newNode = null;
 				try {
-					newNode = copyNode(nodeId, container, false);
+					newNode = copyNode(nodeId, container, true);
 				} catch (Throwable t) {
 					throw new RuntimeException(t);
 				}
 				policyBehaviourFilter.disableBehaviour(newNode);
 				// replace owner, creator & modifier
-				setOwner(newNode.getId(), owner);
-				NodeServiceHelper.copyProperty(oldNodeRef, newNode, CCConstants.CM_PROP_C_CREATOR);
-				NodeServiceHelper.copyProperty(oldNodeRef, newNode, CCConstants.CM_PROP_C_MODIFIER);
-				setProperty(StoreRef.PROTOCOL_WORKSPACE, StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(), nodeId, CCConstants.CCM_PROP_IO_PUBLISHED_MODE, "copy");
+				setPublishedCopyProperties(oldNodeRef, newNode, owner);
+				setProperty(StoreRef.PROTOCOL_WORKSPACE, StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(), oldNodeRef.getId(), CCConstants.CCM_PROP_IO_PUBLISHED_MODE, "copy");
 				setProperty(newNode.getStoreRef().getProtocol(), newNode.getStoreRef().getIdentifier(), newNode.getId(), CCConstants.CCM_PROP_IO_PUBLISHED_DATE, new Date());
 				setProperty(newNode.getStoreRef().getProtocol(), newNode.getStoreRef().getIdentifier(), newNode.getId(), CCConstants.CCM_PROP_IO_PUBLISHED_ORIGINAL,
-						new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, nodeId));
-				NodeServiceHelper.copyProperty(new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, nodeId), newNode, CCConstants.LOM_PROP_LIFECYCLE_VERSION);
-				NodeServiceHelper.copyProperty(new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, nodeId), newNode, CCConstants.CCM_PROP_IO_VERSION_COMMENT);
-
+						oldNodeRef);
+				NodeServiceHelper.copyProperty(oldNodeRef, newNode, CCConstants.LOM_PROP_LIFECYCLE_VERSION);
+				NodeServiceHelper.copyProperty(oldNodeRef, newNode, CCConstants.CCM_PROP_IO_VERSION_COMMENT);
+				for(ChildAssociationRef child : nodeService.getChildAssocs(newNode)){
+					policyBehaviourFilter.disableBehaviour(child.getChildRef());
+					setPublishedCopyProperties(oldNodeRef, child.getChildRef(), owner);
+					policyBehaviourFilter.enableBehaviour(child.getChildRef());
+				}
 				serviceRegistry.getPermissionService().deletePermissions(newNode);
 				setPermissions(newNode.getId(), CCConstants.AUTHORITY_GROUP_EVERYONE,
 						new String[]{CCConstants.PERMISSION_CONSUMER, CCConstants.PERMISSION_CC_PUBLISH},
@@ -945,6 +947,12 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
 			});
 		});
 
+	}
+
+	private void setPublishedCopyProperties(NodeRef oldNodeRef, NodeRef newNode, String owner) {
+		setOwner(newNode.getId(), owner);
+		NodeServiceHelper.copyProperty(oldNodeRef, newNode, CCConstants.CM_PROP_C_CREATOR);
+		NodeServiceHelper.copyProperty(oldNodeRef, newNode, CCConstants.CM_PROP_C_MODIFIER);
 	}
 
 	@Override
