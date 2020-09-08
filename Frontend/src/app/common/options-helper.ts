@@ -344,7 +344,7 @@ export class OptionsHelperService {
             } else if (objects[0].ref) {
                 if(objects[0].type === RestConstants.CCM_TYPE_SAVED_SEARCH) {
                     return ElementType.SavedSearch;
-                } else if(objects[0].aspects.indexOf(RestConstants.CCM_ASPECT_IO_CHILDOBJECT)){
+                } else if(objects[0].aspects.indexOf(RestConstants.CCM_ASPECT_IO_CHILDOBJECT) !== -1){
                     return ElementType.NodeChild;
                 } else {
                     if(NodeHelper.isNodePublishedCopy(objects[0])){
