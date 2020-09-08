@@ -37,6 +37,9 @@
       ><ng-content></ng-content>
     </mat-card-content>
     <mat-card-actions #cardActions *ngIf="_buttons && _buttons.length">
+      <div class="additional-action-area-content">
+        <ng-content select="[action-area]"></ng-content>
+      </div>
       <div *ngFor="let button of _buttons">
         <button *ngIf="button.type==1" mat-flat-button color="primary" [disabled]="button.disabled" (click)="button.callback()">{{button.name | translate}}</button>
         <button *ngIf="button.type==2" mat-button color="primary" [disabled]="button.disabled" (click)="button.callback()">{{button.name | translate}}</button>
