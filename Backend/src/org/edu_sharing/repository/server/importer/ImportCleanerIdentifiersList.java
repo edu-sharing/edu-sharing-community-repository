@@ -126,7 +126,7 @@ public class ImportCleanerIdentifiersList {
 			Document doc = builder.parse(new InputSource(new StringReader(queryResult)));
 			
 			String cursor = (String)xpath.evaluate("/OAI-PMH/ListIdentifiers/resumptionToken/@cursor", doc, XPathConstants.STRING);
-			String size = (String)xpath.evaluate("/OAI-PMH/ListRecords/resumptionToken/@completeListSize", doc, XPathConstants.STRING);
+			String size = (String)xpath.evaluate("/OAI-PMH/ListIdentifiers/resumptionToken/@completeListSize", doc, XPathConstants.STRING);
 			if(size!=null){
 				completeListSize = Integer.parseInt(size);
 			}
