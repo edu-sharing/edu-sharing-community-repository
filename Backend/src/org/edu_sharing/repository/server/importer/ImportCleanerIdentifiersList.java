@@ -60,7 +60,7 @@ public class ImportCleanerIdentifiersList {
 			
 			
 			String url = oaiBaseUrl + "?verb=ListIdentifiers&set=" + set + "&metadataPrefix=" + metadataPrefix;
-			readAllNodesAtOaiService(url);
+			readAllNodesAtOaiService(url, true);
 			
 			logger.info("found:" + allNodesInSet.size() +" in repository for set " + set);
 			logger.info("found:" + nodeAtOaiService.size() +" at oai service " + oaiBaseUrl + " set:" + set);
@@ -115,7 +115,7 @@ public class ImportCleanerIdentifiersList {
 	
 
 	
-	private void readAllNodesAtOaiService(String url) throws Throwable{
+	private void readAllNodesAtOaiService(String url, boolean primaryCall) throws Throwable{
 		
 		logger.info("url:"+url);
 		Integer completeListSize = null;
@@ -127,7 +127,7 @@ public class ImportCleanerIdentifiersList {
 			
 			String cursor = (String)xpath.evaluate("/OAI-PMH/ListIdentifiers/resumptionToken/@cursor", doc, XPathConstants.STRING);
 			String size = (String)xpath.evaluate("/OAI-PMH/ListIdentifiers/resumptionToken/@completeListSize", doc, XPathConstants.STRING);
-			if(size!=null){
+			if(primaryCall && size!=null){
 				completeListSize = Integer.parseInt(size);
 			}
 			String token = (String)xpath.evaluate("/OAI-PMH/ListIdentifiers/resumptionToken", doc, XPathConstants.STRING);
@@ -143,7 +143,7 @@ public class ImportCleanerIdentifiersList {
 				if (token.trim().length() > 0) {
 					try {
 						String urlNext = this.oaiBaseUrl + "?verb=ListIdentifiers&resumptionToken=" + token;
-						readAllNodesAtOaiService(urlNext);
+						readAllNodesAtOaiService(urlNext, false);
 
 					} catch (NumberFormatException e) {
 						logger.error(e.getMessage(), e);
@@ -153,7 +153,7 @@ public class ImportCleanerIdentifiersList {
 				}
 			}
 		}
-		if(completeListSize != null && nodeAtOaiService.size() != completeListSize){
+		if(primaryCall && completeListSize != null && nodeAtOaiService.size() != completeListSize){
 			throw new IllegalStateException("Count of completeListSize (" + completeListSize+") does not match with fetched oai count (" + nodeAtOaiService.size()+")");
 		}
 	}
