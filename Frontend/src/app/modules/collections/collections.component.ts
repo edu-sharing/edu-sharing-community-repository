@@ -677,7 +677,7 @@ export class CollectionsMainComponent{
             this.addToOther=[data.node];
           });
         }
-        if(params['nodeId']){
+        /*if(params['nodeId']){
           let node=params['nodeId'].split("/");
           node=node[node.length-1];
           console.log("node: "+node);
@@ -687,7 +687,7 @@ export class CollectionsMainComponent{
             //this.displayCollectionById(id)
           });
         }
-        else {
+        else {*/
           this.showCollection=id!='-root-';
           this.displayCollectionById(id,(collection:EduData.Collection)=>{
             if(params['content']){
@@ -703,7 +703,7 @@ export class CollectionsMainComponent{
             }
             this.frame.broadcastEvent(FrameEventsService.EVENT_INVALIDATE_HEIGHT);
           });
-        }
+        // }
 
       });
 
