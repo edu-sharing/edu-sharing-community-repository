@@ -134,7 +134,10 @@ public class ImportCleanerIdentifiersList {
 			if(token!=null) {
 				token = URIUtil.encodeQuery(token);
 
-				handleIdentifierList(doc);
+				int deletedCount = handleIdentifierList(doc);
+				if(completeListSize!=null){
+					completeListSize -= deletedCount;
+				}
 				//&& completeListSize != null && cursor != null &&  (new Integer(completeListSize) > new Integer(cursor))
 
 				if (token.trim().length() > 0) {
@@ -155,9 +158,9 @@ public class ImportCleanerIdentifiersList {
 		}
 	}
 	
-	private void handleIdentifierList(Document docIdentifiers) throws Throwable{
+	private int handleIdentifierList(Document docIdentifiers) throws Throwable{
 		NodeList nodeList = (NodeList)xpath.evaluate("/OAI-PMH/ListIdentifiers/header", docIdentifiers, XPathConstants.NODESET);
-		
+		int deletedCount = 0;
 		int nrOfRs = nodeList.getLength();
 		for(int i = 0; i < nrOfRs;i++){
 			Node headerNode = nodeList.item(i);
@@ -165,12 +168,13 @@ public class ImportCleanerIdentifiersList {
 
 			String status = (String)xpath.evaluate("@status", headerNode, XPathConstants.STRING);
 			if(status != null && status.trim().equals("deleted")){
-				
+				deletedCount++;
 				logger.info("Object with Identifier:"+identifier+" is deleted. Will continue with the next one");
 				continue;
 			}
 			
 			nodeAtOaiService.add(identifier);
 		}
+		return deletedCount;
 	}
 }
