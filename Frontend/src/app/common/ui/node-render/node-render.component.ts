@@ -454,7 +454,7 @@ export class NodeRenderComponent implements EventListener{
       if(this.downloadUrl) {
           NodeHelper.downloadUrl(this.toast, this.connector.getCordovaService(), this.downloadUrl);
       } else {
-          NodeHelper.downloadNode(this.toast, this.connector.getCordovaService(), this._node, this.version);
+          NodeHelper.downloadNode(this.toast, this.connector.getCordovaService(), this._node, this.isChildobject ? null : this.version);
       }
   }
 
