@@ -512,6 +512,7 @@
         "AUTHOR_FREETEXT": "General Author information",
         "AUTHOR_FREETEXT_PLACEHOLDER": "Who are the authors of this work? How should they be attributed?",
         "AUTHOR_PERSON": "Author & Contributors",
+        "AUTHOR_UNSET": "<not set>",
         "LICENSE": "license",
         "WORKFLOW": "workflow state",
         "BULK_OVERRIDE": "Replace",

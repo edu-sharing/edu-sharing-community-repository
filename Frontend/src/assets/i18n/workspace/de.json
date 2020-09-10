@@ -130,6 +130,7 @@
                 "OPEN_VERSION": "Version anzeigen",
                 "NO_LICENSE": "Das aktuelle Material hat keine zugewiesene Lizenz. Freigegebene Materialien sollten eine eindeutige Lizenz besitzen, damit festgelegt ist, ob und wie das Material weiterverwendet werden darf",
                 "LICENSE_INFO": "Das aktuelle Material steht unter der Lizenz {{license}}.",
+                "LICENSE_AUTHOR": "Die Urheber sollen bei einer Weiterverwendung wie folgt genannt werden",
                 "LICENSE_INFO_COPY": "Bei einer veröffentlichten Kopie behält die bereits veröffentlichte Kopie die zuvor festgelegte Lizenz",
                 "SET_LICENSE": "Lizenzdialog öffnen",
                 "INHERITED": "Das übergeordnete Element/Ordner ist bereits öffentlich. Bitte deaktivieren Sie die Vererbung oder ändern Sie die Berechtigungen am übergeordneten Element",

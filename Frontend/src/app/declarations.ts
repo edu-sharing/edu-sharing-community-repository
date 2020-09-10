@@ -40,6 +40,7 @@
   import {VersionLabelPipe} from './common/ui/version-label.pipe';
   import {ToolpermissionCheckDirective} from './common/directives/toolpermission-check.directive';
   import {InputFillProgressComponent} from './common/ui/input-fill-progress/input-fill-progress.component';
+  import {NodeAuthorNamePipe} from './common/ui/node-author-name.pipe';
 
   export const DECLARATIONS = [
       MdsTestComponent,
@@ -51,6 +52,7 @@
       AutocompleteComponent,
       AuthoritySearchInputComponent,
       NodeTitlePipe,
+      NodeAuthorNamePipe,
       VersionLabelPipe,
       TimePipe,
       FileChooserComponent,

@@ -6,6 +6,7 @@
   <ng-container *ngIf="!node?.isDirectory">
     <info-message mode="info" *ngIf="getLicense()">
       {{ 'WORKSPACE.SHARE.PUBLISH.LICENSE_INFO' | translate:{license: getLicenseText()} }}
+      {{ 'WORKSPACE.SHARE.PUBLISH.LICENSE_AUTHOR' | translate }}: {{ node | nodeAuthorName}}
       <ng-container *ngIf="shareModeCopy">
         <br /><br />
         {{ 'WORKSPACE.SHARE.PUBLISH.LICENSE_INFO_COPY' | translate }}
