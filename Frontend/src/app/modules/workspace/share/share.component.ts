@@ -295,7 +295,7 @@ export class WorkspaceShareComponent {
                     );
                     this.inherited =
                         permissions[0].permissions.localPermissions.inherited;
-                    this.setInitialState();
+                    setTimeout(()=>this.setInitialState());
                 }
                 this.toast.closeModalDialog();
             });
@@ -315,6 +315,7 @@ export class WorkspaceShareComponent {
                             this.inherit,
                             data.permissions.localPermissions.permissions,
                         );
+                        // dealy on tick to let sub-components (share-publish) init
                         this.initialState = this.getState();
                     }
                 },
@@ -478,7 +479,7 @@ export class WorkspaceShareComponent {
     }
 
     isStateModified() {
-        return this.initialState != this.getState();
+        return this.initialState !== this.getState();
     }
 
     getState() {
@@ -722,7 +723,8 @@ export class WorkspaceShareComponent {
     getPublishActive() {
         return this.getPublishInherit() ||
             // this.localPublish() ||
-            this.publishComponent?.shareMode != null;
+            this.publishComponent?.shareModeDirect ||
+            this.publishComponent?.shareModeCopy;
     }
 
     private getAuthorityPos(permissions: Permission[], authority: string) {

@@ -6,7 +6,7 @@
   <ng-container *ngIf="!node?.isDirectory">
     <info-message mode="info" *ngIf="getLicense()">
       {{ 'WORKSPACE.SHARE.PUBLISH.LICENSE_INFO' | translate:{license: getLicenseText()} }}
-      <ng-container *ngIf="shareMode === 'copy'">
+      <ng-container *ngIf="shareModeCopy">
         <br /><br />
         {{ 'WORKSPACE.SHARE.PUBLISH.LICENSE_INFO_COPY' | translate }}
       </ng-container>
@@ -42,20 +42,22 @@
   <info-message mode="info" *ngIf="isCopy">
     {{'WORKSPACE.SHARE.PUBLISH.COPY_ACTIVE' | translate}}
   </info-message>
-  <mat-radio-group [(ngModel)]="shareMode" (ngModelChange)="updateShareMode($event)" *ngIf="!inherited">
-    <mat-radio-button class="mat-radio-multiline" [value]="null" [disabled]="isCopy">
-      <h4>{{'WORKSPACE.SHARE.PUBLISH.MODE_OFF' | translate}}</h4>
-      <h5>{{'WORKSPACE.SHARE.PUBLISH.MODE_OFF_INFO' | translate}}</h5>
-    </mat-radio-button>
-    <mat-radio-button class="mat-radio-multiline" value="direct" [disabled]="isCopy">
+  <div *ngIf="!inherited" class="share-type">
+    <mat-checkbox class="mat-checkbox-multiline"
+                  [(ngModel)]="shareModeDirect"
+                  (ngModelChange)="updateShareMode()"
+                  value="direct">
       <h4>{{'WORKSPACE.SHARE.PUBLISH.MODE_DIRECT' | translate}}</h4>
       <h5>{{'WORKSPACE.SHARE.PUBLISH.MODE_DIRECT_INFO' | translate}}</h5>
-    </mat-radio-button>
-    <mat-radio-button class="mat-radio-multiline" value="copy" [disabled]="!copyAllowed()">
+    </mat-checkbox>
+    <mat-checkbox [(ngModel)]="shareModeCopy"
+                  class="mat-checkbox-multiline"
+                  (ngModelChange)="$event ? doiActive = true : null; updateShareMode()"
+                  [disabled]="!copyAllowed() || isCopy">
       <h4>{{'WORKSPACE.SHARE.PUBLISH.MODE_COPY' | translate}}</h4>
       <h5>{{'WORKSPACE.SHARE.PUBLISH.MODE_COPY_INFO' | translate}}</h5>
-    </mat-radio-button>
-    <div class="published-versions-container" *ngIf="shareMode === 'copy'">
+    </mat-checkbox>
+    <div class="published-versions-container" *ngIf="shareModeCopy">
       <div class="published-versions">
         <div class="version-republish">
           <mat-radio-group [(ngModel)]="republish"
@@ -85,10 +87,10 @@
         </div>
       </div>
     </div>
-  </mat-radio-group>
+  </div>
 </div>
 <div class="doi" *ngIf="doiPermission && publishCopyPermission &&
-                        !inherited && shareMode=='copy' && republish">
+                        !inherited && shareModeCopy && republish">
   <mat-checkbox [disabled]="doiDisabled"
                 [(ngModel)]="doiActive"
                 (ngModelChange)="updatePublishedVersions()"
@@ -100,7 +102,7 @@
     <div class="label-secondary">{{'WORKSPACE.SHARE.DOI_INFO' | translate}}</div>
   </mat-checkbox>
 </div>
-<div class="published-versions-container" *ngIf="shareMode === 'copy'">
+<div class="published-versions-container" *ngIf="shareModeCopy">
   <div class="published-versions">
     <h6 class="published-versions mat-heading-6">{{'WORKSPACE.SHARE.PUBLISH.VERSIONS_PUBLISHED' | translate}}</h6>
 

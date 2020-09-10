@@ -28,8 +28,12 @@ export class SharePublishComponent implements OnChanges {
   @Output() onDisableInherit = new EventEmitter<void>();
   @Output() onInitCompleted = new EventEmitter<void>();
   doiPermission: boolean;
-  initialShareMode: ShareMode;
-  shareMode: ShareMode;
+  initialState: {
+    copy: boolean,
+    direct: boolean
+  };
+  shareModeCopy: boolean;
+  shareModeDirect: boolean;
   publishCopyPermission: boolean;
   doiActive: boolean;
   doiDisabled: boolean;
@@ -53,6 +57,8 @@ export class SharePublishComponent implements OnChanges {
 
   async ngOnChanges(changes: SimpleChanges) {
     if (this.node && this.permissions) {
+      // refresh already for providing initial state
+      this.refresh();
       this.node = (await this.nodeService.getNodeMetadata(this.node.ref.id, [RestConstants.ALL]).toPromise()).node;
       this.refresh();
       this.onInitCompleted.emit();
@@ -80,7 +86,7 @@ export class SharePublishComponent implements OnChanges {
     this.doiDisabled = this.doiActive;
     const prop = this.node.properties[RestConstants.CCM_PROP_PUBLISHED_MODE]?.[0];
     if(prop === ShareMode.Copy) {
-      this.shareMode = ShareMode.Copy;
+      this.shareModeCopy = true;
       this.isCopy = true;
       this.nodeService.getPublishedCopies(this.node.ref.id).subscribe((nodes) => {
         this.publishedVersions = nodes.nodes.reverse();
@@ -88,39 +94,36 @@ export class SharePublishComponent implements OnChanges {
       }, error => {
         this.toast.error(error);
       });
-    } else if(prop === ShareMode.Direct || !prop) {
-      this.shareMode = ShareMode.Direct;
     }
     if(prop !== ShareMode.Copy) {
       this.republish = true;
     }
-    if(this.shareMode === ShareMode.Direct) {
-      // if GROUP_EVERYONE is not yet invited -> reset to off
-      if(this.permissions.filter(
-          (p: Permission) => p.authority?.authorityName === RestConstants.AUTHORITY_EVERYONE).length === 0
-      ) {
-        this.shareMode = null;
-      }
-    }
-    this.initialShareMode = this.shareMode;
+    // if GROUP_EVERYONE is not yet invited -> reset to off
+    this.shareModeDirect = this.permissions.some(
+        (p: Permission) => p.authority?.authorityName === RestConstants.AUTHORITY_EVERYONE
+    );
+    this.initialState = {
+      copy: this.shareModeCopy,
+      direct: this.shareModeDirect
+    };
     this.updatePublishedVersions();
   }
 
 
 
-  updateShareMode(shareMode: ShareMode, force = false) {
-    this.shareMode = shareMode;
-    if(this.shareMode != null && !force) {
+  updateShareMode(force = false) {
+    if((this.shareModeCopy  || this.shareModeDirect) && !force) {
       if (this.config.instant('publishingNotice', false)) {
         let cancel = () => {
-          this.updateShareMode(null, true);
+          this.shareModeDirect = false;
+          this.shareModeCopy = false;
           this.toast.closeModalDialog();
         };
         this.toast.showModalDialog(
             'WORKSPACE.SHARE.PUBLISHING_WARNING_TITLE',
             'WORKSPACE.SHARE.PUBLISHING_WARNING_MESSAGE',
             DialogButton.getYesNo(cancel, () => {
-              this.updateShareMode(shareMode);
+              this.updateShareMode(true);
               this.toast.closeModalDialog();
             }),
             true,
@@ -129,7 +132,7 @@ export class SharePublishComponent implements OnChanges {
         return;
       }
     }
-    if(this.shareMode != null && this.doiPermission) {
+    if(this.shareModeCopy && this.doiPermission) {
       this.doiActive = true;
     }
     this.updatePublishedVersions();
@@ -139,7 +142,7 @@ export class SharePublishComponent implements OnChanges {
     permissions = permissions.filter(
         (p: Permission) => p.authority.authorityName !== RestConstants.AUTHORITY_EVERYONE
     );
-    if(this.shareMode === ShareMode.Direct) {
+    if(this.shareModeDirect) {
       const permission = RestHelper.getAllAuthoritiesPermission()
       permission.permissions = [RestConstants.ACCESS_CONSUMER, RestConstants.ACCESS_CC_PUBLISH];
       permissions.push(permission);
@@ -149,7 +152,7 @@ export class SharePublishComponent implements OnChanges {
 
   save() {
     return new Observable((observer: Observer<Node|void>) => {
-      if (this.shareMode === ShareMode.Copy &&
+      if (this.shareModeCopy &&
           // republish and not yet published, or wasn't published before at all
           (this.republish && !this.currentVersionPublished() || !this.isCopy)) {
         this.nodeService.publishCopy(this.node.ref.id).subscribe(({node}) => {
@@ -193,7 +196,7 @@ export class SharePublishComponent implements OnChanges {
   }
 
   updatePublishedVersions() {
-    if(!this.isCopy && this.shareMode === ShareMode.Copy
+    if(!this.isCopy && this.shareModeCopy
         || this.republish) {
       const virtual = Helper.deepCopy(this.node);
       virtual.properties[RestConstants.CCM_PROP_PUBLISHED_DATE + '_LONG'] = [new Date().getTime()];

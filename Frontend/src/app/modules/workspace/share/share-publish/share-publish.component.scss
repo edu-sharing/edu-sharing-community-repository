@@ -8,6 +8,12 @@ info-message{
     margin-top: 10px;
   }
 }
+.share-type{
+  mat-checkbox {
+    display: flex;
+    padding: 10px 0;
+  }
+}
 .group-padding{
   padding: 5px $cardPadding;
   h5{
