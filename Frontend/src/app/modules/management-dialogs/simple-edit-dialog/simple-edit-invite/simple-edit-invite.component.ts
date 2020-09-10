@@ -123,9 +123,7 @@ export class SimpleEditInviteComponent {
           permissions.permissions = [];
         }
         if (addPermission) {
-          if(publish && n.properties?.[RestConstants.CCM_PROP_PUBLISHED_MODE]?.[0] === ShareMode.Copy) {
-              console.warn('Node ' + n.ref.id + ' shall be published, but is already published via copy. No permissions will be added');
-          } else if (this.stablePermissionState) {
+          if (this.stablePermissionState) {
             permissions.permissions = [addPermission];
           } else {
             permissions.permissions =
