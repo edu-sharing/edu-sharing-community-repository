@@ -356,3 +356,12 @@ label .label-secondary{
     padding:0 8px;
   }
 }
+.mat-select-panel, .mat-autocomplete-panel {
+  .mat-option{
+    color: $primary;
+  }
+  .mat-option.mat-selected:not(.mat-option-multiple){
+    background-color: $cardLightBackground;
+    font-weight: bold;
+  }
+}
