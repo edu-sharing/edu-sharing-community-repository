@@ -61,6 +61,10 @@ $previewHeight: 160px;
     color: $textVeryLight !important;
     cursor: default;
 }
+.import-blocked{
+    text-decoration: line-through;
+    opacity: 0.75;
+}
 .noCCPublish > div,
 .noPermissions > div {
     /*opacity:0.5;*/
