@@ -755,7 +755,10 @@
 				<property name="ccm:importmodified">
 					<type>d:datetime</type>
 				</property>
-
+				<!-- if import blocked, no reimport for that object is allowed -->
+				<property name="ccm:importblocked">
+					<type>d:boolean</type>
+				</property>
 				<!-- for elixier objects thumbnail url -->
 				<property name="ccm:thumbnailurl">
 					<type>d:text</type>

@@ -515,6 +515,7 @@
         "ADD_NODE_STORE": "Auf Merkliste",
         "DELETE": "Löschen",
         "UNPUBLISH": "Veröffentlichung aufheben",
+        "UNBLOCK_IMPORT": "Reaktivieren",
         "REMOVE_REF": "Aus Sammlung entfernen",
         "CUT": "Ausschneiden",
         "COPY": "Kopieren",

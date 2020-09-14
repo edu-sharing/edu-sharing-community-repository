@@ -482,6 +482,7 @@
         "ADD_NODE_STORE": "Add to memo list",
         "DELETE": "Delete",
         "UNPUBLISH": "Unpublish",
+        "UNBLOCK_IMPORT": "Reactivate",
         "REMOVE_REF": "Remove from collection",
         "CUT": "Cut",
         "COPY": "Copy",

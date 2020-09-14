@@ -118,6 +118,10 @@ public class BulkServiceImpl implements BulkService {
 			// 2. versioning (use the regular service for proper versioning)
 			NodeServiceFactory.getLocalService().createVersion(existing.getId(), propertiesNative);
 		}else{
+			String blocked = NodeServiceHelper.getProperty(existing, CCConstants.CCM_PROP_IO_IMPORT_BLOCKED);
+			if (Boolean.parseBoolean(blocked)) {
+				throw new IllegalStateException("The given node was blocked for any updates and should not be reimported");
+			}
 			HashMap<String, Object> propertiesKeep = checkInternalOverrides(propertiesNative, existing);
 			if(resetVersion){
 				versionServiceAlfresco.deleteVersionHistory(existing);

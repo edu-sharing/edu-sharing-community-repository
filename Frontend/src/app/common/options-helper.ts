@@ -334,24 +334,32 @@ export class OptionsHelperService {
     private hasSelection() {
         return this.data.selectedObjects && this.data.selectedObjects.length;
     }
-    private getType(objects: Node[] | any[]) {
-        // @ TODO may combine for all
-        if (objects && objects[0]) {
-            if(objects[0].authorityType === RestConstants.AUTHORITY_TYPE_GROUP) {
-                return ElementType.Group;
-            } else if(objects[0].authorityType === RestConstants.AUTHORITY_TYPE_USER) {
-                return ElementType.Person;
-            } else if (objects[0].ref) {
-                if(objects[0].type === RestConstants.CCM_TYPE_SAVED_SEARCH) {
-                    return ElementType.SavedSearch;
-                } else if(objects[0].aspects.indexOf(RestConstants.CCM_ASPECT_IO_CHILDOBJECT) !== -1){
-                    return ElementType.NodeChild;
-                } else {
-                    if(NodeHelper.isNodePublishedCopy(objects[0])){
-                        return ElementType.NodePublishedCopy;
-                    }
-                    return ElementType.Node;
+    private getType(objects: Node[]) : ElementType {
+        if (objects) {
+            const types = Array.from(new Set(objects.map((o) => this.getTypeSingle(o))));
+            if(types.length === 1) {
+                return types[0];
+            }
+        }
+        return ElementType.Unknown;
+    }
+    private getTypeSingle(object: Node | any) {
+        if(object.authorityType === RestConstants.AUTHORITY_TYPE_GROUP) {
+            return ElementType.Group;
+        } else if(object.authorityType === RestConstants.AUTHORITY_TYPE_USER) {
+            return ElementType.Person;
+        } else if (object.ref) {
+            if(object.type === RestConstants.CCM_TYPE_SAVED_SEARCH) {
+                return ElementType.SavedSearch;
+            } else if(object.aspects.indexOf(RestConstants.CCM_ASPECT_IO_CHILDOBJECT) !== -1) {
+                return ElementType.NodeChild;
+            } else {
+                if(NodeHelper.isNodePublishedCopy(object)) {
+                    return ElementType.NodePublishedCopy;
+                } else if (object.properties[RestConstants.CCM_PROP_IMPORT_BLOCKED]?.[0] === 'true') {
+                    return ElementType.NodeBlockedImport;
                 }
+                return ElementType.Node;
             }
         }
         return ElementType.Unknown;
@@ -409,7 +417,7 @@ export class OptionsHelperService {
         const debugNode = new OptionItem('OPTIONS.DEBUG', 'build', (object) =>
             management.nodeDebug = this.getObjects(object)[0],
         );
-        debugNode.elementType = [ElementType.Node, ElementType.NodePublishedCopy, ElementType.SavedSearch, ElementType.NodeChild];
+        debugNode.elementType = [ElementType.Node, ElementType.NodePublishedCopy, ElementType.NodeBlockedImport, ElementType.SavedSearch, ElementType.NodeChild];
         debugNode.onlyDesktop = true;
         debugNode.constrains = [Constrain.AdminOrDebug, Constrain.NoBulk];
         debugNode.group = DefaultGroups.View;
@@ -725,6 +733,17 @@ export class OptionsHelperService {
         deleteNode.group = DefaultGroups.Delete;
         deleteNode.priority = 10;
 
+        const unblockNode = new OptionItem('OPTIONS.UNBLOCK_IMPORT', 'sync',(object) => {
+            management.nodeImportUnblock = this.getObjects(object);
+        });
+        unblockNode.elementType = [ElementType.NodeBlockedImport];
+        unblockNode.constrains = [Constrain.HomeRepository, Constrain.NoCollectionReference, Constrain.User];
+        unblockNode.permissions = [RestConstants.PERMISSION_DELETE];
+        unblockNode.permissionsMode = HideMode.Hide;
+        unblockNode.group = DefaultGroups.Edit;
+        unblockNode.priority = 10;
+
+
         const unpublishNode = new OptionItem('OPTIONS.UNPUBLISH', 'cloud_off',(object) => {
             management.nodeDelete = this.getObjects(object);
         });
@@ -732,7 +751,6 @@ export class OptionsHelperService {
         unpublishNode.constrains = [Constrain.HomeRepository, Constrain.User];
         unpublishNode.permissions = [RestConstants.PERMISSION_DELETE];
         unpublishNode.permissionsMode = HideMode.Hide;
-        unpublishNode.key = 'Delete';
         unpublishNode.group = DefaultGroups.Delete;
         unpublishNode.priority = 10;
 
@@ -937,6 +955,7 @@ export class OptionsHelperService {
         options.push(pasteNodes);
         options.push(deleteNode);
         options.push(unpublishNode);
+        options.push(unblockNode);
         options.push(removeNodeRef);
         options.push(reportNode);
         options.push(toggleViewType);
@@ -947,7 +966,6 @@ export class OptionsHelperService {
     }
 
     private editConnector(node: Node|any, type: Filetype = null, win: any = null, connectorType: Connector = null) {
-        console.log(node);
         UIHelper.openConnector(this.connectors, this.iamService, this.eventService, this.toast, node, type, win, connectorType);
     }
     private canAddObjects() {

@@ -109,6 +109,7 @@ public class NodeCustomizationPolicies implements OnContentUpdatePolicy, OnCreat
 			CCConstants.CCM_PROP_WF_PROTOCOL,
 			CCConstants.CCM_PROP_WF_RECEIVER,
 			CCConstants.CCM_PROP_WF_STATUS,
+			CCConstants.CCM_PROP_IO_IMPORT_BLOCKED,
 			CCConstants.CCM_PROP_MAP_COLLECTIONREMOTEID,
 			CCConstants.CM_PROP_METADATASET_EDU_METADATASET,
 			CCConstants.CM_PROP_METADATASET_EDU_FORCEMETADATASET,

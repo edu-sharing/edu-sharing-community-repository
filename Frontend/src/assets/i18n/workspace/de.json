@@ -65,6 +65,10 @@
         "DELETE_MESSAGE_SINGLE_USAGES": "Möchten Sie das Element '{{name}}' wirklich löschen?\n\nDas Element wird insgesamt {{usages}} mal in Sammlungen bzw. angeschlossenen Systemen verwendet.\n\nDurch das Löschen ist das Element dort nicht mehr nutzbar.",
         "DELETE_TITLE": "Elemente löschen?",
         "DELETE_MESSAGE": "Möchten Sie alle ausgewählten Elemente löschen?",
+        "DELETE_IMPORT_BLOCK": "Import blockieren",
+        "DELETE_IMPORT_BLOCK_INFO": "Das Element wird gesperrt und zukünftig nicht erneut importiert",
+        "UNBLOCK_TITLE": "Element(e) reaktivieren?",
+        "UNBLOCK_MESSAGE": "Möchten Sie die gewählten Elemente wieder für den Import freischalten?\n\nGgf. dauert es bis zum nächsten Import, bis die Sichtbarkeit in der Suche der Elemente wiederhergestellt ist",
         "TAB_INVITE": "Einladen",
         "TAB_INVITED": "Schon Eingeladen",
         "TAB_PUBLISH": "Veröffentlichen",
@@ -221,7 +225,8 @@
                 "PREVIEW_CHANGED": "Vorschaubild aktualisiert",
                 "BULK_CREATE": "Node via Bulk importiert",
                 "BULK_UPDATE": "Node via Bulk aktualisiert",
-                "BULK_UPDATE_RESYNC": "Lokale Änderungen auf Bulk-Änderungen angewendet"
+                "BULK_UPDATE_RESYNC": "Lokale Änderungen auf Bulk-Änderungen angewendet",
+                "IMPORT_BLOCKED": "Status der Import-Blockierung wurde geändert"
             }
         },
         "LTI_TOOLS": {
