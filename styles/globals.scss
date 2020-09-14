@@ -97,3 +97,48 @@
     }
   }
 }
+ng5-slider.ng5-slider {
+  .ng5-slider-bar {
+    background: #e1e1e1;
+    border-radius: 2px;
+  }
+  .ng5-slider-selection {
+    background-color: $primary;
+  }
+  .ng5-slider-pointer {
+    background-color: $primary;
+  }
+  .ng5-slider-pointer.ng5-slider-active:after {
+    background-color: $primaryDark;
+  }
+  .ng5-slider-tick.ng5-slider-selected {
+    background-color: $primaryMediumLight;
+  }
+  .ng5-slider-bubble {
+    color: $primaryDark;
+  }
+  .ng5-slider-bubble.ng5-slider-limit {
+    display: none;
+    color: $primaryDark;
+  }
+}
+ng5-slider.ng5-slider-small {
+  .ng5-slider-bubble {
+    font-size: $fontSizeSmall;
+  }
+  .ng5-slider-bar {
+    height: 2px;
+  }
+  .ng5-slider-pointer {
+    width: 16px;
+    height: 16px;
+    top:-7px
+  }
+  .ng5-slider-pointer:after {
+    display: none;
+    /*width: 4px;
+    height: 4px;
+    top: 6px;
+    left: 6px;*/
+  }
+}

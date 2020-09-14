@@ -356,6 +356,10 @@ label .label-secondary{
     padding:0 8px;
   }
 }
+mat-label.mat-label-standalone{
+  font-size: $fontSizeSmall;
+  color: $textLight;
+}
 .mat-select-panel, .mat-autocomplete-panel {
   .mat-option{
     color: $primary;

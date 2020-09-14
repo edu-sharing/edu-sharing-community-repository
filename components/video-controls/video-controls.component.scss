@@ -10,37 +10,6 @@
     width: 90%;
 }
 
-::ng-deep {
-    .selectionSlider .ng5-slider .ng5-slider-bar {
-        background: #e1e1e1;
-        border-radius: 2px;
-    }
-    .selectionSlider .ng5-slider .ng5-slider-selection {
-        background-color: $primary;
-    }
-
-    .selectionSlider .ng5-slider .ng5-slider-pointer {
-        background-color: $primary;
-    }
-
-    .selectionSlider .ng5-slider .ng5-slider-pointer.ng5-slider-active:after {
-        background-color: $primaryDark;
-    }
-
-    .selectionSlider .ng5-slider .ng5-slider-tick.ng5-slider-selected {
-        background-color: $primaryMediumLight;
-    }
-
-    .selectionSlider .ng5-slider .ng5-slider-bubble {
-        color: $primaryDark;
-    }
-
-    .selectionSlider .ng5-slider .ng5-slider-bubble.ng5-slider-limit {
-        display: none;
-        color: $primaryDark;
-    }
-}
-
 .selection {
     background: #fff;
     margin-top: -2px;
