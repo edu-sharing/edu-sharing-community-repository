@@ -17,7 +17,7 @@ import {Router} from '@angular/router';
 import {UIConstants} from "../../core-module/ui/ui-constants";
 import {ClipboardObject, TemporaryStorageService} from '../../core-module/core.module';
 import {RestUsageService} from "../../core-module/core.module";
-import {Observable} from 'rxjs';
+import {observable, Observable} from 'rxjs';
 import {BridgeService} from '../../core-bridge-module/bridge.service';
 import {LinkData, NodeHelper} from '../../core-ui-module/node-helper';
 
@@ -628,10 +628,21 @@ export class WorkspaceManagementDialogsComponent  {
         Observable.forkJoin(nodes.map((n) => {
             const properties: any = {};
             properties[RestConstants.CCM_PROP_IMPORT_BLOCKED] = [null];
-            return this.nodeService.editNodeMetadataNewVersion(n.ref.id, RestConstants.COMMENT_BLOCKED_IMPORT, properties);
-        })).subscribe((results) => {
+            return new Observable((observer) => {
+                this.nodeService.editNodeMetadataNewVersion(n.ref.id, RestConstants.COMMENT_BLOCKED_IMPORT, properties)
+                    .subscribe(({node}) => {
+                        const permissions = new LocalPermissions();
+                        permissions.inherited = true;
+                        permissions.permissions = [];
+                        this.nodeService.setNodePermissions(node.ref.id, permissions).subscribe(() => {
+                            observer.next(node);
+                            observer.complete();
+                        })
+                    })
+            });
+        })).subscribe((results: Node[]) => {
             this.toast.closeModalDialog();
-            this.onRefresh.emit(results.map(n => n.node));
+            this.onRefresh.emit(results);
         });
     }
 }
