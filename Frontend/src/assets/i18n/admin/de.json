@@ -309,7 +309,8 @@
                 "GROUPS": "Alle Gruppen & Organisationen",
                 "ORGS": "Alle Organisationen",
                 "PERSONS": "Alle Personen",
-                "CREATED_CONTENTS_BY_PERSON": "Alle erstellten Objekte eines Nutzers"
+                "CREATED_CONTENTS_BY_PERSON": "Alle erstellten Objekte eines Nutzers",
+                "BROKEN_LINKS": "Inhalte mit ungültigen/nicht erreichbaren Links"
             }
         },
         "JOBS": {
@@ -344,7 +345,8 @@
                 "BulkEditNodesJob": "Bulk-Bearbeitung von einer Property für mehrere Nodes",
                 "BulkDeleteNodesJob": "Bulk-Löschen für mehrere Nodes (z.B. für größe Ordner)",
                 "UpdateFrontpageCacheJob": "Baut den Cache für die Startseite neu auf",
-                "BulkDeleteAuthoritiesJob": "Gruppen & Organisationen im Bulk löschen"
+                "BulkDeleteAuthoritiesJob": "Gruppen & Organisationen im Bulk löschen",
+                "CheckLinkJob": "Prüft, ob das Ziel eines Links noch existiert und setzt den Status"
             }
         },
         "FOLDERTEMPLATES": {

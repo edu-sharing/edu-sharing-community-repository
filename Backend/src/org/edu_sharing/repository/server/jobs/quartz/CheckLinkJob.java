@@ -33,8 +33,8 @@ public class CheckLinkJob extends AbstractJob {
 
     Logger logger = Logger.getLogger(CheckLinkJob.class);
 
-    public static String PARAM_START_FOLDER = "START_FOLDER";
-    public static String PARAM_PROPERTY = "PROPERTY";
+    public static String PARAM_START_FOLDER = "startFolder";
+    public static String PARAM_PROPERTY = "property";
 
     @Override
     public void execute(JobExecutionContext jobExecutionContext) throws JobExecutionException {
@@ -43,6 +43,8 @@ public class CheckLinkJob extends AbstractJob {
         String property = (String)jobExecutionContext.getJobDetail().getJobDataMap().get(PARAM_PROPERTY);
         if(property == null){
             property =  CCConstants.LOM_PROP_TECHNICAL_LOCATION;
+        } else {
+            property = CCConstants.getValidGlobalName(property);
         }
         String fprop = property;
         AuthenticationUtil.runAsSystem(()->{
@@ -52,11 +54,6 @@ public class CheckLinkJob extends AbstractJob {
     }
 
     private void execute(String startFolder, String property){
-
-        if(startFolder == null) {
-            startFolder = repositoryHelper.getCompanyHome().getId();
-        }
-
 
         NodeRunner runner = new NodeRunner();
         runner.setTask((ref)->{
@@ -73,24 +70,26 @@ public class CheckLinkJob extends AbstractJob {
                 location = value.toString();
             }
             if(location != null && location.startsWith("http")){
-
+                int status = 0;
                 try {
                     StatusLine sl = makeHttpCall(location);
-                    int status = sl.getStatusCode();
+                    status = sl.getStatusCode();
                     if(status != 200) {
-                        logger.info(ref.getId() + ";" + replicationSourceId + ";" + status);
+                        //logger.info(ref.getId() + ";" + replicationSourceId + ";" + status);
                     }
                 } catch (IOException e) {
-                    logger.error(ref.getId()+";" + replicationSourceId + ";"+e.getMessage());
+                    //logger.error(ref.getId()+";" + replicationSourceId + ";"+e.getMessage());
                 }
-
+                nodeService.setProperty(ref, QName.createQName(CCConstants.CCM_PROP_IO_LOCATION_STATUS), status);
             }
-
         });
 
         runner.setTypes(Collections.singletonList(CCConstants.CCM_TYPE_IO));
-        runner.setStartFolder(startFolder);
+        if(startFolder != null) {
+            runner.setStartFolder(startFolder);
+        }
         runner.setRunAsSystem(true);
+        runner.setKeepModifiedDate(true);
         runner.setTransaction(NodeRunner.TransactionMode.Local);
         runner.setThreaded(false);
 
@@ -102,7 +101,9 @@ public class CheckLinkJob extends AbstractJob {
         RequestConfig config = RequestConfig.custom()
                 .setConnectTimeout(timeout * 1000)
                 .setConnectionRequestTimeout(timeout * 1000)
-                .setSocketTimeout(timeout * 1000).build();
+                .setSocketTimeout(timeout * 1000)
+                .setRedirectsEnabled(true)
+                .build();
         CloseableHttpClient client =
                 HttpClientBuilder.create().setDefaultRequestConfig(config).build();
 
