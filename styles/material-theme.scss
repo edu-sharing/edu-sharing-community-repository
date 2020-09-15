@@ -369,3 +369,12 @@ mat-label.mat-label-standalone{
     font-weight: bold;
   }
 }
+.mat-chip-list{
+  .mat-chip.mat-standard-chip{
+    background-color: $primaryLight;
+    .mat-chip-remove{
+      color: $primary;
+      opacity: 1;
+    }
+  }
+}
