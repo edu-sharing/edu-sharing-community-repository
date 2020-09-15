@@ -211,7 +211,8 @@ public class OrganisationService {
 			boolean isAlreadySet = false;
 			for(AccessPermission perm : allSetPerms) {
 				if(perm.getAuthority().equals(adminAuthority)
-						&& perm.getPermission().equals(PermissionService.COORDINATOR)) {
+						&& perm.getPermission().equals(PermissionService.COORDINATOR)
+						&& !perm.isInherited()) {
 					isAlreadySet = true;
 				}
 			}
