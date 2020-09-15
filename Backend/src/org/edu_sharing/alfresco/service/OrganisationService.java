@@ -216,7 +216,9 @@ public class OrganisationService {
 				}
 			}
 			if(!isAlreadySet) {
-				logger.debug("will set org admingroup as Coordnator for:" + childRef.getChildRef());
+				logger.debug("will set org admingroup as Coordnator for:" +
+						childRef.getChildRef() +" "+
+						nodeService.getProperty(childRef.getChildRef(),ContentModel.PROP_NAME));
 				if (execute) {
 					permissionService.setPermission(childRef.getChildRef(), adminAuthority, PermissionService.COORDINATOR, true);
 				}
