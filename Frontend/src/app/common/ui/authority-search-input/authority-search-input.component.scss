@@ -65,6 +65,9 @@ user-avatar{
 @media screen and (max-width: $mobileWidth) {
   .suggestion-content .text-content{
     flex-direction: column;
+    >.data{
+      width: 100%;
+    }
     >.affiliation{
       max-width: unset;
       margin: 3px 15px 0 15px;
