@@ -165,6 +165,7 @@ export enum ElementType {
   Node,
   NodeChild, // Child object
   NodePublishedCopy,
+  NodeBlockedImport, // node with property ccm:importblocked == true
   Person,
   Group,
   SavedSearch,
