@@ -20,6 +20,11 @@
         align-items: center;
     }
 }
+:host ::ng-deep .card-licenses{
+    pre{
+        white-space: pre-wrap;
+    }
+}
 .preload {
     position: fixed;
     z-index: 140;

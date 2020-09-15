@@ -6,12 +6,6 @@
   </div>
   <user-profile *ngIf="showProfile" (onCancel)="showProfile = false"></user-profile>
 
-  <div
-    class="dialog darken"
-    [style.z-index]="120"
-    *ngIf="licenseDialog"
-    [@fade]="licenseDialog"
-  ></div>
   <card
     *ngIf="licenseDialog"
     title="{{ 'LICENSE_INFORMATION' | translate }}"
@@ -20,7 +14,7 @@
     [isCancelable]="true"
     (onCancel)="licenseDialog = false"
   >
-    <div class="card-content-padding">
+    <div class="card-content-padding card-licenses">
       <spinner *ngIf="!licenseDetails"></spinner>
       <div [innerHTML]="licenseDetails"></div>
     </div>
