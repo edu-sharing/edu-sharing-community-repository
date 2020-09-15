@@ -1,19 +1,8 @@
 import {RestAdminService} from "../../../core-module/rest/services/rest-admin.service";
-import {Component, EventEmitter, Output} from "@angular/core";
-import {TranslateService} from "@ngx-translate/core";
-import {NodeStatistics, Node, Statistics, IamGroup, Group, Collection} from "../../../core-module/rest/data-object";
-import {ListItem} from "../../../core-module/ui/list-item";
-import {RestConstants} from "../../../core-module/rest/rest-constants";
-import {RestHelper} from "../../../core-module/rest/rest-helper";
-import {NodeHelper} from "../../../core-ui-module/node-helper";
-import {ConfigurationService} from "../../../core-module/rest/services/configuration.service";
-import {DialogButton, RestCollectionService, RestConnectorService, RestIamService, RestMdsService, RestMediacenterService, RestNodeService} from "../../../core-module/core.module";
-import {Helper} from "../../../core-module/rest/helper";
+import {Component} from "@angular/core";
+import {DialogButton, RestLocatorService} from "../../../core-module/core.module";
 import {Toast} from "../../../core-ui-module/toast";
-import {OptionItem} from "../../../core-ui-module/option-item";
-import {AbstractControl, FormBuilder, FormControl, FormGroup, Validators, ValidatorFn} from "@angular/forms";
-import {MdsHelper} from "../../../core-module/rest/mds-helper";
-import {UIHelper} from "../../../core-ui-module/ui-helper";
+import {ModalMessageType} from '../../../common/ui/modal-dialog-toast/modal-dialog-toast.component';
 
 // Charts.js
 declare var Chart:any;
@@ -39,6 +28,7 @@ export class AdminConfigComponent {
 
   constructor(
       private adminService: RestAdminService,
+      private locator: RestLocatorService,
       private toast: Toast,
   ) {
     this.adminService.getConfigFile(AdminConfigComponent.CLIENT_CONFIG_FILE).subscribe((data)=>{
@@ -55,20 +45,35 @@ export class AdminConfigComponent {
     });
 
   }
-
+  displayError(error: any) {
+    console.warn(error);
+    this.toast.closeModalDialog();
+    this.toast.showConfigurableDialog({
+      title: 'ADMIN.GLOBAL_CONFIG.ERROR',
+      message: 'ADMIN.GLOBAL_CONFIG.PARSE_ERROR',
+      messageParameters: { error: error?.error?.error },
+      messageType: ModalMessageType.HTML,
+      isCancelable: true,
+      buttons: [new DialogButton('ADMIN.GLOBAL_CONFIG.CHECK', DialogButton.TYPE_DANGER, () => this.toast.closeModalDialog())],
+    });
+  }
   save() {
     this.toast.showProgressDialog();
     this.adminService.updateConfigFile(AdminConfigComponent.CONFIG_FILE,this.config).subscribe(()=> {
       this.adminService.updateConfigFile(AdminConfigComponent.CLIENT_CONFIG_FILE, this.configClient).subscribe(() => {
         this.adminService.refreshAppInfo().subscribe(() => {
           this.toast.closeModalDialog();
-        }, (error) => {
-          this.toast.error(error, "ADMIN.GLOBAL_CONFIG.PARSE_ERROR");
-          this.toast.closeModalDialog();
+          this.locator.getConfig().subscribe(() => {
+                this.toast.closeModalDialog();
+                this.toast.toast('ADMIN.GLOBAL_CONFIG.SAVED');
+              },error =>
+              this.displayError(error)
+          );
+        }, error => {
+          this.displayError(error);
         })
-      }, (error) => {
-        this.toast.error(error);
-        this.toast.closeModalDialog();
+        }, error => {
+        this.displayError(error);
       });
     });
   }

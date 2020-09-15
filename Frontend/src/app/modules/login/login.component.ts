@@ -40,6 +40,7 @@ export class LoginComponent implements OnInit {
     config: any = {};
     currentProvider: any;
     disabled = false;
+    isSafeLogin=false;
     filteredProviders: any;
     isLoading = true;
     loginUrl: any;
@@ -128,6 +129,7 @@ export class LoginComponent implements OnInit {
                             return;
                         }
                     });
+                    this.isSafeLogin=this.scope==RestConstants.SAFE_SCOPE;
                     this.next = params.next;
                     this.mainnav = params.mainnav !== 'false';
                     if (this.scope === RestConstants.SAFE_SCOPE) {

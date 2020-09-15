@@ -75,7 +75,7 @@ export class OerComponent {
           this.columns[this.COLLECTIONS].push(new ListItem('COLLECTION','info'));
           this.columns[this.COLLECTIONS].push(new ListItem('COLLECTION','scope'));
           this.mdsService.getSet().subscribe((mds:any)=> {
-              this.columns[this.MATERIALS]=MdsHelper.getColumns(mds,'search');
+              this.columns[this.MATERIALS]=MdsHelper.getColumns(this.translate, mds,'search');
           });
           /*
           this.config.get("searchColumns").subscribe((data:any)=>{

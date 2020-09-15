@@ -39,7 +39,7 @@ export class SimpleEditInviteComponent {
   multipleParents: boolean;
   dirty = false;
   parentPermissions: Permission[];
-  parentAuthorities: Authority[] = [];
+  parentAuthorities: Permission[] = [];
   organization: {organization: Group, groups?: any};
   /**
    * When true, we know that we only handling with simple permissions
@@ -55,6 +55,7 @@ export class SimpleEditInviteComponent {
   tpInvite: boolean;
   tpInviteEveryone: boolean;
   missingNodePermissions: boolean;
+  inherited: boolean;
   @Input() set nodes (nodes : Node[]) {
     this._nodes = nodes;
     this.prepare();
@@ -75,9 +76,8 @@ export class SimpleEditInviteComponent {
   ) {
     this.configService.get('simpleEdit.organization.groupTypes',
         [RestConstants.GROUP_TYPE_ADMINISTRATORS]).subscribe((data) => this.organizationGroups = data);
-    // @TODO: Remove dummy value
     this.configService.get('simpleEdit.globalGroups',
-        ['GROUP_ORG_Redaktion',RestConstants.AUTHORITY_EVERYONE]).subscribe((data) => {
+        [RestConstants.AUTHORITY_EVERYONE]).subscribe((data) => {
           this.loadGlobalGroups(data);
     });
     this.connector.hasToolPermission(RestConstants.TOOLPERMISSION_INVITE).subscribe((tp) => this.tpInvite = tp);
@@ -188,9 +188,9 @@ export class SimpleEditInviteComponent {
           map((p) => p.authority.authorityName).
           filter((a) => a !== this.connector.getCurrentLogin().authorityName && a !== RestConstants.AUTHORITY_ROLE_OWNER)
       ));
-      // now, conver them back to objects
+      // now, convert them back to objects
       this.parentAuthorities = authorities.map((a) =>
-        this.parentPermissions.find((p) => p.authority.authorityName === a).authority
+        this.parentPermissions.find((p) => p.authority.authorityName === a)
       );
     }, error => {
       if(error.status === RestConstants.HTTP_FORBIDDEN) {
@@ -202,6 +202,7 @@ export class SimpleEditInviteComponent {
     Observable.forkJoin((this._nodes.map((n) => this.nodeApi.getNodePermissions(n.ref.id)))).
       subscribe((permissions) => {
         this.nodesPermissions = permissions.map((p) => p.permissions);
+        this.inherited = permissions.some((p) => p.permissions.localPermissions.inherited);
         this.organizationApi.getOrganizations().subscribe((orgs) => {
           // @TODO: Only allow for one org
           if(orgs.organizations.length >= 1) {
@@ -333,7 +334,7 @@ export class SimpleEditInviteComponent {
   }
 
   hasInvalidState() {
-    return this.multipleParents || this.parentAuthorities.length > 0 ||
+    return this.multipleParents || (this.inherited && this.parentAuthorities.length > 0) ||
            !this.tpInvite || this.missingNodePermissions;
   }
 

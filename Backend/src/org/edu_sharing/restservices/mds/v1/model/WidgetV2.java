@@ -72,6 +72,7 @@ public class WidgetV2 {
 		private String defaultvalue;
 		private boolean isSearchable;
 		private Condition condition;
+		private int maxlength;
 
 	public WidgetV2(){}
 		public WidgetV2(MetadataWidget widget) {
@@ -82,6 +83,7 @@ public class WidgetV2 {
 			this.type=widget.getType();
 			this.defaultvalue=widget.getDefaultvalue();
 			this.placeholder=widget.getPlaceholder();
+			this.maxlength=widget.getMaxlength();
 			this.unit=widget.getUnit();
 			this.min=widget.getMin();
 			this.max=widget.getMax();
@@ -273,5 +275,13 @@ public class WidgetV2 {
 		public void setSubwidgets(List<Subwidget> subwidgets) {
 			this.subwidgets = subwidgets;
 		}
-	}
+		@JsonProperty
+		public int getMaxlength() {
+			return maxlength;
+		}
+
+		public void setMaxlength(int maxlength) {
+			this.maxlength = maxlength;
+		}
+}
 

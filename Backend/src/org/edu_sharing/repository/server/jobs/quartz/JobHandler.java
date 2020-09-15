@@ -177,6 +177,8 @@ public class JobHandler {
 	
 	public static final String AUTH_INFO_KEY = "AUTH_INFO";
 
+	public static final String FILE_DATA = "FILE_DATA";
+
 	/**
 	 * Singelton
 	 */

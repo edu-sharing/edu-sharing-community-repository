@@ -43,11 +43,16 @@ public class NgServlet extends HttpServlet {
 	private static final int MAX_DESCRIPTION_LENGTH = 160;
 	private static Logger logger = Logger.getLogger(NgServlet.class);
 
+	public static final String PREVIOUS_ANGULAR_URL = "PREVIOUS_ANGULAR_URL";
+
 	@Override
 	protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
 		try {
 			ApplicationInfo home = ApplicationInfoList.getHomeRepository();
 			String head=home.getCustomHtmlHeaders();
+			// store url for shibboleth/sso, regardless if login is present or not (for guest redirects)
+			req.getSession().setAttribute(PREVIOUS_ANGULAR_URL,
+					req.getRequestURI() +( req.getQueryString() != null ? "?"+req.getQueryString() : ""));
 			File index=new File(req.getSession().getServletContext().getRealPath("index.html"));
 			String html=FileUtils.readFileToString(index);
 			if(head!=null) {

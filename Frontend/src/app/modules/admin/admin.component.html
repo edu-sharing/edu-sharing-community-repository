@@ -411,33 +411,40 @@
   </div>
 </div>
 <div *ngIf="modeIsActive('JOBS')" class="content jobs">
-    <div class="heading"><i class="material-icons">done</i><span>{{'ADMIN.TOOLKIT.START_JOB' | translate}}</span></div>
-    <div class="group">
+    <div class="heading"><i class="material-icons">done</i><span>{{'ADMIN.JOBS.START_JOB' | translate}}</span></div>
+    <section class="group">
         <form>
             <div class="inputGroupGrow">
-                <div class="info">{{'ADMIN.TOOLKIT.JOB_CLASS' | translate }}</div>
+                <div class="info">{{'ADMIN.JOBS.JOB_CLASS' | translate }}</div>
                 <div class="autocomplete">
                     <autocomplete
                             [suggestions]="jobClassesSuggested"
                             [allowAny]="true"
                             [inputMinLength]="1"
                             (updateInput)="updateJobSuggestions($event)"
-                            (addItem)="job.name=$event.item.title;job.class=$event.item.id"
+                            (addItem)="job.name=$event.item.title;job.class=$event.item.id;job.object=$event.item.originalObject"
                             (addAny)="job.name='';job.class=$event"></autocomplete>
                     <div class="job-title" *ngIf="job && job.name">{{job.name | translate}}</div>
                     <div class="job-class" *ngIf="job && job.class">{{job.class}}</div>
                 </div>
             </div>
-            <mat-form-field>
-                <textarea matInput
-                      cdkTextareaAutosize
-                      cdkAutosizeMinRows="2"
-                      cdkAutosizeMaxRows="5"
-                      name="jobParams" class="jobParams materialize-textarea" [(ngModel)]="job.params" placeholder='{"param1":"value1","param2":"value2"}'></textarea>
-            </mat-form-field>
-            <button mat-raised-button (click)="startJob()">{{'ADMIN.TOOLKIT.START_JOB' | translate }}</button>
+            <ngx-monaco-editor [options]="jobCodeOptions"
+                               [(ngModel)]="job.params"
+                               [ngModelOptions]="{standalone: true}"
+                               name="jobParams"
+                               class="jobParams materialize-textarea"
+            ></ngx-monaco-editor>
+            <div class="inputGroupGrow" *ngIf="job?.object?.upload">
+                <input #uploadJobSelect type="file" style="display:none" (change)="updateUploadFile($event, 'uploadJobsFile')">
+                <label>{{ 'ADMIN.JOBS.UPLOAD_FILE_LABEL' | translate }}</label>
+                <div class="inputGroup">
+                    <button mat-raised-button (click)="uploadJobSelect.click()">{{'ADMIN.JOBS.CHOOSE_UPLOAD_FILE' | translate}}</button>
+                    <div class="file">{{ uploadJobsFile?.name }}</div>
+                </div>
+            </div>
+            <button mat-raised-button (click)="startJob()">{{'ADMIN.JOBS.START_JOB' | translate }}</button>
         </form>
-    </div>
+    </section>
     <div class="heading"><i class="material-icons">history</i><span>{{'ADMIN.JOBS.LIST' | translate}}</span></div>
     <div class="group">
         <div class="reload"><i class="material-icons clickable" (click)="reloadJobStatus()">refresh</i></div>
@@ -543,7 +550,7 @@
     </div>
     <div class="heading"><i class="material-icons">file_upload</i><span>{{'ADMIN.TOOLKIT.UPLOAD_TEMP' | translate}}</span></div>
   <div class="group">
-    <input #uploadTempSelect type="file" style="display:none" id="uploadTempSelect" (change)="updateUploadTempFile($event)">
+    <input #uploadTempSelect type="file" style="display:none" (change)="updateUploadFile($event, 'uploadTempFile')">
     <div class="inputGroup">
       <button mat-raised-button (click)="uploadTempSelect.click()">{{'ADMIN.TOOLKIT.CHOOSE_UPLOAD_TEMP' | translate}}</button>
       <div class="file">{{ (uploadTempFile ? uploadTempFile.name : '') }}</div>
@@ -596,29 +603,35 @@
                 <mat-radio-button name="solrMode" value="export">{{'ADMIN.BROWSER.OUTPUT_MODE_EXPORT' | translate}}</mat-radio-button>
             </mat-radio-group>
       </div>
-      <div class="inputGroupGrow" *ngIf="lucene.outputMode=='export'">
-          <mat-form-field>
-              <mat-label>{{'ADMIN.BROWSER.LUCENE_EXPORT_PROPERTIES' | translate }}</mat-label>
-              <textarea matInput
-                        cdkTextareaAutosize
-                        cdkAutosizeMinRows="2"
-                        cdkAutosizeMaxRows="5"
-                        class="export-properties" [(ngModel)]="lucene.properties"></textarea>
-              <mat-hint>{{'ADMIN.BROWSER.LUCENE_EXPORT_PROPERTIES_HINT' | translate }}</mat-hint>
-          </mat-form-field>
-      </div>
-      <div class="inputGroupGrow" *ngIf="lucene.outputMode=='export'">
-          <div class="info">{{'ADMIN.BROWSER.OUTPUT_MODE' | translate }}</div>
-          <div>
-              <mat-radio-group [(ngModel)]="lucene.exportFormat">
-                <mat-radio-button name="exportFormat" value="csv">{{'ADMIN.BROWSER.EXPORT_FORMAT_CSV' | translate}}</mat-radio-button>
-                <mat-radio-button name="exportFormat" value="json">{{'ADMIN.BROWSER.EXPORT_FORMAT_JSON' | translate}}</mat-radio-button>
-              </mat-radio-group>
-          </div>
-      </div>
-      <div class="inputGroupGrow" *ngIf="lucene.outputMode=='export'">
-          <div><button mat-flat-button color="primary" (click)="exportLucene()">{{'ADMIN.BROWSER.LUCENE_EXPORT_START' | translate}}</button></div>
-      </div>
+      <ng-container *ngIf="lucene.outputMode=='export'">
+        <div class="inputGroupGrow">
+            <mat-form-field>
+                <mat-label>{{'ADMIN.BROWSER.LUCENE_EXPORT_PROPERTIES' | translate }}</mat-label>
+                <textarea matInput
+                            cdkTextareaAutosize
+                            cdkAutosizeMinRows="2"
+                            cdkAutosizeMaxRows="5"
+                            class="export-properties" [(ngModel)]="lucene.properties"></textarea>
+                <mat-hint>{{'ADMIN.BROWSER.LUCENE_EXPORT_PROPERTIES_HINT' | translate }}</mat-hint>
+            </mat-form-field>
+        </div>
+        <app-lucene-template-memory 
+            [(query)]="lucene.query"
+            [(properties)]="lucene.properties"
+        ></app-lucene-template-memory>
+        <div class="inputGroupGrow">
+            <div class="info">{{'ADMIN.BROWSER.OUTPUT_MODE' | translate }}</div>
+            <div>
+                <mat-radio-group [(ngModel)]="lucene.exportFormat">
+                    <mat-radio-button name="exportFormat" value="csv">{{'ADMIN.BROWSER.EXPORT_FORMAT_CSV' | translate}}</mat-radio-button>
+                    <mat-radio-button name="exportFormat" value="json">{{'ADMIN.BROWSER.EXPORT_FORMAT_JSON' | translate}}</mat-radio-button>
+                </mat-radio-group>
+            </div>
+        </div>
+        <div class="inputGroupGrow">
+            <div><button mat-flat-button color="primary" (click)="exportLucene()">{{'ADMIN.BROWSER.LUCENE_EXPORT_START' | translate}}</button></div>
+        </div>
+      </ng-container>
     <div class="inputGroupGrow" *ngIf="lucene.outputMode=='view'">
       <div class="info">{{'ADMIN.BROWSER.LUCENE_AUTHORITIES' | translate }}</div>
       <authority-search-input [globalSearchAllowed]="true" [placeholder]="'ADMIN.BROWSER.ADD_AUTHORITY'" [allowAny]="true" (onChooseAuthority)="addLuceneAuthority($event)"></authority-search-input>

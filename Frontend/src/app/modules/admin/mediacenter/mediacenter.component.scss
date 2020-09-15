@@ -17,8 +17,20 @@
 .base-data{
   display: flex;
   flex-direction: column;
-  mat-checkbox{
-    padding: 20px 0;
+  .status {
+    font-size: 130%;
+    margin-top: 0;
+  }
+  #activate-label {
+    margin: 0 10px;
+  }
+  .activate-group {
+    display: flex;
+    flex-direction: column;
+    margin: 0.25em 10px 1.8em;
+    > .mat-radio-button {
+      margin: 0.4em;
+    }
   }
   .base-fields{
     display:flex;

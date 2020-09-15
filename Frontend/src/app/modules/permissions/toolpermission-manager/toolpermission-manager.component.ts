@@ -49,7 +49,8 @@ export class ToolpermissionManagerComponent {
     {name:"DATA_MANAGEMENT",icon:"folder",permissions:[
         RestConstants.TOOLPERMISSION_WORKSPACE,
         RestConstants.TOOLPERMISSION_UNCHECKEDCONTENT,
-        RestConstants.TOOLPERMISSION_RATE
+            RestConstants.TOOLPERMISSION_COMMENT_WRITE,
+            RestConstants.TOOLPERMISSION_RATE
     ]},
     {name:"SAFE",icon:"lock",permissions:[
         RestConstants.TOOLPERMISSION_CONFIDENTAL,

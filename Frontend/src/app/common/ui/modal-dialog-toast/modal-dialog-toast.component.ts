@@ -10,6 +10,7 @@ import {UIAnimation} from '../../../core-module/ui/ui-animation';
 import {trigger} from '@angular/animations';
 import {ProgressType} from '../modal-dialog/modal-dialog.component';
 import {CardType} from '../../../core-ui-module/components/card/card.component';
+import {MessageType} from '../../../core-module/ui/message-type';
 
 @Component({
   selector: 'modal-dialog-toast',
@@ -35,6 +36,7 @@ export class ModalDialogToastComponent {
       this.dialogType = data.dialogType;
       this.node = data.node;
       this.messageParameters = data.messageParameters;
+      this.messageType = data.messageType || ModalMessageType.Text;
       this.isCancelable = data.isCancelable;
       this.buttons = data.buttons;
       this.onCancel = data.onCancel;
@@ -44,34 +46,36 @@ export class ModalDialogToastComponent {
 
   public visible= false;
 
-  private isCancelable = true;
+  isCancelable = true;
   /**
    * Name/Label of the input that should be displayed
    */
-  private input: string;
+  input: string;
   /**
    * The title, will be translated automatically
    */
-  private  title: string;
+   title: string;
   /**
    * The message, will be translated automatically
    */
-  private message: string;
+  message: string;
   /**
    * Additional dynamic content for your language string, use an object, e.g.
    * Language String: Hello {{ name }}
    * And use messageParameters={name:'World'}
    */
-  private messageParameters: any;
+  messageParameters: any;
+
+  messageType = ModalMessageType.Text;
   /**
    * type of the progress to display. Null if this is not an progress dialog
    */
   progressType: ProgressType;
-  private dialogType: CardType;
+  dialogType: CardType;
   /* value stored in the input, if enabled */
   inputValue: string;
 
-  private cancel(){
+  cancel(){
     this.visible = false;
     if (this.onCancel != null) this.onCancel();
     this.reset();
@@ -88,7 +92,12 @@ export class ModalDialogOptions {
   progressType?: ProgressType;
   dialogType?: CardType;
   messageParameters?: any;
+  messageType? = ModalMessageType.Text;
   node?: Node|Node[];
   isCancelable? = true;
   onCancel?: () => void;
+}
+export enum ModalMessageType {
+  Text = 'text',
+  HTML = 'html'
 }

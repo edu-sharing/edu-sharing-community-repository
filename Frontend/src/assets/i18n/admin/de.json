@@ -32,7 +32,10 @@
             "SIZE_MEDIUM": "Normal",
             "SIZE_LARGE": "Groß",
             "WARNING": " Beachten Sie bitte, dass ungültige Werte/Syntax das System ggf. nicht mehr erreichbar machen. Prüfen Sie bitte sorgfältig alle Änderungen, bevor Sie fortfahren.",
-            "PARSE_ERROR": "Fehler beim Übernehmen der Config! Prüfen Sie den Syntax die Konfiguration, und wiederholen Sie den Vorgang.<br><b>Das Repository befindet sich aktuell in einem ungültigen Zustand!</b><br>Für weitere Details prüfen Sie bitte die Logdateien"
+            "SAVED": "Konfiguration gespeichert. Ggf. muss die Seite neugeladen werden",
+            "CHECK": "Prüfen",
+            "ERROR": "Konfigurationsfehler",
+            "PARSE_ERROR": "Fehler beim Übernehmen der Config! Prüfen Sie den Syntax die Konfiguration, und wiederholen Sie den Vorgang.<br><b>Das Repository befindet sich aktuell in einem ungültigen Zustand!</b><br>Für weitere Details prüfen Sie bitte die Logdateien<br><br>{{error}}"
         },
         "CONFIG": {
             "XML_CONFIG": "XML-Konfigurationsdateien",
@@ -262,10 +265,7 @@
             "UPLOAD_TEMP": "Dateien in temporäres Verzeichnis hochladen",
             "CHOOSE_UPLOAD_TEMP": "Datei wählen",
             "UPLOAD_TEMP_START": "Hochladen",
-            "UPLOAD_TEMP_DONE": "Datei wurde unter {{filename}} auf dem Server abgelegt",
-            "JOB_CLASS": "Klassenname der Job-Klasse:",
-            "JOB_STARTED": "Die Aufgabe wurde gestartet. Überprüfen Sie die Aufgabenliste, um den Status einzusehen",
-            "START_JOB": "Aufgabe ausführen"
+            "UPLOAD_TEMP_DONE": "Datei wurde unter {{filename}} auf dem Server abgelegt"
         },
         "BROWSER": {
             "NODE_BROWSER": "Node-Browser",
@@ -286,9 +286,36 @@
             "LUCENE_EXPORT_PROPERTIES": "Im Export einzubindende Properties (1 pro Zeile)",
             "LUCENE_EXPORT_PROPERTIES_HINT": "Referenzierung auf Properties des Parents mittels \"parent::<property>\"",
             "LUCENE_EXPORT_START": "Exportieren & Herunterladen",
-            "LUCENE_PROPERTIES_REQUIRED": "Bitte gewünschte properties festlegen"
+            "LUCENE_PROPERTIES_REQUIRED": "Bitte gewünschte properties festlegen",
+            "LUCENE_TEMPLATE_MEMORY": {
+                "GROUP_LABEL": "Abfrage-Vorlagen",
+                "HINT": "Speichern und laden Sie den Inhalt der Felder \"Lucene-Query\" und \"Im Export einzubindende Properties\" in benannten Vorlagen.",
+                "LOAD_BUTTON": "Vorlage laden",
+                "NEW_BUTTON": "Neue Vorlage",
+                "UPDATE_BUTTON": "\"{{ template }}\" überschreiben",
+                "CONFIRM_UPDATE_BUTTON": "Überschreiben",
+                "CONFIRM_UPDATE_TITLE": "\"{{ template }}\" überschreiben?",
+                "CONFIRM_UPDATE_MESSAGE": "Möchten Sie die Vorlage mit den aktuellen Werten überschreiben?",
+                "CONFIRM_DELETE_BUTTON": "Löschen",
+                "CONFIRM_DELETE_TITLE": "\"{{ template }}\" löschen?",
+                "CONFIRM_DELETE_MESSAGE": "Möchten Sie die Vorlage löschen?",
+                "DELETE_BUTTON": "\"{{ template }}\" löschen",
+                "CREATE_BUTTON": "Erstellen",
+                "DEFAULT_TEMPLATE_OVERRIDE": "Standard-Vorlagen dürfen nicht überschrieben werden",
+                "CHOOSE_NAME_TEXT": "Wählen Sie einen Namen für die neue Vorlage.",
+                "CHOOSE_NAME_INPUT_LABEL": "Name"
+            },
+            "LUCENE_DEFAULT_TEMPLATES": {
+                "GROUPS": "Alle Gruppen & Organisationen",
+                "ORGS": "Alle Organisationen",
+                "PERSONS": "Alle Personen",
+                "CREATED_CONTENTS_BY_PERSON": "Alle erstellten Objekte eines Nutzers"
+            }
         },
         "JOBS": {
+            "JOB_CLASS": "Klassenname der Job-Klasse:",
+            "JOB_STARTED": "Die Aufgabe wurde gestartet. Überprüfen Sie die Aufgabenliste, um den Status einzusehen",
+            "START_JOB": "Aufgabe ausführen",
             "LOG": "Log-Einträge",
             "LOG_FILTER": "Filtern nach Inhalt:",
             "LOG_LEVEL": "Filtern nach Schweregrad:",
@@ -307,6 +334,8 @@
             "LOG_LEVEL_4": "Warning",
             "LOG_LEVEL_3": "Error",
             "LOG_LEVEL_0": "Fatal",
+            "UPLOAD_FILE_LABEL": "Datei für Job bereitstellen",
+            "CHOOSE_UPLOAD_FILE": "Datei wählen",
             "NAMES": {
                 "RemoveImportedObjectsJob": "Alle importierten Nodes löschen",
                 "RemoveOrphanCollectionReferencesJob": "Alle Sammlungsreferenzen mit fehlenden Originalobjekt löschen",
@@ -314,7 +343,8 @@
                 "ConvertMultivalueToSinglevalueJob": "Eine Property von Multivalue in Singlevalue konvertieren",
                 "BulkEditNodesJob": "Bulk-Bearbeitung von einer Property für mehrere Nodes",
                 "BulkDeleteNodesJob": "Bulk-Löschen für mehrere Nodes (z.B. für größe Ordner)",
-                "UpdateFrontpageCacheJob": "Baut den Cache für die Startseite neu auf"
+                "UpdateFrontpageCacheJob": "Baut den Cache für die Startseite neu auf",
+                "BulkDeleteAuthoritiesJob": "Gruppen & Organisationen im Bulk löschen"
             }
         },
         "FOLDERTEMPLATES": {
@@ -395,7 +425,6 @@
             "DATA": {
                 "TITLE": "Basisdaten",
                 "EDIT_NOT_ALLOWED": "Um weitere Änderungen an den Daten durchzuführen, kontaktieren Sie bitte den zuständigen Administrator des Systems",
-                "contentStatus": "Medienzentrum ist angebunden",
                 "id": "Interne ID",
                 "location": "Standort",
                 "districtAbbreviation": "Kreiskürzel",
@@ -403,6 +432,14 @@
                 "mainUrl": "URL/Link zur Seite",
                 "CATALOGS": "Katalog {{id}}",
                 "ADD_CATALOG": "Katalog hinzufügen",
+                "ACTIVATE": {
+                    "STATUS_PREFIX": "Status:",
+                    "STATUS_ACTIVE": "Medienzentrum ist angebunden",
+                    "STATUS_INACTIVE": "Medienzentrum ist nicht angebunden",
+                    "LABEL": "Anbindung des Medienzentrums",
+                    "OPTION_ACTIVATE": "aktivieren",
+                    "OPTION_DEACTIVATE": "deaktivieren"
+                },
                 "CATALOG": {
                     "name": "Bezeichnung",
                     "url": "URL/Link"
@@ -420,9 +457,9 @@
                 "DESCRIPTION": "Alle Mitglieder der folgenden Gruppen können auf die Medien dieses Medienzentrums zugreifen"
             },
             "NODES":{
-                "TITLE":"Verwaltete Medien",
+                "TITLE":"Medien",
                 "SEARCHWORD": "Name/Id des Mediums",
-                "FILTER":"Verwaltete Medien filtern"
+                "FILTER":"Medien filtern"
             },
             "STATISTICS": {
                 "TITLE": "Statistiken"

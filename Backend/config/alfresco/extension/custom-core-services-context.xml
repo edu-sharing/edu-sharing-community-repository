@@ -304,6 +304,21 @@
             <ref bean="nodeService" />
         </property>
    	 </bean>
+
+    <bean id="onAddIOChildObjectAspect" class="org.edu_sharing.alfresco.policy.OnAddIOChildObjectAspect" init-method="init">
+        <property name="policyComponent">
+            <ref bean="policyComponent"/>
+        </property>
+        <property name="nodeService">
+            <ref bean="nodeService" />
+        </property>
+        <property name="permissionService">
+            <ref bean="permissionService" />
+        </property>
+        <property name="ownableService">
+            <ref bean="ownableService" />
+        </property>
+    </bean>
    	 
    	 
    	  

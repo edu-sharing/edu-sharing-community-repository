@@ -29,7 +29,7 @@ public class CurriculumReader extends ValuespaceReader{
 
     public CurriculumReader(String valuespaceUrl) {
         // e.g. http://localhost:8000/api/v1/curricula/metadatasets
-        String curriculumRegex="(https?:\\/\\/.*\\/)api\\/v1\\/curricula\\/metadatasets";
+        String curriculumRegex="(https?:\\/\\/.*\\/)api\\/v1\\/curricula\\/metadatasets.*";
         Pattern pattern = Pattern.compile(curriculumRegex);
         Matcher matched = pattern.matcher(valuespaceUrl);
         if(matched.matches()){

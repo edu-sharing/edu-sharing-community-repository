@@ -264,6 +264,7 @@ export class CollectionsMainComponent {
             );
             this.mdsService.getSet().subscribe((data: MdsMetadataset) => {
                 this.referencesColumns = MdsHelper.getColumns(
+                    this.translationService,
                     data,
                     'collectionReferences',
                 );

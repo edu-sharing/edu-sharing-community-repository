@@ -18,7 +18,7 @@ import {
 import { OPEN_URL_MODE } from '../../core-module/ui/ui-constants';
 import { UIHelper } from '../../core-ui-module/ui-helper';
 
-type Target = { type: 'path'; path: string } | { type: 'url'; url: string };
+type Target = { type: 'path'; path: string } | { type: 'url'; url: string; openInNew: boolean };
 
 export interface Entry {
     name: string;
@@ -38,8 +38,10 @@ interface CustomEntryDefinition {
     url?: string;
     scope?: string;
     isDisabled?: boolean;
+    openInNew?: boolean;
     isSeperate?: boolean;
     onlyDesktop?: boolean;
+    onlyWeb?: boolean;
 }
 
 interface EntryDefinition {
@@ -228,6 +230,8 @@ export class MainMenuEntriesService {
             for (const customEntryDefinition of this.config.menuEntries) {
                 if (customEntryDefinition.onlyDesktop && this.ui.isMobile()) {
                     continue;
+                } else if (customEntryDefinition.onlyWeb && this.bridge.isRunningCordova()) {
+                    continue;
                 }
                 let pos = customEntryDefinition.position;
                 if (pos < 0) {
@@ -261,7 +265,11 @@ export class MainMenuEntriesService {
     ): Entry {
         const target: Target = customEntryDefinition.path
             ? { type: 'path', path: customEntryDefinition.path }
-            : { type: 'url', url: customEntryDefinition.url };
+            : {
+                  type: 'url',
+                  url: customEntryDefinition.url,
+                  openInNew: customEntryDefinition.openInNew ?? true,
+              };
         const entry = {
             name: customEntryDefinition.name,
             icon: customEntryDefinition.icon,
@@ -269,7 +277,7 @@ export class MainMenuEntriesService {
             isDisabled: !!customEntryDefinition.isDisabled,
             isSeparate: !!customEntryDefinition.isSeperate,
             isCustom: true,
-            open: () => this.openEntry(entry, target),
+            open: () => { this.openEntry(entry, target); },
         };
         return entry;
     }
@@ -296,7 +304,7 @@ export class MainMenuEntriesService {
         );
     }
 
-    private async openEntry(entry: Entry, target: Target) {
+    private async openEntry(entry: Entry, target: Target): Promise<void> {
         this.frameEvents.broadcastEvent(
             FrameEventsService.EVENT_VIEW_SWITCHED,
             entry.scope,
@@ -320,10 +328,13 @@ export class MainMenuEntriesService {
                 );
                 break;
             case 'url':
+                const mode = target.openInNew
+                    ? OPEN_URL_MODE.BlankSystemBrowser
+                    : OPEN_URL_MODE.Current;
                 UIHelper.openUrl(
                     target.url,
                     this.bridge,
-                    OPEN_URL_MODE.BlankSystemBrowser,
+                    mode,
                 );
                 break;
         }

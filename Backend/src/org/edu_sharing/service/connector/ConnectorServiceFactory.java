@@ -1,6 +1,7 @@
 package org.edu_sharing.service.connector;
 
 import org.edu_sharing.repository.server.MCAlfrescoAPIClient;
+import org.edu_sharing.service.toolpermission.ToolPermissionService;
 import org.edu_sharing.service.toolpermission.ToolPermissionServiceFactory;
 import org.edu_sharing.spring.ApplicationContextFactory;
 
@@ -17,7 +18,11 @@ public class ConnectorServiceFactory {
 	public static void invalidate(){
 		cs = new ConnectorService();
 	}
+
 	public static ConnectorList getConnectorList(){
+		return getConnectorList(ToolPermissionServiceFactory.getInstance());
+	}
+	public static ConnectorList getConnectorList(ToolPermissionService toolPermissionService){
 
 		try{
 			if(new MCAlfrescoAPIClient().isAdmin()){
@@ -31,7 +36,7 @@ public class ConnectorServiceFactory {
 
 		List<Connector> filteredConnectors = new ArrayList<Connector>();
 		for(Connector connector : getConnectorService().connectorList.getConnectors()){
-			if(ToolPermissionServiceFactory.getInstance().hasToolPermissionForConnector(connector.getId())){
+			if(toolPermissionService.hasToolPermissionForConnector(connector.getId())){
 				filteredConnectors.add(connector);
 			}
 		}

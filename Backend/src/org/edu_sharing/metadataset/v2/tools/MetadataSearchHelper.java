@@ -1,6 +1,5 @@
 package org.edu_sharing.metadataset.v2.tools;
 
-import java.io.Serializable;
 import java.security.InvalidParameterException;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -29,7 +28,6 @@ import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.server.tools.ApplicationInfoList;
 import org.edu_sharing.restservices.shared.MdsQueryCriteria;
 import org.edu_sharing.service.authority.AuthorityServiceFactory;
-import org.edu_sharing.service.authority.AuthorityServiceHelper;
 import org.edu_sharing.service.nodeservice.NodeServiceHelper;
 import org.edu_sharing.service.search.SearchServiceFactory;
 import org.edu_sharing.service.search.Suggestion;
@@ -40,7 +38,14 @@ import com.sun.star.lang.IllegalArgumentException;
 public class MetadataSearchHelper {
 	
 	static Logger logger = Logger.getLogger(MetadataSearchHelper.class);
-	
+
+	public static Map<String, String[]> convertCriterias(List<MdsQueryCriteria> criterias){
+		Map<String,String[]> criteriasMap=new HashMap<>();
+		for(MdsQueryCriteria criteria : criterias){
+			criteriasMap.put(criteria.getProperty(),criteria.getValues().toArray(new String[0]));
+		}
+		return criteriasMap;
+	}
 	public static String getLuceneSearchQuery(MetadataQueries queries, String queryId, Map<String,String[]> parameters) throws IllegalArgumentException{
 		return getLuceneSearchQuery(queries.findQuery(queryId), parameters);
 	}

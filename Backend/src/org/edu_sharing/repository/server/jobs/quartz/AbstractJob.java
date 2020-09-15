@@ -60,8 +60,10 @@ public abstract class AbstractJob implements Job,InterruptableJob {
 		this.isStarted = isStarted;
 	}
 
-	public abstract Class[] getJobClasses();
-	
+	public Class[] getJobClasses() {
+		// TODO Auto-generated method stub
+		return allJobs;
+	}
 	protected synchronized void addJobClass(Class job) {
 		if(!Arrays.asList(allJobs).contains(job)) {
 			ArrayList<Class> list = new ArrayList<Class>(Arrays.asList(allJobs));

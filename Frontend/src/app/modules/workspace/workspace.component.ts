@@ -325,7 +325,13 @@ export class WorkspaceMainComponent implements EventListener, OnDestroy {
                         valid = false;
                     }
                     if (!this.isSafe && data.currentScope != null) {
-                        valid = false;
+                        this.connector.logout().subscribe(() => {
+                            this.goToLogin();
+                        }, (error: any) => {
+                            this.toast.error(error);
+                            this.goToLogin();
+                        })
+                        return;
                     }
                     if (!valid) {
                         this.goToLogin();
