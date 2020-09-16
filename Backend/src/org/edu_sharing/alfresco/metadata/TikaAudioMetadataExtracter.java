@@ -42,8 +42,6 @@ public class TikaAudioMetadataExtracter extends org.alfresco.repo.content.metada
     public TikaAudioMetadataExtracter(ArrayList<String> supportedMimeTypes)
     {
         super(supportedMimeTypes);
-
-        System.out.println("YEAH OWN AUDIO MDE");
     }
 
     @Override
