@@ -65,9 +65,7 @@ public class VideoTransformerWorker extends ContentTransformerHelper implements 
 		//JCodec supports only AVC, H.264 in MP4, ISO BMF, Quicktime container for getting a singe frame
 		logger.debug("isTransformable sourceMimetype:"+sourceMimetype+ " targetMimetype:"+targetMimetype);
 		if((MimetypeMap.MIMETYPE_VIDEO_MP4.equals(sourceMimetype)
-				|| MimetypeMap.MIMETYPE_VIDEO_QUICKTIME.equals(sourceMimetype)
-				|| "video/mp4v-es".equals(sourceMimetype)
-				|| "video/x-flv".equals(sourceMimetype))
+				|| MimetypeMap.MIMETYPE_VIDEO_QUICKTIME.equals(sourceMimetype))
 				&& (MimetypeMap.MIMETYPE_IMAGE_PNG.equals(targetMimetype) || MimetypeMap.MIMETYPE_IMAGE_JPEG.equals(targetMimetype) )){
 			return true;
 		}
@@ -143,7 +141,7 @@ public class VideoTransformerWorker extends ContentTransformerHelper implements 
         MimetypeService mimetypeService = getMimetypeService();
         String sourceExtension = mimetypeService.getExtension(sourceMimetype);
         String targetExtension = mimetypeService.getExtension(targetMimetype);
-        if (sourceExtension == null || targetExtension == null)
+	    if (sourceExtension == null || targetExtension == null)
         {
             throw new AlfrescoRuntimeException("Unknown extensions for mimetypes: \n" +
                     "   source mimetype: " + sourceMimetype + "\n" +
@@ -165,7 +163,7 @@ public class VideoTransformerWorker extends ContentTransformerHelper implements 
 	        convertFFMPEG(sourceFile, targetFile,Format.webp);
 	        
 	        if(targetFile.length() > 0){
-	        	writer.putContent(targetFile);
+		    	writer.putContent(targetFile);
 	        }else{
 	        	logger.warn("ffmpeg failed to convert webp. Check version is greater or equal to (March 24, 2014, FFmpeg 2.2). Will fall back to gif.");
 				convertFFMPEG(sourceFile, targetFile,Format.gif);
