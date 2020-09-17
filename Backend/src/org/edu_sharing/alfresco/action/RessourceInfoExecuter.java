@@ -86,7 +86,7 @@ public class RessourceInfoExecuter extends ActionExecuterAbstractBase {
 
 			}
 		}else if(type.equals("application/zip")) {
-			return new ZipArchiveInputStream(is, contentreader.getEncoding(), true);
+			return new ZipArchiveInputStream(is, contentreader.getEncoding(), true, true);
 		}else {
 			logger.info("unknown format:" +  type);
 		}
