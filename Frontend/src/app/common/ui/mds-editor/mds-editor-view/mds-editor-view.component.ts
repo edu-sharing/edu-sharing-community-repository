@@ -186,7 +186,7 @@ export class MdsEditorViewComponent implements OnInit, AfterViewInit {
     private updateWidgetWithHTMLAttributes(widget: Widget) {
         const htmlRef = this.container.nativeElement.querySelector(widget.definition.id.replace(':', '\\:'));
         htmlRef?.getAttributeNames().forEach((attribute) => {
-            widget.definition[attribute] = htmlRef.getAttribute(attribute);
+            (widget.definition as any)[attribute] = htmlRef.getAttribute(attribute);
         });
     }
 
