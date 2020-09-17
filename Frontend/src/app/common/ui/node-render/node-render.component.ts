@@ -492,7 +492,7 @@ export class NodeRenderComponent implements EventListener {
       if(this.downloadUrl) {
           NodeHelper.downloadUrl(this.connector.getBridgeService(), this.downloadUrl);
       } else {
-          NodeHelper.downloadNode(this.connector.getBridgeService(), this._node, this.version);
+          NodeHelper.downloadNode(this.connector.getBridgeService(), this._node, this.isChildobject ? null : this.version);
       }
   }
 
