@@ -15,11 +15,13 @@ import {BridgeService} from '../../../../core-bridge-module/bridge.service';
 import {Helper} from '../../../../core-module/rest/helper';
 import {Toast} from '../../../../core-ui-module/toast';
 import {TranslateService} from '@ngx-translate/core';
+import {MdsEditorInstanceService, CompletionStatusEntry} from '../../../../common/ui/mds-editor/mds-editor-instance.service';
 
 @Component({
   selector: 'app-share-publish',
   templateUrl: 'share-publish.component.html',
-  styleUrls: ['share-publish.component.scss']
+  styleUrls: ['share-publish.component.scss'],
+  providers: [MdsEditorInstanceService],
 })
 export class SharePublishComponent implements OnChanges {
   @Input() node: Node;
@@ -41,11 +43,13 @@ export class SharePublishComponent implements OnChanges {
   republish = false;
   private publishedVersions: Node[] = [];
   allPublishedVersions: Node[];
+  mdsCompletion: CompletionStatusEntry;
   constructor(
       private connector: RestConnectorService,
       private translate: TranslateService,
       private nodeService: RestNodeService,
       private config: ConfigurationService,
+      private mdsService: MdsEditorInstanceService,
       private toast: Toast,
       private router: Router,
       private bridge: BridgeService,
@@ -61,11 +65,18 @@ export class SharePublishComponent implements OnChanges {
       this.refresh();
       this.node = (await this.nodeService.getNodeMetadata(this.node.ref.id, [RestConstants.ALL]).toPromise()).node;
       this.refresh();
-      this.onInitCompleted.emit();
-      this.onInitCompleted.complete();
-    }
-  }
+      this.mdsService.getCompletionStatus().subscribe((completion) => {
+        this.mdsCompletion = {
+          completed: (completion.mandatory.completed || 0) + (completion.mandatoryForPublish.completed || 0),
+          total: (completion.mandatory.total || 0) + (completion.mandatoryForPublish.total || 0),
+        };
+      });
+      this.mdsService.init([this.node]).then(() => {
 
+      });
+      this.onInitCompleted.emit();
+      this.onInitCompleted.complete();}
+  }
   getLicense() {
     return this.node.properties[RestConstants.CCM_PROP_LICENSE]?.[0];
   }
@@ -76,6 +87,13 @@ export class SharePublishComponent implements OnChanges {
   openLicense() {
     this.mainNavService.getDialogs().nodeLicense = [this.node];
     this.mainNavService.getDialogs().nodeLicenseChange.subscribe(async () => {
+      this.node = (await this.nodeService.getNodeMetadata(this.node.ref.id, [RestConstants.ALL]).toPromise()).node;
+      this.refresh();
+    });
+  }
+  openMetadata() {
+    this.mainNavService.getDialogs().nodeMetadata = [this.node];
+    this.mainNavService.getDialogs().nodeMetadataChange.subscribe(async () => {
       this.node = (await this.nodeService.getNodeMetadata(this.node.ref.id, [RestConstants.ALL]).toPromise()).node;
       this.refresh();
     });

@@ -1,0 +1,19 @@
+<app-mds-editor-widget-container [widget]="widget" [label]="false" [valueType]="valueType">
+  <mat-label class="mat-label-standalone">{{ widget.definition.caption }}</mat-label>
+  <ng5-slider
+    *ngIf="isRange"
+    class="ng5-slider-small"
+    [(value)]="currentValue[0]"
+    [(highValue)]="currentValue[1]"
+    [options]="sliderOptions"
+    (valueChange)="updateValues()"
+  ></ng5-slider>
+  <ng5-slider
+    *ngIf="!isRange"
+    class="ng5-slider-small"
+    [(value)]="currentValue[0]"
+    [options]="sliderOptions"
+    (valueChange)="updateValues()"
+  ></ng5-slider>
+  <mat-hint *ngIf="widget.definition.bottomCaption">{{ widget.definition.bottomCaption }}</mat-hint>
+</app-mds-editor-widget-container>

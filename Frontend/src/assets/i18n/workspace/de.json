@@ -136,6 +136,8 @@
                 "LICENSE_INFO": "Das aktuelle Material steht unter der Lizenz {{license}}.",
                 "LICENSE_AUTHOR": "Die Urheber sollen bei einer Weiterverwendung wie folgt genannt werden",
                 "LICENSE_INFO_COPY": "Bei einer veröffentlichten Kopie behält die bereits veröffentlichte Kopie die zuvor festgelegte Lizenz",
+                "MISSING_METADATA": "Es wurden noch nicht alle notwendigen Metadaten ausgefüllt ({{completed}} / {{total}}).\nBitte füllen Sie die für eine Veröffentlichung benötigten Metadaten vollständig aus.",
+                "OPEN_METADATA": "Metadatendialog öffnen",
                 "SET_LICENSE": "Lizenzdialog öffnen",
                 "INHERITED": "Das übergeordnete Element/Ordner ist bereits öffentlich. Bitte deaktivieren Sie die Vererbung oder ändern Sie die Berechtigungen am übergeordneten Element",
                 "VERSIONS_PUBLISHED": "Aktuell veröffentlichte Versionen",

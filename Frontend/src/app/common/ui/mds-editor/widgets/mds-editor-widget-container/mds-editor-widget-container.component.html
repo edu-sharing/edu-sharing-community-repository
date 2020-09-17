@@ -1,0 +1,24 @@
+<div class="header-container">
+  <label *ngIf="label">{{ label }}</label>
+  <div class="spacer"></div>
+  <ng-container *ngIf="isBulk">
+    <mat-slide-toggle
+      *ngIf="valueType === ValueType.String || valueType === ValueType.Range"
+      (change)="onBulkModeReplaceToggleChange($event)"
+      >{{ 'MDS.BULK_REPLACE' | translate }}</mat-slide-toggle
+    >
+    <mat-radio-group
+      *ngIf="valueType === ValueType.MultiValue"
+      class="bulk-mode-radio-group"
+      aria-label="Bulk-editing mode"
+      [value]="bulkMode"
+      (change)="onBulkModeMultiValueChange($event)"
+    >
+      <mat-radio-button value="append">{{ 'MDS.BULK_APPEND' | translate }}</mat-radio-button>
+      <mat-radio-button value="replace">{{ 'MDS.BULK_REPLACE' | translate }}</mat-radio-button>
+    </mat-radio-group>
+  </ng-container>
+</div>
+<div class="body-container" role="group">
+  <ng-content></ng-content>
+</div>

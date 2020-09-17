@@ -1,31 +1,33 @@
-import {Component, EventEmitter, Input, OnChanges, Output, SimpleChanges} from '@angular/core';
-import {ConfigurationHelper, ConfigurationService} from '../../../core-module/core.module';
+import { Component, Input } from '@angular/core';
+import { RequiredMode } from '../mds-editor/types';
 
 @Component({
-  selector: 'app-input-fill-progress',
-  templateUrl: 'input-fill-progress.component.html',
-  styleUrls: ['input-fill-progress.component.scss']
+    selector: 'app-input-fill-progress',
+    templateUrl: 'input-fill-progress.component.html',
+    styleUrls: ['input-fill-progress.component.scss'],
 })
 export class InputFillProgressComponent {
-
     @Input() current: FillTypeStatus;
     @Input() maximum: FillTypeStatus;
-    
+
     getStatus() {
-        for(const type of Object.keys(FillType)) {
-            if((this.current as any)[type] !== (this.maximum as any)[type]){
+        for (const type of Object.values(RequiredMode)) {
+            if ((this.current as any)[type] !== (this.maximum as any)[type]) {
                 return type;
             }
         }
-        return null;
+        return 'finished';
     }
 
     getFullProgress() {
-        let sum=this.current.required;
-        if(this.current.required === this.maximum.required) {
-            sum += (this.current.requiredPublish || 0)
-            if(this.current.requiredPublish === this.maximum.requiredPublish) {
-                sum += (this.current.optional || 0)
+        let sum = this.current[RequiredMode.Mandatory];
+        if (this.current[RequiredMode.Mandatory] === this.maximum[RequiredMode.Mandatory]) {
+            sum += this.current[RequiredMode.MandatoryForPublish] || 0;
+            if (
+                this.current[RequiredMode.MandatoryForPublish] ===
+                this.maximum[RequiredMode.MandatoryForPublish]
+            ) {
+                sum += this.current.optional || 0;
             }
         }
         return sum;
@@ -35,26 +37,22 @@ export class InputFillProgressComponent {
     }
 
     getCurrentMaximum() {
-        if(this.getStatus() === FillType.required) {
-            return this.current.required;
+        if (this.getStatus() === RequiredMode.Mandatory) {
+            return this.current[RequiredMode.Mandatory];
         }
-        return this.maximum.required + (this.maximum.requiredPublish || 0);
+        return (
+            this.maximum[RequiredMode.Mandatory] +
+            (this.maximum[RequiredMode.MandatoryForPublish] || 0)
+        );
     }
     getSum(what: 'current' | 'maximum') {
         let sum = 0;
-        for(const type of Object.keys(FillType)) {
+        for (const type of Object.values(RequiredMode)) {
             sum += (this as any)[what][type] || 0;
         }
         return sum;
     }
 }
 export type FillTypeStatus = {
-    [key in FillType]: number;
+    [key in RequiredMode]: number;
 };
-
-export enum FillType {
-    required = 'required',
-    requiredPublish = 'requiredPublish',
-    //recommended = 'recommended'
-    optional = 'optional'
-}

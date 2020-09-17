@@ -430,8 +430,15 @@ public class MetadataReaderV2 {
 					widget.setSuggestionSource(value);
 				if(name.equals("suggestionQuery"))
 					widget.setSuggestionQuery(value);
-				if(name.equals("required"))
-					widget.setRequired(value.equalsIgnoreCase("true"));
+				if(name.equals("required")) {
+					if(value.equalsIgnoreCase("true")){
+						widget.setRequired(MetadataWidget.Required.mandatory);
+					} else if (value.equalsIgnoreCase("false")){
+						widget.setRequired(MetadataWidget.Required.optional);
+					} else {
+						widget.setRequired(MetadataWidget.Required.valueOf(value));
+					}
+				}
 				if(name.equals("hideIfEmpty"))
 					widget.setHideIfEmpty(value.equalsIgnoreCase("true"));
 				if(name.equals("valuespace_i18n")){
@@ -626,7 +633,9 @@ public class MetadataReaderV2 {
 				String name=data.getNodeName();
 				String value=data.getTextContent();
 				if(name.equals("id"))
-					group.setId(value);			
+					group.setId(value);
+				if(name.equals("rendering"))
+					group.setRendering(MetadataGroup.Rendering.valueOf(value));
 				if(name.equals("views")){
 					List<String> views=new ArrayList<>();
 					NodeList list3=data.getChildNodes();

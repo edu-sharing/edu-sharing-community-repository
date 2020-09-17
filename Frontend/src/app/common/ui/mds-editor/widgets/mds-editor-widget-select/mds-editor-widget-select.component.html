@@ -1,0 +1,13 @@
+<app-mds-editor-widget-container [widget]="widget" [label]="false" [valueType]="valueType">
+  <mat-form-field>
+    <mat-label>{{ widget.definition.caption }}</mat-label>
+    <mat-select [ngModel]="currentValue" (selectionChange)="selected($event)">
+      <mat-option *ngFor="let value of values | async" [value]="value">
+        {{ value.caption }}
+      </mat-option>
+    </mat-select>
+    <mat-hint *ngIf="widget.definition.bottomCaption">{{
+      widget.definition.bottomCaption
+    }}</mat-hint>
+  </mat-form-field>
+</app-mds-editor-widget-container>

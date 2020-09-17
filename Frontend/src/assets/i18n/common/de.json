@@ -539,6 +539,7 @@
     "NO_SIZE": "-",
     "VERSION_COMMENT": "Versionskommentar",
     "MDS": {
+        "DIFFERENT_VALUES": "(Verschiedene Werte)",
         "TITLE": "Infos bearbeiten",
         "SHOW_EXTENDED": "Erweitere Infos anzeigen",
         "SHOW_EXTENDED_SEARCH": "Weitere Filter anzeigen",

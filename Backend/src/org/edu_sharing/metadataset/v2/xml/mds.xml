@@ -692,12 +692,14 @@
 		<groups>
 			<group>
 				<id>io</id>
+				<rendering>angular</rendering>
 				<views>
 					<view>node_general</view>
 				</views>
 			</group>
 			<group>
 				<id>io_simple</id>
+				<rendering>angular</rendering>
 				<views>
 					<view>node_general_simple</view>
 				</views>
@@ -777,6 +779,7 @@
 			</group>
 			<group>
 				<id>map</id>
+				<rendering>angular</rendering>
 				<views>
 					<view>node_map</view>
 				</views>

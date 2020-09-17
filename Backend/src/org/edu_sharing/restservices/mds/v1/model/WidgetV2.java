@@ -67,7 +67,7 @@ public class WidgetV2 {
 		private Integer defaultMax;
 		private Integer step;
 		private boolean isExtended;
-		private boolean isRequired;
+		private MetadataWidget.Required isRequired;
 		private boolean allowempty;
 		private String defaultvalue;
 		private boolean isSearchable;
@@ -218,10 +218,10 @@ public class WidgetV2 {
 			this.allowempty = allowempty;
 		}
 		@JsonProperty("isRequired")
-		public boolean isRequired() {
+		public MetadataWidget.Required isRequired() {
 			return isRequired;
 		}
-		public void setRequired(boolean isRequired) {
+		public void setRequired(MetadataWidget.Required isRequired) {
 			this.isRequired = isRequired;
 		}
 		@JsonProperty("values")

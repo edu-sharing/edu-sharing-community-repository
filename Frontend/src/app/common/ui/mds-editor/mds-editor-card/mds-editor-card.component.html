@@ -1,0 +1,15 @@
+<card
+  height="xlarge"
+  width="large"
+  [title]="title"
+  (onCancel)="cancel.emit()"
+  [buttons]="buttons"
+  [node]="nodes"
+  [jumpmarks]="jumpMarks"
+>
+  <app-input-fill-progress action-area
+    [current]="completedProperties"
+    [maximum]="totalProperties"
+  ></app-input-fill-progress>
+  <app-mds-editor-core></app-mds-editor-core>
+</card>

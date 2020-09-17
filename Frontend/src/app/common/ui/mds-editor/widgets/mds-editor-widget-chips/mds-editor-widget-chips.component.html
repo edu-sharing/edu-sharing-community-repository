@@ -1,0 +1,34 @@
+<app-mds-editor-widget-container [widget]="widget" [label]="false" [valueType]="valueType">
+  <mat-form-field>
+    <mat-label>{{ widget.definition.caption }}</mat-label>
+    <mat-chip-list #chipList>
+      <mat-chip
+        *ngFor="let value of values"
+        [selectable]="false"
+        [removable]="true"
+        (removed)="remove(value)"
+      >
+        {{ value.displayString }}
+        <mat-icon matChipRemove>cancel</mat-icon>
+      </mat-chip>
+      <input
+        #input
+        [formControl]="formControl"
+        [matAutocomplete]="auto"
+        [placeholder]="widget.definition.placeholder"
+        [matChipInputFor]="chipList"
+        [matChipInputSeparatorKeyCodes]="separatorKeysCodes"
+        [matChipInputAddOnBlur]="true"
+        (matChipInputTokenEnd)="add($event)"
+      />
+    </mat-chip-list>
+    <mat-autocomplete #auto="matAutocomplete" (optionSelected)="selected($event)">
+      <mat-option *ngFor="let value of filteredValues | async" [value]="value">
+        {{ value.displayString }}
+      </mat-option>
+    </mat-autocomplete>
+    <mat-hint *ngIf="widget.definition.bottomCaption">{{
+      widget.definition.bottomCaption
+    }}</mat-hint>
+  </mat-form-field>
+</app-mds-editor-widget-container>

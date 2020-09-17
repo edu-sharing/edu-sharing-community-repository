@@ -153,7 +153,7 @@
                       (onCancel)="ltiObject=null"
                       (onCreate)="createLtiNodeObject($event)"
 ></workspace-create-lti>
-<mds #mds *ngIf="nodeMetadata || createMetadata"
+<app-mds-editor-wrapper *ngIf="nodeMetadata || createMetadata"
      [nodes]="nodeMetadata"
      [create]="createMetadata"
      [parentNode]="metadataParent"
@@ -162,7 +162,7 @@
      (openLicense)="nodeLicense=nodeMetadata;editorPending=true;"
      (openTemplate)="nodeTemplate=nodeMetadata[0]"
      (openContributor)="nodeContributor=nodeMetadata[0];editorPending=true;"
-></mds>
+></app-mds-editor-wrapper>
 <node-template *ngIf="nodeTemplate"
      [nodeId]="nodeTemplate.ref.id"
      (onClose)="closeTemplate()"

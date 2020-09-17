@@ -14,11 +14,15 @@ import {trigger} from "@angular/animations";
 import {UIAnimation} from "../../../core-module/ui/ui-animation";
 import {UIService} from '../../../core-module/core.module';
 import {Helper} from "../../../core-module/rest/helper";
+import {MdsEditorWidgetAuthorComponent} from '../../../common/ui/mds-editor/widgets/mds-editor-widget-author/mds-editor-widget-author.component';
+import {MdsEditorInstanceService} from '../../../common/ui/mds-editor/mds-editor-instance.service';
+import {Values} from '../../../common/ui/mds-editor/types';
 
 @Component({
   selector: 'workspace-license',
   templateUrl: 'license.component.html',
   styleUrls: ['license.component.scss'],
+  providers: [MdsEditorInstanceService],
   animations: [
     trigger('fade', UIAnimation.fade()),
     trigger('cardAnimation', UIAnimation.cardAnimation()),
@@ -27,6 +31,7 @@ import {Helper} from "../../../core-module/rest/helper";
 })
 export class WorkspaceLicenseComponent  {
   @ViewChild('selectLicense') selectLicense : ElementRef;
+  @ViewChild('author') author : MdsEditorWidgetAuthorComponent;
 
   /**
    * priority, useful if the dialog seems not to be in the foreground
@@ -150,6 +155,7 @@ export class WorkspaceLicenseComponent  {
       this._nodes=[];
       this.loadNodes(nodes,()=>{
           this._nodes=Helper.deepCopyArray(this._nodes);
+          this.mdsEditorInstanceService.init(this._nodes);
           this.loadConfig();
           this.checkAllowRelease();
           this.readLicense();
@@ -211,6 +217,7 @@ export class WorkspaceLicenseComponent  {
     private connector : RestConnectorService,
     private translate : TranslateService,
     private config : ConfigurationService,
+    private mdsEditorInstanceService : MdsEditorInstanceService,
     private ui : UIService,
     private iamApi : RestIamService,
     private toast : Toast,
@@ -233,19 +240,14 @@ export class WorkspaceLicenseComponent  {
       //this.toast.error(null,'WORKSPACE.LICENSE.RELEASE_WITHOUT_LICENSE');
       //return;
     }
-    let prop:any={};
+    let prop: Values = {};
 
     prop=this.getProperties(prop);
     let i=0;
     this.onLoading.emit(true);
     const updatedNodes: Node[] = [];
     for(let node of this._nodes) {
-      let authors=this._nodes[i].properties[RestConstants.CCM_PROP_LIFECYCLECONTRIBUTER_AUTHOR];
-      if(!authors) {
-          authors = [];
-      }
-      authors[0]=this.authorVCard.toVCardString();
-      prop[RestConstants.CCM_PROP_LIFECYCLECONTRIBUTER_AUTHOR]=authors;
+      prop = this.author.getValues(node, prop);
       node.properties=prop;
       i++;
       this.nodeApi.editNodeMetadataNewVersion(node.ref.id,RestConstants.COMMENT_LICENSE_UPDATE, prop).subscribe((result) => {

@@ -304,7 +304,7 @@
 	
 	
 	<target name="copy_extension_resources" if="extension-name">
-		<echo>extension is active: ${extension-name}</echo>
+		<echo>extension is active: ${extension-name} ${extensions.path}${extension-name}/src</echo>
 		<copy todir="${output.dir}" overwrite="true">
 			<fileset dir="${extensions.path}${extension-name}/src" includes="**/*.xml, **/*.properties">	
 			</fileset>

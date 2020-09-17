@@ -7,7 +7,11 @@ import java.util.List;
 import java.util.Map;
 
 public class MetadataWidget extends MetadataTranslatable{
-
+	public enum Required{
+		mandatory,
+		mandatoryForPublish,
+		optional
+	}
     public static class Subwidget implements Serializable {
 		private String id;
 
@@ -38,7 +42,8 @@ public class MetadataWidget extends MetadataTranslatable{
 	suggestionSource,suggestionQuery,unit,format,
 	valuespaceSort="default";
 	private Integer min,max,defaultMin,defaultMax,step;
-	private boolean required,extended,allowempty,valuespaceClient=true,hideIfEmpty,inherit=true;
+	private boolean extended,allowempty,valuespaceClient=true,hideIfEmpty,inherit=true;
+	private Required required = Required.optional;
 	private List<MetadataKey> values;
 	private List<Subwidget> subwidgets;
 	private int maxlength;
@@ -184,10 +189,10 @@ public class MetadataWidget extends MetadataTranslatable{
 	public void setCaption(String caption) {
 		this.caption = caption;
 	}
-	public boolean isRequired() {
+	public Required isRequired() {
 		return required;
 	}
-	public void setRequired(boolean required) {
+	public void setRequired(Required required) {
 		this.required = required;
 	}
 	public void setValues(List<MetadataKey> values) {

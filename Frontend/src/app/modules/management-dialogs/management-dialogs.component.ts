@@ -20,6 +20,7 @@ import {RestUsageService} from "../../core-module/core.module";
 import {observable, Observable} from 'rxjs';
 import {BridgeService} from '../../core-bridge-module/bridge.service';
 import {LinkData, NodeHelper} from '../../core-ui-module/node-helper';
+import { MdsEditorWrapperComponent } from '../../common/ui/mds-editor/mds-editor-wrapper/mds-editor-wrapper.component';
 
 @Component({
   selector: 'workspace-management',
@@ -32,7 +33,7 @@ import {LinkData, NodeHelper} from '../../core-ui-module/node-helper';
   ]
 })
 export class WorkspaceManagementDialogsComponent  {
-  @ViewChild('mds') mdsRef : MdsComponent;
+  @ViewChild(MdsEditorWrapperComponent) mdsEditorWrapperRef : MdsEditorWrapperComponent;
   @Input() showLtiTools = false;
   @Input() uploadShowPicker = false;
   @Input() uploadMultiple = true;
@@ -178,7 +179,7 @@ export class WorkspaceManagementDialogsComponent  {
   handleKeyboardEvent(event: KeyboardEvent) {
     if(event.key === 'Escape') {
       if(this.nodeMetadata!=null || this.createMetadata){
-        if(this.mdsRef.handleKeyboardEvent(event))
+        if(this.mdsEditorWrapperRef.mdsRef?.handleKeyboardEvent(event))
           return;
         this.closeEditor(false);
         event.preventDefault();

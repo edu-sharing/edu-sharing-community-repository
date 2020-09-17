@@ -1,0 +1,29 @@
+<app-mds-editor-widget-container [widget]="widget" [label]="false" [valueType]="valueType">
+  <!-- There is a bug that causes changed-after-checked errors when there is an *ngIf on a matInput:
+  https://github.com/angular/components/issues/16209. To avoid that, we put the *ngIf on
+  mat-form-field and have a little code duplication. -->
+  <mat-form-field *ngIf="widget.definition.type !== 'textarea'">
+    <mat-label>{{ widget.definition.caption }}</mat-label>
+    <input
+      matInput
+      [type]="widget.definition.type"
+      [placeholder]="widget.definition.placeholder"
+      [formControl]="formControl"
+    />
+    <mat-hint *ngIf="widget.definition.bottomCaption">{{
+      widget.definition.bottomCaption
+    }}</mat-hint>
+  </mat-form-field>
+  <mat-form-field *ngIf="widget.definition.type === 'textarea'">
+    <mat-label>{{ widget.definition.caption }}</mat-label>
+    <textarea
+      *ngIf="widget.definition.type === 'textarea'"
+      matInput
+      [placeholder]="widget.definition.placeholder"
+      [formControl]="formControl"
+    ></textarea>
+    <mat-hint *ngIf="widget.definition.bottomCaption">{{
+      widget.definition.bottomCaption
+    }}</mat-hint>
+  </mat-form-field>
+</app-mds-editor-widget-container>

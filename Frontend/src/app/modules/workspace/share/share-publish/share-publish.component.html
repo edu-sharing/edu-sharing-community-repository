@@ -20,6 +20,16 @@
         </button>
       </div>
     </info-message>
+    <info-message mode="warning"
+                  *ngIf="mdsCompletion?.completed !== mdsCompletion?.total">
+      {{'WORKSPACE.SHARE.PUBLISH.MISSING_METADATA' | translate:mdsCompletion }}
+      <div>
+        <button mat-button color="primary"
+                (click)="openMetadata()">
+          <i icon iconId="arrow_forward"></i> {{'WORKSPACE.SHARE.PUBLISH.OPEN_METADATA' | translate}}
+        </button>
+      </div>
+    </info-message>
     <info-message mode="warning" *ngIf="!getLicense()">
       {{'WORKSPACE.SHARE.PUBLISH.NO_LICENSE' | translate}}
       <div>
@@ -43,7 +53,7 @@
   <info-message mode="info" *ngIf="isCopy">
     {{'WORKSPACE.SHARE.PUBLISH.COPY_ACTIVE' | translate}}
   </info-message>
-  <div *ngIf="!inherited" class="share-type">
+  <div *ngIf="!inherited && mdsCompletion?.completed === mdsCompletion?.total" class="share-type">
     <mat-checkbox class="mat-checkbox-multiline"
                   [(ngModel)]="shareModeDirect"
                   (ngModelChange)="updateShareMode()"

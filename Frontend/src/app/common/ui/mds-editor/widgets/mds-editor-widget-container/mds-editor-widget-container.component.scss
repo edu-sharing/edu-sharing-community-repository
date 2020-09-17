@@ -1,0 +1,18 @@
+.header-container {
+    display: flex;
+    .spacer {
+        flex-grow: 1;
+    }
+    label {
+        font-weight: 700;
+    }
+    .bulk-mode-radio-group {
+        mat-radio-button:not(:last-of-type) {
+            margin-right: 20px;
+        }
+    }
+}
+
+.body-container {
+    margin-bottom: 2em;
+}

@@ -1,0 +1,30 @@
+// @import '../../../../../../core-ui-module/styles/variables';
+
+.tree {
+    li,
+    ul {
+        margin-top: 0;
+        margin-bottom: 0;
+        list-style-type: none;
+    }
+    ul {
+        padding-inline-start: 40px;
+    }
+    .mat-tree-node.selected {
+        background-color: rgba(0, 0, 0, 0.04);
+    }
+}
+
+[hidden] {
+    display: none;
+}
+
+:host ::ng-deep .mat-checkbox {
+    .mat-checkbox-layout {
+        white-space: unset;
+        padding: 5px 20px 5px 0;
+    }
+    .mat-checkbox-inner-container {
+        margin-top: auto !important; // Override !important styling from material
+    }
+}

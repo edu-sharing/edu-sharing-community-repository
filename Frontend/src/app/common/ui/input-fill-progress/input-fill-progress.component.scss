@@ -13,6 +13,7 @@
     .current-bar {
       position: absolute;
       height: 100%;
+      transition: $transitionNormal all;
     }
     .minimum-bar,.publish-bar{
       position: absolute;
@@ -24,15 +25,25 @@
     .publish-bar{
       background-color: #aaa;
     }
-    &.status-required .current-bar {
+    &.status-mandatory .current-bar {
       background-color: $colorStatusNegative;
     }
-    &.status-requiredPublish .current-bar {
+    &.status-mandatoryForPublish .current-bar {
+      background-color: $colorStatusWarning;
+    }
+    &.status-finished .current-bar,
+    &.status-optional .current-bar {
       background-color: $colorStatusPositive;
     }
   }
-  > label{
+  > label {
     padding: 10px 15%;
     font-size: $fontSizeSmall;
+    &.status-mandatory {
+      color: darken($colorStatusNegative, 20%);
+    }
+    &.status-mandatoryForPublish {
+      color: darken($colorStatusWarning, 20%);
+    }
   }
 }

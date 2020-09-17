@@ -1,11 +1,22 @@
 <div class="wrapper" *ngIf="current && maximum">
-    <div class="status status-{{getStatus()}}">
-        <div class="publish-bar" [style.width]="(((maximum.required + (maximum.requiredPublish || 0)) / getSum('maximum')) * 100) + '%'"></div>
-        <div class="minimum-bar" [style.width]="((maximum.required / getSum('maximum')) * 100) + '%'"></div>
-        <div class="current-bar" [style.width]="(getFullProgress() / getSum('maximum'))*100 + '%'"></div>
-    </div>
-    <label>
-        <ng-container>{{getSum('current')}} / {{getSum('maximum')}}</ng-container>
-        {{'FILL_STATUS.MESSAGE' | translate }}
-    </label>
+  <div class="status status-{{ getStatus() }}">
+    <div
+      class="publish-bar"
+      [style.width]="
+        ((maximum.mandatory + (maximum.mandatoryForPublish || 0)) / getSum('maximum')) * 100 + '%'
+      "
+    ></div>
+    <div
+      class="minimum-bar"
+      [style.width]="(maximum.mandatory / getSum('maximum')) * 100 + '%'"
+    ></div>
+    <div
+      class="current-bar"
+      [style.width]="(getFullProgress() / getSum('maximum')) * 100 + '%'"
+    ></div>
+  </div>
+  <label class="status-{{getStatus()}}">
+    <ng-container>{{ getSum('current') }} / {{ getSum('maximum') }}</ng-container>
+    {{ 'FILL_STATUS.MESSAGE' | translate }}
+  </label>
 </div>
