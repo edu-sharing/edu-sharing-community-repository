@@ -1,5 +1,5 @@
 <div class="header-container">
-  <label *ngIf="label">{{ label }}</label>
+  <label *ngIf="label" [id]="labelId">{{ label }}</label>
   <div class="spacer"></div>
   <ng-container *ngIf="isBulk">
     <mat-slide-toggle
@@ -19,6 +19,6 @@
     </mat-radio-group>
   </ng-container>
 </div>
-<div class="body-container" role="group">
+<div class="body-container" role="group" [attr.aria-labelledby]="labelId">
   <ng-content></ng-content>
 </div>

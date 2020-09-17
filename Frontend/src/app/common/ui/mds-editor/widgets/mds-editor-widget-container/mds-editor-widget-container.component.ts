@@ -17,10 +17,12 @@ export class MdsEditorWidgetContainerComponent implements OnInit {
 
     readonly ValueType = ValueType;
     readonly isBulk: boolean;
+    readonly labelId: string;
     bulkMode: BulkMode;
 
     constructor(private mdsEditorInstance: MdsEditorInstanceService) {
         this.isBulk = this.mdsEditorInstance.isBulk;
+        this.labelId = Math.random().toString(36).substr(2);
     }
 
     ngOnInit(): void {
