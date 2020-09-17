@@ -170,6 +170,8 @@ export class MdsEditorViewComponent implements OnInit, AfterViewInit {
             );
             return;
         }
+        // override widget definition using inline parameters
+        const htmlRef = this.updateWidgetWithHTMLAttributes(widget);
         UIHelper.injectAngularComponent(
             this.factoryResolver,
             this.containerRef,
@@ -179,6 +181,13 @@ export class MdsEditorViewComponent implements OnInit, AfterViewInit {
                 widget,
             },
         );
+    }
+
+    private updateWidgetWithHTMLAttributes(widget: Widget) {
+        const htmlRef = this.container.nativeElement.querySelector(widget.definition.id.replace(':', '\\:'));
+        htmlRef?.getAttributeNames().forEach((attribute) => {
+            widget.definition[attribute] = htmlRef.getAttribute(attribute);
+        });
     }
 
     private violatesConstraints(constraints: Constraints): string | null {
