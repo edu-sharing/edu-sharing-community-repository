@@ -841,6 +841,9 @@ public class NodeDao {
 		return this.aspects;
 	}
 	public Node asNode() throws DAOException {
+		return asNode(true);
+	}
+		public Node asNode(boolean fetchReference) throws DAOException {
 		if(this.version!=null){
 			VersionedNode node=new VersionedNode();
 			fillNodeObject(node);
@@ -850,7 +853,7 @@ public class NodeDao {
 			return node;
 		}
 		Node data = new Node();
-		if (isCollectionReference()) {
+		if (isCollectionReference() && fetchReference) {
 			data = new CollectionReference();
 			fillNodeReference((CollectionReference) data);
 		}
@@ -866,7 +869,7 @@ public class NodeDao {
 		final String originalId = (String) getNativeProperties().get(CCConstants.CCM_PROP_IO_ORIGINAL);
 		reference.setOriginalId(originalId);
 		try {
-			reference.setAccessOriginal(NodeDao.getNode(repoDao, originalId).asNode().getAccess());
+			reference.setAccessOriginal(NodeDao.getNode(repoDao, originalId).asNode(false).getAccess());
 		} catch (Throwable t) {
 			// user may has no access to the original or it is deleted, this is okay
 		}
@@ -876,7 +879,7 @@ public class NodeDao {
 			public Void doWork() throws Exception {
 				try {
 					NodeDao nodeDaoOriginal = NodeDao.getNode(repoDao, originalId);
-					reference.setCreatedBy(nodeDaoOriginal.asNode().getCreatedBy());
+					reference.setCreatedBy(nodeDaoOriginal.asNode(false).getCreatedBy());
 				} catch (Throwable t) {
 					reference.setOriginalId(null);
 					// original maybe deleted
