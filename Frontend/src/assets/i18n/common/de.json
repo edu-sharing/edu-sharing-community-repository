@@ -564,7 +564,9 @@
         "LICENSE_NO_PERMISSIONS_SAFE": "Sie können im gesicherten Bereich die Lizenz des Materials nicht ändern",
         "ADD_CHILD_OBJECT": "Weitere Materialien hinzufügen",
         "ADD_CHILD_OBJECT_DESCRIPTION": "Erzeugen Sie eine neue Serie, indem Sie dazugehörige Materialien ergänzen",
-        "ADD_CHILD_OBJECT_QUOTA_REACHED": "Fehler beim Hochladen des Objekts \"{{ name }}\": Speicherplatz-Quota überschritten"
+        "ADD_CHILD_OBJECT_QUOTA_REACHED": "Fehler beim Hochladen des Objekts \"{{ name }}\": Speicherplatz-Quota überschritten",
+        "CONFIRM_DISCARD_TITLE": "Änderungen verwerfen?",
+        "CONFIRM_DISCARD_MESSAGE": "Dialog schließen, ohne die Änderungen zu speichern?"
     },
     "SIMPLE_EDIT": {
         "TITLE": "Schnell-Bearbeitung",

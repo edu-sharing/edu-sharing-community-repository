@@ -179,8 +179,9 @@ export class WorkspaceManagementDialogsComponent  {
   handleKeyboardEvent(event: KeyboardEvent) {
     if(event.key === 'Escape') {
       if(this.nodeMetadata!=null || this.createMetadata){
-        if(this.mdsEditorWrapperRef.mdsRef?.handleKeyboardEvent(event))
+        if (this.mdsEditorWrapperRef.handleKeyboardEvent(event)) {
           return;
+        }
         this.closeEditor(false);
         event.preventDefault();
         event.stopPropagation();

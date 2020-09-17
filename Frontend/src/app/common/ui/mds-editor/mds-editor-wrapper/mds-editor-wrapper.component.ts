@@ -79,6 +79,17 @@ export class MdsEditorWrapperComponent implements OnInit, OnChanges {
         }
     }
 
+    handleKeyboardEvent(event: KeyboardEvent): boolean {
+        switch (this.editorType) {
+            case 'legacy':
+                return this.mdsRef.handleKeyboardEvent(event);
+            case 'angular':
+                // Tell the outer component that we handle all keyboard events. This prevents the
+                // dialog to be closed from outside on Escape without confirmation.
+                return true;
+        }
+    }
+
     async onSave(): Promise<void> {
         this.isLoading = true;
         try {

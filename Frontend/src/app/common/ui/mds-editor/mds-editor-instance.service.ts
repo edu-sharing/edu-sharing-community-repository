@@ -1,4 +1,4 @@
-import {EventEmitter, Injectable} from '@angular/core';
+import { Injectable } from '@angular/core';
 import { BehaviorSubject, Observable, ReplaySubject } from 'rxjs';
 import {
     Node,
@@ -8,6 +8,7 @@ import {
     View,
 } from '../../../core-module/core.module';
 import { MdsEditorCommonService } from './mds-editor-common.service';
+import { NativeWidget } from './mds-editor-view/mds-editor-view.component';
 import {
     BulkMode,
     EditorType,
@@ -21,8 +22,7 @@ import {
     RequiredMode,
     Values,
 } from './types';
-import {NativeWidget} from './mds-editor-view/mds-editor-view.component';
-import {MdsEditorWidgetVersionComponent} from './widgets/mds-editor-widget-version/mds-editor-widget-version.component';
+import { MdsEditorWidgetVersionComponent } from './widgets/mds-editor-widget-version/mds-editor-widget-version.component';
 
 export interface CompletionStatusEntry {
     completed: number;
@@ -276,7 +276,12 @@ export class MdsEditorInstanceService {
     getWidget(propertyName: string): Widget {
         return this.widgets[propertyName];
     }
-    getCanSave(): Observable<boolean> {
+
+    getCanSave(): boolean {
+        return this.canSave.value;
+    }
+
+    observeCanSave(): Observable<boolean> {
         return this.canSave.asObservable();
     }
 
@@ -294,12 +299,12 @@ export class MdsEditorInstanceService {
         if(versionWidget) {
             if(versionWidget.file) {
                 updatedNodes = await this.mdsEditorCommonService.saveNodesMetadata(
-                    this.getNodeValuePairs()
+                    this.getNodeValuePairs(),
                 );
                 await this.mdsEditorCommonService.saveNodeContent(
                     this.nodes.value[0],
                     versionWidget.file,
-                    versionWidget.comment
+                    versionWidget.comment,
                 );
                 return updatedNodes;
             }
@@ -318,13 +323,13 @@ export class MdsEditorInstanceService {
     private updateCanSave() {
         const widgets = Object.values(this.widgets);
         this.canSave.next(
-            widgets.every((state) => state.getStatus() !== 'INVALID') &&
+            (widgets.every((state) => state.getStatus() !== 'INVALID') &&
                 widgets.some(
                     (state) =>
                         (state.getHasChanged() || state.hasUnsavedDefault) &&
                         state.getStatus() !== 'DISABLED',
-                ) ||
-                this.nativeWidgets.some((w) => w.hasChanges.value)
+                )) ||
+                this.nativeWidgets.some((w) => w.hasChanges.value),
         );
     }
 
@@ -397,8 +402,8 @@ export class MdsEditorInstanceService {
             }
             return acc;
         }, {} as { [key: string]: string[] });
-        this.nativeWidgets.forEach((widget) =>
-            values = widget.getValues ? widget.getValues(node, values) : values
+        this.nativeWidgets.forEach(
+            (widget) => (values = widget.getValues ? widget.getValues(node, values) : values),
         );
         return values;
     }
@@ -444,7 +449,7 @@ export class MdsEditorInstanceService {
         this.nativeWidgets.push(nativeWidget);
         nativeWidget.hasChanges.subscribe(() => {
             this.updateCanSave();
-        })
+        });
     }
 }
 

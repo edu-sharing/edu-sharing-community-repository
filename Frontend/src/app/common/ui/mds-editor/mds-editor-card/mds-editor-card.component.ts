@@ -1,9 +1,10 @@
 import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
+import { delay } from 'rxjs/operators';
 import { DialogButton, Node } from '../../../../core-module/core.module';
 import { CardJumpmark } from '../../../../core-ui-module/components/card/card.component';
-import { MdsEditorInstanceService } from '../mds-editor-instance.service';
+import { Toast } from '../../../../core-ui-module/toast';
 import { FillTypeStatus } from '../../input-fill-progress/input-fill-progress.component';
-import { delay } from 'rxjs/operators';
+import { MdsEditorInstanceService } from '../mds-editor-instance.service';
 
 @Component({
     selector: 'app-mds-editor-card',
@@ -26,13 +27,13 @@ export class MdsEditorCardComponent implements OnInit {
     completedProperties: FillTypeStatus;
     totalProperties: FillTypeStatus;
 
-    constructor(private mdsEditorInstance: MdsEditorInstanceService) {}
+    constructor(private mdsEditorInstance: MdsEditorInstanceService, private toast: Toast) {}
 
     ngOnInit(): void {
         this.nodes = this.mdsEditorInstance.nodes.value;
         this.jumpMarks = this.getJumpMarks();
         this.mdsEditorInstance
-            .getCanSave()
+            .observeCanSave()
             .pipe(delay(0))
             .subscribe((value) => {
                 this.buttons[1].disabled = !value;
@@ -44,6 +45,27 @@ export class MdsEditorCardComponent implements OnInit {
                 this.completedProperties = map(completionStatus, (entry) => entry.completed);
                 this.totalProperties = map(completionStatus, (entry) => entry.total);
             });
+    }
+
+    confirmDiscard(): void {
+        if (this.mdsEditorInstance.getCanSave()) {
+            this.toast.showModalDialog(
+                'MDS.CONFIRM_DISCARD_TITLE',
+                'MDS.CONFIRM_DISCARD_MESSAGE',
+                [
+                    new DialogButton('CANCEL', DialogButton.TYPE_CANCEL, () => {
+                        this.toast.closeModalDialog();
+                    }),
+                    new DialogButton('DISCARD', DialogButton.TYPE_PRIMARY, () => {
+                        this.cancel.emit();
+                        this.toast.closeModalDialog();
+                    }),
+                ],
+                true,
+            );
+        } else {
+            this.cancel.emit();
+        }
     }
 
     private getJumpMarks(): CardJumpmark[] {
