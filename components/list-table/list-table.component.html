@@ -85,7 +85,7 @@
                  [style.backgroundColor]="isCollection(node) ? (viewType==2 ? node.preview.isIcon ? getCollectionColor(node) : '#000' : getCollectionColor(node)) : null"
                  [style.border-color]="isCollection(node) ? getCollectionColor(node) : null"
                  [class.dark-color]="isCollection(node) && (viewType == 2 ? node.preview.isIcon : true) && isBrightColorCollection(getCollectionColor(node))"
-                 [class.import-blocked]="node.properties['ccm:importblocked'] ? node.properties['ccm:importblocked'][0] == 'true' : false"
+                 [class.import-blocked]="node.properties && node.properties['ccm:importblocked'] ? node.properties['ccm:importblocked'][0] == 'true' : false"
                  (appDistinctClick)="onDistinctClick($event, node)"
                  (dblclick)="doubleClick(node)"
                  (contextmenu)="contextMenu($event,node)"
