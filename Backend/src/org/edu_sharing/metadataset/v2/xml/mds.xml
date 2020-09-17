@@ -876,7 +876,7 @@
 			</list>
 		</lists>
 		<queries>
-			<basequery>-TYPE:"ccm:toolpermission" AND NOT ASPECT:"ccm:metadataPresettingTemplate" AND NOT @cm\:name:"._*" AND NOT @cm\:name:".DS_Store*" AND NOT PATH:"/sys\:system/sys\:people//*" AND -ASPECT:"ccm:io_childobject"</basequery>
+			<basequery>-TYPE:"ccm:toolpermission" AND NOT ASPECT:"ccm:metadataPresettingTemplate" AND NOT @cm\:name:"._*" AND NOT @cm\:name:".DS_Store*" AND NOT PATH:"/sys\:system/sys\:people//*" AND NOT PATH:"/app:company_home/ccm:Edu_Sharing_System/*" AND -ASPECT:"ccm:io_childobject"</basequery>
 			<allowSearchWithoutCriteria>true</allowSearchWithoutCriteria>
 
 			<query join="AND" id="ngsearch">
