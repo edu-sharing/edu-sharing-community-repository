@@ -11,6 +11,7 @@
     action-area
     [current]="completedProperties"
     [maximum]="totalProperties"
+    (showMissing)="onShowMissing()"
   ></app-input-fill-progress>
   <app-mds-editor-core></app-mds-editor-core>
 </card>

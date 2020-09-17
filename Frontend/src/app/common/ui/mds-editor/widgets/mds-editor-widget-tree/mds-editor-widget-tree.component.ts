@@ -7,8 +7,6 @@ import { DisplayValue } from '../../types';
 import { MdsEditorWidgetBase, ValueType } from '../mds-editor-widget-base';
 import { MdsEditorWidgetTreeCoreComponent } from './mds-editor-widget-tree-core/mds-editor-widget-tree-core.component';
 import { Tree } from './tree';
-;
-
 @Component({
     selector: 'app-mds-editor-widget-tree',
     templateUrl: './mds-editor-widget-tree.component.html',
@@ -25,8 +23,8 @@ export class MdsEditorWidgetTreeComponent
     treeCoreComponent: MdsEditorWidgetTreeCoreComponent;
 
     tree: Tree;
-    values: DisplayValue[];
-    formControl = new FormControl();
+    inputControl = new FormControl();
+    chipsControl: FormControl;
     overlayIsVisible = false;
     readonly overlayPositions: readonly ConnectedPosition[] = [
         {
@@ -50,9 +48,16 @@ export class MdsEditorWidgetTreeComponent
     private destroyed$: ReplaySubject<boolean> = new ReplaySubject(1);
 
     ngOnInit(): void {
-        const values = this.initWidget();
-        this.tree = Tree.generateTree(this.widget.definition.values, values);
-        this.values = values.map((value) => this.tree.idToDisplayValue(value));
+        // this.widget.definition.isRequired = RequiredMode.MandatoryForPublish;
+        const initialValues = this.initWidget();
+        this.tree = Tree.generateTree(this.widget.definition.values, initialValues);
+        this.chipsControl = new FormControl(
+            initialValues.map((value) => this.tree.idToDisplayValue(value)),
+            this.getStandardValidators(),
+        );
+        this.chipsControl.valueChanges.subscribe((values: DisplayValue[]) => {
+            this.setValue(values.map((value) => value.key));
+        });
     }
 
     ngAfterViewInit(): void {
@@ -79,12 +84,16 @@ export class MdsEditorWidgetTreeComponent
         if (this.overlayIsVisible) {
             return;
         }
-        this.overlayIsVisible = true;
+        // Don't interfere with change detection
         setTimeout(() => {
-            overlayClickOutside(
-                this.overlay.overlayRef,
-                this.overlay.origin.elementRef.nativeElement,
-            ).subscribe(() => this.closeOverlay());
+            this.overlayIsVisible = true;
+            // Wait for overlay
+            setTimeout(() => {
+                overlayClickOutside(
+                    this.overlay.overlayRef,
+                    this.overlay.origin.elementRef.nativeElement,
+                ).subscribe(() => this.closeOverlay());
+            });
         });
     }
 
@@ -109,18 +118,16 @@ export class MdsEditorWidgetTreeComponent
         }
     }
 
-    remove(value: DisplayValue): void {
-        this.tree.findById(value.key).checked = false;
-        const index = this.values.indexOf(value);
-        if (index >= 0) {
-            this.values.splice(index, 1);
+    remove(toBeRemoved: DisplayValue): void {
+        this.tree.findById(toBeRemoved.key).checked = false;
+        const values: DisplayValue[] = this.chipsControl.value;
+        if (values.includes(toBeRemoved)) {
+            this.chipsControl.setValue(values.filter((value) => value !== toBeRemoved));
         }
-        this.updateValues();
     }
 
-    updateValues(): void {
-        // this.values$.next(this.values);
-        this.setValue(this.values.map((value) => value.key));
+    onValuesChange(values: DisplayValue[]): void {
+        this.chipsControl.setValue(values);
     }
 }
 

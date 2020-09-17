@@ -1,4 +1,4 @@
-import { Component, Input } from '@angular/core';
+import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { RequiredMode } from '../mds-editor/types';
 
 @Component({
@@ -7,8 +7,11 @@ import { RequiredMode } from '../mds-editor/types';
     styleUrls: ['input-fill-progress.component.scss'],
 })
 export class InputFillProgressComponent {
+    readonly RequiredMode = RequiredMode;
+
     @Input() current: FillTypeStatus;
     @Input() maximum: FillTypeStatus;
+    @Output() showMissing = new EventEmitter();
 
     getStatus() {
         for (const type of Object.values(RequiredMode)) {

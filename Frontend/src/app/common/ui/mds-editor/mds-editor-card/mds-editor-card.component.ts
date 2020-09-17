@@ -68,6 +68,10 @@ export class MdsEditorCardComponent implements OnInit {
         }
     }
 
+    onShowMissing(): void {
+        this.mdsEditorInstance.showMissingRequiredWidgets();
+    }
+
     private getJumpMarks(): CardJumpmark[] {
         return this.mdsEditorInstance.views.map(
             (view) => new CardJumpmark(view.id + '_header', view.caption, view.icon),

@@ -37,13 +37,17 @@
     }
   }
   > label {
-    padding: 10px 15%;
+    padding: 10px 0;
     font-size: $fontSizeSmall;
+    text-align: center;
     &.status-mandatory {
       color: darken($colorStatusNegative, 20%);
     }
     &.status-mandatoryForPublish {
       color: darken($colorStatusWarning, 20%);
+    }
+    .show-missing-button {
+      font-weight: bold;
     }
   }
 }

@@ -30,8 +30,6 @@ export interface CompletionStatusEntry {
 }
 
 export type Widget = InstanceType<typeof MdsEditorInstanceService.Widget>;
-type Widgets = { [property: string]: Widget };
-
 type CompletionStatus = { [key in RequiredMode]: CompletionStatusEntry };
 
 /**
@@ -49,6 +47,7 @@ export class MdsEditorInstanceService {
         private hasChanged = false;
         private status: InputStatus;
         private bulkMode?: BehaviorSubject<BulkMode>; // only when `isBulk`
+        private showMissingRequiredFunction: (shouldScrollIntoView: boolean) => boolean;
         constructor(
             private mdsEditorInstanceService: MdsEditorInstanceService,
             public readonly definition: MdsWidget,
@@ -121,6 +120,30 @@ export class MdsEditorInstanceService {
 
         observeBulkMode(): Observable<BulkMode> {
             return this.bulkMode.asObservable();
+        }
+
+        /**
+         * Register function to reveal a missing required field.
+         *
+         * @param f reveals the required hint if the field is required and has no value; returns
+         * whether the field was missing and scrolled into view
+         */
+        onShowMissingRequired(f: (shouldScrollIntoView: boolean) => boolean) {
+            if (this.showMissingRequiredFunction) {
+                throw new Error('onShowMissingRequired was called more than once');
+            }
+            this.showMissingRequiredFunction = f;
+        }
+
+        /**
+         * @returns whether the the widget was scrolled into view
+         */
+        showMissingRequired(shouldScrollIntoView: boolean): boolean {
+            if (this.showMissingRequiredFunction) {
+                return this.showMissingRequiredFunction(shouldScrollIntoView);
+            } else {
+                return false;
+            }
         }
 
         private updateHasChanged() {
@@ -228,17 +251,20 @@ export class MdsEditorInstanceService {
      *
      * Widgets are not added or removed after initialization, but hold mutable state.
      */
-    private widgets: Widgets;
+    private widgets: Widget[];
     /**
-     * Active, "native" widgets (which are not defined via mds properties directly
-     * e.g. preview, version, author
-     * Will be appended on init depending if they exist in the currently rendered group
+     * Active, "native" widgets (which are not defined via mds properties directly).
+     *
+     * E.g. `preview`, `version`, `author`.
+     *
+     * Will be appended on init depending if they exist in the currently rendered group.
      */
     private nativeWidgets: NativeWidget[] = [];
 
     // Mutable state.
     private completionStatus = new ReplaySubject<CompletionStatus>(1);
     private canSave = new BehaviorSubject(false);
+    private lastScrolledIntoViewIndex: number = null;
 
     constructor(
         private mdsEditorCommonService: MdsEditorCommonService,
@@ -274,7 +300,7 @@ export class MdsEditorInstanceService {
     }
 
     getWidget(propertyName: string): Widget {
-        return this.widgets[propertyName];
+        return this.widgets.find((widget) => widget.definition.id === propertyName);
     }
 
     getCanSave(): boolean {
@@ -289,15 +315,49 @@ export class MdsEditorInstanceService {
         return this.completionStatus.asObservable();
     }
 
+    /**
+     * Shows the required hints of all missing widgets and scrolls widgets into view, rotating
+     * through all widgets when called multiple times.
+     */
+    showMissingRequiredWidgets(): void {
+        if (this.lastScrolledIntoViewIndex === null) {
+            // No widget was scrolled into view yet. We need to touch all widgets so they will
+            // display the required hint and tell them to scroll into view until we found a missing
+            // one.
+            let hasBeenScrolledIntoView = false;
+            for (const [index, widget] of this.widgets.entries()) {
+                const hasJustBeenScrolledIntoView = widget.showMissingRequired(
+                    !hasBeenScrolledIntoView,
+                );
+                if (hasJustBeenScrolledIntoView) {
+                    hasBeenScrolledIntoView = true;
+                    this.lastScrolledIntoViewIndex = index;
+                }
+            }
+        } else {
+            // We already touched all widgets and scrolled one into view. Just iterate the widgets
+            // starting from the one that was last scrolled into view until we find the next missing
+            // one.
+            for (let i = 0; i < this.widgets.length; i++) {
+                const index = (i + this.lastScrolledIntoViewIndex + 1) % this.widgets.length;
+                const hasJustBeenScrolledIntoView = this.widgets[index].showMissingRequired(true);
+                if (hasJustBeenScrolledIntoView) {
+                    this.lastScrolledIntoViewIndex = index;
+                    break;
+                }
+            }
+        }
+    }
+
     async save(): Promise<Node[]> {
         let updatedNodes: Node[];
         console.log(this.nativeWidgets);
-        const versionWidget: MdsEditorWidgetVersionComponent = (
-            this.nativeWidgets.find((w) => (w instanceof MdsEditorWidgetVersionComponent)) as MdsEditorWidgetVersionComponent
-        );
+        const versionWidget: MdsEditorWidgetVersionComponent = this.nativeWidgets.find(
+            (w) => w instanceof MdsEditorWidgetVersionComponent,
+        ) as MdsEditorWidgetVersionComponent;
         console.log('save', versionWidget, MdsEditorWidgetVersionComponent.name);
-        if(versionWidget) {
-            if(versionWidget.file) {
+        if (versionWidget) {
+            if (versionWidget.file) {
                 updatedNodes = await this.mdsEditorCommonService.saveNodesMetadata(
                     this.getNodeValuePairs(),
                 );
@@ -321,10 +381,9 @@ export class MdsEditorInstanceService {
     }
 
     private updateCanSave() {
-        const widgets = Object.values(this.widgets);
         this.canSave.next(
-            (widgets.every((state) => state.getStatus() !== 'INVALID') &&
-                widgets.some(
+            (this.widgets.every((state) => state.getStatus() !== 'INVALID') &&
+                this.widgets.some(
                     (state) =>
                         (state.getHasChanged() || state.hasUnsavedDefault) &&
                         state.getStatus() !== 'DISABLED',
@@ -341,8 +400,8 @@ export class MdsEditorInstanceService {
         return group.views.map((viewId) => mdsDefinition.views.find((v) => v.id === viewId));
     }
 
-    private initWidgets(nodes: Node[], mdsDefinition: MdsDefinition, views: View[]): Widgets {
-        const result: Widgets = {};
+    private initWidgets(nodes: Node[], mdsDefinition: MdsDefinition, views: View[]): Widget[] {
+        const result: Widget[] = [];
         const availableWidgets = mdsDefinition.widgets
             .filter(
                 (widget) =>
@@ -350,9 +409,12 @@ export class MdsEditorInstanceService {
             )
             .filter((widget) => views.some((view) => view.html.indexOf(widget.id) !== -1))
             .filter((widget) => this.meetsCondition(nodes, widget));
-        for (const widget of availableWidgets) {
-            if (!result[widget.id] || this.isActiveOverridingWidget(widget, views)) {
-                result[widget.id] = new MdsEditorInstanceService.Widget(this, widget, nodes);
+        for (const availableWidget of availableWidgets) {
+            if (
+                !result.some((widget) => widget.definition.id === availableWidget.id) ||
+                this.isActiveOverridingWidget(availableWidget, views)
+            ) {
+                result.push(new MdsEditorInstanceService.Widget(this, availableWidget, nodes));
             }
         }
         return result;
@@ -390,7 +452,8 @@ export class MdsEditorInstanceService {
     }
 
     private getValuesForNode(node: Node): Values {
-        let values = Object.entries(this.widgets).reduce((acc, [property, widget]) => {
+        let values = this.widgets.reduce((acc, widget) => {
+            const property = widget.definition.id;
             const newValue = this.getNewPropertyValue(widget, node.properties[property]);
             if (newValue) {
                 if (widget.definition.type === MdsWidgetType.Range) {
@@ -435,7 +498,7 @@ export class MdsEditorInstanceService {
     }
 
     private getCompletionStatusEntry(requiredMode: RequiredMode): CompletionStatusEntry {
-        const total = Object.values(this.widgets).filter(
+        const total = this.widgets.filter(
             (widget) => widget.definition.isRequired === requiredMode,
         );
         const completed = total.filter((widget) => widget.getValue() && widget.getValue()[0]);

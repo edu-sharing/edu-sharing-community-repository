@@ -1,29 +1,30 @@
-<app-mds-editor-widget-container [widget]="widget" [label]="false" [valueType]="valueType">
-  <mat-form-field cdkOverlayOrigin #trigger="cdkOverlayOrigin" (focus)="openOverlay()">
-    <mat-label>{{ widget.definition.caption }}</mat-label>
-    <mat-chip-list #chipList>
-      <mat-chip
-        *ngFor="let value of values"
-        [selectable]="false"
-        [removable]="true"
-        [matTooltip]="value.hint"
-        (click)="revealInTree(value)"
-        (removed)="remove(value)"
-      >
-        {{ value.label }}
-        <mat-icon matChipRemove>cancel</mat-icon>
-      </mat-chip>
-      <input
-        #input
-        [formControl]="formControl"
-        [placeholder]="widget.definition.placeholder"
-        [matChipInputFor]="chipList"
-      />
-    </mat-chip-list>
-    <mat-hint *ngIf="widget.definition.bottomCaption">{{
-      widget.definition.bottomCaption
-    }}</mat-hint>
-  </mat-form-field>
+<app-mds-editor-widget-container
+  [widget]="widget"
+  [label]="false"
+  [valueType]="valueType"
+  [control]="chipsControl"
+  cdkOverlayOrigin
+  #trigger="cdkOverlayOrigin"
+>
+  <mat-chip-list #chipList [formControl]="chipsControl">
+    <mat-chip
+      *ngFor="let value of chipsControl.value"
+      [selectable]="false"
+      [removable]="true"
+      [matTooltip]="value.hint"
+      (click)="revealInTree(value)"
+      (removed)="remove(value)"
+    >
+      {{ value.label }}
+      <mat-icon matChipRemove>cancel</mat-icon>
+    </mat-chip>
+    <input
+      #input
+      [formControl]="inputControl"
+      [placeholder]="widget.definition.placeholder"
+      [matChipInputFor]="chipList"
+    />
+  </mat-chip-list>
 </app-mds-editor-widget-container>
 
 <ng-template
@@ -39,9 +40,9 @@
     <app-mds-editor-widget-tree-core
       [widget]="widget"
       [tree]="tree"
-      [(values)]="values"
-      [filterString]="formControl.value"
-      (valuesChange)="updateValues()"
+      [values]="chipsControl.value"
+      [filterString]="inputControl.value"
+      (valuesChange)="onValuesChange($event)"
     ></app-mds-editor-widget-tree-core>
   </div>
 </ng-template>

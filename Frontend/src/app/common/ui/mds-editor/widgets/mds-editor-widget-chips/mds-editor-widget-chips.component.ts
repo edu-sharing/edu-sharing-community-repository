@@ -3,7 +3,7 @@ import { Component, ElementRef, OnInit, ViewChild } from '@angular/core';
 import { FormControl } from '@angular/forms';
 import { MatAutocomplete, MatAutocompleteSelectedEvent } from '@angular/material/autocomplete';
 import { MatChipInputEvent } from '@angular/material/chips';
-import { BehaviorSubject, combineLatest, from, Observable, Subject } from 'rxjs';
+import { combineLatest, from, Observable } from 'rxjs';
 import {
     debounceTime,
     distinctUntilChanged,
@@ -31,29 +31,26 @@ export class MdsEditorWidgetChipsComponent extends MdsEditorWidgetBase implement
 
     readonly valueType: ValueType = ValueType.MultiValue;
     readonly separatorKeysCodes: number[] = [ENTER, COMMA];
-    values: DisplayValue[];
-    formControl = new FormControl();
+    inputControl = new FormControl();
+    chipsControl: FormControl;
     filteredValues: Observable<DisplayValue[]>;
 
-    private values$: Subject<DisplayValue[]>;
-
     ngOnInit(): void {
+        // this.widget.definition.isRequired = RequiredMode.MandatoryForPublish;
         const initialValues = this.initWidget();
-        this.values = initialValues.map((value) => this.toDisplayValues(value));
-        this.values$ = new BehaviorSubject(this.values);
+        this.chipsControl = new FormControl(
+            initialValues.map((value) => this.toDisplayValues(value)),
+            this.getStandardValidators(),
+        );
+        this.chipsControl.valueChanges
+            .pipe(distinctUntilChanged())
+            .subscribe((values: DisplayValue[]) => this.setValue(values.map((value) => value.key)));
         if (
             this.widget.definition.type === MdsWidgetType.MultiValueSuggestBadges ||
             this.widget.definition.type === MdsWidgetType.MultiValueFixedBadges
         ) {
             this.filteredValues = this.subscribeForSuggestionUpdates();
         }
-        this.getIsDisabled().subscribe((isDisabled) => {
-            if (isDisabled) {
-                this.setStatus('DISABLED');
-            } else {
-                this.setStatus('VALID');
-            }
-        });
     }
 
     add(event: MatChipInputEvent): void {
@@ -62,35 +59,35 @@ export class MdsEditorWidgetChipsComponent extends MdsEditorWidgetBase implement
         }
         const input = event.input;
         const value = (event.value || '').trim();
-        if (value && !this.values.some((v) => v.displayString === value)) {
-            this.values.push(this.toDisplayValues(value));
+        if (
+            value &&
+            !this.chipsControl.value.some((v: DisplayValue) => v.displayString === value)
+        ) {
+            this.chipsControl.setValue([...this.chipsControl.value, this.toDisplayValues(value)]);
         }
         if (input) {
             input.value = '';
         }
-        this.updateValues();
     }
 
-    remove(value: DisplayValue): void {
-        const index = this.values.indexOf(value);
-        if (index >= 0) {
-            this.values.splice(index, 1);
+    remove(toBeRemoved: DisplayValue): void {
+        const values: DisplayValue[] = this.chipsControl.value;
+        if (values.includes(toBeRemoved)) {
+            this.chipsControl.setValue(values.filter((value) => value !== toBeRemoved));
         }
-        this.updateValues();
     }
 
     selected(event: MatAutocompleteSelectedEvent): void {
-        this.values.push(event.option.value);
-        this.updateValues();
+        this.chipsControl.setValue([...this.chipsControl.value, event.option.value]);
         this.input.nativeElement.value = '';
-        this.formControl.setValue(null);
+        this.inputControl.setValue(null);
     }
 
     private subscribeForSuggestionUpdates(): Observable<DisplayValue[]> {
         // Combine observables to update suggestions when either the input field or currently
         // selected values change.
         return combineLatest([
-            this.formControl.valueChanges.pipe(
+            this.inputControl.valueChanges.pipe(
                 startWith(null as string),
                 filter(
                     (value: string | null | DisplayValue) =>
@@ -99,17 +96,15 @@ export class MdsEditorWidgetChipsComponent extends MdsEditorWidgetBase implement
                 debounceTime(200),
                 distinctUntilChanged(),
             ) as Observable<string | null>,
-            this.values$,
+            this.chipsControl.valueChanges.pipe(
+                startWith(this.chipsControl.value),
+                distinctUntilChanged(),
+            ),
         ]).pipe(
             switchMap(([filterString, selectedValues]) =>
                 this.filter(filterString, selectedValues),
             ),
         );
-    }
-
-    private updateValues(): void {
-        this.values$.next(this.values);
-        this.setValue(this.values.map((value) => value.key));
     }
 
     private toDisplayValues(value: MdsWidgetValue | string): DisplayValue {

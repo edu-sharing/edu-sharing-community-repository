@@ -20,5 +20,28 @@
   </ng-container>
 </div>
 <div class="body-container" role="group" [attr.aria-labelledby]="labelId">
-  <ng-content></ng-content>
+  <ng-container *ngIf="!control">
+    <ng-container *ngTemplateOutlet="content"></ng-container>
+  </ng-container>
+  <mat-form-field
+    appRegisterFormField
+    *ngIf="control"
+    [class.warn]="missingRequired === RequiredMode.MandatoryForPublish"
+  >
+    <mat-label>{{ widget.definition.caption }}</mat-label>
+    <ng-container *ngTemplateOutlet="content"></ng-container>
+    <mat-hint *ngIf="widget.definition.bottomCaption">
+      {{ widget.definition.bottomCaption }}
+    </mat-hint>
+    <mat-error [hidden]="!control.errors?.required">
+      <ng-container *ngIf="missingRequired === RequiredMode.Mandatory">
+        {{ 'MDS.REQUIRED_MESSAGE' | translate }}
+      </ng-container>
+      <ng-container *ngIf="missingRequired === RequiredMode.MandatoryForPublish">
+        {{ 'MDS.REQUIRED_FOR_PUBLISH_MESSAGE' | translate }}
+      </ng-container>
+    </mat-error>
+  </mat-form-field>
 </div>
+
+<ng-template #content><ng-content></ng-content></ng-template>

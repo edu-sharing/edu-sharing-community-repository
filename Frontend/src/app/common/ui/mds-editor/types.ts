@@ -22,7 +22,7 @@ export type Values = { [property: string]: string[] };
 
 export type BulkMode = 'no-change' | 'append' | 'replace';
 
-export type InputStatus = 'VALID' | 'INVALID' | 'DISABLED';
+export type InputStatus = 'VALID' | 'INVALID' | 'DISABLED' | 'PENDING';
 
 export enum MdsType {
     Io = 'io',

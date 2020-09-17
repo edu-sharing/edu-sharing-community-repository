@@ -1,6 +1,5 @@
 import { Component, OnInit } from '@angular/core';
 import { FormControl, ValidatorFn, Validators } from '@angular/forms';
-import { RequiredMode } from '../../types';
 import { MdsEditorWidgetBase, ValueType } from '../mds-editor-widget-base';
 
 @Component({
@@ -18,24 +17,11 @@ export class MdsEditorWidgetTextComponent extends MdsEditorWidgetBase implements
         this.formControl.valueChanges.subscribe((value) => {
             this.setValue([value]);
         });
-        this.formControl.statusChanges.subscribe((status: 'VALID' | 'INVALID' | 'DISABLED') => {
-            this.setStatus(status);
-        });
-        this.getIsDisabled().subscribe((isDisabled) => {
-            if (isDisabled) {
-                this.formControl.disable();
-            } else {
-                this.formControl.enable();
-            }
-        });
     }
 
     private getValidators(): ValidatorFn[] {
-        const validators: ValidatorFn[] = [];
+        const validators: ValidatorFn[] = [...this.getStandardValidators()];
         const widgetDefinition = this.widget.definition;
-        if (widgetDefinition.isRequired === RequiredMode.Mandatory) {
-            validators.push(Validators.required);
-        }
         if (widgetDefinition.type === 'email') {
             validators.push(Validators.email);
         } else if (widgetDefinition.type === 'number') {

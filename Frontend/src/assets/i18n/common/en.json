@@ -533,7 +533,9 @@
         "ADD_CHILD_OBJECT_DESCRIPTION": "Create a series by attaching more materials to this object",
         "ADD_CHILD_OBJECT_QUOTA_REACHED": "Error while uploading \"{{ name }}\": Upload quota reached",
         "CONFIRM_DISCARD_TITLE": "Discard changes?",
-        "CONFIRM_DISCARD_MESSAGE": "Close the dialog without saving any changes?"
+        "CONFIRM_DISCARD_MESSAGE": "Close the dialog without saving any changes?",
+        "REQUIRED_MESSAGE": "Field is required",
+        "REQUIRED_FOR_PUBLISH_MESSAGE": "Field is required for publishing"
     },
 
      "SIMPLE_EDIT": {
@@ -651,7 +653,8 @@
     },
     "FILL_STATUS": {
         "REQUIRED": "required fields",
-        "REQUIREDPUBLISH": "for publishing required fields"
+        "REQUIREDPUBLISH": "for publishing required fields",
+        "SHOW": "show"
     },
     "LANGUAGE": {
         "INTERNATIONAL": "international",

@@ -1,3 +1,20 @@
+@import '../../../../../core-ui-module/styles/variables';
+
+mat-form-field {
+    width: 100%;
+}
+
+:host .mat-form-field.mat-form-field-invalid.warn ::ng-deep {
+    .mat-form-field-label,
+    .mat-form-field-outline,
+    .mat-error {
+        color: $colorStatusWarning;
+    }
+    .mat-input-element {
+        caret-color: $colorStatusWarning;
+    }
+}
+
 .header-container {
     display: flex;
     .spacer {

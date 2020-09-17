@@ -15,8 +15,18 @@
       [style.width]="(getFullProgress() / getSum('maximum')) * 100 + '%'"
     ></div>
   </div>
-  <label class="status-{{getStatus()}}">
+  <label class="status-{{ getStatus() }}">
     <ng-container>{{ getSum('current') }} / {{ getSum('maximum') }}</ng-container>
     {{ 'FILL_STATUS.MESSAGE' | translate }}
+    <ng-container
+      *ngIf="
+        getStatus() === RequiredMode.Mandatory || getStatus() === RequiredMode.MandatoryForPublish
+      "
+    >
+      -
+      <span class="clickable show-missing-button" tabindex="0" (click)="showMissing.emit()">
+        {{ 'FILL_STATUS.SHOW' | translate }}
+      </span>
+    </ng-container>
   </label>
 </div>
