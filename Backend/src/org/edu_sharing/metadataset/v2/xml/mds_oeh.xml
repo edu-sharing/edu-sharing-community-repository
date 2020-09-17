@@ -300,6 +300,9 @@
 				<multiple>true</multiple>
 				<multiplejoin>OR</multiplejoin>
 			</property>
+			<property name="ccm:replicationsourceuuid">
+				<statement>@ccm\:replicationsourceuuid:"${value}"</statement>
+			</property>
 		</query>
 	</queries>
 	<queries syntax="dsl">
@@ -342,9 +345,7 @@
 				<multiple>true</multiple>
 				<multiplejoin>OR</multiplejoin>
 			</property>
-			<property name="ccm:replicationsourceuuid">
-				<statement>@ccm\:replicationsourceuuid:"${value}"</statement>
-			</property>
+			<property name="ccm:replicationsourceuuid"/>
 		</query>
 	</queries>
 	<sorts>
