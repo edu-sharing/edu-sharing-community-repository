@@ -3,15 +3,11 @@ import { AfterViewInit, Component, ElementRef, OnDestroy, OnInit, ViewChild } fr
 import { FormControl } from '@angular/forms';
 import { fromEvent, ReplaySubject } from 'rxjs';
 import { filter, takeUntil } from 'rxjs/operators';
+import { DisplayValue } from '../../types';
 import { MdsEditorWidgetBase, ValueType } from '../mds-editor-widget-base';
 import { MdsEditorWidgetTreeCoreComponent } from './mds-editor-widget-tree-core/mds-editor-widget-tree-core.component';
-import {
-    DisplayValue,
-    findNodeById,
-    generateTree,
-    idToDisplayValue,
-    TreeNode,
-} from './mds.editor-widget-tree-common';
+import { Tree } from './tree';
+;
 
 @Component({
     selector: 'app-mds-editor-widget-tree',
@@ -28,7 +24,7 @@ export class MdsEditorWidgetTreeComponent
     @ViewChild(MdsEditorWidgetTreeCoreComponent)
     treeCoreComponent: MdsEditorWidgetTreeCoreComponent;
 
-    tree: TreeNode[];
+    tree: Tree;
     values: DisplayValue[];
     formControl = new FormControl();
     overlayIsVisible = false;
@@ -55,8 +51,8 @@ export class MdsEditorWidgetTreeComponent
 
     ngOnInit(): void {
         const values = this.initWidget();
-        this.tree = generateTree(this.widget.definition.values, values);
-        this.values = values.map((value) => idToDisplayValue(value, this.tree));
+        this.tree = Tree.generateTree(this.widget.definition.values, values);
+        this.values = values.map((value) => this.tree.idToDisplayValue(value));
     }
 
     ngAfterViewInit(): void {
@@ -75,7 +71,7 @@ export class MdsEditorWidgetTreeComponent
     revealInTree(value: DisplayValue): void {
         this.openOverlay();
         setTimeout(() => {
-            this.treeCoreComponent.revealInTree(findNodeById(this.tree, value.key));
+            this.treeCoreComponent.revealInTree(this.tree.findById(value.key));
         });
     }
 
@@ -114,7 +110,7 @@ export class MdsEditorWidgetTreeComponent
     }
 
     remove(value: DisplayValue): void {
-        findNodeById(this.tree, value.key).checked = false;
+        this.tree.findById(value.key).checked = false;
         const index = this.values.indexOf(value);
         if (index >= 0) {
             this.values.splice(index, 1);

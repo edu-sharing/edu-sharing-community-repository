@@ -1,0 +1,134 @@
+import { DisplayValue, MdsWidgetValue } from '../../types';
+
+export class TreeNode {
+    id: string;
+    caption: string;
+    children?: TreeNode[];
+    parent?: TreeNode;
+    checked: boolean;
+    isHidden: boolean;
+}
+
+export class Tree {
+    rootNodes: TreeNode[];
+    nodesMap: { [key: string]: TreeNode };
+
+    static generateTree(definedValues: readonly MdsWidgetValue[], values: readonly string[]): Tree {
+        const tree = new Tree();
+        let remainingValues = definedValues;
+        while (remainingValues.length > 0) {
+            const newRemainingValues = [];
+            for (const value of remainingValues) {
+                if (value.id in tree.nodesMap) {
+                    console.error('Encountered duplicate id when generating tree:', value.id);
+                    continue;
+                }
+                const node: TreeNode = {
+                    id: value.id,
+                    caption: value.caption,
+                    checked: values.includes(value.id),
+                    isHidden: false,
+                };
+                if (!value.parent) {
+                    tree.pushNode(node);
+                } else {
+                    const parent = tree.nodesMap[value.parent];
+                    if (parent) {
+                        tree.pushNode(node, parent);
+                    } else {
+                        newRemainingValues.push(value);
+                    }
+                }
+            }
+            if (remainingValues.length === newRemainingValues.length) {
+                console.error('Failed to find parents for the following nodes:', remainingValues);
+                break;
+            } else {
+                remainingValues = newRemainingValues;
+            }
+        }
+        return tree;
+    }
+
+    private constructor() {
+        this.rootNodes = [];
+        this.nodesMap = {};
+    }
+
+    findById(id: string): TreeNode {
+        return this.nodesMap[id];
+    }
+
+    find(
+        predicate: (node: TreeNode) => boolean,
+        rootNodes: TreeNode[] = this.rootNodes,
+    ): TreeNode[] {
+        let foundNodes: TreeNode[] = [];
+        for (const node of rootNodes) {
+            if (predicate(node)) {
+                foundNodes.push(node);
+            }
+            if (node.children) {
+                foundNodes = [...foundNodes, ...this.find(predicate, node.children)];
+            }
+        }
+        return foundNodes;
+    }
+
+    *iterate(rootNodes: TreeNode[] = this.rootNodes): Generator<TreeNode> {
+        for (const node of rootNodes) {
+            yield node;
+            if (node.children) {
+                for (const childNode of this.iterate(node.children)) {
+                    yield childNode;
+                }
+            }
+        }
+    }
+
+    getAncestors(node: TreeNode): TreeNode[] {
+        const ancestors: TreeNode[] = [];
+        while (node) {
+            ancestors.push(node);
+            node = node.parent;
+        }
+        return ancestors;
+    }
+
+    idToDisplayValue(id: string): DisplayValue {
+        const node = this.nodesMap[id];
+        return this.nodeToDisplayValue(node);
+    }
+
+    nodeToDisplayValue(node: TreeNode): DisplayValue {
+        return {
+            key: node.id,
+            label: node.caption,
+            hint: this.getFullDisplayValue(node),
+        };
+    }
+
+    private pushNode(node: TreeNode, parent?: TreeNode): void {
+        this.nodesMap[node.id] = node;
+        if (parent) {
+            node.parent = parent;
+            if (parent.children) {
+                parent.children.push(node);
+            } else {
+                parent.children = [node];
+            }
+        } else {
+            this.rootNodes.push(node);
+        }
+    }
+
+    private getFullDisplayValue(node: TreeNode): string {
+        let result = node.caption;
+        let parent = node.parent;
+        while (parent) {
+            result = `${parent.caption} / ${result}`;
+            parent = parent.parent;
+        }
+        return result;
+    }
+}

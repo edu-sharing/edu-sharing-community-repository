@@ -125,7 +125,7 @@ export interface MdsWidgetValue {
     id: string;
     caption: string;
     description?: string;
-    parent?: null;
+    parent?: string;
 }
 
 export interface MdsWidgetCondition {
@@ -142,4 +142,10 @@ export enum RequiredMode {
 
 export function assertUnreachable(x: never): never {
     throw new Error('Did not expect to get here');
+}
+
+export interface DisplayValue {
+    key: string;
+    label: string;
+    hint: string;
 }
