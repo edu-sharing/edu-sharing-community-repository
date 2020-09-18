@@ -503,6 +503,7 @@ export class OptionsHelperService {
         const addNodeToCollection = new OptionItem('OPTIONS.COLLECTION', 'layers', (object) =>
             management.addToCollection =  this.getObjects(object)
         );
+        addNodeToCollection.elementType = [ElementType.Node, ElementType.NodePublishedCopy];
         addNodeToCollection.showAsAction = true;
         addNodeToCollection.constrains = [Constrain.Files, Constrain.User];
         addNodeToCollection.customShowCallback = (nodes) => {
@@ -519,6 +520,7 @@ export class OptionsHelperService {
         const bookmarkNode=new OptionItem('OPTIONS.ADD_NODE_STORE', 'bookmark_border',(object) =>
             this.bookmarkNodes(this.getObjects(object))
         );
+        bookmarkNode.elementType = [ElementType.Node, ElementType.NodePublishedCopy];
         bookmarkNode.constrains = [Constrain.Files, Constrain.HomeRepository];
         bookmarkNode.group = DefaultGroups.Reuse;
         bookmarkNode.priority = 20;
