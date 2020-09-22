@@ -239,7 +239,14 @@ export class CardComponent implements AfterContentInit, OnDestroy {
     }
 
     async scrollSmooth(jumpmark: CardJumpmark): Promise<void> {
-        const pos = document.getElementById(jumpmark.id).offsetTop;
+        const headingElement = document.getElementById(jumpmark.id);
+        let pos = headingElement.offsetTop;
+        // In case our headingElement is sticky, we cannot use its own offset since it moves around.
+        // We require for the header to be the first child of its parent in that case. We keep the
+        // simple position calculation from above for backwards compatibility.
+        if (window.getComputedStyle(headingElement).position === 'sticky') {
+            pos = headingElement.parentElement.offsetTop;
+        }
         this.jumpmarkActive = jumpmark;
         this.shouldUpdateJumpmarkOnScroll = false;
         await UIHelper.scrollSmoothElement(pos, this.cardContainer.nativeElement, 2);
@@ -295,6 +302,9 @@ export class CardComponent implements AfterContentInit, OnDestroy {
         // Check how much of any jumpmark section is visible on screen. Return either the first
         // (topmost) section that is visible completely or, if there is none, the one with that
         // covers most of the card's pixels.
+        //
+        // For sticky headings, We have an alternative approach of determining the active jumpmark:
+        // the heading currently sticking to the top of the card is always active.
         const cardTop = this.cardContainer.nativeElement.getBoundingClientRect().top
         const cardBottom = this.cardContainer.nativeElement.getBoundingClientRect().bottom
         let activeJumpmark: CardJumpmark = null;
@@ -302,6 +312,13 @@ export class CardComponent implements AfterContentInit, OnDestroy {
         for (const jumpmark of this.jumpmarks) {
             const headingElement = document.getElementById(jumpmark.id);
             const sectionTop = headingElement.getBoundingClientRect().top;
+            if (window.getComputedStyle(headingElement).position === 'sticky') {
+                if (sectionTop >= cardTop) {
+                    return jumpmark
+                } else {
+                    continue;
+                }
+            }
             const sectionBottom = headingElement.nextElementSibling.getBoundingClientRect().bottom;
             if (sectionTop >= cardTop && sectionBottom < cardBottom) {
                 // The section is completely visible.
