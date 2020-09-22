@@ -718,6 +718,7 @@
 			</group>
 			<group>
 				<id>io_childobject</id>
+				<rendering>angular</rendering>
 				<views>
 					<view>node_childobject</view>
 				</views>

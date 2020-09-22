@@ -277,8 +277,12 @@ export class MdsEditorInstanceService {
      *
      * @throws UserPresentableError
      */
-    async init(nodes: Node[]): Promise<EditorType> {
-        this.nodes.next(await this.mdsEditorCommonService.fetchNodesMetadata(nodes));
+    async init(nodes: Node[], refetch = true): Promise<EditorType> {
+        if(refetch) {
+            this.nodes.next(await this.mdsEditorCommonService.fetchNodesMetadata(nodes));
+        } else {
+            this.nodes.next(nodes);
+        }
         this.isBulk = this.getIsBulk(this.nodes.value);
         this.mdsId = this.mdsEditorCommonService.getMdsId(this.nodes.value);
         this.mdsDefinition = await this.mdsEditorCommonService.fetchMdsDefinition(this.mdsId);
@@ -355,7 +359,11 @@ export class MdsEditorInstanceService {
         const versionWidget: MdsEditorWidgetVersionComponent = this.nativeWidgets.find(
             (w) => w instanceof MdsEditorWidgetVersionComponent,
         ) as MdsEditorWidgetVersionComponent;
-        console.log('save', versionWidget, MdsEditorWidgetVersionComponent.name);
+        for(const widget of this.nativeWidgets) {
+            if(widget.onSaveNode) {
+                await widget.onSaveNode(this.nodes.value);
+            }
+        }
         if (versionWidget) {
             if (versionWidget.file) {
                 updatedNodes = await this.mdsEditorCommonService.saveNodesMetadata(

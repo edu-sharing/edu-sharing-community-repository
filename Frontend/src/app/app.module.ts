@@ -55,6 +55,8 @@ import { MdsEditorWidgetTreeComponent } from './common/ui/mds-editor/widgets/mds
 import { MdsEditorWidgetTreeCoreComponent } from './common/ui/mds-editor/widgets/mds-editor-widget-tree/mds-editor-widget-tree-core/mds-editor-widget-tree-core.component';
 import {MdsEditorWidgetAuthorComponent} from './common/ui/mds-editor/widgets/mds-editor-widget-author/mds-editor-widget-author.component';
 import { HighlightPipe } from './common/ui/mds-editor/widgets/mds-editor-widget-tree/mds-editor-widget-tree-core/highlight.pipe';
+import {MdsEditorWidgetChildobjectsComponent} from './common/ui/mds-editor/widgets/mds-editor-widget-childobjects/mds-editor-widget-childobjects.component';
+import {DragDropModule} from '@angular/cdk/drag-drop';
 
 
 // http://blog.angular-university.io/angular2-ngmodule/
@@ -96,6 +98,7 @@ import { HighlightPipe } from './common/ui/mds-editor/widgets/mds-editor-widget-
         MdsEditorWidgetContainerComponent,
         MdsEditorWidgetPreviewComponent,
         MdsEditorWidgetAuthorComponent,
+        MdsEditorWidgetChildobjectsComponent,
         MdsEditorWidgetErrorComponent,
         MdsEditorWidgetChipsComponent,
         MdsEditorWidgetSelectComponent,
@@ -108,7 +111,8 @@ import { HighlightPipe } from './common/ui/mds-editor/widgets/mds-editor-widget-
     ],
     imports: [
         IMPORTS,
-        Ng5SliderModule
+        Ng5SliderModule,
+        DragDropModule
     ],
     providers: [
         PROVIDERS,

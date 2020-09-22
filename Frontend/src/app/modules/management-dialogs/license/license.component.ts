@@ -119,9 +119,6 @@ export class WorkspaceLicenseComponent  {
   public loading=true;
   private allowedLicenses: string[];
   private releaseMulti: string;
-  public authorTab=0;
-  public authorVCard:VCard;
-  public authorFreetext:string;
   private allowRelease = true;
   userAuthor = false;
 
@@ -136,7 +133,11 @@ export class WorkspaceLicenseComponent  {
     this.loadConfig();
     this._properties = properties;
     this.readLicense();
+    this.mdsEditorInstanceService.init([({
+        properties
+    } as any)], false);
     this.loading=false;
+    this.updateButtons();
   }
   public loadNodes(nodes:Node[],callback:Function,pos=0){
     if(pos==nodes.length){
@@ -247,7 +248,6 @@ export class WorkspaceLicenseComponent  {
     this.onLoading.emit(true);
     const updatedNodes: Node[] = [];
     for(let node of this._nodes) {
-      prop = this.author.getValues(node, prop);
       node.properties=prop;
       i++;
       this.nodeApi.editNodeMetadataNewVersion(node.ref.id,RestConstants.COMMENT_LICENSE_UPDATE, prop).subscribe((result) => {
@@ -323,17 +323,8 @@ export class WorkspaceLicenseComponent  {
     let contactState=this.getValueForAll(RestConstants.CCM_PROP_QUESTIONSALLOWED,"multi","true");
     this.contact=contactState=='true' || contactState==true;
     this.oerMode=this.isOerLicense() || this.type=='NONE';
-    this.authorVCard=new VCard(this.getValueForAll(RestConstants.CCM_PROP_LIFECYCLECONTRIBUTER_AUTHOR));
-    this.userAuthor = false;
-    if (this.authorVCard.uid &&
-        this.authorVCard.uid === this.iamApi.getCurrentUserVCard().uid) {
-        this.userAuthor = true;
-    }
-    this.authorFreetext=this.getValueForAll(RestConstants.CCM_PROP_AUTHOR_FREETEXT);
     UIHelper.invalidateMaterializeTextarea('authorFreetext');
     UIHelper.invalidateMaterializeTextarea('licenseRights');
-    if(this.authorVCard.isValid())
-      this.authorTab=1;
     this.contactIndeterminate=contactState=='multi';
   }
 
@@ -501,9 +492,10 @@ export class WorkspaceLicenseComponent  {
                 prop[RestConstants.CCM_PROP_LICENSE_CC_LOCALE] = [this.ccCountry];
             }
         }
-        prop[RestConstants.CCM_PROP_AUTHOR_FREETEXT]=[this.authorFreetext];
+          prop = this.author.getValues(null, prop);
 
-        if(this.type=='CUSTOM') {
+
+          if(this.type=='CUSTOM') {
             prop[RestConstants.LOM_PROP_RIGHTS_DESCRIPTION] = [this.rightsDescription];
         }
         return prop;
@@ -551,13 +543,6 @@ export class WorkspaceLicenseComponent  {
         return this.getLicenseProperty() && this.getLicenseProperty().startsWith('CC_BY');
     }
 
-    setVCardAuthor(author: boolean) {
-      if(author) {
-          this.authorVCard = this.iamApi.getCurrentUserVCard();
-      } else {
-          this.authorVCard = new VCard();
-      }
-    }
     /**
      * Get all the key from countries and return the array with key and name (Translated) 
      * @param {string[]} countries array with all Countries Key 

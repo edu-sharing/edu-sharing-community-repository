@@ -31,6 +31,7 @@ import { MdsEditorWidgetSliderComponent } from '../widgets/mds-editor-widget-sli
 import { MdsEditorWidgetTextComponent } from '../widgets/mds-editor-widget-text/mds-editor-widget-text.component';
 import { MdsEditorWidgetTreeComponent } from '../widgets/mds-editor-widget-tree/mds-editor-widget-tree.component';
 import { MdsEditorWidgetVersionComponent } from '../widgets/mds-editor-widget-version/mds-editor-widget-version.component';
+import {MdsEditorWidgetChildobjectsComponent} from '../widgets/mds-editor-widget-childobjects/mds-editor-widget-childobjects.component';
 
 export interface NativeWidget {
     hasChanges: BehaviorSubject<boolean>;
@@ -53,7 +54,7 @@ export class MdsEditorViewComponent implements OnInit, AfterViewInit {
         preview: MdsEditorWidgetPreviewComponent,
         author: MdsEditorWidgetAuthorComponent,
         version: MdsEditorWidgetVersionComponent,
-        childobjects: null as null,
+        childobjects: MdsEditorWidgetChildobjectsComponent,
         template: MdsEditorWidgetLinkComponent,
         license: MdsEditorWidgetLinkComponent,
         workflow: null as null,
