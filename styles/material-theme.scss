@@ -378,3 +378,17 @@ mat-label.mat-label-standalone{
     }
   }
 }
+
+.cdk-drag-preview {
+  box-sizing: border-box;
+  border-radius: 4px;
+  @include materialShadowBottom();
+}
+
+.cdk-drag-placeholder {
+  opacity: 0;
+}
+
+.cdk-drag-animating {
+  transition: transform $transitionNormal cubic-bezier(0, 0, 0.2, 1);
+}
