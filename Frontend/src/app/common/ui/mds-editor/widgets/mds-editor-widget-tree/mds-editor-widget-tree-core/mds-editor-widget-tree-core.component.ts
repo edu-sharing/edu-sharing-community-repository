@@ -26,6 +26,12 @@ export class MdsEditorWidgetTreeCoreComponent implements OnInit, OnChanges, OnDe
     @Input() tree: Tree;
     @Input() values: DisplayValue[];
     @Input() filterString: string;
+    /**
+     * Whether a checked parent node should visually indicate that child nodes are checked as well.
+     *
+     * Checkboxes of child nodes will be disabled in this case.
+     */
+    @Input() parentImpliesChildren = false;
 
     @Output() valuesChange = new EventEmitter<DisplayValue[]>();
 
@@ -118,18 +124,55 @@ export class MdsEditorWidgetTreeCoreComponent implements OnInit, OnChanges, OnDe
             this.remove(node);
         }
         this.valuesChange.emit(this.values);
+        if (node.checked && node.children && this.parentImpliesChildren) {
+            // Toggle any checked child nodes off since they are already implicitly checked by this
+            // node.
+            for (const childNode of this.tree.iterate(node.children)) {
+                if (childNode.checked) {
+                    this.toggleNode(childNode, false);
+                }
+            }
+        }
     }
 
     getCheckboxId(node: TreeNode): string {
         return `${node.id}_checkbox`;
     }
 
+    hasCheckedAncestor(node: TreeNode): boolean {
+        while (node) {
+            node = node.parent;
+            if (node?.checked) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    getIsDisabled(node: TreeNode): boolean {
+        if (this.parentImpliesChildren) {
+            return this.hasCheckedAncestor(node);
+        } else {
+            return false;
+        }
+    }
+
+    getIsChecked(node: TreeNode): boolean {
+        if (this.parentImpliesChildren) {
+            return node.checked || this.hasCheckedAncestor(node);
+        } else {
+            return node.checked;
+        }
+    }
+
+    /** Call only via `toggleNode`. */
     private add(node: TreeNode): void {
         if (!this.values.find((value) => node.id === value.key)) {
             this.values.push(this.tree.nodeToDisplayValue(node));
         }
     }
 
+    /** Call only via `toggleNode`. */
     private remove(node: TreeNode): void {
         const index = this.values.findIndex((value) => node.id === value.key);
         if (index >= 0) {

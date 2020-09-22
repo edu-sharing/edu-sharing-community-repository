@@ -6,7 +6,8 @@
       <button mat-icon-button disabled></button>
       <mat-checkbox
         [id]="getCheckboxId(node)"
-        [checked]="node.checked"
+        [checked]="getIsChecked(node)"
+        [disabled]="getIsDisabled(node)"
         (change)="toggleNode(node, $event.checked)"
         ><span [innerHTML]="node.caption | highlight: filterString"></span
       ></mat-checkbox>
@@ -23,7 +24,8 @@
         </button>
         <mat-checkbox
           [id]="getCheckboxId(node)"
-          [checked]="node.checked"
+          [checked]="getIsChecked(node)"
+          [disabled]="getIsDisabled(node)"
           (change)="toggleNode(node, $event.checked)"
           ><span [innerHTML]="node.caption | highlight: filterString"></span
         ></mat-checkbox>
