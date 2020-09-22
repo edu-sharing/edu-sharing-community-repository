@@ -10,21 +10,27 @@ import {
     ViewContainerRef,
 } from '@angular/core';
 import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
+import { BehaviorSubject } from 'rxjs';
 import { Node, View } from '../../../../core-module/core.module';
 import { UIHelper } from '../../../../core-ui-module/ui-helper';
 import { MdsEditorInstanceService, Widget } from '../mds-editor-instance.service';
-import {Constraints, MdsEditorWidgetComponent, MdsWidgetType, NativeWidgetType, Values} from '../types';
+import {
+    Constraints,
+    MdsEditorWidgetComponent,
+    MdsWidgetType,
+    NativeWidgetType,
+    Values,
+} from '../types';
+import { MdsEditorWidgetAuthorComponent } from '../widgets/mds-editor-widget-author/mds-editor-widget-author.component';
 import { MdsEditorWidgetChipsComponent } from '../widgets/mds-editor-widget-chips/mds-editor-widget-chips.component';
 import { MdsEditorWidgetErrorComponent } from '../widgets/mds-editor-widget-error/mds-editor-widget-error.component';
 import { MdsEditorWidgetLinkComponent } from '../widgets/mds-editor-widget-link/mds-editor-widget-link.component';
 import { MdsEditorWidgetPreviewComponent } from '../widgets/mds-editor-widget-preview/mds-editor-widget-preview.component';
+import { MdsEditorWidgetSelectComponent } from '../widgets/mds-editor-widget-select/mds-editor-widget-select.component';
+import { MdsEditorWidgetSliderComponent } from '../widgets/mds-editor-widget-slider/mds-editor-widget-slider.component';
 import { MdsEditorWidgetTextComponent } from '../widgets/mds-editor-widget-text/mds-editor-widget-text.component';
 import { MdsEditorWidgetTreeComponent } from '../widgets/mds-editor-widget-tree/mds-editor-widget-tree.component';
 import { MdsEditorWidgetVersionComponent } from '../widgets/mds-editor-widget-version/mds-editor-widget-version.component';
-import { MdsEditorWidgetSelectComponent } from '../widgets/mds-editor-widget-select/mds-editor-widget-select.component';
-import { MdsEditorWidgetSliderComponent } from '../widgets/mds-editor-widget-slider/mds-editor-widget-slider.component';
-import {MdsEditorWidgetAuthorComponent} from '../widgets/mds-editor-widget-author/mds-editor-widget-author.component';
-import {BehaviorSubject} from 'rxjs';
 
 export interface NativeWidget {
     hasChanges: BehaviorSubject<boolean>;
@@ -105,7 +111,9 @@ export class MdsEditorViewComponent implements OnInit, AfterViewInit {
             const tagName = element.localName;
             if (Object.values(NativeWidgetType).includes(tagName as NativeWidgetType)) {
                 const widgetName = tagName as NativeWidgetType;
-                this.mdsEditorInstance.registerNativeWidget(this.injectNativeWidget(widgetName, element).instance);
+                this.mdsEditorInstance.registerNativeWidget(
+                    this.injectNativeWidget(widgetName, element).instance,
+                );
                 continue;
             }
             const widget = this.mdsEditorInstance.getWidget(tagName);
@@ -170,8 +178,7 @@ export class MdsEditorViewComponent implements OnInit, AfterViewInit {
             );
             return;
         }
-        // override widget definition using inline parameters
-        const htmlRef = this.updateWidgetWithHTMLAttributes(widget);
+        this.updateWidgetWithHTMLAttributes(widget);
         UIHelper.injectAngularComponent(
             this.factoryResolver,
             this.containerRef,
@@ -183,8 +190,13 @@ export class MdsEditorViewComponent implements OnInit, AfterViewInit {
         );
     }
 
-    private updateWidgetWithHTMLAttributes(widget: Widget) {
-        const htmlRef = this.container.nativeElement.querySelector(widget.definition.id.replace(':', '\\:'));
+    /**
+     * Overrides widget definition using inline parameters.
+     */
+    private updateWidgetWithHTMLAttributes(widget: Widget): void {
+        const htmlRef = this.container.nativeElement.querySelector(
+            widget.definition.id.replace(':', '\\:'),
+        );
         htmlRef?.getAttributeNames().forEach((attribute) => {
             (widget.definition as any)[attribute] = htmlRef.getAttribute(attribute);
         });
