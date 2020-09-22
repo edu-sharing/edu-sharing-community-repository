@@ -32,4 +32,7 @@ mat-form-field {
 
 .body-container {
     margin-bottom: 2em;
+    .mat-form-field {
+        scroll-margin-top: 50px;
+    }
 }
