@@ -417,7 +417,14 @@ export class MdsEditorInstanceService {
                 result.push(new MdsEditorInstanceService.Widget(this, availableWidget, nodes));
             }
         }
-        return result;
+        // Sort widgets by order of appearance, so the list can be used to rotate through widgets in
+        // a meaningful way.
+        const concatenatedViewsHtml = views.reduce((acc, view) => (acc += view.html), '');
+        return result.sort(
+            (a, b) =>
+                concatenatedViewsHtml.indexOf(a.definition.id) -
+                concatenatedViewsHtml.indexOf(b.definition.id),
+        );
     }
 
     private isActiveOverridingWidget(widget: MdsWidget, views: View[]): boolean {
