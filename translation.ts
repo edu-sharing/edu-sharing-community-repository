@@ -146,7 +146,7 @@ export class Translation {
                 }),
             ),
             switchMap(selectedLanguage => {
-                console.log('language used: ' + selectedLanguage);
+                // console.log('language used: ' + selectedLanguage);
                 Translation.setLanguage(selectedLanguage);
                 return translate
                     .use(selectedLanguage)
