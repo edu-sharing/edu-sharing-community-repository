@@ -351,11 +351,9 @@ export class MdsEditorInstanceService {
 
     async save(): Promise<Node[]> {
         let updatedNodes: Node[];
-        console.log(this.nativeWidgets);
         const versionWidget: MdsEditorWidgetVersionComponent = this.nativeWidgets.find(
             (w) => w instanceof MdsEditorWidgetVersionComponent,
         ) as MdsEditorWidgetVersionComponent;
-        console.log('save', versionWidget, MdsEditorWidgetVersionComponent.name);
         if (versionWidget) {
             if (versionWidget.file) {
                 updatedNodes = await this.mdsEditorCommonService.saveNodesMetadata(
