@@ -178,7 +178,6 @@ export class WorkspaceExplorerComponent {
       });
     });
     this.storage.get(SessionStorageService.KEY_WORKSPACE_SORT, null).subscribe((sort) => {
-      console.log(sort);
       if(sort?.sortBy != null) {
         this.setSorting(sort);
       }
