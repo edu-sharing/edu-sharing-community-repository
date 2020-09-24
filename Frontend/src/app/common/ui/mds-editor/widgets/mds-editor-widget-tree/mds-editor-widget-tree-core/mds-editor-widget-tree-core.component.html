@@ -4,13 +4,10 @@
     <li class="mat-tree-node" [class.selected]="selectedNode === node">
       <!-- use a disabled button to provide padding for tree leaf -->
       <button mat-icon-button disabled></button>
-      <mat-checkbox
-        [id]="getCheckboxId(node)"
-        [checked]="getIsChecked(node)"
-        [disabled]="getIsDisabled(node)"
-        (change)="toggleNode(node, $event.checked)"
-        ><span [innerHTML]="node.caption | highlight: filterString"></span
-      ></mat-checkbox>
+      <ng-container
+        [ngTemplateOutlet]="isMultiValue ? checkBox : radioButton"
+        [ngTemplateOutletContext]="{ node: node }"
+      ></ng-container>
     </li>
   </mat-tree-node>
   <!-- Nodes with children -->
@@ -22,13 +19,10 @@
             {{ treeControl.isExpanded(node) ? 'expand_more' : 'chevron_right' }}
           </mat-icon>
         </button>
-        <mat-checkbox
-          [id]="getCheckboxId(node)"
-          [checked]="getIsChecked(node)"
-          [disabled]="getIsDisabled(node)"
-          (change)="toggleNode(node, $event.checked)"
-          ><span [innerHTML]="node.caption | highlight: filterString"></span
-        ></mat-checkbox>
+        <ng-container
+          [ngTemplateOutlet]="isMultiValue ? checkBox : radioButton"
+          [ngTemplateOutletContext]="{ node: node }"
+        ></ng-container>
       </div>
       <ul *ngIf="treeControl.isExpanded(node)">
         <ng-container matTreeNodeOutlet></ng-container>
@@ -36,3 +30,23 @@
     </li>
   </mat-nested-tree-node>
 </mat-tree>
+
+<ng-template #checkBox let-node="node">
+  <mat-checkbox
+    [id]="getCheckboxId(node)"
+    [checked]="getIsChecked(node)"
+    [disabled]="getIsDisabled(node)"
+    (change)="toggleNode(node, $event.checked)"
+    ><span [innerHTML]="node.caption | highlight: filterString"></span
+  ></mat-checkbox>
+</ng-template>
+
+<ng-template #radioButton let-node="node">
+  <mat-radio-button
+    [id]="getCheckboxId(node)"
+    [checked]="getIsChecked(node)"
+    [disabled]="getIsDisabled(node)"
+    (change)="toggleNode(node, true)"
+    ><span [innerHTML]="node.caption | highlight: filterString"></span
+  ></mat-radio-button>
+</ng-template>

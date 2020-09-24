@@ -3,7 +3,7 @@ import { AfterViewInit, Component, ElementRef, OnDestroy, OnInit, ViewChild } fr
 import { FormControl } from '@angular/forms';
 import { fromEvent, ReplaySubject } from 'rxjs';
 import { filter, takeUntil } from 'rxjs/operators';
-import { DisplayValue } from '../../types';
+import { DisplayValue, MdsWidgetType } from '../../types';
 import { MdsEditorWidgetBase, ValueType } from '../mds-editor-widget-base';
 import { MdsEditorWidgetTreeCoreComponent } from './mds-editor-widget-tree-core/mds-editor-widget-tree-core.component';
 import { Tree } from './tree';
@@ -15,13 +15,12 @@ import { Tree } from './tree';
 export class MdsEditorWidgetTreeComponent
     extends MdsEditorWidgetBase
     implements OnInit, AfterViewInit, OnDestroy {
-    readonly valueType: ValueType = ValueType.MultiValue;
-
     @ViewChild(CdkConnectedOverlay) overlay: CdkConnectedOverlay;
     @ViewChild('input') input: ElementRef<HTMLElement>;
     @ViewChild(MdsEditorWidgetTreeCoreComponent)
     treeCoreComponent: MdsEditorWidgetTreeCoreComponent;
 
+    valueType: ValueType;
     tree: Tree;
     inputControl = new FormControl();
     chipsControl: FormControl;
@@ -48,6 +47,13 @@ export class MdsEditorWidgetTreeComponent
     private destroyed$: ReplaySubject<boolean> = new ReplaySubject(1);
 
     ngOnInit(): void {
+        if (this.widget.definition.type === MdsWidgetType.SingleValueTree) {
+            this.valueType = ValueType.String;
+        } else if (this.widget.definition.type === MdsWidgetType.MultiValueTree) {
+            this.valueType = ValueType.MultiValue;
+        } else {
+            throw new Error('Unexpected widget type: ' + this.widget.definition.type);
+        }
         // this.widget.definition.isRequired = RequiredMode.MandatoryForPublish;
         const initialValues = this.initWidget();
         this.tree = Tree.generateTree(this.widget.definition.values, initialValues);

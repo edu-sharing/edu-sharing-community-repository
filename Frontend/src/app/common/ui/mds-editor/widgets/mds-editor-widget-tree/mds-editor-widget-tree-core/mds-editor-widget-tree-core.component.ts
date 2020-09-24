@@ -13,7 +13,7 @@ import { MatTreeNestedDataSource } from '@angular/material/tree';
 import { ReplaySubject } from 'rxjs';
 import { distinctUntilChanged, map, takeUntil } from 'rxjs/operators';
 import { Widget } from '../../../mds-editor-instance.service';
-import { DisplayValue } from '../../../types';
+import { DisplayValue, MdsWidgetType } from '../../../types';
 import { Tree, TreeNode } from '../tree';
 
 @Component({
@@ -30,6 +30,8 @@ export class MdsEditorWidgetTreeCoreComponent implements OnInit, OnChanges, OnDe
      * Whether a checked parent node should visually indicate that child nodes are checked as well.
      *
      * Checkboxes of child nodes will be disabled in this case.
+     *
+     * Not compatible with single-value mode.
      */
     @Input() parentImpliesChildren = false;
 
@@ -38,11 +40,13 @@ export class MdsEditorWidgetTreeCoreComponent implements OnInit, OnChanges, OnDe
     treeControl = new NestedTreeControl<TreeNode>((node) => node.children);
     dataSource = new MatTreeNestedDataSource<TreeNode>();
     selectedNode: TreeNode;
+    isMultiValue: boolean;
 
     private filterString$ = new ReplaySubject<string>(1);
     private destroyed$: ReplaySubject<void> = new ReplaySubject(1);
 
     ngOnInit(): void {
+        this.isMultiValue = this.widget.definition.type === MdsWidgetType.MultiValueTree;
         this.clearFilter();
         this.dataSource.data = this.tree.rootNodes;
         this.filterString$
@@ -118,6 +122,12 @@ export class MdsEditorWidgetTreeCoreComponent implements OnInit, OnChanges, OnDe
 
     toggleNode(node: TreeNode, checked?: boolean): void {
         node.checked = checked ?? !node.checked;
+        if (node.checked && !this.isMultiValue) {
+            for (const value of this.values) {
+                this.tree.findById(value.key).checked = false;
+            }
+            this.values = [];
+        }
         if (node.checked) {
             this.add(node);
         } else {

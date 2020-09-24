@@ -75,6 +75,7 @@ export class MdsEditorViewComponent implements OnInit, AfterViewInit {
         [MdsWidgetType.Singleoption]: MdsEditorWidgetSelectComponent,
         [MdsWidgetType.Slider]: MdsEditorWidgetSliderComponent,
         [MdsWidgetType.Range]: MdsEditorWidgetSliderComponent,
+        [MdsWidgetType.SingleValueTree]: MdsEditorWidgetTreeComponent,
         [MdsWidgetType.MultiValueTree]: MdsEditorWidgetTreeComponent,
     };
 
