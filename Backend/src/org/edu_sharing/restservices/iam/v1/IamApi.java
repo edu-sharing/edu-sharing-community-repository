@@ -29,6 +29,7 @@ import org.edu_sharing.restservices.iam.v1.model.AuthorityEntries;
 import org.edu_sharing.restservices.iam.v1.model.GroupEntries;
 import org.edu_sharing.restservices.iam.v1.model.GroupEntry;
 import org.edu_sharing.restservices.iam.v1.model.Preferences;
+import org.edu_sharing.restservices.iam.v1.model.ShowHideEmail;
 import org.edu_sharing.restservices.iam.v1.model.UserEntries;
 import org.edu_sharing.restservices.iam.v1.model.UserEntry;
 import org.edu_sharing.restservices.node.v1.model.NodeEntries;
@@ -344,7 +345,80 @@ public class IamApi  {
 			return ErrorResponse.createResponse(t);
 		}
     }
+
+	@GET
+	@Path("/people/{repository}/{person}/showhideemail")
+	@ApiOperation(
+			value = "Get user email configuration",
+			notes = "Will fail for guest")
+
+	@ApiResponses(
+			value = {
+					@ApiResponse(code = 200, message = RestConstants.HTTP_200, response = ShowHideEmail.class),
+					@ApiResponse(code = 400, message = RestConstants.HTTP_400, response = ErrorResponse.class),
+					@ApiResponse(code = 401, message = RestConstants.HTTP_401, response = ErrorResponse.class),
+					@ApiResponse(code = 403, message = RestConstants.HTTP_403, response = ErrorResponse.class),
+					@ApiResponse(code = 404, message = RestConstants.HTTP_404, response = ErrorResponse.class),
+					@ApiResponse(code = 500, message = RestConstants.HTTP_500, response = ErrorResponse.class)
+			})
+
+	public Response getShowhideemail(
+			@ApiParam(value = "ID of repository (or \"-home-\" for home repository)",required=true, defaultValue="-home-" ) @PathParam("repository") String repository,
+			@ApiParam(value = "username (or \"-me-\" for current user)",required=true, defaultValue="-me-" ) @PathParam("person") String person,
+			@Context HttpServletRequest req) {
+		try{
+			org.edu_sharing.service.authority.AuthorityService service=AuthorityServiceFactory.getAuthorityService(ApplicationInfoList.getHomeRepository().getAppId());
+			if(service.isGuest())
+				throw new Exception("Not allowed for guest user");
+			RepositoryDao repoDao = RepositoryDao.getRepository(repository);
+			PersonDao personDao = PersonDao.getPerson(repoDao, person);
+			Boolean showOrHideEmail=personDao.getShowHideEmail();			
+			ShowHideEmail showHideEmail=new ShowHideEmail();
+			showHideEmail.setShowHideEmail(showOrHideEmail);
+			return Response.status(Response.Status.OK).entity(showHideEmail).build();
+		}catch(Throwable t){
+			return ErrorResponse.createResponse(t);
+		}
+	}
+
+
+
+	@PUT       
+    @Path("/people/{repository}/{person}/showhideemail")    
+    @ApiOperation(
+    	value = "Set Email Configuration", 
+    	notes = "Will fail for guest")
     
+    @ApiResponses(
+    	value = { 
+    			 @ApiResponse(code = 200, message = RestConstants.HTTP_200, response = Void.class),        
+    		        @ApiResponse(code = 400, message = RestConstants.HTTP_400, response = ErrorResponse.class),        
+    		        @ApiResponse(code = 401, message = RestConstants.HTTP_401, response = ErrorResponse.class),        
+    		        @ApiResponse(code = 403, message = RestConstants.HTTP_403, response = ErrorResponse.class),        
+    		        @ApiResponse(code = 404, message = RestConstants.HTTP_404, response = ErrorResponse.class), 
+    		        @ApiResponse(code = 500, message = RestConstants.HTTP_500, response = ErrorResponse.class) 
+    		    })
+
+    public Response setShowhideemail(
+    		@ApiParam(value = "ID of repository (or \"-home-\" for home repository)",required=true, defaultValue="-home-" ) @PathParam("repository") String repository,
+    		@ApiParam(value = "username (or \"-me-\" for current user)",required=true, defaultValue="-me-" ) @PathParam("person") String person,
+    		@ApiParam(value = "show or hide email in profile",required=true,defaultValue = "true") @QueryParam("showHideEmail") String showHideEmail,
+    		@Context HttpServletRequest req) {
+		try{
+			org.edu_sharing.service.authority.AuthorityService service=AuthorityServiceFactory.getAuthorityService(ApplicationInfoList.getHomeRepository().getAppId());
+			if(service.isGuest())
+				throw new Exception("Not allowed for guest user");
+			RepositoryDao repoDao = RepositoryDao.getRepository(repository);
+	    	PersonDao personDao = PersonDao.getPerson(repoDao, person);
+	    	personDao.setShowHideEmail(showHideEmail);
+	    	return Response.status(Response.Status.OK).build();
+		}catch(Throwable t){
+			return ErrorResponse.createResponse(t);
+		}
+    }
+
+
+
     @POST
 
     @Path("/people/{repository}/{person}")    
