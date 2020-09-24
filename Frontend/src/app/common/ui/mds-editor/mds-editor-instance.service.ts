@@ -1,5 +1,6 @@
 import { Injectable } from '@angular/core';
-import { BehaviorSubject, Observable, ReplaySubject } from 'rxjs';
+import { BehaviorSubject, Observable, of, ReplaySubject } from 'rxjs';
+import { map } from 'rxjs/operators';
 import {
     Node,
     RestConnectorService,
@@ -120,6 +121,14 @@ export class MdsEditorInstanceService {
 
         observeBulkMode(): Observable<BulkMode> {
             return this.bulkMode.asObservable();
+        }
+
+        observeIsDisabled(): Observable<boolean> {
+            if (this.bulkMode) {
+                return this.bulkMode.pipe(map((bulkMode) => bulkMode === 'no-change'));
+            } else {
+                return of(false);
+            }
         }
 
         /**
@@ -278,7 +287,7 @@ export class MdsEditorInstanceService {
      * @throws UserPresentableError
      */
     async init(nodes: Node[], refetch = true): Promise<EditorType> {
-        if(refetch) {
+        if (refetch) {
             this.nodes.next(await this.mdsEditorCommonService.fetchNodesMetadata(nodes));
         } else {
             this.nodes.next(nodes);
@@ -354,20 +363,19 @@ export class MdsEditorInstanceService {
     }
 
     async save(): Promise<Node[]> {
+        const newValues = this.getNodeValuePairs();
         let updatedNodes: Node[];
         const versionWidget: MdsEditorWidgetVersionComponent = this.nativeWidgets.find(
             (w) => w instanceof MdsEditorWidgetVersionComponent,
         ) as MdsEditorWidgetVersionComponent;
-        for(const widget of this.nativeWidgets) {
-            if(widget.onSaveNode) {
+        for (const widget of this.nativeWidgets) {
+            if (widget.onSaveNode) {
                 await widget.onSaveNode(this.nodes.value);
             }
         }
         if (versionWidget) {
             if (versionWidget.file) {
-                updatedNodes = await this.mdsEditorCommonService.saveNodesMetadata(
-                    this.getNodeValuePairs(),
-                );
+                updatedNodes = await this.mdsEditorCommonService.saveNodesMetadata(newValues);
                 await this.mdsEditorCommonService.saveNodeContent(
                     this.nodes.value[0],
                     versionWidget.file,
@@ -377,7 +385,7 @@ export class MdsEditorInstanceService {
             }
         }
         updatedNodes = await this.mdsEditorCommonService.saveNodesMetadata(
-            this.getNodeValuePairs(),
+            newValues,
             versionWidget?.comment || RestConstants.COMMENT_METADATA_UPDATE,
         );
         return updatedNodes;

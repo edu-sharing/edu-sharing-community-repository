@@ -32,6 +32,7 @@ import { MdsEditorWidgetTextComponent } from '../widgets/mds-editor-widget-text/
 import { MdsEditorWidgetTreeComponent } from '../widgets/mds-editor-widget-tree/mds-editor-widget-tree.component';
 import { MdsEditorWidgetVersionComponent } from '../widgets/mds-editor-widget-version/mds-editor-widget-version.component';
 import {MdsEditorWidgetChildobjectsComponent} from '../widgets/mds-editor-widget-childobjects/mds-editor-widget-childobjects.component';
+import { MdsEditorWidgetCheckboxComponent } from '../widgets/mds-editor-widget-checkbox/mds-editor-widget-checkbox.component';
 
 export interface NativeWidget {
     hasChanges: BehaviorSubject<boolean>;
@@ -69,6 +70,7 @@ export class MdsEditorViewComponent implements OnInit, AfterViewInit {
         [MdsWidgetType.Month]: MdsEditorWidgetTextComponent,
         [MdsWidgetType.Color]: MdsEditorWidgetTextComponent,
         [MdsWidgetType.Textarea]: MdsEditorWidgetTextComponent,
+        [MdsWidgetType.Checkbox]: MdsEditorWidgetCheckboxComponent,
         [MdsWidgetType.MultiValueBadges]: MdsEditorWidgetChipsComponent,
         [MdsWidgetType.MultiValueSuggestBadges]: MdsEditorWidgetChipsComponent,
         [MdsWidgetType.MultiValueFixedBadges]: MdsEditorWidgetChipsComponent,

@@ -42,6 +42,7 @@ export enum MdsWidgetType {
     Month = 'month',
     Color = 'color',
     Textarea = 'textarea',
+    Checkbox = 'checkbox',
     MultiValueBadges = 'multivalueBadges',
     MultiValueFixedBadges = 'multivalueFixedBadges',
     MultiValueSuggestBadges = 'multivalueSuggestBadges',

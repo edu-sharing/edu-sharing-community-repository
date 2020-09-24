@@ -20,12 +20,12 @@
   </ng-container>
 </div>
 <div class="body-container" role="group" [attr.aria-labelledby]="labelId">
-  <ng-container *ngIf="!control">
+  <ng-container *ngIf="!wrapInFormField">
     <ng-container *ngTemplateOutlet="content"></ng-container>
   </ng-container>
   <mat-form-field
     appRegisterFormField
-    *ngIf="control"
+    *ngIf="wrapInFormField"
     [class.warn]="missingRequired === RequiredMode.MandatoryForPublish"
   >
     <mat-label>{{ widget.definition.caption }}</mat-label>

@@ -66,6 +66,7 @@ export class MdsEditorWidgetContainerComponent implements OnInit, AfterContentIn
     @Input() valueType: ValueType;
     @Input() label: string | boolean;
     @Input() control: FormControl; // Naming this variable `formControl` causes bugs.
+    @Input() wrapInFormField: boolean;
 
     @ViewChild(MatFormField, { read: ElementRef }) formFieldRef: ElementRef<Element>;
     @ContentChild(MatFormFieldControl) formFieldControl: MatFormFieldControl<any>;
@@ -102,6 +103,7 @@ export class MdsEditorWidgetContainerComponent implements OnInit, AfterContentIn
         if (this.control) {
             this.initFormControl(this.control);
         }
+        this.wrapInFormField = this.wrapInFormField ?? !!this.control;
     }
 
     onBulkModeReplaceToggleChange(event: MatSlideToggleChange): void {
@@ -128,16 +130,8 @@ export class MdsEditorWidgetContainerComponent implements OnInit, AfterContentIn
         }
     }
 
-    private getIsDisabled(): Observable<boolean> {
-        if (this.isBulk) {
-            return this.bulkMode.pipe(map((bulkMode) => bulkMode === 'no-change'));
-        } else {
-            return of(false);
-        }
-    }
-
     private initFormControl(formControl: FormControl): void {
-        this.getIsDisabled().subscribe((isDisabled) => {
+        this.widget.observeIsDisabled().subscribe((isDisabled) => {
             if (isDisabled) {
                 this.control.disable();
             } else {

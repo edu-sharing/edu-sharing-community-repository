@@ -36,7 +36,7 @@ export class MdsEditorWidgetSliderComponent extends MdsEditorWidgetBase implemen
         this.currentValue[1] = parseInt(initialValues[1] ?? '0', 10);
         this.isRange = this.widget.definition.type === MdsWidgetType.Range;
 
-        this.getIsDisabled().subscribe((isDisabled) => {
+        this.widget.observeIsDisabled().subscribe((isDisabled) => {
             if (isDisabled) {
                 this.setStatus('DISABLED');
             } else {

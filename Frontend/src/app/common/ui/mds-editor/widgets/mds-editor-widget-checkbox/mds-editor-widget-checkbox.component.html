@@ -1,0 +1,24 @@
+<app-mds-editor-widget-container
+  [widget]="widget"
+  [label]="false"
+  [valueType]="valueType"
+  [control]="formControl"
+  [wrapInFormField]="false"
+>
+  <!-- TODO: add `aria-describedby="{{ widget.definition.id }}_description"` after updating to
+  Angular 10 -->
+  <mat-checkbox
+    matInput
+    [(indeterminate)]="indeterminate"
+    [formControl]="formControl"
+    (indeterminateChange)="onIndeterminateChange($event)"
+    >{{ widget.definition.caption }}</mat-checkbox
+  >
+  <p
+    class="mat-hint description"
+    *ngIf="widget.definition.bottomCaption"
+    id="{{ widget.definition.id }}_description"
+  >
+    {{ widget.definition.bottomCaption }}
+  </p>
+</app-mds-editor-widget-container>
