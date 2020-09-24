@@ -40,12 +40,16 @@ public class RenderingTool {
 	 * @throws GeneralSecurityException
 	 */
 	public String getRenderServiceUrl(ApplicationInfo repInfo, String nodeId, String username,String version,Map<String,String> parameters, boolean backendCall) throws GeneralSecurityException{
-		
-		
+
+		ApplicationInfo homeRepo = ApplicationInfoList.getHomeRepository();
+		// switch to home repo if the defined app is "local" (secondary home repo)
+		if(repInfo.getRepositoryType().equals(ApplicationInfo.REPOSITORY_TYPE_LOCAL)){
+			repInfo = homeRepo;
+		}
+
 		String usernameEncrypted = getUsernameEncrypted(username);
 		
-		ApplicationInfo homeRepo = ApplicationInfoList.getHomeRepository();
-		
+
 		String renderingProxy = (backendCall) ? homeRepo.getWebServerUrl() + "/" + homeRepo.getWebappname() +"/renderingproxy" 
 											  : homeRepo.getClientBaseUrl() +"/renderingproxy";
 		//renderServiceUrl = UrlTool.setParam(renderServiceUrl, "proxyRepId", ApplicationInfoList.getHomeRepository().getAppId());
