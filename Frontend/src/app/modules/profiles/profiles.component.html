@@ -43,7 +43,7 @@
 
         <div *ngIf="!edit">
           <div class="name">{{user | authorityName}}</div>
-          <div class="mail"><a href="mailto:{{user.profile.email}}">{{user.profile.email}}</a></div>
+          <div *ngIf="showHideEmail" class="mail"><a href="mailto:{{user.profile.email}}">{{user.profile.email}}</a></div>
           <!--<div class="authorityName">-->
           <!--<div>{{'USER.authorityName' | translate}}: {{ user.authorityName }}</div>-->
           <!--</div>-->
@@ -59,10 +59,16 @@
               <input matInput type="text" [(ngModel)]="userEdit.profile.lastName">
             </mat-form-field>
           </div>
-          <mat-form-field class="mat-form-field-bright email">
-            <mat-label>{{'USER.email' | translate}}</mat-label>
-            <input matInput type="email" [(ngModel)]="userEdit.profile.email">
-          </mat-form-field>
+          <div>
+            <mat-form-field class="mat-form-field-bright email">
+              <mat-label>{{'USER.email' | translate}}</mat-label>
+              <input matInput type="email" [(ngModel)]="userEdit.profile.email">
+            </mat-form-field>
+            <mat-slide-toggle [checked]="showHideEmail"
+                              [(ngModel)]="showHideEmail">
+              <mat-label >{{ 'USER.'+(showHideEmail?'showEmail':'hideEmail') | translate}}</mat-label>
+            </mat-slide-toggle>
+          </div>
         </div>
         <div class="save">
           <button mat-raised-button *ngIf="edit" (click)="saveEdits()">{{'SAVE' | translate}}</button>

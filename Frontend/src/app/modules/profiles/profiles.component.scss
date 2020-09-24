@@ -255,6 +255,17 @@ $path:'../../../assets/images/';
     }
   }
 }
+
+mat-slide-toggle {
+  padding-left: 20px;
+}
+/deep/ .mat-slide-toggle.mat-checked:not(.mat-disabled) .mat-slide-toggle-bar {
+  background-color: #ece4e5;
+}
+/deep/ .mat-slide-toggle-content{
+  color: white !important;
+  font-size: 1.1em;
+}
 :host ::ng-deep{
   input-password mat-form-field{
     width: 100%;

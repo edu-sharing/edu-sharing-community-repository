@@ -43,6 +43,7 @@ export class ProfilesComponent {
   private static PASSWORD_MIN_LENGTH = 5;
   private editProfile: boolean;
   private editProfileUrl: string;
+  private showHideEmail:boolean=false;
   private avatarImage: any;
   @ViewChild('mainNav') mainNavRef: MainNavComponent;
   @ViewChild('avatar') avatarElement : ElementRef;
@@ -62,6 +63,7 @@ export class ProfilesComponent {
           this.editProfileUrl=this.config.instant("editProfileUrl");
           this.editProfile=this.config.instant("editProfile",true);
           this.loadUser(params['authority']);
+          this.checkIfEmailMustShowOrHide(params['authority'])
         });
       });
   }
@@ -88,6 +90,13 @@ export class ProfilesComponent {
             this.toast.error(null, 'PROFILES.LOAD_ERROR');
         });
     });
+  }
+  private checkIfEmailMustShowOrHide(authority:string){
+        this.iamService.getUserEmailConfiguration(authority).subscribe((showHide: boolean) => {
+            this.showHideEmail = showHide;           
+        }, (error: any) => {
+            this.showHideEmail=false;
+        });
   }
   public updateAvatar(event:any){
     if(this.avatarElement.nativeElement.files && this.avatarElement.nativeElement.files.length){
@@ -152,7 +161,7 @@ export class ProfilesComponent {
     }
     this.globalProgress=true;
     this.iamService.editUser(this.user.authorityName,this.userEdit.profile).subscribe(()=>{
-      this.saveAvatar();
+      this.saveEmailDisplay()
     },(error:any)=>{
       this.globalProgress=false;
       this.toast.error(error);
@@ -193,6 +202,14 @@ export class ProfilesComponent {
     }
   }
 
+  private saveEmailDisplay(){
+    this.iamService.setUserEmailConfiguration(this.showHideEmail,this.user.authorityName).subscribe(()=>{
+      this.saveAvatar();
+    },(error)=>{
+      this.globalProgress=false;
+      this.toast.error(error);
+    });
+  }
   public aboutEdit() {
     this.userEdit=Helper.deepCopy(this.user);
     this.editAbout = true;
