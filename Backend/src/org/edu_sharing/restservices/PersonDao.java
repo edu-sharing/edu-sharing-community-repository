@@ -529,6 +529,26 @@ public class PersonDao {
 		newUserInfo.put(CCConstants.CCM_PROP_PERSON_PREFERENCES, preferences);		
 		((MCAlfrescoAPIClient)this.baseClient).updateUser(newUserInfo);
 	}
+
+	/**
+	 * retrive value from alfresco db 
+	 * @return boolean value true|false 
+	 */
+	public boolean getShowHideEmail() {
+		return (boolean)this.userInfo.get(CCConstants.CCM_PROP_PERSON_SHOW_HIDE_EMAIL);
+	}
+
+	/**
+	 * set value into alfresco database 
+	 * @param  showHideEmail (String) exp: 'true'|'false' 
+	 */
+	public void setShowHideEmail(String showHideEmail) throws Exception{
+		HashMap<String, String> newUserInfo = new HashMap<String, String>();
+		newUserInfo.put(CCConstants.PROP_USERNAME, getUserName());
+		newUserInfo.put(CCConstants.CCM_PROP_PERSON_SHOW_HIDE_EMAIL, showHideEmail);
+		((MCAlfrescoAPIClient)this.baseClient).updateUser(newUserInfo);
+	}
+	
 	public void addNodeList(String list,String nodeId) throws Exception {
 		// Simply check if node is valid
 		NodeDao node=NodeDao.getNode(repoDao, nodeId);
