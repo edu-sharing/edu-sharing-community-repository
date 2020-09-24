@@ -16,6 +16,7 @@ import org.edu_sharing.repository.server.tools.ApplicationInfoList;
 import org.edu_sharing.repository.server.tools.URLTool;
 import org.edu_sharing.service.collection.CollectionService;
 import org.edu_sharing.service.collection.CollectionServiceFactory;
+import org.edu_sharing.service.config.ConfigServiceFactory;
 import org.edu_sharing.service.nodeservice.NodeService;
 import org.edu_sharing.service.nodeservice.NodeServiceFactory;
 import org.edu_sharing.service.rendering.RenderingService;
@@ -34,7 +35,7 @@ public class RepositoryDao {
 		try {
 			ApplicationInfo appInfo = 
 					HOME.equals(repId) 
-				  ? ApplicationInfoList.getHomeRepository() 
+				  ? ApplicationInfoList.getHomeRepositoryObeyConfig(ConfigServiceFactory.getCurrentConfig().getValue("availableRepositories", (String[]) null))
 				  : ApplicationInfoList.getRepositoryInfoById(repId); 
 			
 			if (appInfo == null) {
