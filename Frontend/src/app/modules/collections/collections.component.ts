@@ -392,7 +392,7 @@ export class CollectionsMainComponent {
         if (
             RestHelper.hasAccessPermission(
                 this.collectionContent.node,
-                RestConstants.PERMISSION_DELETE,
+                RestConstants.PERMISSION_WRITE,
             )
         ) {
             return true;
