@@ -1,4 +1,5 @@
-import { DisplayValue, MdsWidgetValue } from '../../types';
+import { MdsWidgetValue } from '../../types';
+import { DisplayValue } from '../DisplayValues';
 
 export class TreeNode {
     id: string;

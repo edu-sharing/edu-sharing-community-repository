@@ -13,7 +13,8 @@ import { MatTreeNestedDataSource } from '@angular/material/tree';
 import { ReplaySubject } from 'rxjs';
 import { distinctUntilChanged, map, takeUntil } from 'rxjs/operators';
 import { Widget } from '../../../mds-editor-instance.service';
-import { DisplayValue, MdsWidgetType } from '../../../types';
+import { MdsWidgetType } from '../../../types';
+import { DisplayValue } from '../../DisplayValues';
 import { Tree, TreeNode } from '../tree';
 
 @Component({

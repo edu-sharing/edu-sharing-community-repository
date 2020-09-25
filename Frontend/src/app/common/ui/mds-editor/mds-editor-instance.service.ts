@@ -396,15 +396,15 @@ export class MdsEditorInstanceService {
     }
 
     private updateCanSave() {
-        this.canSave.next(
-            (this.widgets.every((state) => state.getStatus() !== 'INVALID') &&
-                this.widgets.some(
-                    (state) =>
-                        (state.getHasChanged() || state.hasUnsavedDefault) &&
-                        state.getStatus() !== 'DISABLED',
-                )) ||
-                this.nativeWidgets.some((w) => w.hasChanges.value),
+        const allAreValid = this.widgets.every((state) => state.getStatus() !== 'INVALID');
+        const someWidgetsHaveChanged = this.widgets.some(
+            (widget) =>
+                (widget.getHasChanged() || widget.hasUnsavedDefault) &&
+                widget.getStatus() !== 'DISABLED',
         );
+        const someNativeWidgetsHaveChanged = this.nativeWidgets.some((w) => w.hasChanges.value);
+        const canSave = allAreValid && (someWidgetsHaveChanged || someNativeWidgetsHaveChanged);
+        this.canSave.next(canSave);
     }
 
     private getGroup(mdsDefinition: MdsDefinition, groupId: string): MdsGroup {

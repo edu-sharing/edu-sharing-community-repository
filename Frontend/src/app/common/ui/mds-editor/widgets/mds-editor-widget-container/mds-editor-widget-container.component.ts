@@ -8,14 +8,13 @@ import {
     Injectable,
     Input,
     OnInit,
-    ViewChild,
 } from '@angular/core';
 import { FormControl } from '@angular/forms';
 import { MatFormField, MatFormFieldControl } from '@angular/material/form-field';
 import { MatRadioChange } from '@angular/material/radio';
 import { MatSlideToggleChange } from '@angular/material/slide-toggle';
-import { BehaviorSubject, Observable, of } from 'rxjs';
-import { distinctUntilChanged, map, startWith } from 'rxjs/operators';
+import { BehaviorSubject } from 'rxjs';
+import { distinctUntilChanged, startWith } from 'rxjs/operators';
 import { MdsEditorInstanceService, Widget } from '../../mds-editor-instance.service';
 import { assertUnreachable, BulkMode, InputStatus, RequiredMode } from '../../types';
 import { ValueType } from '../mds-editor-widget-base';
@@ -68,21 +67,24 @@ export class MdsEditorWidgetContainerComponent implements OnInit, AfterContentIn
     @Input() control: FormControl; // Naming this variable `formControl` causes bugs.
     @Input() wrapInFormField: boolean;
 
-    @ViewChild(MatFormField, { read: ElementRef }) formFieldRef: ElementRef<Element>;
     @ContentChild(MatFormFieldControl) formFieldControl: MatFormFieldControl<any>;
 
     readonly isBulk: boolean;
     readonly labelId: string;
+    readonly descriptionId: string;
     bulkMode: BehaviorSubject<BulkMode>;
     missingRequired: RequiredMode | null;
 
     constructor(
+        private elementRef: ElementRef,
         private mdsEditorInstance: MdsEditorInstanceService,
         private cdr: ChangeDetectorRef,
         private formFieldRegistration: FormFieldRegistrationService,
     ) {
         this.isBulk = this.mdsEditorInstance.isBulk;
-        this.labelId = Math.random().toString(36).substr(2);
+        const id = Math.random().toString(36).substr(2);
+        this.labelId = id + '_label';
+        this.descriptionId = id + '_description';
     }
 
     ngAfterContentInit() {
@@ -112,6 +114,10 @@ export class MdsEditorWidgetContainerComponent implements OnInit, AfterContentIn
 
     onBulkModeMultiValueChange(event: MatRadioChange): void {
         this.bulkMode.next(event.value);
+    }
+
+    shouldShowError(): boolean {
+        return !!this.control?.invalid && (this.control.touched || this.control.dirty);
     }
 
     private getInitialBulkMode(): BulkMode {
@@ -146,7 +152,7 @@ export class MdsEditorWidgetContainerComponent implements OnInit, AfterContentIn
         this.widget.onShowMissingRequired((shouldScrollIntoView) => {
             formControl.markAllAsTouched();
             if (formControl.errors?.required && shouldScrollIntoView) {
-                this.formFieldRef.nativeElement.scrollIntoView({
+                this.elementRef.nativeElement.scrollIntoView({
                     behavior: 'smooth',
                     block: 'start',
                 });

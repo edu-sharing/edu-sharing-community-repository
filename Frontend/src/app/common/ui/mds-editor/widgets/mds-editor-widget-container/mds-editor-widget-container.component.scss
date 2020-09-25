@@ -1,6 +1,12 @@
 @import '../../../../../core-ui-module/styles/variables';
 
-mat-form-field {
+:host {
+    display: block;
+    margin-bottom: 1.5em;
+    scroll-margin-top: 50px;
+}
+
+.mat-form-field {
     width: 100%;
 }
 
@@ -21,7 +27,7 @@ mat-form-field {
         flex-grow: 1;
     }
     label {
-        font-weight: 700;
+        margin-bottom: 5px;
     }
     .bulk-mode-radio-group {
         mat-radio-button:not(:last-of-type) {
@@ -30,9 +36,10 @@ mat-form-field {
     }
 }
 
-.body-container {
-    margin-bottom: 2em;
-    .mat-form-field {
-        scroll-margin-top: 50px;
+.subscript {
+    font-size: 75%;
+    margin-top: 5px;
+    &.warn {
+        color: $colorStatusWarning;
     }
 }

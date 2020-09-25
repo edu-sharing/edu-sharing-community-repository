@@ -43,6 +43,8 @@ export enum MdsWidgetType {
     Color = 'color',
     Textarea = 'textarea',
     Checkbox = 'checkbox',
+    RadioHorizontal = 'radioHorizontal',
+    RadioVertical = 'radioVertical',
     MultiValueBadges = 'multivalueBadges',
     MultiValueFixedBadges = 'multivalueFixedBadges',
     MultiValueSuggestBadges = 'multivalueSuggestBadges',
@@ -144,10 +146,4 @@ export enum RequiredMode {
 
 export function assertUnreachable(x: never): never {
     throw new Error('Did not expect to get here');
-}
-
-export interface DisplayValue {
-    key: string;
-    label: string;
-    hint: string;
 }

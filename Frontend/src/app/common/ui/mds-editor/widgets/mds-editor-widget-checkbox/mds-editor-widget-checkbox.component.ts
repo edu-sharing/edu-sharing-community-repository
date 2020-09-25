@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { AbstractControl, FormControl, ValidatorFn } from '@angular/forms';
 import { first } from 'rxjs/operators';
+import { RequiredMode } from '../../types';
 import { MdsEditorWidgetBase, ValueType } from '../mds-editor-widget-base';
 
 @Component({
@@ -14,6 +15,7 @@ export class MdsEditorWidgetCheckboxComponent extends MdsEditorWidgetBase implem
     indeterminate: boolean;
 
     ngOnInit(): void {
+        this.widget.definition.isRequired = RequiredMode.MandatoryForPublish;
         const initialValue = this.initWidget();
         this.indeterminate =
             typeof initialValue[0] === 'string' &&
@@ -23,7 +25,6 @@ export class MdsEditorWidgetCheckboxComponent extends MdsEditorWidgetBase implem
             initialValue[0] === 'true',
             this.getStandardValidators({ requiredValidator }),
         );
-        // TODO: show visual hint for unchecked required checkbox.
         this.formControl.valueChanges.subscribe((value: boolean) => {
             if (!this.indeterminate) {
                 this.setValue([value.toString()]);

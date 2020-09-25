@@ -33,6 +33,7 @@ import { MdsEditorWidgetTreeComponent } from '../widgets/mds-editor-widget-tree/
 import { MdsEditorWidgetVersionComponent } from '../widgets/mds-editor-widget-version/mds-editor-widget-version.component';
 import {MdsEditorWidgetChildobjectsComponent} from '../widgets/mds-editor-widget-childobjects/mds-editor-widget-childobjects.component';
 import { MdsEditorWidgetCheckboxComponent } from '../widgets/mds-editor-widget-checkbox/mds-editor-widget-checkbox.component';
+import { MdsEditorWidgetRadioButtonComponent } from '../widgets/mds-editor-widget-radio-button/mds-editor-widget-radio-button.component';
 
 export interface NativeWidget {
     hasChanges: BehaviorSubject<boolean>;
@@ -71,6 +72,8 @@ export class MdsEditorViewComponent implements OnInit, AfterViewInit {
         [MdsWidgetType.Color]: MdsEditorWidgetTextComponent,
         [MdsWidgetType.Textarea]: MdsEditorWidgetTextComponent,
         [MdsWidgetType.Checkbox]: MdsEditorWidgetCheckboxComponent,
+        [MdsWidgetType.RadioHorizontal]: MdsEditorWidgetRadioButtonComponent,
+        [MdsWidgetType.RadioVertical]: MdsEditorWidgetRadioButtonComponent,
         [MdsWidgetType.MultiValueBadges]: MdsEditorWidgetChipsComponent,
         [MdsWidgetType.MultiValueSuggestBadges]: MdsEditorWidgetChipsComponent,
         [MdsWidgetType.MultiValueFixedBadges]: MdsEditorWidgetChipsComponent,

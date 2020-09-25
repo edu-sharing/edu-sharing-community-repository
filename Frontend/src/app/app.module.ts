@@ -58,6 +58,7 @@ import { HighlightPipe } from './common/ui/mds-editor/widgets/mds-editor-widget-
 import {MdsEditorWidgetChildobjectsComponent} from './common/ui/mds-editor/widgets/mds-editor-widget-childobjects/mds-editor-widget-childobjects.component';
 import {DragDropModule} from '@angular/cdk/drag-drop';
 import { MdsEditorWidgetCheckboxComponent } from './common/ui/mds-editor/widgets/mds-editor-widget-checkbox/mds-editor-widget-checkbox.component';
+import { MdsEditorWidgetRadioButtonComponent } from './common/ui/mds-editor/widgets/mds-editor-widget-radio-button/mds-editor-widget-radio-button.component';
 
 
 // http://blog.angular-university.io/angular2-ngmodule/
@@ -110,6 +111,7 @@ import { MdsEditorWidgetCheckboxComponent } from './common/ui/mds-editor/widgets
         MdsEditorWidgetTreeCoreComponent,
         HighlightPipe,
         MdsEditorWidgetCheckboxComponent,
+        MdsEditorWidgetRadioButtonComponent,
     ],
     imports: [
         IMPORTS,
