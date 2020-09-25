@@ -5,6 +5,7 @@ import {
     ContentChild,
     Directive,
     ElementRef,
+    HostBinding,
     Injectable,
     Input,
     OnInit,
@@ -68,6 +69,8 @@ export class MdsEditorWidgetContainerComponent implements OnInit, AfterContentIn
     @Input() wrapInFormField: boolean;
 
     @ContentChild(MatFormFieldControl) formFieldControl: MatFormFieldControl<any>;
+
+    @HostBinding('class.disabled') isDisabled = false;
 
     readonly isBulk: boolean;
     readonly labelId: string;
@@ -137,13 +140,7 @@ export class MdsEditorWidgetContainerComponent implements OnInit, AfterContentIn
     }
 
     private initFormControl(formControl: FormControl): void {
-        this.widget.observeIsDisabled().subscribe((isDisabled) => {
-            if (isDisabled) {
-                this.control.disable();
-            } else {
-                this.control.enable();
-            }
-        });
+        this.widget.observeIsDisabled().subscribe((isDisabled) => this.setDisabled(isDisabled));
         formControl.statusChanges
             .pipe(startWith(formControl.status), distinctUntilChanged())
             .subscribe((status: InputStatus) => {
@@ -161,6 +158,15 @@ export class MdsEditorWidgetContainerComponent implements OnInit, AfterContentIn
                 return false;
             }
         });
+    }
+
+    private setDisabled(isDisabled: boolean): void {
+        this.isDisabled = isDisabled;
+        if (isDisabled) {
+            this.control.disable();
+        } else {
+            this.control.enable();
+        }
     }
 
     private handleStatus(status: InputStatus): void {

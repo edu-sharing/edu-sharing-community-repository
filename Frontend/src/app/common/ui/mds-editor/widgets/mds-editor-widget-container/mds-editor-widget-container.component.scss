@@ -28,6 +28,9 @@
     }
     label {
         margin-bottom: 5px;
+        :host.disabled & {
+            color: rgba(0, 0, 0, 0.38);
+        }
     }
     .bulk-mode-radio-group {
         mat-radio-button:not(:last-of-type) {
