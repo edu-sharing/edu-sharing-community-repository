@@ -87,10 +87,12 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
 			CCConstants.CCM_PROP_IO_COMMONLICENSE_QUESTIONSALLOWED
 	};
 	private String appId;
+	private ContentService contentService;
 	private DictionaryService dictionaryService;
 	String repositoryId = ApplicationInfoList.getHomeRepository().getAppId();
 	private ServiceRegistry serviceRegistry = null;
 	private NodeService nodeService = null;
+	private NodeService nodeServiceAlfresco = null;
 	private VersionService versionService;
 
 	Logger logger = Logger.getLogger(NodeServiceImpl.class);
@@ -113,7 +115,9 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
 	public NodeServiceImpl(String appId, boolean alfrescoNodeService) {
 		ApplicationContext applicationContext = AlfAppContextGate.getApplicationContext();
 		serviceRegistry = (ServiceRegistry) applicationContext.getBean(ServiceRegistry.SERVICE_REGISTRY);
-		nodeService = (alfrescoNodeService) ? (NodeService)applicationContext.getBean("alfrescoDefaultDbNodeService") : serviceRegistry.getNodeService();
+		nodeService = serviceRegistry.getNodeService();
+		nodeServiceAlfresco = (NodeService) applicationContext.getBean("alfrescoDefaultDbNodeService");
+		contentService = serviceRegistry.getContentService();
 		versionService = serviceRegistry.getVersionService();
 		dictionaryService = serviceRegistry.getDictionaryService();
 		repositoryHelper = (Repository) applicationContext.getBean("repositoryHelper");
@@ -385,24 +389,36 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
 		return result;
 	}
 	@Override
-	public List<NodeRef> getChildrenRecursive(StoreRef store, String nodeId,List<String> types) {
+	public List<NodeRef> getChildrenRecursive(StoreRef store, String nodeId,List<String> types,RecurseMode recurseMode) {
+		// this method uses nodeServiceAlfresco instead of nodeService
+		// to prevent that recursive fetch data of user homes will fetch (and also produce duplicates) of the shared org folders
 		List<ChildAssociationRef> assocs;
 		if(types==null){
-			assocs = nodeService.getChildAssocs(new NodeRef(store, nodeId));
+			assocs = nodeServiceAlfresco.getChildAssocs(new NodeRef(store, nodeId));
 		}
 		else {
 			Set<QName> typesConverted = types.stream().map(QName::createQName).collect(Collectors.toSet());
-			assocs = nodeService.getChildAssocs(new NodeRef(store, nodeId), typesConverted);
+			assocs = nodeServiceAlfresco.getChildAssocs(new NodeRef(store, nodeId), typesConverted);
 		}
 		List<NodeRef> result=new ArrayList<>();
 		for(ChildAssociationRef assoc : assocs){
 			result.add(assoc.getChildRef());
 		}
-		List<ChildAssociationRef> maps = nodeService.getChildAssocs(new NodeRef(store, nodeId), new HashSet<>(Arrays.asList(QName.createQName(CCConstants.CCM_TYPE_MAP),QName.createQName(CCConstants.CM_TYPE_FOLDER))));
+		List<ChildAssociationRef> maps;
+		if(recurseMode.equals(RecurseMode.Folders)) {
+			maps = nodeServiceAlfresco.getChildAssocs(new NodeRef(store, nodeId), new HashSet<>(Arrays.asList(QName.createQName(CCConstants.CCM_TYPE_MAP), QName.createQName(CCConstants.CM_TYPE_FOLDER))));
+		}
+		else if(recurseMode.equals(RecurseMode.All)){
+			// in theory, every object may have children, so we need to access all of them
+			maps = nodeServiceAlfresco.getChildAssocs(new NodeRef(store, nodeId));
+		}
+		else{
+			throw new IllegalArgumentException("invalid RecurseMode");
+		}
 		String user = AuthenticationUtil.getFullyAuthenticatedUser();
 		// run in parallel to increase performance
 		maps.parallelStream().forEach((map)->{
-			AuthenticationUtil.runAs(()->result.addAll(getChildrenRecursive(store,map.getChildRef().getId(),types))
+			AuthenticationUtil.runAs(()->result.addAll(getChildrenRecursive(store,map.getChildRef().getId(),types,recurseMode))
 			,user);
 		});
 		logger.info("Get children recursive finished with "+result.size()+" nodes");

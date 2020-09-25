@@ -21,6 +21,7 @@ import org.edu_sharing.repository.server.jobs.quartz.RemoveDeletedImportsFromSet
 import org.edu_sharing.repository.server.tools.HttpQueryTool;
 import org.edu_sharing.service.nodeservice.NodeServiceFactory;
 import org.edu_sharing.service.nodeservice.NodeServiceHelper;
+import org.edu_sharing.service.nodeservice.RecurseMode;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
@@ -105,7 +106,7 @@ public class ImportCleanerIdentifiersList {
 		if(setFolderRef==null){
 			throw new IllegalArgumentException("Set folder "+set+" was not found. Please check your "+OAIPMHLOMImporter.FOLDER_NAME_IMPORTED_OBJECTS+" folder");
 		}
-		List<NodeRef> allNodes = NodeServiceFactory.getLocalService().getChildrenRecursive(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, setFolderRef.getId(), Collections.singletonList(CCConstants.CCM_TYPE_IO));
+		List<NodeRef> allNodes = NodeServiceFactory.getLocalService().getChildrenRecursive(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, setFolderRef.getId(), Collections.singletonList(CCConstants.CCM_TYPE_IO), RecurseMode.Folders);
 		allNodesInSet=new HashMap<>();
 		allNodes.parallelStream().forEach((entry)-> {
 			AuthenticationUtil.runAsSystem(()->allNodesInSet.put(entry.getId(), NodeServiceHelper.getProperty(entry, CCConstants.CCM_PROP_IO_REPLICATIONSOURCEID)));

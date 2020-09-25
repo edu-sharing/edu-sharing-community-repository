@@ -59,6 +59,7 @@ import org.edu_sharing.repository.server.jobs.quartz.AbstractJob;
 import org.edu_sharing.repository.server.jobs.quartz.OAIConst;
 import org.edu_sharing.service.nodeservice.NodeServiceFactory;
 import org.edu_sharing.service.nodeservice.NodeServiceHelper;
+import org.edu_sharing.service.nodeservice.RecurseMode;
 import org.springframework.context.ApplicationContext;
 
 public class PersistentHandlerEdusharing implements PersistentHandlerInterface {
@@ -326,7 +327,7 @@ public class PersistentHandlerEdusharing implements PersistentHandlerInterface {
 		}
 		if (allNodesInImportfolder == null) {
 			getLogger().info("allNodesInImportfolder is null starting to initialize it");
-			allNodesInImportfolder = NodeServiceFactory.getLocalService().getChildrenRecursive(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE,importFolderId, Collections.singletonList(CCConstants.CCM_TYPE_IO));
+			allNodesInImportfolder = NodeServiceFactory.getLocalService().getChildrenRecursive(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE,importFolderId, Collections.singletonList(CCConstants.CCM_TYPE_IO), RecurseMode.Folders);
 
 			getLogger().info("allNodesInImportfolder initialize finished! size:" + ((allNodesInImportfolder != null) ? allNodesInImportfolder.size() : 0));
 			getLogger().info("allNodesInImportfolder initialize finished! calculated size:" + ((allNodesInImportfolder != null) ? (estimateObjectSize(allNodesInImportfolder)/1024)+" kb" : 0));

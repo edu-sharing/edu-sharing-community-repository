@@ -12,8 +12,7 @@ import org.edu_sharing.repository.server.importer.OAIPMHLOMImporter;
 import org.edu_sharing.repository.server.tools.cache.RepositoryCache;
 import org.edu_sharing.service.nodeservice.NodeService;
 import org.edu_sharing.service.nodeservice.NodeServiceFactory;
-import org.postgresql.util.PSQLException;
-import org.postgresql.util.ServerErrorMessage;
+import org.edu_sharing.service.nodeservice.RecurseMode;
 import org.springframework.context.ApplicationContext;
 
 import javax.transaction.*;
@@ -79,12 +78,18 @@ public class NodeRunner {
      */
     private TransactionMode transaction=TransactionMode.None;
 
+    /**
+     * How to recurse across elements
+     * Default will only recurse into sub-folders, but not sub-elements (e.g. childobjects)
+     */
+    private RecurseMode recurseMode = RecurseMode.Folders;
+
 
     private ApplicationContext applicationContext = AlfAppContextGate.getApplicationContext();
     ServiceRegistry serviceRegistry = (ServiceRegistry) applicationContext.getBean(ServiceRegistry.SERVICE_REGISTRY);
     private BehaviourFilter policyBehaviourFilter = (BehaviourFilter) applicationContext.getBean("policyBehaviourFilter");
 
-    
+
     public NodeRunner() {
 		// TODO Auto-generated constructor stub
 	}
@@ -163,9 +168,9 @@ public class NodeRunner {
         try {
             List<NodeRef> nodes;
             if (runAsSystem)
-                nodes = AuthenticationUtil.runAsSystem(() -> nodeService.getChildrenRecursive(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, startFolder, types));
+                nodes = AuthenticationUtil.runAsSystem(() -> nodeService.getChildrenRecursive(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, startFolder, types, recurseMode));
             else
-                nodes = nodeService.getChildrenRecursive(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, startFolder, types);
+                nodes = nodeService.getChildrenRecursive(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, startFolder, types, recurseMode);
 
             Predicate<? super NodeRef> callFilter = (ref) -> {
                 if (filter == null)
@@ -281,6 +286,15 @@ public class NodeRunner {
     public void setTransaction(TransactionMode transaction) {
         this.transaction = transaction;
     }
+
+    public RecurseMode getRecurseMode() {
+        return recurseMode;
+    }
+
+    public void setRecurseMode(RecurseMode recurseMode) {
+        this.recurseMode = recurseMode;
+    }
+
     public enum TransactionMode{
         None, // no transactions
         Global, // for whole task
