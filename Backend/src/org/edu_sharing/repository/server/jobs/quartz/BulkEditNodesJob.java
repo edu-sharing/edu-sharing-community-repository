@@ -34,6 +34,7 @@ import org.apache.log4j.Logger;
 import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.server.jobs.helper.NodeRunner;
+import org.edu_sharing.service.nodeservice.RecurseMode;
 import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
 import org.springframework.context.ApplicationContext;
@@ -116,6 +117,14 @@ public class BulkEditNodesJob extends AbstractJob{
 		}catch(Throwable t){
 			throw new IllegalArgumentException("Missing or invalid value for required parameter 'mode'",t);
 		}
+		RecurseMode recurseMode = RecurseMode.Folders;
+		try {
+			if(context.getJobDetail().getJobDataMap().get("recurseMode") != null) {
+				recurseMode = RecurseMode.valueOf((String) context.getJobDetail().getJobDataMap().get("recurseMode"));
+			}
+		}catch(Throwable t){
+			throw new IllegalArgumentException("Missing or invalid value for parameter 'recurseMode'",t);
+		}
 		NodeRunner runner = new NodeRunner();
 		runner.setTask((ref)->{
 			org.alfresco.service.cmr.repository.NodeRef nodeRef = new org.alfresco.service.cmr.repository.NodeRef(ref.getStoreRef(), ref.getId());
@@ -136,6 +145,7 @@ public class BulkEditNodesJob extends AbstractJob{
 		runner.setTypes(types);
 		runner.setRunAsSystem(true);
 		runner.setThreaded(false);
+		runner.setRecurseMode(recurseMode);
 		runner.setStartFolder(startFolder);
 		runner.setKeepModifiedDate(true);
 		runner.setTransaction(NodeRunner.TransactionMode.Local);
