@@ -53,6 +53,7 @@ export enum MdsWidgetType {
     Range = 'range',
     SingleValueTree = 'singlevalueTree',
     MultiValueTree = 'multivalueTree',
+    DefaultValue = 'defaultvalue',
 }
 
 export enum NativeWidgetType {

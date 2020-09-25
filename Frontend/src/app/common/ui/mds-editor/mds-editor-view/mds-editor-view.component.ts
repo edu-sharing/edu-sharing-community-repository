@@ -31,7 +31,7 @@ import { MdsEditorWidgetSliderComponent } from '../widgets/mds-editor-widget-sli
 import { MdsEditorWidgetTextComponent } from '../widgets/mds-editor-widget-text/mds-editor-widget-text.component';
 import { MdsEditorWidgetTreeComponent } from '../widgets/mds-editor-widget-tree/mds-editor-widget-tree.component';
 import { MdsEditorWidgetVersionComponent } from '../widgets/mds-editor-widget-version/mds-editor-widget-version.component';
-import {MdsEditorWidgetChildobjectsComponent} from '../widgets/mds-editor-widget-childobjects/mds-editor-widget-childobjects.component';
+import { MdsEditorWidgetChildobjectsComponent } from '../widgets/mds-editor-widget-childobjects/mds-editor-widget-childobjects.component';
 import { MdsEditorWidgetCheckboxComponent } from '../widgets/mds-editor-widget-checkbox/mds-editor-widget-checkbox.component';
 import { MdsEditorWidgetRadioButtonComponent } from '../widgets/mds-editor-widget-radio-button/mds-editor-widget-radio-button.component';
 
@@ -82,6 +82,7 @@ export class MdsEditorViewComponent implements OnInit, AfterViewInit {
         [MdsWidgetType.Range]: MdsEditorWidgetSliderComponent,
         [MdsWidgetType.SingleValueTree]: MdsEditorWidgetTreeComponent,
         [MdsWidgetType.MultiValueTree]: MdsEditorWidgetTreeComponent,
+        [MdsWidgetType.DefaultValue]: null,
     };
 
     @ViewChild('container') container: ElementRef<HTMLDivElement>;
@@ -172,7 +173,7 @@ export class MdsEditorViewComponent implements OnInit, AfterViewInit {
 
     private injectWidget(widget: Widget, element: Element): void {
         const WidgetComponent = MdsEditorViewComponent.widgetComponents[widget.definition.type];
-        if (!WidgetComponent) {
+        if (WidgetComponent === undefined) {
             UIHelper.injectAngularComponent(
                 this.factoryResolver,
                 this.containerRef,
@@ -183,6 +184,8 @@ export class MdsEditorViewComponent implements OnInit, AfterViewInit {
                     reason: `Widget for type ${widget.definition.type} is not implemented`,
                 },
             );
+            return;
+        } else if (WidgetComponent === null) {
             return;
         }
         this.updateWidgetWithHTMLAttributes(widget);
