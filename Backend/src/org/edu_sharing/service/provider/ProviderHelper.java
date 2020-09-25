@@ -5,7 +5,7 @@ import org.edu_sharing.repository.server.tools.ApplicationInfo;
 
 public class ProviderHelper {
     public static boolean hasProvider(ApplicationInfo appInfo) {
-        if(appInfo.ishomeNode()) {
+        if(appInfo.ishomeNode() || appInfo.getRepositoryType().equals(ApplicationInfo.REPOSITORY_TYPE_LOCAL)) {
             return false;
         }
         return appInfo.getType().equals(ApplicationInfo.TYPE_REPOSITORY);

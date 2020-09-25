@@ -8,6 +8,7 @@ import org.apache.log4j.Logger;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.server.MCAlfrescoAPIClient;
 import org.edu_sharing.repository.server.jobs.helper.NodeRunner;
+import org.edu_sharing.service.nodeservice.RecurseMode;
 
 import java.io.PrintWriter;
 import java.io.Serializable;
@@ -57,6 +58,7 @@ public class Release_5_0_Educontext_Default extends UpdateAbstract {
 		runner.setThreaded(true);
 		runner.setTransaction(NodeRunner.TransactionMode.LocalRetrying);
 		runner.setKeepModifiedDate(true);
+		runner.setRecurseMode(RecurseMode.All);
 		int[] processed=new int[]{0};
 		runner.setFilter((ref)->{
 			Serializable prop = nodeService.getProperty(ref, QName.createQName(CCConstants.CCM_PROP_EDUCONTEXT_NAME));

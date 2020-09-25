@@ -27,14 +27,12 @@
  */
 package org.edu_sharing.repository.server.tools;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.LinkedHashMap;
+import java.util.*;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.edu_sharing.restservices.RestConstants;
+import org.edu_sharing.service.config.ConfigServiceFactory;
 
 
 public class ApplicationInfoList {
@@ -212,6 +210,28 @@ public class ApplicationInfoList {
 		}
 		if(homeRepository == null) logger.error("no home repository found. check your application files");
 		return homeRepository;
+	}
+	public static ApplicationInfo getHomeRepositoryObeyConfig(String[] allowedRepos){
+		if(appInfos == null || appInfos.size() < 1){
+			getApplicationInfos();
+		}
+		ApplicationInfo realHome = getHomeRepository();
+
+		if(allowedRepos == null || allowedRepos.length == 0 ){
+			return realHome;
+		}
+		List<String> reposList = Arrays.asList(allowedRepos);
+		if(reposList.contains("-home-") || reposList.contains(realHome.getAppId())) {
+			return realHome;
+		}
+		ApplicationInfo configHome = getRepositoryInfoById(allowedRepos[0]);
+		if(configHome==null){
+			logger.error("Config does not allow home, and fallback repo " + allowedRepos[0]+" does not exist! Please check your client.config.xml!");
+		} else {
+			logger.info("Switching -home- repo to " + allowedRepos[0] + " because of current config");
+			return configHome;
+		}
+		return getHomeRepository();
 	}
 	
 	public static void refresh(){

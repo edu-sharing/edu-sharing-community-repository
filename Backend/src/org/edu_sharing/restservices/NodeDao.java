@@ -35,6 +35,7 @@ import org.edu_sharing.repository.client.tools.metadata.ValueTool;
 import org.edu_sharing.repository.server.AuthenticationToolAPI;
 import org.edu_sharing.repository.server.MCAlfrescoAPIClient;
 import org.edu_sharing.repository.server.SearchResultNodeRef;
+import org.edu_sharing.repository.server.tools.ApplicationInfo;
 import org.edu_sharing.repository.server.tools.ImageTool;
 import org.edu_sharing.repository.server.tools.NameSpaceTool;
 import org.edu_sharing.repository.server.tools.XApiTool;
@@ -1189,15 +1190,19 @@ public class NodeDao {
 	private NodeRef getParentRef() {
 		return createNodeRef(repoDao,getParentId());
 	}
-	private static NodeRef createNodeRef(String repoId,boolean isHomeRepo,String nodeId) {
-		NodeRef parentRef = new NodeRef();
-		parentRef.setRepo(repoId);
-		parentRef.setId(nodeId);
-		parentRef.setHomeRepo(isHomeRepo);
-		return parentRef;
-	}
 	public static NodeRef createNodeRef(RepositoryDao repoDao,String nodeId) {
-		return createNodeRef(repoDao.getId(),repoDao.isHomeRepo(),nodeId);
+		if(repoDao.getRepositoryType().equals(ApplicationInfo.REPOSITORY_TYPE_LOCAL)){
+			try {
+				repoDao = RepositoryDao.getHomeRepository();
+			} catch (DAOException e) {
+				throw new RuntimeException(e);
+			}
+		}
+		NodeRef nodeRef = new NodeRef();
+		nodeRef.setRepo(repoDao.getId());
+		nodeRef.setId(nodeId);
+		nodeRef.setHomeRepo(repoDao.isHomeRepo());
+		return nodeRef;
 	}
 
 	public String getStoreProtocol(){
