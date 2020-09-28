@@ -371,6 +371,16 @@ mat-label.mat-label-standalone{
 }
 .mat-chip-list{
   .mat-chip.mat-standard-chip{
+    &.indeterminate {
+      background: repeating-linear-gradient(
+        -45deg,
+        $primaryLight,
+        $primaryLight 5px,
+        rgba(0,0,0,.04) 5px,
+        rgba(0,0,0,.04) 10px
+     );
+     color: $textLight;
+    } 
     background-color: $primaryLight;
     .mat-chip-remove{
       color: $primary;
