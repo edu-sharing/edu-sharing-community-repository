@@ -48,7 +48,7 @@ export class MdsEditorCardComponent implements OnInit {
     }
 
     confirmDiscard(): void {
-        if (this.mdsEditorInstance.getCanSave()) {
+        if (this.mdsEditorInstance.getHasChanges()) {
             this.toast.showModalDialog(
                 'MDS.CONFIRM_DISCARD_TITLE',
                 'MDS.CONFIRM_DISCARD_MESSAGE',

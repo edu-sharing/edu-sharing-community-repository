@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { BehaviorSubject, Observable, of, ReplaySubject } from 'rxjs';
+import { BehaviorSubject, combineLatest, Observable, of, ReplaySubject } from 'rxjs';
 import { map } from 'rxjs/operators';
 import {
     Node,
@@ -104,19 +104,19 @@ export class MdsEditorInstanceService {
         setValue(value: string[]): void {
             this.value = value;
             this.updateHasChanged();
-            this.mdsEditorInstanceService.updateCanSave();
+            this.mdsEditorInstanceService.updateHasChanges();
             this.mdsEditorInstanceService.updateCompletionState();
         }
 
         setStatus(value: InputStatus): void {
             this.status = value;
-            this.mdsEditorInstanceService.updateCanSave();
+            this.mdsEditorInstanceService.updateIsValid();
         }
 
         setBulkMode(value: BulkMode): void {
             this.bulkMode.next(value);
             this.updateHasChanged();
-            this.mdsEditorInstanceService.updateCanSave();
+            this.mdsEditorInstanceService.updateHasChanges();
         }
 
         observeBulkMode(): Observable<BulkMode> {
@@ -271,15 +271,21 @@ export class MdsEditorInstanceService {
     private nativeWidgets: NativeWidget[] = [];
 
     // Mutable state.
-    private completionStatus = new ReplaySubject<CompletionStatus>(1);
-    private canSave = new BehaviorSubject(false);
+    private completionStatus$ = new ReplaySubject<CompletionStatus>(1);
+    private hasChanges$ = new BehaviorSubject(false);
+    private isValid$ = new BehaviorSubject(true);
+    private canSave$ = new BehaviorSubject(false);
     private lastScrolledIntoViewIndex: number = null;
 
     constructor(
         private mdsEditorCommonService: MdsEditorCommonService,
         private restMdsService: RestMdsService,
         private restConnector: RestConnectorService,
-    ) {}
+    ) {
+        combineLatest([this.hasChanges$, this.isValid$])
+            .pipe(map(([hasChanged, isValid]) => hasChanged && isValid))
+            .subscribe(this.canSave$);
+    }
 
     /**
      * Initializes the service, fetching data from the backend.
@@ -316,16 +322,16 @@ export class MdsEditorInstanceService {
         return this.widgets.find((widget) => widget.definition.id === propertyName);
     }
 
-    getCanSave(): boolean {
-        return this.canSave.value;
+    getHasChanges(): boolean {
+        return this.hasChanges$.value;
     }
 
     observeCanSave(): Observable<boolean> {
-        return this.canSave.asObservable();
+        return this.canSave$.asObservable();
     }
 
     getCompletionStatus(): Observable<CompletionStatus> {
-        return this.completionStatus.asObservable();
+        return this.completionStatus$.asObservable();
     }
 
     /**
@@ -395,16 +401,19 @@ export class MdsEditorInstanceService {
         return nodes.length > 1;
     }
 
-    private updateCanSave() {
-        const allAreValid = this.widgets.every((state) => state.getStatus() !== 'INVALID');
+    private updateHasChanges(): void {
         const someWidgetsHaveChanged = this.widgets.some(
             (widget) =>
                 (widget.getHasChanged() || widget.hasUnsavedDefault) &&
                 widget.getStatus() !== 'DISABLED',
         );
         const someNativeWidgetsHaveChanged = this.nativeWidgets.some((w) => w.hasChanges.value);
-        const canSave = allAreValid && (someWidgetsHaveChanged || someNativeWidgetsHaveChanged);
-        this.canSave.next(canSave);
+        this.hasChanges$.next(someWidgetsHaveChanged || someNativeWidgetsHaveChanged);
+    }
+
+    private updateIsValid(): void {
+        const allAreValid = this.widgets.every((state) => state.getStatus() !== 'INVALID');
+        this.isValid$.next(allAreValid);
     }
 
     private getGroup(mdsDefinition: MdsDefinition, groupId: string): MdsGroup {
@@ -511,7 +520,7 @@ export class MdsEditorInstanceService {
     }
 
     private updateCompletionState(): void {
-        this.completionStatus.next(
+        this.completionStatus$.next(
             Object.values(RequiredMode).reduce((acc, requiredMode) => {
                 acc[requiredMode] = this.getCompletionStatusEntry(requiredMode);
                 return acc;
@@ -533,7 +542,7 @@ export class MdsEditorInstanceService {
     registerNativeWidget(nativeWidget: NativeWidget) {
         this.nativeWidgets.push(nativeWidget);
         nativeWidget.hasChanges.subscribe(() => {
-            this.updateCanSave();
+            this.updateHasChanges();
         });
     }
 }
