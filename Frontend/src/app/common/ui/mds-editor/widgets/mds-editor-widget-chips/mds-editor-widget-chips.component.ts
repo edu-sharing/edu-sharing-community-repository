@@ -15,6 +15,7 @@ import {
 import { MdsWidgetType, MdsWidgetValue } from '../../types';
 import { MdsEditorWidgetBase, ValueType } from '../mds-editor-widget-base';
 
+// TODO: use `{ DisplayValue, DisplayValues } from '../DisplayValues'`
 interface DisplayValue {
     key: string;
     displayString: string;

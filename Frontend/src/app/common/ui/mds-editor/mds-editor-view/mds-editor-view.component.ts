@@ -22,18 +22,19 @@ import {
     Values,
 } from '../types';
 import { MdsEditorWidgetAuthorComponent } from '../widgets/mds-editor-widget-author/mds-editor-widget-author.component';
+import { MdsEditorWidgetCheckboxComponent } from '../widgets/mds-editor-widget-checkbox/mds-editor-widget-checkbox.component';
+import { MdsEditorWidgetCheckboxesComponent } from '../widgets/mds-editor-widget-checkboxes/mds-editor-widget-checkboxes.component';
+import { MdsEditorWidgetChildobjectsComponent } from '../widgets/mds-editor-widget-childobjects/mds-editor-widget-childobjects.component';
 import { MdsEditorWidgetChipsComponent } from '../widgets/mds-editor-widget-chips/mds-editor-widget-chips.component';
 import { MdsEditorWidgetErrorComponent } from '../widgets/mds-editor-widget-error/mds-editor-widget-error.component';
 import { MdsEditorWidgetLinkComponent } from '../widgets/mds-editor-widget-link/mds-editor-widget-link.component';
 import { MdsEditorWidgetPreviewComponent } from '../widgets/mds-editor-widget-preview/mds-editor-widget-preview.component';
+import { MdsEditorWidgetRadioButtonComponent } from '../widgets/mds-editor-widget-radio-button/mds-editor-widget-radio-button.component';
 import { MdsEditorWidgetSelectComponent } from '../widgets/mds-editor-widget-select/mds-editor-widget-select.component';
 import { MdsEditorWidgetSliderComponent } from '../widgets/mds-editor-widget-slider/mds-editor-widget-slider.component';
 import { MdsEditorWidgetTextComponent } from '../widgets/mds-editor-widget-text/mds-editor-widget-text.component';
 import { MdsEditorWidgetTreeComponent } from '../widgets/mds-editor-widget-tree/mds-editor-widget-tree.component';
 import { MdsEditorWidgetVersionComponent } from '../widgets/mds-editor-widget-version/mds-editor-widget-version.component';
-import { MdsEditorWidgetChildobjectsComponent } from '../widgets/mds-editor-widget-childobjects/mds-editor-widget-childobjects.component';
-import { MdsEditorWidgetCheckboxComponent } from '../widgets/mds-editor-widget-checkbox/mds-editor-widget-checkbox.component';
-import { MdsEditorWidgetRadioButtonComponent } from '../widgets/mds-editor-widget-radio-button/mds-editor-widget-radio-button.component';
 
 export interface NativeWidget {
     hasChanges: BehaviorSubject<boolean>;
@@ -74,6 +75,8 @@ export class MdsEditorViewComponent implements OnInit, AfterViewInit {
         [MdsWidgetType.Checkbox]: MdsEditorWidgetCheckboxComponent,
         [MdsWidgetType.RadioHorizontal]: MdsEditorWidgetRadioButtonComponent,
         [MdsWidgetType.RadioVertical]: MdsEditorWidgetRadioButtonComponent,
+        [MdsWidgetType.CheckboxHorizontal]: MdsEditorWidgetCheckboxesComponent,
+        [MdsWidgetType.CheckboxVertical]: MdsEditorWidgetCheckboxesComponent,
         [MdsWidgetType.MultiValueBadges]: MdsEditorWidgetChipsComponent,
         [MdsWidgetType.MultiValueSuggestBadges]: MdsEditorWidgetChipsComponent,
         [MdsWidgetType.MultiValueFixedBadges]: MdsEditorWidgetChipsComponent,

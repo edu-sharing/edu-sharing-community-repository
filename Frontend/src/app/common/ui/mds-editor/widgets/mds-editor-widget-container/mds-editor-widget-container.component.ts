@@ -10,7 +10,7 @@ import {
     Input,
     OnInit,
 } from '@angular/core';
-import { FormControl } from '@angular/forms';
+import { AbstractControl } from '@angular/forms';
 import { MatFormField, MatFormFieldControl } from '@angular/material/form-field';
 import { MatRadioChange } from '@angular/material/radio';
 import { MatSlideToggleChange } from '@angular/material/slide-toggle';
@@ -65,7 +65,7 @@ export class MdsEditorWidgetContainerComponent implements OnInit, AfterContentIn
     @Input() widget: Widget;
     @Input() valueType: ValueType;
     @Input() label: string | boolean;
-    @Input() control: FormControl; // Naming this variable `formControl` causes bugs.
+    @Input() control: AbstractControl;
     @Input() wrapInFormField: boolean;
 
     @ContentChild(MatFormFieldControl) formFieldControl: MatFormFieldControl<any>;
@@ -139,7 +139,7 @@ export class MdsEditorWidgetContainerComponent implements OnInit, AfterContentIn
         }
     }
 
-    private initFormControl(formControl: FormControl): void {
+    private initFormControl(formControl: AbstractControl): void {
         this.widget.observeIsDisabled().subscribe((isDisabled) => this.setDisabled(isDisabled));
         formControl.statusChanges
             .pipe(startWith(formControl.status), distinctUntilChanged())

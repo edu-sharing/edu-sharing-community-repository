@@ -45,6 +45,8 @@ export enum MdsWidgetType {
     Checkbox = 'checkbox',
     RadioHorizontal = 'radioHorizontal',
     RadioVertical = 'radioVertical',
+    CheckboxHorizontal = 'checkboxHorizontal',
+    CheckboxVertical = 'checkboxVertical',
     MultiValueBadges = 'multivalueBadges',
     MultiValueFixedBadges = 'multivalueFixedBadges',
     MultiValueSuggestBadges = 'multivalueSuggestBadges',
