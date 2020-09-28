@@ -5,16 +5,16 @@ import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 
 @ApiModel(description = "")
-public class ShowHideEmail {
+public class ShowEmail {
 	@ApiModelProperty(required = true, value = "false")
-	@JsonProperty("showHideEmail")
-	private boolean showHideEmail; // show or hide email in profile
+	@JsonProperty("showEmail")
+	private boolean showEmail; // show or hide email in profile
 
-	public boolean getShowHideEmail() {
-		return showHideEmail;
+	public boolean getShowEmail() {
+		return showEmail;
 	}
 
-	public void setShowHideEmail(boolean showHideEmail) {
-		this.showHideEmail = showHideEmail;
+	public void setShowEmail(boolean showEmail) {
+		this.showEmail = showEmail;
 	}
 }

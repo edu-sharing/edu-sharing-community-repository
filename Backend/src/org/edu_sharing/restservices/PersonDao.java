@@ -531,21 +531,21 @@ public class PersonDao {
 	}
 
 	/**
-	 * retrive value from alfresco db 
+	 * retrieve value from alfresco db 
 	 * @return boolean value true|false 
 	 */
-	public boolean getShowHideEmail() {
-		return (boolean)this.userInfo.get(CCConstants.CCM_PROP_PERSON_SHOW_HIDE_EMAIL);
+	public boolean getShowEmail() {
+		return (boolean)this.userInfo.get(CCConstants.CCM_PROP_PERSON_SHOW_EMAIL);
 	}
 
 	/**
 	 * set value into alfresco database 
-	 * @param  showHideEmail (String) exp: 'true'|'false' 
+	 * @param  showEmail (String) exp: 'true'|'false' 
 	 */
-	public void setShowHideEmail(String showHideEmail) throws Exception{
+	public void setShowEmail(String showEmail) throws Exception{
 		HashMap<String, String> newUserInfo = new HashMap<String, String>();
 		newUserInfo.put(CCConstants.PROP_USERNAME, getUserName());
-		newUserInfo.put(CCConstants.CCM_PROP_PERSON_SHOW_HIDE_EMAIL, showHideEmail);
+		newUserInfo.put(CCConstants.CCM_PROP_PERSON_SHOW_EMAIL, showEmail);
 		((MCAlfrescoAPIClient)this.baseClient).updateUser(newUserInfo);
 	}
 	
