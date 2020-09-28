@@ -45,7 +45,7 @@ export class MdsEditorWidgetAuthorComponent implements OnInit, NativeWidget {
     ) {}
 
     ngOnInit(): void {
-        this.mdsEditorValues.nodes.filter((n) => n != null).subscribe((nodes) => {
+        this.mdsEditorValues.nodes$.filter((n) => n != null).subscribe((nodes) => {
             this._nodes = nodes;
             if (nodes?.length) {
                 let freetext = Array.from(new Set(nodes.map((n) =>

@@ -17,7 +17,7 @@ export class MdsEditorWidgetSelectComponent extends MdsEditorWidgetBase implemen
 
     ngOnInit() {
         this.formControl = new FormControl(null, this.getStandardValidators());
-        const initialValues = this.initWidget();
+        const initialValues = this.getInitialValue();
         this.values = this.widget.getSuggestedValues();
         this.values.then((values) => {
             this.formControl.setValue(values.find((v) => v.id === initialValues[0]));

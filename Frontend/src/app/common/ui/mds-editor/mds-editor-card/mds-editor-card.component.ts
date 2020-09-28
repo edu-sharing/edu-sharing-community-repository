@@ -30,7 +30,7 @@ export class MdsEditorCardComponent implements OnInit {
     constructor(private mdsEditorInstance: MdsEditorInstanceService, private toast: Toast) {}
 
     ngOnInit(): void {
-        this.nodes = this.mdsEditorInstance.nodes.value;
+        this.nodes = this.mdsEditorInstance.nodes$.value;
         this.jumpMarks = this.getJumpMarks();
         this.mdsEditorInstance
             .observeCanSave()

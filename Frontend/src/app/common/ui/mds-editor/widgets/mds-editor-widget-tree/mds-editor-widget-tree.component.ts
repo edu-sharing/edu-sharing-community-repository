@@ -56,7 +56,7 @@ export class MdsEditorWidgetTreeComponent
             throw new Error('Unexpected widget type: ' + this.widget.definition.type);
         }
         // this.widget.definition.isRequired = RequiredMode.MandatoryForPublish;
-        const initialValues = this.initWidget();
+        const initialValues = this.getInitialValue();
         this.tree = Tree.generateTree(this.widget.definition.values, initialValues);
         this.chipsControl = new FormControl(
             initialValues.map((value) => this.tree.idToDisplayValue(value)),

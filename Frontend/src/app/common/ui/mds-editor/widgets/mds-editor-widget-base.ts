@@ -24,13 +24,11 @@ export abstract class MdsEditorWidgetBase {
     }
 
     /**
-     * Must be called when the widget is available, e.g. in ngOnInit.
-     *
-     * @returns the initial value.
+     * @deprecated use `widget.initialValues` directly
      */
-    protected initWidget(): readonly string[] {
-        if (this.widget.hasCommonInitialValue) {
-            return this.widget.initialValue;
+    protected getInitialValue(): readonly string[] {
+        if (!this.widget.initialValues.individualValues) {
+            return this.widget.initialValues.jointValues;
         } else {
             switch (this.valueType) {
                 case ValueType.String:

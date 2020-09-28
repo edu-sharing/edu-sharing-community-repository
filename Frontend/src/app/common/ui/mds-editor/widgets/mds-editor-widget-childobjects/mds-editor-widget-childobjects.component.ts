@@ -56,7 +56,7 @@ export class MdsEditorWidgetChildobjectsComponent implements OnInit, NativeWidge
     ) {}
 
     ngOnInit(): void {
-        this.mdsEditorValues.nodes.filter((n) => n != null).subscribe(async (nodes) => {
+        this.mdsEditorValues.nodes$.filter((n) => n != null).subscribe(async (nodes) => {
             if (nodes?.length) {
                 this.children = (await this.nodeApi.getNodeChildobjects(nodes[0].ref.id).toPromise()).nodes.map((n) => {
                     return {

@@ -520,6 +520,7 @@
         "BULK_OVERRIDE": "Replace",
         "BULK_REPLACE": "Replace",
         "BULK_APPEND": "Append",
+        "BULK_NO_CHANGE": "Don't change",
         "LICENSE_LINK": "manage license",
         "TEMPLATE_LINK": "Manage metadata template",
         "CONTRIBUTOR_LINK": "Additional Contributors",
@@ -535,7 +536,8 @@
         "CONFIRM_DISCARD_TITLE": "Discard changes?",
         "CONFIRM_DISCARD_MESSAGE": "Close the dialog without saving any changes?",
         "REQUIRED_MESSAGE": "Field is required",
-        "REQUIRED_FOR_PUBLISH_MESSAGE": "Field is required for publishing"
+        "REQUIRED_FOR_PUBLISH_MESSAGE": "Field is required for publishing",
+        "INDETERMINATE_NOTICE": "Click on the value in order to add it to all elements, or remove it in order to delete it from all elements (when \"replace\" is selected)."
     },
 
      "SIMPLE_EDIT": {
