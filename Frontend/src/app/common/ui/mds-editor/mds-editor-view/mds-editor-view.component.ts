@@ -217,7 +217,7 @@ export class MdsEditorViewComponent implements OnInit, AfterViewInit {
 
     private violatesConstraints(constraints: Constraints): string | null {
         if (constraints.requiresNode === true) {
-            if (!this.mdsEditorInstance.nodes.value) {
+            if (!this.mdsEditorInstance.nodes$.value) {
                 return 'Only supported if a node object is available';
             }
         }

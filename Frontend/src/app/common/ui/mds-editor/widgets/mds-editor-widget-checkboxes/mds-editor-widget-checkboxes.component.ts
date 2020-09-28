@@ -14,11 +14,15 @@ export class MdsEditorWidgetCheckboxesComponent extends MdsEditorWidgetBase impl
     values: DisplayValues;
     formArray: FormArray;
     mode: 'horizontal' | 'vertical';
+    indeterminateValues: boolean[];
 
     ngOnInit(): void {
         this.mode = this.getMode();
         this.values = DisplayValues.fromMdsValues(this.widget.definition.values);
-        const initialValue = this.getInitialValue();
+        const initialValue = this.widget.initialValues.jointValues;
+        this.indeterminateValues = this.values.values.map(
+            (value) => !!this.widget.initialValues.individualValues?.includes(value.key),
+        );
         this.formArray = new FormArray(
             this.values.values.map((value) => new FormControl(initialValue.includes(value.key))),
             this.getStandardValidators({ requiredValidator }),
@@ -31,6 +35,15 @@ export class MdsEditorWidgetCheckboxesComponent extends MdsEditorWidgetBase impl
                     .map((value) => value.key);
                 this.setValue(newValues);
             });
+    }
+
+    onIndeterminateChange(isIndeterminate: boolean, index: number): void {
+        this.indeterminateValues[index] = isIndeterminate;
+        this.widget.setIndeterminateValues(
+            this.values.values
+                .filter((_, i) => this.indeterminateValues[i])
+                .map((displayValue) => displayValue.key),
+        );
     }
 
     private getMode(): 'horizontal' | 'vertical' {

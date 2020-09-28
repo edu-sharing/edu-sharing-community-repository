@@ -55,6 +55,7 @@ export class MdsEditorInstanceService {
         readonly hasUnsavedDefault: boolean;
         readonly initialValues: InitialValues;
         private value: string[];
+        private indeterminateValues?: string[];
         private hasChanged = false;
         private status: InputStatus;
         private bulkMode?: BehaviorSubject<BulkMode>; // only when `isBulk`
@@ -84,6 +85,10 @@ export class MdsEditorInstanceService {
             return this.value;
         }
 
+        getIndeterminateValues(): string[] {
+            return this.indeterminateValues;
+        }
+
         getHasChanged(): boolean {
             return this.hasChanged;
         }
@@ -109,6 +114,10 @@ export class MdsEditorInstanceService {
             this.updateHasChanged();
             this.mdsEditorInstanceService.updateHasChanges();
             this.mdsEditorInstanceService.updateCompletionState();
+        }
+
+        setIndeterminateValues(indeterminateValues?: string[]): void {
+            this.indeterminateValues = indeterminateValues;
         }
 
         setStatus(value: InputStatus): void {
@@ -269,7 +278,7 @@ export class MdsEditorInstanceService {
     /** Complete MDS definition. */
     mdsDefinition: MdsDefinition;
     /** Nodes with updated and complete metadata. */
-    nodes = new BehaviorSubject<Node[]>(null);
+    nodes$ = new BehaviorSubject<Node[]>(null);
     /** MDS Views of the relevant group (in order). */
     views: View[];
     /** Whether the editor is in bulk mode to edit multiple nodes at once. */
@@ -314,17 +323,17 @@ export class MdsEditorInstanceService {
      */
     async init(nodes: Node[], refetch = true): Promise<EditorType> {
         if (refetch) {
-            this.nodes.next(await this.mdsEditorCommonService.fetchNodesMetadata(nodes));
+            this.nodes$.next(await this.mdsEditorCommonService.fetchNodesMetadata(nodes));
         } else {
-            this.nodes.next(nodes);
+            this.nodes$.next(nodes);
         }
-        this.isBulk = this.getIsBulk(this.nodes.value);
-        this.mdsId = this.mdsEditorCommonService.getMdsId(this.nodes.value);
+        this.isBulk = this.getIsBulk(this.nodes$.value);
+        this.mdsId = this.mdsEditorCommonService.getMdsId(this.nodes$.value);
         this.mdsDefinition = await this.mdsEditorCommonService.fetchMdsDefinition(this.mdsId);
-        const groupId = this.mdsEditorCommonService.getGroupId(this.nodes.value);
+        const groupId = this.mdsEditorCommonService.getGroupId(this.nodes$.value);
         const group = this.getGroup(this.mdsDefinition, groupId);
         this.views = this.getViews(this.mdsDefinition, group);
-        this.widgets = this.initWidgets(this.nodes.value, this.mdsDefinition, this.views);
+        this.widgets = this.initWidgets(this.nodes$.value, this.mdsDefinition, this.views);
         this.updateCompletionState();
         return group.rendering;
     }
@@ -396,14 +405,14 @@ export class MdsEditorInstanceService {
         ) as MdsEditorWidgetVersionComponent;
         for (const widget of this.nativeWidgets) {
             if (widget.onSaveNode) {
-                await widget.onSaveNode(this.nodes.value);
+                await widget.onSaveNode(this.nodes$.value);
             }
         }
         if (versionWidget) {
             if (versionWidget.file) {
                 updatedNodes = await this.mdsEditorCommonService.saveNodesMetadata(newValues);
                 await this.mdsEditorCommonService.saveNodeContent(
-                    this.nodes.value[0],
+                    this.nodes$.value[0],
                     versionWidget.file,
                     versionWidget.comment,
                 );
@@ -496,7 +505,7 @@ export class MdsEditorInstanceService {
     }
 
     private getNodeValuePairs(): Array<{ node: Node; values: Values }> {
-        return this.nodes.value.map((node) => ({
+        return this.nodes$.value.map((node) => ({
             node,
             values: this.getValuesForNode(node),
         }));
@@ -532,9 +541,17 @@ export class MdsEditorInstanceService {
                 case 'no-change':
                     return null;
                 case 'append':
-                    return removeDuplicates([...(oldPropertyValue ?? []), ...widget.getValue()]);
+                    return removeDuplicates([
+                        ...(oldPropertyValue ?? []),
+                        ...widget.getValue(),
+                    ]);
                 case 'replace':
-                    return widget.getValue();
+                    return removeDuplicates([
+                        ...(oldPropertyValue ?? []).filter((value) =>
+                            widget.getIndeterminateValues()?.includes(value),
+                        ),
+                        ...widget.getValue(),
+                    ]);
             }
         }
     }
@@ -552,7 +569,9 @@ export class MdsEditorInstanceService {
         const total = this.widgets.filter(
             (widget) => widget.definition.isRequired === requiredMode,
         );
-        const completed = total.filter((widget) => widget.getValue() && widget.getValue()[0]);
+        const completed = total.filter(
+            (widget) => widget.getValue() && widget.getValue()[0],
+        );
         return {
             total: total.length,
             completed: completed.length,

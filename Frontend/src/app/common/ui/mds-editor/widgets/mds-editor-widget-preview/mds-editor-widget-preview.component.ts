@@ -28,7 +28,7 @@ export class MdsEditorWidgetPreviewComponent implements OnInit, NativeWidget {
     ) {}
 
     ngOnInit(): void {
-        this.mdsEditorValues.nodes.subscribe((nodes) => {
+        this.mdsEditorValues.nodes$.subscribe((nodes) => {
             if (nodes?.length === 1) {
                 this.nodeSrc = nodes[0].preview.url + '&crop=true&width=400&height=300&dontcache=:cache';
                 this.updateSrc();
