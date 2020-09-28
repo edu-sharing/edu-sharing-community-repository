@@ -43,7 +43,7 @@
 
         <div *ngIf="!edit">
           <div class="name">{{user | authorityName}}</div>
-          <div *ngIf="showHideEmail" class="mail"><a href="mailto:{{user.profile.email}}">{{user.profile.email}}</a></div>
+          <div *ngIf="ShowEmail || user.authorityName ==='admin'" class="mail"><a href="mailto:{{user.profile.email}}">{{user.profile.email}}</a></div>
           <!--<div class="authorityName">-->
           <!--<div>{{'USER.authorityName' | translate}}: {{ user.authorityName }}</div>-->
           <!--</div>-->
@@ -64,9 +64,9 @@
               <mat-label>{{'USER.email' | translate}}</mat-label>
               <input matInput type="email" [(ngModel)]="userEdit.profile.email">
             </mat-form-field>
-            <mat-slide-toggle [checked]="showHideEmail"
-                              [(ngModel)]="showHideEmail">
-              <mat-label >{{ 'USER.'+(showHideEmail?'showEmail':'hideEmail') | translate}}</mat-label>
+            <mat-slide-toggle [checked]="ShowEmail"
+                              [(ngModel)]="ShowEmail">
+              <mat-label >{{ 'USER.'+(ShowEmail?'showEmail':'hideEmail') | translate}}</mat-label>
             </mat-slide-toggle>
           </div>
         </div>
