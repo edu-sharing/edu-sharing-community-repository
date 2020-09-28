@@ -1,7 +1,5 @@
 import { Component, OnInit } from '@angular/core';
 import { AbstractControl, FormControl, ValidatorFn } from '@angular/forms';
-import { first } from 'rxjs/operators';
-import { RequiredMode } from '../../types';
 import { MdsEditorWidgetBase, ValueType } from '../mds-editor-widget-base';
 
 @Component({
@@ -12,37 +10,30 @@ import { MdsEditorWidgetBase, ValueType } from '../mds-editor-widget-base';
 export class MdsEditorWidgetCheckboxComponent extends MdsEditorWidgetBase implements OnInit {
     readonly valueType: ValueType = ValueType.String;
     formControl: FormControl;
-    indeterminate: boolean;
+    isIndeterminate: boolean;
 
     ngOnInit(): void {
-        this.widget.definition.isRequired = RequiredMode.MandatoryForPublish;
-        const initialValue = this.getInitialValue();
-        this.indeterminate =
-            typeof initialValue[0] === 'string' &&
-            initialValue[0] !== 'false' &&
-            initialValue[0] !== 'true';
+        const initialValue = this.widget.initialValues.jointValues[0];
+        this.isIndeterminate = !!this.widget.initialValues.individualValues;
+        this.setIndeterminateValues(this.isIndeterminate);
         this.formControl = new FormControl(
-            initialValue[0] === 'true',
+            initialValue === 'true',
             this.getStandardValidators({ requiredValidator }),
         );
         this.formControl.valueChanges.subscribe((value: boolean) => {
-            if (!this.indeterminate) {
-                this.setValue([value.toString()]);
-            }
+            this.setValue([value.toString()]);
         });
-        // Set a non-indeterminate value when the user selects 'replace' in bulk mode, so we don't
-        // overwrite the property with an empty array on save.
-        if (this.indeterminate) {
-            this.widget
-                .observeIsDisabled()
-                .pipe(first((isDisabled) => !isDisabled))
-                .subscribe(() => (this.indeterminate = false));
-        }
     }
 
-    onIndeterminateChange(indeterminate: boolean): void {
-        if (indeterminate === false) {
-            this.setValue([this.formControl.value.toString()]);
+    onIndeterminateChange(isIndeterminate: boolean): void {
+        this.setIndeterminateValues(isIndeterminate);
+    }
+
+    private setIndeterminateValues(isIndeterminate: boolean): void {
+        if (isIndeterminate) {
+            this.widget.setIndeterminateValues(['false', 'true']);
+        } else {
+            this.widget.setIndeterminateValues(null);
         }
     }
 }

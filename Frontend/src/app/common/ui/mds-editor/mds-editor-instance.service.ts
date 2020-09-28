@@ -55,6 +55,10 @@ export class MdsEditorInstanceService {
         readonly hasUnsavedDefault: boolean;
         readonly initialValues: InitialValues;
         private value: string[];
+        /**
+         * Values that are shown as indeterminate to the user and will not be overwritten when
+         * saving.
+         */
         private indeterminateValues?: string[];
         private hasChanged = false;
         private status: InputStatus;
@@ -543,14 +547,18 @@ export class MdsEditorInstanceService {
                 case 'append':
                     return removeDuplicates([
                         ...(oldPropertyValue ?? []),
-                        ...widget.getValue(),
+                        ...widget
+                            .getValue()
+                            .filter((value) => !widget.getIndeterminateValues()?.includes(value)),
                     ]);
                 case 'replace':
                     return removeDuplicates([
                         ...(oldPropertyValue ?? []).filter((value) =>
                             widget.getIndeterminateValues()?.includes(value),
                         ),
-                        ...widget.getValue(),
+                        ...widget
+                            .getValue()
+                            .filter((value) => !widget.getIndeterminateValues()?.includes(value)),
                     ]);
             }
         }
@@ -569,9 +577,7 @@ export class MdsEditorInstanceService {
         const total = this.widgets.filter(
             (widget) => widget.definition.isRequired === requiredMode,
         );
-        const completed = total.filter(
-            (widget) => widget.getValue() && widget.getValue()[0],
-        );
+        const completed = total.filter((widget) => widget.getValue() && widget.getValue()[0]);
         return {
             total: total.length,
             completed: completed.length,
