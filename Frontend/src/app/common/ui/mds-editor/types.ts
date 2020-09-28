@@ -53,6 +53,7 @@ export enum MdsWidgetType {
     Singleoption = 'singleoption',
     Slider = 'slider',
     Range = 'range',
+    Duration = 'duration',
     SingleValueTree = 'singlevalueTree',
     MultiValueTree = 'multivalueTree',
     DefaultValue = 'defaultvalue',

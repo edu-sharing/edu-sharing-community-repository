@@ -60,6 +60,7 @@ import {DragDropModule} from '@angular/cdk/drag-drop';
 import { MdsEditorWidgetCheckboxComponent } from './common/ui/mds-editor/widgets/mds-editor-widget-checkbox/mds-editor-widget-checkbox.component';
 import { MdsEditorWidgetRadioButtonComponent } from './common/ui/mds-editor/widgets/mds-editor-widget-radio-button/mds-editor-widget-radio-button.component';
 import { MdsEditorWidgetCheckboxesComponent } from './common/ui/mds-editor/widgets/mds-editor-widget-checkboxes/mds-editor-widget-checkboxes.component';
+import {MdsEditorWidgetDurationComponent} from './common/ui/mds-editor/widgets/mds-editor-widget-duration/mds-editor-widget-duration.component';
 
 
 // http://blog.angular-university.io/angular2-ngmodule/
@@ -106,6 +107,7 @@ import { MdsEditorWidgetCheckboxesComponent } from './common/ui/mds-editor/widge
         MdsEditorWidgetChipsComponent,
         MdsEditorWidgetSelectComponent,
         MdsEditorWidgetSliderComponent,
+        MdsEditorWidgetDurationComponent,
         MdsEditorWidgetVersionComponent,
         MdsEditorWidgetLinkComponent,
         MdsEditorWidgetTreeComponent,

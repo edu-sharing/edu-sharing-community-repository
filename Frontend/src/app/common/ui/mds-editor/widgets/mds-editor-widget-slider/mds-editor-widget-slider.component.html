@@ -1,5 +1,4 @@
-<app-mds-editor-widget-container [widget]="widget" [label]="false" [valueType]="valueType">
-  <mat-label class="mat-label-standalone">{{ widget.definition.caption }}</mat-label>
+<app-mds-editor-widget-container [widget]="widget" [label]="widget.definition.caption" [valueType]="valueType">
   <ng5-slider
     *ngIf="isRange"
     class="ng5-slider-small"

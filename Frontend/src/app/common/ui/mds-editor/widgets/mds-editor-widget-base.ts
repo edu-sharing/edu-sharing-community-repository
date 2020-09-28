@@ -18,7 +18,7 @@ export abstract class MdsEditorWidgetBase {
 
     constructor(
         private mdsEditorInstance: MdsEditorInstanceService,
-        private translate: TranslateService,
+        protected translate: TranslateService,
     ) {
         this.isBulk = this.mdsEditorInstance.isBulk;
     }

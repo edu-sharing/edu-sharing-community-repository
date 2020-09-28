@@ -35,6 +35,7 @@ import { MdsEditorWidgetSliderComponent } from '../widgets/mds-editor-widget-sli
 import { MdsEditorWidgetTextComponent } from '../widgets/mds-editor-widget-text/mds-editor-widget-text.component';
 import { MdsEditorWidgetTreeComponent } from '../widgets/mds-editor-widget-tree/mds-editor-widget-tree.component';
 import { MdsEditorWidgetVersionComponent } from '../widgets/mds-editor-widget-version/mds-editor-widget-version.component';
+import {MdsEditorWidgetDurationComponent} from '../widgets/mds-editor-widget-duration/mds-editor-widget-duration.component';
 
 export interface NativeWidget {
     hasChanges: BehaviorSubject<boolean>;
@@ -83,6 +84,7 @@ export class MdsEditorViewComponent implements OnInit, AfterViewInit {
         [MdsWidgetType.Singleoption]: MdsEditorWidgetSelectComponent,
         [MdsWidgetType.Slider]: MdsEditorWidgetSliderComponent,
         [MdsWidgetType.Range]: MdsEditorWidgetSliderComponent,
+        [MdsWidgetType.Duration]: MdsEditorWidgetDurationComponent,
         [MdsWidgetType.SingleValueTree]: MdsEditorWidgetTreeComponent,
         [MdsWidgetType.MultiValueTree]: MdsEditorWidgetTreeComponent,
         [MdsWidgetType.DefaultValue]: null,
