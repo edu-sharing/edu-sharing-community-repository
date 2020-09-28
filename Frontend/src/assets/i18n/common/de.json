@@ -569,7 +569,8 @@
         "CONFIRM_DISCARD_TITLE": "Änderungen verwerfen?",
         "CONFIRM_DISCARD_MESSAGE": "Dialog schließen, ohne die Änderungen zu speichern?",
         "REQUIRED_MESSAGE": "Pflichtfeld",
-        "REQUIRED_FOR_PUBLISH_MESSAGE": "Für die Veröffentlichung erforderliches Feld"
+        "REQUIRED_FOR_PUBLISH_MESSAGE": "Für die Veröffentlichung erforderliches Feld",
+        "INDETERMINATE_NOTICE": "Klicken Sie auf den Wert, um ihn allen Elementen hinzuzufügen, oder entfernen Sie ihn, um ihn aus allen Elementen zu löschen (wenn \"Ersetzen\" ausgewählt ist)."
     },
     "SIMPLE_EDIT": {
         "TITLE": "Schnell-Bearbeitung",

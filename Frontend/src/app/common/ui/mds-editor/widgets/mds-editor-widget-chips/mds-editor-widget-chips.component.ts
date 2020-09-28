@@ -3,7 +3,7 @@ import { Component, ElementRef, OnInit, ViewChild } from '@angular/core';
 import { FormControl } from '@angular/forms';
 import { MatAutocomplete, MatAutocompleteSelectedEvent } from '@angular/material/autocomplete';
 import { MatChipInputEvent } from '@angular/material/chips';
-import { combineLatest, from, Observable } from 'rxjs';
+import { BehaviorSubject, combineLatest, from, Observable } from 'rxjs';
 import {
     debounceTime,
     distinctUntilChanged,
@@ -13,13 +13,8 @@ import {
     switchMap,
 } from 'rxjs/operators';
 import { MdsWidgetType, MdsWidgetValue } from '../../types';
+import { DisplayValue } from '../DisplayValues';
 import { MdsEditorWidgetBase, ValueType } from '../mds-editor-widget-base';
-
-// TODO: use `{ DisplayValue, DisplayValues } from '../DisplayValues'`
-interface DisplayValue {
-    key: string;
-    displayString: string;
-}
 
 @Component({
     selector: 'app-mds-editor-widget-chips',
@@ -35,14 +30,17 @@ export class MdsEditorWidgetChipsComponent extends MdsEditorWidgetBase implement
     inputControl = new FormControl();
     chipsControl: FormControl;
     filteredValues: Observable<DisplayValue[]>;
+    indeterminateValues$: BehaviorSubject<string[]>;
 
     ngOnInit(): void {
-        // this.widget.definition.isRequired = RequiredMode.MandatoryForPublish;
-        const initialValues = this.getInitialValue();
         this.chipsControl = new FormControl(
-            initialValues.map((value) => this.toDisplayValues(value)),
+            [
+                ...this.widget.initialValues.jointValues,
+                ...(this.widget.initialValues.individualValues ?? []),
+            ].map((value) => this.toDisplayValues(value)),
             this.getStandardValidators(),
         );
+        this.indeterminateValues$ = new BehaviorSubject(this.widget.initialValues.individualValues);
         this.chipsControl.valueChanges
             .pipe(distinctUntilChanged())
             .subscribe((values: DisplayValue[]) => this.setValue(values.map((value) => value.key)));
@@ -52,19 +50,19 @@ export class MdsEditorWidgetChipsComponent extends MdsEditorWidgetBase implement
         ) {
             this.filteredValues = this.subscribeForSuggestionUpdates();
         }
+        this.indeterminateValues$.subscribe((indeterminateValues) =>
+            this.widget.setIndeterminateValues(indeterminateValues),
+        );
     }
 
-    add(event: MatChipInputEvent): void {
+    onInputTokenEnd(event: MatChipInputEvent): void {
         if (this.widget.definition.type === MdsWidgetType.MultiValueFixedBadges) {
             return;
         }
         const input = event.input;
         const value = (event.value || '').trim();
-        if (
-            value &&
-            !this.chipsControl.value.some((v: DisplayValue) => v.displayString === value)
-        ) {
-            this.chipsControl.setValue([...this.chipsControl.value, this.toDisplayValues(value)]);
+        if (value) {
+            this.add(this.toDisplayValues(value));
         }
         if (input) {
             input.value = '';
@@ -76,12 +74,28 @@ export class MdsEditorWidgetChipsComponent extends MdsEditorWidgetBase implement
         if (values.includes(toBeRemoved)) {
             this.chipsControl.setValue(values.filter((value) => value !== toBeRemoved));
         }
+        this.removeFromIndeterminateValues(toBeRemoved.key);
     }
 
     selected(event: MatAutocompleteSelectedEvent): void {
-        this.chipsControl.setValue([...this.chipsControl.value, event.option.value]);
+        this.add(event.option.value);
         this.input.nativeElement.value = '';
         this.inputControl.setValue(null);
+    }
+
+    add(value: DisplayValue): void {
+        if (!this.chipsControl.value.some((v: DisplayValue) => v.key === value.key)) {
+            this.chipsControl.setValue([...this.chipsControl.value, value]);
+        }
+        this.removeFromIndeterminateValues(value.key);
+    }
+
+    private removeFromIndeterminateValues(key: string): void {
+        const indeterminateValues = this.indeterminateValues$.value;
+        if (key && indeterminateValues?.includes(key)) {
+            indeterminateValues.splice(indeterminateValues.indexOf(key), 1);
+            this.indeterminateValues$.next(indeterminateValues);
+        }
     }
 
     private subscribeForSuggestionUpdates(): Observable<DisplayValue[]> {
@@ -116,13 +130,13 @@ export class MdsEditorWidgetChipsComponent extends MdsEditorWidgetBase implement
             } else {
                 return {
                     key: value,
-                    displayString: value,
+                    label: value,
                 };
             }
         }
         return {
             key: value.id,
-            displayString: value.caption,
+            label: value.caption,
         };
     }
 
