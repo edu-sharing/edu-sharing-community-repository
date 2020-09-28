@@ -553,6 +553,7 @@
         "BULK_OVERRIDE": "Ersetzen",
         "BULK_REPLACE": "Ersetzen",
         "BULK_APPEND": "Hinzufügen",
+        "BULK_NO_CHANGE": "Unverändert lassen",
         "LICENSE_LINK": "Lizenz verwalten",
         "TEMPLATE_LINK": "Metadaten-Vorlage verwalten",
         "CONTRIBUTOR_LINK": "Weitere Beteiligte",

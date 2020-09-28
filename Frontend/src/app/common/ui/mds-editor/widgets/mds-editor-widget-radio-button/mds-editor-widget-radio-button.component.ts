@@ -19,7 +19,7 @@ export class MdsEditorWidgetRadioButtonComponent extends MdsEditorWidgetBase imp
     ngOnInit(): void {
         this.mode = this.getMode();
         this.values = DisplayValues.fromMdsValues(this.widget.definition.values);
-        const initialValue = this.initWidget();
+        const initialValue = this.getInitialValue();
         this.formControl = new FormControl(
             this.values.get(initialValue[0]),
             this.getStandardValidators({ requiredValidator }),

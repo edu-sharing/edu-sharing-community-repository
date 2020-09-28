@@ -38,7 +38,7 @@ export class MdsEditorWidgetChipsComponent extends MdsEditorWidgetBase implement
 
     ngOnInit(): void {
         // this.widget.definition.isRequired = RequiredMode.MandatoryForPublish;
-        const initialValues = this.initWidget();
+        const initialValues = this.getInitialValue();
         this.chipsControl = new FormControl(
             initialValues.map((value) => this.toDisplayValues(value)),
             this.getStandardValidators(),

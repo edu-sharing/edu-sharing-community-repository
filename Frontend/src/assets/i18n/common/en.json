@@ -520,6 +520,7 @@
         "BULK_OVERRIDE": "Replace",
         "BULK_REPLACE": "Replace",
         "BULK_APPEND": "Append",
+        "BULK_NO_CHANGE": "Don't change",
         "LICENSE_LINK": "manage license",
         "TEMPLATE_LINK": "Manage metadata template",
         "CONTRIBUTOR_LINK": "Additional Contributors",

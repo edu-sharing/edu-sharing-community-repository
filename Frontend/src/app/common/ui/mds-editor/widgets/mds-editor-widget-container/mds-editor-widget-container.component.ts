@@ -102,7 +102,7 @@ export class MdsEditorWidgetContainerComponent implements OnInit, AfterContentIn
             this.label = this.widget.definition.caption;
         }
         if (this.widget && this.isBulk) {
-            this.bulkMode = new BehaviorSubject(this.getInitialBulkMode());
+            this.bulkMode = new BehaviorSubject('no-change');
             this.bulkMode.subscribe((bulkMode) => this.widget.setBulkMode(bulkMode));
         }
         if (this.control) {
@@ -121,22 +121,6 @@ export class MdsEditorWidgetContainerComponent implements OnInit, AfterContentIn
 
     shouldShowError(): boolean {
         return !!this.control?.invalid && (this.control.touched || this.control.dirty);
-    }
-
-    private getInitialBulkMode(): BulkMode {
-        switch (this.valueType) {
-            case ValueType.String:
-            case ValueType.Range:
-                return 'no-change';
-            case ValueType.MultiValue:
-                if (this.widget.hasCommonInitialValue) {
-                    return 'replace';
-                } else {
-                    return 'append';
-                }
-            default:
-                assertUnreachable(this.valueType);
-        }
     }
 
     private initFormControl(formControl: AbstractControl): void {

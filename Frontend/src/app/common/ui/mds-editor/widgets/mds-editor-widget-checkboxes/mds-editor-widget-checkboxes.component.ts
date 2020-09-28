@@ -18,7 +18,7 @@ export class MdsEditorWidgetCheckboxesComponent extends MdsEditorWidgetBase impl
     ngOnInit(): void {
         this.mode = this.getMode();
         this.values = DisplayValues.fromMdsValues(this.widget.definition.values);
-        const initialValue = this.initWidget();
+        const initialValue = this.getInitialValue();
         this.formArray = new FormArray(
             this.values.values.map((value) => new FormControl(initialValue.includes(value.key))),
             this.getStandardValidators({ requiredValidator }),

@@ -12,7 +12,7 @@ export class MdsEditorWidgetTextComponent extends MdsEditorWidgetBase implements
     formControl: FormControl;
 
     ngOnInit(): void {
-        const initialValue = this.initWidget();
+        const initialValue = this.getInitialValue();
         this.formControl = new FormControl(initialValue[0], this.getValidators());
         this.formControl.valueChanges.subscribe((value) => {
             this.setValue([value]);

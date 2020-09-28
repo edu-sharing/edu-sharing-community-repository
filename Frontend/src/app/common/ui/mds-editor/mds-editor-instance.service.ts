@@ -33,6 +33,17 @@ export interface CompletionStatusEntry {
 export type Widget = InstanceType<typeof MdsEditorInstanceService.Widget>;
 type CompletionStatus = { [key in RequiredMode]: CompletionStatusEntry };
 
+export interface InitialValues {
+    /** Values that are initially present in all nodes. */
+    readonly jointValues: string[];
+    /**
+     * Values that are initially present in some but not all nodes.
+     *
+     * Can be null but will never be set to an empty array.
+     */
+    readonly individualValues?: string[];
+}
+
 /**
  * Manages state for an MDS editor instance.
  *
@@ -42,8 +53,7 @@ type CompletionStatus = { [key in RequiredMode]: CompletionStatusEntry };
 export class MdsEditorInstanceService {
     static Widget = class {
         readonly hasUnsavedDefault: boolean;
-        readonly hasCommonInitialValue: boolean;
-        readonly initialValue: readonly string[];
+        readonly initialValues: InitialValues;
         private value: string[];
         private hasChanged = false;
         private status: InputStatus;
@@ -56,22 +66,15 @@ export class MdsEditorInstanceService {
         ) {
             if (nodes.length > 0) {
                 const nodeValues = nodes.map((node) => this.readNodeValue(node, definition));
-                if (arraysAreEqual(nodeValues)) {
-                    if (nodeValues[0] === undefined) {
-                        this.initialValue = this.getDefaultValue(definition);
-                        this.hasUnsavedDefault = this.initialValue.length > 0;
-                    } else {
-                        this.initialValue = nodeValues[0] ?? [];
-                    }
-                    this.hasCommonInitialValue = true;
-                } else {
-                    this.initialValue = [];
-                    this.hasCommonInitialValue = false;
+                if (nodeValues.every((nodeValue) => nodeValue === undefined)) {
+                    const defaultValue = this.getDefaultValue(definition);
+                    this.initialValues = { jointValues: defaultValue };
+                    this.hasUnsavedDefault = defaultValue.length > 0;
                 }
+                this.initialValues = this.getInitialValues(nodeValues);
             } else {
                 throw new Error('not implemented');
             }
-            this.value = [...this.initialValue];
             if (this.mdsEditorInstanceService.getIsBulk(nodes)) {
                 this.bulkMode = new BehaviorSubject<BulkMode>('no-change');
             }
@@ -155,6 +158,22 @@ export class MdsEditorInstanceService {
             }
         }
 
+        private getInitialValues(nodeValues: string[][]): InitialValues {
+            const allValues = nodeValues.reduce((acc, values = []) => {
+                return [...acc, ...values.filter((value) => !acc.includes(value))];
+            }, [] as string[]);
+            const jointValues: string[] = allValues.filter((value) =>
+                nodeValues.every((values = []) => values.includes(value)),
+            );
+            let individualValues: string[] = null;
+            if (allValues.length !== jointValues.length) {
+                individualValues = allValues.filter((value) =>
+                    nodeValues.some((values = []) => !values.includes(value)),
+                );
+            }
+            return { jointValues, individualValues };
+        }
+
         private updateHasChanged() {
             switch (this.bulkMode?.value) {
                 case 'no-change':
@@ -166,7 +185,8 @@ export class MdsEditorInstanceService {
                 case 'replace':
                 case undefined:
                     this.hasChanged =
-                        !this.hasCommonInitialValue || !arrayIsEqual(this.value, this.initialValue);
+                        !!this.initialValues.individualValues ||
+                        !arrayIsEqual(this.value, this.initialValues.jointValues);
             }
         }
 

@@ -16,7 +16,7 @@ export class MdsEditorWidgetCheckboxComponent extends MdsEditorWidgetBase implem
 
     ngOnInit(): void {
         this.widget.definition.isRequired = RequiredMode.MandatoryForPublish;
-        const initialValue = this.initWidget();
+        const initialValue = this.getInitialValue();
         this.indeterminate =
             typeof initialValue[0] === 'string' &&
             initialValue[0] !== 'false' &&

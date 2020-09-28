@@ -11,9 +11,10 @@
       *ngIf="valueType === ValueType.MultiValue"
       class="bulk-mode-radio-group"
       aria-label="Bulk-editing mode"
-      [value]="bulkMode"
+      [value]="bulkMode.value"
       (change)="onBulkModeMultiValueChange($event)"
     >
+      <mat-radio-button value="no-change">{{ 'MDS.BULK_NO_CHANGE' | translate }}</mat-radio-button>
       <mat-radio-button value="append">{{ 'MDS.BULK_APPEND' | translate }}</mat-radio-button>
       <mat-radio-button value="replace">{{ 'MDS.BULK_REPLACE' | translate }}</mat-radio-button>
     </mat-radio-group>

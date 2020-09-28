@@ -28,7 +28,7 @@ export class MdsEditorWidgetSliderComponent extends MdsEditorWidgetBase implemen
     currentValue: number[] = [];
 
     ngOnInit() {
-        const initialValues = this.initWidget();
+        const initialValues = this.getInitialValue();
         this.sliderOptions.floor = this.widget.definition.min;
         this.sliderOptions.ceil = this.widget.definition.max;
         this.sliderOptions.step = this.widget.definition.step ?? 1;
