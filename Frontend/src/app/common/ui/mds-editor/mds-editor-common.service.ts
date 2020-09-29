@@ -51,30 +51,19 @@ export class MdsEditorCommonService {
     ): Promise<Node[]> {
         return forkJoin(
             pairs.map(({ node, values }) => {
-                if(versionComment) {
+                if (versionComment) {
                     return this.restNode
-                        .editNodeMetadataNewVersion(
-                            node.ref.id,
-                            versionComment,
-                            values,
-                        )
+                        .editNodeMetadataNewVersion(node.ref.id, versionComment, values)
                         .pipe(map((nodeWrapper) => nodeWrapper.node));
                 } else {
                     return this.restNode
-                        .editNodeMetadata(
-                            node.ref.id,
-                            values,
-                        )
+                        .editNodeMetadata(node.ref.id, values)
                         .pipe(map((nodeWrapper) => nodeWrapper.node));
                 }
             }),
         ).toPromise();
     }
-    async saveNodeContent(
-        node: Node,
-        file: File,
-        versionComment?: string,
-    ): Promise<void> {
+    async saveNodeContent(node: Node, file: File, versionComment?: string): Promise<void> {
         return this.restNode
             .uploadNodeContent(
                 node.ref.id,
@@ -140,11 +129,12 @@ function areAllEqual<T>(elements: T[]): boolean {
 }
 
 /**
- * Caches a single result.
+ * Caches a single result for a limited time.
  *
  * All arguments must be equal for a cache hit.
  */
 function memoizeSingle(target: any, propertyKey: string, descriptor: PropertyDescriptor) {
+    const TIMEOUT = 500;
     const originalMethod = descriptor.value;
     let cachedArgs: any[];
     let cachedResult: any;
@@ -156,6 +146,7 @@ function memoizeSingle(target: any, propertyKey: string, descriptor: PropertyDes
         ) {
             return cachedResult;
         } else {
+            setTimeout(() => (cachedResult = null), TIMEOUT);
             const result = originalMethod.apply(this, args);
             cachedArgs = args;
             cachedResult = result;
