@@ -17,11 +17,20 @@ export class MdsEditorWidgetSelectComponent extends MdsEditorWidgetBase implemen
 
     ngOnInit() {
         this.formControl = new FormControl(null, this.getStandardValidators());
-        const initialValues = this.getInitialValue();
+        const initialValue = this.widget.initialValues.jointValues[0];
         this.values = this.widget.getSuggestedValues();
-        this.values.then((values) => {
-            this.formControl.setValue(values.find((v) => v.id === initialValues[0]));
-        });
+        if (initialValue) {
+            this.values.then((values) => {
+                const value = values.find((v) => v.id === initialValue);
+                if (value) {
+                    this.formControl.setValue(value);
+                } else {
+                    throw new Error(
+                        `Invalid node value "${initialValue}" for ${this.widget.definition.id}`,
+                    );
+                }
+            });
+        }
         this.formControl.valueChanges.pipe(filter((value) => value !== null)).subscribe((value) => {
             this.setValue([value.id]);
         });
