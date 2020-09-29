@@ -31,7 +31,7 @@ export class MdsEditorWidgetDurationComponent extends MdsEditorWidgetBase implem
     minutes: string;
 
     ngOnInit() {
-        const initialValues = this.initWidget();
+        const initialValues = this.getInitialValue();
         this.sliderOptions.floor = this.widget.definition.min;
         this.sliderOptions.ceil = this.widget.definition.max ?? 599;
         this.currentValue = parseInt(initialValues[0] ?? '0', 10);
