@@ -6,7 +6,8 @@ export class TreeNode {
     caption: string;
     children?: TreeNode[];
     parent?: TreeNode;
-    checked: boolean;
+    isChecked: boolean;
+    isIndeterminate: boolean;
     isHidden: boolean;
 }
 
@@ -14,7 +15,11 @@ export class Tree {
     rootNodes: TreeNode[];
     nodesMap: { [key: string]: TreeNode };
 
-    static generateTree(definedValues: readonly MdsWidgetValue[], values: readonly string[]): Tree {
+    static generateTree(
+        definedValues: readonly MdsWidgetValue[],
+        checkedValues: readonly string[],
+        indeterminateValues?: readonly string[],
+    ): Tree {
         const tree = new Tree();
         let remainingValues = definedValues;
         while (remainingValues.length > 0) {
@@ -27,7 +32,8 @@ export class Tree {
                 const node: TreeNode = {
                     id: value.id,
                     caption: value.caption,
-                    checked: values.includes(value.id),
+                    isChecked: checkedValues.includes(value.id),
+                    isIndeterminate: indeterminateValues?.includes(value.id),
                     isHidden: false,
                 };
                 if (!value.parent) {

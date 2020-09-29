@@ -12,6 +12,7 @@
       [selectable]="false"
       [removable]="true"
       [matTooltip]="value.hint"
+      [class.indeterminate]="(this.indeterminateValues$ | async)?.includes(value.key)"
       (click)="revealInTree(value)"
       (removed)="remove(value)"
     >
@@ -41,8 +42,10 @@
       [widget]="widget"
       [tree]="tree"
       [values]="chipsControl.value"
+      [indeterminateValues]="indeterminateValues$ | async"
       [filterString]="inputControl.value"
       (valuesChange)="onValuesChange($event)"
+      (indeterminateValuesChange)="indeterminateValues$.next($event)"
     ></app-mds-editor-widget-tree-core>
   </div>
 </ng-template>

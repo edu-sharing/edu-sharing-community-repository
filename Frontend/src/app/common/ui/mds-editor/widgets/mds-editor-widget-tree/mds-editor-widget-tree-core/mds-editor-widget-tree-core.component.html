@@ -35,6 +35,7 @@
   <mat-checkbox
     [id]="getCheckboxId(node)"
     [checked]="getIsChecked(node)"
+    [indeterminate]="node.isIndeterminate"
     [disabled]="getIsDisabled(node)"
     (change)="toggleNode(node, $event.checked)"
     ><span [innerHTML]="node.caption | highlight: filterString"></span

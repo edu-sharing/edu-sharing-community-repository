@@ -35,7 +35,7 @@ import { MdsEditorWidgetSliderComponent } from '../widgets/mds-editor-widget-sli
 import { MdsEditorWidgetTextComponent } from '../widgets/mds-editor-widget-text/mds-editor-widget-text.component';
 import { MdsEditorWidgetTreeComponent } from '../widgets/mds-editor-widget-tree/mds-editor-widget-tree.component';
 import { MdsEditorWidgetVersionComponent } from '../widgets/mds-editor-widget-version/mds-editor-widget-version.component';
-import {MdsEditorWidgetDurationComponent} from '../widgets/mds-editor-widget-duration/mds-editor-widget-duration.component';
+import { MdsEditorWidgetDurationComponent } from '../widgets/mds-editor-widget-duration/mds-editor-widget-duration.component';
 
 export interface NativeWidget {
     hasChanges: BehaviorSubject<boolean>;
@@ -124,9 +124,7 @@ export class MdsEditorViewComponent implements OnInit, AfterViewInit {
             const tagName = element.localName;
             if (Object.values(NativeWidgetType).includes(tagName as NativeWidgetType)) {
                 const widgetName = tagName as NativeWidgetType;
-                this.mdsEditorInstance.registerNativeWidget(
-                    this.injectNativeWidget(widgetName, element).instance,
-                );
+                this.injectNativeWidget(widgetName, element);
                 continue;
             }
             const widget = this.mdsEditorInstance.getWidget(tagName);
@@ -136,7 +134,7 @@ export class MdsEditorViewComponent implements OnInit, AfterViewInit {
         }
     }
 
-    private injectNativeWidget(widgetName: NativeWidgetType, element: Element) {
+    private injectNativeWidget(widgetName: NativeWidgetType, element: Element): void {
         const WidgetComponent = MdsEditorViewComponent.nativeWidgets[widgetName];
         if (!WidgetComponent) {
             UIHelper.injectAngularComponent(
@@ -149,7 +147,7 @@ export class MdsEditorViewComponent implements OnInit, AfterViewInit {
                     reason: 'Not implemented',
                 },
             );
-            return null;
+            return;
         }
         const constraintViolation = this.violatesConstraints(WidgetComponent.constraints);
         if (constraintViolation) {
@@ -163,9 +161,9 @@ export class MdsEditorViewComponent implements OnInit, AfterViewInit {
                     reason: constraintViolation,
                 },
             );
-            return null;
+            return;
         }
-        return UIHelper.injectAngularComponent(
+        const nativeWidget = UIHelper.injectAngularComponent(
             this.factoryResolver,
             this.containerRef,
             WidgetComponent,
@@ -174,6 +172,7 @@ export class MdsEditorViewComponent implements OnInit, AfterViewInit {
                 widgetName,
             },
         );
+        this.mdsEditorInstance.registerNativeWidget(nativeWidget.instance);
     }
 
     private injectWidget(widget: Widget, element: Element): void {

@@ -26,6 +26,7 @@ export class MdsEditorWidgetTreeCoreComponent implements OnInit, OnChanges, OnDe
     @Input() widget: Widget;
     @Input() tree: Tree;
     @Input() values: DisplayValue[];
+    @Input() indeterminateValues: string[];
     @Input() filterString: string;
     /**
      * Whether a checked parent node should visually indicate that child nodes are checked as well.
@@ -37,6 +38,7 @@ export class MdsEditorWidgetTreeCoreComponent implements OnInit, OnChanges, OnDe
     @Input() parentImpliesChildren = false;
 
     @Output() valuesChange = new EventEmitter<DisplayValue[]>();
+    @Output() indeterminateValuesChange = new EventEmitter<string[]>();
 
     treeControl = new NestedTreeControl<TreeNode>((node) => node.children);
     dataSource = new MatTreeNestedDataSource<TreeNode>();
@@ -122,24 +124,25 @@ export class MdsEditorWidgetTreeCoreComponent implements OnInit, OnChanges, OnDe
     }
 
     toggleNode(node: TreeNode, checked?: boolean): void {
-        node.checked = checked ?? !node.checked;
-        if (node.checked && !this.isMultiValue) {
+        node.isChecked = checked ?? !node.isChecked;
+        if (node.isChecked && !this.isMultiValue) {
             for (const value of this.values) {
-                this.tree.findById(value.key).checked = false;
+                this.tree.findById(value.key).isChecked = false;
             }
             this.values = [];
         }
-        if (node.checked) {
+        if (node.isChecked) {
             this.add(node);
         } else {
             this.remove(node);
         }
         this.valuesChange.emit(this.values);
-        if (node.checked && node.children && this.parentImpliesChildren) {
+        this.removeFromIndeterminateValues(node);
+        if (node.isChecked && node.children && this.parentImpliesChildren) {
             // Toggle any checked child nodes off since they are already implicitly checked by this
             // node.
             for (const childNode of this.tree.iterate(node.children)) {
-                if (childNode.checked) {
+                if (childNode.isChecked) {
                     this.toggleNode(childNode, false);
                 }
             }
@@ -153,7 +156,7 @@ export class MdsEditorWidgetTreeCoreComponent implements OnInit, OnChanges, OnDe
     hasCheckedAncestor(node: TreeNode): boolean {
         while (node) {
             node = node.parent;
-            if (node?.checked) {
+            if (node?.isChecked) {
                 return true;
             }
         }
@@ -170,9 +173,9 @@ export class MdsEditorWidgetTreeCoreComponent implements OnInit, OnChanges, OnDe
 
     getIsChecked(node: TreeNode): boolean {
         if (this.parentImpliesChildren) {
-            return node.checked || this.hasCheckedAncestor(node);
+            return node.isChecked || this.hasCheckedAncestor(node);
         } else {
-            return node.checked;
+            return node.isChecked;
         }
     }
 
@@ -188,6 +191,14 @@ export class MdsEditorWidgetTreeCoreComponent implements OnInit, OnChanges, OnDe
         const index = this.values.findIndex((value) => node.id === value.key);
         if (index >= 0) {
             this.values.splice(index, 1);
+        }
+    }
+
+    private removeFromIndeterminateValues(node: TreeNode): void {
+        node.isIndeterminate = false;
+        if (this.indeterminateValues?.includes(node.id)) {
+            this.indeterminateValues.splice(this.indeterminateValues.indexOf(node.id), 1);
+            this.indeterminateValuesChange.emit(this.indeterminateValues);
         }
     }
 

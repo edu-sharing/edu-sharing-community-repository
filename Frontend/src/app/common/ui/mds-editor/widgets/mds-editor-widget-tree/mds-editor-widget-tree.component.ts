@@ -1,7 +1,7 @@
 import { CdkConnectedOverlay, ConnectedPosition, OverlayRef } from '@angular/cdk/overlay';
 import { AfterViewInit, Component, ElementRef, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { FormControl } from '@angular/forms';
-import { fromEvent, ReplaySubject } from 'rxjs';
+import { BehaviorSubject, fromEvent, ReplaySubject } from 'rxjs';
 import { filter, takeUntil } from 'rxjs/operators';
 import { MdsWidgetType } from '../../types';
 import { DisplayValue } from '../DisplayValues';
@@ -25,6 +25,7 @@ export class MdsEditorWidgetTreeComponent
     tree: Tree;
     inputControl = new FormControl();
     chipsControl: FormControl;
+    indeterminateValues$: BehaviorSubject<string[]>;
     overlayIsVisible = false;
     readonly overlayPositions: readonly ConnectedPosition[] = [
         {
@@ -55,16 +56,25 @@ export class MdsEditorWidgetTreeComponent
         } else {
             throw new Error('Unexpected widget type: ' + this.widget.definition.type);
         }
-        // this.widget.definition.isRequired = RequiredMode.MandatoryForPublish;
-        const initialValues = this.getInitialValue();
-        this.tree = Tree.generateTree(this.widget.definition.values, initialValues);
+        this.tree = Tree.generateTree(
+            this.widget.definition.values,
+            this.widget.initialValues.jointValues,
+            this.widget.initialValues.individualValues,
+        );
         this.chipsControl = new FormControl(
-            initialValues.map((value) => this.tree.idToDisplayValue(value)),
+            [
+                ...this.widget.initialValues.jointValues,
+                ...(this.widget.initialValues.individualValues ?? []),
+            ].map((value) => this.tree.idToDisplayValue(value)),
             this.getStandardValidators(),
         );
+        this.indeterminateValues$ = new BehaviorSubject(this.widget.initialValues.individualValues);
         this.chipsControl.valueChanges.subscribe((values: DisplayValue[]) => {
             this.setValue(values.map((value) => value.key));
         });
+        this.indeterminateValues$.subscribe((indeterminateValues) =>
+            this.widget.setIndeterminateValues(indeterminateValues),
+        );
     }
 
     ngAfterViewInit(): void {
@@ -126,10 +136,17 @@ export class MdsEditorWidgetTreeComponent
     }
 
     remove(toBeRemoved: DisplayValue): void {
-        this.tree.findById(toBeRemoved.key).checked = false;
+        const treeNode = this.tree.findById(toBeRemoved.key);
+        treeNode.isChecked = false;
+        treeNode.isIndeterminate = false;
         const values: DisplayValue[] = this.chipsControl.value;
         if (values.includes(toBeRemoved)) {
             this.chipsControl.setValue(values.filter((value) => value !== toBeRemoved));
+        }
+        if (this.indeterminateValues$.value.includes(toBeRemoved.key)) {
+            this.indeterminateValues$.next(
+                this.indeterminateValues$.value.filter((value) => value !== toBeRemoved.key),
+            );
         }
     }
 
