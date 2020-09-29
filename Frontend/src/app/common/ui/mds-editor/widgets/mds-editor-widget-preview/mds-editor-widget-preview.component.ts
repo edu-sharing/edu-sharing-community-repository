@@ -33,6 +33,7 @@ export class MdsEditorWidgetPreviewComponent implements OnInit, NativeWidget {
                 this.nodeSrc = nodes[0].preview.url + '&crop=true&width=400&height=300&dontcache=:cache';
                 this.updateSrc();
                 // we need to reload the image since we don't know if the image (e.g. video file) is still being processed
+                // FIXME: this will run forever!
                 setInterval(() => {
                     if(this.file) {
                         return;

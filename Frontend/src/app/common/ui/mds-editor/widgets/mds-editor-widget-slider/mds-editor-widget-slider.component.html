@@ -6,6 +6,7 @@
     [(highValue)]="currentValue[1]"
     [options]="sliderOptions"
     (valueChange)="updateValues()"
+    (highValueChange)="updateValues()"
   ></ng5-slider>
   <ng5-slider
     *ngIf="!isRange"
@@ -14,5 +15,4 @@
     [options]="sliderOptions"
     (valueChange)="updateValues()"
   ></ng5-slider>
-  <mat-hint *ngIf="widget.definition.bottomCaption">{{ widget.definition.bottomCaption }}</mat-hint>
 </app-mds-editor-widget-container>

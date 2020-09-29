@@ -13,10 +13,12 @@ export class MdsEditorWidgetTextComponent extends MdsEditorWidgetBase implements
 
     ngOnInit(): void {
         const initialValue = this.getInitialValue();
-        this.formControl = new FormControl(initialValue[0], this.getValidators());
-        this.formControl.valueChanges.subscribe((value) => {
-            this.setValue([value]);
-        });
+        this.formControl = new FormControl(initialValue[0] ?? null, this.getValidators());
+        this.formControl.valueChanges
+            .filter((value) => value !== null)
+            .subscribe((value) => {
+                this.setValue([value]);
+            });
     }
 
     private getValidators(): ValidatorFn[] {

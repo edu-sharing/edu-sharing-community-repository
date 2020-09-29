@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Injectable, OnDestroy } from '@angular/core';
 import { BehaviorSubject, combineLatest, Observable, of, ReplaySubject } from 'rxjs';
 import { map } from 'rxjs/operators';
 import {
@@ -50,7 +50,7 @@ export interface InitialValues {
  * Do _not_ use in legacy `<mds>` component.
  */
 @Injectable()
-export class MdsEditorInstanceService {
+export class MdsEditorInstanceService implements OnDestroy {
     static Widget = class {
         readonly hasUnsavedDefault: boolean;
         readonly initialValues: InitialValues;
@@ -72,11 +72,13 @@ export class MdsEditorInstanceService {
             if (nodes.length > 0) {
                 const nodeValues = nodes.map((node) => this.readNodeValue(node, definition));
                 if (nodeValues.every((nodeValue) => nodeValue === undefined)) {
-                    const defaultValue = this.getDefaultValue(definition);
+                    const defaultValue = definition.defaultvalue ? [definition.defaultvalue] : [];
                     this.initialValues = { jointValues: defaultValue };
                     this.hasUnsavedDefault = defaultValue.length > 0;
+                } else {
+                    this.initialValues = this.getInitialValues(nodeValues);
                 }
-                this.initialValues = this.getInitialValues(nodeValues);
+                // this.value = [...this.initialValues.jointValues];
             } else {
                 throw new Error('not implemented');
             }
@@ -263,18 +265,6 @@ export class MdsEditorInstanceService {
                 return node.properties[definition.id];
             }
         }
-
-        private getDefaultValue(definition: MdsWidget): string[] {
-            if (definition.type === MdsWidgetType.Slider) {
-                return [definition.defaultMin?.toString()];
-            } else if (definition.type === MdsWidgetType.Range) {
-                return [definition.defaultMin?.toString(), definition.defaultMax?.toString()];
-            } else if (definition.defaultvalue) {
-                return [definition.defaultvalue];
-            } else {
-                return [];
-            }
-        }
     };
 
     // Fixed after initialization
@@ -309,6 +299,7 @@ export class MdsEditorInstanceService {
     private isValid$ = new BehaviorSubject(true);
     private canSave$ = new BehaviorSubject(false);
     private lastScrolledIntoViewIndex: number = null;
+    private isDestroyed = false;
 
     constructor(
         private mdsEditorCommonService: MdsEditorCommonService,
@@ -318,6 +309,10 @@ export class MdsEditorInstanceService {
         combineLatest([this.hasChanges$, this.isValid$])
             .pipe(map(([hasChanged, isValid]) => hasChanged && isValid))
             .subscribe(this.canSave$);
+    }
+
+    ngOnDestroy() {
+        this.isDestroyed = true;
     }
 
     /**
@@ -587,6 +582,14 @@ export class MdsEditorInstanceService {
     registerNativeWidget(nativeWidget: NativeWidget) {
         this.nativeWidgets.push(nativeWidget);
         nativeWidget.hasChanges.subscribe(() => {
+            if (this.isDestroyed) {
+                console.warn(
+                    'Native widget is pushing state after having been destroyed:',
+                    nativeWidget,
+                );
+                nativeWidget.hasChanges.complete();
+                return;
+            }
             this.updateHasChanges();
         });
     }

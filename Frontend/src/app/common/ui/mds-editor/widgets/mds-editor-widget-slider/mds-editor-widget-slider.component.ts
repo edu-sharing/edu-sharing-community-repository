@@ -1,8 +1,8 @@
 import { Component, OnInit } from '@angular/core';
 import { FormControl } from '@angular/forms';
+import { Options } from 'ng5-slider/options';
 import { MdsWidgetType, MdsWidgetValue } from '../../types';
 import { MdsEditorWidgetBase, ValueType } from '../mds-editor-widget-base';
-import { Options } from 'ng5-slider/options';
 
 @Component({
     selector: 'app-mds-editor-widget-slider',
@@ -28,15 +28,22 @@ export class MdsEditorWidgetSliderComponent extends MdsEditorWidgetBase implemen
     currentValue: number[] = [];
 
     ngOnInit() {
-        const initialValues = this.getInitialValue();
         this.sliderOptions.floor = this.widget.definition.min;
         this.sliderOptions.ceil = this.widget.definition.max;
         this.sliderOptions.step = this.widget.definition.step ?? 1;
-        this.currentValue[0] = parseInt(initialValues[0] ?? '0', 10);
-        this.currentValue[1] = parseInt(initialValues[1] ?? '0', 10);
         this.isRange = this.widget.definition.type === MdsWidgetType.Range;
-
+        this.currentValue = this.getInitialValue_();
+        // Since computation of initial values is a bit different for sliders and ranges, we handle
+        // processing of default values here in this component. To reflect default values, we save
+        // values once when initializing. This might mark the whole dialog as dirty without the user
+        // interacting even if default values have not been provided. However, since the slider
+        // always implies a state, to save that state seems to be the natural behavior.
+        this.updateValues();
         this.widget.observeIsDisabled().subscribe((isDisabled) => {
+            this.sliderOptions = {
+                ...this.sliderOptions,
+                disabled: isDisabled,
+            };
             if (isDisabled) {
                 this.setStatus('DISABLED');
             } else {
@@ -51,6 +58,32 @@ export class MdsEditorWidgetSliderComponent extends MdsEditorWidgetBase implemen
             this.setValue([this.currentValue[0].toString()]);
         } else {
             this.setValue([this.currentValue[0].toString(), this.currentValue[1].toString()]);
+        }
+    }
+
+    // TODO: remove trailing underscore when `getInitialValue` is removed from
+    // `MdsEditorWidgetBase`.
+    private getInitialValue_(): number[] {
+        const initialValues = this.widget.initialValues.jointValues;
+        if (this.isRange) {
+            if (initialValues.length === 2) {
+                return [parseInt(initialValues[0], 10), parseInt(initialValues[1], 10)];
+            } else {
+                return [
+                    this.widget.definition.defaultMin ?? this.widget.definition.min,
+                    this.widget.definition.defaultMax ?? this.widget.definition.max,
+                ];
+            }
+        } else {
+            if (initialValues.length === 1) {
+                return [parseInt(initialValues[0], 10)];
+            } else {
+                return [
+                    this.widget.definition.defaultvalue
+                        ? parseInt(this.widget.definition.defaultvalue, 10)
+                        : this.widget.definition.min,
+                ];
+            }
         }
     }
 

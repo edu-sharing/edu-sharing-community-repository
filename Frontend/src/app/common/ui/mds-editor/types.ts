@@ -122,7 +122,7 @@ export interface MdsWidget {
     defaultMax: number;
     step: number;
     allowempty: boolean;
-    defaultvalue: null;
+    defaultvalue: string;
     isRequired: RequiredMode;
     isSearchable: boolean;
     isExtended: boolean;
