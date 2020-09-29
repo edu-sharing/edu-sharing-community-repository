@@ -2,11 +2,12 @@ package org.edu_sharing.repository.server.importer;
 
 import java.io.InputStream;
 import java.io.Serializable;
+import java.net.MalformedURLException;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.URL;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
+import java.util.stream.Stream;
 
 import org.alfresco.service.ServiceRegistry;
 import org.alfresco.service.cmr.dictionary.DictionaryService;
@@ -14,6 +15,9 @@ import org.alfresco.service.cmr.dictionary.PropertyDefinition;
 import org.alfresco.service.cmr.repository.ChildAssociationRef;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.repository.NodeService;
+import org.alfresco.service.cmr.search.ResultSet;
+import org.alfresco.service.cmr.search.SearchParameters;
+import org.alfresco.service.cmr.search.SearchService;
 import org.alfresco.service.namespace.QName;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -26,8 +30,13 @@ import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.client.tools.MimeTypes;
 import org.edu_sharing.repository.client.tools.StringTool;
+import org.edu_sharing.repository.client.tools.UrlTool;
 import org.edu_sharing.repository.server.MCAlfrescoAPIClient;
+import org.edu_sharing.repository.server.tools.URLTool;
 import org.edu_sharing.repository.server.tools.forms.DuplicateFinder;
+import org.edu_sharing.service.clientutils.ClientUtilsService;
+import org.edu_sharing.service.clientutils.WebsiteInformation;
+import org.edu_sharing.service.collection.CollectionServiceFactory;
 
 
 public class ExcelLOMImporter {
@@ -57,6 +66,12 @@ public class ExcelLOMImporter {
 		return rowCount;
 	}
 
+	QName qnameWWWUrl = QName.createQName(CCConstants.CCM_PROP_IO_WWWURL);
+	QName qnameTitle = QName.createQName(CCConstants.LOM_PROP_GENERAL_TITLE);
+	QName qnameLicenseKey = QName.createQName(CCConstants.CCM_PROP_IO_COMMONLICENSE_KEY);
+	QName qnameThumbnail = QName.createQName(CCConstants.CCM_PROP_IO_THUMBNAILURL);
+
+
 	public ExcelLOMImporter(String targetFolder, InputStream is) throws Exception {
 		
 		this.targetFolder = targetFolder;
@@ -76,12 +91,7 @@ public class ExcelLOMImporter {
 			NodeRef targetFolderNodeRef = new NodeRef(MCAlfrescoAPIClient.storeRef,targetFolder);
 			QName assocTypeContains = QName.createQName(CCConstants.CM_ASSOC_FOLDER_CONTAINS);
 			for(Row row : sheet){
-				
-			
-				
 				String folderName = new Integer(rowCount / maxNodesInFolder).toString();
-					
-					
 				NodeRef currentFolder = nodeService.getChildByName(targetFolderNodeRef, assocTypeContains, folderName);
 				
 				if(currentFolder == null){
@@ -103,6 +113,7 @@ public class ExcelLOMImporter {
 					String nodeName = null;
 					
 					String contentUrl = null;
+					HashMap<String, List<String>> collectionsToImportTo = new HashMap<String, List<String>>();
 					for(Cell cell : row){
 						
 						int colIdxIdx = cell.getColumnIndex();
@@ -110,8 +121,25 @@ public class ExcelLOMImporter {
 						if(Cell.CELL_TYPE_STRING != cell.getCellType()){
 							continue;
 						}
-						
+
 						String columnName = IdxColumnMap.get(colIdxIdx);
+
+						String colName = cell.getStringCellValue();
+						if(colName.startsWith("collection")){
+							String wwwurl = (String)toSafe.get(qnameWWWUrl);
+							if(wwwurl != null && wwwurl.startsWith("http")){
+								List<String> collections = collectionsToImportTo.get(wwwurl);
+								if(collections == null){
+									collections = new ArrayList<String>();
+									collectionsToImportTo.put(wwwurl,collections);
+								}
+								String value = cell.getStringCellValue();
+								if(value != null){
+									collections.add(value);
+								}
+							}
+						}
+
 						//System.out.println(columnName + " " + toSafe.get(QName.createQName(CCConstants.CM_NAME)) + " " + cell.getStringCellValue() + " colIdx:" + colIdxIdx);
 						String alfrescoProperty = null;
 						String value = cell.getStringCellValue();
@@ -122,8 +150,6 @@ public class ExcelLOMImporter {
 						if(columnName != null){
 							alfrescoProperty = getExcelAlfMap().get(columnName);
 						}
-						
-						
 						
 						if(alfrescoProperty != null){
 							if(alfrescoProperty != null && 
@@ -151,29 +177,52 @@ public class ExcelLOMImporter {
 								
 								if(alfrescoProperty.equals(CCConstants.LOM_PROP_GENERAL_TITLE)){
 									nodeName = value;
-								
-									
-									
-									HashMap<String,Object> eduProps = new HashMap<String,Object>();
-									eduProps.put(CCConstants.CM_NAME, nodeName);
-									eduProps.put(CCConstants.LOM_PROP_GENERAL_TITLE, nodeName);
-									
-									
-									new DuplicateFinder().transformToSafeName(currentLevelObjects, eduProps);
-									
-									
-									toSafe.put(QName.createQName(CCConstants.CM_NAME), (String)eduProps.get(CCConstants.CM_NAME));
 								}
 							}
 						}
 						
 					}
-					
+
+					//try to get title from wwurl
+					String wwwUrl = (String)toSafe.get(qnameWWWUrl);
+
+					if(toSafe.get(qnameTitle) == null && wwwUrl != null && wwwUrl.startsWith("http")){
+						WebsiteInformation websiteInfo = ClientUtilsService.getWebsiteInformation(wwwUrl);
+						if(websiteInfo != null){
+							String title = websiteInfo.getTitle();
+							toSafe.put(qnameTitle,title);
+							nodeName = title;
+
+							if(toSafe.get(qnameLicenseKey) == null){
+								if(websiteInfo.getLicense() != null){
+									String ccVersion = websiteInfo.getLicense().getCcVersion();
+									toSafe.put(qnameLicenseKey,ccVersion);
+								}
+							}
+						}
+					}
+
+					HashMap<String,Object> eduProps = new HashMap<String,Object>();
+					eduProps.put(CCConstants.CM_NAME, nodeName);
+					eduProps.put(CCConstants.LOM_PROP_GENERAL_TITLE, nodeName);
+					new DuplicateFinder().transformToSafeName(currentLevelObjects, eduProps);
+					toSafe.put(QName.createQName(CCConstants.CM_NAME), (String)eduProps.get(CCConstants.CM_NAME));
+
+
+					String thumbnailUrl = (String)toSafe.get(qnameThumbnail);
+					if(thumbnailUrl == null && wwwUrl != null && wwwUrl.contains("youtu")){
+						String youtubeId = getYoutubeId(wwwUrl);
+						if(youtubeId != null) {
+							thumbnailUrl = "https://img.youtube.com/vi/" + youtubeId + "/0.jpg";
+						}
+						toSafe.put(qnameThumbnail,thumbnailUrl);
+					}
+
 					if(toSafe.size() > 0 && nodeName != null && !nodeName.trim().equals("")){
 						
 						//check for valid thumbnail url
 						boolean createNode = true;
-						String thumbUrl = (String)toSafe.get(QName.createQName(CCConstants.CCM_PROP_IO_THUMBNAILURL));
+						String thumbUrl = (String)toSafe.get(qnameThumbnail);
 						if(thumbUrl == null || !thumbUrl.startsWith("http")) {
 							logger.error("invalid thumbnail url:" + thumbUrl +" for:" +toSafe.get(QName.createQName(CCConstants.CM_NAME))+" will not safe object");
 							createNode = false;
@@ -198,6 +247,35 @@ public class ExcelLOMImporter {
 							}
 						
 							apiClient.createVersion(newNode.getChildRef().getId(), versProps);
+
+							List<String> collectionsForNode =  collectionsToImportTo.get(wwwUrl);
+							if(collectionsForNode != null){
+								String collectionName = collectionsForNode.get(collectionsForNode.size() - 1);
+
+								SearchParameters searchParameters = new SearchParameters();
+								searchParameters.setLanguage(SearchService.LANGUAGE_LUCENE);
+								String query = "ASPECT:\"ccm:collection\" AND @cm\\:name:\"" + collectionName + "\"";
+								searchParameters.setQuery(query);
+								searchParameters.setSkipCount(0);
+								searchParameters.setLimit(10);
+
+								ResultSet rs = serviceRegistry.getSearchService().query(searchParameters);
+								if(rs.length() > 1){
+									logger.error("found more than one collection for name: " +  collectionName);
+									for(int i = 0; i < rs.length(); i++){
+										logger.error(" "+ serviceRegistry.getNodeService().getPath(rs.getNodeRef(i)));
+									}
+								}else{
+									NodeRef collectionNodeRef = rs.getNodeRef(0);
+									logger.info("adding " + nodeName +" "+newNode.getChildRef() +" to " + collectionNodeRef);
+									try {
+										CollectionServiceFactory
+												.getLocalService().addToCollection(collectionNodeRef.getId(),newNode.getChildRef().getId());
+									} catch (Throwable throwable) {
+										logger.error(throwable.getMessage(),throwable);
+									}
+								}
+							}
 						}
 					}
 					
@@ -218,9 +296,39 @@ public class ExcelLOMImporter {
 		}catch(Exception e){
 			throw e;
 		}
-		
+
 	}
-	
+
+	public static void main(String[] args) {
+		String wwwUrl = "https://youtu.be/VMuKmeZCkVQ";
+		System.out.println("id1:"+ getYoutubeId(wwwUrl));
+		wwwUrl = "https://www.youtube.com/watch?v=VMuKmeZCkVQ&feature=youtu.be";
+		System.out.println("id2:"+ getYoutubeId(wwwUrl));
+	}
+
+	private static String getYoutubeId(String wwwUrl){
+		try {
+			if(wwwUrl.startsWith("https://youtu.be")){
+				URL url = new URL(wwwUrl);
+				String id = url.getPath();
+				id = id.replaceAll("/","");
+				return id;
+			}else if(wwwUrl.startsWith("https://www.youtube")){
+
+				URL url = new URL(wwwUrl);
+				String queryString = url.getQuery();
+				String id = Stream.of(queryString.split("&")).map(kv -> kv.split("=")).filter(kv -> "v".equalsIgnoreCase(kv[0])).map(kv -> kv[1])
+						.findFirst()
+						.orElse("");
+				return id;
+			}else{
+				return null;
+			}
+
+		} catch (MalformedURLException e) {
+			return null;
+		}
+	}
 	
 	public HashMap<String, String> getExcelAlfMap() {
 		if(excelAlfMap == null){
@@ -258,6 +366,7 @@ public class ExcelLOMImporter {
 			excelAlfMap.put("licenseTo",CCConstants.CCM_PROP_IO_LICENSE_TO);
 			excelAlfMap.put("licenseValid",CCConstants.CCM_PROP_IO_LICENSE_VALID);
 			excelAlfMap.put("originUniversity",CCConstants.CCM_PROP_IO_UNIVERSITY);
+			excelAlfMap.put("metadataset",CCConstants.CM_PROP_METADATASET_EDU_METADATASET);
 		}
 		return excelAlfMap;
 	}
