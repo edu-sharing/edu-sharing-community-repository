@@ -35,7 +35,7 @@ export class MdsEditorWidgetTreeCoreComponent implements OnInit, OnChanges, OnDe
      *
      * Not compatible with single-value mode.
      */
-    @Input() parentImpliesChildren = false;
+    @Input() parentImpliesChildren = true;
 
     @Output() valuesChange = new EventEmitter<DisplayValue[]>();
     @Output() indeterminateValuesChange = new EventEmitter<string[]>();
@@ -87,7 +87,7 @@ export class MdsEditorWidgetTreeCoreComponent implements OnInit, OnChanges, OnDe
             this.treeControl.expand(parent);
             parent = parent.parent;
         }
-        setTimeout(() => this.scrollIntoView(node));
+        setTimeout(() => this.selectNode(node));
     }
 
     handleKeydown(keyCode: string): boolean {
@@ -112,7 +112,9 @@ export class MdsEditorWidgetTreeCoreComponent implements OnInit, OnChanges, OnDe
                 }
                 return true;
             } else if (keyCode === 'Space') {
-                this.toggleNode(this.selectedNode);
+                if (!this.getIsDisabled(this.selectedNode)) {
+                    this.toggleNode(this.selectedNode);
+                }
                 return true;
             }
         }
@@ -124,13 +126,11 @@ export class MdsEditorWidgetTreeCoreComponent implements OnInit, OnChanges, OnDe
     }
 
     toggleNode(node: TreeNode, checked?: boolean): void {
-        node.isChecked = checked ?? !node.isChecked;
-        if (node.isChecked && !this.isMultiValue) {
-            for (const value of this.values) {
-                this.tree.findById(value.key).isChecked = false;
-            }
-            this.values = [];
+        checked = checked ?? !node.isChecked;
+        if (checked && !this.isMultiValue) {
+            this.clearAll();
         }
+        node.isChecked = checked;
         if (node.isChecked) {
             this.add(node);
         } else {
@@ -199,6 +199,20 @@ export class MdsEditorWidgetTreeCoreComponent implements OnInit, OnChanges, OnDe
         if (this.indeterminateValues?.includes(node.id)) {
             this.indeterminateValues.splice(this.indeterminateValues.indexOf(node.id), 1);
             this.indeterminateValuesChange.emit(this.indeterminateValues);
+        }
+    }
+
+    private clearAll(): void {
+        for (const value of this.values) {
+            this.tree.findById(value.key).isChecked = false;
+        }
+        this.values = [];
+        if (this.indeterminateValues) {
+            for (const key of this.indeterminateValues) {
+                this.tree.findById(key).isIndeterminate = false;
+            }
+            this.indeterminateValues = null;
+            this.indeterminateValuesChange.emit(null);
         }
     }
 
