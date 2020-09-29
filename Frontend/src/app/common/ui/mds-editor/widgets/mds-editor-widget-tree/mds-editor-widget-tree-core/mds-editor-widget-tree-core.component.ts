@@ -35,7 +35,7 @@ export class MdsEditorWidgetTreeCoreComponent implements OnInit, OnChanges, OnDe
      *
      * Not compatible with single-value mode.
      */
-    @Input() parentImpliesChildren = true;
+    @Input() parentImpliesChildren = false;
 
     @Output() valuesChange = new EventEmitter<DisplayValue[]>();
     @Output() indeterminateValuesChange = new EventEmitter<string[]>();
