@@ -113,7 +113,7 @@ public class ExcelLOMImporter {
 					String nodeName = null;
 					
 					String contentUrl = null;
-					HashMap<String, List<String>> collectionsToImportTo = new HashMap<String, List<String>>();
+					LinkedHashSet<String> collectionsToImportTo = new LinkedHashSet<String>();
 					for(Cell cell : row){
 						
 						int colIdxIdx = cell.getColumnIndex();
@@ -123,9 +123,13 @@ public class ExcelLOMImporter {
 						}
 
 						String columnName = IdxColumnMap.get(colIdxIdx);
-						String wwwurl = (String)toSafe.get(qnameWWWUrl);
 
-						collectNodeCollections(row, collectionsToImportTo, cell, columnName, wwwurl);
+						if(columnName.startsWith("collection")){
+							String value = cell.getStringCellValue();
+							if(value != null){
+								collectionsToImportTo.add(value);
+							}
+						}
 
 						//System.out.println(columnName + " " + toSafe.get(QName.createQName(CCConstants.CM_NAME)) + " " + cell.getStringCellValue() + " colIdx:" + colIdxIdx);
 						String alfrescoProperty = null;
@@ -207,8 +211,7 @@ public class ExcelLOMImporter {
 							apiClient.createVersion(newNode.getChildRef().getId(), versProps);
 
 							logger.info("node created:" + serviceRegistry.getNodeService().getPath(newNode.getChildRef()));
-							List<String> collectionsForNode =  collectionsToImportTo.get(wwwUrl);
-							addToCollections(newNode,collectionsForNode);
+							addToCollections(newNode,collectionsToImportTo);
 						}
 					}
 					
@@ -230,25 +233,6 @@ public class ExcelLOMImporter {
 			throw e;
 		}
 
-	}
-
-	private void collectNodeCollections(Row row, HashMap<String, List<String>> collectionsToImportTo, Cell cell, String columnName, String wwwurl) {
-		if(columnName.startsWith("collection")){
-
-			if(wwwurl != null && wwwurl.startsWith("http")){
-				List<String> collections = collectionsToImportTo.get(wwwurl);
-				if(collections == null){
-					collections = new ArrayList<String>();
-					collectionsToImportTo.put(wwwurl,collections);
-				}
-				String value = cell.getStringCellValue();
-				if(value != null){
-					collections.add(value);
-				}
-			}else{
-				logger.error("can not collect collections cause wwwurl is not set already. row:" + row.getRowNum());
-			}
-		}
 	}
 
 	private void addThumbnail(HashMap<QName, Serializable> toSafe, String wwwUrl) {
@@ -294,13 +278,14 @@ public class ExcelLOMImporter {
 		return nodeName;
 	}
 
-	private void addToCollections(ChildAssociationRef newNode, List<String> collectionsForNode){
+	private void addToCollections(ChildAssociationRef newNode, LinkedHashSet<String> collectionsForNode){
 		String wwwUrl = (String)serviceRegistry.getNodeService().getProperty(newNode.getChildRef(),QName.createQName(CCConstants.CCM_PROP_IO_WWWURL));
 		String nodeName = (String)serviceRegistry.getNodeService().getProperty(newNode.getChildRef(), ContentModel.PROP_NAME);
 		if(collectionsForNode != null){
-			String parentCollection = collectionsForNode.get(0);
-			String targetCollection = collectionsForNode.get(collectionsForNode.size() - 1);
-			logger.info("found collections for node " + String.join("/",collectionsForNode));
+
+			String parentCollection = collectionsForNode.stream().findFirst().get();
+			String targetCollection = collectionsForNode.stream().skip(collectionsForNode.size() -1).findFirst().get();
+			logger.info("collections for node " + String.join("/",collectionsForNode) +" p:"+parentCollection +" c:"+targetCollection);
 
 			SearchParameters searchParameters = new SearchParameters();
 			searchParameters.setLanguage(SearchService.LANGUAGE_LUCENE);
@@ -317,7 +302,7 @@ public class ExcelLOMImporter {
 			for(NodeRef nodeRef : rs.getNodeRefs()){
 				Path path = serviceRegistry.getNodeService().getPath(nodeRef);
 				String displayPath = path.toDisplayPath(serviceRegistry.getNodeService(),serviceRegistry.getPermissionService());
-				logger.info("checking path for parent collection:" + parentCollection + " path:"+displayPath);
+				logger.info("checking path for parent collection:" + parentCollection + " path:"+displayPath +"/"+nodeService.getProperty(nodeRef,ContentModel.PROP_NAME));
 				if(displayPath.contains(parentCollection)){
 					pathsMatch.add(displayPath);
 					pathMatchesNodeRef = nodeRef;
@@ -329,7 +314,7 @@ public class ExcelLOMImporter {
 			}else if(pathsMatch.size() == 0){
 				logger.error("no path matched");
 			}else{
-				logger.info("adding " + nodeName +" "+newNode.getChildRef() +" TO " + pathsMatch.iterator().next());
+				logger.info("adding " + nodeName +" "+newNode.getChildRef() +" TO " + pathsMatch.iterator().next() +"/"+nodeService.getProperty(pathMatchesNodeRef,ContentModel.PROP_NAME));
 				try {
 									/*	CollectionServiceFactory
 												.getLocalService().addToCollection(pathMatchesNodeRef.getId(),newNode.getChildRef().getId());
