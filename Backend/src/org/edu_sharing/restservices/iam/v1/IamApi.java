@@ -347,7 +347,7 @@ public class IamApi  {
     }
 
 	@GET
-	@Path("/people/{repository}/{person}profilesettings")
+	@Path("/people/{repository}/{person}/profilesettings")
 	@ApiOperation(
 			value = "Get user email configuration",
 			notes = "Will fail for guest")
