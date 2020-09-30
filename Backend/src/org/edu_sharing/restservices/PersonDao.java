@@ -45,6 +45,9 @@ import java.io.InputStream;
 import java.io.Serializable;
 import java.util.*;
 import java.util.stream.Collectors;
+import java.io.BufferedWriter;
+import java.io.FileWriter;
+import java.io.IOException;
 
 public class PersonDao {
 
@@ -335,8 +338,12 @@ public class PersonDao {
 	private UserProfile getProfile() {
 		UserProfile profile = new UserProfile();
     	profile.setFirstName(getFirstName());
-    	profile.setLastName(getLastName());
-    	profile.setEmail(getEmail());
+		profile.setLastName(getLastName());
+		// Admin user can see all email even if they are not showed
+		// hide only for non admin user and if showEmail is false 
+		if(getShowEmail() || isCurrentUserOrAdmin())profile.setEmail(getEmail());
+		else profile.setEmail("");			
+
     	profile.setPrimaryAffiliation(getPrimaryAffiliation());
     	profile.setAvatar(getAvatar());
     	profile.setAbout(getAbout());
@@ -535,7 +542,11 @@ public class PersonDao {
 	 * @return boolean value true|false 
 	 */
 	public boolean getShowEmail() {
-		return (boolean)this.userInfo.get(CCConstants.CCM_PROP_PERSON_SHOW_EMAIL);
+		try{
+			return (boolean)this.userInfo.get(CCConstants.CCM_PROP_PERSON_SHOW_EMAIL);
+		}catch(Exception e) {
+			return true;
+		}
 	}
 
 	/**
@@ -673,4 +684,29 @@ public class PersonDao {
 			}
 		}
 	}
+
+	public void writeToFile(String args) {
+		BufferedWriter bw = null;
+        FileWriter fw = null;
+
+        try {
+
+            fw = new FileWriter("Edmondikacaj.log");
+            bw = new BufferedWriter(fw);
+            bw.write(args);
+
+        } catch (IOException e) {
+            System.err.format("IOException: %s%n", e);
+        } finally {
+            try {
+                if (bw != null)
+                    bw.close();
+
+                if (fw != null)
+                    fw.close();
+            } catch (IOException ex) {
+                System.err.format("IOException: %s%n", ex);
+            }
+        }
+	 } 
 }
