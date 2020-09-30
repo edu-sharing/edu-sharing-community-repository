@@ -111,12 +111,8 @@ export class MdsEditorWidgetContainerComponent implements OnInit, AfterContentIn
         this.wrapInFormField = this.wrapInFormField ?? !!this.control;
     }
 
-    onBulkModeReplaceToggleChange(event: MatSlideToggleChange): void {
+    onBulkEditToggleChange(event: MatSlideToggleChange): void {
         this.bulkMode.next(event.checked ? 'replace' : 'no-change');
-    }
-
-    onBulkModeMultiValueChange(event: MatRadioChange): void {
-        this.bulkMode.next(event.value);
     }
 
     shouldShowError(): boolean {

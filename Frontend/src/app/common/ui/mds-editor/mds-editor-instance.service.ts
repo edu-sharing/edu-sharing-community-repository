@@ -194,9 +194,6 @@ export class MdsEditorInstanceService implements OnDestroy {
                 case 'no-change':
                     this.hasChanged = false;
                     break;
-                case 'append':
-                    this.hasChanged = this.value.length > 0;
-                    break;
                 case 'replace':
                 case undefined:
                     this.hasChanged =
@@ -539,13 +536,6 @@ export class MdsEditorInstanceService implements OnDestroy {
             switch (widget.getBulkMode()) {
                 case 'no-change':
                     return null;
-                case 'append':
-                    return removeDuplicates([
-                        ...(oldPropertyValue ?? []),
-                        ...widget
-                            .getValue()
-                            .filter((value) => !widget.getIndeterminateValues()?.includes(value)),
-                    ]);
                 case 'replace':
                     return removeDuplicates([
                         ...(oldPropertyValue ?? []).filter((value) =>
