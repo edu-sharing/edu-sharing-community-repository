@@ -76,16 +76,16 @@ export class WorkspaceLicenseComponent  {
     return this.getLicenseProperty();
   }
   public ccShare="";
-  private ccCommercial="";
-  private ccTitleOfWork="";
-  private ccSourceUrl="";
-  private ccVersion="4.0";
-  private ccCountry="";
-  private cc0Type="CC_0";
-  private ccProfileUrl="";
-  private copyrightType="COPYRIGHT_FREE";
-  private eduType="P_NR";
-  private rightsDescription="";
+  ccCommercial="";
+  ccTitleOfWork="";
+  ccSourceUrl="";
+  ccVersion="4.0";
+  ccCountry="";
+  cc0Type="CC_0";
+  ccProfileUrl="";
+  copyrightType="COPYRIGHT_FREE";
+  eduType="P_NR";
+  rightsDescription="";
   private showCcAuthor=false;
   private contact=true;
   private contactIndeterminate=false;

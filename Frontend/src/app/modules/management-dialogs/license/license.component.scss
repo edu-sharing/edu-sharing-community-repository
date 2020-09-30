@@ -10,6 +10,11 @@
   width: 100%;
   margin:10px 0;
 }
+.custom{
+  >mat-form-field{
+    width: 100%;
+  }
+}
 :host ::ng-deep {
   .license-content {
     .mat-tab-labels {

@@ -61,3 +61,13 @@ h5 {
     margin:10px!important;
     text-transform: uppercase;
 }
+.currentLicenseIcon{
+    height:40px;
+    width:auto;
+}
+.customLicenseDescription{
+    white-space: pre-line;
+}
+.currentLicenseDescription{
+    color: $textLight;
+}

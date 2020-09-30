@@ -120,11 +120,14 @@
 
               </div>-->
               <div *ngIf="primaryType=='CUSTOM'" class="custom">
-                 <textarea matInput
+                <mat-form-field>
+                  <mat-label>{{'LICENSE.GROUPS.CUSTOM' | translate}}</mat-label>
+                <textarea matInput
                            cdkTextareaAutosize
                            [(ngModel)]="rightsDescription"
                            cdkAutosizeMinRows="2"
                            cdkAutosizeMaxRows="5"></textarea>
+                </mat-form-field>
               </div>
           </div>
         <app-mds-editor-widget-author #author></app-mds-editor-widget-author>
@@ -165,7 +168,7 @@
               </div>
             </div>
           <div class="currentLicenseDescription">
-            <div class="customLicenseDescription" *ngIf="type=='CUSTOM'">{{rightsDescription}}</div>
+            <div class="customLicenseDescription" *ngIf="primaryType=='CUSTOM'">{{rightsDescription}}</div>
             <div *ngIf="primaryType!='CUSTOM' && primaryType!='COPYRIGHT'" innerHTML="{{ 'LICENSE.DESCRIPTION.'+primaryType | translate }}">
             </div>
             <div *ngIf="primaryType=='COPYRIGHT'">
