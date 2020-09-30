@@ -308,7 +308,7 @@ public class ExcelLOMImporter {
 
 			//check if there is a parent
 			NodeRef pathMatchesNodeRef = null;
-			List<String> pathsMatch = new ArrayList<>();
+			LinkedHashSet<String> pathsMatch = new LinkedHashSet<>();
 			for(NodeRef nodeRef : rs.getNodeRefs()){
 				Path path = serviceRegistry.getNodeService().getPath(nodeRef);
 				String displayPath = path.toDisplayPath(serviceRegistry.getNodeService(),serviceRegistry.getPermissionService());
@@ -325,7 +325,7 @@ public class ExcelLOMImporter {
 				logger.error("no path matched");
 			}else{
 				logger.info("adding " + nodeName +" "+newNode.getChildRef() +" to " + pathMatchesNodeRef);
-				logger.info("adding to path: " + pathsMatch.get(0));
+				logger.info("adding to path: " + pathsMatch.iterator().next());
 				try {
 									/*	CollectionServiceFactory
 												.getLocalService().addToCollection(pathMatchesNodeRef.getId(),newNode.getChildRef().getId());
