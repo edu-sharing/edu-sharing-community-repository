@@ -3,8 +3,6 @@ package org.edu_sharing.repository.server.importer;
 import java.io.InputStream;
 import java.io.Serializable;
 import java.net.MalformedURLException;
-import java.net.URI;
-import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.*;
 import java.util.stream.Stream;
@@ -18,8 +16,6 @@ import org.alfresco.service.cmr.search.ResultSet;
 import org.alfresco.service.cmr.search.SearchParameters;
 import org.alfresco.service.cmr.search.SearchService;
 import org.alfresco.service.namespace.QName;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.apache.log4j.Logger;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Row;
@@ -30,9 +26,7 @@ import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.client.tools.MimeTypes;
 import org.edu_sharing.repository.client.tools.StringTool;
-import org.edu_sharing.repository.client.tools.UrlTool;
 import org.edu_sharing.repository.server.MCAlfrescoAPIClient;
-import org.edu_sharing.repository.server.tools.URLTool;
 import org.edu_sharing.repository.server.tools.forms.DuplicateFinder;
 import org.edu_sharing.service.clientutils.ClientUtilsService;
 import org.edu_sharing.service.clientutils.WebsiteInformation;
@@ -72,7 +66,7 @@ public class ExcelLOMImporter {
 	QName qnameThumbnail = QName.createQName(CCConstants.CCM_PROP_IO_THUMBNAILURL);
 
 
-	public ExcelLOMImporter(String targetFolder, InputStream is) throws Exception {
+	public ExcelLOMImporter(String targetFolder, InputStream is, Boolean addToCollection) throws Exception {
 		
 		this.targetFolder = targetFolder;
 		this.is = is;
@@ -123,6 +117,10 @@ public class ExcelLOMImporter {
 						}
 
 						String columnName = IdxColumnMap.get(colIdxIdx);
+						if(columnName == null){
+							logger.error("no column name found for column:"+colIdxIdx);
+							continue;
+						}
 
 						if(columnName.startsWith("collection")){
 							String value = cell.getStringCellValue();
@@ -211,7 +209,7 @@ public class ExcelLOMImporter {
 							apiClient.createVersion(newNode.getChildRef().getId(), versProps);
 
 							logger.info("node created:" + serviceRegistry.getNodeService().getPath(newNode.getChildRef()));
-							addToCollections(newNode,collectionsToImportTo);
+							addToCollections(newNode,collectionsToImportTo,addToCollection);
 						}
 					}
 					
@@ -278,7 +276,7 @@ public class ExcelLOMImporter {
 		return nodeName;
 	}
 
-	private void addToCollections(ChildAssociationRef newNode, LinkedHashSet<String> collectionsForNode){
+	private void addToCollections(ChildAssociationRef newNode, LinkedHashSet<String> collectionsForNode, Boolean addToCollection){
 		String wwwUrl = (String)serviceRegistry.getNodeService().getProperty(newNode.getChildRef(),QName.createQName(CCConstants.CCM_PROP_IO_WWWURL));
 		String nodeName = (String)serviceRegistry.getNodeService().getProperty(newNode.getChildRef(), ContentModel.PROP_NAME);
 		if(collectionsForNode != null){
@@ -316,9 +314,9 @@ public class ExcelLOMImporter {
 			}else{
 				logger.info("adding;" + nodeName +";"+newNode.getChildRef() +";TO;" + pathsMatch.iterator().next() +"/"+nodeService.getProperty(pathMatchesNodeRef,ContentModel.PROP_NAME));
 				try {
-									/*	CollectionServiceFactory
-												.getLocalService().addToCollection(pathMatchesNodeRef.getId(),newNode.getChildRef().getId());
-									*/
+					if(addToCollection) {
+						CollectionServiceFactory.getLocalService().addToCollection(pathMatchesNodeRef.getId(), newNode.getChildRef().getId());
+					}
 				} catch (Throwable throwable) {
 
 					logger.error(throwable.getMessage(),throwable);

@@ -728,12 +728,13 @@ public class AdminServiceImpl implements AdminService  {
 	 * Import excel data and return the number of rows processed
 	 * @param parent
 	 * @param csv
+	 * @param addToCollection
 	 * @return
 	 * @throws Exception 
 	 */
 	@Override
-	public int importExcel(String parent,InputStream csv) throws Exception{
-		return new ExcelLOMImporter(parent,csv).getRowCount();
+	public int importExcel(String parent, InputStream csv, Boolean addToCollection) throws Exception{
+		return new ExcelLOMImporter(parent,csv,addToCollection).getRowCount();
 	}
 
 	@Override

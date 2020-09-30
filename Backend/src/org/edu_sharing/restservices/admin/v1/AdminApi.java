@@ -703,10 +703,11 @@ public class AdminApi {
 			@ApiResponse(code = 404, message = RestConstants.HTTP_404, response = ErrorResponse.class),
 			@ApiResponse(code = 500, message = RestConstants.HTTP_500, response = ErrorResponse.class) })
 	public Response importExcel(@ApiParam(value = "parent", required = true) @QueryParam("parent") String parent,
+								@ApiParam(value = "addToCollection", required = true, defaultValue = "false") @QueryParam("addToCollection") Boolean addToCollection,
 			@ApiParam(value = "Excel file to import", required = true) @FormDataParam("excel") InputStream is,
 			@Context HttpServletRequest req) {
 		try {
-			int count = AdminServiceFactory.getInstance().importExcel(parent, is);
+			int count = AdminServiceFactory.getInstance().importExcel(parent, is, addToCollection);
 			ExcelResult result = new ExcelResult();
 			result.setRows(count);
 			return Response.ok().entity(result).build();
