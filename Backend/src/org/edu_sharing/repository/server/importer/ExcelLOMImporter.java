@@ -123,23 +123,9 @@ public class ExcelLOMImporter {
 						}
 
 						String columnName = IdxColumnMap.get(colIdxIdx);
+						String wwwurl = (String)toSafe.get(qnameWWWUrl);
 
-						if(columnName.startsWith("collection")){
-							String wwwurl = (String)toSafe.get(qnameWWWUrl);
-							if(wwwurl != null && wwwurl.startsWith("http")){
-								List<String> collections = collectionsToImportTo.get(wwwurl);
-								if(collections == null){
-									collections = new ArrayList<String>();
-									collectionsToImportTo.put(wwwurl,collections);
-								}
-								String value = cell.getStringCellValue();
-								if(value != null){
-									collections.add(value);
-								}
-							}else{
-								logger.error("can not handle collections wwwurl is not set already row:" + row.getRowNum());
-							}
-						}
+						collectNodeCollections(row, collectionsToImportTo, cell, columnName, wwwurl);
 
 						//System.out.println(columnName + " " + toSafe.get(QName.createQName(CCConstants.CM_NAME)) + " " + cell.getStringCellValue() + " colIdx:" + colIdxIdx);
 						String alfrescoProperty = null;
@@ -244,6 +230,25 @@ public class ExcelLOMImporter {
 			throw e;
 		}
 
+	}
+
+	private void collectNodeCollections(Row row, HashMap<String, List<String>> collectionsToImportTo, Cell cell, String columnName, String wwwurl) {
+		if(columnName.startsWith("collection")){
+
+			if(wwwurl != null && wwwurl.startsWith("http")){
+				List<String> collections = collectionsToImportTo.get(wwwurl);
+				if(collections == null){
+					collections = new ArrayList<String>();
+					collectionsToImportTo.put(wwwurl,collections);
+				}
+				String value = cell.getStringCellValue();
+				if(value != null){
+					collections.add(value);
+				}
+			}else{
+				logger.error("can not collect collections cause wwwurl is not set already. row:" + row.getRowNum());
+			}
+		}
 	}
 
 	private void addThumbnail(HashMap<QName, Serializable> toSafe, String wwwUrl) {
