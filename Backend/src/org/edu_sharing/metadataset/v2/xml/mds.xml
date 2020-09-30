@@ -464,7 +464,7 @@
 				<html><![CDATA[
 			  <preview>
               <cm:name caption="{{cm_name_map}}" placeholder="{{cm_name_map_placeholder}}">
-              <template>
+              <maptemplate>
 				]]></html>
 			</template>
 			<template>
@@ -706,12 +706,14 @@
 			</group>
 			<group>
 				<id>io_template</id>
+				<rendering>angular</rendering>
 				<views>
 					<view>node_general_template</view>
 				</views>
 			</group>
 			<group>
 				<id>io_bulk</id>
+				<rendering>angular</rendering>
 				<views>
 					<view>node_general_bulk</view>
 				</views>
@@ -737,6 +739,7 @@
 			</group>
 			<group>
 				<id>saved_search</id>
+				<rendering>angular</rendering>
 				<views>
 					<view>saved_search_general</view>
 				</views>

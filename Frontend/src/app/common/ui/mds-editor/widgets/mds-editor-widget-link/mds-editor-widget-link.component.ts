@@ -1,6 +1,8 @@
 import { Component, OnInit, Input } from '@angular/core';
 import {BehaviorSubject} from 'rxjs';
 import {NativeWidget} from '../../mds-editor-view/mds-editor-view.component';
+import {MainNavService} from '../../../../services/main-nav.service';
+import {MdsEditorInstanceService} from '../../mds-editor-instance.service';
 
 @Component({
     selector: 'app-mds-editor-widget-link',
@@ -12,28 +14,33 @@ export class MdsEditorWidgetLinkComponent implements OnInit, NativeWidget {
         requiresNode: true,
         supportsBulk: false,
     };
-    @Input() widgetName: 'license' | 'template';
+    @Input() widgetName: 'maptemplate';
 
     hasChanges = new BehaviorSubject<boolean>(false);
 
     // caption: string; // Could use as label.
     linkLabel: string;
 
-    constructor() {}
+    constructor(
+        private mainnav: MainNavService,
+        private mdsEditorInstanceService: MdsEditorInstanceService,
+    ) {}
 
     ngOnInit(): void {
         switch (this.widgetName) {
-            case 'license':
-                // this.caption = 'MDS.LICENSE';
-                this.linkLabel = 'MDS.LICENSE_LINK';
-                break;
-            case 'template':
+            case 'maptemplate':
                 this.linkLabel = 'MDS.TEMPLATE_LINK';
                 break;
         }
     }
 
-    onClick(): void {
-        throw new Error('not implemented');
+    async onClick() {
+        if (this.widgetName === 'maptemplate') {
+            await this.mdsEditorInstanceService.save();
+            this.mainnav.getDialogs().nodeMetadata = null;
+            this.mainnav.getDialogs().nodeTemplate = this.mdsEditorInstanceService.nodes$.value[0];
+        } else {
+            throw new Error('not implemented');
+        }
     }
 }

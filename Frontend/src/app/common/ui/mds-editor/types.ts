@@ -63,7 +63,7 @@ export enum NativeWidgetType {
     Preview = 'preview',
     Version = 'version',
     ChildObjects = 'childobjects',
-    Template = 'template',
+    Maptemplate = 'maptemplate',
     License = 'license',
     Workflow = 'workflow',
     Author = 'author',

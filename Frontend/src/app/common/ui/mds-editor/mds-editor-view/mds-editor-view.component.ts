@@ -60,7 +60,7 @@ export class MdsEditorViewComponent implements OnInit, AfterViewInit {
         author: MdsEditorWidgetAuthorComponent,
         version: MdsEditorWidgetVersionComponent,
         childobjects: MdsEditorWidgetChildobjectsComponent,
-        template: MdsEditorWidgetLinkComponent,
+        maptemplate: MdsEditorWidgetLinkComponent,
         license: MdsEditorWidgetLicenseComponent,
         workflow: null as null,
     };
