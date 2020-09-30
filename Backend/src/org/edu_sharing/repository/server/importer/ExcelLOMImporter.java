@@ -302,7 +302,7 @@ public class ExcelLOMImporter {
 			for(NodeRef nodeRef : rs.getNodeRefs()){
 				Path path = serviceRegistry.getNodeService().getPath(nodeRef);
 				String displayPath = path.toDisplayPath(serviceRegistry.getNodeService(),serviceRegistry.getPermissionService());
-				logger.info("checking path for parent collection:" + parentCollection + " path:"+displayPath +"/"+nodeService.getProperty(nodeRef,ContentModel.PROP_NAME));
+				logger.info("checking path for parent collection;\"" + parentCollection + "\";path:"+displayPath +"/"+nodeService.getProperty(nodeRef,ContentModel.PROP_NAME));
 				if(displayPath.contains(parentCollection)){
 					pathsMatch.add(displayPath);
 					pathMatchesNodeRef = nodeRef;
@@ -310,11 +310,11 @@ public class ExcelLOMImporter {
 			}
 
 			if(pathsMatch.size() > 1){
-				logger.error("more than one resultset pathes match:" + String.join(",",pathsMatch));
+				logger.error("more than one path matches;"+nodeName +";"+newNode.getChildRef()+";" + String.join(";",pathsMatch));
 			}else if(pathsMatch.size() == 0){
-				logger.error("no path matched");
+				logger.error("no path matches;"+nodeName +";"+newNode.getChildRef());
 			}else{
-				logger.info("adding " + nodeName +" "+newNode.getChildRef() +" TO " + pathsMatch.iterator().next() +"/"+nodeService.getProperty(pathMatchesNodeRef,ContentModel.PROP_NAME));
+				logger.info("adding;" + nodeName +";"+newNode.getChildRef() +";TO;" + pathsMatch.iterator().next() +"/"+nodeService.getProperty(pathMatchesNodeRef,ContentModel.PROP_NAME));
 				try {
 									/*	CollectionServiceFactory
 												.getLocalService().addToCollection(pathMatchesNodeRef.getId(),newNode.getChildRef().getId());
