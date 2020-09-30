@@ -1,6 +1,11 @@
 <div class="header-container">
   <label *ngIf="label" [id]="labelId">{{ label }}</label>
   <div class="spacer"></div>
+  <!-- A small changes notice mainly for debugging purposes, but could also be used in the product
+  -->
+  <!-- <span *ngIf="widget?.getHasChanged()" class="changes-notice">{{
+    'MDS.HAS_CHANGES' | translate
+  }}</span> -->
   <ng-container *ngIf="isBulk">
     <mat-slide-toggle
       *ngIf="valueType === ValueType.String || valueType === ValueType.Range"

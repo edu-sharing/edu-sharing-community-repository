@@ -507,6 +507,7 @@
     "VERSION_COMMENT": "Version comment",
     "MDS": {
         "DIFFERENT_VALUES": "(Different values)",
+        "HAS_CHANGES": "changed",
         "TITLE": "Edit info",
         "SHOW_EXTENDED": "Show extended info",
         "SHOW_EXTENDED_SEARCH": "Show more filters",

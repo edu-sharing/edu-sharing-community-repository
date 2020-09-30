@@ -23,14 +23,20 @@
 
 .header-container {
     display: flex;
-    .spacer {
-        flex-grow: 1;
-    }
+    align-items: center;
     label {
         margin-bottom: 5px;
         :host.disabled & {
             color: rgba(0, 0, 0, 0.38);
         }
+    }
+    .spacer {
+        flex-grow: 1;
+    }    .changes-notice {
+        color: $primary;
+    }
+    > *:not(:last-child) {
+            margin-right: 10px;
     }
     .bulk-mode-radio-group {
         mat-radio-button:not(:last-of-type) {
