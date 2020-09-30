@@ -36,6 +36,7 @@ import { MdsEditorWidgetTextComponent } from '../widgets/mds-editor-widget-text/
 import { MdsEditorWidgetTreeComponent } from '../widgets/mds-editor-widget-tree/mds-editor-widget-tree.component';
 import { MdsEditorWidgetVersionComponent } from '../widgets/mds-editor-widget-version/mds-editor-widget-version.component';
 import { MdsEditorWidgetDurationComponent } from '../widgets/mds-editor-widget-duration/mds-editor-widget-duration.component';
+import {MdsEditorWidgetLicenseComponent} from '../widgets/mds-editor-widget-license/mds-editor-widget-license.component';
 
 export interface NativeWidget {
     hasChanges: BehaviorSubject<boolean>;
@@ -60,7 +61,7 @@ export class MdsEditorViewComponent implements OnInit, AfterViewInit {
         version: MdsEditorWidgetVersionComponent,
         childobjects: MdsEditorWidgetChildobjectsComponent,
         template: MdsEditorWidgetLinkComponent,
-        license: MdsEditorWidgetLinkComponent,
+        license: MdsEditorWidgetLicenseComponent,
         workflow: null as null,
     };
     private static readonly widgetComponents: {

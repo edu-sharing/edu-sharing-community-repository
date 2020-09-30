@@ -17,10 +17,12 @@ import {SimpleEditMetadataComponent} from './simple-edit-dialog/simple-edit-meta
 import {SimpleEditInviteComponent} from './simple-edit-dialog/simple-edit-invite/simple-edit-invite.component';
 import {SimpleEditLicenseComponent} from './simple-edit-dialog/simple-edit-license/simple-edit-license.component';
 import {LicenseSourceComponent} from "./license/license-source/license-source.component";
+import {LicenseDetailsComponent} from './license/license-details/license-details.component';
 
 export const DECLARATIONS_MANAGEMENT_DIALOGS = [
   WorkspaceLicenseComponent,
   LicenseSourceComponent,
+  LicenseDetailsComponent,
   WorkspaceLtiToolsComponent,
   WorkspaceLtiToolConfigsComponent,
   WorkspaceManagementDialogsComponent,

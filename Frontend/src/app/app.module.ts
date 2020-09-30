@@ -61,6 +61,7 @@ import { MdsEditorWidgetCheckboxComponent } from './common/ui/mds-editor/widgets
 import { MdsEditorWidgetRadioButtonComponent } from './common/ui/mds-editor/widgets/mds-editor-widget-radio-button/mds-editor-widget-radio-button.component';
 import { MdsEditorWidgetCheckboxesComponent } from './common/ui/mds-editor/widgets/mds-editor-widget-checkboxes/mds-editor-widget-checkboxes.component';
 import {MdsEditorWidgetDurationComponent} from './common/ui/mds-editor/widgets/mds-editor-widget-duration/mds-editor-widget-duration.component';
+import {MdsEditorWidgetLicenseComponent} from './common/ui/mds-editor/widgets/mds-editor-widget-license/mds-editor-widget-license.component';
 
 
 // http://blog.angular-university.io/angular2-ngmodule/
@@ -110,6 +111,7 @@ import {MdsEditorWidgetDurationComponent} from './common/ui/mds-editor/widgets/m
         MdsEditorWidgetDurationComponent,
         MdsEditorWidgetVersionComponent,
         MdsEditorWidgetLinkComponent,
+        MdsEditorWidgetLicenseComponent,
         MdsEditorWidgetTreeComponent,
         MdsEditorWidgetTreeCoreComponent,
         HighlightPipe,

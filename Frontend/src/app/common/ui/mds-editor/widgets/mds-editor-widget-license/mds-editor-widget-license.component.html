@@ -1,0 +1,18 @@
+<app-mds-editor-widget-container [label]="false">
+  <ng-container *ngIf="!isSafe">
+    <app-license-details [nodes]="nodes"></app-license-details>
+    <div class="link">
+      <div>
+        <button mat-button
+                (click)="openLicense()"
+                class="link"
+                color="primary"
+                appToolpermissionCheck toolpermission="TOOLPERMISSION_LICENSE">
+          <span>{{ 'MDS.LICENSE_LINK' | translate }}</span>
+          <i icon iconId="arrow_forward"></i>
+        </button>
+      </div>
+    </div>
+  </ng-container>
+  <info-message mode="warning" *ngIf="isSafe">{{'MDS.LICENSE_NO_PERMISSIONS_SAFE' | translate}}</info-message>
+</app-mds-editor-widget-container>
