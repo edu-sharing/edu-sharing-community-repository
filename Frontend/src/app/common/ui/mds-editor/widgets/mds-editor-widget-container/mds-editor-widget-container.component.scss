@@ -32,16 +32,12 @@
     }
     .spacer {
         flex-grow: 1;
-    }    .changes-notice {
+    }
+    .changes-notice {
         color: $primary;
     }
     > *:not(:last-child) {
             margin-right: 10px;
-    }
-    .bulk-mode-radio-group {
-        mat-radio-button:not(:last-of-type) {
-            margin-right: 20px;
-        }
     }
 }
 

@@ -20,7 +20,7 @@ export interface Constraints {
 
 export type Values = { [property: string]: string[] };
 
-export type BulkMode = 'no-change' | 'append' | 'replace';
+export type BulkMode = 'no-change' | 'replace';
 
 export type InputStatus = 'VALID' | 'INVALID' | 'DISABLED' | 'PENDING';
 
