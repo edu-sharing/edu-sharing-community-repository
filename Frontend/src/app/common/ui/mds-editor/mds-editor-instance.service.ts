@@ -275,6 +275,9 @@ export class MdsEditorInstanceService implements OnDestroy {
     /** Whether the editor is in bulk mode to edit multiple nodes at once. */
     isBulk: boolean;
 
+    // TODO: must emit when the mds is fully inflated
+    onMdsInflated = new Observable<void>();
+
     /**
      * Active widgets.
      *
@@ -364,6 +367,7 @@ export class MdsEditorInstanceService implements OnDestroy {
      * through all widgets when called multiple times.
      */
     showMissingRequiredWidgets(): void {
+        console.log('showMissingRequiredWidgets', this.lastScrolledIntoViewIndex);
         if (this.lastScrolledIntoViewIndex === null) {
             // No widget was scrolled into view yet. We need to touch all widgets so they will
             // display the required hint and tell them to scroll into view until we found a missing

@@ -66,7 +66,7 @@ export class MdsEditorWrapperComponent implements OnInit, OnChanges {
     isLoading = true;
     editorType: EditorType;
 
-    constructor(private mdsEditorInstance: MdsEditorInstanceService, private toast: Toast) {}
+    constructor(public mdsEditorInstance: MdsEditorInstanceService, private toast: Toast) {}
 
     ngOnInit(): void {
         this.propertiesAreInitialized = true;

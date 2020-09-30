@@ -66,16 +66,16 @@ export class SharePublishComponent implements OnChanges {
       this.node = (await this.nodeService.getNodeMetadata(this.node.ref.id, [RestConstants.ALL]).toPromise()).node;
       this.refresh();
       this.mdsService.getCompletionStatus().subscribe((completion) => {
+        console.log(completion);
         this.mdsCompletion = {
           completed: (completion.mandatory.completed || 0) + (completion.mandatoryForPublish.completed || 0),
           total: (completion.mandatory.total || 0) + (completion.mandatoryForPublish.total || 0),
         };
       });
-      this.mdsService.init([this.node]).then(() => {
-
-      });
+      this.mdsService.init([this.node]);
       this.onInitCompleted.emit();
-      this.onInitCompleted.complete();}
+      this.onInitCompleted.complete();
+    }
   }
   getLicense() {
     return this.node.properties[RestConstants.CCM_PROP_LICENSE]?.[0];
@@ -93,6 +93,9 @@ export class SharePublishComponent implements OnChanges {
   }
   openMetadata() {
     this.mainNavService.getDialogs().nodeMetadata = [this.node];
+    this.mainNavService.getDialogs().mdsEditorWrapperRef.mdsEditorInstance.onMdsInflated.subscribe(() =>
+      this.mainNavService.getDialogs().mdsEditorWrapperRef.mdsEditorInstance.showMissingRequiredWidgets()
+    );
     this.mainNavService.getDialogs().nodeMetadataChange.subscribe(async () => {
       this.node = (await this.nodeService.getNodeMetadata(this.node.ref.id, [RestConstants.ALL]).toPromise()).node;
       this.refresh();
