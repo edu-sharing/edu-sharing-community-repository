@@ -1,14 +1,7 @@
 package org.edu_sharing.restservices;
 
 import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.Map.Entry;
 import java.util.stream.Collectors;
 
@@ -27,6 +20,7 @@ import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
 import org.edu_sharing.metadataset.v2.MetadataQuery;
 import org.edu_sharing.metadataset.v2.MetadataQueryParameter;
 import org.edu_sharing.metadataset.v2.tools.MetadataSearchHelper;
+import org.edu_sharing.metadataset.v2.MetadataReaderV2;
 import org.edu_sharing.repository.client.rpc.Notify;
 import org.edu_sharing.repository.client.rpc.Share;
 import org.edu_sharing.repository.client.rpc.User;
@@ -179,7 +173,7 @@ public class NodeDao {
 			NodeSearch result = transform(repoDao,searchService.searchV2(mdsDao.getMds(),query,criteriasMap,token),filter);
 			if(result.getCount()==0) {
 				// try to search for ignorable properties to be null
-				List<String> removed=slackCriteriasMap(criteriasMap,mdsDao.getMds().findQuery(query));
+				List<String> removed=slackCriteriasMap(criteriasMap,mdsDao.getMds().findQuery(query, MetadataReaderV2.QUERY_SYNTAX_LUCENE));
 				result=transform(repoDao,searchService.searchV2(mdsDao.getMds(),query,criteriasMap,token),filter);
 				result.setIgnored(removed);
 				return result;
@@ -317,7 +311,7 @@ public class NodeDao {
 	private HashMap<String, Object> nodeProps;
 	private HashMap<String, HashMap<String, Object>> nodeHistory;
 
-	private HashMap<String, Boolean> hasPermissions;
+	private Map<String, Boolean> hasPermissions;
 
 	private final String type;
 	private final List<String> aspects;
@@ -329,7 +323,7 @@ public class NodeDao {
 	NodeService nodeService;
 	CommentService commentService;
 
-	Filter filter;
+	final Filter filter;
 
 	private org.edu_sharing.service.permission.PermissionService permissionService;
 	
@@ -473,7 +467,7 @@ public class NodeDao {
 			}else{
 				this.nodeProps = nodeRef.getProperties();
 			}
-			refreshPermissions();
+			refreshPermissions(nodeRef);
 			
 			if(nodeProps.containsKey(CCConstants.NODETYPE)){
 				this.type = (String) nodeProps.get(CCConstants.NODETYPE);
@@ -481,10 +475,12 @@ public class NodeDao {
 			else{
 				this.type = CCConstants.CCM_TYPE_IO;
 			}
-
-			String[] aspects = nodeService.getAspects(this.storeProtocol,this.storeId, nodeId);
-
-			this.aspects = (aspects != null) ? Arrays.asList(aspects) : new ArrayList<String>();
+			if(nodeRef.getAspects() == null) {
+				String[] aspects = nodeService.getAspects(this.storeProtocol, this.storeId, nodeId);
+				this.aspects = (aspects != null) ? Arrays.asList(aspects) : new ArrayList<String>();
+			} else {
+				this.aspects = nodeRef.getAspects();
+			}
 			this.access = PermissionServiceHelper.getPermissionsAsString(hasPermissions);
 			// replace all data if its an remote object
 			if(this.type.equals(CCConstants.CCM_TYPE_REMOTEOBJECT)){
@@ -515,8 +511,12 @@ public class NodeDao {
 	public boolean isFromRemoteRepository(){
 		return remoteId!=null || !this.repoDao.isHomeRepo() || this.aspects.contains(CCConstants.CCM_ASPECT_REMOTEREPOSITORY);
 	}
-	public void refreshPermissions() {
-        this.hasPermissions = permissionService.hasAllPermissions(storeProtocol, storeId, nodeId,DAO_PERMISSIONS);
+	public void refreshPermissions(org.edu_sharing.service.model.NodeRef nodeRef) {
+		if(nodeRef!=null && nodeRef.getPermissions()!=null && nodeRef.getPermissions().size() > 0){
+			this.hasPermissions = nodeRef.getPermissions();
+		} else {
+			this.hasPermissions = permissionService.hasAllPermissions(storeProtocol, storeId, nodeId, DAO_PERMISSIONS);
+		}
 	}
     public static NodeEntries convertToRest(RepositoryDao repoDao,Filter propFilter,List<NodeRef> children, Integer skipCount, Integer maxItems) throws DAOException {
         NodeEntries result=new NodeEntries();
@@ -1886,6 +1886,45 @@ public class NodeDao {
 					getFrontpageNodes().stream().map((ref)->new NodeRef(repoDao,ref.getId())).collect(Collectors.toList());
 		}catch(Throwable t){
 			throw DAOException.mapping(t);
+		}
+	}
+
+	public NodeDao publishCopy() throws DAOException {
+		try {
+			return NodeDao.getNode(repoDao, nodeService.publishCopy(nodeId), Filter.createShowAllFilter());
+		}catch(Throwable t){
+			throw DAOException.mapping(t);
+		}
+
+	}
+
+	public List<NodeDao> getPublishedCopies() throws DAOException {
+		try {
+			return nodeService.getPublishedCopies(nodeId).stream().map(
+					(id) -> {
+						try {
+							return NodeDao.getNode(repoDao, id, Filter.createShowAllFilter());
+						} catch (DAOException e) {
+							throw new RuntimeException(e);
+						}
+					}
+			).sorted((a,b) -> {
+				try {
+					String[] va=((String) a.getNativeProperties().get(CCConstants.LOM_PROP_LIFECYCLE_VERSION)).split("\\.");
+					String[] vb=((String) b.getNativeProperties().get(CCConstants.LOM_PROP_LIFECYCLE_VERSION)).split("\\.");
+					for(int i=0;i<va.length;i++){
+						int c = Integer.compare(Integer.parseInt(va[i]), Integer.parseInt(vb[i]));
+						if(c!=0) {
+							return c;
+						}
+					}
+					return 0;
+				} catch (Throwable ignored) {
+					return 0;
+				}
+			}).collect(Collectors.toList());
+		}catch(RuntimeException e){
+			throw DAOException.mapping(e.getCause());
 		}
 	}
 }

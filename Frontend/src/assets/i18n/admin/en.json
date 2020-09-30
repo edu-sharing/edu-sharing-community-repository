@@ -306,7 +306,8 @@
                 "GROUPS": "All groups & orgs",
                 "ORGS": "All orgs",
                 "PERSONS": "All persons",
-                "CREATED_CONTENTS_BY_PERSON": "All elements created by a specific user"
+                "CREATED_CONTENTS_BY_PERSON": "All elements created by a specific user",
+                "BROKEN_LINKS": "Contents with invalid/unreachable source"
             }
         },
         "JOBS": {
@@ -341,7 +342,8 @@
                 "BulkDeleteNodesJob": "Bulk deleting of multiple nodes (e.g. large folders)",
                 "BulkEditNodesJob": "Bulk processing of a property for multiple nodes",
                 "UpdateFrontpageCacheJob": "Rebuilds the cache for the start page",
-                "BulkDeleteAuthoritiesJob": "Delete users & orgs via bulk"
+                "BulkDeleteAuthoritiesJob": "Delete users & orgs via bulk",
+                "CheckLinkJob": "Checks if the target of a link still exists and sets an appropriate status"
             }
         },
         "FOLDERTEMPLATES": {

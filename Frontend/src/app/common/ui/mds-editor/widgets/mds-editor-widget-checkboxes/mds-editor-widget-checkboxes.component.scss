@@ -1,0 +1,18 @@
+$checkbox-margin-horizontal: 20px;
+$checkbox-margin-vertical: 10px;
+
+.checkboxes-group {
+    display: flex;
+    flex-wrap: wrap;
+    margin-right: -$checkbox-margin-horizontal;
+    margin-bottom: -$checkbox-margin-vertical;
+    padding: 5px 20px;
+    &.vertical {
+        flex-direction: column;
+    }
+}
+
+.mat-checkbox {
+    margin-right: $checkbox-margin-horizontal;
+    margin-bottom: $checkbox-margin-vertical;
+}

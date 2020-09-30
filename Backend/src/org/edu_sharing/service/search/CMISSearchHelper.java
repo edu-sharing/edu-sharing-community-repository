@@ -27,7 +27,7 @@ public class CMISSearchHelper {
 
     private static Logger logger= Logger.getLogger(CMISSearchHelper.class);
 
-    public static ResultSet fetchNodesByTypeAndFilters(String nodeType, Map<String,Object> filters, int from, int pageSize, int maxPermissionChecks){
+    public static ResultSet fetchNodesByTypeAndFilters(String nodeType, Map<String,Object> filters, CMISSearchData data, int from, int pageSize, int maxPermissionChecks){
     	logger.info("from: "+from+ " pageSize:"+ pageSize);
     	ApplicationContext applicationContext = AlfAppContextGate.getApplicationContext();
         ServiceRegistry serviceRegistry = (ServiceRegistry) applicationContext.getBean(ServiceRegistry.SERVICE_REGISTRY);
@@ -48,16 +48,15 @@ public class CMISSearchHelper {
             List<String> joinedTable = new ArrayList<>();
             for(Map.Entry<String,Object> filter : filters.entrySet()){
                 if(filter.getKey().startsWith("cmis")){
-                    if(where.length() > 0) {
-                        where.append(" AND ");
-                    }else {
-                        where.append(" WHERE ");
-                    }
+                    prepareWhere(where);
                     where.append(tableNameAlias).append(".").append(filter.getKey()).append(" = ").append(escape(filter.getValue().toString()));
                 }
                 else{
                     // join the needed aspect, and access this ones value
                     PropertyDefinition property = serviceRegistry.getDictionaryService().getProperty(QName.createQName(filter.getKey()));
+                    if(property == null){
+                        throw new RuntimeException("Property " + filter.getKey() +" was not found in the alfresco dicitionary. Please check the spelling");
+                    }
                     String aspectTable=CCConstants.getValidLocalName(property.getContainerClass().getName().toString());
                     String aspectTableAlias = property.getContainerClass().getName().getLocalName();
                     if(!joinedTable.contains(aspectTable)) {
@@ -65,11 +64,7 @@ public class CMISSearchHelper {
                                 .append(" ON ").append(aspectTableAlias).append(".cmis:objectId = ").append(tableNameAlias).append(".cmis:objectId ");
                         joinedTable.add(aspectTable);
                     }
-                    if(where.length() > 0) {
-                        where.append(" AND ");
-                    }else {
-                        where.append(" WHERE ");
-                    }
+                    prepareWhere(where);
                     where.append(aspectTableAlias).append(".").append(CCConstants.getValidLocalName(filter.getKey()));
                     if(filter.getValue()==null) {
                         where.append(" IS NULL");
@@ -79,15 +74,32 @@ public class CMISSearchHelper {
                 }
             }
         }
+        if(data!=null){
+            if(data.inFolder != null){
+                prepareWhere(where);
+                where.append("IN_FOLDER(").append(tableNameAlias).append(", ").append(data.inFolder).append(")");
+            }
+            if(data.inTree != null){
+                prepareWhere(where);
+                where.append("IN_TREE(").append(tableNameAlias).append(", ").append(escape(data.inTree)).append(")");
+            }
+        }
         String query="SELECT "+tableNameAlias+".cmis:name FROM "+ tableName + " AS " + tableNameAlias + " " + join + where;
         params.setQuery(query);
         ResultSet result = serviceRegistry.getSearchService().query(params);
-
         logger.info(query+": "+result.getNumberFound() +" "+ result.length() +" "+ result.getClass().getName() +" getBulkFetchSize: "+ result.getBulkFetchSize()+" "+result);
         return result;
     }
 
-    public static List<NodeRef> fetchNodesByTypeAndFilters(String nodeType, Map<String,Object> filters, int maxPermissionChecks){
+    private static void prepareWhere(StringBuilder where) {
+        if(where.length() > 0) {
+            where.append(" AND ");
+        }else {
+            where.append(" WHERE ");
+        }
+    }
+
+    public static List<NodeRef> fetchNodesByTypeAndFilters(String nodeType, Map<String,Object> filters, CMISSearchData data, int maxPermissionChecks){
     	List<NodeRef> result = new ArrayList<NodeRef>();
 
         int from = 0;
@@ -96,7 +108,7 @@ public class CMISSearchHelper {
 
         ResultSet resultSet = null;
         do {
-     	   resultSet = fetchNodesByTypeAndFilters(nodeType, filters, from, pageSize, maxPermissionChecks);
+     	   resultSet = fetchNodesByTypeAndFilters(nodeType, filters, data, from, pageSize, maxPermissionChecks);
      	   result.addAll(resultSet.getNodeRefs());
      	   from += pageSize;
         }while(resultSet.length() > 0);
@@ -105,8 +117,12 @@ public class CMISSearchHelper {
         return result;
     }
 
+    public static List<NodeRef> fetchNodesByTypeAndFilters(String nodeType, Map<String,Object> filters, CMISSearchData data){
+       return fetchNodesByTypeAndFilters(nodeType,filters, data,1000);
+    }
+
     public static List<NodeRef> fetchNodesByTypeAndFilters(String nodeType, Map<String,Object> filters){
-       return fetchNodesByTypeAndFilters(nodeType,filters,1000);
+        return fetchNodesByTypeAndFilters(nodeType,filters, null,1000);
     }
 
     /**
@@ -127,5 +143,18 @@ public class CMISSearchHelper {
 
         sb.append('\'');
         return sb.toString();
+    }
+
+    public static class CMISSearchData {
+        /**
+         * The folder in which the elements are located
+         */
+        public String inFolder;
+        /**
+         * One folder of the tree in which the elements are located
+         * WARNING: When active, SOLR instead of the database will be used!
+         * https://docs.alfresco.com/5.2/concepts/query-lang-support.html
+         */
+        public String inTree;
     }
 }

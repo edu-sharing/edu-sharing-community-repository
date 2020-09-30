@@ -27,10 +27,10 @@ public interface NodeService {
 	
 	public String createNode(String parentId, String nodeType, HashMap<String, String[]> props, String childAssociation) throws Throwable;
 	
-	public String createNodeBasic(String parentID, String nodeTypeString, HashMap<String, Object> _props);
+	public String createNodeBasic(String parentID, String nodeTypeString, HashMap<String, ?> _props);
 
 	public String createNodeBasic(StoreRef store, String parentID, String nodeTypeString, String childAssociation,
-			HashMap<String, Object> _props);
+			HashMap<String, ?> _props);
 
 	public String findNodeByName(String parentId, String name );
 
@@ -121,7 +121,7 @@ public interface NodeService {
 
 	public void removeAspect(String nodeId, String aspect);
 
-    public void updateNodeNative(String nodeId, HashMap<String, Object> _props);
+    public void updateNodeNative(String nodeId, HashMap<String, ?> _props);
 
 	public void removeProperty(String storeProtocol, String storeId, String nodeId, String property);
 
@@ -167,4 +167,15 @@ public interface NodeService {
     Collection<NodeRef> getFrontpageNodes() throws Throwable;
 
     Serializable getPropertyNative(String storeProtocol, String storeId, String nodeId, String property) throws Throwable;
+
+	/**
+	 * create a published copy of the node
+	 */
+	String publishCopy(String nodeId) throws Throwable;
+
+	/**
+	 * Get all published copies of this node
+	 * @return
+	 */
+	List<String> getPublishedCopies(String nodeId);
 }

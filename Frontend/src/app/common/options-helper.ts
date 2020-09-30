@@ -38,6 +38,7 @@ export class OptionsHelperService {
     private appleCmd: boolean;
     private globalOptions: OptionItem[];
     private list: ListTableComponent;
+    private subscriptions: Subscription[] = [];
     private mainNav: MainNavComponent;
     private actionbar: ActionbarComponent;
     private dropdown: DropdownComponent;
@@ -203,18 +204,22 @@ export class OptionsHelperService {
      * refresh all bound components with available menu options
      */
     refreshComponents() {
+        if(this.subscriptions?.length){
+            this.subscriptions.forEach((s) => s.unsubscribe());
+            this.subscriptions = [];
+        }
         if(this.mainNav) {
-            this.mainNav.management.onRefresh.subscribe((nodes: void | Node[]) => {
+            this.subscriptions.push(this.mainNav.management.onRefresh.subscribe((nodes: void | Node[]) => {
                 if(this.listener && this.listener.onRefresh) {
                     this.listener.onRefresh(nodes);
                 }
                 if(this.list) {
                     this.list.updateNodes(nodes);
                 }
-            });
-            this.mainNav.management.onDelete.subscribe(
+            }));
+            this.subscriptions.push(this.mainNav.management.onDelete.subscribe(
                 (result: { objects: any; count: number; error: boolean; }) => this.listener.onDelete(result)
-            );
+            ));
         }
 
         this.globalOptions = this.getAvailableOptions(Target.Actionbar);
@@ -329,21 +334,32 @@ export class OptionsHelperService {
     private hasSelection() {
         return this.data.selectedObjects && this.data.selectedObjects.length;
     }
-    private getType(objects: Node[] | any[]) {
-        // @ TODO may combine for all
-        if (objects && objects[0]) {
-            if(objects[0].authorityType === RestConstants.AUTHORITY_TYPE_GROUP) {
-                return ElementType.Group;
-            } else if(objects[0].authorityType === RestConstants.AUTHORITY_TYPE_USER) {
-                return ElementType.Person;
-            } else if (objects[0].ref) {
-                if(objects[0].type === RestConstants.CCM_TYPE_SAVED_SEARCH) {
-                    return ElementType.SavedSearch;
-                } else if(objects[0].aspects.indexOf(RestConstants.CCM_ASPECT_IO_CHILDOBJECT) !== -1){
-                    return ElementType.NodeChild;
-                } else {
-                    return ElementType.Node;
+    private getType(objects: Node[]) : ElementType {
+        if (objects) {
+            const types = Array.from(new Set(objects.map((o) => this.getTypeSingle(o))));
+            if(types.length === 1) {
+                return types[0];
+            }
+        }
+        return ElementType.Unknown;
+    }
+    private getTypeSingle(object: Node | any) {
+        if(object.authorityType === RestConstants.AUTHORITY_TYPE_GROUP) {
+            return ElementType.Group;
+        } else if(object.authorityType === RestConstants.AUTHORITY_TYPE_USER) {
+            return ElementType.Person;
+        } else if (object.ref) {
+            if(object.type === RestConstants.CCM_TYPE_SAVED_SEARCH) {
+                return ElementType.SavedSearch;
+            } else if(object.aspects.indexOf(RestConstants.CCM_ASPECT_IO_CHILDOBJECT) !== -1) {
+                return ElementType.NodeChild;
+            } else {
+                if(NodeHelper.isNodePublishedCopy(object)) {
+                    return ElementType.NodePublishedCopy;
+                } else if (object.properties[RestConstants.CCM_PROP_IMPORT_BLOCKED]?.[0] === 'true') {
+                    return ElementType.NodeBlockedImport;
                 }
+                return ElementType.Node;
             }
         }
         return ElementType.Unknown;
@@ -401,7 +417,7 @@ export class OptionsHelperService {
         const debugNode = new OptionItem('OPTIONS.DEBUG', 'build', (object) =>
             management.nodeDebug = this.getObjects(object)[0],
         );
-        debugNode.elementType = [ElementType.Node, ElementType.SavedSearch, ElementType.NodeChild];
+        debugNode.elementType = [ElementType.Node, ElementType.NodePublishedCopy, ElementType.NodeBlockedImport, ElementType.SavedSearch, ElementType.NodeChild];
         debugNode.onlyDesktop = true;
         debugNode.constrains = [Constrain.AdminOrDebug, Constrain.NoBulk];
         debugNode.group = DefaultGroups.View;
@@ -487,6 +503,7 @@ export class OptionsHelperService {
         const addNodeToCollection = new OptionItem('OPTIONS.COLLECTION', 'layers', (object) =>
             management.addToCollection =  this.getObjects(object)
         );
+        addNodeToCollection.elementType = [ElementType.Node, ElementType.NodePublishedCopy];
         addNodeToCollection.showAsAction = true;
         addNodeToCollection.constrains = [Constrain.Files, Constrain.User];
         addNodeToCollection.customShowCallback = (nodes) => {
@@ -503,6 +520,7 @@ export class OptionsHelperService {
         const bookmarkNode=new OptionItem('OPTIONS.ADD_NODE_STORE', 'bookmark_border',(object) =>
             this.bookmarkNodes(this.getObjects(object))
         );
+        bookmarkNode.elementType = [ElementType.Node, ElementType.NodePublishedCopy];
         bookmarkNode.constrains = [Constrain.Files, Constrain.HomeRepository];
         bookmarkNode.group = DefaultGroups.Reuse;
         bookmarkNode.priority = 20;
@@ -593,7 +611,7 @@ export class OptionsHelperService {
         const downloadNode = new OptionItem('OPTIONS.DOWNLOAD', 'cloud_download', (object) =>
             NodeHelper.downloadNodes(this.connector, this.getObjects(object))
         );
-        downloadNode.elementType = [ElementType.Node, ElementType.NodeChild];
+        downloadNode.elementType = [ElementType.Node, ElementType.NodeChild, ElementType.NodePublishedCopy];
         downloadNode.constrains = [Constrain.Files];
         downloadNode.group = DefaultGroups.View;
         downloadNode.priority = 40;
@@ -612,7 +630,7 @@ export class OptionsHelperService {
         const downloadMetadataNode = new OptionItem('OPTIONS.DOWNLOAD_METADATA', 'format_align_left', (object) =>
             NodeHelper.downloadNode(this.connector.getBridgeService(), this.getObjects(object)[0], RestConstants.NODE_VERSION_CURRENT, true)
         );
-        downloadMetadataNode.elementType = [ElementType.Node, ElementType.NodeChild];
+        downloadMetadataNode.elementType = [ElementType.Node, ElementType.NodeChild, ElementType.NodePublishedCopy];
         downloadMetadataNode.constrains = [Constrain.Files, Constrain.NoBulk];
         downloadMetadataNode.scopes = [Scope.Render];
         downloadMetadataNode.group = DefaultGroups.View;
@@ -641,6 +659,20 @@ export class OptionsHelperService {
         editNode.permissionsMode = HideMode.Disable;
         editNode.group = DefaultGroups.Edit;
         editNode.priority = 20;
+
+
+        const editNodeOriginal = new OptionItem('OPTIONS.EDIT_ORIGINAL', 'edit', (object) => {
+            this.nodeService.getNodeMetadata(this.getObjects(object)[0].properties[RestConstants.CCM_PROP_IO_ORIGINAL][0]).subscribe((node) => {
+                management.nodeMetadata = [node.node];
+            });
+        });
+        editNodeOriginal.constrains = [Constrain.CollectionReference, Constrain.HomeRepository, Constrain.User];
+        editNodeOriginal.permissions = [RestConstants.ACCESS_WRITE];
+        editNodeOriginal.permissionsRightMode = NodesRightMode.Original;
+        editNodeOriginal.permissionsMode = HideMode.Disable;
+        editNodeOriginal.group = DefaultGroups.Edit;
+        editNodeOriginal.priority = 20;
+
 
         const templateNode = new OptionItem('OPTIONS.TEMPLATE', 'assignment_turned_in', (object) =>
             management.nodeTemplate = this.getObjects(object)[0]
@@ -702,6 +734,28 @@ export class OptionsHelperService {
         deleteNode.key = 'Delete';
         deleteNode.group = DefaultGroups.Delete;
         deleteNode.priority = 10;
+
+        const unblockNode = new OptionItem('OPTIONS.UNBLOCK_IMPORT', 'sync',(object) => {
+            management.nodeImportUnblock = this.getObjects(object);
+        });
+        unblockNode.elementType = [ElementType.NodeBlockedImport];
+        unblockNode.constrains = [Constrain.HomeRepository, Constrain.NoCollectionReference, Constrain.User];
+        unblockNode.permissions = [RestConstants.PERMISSION_DELETE];
+        unblockNode.permissionsMode = HideMode.Hide;
+        unblockNode.group = DefaultGroups.Edit;
+        unblockNode.priority = 10;
+
+
+        const unpublishNode = new OptionItem('OPTIONS.UNPUBLISH', 'cloud_off',(object) => {
+            management.nodeDelete = this.getObjects(object);
+        });
+        unpublishNode.elementType = [ElementType.NodePublishedCopy];
+        unpublishNode.constrains = [Constrain.HomeRepository, Constrain.User];
+        unpublishNode.permissions = [RestConstants.PERMISSION_DELETE];
+        unpublishNode.permissionsMode = HideMode.Hide;
+        unpublishNode.group = DefaultGroups.Delete;
+        unpublishNode.priority = 10;
+
 
         const removeNodeRef =  new OptionItem('OPTIONS.REMOVE_REF','remove_circle_outline', (object) =>
             this.removeFromCollection(this.getObjects(object))
@@ -885,6 +939,7 @@ export class OptionsHelperService {
         options.push(feedbackCollectionView);
         options.push(simpleEditNode);
         options.push(editNode);
+        options.push(editNodeOriginal);
         // add to collection
         options.push(addNodeToCollection);
         // create variant
@@ -901,6 +956,8 @@ export class OptionsHelperService {
         options.push(copyNodes);
         options.push(pasteNodes);
         options.push(deleteNode);
+        options.push(unpublishNode);
+        options.push(unblockNode);
         options.push(removeNodeRef);
         options.push(reportNode);
         options.push(toggleViewType);
@@ -911,7 +968,6 @@ export class OptionsHelperService {
     }
 
     private editConnector(node: Node|any, type: Filetype = null, win: any = null, connectorType: Connector = null) {
-        console.log(node);
         UIHelper.openConnector(this.connectors, this.iamService, this.eventService, this.toast, node, type, win, connectorType);
     }
     private canAddObjects() {

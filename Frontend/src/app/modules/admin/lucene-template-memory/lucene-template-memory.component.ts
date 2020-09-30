@@ -38,6 +38,11 @@ export class LuceneTemplateMemoryComponent implements OnInit {
             query: '@cm\\:creator:"user" OR @cm\\:modifier:"user"',
             properties: ['sys:node-uuid', 'cm:name', 'cclom:title', 'cm:creator', 'cm:created', 'cm:modifier', 'cm:modified', 'cclom:general_keyword', 'ccm:comment_content'].join('\n'),
             isDefault: true
+        },
+        BROKEN_LINKS: {
+            query: 'ISNOTNULL:"ccm:location_status" AND NOT @ccm\\:location_status:"200"',
+            properties: ['sys:node-uuid', 'cm:name', 'cclom:title', 'cm:created', 'cm:modified', 'cclom:general_keyword', 'cclom:location', 'ccm:replicationsource', 'ccm:replicationsourceid'].join('\n'),
+            isDefault: true
         }
     }
 

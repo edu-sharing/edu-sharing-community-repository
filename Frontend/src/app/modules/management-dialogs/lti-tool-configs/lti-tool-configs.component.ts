@@ -7,6 +7,7 @@ import {TranslateService} from "@ngx-translate/core";
 import {MdsComponent} from "../../../common/ui/mds/mds.component";
 import {RestToolService} from "../../../core-module/core.module";
 import {CustomOptions, OptionItem} from "../../../core-ui-module/option-item";
+import { MdsType } from '../../../common/ui/mds-editor/types';
 
 @Component({
   selector: 'workspace-lti-tool-configs',
@@ -46,7 +47,7 @@ export class WorkspaceLtiToolConfigsComponent  {
   ){
     this.actionOptions.push(new OptionItem('WORKSPACE.LTI_TOOLS.NEW_CONFIG', 'add', () => {
       this.onClose.emit();
-      this.onCreate.emit({type:MdsComponent.TYPE_TOOLINSTANCE,node:this._tool});
+      this.onCreate.emit({ type: MdsType.ToolInstance, node:this._tool });
     }));
     this.explorerOptions.addOptions.push(new OptionItem('WORKSPACE.LTI_TOOLS.EDIT_CONFIG','edit',(node:Node)=>{
       this.onEdit.emit(node);

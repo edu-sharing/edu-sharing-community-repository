@@ -127,43 +127,7 @@
                            cdkAutosizeMaxRows="5"></textarea>
               </div>
           </div>
-        <mat-tab-group mat-stretch-tabs [(selectedIndex)]="authorTab" class="author-tabs">
-          <mat-tab label="{{'MDS.AUTHOR_FREETEXT' | translate}}">
-            <mat-form-field class="authorFreetext">
-              <mat-label>{{'MDS.AUTHOR_FREETEXT_PLACEHOLDER' | translate}}</mat-label>
-              <textarea matInput
-              cdkTextareaAutosize
-              id="authorFreetext" [(ngModel)]="authorFreetext"
-              cdkAutosizeMinRows="2"
-              cdkAutosizeMaxRows="5"></textarea>
-            </mat-form-field>
-          </mat-tab>
-          <mat-tab label="{{'MDS.AUTHOR_PERSON' | translate}}">
-            <div class="author-checkbox">
-              <mat-checkbox [(ngModel)]="userAuthor" (ngModelChange)="setVCardAuthor($event)">{{'WORKSPACE.LICENSE.CHECKBOX_AUTHOR' | translate}}</mat-checkbox>
-            </div>
-            <div class="vcard authorPerson">
-              <div class="vcardGroup">
-                <!-- <i icon iconId="person"></i> -->
-                <mat-form-field class="mat-form-field-no-padding">
-                  <mat-label>{{'VCARD.Givenname' | translate}}</mat-label>
-                  <input matInput class="vcard_Givenname vcardFirstInput" id="firstName" [(ngModel)]="authorVCard.givenname" [disabled]="userAuthor">
-                </mat-form-field>
-              </div>
-              <div class="vcardGroup">
-                <mat-form-field class="mat-form-field-no-padding">
-                  <mat-label>{{'VCARD.Surname' | translate}}</mat-label>
-                  <input matInput class="vcard_Surname" id="lastName" [(ngModel)]="authorVCard.surname" [disabled]="userAuthor">
-                </mat-form-field>
-              </div>
-            </div>
-            <div class="contributors">
-              <button mat-button color="primary" (click)="openContributorDialog()" *ngIf="_nodes && _nodes.length==1 && !ui.isMobile()">
-                {{'MDS.CONTRIBUTOR_LINK' | translate}} <i icon iconId="arrow_forward"></i>
-              </button>
-            </div>
-          </mat-tab>
-        </mat-tab-group>
+        <app-mds-editor-widget-author #author></app-mds-editor-widget-author>
         <app-license-source class="cc-additional" *ngIf="isCCAttributableLicense()"
           [(ccTitleOfWork)]="ccTitleOfWork"
           [(ccSourceUrl)]="ccSourceUrl"
@@ -223,6 +187,7 @@
             </div>
           </div>
         </div>
+        <!--
         <div class="licenseCheckbox">
           <div class="switch-release" *ngIf="_nodes">
             <mat-checkbox class="strong" [disabled]="!allowRelease" [(ngModel)]="release" [(indeterminate)]="releaseIndeterminate" (ngModelChange)="changeRelease($event)">
@@ -237,5 +202,6 @@
           </div>
           <mat-checkbox [(ngModel)]="contact" [(indeterminate)]="contactIndeterminate">{{'WORKSPACE.LICENSE.CONTACT' | translate}}</mat-checkbox>
         </div>
+        -->
       </div>
 </card>

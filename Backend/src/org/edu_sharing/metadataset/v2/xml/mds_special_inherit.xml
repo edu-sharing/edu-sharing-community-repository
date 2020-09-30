@@ -1,0 +1,83 @@
+<metadataset id="default" label="default" hidden="false">
+		<name>Sample MDS Inherit First Stage</name>
+		<i18n>mds</i18n>
+		<inherit>mds</inherit>
+		<create>
+			<onlyMetadata>true</onlyMetadata>
+		</create>
+		<widgets>
+			<widget>
+				<id>ccm:group_test</id>
+				<caption>Gruppentest</caption>
+				<type>multivalueGroup</type>
+				<subwidgets>
+					<widget>ccm:classification_purpose</widget>
+					<widget>ccm:educationaltypicalagerange</widget>
+				</subwidgets>
+			</widget>
+		</widgets>
+		<templates>
+			<template>
+				<id>node_extended</id>
+				<caption>Erweitert</caption>
+				<icon>help_outline</icon>
+				<html><![CDATA[
+              <ccm:group_test>
+              <ccm:taxonid>
+              <ccm:educationaltypicalagerange extended="true">
+				]]></html>
+			</template>
+		</templates>
+		<groups>
+			<group>
+				<id>io</id>
+				<views>
+					<view>node_general</view>
+					<view>node_extended</view>
+				</views>
+			</group>
+		</groups>
+		<lists>
+			<list>
+				<id>search</id>
+				<columns>
+					<column>cm:title</column>
+					<column>cm:creator</column>
+					<column>ccm:commonlicense_key</column>
+					<column>ccm:replicationsource</column>				
+				</columns>
+			</list>
+		</lists>
+		<queries>
+			<basequery>-TYPE:"{http://www.campuscontent.de/model/1.0}toolpermission" AND NOT @cm\:name:"._*" AND NOT @cm\:name:".DS_Store*"</basequery>
+			
+			<query join="AND"  id="ngsearch">
+				<property name="ngsearchword">
+					<statement>(@sys\:node-uuid:"${value}" OR TEXT:"${value}" OR @cm\:name:"*${value}*" OR @cclom\:title:"*${value}*" OR @cclom\:general_description:"*${value}*" OR @cclom\:general_keyword:"*${value}*" OR @ccm\:taxonentry:"*${value}*" OR @ccm\:classification_keyword:"*${value}*" OR @ccm\:educationallearningresourcetype:"*${value}*" OR @ccm\:educationalcontext:"*${value}*" OR @ccm\:learninggoal:"*${value}*" OR @ccm\:guidanceteachers:"*${value}*" OR @ccm\:guidancestudents:"*${value}*")</statement>
+					<multiple>true</multiple>
+					<multiplejoin>AND</multiplejoin>
+					<init_by_get_param>p_searchtext</init_by_get_param>
+				</property>
+				<property name="cclom:general_keyword">
+					<statement>@cclom\:general_keyword:"${value}"</statement>
+					<multiple>true</multiple>
+					<multiplejoin>AND</multiplejoin>
+				</property>
+				<property name="cm:name" />
+				<property name="ccm:educationaltypicalagerange_from">
+					<statement>@ccm\:educationaltypicalagerange_from:[${value} TO 99]</statement>
+				</property>
+				<property name="ccm:educationaltypicalagerange_to">
+					<statement>@ccm\:educationaltypicalagerange_to:[1 TO ${value}]</statement>
+				</property>
+				<property name="ccm:classification_purpose">
+					<multiple>true</multiple>	
+					<multiplejoin>OR</multiplejoin>	
+				</property>
+				<property name="ccm:taxonid">
+					<multiple>true</multiple>	
+					<multiplejoin>OR</multiplejoin>	
+				</property>
+			</query>
+		</queries>
+</metadataset>

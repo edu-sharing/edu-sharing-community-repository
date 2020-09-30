@@ -14,11 +14,15 @@ import {trigger} from "@angular/animations";
 import {UIAnimation} from "../../../core-module/ui/ui-animation";
 import {UIService} from '../../../core-module/core.module';
 import {Helper} from "../../../core-module/rest/helper";
+import {MdsEditorWidgetAuthorComponent} from '../../../common/ui/mds-editor/widgets/mds-editor-widget-author/mds-editor-widget-author.component';
+import {MdsEditorInstanceService} from '../../../common/ui/mds-editor/mds-editor-instance.service';
+import {Values} from '../../../common/ui/mds-editor/types';
 
 @Component({
   selector: 'workspace-license',
   templateUrl: 'license.component.html',
   styleUrls: ['license.component.scss'],
+  providers: [MdsEditorInstanceService],
   animations: [
     trigger('fade', UIAnimation.fade()),
     trigger('cardAnimation', UIAnimation.cardAnimation()),
@@ -27,6 +31,7 @@ import {Helper} from "../../../core-module/rest/helper";
 })
 export class WorkspaceLicenseComponent  {
   @ViewChild('selectLicense') selectLicense : ElementRef;
+  @ViewChild('author') author : MdsEditorWidgetAuthorComponent;
 
   /**
    * priority, useful if the dialog seems not to be in the foreground
@@ -114,9 +119,6 @@ export class WorkspaceLicenseComponent  {
   public loading=true;
   private allowedLicenses: string[];
   private releaseMulti: string;
-  public authorTab=0;
-  public authorVCard:VCard;
-  public authorFreetext:string;
   private allowRelease = true;
   userAuthor = false;
 
@@ -131,7 +133,11 @@ export class WorkspaceLicenseComponent  {
     this.loadConfig();
     this._properties = properties;
     this.readLicense();
+    this.mdsEditorInstanceService.init([({
+        properties
+    } as any)], false);
     this.loading=false;
+    this.updateButtons();
   }
   public loadNodes(nodes:Node[],callback:Function,pos=0){
     if(pos==nodes.length){
@@ -150,6 +156,7 @@ export class WorkspaceLicenseComponent  {
       this._nodes=[];
       this.loadNodes(nodes,()=>{
           this._nodes=Helper.deepCopyArray(this._nodes);
+          this.mdsEditorInstanceService.init(this._nodes);
           this.loadConfig();
           this.checkAllowRelease();
           this.readLicense();
@@ -163,7 +170,7 @@ export class WorkspaceLicenseComponent  {
                   this.permissions = permissions.permissions.localPermissions;
                   this.readPermissions(i==this._nodes.length);
                   if(this._nodes.length==1) {
-                      this.doiActive = NodeHelper.isDOIActive(node, permissions.permissions);
+                      this.doiActive = NodeHelper.isDOIActive(node, permissions.permissions.localPermissions.permissions);
                       this.doiDisabled = this.doiActive;
                   }
               });
@@ -211,6 +218,7 @@ export class WorkspaceLicenseComponent  {
     private connector : RestConnectorService,
     private translate : TranslateService,
     private config : ConfigurationService,
+    private mdsEditorInstanceService : MdsEditorInstanceService,
     private ui : UIService,
     private iamApi : RestIamService,
     private toast : Toast,
@@ -233,19 +241,13 @@ export class WorkspaceLicenseComponent  {
       //this.toast.error(null,'WORKSPACE.LICENSE.RELEASE_WITHOUT_LICENSE');
       //return;
     }
-    let prop:any={};
+    let prop: Values = {};
 
     prop=this.getProperties(prop);
     let i=0;
     this.onLoading.emit(true);
     const updatedNodes: Node[] = [];
     for(let node of this._nodes) {
-      let authors=this._nodes[i].properties[RestConstants.CCM_PROP_LIFECYCLECONTRIBUTER_AUTHOR];
-      if(!authors) {
-          authors = [];
-      }
-      authors[0]=this.authorVCard.toVCardString();
-      prop[RestConstants.CCM_PROP_LIFECYCLECONTRIBUTER_AUTHOR]=authors;
       node.properties=prop;
       i++;
       this.nodeApi.editNodeMetadataNewVersion(node.ref.id,RestConstants.COMMENT_LICENSE_UPDATE, prop).subscribe((result) => {
@@ -321,17 +323,8 @@ export class WorkspaceLicenseComponent  {
     let contactState=this.getValueForAll(RestConstants.CCM_PROP_QUESTIONSALLOWED,"multi","true");
     this.contact=contactState=='true' || contactState==true;
     this.oerMode=this.isOerLicense() || this.type=='NONE';
-    this.authorVCard=new VCard(this.getValueForAll(RestConstants.CCM_PROP_LIFECYCLECONTRIBUTER_AUTHOR));
-    this.userAuthor = false;
-    if (this.authorVCard.uid &&
-        this.authorVCard.uid === this.iamApi.getCurrentUserVCard().uid) {
-        this.userAuthor = true;
-    }
-    this.authorFreetext=this.getValueForAll(RestConstants.CCM_PROP_AUTHOR_FREETEXT);
     UIHelper.invalidateMaterializeTextarea('authorFreetext');
     UIHelper.invalidateMaterializeTextarea('licenseRights');
-    if(this.authorVCard.isValid())
-      this.authorTab=1;
     this.contactIndeterminate=contactState=='multi';
   }
 
@@ -499,9 +492,10 @@ export class WorkspaceLicenseComponent  {
                 prop[RestConstants.CCM_PROP_LICENSE_CC_LOCALE] = [this.ccCountry];
             }
         }
-        prop[RestConstants.CCM_PROP_AUTHOR_FREETEXT]=[this.authorFreetext];
+          prop = this.author.getValues(null, prop);
 
-        if(this.type=='CUSTOM') {
+
+          if(this.type=='CUSTOM') {
             prop[RestConstants.LOM_PROP_RIGHTS_DESCRIPTION] = [this.rightsDescription];
         }
         return prop;
@@ -549,13 +543,6 @@ export class WorkspaceLicenseComponent  {
         return this.getLicenseProperty() && this.getLicenseProperty().startsWith('CC_BY');
     }
 
-    setVCardAuthor(author: boolean) {
-      if(author) {
-          this.authorVCard = this.iamApi.getCurrentUserVCard();
-      } else {
-          this.authorVCard = new VCard();
-      }
-    }
     /**
      * Get all the key from countries and return the array with key and name (Translated) 
      * @param {string[]} countries array with all Countries Key 

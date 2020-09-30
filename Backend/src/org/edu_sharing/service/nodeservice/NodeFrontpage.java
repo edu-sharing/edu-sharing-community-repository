@@ -1,7 +1,6 @@
 package org.edu_sharing.service.nodeservice;
 
 import org.alfresco.model.ContentModel;
-import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.repo.security.permissions.PermissionReference;
 import org.alfresco.repo.security.permissions.impl.PermissionReferenceImpl;
 import org.alfresco.repo.security.permissions.impl.model.PermissionModel;
@@ -11,18 +10,14 @@ import org.alfresco.service.cmr.repository.StoreRef;
 import org.alfresco.service.cmr.security.AccessPermission;
 import org.alfresco.service.cmr.security.AccessStatus;
 import org.alfresco.service.namespace.QName;
-import org.apache.http.Header;
 import org.apache.http.HttpHost;
 import org.apache.log4j.Logger;
-import org.apache.lucene.search.Query;
 import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
-import org.edu_sharing.lightbend.LightbendConfigLoader;
+import org.edu_sharing.alfresco.lightbend.LightbendConfigLoader;
 import org.edu_sharing.metadataset.v2.QueryUtils;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.server.jobs.helper.NodeRunner;
 import org.edu_sharing.repository.server.jobs.quartz.AbstractJob;
-import org.edu_sharing.repository.server.jobs.quartz.UpdateFrontpageCacheJob;
-import org.edu_sharing.service.admin.AdminServiceFactory;
 import org.edu_sharing.service.admin.RepositoryConfigFactory;
 import org.edu_sharing.service.admin.model.RepositoryConfig;
 import org.edu_sharing.service.collection.CollectionServiceFactory;
@@ -32,13 +27,13 @@ import org.edu_sharing.service.rating.AccumulatedRatings;
 import org.edu_sharing.service.rating.RatingService;
 import org.edu_sharing.service.rating.RatingServiceFactory;
 import org.edu_sharing.service.search.SearchService;
+import org.edu_sharing.service.search.SearchServiceElastic;
 import org.edu_sharing.service.search.SearchServiceFactory;
 import org.edu_sharing.service.search.model.SortDefinition;
 import org.edu_sharing.service.stream.StreamServiceHelper;
 import org.edu_sharing.service.toolpermission.ToolPermissionServiceFactory;
 import org.edu_sharing.service.tracking.TrackingService;
 import org.edu_sharing.service.tracking.TrackingServiceFactory;
-import org.edu_sharing.service.tracking.TrackingServiceImpl;
 import org.edu_sharing.service.tracking.model.StatisticEntry;
 import org.elasticsearch.action.admin.indices.create.CreateIndexRequest;
 import org.elasticsearch.action.admin.indices.delete.DeleteIndexRequest;
@@ -46,12 +41,12 @@ import org.elasticsearch.action.index.IndexRequest;
 import org.elasticsearch.action.index.IndexResponse;
 import org.elasticsearch.action.search.SearchRequest;
 import org.elasticsearch.action.search.SearchResponse;
+import org.elasticsearch.client.RequestOptions;
 import org.elasticsearch.client.RestClient;
 import org.elasticsearch.client.RestClientBuilder;
 import org.elasticsearch.client.RestHighLevelClient;
 import org.elasticsearch.common.xcontent.XContentBuilder;
 import org.elasticsearch.index.query.BoolQueryBuilder;
-import org.elasticsearch.index.query.QueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.search.SearchHit;
 import org.elasticsearch.search.builder.SearchSourceBuilder;
@@ -121,7 +116,7 @@ public class NodeFrontpage {
                     indexRequest.id(ref.getId());
 
                     indexRequest.source(builder);
-                    IndexResponse result = client.index(indexRequest);
+                    IndexResponse result = client.index(indexRequest, RequestOptions.DEFAULT);
                     String id = result.getId();
                     logger.debug("added node cache for " + ref.getId() + " to elastic");
                 }
@@ -192,7 +187,11 @@ public class NodeFrontpage {
             builder.field("type",CCConstants.getValidLocalName(NodeServiceHelper.getType(ref)));
             builder.startObject("properties");
             for(Map.Entry<QName, Serializable> prop : NodeServiceHelper.getPropertiesNative(ref).entrySet()){
-                builder.field(CCConstants.getValidLocalName(prop.getKey().toString()),prop.getValue());
+                Serializable val = prop.getValue();
+                if(val instanceof org.alfresco.repo.domain.node.ContentDataWithId){
+                    continue;
+                }
+                builder.field(CCConstants.getValidLocalName(prop.getKey().toString()),val);
             }
             builder.endObject();
             builder.startArray("aspects");
@@ -225,22 +224,20 @@ public class NodeFrontpage {
     }
     private void resetElastic(){
         try {
-            client.indices().delete(new DeleteIndexRequest(INDEX_NAME));
+            client.indices().delete(new DeleteIndexRequest(INDEX_NAME),RequestOptions.DEFAULT);
         }catch(Exception e){
         }
         initElastic();
     }
     private void initElastic() {
-        List<HttpHost> hosts = getConfiguredHosts();
-        RestClientBuilder restClient = RestClient.builder(
-                hosts.toArray(new HttpHost[0]));
+        RestClientBuilder restClient = RestClient.builder(SearchServiceElastic.getConfiguredHosts());
         client = new RestHighLevelClient(restClient);
         try {
-            if(!client.ping()){
+            if(!client.ping(RequestOptions.DEFAULT)){
                 throw new Exception();
             }
         } catch (Exception e) {
-            throw new RuntimeException("No Elasticsearch instance was found at "+hosts.get(0));
+            throw new RuntimeException("No Elasticsearch instance was found at "+SearchServiceElastic.getConfiguredHosts()[0]);
         }
         try {
             CreateIndexRequest  indexRequest = new CreateIndexRequest(INDEX_NAME);
@@ -258,23 +255,10 @@ public class NodeFrontpage {
             indexRequest.mapping(TYPE_NAME, builder);
             */
 
-            client.indices().create(indexRequest);
+            client.indices().create(indexRequest,RequestOptions.DEFAULT);
         } catch (Exception e) {
             logger.info("Error while creating the frontpage index (ignore): "+e.getMessage());
         }
-    }
-    private List<HttpHost> getConfiguredHosts() {
-        //@TODO make elastic server configurable
-        List<HttpHost> hosts=null;
-        try {
-            List<String> servers=LightbendConfigLoader.get().getStringList("elasticsearch.servers");
-            hosts=new ArrayList<>();
-            for(String server : servers) {
-                hosts.add(new HttpHost(server.split(":")[0],Integer.parseInt(server.split(":")[1])));
-            }
-        }catch(Throwable t) {
-        }
-        return hosts;
     }
 
     public Collection<NodeRef> getNodesForCurrentUserAndConfig() throws Throwable {
@@ -326,7 +310,7 @@ public class NodeFrontpage {
         searchSourceBuilder.from(0);
         SearchRequest searchRequest = new SearchRequest().source(searchSourceBuilder);
         searchRequest.indices(INDEX_NAME);
-        SearchResponse searchResult = client.search(searchRequest);
+        SearchResponse searchResult = client.search(searchRequest,RequestOptions.DEFAULT);
         List<NodeRef> result=new ArrayList<>();
         for(SearchHit hit : searchResult.getHits().getHits()){
             if(permissionService.hasPermission(StoreRef.PROTOCOL_WORKSPACE,StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(),hit.getId(),CCConstants.PERMISSION_READ)){

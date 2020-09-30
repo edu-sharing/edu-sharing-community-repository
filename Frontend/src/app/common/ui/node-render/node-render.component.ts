@@ -1,21 +1,9 @@
-import {
-    ChangeDetectorRef,
-    Component,
-    ComponentFactoryResolver,
-    ElementRef,
-    EventEmitter,
-    HostListener,
-    Input,
-    NgZone,
-    Output,
-    ViewChild,
-    ViewContainerRef
-} from '@angular/core';
+import {ChangeDetectorRef, Component, ComponentFactoryResolver, ElementRef, EventEmitter, HostListener, Input, NgZone, Output, ViewChild, ViewContainerRef} from '@angular/core';
 import {Toast} from '../../../core-ui-module/toast';
 import {ActivatedRoute, Params, Router} from '@angular/router';
 import {TranslateService} from '@ngx-translate/core';
 import {Translation} from '../../../core-ui-module/translation';
-import {DefaultGroups, OptionItem, Scope} from '../../../core-ui-module/option-item';
+import {DefaultGroups, ElementType, OptionItem, Scope} from '../../../core-ui-module/option-item';
 import {UIAnimation} from '../../../core-module/ui/ui-animation';
 import {UIHelper} from '../../../core-ui-module/ui-helper';
 import {Title} from '@angular/platform-browser';
@@ -333,6 +321,7 @@ export class NodeRenderComponent implements EventListener {
     }
 
     const download=new OptionItem('OPTIONS.DOWNLOAD','cloud_download',()=>this.downloadCurrentNode());
+    download.elementType = [ElementType.Node, ElementType.NodePublishedCopy];
     download.isEnabled=this._node.downloadUrl!=null;
     download.showAsAction=true;
     if(this.isCollectionRef()) {
@@ -372,7 +361,7 @@ export class NodeRenderComponent implements EventListener {
                 this._node=data.node;
                 this.getSequence(()=> {
                     this.mdsApi.getSet(this.getMdsId(), this.repository).subscribe((set) => {
-                        this.similarNodeColumns = MdsHelper.getColumns(this.translate, set,'search');
+                        this.similarNodeColumns = MdsHelper.getColumns(this.translate, set, 'search');
                         this.mds = set;
 
                         jQuery('#nodeRenderContent').html(data.detailsSnippet);

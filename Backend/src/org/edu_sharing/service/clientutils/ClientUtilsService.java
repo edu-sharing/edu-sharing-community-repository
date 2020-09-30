@@ -1,22 +1,17 @@
 package org.edu_sharing.service.clientutils;
 
 import java.net.URL;
-import java.util.HashMap;
 
 import org.apache.commons.lang.StringEscapeUtils;
-import org.edu_sharing.lightbend.LightbendConfigLoader;
-import org.edu_sharing.repository.client.tools.CCConstants;
-import org.edu_sharing.repository.server.RepoFactory;
+import org.edu_sharing.alfresco.lightbend.LightbendConfigLoader;
 import org.edu_sharing.repository.server.tools.HttpQueryTool;
 import org.edu_sharing.repository.server.tools.LRMITool;
-import org.htmlparser.Node;
 import org.htmlparser.NodeFilter;
 import org.htmlparser.Parser;
 import org.htmlparser.Tag;
 import org.htmlparser.filters.NodeClassFilter;
 import org.htmlparser.filters.TagNameFilter;
 import org.htmlparser.lexer.Lexer;
-import org.htmlparser.tags.LinkTag;
 import org.htmlparser.tags.MetaTag;
 import org.htmlparser.tags.ScriptTag;
 import org.htmlparser.tags.TitleTag;

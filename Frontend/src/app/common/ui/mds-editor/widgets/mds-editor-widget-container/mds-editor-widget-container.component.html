@@ -1,0 +1,66 @@
+<div class="header-container">
+  <label *ngIf="label" [id]="labelId">{{ label }}</label>
+  <div class="spacer"></div>
+  <ng-container *ngIf="isBulk">
+    <mat-slide-toggle
+      *ngIf="valueType === ValueType.String || valueType === ValueType.Range"
+      (change)="onBulkModeReplaceToggleChange($event)"
+      >{{ 'MDS.BULK_REPLACE' | translate }}</mat-slide-toggle
+    >
+    <mat-radio-group
+      *ngIf="valueType === ValueType.MultiValue"
+      class="bulk-mode-radio-group"
+      aria-label="Bulk-editing mode"
+      [value]="bulkMode.value"
+      (change)="onBulkModeMultiValueChange($event)"
+    >
+      <mat-radio-button value="no-change">{{ 'MDS.BULK_NO_CHANGE' | translate }}</mat-radio-button>
+      <mat-radio-button value="append">{{ 'MDS.BULK_APPEND' | translate }}</mat-radio-button>
+      <mat-radio-button value="replace">{{ 'MDS.BULK_REPLACE' | translate }}</mat-radio-button>
+    </mat-radio-group>
+  </ng-container>
+</div>
+
+<ng-container *ngIf="!wrapInFormField">
+  <ng-container *ngTemplateOutlet="content"></ng-container>
+  <p
+    *ngIf="widget?.definition.bottomCaption && !shouldShowError()"
+    class="mat-hint subscript"
+    [id]="descriptionId"
+  >
+    {{ widget.definition.bottomCaption }}
+  </p>
+  <p
+    *ngIf="shouldShowError()"
+    class="mat-error subscript"
+    [class.warn]="missingRequired === RequiredMode.MandatoryForPublish"
+  >
+    <ng-container *ngTemplateOutlet="error"></ng-container>
+  </p>
+</ng-container>
+
+<mat-form-field
+  appRegisterFormField
+  *ngIf="wrapInFormField"
+  [class.warn]="missingRequired === RequiredMode.MandatoryForPublish"
+>
+  <mat-label>{{ widget.definition.caption }}</mat-label>
+  <ng-container *ngTemplateOutlet="content"></ng-container>
+  <mat-hint *ngIf="widget.definition.bottomCaption">
+    {{ widget.definition.bottomCaption }}
+  </mat-hint>
+  <mat-error [hidden]="!control.errors?.required">
+    <ng-container *ngTemplateOutlet="error"></ng-container>
+  </mat-error>
+</mat-form-field>
+
+<ng-template #content><ng-content></ng-content></ng-template>
+
+<ng-template #error>
+  <ng-container *ngIf="missingRequired === RequiredMode.Mandatory">
+    {{ 'MDS.REQUIRED_MESSAGE' | translate }}
+  </ng-container>
+  <ng-container *ngIf="missingRequired === RequiredMode.MandatoryForPublish">
+    {{ 'MDS.REQUIRED_FOR_PUBLISH_MESSAGE' | translate }}
+  </ng-container>
+</ng-template>

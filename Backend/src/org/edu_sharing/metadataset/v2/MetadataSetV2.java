@@ -20,7 +20,7 @@ public class MetadataSetV2 implements Serializable {
 	private List<MetadataGroup> groups;
 	private List<MetadataList> lists;
 	private List<MetadataSort> sorts;
-	private MetadataQueries queries;
+	private Map<String, MetadataQueries> queries;
 	private MetadataCreate create;
 	public String getId() {
 		return id;
@@ -84,10 +84,13 @@ public class MetadataSetV2 implements Serializable {
 	public void setI18n(String i18n) {
 		this.i18n = i18n;
 	}
-	public MetadataQueries getQueries() {
+	public Map<String, MetadataQueries> getQueries() {
 		return queries;
 	}
-	public void setQueries(MetadataQueries queries) {
+	public MetadataQueries getQueries(String syntax) {
+		return queries.get(syntax);
+	}
+	public void setQueries(Map<String, MetadataQueries> queries) {
 		this.queries = queries;
 	}
 	public MetadataCreate getCreate() {
@@ -168,7 +171,10 @@ public class MetadataSetV2 implements Serializable {
 		if(mdsOverride.getCreate()!=null) {
 			setCreate(mdsOverride.getCreate());
 		}
-		queries.overrideWith(mdsOverride.getQueries());
+		for(Map.Entry<String, MetadataQueries> querySet : mdsOverride.getQueries().entrySet()){
+			queries.getOrDefault(querySet.getKey(),new MetadataQueries())
+					.overrideWith(mdsOverride.getQueries(querySet.getKey()));
+		}
 	}
 	public MetadataWidget findWidget(String widgetId) {
 		for(MetadataWidget widget : widgets){
@@ -201,12 +207,12 @@ public class MetadataSetV2 implements Serializable {
 		}
 		throw new IllegalArgumentException("Template "+templateId+" was not found in the mds "+id);
 	}
-	public MetadataQuery findQuery(String queryId) {
-		for(MetadataQuery query : queries.getQueries()){
-			if(query.getId().equals(queryId))
-				return query;
+	public MetadataQuery findQuery(String queryId, String syntax) {
+		try {
+			return queries.get(syntax).findQuery(queryId);
+		}catch(IllegalArgumentException e){
+			throw new IllegalArgumentException("Query id "+queryId+" not found using syntax " + syntax, e);
 		}
-		throw new IllegalArgumentException("Query "+queryId+" was not found in the mds "+id);
 	}
 	public List<MetadataWidget> getWidgetsByNode(String nodeType,Collection<String> aspects) {
 		String group=null;

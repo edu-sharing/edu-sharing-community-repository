@@ -24,6 +24,12 @@ public class SearchServiceFactory {
 	}
 
 	public static SearchService getLocalService() {
-		return new SearchServiceImpl(ApplicationInfoList.getHomeRepository().getAppId());
+		ApplicationInfo appInfo = ApplicationInfoList.getHomeRepository();
+		if(ProviderHelper.hasProvider(appInfo)){
+			return ProviderHelper.getProviderByApp(appInfo).getSearchService();
+		}else{
+			return new SearchServiceImpl(appInfo.getAppId());
+		}
+
 	}
 }

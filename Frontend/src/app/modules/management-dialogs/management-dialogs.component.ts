@@ -1,5 +1,5 @@
 import {Component, Input, EventEmitter, Output, ViewChild, ElementRef, HostListener} from '@angular/core';
-import {DialogButton, NodeVersions, RestNodeService, Version} from "../../core-module/core.module";
+import {DialogButton, LocalPermissions, NodeVersions, RestConnectorService, RestNodeService, Version} from "../../core-module/core.module";
 import {TranslateService} from "@ngx-translate/core";
 import {RestSearchService} from "../../core-module/core.module";
 import {Toast} from "../../core-ui-module/toast";
@@ -17,9 +17,10 @@ import {Router} from '@angular/router';
 import {UIConstants} from "../../core-module/ui/ui-constants";
 import {ClipboardObject, TemporaryStorageService} from '../../core-module/core.module';
 import {RestUsageService} from "../../core-module/core.module";
-import {Observable} from 'rxjs';
+import {observable, Observable} from 'rxjs';
 import {BridgeService} from '../../core-bridge-module/bridge.service';
 import {LinkData, NodeHelper} from '../../core-ui-module/node-helper';
+import { MdsEditorWrapperComponent } from '../../common/ui/mds-editor/mds-editor-wrapper/mds-editor-wrapper.component';
 
 @Component({
   selector: 'workspace-management',
@@ -32,8 +33,7 @@ import {LinkData, NodeHelper} from '../../core-ui-module/node-helper';
   ]
 })
 export class WorkspaceManagementDialogsComponent  {
-  public globalProgress = false;
-  @ViewChild('mds') mdsRef : MdsComponent;
+  @ViewChild(MdsEditorWrapperComponent) mdsEditorWrapperRef : MdsEditorWrapperComponent;
   @Input() showLtiTools = false;
   @Input() uploadShowPicker = false;
   @Input() uploadMultiple = true;
@@ -48,30 +48,45 @@ export class WorkspaceManagementDialogsComponent  {
   @Output() nodeLicenseChange = new EventEmitter();
   @Input() addPinnedCollection: Node;
   @Output() addPinnedCollectionChange = new EventEmitter();
+  @Input() set nodeImportUnblock (nodeImportUnblock: Node[]) {
+      this.toast.showConfigurableDialog({
+          title: 'WORKSPACE.UNBLOCK_TITLE',
+          message: 'WORKSPACE.UNBLOCK_MESSAGE',
+          buttons: DialogButton.getOkCancel(
+              () => this.toast.closeModalDialog(),
+              () => this.unblockImportedNodes(nodeImportUnblock)),
+          isCancelable: true
+      });
+  }
   @Input() set nodeDelete (nodeDelete: Node[]){
+        this._nodeDelete = nodeDelete;
         if(nodeDelete==null)
             return;
-        this.dialogTitle='WORKSPACE.DELETE_TITLE'+(nodeDelete.length === 1 ? '_SINGLE' : '');
-        this.dialogMessage='WORKSPACE.DELETE_MESSAGE'+(nodeDelete.length === 1 ? '_SINGLE' : '');
-        if(nodeDelete.length === 1 && nodeDelete[0].collection) {
-            this.dialogTitle='WORKSPACE.DELETE_TITLE_COLLECTION';
-            this.dialogMessage='WORKSPACE.DELETE_MESSAGE_COLLECTION';
-        }
-      this.dialogCancelable=true;
-        this.dialogMessageParameters = {name:RestHelper.getName(nodeDelete[0])};
+        this.nodeDeleteTitle='WORKSPACE.DELETE_TITLE'+(nodeDelete.length === 1 ? '_SINGLE' : '');
+        this.nodeDeleteMessage='WORKSPACE.DELETE_MESSAGE'+(nodeDelete.length === 1 ? '_SINGLE' : '');
+        this.nodeDeleteMessageParams = {name:RestHelper.getName(nodeDelete[0])};
         this.dialogNode=nodeDelete;
-        this.dialogButtons=DialogButton.getCancel(()=> {this.dialogTitle = null});
-        this.dialogButtons.push(new DialogButton('YES_DELETE',DialogButton.TYPE_PRIMARY,()=>{this.deleteConfirmed(nodeDelete)}));
+        this.nodeDeleteButtons=DialogButton.getCancel(()=> {this._nodeDelete = null});
+        this.nodeDeleteButtons.push(new DialogButton('YES_DELETE',DialogButton.TYPE_DANGER,()=>{this.deleteConfirmed(nodeDelete)}));
 
-        // check for usages and warn user
-        if(nodeDelete.length === 1 && !nodeDelete[0].isDirectory) {
-            this.usageService.getNodeUsages(nodeDelete[0].ref.id,nodeDelete[0].ref.repo).subscribe((usages)=>{
+      if(nodeDelete.length === 1 && nodeDelete[0].collection) {
+          this.nodeDeleteTitle='WORKSPACE.DELETE_TITLE_COLLECTION';
+          this.nodeDeleteMessage='WORKSPACE.DELETE_MESSAGE_COLLECTION';
+      } else if(nodeDelete.length === 1 && NodeHelper.isNodePublishedCopy(nodeDelete[0])) {
+          this.nodeDeleteTitle='WORKSPACE.DELETE_TITLE_PUBLISHED_COPY';
+          this.nodeDeleteMessage='WORKSPACE.DELETE_MESSAGE_PUBLISHED_COPY';
+      }else if(nodeDelete.length === 1 && !nodeDelete[0].isDirectory) {
+          // check for usages and warn user
+          this.usageService.getNodeUsages(nodeDelete[0].ref.id,nodeDelete[0].ref.repo).subscribe((usages)=>{
                 if(usages.usages.length>0) {
-                    this.dialogMessage='WORKSPACE.DELETE_MESSAGE_SINGLE_USAGES';
-                    this.dialogMessageParameters = {name:nodeDelete[0].name,usages:usages.usages.length};
+                    this.nodeDeleteMessage='WORKSPACE.DELETE_MESSAGE_SINGLE_USAGES';
+                    this.nodeDeleteMessageParams = {name:nodeDelete[0].name,usages:usages.usages.length};
                 }
             });
         }
+      this.nodeDeleteBlock = this.connector.getCurrentLogin()?.isAdmin &&
+          nodeDelete.every((n) => n.properties[RestConstants.CCM_PROP_REPLICATIONSOURCE] != null);
+      this.nodeDeleteBlockStatus = this.nodeDeleteBlock;
     }
     @Output() nodeDeleteChange = new EventEmitter();
     @Output() onDelete = new EventEmitter<{objects: Node[]|any,error: boolean, count: number}>();
@@ -117,8 +132,15 @@ export class WorkspaceManagementDialogsComponent  {
   @Output() onUpdateLicense=new EventEmitter();
   @Output() onCloseAddToCollection=new EventEmitter();
   @Output() onStoredAddToCollection=new EventEmitter();
+  _nodeDelete: Node[];
   _nodeSimpleEdit: Node[];
   _nodeSimpleFromUpload = false;
+  nodeDeleteTitle: string;
+  nodeDeleteMessage: string;
+  nodeDeleteMessageParams: any;
+  nodeDeleteBlock: boolean;
+  nodeDeleteBlockStatus = true;
+  nodeDeleteButtons: DialogButton[];
   public createMetadata: string;
   public editorPending = false;
   public metadataParent: Node;
@@ -142,12 +164,24 @@ export class WorkspaceManagementDialogsComponent  {
      */
   @Input() qr: {node: Node, data: string};
 
+    /**
+     * @Deprecated, the components should use toast service directly
+     */
+  set globalProgress (globalProgress: boolean) {
+      if(globalProgress) {
+          this.toast.showProgressDialog();
+      } else {
+          this.toast.closeModalDialog();
+      }
+  }
+
   @HostListener('document:keydown', ['$event'])
   handleKeyboardEvent(event: KeyboardEvent) {
     if(event.key === 'Escape') {
       if(this.nodeMetadata!=null || this.createMetadata){
-        if(this.mdsRef.handleKeyboardEvent(event))
+        if (this.mdsEditorWrapperRef.handleKeyboardEvent(event)) {
           return;
+        }
         this.closeEditor(false);
         event.preventDefault();
         event.stopPropagation();
@@ -205,6 +239,7 @@ export class WorkspaceManagementDialogsComponent  {
     private collectionService:RestCollectionService,
     private translate:TranslateService,
     private config:ConfigurationService,
+    private connector:RestConnectorService,
     private searchService:RestSearchService,
     private toast:Toast,
     private bridge:BridgeService,
@@ -220,8 +255,18 @@ export class WorkspaceManagementDialogsComponent  {
         this.nodeShareLinkChange.emit(null);
     }
  closeShare() {
-     this.nodeShare = null
-     this.nodeShareChange.emit(null);
+      // reload node metadata
+     this.toast.showProgressDialog();
+     Observable.forkJoin(this.nodeShare.map((n) => this.nodeService.getNodeMetadata(n.ref.id, [RestConstants.ALL])))
+         .subscribe((nodes: NodeWrapper[]) => {
+             console.log(nodes);
+             this.onRefresh.emit(nodes.map(n => n.node));
+             this.nodeShare = null
+             this.nodeShareChange.emit(null);
+             this.toast.closeModalDialog();
+         }, error => {
+             this.toast.closeModalDialog();
+         });
  }
     public closeWorkflow(node: Node = null){
         this.nodeWorkflow = null;
@@ -232,15 +277,46 @@ export class WorkspaceManagementDialogsComponent  {
     }
     private deleteConfirmed(nodes : Node[],position=0,error=false) : void {
         if (position >= nodes.length) {
-            this.globalProgress = false;
-            if (!error)
-                this.toast.toast("WORKSPACE.TOAST.DELETE_FINISHED");
-            this.onDelete.emit({objects: nodes,error:error,count:position});
+            this.toast.closeModalDialog();
+            this._nodeDelete = null;
+            if (!error) {
+                this.toast.toast('WORKSPACE.TOAST.DELETE_FINISHED');
+            }
+            if (this.nodeDeleteBlockStatus) {
+                this.onRefresh.emit(nodes);
+            } else {
+                this.onDelete.emit({objects: nodes, error: error, count: position});
+            }
             return;
         }
         this.dialogTitle=null;
-        this.globalProgress = true;
-        this.nodeService.deleteNode(nodes[position].ref.id).subscribe(data => {
+        this.toast.showProgressDialog();
+        let callback;
+        if(this.nodeDeleteBlockStatus) {
+            const props: any = {};
+            props[RestConstants.CCM_PROP_IMPORT_BLOCKED] = [true];
+            callback = new Observable((observer) => {
+                this.nodeService.editNodeMetadataNewVersion(
+                    nodes[position].ref.id,
+                    RestConstants.COMMENT_BLOCKED_IMPORT,
+                    props
+                ).subscribe(({node}) => {
+                    const permissions = new LocalPermissions();
+                    permissions.inherited = false;
+                    permissions.permissions = [];
+                    this.nodeService.setNodePermissions(node.ref.id, permissions).subscribe(() => {
+                        observer.next(node);
+                        observer.complete();
+                    });
+                })
+            });
+        } else {
+            callback = this.nodeService.deleteNode(nodes[position].ref.id);
+        }
+        callback.subscribe((node: Node) => {
+            if(node) {
+                nodes[position] = node;
+            }
             this.removeNodeFromClipboard(nodes[position]);
             this.deleteConfirmed(nodes, position + 1, error);
         }, (error: any) => {
@@ -430,9 +506,9 @@ export class WorkspaceManagementDialogsComponent  {
     else{
       this.dialogTitle=null;
     }
-    this.globalProgress=true;
+    this.toast.showProgressDialog();
     UIHelper.addToCollection(this.collectionService,this.router,this.bridge,collection,list,()=>{
-      this.globalProgress=false;
+        this.toast.closeModalDialog();
        this.onStoredAddToCollection.emit(collection);
       if(callback)
         callback();
@@ -547,5 +623,28 @@ export class WorkspaceManagementDialogsComponent  {
         }
         this._nodeSimpleEdit = null;
         this.nodeSimpleEditChange.emit(null);
+    }
+
+    private unblockImportedNodes(nodes: Node[]) {
+        this.toast.showProgressDialog();
+        Observable.forkJoin(nodes.map((n) => {
+            const properties: any = {};
+            properties[RestConstants.CCM_PROP_IMPORT_BLOCKED] = [null];
+            return new Observable((observer) => {
+                this.nodeService.editNodeMetadataNewVersion(n.ref.id, RestConstants.COMMENT_BLOCKED_IMPORT, properties)
+                    .subscribe(({node}) => {
+                        const permissions = new LocalPermissions();
+                        permissions.inherited = true;
+                        permissions.permissions = [];
+                        this.nodeService.setNodePermissions(node.ref.id, permissions).subscribe(() => {
+                            observer.next(node);
+                            observer.complete();
+                        })
+                    })
+            });
+        })).subscribe((results: Node[]) => {
+            this.toast.closeModalDialog();
+            this.onRefresh.emit(results);
+        });
     }
 }

@@ -633,10 +633,12 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
                 for (let facette of data.facettes) {
                     facette.values = facette.values.slice(0, 5);
                     this.mdsSuggestions[facette.property] = [];
+                    const widget = MdsHelper.getWidget(facette.property, null, this.currentMdsSet?.widgets);
                     for (let value of facette.values) {
+                        const cap =  widget?.values?.find((v: any) => v.id === value.value);
                         this.mdsSuggestions[facette.property].push({
                             id: value.value,
-                            caption: value.value,
+                            caption: cap ? cap.caption : value.value,
                         });
                     }
                 }
@@ -1042,11 +1044,18 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
             offset: this.searchService.skipcount[position],
             propertyFilter: [properties],
         };
+        let facettes;
+        try {
+            facettes = MdsHelper.getUsedWidgets(this.currentMdsSet, 'search_suggestions').map((w: any) => w.id);
+        } catch(e) {
+            console.warn('Could not load used facettes from search_suggestions', e);
+            facettes = [RestConstants.LOM_PROP_GENERAL_KEYWORD];
+        }
         let queryRequest =
         this.search
             .search(
                 criterias,
-                [RestConstants.LOM_PROP_GENERAL_KEYWORD],
+                facettes,
                 request,
                 RestConstants.CONTENT_TYPE_FILES,
                 repo ? repo.id : RestConstants.HOME_REPOSITORY,

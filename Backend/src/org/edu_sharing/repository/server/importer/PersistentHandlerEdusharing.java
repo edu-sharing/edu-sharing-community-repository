@@ -187,7 +187,7 @@ public class PersistentHandlerEdusharing implements PersistentHandlerInterface {
 				licenseValidChanged = true;
 			}
 
-			if (mustBePersisted(replicationId,newTimeStamp)) {
+			if (mustBePersisted(childId, replicationId,newTimeStamp)) {
 				getLogger().info(" newTimeStamp "+newTimeStamp+" is after oldTimeStamp "+oldTimeStamp+" have to update object id:" + replicationId);
                 updateNode((String) childId.getId(), newNodeProps, recordHandler.getPropertiesToRemove());
                 setModifiedDate((String) childId.getId(), newNodeProps);
@@ -473,6 +473,9 @@ public class PersistentHandlerEdusharing implements PersistentHandlerInterface {
 		}
 		return replIdTimestampMap;
 	}
+	public synchronized boolean mustBePersisted(String replId, String timeStamp) {
+		return mustBePersisted(null, replId, timeStamp);
+	}
 
 	/**
 	 * checks if an repl object must be created or updated
@@ -481,11 +484,18 @@ public class PersistentHandlerEdusharing implements PersistentHandlerInterface {
 	 * @param timeStamp
 	 * @return
 	 */
-	public synchronized boolean mustBePersisted(String replId, String timeStamp) {
+	public synchronized boolean mustBePersisted(NodeRef childId, String replId, String timeStamp) {
 
 		// we will not safe without replId
 		if (replId == null) {
 			return false;
+		}
+		if(childId != null) {
+			String blocked = NodeServiceHelper.getProperty(childId, CCConstants.CCM_PROP_IO_IMPORT_BLOCKED);
+			if (Boolean.parseBoolean(blocked)) {
+				getLogger().info("Object id " + replId + " is blocked for import, skipping");
+				return false;
+			}
 		}
 		if(job != null &&
 				job.getJobDataMap() != null

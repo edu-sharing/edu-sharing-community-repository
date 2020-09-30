@@ -1,0 +1,32 @@
+<div class="wrapper" *ngIf="current && maximum">
+  <div class="status status-{{ getStatus() }}">
+    <div
+      class="publish-bar"
+      [style.width]="
+        ((maximum.mandatory + (maximum.mandatoryForPublish || 0)) / getSum('maximum')) * 100 + '%'
+      "
+    ></div>
+    <div
+      class="minimum-bar"
+      [style.width]="(maximum.mandatory / getSum('maximum')) * 100 + '%'"
+    ></div>
+    <div
+      class="current-bar"
+      [style.width]="(getFullProgress() / getSum('maximum')) * 100 + '%'"
+    ></div>
+  </div>
+  <label class="status-{{ getStatus() }}">
+    <ng-container>{{ getSum('current') }} / {{ getSum('maximum') }}</ng-container>
+    {{ 'FILL_STATUS.MESSAGE' | translate }}
+    <ng-container
+      *ngIf="
+        getStatus() === RequiredMode.Mandatory || getStatus() === RequiredMode.MandatoryForPublish
+      "
+    >
+      -
+      <span class="clickable show-missing-button" tabindex="0" (click)="showMissing.emit()">
+        {{ 'FILL_STATUS.SHOW' | translate }}
+      </span>
+    </ng-container>
+  </label>
+</div>

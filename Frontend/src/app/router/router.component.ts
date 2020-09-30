@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import {AfterViewInit, Component, ViewChild} from '@angular/core';
 import {NodeRenderComponent} from "../common/ui/node-render/node-render.component";
 import {Router, ActivatedRoute} from "@angular/router";
 import { ApplyToLmsComponent} from "../common/ui/apply-to-lms/apply-to-lms.component";
@@ -27,14 +27,22 @@ import {RegisterComponent} from '../modules/register/register.component';
 import {ServicesComponent} from "../modules/services/services.components";
 import {FileUploadComponent} from '../modules/file-upload/file-upload.component';
 import {EmbedComponent} from "../common/ui/embed/embed.component";
+import {MainNavService} from '../common/services/main-nav.service';
+import {WorkspaceManagementDialogsComponent} from '../modules/management-dialogs/management-dialogs.component';
 
 
 
 @Component({
   selector: 'router',
-  templateUrl: 'router.component.html'
+  templateUrl: 'router.component.html',
+  providers: [MainNavService]
 })
-export class RouterComponent {
+export class RouterComponent implements AfterViewInit{
+    @ViewChild('management') management: WorkspaceManagementDialogsComponent;
+    constructor(
+        private mainNavService: MainNavService
+    ) {
+    }
   /**
    * adds a prefix to all routes for compatibility with tomcat
    * @param route
@@ -55,6 +63,10 @@ export class RouterComponent {
     }
     return result;
   }
+
+    ngAfterViewInit(): void {
+      this.mainNavService.registerDialogs(this.management);
+    }
 }
 // RouterComponent.transformRoute
 // this fails for aot because it can't call static functions

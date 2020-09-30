@@ -124,7 +124,7 @@ public class ArchiveServiceImpl implements ArchiveService  {
 		searchToken.setStoreName(MCAlfrescoAPIClient.archiveStoreRef.getIdentifier());
 		searchToken.setStoreProtocol(MCAlfrescoAPIClient.archiveStoreRef.getProtocol());
 		//searchToken.setQueryString("@cm\\:name:\""+QueryParser.escape(searchWord) + "*\""+" AND ASPECT:\"sys:archived\"");
-		MetadataQueries queries = MetadataHelper.getMetadataset(ApplicationInfoList.getHomeRepository(), CCConstants.metadatasetdefault_id).getQueries();
+		MetadataQueries queries = MetadataHelper.getMetadataset(ApplicationInfoList.getHomeRepository(), CCConstants.metadatasetdefault_id).getQueries(MetadataReaderV2.QUERY_SYNTAX_LUCENE);
 		Map<String, String[]> params=new HashMap<>();
 		params.put(MetadataSetV2.DEFAULT_CLIENT_QUERY_CRITERIA,new String[]{searchWord});
 		if(user!=null && !user.isEmpty()) {

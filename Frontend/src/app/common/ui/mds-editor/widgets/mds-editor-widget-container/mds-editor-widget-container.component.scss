@@ -1,0 +1,48 @@
+@import '../../../../../core-ui-module/styles/variables';
+
+:host {
+    display: block;
+    margin-bottom: 1.5em;
+    scroll-margin-top: 50px;
+}
+
+.mat-form-field {
+    width: 100%;
+}
+
+:host .mat-form-field.mat-form-field-invalid.warn ::ng-deep {
+    .mat-form-field-label,
+    .mat-form-field-outline,
+    .mat-error {
+        color: $colorStatusWarning;
+    }
+    .mat-input-element {
+        caret-color: $colorStatusWarning;
+    }
+}
+
+.header-container {
+    display: flex;
+    .spacer {
+        flex-grow: 1;
+    }
+    label {
+        margin-bottom: 5px;
+        :host.disabled & {
+            color: rgba(0, 0, 0, 0.38);
+        }
+    }
+    .bulk-mode-radio-group {
+        mat-radio-button:not(:last-of-type) {
+            margin-right: 20px;
+        }
+    }
+}
+
+.subscript {
+    font-size: 75%;
+    margin-top: 5px;
+    &.warn {
+        color: $colorStatusWarning;
+    }
+}
