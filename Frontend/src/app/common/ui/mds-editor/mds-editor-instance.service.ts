@@ -275,6 +275,8 @@ export class MdsEditorInstanceService implements OnDestroy {
     /** Whether the editor is in bulk mode to edit multiple nodes at once. */
     isBulk: boolean;
 
+    // Mutable state
+    shouldShowExtendedWidgets$ = new BehaviorSubject(false);
     // TODO: must emit when the mds is fully inflated
     onMdsInflated = new Observable<void>();
 
@@ -293,7 +295,7 @@ export class MdsEditorInstanceService implements OnDestroy {
      */
     private nativeWidgets: NativeWidget[] = [];
 
-    // Mutable state.
+    // Mutable state
     private completionStatus$ = new ReplaySubject<CompletionStatus>(1);
     private hasChanges$ = new BehaviorSubject(false);
     private isValid$ = new BehaviorSubject(true);

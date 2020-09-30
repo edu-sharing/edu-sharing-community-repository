@@ -1,4 +1,9 @@
-<app-mds-editor-view
-  *ngFor="let view of views"
-  [view]="view"
-></app-mds-editor-view>
+<div class="extended-toggle-container">
+  <mat-slide-toggle
+    class="extended-toggle"
+    [ngModel]="shouldShowExtendedWidgets$ | async"
+    (ngModelChange)="shouldShowExtendedWidgets$.next($event)"
+    >{{ 'MDS.SHOW_EXTENDED' | translate }}</mat-slide-toggle
+  >
+</div>
+<app-mds-editor-view *ngFor="let view of views" [view]="view"></app-mds-editor-view>

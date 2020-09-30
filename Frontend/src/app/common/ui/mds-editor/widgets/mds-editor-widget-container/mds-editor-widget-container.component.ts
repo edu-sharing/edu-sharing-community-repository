@@ -1,3 +1,4 @@
+import { animate, group, keyframes, state, style, transition, trigger } from '@angular/animations';
 import {
     AfterContentInit,
     ChangeDetectorRef,
@@ -12,12 +13,11 @@ import {
 } from '@angular/core';
 import { AbstractControl } from '@angular/forms';
 import { MatFormField, MatFormFieldControl } from '@angular/material/form-field';
-import { MatRadioChange } from '@angular/material/radio';
 import { MatSlideToggleChange } from '@angular/material/slide-toggle';
 import { BehaviorSubject } from 'rxjs';
 import { distinctUntilChanged, startWith } from 'rxjs/operators';
 import { MdsEditorInstanceService, Widget } from '../../mds-editor-instance.service';
-import { assertUnreachable, BulkMode, InputStatus, RequiredMode } from '../../types';
+import { BulkMode, InputStatus, RequiredMode } from '../../types';
 import { ValueType } from '../mds-editor-widget-base';
 
 // This is a Service-Directive combination to get hold of the `MatFormField` before it initializes
@@ -57,6 +57,45 @@ export class RegisterFormFieldDirective {
     templateUrl: './mds-editor-widget-container.component.html',
     styleUrls: ['./mds-editor-widget-container.component.scss'],
     providers: [FormFieldRegistrationService],
+    animations: [
+        trigger('showHideExtended', [
+            state(
+                'hidden',
+                style({
+                    height: '0px',
+                    margin: '0px',
+                    opacity: '0',
+                    visibility: 'hidden',
+                }),
+            ),
+            transition('hidden => shown', [
+                style({ overflow: 'hidden' }),
+                group([
+                    animate('.2s'), // animate hight and margin to original size
+                    animate('.2s', style({ overflow: 'hidden' })),
+                    animate(
+                        '2s',
+                        keyframes([
+                            style({ backgroundColor: '#c90' }),
+                            style({ backgroundColor: '*' }),
+                        ]),
+                    ),
+                ]),
+            ]),
+            transition('shown => hidden', [
+                style({ overflow: 'hidden' }),
+                animate(
+                    '.2s',
+                    style({
+                        height: '0px',
+                        margin: '0px',
+                        opacity: '0',
+                        overflow: 'hidden',
+                    }),
+                ),
+            ]),
+        ]),
+    ],
 })
 export class MdsEditorWidgetContainerComponent implements OnInit, AfterContentInit {
     readonly RequiredMode = RequiredMode;
@@ -71,12 +110,16 @@ export class MdsEditorWidgetContainerComponent implements OnInit, AfterContentIn
     @ContentChild(MatFormFieldControl) formFieldControl: MatFormFieldControl<any>;
 
     @HostBinding('class.disabled') isDisabled = false;
+    @HostBinding('@showHideExtended') get showHideExtendedState(): string {
+        return this.isHidden ? 'hidden' : 'shown';
+    }
 
     readonly isBulk: boolean;
     readonly labelId: string;
     readonly descriptionId: string;
     bulkMode: BehaviorSubject<BulkMode>;
     missingRequired: RequiredMode | null;
+    isHidden: boolean;
 
     constructor(
         private elementRef: ElementRef,
@@ -109,6 +152,11 @@ export class MdsEditorWidgetContainerComponent implements OnInit, AfterContentIn
             this.initFormControl(this.control);
         }
         this.wrapInFormField = this.wrapInFormField ?? !!this.control;
+        this.mdsEditorInstance.shouldShowExtendedWidgets$.subscribe(
+            (shouldShowExtendedWidgets) =>
+                (this.isHidden =
+                    !!this.widget?.definition.isExtended && !shouldShowExtendedWidgets),
+        );
     }
 
     onBulkEditToggleChange(event: MatSlideToggleChange): void {
