@@ -36,7 +36,10 @@ export class MdsEditorWidgetLinkComponent implements OnInit, NativeWidget {
 
     async onClick() {
         if (this.widgetName === 'maptemplate') {
-            await this.mdsEditorInstanceService.save();
+            let nodes = await this.mdsEditorInstanceService.save();
+            this.mainnav.getDialogs().onRefresh.emit(nodes);
+            this.mainnav.getDialogs().nodeMetadata = null;
+
             this.mainnav.getDialogs().nodeMetadata = null;
             this.mainnav.getDialogs().nodeTemplate = this.mdsEditorInstanceService.nodes$.value[0];
         } else {
