@@ -43,7 +43,7 @@ export class ProfilesComponent {
   private static PASSWORD_MIN_LENGTH = 5;
   private editProfile: boolean;
   private editProfileUrl: string;
-  private ShowEmail:boolean=true;
+  private showEmail:boolean=true;
   private avatarImage: any;
   @ViewChild('mainNav') mainNavRef: MainNavComponent;
   @ViewChild('avatar') avatarElement : ElementRef;
@@ -92,10 +92,10 @@ export class ProfilesComponent {
     });
   }
   private checkIfEmailMustShowOrHide(authority:string){
-        this.iamService.getUserEmailConfiguration(authority).subscribe((showEmail: boolean) => {
-            this.ShowEmail = showEmail;           
+        this.iamService.getUserEmailConfiguration(authority).subscribe((res: boolean) => {
+            this.showEmail = res;           
         }, (error: any) => {
-            this.ShowEmail=true;
+            this.showEmail=true;
         });
   }
   public updateAvatar(event:any){
@@ -203,7 +203,7 @@ export class ProfilesComponent {
   }
 
   private saveEmailDisplay(){
-    this.iamService.setUserEmailConfiguration(this.ShowEmail,this.user.authorityName).subscribe(()=>{
+    this.iamService.setUserEmailConfiguration(this.showEmail,this.user.authorityName).subscribe(()=>{
       this.saveAvatar();
     },(error)=>{
       this.globalProgress=false;
