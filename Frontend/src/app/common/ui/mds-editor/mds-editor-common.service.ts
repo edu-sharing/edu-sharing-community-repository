@@ -146,7 +146,9 @@ function memoizeSingle(target: any, propertyKey: string, descriptor: PropertyDes
         ) {
             return cachedResult;
         } else {
-            setTimeout(() => (cachedResult = null), TIMEOUT);
+            setTimeout(() => {
+                cachedResult = null;
+            }, TIMEOUT);
             const result = originalMethod.apply(this, args);
             cachedArgs = args;
             cachedResult = result;
