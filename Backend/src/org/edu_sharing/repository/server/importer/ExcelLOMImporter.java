@@ -324,8 +324,7 @@ public class ExcelLOMImporter {
 			}else if(pathsMatch.size() == 0){
 				logger.error("no path matched");
 			}else{
-				logger.info("adding " + nodeName +" "+newNode.getChildRef() +" to " + pathMatchesNodeRef);
-				logger.info("adding to path: " + pathsMatch.iterator().next());
+				logger.info("adding " + nodeName +" "+newNode.getChildRef() +" TO " + pathsMatch.iterator().next());
 				try {
 									/*	CollectionServiceFactory
 												.getLocalService().addToCollection(pathMatchesNodeRef.getId(),newNode.getChildRef().getId());
