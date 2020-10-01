@@ -66,13 +66,16 @@ export class RegisterFormFieldDirective {
                     margin: '0px',
                     opacity: '0',
                     visibility: 'hidden',
+                    overflow: 'hidden', // Needed for transition only
                 }),
             ),
             transition('hidden => shown', [
-                style({ overflow: 'hidden' }),
                 group([
-                    animate('.2s'), // animate hight and margin to original size
+                    // Animate hight, margin, and opacity to original values
+                    animate('.2s'),
+                    // Keep `overflow: hidden` until the widget is fully expanded
                     animate('.2s', style({ overflow: 'hidden' })),
+                    // Highlight widget with slowly fading-out background color
                     animate(
                         '2s',
                         keyframes([
@@ -83,16 +86,10 @@ export class RegisterFormFieldDirective {
                 ]),
             ]),
             transition('shown => hidden', [
+                // Set `overflow: hidden` at the beginning of the animation
                 style({ overflow: 'hidden' }),
-                animate(
-                    '.2s',
-                    style({
-                        height: '0px',
-                        margin: '0px',
-                        opacity: '0',
-                        overflow: 'hidden',
-                    }),
-                ),
+                // Animate to 'hidden' style
+                animate('.2s'),
             ]),
         ]),
     ],
