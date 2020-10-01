@@ -1,4 +1,4 @@
-import {Component, EventEmitter, Input, OnChanges, Output, SimpleChanges} from '@angular/core';
+import {Component, EventEmitter, Input, OnChanges, OnInit, Output, SimpleChanges} from '@angular/core';
 import {UIHelper} from "../../../../core-ui-module/ui-helper";
 import {Node, Permission} from '../../../../core-module/rest/data-object';
 import {RestConstants} from '../../../../core-module/rest/rest-constants';
@@ -44,6 +44,7 @@ export class SharePublishComponent implements OnChanges {
   private publishedVersions: Node[] = [];
   allPublishedVersions: Node[];
   mdsCompletion: CompletionStatusEntry;
+  private initHasStarted = false;
   constructor(
       private connector: RestConnectorService,
       private translate: TranslateService,
@@ -60,7 +61,8 @@ export class SharePublishComponent implements OnChanges {
   }
 
   async ngOnChanges(changes: SimpleChanges) {
-    if (this.node && this.permissions) {
+    if (this.node && this.permissions && !this.initHasStarted) {
+      this.initHasStarted = true;
       // refresh already for providing initial state
       this.refresh();
       this.node = (await this.nodeService.getNodeMetadata(this.node.ref.id, [RestConstants.ALL]).toPromise()).node;

@@ -78,7 +78,8 @@ export class MdsEditorInstanceService implements OnDestroy {
                 } else {
                     this.initialValues = this.getInitialValues(nodeValues);
                 }
-                // this.value = [...this.initialValues.jointValues];
+                // Set initial values, so the initial completion status is calculated correctly.
+                this.value = [...this.initialValues.jointValues];
             } else {
                 throw new Error('not implemented');
             }
