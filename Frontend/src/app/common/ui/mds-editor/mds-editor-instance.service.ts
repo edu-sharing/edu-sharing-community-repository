@@ -277,8 +277,8 @@ export class MdsEditorInstanceService implements OnDestroy {
 
     // Mutable state
     shouldShowExtendedWidgets$ = new BehaviorSubject(false);
-    // TODO: must emit when the mds is fully inflated
-    onMdsInflated = new Observable<void>();
+    /** Fires a single time when all widgets have been injected. */
+    onMdsInflated = new ReplaySubject<void>(1);
 
     /**
      * Active widgets.
@@ -368,8 +368,7 @@ export class MdsEditorInstanceService implements OnDestroy {
      * Shows the required hints of all missing widgets and scrolls widgets into view, rotating
      * through all widgets when called multiple times.
      */
-    showMissingRequiredWidgets(): void {
-        console.log('showMissingRequiredWidgets', this.lastScrolledIntoViewIndex);
+    showMissingRequiredWidgets(shouldScrollIntoView = true): void {
         if (this.lastScrolledIntoViewIndex === null) {
             // No widget was scrolled into view yet. We need to touch all widgets so they will
             // display the required hint and tell them to scroll into view until we found a missing
@@ -377,14 +376,14 @@ export class MdsEditorInstanceService implements OnDestroy {
             let hasBeenScrolledIntoView = false;
             for (const [index, widget] of this.widgets.entries()) {
                 const hasJustBeenScrolledIntoView = widget.showMissingRequired(
-                    !hasBeenScrolledIntoView,
+                    shouldScrollIntoView && !hasBeenScrolledIntoView,
                 );
                 if (hasJustBeenScrolledIntoView) {
                     hasBeenScrolledIntoView = true;
                     this.lastScrolledIntoViewIndex = index;
                 }
             }
-        } else {
+        } else if (shouldScrollIntoView) {
             // We already touched all widgets and scrolled one into view. Just iterate the widgets
             // starting from the one that was last scrolled into view until we find the next missing
             // one.

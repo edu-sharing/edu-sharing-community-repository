@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { AfterViewInit, Component, OnInit } from '@angular/core';
 import { BehaviorSubject } from 'rxjs';
 import { View } from '../../../../core-module/core.module';
 import { MdsEditorInstanceService } from '../mds-editor-instance.service';
@@ -8,7 +8,7 @@ import { MdsEditorInstanceService } from '../mds-editor-instance.service';
     templateUrl: './mds-editor-core.component.html',
     styleUrls: ['./mds-editor-core.component.scss'],
 })
-export class MdsEditorCoreComponent implements OnInit {
+export class MdsEditorCoreComponent implements OnInit, AfterViewInit {
     views: View[];
     readonly shouldShowExtendedWidgets$: BehaviorSubject<boolean>;
 
@@ -18,5 +18,11 @@ export class MdsEditorCoreComponent implements OnInit {
 
     ngOnInit(): void {
         this.views = this.mdsEditorInstance.views;
+    }
+
+    ngAfterViewInit(): void {
+        setTimeout(() => {
+            this.mdsEditorInstance.onMdsInflated.next();
+        });
     }
 }

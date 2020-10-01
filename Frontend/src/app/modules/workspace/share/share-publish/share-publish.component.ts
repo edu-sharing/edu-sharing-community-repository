@@ -93,9 +93,11 @@ export class SharePublishComponent implements OnChanges {
   }
   openMetadata() {
     this.mainNavService.getDialogs().nodeMetadata = [this.node];
-    this.mainNavService.getDialogs().mdsEditorWrapperRef.mdsEditorInstance.onMdsInflated.subscribe(() =>
-      this.mainNavService.getDialogs().mdsEditorWrapperRef.mdsEditorInstance.showMissingRequiredWidgets()
-    );
+    setTimeout(() => { // Wait for `mdsEditorWrapperRef`
+      this.mainNavService.getDialogs().mdsEditorWrapperRef.mdsEditorInstance.onMdsInflated.subscribe(() =>
+        this.mainNavService.getDialogs().mdsEditorWrapperRef.mdsEditorInstance.showMissingRequiredWidgets(false)
+      );
+    })
     this.mainNavService.getDialogs().nodeMetadataChange.subscribe(async () => {
       this.node = (await this.nodeService.getNodeMetadata(this.node.ref.id, [RestConstants.ALL]).toPromise()).node;
       this.refresh();
