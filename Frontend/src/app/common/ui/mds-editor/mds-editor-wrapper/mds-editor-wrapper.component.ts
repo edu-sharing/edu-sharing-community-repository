@@ -5,6 +5,7 @@ import {
     OnChanges,
     OnInit,
     Output,
+    SimpleChanges,
     ViewChild,
 } from '@angular/core';
 import { Node } from '../../../../core-module/core.module';
