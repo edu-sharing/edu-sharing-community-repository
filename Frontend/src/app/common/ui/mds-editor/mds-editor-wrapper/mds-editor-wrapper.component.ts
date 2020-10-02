@@ -62,20 +62,24 @@ export class MdsEditorWrapperComponent implements OnInit, OnChanges {
     @Output() openTemplate = new EventEmitter();
 
     // Internal state.
-    propertiesAreInitialized = false;
+    hasReachedInitState = false;
     isLoading = true;
     editorType: EditorType;
 
     constructor(public mdsEditorInstance: MdsEditorInstanceService, private toast: Toast) {}
 
     ngOnInit(): void {
-        this.propertiesAreInitialized = true;
+        this.hasReachedInitState = true;
         this.init();
     }
 
-    ngOnChanges(): void {
-        if (this.propertiesAreInitialized) {
-            throw new Error('Updating input properties after initialization is not supported.');
+    ngOnChanges(changes: SimpleChanges): void {
+        if (this.hasReachedInitState && changes.nodes) {
+            console.warn(
+                'Updating nodes after initialization is not supported.',
+                'Changes will not be reflected.',
+                changes.nodes,
+            );
         }
     }
 
