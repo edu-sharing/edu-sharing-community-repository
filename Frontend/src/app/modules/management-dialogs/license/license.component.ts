@@ -133,7 +133,7 @@ export class WorkspaceLicenseComponent  {
     this.loadConfig();
     this._properties = properties;
     this.readLicense();
-    this.mdsEditorInstanceService.init([({
+    this.mdsEditorInstanceService.initWithNodes([({
         properties
     } as any)], false);
     this.loading=false;
@@ -156,7 +156,7 @@ export class WorkspaceLicenseComponent  {
       this._nodes=[];
       this.loadNodes(nodes,()=>{
           this._nodes=Helper.deepCopyArray(this._nodes);
-          this.mdsEditorInstanceService.init(this._nodes);
+          this.mdsEditorInstanceService.initWithNodes(this._nodes);
           this.loadConfig();
           this.checkAllowRelease();
           this.readLicense();

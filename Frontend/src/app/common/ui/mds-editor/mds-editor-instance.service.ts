@@ -323,7 +323,7 @@ export class MdsEditorInstanceService implements OnDestroy {
      *
      * @throws UserPresentableError
      */
-    async init(nodes: Node[], refetch = true): Promise<EditorType> {
+    async initWithNodes(nodes: Node[], refetch = true): Promise<EditorType> {
         if (refetch) {
             this.nodes$.next(await this.mdsEditorCommonService.fetchNodesMetadata(nodes));
         } else {
@@ -429,7 +429,7 @@ export class MdsEditorInstanceService implements OnDestroy {
     }
 
     private getIsBulk(nodes: Node[]): boolean {
-        return nodes.length > 1;
+        return nodes?.length > 1;
     }
 
     private updateHasChanges(): void {

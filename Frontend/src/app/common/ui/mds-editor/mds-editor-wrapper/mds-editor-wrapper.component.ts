@@ -106,7 +106,11 @@ export class MdsEditorWrapperComponent implements OnInit, OnChanges {
     private async init(): Promise<void> {
         this.isLoading = true;
         try {
-            this.editorType = (await this.mdsEditorInstance.init(this.nodes)) ?? 'angular';
+            if (this.nodes) {
+                this.editorType = await this.mdsEditorInstance.initWithNodes(this.nodes);
+            } else {
+                this.editorType = 'legacy';
+            }
         } catch (error) {
             this.handleError(error);
         } finally {
