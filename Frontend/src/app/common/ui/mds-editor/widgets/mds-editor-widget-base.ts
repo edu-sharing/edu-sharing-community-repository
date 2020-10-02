@@ -15,12 +15,14 @@ export abstract class MdsEditorWidgetBase {
 
     abstract readonly valueType: ValueType;
     readonly isBulk: boolean;
+    readonly isEmbedded: boolean;
 
     constructor(
         private mdsEditorInstance: MdsEditorInstanceService,
         protected translate: TranslateService,
     ) {
         this.isBulk = this.mdsEditorInstance.isBulk;
+        this.isEmbedded = this.mdsEditorInstance.isEmbedded;
     }
 
     /**

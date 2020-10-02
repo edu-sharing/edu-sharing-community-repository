@@ -8,11 +8,12 @@ import {
     SimpleChanges,
     ViewChild,
 } from '@angular/core';
+import { first } from 'rxjs/operators';
 import { Node } from '../../../../core-module/core.module';
 import { Toast } from '../../../../core-ui-module/toast';
 import { BulkBehaviour, MdsComponent } from '../../mds/mds.component';
 import { MdsEditorInstanceService } from '../mds-editor-instance.service';
-import { EditorType, UserPresentableError } from '../types';
+import { EditorType, MdsWidget, UserPresentableError } from '../types';
 
 /**
  * Wrapper component to select between the legacy `<mds>` component and the Angular-native
@@ -38,7 +39,7 @@ export class MdsEditorWrapperComponent implements OnInit, OnChanges {
     @Input() allowReplacing = true;
     @Input() bulkBehaviour = BulkBehaviour.Default;
     @Input() create: string;
-    @Input() currentValues: any;
+    @Input() @mutable currentValues: any[];
     @Input() customTitle: string;
     @Input() embedded = false;
     @Input() extended = false;
@@ -52,7 +53,7 @@ export class MdsEditorWrapperComponent implements OnInit, OnChanges {
     @Input() priority = 1;
     @Input() repository: string;
     @Input() setId: string;
-    @Input() suggestions: any;
+    @Input() @mutable suggestions: any;
 
     @Output() extendedChange = new EventEmitter();
     @Output() onCancel = new EventEmitter();
@@ -63,27 +64,71 @@ export class MdsEditorWrapperComponent implements OnInit, OnChanges {
     @Output() openTemplate = new EventEmitter();
 
     // Internal state.
-    hasReachedInitState = false;
+    initHasStarted = false;
     isLoading = true;
     editorType: EditorType;
 
-    constructor(public mdsEditorInstance: MdsEditorInstanceService, private toast: Toast) {}
+    /** Properties with `@mutable` decorator. */
+    mutableProperties: string[];
+    private passedThroughProperties: { [key: string]: any } = {};
 
-    ngOnInit(): void {
-        this.hasReachedInitState = true;
-        this.init();
+    constructor(public mdsEditorInstance: MdsEditorInstanceService, private toast: Toast) {
+        return new Proxy(this, {
+            get: (target: MdsEditorWrapperComponent, p, receiver) => {
+                if (p in target) {
+                    return (target as any)[p];
+                } else if (target.mdsRef && p in target.mdsRef) {
+                    const value = (target.mdsRef as any)[p];
+                    if (value && this.passedThroughProperties[p as string] !== value) {
+                        this.passedThroughProperties[p as string] = value;
+                        console.log('passed through', p, value);
+                    }
+                    if (typeof value === 'function') {
+                        return value.bind(target.mdsRef);
+                    }
+                    return value;
+                } else if (!target.mdsRef) {
+                    // Probably requested an MDS property, but isn't ready yet
+                    return;
+                }
+                console.log('get undefined property', p);
+            },
+            // set: (target: MdsEditorWrapperComponent, p, value: any, receiver) => {
+            //     if (p in target) {
+            //         (target as any)[p] = value;
+            //     } else {
+            //         (target as any)[p] = value;
+            //         console.log('set undefined property', p, value, receiver);
+            //     }
+            //     return true;
+            // }
+        });
     }
 
-    ngOnChanges(changes: SimpleChanges): void {
-        if (this.hasReachedInitState && changes.nodes) {
-            console.warn(
-                'Updating nodes after initialization is not supported.',
-                'Changes will not be reflected.',
-                changes.nodes,
-            );
+    ngOnInit(): void {
+        // For compatibility reasons, we wait for `loadMds()` to be called before initializing when
+        // `nodes` is undefined.
+        //
+        // TODO: Make sure that input is not modified after `ngOnInit()` and remove calls to
+        // `loadMds()`
+        if (this.nodes) {
+            this.init();
         }
     }
 
+    ngOnChanges(changes: SimpleChanges): void {
+        for (const property in changes) {
+            if (this.initHasStarted && !this.mutableProperties?.includes(property)) {
+                console.warn(
+                    `Updating property '${property}' after initialization is not supported.`,
+                    'Changes will not be reflected.',
+                    changes[property],
+                );
+            }
+        }
+    }
+
+    /** @deprecated compatibility to legacy `mds` component */
     handleKeyboardEvent(event: KeyboardEvent): boolean {
         switch (this.editorType) {
             case 'legacy':
@@ -92,7 +137,69 @@ export class MdsEditorWrapperComponent implements OnInit, OnChanges {
                 // Tell the outer component that we handle all keyboard events. This prevents the
                 // dialog to be closed from outside on Escape without confirmation.
                 return true;
+            default:
+                console.warn('handleKeyboardEvent() was called before init finished');
+                return null;
         }
+    }
+
+    /** @deprecated compatibility to legacy `mds` component */
+    getValues(): { [property: string]: string[] } {
+        switch (this.editorType) {
+            case 'legacy':
+                return this.mdsRef.getValues();
+            case 'angular':
+                // TODO
+                return {};
+            default:
+                console.warn('getValues() was called before init finished');
+                return null;
+        }
+    }
+
+    /** @deprecated compatibility to legacy `mds` component */
+    saveValues(): { [property: string]: string[] } {
+        switch (this.editorType) {
+            case 'legacy':
+                return this.mdsRef.saveValues();
+            case 'angular':
+                // TODO
+                return {};
+            default:
+                console.warn('saveValues() was called before init finished');
+                return null;
+        }
+    }
+
+    /** @deprecated compatibility to legacy `mds` component */
+    get currentWidgets(): MdsWidget[] {
+        switch (this.editorType) {
+            case 'legacy':
+                return this.mdsRef.currentWidgets;
+            case 'angular':
+                // TODO
+                return [];
+            default:
+                console.warn('get currentWidgets() was called before init finished');
+                return null;
+        }
+    }
+
+    /** @deprecated compatibility to legacy `mds` component */
+    loadMds(): void {
+        this.init().then(() => {
+            switch (this.editorType) {
+                case 'legacy':
+                    setTimeout(() => {
+                        return this.mdsRef.loadMds();
+                    });
+                    return;
+                case 'angular':
+                    this.mdsEditorInstance.mdsDefinition$
+                        .pipe(first((definition) => definition !== null))
+                        .subscribe((definition) => this.onMdsLoaded.emit(definition));
+            }
+        });
     }
 
     async onSave(): Promise<void> {
@@ -109,12 +216,22 @@ export class MdsEditorWrapperComponent implements OnInit, OnChanges {
     }
 
     private async init(): Promise<void> {
+        if (this.initHasStarted) {
+            console.warn('init() was called more than once');
+        }
+        this.initHasStarted = true;
         this.isLoading = true;
+        this.mdsEditorInstance.isEmbedded = this.embedded;
         try {
             if (this.nodes) {
                 this.editorType = await this.mdsEditorInstance.initWithNodes(this.nodes);
             } else {
-                this.editorType = 'legacy';
+                this.editorType = await this.mdsEditorInstance.initAlt(
+                    this.groupId,
+                    this.setId,
+                    this.repository,
+                    this.currentValues,
+                );
             }
         } catch (error) {
             this.handleError(error);
@@ -131,5 +248,14 @@ export class MdsEditorWrapperComponent implements OnInit, OnChanges {
             this.toast.error(error);
         }
         this.onCancel.emit();
+    }
+}
+
+export function mutable(target: MdsEditorWrapperComponent, property: string): void {
+    // `target` is actually the prototype of `MdsEditorWrapperComponent`
+    if (target.mutableProperties) {
+        target.mutableProperties.push(property);
+    } else {
+        target.mutableProperties = [property];
     }
 }

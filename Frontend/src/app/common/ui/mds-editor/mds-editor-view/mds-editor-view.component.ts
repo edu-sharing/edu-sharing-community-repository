@@ -114,7 +114,7 @@ export class MdsEditorViewComponent implements OnInit, AfterViewInit {
     private getHtml(): SafeHtml {
         const html = closeTags(this.view.html, [
             ...Object.values(NativeWidgetType),
-            ...this.mdsEditorInstance.mdsDefinition.widgets.map((w) => w.id),
+            ...this.mdsEditorInstance.mdsDefinition$.value.widgets.map((w) => w.id),
         ]);
         return this.sanitizer.bypassSecurityTrustHtml(html);
     }
@@ -128,7 +128,7 @@ export class MdsEditorViewComponent implements OnInit, AfterViewInit {
                 this.injectNativeWidget(widgetName, element);
                 continue;
             }
-            const widget = this.mdsEditorInstance.getWidget(tagName);
+            const widget = this.mdsEditorInstance.getWidget(tagName, this.view.id);
             if (widget) {
                 this.injectWidget(widget, element);
             }

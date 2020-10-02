@@ -122,7 +122,7 @@
      </div>
 
 
-      <mds #mdsDesktop
+      <app-mds-editor-wrapper #mdsDesktop
        [class.display-none]="currentRepository=='-all-'"
         [groupId]="queryId"
         [repository]="currentRepository"
@@ -135,7 +135,7 @@
         (onMdsLoaded)="onMdsReady($event)"
         (onDone)="applyParameters($event)"
       >
-      </mds>
+      </app-mds-editor-wrapper>
        <div class="mdsSelect" *ngIf="initalized">
          <div *ngIf="mdsSets && mdsSets.length>1">
            <label for="mds">{{'SEARCH.METADATASET' | translate}}</label>

@@ -3,20 +3,7 @@
     flex-direction: column;
 }
 
-.heading {
-    margin: 0;
-    position: sticky;
-    top: 0;
-    z-index: 10;
-    border-bottom: 1px solid #eee;
-    font-size: 130%;
-    font-weight: normal;
-    // padding: 12px 17px;
-    // background-color: #f7f7f7;
-}
-
 .content {
     display: flex;
     flex-direction: column;
-    margin: 25px;
 }

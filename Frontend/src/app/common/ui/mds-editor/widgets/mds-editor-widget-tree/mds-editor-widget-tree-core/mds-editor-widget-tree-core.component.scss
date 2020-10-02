@@ -1,6 +1,7 @@
 // @import '../../../../../../core-ui-module/styles/variables';
 
 .tree {
+    float: left; // Don't cull background color in case of horizontal overflow
     li,
     ul {
         margin-top: 0;

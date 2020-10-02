@@ -36,4 +36,6 @@
 >
 </app-mds-editor-card>
 
+<app-mds-editor-embedded *ngIf="editorType === 'angular' && embedded"></app-mds-editor-embedded>
+
 <global-progress *ngIf="isLoading"></global-progress>
