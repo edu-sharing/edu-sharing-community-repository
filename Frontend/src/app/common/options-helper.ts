@@ -255,7 +255,7 @@ export class OptionsHelperService {
         if (target === Target.List) {
             objects = this.data.allObjects && this.data.allObjects.length ? [this.data.allObjects[0]] : null;
         } else if (target === Target.Actionbar) {
-            objects = this.data.selectedObjects || [this.data.activeObject];
+            objects = this.data.selectedObjects || (this.data.activeObject ? [this.data.activeObject] : null);
         } else if (target === Target.ListDropdown) {
             if (this.data.activeObject) {
                 objects = [this.data.activeObject];
