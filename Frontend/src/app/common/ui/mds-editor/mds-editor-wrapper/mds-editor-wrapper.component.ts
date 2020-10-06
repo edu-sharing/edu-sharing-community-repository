@@ -177,9 +177,7 @@ export class MdsEditorWrapperComponent implements OnInit, OnChanges {
             case 'legacy':
                 return this.mdsRef.currentWidgets;
             case 'angular':
-                // TODO
-                console.warn('get currentWidgets() is not implemented');
-                return [];
+                return this.mdsEditorInstance.widgets.map((widget) => widget.definition);
             default:
                 console.warn('get currentWidgets() was called before init finished');
                 return null;
