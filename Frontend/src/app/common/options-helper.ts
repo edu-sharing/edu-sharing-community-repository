@@ -675,7 +675,7 @@ export class OptionsHelperService {
         const copyNodes = new OptionItem('OPTIONS.COPY', 'content_copy', (node) =>
             this.cutCopyNode(node, true)
         );
-        copyNodes.constrains = [Constrain.HomeRepository, Constrain.User];
+        copyNodes.constrains = [Constrain.HomeRepository, Constrain.User, Constrain.FilesAndFolders];
         copyNodes.scopes = [Scope.WorkspaceList, Scope.WorkspaceTree];
         copyNodes.key = 'KeyC';
         copyNodes.keyCombination = [KeyCombination.CtrlOrAppleCmd];
