@@ -1,4 +1,4 @@
-import { AfterViewInit, Component, ViewChild } from '@angular/core';
+import { AfterViewInit, Component, DoCheck, NgZone, ViewChild } from '@angular/core';
 import { MainNavService } from '../common/services/main-nav.service';
 import { MdsTestComponent } from '../common/test/mds-test/mds-test.component';
 import { ApplyToLmsComponent } from '../common/ui/apply-to-lms/apply-to-lms.component';
@@ -33,8 +33,15 @@ import { WorkspaceMainComponent } from '../modules/workspace/workspace.component
     templateUrl: 'router.component.html',
     providers: [MainNavService],
 })
-export class RouterComponent implements AfterViewInit {
+export class RouterComponent implements DoCheck, AfterViewInit {
+    private static readonly CHECKS_PER_SECOND_WARNING_THRESHOLD = 60;
+    private static readonly CONSECUTIVE_TRANSGRESSION_THRESHOLD = 10;
+
     @ViewChild('management') management: WorkspaceManagementDialogsComponent;
+
+    private numberOfChecks = 0;
+    private consecutiveTransgression = 0;
+    private checksMonitorInterval: number;
 
     /**
      * Adds a prefix to all routes for compatibility with tomcat.
@@ -54,10 +61,42 @@ export class RouterComponent implements AfterViewInit {
         return result;
     }
 
-    constructor(private mainNavService: MainNavService) {}
+    constructor(private mainNavService: MainNavService, private ngZone: NgZone) {
+        this.ngZone.runOutsideAngular(() => {
+            // Do not trigger change detection with setInterval.
+            this.checksMonitorInterval = window.setInterval(() => this.monitorChecks(), 1000);
+        });
+    }
+
+    ngDoCheck(): void {
+        this.numberOfChecks++;
+    }
 
     ngAfterViewInit(): void {
         this.mainNavService.registerDialogs(this.management);
+    }
+
+    private monitorChecks(): void {
+        // console.log('Change detections run in the past second:', this.numberOfChecks);
+        if (this.numberOfChecks > RouterComponent.CHECKS_PER_SECOND_WARNING_THRESHOLD) {
+            this.consecutiveTransgression++;
+            if (
+                this.consecutiveTransgression >= RouterComponent.CONSECUTIVE_TRANSGRESSION_THRESHOLD
+            ) {
+                console.warn(
+                    'Change detection triggered more than ' +
+                        RouterComponent.CHECKS_PER_SECOND_WARNING_THRESHOLD +
+                        ' times per second for the past ' +
+                        RouterComponent.CONSECUTIVE_TRANSGRESSION_THRESHOLD +
+                        ' seconds consecutively.' +
+                        ' Not showing any more warnings.',
+                );
+                window.clearInterval(this.checksMonitorInterval);
+            }
+        } else {
+            this.consecutiveTransgression = 0;
+        }
+        this.numberOfChecks = 0;
     }
 }
 
