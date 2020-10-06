@@ -122,7 +122,7 @@ export class MdsEditorWidgetAuthorComponent implements OnInit, NativeWidget {
         this.onChange();
     }
 
-    getValues(node: Node, values: Values): Values {
+    getValues(values: Values): Values {
         values[RestConstants.CCM_PROP_AUTHOR_FREETEXT] = [this.author.freetext];
         if (!values[RestConstants.CCM_PROP_LIFECYCLECONTRIBUTER_AUTHOR]) {
             values[RestConstants.CCM_PROP_LIFECYCLECONTRIBUTER_AUTHOR] = [];

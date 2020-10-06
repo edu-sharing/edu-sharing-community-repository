@@ -553,7 +553,7 @@ export class MdsEditorInstanceService implements OnDestroy {
             return acc;
         }, {} as { [key: string]: string[] });
         this.nativeWidgets.forEach(
-            (widget) => (values = widget.getValues ? widget.getValues(node, values) : values),
+            (widget) => (values = widget.getValues ? widget.getValues(values) : values),
         );
         return values;
     }

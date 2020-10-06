@@ -492,7 +492,7 @@ export class WorkspaceLicenseComponent  {
                 prop[RestConstants.CCM_PROP_LICENSE_CC_LOCALE] = [this.ccCountry];
             }
         }
-          prop = this.author.getValues(null, prop);
+          prop = this.author.getValues(prop);
 
 
           if(this.type=='CUSTOM') {

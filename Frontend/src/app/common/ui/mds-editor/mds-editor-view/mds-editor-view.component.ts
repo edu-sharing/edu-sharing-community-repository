@@ -41,7 +41,7 @@ import { MdsEditorWidgetVersionComponent } from '../widgets/mds-editor-widget-ve
 export interface NativeWidget {
     hasChanges: BehaviorSubject<boolean>;
     onSaveNode?: (nodes: Node[]) => Promise<Node[]>;
-    getValues?: (node: Node, values: Values) => Values;
+    getValues?: (values: Values) => Values;
 }
 type NativeWidgetClass = {
     constraints: Constraints;
