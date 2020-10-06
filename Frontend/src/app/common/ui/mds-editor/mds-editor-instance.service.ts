@@ -443,6 +443,29 @@ export class MdsEditorInstanceService implements OnDestroy {
         return updatedNodes;
     }
 
+    getValues(node?: Node): Values {
+        let values = this.widgets.reduce((acc, widget) => {
+            const property = widget.definition.id;
+            const newValue = this.getNewPropertyValue(widget, node?.properties[property]);
+            if (newValue) {
+                if (widget.definition.type === MdsWidgetType.Range) {
+                    acc[`${property}_from`] = [newValue[0]];
+                    acc[`${property}_to`] = [newValue[1]];
+                } else {
+                    if (acc[property]) {
+                        throw new Error('Merging of properties is not yet implemented');
+                    }
+                    acc[property] = newValue;
+                }
+            }
+            return acc;
+        }, {} as { [key: string]: string[] });
+        this.nativeWidgets.forEach(
+            (widget) => (values = widget.getValues ? widget.getValues(values) : values),
+        );
+        return values;
+    }
+
     private getIsBulk(nodes: Node[]): boolean {
         return nodes?.length > 1;
     }
@@ -531,31 +554,8 @@ export class MdsEditorInstanceService implements OnDestroy {
     private getNodeValuePairs(): Array<{ node: Node; values: Values }> {
         return this.nodes$.value.map((node) => ({
             node,
-            values: this.getValuesForNode(node),
+            values: this.getValues(node),
         }));
-    }
-
-    private getValuesForNode(node: Node): Values {
-        let values = this.widgets.reduce((acc, widget) => {
-            const property = widget.definition.id;
-            const newValue = this.getNewPropertyValue(widget, node.properties[property]);
-            if (newValue) {
-                if (widget.definition.type === MdsWidgetType.Range) {
-                    acc[`${property}_from`] = [newValue[0]];
-                    acc[`${property}_to`] = [newValue[1]];
-                } else {
-                    if (acc[property]) {
-                        throw new Error('Merging of properties is not yet implemented');
-                    }
-                    acc[property] = newValue;
-                }
-            }
-            return acc;
-        }, {} as { [key: string]: string[] });
-        this.nativeWidgets.forEach(
-            (widget) => (values = widget.getValues ? widget.getValues(values) : values),
-        );
-        return values;
     }
 
     private getNewPropertyValue(widget: Widget, oldPropertyValue?: string[]): string[] {

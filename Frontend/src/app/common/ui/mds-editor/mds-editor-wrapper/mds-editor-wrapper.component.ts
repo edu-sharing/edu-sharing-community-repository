@@ -150,6 +150,7 @@ export class MdsEditorWrapperComponent implements OnInit, OnChanges {
                 return this.mdsRef.getValues();
             case 'angular':
                 // TODO
+                console.warn('getValues() is not implemented');
                 return {};
             default:
                 console.warn('getValues() was called before init finished');
@@ -163,8 +164,7 @@ export class MdsEditorWrapperComponent implements OnInit, OnChanges {
             case 'legacy':
                 return this.mdsRef.saveValues();
             case 'angular':
-                // TODO
-                return {};
+                return this.mdsEditorInstance.getValues();
             default:
                 console.warn('saveValues() was called before init finished');
                 return null;
@@ -178,6 +178,7 @@ export class MdsEditorWrapperComponent implements OnInit, OnChanges {
                 return this.mdsRef.currentWidgets;
             case 'angular':
                 // TODO
+                console.warn('get currentWidgets() is not implemented');
                 return [];
             default:
                 console.warn('get currentWidgets() was called before init finished');
