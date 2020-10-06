@@ -290,7 +290,7 @@ export class MdsEditorInstanceService implements OnDestroy {
      *
      * Widgets are not added or removed after initialization, but hold mutable state.
      */
-    private widgets: Widget[];
+    widgets: readonly Widget[];
     /**
      * Active, "native" widgets (which are not defined via mds properties directly).
      *

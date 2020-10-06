@@ -1,5 +1,6 @@
 <div class="extended-toggle-container">
   <mat-slide-toggle
+    *ngIf="hasExtendedWidgets"
     class="extended-toggle"
     [ngModel]="shouldShowExtendedWidgets$ | async"
     (ngModelChange)="shouldShowExtendedWidgets$.next($event)"

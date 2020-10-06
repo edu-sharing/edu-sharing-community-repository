@@ -10,6 +10,7 @@ import { MdsEditorInstanceService } from '../mds-editor-instance.service';
 })
 export class MdsEditorCoreComponent implements OnInit, AfterViewInit {
     views: View[];
+    hasExtendedWidgets: boolean;
     readonly shouldShowExtendedWidgets$: BehaviorSubject<boolean>;
 
     constructor(private mdsEditorInstance: MdsEditorInstanceService) {
@@ -18,6 +19,9 @@ export class MdsEditorCoreComponent implements OnInit, AfterViewInit {
 
     ngOnInit(): void {
         this.views = this.mdsEditorInstance.views;
+        this.hasExtendedWidgets = this.mdsEditorInstance.widgets.some(
+            (widget) => widget.definition.isExtended,
+        );
     }
 
     ngAfterViewInit(): void {
