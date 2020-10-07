@@ -505,7 +505,7 @@ export class MainNavComponent implements AfterViewInit, OnDestroy {
 
     startTutorial() {
         if (this.connector.getCurrentLogin().statusCode === 'OK') {
-            UIHelper.waitForComponent(this, 'userRef').subscribe(() => {
+            this.uiService.waitForComponent(this, 'userRef').subscribe(() => {
                 this.tutorialElement = this.userRef;
             });
         }

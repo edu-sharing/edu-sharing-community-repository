@@ -16,7 +16,7 @@ import {
   RestIamService,
   RestNodeService,
   RestOrganizationService,
-  SharedFolder,
+  SharedFolder, UIService,
   User,
   UserSimple
 } from '../../../core-module/core.module';
@@ -223,6 +223,7 @@ export class PermissionsAuthoritiesComponent {
   constructor(private toast: Toast,
               private node: RestNodeService,
               private config: ConfigurationService,
+              private uiService: UIService,
               private router: Router,
               private translate: TranslateService,
               private organization: RestOrganizationService,
@@ -638,7 +639,7 @@ export class PermissionsAuthoritiesComponent {
 
     this.addTo = list;
     this.addToSelection = null;
-    UIHelper.waitForComponent(this,'addToComponent').subscribe(()=> this.addToComponent.loadAuthorities());
+    this.uiService.waitForComponent(this,'addToComponent').subscribe(()=> this.addToComponent.loadAuthorities());
   }
   private openEditGroups(data: User) {
       const list = this.getList(data);

@@ -740,7 +740,7 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
         this.setFixMobileNav();
         // init mobile mds
         if(this.hasMobileMds()) {
-            UIHelper.waitForComponent(this, 'mdsMobileRef').subscribe(() => {
+            this.uiService.waitForComponent(this, 'mdsMobileRef').subscribe(() => {
                 this.mdsMobileRef.loadMds();
             });
         }

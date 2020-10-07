@@ -7,7 +7,7 @@ import {Translation} from '../../../core-ui-module/translation';
 
 import * as EduData from "../../../core-module/core.module";
 
-import {RestCollectionService, ListItem, DialogButton, RestMediacenterService, RestMdsService} from "../../../core-module/core.module";
+import {RestCollectionService, ListItem, DialogButton, RestMediacenterService, RestMdsService, UIService} from "../../../core-module/core.module";
 import {RestNodeService} from "../../../core-module/core.module";
 import {RestConstants} from "../../../core-module/core.module";
 import {RestHelper} from "../../../core-module/core.module";
@@ -114,6 +114,7 @@ export class CollectionNewComponent {
       private collectionService : RestCollectionService,
       private nodeService : RestNodeService,
       private connector : RestConnectorService,
+      private uiService : UIService,
       private iamService : RestIamService,
       private mediacenterService : RestMediacenterService,
       private route:ActivatedRoute,
@@ -266,7 +267,7 @@ export class CollectionNewComponent {
       console.log(this.permissions);
       this.showPermissions=true;
       // update state after changing different bindings
-      UIHelper.waitForComponent(this, 'shareRef').subscribe(()=> this.shareRef.refresh());
+      this.uiService.waitForComponent(this, 'shareRef').subscribe(()=> this.shareRef.refresh());
     }
     isNewCollection() : boolean {
         return this.editId==null;
