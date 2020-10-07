@@ -1,4 +1,5 @@
 import {Component, ViewChild} from "@angular/core";
+import {BehaviorSubject, Observable} from 'rxjs';
 
 @Component({
   selector: 'global-container',
@@ -9,20 +10,20 @@ import {Component, ViewChild} from "@angular/core";
  * Global components (always visible regardless of route
  */
 export class GlobalContainerComponent{
-  private static preloading=true;
+  private static preloading = new BehaviorSubject<boolean>(true);
   static instance:GlobalContainerComponent;
   @ViewChild('rocketchat') rocketchat :any; // using any to bypass Circular Dependency issues
 
   constructor(){
     GlobalContainerComponent.instance=this;
   }
-  public getPreloading(){
-    return GlobalContainerComponent.preloading;
+  public static subscribePreloading(){
+    return GlobalContainerComponent.preloading.filter((v) => !v);
   }
   public static getPreloading(){
-    return GlobalContainerComponent.preloading;
+    return GlobalContainerComponent.preloading.value;
   }
   public static finishPreloading(){
-    GlobalContainerComponent.preloading=false;
+    GlobalContainerComponent.preloading.next(false);
   }
 }

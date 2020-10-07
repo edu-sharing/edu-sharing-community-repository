@@ -1,4 +1,4 @@
-import {AfterViewInit, ChangeDetectorRef, Component, ElementRef, HostListener, Input, Output, ViewChild} from "@angular/core";
+import {AfterViewInit, ChangeDetectorRef, Component, ElementRef, HostListener, Input, NgZone, Output, ViewChild} from "@angular/core";
 import {DomSanitizer, SafeResourceUrl} from "@angular/platform-browser";
 import {trigger} from "@angular/animations";
 import {MainNavComponent} from "../../main-nav/main-nav.component";
@@ -42,24 +42,30 @@ export class RocketchatComponent implements EventListener{
     constructor(
         private sanitizer: DomSanitizer,
         private connector: RestConnectorService,
+        private ngZone: NgZone,
+        private changes: ChangeDetectorRef,
         private events: FrameEventsService
     ){
         this.events.addSelfListener(this);
         this.initalize(false);
-        window.addEventListener('message', (event:any)=>{
-            if(event.source!==window.self) {
-                if(event.data.eventName=='startup') {
-                    this.loaded=true;
-                    this.frame.nativeElement.contentWindow.postMessage({
-                        externalCommand: 'login-with-token',
-                        token: this._data.token
-                    }, this._data.url);
+        this.ngZone.runOutsideAngular(() => {
+            window.addEventListener('message', (event: any) => {
+                if (event.source !== window.self) {
+                    if (event.data.eventName === 'startup') {
+                        this.loaded = true;
+                        this.changes.detectChanges();
+                        this.frame.nativeElement.contentWindow.postMessage({
+                            externalCommand: 'login-with-token',
+                            token: this._data.token
+                        }, this._data.url);
+                    }
+                    else if (event.data.eventName === 'new-message' && !this.opened) {
+                        this.unread++;
+                        this.changes.detectChanges();
+                    }
                 }
-                if(event.data.eventName=='new-message' && !this.opened){
-                    this.unread++;
-                }
-            }
-        }, false);
+            }, false);
+        });
     }
     getFrameUrl() {
         //return this.sanitizer.bypassSecurityTrustResourceUrl(this._data.url+'/channel/general?layout=embedded');
@@ -72,7 +78,7 @@ export class RocketchatComponent implements EventListener{
         this.opened=false;
         this.fullscreen=false;
         if(GlobalContainerComponent.getPreloading()) {
-            setTimeout(() => this.initalize(), 100);
+            GlobalContainerComponent.subscribePreloading().first().subscribe(() => this.initalize());
             return;
         }
         this.connector.isLoggedIn(forceRenew).subscribe((login)=>{

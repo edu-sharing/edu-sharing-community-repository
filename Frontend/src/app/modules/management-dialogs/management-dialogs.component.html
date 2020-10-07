@@ -187,6 +187,7 @@
                        (onClose)="closeContributor()"
 ></workspace-contributor>
 <modal-dialog
+              *ngIf="dialogTitle"
               [title]="dialogTitle"
               [message]="dialogMessage"
               [messageParameters]="dialogMessageParameters"

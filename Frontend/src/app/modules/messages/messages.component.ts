@@ -10,6 +10,7 @@ import {RestConnectorService} from "../../core-module/core.module";
 import {Component, ViewChild, ElementRef} from "@angular/core";
 import {RouterComponent} from "../../router/router.component";
 import {UIConstants} from "../../core-module/ui/ui-constants";
+import {GlobalContainerComponent} from '../../common/ui/global-container/global-container.component';
 @Component({
   selector: 'messages-main',
   templateUrl: 'messages.component.html',
@@ -36,6 +37,7 @@ export class MessagesComponent {
           this.messageDetail="MESSAGES.DETAILS.INVALID";
         }
         UIHelper.setTitle(this.message, this.titleService, this.translate, this.config);
+        GlobalContainerComponent.finishPreloading();
       })
     });
   }
