@@ -93,7 +93,9 @@ public class ExceptionHandler
             }
             else
             {
-                response.sendError(error.getHttpStatusCode());
+                //edu-sharing customization: do not use error since it will trigger web.xml handlers which are failing for PROPFIND requests
+                response.setStatus(error.getHttpStatusCode());
+                //response.sendError(error.getHttpStatusCode());
             }
         }
         else
