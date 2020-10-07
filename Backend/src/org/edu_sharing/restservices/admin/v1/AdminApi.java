@@ -1,7 +1,9 @@
 package org.edu_sharing.restservices.admin.v1;
 
+import java.io.FileWriter;
 import java.io.InputStream;
 import java.io.Serializable;
+import java.io.Writer;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -25,6 +27,8 @@ import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;
 
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import org.alfresco.rest.framework.core.exceptions.InvalidArgumentException;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.repository.StoreRef;
@@ -1172,31 +1176,53 @@ public class AdminApi {
 			AdminServiceFactory.getInstance();
 			RepositoryDao repoDao = RepositoryDao.getHomeRepository();
 
-			SearchToken token = new SearchToken();
-			token.setSortDefinition(new SortDefinition(sortProperties, sortAscending));
-			token.setFrom(0);
-			token.setMaxResult(Integer.MAX_VALUE);
-			token.setContentType(ContentType.ALL);
-			token.setLuceneString(query);
-			token.disableSearchCriterias();
-			NodeSearch search = NodeDao.search(repoDao, token, false);
 
 			List<Map<String,Serializable>> data = new ArrayList<>();
-			for (org.edu_sharing.restservices.shared.NodeRef ref : search.getResult()) {
-				NodeRef alfRef=new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE,ref.getId());
-				Map<String, Serializable> props=new HashMap<>();
-				for(String prop : properties){
-					if(prop.startsWith("parent::")){
-						String parentId = NodeServiceFactory.getLocalService().getPrimaryParent(ref.getId());
-						String realProp=prop.substring("parent::".length());
-						props.put(prop, NodeServiceHelper.getPropertyNative(new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE,parentId),CCConstants.getValidGlobalName(realProp)));
-					}
-					else{
-						props.put(prop, NodeServiceHelper.getPropertyNative(alfRef,CCConstants.getValidGlobalName(prop)));
-					}
+			//
+			boolean haseMore = true;
+			int pageSize = 1000;
+			int page = 0;
+			do{
+
+				SearchToken token = new SearchToken();
+				token.setSortDefinition(new SortDefinition(sortProperties, sortAscending));
+				token.setFrom(page);
+				token.setMaxResult(pageSize);
+				token.setContentType(ContentType.ALL);
+				token.setLuceneString(query);
+				token.disableSearchCriterias();
+				NodeSearch search = NodeDao.search(repoDao, token, false);
+				logger.info("page: "+ page +" count:"+search.getCount() +" t:"+Thread.currentThread().getId());
+				page = page + pageSize;
+				if((search.getCount() - 1) <= page){
+					haseMore = false;
 				}
-				data.add(props);
+				for (org.edu_sharing.restservices.shared.NodeRef ref : search.getResult()) {
+					NodeRef alfRef=new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE,ref.getId());
+					Map<String, Serializable> props=new HashMap<>();
+					for(String prop : properties){
+						if(prop.startsWith("parent::")){
+							String parentId = NodeServiceFactory.getLocalService().getPrimaryParent(ref.getId());
+							String realProp=prop.substring("parent::".length());
+							props.put(prop, NodeServiceHelper.getPropertyNative(new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE,parentId),CCConstants.getValidGlobalName(realProp)));
+						}
+						else{
+							props.put(prop, NodeServiceHelper.getPropertyNative(alfRef,CCConstants.getValidGlobalName(prop)));
+						}
+					}
+					data.add(props);
+				}
+
+			}while(haseMore);
+
+			logger.info("result:" + data.size());
+			String tempDir = System.getProperty("java.io.tmpdir");
+			String protocolFile = tempDir + "/" + "edu_export_lucene.txt";
+			try (Writer writer = new FileWriter(protocolFile)) {
+				Gson gson = new GsonBuilder().create();
+				gson.toJson(data, writer);
 			}
+			//
 			return Response.status(Response.Status.OK).entity(data).build();
 
 		} catch (DAOException e) {
