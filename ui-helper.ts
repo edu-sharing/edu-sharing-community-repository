@@ -10,7 +10,7 @@ import {Toast} from './toast';
 import {RestHelper} from '../core-module/rest/rest-helper';
 import {TemporaryStorageService} from '../core-module/rest/services/temporary-storage.service';
 import {UIService} from '../core-module/rest/services/ui.service';
-import {ComponentFactoryResolver, ComponentRef, ElementRef, EmbeddedViewRef, EventEmitter, Type, ViewContainerRef,} from '@angular/core';
+import {ComponentFactoryResolver, ComponentRef, ElementRef, EmbeddedViewRef, EventEmitter, NgZone, Type, ViewContainerRef,} from '@angular/core';
 import {RestCollectionService} from '../core-module/rest/services/rest-collection.service';
 import {NodeHelper} from './node-helper';
 import {RestConnectorsService} from '../core-module/rest/services/rest-connectors.service';
@@ -828,18 +828,24 @@ export class UIHelper {
 
     /**
      * waits until the given component/object is not null and available
+     * @param ngZone NgZone Service
      * @param clz the class where the component is attached (usually "this")
      * @param componentName The name of the property
      */
-    static waitForComponent(clz: any, componentName: string) {
-        return new Observable((observer: Observer<any>) => {
-            let interval = setInterval(() => {
-                if (clz[componentName]) {
-                    observer.next(clz[componentName]);
-                    observer.complete();
-                    clearInterval(interval);
-                }
-            }, 1000 / 60);
+    static waitForComponent(ngZone: NgZone, clz: any, componentName: string) {
+        return ngZone.runOutsideAngular(() => {
+            return new Observable((observer: Observer<any>) => {
+                let interval = setInterval(() => {
+                    if (clz[componentName]) {
+                        observer.next(clz[componentName]);
+                        observer.complete();
+                        clearInterval(interval);
+                    }
+                    else if(!clz) {
+                        clearInterval(interval);
+                    }
+                }, 1000 / 60);
+            });
         });
     }
 
