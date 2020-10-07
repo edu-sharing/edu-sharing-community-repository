@@ -166,7 +166,7 @@ export class CardComponent implements AfterContentInit, OnDestroy {
         CardComponent.modalCards.splice(0, 0, this);
         cardService.setNumberModalCards(CardComponent.modalCards.length);
         document.body.style.overflow = 'hidden';
-        UIHelper.waitForComponent(this, 'jumpmarksRef').subscribe(() => {
+        uiService.waitForComponent(this, 'jumpmarksRef').subscribe(() => {
             this.updateActiveJumpmark();
         });
     }
@@ -309,7 +309,7 @@ export class CardComponent implements AfterContentInit, OnDestroy {
         const cardBottom = this.cardContainer.nativeElement.getBoundingClientRect().bottom
         let activeJumpmark: CardJumpmark = null;
         let maxPixelsVisible = 0;
-        for (const jumpmark of this.jumpmarks) {
+        for (const jumpmark of this.jumpmarks ?? []) {
             const headingElement = document.getElementById(jumpmark.id);
             const sectionTop = headingElement.getBoundingClientRect().top;
             if (window.getComputedStyle(headingElement).position === 'sticky') {
