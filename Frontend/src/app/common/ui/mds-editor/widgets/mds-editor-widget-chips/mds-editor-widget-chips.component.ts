@@ -35,12 +35,14 @@ export class MdsEditorWidgetChipsComponent extends MdsEditorWidgetBase implement
     ngOnInit(): void {
         this.chipsControl = new FormControl(
             [
-                ...this.widget.initialValues.jointValues,
-                ...(this.widget.initialValues.individualValues ?? []),
+                ...this.widget.getInitialValues().jointValues,
+                ...(this.widget.getInitialValues().individualValues ?? []),
             ].map((value) => this.toDisplayValues(value)),
             this.getStandardValidators(),
         );
-        this.indeterminateValues$ = new BehaviorSubject(this.widget.initialValues.individualValues);
+        this.indeterminateValues$ = new BehaviorSubject(
+            this.widget.getInitialValues().individualValues,
+        );
         this.chipsControl.valueChanges
             .pipe(distinctUntilChanged())
             .subscribe((values: DisplayValue[]) => this.setValue(values.map((value) => value.key)));

@@ -12,6 +12,7 @@ import { MdsEditorCommonService } from './mds-editor-common.service';
 import { NativeWidget } from './mds-editor-view/mds-editor-view.component';
 import {
     BulkMode,
+    EditorMode,
     EditorType,
     InputStatus,
     MdsDefinition,
@@ -52,8 +53,8 @@ export interface InitialValues {
 @Injectable()
 export class MdsEditorInstanceService implements OnDestroy {
     static Widget = class {
-        readonly hasUnsavedDefault: boolean;
-        readonly initialValues: InitialValues;
+        private hasUnsavedDefault: boolean;
+        private initialValues: InitialValues;
         private value: string[];
         /**
          * Values that are shown as indeterminate to the user and will not be overwritten when
@@ -69,25 +70,36 @@ export class MdsEditorInstanceService implements OnDestroy {
             private mdsEditorInstanceService: MdsEditorInstanceService,
             public readonly definition: MdsWidget,
             public readonly viewId: string,
-            nodes?: Node[],
-        ) {
-            if (nodes) {
-                const nodeValues = nodes.map((node) => this.readNodeValue(node, definition));
-                if (nodeValues.every((nodeValue) => nodeValue === undefined)) {
-                    const defaultValue = definition.defaultvalue ? [definition.defaultvalue] : [];
-                    this.initialValues = { jointValues: defaultValue };
-                    this.hasUnsavedDefault = defaultValue.length > 0;
-                } else {
-                    this.initialValues = this.getInitialValues(nodeValues);
-                }
-                // Set initial values, so the initial completion status is calculated correctly.
-                this.value = [...this.initialValues.jointValues];
-                if (this.mdsEditorInstanceService.getIsBulk(nodes)) {
-                    this.bulkMode = new BehaviorSubject<BulkMode>('no-change');
-                }
+        ) {}
+
+        initWithNodes(nodes: Node[]): void {
+            const nodeValues = nodes.map((node) => this.readNodeValue(node, this.definition));
+            if (nodeValues.every((nodeValue) => nodeValue === undefined)) {
+                const defaultValue = this.definition.defaultvalue
+                    ? [this.definition.defaultvalue]
+                    : [];
+                this.initialValues = { jointValues: defaultValue };
+                this.hasUnsavedDefault = defaultValue.length > 0;
             } else {
-                this.initialValues = { jointValues: [] };
+                this.initialValues = this.calculateInitialValues(nodeValues);
             }
+            // Set initial values, so the initial completion status is calculated correctly.
+            this.value = [...this.initialValues.jointValues];
+            if (this.mdsEditorInstanceService.getIsBulk(nodes)) {
+                this.bulkMode = new BehaviorSubject<BulkMode>('no-change');
+            }
+        }
+
+        initWithValues(values: Values): void {
+            this.initialValues = { jointValues: values[this.definition.id] || [] };
+        }
+
+        getInitialValues(): InitialValues {
+            return this.initialValues;
+        }
+
+        getHasUnsavedDefault(): boolean {
+            return this.hasUnsavedDefault;
         }
 
         getValue(): string[] {
@@ -176,7 +188,7 @@ export class MdsEditorInstanceService implements OnDestroy {
             }
         }
 
-        private getInitialValues(nodeValues: string[][]): InitialValues {
+        private calculateInitialValues(nodeValues: string[][]): InitialValues {
             const allValues = nodeValues.reduce((acc, values = []) => {
                 return [...acc, ...values.filter((value) => !acc.includes(value))];
             }, [] as string[]);
@@ -269,6 +281,8 @@ export class MdsEditorInstanceService implements OnDestroy {
 
     // Fixed after initialization
     mdsId: string;
+    repository: string;
+    groupId: string;
     /** Complete MDS definition. */
     mdsDefinition$ = new BehaviorSubject<MdsDefinition>(null);
     /** Nodes with updated and complete metadata. */
@@ -277,13 +291,17 @@ export class MdsEditorInstanceService implements OnDestroy {
     views: View[];
     /** Whether the editor is in bulk mode to edit multiple nodes at once. */
     isBulk: boolean;
-    /** Whether the editor runs in embedded mode as opposed to an overlay card */
-    isEmbedded: boolean;
+    editorMode: EditorMode;
 
     // Mutable state
     shouldShowExtendedWidgets$ = new BehaviorSubject(false);
-    /** Fires a single time when all widgets have been injected. */
-    onMdsInflated = new ReplaySubject<void>(1);
+    /**
+     * Fires when (a different) MDS definition was loaded and widgets and views were updated
+     * accordingly.
+     */
+    mdsInitDone = new ReplaySubject<void>(1);
+    /** Fires when all widgets have been injected. */
+    mdsInflated = new ReplaySubject<void>(1);
 
     /**
      * Active widgets.
@@ -327,39 +345,38 @@ export class MdsEditorInstanceService implements OnDestroy {
      *
      * @throws UserPresentableError
      */
-    async initWithNodes(nodes: Node[], refetch = true): Promise<EditorType> {
+    async initForNodes(nodes: Node[], refetch = true): Promise<EditorType> {
+        this.editorMode = 'nodes';
         if (refetch) {
             this.nodes$.next(await this.mdsEditorCommonService.fetchNodesMetadata(nodes));
         } else {
             this.nodes$.next(nodes);
         }
         this.isBulk = this.getIsBulk(this.nodes$.value);
-        this.mdsId = this.mdsEditorCommonService.getMdsId(this.nodes$.value);
-        const mdsDefinition = await this.mdsEditorCommonService.fetchMdsDefinition(this.mdsId);
-        this.mdsDefinition$.next(mdsDefinition);
         const groupId = this.mdsEditorCommonService.getGroupId(this.nodes$.value);
-        const group = this.getGroup(mdsDefinition, groupId);
-        this.views = this.getViews(mdsDefinition, group);
-        this.widgets = this.initWidgets(mdsDefinition, this.views, this.nodes$.value);
+        const mdsId = this.mdsEditorCommonService.getMdsId(this.nodes$.value);
+        await this.initMdsIfChanged(groupId, mdsId);
+        for (const widget of this.widgets) {
+            widget.initWithNodes(this.nodes$.value);
+        }
         this.updateCompletionState();
-        return group.rendering;
+        return this.getGroup(this.mdsDefinition$.value, groupId).rendering;
     }
 
-    async initAlt(
+    async initForSearch(
         groupId: string,
-        setId: string = '-default-',
+        mdsId: string = '-default-',
         repository: string = '-home-',
-        currentValues: any[] = [],
+        initialValues?: Values,
     ): Promise<EditorType> {
+        this.editorMode = 'search';
         this.isBulk = false;
-        this.mdsId = setId;
-        const mdsDefinition = await this.mdsEditorCommonService.fetchMdsDefinition(this.mdsId);
-        this.mdsDefinition$.next(mdsDefinition);
-        const group = this.getGroup(mdsDefinition, groupId);
-        this.views = this.getViews(mdsDefinition, group);
-        this.widgets = this.initWidgets(mdsDefinition, this.views);
+        await this.initMdsIfChanged(groupId, mdsId, repository);
+        for (const widget of this.widgets) {
+            widget.initWithValues(initialValues);
+        }
         this.updateCompletionState();
-        return group.rendering;
+        return this.getGroup(this.mdsDefinition$.value, groupId).rendering;
     }
 
     getWidget(propertyName: string, viewId: string): Widget {
@@ -453,7 +470,7 @@ export class MdsEditorInstanceService implements OnDestroy {
                     acc[`${property}_to`] = [newValue[1]];
                 } else {
                     if (acc[property]) {
-                        throw new Error('Merging of properties is not yet implemented');
+                        console.error('Merging of properties is not yet implemented');
                     }
                     acc[property] = newValue;
                 }
@@ -466,6 +483,28 @@ export class MdsEditorInstanceService implements OnDestroy {
         return values;
     }
 
+    private async initMdsIfChanged(
+        groupId: string,
+        mdsId: string,
+        repository?: string,
+    ): Promise<void> {
+        if (this.mdsId === mdsId && this.repository === repository && this.groupId === groupId) {
+            return;
+        }
+        this.mdsId = mdsId;
+        this.repository = repository;
+        this.groupId = groupId;
+        const mdsDefinition = await this.mdsEditorCommonService.fetchMdsDefinition(
+            mdsId,
+            repository,
+        );
+        this.mdsDefinition$.next(mdsDefinition);
+        const group = this.getGroup(mdsDefinition, groupId);
+        this.views = this.getViews(mdsDefinition, group);
+        this.widgets = this.generateWidgets(mdsDefinition, this.views);
+        this.mdsInitDone.next();
+    }
+
     private getIsBulk(nodes: Node[]): boolean {
         return nodes?.length > 1;
     }
@@ -473,7 +512,7 @@ export class MdsEditorInstanceService implements OnDestroy {
     private updateHasChanges(): void {
         const someWidgetsHaveChanged = this.widgets.some(
             (widget) =>
-                (widget.getHasChanged() || widget.hasUnsavedDefault) &&
+                (widget.getHasChanged() || widget.getHasUnsavedDefault()) &&
                 widget.getStatus() !== 'DISABLED',
         );
         const someNativeWidgetsHaveChanged = this.nativeWidgets.some((w) => w.hasChanges.value);
@@ -493,7 +532,7 @@ export class MdsEditorInstanceService implements OnDestroy {
         return group.views.map((viewId) => mdsDefinition.views.find((v) => v.id === viewId));
     }
 
-    private initWidgets(mdsDefinition: MdsDefinition, views: View[], nodes?: Node[]): Widget[] {
+    private generateWidgets(mdsDefinition: MdsDefinition, views: View[], nodes?: Node[]): Widget[] {
         const result: Widget[] = [];
         const availableWidgets = mdsDefinition.widgets
             .filter(
@@ -503,8 +542,9 @@ export class MdsEditorInstanceService implements OnDestroy {
             .filter((widget) => views.some((view) => view.html.indexOf(widget.id) !== -1))
             .filter((widget) => this.meetsCondition(widget, nodes));
         for (const view of views) {
-            for (const widget of this.getWidgetsForView(availableWidgets, view)) {
-                result.push(new MdsEditorInstanceService.Widget(this, widget, view.id, nodes));
+            for (const widgetDefinition of this.getWidgetsForView(availableWidgets, view)) {
+                const widget = new MdsEditorInstanceService.Widget(this, widgetDefinition, view.id);
+                result.push(widget);
             }
         }
         return result;
@@ -559,7 +599,7 @@ export class MdsEditorInstanceService implements OnDestroy {
     }
 
     private getNewPropertyValue(widget: Widget, oldPropertyValue?: string[]): string[] {
-        if (!widget.getHasChanged() && !widget.hasUnsavedDefault) {
+        if (!widget.getHasChanged() && !widget.getHasUnsavedDefault()) {
             return null;
         } else if (!this.isBulk) {
             return widget.getValue();

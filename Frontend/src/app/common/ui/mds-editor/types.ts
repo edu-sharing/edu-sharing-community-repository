@@ -1,5 +1,5 @@
 import { Type } from '@angular/core';
-import { View, Sort } from '../../../core-module/core.module';
+import { Sort, View } from '../../../core-module/core.module';
 import { MdsEditorWidgetBase } from './widgets/mds-editor-widget-base';
 
 /** Error with a translatable message that is suitable to be shown to the user. */
@@ -12,6 +12,8 @@ export class UserPresentableError extends Error {
         this.name = 'UserPresentableError';
     }
 }
+
+export type EditorMode = 'nodes' | 'search';
 
 export interface Constraints {
     requiresNode?: boolean;

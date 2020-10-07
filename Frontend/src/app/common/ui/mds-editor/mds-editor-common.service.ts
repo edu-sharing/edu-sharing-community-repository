@@ -95,8 +95,8 @@ export class MdsEditorCommonService {
      * Fetches the metadata-set definition from the server.
      */
     @memoize
-    async fetchMdsDefinition(mdsId: string): Promise<MdsDefinition> {
-        return this.mdsService.getSet(mdsId).toPromise();
+    async fetchMdsDefinition(mdsId: string, repository?: string): Promise<MdsDefinition> {
+        return this.mdsService.getSet(mdsId, repository).toPromise();
     }
 
     getGroupId(nodes: Node[]): MdsType {
