@@ -11,12 +11,13 @@ import {
 } from '@angular/core';
 import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
 import { BehaviorSubject } from 'rxjs';
-import { Node, View } from '../../../../core-module/core.module';
+import { Node } from '../../../../core-module/core.module';
 import { UIHelper } from '../../../../core-ui-module/ui-helper';
 import { MdsEditorInstanceService, Widget } from '../mds-editor-instance.service';
 import {
     Constraints,
     MdsEditorWidgetComponent,
+    MdsView,
     MdsWidgetType,
     NativeWidgetType,
     Values,
@@ -92,7 +93,7 @@ export class MdsEditorViewComponent implements OnInit, AfterViewInit {
     };
 
     @ViewChild('container') container: ElementRef<HTMLDivElement>;
-    @Input() view: View;
+    @Input() view: MdsView;
     html: SafeHtml;
 
     constructor(

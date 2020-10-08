@@ -15,6 +15,8 @@ export class UserPresentableError extends Error {
 
 export type EditorMode = 'nodes' | 'search';
 
+export type ViewRelation = 'suggestions';
+
 export interface Constraints {
     requiresNode?: boolean;
     supportsBulk?: boolean;
@@ -78,10 +80,19 @@ export interface MdsDefinition {
     name: string;
     lists: MdsList[];
     groups: MdsGroup[];
-    views: View[];
+    views: MdsView[];
     widgets: MdsWidget[];
     sorts: Sort[];
 }
+
+export interface MdsView {
+    id: string;
+    caption: string;
+    html: string;
+    icon: string;
+    rel: ViewRelation;
+    hideIfEmpty: boolean;
+  }
 
 export type EditorType = 'angular' | 'legacy';
 

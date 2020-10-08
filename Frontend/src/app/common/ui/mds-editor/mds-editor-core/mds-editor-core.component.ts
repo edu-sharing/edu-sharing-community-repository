@@ -1,7 +1,7 @@
-import { AfterViewInit, Component, OnInit } from '@angular/core';
+import { Component } from '@angular/core';
 import { BehaviorSubject } from 'rxjs';
-import { View } from '../../../../core-module/core.module';
 import { MdsEditorInstanceService } from '../mds-editor-instance.service';
+import { MdsView } from '../types';
 
 @Component({
     selector: 'app-mds-editor-core',
@@ -9,7 +9,7 @@ import { MdsEditorInstanceService } from '../mds-editor-instance.service';
     styleUrls: ['./mds-editor-core.component.scss'],
 })
 export class MdsEditorCoreComponent {
-    views: View[];
+    views: MdsView[];
     hasExtendedWidgets: boolean;
     readonly shouldShowExtendedWidgets$: BehaviorSubject<boolean>;
 
