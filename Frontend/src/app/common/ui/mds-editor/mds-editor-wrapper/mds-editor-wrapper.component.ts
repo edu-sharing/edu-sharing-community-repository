@@ -132,7 +132,9 @@ export class MdsEditorWrapperComponent implements OnInit {
             case 'legacy':
                 return this.mdsRef.saveValues();
             case 'angular':
-                return this.mdsEditorInstance.getValues();
+                const values = this.mdsEditorInstance.getValues();
+                this.onDone.emit(values);
+                return values;
             default:
                 console.warn('saveValues() was called before init finished');
                 return null;

@@ -10,7 +10,7 @@ import { ActionbarHelperService } from '../../common/services/actionbar-helper';
 import { ActionbarComponent } from '../../common/ui/actionbar/actionbar.component';
 import { GlobalContainerComponent } from '../../common/ui/global-container/global-container.component';
 import { MainNavComponent } from '../../common/ui/main-nav/main-nav.component';
-import { MdsComponent } from '../../common/ui/mds/mds.component';
+import { MdsEditorWrapperComponent } from '../../common/ui/mds-editor/mds-editor-wrapper/mds-editor-wrapper.component';
 import { BridgeService } from '../../core-bridge-module/bridge.service';
 import { CollectionWrapper, ConfigurationHelper, ConfigurationService, DialogButton, ListItem, LoginResult, MdsInfo, MdsMetadatasets, NetworkRepositories, Node, NodeList, NodeWrapper, Repository, RestCollectionService, RestConnectorService, RestConstants, RestHelper, RestIamService, RestMdsService, RestNetworkService, RestNodeService, RestSearchService, SearchList, SessionStorageService, SortItem, TemporaryStorageService, UIService } from '../../core-module/core.module';
 import { Helper } from '../../core-module/rest/helper';
@@ -36,8 +36,8 @@ import { WindowRefService } from './window-ref.service';
 export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
     readonly SCOPES = Scope;
 
-    @ViewChild('mdsMobile') mdsMobileRef: MdsComponent;
-    @ViewChild('mdsDesktop') mdsDesktopRef: MdsComponent;
+    @ViewChild('mdsMobile') mdsMobileRef: MdsEditorWrapperComponent;
+    @ViewChild('mdsDesktop') mdsDesktopRef: MdsEditorWrapperComponent;
     @ViewChild('list') list: ListTableComponent;
     @ViewChild('mainNav') mainNavRef: MainNavComponent;
     @ViewChild('extendedSearch') extendedSearch: ElementRef;
