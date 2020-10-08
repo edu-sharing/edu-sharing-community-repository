@@ -599,7 +599,11 @@ export class MdsEditorInstanceService implements OnDestroy {
     }
 
     private getNewPropertyValue(widget: Widget, oldPropertyValue?: string[]): string[] {
-        if (!widget.getHasChanged() && !widget.getHasUnsavedDefault()) {
+        if (
+            this.editorMode === 'nodes' &&
+            !widget.getHasChanged() &&
+            !widget.getHasUnsavedDefault()
+        ) {
             return null;
         } else if (!this.isBulk) {
             return widget.getValue();

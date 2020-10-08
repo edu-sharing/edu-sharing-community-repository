@@ -145,7 +145,7 @@ export class MdsEditorWidgetTreeComponent
         if (values.includes(toBeRemoved)) {
             this.chipsControl.setValue(values.filter((value) => value !== toBeRemoved));
         }
-        if (this.indeterminateValues$.value.includes(toBeRemoved.key)) {
+        if (this.indeterminateValues$.value?.includes(toBeRemoved.key)) {
             this.indeterminateValues$.next(
                 this.indeterminateValues$.value.filter((value) => value !== toBeRemoved.key),
             );
