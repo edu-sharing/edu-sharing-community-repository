@@ -381,6 +381,7 @@ mat-label.mat-label-standalone{
      );
      color: $textLight;
     } 
+    height: unset; // Override height: 1px
     background-color: $primaryLight;
     .mat-chip-remove{
       color: $primary;
