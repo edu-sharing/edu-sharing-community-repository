@@ -55,6 +55,9 @@ export class MdsEditorWidgetChipsComponent extends MdsEditorWidgetBase implement
         this.indeterminateValues$.subscribe((indeterminateValues) =>
             this.widget.setIndeterminateValues(indeterminateValues),
         );
+        this.widget.addValue.subscribe((value: MdsWidgetValue) =>
+            this.add(this.toDisplayValues(value)),
+        );
     }
 
     onInputTokenEnd(event: MatChipInputEvent): void {

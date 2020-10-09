@@ -1,4 +1,4 @@
-import { Injectable, OnDestroy } from '@angular/core';
+import { EventEmitter, Injectable, OnDestroy } from '@angular/core';
 import { BehaviorSubject, combineLatest, Observable, of, ReplaySubject } from 'rxjs';
 import { map } from 'rxjs/operators';
 import {
@@ -22,6 +22,7 @@ import {
     MdsWidgetValue,
     NativeWidgetType,
     RequiredMode,
+    Suggestions,
     Values,
     ViewRelation,
 } from './types';
@@ -54,9 +55,10 @@ export interface InitialValues {
 @Injectable()
 export class MdsEditorInstanceService implements OnDestroy {
     static Widget = class {
+        addValue = new EventEmitter<MdsWidgetValue>();
         private hasUnsavedDefault: boolean;
         private initialValues: InitialValues;
-        private value: string[];
+        private value$ = new BehaviorSubject<string[]>(null);
         /**
          * Values that are shown as indeterminate to the user and will not be overwritten when
          * saving.
@@ -86,7 +88,7 @@ export class MdsEditorInstanceService implements OnDestroy {
                 this.initialValues = this.calculateInitialValues(nodeValues);
             }
             // Set initial values, so the initial completion status is calculated correctly.
-            this.value = [...this.initialValues.jointValues];
+            this.value$.next([...this.initialValues.jointValues]);
             if (this.mdsEditorInstanceService.getIsBulk(nodes)) {
                 this.bulkMode = new BehaviorSubject<BulkMode>('no-change');
             }
@@ -109,7 +111,7 @@ export class MdsEditorInstanceService implements OnDestroy {
         }
 
         getValue(): string[] {
-            return this.value;
+            return this.value$.value;
         }
 
         getIndeterminateValues(): string[] {
@@ -137,7 +139,7 @@ export class MdsEditorInstanceService implements OnDestroy {
         }
 
         setValue(value: string[]): void {
-            this.value = value;
+            this.value$.next(value);
             this.updateHasChanged();
             this.mdsEditorInstanceService.updateHasChanges();
             this.mdsEditorInstanceService.updateCompletionState();
@@ -156,6 +158,10 @@ export class MdsEditorInstanceService implements OnDestroy {
             this.bulkMode.next(value);
             this.updateHasChanged();
             this.mdsEditorInstanceService.updateHasChanges();
+        }
+
+        observeValue(): Observable<string[]> {
+            return this.value$.asObservable();
         }
 
         observeBulkMode(): Observable<BulkMode> {
@@ -219,7 +225,7 @@ export class MdsEditorInstanceService implements OnDestroy {
                 case undefined:
                     this.hasChanged =
                         !!this.initialValues.individualValues ||
-                        !arrayIsEqual(this.value, this.initialValues.jointValues);
+                        !arrayIsEqual(this.value$.value, this.initialValues.jointValues);
             }
         }
 
@@ -308,6 +314,7 @@ export class MdsEditorInstanceService implements OnDestroy {
     mdsInitDone = new ReplaySubject<void>(1);
     /** Fires when all widgets have been injected. */
     mdsInflated = new ReplaySubject<void>(1);
+    suggestions$ = new BehaviorSubject<Suggestions>(null);
 
     /**
      * Active widgets.

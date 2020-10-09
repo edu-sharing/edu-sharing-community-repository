@@ -1,10 +1,19 @@
-import { Component, EventEmitter, Input, OnInit, Output, ViewChild } from '@angular/core';
+import {
+    Component,
+    EventEmitter,
+    Input,
+    OnChanges,
+    OnInit,
+    Output,
+    SimpleChanges,
+    ViewChild,
+} from '@angular/core';
 import { first } from 'rxjs/operators';
 import { Node } from '../../../../core-module/core.module';
 import { Toast } from '../../../../core-ui-module/toast';
 import { BulkBehaviour, MdsComponent } from '../../mds/mds.component';
 import { MdsEditorInstanceService } from '../mds-editor-instance.service';
-import { EditorType, MdsWidget, UserPresentableError, Values } from '../types';
+import { EditorType, MdsWidget, Suggestions, UserPresentableError, Values } from '../types';
 
 /**
  * Wrapper component to select between the legacy `<mds>` component and the Angular-native
@@ -20,7 +29,7 @@ import { EditorType, MdsWidget, UserPresentableError, Values } from '../types';
     styleUrls: ['./mds-editor-wrapper.component.scss'],
     providers: [MdsEditorInstanceService],
 })
-export class MdsEditorWrapperComponent implements OnInit {
+export class MdsEditorWrapperComponent implements OnInit, OnChanges {
     // tslint:disable: no-output-on-prefix  // Keep API compatibility.
 
     // Properties compatible to legacy MdsComponent.
@@ -44,7 +53,7 @@ export class MdsEditorWrapperComponent implements OnInit {
     @Input() priority = 1;
     @Input() repository: string;
     @Input() setId: string;
-    @Input() suggestions: any;
+    @Input() suggestions: Suggestions;
 
     @Output() extendedChange = new EventEmitter();
     @Output() onCancel = new EventEmitter();
@@ -58,31 +67,7 @@ export class MdsEditorWrapperComponent implements OnInit {
     isLoading = true;
     editorType: EditorType;
 
-    private passedThroughProperties: { [key: string]: any } = {};
-
-    constructor(public mdsEditorInstance: MdsEditorInstanceService, private toast: Toast) {
-        return new Proxy(this, {
-            get: (target: MdsEditorWrapperComponent, p, receiver) => {
-                if (p in target) {
-                    return (target as any)[p];
-                } else if (target.mdsRef && p in target.mdsRef) {
-                    const value = (target.mdsRef as any)[p];
-                    if (value && this.passedThroughProperties[p as string] !== value) {
-                        this.passedThroughProperties[p as string] = value;
-                        console.log('passed through', p, value);
-                    }
-                    if (typeof value === 'function') {
-                        return value.bind(target.mdsRef);
-                    }
-                    return value;
-                } else if (!target.mdsRef) {
-                    // Probably requested an MDS property, but isn't ready yet
-                    return;
-                }
-                console.log('get undefined property', p);
-            },
-        });
-    }
+    constructor(public mdsEditorInstance: MdsEditorInstanceService, private toast: Toast) {}
 
     ngOnInit(): void {
         // For compatibility reasons, we wait for `loadMds()` to be called before initializing when
@@ -92,6 +77,12 @@ export class MdsEditorWrapperComponent implements OnInit {
         // to `loadMds()`.
         if (this.nodes) {
             this.init();
+        }
+    }
+
+    ngOnChanges(changes: SimpleChanges): void {
+        if ('suggestions' in changes) {
+            this.mdsEditorInstance.suggestions$.next(changes.suggestions.currentValue);
         }
     }
 

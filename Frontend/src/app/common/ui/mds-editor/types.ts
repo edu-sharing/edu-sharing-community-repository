@@ -92,7 +92,7 @@ export interface MdsView {
     icon: string;
     rel: ViewRelation;
     hideIfEmpty: boolean;
-  }
+}
 
 export type EditorType = 'angular' | 'legacy';
 
@@ -154,6 +154,8 @@ export interface MdsWidgetCondition {
     value: string;
     negate: boolean;
 }
+
+export type Suggestions = { [property: string]: MdsWidgetValue[] };
 
 export enum RequiredMode {
     Mandatory = 'mandatory',
