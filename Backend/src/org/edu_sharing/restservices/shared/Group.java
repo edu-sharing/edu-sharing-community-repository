@@ -8,6 +8,8 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 
+import java.util.List;
+
 @ApiModel(description = "")
 public class Group extends Authority {
 
@@ -21,6 +23,8 @@ public class Group extends Authority {
 	 * @TODO is an prop for the ACE Object, remove when not longer needed
 	 */
 	private boolean editable = true;
+	private List<Organization> organizations;
+
 	public Group(){
 	}
 	public static Group getEveryone(){
@@ -76,6 +80,15 @@ public class Group extends Authority {
 	public void setRef(NodeRef ref) {
 		this.ref = ref;
 	}
-	
+
+
+	@JsonProperty
+	public List<Organization> getOrganizations() {
+		return organizations;
+	}
+
+	public void setOrganizations(List<Organization> organizations) {
+		this.organizations = organizations;
+	}
 
 }

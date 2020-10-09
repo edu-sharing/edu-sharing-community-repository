@@ -49,16 +49,31 @@ user-avatar{
         color:$textLight;
       }
     }
-
-    > .affiliation {
-      color: $textMediumLight;
-      text-transform: uppercase;
-      font-size: 75%;
-      @include limitLineCount(1,2);
+    > .secondary-data {
       display: flex;
-      justify-content: flex-end;
-      word-break: break-all;
+      flex-direction: column;
       max-width: 30%;
+      > .affiliation {
+        color: $textMediumLight;
+        text-transform: uppercase;
+        font-size: 75%;
+        @include limitLineCount(1, 2);
+        word-break: break-all;
+        display: flex;
+        justify-content: flex-end;
+      }
+
+      > .parent-orgs {
+        color: $textMediumLight;
+        font-size: $fontSizeSmall;
+        @include limitLineCount(1);
+        display: flex;
+        justify-content: flex-end;
+        word-break: break-all;
+        > span:not(:last-child):after {
+          content: ', ';
+        }
+      }
     }
   }
 }
