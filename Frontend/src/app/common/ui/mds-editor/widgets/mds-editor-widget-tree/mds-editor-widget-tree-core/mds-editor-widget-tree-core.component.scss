@@ -2,6 +2,7 @@
 
 .tree {
     float: left; // Don't cull background color in case of horizontal overflow
+    min-width: 100%;
     li,
     ul {
         margin-top: 0;
