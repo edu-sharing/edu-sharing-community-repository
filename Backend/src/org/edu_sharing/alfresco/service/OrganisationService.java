@@ -188,7 +188,7 @@ public class OrganisationService {
 	 * adds ORG_ADMIN Group as Coordinator if not already set
 	 * @param organisationName
 	 */
-	public void setOrgAdminPermissions(String organisationName) {
+	public void setOrgAdminPermissions(String organisationName, boolean execute) {
 		logger.debug("inviting orgadmin group as coordinator for org:" + organisationName);
 		String authorityName = getAuthorityName(organisationName);
 		NodeRef orgNodeRef = authorityService.getAuthorityNodeRef(authorityName);
@@ -198,11 +198,11 @@ public class OrganisationService {
 			return;
 		}
 
-		setOrgAdminPermissions(eduGroupHomeDir, getOrganisationAdminGroup(organisationName));
+		setOrgAdminPermissions(eduGroupHomeDir, getOrganisationAdminGroup(organisationName),execute);
 
 	}
 
-	private void setOrgAdminPermissions(NodeRef parent, String adminAuthority) {
+	private void setOrgAdminPermissions(NodeRef parent, String adminAuthority, boolean execute) {
 		List<ChildAssociationRef> childAssocs = nodeService.getChildAssocs(parent);
 		for(ChildAssociationRef childRef : childAssocs) {
 
@@ -211,19 +211,22 @@ public class OrganisationService {
 			boolean isAlreadySet = false;
 			for(AccessPermission perm : allSetPerms) {
 				if(perm.getAuthority().equals(adminAuthority)
-						&& perm.getPermission().equals(PermissionService.COORDINATOR)) {
+						&& perm.getPermission().equals(PermissionService.COORDINATOR)
+						&& !perm.isInherited()) {
 					isAlreadySet = true;
 				}
 			}
 			if(!isAlreadySet) {
-				logger.debug("will set org admingroup as Coordnator for:" + childRef.getChildRef() );
-				permissionService.setPermission(childRef.getChildRef(), adminAuthority, PermissionService.COORDINATOR, true);
+				logger.debug("will set org admingroup as Coordnator for:" +
+						childRef.getChildRef() +" "+
+						nodeService.getProperty(childRef.getChildRef(),ContentModel.PROP_NAME));
+				if (execute) {
+					permissionService.setPermission(childRef.getChildRef(), adminAuthority, PermissionService.COORDINATOR, true);
+				}
 			}
 
 			if(nodeService.getType(childRef.getChildRef()).equals(QName.createQName(CCConstants.CCM_TYPE_MAP))) {
-				for(ChildAssociationRef mapChildRef : nodeService.getChildAssocs(childRef.getChildRef())){
-					setOrgAdminPermissions(mapChildRef.getChildRef(), adminAuthority);
-				}
+				setOrgAdminPermissions(childRef.getChildRef(), adminAuthority,execute);
 			}
 		}
 	}
