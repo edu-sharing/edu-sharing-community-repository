@@ -313,7 +313,7 @@ public class LDAPAuthenticationFilter implements Filter {
 				 */
 				 if (logger.isDebugEnabled())
 	                    logger.debug("Basic authentication details present in the header.");
-	                byte[] encodedString = java.util.Base64.getDecoder().decode(authHdr.substring(5).getBytes());
+	                byte[] encodedString = java.util.Base64.getDecoder().decode(authHdr.substring(5).trim().getBytes());
 	                
 	                // ALF-13621: Due to browser inconsistencies we have to try a fallback path of encodings
 	                Set<String> attemptedAuths = new HashSet<String>(DECODERS.length * 2);
